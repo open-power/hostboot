@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -39,12 +39,15 @@ namespace pec
 #endif
 
 
+//>> [CC_PROTECT_MODE_REG]
 static const uint64_t CC_PROTECT_MODE_REG = 0x080303feull;
 
 static const uint32_t CC_PROTECT_MODE_REG_READ_PROTECT_ENABLE = 0;
 static const uint32_t CC_PROTECT_MODE_REG_WRITE_PROTECT_ENABLE = 1;
+//<< [CC_PROTECT_MODE_REG]
 // pec/reg00010.H
 
+//>> [CLOCK_STAT_SL]
 static const uint64_t CLOCK_STAT_SL = 0x08030008ull;
 
 static const uint32_t CLOCK_STAT_SL_PERV_SL = 4;
@@ -62,8 +65,10 @@ static const uint32_t CLOCK_STAT_SL_UNIT11_SL = 15;
 static const uint32_t CLOCK_STAT_SL_UNIT12_SL = 16;
 static const uint32_t CLOCK_STAT_SL_UNIT13_SL = 17;
 static const uint32_t CLOCK_STAT_SL_UNIT14_SL = 18;
+//<< [CLOCK_STAT_SL]
 // pec/reg00010.H
 
+//>> [CPLT_CTRL3]
 static const uint64_t CPLT_CTRL3_RW = 0x08000003ull;
 static const uint64_t CPLT_CTRL3_WO_CLEAR = 0x08000023ull;
 static const uint64_t CPLT_CTRL3_WO_OR = 0x08000013ull;
@@ -83,8 +88,10 @@ static const uint32_t CPLT_CTRL3_11_PSCOM_EN = 15;
 static const uint32_t CPLT_CTRL3_12_PSCOM_EN = 16;
 static const uint32_t CPLT_CTRL3_13_PSCOM_EN = 17;
 static const uint32_t CPLT_CTRL3_14_PSCOM_EN = 18;
+//<< [CPLT_CTRL3]
 // pec/reg00010.H
 
+//>> [EPS_DBG_INST1_COND_REG_1]
 static const uint64_t EPS_DBG_INST1_COND_REG_1 = 0x080107c1ull;
 
 static const uint32_t EPS_DBG_INST1_COND_REG_1_COND1_SEL_A = 0;
@@ -115,8 +122,10 @@ static const uint32_t EPS_DBG_INST1_COND_REG_1_C2_COUNT_LT = 56;
 static const uint32_t EPS_DBG_INST1_COND_REG_1_C2_COUNT_LT_LEN = 4;
 static const uint32_t EPS_DBG_INST1_COND_REG_1_RESET_C3_SELECT = 60;
 static const uint32_t EPS_DBG_INST1_COND_REG_1_RESET_C3_SELECT_LEN = 3;
+//<< [EPS_DBG_INST1_COND_REG_1]
 // pec/reg00010.H
 
+//>> [EPS_DBG_INST2_COND_REG_1]
 static const uint64_t EPS_DBG_INST2_COND_REG_1 = 0x080107c4ull;
 
 static const uint32_t EPS_DBG_INST2_COND_REG_1_COND1_SEL_A = 0;
@@ -147,8 +156,10 @@ static const uint32_t EPS_DBG_INST2_COND_REG_1_C2_COUNT_LT = 56;
 static const uint32_t EPS_DBG_INST2_COND_REG_1_C2_COUNT_LT_LEN = 4;
 static const uint32_t EPS_DBG_INST2_COND_REG_1_RESET_C3_SELECT = 60;
 static const uint32_t EPS_DBG_INST2_COND_REG_1_RESET_C3_SELECT_LEN = 3;
+//<< [EPS_DBG_INST2_COND_REG_1]
 // pec/reg00010.H
 
+//>> [EPS_FIR_CLKSTOP_ON_XSTOP_MASK4]
 static const uint64_t EPS_FIR_CLKSTOP_ON_XSTOP_MASK4 = 0x08040084ull;
 
 static const uint32_t EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_XSTOP_ERR = 0;
@@ -174,14 +185,18 @@ static const uint32_t EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP12 =
 static const uint32_t EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP13 = 24;
 static const uint32_t EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP14 = 25;
 static const uint32_t EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP15 = 26;
+//<< [EPS_FIR_CLKSTOP_ON_XSTOP_MASK4]
 // pec/reg00010.H
 
+//>> [EPS_PSC_ATOMIC_LOCK_MASK_LATCH_REG]
 static const uint64_t EPS_PSC_ATOMIC_LOCK_MASK_LATCH_REG = 0x08010007ull;
 
 static const uint32_t EPS_PSC_ATOMIC_LOCK_MASK_LATCH_REG_ATOMIC_LOCK_MASK = 0;
 static const uint32_t EPS_PSC_ATOMIC_LOCK_MASK_LATCH_REG_ATOMIC_LOCK_MASK_LEN = 32;
+//<< [EPS_PSC_ATOMIC_LOCK_MASK_LATCH_REG]
 // pec/reg00010.H
 
+//>> [PB_PBAIB_REGS_PBAIBHWCFG_REG]
 static const uint64_t PB_PBAIB_REGS_PBAIBHWCFG_REG = 0x08010800ull;
 
 static const uint32_t PB_PBAIB_REGS_PBAIBHWCFG_REG_RESERVED0 = 0;
@@ -206,8 +221,10 @@ static const uint32_t PB_PBAIB_REGS_PBAIBHWCFG_REG_PE_ISMB_ERROR_INJECT_LEN = 3;
 static const uint32_t PB_PBAIB_REGS_PBAIBHWCFG_REG_PE_ISMB_CONSTANT_ERROR_INJECT = 39;
 static const uint32_t PB_PBAIB_REGS_PBAIBHWCFG_REG_PE_OSMB_HOL_BLK_CNT = 40;
 static const uint32_t PB_PBAIB_REGS_PBAIBHWCFG_REG_PE_OSMB_HOL_BLK_CNT_LEN = 3;
+//<< [PB_PBAIB_REGS_PBAIBHWCFG_REG]
 // pec/reg00010.H
 
+//>> [PB_PBCQ_PEPBREGS_NMMU_RTAG_OVERRIDE_REG]
 static const uint64_t PB_PBCQ_PEPBREGS_NMMU_RTAG_OVERRIDE_REG = 0x03011807ull;
 
 static const uint32_t PB_PBCQ_PEPBREGS_NMMU_RTAG_OVERRIDE_REG_PE_NMMU_EN = 0;
@@ -219,8 +236,10 @@ static const uint32_t PB_PBCQ_PEPBREGS_NMMU_RTAG_OVERRIDE_REG_RESERVED_NMMU1 = 2
 static const uint32_t PB_PBCQ_PEPBREGS_NMMU_RTAG_OVERRIDE_REG_RESERVED_NMMU1_LEN = 3;
 static const uint32_t PB_PBCQ_PEPBREGS_NMMU_RTAG_OVERRIDE_REG_PE_NMMU_RESPONSE_BASE_RTAG = 23;
 static const uint32_t PB_PBCQ_PEPBREGS_NMMU_RTAG_OVERRIDE_REG_PE_NMMU_RESPONSE_BASE_RTAG_LEN = 17;
+//<< [PB_PBCQ_PEPBREGS_NMMU_RTAG_OVERRIDE_REG]
 // pec/reg00010.H
 
+//>> [PB_PBCQ_PEPBREGS_NRDSTKOVR_REG]
 static const uint64_t PB_PBCQ_PEPBREGS_NRDSTKOVR_REG = 0x03011808ull;
 
 static const uint32_t PB_PBCQ_PEPBREGS_NRDSTKOVR_REG_STK0 = 0;
@@ -228,7 +247,10 @@ static const uint32_t PB_PBCQ_PEPBREGS_NRDSTKOVR_REG_STK0_LEN = 32;
 static const uint32_t PB_PBCQ_PEPBREGS_NRDSTKOVR_REG_STK1 = 32;
 static const uint32_t PB_PBCQ_PEPBREGS_NRDSTKOVR_REG_STK1_LEN = 16;
 static const uint32_t PB_PBCQ_PEPBREGS_NRDSTKOVR_REG_ENABLE = 48;
+//<< [PB_PBCQ_PEPBREGS_NRDSTKOVR_REG]
 // pec/reg00010.H
+
+//>>THE END<<
 
 #ifndef __PPE_HCODE__
 }

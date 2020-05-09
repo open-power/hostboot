@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -39,6 +39,7 @@ namespace pec
 #endif
 
 
+//>> [BIST]
 static const uint64_t BIST = 0x0803000bull;
 
 static const uint32_t BIST_TC_BIST_START_TEST_DC = 0;
@@ -60,8 +61,10 @@ static const uint32_t BIST_REGION_UNIT12 = 16;
 static const uint32_t BIST_REGION_UNIT13 = 17;
 static const uint32_t BIST_REGION_UNIT14 = 18;
 static const uint32_t BIST_STROBE_WINDOW_EN = 48;
+//<< [BIST]
 // pec/reg00015.H
 
+//>> [CPLT_CTRL5]
 static const uint64_t CPLT_CTRL5_RW = 0x08000005ull;
 static const uint64_t CPLT_CTRL5_WO_CLEAR = 0x08000025ull;
 static const uint64_t CPLT_CTRL5_WO_OR = 0x08000015ull;
@@ -86,8 +89,10 @@ static const uint32_t CPLT_CTRL5_016 = 16;
 static const uint32_t CPLT_CTRL5_017 = 17;
 static const uint32_t CPLT_CTRL5_018 = 18;
 static const uint32_t CPLT_CTRL5_019 = 19;
+//<< [CPLT_CTRL5]
 // pec/reg00015.H
 
+//>> [EPS_FIR_CLKSTOP_ON_XSTOP_MASK2]
 static const uint64_t EPS_FIR_CLKSTOP_ON_XSTOP_MASK2 = 0x08040082ull;
 
 static const uint32_t EPS_FIR_CLKSTOP_ON_XSTOP_MASK2_XSTOP_ERR = 0;
@@ -113,8 +118,10 @@ static const uint32_t EPS_FIR_CLKSTOP_ON_XSTOP_MASK2_UNIT_TC_FIR_LOCAL_XSTOP012 
 static const uint32_t EPS_FIR_CLKSTOP_ON_XSTOP_MASK2_UNIT_TC_FIR_LOCAL_XSTOP013 = 24;
 static const uint32_t EPS_FIR_CLKSTOP_ON_XSTOP_MASK2_UNIT_TC_FIR_LOCAL_XSTOP014 = 25;
 static const uint32_t EPS_FIR_CLKSTOP_ON_XSTOP_MASK2_UNIT_TC_FIR_LOCAL_XSTOP015 = 26;
+//<< [EPS_FIR_CLKSTOP_ON_XSTOP_MASK2]
 // pec/reg00015.H
 
+//>> [EPS_THERM_WSUB_DTS_RESULT0]
 static const uint64_t EPS_THERM_WSUB_DTS_RESULT0 = 0x08050000ull;
 
 static const uint32_t EPS_THERM_WSUB_DTS_RESULT0_0_RESULT = 0;
@@ -123,14 +130,18 @@ static const uint32_t EPS_THERM_WSUB_DTS_RESULT0_1_RESULT = 16;
 static const uint32_t EPS_THERM_WSUB_DTS_RESULT0_1_RESULT_LEN = 16;
 static const uint32_t EPS_THERM_WSUB_DTS_RESULT0_2_RESULT = 32;
 static const uint32_t EPS_THERM_WSUB_DTS_RESULT0_2_RESULT_LEN = 16;
+//<< [EPS_THERM_WSUB_DTS_RESULT0]
 // pec/reg00015.H
 
+//>> [MULTICAST_GROUP_3]
 static const uint64_t MULTICAST_GROUP_3 = 0x080f0003ull;
 
 static const uint32_t MULTICAST_GROUP_3_MULTICAST3_GROUP = 3;
 static const uint32_t MULTICAST_GROUP_3_MULTICAST3_GROUP_LEN = 3;
+//<< [MULTICAST_GROUP_3]
 // pec/reg00015.H
 
+//>> [PB_PBCQ_PEPBREGS_PE_WRITE_PACING_REG]
 static const uint64_t PB_PBCQ_PEPBREGS_PE_WRITE_PACING_REG = 0x03011811ull;
 
 static const uint32_t PB_PBCQ_PEPBREGS_PE_WRITE_PACING_REG_PE_WRITE_PACING_MODE = 0;
@@ -149,34 +160,47 @@ static const uint32_t PB_PBCQ_PEPBREGS_PE_WRITE_PACING_REG_PE_WRITE_PACING_NUM_O
 static const uint32_t PB_PBCQ_PEPBREGS_PE_WRITE_PACING_REG_PE_WRITE_PACING_NUM_OF_CLEAN_RANGES_LEN = 4;
 static const uint32_t PB_PBCQ_PEPBREGS_PE_WRITE_PACING_REG_PE_WRITE_PACING_NUM_OF_HPCACK = 24;
 static const uint32_t PB_PBCQ_PEPBREGS_PE_WRITE_PACING_REG_PE_WRITE_PACING_NUM_OF_HPCACK_LEN = 4;
+//<< [PB_PBCQ_PEPBREGS_PE_WRITE_PACING_REG]
 // pec/reg00015.H
 
+//>> [PROTECT_MODE_REG]
 static const uint64_t PROTECT_MODE_REG = 0x080f03feull;
 
 static const uint32_t PROTECT_MODE_REG_READ_PROTECT_ENABLE = 0;
 static const uint32_t PROTECT_MODE_REG_WRITE_PROTECT_ENABLE = 1;
+//<< [PROTECT_MODE_REG]
 // pec/reg00015.H
 
+//>> [TIMEOUT_REG]
 static const uint64_t TIMEOUT_REG = 0x080f0010ull;
 
 static const uint32_t TIMEOUT_REG_INT_TIMEOUT = 0;
 static const uint32_t TIMEOUT_REG_INT_TIMEOUT_LEN = 2;
+//<< [TIMEOUT_REG]
 // pec/reg00015.H
 
+//>> [TRA0_TR0_CONFIG_1]
 static const uint64_t TRA0_TR0_CONFIG_1 = 0x08010404ull;
 
 static const uint32_t TRA0_TR0_CONFIG_1_CMP_MSK_LT_B_64_TO_87 = 0;
 static const uint32_t TRA0_TR0_CONFIG_1_CMP_MSK_LT_B_64_TO_87_LEN = 24;
+//<< [TRA0_TR0_CONFIG_1]
 // pec/reg00015.H
 
+//>> [VITAL_SCAN_OUT]
 static const uint64_t VITAL_SCAN_OUT = 0x080f0017ull;
+//<< [VITAL_SCAN_OUT]
 // pec/reg00015.H
 
+//>> [XSTOP_UNMASKED]
 static const uint64_t XSTOP_UNMASKED = 0x08040010ull;
 
 static const uint32_t XSTOP_UNMASKED_IN = 1;
 static const uint32_t XSTOP_UNMASKED_IN_LEN = 53;
+//<< [XSTOP_UNMASKED]
 // pec/reg00015.H
+
+//>>THE END<<
 
 #ifndef __PPE_HCODE__
 }

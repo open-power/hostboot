@@ -35,6 +35,7 @@ namespace proc
 #endif
 
 
+//>> PREP_[TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_FSI0]
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
 static inline fapi2::ReturnCode PREP_TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_FSI0(const fapi2::Target<K, M, V>& i_target)
 {
@@ -48,7 +49,9 @@ fapi_try_exit:
     return fapi2::current_err;
 #endif
 }
+//<< PREP_[TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_FSI0]
 
+//>> GET_[TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_FSI0]
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
 static inline fapi2::ReturnCode GET_TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_FSI0(const fapi2::Target<K, M, V>& i_target,
         fapi2::buffer<uint64_t>& o_data)
@@ -63,7 +66,9 @@ fapi_try_exit:
     return fapi2::current_err;
 #endif
 }
+//<< GET_[TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_FSI0]
 
+//>> PUT_[TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_FSI0]
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
 static inline fapi2::ReturnCode PUT_TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_FSI0(const fapi2::Target<K, M, V>& i_target,
         const uint64_t i_data)
@@ -78,7 +83,9 @@ fapi_try_exit:
     return fapi2::current_err;
 #endif
 }
+//<< PUT_[TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_FSI0]
 
+//>> PREP_[TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_RW]
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
 static inline fapi2::ReturnCode PREP_TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_RW(const fapi2::Target<K, M, V>& i_target)
 {
@@ -92,7 +99,9 @@ fapi_try_exit:
     return fapi2::current_err;
 #endif
 }
+//<< PREP_[TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_RW]
 
+//>> GET_[TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_RW]
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
 static inline fapi2::ReturnCode GET_TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_RW(const fapi2::Target<K, M, V>& i_target,
         fapi2::buffer<uint64_t>& o_data)
@@ -107,7 +116,9 @@ fapi_try_exit:
     return fapi2::current_err;
 #endif
 }
+//<< GET_[TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_RW]
 
+//>> PUT_[TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_RW]
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
 static inline fapi2::ReturnCode PUT_TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_RW(const fapi2::Target<K, M, V>& i_target,
         const uint64_t i_data)
@@ -122,8 +133,10 @@ fapi_try_exit:
     return fapi2::current_err;
 #endif
 }
+//<< PUT_[TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_RW]
 
 
+//>> SET_[TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_0_ENABLE]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_0_ENABLE(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
@@ -134,11 +147,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_0_
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_0_ENABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("0:scom_proc Invalid dial access TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_0_ENABLE chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_0_ENABLE]
 
+//>> SET_[TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_0_ENABLE]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_0_ENABLE(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
@@ -149,11 +165,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_0_
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_0_ENABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("1:scom_proc Invalid dial access TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_0_ENABLE chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_0_ENABLE]
 
+//>> SET_[TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_0_ENABLE]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_0_ENABLE(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
@@ -162,11 +181,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_0_
     return o_data.setBit<TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_0_ENABLE>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_0_ENABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("2:scom_proc Invalid dial access TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_0_ENABLE chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_0_ENABLE]
 
+//>> CLEAR_[TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_0_ENABLE]
 static inline fapi2::buffer<uint64_t>& CLEAR_TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_0_ENABLE(
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -176,11 +198,14 @@ static inline fapi2::buffer<uint64_t>& CLEAR_TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_
     return o_data.clearBit<TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_0_ENABLE>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_0_ENABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("3:scom_proc Invalid dial access TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_0_ENABLE chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
     return o_data;
 #endif
 }
+//<< CLEAR_[TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_0_ENABLE]
 
+//>> GET_[TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_0_ENABLE]
 static inline fapi2::buffer<uint64_t>& GET_TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_0_ENABLE(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
@@ -191,11 +216,14 @@ static inline fapi2::buffer<uint64_t>& GET_TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_0_
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_0_ENABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("4:scom_proc Invalid dial access TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_0_ENABLE chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_0_ENABLE]
 
+//>> GET_[TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_0_ENABLE]
 static inline bool GET_TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_0_ENABLE(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
@@ -204,11 +232,14 @@ static inline bool GET_TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_0_ENABLE(fapi2::buffer
     return i_data.getBit<TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_0_ENABLE>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_0_ENABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("5:scom_proc Invalid dial access TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_0_ENABLE chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_0_ENABLE]
 
+//>> SET_[TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_1_ENABLE]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_1_ENABLE(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
@@ -219,11 +250,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_1_
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_1_ENABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("0:scom_proc Invalid dial access TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_1_ENABLE chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_1_ENABLE]
 
+//>> SET_[TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_1_ENABLE]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_1_ENABLE(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
@@ -234,11 +268,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_1_
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_1_ENABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("1:scom_proc Invalid dial access TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_1_ENABLE chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_1_ENABLE]
 
+//>> SET_[TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_1_ENABLE]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_1_ENABLE(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
@@ -247,11 +284,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_1_
     return o_data.setBit<TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_1_ENABLE>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_1_ENABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("2:scom_proc Invalid dial access TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_1_ENABLE chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_1_ENABLE]
 
+//>> CLEAR_[TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_1_ENABLE]
 static inline fapi2::buffer<uint64_t>& CLEAR_TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_1_ENABLE(
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -261,11 +301,14 @@ static inline fapi2::buffer<uint64_t>& CLEAR_TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_
     return o_data.clearBit<TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_1_ENABLE>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_1_ENABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("3:scom_proc Invalid dial access TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_1_ENABLE chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
     return o_data;
 #endif
 }
+//<< CLEAR_[TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_1_ENABLE]
 
+//>> GET_[TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_1_ENABLE]
 static inline fapi2::buffer<uint64_t>& GET_TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_1_ENABLE(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
@@ -276,11 +319,14 @@ static inline fapi2::buffer<uint64_t>& GET_TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_1_
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_1_ENABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("4:scom_proc Invalid dial access TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_1_ENABLE chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_1_ENABLE]
 
+//>> GET_[TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_1_ENABLE]
 static inline bool GET_TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_1_ENABLE(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
@@ -289,11 +335,14 @@ static inline bool GET_TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_1_ENABLE(fapi2::buffer
     return i_data.getBit<TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_1_ENABLE>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_1_ENABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("5:scom_proc Invalid dial access TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_1_ENABLE chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_1_ENABLE]
 
+//>> SET_[TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_2_ENABLE]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_2_ENABLE(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
@@ -304,11 +353,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_2_
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_2_ENABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("0:scom_proc Invalid dial access TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_2_ENABLE chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_2_ENABLE]
 
+//>> SET_[TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_2_ENABLE]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_2_ENABLE(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
@@ -319,11 +371,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_2_
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_2_ENABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("1:scom_proc Invalid dial access TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_2_ENABLE chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_2_ENABLE]
 
+//>> SET_[TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_2_ENABLE]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_2_ENABLE(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
@@ -332,11 +387,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_2_
     return o_data.setBit<TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_2_ENABLE>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_2_ENABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("2:scom_proc Invalid dial access TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_2_ENABLE chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_2_ENABLE]
 
+//>> CLEAR_[TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_2_ENABLE]
 static inline fapi2::buffer<uint64_t>& CLEAR_TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_2_ENABLE(
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -346,11 +404,14 @@ static inline fapi2::buffer<uint64_t>& CLEAR_TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_
     return o_data.clearBit<TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_2_ENABLE>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_2_ENABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("3:scom_proc Invalid dial access TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_2_ENABLE chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
     return o_data;
 #endif
 }
+//<< CLEAR_[TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_2_ENABLE]
 
+//>> GET_[TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_2_ENABLE]
 static inline fapi2::buffer<uint64_t>& GET_TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_2_ENABLE(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
@@ -361,11 +422,14 @@ static inline fapi2::buffer<uint64_t>& GET_TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_2_
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_2_ENABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("4:scom_proc Invalid dial access TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_2_ENABLE chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_2_ENABLE]
 
+//>> GET_[TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_2_ENABLE]
 static inline bool GET_TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_2_ENABLE(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
@@ -374,11 +438,14 @@ static inline bool GET_TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_2_ENABLE(fapi2::buffer
     return i_data.getBit<TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_2_ENABLE>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_2_ENABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("5:scom_proc Invalid dial access TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_2_ENABLE chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_2_ENABLE]
 
+//>> SET_[TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_3_ENABLE]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_3_ENABLE(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
@@ -389,11 +456,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_3_
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_3_ENABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("0:scom_proc Invalid dial access TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_3_ENABLE chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_3_ENABLE]
 
+//>> SET_[TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_3_ENABLE]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_3_ENABLE(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
@@ -404,11 +474,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_3_
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_3_ENABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("1:scom_proc Invalid dial access TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_3_ENABLE chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_3_ENABLE]
 
+//>> SET_[TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_3_ENABLE]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_3_ENABLE(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
@@ -417,11 +490,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_3_
     return o_data.setBit<TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_3_ENABLE>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_3_ENABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("2:scom_proc Invalid dial access TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_3_ENABLE chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_3_ENABLE]
 
+//>> CLEAR_[TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_3_ENABLE]
 static inline fapi2::buffer<uint64_t>& CLEAR_TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_3_ENABLE(
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -431,11 +507,14 @@ static inline fapi2::buffer<uint64_t>& CLEAR_TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_
     return o_data.clearBit<TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_3_ENABLE>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_3_ENABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("3:scom_proc Invalid dial access TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_3_ENABLE chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
     return o_data;
 #endif
 }
+//<< CLEAR_[TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_3_ENABLE]
 
+//>> GET_[TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_3_ENABLE]
 static inline fapi2::buffer<uint64_t>& GET_TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_3_ENABLE(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
@@ -446,11 +525,14 @@ static inline fapi2::buffer<uint64_t>& GET_TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_3_
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_3_ENABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("4:scom_proc Invalid dial access TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_3_ENABLE chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_3_ENABLE]
 
+//>> GET_[TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_3_ENABLE]
 static inline bool GET_TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_3_ENABLE(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
@@ -459,11 +541,14 @@ static inline bool GET_TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_3_ENABLE(fapi2::buffer
     return i_data.getBit<TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_3_ENABLE>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_3_ENABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("5:scom_proc Invalid dial access TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_3_ENABLE chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_3_ENABLE]
 
+//>> SET_[TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_4_ENABLE]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_4_ENABLE(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
@@ -474,11 +559,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_4_
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_4_ENABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("0:scom_proc Invalid dial access TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_4_ENABLE chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_4_ENABLE]
 
+//>> SET_[TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_4_ENABLE]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_4_ENABLE(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
@@ -489,11 +577,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_4_
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_4_ENABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("1:scom_proc Invalid dial access TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_4_ENABLE chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_4_ENABLE]
 
+//>> SET_[TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_4_ENABLE]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_4_ENABLE(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
@@ -502,11 +593,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_4_
     return o_data.setBit<TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_4_ENABLE>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_4_ENABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("2:scom_proc Invalid dial access TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_4_ENABLE chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_4_ENABLE]
 
+//>> CLEAR_[TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_4_ENABLE]
 static inline fapi2::buffer<uint64_t>& CLEAR_TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_4_ENABLE(
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -516,11 +610,14 @@ static inline fapi2::buffer<uint64_t>& CLEAR_TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_
     return o_data.clearBit<TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_4_ENABLE>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_4_ENABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("3:scom_proc Invalid dial access TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_4_ENABLE chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
     return o_data;
 #endif
 }
+//<< CLEAR_[TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_4_ENABLE]
 
+//>> GET_[TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_4_ENABLE]
 static inline fapi2::buffer<uint64_t>& GET_TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_4_ENABLE(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
@@ -531,11 +628,14 @@ static inline fapi2::buffer<uint64_t>& GET_TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_4_
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_4_ENABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("4:scom_proc Invalid dial access TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_4_ENABLE chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_4_ENABLE]
 
+//>> GET_[TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_4_ENABLE]
 static inline bool GET_TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_4_ENABLE(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
@@ -544,11 +644,14 @@ static inline bool GET_TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_4_ENABLE(fapi2::buffer
     return i_data.getBit<TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_4_ENABLE>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_4_ENABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("5:scom_proc Invalid dial access TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_4_ENABLE chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_4_ENABLE]
 
+//>> SET_[TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_5_ENABLE]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_5_ENABLE(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
@@ -559,11 +662,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_5_
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_5_ENABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("0:scom_proc Invalid dial access TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_5_ENABLE chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_5_ENABLE]
 
+//>> SET_[TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_5_ENABLE]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_5_ENABLE(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
@@ -574,11 +680,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_5_
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_5_ENABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("1:scom_proc Invalid dial access TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_5_ENABLE chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_5_ENABLE]
 
+//>> SET_[TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_5_ENABLE]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_5_ENABLE(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
@@ -587,11 +696,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_5_
     return o_data.setBit<TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_5_ENABLE>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_5_ENABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("2:scom_proc Invalid dial access TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_5_ENABLE chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_5_ENABLE]
 
+//>> CLEAR_[TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_5_ENABLE]
 static inline fapi2::buffer<uint64_t>& CLEAR_TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_5_ENABLE(
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -601,11 +713,14 @@ static inline fapi2::buffer<uint64_t>& CLEAR_TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_
     return o_data.clearBit<TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_5_ENABLE>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_5_ENABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("3:scom_proc Invalid dial access TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_5_ENABLE chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
     return o_data;
 #endif
 }
+//<< CLEAR_[TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_5_ENABLE]
 
+//>> GET_[TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_5_ENABLE]
 static inline fapi2::buffer<uint64_t>& GET_TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_5_ENABLE(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
@@ -616,11 +731,14 @@ static inline fapi2::buffer<uint64_t>& GET_TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_5_
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_5_ENABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("4:scom_proc Invalid dial access TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_5_ENABLE chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_5_ENABLE]
 
+//>> GET_[TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_5_ENABLE]
 static inline bool GET_TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_5_ENABLE(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
@@ -629,11 +747,14 @@ static inline bool GET_TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_5_ENABLE(fapi2::buffer
     return i_data.getBit<TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_5_ENABLE>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_5_ENABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("5:scom_proc Invalid dial access TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_5_ENABLE chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_5_ENABLE]
 
+//>> SET_[TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_6_ENABLE]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_6_ENABLE(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
@@ -644,11 +765,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_6_
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_6_ENABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("0:scom_proc Invalid dial access TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_6_ENABLE chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_6_ENABLE]
 
+//>> SET_[TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_6_ENABLE]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_6_ENABLE(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
@@ -659,11 +783,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_6_
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_6_ENABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("1:scom_proc Invalid dial access TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_6_ENABLE chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_6_ENABLE]
 
+//>> SET_[TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_6_ENABLE]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_6_ENABLE(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
@@ -672,11 +799,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_6_
     return o_data.setBit<TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_6_ENABLE>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_6_ENABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("2:scom_proc Invalid dial access TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_6_ENABLE chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_6_ENABLE]
 
+//>> CLEAR_[TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_6_ENABLE]
 static inline fapi2::buffer<uint64_t>& CLEAR_TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_6_ENABLE(
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -686,11 +816,14 @@ static inline fapi2::buffer<uint64_t>& CLEAR_TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_
     return o_data.clearBit<TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_6_ENABLE>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_6_ENABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("3:scom_proc Invalid dial access TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_6_ENABLE chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
     return o_data;
 #endif
 }
+//<< CLEAR_[TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_6_ENABLE]
 
+//>> GET_[TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_6_ENABLE]
 static inline fapi2::buffer<uint64_t>& GET_TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_6_ENABLE(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
@@ -701,11 +834,14 @@ static inline fapi2::buffer<uint64_t>& GET_TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_6_
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_6_ENABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("4:scom_proc Invalid dial access TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_6_ENABLE chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_6_ENABLE]
 
+//>> GET_[TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_6_ENABLE]
 static inline bool GET_TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_6_ENABLE(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
@@ -714,11 +850,14 @@ static inline bool GET_TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_6_ENABLE(fapi2::buffer
     return i_data.getBit<TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_6_ENABLE>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_6_ENABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("5:scom_proc Invalid dial access TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_6_ENABLE chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_6_ENABLE]
 
+//>> SET_[TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_7_ENABLE]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_7_ENABLE(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
@@ -729,11 +868,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_7_
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_7_ENABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("0:scom_proc Invalid dial access TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_7_ENABLE chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_7_ENABLE]
 
+//>> SET_[TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_7_ENABLE]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_7_ENABLE(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
@@ -744,11 +886,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_7_
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_7_ENABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("1:scom_proc Invalid dial access TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_7_ENABLE chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_7_ENABLE]
 
+//>> SET_[TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_7_ENABLE]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_7_ENABLE(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
@@ -757,11 +902,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_7_
     return o_data.setBit<TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_7_ENABLE>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_7_ENABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("2:scom_proc Invalid dial access TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_7_ENABLE chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_7_ENABLE]
 
+//>> CLEAR_[TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_7_ENABLE]
 static inline fapi2::buffer<uint64_t>& CLEAR_TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_7_ENABLE(
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -771,11 +919,14 @@ static inline fapi2::buffer<uint64_t>& CLEAR_TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_
     return o_data.clearBit<TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_7_ENABLE>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_7_ENABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("3:scom_proc Invalid dial access TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_7_ENABLE chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
     return o_data;
 #endif
 }
+//<< CLEAR_[TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_7_ENABLE]
 
+//>> GET_[TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_7_ENABLE]
 static inline fapi2::buffer<uint64_t>& GET_TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_7_ENABLE(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
@@ -786,11 +937,14 @@ static inline fapi2::buffer<uint64_t>& GET_TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_7_
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_7_ENABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("4:scom_proc Invalid dial access TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_7_ENABLE chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_7_ENABLE]
 
+//>> GET_[TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_7_ENABLE]
 static inline bool GET_TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_7_ENABLE(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
@@ -799,11 +953,14 @@ static inline bool GET_TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_7_ENABLE(fapi2::buffer
     return i_data.getBit<TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_7_ENABLE>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_7_ENABLE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("5:scom_proc Invalid dial access TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_7_ENABLE chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[TP_TPVSB_FSI_W_SLAVE_A_MST_0_MENP0_7_ENABLE]
 
+//>> PREP_[TP_TPVSB_FSI_W_SLAVE_A_MST_0_MSSIEP0_FSI0]
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
 static inline fapi2::ReturnCode PREP_TP_TPVSB_FSI_W_SLAVE_A_MST_0_MSSIEP0_FSI0(const fapi2::Target<K, M, V>& i_target)
 {
@@ -817,7 +974,9 @@ fapi_try_exit:
     return fapi2::current_err;
 #endif
 }
+//<< PREP_[TP_TPVSB_FSI_W_SLAVE_A_MST_0_MSSIEP0_FSI0]
 
+//>> GET_[TP_TPVSB_FSI_W_SLAVE_A_MST_0_MSSIEP0_FSI0]
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
 static inline fapi2::ReturnCode GET_TP_TPVSB_FSI_W_SLAVE_A_MST_0_MSSIEP0_FSI0(const fapi2::Target<K, M, V>& i_target,
         fapi2::buffer<uint64_t>& o_data)
@@ -832,7 +991,9 @@ fapi_try_exit:
     return fapi2::current_err;
 #endif
 }
+//<< GET_[TP_TPVSB_FSI_W_SLAVE_A_MST_0_MSSIEP0_FSI0]
 
+//>> PUT_[TP_TPVSB_FSI_W_SLAVE_A_MST_0_MSSIEP0_FSI0]
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
 static inline fapi2::ReturnCode PUT_TP_TPVSB_FSI_W_SLAVE_A_MST_0_MSSIEP0_FSI0(const fapi2::Target<K, M, V>& i_target,
         const uint64_t i_data)
@@ -847,7 +1008,9 @@ fapi_try_exit:
     return fapi2::current_err;
 #endif
 }
+//<< PUT_[TP_TPVSB_FSI_W_SLAVE_A_MST_0_MSSIEP0_FSI0]
 
+//>> PREP_[TP_TPVSB_FSI_W_SLAVE_A_MST_0_MSSIEP0_SCOMFSI0]
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
 static inline fapi2::ReturnCode PREP_TP_TPVSB_FSI_W_SLAVE_A_MST_0_MSSIEP0_SCOMFSI0(const fapi2::Target<K, M, V>&
         i_target)
@@ -862,7 +1025,9 @@ fapi_try_exit:
     return fapi2::current_err;
 #endif
 }
+//<< PREP_[TP_TPVSB_FSI_W_SLAVE_A_MST_0_MSSIEP0_SCOMFSI0]
 
+//>> GET_[TP_TPVSB_FSI_W_SLAVE_A_MST_0_MSSIEP0_SCOMFSI0]
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
 static inline fapi2::ReturnCode GET_TP_TPVSB_FSI_W_SLAVE_A_MST_0_MSSIEP0_SCOMFSI0(const fapi2::Target<K, M, V>&
         i_target, fapi2::buffer<uint64_t>& o_data)
@@ -877,7 +1042,9 @@ fapi_try_exit:
     return fapi2::current_err;
 #endif
 }
+//<< GET_[TP_TPVSB_FSI_W_SLAVE_A_MST_0_MSSIEP0_SCOMFSI0]
 
+//>> PUT_[TP_TPVSB_FSI_W_SLAVE_A_MST_0_MSSIEP0_SCOMFSI0]
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
 static inline fapi2::ReturnCode PUT_TP_TPVSB_FSI_W_SLAVE_A_MST_0_MSSIEP0_SCOMFSI0(const fapi2::Target<K, M, V>&
         i_target, const uint64_t i_data)
@@ -892,8 +1059,10 @@ fapi_try_exit:
     return fapi2::current_err;
 #endif
 }
+//<< PUT_[TP_TPVSB_FSI_W_SLAVE_A_MST_0_MSSIEP0_SCOMFSI0]
 
 
+//>> PREP_[TP_TPVSB_FSI_W_SLAVE_A_MST_0_MSTAP0_FSI0]
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
 static inline fapi2::ReturnCode PREP_TP_TPVSB_FSI_W_SLAVE_A_MST_0_MSTAP0_FSI0(const fapi2::Target<K, M, V>& i_target)
 {
@@ -907,7 +1076,9 @@ fapi_try_exit:
     return fapi2::current_err;
 #endif
 }
+//<< PREP_[TP_TPVSB_FSI_W_SLAVE_A_MST_0_MSTAP0_FSI0]
 
+//>> GET_[TP_TPVSB_FSI_W_SLAVE_A_MST_0_MSTAP0_FSI0]
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
 static inline fapi2::ReturnCode GET_TP_TPVSB_FSI_W_SLAVE_A_MST_0_MSTAP0_FSI0(const fapi2::Target<K, M, V>& i_target,
         fapi2::buffer<uint64_t>& o_data)
@@ -922,7 +1093,9 @@ fapi_try_exit:
     return fapi2::current_err;
 #endif
 }
+//<< GET_[TP_TPVSB_FSI_W_SLAVE_A_MST_0_MSTAP0_FSI0]
 
+//>> PUT_[TP_TPVSB_FSI_W_SLAVE_A_MST_0_MSTAP0_FSI0]
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
 static inline fapi2::ReturnCode PUT_TP_TPVSB_FSI_W_SLAVE_A_MST_0_MSTAP0_FSI0(const fapi2::Target<K, M, V>& i_target,
         const uint64_t i_data)
@@ -937,7 +1110,9 @@ fapi_try_exit:
     return fapi2::current_err;
 #endif
 }
+//<< PUT_[TP_TPVSB_FSI_W_SLAVE_A_MST_0_MSTAP0_FSI0]
 
+//>> PREP_[TP_TPVSB_FSI_W_SLAVE_A_MST_0_MSTAP0_RO]
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
 static inline fapi2::ReturnCode PREP_TP_TPVSB_FSI_W_SLAVE_A_MST_0_MSTAP0_RO(const fapi2::Target<K, M, V>& i_target)
 {
@@ -951,7 +1126,9 @@ fapi_try_exit:
     return fapi2::current_err;
 #endif
 }
+//<< PREP_[TP_TPVSB_FSI_W_SLAVE_A_MST_0_MSTAP0_RO]
 
+//>> GET_[TP_TPVSB_FSI_W_SLAVE_A_MST_0_MSTAP0_RO]
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
 static inline fapi2::ReturnCode GET_TP_TPVSB_FSI_W_SLAVE_A_MST_0_MSTAP0_RO(const fapi2::Target<K, M, V>& i_target,
         fapi2::buffer<uint64_t>& o_data)
@@ -966,7 +1143,9 @@ fapi_try_exit:
     return fapi2::current_err;
 #endif
 }
+//<< GET_[TP_TPVSB_FSI_W_SLAVE_A_MST_0_MSTAP0_RO]
 
+//>> PUT_[TP_TPVSB_FSI_W_SLAVE_A_MST_0_MSTAP0_RO]
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
 static inline fapi2::ReturnCode PUT_TP_TPVSB_FSI_W_SLAVE_A_MST_0_MSTAP0_RO(const fapi2::Target<K, M, V>& i_target,
         const uint64_t i_data)
@@ -981,8 +1160,10 @@ fapi_try_exit:
     return fapi2::current_err;
 #endif
 }
+//<< PUT_[TP_TPVSB_FSI_W_SLAVE_A_MST_0_MSTAP0_RO]
 
 
+//>> SET_[TP_TPVSB_FSI_W_SLAVE_A_MST_0_MSTAP0_FSI_A_MST_0_PORT0_ERROR_CODE]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SLAVE_A_MST_0_MSTAP0_FSI_A_MST_0_PORT0_ERROR_CODE(
     fapi2::buffer<uint64_t>& i_data,
     fapi2::buffer<uint64_t>& o_data)
@@ -994,12 +1175,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SLAVE_A_MST_0_MSTAP0_F
            TP_TPVSB_FSI_W_SLAVE_A_MST_0_MSTAP0_FSI_A_MST_0_PORT0_ERROR_CODE_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SLAVE_A_MST_0_MSTAP0_FSI_A_MST_0_PORT0_ERROR_CODE chip: %x, ec: %x",
+    FAPI_ERR("0:scom_proc Invalid dial access TP_TPVSB_FSI_W_SLAVE_A_MST_0_MSTAP0_FSI_A_MST_0_PORT0_ERROR_CODE chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SLAVE_A_MST_0_MSTAP0_FSI_A_MST_0_PORT0_ERROR_CODE]
 
+//>> SET_[TP_TPVSB_FSI_W_SLAVE_A_MST_0_MSTAP0_FSI_A_MST_0_PORT0_ERROR_CODE]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SLAVE_A_MST_0_MSTAP0_FSI_A_MST_0_PORT0_ERROR_CODE(
     const uint64_t i_data,
     fapi2::buffer<uint64_t>& o_data)
@@ -1011,12 +1194,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SLAVE_A_MST_0_MSTAP0_F
            TP_TPVSB_FSI_W_SLAVE_A_MST_0_MSTAP0_FSI_A_MST_0_PORT0_ERROR_CODE_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SLAVE_A_MST_0_MSTAP0_FSI_A_MST_0_PORT0_ERROR_CODE chip: %x, ec: %x",
+    FAPI_ERR("1:scom_proc Invalid dial access TP_TPVSB_FSI_W_SLAVE_A_MST_0_MSTAP0_FSI_A_MST_0_PORT0_ERROR_CODE chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SLAVE_A_MST_0_MSTAP0_FSI_A_MST_0_PORT0_ERROR_CODE]
 
+//>> GET_[TP_TPVSB_FSI_W_SLAVE_A_MST_0_MSTAP0_FSI_A_MST_0_PORT0_ERROR_CODE]
 static inline fapi2::buffer<uint64_t>& GET_TP_TPVSB_FSI_W_SLAVE_A_MST_0_MSTAP0_FSI_A_MST_0_PORT0_ERROR_CODE(
     fapi2::buffer<uint64_t>& i_data,
     uint64_t& o_data)
@@ -1028,12 +1213,14 @@ static inline fapi2::buffer<uint64_t>& GET_TP_TPVSB_FSI_W_SLAVE_A_MST_0_MSTAP0_F
            TP_TPVSB_FSI_W_SLAVE_A_MST_0_MSTAP0_FSI_A_MST_0_PORT0_ERROR_CODE_LEN>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SLAVE_A_MST_0_MSTAP0_FSI_A_MST_0_PORT0_ERROR_CODE chip: %x, ec: %x",
+    FAPI_ERR("4:scom_proc Invalid dial access TP_TPVSB_FSI_W_SLAVE_A_MST_0_MSTAP0_FSI_A_MST_0_PORT0_ERROR_CODE chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[TP_TPVSB_FSI_W_SLAVE_A_MST_0_MSTAP0_FSI_A_MST_0_PORT0_ERROR_CODE]
 
+//>> SET_[TP_TPVSB_FSI_W_SLAVE_A_MST_0_MSTAP0_FSI_A_MST_0_PORT0_ERROR_CODE_1]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SLAVE_A_MST_0_MSTAP0_FSI_A_MST_0_PORT0_ERROR_CODE_1(
     fapi2::buffer<uint64_t>& i_data,
     fapi2::buffer<uint64_t>& o_data)
@@ -1045,12 +1232,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SLAVE_A_MST_0_MSTAP0_F
            TP_TPVSB_FSI_W_SLAVE_A_MST_0_MSTAP0_FSI_A_MST_0_PORT0_ERROR_CODE_1_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SLAVE_A_MST_0_MSTAP0_FSI_A_MST_0_PORT0_ERROR_CODE_1 chip: %x, ec: %x",
+    FAPI_ERR("0:scom_proc Invalid dial access TP_TPVSB_FSI_W_SLAVE_A_MST_0_MSTAP0_FSI_A_MST_0_PORT0_ERROR_CODE_1 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SLAVE_A_MST_0_MSTAP0_FSI_A_MST_0_PORT0_ERROR_CODE_1]
 
+//>> SET_[TP_TPVSB_FSI_W_SLAVE_A_MST_0_MSTAP0_FSI_A_MST_0_PORT0_ERROR_CODE_1]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SLAVE_A_MST_0_MSTAP0_FSI_A_MST_0_PORT0_ERROR_CODE_1(
     const uint64_t i_data,
     fapi2::buffer<uint64_t>& o_data)
@@ -1062,12 +1251,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SLAVE_A_MST_0_MSTAP0_F
            TP_TPVSB_FSI_W_SLAVE_A_MST_0_MSTAP0_FSI_A_MST_0_PORT0_ERROR_CODE_1_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SLAVE_A_MST_0_MSTAP0_FSI_A_MST_0_PORT0_ERROR_CODE_1 chip: %x, ec: %x",
+    FAPI_ERR("1:scom_proc Invalid dial access TP_TPVSB_FSI_W_SLAVE_A_MST_0_MSTAP0_FSI_A_MST_0_PORT0_ERROR_CODE_1 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SLAVE_A_MST_0_MSTAP0_FSI_A_MST_0_PORT0_ERROR_CODE_1]
 
+//>> GET_[TP_TPVSB_FSI_W_SLAVE_A_MST_0_MSTAP0_FSI_A_MST_0_PORT0_ERROR_CODE_1]
 static inline fapi2::buffer<uint64_t>& GET_TP_TPVSB_FSI_W_SLAVE_A_MST_0_MSTAP0_FSI_A_MST_0_PORT0_ERROR_CODE_1(
     fapi2::buffer<uint64_t>& i_data,
     uint64_t& o_data)
@@ -1079,12 +1270,14 @@ static inline fapi2::buffer<uint64_t>& GET_TP_TPVSB_FSI_W_SLAVE_A_MST_0_MSTAP0_F
            TP_TPVSB_FSI_W_SLAVE_A_MST_0_MSTAP0_FSI_A_MST_0_PORT0_ERROR_CODE_1_LEN>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SLAVE_A_MST_0_MSTAP0_FSI_A_MST_0_PORT0_ERROR_CODE_1 chip: %x, ec: %x",
+    FAPI_ERR("4:scom_proc Invalid dial access TP_TPVSB_FSI_W_SLAVE_A_MST_0_MSTAP0_FSI_A_MST_0_PORT0_ERROR_CODE_1 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[TP_TPVSB_FSI_W_SLAVE_A_MST_0_MSTAP0_FSI_A_MST_0_PORT0_ERROR_CODE_1]
 
+//>> SET_[TP_TPVSB_FSI_W_SLAVE_A_MST_0_MSTAP0_FSI_A_MST_0_PORT0_ERROR_CODE_2]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SLAVE_A_MST_0_MSTAP0_FSI_A_MST_0_PORT0_ERROR_CODE_2(
     fapi2::buffer<uint64_t>& i_data,
     fapi2::buffer<uint64_t>& o_data)
@@ -1096,12 +1289,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SLAVE_A_MST_0_MSTAP0_F
            TP_TPVSB_FSI_W_SLAVE_A_MST_0_MSTAP0_FSI_A_MST_0_PORT0_ERROR_CODE_2_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SLAVE_A_MST_0_MSTAP0_FSI_A_MST_0_PORT0_ERROR_CODE_2 chip: %x, ec: %x",
+    FAPI_ERR("0:scom_proc Invalid dial access TP_TPVSB_FSI_W_SLAVE_A_MST_0_MSTAP0_FSI_A_MST_0_PORT0_ERROR_CODE_2 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SLAVE_A_MST_0_MSTAP0_FSI_A_MST_0_PORT0_ERROR_CODE_2]
 
+//>> SET_[TP_TPVSB_FSI_W_SLAVE_A_MST_0_MSTAP0_FSI_A_MST_0_PORT0_ERROR_CODE_2]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SLAVE_A_MST_0_MSTAP0_FSI_A_MST_0_PORT0_ERROR_CODE_2(
     const uint64_t i_data,
     fapi2::buffer<uint64_t>& o_data)
@@ -1113,12 +1308,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SLAVE_A_MST_0_MSTAP0_F
            TP_TPVSB_FSI_W_SLAVE_A_MST_0_MSTAP0_FSI_A_MST_0_PORT0_ERROR_CODE_2_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SLAVE_A_MST_0_MSTAP0_FSI_A_MST_0_PORT0_ERROR_CODE_2 chip: %x, ec: %x",
+    FAPI_ERR("1:scom_proc Invalid dial access TP_TPVSB_FSI_W_SLAVE_A_MST_0_MSTAP0_FSI_A_MST_0_PORT0_ERROR_CODE_2 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SLAVE_A_MST_0_MSTAP0_FSI_A_MST_0_PORT0_ERROR_CODE_2]
 
+//>> GET_[TP_TPVSB_FSI_W_SLAVE_A_MST_0_MSTAP0_FSI_A_MST_0_PORT0_ERROR_CODE_2]
 static inline fapi2::buffer<uint64_t>& GET_TP_TPVSB_FSI_W_SLAVE_A_MST_0_MSTAP0_FSI_A_MST_0_PORT0_ERROR_CODE_2(
     fapi2::buffer<uint64_t>& i_data,
     uint64_t& o_data)
@@ -1130,12 +1327,14 @@ static inline fapi2::buffer<uint64_t>& GET_TP_TPVSB_FSI_W_SLAVE_A_MST_0_MSTAP0_F
            TP_TPVSB_FSI_W_SLAVE_A_MST_0_MSTAP0_FSI_A_MST_0_PORT0_ERROR_CODE_2_LEN>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SLAVE_A_MST_0_MSTAP0_FSI_A_MST_0_PORT0_ERROR_CODE_2 chip: %x, ec: %x",
+    FAPI_ERR("4:scom_proc Invalid dial access TP_TPVSB_FSI_W_SLAVE_A_MST_0_MSTAP0_FSI_A_MST_0_PORT0_ERROR_CODE_2 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[TP_TPVSB_FSI_W_SLAVE_A_MST_0_MSTAP0_FSI_A_MST_0_PORT0_ERROR_CODE_2]
 
+//>> SET_[TP_TPVSB_FSI_W_SLAVE_A_MST_0_MSTAP0_FOURTH_ERROR]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SLAVE_A_MST_0_MSTAP0_FOURTH_ERROR(
     fapi2::buffer<uint64_t>& i_data,
     fapi2::buffer<uint64_t>& o_data)
@@ -1147,12 +1346,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SLAVE_A_MST_0_MSTAP0_F
            TP_TPVSB_FSI_W_SLAVE_A_MST_0_MSTAP0_FOURTH_ERROR_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SLAVE_A_MST_0_MSTAP0_FOURTH_ERROR chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("0:scom_proc Invalid dial access TP_TPVSB_FSI_W_SLAVE_A_MST_0_MSTAP0_FOURTH_ERROR chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SLAVE_A_MST_0_MSTAP0_FOURTH_ERROR]
 
+//>> SET_[TP_TPVSB_FSI_W_SLAVE_A_MST_0_MSTAP0_FOURTH_ERROR]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SLAVE_A_MST_0_MSTAP0_FOURTH_ERROR(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
@@ -1163,12 +1364,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SLAVE_A_MST_0_MSTAP0_F
            TP_TPVSB_FSI_W_SLAVE_A_MST_0_MSTAP0_FOURTH_ERROR_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SLAVE_A_MST_0_MSTAP0_FOURTH_ERROR chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("1:scom_proc Invalid dial access TP_TPVSB_FSI_W_SLAVE_A_MST_0_MSTAP0_FOURTH_ERROR chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SLAVE_A_MST_0_MSTAP0_FOURTH_ERROR]
 
+//>> GET_[TP_TPVSB_FSI_W_SLAVE_A_MST_0_MSTAP0_FOURTH_ERROR]
 static inline fapi2::buffer<uint64_t>& GET_TP_TPVSB_FSI_W_SLAVE_A_MST_0_MSTAP0_FOURTH_ERROR(
     fapi2::buffer<uint64_t>& i_data,
     uint64_t& o_data)
@@ -1180,12 +1383,14 @@ static inline fapi2::buffer<uint64_t>& GET_TP_TPVSB_FSI_W_SLAVE_A_MST_0_MSTAP0_F
            TP_TPVSB_FSI_W_SLAVE_A_MST_0_MSTAP0_FOURTH_ERROR_LEN>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SLAVE_A_MST_0_MSTAP0_FOURTH_ERROR chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("4:scom_proc Invalid dial access TP_TPVSB_FSI_W_SLAVE_A_MST_0_MSTAP0_FOURTH_ERROR chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[TP_TPVSB_FSI_W_SLAVE_A_MST_0_MSTAP0_FOURTH_ERROR]
 
+//>> SET_[TP_TPVSB_FSI_W_SLAVE_A_MST_0_MSTAP0_CRC_ERROR_COUNT]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SLAVE_A_MST_0_MSTAP0_CRC_ERROR_COUNT(
     fapi2::buffer<uint64_t>& i_data,
     fapi2::buffer<uint64_t>& o_data)
@@ -1197,12 +1402,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SLAVE_A_MST_0_MSTAP0_C
            TP_TPVSB_FSI_W_SLAVE_A_MST_0_MSTAP0_CRC_ERROR_COUNT_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SLAVE_A_MST_0_MSTAP0_CRC_ERROR_COUNT chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("0:scom_proc Invalid dial access TP_TPVSB_FSI_W_SLAVE_A_MST_0_MSTAP0_CRC_ERROR_COUNT chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SLAVE_A_MST_0_MSTAP0_CRC_ERROR_COUNT]
 
+//>> SET_[TP_TPVSB_FSI_W_SLAVE_A_MST_0_MSTAP0_CRC_ERROR_COUNT]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SLAVE_A_MST_0_MSTAP0_CRC_ERROR_COUNT(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
@@ -1213,12 +1420,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SLAVE_A_MST_0_MSTAP0_C
            TP_TPVSB_FSI_W_SLAVE_A_MST_0_MSTAP0_CRC_ERROR_COUNT_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SLAVE_A_MST_0_MSTAP0_CRC_ERROR_COUNT chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("1:scom_proc Invalid dial access TP_TPVSB_FSI_W_SLAVE_A_MST_0_MSTAP0_CRC_ERROR_COUNT chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SLAVE_A_MST_0_MSTAP0_CRC_ERROR_COUNT]
 
+//>> GET_[TP_TPVSB_FSI_W_SLAVE_A_MST_0_MSTAP0_CRC_ERROR_COUNT]
 static inline fapi2::buffer<uint64_t>& GET_TP_TPVSB_FSI_W_SLAVE_A_MST_0_MSTAP0_CRC_ERROR_COUNT(
     fapi2::buffer<uint64_t>& i_data,
     uint64_t& o_data)
@@ -1230,12 +1439,14 @@ static inline fapi2::buffer<uint64_t>& GET_TP_TPVSB_FSI_W_SLAVE_A_MST_0_MSTAP0_C
            TP_TPVSB_FSI_W_SLAVE_A_MST_0_MSTAP0_CRC_ERROR_COUNT_LEN>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SLAVE_A_MST_0_MSTAP0_CRC_ERROR_COUNT chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("4:scom_proc Invalid dial access TP_TPVSB_FSI_W_SLAVE_A_MST_0_MSTAP0_CRC_ERROR_COUNT chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[TP_TPVSB_FSI_W_SLAVE_A_MST_0_MSTAP0_CRC_ERROR_COUNT]
 
+//>> SET_[TP_TPVSB_FSI_W_SLAVE_A_MST_0_MSTAP0_HOT_PLUG_FLAG]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SLAVE_A_MST_0_MSTAP0_HOT_PLUG_FLAG(
     fapi2::buffer<uint64_t>& i_data,
     fapi2::buffer<uint64_t>& o_data)
@@ -1247,12 +1458,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SLAVE_A_MST_0_MSTAP0_H
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SLAVE_A_MST_0_MSTAP0_HOT_PLUG_FLAG chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("0:scom_proc Invalid dial access TP_TPVSB_FSI_W_SLAVE_A_MST_0_MSTAP0_HOT_PLUG_FLAG chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SLAVE_A_MST_0_MSTAP0_HOT_PLUG_FLAG]
 
+//>> SET_[TP_TPVSB_FSI_W_SLAVE_A_MST_0_MSTAP0_HOT_PLUG_FLAG]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SLAVE_A_MST_0_MSTAP0_HOT_PLUG_FLAG(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
@@ -1263,12 +1476,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SLAVE_A_MST_0_MSTAP0_H
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SLAVE_A_MST_0_MSTAP0_HOT_PLUG_FLAG chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("1:scom_proc Invalid dial access TP_TPVSB_FSI_W_SLAVE_A_MST_0_MSTAP0_HOT_PLUG_FLAG chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SLAVE_A_MST_0_MSTAP0_HOT_PLUG_FLAG]
 
+//>> SET_[TP_TPVSB_FSI_W_SLAVE_A_MST_0_MSTAP0_HOT_PLUG_FLAG]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SLAVE_A_MST_0_MSTAP0_HOT_PLUG_FLAG(
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -1278,12 +1493,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SLAVE_A_MST_0_MSTAP0_H
     return o_data.setBit<TP_TPVSB_FSI_W_SLAVE_A_MST_0_MSTAP0_HOT_PLUG_FLAG>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SLAVE_A_MST_0_MSTAP0_HOT_PLUG_FLAG chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("2:scom_proc Invalid dial access TP_TPVSB_FSI_W_SLAVE_A_MST_0_MSTAP0_HOT_PLUG_FLAG chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SLAVE_A_MST_0_MSTAP0_HOT_PLUG_FLAG]
 
+//>> CLEAR_[TP_TPVSB_FSI_W_SLAVE_A_MST_0_MSTAP0_HOT_PLUG_FLAG]
 static inline fapi2::buffer<uint64_t>& CLEAR_TP_TPVSB_FSI_W_SLAVE_A_MST_0_MSTAP0_HOT_PLUG_FLAG(
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -1293,12 +1510,14 @@ static inline fapi2::buffer<uint64_t>& CLEAR_TP_TPVSB_FSI_W_SLAVE_A_MST_0_MSTAP0
     return o_data.clearBit<TP_TPVSB_FSI_W_SLAVE_A_MST_0_MSTAP0_HOT_PLUG_FLAG>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SLAVE_A_MST_0_MSTAP0_HOT_PLUG_FLAG chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("3:scom_proc Invalid dial access TP_TPVSB_FSI_W_SLAVE_A_MST_0_MSTAP0_HOT_PLUG_FLAG chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< CLEAR_[TP_TPVSB_FSI_W_SLAVE_A_MST_0_MSTAP0_HOT_PLUG_FLAG]
 
+//>> GET_[TP_TPVSB_FSI_W_SLAVE_A_MST_0_MSTAP0_HOT_PLUG_FLAG]
 static inline fapi2::buffer<uint64_t>& GET_TP_TPVSB_FSI_W_SLAVE_A_MST_0_MSTAP0_HOT_PLUG_FLAG(
     fapi2::buffer<uint64_t>& i_data,
     uint64_t& o_data)
@@ -1310,12 +1529,14 @@ static inline fapi2::buffer<uint64_t>& GET_TP_TPVSB_FSI_W_SLAVE_A_MST_0_MSTAP0_H
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SLAVE_A_MST_0_MSTAP0_HOT_PLUG_FLAG chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("4:scom_proc Invalid dial access TP_TPVSB_FSI_W_SLAVE_A_MST_0_MSTAP0_HOT_PLUG_FLAG chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[TP_TPVSB_FSI_W_SLAVE_A_MST_0_MSTAP0_HOT_PLUG_FLAG]
 
+//>> GET_[TP_TPVSB_FSI_W_SLAVE_A_MST_0_MSTAP0_HOT_PLUG_FLAG]
 static inline bool GET_TP_TPVSB_FSI_W_SLAVE_A_MST_0_MSTAP0_HOT_PLUG_FLAG(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
@@ -1324,12 +1545,14 @@ static inline bool GET_TP_TPVSB_FSI_W_SLAVE_A_MST_0_MSTAP0_HOT_PLUG_FLAG(fapi2::
     return i_data.getBit<TP_TPVSB_FSI_W_SLAVE_A_MST_0_MSTAP0_HOT_PLUG_FLAG>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SLAVE_A_MST_0_MSTAP0_HOT_PLUG_FLAG chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("5:scom_proc Invalid dial access TP_TPVSB_FSI_W_SLAVE_A_MST_0_MSTAP0_HOT_PLUG_FLAG chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[TP_TPVSB_FSI_W_SLAVE_A_MST_0_MSTAP0_HOT_PLUG_FLAG]
 
+//>> PREP_[TP_TPVSB_FSI_W_SLAVE_A_MST_1_MRESP3_FSI0]
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
 static inline fapi2::ReturnCode PREP_TP_TPVSB_FSI_W_SLAVE_A_MST_1_MRESP3_FSI0(const fapi2::Target<K, M, V>& i_target)
 {
@@ -1343,7 +1566,9 @@ fapi_try_exit:
     return fapi2::current_err;
 #endif
 }
+//<< PREP_[TP_TPVSB_FSI_W_SLAVE_A_MST_1_MRESP3_FSI0]
 
+//>> GET_[TP_TPVSB_FSI_W_SLAVE_A_MST_1_MRESP3_FSI0]
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
 static inline fapi2::ReturnCode GET_TP_TPVSB_FSI_W_SLAVE_A_MST_1_MRESP3_FSI0(const fapi2::Target<K, M, V>& i_target,
         fapi2::buffer<uint64_t>& o_data)
@@ -1358,7 +1583,9 @@ fapi_try_exit:
     return fapi2::current_err;
 #endif
 }
+//<< GET_[TP_TPVSB_FSI_W_SLAVE_A_MST_1_MRESP3_FSI0]
 
+//>> PUT_[TP_TPVSB_FSI_W_SLAVE_A_MST_1_MRESP3_FSI0]
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
 static inline fapi2::ReturnCode PUT_TP_TPVSB_FSI_W_SLAVE_A_MST_1_MRESP3_FSI0(const fapi2::Target<K, M, V>& i_target,
         const uint64_t i_data)
@@ -1373,7 +1600,9 @@ fapi_try_exit:
     return fapi2::current_err;
 #endif
 }
+//<< PUT_[TP_TPVSB_FSI_W_SLAVE_A_MST_1_MRESP3_FSI0]
 
+//>> PREP_[TP_TPVSB_FSI_W_SLAVE_A_MST_1_MRESP3_WO]
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
 static inline fapi2::ReturnCode PREP_TP_TPVSB_FSI_W_SLAVE_A_MST_1_MRESP3_WO(const fapi2::Target<K, M, V>& i_target)
 {
@@ -1387,7 +1616,9 @@ fapi_try_exit:
     return fapi2::current_err;
 #endif
 }
+//<< PREP_[TP_TPVSB_FSI_W_SLAVE_A_MST_1_MRESP3_WO]
 
+//>> GET_[TP_TPVSB_FSI_W_SLAVE_A_MST_1_MRESP3_WO]
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
 static inline fapi2::ReturnCode GET_TP_TPVSB_FSI_W_SLAVE_A_MST_1_MRESP3_WO(const fapi2::Target<K, M, V>& i_target,
         fapi2::buffer<uint64_t>& o_data)
@@ -1402,7 +1633,9 @@ fapi_try_exit:
     return fapi2::current_err;
 #endif
 }
+//<< GET_[TP_TPVSB_FSI_W_SLAVE_A_MST_1_MRESP3_WO]
 
+//>> PUT_[TP_TPVSB_FSI_W_SLAVE_A_MST_1_MRESP3_WO]
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
 static inline fapi2::ReturnCode PUT_TP_TPVSB_FSI_W_SLAVE_A_MST_1_MRESP3_WO(const fapi2::Target<K, M, V>& i_target,
         const uint64_t i_data)
@@ -1417,8 +1650,10 @@ fapi_try_exit:
     return fapi2::current_err;
 #endif
 }
+//<< PUT_[TP_TPVSB_FSI_W_SLAVE_A_MST_1_MRESP3_WO]
 
 
+//>> SET_[TP_TPVSB_FSI_W_SLAVE_A_MST_1_MRESP3_GENERAL_RESET_3]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SLAVE_A_MST_1_MRESP3_GENERAL_RESET_3(
     fapi2::buffer<uint64_t>& i_data,
     fapi2::buffer<uint64_t>& o_data)
@@ -1430,12 +1665,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SLAVE_A_MST_1_MRESP3_G
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SLAVE_A_MST_1_MRESP3_GENERAL_RESET_3 chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("0:scom_proc Invalid dial access TP_TPVSB_FSI_W_SLAVE_A_MST_1_MRESP3_GENERAL_RESET_3 chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SLAVE_A_MST_1_MRESP3_GENERAL_RESET_3]
 
+//>> SET_[TP_TPVSB_FSI_W_SLAVE_A_MST_1_MRESP3_GENERAL_RESET_3]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SLAVE_A_MST_1_MRESP3_GENERAL_RESET_3(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
@@ -1446,12 +1683,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SLAVE_A_MST_1_MRESP3_G
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SLAVE_A_MST_1_MRESP3_GENERAL_RESET_3 chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("1:scom_proc Invalid dial access TP_TPVSB_FSI_W_SLAVE_A_MST_1_MRESP3_GENERAL_RESET_3 chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SLAVE_A_MST_1_MRESP3_GENERAL_RESET_3]
 
+//>> SET_[TP_TPVSB_FSI_W_SLAVE_A_MST_1_MRESP3_GENERAL_RESET_3]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SLAVE_A_MST_1_MRESP3_GENERAL_RESET_3(
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -1461,12 +1700,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SLAVE_A_MST_1_MRESP3_G
     return o_data.setBit<TP_TPVSB_FSI_W_SLAVE_A_MST_1_MRESP3_GENERAL_RESET_3>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SLAVE_A_MST_1_MRESP3_GENERAL_RESET_3 chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("2:scom_proc Invalid dial access TP_TPVSB_FSI_W_SLAVE_A_MST_1_MRESP3_GENERAL_RESET_3 chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SLAVE_A_MST_1_MRESP3_GENERAL_RESET_3]
 
+//>> CLEAR_[TP_TPVSB_FSI_W_SLAVE_A_MST_1_MRESP3_GENERAL_RESET_3]
 static inline fapi2::buffer<uint64_t>& CLEAR_TP_TPVSB_FSI_W_SLAVE_A_MST_1_MRESP3_GENERAL_RESET_3(
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -1476,12 +1717,14 @@ static inline fapi2::buffer<uint64_t>& CLEAR_TP_TPVSB_FSI_W_SLAVE_A_MST_1_MRESP3
     return o_data.clearBit<TP_TPVSB_FSI_W_SLAVE_A_MST_1_MRESP3_GENERAL_RESET_3>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SLAVE_A_MST_1_MRESP3_GENERAL_RESET_3 chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("3:scom_proc Invalid dial access TP_TPVSB_FSI_W_SLAVE_A_MST_1_MRESP3_GENERAL_RESET_3 chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< CLEAR_[TP_TPVSB_FSI_W_SLAVE_A_MST_1_MRESP3_GENERAL_RESET_3]
 
+//>> GET_[TP_TPVSB_FSI_W_SLAVE_A_MST_1_MRESP3_GENERAL_RESET_3]
 static inline fapi2::buffer<uint64_t>& GET_TP_TPVSB_FSI_W_SLAVE_A_MST_1_MRESP3_GENERAL_RESET_3(
     fapi2::buffer<uint64_t>& i_data,
     uint64_t& o_data)
@@ -1493,12 +1736,14 @@ static inline fapi2::buffer<uint64_t>& GET_TP_TPVSB_FSI_W_SLAVE_A_MST_1_MRESP3_G
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SLAVE_A_MST_1_MRESP3_GENERAL_RESET_3 chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("4:scom_proc Invalid dial access TP_TPVSB_FSI_W_SLAVE_A_MST_1_MRESP3_GENERAL_RESET_3 chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[TP_TPVSB_FSI_W_SLAVE_A_MST_1_MRESP3_GENERAL_RESET_3]
 
+//>> GET_[TP_TPVSB_FSI_W_SLAVE_A_MST_1_MRESP3_GENERAL_RESET_3]
 static inline bool GET_TP_TPVSB_FSI_W_SLAVE_A_MST_1_MRESP3_GENERAL_RESET_3(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
@@ -1507,12 +1752,14 @@ static inline bool GET_TP_TPVSB_FSI_W_SLAVE_A_MST_1_MRESP3_GENERAL_RESET_3(fapi2
     return i_data.getBit<TP_TPVSB_FSI_W_SLAVE_A_MST_1_MRESP3_GENERAL_RESET_3>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SLAVE_A_MST_1_MRESP3_GENERAL_RESET_3 chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("5:scom_proc Invalid dial access TP_TPVSB_FSI_W_SLAVE_A_MST_1_MRESP3_GENERAL_RESET_3 chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[TP_TPVSB_FSI_W_SLAVE_A_MST_1_MRESP3_GENERAL_RESET_3]
 
+//>> SET_[TP_TPVSB_FSI_W_SLAVE_A_MST_1_MRESP3_ERROR_RESET_3]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SLAVE_A_MST_1_MRESP3_ERROR_RESET_3(
     fapi2::buffer<uint64_t>& i_data,
     fapi2::buffer<uint64_t>& o_data)
@@ -1524,12 +1771,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SLAVE_A_MST_1_MRESP3_E
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SLAVE_A_MST_1_MRESP3_ERROR_RESET_3 chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("0:scom_proc Invalid dial access TP_TPVSB_FSI_W_SLAVE_A_MST_1_MRESP3_ERROR_RESET_3 chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SLAVE_A_MST_1_MRESP3_ERROR_RESET_3]
 
+//>> SET_[TP_TPVSB_FSI_W_SLAVE_A_MST_1_MRESP3_ERROR_RESET_3]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SLAVE_A_MST_1_MRESP3_ERROR_RESET_3(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
@@ -1540,12 +1789,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SLAVE_A_MST_1_MRESP3_E
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SLAVE_A_MST_1_MRESP3_ERROR_RESET_3 chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("1:scom_proc Invalid dial access TP_TPVSB_FSI_W_SLAVE_A_MST_1_MRESP3_ERROR_RESET_3 chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SLAVE_A_MST_1_MRESP3_ERROR_RESET_3]
 
+//>> SET_[TP_TPVSB_FSI_W_SLAVE_A_MST_1_MRESP3_ERROR_RESET_3]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SLAVE_A_MST_1_MRESP3_ERROR_RESET_3(
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -1555,12 +1806,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SLAVE_A_MST_1_MRESP3_E
     return o_data.setBit<TP_TPVSB_FSI_W_SLAVE_A_MST_1_MRESP3_ERROR_RESET_3>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SLAVE_A_MST_1_MRESP3_ERROR_RESET_3 chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("2:scom_proc Invalid dial access TP_TPVSB_FSI_W_SLAVE_A_MST_1_MRESP3_ERROR_RESET_3 chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SLAVE_A_MST_1_MRESP3_ERROR_RESET_3]
 
+//>> CLEAR_[TP_TPVSB_FSI_W_SLAVE_A_MST_1_MRESP3_ERROR_RESET_3]
 static inline fapi2::buffer<uint64_t>& CLEAR_TP_TPVSB_FSI_W_SLAVE_A_MST_1_MRESP3_ERROR_RESET_3(
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -1570,12 +1823,14 @@ static inline fapi2::buffer<uint64_t>& CLEAR_TP_TPVSB_FSI_W_SLAVE_A_MST_1_MRESP3
     return o_data.clearBit<TP_TPVSB_FSI_W_SLAVE_A_MST_1_MRESP3_ERROR_RESET_3>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SLAVE_A_MST_1_MRESP3_ERROR_RESET_3 chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("3:scom_proc Invalid dial access TP_TPVSB_FSI_W_SLAVE_A_MST_1_MRESP3_ERROR_RESET_3 chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< CLEAR_[TP_TPVSB_FSI_W_SLAVE_A_MST_1_MRESP3_ERROR_RESET_3]
 
+//>> GET_[TP_TPVSB_FSI_W_SLAVE_A_MST_1_MRESP3_ERROR_RESET_3]
 static inline fapi2::buffer<uint64_t>& GET_TP_TPVSB_FSI_W_SLAVE_A_MST_1_MRESP3_ERROR_RESET_3(
     fapi2::buffer<uint64_t>& i_data,
     uint64_t& o_data)
@@ -1587,12 +1842,14 @@ static inline fapi2::buffer<uint64_t>& GET_TP_TPVSB_FSI_W_SLAVE_A_MST_1_MRESP3_E
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SLAVE_A_MST_1_MRESP3_ERROR_RESET_3 chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("4:scom_proc Invalid dial access TP_TPVSB_FSI_W_SLAVE_A_MST_1_MRESP3_ERROR_RESET_3 chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[TP_TPVSB_FSI_W_SLAVE_A_MST_1_MRESP3_ERROR_RESET_3]
 
+//>> GET_[TP_TPVSB_FSI_W_SLAVE_A_MST_1_MRESP3_ERROR_RESET_3]
 static inline bool GET_TP_TPVSB_FSI_W_SLAVE_A_MST_1_MRESP3_ERROR_RESET_3(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
@@ -1601,12 +1858,14 @@ static inline bool GET_TP_TPVSB_FSI_W_SLAVE_A_MST_1_MRESP3_ERROR_RESET_3(fapi2::
     return i_data.getBit<TP_TPVSB_FSI_W_SLAVE_A_MST_1_MRESP3_ERROR_RESET_3>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SLAVE_A_MST_1_MRESP3_ERROR_RESET_3 chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("5:scom_proc Invalid dial access TP_TPVSB_FSI_W_SLAVE_A_MST_1_MRESP3_ERROR_RESET_3 chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[TP_TPVSB_FSI_W_SLAVE_A_MST_1_MRESP3_ERROR_RESET_3]
 
+//>> PREP_[TP_TPVSB_FSI_W_SLAVE_A_MST_1_MSIEP0_FSI0]
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
 static inline fapi2::ReturnCode PREP_TP_TPVSB_FSI_W_SLAVE_A_MST_1_MSIEP0_FSI0(const fapi2::Target<K, M, V>& i_target)
 {
@@ -1620,7 +1879,9 @@ fapi_try_exit:
     return fapi2::current_err;
 #endif
 }
+//<< PREP_[TP_TPVSB_FSI_W_SLAVE_A_MST_1_MSIEP0_FSI0]
 
+//>> GET_[TP_TPVSB_FSI_W_SLAVE_A_MST_1_MSIEP0_FSI0]
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
 static inline fapi2::ReturnCode GET_TP_TPVSB_FSI_W_SLAVE_A_MST_1_MSIEP0_FSI0(const fapi2::Target<K, M, V>& i_target,
         fapi2::buffer<uint64_t>& o_data)
@@ -1635,7 +1896,9 @@ fapi_try_exit:
     return fapi2::current_err;
 #endif
 }
+//<< GET_[TP_TPVSB_FSI_W_SLAVE_A_MST_1_MSIEP0_FSI0]
 
+//>> PUT_[TP_TPVSB_FSI_W_SLAVE_A_MST_1_MSIEP0_FSI0]
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
 static inline fapi2::ReturnCode PUT_TP_TPVSB_FSI_W_SLAVE_A_MST_1_MSIEP0_FSI0(const fapi2::Target<K, M, V>& i_target,
         const uint64_t i_data)
@@ -1650,7 +1913,9 @@ fapi_try_exit:
     return fapi2::current_err;
 #endif
 }
+//<< PUT_[TP_TPVSB_FSI_W_SLAVE_A_MST_1_MSIEP0_FSI0]
 
+//>> PREP_[TP_TPVSB_FSI_W_SLAVE_A_MST_1_MSIEP0_SCOMFSI0]
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
 static inline fapi2::ReturnCode PREP_TP_TPVSB_FSI_W_SLAVE_A_MST_1_MSIEP0_SCOMFSI0(const fapi2::Target<K, M, V>&
         i_target)
@@ -1665,7 +1930,9 @@ fapi_try_exit:
     return fapi2::current_err;
 #endif
 }
+//<< PREP_[TP_TPVSB_FSI_W_SLAVE_A_MST_1_MSIEP0_SCOMFSI0]
 
+//>> GET_[TP_TPVSB_FSI_W_SLAVE_A_MST_1_MSIEP0_SCOMFSI0]
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
 static inline fapi2::ReturnCode GET_TP_TPVSB_FSI_W_SLAVE_A_MST_1_MSIEP0_SCOMFSI0(const fapi2::Target<K, M, V>& i_target,
         fapi2::buffer<uint64_t>& o_data)
@@ -1680,7 +1947,9 @@ fapi_try_exit:
     return fapi2::current_err;
 #endif
 }
+//<< GET_[TP_TPVSB_FSI_W_SLAVE_A_MST_1_MSIEP0_SCOMFSI0]
 
+//>> PUT_[TP_TPVSB_FSI_W_SLAVE_A_MST_1_MSIEP0_SCOMFSI0]
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
 static inline fapi2::ReturnCode PUT_TP_TPVSB_FSI_W_SLAVE_A_MST_1_MSIEP0_SCOMFSI0(const fapi2::Target<K, M, V>& i_target,
         const uint64_t i_data)
@@ -1695,8 +1964,10 @@ fapi_try_exit:
     return fapi2::current_err;
 #endif
 }
+//<< PUT_[TP_TPVSB_FSI_W_SLAVE_A_MST_1_MSIEP0_SCOMFSI0]
 
 
+//>> PREP_[TP_TPVSB_FSI_W_SLAVE_B_SCRSIS4]
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
 static inline fapi2::ReturnCode PREP_TP_TPVSB_FSI_W_SLAVE_B_SCRSIS4(const fapi2::Target<K, M, V>& i_target)
 {
@@ -1710,7 +1981,9 @@ fapi_try_exit:
     return fapi2::current_err;
 #endif
 }
+//<< PREP_[TP_TPVSB_FSI_W_SLAVE_B_SCRSIS4]
 
+//>> GET_[TP_TPVSB_FSI_W_SLAVE_B_SCRSIS4]
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
 static inline fapi2::ReturnCode GET_TP_TPVSB_FSI_W_SLAVE_B_SCRSIS4(const fapi2::Target<K, M, V>& i_target,
         fapi2::buffer<uint64_t>& o_data)
@@ -1725,7 +1998,9 @@ fapi_try_exit:
     return fapi2::current_err;
 #endif
 }
+//<< GET_[TP_TPVSB_FSI_W_SLAVE_B_SCRSIS4]
 
+//>> PUT_[TP_TPVSB_FSI_W_SLAVE_B_SCRSIS4]
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
 static inline fapi2::ReturnCode PUT_TP_TPVSB_FSI_W_SLAVE_B_SCRSIS4(const fapi2::Target<K, M, V>& i_target,
         const uint64_t i_data)
@@ -1740,8 +2015,10 @@ fapi_try_exit:
     return fapi2::current_err;
 #endif
 }
+//<< PUT_[TP_TPVSB_FSI_W_SLAVE_B_SCRSIS4]
 
 
+//>> PREP_[TP_TPVSB_FSI_W_SLAVE_B_SNMR]
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
 static inline fapi2::ReturnCode PREP_TP_TPVSB_FSI_W_SLAVE_B_SNMR(const fapi2::Target<K, M, V>& i_target)
 {
@@ -1755,7 +2032,9 @@ fapi_try_exit:
     return fapi2::current_err;
 #endif
 }
+//<< PREP_[TP_TPVSB_FSI_W_SLAVE_B_SNMR]
 
+//>> GET_[TP_TPVSB_FSI_W_SLAVE_B_SNMR]
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
 static inline fapi2::ReturnCode GET_TP_TPVSB_FSI_W_SLAVE_B_SNMR(const fapi2::Target<K, M, V>& i_target,
         fapi2::buffer<uint64_t>& o_data)
@@ -1770,7 +2049,9 @@ fapi_try_exit:
     return fapi2::current_err;
 #endif
 }
+//<< GET_[TP_TPVSB_FSI_W_SLAVE_B_SNMR]
 
+//>> PUT_[TP_TPVSB_FSI_W_SLAVE_B_SNMR]
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
 static inline fapi2::ReturnCode PUT_TP_TPVSB_FSI_W_SLAVE_B_SNMR(const fapi2::Target<K, M, V>& i_target,
         const uint64_t i_data)
@@ -1785,8 +2066,10 @@ fapi_try_exit:
     return fapi2::current_err;
 #endif
 }
+//<< PUT_[TP_TPVSB_FSI_W_SLAVE_B_SNMR]
 
 
+//>> PREP_[TP_TPVSB_FSI_W_SLAVE_B_SRSIC0]
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
 static inline fapi2::ReturnCode PREP_TP_TPVSB_FSI_W_SLAVE_B_SRSIC0(const fapi2::Target<K, M, V>& i_target)
 {
@@ -1800,7 +2083,9 @@ fapi_try_exit:
     return fapi2::current_err;
 #endif
 }
+//<< PREP_[TP_TPVSB_FSI_W_SLAVE_B_SRSIC0]
 
+//>> GET_[TP_TPVSB_FSI_W_SLAVE_B_SRSIC0]
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
 static inline fapi2::ReturnCode GET_TP_TPVSB_FSI_W_SLAVE_B_SRSIC0(const fapi2::Target<K, M, V>& i_target,
         fapi2::buffer<uint64_t>& o_data)
@@ -1815,7 +2100,9 @@ fapi_try_exit:
     return fapi2::current_err;
 #endif
 }
+//<< GET_[TP_TPVSB_FSI_W_SLAVE_B_SRSIC0]
 
+//>> PUT_[TP_TPVSB_FSI_W_SLAVE_B_SRSIC0]
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
 static inline fapi2::ReturnCode PUT_TP_TPVSB_FSI_W_SLAVE_B_SRSIC0(const fapi2::Target<K, M, V>& i_target,
         const uint64_t i_data)
@@ -1830,8 +2117,10 @@ fapi_try_exit:
     return fapi2::current_err;
 #endif
 }
+//<< PUT_[TP_TPVSB_FSI_W_SLAVE_B_SRSIC0]
 
 
+//>> PREP_[TP_TPVSB_FSI_W_SPIMC_FSI2SPI_COMMAND_REGISTER_FSI]
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
 static inline fapi2::ReturnCode PREP_TP_TPVSB_FSI_W_SPIMC_FSI2SPI_COMMAND_REGISTER_FSI(
     const fapi2::Target<K, M, V>& i_target)
@@ -1846,7 +2135,9 @@ fapi_try_exit:
     return fapi2::current_err;
 #endif
 }
+//<< PREP_[TP_TPVSB_FSI_W_SPIMC_FSI2SPI_COMMAND_REGISTER_FSI]
 
+//>> GET_[TP_TPVSB_FSI_W_SPIMC_FSI2SPI_COMMAND_REGISTER_FSI]
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
 static inline fapi2::ReturnCode GET_TP_TPVSB_FSI_W_SPIMC_FSI2SPI_COMMAND_REGISTER_FSI(
     const fapi2::Target<K, M, V>& i_target, fapi2::buffer<uint64_t>& o_data)
@@ -1861,7 +2152,9 @@ fapi_try_exit:
     return fapi2::current_err;
 #endif
 }
+//<< GET_[TP_TPVSB_FSI_W_SPIMC_FSI2SPI_COMMAND_REGISTER_FSI]
 
+//>> PUT_[TP_TPVSB_FSI_W_SPIMC_FSI2SPI_COMMAND_REGISTER_FSI]
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
 static inline fapi2::ReturnCode PUT_TP_TPVSB_FSI_W_SPIMC_FSI2SPI_COMMAND_REGISTER_FSI(
     const fapi2::Target<K, M, V>& i_target, const uint64_t i_data)
@@ -1877,7 +2170,9 @@ fapi_try_exit:
     return fapi2::current_err;
 #endif
 }
+//<< PUT_[TP_TPVSB_FSI_W_SPIMC_FSI2SPI_COMMAND_REGISTER_FSI]
 
+//>> PREP_[TP_TPVSB_FSI_W_SPIMC_FSI2SPI_COMMAND_REGISTER_FSI_BYTE]
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
 static inline fapi2::ReturnCode PREP_TP_TPVSB_FSI_W_SPIMC_FSI2SPI_COMMAND_REGISTER_FSI_BYTE(
     const fapi2::Target<K, M, V>& i_target)
@@ -1892,7 +2187,9 @@ fapi_try_exit:
     return fapi2::current_err;
 #endif
 }
+//<< PREP_[TP_TPVSB_FSI_W_SPIMC_FSI2SPI_COMMAND_REGISTER_FSI_BYTE]
 
+//>> GET_[TP_TPVSB_FSI_W_SPIMC_FSI2SPI_COMMAND_REGISTER_FSI_BYTE]
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
 static inline fapi2::ReturnCode GET_TP_TPVSB_FSI_W_SPIMC_FSI2SPI_COMMAND_REGISTER_FSI_BYTE(
     const fapi2::Target<K, M, V>& i_target, fapi2::buffer<uint64_t>& o_data)
@@ -1907,7 +2204,9 @@ fapi_try_exit:
     return fapi2::current_err;
 #endif
 }
+//<< GET_[TP_TPVSB_FSI_W_SPIMC_FSI2SPI_COMMAND_REGISTER_FSI_BYTE]
 
+//>> PUT_[TP_TPVSB_FSI_W_SPIMC_FSI2SPI_COMMAND_REGISTER_FSI_BYTE]
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
 static inline fapi2::ReturnCode PUT_TP_TPVSB_FSI_W_SPIMC_FSI2SPI_COMMAND_REGISTER_FSI_BYTE(
     const fapi2::Target<K, M, V>& i_target, const uint64_t i_data)
@@ -1923,8 +2222,10 @@ fapi_try_exit:
     return fapi2::current_err;
 #endif
 }
+//<< PUT_[TP_TPVSB_FSI_W_SPIMC_FSI2SPI_COMMAND_REGISTER_FSI_BYTE]
 
 
+//>> SET_[TP_TPVSB_FSI_W_SPIMC_FSI2SPI_COMMAND_REGISTER_CMD_REG]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_FSI2SPI_COMMAND_REGISTER_CMD_REG(
     fapi2::buffer<uint64_t>& i_data,
     fapi2::buffer<uint64_t>& o_data)
@@ -1937,12 +2238,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_FSI2SPI_COMMAND_
            TP_TPVSB_FSI_W_SPIMC_FSI2SPI_COMMAND_REGISTER_CMD_REG_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_FSI2SPI_COMMAND_REGISTER_CMD_REG chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("0:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_FSI2SPI_COMMAND_REGISTER_CMD_REG chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SPIMC_FSI2SPI_COMMAND_REGISTER_CMD_REG]
 
+//>> SET_[TP_TPVSB_FSI_W_SPIMC_FSI2SPI_COMMAND_REGISTER_CMD_REG]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_FSI2SPI_COMMAND_REGISTER_CMD_REG(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
@@ -1954,12 +2257,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_FSI2SPI_COMMAND_
            TP_TPVSB_FSI_W_SPIMC_FSI2SPI_COMMAND_REGISTER_CMD_REG_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_FSI2SPI_COMMAND_REGISTER_CMD_REG chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("1:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_FSI2SPI_COMMAND_REGISTER_CMD_REG chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SPIMC_FSI2SPI_COMMAND_REGISTER_CMD_REG]
 
+//>> GET_[TP_TPVSB_FSI_W_SPIMC_FSI2SPI_COMMAND_REGISTER_CMD_REG]
 static inline fapi2::buffer<uint64_t>& GET_TP_TPVSB_FSI_W_SPIMC_FSI2SPI_COMMAND_REGISTER_CMD_REG(
     fapi2::buffer<uint64_t>& i_data,
     uint64_t& o_data)
@@ -1972,12 +2277,14 @@ static inline fapi2::buffer<uint64_t>& GET_TP_TPVSB_FSI_W_SPIMC_FSI2SPI_COMMAND_
            TP_TPVSB_FSI_W_SPIMC_FSI2SPI_COMMAND_REGISTER_CMD_REG_LEN>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_FSI2SPI_COMMAND_REGISTER_CMD_REG chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("4:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_FSI2SPI_COMMAND_REGISTER_CMD_REG chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[TP_TPVSB_FSI_W_SPIMC_FSI2SPI_COMMAND_REGISTER_CMD_REG]
 
+//>> PREP_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST0_COUNTER]
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
 static inline fapi2::ReturnCode PREP_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST0_COUNTER(const fapi2::Target<K, M, V>&
         i_target)
@@ -1992,7 +2299,9 @@ fapi_try_exit:
     return fapi2::current_err;
 #endif
 }
+//<< PREP_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST0_COUNTER]
 
+//>> GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST0_COUNTER]
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
 static inline fapi2::ReturnCode GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST0_COUNTER(const fapi2::Target<K, M, V>& i_target,
         fapi2::buffer<uint64_t>& o_data)
@@ -2007,7 +2316,9 @@ fapi_try_exit:
     return fapi2::current_err;
 #endif
 }
+//<< GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST0_COUNTER]
 
+//>> PUT_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST0_COUNTER]
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
 static inline fapi2::ReturnCode PUT_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST0_COUNTER(const fapi2::Target<K, M, V>& i_target,
         const uint64_t i_data)
@@ -2022,8 +2333,10 @@ fapi_try_exit:
     return fapi2::current_err;
 #endif
 }
+//<< PUT_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST0_COUNTER]
 
 
+//>> SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST0_COUNTER_COUNT_N1]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST0_COUNTER_COUNT_N1(
     fapi2::buffer<uint64_t>& i_data,
     fapi2::buffer<uint64_t>& o_data)
@@ -2035,12 +2348,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST0_
            TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST0_COUNTER_COUNT_N1_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST0_COUNTER_COUNT_N1 chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("0:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST0_COUNTER_COUNT_N1 chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST0_COUNTER_COUNT_N1]
 
+//>> SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST0_COUNTER_COUNT_N1]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST0_COUNTER_COUNT_N1(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
@@ -2051,12 +2366,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST0_
            TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST0_COUNTER_COUNT_N1_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST0_COUNTER_COUNT_N1 chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("1:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST0_COUNTER_COUNT_N1 chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST0_COUNTER_COUNT_N1]
 
+//>> GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST0_COUNTER_COUNT_N1]
 static inline fapi2::buffer<uint64_t>& GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST0_COUNTER_COUNT_N1(
     fapi2::buffer<uint64_t>& i_data,
     uint64_t& o_data)
@@ -2068,12 +2385,14 @@ static inline fapi2::buffer<uint64_t>& GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST0_
            TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST0_COUNTER_COUNT_N1_LEN>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST0_COUNTER_COUNT_N1 chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("4:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST0_COUNTER_COUNT_N1 chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST0_COUNTER_COUNT_N1]
 
+//>> SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST0_COUNTER_COUNT_N2]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST0_COUNTER_COUNT_N2(
     fapi2::buffer<uint64_t>& i_data,
     fapi2::buffer<uint64_t>& o_data)
@@ -2085,12 +2404,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST0_
            TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST0_COUNTER_COUNT_N2_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST0_COUNTER_COUNT_N2 chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("0:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST0_COUNTER_COUNT_N2 chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST0_COUNTER_COUNT_N2]
 
+//>> SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST0_COUNTER_COUNT_N2]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST0_COUNTER_COUNT_N2(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
@@ -2101,12 +2422,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST0_
            TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST0_COUNTER_COUNT_N2_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST0_COUNTER_COUNT_N2 chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("1:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST0_COUNTER_COUNT_N2 chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST0_COUNTER_COUNT_N2]
 
+//>> GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST0_COUNTER_COUNT_N2]
 static inline fapi2::buffer<uint64_t>& GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST0_COUNTER_COUNT_N2(
     fapi2::buffer<uint64_t>& i_data,
     uint64_t& o_data)
@@ -2118,12 +2441,14 @@ static inline fapi2::buffer<uint64_t>& GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST0_
            TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST0_COUNTER_COUNT_N2_LEN>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST0_COUNTER_COUNT_N2 chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("4:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST0_COUNTER_COUNT_N2 chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST0_COUNTER_COUNT_N2]
 
+//>> SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST0_COUNTER_COUNT_RESERVED_A]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST0_COUNTER_COUNT_RESERVED_A(
     fapi2::buffer<uint64_t>& i_data,
     fapi2::buffer<uint64_t>& o_data)
@@ -2135,12 +2460,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST0_
            TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST0_COUNTER_COUNT_RESERVED_A_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST0_COUNTER_COUNT_RESERVED_A chip: %x, ec: %x",
+    FAPI_ERR("0:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST0_COUNTER_COUNT_RESERVED_A chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST0_COUNTER_COUNT_RESERVED_A]
 
+//>> SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST0_COUNTER_COUNT_RESERVED_A]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST0_COUNTER_COUNT_RESERVED_A(
     const uint64_t i_data,
     fapi2::buffer<uint64_t>& o_data)
@@ -2152,12 +2479,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST0_
            TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST0_COUNTER_COUNT_RESERVED_A_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST0_COUNTER_COUNT_RESERVED_A chip: %x, ec: %x",
+    FAPI_ERR("1:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST0_COUNTER_COUNT_RESERVED_A chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST0_COUNTER_COUNT_RESERVED_A]
 
+//>> GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST0_COUNTER_COUNT_RESERVED_A]
 static inline fapi2::buffer<uint64_t>& GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST0_COUNTER_COUNT_RESERVED_A(
     fapi2::buffer<uint64_t>& i_data,
     uint64_t& o_data)
@@ -2169,12 +2498,14 @@ static inline fapi2::buffer<uint64_t>& GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST0_
            TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST0_COUNTER_COUNT_RESERVED_A_LEN>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST0_COUNTER_COUNT_RESERVED_A chip: %x, ec: %x",
+    FAPI_ERR("4:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST0_COUNTER_COUNT_RESERVED_A chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST0_COUNTER_COUNT_RESERVED_A]
 
+//>> SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST0_COUNTER_LOOPCOUNT]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST0_COUNTER_LOOPCOUNT(
     fapi2::buffer<uint64_t>& i_data,
     fapi2::buffer<uint64_t>& o_data)
@@ -2186,12 +2517,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST0_
            TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST0_COUNTER_LOOPCOUNT_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST0_COUNTER_LOOPCOUNT chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("0:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST0_COUNTER_LOOPCOUNT chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST0_COUNTER_LOOPCOUNT]
 
+//>> SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST0_COUNTER_LOOPCOUNT]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST0_COUNTER_LOOPCOUNT(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
@@ -2202,12 +2535,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST0_
            TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST0_COUNTER_LOOPCOUNT_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST0_COUNTER_LOOPCOUNT chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("1:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST0_COUNTER_LOOPCOUNT chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST0_COUNTER_LOOPCOUNT]
 
+//>> GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST0_COUNTER_LOOPCOUNT]
 static inline fapi2::buffer<uint64_t>& GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST0_COUNTER_LOOPCOUNT(
     fapi2::buffer<uint64_t>& i_data,
     uint64_t& o_data)
@@ -2219,12 +2554,14 @@ static inline fapi2::buffer<uint64_t>& GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST0_
            TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST0_COUNTER_LOOPCOUNT_LEN>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST0_COUNTER_LOOPCOUNT chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("4:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST0_COUNTER_LOOPCOUNT chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST0_COUNTER_LOOPCOUNT]
 
+//>> SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST0_COUNTER_LOOPCOUNT2]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST0_COUNTER_LOOPCOUNT2(
     fapi2::buffer<uint64_t>& i_data,
     fapi2::buffer<uint64_t>& o_data)
@@ -2236,12 +2573,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST0_
            TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST0_COUNTER_LOOPCOUNT2_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST0_COUNTER_LOOPCOUNT2 chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("0:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST0_COUNTER_LOOPCOUNT2 chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST0_COUNTER_LOOPCOUNT2]
 
+//>> SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST0_COUNTER_LOOPCOUNT2]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST0_COUNTER_LOOPCOUNT2(
     const uint64_t i_data,
     fapi2::buffer<uint64_t>& o_data)
@@ -2253,12 +2592,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST0_
            TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST0_COUNTER_LOOPCOUNT2_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST0_COUNTER_LOOPCOUNT2 chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("1:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST0_COUNTER_LOOPCOUNT2 chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST0_COUNTER_LOOPCOUNT2]
 
+//>> GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST0_COUNTER_LOOPCOUNT2]
 static inline fapi2::buffer<uint64_t>& GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST0_COUNTER_LOOPCOUNT2(
     fapi2::buffer<uint64_t>& i_data,
     uint64_t& o_data)
@@ -2270,12 +2611,14 @@ static inline fapi2::buffer<uint64_t>& GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST0_
            TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST0_COUNTER_LOOPCOUNT2_LEN>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST0_COUNTER_LOOPCOUNT2 chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("4:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST0_COUNTER_LOOPCOUNT2 chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST0_COUNTER_LOOPCOUNT2]
 
+//>> SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST0_COUNTER_SHIFTER_FSM_CONTROL]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST0_COUNTER_SHIFTER_FSM_CONTROL(
     fapi2::buffer<uint64_t>& i_data,
     fapi2::buffer<uint64_t>& o_data)
@@ -2287,12 +2630,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST0_
            TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST0_COUNTER_SHIFTER_FSM_CONTROL_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST0_COUNTER_SHIFTER_FSM_CONTROL chip: %x, ec: %x",
+    FAPI_ERR("0:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST0_COUNTER_SHIFTER_FSM_CONTROL chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST0_COUNTER_SHIFTER_FSM_CONTROL]
 
+//>> SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST0_COUNTER_SHIFTER_FSM_CONTROL]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST0_COUNTER_SHIFTER_FSM_CONTROL(
     const uint64_t i_data,
     fapi2::buffer<uint64_t>& o_data)
@@ -2304,12 +2649,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST0_
            TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST0_COUNTER_SHIFTER_FSM_CONTROL_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST0_COUNTER_SHIFTER_FSM_CONTROL chip: %x, ec: %x",
+    FAPI_ERR("1:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST0_COUNTER_SHIFTER_FSM_CONTROL chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST0_COUNTER_SHIFTER_FSM_CONTROL]
 
+//>> GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST0_COUNTER_SHIFTER_FSM_CONTROL]
 static inline fapi2::buffer<uint64_t>& GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST0_COUNTER_SHIFTER_FSM_CONTROL(
     fapi2::buffer<uint64_t>& i_data,
     uint64_t& o_data)
@@ -2321,12 +2668,14 @@ static inline fapi2::buffer<uint64_t>& GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST0_
            TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST0_COUNTER_SHIFTER_FSM_CONTROL_LEN>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST0_COUNTER_SHIFTER_FSM_CONTROL chip: %x, ec: %x",
+    FAPI_ERR("4:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST0_COUNTER_SHIFTER_FSM_CONTROL chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST0_COUNTER_SHIFTER_FSM_CONTROL]
 
+//>> SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST0_COUNTER_N1_CONTROL]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST0_COUNTER_N1_CONTROL(
     fapi2::buffer<uint64_t>& i_data,
     fapi2::buffer<uint64_t>& o_data)
@@ -2338,12 +2687,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST0_
            TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST0_COUNTER_N1_CONTROL_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST0_COUNTER_N1_CONTROL chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("0:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST0_COUNTER_N1_CONTROL chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST0_COUNTER_N1_CONTROL]
 
+//>> SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST0_COUNTER_N1_CONTROL]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST0_COUNTER_N1_CONTROL(
     const uint64_t i_data,
     fapi2::buffer<uint64_t>& o_data)
@@ -2355,12 +2706,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST0_
            TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST0_COUNTER_N1_CONTROL_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST0_COUNTER_N1_CONTROL chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("1:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST0_COUNTER_N1_CONTROL chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST0_COUNTER_N1_CONTROL]
 
+//>> GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST0_COUNTER_N1_CONTROL]
 static inline fapi2::buffer<uint64_t>& GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST0_COUNTER_N1_CONTROL(
     fapi2::buffer<uint64_t>& i_data,
     uint64_t& o_data)
@@ -2372,12 +2725,14 @@ static inline fapi2::buffer<uint64_t>& GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST0_
            TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST0_COUNTER_N1_CONTROL_LEN>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST0_COUNTER_N1_CONTROL chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("4:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST0_COUNTER_N1_CONTROL chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST0_COUNTER_N1_CONTROL]
 
+//>> SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST0_COUNTER_N2_CONTROL]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST0_COUNTER_N2_CONTROL(
     fapi2::buffer<uint64_t>& i_data,
     fapi2::buffer<uint64_t>& o_data)
@@ -2389,12 +2744,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST0_
            TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST0_COUNTER_N2_CONTROL_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST0_COUNTER_N2_CONTROL chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("0:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST0_COUNTER_N2_CONTROL chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST0_COUNTER_N2_CONTROL]
 
+//>> SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST0_COUNTER_N2_CONTROL]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST0_COUNTER_N2_CONTROL(
     const uint64_t i_data,
     fapi2::buffer<uint64_t>& o_data)
@@ -2406,12 +2763,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST0_
            TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST0_COUNTER_N2_CONTROL_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST0_COUNTER_N2_CONTROL chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("1:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST0_COUNTER_N2_CONTROL chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST0_COUNTER_N2_CONTROL]
 
+//>> GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST0_COUNTER_N2_CONTROL]
 static inline fapi2::buffer<uint64_t>& GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST0_COUNTER_N2_CONTROL(
     fapi2::buffer<uint64_t>& i_data,
     uint64_t& o_data)
@@ -2423,12 +2782,14 @@ static inline fapi2::buffer<uint64_t>& GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST0_
            TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST0_COUNTER_N2_CONTROL_LEN>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST0_COUNTER_N2_CONTROL chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("4:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST0_COUNTER_N2_CONTROL chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST0_COUNTER_N2_CONTROL]
 
+//>> SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST0_COUNTER_COUNT_RESERVED_B]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST0_COUNTER_COUNT_RESERVED_B(
     fapi2::buffer<uint64_t>& i_data,
     fapi2::buffer<uint64_t>& o_data)
@@ -2440,12 +2801,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST0_
            TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST0_COUNTER_COUNT_RESERVED_B_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST0_COUNTER_COUNT_RESERVED_B chip: %x, ec: %x",
+    FAPI_ERR("0:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST0_COUNTER_COUNT_RESERVED_B chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST0_COUNTER_COUNT_RESERVED_B]
 
+//>> SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST0_COUNTER_COUNT_RESERVED_B]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST0_COUNTER_COUNT_RESERVED_B(
     const uint64_t i_data,
     fapi2::buffer<uint64_t>& o_data)
@@ -2457,12 +2820,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST0_
            TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST0_COUNTER_COUNT_RESERVED_B_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST0_COUNTER_COUNT_RESERVED_B chip: %x, ec: %x",
+    FAPI_ERR("1:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST0_COUNTER_COUNT_RESERVED_B chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST0_COUNTER_COUNT_RESERVED_B]
 
+//>> GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST0_COUNTER_COUNT_RESERVED_B]
 static inline fapi2::buffer<uint64_t>& GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST0_COUNTER_COUNT_RESERVED_B(
     fapi2::buffer<uint64_t>& i_data,
     uint64_t& o_data)
@@ -2474,12 +2839,14 @@ static inline fapi2::buffer<uint64_t>& GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST0_
            TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST0_COUNTER_COUNT_RESERVED_B_LEN>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST0_COUNTER_COUNT_RESERVED_B chip: %x, ec: %x",
+    FAPI_ERR("4:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST0_COUNTER_COUNT_RESERVED_B chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST0_COUNTER_COUNT_RESERVED_B]
 
+//>> PREP_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG]
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
 static inline fapi2::ReturnCode PREP_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG(
     const fapi2::Target<K, M, V>& i_target)
@@ -2494,7 +2861,9 @@ fapi_try_exit:
     return fapi2::current_err;
 #endif
 }
+//<< PREP_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG]
 
+//>> GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG]
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
 static inline fapi2::ReturnCode GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG(
     const fapi2::Target<K, M, V>& i_target, fapi2::buffer<uint64_t>& o_data)
@@ -2509,7 +2878,9 @@ fapi_try_exit:
     return fapi2::current_err;
 #endif
 }
+//<< GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG]
 
+//>> PUT_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG]
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
 static inline fapi2::ReturnCode PUT_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG(
     const fapi2::Target<K, M, V>& i_target, const uint64_t i_data)
@@ -2524,8 +2895,10 @@ fapi_try_exit:
     return fapi2::current_err;
 #endif
 }
+//<< PUT_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG]
 
 
+//>> SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_RDR_FULL_STATUS]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_RDR_FULL_STATUS(
     fapi2::buffer<uint64_t>& i_data,
     fapi2::buffer<uint64_t>& o_data)
@@ -2537,12 +2910,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_RDR_FULL_STATUS chip: %x, ec: %x",
+    FAPI_ERR("0:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_RDR_FULL_STATUS chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_RDR_FULL_STATUS]
 
+//>> SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_RDR_FULL_STATUS]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_RDR_FULL_STATUS(
     const uint64_t i_data,
     fapi2::buffer<uint64_t>& o_data)
@@ -2554,12 +2929,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_RDR_FULL_STATUS chip: %x, ec: %x",
+    FAPI_ERR("1:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_RDR_FULL_STATUS chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_RDR_FULL_STATUS]
 
+//>> SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_RDR_FULL_STATUS]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_RDR_FULL_STATUS(
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -2569,12 +2946,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_
     return o_data.setBit<TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_RDR_FULL_STATUS>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_RDR_FULL_STATUS chip: %x, ec: %x",
+    FAPI_ERR("2:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_RDR_FULL_STATUS chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_RDR_FULL_STATUS]
 
+//>> CLEAR_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_RDR_FULL_STATUS]
 static inline fapi2::buffer<uint64_t>& CLEAR_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_RDR_FULL_STATUS(
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -2584,12 +2963,14 @@ static inline fapi2::buffer<uint64_t>& CLEAR_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST
     return o_data.clearBit<TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_RDR_FULL_STATUS>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_RDR_FULL_STATUS chip: %x, ec: %x",
+    FAPI_ERR("3:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_RDR_FULL_STATUS chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< CLEAR_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_RDR_FULL_STATUS]
 
+//>> GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_RDR_FULL_STATUS]
 static inline fapi2::buffer<uint64_t>& GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_RDR_FULL_STATUS(
     fapi2::buffer<uint64_t>& i_data,
     uint64_t& o_data)
@@ -2601,12 +2982,14 @@ static inline fapi2::buffer<uint64_t>& GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_RDR_FULL_STATUS chip: %x, ec: %x",
+    FAPI_ERR("4:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_RDR_FULL_STATUS chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_RDR_FULL_STATUS]
 
+//>> GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_RDR_FULL_STATUS]
 static inline bool GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_RDR_FULL_STATUS(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
@@ -2615,12 +2998,14 @@ static inline bool GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_RDR_FULL_
     return i_data.getBit<TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_RDR_FULL_STATUS>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_RDR_FULL_STATUS chip: %x, ec: %x",
+    FAPI_ERR("5:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_RDR_FULL_STATUS chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_RDR_FULL_STATUS]
 
+//>> SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_RDR_OVER_STATUS]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_RDR_OVER_STATUS(
     fapi2::buffer<uint64_t>& i_data,
     fapi2::buffer<uint64_t>& o_data)
@@ -2632,12 +3017,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_RDR_OVER_STATUS chip: %x, ec: %x",
+    FAPI_ERR("0:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_RDR_OVER_STATUS chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_RDR_OVER_STATUS]
 
+//>> SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_RDR_OVER_STATUS]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_RDR_OVER_STATUS(
     const uint64_t i_data,
     fapi2::buffer<uint64_t>& o_data)
@@ -2649,12 +3036,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_RDR_OVER_STATUS chip: %x, ec: %x",
+    FAPI_ERR("1:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_RDR_OVER_STATUS chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_RDR_OVER_STATUS]
 
+//>> SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_RDR_OVER_STATUS]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_RDR_OVER_STATUS(
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -2664,12 +3053,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_
     return o_data.setBit<TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_RDR_OVER_STATUS>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_RDR_OVER_STATUS chip: %x, ec: %x",
+    FAPI_ERR("2:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_RDR_OVER_STATUS chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_RDR_OVER_STATUS]
 
+//>> CLEAR_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_RDR_OVER_STATUS]
 static inline fapi2::buffer<uint64_t>& CLEAR_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_RDR_OVER_STATUS(
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -2679,12 +3070,14 @@ static inline fapi2::buffer<uint64_t>& CLEAR_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST
     return o_data.clearBit<TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_RDR_OVER_STATUS>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_RDR_OVER_STATUS chip: %x, ec: %x",
+    FAPI_ERR("3:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_RDR_OVER_STATUS chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< CLEAR_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_RDR_OVER_STATUS]
 
+//>> GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_RDR_OVER_STATUS]
 static inline fapi2::buffer<uint64_t>& GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_RDR_OVER_STATUS(
     fapi2::buffer<uint64_t>& i_data,
     uint64_t& o_data)
@@ -2696,12 +3089,14 @@ static inline fapi2::buffer<uint64_t>& GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_RDR_OVER_STATUS chip: %x, ec: %x",
+    FAPI_ERR("4:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_RDR_OVER_STATUS chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_RDR_OVER_STATUS]
 
+//>> GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_RDR_OVER_STATUS]
 static inline bool GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_RDR_OVER_STATUS(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
@@ -2710,12 +3105,14 @@ static inline bool GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_RDR_OVER_
     return i_data.getBit<TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_RDR_OVER_STATUS>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_RDR_OVER_STATUS chip: %x, ec: %x",
+    FAPI_ERR("5:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_RDR_OVER_STATUS chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_RDR_OVER_STATUS]
 
+//>> SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_RDR_UNDER_STATUS]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_RDR_UNDER_STATUS(
     fapi2::buffer<uint64_t>& i_data,
     fapi2::buffer<uint64_t>& o_data)
@@ -2727,12 +3124,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_RDR_UNDER_STATUS chip: %x, ec: %x",
+    FAPI_ERR("0:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_RDR_UNDER_STATUS chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_RDR_UNDER_STATUS]
 
+//>> SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_RDR_UNDER_STATUS]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_RDR_UNDER_STATUS(
     const uint64_t i_data,
     fapi2::buffer<uint64_t>& o_data)
@@ -2744,12 +3143,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_RDR_UNDER_STATUS chip: %x, ec: %x",
+    FAPI_ERR("1:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_RDR_UNDER_STATUS chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_RDR_UNDER_STATUS]
 
+//>> SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_RDR_UNDER_STATUS]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_RDR_UNDER_STATUS(
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -2759,12 +3160,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_
     return o_data.setBit<TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_RDR_UNDER_STATUS>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_RDR_UNDER_STATUS chip: %x, ec: %x",
+    FAPI_ERR("2:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_RDR_UNDER_STATUS chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_RDR_UNDER_STATUS]
 
+//>> CLEAR_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_RDR_UNDER_STATUS]
 static inline fapi2::buffer<uint64_t>& CLEAR_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_RDR_UNDER_STATUS(
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -2774,12 +3177,14 @@ static inline fapi2::buffer<uint64_t>& CLEAR_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST
     return o_data.clearBit<TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_RDR_UNDER_STATUS>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_RDR_UNDER_STATUS chip: %x, ec: %x",
+    FAPI_ERR("3:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_RDR_UNDER_STATUS chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< CLEAR_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_RDR_UNDER_STATUS]
 
+//>> GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_RDR_UNDER_STATUS]
 static inline fapi2::buffer<uint64_t>& GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_RDR_UNDER_STATUS(
     fapi2::buffer<uint64_t>& i_data,
     uint64_t& o_data)
@@ -2791,12 +3196,14 @@ static inline fapi2::buffer<uint64_t>& GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_RDR_UNDER_STATUS chip: %x, ec: %x",
+    FAPI_ERR("4:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_RDR_UNDER_STATUS chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_RDR_UNDER_STATUS]
 
+//>> GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_RDR_UNDER_STATUS]
 static inline bool GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_RDR_UNDER_STATUS(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
@@ -2805,12 +3212,14 @@ static inline bool GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_RDR_UNDER
     return i_data.getBit<TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_RDR_UNDER_STATUS>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_RDR_UNDER_STATUS chip: %x, ec: %x",
+    FAPI_ERR("5:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_RDR_UNDER_STATUS chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_RDR_UNDER_STATUS]
 
+//>> SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_RDR_RESERVED_STATUS]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_RDR_RESERVED_STATUS(
     fapi2::buffer<uint64_t>& i_data,
     fapi2::buffer<uint64_t>& o_data)
@@ -2822,12 +3231,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_RDR_RESERVED_STATUS chip: %x, ec: %x",
+    FAPI_ERR("0:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_RDR_RESERVED_STATUS chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_RDR_RESERVED_STATUS]
 
+//>> SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_RDR_RESERVED_STATUS]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_RDR_RESERVED_STATUS(
     const uint64_t i_data,
     fapi2::buffer<uint64_t>& o_data)
@@ -2839,12 +3250,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_RDR_RESERVED_STATUS chip: %x, ec: %x",
+    FAPI_ERR("1:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_RDR_RESERVED_STATUS chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_RDR_RESERVED_STATUS]
 
+//>> SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_RDR_RESERVED_STATUS]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_RDR_RESERVED_STATUS(
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -2854,12 +3267,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_
     return o_data.setBit<TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_RDR_RESERVED_STATUS>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_RDR_RESERVED_STATUS chip: %x, ec: %x",
+    FAPI_ERR("2:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_RDR_RESERVED_STATUS chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_RDR_RESERVED_STATUS]
 
+//>> CLEAR_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_RDR_RESERVED_STATUS]
 static inline fapi2::buffer<uint64_t>& CLEAR_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_RDR_RESERVED_STATUS(
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -2869,12 +3284,14 @@ static inline fapi2::buffer<uint64_t>& CLEAR_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST
     return o_data.clearBit<TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_RDR_RESERVED_STATUS>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_RDR_RESERVED_STATUS chip: %x, ec: %x",
+    FAPI_ERR("3:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_RDR_RESERVED_STATUS chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< CLEAR_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_RDR_RESERVED_STATUS]
 
+//>> GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_RDR_RESERVED_STATUS]
 static inline fapi2::buffer<uint64_t>& GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_RDR_RESERVED_STATUS(
     fapi2::buffer<uint64_t>& i_data,
     uint64_t& o_data)
@@ -2886,12 +3303,14 @@ static inline fapi2::buffer<uint64_t>& GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_RDR_RESERVED_STATUS chip: %x, ec: %x",
+    FAPI_ERR("4:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_RDR_RESERVED_STATUS chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_RDR_RESERVED_STATUS]
 
+//>> GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_RDR_RESERVED_STATUS]
 static inline bool GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_RDR_RESERVED_STATUS(
     fapi2::buffer<uint64_t>& i_data)
 {
@@ -2901,12 +3320,14 @@ static inline bool GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_RDR_RESER
     return i_data.getBit<TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_RDR_RESERVED_STATUS>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_RDR_RESERVED_STATUS chip: %x, ec: %x",
+    FAPI_ERR("5:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_RDR_RESERVED_STATUS chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_RDR_RESERVED_STATUS]
 
+//>> SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_TDR_FULL_STATUS]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_TDR_FULL_STATUS(
     fapi2::buffer<uint64_t>& i_data,
     fapi2::buffer<uint64_t>& o_data)
@@ -2918,12 +3339,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_TDR_FULL_STATUS chip: %x, ec: %x",
+    FAPI_ERR("0:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_TDR_FULL_STATUS chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_TDR_FULL_STATUS]
 
+//>> SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_TDR_FULL_STATUS]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_TDR_FULL_STATUS(
     const uint64_t i_data,
     fapi2::buffer<uint64_t>& o_data)
@@ -2935,12 +3358,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_TDR_FULL_STATUS chip: %x, ec: %x",
+    FAPI_ERR("1:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_TDR_FULL_STATUS chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_TDR_FULL_STATUS]
 
+//>> SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_TDR_FULL_STATUS]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_TDR_FULL_STATUS(
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -2950,12 +3375,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_
     return o_data.setBit<TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_TDR_FULL_STATUS>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_TDR_FULL_STATUS chip: %x, ec: %x",
+    FAPI_ERR("2:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_TDR_FULL_STATUS chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_TDR_FULL_STATUS]
 
+//>> CLEAR_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_TDR_FULL_STATUS]
 static inline fapi2::buffer<uint64_t>& CLEAR_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_TDR_FULL_STATUS(
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -2965,12 +3392,14 @@ static inline fapi2::buffer<uint64_t>& CLEAR_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST
     return o_data.clearBit<TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_TDR_FULL_STATUS>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_TDR_FULL_STATUS chip: %x, ec: %x",
+    FAPI_ERR("3:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_TDR_FULL_STATUS chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< CLEAR_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_TDR_FULL_STATUS]
 
+//>> GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_TDR_FULL_STATUS]
 static inline fapi2::buffer<uint64_t>& GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_TDR_FULL_STATUS(
     fapi2::buffer<uint64_t>& i_data,
     uint64_t& o_data)
@@ -2982,12 +3411,14 @@ static inline fapi2::buffer<uint64_t>& GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_TDR_FULL_STATUS chip: %x, ec: %x",
+    FAPI_ERR("4:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_TDR_FULL_STATUS chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_TDR_FULL_STATUS]
 
+//>> GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_TDR_FULL_STATUS]
 static inline bool GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_TDR_FULL_STATUS(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
@@ -2996,12 +3427,14 @@ static inline bool GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_TDR_FULL_
     return i_data.getBit<TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_TDR_FULL_STATUS>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_TDR_FULL_STATUS chip: %x, ec: %x",
+    FAPI_ERR("5:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_TDR_FULL_STATUS chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_TDR_FULL_STATUS]
 
+//>> SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_TDR_OVER_STATUS]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_TDR_OVER_STATUS(
     fapi2::buffer<uint64_t>& i_data,
     fapi2::buffer<uint64_t>& o_data)
@@ -3013,12 +3446,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_TDR_OVER_STATUS chip: %x, ec: %x",
+    FAPI_ERR("0:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_TDR_OVER_STATUS chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_TDR_OVER_STATUS]
 
+//>> SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_TDR_OVER_STATUS]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_TDR_OVER_STATUS(
     const uint64_t i_data,
     fapi2::buffer<uint64_t>& o_data)
@@ -3030,12 +3465,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_TDR_OVER_STATUS chip: %x, ec: %x",
+    FAPI_ERR("1:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_TDR_OVER_STATUS chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_TDR_OVER_STATUS]
 
+//>> SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_TDR_OVER_STATUS]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_TDR_OVER_STATUS(
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -3045,12 +3482,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_
     return o_data.setBit<TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_TDR_OVER_STATUS>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_TDR_OVER_STATUS chip: %x, ec: %x",
+    FAPI_ERR("2:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_TDR_OVER_STATUS chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_TDR_OVER_STATUS]
 
+//>> CLEAR_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_TDR_OVER_STATUS]
 static inline fapi2::buffer<uint64_t>& CLEAR_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_TDR_OVER_STATUS(
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -3060,12 +3499,14 @@ static inline fapi2::buffer<uint64_t>& CLEAR_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST
     return o_data.clearBit<TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_TDR_OVER_STATUS>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_TDR_OVER_STATUS chip: %x, ec: %x",
+    FAPI_ERR("3:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_TDR_OVER_STATUS chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< CLEAR_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_TDR_OVER_STATUS]
 
+//>> GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_TDR_OVER_STATUS]
 static inline fapi2::buffer<uint64_t>& GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_TDR_OVER_STATUS(
     fapi2::buffer<uint64_t>& i_data,
     uint64_t& o_data)
@@ -3077,12 +3518,14 @@ static inline fapi2::buffer<uint64_t>& GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_TDR_OVER_STATUS chip: %x, ec: %x",
+    FAPI_ERR("4:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_TDR_OVER_STATUS chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_TDR_OVER_STATUS]
 
+//>> GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_TDR_OVER_STATUS]
 static inline bool GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_TDR_OVER_STATUS(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
@@ -3091,12 +3534,14 @@ static inline bool GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_TDR_OVER_
     return i_data.getBit<TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_TDR_OVER_STATUS>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_TDR_OVER_STATUS chip: %x, ec: %x",
+    FAPI_ERR("5:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_TDR_OVER_STATUS chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_TDR_OVER_STATUS]
 
+//>> SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_TDR_UNDER_STATUS]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_TDR_UNDER_STATUS(
     fapi2::buffer<uint64_t>& i_data,
     fapi2::buffer<uint64_t>& o_data)
@@ -3108,12 +3553,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_TDR_UNDER_STATUS chip: %x, ec: %x",
+    FAPI_ERR("0:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_TDR_UNDER_STATUS chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_TDR_UNDER_STATUS]
 
+//>> SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_TDR_UNDER_STATUS]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_TDR_UNDER_STATUS(
     const uint64_t i_data,
     fapi2::buffer<uint64_t>& o_data)
@@ -3125,12 +3572,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_TDR_UNDER_STATUS chip: %x, ec: %x",
+    FAPI_ERR("1:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_TDR_UNDER_STATUS chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_TDR_UNDER_STATUS]
 
+//>> SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_TDR_UNDER_STATUS]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_TDR_UNDER_STATUS(
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -3140,12 +3589,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_
     return o_data.setBit<TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_TDR_UNDER_STATUS>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_TDR_UNDER_STATUS chip: %x, ec: %x",
+    FAPI_ERR("2:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_TDR_UNDER_STATUS chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_TDR_UNDER_STATUS]
 
+//>> CLEAR_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_TDR_UNDER_STATUS]
 static inline fapi2::buffer<uint64_t>& CLEAR_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_TDR_UNDER_STATUS(
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -3155,12 +3606,14 @@ static inline fapi2::buffer<uint64_t>& CLEAR_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST
     return o_data.clearBit<TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_TDR_UNDER_STATUS>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_TDR_UNDER_STATUS chip: %x, ec: %x",
+    FAPI_ERR("3:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_TDR_UNDER_STATUS chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< CLEAR_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_TDR_UNDER_STATUS]
 
+//>> GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_TDR_UNDER_STATUS]
 static inline fapi2::buffer<uint64_t>& GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_TDR_UNDER_STATUS(
     fapi2::buffer<uint64_t>& i_data,
     uint64_t& o_data)
@@ -3172,12 +3625,14 @@ static inline fapi2::buffer<uint64_t>& GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_TDR_UNDER_STATUS chip: %x, ec: %x",
+    FAPI_ERR("4:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_TDR_UNDER_STATUS chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_TDR_UNDER_STATUS]
 
+//>> GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_TDR_UNDER_STATUS]
 static inline bool GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_TDR_UNDER_STATUS(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
@@ -3186,12 +3641,14 @@ static inline bool GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_TDR_UNDER
     return i_data.getBit<TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_TDR_UNDER_STATUS>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_TDR_UNDER_STATUS chip: %x, ec: %x",
+    FAPI_ERR("5:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_TDR_UNDER_STATUS chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_TDR_UNDER_STATUS]
 
+//>> SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_TDR_RESERVED_STATUS]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_TDR_RESERVED_STATUS(
     fapi2::buffer<uint64_t>& i_data,
     fapi2::buffer<uint64_t>& o_data)
@@ -3203,12 +3660,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_TDR_RESERVED_STATUS chip: %x, ec: %x",
+    FAPI_ERR("0:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_TDR_RESERVED_STATUS chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_TDR_RESERVED_STATUS]
 
+//>> SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_TDR_RESERVED_STATUS]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_TDR_RESERVED_STATUS(
     const uint64_t i_data,
     fapi2::buffer<uint64_t>& o_data)
@@ -3220,12 +3679,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_TDR_RESERVED_STATUS chip: %x, ec: %x",
+    FAPI_ERR("1:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_TDR_RESERVED_STATUS chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_TDR_RESERVED_STATUS]
 
+//>> SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_TDR_RESERVED_STATUS]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_TDR_RESERVED_STATUS(
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -3235,12 +3696,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_
     return o_data.setBit<TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_TDR_RESERVED_STATUS>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_TDR_RESERVED_STATUS chip: %x, ec: %x",
+    FAPI_ERR("2:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_TDR_RESERVED_STATUS chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_TDR_RESERVED_STATUS]
 
+//>> CLEAR_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_TDR_RESERVED_STATUS]
 static inline fapi2::buffer<uint64_t>& CLEAR_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_TDR_RESERVED_STATUS(
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -3250,12 +3713,14 @@ static inline fapi2::buffer<uint64_t>& CLEAR_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST
     return o_data.clearBit<TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_TDR_RESERVED_STATUS>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_TDR_RESERVED_STATUS chip: %x, ec: %x",
+    FAPI_ERR("3:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_TDR_RESERVED_STATUS chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< CLEAR_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_TDR_RESERVED_STATUS]
 
+//>> GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_TDR_RESERVED_STATUS]
 static inline fapi2::buffer<uint64_t>& GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_TDR_RESERVED_STATUS(
     fapi2::buffer<uint64_t>& i_data,
     uint64_t& o_data)
@@ -3267,12 +3732,14 @@ static inline fapi2::buffer<uint64_t>& GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_TDR_RESERVED_STATUS chip: %x, ec: %x",
+    FAPI_ERR("4:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_TDR_RESERVED_STATUS chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_TDR_RESERVED_STATUS]
 
+//>> GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_TDR_RESERVED_STATUS]
 static inline bool GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_TDR_RESERVED_STATUS(
     fapi2::buffer<uint64_t>& i_data)
 {
@@ -3282,12 +3749,14 @@ static inline bool GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_TDR_RESER
     return i_data.getBit<TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_TDR_RESERVED_STATUS>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_TDR_RESERVED_STATUS chip: %x, ec: %x",
+    FAPI_ERR("5:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_TDR_RESERVED_STATUS chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_TDR_RESERVED_STATUS]
 
+//>> SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SEQUENCER_FSM]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SEQUENCER_FSM(
     fapi2::buffer<uint64_t>& i_data,
     fapi2::buffer<uint64_t>& o_data)
@@ -3299,12 +3768,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_
            TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SEQUENCER_FSM_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SEQUENCER_FSM chip: %x, ec: %x",
+    FAPI_ERR("0:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SEQUENCER_FSM chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SEQUENCER_FSM]
 
+//>> SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SEQUENCER_FSM]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SEQUENCER_FSM(
     const uint64_t i_data,
     fapi2::buffer<uint64_t>& o_data)
@@ -3316,12 +3787,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_
            TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SEQUENCER_FSM_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SEQUENCER_FSM chip: %x, ec: %x",
+    FAPI_ERR("1:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SEQUENCER_FSM chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SEQUENCER_FSM]
 
+//>> GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SEQUENCER_FSM]
 static inline fapi2::buffer<uint64_t>& GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SEQUENCER_FSM(
     fapi2::buffer<uint64_t>& i_data,
     uint64_t& o_data)
@@ -3333,12 +3806,14 @@ static inline fapi2::buffer<uint64_t>& GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_
            TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SEQUENCER_FSM_LEN>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SEQUENCER_FSM chip: %x, ec: %x",
+    FAPI_ERR("4:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SEQUENCER_FSM chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SEQUENCER_FSM]
 
+//>> SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SHIFTER_FSM]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SHIFTER_FSM(
     fapi2::buffer<uint64_t>& i_data,
     fapi2::buffer<uint64_t>& o_data)
@@ -3350,12 +3825,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_
            TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SHIFTER_FSM_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SHIFTER_FSM chip: %x, ec: %x",
+    FAPI_ERR("0:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SHIFTER_FSM chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SHIFTER_FSM]
 
+//>> SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SHIFTER_FSM]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SHIFTER_FSM(
     const uint64_t i_data,
     fapi2::buffer<uint64_t>& o_data)
@@ -3367,12 +3844,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_
            TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SHIFTER_FSM_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SHIFTER_FSM chip: %x, ec: %x",
+    FAPI_ERR("1:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SHIFTER_FSM chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SHIFTER_FSM]
 
+//>> GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SHIFTER_FSM]
 static inline fapi2::buffer<uint64_t>& GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SHIFTER_FSM(
     fapi2::buffer<uint64_t>& i_data,
     uint64_t& o_data)
@@ -3384,12 +3863,14 @@ static inline fapi2::buffer<uint64_t>& GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_
            TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SHIFTER_FSM_LEN>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SHIFTER_FSM chip: %x, ec: %x",
+    FAPI_ERR("4:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SHIFTER_FSM chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SHIFTER_FSM]
 
+//>> SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SEQUENCER_OP_INDEX]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SEQUENCER_OP_INDEX(
     fapi2::buffer<uint64_t>& i_data,
     fapi2::buffer<uint64_t>& o_data)
@@ -3401,12 +3882,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_
            TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SEQUENCER_OP_INDEX_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SEQUENCER_OP_INDEX chip: %x, ec: %x",
+    FAPI_ERR("0:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SEQUENCER_OP_INDEX chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SEQUENCER_OP_INDEX]
 
+//>> SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SEQUENCER_OP_INDEX]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SEQUENCER_OP_INDEX(
     const uint64_t i_data,
     fapi2::buffer<uint64_t>& o_data)
@@ -3418,12 +3901,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_
            TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SEQUENCER_OP_INDEX_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SEQUENCER_OP_INDEX chip: %x, ec: %x",
+    FAPI_ERR("1:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SEQUENCER_OP_INDEX chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SEQUENCER_OP_INDEX]
 
+//>> GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SEQUENCER_OP_INDEX]
 static inline fapi2::buffer<uint64_t>& GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SEQUENCER_OP_INDEX(
     fapi2::buffer<uint64_t>& i_data,
     uint64_t& o_data)
@@ -3435,12 +3920,14 @@ static inline fapi2::buffer<uint64_t>& GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_
            TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SEQUENCER_OP_INDEX_LEN>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SEQUENCER_OP_INDEX chip: %x, ec: %x",
+    FAPI_ERR("4:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SEQUENCER_OP_INDEX chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SEQUENCER_OP_INDEX]
 
+//>> SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_32]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_32(
     fapi2::buffer<uint64_t>& i_data,
     fapi2::buffer<uint64_t>& o_data)
@@ -3452,12 +3939,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_32 chip: %x, ec: %x",
+    FAPI_ERR("0:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_32 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_32]
 
+//>> SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_32]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_32(
     const uint64_t i_data,
     fapi2::buffer<uint64_t>& o_data)
@@ -3469,12 +3958,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_32 chip: %x, ec: %x",
+    FAPI_ERR("1:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_32 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_32]
 
+//>> SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_32]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_32(
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -3484,12 +3975,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_
     return o_data.setBit<TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_32>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_32 chip: %x, ec: %x",
+    FAPI_ERR("2:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_32 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_32]
 
+//>> CLEAR_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_32]
 static inline fapi2::buffer<uint64_t>& CLEAR_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_32(
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -3499,12 +3992,14 @@ static inline fapi2::buffer<uint64_t>& CLEAR_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST
     return o_data.clearBit<TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_32>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_32 chip: %x, ec: %x",
+    FAPI_ERR("3:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_32 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< CLEAR_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_32]
 
+//>> GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_32]
 static inline fapi2::buffer<uint64_t>& GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_32(
     fapi2::buffer<uint64_t>& i_data,
     uint64_t& o_data)
@@ -3516,12 +4011,14 @@ static inline fapi2::buffer<uint64_t>& GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_32 chip: %x, ec: %x",
+    FAPI_ERR("4:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_32 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_32]
 
+//>> GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_32]
 static inline bool GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_32(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
@@ -3530,12 +4027,14 @@ static inline bool GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATU
     return i_data.getBit<TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_32>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_32 chip: %x, ec: %x",
+    FAPI_ERR("5:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_32 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_32]
 
+//>> SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_33]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_33(
     fapi2::buffer<uint64_t>& i_data,
     fapi2::buffer<uint64_t>& o_data)
@@ -3547,12 +4046,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_33 chip: %x, ec: %x",
+    FAPI_ERR("0:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_33 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_33]
 
+//>> SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_33]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_33(
     const uint64_t i_data,
     fapi2::buffer<uint64_t>& o_data)
@@ -3564,12 +4065,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_33 chip: %x, ec: %x",
+    FAPI_ERR("1:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_33 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_33]
 
+//>> SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_33]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_33(
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -3579,12 +4082,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_
     return o_data.setBit<TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_33>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_33 chip: %x, ec: %x",
+    FAPI_ERR("2:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_33 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_33]
 
+//>> CLEAR_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_33]
 static inline fapi2::buffer<uint64_t>& CLEAR_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_33(
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -3594,12 +4099,14 @@ static inline fapi2::buffer<uint64_t>& CLEAR_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST
     return o_data.clearBit<TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_33>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_33 chip: %x, ec: %x",
+    FAPI_ERR("3:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_33 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< CLEAR_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_33]
 
+//>> GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_33]
 static inline fapi2::buffer<uint64_t>& GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_33(
     fapi2::buffer<uint64_t>& i_data,
     uint64_t& o_data)
@@ -3611,12 +4118,14 @@ static inline fapi2::buffer<uint64_t>& GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_33 chip: %x, ec: %x",
+    FAPI_ERR("4:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_33 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_33]
 
+//>> GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_33]
 static inline bool GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_33(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
@@ -3625,12 +4134,14 @@ static inline bool GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATU
     return i_data.getBit<TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_33>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_33 chip: %x, ec: %x",
+    FAPI_ERR("5:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_33 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_33]
 
+//>> SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_34]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_34(
     fapi2::buffer<uint64_t>& i_data,
     fapi2::buffer<uint64_t>& o_data)
@@ -3642,12 +4153,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_34 chip: %x, ec: %x",
+    FAPI_ERR("0:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_34 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_34]
 
+//>> SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_34]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_34(
     const uint64_t i_data,
     fapi2::buffer<uint64_t>& o_data)
@@ -3659,12 +4172,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_34 chip: %x, ec: %x",
+    FAPI_ERR("1:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_34 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_34]
 
+//>> SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_34]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_34(
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -3674,12 +4189,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_
     return o_data.setBit<TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_34>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_34 chip: %x, ec: %x",
+    FAPI_ERR("2:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_34 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_34]
 
+//>> CLEAR_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_34]
 static inline fapi2::buffer<uint64_t>& CLEAR_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_34(
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -3689,12 +4206,14 @@ static inline fapi2::buffer<uint64_t>& CLEAR_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST
     return o_data.clearBit<TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_34>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_34 chip: %x, ec: %x",
+    FAPI_ERR("3:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_34 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< CLEAR_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_34]
 
+//>> GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_34]
 static inline fapi2::buffer<uint64_t>& GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_34(
     fapi2::buffer<uint64_t>& i_data,
     uint64_t& o_data)
@@ -3706,12 +4225,14 @@ static inline fapi2::buffer<uint64_t>& GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_34 chip: %x, ec: %x",
+    FAPI_ERR("4:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_34 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_34]
 
+//>> GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_34]
 static inline bool GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_34(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
@@ -3720,12 +4241,14 @@ static inline bool GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATU
     return i_data.getBit<TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_34>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_34 chip: %x, ec: %x",
+    FAPI_ERR("5:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_34 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_34]
 
+//>> SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_35]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_35(
     fapi2::buffer<uint64_t>& i_data,
     fapi2::buffer<uint64_t>& o_data)
@@ -3737,12 +4260,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_35 chip: %x, ec: %x",
+    FAPI_ERR("0:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_35 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_35]
 
+//>> SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_35]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_35(
     const uint64_t i_data,
     fapi2::buffer<uint64_t>& o_data)
@@ -3754,12 +4279,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_35 chip: %x, ec: %x",
+    FAPI_ERR("1:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_35 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_35]
 
+//>> SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_35]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_35(
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -3769,12 +4296,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_
     return o_data.setBit<TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_35>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_35 chip: %x, ec: %x",
+    FAPI_ERR("2:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_35 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_35]
 
+//>> CLEAR_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_35]
 static inline fapi2::buffer<uint64_t>& CLEAR_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_35(
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -3784,12 +4313,14 @@ static inline fapi2::buffer<uint64_t>& CLEAR_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST
     return o_data.clearBit<TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_35>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_35 chip: %x, ec: %x",
+    FAPI_ERR("3:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_35 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< CLEAR_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_35]
 
+//>> GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_35]
 static inline fapi2::buffer<uint64_t>& GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_35(
     fapi2::buffer<uint64_t>& i_data,
     uint64_t& o_data)
@@ -3801,12 +4332,14 @@ static inline fapi2::buffer<uint64_t>& GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_35 chip: %x, ec: %x",
+    FAPI_ERR("4:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_35 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_35]
 
+//>> GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_35]
 static inline bool GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_35(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
@@ -3815,12 +4348,14 @@ static inline bool GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATU
     return i_data.getBit<TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_35>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_35 chip: %x, ec: %x",
+    FAPI_ERR("5:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_35 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_35]
 
+//>> SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_36]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_36(
     fapi2::buffer<uint64_t>& i_data,
     fapi2::buffer<uint64_t>& o_data)
@@ -3832,12 +4367,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_36 chip: %x, ec: %x",
+    FAPI_ERR("0:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_36 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_36]
 
+//>> SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_36]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_36(
     const uint64_t i_data,
     fapi2::buffer<uint64_t>& o_data)
@@ -3849,12 +4386,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_36 chip: %x, ec: %x",
+    FAPI_ERR("1:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_36 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_36]
 
+//>> SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_36]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_36(
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -3864,12 +4403,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_
     return o_data.setBit<TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_36>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_36 chip: %x, ec: %x",
+    FAPI_ERR("2:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_36 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_36]
 
+//>> CLEAR_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_36]
 static inline fapi2::buffer<uint64_t>& CLEAR_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_36(
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -3879,12 +4420,14 @@ static inline fapi2::buffer<uint64_t>& CLEAR_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST
     return o_data.clearBit<TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_36>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_36 chip: %x, ec: %x",
+    FAPI_ERR("3:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_36 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< CLEAR_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_36]
 
+//>> GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_36]
 static inline fapi2::buffer<uint64_t>& GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_36(
     fapi2::buffer<uint64_t>& i_data,
     uint64_t& o_data)
@@ -3896,12 +4439,14 @@ static inline fapi2::buffer<uint64_t>& GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_36 chip: %x, ec: %x",
+    FAPI_ERR("4:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_36 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_36]
 
+//>> GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_36]
 static inline bool GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_36(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
@@ -3910,12 +4455,14 @@ static inline bool GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATU
     return i_data.getBit<TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_36>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_36 chip: %x, ec: %x",
+    FAPI_ERR("5:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_36 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_36]
 
+//>> SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_37]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_37(
     fapi2::buffer<uint64_t>& i_data,
     fapi2::buffer<uint64_t>& o_data)
@@ -3927,12 +4474,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_37 chip: %x, ec: %x",
+    FAPI_ERR("0:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_37 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_37]
 
+//>> SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_37]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_37(
     const uint64_t i_data,
     fapi2::buffer<uint64_t>& o_data)
@@ -3944,12 +4493,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_37 chip: %x, ec: %x",
+    FAPI_ERR("1:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_37 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_37]
 
+//>> SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_37]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_37(
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -3959,12 +4510,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_
     return o_data.setBit<TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_37>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_37 chip: %x, ec: %x",
+    FAPI_ERR("2:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_37 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_37]
 
+//>> CLEAR_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_37]
 static inline fapi2::buffer<uint64_t>& CLEAR_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_37(
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -3974,12 +4527,14 @@ static inline fapi2::buffer<uint64_t>& CLEAR_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST
     return o_data.clearBit<TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_37>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_37 chip: %x, ec: %x",
+    FAPI_ERR("3:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_37 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< CLEAR_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_37]
 
+//>> GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_37]
 static inline fapi2::buffer<uint64_t>& GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_37(
     fapi2::buffer<uint64_t>& i_data,
     uint64_t& o_data)
@@ -3991,12 +4546,14 @@ static inline fapi2::buffer<uint64_t>& GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_37 chip: %x, ec: %x",
+    FAPI_ERR("4:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_37 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_37]
 
+//>> GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_37]
 static inline bool GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_37(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
@@ -4005,12 +4562,14 @@ static inline bool GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATU
     return i_data.getBit<TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_37>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_37 chip: %x, ec: %x",
+    FAPI_ERR("5:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_37 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_37]
 
+//>> SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_38]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_38(
     fapi2::buffer<uint64_t>& i_data,
     fapi2::buffer<uint64_t>& o_data)
@@ -4022,12 +4581,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_38 chip: %x, ec: %x",
+    FAPI_ERR("0:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_38 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_38]
 
+//>> SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_38]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_38(
     const uint64_t i_data,
     fapi2::buffer<uint64_t>& o_data)
@@ -4039,12 +4600,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_38 chip: %x, ec: %x",
+    FAPI_ERR("1:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_38 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_38]
 
+//>> SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_38]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_38(
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -4054,12 +4617,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_
     return o_data.setBit<TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_38>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_38 chip: %x, ec: %x",
+    FAPI_ERR("2:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_38 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_38]
 
+//>> CLEAR_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_38]
 static inline fapi2::buffer<uint64_t>& CLEAR_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_38(
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -4069,12 +4634,14 @@ static inline fapi2::buffer<uint64_t>& CLEAR_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST
     return o_data.clearBit<TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_38>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_38 chip: %x, ec: %x",
+    FAPI_ERR("3:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_38 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< CLEAR_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_38]
 
+//>> GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_38]
 static inline fapi2::buffer<uint64_t>& GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_38(
     fapi2::buffer<uint64_t>& i_data,
     uint64_t& o_data)
@@ -4086,12 +4653,14 @@ static inline fapi2::buffer<uint64_t>& GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_38 chip: %x, ec: %x",
+    FAPI_ERR("4:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_38 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_38]
 
+//>> GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_38]
 static inline bool GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_38(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
@@ -4100,12 +4669,14 @@ static inline bool GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATU
     return i_data.getBit<TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_38>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_38 chip: %x, ec: %x",
+    FAPI_ERR("5:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_38 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_38]
 
+//>> SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_39]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_39(
     fapi2::buffer<uint64_t>& i_data,
     fapi2::buffer<uint64_t>& o_data)
@@ -4117,12 +4688,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_39 chip: %x, ec: %x",
+    FAPI_ERR("0:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_39 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_39]
 
+//>> SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_39]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_39(
     const uint64_t i_data,
     fapi2::buffer<uint64_t>& o_data)
@@ -4134,12 +4707,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_39 chip: %x, ec: %x",
+    FAPI_ERR("1:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_39 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_39]
 
+//>> SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_39]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_39(
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -4149,12 +4724,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_
     return o_data.setBit<TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_39>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_39 chip: %x, ec: %x",
+    FAPI_ERR("2:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_39 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_39]
 
+//>> CLEAR_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_39]
 static inline fapi2::buffer<uint64_t>& CLEAR_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_39(
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -4164,12 +4741,14 @@ static inline fapi2::buffer<uint64_t>& CLEAR_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST
     return o_data.clearBit<TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_39>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_39 chip: %x, ec: %x",
+    FAPI_ERR("3:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_39 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< CLEAR_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_39]
 
+//>> GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_39]
 static inline fapi2::buffer<uint64_t>& GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_39(
     fapi2::buffer<uint64_t>& i_data,
     uint64_t& o_data)
@@ -4181,12 +4760,14 @@ static inline fapi2::buffer<uint64_t>& GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_39 chip: %x, ec: %x",
+    FAPI_ERR("4:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_39 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_39]
 
+//>> GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_39]
 static inline bool GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_39(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
@@ -4195,12 +4776,14 @@ static inline bool GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATU
     return i_data.getBit<TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_39>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_39 chip: %x, ec: %x",
+    FAPI_ERR("5:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_39 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_39]
 
+//>> SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_40]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_40(
     fapi2::buffer<uint64_t>& i_data,
     fapi2::buffer<uint64_t>& o_data)
@@ -4212,12 +4795,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_40 chip: %x, ec: %x",
+    FAPI_ERR("0:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_40 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_40]
 
+//>> SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_40]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_40(
     const uint64_t i_data,
     fapi2::buffer<uint64_t>& o_data)
@@ -4229,12 +4814,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_40 chip: %x, ec: %x",
+    FAPI_ERR("1:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_40 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_40]
 
+//>> SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_40]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_40(
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -4244,12 +4831,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_
     return o_data.setBit<TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_40>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_40 chip: %x, ec: %x",
+    FAPI_ERR("2:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_40 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_40]
 
+//>> CLEAR_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_40]
 static inline fapi2::buffer<uint64_t>& CLEAR_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_40(
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -4259,12 +4848,14 @@ static inline fapi2::buffer<uint64_t>& CLEAR_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST
     return o_data.clearBit<TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_40>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_40 chip: %x, ec: %x",
+    FAPI_ERR("3:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_40 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< CLEAR_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_40]
 
+//>> GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_40]
 static inline fapi2::buffer<uint64_t>& GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_40(
     fapi2::buffer<uint64_t>& i_data,
     uint64_t& o_data)
@@ -4276,12 +4867,14 @@ static inline fapi2::buffer<uint64_t>& GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_40 chip: %x, ec: %x",
+    FAPI_ERR("4:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_40 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_40]
 
+//>> GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_40]
 static inline bool GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_40(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
@@ -4290,12 +4883,14 @@ static inline bool GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATU
     return i_data.getBit<TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_40>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_40 chip: %x, ec: %x",
+    FAPI_ERR("5:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_40 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_40]
 
+//>> SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_41]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_41(
     fapi2::buffer<uint64_t>& i_data,
     fapi2::buffer<uint64_t>& o_data)
@@ -4307,12 +4902,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_41 chip: %x, ec: %x",
+    FAPI_ERR("0:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_41 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_41]
 
+//>> SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_41]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_41(
     const uint64_t i_data,
     fapi2::buffer<uint64_t>& o_data)
@@ -4324,12 +4921,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_41 chip: %x, ec: %x",
+    FAPI_ERR("1:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_41 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_41]
 
+//>> SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_41]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_41(
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -4339,12 +4938,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_
     return o_data.setBit<TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_41>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_41 chip: %x, ec: %x",
+    FAPI_ERR("2:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_41 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_41]
 
+//>> CLEAR_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_41]
 static inline fapi2::buffer<uint64_t>& CLEAR_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_41(
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -4354,12 +4955,14 @@ static inline fapi2::buffer<uint64_t>& CLEAR_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST
     return o_data.clearBit<TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_41>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_41 chip: %x, ec: %x",
+    FAPI_ERR("3:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_41 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< CLEAR_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_41]
 
+//>> GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_41]
 static inline fapi2::buffer<uint64_t>& GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_41(
     fapi2::buffer<uint64_t>& i_data,
     uint64_t& o_data)
@@ -4371,12 +4974,14 @@ static inline fapi2::buffer<uint64_t>& GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_41 chip: %x, ec: %x",
+    FAPI_ERR("4:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_41 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_41]
 
+//>> GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_41]
 static inline bool GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_41(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
@@ -4385,12 +4990,14 @@ static inline bool GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATU
     return i_data.getBit<TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_41>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_41 chip: %x, ec: %x",
+    FAPI_ERR("5:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_41 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_41]
 
+//>> SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_42]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_42(
     fapi2::buffer<uint64_t>& i_data,
     fapi2::buffer<uint64_t>& o_data)
@@ -4402,12 +5009,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_42 chip: %x, ec: %x",
+    FAPI_ERR("0:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_42 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_42]
 
+//>> SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_42]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_42(
     const uint64_t i_data,
     fapi2::buffer<uint64_t>& o_data)
@@ -4419,12 +5028,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_42 chip: %x, ec: %x",
+    FAPI_ERR("1:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_42 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_42]
 
+//>> SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_42]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_42(
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -4434,12 +5045,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_
     return o_data.setBit<TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_42>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_42 chip: %x, ec: %x",
+    FAPI_ERR("2:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_42 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_42]
 
+//>> CLEAR_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_42]
 static inline fapi2::buffer<uint64_t>& CLEAR_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_42(
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -4449,12 +5062,14 @@ static inline fapi2::buffer<uint64_t>& CLEAR_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST
     return o_data.clearBit<TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_42>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_42 chip: %x, ec: %x",
+    FAPI_ERR("3:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_42 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< CLEAR_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_42]
 
+//>> GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_42]
 static inline fapi2::buffer<uint64_t>& GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_42(
     fapi2::buffer<uint64_t>& i_data,
     uint64_t& o_data)
@@ -4466,12 +5081,14 @@ static inline fapi2::buffer<uint64_t>& GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_42 chip: %x, ec: %x",
+    FAPI_ERR("4:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_42 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_42]
 
+//>> GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_42]
 static inline bool GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_42(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
@@ -4480,12 +5097,14 @@ static inline bool GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATU
     return i_data.getBit<TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_42>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_42 chip: %x, ec: %x",
+    FAPI_ERR("5:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_42 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_42]
 
+//>> SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_43]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_43(
     fapi2::buffer<uint64_t>& i_data,
     fapi2::buffer<uint64_t>& o_data)
@@ -4497,12 +5116,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_43 chip: %x, ec: %x",
+    FAPI_ERR("0:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_43 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_43]
 
+//>> SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_43]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_43(
     const uint64_t i_data,
     fapi2::buffer<uint64_t>& o_data)
@@ -4514,12 +5135,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_43 chip: %x, ec: %x",
+    FAPI_ERR("1:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_43 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_43]
 
+//>> SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_43]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_43(
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -4529,12 +5152,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_
     return o_data.setBit<TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_43>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_43 chip: %x, ec: %x",
+    FAPI_ERR("2:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_43 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_43]
 
+//>> CLEAR_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_43]
 static inline fapi2::buffer<uint64_t>& CLEAR_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_43(
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -4544,12 +5169,14 @@ static inline fapi2::buffer<uint64_t>& CLEAR_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST
     return o_data.clearBit<TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_43>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_43 chip: %x, ec: %x",
+    FAPI_ERR("3:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_43 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< CLEAR_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_43]
 
+//>> GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_43]
 static inline fapi2::buffer<uint64_t>& GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_43(
     fapi2::buffer<uint64_t>& i_data,
     uint64_t& o_data)
@@ -4561,12 +5188,14 @@ static inline fapi2::buffer<uint64_t>& GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_43 chip: %x, ec: %x",
+    FAPI_ERR("4:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_43 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_43]
 
+//>> GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_43]
 static inline bool GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_43(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
@@ -4575,12 +5204,14 @@ static inline bool GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATU
     return i_data.getBit<TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_43>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_43 chip: %x, ec: %x",
+    FAPI_ERR("5:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_43 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_43]
 
+//>> SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_44]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_44(
     fapi2::buffer<uint64_t>& i_data,
     fapi2::buffer<uint64_t>& o_data)
@@ -4592,12 +5223,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_44 chip: %x, ec: %x",
+    FAPI_ERR("0:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_44 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_44]
 
+//>> SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_44]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_44(
     const uint64_t i_data,
     fapi2::buffer<uint64_t>& o_data)
@@ -4609,12 +5242,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_44 chip: %x, ec: %x",
+    FAPI_ERR("1:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_44 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_44]
 
+//>> SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_44]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_44(
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -4624,12 +5259,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_
     return o_data.setBit<TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_44>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_44 chip: %x, ec: %x",
+    FAPI_ERR("2:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_44 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_44]
 
+//>> CLEAR_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_44]
 static inline fapi2::buffer<uint64_t>& CLEAR_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_44(
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -4639,12 +5276,14 @@ static inline fapi2::buffer<uint64_t>& CLEAR_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST
     return o_data.clearBit<TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_44>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_44 chip: %x, ec: %x",
+    FAPI_ERR("3:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_44 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< CLEAR_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_44]
 
+//>> GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_44]
 static inline fapi2::buffer<uint64_t>& GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_44(
     fapi2::buffer<uint64_t>& i_data,
     uint64_t& o_data)
@@ -4656,12 +5295,14 @@ static inline fapi2::buffer<uint64_t>& GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_44 chip: %x, ec: %x",
+    FAPI_ERR("4:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_44 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_44]
 
+//>> GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_44]
 static inline bool GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_44(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
@@ -4670,12 +5311,14 @@ static inline bool GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATU
     return i_data.getBit<TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_44>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_44 chip: %x, ec: %x",
+    FAPI_ERR("5:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_44 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_44]
 
+//>> SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_45]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_45(
     fapi2::buffer<uint64_t>& i_data,
     fapi2::buffer<uint64_t>& o_data)
@@ -4687,12 +5330,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_
            TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_45_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_45 chip: %x, ec: %x",
+    FAPI_ERR("0:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_45 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_45]
 
+//>> SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_45]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_45(
     const uint64_t i_data,
     fapi2::buffer<uint64_t>& o_data)
@@ -4704,12 +5349,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_
            TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_45_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_45 chip: %x, ec: %x",
+    FAPI_ERR("1:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_45 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_45]
 
+//>> GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_45]
 static inline fapi2::buffer<uint64_t>& GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_45(
     fapi2::buffer<uint64_t>& i_data,
     uint64_t& o_data)
@@ -4721,12 +5368,14 @@ static inline fapi2::buffer<uint64_t>& GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_
            TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_45_LEN>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_45 chip: %x, ec: %x",
+    FAPI_ERR("4:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_45 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_45]
 
+//>> SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_47]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_47(
     fapi2::buffer<uint64_t>& i_data,
     fapi2::buffer<uint64_t>& o_data)
@@ -4738,12 +5387,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_47 chip: %x, ec: %x",
+    FAPI_ERR("0:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_47 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_47]
 
+//>> SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_47]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_47(
     const uint64_t i_data,
     fapi2::buffer<uint64_t>& o_data)
@@ -4755,12 +5406,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_47 chip: %x, ec: %x",
+    FAPI_ERR("1:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_47 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_47]
 
+//>> SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_47]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_47(
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -4770,12 +5423,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_
     return o_data.setBit<TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_47>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_47 chip: %x, ec: %x",
+    FAPI_ERR("2:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_47 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_47]
 
+//>> CLEAR_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_47]
 static inline fapi2::buffer<uint64_t>& CLEAR_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_47(
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -4785,12 +5440,14 @@ static inline fapi2::buffer<uint64_t>& CLEAR_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST
     return o_data.clearBit<TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_47>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_47 chip: %x, ec: %x",
+    FAPI_ERR("3:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_47 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< CLEAR_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_47]
 
+//>> GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_47]
 static inline fapi2::buffer<uint64_t>& GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_47(
     fapi2::buffer<uint64_t>& i_data,
     uint64_t& o_data)
@@ -4802,12 +5459,14 @@ static inline fapi2::buffer<uint64_t>& GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_47 chip: %x, ec: %x",
+    FAPI_ERR("4:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_47 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_47]
 
+//>> GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_47]
 static inline bool GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_47(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
@@ -4816,12 +5475,14 @@ static inline bool GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATU
     return i_data.getBit<TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_47>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_47 chip: %x, ec: %x",
+    FAPI_ERR("5:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_47 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_47]
 
+//>> SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_48]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_48(
     fapi2::buffer<uint64_t>& i_data,
     fapi2::buffer<uint64_t>& o_data)
@@ -4833,12 +5494,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_
            TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_48_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_48 chip: %x, ec: %x",
+    FAPI_ERR("0:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_48 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_48]
 
+//>> SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_48]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_48(
     const uint64_t i_data,
     fapi2::buffer<uint64_t>& o_data)
@@ -4850,12 +5513,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_
            TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_48_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_48 chip: %x, ec: %x",
+    FAPI_ERR("1:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_48 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_48]
 
+//>> GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_48]
 static inline fapi2::buffer<uint64_t>& GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_48(
     fapi2::buffer<uint64_t>& i_data,
     uint64_t& o_data)
@@ -4867,12 +5532,14 @@ static inline fapi2::buffer<uint64_t>& GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_
            TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_48_LEN>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_48 chip: %x, ec: %x",
+    FAPI_ERR("4:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_48 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_48]
 
+//>> SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_50]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_50(
     fapi2::buffer<uint64_t>& i_data,
     fapi2::buffer<uint64_t>& o_data)
@@ -4884,12 +5551,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_50 chip: %x, ec: %x",
+    FAPI_ERR("0:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_50 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_50]
 
+//>> SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_50]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_50(
     const uint64_t i_data,
     fapi2::buffer<uint64_t>& o_data)
@@ -4901,12 +5570,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_50 chip: %x, ec: %x",
+    FAPI_ERR("1:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_50 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_50]
 
+//>> SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_50]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_50(
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -4916,12 +5587,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_
     return o_data.setBit<TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_50>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_50 chip: %x, ec: %x",
+    FAPI_ERR("2:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_50 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_50]
 
+//>> CLEAR_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_50]
 static inline fapi2::buffer<uint64_t>& CLEAR_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_50(
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -4931,12 +5604,14 @@ static inline fapi2::buffer<uint64_t>& CLEAR_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST
     return o_data.clearBit<TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_50>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_50 chip: %x, ec: %x",
+    FAPI_ERR("3:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_50 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< CLEAR_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_50]
 
+//>> GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_50]
 static inline fapi2::buffer<uint64_t>& GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_50(
     fapi2::buffer<uint64_t>& i_data,
     uint64_t& o_data)
@@ -4948,12 +5623,14 @@ static inline fapi2::buffer<uint64_t>& GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_50 chip: %x, ec: %x",
+    FAPI_ERR("4:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_50 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_50]
 
+//>> GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_50]
 static inline bool GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_50(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
@@ -4962,12 +5639,14 @@ static inline bool GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATU
     return i_data.getBit<TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_50>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_50 chip: %x, ec: %x",
+    FAPI_ERR("5:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_50 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_50]
 
+//>> SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_51]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_51(
     fapi2::buffer<uint64_t>& i_data,
     fapi2::buffer<uint64_t>& o_data)
@@ -4979,12 +5658,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_51 chip: %x, ec: %x",
+    FAPI_ERR("0:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_51 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_51]
 
+//>> SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_51]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_51(
     const uint64_t i_data,
     fapi2::buffer<uint64_t>& o_data)
@@ -4996,12 +5677,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_51 chip: %x, ec: %x",
+    FAPI_ERR("1:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_51 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_51]
 
+//>> SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_51]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_51(
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -5011,12 +5694,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_
     return o_data.setBit<TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_51>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_51 chip: %x, ec: %x",
+    FAPI_ERR("2:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_51 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_51]
 
+//>> CLEAR_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_51]
 static inline fapi2::buffer<uint64_t>& CLEAR_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_51(
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -5026,12 +5711,14 @@ static inline fapi2::buffer<uint64_t>& CLEAR_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST
     return o_data.clearBit<TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_51>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_51 chip: %x, ec: %x",
+    FAPI_ERR("3:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_51 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< CLEAR_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_51]
 
+//>> GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_51]
 static inline fapi2::buffer<uint64_t>& GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_51(
     fapi2::buffer<uint64_t>& i_data,
     uint64_t& o_data)
@@ -5043,12 +5730,14 @@ static inline fapi2::buffer<uint64_t>& GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_51 chip: %x, ec: %x",
+    FAPI_ERR("4:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_51 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_51]
 
+//>> GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_51]
 static inline bool GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_51(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
@@ -5057,12 +5746,14 @@ static inline bool GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATU
     return i_data.getBit<TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_51>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_51 chip: %x, ec: %x",
+    FAPI_ERR("5:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_51 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_51]
 
+//>> SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_52]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_52(
     fapi2::buffer<uint64_t>& i_data,
     fapi2::buffer<uint64_t>& o_data)
@@ -5074,12 +5765,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_
            TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_52_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_52 chip: %x, ec: %x",
+    FAPI_ERR("0:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_52 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_52]
 
+//>> SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_52]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_52(
     const uint64_t i_data,
     fapi2::buffer<uint64_t>& o_data)
@@ -5091,12 +5784,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_
            TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_52_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_52 chip: %x, ec: %x",
+    FAPI_ERR("1:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_52 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_52]
 
+//>> GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_52]
 static inline fapi2::buffer<uint64_t>& GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_52(
     fapi2::buffer<uint64_t>& i_data,
     uint64_t& o_data)
@@ -5108,12 +5803,14 @@ static inline fapi2::buffer<uint64_t>& GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_
            TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_52_LEN>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_52 chip: %x, ec: %x",
+    FAPI_ERR("4:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_52 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST1_STATUS_REG_SPI_STATUS_52]
 
+//>> PREP_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_ERROR_INJECT_]
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
 static inline fapi2::ReturnCode PREP_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_ERROR_INJECT_
 (const fapi2::Target<K, M, V>& i_target)
@@ -5128,7 +5825,9 @@ fapi_try_exit:
     return fapi2::current_err;
 #endif
 }
+//<< PREP_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_ERROR_INJECT_]
 
+//>> GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_ERROR_INJECT_]
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
 static inline fapi2::ReturnCode GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_ERROR_INJECT_
 (const fapi2::Target<K, M, V>& i_target, fapi2::buffer<uint64_t>& o_data)
@@ -5143,7 +5842,9 @@ fapi_try_exit:
     return fapi2::current_err;
 #endif
 }
+//<< GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_ERROR_INJECT_]
 
+//>> PUT_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_ERROR_INJECT_]
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
 static inline fapi2::ReturnCode PUT_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_ERROR_INJECT_
 (const fapi2::Target<K, M, V>& i_target, const uint64_t i_data)
@@ -5158,8 +5859,10 @@ fapi_try_exit:
     return fapi2::current_err;
 #endif
 }
+//<< PUT_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_ERROR_INJECT_]
 
 
+//>> SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_ERROR_INJECT__ERROR_REG_Q]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_ERROR_INJECT__ERROR_REG_Q(
     fapi2::buffer<uint64_t>& i_data,
     fapi2::buffer<uint64_t>& o_data)
@@ -5171,12 +5874,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_
            TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_ERROR_INJECT__ERROR_REG_Q_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_ERROR_INJECT__ERROR_REG_Q chip: %x, ec: %x",
+    FAPI_ERR("0:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_ERROR_INJECT__ERROR_REG_Q chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_ERROR_INJECT__ERROR_REG_Q]
 
+//>> SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_ERROR_INJECT__ERROR_REG_Q]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_ERROR_INJECT__ERROR_REG_Q(
     const uint64_t i_data,
     fapi2::buffer<uint64_t>& o_data)
@@ -5188,12 +5893,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_
            TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_ERROR_INJECT__ERROR_REG_Q_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_ERROR_INJECT__ERROR_REG_Q chip: %x, ec: %x",
+    FAPI_ERR("1:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_ERROR_INJECT__ERROR_REG_Q chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_ERROR_INJECT__ERROR_REG_Q]
 
+//>> GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_ERROR_INJECT__ERROR_REG_Q]
 static inline fapi2::buffer<uint64_t>& GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_ERROR_INJECT__ERROR_REG_Q(
     fapi2::buffer<uint64_t>& i_data,
     uint64_t& o_data)
@@ -5205,12 +5912,14 @@ static inline fapi2::buffer<uint64_t>& GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_
            TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_ERROR_INJECT__ERROR_REG_Q_LEN>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_ERROR_INJECT__ERROR_REG_Q chip: %x, ec: %x",
+    FAPI_ERR("4:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_ERROR_INJECT__ERROR_REG_Q chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_ERROR_INJECT__ERROR_REG_Q]
 
+//>> PREP_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG]
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
 static inline fapi2::ReturnCode PREP_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG(
     const fapi2::Target<K, M, V>& i_target)
@@ -5225,7 +5934,9 @@ fapi_try_exit:
     return fapi2::current_err;
 #endif
 }
+//<< PREP_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG]
 
+//>> GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG]
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
 static inline fapi2::ReturnCode GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG(
     const fapi2::Target<K, M, V>& i_target, fapi2::buffer<uint64_t>& o_data)
@@ -5240,7 +5951,9 @@ fapi_try_exit:
     return fapi2::current_err;
 #endif
 }
+//<< GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG]
 
+//>> PUT_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG]
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
 static inline fapi2::ReturnCode PUT_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG(
     const fapi2::Target<K, M, V>& i_target, const uint64_t i_data)
@@ -5255,8 +5968,10 @@ fapi_try_exit:
     return fapi2::current_err;
 #endif
 }
+//<< PUT_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG]
 
 
+//>> SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_RDR_FULL_STATUS]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_RDR_FULL_STATUS(
     fapi2::buffer<uint64_t>& i_data,
     fapi2::buffer<uint64_t>& o_data)
@@ -5268,12 +5983,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_RDR_FULL_STATUS chip: %x, ec: %x",
+    FAPI_ERR("0:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_RDR_FULL_STATUS chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_RDR_FULL_STATUS]
 
+//>> SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_RDR_FULL_STATUS]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_RDR_FULL_STATUS(
     const uint64_t i_data,
     fapi2::buffer<uint64_t>& o_data)
@@ -5285,12 +6002,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_RDR_FULL_STATUS chip: %x, ec: %x",
+    FAPI_ERR("1:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_RDR_FULL_STATUS chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_RDR_FULL_STATUS]
 
+//>> SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_RDR_FULL_STATUS]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_RDR_FULL_STATUS(
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -5300,12 +6019,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_
     return o_data.setBit<TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_RDR_FULL_STATUS>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_RDR_FULL_STATUS chip: %x, ec: %x",
+    FAPI_ERR("2:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_RDR_FULL_STATUS chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_RDR_FULL_STATUS]
 
+//>> CLEAR_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_RDR_FULL_STATUS]
 static inline fapi2::buffer<uint64_t>& CLEAR_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_RDR_FULL_STATUS(
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -5315,12 +6036,14 @@ static inline fapi2::buffer<uint64_t>& CLEAR_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST
     return o_data.clearBit<TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_RDR_FULL_STATUS>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_RDR_FULL_STATUS chip: %x, ec: %x",
+    FAPI_ERR("3:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_RDR_FULL_STATUS chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< CLEAR_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_RDR_FULL_STATUS]
 
+//>> GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_RDR_FULL_STATUS]
 static inline fapi2::buffer<uint64_t>& GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_RDR_FULL_STATUS(
     fapi2::buffer<uint64_t>& i_data,
     uint64_t& o_data)
@@ -5332,12 +6055,14 @@ static inline fapi2::buffer<uint64_t>& GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_RDR_FULL_STATUS chip: %x, ec: %x",
+    FAPI_ERR("4:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_RDR_FULL_STATUS chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_RDR_FULL_STATUS]
 
+//>> GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_RDR_FULL_STATUS]
 static inline bool GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_RDR_FULL_STATUS(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
@@ -5346,12 +6071,14 @@ static inline bool GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_RDR_FULL_
     return i_data.getBit<TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_RDR_FULL_STATUS>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_RDR_FULL_STATUS chip: %x, ec: %x",
+    FAPI_ERR("5:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_RDR_FULL_STATUS chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_RDR_FULL_STATUS]
 
+//>> SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_RDR_OVER_STATUS]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_RDR_OVER_STATUS(
     fapi2::buffer<uint64_t>& i_data,
     fapi2::buffer<uint64_t>& o_data)
@@ -5363,12 +6090,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_RDR_OVER_STATUS chip: %x, ec: %x",
+    FAPI_ERR("0:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_RDR_OVER_STATUS chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_RDR_OVER_STATUS]
 
+//>> SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_RDR_OVER_STATUS]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_RDR_OVER_STATUS(
     const uint64_t i_data,
     fapi2::buffer<uint64_t>& o_data)
@@ -5380,12 +6109,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_RDR_OVER_STATUS chip: %x, ec: %x",
+    FAPI_ERR("1:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_RDR_OVER_STATUS chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_RDR_OVER_STATUS]
 
+//>> SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_RDR_OVER_STATUS]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_RDR_OVER_STATUS(
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -5395,12 +6126,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_
     return o_data.setBit<TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_RDR_OVER_STATUS>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_RDR_OVER_STATUS chip: %x, ec: %x",
+    FAPI_ERR("2:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_RDR_OVER_STATUS chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_RDR_OVER_STATUS]
 
+//>> CLEAR_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_RDR_OVER_STATUS]
 static inline fapi2::buffer<uint64_t>& CLEAR_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_RDR_OVER_STATUS(
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -5410,12 +6143,14 @@ static inline fapi2::buffer<uint64_t>& CLEAR_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST
     return o_data.clearBit<TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_RDR_OVER_STATUS>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_RDR_OVER_STATUS chip: %x, ec: %x",
+    FAPI_ERR("3:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_RDR_OVER_STATUS chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< CLEAR_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_RDR_OVER_STATUS]
 
+//>> GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_RDR_OVER_STATUS]
 static inline fapi2::buffer<uint64_t>& GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_RDR_OVER_STATUS(
     fapi2::buffer<uint64_t>& i_data,
     uint64_t& o_data)
@@ -5427,12 +6162,14 @@ static inline fapi2::buffer<uint64_t>& GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_RDR_OVER_STATUS chip: %x, ec: %x",
+    FAPI_ERR("4:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_RDR_OVER_STATUS chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_RDR_OVER_STATUS]
 
+//>> GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_RDR_OVER_STATUS]
 static inline bool GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_RDR_OVER_STATUS(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
@@ -5441,12 +6178,14 @@ static inline bool GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_RDR_OVER_
     return i_data.getBit<TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_RDR_OVER_STATUS>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_RDR_OVER_STATUS chip: %x, ec: %x",
+    FAPI_ERR("5:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_RDR_OVER_STATUS chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_RDR_OVER_STATUS]
 
+//>> SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_RDR_UNDER_STATUS]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_RDR_UNDER_STATUS(
     fapi2::buffer<uint64_t>& i_data,
     fapi2::buffer<uint64_t>& o_data)
@@ -5458,12 +6197,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_RDR_UNDER_STATUS chip: %x, ec: %x",
+    FAPI_ERR("0:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_RDR_UNDER_STATUS chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_RDR_UNDER_STATUS]
 
+//>> SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_RDR_UNDER_STATUS]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_RDR_UNDER_STATUS(
     const uint64_t i_data,
     fapi2::buffer<uint64_t>& o_data)
@@ -5475,12 +6216,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_RDR_UNDER_STATUS chip: %x, ec: %x",
+    FAPI_ERR("1:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_RDR_UNDER_STATUS chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_RDR_UNDER_STATUS]
 
+//>> SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_RDR_UNDER_STATUS]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_RDR_UNDER_STATUS(
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -5490,12 +6233,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_
     return o_data.setBit<TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_RDR_UNDER_STATUS>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_RDR_UNDER_STATUS chip: %x, ec: %x",
+    FAPI_ERR("2:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_RDR_UNDER_STATUS chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_RDR_UNDER_STATUS]
 
+//>> CLEAR_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_RDR_UNDER_STATUS]
 static inline fapi2::buffer<uint64_t>& CLEAR_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_RDR_UNDER_STATUS(
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -5505,12 +6250,14 @@ static inline fapi2::buffer<uint64_t>& CLEAR_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST
     return o_data.clearBit<TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_RDR_UNDER_STATUS>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_RDR_UNDER_STATUS chip: %x, ec: %x",
+    FAPI_ERR("3:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_RDR_UNDER_STATUS chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< CLEAR_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_RDR_UNDER_STATUS]
 
+//>> GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_RDR_UNDER_STATUS]
 static inline fapi2::buffer<uint64_t>& GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_RDR_UNDER_STATUS(
     fapi2::buffer<uint64_t>& i_data,
     uint64_t& o_data)
@@ -5522,12 +6269,14 @@ static inline fapi2::buffer<uint64_t>& GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_RDR_UNDER_STATUS chip: %x, ec: %x",
+    FAPI_ERR("4:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_RDR_UNDER_STATUS chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_RDR_UNDER_STATUS]
 
+//>> GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_RDR_UNDER_STATUS]
 static inline bool GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_RDR_UNDER_STATUS(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
@@ -5536,12 +6285,14 @@ static inline bool GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_RDR_UNDER
     return i_data.getBit<TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_RDR_UNDER_STATUS>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_RDR_UNDER_STATUS chip: %x, ec: %x",
+    FAPI_ERR("5:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_RDR_UNDER_STATUS chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_RDR_UNDER_STATUS]
 
+//>> SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_RDR_RESERVED_STATUS]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_RDR_RESERVED_STATUS(
     fapi2::buffer<uint64_t>& i_data,
     fapi2::buffer<uint64_t>& o_data)
@@ -5553,12 +6304,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_RDR_RESERVED_STATUS chip: %x, ec: %x",
+    FAPI_ERR("0:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_RDR_RESERVED_STATUS chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_RDR_RESERVED_STATUS]
 
+//>> SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_RDR_RESERVED_STATUS]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_RDR_RESERVED_STATUS(
     const uint64_t i_data,
     fapi2::buffer<uint64_t>& o_data)
@@ -5570,12 +6323,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_RDR_RESERVED_STATUS chip: %x, ec: %x",
+    FAPI_ERR("1:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_RDR_RESERVED_STATUS chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_RDR_RESERVED_STATUS]
 
+//>> SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_RDR_RESERVED_STATUS]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_RDR_RESERVED_STATUS(
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -5585,12 +6340,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_
     return o_data.setBit<TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_RDR_RESERVED_STATUS>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_RDR_RESERVED_STATUS chip: %x, ec: %x",
+    FAPI_ERR("2:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_RDR_RESERVED_STATUS chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_RDR_RESERVED_STATUS]
 
+//>> CLEAR_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_RDR_RESERVED_STATUS]
 static inline fapi2::buffer<uint64_t>& CLEAR_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_RDR_RESERVED_STATUS(
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -5600,12 +6357,14 @@ static inline fapi2::buffer<uint64_t>& CLEAR_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST
     return o_data.clearBit<TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_RDR_RESERVED_STATUS>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_RDR_RESERVED_STATUS chip: %x, ec: %x",
+    FAPI_ERR("3:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_RDR_RESERVED_STATUS chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< CLEAR_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_RDR_RESERVED_STATUS]
 
+//>> GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_RDR_RESERVED_STATUS]
 static inline fapi2::buffer<uint64_t>& GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_RDR_RESERVED_STATUS(
     fapi2::buffer<uint64_t>& i_data,
     uint64_t& o_data)
@@ -5617,12 +6376,14 @@ static inline fapi2::buffer<uint64_t>& GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_RDR_RESERVED_STATUS chip: %x, ec: %x",
+    FAPI_ERR("4:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_RDR_RESERVED_STATUS chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_RDR_RESERVED_STATUS]
 
+//>> GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_RDR_RESERVED_STATUS]
 static inline bool GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_RDR_RESERVED_STATUS(
     fapi2::buffer<uint64_t>& i_data)
 {
@@ -5632,12 +6393,14 @@ static inline bool GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_RDR_RESER
     return i_data.getBit<TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_RDR_RESERVED_STATUS>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_RDR_RESERVED_STATUS chip: %x, ec: %x",
+    FAPI_ERR("5:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_RDR_RESERVED_STATUS chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_RDR_RESERVED_STATUS]
 
+//>> SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_TDR_FULL_STATUS]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_TDR_FULL_STATUS(
     fapi2::buffer<uint64_t>& i_data,
     fapi2::buffer<uint64_t>& o_data)
@@ -5649,12 +6412,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_TDR_FULL_STATUS chip: %x, ec: %x",
+    FAPI_ERR("0:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_TDR_FULL_STATUS chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_TDR_FULL_STATUS]
 
+//>> SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_TDR_FULL_STATUS]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_TDR_FULL_STATUS(
     const uint64_t i_data,
     fapi2::buffer<uint64_t>& o_data)
@@ -5666,12 +6431,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_TDR_FULL_STATUS chip: %x, ec: %x",
+    FAPI_ERR("1:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_TDR_FULL_STATUS chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_TDR_FULL_STATUS]
 
+//>> SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_TDR_FULL_STATUS]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_TDR_FULL_STATUS(
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -5681,12 +6448,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_
     return o_data.setBit<TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_TDR_FULL_STATUS>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_TDR_FULL_STATUS chip: %x, ec: %x",
+    FAPI_ERR("2:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_TDR_FULL_STATUS chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_TDR_FULL_STATUS]
 
+//>> CLEAR_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_TDR_FULL_STATUS]
 static inline fapi2::buffer<uint64_t>& CLEAR_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_TDR_FULL_STATUS(
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -5696,12 +6465,14 @@ static inline fapi2::buffer<uint64_t>& CLEAR_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST
     return o_data.clearBit<TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_TDR_FULL_STATUS>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_TDR_FULL_STATUS chip: %x, ec: %x",
+    FAPI_ERR("3:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_TDR_FULL_STATUS chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< CLEAR_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_TDR_FULL_STATUS]
 
+//>> GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_TDR_FULL_STATUS]
 static inline fapi2::buffer<uint64_t>& GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_TDR_FULL_STATUS(
     fapi2::buffer<uint64_t>& i_data,
     uint64_t& o_data)
@@ -5713,12 +6484,14 @@ static inline fapi2::buffer<uint64_t>& GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_TDR_FULL_STATUS chip: %x, ec: %x",
+    FAPI_ERR("4:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_TDR_FULL_STATUS chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_TDR_FULL_STATUS]
 
+//>> GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_TDR_FULL_STATUS]
 static inline bool GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_TDR_FULL_STATUS(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
@@ -5727,12 +6500,14 @@ static inline bool GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_TDR_FULL_
     return i_data.getBit<TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_TDR_FULL_STATUS>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_TDR_FULL_STATUS chip: %x, ec: %x",
+    FAPI_ERR("5:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_TDR_FULL_STATUS chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_TDR_FULL_STATUS]
 
+//>> SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_TDR_OVER_STATUS]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_TDR_OVER_STATUS(
     fapi2::buffer<uint64_t>& i_data,
     fapi2::buffer<uint64_t>& o_data)
@@ -5744,12 +6519,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_TDR_OVER_STATUS chip: %x, ec: %x",
+    FAPI_ERR("0:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_TDR_OVER_STATUS chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_TDR_OVER_STATUS]
 
+//>> SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_TDR_OVER_STATUS]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_TDR_OVER_STATUS(
     const uint64_t i_data,
     fapi2::buffer<uint64_t>& o_data)
@@ -5761,12 +6538,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_TDR_OVER_STATUS chip: %x, ec: %x",
+    FAPI_ERR("1:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_TDR_OVER_STATUS chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_TDR_OVER_STATUS]
 
+//>> SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_TDR_OVER_STATUS]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_TDR_OVER_STATUS(
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -5776,12 +6555,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_
     return o_data.setBit<TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_TDR_OVER_STATUS>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_TDR_OVER_STATUS chip: %x, ec: %x",
+    FAPI_ERR("2:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_TDR_OVER_STATUS chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_TDR_OVER_STATUS]
 
+//>> CLEAR_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_TDR_OVER_STATUS]
 static inline fapi2::buffer<uint64_t>& CLEAR_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_TDR_OVER_STATUS(
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -5791,12 +6572,14 @@ static inline fapi2::buffer<uint64_t>& CLEAR_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST
     return o_data.clearBit<TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_TDR_OVER_STATUS>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_TDR_OVER_STATUS chip: %x, ec: %x",
+    FAPI_ERR("3:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_TDR_OVER_STATUS chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< CLEAR_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_TDR_OVER_STATUS]
 
+//>> GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_TDR_OVER_STATUS]
 static inline fapi2::buffer<uint64_t>& GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_TDR_OVER_STATUS(
     fapi2::buffer<uint64_t>& i_data,
     uint64_t& o_data)
@@ -5808,12 +6591,14 @@ static inline fapi2::buffer<uint64_t>& GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_TDR_OVER_STATUS chip: %x, ec: %x",
+    FAPI_ERR("4:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_TDR_OVER_STATUS chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_TDR_OVER_STATUS]
 
+//>> GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_TDR_OVER_STATUS]
 static inline bool GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_TDR_OVER_STATUS(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
@@ -5822,12 +6607,14 @@ static inline bool GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_TDR_OVER_
     return i_data.getBit<TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_TDR_OVER_STATUS>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_TDR_OVER_STATUS chip: %x, ec: %x",
+    FAPI_ERR("5:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_TDR_OVER_STATUS chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_TDR_OVER_STATUS]
 
+//>> SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_TDR_UNDER_STATUS]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_TDR_UNDER_STATUS(
     fapi2::buffer<uint64_t>& i_data,
     fapi2::buffer<uint64_t>& o_data)
@@ -5839,12 +6626,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_TDR_UNDER_STATUS chip: %x, ec: %x",
+    FAPI_ERR("0:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_TDR_UNDER_STATUS chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_TDR_UNDER_STATUS]
 
+//>> SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_TDR_UNDER_STATUS]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_TDR_UNDER_STATUS(
     const uint64_t i_data,
     fapi2::buffer<uint64_t>& o_data)
@@ -5856,12 +6645,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_TDR_UNDER_STATUS chip: %x, ec: %x",
+    FAPI_ERR("1:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_TDR_UNDER_STATUS chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_TDR_UNDER_STATUS]
 
+//>> SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_TDR_UNDER_STATUS]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_TDR_UNDER_STATUS(
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -5871,12 +6662,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_
     return o_data.setBit<TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_TDR_UNDER_STATUS>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_TDR_UNDER_STATUS chip: %x, ec: %x",
+    FAPI_ERR("2:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_TDR_UNDER_STATUS chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_TDR_UNDER_STATUS]
 
+//>> CLEAR_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_TDR_UNDER_STATUS]
 static inline fapi2::buffer<uint64_t>& CLEAR_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_TDR_UNDER_STATUS(
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -5886,12 +6679,14 @@ static inline fapi2::buffer<uint64_t>& CLEAR_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST
     return o_data.clearBit<TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_TDR_UNDER_STATUS>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_TDR_UNDER_STATUS chip: %x, ec: %x",
+    FAPI_ERR("3:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_TDR_UNDER_STATUS chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< CLEAR_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_TDR_UNDER_STATUS]
 
+//>> GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_TDR_UNDER_STATUS]
 static inline fapi2::buffer<uint64_t>& GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_TDR_UNDER_STATUS(
     fapi2::buffer<uint64_t>& i_data,
     uint64_t& o_data)
@@ -5903,12 +6698,14 @@ static inline fapi2::buffer<uint64_t>& GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_TDR_UNDER_STATUS chip: %x, ec: %x",
+    FAPI_ERR("4:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_TDR_UNDER_STATUS chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_TDR_UNDER_STATUS]
 
+//>> GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_TDR_UNDER_STATUS]
 static inline bool GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_TDR_UNDER_STATUS(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
@@ -5917,12 +6714,14 @@ static inline bool GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_TDR_UNDER
     return i_data.getBit<TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_TDR_UNDER_STATUS>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_TDR_UNDER_STATUS chip: %x, ec: %x",
+    FAPI_ERR("5:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_TDR_UNDER_STATUS chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_TDR_UNDER_STATUS]
 
+//>> SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_TDR_RESERVED_STATUS]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_TDR_RESERVED_STATUS(
     fapi2::buffer<uint64_t>& i_data,
     fapi2::buffer<uint64_t>& o_data)
@@ -5934,12 +6733,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_TDR_RESERVED_STATUS chip: %x, ec: %x",
+    FAPI_ERR("0:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_TDR_RESERVED_STATUS chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_TDR_RESERVED_STATUS]
 
+//>> SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_TDR_RESERVED_STATUS]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_TDR_RESERVED_STATUS(
     const uint64_t i_data,
     fapi2::buffer<uint64_t>& o_data)
@@ -5951,12 +6752,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_TDR_RESERVED_STATUS chip: %x, ec: %x",
+    FAPI_ERR("1:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_TDR_RESERVED_STATUS chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_TDR_RESERVED_STATUS]
 
+//>> SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_TDR_RESERVED_STATUS]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_TDR_RESERVED_STATUS(
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -5966,12 +6769,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_
     return o_data.setBit<TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_TDR_RESERVED_STATUS>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_TDR_RESERVED_STATUS chip: %x, ec: %x",
+    FAPI_ERR("2:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_TDR_RESERVED_STATUS chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_TDR_RESERVED_STATUS]
 
+//>> CLEAR_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_TDR_RESERVED_STATUS]
 static inline fapi2::buffer<uint64_t>& CLEAR_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_TDR_RESERVED_STATUS(
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -5981,12 +6786,14 @@ static inline fapi2::buffer<uint64_t>& CLEAR_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST
     return o_data.clearBit<TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_TDR_RESERVED_STATUS>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_TDR_RESERVED_STATUS chip: %x, ec: %x",
+    FAPI_ERR("3:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_TDR_RESERVED_STATUS chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< CLEAR_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_TDR_RESERVED_STATUS]
 
+//>> GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_TDR_RESERVED_STATUS]
 static inline fapi2::buffer<uint64_t>& GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_TDR_RESERVED_STATUS(
     fapi2::buffer<uint64_t>& i_data,
     uint64_t& o_data)
@@ -5998,12 +6805,14 @@ static inline fapi2::buffer<uint64_t>& GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_TDR_RESERVED_STATUS chip: %x, ec: %x",
+    FAPI_ERR("4:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_TDR_RESERVED_STATUS chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_TDR_RESERVED_STATUS]
 
+//>> GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_TDR_RESERVED_STATUS]
 static inline bool GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_TDR_RESERVED_STATUS(
     fapi2::buffer<uint64_t>& i_data)
 {
@@ -6013,12 +6822,14 @@ static inline bool GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_TDR_RESER
     return i_data.getBit<TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_TDR_RESERVED_STATUS>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_TDR_RESERVED_STATUS chip: %x, ec: %x",
+    FAPI_ERR("5:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_TDR_RESERVED_STATUS chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_TDR_RESERVED_STATUS]
 
+//>> SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SEQUENCER_FSM]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SEQUENCER_FSM(
     fapi2::buffer<uint64_t>& i_data,
     fapi2::buffer<uint64_t>& o_data)
@@ -6030,12 +6841,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_
            TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SEQUENCER_FSM_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SEQUENCER_FSM chip: %x, ec: %x",
+    FAPI_ERR("0:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SEQUENCER_FSM chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SEQUENCER_FSM]
 
+//>> SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SEQUENCER_FSM]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SEQUENCER_FSM(
     const uint64_t i_data,
     fapi2::buffer<uint64_t>& o_data)
@@ -6047,12 +6860,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_
            TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SEQUENCER_FSM_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SEQUENCER_FSM chip: %x, ec: %x",
+    FAPI_ERR("1:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SEQUENCER_FSM chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SEQUENCER_FSM]
 
+//>> GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SEQUENCER_FSM]
 static inline fapi2::buffer<uint64_t>& GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SEQUENCER_FSM(
     fapi2::buffer<uint64_t>& i_data,
     uint64_t& o_data)
@@ -6064,12 +6879,14 @@ static inline fapi2::buffer<uint64_t>& GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_
            TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SEQUENCER_FSM_LEN>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SEQUENCER_FSM chip: %x, ec: %x",
+    FAPI_ERR("4:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SEQUENCER_FSM chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SEQUENCER_FSM]
 
+//>> SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SHIFTER_FSM]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SHIFTER_FSM(
     fapi2::buffer<uint64_t>& i_data,
     fapi2::buffer<uint64_t>& o_data)
@@ -6081,12 +6898,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_
            TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SHIFTER_FSM_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SHIFTER_FSM chip: %x, ec: %x",
+    FAPI_ERR("0:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SHIFTER_FSM chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SHIFTER_FSM]
 
+//>> SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SHIFTER_FSM]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SHIFTER_FSM(
     const uint64_t i_data,
     fapi2::buffer<uint64_t>& o_data)
@@ -6098,12 +6917,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_
            TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SHIFTER_FSM_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SHIFTER_FSM chip: %x, ec: %x",
+    FAPI_ERR("1:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SHIFTER_FSM chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SHIFTER_FSM]
 
+//>> GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SHIFTER_FSM]
 static inline fapi2::buffer<uint64_t>& GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SHIFTER_FSM(
     fapi2::buffer<uint64_t>& i_data,
     uint64_t& o_data)
@@ -6115,12 +6936,14 @@ static inline fapi2::buffer<uint64_t>& GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_
            TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SHIFTER_FSM_LEN>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SHIFTER_FSM chip: %x, ec: %x",
+    FAPI_ERR("4:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SHIFTER_FSM chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SHIFTER_FSM]
 
+//>> SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SEQUENCER_OP_INDEX]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SEQUENCER_OP_INDEX(
     fapi2::buffer<uint64_t>& i_data,
     fapi2::buffer<uint64_t>& o_data)
@@ -6132,12 +6955,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_
            TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SEQUENCER_OP_INDEX_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SEQUENCER_OP_INDEX chip: %x, ec: %x",
+    FAPI_ERR("0:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SEQUENCER_OP_INDEX chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SEQUENCER_OP_INDEX]
 
+//>> SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SEQUENCER_OP_INDEX]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SEQUENCER_OP_INDEX(
     const uint64_t i_data,
     fapi2::buffer<uint64_t>& o_data)
@@ -6149,12 +6974,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_
            TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SEQUENCER_OP_INDEX_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SEQUENCER_OP_INDEX chip: %x, ec: %x",
+    FAPI_ERR("1:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SEQUENCER_OP_INDEX chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SEQUENCER_OP_INDEX]
 
+//>> GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SEQUENCER_OP_INDEX]
 static inline fapi2::buffer<uint64_t>& GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SEQUENCER_OP_INDEX(
     fapi2::buffer<uint64_t>& i_data,
     uint64_t& o_data)
@@ -6166,12 +6993,14 @@ static inline fapi2::buffer<uint64_t>& GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_
            TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SEQUENCER_OP_INDEX_LEN>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SEQUENCER_OP_INDEX chip: %x, ec: %x",
+    FAPI_ERR("4:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SEQUENCER_OP_INDEX chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SEQUENCER_OP_INDEX]
 
+//>> SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_32]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_32(
     fapi2::buffer<uint64_t>& i_data,
     fapi2::buffer<uint64_t>& o_data)
@@ -6183,12 +7012,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_32 chip: %x, ec: %x",
+    FAPI_ERR("0:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_32 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_32]
 
+//>> SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_32]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_32(
     const uint64_t i_data,
     fapi2::buffer<uint64_t>& o_data)
@@ -6200,12 +7031,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_32 chip: %x, ec: %x",
+    FAPI_ERR("1:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_32 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_32]
 
+//>> SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_32]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_32(
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -6215,12 +7048,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_
     return o_data.setBit<TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_32>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_32 chip: %x, ec: %x",
+    FAPI_ERR("2:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_32 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_32]
 
+//>> CLEAR_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_32]
 static inline fapi2::buffer<uint64_t>& CLEAR_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_32(
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -6230,12 +7065,14 @@ static inline fapi2::buffer<uint64_t>& CLEAR_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST
     return o_data.clearBit<TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_32>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_32 chip: %x, ec: %x",
+    FAPI_ERR("3:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_32 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< CLEAR_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_32]
 
+//>> GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_32]
 static inline fapi2::buffer<uint64_t>& GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_32(
     fapi2::buffer<uint64_t>& i_data,
     uint64_t& o_data)
@@ -6247,12 +7084,14 @@ static inline fapi2::buffer<uint64_t>& GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_32 chip: %x, ec: %x",
+    FAPI_ERR("4:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_32 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_32]
 
+//>> GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_32]
 static inline bool GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_32(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
@@ -6261,12 +7100,14 @@ static inline bool GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATU
     return i_data.getBit<TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_32>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_32 chip: %x, ec: %x",
+    FAPI_ERR("5:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_32 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_32]
 
+//>> SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_33]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_33(
     fapi2::buffer<uint64_t>& i_data,
     fapi2::buffer<uint64_t>& o_data)
@@ -6278,12 +7119,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_33 chip: %x, ec: %x",
+    FAPI_ERR("0:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_33 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_33]
 
+//>> SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_33]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_33(
     const uint64_t i_data,
     fapi2::buffer<uint64_t>& o_data)
@@ -6295,12 +7138,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_33 chip: %x, ec: %x",
+    FAPI_ERR("1:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_33 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_33]
 
+//>> SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_33]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_33(
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -6310,12 +7155,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_
     return o_data.setBit<TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_33>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_33 chip: %x, ec: %x",
+    FAPI_ERR("2:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_33 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_33]
 
+//>> CLEAR_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_33]
 static inline fapi2::buffer<uint64_t>& CLEAR_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_33(
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -6325,12 +7172,14 @@ static inline fapi2::buffer<uint64_t>& CLEAR_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST
     return o_data.clearBit<TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_33>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_33 chip: %x, ec: %x",
+    FAPI_ERR("3:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_33 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< CLEAR_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_33]
 
+//>> GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_33]
 static inline fapi2::buffer<uint64_t>& GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_33(
     fapi2::buffer<uint64_t>& i_data,
     uint64_t& o_data)
@@ -6342,12 +7191,14 @@ static inline fapi2::buffer<uint64_t>& GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_33 chip: %x, ec: %x",
+    FAPI_ERR("4:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_33 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_33]
 
+//>> GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_33]
 static inline bool GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_33(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
@@ -6356,12 +7207,14 @@ static inline bool GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATU
     return i_data.getBit<TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_33>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_33 chip: %x, ec: %x",
+    FAPI_ERR("5:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_33 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_33]
 
+//>> SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_34]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_34(
     fapi2::buffer<uint64_t>& i_data,
     fapi2::buffer<uint64_t>& o_data)
@@ -6373,12 +7226,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_34 chip: %x, ec: %x",
+    FAPI_ERR("0:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_34 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_34]
 
+//>> SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_34]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_34(
     const uint64_t i_data,
     fapi2::buffer<uint64_t>& o_data)
@@ -6390,12 +7245,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_34 chip: %x, ec: %x",
+    FAPI_ERR("1:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_34 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_34]
 
+//>> SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_34]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_34(
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -6405,12 +7262,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_
     return o_data.setBit<TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_34>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_34 chip: %x, ec: %x",
+    FAPI_ERR("2:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_34 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_34]
 
+//>> CLEAR_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_34]
 static inline fapi2::buffer<uint64_t>& CLEAR_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_34(
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -6420,12 +7279,14 @@ static inline fapi2::buffer<uint64_t>& CLEAR_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST
     return o_data.clearBit<TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_34>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_34 chip: %x, ec: %x",
+    FAPI_ERR("3:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_34 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< CLEAR_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_34]
 
+//>> GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_34]
 static inline fapi2::buffer<uint64_t>& GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_34(
     fapi2::buffer<uint64_t>& i_data,
     uint64_t& o_data)
@@ -6437,12 +7298,14 @@ static inline fapi2::buffer<uint64_t>& GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_34 chip: %x, ec: %x",
+    FAPI_ERR("4:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_34 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_34]
 
+//>> GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_34]
 static inline bool GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_34(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
@@ -6451,12 +7314,14 @@ static inline bool GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATU
     return i_data.getBit<TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_34>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_34 chip: %x, ec: %x",
+    FAPI_ERR("5:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_34 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_34]
 
+//>> SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_35]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_35(
     fapi2::buffer<uint64_t>& i_data,
     fapi2::buffer<uint64_t>& o_data)
@@ -6468,12 +7333,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_35 chip: %x, ec: %x",
+    FAPI_ERR("0:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_35 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_35]
 
+//>> SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_35]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_35(
     const uint64_t i_data,
     fapi2::buffer<uint64_t>& o_data)
@@ -6485,12 +7352,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_35 chip: %x, ec: %x",
+    FAPI_ERR("1:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_35 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_35]
 
+//>> SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_35]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_35(
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -6500,12 +7369,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_
     return o_data.setBit<TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_35>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_35 chip: %x, ec: %x",
+    FAPI_ERR("2:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_35 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_35]
 
+//>> CLEAR_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_35]
 static inline fapi2::buffer<uint64_t>& CLEAR_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_35(
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -6515,12 +7386,14 @@ static inline fapi2::buffer<uint64_t>& CLEAR_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST
     return o_data.clearBit<TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_35>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_35 chip: %x, ec: %x",
+    FAPI_ERR("3:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_35 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< CLEAR_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_35]
 
+//>> GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_35]
 static inline fapi2::buffer<uint64_t>& GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_35(
     fapi2::buffer<uint64_t>& i_data,
     uint64_t& o_data)
@@ -6532,12 +7405,14 @@ static inline fapi2::buffer<uint64_t>& GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_35 chip: %x, ec: %x",
+    FAPI_ERR("4:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_35 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_35]
 
+//>> GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_35]
 static inline bool GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_35(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
@@ -6546,12 +7421,14 @@ static inline bool GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATU
     return i_data.getBit<TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_35>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_35 chip: %x, ec: %x",
+    FAPI_ERR("5:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_35 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_35]
 
+//>> SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_36]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_36(
     fapi2::buffer<uint64_t>& i_data,
     fapi2::buffer<uint64_t>& o_data)
@@ -6563,12 +7440,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_36 chip: %x, ec: %x",
+    FAPI_ERR("0:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_36 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_36]
 
+//>> SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_36]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_36(
     const uint64_t i_data,
     fapi2::buffer<uint64_t>& o_data)
@@ -6580,12 +7459,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_36 chip: %x, ec: %x",
+    FAPI_ERR("1:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_36 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_36]
 
+//>> SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_36]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_36(
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -6595,12 +7476,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_
     return o_data.setBit<TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_36>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_36 chip: %x, ec: %x",
+    FAPI_ERR("2:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_36 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_36]
 
+//>> CLEAR_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_36]
 static inline fapi2::buffer<uint64_t>& CLEAR_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_36(
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -6610,12 +7493,14 @@ static inline fapi2::buffer<uint64_t>& CLEAR_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST
     return o_data.clearBit<TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_36>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_36 chip: %x, ec: %x",
+    FAPI_ERR("3:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_36 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< CLEAR_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_36]
 
+//>> GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_36]
 static inline fapi2::buffer<uint64_t>& GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_36(
     fapi2::buffer<uint64_t>& i_data,
     uint64_t& o_data)
@@ -6627,12 +7512,14 @@ static inline fapi2::buffer<uint64_t>& GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_36 chip: %x, ec: %x",
+    FAPI_ERR("4:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_36 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_36]
 
+//>> GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_36]
 static inline bool GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_36(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
@@ -6641,12 +7528,14 @@ static inline bool GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATU
     return i_data.getBit<TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_36>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_36 chip: %x, ec: %x",
+    FAPI_ERR("5:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_36 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_36]
 
+//>> SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_37]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_37(
     fapi2::buffer<uint64_t>& i_data,
     fapi2::buffer<uint64_t>& o_data)
@@ -6658,12 +7547,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_37 chip: %x, ec: %x",
+    FAPI_ERR("0:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_37 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_37]
 
+//>> SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_37]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_37(
     const uint64_t i_data,
     fapi2::buffer<uint64_t>& o_data)
@@ -6675,12 +7566,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_37 chip: %x, ec: %x",
+    FAPI_ERR("1:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_37 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_37]
 
+//>> SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_37]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_37(
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -6690,12 +7583,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_
     return o_data.setBit<TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_37>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_37 chip: %x, ec: %x",
+    FAPI_ERR("2:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_37 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_37]
 
+//>> CLEAR_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_37]
 static inline fapi2::buffer<uint64_t>& CLEAR_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_37(
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -6705,12 +7600,14 @@ static inline fapi2::buffer<uint64_t>& CLEAR_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST
     return o_data.clearBit<TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_37>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_37 chip: %x, ec: %x",
+    FAPI_ERR("3:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_37 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< CLEAR_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_37]
 
+//>> GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_37]
 static inline fapi2::buffer<uint64_t>& GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_37(
     fapi2::buffer<uint64_t>& i_data,
     uint64_t& o_data)
@@ -6722,12 +7619,14 @@ static inline fapi2::buffer<uint64_t>& GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_37 chip: %x, ec: %x",
+    FAPI_ERR("4:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_37 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_37]
 
+//>> GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_37]
 static inline bool GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_37(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
@@ -6736,12 +7635,14 @@ static inline bool GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATU
     return i_data.getBit<TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_37>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_37 chip: %x, ec: %x",
+    FAPI_ERR("5:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_37 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_37]
 
+//>> SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_38]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_38(
     fapi2::buffer<uint64_t>& i_data,
     fapi2::buffer<uint64_t>& o_data)
@@ -6753,12 +7654,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_38 chip: %x, ec: %x",
+    FAPI_ERR("0:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_38 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_38]
 
+//>> SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_38]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_38(
     const uint64_t i_data,
     fapi2::buffer<uint64_t>& o_data)
@@ -6770,12 +7673,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_38 chip: %x, ec: %x",
+    FAPI_ERR("1:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_38 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_38]
 
+//>> SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_38]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_38(
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -6785,12 +7690,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_
     return o_data.setBit<TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_38>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_38 chip: %x, ec: %x",
+    FAPI_ERR("2:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_38 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_38]
 
+//>> CLEAR_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_38]
 static inline fapi2::buffer<uint64_t>& CLEAR_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_38(
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -6800,12 +7707,14 @@ static inline fapi2::buffer<uint64_t>& CLEAR_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST
     return o_data.clearBit<TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_38>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_38 chip: %x, ec: %x",
+    FAPI_ERR("3:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_38 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< CLEAR_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_38]
 
+//>> GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_38]
 static inline fapi2::buffer<uint64_t>& GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_38(
     fapi2::buffer<uint64_t>& i_data,
     uint64_t& o_data)
@@ -6817,12 +7726,14 @@ static inline fapi2::buffer<uint64_t>& GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_38 chip: %x, ec: %x",
+    FAPI_ERR("4:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_38 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_38]
 
+//>> GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_38]
 static inline bool GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_38(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
@@ -6831,12 +7742,14 @@ static inline bool GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATU
     return i_data.getBit<TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_38>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_38 chip: %x, ec: %x",
+    FAPI_ERR("5:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_38 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_38]
 
+//>> SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_39]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_39(
     fapi2::buffer<uint64_t>& i_data,
     fapi2::buffer<uint64_t>& o_data)
@@ -6848,12 +7761,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_39 chip: %x, ec: %x",
+    FAPI_ERR("0:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_39 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_39]
 
+//>> SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_39]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_39(
     const uint64_t i_data,
     fapi2::buffer<uint64_t>& o_data)
@@ -6865,12 +7780,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_39 chip: %x, ec: %x",
+    FAPI_ERR("1:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_39 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_39]
 
+//>> SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_39]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_39(
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -6880,12 +7797,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_
     return o_data.setBit<TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_39>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_39 chip: %x, ec: %x",
+    FAPI_ERR("2:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_39 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_39]
 
+//>> CLEAR_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_39]
 static inline fapi2::buffer<uint64_t>& CLEAR_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_39(
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -6895,12 +7814,14 @@ static inline fapi2::buffer<uint64_t>& CLEAR_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST
     return o_data.clearBit<TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_39>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_39 chip: %x, ec: %x",
+    FAPI_ERR("3:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_39 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< CLEAR_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_39]
 
+//>> GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_39]
 static inline fapi2::buffer<uint64_t>& GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_39(
     fapi2::buffer<uint64_t>& i_data,
     uint64_t& o_data)
@@ -6912,12 +7833,14 @@ static inline fapi2::buffer<uint64_t>& GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_39 chip: %x, ec: %x",
+    FAPI_ERR("4:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_39 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_39]
 
+//>> GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_39]
 static inline bool GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_39(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
@@ -6926,12 +7849,14 @@ static inline bool GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATU
     return i_data.getBit<TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_39>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_39 chip: %x, ec: %x",
+    FAPI_ERR("5:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_39 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_39]
 
+//>> SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_40]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_40(
     fapi2::buffer<uint64_t>& i_data,
     fapi2::buffer<uint64_t>& o_data)
@@ -6943,12 +7868,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_40 chip: %x, ec: %x",
+    FAPI_ERR("0:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_40 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_40]
 
+//>> SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_40]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_40(
     const uint64_t i_data,
     fapi2::buffer<uint64_t>& o_data)
@@ -6960,12 +7887,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_40 chip: %x, ec: %x",
+    FAPI_ERR("1:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_40 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_40]
 
+//>> SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_40]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_40(
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -6975,12 +7904,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_
     return o_data.setBit<TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_40>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_40 chip: %x, ec: %x",
+    FAPI_ERR("2:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_40 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_40]
 
+//>> CLEAR_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_40]
 static inline fapi2::buffer<uint64_t>& CLEAR_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_40(
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -6990,12 +7921,14 @@ static inline fapi2::buffer<uint64_t>& CLEAR_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST
     return o_data.clearBit<TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_40>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_40 chip: %x, ec: %x",
+    FAPI_ERR("3:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_40 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< CLEAR_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_40]
 
+//>> GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_40]
 static inline fapi2::buffer<uint64_t>& GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_40(
     fapi2::buffer<uint64_t>& i_data,
     uint64_t& o_data)
@@ -7007,12 +7940,14 @@ static inline fapi2::buffer<uint64_t>& GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_40 chip: %x, ec: %x",
+    FAPI_ERR("4:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_40 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_40]
 
+//>> GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_40]
 static inline bool GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_40(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
@@ -7021,12 +7956,14 @@ static inline bool GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATU
     return i_data.getBit<TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_40>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_40 chip: %x, ec: %x",
+    FAPI_ERR("5:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_40 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_40]
 
+//>> SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_41]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_41(
     fapi2::buffer<uint64_t>& i_data,
     fapi2::buffer<uint64_t>& o_data)
@@ -7038,12 +7975,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_41 chip: %x, ec: %x",
+    FAPI_ERR("0:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_41 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_41]
 
+//>> SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_41]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_41(
     const uint64_t i_data,
     fapi2::buffer<uint64_t>& o_data)
@@ -7055,12 +7994,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_41 chip: %x, ec: %x",
+    FAPI_ERR("1:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_41 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_41]
 
+//>> SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_41]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_41(
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -7070,12 +8011,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_
     return o_data.setBit<TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_41>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_41 chip: %x, ec: %x",
+    FAPI_ERR("2:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_41 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_41]
 
+//>> CLEAR_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_41]
 static inline fapi2::buffer<uint64_t>& CLEAR_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_41(
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -7085,12 +8028,14 @@ static inline fapi2::buffer<uint64_t>& CLEAR_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST
     return o_data.clearBit<TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_41>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_41 chip: %x, ec: %x",
+    FAPI_ERR("3:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_41 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< CLEAR_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_41]
 
+//>> GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_41]
 static inline fapi2::buffer<uint64_t>& GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_41(
     fapi2::buffer<uint64_t>& i_data,
     uint64_t& o_data)
@@ -7102,12 +8047,14 @@ static inline fapi2::buffer<uint64_t>& GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_41 chip: %x, ec: %x",
+    FAPI_ERR("4:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_41 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_41]
 
+//>> GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_41]
 static inline bool GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_41(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
@@ -7116,12 +8063,14 @@ static inline bool GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATU
     return i_data.getBit<TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_41>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_41 chip: %x, ec: %x",
+    FAPI_ERR("5:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_41 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_41]
 
+//>> SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_42]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_42(
     fapi2::buffer<uint64_t>& i_data,
     fapi2::buffer<uint64_t>& o_data)
@@ -7133,12 +8082,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_42 chip: %x, ec: %x",
+    FAPI_ERR("0:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_42 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_42]
 
+//>> SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_42]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_42(
     const uint64_t i_data,
     fapi2::buffer<uint64_t>& o_data)
@@ -7150,12 +8101,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_42 chip: %x, ec: %x",
+    FAPI_ERR("1:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_42 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_42]
 
+//>> SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_42]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_42(
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -7165,12 +8118,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_
     return o_data.setBit<TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_42>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_42 chip: %x, ec: %x",
+    FAPI_ERR("2:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_42 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_42]
 
+//>> CLEAR_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_42]
 static inline fapi2::buffer<uint64_t>& CLEAR_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_42(
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -7180,12 +8135,14 @@ static inline fapi2::buffer<uint64_t>& CLEAR_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST
     return o_data.clearBit<TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_42>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_42 chip: %x, ec: %x",
+    FAPI_ERR("3:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_42 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< CLEAR_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_42]
 
+//>> GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_42]
 static inline fapi2::buffer<uint64_t>& GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_42(
     fapi2::buffer<uint64_t>& i_data,
     uint64_t& o_data)
@@ -7197,12 +8154,14 @@ static inline fapi2::buffer<uint64_t>& GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_42 chip: %x, ec: %x",
+    FAPI_ERR("4:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_42 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_42]
 
+//>> GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_42]
 static inline bool GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_42(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
@@ -7211,12 +8170,14 @@ static inline bool GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATU
     return i_data.getBit<TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_42>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_42 chip: %x, ec: %x",
+    FAPI_ERR("5:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_42 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_42]
 
+//>> SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_43]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_43(
     fapi2::buffer<uint64_t>& i_data,
     fapi2::buffer<uint64_t>& o_data)
@@ -7228,12 +8189,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_43 chip: %x, ec: %x",
+    FAPI_ERR("0:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_43 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_43]
 
+//>> SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_43]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_43(
     const uint64_t i_data,
     fapi2::buffer<uint64_t>& o_data)
@@ -7245,12 +8208,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_43 chip: %x, ec: %x",
+    FAPI_ERR("1:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_43 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_43]
 
+//>> SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_43]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_43(
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -7260,12 +8225,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_
     return o_data.setBit<TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_43>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_43 chip: %x, ec: %x",
+    FAPI_ERR("2:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_43 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_43]
 
+//>> CLEAR_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_43]
 static inline fapi2::buffer<uint64_t>& CLEAR_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_43(
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -7275,12 +8242,14 @@ static inline fapi2::buffer<uint64_t>& CLEAR_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST
     return o_data.clearBit<TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_43>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_43 chip: %x, ec: %x",
+    FAPI_ERR("3:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_43 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< CLEAR_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_43]
 
+//>> GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_43]
 static inline fapi2::buffer<uint64_t>& GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_43(
     fapi2::buffer<uint64_t>& i_data,
     uint64_t& o_data)
@@ -7292,12 +8261,14 @@ static inline fapi2::buffer<uint64_t>& GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_43 chip: %x, ec: %x",
+    FAPI_ERR("4:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_43 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_43]
 
+//>> GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_43]
 static inline bool GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_43(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
@@ -7306,12 +8277,14 @@ static inline bool GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATU
     return i_data.getBit<TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_43>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_43 chip: %x, ec: %x",
+    FAPI_ERR("5:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_43 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_43]
 
+//>> SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_44]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_44(
     fapi2::buffer<uint64_t>& i_data,
     fapi2::buffer<uint64_t>& o_data)
@@ -7323,12 +8296,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_44 chip: %x, ec: %x",
+    FAPI_ERR("0:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_44 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_44]
 
+//>> SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_44]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_44(
     const uint64_t i_data,
     fapi2::buffer<uint64_t>& o_data)
@@ -7340,12 +8315,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_44 chip: %x, ec: %x",
+    FAPI_ERR("1:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_44 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_44]
 
+//>> SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_44]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_44(
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -7355,12 +8332,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_
     return o_data.setBit<TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_44>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_44 chip: %x, ec: %x",
+    FAPI_ERR("2:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_44 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_44]
 
+//>> CLEAR_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_44]
 static inline fapi2::buffer<uint64_t>& CLEAR_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_44(
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -7370,12 +8349,14 @@ static inline fapi2::buffer<uint64_t>& CLEAR_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST
     return o_data.clearBit<TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_44>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_44 chip: %x, ec: %x",
+    FAPI_ERR("3:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_44 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< CLEAR_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_44]
 
+//>> GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_44]
 static inline fapi2::buffer<uint64_t>& GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_44(
     fapi2::buffer<uint64_t>& i_data,
     uint64_t& o_data)
@@ -7387,12 +8368,14 @@ static inline fapi2::buffer<uint64_t>& GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_44 chip: %x, ec: %x",
+    FAPI_ERR("4:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_44 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_44]
 
+//>> GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_44]
 static inline bool GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_44(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
@@ -7401,12 +8384,14 @@ static inline bool GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATU
     return i_data.getBit<TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_44>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_44 chip: %x, ec: %x",
+    FAPI_ERR("5:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_44 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_44]
 
+//>> SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_45]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_45(
     fapi2::buffer<uint64_t>& i_data,
     fapi2::buffer<uint64_t>& o_data)
@@ -7418,12 +8403,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_
            TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_45_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_45 chip: %x, ec: %x",
+    FAPI_ERR("0:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_45 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_45]
 
+//>> SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_45]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_45(
     const uint64_t i_data,
     fapi2::buffer<uint64_t>& o_data)
@@ -7435,12 +8422,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_
            TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_45_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_45 chip: %x, ec: %x",
+    FAPI_ERR("1:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_45 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_45]
 
+//>> GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_45]
 static inline fapi2::buffer<uint64_t>& GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_45(
     fapi2::buffer<uint64_t>& i_data,
     uint64_t& o_data)
@@ -7452,12 +8441,14 @@ static inline fapi2::buffer<uint64_t>& GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_
            TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_45_LEN>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_45 chip: %x, ec: %x",
+    FAPI_ERR("4:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_45 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_45]
 
+//>> SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_47]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_47(
     fapi2::buffer<uint64_t>& i_data,
     fapi2::buffer<uint64_t>& o_data)
@@ -7469,12 +8460,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_47 chip: %x, ec: %x",
+    FAPI_ERR("0:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_47 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_47]
 
+//>> SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_47]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_47(
     const uint64_t i_data,
     fapi2::buffer<uint64_t>& o_data)
@@ -7486,12 +8479,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_47 chip: %x, ec: %x",
+    FAPI_ERR("1:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_47 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_47]
 
+//>> SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_47]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_47(
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -7501,12 +8496,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_
     return o_data.setBit<TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_47>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_47 chip: %x, ec: %x",
+    FAPI_ERR("2:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_47 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_47]
 
+//>> CLEAR_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_47]
 static inline fapi2::buffer<uint64_t>& CLEAR_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_47(
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -7516,12 +8513,14 @@ static inline fapi2::buffer<uint64_t>& CLEAR_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST
     return o_data.clearBit<TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_47>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_47 chip: %x, ec: %x",
+    FAPI_ERR("3:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_47 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< CLEAR_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_47]
 
+//>> GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_47]
 static inline fapi2::buffer<uint64_t>& GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_47(
     fapi2::buffer<uint64_t>& i_data,
     uint64_t& o_data)
@@ -7533,12 +8532,14 @@ static inline fapi2::buffer<uint64_t>& GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_47 chip: %x, ec: %x",
+    FAPI_ERR("4:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_47 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_47]
 
+//>> GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_47]
 static inline bool GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_47(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
@@ -7547,12 +8548,14 @@ static inline bool GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATU
     return i_data.getBit<TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_47>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_47 chip: %x, ec: %x",
+    FAPI_ERR("5:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_47 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_47]
 
+//>> SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_48]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_48(
     fapi2::buffer<uint64_t>& i_data,
     fapi2::buffer<uint64_t>& o_data)
@@ -7564,12 +8567,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_
            TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_48_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_48 chip: %x, ec: %x",
+    FAPI_ERR("0:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_48 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_48]
 
+//>> SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_48]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_48(
     const uint64_t i_data,
     fapi2::buffer<uint64_t>& o_data)
@@ -7581,12 +8586,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_
            TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_48_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_48 chip: %x, ec: %x",
+    FAPI_ERR("1:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_48 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_48]
 
+//>> GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_48]
 static inline fapi2::buffer<uint64_t>& GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_48(
     fapi2::buffer<uint64_t>& i_data,
     uint64_t& o_data)
@@ -7598,12 +8605,14 @@ static inline fapi2::buffer<uint64_t>& GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_
            TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_48_LEN>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_48 chip: %x, ec: %x",
+    FAPI_ERR("4:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_48 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_48]
 
+//>> SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_50]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_50(
     fapi2::buffer<uint64_t>& i_data,
     fapi2::buffer<uint64_t>& o_data)
@@ -7615,12 +8624,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_50 chip: %x, ec: %x",
+    FAPI_ERR("0:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_50 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_50]
 
+//>> SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_50]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_50(
     const uint64_t i_data,
     fapi2::buffer<uint64_t>& o_data)
@@ -7632,12 +8643,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_50 chip: %x, ec: %x",
+    FAPI_ERR("1:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_50 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_50]
 
+//>> SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_50]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_50(
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -7647,12 +8660,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_
     return o_data.setBit<TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_50>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_50 chip: %x, ec: %x",
+    FAPI_ERR("2:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_50 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_50]
 
+//>> CLEAR_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_50]
 static inline fapi2::buffer<uint64_t>& CLEAR_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_50(
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -7662,12 +8677,14 @@ static inline fapi2::buffer<uint64_t>& CLEAR_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST
     return o_data.clearBit<TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_50>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_50 chip: %x, ec: %x",
+    FAPI_ERR("3:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_50 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< CLEAR_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_50]
 
+//>> GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_50]
 static inline fapi2::buffer<uint64_t>& GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_50(
     fapi2::buffer<uint64_t>& i_data,
     uint64_t& o_data)
@@ -7679,12 +8696,14 @@ static inline fapi2::buffer<uint64_t>& GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_50 chip: %x, ec: %x",
+    FAPI_ERR("4:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_50 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_50]
 
+//>> GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_50]
 static inline bool GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_50(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
@@ -7693,12 +8712,14 @@ static inline bool GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATU
     return i_data.getBit<TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_50>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_50 chip: %x, ec: %x",
+    FAPI_ERR("5:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_50 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_50]
 
+//>> SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_51]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_51(
     fapi2::buffer<uint64_t>& i_data,
     fapi2::buffer<uint64_t>& o_data)
@@ -7710,12 +8731,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_51 chip: %x, ec: %x",
+    FAPI_ERR("0:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_51 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_51]
 
+//>> SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_51]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_51(
     const uint64_t i_data,
     fapi2::buffer<uint64_t>& o_data)
@@ -7727,12 +8750,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_51 chip: %x, ec: %x",
+    FAPI_ERR("1:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_51 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_51]
 
+//>> SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_51]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_51(
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -7742,12 +8767,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_
     return o_data.setBit<TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_51>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_51 chip: %x, ec: %x",
+    FAPI_ERR("2:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_51 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_51]
 
+//>> CLEAR_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_51]
 static inline fapi2::buffer<uint64_t>& CLEAR_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_51(
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -7757,12 +8784,14 @@ static inline fapi2::buffer<uint64_t>& CLEAR_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST
     return o_data.clearBit<TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_51>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_51 chip: %x, ec: %x",
+    FAPI_ERR("3:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_51 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< CLEAR_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_51]
 
+//>> GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_51]
 static inline fapi2::buffer<uint64_t>& GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_51(
     fapi2::buffer<uint64_t>& i_data,
     uint64_t& o_data)
@@ -7774,12 +8803,14 @@ static inline fapi2::buffer<uint64_t>& GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_51 chip: %x, ec: %x",
+    FAPI_ERR("4:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_51 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_51]
 
+//>> GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_51]
 static inline bool GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_51(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
@@ -7788,12 +8819,14 @@ static inline bool GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATU
     return i_data.getBit<TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_51>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_51 chip: %x, ec: %x",
+    FAPI_ERR("5:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_51 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_51]
 
+//>> SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_52]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_52(
     fapi2::buffer<uint64_t>& i_data,
     fapi2::buffer<uint64_t>& o_data)
@@ -7805,12 +8838,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_
            TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_52_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_52 chip: %x, ec: %x",
+    FAPI_ERR("0:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_52 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_52]
 
+//>> SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_52]
 static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_52(
     const uint64_t i_data,
     fapi2::buffer<uint64_t>& o_data)
@@ -7822,12 +8857,14 @@ static inline fapi2::buffer<uint64_t>& SET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_
            TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_52_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_52 chip: %x, ec: %x",
+    FAPI_ERR("1:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_52 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_52]
 
+//>> GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_52]
 static inline fapi2::buffer<uint64_t>& GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_52(
     fapi2::buffer<uint64_t>& i_data,
     uint64_t& o_data)
@@ -7839,12 +8876,14 @@ static inline fapi2::buffer<uint64_t>& GET_TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_
            TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_52_LEN>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_52 chip: %x, ec: %x",
+    FAPI_ERR("4:scom_proc Invalid dial access TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_52 chip: %x, ec: %x",
              scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[TP_TPVSB_FSI_W_SPIMC_SPI_PIB_SPIMST2_STATUS_REG_SPI_STATUS_52]
 
+//>> PREP_[VAS_VA_EG_SCF_PBCFG1]
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
 static inline fapi2::ReturnCode PREP_VAS_VA_EG_SCF_PBCFG1(const fapi2::Target<K, M, V>& i_target)
 {
@@ -7858,7 +8897,9 @@ fapi_try_exit:
     return fapi2::current_err;
 #endif
 }
+//<< PREP_[VAS_VA_EG_SCF_PBCFG1]
 
+//>> GET_[VAS_VA_EG_SCF_PBCFG1]
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
 static inline fapi2::ReturnCode GET_VAS_VA_EG_SCF_PBCFG1(const fapi2::Target<K, M, V>& i_target,
         fapi2::buffer<uint64_t>& o_data)
@@ -7873,7 +8914,9 @@ fapi_try_exit:
     return fapi2::current_err;
 #endif
 }
+//<< GET_[VAS_VA_EG_SCF_PBCFG1]
 
+//>> PUT_[VAS_VA_EG_SCF_PBCFG1]
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
 static inline fapi2::ReturnCode PUT_VAS_VA_EG_SCF_PBCFG1(const fapi2::Target<K, M, V>& i_target, const uint64_t i_data)
 {
@@ -7887,8 +8930,10 @@ fapi_try_exit:
     return fapi2::current_err;
 #endif
 }
+//<< PUT_[VAS_VA_EG_SCF_PBCFG1]
 
 
+//>> SET_[VAS_VA_EG_SCF_PBCFG1_DISABLE_LN_WR]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_EG_SCF_PBCFG1_DISABLE_LN_WR(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
@@ -7899,11 +8944,13 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_EG_SCF_PBCFG1_DISABLE_LN_WR(fa
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_EG_SCF_PBCFG1_DISABLE_LN_WR chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("0:scom_proc Invalid dial access VAS_VA_EG_SCF_PBCFG1_DISABLE_LN_WR chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_EG_SCF_PBCFG1_DISABLE_LN_WR]
 
+//>> SET_[VAS_VA_EG_SCF_PBCFG1_DISABLE_LN_WR]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_EG_SCF_PBCFG1_DISABLE_LN_WR(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
@@ -7914,11 +8961,13 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_EG_SCF_PBCFG1_DISABLE_LN_WR(co
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_EG_SCF_PBCFG1_DISABLE_LN_WR chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("1:scom_proc Invalid dial access VAS_VA_EG_SCF_PBCFG1_DISABLE_LN_WR chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_EG_SCF_PBCFG1_DISABLE_LN_WR]
 
+//>> SET_[VAS_VA_EG_SCF_PBCFG1_DISABLE_LN_WR]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_EG_SCF_PBCFG1_DISABLE_LN_WR(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
@@ -7927,11 +8976,13 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_EG_SCF_PBCFG1_DISABLE_LN_WR(fa
     return o_data.setBit<VAS_VA_EG_SCF_PBCFG1_DISABLE_LN_WR>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_EG_SCF_PBCFG1_DISABLE_LN_WR chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("2:scom_proc Invalid dial access VAS_VA_EG_SCF_PBCFG1_DISABLE_LN_WR chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_EG_SCF_PBCFG1_DISABLE_LN_WR]
 
+//>> CLEAR_[VAS_VA_EG_SCF_PBCFG1_DISABLE_LN_WR]
 static inline fapi2::buffer<uint64_t>& CLEAR_VAS_VA_EG_SCF_PBCFG1_DISABLE_LN_WR(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
@@ -7940,11 +8991,13 @@ static inline fapi2::buffer<uint64_t>& CLEAR_VAS_VA_EG_SCF_PBCFG1_DISABLE_LN_WR(
     return o_data.clearBit<VAS_VA_EG_SCF_PBCFG1_DISABLE_LN_WR>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_EG_SCF_PBCFG1_DISABLE_LN_WR chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("3:scom_proc Invalid dial access VAS_VA_EG_SCF_PBCFG1_DISABLE_LN_WR chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< CLEAR_[VAS_VA_EG_SCF_PBCFG1_DISABLE_LN_WR]
 
+//>> GET_[VAS_VA_EG_SCF_PBCFG1_DISABLE_LN_WR]
 static inline fapi2::buffer<uint64_t>& GET_VAS_VA_EG_SCF_PBCFG1_DISABLE_LN_WR(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
@@ -7955,11 +9008,13 @@ static inline fapi2::buffer<uint64_t>& GET_VAS_VA_EG_SCF_PBCFG1_DISABLE_LN_WR(fa
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_EG_SCF_PBCFG1_DISABLE_LN_WR chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("4:scom_proc Invalid dial access VAS_VA_EG_SCF_PBCFG1_DISABLE_LN_WR chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[VAS_VA_EG_SCF_PBCFG1_DISABLE_LN_WR]
 
+//>> GET_[VAS_VA_EG_SCF_PBCFG1_DISABLE_LN_WR]
 static inline bool GET_VAS_VA_EG_SCF_PBCFG1_DISABLE_LN_WR(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
@@ -7968,11 +9023,13 @@ static inline bool GET_VAS_VA_EG_SCF_PBCFG1_DISABLE_LN_WR(fapi2::buffer<uint64_t
     return i_data.getBit<VAS_VA_EG_SCF_PBCFG1_DISABLE_LN_WR>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_EG_SCF_PBCFG1_DISABLE_LN_WR chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("5:scom_proc Invalid dial access VAS_VA_EG_SCF_PBCFG1_DISABLE_LN_WR chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[VAS_VA_EG_SCF_PBCFG1_DISABLE_LN_WR]
 
+//>> SET_[VAS_VA_EG_SCF_PBCFG1_DISABLE_G_WR]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_EG_SCF_PBCFG1_DISABLE_G_WR(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
@@ -7983,11 +9040,13 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_EG_SCF_PBCFG1_DISABLE_G_WR(fap
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_EG_SCF_PBCFG1_DISABLE_G_WR chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("0:scom_proc Invalid dial access VAS_VA_EG_SCF_PBCFG1_DISABLE_G_WR chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_EG_SCF_PBCFG1_DISABLE_G_WR]
 
+//>> SET_[VAS_VA_EG_SCF_PBCFG1_DISABLE_G_WR]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_EG_SCF_PBCFG1_DISABLE_G_WR(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
@@ -7998,11 +9057,13 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_EG_SCF_PBCFG1_DISABLE_G_WR(con
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_EG_SCF_PBCFG1_DISABLE_G_WR chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("1:scom_proc Invalid dial access VAS_VA_EG_SCF_PBCFG1_DISABLE_G_WR chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_EG_SCF_PBCFG1_DISABLE_G_WR]
 
+//>> SET_[VAS_VA_EG_SCF_PBCFG1_DISABLE_G_WR]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_EG_SCF_PBCFG1_DISABLE_G_WR(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
@@ -8011,11 +9072,13 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_EG_SCF_PBCFG1_DISABLE_G_WR(fap
     return o_data.setBit<VAS_VA_EG_SCF_PBCFG1_DISABLE_G_WR>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_EG_SCF_PBCFG1_DISABLE_G_WR chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("2:scom_proc Invalid dial access VAS_VA_EG_SCF_PBCFG1_DISABLE_G_WR chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_EG_SCF_PBCFG1_DISABLE_G_WR]
 
+//>> CLEAR_[VAS_VA_EG_SCF_PBCFG1_DISABLE_G_WR]
 static inline fapi2::buffer<uint64_t>& CLEAR_VAS_VA_EG_SCF_PBCFG1_DISABLE_G_WR(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
@@ -8024,11 +9087,13 @@ static inline fapi2::buffer<uint64_t>& CLEAR_VAS_VA_EG_SCF_PBCFG1_DISABLE_G_WR(f
     return o_data.clearBit<VAS_VA_EG_SCF_PBCFG1_DISABLE_G_WR>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_EG_SCF_PBCFG1_DISABLE_G_WR chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("3:scom_proc Invalid dial access VAS_VA_EG_SCF_PBCFG1_DISABLE_G_WR chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< CLEAR_[VAS_VA_EG_SCF_PBCFG1_DISABLE_G_WR]
 
+//>> GET_[VAS_VA_EG_SCF_PBCFG1_DISABLE_G_WR]
 static inline fapi2::buffer<uint64_t>& GET_VAS_VA_EG_SCF_PBCFG1_DISABLE_G_WR(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
@@ -8039,11 +9104,13 @@ static inline fapi2::buffer<uint64_t>& GET_VAS_VA_EG_SCF_PBCFG1_DISABLE_G_WR(fap
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_EG_SCF_PBCFG1_DISABLE_G_WR chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("4:scom_proc Invalid dial access VAS_VA_EG_SCF_PBCFG1_DISABLE_G_WR chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[VAS_VA_EG_SCF_PBCFG1_DISABLE_G_WR]
 
+//>> GET_[VAS_VA_EG_SCF_PBCFG1_DISABLE_G_WR]
 static inline bool GET_VAS_VA_EG_SCF_PBCFG1_DISABLE_G_WR(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
@@ -8052,11 +9119,13 @@ static inline bool GET_VAS_VA_EG_SCF_PBCFG1_DISABLE_G_WR(fapi2::buffer<uint64_t>
     return i_data.getBit<VAS_VA_EG_SCF_PBCFG1_DISABLE_G_WR>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_EG_SCF_PBCFG1_DISABLE_G_WR chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("5:scom_proc Invalid dial access VAS_VA_EG_SCF_PBCFG1_DISABLE_G_WR chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[VAS_VA_EG_SCF_PBCFG1_DISABLE_G_WR]
 
+//>> SET_[VAS_VA_EG_SCF_PBCFG1_DISABLE_VG_WR]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_EG_SCF_PBCFG1_DISABLE_VG_WR(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
@@ -8067,11 +9136,13 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_EG_SCF_PBCFG1_DISABLE_VG_WR(fa
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_EG_SCF_PBCFG1_DISABLE_VG_WR chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("0:scom_proc Invalid dial access VAS_VA_EG_SCF_PBCFG1_DISABLE_VG_WR chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_EG_SCF_PBCFG1_DISABLE_VG_WR]
 
+//>> SET_[VAS_VA_EG_SCF_PBCFG1_DISABLE_VG_WR]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_EG_SCF_PBCFG1_DISABLE_VG_WR(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
@@ -8082,11 +9153,13 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_EG_SCF_PBCFG1_DISABLE_VG_WR(co
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_EG_SCF_PBCFG1_DISABLE_VG_WR chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("1:scom_proc Invalid dial access VAS_VA_EG_SCF_PBCFG1_DISABLE_VG_WR chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_EG_SCF_PBCFG1_DISABLE_VG_WR]
 
+//>> SET_[VAS_VA_EG_SCF_PBCFG1_DISABLE_VG_WR]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_EG_SCF_PBCFG1_DISABLE_VG_WR(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
@@ -8095,11 +9168,13 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_EG_SCF_PBCFG1_DISABLE_VG_WR(fa
     return o_data.setBit<VAS_VA_EG_SCF_PBCFG1_DISABLE_VG_WR>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_EG_SCF_PBCFG1_DISABLE_VG_WR chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("2:scom_proc Invalid dial access VAS_VA_EG_SCF_PBCFG1_DISABLE_VG_WR chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_EG_SCF_PBCFG1_DISABLE_VG_WR]
 
+//>> CLEAR_[VAS_VA_EG_SCF_PBCFG1_DISABLE_VG_WR]
 static inline fapi2::buffer<uint64_t>& CLEAR_VAS_VA_EG_SCF_PBCFG1_DISABLE_VG_WR(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
@@ -8108,11 +9183,13 @@ static inline fapi2::buffer<uint64_t>& CLEAR_VAS_VA_EG_SCF_PBCFG1_DISABLE_VG_WR(
     return o_data.clearBit<VAS_VA_EG_SCF_PBCFG1_DISABLE_VG_WR>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_EG_SCF_PBCFG1_DISABLE_VG_WR chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("3:scom_proc Invalid dial access VAS_VA_EG_SCF_PBCFG1_DISABLE_VG_WR chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< CLEAR_[VAS_VA_EG_SCF_PBCFG1_DISABLE_VG_WR]
 
+//>> GET_[VAS_VA_EG_SCF_PBCFG1_DISABLE_VG_WR]
 static inline fapi2::buffer<uint64_t>& GET_VAS_VA_EG_SCF_PBCFG1_DISABLE_VG_WR(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
@@ -8123,11 +9200,13 @@ static inline fapi2::buffer<uint64_t>& GET_VAS_VA_EG_SCF_PBCFG1_DISABLE_VG_WR(fa
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_EG_SCF_PBCFG1_DISABLE_VG_WR chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("4:scom_proc Invalid dial access VAS_VA_EG_SCF_PBCFG1_DISABLE_VG_WR chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[VAS_VA_EG_SCF_PBCFG1_DISABLE_VG_WR]
 
+//>> GET_[VAS_VA_EG_SCF_PBCFG1_DISABLE_VG_WR]
 static inline bool GET_VAS_VA_EG_SCF_PBCFG1_DISABLE_VG_WR(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
@@ -8136,11 +9215,13 @@ static inline bool GET_VAS_VA_EG_SCF_PBCFG1_DISABLE_VG_WR(fapi2::buffer<uint64_t
     return i_data.getBit<VAS_VA_EG_SCF_PBCFG1_DISABLE_VG_WR>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_EG_SCF_PBCFG1_DISABLE_VG_WR chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("5:scom_proc Invalid dial access VAS_VA_EG_SCF_PBCFG1_DISABLE_VG_WR chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[VAS_VA_EG_SCF_PBCFG1_DISABLE_VG_WR]
 
+//>> SET_[VAS_VA_EG_SCF_PBCFG1_DISABLE_NN_WR]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_EG_SCF_PBCFG1_DISABLE_NN_WR(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
@@ -8151,11 +9232,13 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_EG_SCF_PBCFG1_DISABLE_NN_WR(fa
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_EG_SCF_PBCFG1_DISABLE_NN_WR chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("0:scom_proc Invalid dial access VAS_VA_EG_SCF_PBCFG1_DISABLE_NN_WR chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_EG_SCF_PBCFG1_DISABLE_NN_WR]
 
+//>> SET_[VAS_VA_EG_SCF_PBCFG1_DISABLE_NN_WR]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_EG_SCF_PBCFG1_DISABLE_NN_WR(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
@@ -8166,11 +9249,13 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_EG_SCF_PBCFG1_DISABLE_NN_WR(co
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_EG_SCF_PBCFG1_DISABLE_NN_WR chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("1:scom_proc Invalid dial access VAS_VA_EG_SCF_PBCFG1_DISABLE_NN_WR chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_EG_SCF_PBCFG1_DISABLE_NN_WR]
 
+//>> SET_[VAS_VA_EG_SCF_PBCFG1_DISABLE_NN_WR]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_EG_SCF_PBCFG1_DISABLE_NN_WR(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
@@ -8179,11 +9264,13 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_EG_SCF_PBCFG1_DISABLE_NN_WR(fa
     return o_data.setBit<VAS_VA_EG_SCF_PBCFG1_DISABLE_NN_WR>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_EG_SCF_PBCFG1_DISABLE_NN_WR chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("2:scom_proc Invalid dial access VAS_VA_EG_SCF_PBCFG1_DISABLE_NN_WR chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_EG_SCF_PBCFG1_DISABLE_NN_WR]
 
+//>> CLEAR_[VAS_VA_EG_SCF_PBCFG1_DISABLE_NN_WR]
 static inline fapi2::buffer<uint64_t>& CLEAR_VAS_VA_EG_SCF_PBCFG1_DISABLE_NN_WR(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
@@ -8192,11 +9279,13 @@ static inline fapi2::buffer<uint64_t>& CLEAR_VAS_VA_EG_SCF_PBCFG1_DISABLE_NN_WR(
     return o_data.clearBit<VAS_VA_EG_SCF_PBCFG1_DISABLE_NN_WR>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_EG_SCF_PBCFG1_DISABLE_NN_WR chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("3:scom_proc Invalid dial access VAS_VA_EG_SCF_PBCFG1_DISABLE_NN_WR chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< CLEAR_[VAS_VA_EG_SCF_PBCFG1_DISABLE_NN_WR]
 
+//>> GET_[VAS_VA_EG_SCF_PBCFG1_DISABLE_NN_WR]
 static inline fapi2::buffer<uint64_t>& GET_VAS_VA_EG_SCF_PBCFG1_DISABLE_NN_WR(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
@@ -8207,11 +9296,13 @@ static inline fapi2::buffer<uint64_t>& GET_VAS_VA_EG_SCF_PBCFG1_DISABLE_NN_WR(fa
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_EG_SCF_PBCFG1_DISABLE_NN_WR chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("4:scom_proc Invalid dial access VAS_VA_EG_SCF_PBCFG1_DISABLE_NN_WR chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[VAS_VA_EG_SCF_PBCFG1_DISABLE_NN_WR]
 
+//>> GET_[VAS_VA_EG_SCF_PBCFG1_DISABLE_NN_WR]
 static inline bool GET_VAS_VA_EG_SCF_PBCFG1_DISABLE_NN_WR(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
@@ -8220,11 +9311,13 @@ static inline bool GET_VAS_VA_EG_SCF_PBCFG1_DISABLE_NN_WR(fapi2::buffer<uint64_t
     return i_data.getBit<VAS_VA_EG_SCF_PBCFG1_DISABLE_NN_WR>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_EG_SCF_PBCFG1_DISABLE_NN_WR chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("5:scom_proc Invalid dial access VAS_VA_EG_SCF_PBCFG1_DISABLE_NN_WR chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[VAS_VA_EG_SCF_PBCFG1_DISABLE_NN_WR]
 
+//>> SET_[VAS_VA_EG_SCF_PBCFG1_DISABLE_LN_RD]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_EG_SCF_PBCFG1_DISABLE_LN_RD(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
@@ -8235,11 +9328,13 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_EG_SCF_PBCFG1_DISABLE_LN_RD(fa
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_EG_SCF_PBCFG1_DISABLE_LN_RD chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("0:scom_proc Invalid dial access VAS_VA_EG_SCF_PBCFG1_DISABLE_LN_RD chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_EG_SCF_PBCFG1_DISABLE_LN_RD]
 
+//>> SET_[VAS_VA_EG_SCF_PBCFG1_DISABLE_LN_RD]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_EG_SCF_PBCFG1_DISABLE_LN_RD(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
@@ -8250,11 +9345,13 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_EG_SCF_PBCFG1_DISABLE_LN_RD(co
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_EG_SCF_PBCFG1_DISABLE_LN_RD chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("1:scom_proc Invalid dial access VAS_VA_EG_SCF_PBCFG1_DISABLE_LN_RD chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_EG_SCF_PBCFG1_DISABLE_LN_RD]
 
+//>> SET_[VAS_VA_EG_SCF_PBCFG1_DISABLE_LN_RD]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_EG_SCF_PBCFG1_DISABLE_LN_RD(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
@@ -8263,11 +9360,13 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_EG_SCF_PBCFG1_DISABLE_LN_RD(fa
     return o_data.setBit<VAS_VA_EG_SCF_PBCFG1_DISABLE_LN_RD>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_EG_SCF_PBCFG1_DISABLE_LN_RD chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("2:scom_proc Invalid dial access VAS_VA_EG_SCF_PBCFG1_DISABLE_LN_RD chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_EG_SCF_PBCFG1_DISABLE_LN_RD]
 
+//>> CLEAR_[VAS_VA_EG_SCF_PBCFG1_DISABLE_LN_RD]
 static inline fapi2::buffer<uint64_t>& CLEAR_VAS_VA_EG_SCF_PBCFG1_DISABLE_LN_RD(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
@@ -8276,11 +9375,13 @@ static inline fapi2::buffer<uint64_t>& CLEAR_VAS_VA_EG_SCF_PBCFG1_DISABLE_LN_RD(
     return o_data.clearBit<VAS_VA_EG_SCF_PBCFG1_DISABLE_LN_RD>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_EG_SCF_PBCFG1_DISABLE_LN_RD chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("3:scom_proc Invalid dial access VAS_VA_EG_SCF_PBCFG1_DISABLE_LN_RD chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< CLEAR_[VAS_VA_EG_SCF_PBCFG1_DISABLE_LN_RD]
 
+//>> GET_[VAS_VA_EG_SCF_PBCFG1_DISABLE_LN_RD]
 static inline fapi2::buffer<uint64_t>& GET_VAS_VA_EG_SCF_PBCFG1_DISABLE_LN_RD(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
@@ -8291,11 +9392,13 @@ static inline fapi2::buffer<uint64_t>& GET_VAS_VA_EG_SCF_PBCFG1_DISABLE_LN_RD(fa
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_EG_SCF_PBCFG1_DISABLE_LN_RD chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("4:scom_proc Invalid dial access VAS_VA_EG_SCF_PBCFG1_DISABLE_LN_RD chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[VAS_VA_EG_SCF_PBCFG1_DISABLE_LN_RD]
 
+//>> GET_[VAS_VA_EG_SCF_PBCFG1_DISABLE_LN_RD]
 static inline bool GET_VAS_VA_EG_SCF_PBCFG1_DISABLE_LN_RD(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
@@ -8304,11 +9407,13 @@ static inline bool GET_VAS_VA_EG_SCF_PBCFG1_DISABLE_LN_RD(fapi2::buffer<uint64_t
     return i_data.getBit<VAS_VA_EG_SCF_PBCFG1_DISABLE_LN_RD>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_EG_SCF_PBCFG1_DISABLE_LN_RD chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("5:scom_proc Invalid dial access VAS_VA_EG_SCF_PBCFG1_DISABLE_LN_RD chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[VAS_VA_EG_SCF_PBCFG1_DISABLE_LN_RD]
 
+//>> SET_[VAS_VA_EG_SCF_PBCFG1_DISABLE_G_RD]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_EG_SCF_PBCFG1_DISABLE_G_RD(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
@@ -8319,11 +9424,13 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_EG_SCF_PBCFG1_DISABLE_G_RD(fap
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_EG_SCF_PBCFG1_DISABLE_G_RD chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("0:scom_proc Invalid dial access VAS_VA_EG_SCF_PBCFG1_DISABLE_G_RD chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_EG_SCF_PBCFG1_DISABLE_G_RD]
 
+//>> SET_[VAS_VA_EG_SCF_PBCFG1_DISABLE_G_RD]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_EG_SCF_PBCFG1_DISABLE_G_RD(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
@@ -8334,11 +9441,13 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_EG_SCF_PBCFG1_DISABLE_G_RD(con
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_EG_SCF_PBCFG1_DISABLE_G_RD chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("1:scom_proc Invalid dial access VAS_VA_EG_SCF_PBCFG1_DISABLE_G_RD chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_EG_SCF_PBCFG1_DISABLE_G_RD]
 
+//>> SET_[VAS_VA_EG_SCF_PBCFG1_DISABLE_G_RD]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_EG_SCF_PBCFG1_DISABLE_G_RD(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
@@ -8347,11 +9456,13 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_EG_SCF_PBCFG1_DISABLE_G_RD(fap
     return o_data.setBit<VAS_VA_EG_SCF_PBCFG1_DISABLE_G_RD>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_EG_SCF_PBCFG1_DISABLE_G_RD chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("2:scom_proc Invalid dial access VAS_VA_EG_SCF_PBCFG1_DISABLE_G_RD chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_EG_SCF_PBCFG1_DISABLE_G_RD]
 
+//>> CLEAR_[VAS_VA_EG_SCF_PBCFG1_DISABLE_G_RD]
 static inline fapi2::buffer<uint64_t>& CLEAR_VAS_VA_EG_SCF_PBCFG1_DISABLE_G_RD(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
@@ -8360,11 +9471,13 @@ static inline fapi2::buffer<uint64_t>& CLEAR_VAS_VA_EG_SCF_PBCFG1_DISABLE_G_RD(f
     return o_data.clearBit<VAS_VA_EG_SCF_PBCFG1_DISABLE_G_RD>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_EG_SCF_PBCFG1_DISABLE_G_RD chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("3:scom_proc Invalid dial access VAS_VA_EG_SCF_PBCFG1_DISABLE_G_RD chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< CLEAR_[VAS_VA_EG_SCF_PBCFG1_DISABLE_G_RD]
 
+//>> GET_[VAS_VA_EG_SCF_PBCFG1_DISABLE_G_RD]
 static inline fapi2::buffer<uint64_t>& GET_VAS_VA_EG_SCF_PBCFG1_DISABLE_G_RD(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
@@ -8375,11 +9488,13 @@ static inline fapi2::buffer<uint64_t>& GET_VAS_VA_EG_SCF_PBCFG1_DISABLE_G_RD(fap
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_EG_SCF_PBCFG1_DISABLE_G_RD chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("4:scom_proc Invalid dial access VAS_VA_EG_SCF_PBCFG1_DISABLE_G_RD chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[VAS_VA_EG_SCF_PBCFG1_DISABLE_G_RD]
 
+//>> GET_[VAS_VA_EG_SCF_PBCFG1_DISABLE_G_RD]
 static inline bool GET_VAS_VA_EG_SCF_PBCFG1_DISABLE_G_RD(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
@@ -8388,11 +9503,13 @@ static inline bool GET_VAS_VA_EG_SCF_PBCFG1_DISABLE_G_RD(fapi2::buffer<uint64_t>
     return i_data.getBit<VAS_VA_EG_SCF_PBCFG1_DISABLE_G_RD>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_EG_SCF_PBCFG1_DISABLE_G_RD chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("5:scom_proc Invalid dial access VAS_VA_EG_SCF_PBCFG1_DISABLE_G_RD chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[VAS_VA_EG_SCF_PBCFG1_DISABLE_G_RD]
 
+//>> SET_[VAS_VA_EG_SCF_PBCFG1_DISABLE_VG_RD]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_EG_SCF_PBCFG1_DISABLE_VG_RD(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
@@ -8403,11 +9520,13 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_EG_SCF_PBCFG1_DISABLE_VG_RD(fa
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_EG_SCF_PBCFG1_DISABLE_VG_RD chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("0:scom_proc Invalid dial access VAS_VA_EG_SCF_PBCFG1_DISABLE_VG_RD chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_EG_SCF_PBCFG1_DISABLE_VG_RD]
 
+//>> SET_[VAS_VA_EG_SCF_PBCFG1_DISABLE_VG_RD]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_EG_SCF_PBCFG1_DISABLE_VG_RD(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
@@ -8418,11 +9537,13 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_EG_SCF_PBCFG1_DISABLE_VG_RD(co
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_EG_SCF_PBCFG1_DISABLE_VG_RD chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("1:scom_proc Invalid dial access VAS_VA_EG_SCF_PBCFG1_DISABLE_VG_RD chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_EG_SCF_PBCFG1_DISABLE_VG_RD]
 
+//>> SET_[VAS_VA_EG_SCF_PBCFG1_DISABLE_VG_RD]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_EG_SCF_PBCFG1_DISABLE_VG_RD(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
@@ -8431,11 +9552,13 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_EG_SCF_PBCFG1_DISABLE_VG_RD(fa
     return o_data.setBit<VAS_VA_EG_SCF_PBCFG1_DISABLE_VG_RD>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_EG_SCF_PBCFG1_DISABLE_VG_RD chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("2:scom_proc Invalid dial access VAS_VA_EG_SCF_PBCFG1_DISABLE_VG_RD chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_EG_SCF_PBCFG1_DISABLE_VG_RD]
 
+//>> CLEAR_[VAS_VA_EG_SCF_PBCFG1_DISABLE_VG_RD]
 static inline fapi2::buffer<uint64_t>& CLEAR_VAS_VA_EG_SCF_PBCFG1_DISABLE_VG_RD(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
@@ -8444,11 +9567,13 @@ static inline fapi2::buffer<uint64_t>& CLEAR_VAS_VA_EG_SCF_PBCFG1_DISABLE_VG_RD(
     return o_data.clearBit<VAS_VA_EG_SCF_PBCFG1_DISABLE_VG_RD>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_EG_SCF_PBCFG1_DISABLE_VG_RD chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("3:scom_proc Invalid dial access VAS_VA_EG_SCF_PBCFG1_DISABLE_VG_RD chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< CLEAR_[VAS_VA_EG_SCF_PBCFG1_DISABLE_VG_RD]
 
+//>> GET_[VAS_VA_EG_SCF_PBCFG1_DISABLE_VG_RD]
 static inline fapi2::buffer<uint64_t>& GET_VAS_VA_EG_SCF_PBCFG1_DISABLE_VG_RD(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
@@ -8459,11 +9584,13 @@ static inline fapi2::buffer<uint64_t>& GET_VAS_VA_EG_SCF_PBCFG1_DISABLE_VG_RD(fa
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_EG_SCF_PBCFG1_DISABLE_VG_RD chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("4:scom_proc Invalid dial access VAS_VA_EG_SCF_PBCFG1_DISABLE_VG_RD chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[VAS_VA_EG_SCF_PBCFG1_DISABLE_VG_RD]
 
+//>> GET_[VAS_VA_EG_SCF_PBCFG1_DISABLE_VG_RD]
 static inline bool GET_VAS_VA_EG_SCF_PBCFG1_DISABLE_VG_RD(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
@@ -8472,11 +9599,13 @@ static inline bool GET_VAS_VA_EG_SCF_PBCFG1_DISABLE_VG_RD(fapi2::buffer<uint64_t
     return i_data.getBit<VAS_VA_EG_SCF_PBCFG1_DISABLE_VG_RD>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_EG_SCF_PBCFG1_DISABLE_VG_RD chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("5:scom_proc Invalid dial access VAS_VA_EG_SCF_PBCFG1_DISABLE_VG_RD chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[VAS_VA_EG_SCF_PBCFG1_DISABLE_VG_RD]
 
+//>> SET_[VAS_VA_EG_SCF_PBCFG1_DISABLE_NN_RD]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_EG_SCF_PBCFG1_DISABLE_NN_RD(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
@@ -8487,11 +9616,13 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_EG_SCF_PBCFG1_DISABLE_NN_RD(fa
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_EG_SCF_PBCFG1_DISABLE_NN_RD chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("0:scom_proc Invalid dial access VAS_VA_EG_SCF_PBCFG1_DISABLE_NN_RD chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_EG_SCF_PBCFG1_DISABLE_NN_RD]
 
+//>> SET_[VAS_VA_EG_SCF_PBCFG1_DISABLE_NN_RD]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_EG_SCF_PBCFG1_DISABLE_NN_RD(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
@@ -8502,11 +9633,13 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_EG_SCF_PBCFG1_DISABLE_NN_RD(co
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_EG_SCF_PBCFG1_DISABLE_NN_RD chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("1:scom_proc Invalid dial access VAS_VA_EG_SCF_PBCFG1_DISABLE_NN_RD chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_EG_SCF_PBCFG1_DISABLE_NN_RD]
 
+//>> SET_[VAS_VA_EG_SCF_PBCFG1_DISABLE_NN_RD]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_EG_SCF_PBCFG1_DISABLE_NN_RD(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
@@ -8515,11 +9648,13 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_EG_SCF_PBCFG1_DISABLE_NN_RD(fa
     return o_data.setBit<VAS_VA_EG_SCF_PBCFG1_DISABLE_NN_RD>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_EG_SCF_PBCFG1_DISABLE_NN_RD chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("2:scom_proc Invalid dial access VAS_VA_EG_SCF_PBCFG1_DISABLE_NN_RD chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_EG_SCF_PBCFG1_DISABLE_NN_RD]
 
+//>> CLEAR_[VAS_VA_EG_SCF_PBCFG1_DISABLE_NN_RD]
 static inline fapi2::buffer<uint64_t>& CLEAR_VAS_VA_EG_SCF_PBCFG1_DISABLE_NN_RD(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
@@ -8528,11 +9663,13 @@ static inline fapi2::buffer<uint64_t>& CLEAR_VAS_VA_EG_SCF_PBCFG1_DISABLE_NN_RD(
     return o_data.clearBit<VAS_VA_EG_SCF_PBCFG1_DISABLE_NN_RD>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_EG_SCF_PBCFG1_DISABLE_NN_RD chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("3:scom_proc Invalid dial access VAS_VA_EG_SCF_PBCFG1_DISABLE_NN_RD chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< CLEAR_[VAS_VA_EG_SCF_PBCFG1_DISABLE_NN_RD]
 
+//>> GET_[VAS_VA_EG_SCF_PBCFG1_DISABLE_NN_RD]
 static inline fapi2::buffer<uint64_t>& GET_VAS_VA_EG_SCF_PBCFG1_DISABLE_NN_RD(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
@@ -8543,11 +9680,13 @@ static inline fapi2::buffer<uint64_t>& GET_VAS_VA_EG_SCF_PBCFG1_DISABLE_NN_RD(fa
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_EG_SCF_PBCFG1_DISABLE_NN_RD chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("4:scom_proc Invalid dial access VAS_VA_EG_SCF_PBCFG1_DISABLE_NN_RD chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[VAS_VA_EG_SCF_PBCFG1_DISABLE_NN_RD]
 
+//>> GET_[VAS_VA_EG_SCF_PBCFG1_DISABLE_NN_RD]
 static inline bool GET_VAS_VA_EG_SCF_PBCFG1_DISABLE_NN_RD(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
@@ -8556,11 +9695,13 @@ static inline bool GET_VAS_VA_EG_SCF_PBCFG1_DISABLE_NN_RD(fapi2::buffer<uint64_t
     return i_data.getBit<VAS_VA_EG_SCF_PBCFG1_DISABLE_NN_RD>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_EG_SCF_PBCFG1_DISABLE_NN_RD chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("5:scom_proc Invalid dial access VAS_VA_EG_SCF_PBCFG1_DISABLE_NN_RD chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[VAS_VA_EG_SCF_PBCFG1_DISABLE_NN_RD]
 
+//>> SET_[VAS_VA_EG_SCF_PBCFG1_RD_GO_M_QOS]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_EG_SCF_PBCFG1_RD_GO_M_QOS(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
@@ -8571,11 +9712,13 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_EG_SCF_PBCFG1_RD_GO_M_QOS(fapi
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_EG_SCF_PBCFG1_RD_GO_M_QOS chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("0:scom_proc Invalid dial access VAS_VA_EG_SCF_PBCFG1_RD_GO_M_QOS chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_EG_SCF_PBCFG1_RD_GO_M_QOS]
 
+//>> SET_[VAS_VA_EG_SCF_PBCFG1_RD_GO_M_QOS]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_EG_SCF_PBCFG1_RD_GO_M_QOS(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
@@ -8586,11 +9729,13 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_EG_SCF_PBCFG1_RD_GO_M_QOS(cons
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_EG_SCF_PBCFG1_RD_GO_M_QOS chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("1:scom_proc Invalid dial access VAS_VA_EG_SCF_PBCFG1_RD_GO_M_QOS chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_EG_SCF_PBCFG1_RD_GO_M_QOS]
 
+//>> SET_[VAS_VA_EG_SCF_PBCFG1_RD_GO_M_QOS]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_EG_SCF_PBCFG1_RD_GO_M_QOS(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
@@ -8599,11 +9744,13 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_EG_SCF_PBCFG1_RD_GO_M_QOS(fapi
     return o_data.setBit<VAS_VA_EG_SCF_PBCFG1_RD_GO_M_QOS>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_EG_SCF_PBCFG1_RD_GO_M_QOS chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("2:scom_proc Invalid dial access VAS_VA_EG_SCF_PBCFG1_RD_GO_M_QOS chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_EG_SCF_PBCFG1_RD_GO_M_QOS]
 
+//>> CLEAR_[VAS_VA_EG_SCF_PBCFG1_RD_GO_M_QOS]
 static inline fapi2::buffer<uint64_t>& CLEAR_VAS_VA_EG_SCF_PBCFG1_RD_GO_M_QOS(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
@@ -8612,11 +9759,13 @@ static inline fapi2::buffer<uint64_t>& CLEAR_VAS_VA_EG_SCF_PBCFG1_RD_GO_M_QOS(fa
     return o_data.clearBit<VAS_VA_EG_SCF_PBCFG1_RD_GO_M_QOS>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_EG_SCF_PBCFG1_RD_GO_M_QOS chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("3:scom_proc Invalid dial access VAS_VA_EG_SCF_PBCFG1_RD_GO_M_QOS chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< CLEAR_[VAS_VA_EG_SCF_PBCFG1_RD_GO_M_QOS]
 
+//>> GET_[VAS_VA_EG_SCF_PBCFG1_RD_GO_M_QOS]
 static inline fapi2::buffer<uint64_t>& GET_VAS_VA_EG_SCF_PBCFG1_RD_GO_M_QOS(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
@@ -8627,11 +9776,13 @@ static inline fapi2::buffer<uint64_t>& GET_VAS_VA_EG_SCF_PBCFG1_RD_GO_M_QOS(fapi
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_EG_SCF_PBCFG1_RD_GO_M_QOS chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("4:scom_proc Invalid dial access VAS_VA_EG_SCF_PBCFG1_RD_GO_M_QOS chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[VAS_VA_EG_SCF_PBCFG1_RD_GO_M_QOS]
 
+//>> GET_[VAS_VA_EG_SCF_PBCFG1_RD_GO_M_QOS]
 static inline bool GET_VAS_VA_EG_SCF_PBCFG1_RD_GO_M_QOS(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
@@ -8640,11 +9791,13 @@ static inline bool GET_VAS_VA_EG_SCF_PBCFG1_RD_GO_M_QOS(fapi2::buffer<uint64_t>&
     return i_data.getBit<VAS_VA_EG_SCF_PBCFG1_RD_GO_M_QOS>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_EG_SCF_PBCFG1_RD_GO_M_QOS chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("5:scom_proc Invalid dial access VAS_VA_EG_SCF_PBCFG1_RD_GO_M_QOS chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[VAS_VA_EG_SCF_PBCFG1_RD_GO_M_QOS]
 
+//>> SET_[VAS_VA_EG_SCF_PBCFG1_RESERVED_13]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_EG_SCF_PBCFG1_RESERVED_13(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
@@ -8655,11 +9808,13 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_EG_SCF_PBCFG1_RESERVED_13(fapi
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_EG_SCF_PBCFG1_RESERVED_13 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("0:scom_proc Invalid dial access VAS_VA_EG_SCF_PBCFG1_RESERVED_13 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_EG_SCF_PBCFG1_RESERVED_13]
 
+//>> SET_[VAS_VA_EG_SCF_PBCFG1_RESERVED_13]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_EG_SCF_PBCFG1_RESERVED_13(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
@@ -8670,11 +9825,13 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_EG_SCF_PBCFG1_RESERVED_13(cons
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_EG_SCF_PBCFG1_RESERVED_13 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("1:scom_proc Invalid dial access VAS_VA_EG_SCF_PBCFG1_RESERVED_13 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_EG_SCF_PBCFG1_RESERVED_13]
 
+//>> SET_[VAS_VA_EG_SCF_PBCFG1_RESERVED_13]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_EG_SCF_PBCFG1_RESERVED_13(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
@@ -8683,11 +9840,13 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_EG_SCF_PBCFG1_RESERVED_13(fapi
     return o_data.setBit<VAS_VA_EG_SCF_PBCFG1_RESERVED_13>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_EG_SCF_PBCFG1_RESERVED_13 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("2:scom_proc Invalid dial access VAS_VA_EG_SCF_PBCFG1_RESERVED_13 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_EG_SCF_PBCFG1_RESERVED_13]
 
+//>> CLEAR_[VAS_VA_EG_SCF_PBCFG1_RESERVED_13]
 static inline fapi2::buffer<uint64_t>& CLEAR_VAS_VA_EG_SCF_PBCFG1_RESERVED_13(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
@@ -8696,11 +9855,13 @@ static inline fapi2::buffer<uint64_t>& CLEAR_VAS_VA_EG_SCF_PBCFG1_RESERVED_13(fa
     return o_data.clearBit<VAS_VA_EG_SCF_PBCFG1_RESERVED_13>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_EG_SCF_PBCFG1_RESERVED_13 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("3:scom_proc Invalid dial access VAS_VA_EG_SCF_PBCFG1_RESERVED_13 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< CLEAR_[VAS_VA_EG_SCF_PBCFG1_RESERVED_13]
 
+//>> GET_[VAS_VA_EG_SCF_PBCFG1_RESERVED_13]
 static inline fapi2::buffer<uint64_t>& GET_VAS_VA_EG_SCF_PBCFG1_RESERVED_13(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
@@ -8711,11 +9872,13 @@ static inline fapi2::buffer<uint64_t>& GET_VAS_VA_EG_SCF_PBCFG1_RESERVED_13(fapi
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_EG_SCF_PBCFG1_RESERVED_13 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("4:scom_proc Invalid dial access VAS_VA_EG_SCF_PBCFG1_RESERVED_13 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[VAS_VA_EG_SCF_PBCFG1_RESERVED_13]
 
+//>> GET_[VAS_VA_EG_SCF_PBCFG1_RESERVED_13]
 static inline bool GET_VAS_VA_EG_SCF_PBCFG1_RESERVED_13(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
@@ -8724,11 +9887,13 @@ static inline bool GET_VAS_VA_EG_SCF_PBCFG1_RESERVED_13(fapi2::buffer<uint64_t>&
     return i_data.getBit<VAS_VA_EG_SCF_PBCFG1_RESERVED_13>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_EG_SCF_PBCFG1_RESERVED_13 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("5:scom_proc Invalid dial access VAS_VA_EG_SCF_PBCFG1_RESERVED_13 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[VAS_VA_EG_SCF_PBCFG1_RESERVED_13]
 
+//>> SET_[VAS_VA_EG_SCF_PBCFG1_SKIP_G]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_EG_SCF_PBCFG1_SKIP_G(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
@@ -8739,11 +9904,13 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_EG_SCF_PBCFG1_SKIP_G(fapi2::bu
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_EG_SCF_PBCFG1_SKIP_G chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("0:scom_proc Invalid dial access VAS_VA_EG_SCF_PBCFG1_SKIP_G chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_EG_SCF_PBCFG1_SKIP_G]
 
+//>> SET_[VAS_VA_EG_SCF_PBCFG1_SKIP_G]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_EG_SCF_PBCFG1_SKIP_G(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
@@ -8754,11 +9921,13 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_EG_SCF_PBCFG1_SKIP_G(const uin
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_EG_SCF_PBCFG1_SKIP_G chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("1:scom_proc Invalid dial access VAS_VA_EG_SCF_PBCFG1_SKIP_G chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_EG_SCF_PBCFG1_SKIP_G]
 
+//>> SET_[VAS_VA_EG_SCF_PBCFG1_SKIP_G]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_EG_SCF_PBCFG1_SKIP_G(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
@@ -8767,11 +9936,13 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_EG_SCF_PBCFG1_SKIP_G(fapi2::bu
     return o_data.setBit<VAS_VA_EG_SCF_PBCFG1_SKIP_G>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_EG_SCF_PBCFG1_SKIP_G chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("2:scom_proc Invalid dial access VAS_VA_EG_SCF_PBCFG1_SKIP_G chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_EG_SCF_PBCFG1_SKIP_G]
 
+//>> CLEAR_[VAS_VA_EG_SCF_PBCFG1_SKIP_G]
 static inline fapi2::buffer<uint64_t>& CLEAR_VAS_VA_EG_SCF_PBCFG1_SKIP_G(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
@@ -8780,11 +9951,13 @@ static inline fapi2::buffer<uint64_t>& CLEAR_VAS_VA_EG_SCF_PBCFG1_SKIP_G(fapi2::
     return o_data.clearBit<VAS_VA_EG_SCF_PBCFG1_SKIP_G>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_EG_SCF_PBCFG1_SKIP_G chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("3:scom_proc Invalid dial access VAS_VA_EG_SCF_PBCFG1_SKIP_G chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< CLEAR_[VAS_VA_EG_SCF_PBCFG1_SKIP_G]
 
+//>> GET_[VAS_VA_EG_SCF_PBCFG1_SKIP_G]
 static inline fapi2::buffer<uint64_t>& GET_VAS_VA_EG_SCF_PBCFG1_SKIP_G(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
@@ -8795,11 +9968,13 @@ static inline fapi2::buffer<uint64_t>& GET_VAS_VA_EG_SCF_PBCFG1_SKIP_G(fapi2::bu
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_EG_SCF_PBCFG1_SKIP_G chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("4:scom_proc Invalid dial access VAS_VA_EG_SCF_PBCFG1_SKIP_G chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[VAS_VA_EG_SCF_PBCFG1_SKIP_G]
 
+//>> GET_[VAS_VA_EG_SCF_PBCFG1_SKIP_G]
 static inline bool GET_VAS_VA_EG_SCF_PBCFG1_SKIP_G(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
@@ -8808,11 +9983,13 @@ static inline bool GET_VAS_VA_EG_SCF_PBCFG1_SKIP_G(fapi2::buffer<uint64_t>& i_da
     return i_data.getBit<VAS_VA_EG_SCF_PBCFG1_SKIP_G>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_EG_SCF_PBCFG1_SKIP_G chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("5:scom_proc Invalid dial access VAS_VA_EG_SCF_PBCFG1_SKIP_G chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[VAS_VA_EG_SCF_PBCFG1_SKIP_G]
 
+//>> SET_[VAS_VA_EG_SCF_PBCFG1_HANG_SM_ON_ARE]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_EG_SCF_PBCFG1_HANG_SM_ON_ARE(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
@@ -8823,11 +10000,14 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_EG_SCF_PBCFG1_HANG_SM_ON_ARE(f
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_EG_SCF_PBCFG1_HANG_SM_ON_ARE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("0:scom_proc Invalid dial access VAS_VA_EG_SCF_PBCFG1_HANG_SM_ON_ARE chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_EG_SCF_PBCFG1_HANG_SM_ON_ARE]
 
+//>> SET_[VAS_VA_EG_SCF_PBCFG1_HANG_SM_ON_ARE]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_EG_SCF_PBCFG1_HANG_SM_ON_ARE(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
@@ -8838,11 +10018,14 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_EG_SCF_PBCFG1_HANG_SM_ON_ARE(c
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_EG_SCF_PBCFG1_HANG_SM_ON_ARE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("1:scom_proc Invalid dial access VAS_VA_EG_SCF_PBCFG1_HANG_SM_ON_ARE chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_EG_SCF_PBCFG1_HANG_SM_ON_ARE]
 
+//>> SET_[VAS_VA_EG_SCF_PBCFG1_HANG_SM_ON_ARE]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_EG_SCF_PBCFG1_HANG_SM_ON_ARE(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
@@ -8851,11 +10034,14 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_EG_SCF_PBCFG1_HANG_SM_ON_ARE(f
     return o_data.setBit<VAS_VA_EG_SCF_PBCFG1_HANG_SM_ON_ARE>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_EG_SCF_PBCFG1_HANG_SM_ON_ARE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("2:scom_proc Invalid dial access VAS_VA_EG_SCF_PBCFG1_HANG_SM_ON_ARE chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_EG_SCF_PBCFG1_HANG_SM_ON_ARE]
 
+//>> CLEAR_[VAS_VA_EG_SCF_PBCFG1_HANG_SM_ON_ARE]
 static inline fapi2::buffer<uint64_t>& CLEAR_VAS_VA_EG_SCF_PBCFG1_HANG_SM_ON_ARE(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
@@ -8864,11 +10050,14 @@ static inline fapi2::buffer<uint64_t>& CLEAR_VAS_VA_EG_SCF_PBCFG1_HANG_SM_ON_ARE
     return o_data.clearBit<VAS_VA_EG_SCF_PBCFG1_HANG_SM_ON_ARE>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_EG_SCF_PBCFG1_HANG_SM_ON_ARE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("3:scom_proc Invalid dial access VAS_VA_EG_SCF_PBCFG1_HANG_SM_ON_ARE chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
     return o_data;
 #endif
 }
+//<< CLEAR_[VAS_VA_EG_SCF_PBCFG1_HANG_SM_ON_ARE]
 
+//>> GET_[VAS_VA_EG_SCF_PBCFG1_HANG_SM_ON_ARE]
 static inline fapi2::buffer<uint64_t>& GET_VAS_VA_EG_SCF_PBCFG1_HANG_SM_ON_ARE(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
@@ -8879,11 +10068,14 @@ static inline fapi2::buffer<uint64_t>& GET_VAS_VA_EG_SCF_PBCFG1_HANG_SM_ON_ARE(f
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_EG_SCF_PBCFG1_HANG_SM_ON_ARE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("4:scom_proc Invalid dial access VAS_VA_EG_SCF_PBCFG1_HANG_SM_ON_ARE chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[VAS_VA_EG_SCF_PBCFG1_HANG_SM_ON_ARE]
 
+//>> GET_[VAS_VA_EG_SCF_PBCFG1_HANG_SM_ON_ARE]
 static inline bool GET_VAS_VA_EG_SCF_PBCFG1_HANG_SM_ON_ARE(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
@@ -8892,11 +10084,14 @@ static inline bool GET_VAS_VA_EG_SCF_PBCFG1_HANG_SM_ON_ARE(fapi2::buffer<uint64_
     return i_data.getBit<VAS_VA_EG_SCF_PBCFG1_HANG_SM_ON_ARE>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_EG_SCF_PBCFG1_HANG_SM_ON_ARE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("5:scom_proc Invalid dial access VAS_VA_EG_SCF_PBCFG1_HANG_SM_ON_ARE chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[VAS_VA_EG_SCF_PBCFG1_HANG_SM_ON_ARE]
 
+//>> SET_[VAS_VA_EG_SCF_PBCFG1_RESERVED_16]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_EG_SCF_PBCFG1_RESERVED_16(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
@@ -8907,11 +10102,13 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_EG_SCF_PBCFG1_RESERVED_16(fapi
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_EG_SCF_PBCFG1_RESERVED_16 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("0:scom_proc Invalid dial access VAS_VA_EG_SCF_PBCFG1_RESERVED_16 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_EG_SCF_PBCFG1_RESERVED_16]
 
+//>> SET_[VAS_VA_EG_SCF_PBCFG1_RESERVED_16]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_EG_SCF_PBCFG1_RESERVED_16(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
@@ -8922,11 +10119,13 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_EG_SCF_PBCFG1_RESERVED_16(cons
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_EG_SCF_PBCFG1_RESERVED_16 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("1:scom_proc Invalid dial access VAS_VA_EG_SCF_PBCFG1_RESERVED_16 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_EG_SCF_PBCFG1_RESERVED_16]
 
+//>> SET_[VAS_VA_EG_SCF_PBCFG1_RESERVED_16]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_EG_SCF_PBCFG1_RESERVED_16(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
@@ -8935,11 +10134,13 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_EG_SCF_PBCFG1_RESERVED_16(fapi
     return o_data.setBit<VAS_VA_EG_SCF_PBCFG1_RESERVED_16>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_EG_SCF_PBCFG1_RESERVED_16 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("2:scom_proc Invalid dial access VAS_VA_EG_SCF_PBCFG1_RESERVED_16 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_EG_SCF_PBCFG1_RESERVED_16]
 
+//>> CLEAR_[VAS_VA_EG_SCF_PBCFG1_RESERVED_16]
 static inline fapi2::buffer<uint64_t>& CLEAR_VAS_VA_EG_SCF_PBCFG1_RESERVED_16(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
@@ -8948,11 +10149,13 @@ static inline fapi2::buffer<uint64_t>& CLEAR_VAS_VA_EG_SCF_PBCFG1_RESERVED_16(fa
     return o_data.clearBit<VAS_VA_EG_SCF_PBCFG1_RESERVED_16>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_EG_SCF_PBCFG1_RESERVED_16 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("3:scom_proc Invalid dial access VAS_VA_EG_SCF_PBCFG1_RESERVED_16 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< CLEAR_[VAS_VA_EG_SCF_PBCFG1_RESERVED_16]
 
+//>> GET_[VAS_VA_EG_SCF_PBCFG1_RESERVED_16]
 static inline fapi2::buffer<uint64_t>& GET_VAS_VA_EG_SCF_PBCFG1_RESERVED_16(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
@@ -8963,11 +10166,13 @@ static inline fapi2::buffer<uint64_t>& GET_VAS_VA_EG_SCF_PBCFG1_RESERVED_16(fapi
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_EG_SCF_PBCFG1_RESERVED_16 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("4:scom_proc Invalid dial access VAS_VA_EG_SCF_PBCFG1_RESERVED_16 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[VAS_VA_EG_SCF_PBCFG1_RESERVED_16]
 
+//>> GET_[VAS_VA_EG_SCF_PBCFG1_RESERVED_16]
 static inline bool GET_VAS_VA_EG_SCF_PBCFG1_RESERVED_16(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
@@ -8976,11 +10181,13 @@ static inline bool GET_VAS_VA_EG_SCF_PBCFG1_RESERVED_16(fapi2::buffer<uint64_t>&
     return i_data.getBit<VAS_VA_EG_SCF_PBCFG1_RESERVED_16>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_EG_SCF_PBCFG1_RESERVED_16 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("5:scom_proc Invalid dial access VAS_VA_EG_SCF_PBCFG1_RESERVED_16 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[VAS_VA_EG_SCF_PBCFG1_RESERVED_16]
 
+//>> SET_[VAS_VA_EG_SCF_PBCFG1_CFG_PUMP_MODE]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_EG_SCF_PBCFG1_CFG_PUMP_MODE(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
@@ -8991,11 +10198,13 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_EG_SCF_PBCFG1_CFG_PUMP_MODE(fa
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_EG_SCF_PBCFG1_CFG_PUMP_MODE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("0:scom_proc Invalid dial access VAS_VA_EG_SCF_PBCFG1_CFG_PUMP_MODE chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_EG_SCF_PBCFG1_CFG_PUMP_MODE]
 
+//>> SET_[VAS_VA_EG_SCF_PBCFG1_CFG_PUMP_MODE]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_EG_SCF_PBCFG1_CFG_PUMP_MODE(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
@@ -9006,11 +10215,13 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_EG_SCF_PBCFG1_CFG_PUMP_MODE(co
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_EG_SCF_PBCFG1_CFG_PUMP_MODE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("1:scom_proc Invalid dial access VAS_VA_EG_SCF_PBCFG1_CFG_PUMP_MODE chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_EG_SCF_PBCFG1_CFG_PUMP_MODE]
 
+//>> SET_[VAS_VA_EG_SCF_PBCFG1_CFG_PUMP_MODE]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_EG_SCF_PBCFG1_CFG_PUMP_MODE(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
@@ -9019,11 +10230,13 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_EG_SCF_PBCFG1_CFG_PUMP_MODE(fa
     return o_data.setBit<VAS_VA_EG_SCF_PBCFG1_CFG_PUMP_MODE>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_EG_SCF_PBCFG1_CFG_PUMP_MODE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("2:scom_proc Invalid dial access VAS_VA_EG_SCF_PBCFG1_CFG_PUMP_MODE chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_EG_SCF_PBCFG1_CFG_PUMP_MODE]
 
+//>> CLEAR_[VAS_VA_EG_SCF_PBCFG1_CFG_PUMP_MODE]
 static inline fapi2::buffer<uint64_t>& CLEAR_VAS_VA_EG_SCF_PBCFG1_CFG_PUMP_MODE(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
@@ -9032,11 +10245,13 @@ static inline fapi2::buffer<uint64_t>& CLEAR_VAS_VA_EG_SCF_PBCFG1_CFG_PUMP_MODE(
     return o_data.clearBit<VAS_VA_EG_SCF_PBCFG1_CFG_PUMP_MODE>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_EG_SCF_PBCFG1_CFG_PUMP_MODE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("3:scom_proc Invalid dial access VAS_VA_EG_SCF_PBCFG1_CFG_PUMP_MODE chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< CLEAR_[VAS_VA_EG_SCF_PBCFG1_CFG_PUMP_MODE]
 
+//>> GET_[VAS_VA_EG_SCF_PBCFG1_CFG_PUMP_MODE]
 static inline fapi2::buffer<uint64_t>& GET_VAS_VA_EG_SCF_PBCFG1_CFG_PUMP_MODE(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
@@ -9047,11 +10262,13 @@ static inline fapi2::buffer<uint64_t>& GET_VAS_VA_EG_SCF_PBCFG1_CFG_PUMP_MODE(fa
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_EG_SCF_PBCFG1_CFG_PUMP_MODE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("4:scom_proc Invalid dial access VAS_VA_EG_SCF_PBCFG1_CFG_PUMP_MODE chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[VAS_VA_EG_SCF_PBCFG1_CFG_PUMP_MODE]
 
+//>> GET_[VAS_VA_EG_SCF_PBCFG1_CFG_PUMP_MODE]
 static inline bool GET_VAS_VA_EG_SCF_PBCFG1_CFG_PUMP_MODE(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
@@ -9060,11 +10277,13 @@ static inline bool GET_VAS_VA_EG_SCF_PBCFG1_CFG_PUMP_MODE(fapi2::buffer<uint64_t
     return i_data.getBit<VAS_VA_EG_SCF_PBCFG1_CFG_PUMP_MODE>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_EG_SCF_PBCFG1_CFG_PUMP_MODE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("5:scom_proc Invalid dial access VAS_VA_EG_SCF_PBCFG1_CFG_PUMP_MODE chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[VAS_VA_EG_SCF_PBCFG1_CFG_PUMP_MODE]
 
+//>> SET_[VAS_VA_EG_SCF_PBCFG1_DMA_WR_NOT_INJ]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_EG_SCF_PBCFG1_DMA_WR_NOT_INJ(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
@@ -9075,11 +10294,14 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_EG_SCF_PBCFG1_DMA_WR_NOT_INJ(f
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_EG_SCF_PBCFG1_DMA_WR_NOT_INJ chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("0:scom_proc Invalid dial access VAS_VA_EG_SCF_PBCFG1_DMA_WR_NOT_INJ chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_EG_SCF_PBCFG1_DMA_WR_NOT_INJ]
 
+//>> SET_[VAS_VA_EG_SCF_PBCFG1_DMA_WR_NOT_INJ]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_EG_SCF_PBCFG1_DMA_WR_NOT_INJ(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
@@ -9090,11 +10312,14 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_EG_SCF_PBCFG1_DMA_WR_NOT_INJ(c
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_EG_SCF_PBCFG1_DMA_WR_NOT_INJ chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("1:scom_proc Invalid dial access VAS_VA_EG_SCF_PBCFG1_DMA_WR_NOT_INJ chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_EG_SCF_PBCFG1_DMA_WR_NOT_INJ]
 
+//>> SET_[VAS_VA_EG_SCF_PBCFG1_DMA_WR_NOT_INJ]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_EG_SCF_PBCFG1_DMA_WR_NOT_INJ(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
@@ -9103,11 +10328,14 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_EG_SCF_PBCFG1_DMA_WR_NOT_INJ(f
     return o_data.setBit<VAS_VA_EG_SCF_PBCFG1_DMA_WR_NOT_INJ>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_EG_SCF_PBCFG1_DMA_WR_NOT_INJ chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("2:scom_proc Invalid dial access VAS_VA_EG_SCF_PBCFG1_DMA_WR_NOT_INJ chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_EG_SCF_PBCFG1_DMA_WR_NOT_INJ]
 
+//>> CLEAR_[VAS_VA_EG_SCF_PBCFG1_DMA_WR_NOT_INJ]
 static inline fapi2::buffer<uint64_t>& CLEAR_VAS_VA_EG_SCF_PBCFG1_DMA_WR_NOT_INJ(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
@@ -9116,11 +10344,14 @@ static inline fapi2::buffer<uint64_t>& CLEAR_VAS_VA_EG_SCF_PBCFG1_DMA_WR_NOT_INJ
     return o_data.clearBit<VAS_VA_EG_SCF_PBCFG1_DMA_WR_NOT_INJ>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_EG_SCF_PBCFG1_DMA_WR_NOT_INJ chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("3:scom_proc Invalid dial access VAS_VA_EG_SCF_PBCFG1_DMA_WR_NOT_INJ chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
     return o_data;
 #endif
 }
+//<< CLEAR_[VAS_VA_EG_SCF_PBCFG1_DMA_WR_NOT_INJ]
 
+//>> GET_[VAS_VA_EG_SCF_PBCFG1_DMA_WR_NOT_INJ]
 static inline fapi2::buffer<uint64_t>& GET_VAS_VA_EG_SCF_PBCFG1_DMA_WR_NOT_INJ(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
@@ -9131,11 +10362,14 @@ static inline fapi2::buffer<uint64_t>& GET_VAS_VA_EG_SCF_PBCFG1_DMA_WR_NOT_INJ(f
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_EG_SCF_PBCFG1_DMA_WR_NOT_INJ chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("4:scom_proc Invalid dial access VAS_VA_EG_SCF_PBCFG1_DMA_WR_NOT_INJ chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[VAS_VA_EG_SCF_PBCFG1_DMA_WR_NOT_INJ]
 
+//>> GET_[VAS_VA_EG_SCF_PBCFG1_DMA_WR_NOT_INJ]
 static inline bool GET_VAS_VA_EG_SCF_PBCFG1_DMA_WR_NOT_INJ(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
@@ -9144,11 +10378,14 @@ static inline bool GET_VAS_VA_EG_SCF_PBCFG1_DMA_WR_NOT_INJ(fapi2::buffer<uint64_
     return i_data.getBit<VAS_VA_EG_SCF_PBCFG1_DMA_WR_NOT_INJ>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_EG_SCF_PBCFG1_DMA_WR_NOT_INJ chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("5:scom_proc Invalid dial access VAS_VA_EG_SCF_PBCFG1_DMA_WR_NOT_INJ chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[VAS_VA_EG_SCF_PBCFG1_DMA_WR_NOT_INJ]
 
+//>> SET_[VAS_VA_EG_SCF_PBCFG1_DMA_PART_WR_NOT_INJ]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_EG_SCF_PBCFG1_DMA_PART_WR_NOT_INJ(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
@@ -9159,11 +10396,14 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_EG_SCF_PBCFG1_DMA_PART_WR_NOT_
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_EG_SCF_PBCFG1_DMA_PART_WR_NOT_INJ chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("0:scom_proc Invalid dial access VAS_VA_EG_SCF_PBCFG1_DMA_PART_WR_NOT_INJ chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_EG_SCF_PBCFG1_DMA_PART_WR_NOT_INJ]
 
+//>> SET_[VAS_VA_EG_SCF_PBCFG1_DMA_PART_WR_NOT_INJ]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_EG_SCF_PBCFG1_DMA_PART_WR_NOT_INJ(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
@@ -9174,11 +10414,14 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_EG_SCF_PBCFG1_DMA_PART_WR_NOT_
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_EG_SCF_PBCFG1_DMA_PART_WR_NOT_INJ chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("1:scom_proc Invalid dial access VAS_VA_EG_SCF_PBCFG1_DMA_PART_WR_NOT_INJ chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_EG_SCF_PBCFG1_DMA_PART_WR_NOT_INJ]
 
+//>> SET_[VAS_VA_EG_SCF_PBCFG1_DMA_PART_WR_NOT_INJ]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_EG_SCF_PBCFG1_DMA_PART_WR_NOT_INJ(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
@@ -9187,11 +10430,14 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_EG_SCF_PBCFG1_DMA_PART_WR_NOT_
     return o_data.setBit<VAS_VA_EG_SCF_PBCFG1_DMA_PART_WR_NOT_INJ>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_EG_SCF_PBCFG1_DMA_PART_WR_NOT_INJ chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("2:scom_proc Invalid dial access VAS_VA_EG_SCF_PBCFG1_DMA_PART_WR_NOT_INJ chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_EG_SCF_PBCFG1_DMA_PART_WR_NOT_INJ]
 
+//>> CLEAR_[VAS_VA_EG_SCF_PBCFG1_DMA_PART_WR_NOT_INJ]
 static inline fapi2::buffer<uint64_t>& CLEAR_VAS_VA_EG_SCF_PBCFG1_DMA_PART_WR_NOT_INJ(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
@@ -9200,11 +10446,14 @@ static inline fapi2::buffer<uint64_t>& CLEAR_VAS_VA_EG_SCF_PBCFG1_DMA_PART_WR_NO
     return o_data.clearBit<VAS_VA_EG_SCF_PBCFG1_DMA_PART_WR_NOT_INJ>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_EG_SCF_PBCFG1_DMA_PART_WR_NOT_INJ chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("3:scom_proc Invalid dial access VAS_VA_EG_SCF_PBCFG1_DMA_PART_WR_NOT_INJ chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
     return o_data;
 #endif
 }
+//<< CLEAR_[VAS_VA_EG_SCF_PBCFG1_DMA_PART_WR_NOT_INJ]
 
+//>> GET_[VAS_VA_EG_SCF_PBCFG1_DMA_PART_WR_NOT_INJ]
 static inline fapi2::buffer<uint64_t>& GET_VAS_VA_EG_SCF_PBCFG1_DMA_PART_WR_NOT_INJ(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
@@ -9215,11 +10464,14 @@ static inline fapi2::buffer<uint64_t>& GET_VAS_VA_EG_SCF_PBCFG1_DMA_PART_WR_NOT_
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_EG_SCF_PBCFG1_DMA_PART_WR_NOT_INJ chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("4:scom_proc Invalid dial access VAS_VA_EG_SCF_PBCFG1_DMA_PART_WR_NOT_INJ chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[VAS_VA_EG_SCF_PBCFG1_DMA_PART_WR_NOT_INJ]
 
+//>> GET_[VAS_VA_EG_SCF_PBCFG1_DMA_PART_WR_NOT_INJ]
 static inline bool GET_VAS_VA_EG_SCF_PBCFG1_DMA_PART_WR_NOT_INJ(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
@@ -9228,11 +10480,14 @@ static inline bool GET_VAS_VA_EG_SCF_PBCFG1_DMA_PART_WR_NOT_INJ(fapi2::buffer<ui
     return i_data.getBit<VAS_VA_EG_SCF_PBCFG1_DMA_PART_WR_NOT_INJ>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_EG_SCF_PBCFG1_DMA_PART_WR_NOT_INJ chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("5:scom_proc Invalid dial access VAS_VA_EG_SCF_PBCFG1_DMA_PART_WR_NOT_INJ chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[VAS_VA_EG_SCF_PBCFG1_DMA_PART_WR_NOT_INJ]
 
+//>> SET_[VAS_VA_EG_SCF_PBCFG1_DMA_RD_VG_RST_TMASK]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_EG_SCF_PBCFG1_DMA_RD_VG_RST_TMASK(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
@@ -9243,11 +10498,14 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_EG_SCF_PBCFG1_DMA_RD_VG_RST_TM
            VAS_VA_EG_SCF_PBCFG1_DMA_RD_VG_RST_TMASK_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_EG_SCF_PBCFG1_DMA_RD_VG_RST_TMASK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("0:scom_proc Invalid dial access VAS_VA_EG_SCF_PBCFG1_DMA_RD_VG_RST_TMASK chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_EG_SCF_PBCFG1_DMA_RD_VG_RST_TMASK]
 
+//>> SET_[VAS_VA_EG_SCF_PBCFG1_DMA_RD_VG_RST_TMASK]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_EG_SCF_PBCFG1_DMA_RD_VG_RST_TMASK(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
@@ -9258,11 +10516,14 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_EG_SCF_PBCFG1_DMA_RD_VG_RST_TM
            VAS_VA_EG_SCF_PBCFG1_DMA_RD_VG_RST_TMASK_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_EG_SCF_PBCFG1_DMA_RD_VG_RST_TMASK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("1:scom_proc Invalid dial access VAS_VA_EG_SCF_PBCFG1_DMA_RD_VG_RST_TMASK chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_EG_SCF_PBCFG1_DMA_RD_VG_RST_TMASK]
 
+//>> GET_[VAS_VA_EG_SCF_PBCFG1_DMA_RD_VG_RST_TMASK]
 static inline fapi2::buffer<uint64_t>& GET_VAS_VA_EG_SCF_PBCFG1_DMA_RD_VG_RST_TMASK(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
@@ -9273,11 +10534,14 @@ static inline fapi2::buffer<uint64_t>& GET_VAS_VA_EG_SCF_PBCFG1_DMA_RD_VG_RST_TM
            VAS_VA_EG_SCF_PBCFG1_DMA_RD_VG_RST_TMASK_LEN>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_EG_SCF_PBCFG1_DMA_RD_VG_RST_TMASK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("4:scom_proc Invalid dial access VAS_VA_EG_SCF_PBCFG1_DMA_RD_VG_RST_TMASK chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[VAS_VA_EG_SCF_PBCFG1_DMA_RD_VG_RST_TMASK]
 
+//>> SET_[VAS_VA_EG_SCF_PBCFG1_DMA_WR_VG_RST_TMASK]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_EG_SCF_PBCFG1_DMA_WR_VG_RST_TMASK(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
@@ -9288,11 +10552,14 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_EG_SCF_PBCFG1_DMA_WR_VG_RST_TM
            VAS_VA_EG_SCF_PBCFG1_DMA_WR_VG_RST_TMASK_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_EG_SCF_PBCFG1_DMA_WR_VG_RST_TMASK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("0:scom_proc Invalid dial access VAS_VA_EG_SCF_PBCFG1_DMA_WR_VG_RST_TMASK chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_EG_SCF_PBCFG1_DMA_WR_VG_RST_TMASK]
 
+//>> SET_[VAS_VA_EG_SCF_PBCFG1_DMA_WR_VG_RST_TMASK]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_EG_SCF_PBCFG1_DMA_WR_VG_RST_TMASK(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
@@ -9303,11 +10570,14 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_EG_SCF_PBCFG1_DMA_WR_VG_RST_TM
            VAS_VA_EG_SCF_PBCFG1_DMA_WR_VG_RST_TMASK_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_EG_SCF_PBCFG1_DMA_WR_VG_RST_TMASK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("1:scom_proc Invalid dial access VAS_VA_EG_SCF_PBCFG1_DMA_WR_VG_RST_TMASK chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_EG_SCF_PBCFG1_DMA_WR_VG_RST_TMASK]
 
+//>> GET_[VAS_VA_EG_SCF_PBCFG1_DMA_WR_VG_RST_TMASK]
 static inline fapi2::buffer<uint64_t>& GET_VAS_VA_EG_SCF_PBCFG1_DMA_WR_VG_RST_TMASK(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
@@ -9318,11 +10588,14 @@ static inline fapi2::buffer<uint64_t>& GET_VAS_VA_EG_SCF_PBCFG1_DMA_WR_VG_RST_TM
            VAS_VA_EG_SCF_PBCFG1_DMA_WR_VG_RST_TMASK_LEN>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_EG_SCF_PBCFG1_DMA_WR_VG_RST_TMASK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("4:scom_proc Invalid dial access VAS_VA_EG_SCF_PBCFG1_DMA_WR_VG_RST_TMASK chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[VAS_VA_EG_SCF_PBCFG1_DMA_WR_VG_RST_TMASK]
 
+//>> PREP_[VAS_VA_RG_SCF_FIR_MASK_REG_RW]
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
 static inline fapi2::ReturnCode PREP_VAS_VA_RG_SCF_FIR_MASK_REG_RW(const fapi2::Target<K, M, V>& i_target)
 {
@@ -9336,7 +10609,9 @@ fapi_try_exit:
     return fapi2::current_err;
 #endif
 }
+//<< PREP_[VAS_VA_RG_SCF_FIR_MASK_REG_RW]
 
+//>> GET_[VAS_VA_RG_SCF_FIR_MASK_REG_RW]
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
 static inline fapi2::ReturnCode GET_VAS_VA_RG_SCF_FIR_MASK_REG_RW(const fapi2::Target<K, M, V>& i_target,
         fapi2::buffer<uint64_t>& o_data)
@@ -9351,7 +10626,9 @@ fapi_try_exit:
     return fapi2::current_err;
 #endif
 }
+//<< GET_[VAS_VA_RG_SCF_FIR_MASK_REG_RW]
 
+//>> PUT_[VAS_VA_RG_SCF_FIR_MASK_REG_RW]
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
 static inline fapi2::ReturnCode PUT_VAS_VA_RG_SCF_FIR_MASK_REG_RW(const fapi2::Target<K, M, V>& i_target,
         const uint64_t i_data)
@@ -9367,7 +10644,9 @@ fapi_try_exit:
     return fapi2::current_err;
 #endif
 }
+//<< PUT_[VAS_VA_RG_SCF_FIR_MASK_REG_RW]
 
+//>> PREP_[VAS_VA_RG_SCF_FIR_MASK_REG_WO_AND]
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
 static inline fapi2::ReturnCode PREP_VAS_VA_RG_SCF_FIR_MASK_REG_WO_AND(const fapi2::Target<K, M, V>& i_target)
 {
@@ -9381,7 +10660,9 @@ fapi_try_exit:
     return fapi2::current_err;
 #endif
 }
+//<< PREP_[VAS_VA_RG_SCF_FIR_MASK_REG_WO_AND]
 
+//>> GET_[VAS_VA_RG_SCF_FIR_MASK_REG_WO_AND]
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
 static inline fapi2::ReturnCode GET_VAS_VA_RG_SCF_FIR_MASK_REG_WO_AND(const fapi2::Target<K, M, V>& i_target,
         fapi2::buffer<uint64_t>& o_data)
@@ -9396,7 +10677,9 @@ fapi_try_exit:
     return fapi2::current_err;
 #endif
 }
+//<< GET_[VAS_VA_RG_SCF_FIR_MASK_REG_WO_AND]
 
+//>> PUT_[VAS_VA_RG_SCF_FIR_MASK_REG_WO_AND]
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
 static inline fapi2::ReturnCode PUT_VAS_VA_RG_SCF_FIR_MASK_REG_WO_AND(const fapi2::Target<K, M, V>& i_target,
         const uint64_t i_data)
@@ -9412,7 +10695,9 @@ fapi_try_exit:
     return fapi2::current_err;
 #endif
 }
+//<< PUT_[VAS_VA_RG_SCF_FIR_MASK_REG_WO_AND]
 
+//>> PREP_[VAS_VA_RG_SCF_FIR_MASK_REG_WO_OR]
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
 static inline fapi2::ReturnCode PREP_VAS_VA_RG_SCF_FIR_MASK_REG_WO_OR(const fapi2::Target<K, M, V>& i_target)
 {
@@ -9426,7 +10711,9 @@ fapi_try_exit:
     return fapi2::current_err;
 #endif
 }
+//<< PREP_[VAS_VA_RG_SCF_FIR_MASK_REG_WO_OR]
 
+//>> GET_[VAS_VA_RG_SCF_FIR_MASK_REG_WO_OR]
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
 static inline fapi2::ReturnCode GET_VAS_VA_RG_SCF_FIR_MASK_REG_WO_OR(const fapi2::Target<K, M, V>& i_target,
         fapi2::buffer<uint64_t>& o_data)
@@ -9441,7 +10728,9 @@ fapi_try_exit:
     return fapi2::current_err;
 #endif
 }
+//<< GET_[VAS_VA_RG_SCF_FIR_MASK_REG_WO_OR]
 
+//>> PUT_[VAS_VA_RG_SCF_FIR_MASK_REG_WO_OR]
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
 static inline fapi2::ReturnCode PUT_VAS_VA_RG_SCF_FIR_MASK_REG_WO_OR(const fapi2::Target<K, M, V>& i_target,
         const uint64_t i_data)
@@ -9457,8 +10746,10 @@ fapi_try_exit:
     return fapi2::current_err;
 #endif
 }
+//<< PUT_[VAS_VA_RG_SCF_FIR_MASK_REG_WO_OR]
 
 
+//>> SET_[VAS_VA_RG_SCF_FIR_MASK_REG_EG_LOGIC_HW_ERROR_MASK]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_EG_LOGIC_HW_ERROR_MASK(
     fapi2::buffer<uint64_t>& i_data,
     fapi2::buffer<uint64_t>& o_data)
@@ -9471,12 +10762,14 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_EG_LOGIC_H
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_EG_LOGIC_HW_ERROR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("0:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_EG_LOGIC_HW_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_FIR_MASK_REG_EG_LOGIC_HW_ERROR_MASK]
 
+//>> SET_[VAS_VA_RG_SCF_FIR_MASK_REG_EG_LOGIC_HW_ERROR_MASK]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_EG_LOGIC_HW_ERROR_MASK(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
@@ -9488,12 +10781,14 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_EG_LOGIC_H
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_EG_LOGIC_HW_ERROR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("1:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_EG_LOGIC_HW_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_FIR_MASK_REG_EG_LOGIC_HW_ERROR_MASK]
 
+//>> SET_[VAS_VA_RG_SCF_FIR_MASK_REG_EG_LOGIC_HW_ERROR_MASK]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_EG_LOGIC_HW_ERROR_MASK(
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -9504,12 +10799,14 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_EG_LOGIC_H
     return o_data.setBit<VAS_VA_RG_SCF_FIR_MASK_REG_EG_LOGIC_HW_ERROR_MASK>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_EG_LOGIC_HW_ERROR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("2:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_EG_LOGIC_HW_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_FIR_MASK_REG_EG_LOGIC_HW_ERROR_MASK]
 
+//>> CLEAR_[VAS_VA_RG_SCF_FIR_MASK_REG_EG_LOGIC_HW_ERROR_MASK]
 static inline fapi2::buffer<uint64_t>& CLEAR_VAS_VA_RG_SCF_FIR_MASK_REG_EG_LOGIC_HW_ERROR_MASK(
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -9520,12 +10817,14 @@ static inline fapi2::buffer<uint64_t>& CLEAR_VAS_VA_RG_SCF_FIR_MASK_REG_EG_LOGIC
     return o_data.clearBit<VAS_VA_RG_SCF_FIR_MASK_REG_EG_LOGIC_HW_ERROR_MASK>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_EG_LOGIC_HW_ERROR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("3:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_EG_LOGIC_HW_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< CLEAR_[VAS_VA_RG_SCF_FIR_MASK_REG_EG_LOGIC_HW_ERROR_MASK]
 
+//>> GET_[VAS_VA_RG_SCF_FIR_MASK_REG_EG_LOGIC_HW_ERROR_MASK]
 static inline fapi2::buffer<uint64_t>& GET_VAS_VA_RG_SCF_FIR_MASK_REG_EG_LOGIC_HW_ERROR_MASK(
     fapi2::buffer<uint64_t>& i_data,
     uint64_t& o_data)
@@ -9538,12 +10837,14 @@ static inline fapi2::buffer<uint64_t>& GET_VAS_VA_RG_SCF_FIR_MASK_REG_EG_LOGIC_H
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_EG_LOGIC_HW_ERROR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("4:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_EG_LOGIC_HW_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[VAS_VA_RG_SCF_FIR_MASK_REG_EG_LOGIC_HW_ERROR_MASK]
 
+//>> GET_[VAS_VA_RG_SCF_FIR_MASK_REG_EG_LOGIC_HW_ERROR_MASK]
 static inline bool GET_VAS_VA_RG_SCF_FIR_MASK_REG_EG_LOGIC_HW_ERROR_MASK(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
@@ -9553,12 +10854,14 @@ static inline bool GET_VAS_VA_RG_SCF_FIR_MASK_REG_EG_LOGIC_HW_ERROR_MASK(fapi2::
     return i_data.getBit<VAS_VA_RG_SCF_FIR_MASK_REG_EG_LOGIC_HW_ERROR_MASK>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_EG_LOGIC_HW_ERROR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("5:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_EG_LOGIC_HW_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[VAS_VA_RG_SCF_FIR_MASK_REG_EG_LOGIC_HW_ERROR_MASK]
 
+//>> SET_[VAS_VA_RG_SCF_FIR_MASK_REG_IN_LOGIC_HW_ERROR_MASK]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_IN_LOGIC_HW_ERROR_MASK(
     fapi2::buffer<uint64_t>& i_data,
     fapi2::buffer<uint64_t>& o_data)
@@ -9571,12 +10874,14 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_IN_LOGIC_H
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_IN_LOGIC_HW_ERROR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("0:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_IN_LOGIC_HW_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_FIR_MASK_REG_IN_LOGIC_HW_ERROR_MASK]
 
+//>> SET_[VAS_VA_RG_SCF_FIR_MASK_REG_IN_LOGIC_HW_ERROR_MASK]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_IN_LOGIC_HW_ERROR_MASK(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
@@ -9588,12 +10893,14 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_IN_LOGIC_H
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_IN_LOGIC_HW_ERROR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("1:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_IN_LOGIC_HW_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_FIR_MASK_REG_IN_LOGIC_HW_ERROR_MASK]
 
+//>> SET_[VAS_VA_RG_SCF_FIR_MASK_REG_IN_LOGIC_HW_ERROR_MASK]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_IN_LOGIC_HW_ERROR_MASK(
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -9604,12 +10911,14 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_IN_LOGIC_H
     return o_data.setBit<VAS_VA_RG_SCF_FIR_MASK_REG_IN_LOGIC_HW_ERROR_MASK>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_IN_LOGIC_HW_ERROR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("2:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_IN_LOGIC_HW_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_FIR_MASK_REG_IN_LOGIC_HW_ERROR_MASK]
 
+//>> CLEAR_[VAS_VA_RG_SCF_FIR_MASK_REG_IN_LOGIC_HW_ERROR_MASK]
 static inline fapi2::buffer<uint64_t>& CLEAR_VAS_VA_RG_SCF_FIR_MASK_REG_IN_LOGIC_HW_ERROR_MASK(
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -9620,12 +10929,14 @@ static inline fapi2::buffer<uint64_t>& CLEAR_VAS_VA_RG_SCF_FIR_MASK_REG_IN_LOGIC
     return o_data.clearBit<VAS_VA_RG_SCF_FIR_MASK_REG_IN_LOGIC_HW_ERROR_MASK>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_IN_LOGIC_HW_ERROR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("3:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_IN_LOGIC_HW_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< CLEAR_[VAS_VA_RG_SCF_FIR_MASK_REG_IN_LOGIC_HW_ERROR_MASK]
 
+//>> GET_[VAS_VA_RG_SCF_FIR_MASK_REG_IN_LOGIC_HW_ERROR_MASK]
 static inline fapi2::buffer<uint64_t>& GET_VAS_VA_RG_SCF_FIR_MASK_REG_IN_LOGIC_HW_ERROR_MASK(
     fapi2::buffer<uint64_t>& i_data,
     uint64_t& o_data)
@@ -9638,12 +10949,14 @@ static inline fapi2::buffer<uint64_t>& GET_VAS_VA_RG_SCF_FIR_MASK_REG_IN_LOGIC_H
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_IN_LOGIC_HW_ERROR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("4:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_IN_LOGIC_HW_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[VAS_VA_RG_SCF_FIR_MASK_REG_IN_LOGIC_HW_ERROR_MASK]
 
+//>> GET_[VAS_VA_RG_SCF_FIR_MASK_REG_IN_LOGIC_HW_ERROR_MASK]
 static inline bool GET_VAS_VA_RG_SCF_FIR_MASK_REG_IN_LOGIC_HW_ERROR_MASK(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
@@ -9653,12 +10966,14 @@ static inline bool GET_VAS_VA_RG_SCF_FIR_MASK_REG_IN_LOGIC_HW_ERROR_MASK(fapi2::
     return i_data.getBit<VAS_VA_RG_SCF_FIR_MASK_REG_IN_LOGIC_HW_ERROR_MASK>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_IN_LOGIC_HW_ERROR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("5:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_IN_LOGIC_HW_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[VAS_VA_RG_SCF_FIR_MASK_REG_IN_LOGIC_HW_ERROR_MASK]
 
+//>> SET_[VAS_VA_RG_SCF_FIR_MASK_REG_CQ_LOGIC_HW_ERROR_MASK]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_CQ_LOGIC_HW_ERROR_MASK(
     fapi2::buffer<uint64_t>& i_data,
     fapi2::buffer<uint64_t>& o_data)
@@ -9671,12 +10986,14 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_CQ_LOGIC_H
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_CQ_LOGIC_HW_ERROR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("0:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_CQ_LOGIC_HW_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_FIR_MASK_REG_CQ_LOGIC_HW_ERROR_MASK]
 
+//>> SET_[VAS_VA_RG_SCF_FIR_MASK_REG_CQ_LOGIC_HW_ERROR_MASK]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_CQ_LOGIC_HW_ERROR_MASK(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
@@ -9688,12 +11005,14 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_CQ_LOGIC_H
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_CQ_LOGIC_HW_ERROR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("1:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_CQ_LOGIC_HW_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_FIR_MASK_REG_CQ_LOGIC_HW_ERROR_MASK]
 
+//>> SET_[VAS_VA_RG_SCF_FIR_MASK_REG_CQ_LOGIC_HW_ERROR_MASK]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_CQ_LOGIC_HW_ERROR_MASK(
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -9704,12 +11023,14 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_CQ_LOGIC_H
     return o_data.setBit<VAS_VA_RG_SCF_FIR_MASK_REG_CQ_LOGIC_HW_ERROR_MASK>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_CQ_LOGIC_HW_ERROR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("2:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_CQ_LOGIC_HW_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_FIR_MASK_REG_CQ_LOGIC_HW_ERROR_MASK]
 
+//>> CLEAR_[VAS_VA_RG_SCF_FIR_MASK_REG_CQ_LOGIC_HW_ERROR_MASK]
 static inline fapi2::buffer<uint64_t>& CLEAR_VAS_VA_RG_SCF_FIR_MASK_REG_CQ_LOGIC_HW_ERROR_MASK(
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -9720,12 +11041,14 @@ static inline fapi2::buffer<uint64_t>& CLEAR_VAS_VA_RG_SCF_FIR_MASK_REG_CQ_LOGIC
     return o_data.clearBit<VAS_VA_RG_SCF_FIR_MASK_REG_CQ_LOGIC_HW_ERROR_MASK>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_CQ_LOGIC_HW_ERROR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("3:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_CQ_LOGIC_HW_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< CLEAR_[VAS_VA_RG_SCF_FIR_MASK_REG_CQ_LOGIC_HW_ERROR_MASK]
 
+//>> GET_[VAS_VA_RG_SCF_FIR_MASK_REG_CQ_LOGIC_HW_ERROR_MASK]
 static inline fapi2::buffer<uint64_t>& GET_VAS_VA_RG_SCF_FIR_MASK_REG_CQ_LOGIC_HW_ERROR_MASK(
     fapi2::buffer<uint64_t>& i_data,
     uint64_t& o_data)
@@ -9738,12 +11061,14 @@ static inline fapi2::buffer<uint64_t>& GET_VAS_VA_RG_SCF_FIR_MASK_REG_CQ_LOGIC_H
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_CQ_LOGIC_HW_ERROR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("4:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_CQ_LOGIC_HW_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[VAS_VA_RG_SCF_FIR_MASK_REG_CQ_LOGIC_HW_ERROR_MASK]
 
+//>> GET_[VAS_VA_RG_SCF_FIR_MASK_REG_CQ_LOGIC_HW_ERROR_MASK]
 static inline bool GET_VAS_VA_RG_SCF_FIR_MASK_REG_CQ_LOGIC_HW_ERROR_MASK(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
@@ -9753,12 +11078,14 @@ static inline bool GET_VAS_VA_RG_SCF_FIR_MASK_REG_CQ_LOGIC_HW_ERROR_MASK(fapi2::
     return i_data.getBit<VAS_VA_RG_SCF_FIR_MASK_REG_CQ_LOGIC_HW_ERROR_MASK>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_CQ_LOGIC_HW_ERROR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("5:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_CQ_LOGIC_HW_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[VAS_VA_RG_SCF_FIR_MASK_REG_CQ_LOGIC_HW_ERROR_MASK]
 
+//>> SET_[VAS_VA_RG_SCF_FIR_MASK_REG_WC_LOGIC_HW_ERROR_MASK]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_WC_LOGIC_HW_ERROR_MASK(
     fapi2::buffer<uint64_t>& i_data,
     fapi2::buffer<uint64_t>& o_data)
@@ -9771,12 +11098,14 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_WC_LOGIC_H
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_WC_LOGIC_HW_ERROR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("0:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_WC_LOGIC_HW_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_FIR_MASK_REG_WC_LOGIC_HW_ERROR_MASK]
 
+//>> SET_[VAS_VA_RG_SCF_FIR_MASK_REG_WC_LOGIC_HW_ERROR_MASK]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_WC_LOGIC_HW_ERROR_MASK(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
@@ -9788,12 +11117,14 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_WC_LOGIC_H
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_WC_LOGIC_HW_ERROR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("1:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_WC_LOGIC_HW_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_FIR_MASK_REG_WC_LOGIC_HW_ERROR_MASK]
 
+//>> SET_[VAS_VA_RG_SCF_FIR_MASK_REG_WC_LOGIC_HW_ERROR_MASK]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_WC_LOGIC_HW_ERROR_MASK(
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -9804,12 +11135,14 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_WC_LOGIC_H
     return o_data.setBit<VAS_VA_RG_SCF_FIR_MASK_REG_WC_LOGIC_HW_ERROR_MASK>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_WC_LOGIC_HW_ERROR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("2:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_WC_LOGIC_HW_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_FIR_MASK_REG_WC_LOGIC_HW_ERROR_MASK]
 
+//>> CLEAR_[VAS_VA_RG_SCF_FIR_MASK_REG_WC_LOGIC_HW_ERROR_MASK]
 static inline fapi2::buffer<uint64_t>& CLEAR_VAS_VA_RG_SCF_FIR_MASK_REG_WC_LOGIC_HW_ERROR_MASK(
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -9820,12 +11153,14 @@ static inline fapi2::buffer<uint64_t>& CLEAR_VAS_VA_RG_SCF_FIR_MASK_REG_WC_LOGIC
     return o_data.clearBit<VAS_VA_RG_SCF_FIR_MASK_REG_WC_LOGIC_HW_ERROR_MASK>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_WC_LOGIC_HW_ERROR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("3:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_WC_LOGIC_HW_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< CLEAR_[VAS_VA_RG_SCF_FIR_MASK_REG_WC_LOGIC_HW_ERROR_MASK]
 
+//>> GET_[VAS_VA_RG_SCF_FIR_MASK_REG_WC_LOGIC_HW_ERROR_MASK]
 static inline fapi2::buffer<uint64_t>& GET_VAS_VA_RG_SCF_FIR_MASK_REG_WC_LOGIC_HW_ERROR_MASK(
     fapi2::buffer<uint64_t>& i_data,
     uint64_t& o_data)
@@ -9838,12 +11173,14 @@ static inline fapi2::buffer<uint64_t>& GET_VAS_VA_RG_SCF_FIR_MASK_REG_WC_LOGIC_H
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_WC_LOGIC_HW_ERROR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("4:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_WC_LOGIC_HW_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[VAS_VA_RG_SCF_FIR_MASK_REG_WC_LOGIC_HW_ERROR_MASK]
 
+//>> GET_[VAS_VA_RG_SCF_FIR_MASK_REG_WC_LOGIC_HW_ERROR_MASK]
 static inline bool GET_VAS_VA_RG_SCF_FIR_MASK_REG_WC_LOGIC_HW_ERROR_MASK(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
@@ -9853,12 +11190,14 @@ static inline bool GET_VAS_VA_RG_SCF_FIR_MASK_REG_WC_LOGIC_HW_ERROR_MASK(fapi2::
     return i_data.getBit<VAS_VA_RG_SCF_FIR_MASK_REG_WC_LOGIC_HW_ERROR_MASK>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_WC_LOGIC_HW_ERROR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("5:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_WC_LOGIC_HW_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[VAS_VA_RG_SCF_FIR_MASK_REG_WC_LOGIC_HW_ERROR_MASK]
 
+//>> SET_[VAS_VA_RG_SCF_FIR_MASK_REG_RG_LOGIC_HW_ERROR_MASK]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_RG_LOGIC_HW_ERROR_MASK(
     fapi2::buffer<uint64_t>& i_data,
     fapi2::buffer<uint64_t>& o_data)
@@ -9871,12 +11210,14 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_RG_LOGIC_H
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_RG_LOGIC_HW_ERROR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("0:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_RG_LOGIC_HW_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_FIR_MASK_REG_RG_LOGIC_HW_ERROR_MASK]
 
+//>> SET_[VAS_VA_RG_SCF_FIR_MASK_REG_RG_LOGIC_HW_ERROR_MASK]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_RG_LOGIC_HW_ERROR_MASK(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
@@ -9888,12 +11229,14 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_RG_LOGIC_H
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_RG_LOGIC_HW_ERROR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("1:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_RG_LOGIC_HW_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_FIR_MASK_REG_RG_LOGIC_HW_ERROR_MASK]
 
+//>> SET_[VAS_VA_RG_SCF_FIR_MASK_REG_RG_LOGIC_HW_ERROR_MASK]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_RG_LOGIC_HW_ERROR_MASK(
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -9904,12 +11247,14 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_RG_LOGIC_H
     return o_data.setBit<VAS_VA_RG_SCF_FIR_MASK_REG_RG_LOGIC_HW_ERROR_MASK>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_RG_LOGIC_HW_ERROR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("2:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_RG_LOGIC_HW_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_FIR_MASK_REG_RG_LOGIC_HW_ERROR_MASK]
 
+//>> CLEAR_[VAS_VA_RG_SCF_FIR_MASK_REG_RG_LOGIC_HW_ERROR_MASK]
 static inline fapi2::buffer<uint64_t>& CLEAR_VAS_VA_RG_SCF_FIR_MASK_REG_RG_LOGIC_HW_ERROR_MASK(
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -9920,12 +11265,14 @@ static inline fapi2::buffer<uint64_t>& CLEAR_VAS_VA_RG_SCF_FIR_MASK_REG_RG_LOGIC
     return o_data.clearBit<VAS_VA_RG_SCF_FIR_MASK_REG_RG_LOGIC_HW_ERROR_MASK>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_RG_LOGIC_HW_ERROR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("3:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_RG_LOGIC_HW_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< CLEAR_[VAS_VA_RG_SCF_FIR_MASK_REG_RG_LOGIC_HW_ERROR_MASK]
 
+//>> GET_[VAS_VA_RG_SCF_FIR_MASK_REG_RG_LOGIC_HW_ERROR_MASK]
 static inline fapi2::buffer<uint64_t>& GET_VAS_VA_RG_SCF_FIR_MASK_REG_RG_LOGIC_HW_ERROR_MASK(
     fapi2::buffer<uint64_t>& i_data,
     uint64_t& o_data)
@@ -9938,12 +11285,14 @@ static inline fapi2::buffer<uint64_t>& GET_VAS_VA_RG_SCF_FIR_MASK_REG_RG_LOGIC_H
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_RG_LOGIC_HW_ERROR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("4:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_RG_LOGIC_HW_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[VAS_VA_RG_SCF_FIR_MASK_REG_RG_LOGIC_HW_ERROR_MASK]
 
+//>> GET_[VAS_VA_RG_SCF_FIR_MASK_REG_RG_LOGIC_HW_ERROR_MASK]
 static inline bool GET_VAS_VA_RG_SCF_FIR_MASK_REG_RG_LOGIC_HW_ERROR_MASK(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
@@ -9953,12 +11302,14 @@ static inline bool GET_VAS_VA_RG_SCF_FIR_MASK_REG_RG_LOGIC_HW_ERROR_MASK(fapi2::
     return i_data.getBit<VAS_VA_RG_SCF_FIR_MASK_REG_RG_LOGIC_HW_ERROR_MASK>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_RG_LOGIC_HW_ERROR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("5:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_RG_LOGIC_HW_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[VAS_VA_RG_SCF_FIR_MASK_REG_RG_LOGIC_HW_ERROR_MASK]
 
+//>> SET_[VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_PARITY_ERROR_MASK]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_PARITY_ERROR_MASK(
     fapi2::buffer<uint64_t>& i_data,
     fapi2::buffer<uint64_t>& o_data)
@@ -9971,12 +11322,14 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_PARI
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_PARITY_ERROR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("0:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_PARITY_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_PARITY_ERROR_MASK]
 
+//>> SET_[VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_PARITY_ERROR_MASK]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_PARITY_ERROR_MASK(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
@@ -9988,12 +11341,14 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_PARI
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_PARITY_ERROR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("1:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_PARITY_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_PARITY_ERROR_MASK]
 
+//>> SET_[VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_PARITY_ERROR_MASK]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_PARITY_ERROR_MASK(
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -10004,12 +11359,14 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_PARI
     return o_data.setBit<VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_PARITY_ERROR_MASK>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_PARITY_ERROR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("2:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_PARITY_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_PARITY_ERROR_MASK]
 
+//>> CLEAR_[VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_PARITY_ERROR_MASK]
 static inline fapi2::buffer<uint64_t>& CLEAR_VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_PARITY_ERROR_MASK(
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -10020,12 +11377,14 @@ static inline fapi2::buffer<uint64_t>& CLEAR_VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_PA
     return o_data.clearBit<VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_PARITY_ERROR_MASK>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_PARITY_ERROR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("3:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_PARITY_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< CLEAR_[VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_PARITY_ERROR_MASK]
 
+//>> GET_[VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_PARITY_ERROR_MASK]
 static inline fapi2::buffer<uint64_t>& GET_VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_PARITY_ERROR_MASK(
     fapi2::buffer<uint64_t>& i_data,
     uint64_t& o_data)
@@ -10038,12 +11397,14 @@ static inline fapi2::buffer<uint64_t>& GET_VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_PARI
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_PARITY_ERROR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("4:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_PARITY_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_PARITY_ERROR_MASK]
 
+//>> GET_[VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_PARITY_ERROR_MASK]
 static inline bool GET_VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_PARITY_ERROR_MASK(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
@@ -10053,12 +11414,14 @@ static inline bool GET_VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_PARITY_ERROR_MASK(fapi2:
     return i_data.getBit<VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_PARITY_ERROR_MASK>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_PARITY_ERROR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("5:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_PARITY_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_PARITY_ERROR_MASK]
 
+//>> SET_[VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_RD_ADDR_ERROR_MASK]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_RD_ADDR_ERROR_MASK(
     fapi2::buffer<uint64_t>& i_data,
     fapi2::buffer<uint64_t>& o_data)
@@ -10071,12 +11434,14 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_RD_A
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_RD_ADDR_ERROR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("0:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_RD_ADDR_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_RD_ADDR_ERROR_MASK]
 
+//>> SET_[VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_RD_ADDR_ERROR_MASK]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_RD_ADDR_ERROR_MASK(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
@@ -10088,12 +11453,14 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_RD_A
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_RD_ADDR_ERROR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("1:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_RD_ADDR_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_RD_ADDR_ERROR_MASK]
 
+//>> SET_[VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_RD_ADDR_ERROR_MASK]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_RD_ADDR_ERROR_MASK(
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -10104,12 +11471,14 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_RD_A
     return o_data.setBit<VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_RD_ADDR_ERROR_MASK>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_RD_ADDR_ERROR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("2:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_RD_ADDR_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_RD_ADDR_ERROR_MASK]
 
+//>> CLEAR_[VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_RD_ADDR_ERROR_MASK]
 static inline fapi2::buffer<uint64_t>& CLEAR_VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_RD_ADDR_ERROR_MASK(
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -10120,12 +11489,14 @@ static inline fapi2::buffer<uint64_t>& CLEAR_VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_RD
     return o_data.clearBit<VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_RD_ADDR_ERROR_MASK>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_RD_ADDR_ERROR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("3:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_RD_ADDR_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< CLEAR_[VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_RD_ADDR_ERROR_MASK]
 
+//>> GET_[VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_RD_ADDR_ERROR_MASK]
 static inline fapi2::buffer<uint64_t>& GET_VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_RD_ADDR_ERROR_MASK(
     fapi2::buffer<uint64_t>& i_data,
     uint64_t& o_data)
@@ -10138,12 +11509,14 @@ static inline fapi2::buffer<uint64_t>& GET_VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_RD_A
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_RD_ADDR_ERROR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("4:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_RD_ADDR_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_RD_ADDR_ERROR_MASK]
 
+//>> GET_[VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_RD_ADDR_ERROR_MASK]
 static inline bool GET_VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_RD_ADDR_ERROR_MASK(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
@@ -10153,12 +11526,14 @@ static inline bool GET_VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_RD_ADDR_ERROR_MASK(fapi2
     return i_data.getBit<VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_RD_ADDR_ERROR_MASK>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_RD_ADDR_ERROR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("5:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_RD_ADDR_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_RD_ADDR_ERROR_MASK]
 
+//>> SET_[VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_WR_ADDR_ERROR_MASK]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_WR_ADDR_ERROR_MASK(
     fapi2::buffer<uint64_t>& i_data,
     fapi2::buffer<uint64_t>& o_data)
@@ -10171,12 +11546,14 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_WR_A
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_WR_ADDR_ERROR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("0:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_WR_ADDR_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_WR_ADDR_ERROR_MASK]
 
+//>> SET_[VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_WR_ADDR_ERROR_MASK]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_WR_ADDR_ERROR_MASK(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
@@ -10188,12 +11565,14 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_WR_A
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_WR_ADDR_ERROR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("1:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_WR_ADDR_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_WR_ADDR_ERROR_MASK]
 
+//>> SET_[VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_WR_ADDR_ERROR_MASK]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_WR_ADDR_ERROR_MASK(
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -10204,12 +11583,14 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_WR_A
     return o_data.setBit<VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_WR_ADDR_ERROR_MASK>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_WR_ADDR_ERROR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("2:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_WR_ADDR_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_WR_ADDR_ERROR_MASK]
 
+//>> CLEAR_[VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_WR_ADDR_ERROR_MASK]
 static inline fapi2::buffer<uint64_t>& CLEAR_VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_WR_ADDR_ERROR_MASK(
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -10220,12 +11601,14 @@ static inline fapi2::buffer<uint64_t>& CLEAR_VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_WR
     return o_data.clearBit<VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_WR_ADDR_ERROR_MASK>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_WR_ADDR_ERROR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("3:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_WR_ADDR_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< CLEAR_[VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_WR_ADDR_ERROR_MASK]
 
+//>> GET_[VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_WR_ADDR_ERROR_MASK]
 static inline fapi2::buffer<uint64_t>& GET_VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_WR_ADDR_ERROR_MASK(
     fapi2::buffer<uint64_t>& i_data,
     uint64_t& o_data)
@@ -10238,12 +11621,14 @@ static inline fapi2::buffer<uint64_t>& GET_VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_WR_A
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_WR_ADDR_ERROR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("4:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_WR_ADDR_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_WR_ADDR_ERROR_MASK]
 
+//>> GET_[VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_WR_ADDR_ERROR_MASK]
 static inline bool GET_VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_WR_ADDR_ERROR_MASK(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
@@ -10253,12 +11638,14 @@ static inline bool GET_VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_WR_ADDR_ERROR_MASK(fapi2
     return i_data.getBit<VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_WR_ADDR_ERROR_MASK>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_WR_ADDR_ERROR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("5:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_WR_ADDR_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_WR_ADDR_ERROR_MASK]
 
+//>> SET_[VAS_VA_RG_SCF_FIR_MASK_REG_EG_ECC_CE_ERROR_MASK]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_EG_ECC_CE_ERROR_MASK(
     fapi2::buffer<uint64_t>& i_data,
     fapi2::buffer<uint64_t>& o_data)
@@ -10271,12 +11658,14 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_EG_ECC_CE_
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_EG_ECC_CE_ERROR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("0:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_EG_ECC_CE_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_FIR_MASK_REG_EG_ECC_CE_ERROR_MASK]
 
+//>> SET_[VAS_VA_RG_SCF_FIR_MASK_REG_EG_ECC_CE_ERROR_MASK]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_EG_ECC_CE_ERROR_MASK(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
@@ -10288,12 +11677,14 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_EG_ECC_CE_
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_EG_ECC_CE_ERROR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("1:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_EG_ECC_CE_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_FIR_MASK_REG_EG_ECC_CE_ERROR_MASK]
 
+//>> SET_[VAS_VA_RG_SCF_FIR_MASK_REG_EG_ECC_CE_ERROR_MASK]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_EG_ECC_CE_ERROR_MASK(
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -10304,12 +11695,14 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_EG_ECC_CE_
     return o_data.setBit<VAS_VA_RG_SCF_FIR_MASK_REG_EG_ECC_CE_ERROR_MASK>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_EG_ECC_CE_ERROR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("2:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_EG_ECC_CE_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_FIR_MASK_REG_EG_ECC_CE_ERROR_MASK]
 
+//>> CLEAR_[VAS_VA_RG_SCF_FIR_MASK_REG_EG_ECC_CE_ERROR_MASK]
 static inline fapi2::buffer<uint64_t>& CLEAR_VAS_VA_RG_SCF_FIR_MASK_REG_EG_ECC_CE_ERROR_MASK(
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -10320,12 +11713,14 @@ static inline fapi2::buffer<uint64_t>& CLEAR_VAS_VA_RG_SCF_FIR_MASK_REG_EG_ECC_C
     return o_data.clearBit<VAS_VA_RG_SCF_FIR_MASK_REG_EG_ECC_CE_ERROR_MASK>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_EG_ECC_CE_ERROR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("3:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_EG_ECC_CE_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< CLEAR_[VAS_VA_RG_SCF_FIR_MASK_REG_EG_ECC_CE_ERROR_MASK]
 
+//>> GET_[VAS_VA_RG_SCF_FIR_MASK_REG_EG_ECC_CE_ERROR_MASK]
 static inline fapi2::buffer<uint64_t>& GET_VAS_VA_RG_SCF_FIR_MASK_REG_EG_ECC_CE_ERROR_MASK(
     fapi2::buffer<uint64_t>& i_data,
     uint64_t& o_data)
@@ -10338,12 +11733,14 @@ static inline fapi2::buffer<uint64_t>& GET_VAS_VA_RG_SCF_FIR_MASK_REG_EG_ECC_CE_
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_EG_ECC_CE_ERROR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("4:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_EG_ECC_CE_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[VAS_VA_RG_SCF_FIR_MASK_REG_EG_ECC_CE_ERROR_MASK]
 
+//>> GET_[VAS_VA_RG_SCF_FIR_MASK_REG_EG_ECC_CE_ERROR_MASK]
 static inline bool GET_VAS_VA_RG_SCF_FIR_MASK_REG_EG_ECC_CE_ERROR_MASK(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
@@ -10353,12 +11750,14 @@ static inline bool GET_VAS_VA_RG_SCF_FIR_MASK_REG_EG_ECC_CE_ERROR_MASK(fapi2::bu
     return i_data.getBit<VAS_VA_RG_SCF_FIR_MASK_REG_EG_ECC_CE_ERROR_MASK>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_EG_ECC_CE_ERROR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("5:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_EG_ECC_CE_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[VAS_VA_RG_SCF_FIR_MASK_REG_EG_ECC_CE_ERROR_MASK]
 
+//>> SET_[VAS_VA_RG_SCF_FIR_MASK_REG_IN_ECC_CE_ERROR_MASK]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_IN_ECC_CE_ERROR_MASK(
     fapi2::buffer<uint64_t>& i_data,
     fapi2::buffer<uint64_t>& o_data)
@@ -10371,12 +11770,14 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_IN_ECC_CE_
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_IN_ECC_CE_ERROR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("0:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_IN_ECC_CE_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_FIR_MASK_REG_IN_ECC_CE_ERROR_MASK]
 
+//>> SET_[VAS_VA_RG_SCF_FIR_MASK_REG_IN_ECC_CE_ERROR_MASK]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_IN_ECC_CE_ERROR_MASK(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
@@ -10388,12 +11789,14 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_IN_ECC_CE_
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_IN_ECC_CE_ERROR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("1:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_IN_ECC_CE_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_FIR_MASK_REG_IN_ECC_CE_ERROR_MASK]
 
+//>> SET_[VAS_VA_RG_SCF_FIR_MASK_REG_IN_ECC_CE_ERROR_MASK]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_IN_ECC_CE_ERROR_MASK(
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -10404,12 +11807,14 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_IN_ECC_CE_
     return o_data.setBit<VAS_VA_RG_SCF_FIR_MASK_REG_IN_ECC_CE_ERROR_MASK>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_IN_ECC_CE_ERROR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("2:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_IN_ECC_CE_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_FIR_MASK_REG_IN_ECC_CE_ERROR_MASK]
 
+//>> CLEAR_[VAS_VA_RG_SCF_FIR_MASK_REG_IN_ECC_CE_ERROR_MASK]
 static inline fapi2::buffer<uint64_t>& CLEAR_VAS_VA_RG_SCF_FIR_MASK_REG_IN_ECC_CE_ERROR_MASK(
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -10420,12 +11825,14 @@ static inline fapi2::buffer<uint64_t>& CLEAR_VAS_VA_RG_SCF_FIR_MASK_REG_IN_ECC_C
     return o_data.clearBit<VAS_VA_RG_SCF_FIR_MASK_REG_IN_ECC_CE_ERROR_MASK>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_IN_ECC_CE_ERROR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("3:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_IN_ECC_CE_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< CLEAR_[VAS_VA_RG_SCF_FIR_MASK_REG_IN_ECC_CE_ERROR_MASK]
 
+//>> GET_[VAS_VA_RG_SCF_FIR_MASK_REG_IN_ECC_CE_ERROR_MASK]
 static inline fapi2::buffer<uint64_t>& GET_VAS_VA_RG_SCF_FIR_MASK_REG_IN_ECC_CE_ERROR_MASK(
     fapi2::buffer<uint64_t>& i_data,
     uint64_t& o_data)
@@ -10438,12 +11845,14 @@ static inline fapi2::buffer<uint64_t>& GET_VAS_VA_RG_SCF_FIR_MASK_REG_IN_ECC_CE_
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_IN_ECC_CE_ERROR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("4:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_IN_ECC_CE_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[VAS_VA_RG_SCF_FIR_MASK_REG_IN_ECC_CE_ERROR_MASK]
 
+//>> GET_[VAS_VA_RG_SCF_FIR_MASK_REG_IN_ECC_CE_ERROR_MASK]
 static inline bool GET_VAS_VA_RG_SCF_FIR_MASK_REG_IN_ECC_CE_ERROR_MASK(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
@@ -10453,12 +11862,14 @@ static inline bool GET_VAS_VA_RG_SCF_FIR_MASK_REG_IN_ECC_CE_ERROR_MASK(fapi2::bu
     return i_data.getBit<VAS_VA_RG_SCF_FIR_MASK_REG_IN_ECC_CE_ERROR_MASK>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_IN_ECC_CE_ERROR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("5:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_IN_ECC_CE_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[VAS_VA_RG_SCF_FIR_MASK_REG_IN_ECC_CE_ERROR_MASK]
 
+//>> SET_[VAS_VA_RG_SCF_FIR_MASK_REG_CQ_ECC_CE_ERROR_MASK]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_CQ_ECC_CE_ERROR_MASK(
     fapi2::buffer<uint64_t>& i_data,
     fapi2::buffer<uint64_t>& o_data)
@@ -10471,12 +11882,14 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_CQ_ECC_CE_
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_CQ_ECC_CE_ERROR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("0:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_CQ_ECC_CE_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_FIR_MASK_REG_CQ_ECC_CE_ERROR_MASK]
 
+//>> SET_[VAS_VA_RG_SCF_FIR_MASK_REG_CQ_ECC_CE_ERROR_MASK]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_CQ_ECC_CE_ERROR_MASK(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
@@ -10488,12 +11901,14 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_CQ_ECC_CE_
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_CQ_ECC_CE_ERROR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("1:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_CQ_ECC_CE_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_FIR_MASK_REG_CQ_ECC_CE_ERROR_MASK]
 
+//>> SET_[VAS_VA_RG_SCF_FIR_MASK_REG_CQ_ECC_CE_ERROR_MASK]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_CQ_ECC_CE_ERROR_MASK(
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -10504,12 +11919,14 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_CQ_ECC_CE_
     return o_data.setBit<VAS_VA_RG_SCF_FIR_MASK_REG_CQ_ECC_CE_ERROR_MASK>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_CQ_ECC_CE_ERROR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("2:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_CQ_ECC_CE_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_FIR_MASK_REG_CQ_ECC_CE_ERROR_MASK]
 
+//>> CLEAR_[VAS_VA_RG_SCF_FIR_MASK_REG_CQ_ECC_CE_ERROR_MASK]
 static inline fapi2::buffer<uint64_t>& CLEAR_VAS_VA_RG_SCF_FIR_MASK_REG_CQ_ECC_CE_ERROR_MASK(
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -10520,12 +11937,14 @@ static inline fapi2::buffer<uint64_t>& CLEAR_VAS_VA_RG_SCF_FIR_MASK_REG_CQ_ECC_C
     return o_data.clearBit<VAS_VA_RG_SCF_FIR_MASK_REG_CQ_ECC_CE_ERROR_MASK>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_CQ_ECC_CE_ERROR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("3:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_CQ_ECC_CE_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< CLEAR_[VAS_VA_RG_SCF_FIR_MASK_REG_CQ_ECC_CE_ERROR_MASK]
 
+//>> GET_[VAS_VA_RG_SCF_FIR_MASK_REG_CQ_ECC_CE_ERROR_MASK]
 static inline fapi2::buffer<uint64_t>& GET_VAS_VA_RG_SCF_FIR_MASK_REG_CQ_ECC_CE_ERROR_MASK(
     fapi2::buffer<uint64_t>& i_data,
     uint64_t& o_data)
@@ -10538,12 +11957,14 @@ static inline fapi2::buffer<uint64_t>& GET_VAS_VA_RG_SCF_FIR_MASK_REG_CQ_ECC_CE_
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_CQ_ECC_CE_ERROR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("4:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_CQ_ECC_CE_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[VAS_VA_RG_SCF_FIR_MASK_REG_CQ_ECC_CE_ERROR_MASK]
 
+//>> GET_[VAS_VA_RG_SCF_FIR_MASK_REG_CQ_ECC_CE_ERROR_MASK]
 static inline bool GET_VAS_VA_RG_SCF_FIR_MASK_REG_CQ_ECC_CE_ERROR_MASK(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
@@ -10553,12 +11974,14 @@ static inline bool GET_VAS_VA_RG_SCF_FIR_MASK_REG_CQ_ECC_CE_ERROR_MASK(fapi2::bu
     return i_data.getBit<VAS_VA_RG_SCF_FIR_MASK_REG_CQ_ECC_CE_ERROR_MASK>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_CQ_ECC_CE_ERROR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("5:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_CQ_ECC_CE_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[VAS_VA_RG_SCF_FIR_MASK_REG_CQ_ECC_CE_ERROR_MASK]
 
+//>> SET_[VAS_VA_RG_SCF_FIR_MASK_REG_WC_ECC_CE_ERROR_MASK]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_WC_ECC_CE_ERROR_MASK(
     fapi2::buffer<uint64_t>& i_data,
     fapi2::buffer<uint64_t>& o_data)
@@ -10571,12 +11994,14 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_WC_ECC_CE_
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_WC_ECC_CE_ERROR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("0:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_WC_ECC_CE_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_FIR_MASK_REG_WC_ECC_CE_ERROR_MASK]
 
+//>> SET_[VAS_VA_RG_SCF_FIR_MASK_REG_WC_ECC_CE_ERROR_MASK]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_WC_ECC_CE_ERROR_MASK(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
@@ -10588,12 +12013,14 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_WC_ECC_CE_
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_WC_ECC_CE_ERROR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("1:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_WC_ECC_CE_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_FIR_MASK_REG_WC_ECC_CE_ERROR_MASK]
 
+//>> SET_[VAS_VA_RG_SCF_FIR_MASK_REG_WC_ECC_CE_ERROR_MASK]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_WC_ECC_CE_ERROR_MASK(
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -10604,12 +12031,14 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_WC_ECC_CE_
     return o_data.setBit<VAS_VA_RG_SCF_FIR_MASK_REG_WC_ECC_CE_ERROR_MASK>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_WC_ECC_CE_ERROR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("2:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_WC_ECC_CE_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_FIR_MASK_REG_WC_ECC_CE_ERROR_MASK]
 
+//>> CLEAR_[VAS_VA_RG_SCF_FIR_MASK_REG_WC_ECC_CE_ERROR_MASK]
 static inline fapi2::buffer<uint64_t>& CLEAR_VAS_VA_RG_SCF_FIR_MASK_REG_WC_ECC_CE_ERROR_MASK(
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -10620,12 +12049,14 @@ static inline fapi2::buffer<uint64_t>& CLEAR_VAS_VA_RG_SCF_FIR_MASK_REG_WC_ECC_C
     return o_data.clearBit<VAS_VA_RG_SCF_FIR_MASK_REG_WC_ECC_CE_ERROR_MASK>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_WC_ECC_CE_ERROR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("3:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_WC_ECC_CE_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< CLEAR_[VAS_VA_RG_SCF_FIR_MASK_REG_WC_ECC_CE_ERROR_MASK]
 
+//>> GET_[VAS_VA_RG_SCF_FIR_MASK_REG_WC_ECC_CE_ERROR_MASK]
 static inline fapi2::buffer<uint64_t>& GET_VAS_VA_RG_SCF_FIR_MASK_REG_WC_ECC_CE_ERROR_MASK(
     fapi2::buffer<uint64_t>& i_data,
     uint64_t& o_data)
@@ -10638,12 +12069,14 @@ static inline fapi2::buffer<uint64_t>& GET_VAS_VA_RG_SCF_FIR_MASK_REG_WC_ECC_CE_
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_WC_ECC_CE_ERROR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("4:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_WC_ECC_CE_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[VAS_VA_RG_SCF_FIR_MASK_REG_WC_ECC_CE_ERROR_MASK]
 
+//>> GET_[VAS_VA_RG_SCF_FIR_MASK_REG_WC_ECC_CE_ERROR_MASK]
 static inline bool GET_VAS_VA_RG_SCF_FIR_MASK_REG_WC_ECC_CE_ERROR_MASK(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
@@ -10653,12 +12086,14 @@ static inline bool GET_VAS_VA_RG_SCF_FIR_MASK_REG_WC_ECC_CE_ERROR_MASK(fapi2::bu
     return i_data.getBit<VAS_VA_RG_SCF_FIR_MASK_REG_WC_ECC_CE_ERROR_MASK>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_WC_ECC_CE_ERROR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("5:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_WC_ECC_CE_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[VAS_VA_RG_SCF_FIR_MASK_REG_WC_ECC_CE_ERROR_MASK]
 
+//>> SET_[VAS_VA_RG_SCF_FIR_MASK_REG_RG_ECC_CE_ERROR_MASK]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_RG_ECC_CE_ERROR_MASK(
     fapi2::buffer<uint64_t>& i_data,
     fapi2::buffer<uint64_t>& o_data)
@@ -10671,12 +12106,14 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_RG_ECC_CE_
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_RG_ECC_CE_ERROR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("0:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_RG_ECC_CE_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_FIR_MASK_REG_RG_ECC_CE_ERROR_MASK]
 
+//>> SET_[VAS_VA_RG_SCF_FIR_MASK_REG_RG_ECC_CE_ERROR_MASK]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_RG_ECC_CE_ERROR_MASK(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
@@ -10688,12 +12125,14 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_RG_ECC_CE_
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_RG_ECC_CE_ERROR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("1:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_RG_ECC_CE_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_FIR_MASK_REG_RG_ECC_CE_ERROR_MASK]
 
+//>> SET_[VAS_VA_RG_SCF_FIR_MASK_REG_RG_ECC_CE_ERROR_MASK]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_RG_ECC_CE_ERROR_MASK(
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -10704,12 +12143,14 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_RG_ECC_CE_
     return o_data.setBit<VAS_VA_RG_SCF_FIR_MASK_REG_RG_ECC_CE_ERROR_MASK>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_RG_ECC_CE_ERROR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("2:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_RG_ECC_CE_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_FIR_MASK_REG_RG_ECC_CE_ERROR_MASK]
 
+//>> CLEAR_[VAS_VA_RG_SCF_FIR_MASK_REG_RG_ECC_CE_ERROR_MASK]
 static inline fapi2::buffer<uint64_t>& CLEAR_VAS_VA_RG_SCF_FIR_MASK_REG_RG_ECC_CE_ERROR_MASK(
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -10720,12 +12161,14 @@ static inline fapi2::buffer<uint64_t>& CLEAR_VAS_VA_RG_SCF_FIR_MASK_REG_RG_ECC_C
     return o_data.clearBit<VAS_VA_RG_SCF_FIR_MASK_REG_RG_ECC_CE_ERROR_MASK>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_RG_ECC_CE_ERROR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("3:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_RG_ECC_CE_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< CLEAR_[VAS_VA_RG_SCF_FIR_MASK_REG_RG_ECC_CE_ERROR_MASK]
 
+//>> GET_[VAS_VA_RG_SCF_FIR_MASK_REG_RG_ECC_CE_ERROR_MASK]
 static inline fapi2::buffer<uint64_t>& GET_VAS_VA_RG_SCF_FIR_MASK_REG_RG_ECC_CE_ERROR_MASK(
     fapi2::buffer<uint64_t>& i_data,
     uint64_t& o_data)
@@ -10738,12 +12181,14 @@ static inline fapi2::buffer<uint64_t>& GET_VAS_VA_RG_SCF_FIR_MASK_REG_RG_ECC_CE_
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_RG_ECC_CE_ERROR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("4:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_RG_ECC_CE_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[VAS_VA_RG_SCF_FIR_MASK_REG_RG_ECC_CE_ERROR_MASK]
 
+//>> GET_[VAS_VA_RG_SCF_FIR_MASK_REG_RG_ECC_CE_ERROR_MASK]
 static inline bool GET_VAS_VA_RG_SCF_FIR_MASK_REG_RG_ECC_CE_ERROR_MASK(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
@@ -10753,12 +12198,14 @@ static inline bool GET_VAS_VA_RG_SCF_FIR_MASK_REG_RG_ECC_CE_ERROR_MASK(fapi2::bu
     return i_data.getBit<VAS_VA_RG_SCF_FIR_MASK_REG_RG_ECC_CE_ERROR_MASK>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_RG_ECC_CE_ERROR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("5:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_RG_ECC_CE_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[VAS_VA_RG_SCF_FIR_MASK_REG_RG_ECC_CE_ERROR_MASK]
 
+//>> SET_[VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_OB_CE_ERROR_MASK]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_OB_CE_ERROR_MASK(
     fapi2::buffer<uint64_t>& i_data,
     fapi2::buffer<uint64_t>& o_data)
@@ -10771,12 +12218,14 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_OB_C
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_OB_CE_ERROR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("0:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_OB_CE_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_OB_CE_ERROR_MASK]
 
+//>> SET_[VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_OB_CE_ERROR_MASK]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_OB_CE_ERROR_MASK(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
@@ -10788,12 +12237,14 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_OB_C
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_OB_CE_ERROR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("1:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_OB_CE_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_OB_CE_ERROR_MASK]
 
+//>> SET_[VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_OB_CE_ERROR_MASK]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_OB_CE_ERROR_MASK(
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -10804,12 +12255,14 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_OB_C
     return o_data.setBit<VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_OB_CE_ERROR_MASK>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_OB_CE_ERROR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("2:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_OB_CE_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_OB_CE_ERROR_MASK]
 
+//>> CLEAR_[VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_OB_CE_ERROR_MASK]
 static inline fapi2::buffer<uint64_t>& CLEAR_VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_OB_CE_ERROR_MASK(
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -10820,12 +12273,14 @@ static inline fapi2::buffer<uint64_t>& CLEAR_VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_OB
     return o_data.clearBit<VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_OB_CE_ERROR_MASK>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_OB_CE_ERROR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("3:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_OB_CE_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< CLEAR_[VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_OB_CE_ERROR_MASK]
 
+//>> GET_[VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_OB_CE_ERROR_MASK]
 static inline fapi2::buffer<uint64_t>& GET_VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_OB_CE_ERROR_MASK(
     fapi2::buffer<uint64_t>& i_data,
     uint64_t& o_data)
@@ -10838,12 +12293,14 @@ static inline fapi2::buffer<uint64_t>& GET_VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_OB_C
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_OB_CE_ERROR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("4:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_OB_CE_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_OB_CE_ERROR_MASK]
 
+//>> GET_[VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_OB_CE_ERROR_MASK]
 static inline bool GET_VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_OB_CE_ERROR_MASK(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
@@ -10853,12 +12310,14 @@ static inline bool GET_VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_OB_CE_ERROR_MASK(fapi2::
     return i_data.getBit<VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_OB_CE_ERROR_MASK>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_OB_CE_ERROR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("5:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_OB_CE_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_OB_CE_ERROR_MASK]
 
+//>> SET_[VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_OB_UE_ERROR_MASK]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_OB_UE_ERROR_MASK(
     fapi2::buffer<uint64_t>& i_data,
     fapi2::buffer<uint64_t>& o_data)
@@ -10871,12 +12330,14 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_OB_U
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_OB_UE_ERROR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("0:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_OB_UE_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_OB_UE_ERROR_MASK]
 
+//>> SET_[VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_OB_UE_ERROR_MASK]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_OB_UE_ERROR_MASK(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
@@ -10888,12 +12349,14 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_OB_U
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_OB_UE_ERROR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("1:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_OB_UE_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_OB_UE_ERROR_MASK]
 
+//>> SET_[VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_OB_UE_ERROR_MASK]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_OB_UE_ERROR_MASK(
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -10904,12 +12367,14 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_OB_U
     return o_data.setBit<VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_OB_UE_ERROR_MASK>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_OB_UE_ERROR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("2:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_OB_UE_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_OB_UE_ERROR_MASK]
 
+//>> CLEAR_[VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_OB_UE_ERROR_MASK]
 static inline fapi2::buffer<uint64_t>& CLEAR_VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_OB_UE_ERROR_MASK(
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -10920,12 +12385,14 @@ static inline fapi2::buffer<uint64_t>& CLEAR_VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_OB
     return o_data.clearBit<VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_OB_UE_ERROR_MASK>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_OB_UE_ERROR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("3:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_OB_UE_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< CLEAR_[VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_OB_UE_ERROR_MASK]
 
+//>> GET_[VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_OB_UE_ERROR_MASK]
 static inline fapi2::buffer<uint64_t>& GET_VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_OB_UE_ERROR_MASK(
     fapi2::buffer<uint64_t>& i_data,
     uint64_t& o_data)
@@ -10938,12 +12405,14 @@ static inline fapi2::buffer<uint64_t>& GET_VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_OB_U
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_OB_UE_ERROR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("4:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_OB_UE_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_OB_UE_ERROR_MASK]
 
+//>> GET_[VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_OB_UE_ERROR_MASK]
 static inline bool GET_VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_OB_UE_ERROR_MASK(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
@@ -10953,12 +12422,14 @@ static inline bool GET_VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_OB_UE_ERROR_MASK(fapi2::
     return i_data.getBit<VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_OB_UE_ERROR_MASK>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_OB_UE_ERROR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("5:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_OB_UE_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_OB_UE_ERROR_MASK]
 
+//>> SET_[VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_MASTER_FSM_HANG_MASK]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_MASTER_FSM_HANG_MASK(
     fapi2::buffer<uint64_t>& i_data,
     fapi2::buffer<uint64_t>& o_data)
@@ -10971,12 +12442,14 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_MAST
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_MASTER_FSM_HANG_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("0:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_MASTER_FSM_HANG_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_MASTER_FSM_HANG_MASK]
 
+//>> SET_[VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_MASTER_FSM_HANG_MASK]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_MASTER_FSM_HANG_MASK(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
@@ -10988,12 +12461,14 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_MAST
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_MASTER_FSM_HANG_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("1:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_MASTER_FSM_HANG_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_MASTER_FSM_HANG_MASK]
 
+//>> SET_[VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_MASTER_FSM_HANG_MASK]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_MASTER_FSM_HANG_MASK(
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -11004,12 +12479,14 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_MAST
     return o_data.setBit<VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_MASTER_FSM_HANG_MASK>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_MASTER_FSM_HANG_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("2:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_MASTER_FSM_HANG_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_MASTER_FSM_HANG_MASK]
 
+//>> CLEAR_[VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_MASTER_FSM_HANG_MASK]
 static inline fapi2::buffer<uint64_t>& CLEAR_VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_MASTER_FSM_HANG_MASK(
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -11020,12 +12497,14 @@ static inline fapi2::buffer<uint64_t>& CLEAR_VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_MA
     return o_data.clearBit<VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_MASTER_FSM_HANG_MASK>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_MASTER_FSM_HANG_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("3:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_MASTER_FSM_HANG_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< CLEAR_[VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_MASTER_FSM_HANG_MASK]
 
+//>> GET_[VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_MASTER_FSM_HANG_MASK]
 static inline fapi2::buffer<uint64_t>& GET_VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_MASTER_FSM_HANG_MASK(
     fapi2::buffer<uint64_t>& i_data,
     uint64_t& o_data)
@@ -11038,12 +12517,14 @@ static inline fapi2::buffer<uint64_t>& GET_VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_MAST
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_MASTER_FSM_HANG_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("4:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_MASTER_FSM_HANG_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_MASTER_FSM_HANG_MASK]
 
+//>> GET_[VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_MASTER_FSM_HANG_MASK]
 static inline bool GET_VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_MASTER_FSM_HANG_MASK(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
@@ -11053,12 +12534,14 @@ static inline bool GET_VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_MASTER_FSM_HANG_MASK(fap
     return i_data.getBit<VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_MASTER_FSM_HANG_MASK>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_MASTER_FSM_HANG_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("5:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_MASTER_FSM_HANG_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[VAS_VA_RG_SCF_FIR_MASK_REG_CQ_PB_MASTER_FSM_HANG_MASK]
 
+//>> SET_[VAS_VA_RG_SCF_FIR_MASK_REG_EG_ECC_UE_ERROR_MASK]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_EG_ECC_UE_ERROR_MASK(
     fapi2::buffer<uint64_t>& i_data,
     fapi2::buffer<uint64_t>& o_data)
@@ -11071,12 +12554,14 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_EG_ECC_UE_
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_EG_ECC_UE_ERROR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("0:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_EG_ECC_UE_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_FIR_MASK_REG_EG_ECC_UE_ERROR_MASK]
 
+//>> SET_[VAS_VA_RG_SCF_FIR_MASK_REG_EG_ECC_UE_ERROR_MASK]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_EG_ECC_UE_ERROR_MASK(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
@@ -11088,12 +12573,14 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_EG_ECC_UE_
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_EG_ECC_UE_ERROR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("1:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_EG_ECC_UE_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_FIR_MASK_REG_EG_ECC_UE_ERROR_MASK]
 
+//>> SET_[VAS_VA_RG_SCF_FIR_MASK_REG_EG_ECC_UE_ERROR_MASK]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_EG_ECC_UE_ERROR_MASK(
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -11104,12 +12591,14 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_EG_ECC_UE_
     return o_data.setBit<VAS_VA_RG_SCF_FIR_MASK_REG_EG_ECC_UE_ERROR_MASK>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_EG_ECC_UE_ERROR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("2:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_EG_ECC_UE_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_FIR_MASK_REG_EG_ECC_UE_ERROR_MASK]
 
+//>> CLEAR_[VAS_VA_RG_SCF_FIR_MASK_REG_EG_ECC_UE_ERROR_MASK]
 static inline fapi2::buffer<uint64_t>& CLEAR_VAS_VA_RG_SCF_FIR_MASK_REG_EG_ECC_UE_ERROR_MASK(
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -11120,12 +12609,14 @@ static inline fapi2::buffer<uint64_t>& CLEAR_VAS_VA_RG_SCF_FIR_MASK_REG_EG_ECC_U
     return o_data.clearBit<VAS_VA_RG_SCF_FIR_MASK_REG_EG_ECC_UE_ERROR_MASK>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_EG_ECC_UE_ERROR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("3:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_EG_ECC_UE_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< CLEAR_[VAS_VA_RG_SCF_FIR_MASK_REG_EG_ECC_UE_ERROR_MASK]
 
+//>> GET_[VAS_VA_RG_SCF_FIR_MASK_REG_EG_ECC_UE_ERROR_MASK]
 static inline fapi2::buffer<uint64_t>& GET_VAS_VA_RG_SCF_FIR_MASK_REG_EG_ECC_UE_ERROR_MASK(
     fapi2::buffer<uint64_t>& i_data,
     uint64_t& o_data)
@@ -11138,12 +12629,14 @@ static inline fapi2::buffer<uint64_t>& GET_VAS_VA_RG_SCF_FIR_MASK_REG_EG_ECC_UE_
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_EG_ECC_UE_ERROR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("4:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_EG_ECC_UE_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[VAS_VA_RG_SCF_FIR_MASK_REG_EG_ECC_UE_ERROR_MASK]
 
+//>> GET_[VAS_VA_RG_SCF_FIR_MASK_REG_EG_ECC_UE_ERROR_MASK]
 static inline bool GET_VAS_VA_RG_SCF_FIR_MASK_REG_EG_ECC_UE_ERROR_MASK(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
@@ -11153,12 +12646,14 @@ static inline bool GET_VAS_VA_RG_SCF_FIR_MASK_REG_EG_ECC_UE_ERROR_MASK(fapi2::bu
     return i_data.getBit<VAS_VA_RG_SCF_FIR_MASK_REG_EG_ECC_UE_ERROR_MASK>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_EG_ECC_UE_ERROR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("5:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_EG_ECC_UE_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[VAS_VA_RG_SCF_FIR_MASK_REG_EG_ECC_UE_ERROR_MASK]
 
+//>> SET_[VAS_VA_RG_SCF_FIR_MASK_REG_IN_ECC_UE_ERROR_MASK]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_IN_ECC_UE_ERROR_MASK(
     fapi2::buffer<uint64_t>& i_data,
     fapi2::buffer<uint64_t>& o_data)
@@ -11171,12 +12666,14 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_IN_ECC_UE_
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_IN_ECC_UE_ERROR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("0:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_IN_ECC_UE_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_FIR_MASK_REG_IN_ECC_UE_ERROR_MASK]
 
+//>> SET_[VAS_VA_RG_SCF_FIR_MASK_REG_IN_ECC_UE_ERROR_MASK]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_IN_ECC_UE_ERROR_MASK(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
@@ -11188,12 +12685,14 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_IN_ECC_UE_
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_IN_ECC_UE_ERROR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("1:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_IN_ECC_UE_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_FIR_MASK_REG_IN_ECC_UE_ERROR_MASK]
 
+//>> SET_[VAS_VA_RG_SCF_FIR_MASK_REG_IN_ECC_UE_ERROR_MASK]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_IN_ECC_UE_ERROR_MASK(
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -11204,12 +12703,14 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_IN_ECC_UE_
     return o_data.setBit<VAS_VA_RG_SCF_FIR_MASK_REG_IN_ECC_UE_ERROR_MASK>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_IN_ECC_UE_ERROR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("2:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_IN_ECC_UE_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_FIR_MASK_REG_IN_ECC_UE_ERROR_MASK]
 
+//>> CLEAR_[VAS_VA_RG_SCF_FIR_MASK_REG_IN_ECC_UE_ERROR_MASK]
 static inline fapi2::buffer<uint64_t>& CLEAR_VAS_VA_RG_SCF_FIR_MASK_REG_IN_ECC_UE_ERROR_MASK(
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -11220,12 +12721,14 @@ static inline fapi2::buffer<uint64_t>& CLEAR_VAS_VA_RG_SCF_FIR_MASK_REG_IN_ECC_U
     return o_data.clearBit<VAS_VA_RG_SCF_FIR_MASK_REG_IN_ECC_UE_ERROR_MASK>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_IN_ECC_UE_ERROR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("3:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_IN_ECC_UE_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< CLEAR_[VAS_VA_RG_SCF_FIR_MASK_REG_IN_ECC_UE_ERROR_MASK]
 
+//>> GET_[VAS_VA_RG_SCF_FIR_MASK_REG_IN_ECC_UE_ERROR_MASK]
 static inline fapi2::buffer<uint64_t>& GET_VAS_VA_RG_SCF_FIR_MASK_REG_IN_ECC_UE_ERROR_MASK(
     fapi2::buffer<uint64_t>& i_data,
     uint64_t& o_data)
@@ -11238,12 +12741,14 @@ static inline fapi2::buffer<uint64_t>& GET_VAS_VA_RG_SCF_FIR_MASK_REG_IN_ECC_UE_
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_IN_ECC_UE_ERROR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("4:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_IN_ECC_UE_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[VAS_VA_RG_SCF_FIR_MASK_REG_IN_ECC_UE_ERROR_MASK]
 
+//>> GET_[VAS_VA_RG_SCF_FIR_MASK_REG_IN_ECC_UE_ERROR_MASK]
 static inline bool GET_VAS_VA_RG_SCF_FIR_MASK_REG_IN_ECC_UE_ERROR_MASK(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
@@ -11253,12 +12758,14 @@ static inline bool GET_VAS_VA_RG_SCF_FIR_MASK_REG_IN_ECC_UE_ERROR_MASK(fapi2::bu
     return i_data.getBit<VAS_VA_RG_SCF_FIR_MASK_REG_IN_ECC_UE_ERROR_MASK>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_IN_ECC_UE_ERROR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("5:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_IN_ECC_UE_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[VAS_VA_RG_SCF_FIR_MASK_REG_IN_ECC_UE_ERROR_MASK]
 
+//>> SET_[VAS_VA_RG_SCF_FIR_MASK_REG_CQ_ECC_UE_ERROR_MASK]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_CQ_ECC_UE_ERROR_MASK(
     fapi2::buffer<uint64_t>& i_data,
     fapi2::buffer<uint64_t>& o_data)
@@ -11271,12 +12778,14 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_CQ_ECC_UE_
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_CQ_ECC_UE_ERROR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("0:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_CQ_ECC_UE_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_FIR_MASK_REG_CQ_ECC_UE_ERROR_MASK]
 
+//>> SET_[VAS_VA_RG_SCF_FIR_MASK_REG_CQ_ECC_UE_ERROR_MASK]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_CQ_ECC_UE_ERROR_MASK(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
@@ -11288,12 +12797,14 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_CQ_ECC_UE_
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_CQ_ECC_UE_ERROR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("1:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_CQ_ECC_UE_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_FIR_MASK_REG_CQ_ECC_UE_ERROR_MASK]
 
+//>> SET_[VAS_VA_RG_SCF_FIR_MASK_REG_CQ_ECC_UE_ERROR_MASK]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_CQ_ECC_UE_ERROR_MASK(
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -11304,12 +12815,14 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_CQ_ECC_UE_
     return o_data.setBit<VAS_VA_RG_SCF_FIR_MASK_REG_CQ_ECC_UE_ERROR_MASK>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_CQ_ECC_UE_ERROR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("2:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_CQ_ECC_UE_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_FIR_MASK_REG_CQ_ECC_UE_ERROR_MASK]
 
+//>> CLEAR_[VAS_VA_RG_SCF_FIR_MASK_REG_CQ_ECC_UE_ERROR_MASK]
 static inline fapi2::buffer<uint64_t>& CLEAR_VAS_VA_RG_SCF_FIR_MASK_REG_CQ_ECC_UE_ERROR_MASK(
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -11320,12 +12833,14 @@ static inline fapi2::buffer<uint64_t>& CLEAR_VAS_VA_RG_SCF_FIR_MASK_REG_CQ_ECC_U
     return o_data.clearBit<VAS_VA_RG_SCF_FIR_MASK_REG_CQ_ECC_UE_ERROR_MASK>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_CQ_ECC_UE_ERROR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("3:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_CQ_ECC_UE_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< CLEAR_[VAS_VA_RG_SCF_FIR_MASK_REG_CQ_ECC_UE_ERROR_MASK]
 
+//>> GET_[VAS_VA_RG_SCF_FIR_MASK_REG_CQ_ECC_UE_ERROR_MASK]
 static inline fapi2::buffer<uint64_t>& GET_VAS_VA_RG_SCF_FIR_MASK_REG_CQ_ECC_UE_ERROR_MASK(
     fapi2::buffer<uint64_t>& i_data,
     uint64_t& o_data)
@@ -11338,12 +12853,14 @@ static inline fapi2::buffer<uint64_t>& GET_VAS_VA_RG_SCF_FIR_MASK_REG_CQ_ECC_UE_
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_CQ_ECC_UE_ERROR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("4:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_CQ_ECC_UE_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[VAS_VA_RG_SCF_FIR_MASK_REG_CQ_ECC_UE_ERROR_MASK]
 
+//>> GET_[VAS_VA_RG_SCF_FIR_MASK_REG_CQ_ECC_UE_ERROR_MASK]
 static inline bool GET_VAS_VA_RG_SCF_FIR_MASK_REG_CQ_ECC_UE_ERROR_MASK(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
@@ -11353,12 +12870,14 @@ static inline bool GET_VAS_VA_RG_SCF_FIR_MASK_REG_CQ_ECC_UE_ERROR_MASK(fapi2::bu
     return i_data.getBit<VAS_VA_RG_SCF_FIR_MASK_REG_CQ_ECC_UE_ERROR_MASK>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_CQ_ECC_UE_ERROR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("5:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_CQ_ECC_UE_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[VAS_VA_RG_SCF_FIR_MASK_REG_CQ_ECC_UE_ERROR_MASK]
 
+//>> SET_[VAS_VA_RG_SCF_FIR_MASK_REG_WC_ECC_UE_ERROR_MASK]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_WC_ECC_UE_ERROR_MASK(
     fapi2::buffer<uint64_t>& i_data,
     fapi2::buffer<uint64_t>& o_data)
@@ -11371,12 +12890,14 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_WC_ECC_UE_
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_WC_ECC_UE_ERROR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("0:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_WC_ECC_UE_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_FIR_MASK_REG_WC_ECC_UE_ERROR_MASK]
 
+//>> SET_[VAS_VA_RG_SCF_FIR_MASK_REG_WC_ECC_UE_ERROR_MASK]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_WC_ECC_UE_ERROR_MASK(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
@@ -11388,12 +12909,14 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_WC_ECC_UE_
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_WC_ECC_UE_ERROR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("1:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_WC_ECC_UE_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_FIR_MASK_REG_WC_ECC_UE_ERROR_MASK]
 
+//>> SET_[VAS_VA_RG_SCF_FIR_MASK_REG_WC_ECC_UE_ERROR_MASK]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_WC_ECC_UE_ERROR_MASK(
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -11404,12 +12927,14 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_WC_ECC_UE_
     return o_data.setBit<VAS_VA_RG_SCF_FIR_MASK_REG_WC_ECC_UE_ERROR_MASK>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_WC_ECC_UE_ERROR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("2:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_WC_ECC_UE_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_FIR_MASK_REG_WC_ECC_UE_ERROR_MASK]
 
+//>> CLEAR_[VAS_VA_RG_SCF_FIR_MASK_REG_WC_ECC_UE_ERROR_MASK]
 static inline fapi2::buffer<uint64_t>& CLEAR_VAS_VA_RG_SCF_FIR_MASK_REG_WC_ECC_UE_ERROR_MASK(
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -11420,12 +12945,14 @@ static inline fapi2::buffer<uint64_t>& CLEAR_VAS_VA_RG_SCF_FIR_MASK_REG_WC_ECC_U
     return o_data.clearBit<VAS_VA_RG_SCF_FIR_MASK_REG_WC_ECC_UE_ERROR_MASK>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_WC_ECC_UE_ERROR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("3:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_WC_ECC_UE_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< CLEAR_[VAS_VA_RG_SCF_FIR_MASK_REG_WC_ECC_UE_ERROR_MASK]
 
+//>> GET_[VAS_VA_RG_SCF_FIR_MASK_REG_WC_ECC_UE_ERROR_MASK]
 static inline fapi2::buffer<uint64_t>& GET_VAS_VA_RG_SCF_FIR_MASK_REG_WC_ECC_UE_ERROR_MASK(
     fapi2::buffer<uint64_t>& i_data,
     uint64_t& o_data)
@@ -11438,12 +12965,14 @@ static inline fapi2::buffer<uint64_t>& GET_VAS_VA_RG_SCF_FIR_MASK_REG_WC_ECC_UE_
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_WC_ECC_UE_ERROR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("4:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_WC_ECC_UE_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[VAS_VA_RG_SCF_FIR_MASK_REG_WC_ECC_UE_ERROR_MASK]
 
+//>> GET_[VAS_VA_RG_SCF_FIR_MASK_REG_WC_ECC_UE_ERROR_MASK]
 static inline bool GET_VAS_VA_RG_SCF_FIR_MASK_REG_WC_ECC_UE_ERROR_MASK(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
@@ -11453,12 +12982,14 @@ static inline bool GET_VAS_VA_RG_SCF_FIR_MASK_REG_WC_ECC_UE_ERROR_MASK(fapi2::bu
     return i_data.getBit<VAS_VA_RG_SCF_FIR_MASK_REG_WC_ECC_UE_ERROR_MASK>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_WC_ECC_UE_ERROR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("5:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_WC_ECC_UE_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[VAS_VA_RG_SCF_FIR_MASK_REG_WC_ECC_UE_ERROR_MASK]
 
+//>> SET_[VAS_VA_RG_SCF_FIR_MASK_REG_RG_ECC_UE_ERROR_MASK]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_RG_ECC_UE_ERROR_MASK(
     fapi2::buffer<uint64_t>& i_data,
     fapi2::buffer<uint64_t>& o_data)
@@ -11471,12 +13002,14 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_RG_ECC_UE_
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_RG_ECC_UE_ERROR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("0:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_RG_ECC_UE_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_FIR_MASK_REG_RG_ECC_UE_ERROR_MASK]
 
+//>> SET_[VAS_VA_RG_SCF_FIR_MASK_REG_RG_ECC_UE_ERROR_MASK]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_RG_ECC_UE_ERROR_MASK(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
@@ -11488,12 +13021,14 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_RG_ECC_UE_
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_RG_ECC_UE_ERROR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("1:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_RG_ECC_UE_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_FIR_MASK_REG_RG_ECC_UE_ERROR_MASK]
 
+//>> SET_[VAS_VA_RG_SCF_FIR_MASK_REG_RG_ECC_UE_ERROR_MASK]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_RG_ECC_UE_ERROR_MASK(
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -11504,12 +13039,14 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_RG_ECC_UE_
     return o_data.setBit<VAS_VA_RG_SCF_FIR_MASK_REG_RG_ECC_UE_ERROR_MASK>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_RG_ECC_UE_ERROR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("2:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_RG_ECC_UE_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_FIR_MASK_REG_RG_ECC_UE_ERROR_MASK]
 
+//>> CLEAR_[VAS_VA_RG_SCF_FIR_MASK_REG_RG_ECC_UE_ERROR_MASK]
 static inline fapi2::buffer<uint64_t>& CLEAR_VAS_VA_RG_SCF_FIR_MASK_REG_RG_ECC_UE_ERROR_MASK(
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -11520,12 +13057,14 @@ static inline fapi2::buffer<uint64_t>& CLEAR_VAS_VA_RG_SCF_FIR_MASK_REG_RG_ECC_U
     return o_data.clearBit<VAS_VA_RG_SCF_FIR_MASK_REG_RG_ECC_UE_ERROR_MASK>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_RG_ECC_UE_ERROR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("3:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_RG_ECC_UE_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< CLEAR_[VAS_VA_RG_SCF_FIR_MASK_REG_RG_ECC_UE_ERROR_MASK]
 
+//>> GET_[VAS_VA_RG_SCF_FIR_MASK_REG_RG_ECC_UE_ERROR_MASK]
 static inline fapi2::buffer<uint64_t>& GET_VAS_VA_RG_SCF_FIR_MASK_REG_RG_ECC_UE_ERROR_MASK(
     fapi2::buffer<uint64_t>& i_data,
     uint64_t& o_data)
@@ -11538,12 +13077,14 @@ static inline fapi2::buffer<uint64_t>& GET_VAS_VA_RG_SCF_FIR_MASK_REG_RG_ECC_UE_
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_RG_ECC_UE_ERROR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("4:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_RG_ECC_UE_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[VAS_VA_RG_SCF_FIR_MASK_REG_RG_ECC_UE_ERROR_MASK]
 
+//>> GET_[VAS_VA_RG_SCF_FIR_MASK_REG_RG_ECC_UE_ERROR_MASK]
 static inline bool GET_VAS_VA_RG_SCF_FIR_MASK_REG_RG_ECC_UE_ERROR_MASK(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
@@ -11553,12 +13094,14 @@ static inline bool GET_VAS_VA_RG_SCF_FIR_MASK_REG_RG_ECC_UE_ERROR_MASK(fapi2::bu
     return i_data.getBit<VAS_VA_RG_SCF_FIR_MASK_REG_RG_ECC_UE_ERROR_MASK>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_RG_ECC_UE_ERROR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("5:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_RG_ECC_UE_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[VAS_VA_RG_SCF_FIR_MASK_REG_RG_ECC_UE_ERROR_MASK]
 
+//>> SET_[VAS_VA_RG_SCF_FIR_MASK_REG_IN_PARITY_ERROR_MASK]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_IN_PARITY_ERROR_MASK(
     fapi2::buffer<uint64_t>& i_data,
     fapi2::buffer<uint64_t>& o_data)
@@ -11571,12 +13114,14 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_IN_PARITY_
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_IN_PARITY_ERROR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("0:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_IN_PARITY_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_FIR_MASK_REG_IN_PARITY_ERROR_MASK]
 
+//>> SET_[VAS_VA_RG_SCF_FIR_MASK_REG_IN_PARITY_ERROR_MASK]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_IN_PARITY_ERROR_MASK(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
@@ -11588,12 +13133,14 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_IN_PARITY_
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_IN_PARITY_ERROR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("1:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_IN_PARITY_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_FIR_MASK_REG_IN_PARITY_ERROR_MASK]
 
+//>> SET_[VAS_VA_RG_SCF_FIR_MASK_REG_IN_PARITY_ERROR_MASK]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_IN_PARITY_ERROR_MASK(
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -11604,12 +13151,14 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_IN_PARITY_
     return o_data.setBit<VAS_VA_RG_SCF_FIR_MASK_REG_IN_PARITY_ERROR_MASK>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_IN_PARITY_ERROR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("2:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_IN_PARITY_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_FIR_MASK_REG_IN_PARITY_ERROR_MASK]
 
+//>> CLEAR_[VAS_VA_RG_SCF_FIR_MASK_REG_IN_PARITY_ERROR_MASK]
 static inline fapi2::buffer<uint64_t>& CLEAR_VAS_VA_RG_SCF_FIR_MASK_REG_IN_PARITY_ERROR_MASK(
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -11620,12 +13169,14 @@ static inline fapi2::buffer<uint64_t>& CLEAR_VAS_VA_RG_SCF_FIR_MASK_REG_IN_PARIT
     return o_data.clearBit<VAS_VA_RG_SCF_FIR_MASK_REG_IN_PARITY_ERROR_MASK>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_IN_PARITY_ERROR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("3:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_IN_PARITY_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< CLEAR_[VAS_VA_RG_SCF_FIR_MASK_REG_IN_PARITY_ERROR_MASK]
 
+//>> GET_[VAS_VA_RG_SCF_FIR_MASK_REG_IN_PARITY_ERROR_MASK]
 static inline fapi2::buffer<uint64_t>& GET_VAS_VA_RG_SCF_FIR_MASK_REG_IN_PARITY_ERROR_MASK(
     fapi2::buffer<uint64_t>& i_data,
     uint64_t& o_data)
@@ -11638,12 +13189,14 @@ static inline fapi2::buffer<uint64_t>& GET_VAS_VA_RG_SCF_FIR_MASK_REG_IN_PARITY_
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_IN_PARITY_ERROR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("4:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_IN_PARITY_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[VAS_VA_RG_SCF_FIR_MASK_REG_IN_PARITY_ERROR_MASK]
 
+//>> GET_[VAS_VA_RG_SCF_FIR_MASK_REG_IN_PARITY_ERROR_MASK]
 static inline bool GET_VAS_VA_RG_SCF_FIR_MASK_REG_IN_PARITY_ERROR_MASK(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
@@ -11653,12 +13206,14 @@ static inline bool GET_VAS_VA_RG_SCF_FIR_MASK_REG_IN_PARITY_ERROR_MASK(fapi2::bu
     return i_data.getBit<VAS_VA_RG_SCF_FIR_MASK_REG_IN_PARITY_ERROR_MASK>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_IN_PARITY_ERROR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("5:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_IN_PARITY_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[VAS_VA_RG_SCF_FIR_MASK_REG_IN_PARITY_ERROR_MASK]
 
+//>> SET_[VAS_VA_RG_SCF_FIR_MASK_REG_IN_SW_CAST_ERROR_MASK]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_IN_SW_CAST_ERROR_MASK(
     fapi2::buffer<uint64_t>& i_data,
     fapi2::buffer<uint64_t>& o_data)
@@ -11671,12 +13226,14 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_IN_SW_CAST
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_IN_SW_CAST_ERROR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("0:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_IN_SW_CAST_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_FIR_MASK_REG_IN_SW_CAST_ERROR_MASK]
 
+//>> SET_[VAS_VA_RG_SCF_FIR_MASK_REG_IN_SW_CAST_ERROR_MASK]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_IN_SW_CAST_ERROR_MASK(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
@@ -11688,12 +13245,14 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_IN_SW_CAST
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_IN_SW_CAST_ERROR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("1:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_IN_SW_CAST_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_FIR_MASK_REG_IN_SW_CAST_ERROR_MASK]
 
+//>> SET_[VAS_VA_RG_SCF_FIR_MASK_REG_IN_SW_CAST_ERROR_MASK]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_IN_SW_CAST_ERROR_MASK(
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -11704,12 +13263,14 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_IN_SW_CAST
     return o_data.setBit<VAS_VA_RG_SCF_FIR_MASK_REG_IN_SW_CAST_ERROR_MASK>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_IN_SW_CAST_ERROR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("2:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_IN_SW_CAST_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_FIR_MASK_REG_IN_SW_CAST_ERROR_MASK]
 
+//>> CLEAR_[VAS_VA_RG_SCF_FIR_MASK_REG_IN_SW_CAST_ERROR_MASK]
 static inline fapi2::buffer<uint64_t>& CLEAR_VAS_VA_RG_SCF_FIR_MASK_REG_IN_SW_CAST_ERROR_MASK(
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -11720,12 +13281,14 @@ static inline fapi2::buffer<uint64_t>& CLEAR_VAS_VA_RG_SCF_FIR_MASK_REG_IN_SW_CA
     return o_data.clearBit<VAS_VA_RG_SCF_FIR_MASK_REG_IN_SW_CAST_ERROR_MASK>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_IN_SW_CAST_ERROR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("3:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_IN_SW_CAST_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< CLEAR_[VAS_VA_RG_SCF_FIR_MASK_REG_IN_SW_CAST_ERROR_MASK]
 
+//>> GET_[VAS_VA_RG_SCF_FIR_MASK_REG_IN_SW_CAST_ERROR_MASK]
 static inline fapi2::buffer<uint64_t>& GET_VAS_VA_RG_SCF_FIR_MASK_REG_IN_SW_CAST_ERROR_MASK(
     fapi2::buffer<uint64_t>& i_data,
     uint64_t& o_data)
@@ -11738,12 +13301,14 @@ static inline fapi2::buffer<uint64_t>& GET_VAS_VA_RG_SCF_FIR_MASK_REG_IN_SW_CAST
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_IN_SW_CAST_ERROR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("4:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_IN_SW_CAST_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[VAS_VA_RG_SCF_FIR_MASK_REG_IN_SW_CAST_ERROR_MASK]
 
+//>> GET_[VAS_VA_RG_SCF_FIR_MASK_REG_IN_SW_CAST_ERROR_MASK]
 static inline bool GET_VAS_VA_RG_SCF_FIR_MASK_REG_IN_SW_CAST_ERROR_MASK(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
@@ -11753,12 +13318,14 @@ static inline bool GET_VAS_VA_RG_SCF_FIR_MASK_REG_IN_SW_CAST_ERROR_MASK(fapi2::b
     return i_data.getBit<VAS_VA_RG_SCF_FIR_MASK_REG_IN_SW_CAST_ERROR_MASK>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_IN_SW_CAST_ERROR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("5:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_IN_SW_CAST_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[VAS_VA_RG_SCF_FIR_MASK_REG_IN_SW_CAST_ERROR_MASK]
 
+//>> SET_[VAS_VA_RG_SCF_FIR_MASK_REG_CQ_SMF_ACCESS_ERROR_MASK]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_CQ_SMF_ACCESS_ERROR_MASK(
     fapi2::buffer<uint64_t>& i_data,
     fapi2::buffer<uint64_t>& o_data)
@@ -11771,12 +13338,14 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_CQ_SMF_ACC
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_CQ_SMF_ACCESS_ERROR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("0:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_CQ_SMF_ACCESS_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_FIR_MASK_REG_CQ_SMF_ACCESS_ERROR_MASK]
 
+//>> SET_[VAS_VA_RG_SCF_FIR_MASK_REG_CQ_SMF_ACCESS_ERROR_MASK]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_CQ_SMF_ACCESS_ERROR_MASK(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
@@ -11788,12 +13357,14 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_CQ_SMF_ACC
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_CQ_SMF_ACCESS_ERROR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("1:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_CQ_SMF_ACCESS_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_FIR_MASK_REG_CQ_SMF_ACCESS_ERROR_MASK]
 
+//>> SET_[VAS_VA_RG_SCF_FIR_MASK_REG_CQ_SMF_ACCESS_ERROR_MASK]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_CQ_SMF_ACCESS_ERROR_MASK(
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -11804,12 +13375,14 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_CQ_SMF_ACC
     return o_data.setBit<VAS_VA_RG_SCF_FIR_MASK_REG_CQ_SMF_ACCESS_ERROR_MASK>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_CQ_SMF_ACCESS_ERROR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("2:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_CQ_SMF_ACCESS_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_FIR_MASK_REG_CQ_SMF_ACCESS_ERROR_MASK]
 
+//>> CLEAR_[VAS_VA_RG_SCF_FIR_MASK_REG_CQ_SMF_ACCESS_ERROR_MASK]
 static inline fapi2::buffer<uint64_t>& CLEAR_VAS_VA_RG_SCF_FIR_MASK_REG_CQ_SMF_ACCESS_ERROR_MASK(
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -11820,12 +13393,14 @@ static inline fapi2::buffer<uint64_t>& CLEAR_VAS_VA_RG_SCF_FIR_MASK_REG_CQ_SMF_A
     return o_data.clearBit<VAS_VA_RG_SCF_FIR_MASK_REG_CQ_SMF_ACCESS_ERROR_MASK>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_CQ_SMF_ACCESS_ERROR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("3:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_CQ_SMF_ACCESS_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< CLEAR_[VAS_VA_RG_SCF_FIR_MASK_REG_CQ_SMF_ACCESS_ERROR_MASK]
 
+//>> GET_[VAS_VA_RG_SCF_FIR_MASK_REG_CQ_SMF_ACCESS_ERROR_MASK]
 static inline fapi2::buffer<uint64_t>& GET_VAS_VA_RG_SCF_FIR_MASK_REG_CQ_SMF_ACCESS_ERROR_MASK(
     fapi2::buffer<uint64_t>& i_data,
     uint64_t& o_data)
@@ -11838,12 +13413,14 @@ static inline fapi2::buffer<uint64_t>& GET_VAS_VA_RG_SCF_FIR_MASK_REG_CQ_SMF_ACC
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_CQ_SMF_ACCESS_ERROR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("4:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_CQ_SMF_ACCESS_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[VAS_VA_RG_SCF_FIR_MASK_REG_CQ_SMF_ACCESS_ERROR_MASK]
 
+//>> GET_[VAS_VA_RG_SCF_FIR_MASK_REG_CQ_SMF_ACCESS_ERROR_MASK]
 static inline bool GET_VAS_VA_RG_SCF_FIR_MASK_REG_CQ_SMF_ACCESS_ERROR_MASK(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
@@ -11853,12 +13430,14 @@ static inline bool GET_VAS_VA_RG_SCF_FIR_MASK_REG_CQ_SMF_ACCESS_ERROR_MASK(fapi2
     return i_data.getBit<VAS_VA_RG_SCF_FIR_MASK_REG_CQ_SMF_ACCESS_ERROR_MASK>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_CQ_SMF_ACCESS_ERROR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("5:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_CQ_SMF_ACCESS_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[VAS_VA_RG_SCF_FIR_MASK_REG_CQ_SMF_ACCESS_ERROR_MASK]
 
+//>> SET_[VAS_VA_RG_SCF_FIR_MASK_REG_EG_ECC_SUE_ERROR_MASK]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_EG_ECC_SUE_ERROR_MASK(
     fapi2::buffer<uint64_t>& i_data,
     fapi2::buffer<uint64_t>& o_data)
@@ -11871,12 +13450,14 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_EG_ECC_SUE
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_EG_ECC_SUE_ERROR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("0:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_EG_ECC_SUE_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_FIR_MASK_REG_EG_ECC_SUE_ERROR_MASK]
 
+//>> SET_[VAS_VA_RG_SCF_FIR_MASK_REG_EG_ECC_SUE_ERROR_MASK]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_EG_ECC_SUE_ERROR_MASK(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
@@ -11888,12 +13469,14 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_EG_ECC_SUE
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_EG_ECC_SUE_ERROR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("1:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_EG_ECC_SUE_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_FIR_MASK_REG_EG_ECC_SUE_ERROR_MASK]
 
+//>> SET_[VAS_VA_RG_SCF_FIR_MASK_REG_EG_ECC_SUE_ERROR_MASK]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_EG_ECC_SUE_ERROR_MASK(
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -11904,12 +13487,14 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_EG_ECC_SUE
     return o_data.setBit<VAS_VA_RG_SCF_FIR_MASK_REG_EG_ECC_SUE_ERROR_MASK>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_EG_ECC_SUE_ERROR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("2:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_EG_ECC_SUE_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_FIR_MASK_REG_EG_ECC_SUE_ERROR_MASK]
 
+//>> CLEAR_[VAS_VA_RG_SCF_FIR_MASK_REG_EG_ECC_SUE_ERROR_MASK]
 static inline fapi2::buffer<uint64_t>& CLEAR_VAS_VA_RG_SCF_FIR_MASK_REG_EG_ECC_SUE_ERROR_MASK(
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -11920,12 +13505,14 @@ static inline fapi2::buffer<uint64_t>& CLEAR_VAS_VA_RG_SCF_FIR_MASK_REG_EG_ECC_S
     return o_data.clearBit<VAS_VA_RG_SCF_FIR_MASK_REG_EG_ECC_SUE_ERROR_MASK>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_EG_ECC_SUE_ERROR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("3:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_EG_ECC_SUE_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< CLEAR_[VAS_VA_RG_SCF_FIR_MASK_REG_EG_ECC_SUE_ERROR_MASK]
 
+//>> GET_[VAS_VA_RG_SCF_FIR_MASK_REG_EG_ECC_SUE_ERROR_MASK]
 static inline fapi2::buffer<uint64_t>& GET_VAS_VA_RG_SCF_FIR_MASK_REG_EG_ECC_SUE_ERROR_MASK(
     fapi2::buffer<uint64_t>& i_data,
     uint64_t& o_data)
@@ -11938,12 +13525,14 @@ static inline fapi2::buffer<uint64_t>& GET_VAS_VA_RG_SCF_FIR_MASK_REG_EG_ECC_SUE
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_EG_ECC_SUE_ERROR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("4:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_EG_ECC_SUE_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[VAS_VA_RG_SCF_FIR_MASK_REG_EG_ECC_SUE_ERROR_MASK]
 
+//>> GET_[VAS_VA_RG_SCF_FIR_MASK_REG_EG_ECC_SUE_ERROR_MASK]
 static inline bool GET_VAS_VA_RG_SCF_FIR_MASK_REG_EG_ECC_SUE_ERROR_MASK(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
@@ -11953,12 +13542,14 @@ static inline bool GET_VAS_VA_RG_SCF_FIR_MASK_REG_EG_ECC_SUE_ERROR_MASK(fapi2::b
     return i_data.getBit<VAS_VA_RG_SCF_FIR_MASK_REG_EG_ECC_SUE_ERROR_MASK>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_EG_ECC_SUE_ERROR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("5:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_EG_ECC_SUE_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[VAS_VA_RG_SCF_FIR_MASK_REG_EG_ECC_SUE_ERROR_MASK]
 
+//>> SET_[VAS_VA_RG_SCF_FIR_MASK_REG_IN_ECC_SUE_ERROR_MASK]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_IN_ECC_SUE_ERROR_MASK(
     fapi2::buffer<uint64_t>& i_data,
     fapi2::buffer<uint64_t>& o_data)
@@ -11971,12 +13562,14 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_IN_ECC_SUE
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_IN_ECC_SUE_ERROR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("0:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_IN_ECC_SUE_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_FIR_MASK_REG_IN_ECC_SUE_ERROR_MASK]
 
+//>> SET_[VAS_VA_RG_SCF_FIR_MASK_REG_IN_ECC_SUE_ERROR_MASK]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_IN_ECC_SUE_ERROR_MASK(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
@@ -11988,12 +13581,14 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_IN_ECC_SUE
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_IN_ECC_SUE_ERROR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("1:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_IN_ECC_SUE_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_FIR_MASK_REG_IN_ECC_SUE_ERROR_MASK]
 
+//>> SET_[VAS_VA_RG_SCF_FIR_MASK_REG_IN_ECC_SUE_ERROR_MASK]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_IN_ECC_SUE_ERROR_MASK(
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -12004,12 +13599,14 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_IN_ECC_SUE
     return o_data.setBit<VAS_VA_RG_SCF_FIR_MASK_REG_IN_ECC_SUE_ERROR_MASK>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_IN_ECC_SUE_ERROR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("2:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_IN_ECC_SUE_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_FIR_MASK_REG_IN_ECC_SUE_ERROR_MASK]
 
+//>> CLEAR_[VAS_VA_RG_SCF_FIR_MASK_REG_IN_ECC_SUE_ERROR_MASK]
 static inline fapi2::buffer<uint64_t>& CLEAR_VAS_VA_RG_SCF_FIR_MASK_REG_IN_ECC_SUE_ERROR_MASK(
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -12020,12 +13617,14 @@ static inline fapi2::buffer<uint64_t>& CLEAR_VAS_VA_RG_SCF_FIR_MASK_REG_IN_ECC_S
     return o_data.clearBit<VAS_VA_RG_SCF_FIR_MASK_REG_IN_ECC_SUE_ERROR_MASK>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_IN_ECC_SUE_ERROR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("3:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_IN_ECC_SUE_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< CLEAR_[VAS_VA_RG_SCF_FIR_MASK_REG_IN_ECC_SUE_ERROR_MASK]
 
+//>> GET_[VAS_VA_RG_SCF_FIR_MASK_REG_IN_ECC_SUE_ERROR_MASK]
 static inline fapi2::buffer<uint64_t>& GET_VAS_VA_RG_SCF_FIR_MASK_REG_IN_ECC_SUE_ERROR_MASK(
     fapi2::buffer<uint64_t>& i_data,
     uint64_t& o_data)
@@ -12038,12 +13637,14 @@ static inline fapi2::buffer<uint64_t>& GET_VAS_VA_RG_SCF_FIR_MASK_REG_IN_ECC_SUE
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_IN_ECC_SUE_ERROR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("4:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_IN_ECC_SUE_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[VAS_VA_RG_SCF_FIR_MASK_REG_IN_ECC_SUE_ERROR_MASK]
 
+//>> GET_[VAS_VA_RG_SCF_FIR_MASK_REG_IN_ECC_SUE_ERROR_MASK]
 static inline bool GET_VAS_VA_RG_SCF_FIR_MASK_REG_IN_ECC_SUE_ERROR_MASK(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
@@ -12053,12 +13654,14 @@ static inline bool GET_VAS_VA_RG_SCF_FIR_MASK_REG_IN_ECC_SUE_ERROR_MASK(fapi2::b
     return i_data.getBit<VAS_VA_RG_SCF_FIR_MASK_REG_IN_ECC_SUE_ERROR_MASK>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_IN_ECC_SUE_ERROR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("5:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_IN_ECC_SUE_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[VAS_VA_RG_SCF_FIR_MASK_REG_IN_ECC_SUE_ERROR_MASK]
 
+//>> SET_[VAS_VA_RG_SCF_FIR_MASK_REG_CQ_ECC_SUE_ERROR_MASK]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_CQ_ECC_SUE_ERROR_MASK(
     fapi2::buffer<uint64_t>& i_data,
     fapi2::buffer<uint64_t>& o_data)
@@ -12071,12 +13674,14 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_CQ_ECC_SUE
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_CQ_ECC_SUE_ERROR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("0:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_CQ_ECC_SUE_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_FIR_MASK_REG_CQ_ECC_SUE_ERROR_MASK]
 
+//>> SET_[VAS_VA_RG_SCF_FIR_MASK_REG_CQ_ECC_SUE_ERROR_MASK]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_CQ_ECC_SUE_ERROR_MASK(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
@@ -12088,12 +13693,14 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_CQ_ECC_SUE
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_CQ_ECC_SUE_ERROR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("1:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_CQ_ECC_SUE_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_FIR_MASK_REG_CQ_ECC_SUE_ERROR_MASK]
 
+//>> SET_[VAS_VA_RG_SCF_FIR_MASK_REG_CQ_ECC_SUE_ERROR_MASK]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_CQ_ECC_SUE_ERROR_MASK(
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -12104,12 +13711,14 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_CQ_ECC_SUE
     return o_data.setBit<VAS_VA_RG_SCF_FIR_MASK_REG_CQ_ECC_SUE_ERROR_MASK>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_CQ_ECC_SUE_ERROR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("2:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_CQ_ECC_SUE_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_FIR_MASK_REG_CQ_ECC_SUE_ERROR_MASK]
 
+//>> CLEAR_[VAS_VA_RG_SCF_FIR_MASK_REG_CQ_ECC_SUE_ERROR_MASK]
 static inline fapi2::buffer<uint64_t>& CLEAR_VAS_VA_RG_SCF_FIR_MASK_REG_CQ_ECC_SUE_ERROR_MASK(
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -12120,12 +13729,14 @@ static inline fapi2::buffer<uint64_t>& CLEAR_VAS_VA_RG_SCF_FIR_MASK_REG_CQ_ECC_S
     return o_data.clearBit<VAS_VA_RG_SCF_FIR_MASK_REG_CQ_ECC_SUE_ERROR_MASK>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_CQ_ECC_SUE_ERROR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("3:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_CQ_ECC_SUE_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< CLEAR_[VAS_VA_RG_SCF_FIR_MASK_REG_CQ_ECC_SUE_ERROR_MASK]
 
+//>> GET_[VAS_VA_RG_SCF_FIR_MASK_REG_CQ_ECC_SUE_ERROR_MASK]
 static inline fapi2::buffer<uint64_t>& GET_VAS_VA_RG_SCF_FIR_MASK_REG_CQ_ECC_SUE_ERROR_MASK(
     fapi2::buffer<uint64_t>& i_data,
     uint64_t& o_data)
@@ -12138,12 +13749,14 @@ static inline fapi2::buffer<uint64_t>& GET_VAS_VA_RG_SCF_FIR_MASK_REG_CQ_ECC_SUE
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_CQ_ECC_SUE_ERROR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("4:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_CQ_ECC_SUE_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[VAS_VA_RG_SCF_FIR_MASK_REG_CQ_ECC_SUE_ERROR_MASK]
 
+//>> GET_[VAS_VA_RG_SCF_FIR_MASK_REG_CQ_ECC_SUE_ERROR_MASK]
 static inline bool GET_VAS_VA_RG_SCF_FIR_MASK_REG_CQ_ECC_SUE_ERROR_MASK(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
@@ -12153,12 +13766,14 @@ static inline bool GET_VAS_VA_RG_SCF_FIR_MASK_REG_CQ_ECC_SUE_ERROR_MASK(fapi2::b
     return i_data.getBit<VAS_VA_RG_SCF_FIR_MASK_REG_CQ_ECC_SUE_ERROR_MASK>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_CQ_ECC_SUE_ERROR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("5:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_CQ_ECC_SUE_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[VAS_VA_RG_SCF_FIR_MASK_REG_CQ_ECC_SUE_ERROR_MASK]
 
+//>> SET_[VAS_VA_RG_SCF_FIR_MASK_REG_WC_ECC_SUE_ERROR_MASK]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_WC_ECC_SUE_ERROR_MASK(
     fapi2::buffer<uint64_t>& i_data,
     fapi2::buffer<uint64_t>& o_data)
@@ -12171,12 +13786,14 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_WC_ECC_SUE
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_WC_ECC_SUE_ERROR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("0:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_WC_ECC_SUE_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_FIR_MASK_REG_WC_ECC_SUE_ERROR_MASK]
 
+//>> SET_[VAS_VA_RG_SCF_FIR_MASK_REG_WC_ECC_SUE_ERROR_MASK]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_WC_ECC_SUE_ERROR_MASK(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
@@ -12188,12 +13805,14 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_WC_ECC_SUE
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_WC_ECC_SUE_ERROR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("1:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_WC_ECC_SUE_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_FIR_MASK_REG_WC_ECC_SUE_ERROR_MASK]
 
+//>> SET_[VAS_VA_RG_SCF_FIR_MASK_REG_WC_ECC_SUE_ERROR_MASK]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_WC_ECC_SUE_ERROR_MASK(
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -12204,12 +13823,14 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_WC_ECC_SUE
     return o_data.setBit<VAS_VA_RG_SCF_FIR_MASK_REG_WC_ECC_SUE_ERROR_MASK>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_WC_ECC_SUE_ERROR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("2:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_WC_ECC_SUE_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_FIR_MASK_REG_WC_ECC_SUE_ERROR_MASK]
 
+//>> CLEAR_[VAS_VA_RG_SCF_FIR_MASK_REG_WC_ECC_SUE_ERROR_MASK]
 static inline fapi2::buffer<uint64_t>& CLEAR_VAS_VA_RG_SCF_FIR_MASK_REG_WC_ECC_SUE_ERROR_MASK(
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -12220,12 +13841,14 @@ static inline fapi2::buffer<uint64_t>& CLEAR_VAS_VA_RG_SCF_FIR_MASK_REG_WC_ECC_S
     return o_data.clearBit<VAS_VA_RG_SCF_FIR_MASK_REG_WC_ECC_SUE_ERROR_MASK>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_WC_ECC_SUE_ERROR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("3:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_WC_ECC_SUE_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< CLEAR_[VAS_VA_RG_SCF_FIR_MASK_REG_WC_ECC_SUE_ERROR_MASK]
 
+//>> GET_[VAS_VA_RG_SCF_FIR_MASK_REG_WC_ECC_SUE_ERROR_MASK]
 static inline fapi2::buffer<uint64_t>& GET_VAS_VA_RG_SCF_FIR_MASK_REG_WC_ECC_SUE_ERROR_MASK(
     fapi2::buffer<uint64_t>& i_data,
     uint64_t& o_data)
@@ -12238,12 +13861,14 @@ static inline fapi2::buffer<uint64_t>& GET_VAS_VA_RG_SCF_FIR_MASK_REG_WC_ECC_SUE
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_WC_ECC_SUE_ERROR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("4:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_WC_ECC_SUE_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[VAS_VA_RG_SCF_FIR_MASK_REG_WC_ECC_SUE_ERROR_MASK]
 
+//>> GET_[VAS_VA_RG_SCF_FIR_MASK_REG_WC_ECC_SUE_ERROR_MASK]
 static inline bool GET_VAS_VA_RG_SCF_FIR_MASK_REG_WC_ECC_SUE_ERROR_MASK(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
@@ -12253,12 +13878,14 @@ static inline bool GET_VAS_VA_RG_SCF_FIR_MASK_REG_WC_ECC_SUE_ERROR_MASK(fapi2::b
     return i_data.getBit<VAS_VA_RG_SCF_FIR_MASK_REG_WC_ECC_SUE_ERROR_MASK>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_WC_ECC_SUE_ERROR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("5:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_WC_ECC_SUE_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[VAS_VA_RG_SCF_FIR_MASK_REG_WC_ECC_SUE_ERROR_MASK]
 
+//>> SET_[VAS_VA_RG_SCF_FIR_MASK_REG_RG_ECC_SUE_ERROR_MASK]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_RG_ECC_SUE_ERROR_MASK(
     fapi2::buffer<uint64_t>& i_data,
     fapi2::buffer<uint64_t>& o_data)
@@ -12271,12 +13898,14 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_RG_ECC_SUE
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_RG_ECC_SUE_ERROR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("0:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_RG_ECC_SUE_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_FIR_MASK_REG_RG_ECC_SUE_ERROR_MASK]
 
+//>> SET_[VAS_VA_RG_SCF_FIR_MASK_REG_RG_ECC_SUE_ERROR_MASK]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_RG_ECC_SUE_ERROR_MASK(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
@@ -12288,12 +13917,14 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_RG_ECC_SUE
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_RG_ECC_SUE_ERROR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("1:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_RG_ECC_SUE_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_FIR_MASK_REG_RG_ECC_SUE_ERROR_MASK]
 
+//>> SET_[VAS_VA_RG_SCF_FIR_MASK_REG_RG_ECC_SUE_ERROR_MASK]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_RG_ECC_SUE_ERROR_MASK(
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -12304,12 +13935,14 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_RG_ECC_SUE
     return o_data.setBit<VAS_VA_RG_SCF_FIR_MASK_REG_RG_ECC_SUE_ERROR_MASK>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_RG_ECC_SUE_ERROR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("2:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_RG_ECC_SUE_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_FIR_MASK_REG_RG_ECC_SUE_ERROR_MASK]
 
+//>> CLEAR_[VAS_VA_RG_SCF_FIR_MASK_REG_RG_ECC_SUE_ERROR_MASK]
 static inline fapi2::buffer<uint64_t>& CLEAR_VAS_VA_RG_SCF_FIR_MASK_REG_RG_ECC_SUE_ERROR_MASK(
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -12320,12 +13953,14 @@ static inline fapi2::buffer<uint64_t>& CLEAR_VAS_VA_RG_SCF_FIR_MASK_REG_RG_ECC_S
     return o_data.clearBit<VAS_VA_RG_SCF_FIR_MASK_REG_RG_ECC_SUE_ERROR_MASK>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_RG_ECC_SUE_ERROR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("3:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_RG_ECC_SUE_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< CLEAR_[VAS_VA_RG_SCF_FIR_MASK_REG_RG_ECC_SUE_ERROR_MASK]
 
+//>> GET_[VAS_VA_RG_SCF_FIR_MASK_REG_RG_ECC_SUE_ERROR_MASK]
 static inline fapi2::buffer<uint64_t>& GET_VAS_VA_RG_SCF_FIR_MASK_REG_RG_ECC_SUE_ERROR_MASK(
     fapi2::buffer<uint64_t>& i_data,
     uint64_t& o_data)
@@ -12338,12 +13973,14 @@ static inline fapi2::buffer<uint64_t>& GET_VAS_VA_RG_SCF_FIR_MASK_REG_RG_ECC_SUE
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_RG_ECC_SUE_ERROR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("4:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_RG_ECC_SUE_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[VAS_VA_RG_SCF_FIR_MASK_REG_RG_ECC_SUE_ERROR_MASK]
 
+//>> GET_[VAS_VA_RG_SCF_FIR_MASK_REG_RG_ECC_SUE_ERROR_MASK]
 static inline bool GET_VAS_VA_RG_SCF_FIR_MASK_REG_RG_ECC_SUE_ERROR_MASK(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
@@ -12353,12 +13990,14 @@ static inline bool GET_VAS_VA_RG_SCF_FIR_MASK_REG_RG_ECC_SUE_ERROR_MASK(fapi2::b
     return i_data.getBit<VAS_VA_RG_SCF_FIR_MASK_REG_RG_ECC_SUE_ERROR_MASK>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_RG_ECC_SUE_ERROR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("5:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_RG_ECC_SUE_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[VAS_VA_RG_SCF_FIR_MASK_REG_RG_ECC_SUE_ERROR_MASK]
 
+//>> SET_[VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_HYP_RD_ADDR_ERR_MASK]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_HYP_RD_ADDR_ERR_MASK(
     fapi2::buffer<uint64_t>& i_data,
     fapi2::buffer<uint64_t>& o_data)
@@ -12371,12 +14010,14 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_HYP_R
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_HYP_RD_ADDR_ERR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("0:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_HYP_RD_ADDR_ERR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_HYP_RD_ADDR_ERR_MASK]
 
+//>> SET_[VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_HYP_RD_ADDR_ERR_MASK]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_HYP_RD_ADDR_ERR_MASK(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
@@ -12388,12 +14029,14 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_HYP_R
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_HYP_RD_ADDR_ERR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("1:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_HYP_RD_ADDR_ERR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_HYP_RD_ADDR_ERR_MASK]
 
+//>> SET_[VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_HYP_RD_ADDR_ERR_MASK]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_HYP_RD_ADDR_ERR_MASK(
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -12404,12 +14047,14 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_HYP_R
     return o_data.setBit<VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_HYP_RD_ADDR_ERR_MASK>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_HYP_RD_ADDR_ERR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("2:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_HYP_RD_ADDR_ERR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_HYP_RD_ADDR_ERR_MASK]
 
+//>> CLEAR_[VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_HYP_RD_ADDR_ERR_MASK]
 static inline fapi2::buffer<uint64_t>& CLEAR_VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_HYP_RD_ADDR_ERR_MASK(
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -12420,12 +14065,14 @@ static inline fapi2::buffer<uint64_t>& CLEAR_VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_HYP
     return o_data.clearBit<VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_HYP_RD_ADDR_ERR_MASK>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_HYP_RD_ADDR_ERR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("3:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_HYP_RD_ADDR_ERR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< CLEAR_[VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_HYP_RD_ADDR_ERR_MASK]
 
+//>> GET_[VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_HYP_RD_ADDR_ERR_MASK]
 static inline fapi2::buffer<uint64_t>& GET_VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_HYP_RD_ADDR_ERR_MASK(
     fapi2::buffer<uint64_t>& i_data,
     uint64_t& o_data)
@@ -12438,12 +14085,14 @@ static inline fapi2::buffer<uint64_t>& GET_VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_HYP_R
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_HYP_RD_ADDR_ERR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("4:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_HYP_RD_ADDR_ERR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_HYP_RD_ADDR_ERR_MASK]
 
+//>> GET_[VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_HYP_RD_ADDR_ERR_MASK]
 static inline bool GET_VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_HYP_RD_ADDR_ERR_MASK(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
@@ -12453,12 +14102,14 @@ static inline bool GET_VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_HYP_RD_ADDR_ERR_MASK(fapi
     return i_data.getBit<VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_HYP_RD_ADDR_ERR_MASK>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_HYP_RD_ADDR_ERR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("5:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_HYP_RD_ADDR_ERR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_HYP_RD_ADDR_ERR_MASK]
 
+//>> SET_[VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_OS_RD_ADDR_ERR_MASK]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_OS_RD_ADDR_ERR_MASK(
     fapi2::buffer<uint64_t>& i_data,
     fapi2::buffer<uint64_t>& o_data)
@@ -12471,12 +14122,14 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_OS_RD
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_OS_RD_ADDR_ERR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("0:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_OS_RD_ADDR_ERR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_OS_RD_ADDR_ERR_MASK]
 
+//>> SET_[VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_OS_RD_ADDR_ERR_MASK]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_OS_RD_ADDR_ERR_MASK(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
@@ -12488,12 +14141,14 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_OS_RD
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_OS_RD_ADDR_ERR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("1:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_OS_RD_ADDR_ERR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_OS_RD_ADDR_ERR_MASK]
 
+//>> SET_[VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_OS_RD_ADDR_ERR_MASK]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_OS_RD_ADDR_ERR_MASK(
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -12504,12 +14159,14 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_OS_RD
     return o_data.setBit<VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_OS_RD_ADDR_ERR_MASK>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_OS_RD_ADDR_ERR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("2:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_OS_RD_ADDR_ERR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_OS_RD_ADDR_ERR_MASK]
 
+//>> CLEAR_[VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_OS_RD_ADDR_ERR_MASK]
 static inline fapi2::buffer<uint64_t>& CLEAR_VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_OS_RD_ADDR_ERR_MASK(
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -12520,12 +14177,14 @@ static inline fapi2::buffer<uint64_t>& CLEAR_VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_OS_
     return o_data.clearBit<VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_OS_RD_ADDR_ERR_MASK>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_OS_RD_ADDR_ERR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("3:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_OS_RD_ADDR_ERR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< CLEAR_[VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_OS_RD_ADDR_ERR_MASK]
 
+//>> GET_[VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_OS_RD_ADDR_ERR_MASK]
 static inline fapi2::buffer<uint64_t>& GET_VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_OS_RD_ADDR_ERR_MASK(
     fapi2::buffer<uint64_t>& i_data,
     uint64_t& o_data)
@@ -12538,12 +14197,14 @@ static inline fapi2::buffer<uint64_t>& GET_VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_OS_RD
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_OS_RD_ADDR_ERR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("4:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_OS_RD_ADDR_ERR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_OS_RD_ADDR_ERR_MASK]
 
+//>> GET_[VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_OS_RD_ADDR_ERR_MASK]
 static inline bool GET_VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_OS_RD_ADDR_ERR_MASK(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
@@ -12553,12 +14214,14 @@ static inline bool GET_VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_OS_RD_ADDR_ERR_MASK(fapi2
     return i_data.getBit<VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_OS_RD_ADDR_ERR_MASK>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_OS_RD_ADDR_ERR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("5:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_OS_RD_ADDR_ERR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_OS_RD_ADDR_ERR_MASK]
 
+//>> SET_[VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_HYP_WR_ADDR_ERR_MASK]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_HYP_WR_ADDR_ERR_MASK(
     fapi2::buffer<uint64_t>& i_data,
     fapi2::buffer<uint64_t>& o_data)
@@ -12571,12 +14234,14 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_HYP_W
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_HYP_WR_ADDR_ERR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("0:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_HYP_WR_ADDR_ERR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_HYP_WR_ADDR_ERR_MASK]
 
+//>> SET_[VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_HYP_WR_ADDR_ERR_MASK]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_HYP_WR_ADDR_ERR_MASK(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
@@ -12588,12 +14253,14 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_HYP_W
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_HYP_WR_ADDR_ERR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("1:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_HYP_WR_ADDR_ERR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_HYP_WR_ADDR_ERR_MASK]
 
+//>> SET_[VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_HYP_WR_ADDR_ERR_MASK]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_HYP_WR_ADDR_ERR_MASK(
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -12604,12 +14271,14 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_HYP_W
     return o_data.setBit<VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_HYP_WR_ADDR_ERR_MASK>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_HYP_WR_ADDR_ERR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("2:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_HYP_WR_ADDR_ERR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_HYP_WR_ADDR_ERR_MASK]
 
+//>> CLEAR_[VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_HYP_WR_ADDR_ERR_MASK]
 static inline fapi2::buffer<uint64_t>& CLEAR_VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_HYP_WR_ADDR_ERR_MASK(
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -12620,12 +14289,14 @@ static inline fapi2::buffer<uint64_t>& CLEAR_VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_HYP
     return o_data.clearBit<VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_HYP_WR_ADDR_ERR_MASK>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_HYP_WR_ADDR_ERR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("3:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_HYP_WR_ADDR_ERR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< CLEAR_[VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_HYP_WR_ADDR_ERR_MASK]
 
+//>> GET_[VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_HYP_WR_ADDR_ERR_MASK]
 static inline fapi2::buffer<uint64_t>& GET_VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_HYP_WR_ADDR_ERR_MASK(
     fapi2::buffer<uint64_t>& i_data,
     uint64_t& o_data)
@@ -12638,12 +14309,14 @@ static inline fapi2::buffer<uint64_t>& GET_VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_HYP_W
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_HYP_WR_ADDR_ERR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("4:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_HYP_WR_ADDR_ERR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_HYP_WR_ADDR_ERR_MASK]
 
+//>> GET_[VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_HYP_WR_ADDR_ERR_MASK]
 static inline bool GET_VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_HYP_WR_ADDR_ERR_MASK(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
@@ -12653,12 +14326,14 @@ static inline bool GET_VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_HYP_WR_ADDR_ERR_MASK(fapi
     return i_data.getBit<VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_HYP_WR_ADDR_ERR_MASK>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_HYP_WR_ADDR_ERR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("5:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_HYP_WR_ADDR_ERR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_HYP_WR_ADDR_ERR_MASK]
 
+//>> SET_[VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_OS_WR_ADDR_ERR_MASK]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_OS_WR_ADDR_ERR_MASK(
     fapi2::buffer<uint64_t>& i_data,
     fapi2::buffer<uint64_t>& o_data)
@@ -12671,12 +14346,14 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_OS_WR
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_OS_WR_ADDR_ERR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("0:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_OS_WR_ADDR_ERR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_OS_WR_ADDR_ERR_MASK]
 
+//>> SET_[VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_OS_WR_ADDR_ERR_MASK]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_OS_WR_ADDR_ERR_MASK(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
@@ -12688,12 +14365,14 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_OS_WR
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_OS_WR_ADDR_ERR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("1:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_OS_WR_ADDR_ERR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_OS_WR_ADDR_ERR_MASK]
 
+//>> SET_[VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_OS_WR_ADDR_ERR_MASK]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_OS_WR_ADDR_ERR_MASK(
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -12704,12 +14383,14 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_OS_WR
     return o_data.setBit<VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_OS_WR_ADDR_ERR_MASK>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_OS_WR_ADDR_ERR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("2:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_OS_WR_ADDR_ERR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_OS_WR_ADDR_ERR_MASK]
 
+//>> CLEAR_[VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_OS_WR_ADDR_ERR_MASK]
 static inline fapi2::buffer<uint64_t>& CLEAR_VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_OS_WR_ADDR_ERR_MASK(
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -12720,12 +14401,14 @@ static inline fapi2::buffer<uint64_t>& CLEAR_VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_OS_
     return o_data.clearBit<VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_OS_WR_ADDR_ERR_MASK>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_OS_WR_ADDR_ERR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("3:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_OS_WR_ADDR_ERR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< CLEAR_[VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_OS_WR_ADDR_ERR_MASK]
 
+//>> GET_[VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_OS_WR_ADDR_ERR_MASK]
 static inline fapi2::buffer<uint64_t>& GET_VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_OS_WR_ADDR_ERR_MASK(
     fapi2::buffer<uint64_t>& i_data,
     uint64_t& o_data)
@@ -12738,12 +14421,14 @@ static inline fapi2::buffer<uint64_t>& GET_VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_OS_WR
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_OS_WR_ADDR_ERR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("4:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_OS_WR_ADDR_ERR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_OS_WR_ADDR_ERR_MASK]
 
+//>> GET_[VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_OS_WR_ADDR_ERR_MASK]
 static inline bool GET_VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_OS_WR_ADDR_ERR_MASK(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
@@ -12753,12 +14438,14 @@ static inline bool GET_VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_OS_WR_ADDR_ERR_MASK(fapi2
     return i_data.getBit<VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_OS_WR_ADDR_ERR_MASK>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_OS_WR_ADDR_ERR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("5:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_OS_WR_ADDR_ERR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_OS_WR_ADDR_ERR_MASK]
 
+//>> SET_[VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_NON8B_HYP_ERR_MASK]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_NON8B_HYP_ERR_MASK(
     fapi2::buffer<uint64_t>& i_data,
     fapi2::buffer<uint64_t>& o_data)
@@ -12771,12 +14458,14 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_NON8B
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_NON8B_HYP_ERR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("0:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_NON8B_HYP_ERR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_NON8B_HYP_ERR_MASK]
 
+//>> SET_[VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_NON8B_HYP_ERR_MASK]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_NON8B_HYP_ERR_MASK(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
@@ -12788,12 +14477,14 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_NON8B
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_NON8B_HYP_ERR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("1:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_NON8B_HYP_ERR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_NON8B_HYP_ERR_MASK]
 
+//>> SET_[VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_NON8B_HYP_ERR_MASK]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_NON8B_HYP_ERR_MASK(
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -12804,12 +14495,14 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_NON8B
     return o_data.setBit<VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_NON8B_HYP_ERR_MASK>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_NON8B_HYP_ERR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("2:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_NON8B_HYP_ERR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_NON8B_HYP_ERR_MASK]
 
+//>> CLEAR_[VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_NON8B_HYP_ERR_MASK]
 static inline fapi2::buffer<uint64_t>& CLEAR_VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_NON8B_HYP_ERR_MASK(
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -12820,12 +14513,14 @@ static inline fapi2::buffer<uint64_t>& CLEAR_VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_NON
     return o_data.clearBit<VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_NON8B_HYP_ERR_MASK>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_NON8B_HYP_ERR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("3:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_NON8B_HYP_ERR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< CLEAR_[VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_NON8B_HYP_ERR_MASK]
 
+//>> GET_[VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_NON8B_HYP_ERR_MASK]
 static inline fapi2::buffer<uint64_t>& GET_VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_NON8B_HYP_ERR_MASK(
     fapi2::buffer<uint64_t>& i_data,
     uint64_t& o_data)
@@ -12838,12 +14533,14 @@ static inline fapi2::buffer<uint64_t>& GET_VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_NON8B
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_NON8B_HYP_ERR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("4:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_NON8B_HYP_ERR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_NON8B_HYP_ERR_MASK]
 
+//>> GET_[VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_NON8B_HYP_ERR_MASK]
 static inline bool GET_VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_NON8B_HYP_ERR_MASK(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
@@ -12853,12 +14550,14 @@ static inline bool GET_VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_NON8B_HYP_ERR_MASK(fapi2:
     return i_data.getBit<VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_NON8B_HYP_ERR_MASK>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_NON8B_HYP_ERR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("5:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_NON8B_HYP_ERR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_NON8B_HYP_ERR_MASK]
 
+//>> SET_[VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_NON8B_OS_ERR_MASK]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_NON8B_OS_ERR_MASK(
     fapi2::buffer<uint64_t>& i_data,
     fapi2::buffer<uint64_t>& o_data)
@@ -12871,12 +14570,14 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_NON8B
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_NON8B_OS_ERR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("0:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_NON8B_OS_ERR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_NON8B_OS_ERR_MASK]
 
+//>> SET_[VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_NON8B_OS_ERR_MASK]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_NON8B_OS_ERR_MASK(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
@@ -12888,12 +14589,14 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_NON8B
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_NON8B_OS_ERR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("1:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_NON8B_OS_ERR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_NON8B_OS_ERR_MASK]
 
+//>> SET_[VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_NON8B_OS_ERR_MASK]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_NON8B_OS_ERR_MASK(
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -12904,12 +14607,14 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_NON8B
     return o_data.setBit<VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_NON8B_OS_ERR_MASK>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_NON8B_OS_ERR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("2:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_NON8B_OS_ERR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_NON8B_OS_ERR_MASK]
 
+//>> CLEAR_[VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_NON8B_OS_ERR_MASK]
 static inline fapi2::buffer<uint64_t>& CLEAR_VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_NON8B_OS_ERR_MASK(
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -12920,12 +14625,14 @@ static inline fapi2::buffer<uint64_t>& CLEAR_VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_NON
     return o_data.clearBit<VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_NON8B_OS_ERR_MASK>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_NON8B_OS_ERR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("3:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_NON8B_OS_ERR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< CLEAR_[VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_NON8B_OS_ERR_MASK]
 
+//>> GET_[VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_NON8B_OS_ERR_MASK]
 static inline fapi2::buffer<uint64_t>& GET_VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_NON8B_OS_ERR_MASK(
     fapi2::buffer<uint64_t>& i_data,
     uint64_t& o_data)
@@ -12938,12 +14645,14 @@ static inline fapi2::buffer<uint64_t>& GET_VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_NON8B
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_NON8B_OS_ERR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("4:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_NON8B_OS_ERR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_NON8B_OS_ERR_MASK]
 
+//>> GET_[VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_NON8B_OS_ERR_MASK]
 static inline bool GET_VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_NON8B_OS_ERR_MASK(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
@@ -12953,12 +14662,14 @@ static inline bool GET_VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_NON8B_OS_ERR_MASK(fapi2::
     return i_data.getBit<VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_NON8B_OS_ERR_MASK>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_NON8B_OS_ERR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("5:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_NON8B_OS_ERR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[VAS_VA_RG_SCF_FIR_MASK_REG_MMIO_NON8B_OS_ERR_MASK]
 
+//>> SET_[VAS_VA_RG_SCF_FIR_MASK_REG_WM_WIN_NOT_OPEN_ERR_MASK]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_WM_WIN_NOT_OPEN_ERR_MASK(
     fapi2::buffer<uint64_t>& i_data,
     fapi2::buffer<uint64_t>& o_data)
@@ -12971,12 +14682,14 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_WM_WIN_NOT
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_WM_WIN_NOT_OPEN_ERR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("0:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_WM_WIN_NOT_OPEN_ERR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_FIR_MASK_REG_WM_WIN_NOT_OPEN_ERR_MASK]
 
+//>> SET_[VAS_VA_RG_SCF_FIR_MASK_REG_WM_WIN_NOT_OPEN_ERR_MASK]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_WM_WIN_NOT_OPEN_ERR_MASK(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
@@ -12988,12 +14701,14 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_WM_WIN_NOT
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_WM_WIN_NOT_OPEN_ERR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("1:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_WM_WIN_NOT_OPEN_ERR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_FIR_MASK_REG_WM_WIN_NOT_OPEN_ERR_MASK]
 
+//>> SET_[VAS_VA_RG_SCF_FIR_MASK_REG_WM_WIN_NOT_OPEN_ERR_MASK]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_WM_WIN_NOT_OPEN_ERR_MASK(
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -13004,12 +14719,14 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_WM_WIN_NOT
     return o_data.setBit<VAS_VA_RG_SCF_FIR_MASK_REG_WM_WIN_NOT_OPEN_ERR_MASK>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_WM_WIN_NOT_OPEN_ERR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("2:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_WM_WIN_NOT_OPEN_ERR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_FIR_MASK_REG_WM_WIN_NOT_OPEN_ERR_MASK]
 
+//>> CLEAR_[VAS_VA_RG_SCF_FIR_MASK_REG_WM_WIN_NOT_OPEN_ERR_MASK]
 static inline fapi2::buffer<uint64_t>& CLEAR_VAS_VA_RG_SCF_FIR_MASK_REG_WM_WIN_NOT_OPEN_ERR_MASK(
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -13020,12 +14737,14 @@ static inline fapi2::buffer<uint64_t>& CLEAR_VAS_VA_RG_SCF_FIR_MASK_REG_WM_WIN_N
     return o_data.clearBit<VAS_VA_RG_SCF_FIR_MASK_REG_WM_WIN_NOT_OPEN_ERR_MASK>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_WM_WIN_NOT_OPEN_ERR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("3:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_WM_WIN_NOT_OPEN_ERR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< CLEAR_[VAS_VA_RG_SCF_FIR_MASK_REG_WM_WIN_NOT_OPEN_ERR_MASK]
 
+//>> GET_[VAS_VA_RG_SCF_FIR_MASK_REG_WM_WIN_NOT_OPEN_ERR_MASK]
 static inline fapi2::buffer<uint64_t>& GET_VAS_VA_RG_SCF_FIR_MASK_REG_WM_WIN_NOT_OPEN_ERR_MASK(
     fapi2::buffer<uint64_t>& i_data,
     uint64_t& o_data)
@@ -13038,12 +14757,14 @@ static inline fapi2::buffer<uint64_t>& GET_VAS_VA_RG_SCF_FIR_MASK_REG_WM_WIN_NOT
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_WM_WIN_NOT_OPEN_ERR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("4:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_WM_WIN_NOT_OPEN_ERR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[VAS_VA_RG_SCF_FIR_MASK_REG_WM_WIN_NOT_OPEN_ERR_MASK]
 
+//>> GET_[VAS_VA_RG_SCF_FIR_MASK_REG_WM_WIN_NOT_OPEN_ERR_MASK]
 static inline bool GET_VAS_VA_RG_SCF_FIR_MASK_REG_WM_WIN_NOT_OPEN_ERR_MASK(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
@@ -13053,12 +14774,14 @@ static inline bool GET_VAS_VA_RG_SCF_FIR_MASK_REG_WM_WIN_NOT_OPEN_ERR_MASK(fapi2
     return i_data.getBit<VAS_VA_RG_SCF_FIR_MASK_REG_WM_WIN_NOT_OPEN_ERR_MASK>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_WM_WIN_NOT_OPEN_ERR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("5:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_WM_WIN_NOT_OPEN_ERR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[VAS_VA_RG_SCF_FIR_MASK_REG_WM_WIN_NOT_OPEN_ERR_MASK]
 
+//>> SET_[VAS_VA_RG_SCF_FIR_MASK_REG_WM_MULTIHIT_ERR_MASK]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_WM_MULTIHIT_ERR_MASK(
     fapi2::buffer<uint64_t>& i_data,
     fapi2::buffer<uint64_t>& o_data)
@@ -13071,12 +14794,14 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_WM_MULTIHI
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_WM_MULTIHIT_ERR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("0:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_WM_MULTIHIT_ERR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_FIR_MASK_REG_WM_MULTIHIT_ERR_MASK]
 
+//>> SET_[VAS_VA_RG_SCF_FIR_MASK_REG_WM_MULTIHIT_ERR_MASK]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_WM_MULTIHIT_ERR_MASK(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
@@ -13088,12 +14813,14 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_WM_MULTIHI
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_WM_MULTIHIT_ERR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("1:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_WM_MULTIHIT_ERR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_FIR_MASK_REG_WM_MULTIHIT_ERR_MASK]
 
+//>> SET_[VAS_VA_RG_SCF_FIR_MASK_REG_WM_MULTIHIT_ERR_MASK]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_WM_MULTIHIT_ERR_MASK(
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -13104,12 +14831,14 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_WM_MULTIHI
     return o_data.setBit<VAS_VA_RG_SCF_FIR_MASK_REG_WM_MULTIHIT_ERR_MASK>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_WM_MULTIHIT_ERR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("2:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_WM_MULTIHIT_ERR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_FIR_MASK_REG_WM_MULTIHIT_ERR_MASK]
 
+//>> CLEAR_[VAS_VA_RG_SCF_FIR_MASK_REG_WM_MULTIHIT_ERR_MASK]
 static inline fapi2::buffer<uint64_t>& CLEAR_VAS_VA_RG_SCF_FIR_MASK_REG_WM_MULTIHIT_ERR_MASK(
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -13120,12 +14849,14 @@ static inline fapi2::buffer<uint64_t>& CLEAR_VAS_VA_RG_SCF_FIR_MASK_REG_WM_MULTI
     return o_data.clearBit<VAS_VA_RG_SCF_FIR_MASK_REG_WM_MULTIHIT_ERR_MASK>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_WM_MULTIHIT_ERR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("3:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_WM_MULTIHIT_ERR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< CLEAR_[VAS_VA_RG_SCF_FIR_MASK_REG_WM_MULTIHIT_ERR_MASK]
 
+//>> GET_[VAS_VA_RG_SCF_FIR_MASK_REG_WM_MULTIHIT_ERR_MASK]
 static inline fapi2::buffer<uint64_t>& GET_VAS_VA_RG_SCF_FIR_MASK_REG_WM_MULTIHIT_ERR_MASK(
     fapi2::buffer<uint64_t>& i_data,
     uint64_t& o_data)
@@ -13138,12 +14869,14 @@ static inline fapi2::buffer<uint64_t>& GET_VAS_VA_RG_SCF_FIR_MASK_REG_WM_MULTIHI
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_WM_MULTIHIT_ERR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("4:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_WM_MULTIHIT_ERR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[VAS_VA_RG_SCF_FIR_MASK_REG_WM_MULTIHIT_ERR_MASK]
 
+//>> GET_[VAS_VA_RG_SCF_FIR_MASK_REG_WM_MULTIHIT_ERR_MASK]
 static inline bool GET_VAS_VA_RG_SCF_FIR_MASK_REG_WM_MULTIHIT_ERR_MASK(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
@@ -13153,12 +14886,14 @@ static inline bool GET_VAS_VA_RG_SCF_FIR_MASK_REG_WM_MULTIHIT_ERR_MASK(fapi2::bu
     return i_data.getBit<VAS_VA_RG_SCF_FIR_MASK_REG_WM_MULTIHIT_ERR_MASK>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_WM_MULTIHIT_ERR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("5:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_WM_MULTIHIT_ERR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[VAS_VA_RG_SCF_FIR_MASK_REG_WM_MULTIHIT_ERR_MASK]
 
+//>> SET_[VAS_VA_RG_SCF_FIR_MASK_REG_PG_MIG_DISABLED_ERR_MASK]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_PG_MIG_DISABLED_ERR_MASK(
     fapi2::buffer<uint64_t>& i_data,
     fapi2::buffer<uint64_t>& o_data)
@@ -13171,12 +14906,14 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_PG_MIG_DIS
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_PG_MIG_DISABLED_ERR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("0:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_PG_MIG_DISABLED_ERR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_FIR_MASK_REG_PG_MIG_DISABLED_ERR_MASK]
 
+//>> SET_[VAS_VA_RG_SCF_FIR_MASK_REG_PG_MIG_DISABLED_ERR_MASK]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_PG_MIG_DISABLED_ERR_MASK(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
@@ -13188,12 +14925,14 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_PG_MIG_DIS
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_PG_MIG_DISABLED_ERR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("1:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_PG_MIG_DISABLED_ERR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_FIR_MASK_REG_PG_MIG_DISABLED_ERR_MASK]
 
+//>> SET_[VAS_VA_RG_SCF_FIR_MASK_REG_PG_MIG_DISABLED_ERR_MASK]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_PG_MIG_DISABLED_ERR_MASK(
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -13204,12 +14943,14 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_PG_MIG_DIS
     return o_data.setBit<VAS_VA_RG_SCF_FIR_MASK_REG_PG_MIG_DISABLED_ERR_MASK>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_PG_MIG_DISABLED_ERR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("2:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_PG_MIG_DISABLED_ERR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_FIR_MASK_REG_PG_MIG_DISABLED_ERR_MASK]
 
+//>> CLEAR_[VAS_VA_RG_SCF_FIR_MASK_REG_PG_MIG_DISABLED_ERR_MASK]
 static inline fapi2::buffer<uint64_t>& CLEAR_VAS_VA_RG_SCF_FIR_MASK_REG_PG_MIG_DISABLED_ERR_MASK(
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -13220,12 +14961,14 @@ static inline fapi2::buffer<uint64_t>& CLEAR_VAS_VA_RG_SCF_FIR_MASK_REG_PG_MIG_D
     return o_data.clearBit<VAS_VA_RG_SCF_FIR_MASK_REG_PG_MIG_DISABLED_ERR_MASK>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_PG_MIG_DISABLED_ERR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("3:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_PG_MIG_DISABLED_ERR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< CLEAR_[VAS_VA_RG_SCF_FIR_MASK_REG_PG_MIG_DISABLED_ERR_MASK]
 
+//>> GET_[VAS_VA_RG_SCF_FIR_MASK_REG_PG_MIG_DISABLED_ERR_MASK]
 static inline fapi2::buffer<uint64_t>& GET_VAS_VA_RG_SCF_FIR_MASK_REG_PG_MIG_DISABLED_ERR_MASK(
     fapi2::buffer<uint64_t>& i_data,
     uint64_t& o_data)
@@ -13238,12 +14981,14 @@ static inline fapi2::buffer<uint64_t>& GET_VAS_VA_RG_SCF_FIR_MASK_REG_PG_MIG_DIS
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_PG_MIG_DISABLED_ERR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("4:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_PG_MIG_DISABLED_ERR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[VAS_VA_RG_SCF_FIR_MASK_REG_PG_MIG_DISABLED_ERR_MASK]
 
+//>> GET_[VAS_VA_RG_SCF_FIR_MASK_REG_PG_MIG_DISABLED_ERR_MASK]
 static inline bool GET_VAS_VA_RG_SCF_FIR_MASK_REG_PG_MIG_DISABLED_ERR_MASK(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
@@ -13253,12 +14998,14 @@ static inline bool GET_VAS_VA_RG_SCF_FIR_MASK_REG_PG_MIG_DISABLED_ERR_MASK(fapi2
     return i_data.getBit<VAS_VA_RG_SCF_FIR_MASK_REG_PG_MIG_DISABLED_ERR_MASK>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_PG_MIG_DISABLED_ERR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("5:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_PG_MIG_DISABLED_ERR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[VAS_VA_RG_SCF_FIR_MASK_REG_PG_MIG_DISABLED_ERR_MASK]
 
+//>> SET_[VAS_VA_RG_SCF_FIR_MASK_REG_PG_MIG_SIZE_MISMATCH_ERR_MASK]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_PG_MIG_SIZE_MISMATCH_ERR_MASK(
     fapi2::buffer<uint64_t>& i_data,
     fapi2::buffer<uint64_t>& o_data)
@@ -13271,12 +15018,14 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_PG_MIG_SIZ
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_PG_MIG_SIZE_MISMATCH_ERR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("0:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_PG_MIG_SIZE_MISMATCH_ERR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_FIR_MASK_REG_PG_MIG_SIZE_MISMATCH_ERR_MASK]
 
+//>> SET_[VAS_VA_RG_SCF_FIR_MASK_REG_PG_MIG_SIZE_MISMATCH_ERR_MASK]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_PG_MIG_SIZE_MISMATCH_ERR_MASK(
     const uint64_t i_data,
     fapi2::buffer<uint64_t>& o_data)
@@ -13289,12 +15038,14 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_PG_MIG_SIZ
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_PG_MIG_SIZE_MISMATCH_ERR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("1:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_PG_MIG_SIZE_MISMATCH_ERR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_FIR_MASK_REG_PG_MIG_SIZE_MISMATCH_ERR_MASK]
 
+//>> SET_[VAS_VA_RG_SCF_FIR_MASK_REG_PG_MIG_SIZE_MISMATCH_ERR_MASK]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_PG_MIG_SIZE_MISMATCH_ERR_MASK(
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -13305,12 +15056,14 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_PG_MIG_SIZ
     return o_data.setBit<VAS_VA_RG_SCF_FIR_MASK_REG_PG_MIG_SIZE_MISMATCH_ERR_MASK>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_PG_MIG_SIZE_MISMATCH_ERR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("2:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_PG_MIG_SIZE_MISMATCH_ERR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_FIR_MASK_REG_PG_MIG_SIZE_MISMATCH_ERR_MASK]
 
+//>> CLEAR_[VAS_VA_RG_SCF_FIR_MASK_REG_PG_MIG_SIZE_MISMATCH_ERR_MASK]
 static inline fapi2::buffer<uint64_t>& CLEAR_VAS_VA_RG_SCF_FIR_MASK_REG_PG_MIG_SIZE_MISMATCH_ERR_MASK(
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -13321,12 +15074,14 @@ static inline fapi2::buffer<uint64_t>& CLEAR_VAS_VA_RG_SCF_FIR_MASK_REG_PG_MIG_S
     return o_data.clearBit<VAS_VA_RG_SCF_FIR_MASK_REG_PG_MIG_SIZE_MISMATCH_ERR_MASK>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_PG_MIG_SIZE_MISMATCH_ERR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("3:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_PG_MIG_SIZE_MISMATCH_ERR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< CLEAR_[VAS_VA_RG_SCF_FIR_MASK_REG_PG_MIG_SIZE_MISMATCH_ERR_MASK]
 
+//>> GET_[VAS_VA_RG_SCF_FIR_MASK_REG_PG_MIG_SIZE_MISMATCH_ERR_MASK]
 static inline fapi2::buffer<uint64_t>& GET_VAS_VA_RG_SCF_FIR_MASK_REG_PG_MIG_SIZE_MISMATCH_ERR_MASK(
     fapi2::buffer<uint64_t>& i_data,
     uint64_t& o_data)
@@ -13339,12 +15094,14 @@ static inline fapi2::buffer<uint64_t>& GET_VAS_VA_RG_SCF_FIR_MASK_REG_PG_MIG_SIZ
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_PG_MIG_SIZE_MISMATCH_ERR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("4:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_PG_MIG_SIZE_MISMATCH_ERR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[VAS_VA_RG_SCF_FIR_MASK_REG_PG_MIG_SIZE_MISMATCH_ERR_MASK]
 
+//>> GET_[VAS_VA_RG_SCF_FIR_MASK_REG_PG_MIG_SIZE_MISMATCH_ERR_MASK]
 static inline bool GET_VAS_VA_RG_SCF_FIR_MASK_REG_PG_MIG_SIZE_MISMATCH_ERR_MASK(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
@@ -13354,12 +15111,14 @@ static inline bool GET_VAS_VA_RG_SCF_FIR_MASK_REG_PG_MIG_SIZE_MISMATCH_ERR_MASK(
     return i_data.getBit<VAS_VA_RG_SCF_FIR_MASK_REG_PG_MIG_SIZE_MISMATCH_ERR_MASK>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_PG_MIG_SIZE_MISMATCH_ERR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("5:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_PG_MIG_SIZE_MISMATCH_ERR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[VAS_VA_RG_SCF_FIR_MASK_REG_PG_MIG_SIZE_MISMATCH_ERR_MASK]
 
+//>> SET_[VAS_VA_RG_SCF_FIR_MASK_REG_NOTIFY_FAILED_ERR_MASK]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_NOTIFY_FAILED_ERR_MASK(
     fapi2::buffer<uint64_t>& i_data,
     fapi2::buffer<uint64_t>& o_data)
@@ -13372,12 +15131,14 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_NOTIFY_FAI
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_NOTIFY_FAILED_ERR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("0:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_NOTIFY_FAILED_ERR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_FIR_MASK_REG_NOTIFY_FAILED_ERR_MASK]
 
+//>> SET_[VAS_VA_RG_SCF_FIR_MASK_REG_NOTIFY_FAILED_ERR_MASK]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_NOTIFY_FAILED_ERR_MASK(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
@@ -13389,12 +15150,14 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_NOTIFY_FAI
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_NOTIFY_FAILED_ERR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("1:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_NOTIFY_FAILED_ERR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_FIR_MASK_REG_NOTIFY_FAILED_ERR_MASK]
 
+//>> SET_[VAS_VA_RG_SCF_FIR_MASK_REG_NOTIFY_FAILED_ERR_MASK]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_NOTIFY_FAILED_ERR_MASK(
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -13405,12 +15168,14 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_NOTIFY_FAI
     return o_data.setBit<VAS_VA_RG_SCF_FIR_MASK_REG_NOTIFY_FAILED_ERR_MASK>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_NOTIFY_FAILED_ERR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("2:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_NOTIFY_FAILED_ERR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_FIR_MASK_REG_NOTIFY_FAILED_ERR_MASK]
 
+//>> CLEAR_[VAS_VA_RG_SCF_FIR_MASK_REG_NOTIFY_FAILED_ERR_MASK]
 static inline fapi2::buffer<uint64_t>& CLEAR_VAS_VA_RG_SCF_FIR_MASK_REG_NOTIFY_FAILED_ERR_MASK(
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -13421,12 +15186,14 @@ static inline fapi2::buffer<uint64_t>& CLEAR_VAS_VA_RG_SCF_FIR_MASK_REG_NOTIFY_F
     return o_data.clearBit<VAS_VA_RG_SCF_FIR_MASK_REG_NOTIFY_FAILED_ERR_MASK>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_NOTIFY_FAILED_ERR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("3:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_NOTIFY_FAILED_ERR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< CLEAR_[VAS_VA_RG_SCF_FIR_MASK_REG_NOTIFY_FAILED_ERR_MASK]
 
+//>> GET_[VAS_VA_RG_SCF_FIR_MASK_REG_NOTIFY_FAILED_ERR_MASK]
 static inline fapi2::buffer<uint64_t>& GET_VAS_VA_RG_SCF_FIR_MASK_REG_NOTIFY_FAILED_ERR_MASK(
     fapi2::buffer<uint64_t>& i_data,
     uint64_t& o_data)
@@ -13439,12 +15206,14 @@ static inline fapi2::buffer<uint64_t>& GET_VAS_VA_RG_SCF_FIR_MASK_REG_NOTIFY_FAI
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_NOTIFY_FAILED_ERR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("4:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_NOTIFY_FAILED_ERR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[VAS_VA_RG_SCF_FIR_MASK_REG_NOTIFY_FAILED_ERR_MASK]
 
+//>> GET_[VAS_VA_RG_SCF_FIR_MASK_REG_NOTIFY_FAILED_ERR_MASK]
 static inline bool GET_VAS_VA_RG_SCF_FIR_MASK_REG_NOTIFY_FAILED_ERR_MASK(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
@@ -13454,12 +15223,14 @@ static inline bool GET_VAS_VA_RG_SCF_FIR_MASK_REG_NOTIFY_FAILED_ERR_MASK(fapi2::
     return i_data.getBit<VAS_VA_RG_SCF_FIR_MASK_REG_NOTIFY_FAILED_ERR_MASK>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_NOTIFY_FAILED_ERR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("5:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_NOTIFY_FAILED_ERR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[VAS_VA_RG_SCF_FIR_MASK_REG_NOTIFY_FAILED_ERR_MASK]
 
+//>> SET_[VAS_VA_RG_SCF_FIR_MASK_REG_WR_MON_NOT_DISABLED_ERR_MASK]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_WR_MON_NOT_DISABLED_ERR_MASK(
     fapi2::buffer<uint64_t>& i_data,
     fapi2::buffer<uint64_t>& o_data)
@@ -13472,12 +15243,14 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_WR_MON_NOT
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_WR_MON_NOT_DISABLED_ERR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("0:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_WR_MON_NOT_DISABLED_ERR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_FIR_MASK_REG_WR_MON_NOT_DISABLED_ERR_MASK]
 
+//>> SET_[VAS_VA_RG_SCF_FIR_MASK_REG_WR_MON_NOT_DISABLED_ERR_MASK]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_WR_MON_NOT_DISABLED_ERR_MASK(
     const uint64_t i_data,
     fapi2::buffer<uint64_t>& o_data)
@@ -13490,12 +15263,14 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_WR_MON_NOT
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_WR_MON_NOT_DISABLED_ERR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("1:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_WR_MON_NOT_DISABLED_ERR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_FIR_MASK_REG_WR_MON_NOT_DISABLED_ERR_MASK]
 
+//>> SET_[VAS_VA_RG_SCF_FIR_MASK_REG_WR_MON_NOT_DISABLED_ERR_MASK]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_WR_MON_NOT_DISABLED_ERR_MASK(
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -13506,12 +15281,14 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_WR_MON_NOT
     return o_data.setBit<VAS_VA_RG_SCF_FIR_MASK_REG_WR_MON_NOT_DISABLED_ERR_MASK>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_WR_MON_NOT_DISABLED_ERR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("2:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_WR_MON_NOT_DISABLED_ERR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_FIR_MASK_REG_WR_MON_NOT_DISABLED_ERR_MASK]
 
+//>> CLEAR_[VAS_VA_RG_SCF_FIR_MASK_REG_WR_MON_NOT_DISABLED_ERR_MASK]
 static inline fapi2::buffer<uint64_t>& CLEAR_VAS_VA_RG_SCF_FIR_MASK_REG_WR_MON_NOT_DISABLED_ERR_MASK(
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -13522,12 +15299,14 @@ static inline fapi2::buffer<uint64_t>& CLEAR_VAS_VA_RG_SCF_FIR_MASK_REG_WR_MON_N
     return o_data.clearBit<VAS_VA_RG_SCF_FIR_MASK_REG_WR_MON_NOT_DISABLED_ERR_MASK>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_WR_MON_NOT_DISABLED_ERR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("3:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_WR_MON_NOT_DISABLED_ERR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< CLEAR_[VAS_VA_RG_SCF_FIR_MASK_REG_WR_MON_NOT_DISABLED_ERR_MASK]
 
+//>> GET_[VAS_VA_RG_SCF_FIR_MASK_REG_WR_MON_NOT_DISABLED_ERR_MASK]
 static inline fapi2::buffer<uint64_t>& GET_VAS_VA_RG_SCF_FIR_MASK_REG_WR_MON_NOT_DISABLED_ERR_MASK(
     fapi2::buffer<uint64_t>& i_data,
     uint64_t& o_data)
@@ -13540,12 +15319,14 @@ static inline fapi2::buffer<uint64_t>& GET_VAS_VA_RG_SCF_FIR_MASK_REG_WR_MON_NOT
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_WR_MON_NOT_DISABLED_ERR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("4:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_WR_MON_NOT_DISABLED_ERR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[VAS_VA_RG_SCF_FIR_MASK_REG_WR_MON_NOT_DISABLED_ERR_MASK]
 
+//>> GET_[VAS_VA_RG_SCF_FIR_MASK_REG_WR_MON_NOT_DISABLED_ERR_MASK]
 static inline bool GET_VAS_VA_RG_SCF_FIR_MASK_REG_WR_MON_NOT_DISABLED_ERR_MASK(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
@@ -13555,12 +15336,14 @@ static inline bool GET_VAS_VA_RG_SCF_FIR_MASK_REG_WR_MON_NOT_DISABLED_ERR_MASK(f
     return i_data.getBit<VAS_VA_RG_SCF_FIR_MASK_REG_WR_MON_NOT_DISABLED_ERR_MASK>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_WR_MON_NOT_DISABLED_ERR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("5:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_WR_MON_NOT_DISABLED_ERR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[VAS_VA_RG_SCF_FIR_MASK_REG_WR_MON_NOT_DISABLED_ERR_MASK]
 
+//>> SET_[VAS_VA_RG_SCF_FIR_MASK_REG_VAS_REJECTED_PASTE_CMD_MASK]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_VAS_REJECTED_PASTE_CMD_MASK(
     fapi2::buffer<uint64_t>& i_data,
     fapi2::buffer<uint64_t>& o_data)
@@ -13573,12 +15356,14 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_VAS_REJECT
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_VAS_REJECTED_PASTE_CMD_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("0:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_VAS_REJECTED_PASTE_CMD_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_FIR_MASK_REG_VAS_REJECTED_PASTE_CMD_MASK]
 
+//>> SET_[VAS_VA_RG_SCF_FIR_MASK_REG_VAS_REJECTED_PASTE_CMD_MASK]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_VAS_REJECTED_PASTE_CMD_MASK(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
@@ -13590,12 +15375,14 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_VAS_REJECT
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_VAS_REJECTED_PASTE_CMD_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("1:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_VAS_REJECTED_PASTE_CMD_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_FIR_MASK_REG_VAS_REJECTED_PASTE_CMD_MASK]
 
+//>> SET_[VAS_VA_RG_SCF_FIR_MASK_REG_VAS_REJECTED_PASTE_CMD_MASK]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_VAS_REJECTED_PASTE_CMD_MASK(
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -13606,12 +15393,14 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_VAS_REJECT
     return o_data.setBit<VAS_VA_RG_SCF_FIR_MASK_REG_VAS_REJECTED_PASTE_CMD_MASK>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_VAS_REJECTED_PASTE_CMD_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("2:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_VAS_REJECTED_PASTE_CMD_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_FIR_MASK_REG_VAS_REJECTED_PASTE_CMD_MASK]
 
+//>> CLEAR_[VAS_VA_RG_SCF_FIR_MASK_REG_VAS_REJECTED_PASTE_CMD_MASK]
 static inline fapi2::buffer<uint64_t>& CLEAR_VAS_VA_RG_SCF_FIR_MASK_REG_VAS_REJECTED_PASTE_CMD_MASK(
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -13622,12 +15411,14 @@ static inline fapi2::buffer<uint64_t>& CLEAR_VAS_VA_RG_SCF_FIR_MASK_REG_VAS_REJE
     return o_data.clearBit<VAS_VA_RG_SCF_FIR_MASK_REG_VAS_REJECTED_PASTE_CMD_MASK>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_VAS_REJECTED_PASTE_CMD_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("3:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_VAS_REJECTED_PASTE_CMD_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< CLEAR_[VAS_VA_RG_SCF_FIR_MASK_REG_VAS_REJECTED_PASTE_CMD_MASK]
 
+//>> GET_[VAS_VA_RG_SCF_FIR_MASK_REG_VAS_REJECTED_PASTE_CMD_MASK]
 static inline fapi2::buffer<uint64_t>& GET_VAS_VA_RG_SCF_FIR_MASK_REG_VAS_REJECTED_PASTE_CMD_MASK(
     fapi2::buffer<uint64_t>& i_data,
     uint64_t& o_data)
@@ -13640,12 +15431,14 @@ static inline fapi2::buffer<uint64_t>& GET_VAS_VA_RG_SCF_FIR_MASK_REG_VAS_REJECT
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_VAS_REJECTED_PASTE_CMD_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("4:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_VAS_REJECTED_PASTE_CMD_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[VAS_VA_RG_SCF_FIR_MASK_REG_VAS_REJECTED_PASTE_CMD_MASK]
 
+//>> GET_[VAS_VA_RG_SCF_FIR_MASK_REG_VAS_REJECTED_PASTE_CMD_MASK]
 static inline bool GET_VAS_VA_RG_SCF_FIR_MASK_REG_VAS_REJECTED_PASTE_CMD_MASK(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
@@ -13655,12 +15448,14 @@ static inline bool GET_VAS_VA_RG_SCF_FIR_MASK_REG_VAS_REJECTED_PASTE_CMD_MASK(fa
     return i_data.getBit<VAS_VA_RG_SCF_FIR_MASK_REG_VAS_REJECTED_PASTE_CMD_MASK>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_VAS_REJECTED_PASTE_CMD_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("5:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_VAS_REJECTED_PASTE_CMD_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[VAS_VA_RG_SCF_FIR_MASK_REG_VAS_REJECTED_PASTE_CMD_MASK]
 
+//>> SET_[VAS_VA_RG_SCF_FIR_MASK_REG_DATA_HANG_DETECTED_MASK]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_DATA_HANG_DETECTED_MASK(
     fapi2::buffer<uint64_t>& i_data,
     fapi2::buffer<uint64_t>& o_data)
@@ -13673,12 +15468,14 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_DATA_HANG_
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_DATA_HANG_DETECTED_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("0:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_DATA_HANG_DETECTED_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_FIR_MASK_REG_DATA_HANG_DETECTED_MASK]
 
+//>> SET_[VAS_VA_RG_SCF_FIR_MASK_REG_DATA_HANG_DETECTED_MASK]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_DATA_HANG_DETECTED_MASK(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
@@ -13690,12 +15487,14 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_DATA_HANG_
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_DATA_HANG_DETECTED_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("1:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_DATA_HANG_DETECTED_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_FIR_MASK_REG_DATA_HANG_DETECTED_MASK]
 
+//>> SET_[VAS_VA_RG_SCF_FIR_MASK_REG_DATA_HANG_DETECTED_MASK]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_DATA_HANG_DETECTED_MASK(
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -13706,12 +15505,14 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_DATA_HANG_
     return o_data.setBit<VAS_VA_RG_SCF_FIR_MASK_REG_DATA_HANG_DETECTED_MASK>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_DATA_HANG_DETECTED_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("2:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_DATA_HANG_DETECTED_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_FIR_MASK_REG_DATA_HANG_DETECTED_MASK]
 
+//>> CLEAR_[VAS_VA_RG_SCF_FIR_MASK_REG_DATA_HANG_DETECTED_MASK]
 static inline fapi2::buffer<uint64_t>& CLEAR_VAS_VA_RG_SCF_FIR_MASK_REG_DATA_HANG_DETECTED_MASK(
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -13722,12 +15523,14 @@ static inline fapi2::buffer<uint64_t>& CLEAR_VAS_VA_RG_SCF_FIR_MASK_REG_DATA_HAN
     return o_data.clearBit<VAS_VA_RG_SCF_FIR_MASK_REG_DATA_HANG_DETECTED_MASK>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_DATA_HANG_DETECTED_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("3:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_DATA_HANG_DETECTED_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< CLEAR_[VAS_VA_RG_SCF_FIR_MASK_REG_DATA_HANG_DETECTED_MASK]
 
+//>> GET_[VAS_VA_RG_SCF_FIR_MASK_REG_DATA_HANG_DETECTED_MASK]
 static inline fapi2::buffer<uint64_t>& GET_VAS_VA_RG_SCF_FIR_MASK_REG_DATA_HANG_DETECTED_MASK(
     fapi2::buffer<uint64_t>& i_data,
     uint64_t& o_data)
@@ -13740,12 +15543,14 @@ static inline fapi2::buffer<uint64_t>& GET_VAS_VA_RG_SCF_FIR_MASK_REG_DATA_HANG_
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_DATA_HANG_DETECTED_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("4:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_DATA_HANG_DETECTED_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[VAS_VA_RG_SCF_FIR_MASK_REG_DATA_HANG_DETECTED_MASK]
 
+//>> GET_[VAS_VA_RG_SCF_FIR_MASK_REG_DATA_HANG_DETECTED_MASK]
 static inline bool GET_VAS_VA_RG_SCF_FIR_MASK_REG_DATA_HANG_DETECTED_MASK(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
@@ -13755,12 +15560,14 @@ static inline bool GET_VAS_VA_RG_SCF_FIR_MASK_REG_DATA_HANG_DETECTED_MASK(fapi2:
     return i_data.getBit<VAS_VA_RG_SCF_FIR_MASK_REG_DATA_HANG_DETECTED_MASK>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_DATA_HANG_DETECTED_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("5:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_DATA_HANG_DETECTED_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[VAS_VA_RG_SCF_FIR_MASK_REG_DATA_HANG_DETECTED_MASK]
 
+//>> SET_[VAS_VA_RG_SCF_FIR_MASK_REG_INCOMING_PB_PARITY_ERR_MASK]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_INCOMING_PB_PARITY_ERR_MASK(
     fapi2::buffer<uint64_t>& i_data,
     fapi2::buffer<uint64_t>& o_data)
@@ -13773,12 +15580,14 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_INCOMING_P
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_INCOMING_PB_PARITY_ERR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("0:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_INCOMING_PB_PARITY_ERR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_FIR_MASK_REG_INCOMING_PB_PARITY_ERR_MASK]
 
+//>> SET_[VAS_VA_RG_SCF_FIR_MASK_REG_INCOMING_PB_PARITY_ERR_MASK]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_INCOMING_PB_PARITY_ERR_MASK(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
@@ -13790,12 +15599,14 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_INCOMING_P
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_INCOMING_PB_PARITY_ERR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("1:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_INCOMING_PB_PARITY_ERR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_FIR_MASK_REG_INCOMING_PB_PARITY_ERR_MASK]
 
+//>> SET_[VAS_VA_RG_SCF_FIR_MASK_REG_INCOMING_PB_PARITY_ERR_MASK]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_INCOMING_PB_PARITY_ERR_MASK(
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -13806,12 +15617,14 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_INCOMING_P
     return o_data.setBit<VAS_VA_RG_SCF_FIR_MASK_REG_INCOMING_PB_PARITY_ERR_MASK>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_INCOMING_PB_PARITY_ERR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("2:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_INCOMING_PB_PARITY_ERR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_FIR_MASK_REG_INCOMING_PB_PARITY_ERR_MASK]
 
+//>> CLEAR_[VAS_VA_RG_SCF_FIR_MASK_REG_INCOMING_PB_PARITY_ERR_MASK]
 static inline fapi2::buffer<uint64_t>& CLEAR_VAS_VA_RG_SCF_FIR_MASK_REG_INCOMING_PB_PARITY_ERR_MASK(
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -13822,12 +15635,14 @@ static inline fapi2::buffer<uint64_t>& CLEAR_VAS_VA_RG_SCF_FIR_MASK_REG_INCOMING
     return o_data.clearBit<VAS_VA_RG_SCF_FIR_MASK_REG_INCOMING_PB_PARITY_ERR_MASK>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_INCOMING_PB_PARITY_ERR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("3:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_INCOMING_PB_PARITY_ERR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< CLEAR_[VAS_VA_RG_SCF_FIR_MASK_REG_INCOMING_PB_PARITY_ERR_MASK]
 
+//>> GET_[VAS_VA_RG_SCF_FIR_MASK_REG_INCOMING_PB_PARITY_ERR_MASK]
 static inline fapi2::buffer<uint64_t>& GET_VAS_VA_RG_SCF_FIR_MASK_REG_INCOMING_PB_PARITY_ERR_MASK(
     fapi2::buffer<uint64_t>& i_data,
     uint64_t& o_data)
@@ -13840,12 +15655,14 @@ static inline fapi2::buffer<uint64_t>& GET_VAS_VA_RG_SCF_FIR_MASK_REG_INCOMING_P
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_INCOMING_PB_PARITY_ERR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("4:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_INCOMING_PB_PARITY_ERR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[VAS_VA_RG_SCF_FIR_MASK_REG_INCOMING_PB_PARITY_ERR_MASK]
 
+//>> GET_[VAS_VA_RG_SCF_FIR_MASK_REG_INCOMING_PB_PARITY_ERR_MASK]
 static inline bool GET_VAS_VA_RG_SCF_FIR_MASK_REG_INCOMING_PB_PARITY_ERR_MASK(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
@@ -13855,12 +15672,14 @@ static inline bool GET_VAS_VA_RG_SCF_FIR_MASK_REG_INCOMING_PB_PARITY_ERR_MASK(fa
     return i_data.getBit<VAS_VA_RG_SCF_FIR_MASK_REG_INCOMING_PB_PARITY_ERR_MASK>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_INCOMING_PB_PARITY_ERR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("5:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_INCOMING_PB_PARITY_ERR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[VAS_VA_RG_SCF_FIR_MASK_REG_INCOMING_PB_PARITY_ERR_MASK]
 
+//>> SET_[VAS_VA_RG_SCF_FIR_MASK_REG_SCOM1_SAT_ERR_MASK]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_SCOM1_SAT_ERR_MASK(
     fapi2::buffer<uint64_t>& i_data,
     fapi2::buffer<uint64_t>& o_data)
@@ -13873,11 +15692,14 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_SCOM1_SAT_
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_SCOM1_SAT_ERR_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("0:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_SCOM1_SAT_ERR_MASK chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_FIR_MASK_REG_SCOM1_SAT_ERR_MASK]
 
+//>> SET_[VAS_VA_RG_SCF_FIR_MASK_REG_SCOM1_SAT_ERR_MASK]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_SCOM1_SAT_ERR_MASK(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
@@ -13889,11 +15711,14 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_SCOM1_SAT_
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_SCOM1_SAT_ERR_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("1:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_SCOM1_SAT_ERR_MASK chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_FIR_MASK_REG_SCOM1_SAT_ERR_MASK]
 
+//>> SET_[VAS_VA_RG_SCF_FIR_MASK_REG_SCOM1_SAT_ERR_MASK]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_SCOM1_SAT_ERR_MASK(
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -13904,11 +15729,14 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_SCOM1_SAT_
     return o_data.setBit<VAS_VA_RG_SCF_FIR_MASK_REG_SCOM1_SAT_ERR_MASK>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_SCOM1_SAT_ERR_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("2:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_SCOM1_SAT_ERR_MASK chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_FIR_MASK_REG_SCOM1_SAT_ERR_MASK]
 
+//>> CLEAR_[VAS_VA_RG_SCF_FIR_MASK_REG_SCOM1_SAT_ERR_MASK]
 static inline fapi2::buffer<uint64_t>& CLEAR_VAS_VA_RG_SCF_FIR_MASK_REG_SCOM1_SAT_ERR_MASK(
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -13919,11 +15747,14 @@ static inline fapi2::buffer<uint64_t>& CLEAR_VAS_VA_RG_SCF_FIR_MASK_REG_SCOM1_SA
     return o_data.clearBit<VAS_VA_RG_SCF_FIR_MASK_REG_SCOM1_SAT_ERR_MASK>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_SCOM1_SAT_ERR_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("3:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_SCOM1_SAT_ERR_MASK chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
     return o_data;
 #endif
 }
+//<< CLEAR_[VAS_VA_RG_SCF_FIR_MASK_REG_SCOM1_SAT_ERR_MASK]
 
+//>> GET_[VAS_VA_RG_SCF_FIR_MASK_REG_SCOM1_SAT_ERR_MASK]
 static inline fapi2::buffer<uint64_t>& GET_VAS_VA_RG_SCF_FIR_MASK_REG_SCOM1_SAT_ERR_MASK(
     fapi2::buffer<uint64_t>& i_data,
     uint64_t& o_data)
@@ -13936,11 +15767,14 @@ static inline fapi2::buffer<uint64_t>& GET_VAS_VA_RG_SCF_FIR_MASK_REG_SCOM1_SAT_
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_SCOM1_SAT_ERR_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("4:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_SCOM1_SAT_ERR_MASK chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[VAS_VA_RG_SCF_FIR_MASK_REG_SCOM1_SAT_ERR_MASK]
 
+//>> GET_[VAS_VA_RG_SCF_FIR_MASK_REG_SCOM1_SAT_ERR_MASK]
 static inline bool GET_VAS_VA_RG_SCF_FIR_MASK_REG_SCOM1_SAT_ERR_MASK(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
@@ -13950,11 +15784,14 @@ static inline bool GET_VAS_VA_RG_SCF_FIR_MASK_REG_SCOM1_SAT_ERR_MASK(fapi2::buff
     return i_data.getBit<VAS_VA_RG_SCF_FIR_MASK_REG_SCOM1_SAT_ERR_MASK>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_SCOM1_SAT_ERR_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("5:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_SCOM1_SAT_ERR_MASK chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[VAS_VA_RG_SCF_FIR_MASK_REG_SCOM1_SAT_ERR_MASK]
 
+//>> SET_[VAS_VA_RG_SCF_FIR_MASK_REG_NX_LOCAL_XSTOP_MASK]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_NX_LOCAL_XSTOP_MASK(
     fapi2::buffer<uint64_t>& i_data,
     fapi2::buffer<uint64_t>& o_data)
@@ -13967,11 +15804,14 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_NX_LOCAL_X
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_NX_LOCAL_XSTOP_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("0:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_NX_LOCAL_XSTOP_MASK chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_FIR_MASK_REG_NX_LOCAL_XSTOP_MASK]
 
+//>> SET_[VAS_VA_RG_SCF_FIR_MASK_REG_NX_LOCAL_XSTOP_MASK]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_NX_LOCAL_XSTOP_MASK(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
@@ -13983,11 +15823,14 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_NX_LOCAL_X
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_NX_LOCAL_XSTOP_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("1:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_NX_LOCAL_XSTOP_MASK chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_FIR_MASK_REG_NX_LOCAL_XSTOP_MASK]
 
+//>> SET_[VAS_VA_RG_SCF_FIR_MASK_REG_NX_LOCAL_XSTOP_MASK]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_NX_LOCAL_XSTOP_MASK(
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -13998,11 +15841,14 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_NX_LOCAL_X
     return o_data.setBit<VAS_VA_RG_SCF_FIR_MASK_REG_NX_LOCAL_XSTOP_MASK>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_NX_LOCAL_XSTOP_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("2:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_NX_LOCAL_XSTOP_MASK chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_FIR_MASK_REG_NX_LOCAL_XSTOP_MASK]
 
+//>> CLEAR_[VAS_VA_RG_SCF_FIR_MASK_REG_NX_LOCAL_XSTOP_MASK]
 static inline fapi2::buffer<uint64_t>& CLEAR_VAS_VA_RG_SCF_FIR_MASK_REG_NX_LOCAL_XSTOP_MASK(
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -14013,11 +15859,14 @@ static inline fapi2::buffer<uint64_t>& CLEAR_VAS_VA_RG_SCF_FIR_MASK_REG_NX_LOCAL
     return o_data.clearBit<VAS_VA_RG_SCF_FIR_MASK_REG_NX_LOCAL_XSTOP_MASK>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_NX_LOCAL_XSTOP_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("3:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_NX_LOCAL_XSTOP_MASK chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
     return o_data;
 #endif
 }
+//<< CLEAR_[VAS_VA_RG_SCF_FIR_MASK_REG_NX_LOCAL_XSTOP_MASK]
 
+//>> GET_[VAS_VA_RG_SCF_FIR_MASK_REG_NX_LOCAL_XSTOP_MASK]
 static inline fapi2::buffer<uint64_t>& GET_VAS_VA_RG_SCF_FIR_MASK_REG_NX_LOCAL_XSTOP_MASK(
     fapi2::buffer<uint64_t>& i_data,
     uint64_t& o_data)
@@ -14030,11 +15879,14 @@ static inline fapi2::buffer<uint64_t>& GET_VAS_VA_RG_SCF_FIR_MASK_REG_NX_LOCAL_X
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_NX_LOCAL_XSTOP_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("4:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_NX_LOCAL_XSTOP_MASK chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[VAS_VA_RG_SCF_FIR_MASK_REG_NX_LOCAL_XSTOP_MASK]
 
+//>> GET_[VAS_VA_RG_SCF_FIR_MASK_REG_NX_LOCAL_XSTOP_MASK]
 static inline bool GET_VAS_VA_RG_SCF_FIR_MASK_REG_NX_LOCAL_XSTOP_MASK(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
@@ -14044,11 +15896,14 @@ static inline bool GET_VAS_VA_RG_SCF_FIR_MASK_REG_NX_LOCAL_XSTOP_MASK(fapi2::buf
     return i_data.getBit<VAS_VA_RG_SCF_FIR_MASK_REG_NX_LOCAL_XSTOP_MASK>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_NX_LOCAL_XSTOP_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("5:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_NX_LOCAL_XSTOP_MASK chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[VAS_VA_RG_SCF_FIR_MASK_REG_NX_LOCAL_XSTOP_MASK]
 
+//>> SET_[VAS_VA_RG_SCF_FIR_MASK_REG_SCOM_MMIO_ADDR_ERR_MASK]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_SCOM_MMIO_ADDR_ERR_MASK(
     fapi2::buffer<uint64_t>& i_data,
     fapi2::buffer<uint64_t>& o_data)
@@ -14061,12 +15916,14 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_SCOM_MMIO_
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_SCOM_MMIO_ADDR_ERR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("0:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_SCOM_MMIO_ADDR_ERR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_FIR_MASK_REG_SCOM_MMIO_ADDR_ERR_MASK]
 
+//>> SET_[VAS_VA_RG_SCF_FIR_MASK_REG_SCOM_MMIO_ADDR_ERR_MASK]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_SCOM_MMIO_ADDR_ERR_MASK(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
@@ -14078,12 +15935,14 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_SCOM_MMIO_
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_SCOM_MMIO_ADDR_ERR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("1:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_SCOM_MMIO_ADDR_ERR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_FIR_MASK_REG_SCOM_MMIO_ADDR_ERR_MASK]
 
+//>> SET_[VAS_VA_RG_SCF_FIR_MASK_REG_SCOM_MMIO_ADDR_ERR_MASK]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_SCOM_MMIO_ADDR_ERR_MASK(
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -14094,12 +15953,14 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_SCOM_MMIO_
     return o_data.setBit<VAS_VA_RG_SCF_FIR_MASK_REG_SCOM_MMIO_ADDR_ERR_MASK>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_SCOM_MMIO_ADDR_ERR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("2:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_SCOM_MMIO_ADDR_ERR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_FIR_MASK_REG_SCOM_MMIO_ADDR_ERR_MASK]
 
+//>> CLEAR_[VAS_VA_RG_SCF_FIR_MASK_REG_SCOM_MMIO_ADDR_ERR_MASK]
 static inline fapi2::buffer<uint64_t>& CLEAR_VAS_VA_RG_SCF_FIR_MASK_REG_SCOM_MMIO_ADDR_ERR_MASK(
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -14110,12 +15971,14 @@ static inline fapi2::buffer<uint64_t>& CLEAR_VAS_VA_RG_SCF_FIR_MASK_REG_SCOM_MMI
     return o_data.clearBit<VAS_VA_RG_SCF_FIR_MASK_REG_SCOM_MMIO_ADDR_ERR_MASK>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_SCOM_MMIO_ADDR_ERR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("3:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_SCOM_MMIO_ADDR_ERR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< CLEAR_[VAS_VA_RG_SCF_FIR_MASK_REG_SCOM_MMIO_ADDR_ERR_MASK]
 
+//>> GET_[VAS_VA_RG_SCF_FIR_MASK_REG_SCOM_MMIO_ADDR_ERR_MASK]
 static inline fapi2::buffer<uint64_t>& GET_VAS_VA_RG_SCF_FIR_MASK_REG_SCOM_MMIO_ADDR_ERR_MASK(
     fapi2::buffer<uint64_t>& i_data,
     uint64_t& o_data)
@@ -14128,12 +15991,14 @@ static inline fapi2::buffer<uint64_t>& GET_VAS_VA_RG_SCF_FIR_MASK_REG_SCOM_MMIO_
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_SCOM_MMIO_ADDR_ERR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("4:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_SCOM_MMIO_ADDR_ERR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[VAS_VA_RG_SCF_FIR_MASK_REG_SCOM_MMIO_ADDR_ERR_MASK]
 
+//>> GET_[VAS_VA_RG_SCF_FIR_MASK_REG_SCOM_MMIO_ADDR_ERR_MASK]
 static inline bool GET_VAS_VA_RG_SCF_FIR_MASK_REG_SCOM_MMIO_ADDR_ERR_MASK(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
@@ -14143,12 +16008,14 @@ static inline bool GET_VAS_VA_RG_SCF_FIR_MASK_REG_SCOM_MMIO_ADDR_ERR_MASK(fapi2:
     return i_data.getBit<VAS_VA_RG_SCF_FIR_MASK_REG_SCOM_MMIO_ADDR_ERR_MASK>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_SCOM_MMIO_ADDR_ERR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("5:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_SCOM_MMIO_ADDR_ERR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[VAS_VA_RG_SCF_FIR_MASK_REG_SCOM_MMIO_ADDR_ERR_MASK]
 
+//>> SET_[VAS_VA_RG_SCF_FIR_MASK_REG_CQ_RG_FIR_TOPO_INDEX_ERR_MASK]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_CQ_RG_FIR_TOPO_INDEX_ERR_MASK(
     fapi2::buffer<uint64_t>& i_data,
     fapi2::buffer<uint64_t>& o_data)
@@ -14161,12 +16028,14 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_CQ_RG_FIR_
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_CQ_RG_FIR_TOPO_INDEX_ERR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("0:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_CQ_RG_FIR_TOPO_INDEX_ERR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_FIR_MASK_REG_CQ_RG_FIR_TOPO_INDEX_ERR_MASK]
 
+//>> SET_[VAS_VA_RG_SCF_FIR_MASK_REG_CQ_RG_FIR_TOPO_INDEX_ERR_MASK]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_CQ_RG_FIR_TOPO_INDEX_ERR_MASK(
     const uint64_t i_data,
     fapi2::buffer<uint64_t>& o_data)
@@ -14179,12 +16048,14 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_CQ_RG_FIR_
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_CQ_RG_FIR_TOPO_INDEX_ERR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("1:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_CQ_RG_FIR_TOPO_INDEX_ERR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_FIR_MASK_REG_CQ_RG_FIR_TOPO_INDEX_ERR_MASK]
 
+//>> SET_[VAS_VA_RG_SCF_FIR_MASK_REG_CQ_RG_FIR_TOPO_INDEX_ERR_MASK]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_CQ_RG_FIR_TOPO_INDEX_ERR_MASK(
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -14195,12 +16066,14 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_FIR_MASK_REG_CQ_RG_FIR_
     return o_data.setBit<VAS_VA_RG_SCF_FIR_MASK_REG_CQ_RG_FIR_TOPO_INDEX_ERR_MASK>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_CQ_RG_FIR_TOPO_INDEX_ERR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("2:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_CQ_RG_FIR_TOPO_INDEX_ERR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_FIR_MASK_REG_CQ_RG_FIR_TOPO_INDEX_ERR_MASK]
 
+//>> CLEAR_[VAS_VA_RG_SCF_FIR_MASK_REG_CQ_RG_FIR_TOPO_INDEX_ERR_MASK]
 static inline fapi2::buffer<uint64_t>& CLEAR_VAS_VA_RG_SCF_FIR_MASK_REG_CQ_RG_FIR_TOPO_INDEX_ERR_MASK(
     fapi2::buffer<uint64_t>& o_data)
 {
@@ -14211,12 +16084,14 @@ static inline fapi2::buffer<uint64_t>& CLEAR_VAS_VA_RG_SCF_FIR_MASK_REG_CQ_RG_FI
     return o_data.clearBit<VAS_VA_RG_SCF_FIR_MASK_REG_CQ_RG_FIR_TOPO_INDEX_ERR_MASK>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_CQ_RG_FIR_TOPO_INDEX_ERR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("3:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_CQ_RG_FIR_TOPO_INDEX_ERR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< CLEAR_[VAS_VA_RG_SCF_FIR_MASK_REG_CQ_RG_FIR_TOPO_INDEX_ERR_MASK]
 
+//>> GET_[VAS_VA_RG_SCF_FIR_MASK_REG_CQ_RG_FIR_TOPO_INDEX_ERR_MASK]
 static inline fapi2::buffer<uint64_t>& GET_VAS_VA_RG_SCF_FIR_MASK_REG_CQ_RG_FIR_TOPO_INDEX_ERR_MASK(
     fapi2::buffer<uint64_t>& i_data,
     uint64_t& o_data)
@@ -14229,12 +16104,14 @@ static inline fapi2::buffer<uint64_t>& GET_VAS_VA_RG_SCF_FIR_MASK_REG_CQ_RG_FIR_
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_CQ_RG_FIR_TOPO_INDEX_ERR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("4:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_CQ_RG_FIR_TOPO_INDEX_ERR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[VAS_VA_RG_SCF_FIR_MASK_REG_CQ_RG_FIR_TOPO_INDEX_ERR_MASK]
 
+//>> GET_[VAS_VA_RG_SCF_FIR_MASK_REG_CQ_RG_FIR_TOPO_INDEX_ERR_MASK]
 static inline bool GET_VAS_VA_RG_SCF_FIR_MASK_REG_CQ_RG_FIR_TOPO_INDEX_ERR_MASK(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
@@ -14244,12 +16121,14 @@ static inline bool GET_VAS_VA_RG_SCF_FIR_MASK_REG_CQ_RG_FIR_TOPO_INDEX_ERR_MASK(
     return i_data.getBit<VAS_VA_RG_SCF_FIR_MASK_REG_CQ_RG_FIR_TOPO_INDEX_ERR_MASK>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_CQ_RG_FIR_TOPO_INDEX_ERR_MASK chip: %x, ec: %x", scomt::chip,
-             scomt::ec);
+    FAPI_ERR("5:scom_proc Invalid dial access VAS_VA_RG_SCF_FIR_MASK_REG_CQ_RG_FIR_TOPO_INDEX_ERR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[VAS_VA_RG_SCF_FIR_MASK_REG_CQ_RG_FIR_TOPO_INDEX_ERR_MASK]
 
+//>> PREP_[VAS_VA_RG_SCF_INERRRPT]
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
 static inline fapi2::ReturnCode PREP_VAS_VA_RG_SCF_INERRRPT(const fapi2::Target<K, M, V>& i_target)
 {
@@ -14263,7 +16142,9 @@ fapi_try_exit:
     return fapi2::current_err;
 #endif
 }
+//<< PREP_[VAS_VA_RG_SCF_INERRRPT]
 
+//>> GET_[VAS_VA_RG_SCF_INERRRPT]
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
 static inline fapi2::ReturnCode GET_VAS_VA_RG_SCF_INERRRPT(const fapi2::Target<K, M, V>& i_target,
         fapi2::buffer<uint64_t>& o_data)
@@ -14278,7 +16159,9 @@ fapi_try_exit:
     return fapi2::current_err;
 #endif
 }
+//<< GET_[VAS_VA_RG_SCF_INERRRPT]
 
+//>> PUT_[VAS_VA_RG_SCF_INERRRPT]
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
 static inline fapi2::ReturnCode PUT_VAS_VA_RG_SCF_INERRRPT(const fapi2::Target<K, M, V>& i_target,
         const uint64_t i_data)
@@ -14293,8 +16176,10 @@ fapi_try_exit:
     return fapi2::current_err;
 #endif
 }
+//<< PUT_[VAS_VA_RG_SCF_INERRRPT]
 
 
+//>> SET_[VAS_VA_RG_SCF_INERRRPT_RESET]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_INERRRPT_RESET(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
@@ -14305,11 +16190,13 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_INERRRPT_RESET(fapi2::b
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_INERRRPT_RESET chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("0:scom_proc Invalid dial access VAS_VA_RG_SCF_INERRRPT_RESET chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_INERRRPT_RESET]
 
+//>> SET_[VAS_VA_RG_SCF_INERRRPT_RESET]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_INERRRPT_RESET(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
@@ -14320,11 +16207,13 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_INERRRPT_RESET(const ui
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_INERRRPT_RESET chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("1:scom_proc Invalid dial access VAS_VA_RG_SCF_INERRRPT_RESET chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_INERRRPT_RESET]
 
+//>> SET_[VAS_VA_RG_SCF_INERRRPT_RESET]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_INERRRPT_RESET(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
@@ -14333,11 +16222,13 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_INERRRPT_RESET(fapi2::b
     return o_data.setBit<VAS_VA_RG_SCF_INERRRPT_RESET>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_INERRRPT_RESET chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("2:scom_proc Invalid dial access VAS_VA_RG_SCF_INERRRPT_RESET chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_INERRRPT_RESET]
 
+//>> CLEAR_[VAS_VA_RG_SCF_INERRRPT_RESET]
 static inline fapi2::buffer<uint64_t>& CLEAR_VAS_VA_RG_SCF_INERRRPT_RESET(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
@@ -14346,11 +16237,13 @@ static inline fapi2::buffer<uint64_t>& CLEAR_VAS_VA_RG_SCF_INERRRPT_RESET(fapi2:
     return o_data.clearBit<VAS_VA_RG_SCF_INERRRPT_RESET>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_INERRRPT_RESET chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("3:scom_proc Invalid dial access VAS_VA_RG_SCF_INERRRPT_RESET chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< CLEAR_[VAS_VA_RG_SCF_INERRRPT_RESET]
 
+//>> GET_[VAS_VA_RG_SCF_INERRRPT_RESET]
 static inline fapi2::buffer<uint64_t>& GET_VAS_VA_RG_SCF_INERRRPT_RESET(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
@@ -14361,11 +16254,13 @@ static inline fapi2::buffer<uint64_t>& GET_VAS_VA_RG_SCF_INERRRPT_RESET(fapi2::b
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_INERRRPT_RESET chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("4:scom_proc Invalid dial access VAS_VA_RG_SCF_INERRRPT_RESET chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[VAS_VA_RG_SCF_INERRRPT_RESET]
 
+//>> GET_[VAS_VA_RG_SCF_INERRRPT_RESET]
 static inline bool GET_VAS_VA_RG_SCF_INERRRPT_RESET(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
@@ -14374,11 +16269,13 @@ static inline bool GET_VAS_VA_RG_SCF_INERRRPT_RESET(fapi2::buffer<uint64_t>& i_d
     return i_data.getBit<VAS_VA_RG_SCF_INERRRPT_RESET>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_INERRRPT_RESET chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("5:scom_proc Invalid dial access VAS_VA_RG_SCF_INERRRPT_RESET chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[VAS_VA_RG_SCF_INERRRPT_RESET]
 
+//>> SET_[VAS_VA_RG_SCF_INERRRPT_BIT4]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_INERRRPT_BIT4(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
@@ -14389,11 +16286,13 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_INERRRPT_BIT4(fapi2::bu
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT4 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("0:scom_proc Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT4 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_INERRRPT_BIT4]
 
+//>> SET_[VAS_VA_RG_SCF_INERRRPT_BIT4]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_INERRRPT_BIT4(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
@@ -14404,11 +16303,13 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_INERRRPT_BIT4(const uin
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT4 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("1:scom_proc Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT4 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_INERRRPT_BIT4]
 
+//>> SET_[VAS_VA_RG_SCF_INERRRPT_BIT4]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_INERRRPT_BIT4(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
@@ -14417,11 +16318,13 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_INERRRPT_BIT4(fapi2::bu
     return o_data.setBit<VAS_VA_RG_SCF_INERRRPT_BIT4>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT4 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("2:scom_proc Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT4 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_INERRRPT_BIT4]
 
+//>> CLEAR_[VAS_VA_RG_SCF_INERRRPT_BIT4]
 static inline fapi2::buffer<uint64_t>& CLEAR_VAS_VA_RG_SCF_INERRRPT_BIT4(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
@@ -14430,11 +16333,13 @@ static inline fapi2::buffer<uint64_t>& CLEAR_VAS_VA_RG_SCF_INERRRPT_BIT4(fapi2::
     return o_data.clearBit<VAS_VA_RG_SCF_INERRRPT_BIT4>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT4 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("3:scom_proc Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT4 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< CLEAR_[VAS_VA_RG_SCF_INERRRPT_BIT4]
 
+//>> GET_[VAS_VA_RG_SCF_INERRRPT_BIT4]
 static inline fapi2::buffer<uint64_t>& GET_VAS_VA_RG_SCF_INERRRPT_BIT4(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
@@ -14445,11 +16350,13 @@ static inline fapi2::buffer<uint64_t>& GET_VAS_VA_RG_SCF_INERRRPT_BIT4(fapi2::bu
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT4 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("4:scom_proc Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT4 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[VAS_VA_RG_SCF_INERRRPT_BIT4]
 
+//>> GET_[VAS_VA_RG_SCF_INERRRPT_BIT4]
 static inline bool GET_VAS_VA_RG_SCF_INERRRPT_BIT4(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
@@ -14458,11 +16365,13 @@ static inline bool GET_VAS_VA_RG_SCF_INERRRPT_BIT4(fapi2::buffer<uint64_t>& i_da
     return i_data.getBit<VAS_VA_RG_SCF_INERRRPT_BIT4>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT4 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("5:scom_proc Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT4 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[VAS_VA_RG_SCF_INERRRPT_BIT4]
 
+//>> SET_[VAS_VA_RG_SCF_INERRRPT_BIT5]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_INERRRPT_BIT5(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
@@ -14473,11 +16382,13 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_INERRRPT_BIT5(fapi2::bu
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT5 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("0:scom_proc Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT5 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_INERRRPT_BIT5]
 
+//>> SET_[VAS_VA_RG_SCF_INERRRPT_BIT5]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_INERRRPT_BIT5(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
@@ -14488,11 +16399,13 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_INERRRPT_BIT5(const uin
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT5 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("1:scom_proc Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT5 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_INERRRPT_BIT5]
 
+//>> SET_[VAS_VA_RG_SCF_INERRRPT_BIT5]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_INERRRPT_BIT5(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
@@ -14501,11 +16414,13 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_INERRRPT_BIT5(fapi2::bu
     return o_data.setBit<VAS_VA_RG_SCF_INERRRPT_BIT5>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT5 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("2:scom_proc Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT5 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_INERRRPT_BIT5]
 
+//>> CLEAR_[VAS_VA_RG_SCF_INERRRPT_BIT5]
 static inline fapi2::buffer<uint64_t>& CLEAR_VAS_VA_RG_SCF_INERRRPT_BIT5(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
@@ -14514,11 +16429,13 @@ static inline fapi2::buffer<uint64_t>& CLEAR_VAS_VA_RG_SCF_INERRRPT_BIT5(fapi2::
     return o_data.clearBit<VAS_VA_RG_SCF_INERRRPT_BIT5>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT5 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("3:scom_proc Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT5 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< CLEAR_[VAS_VA_RG_SCF_INERRRPT_BIT5]
 
+//>> GET_[VAS_VA_RG_SCF_INERRRPT_BIT5]
 static inline fapi2::buffer<uint64_t>& GET_VAS_VA_RG_SCF_INERRRPT_BIT5(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
@@ -14529,11 +16446,13 @@ static inline fapi2::buffer<uint64_t>& GET_VAS_VA_RG_SCF_INERRRPT_BIT5(fapi2::bu
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT5 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("4:scom_proc Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT5 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[VAS_VA_RG_SCF_INERRRPT_BIT5]
 
+//>> GET_[VAS_VA_RG_SCF_INERRRPT_BIT5]
 static inline bool GET_VAS_VA_RG_SCF_INERRRPT_BIT5(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
@@ -14542,11 +16461,13 @@ static inline bool GET_VAS_VA_RG_SCF_INERRRPT_BIT5(fapi2::buffer<uint64_t>& i_da
     return i_data.getBit<VAS_VA_RG_SCF_INERRRPT_BIT5>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT5 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("5:scom_proc Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT5 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[VAS_VA_RG_SCF_INERRRPT_BIT5]
 
+//>> SET_[VAS_VA_RG_SCF_INERRRPT_BIT6]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_INERRRPT_BIT6(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
@@ -14557,11 +16478,13 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_INERRRPT_BIT6(fapi2::bu
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT6 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("0:scom_proc Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT6 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_INERRRPT_BIT6]
 
+//>> SET_[VAS_VA_RG_SCF_INERRRPT_BIT6]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_INERRRPT_BIT6(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
@@ -14572,11 +16495,13 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_INERRRPT_BIT6(const uin
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT6 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("1:scom_proc Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT6 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_INERRRPT_BIT6]
 
+//>> SET_[VAS_VA_RG_SCF_INERRRPT_BIT6]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_INERRRPT_BIT6(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
@@ -14585,11 +16510,13 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_INERRRPT_BIT6(fapi2::bu
     return o_data.setBit<VAS_VA_RG_SCF_INERRRPT_BIT6>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT6 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("2:scom_proc Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT6 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_INERRRPT_BIT6]
 
+//>> CLEAR_[VAS_VA_RG_SCF_INERRRPT_BIT6]
 static inline fapi2::buffer<uint64_t>& CLEAR_VAS_VA_RG_SCF_INERRRPT_BIT6(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
@@ -14598,11 +16525,13 @@ static inline fapi2::buffer<uint64_t>& CLEAR_VAS_VA_RG_SCF_INERRRPT_BIT6(fapi2::
     return o_data.clearBit<VAS_VA_RG_SCF_INERRRPT_BIT6>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT6 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("3:scom_proc Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT6 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< CLEAR_[VAS_VA_RG_SCF_INERRRPT_BIT6]
 
+//>> GET_[VAS_VA_RG_SCF_INERRRPT_BIT6]
 static inline fapi2::buffer<uint64_t>& GET_VAS_VA_RG_SCF_INERRRPT_BIT6(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
@@ -14613,11 +16542,13 @@ static inline fapi2::buffer<uint64_t>& GET_VAS_VA_RG_SCF_INERRRPT_BIT6(fapi2::bu
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT6 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("4:scom_proc Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT6 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[VAS_VA_RG_SCF_INERRRPT_BIT6]
 
+//>> GET_[VAS_VA_RG_SCF_INERRRPT_BIT6]
 static inline bool GET_VAS_VA_RG_SCF_INERRRPT_BIT6(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
@@ -14626,11 +16557,13 @@ static inline bool GET_VAS_VA_RG_SCF_INERRRPT_BIT6(fapi2::buffer<uint64_t>& i_da
     return i_data.getBit<VAS_VA_RG_SCF_INERRRPT_BIT6>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT6 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("5:scom_proc Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT6 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[VAS_VA_RG_SCF_INERRRPT_BIT6]
 
+//>> SET_[VAS_VA_RG_SCF_INERRRPT_BIT7]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_INERRRPT_BIT7(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
@@ -14641,11 +16574,13 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_INERRRPT_BIT7(fapi2::bu
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT7 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("0:scom_proc Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT7 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_INERRRPT_BIT7]
 
+//>> SET_[VAS_VA_RG_SCF_INERRRPT_BIT7]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_INERRRPT_BIT7(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
@@ -14656,11 +16591,13 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_INERRRPT_BIT7(const uin
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT7 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("1:scom_proc Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT7 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_INERRRPT_BIT7]
 
+//>> SET_[VAS_VA_RG_SCF_INERRRPT_BIT7]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_INERRRPT_BIT7(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
@@ -14669,11 +16606,13 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_INERRRPT_BIT7(fapi2::bu
     return o_data.setBit<VAS_VA_RG_SCF_INERRRPT_BIT7>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT7 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("2:scom_proc Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT7 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_INERRRPT_BIT7]
 
+//>> CLEAR_[VAS_VA_RG_SCF_INERRRPT_BIT7]
 static inline fapi2::buffer<uint64_t>& CLEAR_VAS_VA_RG_SCF_INERRRPT_BIT7(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
@@ -14682,11 +16621,13 @@ static inline fapi2::buffer<uint64_t>& CLEAR_VAS_VA_RG_SCF_INERRRPT_BIT7(fapi2::
     return o_data.clearBit<VAS_VA_RG_SCF_INERRRPT_BIT7>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT7 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("3:scom_proc Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT7 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< CLEAR_[VAS_VA_RG_SCF_INERRRPT_BIT7]
 
+//>> GET_[VAS_VA_RG_SCF_INERRRPT_BIT7]
 static inline fapi2::buffer<uint64_t>& GET_VAS_VA_RG_SCF_INERRRPT_BIT7(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
@@ -14697,11 +16638,13 @@ static inline fapi2::buffer<uint64_t>& GET_VAS_VA_RG_SCF_INERRRPT_BIT7(fapi2::bu
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT7 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("4:scom_proc Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT7 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[VAS_VA_RG_SCF_INERRRPT_BIT7]
 
+//>> GET_[VAS_VA_RG_SCF_INERRRPT_BIT7]
 static inline bool GET_VAS_VA_RG_SCF_INERRRPT_BIT7(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
@@ -14710,11 +16653,13 @@ static inline bool GET_VAS_VA_RG_SCF_INERRRPT_BIT7(fapi2::buffer<uint64_t>& i_da
     return i_data.getBit<VAS_VA_RG_SCF_INERRRPT_BIT7>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT7 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("5:scom_proc Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT7 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[VAS_VA_RG_SCF_INERRRPT_BIT7]
 
+//>> SET_[VAS_VA_RG_SCF_INERRRPT_BIT8]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_INERRRPT_BIT8(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
@@ -14725,11 +16670,13 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_INERRRPT_BIT8(fapi2::bu
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT8 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("0:scom_proc Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT8 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_INERRRPT_BIT8]
 
+//>> SET_[VAS_VA_RG_SCF_INERRRPT_BIT8]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_INERRRPT_BIT8(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
@@ -14740,11 +16687,13 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_INERRRPT_BIT8(const uin
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT8 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("1:scom_proc Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT8 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_INERRRPT_BIT8]
 
+//>> SET_[VAS_VA_RG_SCF_INERRRPT_BIT8]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_INERRRPT_BIT8(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
@@ -14753,11 +16702,13 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_INERRRPT_BIT8(fapi2::bu
     return o_data.setBit<VAS_VA_RG_SCF_INERRRPT_BIT8>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT8 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("2:scom_proc Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT8 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_INERRRPT_BIT8]
 
+//>> CLEAR_[VAS_VA_RG_SCF_INERRRPT_BIT8]
 static inline fapi2::buffer<uint64_t>& CLEAR_VAS_VA_RG_SCF_INERRRPT_BIT8(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
@@ -14766,11 +16717,13 @@ static inline fapi2::buffer<uint64_t>& CLEAR_VAS_VA_RG_SCF_INERRRPT_BIT8(fapi2::
     return o_data.clearBit<VAS_VA_RG_SCF_INERRRPT_BIT8>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT8 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("3:scom_proc Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT8 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< CLEAR_[VAS_VA_RG_SCF_INERRRPT_BIT8]
 
+//>> GET_[VAS_VA_RG_SCF_INERRRPT_BIT8]
 static inline fapi2::buffer<uint64_t>& GET_VAS_VA_RG_SCF_INERRRPT_BIT8(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
@@ -14781,11 +16734,13 @@ static inline fapi2::buffer<uint64_t>& GET_VAS_VA_RG_SCF_INERRRPT_BIT8(fapi2::bu
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT8 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("4:scom_proc Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT8 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[VAS_VA_RG_SCF_INERRRPT_BIT8]
 
+//>> GET_[VAS_VA_RG_SCF_INERRRPT_BIT8]
 static inline bool GET_VAS_VA_RG_SCF_INERRRPT_BIT8(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
@@ -14794,11 +16749,13 @@ static inline bool GET_VAS_VA_RG_SCF_INERRRPT_BIT8(fapi2::buffer<uint64_t>& i_da
     return i_data.getBit<VAS_VA_RG_SCF_INERRRPT_BIT8>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT8 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("5:scom_proc Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT8 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[VAS_VA_RG_SCF_INERRRPT_BIT8]
 
+//>> SET_[VAS_VA_RG_SCF_INERRRPT_BIT9]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_INERRRPT_BIT9(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
@@ -14809,11 +16766,13 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_INERRRPT_BIT9(fapi2::bu
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT9 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("0:scom_proc Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT9 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_INERRRPT_BIT9]
 
+//>> SET_[VAS_VA_RG_SCF_INERRRPT_BIT9]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_INERRRPT_BIT9(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
@@ -14824,11 +16783,13 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_INERRRPT_BIT9(const uin
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT9 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("1:scom_proc Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT9 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_INERRRPT_BIT9]
 
+//>> SET_[VAS_VA_RG_SCF_INERRRPT_BIT9]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_INERRRPT_BIT9(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
@@ -14837,11 +16798,13 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_INERRRPT_BIT9(fapi2::bu
     return o_data.setBit<VAS_VA_RG_SCF_INERRRPT_BIT9>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT9 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("2:scom_proc Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT9 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_INERRRPT_BIT9]
 
+//>> CLEAR_[VAS_VA_RG_SCF_INERRRPT_BIT9]
 static inline fapi2::buffer<uint64_t>& CLEAR_VAS_VA_RG_SCF_INERRRPT_BIT9(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
@@ -14850,11 +16813,13 @@ static inline fapi2::buffer<uint64_t>& CLEAR_VAS_VA_RG_SCF_INERRRPT_BIT9(fapi2::
     return o_data.clearBit<VAS_VA_RG_SCF_INERRRPT_BIT9>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT9 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("3:scom_proc Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT9 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< CLEAR_[VAS_VA_RG_SCF_INERRRPT_BIT9]
 
+//>> GET_[VAS_VA_RG_SCF_INERRRPT_BIT9]
 static inline fapi2::buffer<uint64_t>& GET_VAS_VA_RG_SCF_INERRRPT_BIT9(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
@@ -14865,11 +16830,13 @@ static inline fapi2::buffer<uint64_t>& GET_VAS_VA_RG_SCF_INERRRPT_BIT9(fapi2::bu
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT9 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("4:scom_proc Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT9 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[VAS_VA_RG_SCF_INERRRPT_BIT9]
 
+//>> GET_[VAS_VA_RG_SCF_INERRRPT_BIT9]
 static inline bool GET_VAS_VA_RG_SCF_INERRRPT_BIT9(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
@@ -14878,11 +16845,13 @@ static inline bool GET_VAS_VA_RG_SCF_INERRRPT_BIT9(fapi2::buffer<uint64_t>& i_da
     return i_data.getBit<VAS_VA_RG_SCF_INERRRPT_BIT9>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT9 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("5:scom_proc Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT9 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[VAS_VA_RG_SCF_INERRRPT_BIT9]
 
+//>> SET_[VAS_VA_RG_SCF_INERRRPT_BIT10]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_INERRRPT_BIT10(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
@@ -14893,11 +16862,13 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_INERRRPT_BIT10(fapi2::b
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT10 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("0:scom_proc Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT10 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_INERRRPT_BIT10]
 
+//>> SET_[VAS_VA_RG_SCF_INERRRPT_BIT10]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_INERRRPT_BIT10(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
@@ -14908,11 +16879,13 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_INERRRPT_BIT10(const ui
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT10 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("1:scom_proc Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT10 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_INERRRPT_BIT10]
 
+//>> SET_[VAS_VA_RG_SCF_INERRRPT_BIT10]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_INERRRPT_BIT10(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
@@ -14921,11 +16894,13 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_INERRRPT_BIT10(fapi2::b
     return o_data.setBit<VAS_VA_RG_SCF_INERRRPT_BIT10>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT10 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("2:scom_proc Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT10 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_INERRRPT_BIT10]
 
+//>> CLEAR_[VAS_VA_RG_SCF_INERRRPT_BIT10]
 static inline fapi2::buffer<uint64_t>& CLEAR_VAS_VA_RG_SCF_INERRRPT_BIT10(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
@@ -14934,11 +16909,13 @@ static inline fapi2::buffer<uint64_t>& CLEAR_VAS_VA_RG_SCF_INERRRPT_BIT10(fapi2:
     return o_data.clearBit<VAS_VA_RG_SCF_INERRRPT_BIT10>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT10 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("3:scom_proc Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT10 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< CLEAR_[VAS_VA_RG_SCF_INERRRPT_BIT10]
 
+//>> GET_[VAS_VA_RG_SCF_INERRRPT_BIT10]
 static inline fapi2::buffer<uint64_t>& GET_VAS_VA_RG_SCF_INERRRPT_BIT10(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
@@ -14949,11 +16926,13 @@ static inline fapi2::buffer<uint64_t>& GET_VAS_VA_RG_SCF_INERRRPT_BIT10(fapi2::b
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT10 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("4:scom_proc Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT10 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[VAS_VA_RG_SCF_INERRRPT_BIT10]
 
+//>> GET_[VAS_VA_RG_SCF_INERRRPT_BIT10]
 static inline bool GET_VAS_VA_RG_SCF_INERRRPT_BIT10(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
@@ -14962,11 +16941,13 @@ static inline bool GET_VAS_VA_RG_SCF_INERRRPT_BIT10(fapi2::buffer<uint64_t>& i_d
     return i_data.getBit<VAS_VA_RG_SCF_INERRRPT_BIT10>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT10 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("5:scom_proc Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT10 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[VAS_VA_RG_SCF_INERRRPT_BIT10]
 
+//>> SET_[VAS_VA_RG_SCF_INERRRPT_BIT11]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_INERRRPT_BIT11(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
@@ -14977,11 +16958,13 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_INERRRPT_BIT11(fapi2::b
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT11 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("0:scom_proc Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT11 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_INERRRPT_BIT11]
 
+//>> SET_[VAS_VA_RG_SCF_INERRRPT_BIT11]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_INERRRPT_BIT11(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
@@ -14992,11 +16975,13 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_INERRRPT_BIT11(const ui
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT11 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("1:scom_proc Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT11 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_INERRRPT_BIT11]
 
+//>> SET_[VAS_VA_RG_SCF_INERRRPT_BIT11]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_INERRRPT_BIT11(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
@@ -15005,11 +16990,13 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_INERRRPT_BIT11(fapi2::b
     return o_data.setBit<VAS_VA_RG_SCF_INERRRPT_BIT11>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT11 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("2:scom_proc Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT11 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_INERRRPT_BIT11]
 
+//>> CLEAR_[VAS_VA_RG_SCF_INERRRPT_BIT11]
 static inline fapi2::buffer<uint64_t>& CLEAR_VAS_VA_RG_SCF_INERRRPT_BIT11(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
@@ -15018,11 +17005,13 @@ static inline fapi2::buffer<uint64_t>& CLEAR_VAS_VA_RG_SCF_INERRRPT_BIT11(fapi2:
     return o_data.clearBit<VAS_VA_RG_SCF_INERRRPT_BIT11>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT11 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("3:scom_proc Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT11 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< CLEAR_[VAS_VA_RG_SCF_INERRRPT_BIT11]
 
+//>> GET_[VAS_VA_RG_SCF_INERRRPT_BIT11]
 static inline fapi2::buffer<uint64_t>& GET_VAS_VA_RG_SCF_INERRRPT_BIT11(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
@@ -15033,11 +17022,13 @@ static inline fapi2::buffer<uint64_t>& GET_VAS_VA_RG_SCF_INERRRPT_BIT11(fapi2::b
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT11 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("4:scom_proc Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT11 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[VAS_VA_RG_SCF_INERRRPT_BIT11]
 
+//>> GET_[VAS_VA_RG_SCF_INERRRPT_BIT11]
 static inline bool GET_VAS_VA_RG_SCF_INERRRPT_BIT11(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
@@ -15046,11 +17037,13 @@ static inline bool GET_VAS_VA_RG_SCF_INERRRPT_BIT11(fapi2::buffer<uint64_t>& i_d
     return i_data.getBit<VAS_VA_RG_SCF_INERRRPT_BIT11>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT11 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("5:scom_proc Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT11 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[VAS_VA_RG_SCF_INERRRPT_BIT11]
 
+//>> SET_[VAS_VA_RG_SCF_INERRRPT_BIT12]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_INERRRPT_BIT12(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
@@ -15061,11 +17054,13 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_INERRRPT_BIT12(fapi2::b
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT12 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("0:scom_proc Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT12 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_INERRRPT_BIT12]
 
+//>> SET_[VAS_VA_RG_SCF_INERRRPT_BIT12]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_INERRRPT_BIT12(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
@@ -15076,11 +17071,13 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_INERRRPT_BIT12(const ui
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT12 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("1:scom_proc Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT12 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_INERRRPT_BIT12]
 
+//>> SET_[VAS_VA_RG_SCF_INERRRPT_BIT12]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_INERRRPT_BIT12(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
@@ -15089,11 +17086,13 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_INERRRPT_BIT12(fapi2::b
     return o_data.setBit<VAS_VA_RG_SCF_INERRRPT_BIT12>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT12 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("2:scom_proc Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT12 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_INERRRPT_BIT12]
 
+//>> CLEAR_[VAS_VA_RG_SCF_INERRRPT_BIT12]
 static inline fapi2::buffer<uint64_t>& CLEAR_VAS_VA_RG_SCF_INERRRPT_BIT12(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
@@ -15102,11 +17101,13 @@ static inline fapi2::buffer<uint64_t>& CLEAR_VAS_VA_RG_SCF_INERRRPT_BIT12(fapi2:
     return o_data.clearBit<VAS_VA_RG_SCF_INERRRPT_BIT12>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT12 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("3:scom_proc Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT12 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< CLEAR_[VAS_VA_RG_SCF_INERRRPT_BIT12]
 
+//>> GET_[VAS_VA_RG_SCF_INERRRPT_BIT12]
 static inline fapi2::buffer<uint64_t>& GET_VAS_VA_RG_SCF_INERRRPT_BIT12(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
@@ -15117,11 +17118,13 @@ static inline fapi2::buffer<uint64_t>& GET_VAS_VA_RG_SCF_INERRRPT_BIT12(fapi2::b
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT12 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("4:scom_proc Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT12 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[VAS_VA_RG_SCF_INERRRPT_BIT12]
 
+//>> GET_[VAS_VA_RG_SCF_INERRRPT_BIT12]
 static inline bool GET_VAS_VA_RG_SCF_INERRRPT_BIT12(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
@@ -15130,11 +17133,13 @@ static inline bool GET_VAS_VA_RG_SCF_INERRRPT_BIT12(fapi2::buffer<uint64_t>& i_d
     return i_data.getBit<VAS_VA_RG_SCF_INERRRPT_BIT12>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT12 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("5:scom_proc Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT12 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[VAS_VA_RG_SCF_INERRRPT_BIT12]
 
+//>> SET_[VAS_VA_RG_SCF_INERRRPT_BIT13]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_INERRRPT_BIT13(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
@@ -15145,11 +17150,13 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_INERRRPT_BIT13(fapi2::b
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT13 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("0:scom_proc Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT13 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_INERRRPT_BIT13]
 
+//>> SET_[VAS_VA_RG_SCF_INERRRPT_BIT13]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_INERRRPT_BIT13(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
@@ -15160,11 +17167,13 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_INERRRPT_BIT13(const ui
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT13 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("1:scom_proc Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT13 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_INERRRPT_BIT13]
 
+//>> SET_[VAS_VA_RG_SCF_INERRRPT_BIT13]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_INERRRPT_BIT13(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
@@ -15173,11 +17182,13 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_INERRRPT_BIT13(fapi2::b
     return o_data.setBit<VAS_VA_RG_SCF_INERRRPT_BIT13>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT13 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("2:scom_proc Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT13 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_INERRRPT_BIT13]
 
+//>> CLEAR_[VAS_VA_RG_SCF_INERRRPT_BIT13]
 static inline fapi2::buffer<uint64_t>& CLEAR_VAS_VA_RG_SCF_INERRRPT_BIT13(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
@@ -15186,11 +17197,13 @@ static inline fapi2::buffer<uint64_t>& CLEAR_VAS_VA_RG_SCF_INERRRPT_BIT13(fapi2:
     return o_data.clearBit<VAS_VA_RG_SCF_INERRRPT_BIT13>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT13 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("3:scom_proc Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT13 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< CLEAR_[VAS_VA_RG_SCF_INERRRPT_BIT13]
 
+//>> GET_[VAS_VA_RG_SCF_INERRRPT_BIT13]
 static inline fapi2::buffer<uint64_t>& GET_VAS_VA_RG_SCF_INERRRPT_BIT13(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
@@ -15201,11 +17214,13 @@ static inline fapi2::buffer<uint64_t>& GET_VAS_VA_RG_SCF_INERRRPT_BIT13(fapi2::b
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT13 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("4:scom_proc Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT13 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[VAS_VA_RG_SCF_INERRRPT_BIT13]
 
+//>> GET_[VAS_VA_RG_SCF_INERRRPT_BIT13]
 static inline bool GET_VAS_VA_RG_SCF_INERRRPT_BIT13(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
@@ -15214,11 +17229,13 @@ static inline bool GET_VAS_VA_RG_SCF_INERRRPT_BIT13(fapi2::buffer<uint64_t>& i_d
     return i_data.getBit<VAS_VA_RG_SCF_INERRRPT_BIT13>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT13 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("5:scom_proc Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT13 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[VAS_VA_RG_SCF_INERRRPT_BIT13]
 
+//>> SET_[VAS_VA_RG_SCF_INERRRPT_BIT14]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_INERRRPT_BIT14(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
@@ -15229,11 +17246,13 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_INERRRPT_BIT14(fapi2::b
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT14 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("0:scom_proc Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT14 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_INERRRPT_BIT14]
 
+//>> SET_[VAS_VA_RG_SCF_INERRRPT_BIT14]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_INERRRPT_BIT14(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
@@ -15244,11 +17263,13 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_INERRRPT_BIT14(const ui
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT14 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("1:scom_proc Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT14 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_INERRRPT_BIT14]
 
+//>> SET_[VAS_VA_RG_SCF_INERRRPT_BIT14]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_INERRRPT_BIT14(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
@@ -15257,11 +17278,13 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_INERRRPT_BIT14(fapi2::b
     return o_data.setBit<VAS_VA_RG_SCF_INERRRPT_BIT14>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT14 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("2:scom_proc Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT14 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_INERRRPT_BIT14]
 
+//>> CLEAR_[VAS_VA_RG_SCF_INERRRPT_BIT14]
 static inline fapi2::buffer<uint64_t>& CLEAR_VAS_VA_RG_SCF_INERRRPT_BIT14(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
@@ -15270,11 +17293,13 @@ static inline fapi2::buffer<uint64_t>& CLEAR_VAS_VA_RG_SCF_INERRRPT_BIT14(fapi2:
     return o_data.clearBit<VAS_VA_RG_SCF_INERRRPT_BIT14>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT14 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("3:scom_proc Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT14 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< CLEAR_[VAS_VA_RG_SCF_INERRRPT_BIT14]
 
+//>> GET_[VAS_VA_RG_SCF_INERRRPT_BIT14]
 static inline fapi2::buffer<uint64_t>& GET_VAS_VA_RG_SCF_INERRRPT_BIT14(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
@@ -15285,11 +17310,13 @@ static inline fapi2::buffer<uint64_t>& GET_VAS_VA_RG_SCF_INERRRPT_BIT14(fapi2::b
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT14 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("4:scom_proc Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT14 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[VAS_VA_RG_SCF_INERRRPT_BIT14]
 
+//>> GET_[VAS_VA_RG_SCF_INERRRPT_BIT14]
 static inline bool GET_VAS_VA_RG_SCF_INERRRPT_BIT14(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
@@ -15298,11 +17325,13 @@ static inline bool GET_VAS_VA_RG_SCF_INERRRPT_BIT14(fapi2::buffer<uint64_t>& i_d
     return i_data.getBit<VAS_VA_RG_SCF_INERRRPT_BIT14>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT14 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("5:scom_proc Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT14 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[VAS_VA_RG_SCF_INERRRPT_BIT14]
 
+//>> SET_[VAS_VA_RG_SCF_INERRRPT_BIT15]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_INERRRPT_BIT15(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
@@ -15313,11 +17342,13 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_INERRRPT_BIT15(fapi2::b
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT15 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("0:scom_proc Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT15 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_INERRRPT_BIT15]
 
+//>> SET_[VAS_VA_RG_SCF_INERRRPT_BIT15]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_INERRRPT_BIT15(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
@@ -15328,11 +17359,13 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_INERRRPT_BIT15(const ui
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT15 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("1:scom_proc Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT15 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_INERRRPT_BIT15]
 
+//>> SET_[VAS_VA_RG_SCF_INERRRPT_BIT15]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_INERRRPT_BIT15(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
@@ -15341,11 +17374,13 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_INERRRPT_BIT15(fapi2::b
     return o_data.setBit<VAS_VA_RG_SCF_INERRRPT_BIT15>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT15 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("2:scom_proc Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT15 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_INERRRPT_BIT15]
 
+//>> CLEAR_[VAS_VA_RG_SCF_INERRRPT_BIT15]
 static inline fapi2::buffer<uint64_t>& CLEAR_VAS_VA_RG_SCF_INERRRPT_BIT15(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
@@ -15354,11 +17389,13 @@ static inline fapi2::buffer<uint64_t>& CLEAR_VAS_VA_RG_SCF_INERRRPT_BIT15(fapi2:
     return o_data.clearBit<VAS_VA_RG_SCF_INERRRPT_BIT15>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT15 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("3:scom_proc Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT15 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< CLEAR_[VAS_VA_RG_SCF_INERRRPT_BIT15]
 
+//>> GET_[VAS_VA_RG_SCF_INERRRPT_BIT15]
 static inline fapi2::buffer<uint64_t>& GET_VAS_VA_RG_SCF_INERRRPT_BIT15(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
@@ -15369,11 +17406,13 @@ static inline fapi2::buffer<uint64_t>& GET_VAS_VA_RG_SCF_INERRRPT_BIT15(fapi2::b
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT15 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("4:scom_proc Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT15 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[VAS_VA_RG_SCF_INERRRPT_BIT15]
 
+//>> GET_[VAS_VA_RG_SCF_INERRRPT_BIT15]
 static inline bool GET_VAS_VA_RG_SCF_INERRRPT_BIT15(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
@@ -15382,11 +17421,13 @@ static inline bool GET_VAS_VA_RG_SCF_INERRRPT_BIT15(fapi2::buffer<uint64_t>& i_d
     return i_data.getBit<VAS_VA_RG_SCF_INERRRPT_BIT15>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT15 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("5:scom_proc Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT15 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[VAS_VA_RG_SCF_INERRRPT_BIT15]
 
+//>> SET_[VAS_VA_RG_SCF_INERRRPT_BIT16]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_INERRRPT_BIT16(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
@@ -15397,11 +17438,13 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_INERRRPT_BIT16(fapi2::b
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT16 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("0:scom_proc Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT16 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_INERRRPT_BIT16]
 
+//>> SET_[VAS_VA_RG_SCF_INERRRPT_BIT16]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_INERRRPT_BIT16(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
@@ -15412,11 +17455,13 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_INERRRPT_BIT16(const ui
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT16 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("1:scom_proc Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT16 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_INERRRPT_BIT16]
 
+//>> SET_[VAS_VA_RG_SCF_INERRRPT_BIT16]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_INERRRPT_BIT16(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
@@ -15425,11 +17470,13 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_INERRRPT_BIT16(fapi2::b
     return o_data.setBit<VAS_VA_RG_SCF_INERRRPT_BIT16>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT16 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("2:scom_proc Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT16 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_INERRRPT_BIT16]
 
+//>> CLEAR_[VAS_VA_RG_SCF_INERRRPT_BIT16]
 static inline fapi2::buffer<uint64_t>& CLEAR_VAS_VA_RG_SCF_INERRRPT_BIT16(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
@@ -15438,11 +17485,13 @@ static inline fapi2::buffer<uint64_t>& CLEAR_VAS_VA_RG_SCF_INERRRPT_BIT16(fapi2:
     return o_data.clearBit<VAS_VA_RG_SCF_INERRRPT_BIT16>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT16 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("3:scom_proc Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT16 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< CLEAR_[VAS_VA_RG_SCF_INERRRPT_BIT16]
 
+//>> GET_[VAS_VA_RG_SCF_INERRRPT_BIT16]
 static inline fapi2::buffer<uint64_t>& GET_VAS_VA_RG_SCF_INERRRPT_BIT16(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
@@ -15453,11 +17502,13 @@ static inline fapi2::buffer<uint64_t>& GET_VAS_VA_RG_SCF_INERRRPT_BIT16(fapi2::b
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT16 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("4:scom_proc Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT16 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[VAS_VA_RG_SCF_INERRRPT_BIT16]
 
+//>> GET_[VAS_VA_RG_SCF_INERRRPT_BIT16]
 static inline bool GET_VAS_VA_RG_SCF_INERRRPT_BIT16(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
@@ -15466,11 +17517,13 @@ static inline bool GET_VAS_VA_RG_SCF_INERRRPT_BIT16(fapi2::buffer<uint64_t>& i_d
     return i_data.getBit<VAS_VA_RG_SCF_INERRRPT_BIT16>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT16 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("5:scom_proc Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT16 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[VAS_VA_RG_SCF_INERRRPT_BIT16]
 
+//>> SET_[VAS_VA_RG_SCF_INERRRPT_BIT17]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_INERRRPT_BIT17(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
@@ -15481,11 +17534,13 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_INERRRPT_BIT17(fapi2::b
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT17 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("0:scom_proc Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT17 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_INERRRPT_BIT17]
 
+//>> SET_[VAS_VA_RG_SCF_INERRRPT_BIT17]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_INERRRPT_BIT17(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
@@ -15496,11 +17551,13 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_INERRRPT_BIT17(const ui
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT17 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("1:scom_proc Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT17 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_INERRRPT_BIT17]
 
+//>> SET_[VAS_VA_RG_SCF_INERRRPT_BIT17]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_INERRRPT_BIT17(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
@@ -15509,11 +17566,13 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_INERRRPT_BIT17(fapi2::b
     return o_data.setBit<VAS_VA_RG_SCF_INERRRPT_BIT17>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT17 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("2:scom_proc Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT17 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_INERRRPT_BIT17]
 
+//>> CLEAR_[VAS_VA_RG_SCF_INERRRPT_BIT17]
 static inline fapi2::buffer<uint64_t>& CLEAR_VAS_VA_RG_SCF_INERRRPT_BIT17(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
@@ -15522,11 +17581,13 @@ static inline fapi2::buffer<uint64_t>& CLEAR_VAS_VA_RG_SCF_INERRRPT_BIT17(fapi2:
     return o_data.clearBit<VAS_VA_RG_SCF_INERRRPT_BIT17>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT17 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("3:scom_proc Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT17 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< CLEAR_[VAS_VA_RG_SCF_INERRRPT_BIT17]
 
+//>> GET_[VAS_VA_RG_SCF_INERRRPT_BIT17]
 static inline fapi2::buffer<uint64_t>& GET_VAS_VA_RG_SCF_INERRRPT_BIT17(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
@@ -15537,11 +17598,13 @@ static inline fapi2::buffer<uint64_t>& GET_VAS_VA_RG_SCF_INERRRPT_BIT17(fapi2::b
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT17 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("4:scom_proc Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT17 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[VAS_VA_RG_SCF_INERRRPT_BIT17]
 
+//>> GET_[VAS_VA_RG_SCF_INERRRPT_BIT17]
 static inline bool GET_VAS_VA_RG_SCF_INERRRPT_BIT17(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
@@ -15550,11 +17613,13 @@ static inline bool GET_VAS_VA_RG_SCF_INERRRPT_BIT17(fapi2::buffer<uint64_t>& i_d
     return i_data.getBit<VAS_VA_RG_SCF_INERRRPT_BIT17>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT17 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("5:scom_proc Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT17 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[VAS_VA_RG_SCF_INERRRPT_BIT17]
 
+//>> SET_[VAS_VA_RG_SCF_INERRRPT_BIT18]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_INERRRPT_BIT18(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
@@ -15565,11 +17630,13 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_INERRRPT_BIT18(fapi2::b
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT18 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("0:scom_proc Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT18 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_INERRRPT_BIT18]
 
+//>> SET_[VAS_VA_RG_SCF_INERRRPT_BIT18]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_INERRRPT_BIT18(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
@@ -15580,11 +17647,13 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_INERRRPT_BIT18(const ui
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT18 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("1:scom_proc Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT18 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_INERRRPT_BIT18]
 
+//>> SET_[VAS_VA_RG_SCF_INERRRPT_BIT18]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_INERRRPT_BIT18(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
@@ -15593,11 +17662,13 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_INERRRPT_BIT18(fapi2::b
     return o_data.setBit<VAS_VA_RG_SCF_INERRRPT_BIT18>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT18 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("2:scom_proc Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT18 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_INERRRPT_BIT18]
 
+//>> CLEAR_[VAS_VA_RG_SCF_INERRRPT_BIT18]
 static inline fapi2::buffer<uint64_t>& CLEAR_VAS_VA_RG_SCF_INERRRPT_BIT18(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
@@ -15606,11 +17677,13 @@ static inline fapi2::buffer<uint64_t>& CLEAR_VAS_VA_RG_SCF_INERRRPT_BIT18(fapi2:
     return o_data.clearBit<VAS_VA_RG_SCF_INERRRPT_BIT18>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT18 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("3:scom_proc Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT18 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< CLEAR_[VAS_VA_RG_SCF_INERRRPT_BIT18]
 
+//>> GET_[VAS_VA_RG_SCF_INERRRPT_BIT18]
 static inline fapi2::buffer<uint64_t>& GET_VAS_VA_RG_SCF_INERRRPT_BIT18(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
@@ -15621,11 +17694,13 @@ static inline fapi2::buffer<uint64_t>& GET_VAS_VA_RG_SCF_INERRRPT_BIT18(fapi2::b
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT18 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("4:scom_proc Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT18 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[VAS_VA_RG_SCF_INERRRPT_BIT18]
 
+//>> GET_[VAS_VA_RG_SCF_INERRRPT_BIT18]
 static inline bool GET_VAS_VA_RG_SCF_INERRRPT_BIT18(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
@@ -15634,11 +17709,13 @@ static inline bool GET_VAS_VA_RG_SCF_INERRRPT_BIT18(fapi2::buffer<uint64_t>& i_d
     return i_data.getBit<VAS_VA_RG_SCF_INERRRPT_BIT18>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT18 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("5:scom_proc Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT18 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[VAS_VA_RG_SCF_INERRRPT_BIT18]
 
+//>> SET_[VAS_VA_RG_SCF_INERRRPT_BIT19]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_INERRRPT_BIT19(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
@@ -15649,11 +17726,13 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_INERRRPT_BIT19(fapi2::b
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT19 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("0:scom_proc Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT19 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_INERRRPT_BIT19]
 
+//>> SET_[VAS_VA_RG_SCF_INERRRPT_BIT19]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_INERRRPT_BIT19(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
@@ -15664,11 +17743,13 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_INERRRPT_BIT19(const ui
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT19 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("1:scom_proc Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT19 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_INERRRPT_BIT19]
 
+//>> SET_[VAS_VA_RG_SCF_INERRRPT_BIT19]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_INERRRPT_BIT19(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
@@ -15677,11 +17758,13 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_INERRRPT_BIT19(fapi2::b
     return o_data.setBit<VAS_VA_RG_SCF_INERRRPT_BIT19>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT19 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("2:scom_proc Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT19 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_INERRRPT_BIT19]
 
+//>> CLEAR_[VAS_VA_RG_SCF_INERRRPT_BIT19]
 static inline fapi2::buffer<uint64_t>& CLEAR_VAS_VA_RG_SCF_INERRRPT_BIT19(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
@@ -15690,11 +17773,13 @@ static inline fapi2::buffer<uint64_t>& CLEAR_VAS_VA_RG_SCF_INERRRPT_BIT19(fapi2:
     return o_data.clearBit<VAS_VA_RG_SCF_INERRRPT_BIT19>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT19 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("3:scom_proc Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT19 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< CLEAR_[VAS_VA_RG_SCF_INERRRPT_BIT19]
 
+//>> GET_[VAS_VA_RG_SCF_INERRRPT_BIT19]
 static inline fapi2::buffer<uint64_t>& GET_VAS_VA_RG_SCF_INERRRPT_BIT19(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
@@ -15705,11 +17790,13 @@ static inline fapi2::buffer<uint64_t>& GET_VAS_VA_RG_SCF_INERRRPT_BIT19(fapi2::b
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT19 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("4:scom_proc Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT19 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[VAS_VA_RG_SCF_INERRRPT_BIT19]
 
+//>> GET_[VAS_VA_RG_SCF_INERRRPT_BIT19]
 static inline bool GET_VAS_VA_RG_SCF_INERRRPT_BIT19(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
@@ -15718,11 +17805,13 @@ static inline bool GET_VAS_VA_RG_SCF_INERRRPT_BIT19(fapi2::buffer<uint64_t>& i_d
     return i_data.getBit<VAS_VA_RG_SCF_INERRRPT_BIT19>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT19 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("5:scom_proc Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT19 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[VAS_VA_RG_SCF_INERRRPT_BIT19]
 
+//>> SET_[VAS_VA_RG_SCF_INERRRPT_BIT20]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_INERRRPT_BIT20(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
@@ -15733,11 +17822,13 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_INERRRPT_BIT20(fapi2::b
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT20 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("0:scom_proc Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT20 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_INERRRPT_BIT20]
 
+//>> SET_[VAS_VA_RG_SCF_INERRRPT_BIT20]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_INERRRPT_BIT20(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
@@ -15748,11 +17839,13 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_INERRRPT_BIT20(const ui
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT20 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("1:scom_proc Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT20 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_INERRRPT_BIT20]
 
+//>> SET_[VAS_VA_RG_SCF_INERRRPT_BIT20]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_INERRRPT_BIT20(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
@@ -15761,11 +17854,13 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_INERRRPT_BIT20(fapi2::b
     return o_data.setBit<VAS_VA_RG_SCF_INERRRPT_BIT20>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT20 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("2:scom_proc Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT20 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_INERRRPT_BIT20]
 
+//>> CLEAR_[VAS_VA_RG_SCF_INERRRPT_BIT20]
 static inline fapi2::buffer<uint64_t>& CLEAR_VAS_VA_RG_SCF_INERRRPT_BIT20(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
@@ -15774,11 +17869,13 @@ static inline fapi2::buffer<uint64_t>& CLEAR_VAS_VA_RG_SCF_INERRRPT_BIT20(fapi2:
     return o_data.clearBit<VAS_VA_RG_SCF_INERRRPT_BIT20>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT20 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("3:scom_proc Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT20 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< CLEAR_[VAS_VA_RG_SCF_INERRRPT_BIT20]
 
+//>> GET_[VAS_VA_RG_SCF_INERRRPT_BIT20]
 static inline fapi2::buffer<uint64_t>& GET_VAS_VA_RG_SCF_INERRRPT_BIT20(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
@@ -15789,11 +17886,13 @@ static inline fapi2::buffer<uint64_t>& GET_VAS_VA_RG_SCF_INERRRPT_BIT20(fapi2::b
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT20 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("4:scom_proc Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT20 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[VAS_VA_RG_SCF_INERRRPT_BIT20]
 
+//>> GET_[VAS_VA_RG_SCF_INERRRPT_BIT20]
 static inline bool GET_VAS_VA_RG_SCF_INERRRPT_BIT20(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
@@ -15802,11 +17901,13 @@ static inline bool GET_VAS_VA_RG_SCF_INERRRPT_BIT20(fapi2::buffer<uint64_t>& i_d
     return i_data.getBit<VAS_VA_RG_SCF_INERRRPT_BIT20>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT20 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("5:scom_proc Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT20 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[VAS_VA_RG_SCF_INERRRPT_BIT20]
 
+//>> SET_[VAS_VA_RG_SCF_INERRRPT_BIT21]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_INERRRPT_BIT21(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
@@ -15817,11 +17918,13 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_INERRRPT_BIT21(fapi2::b
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT21 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("0:scom_proc Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT21 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_INERRRPT_BIT21]
 
+//>> SET_[VAS_VA_RG_SCF_INERRRPT_BIT21]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_INERRRPT_BIT21(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
@@ -15832,11 +17935,13 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_INERRRPT_BIT21(const ui
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT21 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("1:scom_proc Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT21 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_INERRRPT_BIT21]
 
+//>> SET_[VAS_VA_RG_SCF_INERRRPT_BIT21]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_INERRRPT_BIT21(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
@@ -15845,11 +17950,13 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_INERRRPT_BIT21(fapi2::b
     return o_data.setBit<VAS_VA_RG_SCF_INERRRPT_BIT21>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT21 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("2:scom_proc Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT21 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_INERRRPT_BIT21]
 
+//>> CLEAR_[VAS_VA_RG_SCF_INERRRPT_BIT21]
 static inline fapi2::buffer<uint64_t>& CLEAR_VAS_VA_RG_SCF_INERRRPT_BIT21(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
@@ -15858,11 +17965,13 @@ static inline fapi2::buffer<uint64_t>& CLEAR_VAS_VA_RG_SCF_INERRRPT_BIT21(fapi2:
     return o_data.clearBit<VAS_VA_RG_SCF_INERRRPT_BIT21>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT21 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("3:scom_proc Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT21 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< CLEAR_[VAS_VA_RG_SCF_INERRRPT_BIT21]
 
+//>> GET_[VAS_VA_RG_SCF_INERRRPT_BIT21]
 static inline fapi2::buffer<uint64_t>& GET_VAS_VA_RG_SCF_INERRRPT_BIT21(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
@@ -15873,11 +17982,13 @@ static inline fapi2::buffer<uint64_t>& GET_VAS_VA_RG_SCF_INERRRPT_BIT21(fapi2::b
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT21 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("4:scom_proc Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT21 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[VAS_VA_RG_SCF_INERRRPT_BIT21]
 
+//>> GET_[VAS_VA_RG_SCF_INERRRPT_BIT21]
 static inline bool GET_VAS_VA_RG_SCF_INERRRPT_BIT21(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
@@ -15886,11 +17997,13 @@ static inline bool GET_VAS_VA_RG_SCF_INERRRPT_BIT21(fapi2::buffer<uint64_t>& i_d
     return i_data.getBit<VAS_VA_RG_SCF_INERRRPT_BIT21>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT21 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("5:scom_proc Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT21 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[VAS_VA_RG_SCF_INERRRPT_BIT21]
 
+//>> SET_[VAS_VA_RG_SCF_INERRRPT_BIT22]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_INERRRPT_BIT22(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
@@ -15901,11 +18014,13 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_INERRRPT_BIT22(fapi2::b
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT22 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("0:scom_proc Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT22 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_INERRRPT_BIT22]
 
+//>> SET_[VAS_VA_RG_SCF_INERRRPT_BIT22]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_INERRRPT_BIT22(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
@@ -15916,11 +18031,13 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_INERRRPT_BIT22(const ui
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT22 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("1:scom_proc Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT22 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_INERRRPT_BIT22]
 
+//>> SET_[VAS_VA_RG_SCF_INERRRPT_BIT22]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_INERRRPT_BIT22(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
@@ -15929,11 +18046,13 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_INERRRPT_BIT22(fapi2::b
     return o_data.setBit<VAS_VA_RG_SCF_INERRRPT_BIT22>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT22 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("2:scom_proc Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT22 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_INERRRPT_BIT22]
 
+//>> CLEAR_[VAS_VA_RG_SCF_INERRRPT_BIT22]
 static inline fapi2::buffer<uint64_t>& CLEAR_VAS_VA_RG_SCF_INERRRPT_BIT22(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
@@ -15942,11 +18061,13 @@ static inline fapi2::buffer<uint64_t>& CLEAR_VAS_VA_RG_SCF_INERRRPT_BIT22(fapi2:
     return o_data.clearBit<VAS_VA_RG_SCF_INERRRPT_BIT22>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT22 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("3:scom_proc Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT22 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< CLEAR_[VAS_VA_RG_SCF_INERRRPT_BIT22]
 
+//>> GET_[VAS_VA_RG_SCF_INERRRPT_BIT22]
 static inline fapi2::buffer<uint64_t>& GET_VAS_VA_RG_SCF_INERRRPT_BIT22(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
@@ -15957,11 +18078,13 @@ static inline fapi2::buffer<uint64_t>& GET_VAS_VA_RG_SCF_INERRRPT_BIT22(fapi2::b
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT22 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("4:scom_proc Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT22 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[VAS_VA_RG_SCF_INERRRPT_BIT22]
 
+//>> GET_[VAS_VA_RG_SCF_INERRRPT_BIT22]
 static inline bool GET_VAS_VA_RG_SCF_INERRRPT_BIT22(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
@@ -15970,11 +18093,13 @@ static inline bool GET_VAS_VA_RG_SCF_INERRRPT_BIT22(fapi2::buffer<uint64_t>& i_d
     return i_data.getBit<VAS_VA_RG_SCF_INERRRPT_BIT22>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT22 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("5:scom_proc Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT22 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[VAS_VA_RG_SCF_INERRRPT_BIT22]
 
+//>> SET_[VAS_VA_RG_SCF_INERRRPT_BIT23]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_INERRRPT_BIT23(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
@@ -15985,11 +18110,13 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_INERRRPT_BIT23(fapi2::b
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT23 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("0:scom_proc Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT23 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_INERRRPT_BIT23]
 
+//>> SET_[VAS_VA_RG_SCF_INERRRPT_BIT23]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_INERRRPT_BIT23(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
@@ -16000,11 +18127,13 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_INERRRPT_BIT23(const ui
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT23 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("1:scom_proc Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT23 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_INERRRPT_BIT23]
 
+//>> SET_[VAS_VA_RG_SCF_INERRRPT_BIT23]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_INERRRPT_BIT23(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
@@ -16013,11 +18142,13 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_INERRRPT_BIT23(fapi2::b
     return o_data.setBit<VAS_VA_RG_SCF_INERRRPT_BIT23>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT23 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("2:scom_proc Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT23 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_INERRRPT_BIT23]
 
+//>> CLEAR_[VAS_VA_RG_SCF_INERRRPT_BIT23]
 static inline fapi2::buffer<uint64_t>& CLEAR_VAS_VA_RG_SCF_INERRRPT_BIT23(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
@@ -16026,11 +18157,13 @@ static inline fapi2::buffer<uint64_t>& CLEAR_VAS_VA_RG_SCF_INERRRPT_BIT23(fapi2:
     return o_data.clearBit<VAS_VA_RG_SCF_INERRRPT_BIT23>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT23 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("3:scom_proc Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT23 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< CLEAR_[VAS_VA_RG_SCF_INERRRPT_BIT23]
 
+//>> GET_[VAS_VA_RG_SCF_INERRRPT_BIT23]
 static inline fapi2::buffer<uint64_t>& GET_VAS_VA_RG_SCF_INERRRPT_BIT23(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
@@ -16041,11 +18174,13 @@ static inline fapi2::buffer<uint64_t>& GET_VAS_VA_RG_SCF_INERRRPT_BIT23(fapi2::b
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT23 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("4:scom_proc Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT23 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[VAS_VA_RG_SCF_INERRRPT_BIT23]
 
+//>> GET_[VAS_VA_RG_SCF_INERRRPT_BIT23]
 static inline bool GET_VAS_VA_RG_SCF_INERRRPT_BIT23(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
@@ -16054,11 +18189,13 @@ static inline bool GET_VAS_VA_RG_SCF_INERRRPT_BIT23(fapi2::buffer<uint64_t>& i_d
     return i_data.getBit<VAS_VA_RG_SCF_INERRRPT_BIT23>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT23 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("5:scom_proc Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT23 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[VAS_VA_RG_SCF_INERRRPT_BIT23]
 
+//>> SET_[VAS_VA_RG_SCF_INERRRPT_BIT24]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_INERRRPT_BIT24(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
@@ -16069,11 +18206,13 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_INERRRPT_BIT24(fapi2::b
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT24 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("0:scom_proc Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT24 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_INERRRPT_BIT24]
 
+//>> SET_[VAS_VA_RG_SCF_INERRRPT_BIT24]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_INERRRPT_BIT24(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
@@ -16084,11 +18223,13 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_INERRRPT_BIT24(const ui
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT24 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("1:scom_proc Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT24 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_INERRRPT_BIT24]
 
+//>> SET_[VAS_VA_RG_SCF_INERRRPT_BIT24]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_INERRRPT_BIT24(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
@@ -16097,11 +18238,13 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_INERRRPT_BIT24(fapi2::b
     return o_data.setBit<VAS_VA_RG_SCF_INERRRPT_BIT24>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT24 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("2:scom_proc Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT24 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_INERRRPT_BIT24]
 
+//>> CLEAR_[VAS_VA_RG_SCF_INERRRPT_BIT24]
 static inline fapi2::buffer<uint64_t>& CLEAR_VAS_VA_RG_SCF_INERRRPT_BIT24(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
@@ -16110,11 +18253,13 @@ static inline fapi2::buffer<uint64_t>& CLEAR_VAS_VA_RG_SCF_INERRRPT_BIT24(fapi2:
     return o_data.clearBit<VAS_VA_RG_SCF_INERRRPT_BIT24>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT24 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("3:scom_proc Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT24 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< CLEAR_[VAS_VA_RG_SCF_INERRRPT_BIT24]
 
+//>> GET_[VAS_VA_RG_SCF_INERRRPT_BIT24]
 static inline fapi2::buffer<uint64_t>& GET_VAS_VA_RG_SCF_INERRRPT_BIT24(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
@@ -16125,11 +18270,13 @@ static inline fapi2::buffer<uint64_t>& GET_VAS_VA_RG_SCF_INERRRPT_BIT24(fapi2::b
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT24 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("4:scom_proc Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT24 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[VAS_VA_RG_SCF_INERRRPT_BIT24]
 
+//>> GET_[VAS_VA_RG_SCF_INERRRPT_BIT24]
 static inline bool GET_VAS_VA_RG_SCF_INERRRPT_BIT24(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
@@ -16138,11 +18285,13 @@ static inline bool GET_VAS_VA_RG_SCF_INERRRPT_BIT24(fapi2::buffer<uint64_t>& i_d
     return i_data.getBit<VAS_VA_RG_SCF_INERRRPT_BIT24>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT24 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("5:scom_proc Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT24 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[VAS_VA_RG_SCF_INERRRPT_BIT24]
 
+//>> SET_[VAS_VA_RG_SCF_INERRRPT_BIT25]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_INERRRPT_BIT25(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
@@ -16153,11 +18302,13 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_INERRRPT_BIT25(fapi2::b
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT25 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("0:scom_proc Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT25 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_INERRRPT_BIT25]
 
+//>> SET_[VAS_VA_RG_SCF_INERRRPT_BIT25]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_INERRRPT_BIT25(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
@@ -16168,11 +18319,13 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_INERRRPT_BIT25(const ui
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT25 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("1:scom_proc Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT25 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_INERRRPT_BIT25]
 
+//>> SET_[VAS_VA_RG_SCF_INERRRPT_BIT25]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_INERRRPT_BIT25(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
@@ -16181,11 +18334,13 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_INERRRPT_BIT25(fapi2::b
     return o_data.setBit<VAS_VA_RG_SCF_INERRRPT_BIT25>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT25 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("2:scom_proc Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT25 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_INERRRPT_BIT25]
 
+//>> CLEAR_[VAS_VA_RG_SCF_INERRRPT_BIT25]
 static inline fapi2::buffer<uint64_t>& CLEAR_VAS_VA_RG_SCF_INERRRPT_BIT25(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
@@ -16194,11 +18349,13 @@ static inline fapi2::buffer<uint64_t>& CLEAR_VAS_VA_RG_SCF_INERRRPT_BIT25(fapi2:
     return o_data.clearBit<VAS_VA_RG_SCF_INERRRPT_BIT25>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT25 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("3:scom_proc Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT25 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< CLEAR_[VAS_VA_RG_SCF_INERRRPT_BIT25]
 
+//>> GET_[VAS_VA_RG_SCF_INERRRPT_BIT25]
 static inline fapi2::buffer<uint64_t>& GET_VAS_VA_RG_SCF_INERRRPT_BIT25(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
@@ -16209,11 +18366,13 @@ static inline fapi2::buffer<uint64_t>& GET_VAS_VA_RG_SCF_INERRRPT_BIT25(fapi2::b
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT25 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("4:scom_proc Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT25 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[VAS_VA_RG_SCF_INERRRPT_BIT25]
 
+//>> GET_[VAS_VA_RG_SCF_INERRRPT_BIT25]
 static inline bool GET_VAS_VA_RG_SCF_INERRRPT_BIT25(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
@@ -16222,11 +18381,13 @@ static inline bool GET_VAS_VA_RG_SCF_INERRRPT_BIT25(fapi2::buffer<uint64_t>& i_d
     return i_data.getBit<VAS_VA_RG_SCF_INERRRPT_BIT25>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT25 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("5:scom_proc Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT25 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[VAS_VA_RG_SCF_INERRRPT_BIT25]
 
+//>> SET_[VAS_VA_RG_SCF_INERRRPT_BIT26]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_INERRRPT_BIT26(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
@@ -16237,11 +18398,13 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_INERRRPT_BIT26(fapi2::b
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT26 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("0:scom_proc Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT26 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_INERRRPT_BIT26]
 
+//>> SET_[VAS_VA_RG_SCF_INERRRPT_BIT26]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_INERRRPT_BIT26(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
@@ -16252,11 +18415,13 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_INERRRPT_BIT26(const ui
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT26 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("1:scom_proc Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT26 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_INERRRPT_BIT26]
 
+//>> SET_[VAS_VA_RG_SCF_INERRRPT_BIT26]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_INERRRPT_BIT26(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
@@ -16265,11 +18430,13 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_INERRRPT_BIT26(fapi2::b
     return o_data.setBit<VAS_VA_RG_SCF_INERRRPT_BIT26>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT26 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("2:scom_proc Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT26 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_INERRRPT_BIT26]
 
+//>> CLEAR_[VAS_VA_RG_SCF_INERRRPT_BIT26]
 static inline fapi2::buffer<uint64_t>& CLEAR_VAS_VA_RG_SCF_INERRRPT_BIT26(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
@@ -16278,11 +18445,13 @@ static inline fapi2::buffer<uint64_t>& CLEAR_VAS_VA_RG_SCF_INERRRPT_BIT26(fapi2:
     return o_data.clearBit<VAS_VA_RG_SCF_INERRRPT_BIT26>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT26 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("3:scom_proc Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT26 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< CLEAR_[VAS_VA_RG_SCF_INERRRPT_BIT26]
 
+//>> GET_[VAS_VA_RG_SCF_INERRRPT_BIT26]
 static inline fapi2::buffer<uint64_t>& GET_VAS_VA_RG_SCF_INERRRPT_BIT26(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
@@ -16293,11 +18462,13 @@ static inline fapi2::buffer<uint64_t>& GET_VAS_VA_RG_SCF_INERRRPT_BIT26(fapi2::b
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT26 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("4:scom_proc Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT26 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[VAS_VA_RG_SCF_INERRRPT_BIT26]
 
+//>> GET_[VAS_VA_RG_SCF_INERRRPT_BIT26]
 static inline bool GET_VAS_VA_RG_SCF_INERRRPT_BIT26(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
@@ -16306,11 +18477,13 @@ static inline bool GET_VAS_VA_RG_SCF_INERRRPT_BIT26(fapi2::buffer<uint64_t>& i_d
     return i_data.getBit<VAS_VA_RG_SCF_INERRRPT_BIT26>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT26 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("5:scom_proc Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT26 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[VAS_VA_RG_SCF_INERRRPT_BIT26]
 
+//>> SET_[VAS_VA_RG_SCF_INERRRPT_BIT27]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_INERRRPT_BIT27(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
@@ -16321,11 +18494,13 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_INERRRPT_BIT27(fapi2::b
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT27 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("0:scom_proc Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT27 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_INERRRPT_BIT27]
 
+//>> SET_[VAS_VA_RG_SCF_INERRRPT_BIT27]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_INERRRPT_BIT27(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
@@ -16336,11 +18511,13 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_INERRRPT_BIT27(const ui
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT27 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("1:scom_proc Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT27 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_INERRRPT_BIT27]
 
+//>> SET_[VAS_VA_RG_SCF_INERRRPT_BIT27]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_INERRRPT_BIT27(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
@@ -16349,11 +18526,13 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_INERRRPT_BIT27(fapi2::b
     return o_data.setBit<VAS_VA_RG_SCF_INERRRPT_BIT27>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT27 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("2:scom_proc Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT27 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_INERRRPT_BIT27]
 
+//>> CLEAR_[VAS_VA_RG_SCF_INERRRPT_BIT27]
 static inline fapi2::buffer<uint64_t>& CLEAR_VAS_VA_RG_SCF_INERRRPT_BIT27(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
@@ -16362,11 +18541,13 @@ static inline fapi2::buffer<uint64_t>& CLEAR_VAS_VA_RG_SCF_INERRRPT_BIT27(fapi2:
     return o_data.clearBit<VAS_VA_RG_SCF_INERRRPT_BIT27>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT27 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("3:scom_proc Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT27 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< CLEAR_[VAS_VA_RG_SCF_INERRRPT_BIT27]
 
+//>> GET_[VAS_VA_RG_SCF_INERRRPT_BIT27]
 static inline fapi2::buffer<uint64_t>& GET_VAS_VA_RG_SCF_INERRRPT_BIT27(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
@@ -16377,11 +18558,13 @@ static inline fapi2::buffer<uint64_t>& GET_VAS_VA_RG_SCF_INERRRPT_BIT27(fapi2::b
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT27 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("4:scom_proc Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT27 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[VAS_VA_RG_SCF_INERRRPT_BIT27]
 
+//>> GET_[VAS_VA_RG_SCF_INERRRPT_BIT27]
 static inline bool GET_VAS_VA_RG_SCF_INERRRPT_BIT27(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
@@ -16390,11 +18573,13 @@ static inline bool GET_VAS_VA_RG_SCF_INERRRPT_BIT27(fapi2::buffer<uint64_t>& i_d
     return i_data.getBit<VAS_VA_RG_SCF_INERRRPT_BIT27>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT27 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("5:scom_proc Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT27 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[VAS_VA_RG_SCF_INERRRPT_BIT27]
 
+//>> SET_[VAS_VA_RG_SCF_INERRRPT_BIT28]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_INERRRPT_BIT28(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
@@ -16405,11 +18590,13 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_INERRRPT_BIT28(fapi2::b
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT28 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("0:scom_proc Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT28 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_INERRRPT_BIT28]
 
+//>> SET_[VAS_VA_RG_SCF_INERRRPT_BIT28]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_INERRRPT_BIT28(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
@@ -16420,11 +18607,13 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_INERRRPT_BIT28(const ui
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT28 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("1:scom_proc Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT28 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_INERRRPT_BIT28]
 
+//>> SET_[VAS_VA_RG_SCF_INERRRPT_BIT28]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_INERRRPT_BIT28(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
@@ -16433,11 +18622,13 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_INERRRPT_BIT28(fapi2::b
     return o_data.setBit<VAS_VA_RG_SCF_INERRRPT_BIT28>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT28 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("2:scom_proc Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT28 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_INERRRPT_BIT28]
 
+//>> CLEAR_[VAS_VA_RG_SCF_INERRRPT_BIT28]
 static inline fapi2::buffer<uint64_t>& CLEAR_VAS_VA_RG_SCF_INERRRPT_BIT28(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
@@ -16446,11 +18637,13 @@ static inline fapi2::buffer<uint64_t>& CLEAR_VAS_VA_RG_SCF_INERRRPT_BIT28(fapi2:
     return o_data.clearBit<VAS_VA_RG_SCF_INERRRPT_BIT28>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT28 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("3:scom_proc Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT28 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< CLEAR_[VAS_VA_RG_SCF_INERRRPT_BIT28]
 
+//>> GET_[VAS_VA_RG_SCF_INERRRPT_BIT28]
 static inline fapi2::buffer<uint64_t>& GET_VAS_VA_RG_SCF_INERRRPT_BIT28(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
@@ -16461,11 +18654,13 @@ static inline fapi2::buffer<uint64_t>& GET_VAS_VA_RG_SCF_INERRRPT_BIT28(fapi2::b
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT28 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("4:scom_proc Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT28 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[VAS_VA_RG_SCF_INERRRPT_BIT28]
 
+//>> GET_[VAS_VA_RG_SCF_INERRRPT_BIT28]
 static inline bool GET_VAS_VA_RG_SCF_INERRRPT_BIT28(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
@@ -16474,11 +18669,13 @@ static inline bool GET_VAS_VA_RG_SCF_INERRRPT_BIT28(fapi2::buffer<uint64_t>& i_d
     return i_data.getBit<VAS_VA_RG_SCF_INERRRPT_BIT28>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT28 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("5:scom_proc Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT28 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[VAS_VA_RG_SCF_INERRRPT_BIT28]
 
+//>> SET_[VAS_VA_RG_SCF_INERRRPT_BIT29]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_INERRRPT_BIT29(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
@@ -16489,11 +18686,13 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_INERRRPT_BIT29(fapi2::b
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT29 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("0:scom_proc Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT29 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_INERRRPT_BIT29]
 
+//>> SET_[VAS_VA_RG_SCF_INERRRPT_BIT29]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_INERRRPT_BIT29(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
@@ -16504,11 +18703,13 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_INERRRPT_BIT29(const ui
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT29 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("1:scom_proc Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT29 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_INERRRPT_BIT29]
 
+//>> SET_[VAS_VA_RG_SCF_INERRRPT_BIT29]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_INERRRPT_BIT29(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
@@ -16517,11 +18718,13 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_INERRRPT_BIT29(fapi2::b
     return o_data.setBit<VAS_VA_RG_SCF_INERRRPT_BIT29>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT29 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("2:scom_proc Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT29 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_INERRRPT_BIT29]
 
+//>> CLEAR_[VAS_VA_RG_SCF_INERRRPT_BIT29]
 static inline fapi2::buffer<uint64_t>& CLEAR_VAS_VA_RG_SCF_INERRRPT_BIT29(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
@@ -16530,11 +18733,13 @@ static inline fapi2::buffer<uint64_t>& CLEAR_VAS_VA_RG_SCF_INERRRPT_BIT29(fapi2:
     return o_data.clearBit<VAS_VA_RG_SCF_INERRRPT_BIT29>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT29 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("3:scom_proc Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT29 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< CLEAR_[VAS_VA_RG_SCF_INERRRPT_BIT29]
 
+//>> GET_[VAS_VA_RG_SCF_INERRRPT_BIT29]
 static inline fapi2::buffer<uint64_t>& GET_VAS_VA_RG_SCF_INERRRPT_BIT29(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
@@ -16545,11 +18750,13 @@ static inline fapi2::buffer<uint64_t>& GET_VAS_VA_RG_SCF_INERRRPT_BIT29(fapi2::b
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT29 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("4:scom_proc Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT29 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[VAS_VA_RG_SCF_INERRRPT_BIT29]
 
+//>> GET_[VAS_VA_RG_SCF_INERRRPT_BIT29]
 static inline bool GET_VAS_VA_RG_SCF_INERRRPT_BIT29(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
@@ -16558,11 +18765,13 @@ static inline bool GET_VAS_VA_RG_SCF_INERRRPT_BIT29(fapi2::buffer<uint64_t>& i_d
     return i_data.getBit<VAS_VA_RG_SCF_INERRRPT_BIT29>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT29 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("5:scom_proc Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT29 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[VAS_VA_RG_SCF_INERRRPT_BIT29]
 
+//>> SET_[VAS_VA_RG_SCF_INERRRPT_BIT30]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_INERRRPT_BIT30(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
@@ -16573,11 +18782,13 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_INERRRPT_BIT30(fapi2::b
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT30 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("0:scom_proc Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT30 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_INERRRPT_BIT30]
 
+//>> SET_[VAS_VA_RG_SCF_INERRRPT_BIT30]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_INERRRPT_BIT30(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
@@ -16588,11 +18799,13 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_INERRRPT_BIT30(const ui
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT30 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("1:scom_proc Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT30 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_INERRRPT_BIT30]
 
+//>> SET_[VAS_VA_RG_SCF_INERRRPT_BIT30]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_INERRRPT_BIT30(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
@@ -16601,11 +18814,13 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_INERRRPT_BIT30(fapi2::b
     return o_data.setBit<VAS_VA_RG_SCF_INERRRPT_BIT30>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT30 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("2:scom_proc Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT30 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_INERRRPT_BIT30]
 
+//>> CLEAR_[VAS_VA_RG_SCF_INERRRPT_BIT30]
 static inline fapi2::buffer<uint64_t>& CLEAR_VAS_VA_RG_SCF_INERRRPT_BIT30(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
@@ -16614,11 +18829,13 @@ static inline fapi2::buffer<uint64_t>& CLEAR_VAS_VA_RG_SCF_INERRRPT_BIT30(fapi2:
     return o_data.clearBit<VAS_VA_RG_SCF_INERRRPT_BIT30>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT30 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("3:scom_proc Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT30 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< CLEAR_[VAS_VA_RG_SCF_INERRRPT_BIT30]
 
+//>> GET_[VAS_VA_RG_SCF_INERRRPT_BIT30]
 static inline fapi2::buffer<uint64_t>& GET_VAS_VA_RG_SCF_INERRRPT_BIT30(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
@@ -16629,11 +18846,13 @@ static inline fapi2::buffer<uint64_t>& GET_VAS_VA_RG_SCF_INERRRPT_BIT30(fapi2::b
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT30 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("4:scom_proc Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT30 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[VAS_VA_RG_SCF_INERRRPT_BIT30]
 
+//>> GET_[VAS_VA_RG_SCF_INERRRPT_BIT30]
 static inline bool GET_VAS_VA_RG_SCF_INERRRPT_BIT30(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
@@ -16642,11 +18861,13 @@ static inline bool GET_VAS_VA_RG_SCF_INERRRPT_BIT30(fapi2::buffer<uint64_t>& i_d
     return i_data.getBit<VAS_VA_RG_SCF_INERRRPT_BIT30>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT30 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("5:scom_proc Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT30 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[VAS_VA_RG_SCF_INERRRPT_BIT30]
 
+//>> SET_[VAS_VA_RG_SCF_INERRRPT_BIT31]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_INERRRPT_BIT31(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
@@ -16657,11 +18878,13 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_INERRRPT_BIT31(fapi2::b
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT31 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("0:scom_proc Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT31 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_INERRRPT_BIT31]
 
+//>> SET_[VAS_VA_RG_SCF_INERRRPT_BIT31]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_INERRRPT_BIT31(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
@@ -16672,11 +18895,13 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_INERRRPT_BIT31(const ui
            1>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT31 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("1:scom_proc Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT31 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_INERRRPT_BIT31]
 
+//>> SET_[VAS_VA_RG_SCF_INERRRPT_BIT31]
 static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_INERRRPT_BIT31(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
@@ -16685,11 +18910,13 @@ static inline fapi2::buffer<uint64_t>& SET_VAS_VA_RG_SCF_INERRRPT_BIT31(fapi2::b
     return o_data.setBit<VAS_VA_RG_SCF_INERRRPT_BIT31>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT31 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("2:scom_proc Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT31 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[VAS_VA_RG_SCF_INERRRPT_BIT31]
 
+//>> CLEAR_[VAS_VA_RG_SCF_INERRRPT_BIT31]
 static inline fapi2::buffer<uint64_t>& CLEAR_VAS_VA_RG_SCF_INERRRPT_BIT31(fapi2::buffer<uint64_t>& o_data)
 {
 #ifdef SCOM_CHECKING
@@ -16698,11 +18925,13 @@ static inline fapi2::buffer<uint64_t>& CLEAR_VAS_VA_RG_SCF_INERRRPT_BIT31(fapi2:
     return o_data.clearBit<VAS_VA_RG_SCF_INERRRPT_BIT31>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT31 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("3:scom_proc Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT31 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< CLEAR_[VAS_VA_RG_SCF_INERRRPT_BIT31]
 
+//>> GET_[VAS_VA_RG_SCF_INERRRPT_BIT31]
 static inline fapi2::buffer<uint64_t>& GET_VAS_VA_RG_SCF_INERRRPT_BIT31(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
@@ -16713,11 +18942,13 @@ static inline fapi2::buffer<uint64_t>& GET_VAS_VA_RG_SCF_INERRRPT_BIT31(fapi2::b
            1>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT31 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("4:scom_proc Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT31 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[VAS_VA_RG_SCF_INERRRPT_BIT31]
 
+//>> GET_[VAS_VA_RG_SCF_INERRRPT_BIT31]
 static inline bool GET_VAS_VA_RG_SCF_INERRRPT_BIT31(fapi2::buffer<uint64_t>& i_data)
 {
 #ifdef SCOM_CHECKING
@@ -16726,11 +18957,13 @@ static inline bool GET_VAS_VA_RG_SCF_INERRRPT_BIT31(fapi2::buffer<uint64_t>& i_d
     return i_data.getBit<VAS_VA_RG_SCF_INERRRPT_BIT31>();
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT31 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("5:scom_proc Invalid dial access VAS_VA_RG_SCF_INERRRPT_BIT31 chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[VAS_VA_RG_SCF_INERRRPT_BIT31]
 
+//>> PREP_[VAS_VA_RG_SCF_RESERVE]
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
 static inline fapi2::ReturnCode PREP_VAS_VA_RG_SCF_RESERVE(const fapi2::Target<K, M, V>& i_target)
 {
@@ -16744,7 +18977,9 @@ fapi_try_exit:
     return fapi2::current_err;
 #endif
 }
+//<< PREP_[VAS_VA_RG_SCF_RESERVE]
 
+//>> GET_[VAS_VA_RG_SCF_RESERVE]
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
 static inline fapi2::ReturnCode GET_VAS_VA_RG_SCF_RESERVE(const fapi2::Target<K, M, V>& i_target,
         fapi2::buffer<uint64_t>& o_data)
@@ -16759,7 +18994,9 @@ fapi_try_exit:
     return fapi2::current_err;
 #endif
 }
+//<< GET_[VAS_VA_RG_SCF_RESERVE]
 
+//>> PUT_[VAS_VA_RG_SCF_RESERVE]
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
 static inline fapi2::ReturnCode PUT_VAS_VA_RG_SCF_RESERVE(const fapi2::Target<K, M, V>& i_target, const uint64_t i_data)
 {
@@ -16773,8 +19010,10 @@ fapi_try_exit:
     return fapi2::current_err;
 #endif
 }
+//<< PUT_[VAS_VA_RG_SCF_RESERVE]
 
 
+//>> PREP_[VAS_VA_RG_SCF_WRMON1BAR]
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
 static inline fapi2::ReturnCode PREP_VAS_VA_RG_SCF_WRMON1BAR(const fapi2::Target<K, M, V>& i_target)
 {
@@ -16788,7 +19027,9 @@ fapi_try_exit:
     return fapi2::current_err;
 #endif
 }
+//<< PREP_[VAS_VA_RG_SCF_WRMON1BAR]
 
+//>> GET_[VAS_VA_RG_SCF_WRMON1BAR]
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
 static inline fapi2::ReturnCode GET_VAS_VA_RG_SCF_WRMON1BAR(const fapi2::Target<K, M, V>& i_target,
         fapi2::buffer<uint64_t>& o_data)
@@ -16803,7 +19044,9 @@ fapi_try_exit:
     return fapi2::current_err;
 #endif
 }
+//<< GET_[VAS_VA_RG_SCF_WRMON1BAR]
 
+//>> PUT_[VAS_VA_RG_SCF_WRMON1BAR]
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
 static inline fapi2::ReturnCode PUT_VAS_VA_RG_SCF_WRMON1BAR(const fapi2::Target<K, M, V>& i_target,
         const uint64_t i_data)
@@ -16818,8 +19061,10 @@ fapi_try_exit:
     return fapi2::current_err;
 #endif
 }
+//<< PUT_[VAS_VA_RG_SCF_WRMON1BAR]
 
 
+//>> PREP_[VAS_VA_RG_SCF_WRMON4WID]
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
 static inline fapi2::ReturnCode PREP_VAS_VA_RG_SCF_WRMON4WID(const fapi2::Target<K, M, V>& i_target)
 {
@@ -16833,7 +19078,9 @@ fapi_try_exit:
     return fapi2::current_err;
 #endif
 }
+//<< PREP_[VAS_VA_RG_SCF_WRMON4WID]
 
+//>> GET_[VAS_VA_RG_SCF_WRMON4WID]
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
 static inline fapi2::ReturnCode GET_VAS_VA_RG_SCF_WRMON4WID(const fapi2::Target<K, M, V>& i_target,
         fapi2::buffer<uint64_t>& o_data)
@@ -16848,7 +19095,9 @@ fapi_try_exit:
     return fapi2::current_err;
 #endif
 }
+//<< GET_[VAS_VA_RG_SCF_WRMON4WID]
 
+//>> PUT_[VAS_VA_RG_SCF_WRMON4WID]
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
 static inline fapi2::ReturnCode PUT_VAS_VA_RG_SCF_WRMON4WID(const fapi2::Target<K, M, V>& i_target,
         const uint64_t i_data)
@@ -16863,8 +19112,10 @@ fapi_try_exit:
     return fapi2::current_err;
 #endif
 }
+//<< PUT_[VAS_VA_RG_SCF_WRMON4WID]
 
 
+//>> PREP_[VAS_VA_RG_SCF_WRMON5CMP]
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
 static inline fapi2::ReturnCode PREP_VAS_VA_RG_SCF_WRMON5CMP(const fapi2::Target<K, M, V>& i_target)
 {
@@ -16878,7 +19129,9 @@ fapi_try_exit:
     return fapi2::current_err;
 #endif
 }
+//<< PREP_[VAS_VA_RG_SCF_WRMON5CMP]
 
+//>> GET_[VAS_VA_RG_SCF_WRMON5CMP]
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
 static inline fapi2::ReturnCode GET_VAS_VA_RG_SCF_WRMON5CMP(const fapi2::Target<K, M, V>& i_target,
         fapi2::buffer<uint64_t>& o_data)
@@ -16893,7 +19146,9 @@ fapi_try_exit:
     return fapi2::current_err;
 #endif
 }
+//<< GET_[VAS_VA_RG_SCF_WRMON5CMP]
 
+//>> PUT_[VAS_VA_RG_SCF_WRMON5CMP]
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
 static inline fapi2::ReturnCode PUT_VAS_VA_RG_SCF_WRMON5CMP(const fapi2::Target<K, M, V>& i_target,
         const uint64_t i_data)
@@ -16908,8 +19163,11 @@ fapi_try_exit:
     return fapi2::current_err;
 #endif
 }
+//<< PUT_[VAS_VA_RG_SCF_WRMON5CMP]
 
 
+
+//>>THE END<<
 
 #ifndef __PPE_HCODE__
 }

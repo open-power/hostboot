@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -39,6 +39,7 @@ namespace phb
 #endif
 
 
+//>> [RSB_REGS_FIR_REG]
 static const uint64_t RSB_REGS_FIR_REG_RW = 0x08010908ull;
 static const uint64_t RSB_REGS_FIR_REG_WO_AND = 0x08010909ull;
 static const uint64_t RSB_REGS_FIR_REG_WO_OR = 0x0801090aull;
@@ -107,8 +108,10 @@ static const uint32_t RSB_REGS_FIR_REG_TCE_ECC_CORRECTABLE_ERROR = 60;
 static const uint32_t RSB_REGS_FIR_REG_TCE_ECC_UNCORRECTABLE_ERROR = 61;
 static const uint32_t RSB_REGS_FIR_REG_TCE_RESERVED01 = 62;
 static const uint32_t RSB_REGS_FIR_REG_FIR_INTERNAL_PARITY_ERROR = 63;
+//<< [RSB_REGS_FIR_REG]
 // phb/reg00006.H
 
+//>> [RSB_SCOM_SSR_PLB_PLAP_PCI_DLR_LAP_PAST]
 static const uint64_t RSB_SCOM_SSR_PLB_PLAP_PCI_DLR_LAP_PAST = 0x08010915ull;
 
 static const uint32_t RSB_SCOM_SSR_PLB_PLAP_PCI_DLR_LAP_PAST_PHB5_DLR_PAST_TL_PCI_GEN_REQ = 0;
@@ -128,7 +131,10 @@ static const uint32_t RSB_SCOM_SSR_PLB_PLAP_PCI_DLR_LAP_PAST_PHB5_DLR_PAST_DL_PC
 static const uint32_t RSB_SCOM_SSR_PLB_PLAP_PCI_DLR_LAP_PAST_PHB5_DLR_PAST_DL_PCI_GEN_HIST_LEN = 7;
 static const uint32_t RSB_SCOM_SSR_PLB_PLAP_PCI_DLR_LAP_PAST_PHB5_DLR_PAST_DL_PCI_SIZE_HIST = 47;
 static const uint32_t RSB_SCOM_SSR_PLB_PLAP_PCI_DLR_LAP_PAST_PHB5_DLR_PAST_DL_PCI_SIZE_HIST_LEN = 4;
+//<< [RSB_SCOM_SSR_PLB_PLAP_PCI_DLR_LAP_PAST]
 // phb/reg00006.H
+
+//>>THE END<<
 
 #ifndef __PPE_HCODE__
 }

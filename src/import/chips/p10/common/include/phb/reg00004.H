@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -35,6 +35,7 @@ namespace phb
 #endif
 
 
+//>> PREP_[REGS_NFIR_REG_RW]
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
 static inline fapi2::ReturnCode PREP_REGS_NFIR_REG_RW(const fapi2::Target<K, M, V>& i_target)
 {
@@ -48,7 +49,9 @@ fapi_try_exit:
     return fapi2::current_err;
 #endif
 }
+//<< PREP_[REGS_NFIR_REG_RW]
 
+//>> GET_[REGS_NFIR_REG_RW]
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
 static inline fapi2::ReturnCode GET_REGS_NFIR_REG_RW(const fapi2::Target<K, M, V>& i_target,
         fapi2::buffer<uint64_t>& o_data)
@@ -63,7 +66,9 @@ fapi_try_exit:
     return fapi2::current_err;
 #endif
 }
+//<< GET_[REGS_NFIR_REG_RW]
 
+//>> PUT_[REGS_NFIR_REG_RW]
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
 static inline fapi2::ReturnCode PUT_REGS_NFIR_REG_RW(const fapi2::Target<K, M, V>& i_target, const uint64_t i_data)
 {
@@ -77,7 +82,9 @@ fapi_try_exit:
     return fapi2::current_err;
 #endif
 }
+//<< PUT_[REGS_NFIR_REG_RW]
 
+//>> PREP_[REGS_NFIR_REG_WO_AND]
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
 static inline fapi2::ReturnCode PREP_REGS_NFIR_REG_WO_AND(const fapi2::Target<K, M, V>& i_target)
 {
@@ -91,7 +98,9 @@ fapi_try_exit:
     return fapi2::current_err;
 #endif
 }
+//<< PREP_[REGS_NFIR_REG_WO_AND]
 
+//>> GET_[REGS_NFIR_REG_WO_AND]
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
 static inline fapi2::ReturnCode GET_REGS_NFIR_REG_WO_AND(const fapi2::Target<K, M, V>& i_target,
         fapi2::buffer<uint64_t>& o_data)
@@ -106,7 +115,9 @@ fapi_try_exit:
     return fapi2::current_err;
 #endif
 }
+//<< GET_[REGS_NFIR_REG_WO_AND]
 
+//>> PUT_[REGS_NFIR_REG_WO_AND]
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
 static inline fapi2::ReturnCode PUT_REGS_NFIR_REG_WO_AND(const fapi2::Target<K, M, V>& i_target, const uint64_t i_data)
 {
@@ -120,7 +131,9 @@ fapi_try_exit:
     return fapi2::current_err;
 #endif
 }
+//<< PUT_[REGS_NFIR_REG_WO_AND]
 
+//>> PREP_[REGS_NFIR_REG_WO_OR]
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
 static inline fapi2::ReturnCode PREP_REGS_NFIR_REG_WO_OR(const fapi2::Target<K, M, V>& i_target)
 {
@@ -134,7 +147,9 @@ fapi_try_exit:
     return fapi2::current_err;
 #endif
 }
+//<< PREP_[REGS_NFIR_REG_WO_OR]
 
+//>> GET_[REGS_NFIR_REG_WO_OR]
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
 static inline fapi2::ReturnCode GET_REGS_NFIR_REG_WO_OR(const fapi2::Target<K, M, V>& i_target,
         fapi2::buffer<uint64_t>& o_data)
@@ -149,7 +164,9 @@ fapi_try_exit:
     return fapi2::current_err;
 #endif
 }
+//<< GET_[REGS_NFIR_REG_WO_OR]
 
+//>> PUT_[REGS_NFIR_REG_WO_OR]
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
 static inline fapi2::ReturnCode PUT_REGS_NFIR_REG_WO_OR(const fapi2::Target<K, M, V>& i_target, const uint64_t i_data)
 {
@@ -163,8 +180,10 @@ fapi_try_exit:
     return fapi2::current_err;
 #endif
 }
+//<< PUT_[REGS_NFIR_REG_WO_OR]
 
 
+//>> SET_[REGS_NFIR_REG_NFIRNFIR]
 static inline fapi2::buffer<uint64_t>& SET_REGS_NFIR_REG_NFIRNFIR(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
@@ -175,11 +194,13 @@ static inline fapi2::buffer<uint64_t>& SET_REGS_NFIR_REG_NFIRNFIR(fapi2::buffer<
            REGS_NFIR_REG_NFIRNFIR_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access REGS_NFIR_REG_NFIRNFIR chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("0:scom_phb Invalid dial access REGS_NFIR_REG_NFIRNFIR chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[REGS_NFIR_REG_NFIRNFIR]
 
+//>> SET_[REGS_NFIR_REG_NFIRNFIR]
 static inline fapi2::buffer<uint64_t>& SET_REGS_NFIR_REG_NFIRNFIR(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
@@ -190,11 +211,13 @@ static inline fapi2::buffer<uint64_t>& SET_REGS_NFIR_REG_NFIRNFIR(const uint64_t
            REGS_NFIR_REG_NFIRNFIR_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access REGS_NFIR_REG_NFIRNFIR chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("1:scom_phb Invalid dial access REGS_NFIR_REG_NFIRNFIR chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[REGS_NFIR_REG_NFIRNFIR]
 
+//>> GET_[REGS_NFIR_REG_NFIRNFIR]
 static inline fapi2::buffer<uint64_t>& GET_REGS_NFIR_REG_NFIRNFIR(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
@@ -205,11 +228,13 @@ static inline fapi2::buffer<uint64_t>& GET_REGS_NFIR_REG_NFIRNFIR(fapi2::buffer<
            REGS_NFIR_REG_NFIRNFIR_LEN>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access REGS_NFIR_REG_NFIRNFIR chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("4:scom_phb Invalid dial access REGS_NFIR_REG_NFIRNFIR chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[REGS_NFIR_REG_NFIRNFIR]
 
+//>> PREP_[RSB_REGS_PHB5_PMON_EVENT_SEL]
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
 static inline fapi2::ReturnCode PREP_RSB_REGS_PHB5_PMON_EVENT_SEL(const fapi2::Target<K, M, V>& i_target)
 {
@@ -223,7 +248,9 @@ fapi_try_exit:
     return fapi2::current_err;
 #endif
 }
+//<< PREP_[RSB_REGS_PHB5_PMON_EVENT_SEL]
 
+//>> GET_[RSB_REGS_PHB5_PMON_EVENT_SEL]
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
 static inline fapi2::ReturnCode GET_RSB_REGS_PHB5_PMON_EVENT_SEL(const fapi2::Target<K, M, V>& i_target,
         fapi2::buffer<uint64_t>& o_data)
@@ -238,7 +265,9 @@ fapi_try_exit:
     return fapi2::current_err;
 #endif
 }
+//<< GET_[RSB_REGS_PHB5_PMON_EVENT_SEL]
 
+//>> PUT_[RSB_REGS_PHB5_PMON_EVENT_SEL]
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
 static inline fapi2::ReturnCode PUT_RSB_REGS_PHB5_PMON_EVENT_SEL(const fapi2::Target<K, M, V>& i_target,
         const uint64_t i_data)
@@ -253,8 +282,11 @@ fapi_try_exit:
     return fapi2::current_err;
 #endif
 }
+//<< PUT_[RSB_REGS_PHB5_PMON_EVENT_SEL]
 
 
+
+//>>THE END<<
 
 #ifndef __PPE_HCODE__
 }

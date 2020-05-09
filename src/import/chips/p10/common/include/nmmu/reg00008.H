@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -35,6 +35,7 @@ namespace nmmu
 #endif
 
 
+//>> PREP_[FIR1_MASK_REG_RW]
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
 static inline fapi2::ReturnCode PREP_FIR1_MASK_REG_RW(const fapi2::Target<K, M, V>& i_target)
 {
@@ -48,7 +49,9 @@ fapi_try_exit:
     return fapi2::current_err;
 #endif
 }
+//<< PREP_[FIR1_MASK_REG_RW]
 
+//>> GET_[FIR1_MASK_REG_RW]
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
 static inline fapi2::ReturnCode GET_FIR1_MASK_REG_RW(const fapi2::Target<K, M, V>& i_target,
         fapi2::buffer<uint64_t>& o_data)
@@ -63,7 +66,9 @@ fapi_try_exit:
     return fapi2::current_err;
 #endif
 }
+//<< GET_[FIR1_MASK_REG_RW]
 
+//>> PUT_[FIR1_MASK_REG_RW]
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
 static inline fapi2::ReturnCode PUT_FIR1_MASK_REG_RW(const fapi2::Target<K, M, V>& i_target, const uint64_t i_data)
 {
@@ -77,7 +82,9 @@ fapi_try_exit:
     return fapi2::current_err;
 #endif
 }
+//<< PUT_[FIR1_MASK_REG_RW]
 
+//>> PREP_[FIR1_MASK_REG_WO_AND]
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
 static inline fapi2::ReturnCode PREP_FIR1_MASK_REG_WO_AND(const fapi2::Target<K, M, V>& i_target)
 {
@@ -91,7 +98,9 @@ fapi_try_exit:
     return fapi2::current_err;
 #endif
 }
+//<< PREP_[FIR1_MASK_REG_WO_AND]
 
+//>> GET_[FIR1_MASK_REG_WO_AND]
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
 static inline fapi2::ReturnCode GET_FIR1_MASK_REG_WO_AND(const fapi2::Target<K, M, V>& i_target,
         fapi2::buffer<uint64_t>& o_data)
@@ -106,7 +115,9 @@ fapi_try_exit:
     return fapi2::current_err;
 #endif
 }
+//<< GET_[FIR1_MASK_REG_WO_AND]
 
+//>> PUT_[FIR1_MASK_REG_WO_AND]
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
 static inline fapi2::ReturnCode PUT_FIR1_MASK_REG_WO_AND(const fapi2::Target<K, M, V>& i_target, const uint64_t i_data)
 {
@@ -120,7 +131,9 @@ fapi_try_exit:
     return fapi2::current_err;
 #endif
 }
+//<< PUT_[FIR1_MASK_REG_WO_AND]
 
+//>> PREP_[FIR1_MASK_REG_WO_OR]
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
 static inline fapi2::ReturnCode PREP_FIR1_MASK_REG_WO_OR(const fapi2::Target<K, M, V>& i_target)
 {
@@ -134,7 +147,9 @@ fapi_try_exit:
     return fapi2::current_err;
 #endif
 }
+//<< PREP_[FIR1_MASK_REG_WO_OR]
 
+//>> GET_[FIR1_MASK_REG_WO_OR]
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
 static inline fapi2::ReturnCode GET_FIR1_MASK_REG_WO_OR(const fapi2::Target<K, M, V>& i_target,
         fapi2::buffer<uint64_t>& o_data)
@@ -149,7 +164,9 @@ fapi_try_exit:
     return fapi2::current_err;
 #endif
 }
+//<< GET_[FIR1_MASK_REG_WO_OR]
 
+//>> PUT_[FIR1_MASK_REG_WO_OR]
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
 static inline fapi2::ReturnCode PUT_FIR1_MASK_REG_WO_OR(const fapi2::Target<K, M, V>& i_target, const uint64_t i_data)
 {
@@ -163,8 +180,10 @@ fapi_try_exit:
     return fapi2::current_err;
 #endif
 }
+//<< PUT_[FIR1_MASK_REG_WO_OR]
 
 
+//>> SET_[FIR1_MASK_REG_MM_FIR1_MASK]
 static inline fapi2::buffer<uint64_t>& SET_FIR1_MASK_REG_MM_FIR1_MASK(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
@@ -175,11 +194,13 @@ static inline fapi2::buffer<uint64_t>& SET_FIR1_MASK_REG_MM_FIR1_MASK(fapi2::buf
            FIR1_MASK_REG_MM_FIR1_MASK_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access FIR1_MASK_REG_MM_FIR1_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("0:scom_nmmu Invalid dial access FIR1_MASK_REG_MM_FIR1_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[FIR1_MASK_REG_MM_FIR1_MASK]
 
+//>> SET_[FIR1_MASK_REG_MM_FIR1_MASK]
 static inline fapi2::buffer<uint64_t>& SET_FIR1_MASK_REG_MM_FIR1_MASK(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
@@ -190,11 +211,13 @@ static inline fapi2::buffer<uint64_t>& SET_FIR1_MASK_REG_MM_FIR1_MASK(const uint
            FIR1_MASK_REG_MM_FIR1_MASK_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access FIR1_MASK_REG_MM_FIR1_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("1:scom_nmmu Invalid dial access FIR1_MASK_REG_MM_FIR1_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[FIR1_MASK_REG_MM_FIR1_MASK]
 
+//>> GET_[FIR1_MASK_REG_MM_FIR1_MASK]
 static inline fapi2::buffer<uint64_t>& GET_FIR1_MASK_REG_MM_FIR1_MASK(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
@@ -205,11 +228,14 @@ static inline fapi2::buffer<uint64_t>& GET_FIR1_MASK_REG_MM_FIR1_MASK(fapi2::buf
            FIR1_MASK_REG_MM_FIR1_MASK_LEN>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access FIR1_MASK_REG_MM_FIR1_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("4:scom_nmmu Invalid dial access FIR1_MASK_REG_MM_FIR1_MASK chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[FIR1_MASK_REG_MM_FIR1_MASK]
 
+
+//>>THE END<<
 
 #ifndef __PPE_HCODE__
 }

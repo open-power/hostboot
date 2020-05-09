@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -39,6 +39,7 @@ namespace nmmu
 #endif
 
 
+//>> [FBC_CQ_WRAP_NXCQ_SCOM_MM_EPSILON_COUNTER_VALUE]
 static const uint64_t FBC_CQ_WRAP_NXCQ_SCOM_MM_EPSILON_COUNTER_VALUE = 0x02010c1dull;
 
 static const uint32_t FBC_CQ_WRAP_NXCQ_SCOM_MM_EPSILON_COUNTER_VALUE_WR_EPSILON_TIER_1_CNT_VAL = 0;
@@ -50,8 +51,10 @@ static const uint32_t FBC_CQ_WRAP_NXCQ_SCOM_MM_EPSILON_COUNTER_VALUE_WR_EPSILON_
 static const uint32_t FBC_CQ_WRAP_NXCQ_SCOM_MM_EPSILON_COUNTER_VALUE_WR_EPSILON_TIER_2_DIV_VAL = 28;
 static const uint32_t FBC_CQ_WRAP_NXCQ_SCOM_MM_EPSILON_COUNTER_VALUE_WR_EPSILON_TIER_2_DIV_VAL_LEN = 4;
 static const uint32_t FBC_CQ_WRAP_NXCQ_SCOM_MM_EPSILON_COUNTER_VALUE_EPSILON_DISABLE = 32;
+//<< [FBC_CQ_WRAP_NXCQ_SCOM_MM_EPSILON_COUNTER_VALUE]
 // nmmu/reg00014.H
 
+//>> [FBC_CQ_WRAP_NXCQ_SCOM_NX_PMU_CONTROL_REG]
 static const uint64_t FBC_CQ_WRAP_NXCQ_SCOM_NX_PMU_CONTROL_REG = 0x02010c26ull;
 
 static const uint32_t FBC_CQ_WRAP_NXCQ_SCOM_NX_PMU_CONTROL_REG_CNT0_ENABLE = 0;
@@ -83,8 +86,10 @@ static const uint32_t FBC_CQ_WRAP_NXCQ_SCOM_NX_PMU_CONTROL_REG_CNT3_BIT_PAIR_SEL
 static const uint32_t FBC_CQ_WRAP_NXCQ_SCOM_NX_PMU_CONTROL_REG_CNT3_BIT_PAIR_SEL_LEN = 2;
 static const uint32_t FBC_CQ_WRAP_NXCQ_SCOM_NX_PMU_CONTROL_REG_PORT_SEL = 28;
 static const uint32_t FBC_CQ_WRAP_NXCQ_SCOM_NX_PMU_CONTROL_REG_PORT_SEL_LEN = 2;
+//<< [FBC_CQ_WRAP_NXCQ_SCOM_NX_PMU_CONTROL_REG]
 // nmmu/reg00014.H
 
+//>> [FBC_CQ_WRAP_NXCQ_SCOM_NX_PMU_COUNTER_REG]
 static const uint64_t FBC_CQ_WRAP_NXCQ_SCOM_NX_PMU_COUNTER_REG = 0x02010c27ull;
 
 static const uint32_t FBC_CQ_WRAP_NXCQ_SCOM_NX_PMU_COUNTER_REG_0 = 0;
@@ -95,8 +100,10 @@ static const uint32_t FBC_CQ_WRAP_NXCQ_SCOM_NX_PMU_COUNTER_REG_2 = 32;
 static const uint32_t FBC_CQ_WRAP_NXCQ_SCOM_NX_PMU_COUNTER_REG_2_LEN = 16;
 static const uint32_t FBC_CQ_WRAP_NXCQ_SCOM_NX_PMU_COUNTER_REG_3 = 48;
 static const uint32_t FBC_CQ_WRAP_NXCQ_SCOM_NX_PMU_COUNTER_REG_3_LEN = 16;
+//<< [FBC_CQ_WRAP_NXCQ_SCOM_NX_PMU_COUNTER_REG]
 // nmmu/reg00014.H
 
+//>> [NMMU_DBG_MODE]
 static const uint64_t NMMU_DBG_MODE = 0x02010c59ull;
 
 static const uint32_t NMMU_DBG_MODE_MM_DBG_MODE_EN = 0;
@@ -144,19 +151,26 @@ static const uint32_t NMMU_DBG_MODE_MM_DBG_MODE_RDX_BUS0_STG0_SEL = 60;
 static const uint32_t NMMU_DBG_MODE_MM_DBG_MODE_RDX_BUS0_STG0_SEL_LEN = 2;
 static const uint32_t NMMU_DBG_MODE_MM_DBG_MODE_RDX_BUS1_STG0_SEL = 62;
 static const uint32_t NMMU_DBG_MODE_MM_DBG_MODE_RDX_BUS1_STG0_SEL_LEN = 2;
+//<< [NMMU_DBG_MODE]
 // nmmu/reg00014.H
 
+//>> [NMMU_FLT_STAT_REG]
 static const uint64_t NMMU_FLT_STAT_REG = 0x02010c51ull;
 
 static const uint32_t NMMU_FLT_STAT_REG_MM_FLT_STAT = 0;
 static const uint32_t NMMU_FLT_STAT_REG_MM_FLT_STAT_LEN = 16;
+//<< [NMMU_FLT_STAT_REG]
 // nmmu/reg00014.H
 
+//>> [NMMU_PMU1_CTL_REG]
 static const uint64_t NMMU_PMU1_CTL_REG = 0x02010c4eull;
 
 static const uint32_t NMMU_PMU1_CTL_REG_MM_PMU1_CTL = 0;
 static const uint32_t NMMU_PMU1_CTL_REG_MM_PMU1_CTL_LEN = 64;
+//<< [NMMU_PMU1_CTL_REG]
 // nmmu/reg00014.H
+
+//>>THE END<<
 
 #ifndef __PPE_HCODE__
 }

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -39,18 +39,23 @@ namespace phb
 #endif
 
 
+//>> [REGS_MMIOBAR1_MASK_REG]
 static const uint64_t REGS_MMIOBAR1_MASK_REG = 0x03011851ull;
 
 static const uint32_t REGS_MMIOBAR1_MASK_REG_PE_MMIO_MASK1 = 0;
 static const uint32_t REGS_MMIOBAR1_MASK_REG_PE_MMIO_MASK1_LEN = 40;
+//<< [REGS_MMIOBAR1_MASK_REG]
 // phb/reg00007.H
 
+//>> [REGS_PBAIB_CERR_RPT_REG]
 static const uint64_t REGS_PBAIB_CERR_RPT_REG = 0x0801084bull;
 
 static const uint32_t REGS_PBAIB_CERR_RPT_REG_PBAIB_CERR_RPT0 = 0;
 static const uint32_t REGS_PBAIB_CERR_RPT_REG_PBAIB_CERR_RPT0_LEN = 21;
+//<< [REGS_PBAIB_CERR_RPT_REG]
 // phb/reg00007.H
 
+//>> [REGS_PE_CACHE_INJECT_CNTL_REG]
 static const uint64_t REGS_PE_CACHE_INJECT_CNTL_REG = 0x03011857ull;
 
 static const uint32_t REGS_PE_CACHE_INJECT_CNTL_REG_ENABLE_PARTIAL_CACHE_INJECTION = 0;
@@ -61,10 +66,15 @@ static const uint32_t REGS_PE_CACHE_INJECT_CNTL_REG_ENABLE_FULL_CACHE_INJECTION 
 static const uint32_t REGS_PE_CACHE_INJECT_CNTL_REG_ENABLE_FULL_CACHE_INJECTION_ON_HINT = 5;
 static const uint32_t REGS_PE_CACHE_INJECT_CNTL_REG_SET_D_BIT_ON_FULL_CACHE_INJECTION = 6;
 static const uint32_t REGS_PE_CACHE_INJECT_CNTL_REG_STALL_FULL_CACHE_INJECTION_ON_THRESHOLD = 7;
+//<< [REGS_PE_CACHE_INJECT_CNTL_REG]
 // phb/reg00007.H
 
+//>> [RSB_REGS_PHB5_PMON_COUNTERS]
 static const uint64_t RSB_REGS_PHB5_PMON_COUNTERS = 0x08010919ull;
+//<< [RSB_REGS_PHB5_PMON_COUNTERS]
 // phb/reg00007.H
+
+//>>THE END<<
 
 #ifndef __PPE_HCODE__
 }

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -39,6 +39,7 @@ namespace pauc
 #endif
 
 
+//>> [CPLT_STAT0]
 static const uint64_t CPLT_STAT0 = 0x10000100ull;
 
 static const uint32_t CPLT_STAT0_ABIST_DONE_DC = 0;
@@ -71,24 +72,30 @@ static const uint32_t CPLT_STAT0_FREE_USAGE_28I = 28;
 static const uint32_t CPLT_STAT0_FREE_USAGE_29I = 29;
 static const uint32_t CPLT_STAT0_FREE_USAGE_30I = 30;
 static const uint32_t CPLT_STAT0_FREE_USAGE_31I = 31;
+//<< [CPLT_STAT0]
 // pauc/reg00002.H
 
+//>> [DL_PPE_WRAP_XIRAMEDR]
 static const uint64_t DL_PPE_WRAP_XIRAMEDR = 0x10012c54ull;
 
 static const uint32_t DL_PPE_WRAP_XIRAMEDR_GA_IR = 0;
 static const uint32_t DL_PPE_WRAP_XIRAMEDR_GA_IR_LEN = 32;
 static const uint32_t DL_PPE_WRAP_XIRAMEDR_EDR = 32;
 static const uint32_t DL_PPE_WRAP_XIRAMEDR_EDR_LEN = 32;
+//<< [DL_PPE_WRAP_XIRAMEDR]
 // pauc/reg00002.H
 
+//>> [DL_PPE_WRAP_XIXCR]
 static const uint64_t DL_PPE_WRAP_XIXCR = 0x10012c50ull;
 
 static const uint32_t DL_PPE_WRAP_XIXCR_PPE_XIXCR_XCR = 1;
 static const uint32_t DL_PPE_WRAP_XIXCR_PPE_XIXCR_XCR_LEN = 3;
 static const uint32_t DL_PPE_WRAP_XIXCR_NULL_CTR = 32;
 static const uint32_t DL_PPE_WRAP_XIXCR_NULL_CTR_LEN = 32;
+//<< [DL_PPE_WRAP_XIXCR]
 // pauc/reg00002.H
 
+//>> [DL_SCOM_MAC_FIR_MASK_REG]
 static const uint64_t DL_SCOM_MAC_FIR_MASK_REG_RW = 0x10012c43ull;
 static const uint64_t DL_SCOM_MAC_FIR_MASK_REG_WO_AND = 0x10012c44ull;
 static const uint64_t DL_SCOM_MAC_FIR_MASK_REG_WO_OR = 0x10012c45ull;
@@ -119,14 +126,18 @@ static const uint32_t DL_SCOM_MAC_FIR_MASK_REG_PPE_CODE_RECAL_NOT_RUN_MASK = 22;
 static const uint32_t DL_SCOM_MAC_FIR_MASK_REG_PPE_CODE_THREAD_LOCKED_MASK = 23;
 static const uint32_t DL_SCOM_MAC_FIR_MASK_REG_PPE_CODE_6_MASK = 24;
 static const uint32_t DL_SCOM_MAC_FIR_MASK_REG_PPE_CODE_7_MASK = 25;
+//<< [DL_SCOM_MAC_FIR_MASK_REG]
 // pauc/reg00002.H
 
+//>> [DL_SCOM_MAC_FIR_WOF_REG]
 static const uint64_t DL_SCOM_MAC_FIR_WOF_REG = 0x10012c48ull;
 
 static const uint32_t DL_SCOM_MAC_FIR_WOF_REG_WOF = 0;
 static const uint32_t DL_SCOM_MAC_FIR_WOF_REG_WOF_LEN = 26;
+//<< [DL_SCOM_MAC_FIR_WOF_REG]
 // pauc/reg00002.H
 
+//>> [PB_FP23_CFG]
 static const uint64_t PB_FP23_CFG = 0x1001180bull;
 
 static const uint32_t PB_FP23_CFG_2_CREDIT_PRIORITY_4_NOT_8 = 0;
@@ -163,8 +174,10 @@ static const uint32_t PB_FP23_CFG_3_RUN_AFTER_FRAME_ERROR = 56;
 static const uint32_t PB_FP23_CFG_3_BRICKWALL_CREDITS_TO_NEST = 57;
 static const uint32_t PB_FP23_CFG_3_PRS_SPARE = 58;
 static const uint32_t PB_FP23_CFG_3_PRS_SPARE_LEN = 6;
+//<< [PB_FP23_CFG]
 // pauc/reg00002.H
 
+//>> [PB_TRACE_CFG]
 static const uint64_t PB_TRACE_CFG = 0x10011826ull;
 
 static const uint32_t PB_TRACE_CFG_0L_SEL = 0;
@@ -175,8 +188,10 @@ static const uint32_t PB_TRACE_CFG_1L_SEL = 16;
 static const uint32_t PB_TRACE_CFG_1L_SEL_LEN = 8;
 static const uint32_t PB_TRACE_CFG_1R_SEL = 24;
 static const uint32_t PB_TRACE_CFG_1R_SEL_LEN = 8;
+//<< [PB_TRACE_CFG]
 // pauc/reg00002.H
 
+//>> [PHY_SCOM_MAC_FIR_REG]
 static const uint64_t PHY_SCOM_MAC_FIR_REG_RW = 0x10012c00ull;
 static const uint64_t PHY_SCOM_MAC_FIR_REG_WO_AND = 0x10012c01ull;
 static const uint64_t PHY_SCOM_MAC_FIR_REG_WO_OR = 0x10012c02ull;
@@ -207,8 +222,10 @@ static const uint32_t PHY_SCOM_MAC_FIR_REG_PPE_CODE_RECAL_NOT_RUN = 22;
 static const uint32_t PHY_SCOM_MAC_FIR_REG_PPE_CODE_THREAD_LOCKED = 23;
 static const uint32_t PHY_SCOM_MAC_FIR_REG_PPE_CODE_6 = 24;
 static const uint32_t PHY_SCOM_MAC_FIR_REG_PPE_CODE_7 = 25;
+//<< [PHY_SCOM_MAC_FIR_REG]
 // pauc/reg00002.H
 
+//>> [SPATTN]
 static const uint64_t SPATTN = 0x10040002ull;
 
 static const uint32_t SPATTN_ANY_SPATTN = 0;
@@ -247,23 +264,30 @@ static const uint32_t SPATTN_IN32 = 32;
 static const uint32_t SPATTN_IN33 = 33;
 static const uint32_t SPATTN_IN34 = 34;
 static const uint32_t SPATTN_IN35 = 35;
+//<< [SPATTN]
 // pauc/reg00002.H
 
+//>> [TRA0_TR1_CONFIG_5]
 static const uint64_t TRA0_TR1_CONFIG_5 = 0x10010448ull;
 
 static const uint32_t TRA0_TR1_CONFIG_5_C = 0;
 static const uint32_t TRA0_TR1_CONFIG_5_C_LEN = 24;
 static const uint32_t TRA0_TR1_CONFIG_5_D = 24;
 static const uint32_t TRA0_TR1_CONFIG_5_D_LEN = 24;
+//<< [TRA0_TR1_CONFIG_5]
 // pauc/reg00002.H
 
+//>> [TRA1_TR0_CONFIG_3]
 static const uint64_t TRA1_TR0_CONFIG_3 = 0x10010486ull;
 
 static const uint32_t TRA1_TR0_CONFIG_3_C = 0;
 static const uint32_t TRA1_TR0_CONFIG_3_C_LEN = 24;
 static const uint32_t TRA1_TR0_CONFIG_3_D = 24;
 static const uint32_t TRA1_TR0_CONFIG_3_D_LEN = 24;
+//<< [TRA1_TR0_CONFIG_3]
 // pauc/reg00002.H
+
+//>>THE END<<
 
 #ifndef __PPE_HCODE__
 }

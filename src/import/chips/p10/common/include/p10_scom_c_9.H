@@ -39,6 +39,7 @@ namespace c
 #endif
 
 
+//>> [CPMS_DDSR]
 static const uint64_t CPMS_DDSR = 0x200e0e50ull;
 
 static const uint32_t CPMS_DDSR_DDS_DATA = 3;
@@ -57,8 +58,10 @@ static const uint32_t CPMS_DDSR_STOP_STATE_ACTIVE = 60;
 static const uint32_t CPMS_DDSR_CORE_SAMPLE_DISABLED = 61;
 static const uint32_t CPMS_DDSR_STOP_STATE_OCCURRED = 62;
 static const uint32_t CPMS_DDSR_SAMPLE_DISABLE_OCCURRED = 63;
+//<< [CPMS_DDSR]
 // c/reg00009.H
 
+//>> [CPMS_FDIR]
 static const uint64_t CPMS_FDIR = 0x200e0e44ull;
 static const uint64_t CPMS_FDIR_WO_CLEAR = 0x200e0e47ull;
 static const uint64_t CPMS_FDIR_WO_OR = 0x200e0e46ull;
@@ -92,8 +95,10 @@ static const uint32_t CPMS_FDIR_EXCLUDE_LSU_HALT = 28;
 static const uint32_t CPMS_FDIR_IRRITATE_WEIGHT_SELECT = 29;
 static const uint32_t CPMS_FDIR_IRRITATE_WEIGHT_SELECT_LEN = 2;
 static const uint32_t CPMS_FDIR_INJECT_DPT_SUSPEND = 31;
+//<< [CPMS_FDIR]
 // c/reg00009.H
 
+//>> [EC_PC_COMMON_SPR_CTRL]
 static const uint64_t EC_PC_COMMON_SPR_CTRL = 0x20020485ull;
 
 static const uint32_t EC_PC_COMMON_SPR_CTRL_CTRL_T0_RUN_Q = 48;
@@ -105,8 +110,10 @@ static const uint32_t EC_PC_COMMON_SPR_CTRL_CTRL_T5_RUN_Q = 53;
 static const uint32_t EC_PC_COMMON_SPR_CTRL_CTRL_T6_RUN_Q = 54;
 static const uint32_t EC_PC_COMMON_SPR_CTRL_CTRL_T7_RUN_Q = 55;
 static const uint32_t EC_PC_COMMON_SPR_CTRL_RUN_LATCH = 63;
+//<< [EC_PC_COMMON_SPR_CTRL]
 // c/reg00009.H
 
+//>> [EC_PC_IMA_TRACE]
 static const uint64_t EC_PC_IMA_TRACE = 0x20020401ull;
 
 static const uint32_t EC_PC_IMA_TRACE_SAMPSEL = 0;
@@ -119,8 +126,10 @@ static const uint32_t EC_PC_IMA_TRACE_CPMC2SEL = 43;
 static const uint32_t EC_PC_IMA_TRACE_CPMC2SEL_LEN = 5;
 static const uint32_t EC_PC_IMA_TRACE_BUFFERSIZE = 48;
 static const uint32_t EC_PC_IMA_TRACE_BUFFERSIZE_LEN = 3;
+//<< [EC_PC_IMA_TRACE]
 // c/reg00009.H
 
+//>> [EC_PC_TFX_SM]
 static const uint64_t EC_PC_TFX_SM = 0x2002049bull;
 
 static const uint32_t EC_PC_TFX_SM_INACTIVE = 0;
@@ -128,8 +137,10 @@ static const uint32_t EC_PC_TFX_SM_ACTIVE = 1;
 static const uint32_t EC_PC_TFX_SM_LOAD = 2;
 static const uint32_t EC_PC_TFX_SM_SEND = 3;
 static const uint32_t EC_PC_TFX_SM_RECEIVE = 4;
+//<< [EC_PC_TFX_SM]
 // c/reg00009.H
 
+//>> [EC_PC_THRCTL_TCTLCOM_HANG_CONTROL]
 static const uint64_t EC_PC_THRCTL_TCTLCOM_HANG_CONTROL = 0x20020452ull;
 
 static const uint32_t EC_PC_THRCTL_TCTLCOM_HANG_CONTROL_CORE_HANG_LIMIT = 0;
@@ -146,21 +157,27 @@ static const uint32_t EC_PC_THRCTL_TCTLCOM_HANG_CONTROL_ACTIVE_MASK = 29;
 static const uint32_t EC_PC_THRCTL_TCTLCOM_HANG_CONTROL_ACTIVE_MASK_LEN = 5;
 static const uint32_t EC_PC_THRCTL_TCTLCOM_HANG_CONTROL_TLBIE_STALL_LIMIT = 34;
 static const uint32_t EC_PC_THRCTL_TCTLCOM_HANG_CONTROL_TLBIE_STALL_LIMIT_LEN = 8;
+//<< [EC_PC_THRCTL_TCTLCOM_HANG_CONTROL]
 // c/reg00009.H
 
+//>> [EC_PC_TRACE1_TR_TR0_CONFIG_1]
 static const uint64_t EC_PC_TRACE1_TR_TR0_CONFIG_1 = 0x20020a44ull;
 
 static const uint32_t EC_PC_TRACE1_TR_TR0_CONFIG_1_CMP_MSK_LT_B_64_TO_87 = 0;
 static const uint32_t EC_PC_TRACE1_TR_TR0_CONFIG_1_CMP_MSK_LT_B_64_TO_87_LEN = 24;
+//<< [EC_PC_TRACE1_TR_TR0_CONFIG_1]
 // c/reg00009.H
 
+//>> [L3_MISC_L3CERRS_BACKING_CTL_REG]
 static const uint64_t L3_MISC_L3CERRS_BACKING_CTL_REG = 0x2001060full;
 
 static const uint32_t L3_MISC_L3CERRS_BACKING_CTL_REG_CASTOUT_TO_BACKING_L3_EN_CFG = 0;
 static const uint32_t L3_MISC_L3CERRS_BACKING_CTL_REG_BACKING_CNT_CFG = 1;
 static const uint32_t L3_MISC_L3CERRS_BACKING_CTL_REG_BACKING_CNT_CFG_LEN = 3;
+//<< [L3_MISC_L3CERRS_BACKING_CTL_REG]
 // c/reg00009.H
 
+//>> [L3_MISC_L3CERRS_WR_EPSILON_CFG_REG]
 static const uint64_t L3_MISC_L3CERRS_WR_EPSILON_CFG_REG = 0x2001062aull;
 
 static const uint32_t L3_MISC_L3CERRS_WR_EPSILON_CFG_REG_L3_WT4CR_WR_TIER1_EPS_VAL = 0;
@@ -174,8 +191,10 @@ static const uint32_t L3_MISC_L3CERRS_WR_EPSILON_CFG_REG_L3_EPS_STEP_MODE_LEN = 
 static const uint32_t L3_MISC_L3CERRS_WR_EPSILON_CFG_REG_L3_EPS_DIVIDER_MODE = 30;
 static const uint32_t L3_MISC_L3CERRS_WR_EPSILON_CFG_REG_L3_EPS_DIVIDER_MODE_LEN = 4;
 static const uint32_t L3_MISC_L3CERRS_WR_EPSILON_CFG_REG_EPS_CNT_USE_L3_DIVIDER_EN = 34;
+//<< [L3_MISC_L3CERRS_WR_EPSILON_CFG_REG]
 // c/reg00009.H
 
+//>> [L3_MISC_L3CERRS_PHYP_PURGE_REG]
 static const uint64_t L3_MISC_L3CERRS_PHYP_PURGE_REG = 0x20010614ull;
 
 static const uint32_t L3_MISC_L3CERRS_PHYP_PURGE_REG_L3_PHYP_PURGE_REQ = 0;
@@ -192,8 +211,10 @@ static const uint32_t L3_MISC_L3CERRS_PHYP_PURGE_REG_L3_PHYP_PURGE_MEMBER = 12;
 static const uint32_t L3_MISC_L3CERRS_PHYP_PURGE_REG_L3_PHYP_PURGE_MEMBER_LEN = 4;
 static const uint32_t L3_MISC_L3CERRS_PHYP_PURGE_REG_L3_PHYP_PURGE_DIR_ADDR = 16;
 static const uint32_t L3_MISC_L3CERRS_PHYP_PURGE_REG_L3_PHYP_PURGE_DIR_ADDR_LEN = 11;
+//<< [L3_MISC_L3CERRS_PHYP_PURGE_REG]
 // c/reg00009.H
 
+//>> [NC_NCCHTM_NCCHTSC_HTM_IMA_STATUS]
 static const uint64_t NC_NCCHTM_NCCHTSC_HTM_IMA_STATUS = 0x2001068aull;
 
 static const uint32_t NC_NCCHTM_NCCHTSC_HTM_IMA_STATUS_IMA_ERROR = 0;
@@ -205,19 +226,26 @@ static const uint32_t NC_NCCHTM_NCCHTSC_HTM_IMA_STATUS_IMA_FSM = 5;
 static const uint32_t NC_NCCHTM_NCCHTSC_HTM_IMA_STATUS_IMA_FSM_LEN = 7;
 static const uint32_t NC_NCCHTM_NCCHTSC_HTM_IMA_STATUS_IMA_COUNT = 12;
 static const uint32_t NC_NCCHTM_NCCHTSC_HTM_IMA_STATUS_IMA_COUNT_LEN = 4;
+//<< [NC_NCCHTM_NCCHTSC_HTM_IMA_STATUS]
 // c/reg00009.H
 
+//>> [NC_NCCHTM_NCCHTSC_HTM_LAST]
 static const uint64_t NC_NCCHTM_NCCHTSC_HTM_LAST = 0x20010683ull;
 
 static const uint32_t NC_NCCHTM_NCCHTSC_HTM_LAST_HTM_LAST_ADDRESS = 12;
 static const uint32_t NC_NCCHTM_NCCHTSC_HTM_LAST_HTM_LAST_ADDRESS_LEN = 45;
+//<< [NC_NCCHTM_NCCHTSC_HTM_LAST]
 // c/reg00009.H
 
+//>> [QME_CDBB]
 static const uint64_t QME_CDBB = 0x200e0804ull;
 
 static const uint32_t QME_CDBB_MESSAGE_NUMBER = 0;
 static const uint32_t QME_CDBB_MESSAGE_NUMBER_LEN = 8;
+//<< [QME_CDBB]
 // c/reg00009.H
+
+//>>THE END<<
 
 #ifndef __PPE_HCODE__
 }

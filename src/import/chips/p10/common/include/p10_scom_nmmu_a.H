@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -39,6 +39,7 @@ namespace nmmu
 #endif
 
 
+//>> [FIR1_REG]
 static const uint64_t FIR1_REG_RW = 0x02010c40ull;
 static const uint64_t FIR1_REG_WO_AND = 0x02010c41ull;
 static const uint64_t FIR1_REG_WO_OR = 0x02010c42ull;
@@ -89,8 +90,10 @@ static const uint32_t FIR1_REG_CP1_LXSTOP_ERR_DET = 42;
 static const uint32_t FIR1_REG_NPU_LXSTOP_ERR_DET = 43;
 static const uint32_t FIR1_REG_FBC_LXSTOP_ERR_DET = 44;
 static const uint32_t FIR1_REG_SPARE = 45;
+//<< [FIR1_REG]
 // nmmu/reg00010.H
 
+//>> [NMMU_ERR_LOG]
 static const uint64_t NMMU_ERR_LOG = 0x02010c57ull;
 
 static const uint32_t NMMU_ERR_LOG_RESERVED_0_1 = 0;
@@ -102,7 +105,10 @@ static const uint32_t NMMU_ERR_LOG_MM_ERR_INJ_SNP_FLT_MULT_SEL = 5;
 static const uint32_t NMMU_ERR_LOG_MM_ERR_INJ_SNP_FLT_MULT_SEL_LEN = 3;
 static const uint32_t NMMU_ERR_LOG_RESERVED_08_63 = 8;
 static const uint32_t NMMU_ERR_LOG_RESERVED_08_63_LEN = 56;
+//<< [NMMU_ERR_LOG]
 // nmmu/reg00010.H
+
+//>>THE END<<
 
 #ifndef __PPE_HCODE__
 }

@@ -39,6 +39,7 @@ namespace pauc
 #endif
 
 
+//>> [CPLT_CONF1]
 static const uint64_t CPLT_CONF1_RW = 0x10000009ull;
 static const uint64_t CPLT_CONF1_WO_CLEAR = 0x10000029ull;
 static const uint64_t CPLT_CONF1_WO_OR = 0x10000019ull;
@@ -47,8 +48,10 @@ static const uint32_t CPLT_CONF1_0_IOVALID_DC = 0;
 static const uint32_t CPLT_CONF1_1_IOVALID_DC = 1;
 static const uint32_t CPLT_CONF1_2_IOVALID_DC = 2;
 static const uint32_t CPLT_CONF1_3_IOVALID_DC = 3;
+//<< [CPLT_CONF1]
 // pauc/reg00006.H
 
+//>> [CPLT_CTRL1]
 static const uint64_t CPLT_CTRL1_RW = 0x10000001ull;
 static const uint64_t CPLT_CTRL1_WO_CLEAR = 0x10000021ull;
 static const uint64_t CPLT_CTRL1_WO_OR = 0x10000011ull;
@@ -70,20 +73,28 @@ static const uint32_t CPLT_CTRL1_REGION12_FENCE_DC = 16;
 static const uint32_t CPLT_CTRL1_REGION13_FENCE_DC = 17;
 static const uint32_t CPLT_CTRL1_REGION14_FENCE_DC = 18;
 static const uint32_t CPLT_CTRL1_STG_ACT_EN_DC = 22;
+//<< [CPLT_CTRL1]
 // pauc/reg00006.H
 
+//>> [DL_PPE_WRAP_ARB_CSAR]
 static const uint64_t DL_PPE_WRAP_ARB_CSAR = 0x10012c4dull;
 
 static const uint32_t DL_PPE_WRAP_ARB_CSAR_CSAR_SRAM_ADDRESS = 16;
 static const uint32_t DL_PPE_WRAP_ARB_CSAR_CSAR_SRAM_ADDRESS_LEN = 13;
+//<< [DL_PPE_WRAP_ARB_CSAR]
 // pauc/reg00006.H
 
+//>> [EPS_DBG_INST1_COND_REG_3]
 static const uint64_t EPS_DBG_INST1_COND_REG_3 = 0x100107c3ull;
+//<< [EPS_DBG_INST1_COND_REG_3]
 // pauc/reg00006.H
 
+//>> [EPS_DBG_INST2_COND_REG_3]
 static const uint64_t EPS_DBG_INST2_COND_REG_3 = 0x100107c6ull;
+//<< [EPS_DBG_INST2_COND_REG_3]
 // pauc/reg00006.H
 
+//>> [EPS_PSC_PSCOM_STATUS_ERROR_REG]
 static const uint64_t EPS_PSC_PSCOM_STATUS_ERROR_REG = 0x10010001ull;
 
 static const uint32_t EPS_PSC_PSCOM_STATUS_ERROR_REG_ACCUMULATED_PCB_WDATA_PARITY_ERROR = 0;
@@ -122,21 +133,27 @@ static const uint32_t EPS_PSC_PSCOM_STATUS_ERROR_REG_TRAPPED_PCB_COMMAND_PARITY_
 static const uint32_t EPS_PSC_PSCOM_STATUS_ERROR_REG_TRAPPED_GENERAL_TIMEOUT = 33;
 static const uint32_t EPS_PSC_PSCOM_STATUS_ERROR_REG_TRAPPED_SATELLITE_ACKNOWLEDGE_ACCESS_VIOLATION = 34;
 static const uint32_t EPS_PSC_PSCOM_STATUS_ERROR_REG_TRAPPED_SATELLITE_ACKNOWLEDGE_INVALID_REGISTER = 35;
+//<< [EPS_PSC_PSCOM_STATUS_ERROR_REG]
 // pauc/reg00006.H
 
+//>> [EPS_PSC_RING_FENCE_MASK_LATCH_REG]
 static const uint64_t EPS_PSC_RING_FENCE_MASK_LATCH_REG = 0x10010008ull;
 
 static const uint32_t EPS_PSC_RING_FENCE_MASK_LATCH_REG_RING_FENCE_ENABLE_MASK = 1;
 static const uint32_t EPS_PSC_RING_FENCE_MASK_LATCH_REG_RING_FENCE_ENABLE_MASK_LEN = 31;
+//<< [EPS_PSC_RING_FENCE_MASK_LATCH_REG]
 // pauc/reg00006.H
 
+//>> [EPS_THERM_WSUB_TIMESTAMP_COUNTER_READ]
 static const uint64_t EPS_THERM_WSUB_TIMESTAMP_COUNTER_READ = 0x1005001cull;
 
 static const uint32_t EPS_THERM_WSUB_TIMESTAMP_COUNTER_READ_VALUE = 0;
 static const uint32_t EPS_THERM_WSUB_TIMESTAMP_COUNTER_READ_VALUE_LEN = 44;
 static const uint32_t EPS_THERM_WSUB_TIMESTAMP_COUNTER_READ_OVERFLOW_ERR = 44;
+//<< [EPS_THERM_WSUB_TIMESTAMP_COUNTER_READ]
 // pauc/reg00006.H
 
+//>> [LOCAL_XSTOP_MASK]
 static const uint64_t LOCAL_XSTOP_MASK_RW = 0x10040043ull;
 static const uint64_t LOCAL_XSTOP_MASK_WO_CLEAR = 0x10040063ull;
 static const uint64_t LOCAL_XSTOP_MASK_WO_OR = 0x10040053ull;
@@ -156,28 +173,36 @@ static const uint32_t LOCAL_XSTOP_MASK_12 = 12;
 static const uint32_t LOCAL_XSTOP_MASK_13 = 13;
 static const uint32_t LOCAL_XSTOP_MASK_14 = 14;
 static const uint32_t LOCAL_XSTOP_MASK_15 = 15;
+//<< [LOCAL_XSTOP_MASK]
 // pauc/reg00006.H
 
+//>> [LOCAL_XSTOP_UNMASKED]
 static const uint64_t LOCAL_XSTOP_UNMASKED = 0x10040013ull;
 
 static const uint32_t LOCAL_XSTOP_UNMASKED_IN = 1;
 static const uint32_t LOCAL_XSTOP_UNMASKED_IN_LEN = 15;
+//<< [LOCAL_XSTOP_UNMASKED]
 // pauc/reg00006.H
 
+//>> [PHY_PPE_WRAP_ARB_CSAR]
 static const uint64_t PHY_PPE_WRAP_ARB_CSAR = 0x10012c0dull;
 
 static const uint32_t PHY_PPE_WRAP_ARB_CSAR_CSAR_SRAM_ADDRESS = 16;
 static const uint32_t PHY_PPE_WRAP_ARB_CSAR_CSAR_SRAM_ADDRESS_LEN = 13;
+//<< [PHY_PPE_WRAP_ARB_CSAR]
 // pauc/reg00006.H
 
+//>> [TRA0_TR0_CONFIG_5]
 static const uint64_t TRA0_TR0_CONFIG_5 = 0x10010408ull;
 
 static const uint32_t TRA0_TR0_CONFIG_5_C = 0;
 static const uint32_t TRA0_TR0_CONFIG_5_C_LEN = 24;
 static const uint32_t TRA0_TR0_CONFIG_5_D = 24;
 static const uint32_t TRA0_TR0_CONFIG_5_D_LEN = 24;
+//<< [TRA0_TR0_CONFIG_5]
 // pauc/reg00006.H
 
+//>> [TRA0_TR1_CONFIG]
 static const uint64_t TRA0_TR1_CONFIG = 0x10010442ull;
 
 static const uint32_t TRA0_TR1_CONFIG_STORE_ON_TRIG_MODE = 0;
@@ -196,8 +221,10 @@ static const uint32_t TRA0_TR1_CONFIG_TRACE_RUN_STICKY = 20;
 static const uint32_t TRA0_TR1_CONFIG_DISABLE_BANK_EDGE_DETECT = 21;
 static const uint32_t TRA0_TR1_CONFIG_DISABLE_SCOM_TRCTRL_TRARR_RD_ACT = 22;
 static const uint32_t TRA0_TR1_CONFIG_MASTER_CLOCK_ENABLE_INT = 23;
+//<< [TRA0_TR1_CONFIG]
 // pauc/reg00006.H
 
+//>> [TRA1_TR0_CONFIG]
 static const uint64_t TRA1_TR0_CONFIG = 0x10010482ull;
 
 static const uint32_t TRA1_TR0_CONFIG_STORE_ON_TRIG_MODE = 0;
@@ -216,13 +243,18 @@ static const uint32_t TRA1_TR0_CONFIG_TRACE_RUN_STICKY = 20;
 static const uint32_t TRA1_TR0_CONFIG_DISABLE_BANK_EDGE_DETECT = 21;
 static const uint32_t TRA1_TR0_CONFIG_DISABLE_SCOM_TRCTRL_TRARR_RD_ACT = 22;
 static const uint32_t TRA1_TR0_CONFIG_MASTER_CLOCK_ENABLE_INT = 23;
+//<< [TRA1_TR0_CONFIG]
 // pauc/reg00006.H
 
+//>> [TXIRLM_REGS_TX_IMPCAL_SWO6_PB]
 static const uint64_t TXIRLM_REGS_TX_IMPCAL_SWO6_PB = 0x800f5dc010012c3full;
 
 static const uint32_t TXIRLM_REGS_TX_IMPCAL_SWO6_PB_TX_ZCAL_SWO_IMP_CNTL_1R_1XP_0_15 = 48;
 static const uint32_t TXIRLM_REGS_TX_IMPCAL_SWO6_PB_TX_ZCAL_SWO_IMP_CNTL_1R_1XP_0_15_LEN = 16;
+//<< [TXIRLM_REGS_TX_IMPCAL_SWO6_PB]
 // pauc/reg00006.H
+
+//>>THE END<<
 
 #ifndef __PPE_HCODE__
 }

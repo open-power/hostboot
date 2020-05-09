@@ -39,6 +39,7 @@ namespace c
 #endif
 
 
+//>> [CPMS_ACCR]
 static const uint64_t CPMS_ACCR = 0x200e0e78ull;
 
 static const uint32_t CPMS_ACCR_COUNT_MODE = 0;
@@ -55,8 +56,10 @@ static const uint32_t CPMS_ACCR_LO_THRESHOLD = 16;
 static const uint32_t CPMS_ACCR_LO_THRESHOLD_LEN = 8;
 static const uint32_t CPMS_ACCR_SPARE = 24;
 static const uint32_t CPMS_ACCR_SPARE_LEN = 2;
+//<< [CPMS_ACCR]
 // c/reg00015.H
 
+//>> [CPMS_MMAR]
 static const uint64_t CPMS_MMAR = 0x200e0e38ull;
 static const uint64_t CPMS_MMAR_SCOM2 = 0x200e0e3aull;
 static const uint64_t CPMS_MMAR_WO_CLEAR = 0x200e0e3bull;
@@ -67,8 +70,10 @@ static const uint32_t CPMS_MMAR_LIMIT = 2;
 static const uint32_t CPMS_MMAR_LIMIT_LEN = 2;
 static const uint32_t CPMS_MMAR_LIMIT_UPDATE_SELECT = 4;
 static const uint32_t CPMS_MMAR_DIRTY = 32;
+//<< [CPMS_MMAR]
 // c/reg00015.H
 
+//>> [CPMS_SDSR]
 static const uint64_t CPMS_SDSR = 0x200e0e68ull;
 
 static const uint32_t CPMS_SDSR_DDS_DATA = 0;
@@ -78,11 +83,15 @@ static const uint32_t CPMS_SDSR_DDS_MIN_LEN = 5;
 static const uint32_t CPMS_SDSR_DDS_MAX = 10;
 static const uint32_t CPMS_SDSR_DDS_MAX_LEN = 5;
 static const uint32_t CPMS_SDSR_SAMPLE_DISABLE_OCCURRED = 15;
+//<< [CPMS_SDSR]
 // c/reg00015.H
 
+//>> [EC_PC_COMMON_SPR_SCOMD]
 static const uint64_t EC_PC_COMMON_SPR_SCOMD = 0x20020481ull;
+//<< [EC_PC_COMMON_SPR_SCOMD]
 // c/reg00015.H
 
+//>> [EC_PC_COMMON_SPR_TFAC_HOLD_OUT]
 static const uint64_t EC_PC_COMMON_SPR_TFAC_HOLD_OUT = 0x200204b7ull;
 
 static const uint32_t EC_PC_COMMON_SPR_TFAC_HOLD_OUT_TFC_SPR_CONTROL_HOLD_OUT = 0;
@@ -114,8 +123,10 @@ static const uint32_t EC_PC_COMMON_SPR_TFAC_HOLD_OUT_COMMON_SCOM_HOLD_OUT = 44;
 static const uint32_t EC_PC_COMMON_SPR_TFAC_HOLD_OUT_TFX_SPR_TFAC_XFER_HOLD_OUT = 45;
 static const uint32_t EC_PC_COMMON_SPR_TFAC_HOLD_OUT_TFX_SPR_TFAC_XFER_HOLD_OUT_LEN = 3;
 static const uint32_t EC_PC_COMMON_SPR_TFAC_HOLD_OUT_TFR_SPR_RFC_SCR_P_HOLD_OUT = 48;
+//<< [EC_PC_COMMON_SPR_TFAC_HOLD_OUT]
 // c/reg00015.H
 
+//>> [EC_PC_PWM_EVENTS]
 static const uint64_t EC_PC_PWM_EVENTS = 0x200204a2ull;
 
 static const uint32_t EC_PC_PWM_EVENTS_PWM_EVENTS_RESERVED_32 = 32;
@@ -138,20 +149,26 @@ static const uint32_t EC_PC_PWM_EVENTS_PWM_EVENTS_RESERVED_60 = 60;
 static const uint32_t EC_PC_PWM_EVENTS_PWM_EVENTS_RESERVED_61 = 61;
 static const uint32_t EC_PC_PWM_EVENTS_PMCM_THRESHOLD = 62;
 static const uint32_t EC_PC_PWM_EVENTS_PMCM_THRESHOLD_LEN = 2;
+//<< [EC_PC_PWM_EVENTS]
 // c/reg00015.H
 
+//>> [EC_PC_TRACE1_TR_TR0_CONFIG_0]
 static const uint64_t EC_PC_TRACE1_TR_TR0_CONFIG_0 = 0x20020a43ull;
 
 static const uint32_t EC_PC_TRACE1_TR_TR0_CONFIG_0_CMP_MSK_LT_B_0_TO_63 = 0;
 static const uint32_t EC_PC_TRACE1_TR_TR0_CONFIG_0_CMP_MSK_LT_B_0_TO_63_LEN = 64;
+//<< [EC_PC_TRACE1_TR_TR0_CONFIG_0]
 // c/reg00015.H
 
+//>> [EC_PC_TRACE2_TR_TR0_TRACE_HI_DATA_REG]
 static const uint64_t EC_PC_TRACE2_TR_TR0_TRACE_HI_DATA_REG = 0x20020a80ull;
 
 static const uint32_t EC_PC_TRACE2_TR_TR0_TRACE_HI_DATA_REG_TRACE_HI_DATA = 0;
 static const uint32_t EC_PC_TRACE2_TR_TR0_TRACE_HI_DATA_REG_TRACE_HI_DATA_LEN = 64;
+//<< [EC_PC_TRACE2_TR_TR0_TRACE_HI_DATA_REG]
 // c/reg00015.H
 
+//>> [L2_L2MISC_L2CERRS_ERR_INJ_REG]
 static const uint64_t L2_L2MISC_L2CERRS_ERR_INJ_REG = 0x2002000cull;
 
 static const uint32_t L2_L2MISC_L2CERRS_ERR_INJ_REG_DW_TYPE = 0;
@@ -164,8 +181,10 @@ static const uint32_t L2_L2MISC_L2CERRS_ERR_INJ_REG_CPI_TYPE = 10;
 static const uint32_t L2_L2MISC_L2CERRS_ERR_INJ_REG_CPI_TYPE_LEN = 3;
 static const uint32_t L2_L2MISC_L2CERRS_ERR_INJ_REG_LVDIR_EN = 13;
 static const uint32_t L2_L2MISC_L2CERRS_ERR_INJ_REG_LRU_EN = 14;
+//<< [L2_L2MISC_L2CERRS_ERR_INJ_REG]
 // c/reg00015.H
 
+//>> [L2TRA_TR0_TRACE_LO_DATA_REG]
 static const uint64_t L2TRA_TR0_TRACE_LO_DATA_REG = 0x20020041ull;
 
 static const uint32_t L2TRA_TR0_TRACE_LO_DATA_REG_LO_DATA = 0;
@@ -179,8 +198,10 @@ static const uint32_t L2TRA_TR0_TRACE_LO_DATA_REG_WRITE_ON_RUN = 52;
 static const uint32_t L2TRA_TR0_TRACE_LO_DATA_REG_RUNNING = 53;
 static const uint32_t L2TRA_TR0_TRACE_LO_DATA_REG_HOLD_ADDRESS = 54;
 static const uint32_t L2TRA_TR0_TRACE_LO_DATA_REG_HOLD_ADDRESS_LEN = 10;
+//<< [L2TRA_TR0_TRACE_LO_DATA_REG]
 // c/reg00015.H
 
+//>> [L2TRA_TR0_CONFIG]
 static const uint64_t L2TRA_TR0_CONFIG = 0x20020042ull;
 
 static const uint32_t L2TRA_TR0_CONFIG_STORE_ON_TRIG_MODE = 0;
@@ -200,14 +221,18 @@ static const uint32_t L2TRA_TR0_CONFIG_DISABLE_BANK_EDGE_DETECT = 21;
 static const uint32_t L2TRA_TR0_CONFIG_DISABLE_SCOM_RD_ACT_OR_ACTIVATE_CROSS = 22;
 static const uint32_t L2TRA_TR0_CONFIG_MASTER_CLOCK_ENABLE_INT = 23;
 static const uint32_t L2TRA_TR0_CONFIG_CROSS_DISABLE_SCOM_RD_ACT = 24;
+//<< [L2TRA_TR0_CONFIG]
 // c/reg00015.H
 
+//>> [L3_MISC_L3CERRS_WIFSM_INJ_DIS_REG]
 static const uint64_t L3_MISC_L3CERRS_WIFSM_INJ_DIS_REG = 0x2001060cull;
 
 static const uint32_t L3_MISC_L3CERRS_WIFSM_INJ_DIS_REG_L3_WIFSM_INJ_DIS_CFG = 0;
 static const uint32_t L3_MISC_L3CERRS_WIFSM_INJ_DIS_REG_L3_WIFSM_INJ_DIS_CFG_LEN = 2;
+//<< [L3_MISC_L3CERRS_WIFSM_INJ_DIS_REG]
 // c/reg00015.H
 
+//>> [NC_NCMISC_NCSCOMS_FIR_REG]
 static const uint64_t NC_NCMISC_NCSCOMS_FIR_REG_RW = 0x20010640ull;
 static const uint64_t NC_NCMISC_NCSCOMS_FIR_REG_WO_AND = 0x20010641ull;
 static const uint64_t NC_NCMISC_NCSCOMS_FIR_REG_WO_OR = 0x20010642ull;
@@ -234,8 +259,10 @@ static const uint32_t NC_NCMISC_NCSCOMS_FIR_REG_DARN_EN_ERR = 20;
 static const uint32_t NC_NCMISC_NCSCOMS_FIR_REG_DARN_ADDR_ERR = 21;
 static const uint32_t NC_NCMISC_NCSCOMS_FIR_REG_SPARE_FIR = 22;
 static const uint32_t NC_NCMISC_NCSCOMS_FIR_REG_SPARE_FIR_LEN = 7;
+//<< [NC_NCMISC_NCSCOMS_FIR_REG]
 // c/reg00015.H
 
+//>> [NC_NCMISC_NCSCOMS_NCU_MODE_REG]
 static const uint64_t NC_NCMISC_NCSCOMS_NCU_MODE_REG = 0x2001064aull;
 
 static const uint32_t NC_NCMISC_NCSCOMS_NCU_MODE_REG_HTM_QUEUE_LIMIT = 0;
@@ -257,7 +284,10 @@ static const uint32_t NC_NCMISC_NCSCOMS_NCU_MODE_REG_TLBIE_CNT_THRESH_LEN = 8;
 static const uint32_t NC_NCMISC_NCSCOMS_NCU_MODE_REG_TLB_CHK_WAIT_DEC = 40;
 static const uint32_t NC_NCMISC_NCSCOMS_NCU_MODE_REG_TLB_CHK_WAIT_DEC_LEN = 8;
 static const uint32_t NC_NCMISC_NCSCOMS_NCU_MODE_REG_SKIP_GRP_SCOPE_EN = 48;
+//<< [NC_NCMISC_NCSCOMS_NCU_MODE_REG]
 // c/reg00015.H
+
+//>>THE END<<
 
 #ifndef __PPE_HCODE__
 }

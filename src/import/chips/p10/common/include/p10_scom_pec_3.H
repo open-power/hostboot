@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -39,6 +39,7 @@ namespace pec
 #endif
 
 
+//>> [CLOCK_STAT_NSL]
 static const uint64_t CLOCK_STAT_NSL = 0x08030009ull;
 
 static const uint32_t CLOCK_STAT_NSL_PERV_NSL = 4;
@@ -56,8 +57,10 @@ static const uint32_t CLOCK_STAT_NSL_UNIT11_NSL = 15;
 static const uint32_t CLOCK_STAT_NSL_UNIT12_NSL = 16;
 static const uint32_t CLOCK_STAT_NSL_UNIT13_NSL = 17;
 static const uint32_t CLOCK_STAT_NSL_UNIT14_NSL = 18;
+//<< [CLOCK_STAT_NSL]
 // pec/reg00003.H
 
+//>> [EPS_FIR_ANY_LOCAL_ERR_MASK]
 static const uint64_t EPS_FIR_ANY_LOCAL_ERR_MASK = 0x08040080ull;
 
 static const uint32_t EPS_FIR_ANY_LOCAL_ERR_MASK_XSTOP_TO_PCB = 0;
@@ -65,17 +68,23 @@ static const uint32_t EPS_FIR_ANY_LOCAL_ERR_MASK_RECOV_TO_PCB = 1;
 static const uint32_t EPS_FIR_ANY_LOCAL_ERR_MASK_SPATTN_TO_PCB = 2;
 static const uint32_t EPS_FIR_ANY_LOCAL_ERR_MASK_LOCAL_XSTOP_TO_PCB = 3;
 static const uint32_t EPS_FIR_ANY_LOCAL_ERR_MASK_HOSTATTN_TO_PCB = 4;
+//<< [EPS_FIR_ANY_LOCAL_ERR_MASK]
 // pec/reg00003.H
 
+//>> [EPS_THERM_WSUB_DTS_RESULT2]
 static const uint64_t EPS_THERM_WSUB_DTS_RESULT2 = 0x08050002ull;
 
 static const uint32_t EPS_THERM_WSUB_DTS_RESULT2_DTS_8_RESULT = 0;
 static const uint32_t EPS_THERM_WSUB_DTS_RESULT2_DTS_8_RESULT_LEN = 16;
+//<< [EPS_THERM_WSUB_DTS_RESULT2]
 // pec/reg00003.H
 
+//>> [EPS_THERM_WSUB_SKITTER_DATA1]
 static const uint64_t EPS_THERM_WSUB_SKITTER_DATA1 = 0x0805001aull;
+//<< [EPS_THERM_WSUB_SKITTER_DATA1]
 // pec/reg00003.H
 
+//>> [EPS_THERM_WSUB_MODE_REG]
 static const uint64_t EPS_THERM_WSUB_MODE_REG = 0x0805000full;
 
 static const uint32_t EPS_THERM_WSUB_MODE_REG_THERM_DIS_CPM_BUBBLE_CORR = 0;
@@ -97,8 +106,10 @@ static const uint32_t EPS_THERM_WSUB_MODE_REG_THERM_DTS_ENABLE_L1_LEN = 3;
 static const uint32_t EPS_THERM_WSUB_MODE_REG_THERM_DTS_ENABLE_L2 = 24;
 static const uint32_t EPS_THERM_WSUB_MODE_REG_THERM_DTS_ENABLE_L2_LEN = 3;
 static const uint32_t EPS_THERM_WSUB_MODE_REG_THERM_DTS_ENABLE_L3 = 28;
+//<< [EPS_THERM_WSUB_MODE_REG]
 // pec/reg00003.H
 
+//>> [LOCAL_XSTOP]
 static const uint64_t LOCAL_XSTOP = 0x08040003ull;
 
 static const uint32_t LOCAL_XSTOP_ANY_LOCAL_XSTOP = 0;
@@ -117,19 +128,25 @@ static const uint32_t LOCAL_XSTOP_IN12 = 12;
 static const uint32_t LOCAL_XSTOP_IN13 = 13;
 static const uint32_t LOCAL_XSTOP_IN14 = 14;
 static const uint32_t LOCAL_XSTOP_IN15 = 15;
+//<< [LOCAL_XSTOP]
 // pec/reg00003.H
 
+//>> [LXSTOP_INTERRUPT_REG]
 static const uint64_t LXSTOP_INTERRUPT_REG = 0x080f002aull;
 
 static const uint32_t LXSTOP_INTERRUPT_REG_LXSTOP = 0;
+//<< [LXSTOP_INTERRUPT_REG]
 // pec/reg00003.H
 
+//>> [MULTICAST_GROUP_1]
 static const uint64_t MULTICAST_GROUP_1 = 0x080f0001ull;
 
 static const uint32_t MULTICAST_GROUP_1_MULTICAST1_GROUP = 3;
 static const uint32_t MULTICAST_GROUP_1_MULTICAST1_GROUP_LEN = 3;
+//<< [MULTICAST_GROUP_1]
 // pec/reg00003.H
 
+//>> [NET_CTRL0]
 static const uint64_t NET_CTRL0_RW = 0x080f0040ull;
 static const uint64_t NET_CTRL0_RW_WAND = 0x080f0041ull;
 static const uint64_t NET_CTRL0_RW_WOR = 0x080f0042ull;
@@ -166,8 +183,10 @@ static const uint32_t NET_CTRL0_HTB_INTEST = 28;
 static const uint32_t NET_CTRL0_HTB_EXTEST = 29;
 // ERROR Duplicate Dial         static const uint32_t NET_CTRL0_PM_ACCESS = 30;
 static const uint32_t NET_CTRL0_PLLFORCE_OUT_EN = 31;
+//<< [NET_CTRL0]
 // pec/reg00003.H
 
+//>> [PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG]
 static const uint64_t PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG = 0x03011810ull;
 
 static const uint32_t PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_PE_INJECT_THRESHOLD_ENABLE = 0;
@@ -198,19 +217,25 @@ static const uint32_t PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_PE_INJECT_THRESHO
 static const uint32_t PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_PE_INJECT_THRESHOLD_SYSTEM_MINIMUM_DECREMENT_RATE = 56;
 static const uint32_t PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG_PE_INJECT_THRESHOLD_SYSTEM_MINIMUM_DECREMENT_RATE_LEN =
     8;
+//<< [PB_PBCQ_PEPBREGS_PE_INJECT_THRESHOLD_REG]
 // pec/reg00003.H
 
+//>> [PHASE_COUNTER_RESET]
 static const uint64_t PHASE_COUNTER_RESET = 0x08030028ull;
 
 static const uint32_t PHASE_COUNTER_RESET_PHASECOUNTER_RESET = 0;
+//<< [PHASE_COUNTER_RESET]
 // pec/reg00003.H
 
+//>> [PLL_LOCK_REG]
 static const uint64_t PLL_LOCK_REG = 0x080f0019ull;
 
 static const uint32_t PLL_LOCK_REG_LOCK = 0;
 static const uint32_t PLL_LOCK_REG_LOCK_LEN = 8;
+//<< [PLL_LOCK_REG]
 // pec/reg00003.H
 
+//>> [SPATTN_MASK]
 static const uint64_t SPATTN_MASK_RW = 0x08040042ull;
 static const uint64_t SPATTN_MASK_WO_CLEAR = 0x08040062ull;
 static const uint64_t SPATTN_MASK_WO_OR = 0x08040052ull;
@@ -250,15 +275,20 @@ static const uint32_t SPATTN_MASK_32 = 32;
 static const uint32_t SPATTN_MASK_33 = 33;
 static const uint32_t SPATTN_MASK_34 = 34;
 static const uint32_t SPATTN_MASK_35 = 35;
+//<< [SPATTN_MASK]
 // pec/reg00003.H
 
+//>> [TRA0_TR0_CONFIG_3]
 static const uint64_t TRA0_TR0_CONFIG_3 = 0x08010406ull;
 
 static const uint32_t TRA0_TR0_CONFIG_3_C = 0;
 static const uint32_t TRA0_TR0_CONFIG_3_C_LEN = 24;
 static const uint32_t TRA0_TR0_CONFIG_3_D = 24;
 static const uint32_t TRA0_TR0_CONFIG_3_D_LEN = 24;
+//<< [TRA0_TR0_CONFIG_3]
 // pec/reg00003.H
+
+//>>THE END<<
 
 #ifndef __PPE_HCODE__
 }

@@ -39,6 +39,7 @@ namespace pec
 #endif
 
 
+//>> [EPS_FIR_LOCAL_WOF]
 static const uint64_t EPS_FIR_LOCAL_WOF = 0x08040108ull;
 
 static const uint32_t EPS_FIR_LOCAL_WOF_00 = 0;
@@ -105,8 +106,10 @@ static const uint32_t EPS_FIR_LOCAL_WOF_60 = 60;
 static const uint32_t EPS_FIR_LOCAL_WOF_61 = 61;
 static const uint32_t EPS_FIR_LOCAL_WOF_62 = 62;
 static const uint32_t EPS_FIR_LOCAL_WOF_63 = 63;
+//<< [EPS_FIR_LOCAL_WOF]
 // pec/reg00007.H
 
+//>> [EPS_THERM_WSUB_CONTROL_REG]
 static const uint64_t EPS_THERM_WSUB_CONTROL_REG = 0x08050012ull;
 
 static const uint32_t EPS_THERM_WSUB_CONTROL_REG_RESET_TRIP_HISTORY = 0;
@@ -122,70 +125,90 @@ static const uint32_t EPS_THERM_WSUB_CONTROL_REG_FORCE_RESET_THRES_L3RESULTS = 9
 static const uint32_t EPS_THERM_WSUB_CONTROL_REG_FORCE_MEASURE_VOLT_INTERRUPTIBLE = 10;
 static const uint32_t EPS_THERM_WSUB_CONTROL_REG_FORCE_RESET_MEASURE_VOLT = 11;
 static const uint32_t EPS_THERM_WSUB_CONTROL_REG_FORCE_SHIFT_SENSOR = 12;
+//<< [EPS_THERM_WSUB_CONTROL_REG]
 // pec/reg00007.H
 
+//>> [EPS_THERM_WSUB_SKITTER_CLKSRC_REG]
 static const uint64_t EPS_THERM_WSUB_SKITTER_CLKSRC_REG = 0x08050016ull;
 
 static const uint32_t EPS_THERM_WSUB_SKITTER_CLKSRC_REG_CLKSRC = 0;
 static const uint32_t EPS_THERM_WSUB_SKITTER_CLKSRC_REG_CLKSRC_LEN = 3;
 static const uint32_t EPS_THERM_WSUB_SKITTER_CLKSRC_REG_DELAY_SELECT = 36;
 static const uint32_t EPS_THERM_WSUB_SKITTER_CLKSRC_REG_DELAY_SELECT_LEN = 2;
+//<< [EPS_THERM_WSUB_SKITTER_CLKSRC_REG]
 // pec/reg00007.H
 
+//>> [HANG_PULSE_0_REG]
 static const uint64_t HANG_PULSE_0_REG = 0x080f0020ull;
 
 static const uint32_t HANG_PULSE_0_REG_HANG_PULSE_REG_0 = 0;
 static const uint32_t HANG_PULSE_0_REG_HANG_PULSE_REG_0_LEN = 6;
 static const uint32_t HANG_PULSE_0_REG_SUPPRESS_HANG_0 = 6;
+//<< [HANG_PULSE_0_REG]
 // pec/reg00007.H
 
+//>> [HANG_PULSE_1_REG]
 static const uint64_t HANG_PULSE_1_REG = 0x080f0021ull;
 
 static const uint32_t HANG_PULSE_1_REG_HANG_PULSE_REG_1 = 0;
 static const uint32_t HANG_PULSE_1_REG_HANG_PULSE_REG_1_LEN = 6;
 static const uint32_t HANG_PULSE_1_REG_SUPPRESS_HANG_1 = 6;
+//<< [HANG_PULSE_1_REG]
 // pec/reg00007.H
 
+//>> [HANG_PULSE_2_REG]
 static const uint64_t HANG_PULSE_2_REG = 0x080f0022ull;
 
 static const uint32_t HANG_PULSE_2_REG_HANG_PULSE_REG_2 = 0;
 static const uint32_t HANG_PULSE_2_REG_HANG_PULSE_REG_2_LEN = 6;
 static const uint32_t HANG_PULSE_2_REG_SUPPRESS_HANG_2 = 6;
+//<< [HANG_PULSE_2_REG]
 // pec/reg00007.H
 
+//>> [HANG_PULSE_3_REG]
 static const uint64_t HANG_PULSE_3_REG = 0x080f0023ull;
 
 static const uint32_t HANG_PULSE_3_REG_HANG_PULSE_REG_3 = 0;
 static const uint32_t HANG_PULSE_3_REG_HANG_PULSE_REG_3_LEN = 6;
 static const uint32_t HANG_PULSE_3_REG_SUPPRESS_HANG_3 = 6;
+//<< [HANG_PULSE_3_REG]
 // pec/reg00007.H
 
+//>> [HANG_PULSE_4_REG]
 static const uint64_t HANG_PULSE_4_REG = 0x080f0024ull;
 
 static const uint32_t HANG_PULSE_4_REG_HANG_PULSE_REG_4 = 0;
 static const uint32_t HANG_PULSE_4_REG_HANG_PULSE_REG_4_LEN = 6;
 static const uint32_t HANG_PULSE_4_REG_SUPPRESS_HANG_4 = 6;
+//<< [HANG_PULSE_4_REG]
 // pec/reg00007.H
 
+//>> [HANG_PULSE_5_REG]
 static const uint64_t HANG_PULSE_5_REG = 0x080f0025ull;
 
 static const uint32_t HANG_PULSE_5_REG_HANG_PULSE_REG_5 = 0;
 static const uint32_t HANG_PULSE_5_REG_HANG_PULSE_REG_5_LEN = 6;
 static const uint32_t HANG_PULSE_5_REG_SUPPRESS_HANG_5 = 6;
+//<< [HANG_PULSE_5_REG]
 // pec/reg00007.H
 
+//>> [HANG_PULSE_6_REG]
 static const uint64_t HANG_PULSE_6_REG = 0x080f0026ull;
 
 static const uint32_t HANG_PULSE_6_REG_HANG_PULSE_REG_6 = 0;
 static const uint32_t HANG_PULSE_6_REG_HANG_PULSE_REG_6_LEN = 6;
 static const uint32_t HANG_PULSE_6_REG_SUPPRESS_HANG_6 = 6;
+//<< [HANG_PULSE_6_REG]
 // pec/reg00007.H
 
+//>> [HOSTATTN_INTERRUPT_REG]
 static const uint64_t HOSTATTN_INTERRUPT_REG = 0x080f002bull;
 
 static const uint32_t HOSTATTN_INTERRUPT_REG_TYPE4 = 0;
+//<< [HOSTATTN_INTERRUPT_REG]
 // pec/reg00007.H
 
+//>> [OPCG_CAPT2]
 static const uint64_t OPCG_CAPT2 = 0x08030011ull;
 
 static const uint32_t OPCG_CAPT2_13_01EVEN = 4;
@@ -212,15 +235,19 @@ static const uint32_t OPCG_CAPT2_23_06EVEN = 54;
 static const uint32_t OPCG_CAPT2_23_06EVEN_LEN = 5;
 static const uint32_t OPCG_CAPT2_24_06ODD = 59;
 static const uint32_t OPCG_CAPT2_24_06ODD_LEN = 5;
+//<< [OPCG_CAPT2]
 // pec/reg00007.H
 
+//>> [PB_PBAIB_REGS_PBAIBHWOVR_REG]
 static const uint64_t PB_PBAIB_REGS_PBAIBHWOVR_REG = 0x08010801ull;
 
 static const uint32_t PB_PBAIB_REGS_PBAIBHWOVR_REG_CS_FAST_TIMER = 0;
 static const uint32_t PB_PBAIB_REGS_PBAIBHWOVR_REG_CS_DISABLE_PEST = 1;
 static const uint32_t PB_PBAIB_REGS_PBAIBHWOVR_REG_CS_DISABLE_EARLY_ACK_RETRY = 2;
+//<< [PB_PBAIB_REGS_PBAIBHWOVR_REG]
 // pec/reg00007.H
 
+//>> [PB_PBAIB_REGS_PRDSTKOVR_REG]
 static const uint64_t PB_PBAIB_REGS_PRDSTKOVR_REG = 0x08010802ull;
 
 static const uint32_t PB_PBAIB_REGS_PRDSTKOVR_REG_STK0 = 0;
@@ -228,8 +255,10 @@ static const uint32_t PB_PBAIB_REGS_PRDSTKOVR_REG_STK0_LEN = 32;
 static const uint32_t PB_PBAIB_REGS_PRDSTKOVR_REG_STK1 = 32;
 static const uint32_t PB_PBAIB_REGS_PRDSTKOVR_REG_STK1_LEN = 16;
 static const uint32_t PB_PBAIB_REGS_PRDSTKOVR_REG_ENABLE = 48;
+//<< [PB_PBAIB_REGS_PRDSTKOVR_REG]
 // pec/reg00007.H
 
+//>> [PIPEDINCTL1]
 static const uint64_t PIPEDINCTL1 = 0x0801151aull;
 
 static const uint32_t PIPEDINCTL1_IPE_LANE7_REF_CLK_REQ_N = 0;
@@ -264,8 +293,10 @@ static const uint32_t PIPEDINCTL1_HY_PHY1_PPM_DRIFT_LEN = 6;
 static const uint32_t PIPEDINCTL1_HY_PHY0_PPM_DRIFT_VLD = 57;
 static const uint32_t PIPEDINCTL1_HY_PHY0_PPM_DRIFT = 58;
 static const uint32_t PIPEDINCTL1_HY_PHY0_PPM_DRIFT_LEN = 6;
+//<< [PIPEDINCTL1]
 // pec/reg00007.H
 
+//>> [PIPEDOUTCTL2]
 static const uint64_t PIPEDOUTCTL2 = 0x08011516ull;
 
 static const uint32_t PIPEDOUTCTL2_RESERVED_63_59 = 0;
@@ -282,26 +313,34 @@ static const uint32_t PIPEDOUTCTL2_UPCS_PIPE_CONFIG = 13;
 static const uint32_t PIPEDOUTCTL2_UPCS_PIPE_CONFIG_LEN = 3;
 static const uint32_t PIPEDOUTCTL2_RESERVED_47_0 = 16;
 static const uint32_t PIPEDOUTCTL2_RESERVED_47_0_LEN = 48;
+//<< [PIPEDOUTCTL2]
 // pec/reg00007.H
 
+//>> [RECOV_UNMASKED]
 static const uint64_t RECOV_UNMASKED = 0x08040011ull;
 
 static const uint32_t RECOV_UNMASKED_IN = 1;
 static const uint32_t RECOV_UNMASKED_IN_LEN = 53;
+//<< [RECOV_UNMASKED]
 // pec/reg00007.H
 
+//>> [SCAN_UPDATEDR]
 static const uint64_t SCAN_UPDATEDR = 0x0803a000ull;
 
 static const uint32_t SCAN_UPDATEDR_SCAN_UPDATEDR_REG = 0;
 static const uint32_t SCAN_UPDATEDR_SCAN_UPDATEDR_REG_LEN = 32;
+//<< [SCAN_UPDATEDR]
 // pec/reg00007.H
 
+//>> [SPATTN_UNMASKED]
 static const uint64_t SPATTN_UNMASKED = 0x08040012ull;
 
 static const uint32_t SPATTN_UNMASKED_IN = 1;
 static const uint32_t SPATTN_UNMASKED_IN_LEN = 35;
+//<< [SPATTN_UNMASKED]
 // pec/reg00007.H
 
+//>> [SYNC_CONFIG]
 static const uint64_t SYNC_CONFIG = 0x08030000ull;
 
 static const uint32_t SYNC_CONFIG_SYNC_PULSE_DELAY = 0;
@@ -319,7 +358,10 @@ static const uint32_t SYNC_CONFIG_CONT_SCAN_SHORT_WAIT = 13;
 static const uint32_t SYNC_CONFIG_PHASE_COUNTER_ON_CLKCHANGE_EN = 15;
 static const uint32_t SYNC_CONFIG_PHASE_COUNTER_ON_CLKCHANGE = 16;
 static const uint32_t SYNC_CONFIG_PHASE_COUNTER_ON_CLKCHANGE_LEN = 8;
+//<< [SYNC_CONFIG]
 // pec/reg00007.H
+
+//>>THE END<<
 
 #ifndef __PPE_HCODE__
 }

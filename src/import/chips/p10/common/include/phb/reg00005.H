@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -35,6 +35,7 @@ namespace phb
 #endif
 
 
+//>> PREP_[REGS_NFIRWOF_REG]
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
 static inline fapi2::ReturnCode PREP_REGS_NFIRWOF_REG(const fapi2::Target<K, M, V>& i_target)
 {
@@ -48,7 +49,9 @@ fapi_try_exit:
     return fapi2::current_err;
 #endif
 }
+//<< PREP_[REGS_NFIRWOF_REG]
 
+//>> GET_[REGS_NFIRWOF_REG]
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
 static inline fapi2::ReturnCode GET_REGS_NFIRWOF_REG(const fapi2::Target<K, M, V>& i_target,
         fapi2::buffer<uint64_t>& o_data)
@@ -63,7 +66,9 @@ fapi_try_exit:
     return fapi2::current_err;
 #endif
 }
+//<< GET_[REGS_NFIRWOF_REG]
 
+//>> PUT_[REGS_NFIRWOF_REG]
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
 static inline fapi2::ReturnCode PUT_REGS_NFIRWOF_REG(const fapi2::Target<K, M, V>& i_target, const uint64_t i_data)
 {
@@ -77,8 +82,10 @@ fapi_try_exit:
     return fapi2::current_err;
 #endif
 }
+//<< PUT_[REGS_NFIRWOF_REG]
 
 
+//>> PREP_[RSB_REGS_PHB5_PMON_CONFIG]
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
 static inline fapi2::ReturnCode PREP_RSB_REGS_PHB5_PMON_CONFIG(const fapi2::Target<K, M, V>& i_target)
 {
@@ -92,7 +99,9 @@ fapi_try_exit:
     return fapi2::current_err;
 #endif
 }
+//<< PREP_[RSB_REGS_PHB5_PMON_CONFIG]
 
+//>> GET_[RSB_REGS_PHB5_PMON_CONFIG]
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
 static inline fapi2::ReturnCode GET_RSB_REGS_PHB5_PMON_CONFIG(const fapi2::Target<K, M, V>& i_target,
         fapi2::buffer<uint64_t>& o_data)
@@ -107,7 +116,9 @@ fapi_try_exit:
     return fapi2::current_err;
 #endif
 }
+//<< GET_[RSB_REGS_PHB5_PMON_CONFIG]
 
+//>> PUT_[RSB_REGS_PHB5_PMON_CONFIG]
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
 static inline fapi2::ReturnCode PUT_RSB_REGS_PHB5_PMON_CONFIG(const fapi2::Target<K, M, V>& i_target,
         const uint64_t i_data)
@@ -122,8 +133,11 @@ fapi_try_exit:
     return fapi2::current_err;
 #endif
 }
+//<< PUT_[RSB_REGS_PHB5_PMON_CONFIG]
 
 
+
+//>>THE END<<
 
 #ifndef __PPE_HCODE__
 }

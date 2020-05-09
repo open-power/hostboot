@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -39,33 +39,43 @@ namespace phb
 #endif
 
 
+//>> [REGS_BARE_REG]
 static const uint64_t REGS_BARE_REG = 0x03011854ull;
 
 static const uint32_t REGS_BARE_REG_MMIO_BAR0_EN = 0;
 static const uint32_t REGS_BARE_REG_MMIO_BAR1_EN = 1;
 static const uint32_t REGS_BARE_REG_PHB_BAR_EN = 2;
 static const uint32_t REGS_BARE_REG_INT_BAR_EN = 3;
+//<< [REGS_BARE_REG]
 // phb/reg00015.H
 
+//>> [REGS_MMIOBAR0_REG]
 static const uint64_t REGS_MMIOBAR0_REG = 0x0301184eull;
 
 static const uint32_t REGS_MMIOBAR0_REG_PE_MMIO_BAR0 = 0;
 static const uint32_t REGS_MMIOBAR0_REG_PE_MMIO_BAR0_LEN = 40;
+//<< [REGS_MMIOBAR0_REG]
 // phb/reg00015.H
 
+//>> [REGS_MMIOBAR1_REG]
 static const uint64_t REGS_MMIOBAR1_REG = 0x03011850ull;
 
 static const uint32_t REGS_MMIOBAR1_REG_PE_MMIO_BAR1 = 0;
 static const uint32_t REGS_MMIOBAR1_REG_PE_MMIO_BAR1_LEN = 40;
+//<< [REGS_MMIOBAR1_REG]
 // phb/reg00015.H
 
+//>> [REGS_PBAIBTXDCR_REG]
 static const uint64_t REGS_PBAIBTXDCR_REG = 0x0801084eull;
 
 static const uint32_t REGS_PBAIBTXDCR_REG_A = 33;
 static const uint32_t REGS_PBAIBTXDCR_REG_A_LEN = 2;
 static const uint32_t REGS_PBAIBTXDCR_REG_R = 44;
 static const uint32_t REGS_PBAIBTXDCR_REG_R_LEN = 4;
+//<< [REGS_PBAIBTXDCR_REG]
 // phb/reg00015.H
+
+//>>THE END<<
 
 #ifndef __PPE_HCODE__
 }

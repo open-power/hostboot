@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -39,13 +39,17 @@ namespace nmmu
 #endif
 
 
+//>> [FIR1_MASK_REG]
 static const uint64_t FIR1_MASK_REG_RW = 0x02010c43ull;
 static const uint64_t FIR1_MASK_REG_WO_AND = 0x02010c44ull;
 static const uint64_t FIR1_MASK_REG_WO_OR = 0x02010c45ull;
 
 static const uint32_t FIR1_MASK_REG_MM_FIR1_MASK = 0;
 static const uint32_t FIR1_MASK_REG_MM_FIR1_MASK_LEN = 46;
+//<< [FIR1_MASK_REG]
 // nmmu/reg00008.H
+
+//>>THE END<<
 
 #ifndef __PPE_HCODE__
 }

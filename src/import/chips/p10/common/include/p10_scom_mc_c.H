@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -39,6 +39,7 @@ namespace mc
 #endif
 
 
+//>> [CPLT_CTRL2]
 static const uint64_t CPLT_CTRL2_RW = 0x0c000002ull;
 static const uint64_t CPLT_CTRL2_WO_CLEAR = 0x0c000022ull;
 static const uint64_t CPLT_CTRL2_WO_OR = 0x0c000012ull;
@@ -58,20 +59,26 @@ static const uint32_t CPLT_CTRL2_11_PGOOD = 15;
 static const uint32_t CPLT_CTRL2_12_PGOOD = 16;
 static const uint32_t CPLT_CTRL2_13_PGOOD = 17;
 static const uint32_t CPLT_CTRL2_14_PGOOD = 18;
+//<< [CPLT_CTRL2]
 // mc/reg00012.H
 
+//>> [CPLT_MASK0]
 static const uint64_t CPLT_MASK0 = 0x0c000101ull;
 
 static const uint32_t CPLT_MASK0_ITR_MASK = 0;
 static const uint32_t CPLT_MASK0_ITR_MASK_LEN = 32;
+//<< [CPLT_MASK0]
 // mc/reg00012.H
 
+//>> [CTRL_PROTECT_MODE_REG]
 static const uint64_t CTRL_PROTECT_MODE_REG = 0x0c0003feull;
 
 static const uint32_t CTRL_PROTECT_MODE_REG_READ_PROTECT_ENABLE = 0;
 static const uint32_t CTRL_PROTECT_MODE_REG_WRITE_PROTECT_ENABLE = 1;
+//<< [CTRL_PROTECT_MODE_REG]
 // mc/reg00012.H
 
+//>> [EPS_DBG_MODE_REG]
 static const uint64_t EPS_DBG_MODE_REG = 0x0c0107c0ull;
 
 static const uint32_t EPS_DBG_MODE_REG_GLB_BRCST_MODE = 0;
@@ -96,8 +103,10 @@ static const uint32_t EPS_DBG_MODE_REG_INST2_CONDITION_HISTORY_STATUS = 23;
 static const uint32_t EPS_DBG_MODE_REG_INST2_CONDITION_HISTORY_STATUS_LEN = 3;
 static const uint32_t EPS_DBG_MODE_REG_UNUSED = 26;
 static const uint32_t EPS_DBG_MODE_REG_UNUSED_LEN = 6;
+//<< [EPS_DBG_MODE_REG]
 // mc/reg00012.H
 
+//>> [EPS_FIR_CLKSTOP_ON_XSTOP_MASK5]
 static const uint64_t EPS_FIR_CLKSTOP_ON_XSTOP_MASK5 = 0x0c040085ull;
 
 static const uint32_t EPS_FIR_CLKSTOP_ON_XSTOP_MASK5_XSTOP_ERR = 0;
@@ -123,63 +132,83 @@ static const uint32_t EPS_FIR_CLKSTOP_ON_XSTOP_MASK5_UNIT_TC_FIR_LOCAL_XSTOP12 =
 static const uint32_t EPS_FIR_CLKSTOP_ON_XSTOP_MASK5_UNIT_TC_FIR_LOCAL_XSTOP13 = 24;
 static const uint32_t EPS_FIR_CLKSTOP_ON_XSTOP_MASK5_UNIT_TC_FIR_LOCAL_XSTOP14 = 25;
 static const uint32_t EPS_FIR_CLKSTOP_ON_XSTOP_MASK5_UNIT_TC_FIR_LOCAL_XSTOP15 = 26;
+//<< [EPS_FIR_CLKSTOP_ON_XSTOP_MASK5]
 // mc/reg00012.H
 
+//>> [EPS_PSC_WRITE_PROTECT_ENABLE_REG]
 static const uint64_t EPS_PSC_WRITE_PROTECT_ENABLE_REG = 0x0c010005ull;
 
 static const uint32_t EPS_PSC_WRITE_PROTECT_ENABLE_REG_ENABLE_RING_LOCKING = 0;
 static const uint32_t EPS_PSC_WRITE_PROTECT_ENABLE_REG_RESERVED_RING_LOCKING = 1;
+//<< [EPS_PSC_WRITE_PROTECT_ENABLE_REG]
 // mc/reg00012.H
 
+//>> [HOSTATTN_UNMASKED]
 static const uint64_t HOSTATTN_UNMASKED = 0x0c040014ull;
 
 static const uint32_t HOSTATTN_UNMASKED_IN = 1;
 static const uint32_t HOSTATTN_UNMASKED_IN_LEN = 53;
+//<< [HOSTATTN_UNMASKED]
 // mc/reg00012.H
 
+//>> [MBA_SCOMFIR_DBG1_SCOM0Q]
 static const uint64_t MBA_SCOMFIR_DBG1_SCOM0Q = 0x0c010f96ull;
 
 static const uint32_t MBA_SCOMFIR_DBG1_SCOM0Q_DBG1_SCOM0Q_DEBUG_BUS_0_43 = 0;
 static const uint32_t MBA_SCOMFIR_DBG1_SCOM0Q_DBG1_SCOM0Q_DEBUG_BUS_0_43_LEN = 44;
+//<< [MBA_SCOMFIR_DBG1_SCOM0Q]
 // mc/reg00012.H
 
+//>> [MBA_SCOMFIR_WATFNB]
 static const uint64_t MBA_SCOMFIR_WATFNB = 0x0c010f8dull;
 
 static const uint32_t MBA_SCOMFIR_WATFNB_3_CFG = 0;
 static const uint32_t MBA_SCOMFIR_WATFNB_3_CFG_LEN = 22;
 static const uint32_t MBA_SCOMFIR_WATFNB_4_CFG = 22;
 static const uint32_t MBA_SCOMFIR_WATFNB_4_CFG_LEN = 22;
+//<< [MBA_SCOMFIR_WATFNB]
 // mc/reg00012.H
 
+//>> [MULTICAST_GROUP_4]
 static const uint64_t MULTICAST_GROUP_4 = 0x0c0f0004ull;
 
 static const uint32_t MULTICAST_GROUP_4_MULTICAST4_GROUP = 3;
 static const uint32_t MULTICAST_GROUP_4_MULTICAST4_GROUP_LEN = 3;
+//<< [MULTICAST_GROUP_4]
 // mc/reg00012.H
 
+//>> [PCB_OPCG_STOP]
 static const uint64_t PCB_OPCG_STOP = 0x0c030030ull;
 
 static const uint32_t PCB_OPCG_STOP_PCB_OPCGSTOP = 0;
+//<< [PCB_OPCG_STOP]
 // mc/reg00012.H
 
+//>> [PRE_COUNTER_REG]
 static const uint64_t PRE_COUNTER_REG = 0x0c0f0028ull;
 
 static const uint32_t PRE_COUNTER_REG_PRE_COUNTER = 0;
 static const uint32_t PRE_COUNTER_REG_PRE_COUNTER_LEN = 8;
+//<< [PRE_COUNTER_REG]
 // mc/reg00012.H
 
+//>> [SCAN64CONTSCAN]
 static const uint64_t SCAN64CONTSCAN = 0x0c03f000ull;
 
 static const uint32_t SCAN64CONTSCAN_SCAN64CONTSCAN_REG = 0;
 static const uint32_t SCAN64CONTSCAN_SCAN64CONTSCAN_REG_LEN = 64;
+//<< [SCAN64CONTSCAN]
 // mc/reg00012.H
 
+//>> [SCOMFIR_MCFIRACT0]
 static const uint64_t SCOMFIR_MCFIRACT0 = 0x0c010c06ull;
 
 static const uint32_t SCOMFIR_MCFIRACT0_MCFIRACT0_ACTION_0 = 0;
 static const uint32_t SCOMFIR_MCFIRACT0_MCFIRACT0_ACTION_0_LEN = 24;
+//<< [SCOMFIR_MCFIRACT0]
 // mc/reg00012.H
 
+//>> [SCOMFIR_MCMODE0]
 static const uint64_t SCOMFIR_MCMODE0 = 0x0c010c11ull;
 
 static const uint32_t SCOMFIR_MCMODE0_SCOM_PERFMON_START_COMMAND = 0;
@@ -210,8 +239,10 @@ static const uint32_t SCOMFIR_MCMODE0_ADD_HASH_BITS_LEN = 2;
 static const uint32_t SCOMFIR_MCMODE0_ENABLE_ADD_HASH = 40;
 static const uint32_t SCOMFIR_MCMODE0_RESERVED_41_63 = 41;
 static const uint32_t SCOMFIR_MCMODE0_RESERVED_41_63_LEN = 23;
+//<< [SCOMFIR_MCMODE0]
 // mc/reg00012.H
 
+//>> [SCOMFIR_MCPERF1]
 static const uint64_t SCOMFIR_MCPERF1 = 0x0c010c10ull;
 
 static const uint32_t SCOMFIR_MCPERF1_DISABLE_FASTPATH = 0;
@@ -243,8 +274,10 @@ static const uint32_t SCOMFIR_MCPERF1_DIS_CHANNEL_FAIL_FORCE_MIRROR = 45;
 static const uint32_t SCOMFIR_MCPERF1_EN_VG_SPECDIS = 46;
 static const uint32_t SCOMFIR_MCPERF1_RESERVED_47_63 = 47;
 static const uint32_t SCOMFIR_MCPERF1_RESERVED_47_63_LEN = 17;
+//<< [SCOMFIR_MCPERF1]
 // mc/reg00012.H
 
+//>> [SCOMFIR_MCWATACT]
 static const uint64_t SCOMFIR_MCWATACT = 0x0c010c18ull;
 
 static const uint32_t SCOMFIR_MCWATACT_EVENT_0_WAT_DISABLE_ALL_SPECULATION = 0;
@@ -273,8 +306,10 @@ static const uint32_t SCOMFIR_MCWATACT_EVENT_2_WAT_FORCE_MDI1 = 22;
 static const uint32_t SCOMFIR_MCWATACT_EVENT_3_WAT_FORCE_MDI1 = 23;
 static const uint32_t SCOMFIR_MCWATACT_RESERVED_36_47 = 24;
 static const uint32_t SCOMFIR_MCWATACT_RESERVED_36_47_LEN = 16;
+//<< [SCOMFIR_MCWATACT]
 // mc/reg00012.H
 
+//>> [TRA1_TR0_CONFIG_9]
 static const uint64_t TRA1_TR0_CONFIG_9 = 0x0c010489ull;
 
 static const uint32_t TRA1_TR0_CONFIG_9_DISABLE_COMPRESSION = 0;
@@ -305,12 +340,17 @@ static const uint32_t TRA1_TR0_CONFIG_9_TRIG0_ERR_CMP = 34;
 static const uint32_t TRA1_TR0_CONFIG_9_TRIG1_ERR_CMP = 35;
 static const uint32_t TRA1_TR0_CONFIG_9_DD1_STRETCH_TRIGGER_PULSES = 36;
 static const uint32_t TRA1_TR0_CONFIG_9_SPARE_LT = 37;
+//<< [TRA1_TR0_CONFIG_9]
 // mc/reg00012.H
 
+//>> [XSTOP_INTERRUPT_REG]
 static const uint64_t XSTOP_INTERRUPT_REG = 0x0c0f001cull;
 
 static const uint32_t XSTOP_INTERRUPT_REG_XSTOP = 0;
+//<< [XSTOP_INTERRUPT_REG]
 // mc/reg00012.H
+
+//>>THE END<<
 
 #ifndef __PPE_HCODE__
 }

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -39,6 +39,7 @@ namespace pec
 #endif
 
 
+//>> [EPS_FIR_CLKSTOP_ON_XSTOP_MASK1]
 static const uint64_t EPS_FIR_CLKSTOP_ON_XSTOP_MASK1 = 0x08040081ull;
 
 static const uint32_t EPS_FIR_CLKSTOP_ON_XSTOP_MASK1_XSTOP_ERR = 0;
@@ -64,11 +65,15 @@ static const uint32_t EPS_FIR_CLKSTOP_ON_XSTOP_MASK1_UNIT_TC_FIR_LOCAL_XSTOP12 =
 static const uint32_t EPS_FIR_CLKSTOP_ON_XSTOP_MASK1_UNIT_TC_FIR_LOCAL_XSTOP13 = 24;
 static const uint32_t EPS_FIR_CLKSTOP_ON_XSTOP_MASK1_UNIT_TC_FIR_LOCAL_XSTOP14 = 25;
 static const uint32_t EPS_FIR_CLKSTOP_ON_XSTOP_MASK1_UNIT_TC_FIR_LOCAL_XSTOP15 = 26;
+//<< [EPS_FIR_CLKSTOP_ON_XSTOP_MASK1]
 // pec/reg00005.H
 
+//>> [EPS_THERM_WSUB_SKITTER_DATA0]
 static const uint64_t EPS_THERM_WSUB_SKITTER_DATA0 = 0x08050019ull;
+//<< [EPS_THERM_WSUB_SKITTER_DATA0]
 // pec/reg00005.H
 
+//>> [EPS_THERM_WSUB_SKITTER_MODE_REG]
 static const uint64_t EPS_THERM_WSUB_SKITTER_MODE_REG = 0x08050010ull;
 
 static const uint32_t EPS_THERM_WSUB_SKITTER_MODE_REG_SKITTER_HOLD_SAMPLE = 0;
@@ -81,8 +86,10 @@ static const uint32_t EPS_THERM_WSUB_SKITTER_MODE_REG_SKITTER_SAMPLE_GUTS = 8;
 static const uint32_t EPS_THERM_WSUB_SKITTER_MODE_REG_SKITTER_SAMPLE_GUTS_LEN = 2;
 static const uint32_t EPS_THERM_WSUB_SKITTER_MODE_REG_SKITTER_HOLD_SAMPLE_WITH_TRIGGER = 44;
 static const uint32_t EPS_THERM_WSUB_SKITTER_MODE_REG_SKITTER_DATA_V_LT = 45;
+//<< [EPS_THERM_WSUB_SKITTER_MODE_REG]
 // pec/reg00005.H
 
+//>> [ERROR_STATUS]
 static const uint64_t ERROR_STATUS = 0x0803000full;
 
 static const uint32_t ERROR_STATUS_PCB_WRITE_NOT_ALLOWED_ERR = 0;
@@ -113,8 +120,10 @@ static const uint32_t ERROR_STATUS_VITL_ALIGN_ERR = 24;
 static const uint32_t ERROR_STATUS_UNIT_SYNC_LVL_ERR = 25;
 static const uint32_t ERROR_STATUS_PARITY_ON_SELFBOOT_CMD_STATE_ERR = 26;
 static const uint32_t ERROR_STATUS_OPCG_STOPPED_BY_PCB_ERR = 27;
+//<< [ERROR_STATUS]
 // pec/reg00005.H
 
+//>> [NET_CTRL1]
 static const uint64_t NET_CTRL1_RW = 0x080f0044ull;
 static const uint64_t NET_CTRL1_RW_WAND = 0x080f0045ull;
 static const uint64_t NET_CTRL1_RW_WOR = 0x080f0046ull;
@@ -145,8 +154,10 @@ static const uint32_t NET_CTRL1_CORE2_CLK_DCADJUST_RESET_DC = 22;
 static const uint32_t NET_CTRL1_CORE3_CLK_DCADJUST_RESET_DC = 23;
 static const uint32_t NET_CTRL1_PCB_ACCESS = 24;
 static const uint32_t NET_CTRL1_PCB_ACCESS_LEN = 8;
+//<< [NET_CTRL1]
 // pec/reg00005.H
 
+//>> [PB_PBCQ_PEPBREGS_NESTTRC_REG]
 static const uint64_t PB_PBCQ_PEPBREGS_NESTTRC_REG = 0x03011803ull;
 
 static const uint32_t PB_PBCQ_PEPBREGS_NESTTRC_REG_TRACE_MUX_SEL_A = 0;
@@ -158,26 +169,35 @@ static const uint32_t PB_PBCQ_PEPBREGS_NESTTRC_REG_TRACE_MUX_SEL_C_LEN = 4;
 static const uint32_t PB_PBCQ_PEPBREGS_NESTTRC_REG_TRACE_MUX_SEL_D = 12;
 static const uint32_t PB_PBCQ_PEPBREGS_NESTTRC_REG_TRACE_MUX_SEL_D_LEN = 4;
 static const uint32_t PB_PBCQ_PEPBREGS_NESTTRC_REG_PE_TRACE_ENABLE = 16;
+//<< [PB_PBCQ_PEPBREGS_NESTTRC_REG]
 // pec/reg00005.H
 
+//>> [PB_PBCQ_PEPBREGS_PREDV_REG]
 static const uint64_t PB_PBCQ_PEPBREGS_PREDV_REG = 0x03011806ull;
 
 static const uint32_t PB_PBCQ_PEPBREGS_PREDV_REG_RD_PREDV_TIMEOUT_MASK = 0;
 static const uint32_t PB_PBCQ_PEPBREGS_PREDV_REG_RD_PREDV_TIMEOUT_MASK_LEN = 8;
 static const uint32_t PB_PBCQ_PEPBREGS_PREDV_REG_WR_PREDV_TIMEOUT_MASK = 8;
 static const uint32_t PB_PBCQ_PEPBREGS_PREDV_REG_WR_PREDV_TIMEOUT_MASK_LEN = 8;
+//<< [PB_PBCQ_PEPBREGS_PREDV_REG]
 // pec/reg00005.H
 
+//>> [SCAN_LONG_ROTATE]
 static const uint64_t SCAN_LONG_ROTATE = 0x08039000ull;
+//<< [SCAN_LONG_ROTATE]
 // pec/reg00005.H
 
+//>> [TRA0_TR0_CONFIG_2]
 static const uint64_t TRA0_TR0_CONFIG_2 = 0x08010405ull;
 
 static const uint32_t TRA0_TR0_CONFIG_2_A = 0;
 static const uint32_t TRA0_TR0_CONFIG_2_A_LEN = 24;
 static const uint32_t TRA0_TR0_CONFIG_2_B = 24;
 static const uint32_t TRA0_TR0_CONFIG_2_B_LEN = 24;
+//<< [TRA0_TR0_CONFIG_2]
 // pec/reg00005.H
+
+//>>THE END<<
 
 #ifndef __PPE_HCODE__
 }

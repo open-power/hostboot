@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -39,6 +39,7 @@ namespace mcc
 #endif
 
 
+//>> [ATCL_CL_CLSCOM_MCPERF0]
 static const uint64_t ATCL_CL_CLSCOM_MCPERF0 = 0x0c010c23ull;
 
 static const uint32_t ATCL_CL_CLSCOM_MCPERF0_EN_CL_DIS_LIMIT_NSQ = 0;
@@ -72,14 +73,18 @@ static const uint32_t ATCL_CL_CLSCOM_MCPERF0_NUM_HA_RSVD_SEL = 58;
 static const uint32_t ATCL_CL_CLSCOM_MCPERF0_NUM_HA_RSVD_SEL_LEN = 2;
 static const uint32_t ATCL_CL_CLSCOM_MCPERF0_NUM_HTM_WRBUF_RSVD = 60;
 static const uint32_t ATCL_CL_CLSCOM_MCPERF0_NUM_HTM_WRBUF_RSVD_LEN = 4;
+//<< [ATCL_CL_CLSCOM_MCPERF0]
 // mcc/reg00013.H
 
+//>> [CRYPTO_ENCRYPT_CRYPTOKEY1B]
 static const uint64_t CRYPTO_ENCRYPT_CRYPTOKEY1B = 0x0c010f53ull;
 
 static const uint32_t CRYPTO_ENCRYPT_CRYPTOKEY1B_KEY1B = 0;
 static const uint32_t CRYPTO_ENCRYPT_CRYPTOKEY1B_KEY1B_LEN = 64;
+//<< [CRYPTO_ENCRYPT_CRYPTOKEY1B]
 // mcc/reg00013.H
 
+//>> [DSTL_DSTLCFG2]
 static const uint64_t DSTL_DSTLCFG2 = 0x0c010d0eull;
 
 static const uint32_t DSTL_DSTLCFG2_TEMPLATE0_RATE_PACING = 0;
@@ -124,8 +129,10 @@ static const uint32_t DSTL_DSTLCFG2_CFG_SUBCH_A_FAIL_DIS_LOCAL_PARITY = 49;
 static const uint32_t DSTL_DSTLCFG2_CFG_SUBCH_B_FAIL_DIS_LOCAL_PARITY = 50;
 static const uint32_t DSTL_DSTLCFG2_RESERVED_51_62 = 51;
 static const uint32_t DSTL_DSTLCFG2_RESERVED_51_62_LEN = 12;
+//<< [DSTL_DSTLCFG2]
 // mcc/reg00013.H
 
+//>> [USTL_USTLCFG]
 static const uint64_t USTL_USTLCFG = 0x0c010e0bull;
 
 static const uint32_t USTL_USTLCFG_IBM_BUFFER_CHIP_CHANA_ENABLE = 0;
@@ -178,16 +185,20 @@ static const uint32_t USTL_USTLCFG_PMU_SELECT_ALT_PERF = 60;
 static const uint32_t USTL_USTLCFG_CS_HW477424_DISABLE = 61;
 static const uint32_t USTL_USTLCFG_CS_HW475333_DISABLE = 62;
 static const uint32_t USTL_USTLCFG_LOL_DROPOUT_FOR_DL_DEGRADE_DIS = 63;
+//<< [USTL_USTLCFG]
 // mcc/reg00013.H
 
+//>> [USTL_USTLCFWOF]
 static const uint64_t USTL_USTLCFWOF = 0x0c010e15ull;
 
 static const uint32_t USTL_USTLCFWOF_A_CHANFAIL_WOF = 0;
 static const uint32_t USTL_USTLCFWOF_A_CHANFAIL_WOF_LEN = 16;
 static const uint32_t USTL_USTLCFWOF_B_CHANFAIL_WOF = 16;
 static const uint32_t USTL_USTLCFWOF_B_CHANFAIL_WOF_LEN = 16;
+//<< [USTL_USTLCFWOF]
 // mcc/reg00013.H
 
+//>> [USTL_USTLFAILMASK]
 static const uint64_t USTL_USTLFAILMASK = 0x0c010e13ull;
 
 static const uint32_t USTL_USTLFAILMASK_RECOVER_ENABLE_MASK = 0;
@@ -198,23 +209,30 @@ static const uint32_t USTL_USTLFAILMASK_CHAN_FAIL_ENABLE_MASK = 32;
 static const uint32_t USTL_USTLFAILMASK_CHAN_FAIL_ENABLE_MASK_LEN = 12;
 static const uint32_t USTL_USTLFAILMASK_CHANNEL_FAIL_TYPE_DISABLE = 48;
 static const uint32_t USTL_USTLFAILMASK_CHANNEL_FAIL_TYPE_DISABLE_LEN = 10;
+//<< [USTL_USTLFAILMASK]
 // mcc/reg00013.H
 
+//>> [USTL_USTLFIRMASK]
 static const uint64_t USTL_USTLFIRMASK_RW = 0x0c010e03ull;
 static const uint64_t USTL_USTLFIRMASK_WO_AND = 0x0c010e04ull;
 static const uint64_t USTL_USTLFIRMASK_WO_OR = 0x0c010e05ull;
 
 static const uint32_t USTL_USTLFIRMASK_USTLFIRMASK_FIR_MASK = 0;
 static const uint32_t USTL_USTLFIRMASK_USTLFIRMASK_FIR_MASK_LEN = 62;
+//<< [USTL_USTLFIRMASK]
 // mcc/reg00013.H
 
+//>> [USTL_USTLLOLMASK]
 static const uint64_t USTL_USTLLOLMASK = 0x0c010e12ull;
 
 static const uint32_t USTL_USTLLOLMASK_RECOVER_ENABLE_MASK = 0;
 static const uint32_t USTL_USTLLOLMASK_RECOVER_ENABLE_MASK_LEN = 22;
 static const uint32_t USTL_USTLLOLMASK_CHECKSTOP_ENABLE_MASK = 32;
 static const uint32_t USTL_USTLLOLMASK_CHECKSTOP_ENABLE_MASK_LEN = 22;
+//<< [USTL_USTLLOLMASK]
 // mcc/reg00013.H
+
+//>>THE END<<
 
 #ifndef __PPE_HCODE__
 }

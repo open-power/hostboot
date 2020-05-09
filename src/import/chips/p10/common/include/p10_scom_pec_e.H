@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -39,6 +39,7 @@ namespace pec
 #endif
 
 
+//>> [EPS_DBG_TRACE_REG_1]
 static const uint64_t EPS_DBG_TRACE_REG_1 = 0x080107ceull;
 
 static const uint32_t EPS_DBG_TRACE_REG_1_1_CONDITION1_ACTION_DO = 0;
@@ -71,8 +72,10 @@ static const uint32_t EPS_DBG_TRACE_REG_1_1_CHECKSTOP_MODE_SELECTOR = 51;
 static const uint32_t EPS_DBG_TRACE_REG_1_2_CHECKSTOP_MODE_LT = 52;
 static const uint32_t EPS_DBG_TRACE_REG_1_2_CHECKSTOP_MODE_LT_LEN = 3;
 static const uint32_t EPS_DBG_TRACE_REG_1_2_CHECKSTOP_MODE_SELECTOR = 55;
+//<< [EPS_DBG_TRACE_REG_1]
 // pec/reg00014.H
 
+//>> [EPS_FIR_LOCAL_ACTION1]
 static const uint64_t EPS_FIR_LOCAL_ACTION1 = 0x08040107ull;
 
 static const uint32_t EPS_FIR_LOCAL_ACTION1_00 = 0;
@@ -139,8 +142,10 @@ static const uint32_t EPS_FIR_LOCAL_ACTION1_60 = 60;
 static const uint32_t EPS_FIR_LOCAL_ACTION1_61 = 61;
 static const uint32_t EPS_FIR_LOCAL_ACTION1_62 = 62;
 static const uint32_t EPS_FIR_LOCAL_ACTION1_63 = 63;
+//<< [EPS_FIR_LOCAL_ACTION1]
 // pec/reg00014.H
 
+//>> [IXMODE]
 static const uint64_t IXMODE = 0x0801150eull;
 
 static const uint32_t IXMODE_PHY0_SRAM_EXT_LD_DONE = 0;
@@ -156,8 +161,10 @@ static const uint32_t IXMODE_PHY0_ARRAY_ERR_INJ_ACTION = 28;
 static const uint32_t IXMODE_PHY1_ARRAY_ERR_INJ_EN = 31;
 static const uint32_t IXMODE_PHY1_ARRAY_ERR_INJ_TYPE = 32;
 static const uint32_t IXMODE_PHY1_ARRAY_ERR_INJ_ACTION = 33;
+//<< [IXMODE]
 // pec/reg00014.H
 
+//>> [OPCG_REG1]
 static const uint64_t OPCG_REG1 = 0x08030003ull;
 
 static const uint32_t OPCG_REG1_SCAN_COUNT = 0;
@@ -179,14 +186,18 @@ static const uint32_t OPCG_REG1_MISR_MODE = 57;
 static const uint32_t OPCG_REG1_INFINITE_MODE = 58;
 static const uint32_t OPCG_REG1_NSL_FILL_COUNT = 59;
 static const uint32_t OPCG_REG1_NSL_FILL_COUNT_LEN = 5;
+//<< [OPCG_REG1]
 // pec/reg00014.H
 
+//>> [PB_PBCQ_PEPBREGS_ADDREXTMASK_REG]
 static const uint64_t PB_PBCQ_PEPBREGS_ADDREXTMASK_REG = 0x03011805ull;
 
 static const uint32_t PB_PBCQ_PEPBREGS_ADDREXTMASK_REG_PE_ADDREXTMASK = 0;
 static const uint32_t PB_PBCQ_PEPBREGS_ADDREXTMASK_REG_PE_ADDREXTMASK_LEN = 7;
+//<< [PB_PBCQ_PEPBREGS_ADDREXTMASK_REG]
 // pec/reg00014.H
 
+//>> [PB_PBCQ_PEPBREGS_PBCQHWCFG_REG]
 static const uint64_t PB_PBCQ_PEPBREGS_PBCQHWCFG_REG = 0x03011800ull;
 
 static const uint32_t PB_PBCQ_PEPBREGS_PBCQHWCFG_REG_HANG_POLL_SCALE = 0;
@@ -244,14 +255,18 @@ static const uint32_t PB_PBCQ_PEPBREGS_PBCQHWCFG_REG_PE_DISABLE_TCE_ARBITRATION 
 static const uint32_t PB_PBCQ_PEPBREGS_PBCQHWCFG_REG_PE_DISABLE_CQ_TCE_ARBITRATION = 61;
 static const uint32_t PB_PBCQ_PEPBREGS_PBCQHWCFG_REG_PE_DISABLE_MC_PREFETCH = 62;
 static const uint32_t PB_PBCQ_PEPBREGS_PBCQHWCFG_REG_PE_IGNORE_SFSTAT = 63;
+//<< [PB_PBCQ_PEPBREGS_PBCQHWCFG_REG]
 // pec/reg00014.H
 
+//>> [PB_PBCQ_PEPBREGS_PE_TOPOLOGY_REG2]
 static const uint64_t PB_PBCQ_PEPBREGS_PE_TOPOLOGY_REG2 = 0x0301180eull;
 
 static const uint32_t PB_PBCQ_PEPBREGS_PE_TOPOLOGY_REG2_PE_TOPOLOGY_ID_REG2 = 0;
 static const uint32_t PB_PBCQ_PEPBREGS_PE_TOPOLOGY_REG2_PE_TOPOLOGY_ID_REG2_LEN = 40;
+//<< [PB_PBCQ_PEPBREGS_PE_TOPOLOGY_REG2]
 // pec/reg00014.H
 
+//>> [SLAVE_CONFIG_REG]
 static const uint64_t SLAVE_CONFIG_REG = 0x080f001eull;
 
 static const uint32_t SLAVE_CONFIG_REG_DISABLE_PERV_THOLD_CHECK = 0;
@@ -270,8 +285,10 @@ static const uint32_t SLAVE_CONFIG_REG_MASK_PLL_ERRS = 12;
 static const uint32_t SLAVE_CONFIG_REG_MASK_PLL_ERRS_LEN = 8;
 static const uint32_t SLAVE_CONFIG_REG_QME_PAR_DIS = 20;
 static const uint32_t SLAVE_CONFIG_REG_FORCE_0_QME = 21;
+//<< [SLAVE_CONFIG_REG]
 // pec/reg00014.H
 
+//>> [XSTOP2]
 static const uint64_t XSTOP2 = 0x0803000dull;
 
 static const uint32_t XSTOP2_ENABLE = 0;
@@ -295,7 +312,10 @@ static const uint32_t XSTOP2_REGION_UNIT13 = 17;
 static const uint32_t XSTOP2_REGION_UNIT14 = 18;
 static const uint32_t XSTOP2_WAIT_CYCLES = 48;
 static const uint32_t XSTOP2_WAIT_CYCLES_LEN = 12;
+//<< [XSTOP2]
 // pec/reg00014.H
+
+//>>THE END<<
 
 #ifndef __PPE_HCODE__
 }

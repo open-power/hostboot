@@ -39,6 +39,7 @@ namespace c
 #endif
 
 
+//>> [CPMS_CERR]
 static const uint64_t CPMS_CERR = 0x200e0e10ull;
 
 static const uint32_t CPMS_CERR_L3_PFET_SEQ_ERR = 0;
@@ -52,8 +53,10 @@ static const uint32_t CPMS_CERR_PROXY_UNDERFLOW = 7;
 static const uint32_t CPMS_CERR_PITCH_SATURATED = 8;
 static const uint32_t CPMS_CERR_FTC_DEBUG_EVENT = 9;
 static const uint32_t CPMS_CERR_FTC_DEBUG_EVENT_LEN = 3;
+//<< [CPMS_CERR]
 // c/reg00006.H
 
+//>> [CPMS_CUCR]
 static const uint64_t CPMS_CUCR = 0x200e0e3cull;
 static const uint64_t CPMS_CUCR_SCOM2 = 0x200e0e3eull;
 static const uint64_t CPMS_CUCR_WO_CLEAR = 0x200e0e3full;
@@ -99,16 +102,20 @@ static const uint32_t CPMS_CUCR_QME_TYPE0_EVENTC0_PENDING = 60;
 static const uint32_t CPMS_CUCR_QME_TYPE0_EVENTC1_PENDING = 61;
 static const uint32_t CPMS_CUCR_QME_TYPE0_EVENTC2_PENDING = 62;
 static const uint32_t CPMS_CUCR_QME_TYPE0_EVENTC3_PENDING = 63;
+//<< [CPMS_CUCR]
 // c/reg00006.H
 
+//>> [CPMS_DMSR]
 static const uint64_t CPMS_DMSR = 0x200e0e64ull;
 
 static const uint32_t CPMS_DMSR_0_COUNT = 0;
 static const uint32_t CPMS_DMSR_0_COUNT_LEN = 24;
 static const uint32_t CPMS_DMSR_1_COUNT = 32;
 static const uint32_t CPMS_DMSR_1_COUNT_LEN = 24;
+//<< [CPMS_DMSR]
 // c/reg00006.H
 
+//>> [CPMS_DPPR]
 static const uint64_t CPMS_DPPR = 0x200e0ea8ull;
 static const uint64_t CPMS_DPPR_WO_CLEAR = 0x200e0eabull;
 static const uint64_t CPMS_DPPR_WO_OR = 0x200e0eaaull;
@@ -139,8 +146,10 @@ static const uint32_t CPMS_DPPR_OCP_LOCAL_TANK_VALUE = 40;
 static const uint32_t CPMS_DPPR_OCP_LOCAL_TANK_VALUE_LEN = 10;
 static const uint32_t CPMS_DPPR_OCP_PITCH_OVERRIDE = 50;
 static const uint32_t CPMS_DPPR_OCP_OVERRIDE_HISTORY = 51;
+//<< [CPMS_DPPR]
 // c/reg00006.H
 
+//>> [CPMS_MMA_PFETCNTL]
 static const uint64_t CPMS_MMA_PFETCNTL = 0x200e0e30ull;
 static const uint64_t CPMS_MMA_PFETCNTL_WO_CLEAR = 0x200e0e33ull;
 static const uint64_t CPMS_MMA_PFETCNTL_WO_OR = 0x200e0e32ull;
@@ -158,8 +167,10 @@ static const uint32_t CPMS_MMA_PFETCNTL_VDD_PG_STATE_LEN = 4;
 static const uint32_t CPMS_MMA_PFETCNTL_VDD_PG_SEL = 46;
 static const uint32_t CPMS_MMA_PFETCNTL_VDD_PG_SEL_LEN = 4;
 static const uint32_t CPMS_MMA_PFETCNTL_MMA_FORCE_CL2 = 63;
+//<< [CPMS_MMA_PFETCNTL]
 // c/reg00006.H
 
+//>> [EC_IFU_IFRE_IFCER_UNIT_HOLD_OUT3]
 static const uint64_t EC_IFU_IFRE_IFCER_UNIT_HOLD_OUT3 = 0x20020603ull;
 
 static const uint32_t EC_IFU_IFRE_IFCER_UNIT_HOLD_OUT3_48 = 0;
@@ -178,8 +189,10 @@ static const uint32_t EC_IFU_IFRE_IFCER_UNIT_HOLD_OUT3_60 = 12;
 static const uint32_t EC_IFU_IFRE_IFCER_UNIT_HOLD_OUT3_61 = 13;
 static const uint32_t EC_IFU_IFRE_IFCER_UNIT_HOLD_OUT3_62 = 14;
 static const uint32_t EC_IFU_IFRE_IFCER_UNIT_HOLD_OUT3_63 = 15;
+//<< [EC_IFU_IFRE_IFCER_UNIT_HOLD_OUT3]
 // c/reg00006.H
 
+//>> [EC_PC_COMMON_SPR_V0_HMER]
 static const uint64_t EC_PC_COMMON_SPR_V0_HMER_RW_WAND = 0x20020492ull;
 static const uint64_t EC_PC_COMMON_SPR_V0_HMER_WO_OR = 0x2002048eull;
 
@@ -206,8 +219,10 @@ static const uint32_t EC_PC_COMMON_SPR_V0_HMER_SPARE_19 = 19;
 static const uint32_t EC_PC_COMMON_SPR_V0_HMER_SPARE_20 = 20;
 static const uint32_t EC_PC_COMMON_SPR_V0_HMER_V0_HMER_XSCOM_STATUS = 21;
 static const uint32_t EC_PC_COMMON_SPR_V0_HMER_V0_HMER_XSCOM_STATUS_LEN = 3;
+//<< [EC_PC_COMMON_SPR_V0_HMER]
 // c/reg00006.H
 
+//>> [EC_PC_FIR_CORE]
 static const uint64_t EC_PC_FIR_CORE_RW = 0x20020440ull;
 static const uint64_t EC_PC_FIR_CORE_WO_AND = 0x20020441ull;
 static const uint64_t EC_PC_FIR_CORE_WO_OR = 0x20020442ull;
@@ -263,8 +278,10 @@ static const uint32_t EC_PC_FIR_CORE_PC_XSTOP_ON_DBG_TRIGGER_ERROR = 60;
 static const uint32_t EC_PC_FIR_CORE_PC_FW_INJ_REC_ERROR = 61;
 static const uint32_t EC_PC_FIR_CORE_PC_FW_INJ_XSTOP_ERROR = 62;
 static const uint32_t EC_PC_FIR_CORE_PC_PHYP_XSTOP_ERROR = 63;
+//<< [EC_PC_FIR_CORE]
 // c/reg00006.H
 
+//>> [EC_PC_FIR_CORE_FIRMASK]
 static const uint64_t EC_PC_FIR_CORE_FIRMASK_RW = 0x20020443ull;
 static const uint64_t EC_PC_FIR_CORE_FIRMASK_WO_AND = 0x20020444ull;
 static const uint64_t EC_PC_FIR_CORE_FIRMASK_WO_OR = 0x20020445ull;
@@ -320,8 +337,10 @@ static const uint32_t EC_PC_FIR_CORE_FIRMASK_MASK_PC_XSTOP_ON_DBG_TRIGGER_ERROR 
 static const uint32_t EC_PC_FIR_CORE_FIRMASK_MASK_PC_FW_INJ_REC_ERROR = 61;
 static const uint32_t EC_PC_FIR_CORE_FIRMASK_MASK_PC_FW_INJ_XSTOP_ERROR = 62;
 static const uint32_t EC_PC_FIR_CORE_FIRMASK_MASK_PC_PHYP_XSTOP_ERROR = 63;
+//<< [EC_PC_FIR_CORE_FIRMASK]
 // c/reg00006.H
 
+//>> [EC_PC_FIR_ERR_INJ]
 static const uint64_t EC_PC_FIR_ERR_INJ = 0x2002044dull;
 
 static const uint32_t EC_PC_FIR_ERR_INJ_ERR_INJ_TO_LSU = 0;
@@ -345,8 +364,10 @@ static const uint32_t EC_PC_FIR_ERR_INJ_ERR_INJ_TAP_SEL = 17;
 static const uint32_t EC_PC_FIR_ERR_INJ_ERR_INJ_TAP_SEL_LEN = 4;
 static const uint32_t EC_PC_FIR_ERR_INJ_ERR_INJ_HYP_BLOCK = 21;
 static const uint32_t EC_PC_FIR_ERR_INJ_ERR_INJ_HYP_BLOCK_LEN = 3;
+//<< [EC_PC_FIR_ERR_INJ]
 // c/reg00006.H
 
+//>> [EC_PC_THRCTL_TCTLCOM_DIRECT_CONTROLS]
 static const uint64_t EC_PC_THRCTL_TCTLCOM_DIRECT_CONTROLS = 0x20020449ull;
 
 static const uint32_t EC_PC_THRCTL_TCTLCOM_DIRECT_CONTROLS_0_CLEAR_MAINT = 3;
@@ -369,16 +390,20 @@ static const uint32_t EC_PC_THRCTL_TCTLCOM_DIRECT_CONTROLS_3_SRESET_REQUEST = 28
 static const uint32_t EC_PC_THRCTL_TCTLCOM_DIRECT_CONTROLS_3_CORE_STEP = 29;
 static const uint32_t EC_PC_THRCTL_TCTLCOM_DIRECT_CONTROLS_3_CORE_START = 30;
 static const uint32_t EC_PC_THRCTL_TCTLCOM_DIRECT_CONTROLS_3_CORE_STOP = 31;
+//<< [EC_PC_THRCTL_TCTLCOM_DIRECT_CONTROLS]
 // c/reg00006.H
 
+//>> [EC_PC_TRACE1_TR_TR0_CONFIG_4]
 static const uint64_t EC_PC_TRACE1_TR_TR0_CONFIG_4 = 0x20020a47ull;
 
 static const uint32_t EC_PC_TRACE1_TR_TR0_CONFIG_4_A = 0;
 static const uint32_t EC_PC_TRACE1_TR_TR0_CONFIG_4_A_LEN = 24;
 static const uint32_t EC_PC_TRACE1_TR_TR0_CONFIG_4_B = 24;
 static const uint32_t EC_PC_TRACE1_TR_TR0_CONFIG_4_B_LEN = 24;
+//<< [EC_PC_TRACE1_TR_TR0_CONFIG_4]
 // c/reg00006.H
 
+//>> [EC_PC_TRACE2_TR_TR0_CONFIG]
 static const uint64_t EC_PC_TRACE2_TR_TR0_CONFIG = 0x20020a82ull;
 
 static const uint32_t EC_PC_TRACE2_TR_TR0_CONFIG_STORE_ON_TRIG_MODE = 0;
@@ -398,24 +423,30 @@ static const uint32_t EC_PC_TRACE2_TR_TR0_CONFIG_DISABLE_BANK_EDGE_DETECT = 21;
 static const uint32_t EC_PC_TRACE2_TR_TR0_CONFIG_DISABLE_SCOM_RD_ACT_OR_ACTIVATE_CROSS = 22;
 static const uint32_t EC_PC_TRACE2_TR_TR0_CONFIG_MASTER_CLOCK_ENABLE_INT = 23;
 static const uint32_t EC_PC_TRACE2_TR_TR0_CONFIG_CROSS_DISABLE_SCOM_RD_ACT = 24;
+//<< [EC_PC_TRACE2_TR_TR0_CONFIG]
 // c/reg00006.H
 
+//>> [L2_L2MISC_L2CERRS_FIR_MASK_REG]
 static const uint64_t L2_L2MISC_L2CERRS_FIR_MASK_REG_RW = 0x20020003ull;
 static const uint64_t L2_L2MISC_L2CERRS_FIR_MASK_REG_WO_AND = 0x20020004ull;
 static const uint64_t L2_L2MISC_L2CERRS_FIR_MASK_REG_WO_OR = 0x20020005ull;
 
 static const uint32_t L2_L2MISC_L2CERRS_FIR_MASK_REG_L2_FIR_MASK = 0;
 static const uint32_t L2_L2MISC_L2CERRS_FIR_MASK_REG_L2_FIR_MASK_LEN = 40;
+//<< [L2_L2MISC_L2CERRS_FIR_MASK_REG]
 // c/reg00006.H
 
+//>> [L2TRA_TR0_CONFIG_2]
 static const uint64_t L2TRA_TR0_CONFIG_2 = 0x20020045ull;
 
 static const uint32_t L2TRA_TR0_CONFIG_2_A = 0;
 static const uint32_t L2TRA_TR0_CONFIG_2_A_LEN = 24;
 static const uint32_t L2TRA_TR0_CONFIG_2_B = 24;
 static const uint32_t L2TRA_TR0_CONFIG_2_B_LEN = 24;
+//<< [L2TRA_TR0_CONFIG_2]
 // c/reg00006.H
 
+//>> [NC_NCMISC_NCSCOMS_NCU_MODE_REG2]
 static const uint64_t NC_NCMISC_NCSCOMS_NCU_MODE_REG2 = 0x2001064bull;
 
 static const uint32_t NC_NCMISC_NCSCOMS_NCU_MODE_REG2_HANG_POLL_PULSE_DIV = 0;
@@ -430,13 +461,18 @@ static const uint32_t NC_NCMISC_NCSCOMS_NCU_MODE_REG2_TLB_STG2_HANG_POLL_PULSE_D
 static const uint32_t NC_NCMISC_NCSCOMS_NCU_MODE_REG2_TLB_STG2_HANG_POLL_PULSE_DIV_LEN = 4;
 static const uint32_t NC_NCMISC_NCSCOMS_NCU_MODE_REG2_MASTER_TLB_DATA_POLL_PULSE_DIV = 26;
 static const uint32_t NC_NCMISC_NCSCOMS_NCU_MODE_REG2_MASTER_TLB_DATA_POLL_PULSE_DIV_LEN = 10;
+//<< [NC_NCMISC_NCSCOMS_NCU_MODE_REG2]
 // c/reg00006.H
 
+//>> [WRITE_PROTECT_RINGS_REG]
 static const uint64_t WRITE_PROTECT_RINGS_REG = 0x20010006ull;
 
 static const uint32_t WRITE_PROTECT_RINGS_REG_WRITE_PROTECT_RINGS = 0;
 static const uint32_t WRITE_PROTECT_RINGS_REG_WRITE_PROTECT_RINGS_LEN = 32;
+//<< [WRITE_PROTECT_RINGS_REG]
 // c/reg00006.H
+
+//>>THE END<<
 
 #ifndef __PPE_HCODE__
 }

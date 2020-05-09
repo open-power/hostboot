@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -39,6 +39,7 @@ namespace nmmu
 #endif
 
 
+//>> [FBC_CQ_WRAP_NXCQ_SCOM_MMCQ_PB_MODE_REG]
 static const uint64_t FBC_CQ_WRAP_NXCQ_SCOM_MMCQ_PB_MODE_REG = 0x02010c15ull;
 
 static const uint32_t FBC_CQ_WRAP_NXCQ_SCOM_MMCQ_PB_MODE_REG_DMA_WR_DISABLE_LN = 0;
@@ -65,8 +66,10 @@ static const uint32_t FBC_CQ_WRAP_NXCQ_SCOM_MMCQ_PB_MODE_REG_DMA_WR_VG_RESET_TIM
 static const uint32_t FBC_CQ_WRAP_NXCQ_SCOM_MMCQ_PB_MODE_REG_DMA_WR_VG_RESET_TIMER_MASK_LEN = 8;
 static const uint32_t FBC_CQ_WRAP_NXCQ_SCOM_MMCQ_PB_MODE_REG_ADDR_EXT_MASK = 56;
 static const uint32_t FBC_CQ_WRAP_NXCQ_SCOM_MMCQ_PB_MODE_REG_ADDR_EXT_MASK_LEN = 7;
+//<< [FBC_CQ_WRAP_NXCQ_SCOM_MMCQ_PB_MODE_REG]
 // nmmu/reg00000.H
 
+//>> [FBC_CQ_WRAP_NXCQ_SCOM_NX_MISC_CONTROL_REG]
 static const uint64_t FBC_CQ_WRAP_NXCQ_SCOM_NX_MISC_CONTROL_REG = 0x02010c28ull;
 
 static const uint32_t FBC_CQ_WRAP_NXCQ_SCOM_NX_MISC_CONTROL_REG_POLL_SCALE = 4;
@@ -75,8 +78,10 @@ static const uint32_t FBC_CQ_WRAP_NXCQ_SCOM_NX_MISC_CONTROL_REG_DATA_SCALE = 8;
 static const uint32_t FBC_CQ_WRAP_NXCQ_SCOM_NX_MISC_CONTROL_REG_DATA_SCALE_LEN = 4;
 static const uint32_t FBC_CQ_WRAP_NXCQ_SCOM_NX_MISC_CONTROL_REG_SHM_SCALE = 12;
 static const uint32_t FBC_CQ_WRAP_NXCQ_SCOM_NX_MISC_CONTROL_REG_SHM_SCALE_LEN = 4;
+//<< [FBC_CQ_WRAP_NXCQ_SCOM_NX_MISC_CONTROL_REG]
 // nmmu/reg00000.H
 
+//>> [FBC_CQ_WRAP_NXCQ_SCOM_NX_PB_ECC_REG]
 static const uint64_t FBC_CQ_WRAP_NXCQ_SCOM_NX_PB_ECC_REG = 0x02010c11ull;
 
 static const uint32_t FBC_CQ_WRAP_NXCQ_SCOM_NX_PB_ECC_REG_ECC_INJECT_MODE = 0;
@@ -86,13 +91,18 @@ static const uint32_t FBC_CQ_WRAP_NXCQ_SCOM_NX_PB_ECC_REG_ECC_INJECT_TYPE_LEN = 
 static const uint32_t FBC_CQ_WRAP_NXCQ_SCOM_NX_PB_ECC_REG_PBCQ_INJECT_ENABLE = 4;
 static const uint32_t FBC_CQ_WRAP_NXCQ_SCOM_NX_PB_ECC_REG_PBCQ_ARRAY = 5;
 static const uint32_t FBC_CQ_WRAP_NXCQ_SCOM_NX_PB_ECC_REG_PBCQ_ARRAY_LEN = 4;
+//<< [FBC_CQ_WRAP_NXCQ_SCOM_NX_PB_ECC_REG]
 // nmmu/reg00000.H
 
+//>> [NMMU_PMU1_CNT_REG]
 static const uint64_t NMMU_PMU1_CNT_REG = 0x02010c50ull;
 
 static const uint32_t NMMU_PMU1_CNT_REG_MM_PMU1_CNT = 0;
 static const uint32_t NMMU_PMU1_CNT_REG_MM_PMU1_CNT_LEN = 64;
+//<< [NMMU_PMU1_CNT_REG]
 // nmmu/reg00000.H
+
+//>>THE END<<
 
 #ifndef __PPE_HCODE__
 }

@@ -39,6 +39,7 @@ namespace c
 #endif
 
 
+//>> [CPMS_DPMR]
 static const uint64_t CPMS_DPMR = 0x200e0ea0ull;
 
 static const uint32_t CPMS_DPMR_POWER_PROXY_ENABLE = 0;
@@ -49,8 +50,10 @@ static const uint32_t CPMS_DPMR_EMPATH_MODE_SEL = 4;
 static const uint32_t CPMS_DPMR_DDP_DDS_ADJUST_EN = 5;
 static const uint32_t CPMS_DPMR_SPARE = 6;
 static const uint32_t CPMS_DPMR_SPARE_LEN = 2;
+//<< [CPMS_DPMR]
 // c/reg00010.H
 
+//>> [EC_IFU_IFRE_IFCER_UNIT_HOLD_OUT1]
 static const uint64_t EC_IFU_IFRE_IFCER_UNIT_HOLD_OUT1 = 0x20020601ull;
 
 static const uint32_t EC_IFU_IFRE_IFCER_UNIT_HOLD_OUT1_16 = 0;
@@ -69,13 +72,17 @@ static const uint32_t EC_IFU_IFRE_IFCER_UNIT_HOLD_OUT1_28 = 12;
 static const uint32_t EC_IFU_IFRE_IFCER_UNIT_HOLD_OUT1_29 = 13;
 static const uint32_t EC_IFU_IFRE_IFCER_UNIT_HOLD_OUT1_30 = 14;
 static const uint32_t EC_IFU_IFRE_IFCER_UNIT_HOLD_OUT1_31 = 15;
+//<< [EC_IFU_IFRE_IFCER_UNIT_HOLD_OUT1]
 // c/reg00010.H
 
+//>> [EC_PC_FIR_CORE_SYS]
 static const uint64_t EC_PC_FIR_CORE_SYS = 0x2002044aull;
 
 static const uint32_t EC_PC_FIR_CORE_SYS_CORE_SYS_ENABLE = 1;
+//<< [EC_PC_FIR_CORE_SYS]
 // c/reg00010.H
 
+//>> [EC_PC_FIR_CORE_WOF]
 static const uint64_t EC_PC_FIR_CORE_WOF = 0x20020448ull;
 
 static const uint32_t EC_PC_FIR_CORE_WOF_IF_SRAM_REC_ERROR = 0;
@@ -142,16 +149,20 @@ static const uint32_t EC_PC_FIR_CORE_WOF_PC_XSTOP_ON_DBG_TRIGGER_ERROR = 60;
 static const uint32_t EC_PC_FIR_CORE_WOF_PC_FW_INJ_REC_ERROR = 61;
 static const uint32_t EC_PC_FIR_CORE_WOF_PC_FW_INJ_XSTOP_ERROR = 62;
 static const uint32_t EC_PC_FIR_CORE_WOF_PC_PHYP_XSTOP_ERROR = 63;
+//<< [EC_PC_FIR_CORE_WOF]
 // c/reg00010.H
 
+//>> [EC_PC_FIR_RAM_STATUS]
 static const uint64_t EC_PC_FIR_RAM_STATUS = 0x20020450ull;
 
 static const uint32_t EC_PC_FIR_RAM_STATUS_RAM_CONTROL_ACCESS_DURING_RECOV = 0;
 static const uint32_t EC_PC_FIR_RAM_STATUS_RAM_COMPLETION = 1;
 static const uint32_t EC_PC_FIR_RAM_STATUS_RAM_EXCEPTION = 2;
 static const uint32_t EC_PC_FIR_RAM_STATUS_LSU_EMPTY = 3;
+//<< [EC_PC_FIR_RAM_STATUS]
 // c/reg00010.H
 
+//>> [EC_PC_PMC_UPDATE]
 static const uint64_t EC_PC_PMC_UPDATE = 0x20020414ull;
 
 static const uint32_t EC_PC_PMC_UPDATE_PMC_REG_MSR_S_ON_SRESET = 0;
@@ -177,8 +188,10 @@ static const uint32_t EC_PC_PMC_UPDATE_PSSCR_VT3_PLS = 57;
 static const uint32_t EC_PC_PMC_UPDATE_PSSCR_VT3_PLS_LEN = 4;
 static const uint32_t EC_PC_PMC_UPDATE_PSSCR_VT3_SRR1 = 61;
 static const uint32_t EC_PC_PMC_UPDATE_PSSCR_VT3_SRR1_LEN = 3;
+//<< [EC_PC_PMC_UPDATE]
 // c/reg00010.H
 
+//>> [EC_PC_TRACE2_TR_TR0_TRACE_LO_DATA_REG]
 static const uint64_t EC_PC_TRACE2_TR_TR0_TRACE_LO_DATA_REG = 0x20020a81ull;
 
 static const uint32_t EC_PC_TRACE2_TR_TR0_TRACE_LO_DATA_REG_LO_DATA = 0;
@@ -192,32 +205,42 @@ static const uint32_t EC_PC_TRACE2_TR_TR0_TRACE_LO_DATA_REG_WRITE_ON_RUN = 52;
 static const uint32_t EC_PC_TRACE2_TR_TR0_TRACE_LO_DATA_REG_RUNNING = 53;
 static const uint32_t EC_PC_TRACE2_TR_TR0_TRACE_LO_DATA_REG_HOLD_ADDRESS = 54;
 static const uint32_t EC_PC_TRACE2_TR_TR0_TRACE_LO_DATA_REG_HOLD_ADDRESS_LEN = 10;
+//<< [EC_PC_TRACE2_TR_TR0_TRACE_LO_DATA_REG]
 // c/reg00010.H
 
+//>> [L2_L2MISC_L2CERRS_FIR_ACTION0_REG]
 static const uint64_t L2_L2MISC_L2CERRS_FIR_ACTION0_REG = 0x20020006ull;
 
 static const uint32_t L2_L2MISC_L2CERRS_FIR_ACTION0_REG_FIR_ACTION0 = 0;
 static const uint32_t L2_L2MISC_L2CERRS_FIR_ACTION0_REG_FIR_ACTION0_LEN = 40;
+//<< [L2_L2MISC_L2CERRS_FIR_ACTION0_REG]
 // c/reg00010.H
 
+//>> [L2_L2MISC_L2CERRS_FIR_ACTION1_REG]
 static const uint64_t L2_L2MISC_L2CERRS_FIR_ACTION1_REG = 0x20020007ull;
 
 static const uint32_t L2_L2MISC_L2CERRS_FIR_ACTION1_REG_FIR_ACTION1 = 0;
 static const uint32_t L2_L2MISC_L2CERRS_FIR_ACTION1_REG_FIR_ACTION1_LEN = 40;
+//<< [L2_L2MISC_L2CERRS_FIR_ACTION1_REG]
 // c/reg00010.H
 
+//>> [L2TRA_TR0_TRACE_HI_DATA_REG]
 static const uint64_t L2TRA_TR0_TRACE_HI_DATA_REG = 0x20020040ull;
 
 static const uint32_t L2TRA_TR0_TRACE_HI_DATA_REG_TRACE_HI_DATA = 0;
 static const uint32_t L2TRA_TR0_TRACE_HI_DATA_REG_TRACE_HI_DATA_LEN = 64;
+//<< [L2TRA_TR0_TRACE_HI_DATA_REG]
 // c/reg00010.H
 
+//>> [L2TRA_TR0_CONFIG_0]
 static const uint64_t L2TRA_TR0_CONFIG_0 = 0x20020043ull;
 
 static const uint32_t L2TRA_TR0_CONFIG_0_CMP_MSK_LT_B_0_TO_63 = 0;
 static const uint32_t L2TRA_TR0_CONFIG_0_CMP_MSK_LT_B_0_TO_63_LEN = 64;
+//<< [L2TRA_TR0_CONFIG_0]
 // c/reg00010.H
 
+//>> [L2TRA_TR1_CONFIG_9]
 static const uint64_t L2TRA_TR1_CONFIG_9 = 0x20020089ull;
 
 static const uint32_t L2TRA_TR1_CONFIG_9_DISABLE_COMPRESSION = 0;
@@ -248,15 +271,20 @@ static const uint32_t L2TRA_TR1_CONFIG_9_TRIG0_ERR_CMP = 34;
 static const uint32_t L2TRA_TR1_CONFIG_9_TRIG1_ERR_CMP = 35;
 static const uint32_t L2TRA_TR1_CONFIG_9_DD1_STRETCH_TRIGGER_PULSES = 36;
 static const uint32_t L2TRA_TR1_CONFIG_9_SPARE_LT = 37;
+//<< [L2TRA_TR1_CONFIG_9]
 // c/reg00010.H
 
+//>> [L3_MISC_L3CERRS_LRU_VIC_ALLOC_REG]
 static const uint64_t L3_MISC_L3CERRS_LRU_VIC_ALLOC_REG = 0x20010611ull;
 
 static const uint32_t L3_MISC_L3CERRS_LRU_VIC_ALLOC_REG_SEGR_COLUMN_CFG = 0;
 static const uint32_t L3_MISC_L3CERRS_LRU_VIC_ALLOC_REG_SEGR_COLUMN_CFG_LEN = 16;
 static const uint32_t L3_MISC_L3CERRS_LRU_VIC_ALLOC_REG_ALLOC_MD_CFG = 16;
 static const uint32_t L3_MISC_L3CERRS_LRU_VIC_ALLOC_REG_ALLOC_MD_CFG_LEN = 2;
+//<< [L3_MISC_L3CERRS_LRU_VIC_ALLOC_REG]
 // c/reg00010.H
+
+//>>THE END<<
 
 #ifndef __PPE_HCODE__
 }

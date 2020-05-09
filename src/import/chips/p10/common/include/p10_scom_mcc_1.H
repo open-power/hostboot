@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -39,6 +39,7 @@ namespace mcc
 #endif
 
 
+//>> [ATCL_CL_CLSCOM_MCPERF2]
 static const uint64_t ATCL_CL_CLSCOM_MCPERF2 = 0x0c010c24ull;
 
 static const uint32_t ATCL_CL_CLSCOM_MCPERF2_PF_DROP_VALUE0 = 0;
@@ -83,14 +84,18 @@ static const uint32_t ATCL_CL_CLSCOM_MCPERF2_BYP_RETRY_FULL_LEN = 2;
 static const uint32_t ATCL_CL_CLSCOM_MCPERF2_DIS_NUM_CLEAN_MOD = 61;
 static const uint32_t ATCL_CL_CLSCOM_MCPERF2_RESERVED_62 = 62;
 static const uint32_t ATCL_CL_CLSCOM_MCPERF2_LOAD_RSVD_VALUES = 63;
+//<< [ATCL_CL_CLSCOM_MCPERF2]
 // mcc/reg00001.H
 
+//>> [CRYPTO_DECRYPT_CRYPTOKEY1A]
 static const uint64_t CRYPTO_DECRYPT_CRYPTOKEY1A = 0x0c010f5aull;
 
 static const uint32_t CRYPTO_DECRYPT_CRYPTOKEY1A_KEY1A = 0;
 static const uint32_t CRYPTO_DECRYPT_CRYPTOKEY1A_KEY1A_LEN = 64;
+//<< [CRYPTO_DECRYPT_CRYPTOKEY1A]
 // mcc/reg00001.H
 
+//>> [WDF_DSTL_ECC]
 static const uint64_t WDF_DSTL_ECC = 0x0c010f45ull;
 
 static const uint32_t WDF_DSTL_ECC_0_ERR_TYPE = 0;
@@ -109,8 +114,10 @@ static const uint32_t WDF_DSTL_ECC_3_ERR_TYPE = 48;
 static const uint32_t WDF_DSTL_ECC_3_ERR_TYPE_LEN = 3;
 static const uint32_t WDF_DSTL_ECC_3_SYNDROME = 56;
 static const uint32_t WDF_DSTL_ECC_3_SYNDROME_LEN = 8;
+//<< [WDF_DSTL_ECC]
 // mcc/reg00001.H
 
+//>> [WDF_ECC]
 static const uint64_t WDF_ECC = 0x0c010f41ull;
 
 static const uint32_t WDF_ECC_0_ERR_TYPE = 0;
@@ -129,7 +136,10 @@ static const uint32_t WDF_ECC_3_ERR_TYPE = 48;
 static const uint32_t WDF_ECC_3_ERR_TYPE_LEN = 3;
 static const uint32_t WDF_ECC_3_SYNDROME = 56;
 static const uint32_t WDF_ECC_3_SYNDROME_LEN = 8;
+//<< [WDF_ECC]
 // mcc/reg00001.H
+
+//>>THE END<<
 
 #ifndef __PPE_HCODE__
 }

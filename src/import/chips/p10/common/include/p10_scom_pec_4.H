@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -39,6 +39,7 @@ namespace pec
 #endif
 
 
+//>> [CLOCK_STAT_ARY]
 static const uint64_t CLOCK_STAT_ARY = 0x0803000aull;
 
 static const uint32_t CLOCK_STAT_ARY_PERV_ARY = 4;
@@ -56,8 +57,10 @@ static const uint32_t CLOCK_STAT_ARY_UNIT11_ARY = 15;
 static const uint32_t CLOCK_STAT_ARY_UNIT12_ARY = 16;
 static const uint32_t CLOCK_STAT_ARY_UNIT13_ARY = 17;
 static const uint32_t CLOCK_STAT_ARY_UNIT14_ARY = 18;
+//<< [CLOCK_STAT_ARY]
 // pec/reg00004.H
 
+//>> [EPS_FIR_LOCAL_ACTION2]
 static const uint64_t EPS_FIR_LOCAL_ACTION2 = 0x08040109ull;
 
 static const uint32_t EPS_FIR_LOCAL_ACTION2_00 = 0;
@@ -124,16 +127,20 @@ static const uint32_t EPS_FIR_LOCAL_ACTION2_60 = 60;
 static const uint32_t EPS_FIR_LOCAL_ACTION2_61 = 61;
 static const uint32_t EPS_FIR_LOCAL_ACTION2_62 = 62;
 static const uint32_t EPS_FIR_LOCAL_ACTION2_63 = 63;
+//<< [EPS_FIR_LOCAL_ACTION2]
 // pec/reg00004.H
 
+//>> [EPS_THERM_WSUB_INJECT_REG]
 static const uint64_t EPS_THERM_WSUB_INJECT_REG = 0x08050011ull;
 
 static const uint32_t EPS_THERM_WSUB_INJECT_REG_TRIP = 0;
 static const uint32_t EPS_THERM_WSUB_INJECT_REG_TRIP_LEN = 2;
 static const uint32_t EPS_THERM_WSUB_INJECT_REG_MODE = 2;
 static const uint32_t EPS_THERM_WSUB_INJECT_REG_MODE_LEN = 2;
+//<< [EPS_THERM_WSUB_INJECT_REG]
 // pec/reg00004.H
 
+//>> [OPCG_REG2]
 static const uint64_t OPCG_REG2 = 0x08030004ull;
 
 static const uint32_t OPCG_REG2_OPCG_GO2 = 0;
@@ -156,25 +163,33 @@ static const uint32_t OPCG_REG2_SM_LBIST_CTRL_LOCAL_OVERRIDE = 58;
 static const uint32_t OPCG_REG2_SM_LBIST_CTRL_LOAD_APERTURE_VALUE = 59;
 static const uint32_t OPCG_REG2_SM_LBIST_CTRL_LOAD_APERTURE_SELECT = 60;
 static const uint32_t OPCG_REG2_SM_LBIST_CTRL_LOAD_APERTURE_SELECT_LEN = 4;
+//<< [OPCG_REG2]
 // pec/reg00004.H
 
+//>> [PB_PBCQ_PEPBREGS_PE_TOPOLOGY_REG1]
 static const uint64_t PB_PBCQ_PEPBREGS_PE_TOPOLOGY_REG1 = 0x0301180dull;
 
 static const uint32_t PB_PBCQ_PEPBREGS_PE_TOPOLOGY_REG1_PE_TOPOLOGY_ID_REG1 = 0;
 static const uint32_t PB_PBCQ_PEPBREGS_PE_TOPOLOGY_REG1_PE_TOPOLOGY_ID_REG1_LEN = 40;
+//<< [PB_PBCQ_PEPBREGS_PE_TOPOLOGY_REG1]
 // pec/reg00004.H
 
+//>> [PCB_OPCG_GO]
 static const uint64_t PCB_OPCG_GO = 0x08030020ull;
 
 static const uint32_t PCB_OPCG_GO_PCB_OPCGGO = 0;
+//<< [PCB_OPCG_GO]
 // pec/reg00004.H
 
+//>> [REGION_CCFLUSH_STATUS]
 static const uint64_t REGION_CCFLUSH_STATUS = 0x08030016ull;
 
 static const uint32_t REGION_CCFLUSH_STATUS_REGION_CCFLUSH = 4;
 static const uint32_t REGION_CCFLUSH_STATUS_REGION_CCFLUSH_LEN = 15;
+//<< [REGION_CCFLUSH_STATUS]
 // pec/reg00004.H
 
+//>> [TRA0_TR0_TRACE_LO_DATA_REG]
 static const uint64_t TRA0_TR0_TRACE_LO_DATA_REG = 0x08010401ull;
 
 static const uint32_t TRA0_TR0_TRACE_LO_DATA_REG_LO_DATA = 0;
@@ -188,8 +203,10 @@ static const uint32_t TRA0_TR0_TRACE_LO_DATA_REG_WRITE_ON_RUN = 52;
 static const uint32_t TRA0_TR0_TRACE_LO_DATA_REG_RUNNING = 53;
 static const uint32_t TRA0_TR0_TRACE_LO_DATA_REG_HOLD_ADDRESS = 54;
 static const uint32_t TRA0_TR0_TRACE_LO_DATA_REG_HOLD_ADDRESS_LEN = 10;
+//<< [TRA0_TR0_TRACE_LO_DATA_REG]
 // pec/reg00004.H
 
+//>> [XSTOP1]
 static const uint64_t XSTOP1 = 0x0803000cull;
 
 static const uint32_t XSTOP1_ENABLE = 0;
@@ -213,7 +230,10 @@ static const uint32_t XSTOP1_REGION_UNIT13 = 17;
 static const uint32_t XSTOP1_REGION_UNIT14 = 18;
 static const uint32_t XSTOP1_WAIT_CYCLES = 48;
 static const uint32_t XSTOP1_WAIT_CYCLES_LEN = 12;
+//<< [XSTOP1]
 // pec/reg00004.H
+
+//>>THE END<<
 
 #ifndef __PPE_HCODE__
 }

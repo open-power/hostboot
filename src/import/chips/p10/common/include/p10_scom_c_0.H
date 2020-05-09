@@ -39,6 +39,7 @@ namespace c
 #endif
 
 
+//>> [CPMS_L3_PFETCNTL]
 static const uint64_t CPMS_L3_PFETCNTL = 0x200e0e20ull;
 static const uint64_t CPMS_L3_PFETCNTL_WO_CLEAR = 0x200e0e23ull;
 static const uint64_t CPMS_L3_PFETCNTL_WO_OR = 0x200e0e22ull;
@@ -68,8 +69,10 @@ static const uint32_t CPMS_L3_PFETCNTL_VCS_PG_STATE_LEN = 4;
 static const uint32_t CPMS_L3_PFETCNTL_VCS_PG_SEL = 54;
 static const uint32_t CPMS_L3_PFETCNTL_VCS_PG_SEL_LEN = 4;
 static const uint32_t CPMS_L3_PFETCNTL_SRAM_ENABLE = 63;
+//<< [CPMS_L3_PFETCNTL]
 // c/reg00000.H
 
+//>> [EC_IFU_IFRE_IFCER_UNIT_HOLD_OUT2]
 static const uint64_t EC_IFU_IFRE_IFCER_UNIT_HOLD_OUT2 = 0x20020602ull;
 
 static const uint32_t EC_IFU_IFRE_IFCER_UNIT_HOLD_OUT2_32 = 0;
@@ -88,40 +91,52 @@ static const uint32_t EC_IFU_IFRE_IFCER_UNIT_HOLD_OUT2_44 = 12;
 static const uint32_t EC_IFU_IFRE_IFCER_UNIT_HOLD_OUT2_45 = 13;
 static const uint32_t EC_IFU_IFRE_IFCER_UNIT_HOLD_OUT2_46 = 14;
 static const uint32_t EC_IFU_IFRE_IFCER_UNIT_HOLD_OUT2_47 = 15;
+//<< [EC_IFU_IFRE_IFCER_UNIT_HOLD_OUT2]
 // c/reg00000.H
 
+//>> [EC_PC_COMMON_SPR_HMEER]
 static const uint64_t EC_PC_COMMON_SPR_HMEER = 0x20020496ull;
 
 static const uint32_t EC_PC_COMMON_SPR_HMEER_ENABLE = 0;
 static const uint32_t EC_PC_COMMON_SPR_HMEER_ENABLE_LEN = 24;
+//<< [EC_PC_COMMON_SPR_HMEER]
 // c/reg00000.H
 
+//>> [EC_PC_TRACE1_TR_TR0_CONFIG_5]
 static const uint64_t EC_PC_TRACE1_TR_TR0_CONFIG_5 = 0x20020a48ull;
 
 static const uint32_t EC_PC_TRACE1_TR_TR0_CONFIG_5_C = 0;
 static const uint32_t EC_PC_TRACE1_TR_TR0_CONFIG_5_C_LEN = 24;
 static const uint32_t EC_PC_TRACE1_TR_TR0_CONFIG_5_D = 24;
 static const uint32_t EC_PC_TRACE1_TR_TR0_CONFIG_5_D_LEN = 24;
+//<< [EC_PC_TRACE1_TR_TR0_CONFIG_5]
 // c/reg00000.H
 
+//>> [L2TRA_TR0_CONFIG_3]
 static const uint64_t L2TRA_TR0_CONFIG_3 = 0x20020046ull;
 
 static const uint32_t L2TRA_TR0_CONFIG_3_C = 0;
 static const uint32_t L2TRA_TR0_CONFIG_3_C_LEN = 24;
 static const uint32_t L2TRA_TR0_CONFIG_3_D = 24;
 static const uint32_t L2TRA_TR0_CONFIG_3_D_LEN = 24;
+//<< [L2TRA_TR0_CONFIG_3]
 // c/reg00000.H
 
+//>> [L3_MISC_L3CERRS_PM_PURGE_REG]
 static const uint64_t L3_MISC_L3CERRS_PM_PURGE_REG = 0x20010613ull;
 
 static const uint32_t L3_MISC_L3CERRS_PM_PURGE_REG_REQ = 0;
 static const uint32_t L3_MISC_L3CERRS_PM_PURGE_REG_BUSY_ERR = 1;
 static const uint32_t L3_MISC_L3CERRS_PM_PURGE_REG_ABORT = 2;
+//<< [L3_MISC_L3CERRS_PM_PURGE_REG]
 // c/reg00000.H
 
+//>> [NC_NCCHTM_NCCHTSC_HTM_CSEL]
 static const uint64_t NC_NCCHTM_NCCHTSC_HTM_CSEL = 0x20010687ull;
+//<< [NC_NCCHTM_NCCHTSC_HTM_CSEL]
 // c/reg00000.H
 
+//>> [NC_NCMISC_NCSCOMS_NCU_MODE_REG3]
 static const uint64_t NC_NCMISC_NCSCOMS_NCU_MODE_REG3 = 0x2001064cull;
 
 static const uint32_t NC_NCMISC_NCSCOMS_NCU_MODE_REG3_TLBIE_STALL_EN = 0;
@@ -138,14 +153,18 @@ static const uint32_t NC_NCMISC_NCSCOMS_NCU_MODE_REG3_SMF_ENABLE = 20;
 static const uint32_t NC_NCMISC_NCSCOMS_NCU_MODE_REG3_TLBIE_OVERLAP_OP2_EN = 21;
 static const uint32_t NC_NCMISC_NCSCOMS_NCU_MODE_REG3_SPARE = 22;
 static const uint32_t NC_NCMISC_NCSCOMS_NCU_MODE_REG3_SPARE_LEN = 10;
+//<< [NC_NCMISC_NCSCOMS_NCU_MODE_REG3]
 // c/reg00000.H
 
+//>> [QME_SPWU_OTR]
 static const uint64_t QME_SPWU_OTR = 0x200e0830ull;
 
 static const uint32_t QME_SPWU_OTR_REQ = 0;
 static const uint32_t QME_SPWU_OTR_DONE = 4;
+//<< [QME_SPWU_OTR]
 // c/reg00000.H
 
+//>> [QME_SSH_OTR]
 static const uint64_t QME_SSH_OTR = 0x200e0820ull;
 
 static const uint32_t QME_SSH_OTR_STOP_GATED = 0;
@@ -166,8 +185,10 @@ static const uint32_t QME_SSH_OTR_STOP_STATE_EXITED = 22;
 static const uint32_t QME_SSH_OTR_STOP_STATE_ENTERED = 23;
 static const uint32_t QME_SSH_OTR_DEEPEST_STOP_ENTRY = 24;
 static const uint32_t QME_SSH_OTR_DEEPEST_STOP_ENTRY_LEN = 4;
+//<< [QME_SSH_OTR]
 // c/reg00000.H
 
+//>> [QME_SSH_SRC]
 static const uint64_t QME_SSH_SRC = 0x200e081cull;
 
 static const uint32_t QME_SSH_SRC_STOP_GATED = 0;
@@ -195,7 +216,10 @@ static const uint32_t QME_SSH_SRC_SPC_WKUP_RECENT_ACT = 60;
 static const uint32_t QME_SSH_SRC_SPC_WKUP_RECENT_ACT_LEN = 2;
 static const uint32_t QME_SSH_SRC_SPC_WKUP_RECENT_DRP = 62;
 static const uint32_t QME_SSH_SRC_SPC_WKUP_RECENT_DRP_LEN = 2;
+//<< [QME_SSH_SRC]
 // c/reg00000.H
+
+//>>THE END<<
 
 #ifndef __PPE_HCODE__
 }

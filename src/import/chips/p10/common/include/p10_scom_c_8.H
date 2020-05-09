@@ -39,6 +39,7 @@ namespace c
 #endif
 
 
+//>> [CPMS_ACDR]
 static const uint64_t CPMS_ACDR = 0x200e0e7cull;
 
 static const uint32_t CPMS_ACDR_CHAR_COUNTA_SCALE = 0;
@@ -57,8 +58,10 @@ static const uint32_t CPMS_ACDR_CHAR_COUNTA_MOD = 60;
 static const uint32_t CPMS_ACDR_CHAR_COUNTB_MOD = 61;
 static const uint32_t CPMS_ACDR_CHAR_COUNTC_MOD = 62;
 static const uint32_t CPMS_ACDR_SAMPLE_DISABLE_INDICATOR = 63;
+//<< [CPMS_ACDR]
 // c/reg00008.H
 
+//>> [CPMS_CL2_PFETSTAT]
 static const uint64_t CPMS_CL2_PFETSTAT = 0x200e0e2cull;
 
 static const uint32_t CPMS_CL2_PFETSTAT_VDD_PFETS_ENABLED_SENSE = 0;
@@ -70,8 +73,10 @@ static const uint32_t CPMS_CL2_PFETSTAT_VDD_PFET_ENABLE_ACTUAL_LEN = 8;
 static const uint32_t CPMS_CL2_PFETSTAT_VCS_PFET_ENABLE_ACTUAL = 24;
 static const uint32_t CPMS_CL2_PFETSTAT_VCS_PFET_ENABLE_ACTUAL_LEN = 8;
 static const uint32_t CPMS_CL2_PFETSTAT_SRAM_ENABLE_ACTUAL = 63;
+//<< [CPMS_CL2_PFETSTAT]
 // c/reg00008.H
 
+//>> [CPMS_DTCR]
 static const uint64_t CPMS_DTCR = 0x200e0e84ull;
 
 static const uint32_t CPMS_DTCR_DPT_MODE = 0;
@@ -88,8 +93,10 @@ static const uint32_t CPMS_DTCR_CORE_DPT_INFLIGHT_LIMIT_LEN = 8;
 static const uint32_t CPMS_DTCR_DISABLE_DPT_ON_UPDATE = 24;
 static const uint32_t CPMS_DTCR_CORE_SMT_MODE = 34;
 static const uint32_t CPMS_DTCR_CORE_SMT_MODE_LEN = 2;
+//<< [CPMS_DTCR]
 // c/reg00008.H
 
+//>> [CPMS_ESCR]
 static const uint64_t CPMS_ESCR = 0x200e0e6cull;
 
 static const uint32_t CPMS_ESCR_DURATION_MODE = 0;
@@ -130,8 +137,10 @@ static const uint32_t CPMS_ESCR_EVENTY_COMPARE = 56;
 static const uint32_t CPMS_ESCR_EVENTY_COMPARE_LEN = 4;
 static const uint32_t CPMS_ESCR_EVENTY_DONTCARE = 60;
 static const uint32_t CPMS_ESCR_EVENTY_DONTCARE_LEN = 4;
+//<< [CPMS_ESCR]
 // c/reg00008.H
 
+//>> [EC_LS_LSU_HOLD_OUT_REG13]
 static const uint64_t EC_LS_LSU_HOLD_OUT_REG13 = 0x200206cdull;
 
 static const uint32_t EC_LS_LSU_HOLD_OUT_REG13_D_XFVC_UPDATE_PASS_FAIL_NOT_ONE_HOT_ERR_HOLD_OUT = 0;
@@ -147,8 +156,10 @@ static const uint32_t EC_LS_LSU_HOLD_OUT_REG13_P_LS_L2_ST_ORD_G_SHOULD_NOT_BE_SE
 static const uint32_t EC_LS_LSU_HOLD_OUT_REG13_P_MU_LS_ST_RC_RA60_EQUALS_0_ERR_HOLD_OUT = 10;
 static const uint32_t EC_LS_LSU_HOLD_OUT_REG13_P_NCU_STORE_32B_ERR_HOLD_OUT = 11;
 static const uint32_t EC_LS_LSU_HOLD_OUT_REG13_P_STORE_0B_ERR_HOLD_OUT = 12;
+//<< [EC_LS_LSU_HOLD_OUT_REG13]
 // c/reg00008.H
 
+//>> [EC_LS_LSU_HOLD_OUT_REG5]
 static const uint64_t EC_LS_LSU_HOLD_OUT_REG5 = 0x200206c5ull;
 
 static const uint32_t EC_LS_LSU_HOLD_OUT_REG5_RES_LD0_DCAC_TAG_ERR_HOLD_OUT = 0;
@@ -164,8 +175,10 @@ static const uint32_t EC_LS_LSU_HOLD_OUT_REG5_ERTO_MP3_ERRPT_FMISS_ERR_HOLD_OUT_
 static const uint32_t EC_LS_LSU_HOLD_OUT_REG5_ERTO_MP3_ERRPT_FMISS_ERR_HOLD_OUT_2 = 10;
 static const uint32_t EC_LS_LSU_HOLD_OUT_REG5_ERTO_MP3_ERRPT_FMISS_ERR_HOLD_OUT_3 = 11;
 static const uint32_t EC_LS_LSU_HOLD_OUT_REG5_LMQ_MP5_BAD_RESPONSE_HOLD_OUT = 12;
+//<< [EC_LS_LSU_HOLD_OUT_REG5]
 // c/reg00008.H
 
+//>> [EC_PC_COMMON_SPR_V3_HMER]
 static const uint64_t EC_PC_COMMON_SPR_V3_HMER_RW_WAND = 0x20020495ull;
 static const uint64_t EC_PC_COMMON_SPR_V3_HMER_WO_OR = 0x20020491ull;
 
@@ -192,8 +205,10 @@ static const uint32_t EC_PC_COMMON_SPR_V3_HMER_SPARE_19 = 19;
 static const uint32_t EC_PC_COMMON_SPR_V3_HMER_SPARE_20 = 20;
 static const uint32_t EC_PC_COMMON_SPR_V3_HMER_V3_HMER_XSCOM_STATUS = 21;
 static const uint32_t EC_PC_COMMON_SPR_V3_HMER_V3_HMER_XSCOM_STATUS_LEN = 3;
+//<< [EC_PC_COMMON_SPR_V3_HMER]
 // c/reg00008.H
 
+//>> [EC_PC_PMU_SPRCOR_HV_STATE]
 static const uint64_t EC_PC_PMU_SPRCOR_HV_STATE = 0x2002040dull;
 
 static const uint32_t EC_PC_PMU_SPRCOR_HV_STATE_0_MSR_HV = 56;
@@ -204,33 +219,45 @@ static const uint32_t EC_PC_PMU_SPRCOR_HV_STATE_0_MSR_PR = 60;
 static const uint32_t EC_PC_PMU_SPRCOR_HV_STATE_1_MSR_PR = 61;
 static const uint32_t EC_PC_PMU_SPRCOR_HV_STATE_2_MSR_PR = 62;
 static const uint32_t EC_PC_PMU_SPRCOR_HV_STATE_3_MSR_PR = 63;
+//<< [EC_PC_PMU_SPRCOR_HV_STATE]
 // c/reg00008.H
 
+//>> [EC_PC_PMU_SPRCOR_SCOMC_EN]
 static const uint64_t EC_PC_PMU_SPRCOR_SCOMC_EN = 0x2002040aull;
 
 static const uint32_t EC_PC_PMU_SPRCOR_SCOMC_EN_ENABLE_INDIRECT_PMU_SCOM = 0;
+//<< [EC_PC_PMU_SPRCOR_SCOMC_EN]
 // c/reg00008.H
 
+//>> [EC_PC_PMU_SPRCOR_SCOMD]
 static const uint64_t EC_PC_PMU_SPRCOR_SCOMD = 0x20020409ull;
+//<< [EC_PC_PMU_SPRCOR_SCOMD]
 // c/reg00008.H
 
+//>> [EC_PC_PMU_SPRCOR_SHID0]
 static const uint64_t EC_PC_PMU_SPRCOR_SHID0 = 0x2002040cull;
 
 static const uint32_t EC_PC_PMU_SPRCOR_SHID0_TRIG2_TRACE_EN = 0;
 static const uint32_t EC_PC_PMU_SPRCOR_SHID0_DIS_TRACE_SPR = 1;
+//<< [EC_PC_PMU_SPRCOR_SHID0]
 // c/reg00008.H
 
+//>> [EC_PC_SCR7]
 static const uint64_t EC_PC_SCR7 = 0x2002048dull;
+//<< [EC_PC_SCR7]
 // c/reg00008.H
 
+//>> [EC_PC_TRACE2_TR_TR0_CONFIG_5]
 static const uint64_t EC_PC_TRACE2_TR_TR0_CONFIG_5 = 0x20020a88ull;
 
 static const uint32_t EC_PC_TRACE2_TR_TR0_CONFIG_5_C = 0;
 static const uint32_t EC_PC_TRACE2_TR_TR0_CONFIG_5_C_LEN = 24;
 static const uint32_t EC_PC_TRACE2_TR_TR0_CONFIG_5_D = 24;
 static const uint32_t EC_PC_TRACE2_TR_TR0_CONFIG_5_D_LEN = 24;
+//<< [EC_PC_TRACE2_TR_TR0_CONFIG_5]
 // c/reg00008.H
 
+//>> [L2_L2MISC_L2CERRS_TOPOTABLE0]
 static const uint64_t L2_L2MISC_L2CERRS_TOPOTABLE0 = 0x20020014ull;
 
 static const uint32_t L2_L2MISC_L2CERRS_TOPOTABLE0_0_VAL = 0;
@@ -257,14 +284,18 @@ static const uint32_t L2_L2MISC_L2CERRS_TOPOTABLE0_6 = 32;
 static const uint32_t L2_L2MISC_L2CERRS_TOPOTABLE0_6_LEN = 4;
 static const uint32_t L2_L2MISC_L2CERRS_TOPOTABLE0_7 = 36;
 static const uint32_t L2_L2MISC_L2CERRS_TOPOTABLE0_7_LEN = 4;
+//<< [L2_L2MISC_L2CERRS_TOPOTABLE0]
 // c/reg00008.H
 
+//>> [L2TRA_TR1_CONFIG_1]
 static const uint64_t L2TRA_TR1_CONFIG_1 = 0x20020084ull;
 
 static const uint32_t L2TRA_TR1_CONFIG_1_CMP_MSK_LT_B_64_TO_87 = 0;
 static const uint32_t L2TRA_TR1_CONFIG_1_CMP_MSK_LT_B_64_TO_87_LEN = 24;
+//<< [L2TRA_TR1_CONFIG_1]
 // c/reg00008.H
 
+//>> [NC_NCCHTM_NCCHTSC_HTM_STAT]
 static const uint64_t NC_NCCHTM_NCCHTSC_HTM_STAT = 0x20010682ull;
 
 static const uint32_t NC_NCCHTM_NCCHTSC_HTM_STAT_HTMCO_STATUS_PURGE_IN_PROG = 0;
@@ -285,8 +316,10 @@ static const uint32_t NC_NCCHTM_NCCHTSC_HTM_STAT_HTMCO_STATUS_COMPLETE = 14;
 static const uint32_t NC_NCCHTM_NCCHTSC_HTM_STAT_HTMCO_STATUS_ENABLE = 15;
 static const uint32_t NC_NCCHTM_NCCHTSC_HTM_STAT_HTMCO_STATUS_STAMP = 16;
 static const uint32_t NC_NCCHTM_NCCHTSC_HTM_STAT_STATUS_SCOM_ERROR = 17;
+//<< [NC_NCCHTM_NCCHTSC_HTM_STAT]
 // c/reg00008.H
 
+//>> [PSCOM_STATUS_ERROR_REG]
 static const uint64_t PSCOM_STATUS_ERROR_REG = 0x20010001ull;
 
 static const uint32_t PSCOM_STATUS_ERROR_REG_ACCUMULATED_PCB_WDATA_PARITY_ERROR = 0;
@@ -325,8 +358,10 @@ static const uint32_t PSCOM_STATUS_ERROR_REG_TRAPPED_PCB_COMMAND_PARITY_ERROR = 
 static const uint32_t PSCOM_STATUS_ERROR_REG_TRAPPED_GENERAL_TIMEOUT = 33;
 static const uint32_t PSCOM_STATUS_ERROR_REG_TRAPPED_SATELLITE_ACKNOWLEDGE_ACCESS_VIOLATION = 34;
 static const uint32_t PSCOM_STATUS_ERROR_REG_TRAPPED_SATELLITE_ACKNOWLEDGE_INVALID_REGISTER = 35;
+//<< [PSCOM_STATUS_ERROR_REG]
 // c/reg00008.H
 
+//>> [QME_QOSR]
 static const uint64_t QME_QOSR = 0x200e08a0ull;
 
 static const uint32_t QME_QOSR_0_QOS_INDEX = 2;
@@ -345,7 +380,10 @@ static const uint32_t QME_QOSR_2_DTC_INDEX = 50;
 static const uint32_t QME_QOSR_2_DTC_INDEX_LEN = 6;
 static const uint32_t QME_QOSR_3_DTC_INDEX = 58;
 static const uint32_t QME_QOSR_3_DTC_INDEX_LEN = 6;
+//<< [QME_QOSR]
 // c/reg00008.H
+
+//>>THE END<<
 
 #ifndef __PPE_HCODE__
 }

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -39,6 +39,7 @@ namespace pauc
 #endif
 
 
+//>> [DL_PPE_WRAP_SCOM_FUNC]
 static const uint64_t DL_PPE_WRAP_SCOM_FUNC = 0x10012c67ull;
 
 static const uint32_t DL_PPE_WRAP_SCOM_FUNC_EOL_SLOW_TOGGLE = 0;
@@ -46,8 +47,10 @@ static const uint32_t DL_PPE_WRAP_SCOM_FUNC_EOL_FAST_TOGGLE = 1;
 static const uint32_t DL_PPE_WRAP_SCOM_FUNC_PPE_INTERRUPT = 2;
 static const uint32_t DL_PPE_WRAP_SCOM_FUNC_PPE_FUNC_SPARES = 3;
 static const uint32_t DL_PPE_WRAP_SCOM_FUNC_PPE_FUNC_SPARES_LEN = 13;
+//<< [DL_PPE_WRAP_SCOM_FUNC]
 // pauc/reg00014.H
 
+//>> [EPS_DBG_TRACE_REG_1]
 static const uint64_t EPS_DBG_TRACE_REG_1 = 0x100107ceull;
 
 static const uint32_t EPS_DBG_TRACE_REG_1_1_CONDITION1_ACTION_DO = 0;
@@ -80,8 +83,10 @@ static const uint32_t EPS_DBG_TRACE_REG_1_1_CHECKSTOP_MODE_SELECTOR = 51;
 static const uint32_t EPS_DBG_TRACE_REG_1_2_CHECKSTOP_MODE_LT = 52;
 static const uint32_t EPS_DBG_TRACE_REG_1_2_CHECKSTOP_MODE_LT_LEN = 3;
 static const uint32_t EPS_DBG_TRACE_REG_1_2_CHECKSTOP_MODE_SELECTOR = 55;
+//<< [EPS_DBG_TRACE_REG_1]
 // pauc/reg00014.H
 
+//>> [EPS_FIR_LOCAL_ACTION1]
 static const uint64_t EPS_FIR_LOCAL_ACTION1 = 0x10040107ull;
 
 static const uint32_t EPS_FIR_LOCAL_ACTION1_00 = 0;
@@ -148,8 +153,10 @@ static const uint32_t EPS_FIR_LOCAL_ACTION1_60 = 60;
 static const uint32_t EPS_FIR_LOCAL_ACTION1_61 = 61;
 static const uint32_t EPS_FIR_LOCAL_ACTION1_62 = 62;
 static const uint32_t EPS_FIR_LOCAL_ACTION1_63 = 63;
+//<< [EPS_FIR_LOCAL_ACTION1]
 // pauc/reg00014.H
 
+//>> [OPCG_REG1]
 static const uint64_t OPCG_REG1 = 0x10030003ull;
 
 static const uint32_t OPCG_REG1_SCAN_COUNT = 0;
@@ -171,8 +178,10 @@ static const uint32_t OPCG_REG1_MISR_MODE = 57;
 static const uint32_t OPCG_REG1_INFINITE_MODE = 58;
 static const uint32_t OPCG_REG1_NSL_FILL_COUNT = 59;
 static const uint32_t OPCG_REG1_NSL_FILL_COUNT_LEN = 5;
+//<< [OPCG_REG1]
 // pauc/reg00014.H
 
+//>> [PB_DOB23_DIB23_INT_ERR_REG]
 static const uint64_t PB_DOB23_DIB23_INT_ERR_REG = 0x1001182aull;
 
 static const uint32_t PB_DOB23_DIB23_INT_ERR_REG_OB23_RTAG_PBITERR = 0;
@@ -227,14 +236,20 @@ static const uint32_t PB_DOB23_DIB23_INT_ERR_REG_OB23_DIBF0VC0_OVER_UNDERFLOW = 
 static const uint32_t PB_DOB23_DIB23_INT_ERR_REG_OB23_DIBF0VC1_OVER_UNDERFLOW = 49;
 static const uint32_t PB_DOB23_DIB23_INT_ERR_REG_OB23_DIBF1VC0_OVER_UNDERFLOW = 50;
 static const uint32_t PB_DOB23_DIB23_INT_ERR_REG_OB23_DIBF1VC1_OVER_UNDERFLOW = 51;
+//<< [PB_DOB23_DIB23_INT_ERR_REG]
 // pauc/reg00014.H
 
+//>> [PB_MAILBOX_10_REG]
 static const uint64_t PB_MAILBOX_10_REG = 0x10011832ull;
+//<< [PB_MAILBOX_10_REG]
 // pauc/reg00014.H
 
+//>> [PB_MAILBOX_11_REG]
 static const uint64_t PB_MAILBOX_11_REG = 0x10011833ull;
+//<< [PB_MAILBOX_11_REG]
 // pauc/reg00014.H
 
+//>> [PB_PMU2_CNPM_COUNTER]
 static const uint64_t PB_PMU2_CNPM_COUNTER = 0x10011823ull;
 
 static const uint32_t PB_PMU2_CNPM_COUNTER_0 = 0;
@@ -245,8 +260,10 @@ static const uint32_t PB_PMU2_CNPM_COUNTER_2 = 32;
 static const uint32_t PB_PMU2_CNPM_COUNTER_2_LEN = 16;
 static const uint32_t PB_PMU2_CNPM_COUNTER_3 = 48;
 static const uint32_t PB_PMU2_CNPM_COUNTER_3_LEN = 16;
+//<< [PB_PMU2_CNPM_COUNTER]
 // pauc/reg00014.H
 
+//>> [PB_PTL_FIR_MASK_REG]
 static const uint64_t PB_PTL_FIR_MASK_REG_RW = 0x10011803ull;
 static const uint64_t PB_PTL_FIR_MASK_REG_WO_AND = 0x10011804ull;
 static const uint64_t PB_PTL_FIR_MASK_REG_WO_OR = 0x10011805ull;
@@ -291,20 +308,26 @@ static const uint32_t PB_PTL_FIR_MASK_REG_PTL0_SPARE_MASK = 36;
 static const uint32_t PB_PTL_FIR_MASK_REG_PTL1_SPARE_MASK = 37;
 static const uint32_t PB_PTL_FIR_MASK_REG_PTL2_SPARE_MASK = 38;
 static const uint32_t PB_PTL_FIR_MASK_REG_PTL3_SPARE_MASK = 39;
+//<< [PB_PTL_FIR_MASK_REG]
 // pauc/reg00014.H
 
+//>> [PHY_SCOM_MAC_FIR_ACTION0_REG]
 static const uint64_t PHY_SCOM_MAC_FIR_ACTION0_REG = 0x10012c06ull;
 
 static const uint32_t PHY_SCOM_MAC_FIR_ACTION0_REG_FIR_ACTION0 = 0;
 static const uint32_t PHY_SCOM_MAC_FIR_ACTION0_REG_FIR_ACTION0_LEN = 26;
+//<< [PHY_SCOM_MAC_FIR_ACTION0_REG]
 // pauc/reg00014.H
 
+//>> [PHY_SCOM_MAC_FIR_ACTION1_REG]
 static const uint64_t PHY_SCOM_MAC_FIR_ACTION1_REG = 0x10012c07ull;
 
 static const uint32_t PHY_SCOM_MAC_FIR_ACTION1_REG_FIR_ACTION1 = 0;
 static const uint32_t PHY_SCOM_MAC_FIR_ACTION1_REG_FIR_ACTION1_LEN = 26;
+//<< [PHY_SCOM_MAC_FIR_ACTION1_REG]
 // pauc/reg00014.H
 
+//>> [RCMD_RATE_CFG]
 static const uint64_t RCMD_RATE_CFG = 0x1001180cull;
 
 static const uint32_t RCMD_RATE_CFG_X_RCMD_RATE = 0;
@@ -329,8 +352,10 @@ static const uint32_t RCMD_RATE_CFG_Y_CMD_GAP_TABLE = 35;
 static const uint32_t RCMD_RATE_CFG_Y_DISABLE_CREDIT_BANK = 36;
 static const uint32_t RCMD_RATE_CFG_Y_CMD_GAP_CFG = 37;
 static const uint32_t RCMD_RATE_CFG_Y_CMD_GAP_CFG_LEN = 3;
+//<< [RCMD_RATE_CFG]
 // pauc/reg00014.H
 
+//>> [SLAVE_CONFIG_REG]
 static const uint64_t SLAVE_CONFIG_REG = 0x100f001eull;
 
 static const uint32_t SLAVE_CONFIG_REG_DISABLE_PERV_THOLD_CHECK = 0;
@@ -349,14 +374,18 @@ static const uint32_t SLAVE_CONFIG_REG_MASK_PLL_ERRS = 12;
 static const uint32_t SLAVE_CONFIG_REG_MASK_PLL_ERRS_LEN = 8;
 static const uint32_t SLAVE_CONFIG_REG_QME_PAR_DIS = 20;
 static const uint32_t SLAVE_CONFIG_REG_FORCE_0_QME = 21;
+//<< [SLAVE_CONFIG_REG]
 // pauc/reg00014.H
 
+//>> [TRA1_TR0_CONFIG_1]
 static const uint64_t TRA1_TR0_CONFIG_1 = 0x10010484ull;
 
 static const uint32_t TRA1_TR0_CONFIG_1_CMP_MSK_LT_B_64_TO_87 = 0;
 static const uint32_t TRA1_TR0_CONFIG_1_CMP_MSK_LT_B_64_TO_87_LEN = 24;
+//<< [TRA1_TR0_CONFIG_1]
 // pauc/reg00014.H
 
+//>> [XSTOP2]
 static const uint64_t XSTOP2 = 0x1003000dull;
 
 static const uint32_t XSTOP2_ENABLE = 0;
@@ -380,7 +409,10 @@ static const uint32_t XSTOP2_REGION_UNIT13 = 17;
 static const uint32_t XSTOP2_REGION_UNIT14 = 18;
 static const uint32_t XSTOP2_WAIT_CYCLES = 48;
 static const uint32_t XSTOP2_WAIT_CYCLES_LEN = 12;
+//<< [XSTOP2]
 // pauc/reg00014.H
+
+//>>THE END<<
 
 #ifndef __PPE_HCODE__
 }

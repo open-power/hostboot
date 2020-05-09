@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -39,6 +39,7 @@ namespace mcc
 #endif
 
 
+//>> [ATCL_CL_CLSCOM_MCEBUSCL]
 static const uint64_t ATCL_CL_CLSCOM_MCEBUSCL = 0x0c010c29ull;
 
 static const uint32_t ATCL_CL_CLSCOM_MCEBUSCL_SEL_EBUS_CLS0 = 0;
@@ -49,27 +50,36 @@ static const uint32_t ATCL_CL_CLSCOM_MCEBUSCL_SEL_EBUS_EVENTA = 4;
 static const uint32_t ATCL_CL_CLSCOM_MCEBUSCL_SEL_EBUS_EVENTB = 5;
 static const uint32_t ATCL_CL_CLSCOM_MCEBUSCL_RESERVED6_15 = 6;
 static const uint32_t ATCL_CL_CLSCOM_MCEBUSCL_RESERVED6_15_LEN = 10;
+//<< [ATCL_CL_CLSCOM_MCEBUSCL]
 // mcc/reg00015.H
 
+//>> [CRYPTO_DECRYPT_CRYPTONONCEB]
 static const uint64_t CRYPTO_DECRYPT_CRYPTONONCEB = 0x0c010f5full;
 
 static const uint32_t CRYPTO_DECRYPT_CRYPTONONCEB_NONCEB = 0;
 static const uint32_t CRYPTO_DECRYPT_CRYPTONONCEB_NONCEB_LEN = 24;
+//<< [CRYPTO_DECRYPT_CRYPTONONCEB]
 // mcc/reg00015.H
 
+//>> [CRYPTO_ENCRYPT_CRYPTONONCEA]
 static const uint64_t CRYPTO_ENCRYPT_CRYPTONONCEA = 0x0c010f56ull;
 
 static const uint32_t CRYPTO_ENCRYPT_CRYPTONONCEA_NONCEA = 0;
 static const uint32_t CRYPTO_ENCRYPT_CRYPTONONCEA_NONCEA_LEN = 64;
+//<< [CRYPTO_ENCRYPT_CRYPTONONCEA]
 // mcc/reg00015.H
 
+//>> [USTL_USTLLOLDROP]
 static const uint64_t USTL_USTLLOLDROP = 0x0c010e11ull;
 
 static const uint32_t USTL_USTLLOLDROP_A_DROP_REASON = 0;
 static const uint32_t USTL_USTLLOLDROP_A_DROP_REASON_LEN = 22;
 static const uint32_t USTL_USTLLOLDROP_B_DROP_REASON = 32;
 static const uint32_t USTL_USTLLOLDROP_B_DROP_REASON_LEN = 22;
+//<< [USTL_USTLLOLDROP]
 // mcc/reg00015.H
+
+//>>THE END<<
 
 #ifndef __PPE_HCODE__
 }

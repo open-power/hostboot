@@ -39,6 +39,7 @@ namespace pau
 #endif
 
 
+//>> [AME_AME1_MISC_AMM_CONFIG1]
 static const uint64_t AME_AME1_MISC_AMM_CONFIG1 = 0x10010bd1ull;
 
 static const uint32_t AME_AME1_MISC_AMM_CONFIG1_1_RESERVED = 32;
@@ -51,8 +52,10 @@ static const uint32_t AME_AME1_MISC_AMM_CONFIG1_MRQ_ACT_TIMER = 57;
 static const uint32_t AME_AME1_MISC_AMM_CONFIG1_MRQ_VC2_CRD_SMR = 58;
 static const uint32_t AME_AME1_MISC_AMM_CONFIG1_MRQ_SMR_MAX = 59;
 static const uint32_t AME_AME1_MISC_AMM_CONFIG1_MRQ_SMR_MAX_LEN = 5;
+//<< [AME_AME1_MISC_AMM_CONFIG1]
 // pau/reg00017.H
 
+//>> [AME_AME2_MISC_DEBUG_CONFIG1]
 static const uint64_t AME_AME2_MISC_DEBUG_CONFIG1 = 0x10010be5ull;
 
 static const uint32_t AME_AME2_MISC_DEBUG_CONFIG1_0_B6_CSEL = 0;
@@ -87,8 +90,10 @@ static const uint32_t AME_AME2_MISC_DEBUG_CONFIG1_CL1_B10_SEL = 46;
 static const uint32_t AME_AME2_MISC_DEBUG_CONFIG1_CL1_B10_SEL_LEN = 4;
 static const uint32_t AME_AME2_MISC_DEBUG_CONFIG1_RESERVED1 = 50;
 static const uint32_t AME_AME2_MISC_DEBUG_CONFIG1_RESERVED1_LEN = 14;
+//<< [AME_AME2_MISC_DEBUG_CONFIG1]
 // pau/reg00017.H
 
+//>> [AME_AME2_MISC_PMU_CONFIG1]
 static const uint64_t AME_AME2_MISC_PMU_CONFIG1 = 0x10010be6ull;
 
 static const uint32_t AME_AME2_MISC_PMU_CONFIG1_0_SEL = 28;
@@ -99,8 +104,10 @@ static const uint32_t AME_AME2_MISC_PMU_CONFIG1_2_SEL = 46;
 static const uint32_t AME_AME2_MISC_PMU_CONFIG1_2_SEL_LEN = 9;
 static const uint32_t AME_AME2_MISC_PMU_CONFIG1_3_SEL = 55;
 static const uint32_t AME_AME2_MISC_PMU_CONFIG1_3_SEL_LEN = 9;
+//<< [AME_AME2_MISC_PMU_CONFIG1]
 // pau/reg00017.H
 
+//>> [CS_CTL_MISC_BDF2PE_14_CONFIG]
 static const uint64_t CS_CTL_MISC_BDF2PE_14_CONFIG = 0x100109beull;
 
 static const uint32_t CS_CTL_MISC_BDF2PE_14_CONFIG_ENABLE = 0;
@@ -110,8 +117,10 @@ static const uint32_t CS_CTL_MISC_BDF2PE_14_CONFIG_PE = 4;
 static const uint32_t CS_CTL_MISC_BDF2PE_14_CONFIG_PE_LEN = 4;
 static const uint32_t CS_CTL_MISC_BDF2PE_14_CONFIG_BDF = 8;
 static const uint32_t CS_CTL_MISC_BDF2PE_14_CONFIG_BDF_LEN = 16;
+//<< [CS_CTL_MISC_BDF2PE_14_CONFIG]
 // pau/reg00017.H
 
+//>> [CS_CTL_MISC_CONFIG3]
 static const uint64_t CS_CTL_MISC_CONFIG3 = 0x10010983ull;
 
 static const uint32_t CS_CTL_MISC_CONFIG3_THROTTLE_MODE_PWR0 = 0;
@@ -196,16 +205,20 @@ static const uint32_t CS_CTL_MISC_CONFIG3_THROTTLE_MODE_PRB4_LEN = 3;
 // ERROR Duplicate Dial         static const uint32_t CS_CTL_MISC_CONFIG3_THROTTLE_MODE_PRB4_LEN = 3;
 static const uint32_t CS_CTL_MISC_CONFIG3_3_RESERVED1 = 60;
 static const uint32_t CS_CTL_MISC_CONFIG3_3_RESERVED1_LEN = 4;
+//<< [CS_CTL_MISC_CONFIG3]
 // pau/reg00017.H
 
+//>> [CS_CTL_MISC_FENCE_CONTROL2]
 static const uint64_t CS_CTL_MISC_FENCE_CONTROL2 = 0x100109a3ull;
 
 static const uint32_t CS_CTL_MISC_FENCE_CONTROL2_2_REQUEST_FENCE = 0;
 static const uint32_t CS_CTL_MISC_FENCE_CONTROL2_2_REQUEST_FENCE_LEN = 2;
 static const uint32_t CS_CTL_MISC_FENCE_CONTROL2_CONTROL2_RESERVED = 2;
 static const uint32_t CS_CTL_MISC_FENCE_CONTROL2_CONTROL2_RESERVED_LEN = 2;
+//<< [CS_CTL_MISC_FENCE_CONTROL2]
 // pau/reg00017.H
 
+//>> [CS_CTL_MISC_PERF_MATCH_CONFIG]
 static const uint64_t CS_CTL_MISC_PERF_MATCH_CONFIG = 0x10010984ull;
 
 static const uint32_t CS_CTL_MISC_PERF_MATCH_CONFIG_TTYPE = 0;
@@ -217,8 +230,10 @@ static const uint32_t CS_CTL_MISC_PERF_MATCH_CONFIG_PE_LEN = 4;
 static const uint32_t CS_CTL_MISC_PERF_MATCH_CONFIG_BE = 24;
 static const uint32_t CS_CTL_MISC_PERF_MATCH_CONFIG_RESERVED = 25;
 static const uint32_t CS_CTL_MISC_PERF_MATCH_CONFIG_RESERVED_LEN = 3;
+//<< [CS_CTL_MISC_PERF_MATCH_CONFIG]
 // pau/reg00017.H
 
+//>> [CS_SM0_MCP_MISC_CONFIG0]
 static const uint64_t CS_SM0_MCP_MISC_CONFIG0 = 0x10010800ull;
 
 static const uint32_t CS_SM0_MCP_MISC_CONFIG0_MA_DSA_OPT_CLAIM_UR = 0;
@@ -283,8 +298,10 @@ static const uint32_t CS_SM0_MCP_MISC_CONFIG0_BRK1_IMP_TAGS_MODE_ENABLE = 60;
 static const uint32_t CS_SM0_MCP_MISC_CONFIG0_BRK2_IMP_TAGS_MODE_ENABLE = 61;
 static const uint32_t CS_SM0_MCP_MISC_CONFIG0_BRK3_IMP_TAGS_MODE_ENABLE = 62;
 static const uint32_t CS_SM0_MCP_MISC_CONFIG0_BRK4_IMP_TAGS_MODE_ENABLE = 63;
+//<< [CS_SM0_MCP_MISC_CONFIG0]
 // pau/reg00017.H
 
+//>> [CS_SM0_SNP_MISC_CONFIG_RELAXED_SRC1]
 static const uint64_t CS_SM0_SNP_MISC_CONFIG_RELAXED_SRC1 = 0x1001083full;
 
 static const uint32_t CS_SM0_SNP_MISC_CONFIG_RELAXED_SRC1_TAG = 0;
@@ -303,8 +320,10 @@ static const uint32_t CS_SM0_SNP_MISC_CONFIG_RELAXED_SRC1_WRSTART = 48;
 static const uint32_t CS_SM0_SNP_MISC_CONFIG_RELAXED_SRC1_WRSTART_LEN = 8;
 static const uint32_t CS_SM0_SNP_MISC_CONFIG_RELAXED_SRC1_WREND = 56;
 static const uint32_t CS_SM0_SNP_MISC_CONFIG_RELAXED_SRC1_WREND_LEN = 8;
+//<< [CS_SM0_SNP_MISC_CONFIG_RELAXED_SRC1]
 // pau/reg00017.H
 
+//>> [CS_SM0_SNP_MISC_GENID_BAR]
 static const uint64_t CS_SM0_SNP_MISC_GENID_BAR = 0x1001083dull;
 
 static const uint32_t CS_SM0_SNP_MISC_GENID_BAR_CONFIG_GENID_BAR_ENABLE = 0;
@@ -315,8 +334,10 @@ static const uint32_t CS_SM0_SNP_MISC_GENID_BAR_CONFIG_GENID_BAR_ADDR_LEN = 30;
 static const uint32_t CS_SM0_SNP_MISC_GENID_BAR_GENID_RESERVED2 = 33;
 static const uint32_t CS_SM0_SNP_MISC_GENID_BAR_GENID_RESERVED2_LEN = 2;
 static const uint32_t CS_SM0_SNP_MISC_GENID_BAR_CONFIG_GENID_BAR_POISON = 35;
+//<< [CS_SM0_SNP_MISC_GENID_BAR]
 // pau/reg00017.H
 
+//>> [CS_SM0_SNP_MISC_SM_STATUS]
 static const uint64_t CS_SM0_SNP_MISC_SM_STATUS = 0x10010852ull;
 
 static const uint32_t CS_SM0_SNP_MISC_SM_STATUS_PWR0 = 0;
@@ -342,8 +363,10 @@ static const uint32_t CS_SM0_SNP_MISC_SM_STATUS_PRB4 = 19;
 static const uint32_t CS_SM0_SNP_MISC_SM_STATUS_CHGRATE = 20;
 static const uint32_t CS_SM0_SNP_MISC_SM_STATUS_RESERVED1 = 21;
 static const uint32_t CS_SM0_SNP_MISC_SM_STATUS_RESERVED1_LEN = 3;
+//<< [CS_SM0_SNP_MISC_SM_STATUS]
 // pau/reg00017.H
 
+//>> [CS_SM0_SNP_MISC_TOPOLOGY_TABLE2]
 static const uint64_t CS_SM0_SNP_MISC_TOPOLOGY_TABLE2 = 0x1001085eull;
 
 static const uint32_t CS_SM0_SNP_MISC_TOPOLOGY_TABLE2_ABLE_16_23 = 0;
@@ -364,20 +387,26 @@ static const uint32_t CS_SM0_SNP_MISC_TOPOLOGY_TABLE2_TRY22 = 32;
 static const uint32_t CS_SM0_SNP_MISC_TOPOLOGY_TABLE2_TRY22_LEN = 4;
 static const uint32_t CS_SM0_SNP_MISC_TOPOLOGY_TABLE2_TRY23 = 36;
 static const uint32_t CS_SM0_SNP_MISC_TOPOLOGY_TABLE2_TRY23_LEN = 4;
+//<< [CS_SM0_SNP_MISC_TOPOLOGY_TABLE2]
 // pau/reg00017.H
 
+//>> [CS_SM1_DIR_MISC_SCOM_L2_DATA]
 static const uint64_t CS_SM1_DIR_MISC_SCOM_L2_DATA = 0x1001088cull;
 
 static const uint32_t CS_SM1_DIR_MISC_SCOM_L2_DATA_L2_SCOM_READ_DATA = 0;
 static const uint32_t CS_SM1_DIR_MISC_SCOM_L2_DATA_L2_SCOM_READ_DATA_LEN = 64;
+//<< [CS_SM1_DIR_MISC_SCOM_L2_DATA]
 // pau/reg00017.H
 
+//>> [CS_SM1_MCP_MISC_CERR_MESSAGE0]
 static const uint64_t CS_SM1_MCP_MISC_CERR_MESSAGE0 = 0x10010866ull;
 
 static const uint32_t CS_SM1_MCP_MISC_CERR_MESSAGE0_CERR_MESSAGE_BITS0 = 0;
 static const uint32_t CS_SM1_MCP_MISC_CERR_MESSAGE0_CERR_MESSAGE_BITS0_LEN = 64;
+//<< [CS_SM1_MCP_MISC_CERR_MESSAGE0]
 // pau/reg00017.H
 
+//>> [CS_SM1_SNP_MISC_CONFIG_RELAXED_BRK2]
 static const uint64_t CS_SM1_SNP_MISC_CONFIG_RELAXED_BRK2 = 0x100108a8ull;
 
 static const uint32_t CS_SM1_SNP_MISC_CONFIG_RELAXED_BRK2_CMD_CL_DMA_W = 0;
@@ -443,8 +472,10 @@ static const uint32_t CS_SM1_SNP_MISC_CONFIG_RELAXED_BRK2_SOURCE7_WRENA = 60;
 static const uint32_t CS_SM1_SNP_MISC_CONFIG_RELAXED_BRK2_SOURCE7_RDENA = 61;
 static const uint32_t CS_SM1_SNP_MISC_CONFIG_RELAXED_BRK2_SOURCE7_AWENA = 62;
 static const uint32_t CS_SM1_SNP_MISC_CONFIG_RELAXED_BRK2_SOURCE7_ARENA = 63;
+//<< [CS_SM1_SNP_MISC_CONFIG_RELAXED_BRK2]
 // pau/reg00017.H
 
+//>> [CS_SM1_SNP_MISC_LOW_WATER]
 static const uint64_t CS_SM1_SNP_MISC_LOW_WATER = 0x100108abull;
 
 static const uint32_t CS_SM1_SNP_MISC_LOW_WATER_LOW_WATER_PWR0 = 0;
@@ -511,8 +542,10 @@ static const uint32_t CS_SM1_SNP_MISC_LOW_WATER_WEIGHT_CST4 = 60;
 static const uint32_t CS_SM1_SNP_MISC_LOW_WATER_WEIGHT_CST4_LEN = 2;
 static const uint32_t CS_SM1_SNP_MISC_LOW_WATER_WEIGHT_PRB4 = 62;
 static const uint32_t CS_SM1_SNP_MISC_LOW_WATER_WEIGHT_PRB4_LEN = 2;
+//<< [CS_SM1_SNP_MISC_LOW_WATER]
 // pau/reg00017.H
 
+//>> [CS_SM1_SNP_MISC_SCOM_L2_ADDR]
 static const uint64_t CS_SM1_SNP_MISC_SCOM_L2_ADDR = 0x100108bbull;
 
 static const uint32_t CS_SM1_SNP_MISC_SCOM_L2_ADDR_VALID = 0;
@@ -522,8 +555,10 @@ static const uint32_t CS_SM1_SNP_MISC_SCOM_L2_ADDR_CCI = 4;
 static const uint32_t CS_SM1_SNP_MISC_SCOM_L2_ADDR_CCI_LEN = 10;
 static const uint32_t CS_SM1_SNP_MISC_SCOM_L2_ADDR_WAY = 14;
 static const uint32_t CS_SM1_SNP_MISC_SCOM_L2_ADDR_WAY_LEN = 2;
+//<< [CS_SM1_SNP_MISC_SCOM_L2_ADDR]
 // pau/reg00017.H
 
+//>> [CS_SM2_MCP_MISC_CERR_HOLD1]
 static const uint64_t CS_SM2_MCP_MISC_CERR_HOLD1 = 0x100108d6ull;
 
 static const uint32_t CS_SM2_MCP_MISC_CERR_HOLD1_NLGX_0 = 0;
@@ -562,8 +597,10 @@ static const uint32_t CS_SM2_MCP_MISC_CERR_HOLD1_STA_0 = 32;
 static const uint32_t CS_SM2_MCP_MISC_CERR_HOLD1_STA_1 = 33;
 static const uint32_t CS_SM2_MCP_MISC_CERR_HOLD1_STA_2 = 34;
 static const uint32_t CS_SM2_MCP_MISC_CERR_HOLD1_STA_3 = 35;
+//<< [CS_SM2_MCP_MISC_CERR_HOLD1]
 // pau/reg00017.H
 
+//>> [CS_SM2_MCP_MISC_DEBUG0_CONFIG]
 static const uint64_t CS_SM2_MCP_MISC_DEBUG0_CONFIG = 0x100108daull;
 
 static const uint32_t CS_SM2_MCP_MISC_DEBUG0_CONFIG_POD0 = 0;
@@ -591,8 +628,10 @@ static const uint32_t CS_SM2_MCP_MISC_DEBUG0_CONFIG_POD10_LEN = 5;
 static const uint32_t CS_SM2_MCP_MISC_DEBUG0_CONFIG_RESERVED1 = 55;
 static const uint32_t CS_SM2_MCP_MISC_DEBUG0_CONFIG_RESERVED1_LEN = 8;
 static const uint32_t CS_SM2_MCP_MISC_DEBUG0_CONFIG_ACT = 63;
+//<< [CS_SM2_MCP_MISC_DEBUG0_CONFIG]
 // pau/reg00017.H
 
+//>> [CS_SM2_SNP_MISC_CERR_MASK0]
 static const uint64_t CS_SM2_SNP_MISC_CERR_MASK0 = 0x10010914ull;
 
 static const uint32_t CS_SM2_SNP_MISC_CERR_MASK0_NCF_0 = 0;
@@ -659,8 +698,10 @@ static const uint32_t CS_SM2_SNP_MISC_CERR_MASK0_PBF_0 = 60;
 static const uint32_t CS_SM2_SNP_MISC_CERR_MASK0_PBF_1 = 61;
 static const uint32_t CS_SM2_SNP_MISC_CERR_MASK0_PBF_2 = 62;
 static const uint32_t CS_SM2_SNP_MISC_CERR_MASK0_PBF_3 = 63;
+//<< [CS_SM2_SNP_MISC_CERR_MASK0]
 // pau/reg00017.H
 
+//>> [CS_SM2_SNP_MISC_CONFIG_RELAXED_SRC1]
 static const uint64_t CS_SM2_SNP_MISC_CONFIG_RELAXED_SRC1 = 0x100108ffull;
 
 static const uint32_t CS_SM2_SNP_MISC_CONFIG_RELAXED_SRC1_TAG = 0;
@@ -679,8 +720,10 @@ static const uint32_t CS_SM2_SNP_MISC_CONFIG_RELAXED_SRC1_WRSTART = 48;
 static const uint32_t CS_SM2_SNP_MISC_CONFIG_RELAXED_SRC1_WRSTART_LEN = 8;
 static const uint32_t CS_SM2_SNP_MISC_CONFIG_RELAXED_SRC1_WREND = 56;
 static const uint32_t CS_SM2_SNP_MISC_CONFIG_RELAXED_SRC1_WREND_LEN = 8;
+//<< [CS_SM2_SNP_MISC_CONFIG_RELAXED_SRC1]
 // pau/reg00017.H
 
+//>> [CS_SM2_SNP_MISC_GPU0_BAR]
 static const uint64_t CS_SM2_SNP_MISC_GPU0_BAR = 0x100108f2ull;
 
 static const uint32_t CS_SM2_SNP_MISC_GPU0_BAR_ENABLE = 0;
@@ -700,8 +743,10 @@ static const uint32_t CS_SM2_SNP_MISC_GPU0_BAR_SECURE_A12 = 48;
 static const uint32_t CS_SM2_SNP_MISC_GPU0_BAR_CHIP_EQ_GROUP = 49;
 static const uint32_t CS_SM2_SNP_MISC_GPU0_BAR_EXTENDED_MODE = 50;
 static const uint32_t CS_SM2_SNP_MISC_GPU0_BAR_RESERVED = 51;
+//<< [CS_SM2_SNP_MISC_GPU0_BAR]
 // pau/reg00017.H
 
+//>> [CS_SM2_SNP_MISC_GPU1_BAR]
 static const uint64_t CS_SM2_SNP_MISC_GPU1_BAR = 0x100108f3ull;
 
 static const uint32_t CS_SM2_SNP_MISC_GPU1_BAR_ENABLE = 0;
@@ -721,8 +766,10 @@ static const uint32_t CS_SM2_SNP_MISC_GPU1_BAR_SECURE_A12 = 48;
 static const uint32_t CS_SM2_SNP_MISC_GPU1_BAR_CHIP_EQ_GROUP = 49;
 static const uint32_t CS_SM2_SNP_MISC_GPU1_BAR_EXTENDED_MODE = 50;
 static const uint32_t CS_SM2_SNP_MISC_GPU1_BAR_RESERVED = 51;
+//<< [CS_SM2_SNP_MISC_GPU1_BAR]
 // pau/reg00017.H
 
+//>> [CS_SM2_SNP_MISC_GPU2_BAR]
 static const uint64_t CS_SM2_SNP_MISC_GPU2_BAR = 0x100108f4ull;
 
 static const uint32_t CS_SM2_SNP_MISC_GPU2_BAR_ENABLE = 0;
@@ -742,8 +789,10 @@ static const uint32_t CS_SM2_SNP_MISC_GPU2_BAR_SECURE_A12 = 48;
 static const uint32_t CS_SM2_SNP_MISC_GPU2_BAR_CHIP_EQ_GROUP = 49;
 static const uint32_t CS_SM2_SNP_MISC_GPU2_BAR_EXTENDED_MODE = 50;
 static const uint32_t CS_SM2_SNP_MISC_GPU2_BAR_RESERVED = 51;
+//<< [CS_SM2_SNP_MISC_GPU2_BAR]
 // pau/reg00017.H
 
+//>> [CS_SM2_SNP_MISC_GPU3_BAR]
 static const uint64_t CS_SM2_SNP_MISC_GPU3_BAR = 0x100108f5ull;
 
 static const uint32_t CS_SM2_SNP_MISC_GPU3_BAR_ENABLE = 0;
@@ -763,8 +812,10 @@ static const uint32_t CS_SM2_SNP_MISC_GPU3_BAR_SECURE_A12 = 48;
 static const uint32_t CS_SM2_SNP_MISC_GPU3_BAR_CHIP_EQ_GROUP = 49;
 static const uint32_t CS_SM2_SNP_MISC_GPU3_BAR_EXTENDED_MODE = 50;
 static const uint32_t CS_SM2_SNP_MISC_GPU3_BAR_RESERVED = 51;
+//<< [CS_SM2_SNP_MISC_GPU3_BAR]
 // pau/reg00017.H
 
+//>> [CS_SM2_SNP_MISC_GPU4_BAR]
 static const uint64_t CS_SM2_SNP_MISC_GPU4_BAR = 0x100108f6ull;
 
 static const uint32_t CS_SM2_SNP_MISC_GPU4_BAR_ENABLE = 0;
@@ -784,8 +835,10 @@ static const uint32_t CS_SM2_SNP_MISC_GPU4_BAR_SECURE_A12 = 48;
 static const uint32_t CS_SM2_SNP_MISC_GPU4_BAR_CHIP_EQ_GROUP = 49;
 static const uint32_t CS_SM2_SNP_MISC_GPU4_BAR_EXTENDED_MODE = 50;
 static const uint32_t CS_SM2_SNP_MISC_GPU4_BAR_RESERVED = 51;
+//<< [CS_SM2_SNP_MISC_GPU4_BAR]
 // pau/reg00017.H
 
+//>> [CS_SM3_DIR_MISC_DEBUG0_CONFIG]
 static const uint64_t CS_SM3_DIR_MISC_DEBUG0_CONFIG = 0x1001094aull;
 
 static const uint32_t CS_SM3_DIR_MISC_DEBUG0_CONFIG_POD0 = 0;
@@ -813,14 +866,18 @@ static const uint32_t CS_SM3_DIR_MISC_DEBUG0_CONFIG_POD10_LEN = 5;
 static const uint32_t CS_SM3_DIR_MISC_DEBUG0_CONFIG_RESERVED1 = 55;
 static const uint32_t CS_SM3_DIR_MISC_DEBUG0_CONFIG_RESERVED1_LEN = 8;
 static const uint32_t CS_SM3_DIR_MISC_DEBUG0_CONFIG_ACT = 63;
+//<< [CS_SM3_DIR_MISC_DEBUG0_CONFIG]
 // pau/reg00017.H
 
+//>> [CS_SM3_MCP_MISC_CERR_MESSAGE5]
 static const uint64_t CS_SM3_MCP_MISC_CERR_MESSAGE5 = 0x1001092bull;
 
 static const uint32_t CS_SM3_MCP_MISC_CERR_MESSAGE5_CERR_MESSAGE_BITS5 = 0;
 static const uint32_t CS_SM3_MCP_MISC_CERR_MESSAGE5_CERR_MESSAGE_BITS5_LEN = 64;
+//<< [CS_SM3_MCP_MISC_CERR_MESSAGE5]
 // pau/reg00017.H
 
+//>> [CS_SM3_SNP_MISC_CONFIG_RELAXED_BRK2]
 static const uint64_t CS_SM3_SNP_MISC_CONFIG_RELAXED_BRK2 = 0x10010968ull;
 
 static const uint32_t CS_SM3_SNP_MISC_CONFIG_RELAXED_BRK2_CMD_CL_DMA_W = 0;
@@ -886,14 +943,18 @@ static const uint32_t CS_SM3_SNP_MISC_CONFIG_RELAXED_BRK2_SOURCE7_WRENA = 60;
 static const uint32_t CS_SM3_SNP_MISC_CONFIG_RELAXED_BRK2_SOURCE7_RDENA = 61;
 static const uint32_t CS_SM3_SNP_MISC_CONFIG_RELAXED_BRK2_SOURCE7_AWENA = 62;
 static const uint32_t CS_SM3_SNP_MISC_CONFIG_RELAXED_BRK2_SOURCE7_ARENA = 63;
+//<< [CS_SM3_SNP_MISC_CONFIG_RELAXED_BRK2]
 // pau/reg00017.H
 
+//>> [DAT_MISC_CERR_LOG_MASK]
 static const uint64_t DAT_MISC_CERR_LOG_MASK = 0x100109cbull;
 
 static const uint32_t DAT_MISC_CERR_LOG_MASK_CERR_LOG_MASK_BITS = 47;
 static const uint32_t DAT_MISC_CERR_LOG_MASK_CERR_LOG_MASK_BITS_LEN = 17;
+//<< [DAT_MISC_CERR_LOG_MASK]
 // pau/reg00017.H
 
+//>> [DAT_MISC_REM1]
 static const uint64_t DAT_MISC_REM1 = 0x100109ceull;
 
 static const uint32_t DAT_MISC_REM1_PBRX_RTAG = 34;
@@ -903,14 +964,18 @@ static const uint32_t DAT_MISC_REM1_ALU_ADR_LEN = 3;
 static const uint32_t DAT_MISC_REM1_ALU_TYPE = 59;
 static const uint32_t DAT_MISC_REM1_ALU_TYPE_LEN = 4;
 static const uint32_t DAT_MISC_REM1_ALU_SZ = 63;
+//<< [DAT_MISC_REM1]
 // pau/reg00017.H
 
+//>> [DAT_MISC_SCRATCH0]
 static const uint64_t DAT_MISC_SCRATCH0 = 0x100109c3ull;
 
 static const uint32_t DAT_MISC_SCRATCH0_SCRATCH0_IDIAL = 0;
 static const uint32_t DAT_MISC_SCRATCH0_SCRATCH0_IDIAL_LEN = 64;
+//<< [DAT_MISC_SCRATCH0]
 // pau/reg00017.H
 
+//>> [MISC_REGS_BDF2PE_13_CONFIG]
 static const uint64_t MISC_REGS_BDF2PE_13_CONFIG = 0x10010b5dull;
 
 static const uint32_t MISC_REGS_BDF2PE_13_CONFIG_ENABLE = 0;
@@ -920,14 +985,18 @@ static const uint32_t MISC_REGS_BDF2PE_13_CONFIG_PE = 4;
 static const uint32_t MISC_REGS_BDF2PE_13_CONFIG_PE_LEN = 4;
 static const uint32_t MISC_REGS_BDF2PE_13_CONFIG_BDF = 8;
 static const uint32_t MISC_REGS_BDF2PE_13_CONFIG_BDF_LEN = 16;
+//<< [MISC_REGS_BDF2PE_13_CONFIG]
 // pau/reg00017.H
 
+//>> [MISC_REGS_INT_0_CONFIG]
 static const uint64_t MISC_REGS_INT_0_CONFIG = 0x10010b3cull;
 
 static const uint32_t MISC_REGS_INT_0_CONFIG_CONFIG_INT_0 = 0;
 static const uint32_t MISC_REGS_INT_0_CONFIG_CONFIG_INT_0_LEN = 64;
+//<< [MISC_REGS_INT_0_CONFIG]
 // pau/reg00017.H
 
+//>> [MISC_REGS_INT_LOG_0_PE9]
 static const uint64_t MISC_REGS_INT_LOG_0_PE9 = 0x10010b99ull;
 
 static const uint32_t MISC_REGS_INT_LOG_0_PE9_VLD = 0;
@@ -935,8 +1004,10 @@ static const uint32_t MISC_REGS_INT_LOG_0_PE9_LVL = 1;
 static const uint32_t MISC_REGS_INT_LOG_0_PE9_LVL_LEN = 60;
 static const uint32_t MISC_REGS_INT_LOG_0_PE9_RSVD0 = 61;
 static const uint32_t MISC_REGS_INT_LOG_0_PE9_RSVD0_LEN = 3;
+//<< [MISC_REGS_INT_LOG_0_PE9]
 // pau/reg00017.H
 
+//>> [MISC_REGS_INT_LOG_1_PE9]
 static const uint64_t MISC_REGS_INT_LOG_1_PE9 = 0x10010ba9ull;
 
 static const uint32_t MISC_REGS_INT_LOG_1_PE9_VLD = 0;
@@ -946,8 +1017,10 @@ static const uint32_t MISC_REGS_INT_LOG_1_PE9_CQ = 33;
 static const uint32_t MISC_REGS_INT_LOG_1_PE9_CQ_LEN = 24;
 static const uint32_t MISC_REGS_INT_LOG_1_PE9_RSVD0 = 57;
 static const uint32_t MISC_REGS_INT_LOG_1_PE9_RSVD0_LEN = 7;
+//<< [MISC_REGS_INT_LOG_1_PE9]
 // pau/reg00017.H
 
+//>> [MISC_REGS_INT_REQ]
 static const uint64_t MISC_REGS_INT_REQ = 0x10010b47ull;
 
 static const uint32_t MISC_REGS_INT_REQ_00 = 0;
@@ -968,14 +1041,18 @@ static const uint32_t MISC_REGS_INT_REQ_37 = 37;
 static const uint32_t MISC_REGS_INT_REQ_38 = 38;
 static const uint32_t MISC_REGS_INT_REQ_39 = 39;
 static const uint32_t MISC_REGS_INT_REQ_40 = 40;
+//<< [MISC_REGS_INT_REQ]
 // pau/reg00017.H
 
+//>> [MISC_REGS_PESTB_ADDR_PE9]
 static const uint64_t MISC_REGS_PESTB_ADDR_PE9 = 0x10010b89ull;
 
 static const uint32_t MISC_REGS_PESTB_ADDR_PE9_DMA_STOPPED_STATE_ADDR_PE9 = 0;
 static const uint32_t MISC_REGS_PESTB_ADDR_PE9_DMA_STOPPED_STATE_ADDR_PE9_LEN = 37;
+//<< [MISC_REGS_PESTB_ADDR_PE9]
 // pau/reg00017.H
 
+//>> [OTL0_MISC_CONFIG_DEBUG0]
 static const uint64_t OTL0_MISC_CONFIG_DEBUG0 = 0x10010a28ull;
 
 static const uint32_t OTL0_MISC_CONFIG_DEBUG0_0_BYTE0 = 0;
@@ -1003,14 +1080,18 @@ static const uint32_t OTL0_MISC_CONFIG_DEBUG0_0_BYTE10_LEN = 5;
 static const uint32_t OTL0_MISC_CONFIG_DEBUG0_0_RESERVED = 55;
 static const uint32_t OTL0_MISC_CONFIG_DEBUG0_0_RESERVED_LEN = 8;
 static const uint32_t OTL0_MISC_CONFIG_DEBUG0_ACT = 63;
+//<< [OTL0_MISC_CONFIG_DEBUG0]
 // pau/reg00017.H
 
+//>> [OTL0_MISC_CONFIG_TX_DLC]
 static const uint64_t OTL0_MISC_CONFIG_TX_DLC = 0x10010a2cull;
 
 static const uint32_t OTL0_MISC_CONFIG_TX_DLC_CONFIG_TX_DL_CREDITS = 0;
 static const uint32_t OTL0_MISC_CONFIG_TX_DLC_CONFIG_TX_DL_CREDITS_LEN = 10;
+//<< [OTL0_MISC_CONFIG_TX_DLC]
 // pau/reg00017.H
 
+//>> [OTL0_MISC_ERROR_SIG_RXI]
 static const uint64_t OTL0_MISC_ERROR_SIG_RXI = 0x10010a2eull;
 
 static const uint32_t OTL0_MISC_ERROR_SIG_RXI_CAPTURED = 0;
@@ -1018,8 +1099,10 @@ static const uint32_t OTL0_MISC_ERROR_SIG_RXI_ENCODE = 1;
 static const uint32_t OTL0_MISC_ERROR_SIG_RXI_ENCODE_LEN = 7;
 static const uint32_t OTL0_MISC_ERROR_SIG_RXI_SIGNATURE = 8;
 static const uint32_t OTL0_MISC_ERROR_SIG_RXI_SIGNATURE_LEN = 56;
+//<< [OTL0_MISC_ERROR_SIG_RXI]
 // pau/reg00017.H
 
+//>> [OTL1_MISC_CONFIG_DEBUG1]
 static const uint64_t OTL1_MISC_CONFIG_DEBUG1 = 0x10010a59ull;
 
 static const uint32_t OTL1_MISC_CONFIG_DEBUG1_BYTE0 = 0;
@@ -1046,8 +1129,10 @@ static const uint32_t OTL1_MISC_CONFIG_DEBUG1_BYTE10 = 50;
 static const uint32_t OTL1_MISC_CONFIG_DEBUG1_BYTE10_LEN = 5;
 static const uint32_t OTL1_MISC_CONFIG_DEBUG1_RESERVED = 55;
 static const uint32_t OTL1_MISC_CONFIG_DEBUG1_RESERVED_LEN = 9;
+//<< [OTL1_MISC_CONFIG_DEBUG1]
 // pau/reg00017.H
 
+//>> [OTL1_MISC_HAPPI_BAR1]
 static const uint64_t OTL1_MISC_HAPPI_BAR1 = 0x10010a6cull;
 
 static const uint32_t OTL1_MISC_HAPPI_BAR1_ENABLE = 0;
@@ -1057,8 +1142,10 @@ static const uint32_t OTL1_MISC_HAPPI_BAR1_MASK = 22;
 static const uint32_t OTL1_MISC_HAPPI_BAR1_MASK_LEN = 21;
 static const uint32_t OTL1_MISC_HAPPI_BAR1_SUB = 43;
 static const uint32_t OTL1_MISC_HAPPI_BAR1_SUB_LEN = 21;
+//<< [OTL1_MISC_HAPPI_BAR1]
 // pau/reg00017.H
 
+//>> [OTL1_MISC_PMU_CONTROL2]
 static const uint64_t OTL1_MISC_PMU_CONTROL2 = 0x10010a54ull;
 
 static const uint32_t OTL1_MISC_PMU_CONTROL2_C01_DCMASKA = 0;
@@ -1081,16 +1168,20 @@ static const uint32_t OTL1_MISC_PMU_CONTROL2_DCMASK_LATENCY = 40;
 static const uint32_t OTL1_MISC_PMU_CONTROL2_DCMASK_LATENCY_LEN = 8;
 static const uint32_t OTL1_MISC_PMU_CONTROL2_RESERVED2 = 48;
 static const uint32_t OTL1_MISC_PMU_CONTROL2_RESERVED2_LEN = 16;
+//<< [OTL1_MISC_PMU_CONTROL2]
 // pau/reg00017.H
 
+//>> [OTL1_MISC_PSL_TFC_AN]
 static const uint64_t OTL1_MISC_PSL_TFC_AN = 0x10010a7aull;
 
 static const uint32_t OTL1_MISC_PSL_TFC_AN_TFC_ACK = 28;
 static const uint32_t OTL1_MISC_PSL_TFC_AN_C = 29;
 static const uint32_t OTL1_MISC_PSL_TFC_AN_AE = 30;
 static const uint32_t OTL1_MISC_PSL_TFC_AN_R = 31;
+//<< [OTL1_MISC_PSL_TFC_AN]
 // pau/reg00017.H
 
+//>> [XSL_MAIN_XSLOP_VLOG_RGS_OSL_XLATE_CFG0]
 static const uint64_t XSL_MAIN_XSLOP_VLOG_RGS_OSL_XLATE_CFG0 = 0x10010a88ull;
 
 static const uint32_t XSL_MAIN_XSLOP_VLOG_RGS_OSL_XLATE_CFG0_MULTI_AFU_DIAL = 0;
@@ -1099,15 +1190,19 @@ static const uint32_t XSL_MAIN_XSLOP_VLOG_RGS_OSL_XLATE_CFG0_2M_PG_DISABLE_DIAL 
 static const uint32_t XSL_MAIN_XSLOP_VLOG_RGS_OSL_XLATE_CFG0_OPENCAPI3_DIAL = 32;
 static const uint32_t XSL_MAIN_XSLOP_VLOG_RGS_OSL_XLATE_CFG0_KILL_XLATE_TYPE_DIAL = 33;
 static const uint32_t XSL_MAIN_XSLOP_VLOG_RGS_OSL_XLATE_CFG0_KILL_XLATE_TYPE_DIAL_LEN = 2;
+//<< [XSL_MAIN_XSLOP_VLOG_RGS_OSL_XLATE_CFG0]
 // pau/reg00017.H
 
+//>> [XTS_ATSD_HYP3]
 static const uint64_t XTS_ATSD_HYP3 = 0x10010b13ull;
 
 static const uint32_t XTS_ATSD_HYP3_MSRHV = 51;
 static const uint32_t XTS_ATSD_HYP3_LPARID = 52;
 static const uint32_t XTS_ATSD_HYP3_LPARID_LEN = 12;
+//<< [XTS_ATSD_HYP3]
 // pau/reg00017.H
 
+//>> [XTS_REG_DEBUG0_CONFIG]
 static const uint64_t XTS_REG_DEBUG0_CONFIG = 0x10010af6ull;
 
 static const uint32_t XTS_REG_DEBUG0_CONFIG_POD0 = 0;
@@ -1135,7 +1230,10 @@ static const uint32_t XTS_REG_DEBUG0_CONFIG_POD10_LEN = 5;
 static const uint32_t XTS_REG_DEBUG0_CONFIG_RESERVED1 = 55;
 static const uint32_t XTS_REG_DEBUG0_CONFIG_RESERVED1_LEN = 8;
 static const uint32_t XTS_REG_DEBUG0_CONFIG_ACT = 63;
+//<< [XTS_REG_DEBUG0_CONFIG]
 // pau/reg00017.H
+
+//>>THE END<<
 
 #ifndef __PPE_HCODE__
 }

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -39,19 +39,24 @@ namespace phb
 #endif
 
 
+//>> [PHB5_SCOM_UV_SEC_INCL_CMP]
 static const uint64_t PHB5_SCOM_UV_SEC_INCL_CMP = 0x08010906ull;
 
 static const uint32_t PHB5_SCOM_UV_SEC_INCL_CMP_ENABLE = 0;
 static const uint32_t PHB5_SCOM_UV_SEC_INCL_CMP_VALUE = 12;
 static const uint32_t PHB5_SCOM_UV_SEC_INCL_CMP_VALUE_LEN = 40;
+//<< [PHB5_SCOM_UV_SEC_INCL_CMP]
 // phb/reg00009.H
 
+//>> [REGS_MMIOBAR0_MASK_REG]
 static const uint64_t REGS_MMIOBAR0_MASK_REG = 0x0301184full;
 
 static const uint32_t REGS_MMIOBAR0_MASK_REG_PE_MMIO_MASK0 = 0;
 static const uint32_t REGS_MMIOBAR0_MASK_REG_PE_MMIO_MASK0_LEN = 40;
+//<< [REGS_MMIOBAR0_MASK_REG]
 // phb/reg00009.H
 
+//>> [REGS_PBCQMODE_REG]
 static const uint64_t REGS_PBCQMODE_REG = 0x0301184dull;
 
 static const uint32_t REGS_PBCQMODE_REG_PE_PEER2PEER_MODDE = 0;
@@ -60,19 +65,26 @@ static const uint32_t REGS_PBCQMODE_REG_PE_PB_CQ_REGS_CS_ENABLE_SMF = 2;
 static const uint32_t REGS_PBCQMODE_REG_PE_ATOMIC_LITTLE_ENDIAN = 3;
 static const uint32_t REGS_PBCQMODE_REG_PE_RDP2P_DMA_MODE = 4;
 static const uint32_t REGS_PBCQMODE_REG_PE_LDP2P_DMA_MODE = 5;
+//<< [REGS_PBCQMODE_REG]
 // phb/reg00009.H
 
+//>> [REGS_PFIRACTION0_REG]
 static const uint64_t REGS_PFIRACTION0_REG = 0x08010846ull;
 
 static const uint32_t REGS_PFIRACTION0_REG_PFIRACTION0 = 0;
 static const uint32_t REGS_PFIRACTION0_REG_PFIRACTION0_LEN = 6;
+//<< [REGS_PFIRACTION0_REG]
 // phb/reg00009.H
 
+//>> [REGS_PFIRACTION1_REG]
 static const uint64_t REGS_PFIRACTION1_REG = 0x08010847ull;
 
 static const uint32_t REGS_PFIRACTION1_REG_PFIRACTION1 = 0;
 static const uint32_t REGS_PFIRACTION1_REG_PFIRACTION1_LEN = 6;
+//<< [REGS_PFIRACTION1_REG]
 // phb/reg00009.H
+
+//>>THE END<<
 
 #ifndef __PPE_HCODE__
 }

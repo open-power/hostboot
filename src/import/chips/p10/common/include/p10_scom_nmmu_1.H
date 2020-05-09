@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -39,8 +39,12 @@ namespace nmmu
 #endif
 
 
+//>> [FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_WOF_REG]
 static const uint64_t FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_WOF_REG = 0x02010c08ull;
+//<< [FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_WOF_REG]
 // nmmu/reg00001.H
+
+//>>THE END<<
 
 #ifndef __PPE_HCODE__
 }

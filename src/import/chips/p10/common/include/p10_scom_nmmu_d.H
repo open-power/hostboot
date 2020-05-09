@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -39,30 +39,39 @@ namespace nmmu
 #endif
 
 
+//>> [CFG_NMMU_XLAT_CTL_REG1]
 static const uint64_t CFG_NMMU_XLAT_CTL_REG1 = 0x02010c4bull;
 
 static const uint32_t CFG_NMMU_XLAT_CTL_REG1_MM_CFG_XLAT_CTL_PTCR = 0;
 static const uint32_t CFG_NMMU_XLAT_CTL_REG1_MM_CFG_XLAT_CTL_PTCR_LEN = 64;
+//<< [CFG_NMMU_XLAT_CTL_REG1]
 // nmmu/reg00013.H
 
+//>> [FBC_CQ_WRAP_NX_DEBUG_SNAPSHOT_1]
 static const uint64_t FBC_CQ_WRAP_NX_DEBUG_SNAPSHOT_1 = 0x02010c25ull;
 
 static const uint32_t FBC_CQ_WRAP_NX_DEBUG_SNAPSHOT_1_NX_DEBUG_SNAPSHOT_B64_87 = 0;
 static const uint32_t FBC_CQ_WRAP_NX_DEBUG_SNAPSHOT_1_NX_DEBUG_SNAPSHOT_B64_87_LEN = 24;
+//<< [FBC_CQ_WRAP_NX_DEBUG_SNAPSHOT_1]
 // nmmu/reg00013.H
 
+//>> [FIR1_ACTION0_REG]
 static const uint64_t FIR1_ACTION0_REG = 0x02010c46ull;
 
 static const uint32_t FIR1_ACTION0_REG_MM_FIR1_ACTION0 = 0;
 static const uint32_t FIR1_ACTION0_REG_MM_FIR1_ACTION0_LEN = 46;
+//<< [FIR1_ACTION0_REG]
 // nmmu/reg00013.H
 
+//>> [FIR1_ACTION1_REG]
 static const uint64_t FIR1_ACTION1_REG = 0x02010c47ull;
 
 static const uint32_t FIR1_ACTION1_REG_MM_FIR1_ACTION1 = 0;
 static const uint32_t FIR1_ACTION1_REG_MM_FIR1_ACTION1_LEN = 46;
+//<< [FIR1_ACTION1_REG]
 // nmmu/reg00013.H
 
+//>> [NMMU_ERR_INJ]
 static const uint64_t NMMU_ERR_INJ = 0x02010c58ull;
 
 static const uint32_t NMMU_ERR_INJ_RESERVED_0_1 = 0;
@@ -119,13 +128,18 @@ static const uint32_t NMMU_ERR_INJ_MM_ERR_INJ_CXT_CAC_SNGL_SHOT_EN = 59;
 static const uint32_t NMMU_ERR_INJ_MM_ERR_INJ_CXT_CAC_OVERLAP_EN = 60;
 static const uint32_t NMMU_ERR_INJ_MM_ERR_INJ_CXT_CAC_MULT_SEL = 61;
 static const uint32_t NMMU_ERR_INJ_MM_ERR_INJ_CXT_CAC_MULT_SEL_LEN = 3;
+//<< [NMMU_ERR_INJ]
 // nmmu/reg00013.H
 
+//>> [NMMU_PMU0_CTL_REG]
 static const uint64_t NMMU_PMU0_CTL_REG = 0x02010c4dull;
 
 static const uint32_t NMMU_PMU0_CTL_REG_MM_PMU0_CTL = 0;
 static const uint32_t NMMU_PMU0_CTL_REG_MM_PMU0_CTL_LEN = 64;
+//<< [NMMU_PMU0_CTL_REG]
 // nmmu/reg00013.H
+
+//>>THE END<<
 
 #ifndef __PPE_HCODE__
 }

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -39,6 +39,7 @@ namespace mc
 #endif
 
 
+//>> [CLK_REGION]
 static const uint64_t CLK_REGION = 0x0c030006ull;
 
 static const uint32_t CLK_REGION_CLOCK_CMD = 0;
@@ -66,8 +67,10 @@ static const uint32_t CLK_REGION_SEL_THOLD_ARY = 50;
 static const uint32_t CLK_REGION_CLOCK_PULSE_USE_EVEN = 52;
 static const uint32_t CLK_REGION_CLOCK_START_RUNN_SUPPR_FIRST_CLK = 53;
 static const uint32_t CLK_REGION_CLOCK_STOP_RUNN_SUPPR_LAST_CLK = 54;
+//<< [CLK_REGION]
 // mc/reg00000.H
 
+//>> [CPLT_CONF0]
 static const uint64_t CPLT_CONF0_RW = 0x0c000008ull;
 static const uint64_t CPLT_CONF0_WO_CLEAR = 0x0c000028ull;
 static const uint64_t CPLT_CONF0_WO_OR = 0x0c000018ull;
@@ -118,8 +121,10 @@ static const uint32_t CPLT_CONF0_FREE_USAGE_60G = 60;
 static const uint32_t CPLT_CONF0_FREE_USAGE_61G = 61;
 static const uint32_t CPLT_CONF0_FREE_USAGE_62G = 62;
 static const uint32_t CPLT_CONF0_FREE_USAGE_63G = 63;
+//<< [CPLT_CONF0]
 // mc/reg00000.H
 
+//>> [CPLT_CTRL0]
 static const uint64_t CPLT_CTRL0_RW = 0x0c000000ull;
 static const uint64_t CPLT_CTRL0_WO_CLEAR = 0x0c000020ull;
 static const uint64_t CPLT_CTRL0_WO_OR = 0x0c000010ull;
@@ -173,8 +178,10 @@ static const uint32_t CPLT_CTRL0_FREE_USAGE_60A = 60;
 static const uint32_t CPLT_CTRL0_FREE_USAGE_61A = 61;
 static const uint32_t CPLT_CTRL0_FREE_USAGE_62A = 62;
 static const uint32_t CPLT_CTRL0_FREE_USAGE_63A = 63;
+//<< [CPLT_CTRL0]
 // mc/reg00000.H
 
+//>> [EPS_DBG_INST1_COND_REG_2]
 static const uint64_t EPS_DBG_INST1_COND_REG_2 = 0x0c0107c2ull;
 
 static const uint32_t EPS_DBG_INST1_COND_REG_2_CROSS_COUPLE_SELECT_1_A = 0;
@@ -187,8 +194,10 @@ static const uint32_t EPS_DBG_INST1_COND_REG_2_CROSS_COUPLE_SELECT_2_B = 15;
 static const uint32_t EPS_DBG_INST1_COND_REG_2_CROSS_COUPLE_SELECT_2_B_LEN = 5;
 static const uint32_t EPS_DBG_INST1_COND_REG_2_TO_CMP_LT = 20;
 static const uint32_t EPS_DBG_INST1_COND_REG_2_TO_CMP_LT_LEN = 24;
+//<< [EPS_DBG_INST1_COND_REG_2]
 // mc/reg00000.H
 
+//>> [EPS_DBG_INST2_COND_REG_2]
 static const uint64_t EPS_DBG_INST2_COND_REG_2 = 0x0c0107c5ull;
 
 static const uint32_t EPS_DBG_INST2_COND_REG_2_CROSS_COUPLE_SELECT_1_A = 0;
@@ -201,14 +210,18 @@ static const uint32_t EPS_DBG_INST2_COND_REG_2_CROSS_COUPLE_SELECT_2_B = 15;
 static const uint32_t EPS_DBG_INST2_COND_REG_2_CROSS_COUPLE_SELECT_2_B_LEN = 5;
 static const uint32_t EPS_DBG_INST2_COND_REG_2_TO_CMP_LT = 20;
 static const uint32_t EPS_DBG_INST2_COND_REG_2_TO_CMP_LT_LEN = 24;
+//<< [EPS_DBG_INST2_COND_REG_2]
 // mc/reg00000.H
 
+//>> [EPS_DBG_XTRA_TRACE_MODE]
 static const uint64_t EPS_DBG_XTRA_TRACE_MODE = 0x0c0107d1ull;
 
 static const uint32_t EPS_DBG_XTRA_TRACE_MODE_XTRA_TRACE_MODE_DATA = 0;
 static const uint32_t EPS_DBG_XTRA_TRACE_MODE_XTRA_TRACE_MODE_DATA_LEN = 42;
+//<< [EPS_DBG_XTRA_TRACE_MODE]
 // mc/reg00000.H
 
+//>> [EPS_FIR_MODE_REG]
 static const uint64_t EPS_FIR_MODE_REG = 0x0c040088ull;
 
 static const uint32_t EPS_FIR_MODE_REG_XSTOP_LOCK = 0;
@@ -227,8 +240,10 @@ static const uint32_t EPS_FIR_MODE_REG_MODE_REG12 = 12;
 static const uint32_t EPS_FIR_MODE_REG_MODE_REG13 = 13;
 static const uint32_t EPS_FIR_MODE_REG_MODE_REG14 = 14;
 static const uint32_t EPS_FIR_MODE_REG_MODE_REG15 = 15;
+//<< [EPS_FIR_MODE_REG]
 // mc/reg00000.H
 
+//>> [EPS_THERM_WSUB_DTS_TRC_RESULT]
 static const uint64_t EPS_THERM_WSUB_DTS_TRC_RESULT = 0x0c050003ull;
 
 static const uint32_t EPS_THERM_WSUB_DTS_TRC_RESULT_TIMESTAMP_COUNTER_VALUE = 0;
@@ -236,8 +251,10 @@ static const uint32_t EPS_THERM_WSUB_DTS_TRC_RESULT_TIMESTAMP_COUNTER_VALUE_LEN 
 static const uint32_t EPS_THERM_WSUB_DTS_TRC_RESULT_TIMESTAMP_COUNTER_OVERFLOW_ERR = 44;
 static const uint32_t EPS_THERM_WSUB_DTS_TRC_RESULT_DTS_1_RESULT = 48;
 static const uint32_t EPS_THERM_WSUB_DTS_TRC_RESULT_DTS_1_RESULT_LEN = 16;
+//<< [EPS_THERM_WSUB_DTS_TRC_RESULT]
 // mc/reg00000.H
 
+//>> [EPS_THERM_WSUB_ERR_STATUS_REG]
 static const uint64_t EPS_THERM_WSUB_ERR_STATUS_REG = 0x0c050013ull;
 
 static const uint32_t EPS_THERM_WSUB_ERR_STATUS_REG_SERIAL_SHIFTCNT_MODEREG_PARITY_ERR_HOLD = 0;
@@ -271,8 +288,10 @@ static const uint32_t EPS_THERM_WSUB_ERR_STATUS_REG_MEASURE_VOLT_LT = 56;
 static const uint32_t EPS_THERM_WSUB_ERR_STATUS_REG_READ_CPM_LT = 57;
 static const uint32_t EPS_THERM_WSUB_ERR_STATUS_REG_WRITE_CPM_LT = 58;
 static const uint32_t EPS_THERM_WSUB_ERR_STATUS_REG_UNUSED = 59;
+//<< [EPS_THERM_WSUB_ERR_STATUS_REG]
 // mc/reg00000.H
 
+//>> [HOSTATTN]
 static const uint64_t HOSTATTN = 0x0c040004ull;
 
 static const uint32_t HOSTATTN_ANY_HOSTATTN = 0;
@@ -329,8 +348,10 @@ static const uint32_t HOSTATTN_IN50 = 50;
 static const uint32_t HOSTATTN_IN51 = 51;
 static const uint32_t HOSTATTN_IN52 = 52;
 static const uint32_t HOSTATTN_IN53 = 53;
+//<< [HOSTATTN]
 // mc/reg00000.H
 
+//>> [HOSTATTN_MASK]
 static const uint64_t HOSTATTN_MASK_RW = 0x0c040044ull;
 static const uint64_t HOSTATTN_MASK_WO_CLEAR = 0x0c040064ull;
 static const uint64_t HOSTATTN_MASK_WO_OR = 0x0c040054ull;
@@ -388,8 +409,10 @@ static const uint32_t HOSTATTN_MASK_50 = 50;
 static const uint32_t HOSTATTN_MASK_51 = 51;
 static const uint32_t HOSTATTN_MASK_52 = 52;
 static const uint32_t HOSTATTN_MASK_53 = 53;
+//<< [HOSTATTN_MASK]
 // mc/reg00000.H
 
+//>> [MBA_SCOMFIR_MISCFIRQ]
 static const uint64_t MBA_SCOMFIR_MISCFIRQ_RW = 0x0c010f00ull;
 static const uint64_t MBA_SCOMFIR_MISCFIRQ_WO_AND = 0x0c010f01ull;
 static const uint64_t MBA_SCOMFIR_MISCFIRQ_WO_OR = 0x0c010f02ull;
@@ -406,8 +429,10 @@ static const uint32_t MBA_SCOMFIR_MISCFIRQ_MCEBUSEN_REGS_PE = 8;
 static const uint32_t MBA_SCOMFIR_MISCFIRQ_MCWAT_REGS_PE = 9;
 static const uint32_t MBA_SCOMFIR_MISCFIRQ_RESERVED_10 = 10;
 static const uint32_t MBA_SCOMFIR_MISCFIRQ_RESERVED_11 = 11;
+//<< [MBA_SCOMFIR_MISCFIRQ]
 // mc/reg00000.H
 
+//>> [OPCG_ALIGN]
 static const uint64_t OPCG_ALIGN = 0x0c030001ull;
 
 static const uint32_t OPCG_ALIGN_INOP_ALIGN = 0;
@@ -432,14 +457,18 @@ static const uint32_t OPCG_ALIGN_SCAN_RATIO = 47;
 static const uint32_t OPCG_ALIGN_SCAN_RATIO_LEN = 5;
 static const uint32_t OPCG_ALIGN_OPCG_WAIT_CYCLES = 52;
 static const uint32_t OPCG_ALIGN_OPCG_WAIT_CYCLES_LEN = 12;
+//<< [OPCG_ALIGN]
 // mc/reg00000.H
 
+//>> [SCAN_CAPTUREDR]
 static const uint64_t SCAN_CAPTUREDR = 0x0c03c000ull;
 
 static const uint32_t SCAN_CAPTUREDR_SCAN_CAPTUREDR_REG = 0;
 static const uint32_t SCAN_CAPTUREDR_SCAN_CAPTUREDR_REG_LEN = 32;
+//<< [SCAN_CAPTUREDR]
 // mc/reg00000.H
 
+//>> [SCOMFIR_MCFGPM1]
 static const uint64_t SCOMFIR_MCFGPM1 = 0x0c010c30ull;
 
 static const uint32_t SCOMFIR_MCFGPM1_VALID = 0;
@@ -447,14 +476,18 @@ static const uint32_t SCOMFIR_MCFGPM1_GROUP_BASE_ADDRESS = 1;
 static const uint32_t SCOMFIR_MCFGPM1_GROUP_BASE_ADDRESS_LEN = 24;
 static const uint32_t SCOMFIR_MCFGPM1_GROUP_SIZE = 25;
 static const uint32_t SCOMFIR_MCFGPM1_GROUP_SIZE_LEN = 15;
+//<< [SCOMFIR_MCFGPM1]
 // mc/reg00000.H
 
+//>> [SCOMFIR_MCFIRACT2]
 static const uint64_t SCOMFIR_MCFIRACT2 = 0x0c010c09ull;
 
 static const uint32_t SCOMFIR_MCFIRACT2_MCFIRACT2_ACTION_2 = 0;
 static const uint32_t SCOMFIR_MCFIRACT2_MCFIRACT2_ACTION_2_LEN = 24;
+//<< [SCOMFIR_MCFIRACT2]
 // mc/reg00000.H
 
+//>> [SCOMFIR_MCMODE2]
 static const uint64_t SCOMFIR_MCMODE2 = 0x0c010c13ull;
 
 static const uint32_t SCOMFIR_MCMODE2_FORCE_SFSTAT_ACTIVE = 0;
@@ -481,16 +514,20 @@ static const uint32_t SCOMFIR_MCMODE2_CHANNEL1_SUBCHANNEL0_ENABLE = 55;
 static const uint32_t SCOMFIR_MCMODE2_CHANNEL1_SUBCHANNEL1_ENABLE = 56;
 static const uint32_t SCOMFIR_MCMODE2_RESERVED_57_63 = 57;
 static const uint32_t SCOMFIR_MCMODE2_RESERVED_57_63_LEN = 7;
+//<< [SCOMFIR_MCMODE2]
 // mc/reg00000.H
 
+//>> [TRA0_TR0_CONFIG_4]
 static const uint64_t TRA0_TR0_CONFIG_4 = 0x0c010407ull;
 
 static const uint32_t TRA0_TR0_CONFIG_4_A = 0;
 static const uint32_t TRA0_TR0_CONFIG_4_A_LEN = 24;
 static const uint32_t TRA0_TR0_CONFIG_4_B = 24;
 static const uint32_t TRA0_TR0_CONFIG_4_B_LEN = 24;
+//<< [TRA0_TR0_CONFIG_4]
 // mc/reg00000.H
 
+//>> [TRA1_TR0_TRACE_LO_DATA_REG]
 static const uint64_t TRA1_TR0_TRACE_LO_DATA_REG = 0x0c010481ull;
 
 static const uint32_t TRA1_TR0_TRACE_LO_DATA_REG_LO_DATA = 0;
@@ -504,8 +541,10 @@ static const uint32_t TRA1_TR0_TRACE_LO_DATA_REG_WRITE_ON_RUN = 52;
 static const uint32_t TRA1_TR0_TRACE_LO_DATA_REG_RUNNING = 53;
 static const uint32_t TRA1_TR0_TRACE_LO_DATA_REG_HOLD_ADDRESS = 54;
 static const uint32_t TRA1_TR0_TRACE_LO_DATA_REG_HOLD_ADDRESS_LEN = 10;
+//<< [TRA1_TR0_TRACE_LO_DATA_REG]
 // mc/reg00000.H
 
+//>> [XSTOP_MASK]
 static const uint64_t XSTOP_MASK_RW = 0x0c040040ull;
 static const uint64_t XSTOP_MASK_WO_CLEAR = 0x0c040060ull;
 static const uint64_t XSTOP_MASK_WO_OR = 0x0c040050ull;
@@ -563,7 +602,10 @@ static const uint32_t XSTOP_MASK_50 = 50;
 static const uint32_t XSTOP_MASK_51 = 51;
 static const uint32_t XSTOP_MASK_52 = 52;
 static const uint32_t XSTOP_MASK_53 = 53;
+//<< [XSTOP_MASK]
 // mc/reg00000.H
+
+//>>THE END<<
 
 #ifndef __PPE_HCODE__
 }

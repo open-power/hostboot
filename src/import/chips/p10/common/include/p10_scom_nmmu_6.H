@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -39,6 +39,7 @@ namespace nmmu
 #endif
 
 
+//>> [FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG]
 static const uint64_t FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_RW = 0x02010c00ull;
 static const uint64_t FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_AND = 0x02010c01ull;
 static const uint64_t FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_WO_OR = 0x02010c02ull;
@@ -63,7 +64,10 @@ static const uint32_t FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_INT_STATE_ERR_FIR = 16;
 static const uint32_t FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_PBUS_LOAD_LINK_ERR_FIR = 17;
 static const uint32_t FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_PBUS_STORE_LINK_ERR_FIR = 18;
 static const uint32_t FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG_PBUS_LINK_ABORT_FIR = 19;
+//<< [FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_REG]
 // nmmu/reg00006.H
+
+//>>THE END<<
 
 #ifndef __PPE_HCODE__
 }

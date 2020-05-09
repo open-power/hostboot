@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -39,26 +39,33 @@ namespace mcc
 #endif
 
 
+//>> [CRYPTO_DECRYPT_CRYPTONONCEA]
 static const uint64_t CRYPTO_DECRYPT_CRYPTONONCEA = 0x0c010f5eull;
 
 static const uint32_t CRYPTO_DECRYPT_CRYPTONONCEA_NONCEA = 0;
 static const uint32_t CRYPTO_DECRYPT_CRYPTONONCEA_NONCEA_LEN = 64;
+//<< [CRYPTO_DECRYPT_CRYPTONONCEA]
 // mcc/reg00005.H
 
+//>> [CRYPTO_ENCRYPT_CRYPTONONCEB]
 static const uint64_t CRYPTO_ENCRYPT_CRYPTONONCEB = 0x0c010f57ull;
 
 static const uint32_t CRYPTO_ENCRYPT_CRYPTONONCEB_NONCEB = 0;
 static const uint32_t CRYPTO_ENCRYPT_CRYPTONONCEB_NONCEB_LEN = 24;
+//<< [CRYPTO_ENCRYPT_CRYPTONONCEB]
 // mcc/reg00005.H
 
+//>> [DSTL_DSTLTRACK2]
 static const uint64_t DSTL_DSTLTRACK2 = 0x0c010d15ull;
 
 static const uint32_t DSTL_DSTLTRACK2_POOL_CURRENT_COUNT = 0;
 static const uint32_t DSTL_DSTLTRACK2_POOL_CURRENT_COUNT_LEN = 7;
 static const uint32_t DSTL_DSTLTRACK2_READ_WDF_CURRENT_COUNT = 9;
 static const uint32_t DSTL_DSTLTRACK2_READ_WDF_CURRENT_COUNT_LEN = 7;
+//<< [DSTL_DSTLTRACK2]
 // mcc/reg00005.H
 
+//>> [USTL_USTLOCAPIERROR]
 static const uint64_t USTL_USTLOCAPIERROR = 0x0c010e14ull;
 
 static const uint32_t USTL_USTLOCAPIERROR_USTLOCAPIERROR_SUB_CHANNEL_ID = 0;
@@ -66,7 +73,10 @@ static const uint32_t USTL_USTLOCAPIERROR_OCAPIERROR_ERROR_TYPE = 1;
 static const uint32_t USTL_USTLOCAPIERROR_OCAPIERROR_ERROR_TYPE_LEN = 8;
 static const uint32_t USTL_USTLOCAPIERROR_OCAPIERROR_ERROR_INFORMATION = 9;
 static const uint32_t USTL_USTLOCAPIERROR_OCAPIERROR_ERROR_INFORMATION_LEN = 31;
+//<< [USTL_USTLOCAPIERROR]
 // mcc/reg00005.H
+
+//>>THE END<<
 
 #ifndef __PPE_HCODE__
 }

@@ -39,6 +39,7 @@ namespace c
 #endif
 
 
+//>> [CPMS_CCCR]
 static const uint64_t CPMS_CCCR = 0x200e0e70ull;
 
 static const uint32_t CPMS_CCCR_COUNT_MODE = 0;
@@ -55,8 +56,10 @@ static const uint32_t CPMS_CCCR_LO_THRESHOLD = 16;
 static const uint32_t CPMS_CCCR_LO_THRESHOLD_LEN = 8;
 static const uint32_t CPMS_CCCR_SPARE = 24;
 static const uint32_t CPMS_CCCR_SPARE_LEN = 2;
+//<< [CPMS_CCCR]
 // c/reg00004.H
 
+//>> [CPMS_DPCR]
 static const uint64_t CPMS_DPCR = 0x200e0ea4ull;
 
 static const uint32_t CPMS_DPCR_PROXY_SCALE_FACTOR = 0;
@@ -65,8 +68,10 @@ static const uint32_t CPMS_DPCR_PROXY_LEAKAGE_CONSTANT = 12;
 static const uint32_t CPMS_DPCR_PROXY_LEAKAGE_CONSTANT_LEN = 8;
 static const uint32_t CPMS_DPCR_DDP_RECHARGE_VALUE = 20;
 static const uint32_t CPMS_DPCR_DDP_RECHARGE_VALUE_LEN = 7;
+//<< [CPMS_DPCR]
 // c/reg00004.H
 
+//>> [CPMS_PSSR]
 static const uint64_t CPMS_PSSR = 0x200e0e9cull;
 
 static const uint32_t CPMS_PSSR_ACCUM_ERROR = 0;
@@ -84,8 +89,10 @@ static const uint32_t CPMS_PSSR_PITCH_SUB_PERIOD_LEN = 2;
 static const uint32_t CPMS_PSSR_PITCH_PERIOD_TIMER = 50;
 static const uint32_t CPMS_PSSR_PITCH_PERIOD_TIMER_LEN = 13;
 static const uint32_t CPMS_PSSR_PITCH_ACTIVE = 63;
+//<< [CPMS_PSSR]
 // c/reg00004.H
 
+//>> [CPMS_RVCSR]
 static const uint64_t CPMS_RVCSR = 0x200e0e04ull;
 static const uint64_t CPMS_RVCSR_WO_CLEAR = 0x200e0e07ull;
 static const uint64_t CPMS_RVCSR_WO_OR = 0x200e0e06ull;
@@ -98,8 +105,10 @@ static const uint32_t CPMS_RVCSR_RVRM_TUNE_LEN = 6;
 static const uint32_t CPMS_RVCSR_RVID_ACTIVE = 32;
 static const uint32_t CPMS_RVCSR_BYPASS_ACTIVE = 33;
 static const uint32_t CPMS_RVCSR_RVID_ENABLED = 34;
+//<< [CPMS_RVCSR]
 // c/reg00004.H
 
+//>> [EC_LS_LSU_HOLD_OUT_REG11]
 static const uint64_t EC_LS_LSU_HOLD_OUT_REG11 = 0x200206cbull;
 
 static const uint32_t EC_LS_LSU_HOLD_OUT_REG11_00 = 0;
@@ -118,8 +127,10 @@ static const uint32_t EC_LS_LSU_HOLD_OUT_REG11_12 = 12;
 static const uint32_t EC_LS_LSU_HOLD_OUT_REG11_13 = 13;
 static const uint32_t EC_LS_LSU_HOLD_OUT_REG11_14 = 14;
 static const uint32_t EC_LS_LSU_HOLD_OUT_REG11_15 = 15;
+//<< [EC_LS_LSU_HOLD_OUT_REG11]
 // c/reg00004.H
 
+//>> [EC_LS_LSU_HOLD_OUT_REG7]
 static const uint64_t EC_LS_LSU_HOLD_OUT_REG7 = 0x200206c7ull;
 
 static const uint32_t EC_LS_LSU_HOLD_OUT_REG7_LRQ0_OVERFLOW_ERR_HOLD_OUT = 0;
@@ -130,19 +141,25 @@ static const uint32_t EC_LS_LSU_HOLD_OUT_REG7_DMAG_ST0_RES_EADIR_MULTIHIT_RECOV_
 static const uint32_t EC_LS_LSU_HOLD_OUT_REG7_DMAG_ST1_RES_EADIR_MULTIHIT_RECOV_HOLD_OUT = 5;
 static const uint32_t EC_LS_LSU_HOLD_OUT_REG7_DMAG_ST0_RES_EADIR_MULTIHIT_XSTOP_HOLD_OUT = 6;
 static const uint32_t EC_LS_LSU_HOLD_OUT_REG7_DMAG_ST1_RES_EADIR_MULTIHIT_XSTOP_HOLD_OUT = 7;
+//<< [EC_LS_LSU_HOLD_OUT_REG7]
 // c/reg00004.H
 
+//>> [EC_PC_COMMON_SPR_VSU_HOLD_OUT]
 static const uint64_t EC_PC_COMMON_SPR_VSU_HOLD_OUT = 0x200204b6ull;
+//<< [EC_PC_COMMON_SPR_VSU_HOLD_OUT]
 // c/reg00004.H
 
+//>> [EC_PC_FIR_RECOV_THOLD]
 static const uint64_t EC_PC_FIR_RECOV_THOLD = 0x2002044cull;
 
 static const uint32_t EC_PC_FIR_RECOV_THOLD_THRESHOLD_LIMIT = 0;
 static const uint32_t EC_PC_FIR_RECOV_THOLD_THRESHOLD_LIMIT_LEN = 8;
 static const uint32_t EC_PC_FIR_RECOV_THOLD_THRESHOLD_RESET = 8;
 static const uint32_t EC_PC_FIR_RECOV_THOLD_THRESHOLD_RESET_LEN = 2;
+//<< [EC_PC_FIR_RECOV_THOLD]
 // c/reg00004.H
 
+//>> [EC_PC_IMA_EVENT_MASK]
 static const uint64_t EC_PC_IMA_EVENT_MASK = 0x20020400ull;
 
 static const uint32_t EC_PC_IMA_EVENT_MASK_IC_TAP = 30;
@@ -156,27 +173,35 @@ static const uint32_t EC_PC_IMA_EVENT_MASK_EVENT_VTID = 39;
 static const uint32_t EC_PC_IMA_EVENT_MASK_EVENT_VTID_LEN = 2;
 static const uint32_t EC_PC_IMA_EVENT_MASK_EVENT_SELECT = 41;
 static const uint32_t EC_PC_IMA_EVENT_MASK_EVENT_SELECT_LEN = 5;
+//<< [EC_PC_IMA_EVENT_MASK]
 // c/reg00004.H
 
+//>> [EC_PC_SCR5]
 static const uint64_t EC_PC_SCR5 = 0x2002048bull;
+//<< [EC_PC_SCR5]
 // c/reg00004.H
 
+//>> [EC_PC_TOD_SYNC011]
 static const uint64_t EC_PC_TOD_SYNC011 = 0x200204a3ull;
 
 static const uint32_t EC_PC_TOD_SYNC011_TOD = 0;
 static const uint32_t EC_PC_TOD_SYNC011_TOD_LEN = 52;
 static const uint32_t EC_PC_TOD_SYNC011_CHIP_TOD_STATUS = 60;
 static const uint32_t EC_PC_TOD_SYNC011_CHIP_TOD_STATUS_LEN = 4;
+//<< [EC_PC_TOD_SYNC011]
 // c/reg00004.H
 
+//>> [EC_PC_TOD_SYNC100]
 static const uint64_t EC_PC_TOD_SYNC100 = 0x200204a3ull;
 
 static const uint32_t EC_PC_TOD_SYNC100_TOD = 0;
 static const uint32_t EC_PC_TOD_SYNC100_TOD_LEN = 51;
 static const uint32_t EC_PC_TOD_SYNC100_CHIP_TOD_STATUS = 60;
 static const uint32_t EC_PC_TOD_SYNC100_CHIP_TOD_STATUS_LEN = 4;
+//<< [EC_PC_TOD_SYNC100]
 // c/reg00004.H
 
+//>> [L2_L2MISC_L2CERRS_ERR_RPT1]
 static const uint64_t L2_L2MISC_L2CERRS_ERR_RPT1 = 0x20020013ull;
 
 static const uint32_t L2_L2MISC_L2CERRS_ERR_RPT1_14_RCX_UNEXP_IDLE_L3_CRESP_ERR = 0;
@@ -211,8 +236,10 @@ static const uint32_t L2_L2MISC_L2CERRS_ERR_RPT1_14_TMA_LARXA_VS_FRCMISS_SV_ERR 
 static const uint32_t L2_L2MISC_L2CERRS_ERR_RPT1_22_RC_TGT_NODAL_REQ_CRESP_DINC_ERR = 29;
 static const uint32_t L2_L2MISC_L2CERRS_ERR_RPT1_22_SN_TGT_NODAL_REQ_CRESP_DINC_ERR = 30;
 static const uint32_t L2_L2MISC_L2CERRS_ERR_RPT1_14_SNX_FSM_PARITY_ERR = 31;
+//<< [L2_L2MISC_L2CERRS_ERR_RPT1]
 // c/reg00004.H
 
+//>> [L2_L2MISC_L2CERRS_MODE_REG0]
 static const uint64_t L2_L2MISC_L2CERRS_MODE_REG0 = 0x2002000aull;
 
 static const uint32_t L2_L2MISC_L2CERRS_MODE_REG0_CFG_LRU_DIRECT_MAP = 0;
@@ -246,8 +273,10 @@ static const uint32_t L2_L2MISC_L2CERRS_MODE_REG0_CFG_SKIP_GRP_SCOPE_EN = 38;
 static const uint32_t L2_L2MISC_L2CERRS_MODE_REG0_CFG_TM_DTT_DIS = 39;
 static const uint32_t L2_L2MISC_L2CERRS_MODE_REG0_MODE_REG0_SPARE = 40;
 static const uint32_t L2_L2MISC_L2CERRS_MODE_REG0_MODE_REG0_SPARE_LEN = 2;
+//<< [L2_L2MISC_L2CERRS_MODE_REG0]
 // c/reg00004.H
 
+//>> [L2_L2MISC_L2CERRS_TOPOTABLE2]
 static const uint64_t L2_L2MISC_L2CERRS_TOPOTABLE2 = 0x20020016ull;
 
 static const uint32_t L2_L2MISC_L2CERRS_TOPOTABLE2_16_VAL = 0;
@@ -274,16 +303,20 @@ static const uint32_t L2_L2MISC_L2CERRS_TOPOTABLE2_22 = 32;
 static const uint32_t L2_L2MISC_L2CERRS_TOPOTABLE2_22_LEN = 4;
 static const uint32_t L2_L2MISC_L2CERRS_TOPOTABLE2_23 = 36;
 static const uint32_t L2_L2MISC_L2CERRS_TOPOTABLE2_23_LEN = 4;
+//<< [L2_L2MISC_L2CERRS_TOPOTABLE2]
 // c/reg00004.H
 
+//>> [L2TRA_TR1_CONFIG_3]
 static const uint64_t L2TRA_TR1_CONFIG_3 = 0x20020086ull;
 
 static const uint32_t L2TRA_TR1_CONFIG_3_C = 0;
 static const uint32_t L2TRA_TR1_CONFIG_3_C_LEN = 24;
 static const uint32_t L2TRA_TR1_CONFIG_3_D = 24;
 static const uint32_t L2TRA_TR1_CONFIG_3_D_LEN = 24;
+//<< [L2TRA_TR1_CONFIG_3]
 // c/reg00004.H
 
+//>> [L3_MISC_L3CERRS_TOPOLOGY_TBL2_SCOM_RD]
 static const uint64_t L3_MISC_L3CERRS_TOPOLOGY_TBL2_SCOM_RD = 0x20010627ull;
 
 static const uint32_t L3_MISC_L3CERRS_TOPOLOGY_TBL2_SCOM_RD_16_VALID = 0;
@@ -310,8 +343,10 @@ static const uint32_t L3_MISC_L3CERRS_TOPOLOGY_TBL2_SCOM_RD_22 = 32;
 static const uint32_t L3_MISC_L3CERRS_TOPOLOGY_TBL2_SCOM_RD_22_LEN = 4;
 static const uint32_t L3_MISC_L3CERRS_TOPOLOGY_TBL2_SCOM_RD_23 = 36;
 static const uint32_t L3_MISC_L3CERRS_TOPOLOGY_TBL2_SCOM_RD_23_LEN = 4;
+//<< [L3_MISC_L3CERRS_TOPOLOGY_TBL2_SCOM_RD]
 // c/reg00004.H
 
+//>> [NC_NCMISC_NCSCOMS_ERR_RPT_REG]
 static const uint64_t NC_NCMISC_NCSCOMS_ERR_RPT_REG = 0x2001064eull;
 
 static const uint32_t NC_NCMISC_NCSCOMS_ERR_RPT_REG_0_OVERFLOW_ERR = 0;
@@ -349,38 +384,50 @@ static const uint32_t NC_NCMISC_NCSCOMS_ERR_RPT_REG_0_XSQCT_FSM_PERR = 31;
 static const uint32_t NC_NCMISC_NCSCOMS_ERR_RPT_REG_0_LDCTL_FSM_PERR = 32;
 static const uint32_t NC_NCMISC_NCSCOMS_ERR_RPT_REG_0_SNCTL_FSM_PERR = 33;
 static const uint32_t NC_NCMISC_NCSCOMS_ERR_RPT_REG_0_UNEXP_IMA_DATA = 34;
+//<< [NC_NCMISC_NCSCOMS_ERR_RPT_REG]
 // c/reg00004.H
 
+//>> [NC_NCMISC_NCSCOMS_FIR_ACTION0_REG]
 static const uint64_t NC_NCMISC_NCSCOMS_FIR_ACTION0_REG = 0x20010646ull;
 
 static const uint32_t NC_NCMISC_NCSCOMS_FIR_ACTION0_REG_FIR_ACTION0 = 0;
 static const uint32_t NC_NCMISC_NCSCOMS_FIR_ACTION0_REG_FIR_ACTION0_LEN = 29;
+//<< [NC_NCMISC_NCSCOMS_FIR_ACTION0_REG]
 // c/reg00004.H
 
+//>> [NC_NCMISC_NCSCOMS_FIR_ACTION1_REG]
 static const uint64_t NC_NCMISC_NCSCOMS_FIR_ACTION1_REG = 0x20010647ull;
 
 static const uint32_t NC_NCMISC_NCSCOMS_FIR_ACTION1_REG_FIR_ACTION1 = 0;
 static const uint32_t NC_NCMISC_NCSCOMS_FIR_ACTION1_REG_FIR_ACTION1_LEN = 29;
+//<< [NC_NCMISC_NCSCOMS_FIR_ACTION1_REG]
 // c/reg00004.H
 
+//>> [QME_SPWU_FSP]
 static const uint64_t QME_SPWU_FSP = 0x200e0834ull;
 
 static const uint32_t QME_SPWU_FSP_REQ = 0;
 static const uint32_t QME_SPWU_FSP_DONE = 4;
+//<< [QME_SPWU_FSP]
 // c/reg00004.H
 
+//>> [QME_SPWU_HYP]
 static const uint64_t QME_SPWU_HYP = 0x200e083cull;
 
 static const uint32_t QME_SPWU_HYP_REQ = 0;
 static const uint32_t QME_SPWU_HYP_DONE = 4;
+//<< [QME_SPWU_HYP]
 // c/reg00004.H
 
+//>> [QME_SPWU_OCC]
 static const uint64_t QME_SPWU_OCC = 0x200e0838ull;
 
 static const uint32_t QME_SPWU_OCC_REQ = 0;
 static const uint32_t QME_SPWU_OCC_DONE = 4;
+//<< [QME_SPWU_OCC]
 // c/reg00004.H
 
+//>> [QME_SSH_FSP]
 static const uint64_t QME_SSH_FSP = 0x200e0824ull;
 
 static const uint32_t QME_SSH_FSP_STOP_GATED = 0;
@@ -395,8 +442,10 @@ static const uint32_t QME_SSH_FSP_DEEPEST_REQ_STOP_LEVEL = 12;
 static const uint32_t QME_SSH_FSP_DEEPEST_REQ_STOP_LEVEL_LEN = 4;
 static const uint32_t QME_SSH_FSP_DEEPEST_ACT_STOP_LEVEL = 16;
 static const uint32_t QME_SSH_FSP_DEEPEST_ACT_STOP_LEVEL_LEN = 4;
+//<< [QME_SSH_FSP]
 // c/reg00004.H
 
+//>> [QME_SSH_HYP]
 static const uint64_t QME_SSH_HYP = 0x200e082cull;
 
 static const uint32_t QME_SSH_HYP_STOP_GATED = 0;
@@ -411,8 +460,10 @@ static const uint32_t QME_SSH_HYP_DEEPEST_REQ_STOP_LEVEL = 12;
 static const uint32_t QME_SSH_HYP_DEEPEST_REQ_STOP_LEVEL_LEN = 4;
 static const uint32_t QME_SSH_HYP_DEEPEST_ACT_STOP_LEVEL = 16;
 static const uint32_t QME_SSH_HYP_DEEPEST_ACT_STOP_LEVEL_LEN = 4;
+//<< [QME_SSH_HYP]
 // c/reg00004.H
 
+//>> [QME_SSH_OCC]
 static const uint64_t QME_SSH_OCC = 0x200e0828ull;
 
 static const uint32_t QME_SSH_OCC_STOP_GATED = 0;
@@ -427,13 +478,18 @@ static const uint32_t QME_SSH_OCC_DEEPEST_REQ_STOP_LEVEL = 12;
 static const uint32_t QME_SSH_OCC_DEEPEST_REQ_STOP_LEVEL_LEN = 4;
 static const uint32_t QME_SSH_OCC_DEEPEST_ACT_STOP_LEVEL = 16;
 static const uint32_t QME_SSH_OCC_DEEPEST_ACT_STOP_LEVEL_LEN = 4;
+//<< [QME_SSH_OCC]
 // c/reg00004.H
 
+//>> [WRITE_PROTECT_ENABLE_REG]
 static const uint64_t WRITE_PROTECT_ENABLE_REG = 0x20010005ull;
 
 static const uint32_t WRITE_PROTECT_ENABLE_REG_ENABLE_RING_LOCKING = 0;
 static const uint32_t WRITE_PROTECT_ENABLE_REG_RESERVED_RING_LOCKING = 1;
+//<< [WRITE_PROTECT_ENABLE_REG]
 // c/reg00004.H
+
+//>>THE END<<
 
 #ifndef __PPE_HCODE__
 }

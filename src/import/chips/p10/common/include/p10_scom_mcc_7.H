@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -39,6 +39,7 @@ namespace mcc
 #endif
 
 
+//>> [ATCL_CL_CLSCOM_MCBUSYQ]
 static const uint64_t ATCL_CL_CLSCOM_MCBUSYQ = 0x0c010c27ull;
 
 static const uint32_t ATCL_CL_CLSCOM_MCBUSYQ_ENABLE_BUSY_COUNTERS = 0;
@@ -53,8 +54,10 @@ static const uint32_t ATCL_CL_CLSCOM_MCBUSYQ_BUSY_COUNTER_THRESHOLD2_LEN = 10;
 static const uint32_t ATCL_CL_CLSCOM_MCBUSYQ_ENABLE_AGGRESSIVE_BUSY = 34;
 static const uint32_t ATCL_CL_CLSCOM_MCBUSYQ_RSVD_35_43 = 35;
 static const uint32_t ATCL_CL_CLSCOM_MCBUSYQ_RSVD_35_43_LEN = 9;
+//<< [ATCL_CL_CLSCOM_MCBUSYQ]
 // mcc/reg00007.H
 
+//>> [ATCL_CL_CLSCOM_MCPERF3]
 static const uint64_t ATCL_CL_CLSCOM_MCPERF3 = 0x0c010c2bull;
 
 static const uint32_t ATCL_CL_CLSCOM_MCPERF3_EN_DROP_PLS_F_FULL = 0;
@@ -103,14 +106,18 @@ static const uint32_t ATCL_CL_CLSCOM_MCPERF3_DISABLE_RETRY_AMO_HPC_WR_BAD_CR = 5
 static const uint32_t ATCL_CL_CLSCOM_MCPERF3_EN_INBAND_NO_DISP_WIN = 57;
 static const uint32_t ATCL_CL_CLSCOM_MCPERF3_INBAND_NO_DISP_THRESH = 58;
 static const uint32_t ATCL_CL_CLSCOM_MCPERF3_INBAND_NO_DISP_THRESH_LEN = 6;
+//<< [ATCL_CL_CLSCOM_MCPERF3]
 // mcc/reg00007.H
 
+//>> [CRYPTO_ENCRYPT_CRYPTOKEY1A]
 static const uint64_t CRYPTO_ENCRYPT_CRYPTOKEY1A = 0x0c010f52ull;
 
 static const uint32_t CRYPTO_ENCRYPT_CRYPTOKEY1A_KEY1A = 0;
 static const uint32_t CRYPTO_ENCRYPT_CRYPTOKEY1A_KEY1A_LEN = 64;
+//<< [CRYPTO_ENCRYPT_CRYPTOKEY1A]
 // mcc/reg00007.H
 
+//>> [DSTL_DSTLINJ]
 static const uint64_t DSTL_DSTLINJ = 0x0c010d0dull;
 
 static const uint32_t DSTL_DSTLINJ_ERR_INJ_TRIGGER = 0;
@@ -119,14 +126,18 @@ static const uint32_t DSTL_DSTLINJ_ERR_INJ_TYPE = 2;
 static const uint32_t DSTL_DSTLINJ_ERR_INJ_SUBCH_SEL = 3;
 static const uint32_t DSTL_DSTLINJ_RESERVED_4_15 = 4;
 static const uint32_t DSTL_DSTLINJ_RESERVED_4_15_LEN = 12;
+//<< [DSTL_DSTLINJ]
 // mcc/reg00007.H
 
+//>> [USTL_USTLCFG2]
 static const uint64_t USTL_USTLCFG2 = 0x0c010e17ull;
 
 static const uint32_t USTL_USTLCFG2_USTLCFG2_RESP_QUEUE_STALL_THRESH = 0;
 static const uint32_t USTL_USTLCFG2_USTLCFG2_RESP_QUEUE_STALL_THRESH_LEN = 6;
+//<< [USTL_USTLCFG2]
 // mcc/reg00007.H
 
+//>> [WRITE_READCFG]
 static const uint64_t WRITE_READCFG = 0x0c010f4dull;
 
 static const uint32_t WRITE_READCFG_CFG_RD_EINJ_TARGET = 0;
@@ -156,8 +167,10 @@ static const uint32_t WRITE_READCFG_CFG_RD_WAT_STALL_EVENT = 36;
 static const uint32_t WRITE_READCFG_CFG_RD_WAT_STALL_EVENT_LEN = 2;
 static const uint32_t WRITE_READCFG_READCFG_RESERVED_38_39 = 38;
 static const uint32_t WRITE_READCFG_READCFG_RESERVED_38_39_LEN = 2;
+//<< [WRITE_READCFG]
 // mcc/reg00007.H
 
+//>> [WRITE_WRT_DSTL_ECC]
 static const uint64_t WRITE_WRT_DSTL_ECC = 0x0c010f4cull;
 
 static const uint32_t WRITE_WRT_DSTL_ECC_0_ERR_TYPE = 0;
@@ -176,7 +189,10 @@ static const uint32_t WRITE_WRT_DSTL_ECC_3_ERR_TYPE = 48;
 static const uint32_t WRITE_WRT_DSTL_ECC_3_ERR_TYPE_LEN = 3;
 static const uint32_t WRITE_WRT_DSTL_ECC_3_SYNDROME = 56;
 static const uint32_t WRITE_WRT_DSTL_ECC_3_SYNDROME_LEN = 8;
+//<< [WRITE_WRT_DSTL_ECC]
 // mcc/reg00007.H
+
+//>>THE END<<
 
 #ifndef __PPE_HCODE__
 }

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -39,21 +39,28 @@ namespace phb
 #endif
 
 
+//>> [REGS_NFIRACTION0_REG]
 static const uint64_t REGS_NFIRACTION0_REG = 0x03011846ull;
 
 static const uint32_t REGS_NFIRACTION0_REG_NFIRACTION0 = 0;
 static const uint32_t REGS_NFIRACTION0_REG_NFIRACTION0_LEN = 28;
+//<< [REGS_NFIRACTION0_REG]
 // phb/reg00003.H
 
+//>> [REGS_NFIRACTION1_REG]
 static const uint64_t REGS_NFIRACTION1_REG = 0x03011847ull;
 
 static const uint32_t REGS_NFIRACTION1_REG_NFIRACTION1 = 0;
 static const uint32_t REGS_NFIRACTION1_REG_NFIRACTION1_LEN = 28;
+//<< [REGS_NFIRACTION1_REG]
 // phb/reg00003.H
 
+//>> [REGS_RESERVED1_REG]
 static const uint64_t REGS_RESERVED1_REG = 0x0801084cull;
+//<< [REGS_RESERVED1_REG]
 // phb/reg00003.H
 
+//>> [RSB_REGS_WOF_REG]
 static const uint64_t RSB_REGS_WOF_REG = 0x08010910ull;
 
 static const uint32_t RSB_REGS_WOF_REG_AIB_COMMAND_INVALID = 0;
@@ -120,8 +127,10 @@ static const uint32_t RSB_REGS_WOF_REG_TCE_ECC_CORRECTABLE_ERROR = 60;
 static const uint32_t RSB_REGS_WOF_REG_TCE_ECC_UNCORRECTABLE_ERROR = 61;
 static const uint32_t RSB_REGS_WOF_REG_TCE_RESERVED01 = 62;
 static const uint32_t RSB_REGS_WOF_REG_LEM_FIR_INTERNAL_PARITY_ERROR = 63;
+//<< [RSB_REGS_WOF_REG]
 // phb/reg00003.H
 
+//>> [RSB_SCOM_SSR_PLB_PLAP_PCI_DLR_LAP_PASR]
 static const uint64_t RSB_SCOM_SSR_PLB_PLAP_PCI_DLR_LAP_PASR = 0x08010913ull;
 
 static const uint32_t RSB_SCOM_SSR_PLB_PLAP_PCI_DLR_LAP_PASR_PHB5_DLR_PASR_DL_LINK_POPULATED = 0;
@@ -132,7 +141,10 @@ static const uint32_t RSB_SCOM_SSR_PLB_PLAP_PCI_DLR_LAP_PASR_PHB5_DLR_PASR_DL_PC
 static const uint32_t RSB_SCOM_SSR_PLB_PLAP_PCI_DLR_LAP_PASR_PHB5_DLR_PASR_DL_PCI_SIZE_LEN = 2;
 static const uint32_t RSB_SCOM_SSR_PLB_PLAP_PCI_DLR_LAP_PASR_DL_ENABLE = 10;
 static const uint32_t RSB_SCOM_SSR_PLB_PLAP_PCI_DLR_LAP_PASR_PHB5_DLR_PASR_FREEZE_INFO = 11;
+//<< [RSB_SCOM_SSR_PLB_PLAP_PCI_DLR_LAP_PASR]
 // phb/reg00003.H
+
+//>>THE END<<
 
 #ifndef __PPE_HCODE__
 }

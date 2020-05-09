@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -39,12 +39,15 @@ namespace mcc
 #endif
 
 
+//>> [DSTL_DSTLFIRACT0]
 static const uint64_t DSTL_DSTLFIRACT0 = 0x0c010d06ull;
 
 static const uint32_t DSTL_DSTLFIRACT0_DSTLFIRACT0_ACTION_0 = 0;
 static const uint32_t DSTL_DSTLFIRACT0_DSTLFIRACT0_ACTION_0_LEN = 39;
+//<< [DSTL_DSTLFIRACT0]
 // mcc/reg00012.H
 
+//>> [DSTL_DSTLPSAVE1]
 static const uint64_t DSTL_DSTLPSAVE1 = 0x0c010d13ull;
 
 static const uint32_t DSTL_DSTLPSAVE1_MASTER_PSAVE_A_LUC = 0;
@@ -71,8 +74,10 @@ static const uint32_t DSTL_DSTLPSAVE1_MASTER_PSAVE_WSIZE = 56;
 static const uint32_t DSTL_DSTLPSAVE1_MASTER_PSAVE_WSIZE_LEN = 3;
 static const uint32_t DSTL_DSTLPSAVE1_RESERVED_59_63 = 59;
 static const uint32_t DSTL_DSTLPSAVE1_RESERVED_59_63_LEN = 5;
+//<< [DSTL_DSTLPSAVE1]
 // mcc/reg00012.H
 
+//>> [DSTL_DSTLTRACK]
 static const uint64_t DSTL_DSTLTRACK = 0x0c010d0full;
 
 static const uint32_t DSTL_DSTLTRACK_CHANA_BUFFER_TLXDCP0_AVAILABLE = 0;
@@ -93,8 +98,10 @@ static const uint32_t DSTL_DSTLTRACK_TLXVC3_CREDIT_TOTAL_SHADOW = 44;
 static const uint32_t DSTL_DSTLTRACK_TLXVC3_CREDIT_TOTAL_SHADOW_LEN = 4;
 static const uint32_t DSTL_DSTLTRACK_TLXDCP0_CREDIT_TOTAL_SHADOW = 50;
 static const uint32_t DSTL_DSTLTRACK_TLXDCP0_CREDIT_TOTAL_SHADOW_LEN = 7;
+//<< [DSTL_DSTLTRACK]
 // mcc/reg00012.H
 
+//>> [USTL_USTLDBG]
 static const uint64_t USTL_USTLDBG = 0x0c010e0dull;
 
 static const uint32_t USTL_USTLDBG_A_STOP_LOL = 0;
@@ -113,7 +120,10 @@ static const uint32_t USTL_USTLDBG_A_FORCE_BOGUS = 24;
 static const uint32_t USTL_USTLDBG_A_FORCE_BOGUS_LEN = 4;
 static const uint32_t USTL_USTLDBG_B_FORCE_BOGUS = 28;
 static const uint32_t USTL_USTLDBG_B_FORCE_BOGUS_LEN = 4;
+//<< [USTL_USTLDBG]
 // mcc/reg00012.H
+
+//>>THE END<<
 
 #ifndef __PPE_HCODE__
 }

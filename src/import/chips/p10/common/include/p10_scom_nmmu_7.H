@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -39,6 +39,7 @@ namespace nmmu
 #endif
 
 
+//>> [CFG_NMMU_CTL_SLB]
 static const uint64_t CFG_NMMU_CTL_SLB = 0x02010c54ull;
 
 static const uint32_t CFG_NMMU_CTL_SLB_MM_CFG_NMMU_CTL_SLB_MBR_DIS = 0;
@@ -71,25 +72,34 @@ static const uint32_t CFG_NMMU_CTL_SLB_RESERVED_53_56_LEN = 4;
 static const uint32_t CFG_NMMU_CTL_SLB_MM_CFG_NMMU_CTL_SLB_TWSM_11_1_MODE_ENA = 57;
 static const uint32_t CFG_NMMU_CTL_SLB_MM_CFG_NMMU_CTL_SLB_SNGL_SHOT_ENA = 58;
 static const uint32_t CFG_NMMU_CTL_SLB_MM_CFG_NMMU_CTL_SLB_FBC_SNGL_SHOT_HOLDOFF_ENA = 59;
+//<< [CFG_NMMU_CTL_SLB]
 // nmmu/reg00007.H
 
+//>> [CFG_NMMU_XLAT_CTL_REG2]
 static const uint64_t CFG_NMMU_XLAT_CTL_REG2 = 0x02010c4cull;
 
 static const uint32_t CFG_NMMU_XLAT_CTL_REG2_MM_CFG_XLAT_CTL_URMOR = 0;
 static const uint32_t CFG_NMMU_XLAT_CTL_REG2_MM_CFG_XLAT_CTL_URMOR_LEN = 64;
+//<< [CFG_NMMU_XLAT_CTL_REG2]
 // nmmu/reg00007.H
 
+//>> [FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_ACTION0_REG]
 static const uint64_t FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_ACTION0_REG = 0x02010c06ull;
 
 static const uint32_t FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_ACTION0_REG_NX_CQ_FIR_ACTION0 = 0;
 static const uint32_t FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_ACTION0_REG_NX_CQ_FIR_ACTION0_LEN = 20;
+//<< [FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_ACTION0_REG]
 // nmmu/reg00007.H
 
+//>> [FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_ACTION1_REG]
 static const uint64_t FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_ACTION1_REG = 0x02010c07ull;
 
 static const uint32_t FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_ACTION1_REG_NX_CQ_FIR_ACTION1 = 0;
 static const uint32_t FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_ACTION1_REG_NX_CQ_FIR_ACTION1_LEN = 20;
+//<< [FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_ACTION1_REG]
 // nmmu/reg00007.H
+
+//>>THE END<<
 
 #ifndef __PPE_HCODE__
 }

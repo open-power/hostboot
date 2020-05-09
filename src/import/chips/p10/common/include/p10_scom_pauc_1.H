@@ -39,6 +39,7 @@ namespace pauc
 #endif
 
 
+//>> [DBG_CBS_CC]
 static const uint64_t DBG_CBS_CC = 0x10030013ull;
 
 static const uint32_t DBG_CBS_CC_DBG_RESET_EP = 0;
@@ -65,8 +66,10 @@ static const uint32_t DBG_CBS_CC_DBG_PCB_REQUEST_SINCE_RESET = 28;
 static const uint32_t DBG_CBS_CC_DBG_PARANOIA_TEST_ENABLE_CHANGE = 29;
 static const uint32_t DBG_CBS_CC_DBG_PARANOIA_VITL_CLKOFF_CHANGE = 30;
 static const uint32_t DBG_CBS_CC_TP_TPFSI_CBS_ACK = 31;
+//<< [DBG_CBS_CC]
 // pauc/reg00001.H
 
+//>> [DL_PPE_WRAP_MIB_XISGB]
 static const uint64_t DL_PPE_WRAP_MIB_XISGB = 0x10012c58ull;
 
 static const uint32_t DL_PPE_WRAP_MIB_XISGB_SGB_STORE_ADDRESS = 0;
@@ -75,8 +78,10 @@ static const uint32_t DL_PPE_WRAP_MIB_XISGB_MEM_IMPRECISE_ERROR_PENDING = 35;
 static const uint32_t DL_PPE_WRAP_MIB_XISGB_SGB_BYTE_VALID = 36;
 static const uint32_t DL_PPE_WRAP_MIB_XISGB_SGB_BYTE_VALID_LEN = 4;
 static const uint32_t DL_PPE_WRAP_MIB_XISGB_SGB_FLUSH_PENDING = 63;
+//<< [DL_PPE_WRAP_MIB_XISGB]
 // pauc/reg00001.H
 
+//>> [EPS_PSC_ADDR_TRAP_REG]
 static const uint64_t EPS_PSC_ADDR_TRAP_REG = 0x10010003ull;
 
 static const uint32_t EPS_PSC_ADDR_TRAP_REG_PCB_ADDRESS_OF_LAST_TRANSACTION_WITH_ERROR = 0;
@@ -91,8 +96,10 @@ static const uint32_t EPS_PSC_ADDR_TRAP_REG_SATELLITE_ACKNOWLEDGE_BIT_ACCESS_VIO
 static const uint32_t EPS_PSC_ADDR_TRAP_REG_SATELLITE_ACKNOWLEDGE_BIT_INVALID_REGISTER = 34;
 static const uint32_t EPS_PSC_ADDR_TRAP_REG_LAST_MASTERID = 35;
 static const uint32_t EPS_PSC_ADDR_TRAP_REG_LAST_MASTERID_LEN = 4;
+//<< [EPS_PSC_ADDR_TRAP_REG]
 // pauc/reg00001.H
 
+//>> [EPS_PSC_PSCOM_MODE_REG]
 static const uint64_t EPS_PSC_PSCOM_MODE_REG = 0x10010000ull;
 
 static const uint32_t EPS_PSC_PSCOM_MODE_REG_ABORT_ON_PCB_ADDR_PARITY_ERROR = 0;
@@ -105,13 +112,17 @@ static const uint32_t EPS_PSC_PSCOM_MODE_REG_FORCE_ALL_RINGS = 7;
 static const uint32_t EPS_PSC_PSCOM_MODE_REG_FSM_SELFRESET_ON_STATEVEC_PARITYERROR_ENABLE = 8;
 static const uint32_t EPS_PSC_PSCOM_MODE_REG_RESERVED_PSCOM_MODE_LT = 9;
 static const uint32_t EPS_PSC_PSCOM_MODE_REG_RESERVED_PSCOM_MODE_LT_LEN = 3;
+//<< [EPS_PSC_PSCOM_MODE_REG]
 // pauc/reg00001.H
 
+//>> [HEARTBEAT_REG]
 static const uint64_t HEARTBEAT_REG = 0x100f0018ull;
 
 static const uint32_t HEARTBEAT_REG_HEARTBEAT_DEAD = 0;
+//<< [HEARTBEAT_REG]
 // pauc/reg00001.H
 
+//>> [OPCG_CAPT3]
 static const uint64_t OPCG_CAPT3 = 0x10030012ull;
 
 static const uint32_t OPCG_CAPT3_07EVEN = 4;
@@ -138,8 +149,10 @@ static const uint32_t OPCG_CAPT3_12EVEN = 54;
 static const uint32_t OPCG_CAPT3_12EVEN_LEN = 5;
 static const uint32_t OPCG_CAPT3_12ODD = 59;
 static const uint32_t OPCG_CAPT3_12ODD_LEN = 5;
+//<< [OPCG_CAPT3]
 // pauc/reg00001.H
 
+//>> [PB_PMU0_TLPM_COUNTER]
 static const uint64_t PB_PMU0_TLPM_COUNTER = 0x1001181bull;
 
 static const uint32_t PB_PMU0_TLPM_COUNTER_0 = 0;
@@ -150,8 +163,10 @@ static const uint32_t PB_PMU0_TLPM_COUNTER_2 = 32;
 static const uint32_t PB_PMU0_TLPM_COUNTER_2_LEN = 16;
 static const uint32_t PB_PMU0_TLPM_COUNTER_3 = 48;
 static const uint32_t PB_PMU0_TLPM_COUNTER_3_LEN = 16;
+//<< [PB_PMU0_TLPM_COUNTER]
 // pauc/reg00001.H
 
+//>> [PHY_PPE_WRAP_MIB_XIICAC]
 static const uint64_t PHY_PPE_WRAP_MIB_XIICAC = 0x10012c19ull;
 
 static const uint32_t PHY_PPE_WRAP_MIB_XIICAC_ICACHE_TAG_ADDR = 0;
@@ -166,16 +181,20 @@ static const uint32_t PHY_PPE_WRAP_MIB_XIICAC_ICACHE_LINE2_VALID_LEN = 4;
 static const uint32_t PHY_PPE_WRAP_MIB_XIICAC_ICACHE_LINE_PTR = 45;
 static const uint32_t PHY_PPE_WRAP_MIB_XIICAC_ICACHE_LINE2_ERR = 46;
 static const uint32_t PHY_PPE_WRAP_MIB_XIICAC_ICACHE_PREFETCH_PENDING = 47;
+//<< [PHY_PPE_WRAP_MIB_XIICAC]
 // pauc/reg00001.H
 
+//>> [PHY_PPE_WRAP_SCOM_FLAGS]
 static const uint64_t PHY_PPE_WRAP_SCOM_FLAGS_RW = 0x10012c23ull;
 static const uint64_t PHY_PPE_WRAP_SCOM_FLAGS_WO_CLEAR = 0x10012c25ull;
 static const uint64_t PHY_PPE_WRAP_SCOM_FLAGS_WO_OR = 0x10012c24ull;
 
 static const uint32_t PHY_PPE_WRAP_SCOM_FLAGS_SCOM_PPE_FLAGS_FIELD = 0;
 static const uint32_t PHY_PPE_WRAP_SCOM_FLAGS_SCOM_PPE_FLAGS_FIELD_LEN = 16;
+//<< [PHY_PPE_WRAP_SCOM_FLAGS]
 // pauc/reg00001.H
 
+//>> [PHY_PPE_WRAP_SCOM_FUNC]
 static const uint64_t PHY_PPE_WRAP_SCOM_FUNC = 0x10012c27ull;
 
 static const uint32_t PHY_PPE_WRAP_SCOM_FUNC_EOL_SLOW_TOGGLE = 0;
@@ -183,54 +202,71 @@ static const uint32_t PHY_PPE_WRAP_SCOM_FUNC_EOL_FAST_TOGGLE = 1;
 static const uint32_t PHY_PPE_WRAP_SCOM_FUNC_PPE_INTERRUPT = 2;
 static const uint32_t PHY_PPE_WRAP_SCOM_FUNC_PPE_FUNC_SPARES = 3;
 static const uint32_t PHY_PPE_WRAP_SCOM_FUNC_PPE_FUNC_SPARES_LEN = 13;
+//<< [PHY_PPE_WRAP_SCOM_FUNC]
 // pauc/reg00001.H
 
+//>> [RECOV_INTERRUPT_REG]
 static const uint64_t RECOV_INTERRUPT_REG = 0x100f001bull;
 
 static const uint32_t RECOV_INTERRUPT_REG_RECOV = 0;
+//<< [RECOV_INTERRUPT_REG]
 // pauc/reg00001.H
 
+//>> [SCAN32]
 static const uint64_t SCAN32 = 0x10038000ull;
 
 static const uint32_t SCAN32_SCAN32_REG = 0;
 static const uint32_t SCAN32_SCAN32_REG_LEN = 32;
+//<< [SCAN32]
 // pauc/reg00001.H
 
+//>> [SCAN64]
 static const uint64_t SCAN64 = 0x1003e000ull;
 
 static const uint32_t SCAN64_SCAN64_REG = 0;
 static const uint32_t SCAN64_SCAN64_REG_LEN = 64;
+//<< [SCAN64]
 // pauc/reg00001.H
 
+//>> [TRA0_TR0_TRACE_HI_DATA_REG]
 static const uint64_t TRA0_TR0_TRACE_HI_DATA_REG = 0x10010400ull;
 
 static const uint32_t TRA0_TR0_TRACE_HI_DATA_REG_TRACE_HI_DATA = 0;
 static const uint32_t TRA0_TR0_TRACE_HI_DATA_REG_TRACE_HI_DATA_LEN = 64;
+//<< [TRA0_TR0_TRACE_HI_DATA_REG]
 // pauc/reg00001.H
 
+//>> [TRA0_TR1_CONFIG_2]
 static const uint64_t TRA0_TR1_CONFIG_2 = 0x10010445ull;
 
 static const uint32_t TRA0_TR1_CONFIG_2_A = 0;
 static const uint32_t TRA0_TR1_CONFIG_2_A_LEN = 24;
 static const uint32_t TRA0_TR1_CONFIG_2_B = 24;
 static const uint32_t TRA0_TR1_CONFIG_2_B_LEN = 24;
+//<< [TRA0_TR1_CONFIG_2]
 // pauc/reg00001.H
 
+//>> [TRA1_TR0_CONFIG_4]
 static const uint64_t TRA1_TR0_CONFIG_4 = 0x10010487ull;
 
 static const uint32_t TRA1_TR0_CONFIG_4_A = 0;
 static const uint32_t TRA1_TR0_CONFIG_4_A_LEN = 24;
 static const uint32_t TRA1_TR0_CONFIG_4_B = 24;
 static const uint32_t TRA1_TR0_CONFIG_4_B_LEN = 24;
+//<< [TRA1_TR0_CONFIG_4]
 // pauc/reg00001.H
 
+//>> [TXIRLM_REGS_TX_IMPCAL_SWO2_PB]
 static const uint64_t TXIRLM_REGS_TX_IMPCAL_SWO2_PB = 0x800f3dc010012c3full;
 
 static const uint32_t TXIRLM_REGS_TX_IMPCAL_SWO2_PB_IN_VAL = 48;
 static const uint32_t TXIRLM_REGS_TX_IMPCAL_SWO2_PB_IN_VAL_LEN = 7;
 static const uint32_t TXIRLM_REGS_TX_IMPCAL_SWO2_PB_AX_VAL = 55;
 static const uint32_t TXIRLM_REGS_TX_IMPCAL_SWO2_PB_AX_VAL_LEN = 7;
+//<< [TXIRLM_REGS_TX_IMPCAL_SWO2_PB]
 // pauc/reg00001.H
+
+//>>THE END<<
 
 #ifndef __PPE_HCODE__
 }

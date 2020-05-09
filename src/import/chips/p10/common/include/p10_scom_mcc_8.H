@@ -39,6 +39,7 @@ namespace mcc
 #endif
 
 
+//>> [ATCL_CL_CLSCOM_MCEPSQ]
 static const uint64_t ATCL_CL_CLSCOM_MCEPSQ = 0x0c010c26ull;
 
 static const uint32_t ATCL_CL_CLSCOM_MCEPSQ_JITTER_EPSILON = 0;
@@ -55,14 +56,18 @@ static const uint32_t ATCL_CL_CLSCOM_MCEPSQ_VECTOR_GROUP_EPSILON = 40;
 static const uint32_t ATCL_CL_CLSCOM_MCEPSQ_VECTOR_GROUP_EPSILON_LEN = 8;
 static const uint32_t ATCL_CL_CLSCOM_MCEPSQ_EPF_EPSILON = 48;
 static const uint32_t ATCL_CL_CLSCOM_MCEPSQ_EPF_EPSILON_LEN = 8;
+//<< [ATCL_CL_CLSCOM_MCEPSQ]
 // mcc/reg00008.H
 
+//>> [CRYPTO_DECRYPT_CRYPTOKEY2B]
 static const uint64_t CRYPTO_DECRYPT_CRYPTOKEY2B = 0x0c010f5dull;
 
 static const uint32_t CRYPTO_DECRYPT_CRYPTOKEY2B_KEY2B = 0;
 static const uint32_t CRYPTO_DECRYPT_CRYPTOKEY2B_KEY2B_LEN = 64;
+//<< [CRYPTO_DECRYPT_CRYPTOKEY2B]
 // mcc/reg00008.H
 
+//>> [CRYPTO_ENCRYPT_CRYPTOCFG]
 static const uint64_t CRYPTO_ENCRYPT_CRYPTOCFG = 0x0c010f50ull;
 
 static const uint32_t CRYPTO_ENCRYPT_CRYPTOCFG_CFG_WRITE_MODE_ECC_CHK_DIS = 0;
@@ -88,8 +93,10 @@ static const uint32_t CRYPTO_ENCRYPT_CRYPTOCFG_ONE_SHOT_INJ = 24;
 static const uint32_t CRYPTO_ENCRYPT_CRYPTOCFG_PERSISTANT_INJ = 25;
 static const uint32_t CRYPTO_ENCRYPT_CRYPTOCFG_CRYPTOCFG_26_31_SPARE = 26;
 static const uint32_t CRYPTO_ENCRYPT_CRYPTOCFG_CRYPTOCFG_26_31_SPARE_LEN = 6;
+//<< [CRYPTO_ENCRYPT_CRYPTOCFG]
 // mcc/reg00008.H
 
+//>> [USTL_USTLBADRESP]
 static const uint64_t USTL_USTLBADRESP = 0x0c010e10ull;
 
 static const uint32_t USTL_USTLBADRESP_A_BAD_RESP_VAL = 0;
@@ -102,8 +109,10 @@ static const uint32_t USTL_USTLBADRESP_B_BAD_RESP_IS_WRITE = 11;
 static const uint32_t USTL_USTLBADRESP_B_BAD_RESP_IS_GOOD = 12;
 static const uint32_t USTL_USTLBADRESP_B_BAD_RESP_TAG = 13;
 static const uint32_t USTL_USTLBADRESP_B_BAD_RESP_TAG_LEN = 7;
+//<< [USTL_USTLBADRESP]
 // mcc/reg00008.H
 
+//>> [USTL_USTLERRPT]
 static const uint64_t USTL_USTLERRPT = 0x0c010e16ull;
 
 static const uint32_t USTL_USTLERRPT_DF_CMT_PAR_ERR = 0;
@@ -119,14 +128,18 @@ static const uint32_t USTL_USTLERRPT_RT_MCS_SLICE2_WRITE_DISP_PAR_ERR = 9;
 static const uint32_t USTL_USTLERRPT_RT_MCS_SLICE3_WRITE_DISP_PAR_ERR = 10;
 static const uint32_t USTL_USTLERRPT_RT_MCS_WB_DONE_PAR_ERR = 11;
 static const uint32_t USTL_USTLERRPT_RT_DSTL_WB_READ_TAG_PAR_ERR = 12;
+//<< [USTL_USTLERRPT]
 // mcc/reg00008.H
 
+//>> [USTL_USTLFIRACT0]
 static const uint64_t USTL_USTLFIRACT0 = 0x0c010e06ull;
 
 static const uint32_t USTL_USTLFIRACT0_USTLFIRACT0_ACTION_0 = 0;
 static const uint32_t USTL_USTLFIRACT0_USTLFIRACT0_ACTION_0_LEN = 62;
+//<< [USTL_USTLFIRACT0]
 // mcc/reg00008.H
 
+//>> [USTL_USTLSTATUS]
 static const uint64_t USTL_USTLSTATUS = 0x0c010e0aull;
 
 static const uint32_t USTL_USTLSTATUS_CHANA_LOL_MODE = 0;
@@ -171,8 +184,10 @@ static const uint32_t USTL_USTLSTATUS_CHANB_FAIL_UNDEFINED_CODE = 52;
 static const uint32_t USTL_USTLSTATUS_CHANB_FAIL_WR_RETRY = 53;
 static const uint32_t USTL_USTLSTATUS_CHANA_FAIL_MEM_CNTL = 54;
 static const uint32_t USTL_USTLSTATUS_CHANB_FAIL_MEM_CNTL = 55;
+//<< [USTL_USTLSTATUS]
 // mcc/reg00008.H
 
+//>> [WDF_WDFDBG]
 static const uint64_t WDF_WDFDBG = 0x0c010f44ull;
 
 static const uint32_t WDF_WDFDBG_DBG_SPARE = 0;
@@ -184,7 +199,10 @@ static const uint32_t WDF_WDFDBG_WAT0_EVENT_SELECT = 36;
 static const uint32_t WDF_WDFDBG_WAT0_EVENT_SELECT_LEN = 4;
 static const uint32_t WDF_WDFDBG_WAT1_EVENT_SELECT = 40;
 static const uint32_t WDF_WDFDBG_WAT1_EVENT_SELECT_LEN = 4;
+//<< [WDF_WDFDBG]
 // mcc/reg00008.H
+
+//>>THE END<<
 
 #ifndef __PPE_HCODE__
 }

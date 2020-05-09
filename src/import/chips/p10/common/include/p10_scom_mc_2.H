@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -39,6 +39,7 @@ namespace mc
 #endif
 
 
+//>> [CPLT_STAT0]
 static const uint64_t CPLT_STAT0 = 0x0c000100ull;
 
 static const uint32_t CPLT_STAT0_ABIST_DONE_DC = 0;
@@ -71,20 +72,26 @@ static const uint32_t CPLT_STAT0_FREE_USAGE_28I = 28;
 static const uint32_t CPLT_STAT0_FREE_USAGE_29I = 29;
 static const uint32_t CPLT_STAT0_FREE_USAGE_30I = 30;
 static const uint32_t CPLT_STAT0_FREE_USAGE_31I = 31;
+//<< [CPLT_STAT0]
 // mc/reg00002.H
 
+//>> [MBA_SCOMFIR_DBG0_SCOM0Q]
 static const uint64_t MBA_SCOMFIR_DBG0_SCOM0Q = 0x0c010f94ull;
 
 static const uint32_t MBA_SCOMFIR_DBG0_SCOM0Q_DBG0_SCOM0Q_DEBUG_BUS_0_43 = 0;
 static const uint32_t MBA_SCOMFIR_DBG0_SCOM0Q_DBG0_SCOM0Q_DEBUG_BUS_0_43_LEN = 44;
+//<< [MBA_SCOMFIR_DBG0_SCOM0Q]
 // mc/reg00002.H
 
+//>> [MBA_SCOMFIR_WATMSKA0]
 static const uint64_t MBA_SCOMFIR_WATMSKA0 = 0x0c010f80ull;
 
 static const uint32_t MBA_SCOMFIR_WATMSKA0_WAT_MASK_A0 = 0;
 static const uint32_t MBA_SCOMFIR_WATMSKA0_WAT_MASK_A0_LEN = 44;
+//<< [MBA_SCOMFIR_WATMSKA0]
 // mc/reg00002.H
 
+//>> [SPATTN]
 static const uint64_t SPATTN = 0x0c040002ull;
 
 static const uint32_t SPATTN_ANY_SPATTN = 0;
@@ -123,15 +130,20 @@ static const uint32_t SPATTN_IN32 = 32;
 static const uint32_t SPATTN_IN33 = 33;
 static const uint32_t SPATTN_IN34 = 34;
 static const uint32_t SPATTN_IN35 = 35;
+//<< [SPATTN]
 // mc/reg00002.H
 
+//>> [TRA1_TR0_CONFIG_3]
 static const uint64_t TRA1_TR0_CONFIG_3 = 0x0c010486ull;
 
 static const uint32_t TRA1_TR0_CONFIG_3_C = 0;
 static const uint32_t TRA1_TR0_CONFIG_3_C_LEN = 24;
 static const uint32_t TRA1_TR0_CONFIG_3_D = 24;
 static const uint32_t TRA1_TR0_CONFIG_3_D_LEN = 24;
+//<< [TRA1_TR0_CONFIG_3]
 // mc/reg00002.H
+
+//>>THE END<<
 
 #ifndef __PPE_HCODE__
 }

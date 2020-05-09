@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -39,6 +39,7 @@ namespace nmmu
 #endif
 
 
+//>> [CFG_NMMU_CTL_TLB]
 static const uint64_t CFG_NMMU_CTL_TLB = 0x02010c55ull;
 
 static const uint32_t CFG_NMMU_CTL_TLB_MBR_DIS = 0;
@@ -79,13 +80,18 @@ static const uint32_t CFG_NMMU_CTL_TLB_MPSS_PREF_PGSZ_ENA = 56;
 static const uint32_t CFG_NMMU_CTL_TLB_TWSM_11_1_MODE_ENA = 57;
 static const uint32_t CFG_NMMU_CTL_TLB_SNGL_SHOT_ENA = 58;
 static const uint32_t CFG_NMMU_CTL_TLB_SLB_SNGL_SHOT_HOLDOFF_ENA = 59;
+//<< [CFG_NMMU_CTL_TLB]
 // nmmu/reg00002.H
 
+//>> [FBC_CQ_WRAP_NXCQ_SCOM_NX_PB_DEBUG_REG]
 static const uint64_t FBC_CQ_WRAP_NXCQ_SCOM_NX_PB_DEBUG_REG = 0x02010c10ull;
 
 static const uint32_t FBC_CQ_WRAP_NXCQ_SCOM_NX_PB_DEBUG_REG_NXCQ_TRACE_CNTL = 0;
 static const uint32_t FBC_CQ_WRAP_NXCQ_SCOM_NX_PB_DEBUG_REG_NXCQ_TRACE_CNTL_LEN = 8;
+//<< [FBC_CQ_WRAP_NXCQ_SCOM_NX_PB_DEBUG_REG]
 // nmmu/reg00002.H
+
+//>>THE END<<
 
 #ifndef __PPE_HCODE__
 }

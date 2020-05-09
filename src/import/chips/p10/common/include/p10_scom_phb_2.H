@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -39,6 +39,7 @@ namespace phb
 #endif
 
 
+//>> [PHB5_SCOM_UV_SEC_EXCL]
 static const uint64_t PHB5_SCOM_UV_SEC_EXCL = 0x08010904ull;
 
 static const uint32_t PHB5_SCOM_UV_SEC_EXCL_ENABLE = 0;
@@ -46,20 +47,26 @@ static const uint32_t PHB5_SCOM_UV_SEC_EXCL_CMP_VALUE = 12;
 static const uint32_t PHB5_SCOM_UV_SEC_EXCL_CMP_VALUE_LEN = 8;
 static const uint32_t PHB5_SCOM_UV_SEC_EXCL_MSK_VALUE = 44;
 static const uint32_t PHB5_SCOM_UV_SEC_EXCL_MSK_VALUE_LEN = 8;
+//<< [PHB5_SCOM_UV_SEC_EXCL]
 // phb/reg00002.H
 
+//>> [REGS_CERR_RPT0_REG]
 static const uint64_t REGS_CERR_RPT0_REG = 0x0301184aull;
 
 static const uint32_t REGS_CERR_RPT0_REG_CERR_RPT0 = 0;
 static const uint32_t REGS_CERR_RPT0_REG_CERR_RPT0_LEN = 64;
+//<< [REGS_CERR_RPT0_REG]
 // phb/reg00002.H
 
+//>> [REGS_CERR_RPT1_REG]
 static const uint64_t REGS_CERR_RPT1_REG = 0x0301184bull;
 
 static const uint32_t REGS_CERR_RPT1_REG_CERR_RPT1 = 0;
 static const uint32_t REGS_CERR_RPT1_REG_CERR_RPT1_LEN = 42;
+//<< [REGS_CERR_RPT1_REG]
 // phb/reg00002.H
 
+//>> [RSB_REGS_UVI_PHB5_SCOM_UV_OFFSET_CNTL]
 static const uint64_t RSB_REGS_UVI_PHB5_SCOM_UV_OFFSET_CNTL = 0x08010905ull;
 
 static const uint32_t RSB_REGS_UVI_PHB5_SCOM_UV_OFFSET_CNTL_CONFIG_DATA_ENABLE = 0;
@@ -71,7 +78,10 @@ static const uint32_t RSB_REGS_UVI_PHB5_SCOM_UV_OFFSET_CNTL_IODA_TABLE_ADDR_ENAB
 static const uint32_t RSB_REGS_UVI_PHB5_SCOM_UV_OFFSET_CNTL_IODA_TABLE_DATA_ENABLE = 6;
 static const uint32_t RSB_REGS_UVI_PHB5_SCOM_UV_OFFSET_CNTL_INT_NOTIFY_BASE_ADDR_ENABLE = 7;
 static const uint32_t RSB_REGS_UVI_PHB5_SCOM_UV_OFFSET_CNTL_INT_NOTIFY_BASE_INDEX_ENABLE = 8;
+//<< [RSB_REGS_UVI_PHB5_SCOM_UV_OFFSET_CNTL]
 // phb/reg00002.H
+
+//>>THE END<<
 
 #ifndef __PPE_HCODE__
 }

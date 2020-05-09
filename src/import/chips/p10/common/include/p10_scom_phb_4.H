@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -39,16 +39,22 @@ namespace phb
 #endif
 
 
+//>> [REGS_NFIR_REG]
 static const uint64_t REGS_NFIR_REG_RW = 0x03011840ull;
 static const uint64_t REGS_NFIR_REG_WO_AND = 0x03011841ull;
 static const uint64_t REGS_NFIR_REG_WO_OR = 0x03011842ull;
 
 static const uint32_t REGS_NFIR_REG_NFIRNFIR = 0;
 static const uint32_t REGS_NFIR_REG_NFIRNFIR_LEN = 28;
+//<< [REGS_NFIR_REG]
 // phb/reg00004.H
 
+//>> [RSB_REGS_PHB5_PMON_EVENT_SEL]
 static const uint64_t RSB_REGS_PHB5_PMON_EVENT_SEL = 0x08010918ull;
+//<< [RSB_REGS_PHB5_PMON_EVENT_SEL]
 // phb/reg00004.H
+
+//>>THE END<<
 
 #ifndef __PPE_HCODE__
 }

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -39,6 +39,7 @@ namespace mcc
 #endif
 
 
+//>> [CRYPTO_DECRYPT_CRYPTOCFG]
 static const uint64_t CRYPTO_DECRYPT_CRYPTOCFG = 0x0c010f58ull;
 
 static const uint32_t CRYPTO_DECRYPT_CRYPTOCFG_CFG_WRITE_MODE_ECC_CHK_DIS = 0;
@@ -64,8 +65,10 @@ static const uint32_t CRYPTO_DECRYPT_CRYPTOCFG_ONE_SHOT_INJ = 24;
 static const uint32_t CRYPTO_DECRYPT_CRYPTOCFG_PERSISTANT_INJ = 25;
 static const uint32_t CRYPTO_DECRYPT_CRYPTOCFG_SPARE_26_31 = 26;
 static const uint32_t CRYPTO_DECRYPT_CRYPTOCFG_SPARE_26_31_LEN = 6;
+//<< [CRYPTO_DECRYPT_CRYPTOCFG]
 // mcc/reg00006.H
 
+//>> [DSTL_DSTLPSAVE2]
 static const uint64_t DSTL_DSTLPSAVE2 = 0x0c010d14ull;
 
 static const uint32_t DSTL_DSTLPSAVE2_SLAVE_PSAVE_A_LUC = 0;
@@ -92,7 +95,10 @@ static const uint32_t DSTL_DSTLPSAVE2_SLAVE_PSAVE_WSIZE = 56;
 static const uint32_t DSTL_DSTLPSAVE2_SLAVE_PSAVE_WSIZE_LEN = 3;
 static const uint32_t DSTL_DSTLPSAVE2_RESERVED_59_63 = 59;
 static const uint32_t DSTL_DSTLPSAVE2_RESERVED_59_63_LEN = 5;
+//<< [DSTL_DSTLPSAVE2]
 // mcc/reg00006.H
+
+//>>THE END<<
 
 #ifndef __PPE_HCODE__
 }

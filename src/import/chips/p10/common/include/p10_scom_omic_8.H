@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -39,6 +39,7 @@ namespace omic
 #endif
 
 
+//>> [CTL_REGS_RX_MODE15_PG]
 static const uint64_t CTL_REGS_RX_MODE15_PG = 0x8008784010012c3full;
 
 static const uint32_t CTL_REGS_RX_MODE15_PG_0 = 48;
@@ -49,14 +50,18 @@ static const uint32_t CTL_REGS_RX_MODE15_PG_2 = 56;
 static const uint32_t CTL_REGS_RX_MODE15_PG_2_LEN = 4;
 static const uint32_t CTL_REGS_RX_MODE15_PG_3 = 60;
 static const uint32_t CTL_REGS_RX_MODE15_PG_3_LEN = 4;
+//<< [CTL_REGS_RX_MODE15_PG]
 // omic/reg00008.H
 
+//>> [CTL_REGS_TX_CNTL7_PG]
 static const uint64_t CTL_REGS_TX_CNTL7_PG = 0x800c744010012c3full;
 
 static const uint32_t CTL_REGS_TX_CNTL7_PG_TX_PATTERN_0_15 = 48;
 static const uint32_t CTL_REGS_TX_CNTL7_PG_TX_PATTERN_0_15_LEN = 16;
+//<< [CTL_REGS_TX_CNTL7_PG]
 // omic/reg00008.H
 
+//>> [CTL_REGS_TX_MODE1_PG]
 static const uint64_t CTL_REGS_TX_MODE1_PG = 0x800c0c4010012c3full;
 
 static const uint32_t CTL_REGS_TX_MODE1_PG_CLKDIST_PDWN = 48;
@@ -71,39 +76,51 @@ static const uint32_t CTL_REGS_TX_MODE1_PG_IREF_VSET_DAC = 60;
 static const uint32_t CTL_REGS_TX_MODE1_PG_IREF_VSET_DAC_LEN = 2;
 static const uint32_t CTL_REGS_TX_MODE1_PG_IREF_BYPASS = 62;
 static const uint32_t CTL_REGS_TX_MODE1_PG_IREF_PDWN_B = 63;
+//<< [CTL_REGS_TX_MODE1_PG]
 // omic/reg00008.H
 
+//>> [DATASM_REGS_RX_CNT17_PG]
 static const uint64_t DATASM_REGS_RX_CNT17_PG = 0x800a084010012c3full;
 
 static const uint32_t DATASM_REGS_RX_CNT17_PG_2 = 48;
 static const uint32_t DATASM_REGS_RX_CNT17_PG_2_LEN = 6;
 static const uint32_t DATASM_REGS_RX_CNT17_PG_3 = 54;
 static const uint32_t DATASM_REGS_RX_CNT17_PG_3_LEN = 6;
+//<< [DATASM_REGS_RX_CNT17_PG]
 // omic/reg00008.H
 
+//>> [DATASM_REGS_RX_CNT27_PG]
 static const uint64_t DATASM_REGS_RX_CNT27_PG = 0x800a584010012c3full;
 
 static const uint32_t DATASM_REGS_RX_CNT27_PG_RX_A_LANE_DONE_0_15 = 48;
 static const uint32_t DATASM_REGS_RX_CNT27_PG_RX_A_LANE_DONE_0_15_LEN = 16;
+//<< [DATASM_REGS_RX_CNT27_PG]
 // omic/reg00008.H
 
+//>> [DATASM_REGS_RX_CNTL4_PG]
 static const uint64_t DATASM_REGS_RX_CNTL4_PG = 0x8009a04010012c3full;
 
 static const uint32_t DATASM_REGS_RX_CNTL4_PG_RX_CLEAR_SERVO_QUEUES_WO_PULSE_SLOW_SIGNAL = 48;
+//<< [DATASM_REGS_RX_CNTL4_PG]
 // omic/reg00008.H
 
+//>> [DATASM_REGS_RX_STAT4_PG]
 static const uint64_t DATASM_REGS_RX_STAT4_PG = 0x800aa84010012c3full;
 
 static const uint32_t DATASM_REGS_RX_STAT4_PG_RX_DATA_PIPE_MAIN_0_15_RO_SIGNAL = 48;
 static const uint32_t DATASM_REGS_RX_STAT4_PG_RX_DATA_PIPE_MAIN_0_15_RO_SIGNAL_LEN = 16;
+//<< [DATASM_REGS_RX_STAT4_PG]
 // omic/reg00008.H
 
+//>> [TX_CTL_SM_REGS_CTLSM_CNTL6_PG]
 static const uint64_t TX_CTL_SM_REGS_CTLSM_CNTL6_PG = 0x800cec4010012c3full;
 
 static const uint32_t TX_CTL_SM_REGS_CTLSM_CNTL6_PG_TX_PSAVE_FORCE_REQ_16_23_0 = 48;
 static const uint32_t TX_CTL_SM_REGS_CTLSM_CNTL6_PG_TX_PSAVE_FORCE_REQ_16_23_0_LEN = 8;
+//<< [TX_CTL_SM_REGS_CTLSM_CNTL6_PG]
 // omic/reg00008.H
 
+//>> [TX_CTL_SM_REGS_CTLSM_SPARE_MODE_PG]
 static const uint64_t TX_CTL_SM_REGS_CTLSM_SPARE_MODE_PG = 0x800ca44010012c3full;
 
 static const uint32_t TX_CTL_SM_REGS_CTLSM_SPARE_MODE_PG_0 = 48;
@@ -114,16 +131,20 @@ static const uint32_t TX_CTL_SM_REGS_CTLSM_SPARE_MODE_PG_4 = 52;
 static const uint32_t TX_CTL_SM_REGS_CTLSM_SPARE_MODE_PG_5 = 53;
 static const uint32_t TX_CTL_SM_REGS_CTLSM_SPARE_MODE_PG_6 = 54;
 static const uint32_t TX_CTL_SM_REGS_CTLSM_SPARE_MODE_PG_7 = 55;
+//<< [TX_CTL_SM_REGS_CTLSM_SPARE_MODE_PG]
 // omic/reg00008.H
 
+//>> [TX_CTL_SM_REGS_CTLSM_STAT6_PG]
 static const uint64_t TX_CTL_SM_REGS_CTLSM_STAT6_PG = 0x800d6c4010012c3full;
 
 static const uint32_t TX_CTL_SM_REGS_CTLSM_STAT6_PG_TX_BIST_DCC_FAIL = 48;
 static const uint32_t TX_CTL_SM_REGS_CTLSM_STAT6_PG_TX_BIST_LS_FAIL = 49;
 static const uint32_t TX_CTL_SM_REGS_CTLSM_STAT6_PG_TX_BIST_HS_FAIL = 50;
 static const uint32_t TX_CTL_SM_REGS_CTLSM_STAT6_PG_TX_IREF_PARITYCHK_CLOCK_RO_SIGNAL = 51;
+//<< [TX_CTL_SM_REGS_CTLSM_STAT6_PG]
 // omic/reg00008.H
 
+//>> [TX_SYNC]
 //ERRCODE: // Some of the name targets not found in address targets: omic
 // No targets could be determined from the address.
 
@@ -146,7 +167,10 @@ static const uint32_t TX_SYNC_DL1_DELAY = 56;
 static const uint32_t TX_SYNC_DL1_DELAY_LEN = 4;
 static const uint32_t TX_SYNC_DL0_DELAY = 60;
 static const uint32_t TX_SYNC_DL0_DELAY_LEN = 4;
+//<< [TX_SYNC]
 // omic/reg00008.H
+
+//>>THE END<<
 
 #ifndef __PPE_HCODE__
 }

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -39,18 +39,23 @@ namespace omic
 #endif
 
 
+//>> [DATASM_REGS_RX_STAT11_PG]
 static const uint64_t DATASM_REGS_RX_STAT11_PG = 0x800ae04010012c3full;
 
 static const uint32_t DATASM_REGS_RX_STAT11_PG_RX_SERVO_RESULT_QUEUE_RO_SIGNAL = 48;
 static const uint32_t DATASM_REGS_RX_STAT11_PG_RX_SERVO_RESULT_QUEUE_RO_SIGNAL_LEN = 16;
+//<< [DATASM_REGS_RX_STAT11_PG]
 // omic/reg00009.H
 
+//>> [DATASM_REGS_RX_STAT21_PG]
 static const uint64_t DATASM_REGS_RX_STAT21_PG = 0x800b304010012c3full;
 
 static const uint32_t DATASM_REGS_RX_STAT21_PG_RX_DL_PHY_RECAL_REQ_0_15_RO_SIGNAL = 48;
 static const uint32_t DATASM_REGS_RX_STAT21_PG_RX_DL_PHY_RECAL_REQ_0_15_RO_SIGNAL_LEN = 16;
+//<< [DATASM_REGS_RX_STAT21_PG]
 // omic/reg00009.H
 
+//>> [PMU_CNTR]
 //ERRCODE: // Some of the name targets not found in address targets: omic
 // No targets could be determined from the address.
 
@@ -64,7 +69,10 @@ static const uint32_t PMU_CNTR_1 = 32;
 static const uint32_t PMU_CNTR_1_LEN = 16;
 static const uint32_t PMU_CNTR_0 = 48;
 static const uint32_t PMU_CNTR_0_LEN = 16;
+//<< [PMU_CNTR]
 // omic/reg00009.H
+
+//>>THE END<<
 
 #ifndef __PPE_HCODE__
 }

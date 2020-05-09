@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -35,6 +35,7 @@ namespace nmmu
 #endif
 
 
+//>> PREP_[FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_WOF_REG]
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
 static inline fapi2::ReturnCode PREP_FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_WOF_REG(const fapi2::Target<K, M, V>& i_target)
 {
@@ -48,7 +49,9 @@ fapi_try_exit:
     return fapi2::current_err;
 #endif
 }
+//<< PREP_[FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_WOF_REG]
 
+//>> GET_[FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_WOF_REG]
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
 static inline fapi2::ReturnCode GET_FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_WOF_REG(const fapi2::Target<K, M, V>& i_target,
         fapi2::buffer<uint64_t>& o_data)
@@ -63,7 +66,9 @@ fapi_try_exit:
     return fapi2::current_err;
 #endif
 }
+//<< GET_[FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_WOF_REG]
 
+//>> PUT_[FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_WOF_REG]
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
 static inline fapi2::ReturnCode PUT_FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_WOF_REG(const fapi2::Target<K, M, V>& i_target,
         const uint64_t i_data)
@@ -78,8 +83,11 @@ fapi_try_exit:
     return fapi2::current_err;
 #endif
 }
+//<< PUT_[FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_WOF_REG]
 
 
+
+//>>THE END<<
 
 #ifndef __PPE_HCODE__
 }

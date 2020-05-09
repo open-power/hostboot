@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -39,6 +39,7 @@ namespace omic
 #endif
 
 
+//>> [CTL_REGS_RX_CNTL5_PG]
 static const uint64_t CTL_REGS_RX_CNTL5_PG = 0x8009204010012c3full;
 
 static const uint32_t CTL_REGS_RX_CNTL5_PG_RX_PERVASIVE_CAPT = 48;
@@ -46,8 +47,10 @@ static const uint32_t CTL_REGS_RX_CNTL5_PG_TC_BIST_SHARED_OVRD = 49;
 static const uint32_t CTL_REGS_RX_CNTL5_PG_TC_BIST_OPCG_GO_OVRD = 50;
 static const uint32_t CTL_REGS_RX_CNTL5_PG_TC_BIST_CODE_GO = 51;
 static const uint32_t CTL_REGS_RX_CNTL5_PG_SYSTEM_MANU_SEL = 52;
+//<< [CTL_REGS_RX_CNTL5_PG]
 // omic/reg00006.H
 
+//>> [CTL_REGS_RX_MODE16_PG]
 static const uint64_t CTL_REGS_RX_MODE16_PG = 0x8008804010012c3full;
 
 static const uint32_t CTL_REGS_RX_MODE16_PG_INC_DEC_AMT0 = 48;
@@ -58,8 +61,10 @@ static const uint32_t CTL_REGS_RX_MODE16_PG_INC_DEC_AMT1 = 56;
 static const uint32_t CTL_REGS_RX_MODE16_PG_INC_DEC_AMT1_LEN = 3;
 static const uint32_t CTL_REGS_RX_MODE16_PG_THRESH2 = 59;
 static const uint32_t CTL_REGS_RX_MODE16_PG_THRESH2_LEN = 5;
+//<< [CTL_REGS_RX_MODE16_PG]
 // omic/reg00006.H
 
+//>> [CTL_REGS_RX_MODE3_PG]
 static const uint64_t CTL_REGS_RX_MODE3_PG = 0x8008184010012c3full;
 
 static const uint32_t CTL_REGS_RX_MODE3_PG_FILTER_DEPTH = 48;
@@ -71,22 +76,28 @@ static const uint32_t CTL_REGS_RX_MODE3_PG_VOTE_RATIO_CFG_LEN = 3;
 static const uint32_t CTL_REGS_RX_MODE3_PG_DATA_SRC = 60;
 static const uint32_t CTL_REGS_RX_MODE3_PG_FORMAT = 61;
 static const uint32_t CTL_REGS_RX_MODE3_PG_VOTE_WIN_BOTH = 62;
+//<< [CTL_REGS_RX_MODE3_PG]
 // omic/reg00006.H
 
+//>> [CTL_REGS_RX_FIR1_ERROR_INJECT_PG]
 static const uint64_t CTL_REGS_RX_FIR1_ERROR_INJECT_PG = 0x8009384010012c3full;
 
 static const uint32_t CTL_REGS_RX_FIR1_ERROR_INJECT_PG_RX_PG_FIR1_ERR_INJ = 48;
 static const uint32_t CTL_REGS_RX_FIR1_ERROR_INJECT_PG_RX_PG_FIR1_ERR_INJ_LEN = 11;
+//<< [CTL_REGS_RX_FIR1_ERROR_INJECT_PG]
 // omic/reg00006.H
 
+//>> [CTL_REGS_TX_CNTL4_PG]
 static const uint64_t CTL_REGS_TX_CNTL4_PG = 0x800c5c4010012c3full;
 
 static const uint32_t CTL_REGS_TX_CNTL4_PG_DAC_CNTL = 48;
 static const uint32_t CTL_REGS_TX_CNTL4_PG_DAC_CNTL_LEN = 8;
 static const uint32_t CTL_REGS_TX_CNTL4_PG_CLAMP_DISABLE = 56;
 static const uint32_t CTL_REGS_TX_CNTL4_PG_PHASE_SEL = 57;
+//<< [CTL_REGS_TX_CNTL4_PG]
 // omic/reg00006.H
 
+//>> [DATASM_REGS_RX_CNT14_PG]
 static const uint64_t DATASM_REGS_RX_CNT14_PG = 0x8009f04010012c3full;
 
 static const uint32_t DATASM_REGS_RX_CNT14_PG_0_SEL = 48;
@@ -95,49 +106,66 @@ static const uint32_t DATASM_REGS_RX_CNT14_PG_1_SEL = 53;
 static const uint32_t DATASM_REGS_RX_CNT14_PG_1_SEL_LEN = 5;
 static const uint32_t DATASM_REGS_RX_CNT14_PG_2_SEL = 58;
 static const uint32_t DATASM_REGS_RX_CNT14_PG_2_SEL_LEN = 5;
+//<< [DATASM_REGS_RX_CNT14_PG]
 // omic/reg00006.H
 
+//>> [DATASM_REGS_RX_CNT24_PG]
 static const uint64_t DATASM_REGS_RX_CNT24_PG = 0x800a404010012c3full;
 
 static const uint32_t DATASM_REGS_RX_CNT24_PG_RX_A_LANE_FAIL_16_23 = 48;
 static const uint32_t DATASM_REGS_RX_CNT24_PG_RX_A_LANE_FAIL_16_23_LEN = 8;
+//<< [DATASM_REGS_RX_CNT24_PG]
 // omic/reg00006.H
 
+//>> [DATASM_REGS_RX_CNTL7_PG]
 static const uint64_t DATASM_REGS_RX_CNTL7_PG = 0x8009b84010012c3full;
 
 static const uint32_t DATASM_REGS_RX_CNTL7_PG_RX_PSAVE_FENCE_STS_IO_DL_0_15 = 48;
 static const uint32_t DATASM_REGS_RX_CNTL7_PG_RX_PSAVE_FENCE_STS_IO_DL_0_15_LEN = 16;
+//<< [DATASM_REGS_RX_CNTL7_PG]
 // omic/reg00006.H
 
+//>> [DATASM_REGS_RX_STAT19_PG]
 static const uint64_t DATASM_REGS_RX_STAT19_PG = 0x800b204010012c3full;
 
 static const uint32_t DATASM_REGS_RX_STAT19_PG_RX_DL_PHY_RUN_LANE_0_15_RO_SIGNAL = 48;
 static const uint32_t DATASM_REGS_RX_STAT19_PG_RX_DL_PHY_RUN_LANE_0_15_RO_SIGNAL_LEN = 16;
+//<< [DATASM_REGS_RX_STAT19_PG]
 // omic/reg00006.H
 
+//>> [DATASM_REGS_RX_STAT29_PG]
 static const uint64_t DATASM_REGS_RX_STAT29_PG = 0x800b704010012c3full;
 
 static const uint32_t DATASM_REGS_RX_STAT29_PG_RX_VTAL_EARLY_RESULT_RO_SIGNAL = 48;
 static const uint32_t DATASM_REGS_RX_STAT29_PG_RX_VTAL_EARLY_RESULT_RO_SIGNAL_LEN = 16;
+//<< [DATASM_REGS_RX_STAT29_PG]
 // omic/reg00006.H
 
+//>> [DATASM_REGS_RX_STAT7_PG]
 static const uint64_t DATASM_REGS_RX_STAT7_PG = 0x800ac04010012c3full;
 
 static const uint32_t DATASM_REGS_RX_STAT7_PG_RX_SERVO_STATUS1_RO_SIGNAL = 48;
 static const uint32_t DATASM_REGS_RX_STAT7_PG_RX_SERVO_STATUS1_RO_SIGNAL_LEN = 16;
+//<< [DATASM_REGS_RX_STAT7_PG]
 // omic/reg00006.H
 
+//>> [TX_CTL_SM_REGS_CTLSM_CNTL5_PG]
 static const uint64_t TX_CTL_SM_REGS_CTLSM_CNTL5_PG = 0x800ce44010012c3full;
 
 static const uint32_t TX_CTL_SM_REGS_CTLSM_CNTL5_PG_TX_PSAVE_FORCE_REQ_0_15 = 48;
 static const uint32_t TX_CTL_SM_REGS_CTLSM_CNTL5_PG_TX_PSAVE_FORCE_REQ_0_15_LEN = 16;
+//<< [TX_CTL_SM_REGS_CTLSM_CNTL5_PG]
 // omic/reg00006.H
 
+//>> [TX_CTL_SM_REGS_CTLSM_STAT5_PG]
 static const uint64_t TX_CTL_SM_REGS_CTLSM_STAT5_PG = 0x800d644010012c3full;
 
 static const uint32_t TX_CTL_SM_REGS_CTLSM_STAT5_PG_TX_PSAVE_STS_PHY_16_23_RO_SIGNAL = 48;
 static const uint32_t TX_CTL_SM_REGS_CTLSM_STAT5_PG_TX_PSAVE_STS_PHY_16_23_RO_SIGNAL_LEN = 8;
+//<< [TX_CTL_SM_REGS_CTLSM_STAT5_PG]
 // omic/reg00006.H
+
+//>>THE END<<
 
 #ifndef __PPE_HCODE__
 }

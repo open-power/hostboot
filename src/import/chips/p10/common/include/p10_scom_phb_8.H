@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -39,17 +39,22 @@ namespace phb
 #endif
 
 
+//>> [REGS_PFIRMASK_REG]
 static const uint64_t REGS_PFIRMASK_REG_RW = 0x08010843ull;
 static const uint64_t REGS_PFIRMASK_REG_WO_AND = 0x08010844ull;
 static const uint64_t REGS_PFIRMASK_REG_WO_OR = 0x08010845ull;
 
 static const uint32_t REGS_PFIRMASK_REG_PFIRMASK = 0;
 static const uint32_t REGS_PFIRMASK_REG_PFIRMASK_LEN = 6;
+//<< [REGS_PFIRMASK_REG]
 // phb/reg00008.H
 
+//>> [REGS_PFIRWOF_REG]
 static const uint64_t REGS_PFIRWOF_REG = 0x08010848ull;
+//<< [REGS_PFIRWOF_REG]
 // phb/reg00008.H
 
+//>> [RSB_REGS_ACTION1_REG]
 static const uint64_t RSB_REGS_ACTION1_REG = 0x0801090full;
 
 static const uint32_t RSB_REGS_ACTION1_REG_AIB_COMMAND_INVALID = 0;
@@ -116,7 +121,10 @@ static const uint32_t RSB_REGS_ACTION1_REG_TCE_ECC_CORRECTABLE_ERROR = 60;
 static const uint32_t RSB_REGS_ACTION1_REG_TCE_ECC_UNCORRECTABLE_ERROR = 61;
 static const uint32_t RSB_REGS_ACTION1_REG_TCE_RESERVED01 = 62;
 static const uint32_t RSB_REGS_ACTION1_REG_LEM_FIR_INTERNAL_PARITY_ERROR = 63;
+//<< [RSB_REGS_ACTION1_REG]
 // phb/reg00008.H
+
+//>>THE END<<
 
 #ifndef __PPE_HCODE__
 }

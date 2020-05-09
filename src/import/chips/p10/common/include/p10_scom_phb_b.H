@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -39,13 +39,16 @@ namespace phb
 #endif
 
 
+//>> [REGS_PE_SPARSE_PAGE_CNTL_REG]
 static const uint64_t REGS_PE_SPARSE_PAGE_CNTL_REG = 0x03011856ull;
 
 static const uint32_t REGS_PE_SPARSE_PAGE_CNTL_REG_FV = 3;
 static const uint32_t REGS_PE_SPARSE_PAGE_CNTL_REG_T3 = 4;
 static const uint32_t REGS_PE_SPARSE_PAGE_CNTL_REG_T4 = 5;
+//<< [REGS_PE_SPARSE_PAGE_CNTL_REG]
 // phb/reg00011.H
 
+//>> [RSB_REGS_ACT0_REG]
 static const uint64_t RSB_REGS_ACT0_REG = 0x0801090eull;
 
 static const uint32_t RSB_REGS_ACT0_REG_AIB_COMMAND_INVALID = 0;
@@ -112,8 +115,10 @@ static const uint32_t RSB_REGS_ACT0_REG_TCE_ECC_CORRECTABLE_ERROR = 60;
 static const uint32_t RSB_REGS_ACT0_REG_TCE_ECC_UNCORRECTABLE_ERROR = 61;
 static const uint32_t RSB_REGS_ACT0_REG_TCE_RESERVED01 = 62;
 static const uint32_t RSB_REGS_ACT0_REG_LEM_FIR_INTERNAL_PARITY_ERROR = 63;
+//<< [RSB_REGS_ACT0_REG]
 // phb/reg00011.H
 
+//>> [RSB_REGS_MASK_REG]
 static const uint64_t RSB_REGS_MASK_REG_RW = 0x0801090bull;
 static const uint64_t RSB_REGS_MASK_REG_WO_AND = 0x0801090cull;
 static const uint64_t RSB_REGS_MASK_REG_WO_OR = 0x0801090dull;
@@ -182,7 +187,10 @@ static const uint32_t RSB_REGS_MASK_REG_TCE_ECC_CORRECTABLE_ERROR = 60;
 static const uint32_t RSB_REGS_MASK_REG_TCE_ECC_UNCORRECTABLE_ERROR = 61;
 static const uint32_t RSB_REGS_MASK_REG_TCE_RESERVED01 = 62;
 static const uint32_t RSB_REGS_MASK_REG_LEM_FIR_INTERNAL_PARITY_ERROR = 63;
+//<< [RSB_REGS_MASK_REG]
 // phb/reg00011.H
+
+//>>THE END<<
 
 #ifndef __PPE_HCODE__
 }

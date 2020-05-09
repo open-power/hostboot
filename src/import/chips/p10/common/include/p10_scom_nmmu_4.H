@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -39,6 +39,7 @@ namespace nmmu
 #endif
 
 
+//>> [CFG_NMMU_CTL_SM]
 static const uint64_t CFG_NMMU_CTL_SM = 0x02010c52ull;
 
 static const uint32_t CFG_NMMU_CTL_SM_MM_CFG_NMMU_CTL_SM_TWSM_DIS = 0;
@@ -80,8 +81,10 @@ static const uint32_t CFG_NMMU_CTL_SM_MM_CFG_NMMU_CTL_TW_PTE_UPD_INTR_EN = 58;
 static const uint32_t CFG_NMMU_CTL_SM_MM_CFG_NMMU_CTL_NCU_SNP_TLBIE_PACING_CNT_EN = 59;
 // ERROR Duplicate Dial         static const uint32_t CFG_NMMU_CTL_SM_MM_CFG_NMMU_CTL_DYN_ST_FREQ_MULT = 60;
 // ERROR Duplicate Dial         static const uint32_t CFG_NMMU_CTL_SM_MM_CFG_NMMU_CTL_DYN_ST_FREQ_MULT_LEN = 4;
+//<< [CFG_NMMU_CTL_SM]
 // nmmu/reg00004.H
 
+//>> [FBC_CQ_WRAP_NXCQ_SCOM_MMCQ_LCO_CONFIG_REG]
 static const uint64_t FBC_CQ_WRAP_NXCQ_SCOM_MMCQ_LCO_CONFIG_REG = 0x02010c16ull;
 
 static const uint32_t FBC_CQ_WRAP_NXCQ_SCOM_MMCQ_LCO_CONFIG_REG_TARG_CONFIG = 0;
@@ -90,7 +93,10 @@ static const uint32_t FBC_CQ_WRAP_NXCQ_SCOM_MMCQ_LCO_CONFIG_REG_TARG_MIN = 32;
 static const uint32_t FBC_CQ_WRAP_NXCQ_SCOM_MMCQ_LCO_CONFIG_REG_TARG_MIN_LEN = 6;
 static const uint32_t FBC_CQ_WRAP_NXCQ_SCOM_MMCQ_LCO_CONFIG_REG_CRED_MASK = 38;
 static const uint32_t FBC_CQ_WRAP_NXCQ_SCOM_MMCQ_LCO_CONFIG_REG_CRED_MASK_LEN = 3;
+//<< [FBC_CQ_WRAP_NXCQ_SCOM_MMCQ_LCO_CONFIG_REG]
 // nmmu/reg00004.H
+
+//>>THE END<<
 
 #ifndef __PPE_HCODE__
 }

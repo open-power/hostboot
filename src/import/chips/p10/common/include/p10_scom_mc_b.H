@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -39,6 +39,7 @@ namespace mc
 #endif
 
 
+//>> [ATOMIC_LOCK_REG]
 static const uint64_t ATOMIC_LOCK_REG = 0x0c0f03ffull;
 
 static const uint32_t ATOMIC_LOCK_REG_LOCK_ENABLE = 0;
@@ -46,13 +47,17 @@ static const uint32_t ATOMIC_LOCK_REG_ID = 1;
 static const uint32_t ATOMIC_LOCK_REG_ID_LEN = 4;
 static const uint32_t ATOMIC_LOCK_REG_ACTIVITY = 8;
 static const uint32_t ATOMIC_LOCK_REG_ACTIVITY_LEN = 8;
+//<< [ATOMIC_LOCK_REG]
 // mc/reg00011.H
 
+//>> [ATTN_INTERRUPT_REG]
 static const uint64_t ATTN_INTERRUPT_REG = 0x0c0f001aull;
 
 static const uint32_t ATTN_INTERRUPT_REG_ATTN = 0;
+//<< [ATTN_INTERRUPT_REG]
 // mc/reg00011.H
 
+//>> [EPS_DBG_TRACE_MODE_REG_2]
 static const uint64_t EPS_DBG_TRACE_MODE_REG_2 = 0x0c0107cfull;
 
 static const uint32_t EPS_DBG_TRACE_MODE_REG_2_RUNN_COUNT_COMPARE_VALUE = 0;
@@ -65,8 +70,10 @@ static const uint32_t EPS_DBG_TRACE_MODE_REG_2_ACCUM_HIST_MODE = 20;
 static const uint32_t EPS_DBG_TRACE_MODE_REG_2_FRZ_COUNT_ON = 21;
 static const uint32_t EPS_DBG_TRACE_MODE_REG_2_EXTEND_BANK = 22;
 static const uint32_t EPS_DBG_TRACE_MODE_REG_2_EXTEND_BANK_LEN = 2;
+//<< [EPS_DBG_TRACE_MODE_REG_2]
 // mc/reg00011.H
 
+//>> [EPS_FIR_LOCAL_MASK]
 static const uint64_t EPS_FIR_LOCAL_MASK_RW = 0x0c040103ull;
 static const uint64_t EPS_FIR_LOCAL_MASK_WO_AND = 0x0c040104ull;
 static const uint64_t EPS_FIR_LOCAL_MASK_WO_OR = 0x0c040105ull;
@@ -135,8 +142,10 @@ static const uint32_t EPS_FIR_LOCAL_MASK_60 = 60;
 static const uint32_t EPS_FIR_LOCAL_MASK_61 = 61;
 static const uint32_t EPS_FIR_LOCAL_MASK_62 = 62;
 static const uint32_t EPS_FIR_LOCAL_MASK_63 = 63;
+//<< [EPS_FIR_LOCAL_MASK]
 // mc/reg00011.H
 
+//>> [LOCAL_FIR]
 static const uint64_t LOCAL_FIR_RW = 0x0c040100ull;
 static const uint64_t LOCAL_FIR_WO_AND = 0x0c040101ull;
 static const uint64_t LOCAL_FIR_WO_OR = 0x0c040102ull;
@@ -205,8 +214,10 @@ static const uint32_t LOCAL_FIR_IN60 = 60;
 static const uint32_t LOCAL_FIR_IN61 = 61;
 static const uint32_t LOCAL_FIR_IN62 = 62;
 static const uint32_t LOCAL_FIR_EXT_LOCAL_XSTOP = 63;
+//<< [LOCAL_FIR]
 // mc/reg00011.H
 
+//>> [MBA_SCOMFIR_MCEBUSEN3]
 static const uint64_t MBA_SCOMFIR_MCEBUSEN3 = 0x0c010fa7ull;
 
 static const uint32_t MBA_SCOMFIR_MCEBUSEN3_N = 0;
@@ -214,20 +225,26 @@ static const uint32_t MBA_SCOMFIR_MCEBUSEN3_N_LEN = 16;
 static const uint32_t MBA_SCOMFIR_MCEBUSEN3_NABLE = 16;
 static const uint32_t MBA_SCOMFIR_MCEBUSEN3_XTENDED_SELECT = 17;
 static const uint32_t MBA_SCOMFIR_MCEBUSEN3_XTENDED_SELECT_LEN = 3;
+//<< [MBA_SCOMFIR_MCEBUSEN3]
 // mc/reg00011.H
 
+//>> [MBA_SCOMFIR_WATCTL]
 static const uint64_t MBA_SCOMFIR_WATCTL = 0x0c010f91ull;
 
 static const uint32_t MBA_SCOMFIR_WATCTL_WAT_CONTROL = 0;
 static const uint32_t MBA_SCOMFIR_WATCTL_WAT_CONTROL_LEN = 26;
+//<< [MBA_SCOMFIR_WATCTL]
 // mc/reg00011.H
 
+//>> [MBA_SCOMFIR_WATPATB0]
 static const uint64_t MBA_SCOMFIR_WATPATB0 = 0x0c010f86ull;
 
 static const uint32_t MBA_SCOMFIR_WATPATB0_WAT_PATTERN_B0 = 0;
 static const uint32_t MBA_SCOMFIR_WATPATB0_WAT_PATTERN_B0_LEN = 44;
+//<< [MBA_SCOMFIR_WATPATB0]
 // mc/reg00011.H
 
+//>> [RECOV]
 static const uint64_t RECOV = 0x0c040001ull;
 
 static const uint32_t RECOV_ANY_RECOV = 0;
@@ -284,8 +301,10 @@ static const uint32_t RECOV_IN50 = 50;
 static const uint32_t RECOV_IN51 = 51;
 static const uint32_t RECOV_IN52 = 52;
 static const uint32_t RECOV_IN53 = 53;
+//<< [RECOV]
 // mc/reg00011.H
 
+//>> [SCOMFIR_MCFGP0]
 static const uint64_t SCOMFIR_MCFGP0 = 0x0c010c0aull;
 
 static const uint32_t SCOMFIR_MCFGP0_0_VALID = 0;
@@ -301,8 +320,10 @@ static const uint32_t SCOMFIR_MCFGP0_R0_CONFIGURATION_GROUP_SIZE = 46;
 static const uint32_t SCOMFIR_MCFGP0_R0_CONFIGURATION_GROUP_SIZE_LEN = 8;
 static const uint32_t SCOMFIR_MCFGP0_R0_MMIO_GROUP_SIZE = 54;
 static const uint32_t SCOMFIR_MCFGP0_R0_MMIO_GROUP_SIZE_LEN = 8;
+//<< [SCOMFIR_MCFGP0]
 // mc/reg00011.H
 
+//>> [XSTOP4]
 static const uint64_t XSTOP4 = 0x0c030014ull;
 
 static const uint32_t XSTOP4_ENABLE = 0;
@@ -326,7 +347,10 @@ static const uint32_t XSTOP4_REGION_UNIT13 = 17;
 static const uint32_t XSTOP4_REGION_UNIT14 = 18;
 static const uint32_t XSTOP4_WAIT_CYCLES = 48;
 static const uint32_t XSTOP4_WAIT_CYCLES_LEN = 12;
+//<< [XSTOP4]
 // mc/reg00011.H
+
+//>>THE END<<
 
 #ifndef __PPE_HCODE__
 }

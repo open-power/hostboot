@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -39,6 +39,7 @@ namespace pauc
 #endif
 
 
+//>> [ATOMIC_LOCK_REG]
 static const uint64_t ATOMIC_LOCK_REG = 0x100f03ffull;
 
 static const uint32_t ATOMIC_LOCK_REG_LOCK_ENABLE = 0;
@@ -46,21 +47,27 @@ static const uint32_t ATOMIC_LOCK_REG_ID = 1;
 static const uint32_t ATOMIC_LOCK_REG_ID_LEN = 4;
 static const uint32_t ATOMIC_LOCK_REG_ACTIVITY = 8;
 static const uint32_t ATOMIC_LOCK_REG_ACTIVITY_LEN = 8;
+//<< [ATOMIC_LOCK_REG]
 // pauc/reg00011.H
 
+//>> [ATTN_INTERRUPT_REG]
 static const uint64_t ATTN_INTERRUPT_REG = 0x100f001aull;
 
 static const uint32_t ATTN_INTERRUPT_REG_ATTN = 0;
+//<< [ATTN_INTERRUPT_REG]
 // pauc/reg00011.H
 
+//>> [DL_PPE_WRAP_XIRAMGA]
 static const uint64_t DL_PPE_WRAP_XIRAMGA = 0x10012c52ull;
 
 static const uint32_t DL_PPE_WRAP_XIRAMGA_GA_IR = 0;
 static const uint32_t DL_PPE_WRAP_XIRAMGA_GA_IR_LEN = 32;
 static const uint32_t DL_PPE_WRAP_XIRAMGA_RA_SPRG0 = 32;
 static const uint32_t DL_PPE_WRAP_XIRAMGA_RA_SPRG0_LEN = 32;
+//<< [DL_PPE_WRAP_XIRAMGA]
 // pauc/reg00011.H
 
+//>> [DL_SCOM_MAC_FIR_REG]
 static const uint64_t DL_SCOM_MAC_FIR_REG_RW = 0x10012c40ull;
 static const uint64_t DL_SCOM_MAC_FIR_REG_WO_AND = 0x10012c41ull;
 static const uint64_t DL_SCOM_MAC_FIR_REG_WO_OR = 0x10012c42ull;
@@ -91,8 +98,10 @@ static const uint32_t DL_SCOM_MAC_FIR_REG_PPE_CODE_RECAL_NOT_RUN = 22;
 static const uint32_t DL_SCOM_MAC_FIR_REG_PPE_CODE_THREAD_LOCKED = 23;
 static const uint32_t DL_SCOM_MAC_FIR_REG_PPE_CODE_6 = 24;
 static const uint32_t DL_SCOM_MAC_FIR_REG_PPE_CODE_7 = 25;
+//<< [DL_SCOM_MAC_FIR_REG]
 // pauc/reg00011.H
 
+//>> [EPS_DBG_TRACE_MODE_REG_2]
 static const uint64_t EPS_DBG_TRACE_MODE_REG_2 = 0x100107cfull;
 
 static const uint32_t EPS_DBG_TRACE_MODE_REG_2_RUNN_COUNT_COMPARE_VALUE = 0;
@@ -105,8 +114,10 @@ static const uint32_t EPS_DBG_TRACE_MODE_REG_2_ACCUM_HIST_MODE = 20;
 static const uint32_t EPS_DBG_TRACE_MODE_REG_2_FRZ_COUNT_ON = 21;
 static const uint32_t EPS_DBG_TRACE_MODE_REG_2_EXTEND_BANK = 22;
 static const uint32_t EPS_DBG_TRACE_MODE_REG_2_EXTEND_BANK_LEN = 2;
+//<< [EPS_DBG_TRACE_MODE_REG_2]
 // pauc/reg00011.H
 
+//>> [EPS_FIR_LOCAL_MASK]
 static const uint64_t EPS_FIR_LOCAL_MASK_RW = 0x10040103ull;
 static const uint64_t EPS_FIR_LOCAL_MASK_WO_AND = 0x10040104ull;
 static const uint64_t EPS_FIR_LOCAL_MASK_WO_OR = 0x10040105ull;
@@ -175,8 +186,10 @@ static const uint32_t EPS_FIR_LOCAL_MASK_60 = 60;
 static const uint32_t EPS_FIR_LOCAL_MASK_61 = 61;
 static const uint32_t EPS_FIR_LOCAL_MASK_62 = 62;
 static const uint32_t EPS_FIR_LOCAL_MASK_63 = 63;
+//<< [EPS_FIR_LOCAL_MASK]
 // pauc/reg00011.H
 
+//>> [LOCAL_FIR]
 static const uint64_t LOCAL_FIR_RW = 0x10040100ull;
 static const uint64_t LOCAL_FIR_WO_AND = 0x10040101ull;
 static const uint64_t LOCAL_FIR_WO_OR = 0x10040102ull;
@@ -245,22 +258,30 @@ static const uint32_t LOCAL_FIR_IN60 = 60;
 static const uint32_t LOCAL_FIR_IN61 = 61;
 static const uint32_t LOCAL_FIR_IN62 = 62;
 static const uint32_t LOCAL_FIR_EXT_LOCAL_XSTOP = 63;
+//<< [LOCAL_FIR]
 // pauc/reg00011.H
 
+//>> [PB_MAILBOX_00_REG]
 static const uint64_t PB_MAILBOX_00_REG = 0x10011830ull;
+//<< [PB_MAILBOX_00_REG]
 // pauc/reg00011.H
 
+//>> [PB_MAILBOX_01_REG]
 static const uint64_t PB_MAILBOX_01_REG = 0x10011831ull;
+//<< [PB_MAILBOX_01_REG]
 // pauc/reg00011.H
 
+//>> [PHY_PPE_WRAP_XIDBGINF]
 static const uint64_t PHY_PPE_WRAP_XIDBGINF = 0x10012c1full;
 
 static const uint32_t PHY_PPE_WRAP_XIDBGINF_SRR0 = 0;
 static const uint32_t PHY_PPE_WRAP_XIDBGINF_SRR0_LEN = 30;
 static const uint32_t PHY_PPE_WRAP_XIDBGINF_LR = 32;
 static const uint32_t PHY_PPE_WRAP_XIDBGINF_LR_LEN = 32;
+//<< [PHY_PPE_WRAP_XIDBGINF]
 // pauc/reg00011.H
 
+//>> [RECOV]
 static const uint64_t RECOV = 0x10040001ull;
 
 static const uint32_t RECOV_ANY_RECOV = 0;
@@ -317,14 +338,18 @@ static const uint32_t RECOV_IN50 = 50;
 static const uint32_t RECOV_IN51 = 51;
 static const uint32_t RECOV_IN52 = 52;
 static const uint32_t RECOV_IN53 = 53;
+//<< [RECOV]
 // pauc/reg00011.H
 
+//>> [TRA0_TR1_CONFIG_1]
 static const uint64_t TRA0_TR1_CONFIG_1 = 0x10010444ull;
 
 static const uint32_t TRA0_TR1_CONFIG_1_CMP_MSK_LT_B_64_TO_87 = 0;
 static const uint32_t TRA0_TR1_CONFIG_1_CMP_MSK_LT_B_64_TO_87_LEN = 24;
+//<< [TRA0_TR1_CONFIG_1]
 // pauc/reg00011.H
 
+//>> [XSTOP4]
 static const uint64_t XSTOP4 = 0x10030014ull;
 
 static const uint32_t XSTOP4_ENABLE = 0;
@@ -348,7 +373,10 @@ static const uint32_t XSTOP4_REGION_UNIT13 = 17;
 static const uint32_t XSTOP4_REGION_UNIT14 = 18;
 static const uint32_t XSTOP4_WAIT_CYCLES = 48;
 static const uint32_t XSTOP4_WAIT_CYCLES_LEN = 12;
+//<< [XSTOP4]
 // pauc/reg00011.H
+
+//>>THE END<<
 
 #ifndef __PPE_HCODE__
 }

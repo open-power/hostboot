@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -35,6 +35,7 @@ namespace phb
 #endif
 
 
+//>> PREP_[PHB5_SCOM_UV_SEC_INCL_MSK]
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
 static inline fapi2::ReturnCode PREP_PHB5_SCOM_UV_SEC_INCL_MSK(const fapi2::Target<K, M, V>& i_target)
 {
@@ -48,7 +49,9 @@ fapi_try_exit:
     return fapi2::current_err;
 #endif
 }
+//<< PREP_[PHB5_SCOM_UV_SEC_INCL_MSK]
 
+//>> GET_[PHB5_SCOM_UV_SEC_INCL_MSK]
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
 static inline fapi2::ReturnCode GET_PHB5_SCOM_UV_SEC_INCL_MSK(const fapi2::Target<K, M, V>& i_target,
         fapi2::buffer<uint64_t>& o_data)
@@ -63,7 +66,9 @@ fapi_try_exit:
     return fapi2::current_err;
 #endif
 }
+//<< GET_[PHB5_SCOM_UV_SEC_INCL_MSK]
 
+//>> PUT_[PHB5_SCOM_UV_SEC_INCL_MSK]
 template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
 static inline fapi2::ReturnCode PUT_PHB5_SCOM_UV_SEC_INCL_MSK(const fapi2::Target<K, M, V>& i_target,
         const uint64_t i_data)
@@ -78,8 +83,10 @@ fapi_try_exit:
     return fapi2::current_err;
 #endif
 }
+//<< PUT_[PHB5_SCOM_UV_SEC_INCL_MSK]
 
 
+//>> SET_[PHB5_SCOM_UV_SEC_INCL_MSK_VALUE]
 static inline fapi2::buffer<uint64_t>& SET_PHB5_SCOM_UV_SEC_INCL_MSK_VALUE(fapi2::buffer<uint64_t>& i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
@@ -90,11 +97,13 @@ static inline fapi2::buffer<uint64_t>& SET_PHB5_SCOM_UV_SEC_INCL_MSK_VALUE(fapi2
            PHB5_SCOM_UV_SEC_INCL_MSK_VALUE_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access PHB5_SCOM_UV_SEC_INCL_MSK_VALUE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("0:scom_phb Invalid dial access PHB5_SCOM_UV_SEC_INCL_MSK_VALUE chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[PHB5_SCOM_UV_SEC_INCL_MSK_VALUE]
 
+//>> SET_[PHB5_SCOM_UV_SEC_INCL_MSK_VALUE]
 static inline fapi2::buffer<uint64_t>& SET_PHB5_SCOM_UV_SEC_INCL_MSK_VALUE(const uint64_t i_data,
         fapi2::buffer<uint64_t>& o_data)
 {
@@ -105,11 +114,13 @@ static inline fapi2::buffer<uint64_t>& SET_PHB5_SCOM_UV_SEC_INCL_MSK_VALUE(const
            PHB5_SCOM_UV_SEC_INCL_MSK_VALUE_LEN>(i_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access PHB5_SCOM_UV_SEC_INCL_MSK_VALUE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("1:scom_phb Invalid dial access PHB5_SCOM_UV_SEC_INCL_MSK_VALUE chip: %x, ec: %x", scomt::chip, scomt::ec);
     return o_data;
 #endif
 }
+//<< SET_[PHB5_SCOM_UV_SEC_INCL_MSK_VALUE]
 
+//>> GET_[PHB5_SCOM_UV_SEC_INCL_MSK_VALUE]
 static inline fapi2::buffer<uint64_t>& GET_PHB5_SCOM_UV_SEC_INCL_MSK_VALUE(fapi2::buffer<uint64_t>& i_data,
         uint64_t& o_data)
 {
@@ -120,11 +131,14 @@ static inline fapi2::buffer<uint64_t>& GET_PHB5_SCOM_UV_SEC_INCL_MSK_VALUE(fapi2
            PHB5_SCOM_UV_SEC_INCL_MSK_VALUE_LEN>(o_data);
 #ifdef SCOM_CHECKING
 fapi_try_exit:
-    FAPI_ERR("Invalid dial access PHB5_SCOM_UV_SEC_INCL_MSK_VALUE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    FAPI_ERR("4:scom_phb Invalid dial access PHB5_SCOM_UV_SEC_INCL_MSK_VALUE chip: %x, ec: %x", scomt::chip, scomt::ec);
     return i_data;
 #endif
 }
+//<< GET_[PHB5_SCOM_UV_SEC_INCL_MSK_VALUE]
 
+
+//>>THE END<<
 
 #ifndef __PPE_HCODE__
 }

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -39,6 +39,7 @@ namespace omic
 #endif
 
 
+//>> [CMN_CONFIG]
 //ERRCODE: // Some of the name targets not found in address targets: omic
 // No targets could be determined from the address.
 
@@ -90,19 +91,25 @@ static const uint32_t CMN_CONFIG_CFG_CMN_CNTR3_EN = 60;
 static const uint32_t CMN_CONFIG_CFG_CMN_CNTR2_EN = 61;
 static const uint32_t CMN_CONFIG_CFG_CMN_CNTR1_EN = 62;
 static const uint32_t CMN_CONFIG_CFG_CMN_CNTR0_EN = 63;
+//<< [CMN_CONFIG]
 // omic/reg00013.H
 
+//>> [CTL_REGS_RX_MODE14_PG]
 static const uint64_t CTL_REGS_RX_MODE14_PG = 0x8008704010012c3full;
 
 static const uint32_t CTL_REGS_RX_MODE14_PG_RX_LOFF_LIVEDGE_MODE = 48;
+//<< [CTL_REGS_RX_MODE14_PG]
 // omic/reg00013.H
 
+//>> [CTL_REGS_RX_MODE1_PG]
 static const uint64_t CTL_REGS_RX_MODE1_PG = 0x8008084010012c3full;
 
 static const uint32_t CTL_REGS_RX_MODE1_PG_CLKDIST_PDWN = 48;
 static const uint32_t CTL_REGS_RX_MODE1_PG_16TO1 = 51;
+//<< [CTL_REGS_RX_MODE1_PG]
 // omic/reg00013.H
 
+//>> [CTL_REGS_RX_MODE24_PG]
 static const uint64_t CTL_REGS_RX_MODE24_PG = 0x8008c04010012c3full;
 
 static const uint32_t CTL_REGS_RX_MODE24_PG_1_INVALID_LOCK_THRESH_INC = 48;
@@ -113,45 +120,60 @@ static const uint32_t CTL_REGS_RX_MODE24_PG_2_INVALID_LOCK_THRESH_INC = 56;
 static const uint32_t CTL_REGS_RX_MODE24_PG_2_INVALID_LOCK_THRESH_INC_LEN = 4;
 static const uint32_t CTL_REGS_RX_MODE24_PG_2_INVALID_LOCK_THRESH_DEC = 60;
 static const uint32_t CTL_REGS_RX_MODE24_PG_2_INVALID_LOCK_THRESH_DEC_LEN = 4;
+//<< [CTL_REGS_RX_MODE24_PG]
 // omic/reg00013.H
 
+//>> [CTL_REGS_TX_CNTL6_PG]
 static const uint64_t CTL_REGS_TX_CNTL6_PG = 0x800c6c4010012c3full;
 
 static const uint32_t CTL_REGS_TX_CNTL6_PG_TX_TDR_PULSE_WIDTH = 48;
 static const uint32_t CTL_REGS_TX_CNTL6_PG_TX_TDR_PULSE_WIDTH_LEN = 9;
+//<< [CTL_REGS_TX_CNTL6_PG]
 // omic/reg00013.H
 
+//>> [DATASM_REGS_RX_CNT16_PG]
 static const uint64_t DATASM_REGS_RX_CNT16_PG = 0x800a004010012c3full;
 
 static const uint32_t DATASM_REGS_RX_CNT16_PG_0 = 48;
 static const uint32_t DATASM_REGS_RX_CNT16_PG_0_LEN = 6;
 static const uint32_t DATASM_REGS_RX_CNT16_PG_1 = 54;
 static const uint32_t DATASM_REGS_RX_CNT16_PG_1_LEN = 6;
+//<< [DATASM_REGS_RX_CNT16_PG]
 // omic/reg00013.H
 
+//>> [DATASM_REGS_RX_CNT26_PG]
 static const uint64_t DATASM_REGS_RX_CNT26_PG = 0x800a504010012c3full;
 
 static const uint32_t DATASM_REGS_RX_CNT26_PG_RX_B_LANE_FAIL_16_23 = 56;
 static const uint32_t DATASM_REGS_RX_CNT26_PG_RX_B_LANE_FAIL_16_23_LEN = 8;
+//<< [DATASM_REGS_RX_CNT26_PG]
 // omic/reg00013.H
 
+//>> [DATASM_REGS_RX_CNTL5_PG]
 static const uint64_t DATASM_REGS_RX_CNTL5_PG = 0x8009a84010012c3full;
 
 static const uint32_t DATASM_REGS_RX_CNTL5_PG_RX_PSAVE_FENCE_REQ_DL_IO_0_15 = 48;
 static const uint32_t DATASM_REGS_RX_CNTL5_PG_RX_PSAVE_FENCE_REQ_DL_IO_0_15_LEN = 16;
+//<< [DATASM_REGS_RX_CNTL5_PG]
 // omic/reg00013.H
 
+//>> [DATASM_REGS_RX_STAT5_PG]
 static const uint64_t DATASM_REGS_RX_STAT5_PG = 0x800ab04010012c3full;
 
 static const uint32_t DATASM_REGS_RX_STAT5_PG_RX_DATA_PIPE_MAIN_16_31_RO_SIGNAL = 48;
 static const uint32_t DATASM_REGS_RX_STAT5_PG_RX_DATA_PIPE_MAIN_16_31_RO_SIGNAL_LEN = 16;
+//<< [DATASM_REGS_RX_STAT5_PG]
 // omic/reg00013.H
 
+//>> [TX_CTL_SM_REGS_CTLSM_CNTL7_PG]
 static const uint64_t TX_CTL_SM_REGS_CTLSM_CNTL7_PG = 0x800cf44010012c3full;
 
 static const uint32_t TX_CTL_SM_REGS_CTLSM_CNTL7_PG_TX_PSAVE_FORCE_STS_0_15 = 48;
 static const uint32_t TX_CTL_SM_REGS_CTLSM_CNTL7_PG_TX_PSAVE_FORCE_STS_0_15_LEN = 16;
+//<< [TX_CTL_SM_REGS_CTLSM_CNTL7_PG]
 // omic/reg00013.H
+
+//>>THE END<<
 
 #ifndef __PPE_HCODE__
 }

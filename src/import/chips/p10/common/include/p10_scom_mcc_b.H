@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -39,12 +39,15 @@ namespace mcc
 #endif
 
 
+//>> [CRYPTO_DECRYPT_CRYPTOKEY1B]
 static const uint64_t CRYPTO_DECRYPT_CRYPTOKEY1B = 0x0c010f5bull;
 
 static const uint32_t CRYPTO_DECRYPT_CRYPTOKEY1B_KEY1B = 0;
 static const uint32_t CRYPTO_DECRYPT_CRYPTOKEY1B_KEY1B_LEN = 64;
+//<< [CRYPTO_DECRYPT_CRYPTOKEY1B]
 // mcc/reg00011.H
 
+//>> [DSTL_DSTLCREDIT]
 static const uint64_t DSTL_DSTLCREDIT = 0x0c010d0aull;
 
 static const uint32_t DSTL_DSTLCREDIT_XVC0_CREDIT_INIT = 2;
@@ -63,8 +66,10 @@ static const uint32_t DSTL_DSTLCREDIT_XDCP0_CHANA_POOL = 50;
 static const uint32_t DSTL_DSTLCREDIT_XDCP0_CHANA_POOL_LEN = 6;
 static const uint32_t DSTL_DSTLCREDIT_XDCP0_CHANB_POOL = 58;
 static const uint32_t DSTL_DSTLCREDIT_XDCP0_CHANB_POOL_LEN = 6;
+//<< [DSTL_DSTLCREDIT]
 // mcc/reg00011.H
 
+//>> [DSTL_DSTLFIR]
 static const uint64_t DSTL_DSTLFIR_RW = 0x0c010d00ull;
 static const uint64_t DSTL_DSTLFIR_WO_AND = 0x0c010d01ull;
 static const uint64_t DSTL_DSTLFIR_WO_OR = 0x0c010d02ull;
@@ -103,8 +108,10 @@ static const uint32_t DSTL_DSTLFIR_SUBCHANNEL_A_PARITY_ERROR = 35;
 static const uint32_t DSTL_DSTLFIR_SUBCHANNEL_B_PARITY_ERROR = 36;
 static const uint32_t DSTL_DSTLFIR_SPARE37 = 37;
 static const uint32_t DSTL_DSTLFIR_SPARE38 = 38;
+//<< [DSTL_DSTLFIR]
 // mcc/reg00011.H
 
+//>> [USTL_USTLERRRPT]
 static const uint64_t USTL_USTLERRRPT = 0x0c010e0eull;
 
 static const uint32_t USTL_USTLERRRPT_USTLERRPRT_CHANA_RDCMD_PARITY_ERROR_HOLD_OUT = 0;
@@ -148,13 +155,18 @@ static const uint32_t USTL_USTLERRRPT_USTLERRPRT_CHANB_META_PARITY_ERROR_HOLD_OU
 static const uint32_t USTL_USTLERRRPT_USTLERRPRT_READ_USTL_DUPLICATE_OW_CHANA_HOLD_OUT = 38;
 static const uint32_t USTL_USTLERRRPT_USTLERRPRT_READ_USTL_DUPLICATE_OW_CHANB_HOLD_OUT = 39;
 static const uint32_t USTL_USTLERRRPT_USTLERRPRT_CNFG2_REG_PE_HOLD_OUT = 40;
+//<< [USTL_USTLERRRPT]
 // mcc/reg00011.H
 
+//>> [USTL_USTLFIRWOF]
 static const uint64_t USTL_USTLFIRWOF = 0x0c010e08ull;
 
 static const uint32_t USTL_USTLFIRWOF_USTLFIRWOF_WOF = 0;
 static const uint32_t USTL_USTLFIRWOF_USTLFIRWOF_WOF_LEN = 62;
+//<< [USTL_USTLFIRWOF]
 // mcc/reg00011.H
+
+//>>THE END<<
 
 #ifndef __PPE_HCODE__
 }

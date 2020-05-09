@@ -39,6 +39,7 @@ namespace pec
 #endif
 
 
+//>> [DBG_CBS_CC]
 static const uint64_t DBG_CBS_CC = 0x08030013ull;
 
 static const uint32_t DBG_CBS_CC_DBG_RESET_EP = 0;
@@ -65,8 +66,10 @@ static const uint32_t DBG_CBS_CC_DBG_PCB_REQUEST_SINCE_RESET = 28;
 static const uint32_t DBG_CBS_CC_DBG_PARANOIA_TEST_ENABLE_CHANGE = 29;
 static const uint32_t DBG_CBS_CC_DBG_PARANOIA_VITL_CLKOFF_CHANGE = 30;
 static const uint32_t DBG_CBS_CC_TP_TPFSI_CBS_ACK = 31;
+//<< [DBG_CBS_CC]
 // pec/reg00001.H
 
+//>> [EPS_PSC_ADDR_TRAP_REG]
 static const uint64_t EPS_PSC_ADDR_TRAP_REG = 0x08010003ull;
 
 static const uint32_t EPS_PSC_ADDR_TRAP_REG_PCB_ADDRESS_OF_LAST_TRANSACTION_WITH_ERROR = 0;
@@ -81,8 +84,10 @@ static const uint32_t EPS_PSC_ADDR_TRAP_REG_SATELLITE_ACKNOWLEDGE_BIT_ACCESS_VIO
 static const uint32_t EPS_PSC_ADDR_TRAP_REG_SATELLITE_ACKNOWLEDGE_BIT_INVALID_REGISTER = 34;
 static const uint32_t EPS_PSC_ADDR_TRAP_REG_LAST_MASTERID = 35;
 static const uint32_t EPS_PSC_ADDR_TRAP_REG_LAST_MASTERID_LEN = 4;
+//<< [EPS_PSC_ADDR_TRAP_REG]
 // pec/reg00001.H
 
+//>> [EPS_PSC_PSCOM_MODE_REG]
 static const uint64_t EPS_PSC_PSCOM_MODE_REG = 0x08010000ull;
 
 static const uint32_t EPS_PSC_PSCOM_MODE_REG_ABORT_ON_PCB_ADDR_PARITY_ERROR = 0;
@@ -95,13 +100,17 @@ static const uint32_t EPS_PSC_PSCOM_MODE_REG_FORCE_ALL_RINGS = 7;
 static const uint32_t EPS_PSC_PSCOM_MODE_REG_FSM_SELFRESET_ON_STATEVEC_PARITYERROR_ENABLE = 8;
 static const uint32_t EPS_PSC_PSCOM_MODE_REG_RESERVED_PSCOM_MODE_LT = 9;
 static const uint32_t EPS_PSC_PSCOM_MODE_REG_RESERVED_PSCOM_MODE_LT_LEN = 3;
+//<< [EPS_PSC_PSCOM_MODE_REG]
 // pec/reg00001.H
 
+//>> [HEARTBEAT_REG]
 static const uint64_t HEARTBEAT_REG = 0x080f0018ull;
 
 static const uint32_t HEARTBEAT_REG_HEARTBEAT_DEAD = 0;
+//<< [HEARTBEAT_REG]
 // pec/reg00001.H
 
+//>> [OPCG_CAPT3]
 static const uint64_t OPCG_CAPT3 = 0x08030012ull;
 
 static const uint32_t OPCG_CAPT3_07EVEN = 4;
@@ -128,8 +137,10 @@ static const uint32_t OPCG_CAPT3_12EVEN = 54;
 static const uint32_t OPCG_CAPT3_12EVEN_LEN = 5;
 static const uint32_t OPCG_CAPT3_12ODD = 59;
 static const uint32_t OPCG_CAPT3_12ODD_LEN = 5;
+//<< [OPCG_CAPT3]
 // pec/reg00001.H
 
+//>> [PIPEDINCTL0]
 static const uint64_t PIPEDINCTL0 = 0x08011519ull;
 
 static const uint32_t PIPEDINCTL0_RESERVED_63_17 = 0;
@@ -147,38 +158,51 @@ static const uint32_t PIPEDINCTL0_PHY0_REFB_CLKDET_RESULT = 60;
 static const uint32_t PIPEDINCTL0_PHY0_REFA_CLKDET_RESULT = 61;
 static const uint32_t PIPEDINCTL0_PHY0_MPLLB_FORCE_ACK = 62;
 static const uint32_t PIPEDINCTL0_PHY0_MPLLA_FORCE_ACK = 63;
+//<< [PIPEDINCTL0]
 // pec/reg00001.H
 
+//>> [PIPEDOUTCTL3]
 static const uint64_t PIPEDOUTCTL3 = 0x08011517ull;
 
 static const uint32_t PIPEDOUTCTL3_PHY1_HANDSHAKE = 0;
 static const uint32_t PIPEDOUTCTL3_PHY0_HANDSHAKE = 1;
 static const uint32_t PIPEDOUTCTL3_RESERVED_61_0 = 2;
 static const uint32_t PIPEDOUTCTL3_RESERVED_61_0_LEN = 62;
+//<< [PIPEDOUTCTL3]
 // pec/reg00001.H
 
+//>> [RECOV_INTERRUPT_REG]
 static const uint64_t RECOV_INTERRUPT_REG = 0x080f001bull;
 
 static const uint32_t RECOV_INTERRUPT_REG_RECOV = 0;
+//<< [RECOV_INTERRUPT_REG]
 // pec/reg00001.H
 
+//>> [SCAN32]
 static const uint64_t SCAN32 = 0x08038000ull;
 
 static const uint32_t SCAN32_SCAN32_REG = 0;
 static const uint32_t SCAN32_SCAN32_REG_LEN = 32;
+//<< [SCAN32]
 // pec/reg00001.H
 
+//>> [SCAN64]
 static const uint64_t SCAN64 = 0x0803e000ull;
 
 static const uint32_t SCAN64_SCAN64_REG = 0;
 static const uint32_t SCAN64_SCAN64_REG_LEN = 64;
+//<< [SCAN64]
 // pec/reg00001.H
 
+//>> [TRA0_TR0_TRACE_HI_DATA_REG]
 static const uint64_t TRA0_TR0_TRACE_HI_DATA_REG = 0x08010400ull;
 
 static const uint32_t TRA0_TR0_TRACE_HI_DATA_REG_TRACE_HI_DATA = 0;
 static const uint32_t TRA0_TR0_TRACE_HI_DATA_REG_TRACE_HI_DATA_LEN = 64;
+//<< [TRA0_TR0_TRACE_HI_DATA_REG]
 // pec/reg00001.H
+
+//>>THE END<<
 
 #ifndef __PPE_HCODE__
 }

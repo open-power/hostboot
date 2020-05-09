@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -39,20 +39,25 @@ namespace phb
 #endif
 
 
+//>> [REGS_PE_DFREEZE_REG]
 static const uint64_t REGS_PE_DFREEZE_REG = 0x03011855ull;
 
 static const uint32_t REGS_PE_DFREEZE_REG_PE_DFREEZE = 0;
 static const uint32_t REGS_PE_DFREEZE_REG_PE_DFREEZE_LEN = 28;
+//<< [REGS_PE_DFREEZE_REG]
 // phb/reg00013.H
 
+//>> [REGS_PFIR_REG]
 static const uint64_t REGS_PFIR_REG_RW = 0x08010840ull;
 static const uint64_t REGS_PFIR_REG_WO_AND = 0x08010841ull;
 static const uint64_t REGS_PFIR_REG_WO_OR = 0x08010842ull;
 
 static const uint32_t REGS_PFIR_REG_PFIRPFIR = 0;
 static const uint32_t REGS_PFIR_REG_PFIRPFIR_LEN = 6;
+//<< [REGS_PFIR_REG]
 // phb/reg00013.H
 
+//>> [RSB_SCOM_SSR_PHB5_HVIAR]
 static const uint64_t RSB_SCOM_SSR_PHB5_HVIAR = 0x08010900ull;
 
 static const uint32_t RSB_SCOM_SSR_PHB5_HVIAR_REQ_ADDR_VLD = 0;
@@ -60,7 +65,10 @@ static const uint32_t RSB_SCOM_SSR_PHB5_HVIAR_REQ_4B = 1;
 static const uint32_t RSB_SCOM_SSR_PHB5_HVIAR_AUTO_INC = 2;
 static const uint32_t RSB_SCOM_SSR_PHB5_HVIAR_REQ_ADDR_VALUE = 51;
 static const uint32_t RSB_SCOM_SSR_PHB5_HVIAR_REQ_ADDR_VALUE_LEN = 11;
+//<< [RSB_SCOM_SSR_PHB5_HVIAR]
 // phb/reg00013.H
+
+//>>THE END<<
 
 #ifndef __PPE_HCODE__
 }

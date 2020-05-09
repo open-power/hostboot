@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -39,6 +39,7 @@ namespace mc
 #endif
 
 
+//>> [CC_ATOMIC_LOCK_REG]
 static const uint64_t CC_ATOMIC_LOCK_REG = 0x0c0303ffull;
 
 static const uint32_t CC_ATOMIC_LOCK_REG_LOCK_ENABLE = 0;
@@ -46,8 +47,10 @@ static const uint32_t CC_ATOMIC_LOCK_REG_ID = 1;
 static const uint32_t CC_ATOMIC_LOCK_REG_ID_LEN = 4;
 static const uint32_t CC_ATOMIC_LOCK_REG_ACTIVITY = 8;
 static const uint32_t CC_ATOMIC_LOCK_REG_ACTIVITY_LEN = 8;
+//<< [CC_ATOMIC_LOCK_REG]
 // mc/reg00013.H
 
+//>> [CTRL_ATOMIC_LOCK_REG]
 static const uint64_t CTRL_ATOMIC_LOCK_REG = 0x0c0003ffull;
 
 static const uint32_t CTRL_ATOMIC_LOCK_REG_LOCK_ENABLE = 0;
@@ -55,47 +58,61 @@ static const uint32_t CTRL_ATOMIC_LOCK_REG_ID = 1;
 static const uint32_t CTRL_ATOMIC_LOCK_REG_ID_LEN = 4;
 static const uint32_t CTRL_ATOMIC_LOCK_REG_ACTIVITY = 8;
 static const uint32_t CTRL_ATOMIC_LOCK_REG_ACTIVITY_LEN = 8;
+//<< [CTRL_ATOMIC_LOCK_REG]
 // mc/reg00013.H
 
+//>> [EPS_DBG_DEBUG_TRACE_CONTROL]
 static const uint64_t EPS_DBG_DEBUG_TRACE_CONTROL = 0x0c0107d0ull;
 
 static const uint32_t EPS_DBG_DEBUG_TRACE_CONTROL_START = 0;
 static const uint32_t EPS_DBG_DEBUG_TRACE_CONTROL_STOP = 1;
 static const uint32_t EPS_DBG_DEBUG_TRACE_CONTROL_RESET = 2;
+//<< [EPS_DBG_DEBUG_TRACE_CONTROL]
 // mc/reg00013.H
 
+//>> [MBA_SCOMFIR_DBG1_SCOM1Q]
 static const uint64_t MBA_SCOMFIR_DBG1_SCOM1Q = 0x0c010f97ull;
 
 static const uint32_t MBA_SCOMFIR_DBG1_SCOM1Q_DBG1_SCOM1Q_DEBUG_BUS_44_87 = 0;
 static const uint32_t MBA_SCOMFIR_DBG1_SCOM1Q_DBG1_SCOM1Q_DEBUG_BUS_44_87_LEN = 44;
+//<< [MBA_SCOMFIR_DBG1_SCOM1Q]
 // mc/reg00013.H
 
+//>> [MBA_SCOMFIR_MCEBUSEN2]
 static const uint64_t MBA_SCOMFIR_MCEBUSEN2 = 0x0c010fa6ull;
 
 static const uint32_t MBA_SCOMFIR_MCEBUSEN2_MCEBUSEN2_EVENT_BUS_SELECTS = 0;
 static const uint32_t MBA_SCOMFIR_MCEBUSEN2_MCEBUSEN2_EVENT_BUS_SELECTS_LEN = 64;
+//<< [MBA_SCOMFIR_MCEBUSEN2]
 // mc/reg00013.H
 
+//>> [MBA_SCOMFIR_MISCFIRMASK]
 static const uint64_t MBA_SCOMFIR_MISCFIRMASK_RW = 0x0c010f03ull;
 static const uint64_t MBA_SCOMFIR_MISCFIRMASK_WO_AND = 0x0c010f04ull;
 static const uint64_t MBA_SCOMFIR_MISCFIRMASK_WO_OR = 0x0c010f05ull;
 
 static const uint32_t MBA_SCOMFIR_MISCFIRMASK_MISCFIRMASK_FIR_MASK = 0;
 static const uint32_t MBA_SCOMFIR_MISCFIRMASK_MISCFIRMASK_FIR_MASK_LEN = 12;
+//<< [MBA_SCOMFIR_MISCFIRMASK]
 // mc/reg00013.H
 
+//>> [MBA_SCOMFIR_MISCFIRWOF]
 static const uint64_t MBA_SCOMFIR_MISCFIRWOF = 0x0c010f08ull;
 
 static const uint32_t MBA_SCOMFIR_MISCFIRWOF_MISCFIRWOF_FIR_WOF = 0;
 static const uint32_t MBA_SCOMFIR_MISCFIRWOF_MISCFIRWOF_FIR_WOF_LEN = 12;
+//<< [MBA_SCOMFIR_MISCFIRWOF]
 // mc/reg00013.H
 
+//>> [MBA_SCOMFIR_WATPATB1]
 static const uint64_t MBA_SCOMFIR_WATPATB1 = 0x0c010f87ull;
 
 static const uint32_t MBA_SCOMFIR_WATPATB1_WAT_PATTERN_B1 = 0;
 static const uint32_t MBA_SCOMFIR_WATPATB1_WAT_PATTERN_B1_LEN = 44;
+//<< [MBA_SCOMFIR_WATPATB1]
 // mc/reg00013.H
 
+//>> [OPCG_CAPT1]
 static const uint64_t OPCG_CAPT1 = 0x0c030010ull;
 
 static const uint32_t OPCG_CAPT1_COUNT = 0;
@@ -124,14 +141,18 @@ static const uint32_t OPCG_CAPT1_SEQ_11 = 54;
 static const uint32_t OPCG_CAPT1_SEQ_11_LEN = 5;
 static const uint32_t OPCG_CAPT1_SEQ_12 = 59;
 static const uint32_t OPCG_CAPT1_SEQ_12_LEN = 5;
+//<< [OPCG_CAPT1]
 // mc/reg00013.H
 
+//>> [PRIMARY_ADDRESS_REG]
 static const uint64_t PRIMARY_ADDRESS_REG = 0x0c0f0000ull;
 
 static const uint32_t PRIMARY_ADDRESS_REG_PRIMARY_ADDRESS = 0;
 static const uint32_t PRIMARY_ADDRESS_REG_PRIMARY_ADDRESS_LEN = 6;
+//<< [PRIMARY_ADDRESS_REG]
 // mc/reg00013.H
 
+//>> [RECOV_MASK]
 static const uint64_t RECOV_MASK_RW = 0x0c040041ull;
 static const uint64_t RECOV_MASK_WO_CLEAR = 0x0c040061ull;
 static const uint64_t RECOV_MASK_WO_OR = 0x0c040051ull;
@@ -189,14 +210,18 @@ static const uint32_t RECOV_MASK_50 = 50;
 static const uint32_t RECOV_MASK_51 = 51;
 static const uint32_t RECOV_MASK_52 = 52;
 static const uint32_t RECOV_MASK_53 = 53;
+//<< [RECOV_MASK]
 // mc/reg00013.H
 
+//>> [SCAN_UPDATEDR_LONG]
 static const uint64_t SCAN_UPDATEDR_LONG = 0x0c03b000ull;
 
 static const uint32_t SCAN_UPDATEDR_LONG_SCAN_UPDATEDR_LONG_REG = 0;
 static const uint32_t SCAN_UPDATEDR_LONG_SCAN_UPDATEDR_LONG_REG_LEN = 32;
+//<< [SCAN_UPDATEDR_LONG]
 // mc/reg00013.H
 
+//>> [SCOMFIR_MCFGP1]
 static const uint64_t SCOMFIR_MCFGP1 = 0x0c010c0bull;
 
 static const uint32_t SCOMFIR_MCFGP1_1_VALID = 0;
@@ -212,8 +237,10 @@ static const uint32_t SCOMFIR_MCFGP1_R1_CONFIGURATION_GROUP_SIZE = 46;
 static const uint32_t SCOMFIR_MCFGP1_R1_CONFIGURATION_GROUP_SIZE_LEN = 8;
 static const uint32_t SCOMFIR_MCFGP1_R1_MMIO_GROUP_SIZE = 54;
 static const uint32_t SCOMFIR_MCFGP1_R1_MMIO_GROUP_SIZE_LEN = 8;
+//<< [SCOMFIR_MCFGP1]
 // mc/reg00013.H
 
+//>> [TRA0_TR0_CONFIG_9]
 static const uint64_t TRA0_TR0_CONFIG_9 = 0x0c010409ull;
 
 static const uint32_t TRA0_TR0_CONFIG_9_DISABLE_COMPRESSION = 0;
@@ -244,8 +271,10 @@ static const uint32_t TRA0_TR0_CONFIG_9_TRIG0_ERR_CMP = 34;
 static const uint32_t TRA0_TR0_CONFIG_9_TRIG1_ERR_CMP = 35;
 static const uint32_t TRA0_TR0_CONFIG_9_DD1_STRETCH_TRIGGER_PULSES = 36;
 static const uint32_t TRA0_TR0_CONFIG_9_SPARE_LT = 37;
+//<< [TRA0_TR0_CONFIG_9]
 // mc/reg00013.H
 
+//>> [XSTOP5]
 static const uint64_t XSTOP5 = 0x0c030015ull;
 
 static const uint32_t XSTOP5_ENABLE = 0;
@@ -269,7 +298,10 @@ static const uint32_t XSTOP5_REGION_UNIT13 = 17;
 static const uint32_t XSTOP5_REGION_UNIT14 = 18;
 static const uint32_t XSTOP5_WAIT_CYCLES = 48;
 static const uint32_t XSTOP5_WAIT_CYCLES_LEN = 12;
+//<< [XSTOP5]
 // mc/reg00013.H
+
+//>>THE END<<
 
 #ifndef __PPE_HCODE__
 }

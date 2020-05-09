@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -39,12 +39,15 @@ namespace mcc
 #endif
 
 
+//>> [CRYPTO_DECRYPT_CRYPTOKEY2A]
 static const uint64_t CRYPTO_DECRYPT_CRYPTOKEY2A = 0x0c010f5cull;
 
 static const uint32_t CRYPTO_DECRYPT_CRYPTOKEY2A_KEY2A = 0;
 static const uint32_t CRYPTO_DECRYPT_CRYPTOKEY2A_KEY2A_LEN = 64;
+//<< [CRYPTO_DECRYPT_CRYPTOKEY2A]
 // mcc/reg00002.H
 
+//>> [DSTL_DSLTWAT]
 static const uint64_t DSTL_DSLTWAT = 0x0c010d11ull;
 
 static const uint32_t DSTL_DSLTWAT_CHANA_WAT_ACT_PMU = 0;
@@ -73,8 +76,10 @@ static const uint32_t DSTL_DSLTWAT_CHANB_WAT_HOLD_TLXDCP0_EN = 22;
 static const uint32_t DSTL_DSLTWAT_CHANB_WAT_HOLD_TLXDCP0_EN_LEN = 2;
 static const uint32_t DSTL_DSLTWAT_RESERVED_24_62 = 24;
 static const uint32_t DSTL_DSLTWAT_RESERVED_24_62_LEN = 39;
+//<< [DSTL_DSLTWAT]
 // mcc/reg00002.H
 
+//>> [USTL_USTLFIR]
 static const uint64_t USTL_USTLFIR_RW = 0x0c010e00ull;
 static const uint64_t USTL_USTLFIR_WO_AND = 0x0c010e01ull;
 static const uint64_t USTL_USTLFIR_WO_OR = 0x0c010e02ull;
@@ -141,14 +146,18 @@ static const uint32_t USTL_USTLFIR_RECOV_REG_PARITY_ERROR = 58;
 static const uint32_t USTL_USTLFIR_CHANA_INVALID_DL_DP_COMBO = 59;
 static const uint32_t USTL_USTLFIR_CHANB_INVALID_DL_DP_COMBO = 60;
 static const uint32_t USTL_USTLFIR_SPARE_61 = 61;
+//<< [USTL_USTLFIR]
 // mcc/reg00002.H
 
+//>> [WDF_HCA_ACCUM_REG]
 static const uint64_t WDF_HCA_ACCUM_REG = 0x0c010f42ull;
 
 static const uint32_t WDF_HCA_ACCUM_REG_ACCUM_REG = 0;
 static const uint32_t WDF_HCA_ACCUM_REG_ACCUM_REG_LEN = 64;
+//<< [WDF_HCA_ACCUM_REG]
 // mcc/reg00002.H
 
+//>> [WDF_WBMGR_TAG_INFO]
 static const uint64_t WDF_WBMGR_TAG_INFO = 0x0c010f43ull;
 
 static const uint32_t WDF_WBMGR_TAG_INFO_SLICE0_BUFFER_OVERRUN = 0;
@@ -156,7 +165,10 @@ static const uint32_t WDF_WBMGR_TAG_INFO_SLICE1_BUFFER_OVERRUN = 1;
 static const uint32_t WDF_WBMGR_TAG_INFO_SLICE2_BUFFER_OVERRUN = 2;
 static const uint32_t WDF_WBMGR_TAG_INFO_SLICE3_BUFFER_OVERRUN = 3;
 static const uint32_t WDF_WBMGR_TAG_INFO_TAG_OVERRUN = 4;
+//<< [WDF_WBMGR_TAG_INFO]
 // mcc/reg00002.H
+
+//>>THE END<<
 
 #ifndef __PPE_HCODE__
 }

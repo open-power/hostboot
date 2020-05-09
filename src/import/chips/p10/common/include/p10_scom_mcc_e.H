@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -39,18 +39,23 @@ namespace mcc
 #endif
 
 
+//>> [CRYPTO_ENCRYPT_CRYPTOKEY2B]
 static const uint64_t CRYPTO_ENCRYPT_CRYPTOKEY2B = 0x0c010f55ull;
 
 static const uint32_t CRYPTO_ENCRYPT_CRYPTOKEY2B_KEY2B = 0;
 static const uint32_t CRYPTO_ENCRYPT_CRYPTOKEY2B_KEY2B_LEN = 64;
+//<< [CRYPTO_ENCRYPT_CRYPTOKEY2B]
 // mcc/reg00014.H
 
+//>> [USTL_USTLFIRACT1]
 static const uint64_t USTL_USTLFIRACT1 = 0x0c010e07ull;
 
 static const uint32_t USTL_USTLFIRACT1_USTLFIRACT1_ACTION_1 = 0;
 static const uint32_t USTL_USTLFIRACT1_USTLFIRACT1_ACTION_1_LEN = 62;
+//<< [USTL_USTLFIRACT1]
 // mcc/reg00014.H
 
+//>> [USTL_USTLINJ]
 static const uint64_t USTL_USTLINJ = 0x0c010e0cull;
 
 static const uint32_t USTL_USTLINJ_FAIL_RESP_TYPE = 3;
@@ -65,7 +70,10 @@ static const uint32_t USTL_USTLINJ_ONE_SHOT = 27;
 static const uint32_t USTL_USTLINJ_DATA_OUT = 28;
 static const uint32_t USTL_USTLINJ_DATA_DW_SEL = 29;
 static const uint32_t USTL_USTLINJ_DATA_DW_SEL_LEN = 2;
+//<< [USTL_USTLINJ]
 // mcc/reg00014.H
+
+//>>THE END<<
 
 #ifndef __PPE_HCODE__
 }

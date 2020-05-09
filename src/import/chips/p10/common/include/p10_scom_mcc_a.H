@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -39,6 +39,7 @@ namespace mcc
 #endif
 
 
+//>> [ATCL_CL_CLSCOM_MCERRINJ]
 static const uint64_t ATCL_CL_CLSCOM_MCERRINJ = 0x0c010c28ull;
 
 static const uint32_t ATCL_CL_CLSCOM_MCERRINJ_WB_ERR_INJ = 0;
@@ -46,8 +47,10 @@ static const uint32_t ATCL_CL_CLSCOM_MCERRINJ_WB_ERR_INJ_LEN = 3;
 static const uint32_t ATCL_CL_CLSCOM_MCERRINJ_RESERVED3_6 = 3;
 static const uint32_t ATCL_CL_CLSCOM_MCERRINJ_RESERVED3_6_LEN = 4;
 static const uint32_t ATCL_CL_CLSCOM_MCERRINJ_RESET_KEEPER = 7;
+//<< [ATCL_CL_CLSCOM_MCERRINJ]
 // mcc/reg00010.H
 
+//>> [DSTL_DSTLERRRPT]
 static const uint64_t DSTL_DSTLERRRPT = 0x0c010d0cull;
 
 static const uint32_t DSTL_DSTLERRRPT_CHANA_CREDIT_UNDERFLOW_ERROR_HOLD_OUT = 0;
@@ -98,20 +101,26 @@ static const uint32_t DSTL_DSTLERRRPT_CHANA_WRDATA_COUNTER_ASSUMPTION_ERROR_HOLD
 static const uint32_t DSTL_DSTLERRRPT_CHANB_WRDATA_COUNTER_ASSUMPTION_ERROR_HOLD_OUT = 45;
 static const uint32_t DSTL_DSTLERRRPT_SUBCHANNEL_A_FAIL_STATE = 62;
 static const uint32_t DSTL_DSTLERRRPT_SUBCHANNEL_B_FAIL_STATE = 63;
+//<< [DSTL_DSTLERRRPT]
 // mcc/reg00010.H
 
+//>> [DSTL_DSTLFIRACT1]
 static const uint64_t DSTL_DSTLFIRACT1 = 0x0c010d07ull;
 
 static const uint32_t DSTL_DSTLFIRACT1_DSTLFIRACT1_ACTION_1 = 0;
 static const uint32_t DSTL_DSTLFIRACT1_DSTLFIRACT1_ACTION_1_LEN = 39;
+//<< [DSTL_DSTLFIRACT1]
 // mcc/reg00010.H
 
+//>> [DSTL_DSTLFIRWOF]
 static const uint64_t DSTL_DSTLFIRWOF = 0x0c010d08ull;
 
 static const uint32_t DSTL_DSTLFIRWOF_DSTLFIRWOF_WOF = 0;
 static const uint32_t DSTL_DSTLFIRWOF_DSTLFIRWOF_WOF_LEN = 39;
+//<< [DSTL_DSTLFIRWOF]
 // mcc/reg00010.H
 
+//>> [DSTL_DSTLPSAVE0]
 static const uint64_t DSTL_DSTLPSAVE0 = 0x0c010d12ull;
 
 static const uint32_t DSTL_DSTLPSAVE0_MASTER_PSAVE_MODE = 0;
@@ -139,7 +148,10 @@ static const uint32_t DSTL_DSTLPSAVE0_PSAVE_REQUEST_OVERRIDE = 41;
 static const uint32_t DSTL_DSTLPSAVE0_PSAVE_REQUEST_OVERRIDE_LEN = 2;
 static const uint32_t DSTL_DSTLPSAVE0_RESERVED_43_47 = 43;
 static const uint32_t DSTL_DSTLPSAVE0_RESERVED_43_47_LEN = 5;
+//<< [DSTL_DSTLPSAVE0]
 // mcc/reg00010.H
+
+//>>THE END<<
 
 #ifndef __PPE_HCODE__
 }

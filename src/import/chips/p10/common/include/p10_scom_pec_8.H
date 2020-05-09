@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -39,6 +39,7 @@ namespace pec
 #endif
 
 
+//>> [ASSIST_INTERRUPT_REG]
 static const uint64_t ASSIST_INTERRUPT_REG = 0x080f0011ull;
 
 static const uint32_t ASSIST_INTERRUPT_REG_ATTN = 0;
@@ -46,14 +47,18 @@ static const uint32_t ASSIST_INTERRUPT_REG_RECOV = 1;
 static const uint32_t ASSIST_INTERRUPT_REG_XSTOP = 2;
 static const uint32_t ASSIST_INTERRUPT_REG_LXSTOP = 3;
 static const uint32_t ASSIST_INTERRUPT_REG_TYPE4 = 4;
+//<< [ASSIST_INTERRUPT_REG]
 // pec/reg00008.H
 
+//>> [EDRAM_STATUS]
 static const uint64_t EDRAM_STATUS = 0x080f0029ull;
 
 static const uint32_t EDRAM_STATUS_EDRAM_STAT = 0;
 static const uint32_t EDRAM_STATUS_EDRAM_STAT_LEN = 4;
+//<< [EDRAM_STATUS]
 // pec/reg00008.H
 
+//>> [EPS_DBG_TRACE_REG_0]
 static const uint64_t EPS_DBG_TRACE_REG_0 = 0x080107cdull;
 
 static const uint32_t EPS_DBG_TRACE_REG_0_INST1_COND3_ENABLE = 0;
@@ -90,8 +95,10 @@ static const uint32_t EPS_DBG_TRACE_REG_0_TRIG0_LEVEL_SEL = 50;
 static const uint32_t EPS_DBG_TRACE_REG_0_TRIG0_LEVEL_SEL_LEN = 4;
 static const uint32_t EPS_DBG_TRACE_REG_0_TRIG1_LEVEL_SEL = 54;
 static const uint32_t EPS_DBG_TRACE_REG_0_TRIG1_LEVEL_SEL_LEN = 4;
+//<< [EPS_DBG_TRACE_REG_0]
 // pec/reg00008.H
 
+//>> [EPS_FIR_LOCAL_ACTION0]
 static const uint64_t EPS_FIR_LOCAL_ACTION0 = 0x08040106ull;
 
 static const uint32_t EPS_FIR_LOCAL_ACTION0_00 = 0;
@@ -158,8 +165,10 @@ static const uint32_t EPS_FIR_LOCAL_ACTION0_60 = 60;
 static const uint32_t EPS_FIR_LOCAL_ACTION0_61 = 61;
 static const uint32_t EPS_FIR_LOCAL_ACTION0_62 = 62;
 static const uint32_t EPS_FIR_LOCAL_ACTION0_63 = 63;
+//<< [EPS_FIR_LOCAL_ACTION0]
 // pec/reg00008.H
 
+//>> [EPS_PSC_PSCOM_ERROR_MASK]
 static const uint64_t EPS_PSC_PSCOM_ERROR_MASK = 0x08010002ull;
 
 static const uint32_t EPS_PSC_PSCOM_ERROR_MASK_PCB_WDATA_PARITY_ERROR = 0;
@@ -180,14 +189,18 @@ static const uint32_t EPS_PSC_PSCOM_ERROR_MASK_PCB_COMMAND_PARITY_ERROR = 14;
 static const uint32_t EPS_PSC_PSCOM_ERROR_MASK_GENERAL_TIMEOUT = 15;
 static const uint32_t EPS_PSC_PSCOM_ERROR_MASK_SATELLITE_ACKNOWLEDGE_ACCESS_VIOLATION = 16;
 static const uint32_t EPS_PSC_PSCOM_ERROR_MASK_SATELLITE_ACKNOWLEDGE_INVALID_REGISTER = 17;
+//<< [EPS_PSC_PSCOM_ERROR_MASK]
 // pec/reg00008.H
 
+//>> [EPS_PSC_WRITE_PROTECT_RINGS_REG]
 static const uint64_t EPS_PSC_WRITE_PROTECT_RINGS_REG = 0x08010006ull;
 
 static const uint32_t EPS_PSC_WRITE_PROTECT_RINGS_REG_WRITE_PROTECT_RINGS = 0;
 static const uint32_t EPS_PSC_WRITE_PROTECT_RINGS_REG_WRITE_PROTECT_RINGS_LEN = 32;
+//<< [EPS_PSC_WRITE_PROTECT_RINGS_REG]
 // pec/reg00008.H
 
+//>> [ERROR_REG]
 static const uint64_t ERROR_REG = 0x080f001full;
 
 static const uint32_t ERROR_REG_CE_ERROR = 0;
@@ -219,8 +232,10 @@ static const uint32_t ERROR_REG_QME_INTERFACE_PARITY_ERROR = 32;
 static const uint32_t ERROR_REG_QME_DATA_PARITY_ERROR = 33;
 static const uint32_t ERROR_REG_QME_ADDR_PARITY_ERROR = 34;
 static const uint32_t ERROR_REG_QME_FSM_ERROR = 35;
+//<< [ERROR_REG]
 // pec/reg00008.H
 
+//>> [IOPFIRMASK]
 static const uint64_t IOPFIRMASK_RW = 0x08011503ull;
 static const uint64_t IOPFIRMASK_WO_AND = 0x08011504ull;
 static const uint64_t IOPFIRMASK_WO_OR = 0x08011505ull;
@@ -237,8 +252,10 @@ static const uint32_t IOPFIRMASK_SCRUB0_ECC_CE_MASK = 8;
 static const uint32_t IOPFIRMASK_SCRUB0_ECC_UE_MASK = 9;
 static const uint32_t IOPFIRMASK_SCRUB1_ECC_CE_MASK = 10;
 static const uint32_t IOPFIRMASK_SCRUB1_ECC_UE_MASK = 11;
+//<< [IOPFIRMASK]
 // pec/reg00008.H
 
+//>> [OPCG_REG0]
 static const uint64_t OPCG_REG0 = 0x08030002ull;
 
 static const uint32_t OPCG_REG0_RUNN_MODE = 0;
@@ -257,26 +274,34 @@ static const uint32_t OPCG_REG0_OPCG_STARTS_BIST = 14;
 static const uint32_t OPCG_REG0_RUNN_HLD_DLY_EN = 15;
 static const uint32_t OPCG_REG0_LOOP_COUNT = 21;
 static const uint32_t OPCG_REG0_LOOP_COUNT_LEN = 43;
+//<< [OPCG_REG0]
 // pec/reg00008.H
 
+//>> [PB_PBCQ_PEPBREGS_PE_TOPOLOGY_REG3]
 static const uint64_t PB_PBCQ_PEPBREGS_PE_TOPOLOGY_REG3 = 0x0301180full;
 
 static const uint32_t PB_PBCQ_PEPBREGS_PE_TOPOLOGY_REG3_PE_TOPOLOGY_ID_REG3 = 0;
 static const uint32_t PB_PBCQ_PEPBREGS_PE_TOPOLOGY_REG3_PE_TOPOLOGY_ID_REG3_LEN = 40;
+//<< [PB_PBCQ_PEPBREGS_PE_TOPOLOGY_REG3]
 // pec/reg00008.H
 
+//>> [PIPEDINCTL4]
 static const uint64_t PIPEDINCTL4 = 0x0801151dull;
 
 static const uint32_t PIPEDINCTL4_RESERVED_63_0 = 0;
 static const uint32_t PIPEDINCTL4_RESERVED_63_0_LEN = 64;
+//<< [PIPEDINCTL4]
 // pec/reg00008.H
 
+//>> [SCAN_CAPTUREDR_LONG]
 static const uint64_t SCAN_CAPTUREDR_LONG = 0x0803d000ull;
 
 static const uint32_t SCAN_CAPTUREDR_LONG_SCAN_CAPTUREDR_LONG_REG = 0;
 static const uint32_t SCAN_CAPTUREDR_LONG_SCAN_CAPTUREDR_LONG_REG_LEN = 32;
+//<< [SCAN_CAPTUREDR_LONG]
 // pec/reg00008.H
 
+//>> [SCAN_REGION_TYPE]
 static const uint64_t SCAN_REGION_TYPE = 0x08030005ull;
 
 static const uint32_t SCAN_REGION_TYPE_SYSTEM_FAST_INIT = 0;
@@ -310,8 +335,10 @@ static const uint32_t SCAN_REGION_TYPE_SCAN_TYPE_BNDY = 56;
 static const uint32_t SCAN_REGION_TYPE_SCAN_TYPE_FARR = 57;
 static const uint32_t SCAN_REGION_TYPE_SCAN_TYPE_CMSK = 58;
 static const uint32_t SCAN_REGION_TYPE_SCAN_TYPE_INEX = 59;
+//<< [SCAN_REGION_TYPE]
 // pec/reg00008.H
 
+//>> [TRA0_TR0_CONFIG]
 static const uint64_t TRA0_TR0_CONFIG = 0x08010402ull;
 
 static const uint32_t TRA0_TR0_CONFIG_STORE_ON_TRIG_MODE = 0;
@@ -330,8 +357,10 @@ static const uint32_t TRA0_TR0_CONFIG_TRACE_RUN_STICKY = 20;
 static const uint32_t TRA0_TR0_CONFIG_DISABLE_BANK_EDGE_DETECT = 21;
 static const uint32_t TRA0_TR0_CONFIG_DISABLE_SCOM_TRCTRL_TRARR_RD_ACT = 22;
 static const uint32_t TRA0_TR0_CONFIG_MASTER_CLOCK_ENABLE_INT = 23;
+//<< [TRA0_TR0_CONFIG]
 // pec/reg00008.H
 
+//>> [WOF]
 static const uint64_t WOF = 0x08040021ull;
 
 static const uint32_t WOF_ANY_WOF = 0;
@@ -388,8 +417,10 @@ static const uint32_t WOF_IN050 = 50;
 static const uint32_t WOF_IN051 = 51;
 static const uint32_t WOF_IN052 = 52;
 static const uint32_t WOF_IN053 = 53;
+//<< [WOF]
 // pec/reg00008.H
 
+//>> [XSTOP3]
 static const uint64_t XSTOP3 = 0x0803000eull;
 
 static const uint32_t XSTOP3_ENABLE = 0;
@@ -413,7 +444,10 @@ static const uint32_t XSTOP3_REGION_UNIT13 = 17;
 static const uint32_t XSTOP3_REGION_UNIT14 = 18;
 static const uint32_t XSTOP3_WAIT_CYCLES = 48;
 static const uint32_t XSTOP3_WAIT_CYCLES_LEN = 12;
+//<< [XSTOP3]
 // pec/reg00008.H
+
+//>>THE END<<
 
 #ifndef __PPE_HCODE__
 }

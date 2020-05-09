@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -39,6 +39,7 @@ namespace mc
 #endif
 
 
+//>> [DBG_CBS_CC]
 static const uint64_t DBG_CBS_CC = 0x0c030013ull;
 
 static const uint32_t DBG_CBS_CC_DBG_RESET_EP = 0;
@@ -65,8 +66,10 @@ static const uint32_t DBG_CBS_CC_DBG_PCB_REQUEST_SINCE_RESET = 28;
 static const uint32_t DBG_CBS_CC_DBG_PARANOIA_TEST_ENABLE_CHANGE = 29;
 static const uint32_t DBG_CBS_CC_DBG_PARANOIA_VITL_CLKOFF_CHANGE = 30;
 static const uint32_t DBG_CBS_CC_TP_TPFSI_CBS_ACK = 31;
+//<< [DBG_CBS_CC]
 // mc/reg00001.H
 
+//>> [EPS_PSC_ADDR_TRAP_REG]
 static const uint64_t EPS_PSC_ADDR_TRAP_REG = 0x0c010003ull;
 
 static const uint32_t EPS_PSC_ADDR_TRAP_REG_PCB_ADDRESS_OF_LAST_TRANSACTION_WITH_ERROR = 0;
@@ -81,8 +84,10 @@ static const uint32_t EPS_PSC_ADDR_TRAP_REG_SATELLITE_ACKNOWLEDGE_BIT_ACCESS_VIO
 static const uint32_t EPS_PSC_ADDR_TRAP_REG_SATELLITE_ACKNOWLEDGE_BIT_INVALID_REGISTER = 34;
 static const uint32_t EPS_PSC_ADDR_TRAP_REG_LAST_MASTERID = 35;
 static const uint32_t EPS_PSC_ADDR_TRAP_REG_LAST_MASTERID_LEN = 4;
+//<< [EPS_PSC_ADDR_TRAP_REG]
 // mc/reg00001.H
 
+//>> [EPS_PSC_PSCOM_MODE_REG]
 static const uint64_t EPS_PSC_PSCOM_MODE_REG = 0x0c010000ull;
 
 static const uint32_t EPS_PSC_PSCOM_MODE_REG_ABORT_ON_PCB_ADDR_PARITY_ERROR = 0;
@@ -95,13 +100,17 @@ static const uint32_t EPS_PSC_PSCOM_MODE_REG_FORCE_ALL_RINGS = 7;
 static const uint32_t EPS_PSC_PSCOM_MODE_REG_FSM_SELFRESET_ON_STATEVEC_PARITYERROR_ENABLE = 8;
 static const uint32_t EPS_PSC_PSCOM_MODE_REG_RESERVED_PSCOM_MODE_LT = 9;
 static const uint32_t EPS_PSC_PSCOM_MODE_REG_RESERVED_PSCOM_MODE_LT_LEN = 3;
+//<< [EPS_PSC_PSCOM_MODE_REG]
 // mc/reg00001.H
 
+//>> [HEARTBEAT_REG]
 static const uint64_t HEARTBEAT_REG = 0x0c0f0018ull;
 
 static const uint32_t HEARTBEAT_REG_HEARTBEAT_DEAD = 0;
+//<< [HEARTBEAT_REG]
 // mc/reg00001.H
 
+//>> [MBA_SCOMFIR_MCBERRPTQ]
 static const uint64_t MBA_SCOMFIR_MCBERRPTQ = 0x0c010fe7ull;
 
 static const uint32_t MBA_SCOMFIR_MCBERRPTQ_MBA_MCBERRPTQ_AACR_PARITY_HOLD_OUT = 0;
@@ -128,20 +137,26 @@ static const uint32_t MBA_SCOMFIR_MCBERRPTQ_WATPATA0_PE_HOLD_OUT = 25;
 static const uint32_t MBA_SCOMFIR_MCBERRPTQ_WATPATA1_PE_HOLD_OUT = 26;
 static const uint32_t MBA_SCOMFIR_MCBERRPTQ_WATPATB0_PE_HOLD_OUT = 27;
 static const uint32_t MBA_SCOMFIR_MCBERRPTQ_WATPATB1_PE_HOLD_OUT = 28;
+//<< [MBA_SCOMFIR_MCBERRPTQ]
 // mc/reg00001.H
 
+//>> [MBA_SCOMFIR_MCEBUSEN0]
 static const uint64_t MBA_SCOMFIR_MCEBUSEN0 = 0x0c010fa4ull;
 
 static const uint32_t MBA_SCOMFIR_MCEBUSEN0_MCEBUSEN0_EVENT_BUS_SELECTS = 0;
 static const uint32_t MBA_SCOMFIR_MCEBUSEN0_MCEBUSEN0_EVENT_BUS_SELECTS_LEN = 64;
+//<< [MBA_SCOMFIR_MCEBUSEN0]
 // mc/reg00001.H
 
+//>> [MBA_SCOMFIR_WATMSKB0]
 static const uint64_t MBA_SCOMFIR_WATMSKB0 = 0x0c010f82ull;
 
 static const uint32_t MBA_SCOMFIR_WATMSKB0_WAT_MASK_B0 = 0;
 static const uint32_t MBA_SCOMFIR_WATMSKB0_WAT_MASK_B0_LEN = 44;
+//<< [MBA_SCOMFIR_WATMSKB0]
 // mc/reg00001.H
 
+//>> [OPCG_CAPT3]
 static const uint64_t OPCG_CAPT3 = 0x0c030012ull;
 
 static const uint32_t OPCG_CAPT3_07EVEN = 4;
@@ -168,25 +183,33 @@ static const uint32_t OPCG_CAPT3_12EVEN = 54;
 static const uint32_t OPCG_CAPT3_12EVEN_LEN = 5;
 static const uint32_t OPCG_CAPT3_12ODD = 59;
 static const uint32_t OPCG_CAPT3_12ODD_LEN = 5;
+//<< [OPCG_CAPT3]
 // mc/reg00001.H
 
+//>> [RECOV_INTERRUPT_REG]
 static const uint64_t RECOV_INTERRUPT_REG = 0x0c0f001bull;
 
 static const uint32_t RECOV_INTERRUPT_REG_RECOV = 0;
+//<< [RECOV_INTERRUPT_REG]
 // mc/reg00001.H
 
+//>> [SCAN32]
 static const uint64_t SCAN32 = 0x0c038000ull;
 
 static const uint32_t SCAN32_SCAN32_REG = 0;
 static const uint32_t SCAN32_SCAN32_REG_LEN = 32;
+//<< [SCAN32]
 // mc/reg00001.H
 
+//>> [SCAN64]
 static const uint64_t SCAN64 = 0x0c03e000ull;
 
 static const uint32_t SCAN64_SCAN64_REG = 0;
 static const uint32_t SCAN64_SCAN64_REG_LEN = 64;
+//<< [SCAN64]
 // mc/reg00001.H
 
+//>> [SCOMFIR_MCTO]
 static const uint64_t SCOMFIR_MCTO = 0x0c010c1bull;
 
 static const uint32_t SCOMFIR_MCTO_SELECT_PB_HANG_PULSE = 0;
@@ -207,21 +230,28 @@ static const uint32_t SCOMFIR_MCTO_RESERVED_53 = 35;
 static const uint32_t SCOMFIR_MCTO_DISABLE_HARDWARE_TRACE_MANAGER_HANG = 36;
 static const uint32_t SCOMFIR_MCTO_CHANNEL_TIMEOUT_VALUE = 37;
 static const uint32_t SCOMFIR_MCTO_CHANNEL_TIMEOUT_VALUE_LEN = 3;
+//<< [SCOMFIR_MCTO]
 // mc/reg00001.H
 
+//>> [TRA0_TR0_TRACE_HI_DATA_REG]
 static const uint64_t TRA0_TR0_TRACE_HI_DATA_REG = 0x0c010400ull;
 
 static const uint32_t TRA0_TR0_TRACE_HI_DATA_REG_TRACE_HI_DATA = 0;
 static const uint32_t TRA0_TR0_TRACE_HI_DATA_REG_TRACE_HI_DATA_LEN = 64;
+//<< [TRA0_TR0_TRACE_HI_DATA_REG]
 // mc/reg00001.H
 
+//>> [TRA1_TR0_CONFIG_4]
 static const uint64_t TRA1_TR0_CONFIG_4 = 0x0c010487ull;
 
 static const uint32_t TRA1_TR0_CONFIG_4_A = 0;
 static const uint32_t TRA1_TR0_CONFIG_4_A_LEN = 24;
 static const uint32_t TRA1_TR0_CONFIG_4_B = 24;
 static const uint32_t TRA1_TR0_CONFIG_4_B_LEN = 24;
+//<< [TRA1_TR0_CONFIG_4]
 // mc/reg00001.H
+
+//>>THE END<<
 
 #ifndef __PPE_HCODE__
 }

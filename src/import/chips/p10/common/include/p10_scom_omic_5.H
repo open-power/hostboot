@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -39,6 +39,7 @@ namespace omic
 #endif
 
 
+//>> [CTL_REGS_RX_MODE18_PG]
 static const uint64_t CTL_REGS_RX_MODE18_PG = 0x8008904010012c3full;
 
 static const uint32_t CTL_REGS_RX_MODE18_PG_GAIN_HIST_BIAS_THRESH = 48;
@@ -52,8 +53,10 @@ static const uint32_t CTL_REGS_RX_MODE18_PG_GAIN_SAMPLE_BIAS_DIS = 60;
 static const uint32_t CTL_REGS_RX_MODE18_PG_GAIN_SAMPLE_BIAS_MODE = 61;
 static const uint32_t CTL_REGS_RX_MODE18_PG_CONVERGE_UP_ENABLE = 62;
 static const uint32_t CTL_REGS_RX_MODE18_PG_CONVERGE_DOWN_ENABLE = 63;
+//<< [CTL_REGS_RX_MODE18_PG]
 // omic/reg00005.H
 
+//>> [CTL_REGS_TX_SPARE_MODE_PG]
 static const uint64_t CTL_REGS_TX_SPARE_MODE_PG = 0x800c044010012c3full;
 
 static const uint32_t CTL_REGS_TX_SPARE_MODE_PG_0 = 48;
@@ -66,34 +69,44 @@ static const uint32_t CTL_REGS_TX_SPARE_MODE_PG_6 = 54;
 static const uint32_t CTL_REGS_TX_SPARE_MODE_PG_7 = 55;
 static const uint32_t CTL_REGS_TX_SPARE_MODE_PG_8_9 = 56;
 static const uint32_t CTL_REGS_TX_SPARE_MODE_PG_8_9_LEN = 2;
+//<< [CTL_REGS_TX_SPARE_MODE_PG]
 // omic/reg00005.H
 
+//>> [DATASM_REGS_RX_CNTL9_PG]
 static const uint64_t DATASM_REGS_RX_CNTL9_PG = 0x8009c84010012c3full;
 
 static const uint32_t DATASM_REGS_RX_CNTL9_PG_RX_PSAVE_FORCE_REQ_0_15 = 48;
 static const uint32_t DATASM_REGS_RX_CNTL9_PG_RX_PSAVE_FORCE_REQ_0_15_LEN = 16;
+//<< [DATASM_REGS_RX_CNTL9_PG]
 // omic/reg00005.H
 
+//>> [DATASM_REGS_RX_STAT17_PG]
 static const uint64_t DATASM_REGS_RX_STAT17_PG = 0x800b104010012c3full;
 
 static const uint32_t DATASM_REGS_RX_STAT17_PG_RX_LOFF_HYST_MAX_RO_SIGNAL = 48;
 static const uint32_t DATASM_REGS_RX_STAT17_PG_RX_LOFF_HYST_MAX_RO_SIGNAL_LEN = 8;
+//<< [DATASM_REGS_RX_STAT17_PG]
 // omic/reg00005.H
 
+//>> [DATASM_REGS_RX_STAT27_PG]
 static const uint64_t DATASM_REGS_RX_STAT27_PG = 0x800b604010012c3full;
 
 static const uint32_t DATASM_REGS_RX_STAT27_PG_RX_PSAVE_STS_PHY_16_23_RO_SIGNAL = 48;
 static const uint32_t DATASM_REGS_RX_STAT27_PG_RX_PSAVE_STS_PHY_16_23_RO_SIGNAL_LEN = 8;
+//<< [DATASM_REGS_RX_STAT27_PG]
 // omic/reg00005.H
 
+//>> [DATASM_REGS_RX_STAT9_PG]
 static const uint64_t DATASM_REGS_RX_STAT9_PG = 0x800ad04010012c3full;
 
 static const uint32_t DATASM_REGS_RX_STAT9_PG_P_16_23_RO_SIGNAL = 48;
 static const uint32_t DATASM_REGS_RX_STAT9_PG_P_16_23_RO_SIGNAL_LEN = 8;
 static const uint32_t DATASM_REGS_RX_STAT9_PG_N_16_23_RO_SIGNAL = 56;
 static const uint32_t DATASM_REGS_RX_STAT9_PG_N_16_23_RO_SIGNAL_LEN = 8;
+//<< [DATASM_REGS_RX_STAT9_PG]
 // omic/reg00005.H
 
+//>> [TX_CTL_SM_REGS_FIR_PG]
 static const uint64_t TX_CTL_SM_REGS_FIR_PG = 0x800c844010012c3full;
 
 static const uint32_t TX_CTL_SM_REGS_FIR_PG_G_FIR_ERR_TX_SM_REGS_RO_SIGNAL = 48;
@@ -101,7 +114,10 @@ static const uint32_t TX_CTL_SM_REGS_FIR_PG_G_FIR_ERR_CTL_REGS_RO_SIGNAL = 49;
 static const uint32_t TX_CTL_SM_REGS_FIR_PG_G_FIR_ERR_GCR_ARB_SM_RO_SIGNAL = 50;
 static const uint32_t TX_CTL_SM_REGS_FIR_PG_G_FIR_ERR_TX_PSAVE_SM_RO_SIGNAL = 51;
 static const uint32_t TX_CTL_SM_REGS_FIR_PG_L_FIR_ERR_RO_SIGNAL = 52;
+//<< [TX_CTL_SM_REGS_FIR_PG]
 // omic/reg00005.H
+
+//>>THE END<<
 
 #ifndef __PPE_HCODE__
 }

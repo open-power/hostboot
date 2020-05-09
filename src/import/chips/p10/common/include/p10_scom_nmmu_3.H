@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -39,11 +39,15 @@ namespace nmmu
 #endif
 
 
+//>> [NMMU_PMU0_CNT_REG]
 static const uint64_t NMMU_PMU0_CNT_REG = 0x02010c4full;
 
 static const uint32_t NMMU_PMU0_CNT_REG_MM_PMU0_CNT = 0;
 static const uint32_t NMMU_PMU0_CNT_REG_MM_PMU0_CNT_LEN = 64;
+//<< [NMMU_PMU0_CNT_REG]
 // nmmu/reg00003.H
+
+//>>THE END<<
 
 #ifndef __PPE_HCODE__
 }

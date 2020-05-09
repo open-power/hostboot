@@ -39,6 +39,7 @@ namespace c
 #endif
 
 
+//>> [EC_LS_LSU_HOLD_OUT_REG1]
 static const uint64_t EC_LS_LSU_HOLD_OUT_REG1 = 0x200206c1ull;
 
 static const uint32_t EC_LS_LSU_HOLD_OUT_REG1_0 = 0;
@@ -57,8 +58,10 @@ static const uint32_t EC_LS_LSU_HOLD_OUT_REG1_12 = 12;
 static const uint32_t EC_LS_LSU_HOLD_OUT_REG1_13 = 13;
 static const uint32_t EC_LS_LSU_HOLD_OUT_REG1_14 = 14;
 static const uint32_t EC_LS_LSU_HOLD_OUT_REG1_15 = 15;
+//<< [EC_LS_LSU_HOLD_OUT_REG1]
 // c/reg00001.H
 
+//>> [EC_PC_COMMON_SPR_SPATTN_MASK]
 static const uint64_t EC_PC_COMMON_SPR_SPATTN_MASK = 0x2002049aull;
 
 static const uint32_t EC_PC_COMMON_SPR_SPATTN_MASK_0_SPATTN_MASK = 0;
@@ -77,11 +80,15 @@ static const uint32_t EC_PC_COMMON_SPR_SPATTN_MASK_6_SPATTN_MASK = 24;
 static const uint32_t EC_PC_COMMON_SPR_SPATTN_MASK_6_SPATTN_MASK_LEN = 4;
 static const uint32_t EC_PC_COMMON_SPR_SPATTN_MASK_7_SPATTN_MASK = 28;
 static const uint32_t EC_PC_COMMON_SPR_SPATTN_MASK_7_SPATTN_MASK_LEN = 4;
+//<< [EC_PC_COMMON_SPR_SPATTN_MASK]
 // c/reg00001.H
 
+//>> [EC_PC_SCR3]
 static const uint64_t EC_PC_SCR3 = 0x20020489ull;
+//<< [EC_PC_SCR3]
 // c/reg00001.H
 
+//>> [EC_PC_TRACE1_TR_TR0_CONFIG]
 static const uint64_t EC_PC_TRACE1_TR_TR0_CONFIG = 0x20020a42ull;
 
 static const uint32_t EC_PC_TRACE1_TR_TR0_CONFIG_STORE_ON_TRIG_MODE = 0;
@@ -101,14 +108,18 @@ static const uint32_t EC_PC_TRACE1_TR_TR0_CONFIG_DISABLE_BANK_EDGE_DETECT = 21;
 static const uint32_t EC_PC_TRACE1_TR_TR0_CONFIG_DISABLE_SCOM_RD_ACT_OR_ACTIVATE_CROSS = 22;
 static const uint32_t EC_PC_TRACE1_TR_TR0_CONFIG_MASTER_CLOCK_ENABLE_INT = 23;
 static const uint32_t EC_PC_TRACE1_TR_TR0_CONFIG_CROSS_DISABLE_SCOM_RD_ACT = 24;
+//<< [EC_PC_TRACE1_TR_TR0_CONFIG]
 // c/reg00001.H
 
+//>> [EC_PC_TRACE2_TR_TR0_CONFIG_1]
 static const uint64_t EC_PC_TRACE2_TR_TR0_CONFIG_1 = 0x20020a84ull;
 
 static const uint32_t EC_PC_TRACE2_TR_TR0_CONFIG_1_CMP_MSK_LT_B_64_TO_87 = 0;
 static const uint32_t EC_PC_TRACE2_TR_TR0_CONFIG_1_CMP_MSK_LT_B_64_TO_87_LEN = 24;
+//<< [EC_PC_TRACE2_TR_TR0_CONFIG_1]
 // c/reg00001.H
 
+//>> [EC_SD_SDP_SDCR_UNIT_HOLD_OUT0]
 static const uint64_t EC_SD_SDP_SDCR_UNIT_HOLD_OUT0 = 0x20020640ull;
 
 static const uint32_t EC_SD_SDP_SDCR_UNIT_HOLD_OUT0_PC_ERR_INJ_HOLD_OUT = 0;
@@ -127,8 +138,10 @@ static const uint32_t EC_SD_SDP_SDCR_UNIT_HOLD_OUT0_SDQ_ISSMUX_HOLD_OUT = 12;
 static const uint32_t EC_SD_SDP_SDCR_UNIT_HOLD_OUT0_SDQ_BRDCAST_HOLD_OUT = 13;
 static const uint32_t EC_SD_SDP_SDCR_UNIT_HOLD_OUT0_SDQ_LSU_WKUP_HOLD_OUT = 14;
 static const uint32_t EC_SD_SDP_SDCR_UNIT_HOLD_OUT0_SDXM_ERR_HOLD_OUT_0 = 15;
+//<< [EC_SD_SDP_SDCR_UNIT_HOLD_OUT0]
 // c/reg00001.H
 
+//>> [L2TRA_TR1_CONFIG]
 static const uint64_t L2TRA_TR1_CONFIG = 0x20020082ull;
 
 static const uint32_t L2TRA_TR1_CONFIG_STORE_ON_TRIG_MODE = 0;
@@ -148,16 +161,20 @@ static const uint32_t L2TRA_TR1_CONFIG_DISABLE_BANK_EDGE_DETECT = 21;
 static const uint32_t L2TRA_TR1_CONFIG_DISABLE_SCOM_RD_ACT_OR_ACTIVATE_CROSS = 22;
 static const uint32_t L2TRA_TR1_CONFIG_MASTER_CLOCK_ENABLE_INT = 23;
 static const uint32_t L2TRA_TR1_CONFIG_CROSS_DISABLE_SCOM_RD_ACT = 24;
+//<< [L2TRA_TR1_CONFIG]
 // c/reg00001.H
 
+//>> [L2TRA_TR1_CONFIG_5]
 static const uint64_t L2TRA_TR1_CONFIG_5 = 0x20020088ull;
 
 static const uint32_t L2TRA_TR1_CONFIG_5_C = 0;
 static const uint32_t L2TRA_TR1_CONFIG_5_C_LEN = 24;
 static const uint32_t L2TRA_TR1_CONFIG_5_D = 24;
 static const uint32_t L2TRA_TR1_CONFIG_5_D_LEN = 24;
+//<< [L2TRA_TR1_CONFIG_5]
 // c/reg00001.H
 
+//>> [L3_MISC_L3CERRS_FIR_REG]
 static const uint64_t L3_MISC_L3CERRS_FIR_REG_RW = 0x20010600ull;
 static const uint64_t L3_MISC_L3CERRS_FIR_REG_WO_AND = 0x20010601ull;
 static const uint64_t L3_MISC_L3CERRS_FIR_REG_WO_OR = 0x20010602ull;
@@ -195,8 +212,10 @@ static const uint32_t L3_MISC_L3CERRS_FIR_REG_ALL_MEMBERS_DELETED_ERROR = 29;
 static const uint32_t L3_MISC_L3CERRS_FIR_REG_LCO_IN_CHIPLET_ID_MISMATCH = 30;
 static const uint32_t L3_MISC_L3CERRS_FIR_REG_PB_MAST_WR_ACK_DEAD = 31;
 static const uint32_t L3_MISC_L3CERRS_FIR_REG_PB_MAST_RD_ACK_DEAD = 32;
+//<< [L3_MISC_L3CERRS_FIR_REG]
 // c/reg00001.H
 
+//>> [L3_MISC_L3CERRS_TOPOLOGY_TBL1_SCOM_RD]
 static const uint64_t L3_MISC_L3CERRS_TOPOLOGY_TBL1_SCOM_RD = 0x20010626ull;
 
 static const uint32_t L3_MISC_L3CERRS_TOPOLOGY_TBL1_SCOM_RD_08_VALID = 0;
@@ -223,8 +242,10 @@ static const uint32_t L3_MISC_L3CERRS_TOPOLOGY_TBL1_SCOM_RD_14 = 32;
 static const uint32_t L3_MISC_L3CERRS_TOPOLOGY_TBL1_SCOM_RD_14_LEN = 4;
 static const uint32_t L3_MISC_L3CERRS_TOPOLOGY_TBL1_SCOM_RD_15 = 36;
 static const uint32_t L3_MISC_L3CERRS_TOPOLOGY_TBL1_SCOM_RD_15_LEN = 4;
+//<< [L3_MISC_L3CERRS_TOPOLOGY_TBL1_SCOM_RD]
 // c/reg00001.H
 
+//>> [NC_NCMISC_NCSCOMS_NCU_TOPOTABLE_REG2]
 static const uint64_t NC_NCMISC_NCSCOMS_NCU_TOPOTABLE_REG2 = 0x20010656ull;
 
 static const uint32_t NC_NCMISC_NCSCOMS_NCU_TOPOTABLE_REG2_16_VAL = 0;
@@ -251,8 +272,10 @@ static const uint32_t NC_NCMISC_NCSCOMS_NCU_TOPOTABLE_REG2_22 = 32;
 static const uint32_t NC_NCMISC_NCSCOMS_NCU_TOPOTABLE_REG2_22_LEN = 4;
 static const uint32_t NC_NCMISC_NCSCOMS_NCU_TOPOTABLE_REG2_23 = 36;
 static const uint32_t NC_NCMISC_NCSCOMS_NCU_TOPOTABLE_REG2_23_LEN = 4;
+//<< [NC_NCMISC_NCSCOMS_NCU_TOPOTABLE_REG2]
 // c/reg00001.H
 
+//>> [QME_DCSR]
 static const uint64_t QME_DCSR = 0x200e0870ull;
 
 static const uint32_t QME_DCSR_PLS_T0 = 0;
@@ -274,14 +297,18 @@ static const uint32_t QME_DCSR_SL_T3_LEN = 2;
 static const uint32_t QME_DCSR_SRESET_MSR_S = 24;
 static const uint32_t QME_DCSR_THREAD_INSTR_RUNNING_HISTORY = 60;
 static const uint32_t QME_DCSR_THREAD_INSTR_RUNNING_HISTORY_LEN = 4;
+//<< [QME_DCSR]
 // c/reg00001.H
 
+//>> [QME_PMCRS]
 static const uint64_t QME_PMCRS = 0x200e0860ull;
 
 static const uint32_t QME_PMCRS_DATA = 0;
 static const uint32_t QME_PMCRS_DATA_LEN = 64;
+//<< [QME_PMCRS]
 // c/reg00001.H
 
+//>> [QME_PMSRS]
 static const uint64_t QME_PMSRS = 0x200e0864ull;
 
 static const uint32_t QME_PMSRS_PSTATE_DATA = 0;
@@ -289,8 +316,10 @@ static const uint32_t QME_PMSRS_PSTATE_DATA_LEN = 36;
 static const uint32_t QME_PMSRS_INVALID_VERSION = 58;
 static const uint32_t QME_PMSRS_VERSION = 59;
 static const uint32_t QME_PMSRS_VERSION_LEN = 5;
+//<< [QME_PMSRS]
 // c/reg00001.H
 
+//>> [QME_PSCRS2]
 static const uint64_t QME_PSCRS2 = 0x200e0858ull;
 
 static const uint32_t QME_PSCRS2_DPDES_EXIT_ENABLE = 0;
@@ -313,7 +342,10 @@ static const uint32_t QME_PSCRS2_RL = 20;
 static const uint32_t QME_PSCRS2_RL_LEN = 4;
 static const uint32_t QME_PSCRS2_PLS = 24;
 static const uint32_t QME_PSCRS2_PLS_LEN = 4;
+//<< [QME_PSCRS2]
 // c/reg00001.H
+
+//>>THE END<<
 
 #ifndef __PPE_HCODE__
 }
