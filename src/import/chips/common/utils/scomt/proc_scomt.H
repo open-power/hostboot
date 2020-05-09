@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -132,9 +132,9 @@ static inline fapi2::ReturnCode chkReg(const uint64_t& i_reg)
 
         if (!(i_reg == scomt::last_scom))
         {
-            printf("This operation is not supported for scomt::last_scom: 0x%lx, expecting: 0x%lx\n",
-                   scomt::last_scom,
-                   i_reg);
+            FAPI_ERR("This operation is not supported for scomt::last_scom: 0x%lx, expecting: 0x%lx\n",
+                     scomt::last_scom,
+                     i_reg);
             assert(false);
         }
 
@@ -171,10 +171,10 @@ static inline fapi2::ReturnCode chkReg(const uint64_t& i_reg0, const uint64_t& i
         if (!((i_reg0 == scomt::last_scom ||
                i_reg1 == scomt::last_scom)))
         {
-            printf("This operation is not supported for scomt::last_scom: 0x%lx, expecting: 0x%lx or 0x%lx\n",
-                   scomt::last_scom,
-                   i_reg0,
-                   i_reg1);
+            FAPI_ERR("This operation is not supported for scomt::last_scom: 0x%lx, expecting: 0x%lx or 0x%lx\n",
+                     scomt::last_scom,
+                     i_reg0,
+                     i_reg1);
             assert(false);
         }
 
@@ -217,11 +217,11 @@ static inline fapi2::ReturnCode chkReg(const uint64_t& i_reg0,
                i_reg1 == scomt::last_scom ||
                i_reg2 == scomt::last_scom)))
         {
-            printf("This operation is not supported for scomt::last_scom: 0x%lx, expecting: 0x%lx, 0x%lx or 0x%lx\n",
-                   scomt::last_scom,
-                   i_reg0,
-                   i_reg1,
-                   i_reg2);
+            FAPI_ERR("This operation is not supported for scomt::last_scom: 0x%lx, expecting: 0x%lx, 0x%lx or 0x%lx\n",
+                     scomt::last_scom,
+                     i_reg0,
+                     i_reg1,
+                     i_reg2);
             assert(false);
         }
 
@@ -269,12 +269,12 @@ static inline fapi2::ReturnCode chkReg(const uint64_t& i_reg0,
                i_reg2 == scomt::last_scom ||
                i_reg3 == scomt::last_scom)))
         {
-            printf("This operation is not supported for scomt::last_scom: 0x%lx, expecting: 0x%lx, 0x%lx, 0x%lx or 0x%lx\n",
-                   scomt::last_scom,
-                   i_reg0,
-                   i_reg1,
-                   i_reg2,
-                   i_reg3);
+            FAPI_ERR("This operation is not supported for scomt::last_scom: 0x%llx, expecting: 0x%llx, 0x%llx, 0x%llx or 0x%llx\n",
+                     scomt::last_scom,
+                     i_reg0,
+                     i_reg1,
+                     i_reg2,
+                     i_reg3);
             assert(false);
         }
 
@@ -327,13 +327,13 @@ static inline fapi2::ReturnCode chkReg(const uint64_t& i_reg0,
                i_reg3 == scomt::last_scom ||
                i_reg4 == scomt::last_scom)))
         {
-            printf("This operation is not supported for scomt::last_scom: 0x%lx, expecting: 0x%lx, 0x%lx, 0x%lx, 0x%lx or 0x%lx\n",
-                   scomt::last_scom,
-                   i_reg0,
-                   i_reg1,
-                   i_reg2,
-                   i_reg3,
-                   i_reg4);
+            FAPI_ERR("This operation is not supported for scomt::last_scom: 0x%lx, expecting: 0x%lx, 0x%lx, 0x%lx, 0x%lx or 0x%lx\n",
+                     scomt::last_scom,
+                     i_reg0,
+                     i_reg1,
+                     i_reg2,
+                     i_reg3,
+                     i_reg4);
             assert(false);
         }
 
@@ -391,14 +391,14 @@ static inline fapi2::ReturnCode chkReg(const uint64_t& i_reg0,
                i_reg4 == scomt::last_scom ||
                i_reg5 == scomt::last_scom)))
         {
-            printf("This operation is not supported for scomt::last_scom: 0x%lx, expecting: 0x%lx, 0x%lx, 0x%lx, 0x%lx, 0x%lx or 0x%lx\n",
-                   scomt::last_scom,
-                   i_reg0,
-                   i_reg1,
-                   i_reg2,
-                   i_reg3,
-                   i_reg4,
-                   i_reg5);
+            FAPI_ERR("This operation is not supported for scomt::last_scom: 0x%lx, expecting: 0x%lx, 0x%lx, 0x%lx, 0x%lx, 0x%lx or 0x%lx\n",
+                     scomt::last_scom,
+                     i_reg0,
+                     i_reg1,
+                     i_reg2,
+                     i_reg3,
+                     i_reg4,
+                     i_reg5);
             assert(false);
         }
 
@@ -461,15 +461,15 @@ static inline fapi2::ReturnCode chkReg(const uint64_t& i_reg0,
                i_reg5 == scomt::last_scom ||
                i_reg6 == scomt::last_scom)))
         {
-            printf("This operation is not supported for scomt::last_scom: 0x%lx, expecting: 0x%lx, 0x%lx, 0x%lx, 0x%lx, 0x%lx, 0x%lx or 0x%lx\n",
-                   scomt::last_scom,
-                   i_reg0,
-                   i_reg1,
-                   i_reg2,
-                   i_reg3,
-                   i_reg4,
-                   i_reg5,
-                   i_reg6);
+            FAPI_ERR("This operation is not supported for scomt::last_scom: 0x%lx, expecting: 0x%lx, 0x%lx, 0x%lx, 0x%lx, 0x%lx, 0x%lx or 0x%lx\n",
+                     scomt::last_scom,
+                     i_reg0,
+                     i_reg1,
+                     i_reg2,
+                     i_reg3,
+                     i_reg4,
+                     i_reg5,
+                     i_reg6);
             assert(false);
         }
 
@@ -514,10 +514,10 @@ static inline fapi2::ReturnCode failOn(const uint8_t& i_chip, const uint8_t& i_e
 
     if ((scomt::chip == i_chip) && (scomt::ec == i_ec))
     {
-        printf("This scom operation (0x%lx) is not supported for chip: 0x%x ec: 0x%x\n",
-               scomt::last_scom,
-               static_cast<uint32_t>(i_chip),
-               static_cast<uint32_t>(i_ec));
+        FAPI_ERR("This scom operation (0x%lx) is not supported for chip: 0x%x ec: 0x%x\n",
+                 scomt::last_scom,
+                 static_cast<uint32_t>(i_chip),
+                 static_cast<uint32_t>(i_ec));
 
         assert(false);
     }
