@@ -162,7 +162,7 @@ fapi_try_exit:
 ///
 /// @brief Check the OMI train status on the OCMB chip
 ///
-/// @param[in] i_target OCMB chil
+/// @param[in] i_target OCMB chip
 /// @param[out] o_state_machine_state training state mahcine
 /// @param[out] o_omi_training_status training status
 /// @return fapi2::ReturnCode
@@ -189,16 +189,25 @@ fapi_try_exit:
 /// @brief Helper function to perform BUMP_SL workaround
 ///
 /// @param[in] i_omi OMI target
+/// @param[in] i_lane OMI lane
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
 ///
-fapi2::ReturnCode bump_sl_workaround(const fapi2::Target<fapi2::TARGET_TYPE_OMI>& i_omi)
+fapi2::ReturnCode bump_sl_workaround(const fapi2::Target<fapi2::TARGET_TYPE_OMI>& i_omi, uint8_t i_lane)
 {
-    FAPI_DBG("Performing BUMP_SL workaround on %s", mss::c_str(i_omi));
+    FAPI_INF("Performing BUMP_SL workaround on %s", mss::c_str(i_omi));
 
     const auto& l_omic = mss::find_target<fapi2::TARGET_TYPE_OMIC>(i_omi);
 
     fapi2::buffer<uint64_t> l_omi_status;
     uint8_t l_state_machine_state_omi = 0;
+    constexpr uint8_t MAX_LANE = 7;
+
+    // Check valid lane input
+    FAPI_ASSERT((i_lane <= MAX_LANE),
+                fapi2::EXP_OMI_BUMP_SL_WORKAROUND_ERROR()
+                .set_MAX_LANE(MAX_LANE)
+                .set_LANE_INPUT(i_lane),
+                "Invalid lane input of %d", i_lane);
 
     // Check OMI training status
     FAPI_TRY(mss::getScom(i_omi, P9A_MC_REG2_DL0_STATUS, l_omi_status));
@@ -213,8 +222,8 @@ fapi2::ReturnCode bump_sl_workaround(const fapi2::Target<fapi2::TARGET_TYPE_OMI>
 
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_OMI_DL_GROUP_POS, i_omi, l_group_pos));
 
-        l_lane = l_group_pos * mss::conversions::BITS_PER_BYTE; // tk 8 = bits_per_byte
-
+        l_lane = (l_group_pos * mss::conversions::BITS_PER_BYTE) + i_lane; // tk 8 = bits_per_byte
+        FAPI_INF("Bumping PHY by one UI for lane %d", i_lane);
         // Set
         FAPI_TRY(io::rmw(OPT_RX_PR_BUMP_SL_1UI, // reg, fld, len
                          l_omic, // target

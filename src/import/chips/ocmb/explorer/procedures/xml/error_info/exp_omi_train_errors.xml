@@ -52,5 +52,22 @@
         <target>OCMB_TARGET</target>
     </gard>
   </hwpError>
+  <hwpError>
+    <rc>RC_EXP_OMI_BUMP_SL_WORKAROUND_ERROR</rc>
+    <description>
+      bump_sl_workaround received an invalid lane input
+    </description>
+    <ffdc>OCMB_TARGET</ffdc>
+    <ffdc>LANE_INPUT</ffdc>
+    <ffdc>MAX_LANE</ffdc>
+    <callout>
+        <target>OCMB_TARGET</target>
+        <priority>HIGH</priority>
+    </callout>
+    <callout>
+        <bus>OMI_TARGET, OCMB_TARGET</bus>
+        <priority>HIGH</priority>
+    </callout>
+  </hwpError>
   <!-- ******************************************************************** -->
 </hwpErrors>

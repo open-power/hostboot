@@ -64,15 +64,19 @@ fapi2::ReturnCode exp_omi_train_check(const fapi2::Target<fapi2::TARGET_TYPE_OCM
     fapi2::buffer<uint64_t> l_dl0_config1;
     uint8_t l_state_machine_state = 0;
     uint32_t l_omi_freq = 0;
+    uint8_t l_lane = 0;
+    constexpr uint8_t NUM_LANES = 8;
 
     FAPI_TRY(mss::exp::omi::train::poll_for_training_completion(i_target, l_state_machine_state, l_omi_status));
 
-    if (l_state_machine_state == mss::omi::train_mode::TX_TRAINING_STATE2)
+    while ((l_state_machine_state == mss::omi::train_mode::TX_TRAINING_STATE2
+            || l_state_machine_state == mss::omi::train_mode::TX_TRAINING_STATE1) && l_lane < NUM_LANES)
     {
-        FAPI_TRY(mss::exp::omi::train::bump_sl_workaround(l_omi));
+        FAPI_TRY(mss::exp::omi::train::bump_sl_workaround(l_omi, l_lane));
 
         // Now poll once more
         FAPI_TRY(mss::exp::omi::train::poll_for_training_completion(i_target, l_state_machine_state, l_omi_status));
+        l_lane++;
     }
 
     // Note: this is very useful debug information while trying to debug training during polling

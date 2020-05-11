@@ -250,9 +250,11 @@ fapi2::ReturnCode omi_train_status(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_C
 /// @brief Helper function to perform BUMP_SL workaround
 ///
 /// @param[in] i_omi OMI target
+/// @param[in] i_lane OMI lane
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
 ///
-fapi2::ReturnCode bump_sl_workaround(const fapi2::Target<fapi2::TARGET_TYPE_OMI>& i_omi);
+fapi2::ReturnCode bump_sl_workaround(const fapi2::Target<fapi2::TARGET_TYPE_OMI>& i_omi,
+                                     const uint8_t i_lane);
 
 ///
 /// @brief Poll for OMI training completion
