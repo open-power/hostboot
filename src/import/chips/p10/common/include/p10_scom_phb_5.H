@@ -44,11 +44,6 @@ static const uint64_t REGS_NFIRWOF_REG = 0x03011848ull;
 //<< [REGS_NFIRWOF_REG]
 // phb/reg00005.H
 
-//>> [RSB_REGS_PHB5_PMON_CONFIG]
-static const uint64_t RSB_REGS_PHB5_PMON_CONFIG = 0x08010917ull;
-//<< [RSB_REGS_PHB5_PMON_CONFIG]
-// phb/reg00005.H
-
 //>>THE END<<
 
 #ifndef __PPE_HCODE__

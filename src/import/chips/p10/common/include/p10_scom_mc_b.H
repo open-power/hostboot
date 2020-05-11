@@ -39,38 +39,11 @@ namespace mc
 #endif
 
 
-//>> [ATOMIC_LOCK_REG]
-static const uint64_t ATOMIC_LOCK_REG = 0x0c0f03ffull;
-
-static const uint32_t ATOMIC_LOCK_REG_LOCK_ENABLE = 0;
-static const uint32_t ATOMIC_LOCK_REG_ID = 1;
-static const uint32_t ATOMIC_LOCK_REG_ID_LEN = 4;
-static const uint32_t ATOMIC_LOCK_REG_ACTIVITY = 8;
-static const uint32_t ATOMIC_LOCK_REG_ACTIVITY_LEN = 8;
-//<< [ATOMIC_LOCK_REG]
-// mc/reg00011.H
-
 //>> [ATTN_INTERRUPT_REG]
 static const uint64_t ATTN_INTERRUPT_REG = 0x0c0f001aull;
 
 static const uint32_t ATTN_INTERRUPT_REG_ATTN = 0;
 //<< [ATTN_INTERRUPT_REG]
-// mc/reg00011.H
-
-//>> [EPS_DBG_TRACE_MODE_REG_2]
-static const uint64_t EPS_DBG_TRACE_MODE_REG_2 = 0x0c0107cfull;
-
-static const uint32_t EPS_DBG_TRACE_MODE_REG_2_RUNN_COUNT_COMPARE_VALUE = 0;
-static const uint32_t EPS_DBG_TRACE_MODE_REG_2_RUNN_COUNT_COMPARE_VALUE_LEN = 16;
-static const uint32_t EPS_DBG_TRACE_MODE_REG_2_IMM_FREEZE_MODE = 16;
-static const uint32_t EPS_DBG_TRACE_MODE_REG_2_STOP_ON_ERR = 17;
-static const uint32_t EPS_DBG_TRACE_MODE_REG_2_BANK_ON_RUNN_MATCH = 18;
-static const uint32_t EPS_DBG_TRACE_MODE_REG_2_FORCE_TEST_MODE = 19;
-static const uint32_t EPS_DBG_TRACE_MODE_REG_2_ACCUM_HIST_MODE = 20;
-static const uint32_t EPS_DBG_TRACE_MODE_REG_2_FRZ_COUNT_ON = 21;
-static const uint32_t EPS_DBG_TRACE_MODE_REG_2_EXTEND_BANK = 22;
-static const uint32_t EPS_DBG_TRACE_MODE_REG_2_EXTEND_BANK_LEN = 2;
-//<< [EPS_DBG_TRACE_MODE_REG_2]
 // mc/reg00011.H
 
 //>> [EPS_FIR_LOCAL_MASK]
@@ -217,93 +190,6 @@ static const uint32_t LOCAL_FIR_EXT_LOCAL_XSTOP = 63;
 //<< [LOCAL_FIR]
 // mc/reg00011.H
 
-//>> [MBA_SCOMFIR_MCEBUSEN3]
-static const uint64_t MBA_SCOMFIR_MCEBUSEN3 = 0x0c010fa7ull;
-
-static const uint32_t MBA_SCOMFIR_MCEBUSEN3_N = 0;
-static const uint32_t MBA_SCOMFIR_MCEBUSEN3_N_LEN = 16;
-static const uint32_t MBA_SCOMFIR_MCEBUSEN3_NABLE = 16;
-static const uint32_t MBA_SCOMFIR_MCEBUSEN3_XTENDED_SELECT = 17;
-static const uint32_t MBA_SCOMFIR_MCEBUSEN3_XTENDED_SELECT_LEN = 3;
-//<< [MBA_SCOMFIR_MCEBUSEN3]
-// mc/reg00011.H
-
-//>> [MBA_SCOMFIR_WATCTL]
-static const uint64_t MBA_SCOMFIR_WATCTL = 0x0c010f91ull;
-
-static const uint32_t MBA_SCOMFIR_WATCTL_WAT_CONTROL = 0;
-static const uint32_t MBA_SCOMFIR_WATCTL_WAT_CONTROL_LEN = 26;
-//<< [MBA_SCOMFIR_WATCTL]
-// mc/reg00011.H
-
-//>> [MBA_SCOMFIR_WATPATB0]
-static const uint64_t MBA_SCOMFIR_WATPATB0 = 0x0c010f86ull;
-
-static const uint32_t MBA_SCOMFIR_WATPATB0_WAT_PATTERN_B0 = 0;
-static const uint32_t MBA_SCOMFIR_WATPATB0_WAT_PATTERN_B0_LEN = 44;
-//<< [MBA_SCOMFIR_WATPATB0]
-// mc/reg00011.H
-
-//>> [RECOV]
-static const uint64_t RECOV = 0x0c040001ull;
-
-static const uint32_t RECOV_ANY_RECOV = 0;
-static const uint32_t RECOV_RESERVED1R = 1;
-static const uint32_t RECOV_ANY_LOCAL_XSTOP = 2;
-static const uint32_t RECOV_RESERVED3R = 3;
-static const uint32_t RECOV_PERV = 4;
-static const uint32_t RECOV_IN05 = 5;
-static const uint32_t RECOV_IN06 = 6;
-static const uint32_t RECOV_IN07 = 7;
-static const uint32_t RECOV_IN08 = 8;
-static const uint32_t RECOV_IN09 = 9;
-static const uint32_t RECOV_IN10 = 10;
-static const uint32_t RECOV_IN11 = 11;
-static const uint32_t RECOV_IN12 = 12;
-static const uint32_t RECOV_IN13 = 13;
-static const uint32_t RECOV_IN14 = 14;
-static const uint32_t RECOV_IN15 = 15;
-static const uint32_t RECOV_IN16 = 16;
-static const uint32_t RECOV_IN17 = 17;
-static const uint32_t RECOV_IN18 = 18;
-static const uint32_t RECOV_IN19 = 19;
-static const uint32_t RECOV_IN20 = 20;
-static const uint32_t RECOV_IN21 = 21;
-static const uint32_t RECOV_IN22 = 22;
-static const uint32_t RECOV_IN23 = 23;
-static const uint32_t RECOV_IN24 = 24;
-static const uint32_t RECOV_IN25 = 25;
-static const uint32_t RECOV_IN26 = 26;
-static const uint32_t RECOV_IN27 = 27;
-static const uint32_t RECOV_IN28 = 28;
-static const uint32_t RECOV_IN29 = 29;
-static const uint32_t RECOV_IN30 = 30;
-static const uint32_t RECOV_IN31 = 31;
-static const uint32_t RECOV_IN32 = 32;
-static const uint32_t RECOV_IN33 = 33;
-static const uint32_t RECOV_IN34 = 34;
-static const uint32_t RECOV_IN35 = 35;
-static const uint32_t RECOV_IN36 = 36;
-static const uint32_t RECOV_IN37 = 37;
-static const uint32_t RECOV_IN38 = 38;
-static const uint32_t RECOV_IN39 = 39;
-static const uint32_t RECOV_IN40 = 40;
-static const uint32_t RECOV_IN41 = 41;
-static const uint32_t RECOV_IN42 = 42;
-static const uint32_t RECOV_IN43 = 43;
-static const uint32_t RECOV_IN44 = 44;
-static const uint32_t RECOV_IN45 = 45;
-static const uint32_t RECOV_IN46 = 46;
-static const uint32_t RECOV_IN47 = 47;
-static const uint32_t RECOV_IN48 = 48;
-static const uint32_t RECOV_IN49 = 49;
-static const uint32_t RECOV_IN50 = 50;
-static const uint32_t RECOV_IN51 = 51;
-static const uint32_t RECOV_IN52 = 52;
-static const uint32_t RECOV_IN53 = 53;
-//<< [RECOV]
-// mc/reg00011.H
-
 //>> [SCOMFIR_MCFGP0]
 static const uint64_t SCOMFIR_MCFGP0 = 0x0c010c0aull;
 
@@ -321,33 +207,6 @@ static const uint32_t SCOMFIR_MCFGP0_R0_CONFIGURATION_GROUP_SIZE_LEN = 8;
 static const uint32_t SCOMFIR_MCFGP0_R0_MMIO_GROUP_SIZE = 54;
 static const uint32_t SCOMFIR_MCFGP0_R0_MMIO_GROUP_SIZE_LEN = 8;
 //<< [SCOMFIR_MCFGP0]
-// mc/reg00011.H
-
-//>> [XSTOP4]
-static const uint64_t XSTOP4 = 0x0c030014ull;
-
-static const uint32_t XSTOP4_ENABLE = 0;
-static const uint32_t XSTOP4_WAIT_SNOPA = 1;
-static const uint32_t XSTOP4_TRIGGER_OPCG_GO = 2;
-static const uint32_t XSTOP4_WAIT_ALWAYS = 3;
-static const uint32_t XSTOP4_REGION_PERV = 4;
-static const uint32_t XSTOP4_REGION_UNIT1 = 5;
-static const uint32_t XSTOP4_REGION_UNIT2 = 6;
-static const uint32_t XSTOP4_REGION_UNIT3 = 7;
-static const uint32_t XSTOP4_REGION_UNIT4 = 8;
-static const uint32_t XSTOP4_REGION_UNIT5 = 9;
-static const uint32_t XSTOP4_REGION_UNIT6 = 10;
-static const uint32_t XSTOP4_REGION_UNIT7 = 11;
-static const uint32_t XSTOP4_REGION_UNIT8 = 12;
-static const uint32_t XSTOP4_REGION_UNIT9 = 13;
-static const uint32_t XSTOP4_REGION_UNIT10 = 14;
-static const uint32_t XSTOP4_REGION_UNIT11 = 15;
-static const uint32_t XSTOP4_REGION_UNIT12 = 16;
-static const uint32_t XSTOP4_REGION_UNIT13 = 17;
-static const uint32_t XSTOP4_REGION_UNIT14 = 18;
-static const uint32_t XSTOP4_WAIT_CYCLES = 48;
-static const uint32_t XSTOP4_WAIT_CYCLES_LEN = 12;
-//<< [XSTOP4]
 // mc/reg00011.H
 
 //>>THE END<<

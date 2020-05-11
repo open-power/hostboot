@@ -49,11 +49,6 @@ static const uint32_t REGS_NFIR_REG_NFIRNFIR_LEN = 28;
 //<< [REGS_NFIR_REG]
 // phb/reg00004.H
 
-//>> [RSB_REGS_PHB5_PMON_EVENT_SEL]
-static const uint64_t RSB_REGS_PHB5_PMON_EVENT_SEL = 0x08010918ull;
-//<< [RSB_REGS_PHB5_PMON_EVENT_SEL]
-// phb/reg00004.H
-
 //>>THE END<<
 
 #ifndef __PPE_HCODE__

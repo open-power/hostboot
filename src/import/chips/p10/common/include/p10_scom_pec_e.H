@@ -39,42 +39,6 @@ namespace pec
 #endif
 
 
-//>> [EPS_DBG_TRACE_REG_1]
-static const uint64_t EPS_DBG_TRACE_REG_1 = 0x080107ceull;
-
-static const uint32_t EPS_DBG_TRACE_REG_1_1_CONDITION1_ACTION_DO = 0;
-static const uint32_t EPS_DBG_TRACE_REG_1_1_CONDITION1_ACTION_DO_LEN = 2;
-static const uint32_t EPS_DBG_TRACE_REG_1_1_CONDITION2_ACTION_DO = 2;
-static const uint32_t EPS_DBG_TRACE_REG_1_1_CONDITION2_ACTION_DO_LEN = 2;
-static const uint32_t EPS_DBG_TRACE_REG_1_1_C2_TIMEOUT_ACTION_DO = 4;
-static const uint32_t EPS_DBG_TRACE_REG_1_1_C2_TIMEOUT_ACTION_DO_LEN = 2;
-static const uint32_t EPS_DBG_TRACE_REG_1_2_CONDITION1_ACTION_DO = 6;
-static const uint32_t EPS_DBG_TRACE_REG_1_2_CONDITION1_ACTION_DO_LEN = 2;
-static const uint32_t EPS_DBG_TRACE_REG_1_2_CONDITION2_ACTION_DO = 8;
-static const uint32_t EPS_DBG_TRACE_REG_1_2_CONDITION2_ACTION_DO_LEN = 2;
-static const uint32_t EPS_DBG_TRACE_REG_1_2_C2_TIMEOUT_ACTION_DO = 10;
-static const uint32_t EPS_DBG_TRACE_REG_1_2_C2_TIMEOUT_ACTION_DO_LEN = 2;
-static const uint32_t EPS_DBG_TRACE_REG_1_1_CONDITION1_ACTION_WAITN = 24;
-static const uint32_t EPS_DBG_TRACE_REG_1_1_CONDITION2_ACTION_WAITN = 25;
-static const uint32_t EPS_DBG_TRACE_REG_1_1_C2_TIMEOUT_ACTION_WAITN = 26;
-static const uint32_t EPS_DBG_TRACE_REG_1_2_CONDITION1_ACTION_WAITN = 27;
-static const uint32_t EPS_DBG_TRACE_REG_1_2_CONDITION2_ACTION_WAITN = 28;
-static const uint32_t EPS_DBG_TRACE_REG_1_2_C2_TIMEOUT_ACTION_WAITN = 29;
-static const uint32_t EPS_DBG_TRACE_REG_1_1_CONDITION1_ACTION_BANK = 36;
-static const uint32_t EPS_DBG_TRACE_REG_1_1_CONDITION2_ACTION_BANK = 37;
-static const uint32_t EPS_DBG_TRACE_REG_1_1_C2_TIMEOUT_ACTION_BANK = 38;
-static const uint32_t EPS_DBG_TRACE_REG_1_2_CONDITION1_ACTION_BANK = 39;
-static const uint32_t EPS_DBG_TRACE_REG_1_2_CONDITION2_ACTION_BANK = 40;
-static const uint32_t EPS_DBG_TRACE_REG_1_2_C2_TIMEOUT_ACTION_BANK = 41;
-static const uint32_t EPS_DBG_TRACE_REG_1_1_CHECKSTOP_MODE_LT = 48;
-static const uint32_t EPS_DBG_TRACE_REG_1_1_CHECKSTOP_MODE_LT_LEN = 3;
-static const uint32_t EPS_DBG_TRACE_REG_1_1_CHECKSTOP_MODE_SELECTOR = 51;
-static const uint32_t EPS_DBG_TRACE_REG_1_2_CHECKSTOP_MODE_LT = 52;
-static const uint32_t EPS_DBG_TRACE_REG_1_2_CHECKSTOP_MODE_LT_LEN = 3;
-static const uint32_t EPS_DBG_TRACE_REG_1_2_CHECKSTOP_MODE_SELECTOR = 55;
-//<< [EPS_DBG_TRACE_REG_1]
-// pec/reg00014.H
-
 //>> [EPS_FIR_LOCAL_ACTION1]
 static const uint64_t EPS_FIR_LOCAL_ACTION1 = 0x08040107ull;
 
@@ -145,25 +109,6 @@ static const uint32_t EPS_FIR_LOCAL_ACTION1_63 = 63;
 //<< [EPS_FIR_LOCAL_ACTION1]
 // pec/reg00014.H
 
-//>> [IXMODE]
-static const uint64_t IXMODE = 0x0801150eull;
-
-static const uint32_t IXMODE_PHY0_SRAM_EXT_LD_DONE = 0;
-static const uint32_t IXMODE_PHY1_SRAM_EXT_LD_DONE = 1;
-static const uint32_t IXMODE_RAM_SCOM_ACCESS_MODE = 2;
-static const uint32_t IXMODE_RAM_SCOM_AUTOINC_RW_MODE = 3;
-static const uint32_t IXMODE_SCRUB_EN = 17;
-static const uint32_t IXMODE_SCRUB_PERIOD = 18;
-static const uint32_t IXMODE_SCRUB_PERIOD_LEN = 8;
-static const uint32_t IXMODE_PHY0_ARRAY_ERR_INJ_EN = 26;
-static const uint32_t IXMODE_PHY0_ARRAY_ERR_INJ_TYPE = 27;
-static const uint32_t IXMODE_PHY0_ARRAY_ERR_INJ_ACTION = 28;
-static const uint32_t IXMODE_PHY1_ARRAY_ERR_INJ_EN = 31;
-static const uint32_t IXMODE_PHY1_ARRAY_ERR_INJ_TYPE = 32;
-static const uint32_t IXMODE_PHY1_ARRAY_ERR_INJ_ACTION = 33;
-//<< [IXMODE]
-// pec/reg00014.H
-
 //>> [OPCG_REG1]
 static const uint64_t OPCG_REG1 = 0x08030003ull;
 
@@ -187,14 +132,6 @@ static const uint32_t OPCG_REG1_INFINITE_MODE = 58;
 static const uint32_t OPCG_REG1_NSL_FILL_COUNT = 59;
 static const uint32_t OPCG_REG1_NSL_FILL_COUNT_LEN = 5;
 //<< [OPCG_REG1]
-// pec/reg00014.H
-
-//>> [PB_PBCQ_PEPBREGS_ADDREXTMASK_REG]
-static const uint64_t PB_PBCQ_PEPBREGS_ADDREXTMASK_REG = 0x03011805ull;
-
-static const uint32_t PB_PBCQ_PEPBREGS_ADDREXTMASK_REG_PE_ADDREXTMASK = 0;
-static const uint32_t PB_PBCQ_PEPBREGS_ADDREXTMASK_REG_PE_ADDREXTMASK_LEN = 7;
-//<< [PB_PBCQ_PEPBREGS_ADDREXTMASK_REG]
 // pec/reg00014.H
 
 //>> [PB_PBCQ_PEPBREGS_PBCQHWCFG_REG]
@@ -286,33 +223,6 @@ static const uint32_t SLAVE_CONFIG_REG_MASK_PLL_ERRS_LEN = 8;
 static const uint32_t SLAVE_CONFIG_REG_QME_PAR_DIS = 20;
 static const uint32_t SLAVE_CONFIG_REG_FORCE_0_QME = 21;
 //<< [SLAVE_CONFIG_REG]
-// pec/reg00014.H
-
-//>> [XSTOP2]
-static const uint64_t XSTOP2 = 0x0803000dull;
-
-static const uint32_t XSTOP2_ENABLE = 0;
-static const uint32_t XSTOP2_WAIT_SNOPA = 1;
-static const uint32_t XSTOP2_TRIGGER_OPCG_GO = 2;
-static const uint32_t XSTOP2_WAIT_ALWAYS = 3;
-static const uint32_t XSTOP2_REGION_PERV = 4;
-static const uint32_t XSTOP2_REGION_UNIT1 = 5;
-static const uint32_t XSTOP2_REGION_UNIT2 = 6;
-static const uint32_t XSTOP2_REGION_UNIT3 = 7;
-static const uint32_t XSTOP2_REGION_UNIT4 = 8;
-static const uint32_t XSTOP2_REGION_UNIT5 = 9;
-static const uint32_t XSTOP2_REGION_UNIT6 = 10;
-static const uint32_t XSTOP2_REGION_UNIT7 = 11;
-static const uint32_t XSTOP2_REGION_UNIT8 = 12;
-static const uint32_t XSTOP2_REGION_UNIT9 = 13;
-static const uint32_t XSTOP2_REGION_UNIT10 = 14;
-static const uint32_t XSTOP2_REGION_UNIT11 = 15;
-static const uint32_t XSTOP2_REGION_UNIT12 = 16;
-static const uint32_t XSTOP2_REGION_UNIT13 = 17;
-static const uint32_t XSTOP2_REGION_UNIT14 = 18;
-static const uint32_t XSTOP2_WAIT_CYCLES = 48;
-static const uint32_t XSTOP2_WAIT_CYCLES_LEN = 12;
-//<< [XSTOP2]
 // pec/reg00014.H
 
 //>>THE END<<

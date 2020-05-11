@@ -65,16 +65,6 @@ static const uint32_t REGS_MMIOBAR1_REG_PE_MMIO_BAR1_LEN = 40;
 //<< [REGS_MMIOBAR1_REG]
 // phb/reg00015.H
 
-//>> [REGS_PBAIBTXDCR_REG]
-static const uint64_t REGS_PBAIBTXDCR_REG = 0x0801084eull;
-
-static const uint32_t REGS_PBAIBTXDCR_REG_A = 33;
-static const uint32_t REGS_PBAIBTXDCR_REG_A_LEN = 2;
-static const uint32_t REGS_PBAIBTXDCR_REG_R = 44;
-static const uint32_t REGS_PBAIBTXDCR_REG_R_LEN = 4;
-//<< [REGS_PBAIBTXDCR_REG]
-// phb/reg00015.H
-
 //>>THE END<<
 
 #ifndef __PPE_HCODE__

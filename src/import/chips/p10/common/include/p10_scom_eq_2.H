@@ -39,119 +39,6 @@ namespace eq
 #endif
 
 
-//>> [CLK_ADJ_00_DCADJ_WRAP_PHASE_MEASUREMENT]
-static const uint64_t CLK_ADJ_00_DCADJ_WRAP_PHASE_MEASUREMENT = 0x20018318ull;
-
-static const uint32_t CLK_ADJ_00_DCADJ_WRAP_PHASE_MEASUREMENT_1_VAL = 0;
-static const uint32_t CLK_ADJ_00_DCADJ_WRAP_PHASE_MEASUREMENT_2_VAL = 1;
-static const uint32_t CLK_ADJ_00_DCADJ_WRAP_PHASE_MEASUREMENT_2_VAL_LEN = 7;
-static const uint32_t CLK_ADJ_00_DCADJ_WRAP_PHASE_MEASUREMENT_3_VAL = 8;
-static const uint32_t CLK_ADJ_00_DCADJ_WRAP_PHASE_MEASUREMENT_4_VAL = 9;
-static const uint32_t CLK_ADJ_00_DCADJ_WRAP_PHASE_MEASUREMENT_4_VAL_LEN = 7;
-//<< [CLK_ADJ_00_DCADJ_WRAP_PHASE_MEASUREMENT]
-// eq/reg00002.H
-
-//>> [CLK_ADJ_00_DCADJ_WRAP_SET_LOW_PASS_DLY]
-static const uint64_t CLK_ADJ_00_DCADJ_WRAP_SET_LOW_PASS_DLY = 0x20018309ull;
-
-static const uint32_t CLK_ADJ_00_DCADJ_WRAP_SET_LOW_PASS_DLY_LOW_PASS_DELAY_VALUE = 0;
-static const uint32_t CLK_ADJ_00_DCADJ_WRAP_SET_LOW_PASS_DLY_LOW_PASS_DELAY_VALUE_LEN = 16;
-//<< [CLK_ADJ_00_DCADJ_WRAP_SET_LOW_PASS_DLY]
-// eq/reg00002.H
-
-//>> [CLK_ADJ_00_SKEW_WRAP_SKEWADJ_CACHE_PDLY_FSM_STATES]
-static const uint64_t CLK_ADJ_00_SKEW_WRAP_SKEWADJ_CACHE_PDLY_FSM_STATES = 0x2001833bull;
-
-static const uint32_t CLK_ADJ_00_SKEW_WRAP_SKEWADJ_CACHE_PDLY_FSM_STATES_0 = 2;
-static const uint32_t CLK_ADJ_00_SKEW_WRAP_SKEWADJ_CACHE_PDLY_FSM_STATES_0_LEN = 6;
-static const uint32_t CLK_ADJ_00_SKEW_WRAP_SKEWADJ_CACHE_PDLY_FSM_STATES_1 = 10;
-static const uint32_t CLK_ADJ_00_SKEW_WRAP_SKEWADJ_CACHE_PDLY_FSM_STATES_1_LEN = 6;
-static const uint32_t CLK_ADJ_00_SKEW_WRAP_SKEWADJ_CACHE_PDLY_FSM_STATES_2 = 18;
-static const uint32_t CLK_ADJ_00_SKEW_WRAP_SKEWADJ_CACHE_PDLY_FSM_STATES_2_LEN = 6;
-static const uint32_t CLK_ADJ_00_SKEW_WRAP_SKEWADJ_CACHE_PDLY_FSM_STATES_3 = 26;
-static const uint32_t CLK_ADJ_00_SKEW_WRAP_SKEWADJ_CACHE_PDLY_FSM_STATES_3_LEN = 6;
-//<< [CLK_ADJ_00_SKEW_WRAP_SKEWADJ_CACHE_PDLY_FSM_STATES]
-// eq/reg00002.H
-
-//>> [CLK_ADJ_01_SKEW_WRAP_SKEWADJ_SET_SWAP_CACHE_INC_DEC]
-static const uint64_t CLK_ADJ_01_SKEW_WRAP_SKEWADJ_SET_SWAP_CACHE_INC_DEC = 0x2001432full;
-
-static const uint32_t CLK_ADJ_01_SKEW_WRAP_SKEWADJ_SET_SWAP_CACHE_INC_DEC_CACHE_INC_DEC_INVERT = 0;
-//<< [CLK_ADJ_01_SKEW_WRAP_SKEWADJ_SET_SWAP_CACHE_INC_DEC]
-// eq/reg00002.H
-
-//>> [CLK_ADJ_01_SKEW_WRAP_SKEWADJ_SOFT_RESET]
-static const uint64_t CLK_ADJ_01_SKEW_WRAP_SKEWADJ_SOFT_RESET = 0x20014325ull;
-//<< [CLK_ADJ_01_SKEW_WRAP_SKEWADJ_SOFT_RESET]
-// eq/reg00002.H
-
-//>> [CLK_ADJ_01_SKEW_WRAP_SKEWADJ_SYNC_DONE_FSM_STATES]
-static const uint64_t CLK_ADJ_01_SKEW_WRAP_SKEWADJ_SYNC_DONE_FSM_STATES = 0x20014338ull;
-
-static const uint32_t CLK_ADJ_01_SKEW_WRAP_SKEWADJ_SYNC_DONE_FSM_STATES_CORE_SYNC_DONE_STATE = 2;
-static const uint32_t CLK_ADJ_01_SKEW_WRAP_SKEWADJ_SYNC_DONE_FSM_STATES_CORE_SYNC_DONE_STATE_LEN = 2;
-static const uint32_t CLK_ADJ_01_SKEW_WRAP_SKEWADJ_SYNC_DONE_FSM_STATES_CACHE_SYNC_DONE_STATE = 6;
-static const uint32_t CLK_ADJ_01_SKEW_WRAP_SKEWADJ_SYNC_DONE_FSM_STATES_CACHE_SYNC_DONE_STATE_LEN = 2;
-static const uint32_t CLK_ADJ_01_SKEW_WRAP_SKEWADJ_SYNC_DONE_FSM_STATES_CORE_ENABLE = 10;
-static const uint32_t CLK_ADJ_01_SKEW_WRAP_SKEWADJ_SYNC_DONE_FSM_STATES_CORE_SYNC_DONE = 11;
-static const uint32_t CLK_ADJ_01_SKEW_WRAP_SKEWADJ_SYNC_DONE_FSM_STATES_CACHE_ENABLE = 14;
-static const uint32_t CLK_ADJ_01_SKEW_WRAP_SKEWADJ_SYNC_DONE_FSM_STATES_CACHE_SYNC_DONE = 15;
-static const uint32_t CLK_ADJ_01_SKEW_WRAP_SKEWADJ_SYNC_DONE_FSM_STATES_CORE_PDLY_ERR = 18;
-static const uint32_t CLK_ADJ_01_SKEW_WRAP_SKEWADJ_SYNC_DONE_FSM_STATES_CACHE_PDLY_ERR = 19;
-static const uint32_t CLK_ADJ_01_SKEW_WRAP_SKEWADJ_SYNC_DONE_FSM_STATES_HOLD_MODE_ACTIVE = 20;
-static const uint32_t CLK_ADJ_01_SKEW_WRAP_SKEWADJ_SYNC_DONE_FSM_STATES_ADJUST_MODE_ACTIVE = 21;
-static const uint32_t CLK_ADJ_01_SKEW_WRAP_SKEWADJ_SYNC_DONE_FSM_STATES_SINGLE_STEP_MODE_ACTIVE = 22;
-static const uint32_t CLK_ADJ_01_SKEW_WRAP_SKEWADJ_SYNC_DONE_FSM_STATES_INIT_MODE_ACTIVE = 23;
-static const uint32_t CLK_ADJ_01_SKEW_WRAP_SKEWADJ_SYNC_DONE_FSM_STATES_ONE_SHOT_MODE_ACTIVE = 26;
-static const uint32_t CLK_ADJ_01_SKEW_WRAP_SKEWADJ_SYNC_DONE_FSM_STATES_ONE_SHOT_ADJUSTED = 27;
-static const uint32_t CLK_ADJ_01_SKEW_WRAP_SKEWADJ_SYNC_DONE_FSM_STATES_SKEW_ADJ_ACTIVE = 31;
-//<< [CLK_ADJ_01_SKEW_WRAP_SKEWADJ_SYNC_DONE_FSM_STATES]
-// eq/reg00002.H
-
-//>> [CLK_ADJ_02_SKEW_WRAP_SKEWADJ_SET_INVERT_CACHE_IS_LATE]
-static const uint64_t CLK_ADJ_02_SKEW_WRAP_SKEWADJ_SET_INVERT_CACHE_IS_LATE = 0x2001232bull;
-
-static const uint32_t CLK_ADJ_02_SKEW_WRAP_SKEWADJ_SET_INVERT_CACHE_IS_LATE_CACHE_IS_LATE_INVERT = 0;
-//<< [CLK_ADJ_02_SKEW_WRAP_SKEWADJ_SET_INVERT_CACHE_IS_LATE]
-// eq/reg00002.H
-
-//>> [CLK_ADJ_02_SKEW_WRAP_SKEWADJ_SET_STICK_CORE_SYNC_DONE]
-static const uint64_t CLK_ADJ_02_SKEW_WRAP_SKEWADJ_SET_STICK_CORE_SYNC_DONE = 0x20012332ull;
-
-static const uint32_t CLK_ADJ_02_SKEW_WRAP_SKEWADJ_SET_STICK_CORE_SYNC_DONE_CORE_SYNC_DONE_STICK = 0;
-//<< [CLK_ADJ_02_SKEW_WRAP_SKEWADJ_SET_STICK_CORE_SYNC_DONE]
-// eq/reg00002.H
-
-//>> [CLK_ADJ_03_DCADJ_WRAP_MEASURE_HISTORY]
-static const uint64_t CLK_ADJ_03_DCADJ_WRAP_MEASURE_HISTORY = 0x20011316ull;
-
-static const uint32_t CLK_ADJ_03_DCADJ_WRAP_MEASURE_HISTORY_1 = 0;
-static const uint32_t CLK_ADJ_03_DCADJ_WRAP_MEASURE_HISTORY_1_LEN = 8;
-static const uint32_t CLK_ADJ_03_DCADJ_WRAP_MEASURE_HISTORY_2 = 8;
-static const uint32_t CLK_ADJ_03_DCADJ_WRAP_MEASURE_HISTORY_2_LEN = 8;
-//<< [CLK_ADJ_03_DCADJ_WRAP_MEASURE_HISTORY]
-// eq/reg00002.H
-
-//>> [CLK_ADJ_03_DCADJ_WRAP_SET_ADJUST_MODE]
-static const uint64_t CLK_ADJ_03_DCADJ_WRAP_SET_ADJUST_MODE = 0x20011302ull;
-
-static const uint32_t CLK_ADJ_03_DCADJ_WRAP_SET_ADJUST_MODE_SET_ADJUST_MD = 1;
-//<< [CLK_ADJ_03_DCADJ_WRAP_SET_ADJUST_MODE]
-// eq/reg00002.H
-
-//>> [CLK_ADJ_03_DCADJ_WRAP_SET_ENABLE_OVERRIDE]
-static const uint64_t CLK_ADJ_03_DCADJ_WRAP_SET_ENABLE_OVERRIDE = 0x20011312ull;
-
-static const uint32_t CLK_ADJ_03_DCADJ_WRAP_SET_ENABLE_OVERRIDE_ENA = 0;
-static const uint32_t CLK_ADJ_03_DCADJ_WRAP_SET_ENABLE_OVERRIDE_VAL = 1;
-//<< [CLK_ADJ_03_DCADJ_WRAP_SET_ENABLE_OVERRIDE]
-// eq/reg00002.H
-
-//>> [CLK_ADJ_03_SKEW_WRAP_SKEWADJ_SOFT_RESET]
-static const uint64_t CLK_ADJ_03_SKEW_WRAP_SKEWADJ_SOFT_RESET = 0x20011325ull;
-//<< [CLK_ADJ_03_SKEW_WRAP_SKEWADJ_SOFT_RESET]
-// eq/reg00002.H
-
 //>> [CPLT_STAT0]
 static const uint64_t CPLT_STAT0 = 0x20000100ull;
 
@@ -206,107 +93,6 @@ static const uint32_t EPS_THERM_WSUB2_MODE_REG_THERM_DTS_ENABLE_L3 = 28;
 //<< [EPS_THERM_WSUB2_MODE_REG]
 // eq/reg00002.H
 
-//>> [L3TRA0_TR1_TRACE_HI_DATA_REG]
-static const uint64_t L3TRA0_TR1_TRACE_HI_DATA_REG = 0x20018220ull;
-
-static const uint32_t L3TRA0_TR1_TRACE_HI_DATA_REG_TRACE_HI_DATA = 0;
-static const uint32_t L3TRA0_TR1_TRACE_HI_DATA_REG_TRACE_HI_DATA_LEN = 64;
-//<< [L3TRA0_TR1_TRACE_HI_DATA_REG]
-// eq/reg00002.H
-
-//>> [L3TRA0_TR1_CONFIG_5]
-static const uint64_t L3TRA0_TR1_CONFIG_5 = 0x20018228ull;
-
-static const uint32_t L3TRA0_TR1_CONFIG_5_C = 0;
-static const uint32_t L3TRA0_TR1_CONFIG_5_C_LEN = 24;
-static const uint32_t L3TRA0_TR1_CONFIG_5_D = 24;
-static const uint32_t L3TRA0_TR1_CONFIG_5_D_LEN = 24;
-//<< [L3TRA0_TR1_CONFIG_5]
-// eq/reg00002.H
-
-//>> [L3TRA1_TR0_CONFIG_3]
-static const uint64_t L3TRA1_TR0_CONFIG_3 = 0x20018246ull;
-
-static const uint32_t L3TRA1_TR0_CONFIG_3_C = 0;
-static const uint32_t L3TRA1_TR0_CONFIG_3_C_LEN = 24;
-static const uint32_t L3TRA1_TR0_CONFIG_3_D = 24;
-static const uint32_t L3TRA1_TR0_CONFIG_3_D_LEN = 24;
-//<< [L3TRA1_TR0_CONFIG_3]
-// eq/reg00002.H
-
-//>> [L3TRA2_TR0_CONFIG_4]
-static const uint64_t L3TRA2_TR0_CONFIG_4 = 0x20018287ull;
-
-static const uint32_t L3TRA2_TR0_CONFIG_4_A = 0;
-static const uint32_t L3TRA2_TR0_CONFIG_4_A_LEN = 24;
-static const uint32_t L3TRA2_TR0_CONFIG_4_B = 24;
-static const uint32_t L3TRA2_TR0_CONFIG_4_B_LEN = 24;
-//<< [L3TRA2_TR0_CONFIG_4]
-// eq/reg00002.H
-
-//>> [L3TRA3_TR0_TRACE_LO_DATA_REG]
-static const uint64_t L3TRA3_TR0_TRACE_LO_DATA_REG = 0x200182c1ull;
-
-static const uint32_t L3TRA3_TR0_TRACE_LO_DATA_REG_LO_DATA = 0;
-static const uint32_t L3TRA3_TR0_TRACE_LO_DATA_REG_LO_DATA_LEN = 32;
-static const uint32_t L3TRA3_TR0_TRACE_LO_DATA_REG_ADDRESS = 32;
-static const uint32_t L3TRA3_TR0_TRACE_LO_DATA_REG_ADDRESS_LEN = 10;
-static const uint32_t L3TRA3_TR0_TRACE_LO_DATA_REG_LAST_BANK = 42;
-static const uint32_t L3TRA3_TR0_TRACE_LO_DATA_REG_LAST_BANK_LEN = 9;
-static const uint32_t L3TRA3_TR0_TRACE_LO_DATA_REG_LAST_BANK_VALID = 51;
-static const uint32_t L3TRA3_TR0_TRACE_LO_DATA_REG_WRITE_ON_RUN = 52;
-static const uint32_t L3TRA3_TR0_TRACE_LO_DATA_REG_RUNNING = 53;
-static const uint32_t L3TRA3_TR0_TRACE_LO_DATA_REG_HOLD_ADDRESS = 54;
-static const uint32_t L3TRA3_TR0_TRACE_LO_DATA_REG_HOLD_ADDRESS_LEN = 10;
-//<< [L3TRA3_TR0_TRACE_LO_DATA_REG]
-// eq/reg00002.H
-
-//>> [L3TRA3_TR1_CONFIG_2]
-static const uint64_t L3TRA3_TR1_CONFIG_2 = 0x200182e5ull;
-
-static const uint32_t L3TRA3_TR1_CONFIG_2_A = 0;
-static const uint32_t L3TRA3_TR1_CONFIG_2_A_LEN = 24;
-static const uint32_t L3TRA3_TR1_CONFIG_2_B = 24;
-static const uint32_t L3TRA3_TR1_CONFIG_2_B_LEN = 24;
-//<< [L3TRA3_TR1_CONFIG_2]
-// eq/reg00002.H
-
-//>> [QMETRA0_TR0_CONFIG_5]
-static const uint64_t QMETRA0_TR0_CONFIG_5 = 0x20018408ull;
-
-static const uint32_t QMETRA0_TR0_CONFIG_5_C = 0;
-static const uint32_t QMETRA0_TR0_CONFIG_5_C_LEN = 24;
-static const uint32_t QMETRA0_TR0_CONFIG_5_D = 24;
-static const uint32_t QMETRA0_TR0_CONFIG_5_D_LEN = 24;
-//<< [QMETRA0_TR0_CONFIG_5]
-// eq/reg00002.H
-
-//>> [QME_DUCR]
-static const uint64_t QME_DUCR = 0x200e0170ull;
-
-static const uint32_t QME_DUCR_FDCR_DELAY_C0 = 0;
-static const uint32_t QME_DUCR_FDCR_DELAY_C0_LEN = 8;
-static const uint32_t QME_DUCR_FDCR_DELAY_C1 = 8;
-static const uint32_t QME_DUCR_FDCR_DELAY_C1_LEN = 8;
-static const uint32_t QME_DUCR_FDCR_DELAY_C2 = 16;
-static const uint32_t QME_DUCR_FDCR_DELAY_C2_LEN = 8;
-static const uint32_t QME_DUCR_FDCR_DELAY_C3 = 24;
-static const uint32_t QME_DUCR_FDCR_DELAY_C3_LEN = 8;
-static const uint32_t QME_DUCR_FDCR_CAL_ADJUST_C0 = 32;
-static const uint32_t QME_DUCR_FDCR_CAL_ADJUST_C0_LEN = 2;
-static const uint32_t QME_DUCR_FDCR_CAL_ADJUST_C1 = 34;
-static const uint32_t QME_DUCR_FDCR_CAL_ADJUST_C1_LEN = 2;
-static const uint32_t QME_DUCR_FDCR_CAL_ADJUST_C2 = 36;
-static const uint32_t QME_DUCR_FDCR_CAL_ADJUST_C2_LEN = 2;
-static const uint32_t QME_DUCR_FDCR_CAL_ADJUST_C3 = 38;
-static const uint32_t QME_DUCR_FDCR_CAL_ADJUST_C3_LEN = 2;
-static const uint32_t QME_DUCR_CORE_UPDATE_ENABLE = 40;
-static const uint32_t QME_DUCR_CORE_UPDATE_ENABLE_LEN = 4;
-static const uint32_t QME_DUCR_RESERVED_44_63 = 44;
-static const uint32_t QME_DUCR_RESERVED_44_63_LEN = 20;
-//<< [QME_DUCR]
-// eq/reg00002.H
-
 //>> [QME_EISR]
 static const uint64_t QME_EISR_RW = 0x200e0260ull;
 static const uint64_t QME_EISR_WO_CLEAR = 0x200e0263ull;
@@ -355,39 +141,6 @@ static const uint32_t QME_EISR_CPMS_INTERRUPT1_LEN = 4;
 //<< [QME_EISR]
 // eq/reg00002.H
 
-//>> [QME_LFIRACT1]
-static const uint64_t QME_LFIRACT1 = 0x200e000cull;
-
-static const uint32_t QME_LFIRACT1_FIR_ACTION1 = 0;
-static const uint32_t QME_LFIRACT1_FIR_ACTION1_LEN = 36;
-//<< [QME_LFIRACT1]
-// eq/reg00002.H
-
-//>> [QME_SCOM_XIICAC]
-static const uint64_t QME_SCOM_XIICAC = 0x200e0224ull;
-
-static const uint32_t QME_SCOM_XIICAC_ICACHE_TAG_ADDR = 0;
-static const uint32_t QME_SCOM_XIICAC_ICACHE_TAG_ADDR_LEN = 27;
-static const uint32_t QME_SCOM_XIICAC_ICACHE_ERR = 32;
-static const uint32_t QME_SCOM_XIICAC_QME_SCOM_XISIB_PIB_IFETCH_PENDING = 34;
-static const uint32_t QME_SCOM_XIICAC_QME_SCOM_XIMEM_MEM_IFETCH_PENDING = 35;
-static const uint32_t QME_SCOM_XIICAC_ICACHE_VALID = 36;
-static const uint32_t QME_SCOM_XIICAC_ICACHE_VALID_LEN = 4;
-//<< [QME_SCOM_XIICAC]
-// eq/reg00002.H
-
-//>> [QME_SCOM_XISGB]
-static const uint64_t QME_SCOM_XISGB = 0x200e0220ull;
-
-static const uint32_t QME_SCOM_XISGB_STORE_ADDRESS = 0;
-static const uint32_t QME_SCOM_XISGB_STORE_ADDRESS_LEN = 32;
-static const uint32_t QME_SCOM_XISGB_QME_SCOM_XIMEM_MEM_IMPRECISE_ERROR_PENDING = 35;
-static const uint32_t QME_SCOM_XISGB_SGB_BYTE_VALID = 36;
-static const uint32_t QME_SCOM_XISGB_SGB_BYTE_VALID_LEN = 4;
-static const uint32_t QME_SCOM_XISGB_SGB_FLUSH_PENDING = 63;
-//<< [QME_SCOM_XISGB]
-// eq/reg00002.H
-
 //>> [QME_SCRB]
 static const uint64_t QME_SCRB_RW = 0x200e0128ull;
 static const uint64_t QME_SCRB_WO_CLEAR = 0x200e012bull;
@@ -398,56 +151,38 @@ static const uint32_t QME_SCRB_DATA_LEN = 32;
 //<< [QME_SCRB]
 // eq/reg00002.H
 
-//>> [QME_THOR]
-static const uint64_t QME_THOR = 0x200e0098ull;
+//>> [QME_LFIRACT1]
+static const uint64_t QME_LFIRACT1 = 0x200e000cull;
 
-static const uint32_t QME_THOR_TSR_OVERRIDE_EN = 0;
-static const uint32_t QME_THOR_PTSR_OVERRIDE_SEL = 1;
-static const uint32_t QME_THOR_TSR_OVERRIDE_VAL = 4;
-static const uint32_t QME_THOR_TSR_OVERRIDE_VAL_LEN = 8;
-//<< [QME_THOR]
+static const uint32_t QME_LFIRACT1_FIR_ACTION1 = 0;
+static const uint32_t QME_LFIRACT1_FIR_ACTION1_LEN = 36;
+//<< [QME_LFIRACT1]
 // eq/reg00002.H
 
-//>> [SPATTN]
-static const uint64_t SPATTN = 0x20040002ull;
+//>> [QME_DUCR]
+static const uint64_t QME_DUCR = 0x200e0170ull;
 
-static const uint32_t SPATTN_ANY_SPATTN = 0;
-static const uint32_t SPATTN_RESERVED1S = 1;
-static const uint32_t SPATTN_RESERVED2S = 2;
-static const uint32_t SPATTN_RESERVED3S = 3;
-static const uint32_t SPATTN_PERV = 4;
-static const uint32_t SPATTN_IN05 = 5;
-static const uint32_t SPATTN_IN06 = 6;
-static const uint32_t SPATTN_IN07 = 7;
-static const uint32_t SPATTN_IN08 = 8;
-static const uint32_t SPATTN_IN09 = 9;
-static const uint32_t SPATTN_IN10 = 10;
-static const uint32_t SPATTN_IN11 = 11;
-static const uint32_t SPATTN_IN12 = 12;
-static const uint32_t SPATTN_IN13 = 13;
-static const uint32_t SPATTN_IN14 = 14;
-static const uint32_t SPATTN_IN15 = 15;
-static const uint32_t SPATTN_IN16 = 16;
-static const uint32_t SPATTN_IN17 = 17;
-static const uint32_t SPATTN_IN18 = 18;
-static const uint32_t SPATTN_IN19 = 19;
-static const uint32_t SPATTN_IN20 = 20;
-static const uint32_t SPATTN_IN21 = 21;
-static const uint32_t SPATTN_IN22 = 22;
-static const uint32_t SPATTN_IN23 = 23;
-static const uint32_t SPATTN_IN24 = 24;
-static const uint32_t SPATTN_IN25 = 25;
-static const uint32_t SPATTN_IN26 = 26;
-static const uint32_t SPATTN_IN27 = 27;
-static const uint32_t SPATTN_IN28 = 28;
-static const uint32_t SPATTN_IN29 = 29;
-static const uint32_t SPATTN_IN30 = 30;
-static const uint32_t SPATTN_IN31 = 31;
-static const uint32_t SPATTN_IN32 = 32;
-static const uint32_t SPATTN_IN33 = 33;
-static const uint32_t SPATTN_IN34 = 34;
-static const uint32_t SPATTN_IN35 = 35;
-//<< [SPATTN]
+static const uint32_t QME_DUCR_FDCR_DELAY_C0 = 0;
+static const uint32_t QME_DUCR_FDCR_DELAY_C0_LEN = 8;
+static const uint32_t QME_DUCR_FDCR_DELAY_C1 = 8;
+static const uint32_t QME_DUCR_FDCR_DELAY_C1_LEN = 8;
+static const uint32_t QME_DUCR_FDCR_DELAY_C2 = 16;
+static const uint32_t QME_DUCR_FDCR_DELAY_C2_LEN = 8;
+static const uint32_t QME_DUCR_FDCR_DELAY_C3 = 24;
+static const uint32_t QME_DUCR_FDCR_DELAY_C3_LEN = 8;
+static const uint32_t QME_DUCR_FDCR_CAL_ADJUST_C0 = 32;
+static const uint32_t QME_DUCR_FDCR_CAL_ADJUST_C0_LEN = 2;
+static const uint32_t QME_DUCR_FDCR_CAL_ADJUST_C1 = 34;
+static const uint32_t QME_DUCR_FDCR_CAL_ADJUST_C1_LEN = 2;
+static const uint32_t QME_DUCR_FDCR_CAL_ADJUST_C2 = 36;
+static const uint32_t QME_DUCR_FDCR_CAL_ADJUST_C2_LEN = 2;
+static const uint32_t QME_DUCR_FDCR_CAL_ADJUST_C3 = 38;
+static const uint32_t QME_DUCR_FDCR_CAL_ADJUST_C3_LEN = 2;
+static const uint32_t QME_DUCR_CORE_UPDATE_ENABLE = 40;
+static const uint32_t QME_DUCR_CORE_UPDATE_ENABLE_LEN = 4;
+static const uint32_t QME_DUCR_RESERVED_44_63 = 44;
+static const uint32_t QME_DUCR_RESERVED_44_63_LEN = 20;
+//<< [QME_DUCR]
 // eq/reg00002.H
 
 //>>THE END<<

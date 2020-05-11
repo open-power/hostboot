@@ -39,16 +39,6 @@ namespace nmmu
 #endif
 
 
-//>> [FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_MASK_REG]
-static const uint64_t FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_MASK_REG_RW = 0x02010c03ull;
-static const uint64_t FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_MASK_REG_WO_AND = 0x02010c04ull;
-static const uint64_t FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_MASK_REG_WO_OR = 0x02010c05ull;
-
-static const uint32_t FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_MASK_REG_NX_CQ_FIR_MASK = 0;
-static const uint32_t FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_MASK_REG_NX_CQ_FIR_MASK_LEN = 20;
-//<< [FBC_CQ_WRAP_NXCQ_SCOM_NX_FIR_MASK_REG]
-// nmmu/reg00015.H
-
 //>>THE END<<
 
 #ifndef __PPE_HCODE__

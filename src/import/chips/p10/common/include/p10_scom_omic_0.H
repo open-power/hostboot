@@ -39,63 +39,6 @@ namespace omic
 #endif
 
 
-//>> [CTL_REGS_RX_MODE19_PG]
-static const uint64_t CTL_REGS_RX_MODE19_PG = 0x8008984010012c3full;
-
-static const uint32_t CTL_REGS_RX_MODE19_PG_HIST_BIAS_THRESH = 48;
-static const uint32_t CTL_REGS_RX_MODE19_PG_HIST_BIAS_THRESH_LEN = 5;
-static const uint32_t CTL_REGS_RX_MODE19_PG_N1_SAMPLES = 53;
-static const uint32_t CTL_REGS_RX_MODE19_PG_N1_BIAS_THRESH = 54;
-static const uint32_t CTL_REGS_RX_MODE19_PG_N1_BIAS_THRESH_LEN = 4;
-static const uint32_t CTL_REGS_RX_MODE19_PG_N2_SAMPLES = 58;
-//<< [CTL_REGS_RX_MODE19_PG]
-// omic/reg00000.H
-
-//>> [DATASM_REGS_RX_CNTL8_PG]
-static const uint64_t DATASM_REGS_RX_CNTL8_PG = 0x8009c04010012c3full;
-
-static const uint32_t DATASM_REGS_RX_CNTL8_PG_RX_PSAVE_FENCE_STS_IO_DL_16_23 = 48;
-static const uint32_t DATASM_REGS_RX_CNTL8_PG_RX_PSAVE_FENCE_STS_IO_DL_16_23_LEN = 8;
-//<< [DATASM_REGS_RX_CNTL8_PG]
-// omic/reg00000.H
-
-//>> [DATASM_REGS_RX_STAT16_PG]
-static const uint64_t DATASM_REGS_RX_STAT16_PG = 0x800b084010012c3full;
-
-static const uint32_t DATASM_REGS_RX_STAT16_PG_DIR_CHG_CNT_RO_SIGNAL = 48;
-static const uint32_t DATASM_REGS_RX_STAT16_PG_DIR_CHG_CNT_RO_SIGNAL_LEN = 5;
-static const uint32_t DATASM_REGS_RX_STAT16_PG_VOTE_DIFF_RO_SIGNAL = 53;
-static const uint32_t DATASM_REGS_RX_STAT16_PG_VOTE_DIFF_RO_SIGNAL_LEN = 11;
-//<< [DATASM_REGS_RX_STAT16_PG]
-// omic/reg00000.H
-
-//>> [DATASM_REGS_RX_STAT26_PG]
-static const uint64_t DATASM_REGS_RX_STAT26_PG = 0x800b584010012c3full;
-
-static const uint32_t DATASM_REGS_RX_STAT26_PG_RX_PSAVE_STS_PHY_0_15_RO_SIGNAL = 48;
-static const uint32_t DATASM_REGS_RX_STAT26_PG_RX_PSAVE_STS_PHY_0_15_RO_SIGNAL_LEN = 16;
-//<< [DATASM_REGS_RX_STAT26_PG]
-// omic/reg00000.H
-
-//>> [DATASM_REGS_RX_STAT8_PG]
-static const uint64_t DATASM_REGS_RX_STAT8_PG = 0x800ac84010012c3full;
-
-static const uint32_t DATASM_REGS_RX_STAT8_PG_RX_SCAN_P_0_15_RO_SIGNAL = 48;
-static const uint32_t DATASM_REGS_RX_STAT8_PG_RX_SCAN_P_0_15_RO_SIGNAL_LEN = 16;
-//<< [DATASM_REGS_RX_STAT8_PG]
-// omic/reg00000.H
-
-//>> [MC_OMI_FIR_WOF_REG]
-//ERRCODE: // Some of the name targets not found in address targets: omic
-// No targets could be determined from the address.
-
-static const uint64_t MC_OMI_FIR_WOF_REG = 0x0c011408ull;
-
-static const uint32_t MC_OMI_FIR_WOF_REG_MC_OMI_FIR_WOF = 0;
-static const uint32_t MC_OMI_FIR_WOF_REG_MC_OMI_FIR_WOF_LEN = 62;
-//<< [MC_OMI_FIR_WOF_REG]
-// omic/reg00000.H
-
 //>>THE END<<
 
 #ifndef __PPE_HCODE__

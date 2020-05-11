@@ -39,30 +39,11 @@ namespace phb
 #endif
 
 
-//>> [REGS_INTBAR_REG]
-static const uint64_t REGS_INTBAR_REG = 0x03011853ull;
-
-static const uint32_t REGS_INTBAR_REG_PE_INT_BAR = 0;
-static const uint32_t REGS_INTBAR_REG_PE_INT_BAR_LEN = 28;
-//<< [REGS_INTBAR_REG]
-// phb/reg00014.H
-
 //>> [REGS_PHBRESET_REG]
 static const uint64_t REGS_PHBRESET_REG = 0x0801084aull;
 
 static const uint32_t REGS_PHBRESET_REG_PE_ETU_RESET = 0;
 //<< [REGS_PHBRESET_REG]
-// phb/reg00014.H
-
-//>> [RSB_SCOM_SSR_PHB5_UVIAR]
-static const uint64_t RSB_SCOM_SSR_PHB5_UVIAR = 0x08010902ull;
-
-static const uint32_t RSB_SCOM_SSR_PHB5_UVIAR_REQ_ADDR_VLD = 0;
-static const uint32_t RSB_SCOM_SSR_PHB5_UVIAR_REQ_4B = 1;
-static const uint32_t RSB_SCOM_SSR_PHB5_UVIAR_AUTO_INC = 2;
-static const uint32_t RSB_SCOM_SSR_PHB5_UVIAR_REQ_ADDR_VALUE = 51;
-static const uint32_t RSB_SCOM_SSR_PHB5_UVIAR_REQ_ADDR_VALUE_LEN = 11;
-//<< [RSB_SCOM_SSR_PHB5_UVIAR]
 // phb/reg00014.H
 
 //>>THE END<<

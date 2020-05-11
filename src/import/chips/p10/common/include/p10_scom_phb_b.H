@@ -39,15 +39,6 @@ namespace phb
 #endif
 
 
-//>> [REGS_PE_SPARSE_PAGE_CNTL_REG]
-static const uint64_t REGS_PE_SPARSE_PAGE_CNTL_REG = 0x03011856ull;
-
-static const uint32_t REGS_PE_SPARSE_PAGE_CNTL_REG_FV = 3;
-static const uint32_t REGS_PE_SPARSE_PAGE_CNTL_REG_T3 = 4;
-static const uint32_t REGS_PE_SPARSE_PAGE_CNTL_REG_T4 = 5;
-//<< [REGS_PE_SPARSE_PAGE_CNTL_REG]
-// phb/reg00011.H
-
 //>> [RSB_REGS_ACT0_REG]
 static const uint64_t RSB_REGS_ACT0_REG = 0x0801090eull;
 

@@ -39,182 +39,6 @@ namespace c
 #endif
 
 
-//>> [EC_LS_LSU_HOLD_OUT_REG1]
-static const uint64_t EC_LS_LSU_HOLD_OUT_REG1 = 0x200206c1ull;
-
-static const uint32_t EC_LS_LSU_HOLD_OUT_REG1_0 = 0;
-static const uint32_t EC_LS_LSU_HOLD_OUT_REG1_1 = 1;
-static const uint32_t EC_LS_LSU_HOLD_OUT_REG1_2 = 2;
-static const uint32_t EC_LS_LSU_HOLD_OUT_REG1_3 = 3;
-static const uint32_t EC_LS_LSU_HOLD_OUT_REG1_4 = 4;
-static const uint32_t EC_LS_LSU_HOLD_OUT_REG1_5 = 5;
-static const uint32_t EC_LS_LSU_HOLD_OUT_REG1_6 = 6;
-static const uint32_t EC_LS_LSU_HOLD_OUT_REG1_7 = 7;
-static const uint32_t EC_LS_LSU_HOLD_OUT_REG1_8 = 8;
-static const uint32_t EC_LS_LSU_HOLD_OUT_REG1_9 = 9;
-static const uint32_t EC_LS_LSU_HOLD_OUT_REG1_10 = 10;
-static const uint32_t EC_LS_LSU_HOLD_OUT_REG1_11 = 11;
-static const uint32_t EC_LS_LSU_HOLD_OUT_REG1_12 = 12;
-static const uint32_t EC_LS_LSU_HOLD_OUT_REG1_13 = 13;
-static const uint32_t EC_LS_LSU_HOLD_OUT_REG1_14 = 14;
-static const uint32_t EC_LS_LSU_HOLD_OUT_REG1_15 = 15;
-//<< [EC_LS_LSU_HOLD_OUT_REG1]
-// c/reg00001.H
-
-//>> [EC_PC_COMMON_SPR_SPATTN_MASK]
-static const uint64_t EC_PC_COMMON_SPR_SPATTN_MASK = 0x2002049aull;
-
-static const uint32_t EC_PC_COMMON_SPR_SPATTN_MASK_0_SPATTN_MASK = 0;
-static const uint32_t EC_PC_COMMON_SPR_SPATTN_MASK_0_SPATTN_MASK_LEN = 4;
-static const uint32_t EC_PC_COMMON_SPR_SPATTN_MASK_1_SPATTN_MASK = 4;
-static const uint32_t EC_PC_COMMON_SPR_SPATTN_MASK_1_SPATTN_MASK_LEN = 4;
-static const uint32_t EC_PC_COMMON_SPR_SPATTN_MASK_2_SPATTN_MASK = 8;
-static const uint32_t EC_PC_COMMON_SPR_SPATTN_MASK_2_SPATTN_MASK_LEN = 4;
-static const uint32_t EC_PC_COMMON_SPR_SPATTN_MASK_3_SPATTN_MASK = 12;
-static const uint32_t EC_PC_COMMON_SPR_SPATTN_MASK_3_SPATTN_MASK_LEN = 4;
-static const uint32_t EC_PC_COMMON_SPR_SPATTN_MASK_4_SPATTN_MASK = 16;
-static const uint32_t EC_PC_COMMON_SPR_SPATTN_MASK_4_SPATTN_MASK_LEN = 4;
-static const uint32_t EC_PC_COMMON_SPR_SPATTN_MASK_5_SPATTN_MASK = 20;
-static const uint32_t EC_PC_COMMON_SPR_SPATTN_MASK_5_SPATTN_MASK_LEN = 4;
-static const uint32_t EC_PC_COMMON_SPR_SPATTN_MASK_6_SPATTN_MASK = 24;
-static const uint32_t EC_PC_COMMON_SPR_SPATTN_MASK_6_SPATTN_MASK_LEN = 4;
-static const uint32_t EC_PC_COMMON_SPR_SPATTN_MASK_7_SPATTN_MASK = 28;
-static const uint32_t EC_PC_COMMON_SPR_SPATTN_MASK_7_SPATTN_MASK_LEN = 4;
-//<< [EC_PC_COMMON_SPR_SPATTN_MASK]
-// c/reg00001.H
-
-//>> [EC_PC_SCR3]
-static const uint64_t EC_PC_SCR3 = 0x20020489ull;
-//<< [EC_PC_SCR3]
-// c/reg00001.H
-
-//>> [EC_PC_TRACE1_TR_TR0_CONFIG]
-static const uint64_t EC_PC_TRACE1_TR_TR0_CONFIG = 0x20020a42ull;
-
-static const uint32_t EC_PC_TRACE1_TR_TR0_CONFIG_STORE_ON_TRIG_MODE = 0;
-static const uint32_t EC_PC_TRACE1_TR_TR0_CONFIG_WRITE_ON_RUN_MODE = 1;
-static const uint32_t EC_PC_TRACE1_TR_TR0_CONFIG_EXTEND_TRIG_MODE = 2;
-static const uint32_t EC_PC_TRACE1_TR_TR0_CONFIG_EXTEND_TRIG_MODE_LEN = 8;
-static const uint32_t EC_PC_TRACE1_TR_TR0_CONFIG_BANK_MODE = 10;
-static const uint32_t EC_PC_TRACE1_TR_TR0_CONFIG_ENH_TRACE_MODE = 11;
-static const uint32_t EC_PC_TRACE1_TR_TR0_CONFIG_LOCAL_CLOCK_GATE_CONTROL = 12;
-static const uint32_t EC_PC_TRACE1_TR_TR0_CONFIG_LOCAL_CLOCK_GATE_CONTROL_LEN = 2;
-static const uint32_t EC_PC_TRACE1_TR_TR0_CONFIG_TRACE_SELECT_CONTROL = 14;
-static const uint32_t EC_PC_TRACE1_TR_TR0_CONFIG_TRACE_SELECT_CONTROL_LEN = 4;
-static const uint32_t EC_PC_TRACE1_TR_TR0_CONFIG_TRACE_RUN_HOLD_OFF = 18;
-static const uint32_t EC_PC_TRACE1_TR_TR0_CONFIG_TRACE_RUN_STATUS = 19;
-static const uint32_t EC_PC_TRACE1_TR_TR0_CONFIG_TRACE_RUN_STICKY = 20;
-static const uint32_t EC_PC_TRACE1_TR_TR0_CONFIG_DISABLE_BANK_EDGE_DETECT = 21;
-static const uint32_t EC_PC_TRACE1_TR_TR0_CONFIG_DISABLE_SCOM_RD_ACT_OR_ACTIVATE_CROSS = 22;
-static const uint32_t EC_PC_TRACE1_TR_TR0_CONFIG_MASTER_CLOCK_ENABLE_INT = 23;
-static const uint32_t EC_PC_TRACE1_TR_TR0_CONFIG_CROSS_DISABLE_SCOM_RD_ACT = 24;
-//<< [EC_PC_TRACE1_TR_TR0_CONFIG]
-// c/reg00001.H
-
-//>> [EC_PC_TRACE2_TR_TR0_CONFIG_1]
-static const uint64_t EC_PC_TRACE2_TR_TR0_CONFIG_1 = 0x20020a84ull;
-
-static const uint32_t EC_PC_TRACE2_TR_TR0_CONFIG_1_CMP_MSK_LT_B_64_TO_87 = 0;
-static const uint32_t EC_PC_TRACE2_TR_TR0_CONFIG_1_CMP_MSK_LT_B_64_TO_87_LEN = 24;
-//<< [EC_PC_TRACE2_TR_TR0_CONFIG_1]
-// c/reg00001.H
-
-//>> [EC_SD_SDP_SDCR_UNIT_HOLD_OUT0]
-static const uint64_t EC_SD_SDP_SDCR_UNIT_HOLD_OUT0 = 0x20020640ull;
-
-static const uint32_t EC_SD_SDP_SDCR_UNIT_HOLD_OUT0_PC_ERR_INJ_HOLD_OUT = 0;
-static const uint32_t EC_SD_SDP_SDCR_UNIT_HOLD_OUT0_SDCC_T0_HEAD_TAIL_XSTOP_HOLD_OUT = 1;
-static const uint32_t EC_SD_SDP_SDCR_UNIT_HOLD_OUT0_SDCC_T1_HEAD_TAIL_XSTOP_HOLD_OUT = 2;
-static const uint32_t EC_SD_SDP_SDCR_UNIT_HOLD_OUT0_SDCC_T2_HEAD_TAIL_XSTOP_HOLD_OUT = 3;
-static const uint32_t EC_SD_SDP_SDCR_UNIT_HOLD_OUT0_SDCC_T3_HEAD_TAIL_XSTOP_HOLD_OUT = 4;
-static const uint32_t EC_SD_SDP_SDCR_UNIT_HOLD_OUT0_SDCC_BLOCK_TROUBLE_ERROR = 5;
-static const uint32_t EC_SD_SDP_SDCR_UNIT_HOLD_OUT0_SDCCC_COMP0_HOLD_OUT = 6;
-static const uint32_t EC_SD_SDP_SDCR_UNIT_HOLD_OUT0_SDCCC_COMP1_HOLD_OUT = 7;
-static const uint32_t EC_SD_SDP_SDCR_UNIT_HOLD_OUT0_SDCCC_COMP2_HOLD_OUT = 8;
-static const uint32_t EC_SD_SDP_SDCR_UNIT_HOLD_OUT0_SDCCC_COMP3_HOLD_OUT = 9;
-static const uint32_t EC_SD_SDP_SDCR_UNIT_HOLD_OUT0_WAT_INJECT_INT_HOLD_OUT = 10;
-static const uint32_t EC_SD_SDP_SDCR_UNIT_HOLD_OUT0_SDQ_DISP_HOLD_OUT = 11;
-static const uint32_t EC_SD_SDP_SDCR_UNIT_HOLD_OUT0_SDQ_ISSMUX_HOLD_OUT = 12;
-static const uint32_t EC_SD_SDP_SDCR_UNIT_HOLD_OUT0_SDQ_BRDCAST_HOLD_OUT = 13;
-static const uint32_t EC_SD_SDP_SDCR_UNIT_HOLD_OUT0_SDQ_LSU_WKUP_HOLD_OUT = 14;
-static const uint32_t EC_SD_SDP_SDCR_UNIT_HOLD_OUT0_SDXM_ERR_HOLD_OUT_0 = 15;
-//<< [EC_SD_SDP_SDCR_UNIT_HOLD_OUT0]
-// c/reg00001.H
-
-//>> [L2TRA_TR1_CONFIG]
-static const uint64_t L2TRA_TR1_CONFIG = 0x20020082ull;
-
-static const uint32_t L2TRA_TR1_CONFIG_STORE_ON_TRIG_MODE = 0;
-static const uint32_t L2TRA_TR1_CONFIG_WRITE_ON_RUN_MODE = 1;
-static const uint32_t L2TRA_TR1_CONFIG_EXTEND_TRIG_MODE = 2;
-static const uint32_t L2TRA_TR1_CONFIG_EXTEND_TRIG_MODE_LEN = 8;
-static const uint32_t L2TRA_TR1_CONFIG_BANK_MODE = 10;
-static const uint32_t L2TRA_TR1_CONFIG_ENH_TRACE_MODE = 11;
-static const uint32_t L2TRA_TR1_CONFIG_LOCAL_CLOCK_GATE_CONTROL = 12;
-static const uint32_t L2TRA_TR1_CONFIG_LOCAL_CLOCK_GATE_CONTROL_LEN = 2;
-static const uint32_t L2TRA_TR1_CONFIG_TRACE_SELECT_CONTROL = 14;
-static const uint32_t L2TRA_TR1_CONFIG_TRACE_SELECT_CONTROL_LEN = 4;
-static const uint32_t L2TRA_TR1_CONFIG_TRACE_RUN_HOLD_OFF = 18;
-static const uint32_t L2TRA_TR1_CONFIG_TRACE_RUN_STATUS = 19;
-static const uint32_t L2TRA_TR1_CONFIG_TRACE_RUN_STICKY = 20;
-static const uint32_t L2TRA_TR1_CONFIG_DISABLE_BANK_EDGE_DETECT = 21;
-static const uint32_t L2TRA_TR1_CONFIG_DISABLE_SCOM_RD_ACT_OR_ACTIVATE_CROSS = 22;
-static const uint32_t L2TRA_TR1_CONFIG_MASTER_CLOCK_ENABLE_INT = 23;
-static const uint32_t L2TRA_TR1_CONFIG_CROSS_DISABLE_SCOM_RD_ACT = 24;
-//<< [L2TRA_TR1_CONFIG]
-// c/reg00001.H
-
-//>> [L2TRA_TR1_CONFIG_5]
-static const uint64_t L2TRA_TR1_CONFIG_5 = 0x20020088ull;
-
-static const uint32_t L2TRA_TR1_CONFIG_5_C = 0;
-static const uint32_t L2TRA_TR1_CONFIG_5_C_LEN = 24;
-static const uint32_t L2TRA_TR1_CONFIG_5_D = 24;
-static const uint32_t L2TRA_TR1_CONFIG_5_D_LEN = 24;
-//<< [L2TRA_TR1_CONFIG_5]
-// c/reg00001.H
-
-//>> [L3_MISC_L3CERRS_FIR_REG]
-static const uint64_t L3_MISC_L3CERRS_FIR_REG_RW = 0x20010600ull;
-static const uint64_t L3_MISC_L3CERRS_FIR_REG_WO_AND = 0x20010601ull;
-static const uint64_t L3_MISC_L3CERRS_FIR_REG_WO_OR = 0x20010602ull;
-
-static const uint32_t L3_MISC_L3CERRS_FIR_REG_RDDSP_SEGR_MODE_ALL_MEM_UNAVAIL_ERR = 0;
-static const uint32_t L3_MISC_L3CERRS_FIR_REG_CHIP_CONTAINED_ERR = 1;
-static const uint32_t L3_MISC_L3CERRS_FIR_REG_TOPO_TABLE_ERR = 2;
-static const uint32_t L3_MISC_L3CERRS_FIR_REG_DRAM_POS_WORDLINE_FAIL = 3;
-static const uint32_t L3_MISC_L3CERRS_FIR_REG_RD_DF_CE_DET_NOT_LINDEL_REQ = 4;
-static const uint32_t L3_MISC_L3CERRS_FIR_REG_RD_DF_UE_DET = 5;
-static const uint32_t L3_MISC_L3CERRS_FIR_REG_RD_DF_SUE_DET = 6;
-static const uint32_t L3_MISC_L3CERRS_FIR_REG_WR_DF_CE_FROM_PB = 7;
-static const uint32_t L3_MISC_L3CERRS_FIR_REG_WR_DF_UE_FROM_PB = 8;
-static const uint32_t L3_MISC_L3CERRS_FIR_REG_WR_DF_SUE_FROM_PB = 9;
-static const uint32_t L3_MISC_L3CERRS_FIR_REG_WR_DF_CE_FROM_L2_OR_WIHPC = 10;
-static const uint32_t L3_MISC_L3CERRS_FIR_REG_WR_DF_UE_FROM_L2_OR_WIHPC = 11;
-static const uint32_t L3_MISC_L3CERRS_FIR_REG_WR_DF_SUE_FROM_L2_OR_WIHPC = 12;
-static const uint32_t L3_MISC_L3CERRS_FIR_REG_DIR_RD_CE_DET = 13;
-static const uint32_t L3_MISC_L3CERRS_FIR_REG_DIR_RD_UE_DET = 14;
-static const uint32_t L3_MISC_L3CERRS_FIR_REG_DIR_RD_PHANTOM_ERROR = 15;
-static const uint32_t L3_MISC_L3CERRS_FIR_REG_PB_MAST_WR_ADDR_ERR = 16;
-static const uint32_t L3_MISC_L3CERRS_FIR_REG_PB_MAST_RD_ADDR_ERR = 17;
-static const uint32_t L3_MISC_L3CERRS_FIR_REG_PB_HANG_POLL = 18;
-static const uint32_t L3_MISC_L3CERRS_FIR_REG_LRU_INVAL_CNT = 19;
-static const uint32_t L3_MISC_L3CERRS_FIR_REG_FIR_SPARE20 = 20;
-static const uint32_t L3_MISC_L3CERRS_FIR_REG_FIR_SPARE21 = 21;
-static const uint32_t L3_MISC_L3CERRS_FIR_REG_FIR_SPARE22 = 22;
-static const uint32_t L3_MISC_L3CERRS_FIR_REG_MACH_HANG_DETECTED = 23;
-static const uint32_t L3_MISC_L3CERRS_FIR_REG_HW_CONTROL_ERR = 24;
-static const uint32_t L3_MISC_L3CERRS_FIR_REG_SNP_CACHE_INHIBIT_ERR = 25;
-static const uint32_t L3_MISC_L3CERRS_FIR_REG_LINE_DEL_CE_DONE = 26;
-static const uint32_t L3_MISC_L3CERRS_FIR_REG_LCO_IN_NOT_PROX_ERR = 27;
-static const uint32_t L3_MISC_L3CERRS_FIR_REG_LRU_VIC_SEL_ERROR = 28;
-static const uint32_t L3_MISC_L3CERRS_FIR_REG_ALL_MEMBERS_DELETED_ERROR = 29;
-static const uint32_t L3_MISC_L3CERRS_FIR_REG_LCO_IN_CHIPLET_ID_MISMATCH = 30;
-static const uint32_t L3_MISC_L3CERRS_FIR_REG_PB_MAST_WR_ACK_DEAD = 31;
-static const uint32_t L3_MISC_L3CERRS_FIR_REG_PB_MAST_RD_ACK_DEAD = 32;
-//<< [L3_MISC_L3CERRS_FIR_REG]
-// c/reg00001.H
-
 //>> [L3_MISC_L3CERRS_TOPOLOGY_TBL1_SCOM_RD]
 static const uint64_t L3_MISC_L3CERRS_TOPOLOGY_TBL1_SCOM_RD = 0x20010626ull;
 
@@ -275,48 +99,45 @@ static const uint32_t NC_NCMISC_NCSCOMS_NCU_TOPOTABLE_REG2_23_LEN = 4;
 //<< [NC_NCMISC_NCSCOMS_NCU_TOPOTABLE_REG2]
 // c/reg00001.H
 
-//>> [QME_DCSR]
-static const uint64_t QME_DCSR = 0x200e0870ull;
+//>> [L3_MISC_L3CERRS_FIR_REG]
+static const uint64_t L3_MISC_L3CERRS_FIR_REG_RW = 0x20010600ull;
+static const uint64_t L3_MISC_L3CERRS_FIR_REG_WO_AND = 0x20010601ull;
+static const uint64_t L3_MISC_L3CERRS_FIR_REG_WO_OR = 0x20010602ull;
 
-static const uint32_t QME_DCSR_PLS_T0 = 0;
-static const uint32_t QME_DCSR_PLS_T0_LEN = 4;
-static const uint32_t QME_DCSR_PLS_T1 = 4;
-static const uint32_t QME_DCSR_PLS_T1_LEN = 4;
-static const uint32_t QME_DCSR_PLS_T2 = 8;
-static const uint32_t QME_DCSR_PLS_T2_LEN = 4;
-static const uint32_t QME_DCSR_PLS_T3 = 12;
-static const uint32_t QME_DCSR_PLS_T3_LEN = 4;
-static const uint32_t QME_DCSR_SL_T0 = 16;
-static const uint32_t QME_DCSR_SL_T0_LEN = 2;
-static const uint32_t QME_DCSR_SL_T1 = 18;
-static const uint32_t QME_DCSR_SL_T1_LEN = 2;
-static const uint32_t QME_DCSR_SL_T2 = 20;
-static const uint32_t QME_DCSR_SL_T2_LEN = 2;
-static const uint32_t QME_DCSR_SL_T3 = 22;
-static const uint32_t QME_DCSR_SL_T3_LEN = 2;
-static const uint32_t QME_DCSR_SRESET_MSR_S = 24;
-static const uint32_t QME_DCSR_THREAD_INSTR_RUNNING_HISTORY = 60;
-static const uint32_t QME_DCSR_THREAD_INSTR_RUNNING_HISTORY_LEN = 4;
-//<< [QME_DCSR]
-// c/reg00001.H
-
-//>> [QME_PMCRS]
-static const uint64_t QME_PMCRS = 0x200e0860ull;
-
-static const uint32_t QME_PMCRS_DATA = 0;
-static const uint32_t QME_PMCRS_DATA_LEN = 64;
-//<< [QME_PMCRS]
-// c/reg00001.H
-
-//>> [QME_PMSRS]
-static const uint64_t QME_PMSRS = 0x200e0864ull;
-
-static const uint32_t QME_PMSRS_PSTATE_DATA = 0;
-static const uint32_t QME_PMSRS_PSTATE_DATA_LEN = 36;
-static const uint32_t QME_PMSRS_INVALID_VERSION = 58;
-static const uint32_t QME_PMSRS_VERSION = 59;
-static const uint32_t QME_PMSRS_VERSION_LEN = 5;
-//<< [QME_PMSRS]
+static const uint32_t L3_MISC_L3CERRS_FIR_REG_RDDSP_SEGR_MODE_ALL_MEM_UNAVAIL_ERR = 0;
+static const uint32_t L3_MISC_L3CERRS_FIR_REG_CHIP_CONTAINED_ERR = 1;
+static const uint32_t L3_MISC_L3CERRS_FIR_REG_TOPO_TABLE_ERR = 2;
+static const uint32_t L3_MISC_L3CERRS_FIR_REG_DRAM_POS_WORDLINE_FAIL = 3;
+static const uint32_t L3_MISC_L3CERRS_FIR_REG_RD_DF_CE_DET_NOT_LINDEL_REQ = 4;
+static const uint32_t L3_MISC_L3CERRS_FIR_REG_RD_DF_UE_DET = 5;
+static const uint32_t L3_MISC_L3CERRS_FIR_REG_RD_DF_SUE_DET = 6;
+static const uint32_t L3_MISC_L3CERRS_FIR_REG_WR_DF_CE_FROM_PB = 7;
+static const uint32_t L3_MISC_L3CERRS_FIR_REG_WR_DF_UE_FROM_PB = 8;
+static const uint32_t L3_MISC_L3CERRS_FIR_REG_WR_DF_SUE_FROM_PB = 9;
+static const uint32_t L3_MISC_L3CERRS_FIR_REG_WR_DF_CE_FROM_L2_OR_WIHPC = 10;
+static const uint32_t L3_MISC_L3CERRS_FIR_REG_WR_DF_UE_FROM_L2_OR_WIHPC = 11;
+static const uint32_t L3_MISC_L3CERRS_FIR_REG_WR_DF_SUE_FROM_L2_OR_WIHPC = 12;
+static const uint32_t L3_MISC_L3CERRS_FIR_REG_DIR_RD_CE_DET = 13;
+static const uint32_t L3_MISC_L3CERRS_FIR_REG_DIR_RD_UE_DET = 14;
+static const uint32_t L3_MISC_L3CERRS_FIR_REG_DIR_RD_PHANTOM_ERROR = 15;
+static const uint32_t L3_MISC_L3CERRS_FIR_REG_PB_MAST_WR_ADDR_ERR = 16;
+static const uint32_t L3_MISC_L3CERRS_FIR_REG_PB_MAST_RD_ADDR_ERR = 17;
+static const uint32_t L3_MISC_L3CERRS_FIR_REG_PB_HANG_POLL = 18;
+static const uint32_t L3_MISC_L3CERRS_FIR_REG_LRU_INVAL_CNT = 19;
+static const uint32_t L3_MISC_L3CERRS_FIR_REG_FIR_SPARE20 = 20;
+static const uint32_t L3_MISC_L3CERRS_FIR_REG_FIR_SPARE21 = 21;
+static const uint32_t L3_MISC_L3CERRS_FIR_REG_FIR_SPARE22 = 22;
+static const uint32_t L3_MISC_L3CERRS_FIR_REG_MACH_HANG_DETECTED = 23;
+static const uint32_t L3_MISC_L3CERRS_FIR_REG_HW_CONTROL_ERR = 24;
+static const uint32_t L3_MISC_L3CERRS_FIR_REG_SNP_CACHE_INHIBIT_ERR = 25;
+static const uint32_t L3_MISC_L3CERRS_FIR_REG_LINE_DEL_CE_DONE = 26;
+static const uint32_t L3_MISC_L3CERRS_FIR_REG_LCO_IN_NOT_PROX_ERR = 27;
+static const uint32_t L3_MISC_L3CERRS_FIR_REG_LRU_VIC_SEL_ERROR = 28;
+static const uint32_t L3_MISC_L3CERRS_FIR_REG_ALL_MEMBERS_DELETED_ERROR = 29;
+static const uint32_t L3_MISC_L3CERRS_FIR_REG_LCO_IN_CHIPLET_ID_MISMATCH = 30;
+static const uint32_t L3_MISC_L3CERRS_FIR_REG_PB_MAST_WR_ACK_DEAD = 31;
+static const uint32_t L3_MISC_L3CERRS_FIR_REG_PB_MAST_RD_ACK_DEAD = 32;
+//<< [L3_MISC_L3CERRS_FIR_REG]
 // c/reg00001.H
 
 //>> [QME_PSCRS2]
@@ -343,6 +164,17 @@ static const uint32_t QME_PSCRS2_RL_LEN = 4;
 static const uint32_t QME_PSCRS2_PLS = 24;
 static const uint32_t QME_PSCRS2_PLS_LEN = 4;
 //<< [QME_PSCRS2]
+// c/reg00001.H
+
+//>> [QME_PMSRS]
+static const uint64_t QME_PMSRS = 0x200e0864ull;
+
+static const uint32_t QME_PMSRS_PSTATE_DATA = 0;
+static const uint32_t QME_PMSRS_PSTATE_DATA_LEN = 36;
+static const uint32_t QME_PMSRS_INVALID_VERSION = 58;
+static const uint32_t QME_PMSRS_VERSION = 59;
+static const uint32_t QME_PMSRS_VERSION_LEN = 5;
+//<< [QME_PMSRS]
 // c/reg00001.H
 
 //>>THE END<<
