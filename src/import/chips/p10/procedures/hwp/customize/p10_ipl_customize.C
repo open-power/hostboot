@@ -2056,20 +2056,21 @@ fapi2::ReturnCode apply_fbc_dyninits(
     fapi2::ATTR_FREQ_CORE_CEILING_MHZ_Type l_core_fmax;
     fapi2::ATTR_FREQ_PAU_MHZ_Type l_fpau;
     fapi2::ATTR_FREQ_MC_MHZ_Type l_fmc;
+    bool l_fmc_valid = false;
     fapi2::ATTR_CHIP_UNIT_POS_Type l_mc_pos;
-    bool l_rt2pa_nominal;
-    bool l_rt2pa_safe;
-    bool l_pa2rt_turbo;
-    bool l_pa2rt_nominal;
-    bool l_pa2rt_safe;
-    bool l_rt2mc_ultraturbo[4]  = { false };
-    bool l_rt2mc_turbo[4]       = { false };
-    bool l_rt2mc_nominal[4]     = { false };
-    bool l_rt2mc_safe[4]        = { false };
-    bool l_mc2rt_ultraturbo[4]  = { false };
-    bool l_mc2rt_turbo[4]       = { false };
-    bool l_mc2rt_nominal[4]     = { false };
-    bool l_mc2rt_safe[4]        = { false };
+    bool l_rt2pa_nominal    = false;
+    bool l_rt2pa_safe       = false;
+    bool l_pa2rt_turbo      = false;
+    bool l_pa2rt_nominal    = false;
+    bool l_pa2rt_safe       = false;
+    bool l_rt2mc_ultraturbo = false;
+    bool l_rt2mc_turbo      = false;
+    bool l_rt2mc_nominal    = false;
+    bool l_rt2mc_safe       = false;
+    bool l_mc2rt_ultraturbo = false;
+    bool l_mc2rt_turbo      = false;
+    bool l_mc2rt_nominal    = false;
+    bool l_mc2rt_safe       = false;
 
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_FREQ_PAU_MHZ, FAPI_SYSTEM, l_fpau),
              "Error from FAPI_ATTR_GET (ATTR_FREQ_PAU_MHZ)");
@@ -2078,33 +2079,41 @@ fapi2::ReturnCode apply_fbc_dyninits(
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_FREQ_CORE_CEILING_MHZ, i_procTarget, l_core_fmax),
              "Error from FAPI_ATTR_GET (ATTR_FREQ_CORE_CEILING_MHZ)");
 
-    // MC Fast Settings
-    for (auto& l_mc_target : i_procTarget.getChildren<fapi2::TARGET_TYPE_MC>())
-    {
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, l_mc_target, l_mc_pos),
-                 "Error from FAPI_ATTR_GET (ATTR_CHIP_UNIT_POS_Type)");
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_FREQ_MC_MHZ, l_mc_target, l_fmc),
-                 "Error from FAPI_ATTR_GET (ATTR_FREQ_MC_MHZ)");
 
-        if(l_fmc > 1610)
+    // current ring infrastructure only supports only one common MC frequency across the chip
+    {
+        fapi2::ATTR_FREQ_MC_MHZ_Type l_fmc_common;
+        fapi2::ATTR_CHIP_UNIT_POS_Type l_mc_pos_common;
+
+        for (auto& l_mc_target : i_procTarget.getChildren<fapi2::TARGET_TYPE_MC>())
         {
-            if(l_mc_pos == 0)
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, l_mc_target, l_mc_pos),
+                     "Error from FAPI_ATTR_GET (ATTR_CHIP_UNIT_POS_Type)");
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_FREQ_MC_MHZ, l_mc_target, l_fmc),
+                     "Error from FAPI_ATTR_GET (ATTR_FREQ_MC_MHZ)");
+
+            if (!l_fmc_valid)
             {
-                io_featureVec |= fapi2::ENUM_ATTR_DYNAMIC_INIT_FEATURE_VEC_FBC_MC0_FAST;
+                l_fmc_common = l_fmc;
+                l_mc_pos_common = l_mc_pos;
+                l_fmc_valid = true;
             }
-            else if(l_mc_pos == 1)
-            {
-                io_featureVec |= fapi2::ENUM_ATTR_DYNAMIC_INIT_FEATURE_VEC_FBC_MC1_FAST;
-            }
-            else if(l_mc_pos == 2)
-            {
-                io_featureVec |= fapi2::ENUM_ATTR_DYNAMIC_INIT_FEATURE_VEC_FBC_MC2_FAST;
-            }
-            else
-            {
-                io_featureVec |= fapi2::ENUM_ATTR_DYNAMIC_INIT_FEATURE_VEC_FBC_MC3_FAST;
-            }
+
+            FAPI_ASSERT(l_fmc_common == l_fmc,
+                        fapi2::XIPC_UNEQUAL_MC_FREQS().
+                        set_CHIP_TARGET(i_procTarget).
+                        set_MC_UNIT1(l_mc_pos_common).
+                        set_MC_FREQ1(l_fmc_common).
+                        set_MC_UNIT2(l_mc_pos).
+                        set_MC_FREQ2(l_fmc),
+                        "Chip has unequal MC chiplet frequencies");
         }
+    }
+
+    // MC Fast Settings
+    if(l_fmc_valid && (l_fmc > 1610))
+    {
+        io_featureVec |= fapi2::ENUM_ATTR_DYNAMIC_INIT_FEATURE_VEC_FBC_MC_FAST;
     }
 
     // PBI Async Settings
@@ -2138,24 +2147,18 @@ fapi2::ReturnCode apply_fbc_dyninits(
     l_pa2rt_nominal    = (((4 * l_fpau) >= (3 * l_core_fmax)) && ((l_fpau) < (l_core_fmax))) ? (true) : (false);
     l_pa2rt_safe       = (( 4 * l_fpau)  < (3 * l_core_fmax))                                ? (true) : (false);
 
-    for (auto& l_mc_target : i_procTarget.getChildren<fapi2::TARGET_TYPE_MC>())
+
+    if(l_fmc_valid)
     {
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, l_mc_target, l_mc_pos),
-                 "Error from FAPI_ATTR_GET (ATTR_CHIP_UNIT_POS_Type)");
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_FREQ_MC_MHZ, l_mc_target, l_fmc),
-                 "Error from FAPI_ATTR_GET (ATTR_FREQ_MC_MHZ)");
+        l_rt2mc_ultraturbo = ( (l_core_fmin) >= (3 * l_fmc))                                   ? (true) : (false);
+        l_rt2mc_turbo      = (((l_core_fmin) >= (2 * l_fmc)) && ((l_core_fmin) < (3 * l_fmc))) ? (true) : (false);
+        l_rt2mc_nominal    = (((l_core_fmin) >= (    l_fmc)) && ((l_core_fmin) < (2 * l_fmc))) ? (true) : (false);
+        l_rt2mc_safe       = ( (l_core_fmin)  < (    l_fmc))                                   ? (true) : (false);
 
-        l_rt2mc_ultraturbo[l_mc_pos] = ( (l_core_fmin) >= (3 * l_fmc))                                   ? (true) : (false);
-        l_rt2mc_turbo[l_mc_pos]      = (((l_core_fmin) >= (2 * l_fmc)) && ((l_core_fmin) < (3 * l_fmc))) ? (true) : (false);
-        l_rt2mc_nominal[l_mc_pos]    = (((l_core_fmin) >= (    l_fmc)) && ((l_core_fmin) < (2 * l_fmc))) ? (true) : (false);
-        l_rt2mc_safe[l_mc_pos]       = ( (l_core_fmin)  < (    l_fmc))                                   ? (true) : (false);
-
-        l_mc2rt_ultraturbo[l_mc_pos] = ((     l_fmc) >= (    l_core_fmax))                               ? (true) : (false);
-        l_mc2rt_turbo[l_mc_pos]      = (((4 * l_fmc) >= (3 * l_core_fmax))
-                                        && ((    l_fmc) < (    l_core_fmax))) ? (true) : (false);
-        l_mc2rt_nominal[l_mc_pos]    = (((2 * l_fmc) >= (    l_core_fmax))
-                                        && ((4 * l_fmc) < (3 * l_core_fmax))) ? (true) : (false);
-        l_mc2rt_safe[l_mc_pos]       = (( 2 * l_fmc)  < (    l_core_fmax))                               ? (true) : (false);
+        l_mc2rt_ultraturbo = ((     l_fmc) >= (    l_core_fmax))                                       ? (true) : (false);
+        l_mc2rt_turbo      = (((4 * l_fmc) >= (3 * l_core_fmax)) && ((    l_fmc) < (    l_core_fmax))) ? (true) : (false);
+        l_mc2rt_nominal    = (((2 * l_fmc) >= (    l_core_fmax)) && ((4 * l_fmc) < (3 * l_core_fmax))) ? (true) : (false);
+        l_mc2rt_safe       = (( 2 * l_fmc)  < (    l_core_fmax))                                       ? (true) : (false);
     }
 
     if(l_rt2pa_nominal)
@@ -2183,164 +2186,44 @@ fapi2::ReturnCode apply_fbc_dyninits(
         io_featureVec |= ENUM_ATTR_DYNAMIC_INIT_FEATURE_VEC_FBC_ASYNC_PA2RT_SAFE;
     }
 
-    if(l_rt2mc_ultraturbo[0])
+    if(l_rt2mc_ultraturbo)
     {
-        io_featureVec |= ENUM_ATTR_DYNAMIC_INIT_FEATURE_VEC_FBC_ASYNC_RT2MC0_ULTRATURBO;
+        io_featureVec |= ENUM_ATTR_DYNAMIC_INIT_FEATURE_VEC_FBC_ASYNC_RT2MC_ULTRATURBO;
     }
 
-    if(l_rt2mc_turbo[0])
+    if(l_rt2mc_turbo)
     {
-        io_featureVec |= ENUM_ATTR_DYNAMIC_INIT_FEATURE_VEC_FBC_ASYNC_RT2MC0_TURBO;
+        io_featureVec |= ENUM_ATTR_DYNAMIC_INIT_FEATURE_VEC_FBC_ASYNC_RT2MC_TURBO;
     }
 
-    if(l_rt2mc_nominal[0])
+    if(l_rt2mc_nominal)
     {
-        io_featureVec |= ENUM_ATTR_DYNAMIC_INIT_FEATURE_VEC_FBC_ASYNC_RT2MC0_NOMINAL;
+        io_featureVec |= ENUM_ATTR_DYNAMIC_INIT_FEATURE_VEC_FBC_ASYNC_RT2MC_NOMINAL;
     }
 
-    if(l_rt2mc_safe[0])
+    if(l_rt2mc_safe)
     {
-        io_featureVec |= ENUM_ATTR_DYNAMIC_INIT_FEATURE_VEC_FBC_ASYNC_RT2MC0_SAFE;
+        io_featureVec |= ENUM_ATTR_DYNAMIC_INIT_FEATURE_VEC_FBC_ASYNC_RT2MC_SAFE;
     }
 
-    if(l_rt2mc_ultraturbo[1])
+    if(l_mc2rt_ultraturbo)
     {
-        io_featureVec |= ENUM_ATTR_DYNAMIC_INIT_FEATURE_VEC_FBC_ASYNC_RT2MC1_ULTRATURBO;
+        io_featureVec |= ENUM_ATTR_DYNAMIC_INIT_FEATURE_VEC_FBC_ASYNC_MC2RT_ULTRATURBO;
     }
 
-    if(l_rt2mc_turbo[1])
+    if(l_mc2rt_turbo)
     {
-        io_featureVec |= ENUM_ATTR_DYNAMIC_INIT_FEATURE_VEC_FBC_ASYNC_RT2MC1_TURBO;
+        io_featureVec |= ENUM_ATTR_DYNAMIC_INIT_FEATURE_VEC_FBC_ASYNC_MC2RT_TURBO;
     }
 
-    if(l_rt2mc_nominal[1])
+    if(l_mc2rt_nominal)
     {
-        io_featureVec |= ENUM_ATTR_DYNAMIC_INIT_FEATURE_VEC_FBC_ASYNC_RT2MC1_NOMINAL;
+        io_featureVec |= ENUM_ATTR_DYNAMIC_INIT_FEATURE_VEC_FBC_ASYNC_MC2RT_NOMINAL;
     }
 
-    if(l_rt2mc_safe[1])
+    if(l_mc2rt_safe)
     {
-        io_featureVec |= ENUM_ATTR_DYNAMIC_INIT_FEATURE_VEC_FBC_ASYNC_RT2MC1_SAFE;
-    }
-
-    if(l_rt2mc_ultraturbo[2])
-    {
-        io_featureVec |= ENUM_ATTR_DYNAMIC_INIT_FEATURE_VEC_FBC_ASYNC_RT2MC2_ULTRATURBO;
-    }
-
-    if(l_rt2mc_turbo[2])
-    {
-        io_featureVec |= ENUM_ATTR_DYNAMIC_INIT_FEATURE_VEC_FBC_ASYNC_RT2MC2_TURBO;
-    }
-
-    if(l_rt2mc_nominal[2])
-    {
-        io_featureVec |= ENUM_ATTR_DYNAMIC_INIT_FEATURE_VEC_FBC_ASYNC_RT2MC2_NOMINAL;
-    }
-
-    if(l_rt2mc_safe[2])
-    {
-        io_featureVec |= ENUM_ATTR_DYNAMIC_INIT_FEATURE_VEC_FBC_ASYNC_RT2MC2_SAFE;
-    }
-
-    if(l_rt2mc_ultraturbo[3])
-    {
-        io_featureVec |= ENUM_ATTR_DYNAMIC_INIT_FEATURE_VEC_FBC_ASYNC_RT2MC3_ULTRATURBO;
-    }
-
-    if(l_rt2mc_turbo[3])
-    {
-        io_featureVec |= ENUM_ATTR_DYNAMIC_INIT_FEATURE_VEC_FBC_ASYNC_RT2MC3_TURBO;
-    }
-
-    if(l_rt2mc_nominal[3])
-    {
-        io_featureVec |= ENUM_ATTR_DYNAMIC_INIT_FEATURE_VEC_FBC_ASYNC_RT2MC3_NOMINAL;
-    }
-
-    if(l_rt2mc_safe[3])
-    {
-        io_featureVec |= ENUM_ATTR_DYNAMIC_INIT_FEATURE_VEC_FBC_ASYNC_RT2MC3_SAFE;
-    }
-
-    if(l_mc2rt_ultraturbo[0])
-    {
-        io_featureVec |= ENUM_ATTR_DYNAMIC_INIT_FEATURE_VEC_FBC_ASYNC_MC2RT0_ULTRATURBO;
-    }
-
-    if(l_mc2rt_turbo[0])
-    {
-        io_featureVec |= ENUM_ATTR_DYNAMIC_INIT_FEATURE_VEC_FBC_ASYNC_MC2RT0_TURBO;
-    }
-
-    if(l_mc2rt_nominal[0])
-    {
-        io_featureVec |= ENUM_ATTR_DYNAMIC_INIT_FEATURE_VEC_FBC_ASYNC_MC2RT0_NOMINAL;
-    }
-
-    if(l_mc2rt_safe[0])
-    {
-        io_featureVec |= ENUM_ATTR_DYNAMIC_INIT_FEATURE_VEC_FBC_ASYNC_MC2RT0_SAFE;
-    }
-
-    if(l_mc2rt_ultraturbo[1])
-    {
-        io_featureVec |= ENUM_ATTR_DYNAMIC_INIT_FEATURE_VEC_FBC_ASYNC_MC2RT1_ULTRATURBO;
-    }
-
-    if(l_mc2rt_turbo[1])
-    {
-        io_featureVec |= ENUM_ATTR_DYNAMIC_INIT_FEATURE_VEC_FBC_ASYNC_MC2RT1_TURBO;
-    }
-
-    if(l_mc2rt_nominal[1])
-    {
-        io_featureVec |= ENUM_ATTR_DYNAMIC_INIT_FEATURE_VEC_FBC_ASYNC_MC2RT1_NOMINAL;
-    }
-
-    if(l_mc2rt_safe[1])
-    {
-        io_featureVec |= ENUM_ATTR_DYNAMIC_INIT_FEATURE_VEC_FBC_ASYNC_MC2RT1_SAFE;
-    }
-
-    if(l_mc2rt_ultraturbo[2])
-    {
-        io_featureVec |= ENUM_ATTR_DYNAMIC_INIT_FEATURE_VEC_FBC_ASYNC_MC2RT2_ULTRATURBO;
-    }
-
-    if(l_mc2rt_turbo[2])
-    {
-        io_featureVec |= ENUM_ATTR_DYNAMIC_INIT_FEATURE_VEC_FBC_ASYNC_MC2RT2_TURBO;
-    }
-
-    if(l_mc2rt_nominal[2])
-    {
-        io_featureVec |= ENUM_ATTR_DYNAMIC_INIT_FEATURE_VEC_FBC_ASYNC_MC2RT2_NOMINAL;
-    }
-
-    if(l_mc2rt_safe[2])
-    {
-        io_featureVec |= ENUM_ATTR_DYNAMIC_INIT_FEATURE_VEC_FBC_ASYNC_MC2RT2_SAFE;
-    }
-
-    if(l_mc2rt_ultraturbo[3])
-    {
-        io_featureVec |= ENUM_ATTR_DYNAMIC_INIT_FEATURE_VEC_FBC_ASYNC_MC2RT3_ULTRATURBO;
-    }
-
-    if(l_mc2rt_turbo[3])
-    {
-        io_featureVec |= ENUM_ATTR_DYNAMIC_INIT_FEATURE_VEC_FBC_ASYNC_MC2RT3_TURBO;
-    }
-
-    if(l_mc2rt_nominal[3])
-    {
-        io_featureVec |= ENUM_ATTR_DYNAMIC_INIT_FEATURE_VEC_FBC_ASYNC_MC2RT3_NOMINAL;
-    }
-
-    if(l_mc2rt_safe[3])
-    {
-        io_featureVec |= ENUM_ATTR_DYNAMIC_INIT_FEATURE_VEC_FBC_ASYNC_MC2RT3_SAFE;
+        io_featureVec |= ENUM_ATTR_DYNAMIC_INIT_FEATURE_VEC_FBC_ASYNC_MC2RT_SAFE;
     }
 
 fapi_try_exit:
