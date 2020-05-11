@@ -386,6 +386,7 @@ void* call_proc_exit_cache_contained (void *io_pArgs)
                 // 3) Ensure that interrupt presenter is drained
                 // 4) call p10_exit_cache_contained which routes
                 //       a chipop to the SBE
+                // 5) Resume the mailbox
 
                 l_errl = MBOX::reclaimDmaBfrsFromFsp();
                 if (l_errl)
@@ -439,12 +440,37 @@ void* call_proc_exit_cache_contained (void *io_pArgs)
                         l_fapiProcList,
                         p10_sbe_exit_cache_contained_step_t::RUN_ALL);
 
-                if(l_errl)
+                // Don't check the error just yet, first resume the MBOX.
+                errlHndl_t l_mboxErrl = MBOX::resume();
+                if (l_mboxErrl)
                 {
-                    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                        "call_proc_exit_cache_contained:: failed");
+                    // Make sure l_errl isn't overwritten.
+                    if (l_errl != nullptr)
+                    {
+                        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                                  "call_proc_exit_cache_contained:: failed");
+                        // MBOX error can still be gathered from a dump or live
+                        // debug.
+                        ERRORLOG::errlCommit(l_mboxErrl, ISTEP_COMP_ID);
+                    }
+                    else
+                    {
+                        l_errl = l_mboxErrl;
+                        l_mboxErrl = nullptr;
+                    }
+                    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                      "call_proc_exit_cache_contained ERROR : MBOX::resume");
                     break;
                 }
+
+                // Now that the MBOX is resumed check for an error.
+                if(l_errl)
+                {
+                    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                              "call_proc_exit_cache_contained:: failed");
+                    break;
+                }
+
             } while (0);
 
         }
