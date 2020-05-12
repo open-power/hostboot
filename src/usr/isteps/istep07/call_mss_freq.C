@@ -68,20 +68,18 @@ void*    call_mss_freq( void *io_pArgs )
 
     do
     {
-        TargetHandleList l_memportTargetList;
-        getAllChiplets(l_memportTargetList, TYPE_MEM_PORT);
-
-        for (const auto & l_memport_target : l_memportTargetList)
+        TargetHandleList l_procTargetList;
+        getAllChips(l_procTargetList, TYPE_PROC);
+        
+        for (const auto & l_proc_target : l_procTargetList)
         {
+            //  call the HWP on each processor
+            fapi2::Target <fapi2::TARGET_TYPE_PROC_CHIP> l_fapi_proc_target(l_proc_target);
             TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                "call_mss_freq: p10_mss_freq HWP target HUID %.8x",
-                get_huid(l_memport_target));
+                "call_mss_freq: p10_mss_freq HWP target HUID 0x%.08X",
+                get_huid(l_proc_target));
 
-            //  call the HWP on each memory port
-            fapi2::Target <fapi2::TARGET_TYPE_MEM_PORT> l_fapi_memport_target
-                (l_memport_target);
-
-            FAPI_INVOKE_HWP(l_err, p10_mss_freq, l_fapi_memport_target);
+            FAPI_INVOKE_HWP(l_err, p10_mss_freq, l_fapi_proc_target);
 
             //  process return code.
             if (l_err)
@@ -89,11 +87,11 @@ void*    call_mss_freq( void *io_pArgs )
                 TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                     "call_mss_freq: ERROR in p10_mss_freq HWP on target 0x%.08x. "
                     TRACE_ERR_FMT,
-                    get_huid(l_memport_target),
+                    get_huid(l_proc_target),
                     TRACE_ERR_ARGS(l_err));
 
                 // capture the target data in the elog
-                ErrlUserDetailsTarget(l_memport_target).addToLog( l_err );
+                ErrlUserDetailsTarget(l_proc_target).addToLog( l_err );
 
                 // Create IStep error log and cross reference to error that occurred
                 l_StepError.addErrorDetails( l_err );
@@ -106,7 +104,8 @@ void*    call_mss_freq( void *io_pArgs )
             else
             {
                 TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                      "call_mss_freq: p10_mss_freq HWP succeeded");
+                      "call_mss_freq: p10_mss_freq HWP succeeded on target 0x%.08X",
+                      get_huid(l_proc_target));
             }
         }
 
@@ -133,8 +132,21 @@ void*    call_mss_freq( void *io_pArgs )
             break;
         }
 
-        TargetHandleList l_procTargetList;
-        getAllChips(l_procTargetList, TYPE_PROC);
+        Target * l_masterProc = nullptr;
+
+        l_err = targetService().queryMasterProcChipTargetHandle(l_masterProc);
+        if(l_err)
+        {
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                     "call_mss_freq: call to queryMasterProcChipTargetHandle failed. "
+                     TRACE_ERR_FMT,
+                     TRACE_ERR_ARGS(l_err));
+            l_StepError.addErrorDetails( l_err );
+            l_err->collectTrace("ISTEPS_TRACE");
+            errlCommit( l_err, ISTEP_COMP_ID );
+            break;
+        }
+
         for (const auto & l_proc_target : l_procTargetList)
         {
             //  call the HWP on each processor

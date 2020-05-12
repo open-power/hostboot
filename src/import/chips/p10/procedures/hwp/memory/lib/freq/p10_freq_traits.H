@@ -22,13 +22,16 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+
 ///
 /// @file p10_freq_traits.H
 /// @brief Contains frequency traits information for P10
 ///
-/// *HWP HW Maintainer: Stephen Glancy <sglancy@us.ibm.com>
-/// *HWP FW Maintainer: Glenn Miles <milesg@ibm.com>
-/// *HWP Consumed by: HB
+// *HWP HWP Owner: Stephen Glancy <sglancy@us.ibm.com>
+// *HWP FW Owner: Andre Marin <aamarin@us.ibm.com>
+// *HWP Team: Memory
+// *HWP Level: 2
+// *HWP Consumed by: CI
 
 #ifndef _P10_FREQ_TRAITS_H_
 #define _P10_FREQ_TRAITS_H_
@@ -53,14 +56,15 @@ class frequency_traits<mss::proc_type::PROC_P10>
         //////////////////////////////////////////////////////////////
         static constexpr fapi2::TargetType PORT_TARGET_TYPE = fapi2::TARGET_TYPE_MEM_PORT;
         static constexpr fapi2::TargetType FREQ_TARGET_TYPE = fapi2::TARGET_TYPE_MEM_PORT;
+        static constexpr fapi2::TargetType FREQ_DOMAIN_TARGET_TYPE = fapi2::TARGET_TYPE_PROC_CHIP;
         static constexpr fapi2::TargetType VPD_TARGET_TYPE = fapi2::TARGET_TYPE_OCMB_CHIP;
 
         //////////////////////////////////////////////////////////////
         // Traits values
         //////////////////////////////////////////////////////////////
         static const std::vector<uint64_t> SUPPORTED_FREQS;
-        // MEM_PORT is our frequency domain. So 1 port per domain
-        static constexpr uint64_t PORTS_PER_FREQ_DOMAIN = 1;
+        // PROC_CHIP is our frequency domain
+        static constexpr uint64_t PORTS_PER_FREQ_DOMAIN = 16;
         // Max DIMM's per port
         static constexpr uint64_t MAX_DIMM_PER_PORT = 2;
         // Maxium number of primary ranks on a DIMM

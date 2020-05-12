@@ -161,7 +161,6 @@ class freq_scoreboard
 
                     if ( l_scoreboard_freq > i_freq_limit )
                     {
-                        FAPI_INF("Removing freq %d on port %d since it's above the limit %d", l_scoreboard_freq, i_port_pos, i_freq_limit);
                         l_port_supported_freqs[l_index] = false;
                     }
                 }
@@ -313,7 +312,7 @@ class freq_scoreboard
         /// @return FAPI2_RC_SUCCESS if successful
         ///
         template<mss::proc_type P, typename TT = mss::frequency_traits<P>>
-        fapi2::ReturnCode resolve(const fapi2::Target<TT::FREQ_TARGET_TYPE>& i_target,
+        fapi2::ReturnCode resolve(const fapi2::Target<TT::FREQ_DOMAIN_TARGET_TYPE>& i_target,
                                   const std::vector<std::vector<uint32_t>>& i_vpd_supported_freqs,
                                   std::vector<uint8_t>& o_deconfigured,
                                   std::vector<fapi2::Target<TT::PORT_TARGET_TYPE>>& o_deconfigured_targets,
@@ -419,7 +418,7 @@ class freq_scoreboard
         /// @returh l_supported_vector return the fector of supported frequencies
         ///
         template<mss::proc_type P, typename TT = mss::frequency_traits<P>>
-        std::vector<uint64_t> count_supported_frequencies(const fapi2::Target<TT::FREQ_TARGET_TYPE>& i_target,
+        std::vector<uint64_t> count_supported_frequencies(const fapi2::Target<TT::FREQ_DOMAIN_TARGET_TYPE>& i_target,
                 const std::vector<fapi2::Target<TT::PORT_TARGET_TYPE>>& i_ports,
                 std::vector<uint32_t>& o_freqs)
         {
@@ -436,7 +435,7 @@ class freq_scoreboard
                 {
                     if (l_supported[l_index])
                     {
-                        FAPI_INF("%s Frequency %d is supported by port%d", mss::c_str(i_target), TT::SUPPORTED_FREQS[l_index], l_pos);
+                        FAPI_DBG("%s Frequency %d is supported by port%d", mss::c_str(i_target), TT::SUPPORTED_FREQS[l_index], l_pos);
                         ++l_support_counts[l_index];
                     }
 
@@ -444,7 +443,7 @@ class freq_scoreboard
                     // Note that deconfigured ports will support all frequencies due to the way the scoreboard is built
                     if (l_support_counts[l_index] == iv_num_ports)
                     {
-                        FAPI_INF("%s Frequency %d is supported by all ports", mss::c_str(i_target), TT::SUPPORTED_FREQS[l_index]);
+                        FAPI_DBG("%s Frequency %d is supported by all ports", mss::c_str(i_target), TT::SUPPORTED_FREQS[l_index]);
                         o_freqs.push_back(TT::SUPPORTED_FREQS[l_index]);
                     }
 
@@ -467,7 +466,7 @@ class freq_scoreboard
         /// @return FAPI2_RC_SUCCESS iff ok
         ///
         template<mss::proc_type P, typename TT = mss::frequency_traits<P>>
-        fapi2::ReturnCode deconfigure_ports(const fapi2::Target<TT::FREQ_TARGET_TYPE>& i_target,
+        fapi2::ReturnCode deconfigure_ports(const fapi2::Target<TT::FREQ_DOMAIN_TARGET_TYPE>& i_target,
                                             const std::vector<fapi2::Target<TT::PORT_TARGET_TYPE>>& i_ports,
                                             const uint64_t i_best_freq_index,
                                             std::vector<uint8_t>& o_deconfigured,
@@ -483,7 +482,7 @@ class freq_scoreboard
                                                     i_ports.end(),
                                                     [l_pos]( const fapi2::Target<TT::PORT_TARGET_TYPE>& i_rhs) -> bool
                 {
-                    return (mss::relative_pos<TT::FREQ_TARGET_TYPE>(i_rhs) == l_pos);
+                    return (mss::relative_pos<TT::FREQ_DOMAIN_TARGET_TYPE>(i_rhs) == l_pos);
                 });
 
                 // If we didn't find an port for a given position, there wasn't one configured there
@@ -494,7 +493,7 @@ class freq_scoreboard
 
                 // and call it out if it doesn't support the selected freq
                 const auto& p = *l_it_port;
-                FAPI_INF("Checking if port %d (%s) supports common frequency", l_pos, mss::c_str(p));
+                FAPI_DBG("Checking if port %d (%s) supports common frequency", l_pos, mss::c_str(p));
 
                 if (!iv_supported_port_freqs[l_pos][i_best_freq_index])
                 {
@@ -532,7 +531,7 @@ class freq_scoreboard
 /// @return FAPI2_RC_SUCCESS iff ok
 ///
 template<mss::proc_type P, typename TT = mss::frequency_traits<P>>
-fapi2::ReturnCode limit_freq_by_processor(const fapi2::Target<TT::FREQ_TARGET_TYPE>& i_target,
+fapi2::ReturnCode limit_freq_by_processor(const fapi2::Target<TT::FREQ_DOMAIN_TARGET_TYPE>& i_target,
         freq_scoreboard& io_scoreboard);
 
 ///
@@ -547,7 +546,7 @@ fapi2::ReturnCode limit_freq_by_processor(const fapi2::Target<TT::FREQ_TARGET_TY
 /// have a path for testing
 ///
 template<mss::proc_type P, typename TT = mss::frequency_traits<P>>
-inline fapi2::ReturnCode limit_freq_by_mrw(const fapi2::Target<TT::FREQ_TARGET_TYPE>& i_target,
+inline fapi2::ReturnCode limit_freq_by_mrw(const fapi2::Target<TT::FREQ_DOMAIN_TARGET_TYPE>& i_target,
         const std::vector<uint32_t>& i_max_mrw_freqs,
         freq_scoreboard& io_scoreboard)
 {
@@ -574,13 +573,13 @@ inline fapi2::ReturnCode limit_freq_by_mrw(const fapi2::Target<TT::FREQ_TARGET_T
                  mss::c_str(i_target),
                  i_max_mrw_freqs.size());
 
-    FAPI_INF("attribute supported max allowed dimm freqs %d %d %d %d %d for %s",
+    FAPI_DBG("attribute supported max allowed dimm freqs %d %d %d %d %d for %s",
              i_max_mrw_freqs[0], i_max_mrw_freqs[1], i_max_mrw_freqs[2], i_max_mrw_freqs[3], i_max_mrw_freqs[4],
              mss::c_str(i_target));
 
     for( const auto& p : mss::find_targets<TT::PORT_TARGET_TYPE>(i_target) )
     {
-        const auto l_port_pos = mss::relative_pos<TT::FREQ_TARGET_TYPE>(p);
+        const auto l_port_pos = mss::relative_pos<TT::FREQ_DOMAIN_TARGET_TYPE>(p);
         const auto l_dimms = mss::find_targets<fapi2::TARGET_TYPE_DIMM>(p);
         const uint64_t l_dimms_on_port = l_dimms.size();
 
@@ -618,7 +617,7 @@ inline fapi2::ReturnCode limit_freq_by_mrw(const fapi2::Target<TT::FREQ_TARGET_T
             // If we have an LRDIMM, it's treated as a one rank DIMM from the memory controller's perspective
             l_rank_index = l_dimm_type == TT::LRDIMM_TYPE ? 0 : l_num_master_ranks - 1;
             l_index = l_indexes[l_dimms_on_port - 1][l_rank_index];
-            FAPI_INF("%s is %s. rank_index%u index:%u", spd::c_str(d), l_dimm_type == TT::LRDIMM_TYPE ? "LRDIMM" : "RDIMM",
+            FAPI_DBG("%s is %s. rank_index%u index:%u", spd::c_str(d), l_dimm_type == TT::LRDIMM_TYPE ? "LRDIMM" : "RDIMM",
                      l_rank_index, l_index);
 
             FAPI_ASSERT( (l_index < NUM_MAX_FREQS),
@@ -631,7 +630,7 @@ inline fapi2::ReturnCode limit_freq_by_mrw(const fapi2::Target<TT::FREQ_TARGET_T
                          l_num_master_ranks,
                          mss::c_str(d));
 
-            FAPI_INF("%s rank config %d drop %d yields max freq attribute index of %d (%d)",
+            FAPI_DBG("%s rank config %d drop %d yields max freq attribute index of %d (%d)",
                      mss::c_str(d), l_num_master_ranks, l_dimms_on_port,
                      l_indexes[l_dimms_on_port - 1][l_rank_index],
                      i_max_mrw_freqs[l_index] );
@@ -661,7 +660,7 @@ fapi_try_exit:
 /// have a path for testing
 ///
 template<mss::proc_type P, typename TT = mss::frequency_traits<P>>
-fapi2::ReturnCode limit_freq_by_vpd(const fapi2::Target<TT::FREQ_TARGET_TYPE>& i_target,
+fapi2::ReturnCode limit_freq_by_vpd(const fapi2::Target<TT::FREQ_DOMAIN_TARGET_TYPE>& i_target,
                                     const std::vector<std::vector<uint32_t>>& i_hw_freqs,
                                     freq_scoreboard& io_scoreboard)
 {
@@ -675,7 +674,7 @@ fapi2::ReturnCode limit_freq_by_vpd(const fapi2::Target<TT::FREQ_TARGET_TYPE>& i
 
     for( const auto& p : mss::find_targets<TT::PORT_TARGET_TYPE>(i_target) )
     {
-        const auto l_port_pos = mss::relative_pos<TT::FREQ_TARGET_TYPE>(p);
+        const auto l_port_pos = mss::relative_pos<TT::FREQ_DOMAIN_TARGET_TYPE>(p);
         const auto& l_port_freqs = i_hw_freqs[l_port_pos];
 
         // This is the list of supported frequencies for VPD
@@ -715,13 +714,13 @@ fapi_try_exit:
 /// have a path for testing
 ///
 template<mss::proc_type P, typename TT = mss::frequency_traits<P>>
-fapi2::ReturnCode limit_freq_by_spd(const fapi2::Target<TT::FREQ_TARGET_TYPE>& i_target,
+fapi2::ReturnCode limit_freq_by_spd(const fapi2::Target<TT::FREQ_DOMAIN_TARGET_TYPE>& i_target,
                                     const std::vector<uint32_t>& i_hw_freqs,
                                     freq_scoreboard& io_scoreboard)
 {
     for( const auto& p : mss::find_targets<TT::PORT_TARGET_TYPE>(i_target) )
     {
-        const auto l_port_pos = mss::relative_pos<TT::FREQ_TARGET_TYPE>(p);
+        const auto l_port_pos = mss::relative_pos<TT::FREQ_DOMAIN_TARGET_TYPE>(p);
 
         // Remove any frequencies that aren't in this port's list from the scoreboard
         io_scoreboard.remove_freqs_above_limit(l_port_pos, i_hw_freqs);

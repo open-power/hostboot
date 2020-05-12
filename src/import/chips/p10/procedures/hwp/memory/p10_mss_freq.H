@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -36,7 +36,7 @@
 
 #include <fapi2.H>
 
-typedef fapi2::ReturnCode (*p10_mss_freq_FP_t) (const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>&);
+typedef fapi2::ReturnCode (*p10_mss_freq_FP_t) (const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&);
 
 extern "C"
 {
@@ -46,7 +46,7 @@ extern "C"
     /// @param[in] i_target port target
     /// @return FAPI2_RC_SUCCESS iff ok
     ///
-    fapi2::ReturnCode p10_mss_freq( const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target );
+    fapi2::ReturnCode p10_mss_freq( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target );
 
 }
 

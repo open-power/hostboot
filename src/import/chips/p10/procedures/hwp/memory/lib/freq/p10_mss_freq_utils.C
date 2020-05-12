@@ -22,17 +22,24 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+
 ///
-/// @file p10_mss_frequency.C
-/// @brief p10 (explorer) specializations for frequency library
+/// @file p10_mss_freq.C
+/// @brief p10 specializations for frequency library
 ///
-/// *HWP HW Maintainer: Louis Stermole <stermole@us.ibm.com>
-/// *HWP FW Maintainer: Glenn Miles <milesg@ibm.com>
-/// *HWP Consumed by: HB
+// *HWP HWP Owner: Stephen Glancy <sglancy@us.ibm.com>
+// *HWP HWP Backup: Louis Stermole <stermole@us.ibm.com>
+// *HWP Team: Memory
+// *HWP Level: 3
+// *HWP Consumed by: HB:FSP
 
 #include <fapi2.H>
 #include <vpd_access.H>
 #include <vector>
+
+// Explorer rank API
+#include <lib/shared/exp_defaults.H>
+#include <lib/dimm/exp_rank.H>
 
 // Memory libraries
 #include <lib/freq/p10_freq_traits.H>
@@ -59,7 +66,7 @@ const std::vector< uint64_t > frequency_traits<mss::proc_type::PROC_P10>::SUPPOR
 };
 
 ///
-/// @brief      Sets DRAM CAS latency attributes - specialization for P10 and MEM_PORT
+/// @brief      Sets DRAM CAS latency attributes - specialization for PROC_P10 and MEM_PORT
 /// @param[in]  i_target the controller target for the cas_latency value
 /// @param[in]  i_cas_latency cas latency to update
 /// @return     FAPI2_RC_SUCCESS iff ok
@@ -90,24 +97,27 @@ fapi_try_exit:
 }
 
 ///
-/// @brief      Sets the frequency value - specialization for P10 and MEM_PORT
+/// @brief      Sets the frequency value - specialization for PROC_P10 and MEM_PORT
 /// @param[in]  i_target the target on which to set the frequency values
 /// @param[in]  i_freq frequency value to set
 /// @return     FAPI2_RC_SUCCESS iff ok
 ///
 template<>
 fapi2::ReturnCode set_freq<mss::proc_type::PROC_P10>(
-    const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
     const uint64_t i_freq)
 {
-    FAPI_TRY( mss::attr::set_freq(i_target, i_freq) );
+    for (const auto& l_port : mss::find_targets<fapi2::TARGET_TYPE_MEM_PORT>(i_target))
+    {
+        FAPI_TRY( mss::attr::set_freq(l_port, i_freq) );
+    }
 
 fapi_try_exit:
     return fapi2::current_err;
 }
 
 ///
-/// @brief      Gets the number of master ranks per DIMM - specialization for P10 and MEM_PORT
+/// @brief      Gets the number of master ranks per DIMM - specialization for PROC_P10 and MEM_PORT
 /// @param[in]  i_target the target on which to get the number of master ranks per DIMM
 /// @param[out] o_master_ranks number of master ranks per DIMM
 /// @return     FAPI2_RC_SUCCESS iff ok
@@ -127,7 +137,7 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 ///
-/// @brief Gets the DIMM type for a specific DIMM - specialization for the NIMBUS processor type
+/// @brief Gets the DIMM type for a specific DIMM - specialization for the PROC_P10 processor type
 /// @param[in] i_target DIMM target
 /// @param[out] o_dimm_type DIMM type on the DIMM target
 /// @return FAPI2_RC_SUCCESS iff ok
@@ -140,7 +150,7 @@ fapi2::ReturnCode get_dimm_type<mss::proc_type::PROC_P10>(const fapi2::Target<fa
 }
 
 ///
-/// @brief Gets the attribute for the maximum - specialization for P10
+/// @brief Gets the attribute for the maximum - specialization for PROC_P10
 /// @param[out] o_allowed_dimm_freq allowed dimm frequency
 /// @return FAPI2_RC_SUCCESS iff ok
 ///
@@ -156,7 +166,7 @@ fapi_try_exit:
 }
 
 ///
-/// @brief      Gets the DIMM type - specialization for P10 and MEM_PORT
+/// @brief      Gets the DIMM type - specialization for PROC_P10 and MEM_PORT
 /// @param[in]  i_target the target on which to get the DIMM types
 /// @param[out] o_dimm_type DIMM types
 /// @return     FAPI2_RC_SUCCESS iff ok
@@ -177,14 +187,14 @@ fapi_try_exit:
 }
 
 ///
-/// @brief Calls out the code if we calculated a bad frequency for the domain - specialization for P10 and MEM_PORT
+/// @brief Calls out the code if we calculated a bad frequency for the domain - specialization for PROC_P10 and MEM_PORT
 /// @param[in] i_target target on which to operate
 /// @param[in] i_final_freq frequency calculated for domain
 /// @return FAPI2_RC_SUCCESS iff ok
 ///
 template<>
 fapi2::ReturnCode callout_bad_freq_calculated<mss::proc_type::PROC_P10>(
-    const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
     const uint64_t i_final_freq)
 {
     using TT = mss::frequency_traits<mss::proc_type::PROC_P10>;
@@ -215,62 +225,25 @@ fapi_try_exit:
 }
 
 ///
-/// @brief Return a list of configured ranks on a MEM_PORT
-/// @param[in] i_target the port target
-/// @param[out] o_ranks list of valid ranks on the port
-/// @return FAPI2_RC_SUCCESS iff ok
+/// @brief Determines if rank info object is that of an LR dimm
 ///
-// TK this function should get replaced by our rank API when available
-fapi2::ReturnCode get_ranks_for_vpd(
-    const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
-    std::vector<uint64_t>& o_ranks)
+/// @param[in] i_rank_info rank info object
+/// @param[out] l_lr_dimm true if LRDIMM, else false
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if success
+///
+inline fapi2::ReturnCode rank_is_lr_dimm(const mss::rank::info<> i_rank_info, bool& o_lr_dimm)
 {
-    using TT = mss::frequency_traits<mss::proc_type::PROC_P10>;
+    uint8_t l_dimm_type = 0;
+    FAPI_TRY(mss::attr::get_dimm_type(i_rank_info.get_dimm_target(), l_dimm_type));
 
-    uint8_t l_rank_count_dimm[TT::MAX_DIMM_PER_PORT] = {};
-    uint8_t l_dimm_type[TT::MAX_DIMM_PER_PORT] = {};
-
-    o_ranks.clear();
-
-    FAPI_TRY( get_master_rank_per_dimm<mss::proc_type::PROC_P10>(i_target, &(l_rank_count_dimm[0])) );
-    FAPI_TRY( get_dimm_type<mss::proc_type::PROC_P10>(i_target, &(l_dimm_type[0])) );
-
-    // So for LRDIMM, our SI works a bit differently than for non-LRDIMM
-    // LRDIMM's have buffers that operate on a per-DIMM basis across multiple ranks
-    // As such, they act as a single load, similar to a 1R DIMM would
-    // per the IBM signal integrity team, the 1R DIMM settings should be used for LRDIMM's
-    // So, if we are LRDIMM's and have ranks, we want to only note it as a 1R DIMM for purposes of querying the VPD
-    FAPI_DBG("%s for DIMM 0 rank count %u dimm type %u %s",
-             mss::c_str(i_target), l_rank_count_dimm[0], l_dimm_type[0], l_dimm_type[0] == TT::LRDIMM_TYPE ? "LRDIMM" : "RDIMM");
-    FAPI_DBG("%s for DIMM 1 rank count %u dimm type %u %s",
-             mss::c_str(i_target), l_rank_count_dimm[1], l_dimm_type[1], l_dimm_type[1] == TT::LRDIMM_TYPE ? "LRDIMM" : "RDIMM");
-
-    l_rank_count_dimm[0] = ((l_dimm_type[0] == TT::LRDIMM_TYPE) && (l_rank_count_dimm[0] > 0)) ? 1 : l_rank_count_dimm[0];
-    l_rank_count_dimm[1] = ((l_dimm_type[1] == TT::LRDIMM_TYPE) && (l_rank_count_dimm[1] > 0)) ? 1 : l_rank_count_dimm[1];
-
-    FAPI_DBG("after LR modification %s for DIMM 0 rank count %u dimm type %u %s",
-             mss::c_str(i_target), l_rank_count_dimm[0], l_dimm_type[0], l_dimm_type[0] == TT::LRDIMM_TYPE ? "LRDIMM" : "RDIMM");
-    FAPI_DBG("after LR modification %s for DIMM 1 rank count %u dimm type %u %s",
-             mss::c_str(i_target), l_rank_count_dimm[1], l_dimm_type[1], l_dimm_type[1] == TT::LRDIMM_TYPE ? "LRDIMM" : "RDIMM");
-
-    // Add DIMM0's ranks
-    for (uint64_t l_rank = 0; l_rank < l_rank_count_dimm[0]; ++l_rank)
-    {
-        o_ranks.push_back(l_rank);
-    }
-
-    // Add DIMM1's ranks
-    for (uint64_t l_rank = 0; l_rank < l_rank_count_dimm[1]; ++l_rank)
-    {
-        o_ranks.push_back(l_rank + TT::MAX_PRIMARY_RANK_PER_DIMM);
-    }
+    o_lr_dimm = (l_dimm_type == fapi2::ENUM_ATTR_MEM_EFF_DIMM_TYPE_LRDIMM);
 
 fapi_try_exit:
     return fapi2::current_err;
 }
 
 ///
-/// @brief Check VPD config for support of a given freq - P10 specialization
+/// @brief Check VPD config for support of a given freq - PROC_P10 specialization
 /// @param[in] i_target the target on which to operate
 /// @param[in] i_proposed_freq frequency to check for support
 /// @param[out] o_supported true if VPD supports the proposed frequency
@@ -285,7 +258,7 @@ fapi2::ReturnCode check_freq_support_vpd<mss::proc_type::PROC_P10>( const fapi2:
     using TT = mss::frequency_traits<mss::proc_type::PROC_P10>;
     o_supported = false;
 
-    std::vector<uint64_t> l_ranks;
+    std::vector<mss::rank::info<>> l_ranks;
     fapi2::VPDInfo<TT::VPD_TARGET_TYPE> l_vpd_info(TT::VPD_BLOB);
 
     const auto& l_vpd_target = mss::find_target<TT::VPD_TARGET_TYPE>(i_target);
@@ -295,29 +268,35 @@ fapi2::ReturnCode check_freq_support_vpd<mss::proc_type::PROC_P10>( const fapi2:
 
     FAPI_TRY(convert_ddr_freq_to_omi_freq(i_target, i_proposed_freq, l_omi_freq));
     l_vpd_info.iv_omi_freq_mhz = l_omi_freq;
-    FAPI_INF("Setting VPD info OMI frequency: %d Gbps, for DDR frequency %d MT/s",
-             l_vpd_info.iv_omi_freq_mhz, i_proposed_freq);
 
     // DDIMM SPD can contain different SI settings for each master rank.
     // To determine which frequencies are supported, we have to check for each valid
     // master rank on the port's DIMMs
-    FAPI_TRY(get_ranks_for_vpd(i_target, l_ranks));
+    FAPI_TRY(mss::rank::ranks_on_port(i_target, l_ranks));
 
-    for (const auto l_rank : l_ranks)
+    for (const auto& l_rank : l_ranks)
     {
-        l_vpd_info.iv_rank = l_rank;
-        FAPI_INF("%s. VPD info - checking rank: %d",
-                 mss::c_str(i_target), l_rank);
+        // We will skip LRDIMMs with ranks > 0
+        bool l_is_lr_dimm = false;
+        FAPI_TRY(rank_is_lr_dimm(l_rank, l_is_lr_dimm));
+
+        if (rank_not_supported_in_vpd_config(l_is_lr_dimm, l_rank.get_dimm_rank()))
+        {
+            FAPI_DBG("LRDIMM ranks > 0 are not supported for check_freq_support_vpd. Skipping this rank. Target: %s",
+                     mss::c_str(i_target));
+            continue;
+        }
+
+        l_vpd_info.iv_rank = l_rank.get_dimm_rank();
 
         // Check if this VPD configuration is supported
         FAPI_TRY(is_vpd_config_supported<mss::proc_type::PROC_P10>(l_vpd_target, i_proposed_freq, l_vpd_info, o_supported),
-                 "%s failed to determine if %u freq is supported", mss::c_str(i_target), i_proposed_freq);
-
+                 "%s failed to determine if %u freq is supported on rank %d", mss::c_str(i_target), i_proposed_freq, l_vpd_info.iv_rank);
 
         // If we fail any of the ranks, then this VPD configuration is not supported
         if(o_supported == false)
         {
-            FAPI_INF("%s is not supported on rank%u exiting...", mss::c_str(i_target), l_rank);
+            FAPI_INF("%s is not supported on rank %u exiting...", mss::c_str(i_target), l_rank.get_port_rank());
             break;
         }
     }
@@ -327,36 +306,41 @@ fapi_try_exit:
 }
 
 ///
-/// @brief Update supported frequency scoreboard according to processor limits - specialization for P10 and MEM_PORT
+/// @brief Update supported frequency scoreboard according to processor limits - specialization for PROC_P10 and PROC_CHIP
 /// @param[in] i_target processor frequency domain
 /// @param[in,out] io_scoreboard scoreboard of port targets supporting each frequency
 /// @return FAPI2_RC_SUCCESS iff ok
 ///
 template<>
 fapi2::ReturnCode limit_freq_by_processor<mss::proc_type::PROC_P10>(
-    const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
     freq_scoreboard& io_scoreboard)
 {
-    std::vector<uint64_t> l_converted_omi_freqs;
-
     // OCMB always needs to be in sync between OMI and DDR, by the given ratio
     // so we convert the supported OMI freqs and remove every other DDR freq
     // from the scoreboard
-    for (const auto l_omi_freq : P10_OMI_FREQS)
+    for (const auto& l_port : mss::find_targets<fapi2::TARGET_TYPE_MEM_PORT>(i_target))
     {
-        uint64_t l_ddr_freq = 0;
-        FAPI_TRY(convert_omi_freq_to_ddr_freq(i_target, l_omi_freq, l_ddr_freq));
-        l_converted_omi_freqs.push_back(l_ddr_freq);
-    }
+        const auto l_port_pos = mss::relative_pos<fapi2::TARGET_TYPE_PROC_CHIP>(l_port);
 
-    FAPI_TRY(io_scoreboard.remove_freqs_not_on_list(0, l_converted_omi_freqs));
+        std::vector<uint64_t> l_converted_omi_freqs;
+
+        for (const auto l_omi_freq : P10_OMI_FREQS)
+        {
+            uint64_t l_ddr_freq = 0;
+            FAPI_TRY(convert_omi_freq_to_ddr_freq(l_port, l_omi_freq, l_ddr_freq));
+            l_converted_omi_freqs.push_back(l_ddr_freq);
+        }
+
+        FAPI_TRY(io_scoreboard.remove_freqs_not_on_list(l_port_pos, l_converted_omi_freqs));
+    }
 
 fapi_try_exit:
     return fapi2::current_err;
 }
 
 ///
-/// @brief Gets the number of master ranks on each DIMM - specialization for the P10 processor type
+/// @brief Gets the number of master ranks on each DIMM - specialization for the PROC_P10 processor type
 /// @param[in] i_target DIMM target
 /// @param[out] o_master_ranks number of master ranks
 /// @return FAPI2_RC_SUCCESS iff ok
@@ -370,15 +354,15 @@ fapi2::ReturnCode num_master_ranks_per_dimm<mss::proc_type::PROC_P10>(
 }
 
 ///
-/// @brief Calls out the target if no DIMM frequencies are supported - specialization for P10 and MEM_PORT
+/// @brief Calls out the target if no DIMM frequencies are supported - specialization for PROC_P10 and MEM_PORT
 /// @param[in] i_target target on which to operate
 /// @param[in] i_supported_freq true if any FREQ's are supported
-/// @param[in,out] i_num_ports number of configured ports (always 1 for P10)
+/// @param[in,out] i_num_ports number of configured ports
 /// @return FAPI2_RC_SUCCESS iff ok
 ///
 template<>
 fapi2::ReturnCode callout_no_common_freq<mss::proc_type::PROC_P10>(
-    const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
     const bool i_supported_freq,
     const uint64_t i_num_ports)
 {
@@ -400,14 +384,14 @@ fapi_try_exit:
 }
 
 ///
-/// @brief Calls out the target if no DIMM frequencies are supported - specialization for P10 and MEM_PORT
+/// @brief Calls out the target if no DIMM frequencies are supported - specialization for PROC_P10 and MEM_PORT
 /// @param[in] i_target target on which to operate
 /// @param[in] i_vpd_supported_freqs VPD supported frequencies for the callout
 /// @return FAPI2_RC_SUCCESS iff ok
 ///
 template<>
 fapi2::ReturnCode callout_max_freq_empty_set<mss::proc_type::PROC_P10>(
-    const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
     const std::vector<std::vector<uint32_t>>& i_vpd_supported_freqs)
 {
 
@@ -422,21 +406,26 @@ fapi2::ReturnCode callout_max_freq_empty_set<mss::proc_type::PROC_P10>(
     uint32_t l_max_mrw_freqs[NUM_MAX_FREQS] = {0};
     FAPI_TRY( mss::attr::get_max_allowed_dimm_freq(l_max_mrw_freqs) );
 
-    FAPI_ASSERT(false,
-                fapi2::P10_MSS_MRW_FREQ_MAX_FREQ_EMPTY_SET()
-                .set_MSS_VPD_FREQ_0(l_port_vpd_max_freq[0])
-                .set_MSS_VPD_FREQ_1(l_port_vpd_max_freq[1])
-                .set_MSS_VPD_FREQ_2(l_port_vpd_max_freq[2])
-                .set_MSS_MAX_FREQ_0(l_max_mrw_freqs[0])
-                .set_MSS_MAX_FREQ_1(l_max_mrw_freqs[1])
-                .set_MSS_MAX_FREQ_2(l_max_mrw_freqs[2])
-                .set_MSS_MAX_FREQ_3(l_max_mrw_freqs[3])
-                .set_MSS_MAX_FREQ_4(l_max_mrw_freqs[4])
-                .set_OMI_FREQ_0(fapi2::ENUM_ATTR_MSS_OCMB_EXP_BOOT_CONFIG_SERDES_FREQUENCY_SERDES_21_33GBPS)
-                .set_OMI_FREQ_1(fapi2::ENUM_ATTR_MSS_OCMB_EXP_BOOT_CONFIG_SERDES_FREQUENCY_SERDES_23_46GBPS)
-                .set_OMI_FREQ_2(fapi2::ENUM_ATTR_MSS_OCMB_EXP_BOOT_CONFIG_SERDES_FREQUENCY_SERDES_25_60GBPS)
-                .set_PORT_TARGET(i_target),
-                "%s didn't find a supported frequency for the port", mss::c_str(i_target));
+    for (const auto& l_port : mss::find_targets<fapi2::TARGET_TYPE_MEM_PORT>(i_target))
+    {
+        FAPI_ASSERT_NOEXIT(false,
+                           fapi2::P10_MSS_MRW_FREQ_MAX_FREQ_EMPTY_SET()
+                           .set_MSS_VPD_FREQ_0(l_port_vpd_max_freq[0])
+                           .set_MSS_VPD_FREQ_1(l_port_vpd_max_freq[1])
+                           .set_MSS_VPD_FREQ_2(l_port_vpd_max_freq[2])
+                           .set_MSS_MAX_FREQ_0(l_max_mrw_freqs[0])
+                           .set_MSS_MAX_FREQ_1(l_max_mrw_freqs[1])
+                           .set_MSS_MAX_FREQ_2(l_max_mrw_freqs[2])
+                           .set_MSS_MAX_FREQ_3(l_max_mrw_freqs[3])
+                           .set_MSS_MAX_FREQ_4(l_max_mrw_freqs[4])
+                           .set_OMI_FREQ_0(fapi2::ENUM_ATTR_MSS_OCMB_EXP_BOOT_CONFIG_SERDES_FREQUENCY_SERDES_21_33GBPS)
+                           .set_OMI_FREQ_1(fapi2::ENUM_ATTR_MSS_OCMB_EXP_BOOT_CONFIG_SERDES_FREQUENCY_SERDES_23_46GBPS)
+                           .set_OMI_FREQ_2(fapi2::ENUM_ATTR_MSS_OCMB_EXP_BOOT_CONFIG_SERDES_FREQUENCY_SERDES_25_60GBPS)
+                           .set_PORT_TARGET(l_port),
+                           "%s didn't find a supported frequency for any ports in this domain", mss::c_str(l_port));
+    }
+
+    return fapi2::RC_P10_MSS_MRW_FREQ_MAX_FREQ_EMPTY_SET;
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -445,14 +434,14 @@ namespace check
 {
 
 ///
-/// @brief Checks the final frequency for the system type - P10 and MEM_PORT specialization
+/// @brief Checks the final frequency for the system type - PROC_P10 and PROC_CHIP specialization
 /// @param[in] i_target the target on which to operate
 /// @return FAPI2_RC_SUCCESS iff okay
 /// @note This function was needed in Nimbus to enforce a frequency limit due to a hardware limitation
 ///       and is not needed here.
 ///
 template<>
-fapi2::ReturnCode final_freq<mss::proc_type::PROC_P10>(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target)
+fapi2::ReturnCode final_freq<mss::proc_type::PROC_P10>(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
 {
     return fapi2::FAPI2_RC_SUCCESS;
 }

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -87,6 +87,20 @@ posTraits<fapi2::TARGET_TYPE_MEM_PORT>::pos_type
 relative_pos<fapi2::TARGET_TYPE_MEM_PORT>(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target)
 {
     return 0;
+}
+
+///
+/// @brief Return a mem_port's relative position from a proc_chip
+/// @param[in] i_target a target representing the target in question
+/// @return The position relative to chiplet R
+///
+template<>
+posTraits<fapi2::TARGET_TYPE_MEM_PORT>::pos_type
+relative_pos<fapi2::TARGET_TYPE_PROC_CHIP>(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target)
+{
+    typedef mcTypeTraits<mc_type::EXPLORER> TT;
+    return fapi_pos(i_target) % (TT::PORTS_PER_OCMB * TT::OCMB_PER_OMI * TT::OMI_PER_MCC * TT::MCC_PER_MI * TT::MI_PER_MC *
+                                 TT::MC_PER_PROC);
 }
 
 }// mss

@@ -323,7 +323,7 @@ struct attrEngineTraits<P, attr_eff_engine_fields, attr_eff_engine_fields::PRIMA
 };
 
 ///
-/// @brief Traits for pre_data_engine
+/// @brief Traits for attr_engine
 /// @class attrEngineTraits - partial specialization
 /// @tparam P processor type
 /// @note attr_eff_engine_fields, DRAM_DENSITY specialization
@@ -449,7 +449,7 @@ struct attrEngineTraits<P, attr_eff_engine_fields, attr_eff_engine_fields::PRIM_
         // DDR4 SPD Document Release 3
         // Byte 13 (0x00D): Module Memory Bus Width
         // =========================================================
-        const std::vector<std::pair<uint8_t, uint8_t> > BUS_WIDTH_MAP =
+        static const std::vector<std::pair<uint8_t, uint8_t> > BUS_WIDTH_MAP =
         {
             // {key byte, bus width (in bits)
             {0, fapi2::ENUM_ATTR_MEM_EFF_PRIM_BUS_WIDTH_8_BITS},
@@ -516,7 +516,7 @@ struct attrEngineTraits<P, attr_eff_engine_fields, attr_eff_engine_fields::DRAM_
     /// @param[out] o_setting value we want to set attr with
     /// @return FAPI2_RC_SUCCESS iff okay
     ///
-    static fapi2::ReturnCode get_value_to_set(const spd::facade& i_spd_data,
+    static inline fapi2::ReturnCode get_value_to_set(const spd::facade& i_spd_data,
             attr_integral_type& o_setting)
     {
         // =========================================================
@@ -2203,7 +2203,7 @@ struct attrEngineTraits<P, attr_engine_derived_fields, attr_engine_derived_field
     /// @param[out] o_setting value we want to set attr with
     /// @return FAPI2_RC_SUCCESS iff okay
     ///
-    static fapi2::ReturnCode get_value_to_set(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+    static inline fapi2::ReturnCode get_value_to_set(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
             attr_integral_type& o_setting)
     {
         uint8_t l_master_ranks_per_dimm = 0;
@@ -2276,7 +2276,7 @@ struct attrEngineTraits<P, attr_eff_engine_fields, attr_eff_engine_fields::DRAM_
     /// @param[out] o_setting value we want to set attr with
     /// @return FAPI2_RC_SUCCESS iff okay
     ///
-    static fapi2::ReturnCode get_value_to_set(const spd::facade& i_spd_data,
+    static inline fapi2::ReturnCode get_value_to_set(const spd::facade& i_spd_data,
             attr_integral_type& o_setting)
     {
         // Taken from DDR4 JEDEC spec 1716.78C

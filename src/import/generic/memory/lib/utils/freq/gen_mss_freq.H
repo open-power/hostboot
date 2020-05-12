@@ -105,7 +105,7 @@ fapi2::ReturnCode get_dimm_type(const fapi2::Target<T>& i_target,
 /// @return FAPI2_RC_SUCCESS iff ok
 ///
 template<mss::proc_type P, typename TT = mss::frequency_traits<P>>
-fapi2::ReturnCode callout_bad_freq_calculated(const fapi2::Target<TT::FREQ_TARGET_TYPE>& i_target,
+fapi2::ReturnCode callout_bad_freq_calculated(const fapi2::Target<TT::FREQ_DOMAIN_TARGET_TYPE>& i_target,
         const uint64_t i_final_freq);
 
 ///
@@ -208,7 +208,7 @@ fapi2::ReturnCode check_freq_support_vpd( const fapi2::Target<TT::PORT_TARGET_TY
 /// @return     FAPI2_RC_SUCCESS iff ok
 ///
 template<mss::proc_type P, typename TT = mss::frequency_traits<P>>
-inline fapi2::ReturnCode set_freq_attrs(const fapi2::Target<TT::FREQ_TARGET_TYPE>& i_target,
+inline fapi2::ReturnCode set_freq_attrs(const fapi2::Target<TT::FREQ_DOMAIN_TARGET_TYPE>& i_target,
                                         const std::vector<uint64_t>& i_dimm_freq)
 {
     // Find the minimum (but non-0) freq in the vector. If we see all 0's we'll write a 0. However,
@@ -245,7 +245,7 @@ fapi_try_exit:
 /// @return FAPI2_RC_SUCCESS iff okay
 ///
 template<mss::proc_type P, typename TT = mss::frequency_traits<P>>
-inline fapi2::ReturnCode spd_supported_freq(const fapi2::Target<TT::FREQ_TARGET_TYPE>& i_target,
+inline fapi2::ReturnCode spd_supported_freq(const fapi2::Target<TT::FREQ_DOMAIN_TARGET_TYPE>& i_target,
         std::vector<uint32_t>& o_supported_freqs)
 {
     uint64_t l_largest_tck = 0;
@@ -255,7 +255,17 @@ inline fapi2::ReturnCode spd_supported_freq(const fapi2::Target<TT::FREQ_TARGET_
 
     // Get cached decoder
     std::vector< mss::spd::facade > l_spd_facades;
-    FAPI_TRY( get_spd_decoder_list(i_target, l_spd_facades), "%s get decoder - spd", mss::c_str(i_target) );
+
+    for (const auto& l_port : mss::find_targets<TT::PORT_TARGET_TYPE>(i_target))
+    {
+        std::vector< mss::spd::facade > l_these_spd_facades;
+        FAPI_TRY( get_spd_decoder_list(l_port, l_these_spd_facades), "%s get decoder - spd", mss::c_str(l_port) );
+
+        for (const auto& l_spd_facade : l_these_spd_facades)
+        {
+            l_spd_facades.push_back(l_spd_facade);
+        }
+    }
 
     // Looking for the biggest application period on an MC.
     // This will further reduce supported frequencies the system can run on.
@@ -263,7 +273,7 @@ inline fapi2::ReturnCode spd_supported_freq(const fapi2::Target<TT::FREQ_TARGET_
     {
         const auto l_dimm = l_cache.get_dimm_target();
         const auto l_port = mss::find_target<TT::PORT_TARGET_TYPE>(l_dimm);
-        const auto l_port_pos = mss::relative_pos<TT::FREQ_TARGET_TYPE>(l_port);
+        const auto l_port_pos = mss::relative_pos<TT::FREQ_DOMAIN_TARGET_TYPE>(l_port);
         uint64_t l_tckmax_in_ps = 0;
         uint64_t l_tck_min_in_ps = 0;
         uint32_t l_dimm_freq = 0;
@@ -279,7 +289,7 @@ inline fapi2::ReturnCode spd_supported_freq(const fapi2::Target<TT::FREQ_TARGET_
         l_largest_tck = std::min(l_largest_tck, l_tckmax_in_ps);
 
         FAPI_TRY( mss::ps_to_freq(l_largest_tck, l_dimm_freq), "%s ps to freq %lu", mss::c_str(i_target), l_largest_tck );
-        FAPI_INF("Biggest freq supported from SPD %d MT/s for %s",
+        FAPI_DBG("Biggest freq supported from SPD %d MT/s for %s",
                  l_dimm_freq, mss::c_str(l_dimm));
 
         o_supported_freqs[l_port_pos] = std::min(l_dimm_freq, o_supported_freqs[l_port_pos]);
@@ -299,12 +309,12 @@ fapi_try_exit:
 ///
 // Pass in the syncronous target
 template<mss::proc_type P, typename TT = mss::frequency_traits<P>>
-fapi2::ReturnCode vpd_supported_freqs( const fapi2::Target<TT::FREQ_TARGET_TYPE>& i_target,
+fapi2::ReturnCode vpd_supported_freqs( const fapi2::Target<TT::FREQ_DOMAIN_TARGET_TYPE>& i_target,
                                        std::vector<std::vector<uint32_t>>& o_vpd_supported_freqs)
 {
     // This bitmap will keep track of the ports we visit.
     // Any we don't are not configured, so will support all frequencies in the scoreboard
-    fapi2::buffer<uint8_t> configured_ports;
+    fapi2::buffer<uint64_t> configured_ports;
 
     // Clearing output Just.In.Case
     o_vpd_supported_freqs.clear();
@@ -317,7 +327,8 @@ fapi2::ReturnCode vpd_supported_freqs( const fapi2::Target<TT::FREQ_TARGET_TYPE>
     // Just go to find target for the port level
     for( const auto& p : mss::find_targets<TT::PORT_TARGET_TYPE>(i_target) )
     {
-        const auto l_port_pos = mss::relative_pos<TT::FREQ_TARGET_TYPE>(p);
+        const auto l_port_pos = mss::relative_pos<TT::FREQ_DOMAIN_TARGET_TYPE>(p);
+
         FAPI_TRY( configured_ports.setBit(l_port_pos) );
 
         if( mss::count_dimm(p) == 0 )
@@ -342,7 +353,7 @@ fapi2::ReturnCode vpd_supported_freqs( const fapi2::Target<TT::FREQ_TARGET_TYPE>
             // Add supported freqs to our output
             if (l_supported)
             {
-                FAPI_INF("VPD supported freq added: %d for %s", freq, mss::c_str(p) );
+                FAPI_DBG("VPD supported freq added: %d for %s", freq, mss::c_str(p) );
                 o_vpd_supported_freqs[l_port_pos].push_back(freq);
             }
         }
@@ -381,7 +392,7 @@ fapi_try_exit:
 /// @return FAPI2_RC_SUCCESS iff okay
 ///
 template<mss::proc_type P, typename TT = mss::frequency_traits<P>>
-inline fapi2::ReturnCode find_min_dimm_freq(const fapi2::Target<TT::FREQ_TARGET_TYPE>& i_target,
+inline fapi2::ReturnCode find_min_dimm_freq(const fapi2::Target<TT::FREQ_DOMAIN_TARGET_TYPE>& i_target,
         const std::vector<uint32_t>& i_supported_freqs,
         std::vector<uint64_t>& o_min_dimm_freq)
 {
@@ -420,14 +431,14 @@ inline fapi2::ReturnCode find_min_dimm_freq(const fapi2::Target<TT::FREQ_TARGET_
             // Find CAS latency using JEDEC algorithm
             FAPI_TRY( l_cas_latency.find_cl(l_desired_cl, l_tCKmin), "%s failed to find a cas latency", mss::c_str(i_target) );
 
-            FAPI_INF("%s. Result from CL algorithm, CL (nck): %d, tCK (ps): %d",
+            FAPI_DBG("%s. Result from CL algorithm, CL (nck): %d, tCK (ps): %d",
                      mss::c_str(l_port), l_desired_cl, l_tCKmin);
 
             // Find dimm transfer speed from selected tCK
             FAPI_TRY( mss::ps_to_freq(l_tCKmin, l_desired_freq),
                       "%s. Failed ps_to_freq()", mss::c_str(l_port) );
 
-            FAPI_INF("DIMM speed %d from selected tCK (ps): %d for %s",
+            FAPI_DBG("DIMM speed %d from selected tCK (ps): %d for %s",
                      l_desired_freq,
                      l_tCKmin,
                      mss::c_str(l_port));
@@ -437,7 +448,7 @@ inline fapi2::ReturnCode find_min_dimm_freq(const fapi2::Target<TT::FREQ_TARGET_
         }// end else
 
         FAPI_TRY(set_CL_attr<P>(l_port, l_desired_cl), "%s. Failed set_CL_attr()", mss::c_str(l_port) );
-    } // mca
+    } // port
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -452,7 +463,7 @@ fapi_try_exit:
 /// @return FAPI2_RC_SUCCESS iff okay
 ///
 template<mss::proc_type P, typename TT = mss::frequency_traits<P>>
-inline fapi2::ReturnCode supported_freqs(const fapi2::Target<TT::FREQ_TARGET_TYPE>& i_target,
+inline fapi2::ReturnCode supported_freqs(const fapi2::Target<TT::FREQ_DOMAIN_TARGET_TYPE>& i_target,
         std::vector<uint32_t>& o_freqs)
 {
     o_freqs.clear();
@@ -466,12 +477,14 @@ inline fapi2::ReturnCode supported_freqs(const fapi2::Target<TT::FREQ_TARGET_TYP
 
     // Retrieve system MRW, SPD, and VPD constraints
     FAPI_TRY( max_allowed_dimm_freq<P>(l_max_mrw_freqs.data()), "%s max_allowed_dimm_freq", mss::c_str(i_target) );
+
     FAPI_TRY( spd_supported_freq<P>(i_target, l_spd_supported_freq),
               "%s spd supported freqs", mss::c_str(i_target) );
+
     FAPI_TRY( vpd_supported_freqs<P>(i_target, l_vpd_supported_freqs),
               "%s vpd supported freqs", mss::c_str(i_target) );
 
-    // Limits the frequency by the Nimbus processor constraints (sync mode)
+    // Limits the frequency by the processor constraints (sync mode)
     FAPI_TRY( limit_freq_by_processor<P>(i_target, l_scoreboard) );
 
     // Limit frequency scoreboard according to MRW constraints
@@ -512,7 +525,7 @@ namespace check
 /// @return FAPI2_RC_SUCCESS iff okay
 ///
 template<mss::proc_type P, typename TT = mss::frequency_traits<P>>
-fapi2::ReturnCode final_freq(const fapi2::Target<TT::FREQ_TARGET_TYPE>& i_target);
+fapi2::ReturnCode final_freq(const fapi2::Target<TT::FREQ_DOMAIN_TARGET_TYPE>& i_target);
 
 } // check nameespace
 
@@ -524,16 +537,16 @@ fapi2::ReturnCode final_freq(const fapi2::Target<TT::FREQ_TARGET_TYPE>& i_target
 /// @return FAPI2_RC_SUCCESS iff okay
 ///
 template<mss::proc_type P, typename TT = mss::frequency_traits<P>>
-fapi2::ReturnCode generate_freq(const fapi2::Target<TT::FREQ_TARGET_TYPE>& i_target)
+fapi2::ReturnCode generate_freq(const fapi2::Target<TT::FREQ_DOMAIN_TARGET_TYPE>& i_target)
 {
     std::vector<uint64_t> l_min_dimm_freq;
     std::vector<uint32_t> l_supported_freqs;
 
-    // Get supported freqs for this MCBIST
+    // Get supported freqs for this domain
     FAPI_TRY( mss::supported_freqs<P>(i_target, l_supported_freqs), "%s failed to get supported frequencies",
               mss::c_str(i_target) );
 
-    // Finds the minimum supported DIMM frequencies for this MCBIST
+    // Finds the minimum supported DIMM frequencies for this domain
     FAPI_TRY(mss::find_min_dimm_freq<P>(i_target, l_supported_freqs, l_min_dimm_freq),
              "%s. Failed find_min_dimm_freq()", mss::c_str(i_target) );
 
