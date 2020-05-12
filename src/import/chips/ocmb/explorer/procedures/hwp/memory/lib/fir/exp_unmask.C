@@ -258,7 +258,8 @@ fapi2::ReturnCode after_mc_omi_init<mss::mc_type::EXPLORER>(const fapi2::Target<
 
     // Pull global fir mask state and unmask bits per spec
     FAPI_TRY(fapi2::getScom(i_target, EXPLR_TP_MB_UNIT_TOP_FIR_MASK, l_global_fir_mask_reg));
-    l_global_fir_mask_reg.clearBit<EXPLR_TP_MB_UNIT_TOP_XFIR_IN3>()
+    l_global_fir_mask_reg.clearBit<EXPLR_TP_MB_UNIT_TOP_XFIR_IN0>()
+    .clearBit<EXPLR_TP_MB_UNIT_TOP_XFIR_IN3>()
     .clearBit<EXPLR_TP_MB_UNIT_TOP_XFIR_IN4>()
     .clearBit<EXPLR_TP_MB_UNIT_TOP_XFIR_IN7>()
     .clearBit<EXPLR_TP_MB_UNIT_TOP_XFIR_IN8>()
