@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2015,2019                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2015,2020                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -314,5 +314,18 @@
   <default>ENABLE</default>
   <platInit/>
   </attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_BOOT_PAU_DPLL_BYPASS</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>
+    Force the SBE to boot with PAU DPLL in bypass
+  </description>
+  <valueType>uint8</valueType>
+  <enum>BYPASS = 0x1, NO_BYPASS = 0x0</enum>
+  <default>BYPASS</default>
+  <writeable/>
+  <platInit/>
+</attribute>
 <!-- ********************************************************************** -->
 </attributes>

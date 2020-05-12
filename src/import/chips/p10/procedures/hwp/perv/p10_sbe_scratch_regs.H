@@ -116,6 +116,7 @@ enum p10_sbe_scratch_regs
     ATTR_NEST_DPLL_BYPASS_BIT                       = 12,
     ATTR_PAU_DPLL_BYPASS_BIT                        = 13,
     ATTR_IO_TANK_PLL_BYPASS_BIT                     = 14,
+    ATTR_BOOT_PAU_DPLL_BYPASS_BIT                   = 15,
 
     ATTR_PROC_FABRIC_EFF_TOPOLOGY_ID_STARTBIT       = 16,
     ATTR_PROC_FABRIC_EFF_TOPOLOGY_ID_LENGTH         = 4,

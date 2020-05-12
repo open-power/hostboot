@@ -568,6 +568,7 @@ fapi2::ReturnCode p10_setup_sbe_config(
         fapi2::ATTR_CP_PLLIOSSFLT_BYPASS_Type l_attr_cp_plliossflt_bypass;
         fapi2::ATTR_NEST_DPLL_BYPASS_Type l_attr_nest_dpll_bypass;
         fapi2::ATTR_PAU_DPLL_BYPASS_Type l_attr_pau_dpll_bypass;
+        fapi2::ATTR_BOOT_PAU_DPLL_BYPASS_Type l_attr_boot_pau_dpll_bypass;
         fapi2::ATTR_IO_TANK_PLL_BYPASS_Type l_attr_io_tank_pll_bypass;
         fapi2::ATTR_PROC_FABRIC_EFF_TOPOLOGY_ID_Type l_attr_proc_fabric_eff_topology_id;
         fapi2::ATTR_PROC_FABRIC_TOPOLOGY_MODE_Type l_attr_proc_fabric_topology_mode;
@@ -615,6 +616,11 @@ fapi2::ReturnCode p10_setup_sbe_config(
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PAU_DPLL_BYPASS, i_target_chip, l_attr_pau_dpll_bypass),
                  "Error from FAPI_ATTR_GET (ATTR_PAU_DPLL_BYPASS");
         l_scratch6_reg.writeBit<ATTR_PAU_DPLL_BYPASS_BIT>(l_attr_pau_dpll_bypass == fapi2::ENUM_ATTR_PAU_DPLL_BYPASS_BYPASS);
+
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_BOOT_PAU_DPLL_BYPASS, i_target_chip, l_attr_boot_pau_dpll_bypass),
+                 "Error from FAPI_ATTR_GET (ATTR_BOOT_PAU_DPLL_BYPASS");
+        l_scratch6_reg.writeBit<ATTR_BOOT_PAU_DPLL_BYPASS_BIT>(l_attr_boot_pau_dpll_bypass ==
+                fapi2::ENUM_ATTR_BOOT_PAU_DPLL_BYPASS_BYPASS);
 
         FAPI_DBG("Reading tank PLL bypass attributes");
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IO_TANK_PLL_BYPASS, i_target_chip, l_attr_io_tank_pll_bypass));

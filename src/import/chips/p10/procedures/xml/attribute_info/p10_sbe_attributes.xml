@@ -308,6 +308,10 @@
     <value>0x0</value>
   </entry>
   <entry>
+    <name>ATTR_BOOT_PAU_DPLL_BYPASS</name>
+    <value>0x1</value>
+  </entry>
+  <entry>
     <name>ATTR_IO_TANK_PLL_BYPASS</name>
     <value>0x0</value>
   </entry>
