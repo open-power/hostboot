@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -68,6 +68,8 @@ fapi2::ReturnCode p9_quad_power_off(
     uint64_t* o_ring_save_data)
 {
     fapi2::buffer<uint64_t> l_data64;
+    uint8_t  l_chpltNumber = 0;
+    uint32_t l_cur_stoplevel = 0;
     constexpr uint64_t l_rawData = 0x1100000000000000ULL; // Bit 3 & 7 are set to be manipulated
     constexpr uint32_t MAX_CORE_PER_QUAD = 4;
     fapi2::ReturnCode rc = fapi2::FAPI2_RC_SUCCESS;
@@ -202,10 +204,51 @@ fapi2::ReturnCode p9_quad_power_off(
                   PM_PFET_TYPE_C::BOTH, PM_PFET_TYPE_C::OFF);
     FAPI_TRY(rc);
 
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, i_target, l_chpltNumber),
+             "ERROR: Failed to get the position of the Quad:0x%08X",
+             i_target);
+    //Check SSH register to make sure stop level are marked F/B
+    FAPI_DBG("   Read QPPM Stop State History for core %d", l_chpltNumber);
+    FAPI_TRY(fapi2::getScom(i_target, EQ_PPM_SSHSRC, l_data64),
+             "Error reading data from QPPM SSHSRC");
+    l_data64.extractToRight<uint32_t>(l_cur_stoplevel,
+                                      EQ_PPM_SSHSRC_ACT_STOP_LEVEL, EQ_PPM_SSHSRC_ACT_STOP_LEVEL_LEN);
+
+    if (l_data64.getBit<EQ_PPM_SSHSRC_STOP_GATED>() == 1 &&
+        (l_cur_stoplevel != 0xF && l_cur_stoplevel != 0xB))
+    {
+        l_cur_stoplevel = 0xB;
+        l_data64.insertFromRight<EQ_PPM_SSHSRC_ACT_STOP_LEVEL,
+                                 EQ_PPM_SSHSRC_ACT_STOP_LEVEL_LEN>(l_cur_stoplevel);
+        FAPI_TRY(fapi2::putScom(i_target, EQ_PPM_SSHSRC, l_data64),
+                 "Error reading data from QPPM SSHSRC");
+    }
+
     //Enable regular wakeup for each core after the quad has been powered off
     for (const auto& l_core : i_target.getChildren<fapi2::TARGET_TYPE_CORE>())
     {
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, i_target, l_chpltNumber),
+                 "ERROR: Failed to get the position of the Core:0x%08X",
+                 l_core);
+        FAPI_DBG("   Read CPPM Stop State History for core %d", l_chpltNumber);
+        FAPI_TRY(fapi2::getScom(l_core, C_PPM_SSHSRC, l_data64),
+                 "Error reading data from CPPM SSHSRC");
+        l_cur_stoplevel = 0;
+        l_data64.extractToRight<uint32_t>(l_cur_stoplevel,
+                                          C_PPM_SSHSRC_ACT_STOP_LEVEL, C_PPM_SSHSRC_ACT_STOP_LEVEL_LEN);
+
+        if (l_data64.getBit<C_PPM_SSHSRC_STOP_GATED>() == 1 &&
+            (l_cur_stoplevel != 0xF && l_cur_stoplevel != 0xB))
+        {
+            l_cur_stoplevel = 0xB;
+            l_data64.insertFromRight<C_PPM_SSHSRC_ACT_STOP_LEVEL,
+                                     C_PPM_SSHSRC_ACT_STOP_LEVEL_LEN>(l_cur_stoplevel);
+            FAPI_TRY(fapi2::putScom(l_core, C_PPM_SSHSRC, l_data64),
+                     "Error reading data from CPPM SSHSRC");
+        }
+
         FAPI_EXEC_HWP(rc, p9_block_wakeup_intr, l_core, p9pmblockwkup::CLEAR);
+
     }
 
 fapi_try_exit:
