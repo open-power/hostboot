@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2015,2019
+# Contributors Listed Below - COPYRIGHT 2015,2020
 # [+] International Business Machines Corp.
 #
 #
@@ -82,6 +82,7 @@ my %maxInstance = (
     "MCC"           => 8,
     "OMI"           => 16,
     "OCMB_CHIP"     => 16,
+    "PMIC"          => 64,
     "MEM_PORT"      => 16,
     "DDIMM"         => 16,
     "DMI"           => 8,
@@ -892,16 +893,6 @@ sub buildAffinity
         }
         elsif ($type eq "OCMB_CHIP")
         {
-            # Ocmbs are not in order, so we take the parent dimm's POSITION as
-            # our current ocmb number
-            # Ex. dimm19 = ocmb19
-            my $parent = $self->getTargetParent($target);
-            $ocmb = $self->getAttribute($parent, "POSITION");
-            $self->{targeting}{SYS}[0]{NODES}[$node]{OCMB_CHIPS}[$ocmb]{KEY} = $target;
-            $self->setHuid($target, $sys_pos, $node);
-
-            my $ocmb_phys = $node_phys . "/ocmb_chip-$ocmb";
-
             # Find the OMI bus connection to determine target values
             my $proc_num = -1;
             my $mc_num = -1;
@@ -946,23 +937,26 @@ sub buildAffinity
                 }
             }
 
-            my $ocmb_aff = $node_aff . "/proc-$proc_num/mc-$mc_num/mi-$mi_num/mcc-$mcc_num/omi-$omi_num/ocmb_chip-0";
-            $self->setAttribute($target, "AFFINITY_PATH", $ocmb_aff);
-            $self->setAttribute($target, "PHYS_PATH", $ocmb_phys);
-
             # The standard fapi_pos calculation uses the relative position to
             # the proc instead of omi_chip_unit. However, in this case, there is
             # no direct way to get the relative position to the proc. The
             # relationship between ocmb and omi is 1:1, so we take the chip unit
             # of the corresponding omi as the relative position to the proc
-            my $fapi_pos = $omi_chip_unit + ($maxInstance{$type} * $proc_num);
-            $self->setAttribute($target, "FAPI_POS", $fapi_pos);
+            my $ocmb = $omi_chip_unit + ($maxInstance{$type} * $proc_num);
+            $self->setAttribute($target, "FAPI_POS", $ocmb);
+            my $ocmb_phys = $node_phys . "/ocmb_chip-$ocmb";
+            my $ocmb_aff = $node_aff . "/proc-$proc_num/mc-$mc_num/mi-$mi_num/mcc-$mcc_num/omi-$omi_num/ocmb_chip-0";
+            $self->setAttribute($target, "AFFINITY_PATH", $ocmb_aff);
+            $self->setAttribute($target, "PHYS_PATH", $ocmb_phys);
 
-            my $ocmb_num = $fapi_pos;
+            $self->{targeting}{SYS}[0]{NODES}[$node]{OCMB_CHIPS}[$ocmb]{KEY} = $target;
+            $self->setHuid($target, $sys_pos, $node, $ocmb);
+
+            my $ocmb_num = $ocmb;
             # The norm for FAPI_NAME has a two digit number at the end
-            if ($fapi_pos < 10)
+            if ($ocmb < 10)
             {
-                $ocmb_num = "0$fapi_pos";
+                $ocmb_num = "0$ocmb";
             }
 
             $self->setAttribute($target, "MRU_ID", "0x00060000");
@@ -1030,7 +1024,7 @@ sub buildAffinity
             $self->setAttribute($target, "AFFINITY_PATH", "$ocmb_affinity/mem_port-0");
             my $ocmb_phys = $self->getAttribute($parent, "PHYS_PATH");
             $self->setAttribute($target, "PHYS_PATH", "$ocmb_phys/mem_port-0");
-            $self->setHuid($target, $sys_pos, $node);
+            $self->setHuid($target, $sys_pos, $node, $ocmb_num);
             $self->deleteAttribute($target, "EXP_SAFEMODE_MEM_THROTTLED_N_COMMANDS_PER_PORT");
 
             $self->{targeting}{SYS}[0]{NODES}[$node]{OCMB_CHIPS}[$ocmb_num]{MEM_PORTS}[0]{KEY} = $target;
@@ -1039,9 +1033,6 @@ sub buildAffinity
         # interfere with it
         elsif ($type eq "DIMM" && $self->getTargetType($target) eq "lcard-dimm-ddimm")
         {
-            # Dimms are not posted in order, so need to get the dimm's position
-            $dimm = $self->getAttribute($target, "POSITION");
-
             # Find the OMI bus connection to determine target values
             my $proc_num = -1;
             my $mc_num = -1;
@@ -1088,25 +1079,25 @@ sub buildAffinity
                 }
             }
 
+            my $dimm = $omi_chip_unit + ($maxInstance{"DDIMM"} * $proc_num);
             $self->{targeting}{SYS}[0]{NODES}[$node]{DIMMS}[$dimm]{KEY} = $target;
             $self->setAttribute($target, "PHYS_PATH", $node_phys . "/dimm-$dimm");
-            $self->setHuid($target, $sys_pos, $node);
+            $self->setHuid($target, $sys_pos, $node, $dimm);
 
             # The standard fapi_pos calculation uses the relative position to
             # the proc instead of omi_chip_unit. However, in this case, there is
             # no direct way to get the relative position to the proc. The
             # relationship between dimm and omi is 1:1, so we take the chip unit
             # of the corresponding omi as the relative position to the proc
-            my $fapi_pos = $omi_chip_unit + ($maxInstance{"DDIMM"} * $proc_num);
-            $self->setAttribute($target, "FAPI_POS", $fapi_pos);
+            $self->setAttribute($target, "FAPI_POS", $dimm);
             $self->setAttribute($target, "ORDINAL_ID", $dimm);
             $self->setAttribute($target, "REL_POS", 0);
             $self->setAttribute($target, "VPD_REC_NUM", $dimm);
 
-            my $dimm_num = $fapi_pos;
-            if ($fapi_pos < 10)
+            my $dimm_num = $dimm;
+            if ($dimm < 10)
             {
-                $dimm_num = "0$fapi_pos";
+                $dimm_num = "0$dimm";
             }
             # chipunit:slot:node:system:position
             $self->setAttribute($target, "FAPI_NAME", "dimm:k0:n0:s0:p$dimm_num");
@@ -1123,47 +1114,13 @@ sub buildAffinity
         }
         elsif ($type eq "PMIC")
         {
-            # Pmics are not in order, so we take the parent dimm's
-            # POSITION * 4 as our current pmic number, adding one
-            # if it's a pmic1, two if it's a pmic2, three if it's a
-            # pmic3
-            # Ex. on a pmic0, dimm19 = pmic76
-            # Ex. on a pmic1, dimm19 = pmic77
-            # Ex. on a pmic2, dimm19 = pmic78
-            # Ex. on a pmic3, dimm19 = pmic79
-            my $instance_name = $self->getInstanceName($target);
-            my $parent = $self->getTargetParent($target);
-            my $parent_fapi_pos = $self->getAttribute($parent, "FAPI_POS");
-            my $parent_pos = $self->getAttribute($parent, "POSITION");
-            my $position = $self->getAttribute($target, "POSITION");
-            $pmic = ($parent_pos * 4) + $position;
-
-            $self->{targeting}{SYS}[0]{NODES}[$node]{PMICS}[$pmic]{KEY} = $target;
-            $self->setAttribute($target, "PHYS_PATH", $node_phys . "/pmic-$pmic");
-            $self->setAttribute($target, "ORDINAL_ID", $pmic);
-            $self->setAttribute($target, "REL_POS", $pmic % 2);
-
-            # Same logic with the position, but with FAPI_POS instead
-            my $fapi_pos = ($parent_fapi_pos * 4) + $position;
-            $self->setAttribute($target, "FAPI_POS", $fapi_pos);
-            $self->setAttribute($target, "POSITION", $pmic);
-            $self->setHuid($target, $sys_pos, $node);
-
-            my $pmic_num = $fapi_pos;
-            # The norm for FAPI_NAME has a two digit number at the end
-            if ($fapi_pos < 10)
-            {
-                $pmic_num = "0$fapi_pos";
-            }
-            # chipunit:slot:node:system:position
-            $self->setAttribute($target, "FAPI_NAME", "pmic:k0:n0:s0:p$pmic_num");
-
             # Find the OMI bus connection to determine target values
             my $proc_num = -1;
             my $mc_num = -1;
             my $mi_num = -1;
             my $mcc_num = -1;
             my $omi_num = -1;
+            my $omi_chip_unit = -1;
             my $conn = $self->findConnectionsByDirection($self->getTargetParent($target), "OMI", "", 1);
             if ($conn ne "")
             {
@@ -1193,9 +1150,41 @@ sub buildAffinity
                     $mc_num = $targets[7] % 2;
                     $mi_num = $targets[8] % 2;
                     $mcc_num = $targets[9] % 2;
-                    $omi_num = $targets[10] % 2;
+                    $omi_num = $targets[10];
+                    $omi_chip_unit = $omi_num;
+                    $omi_num %= 2;
+
                 }
             }
+
+            # Take the corresponding omi chip number * 4
+            # as our current pmic number, adding one
+            # if it's a pmic1, two if it's a pmic2, three if it's a
+            # pmic3
+            # Ex. on a pmic0, omi19 = pmic76
+            # Ex. on a pmic1, omi19 = pmic77
+            # Ex. on a pmic2, omi19 = pmic78
+            # Ex. on a pmic3, omi19 = pmic79
+            my $position = $self->getAttribute($target, "POSITION");
+            my $pmic = (($omi_chip_unit * 4) + $position) + ($maxInstance{$type} * $proc_num);
+            $self->{targeting}{SYS}[0]{NODES}[$node]{PMICS}[$pmic]{KEY} = $target;
+            $self->setAttribute($target, "PHYS_PATH", $node_phys . "/pmic-$pmic");
+            $self->setAttribute($target, "ORDINAL_ID", $pmic);
+            $self->setAttribute($target, "REL_POS", $pmic % 2);
+
+            # Same logic with the position, but with FAPI_POS instead
+            $self->setAttribute($target, "FAPI_POS", $pmic);
+            $self->setAttribute($target, "POSITION", $pmic);
+            $self->setHuid($target, $sys_pos, $node, $pmic);
+
+            my $pmic_num = $pmic;
+            # The norm for FAPI_NAME has a two digit number at the end
+            if ($pmic_num < 10)
+            {
+                $pmic_num = "0$pmic";
+            }
+            # chipunit:slot:node:system:position
+            $self->setAttribute($target, "FAPI_NAME", "pmic:k0:n0:s0:p$pmic_num");
 
             my $ocmb_num = 0;
             $pmic_num %= 2;
@@ -3138,6 +3127,7 @@ sub setHuid
     my $target = shift;
     my $sys    = shift;
     my $node   = shift;
+    my $pos    = shift;
 
     my $type    = $self->getType($target);
     my $type_id = $self->{enumeration}->{TYPE}->{$type};
@@ -3160,6 +3150,10 @@ sub setHuid
     }
     else { $self->{huid_idx}->{$type} = 0; }
     # Format: SSSS NNNN TTTTTTTT iiiiiiiiiiiiiiii
+    if (defined ($pos))
+    {
+        $index = $pos;
+    }
     my $huid = sprintf("%01x%01x%02x%04x", $sys, $node, $type_id, $index);
     $huid = "0x" . uc($huid);
 
