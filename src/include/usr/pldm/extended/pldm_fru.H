@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/include/usr/pldm/extended/hb_pdrs.H $                     */
+/* $Source: src/include/usr/pldm/extended/pldm_fru.H $                    */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
@@ -23,57 +23,39 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-/* @file hb_pdrs.H
+#ifndef PLDM_FRU_H__
+#define PLDM_FRU_H__
+
+#include <stdint.h>
+
+/* @file pldm_fru.H
  *
- * Defines the interface for adding Hostboot's PDRs to a PDR repository.
+ * @brief Constants and types related to FRU records.
  */
 
-#ifndef HB_PDRS_H
-#define HB_PDRS_H
-
-#include <pldm/requests/pldm_pdr_requests.H>
-#include <targeting/common/target.H>
+namespace TARGETING
+{
+class Target;
+}
 
 namespace PLDM
 {
 
-using terminus_id_t = uint16_t;
+using fru_record_set_id_t = uint16_t;
 
-// These are Entity Types used in Entity Association PDRs
-enum entity_type : uint8_t
-{
-    // These values are from Table 15 in DSP0249 v1.1.0
-    ENTITY_TYPE_BACKPLANE = 64,
-    ENTITY_TYPE_DIMM = 66,
-    ENTITY_TYPE_PROCESSOR_MODULE = 67
-};
+// currently we support version 1.0 of fru table
+constexpr uint8_t SUPPORTED_FRU_VERSION_MAJOR = 1;
+constexpr uint8_t SUPPORTED_FRU_VERSION_MINOR = 0;
 
-/*
- * This table contains info on how to add each target type's info to the
- * assocation tree.
- */
-
-struct fru_inventory_class
-{
-    TARGETING::ATTR_CLASS_type targetClass;
-    TARGETING::TYPE targetType;
-    entity_type entityType;
-};
-
-extern const std::array<fru_inventory_class, 2> fru_inventory_classes;
-
-/* @brief Adds Hostboot's PDRs to the given PDR repository.
- *        These PDRs are:
- *        1) FRU Record Set PDRs, one for each DIMM and PROC
- *        2) Entity Association PDRs, one for each relationship between the
- *           DIMMs/PROCs and the Backplane.
+/* @brief Gets a Target's FRU Record Set ID.
  *
- * @param[in/out] io_repository        The repository to add the PDRs to. Must not
- *                                     be nullptr.
- * @param[in]     i_terminus_id        ID of the terminus for the given repository.
+ * @note The Record Set ID is encoded as the target's Targeting type in the
+ *       most-significant octet, and the target's ordinal ID in the
+ *       least-significant octet of the 16-bit RSID.
+ *
+ * @param[in] i_target  The target to get the FRU RSID for.
  */
-void addHostbootPdrs(pldm_pdr* io_repository,
-                     terminus_id_t i_terminus_id);
+fru_record_set_id_t getTargetFruRecordSetID(const TARGETING::Target* i_target);
 
 }
 

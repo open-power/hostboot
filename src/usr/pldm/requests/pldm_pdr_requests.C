@@ -23,6 +23,11 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
+/* @file pldm_pdr_requests.C
+ *
+ * @brief Implementation of PLDM PDR-related requester functions.
+ */
+
 // Standard library
 #include <vector>
 #include <cstdint>
@@ -83,6 +88,8 @@ errlHndl_t getPDR(const msg_q_t i_msgQ,
                   pdr& o_pdr)
 {
     PLDM_ENTER("getPDR");
+
+    PLDM_INF("Making request for PDR 0x%08x from the BMC", io_pdr_record_handle);
 
     struct get_pdr_response
     {
@@ -218,10 +225,7 @@ errlHndl_t getPDR(const msg_q_t i_msgQ,
         /* If these assertions fail, then the other end is trying to do a
          * multipart transfer, which we do not support. */
 
-        assert(response.transfer_flag == PLDM_START_AND_END
-               || response.transfer_flag == PLDM_START, // @TODO RTC 251836:
-                                                        // Remove this when BMC
-                                                        // fixes its code
+        assert(response.transfer_flag == PLDM_START_AND_END,
                "Expected PLDM response transfer flag to be PLDM_START_AND_END "
                "got %d",
                response.transfer_flag);
@@ -397,9 +401,10 @@ errlHndl_t sendRepositoryChangedEvent(const terminus_id i_tid,
                 }
 
                 uint8_t completion_code = PLDM_SUCCESS;
-                uint8_t status = 0; // Don't really care about this status, it just
-                // tells us what happened with the logging (see
-                // DSP0248 1.2.0 section 16.6 for details)
+                uint8_t status = 0; // Don't really care about this status, it
+                                    // just tells us what happened with the
+                                    // logging (see DSP0248 1.2.0 section 16.6
+                                    // for details)
 
                 /* @TODO RTC 252081: Uncomment this block when the BMC handles the
                  * PdrRepositoryUpdate event. */
@@ -409,6 +414,7 @@ errlHndl_t sendRepositoryChangedEvent(const terminus_id i_tid,
                                          response_bytes,
                                          &completion_code,
                                          &status);
+#endif
 
                 if (errl)
                 {
@@ -441,7 +447,6 @@ errlHndl_t sendRepositoryChangedEvent(const terminus_id i_tid,
                     addBmcErrorCallouts(errl);
                     break;
                 }
-#endif
 
                 PLDM_INF("Sent PDR Repository Changed Event successfully (code is %d, status is %d)",
                          completion_code, status);

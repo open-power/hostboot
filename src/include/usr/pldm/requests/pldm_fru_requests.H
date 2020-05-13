@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-#ifndef PLDM_FRU_REQEUSTS_H
+#ifndef PLDM_FRU_REQUESTS_H
 #define PLDM_FRU_REQUESTS_H
 
 /**

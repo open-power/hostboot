@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/include/usr/pldm/extended/hb_pdrs.H $                     */
+/* $Source: src/usr/pldm/extended/pldm_fru.C $                            */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
@@ -23,58 +23,29 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-/* @file hb_pdrs.H
+/* @file pldm_fru.C
  *
- * Defines the interface for adding Hostboot's PDRs to a PDR repository.
+ * @brief Implementation of FRU-related utilities.
  */
 
-#ifndef HB_PDRS_H
-#define HB_PDRS_H
+#include <stdint.h>
 
-#include <pldm/requests/pldm_pdr_requests.H>
 #include <targeting/common/target.H>
+#include <pldm/extended/pldm_fru.H>
 
-namespace PLDM
+using namespace TARGETING;
+
+PLDM::fru_record_set_id_t PLDM::getTargetFruRecordSetID(const Target* const i_target)
 {
+    const auto targetType = i_target->getAttr<ATTR_TYPE>();
+    const auto ordinal = i_target->getAttr<ATTR_ORDINAL_ID>();
 
-using terminus_id_t = uint16_t;
+    assert(targetType <= UINT8_MAX,
+           "Target type for FRU Record Set ID is out of range (HUID 0x%08x)",
+           get_huid(i_target));
+    assert(ordinal <= UINT8_MAX,
+           "Ordinal ID for FRU Record Set ID is out of range (HUID 0x%08x)",
+           get_huid(i_target));
 
-// These are Entity Types used in Entity Association PDRs
-enum entity_type : uint8_t
-{
-    // These values are from Table 15 in DSP0249 v1.1.0
-    ENTITY_TYPE_BACKPLANE = 64,
-    ENTITY_TYPE_DIMM = 66,
-    ENTITY_TYPE_PROCESSOR_MODULE = 67
-};
-
-/*
- * This table contains info on how to add each target type's info to the
- * assocation tree.
- */
-
-struct fru_inventory_class
-{
-    TARGETING::ATTR_CLASS_type targetClass;
-    TARGETING::TYPE targetType;
-    entity_type entityType;
-};
-
-extern const std::array<fru_inventory_class, 2> fru_inventory_classes;
-
-/* @brief Adds Hostboot's PDRs to the given PDR repository.
- *        These PDRs are:
- *        1) FRU Record Set PDRs, one for each DIMM and PROC
- *        2) Entity Association PDRs, one for each relationship between the
- *           DIMMs/PROCs and the Backplane.
- *
- * @param[in/out] io_repository        The repository to add the PDRs to. Must not
- *                                     be nullptr.
- * @param[in]     i_terminus_id        ID of the terminus for the given repository.
- */
-void addHostbootPdrs(pldm_pdr* io_repository,
-                     terminus_id_t i_terminus_id);
-
+    return (targetType << 8) | ordinal;
 }
-
-#endif

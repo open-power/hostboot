@@ -102,6 +102,10 @@ struct pldm_response_t
     uint8_t pldm_payload[PayloadHeaderSize - sizeof(pldm_msg::payload)];
 };
 
+// Special value for send_pldm_response indicating an empty variable-size
+// payload portion.
+const size_t PLDM_RESPONSE_EMPTY_PAYLOAD_SIZE = 0;
+
 /* @brief send_pldm_response
  *
  *        Encodes a PLDM response message and sends it on the given message queue.
@@ -120,11 +124,23 @@ errlHndl_t send_pldm_response(const msg_q_t i_msgQ,
 {
     using response_t = pldm_response_t<PayloadHeaderSize>;
 
+    // This is an arbitrary but hopefully unique value used to catch any
+    // accidental buffer overflows from the message encoder functions.
+    const uint64_t buffer_canary = 0x0BADF00DDEADBEEFull;
+
     const size_t mctp_message_size =
         sizeof(response_t)
         + i_payload_size;
 
-    std::vector<uint8_t> response_alloc(mctp_message_size);
+    // Allocate enough space for the message and the canary, then store the
+    // canary at the end of the message. After the encoder runs, check the
+    // canary to make sure that it didn't get overwritten, and if it did, we
+    // have detected an overflow and we assert.
+    std::vector<uint8_t> response_alloc(mctp_message_size + sizeof(buffer_canary));
+
+    memcpy(&response_alloc[mctp_message_size],
+           &buffer_canary,
+           sizeof(buffer_canary));
 
     const auto response = reinterpret_cast<response_t*>(response_alloc.data());
 
@@ -133,8 +149,20 @@ errlHndl_t send_pldm_response(const msg_q_t i_msgQ,
                                  &response->pldm_message);
 
         assert(rc == PLDM_SUCCESS,
-               "Response encoder at %p failed with code %d (mctp message size = %d)",
+               "Response encoder at address %p failed with code %d (mctp message size = %d)",
                i_encoder, rc, mctp_message_size);
+    }
+
+    {
+        uint64_t real_canary = 0;
+
+        memcpy(&real_canary,
+               &response_alloc[mctp_message_size],
+               sizeof(real_canary));
+
+        assert(buffer_canary == real_canary,
+               "Response encoder at address %p corrupted the buffer canary",
+               i_encoder);
     }
 
     std::unique_ptr<msg_t, decltype(&msg_free)> msg(msg_allocate(), msg_free);

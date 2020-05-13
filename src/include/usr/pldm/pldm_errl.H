@@ -31,6 +31,8 @@
 #ifndef PLDM_ERRL_H__
 #define PLDM_ERRL_H__
 
+#include <errl/errlentry.H>
+
 namespace PLDM
 {
 

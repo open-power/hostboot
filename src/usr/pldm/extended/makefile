@@ -45,6 +45,7 @@ OBJS += pldm_monitor_control_responders.o
 OBJS += hb_pdrs.o
 OBJS += pdr_manager.o
 OBJS += hb_fru.o
+OBJS += pldm_fru.o
 OBJS += pldm_responder.o
 OBJS += pldm_extended_init.o
 

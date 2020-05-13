@@ -23,11 +23,18 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
+/* @file hb_pdrs.C
+ *
+ * @brief Implementation of functions related to PDRs that Hostboot itself
+ *        generates.
+ */
+
 // Standard library
 #include <memory>
 
 // PLDM
 #include <pldm/extended/hb_pdrs.H>
+#include <pldm/extended/pldm_fru.H>
 #include "../extern/pdr.h"
 #include "../common/pldmtrace.H"
 
@@ -38,17 +45,14 @@
 
 using namespace TARGETING;
 
-// These are Entity Types used in Entity Association PDRs
-enum entity_type : uint8_t
-{
-    // These values are from Table 15 in DSP0249 v1.1.0
-    ENTITY_TYPE_BACKPLANE = 64,
-    ENTITY_TYPE_DIMM = 66,
-    ENTITY_TYPE_PROCESSOR_MODULE = 67
-};
-
 namespace PLDM
 {
+
+extern const std::array<fru_inventory_class, 2> fru_inventory_classes
+{{
+    { TARGETING::CLASS_CHIP, TARGETING::TYPE_PROC, ENTITY_TYPE_PROCESSOR_MODULE },
+    { TARGETING::CLASS_LOGICAL_CARD, TARGETING::TYPE_DIMM, ENTITY_TYPE_DIMM }
+}};
 
 void addHostbootPdrs(pldm_pdr* const io_repo,
                      const terminus_id_t i_terminus_id)
@@ -76,43 +80,16 @@ void addHostbootPdrs(pldm_pdr* const io_repo,
                                            nullptr, // means "no parent" i.e. root
                                            PLDM_ENTITY_ASSOCIAION_PHYSICAL);
 
-    /* Now we add all the children of the backplane to the tree.
-     *
-     * This table contains info on how to add each target type's info to the
-     * assocation tree.
-     */
-    struct
-    {
-        ATTR_CLASS_type targetClass;
-        TARGETING::TYPE targetType;
-        entity_type entityType;
-    }
-    entities[] =
-    {
-        { CLASS_CHIP,         TYPE_PROC, ENTITY_TYPE_PROCESSOR_MODULE },
-        { CLASS_LOGICAL_CARD, TYPE_DIMM, ENTITY_TYPE_DIMM }
-    };
+    /* Now we add all the children of the backplane to the tree. */
 
-    uint16_t next_fru_record_set_id = 0;
-
-    for (const auto entity : entities)
+    for (const auto entity : fru_inventory_classes)
     {
         TargetHandleList targets;
 
-        {
-            PredicateHwas l_predPres;
-            l_predPres.present(true);
-            PredicateCTM l_CtmFilter(entity.targetClass, entity.targetType);
-            PredicatePostfixExpr l_present;
-            l_present.push(&l_CtmFilter).push(&l_predPres).And();
-            TargetRangeFilter l_presTargetList(targetService().begin(),
-                                               targetService().end(),
-                                               &l_present);
-            for ( ; l_presTargetList; ++l_presTargetList)
-            {
-                targets.push_back(*l_presTargetList);
-            }
-        }
+        getClassResources(targets,
+                          entity.targetClass,
+                          entity.targetType,
+                          UTIL_FILTER_PRESENT);
 
         for (size_t i = 0; i < targets.size(); ++i)
         {
@@ -135,12 +112,14 @@ void addHostbootPdrs(pldm_pdr* const io_repo,
                                              backplane_node,
                                              PLDM_ENTITY_ASSOCIAION_PHYSICAL);
 
-            ++next_fru_record_set_id;
+            // We need the FRU Record Set ID to be unique to each target
+            // instance.
+            const fru_record_set_id_t rsid = getTargetFruRecordSetID(targets[i]);
 
             // Add the FRU record set PDR to the repo
             pldm_pdr_add_fru_record_set(io_repo,
                                         i_terminus_id,
-                                        next_fru_record_set_id,
+                                        rsid,
                                         pldmEntity.entity_type,
                                         pldmEntity.entity_instance_num,
                                         pldmEntity.entity_container_id);

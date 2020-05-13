@@ -23,6 +23,11 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
+/* @file pldm_fru_requests.C
+ *
+ * @brief Implementation of PLDM FRU-related requester functions.
+ */
+
 // System Headers
 #include <assert.h>
 #include <string.h>
@@ -38,8 +43,9 @@
 #include <pldm/pldm_reasoncodes.H>
 #include <pldm/requests/pldm_fru_requests.H>
 #include <pldm/pldm_request.H>
-// libpldm
+#include <pldm/extended/pldm_fru.H>
 #include "../common/pldmtrace.H"
+// libpldm
 #include "../extern/fru.h"
 // Other userspace module includes
 #include <mctp/mctp_message_types.H>
@@ -50,9 +56,6 @@ using namespace ERRORLOG;
 
 namespace PLDM
 {
-// currently we support version 1.0 of fru table
-constexpr uint8_t SUPPORTED_VERSION_MAJOR = 1;
-constexpr uint8_t SUPPORTED_VERSION_MINOR = 0;
 
 errlHndl_t getFruRecordTableMetaData(pldm_fru_record_table_metadata_t& o_table_metadata)
 {
@@ -129,8 +132,8 @@ errlHndl_t getFruRecordTableMetaData(pldm_fru_record_table_metadata_t& o_table_m
         break;
     }
 
-    if(o_table_metadata.fruDataVerMajor != SUPPORTED_VERSION_MAJOR ||
-       o_table_metadata.fruDataVerMinor != SUPPORTED_VERSION_MINOR )
+    if(o_table_metadata.fruDataVerMajor != SUPPORTED_FRU_VERSION_MAJOR ||
+       o_table_metadata.fruDataVerMinor != SUPPORTED_FRU_VERSION_MINOR)
     {
         PLDM_ERR("decode_get_fru_record_table_metadata_resp invalid version %d.%d when expecting 1.0",
                   o_table_metadata.fruDataVerMajor,
@@ -156,8 +159,8 @@ errlHndl_t getFruRecordTableMetaData(pldm_fru_record_table_metadata_t& o_table_m
                                       TO_UINT16(o_table_metadata.fruDataVerMajor),
                                       TO_UINT16(o_table_metadata.fruDataVerMinor)),
                                   TWO_UINT16_TO_UINT32(
-                                      TO_UINT16(SUPPORTED_VERSION_MAJOR),
-                                      TO_UINT16(SUPPORTED_VERSION_MINOR))),
+                                      TO_UINT16(SUPPORTED_FRU_VERSION_MAJOR),
+                                      TO_UINT16(SUPPORTED_FRU_VERSION_MINOR))),
                                response_hdr_data,
                                ErrlEntry::ADD_SW_CALLOUT);
         errl->collectTrace(PLDM_COMP_NAME);

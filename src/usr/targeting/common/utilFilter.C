@@ -22,6 +22,12 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+
+/* @file utilFilter.C
+ *
+ * @brief Implementation of targeting filter utilities.
+ */
+
 //******************************************************************************
 // Includes
 //******************************************************************************
@@ -48,22 +54,10 @@ namespace TARGETING
 
 #define TARG_CLASS ""
 
-/**
- * @brief Populate the o_vector with target object pointers based on the
- *        requested class, type, and functional state.
- *
- * @parm[out] o_vector, reference of vector of target pointers.
- * @parm[in]  i_class,  the class of the targets to be obtained
- * @parm[in]  i_type,   the type of the targets to be obtained
- * @parm[in]  i_state,  Selection filter based on ResourceState enum,
- *                      designates all, present, or functional
- *
- * @return N/A
- */
-void _getClassResources( TARGETING::TargetHandleList & o_vector,
+void getClassResources( TARGETING::TargetHandleList & o_vector,
                      CLASS i_class, TYPE  i_type, ResourceState i_state )
 {
-    #define TARG_FN "_getClassResources(...)"
+    #define TARG_FN "getClassResources(...)"
 
     switch(i_state)
     {
@@ -190,19 +184,19 @@ void _getClassResources( TARGETING::TargetHandleList & o_vector,
 void getChipResources( TARGETING::TargetHandleList & o_vector,
                        TYPE i_chipType, ResourceState i_state )
 {
-    _getClassResources(o_vector, CLASS_CHIP, i_chipType, i_state);
+    getClassResources(o_vector, CLASS_CHIP, i_chipType, i_state);
 }
 
 void getEncResources( TARGETING::TargetHandleList & o_vector,
                       TYPE i_type, ResourceState i_state )
 {
-    _getClassResources(o_vector, CLASS_ENC, i_type, i_state);
+    getClassResources(o_vector, CLASS_ENC, i_type, i_state);
 }
 
 void getChipletResources( TARGETING::TargetHandleList & o_vector,
                           TYPE i_chipletType, ResourceState i_state )
 {
-    _getClassResources(o_vector, CLASS_UNIT, i_chipletType, i_state);
+    getClassResources(o_vector, CLASS_UNIT, i_chipletType, i_state);
 }
 
 // Retrofit functions to getChipOrChipletResources
@@ -211,12 +205,12 @@ void getAllChips( TARGETING::TargetHandleList & o_vector,
 {
     if (i_functional)
     {
-        _getClassResources(o_vector, CLASS_CHIP, i_chipType,
+        getClassResources(o_vector, CLASS_CHIP, i_chipType,
                            UTIL_FILTER_FUNCTIONAL);
     }
     else
     {
-        _getClassResources(o_vector, CLASS_CHIP, i_chipType, UTIL_FILTER_ALL);
+        getClassResources(o_vector, CLASS_CHIP, i_chipType, UTIL_FILTER_ALL);
     }
 }
 
@@ -227,12 +221,12 @@ void getAllAsics(
 {
     if (i_functional)
     {
-        _getClassResources(o_asics, CLASS_ASIC, i_asicType,
+        getClassResources(o_asics, CLASS_ASIC, i_asicType,
                            UTIL_FILTER_FUNCTIONAL);
     }
     else
     {
-        _getClassResources(o_asics, CLASS_ASIC, i_asicType, UTIL_FILTER_ALL);
+        getClassResources(o_asics, CLASS_ASIC, i_asicType, UTIL_FILTER_ALL);
     }
 }
 
@@ -242,14 +236,14 @@ void getAllLogicalCards( TARGETING::TargetHandleList & o_vector,
 {
     if (i_functional)
     {
-        _getClassResources( o_vector,
+        getClassResources( o_vector,
                                 CLASS_LOGICAL_CARD,
                                 i_cardType,
                                 UTIL_FILTER_FUNCTIONAL );
     }
     else
     {
-        _getClassResources( o_vector,
+        getClassResources( o_vector,
                                 CLASS_LOGICAL_CARD,
                                 i_cardType,
                                 UTIL_FILTER_ALL );
@@ -263,14 +257,14 @@ void getAllCards( TARGETING::TargetHandleList & o_vector,
 {
     if (i_functional)
     {
-        _getClassResources( o_vector,
+        getClassResources( o_vector,
                                 CLASS_CARD,
                                 i_cardType,
                                 UTIL_FILTER_FUNCTIONAL );
     }
     else
     {
-        _getClassResources( o_vector,
+        getClassResources( o_vector,
                                 CLASS_CARD,
                                 i_cardType,
                                 UTIL_FILTER_ALL );
@@ -283,12 +277,12 @@ void getAllChiplets( TARGETING::TargetHandleList & o_vector,
 {
     if (i_functional)
     {
-        _getClassResources(o_vector, CLASS_UNIT, i_chipletType,
+        getClassResources(o_vector, CLASS_UNIT, i_chipletType,
                            UTIL_FILTER_FUNCTIONAL);
     }
     else
     {
-        _getClassResources(o_vector, CLASS_UNIT, i_chipletType,
+        getClassResources(o_vector, CLASS_UNIT, i_chipletType,
                            UTIL_FILTER_ALL);
     }
 }

@@ -47,12 +47,25 @@ namespace TARGETING
         UTIL_FILTER_ALL,                     // All targets
         UTIL_FILTER_PRESENT,                 // Present at minimum
         UTIL_FILTER_FUNCTIONAL,              // Functional targets only
-        UTIL_FILTER_PRESENT_NON_FUNCTIONAL,  //All present and non-fucntional
-        UTIL_FILTER_NON_FUNCTIONAL           //All non-fucntional
+        UTIL_FILTER_PRESENT_NON_FUNCTIONAL,  // All present and non-functional
+        UTIL_FILTER_NON_FUNCTIONAL           // All non-functional
     };
 
 
-
+/**
+ * @brief Populate the o_vector with target object pointers based on the
+ *        requested class, type, and functional state.
+ *
+ * @parm[out] o_vector, reference of vector of target pointers.
+ * @parm[in]  i_class,  the class of the targets to be obtained
+ * @parm[in]  i_type,   the type of the targets to be obtained
+ * @parm[in]  i_state,  Selection filter based on ResourceState enum,
+ *                      designates all, present, or functional
+ *
+ * @return N/A
+ */
+void getClassResources( TARGETING::TargetHandleList & o_vector,
+                        CLASS i_class, TYPE  i_type, ResourceState i_state );
 
 /**
  * @brief Predicate function to sort by HUID
