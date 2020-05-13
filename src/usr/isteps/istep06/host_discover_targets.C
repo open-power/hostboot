@@ -54,6 +54,7 @@
 #ifdef CONFIG_PLDM
 #include <pldm/extended/pdr_manager.H>
 #include <pldm/extended/hb_fru.H>
+#include <pldm/extended/pldm_entity_ids.H>
 #endif
 #include <fapi2/plat_hwp_invoker.H>
 #include <fapi2/target.H>
@@ -476,18 +477,17 @@ errlHndl_t powerDownSlaveQuads()
 
 #ifdef CONFIG_PLDM
 
-/* @brief Perform the first half of the PDR exchange with the BMC (until and
- *        including Hostboot notifying the BMC that it has added its own PDRs to
- *        its repository).
+/* @brief Perform the first step of the PDR exchange, which will fetch the BMC's
+ *        PDRs and add them to Hostboot's PDR repository.  These are necessary
+ *        to request the FRU VPD for targets "owned" by the BMC.
+ *
  * @return errlHndl_t Error if any, otherwise nullptr.
  */
-static errlHndl_t exchange_pdrs()
+static errlHndl_t fetch_remote_pdrs()
 {
-    /* Perform part of the PDR exchange sequence with the BMC. We will get their
-     * PDRs first, then allow them to request our PDRs after we send them a PDR
-     * Repository Changed event. */
-
     errlHndl_t l_err = nullptr;
+
+    /* Fetch the BMC's PDRs. */
 
     do
     {
@@ -504,19 +504,43 @@ static errlHndl_t exchange_pdrs()
             break;
         }
 
-        const auto bmc_pdr_handles = PLDM::thePdrManager().getAllPdrHandles();
-
-        /* Add our own PDRs to our repository. */
-
         TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
                   "Added %llu remote PDRs to PDR manager",
                   PLDM::thePdrManager().pdrCount());
+    } while (false);
+
+    return l_err;
+}
+
+/* @brief Add local PDRs and finish the first half of the PDR exchange with the
+ *        BMC (until and including Hostboot notifying the BMC that it has added
+ *        its own PDRs to its repository). Presence detection should have already
+ *        been done.
+ *
+ * @return errlHndl_t Error if any, otherwise nullptr.
+ */
+static errlHndl_t exchange_pdrs()
+{
+    /* Perform part of the PDR exchange sequence with the BMC. We will get their
+     * PDRs first, then allow them to request our PDRs after we send them a PDR
+     * Repository Changed event. */
+
+    errlHndl_t l_err = nullptr;
+
+    do
+    {
+        /* Save a list of the BMC's PDR handles. */
+
+        const auto bmc_pdr_handles = PLDM::thePdrManager().getAllPdrHandles();
+
+        /* Add our own PDRs to our repository. */
 
         PLDM::thePdrManager().addLocalPdrs();
 
         auto hb_pdr_handles = PLDM::thePdrManager().getAllPdrHandles();
 
-        // Remove the BMC handles from the HB PDR handle list
+        /*  Remove the BMC handles from the HB PDR handle list */
+
         const auto bmc_pdrs
             = std::remove_if(begin(hb_pdr_handles), end(hb_pdr_handles),
                              [&bmc_pdr_handles](const uint32_t handle)
@@ -596,6 +620,10 @@ static errlHndl_t finish_pdr_exchange()
             break;
         }
     } while (false);
+
+    // Assign the PLDM-aware targets their entity IDs
+
+    PLDM::assignTargetEntityIds();
 
     return l_err;
 }
@@ -678,38 +706,68 @@ void* host_discover_targets( void *io_pArgs )
         TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
                   "host_discover_targets: Normal IPL mode");
 
-#ifdef CONFIG_PLDM
-        l_err = exchange_pdrs();
-
-        if (l_err)
-        {
-            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                      ERR_MRK"Failed to exchange PDRs with the BMC");
-
-            captureError(l_err, l_stepError, ISTEP_COMP_ID);
-            pdr_exchange_failed = true;
-        }
-#endif
-
 #if( defined(CONFIG_SUPPORT_EEPROM_CACHING) && !defined(CONFIG_SUPPORT_EEPROM_HWACCESS) )
         l_err = EEPROM::cacheEECACHEPartition();
 #endif
 
 #ifdef CONFIG_PLDM
-        l_err = PLDM::cacheRemoteFruVpd();
-        if (l_err)
-        {
-            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                      ERR_MRK"Failed to cache remote FRU info from the BMC");
+        /* First step of the PDR exchange is to fetch remote PDRs and then cache
+         * remote FRU VPD. Presence detection depends on this data. */
 
-            captureError(l_err, l_stepError, ISTEP_COMP_ID);
+        if (!l_err)
+        {
+            do
+            {
+                l_err = fetch_remote_pdrs();
+
+                if (l_err)
+                {
+                    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                              ERR_MRK"Failed to fetch PDRs from the BMC");
+
+                    pdr_exchange_failed = true;
+                    captureError(l_err, l_stepError, ISTEP_COMP_ID);
+                    break;
+                }
+
+                l_err = PLDM::cacheRemoteFruVpd();
+                if (l_err)
+                {
+                    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                              ERR_MRK"Failed to cache remote FRU info from the BMC");
+
+                    captureError(l_err, l_stepError, ISTEP_COMP_ID);
+                    break;
+                }
+            } while (false);
         }
 #endif
+
         if(nullptr == l_err)
         {
             HWAS::HWASDiscovery l_HWASDiscovery;
             l_err = l_HWASDiscovery.discoverTargets();
         }
+
+#ifdef CONFIG_PLDM
+        /* Second step of the PDR exchange is to add local PDRs and notify the
+         * BMC that we have done so. This will cause them to fetch the new PDRs
+         * from us. This has to be done after presence detection. */
+
+        if (!pdr_exchange_failed && !l_err)
+        {
+            l_err = exchange_pdrs();
+
+            if (l_err)
+            {
+                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                          ERR_MRK"Failed to exchange PDRs with the BMC");
+
+                pdr_exchange_failed = true;
+                captureError(l_err, l_stepError, ISTEP_COMP_ID);
+            }
+        }
+#endif
     }
 
 #if (defined(CONFIG_MEMVPD_READ_FROM_HW)&&defined(CONFIG_MEMVPD_READ_FROM_PNOR))

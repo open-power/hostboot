@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/include/usr/pldm/extended/pldm_fru.H $                    */
+/* $Source: src/include/usr/pldm/extended/pldm_entity_ids.H $             */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
@@ -23,49 +23,26 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-#ifndef PLDM_FRU_H__
-#define PLDM_FRU_H__
-
-#include <stdint.h>
-
-/* @file pldm_fru.H
+/* @file pldm_entity_ids.H
  *
- * @brief Constants and types related to FRU records.
+ * @brief API for working with PLDM Entity IDs
  */
 
-namespace TARGETING
-{
-class Target;
-}
+#ifndef PLDM_ENTITY_IDS_H
+#define PLDM_ENTITY_IDS_H
+
+#include <errl/errlentry.H>
 
 namespace PLDM
 {
 
-using fru_record_set_id_t = uint16_t;
-
-// currently we support version 1.0 of fru table
-constexpr uint8_t SUPPORTED_FRU_VERSION_MAJOR = 1;
-constexpr uint8_t SUPPORTED_FRU_VERSION_MINOR = 0;
-
-/* @brief Gets a Target's FRU Record Set ID.
+/* @brief Update the PLDM Entity ID attributes of all PLDM-aware targets (PROC,
+ *        DIMM, etc.)
  *
- * @note The Record Set ID is encoded as the target's Targeting type in the
- *       most-significant octet, and the target's ordinal ID in the
- *       least-significant octet of the 16-bit RSID.
- *
- * @param[in] i_target  The target to get the FRU RSID for.
- * @return fru_record_set_id_t  The encoded FRU Record Set ID.
+ * @return errlHndl_t  Error if any, otherwise nullptr.
  */
-fru_record_set_id_t getTargetFruRecordSetID(const TARGETING::Target* i_target);
 
-/* @brief Returns a Target handle from a given FRU Record Set ID.
- *        The RSID must have been encoded by getTargetFruRecordSetID.
- *
- * @param[in] i_rsid  The RSID to use to find the Target
- * @return Target*    Handle to the Target with the given RSID,
- *                    or nullptr if none match
- */
-TARGETING::Target* getTargetFromHostbootFruRecordSetID(fru_record_set_id_t i_rsid);
+errlHndl_t assignTargetEntityIds();
 
 }
 

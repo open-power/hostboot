@@ -51,6 +51,7 @@ namespace PLDM
         // These values are defined by IBM as OEM codes
         ENTITY_TYPE_TPM = 24576
     };
+
     // These are the different types of PLDM message types we can expect
     // See DSP0245 v1.2.0 Table 1
     // When the MCTP layer creates a message to send to either inbound rsp

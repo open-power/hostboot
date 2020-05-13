@@ -312,6 +312,21 @@ errlHndl_t PdrManager::awaitBmcPdrRepoChanged(const size_t i_timeout_ms)
 
 #endif
 
+bool PdrManager::findEntityByFruRecordSetId(const fru_record_set_id i_rsid,
+                                            pldm_entity& o_entity) const
+{
+    const auto lock = scoped_mutex_lock(iv_access_mutex);
+
+    terminus_id_t terminus_id = 0;
+
+    return pldm_pdr_fru_record_set_find_by_rsi(iv_pdr_repo.get(),
+                                               i_rsid,
+                                               &terminus_id,
+                                               &o_entity.entity_type,
+                                               &o_entity.entity_instance_num,
+                                               &o_entity.entity_container_id);
+}
+
 PdrManager& thePdrManager()
 {
     return Singleton<PdrManager>::instance();

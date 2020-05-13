@@ -31,14 +31,22 @@
 #ifndef PDR_MANAGER_H__
 #define PDR_MANAGER_H__
 
+// Standard library
 #include <memory>
 #include <vector>
-#include <sys/sync.h>
-#include <errl/errlentry.H>
-#include <sys/msg.h>
+
+// PLDM
 #include <pldm/extended/hb_pdrs.H>
 #include <pldm/requests/pldm_pdr_requests.H>
 #include <pldm/requests/pldm_fru_requests.H>
+
+// libpldm
+#include "../../../../usr/pldm/extern/pdr.h"
+
+// Misc
+#include <sys/sync.h>
+#include <errl/errlentry.H>
+#include <sys/msg.h>
 
 class PldmPdrTestSuite;
 
@@ -146,6 +154,16 @@ public:
      * @return vector            List of FRU Record Set IDs for the given entity type
      */
     std::vector<fru_record_set_id> findFruRecordSetIdsByType(entity_type i_entity_type) const;
+
+    /* @brief  Look up the entity ID corresponding with the given FRU Record Set ID
+     *         in the PDR repository.
+     *
+     * @param[in] i_rsid     The FRU RSID to look up
+     * @param[out] o_entity  The entity ID if found, otherwise unset
+     * @return bool          Whether the FRU RSID was found in the PDR repository
+     */
+    bool findEntityByFruRecordSetId(fru_record_set_id i_rsid,
+                                    pldm_entity& o_entity) const;
 
     // The BMC TID is 1, HB is 2. It is important that the terminus IDs in the
     // system do not conflict with one another.

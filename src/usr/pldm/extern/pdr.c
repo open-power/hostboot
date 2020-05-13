@@ -306,11 +306,11 @@ const pldm_pdr_record *pldm_pdr_fru_record_set_find_by_rsi(
 		struct pldm_pdr_fru_record_set *fru =
 		    (struct pldm_pdr_fru_record_set
 			 *)(data + sizeof(struct pldm_pdr_hdr));
-		if (fru->fru_rsi == fru_rsi) {
-			*terminus_handle = fru->terminus_handle;
-			*entity_type = fru->entity_type;
-			*entity_instance_num = fru->entity_instance_num;
-			*container_id = fru->container_id;
+		if (fru->fru_rsi == htole16(fru_rsi)) {
+			*terminus_handle = le16toh(fru->terminus_handle);
+			*entity_type = le16toh(fru->entity_type);
+			*entity_instance_num = le16toh(fru->entity_instance_num);
+			*container_id = le16toh(fru->container_id);
 			return curr_record;
 		}
 		data = NULL;
