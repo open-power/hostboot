@@ -27,6 +27,7 @@
 use strict;
 use Getopt::Long;
 use File::Copy;
+use File::Basename;
 
 
 binmode STDOUT, ':bytes';
@@ -153,6 +154,10 @@ sub print_help()
     print "\n";
     print "  # (SPI) lookup eeprom matching input params and write new image's contents to offset in EECACHE where matching eeprom data exists ( manipulate input binary )\n";
     print "  eecache_editor.pl --eecache EECACHE.bin --engine 3 --devOffset 0xc0 --masterHuid 0x50000 --newImage newSPD.dat\n";
+    print "\n";
+    print "  # To replace a section using --uniqueId, you can first look at your cache \"eecache_editor.pl --eecache EECACHE.bin\"\n";
+    print "  # and find the section that you want to replace, you'll use \"unique ID\" entry\n";
+    print "  eecache_editor.pl --eecache EECACHE.bin --uniqueId 0x020005000003010000 --newImage newSPD.dat\n";
     print "---------------------------------------------\n";
 }
 
@@ -166,7 +171,7 @@ if( ($pnorBinaryPath eq "") &&
     ($eecacheBinaryPath eq ""))
 {
     # Print error saying we need one of these filled in
-    print "ERROR Neither PNOR binary nor EECACHE section binary passed in. Cannot continue.\n\n";
+    print "ERROR: Neither PNOR binary nor EECACHE section binary passed in. Cannot continue.\n\n";
     print_help();
     exit 0;
 }
@@ -243,11 +248,9 @@ else
     print "\nUnique ID we are looking up: 0x$uniqueId \n\n" ;
 }
 
-# setup input and output files
+# setup input and output file handles
 my $input_fh;
 my $output_fh;
-
-my $new_fh;
 
 if($inputIsEntirePnor)
 {
@@ -273,11 +276,6 @@ else
         open $output_fh, '+>:raw', $outFilePath or die "failed to open $outFilePath: $!\n";
         copy($eecacheBinaryPath, $outFilePath) ;
     }
-}
-
-if($newImagePath ne "")
-{
-    open $new_fh, '<', $newImagePath or die "failed to open $newImagePath: $!\n";
 }
 
 
@@ -317,21 +315,75 @@ else
         {
             if($newImagePath ne "") # if a new image is available try to load it in
             {
-                my $new_file_size = -s $newImagePath ;
-                my $new_file_data;
-                read($new_fh, $new_file_data, $new_file_size );
+                my $new_file_size = -s $newImagePath;
 
-                # Verify the new image is the correct size
-                if( $new_file_size != $hashRef->{'entry_size'})
+                # Var used to keep track of which image to write into EECACHE at
+                # the end of this if-statement
+                my $inputImgPath = $newImagePath;
+
+                # If the size of the new image is larger than the entry size
+                # available in EECACHE, then this image cannot be inserted.
+                if ($new_file_size > $hashRef->{'entry_size'})
                 {
-                    print "ERROR incorrect size, EECACHE is reporting size to be".$hashRef->{'entry_size'}."bytes but file proved is only".$new_file_size." bytes\n";
-                    exit 0;
+                    die "ERROR: incorrect size, EECACHE is reporting the".
+                    " entry size to be ".$hashRef->{'entry_size'}." bytes, but".
+                    " new file to be inserted is larger at a size of "
+                    .$new_file_size." bytes.\n";
                 }
 
-                # seek to the offset inside EEACHE where this eeprom's cache lives
-                # and write the new file contents
-                seek($output_fh, $hashRef->{'entry_offset'} , 0);
-                print $output_fh $new_file_data;
+                # If the new file to be loaded-in is smaller in size than the
+                # allocated EECACHE entry size, then pad a copy of the
+                # file to fit.
+                # Note that in the case that the image ($newImagePath) to be
+                # inserted into the EECACHE is exactly the size of the entry in
+                # EECACHE, then padding will be skipped.
+                if ($new_file_size < $hashRef->{'entry_size'})
+                {
+                    # Make a copy of the input image file and pad it to fit
+                    # $hashRef->{'entry_size'} size
+
+                    # Path of copy of input image which will be padded
+                    # Note that the padded image will be stored in the
+                    # current directory
+                    my $paddedInputImg = basename($newImagePath);
+                    $paddedInputImg .= ".padded";
+
+                    $inputImgPath = $paddedInputImg;
+
+                    # Create copy and pad
+                    print("Provided image ($newImagePath) to write into ".
+                        "EECACHE is smaller than cache entry.\n");
+                    print("Creating a padded copy of the image ($paddedInputImg)".
+                        " to be inserted into the cache entry.\n");
+
+                    system("\\cp -f $newImagePath $paddedInputImg");
+                    die "ERROR: Failed to create copy of input image to be ".
+                    "padded $newImagePath" if($?);
+                    system("truncate $paddedInputImg -s $hashRef->{'entry_size'}");
+                    die "ERROR: Failed to pad image $newImagePath" if($?);
+
+                }
+
+                # Open and read input img file to work with
+                my $inputImgSize = -s $inputImgPath;
+                my $imgOffset = hex $hashRef->{'entry_offset'};
+
+                my $inputImgHandle;
+                open $inputImgHandle, '<', $inputImgPath or die "failed to open $inputImgPath: $!\n";
+
+                my $newFileData;
+                read($inputImgHandle, $newFileData, $inputImgSize);
+
+                print("Inserting img: $inputImgPath\n");
+                print("Of size: $inputImgSize\n");
+                print("At entry offset: $imgOffset\n");
+
+                # seek to the offset inside EEACHE where this eeprom's cache
+                # lives and write the new file contents
+                seek($output_fh, $imgOffset , 0);
+                print $output_fh $newFileData;
+
+                close $inputImgHandle;
             }
             elsif($clearEepromData) # if we are told to clear the data do that
             {
@@ -367,7 +419,7 @@ close $output_fh;
 exit 0;
 
 
-# Start Subroutines
+# Subroutines
 
 sub readEecacheToc {
     my $eecache_fh = shift;
@@ -634,10 +686,13 @@ sub parseEecacheToc {
 
         $totalEntryCount++;
 
-        if(uc $entryUniqueID eq uc $idToMatch)
+        if(hexStrsEqual($entryUniqueID, $idToMatch))
         {
             $entryInfo{entry_offset} = $internal_offset;
-            $entryInfo{entry_size}   = $cached_copy_size * 1024; # KB to Bytes
+
+            # Converting hex string to int and multiplying by 1024
+            # KB to Bytes
+            $entryInfo{entry_size}   = (hex $cached_copy_size) * 1024;
             $entryInfo{header_offset} = $headerEntryOffset - $tocEntrySizeBytes;
 
             $matchSummaryString =  "ENTRY FOUND ...\n";
@@ -752,6 +807,8 @@ sub parseEecacheToc {
         "  Valid Entry Count    : $validEntryCount \n".
         "  Max Possible Entries : $tocEntries\n\n");
 
+    print "\nmatchSummaryString: $matchSummaryString\n";
+
     if($matchSummaryString ne "")
     {
         print $matchSummaryString;
@@ -801,3 +858,42 @@ sub isUniqueIdValid
     }
 }
 
+# Helper functions
+
+# @brief Take two strings containing hex values and return bool whether the hex
+# values are equal
+#
+# The hex-strings do not have to be of the same format, i.e.:
+# - it doesn't matter if the hex string contains "0x"
+# - it doesn't matter if letters are capitalized or not
+# E.g.: hexStrsEqual("0X123AB", "123ab") will return True
+#
+# @param[in] $str1 Expected string containing hex value
+# @param[in] $str2 Expected string containing hex value
+#
+# @return
+# - Returns True if hex values equal
+# - Returns False if hex values are not equal
+sub hexStrsEqual
+{
+    # Input arguments, hex-value strings
+    my $str1 = shift;
+    my $str2 = shift;
+
+    # Check if any of the hex-strings contains "0x" decorator
+    # Note that if hex-string only has one character, then substr(...) will
+    # return that one character and not fail
+    if (uc substr($str1, 0, 2) eq "0X")
+    {
+        # If str1 contains "0x", remove it
+        $str1 = substr($str1, 2);
+    }
+    if (uc substr($str2, 0, 2) eq "0X")
+    {
+        # If str2 contains "0x", remove it
+        $str2 = substr($str2, 2);
+    }
+
+    return (uc $str1 eq uc $str2);
+
+}
