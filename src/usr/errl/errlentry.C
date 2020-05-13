@@ -116,9 +116,9 @@ ErrlEntry::ErrlEntry(const errlSeverity_t i_sev,
     iv_doHbDump(i_hbDump)
 {
     #ifdef CONFIG_ERRL_ENTRY_TRACE
-    TRACFCOMP( g_trac_errl, ERR_MRK"Error created : PLID=%.8X, RC=%.4X, Mod=%.2X, Userdata=%.16llX %.16llX, Sev=%s", plid(), i_reasonCode, i_modId, i_user1, i_user2, errl_sev_str_map.at(i_sev) );
+    TRACFCOMP( g_trac_errl, ERR_MRK"Error created : PLID=%.8X, EID=%.8X, RC=%.4X, Mod=%.2X, Userdata=%.16llX %.16llX, Sev=%s", plid(), eid(), i_reasonCode, i_modId, i_user1, i_user2, errl_sev_str_map.at(i_sev) );
     #else
-    TRACDCOMP( g_trac_errl, ERR_MRK"Error created : PLID=%.8X, RC=%.4X, Mod=%.2X, Userdata=%.16llX %.16llX, Sev=%s", plid(), i_reasonCode, i_modId, i_user1, i_user2, errl_sev_str_map.at(i_sev) );
+    TRACDCOMP( g_trac_errl, ERR_MRK"Error created : PLID=%.8X, EID=%.8X, RC=%.4X, Mod=%.2X, Userdata=%.16llX %.16llX, Sev=%s", plid(), eid(), i_reasonCode, i_modId, i_user1, i_user2, errl_sev_str_map.at(i_sev) );
     #endif
     // Collect the Backtrace and add it to the error log
     iv_pBackTrace = new ErrlUserDetailsBackTrace();
@@ -142,6 +142,16 @@ ErrlEntry::ErrlEntry(const errlSeverity_t i_sev,
 ///////////////////////////////////////////////////////////////////////////////
 ErrlEntry::~ErrlEntry()
 {
+    // Trace a delete/destruction on an uncommitted log
+    if (iv_Private.iv_committed == 0)
+    {
+        #ifdef CONFIG_ERRL_ENTRY_TRACE
+        TRACFCOMP( g_trac_errl, ERR_MRK"Error deleted without commit : PLID=%.8X, EID=%.8X", plid(), eid());
+        #else
+        TRACDCOMP( g_trac_errl, ERR_MRK"Error deleted without commit : PLID=%.8X, EID=%.8X", plid(), eid());
+        #endif
+    }
+
     // Free memory of all sections
     for (std::vector<ErrlUD*>::const_iterator l_itr = iv_SectionVector.begin();
          l_itr != iv_SectionVector.end(); ++l_itr)
