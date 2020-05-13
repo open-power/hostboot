@@ -93,6 +93,16 @@ enum PositionBounds
 
     MAX_EQ_PER_PROC     = 8,
 
+    MAX_PAUC_PER_PROC   = 4,
+
+    MAX_IOHS_PER_PAUC   = 2,
+    MAX_IOHS_PER_PROC   = MAX_IOHS_PER_PAUC * MAX_PAUC_PER_PROC,
+
+    MAX_PAU_PER_IOHS    = 1,
+    MAX_PAU_PER_PROC    = MAX_PAU_PER_IOHS * MAX_IOHS_PER_PROC,
+
+    MAX_NMMU_PER_PROC   = 2,
+
     MAX_EC_PER_EQ       = 4,
     MAX_EC_PER_PROC     = MAX_EC_PER_EQ * MAX_EQ_PER_PROC,
 

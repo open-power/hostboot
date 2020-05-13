@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/diag/prdf/plat/p9/prdfP9PmRecovery.H $                */
+/* $Source: src/usr/diag/prdf/plat/p10/prdfP10PmRecovery.H $              */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018                             */
+/* Contributors Listed Below - COPYRIGHT 2018,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,12 +22,12 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-/** @file  prdfP9PmRecovery.H
+/** @file  prdfP10PmRecovery.H
  *  @brief Power management STOP failure recovery actions
  */
 
-#ifndef __prdfP9PmRecovery_H
-#define __prdfP9PmRecovery_H
+#ifndef __prdfP10PmRecovery_H
+#define __prdfP10PmRecovery_H
 
 // Framework includes
 #include <prdfExtensibleChip.H>
@@ -39,7 +39,7 @@ namespace PRDF
 
 /**
  * @brief Power management STOP failure recovery actions
- * @param i_chip  P9 extensible chip
+ * @param i_chip  P10 extensible chip
  * @param io_sc   Step code data structure
  * @param return SUCCESS/FAIL
  */
@@ -47,4 +47,4 @@ int32_t pmRecovery( ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc );
 
 } // end namespace PRDF
 
-#endif // __prdfP9PmRecovery_H
+#endif // __prdfP10PmRecovery_H

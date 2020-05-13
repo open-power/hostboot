@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/diag/prdf/common/plat/p9/prdfP9Proc.C $               */
+/* $Source: src/usr/diag/prdf/common/plat/p10/prdfP10Proc.C $             */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
@@ -23,8 +23,8 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-/** @file  prdfP9Proc.C
- *  @brief Contains all the plugin code for the PRD P9 Proc
+/** @file  prdfP10Proc.C
+ *  @brief Contains all the plugin code for the PRD P10 Proc
  */
 
 // Framework includes
@@ -37,14 +37,15 @@
 #ifdef __HOSTBOOT_MODULE
 #include <prdfPlatServices_ipl.H>
 #include <prdfErrlUtil.H>
+#include <prdfLaneRepair.H>
+/* TODO RTC 247259
 #include <sbeio/sbeioif.H>
+*/
 #endif
 
 #ifdef __HOSTBOOT_RUNTIME
-#include <prdfP9PmRecovery.H>
+#include <prdfP10PmRecovery.H>
 #endif
-
-#include <prdfLaneRepair.H>
 
 // Platform includes
 
@@ -94,6 +95,7 @@ int32_t CheckForRecovered( ExtensibleChip * i_chip,
     return SUCCESS;
 }
 PRDF_PLUGIN_DEFINE_NS( axone_proc,   Proc, CheckForRecovered );
+PRDF_PLUGIN_DEFINE_NS( p10_proc,     Proc, CheckForRecovered );
 
 //------------------------------------------------------------------------------
 /**
@@ -174,6 +176,7 @@ int32_t CheckForRecoveredSev(ExtensibleChip * i_chip, uint32_t & o_sev)
 
 }
 PRDF_PLUGIN_DEFINE_NS( axone_proc,   Proc, CheckForRecoveredSev );
+PRDF_PLUGIN_DEFINE_NS( p10_proc,     Proc, CheckForRecoveredSev );
 
 /** @func GetCheckstopInfo
  *  To be called from the fabric domain to gather Checkstop information.  This
@@ -270,6 +273,7 @@ int32_t GetCheckstopInfo( ExtensibleChip * i_chip,
 
 }
 PRDF_PLUGIN_DEFINE_NS( axone_proc,   Proc, GetCheckstopInfo );
+PRDF_PLUGIN_DEFINE_NS( p10_proc,     Proc, GetCheckstopInfo );
 
 //------------------------------------------------------------------------------
 
@@ -287,6 +291,7 @@ int32_t isHostAttnFirAccessible(ExtensibleChip * i_chip, bool & o_isOkToAccess)
     return SUCCESS;
 }
 PRDF_PLUGIN_DEFINE_NS( axone_proc,   Proc, isHostAttnFirAccessible );
+PRDF_PLUGIN_DEFINE_NS( p10_proc,     Proc, isHostAttnFirAccessible );
 
 //------------------------------------------------------------------------------
 
@@ -331,6 +336,7 @@ int32_t isUcsFirAccessible(ExtensibleChip * i_chip, bool & o_isOkToAccess)
     return SUCCESS;
 }
 PRDF_PLUGIN_DEFINE_NS( axone_proc,   Proc, isUcsFirAccessible );
+PRDF_PLUGIN_DEFINE_NS( p10_proc,     Proc, isUcsFirAccessible );
 
 //------------------------------------------------------------------------------
 
@@ -348,6 +354,7 @@ int32_t handleDeadmanTimer( ExtensibleChip * i_chip,
     return SUCCESS;
 }
 PRDF_PLUGIN_DEFINE_NS( axone_proc,   Proc, handleDeadmanTimer );
+PRDF_PLUGIN_DEFINE_NS( p10_proc,     Proc, handleDeadmanTimer );
 
 //------------------------------------------------------------------------------
 
@@ -389,6 +396,7 @@ int32_t handleSbeVital( ExtensibleChip * i_chip,
     return SUCCESS;
 }
 PRDF_PLUGIN_DEFINE_NS( axone_proc,   Proc, handleSbeVital );
+PRDF_PLUGIN_DEFINE_NS( p10_proc,     Proc, handleSbeVital );
 
 //------------------------------------------------------------------------------
 
@@ -422,6 +430,7 @@ int32_t CheckForUnitCs( ExtensibleChip * i_chip,
     return SUCCESS;
 }
 PRDF_PLUGIN_DEFINE_NS( axone_proc,   Proc, CheckForUnitCs );
+PRDF_PLUGIN_DEFINE_NS( p10_proc,     Proc, CheckForUnitCs );
 
 //------------------------------------------------------------------------------
 
@@ -455,6 +464,7 @@ int32_t PmRecovery( ExtensibleChip * i_chip,
     return SUCCESS;
 }
 PRDF_PLUGIN_DEFINE_NS( axone_proc,   Proc, PmRecovery );
+PRDF_PLUGIN_DEFINE_NS( p10_proc,     Proc, PmRecovery );
 
 //------------------------------------------------------------------------------
 
@@ -529,6 +539,7 @@ int32_t handleIntCqFirPcRecovError( ExtensibleChip * i_chip,
     return l_rc;
 }
 PRDF_PLUGIN_DEFINE_NS( axone_proc,   Proc, handleIntCqFirPcRecovError );
+PRDF_PLUGIN_DEFINE_NS( p10_proc,     Proc, handleIntCqFirPcRecovError );
 
 //------------------------------------------------------------------------------
 

@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/diag/prdf/common/plat/p9/prdfCommonPlugins.C $        */
+/* $Source: src/usr/diag/prdf/common/plat/p10/prdfCommonPlugins.C $       */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
@@ -79,6 +79,18 @@ PRDF_PLUGIN_DEFINE_NS( axone_phb,      CommonPlugins, ClearServiceCallFlag );
 PRDF_PLUGIN_DEFINE_NS( axone_proc,     CommonPlugins, ClearServiceCallFlag );
 PRDF_PLUGIN_DEFINE_NS( axone_xbus,     CommonPlugins, ClearServiceCallFlag );
 PRDF_PLUGIN_DEFINE_NS( explorer_ocmb,  CommonPlugins, ClearServiceCallFlag );
+PRDF_PLUGIN_DEFINE_NS( p10_proc,       CommonPlugins, ClearServiceCallFlag );
+PRDF_PLUGIN_DEFINE_NS( p10_mcc,        CommonPlugins, ClearServiceCallFlag );
+PRDF_PLUGIN_DEFINE_NS( p10_phb,        CommonPlugins, ClearServiceCallFlag );
+PRDF_PLUGIN_DEFINE_NS( p10_eq,         CommonPlugins, ClearServiceCallFlag );
+PRDF_PLUGIN_DEFINE_NS( p10_core,       CommonPlugins, ClearServiceCallFlag );
+PRDF_PLUGIN_DEFINE_NS( p10_pec,        CommonPlugins, ClearServiceCallFlag );
+PRDF_PLUGIN_DEFINE_NS( p10_pauc,       CommonPlugins, ClearServiceCallFlag );
+PRDF_PLUGIN_DEFINE_NS( p10_omic,       CommonPlugins, ClearServiceCallFlag );
+PRDF_PLUGIN_DEFINE_NS( p10_pau,        CommonPlugins, ClearServiceCallFlag );
+PRDF_PLUGIN_DEFINE_NS( p10_iohs,       CommonPlugins, ClearServiceCallFlag );
+PRDF_PLUGIN_DEFINE_NS( p10_nmmu,       CommonPlugins, ClearServiceCallFlag );
+PRDF_PLUGIN_DEFINE_NS( p10_mc,         CommonPlugins, ClearServiceCallFlag );
 
 /**
  * @brief   Clear the service call flag (field and MNFG) so that thresholding
@@ -98,6 +110,7 @@ int32_t ClearServiceCallFlag_mnfgInfo( ExtensibleChip * i_chip,
     return SUCCESS;
 }
 PRDF_PLUGIN_DEFINE_NS(axone_proc,   CommonPlugins, ClearServiceCallFlag_mnfgInfo);
+PRDF_PLUGIN_DEFINE_NS(p10_proc,   CommonPlugins, ClearServiceCallFlag_mnfgInfo);
 
 } // namespace CommonPlugins ends
 

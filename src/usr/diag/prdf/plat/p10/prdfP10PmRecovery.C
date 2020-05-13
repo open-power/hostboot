@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/diag/prdf/plat/p9/prdfP9PmRecovery.C $                */
+/* $Source: src/usr/diag/prdf/plat/p10/prdfP10PmRecovery.C $              */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
@@ -25,12 +25,13 @@
 
 #include <iipServiceDataCollector.h>
 #include <prdfExtensibleChip.H>
-#include <prdfP9PmRecovery.H>
+#include <prdfP10PmRecovery.H>
 #include <prdfErrlUtil.H>
 
+/* TODO RTC 247259
 #include <hwas/common/hwas.H>
 #include <hwas/common/deconfigGard.H>
-
+*/
 
 using namespace TARGETING;
 

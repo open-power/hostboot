@@ -44,5 +44,8 @@ prd_obj += prdfP10ProcDomain.o
 prd_obj += prdfFsiCapUtil.o
 
 # rule plugin related
+prd_rule_plugin += prdfCommonPlugins.o
 prd_rule_plugin += prdfP10Pll.o
+prd_rule_plugin += prdfP10Proc.o
+prd_rule_plugin += prdfLaneRepair.o
 

@@ -73,7 +73,6 @@ int32_t analyzeIplCEStats( TargetHandle_t i_trgt, bool &o_calloutMade )
 
     PRDF_ENTER( PRDF_FUNC "(0x%08x)", getHuid(i_trgt) );
 
-/* RTC 253001: Temporarily disable
     PRDF_SYSTEM_SCOPELOCK; // will unlock when going out of scope
 
     o_calloutMade = false;
@@ -91,7 +90,6 @@ int32_t analyzeIplCEStats( TargetHandle_t i_trgt, bool &o_calloutMade )
         PRDF_ERR( PRDF_FUNC "Unsupported target type %d", type );
         PRDF_ASSERT( false ); // code bug
     }
-*/
 
     PRDF_EXIT( PRDF_FUNC "(0x%08x), o_calloutMade:%u",
                getHuid(i_trgt), o_calloutMade );
@@ -110,7 +108,6 @@ errlHndl_t startScrub( const TargetHandle_t i_trgt )
 
     errlHndl_t o_errl = nullptr;
 
-/* RTC 253001: Temporarily disable
     int32_t l_rc = SUCCESS;
 
     // will unlock when going out of scope
@@ -173,12 +170,11 @@ errlHndl_t startScrub( const TargetHandle_t i_trgt )
 
         // Add traces
         o_errl->collectTrace( PRDF_COMP_NAME,      512 );
-        / * TODO RTC 247259
+        /* TODO RTC 247259
         o_errl->collectTrace( FAPI_TRACE_NAME,     256 );
         o_errl->collectTrace( FAPI_IMP_TRACE_NAME, 256 );
-        * /
+        */
     }
-*/
 
     PRDF_EXIT( PRDF_FUNC );
 

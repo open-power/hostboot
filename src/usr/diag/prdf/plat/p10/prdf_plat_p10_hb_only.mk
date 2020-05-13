@@ -1,11 +1,11 @@
 # IBM_PROLOG_BEGIN_TAG
 # This is an automatically generated prolog.
 #
-# $Source: src/usr/diag/prdf/plat/p9/prdf_plat_p9_hb_only.mk $
+# $Source: src/usr/diag/prdf/plat/p10/prdf_plat_p10_hb_only.mk $
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2016,2019
+# Contributors Listed Below - COPYRIGHT 2016,2020
 # [+] International Business Machines Corp.
 #
 #
@@ -29,17 +29,17 @@
 # Paths common to both IPL and runtime
 ################################################################################
 
-prd_vpath += ${PRD_SRC_PATH}/plat/p9
+prd_vpath += ${PRD_SRC_PATH}/plat/p10
 
-prd_incpath += ${PRD_SRC_PATH}/plat/p9
+prd_incpath += ${PRD_SRC_PATH}/plat/p10
 
 ################################################################################
 # Hostboot only object files common to both IPL and runtime
 ################################################################################
 
-# plat/p9/ (non-rule plugin related)
+# plat/p10/ (non-rule plugin related)
 
-# plat/p9/ (rule plugin related)
+# plat/p10/ (rule plugin related)
 
 ################################################################################
 # Hostboot only object files (IPL only)
@@ -47,7 +47,7 @@ prd_incpath += ${PRD_SRC_PATH}/plat/p9
 
 ifneq (${HOSTBOOT_RUNTIME},1)
 
-# plat/p9/ (non-rule plugin related)
+# plat/p10/ (non-rule plugin related)
 
 endif
 
@@ -57,8 +57,8 @@ endif
 
 ifeq (${HOSTBOOT_RUNTIME},1)
 
-# plat/p9/ (non-rule plugin related)
-prd_obj += prdfP9PmRecovery.o
+# plat/p10/ (non-rule plugin related)
+prd_obj += prdfP10PmRecovery.o
 
 endif
 
