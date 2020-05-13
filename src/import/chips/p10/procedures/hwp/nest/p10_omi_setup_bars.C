@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2017,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -37,9 +37,11 @@
 //-----------------------------------------------------------------------------------
 #include <p10_omi_setup_bars.H>
 #include <p10_fbc_utils.H>
+#include <p10_scom_mc_a.H>
 #include <p10_scom_mc_b.H>
 #include <p10_scom_mc_d.H>
 #include <p10_scom_mc_8.H>
+#include <p10_scom_mc_9.H>
 #include <p10_scom_mc_e.H>
 
 #include <lib/inband/exp_inband.H>
@@ -220,6 +222,52 @@ fapi2::ReturnCode p10_omi_setup_bars(
                 FAPI_TRY(PUT_SCOMFIR_MCFGPR1(l_mi, l_scom_data));
             }
         }
+    }
+
+    for (auto l_mi : i_target.getChildren<fapi2::TARGET_TYPE_MI>())
+    {
+
+        FAPI_DBG("Unmasking FIR");
+
+        fapi2::buffer<uint64_t> l_mcfiraction;
+        fapi2::buffer<uint64_t> l_mcfirmask_and;
+
+        // Setup MC Fault Isolation Action1 register buffer
+        l_mcfiraction.setBit<SCOMFIR_MCFIR_MC_INTERNAL_RECOVERABLE_ERROR>();
+        l_mcfiraction.setBit<SCOMFIR_MCFIR_INBAND_BAR_HIT_WITH_INCORRECT_TTYPE>();
+        l_mcfiraction.setBit<SCOMFIR_MCFIR_COMMAND_LIST_TIMEOUT>();
+        l_mcfiraction.setBit<SCOMFIR_MCFIR_POP_RCMD_NOHIT>();
+        l_mcfiraction.setBit<SCOMFIR_MCFIR_POP_RCMD_BADHIT>();
+        l_mcfiraction.setBit<SCOMFIR_MCFIR_INVALID_SMF_ACCESS>();
+        l_mcfiraction.setBit<SCOMFIR_MCFIR_SYNC_ERROR>();
+
+        // Setup FIR bits in MC Fault Isolation Mask Register buffer
+        l_mcfirmask_and.flush<1>();
+        l_mcfirmask_and.clearBit<SCOMFIR_MCFIR_MC_INTERNAL_RECOVERABLE_ERROR>();
+        l_mcfirmask_and.clearBit<SCOMFIR_MCFIR_MC_INTERNAL_NONRECOVERABLE_ERROR>();
+        l_mcfirmask_and.clearBit<SCOMFIR_MCFIR_POWERBUS_PROTOCOL_ERROR>();
+        l_mcfirmask_and.clearBit<SCOMFIR_MCFIR_INBAND_BAR_HIT_WITH_INCORRECT_TTYPE>();
+        l_mcfirmask_and.clearBit<SCOMFIR_MCFIR_MULTIPLE_BAR_HIT>();
+        l_mcfirmask_and.clearBit<SCOMFIR_MCFIR_COMMAND_LIST_TIMEOUT>();
+        l_mcfirmask_and.clearBit<SCOMFIR_MCFIR_POP_RCMD_NOHIT>();
+        l_mcfirmask_and.clearBit<SCOMFIR_MCFIR_POP_RCMD_BADHIT>();
+        l_mcfirmask_and.clearBit<SCOMFIR_MCFIR_MULTIPLE_TID_ERROR>();
+        l_mcfirmask_and.clearBit<SCOMFIR_MCFIR_INVALID_SMF_ACCESS>();
+        l_mcfirmask_and.clearBit<SCOMFIR_MCFIR_SYNC_ERROR>();
+
+        char l_targetStr[fapi2::MAX_ECMD_STRING_LEN];
+        fapi2::toString(l_mi, l_targetStr, sizeof(l_targetStr));
+        FAPI_INF("Unmask FIR for MC target: %s", l_targetStr);
+
+        // Write MC FIR action1
+        FAPI_TRY(fapi2::putScom(l_mi, SCOMFIR_MCFIRACT1, l_mcfiraction),
+                 "Error from putScom (SCOMFIR_MCFIRACT1)");
+
+        // Write mask
+        FAPI_TRY(fapi2::putScom(l_mi, SCOMFIR_MCFIRMASK_WO_AND, l_mcfirmask_and),
+                 "Error from putScom (SCOMFIR_MCFIRMASK_WO_AND)");
+
+        FAPI_DBG("Unmask Complete");
     }
 
 fapi_try_exit:
