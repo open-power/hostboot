@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/include/usr/mctp/mctp_const.H $                           */
+/* $Source: src/usr/mctp/extern/libmctp_rc.h $                            */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
@@ -22,40 +22,18 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-#ifndef MCTP_CONST_H
-#define MCTP_CONST_H
+
+#ifndef _LIBMCTP_RC_H
+#define _LIBMCTP_RC_H
 
 /**
- *  @file mctp_const.H
- *  @brief constants and types used in MCTP related code
+ *  @file  libmctp_rc.h
+ *  @brief Return codes for the libmctp library
  */
 
-#include <vector>
-#include <mctp/mctp_message_types.H>
-#include <../../src/usr/mctp/extern/libmctp_rc.h>
-
-namespace MCTP
-{
-    using byte_vector_t = std::vector<uint8_t>;
-    using eid_t = uint8_t;
-
-    constexpr uint8_t KCS_INIT        = 0x00;
-    constexpr uint8_t KCS_TX_BEGIN    = 0x01;
-    constexpr uint8_t KCS_RX_COMPLETE = 0x02;
-    constexpr uint8_t KCS_DUMMY       = 0xFF;
-
-    enum inbound_msgq_msg_t
-    {
-        MSG_INIT        = 0x00,
-        MSG_TX_BEGIN    = 0x01,
-        MSG_RX_COMPLETE = 0x02,
-        MSG_DUMMY       = 0xFF
-    };
-
-    enum outbound_msgq_msg_t
-    {
-        MSG_SEND_PLDM        = 0x00
-    };
-}
+#define RC_MCTP_SUCCESS 0
+#define RC_MCTP_GENERIC_FAIL -1
+#define RC_MCTP_INVALID_LENGTH -2
+#define RC_MCTP_ALLOCATION_FAIL -3
 
 #endif

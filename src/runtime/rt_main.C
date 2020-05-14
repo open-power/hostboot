@@ -22,6 +22,12 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+
+/**
+ * @file rt_main.C
+ * @brief Entry point for HBRT initialization
+ */
+
 #include <builtins.h>
 #include <limits.h>
 #include <runtime/interface.h>
@@ -144,6 +150,9 @@ runtimeInterfaces_t* rt_start(hostInterfaces_t* intf)
 
     // apply temp overrides
     rtPost->callApplyTempOverrides();
+
+    // initialize MCTP
+    rtPost->callInitMctp();
 
     // Make sure errlmanager is ready
     rtPost->callInitErrlManager();

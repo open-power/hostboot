@@ -29,11 +29,18 @@
 
 #ifndef __MCTP_MESSAGE_TYPES_H
 #define __MCTP_MESSAGE_TYPES_H
+
+/**
+ *  @file mctp_message_types.H
+ *  @brief Values of different MCTP payload types, see DSP0239 v1.6.0 table 1
+ */
+
 namespace MCTP
 {
+    using message_type = uint8_t;
 
-    constexpr uint8_t MCTP_MSG_TYPE_PLDM = 1;
-
+    constexpr message_type MCTP_MSG_TYPE_CONTROL = 0x00;
+    constexpr message_type MCTP_MSG_TYPE_PLDM    = 0x01;
 }
 
 #endif

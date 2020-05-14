@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/include/usr/mctp/mctp_const.H $                           */
+/* $Source: src/include/usr/mctp/mctpif_rt.H $                            */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
@@ -22,40 +22,48 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-#ifndef MCTP_CONST_H
-#define MCTP_CONST_H
+#ifndef MCTPIF_RT_H
+#define MCTPIF_RT_H
 
 /**
- *  @file mctp_const.H
- *  @brief constants and types used in MCTP related code
+ * @file mctpif_rt.H
+ * @brief MCTP's interface for hostboot runtime modules to use
  */
-
-#include <vector>
-#include <mctp/mctp_message_types.H>
-#include <../../src/usr/mctp/extern/libmctp_rc.h>
+#include <mctp/mctp_const.H>
 
 namespace MCTP
 {
-    using byte_vector_t = std::vector<uint8_t>;
-    using eid_t = uint8_t;
+    /**
+    * @brief Perform MCTP_RECEIVE fw_request to get the next MCTP packet
+    *        if the hypervisor has one for HBRT
+    *
+    * @return int                Return Code which will either be from
+    *                            interface.h or from libmctp_rc.h
+    *                            (there should be no overlap)
+    */
+    int get_next_packet(void);
 
-    constexpr uint8_t KCS_INIT        = 0x00;
-    constexpr uint8_t KCS_TX_BEGIN    = 0x01;
-    constexpr uint8_t KCS_RX_COMPLETE = 0x02;
-    constexpr uint8_t KCS_DUMMY       = 0xFF;
-
-    enum inbound_msgq_msg_t
-    {
-        MSG_INIT        = 0x00,
-        MSG_TX_BEGIN    = 0x01,
-        MSG_RX_COMPLETE = 0x02,
-        MSG_DUMMY       = 0xFF
-    };
-
-    enum outbound_msgq_msg_t
-    {
-        MSG_SEND_PLDM        = 0x00
-    };
+    /**
+    * @brief Packetize the payload passed to us into MCTP packets and send
+    *        them to the BMC using the hypervsior as a virtual bridge
+    *
+    * @param[in] i_mctp_payload  Byte vector containing the complete MCTP
+    *                            message payload. If this message exceeds the
+    *                            max MCTP packet size, the MCTP core logic will
+    *                            packetize the message. It is expected that the
+    *                            first byte of this buffer is set to the
+    *                            correct message type prior to being passed to
+    *                            this function
+    *
+    * @return int                Return Code which will either be from
+    *                            interface.h or from libmctp_rc.h
+    *                            (there should be no overlap)
+    *
+    */
+    // TODO https://github.com/openbmc/libmctp/issues/4
+    // this should be a const reference but requires changes
+    // to core interface
+    int send_message(byte_vector_t& i_mctp_payload);
 }
 
 #endif

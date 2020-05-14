@@ -103,8 +103,11 @@ enum MemoryError_t
 /* Memory channel failure caused an error out to buffer chip. */
 #define HBRT_RC_CHANNEL_FAILURE        ((int)(0x0u - 0x1008u))  /* 0xFFFF_EFF8 */
 
+/* Hypervisor did not have an MCTP packet ready for HBRT to consume */
+#define HBRT_RC_NO_MCTP_PACKET         ((int)(0x0u - 0x1009u))  /* 0xFFFF_EFF7 */
+
 /* Any host-specific RCs will be this value or bigger */
-#define HBRT_RC_NEXT_OPEN_RC           ((int)(0x0u - 0x1009u))  /* 0xFFFF_EFF7 */
+#define HBRT_RC_NEXT_OPEN_RC           ((int)(0x0u - 0x100Au))  /* 0xFFF_EFF6 */
 
 /** End return codes for scom_read, scom_write. */
 
@@ -765,7 +768,10 @@ typedef struct hostInterfaces
     // Created a static constexpr to return the base size of hbrt_fw_msg
     // Cannot do #define - sizeof not allowed to be used in #defines
     static constexpr size_t HBRT_FW_MSG_BASE_SIZE =
-                                            sizeof(hbrt_fw_msg::io_type);
+          sizeof(hbrt_fw_msg::io_type);
+
+    static constexpr size_t HBRT_FW_GENERIC_RSP_SIZE =
+          sizeof(hbrt_fw_msg::resp_generic) + HBRT_FW_MSG_BASE_SIZE;
 
     /**
      * @brief Send a request to firmware, and receive a response
@@ -1176,6 +1182,11 @@ struct postInitCalls_t
      */
     void (*callInitPnor)();
 
+    /**
+     * @brief Calls MctpRP::init which will initialize HBRT's end of
+     *        the virtual MCTP bus between HBRT and the hypervisor
+     */
+    void (*callInitMctp)();
 
     /**
      * @brief Sets up ErrlManager so it is ready for errors

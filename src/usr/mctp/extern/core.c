@@ -6,6 +6,7 @@
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
 /* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
@@ -252,6 +253,21 @@ struct mctp *mctp_init(void)
   memset(mctp, 0, sizeof(*mctp));
 
   return mctp;
+}
+
+void mctp_destroy(struct mctp *mctp)
+{
+        int i;
+
+        /* Cleanup message assembly contexts */
+        for (i = 0; i < ARRAY_SIZE(mctp->msg_ctxs); i++) {
+                struct mctp_msg_ctx *tmp = &mctp->msg_ctxs[i];
+                if (tmp->buf)
+                        __mctp_free(tmp->buf);
+        }
+
+        __mctp_free(mctp->busses);
+        __mctp_free(mctp);
 }
 
 int mctp_set_rx_all(struct mctp *mctp, mctp_rx_fn fn, void *data)

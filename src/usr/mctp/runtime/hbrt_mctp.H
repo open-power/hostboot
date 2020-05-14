@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/include/usr/mctp/mctp_const.H $                           */
+/* $Source: src/usr/mctp/runtime/hbrt_mctp.H $                            */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
@@ -22,40 +22,41 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-#ifndef MCTP_CONST_H
-#define MCTP_CONST_H
+#ifndef _HBRT_MCTP_H
+#define _HBRT_MCTP_H
 
 /**
- *  @file mctp_const.H
- *  @brief constants and types used in MCTP related code
+ *  @file  hbrt_mctp.H
+ *  @brief Declaration of functions we will bind to the hbrt virtual
+ *         mctp binding.
  */
+#include <stdint.h>
 
-#include <vector>
-#include <mctp/mctp_message_types.H>
-#include <../../src/usr/mctp/extern/libmctp_rc.h>
+/**
+ *  @brief Function which will bind to mctp_send and calls MCTP_SEND
+ *         via the firmware_request interface.
+ *
+ *  @param[in] i_len  Length of the MCTP packet we want to send.
+ *  @param[in] i_val  Pointer to a buffer containing MCTP packet we want to
+ *                    send. This buffer is allocated and freed by the caller.
+ *
+ *  @return Return code, either from firmware_request or libmctp.
+ */
+extern "C"
+int __mctp_hbrtvirt_hostboot_mctp_send(uint32_t i_len, const void *i_val);
 
-namespace MCTP
-{
-    using byte_vector_t = std::vector<uint8_t>;
-    using eid_t = uint8_t;
-
-    constexpr uint8_t KCS_INIT        = 0x00;
-    constexpr uint8_t KCS_TX_BEGIN    = 0x01;
-    constexpr uint8_t KCS_RX_COMPLETE = 0x02;
-    constexpr uint8_t KCS_DUMMY       = 0xFF;
-
-    enum inbound_msgq_msg_t
-    {
-        MSG_INIT        = 0x00,
-        MSG_TX_BEGIN    = 0x01,
-        MSG_RX_COMPLETE = 0x02,
-        MSG_DUMMY       = 0xFF
-    };
-
-    enum outbound_msgq_msg_t
-    {
-        MSG_SEND_PLDM        = 0x00
-    };
-}
+/**
+ *  @brief Function which will bind to mctp_receive and calls MCTP_RECEIVE
+ *         via the firmware_request interface.
+ *
+ *  @param[in,out] len  in  : Length of the buffer provided.
+ *                      out : Length copied into buffer.
+ *  @param[out]    val  Pointer to buffer that MCTP packet will by copied
+ *                      into. This buffer is allocated and freed by the caller.
+ *
+ *  @return Return code, either from firmware_request or libmctp.
+ */
+extern "C"
+int __mctp_hbrtvirt_hostboot_mctp_receive(uint64_t *io_len, void *o_val);
 
 #endif

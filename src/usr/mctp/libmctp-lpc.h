@@ -25,6 +25,10 @@
 #ifndef _LIBMCTP_LPCL_H
 #define _LIBMCTP_LPCL_H
 
+/**
+ * @file libmctp-lpc.h
+ * @brief header with common code for lpc binding
+ */
 // Headers from local directory
 #include "extern/libmctp.h"
 
@@ -43,11 +47,6 @@ struct mctp_lpcmap_hdr {
   uint32_t  tx_offset;
   uint32_t  tx_size;
 } __attribute__((packed));
-
-#ifndef container_of
-#define container_of(ptr, type, member) \
-    (type *)((char *)(ptr) - (char *)&((type *)0)->member)
-#endif
 
 // first 4 bytes of config area of MCTP space
 const uint32_t MCTP_MAGIC = 0x4d435450;

@@ -27,6 +27,12 @@ MODULE = mctp_rt
 
 ROOTPATH = ../../../..
 
+include ../common.mk
+
+OBJS += hbrt_mctp.o
+OBJS += hbrtvirt.o
+OBJS += mctprp_rt.o
+
 SUBDIRS += test.d
 
 include $(ROOTPATH)/config.mk

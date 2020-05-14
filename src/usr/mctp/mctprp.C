@@ -23,6 +23,11 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
+/**
+ * @file  mctprp.C
+ * @brief Resource provider for MCTP stack during IPL time
+ */
+
 // Headers from local directory
 #include "mctprp.H"
 #include "libmctp-hostlpc.h"
@@ -304,7 +309,7 @@ void MctpRP::handle_outbound_messages(void)
                                        msg->extra_data,
                                        msg->data[0]);
 
-              if(rc != RC_MCTP_CORE_SUCCESS)
+              if(rc != RC_MCTP_SUCCESS)
               {
                   TRACFCOMP(g_trac_mctp,
                             "MSG_SEND_PLDM failed during mctp_message_tx  rc = 0x%x",

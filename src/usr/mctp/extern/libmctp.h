@@ -6,6 +6,7 @@
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
 /* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
@@ -45,6 +46,11 @@ struct mctp_hdr {
   uint8_t  flags_seq_tag;
 };
 
+#ifndef container_of
+#define container_of(ptr, type, member) \
+    (type *)((char *)(ptr) - (char *)&((type *)0)->member)
+#endif
+
 /* Definitions for flags_seq_tag field */
 #define MCTP_HDR_FLAG_SOM  (1<<7)
 #define MCTP_HDR_FLAG_EOM  (1<<6)
@@ -83,6 +89,7 @@ struct mctp;
 struct mctp_bus;
 
 struct mctp *mctp_init(void);
+void mctp_destroy(struct mctp *mctp);
 
 /* Register a binding to the MCTP core, and creates a bus (populating
  * binding->bus).
