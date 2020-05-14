@@ -2478,6 +2478,9 @@
       <id>SP_FUNCTIONS</id>
     </attribute>
     <attribute>
+      <id>SYNC_BETWEEN_STEPS</id>
+    </attribute>
+    <attribute>
       <id>TEST_MAX_STRING</id>
     </attribute>
     <attribute>
