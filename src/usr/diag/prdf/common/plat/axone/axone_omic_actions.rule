@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2018,2019
+# Contributors Listed Below - COPYRIGHT 2018,2020
 # [+] International Business Machines Corp.
 #
 #
@@ -135,19 +135,19 @@ actionclass dl2_omi_bus_th_1
 actionclass dl0_omi_bus_th_32perDay
 {
     dl0_omi_bus;
-    threshold1;
+    threshold32pday;
 };
 
 actionclass dl1_omi_bus_th_32perDay
 {
     dl1_omi_bus;
-    threshold1;
+    threshold32pday;
 };
 
 actionclass dl2_omi_bus_th_32perDay
 {
     dl2_omi_bus;
-    threshold1;
+    threshold32pday;
 };
 
 ################################################################################
