@@ -63,11 +63,12 @@ extern "C"
         }
 
         // Disable PMICs and clear status bits so we are starting at a known off state
-        FAPI_TRY(mss::pmic::disable_and_reset_pmics(l_pmics));
+        FAPI_TRY(mss::pmic::disable_and_reset_pmics(i_ocmb_target));
 
         // // If we're enabling via internal settings, we can just run VR ENABLE down the line
         if (i_mode == mss::pmic::enable_mode::MANUAL)
         {
+            FAPI_INF("Manual mode specified. PMICs will not be disabled/enabled in any defined order.");
             FAPI_TRY(mss::pmic::enable_manual(l_pmics));
         }
         else

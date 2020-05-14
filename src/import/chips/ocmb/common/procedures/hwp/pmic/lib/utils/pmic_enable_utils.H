@@ -389,10 +389,10 @@ fapi2::ReturnCode enable_chip_1U_2U(const fapi2::Target<fapi2::TARGET_TYPE_PMIC>
 ///
 /// @brief Disable PMICs and clear status bits in preparation for enable
 ///
-/// @param[in] i_pmics vector of PMIC targets
+/// @param[in] i_ocmb_target OCMB parent target
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
 ///
-fapi2::ReturnCode disable_and_reset_pmics(const std::vector<fapi2::Target<fapi2::TARGET_TYPE_PMIC>>& i_pmics);
+fapi2::ReturnCode disable_and_reset_pmics(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP> i_ocmb_target);
 
 ///
 /// @brief Check for supported module height for the DIMMs on the provided OCMB

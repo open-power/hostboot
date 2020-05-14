@@ -502,16 +502,25 @@ fapi_try_exit:
 ///
 /// @brief Disable PMICs and clear status bits in preparation for enable
 ///
-/// @param[in] i_pmics vector of PMIC targets
+/// @param[in] i_ocmb_target OCMB parent target
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
 ///
-fapi2::ReturnCode disable_and_reset_pmics(const std::vector<fapi2::Target<fapi2::TARGET_TYPE_PMIC>>& i_pmics)
+fapi2::ReturnCode disable_and_reset_pmics(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP> i_ocmb_target)
 {
     using REGS = pmicRegs<mss::pmic::product::JEDEC_COMPLIANT>;
     using FIELDS = pmicFields<mss::pmic::product::JEDEC_COMPLIANT>;
 
-    for (const auto& l_pmic : i_pmics)
+    // First, grab the PMIC targets in REL_POS order
+    auto l_pmics = mss::find_targets_sorted_by_index<fapi2::TARGET_TYPE_PMIC>(i_ocmb_target);
+
+    // Next, sort them by the sequence attributes
+    FAPI_TRY(mss::pmic::order_pmics_by_sequence(i_ocmb_target, l_pmics));
+
+    // Reverse loop
+    for (int16_t l_i = (l_pmics.size() - 1); l_i >= 0; --l_i)
     {
+        const auto& PMIC = l_pmics[l_i];
+
         // First, disable
         {
             fapi2::buffer<uint8_t> l_reg_contents;
@@ -519,12 +528,12 @@ fapi2::ReturnCode disable_and_reset_pmics(const std::vector<fapi2::Target<fapi2:
             // Redundant clearBit, but just so it's clear what we're doing
             l_reg_contents.clearBit<FIELDS::R32_VR_ENABLE>();
 
-            FAPI_TRY(mss::pmic::i2c::reg_write_reverse_buffer(l_pmic, REGS::R32, l_reg_contents));
+            FAPI_TRY(mss::pmic::i2c::reg_write_reverse_buffer(PMIC, REGS::R32, l_reg_contents));
         }
 
         // Now that it's disabled, let's clear the status bits so errors don't hang over into the next enable
         {
-            FAPI_TRY(mss::pmic::status::clear(l_pmic));
+            FAPI_TRY(mss::pmic::status::clear(PMIC));
         }
     }
 
