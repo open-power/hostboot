@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -167,6 +167,7 @@ p10_rng_init_phase2(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
     }
 
     // set NX RNG enable
+    FAPI_TRY(PREP_NX_PBI_RNG_CFG(i_target));
     SET_NX_PBI_RNG_CFG_RNG_ENABLE(l_rng_cfg_data);
     FAPI_TRY(PUT_NX_PBI_RNG_CFG(i_target, l_rng_cfg_data));
 

@@ -499,13 +499,14 @@ fapi2::ReturnCode p10_fabric_iovalid_link_validate(
     // validate DL training state; poll for training completion
     for(uint32_t l_poll_loops = DL_MAX_POLL_LOOPS; l_poll_loops > 0 && !l_dl_trained; l_poll_loops--)
     {
-        FAPI_TRY(GET_DLP_FIR_REG_RW(i_loc_endp_target, l_dl_fir_reg),
-                 "Error from getScom (DLP_FIR_REG_RW)");
         FAPI_TRY(GET_DLP_DLL_STATUS(i_loc_endp_target, l_dl_status_reg),
                  "Error from getScom (DLP_DLL_STATUS)");
 
         GET_DLP_DLL_STATUS_0_TIMEOUT_STATE(l_dl_status_reg, l_dl_timeout_state_evn);
         GET_DLP_DLL_STATUS_1_TIMEOUT_STATE(l_dl_status_reg, l_dl_timeout_state_odd);
+
+        FAPI_TRY(GET_DLP_FIR_REG_RW(i_loc_endp_target, l_dl_fir_reg),
+                 "Error from getScom (DLP_FIR_REG_RW)");
 
         if (l_loc_link_train == fapi2::ENUM_ATTR_IOHS_LINK_TRAIN_BOTH)
         {
@@ -888,6 +889,15 @@ fapi2::ReturnCode p10_fabric_iovalid_update_link(
     fapi2::buffer<uint64_t> l_iovalid_mask;
 
     auto l_pauc_target = i_target.getParent<fapi2::TARGET_TYPE_PAUC>();
+
+    if(i_set_not_clear)
+    {
+        FAPI_TRY(PREP_CPLT_CONF1_WO_OR(l_pauc_target));
+    }
+    else
+    {
+        FAPI_TRY(PREP_CPLT_CONF1_WO_CLEAR(l_pauc_target));
+    }
 
     if ((i_en == fapi2::ENUM_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG_TRUE) ||
         (i_en == fapi2::ENUM_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG_EVEN_ONLY))

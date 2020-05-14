@@ -139,12 +139,9 @@ p10_rng_init_phase1(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
     // parameters, read delay parameters.  program window sizes, pace, self test
     // enables/parameters, and read delay parameters get values from self test
     // registers
-    FAPI_TRY(GET_NX_PBI_RNG_ST0(i_target, l_rng_st0_data));
-    FAPI_TRY(GET_NX_PBI_RNG_ST1(i_target, l_rng_st1_data));
-    FAPI_TRY(GET_NX_PBI_RNG_ST3(i_target, l_rng_st3_data));
-    FAPI_TRY(GET_NX_PBI_RNG_RDELAY(i_target, l_rng_rdelay_data));
 
     FAPI_INF("Configuring Self Test Registers (non P10N DD1)");
+    FAPI_TRY(GET_NX_PBI_RNG_ST0(i_target, l_rng_st0_data));
     // configure RNG Self Test Register 0
     SET_NX_PBI_RNG_ST0_REPTEST_MATCH_TH(NX_RNG_ST0_REPTEST_MATCH_TH_VAL, l_rng_st0_data);
     SET_NX_PBI_RNG_ST0_ADAPTEST_SAMPLE_SIZE(NX_RNG_ST0_ADAPTEST_SAMPLE_SIZE_VAL, l_rng_st0_data);
@@ -153,26 +150,27 @@ p10_rng_init_phase1(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
     SET_NX_PBI_RNG_ST0_ADAPTEST_RRN_RNG1_MATCH_TH(NX_RNG_ST0_ADAPTEST_RRN_RNG1_MATCH_TH_VAL, l_rng_st0_data);
     SET_NX_PBI_RNG_ST0_ADAPTEST_CRN_RNG0_MATCH_TH(NX_RNG_ST0_ADAPTEST_CRN_RNG0_MATCH_TH_VAL, l_rng_st0_data);
     SET_NX_PBI_RNG_ST0_ADAPTEST_CRN_RNG1_MATCH_TH(NX_RNG_ST0_ADAPTEST_CRN_RNG1_MATCH_TH_VAL, l_rng_st0_data);
+    FAPI_TRY(PUT_NX_PBI_RNG_ST0(i_target, l_rng_st0_data));
 
     //// configure RNG Self Test Register 1
+    FAPI_TRY(GET_NX_PBI_RNG_ST1(i_target, l_rng_st1_data));
     SET_NX_PBI_RNG_ST1_SOFT_FAIL_TH(NX_RNG_ST1_SOFT_FAIL_TH_VAL, l_rng_st1_data);
     SET_NX_PBI_RNG_ST1_1BIT_MATCH_TH_MIN(NX_RNG_ST1_1BIT_MATCH_TH_MIN_VAL, l_rng_st1_data);
     SET_NX_PBI_RNG_ST1_1BIT_MATCH_TH_MAX(NX_RNG_ST1_1BIT_MATCH_TH_MAX_VAL, l_rng_st1_data);
+    FAPI_TRY(PUT_NX_PBI_RNG_ST1(i_target, l_rng_st1_data));
 
     //// configure RNG Self Test Register 3
+    FAPI_TRY(GET_NX_PBI_RNG_ST3(i_target, l_rng_st3_data));
     SET_NX_PBI_RNG_ST3_RRN_ENABLE(NX_RNG_ST3_RRN_ENABLE_VAL, l_rng_st3_data);
     SET_NX_PBI_RNG_ST3_WINDOW_SIZE(NX_RNG_ST3_WINDOW_SIZE_VAL, l_rng_st3_data);
     SET_NX_PBI_RNG_ST3_MATCH_TH_MIN(NX_RNG_ST3_MATCH_TH_MIN_VAL, l_rng_st3_data);
     SET_NX_PBI_RNG_ST3_MATCH_TH_MAX(NX_RNG_ST3_MATCH_TH_MAX_VAL, l_rng_st3_data);
+    FAPI_TRY(PUT_NX_PBI_RNG_ST3(i_target, l_rng_st3_data));
 
     //// configure RNG Read Delay Parameters Register
+    FAPI_TRY(GET_NX_PBI_RNG_RDELAY(i_target, l_rng_rdelay_data));
     SET_NX_PBI_RNG_RDELAY_LFSR_RESEED_EN(NX_RNG_RDELAY_LFSR_RESEED_EN_VAL, l_rng_rdelay_data);
     SET_NX_PBI_RNG_RDELAY_READ_RTY_RATIO(NX_RNG_RDELAY_READ_RTY_RATIO_VAL, l_rng_rdelay_data);
-
-    //// Put configurations into test registers
-    FAPI_TRY(PUT_NX_PBI_RNG_ST0(i_target, l_rng_st0_data));
-    FAPI_TRY(PUT_NX_PBI_RNG_ST1(i_target, l_rng_st1_data));
-    FAPI_TRY(PUT_NX_PBI_RNG_ST3(i_target, l_rng_st3_data));
     FAPI_TRY(PUT_NX_PBI_RNG_RDELAY(i_target, l_rng_rdelay_data));
 
     // 4. If RNG is not broken then host boot sets rng_enable =1.

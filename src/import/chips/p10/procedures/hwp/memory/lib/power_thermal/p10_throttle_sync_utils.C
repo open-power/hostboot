@@ -55,6 +55,7 @@ fapi2::ReturnCode enable_sync_operations(const fapi2::Target<fapi2::TARGET_TYPE_
     FAPI_DBG("Entering enable_sync_operations on target %s", mss::c_str(i_target));
 
     fapi2::buffer<uint64_t> l_scomData(0);
+    FAPI_TRY(PREP_SCOMFIR_MCMODE0(i_target));
     SET_SCOMFIR_MCMODE0_DISABLE_MC_SYNC(l_scomData);
 
     FAPI_DBG("Writing SCOMFIR_MCSYNC 0x%016llX: Data 0x%016llX for %s",
@@ -86,6 +87,7 @@ fapi2::ReturnCode setup_master(const fapi2::Target<fapi2::TARGET_TYPE_MI>& i_tar
     // -------------------------------------------------------------------
 
     // Set GO bit
+    FAPI_TRY(PREP_SCOMFIR_MCSYNC(i_target));
     SET_SCOMFIR_MCSYNC_SYNC_GO(l_scomData);
     FAPI_TRY(PUT_SCOMFIR_MCSYNC(i_target, l_scomData),
              "Failed PUT_SCOMFIR_MCSYNC() on %s", mss::c_str(i_target));
@@ -122,6 +124,7 @@ fapi2::ReturnCode setup_master(const fapi2::Target<fapi2::TARGET_TYPE_MI>& i_tar
     // --------------------------------------------------------------
 
     // Setup SYNC_GO
+    FAPI_TRY(PREP_SCOMFIR_MCSYNC(i_target));
     SET_SCOMFIR_MCSYNC_SYNC_GO(l_scomData);
 
     // Write to MCSYNC reg

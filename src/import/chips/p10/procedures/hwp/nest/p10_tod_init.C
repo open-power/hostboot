@@ -377,13 +377,13 @@ fapi2::ReturnCode sync_spread(
              l_chip_it != l_targets.end();
             )
         {
-            FAPI_TRY(GET_TOD_TIMER_REG(*l_chip_it,
-                                       l_tod_timer_data),
-                     "Error polling TOD_TIMER_REG");
-
             FAPI_TRY(GET_TOD_VALUE_REG(*l_chip_it,
                                        l_tod_value_reg),
                      "Error from GET_TOD_VALUE_REG");
+
+            FAPI_TRY(GET_TOD_TIMER_REG(*l_chip_it,
+                                       l_tod_timer_data),
+                     "Error polling TOD_TIMER_REG");
 
             if (GET_TOD_TIMER_REG_STATUS1(l_tod_timer_data))
             {
