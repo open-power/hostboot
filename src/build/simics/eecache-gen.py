@@ -94,9 +94,9 @@ def hb_eecache_setup(file_name, version, verbose):
     # create the header records
     with open(file_name, 'wb') as f:
         if version == 1:
-            # version 1 byte. only supports version 1
+            # version, written in 1 byte. only supports version 1
             f.write(struct.pack('>B', 1));
-            # end of cache 4 bytes
+            # end of cache, written in 4 bytes
             f.write(struct.pack('>i', 0x24357));
 
             # eepromRecordHeader for MVPD (proc 0)
@@ -113,38 +113,50 @@ def hb_eecache_setup(file_name, version, verbose):
             # for DIMM port 1
             write_eecache_record_v1(f, 0x50001, 8, 3, 0xA0, 0xFF, 4,  0x23357, 0x80);
 
-            # 44 more record headers need to fill up
-            for x in range(44):
+            # Note: These max eeprom counts come from src/include/usr/eeprom/eeprom_const.H
+            # For version 1, it is currently a max count of 50
+            # Given 6 records already filled out above, 44 more record headers
+            # can be filled out as empty
+            for _ in range(44):
                 write_eecache_record_v1(f, 0, 0, 0, 0, 0, 0, 0xFFFFFFFF, 0);
-        elif version == 2:
-            # version 1 byte. (version 2 but no SPI access yet)
-            f.write(struct.pack('>B', 2));
-            # end of cache 4 bytes
-            f.write(struct.pack('>i', 0x12389));
-    
-            # eepromRecordHeader for MVPD (proc 0)
-            write_i2c_eecache_record(f, 0x50000, 0, 1, 0xA0, 0xFF, 64, 0x389, 0xC0);
-            # for DIMM port 0
-            write_i2c_eecache_record(f, 0x50000, 0, 3, 0xA0, 0xFF, 4, 0x10389, 0xC0);
-            # for DIMM port 1
-            write_i2c_eecache_record(f, 0x50000, 1, 3, 0xA0, 0xFF, 4, 0x11389, 0xC0);
 
-            # 47 more record headers need to fill up
-            for x in range(47):
-                write_i2c_eecache_record(f, 0, 0, 0, 0, 0, 0, 0xFFFFFFFF, 0);
-        else:
-            # version 1 byte. Supports version 2 with SPI
+        elif version == 2:
+            # version, written in 1 byte. (version 2 but no SPI access yet)
             f.write(struct.pack('>B', 2));
-            # end of cache 4 bytes
-            f.write(struct.pack('>i', 0x12389));
-            # eepromRecordHeader for MVPD
-            write_spi_eecache_record(f, 0x50000, 0x02, 0x00C0, 64, 0x389, 0xC0);
+            # end of cache, written in 4 bytes
+            f.write(struct.pack('>i', 0x1270D));
+
+            # eepromRecordHeader for MVPD (proc 0)
+            write_i2c_eecache_record(f, 0x50000, 0, 1, 0xA0, 0xFF, 64, 0x70D, 0xC0);
             # for DIMM port 0
-            write_i2c_eecache_record(f, 0x50000, 0, 3, 0xA0, 0xFF, 4, 0x10389, 0xC0);
+            write_i2c_eecache_record(f, 0x50000, 0, 3, 0xA0, 0xFF, 4, 0x1070D, 0xC0);
             # for DIMM port 1
-            write_i2c_eecache_record(f, 0x50000, 1, 3, 0xA0, 0xFF, 4, 0x11389, 0xC0);
-            # 47 more record headers need to fill up
-            for x in range(47):
+            write_i2c_eecache_record(f, 0x50000, 1, 3, 0xA0, 0xFF, 4, 0x1170D, 0xC0);
+
+            # Note: These max eeprom counts come from src/include/usr/eeprom/eeprom_const.H
+            # For version 2, it is currently a max count of 100
+            # Given 3 records already filled out above, 97 more record headers
+            # can be filled out as empty
+            for _ in range(97):
+                write_i2c_eecache_record(f, 0, 0, 0, 0, 0, 0, 0xFFFFFFFF, 0);
+
+        else:
+            # version, written in 1 byte. Supports version 2 with SPI
+            f.write(struct.pack('>B', 2));
+            # end of cache, written in 4 bytes
+            f.write(struct.pack('>i', 0x1270D));
+            # eepromRecordHeader for MVPD
+            write_spi_eecache_record(f, 0x50000, 0x02, 0x00C0, 64, 0x70D, 0xC0);
+            # for DIMM port 0
+            write_i2c_eecache_record(f, 0x50000, 0, 3, 0xA0, 0xFF, 4, 0x1070D, 0xC0);
+            # for DIMM port 1
+            write_i2c_eecache_record(f, 0x50000, 1, 3, 0xA0, 0xFF, 4, 0x1170D, 0xC0);
+
+            # Note: These max eeprom counts come from src/include/usr/eeprom/eeprom_const.H
+            # For version 2, it is currently a max count of 100
+            # Given 3 records already filled out above, 97 more record headers
+            # can be filled out as empty
+            for _ in range(97):
                 write_i2c_eecache_record(f, 0, 0, 0, 0, 0, 0, 0xFFFFFFFF, 0);
 
     ##################################### Populate Proc 0 Records ####################################

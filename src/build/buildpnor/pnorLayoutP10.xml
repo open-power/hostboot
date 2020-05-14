@@ -88,10 +88,10 @@ Layout Description
     <section>
         <!-- NOTE must be before images that are likely to change like HBI,
         also must update standalone.simics if EECACHE offset changes-->
-        <description>Eeprom Cache(512K)</description>
+        <description>Eeprom Cache(2056K)</description>
         <eyeCatch>EECACHE</eyeCatch>
         <physicalOffset>0x2C000</physicalOffset>
-        <physicalRegionSize>0x80000</physicalRegionSize>
+        <physicalRegionSize>0x202000</physicalRegionSize>
         <side>sideless</side>
         <ecc/>
     </section>

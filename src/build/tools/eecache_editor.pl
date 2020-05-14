@@ -64,6 +64,7 @@ my $devOffset = 0xFFFF;  # initialized to invalid offset
 #
 # 4) Extract the contents for a given masterHuid, port, engine, devAddr, muxSelect
 
+# Note: *_NUM_ENTRIES count comes from src/include/usr/eeprom/eeprom_const.H
 use constant VERSION_1_TOC_ENTRY_SIZE_BYTES => 17;
 use constant VERSION_1_TOC_ENTRY_SIZE_BITS => (VERSION_1_TOC_ENTRY_SIZE_BYTES * 8) ;
 use constant VERSION_1_NUM_ENTRIES => 50;
@@ -71,7 +72,7 @@ use constant VERSION_1_TOC_SIZE => (VERSION_1_TOC_ENTRY_SIZE_BYTES * VERSION_1_N
 
 use constant VERSION_2_TOC_ENTRY_SIZE_BYTES => 18;
 use constant VERSION_2_TOC_ENTRY_SIZE_BITS => (VERSION_2_TOC_ENTRY_SIZE_BYTES * 8) ;
-use constant VERSION_2_NUM_ENTRIES => 50;
+use constant VERSION_2_NUM_ENTRIES => 100;
 use constant VERSION_2_TOC_SIZE => (VERSION_2_TOC_ENTRY_SIZE_BYTES * VERSION_2_NUM_ENTRIES) + 5;
 
 use constant VERSION_LATEST => 2;
