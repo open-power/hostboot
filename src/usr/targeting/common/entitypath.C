@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -478,7 +478,7 @@ const char* EntityPath::pathElementTypeAsString(
         case TYPE_MCC:
             return "MCC";
         case TYPE_OCMB_CHIP:
-            return "OCBM_CHIP";
+            return "OCMB_CHIP";
         case TYPE_MEM_PORT:
             return "MEM_PORT";
         case TYPE_I2C_MUX:
