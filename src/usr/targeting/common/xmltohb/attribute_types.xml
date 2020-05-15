@@ -5804,6 +5804,7 @@
     <no_export/>
   </attribute>
 
+  <!-- ********************************************************************* -->
   <attribute>
     <description>Entity path of the peer target of a bus target
     </description>
@@ -6537,6 +6538,53 @@
     <no_export/>
   </attribute>
 
+  <!-- ********************************************************************* -->
+  <attribute>
+    <description>
+      This attribute holds the base MRW values that controls the latches required to configure the
+      PHBs to swap its lanes if wiring to the connector/device is straight or reverse. On some
+      systems Dynamic Bifurcation can occur (based on VPD values or some other indicator) which may
+      tweak the value provided in this _BASE attribute and the ATTR_PROC_PCIE_LANE_REVERSAL used by
+      the HWP directly. If no dynamic bifurcation occurs the _BASE attribute value and
+      ATTR_PROC_PCIE_LANE_REVERSAL will be identical.
+
+      creator: platform
+      consumer: p10_pcie_scominit
+      firmware notes:
+        These are config dependent attributes based on PCIe Lane/sideband signal routing and PCIe endpoints attached.
+
+       Attribute Name                     Definition                 Example    Comments                        Targeted HWP Attributes
+       ATTR_PROC_PCIE_LANE_REVERSAL_BASE  (Stack0, Stack1, Stack2)   (1, 0, 0)  Reverse lanes on PHB0.          TC_PCI_LANE_CFG_DC_2H
+                                                                                Do not reverse lanes on PHB1.   TC_PCI_LANE_CFG_DC_3H
+                                                                                Do not reverse lanes on PHB2.   TC_PCI_LANE_CFG_DC_4H
+
+       Register Address      Register Name             Bit    Signal Name                Bit Description
+       8000009 / 9000009     TPPCI.PCI.CPLT_CONF1      0      TC_PCI_LANE_CFG_DC_0H      MSB for  LANE CFG  in the logic that configures x16, x8x8, x8x4x4
+                                                       1      TC_PCI_LANE_CFG_DC_1H      LSB for LANE CFG  in the logic that configures x16, x8x8, x8x4x4
+
+                                                       2      TC_PCI_SWAP_DC_2H          LANE SWAP control for Stack0
+                                                       3      TC_PCI_SWAP_DC_3H          LANE SWAP control for Stack0
+                                                       4      TC_PCI_SWAP_DC_4H          LANE SWAP control for Stack0
+
+                                                       8      TC_PCI_IOVALID_DC_8H       IOVALID control for Stack0
+                                                       9      TC_PCI_IOVALID_DC_9H       IOVALID control for Stack1
+                                                       10     TC_PCI_IOVALID_DC_10H      IOVALID control for Stack2
+
+    </description>
+    <global/>
+    <id>PROC_PCIE_LANE_REVERSAL_BASE</id>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <simpleType>
+      <array>3</array>
+      <uint8_t>
+        <default>
+              0x0,0x0,0x0
+          </default>
+      </uint8_t>
+    </simpleType>
+  </attribute>
+
   <attribute>
     <id>PROC_PCIE_NUM_PEC</id>
     <description>
@@ -6656,6 +6704,55 @@
     </simpleType>
     <persistency>non-volatile</persistency>
     <readable/>
+  </attribute>
+
+  <!-- ********************************************************************* -->
+  <attribute>
+    <description>
+      This attribute holds the base values from the MRW to define how to configure the PEC as a x16,
+      x8x8, or x8x4x4 based on what PHBs are active defined from the MRW. On some systems Dynamic
+      Bifurcation can occur (based on VPD values or some other indicator) which may tweak the value
+      provided in this _BASE attribute and the ATTR_PROC_PCIE_PHB_ACTIVE used by the HWP directly.
+      If no dynamic bifurcation occurs the _BASE attribute value and ATTR_PROC_PCIE_PHB_ACTIVE will
+      be identical.
+
+      creator: platform
+      consumer: p10_pcie_scominit
+      firmware notes:
+        These are config dependent attributes based on PCIe Lane/sideband signal routing and PCIe endpoints attached.
+
+       Attribute Name                  Definition                Example      Comments       Targeted Register Latches
+       ATTR_PROC_PCIE_PHB_ACTIVE_BASE  (Stack0, Stack1, Stack2)  (1, 0, 0)    PHB0 enabled   TC_PCI_LANE_CFG_DC_0H, TC_PCI_LANE_CFG_DC_1H
+                                                                              PHB1 disabled
+                                                                              PHB2 disabled
+
+       Register Latch Definition:
+       PCI0 / PCI1
+       Register Address      Register Name             Bit    Signal Name                Bit Description
+       8000009 / 9000009     TPPCI.PCI.CPLT_CONF1      0      TC_PCI_LANE_CFG_DC_0H      MSB for  LANE CFG  in the logic that configures x16, x8x8, x8x4x4
+                                                       1      TC_PCI_LANE_CFG_DC_1H      LSB for LANE CFG  in the logic that configures x16, x8x8, x8x4x4
+
+                                                       2      TC_PCI_SWAP_DC_2H          LANE SWAP control for Stack0
+                                                       3      TC_PCI_SWAP_DC_3H          LANE SWAP control for Stack0
+                                                       4      TC_PCI_SWAP_DC_4H          LANE SWAP control for Stack0
+
+                                                       8      TC_PCI_IOVALID_DC_8H       IOVALID control for Stack0
+                                                       9      TC_PCI_IOVALID_DC_9H       IOVALID control for Stack1
+                                                       10     TC_PCI_IOVALID_DC_10H      IOVALID control for Stack2
+
+    </description>
+    <global/>
+    <id>PROC_PCIE_PHB_ACTIVE_BASE</id>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <simpleType>
+      <array>3</array>
+      <uint8_t>
+        <default>
+              0x1,0x1,0x1
+          </default>
+      </uint8_t>
+    </simpleType>
   </attribute>
 
   <attribute>

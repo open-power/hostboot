@@ -4277,6 +4277,12 @@
     <attribute>
       <id>PARENT_PERVASIVE</id>
     </attribute>
+    <attribute>
+      <id>PROC_PCIE_LANE_REVERSAL_BASE</id>
+    </attribute>
+    <attribute>
+      <id>PROC_PCIE_PHB_ACTIVE_BASE</id>
+    </attribute>
   </targetType>
 
   <!-- PEC corresponds to IOP. Use same PEC target for Nimbus and Cumulus
