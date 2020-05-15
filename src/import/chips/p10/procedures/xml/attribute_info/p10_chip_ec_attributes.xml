@@ -267,4 +267,21 @@
     </chipEcFeature>
   </attribute>
   <!-- ******************************************************************** -->
+  <attribute>
+    <id>ATTR_CHIP_EC_FEATURE_VAS_DD1_MODE_HW405778</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      Disable MMIO Atag Reuse bug fix on NX Utilization (read-only) registers
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_P10</name>
+        <ec>
+          <value>0x10</value>
+          <test>EQUAL</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
+  <!-- ******************************************************************** -->
 </attributes>
