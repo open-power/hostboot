@@ -433,9 +433,14 @@ typedef struct
     //is reported if it ever happens
     uint32_t wov_max_droop_pct;
 
+    //Offset added to VDD to come up the corresponding VCS voltage. Note, VCS value
+    //is bounded by the vcs_floor value below
+    uint16_t vcs_vdd_offset_mv;
+
+    //The minimum value of VCS
+    uint16_t vcs_floor_mv;
+
     uint32_t pad1;
-
-
     // Biased Compare VID operating points
     // @todo RTC 201083 Add DDS GPPB values
     // CompareVIDPoints_t vid_point_set[NUM_PV_POINTS];

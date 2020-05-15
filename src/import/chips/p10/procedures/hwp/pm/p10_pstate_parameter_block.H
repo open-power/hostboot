@@ -183,6 +183,8 @@ typedef struct
     uint32_t attr_sram_write_assist_mv;
     uint32_t attr_array_write_assist_set;
     uint8_t  attr_rvrm_deadzone_mv;
+    uint8_t attr_vcs_vdd_offset_mv;
+    uint16_t attr_vcs_floor_mv;
 
 } AttributeList;
 

@@ -999,9 +999,9 @@ fapi2::ReturnCode PlatPmPPB::gppb_init(
         }
         io_globalppb->pgpe_flags[PGPE_FLAG_PHANTOM_HALT_ENABLE] = iv_attrs.attr_phantom_halt_enable;
 
+        io_globalppb->vcs_vdd_offset_mv = iv_attrs.attr_vcs_vdd_offset_mv;
+        io_globalppb->vcs_floor_mv  = iv_attrs.attr_vcs_floor_mv;
 
-
-#if 0
         //WOV parameters
         io_globalppb->wov_sample_125us                = revle32(iv_attrs.attr_wov_sample_125us);
         io_globalppb->wov_max_droop_pct               = revle32(iv_attrs.attr_wov_max_droop_pct);
@@ -1017,11 +1017,10 @@ fapi2::ReturnCode PlatPmPPB::gppb_init(
 
         if (io_globalppb->wov_underv_vmin_mv == 0)
         {
-            io_globalppb->wov_underv_vmin_mv = revle16(uint16_t(revle32(io_globalppb->safe_voltage_mv)));
+            io_globalppb->wov_underv_vmin_mv = revle16(uint16_t(revle32(io_globalppb->safe_voltage_mv[SAFE_VOLTAGE_VDD])));
             FAPI_INF("WOV_VMIN_MV=%u",revle16(io_globalppb->wov_underv_vmin_mv));
-            FAPI_INF("SafeVoltage=%u",revle32(io_globalppb->safe_voltage_mv));
+            FAPI_INF("SafeVoltage=%u",revle32(io_globalppb->safe_voltage_mv[SAFE_VOLTAGE_VDD]));
         }
-#endif
 
 
     } while (0);
@@ -1482,6 +1481,9 @@ FAPI_INF("%-60s[3] = 0x%08x %d", #attr_name, iv_attrs.attr_assign[3], iv_attrs.a
     DATABLOCK_GET_ATTR(ATTR_WOV_OVERV_STEP_DECR_10THPCT,    iv_procChip,attr_wov_overv_step_decr_pct);
     DATABLOCK_GET_ATTR(ATTR_WOV_OVERV_MAX_10THPCT,          iv_procChip,attr_wov_overv_max_pct);
 
+    //VCS attributes
+    DATABLOCK_GET_ATTR(ATTR_VCS_FLOOR_MV,                   iv_procChip,attr_vcs_floor_mv);
+    DATABLOCK_GET_ATTR(ATTR_VCS_VDD_OFFSET_MV,              iv_procChip,attr_vcs_vdd_offset_mv);
 
 
     // Deal with defaults if attributes are not set
