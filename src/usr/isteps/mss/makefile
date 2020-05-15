@@ -74,6 +74,7 @@ MSS_LIB += ${ROOTPATH}/src/import/generic/memory/lib/utils/shared/
 MSS_LIB += ${ROOTPATH}/src/import/generic/memory/lib/utils/freq
 MSS_LIB += ${ROOTPATH}/src/import/generic/memory/lib/utils/mcbist/
 MSS_LIB += ${EXPLORER_PROCEDURES_PATH}/hwp/memory/
+MSS_LIB += ${EXPLORER_PROCEDURES_PATH}/hwp/memory/lib/dimm/
 MSS_LIB += ${EXPLORER_PROCEDURES_PATH}/hwp/memory/lib/dimm/ddr4/
 MSS_LIB += ${EXPLORER_PROCEDURES_PATH}/hwp/memory/lib/
 MSS_LIB += ${EXPLORER_PROCEDURES_PATH}/hwp/memory/lib/shared
