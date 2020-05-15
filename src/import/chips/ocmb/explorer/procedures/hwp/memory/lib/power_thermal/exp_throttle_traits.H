@@ -39,6 +39,9 @@
 
 #include <fapi2.H>
 #include <generic/memory/lib/utils/power_thermal/gen_throttle_traits.H>
+#include <explorer_scom_addresses.H>
+#include <explorer_scom_addresses_fld.H>
+#include <explorer_scom_addresses_fld_fixes.H>
 
 namespace mss
 {
@@ -160,6 +163,61 @@ class throttle_traits<mss::mc_type::EXPLORER>
         // Definition is in chip folder
         static const std::vector< std::pair<uint8_t , uint8_t> > DIMM_TYPE_MAP;
 
+        // Throttle values
+        static constexpr uint64_t NM_RAS_WEIGHT = 0b000;
+        static constexpr uint64_t NM_CAS_WEIGHT = 0b001;
+
+        static constexpr uint64_t MAXALL_MINALL = 0b000;
+
+        // Wait 4 refresh intervals of idle before powering down all ranks
+        static constexpr uint64_t MIN_DOMAIN_REDUCTION_TIME = 4;
+
+        // Wait 8 refresh intervals of idle before going into STR on all ranks
+        static constexpr uint64_t ENTER_STR_TIME = 8;
+
+        static constexpr bool CFG_NM_CHANGE_AFTER_SYNC_VALUE = true;
+
+        // Scom register definitions
+        static constexpr uint64_t MBARPC0Q_REG = EXPLR_SRQ_MBARPC0Q;
+        static constexpr uint64_t FARB3Q_REG = EXPLR_SRQ_MBA_FARB3Q;
+        static constexpr uint64_t FARB4Q_REG = EXPLR_SRQ_MBA_FARB4Q;
+        static constexpr uint64_t STR0Q_REG = EXPLR_SRQ_MBASTR0Q;
+
+        // Scom register field definition
+        enum
+        {
+            CFG_MIN_DOMAIN_REDUCTION_ENABLE = EXPLR_SRQ_MBARPC0Q_CFG_MIN_DOMAIN_REDUCTION_ENABLE,
+            CFG_MIN_DOMAIN_REDUCTION_TIME = EXPLR_SRQ_MBARPC0Q_CFG_MIN_DOMAIN_REDUCTION_TIME,
+            CFG_MIN_DOMAIN_REDUCTION_TIME_LEN = EXPLR_SRQ_MBARPC0Q_CFG_MIN_DOMAIN_REDUCTION_TIME_LEN,
+            CFG_MIN_MAX_DOMAINS_ENABLE = EXPLR_SRQ_MBARPC0Q_CFG_MIN_MAX_DOMAINS_ENABLE,
+            CFG_MIN_MAX_DOMAINS = EXPLR_SRQ_MBARPC0Q_CFG_MIN_MAX_DOMAINS,
+            CFG_MIN_MAX_DOMAINS_LEN = EXPLR_SRQ_MBARPC0Q_CFG_MIN_MAX_DOMAINS_LEN,
+            CFG_LP_CTRL_ENABLE = EXPLR_SRQ_MBARPC0Q_CFG_LP_CTRL_ENABLE,
+            CFG_LP_DATA_ENABLE = EXPLR_SRQ_MBARPC0Q_CFG_LP_DATA_ENABLE,
+
+            CFG_FORCE_STR = EXPLR_SRQ_MBASTR0Q_CFG_FORCE_STR,
+            CFG_STR_ENABLE = EXPLR_SRQ_MBASTR0Q_CFG_STR_ENABLE,
+            CFG_ENTER_STR_TIME = EXPLR_SRQ_MBASTR0Q_CFG_ENTER_STR_TIME,
+            CFG_ENTER_STR_TIME_LEN = EXPLR_SRQ_MBASTR0Q_CFG_ENTER_STR_TIME_LEN,
+            CFG_DIS_CLK_IN_STR = EXPLR_SRQ_MBASTR0Q_CFG_DIS_CLK_IN_STR,
+
+            RUNTIME_N_SLOT = EXPLR_SRQ_MBA_FARB3Q_CFG_NM_N_PER_SLOT,
+            RUNTIME_N_SLOT_LEN = EXPLR_SRQ_MBA_FARB3Q_CFG_NM_N_PER_SLOT_LEN,
+            RUNTIME_N_PORT = EXPLR_SRQ_MBA_FARB3Q_CFG_NM_N_PER_PORT,
+            RUNTIME_N_PORT_LEN = EXPLR_SRQ_MBA_FARB3Q_CFG_NM_N_PER_PORT_LEN,
+            RUNTIME_M = EXPLR_SRQ_MBA_FARB3Q_CFG_NM_M,
+            RUNTIME_M_LEN = EXPLR_SRQ_MBA_FARB3Q_CFG_NM_M_LEN,
+            CFG_RAS_WEIGHT = EXPLR_SRQ_MBA_FARB3Q_CFG_NM_RAS_WEIGHT,
+            CFG_RAS_WEIGHT_LEN = EXPLR_SRQ_MBA_FARB3Q_CFG_NM_RAS_WEIGHT_LEN,
+            CFG_CAS_WEIGHT = EXPLR_SRQ_MBA_FARB3Q_CFG_NM_CAS_WEIGHT,
+            CFG_CAS_WEIGHT_LEN = EXPLR_SRQ_MBA_FARB3Q_CFG_NM_CAS_WEIGHT_LEN,
+            CFG_NM_CHANGE_AFTER_SYNC = EXPLR_SRQ_MBA_FARB3Q_CFG_NM_CHANGE_AFTER_SYNC,
+
+            EMERGENCY_M = EXPLR_SRQ_MBA_FARB4Q_EMERGENCY_M,
+            EMERGENCY_M_LEN = EXPLR_SRQ_MBA_FARB4Q_EMERGENCY_M_LEN,
+            EMERGENCY_N = EXPLR_SRQ_MBA_FARB4Q_EMERGENCY_N,
+            EMERGENCY_N_LEN = EXPLR_SRQ_MBA_FARB4Q_EMERGENCY_N_LEN,
+        };
 };
 }//power_thermal
 }// mss

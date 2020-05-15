@@ -22,6 +22,21 @@
 <!-- permissions and limitations under the License.                         -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
-<hwpErrors>
-
-</hwpErrors>
+<attributes>
+    <attribute>
+        <id>ATTR_MEM_PMIC_4U_N_MODE</id>
+        <targetType>TARGET_TYPE_PMIC</targetType>
+        <description>
+          PMIC pair running in N-Mode (no redundancy) instead of N+1 mode.
+          This attribute applies to 4U only, would be set if GPIO or PMIC
+          setup reported a failure. Attribute should be compared with the
+          value of its redundant pmic's attribute. If both have declared
+          N-Mode, then both in the redundant pair will not be enabled.
+        </description>
+        <enum>N_PLUS_1_MODE = 0, N_MODE = 1</enum>
+        <initToZero></initToZero>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <mssAccessorName>pmic_n_mode</mssAccessorName>
+    </attribute>
+</attributes>

@@ -107,7 +107,7 @@ static const std::vector<std::pair<uint64_t, uint64_t>> MCC_OMI_INIT_FIR_REGS =
 /// @param[in] i_target - the target on which to operate
 /// @param[in,out] io_rc - the return code for the function
 /// @param[out] o_fir_error - true iff a FIR was hit
-/// @param[in] i_checklist - the list of vectour reg/mask pairs to search; default exp omi init firs
+/// @param[in] i_checklist - the list of vectour reg/mask pairs to search
 /// @note i_checklist is last since optional parameter w/ default needs to be end of list
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff ok
 ///
@@ -185,13 +185,13 @@ fapi_try_exit:
 /// @note specialization for EXPLORER and fir checklist for OMI regs
 ///
 template<>
-fapi2::ReturnCode bad_fir_bits<mss::mc_type::EXPLORER, firChecklist::OMI>( const
-        fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
-        fapi2::ReturnCode& io_rc,
-        bool& o_fir_error)
+fapi2::ReturnCode bad_fir_bits<mss::mc_type::EXPLORER, firChecklist::OMI>(
+    const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+    fapi2::ReturnCode& io_rc,
+    bool& o_fir_error)
 {
     const auto& l_mcc = mss::find_target<fapi2::TARGET_TYPE_MCC>(i_target);
-    const auto& l_mc = mss::find_target<fapi2::TARGET_TYPE_MC>(l_mcc);
+    const auto& l_omic = mss::find_target<fapi2::TARGET_TYPE_OMIC>(i_target);
 
     // Start by assuming we do not have a FIR; if true at any point, skip other checks to preserve error
     o_fir_error = false;
@@ -201,7 +201,7 @@ fapi2::ReturnCode bad_fir_bits<mss::mc_type::EXPLORER, firChecklist::OMI>( const
 
     if (o_fir_error != true)
     {
-        FAPI_TRY(bad_fir_bits_helper(l_mc, io_rc, o_fir_error, MC_OMI_INIT_FIR_REGS));
+        FAPI_TRY(bad_fir_bits_helper(l_omic, io_rc, o_fir_error, MC_OMI_INIT_FIR_REGS));
     }
 
     if (o_fir_error != true)
@@ -219,13 +219,36 @@ fapi_try_exit:
 /// @param[in,out] io_rc - the return code for the function
 /// @param[out] o_fir_error - true iff a FIR was hit
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff ok
+/// @note Specialization for EXPLORER, fir checklist for OMI regs, TARGET_TYPE_OMI
+///
+template<>
+fapi2::ReturnCode bad_fir_bits<mss::mc_type::EXPLORER, firChecklist::OMI>(
+    const fapi2::Target<fapi2::TARGET_TYPE_OMI>& i_target,
+    fapi2::ReturnCode& io_rc,
+    bool& o_fir_error )
+{
+    for (const auto& l_ocmb : mss::find_targets<fapi2::TARGET_TYPE_OCMB_CHIP>(i_target))
+    {
+        FAPI_TRY( (bad_fir_bits<mss::mc_type::EXPLORER, firChecklist::OMI>(l_ocmb, io_rc, o_fir_error)) );
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Checks whether any FIRs have lit up on a target
+/// @param[in] i_target - the target on which to operate
+/// @param[in,out] io_rc - the return code for the function
+/// @param[out] o_fir_error - true iff a FIR was hit
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff ok
 /// @note specialization for EXPLORER and fir checklist for DRAMINIT regs
 ///
 template<>
-fapi2::ReturnCode bad_fir_bits<mss::mc_type::EXPLORER, firChecklist::DRAMINIT>( const
-        fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
-        fapi2::ReturnCode& io_rc,
-        bool& o_fir_error)
+fapi2::ReturnCode bad_fir_bits<mss::mc_type::EXPLORER, firChecklist::DRAMINIT>(
+    const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+    fapi2::ReturnCode& io_rc,
+    bool& o_fir_error)
 {
     // For draminit case, we want to check SRQFIR[4] and LOCAL_FIR[20,36] only, so unmask checkbits
     // NOTE: if you change DRAMINIT_FIR_REGS, you need to update these indices
@@ -262,10 +285,10 @@ fapi_try_exit:
 /// @note specialization for EXPLORER and fir checklist for CCS regs
 ///
 template<>
-fapi2::ReturnCode bad_fir_bits<mss::mc_type::EXPLORER, firChecklist::CCS>( const
-        fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
-        fapi2::ReturnCode& io_rc,
-        bool& o_fir_error)
+fapi2::ReturnCode bad_fir_bits<mss::mc_type::EXPLORER, firChecklist::CCS>(
+    const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+    fapi2::ReturnCode& io_rc,
+    bool& o_fir_error)
 {
     // For draminit_mc case, we want to check SRQFIR[4] and MBISTFIR[2,3] only, so unmask checkbits
     // NOTE: if you change DRAMINIT_MC_FIR_REGS, you need to update these indices
@@ -300,6 +323,8 @@ fapi_try_exit:
 /// @param[out] o_fir_error - true iff a FIR was hit
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff ok
 /// @note specialization for EXPLORER and fir checklist for GENERIC case
+/// Redirects the GENERIC case to the DRAMINIT checks because no FIR checklist is defined for GENERIC.
+/// GENERIC case required for bad_fir_bits call in mss_bad_bits.H -- update if GENERIC check needed
 ///
 template<>
 fapi2::ReturnCode bad_fir_bits<mss::mc_type::EXPLORER, firChecklist::GENERIC>( const

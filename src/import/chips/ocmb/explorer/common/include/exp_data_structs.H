@@ -72,6 +72,9 @@ enum exp_struct_sizes
     DBYTE_N_SIZE = 10,
     NIBBLE_N_SIZE = 20,
     BIT_N_SIZE = 8,
+
+    // EXP_FW_ADAPTER_PROPERTIES_GET number of images
+    FW_ADAPTER_MAX_FW_IMAGE = 2,
 };
 
 ///
@@ -874,5 +877,31 @@ typedef struct __attribute__((packed)) user_2d_eye_response_2_msdg
     user_response_rc_msdg_t rc_resp;
 
 } user_2d_eye_response_2_msdg_t;
+
+///
+/// @class fw_adapter_properties_struct
+/// @brief EXP_FW_ADAPTER_PROPERTIES_GET data response format (Explorer FW Document v1.21)
+///
+typedef struct __attribute__((packed))
+{
+    uint32_t fw_number_of_images;     // number of FW images
+    uint32_t boot_partion_id;         // ID of current boot partion
+    struct fw_version_string
+    {
+        uint32_t major;               // FW version - Major release
+        uint32_t minor;               // FW version - Minor release
+        uint32_t build_patch;         // FW build patch number
+        uint32_t build_num;           // FW build number
+        uint32_t build_date;          // FW build data mmddyyyy
+    } fw_ver_str[FW_ADAPTER_MAX_FW_IMAGE];
+
+    uint32_t ram_size_in_bytes;       // RAM size in bytes
+    uint32_t chip_version;            // Explorer chip revision
+    uint32_t spi_flash_id;            // SPI flash ID
+    uint32_t spi_flash_sector_size;   // SPI flash size in bytes
+    uint32_t spi_flash_size;          // SPI flash size in bytes
+    uint32_t error_buffer_size;       // FW error buffer size in bytes
+}
+fw_adapter_properties_struct;
 
 #endif

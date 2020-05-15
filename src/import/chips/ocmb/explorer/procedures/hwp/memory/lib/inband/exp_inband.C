@@ -423,14 +423,15 @@ fapi_try_exit:
 
 ///
 /// @brief Converts a little endian data array to a host_fw_response_struct
-/// @param[in] i_data little endian data to process
+/// @param[in,out] io_data little endian data to process
 /// @param[out] o_crc computed CRC
 /// @param[out] o_response response structure
 /// @return fapi2::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
 ///
-fapi2::ReturnCode host_fw_response_struct_from_little_endian(std::vector<uint8_t>& i_data,
-        uint32_t& o_crc,
-        host_fw_response_struct& o_response)
+fapi2::ReturnCode host_fw_response_struct_from_little_endian(
+    std::vector<uint8_t>& io_data,
+    uint32_t& o_crc,
+    host_fw_response_struct& o_response)
 {
     uint32_t l_idx = 0;
 
@@ -442,16 +443,16 @@ fapi2::ReturnCode host_fw_response_struct_from_little_endian(std::vector<uint8_t
     uint32_t l_host_work_area = 0;
     uint32_t l_response_header_crc = 0;
 
-    FAPI_TRY(correctMMIOEndianForStruct(i_data));
-    FAPI_TRY(correctMMIOword_order(i_data));
-    FAPI_TRY(readCrctEndian(i_data, l_idx, l_response_id));
-    FAPI_TRY(readCrctEndian(i_data, l_idx, l_response_flags));
-    FAPI_TRY(readCrctEndian(i_data, l_idx, l_request_identifier));
-    FAPI_TRY(readCrctEndian(i_data, l_idx, l_response_length));
-    FAPI_TRY(readCrctEndian(i_data, l_idx, l_response_crc));
-    FAPI_TRY(readCrctEndian(i_data, l_idx, l_host_work_area));
-    FAPI_TRY(readCrctEndianArray(i_data, RSP_PADDING_SIZE, l_idx, o_response.padding));
-    FAPI_TRY(readCrctEndianArray(i_data, ARGUMENT_SIZE, l_idx, o_response.response_argument));
+    FAPI_TRY(correctMMIOEndianForStruct(io_data));
+    FAPI_TRY(correctMMIOword_order(io_data));
+    FAPI_TRY(readCrctEndian(io_data, l_idx, l_response_id));
+    FAPI_TRY(readCrctEndian(io_data, l_idx, l_response_flags));
+    FAPI_TRY(readCrctEndian(io_data, l_idx, l_request_identifier));
+    FAPI_TRY(readCrctEndian(io_data, l_idx, l_response_length));
+    FAPI_TRY(readCrctEndian(io_data, l_idx, l_response_crc));
+    FAPI_TRY(readCrctEndian(io_data, l_idx, l_host_work_area));
+    FAPI_TRY(readCrctEndianArray(io_data, RSP_PADDING_SIZE, l_idx, o_response.padding));
+    FAPI_TRY(readCrctEndianArray(io_data, ARGUMENT_SIZE, l_idx, o_response.response_argument));
 
     o_response.response_id = l_response_id;
     o_response.response_flags = l_response_flags;
@@ -460,9 +461,9 @@ fapi2::ReturnCode host_fw_response_struct_from_little_endian(std::vector<uint8_t
     o_response.response_crc = l_response_crc;
     o_response.host_work_area = l_host_work_area;
 
-    o_crc = crc32_gen(i_data, l_idx);
+    o_crc = crc32_gen(io_data, l_idx);
 
-    FAPI_TRY(readCrctEndian(i_data, l_idx, l_response_header_crc));
+    FAPI_TRY(readCrctEndian(io_data, l_idx, l_response_header_crc));
     o_response.response_header_crc = l_response_header_crc;
 
 fapi_try_exit:
@@ -472,26 +473,27 @@ fapi_try_exit:
 ///
 /// @brief Converts a little endian data array to a host_fw_response_struct
 /// @param[in] i_target OCMB target on which to operate
-/// @param[in] i_data little endian data to process
+/// @param[in,out] io_data little endian data to process
 /// @param[out] o_response response structure
 /// @return fapi2::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
 /// @note helper function to allow for checking FFDC
 ///
-fapi2::ReturnCode host_fw_response_struct_from_little_endian(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>&
-        i_target,
-        std::vector<uint8_t>& i_data,
-        host_fw_response_struct& o_response)
+fapi2::ReturnCode host_fw_response_struct_from_little_endian(
+    const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+    std::vector<uint8_t>& io_data,
+    host_fw_response_struct& o_response)
 {
     uint32_t l_crc = 0;
-    fapi2::current_err = host_fw_response_struct_from_little_endian(i_data, l_crc, o_response);
+    fapi2::current_err = host_fw_response_struct_from_little_endian(io_data, l_crc, o_response);
+    // Re-assert here so we capture the OCMB target (lower level code uses FAPI_SYSTEM)
     FAPI_ASSERT(fapi2::current_err == fapi2::FAPI2_RC_SUCCESS,
                 fapi2::EXP_INBAND_LE_DATA_RANGE()
                 .set_TARGET(i_target)
                 .set_FUNCTION(mss::exp::READ_HOST_FW_RESPONSE_STRUCT)
-                .set_DATA_SIZE(i_data.size())
+                .set_DATA_SIZE(io_data.size())
                 .set_MAX_INDEX(sizeof(host_fw_response_struct)),
                 "%s Failed to convert from data to host_fw_response_struct data size %u expected size %u",
-                mss::c_str(i_target), i_data.size(), sizeof(host_fw_response_struct));
+                mss::c_str(i_target), io_data.size(), sizeof(host_fw_response_struct));
 
 //TODO CQ: SW461052 Correct MMIO CRC responses
 #ifndef __HOSTBOOT_MODULE
@@ -626,13 +628,14 @@ fapi_try_exit:
 
 ///
 /// @brief Converts a little endian data array to a sensor_cache_struct
-/// @param[in] i_data little endian data to process
+/// @param[in,out] io_data little endian data to process
 /// @param[out] o_data sensor cache structure
 /// @return true if success false if failure
 /// @note helper function - returning a bool and will have true FFDC in a separate function
 ///
-fapi2::ReturnCode sensor_cache_struct_from_little_endian(std::vector<uint8_t>& i_data,
-        sensor_cache_struct& o_data)
+fapi2::ReturnCode sensor_cache_struct_from_little_endian(
+    std::vector<uint8_t>& io_data,
+    sensor_cache_struct& o_data)
 {
     // Local variables to avoid error in passing packed struct fields by reference
     uint32_t l_idx = 0;
@@ -652,24 +655,24 @@ fapi2::ReturnCode sensor_cache_struct_from_little_endian(std::vector<uint8_t>& i
     uint32_t l_mba_arrival_histo_high = 0;
     uint8_t l_initial_packet1 = 0;
 
-    FAPI_TRY(correctMMIOEndianForStruct(i_data));
-    FAPI_TRY(correctMMIOword_order(i_data));
-    FAPI_TRY(readCrctEndian(i_data, l_idx, l_status));
-    FAPI_TRY(readCrctEndian(i_data, l_idx, l_ocmb_dts));
-    FAPI_TRY(readCrctEndian(i_data, l_idx, l_mem_dts0));
-    FAPI_TRY(readCrctEndian(i_data, l_idx, l_mem_dts1));
-    FAPI_TRY(readCrctEndian(i_data, l_idx, l_mba_reads));
-    FAPI_TRY(readCrctEndian(i_data, l_idx, l_mba_writes));
-    FAPI_TRY(readCrctEndian(i_data, l_idx, l_mba_activations));
-    FAPI_TRY(readCrctEndian(i_data, l_idx, l_mba_powerups));
-    FAPI_TRY(readCrctEndian(i_data, l_idx, l_self_timed_refresh));
-    FAPI_TRY(readCrctEndianArray(i_data, SENSOR_CACHE_PADDING_SIZE_0, l_idx, o_data.reserved0));
-    FAPI_TRY(readCrctEndian(i_data, l_idx, l_frame_count));
-    FAPI_TRY(readCrctEndian(i_data, l_idx, l_mba_arrival_histo_base));
-    FAPI_TRY(readCrctEndian(i_data, l_idx, l_mba_arrival_histo_low));
-    FAPI_TRY(readCrctEndian(i_data, l_idx, l_mba_arrival_histo_med));
-    FAPI_TRY(readCrctEndian(i_data, l_idx, l_mba_arrival_histo_high));
-    FAPI_TRY(readCrctEndian(i_data, l_idx, l_initial_packet1));
+    FAPI_TRY(correctMMIOEndianForStruct(io_data));
+    FAPI_TRY(correctMMIOword_order(io_data));
+    FAPI_TRY(readCrctEndian(io_data, l_idx, l_status));
+    FAPI_TRY(readCrctEndian(io_data, l_idx, l_ocmb_dts));
+    FAPI_TRY(readCrctEndian(io_data, l_idx, l_mem_dts0));
+    FAPI_TRY(readCrctEndian(io_data, l_idx, l_mem_dts1));
+    FAPI_TRY(readCrctEndian(io_data, l_idx, l_mba_reads));
+    FAPI_TRY(readCrctEndian(io_data, l_idx, l_mba_writes));
+    FAPI_TRY(readCrctEndian(io_data, l_idx, l_mba_activations));
+    FAPI_TRY(readCrctEndian(io_data, l_idx, l_mba_powerups));
+    FAPI_TRY(readCrctEndian(io_data, l_idx, l_self_timed_refresh));
+    FAPI_TRY(readCrctEndianArray(io_data, SENSOR_CACHE_PADDING_SIZE_0, l_idx, o_data.reserved0));
+    FAPI_TRY(readCrctEndian(io_data, l_idx, l_frame_count));
+    FAPI_TRY(readCrctEndian(io_data, l_idx, l_mba_arrival_histo_base));
+    FAPI_TRY(readCrctEndian(io_data, l_idx, l_mba_arrival_histo_low));
+    FAPI_TRY(readCrctEndian(io_data, l_idx, l_mba_arrival_histo_med));
+    FAPI_TRY(readCrctEndian(io_data, l_idx, l_mba_arrival_histo_high));
+    FAPI_TRY(readCrctEndian(io_data, l_idx, l_initial_packet1));
 
     o_data.frame_count = l_frame_count;
     o_data.mba_arrival_histo_base = l_mba_arrival_histo_base;
@@ -687,7 +690,7 @@ fapi2::ReturnCode sensor_cache_struct_from_little_endian(std::vector<uint8_t>& i
     o_data.mba_powerups = l_mba_powerups;
     o_data.self_timed_refresh = l_self_timed_refresh;
 
-    FAPI_TRY(readCrctEndianArray(i_data, SENSOR_CACHE_PADDING_SIZE_1, l_idx, o_data.reserved1));
+    FAPI_TRY(readCrctEndianArray(io_data, SENSOR_CACHE_PADDING_SIZE_1, l_idx, o_data.reserved1));
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -696,18 +699,18 @@ fapi_try_exit:
 ///
 /// @brief Converts a little endian data array to a sensor_cache_struct
 /// @param[in] i_target OCMB target on which to operate
-/// @param[in] i_data little endian data to process
+/// @param[in,out] io_data little endian data to process
 /// @param[out] o_data sensor cache structure
 /// @return fapi2::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
 /// @note helper function to allow for checking FFDC
 ///
-fapi2::ReturnCode sensor_cache_struct_from_little_endian(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>&
-        i_target,
-        std::vector<uint8_t>& i_data,
-        sensor_cache_struct& o_data)
+fapi2::ReturnCode sensor_cache_struct_from_little_endian(
+    const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+    std::vector<uint8_t>& io_data,
+    sensor_cache_struct& o_data)
 {
     fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
-    FAPI_TRY(sensor_cache_struct_from_little_endian(i_data, o_data));
+    FAPI_TRY(sensor_cache_struct_from_little_endian(io_data, o_data));
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -977,6 +980,53 @@ fapi_try_exit:
     FAPI_DBG("Exiting with return code : 0x%08X...", (uint64_t)fapi2::current_err);
     return fapi2::current_err;
 }
+
+namespace check
+{
+
+///
+/// @brief Checks explorer response argument for a successful command
+/// @param[in] i_target OCMB target
+/// @param[in] i_rsp response from command
+/// @param[in] i_cmd original command
+/// @return FAPI2_RC_SUCCESS iff okay
+///
+fapi2::ReturnCode response(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+                           const host_fw_response_struct& i_rsp,
+                           const host_fw_command_struct& i_cmd)
+{
+    fapi2::buffer<uint32_t> l_error_code;
+
+    l_error_code.insertFromRight<0, BITS_PER_BYTE>(i_rsp.response_argument[4]).
+    insertFromRight<BITS_PER_BYTE, BITS_PER_BYTE>(i_rsp.response_argument[3]).
+    insertFromRight<2 * BITS_PER_BYTE, BITS_PER_BYTE>(i_rsp.response_argument[2]).
+    insertFromRight<3 * BITS_PER_BYTE, BITS_PER_BYTE>(i_rsp.response_argument[1]);
+
+    // Check if cmd was successful
+    FAPI_ASSERT(i_rsp.response_argument[0] == omi::response_arg::SUCCESS &&
+                i_rsp.request_identifier == i_cmd.request_identifier &&
+                i_rsp.response_id == i_cmd.cmd_id,
+                fapi2::MSS_EXP_RSP_ARG_FAILED().
+                set_TARGET(i_target).
+                set_CMD_ID(i_cmd.cmd_id).
+                set_RSP_ID(i_rsp.response_id).
+                set_EXTENDED_ERROR_CODE(l_error_code).
+                set_ERROR_CODE(i_rsp.response_argument[5]).
+                set_EXPECTED_REQID(i_cmd.request_identifier).
+                set_ACTUAL_REQID(i_rsp.request_identifier),
+                "Failed Explorer command on %s, cmd_id=0x%X, rsp_id=0x%X, response_arg[0]=0x%X, extended_error_code=0x%08X error_code=0x%02X "
+                "RSP RQ ID: %u CMD RQ ID: %u",
+                mss::c_str(i_target), i_cmd.cmd_id, i_rsp.response_id, i_rsp.response_argument[0], l_error_code,
+                i_rsp.response_argument[5],
+                i_rsp.request_identifier, i_cmd.request_identifier);
+
+    return fapi2::FAPI2_RC_SUCCESS;
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+} // namespace check
 
 } // namespace ib
 

@@ -1208,6 +1208,18 @@
   </hwpError>
 
   <hwpError>
+    <rc>RC_MSS_UNSUPPORTED_MRW_POWER_CONTROL_REQUESTED</rc>
+    <description>
+      The value of ATTR_MSS_MRW_POWER_CONTROL_REQUESTED is unsupported
+    </description>
+    <ffdc>VALUE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
+  <hwpError>
     <rc>RC_MSS_TOO_MANY_PRIMARY_RANKS_ON_DIMM</rc>
     <description>
         Too many primary ranks were seen on the dimm according
@@ -1409,6 +1421,85 @@
     <ffdc>MIN_UTIL_VALUE</ffdc>
     <callout>
       <procedure>CODE</procedure>
+    <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_UNKNOWN_DIMM_MODULE_MFG_ID</rc>
+    <description>
+        Module manufacturing ID from DIMM SPD was not recognized in
+        plug rule enforcement function.
+    </description>
+    <ffdc>MODULE_MFG_ID</ffdc>
+    <callout>
+      <target>DIMM_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_UNSUPPORTED_SPD_REVISION</rc>
+    <description>
+        DIMM SPD revision is older than least supported revision.
+    </description>
+    <ffdc>SPD_REVISION</ffdc>
+    <ffdc>MINIMUM_FUNCTIONAL_SPD_REVISION</ffdc>
+    <callout>
+      <procedure>MEMORY_PLUGGING_ERROR</procedure>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <target>DIMM_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>DIMM_TARGET</target>
+    </deconfigure>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_NON_CURRENT_SPD_REVISION</rc>
+    <description>
+        DIMM SPD revision is not current, and could be updated.
+    </description>
+    <ffdc>SPD_REVISION</ffdc>
+    <ffdc>LATEST_SPD_REVISION</ffdc>
+    <callout>
+      <target>DIMM_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_UNSUPPORTED_SPD_CONTENT_REVISION</rc>
+    <description>
+        DIMM SPD content revision is older than least supported revision.
+    </description>
+    <ffdc>SPD_CONTENT_REVISION</ffdc>
+    <ffdc>MINIMUM_FUNCTIONAL_SPD_CONTENT_REVISION</ffdc>
+    <callout>
+      <procedure>MEMORY_PLUGGING_ERROR</procedure>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <target>DIMM_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>DIMM_TARGET</target>
+    </deconfigure>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_NON_CURRENT_SPD_CONTENT_REVISION</rc>
+    <description>
+        DIMM SPD content revision is not current, and could be updated.
+    </description>
+    <ffdc>SPD_CONTENT_REVISION</ffdc>
+    <ffdc>LATEST_SPD_CONTENT_REVISION</ffdc>
+    <callout>
+      <target>DIMM_TARGET</target>
       <priority>HIGH</priority>
     </callout>
   </hwpError>

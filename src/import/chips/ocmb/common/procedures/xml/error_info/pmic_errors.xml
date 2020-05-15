@@ -244,4 +244,106 @@
     </callout>
   </hwpError>
 
+  <hwpError>
+    <rc>RC_PMIC_EXPECTED_FOUR_PMICS</rc>
+    <description>
+       The presence of GPIO/ADC devices implies we should have a redundant PMIC configuration.
+       Expected 4 PMICs, but platform did not provide 4.
+    </description>
+    <ffdc>OCMB_TARGET</ffdc>
+    <ffdc>NUM_PMICS</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>MEDIUM</priority>
+    </callout>
+    <callout>
+      <target>OCMB_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_INVALID_NUMBER_OF_I2C_DEVICES</rc>
+    <description>
+       Expected 4 GENERICI2CSLAVE targets: 2 GPIO expanders and 2 ADCs.
+       Platform did not provide 4 devices.
+    </description>
+    <ffdc>OCMB_TARGET</ffdc>
+    <ffdc>NUM_I2C_DEVICES</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>MEDIUM</priority>
+    </callout>
+    <callout>
+      <target>OCMB_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_PMIC_MISMATCHING_REDUNDANCY_ATTRS</rc>
+    <description>
+       PMIC0_REDUNDANCY and PMIC1_REDUNDANCY must match (both 0 or both 1).
+       A configuration doesn't exist where only 1 PMIC has redundancy.
+    </description>
+    <ffdc>OCMB_TARGET</ffdc>
+    <ffdc>PMIC0_REDUNDANCY</ffdc>
+    <ffdc>PMIC1_REDUNDANCY</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>MEDIUM</priority>
+    </callout>
+    <callout>
+      <target>OCMB_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_PMIC_REDUNDANT_PAIR_DOWN</rc>
+    <description>
+       Both PMICs in a redundant pair had errors which caused each to drop into N-Mode.
+       Neither PMIC will be able to be VR_ENABLE'd
+    </description>
+    <ffdc>OCMB_TARGET</ffdc>
+    <ffdc>N_MODE_PMIC0</ffdc>
+    <ffdc>N_MODE_PMIC1</ffdc>
+    <ffdc>N_MODE_PMIC2</ffdc>
+    <ffdc>N_MODE_PMIC3</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>MEDIUM</priority>
+    </callout>
+    <callout>
+      <target>OCMB_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>OCMB_TARGET</target>
+    </deconfigure>
+    <gard>
+      <target>OCMB_TARGET</target>
+    </gard>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_PMIC_I2C_POLLING_TIMEOUT</rc>
+    <description>
+      Polling a PMIC I2C device timed out
+    </description>
+    <ffdc>TARGET</ffdc>
+    <ffdc>FUNCTION</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>MEDIUM</priority>
+    </callout>
+    <callout>
+      <target>TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>TARGET</target>
+    </deconfigure>
+  </hwpError>
+
 </hwpErrors>

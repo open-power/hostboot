@@ -42,6 +42,7 @@
 #include <generic/memory/lib/mss_generic_system_attribute_getters.H>
 #include <lib/shared/exp_consts.H>
 #include <p10_scom_omi_a.H>
+#include <lib/i2c/exp_i2c.H>
 
 namespace mss
 {
@@ -243,6 +244,37 @@ fapi2::ReturnCode poll_for_training_completion(
 
     }
     while (l_tries < MAX_LOOP_COUNT && o_state_machine_state != STATE_MACHINE_SUCCESS);
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Abort Explorer FW polling for OMI training completion
+/// @param[in] i_target OCMB target
+/// @return fapi2::ReturnCode
+///
+fapi2::ReturnCode poll_abort(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target)
+{
+    FAPI_INF("%s OMI training did not complete by end of polling loop. Sending TWI_POLL_ABORT command",
+             mss::c_str(i_target));
+
+    // Send TWI_POLL_ABORT
+    std::vector<uint8_t> l_data;
+    l_data.push_back(mss::exp::i2c::FW_TWI_POLL_ABORT);
+
+    FAPI_TRY(fapi2::putI2c(i_target, l_data),
+             "%s i2c failure sending POLL_ABORT command",
+             mss::c_str(i_target));
+
+    // Now poll again until BUSY state goes away
+    // note the assertion parameters mean assert if we remain in the BUSY state after polling
+    // and don't assert if we get a non-success status (which is ok since we're purposely aborting the command)
+    return mss::exp::i2c::fw_status(i_target,
+                                    mss::common_timings::DELAY_1MS,
+                                    100,
+                                    mss::exp::i2c::ASSERT_IF_BUSY_FW_STATUS,
+                                    mss::exp::i2c::NO_ASSERT_IF_BAD_FW_STATUS);
 
 fapi_try_exit:
     return fapi2::current_err;

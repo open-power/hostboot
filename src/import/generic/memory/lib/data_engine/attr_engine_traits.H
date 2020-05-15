@@ -47,6 +47,7 @@
 #include <generic/memory/lib/spd/ddimm/efd_decoder.H>
 #include <generic/memory/lib/utils/dimm/mss_timing.H>
 #include <generic/memory/lib/spd/spd_utils.H>
+#include <generic/memory/lib/utils/shared/mss_generic_consts.H>
 
 namespace mss
 {
@@ -753,24 +754,16 @@ struct attrEngineTraits<P, attr_si_engine_fields, attr_si_engine_fields::SI_MC_R
             attr_integral_type& o_setting)
     {
         uint8_t l_odt_impedance = 0;
+        uint8_t l_spd_rev = 0;
 
-        static const std::vector< std::pair<uint8_t, uint8_t> > ODT_IMP_MAP =
-        {
-            // {key byte, PHY ODT IMP (ohms)}
-            {0b00000, fapi2::ENUM_ATTR_MEM_SI_MC_RCV_IMP_DQ_DQS_DISABLE},
-            {0b00001, fapi2::ENUM_ATTR_MEM_SI_MC_RCV_IMP_DQ_DQS_OHM_40},
-            {0b00010, fapi2::ENUM_ATTR_MEM_SI_MC_RCV_IMP_DQ_DQS_OHM_60},
-            {0b00011, fapi2::ENUM_ATTR_MEM_SI_MC_RCV_IMP_DQ_DQS_OHM_80},
-            {0b00100, fapi2::ENUM_ATTR_MEM_SI_MC_RCV_IMP_DQ_DQS_OHM_120},
-            {0b00101, fapi2::ENUM_ATTR_MEM_SI_MC_RCV_IMP_DQ_DQS_OHM_240},
-
-            // All others reserved
-        };
         const auto l_ocmb = i_efd_data->get_target();
+        const auto& l_ports = mss::find_targets<fapi2::TARGET_TYPE_MEM_PORT>(l_ocmb);
 
+        FAPI_TRY(mss::attr::get_spd_revision(l_ports[0], l_spd_rev));
         FAPI_TRY(i_efd_data->phy_odt_impedance(l_odt_impedance));
-        // Map SPD value to desired setting
-        FAPI_TRY(lookup_table_check(l_ocmb, ODT_IMP_MAP, mss::SET_SI_MC_RCV_IMP_DQ_DQS, l_odt_impedance, o_setting));
+
+        // Call helper function
+        FAPI_TRY(mss::gen::decode_rcv_imp_dq_dqs(l_ocmb, l_odt_impedance, l_spd_rev, o_setting));
 
     fapi_try_exit:
         return fapi2::current_err;
@@ -1678,8 +1671,17 @@ struct attrEngineTraits<P, attr_si_engine_fields, attr_si_engine_fields::SI_DRAM
     static inline fapi2::ReturnCode get_value_to_set(const std::shared_ptr<efd::base_decoder>& i_efd_data,
             attr_integral_type& o_setting)
     {
-        i_efd_data->write_preamble(o_setting);
-        return i_efd_data->read_preamble(o_setting);
+        uint8_t l_read_preamble = 0;
+        uint8_t l_write_preamble = 0;
+
+        FAPI_TRY(i_efd_data->read_preamble(l_read_preamble));
+        FAPI_TRY(i_efd_data->write_preamble(l_write_preamble));
+
+        o_setting = static_cast<attr_integral_type>(
+                        mss::gen::align_preamble_to_attr(l_read_preamble, l_write_preamble));
+
+    fapi_try_exit:
+        return fapi2::current_err;
     }
 };
 
@@ -3572,27 +3574,27 @@ struct attrEngineTraits<P, attr_eff_engine_fields, attr_eff_engine_fields::DRAM_
 ///
 /// @brief Traits for attr_engine
 /// @class attrEngineTraits
-/// @note attr_engine_derived_fields, SPD_REVISION specialization
+/// @note attr_engine_derived_fields, SPD_CONTENT_REVISION specialization
 ///
-template < proc_type P >
-struct attrEngineTraits<P, attr_eff_engine_fields, attr_eff_engine_fields::SPD_REVISION>
+template< proc_type P >
+struct attrEngineTraits<P, attr_eff_engine_fields, attr_eff_engine_fields::SPD_CONTENT_REVISION>
 {
-    using attr_type = fapi2::ATTR_MEM_EFF_SPD_REVISION_Type;
+    using attr_type = fapi2::ATTR_MEM_EFF_SPD_CONTENT_REVISION_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
     using attr_type_to_set = attr_integral_type;
-    static constexpr fapi2::TargetType TARGET_TYPE = fapi2::ATTR_MEM_EFF_SPD_REVISION_TargetType;
-    static constexpr generic_ffdc_codes FFDC_CODE = SET_SPD_REVISION;
+    static constexpr fapi2::TargetType TARGET_TYPE = fapi2::ATTR_MEM_EFF_SPD_CONTENT_REVISION_TargetType;
+    static constexpr generic_ffdc_codes FFDC_CODE = SET_SPD_CONTENT_REVISION;
 
     ///
     /// @brief attribute getter
-    /// @param[in] i_target the fapi2 target
+    /// @param[in] i_target the attr target
     /// @param[out] o_setting array to populate
     /// @return FAPI2_RC_SUCCESS iff okay
     ///
     static fapi2::ReturnCode get_attr(const fapi2::Target<TARGET_TYPE>& i_target,
                                       attr_type& o_setting)
     {
-        return mss::attr::get_spd_revision(i_target, o_setting);
+        return mss::attr::get_spd_content_revision(i_target, o_setting);
     }
 
     ///
@@ -3604,19 +3606,23 @@ struct attrEngineTraits<P, attr_eff_engine_fields, attr_eff_engine_fields::SPD_R
     static fapi2::ReturnCode set_attr(const fapi2::Target<TARGET_TYPE>& i_target,
                                       attr_type& i_setting)
     {
-        return mss::attr::set_spd_revision(i_target, i_setting);
+        return mss::attr::set_spd_content_revision(i_target, i_setting);
     }
 
     ///
     /// @brief Computes setting for attribute
-    /// @param[in] i_efd_data EFD data
+    /// @param[in] i_spd_data SPD data
     /// @param[out] o_setting value we want to set attr with
     /// @return FAPI2_RC_SUCCESS iff okay
     ///
-    static inline fapi2::ReturnCode get_value_to_set(const spd::facade& i_spd_data,
+    static fapi2::ReturnCode get_value_to_set(const spd::facade& i_spd_data,
             attr_integral_type& o_setting)
     {
-        return i_spd_data.revision(o_setting);
+        // =========================================================
+        // DDR4 SPD Document Release 4
+        // Byte 221 (0x0DD): SPD Content Revision
+        // =========================================================
+        return i_spd_data.spd_content_revision(o_setting);
     }
 };
 

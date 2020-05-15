@@ -330,6 +330,7 @@ inline fapi2::ReturnCode setup_reg_dl_after_chiplet_scominit_helper(
     scomt::omi::SET_ERROR_MASK_34(l_reg_data);
     scomt::omi::SET_ERROR_MASK_33(l_reg_data);
     scomt::omi::SET_ERROR_MASK_32(l_reg_data);
+    scomt::omi::SET_ERROR_MASK_18(l_reg_data);
     scomt::omi::CLEAR_ERROR_MASK_17(l_reg_data);
     scomt::omi::CLEAR_ERROR_MASK_16(l_reg_data);
     scomt::omi::CLEAR_ERROR_MASK_15(l_reg_data);

@@ -37,22 +37,7 @@
 #define __PMIC_ENABLE_H__
 
 #include <fapi2.H>
-
-namespace mss
-{
-namespace pmic
-{
-
-///
-/// @brief Different enable operations
-///
-enum enable_mode
-{
-    SPD = 0, // Use values from the SPD (default). Overwrite the vendor region with SPD settings
-    MANUAL = 1, // Use voltage settings currently in the vendor region. (Changed via pmic_update, or factory defaults)
-};
-}
-}
+#include <lib/utils/pmic_consts.H>
 
 typedef fapi2::ReturnCode (*pmic_enable_FP_t) (const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>&,
         const mss::pmic::enable_mode);

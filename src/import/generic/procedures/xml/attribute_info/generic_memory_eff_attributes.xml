@@ -627,7 +627,7 @@
       Decodes SPD Byte 320 and 321 for ISDIMMs (Fujitsu, US Modular)
       Decodes SPD Byte 512 and 513 for DDIMMs (Micron, Samsung, Smart)
     </description>
-    <enum>MICRON = 0x802C, SAMSUNG = 0x80CE, SMART = 0x8094, FUJITSU = 0x8004, US_MODULAR = 0x04AB</enum>
+    <enum>MICRON = 0x802C, SAMSUNG = 0x80CE, SMART = 0x0194, FUJITSU = 0x8004, US_MODULAR = 0x04AB</enum>
     <initToZero></initToZero>
     <valueType>uint16</valueType>
     <writeable/>
@@ -660,7 +660,7 @@
       DRAM Modlue Height
       Decodes SPD Byte 193
     </description>
-    <enum>1U = 0, 2U = 1, 4U = 2 </enum>
+    <enum>1U = 0, 2U = 1, 4U = 4 </enum>
     <initToZero></initToZero>
     <valueType>uint8</valueType>
     <writeable/>
@@ -930,6 +930,18 @@
     <valueType>uint8</valueType>
     <writeable/>
     <mssAccessorName>spd_revision</mssAccessorName>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_MEM_EFF_SPD_CONTENT_REVISION</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      SPD content revision (SPD Byte 221)
+    </description>
+    <initToZero></initToZero>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <mssAccessorName>spd_content_revision</mssAccessorName>
   </attribute>
 
 </attributes>

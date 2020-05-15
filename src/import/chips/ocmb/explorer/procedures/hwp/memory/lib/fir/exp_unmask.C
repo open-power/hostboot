@@ -257,9 +257,6 @@ fapi2::ReturnCode after_mc_omi_init<mss::mc_type::EXPLORER>(const fapi2::Target<
     fapi2::ReturnCode l_rc3 = fapi2::FAPI2_RC_SUCCESS;
     fapi2::ReturnCode l_rc4 = fapi2::FAPI2_RC_SUCCESS;
 
-    fapi2::buffer<uint64_t> l_global_fir_mask_reg;
-    fapi2::buffer<uint64_t> l_global_spa_attn_reg;
-
     mss::fir::reg<EXPLR_MMIO_MFIR> l_exp_mmio_mfir_reg(i_target, l_rc1);
     mss::fir::reg<EXPLR_TLXT_TLXFIRQ> l_exp_tlxt_fir_reg(i_target, l_rc2);
     mss::fir::reg<EXPLR_TP_MB_UNIT_TOP_LOCAL_FIR> l_exp_local_fir_reg(i_target, l_rc3);
@@ -273,23 +270,6 @@ fapi2::ReturnCode after_mc_omi_init<mss::mc_type::EXPLORER>(const fapi2::Target<
              mss::c_str(i_target), EXPLR_TP_MB_UNIT_TOP_LOCAL_FIR);
     FAPI_TRY(l_rc4, "for target %s unable to create fir::reg for EXPLR_DLX_MC_OMI_FIR_REG 0x%0x",
              mss::c_str(i_target), EXPLR_DLX_MC_OMI_FIR_REG);
-
-    // Pull global fir mask state and unmask bits per spec
-    FAPI_TRY(fapi2::getScom(i_target, EXPLR_TP_MB_UNIT_TOP_FIR_MASK, l_global_fir_mask_reg));
-    l_global_fir_mask_reg.clearBit<EXPLR_TP_MB_UNIT_TOP_XFIR_IN0>()
-    .clearBit<EXPLR_TP_MB_UNIT_TOP_XFIR_IN3>()
-    .clearBit<EXPLR_TP_MB_UNIT_TOP_XFIR_IN4>()
-    .clearBit<EXPLR_TP_MB_UNIT_TOP_XFIR_IN7>()
-    .clearBit<EXPLR_TP_MB_UNIT_TOP_XFIR_IN8>()
-    .clearBit<EXPLR_TP_MB_UNIT_TOP_XFIR_IN9>()
-    .clearBit<EXPLR_TP_MB_UNIT_TOP_XFIR_IN11>()
-    .clearBit<EXPLR_TP_MB_UNIT_TOP_XFIR_IN12>();
-    FAPI_TRY(fapi2::putScom(i_target, EXPLR_TP_MB_UNIT_TOP_FIR_MASK, l_global_fir_mask_reg));
-
-    // Pull global special attn state and unmask bits per spec
-    FAPI_TRY(fapi2::getScom(i_target, EXPLR_TP_MB_UNIT_TOP_SPA_MASK, l_global_spa_attn_reg));
-    l_global_spa_attn_reg.clearBit<EXPLR_TP_MB_UNIT_TOP_SPATTN_IN5>();
-    FAPI_TRY(fapi2::putScom(i_target, EXPLR_TP_MB_UNIT_TOP_SPA_MASK, l_global_spa_attn_reg));
 
     // Setup MMIO MFIR unmasks per spec
     FAPI_TRY(l_exp_mmio_mfir_reg.recoverable_error<EXPLR_MMIO_MFIR_SCOM_ERR>()
@@ -417,6 +397,8 @@ fapi2::ReturnCode after_mc_omi_setup<mss::mc_type::EXPLORER>( const fapi2::Targe
     constexpr uint64_t MASK_ALL = ~0ull;
 
     fapi2::buffer<uint64_t> l_dl0_error_mask;
+    fapi2::buffer<uint64_t> l_global_fir_mask_reg;
+    fapi2::buffer<uint64_t> l_global_spa_attn_reg;
 
     fapi2::ReturnCode l_rc1 = fapi2::FAPI2_RC_SUCCESS;
     fapi2::ReturnCode l_rc2 = fapi2::FAPI2_RC_SUCCESS;
@@ -484,11 +466,31 @@ fapi2::ReturnCode after_mc_omi_setup<mss::mc_type::EXPLORER>( const fapi2::Targe
     .setBit<EXPLR_DLX_DL0_ERROR_MASK_36>()
     .clearBit<EXPLR_DLX_DL0_ERROR_MASK_33>()
     .setBit<EXPLR_DLX_DL0_ERROR_MASK_32>()
+    .setBit<EXPLR_DLX_DL0_ERROR_MASK_18>()
     .clearBit<EXPLR_DLX_DL0_ERROR_MASK_17>()
     .clearBit<EXPLR_DLX_DL0_ERROR_MASK_16>()
     .clearBit<EXPLR_DLX_DL0_ERROR_MASK_15>()
     .clearBit<EXPLR_DLX_DL0_ERROR_MASK_14>();
     FAPI_TRY(fapi2::putScom(i_target, EXPLR_DLX_DL0_ERROR_MASK, l_dl0_error_mask));
+
+    // Pull global fir mask state and unmask bits per spec
+    FAPI_TRY(fapi2::getScom(i_target, EXPLR_TP_MB_UNIT_TOP_FIR_MASK, l_global_fir_mask_reg));
+    l_global_fir_mask_reg.clearBit<EXPLR_TP_MB_UNIT_TOP_XFIR_IN0>()
+    .clearBit<EXPLR_TP_MB_UNIT_TOP_XFIR_IN3>()
+    .clearBit<EXPLR_TP_MB_UNIT_TOP_XFIR_IN4>()
+    .clearBit<EXPLR_TP_MB_UNIT_TOP_XFIR_IN7>()
+    .clearBit<EXPLR_TP_MB_UNIT_TOP_XFIR_IN8>()
+    .clearBit<EXPLR_TP_MB_UNIT_TOP_XFIR_IN9>()
+    .clearBit<EXPLR_TP_MB_UNIT_TOP_XFIR_IN11>()
+    .clearBit<EXPLR_TP_MB_UNIT_TOP_XFIR_IN12>();
+    FAPI_TRY(fapi2::putScom(i_target, EXPLR_TP_MB_UNIT_TOP_FIR_MASK, l_global_fir_mask_reg));
+
+    // Pull global special attn state and unmask bits per spec
+    FAPI_TRY(fapi2::getScom(i_target, EXPLR_TP_MB_UNIT_TOP_SPA_MASK, l_global_spa_attn_reg));
+    l_global_spa_attn_reg.clearBit<EXPLR_TP_MB_UNIT_TOP_SPATTN_IN5>();
+    FAPI_TRY(fapi2::putScom(i_target, EXPLR_TP_MB_UNIT_TOP_SPA_MASK, l_global_spa_attn_reg));
+
+    return fapi2::FAPI2_RC_SUCCESS;
 
 fapi_try_exit:
 

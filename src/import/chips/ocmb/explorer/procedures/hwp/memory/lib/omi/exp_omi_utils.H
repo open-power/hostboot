@@ -268,6 +268,13 @@ fapi2::ReturnCode poll_for_training_completion(
     uint8_t& o_state_machine_state,
     fapi2::buffer<uint64_t>& o_omi_status);
 
+///
+/// @brief Abort Explorer FW polling for OMI training completion
+/// @param[in] i_target OCMB target
+/// @return fapi2::ReturnCode
+///
+fapi2::ReturnCode poll_abort(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target);
+
 } // ns train
 
 } // ns omi

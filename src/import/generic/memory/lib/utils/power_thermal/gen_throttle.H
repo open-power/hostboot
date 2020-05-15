@@ -1119,14 +1119,19 @@ fapi_try_exit:
 
 
 ///
-/// @brief set the safemode throttle register
+/// @brief Calculate utilization from input or safemode throttles
 /// @tparam MC mss::mc_type
 /// @tparam T the fapi2 target type of the target
-/// @tparam TT portTraits port traits for the given MC target type
+/// @tparam TT throttle_traits throttle traits for the given MC target type
 /// @param[in] i_target the port target
+/// @param[in] i_input_databus_util input utilization
+/// @param[in] i_dram_clocks window of M DRAM clocks
+/// @param[in] i_safemode_throttle_per_port safemode throttle value
+/// @param[in] i_max_databus_util databus utilization limit
+/// @param[out] o_util calculated utilization
+/// @param[out] o_util_error true if input utilization is lower than minimum allowed
+/// @param[out] o_safemode true if safemode throttle values were used for calculation
 /// @return fapi2::FAPI2_RC_SUCCESS if ok
-/// @note sets FARB4Q
-/// @note used to set throttle window (N throttles  / M clocks)
 ///
 template<mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T, typename TT = throttle_traits<MC>>
 fapi2::ReturnCode calc_utilization(const fapi2::Target<T>& i_target,
@@ -1153,7 +1158,7 @@ fapi2::ReturnCode calc_utilization(const fapi2::Target<T>& i_target,
                  mss::c_str(i_target),
                  i_safemode_throttle_per_port,
                  i_dram_clocks);
-        FAPI_INF("%s Safemode throttles being used since input util is zero:  Using N=%d, Utilization %f",
+        FAPI_INF("%s Safemode throttles being used since input util is zero:  Using N=%d, Utilization %d %%",
                  mss::c_str(i_target),
                  i_safemode_throttle_per_port,
                  o_util);
@@ -1321,6 +1326,266 @@ fapi2::ReturnCode equalize_throttles (const std::vector< fapi2::Target<T> >& i_t
     return fapi2::FAPI2_RC_SUCCESS;
 fapi_try_exit:
     FAPI_ERR("Error equalizing memory throttles");
+    return fapi2::current_err;
+}
+
+///
+/// @brief Write the runtime memory throttle settings from attributes to scom registers
+/// @tparam MC mss::mc_type
+/// @tparam T the fapi2 target type of the target
+/// @tparam TT throttle traits for the given MC target type
+/// @param[in] i_target the port target
+/// @return fapi2::FAPI2_RC_SUCCESS iff ok
+/// @note overwriting the safemode throttle values
+///
+template<mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T, typename TT = throttle_traits<MC>>
+fapi2::ReturnCode write_runtime_throttles(const fapi2::Target<T>& i_target)
+{
+    FAPI_INF("%s Start write_runtime_throttles", mss::c_str(i_target));
+
+    uint16_t l_runtime_port = 0;
+    uint16_t l_runtime_slot = 0;
+
+    fapi2::buffer<uint64_t> l_data;
+    FAPI_TRY(fapi2::getScom(i_target, TT::FARB3Q_REG, l_data));
+
+    FAPI_TRY( mss::attr::get_runtime_mem_throttled_n_commands_per_port(i_target, l_runtime_port));
+    FAPI_TRY( mss::attr::get_runtime_mem_throttled_n_commands_per_slot(i_target, l_runtime_slot));
+
+    l_data.insertFromRight<TT::RUNTIME_N_SLOT, TT::RUNTIME_N_SLOT_LEN>(l_runtime_slot);
+    l_data.insertFromRight<TT::RUNTIME_N_PORT, TT::RUNTIME_N_PORT_LEN>(l_runtime_port);
+
+    FAPI_TRY( fapi2::putScom(i_target, TT::FARB3Q_REG, l_data) );
+
+    FAPI_INF("%s End write_runtime_throttles", mss::c_str(i_target));
+    return fapi2::FAPI2_RC_SUCCESS;
+
+fapi_try_exit:
+    FAPI_ERR("%s Couldn't finish write_runtime_throttles", mss::c_str(i_target));
+    return fapi2::current_err;
+}
+
+///
+/// @brief set the PWR CNTRL register
+/// @tparam MC mss::mc_type
+/// @tparam T the fapi2 target type of the target
+/// @tparam TT throttle traits for the given MC target type
+/// @param[in] i_target the port target
+/// @return fapi2::FAPI2_RC_SUCCESS if ok
+///
+template<mss::mc_type MC, fapi2::TargetType T, typename TT = throttle_traits<MC>>
+fapi2::ReturnCode set_pwr_cntrl_reg(const fapi2::Target<T>& i_target)
+{
+    fapi2::ATTR_MSS_MRW_POWER_CONTROL_REQUESTED_Type l_pwr_cntrl = 0;
+    fapi2::buffer<uint64_t> l_data;
+
+    FAPI_TRY(mss::attr::get_mrw_power_control_requested(l_pwr_cntrl));
+    FAPI_TRY(fapi2::getScom(i_target, TT::MBARPC0Q_REG, l_data));
+
+    l_data.insertFromRight<TT::CFG_MIN_MAX_DOMAINS, TT::CFG_MIN_MAX_DOMAINS_LEN>(TT::MAXALL_MINALL);
+
+    // Write data if PWR_CNTRL_REQUESTED includes power down
+    switch (l_pwr_cntrl)
+    {
+        case fapi2::ENUM_ATTR_MSS_MRW_POWER_CONTROL_REQUESTED_POWER_DOWN:
+            l_data.clearBit<TT::CFG_LP_CTRL_ENABLE>();
+            l_data.clearBit<TT::CFG_LP_DATA_ENABLE>();
+            l_data.setBit<TT::CFG_MIN_DOMAIN_REDUCTION_ENABLE>();
+            break;
+
+        case fapi2::ENUM_ATTR_MSS_MRW_POWER_CONTROL_REQUESTED_PD_AND_STR:
+        case fapi2::ENUM_ATTR_MSS_MRW_POWER_CONTROL_REQUESTED_PD_AND_STR_CLK_STOP:
+            l_data.setBit<TT::CFG_LP_CTRL_ENABLE>();
+            l_data.setBit<TT::CFG_LP_DATA_ENABLE>();
+            l_data.setBit<TT::CFG_MIN_DOMAIN_REDUCTION_ENABLE>();
+            break;
+
+        case fapi2::ENUM_ATTR_MSS_MRW_POWER_CONTROL_REQUESTED_OFF:
+            l_data.clearBit<TT::CFG_LP_CTRL_ENABLE>();
+            l_data.clearBit<TT::CFG_LP_DATA_ENABLE>();
+            l_data.clearBit<TT::CFG_MIN_DOMAIN_REDUCTION_ENABLE>();
+            break;
+
+        default:
+            FAPI_ASSERT( false,
+                         fapi2::MSS_UNSUPPORTED_MRW_POWER_CONTROL_REQUESTED()
+                         .set_VALUE(l_pwr_cntrl),
+                         "%s ATTR_MSS_MRW_POWER_CONTROL_REQUESTED not set correctly in MRW: %lu",
+                         mss::c_str(i_target),
+                         l_pwr_cntrl);
+            break;
+    }
+
+    //Set the MIN_DOMAIN_REDUCTION time
+    l_data.insertFromRight<TT::CFG_MIN_DOMAIN_REDUCTION_TIME, TT::CFG_MIN_DOMAIN_REDUCTION_TIME_LEN>
+    (TT::MIN_DOMAIN_REDUCTION_TIME);
+
+    FAPI_TRY(fapi2::putScom(i_target, TT::MBARPC0Q_REG, l_data));
+
+    return fapi2::FAPI2_RC_SUCCESS;
+fapi_try_exit:
+    FAPI_ERR("%s Error setting power control register MBARPC0Q", mss::c_str(i_target));
+    return fapi2::current_err;
+}
+
+///
+/// @brief set the STR register
+/// @tparam MC mss::mc_type
+/// @tparam T the fapi2 target type of the target
+/// @tparam TT throttle traits for the given MC target type
+/// @param[in] i_target the port target
+/// @return fapi2::FAPI2_RC_SUCCESS if ok
+///
+template<mss::mc_type MC, fapi2::TargetType T, typename TT = throttle_traits<MC>>
+fapi2::ReturnCode set_str_reg(const fapi2::Target<T>& i_target)
+{
+    fapi2::ATTR_MSS_MRW_POWER_CONTROL_REQUESTED_Type l_str_enable = 0;
+    fapi2::buffer<uint64_t> l_data;
+
+    FAPI_TRY(mss::attr::get_mrw_power_control_requested(l_str_enable));
+    FAPI_TRY(fapi2::getScom(i_target, TT::STR0Q_REG, l_data));
+
+    //Write bit if STR should be enabled
+    switch (l_str_enable)
+    {
+        case fapi2::ENUM_ATTR_MSS_MRW_POWER_CONTROL_REQUESTED_PD_AND_STR:
+            l_data.setBit<TT::CFG_STR_ENABLE>();
+            l_data.clearBit<TT::CFG_DIS_CLK_IN_STR>();
+            break;
+
+        case fapi2::ENUM_ATTR_MSS_MRW_POWER_CONTROL_REQUESTED_PD_AND_STR_CLK_STOP:
+            l_data.setBit<TT::CFG_STR_ENABLE>();
+            l_data.setBit<TT::CFG_DIS_CLK_IN_STR>();
+            break;
+
+        case fapi2::ENUM_ATTR_MSS_MRW_POWER_CONTROL_REQUESTED_POWER_DOWN:
+        case fapi2::ENUM_ATTR_MSS_MRW_POWER_CONTROL_REQUESTED_OFF:
+            l_data.clearBit<TT::CFG_STR_ENABLE>();
+            l_data.clearBit<TT::CFG_DIS_CLK_IN_STR>();
+            break;
+
+        default:
+            FAPI_ASSERT( false,
+                         fapi2::MSS_UNSUPPORTED_MRW_POWER_CONTROL_REQUESTED()
+                         .set_VALUE(l_str_enable),
+                         "%s ATTR_MSS_MRW_POWER_CONTROL_REQUESTED not set correctly in MRW: %lu",
+                         mss::c_str(i_target),
+                         l_str_enable);
+            break;
+    }
+
+    l_data.insertFromRight<TT::CFG_ENTER_STR_TIME, TT::CFG_ENTER_STR_TIME_LEN>(TT::ENTER_STR_TIME);
+
+    FAPI_TRY(fapi2::putScom(i_target, TT::STR0Q_REG, l_data));
+
+    return fapi2::FAPI2_RC_SUCCESS;
+fapi_try_exit:
+    FAPI_ERR("%s Error setting the STR register MBASTR0Q", mss::c_str(i_target));
+    return fapi2::current_err;
+}
+
+///
+/// @brief set the general N/M throttle register
+/// @tparam MC mss::mc_type
+/// @tparam T the fapi2 target type of the target
+/// @tparam TT throttle traits for the given MC target type
+/// @param[in] i_target the port target
+/// @return fapi2::FAPI2_RC_SUCCESS if ok
+///
+template<mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T, typename TT = throttle_traits<MC>>
+fapi2::ReturnCode set_nm_support(const fapi2::Target<T>& i_target)
+{
+    uint16_t l_run_slot = 0;
+    uint16_t l_run_port = 0;
+    fapi2::ATTR_MSS_MRW_MEM_M_DRAM_CLOCKS_Type l_throttle_denominator = 0;
+
+    fapi2::buffer<uint64_t> l_data;
+
+    FAPI_TRY(mss::attr::get_mrw_mem_m_dram_clocks(l_throttle_denominator));
+
+    FAPI_TRY(fapi2::getScom(i_target, TT::FARB3Q_REG, l_data));
+
+    // runtime should be calculated in eff_config_thermal, which is called before scominit in ipl
+    FAPI_TRY(mss::attr::get_runtime_mem_throttled_n_commands_per_port(i_target, l_run_port));
+    FAPI_TRY(mss::attr::get_runtime_mem_throttled_n_commands_per_slot(i_target, l_run_slot));
+    FAPI_INF("For target %s throttled n commands per port are %d, per slot are %d, and dram m clocks are %d",
+             mss::c_str(i_target),
+             l_run_port,
+             l_run_slot,
+             l_throttle_denominator);
+
+    l_data.insertFromRight<TT::RUNTIME_N_SLOT, TT::RUNTIME_N_SLOT_LEN>(l_run_slot);
+    l_data.insertFromRight<TT::RUNTIME_N_PORT, TT::RUNTIME_N_PORT_LEN>(l_run_port);
+    l_data.insertFromRight<TT::RUNTIME_M, TT::RUNTIME_M_LEN>(l_throttle_denominator);
+    l_data.insertFromRight<TT::CFG_RAS_WEIGHT, TT::CFG_RAS_WEIGHT_LEN>(TT::NM_RAS_WEIGHT);
+    l_data.insertFromRight<TT::CFG_CAS_WEIGHT, TT::CFG_CAS_WEIGHT_LEN>(TT::NM_CAS_WEIGHT);
+
+    // If set, changes to cfg_nm_n_per_slot, cfg_nm_n_per_port, cfg_nm_m, min_max_domains
+    // will only be applied after a pc_sync command is seen
+    // Set differently for different MC types because of hardware differences (see portTraits<MC> for details)
+    l_data.writeBit<TT::CFG_NM_CHANGE_AFTER_SYNC>(TT::CFG_NM_CHANGE_AFTER_SYNC_VALUE);
+
+    FAPI_TRY(fapi2::putScom(i_target, TT::FARB3Q_REG, l_data));
+
+    return fapi2::FAPI2_RC_SUCCESS;
+fapi_try_exit:
+    FAPI_ERR("%s Error setting nm throttles", mss::c_str(i_target));
+    return fapi2::current_err;
+}
+
+///
+/// @brief set the safemode throttle register
+/// @tparam MC mss::mc_type
+/// @tparam T the fapi2 target type of the target
+/// @tparam TT throttle traits for the given MC target type
+/// @param[in] i_target the port target
+/// @return fapi2::FAPI2_RC_SUCCESS if ok
+/// @note sets FARB4Q
+/// @note used to set throttle window (N throttles  / M clocks)
+///
+template<mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T, typename TT = throttle_traits<MC>>
+fapi2::ReturnCode set_safemode_throttles(const fapi2::Target<T>& i_target)
+{
+    fapi2::buffer<uint64_t> l_data;
+    fapi2::ATTR_MSS_MRW_SAFEMODE_MEM_THROTTLED_N_COMMANDS_PER_PORT_Type l_throttle_per_port = 0;
+    fapi2::ATTR_MSS_MRW_MEM_M_DRAM_CLOCKS_Type l_throttle_denominator = 0;
+
+    FAPI_TRY(mss::attr::get_mrw_mem_m_dram_clocks(l_throttle_denominator));
+    FAPI_TRY(mss::attr::get_mrw_safemode_mem_throttled_n_commands_per_port(l_throttle_per_port));
+
+    FAPI_TRY(fapi2::getScom(i_target, TT::FARB4Q_REG, l_data));
+
+    l_data.insertFromRight<TT::EMERGENCY_M, TT::EMERGENCY_M_LEN>(l_throttle_denominator);
+    l_data.insertFromRight<TT::EMERGENCY_N, TT::EMERGENCY_N_LEN>(l_throttle_per_port);
+
+    FAPI_TRY(fapi2::putScom(i_target, TT::FARB4Q_REG, l_data));
+
+    return fapi2::FAPI2_RC_SUCCESS;
+
+fapi_try_exit:
+    FAPI_ERR("%s Error setting safemode throttles", mss::c_str(i_target));
+    return fapi2::current_err;
+}
+
+///
+/// @brief safemode throttle values defined from MRW attributes
+/// @tparam MC mss::mc_type
+/// @tparam T the fapi2 target type of the target
+/// @param[in] i_target the port target
+/// @return fapi2::FAPI2_RC_SUCCESS if ok
+/// @note sets safemode values for emergency mode and regular throttling
+///
+template<mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T>
+fapi2::ReturnCode thermal_throttle_scominit(const fapi2::Target<T>& i_target)
+{
+    FAPI_TRY(set_pwr_cntrl_reg<MC>(i_target));
+    FAPI_TRY(set_str_reg<MC>(i_target));
+    FAPI_TRY(set_nm_support<MC>(i_target));
+    FAPI_TRY(set_safemode_throttles<MC>(i_target));
+
+    return fapi2::FAPI2_RC_SUCCESS;
+fapi_try_exit:
+    FAPI_ERR("%s Error setting scominits for power_thermal values", mss::c_str(i_target));
     return fapi2::current_err;
 }
 

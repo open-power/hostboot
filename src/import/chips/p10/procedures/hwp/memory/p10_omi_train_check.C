@@ -38,6 +38,7 @@
 #include <p10_scom_omi.H>
 #include <lib/omi/p10_omi_utils.H>
 #include <generic/memory/lib/utils/shared/mss_generic_consts.H>
+#include <generic/memory/lib/utils/mss_generic_check.H>
 
 ///
 /// @brief Check training state of OMI
@@ -115,6 +116,6 @@ fapi2::ReturnCode p10_omi_train_check(const fapi2::Target<fapi2::TARGET_TYPE_OMI
     return fapi2::FAPI2_RC_SUCCESS;
 
 fapi_try_exit:
-    FAPI_DBG("End");
-    return fapi2::current_err;
+    // If OMI training failed or timed out, we need to check some FIRs
+    return mss::check::fir_or_pll_fail<mss::mc_type::EXPLORER, mss::check::firChecklist::OMI>(i_target, fapi2::current_err);
 }

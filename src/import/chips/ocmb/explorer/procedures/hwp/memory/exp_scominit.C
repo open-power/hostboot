@@ -37,11 +37,13 @@
 #include <generic/memory/lib/utils/c_str.H>
 #include <generic/memory/lib/utils/count_dimm.H>
 #include <generic/memory/lib/utils/find.H>
+#include <lib/shared/exp_defaults.H>
+#include <lib/power_thermal/exp_throttle.H>
 #include <explorer_scom.H>
 #include <generic/memory/mss_git_data_helper.H>
-#include <lib/shared/exp_defaults.H>
 #include <lib/shared/exp_consts.H>
 #include <generic/memory/lib/utils/fir/gen_mss_unmask.H>
+#include <lib/inband/exp_fw_adapter_properties.H>
 
 extern "C"
 {
@@ -77,10 +79,16 @@ extern "C"
             FAPI_EXEC_HWP(l_rc, explorer_scom, i_target, l_port, FAPI_SYSTEM, l_mc);
 
             FAPI_TRY(l_rc, "Error from explorer.scom.initfile %s", mss::c_str(l_port));
+
+            // Write power controls and emergency throttle settings
+            FAPI_TRY(mss::power_thermal::thermal_throttle_scominit<mss::mc_type::EXPLORER>(l_port));
         }
 
         // Run required unmasks for LOCAL_FIR, FABR0, SRQFIR after scominit
         FAPI_TRY(mss::unmask::after_scominit<mss::mc_type::EXPLORER>(i_target));
+
+        // Print and record Explorer FW version info
+        FAPI_TRY( mss::exp::ib::run_fw_adapter_properties_get(i_target) );
 
         return fapi2::FAPI2_RC_SUCCESS;
 

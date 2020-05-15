@@ -94,7 +94,10 @@ constexpr uint64_t literal_0b01010 = 0b01010;
 constexpr uint64_t literal_0b00000 = 0b00000;
 constexpr uint64_t literal_0b00010 = 0b00010;
 constexpr uint64_t literal_0b00011 = 0b00011;
+constexpr uint64_t literal_0b0000 = 0b0000;
 constexpr uint64_t literal_0b0001 = 0b0001;
+constexpr uint64_t literal_0b0010 = 0b0010;
+constexpr uint64_t literal_0b0011 = 0b0011;
 
 fapi2::ReturnCode explorer_scom(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& TGT0,
                                 const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& TGT1, const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>& TGT2,
@@ -1757,10 +1760,10 @@ fapi2::ReturnCode explorer_scom(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP
         {
             FAPI_TRY(fapi2::getScom( TGT0, 0x801240dull, l_scom_buffer ));
 
-            l_scom_buffer.insert<48, 4, 60, uint64_t>(literal_0b0001 );
+            l_scom_buffer.insert<48, 4, 60, uint64_t>(literal_0b0000 );
             l_scom_buffer.insert<52, 4, 60, uint64_t>(literal_0b0001 );
-            l_scom_buffer.insert<56, 4, 60, uint64_t>(literal_0b0001 );
-            l_scom_buffer.insert<60, 4, 60, uint64_t>(literal_0b0001 );
+            l_scom_buffer.insert<56, 4, 60, uint64_t>(literal_0b0010 );
+            l_scom_buffer.insert<60, 4, 60, uint64_t>(literal_0b0011 );
             FAPI_TRY(fapi2::putScom(TGT0, 0x801240dull, l_scom_buffer));
         }
         {

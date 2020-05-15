@@ -58,9 +58,10 @@ enum class pre_data_init_fields
     MRANKS = 5,
     HOST_TO_DDR_SPEED_RATIO = 6,
     DIMM_RANKS_CNFG = 7,
+    SPD_REVISION = 8,
 
     // Dispatcher set to last enum value
-    DISPATCHER = DIMM_RANKS_CNFG,
+    DISPATCHER = SPD_REVISION,
 };
 
 ///
@@ -118,11 +119,11 @@ enum class attr_eff_engine_fields
     DRAM_MFG_ID = 23,
     RCD_MFG_ID = 24,
     DRAM_MODULE_HEIGHT = 25,
-    SPD_REVISION = 26,
-    MODULE_MFG_ID = 27,
+    MODULE_MFG_ID = 26,
+    SPD_CONTENT_REVISION = 27,
 
     // Dispatcher set to last enum value
-    DISPATCHER = MODULE_MFG_ID,
+    DISPATCHER = SPD_CONTENT_REVISION,
 };
 
 ///

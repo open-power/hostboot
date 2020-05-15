@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -47,6 +47,7 @@ namespace efd
 ///
 /// @brief Generates the EFD decoder based upon the EFD type
 /// @param[in] i_target DIMM target
+/// @param[in] i_rev SPD revision
 /// @param[in] i_data SPD data
 /// @param[in] i_rank the current rank
 /// @param[out] o_decoder shared pointer to the decoder in question
@@ -54,14 +55,49 @@ namespace efd
 ///
 // TODO:update this for other types of EFD
 inline fapi2::ReturnCode factory(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+                                 const uint8_t i_rev,
                                  const std::vector<uint8_t>& i_data,
                                  const size_t i_rank,
                                  std::shared_ptr<base_decoder>& o_decoder_ptr)
 {
-    o_decoder_ptr = std::make_shared<mss::efd::decoder<mss::spd::device_type::DDR4,
-    DDR4_CUSTOM_MICROCHIP,
-    mss::spd::rev::V0_0>>(i_target, i_data, i_rank);
-    return fapi2::FAPI2_RC_SUCCESS;
+    // Poor man's fallback technique: if we receive a revision that's later than (or numerically
+    // greater than) the latest supported, we'll decode as if it's the latest supported rev
+    const uint8_t l_fallback_rev = (i_rev > mss::spd::rev::DDIMM_MAX) ? mss::spd::rev::DDIMM_MAX : i_rev;
+
+    switch (l_fallback_rev)
+    {
+        case mss::spd::rev::V0_3:
+            {
+                o_decoder_ptr = std::make_shared<mss::efd::decoder<mss::spd::device_type::DDR4,
+                DDR4_CUSTOM_MICROCHIP,
+                mss::spd::rev::V0_3>>(i_target, i_data, i_rank);
+                return fapi2::FAPI2_RC_SUCCESS;
+                break;
+            }
+
+        case mss::spd::rev::V0_4:
+            {
+                o_decoder_ptr = std::make_shared<mss::efd::decoder<mss::spd::device_type::DDR4,
+                DDR4_CUSTOM_MICROCHIP,
+                mss::spd::rev::V0_4>>(i_target, i_data, i_rank);
+                return fapi2::FAPI2_RC_SUCCESS;
+                break;
+            }
+
+        default:
+            {
+                FAPI_ASSERT(false,
+                            fapi2::MSS_INVALID_SPD_PARAMETER_RECEIVED()
+                            .set_SPD_PARAM(i_rev)
+                            .set_FUNCTION_CODE(EFD_FACTORY)
+                            .set_TARGET(i_target),
+                            "Unsupported SPD revision received in EFD decoder factory 0x%02x for %s",
+                            i_rev, spd::c_str(i_target));
+            }
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
 }
 
 } // ns efd

@@ -48,8 +48,269 @@
 
 namespace mss
 {
+
+namespace gpio
+{
+
+///
+/// @brief Poll for the GPIO input port ready on the bit corresponding to the PMIC pair
+///
+/// @param[in] i_gpio_target GPIO target
+/// @param[in] i_pmic_pair_bit the PMIC pair bit
+/// @return fapi2::ReturnCode
+///
+fapi2::ReturnCode poll_input_port_ready(
+    const fapi2::Target<fapi2::TARGET_TYPE_GENERICI2CSLAVE>& i_gpio_target,
+    const mss::gpio::fields i_pmic_pair_bit);
+
+} // ns gpio
+
 namespace pmic
 {
+
+using ADC_REGS = mss::adc::regs;
+using ADC_FIELDS = mss::adc::fields;
+
+// The sequences below and accompanying comments are
+// defined in section 6.1.1 of the Redundant Power on DIMM –
+// Functional Specification document
+
+// ADC1 register sequence
+// pair<REG,DATA>
+static const std::vector<std::pair<uint8_t, uint8_t>> ADC1_CH_INIT =
+{
+    // 33: Set channels to auto sequencing, all channels
+    {ADC_REGS::AUTO_SEQ_CH_SEL, ADC_FIELDS::AUTO_SEQ_CH_SEL_ALL_AUTO_SEQUENCING},
+    // 34: Set auto sequence mode
+    {ADC_REGS::SEQUENCE_CFG, ADC_FIELDS::SEQUENCE_CFG_AUTO_SEQUENCE},
+
+    // CH 1
+    // 35: Keep upper limit at max, enable hysteresis
+    {ADC_REGS::HYSTERESIS_CH1, ADC_FIELDS::HYSTERESIS_UPPER_LIMIT_MAX_ENABLE},
+
+    // 36: Keep default, may skip if not multibyte writing
+    {ADC_REGS::HIGH_TH_CH1, ADC_FIELDS::HIGH_TH_DEFAULT},
+
+    // 37: Set up so alert must persist for 4 consecutive readings
+    {ADC_REGS::EVENT_COUNT_CH1, ADC_FIELDS::EVENT_COUNT_ADC1_CH1_ALERT_4_CONSECUTIVE_READINGS},
+
+    // 38: 1AB_VLOC (VDDR1) Low Threshold = 0.643 V
+    {ADC_REGS::LOW_TH_CH1, ADC_FIELDS::LOW_TH_CH1_1AB_VLOC_LOW_THRESHOLD_643mv},
+
+    // CH 2
+    // 39: Keep upper limit at max, enable hysteresis
+    {ADC_REGS::HYSTERESIS_CH2, ADC_FIELDS::HYSTERESIS_UPPER_LIMIT_MAX_ENABLE},
+
+    // 40: Keep default, may skip if not multibyte writing
+    {ADC_REGS::HIGH_TH_CH2, ADC_FIELDS::HIGH_TH_DEFAULT},
+
+    // 41: Set up so alert must persist for 4 consecutive readings
+    {ADC_REGS::EVENT_COUNT_CH2, ADC_FIELDS::EVENT_COUNT_ADC1_CH2_ALERT_4_CONSECUTIVE_READINGS},
+
+    // 42: 1C_VLOC (VIO) Low Threshold = 0.476 V
+    {ADC_REGS::LOW_TH_CH2, ADC_FIELDS::LOW_TH_CH2_1C_VLOC_LOW_THRESHOLD_476mv},
+
+    // CH3
+    // 43: Keep upper limit at max, enable hysteresis
+    {ADC_REGS::HYSTERESIS_CH3, ADC_FIELDS::HYSTERESIS_UPPER_LIMIT_MAX_ENABLE},
+
+    // 44: Keep default, may skip if not multibyte writing
+    {ADC_REGS::HIGH_TH_CH3, ADC_FIELDS::HIGH_TH_DEFAULT},
+
+    // 45: Set up so alert must persist for 4 consecutive readings
+    {ADC_REGS::EVENT_COUNT_CH3, ADC_FIELDS::EVENT_COUNT_ADC1_CH3_ALERT_4_CONSECUTIVE_READINGS},
+
+    // 46: 1D_VLOC/2 (VPP) Low Threshold = 0.733 V
+    {ADC_REGS::LOW_TH_CH3, ADC_FIELDS::LOW_TH_CH3_1D_VLOC_LOW_THRESHOLD_733mv},
+
+    // CH 4
+    // 47: Keep upper limit at max, enable hysteresis
+    {ADC_REGS::HYSTERESIS_CH4, ADC_FIELDS::HYSTERESIS_UPPER_LIMIT_MAX_ENABLE},
+
+    // 48: Keep default, may skip if not multibyte writing
+    {ADC_REGS::HIGH_TH_CH4, ADC_FIELDS::HIGH_TH_DEFAULT},
+
+    // 49: Set up so alert must persist for 4 consecutive readings
+    {ADC_REGS::EVENT_COUNT_CH4, ADC_FIELDS::EVENT_COUNT_ADC1_CH4_ALERT_4_CONSECUTIVE_READINGS},
+
+    // 50: 2C_VLOC (VIO) Low Threshold = 0.476 V
+    {ADC_REGS::LOW_TH_CH4, ADC_FIELDS::LOW_TH_CH4_2C_VLOC_LOW_THRESHOLD_476mv},
+
+    // CH 5
+    // 51: Keep upper limit at max, enable hysteresis
+    {ADC_REGS::HYSTERESIS_CH5, ADC_FIELDS::HYSTERESIS_UPPER_LIMIT_MAX_ENABLE},
+
+    // 52: Keep default, may skip if not multibyte writing
+    {ADC_REGS::HIGH_TH_CH5, ADC_FIELDS::HIGH_TH_DEFAULT},
+
+    // 53: Set up so alert must persist for 4 consecutive readings
+    {ADC_REGS::EVENT_COUNT_CH5, ADC_FIELDS::EVENT_COUNT_ADC1_CH5_ALERT_4_CONSECUTIVE_READINGS},
+
+    // 54: 2D_VLOC/2 (VPP) Low Threshold = 0.733 V
+    {ADC_REGS::LOW_TH_CH5, ADC_FIELDS::LOW_TH_CH5_2D_VLOC_LOW_THRESHOLD_733mv},
+
+    // CH 7
+    // 55: Keep upper limit at max, enable hysteresis
+    {ADC_REGS::HYSTERESIS_CH7, ADC_FIELDS::HYSTERESIS_UPPER_LIMIT_MAX_ENABLE},
+
+    // 56: Keep default, may skip if not multibyte writing
+    {ADC_REGS::HIGH_TH_CH7, ADC_FIELDS::HIGH_TH_DEFAULT},
+
+    // 57: Set up so alert must persist for 4 consecutive readings
+    {ADC_REGS::EVENT_COUNT_CH7, ADC_FIELDS::EVENT_COUNT_ADC1_CH7_ALERT_4_CONSECUTIVE_READINGS},
+
+    // 58: 2AB_VLOC Low (VDDR1) Threshold = 0.643 V
+    {ADC_REGS::LOW_TH_CH7, ADC_FIELDS::LOW_TH_CH7_2AB_VLOC_LOW_THRESHOLD_643mv},
+
+    // Finalize
+    // 59: Set channels to trigger an alert, only local voltages
+    {ADC_REGS::ALERT_CH_SEL, ADC_FIELDS::ALERT_CH_SEL_ADC1_LOCAL_VOLTAGES_ALERT},
+
+    // 60: Set alert pin function to remain active high (not pulsed)
+    {ADC_REGS::ALERT_PIN_CFG, ADC_FIELDS::ALERT_PIN_CFG_ACTIVE_HIGH},
+
+    // 61: Setup autonomous conversions and sampling speed
+    {ADC_REGS::OPMODE_CFG, ADC_FIELDS::OPMODE_CFG_AUTONOMOUS},
+
+    // 62: Set over sampling, 8 samples
+    {ADC_REGS::OSR_CFG, ADC_FIELDS::OSR_CFG_8_SAMPLE_OVERSAMPLING},
+
+    // 63: Enable digital window comparator and stats
+    {ADC_REGS::GENERAL_CFG, ADC_FIELDS::GENERAL_CFG_EN_DIGITAL_WINDOW_COMPARATOR_AND_STATS},
+
+    // 64: Enable Channel sequencing
+    {ADC_REGS::SEQUENCE_CFG, ADC_FIELDS::SEQUENCE_CFG_CHANNEL_SEQUENCING}
+};
+
+// ADC2 register sequence
+// pair<REG,DATA>
+static const std::vector<std::pair<uint8_t, uint8_t>> ADC2_CH_INIT =
+{
+    // 65: Set channels to auto sequencing, all channels
+    {ADC_REGS::AUTO_SEQ_CH_SEL, ADC_FIELDS::AUTO_SEQ_CH_SEL_ALL_AUTO_SEQUENCING},
+
+    // 66: Set auto sequence mode
+    {ADC_REGS::SEQUENCE_CFG, ADC_FIELDS::SEQUENCE_CFG_AUTO_SEQUENCE},
+
+    // CH 2
+    // 67: Keep upper limit at max, enable hysteresis
+    {ADC_REGS::HYSTERESIS_CH2, ADC_FIELDS::HYSTERESIS_UPPER_LIMIT_MAX_ENABLE},
+
+    // 68: Keep default, may skip if not multibyte writing
+    {ADC_REGS::HIGH_TH_CH2, ADC_FIELDS::HIGH_TH_DEFAULT},
+
+    // 69: Set up so alert must persist for 4 consecutive readings
+    {ADC_REGS::EVENT_COUNT_CH2, ADC_FIELDS::EVENT_COUNT_ADC2_CH2_ALERT_4_CONSECUTIVE_READINGS},
+
+    // 70: 3C_VLOC (VDD) Low Threshold = 0.391 V
+    {ADC_REGS::LOW_TH_CH2, ADC_FIELDS::LOW_TH_CH2_3C_VLOC_LOW_THRESHOLD_391mv},
+
+    // CH 3
+    // 71: Keep upper limit at max, enable hysteresis
+    {ADC_REGS::HYSTERESIS_CH3, ADC_FIELDS::HYSTERESIS_UPPER_LIMIT_MAX_ENABLE},
+
+    // 72: Keep default, may skip if not multibyte writing
+    {ADC_REGS::HIGH_TH_CH3, ADC_FIELDS::HIGH_TH_DEFAULT},
+
+    // 73: Set up so alert must persist for 4 consecutive readings
+    {ADC_REGS::EVENT_COUNT_CH3, ADC_FIELDS::EVENT_COUNT_ADC2_CH3_ALERT_4_CONSECUTIVE_READINGS},
+
+    // 74: 4AB_VLOC (VDDR2) Low Threshold = 0.643 V
+    {ADC_REGS::LOW_TH_CH3, ADC_FIELDS::LOW_TH_CH3_4AB_VLOC_LOW_THRESHOLD_543mv},
+
+    // CH 5
+    // 75: Keep upper limit at max, enable hysteresis
+    {ADC_REGS::HYSTERESIS_CH5, ADC_FIELDS::HYSTERESIS_UPPER_LIMIT_MAX_ENABLE},
+
+    // 76: Keep default, may skip if not multibyte writing
+    {ADC_REGS::HIGH_TH_CH5, ADC_FIELDS::HIGH_TH_DEFAULT},
+
+    // 77: Set up so alert must persist for 4 consecutive readings
+    {ADC_REGS::EVENT_COUNT_CH5, ADC_FIELDS::EVENT_COUNT_ADC2_CH5_ALERT_4_CONSECUTIVE_READINGS},
+
+    // 78: 4C_VLOC (VDD) Low Threshold = 0.391 V
+    {ADC_REGS::LOW_TH_CH5, ADC_FIELDS::LOW_TH_CH5_4C_VLOC_LOW_THRESHOLD_391mv},
+
+    // CH 7
+    // 79: Keep upper limit at max, enable hysteresis
+    {ADC_REGS::HYSTERESIS_CH7, ADC_FIELDS::HYSTERESIS_UPPER_LIMIT_MAX_ENABLE},
+
+    // 80: Keep default, may skip if not multibyte writing
+    {ADC_REGS::HIGH_TH_CH7, ADC_FIELDS::HIGH_TH_DEFAULT},
+
+    // 81: Set up so alert must persist for 4 consecutive readings
+    {ADC_REGS::EVENT_COUNT_CH7, ADC_FIELDS::EVENT_COUNT_ADC2_CH7_ALERT_4_CONSECUTIVE_READINGS},
+
+    // 82: 3AB_VLOC (VDDR2) Low Threshold = 0.643 V
+    {ADC_REGS::LOW_TH_CH7, ADC_FIELDS::LOW_TH_CH7_3AB_VLOC_LOW_THRESHOLD_543mv},
+
+    // Finalize
+    // 83: Set channels to trigger an alert, only local voltages
+    {ADC_REGS::ALERT_CH_SEL, ADC_FIELDS::ALERT_CH_SEL_ADC2_LOCAL_VOLTAGES_ALERT},
+
+    // 84: Set alert pin function to remain active high (not pulsed)
+    {ADC_REGS::ALERT_PIN_CFG, ADC_FIELDS::ALERT_PIN_CFG_ACTIVE_HIGH},
+
+    // 85: Setup autonomous conversions and sampling speed
+    {ADC_REGS::OPMODE_CFG, ADC_FIELDS::OPMODE_CFG_AUTONOMOUS},
+
+    // 86: Set over sampling, 8 samples
+    {ADC_REGS::OSR_CFG, ADC_FIELDS::OSR_CFG_8_SAMPLE_OVERSAMPLING},
+
+    // 87: Enable digital window comparator and stats
+    {ADC_REGS::GENERAL_CFG, ADC_FIELDS::GENERAL_CFG_EN_DIGITAL_WINDOW_COMPARATOR_AND_STATS},
+
+    // 88: Enable Channel sequencing
+    {ADC_REGS::SEQUENCE_CFG, ADC_FIELDS::SEQUENCE_CFG_CHANNEL_SEQUENCING}
+};
+
+///
+/// @brief Struct for PMIC / GPIO / ADC target info for redundant PMIC configs
+/// @note Requires a redundancy config, or else will try to grab null targets
+///
+struct target_info_redundancy
+{
+    fapi2::Target<fapi2::TARGET_TYPE_PMIC> iv_pmic0;
+    fapi2::Target<fapi2::TARGET_TYPE_PMIC> iv_pmic1;
+    fapi2::Target<fapi2::TARGET_TYPE_PMIC> iv_pmic2;
+    fapi2::Target<fapi2::TARGET_TYPE_PMIC> iv_pmic3;
+
+    fapi2::Target<fapi2::TARGET_TYPE_GENERICI2CSLAVE> iv_adc1;
+    fapi2::Target<fapi2::TARGET_TYPE_GENERICI2CSLAVE> iv_adc2;
+    fapi2::Target<fapi2::TARGET_TYPE_GENERICI2CSLAVE> iv_gpio1;
+    fapi2::Target<fapi2::TARGET_TYPE_GENERICI2CSLAVE> iv_gpio2;
+
+    fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP> iv_ocmb;
+
+    ///
+    /// @brief Construct a new target_info_redundancy object
+    ///
+    /// @param[in] i_ocmb OCMB target
+    /// @note pmic_enable.C plug rules ensures that a valid number of I2C and PMIC children targets exist
+    ///
+    target_info_redundancy(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_ocmb)
+    {
+        const auto I2C_DEVICES =
+            mss::find_targets_sorted_by_index<fapi2::TARGET_TYPE_GENERICI2CSLAVE>(i_ocmb);
+
+        const auto PMICS =
+            mss::find_targets_sorted_by_index<fapi2::TARGET_TYPE_PMIC>(i_ocmb);
+
+        // This numbering is how PMIC HWP's have numbered the PMICs and how platform provides them.
+        // This varies from the "Redundant Power on DIMM – Functional Specification" numbering
+        iv_pmic0 = PMICS[mss::pmic::id::PMIC0];
+        iv_pmic1 = PMICS[mss::pmic::id::PMIC1];
+        iv_pmic2 = PMICS[mss::pmic::id::PMIC2]; // Redundant PMIC0
+        iv_pmic3 = PMICS[mss::pmic::id::PMIC3]; // Redundant PMIC1
+
+        iv_adc1 = I2C_DEVICES[mss::generic_i2c_slave::ADC1];
+        iv_adc2 = I2C_DEVICES[mss::generic_i2c_slave::ADC2];
+        iv_gpio1 = I2C_DEVICES[mss::generic_i2c_slave::GPIO1];
+        iv_gpio2 = I2C_DEVICES[mss::generic_i2c_slave::GPIO2];
+
+        iv_ocmb = i_ocmb;
+    }
+};
 
 //-----------------------------------
 // SPD Biasing functions
@@ -303,15 +564,13 @@ inline fapi2::ReturnCode bias_with_spd_settings<mss::pmic::vendor::IDT>(
     const fapi2::Target<fapi2::TargetType::TARGET_TYPE_PMIC>& i_pmic_target,
     const fapi2::Target<fapi2::TargetType::TARGET_TYPE_OCMB_CHIP>& i_ocmb_target)
 {
-    using CONSTS = mss::pmic::consts<mss::pmic::product::JEDEC_COMPLIANT>;
     // Unlock Vendor Region
     FAPI_TRY(mss::pmic::unlock_vendor_region(i_pmic_target),
              "Error unlocking vendor region on PMIC %s", mss::c_str(i_pmic_target));
 
     {
         // PMIC position/ID of the OCMB target. There could be 4 total, but we care about whether its PMIC0(2) or PMIC1(3)
-        const mss::pmic::id l_relative_pmic_id = static_cast<mss::pmic::id>(
-                    mss::index(i_pmic_target) % CONSTS::NUM_UNIQUE_PMICS);
+        const mss::pmic::id l_relative_pmic_id = get_relative_pmic_id(i_pmic_target);
 
         // Phase combination
         FAPI_TRY(mss::pmic::bias_with_spd_phase_comb(i_pmic_target, i_ocmb_target, l_relative_pmic_id));
@@ -369,22 +628,17 @@ fapi_try_exit:
 //------------------- ENABLE FUNCTIONS-----------------//
 
 ///
-/// @brief Enable pmics using manual mode (direct VR enable, no SPD fields)
-/// @param[in] i_pmics vector of PMICs to enable
-///
-fapi2::ReturnCode enable_manual(const std::vector<fapi2::Target<fapi2::TARGET_TYPE_PMIC>>& i_pmics);
-
-///
-/// @brief Function to enable 1U and 2U pmics
+/// @brief Function to enable PMIC using SPD settings
 ///
 /// @param[in] i_pmic_target - the pmic target
 /// @param[in] i_ocmb_target - the OCMB parent target of the pmic
 /// @param[in] i_vendor_id - the vendor ID of the PMIC to bias
 /// @return fapi2::ReturnCode - FAPI2_RC_SUCCESS if successful
 ///
-fapi2::ReturnCode enable_chip_1U_2U(const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& i_pmic_target,
-                                    const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_ocmb_target,
-                                    const uint16_t i_vendor_id);
+fapi2::ReturnCode enable_spd(
+    const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& i_pmic_target,
+    const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_ocmb_target,
+    const uint16_t i_vendor_id);
 
 ///
 /// @brief Disable PMICs and clear status bits in preparation for enable
@@ -395,12 +649,139 @@ fapi2::ReturnCode enable_chip_1U_2U(const fapi2::Target<fapi2::TARGET_TYPE_PMIC>
 fapi2::ReturnCode disable_and_reset_pmics(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP> i_ocmb_target);
 
 ///
-/// @brief Check for supported module height for the DIMMs on the provided OCMB
+/// @brief Enable PMIC for 1U/2U
+///
+/// @param[in] i_ocmb_target OCMB target parent of PMICs
+/// @param[in] i_mode manual/SPD enable mode
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
+///
+fapi2::ReturnCode enable_1u_2u(
+    const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_ocmb_target,
+    const mss::pmic::enable_mode i_mode);
+
+///
+/// @brief Setup ADC1
+///
+/// @param[in] i_adc ADC1
+/// @return fapi2::ReturnCode
+///
+fapi2::ReturnCode setup_adc1(const fapi2::Target<fapi2::TARGET_TYPE_GENERICI2CSLAVE>& i_adc);
+
+///
+/// @brief Setup ADC2
+///
+/// @param[in] i_adc ADC2
+/// @return fapi2::ReturnCode
+///
+fapi2::ReturnCode setup_adc2(const fapi2::Target<fapi2::TARGET_TYPE_GENERICI2CSLAVE>& i_adc);
+
+///
+/// @brief Validate that the efuse appears off by measuring VIN of the given PMIC
+///
+/// @param[in] i_pmic_target PMIC target
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS
+///
+fapi2::ReturnCode validate_efuse_off(const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& i_pmic_target);
+
+///
+/// @brief Validate that the efuse appears on by measuring VIN of the given PMIC
+///
+/// @param[in] i_pmic_target PMIC target
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS
+///
+fapi2::ReturnCode validate_efuse_on(const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& i_pmic_target);
+
+///
+/// @brief Enable EFUSE according to 4U Functional Specification
+///
+/// @param[in] i_gpio GPIO target
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
+/// @note Corresponds to steps (6,7,8) & (16,17,18) in 4U DDIMM Functional Spec
+///
+fapi2::ReturnCode enable_efuse(const fapi2::Target<fapi2::TARGET_TYPE_GENERICI2CSLAVE>& i_gpio);
+
+///
+/// @brief Set the up PMIC pair and matching GPIO expander prior to PMIC enable
+///
+/// @param[in] i_pmic0 PMIC target connected to GPIO expander
+/// @param[in] i_pmic1 PMIC target connected to GPIO expander
+/// @param[in] i_gpio GPIO expander
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
+/// @note the PMIC pair is NOT a redundant pair, this is the independent pair connected to one GPIO
+///
+fapi2::ReturnCode setup_pmic_pair_and_gpio(
+    const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& i_pmic0,
+    const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& i_pmic1,
+    const fapi2::Target<fapi2::TARGET_TYPE_GENERICI2CSLAVE>& i_gpio);
+
+///
+/// @brief Set the up GPIOs, ADCs, PMICs for a redundancy configuration / 4U
 ///
 /// @param[in] i_ocmb_target OCMB target
-/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff ok, else error code
+/// @param[in] i_mode manual/SPD enable mode
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if success, else error code
 ///
-fapi2::ReturnCode check_for_valid_module_height(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_ocmb_target);
+fapi2::ReturnCode enable_with_redundancy(
+    const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_ocmb_target,
+    const mss::pmic::enable_mode i_mode);
+
+namespace check
+{
+
+///
+/// @brief Reset N Mode attributes
+///
+/// @param[in] i_target_info OCMB, PMIC and I2C target struct
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS, else error code
+/// @note For 4U only. Has no effect on 1U/2U.
+///
+fapi2::ReturnCode reset_n_mode_attrs(const target_info_redundancy& i_target_info);
+
+///
+/// @brief Check if the GPIOs are already enabled (efuse is on)
+///
+/// @param[in] i_target_info OCMB, PMIC and I2C target struct
+/// @param[out] o_already_enabled true if efuse already on, else false
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if success, else
+///
+fapi2::ReturnCode gpios_already_enabled(const target_info_redundancy& i_target_info, bool& o_already_enabled);
+
+///
+/// @brief Helper function to check if GPIO is already enabled given config register contents
+///
+/// @param[in] i_config CONFIG register contents
+/// @return bool enabled true/false
+/// @note unit-testable helper function
+///
+inline bool gpios_already_enabled_helper(const uint8_t i_config)
+{
+    return (i_config == mss::gpio::fields::CONFIGURATION_IO_MAP);
+}
+
+///
+/// @brief Check for the given 4 PMICs that their n-mode declarations are safe to continue the procedure
+///
+/// @param[in] i_target_info OCMB, PMIC and I2C target struct
+/// @return fapi2::ReturnCode RC_PMIC_REDUNDANT_PAIR_DOWN if pair declares n-mode, else SUCCESS if no issue
+///
+fapi2::ReturnCode valid_n_mode(const target_info_redundancy& i_target_info);
+
+///
+/// @brief Check for valid N-mode given the status of all 4 PMICs, assert out otherwise
+///
+/// @param[in] i_ocmb_target OCMB target (for FFDC)
+/// @param[in] i_n_mode_pmic0 N-mode state for pmic
+/// @param[in] i_n_mode_pmic1 N-mode state for pmic
+/// @param[in] i_n_mode_pmic2 N-mode state for pmic
+/// @param[in] i_n_mode_pmic3 N-mode state for pmic
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else RC_PMIC_REDUNDANT_PAIR_DOWN
+///
+fapi2::ReturnCode valid_n_mode_helper(
+    const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_ocmb_target,
+    const uint8_t i_n_mode_pmic0,
+    const uint8_t i_n_mode_pmic1,
+    const uint8_t i_n_mode_pmic2,
+    const uint8_t i_n_mode_pmic3);
 
 ///
 /// @brief Check that the vendor ID register and attribute match
@@ -409,7 +790,7 @@ fapi2::ReturnCode check_for_valid_module_height(const fapi2::Target<fapi2::TARGE
 /// @param[in] i_pmic_target PMIC target to check
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff no error
 ///
-fapi2::ReturnCode check_matching_vendors(
+fapi2::ReturnCode matching_vendors(
     const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_ocmb_target,
     const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& i_pmic_target);
 
@@ -422,20 +803,20 @@ fapi2::ReturnCode check_matching_vendors(
 /// @param[in] i_vendor_reg_hi vendor register high byte
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff no error
 ///
-fapi2::ReturnCode check_matching_vendors_helper(
+fapi2::ReturnCode matching_vendors_helper(
     const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& i_pmic_target,
     const uint16_t i_vendor_attr,
     const uint8_t i_vendor_reg_lo,
     const uint8_t i_vendor_reg_hi);
 
 ///
-/// @brief Check that the revision # register and attribute match
+/// @brief Check that the IDT revision # register and attribute match
 ///
 /// @param[in] i_ocmb_target OCMB target
 /// @param[in] i_pmic_target PMIC target to check
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff no error
 ///
-fapi2::ReturnCode check_matching_revisions(
+fapi2::ReturnCode valid_idt_revisions(
     const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_ocmb_target,
     const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& i_pmic_target);
 
@@ -447,22 +828,13 @@ fapi2::ReturnCode check_matching_revisions(
 /// @param[in] i_rev_reg revision value from register
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff no error
 ///
-fapi2::ReturnCode check_valid_idt_revisions_helper(
+fapi2::ReturnCode valid_idt_revisions_helper(
     const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& i_pmic_target,
     const uint8_t i_rev_attr,
     const uint8_t i_rev_reg);
 
-///
-/// @brief Enable PMIC for SPD mode
-///
-/// @param[in] i_ocmb_target OCMB target parent of PMICs
-/// @param[in,out] io_pmics vector of PMICs sorted by mss::index. Expected to be non-empty, sorted again by sequence ATTR
-/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
-///
-fapi2::ReturnCode pmic_enable_SPD(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_ocmb_target,
-                                  std::vector<fapi2::Target<fapi2::TARGET_TYPE_PMIC>>& io_pmics);
-
-}
+} // check
+} // pmic
 } // mss
 
 #endif

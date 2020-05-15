@@ -44,6 +44,15 @@ namespace pmic
 {
 
 ///
+/// @brief Different enable operations
+///
+enum enable_mode
+{
+    SPD = 0, // Use values from the SPD (default). Overwrite the vendor region with SPD settings
+    MANUAL = 1, // Use voltage settings currently in the vendor region. (Changed via pmic_update, or factory defaults)
+};
+
+///
 /// @brief Module height from SPD (1U-4U)
 /// @note these values are taken directly from the SPD.
 ///
@@ -258,7 +267,8 @@ struct consts<mss::pmic::product::JEDEC_COMPLIANT>
 {
     static constexpr uint8_t RANGE_0                    = 0;
     static constexpr uint8_t RANGE_1                    = 1;
-    static constexpr uint8_t NUM_UNIQUE_PMICS           = 2; // PMIC0/2, PMIC1/3
+    static constexpr uint8_t NUM_PRIMARY_PMICS          = 2; // PMIC0/2, PMIC1/3
+    static constexpr uint8_t NUM_PMICS_4U               = 4; // 2 redundant
     static constexpr uint8_t NUMBER_OF_RAILS            = 4;
 
     static constexpr uint8_t VENDOR_PASSWORD_LOW        = 0x73;
@@ -312,6 +322,20 @@ struct consts<mss::pmic::product::JEDEC_COMPLIANT>
     static constexpr uint32_t SWD_VOLT_RANGE1_MAX          = 2835;
 
     static constexpr uint32_t VOLT_STEP                    = 5;
+
+    // 4U Consts
+
+    // R30
+
+    // Sets bit 7, ENABLE_ADC = 1,
+    // Sets bit range 6:3 to monitor VIN_BULK = 0b0101
+    static constexpr uint8_t R30_SAMPLE_VIN_BULK_ENABLE_ADC = 0xA8;
+
+    // R31
+    static constexpr uint8_t R31_VIN_BULK_EFUSE_OFF_HIGH  = 0x04;
+    static constexpr uint8_t R31_VIN_BULK_EFUSE_ON_HIGH   = 0xBF;
+    static constexpr uint8_t R31_VIN_BULK_EFUSE_ON_LOW    = 0x9D;
+
 };
 
 namespace i2c
@@ -327,6 +351,158 @@ enum sizes
 
 } // i2c
 } // pmic
-} // mss
+
+///
+/// @brief Constants for GENERICI2CSLAVE devices
+///
+enum generic_i2c_slave
+{
+    NUM_TOTAL_DEVICES = 4,
+    NUM_GPIO = 2,
+    NUM_ADC = 2,
+
+    // GENERICI2CSLAVE REL_POS orderings
+    ADC1 = 0,
+    ADC2 = 1,
+    GPIO1 = 2,
+    GPIO2 = 3,
+};
+
+namespace gpio
+{
+
+///
+/// @brief GPIO registers
+///
+enum regs
+{
+    INPUT_PORT_REG = 0x00,
+    EFUSE_OUTPUT = 0x01,
+    EFUSE_POLARITY = 0x02,
+    CONFIGURATION = 0x03,
+};
+
+///
+/// @brief GPIO register fields
+///
+enum fields
+{
+    INPUT_PORT_REG_PMIC_PAIR0   = 2,
+    INPUT_PORT_REG_PMIC_PAIR1   = 3,
+
+    EFUSE_OUTPUT_SETTING        = 0xFF,
+    EFUSE_POLARITY_SETTING      = 0x00,
+
+    // 1's are inputs, 0's are outputs
+    CONFIGURATION_IO_MAP        = 0xFC,
+};
+
+} // ns gpio
+
+namespace adc
+{
+
+///
+/// @brief Registers for ADC devices
+///
+enum regs
+{
+    GENERAL_CFG         = 0x01,
+    OSR_CFG             = 0x03,
+    OPMODE_CFG          = 0x04,
+    SEQUENCE_CFG        = 0x10,
+    AUTO_SEQ_CH_SEL     = 0x12,
+    ALERT_CH_SEL        = 0x14,
+    ALERT_PIN_CFG       = 0x17,
+
+    HYSTERESIS_CH1      = 0x24,
+    HIGH_TH_CH1         = 0x25,
+    EVENT_COUNT_CH1     = 0x26,
+    LOW_TH_CH1          = 0x27,
+
+    HYSTERESIS_CH2      = 0x28,
+    HIGH_TH_CH2         = 0x29,
+    EVENT_COUNT_CH2     = 0x2A,
+    LOW_TH_CH2          = 0x2B,
+
+    HYSTERESIS_CH3      = 0x2C,
+    HIGH_TH_CH3         = 0x2D,
+    EVENT_COUNT_CH3     = 0x2E,
+    LOW_TH_CH3          = 0x2F,
+
+    HYSTERESIS_CH4      = 0x30,
+    HIGH_TH_CH4         = 0x31,
+    EVENT_COUNT_CH4     = 0x32,
+    LOW_TH_CH4          = 0x33,
+
+    HYSTERESIS_CH5      = 0x34,
+    HIGH_TH_CH5         = 0x35,
+    EVENT_COUNT_CH5     = 0x36,
+    LOW_TH_CH5          = 0x37,
+
+    HYSTERESIS_CH7      = 0x3C,
+    HIGH_TH_CH7         = 0x3D,
+    EVENT_COUNT_CH7     = 0x3E,
+    LOW_TH_CH7          = 0x3F,
+};
+
+///
+/// @brief Fields and contents for ADC regs
+///
+enum fields
+{
+    GENERAL_CFG_EN_DIGITAL_WINDOW_COMPARATOR_AND_STATS  = 0x30,
+    SEQUENCE_CFG_CHANNEL_SEQUENCING                     = 0x11,
+    SEQUENCE_CFG_AUTO_SEQUENCE                          = 0x01,
+    AUTO_SEQ_CH_SEL_ALL_AUTO_SEQUENCING                 = 0xFF,
+    ALERT_CH_SEL_ADC1_LOCAL_VOLTAGES_ALERT              = 0xBE,
+    ALERT_CH_SEL_ADC2_LOCAL_VOLTAGES_ALERT              = 0xAC,
+    ALERT_PIN_CFG_ACTIVE_HIGH                           = 0x01,
+    OPMODE_CFG_AUTONOMOUS                               = 0x31,
+    OSR_CFG_8_SAMPLE_OVERSAMPLING                       = 0x07,
+
+
+    HYSTERESIS_UPPER_LIMIT_MAX_ENABLE                   = 0xF1,
+    HIGH_TH_DEFAULT                                     = 0xFF,
+
+    EVENT_COUNT_ADC1_CH1_ALERT_4_CONSECUTIVE_READINGS        = 0x74,
+    EVENT_COUNT_ADC1_CH2_ALERT_4_CONSECUTIVE_READINGS        = 0x24,
+    EVENT_COUNT_ADC1_CH3_ALERT_4_CONSECUTIVE_READINGS        = 0xB4,
+    EVENT_COUNT_ADC1_CH4_ALERT_4_CONSECUTIVE_READINGS        = 0x24,
+    EVENT_COUNT_ADC1_CH5_ALERT_4_CONSECUTIVE_READINGS        = 0xB4,
+    EVENT_COUNT_ADC1_CH7_ALERT_4_CONSECUTIVE_READINGS        = 0x74,
+
+    EVENT_COUNT_ADC2_CH2_ALERT_4_CONSECUTIVE_READINGS        = 0x64,
+    EVENT_COUNT_ADC2_CH3_ALERT_4_CONSECUTIVE_READINGS        = 0x74,
+    EVENT_COUNT_ADC2_CH5_ALERT_4_CONSECUTIVE_READINGS        = 0x64,
+    EVENT_COUNT_ADC2_CH7_ALERT_4_CONSECUTIVE_READINGS        = 0x74,
+
+    LOW_TH_CH1_1AB_VLOC_LOW_THRESHOLD_643mv             = 0x42,
+    LOW_TH_CH2_1C_VLOC_LOW_THRESHOLD_476mv              = 0x31,
+    LOW_TH_CH3_1D_VLOC_LOW_THRESHOLD_733mv              = 0x4B,
+    LOW_TH_CH4_2C_VLOC_LOW_THRESHOLD_476mv              = 0x31,
+    LOW_TH_CH5_2D_VLOC_LOW_THRESHOLD_733mv              = 0x4B,
+    LOW_TH_CH7_2AB_VLOC_LOW_THRESHOLD_643mv             = 0x42,
+
+    LOW_TH_CH2_3C_VLOC_LOW_THRESHOLD_391mv              = 0x28,
+    LOW_TH_CH3_4AB_VLOC_LOW_THRESHOLD_543mv             = 0x42,
+    LOW_TH_CH5_4C_VLOC_LOW_THRESHOLD_391mv              = 0x28,
+    LOW_TH_CH7_3AB_VLOC_LOW_THRESHOLD_543mv             = 0x42,
+};
+
+///
+/// @brief i2c consts for ADC devices
+///
+namespace i2c
+{
+enum opcode
+{
+    READ  = 0x10,
+    WRITE = 0x08,
+};
+};
+
+} // ns adc
+} // ns mss
 
 #endif

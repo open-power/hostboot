@@ -370,11 +370,11 @@ struct phy_params_t
     uint8_t iv_ca_latency_adder[MAX_DIMM_PER_PORT];
     uint8_t iv_bist_cal_mode[MAX_DIMM_PER_PORT];
     uint8_t iv_bist_ca_parity_latency[MAX_DIMM_PER_PORT];
-    uint16_t iv_rcd_dic;
-    uint16_t iv_rcd_voltage_ctrl;
+    uint16_t iv_rcd_dic[MAX_DIMM_PER_PORT];
+    uint16_t iv_rcd_voltage_ctrl[MAX_DIMM_PER_PORT];
     uint8_t iv_f0rc7x[MAX_DIMM_PER_PORT];
     uint8_t iv_f1rc00[MAX_DIMM_PER_PORT];
-    uint16_t iv_rcd_slew_rate;
+    uint16_t iv_rcd_slew_rate[MAX_DIMM_PER_PORT];
     uint8_t iv_dfimrl_ddrclk;
     uint8_t iv_atxdly_a[DRAMINIT_NUM_ADDR_DELAYS];
     uint8_t iv_atxdly_b[DRAMINIT_NUM_ADDR_DELAYS];
@@ -1239,7 +1239,7 @@ class phy_params
         ///
         fapi2::ReturnCode set_RcdDic(user_input_msdg& io_phy_params) const
         {
-            io_phy_params.RcdDic[0] = iv_params.iv_rcd_dic;
+            io_phy_params.RcdDic[0] = iv_params.iv_rcd_dic[0];
 
             return fapi2::FAPI2_RC_SUCCESS;
         }
@@ -1251,7 +1251,7 @@ class phy_params
         ///
         fapi2::ReturnCode set_RcdVoltageCtrl(user_input_msdg& io_phy_params) const
         {
-            io_phy_params.RcdVoltageCtrl[0] = iv_params.iv_rcd_voltage_ctrl;
+            io_phy_params.RcdVoltageCtrl[0] = iv_params.iv_rcd_voltage_ctrl[0];
 
             return fapi2::FAPI2_RC_SUCCESS;
         }
@@ -1285,7 +1285,7 @@ class phy_params
         ///
         fapi2::ReturnCode set_RcdSlewRate(user_input_msdg& io_phy_params) const
         {
-            io_phy_params.RcdSlewRate[0] = iv_params.iv_rcd_slew_rate;
+            io_phy_params.RcdSlewRate[0] = iv_params.iv_rcd_slew_rate[0];
             return fapi2::FAPI2_RC_SUCCESS;
         }
 
@@ -1368,22 +1368,6 @@ class phy_params
         }
 
 };
-
-namespace check
-{
-
-///
-/// @brief Checks explorer response argument for a successful command
-/// @param[in] i_target OCMB target
-/// @param[in] i_rsp response from command
-/// @param[in] i_cmd original command
-/// @return FAPI2_RC_SUCCESS iff okay
-///
-fapi2::ReturnCode response(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
-                           const host_fw_response_struct& i_rsp,
-                           const host_fw_command_struct& i_cmd);
-
-}//check
 
 }// exp
 }// mss

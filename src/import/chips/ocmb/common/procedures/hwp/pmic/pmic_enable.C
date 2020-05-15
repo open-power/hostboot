@@ -65,17 +65,21 @@ extern "C"
         // Disable PMICs and clear status bits so we are starting at a known off state
         FAPI_TRY(mss::pmic::disable_and_reset_pmics(i_ocmb_target));
 
-        // // If we're enabling via internal settings, we can just run VR ENABLE down the line
-        if (i_mode == mss::pmic::enable_mode::MANUAL)
+        //
+        // TK - plug rules here in next commit for 4U attribute/target validation
+        //
+
+        if (mss::find_targets<fapi2::TARGET_TYPE_GENERICI2CSLAVE>(i_ocmb_target).size() > 0)
         {
-            FAPI_INF("Manual mode specified. PMICs will not be disabled/enabled in any defined order.");
-            FAPI_TRY(mss::pmic::enable_manual(l_pmics));
+            // We have I2C slave devices, so we will do the "4U" redundancy enable process
+            FAPI_TRY(mss::pmic::enable_with_redundancy(i_ocmb_target, i_mode));
         }
         else
         {
-            // At this point, we are certain there are pmics, so we can proceed
-            FAPI_TRY(mss::pmic::pmic_enable_SPD(i_ocmb_target, l_pmics));
+            FAPI_TRY(mss::pmic::enable_1u_2u(i_ocmb_target, i_mode));
         }
+
+        // If we're enabling via internal settings, we can just run VR ENABLE down the line
 
         // Check that all the PMIC statuses are good post-enable
         FAPI_TRY(mss::pmic::status::check_all_pmics(i_ocmb_target),

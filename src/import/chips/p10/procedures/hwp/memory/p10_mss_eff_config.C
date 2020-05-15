@@ -52,6 +52,7 @@
 #include <lib/freq/p10_sync.H>
 #include <generic/memory/mss_git_data_helper.H>
 #include <lib/workarounds/exp_ccs_2666_write_workarounds.H>
+#include <lib/plug_rules/p10_plug_rules.H>
 
 ///
 /// @brief Configure the attributes for each controller
@@ -77,6 +78,7 @@ fapi2::ReturnCode p10_mss_eff_config( const fapi2::Target<fapi2::TARGET_TYPE_MEM
 
         for (const auto& l_rank : l_ranks)
         {
+            uint8_t l_spd_rev = 0;
             std::shared_ptr<mss::efd::base_decoder> l_efd_data;
 
             // Get EFD size
@@ -92,7 +94,8 @@ fapi2::ReturnCode p10_mss_eff_config( const fapi2::Target<fapi2::TARGET_TYPE_MEM
             FAPI_TRY( fapi2::getVPD(l_ocmb, l_vpd_info, l_vpd_raw.data()) );
 
             // Instantiate EFD decoder
-            FAPI_TRY( mss::efd::factory(l_ocmb, l_vpd_raw, l_vpd_info.iv_rank, l_efd_data) );
+            FAPI_TRY( mss::attr::get_spd_revision(i_target, l_spd_rev) );
+            FAPI_TRY( mss::efd::factory(l_ocmb, l_spd_rev, l_vpd_raw, l_vpd_info.iv_rank, l_efd_data) );
 
             // Set up SI ATTRS
             FAPI_TRY( (mss::gen::attr_engine<mss::proc_type::PROC_P10, mss::attr_si_engine_fields>::set(l_efd_data)) );
@@ -135,6 +138,9 @@ fapi2::ReturnCode p10_mss_eff_config( const fapi2::Target<fapi2::TARGET_TYPE_MEM
         FAPI_TRY( (mss::gen::attr_engine<mss::proc_type::PROC_P10, mss::attr_engine_derived_fields>::set(dimm)) );
 
     }// dimm
+
+    // Enforces plug rules
+    FAPI_TRY(mss::plug_rule::enforce_post_eff_config(i_target));
 
     // Conducts the workaround for CCS writes at 2666
     FAPI_TRY(mss::exp::workarounds::update_cwl(i_target));

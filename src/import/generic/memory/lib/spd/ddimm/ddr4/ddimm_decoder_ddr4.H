@@ -564,6 +564,19 @@ class decoder< DDR4, DDIMM_MODULE, R > : public dimm_module_decoder
         }
 
         ///
+        /// @brief Decodes SPD Content Revision -> SPD_CONTENT_REVISION
+        /// @param[out] o_output encoding from SPD
+        /// @return FAPI2_RC_SUCCESS if okay
+        ///
+        virtual fapi2::ReturnCode spd_content_revision(uint8_t& o_output) const override
+        {
+            FAPI_TRY( (mss::spd::reader<fields_t::SPD_CONTENT_REVISION, R>(iv_target, iv_data, o_output)) );
+
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
+
+        ///
         /// @brief Decodes Voltage VIN_MTG Edge connector -> VIN_MGMT_NOMINAL
         /// @param[out] o_output encoding from SPD
         /// @return FAPI2_RC_SUCCESS if okay
@@ -1453,6 +1466,19 @@ class decoder< DDR4, DDIMM_MODULE, R > : public dimm_module_decoder
         }
 
         ///
+        /// @brief Decodes Thermal Sensor 0 Secondary Sensor Availability -> THERM_SENSOR_0_SECOND_AVAIL
+        /// @param[out] o_output encoding from SPD
+        /// @return FAPI2_RC_SUCCESS if okay
+        ///
+        virtual fapi2::ReturnCode therm_sensor_0_secondary_availability(uint8_t& o_output) const override
+        {
+            FAPI_TRY((mss::spd::reader<fields_t::THERM_SENSOR_0_SECOND_AVAIL, R>(iv_target, iv_data, o_output)));
+
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
+
+        ///
         /// @brief Decodes Thermal Sensor 0 Type -> THERM_SENSOR_0_TYPE
         /// @param[out] o_output encoding from SPD
         /// @return FAPI2_RC_SUCCESS if okay
@@ -1499,6 +1525,19 @@ class decoder< DDR4, DDIMM_MODULE, R > : public dimm_module_decoder
         virtual fapi2::ReturnCode therm_sensor_1_availability(uint8_t& o_output) const override
         {
             FAPI_TRY((mss::spd::reader<fields_t::THERM_SENSOR_1_AVAIL, R>(iv_target, iv_data, o_output)));
+
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
+
+        ///
+        /// @brief Decodes Thermal Sensor 1 Secondary Sensor Availability -> THERM_SENSOR_1_SECOND_AVAIL
+        /// @param[out] o_output encoding from SPD
+        /// @return FAPI2_RC_SUCCESS if okay
+        ///
+        virtual fapi2::ReturnCode therm_sensor_1_secondary_availability(uint8_t& o_output) const override
+        {
+            FAPI_TRY((mss::spd::reader<fields_t::THERM_SENSOR_1_SECOND_AVAIL, R>(iv_target, iv_data, o_output)));
 
         fapi_try_exit:
             return fapi2::current_err;
@@ -1590,6 +1629,84 @@ class decoder< DDR4, DDIMM_MODULE, R > : public dimm_module_decoder
         virtual fapi2::ReturnCode therm_sensor_differential_i2c_address(uint8_t& o_output) const override
         {
             FAPI_TRY((mss::spd::reader<fields_t::THERM_SENSOR_DIFF_I2C_ADDRESS, R>(iv_target, iv_data, o_output)));
+
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
+
+        ///
+        /// @brief Decodes Secondary Thermal Sensor 0 I2C Address -> THERM_SENSOR_0_SECOND_I2C_ADDRESS
+        /// @param[out] o_output encoding from SPD
+        /// @return FAPI2_RC_SUCCESS if okay
+        ///
+        virtual fapi2::ReturnCode therm_sensor_0_secondary_i2c_address(uint8_t& o_output) const override
+        {
+            FAPI_TRY((mss::spd::reader<fields_t::THERM_SENSOR_0_SECOND_I2C_ADDRESS, R>(iv_target, iv_data, o_output)));
+
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
+
+        ///
+        /// @brief Decodes Secondary Thermal Sensor 1 I2C Address -> THERM_SENSOR_1_SECOND_I2C_ADDRESS
+        /// @param[out] o_output encoding from SPD
+        /// @return FAPI2_RC_SUCCESS if okay
+        ///
+        virtual fapi2::ReturnCode therm_sensor_1_secondary_i2c_address(uint8_t& o_output) const override
+        {
+            FAPI_TRY((mss::spd::reader<fields_t::THERM_SENSOR_1_SECOND_I2C_ADDRESS, R>(iv_target, iv_data, o_output)));
+
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
+
+        ///
+        /// @brief Decodes Secondary Thermal Sensor 1 Location -> THERM_SENSOR_1_SECOND_LOCATION
+        /// @param[out] o_output encoding from SPD
+        /// @return FAPI2_RC_SUCCESS if okay
+        ///
+        virtual fapi2::ReturnCode therm_sensor_1_secondary_location(uint8_t& o_output) const override
+        {
+            FAPI_TRY((mss::spd::reader<fields_t::THERM_SENSOR_1_SECOND_LOCATION, R>(iv_target, iv_data, o_output)));
+
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
+
+        ///
+        /// @brief Decodes Secondary Thermal Sensor 0 Location -> THERM_SENSOR_0_SECOND_LOCATION
+        /// @param[out] o_output encoding from SPD
+        /// @return FAPI2_RC_SUCCESS if okay
+        ///
+        virtual fapi2::ReturnCode therm_sensor_0_secondary_location(uint8_t& o_output) const override
+        {
+            FAPI_TRY((mss::spd::reader<fields_t::THERM_SENSOR_0_SECOND_LOCATION, R>(iv_target, iv_data, o_output)));
+
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
+
+        ///
+        /// @brief Decodes Thermal Sensor 1 Location -> THERM_SENSOR_1_LOCATION
+        /// @param[out] o_output encoding from SPD
+        /// @return FAPI2_RC_SUCCESS if okay
+        ///
+        virtual fapi2::ReturnCode therm_sensor_1_location(uint8_t& o_output) const override
+        {
+            FAPI_TRY((mss::spd::reader<fields_t::THERM_SENSOR_1_LOCATION, R>(iv_target, iv_data, o_output)));
+
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
+
+        ///
+        /// @brief Decodes Thermal Sensor 0 Location -> THERM_SENSOR_0_LOCATION
+        /// @param[out] o_output encoding from SPD
+        /// @return FAPI2_RC_SUCCESS if okay
+        ///
+        virtual fapi2::ReturnCode therm_sensor_0_location(uint8_t& o_output) const override
+        {
+            FAPI_TRY((mss::spd::reader<fields_t::THERM_SENSOR_0_LOCATION, R>(iv_target, iv_data, o_output)));
 
         fapi_try_exit:
             return fapi2::current_err;

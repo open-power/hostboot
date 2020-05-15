@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -141,8 +141,10 @@ static const uint64_t EXPLR_IB_SENSOR_CACHE_ADDR = EXPLR_IB_MMIO_OFFSET | 0x4008
 /// @param[out] o_crc the calculated crc of the data
 /// @return fapi2::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
 ///
-fapi2::ReturnCode user_input_msdg_to_little_endian(const user_input_msdg& i_input, std::vector<uint8_t>& o_data,
-        uint32_t& o_crc);
+fapi2::ReturnCode user_input_msdg_to_little_endian(
+    const user_input_msdg& i_input,
+    std::vector<uint8_t>& o_data,
+    uint32_t& o_crc);
 
 ///
 /// @brief Converts host_fw_command_struct to little endian
@@ -150,55 +152,58 @@ fapi2::ReturnCode user_input_msdg_to_little_endian(const user_input_msdg& i_inpu
 /// @param[out] o_data vector of bytes for mmio.
 /// @return fapi2::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
 ///
-fapi2::ReturnCode host_fw_command_struct_to_little_endian(const host_fw_command_struct& i_input,
-        std::vector<uint8_t>& o_data);
+fapi2::ReturnCode host_fw_command_struct_to_little_endian(
+    const host_fw_command_struct& i_input,
+    std::vector<uint8_t>& o_data);
 
 ///
 /// @brief Converts a little endian data array to a host_fw_response_struct
-/// @param[in] i_data little endian data to process
+/// @param[in,out] io_data little endian data to process
 /// @param[out] o_crc computed CRC
 /// @param[out] o_response response structure
 /// @return fapi2::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
 ///
-fapi2::ReturnCode host_fw_response_struct_from_little_endian(std::vector<uint8_t>& i_data,
-        uint32_t& o_crc,
-        host_fw_response_struct& o_response);
+fapi2::ReturnCode host_fw_response_struct_from_little_endian(
+    std::vector<uint8_t>& io_data,
+    uint32_t& o_crc,
+    host_fw_response_struct& o_response);
 
 ///
 /// @brief Converts a little endian data array to a host_fw_response_struct
 /// @param[in] i_target OCMB target on which to operate
-/// @param[in] i_data little endian data to process
+/// @param[in,out] io_data little endian data to process
 /// @param[out] o_response response structure
 /// @return fapi2::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
 /// @note helper function to allow for checking FFDC
 ///
-fapi2::ReturnCode host_fw_response_struct_from_little_endian(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>&
-        i_target,
-        std::vector<uint8_t>& i_data,
-        host_fw_response_struct& o_response);
+fapi2::ReturnCode host_fw_response_struct_from_little_endian(
+    const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+    std::vector<uint8_t>& io_data,
+    host_fw_response_struct& o_response);
 
 ///
 /// @brief Converts a little endian data array to a sensor_cache_struct
-/// @param[in] i_data little endian data to process
+/// @param[in,out] io_data little endian data to process
 /// @param[out] o_data sensor cache structure
 /// @return fapi2::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
 /// @note helper function - returning a bool and will have true FFDC in a separate function
 ///
-fapi2::ReturnCode sensor_cache_struct_from_little_endian(std::vector<uint8_t>& i_data,
-        sensor_cache_struct& o_data);
+fapi2::ReturnCode sensor_cache_struct_from_little_endian(
+    std::vector<uint8_t>& io_data,
+    sensor_cache_struct& o_data);
 
 ///
 /// @brief Converts a little endian data array to a sensor_cache_struct
 /// @param[in] i_target OCMB target on which to operate
-/// @param[in] i_data little endian data to process
+/// @param[in,out] io_data little endian data to process
 /// @param[out] o_data sensor cache structure
 /// @return fapi2::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
 /// @note helper function to allow for checking FFDC
 ///
-fapi2::ReturnCode sensor_cache_struct_from_little_endian(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>&
-        i_target,
-        std::vector<uint8_t>& i_data,
-        sensor_cache_struct& o_data);
+fapi2::ReturnCode sensor_cache_struct_from_little_endian(
+    const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+    std::vector<uint8_t>& io_data,
+    sensor_cache_struct& o_data);
 
 //--------------------------------------------------------------------------------
 // Write operations
@@ -492,6 +497,22 @@ fapi2::ReturnCode readCrctEndianArray(const std::vector<uint8_t>& i_input, const
                                       T* o_data);
 
 //--------------------------------------------------------------------------------
+
+namespace check
+{
+
+///
+/// @brief Checks explorer response argument for a successful command
+/// @param[in] i_target OCMB target
+/// @param[in] i_rsp response from command
+/// @param[in] i_cmd original command
+/// @return FAPI2_RC_SUCCESS iff okay
+///
+fapi2::ReturnCode response(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+                           const host_fw_response_struct& i_rsp,
+                           const host_fw_command_struct& i_cmd);
+
+}//check
 
 } // namespace ib
 

@@ -525,6 +525,61 @@ class base_decoder
         }
 
         ///
+        /// @brief Decodes RCD driver impedance control -> EXP_RCD_DIC
+        /// @param[out] o_output encoding from SPD
+        /// @return FAPI2_RC_SUCCESS if okay
+        ///
+        virtual fapi2::ReturnCode rcd_dic(uint16_t& o_output) const
+        {
+            o_output = 0;
+            return fapi2::FAPI2_RC_SUCCESS;
+        }
+
+        ///
+        /// @brief Decodes RCD voltage control -> EXP_RCD_VOLTAGE_CTRL
+        /// @param[out] o_output encoding from SPD
+        /// @return FAPI2_RC_SUCCESS if okay
+        ///
+        virtual fapi2::ReturnCode rcd_voltage_ctrl(uint16_t& o_output) const
+        {
+            o_output = 0;
+            return fapi2::FAPI2_RC_SUCCESS;
+        }
+
+        ///
+        /// @brief Decodes RCD Input Bus Termination -> DIMM_DDR4_F0RC7X
+        /// @param[out] o_output encoding from SPD
+        /// @return FAPI2_RC_SUCCESS if okay
+        ///
+        virtual fapi2::ReturnCode dimm_ddr4_f0rc7x(uint8_t& o_output) const
+        {
+            o_output = 0;
+            return fapi2::FAPI2_RC_SUCCESS;
+        }
+
+        ///
+        /// @brief Decodes RCD data buffer driver impedance control -> DIMM_DDR4_F1RC00
+        /// @param[out] o_output encoding from SPD
+        /// @return FAPI2_RC_SUCCESS if okay
+        ///
+        virtual fapi2::ReturnCode dimm_ddr4_f1rc00(uint8_t& o_output) const
+        {
+            o_output = 0;
+            return fapi2::FAPI2_RC_SUCCESS;
+        }
+
+        ///
+        /// @brief Decodes RCD slew rate control -> RCD_SLEW_RATE
+        /// @param[out] o_output encoding from SPD
+        /// @return FAPI2_RC_SUCCESS if okay
+        ///
+        virtual fapi2::ReturnCode rcd_slew_rate(uint16_t& o_output) const
+        {
+            o_output = 0;
+            return fapi2::FAPI2_RC_SUCCESS;
+        }
+
+        ///
         /// @brief Decodes ODT WR Map CS Byte0 -> ODT_WR_MAP_RANK3
         /// @param[out] o_output encoding from SPD
         /// @return FAPI2_RC_SUCCESS if okay

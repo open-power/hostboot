@@ -164,6 +164,7 @@ const uint16_t SPD_DDR4_DMB_MFG_ID_IBM = 0xA480;
 const uint8_t SPD_DDR4_EXPECTED_DMB_REVISION_0_MICROCHIP = 0x00;
 const uint8_t SPD_DDR4_EXPECTED_DMB_REVISION_A0_MICROCHIP = 0xA0;
 const uint8_t SPD_DDR4_EXPECTED_DMB_REVISION_A1_MICROCHIP = 0xA1;
+const uint8_t SPD_DDR4_EXPECTED_DMB_REVISION_B0_MICROCHIP = 0xB0;
 const uint8_t SPD_DDR4_EXPECTED_DMB_REVISION_IBM = 0x00;
 
 // Maximum number of FFDC elements we will save off
@@ -237,15 +238,17 @@ uint16_t check_valid_dmb_revision(const uint16_t i_mfg_id, const uint8_t i_dmb_r
     else // == SPD_DDR4_EXPECTED_DMB_REVISION_MICROCHIP
     {
         // We asserted earlier that we are either MCHP or IBM mfg ID
-        FAPI_DBG("ddr4_get_efd: SPD DMB revision = 0x%.2X, expected DMB revision = 0x%.2X or 0x%.2X or 0x%.2X",
+        FAPI_DBG("ddr4_get_efd: SPD DMB revision = 0x%.2X, expected DMB revision = 0x%.2X or 0x%.2X or 0x%.2X  or 0x%.2X",
                  i_dmb_revision,
                  SPD_DDR4_EXPECTED_DMB_REVISION_0_MICROCHIP,
                  SPD_DDR4_EXPECTED_DMB_REVISION_A0_MICROCHIP,
-                 SPD_DDR4_EXPECTED_DMB_REVISION_A1_MICROCHIP);
+                 SPD_DDR4_EXPECTED_DMB_REVISION_A1_MICROCHIP,
+                 SPD_DDR4_EXPECTED_DMB_REVISION_B0_MICROCHIP);
 
         return ((i_dmb_revision == SPD_DDR4_EXPECTED_DMB_REVISION_0_MICROCHIP) ||
                 (i_dmb_revision == SPD_DDR4_EXPECTED_DMB_REVISION_A0_MICROCHIP) ||
-                (i_dmb_revision == SPD_DDR4_EXPECTED_DMB_REVISION_A1_MICROCHIP));
+                (i_dmb_revision == SPD_DDR4_EXPECTED_DMB_REVISION_A1_MICROCHIP) ||
+                (i_dmb_revision == SPD_DDR4_EXPECTED_DMB_REVISION_B0_MICROCHIP));
     }
 }
 
@@ -686,12 +689,13 @@ extern "C"
                                   (i_spdBuffer[SPD_MEM_TYPE_ADDR])),
                      "ddr4_get_efd: SPD DMB revision 0x%.2X is not an expected revision: "
                      "IBM expected: 0x%.2X "
-                     "MCHP expected: 0x%.2X or 0x%.2X or 0x%.2X",
+                     "MCHP expected: 0x%.2X or 0x%.2X or 0x%.2X or 0x%.2X",
                      l_dmb_revision,
                      SPD_DDR4_EXPECTED_DMB_REVISION_IBM,
                      SPD_DDR4_EXPECTED_DMB_REVISION_0_MICROCHIP,
                      SPD_DDR4_EXPECTED_DMB_REVISION_A0_MICROCHIP,
-                     SPD_DDR4_EXPECTED_DMB_REVISION_A1_MICROCHIP);
+                     SPD_DDR4_EXPECTED_DMB_REVISION_A1_MICROCHIP,
+                     SPD_DDR4_EXPECTED_DMB_REVISION_B0_MICROCHIP);
 
         // Set the outgoing DMB revision
         io_vpdInfo.iv_dmb_revision = l_dmb_revision;

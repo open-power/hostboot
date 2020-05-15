@@ -171,6 +171,23 @@
     </attribute>
 
     <attribute>
+        <id>ATTR_MEM_EFF_THERM_SENSOR_0_SECOND_AVAIL</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+          The availability of thermal sensor 0's secondary sensor
+        </description>
+        <valueType>uint8</valueType>
+        <initToZero/>
+        <enum>
+          NOT_AVAILABLE = 0,
+          AVAILABLE = 1
+        </enum>
+        <writeable/>
+        <default>NOT_AVAILABLE</default>
+        <mssAccessorName>therm_sensor_0_secondary_availability</mssAccessorName>
+    </attribute>
+
+    <attribute>
         <id>ATTR_MEM_EFF_THERM_SENSOR_0_TYPE</id>
         <targetType>TARGET_TYPE_MEM_PORT</targetType>
         <description>
@@ -238,6 +255,23 @@
         <writeable/>
         <default>NOT_AVAILABLE</default>
         <mssAccessorName>therm_sensor_1_availability</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MEM_EFF_THERM_SENSOR_1_SECOND_AVAIL</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+          The availability of thermal sensor 1's secondary sensor
+        </description>
+        <valueType>uint8</valueType>
+        <initToZero/>
+        <enum>
+          NOT_AVAILABLE = 0,
+          AVAILABLE = 1
+        </enum>
+        <writeable/>
+        <default>NOT_AVAILABLE</default>
+        <mssAccessorName>therm_sensor_1_secondary_availability</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -360,6 +394,82 @@
         <writeable/>
         <initToZero/>
         <mssAccessorName>therm_sensor_differential_i2c_addr</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MEM_EFF_THERM_SENSOR_0_SECOND_I2C_ADDR</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+          Secondary Thermal Sensor 0 I2C Address
+        </description>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <initToZero/>
+        <mssAccessorName>therm_sensor_0_secondary_i2c_addr</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MEM_EFF_THERM_SENSOR_1_SECOND_I2C_ADDR</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+          Secondary Thermal Sensor 1 I2C Address
+        </description>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <initToZero/>
+        <mssAccessorName>therm_sensor_1_secondary_i2c_addr</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MEM_EFF_THERM_SENSOR_1_SECOND_LOCATION</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+          Secondary Thermal Sensor 1 Location
+        </description>
+        <valueType>uint8</valueType>
+        <enum>LOWER_LEFT = 0, UPPER_LEFT = 1, LOWER_RIGHT = 2, UPPER_RIGHT = 3</enum>
+        <writeable/>
+        <initToZero/>
+        <mssAccessorName>therm_sensor_1_secondary_location</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MEM_EFF_THERM_SENSOR_0_SECOND_LOCATION</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+          Secondary Thermal Sensor 0 Location
+        </description>
+        <valueType>uint8</valueType>
+        <enum>LOWER_LEFT = 0, UPPER_LEFT = 1, LOWER_RIGHT = 2, UPPER_RIGHT = 3</enum>
+        <writeable/>
+        <initToZero/>
+        <mssAccessorName>therm_sensor_0_secondary_location</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MEM_EFF_THERM_SENSOR_1_LOCATION</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+          Thermal Sensor 1 Location
+        </description>
+        <valueType>uint8</valueType>
+        <enum>LOWER_LEFT = 0, UPPER_LEFT = 1, LOWER_RIGHT = 2, UPPER_RIGHT = 3</enum>
+        <writeable/>
+        <initToZero/>
+        <mssAccessorName>therm_sensor_1_location</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MEM_EFF_THERM_SENSOR_0_LOCATION</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+          Thermal Sensor 0 Location
+        </description>
+        <valueType>uint8</valueType>
+        <enum>LOWER_LEFT = 0, UPPER_LEFT = 1, LOWER_RIGHT = 2, UPPER_RIGHT = 3</enum>
+        <writeable/>
+        <initToZero/>
+        <mssAccessorName>therm_sensor_0_location</mssAccessorName>
     </attribute>
 
     <attribute>

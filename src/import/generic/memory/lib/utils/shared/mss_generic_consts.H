@@ -189,6 +189,8 @@ enum generic_ffdc_codes
     SET_HOST_TO_DDR_SPEED_RATIO = 0x102B,
     SET_ATTR_HOST_TO_DDR_SPEED_RATIO = 0x102C,
     CCS_INST_CONFIGURE_RANK = 0x102D,
+    SET_SPD_CONTENT_REVISION = 0x102E,
+    SET_ATTR_SPD_CONTENT_REVISION = 0x102F,
     SET_DIMM_RANKS_CNFG = 0x1039,
     DDIMM_RAWCARD_DECODE = 0x103a,
     INIT_RANK_INFO = 0x103B,
@@ -279,6 +281,12 @@ enum generic_ffdc_codes
     MRS02_GEN = 0x10A0,
     SET_MODULE_MFG_ID = 0x10A1,
     PDA_WR_VREF_LATCH_CONTAINER = 0x10A2,
+
+    // PMIC polling
+    POLL_INPUT_PORT_READY = 0x10A3,
+    POLL_FOR_PBULK_GOOD = 0x10A4,
+
+    EFD_FACTORY = 0x10A5,
 };
 
 ///
@@ -541,6 +549,7 @@ enum test_type
     RMWFIX_I = 50,
     W_INFINITE = 51,
     R_INFINITE = 52,
+    MARCH_RF = 53,
 };
 
 
@@ -954,6 +963,7 @@ enum rev : uint8_t
 {
     V0_0 = 0x00, ///< represents Rev 0.0
     V0_3 = 0x03, ///< represents Rev 0.3
+    V0_4 = 0x04, ///< represents Rev 0.4
     V1_0 = 0x10, ///< represents Rev 1.0
     V1_1 = 0x11, ///< represents Rev 1.1
     V1_2 = 0x12, ///< represents Rev 1.2
@@ -963,7 +973,7 @@ enum rev : uint8_t
     GEN_SEC_MAX = V1_1,
     RDIMM_MAX = V1_1,
     LRDIMM_MAX = V1_2,
-    DDIMM_MAX = V0_3,
+    DDIMM_MAX = V0_4,
 };
 
 ///

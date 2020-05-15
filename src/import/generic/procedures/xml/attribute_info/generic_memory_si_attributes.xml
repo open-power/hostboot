@@ -444,7 +444,7 @@
         <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
-        <enum>DISABLE = 0, OHM_40 = 40, OHM_60 = 60, OHM_80 = 80, OHM_120 = 120, OHM_240 = 240</enum>
+        <enum>DISABLE = 0, OHM_40 = 40, OHM_48 = 48, OHM_60 = 60, OHM_80 = 80, OHM_120 = 120, OHM_240 = 240</enum>
         <mssUnits>ohm</mssUnits>
         <mssAccessorName>si_mc_rcv_imp_dq_dqs</mssAccessorName>
         <array>2 4</array>
