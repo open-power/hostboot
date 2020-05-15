@@ -69,6 +69,27 @@ inline fapi2::ReturnCode mvpd_fwms<mss::mc_type::NIMBUS>(const fapi2::Target<fap
 }
 
 ///
+/// @brief ATTR_MEM_EFF_DIMM_SPARE getter
+/// @param[in] const ref to the TARGET_TYPE_DIMM
+/// @param[out] uint32_t&[] array reference to store the value
+/// @return fapi2::ReturnCode - FAPI2_RC_SUCCESS iff get is OK
+/// @note  Spare DRAM availability. Used in various locations and is computed in mss_eff_cnfg.
+/// Array indexes are [DIMM][RANK]
+/// @note This attribute doesn't exist on Nimbus because ISDIMMs don't have spares, so we always
+/// return NO_SPARE
+///
+template<>
+inline fapi2::ReturnCode dimm_spare< mss::mc_type::NIMBUS >(
+    const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+    uint8_t (&o_array)[mss::MAX_RANK_PER_DIMM_ATTR])
+{
+    uint8_t l_value[mss::MAX_RANK_PER_DIMM_ATTR] = {fapi2::ENUM_ATTR_MEM_EFF_DIMM_SPARE_NO_SPARE};
+
+    memcpy(o_array, &l_value, mss::MAX_RANK_PER_DIMM_ATTR);
+    return fapi2::FAPI2_RC_SUCCESS;
+}
+
+///
 /// @class Traits and policy class for port code - specialization for Nimbus. The target of registers is TARGET_TYPE_MCA.
 ///
 template<>

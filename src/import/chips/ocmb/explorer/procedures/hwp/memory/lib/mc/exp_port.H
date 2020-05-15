@@ -192,6 +192,22 @@ inline fapi2::ReturnCode reorder_queue_setting<mss::mc_type::EXPLORER>(
 }
 
 ///
+/// @brief ATTR_MEM_EFF_DIMM_SPARE getter
+/// @param[in] const ref to the TARGET_TYPE_DIMM
+/// @param[out] uint32_t&[] array reference to store the value
+/// @return fapi2::ReturnCode - FAPI2_RC_SUCCESS iff get is OK
+/// @note  Spare DRAM availability. Used in various locations and is computed in mss_eff_cnfg.
+/// Array indexes are [DIMM][RANK]
+///
+template<>
+inline fapi2::ReturnCode dimm_spare< mss::mc_type::EXPLORER >(
+    const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+    uint8_t (&o_array)[mss::MAX_RANK_PER_DIMM_ATTR])
+{
+    return mss::attr::get_dimm_spare(i_target, o_array);
+}
+
+///
 /// @brief Change the state of the force_str bit - mc_type::EXPLORER specialization
 /// @tparam MC the memory controller type
 /// @param[in] i_target the target

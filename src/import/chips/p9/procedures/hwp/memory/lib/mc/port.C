@@ -322,4 +322,37 @@ fapi2::ReturnCode ecc_reg_settings_draminit_mc<mss::mc_type::NIMBUS>(
     return fapi2::FAPI2_RC_SUCCESS;
 }
 
+///
+/// @brief Get the number of bytes to check in restore_repairs, mc_type NIMBUS specialization
+/// @param[in] i_spare_support value of ATTR_DIMM_SPARE for this [DIMM][RANK] combo
+/// @return total number of bytes
+///
+template<>
+uint64_t get_total_bytes<mss::mc_type::NIMBUS>(const uint8_t i_spare_support)
+{
+    using MCT = mss::mcbistMCTraits<mss::mc_type::NIMBUS>;
+    using MT = mss::mcbistTraits<mss::mc_type::NIMBUS, MCT::MC_TARGET_TYPE>;
+
+    constexpr uint64_t MAX_DQ_BYTES = MT::MAX_DQ_NIBBLES / mss::conversions::NIBBLES_PER_BYTE;
+
+    // Nimbus has no spares, so always return total number of bytes
+    return MAX_DQ_BYTES;
+}
+
+///
+/// @brief Figure out if selected nibble is a non-existent spare in restore_repairs, mc_type NIMBUS specialization
+/// @param[in] i_spare_support value of ATTR_DIMM_SPARE for this [DIMM][RANK] combo
+/// @param[in] i_byte logical byte index
+/// @param[in] i_nibble logical nibble index
+/// @return true if selected nibble is a non-existent spare and needs to be skipped
+///
+template<>
+bool skip_dne_spare_nibble<mss::mc_type::NIMBUS>(const uint8_t i_spare_support,
+        const uint64_t i_byte,
+        const size_t i_nibble)
+{
+    // Nimbus has no spares
+    return false;
+}
+
 } // ns mss

@@ -173,6 +173,20 @@ template< mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T>
 fapi2::ReturnCode mvpd_fwms(const fapi2::Target< T>& i_target, uint32_t (&o_array)[MARK_STORE_COUNT]);
 
 ///
+/// @brief ATTR_MEM_EFF_DIMM_SPARE getter
+/// @tparam MC the memory controller type
+/// @param[in] const ref to the TARGET_TYPE_DIMM
+/// @param[out] uint32_t&[] array reference to store the value
+/// @return fapi2::ReturnCode - FAPI2_RC_SUCCESS iff get is OK
+/// @note  Spare DRAM availability. Used in various locations and is computed in mss_eff_cnfg.
+/// Array indexes are [DIMM][RANK]
+///
+template< mss::mc_type MC >
+inline fapi2::ReturnCode dimm_spare(
+    const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+    uint8_t (&o_array)[MAX_RANK_PER_DIMM_ATTR]);
+
+///
 /// @brief Enable power management
 /// @tparam MC the memory controller type
 /// @tparam T the fapi2 target type of the target
@@ -1264,6 +1278,28 @@ inline std::vector<uint64_t> bad_bit_helper(const uint8_t i_bad_bits, const size
     return l_output;
 }
 
+///
+/// @brief Get the number of bytes to check in restore_repairs
+/// @tparam MC the memory controller type
+/// @param[in] i_spare_support value of ATTR_DIMM_SPARE for this [DIMM][RANK] combo
+/// @return total number of bytes
+///
+template< mss::mc_type MC >
+uint64_t get_total_bytes(const uint8_t i_spare_support);
+
+///
+/// @brief Figure out if selected nibble is a non-existent spare in restore_repairs
+/// @tparam MC the memory controller type
+/// @param[in] i_spare_support value of ATTR_DIMM_SPARE for this [DIMM][RANK] combo
+/// @param[in] i_byte logical byte index
+/// @param[in] i_nibble logical nibble index
+/// @return true if selected nibble is a non-existent spare and needs to be skipped
+///
+template< mss::mc_type MC >
+bool skip_dne_spare_nibble(const uint8_t i_spare_support,
+                           const uint64_t i_byte,
+                           const size_t i_nibble);
+
 // TODO: RTC: 157753 tparam R can be pulled from an PORT trait once we have it
 //
 /// @brief Restore symbol and chip marks according to BAD_DQ_BITMAP attribute, helper function for unit testing
@@ -1285,11 +1321,12 @@ inline fapi2::ReturnCode restore_repairs_helper( const fapi2::Target<T>& i_targe
 {
     FAPI_INF("%s Restore repair marks from bad DQ data", mss::c_str(i_target));
 
-    using MCT = mss::mcbistMCTraits<MC>;
-    using MT = mss::mcbistTraits<MC, MCT::MC_TARGET_TYPE>;
-
     std::vector<uint64_t> l_ranks;
     const auto l_dimm_idx = index(i_target);
+    uint8_t l_dimm_spare[MAX_RANK_PER_DIMM_ATTR] = {0};
+
+    // gets spare availability
+    FAPI_TRY( mss::dimm_spare<MC>(i_target, l_dimm_spare) );
 
     // gets all of the ranks to loop over
     FAPI_TRY( mss::rank::ranks_on_dimm_helper<MC>(i_target, l_ranks) );
@@ -1299,12 +1336,23 @@ inline fapi2::ReturnCode restore_repairs_helper( const fapi2::Target<T>& i_targe
     {
         const auto l_rank_idx = index(l_rank);
 
+        // don't process last byte if it's a non-existent spare. Non-existent spare bits are marked 'bad' in the attribute
+        const auto l_total_bytes = get_total_bytes<MC>(l_dimm_spare[l_rank]);
+
         repair_state_machine<MC, fapi2::TARGET_TYPE_DIMM> l_machine;
 
-        for (uint64_t l_byte = 0; l_byte < (MT::MAX_DQ_NIBBLES / mss::conversions::NIBBLES_PER_BYTE); ++l_byte)
+        for (uint64_t l_byte = 0; l_byte < l_total_bytes; ++l_byte)
         {
             for (size_t l_nibble = 0; l_nibble < mss::conversions::NIBBLES_PER_BYTE; ++l_nibble)
             {
+                // don't process non-existent spare nibble because all non-existent spare bits are marked 'bad' in the attribute
+                if (skip_dne_spare_nibble<MC>(l_dimm_spare[l_rank], l_byte, l_nibble))
+                {
+                    FAPI_DBG("Skip processing bits on DIMM:%d rank:%d nibble%d because they are non-existent spares",
+                             l_dimm_idx, l_rank, (l_byte * NIBBLES_PER_BYTE) + l_nibble);
+                    continue;
+                }
+
                 const auto l_bad_dq_vector = bad_bit_helper(i_bad_bits[l_rank_idx][l_byte], l_nibble);
                 FAPI_DBG("Total bad bits on DIMM:%d rank:%d nibble%d: %d",
                          l_dimm_idx, l_rank, (l_byte * NIBBLES_PER_BYTE) + l_nibble, l_bad_dq_vector.size());
