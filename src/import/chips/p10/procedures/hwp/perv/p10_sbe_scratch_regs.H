@@ -54,7 +54,6 @@ enum p10_sbe_scratch_regs
 
     PCI_GARD_STARTBIT                               = 0,
     PCI_GARD_LENGTH                                 = 2,
-    NMMU1_GARD_BIT                                  = 2,
     MC_GARD_STARTBIT                                = 4,
     MC_GARD_LENGTH                                  = 4,
     PAUC_GARD_STARTBIT                              = 8,

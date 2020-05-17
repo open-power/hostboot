@@ -351,7 +351,6 @@ fapi2::ReturnCode p10_setup_sbe_config(
     {
         fapi2::buffer<uint32_t> l_scratch2_reg = 0;
         uint32_t l_pci_gard_vector;
-        uint32_t l_nmmu_gard_vector;
         uint32_t l_mc_gard_vector;
         uint32_t l_pauc_gard_vector;
         uint32_t l_pau_gard_vector;
@@ -363,13 +362,6 @@ fapi2::ReturnCode p10_setup_sbe_config(
                  l_pci_gard_vector),
                  "Error from p10_sbe_scratch_calc_gard_vector (pec)");
         l_scratch2_reg.insert<PCI_GARD_STARTBIT, PCI_GARD_LENGTH, GARD_VECTOR_STARTBIT>(l_pci_gard_vector);
-
-        // NMMU1
-        FAPI_DBG("Calculating NMMU region gard vector");
-        FAPI_TRY(p10_sbe_scratch_calc_gard_vector<fapi2::TARGET_TYPE_NMMU>(i_target_chip,
-                 l_nmmu_gard_vector),
-                 "Error from p10_sbe_scratch_calc_gard_vector (nmmu)");
-        l_scratch2_reg.insert<NMMU1_GARD_BIT, 1, 1>(l_nmmu_gard_vector);
 
         // MC
         FAPI_DBG("Calculating MC chiplet gard vector");

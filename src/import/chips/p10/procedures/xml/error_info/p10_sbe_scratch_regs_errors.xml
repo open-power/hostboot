@@ -57,4 +57,14 @@
   <ffdc>PAUC_PRESENT</ffdc>
 </hwpError>
 <!-- ******************************************************************** -->
+<hwpError>
+  <rc>RC_P10_SBE_ATTR_SETUP_NMMU1_ERR</rc>
+  <description>
+    NMMU1 unit is logically required by PAU unit configuration, but is
+    disabled in N1 chiplet ATTR_PG_MVPD data
+  </description>
+  <ffdc>TARGET_CHIP</ffdc>
+  <ffdc>N1_PG_MVPD</ffdc>
+</hwpError>
+<!-- ******************************************************************** -->
 </hwpErrors>
