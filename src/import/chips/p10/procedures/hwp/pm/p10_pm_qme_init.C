@@ -64,6 +64,7 @@
 #include <p10_pm_qme_init.H>
 #include <p10_scom_proc_3.H>
 #include <p10_scom_proc_5.H>
+#include <p10_scom_c_7.H>
 #include <p10_scom_eq.H>
 #include <p10_scom_perv.H>
 #include <multicast_group_defs.H>
@@ -374,6 +375,7 @@ fapi2::ReturnCode qme_halt(
 {
     using namespace scomt;
     using namespace eq;
+    using namespace c;
     fapi2::buffer<uint64_t> l_data64;
     uint32_t                l_timeout_in_MS = 100;
 
@@ -384,6 +386,8 @@ fapi2::ReturnCode qme_halt(
         i_target.getMulticast<fapi2::TARGET_TYPE_EQ, fapi2::MULTICAST_OR >(fapi2::MCGROUP_GOOD_EQ);
     auto l_eq_mc_and =
         i_target.getMulticast<fapi2::TARGET_TYPE_EQ, fapi2::MULTICAST_AND >(fapi2::MCGROUP_GOOD_EQ);
+    fapi2::Target < fapi2::TARGET_TYPE_CORE | fapi2::TARGET_TYPE_MULTICAST, fapi2::MULTICAST_AND > core_mc_target_and =
+        i_target.getMulticast< fapi2::MULTICAST_AND >(fapi2::MCGROUP_GOOD_EQ, fapi2::MCCORE_ALL);
 
     FAPI_INF("Send HALT command via XCR...");
     l_data64.flush<0>().insertFromRight( XCR_HALT, 1, 3 );
@@ -406,6 +410,10 @@ fapi2::ReturnCode qme_halt(
                      .set_PPE_STATE_MODE(XCR_HALT),
                      "STOP Reset Timeout");
     }
+
+    l_data64.flush<0>().setBit < QME_SCSR_ASSERT_SPECIAL_WKUP_DONE > ();
+    l_data64.setBit < QME_SCSR_AUTO_SPECIAL_WAKEUP_DISABLE > ();
+    FAPI_TRY( putScom( core_mc_target_and, QME_SCSR_WO_CLEAR, l_data64 ) );
 
     FAPI_INF("Clear QME_ACTIVE in OCC Flag Register...");
     l_data64.flush<0>().setBit<QME_ACTIVE>();
