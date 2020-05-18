@@ -386,6 +386,22 @@ errlHndl_t handlePhysPresenceWindow(void)
     bool is_window_open = false;
     bool doesKeyClearRequestPhysPres = false;
 
+    // This code uses the value in ATTR_KEY_CLEAR_REQUEST and
+    // if we continue on with the IPL we crossover that value
+    // to ATTR_KEY_CLEAR_REQUEST_HB, while clearing ATTR_KEY_CLEAR_REQUEST.
+    // ATTR_KEY_CLEAR_REQUEST is shared with the FSP and this allows
+    // Hostboot to clear the request and have it synced down in istep 16
+    KEY_CLEAR_REQUEST keyClearRequests = KEY_CLEAR_REQUEST_NONE;
+    uint16_t keyClearRequests_HB = 0;
+    bool doAttrCrossOver = false;
+
+
+    // Get the attributes associated with Physical Presence
+    TargetService& tS = targetService();
+    Target* sys = nullptr;
+    (void) tS.getTopLevelTarget( sys );
+    assert(sys, "handlePhysPresenceWindow: system target is nullptr");
+
     do
     {
 
@@ -395,12 +411,6 @@ errlHndl_t handlePhysPresenceWindow(void)
         SB_INF("handlePhysPresenceWindow: Skipping as not supported in simics");
         break;
     }
-
-    // Get the attributes associated with Physical Presence
-    TargetService& tS = targetService();
-    Target* sys = nullptr;
-    (void) tS.getTopLevelTarget( sys );
-    assert(sys, "handlePhysPresenceWindow: system target is nullptr");
 
     // NOTE: Using attributes to request opening the physical presence window
     // and/or fake the assertion of physical presence is only for testing
@@ -416,7 +426,6 @@ errlHndl_t handlePhysPresenceWindow(void)
 
     // Get info associated with Key Clear Requests - another possible reason
     // to open the Physical Presence Window
-    KEY_CLEAR_REQUEST keyClearRequests = KEY_CLEAR_REQUEST_NONE;
 #ifdef CONFIG_KEY_CLEAR
     getKeyClearRequest(doesKeyClearRequestPhysPres, keyClearRequests);
     SB_INF("handlePhysPresenceWindow: call to getKeyClearRequest "
@@ -453,6 +462,8 @@ errlHndl_t handlePhysPresenceWindow(void)
             sys->setAttr<ATTR_PHYS_PRES_REQUEST_OPEN_WINDOW>(attr_open_window);
         }
 
+        doAttrCrossOver = true;
+
         break;
     }
 
@@ -472,6 +483,8 @@ errlHndl_t handlePhysPresenceWindow(void)
         attr_phys_pres_reipl = 0x00;
         sys->setAttr<ATTR_PHYS_PRES_REIPL>(attr_phys_pres_reipl);
 
+        doAttrCrossOver = true;
+
         break;
     }
 
@@ -484,6 +497,9 @@ errlHndl_t handlePhysPresenceWindow(void)
                "(attr_phys_pres_asserted=0x%.2X)",
                attr_open_window, doesKeyClearRequestPhysPres,
                attr_phys_pres_asserted);
+
+        doAttrCrossOver = true;
+
         break;
     }
 
@@ -671,6 +687,17 @@ errlHndl_t handlePhysPresenceWindow(void)
     else if (err != nullptr)
     {
         err->collectTrace( SECURE_COMP_NAME );
+    }
+
+    if (doAttrCrossOver == true)
+    {
+        // Convert ATTR_KEY_CLEAR_REQUEST to ATTR_KEY_CLEAR_REQUEST_HB
+        // and clear ATTR_KEY_CLEAR_REQUEST so this will get synced
+        // down to FSP in istep 16
+        keyClearRequests_HB = keyClearRequests;
+        keyClearRequests = KEY_CLEAR_REQUEST_NONE;
+        sys->setAttr<ATTR_KEY_CLEAR_REQUEST>(keyClearRequests);
+        sys->setAttr<ATTR_KEY_CLEAR_REQUEST_HB>(keyClearRequests_HB);
     }
 
     SB_EXIT("handlePhysPresenceWindow: err_rc=0x%X",

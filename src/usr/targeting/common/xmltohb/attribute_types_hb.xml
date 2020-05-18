@@ -905,6 +905,23 @@
   </attribute>
 
   <attribute>
+    <id>KEY_CLEAR_REQUEST_HB</id>
+    <description>
+        Indicates which Key Clear Requests are being made
+        See KEY_CLEAR_REQUEST enum in attribute_types.xml for bit definition
+        This attribute assumes the value of the shared attribute
+          KEY_CLEAR_REQUEST so that the shared attribute can be cleared and
+          synced with the FSP on istep 16.
+    </description>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <simpleType>
+      <uint16_t/>
+    </simpleType>
+    <writeable/>
+  </attribute>
+
+  <attribute>
     <id>MASTER_MBOX_SCRATCH</id>
     <description>
       Value of the master mailbox scratch regs

@@ -341,6 +341,9 @@
       <id>IS_MPIPL_HB</id>
     </attribute>
     <attribute>
+      <id>KEY_CLEAR_REQUEST_HB</id>
+    </attribute>
+    <attribute>
       <id>MASTER_MBOX_SCRATCH</id>
     </attribute>
     <attribute>
