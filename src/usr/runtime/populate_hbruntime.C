@@ -1832,10 +1832,11 @@ errlHndl_t populate_hbSecurebootData ( void )
 
 #ifdef CONFIG_KEY_CLEAR
         // Populate "Host FW key clear requests" section
-        // NOTE: ATTR_KEY_CLEAR_REQUEST enum should sync with expected bits
-        // in HDAT spec
+        // NOTE: KEY_CLEAR_REQUEST enum should sync with expected bits
+        // in HDAT spec; this enum is used for both ATTR_KEY_CLEAR_REQUEST
+        // and ATTR_KEY_CLEAR_REQUEST_HB
         auto key_clear_request =
-            sys->getAttr<TARGETING::ATTR_KEY_CLEAR_REQUEST>();
+            sys->getAttr<TARGETING::ATTR_KEY_CLEAR_REQUEST_HB>();
 
         // If Physical Presence was not asserted, then mask off all bits
         // except for Mfg bit in case of imprint drivers
@@ -1886,13 +1887,13 @@ errlHndl_t populate_hbSecurebootData ( void )
 
         TRACFCOMP(g_trac_runtime, INFO_MRK"populate_hbSecurebootData: "
                   "Setting key_clear_request in HDAT to 0x%.4X before clearing "
-                  "ATTR_KEY_CLEAR_REQUEST",
+                  "ATTR_KEY_CLEAR_REQUEST_HB",
                   key_clear_request);
         l_sysParmsPtr->hdatKeyClearRequest = key_clear_request;
 
         // Clear the Key Clear Requests
         key_clear_request = KEY_CLEAR_REQUEST_NONE;
-        sys->setAttr<TARGETING::ATTR_KEY_CLEAR_REQUEST>(key_clear_request);
+        sys->setAttr<TARGETING::ATTR_KEY_CLEAR_REQUEST_HB>(key_clear_request);
 #ifdef CONFIG_BMC_IPMI
         l_elog = SECUREBOOT::clearKeyClearSensor();
         if(l_elog != nullptr)
