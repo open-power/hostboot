@@ -102,6 +102,7 @@ prd_incpath += ${ROOTPATH}/src/import/chips/ocmb/explorer/procedures/hwp/memory/
 #prd_incpath += ${ROOTPATH}/src/import/chips/ocmb/explorer/procedures/hwp/memory/lib/
 #prd_incpath += ${ROOTPATH}/src/import/chips/ocmb/explorer/procedures/hwp/memory/lib/phy/
 #prd_incpath += ${ROOTPATH}/src/import/chips/ocmb/explorer/procedures/hwp/memory/lib/ecc/
+#prd_incpath += ${ROOTPATH}/src/import/chips/ocmb/explorer/procedures/hwp/memory/lib/mc/
 prd_incpath += ${ROOTPATH}/obj/genfiles/chips/ocmb/explorer/procedures/hwp/memory/lib/
 prd_incpath += ${ROOTPATH}/obj/genfiles/generic/memory/lib/
 #prd_incpath += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/memory/lib/phy/
@@ -210,6 +211,7 @@ CLEAN_TARGETS += ${MFG_THRES_PATH}
 
 #TODO RTC 247259
 #prd_vpath += ${ROOTPATH}/src/import/chips/ocmb/explorer/procedures/hwp/memory/lib/
+#prd_vpath += ${ROOTPATH}/src/import/chips/ocmb/explorer/procedures/hwp/memory/lib/mc/
 #prd_vpath += ${ROOTPATH}/src/import/chips/ocmb/explorer/procedures/hwp/memory/lib/phy/
 #prd_vpath += ${ROOTPATH}/src/import/chips/ocmb/explorer/procedures/hwp/memory/lib/eff_config/
 #prd_vpath += ${ROOTPATH}/src/import/chips/ocmb/explorer/procedures/hwp/memory/lib/mcbist/
@@ -279,6 +281,8 @@ CLEAN_TARGETS += ${MFG_THRES_PATH}
 #prd_obj_no_sim += dcd.o
 #prd_obj_no_sim += rdimm_raw_cards.o
 #prd_obj_no_sim += lrdimm_raw_cards.o
+#prd_obj_no_sim += exp_port.o
+#prd_obj_no_sim += port.o
 
 ################################################################################
 # The following are hardware procedure utilities that we are pulling into the
