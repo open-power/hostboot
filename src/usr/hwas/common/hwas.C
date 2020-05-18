@@ -1473,10 +1473,30 @@ errlHndl_t checkPartialGoodForDescendants(
                 parentState = false;
             }
 
-            descState = isDescFunctional(pDesc,
-                                         i_pgData,
-                                         targetStates,
-                                         io_deconfigTargets);
+            // Only call isDescFunctional to check PG rules if this target is
+            // descended from a PROC target (because PG rules only apply to
+            // PROCs).
+            {
+                TargetHandleList list;
+
+                getParentAffinityTargetsByState(list,
+                                                pDesc,
+                                                CLASS_CHIP,
+                                                TYPE_PROC,
+                                                UTIL_FILTER_ALL);
+
+                if (!list.empty())
+                {
+                    descState = isDescFunctional(pDesc,
+                                                 i_pgData,
+                                                 targetStates,
+                                                 io_deconfigTargets);
+                }
+                else
+                {
+                    descState = true;
+                }
+            }
 
             // If one descendant of the current parent is functional,
             // then the parent is functional and should be checked by
