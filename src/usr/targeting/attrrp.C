@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -157,18 +157,18 @@ namespace TARGETING
         return Singleton<AttrRP>::instance()._notifyResourceReady(i_resource);
     }
 
-    errlHndl_t AttrRP::syncAllAttributesToFsp()
+    errlHndl_t AttrRP::syncAllAttributesToFspOrBmc()
     {
-        return Singleton<AttrRP>::instance()._syncAllAttributesToFsp();
+        return Singleton<AttrRP>::instance()._syncAllAttributesToFspOrBmc();
     }
 
-    errlHndl_t AttrRP::_syncAllAttributesToFsp() const
+    errlHndl_t AttrRP::_syncAllAttributesToFspOrBmc() const
     {
         TRACFCOMP(g_trac_targeting, ENTER_MRK
-                  "AttrRP::_syncAllAttributesToFsp");
+                  "AttrRP::_syncAllAttributesToFspOrBmc");
         auto pError = _sendAttrSyncMsg(MSG_INVOKE_ATTR_SYNC, true);
         TRACFCOMP(g_trac_targeting, EXIT_MRK
-                  "AttrRP::_syncAllAttributesToFsp");
+                  "AttrRP::_syncAllAttributesToFspOrBmc");
         return pError;
     }
 
@@ -352,8 +352,12 @@ namespace TARGETING
         if(!INITSERVICE::spBaseServicesEnabled())
         {
             TRACFCOMP(g_trac_targeting, INFO_MRK "_invokeAttrSync: "
-                      "FSP services not available; suppressing "
-                      "attribute sync.");
+                      "FSP services not available; calling "
+                      "attribute sync for BMC.");
+#ifdef CONFIG_DEVTREE
+                    // Test devtree sync
+                    DEVTREE::devtreeSyncAttrs();
+#endif
             break;
         }
 

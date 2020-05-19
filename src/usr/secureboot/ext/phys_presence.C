@@ -619,23 +619,19 @@ errlHndl_t handlePhysPresenceWindow(void)
            "and setting ATTR_PHYS_PRES_REIPL to 0x01 (0x%.2X)",
            attr_open_window, attr_phys_pres_reipl);
 
-    // Sync attributes for FSP systems
-    if(INITSERVICE::spBaseServicesEnabled())
+    // Sync all attributes to FSP or BMC before powering off
+    err = TARGETING::AttrRP::syncAllAttributesToFspOrBmc();
+    if( err )
     {
-        // Sync all attributes to FSP before powering off
-        err = TARGETING::AttrRP::syncAllAttributesToFsp();
-        if( err )
-        {
-            // Failed to sync all attributes to FSP; this is not
-            // necessarily fatal.  The power off will continue,
-            // but this issue will be logged.
-            SB_ERR("handlePhysPresenceWindow: Error syncing "
-                   "attributes to FSP. "
-                   TRACE_ERR_FMT,
-                   TRACE_ERR_ARGS(err));
-            err->collectTrace( SECURE_COMP_NAME );
-            errlCommit(err,SECURE_COMP_ID );
-        }
+        // Failed to sync all attributes to FSP/BMC; this is not
+        // necessarily fatal.  The power off will continue,
+        // but this issue will be logged.
+        SB_ERR("handlePhysPresenceWindow: Error syncing "
+               "attributes to FSP/BMC. "
+               TRACE_ERR_FMT,
+               TRACE_ERR_ARGS(err));
+        err->collectTrace( SECURE_COMP_NAME );
+        errlCommit(err,SECURE_COMP_ID );
     }
 
     // Alert the users that the system will power off

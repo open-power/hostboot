@@ -1342,20 +1342,17 @@ void tpmVerifyFunctionalPrimaryTpmExists(
                 }
                 errlCommit(err, TRBOOT_COMP_ID);
 
-                // Sync the attributes to FSP if applicable.
+                // Sync the attributes to FSP or BMC if applicable.
                 // This will allow for FSP to attempt to perform
                 // TPM alignment check.
-                if(INITSERVICE::spBaseServicesEnabled())
+                err = TARGETING::AttrRP::syncAllAttributesToFspOrBmc();
+                if(err)
                 {
-                    err = TARGETING::AttrRP::syncAllAttributesToFsp();
-                    if(err)
-                    {
-                        TRACFCOMP(g_trac_trustedboot, ERR_MRK
-                                  "tpmVerifyFunctionalPrimaryTpmExists: Could "
-                                  "not sync attributes to FSP; errl EID 0x%08X",
-                                  err->eid());
-                        errlCommit(err, TRBOOT_COMP_ID);
-                    }
+                    TRACFCOMP(g_trac_trustedboot, ERR_MRK
+                              "tpmVerifyFunctionalPrimaryTpmExists: Could "
+                              "not sync attributes to FSP/BMC; errl EID 0x%08X",
+                              err->eid());
+                    errlCommit(err, TRBOOT_COMP_ID);
                 }
 
                 // terminating the IPL with this fail

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -378,11 +378,11 @@ class AttrRP
         static errlHndl_t notifyResourceReady(RESOURCE i_resource);
 
         /**
-         *  @brief This is a static wrapper around _syncAllAttributesToFsp
+         *  @brief This is a static wrapper around _syncAllAttributesToFspOrBmc
          *
-         *  @see _syncAllAttributesToFsp for documentation
+         *  @see _syncAllAttributesToFspOrBmc for documentation
          */
-        static errlHndl_t syncAllAttributesToFsp();
+        static errlHndl_t syncAllAttributesToFspOrBmc();
 
         /**
          *  @brief This is a static wrapper around _sendAttrOverridesAndSyncs
@@ -649,14 +649,14 @@ class AttrRP
         errlHndl_t _notifyResourceReady(RESOURCE i_resource) const;
 
         /**
-         *  @brief Forces attributes to sync down to FSP
+         *  @brief Forces attributes to sync down to FSP or BMC
          *
          *  @return errlHndl_t Error log handle
          *  @retval nullptr  Attribute synchronization successful
          *  @retval !nullptr Attribute synchronization failed; handle
          *      references valid error log
          */
-        errlHndl_t _syncAllAttributesToFsp() const;
+        errlHndl_t _syncAllAttributesToFspOrBmc() const;
 
         /**
          *  @brief Send attribute overrides and sync down to FSP

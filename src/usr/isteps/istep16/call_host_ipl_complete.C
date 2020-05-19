@@ -23,6 +23,10 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
+/** @file call_host_ipl_complete.C
+ *  @brief Host IPL Complete function
+ */
+
 #include <errl/errlentry.H>
 #include <initservice/isteps_trace.H>
 #include <isteps/hwpisteperror.H>
@@ -200,13 +204,8 @@ void* call_host_ipl_complete(void* const io_pArgs)
                       spAttnArea2Addr);
         }
 
-#ifdef CONFIG_DEVTREE
-        // Test devtree sync
-        DEVTREE::devtreeSyncAttrs();
-#endif
-
         // Sync attributes to Fsp
-        l_err = TARGETING::AttrRP::syncAllAttributesToFsp();
+        l_err = TARGETING::AttrRP::syncAllAttributesToFspOrBmc();
 
         if (l_err)
         {

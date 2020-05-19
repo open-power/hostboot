@@ -1017,8 +1017,6 @@ errlHndl_t IStepDispatcher::doIstep(uint32_t i_istep,
         //  flush contTrace immediately after each i_istep/substep  returns
         TRAC_FLUSH_BUFFERS();
 
-#ifndef CONFIG_BMC_IPMI
-
         // sync the attributes to fsp in single step mode but only after step 6
         // is complete to allow discoverTargets() to run before the sync is done
         if(iv_istepMode && (i_istep > HB_START_ISTEP))
@@ -1028,7 +1026,8 @@ errlHndl_t IStepDispatcher::doIstep(uint32_t i_istep,
                 TRACFCOMP(g_trac_initsvc,
                           INFO_MRK"doIstep: sync attributes to FSP");
 
-                errlHndl_t l_errl = TARGETING::AttrRP::syncAllAttributesToFsp();
+                errlHndl_t l_errl =
+                    TARGETING::AttrRP::syncAllAttributesToFspOrBmc();
 
                 if(l_errl)
                 {
@@ -1038,7 +1037,6 @@ errlHndl_t IStepDispatcher::doIstep(uint32_t i_istep,
                 }
             }
         }
-#endif
 
         if(err)
         {

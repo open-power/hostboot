@@ -320,23 +320,20 @@ namespace SBE
                          g_hw_keys_hash_transition_data,
                          sizeof(g_hw_keys_hash_transition_data));
 
-                if(INITSERVICE::spBaseServicesEnabled())
+                // Sync all attributes to FSP/BMC before we quiesce all the
+                // SBEs.
+                err = TARGETING::AttrRP::syncAllAttributesToFspOrBmc();
+                if( err )
                 {
-                    // Sync all attributes to FSP before we quiesce all the
-                    // SBEs.
-                    err = TARGETING::AttrRP::syncAllAttributesToFsp();
-                    if( err )
-                    {
-                        // Failed to sync all attributes to FSP; this is not
-                        // necessarily fatal.  The key transition will continue,
-                        // but this issue will be logged.
-                        TRACFCOMP(g_trac_sbe, ERR_MRK
-                            "updateProcessorSbeSeeproms: Error syncing "
-                            "attributes to FSP"
-                            TRACE_ERR_FMT,
-                            TRACE_ERR_ARGS(err));
-                        errlCommit(err,SBE_COMP_ID);
-                    }
+                    // Failed to sync all attributes to FSP/BMC; this is not
+                    // necessarily fatal.  The key transition will continue,
+                    // but this issue will be logged.
+                    TRACFCOMP(g_trac_sbe, ERR_MRK
+                        "updateProcessorSbeSeeproms: Error syncing "
+                        "attributes to FSP/BMC"
+                        TRACE_ERR_FMT,
+                        TRACE_ERR_ARGS(err));
+                    errlCommit(err,SBE_COMP_ID);
                 }
             }
 
@@ -5624,19 +5621,18 @@ errlHndl_t sbeDoReboot( void )
             // No Break - Still send chassis power cycle
         }
 
-#else //non-IPMI
+#endif
 
-        if(   INITSERVICE::spBaseServicesEnabled()
-           && !g_do_hw_keys_hash_transition)
+        if (!g_do_hw_keys_hash_transition)
         {
-            // Sync all attributes to the FSP before doing the Shutdown
-            err = TARGETING::AttrRP::syncAllAttributesToFsp();
+            // Sync all attributes to the FSP/BMC before doing the Shutdown
+            err = TARGETING::AttrRP::syncAllAttributesToFspOrBmc();
             if( err )
             {
                 // Something failed on the sync.  Commit the error here
                 // and continue with the Re-IPL Request
                 TRACFCOMP(g_trac_sbe, ERR_MRK
-                    "sbeDoReboot: Error syncing attributes to FSP.  "
+                    "sbeDoReboot: Error syncing attributes to FSP/BMC.  "
                     "RC=0x%04X, PLID=0x%08X",
                     ERRL_GETRC_SAFE(err),
                     ERRL_GETPLID_SAFE(err));
@@ -5646,11 +5642,9 @@ errlHndl_t sbeDoReboot( void )
             {
                 TRACFCOMP( g_trac_sbe,
                            INFO_MRK"sbeDoReboot() - Sync "
-                           "Attributes to FSP" );
+                           "Attributes to FSP/BMC" );
             }
         }
-
-#endif
 
 #ifdef CONFIG_CONSOLE
         if(g_do_hw_keys_hash_transition)
