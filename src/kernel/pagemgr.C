@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2010,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2010,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -40,7 +40,8 @@
 #include <kernel/misc.H>
 #include <usr/debugpointers.H>
 #include <kernel/cpumgr.H>
-
+#include <usr/vmmconst.h>
+#include <kernel/spte.H>
 
 size_t PageManager::cv_coalesce_count = 0;
 size_t PageManager::cv_low_page_count = -1;
@@ -63,6 +64,25 @@ void PageManagerCore::addMemory( size_t i_addr, size_t i_pageCount )
         iv_heap[page_length].push(page);
         page = (page_t*)((uint64_t)page + (1 << page_length)*PAGESIZE);
         length -= (1 << page_length);
+    }
+
+    // Update set of registered heap memory ranges to support heap coalescing.
+    // It is a critical error for the last range to already be registered when
+    // this API is invoked.
+    kassert(!iv_ranges.back().first);
+    for(auto& range : iv_ranges)
+    {
+        // Range value of 0 indicates a free range to use, since Hostboot cannot
+        // ever start the heap at an address of 0.
+        if(!range.first)
+        {
+            range.first=i_addr;
+            range.second=i_pageCount*PAGE_SIZE;
+            break;
+        }
+
+        // Can't ever start a range at/below that of an existing range.
+        kassert(i_addr > range.first);
     }
     __sync_add_and_fetch(&iv_available, i_pageCount);
 }
@@ -430,35 +450,31 @@ void PageManagerCore::coalesce( void )
 
         while(NULL != (p = pq.remove()))
         {
-            // p needs to be the even buddy to prevent merging of wrong block.
+            // p needs to be the even buddy to prevent merging of wrong blocks.
             // To determine this, get the index of the block as if the whole
             // page memory space were blocks of this size.  Note: have to
             // take into account the page manager "hole" in the middle of the
             // initial memory allocation.  Also have to ignore the OCC
-            // bootloader page at the start of the third memory range which
-            // accounts for the rest of the cache.
+            // bootloader page at the start of the third memory range (which
+            // accounts for the rest of the initial cache), and the SPTE entries
+            // at the start of the 4th memory range (which accounts for the rest
+            // of the Hostboot memory footprint).
             uint64_t p_idx = 0;
-            if(reinterpret_cast<uint64_t>(p) < VmmManager::pageTableOffset())
+            const auto addr = reinterpret_cast<uint64_t>(p);
+            bool found=false;
+            for(const auto& range : iv_ranges)
             {
-                p_idx = (  reinterpret_cast<uint64_t>(p)
-                         - VmmManager::endPreservedOffset())/
-                            ((1 << bucket)*PAGESIZE);
+                if(   (addr >= range.first)
+                   && (addr < (range.first + range.second)) )
+                {
+                    p_idx = (addr - range.first) / ((1 << bucket)*PAGESIZE);
+                    found=true;
+                    break;
+                }
             }
-            else if(  reinterpret_cast<uint64_t>(p)
-                    < VmmManager::INITIAL_MEM_SIZE)
-            {
-                p_idx = (  reinterpret_cast<uint64_t>(p)
-                         - (  VmmManager::pageTableOffset()
-                            + VmmManager::PTSIZE) )/
-                               ((1 << bucket)*PAGESIZE);
-            }
-            else
-            {
-                p_idx = (  reinterpret_cast<uint64_t>(p)
-                         - (  VmmManager::INITIAL_MEM_SIZE
-                            + PAGESIZE) )/
-                               ((1 << bucket)*PAGESIZE);
-            }
+            // Critical error if we didn't map into a known/registered address
+            // range.
+            kassert(found);
 
             if(0 != (p_idx % 2))  // odd index
             {
