@@ -143,6 +143,16 @@ static const uint32_t QME_RCTAR0_DATA_LEN = 64;
 //<< [QME_RCTAR0]
 // eq/reg00010.H
 
+//>> [QME_TSEL]
+static const uint64_t QME_TSEL = 0x200e0240ull;
+
+static const uint32_t QME_TSEL_WATCHDOG_SEL = 0;
+static const uint32_t QME_TSEL_WATCHDOG_SEL_LEN = 4;
+static const uint32_t QME_TSEL_FIT_SEL = 4;
+static const uint32_t QME_TSEL_FIT_SEL_LEN = 4;
+//<< [QME_TSEL]
+// eq/reg00010.H
+
 //>>THE END<<
 
 #ifndef __PPE_HCODE__

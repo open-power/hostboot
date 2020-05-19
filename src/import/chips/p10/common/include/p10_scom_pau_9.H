@@ -85,6 +85,78 @@ static const uint32_t XSL_MAIN_GPU1_BAR_RESERVED = 51;
 //<< [XSL_MAIN_GPU1_BAR]
 // pau/reg00011.H
 
+//>> [FIR_REG_1]
+static const uint64_t FIR_REG_1_RW = 0x10010c40ull;
+static const uint64_t FIR_REG_1_WO_AND = 0x10010c41ull;
+static const uint64_t FIR_REG_1_WO_OR = 0x10010c42ull;
+
+static const uint32_t FIR_REG_1_NDL_BRK0_STALL = 0;
+static const uint32_t FIR_REG_1_NDL_BRK0_NOSTALL = 1;
+static const uint32_t FIR_REG_1_NDL_BRK1_STALL = 2;
+static const uint32_t FIR_REG_1_NDL_BRK1_NOSTALL = 3;
+static const uint32_t FIR_REG_1_NDL_BRK2_STALL = 4;
+static const uint32_t FIR_REG_1_NDL_BRK2_NOSTALL = 5;
+static const uint32_t FIR_REG_1_NDL_BRK3_STALL = 6;
+static const uint32_t FIR_REG_1_NDL_BRK3_NOSTALL = 7;
+static const uint32_t FIR_REG_1_NDL_BRK4_STALL = 8;
+static const uint32_t FIR_REG_1_NDL_BRK4_NOSTALL = 9;
+static const uint32_t FIR_REG_1_NDL_BRK5_STALL = 10;
+static const uint32_t FIR_REG_1_NDL_BRK5_NOSTALL = 11;
+static const uint32_t FIR_REG_1_MISC_REG_RING_ERR = 12;
+static const uint32_t FIR_REG_1_MISC_INT_RA_PERR = 13;
+static const uint32_t FIR_REG_1_MISC_DA_ADDR_PERR = 14;
+static const uint32_t FIR_REG_1_MISC_CTRL_PERR = 15;
+static const uint32_t FIR_REG_1_FIR1_RSVD_16 = 16;
+static const uint32_t FIR_REG_1_ATS_TVT_ENTRY_INVALID = 17;
+static const uint32_t FIR_REG_1_ATS_TVT_ADDR_RANGE_ERR = 18;
+static const uint32_t FIR_REG_1_ATS_TCE_PAGE_ACCESS_CA_ERR = 19;
+static const uint32_t FIR_REG_1_ATS_TCE_CACHE_MULT_HIT_ERR = 20;
+static const uint32_t FIR_REG_1_ATS_TCE_PAGE_ACCESS_TW_ERR = 21;
+static const uint32_t FIR_REG_1_ATS_TCE_REQ_TO_ERR = 22;
+static const uint32_t FIR_REG_1_ATS_TCD_PERR = 23;
+static const uint32_t FIR_REG_1_ATS_TDR_PERR = 24;
+static const uint32_t FIR_REG_1_ATS_AT_EA_UE = 25;
+static const uint32_t FIR_REG_1_ATS_AT_EA_CE = 26;
+static const uint32_t FIR_REG_1_ATS_AT_TDRMEM_UE = 27;
+static const uint32_t FIR_REG_1_ATS_AT_TDRMEM_CE = 28;
+static const uint32_t FIR_REG_1_ATS_AT_RSPOUT_UE = 29;
+static const uint32_t FIR_REG_1_ATS_AT_RSPOUT_CE = 30;
+static const uint32_t FIR_REG_1_ATS_TVT_PERR = 31;
+static const uint32_t FIR_REG_1_ATS_IODA_ADDR_PERR = 32;
+static const uint32_t FIR_REG_1_ATS_PAU_CTRL_PERR = 33;
+static const uint32_t FIR_REG_1_ATS_PAU_TOR_PERR = 34;
+static const uint32_t FIR_REG_1_ATS_INVAL_IODA_TBL_SEL = 35;
+static const uint32_t FIR_REG_1_ATS_RSVD_19 = 36;
+static const uint32_t FIR_REG_1_XSL_KILL_XLATE_EPOCH_TIMEOUT = 37;
+static const uint32_t FIR_REG_1_XSL_RSVD_19 = 38;
+static const uint32_t FIR_REG_1_XSL_RSVD_20 = 39;
+static const uint32_t FIR_REG_1_XSL_RSVD_21 = 40;
+static const uint32_t FIR_REG_1_XSL_RSVD_22 = 41;
+static const uint32_t FIR_REG_1_XSL_RSVD_23 = 42;
+static const uint32_t FIR_REG_1_XSL_RSVD_24 = 43;
+static const uint32_t FIR_REG_1_XSL_RSVD_25 = 44;
+static const uint32_t FIR_REG_1_XSL_RSVD_26 = 45;
+static const uint32_t FIR_REG_1_XSL_RSVD_27 = 46;
+static const uint32_t FIR_REG_1_NDL_BRK6_STALL = 47;
+static const uint32_t FIR_REG_1_NDL_BRK6_NOSTALL = 48;
+static const uint32_t FIR_REG_1_NDL_BRK7_STALL = 49;
+static const uint32_t FIR_REG_1_NDL_BRK7_NOSTALL = 50;
+static const uint32_t FIR_REG_1_NDL_BRK8_STALL = 51;
+static const uint32_t FIR_REG_1_NDL_BRK8_NOSTALL = 52;
+static const uint32_t FIR_REG_1_NDL_BRK9_STALL = 53;
+static const uint32_t FIR_REG_1_NDL_BRK9_NOSTALL = 54;
+static const uint32_t FIR_REG_1_NDL_BRK10_STALL = 55;
+static const uint32_t FIR_REG_1_NDL_BRK10_NOSTALL = 56;
+static const uint32_t FIR_REG_1_NDL_BRK11_STALL = 57;
+static const uint32_t FIR_REG_1_NDL_BRK11_NOSTALL = 58;
+static const uint32_t FIR_REG_1_AME_RSVD_2 = 59;
+static const uint32_t FIR_REG_1_SCOMSAT00_ERR = 60;
+static const uint32_t FIR_REG_1_SCOMSAT01_ERR = 61;
+static const uint32_t FIR_REG_1_FIR1_RSVD_62 = 62;
+static const uint32_t FIR_REG_1_FIR1_RSVD_63 = 63;
+//<< [FIR_REG_1]
+// pau/reg00011.H
+
 //>>THE END<<
 
 #ifndef __PPE_HCODE__

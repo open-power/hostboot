@@ -112,6 +112,88 @@ static const uint32_t QME_LFIRACT0_FIR_ACTION0_LEN = 36;
 //<< [QME_LFIRACT0]
 // eq/reg00004.H
 
+//>> [QME_FTXR]
+static const uint64_t QME_FTXR = 0x200e0178ull;
+
+static const uint32_t QME_FTXR_C0_DTC_INDEX = 2;
+static const uint32_t QME_FTXR_C0_DTC_INDEX_LEN = 6;
+static const uint32_t QME_FTXR_C1_DTC_INDEX = 10;
+static const uint32_t QME_FTXR_C1_DTC_INDEX_LEN = 6;
+static const uint32_t QME_FTXR_C2_DTC_INDEX = 18;
+static const uint32_t QME_FTXR_C2_DTC_INDEX_LEN = 6;
+static const uint32_t QME_FTXR_C3_DTC_INDEX = 26;
+static const uint32_t QME_FTXR_C3_DTC_INDEX_LEN = 6;
+static const uint32_t QME_FTXR_FTX_UPDATE_PENDING = 32;
+static const uint32_t QME_FTXR_FTX_UPDATE_PENDING_LEN = 4;
+static const uint32_t QME_FTXR_QOS_UPDATE_PENDING = 36;
+static const uint32_t QME_FTXR_QOS_UPDATE_PENDING_LEN = 4;
+//<< [QME_FTXR]
+// eq/reg00004.H
+
+//>> [QME_PLSR]
+static const uint64_t QME_PLSR = 0x200e0148ull;
+
+static const uint32_t QME_PLSR_0_T0 = 0;
+static const uint32_t QME_PLSR_0_T0_LEN = 4;
+static const uint32_t QME_PLSR_0_T1 = 4;
+static const uint32_t QME_PLSR_0_T1_LEN = 4;
+static const uint32_t QME_PLSR_0_T2 = 8;
+static const uint32_t QME_PLSR_0_T2_LEN = 4;
+static const uint32_t QME_PLSR_0_T3 = 12;
+static const uint32_t QME_PLSR_0_T3_LEN = 4;
+static const uint32_t QME_PLSR_1_T0 = 16;
+static const uint32_t QME_PLSR_1_T0_LEN = 4;
+static const uint32_t QME_PLSR_1_T1 = 20;
+static const uint32_t QME_PLSR_1_T1_LEN = 4;
+static const uint32_t QME_PLSR_1_T2 = 24;
+static const uint32_t QME_PLSR_1_T2_LEN = 4;
+static const uint32_t QME_PLSR_1_T3 = 28;
+static const uint32_t QME_PLSR_1_T3_LEN = 4;
+static const uint32_t QME_PLSR_2_T0 = 32;
+static const uint32_t QME_PLSR_2_T0_LEN = 4;
+static const uint32_t QME_PLSR_2_T1 = 36;
+static const uint32_t QME_PLSR_2_T1_LEN = 4;
+static const uint32_t QME_PLSR_2_T2 = 40;
+static const uint32_t QME_PLSR_2_T2_LEN = 4;
+static const uint32_t QME_PLSR_2_T3 = 44;
+static const uint32_t QME_PLSR_2_T3_LEN = 4;
+static const uint32_t QME_PLSR_3_T0 = 48;
+static const uint32_t QME_PLSR_3_T0_LEN = 4;
+static const uint32_t QME_PLSR_3_T1 = 52;
+static const uint32_t QME_PLSR_3_T1_LEN = 4;
+static const uint32_t QME_PLSR_3_T2 = 56;
+static const uint32_t QME_PLSR_3_T2_LEN = 4;
+static const uint32_t QME_PLSR_3_T3 = 60;
+static const uint32_t QME_PLSR_3_T3_LEN = 4;
+//<< [QME_PLSR]
+// eq/reg00004.H
+
+//>> [QME_RCSCR]
+static const uint64_t QME_RCSCR = 0x200e0184ull;
+static const uint64_t QME_RCSCR_WO_CLEAR = 0x200e0187ull;
+static const uint64_t QME_RCSCR_WO_OR = 0x200e0186ull;
+
+static const uint32_t QME_RCSCR_OFF_REQ = 0;
+static const uint32_t QME_RCSCR_OFF_REQ_LEN = 4;
+static const uint32_t QME_RCSCR_CHANGE_DONE = 4;
+static const uint32_t QME_RCSCR_CHANGE_DONE_LEN = 4;
+static const uint32_t QME_RCSCR_CHANGE_ACTIVE = 8;
+static const uint32_t QME_RCSCR_CHANGE_ACTIVE_LEN = 4;
+static const uint32_t QME_RCSCR_PARTIAL_GOOD = 12;
+static const uint32_t QME_RCSCR_PARTIAL_GOOD_LEN = 4;
+static const uint32_t QME_RCSCR_CHANGE_ERROR = 16;
+static const uint32_t QME_RCSCR_CHANGE_ERROR_LEN = 4;
+static const uint32_t QME_RCSCR_0_TARGET_INDEX = 35;
+static const uint32_t QME_RCSCR_0_TARGET_INDEX_LEN = 5;
+static const uint32_t QME_RCSCR_1_TARGET_INDEX = 43;
+static const uint32_t QME_RCSCR_1_TARGET_INDEX_LEN = 5;
+static const uint32_t QME_RCSCR_2_TARGET_INDEX = 51;
+static const uint32_t QME_RCSCR_2_TARGET_INDEX_LEN = 5;
+static const uint32_t QME_RCSCR_3_TARGET_INDEX = 59;
+static const uint32_t QME_RCSCR_3_TARGET_INDEX_LEN = 5;
+//<< [QME_RCSCR]
+// eq/reg00004.H
+
 //>>THE END<<
 
 #ifndef __PPE_HCODE__

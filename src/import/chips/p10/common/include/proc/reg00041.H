@@ -5297,6 +5297,109 @@ fapi_try_exit:
 }
 //<< GET_[PB_COM_SCOM_EQ0_STATION_FIR_MASK_REG_LINK1_HW_PARITY_ERROR_MASK]
 
+//>> PREP_[PB_COM_SCOM_EQ0_STATION_FIR_MASK_REG_WO_AND]
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PREP_PB_COM_SCOM_EQ0_STATION_FIR_MASK_REG_WO_AND(const fapi2::Target<K, M, V>& i_target)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = PB_COM_SCOM_EQ0_STATION_FIR_MASK_REG_WO_AND;
+#endif
+    return fapi2::current_err;
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+//<< PREP_[PB_COM_SCOM_EQ0_STATION_FIR_MASK_REG_WO_AND]
+
+//>> GET_[PB_COM_SCOM_EQ0_STATION_FIR_MASK_REG_WO_AND]
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode GET_PB_COM_SCOM_EQ0_STATION_FIR_MASK_REG_WO_AND(const fapi2::Target<K, M, V>& i_target,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = PB_COM_SCOM_EQ0_STATION_FIR_MASK_REG_WO_AND;
+#endif
+    return fapi2::getScom(i_target, PB_COM_SCOM_EQ0_STATION_FIR_MASK_REG_WO_AND, o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+//<< GET_[PB_COM_SCOM_EQ0_STATION_FIR_MASK_REG_WO_AND]
+
+//>> PUT_[PB_COM_SCOM_EQ0_STATION_FIR_MASK_REG_WO_AND]
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PUT_PB_COM_SCOM_EQ0_STATION_FIR_MASK_REG_WO_AND(const fapi2::Target<K, M, V>& i_target,
+        const uint64_t i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    FAPI_TRY(scomt::chkReg(PB_COM_SCOM_EQ0_STATION_FIR_MASK_REG_RW, PB_COM_SCOM_EQ0_STATION_FIR_MASK_REG_WO_AND,
+                           PB_COM_SCOM_EQ0_STATION_FIR_MASK_REG_WO_OR));
+#endif
+    return fapi2::putScom(i_target, PB_COM_SCOM_EQ0_STATION_FIR_MASK_REG_WO_AND, i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+//<< PUT_[PB_COM_SCOM_EQ0_STATION_FIR_MASK_REG_WO_AND]
+
+//>> PREP_[PB_COM_SCOM_EQ0_STATION_FIR_MASK_REG_WO_OR]
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PREP_PB_COM_SCOM_EQ0_STATION_FIR_MASK_REG_WO_OR(const fapi2::Target<K, M, V>& i_target)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = PB_COM_SCOM_EQ0_STATION_FIR_MASK_REG_WO_OR;
+#endif
+    return fapi2::current_err;
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+//<< PREP_[PB_COM_SCOM_EQ0_STATION_FIR_MASK_REG_WO_OR]
+
+//>> GET_[PB_COM_SCOM_EQ0_STATION_FIR_MASK_REG_WO_OR]
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode GET_PB_COM_SCOM_EQ0_STATION_FIR_MASK_REG_WO_OR(const fapi2::Target<K, M, V>& i_target,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = PB_COM_SCOM_EQ0_STATION_FIR_MASK_REG_WO_OR;
+#endif
+    return fapi2::getScom(i_target, PB_COM_SCOM_EQ0_STATION_FIR_MASK_REG_WO_OR, o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+//<< GET_[PB_COM_SCOM_EQ0_STATION_FIR_MASK_REG_WO_OR]
+
+//>> PUT_[PB_COM_SCOM_EQ0_STATION_FIR_MASK_REG_WO_OR]
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PUT_PB_COM_SCOM_EQ0_STATION_FIR_MASK_REG_WO_OR(const fapi2::Target<K, M, V>& i_target,
+        const uint64_t i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    FAPI_TRY(scomt::chkReg(PB_COM_SCOM_EQ0_STATION_FIR_MASK_REG_RW, PB_COM_SCOM_EQ0_STATION_FIR_MASK_REG_WO_AND,
+                           PB_COM_SCOM_EQ0_STATION_FIR_MASK_REG_WO_OR));
+#endif
+    return fapi2::putScom(i_target, PB_COM_SCOM_EQ0_STATION_FIR_MASK_REG_WO_OR, i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+//<< PUT_[PB_COM_SCOM_EQ0_STATION_FIR_MASK_REG_WO_OR]
+
+
 //>>THE END<<
 
 #ifndef __PPE_HCODE__

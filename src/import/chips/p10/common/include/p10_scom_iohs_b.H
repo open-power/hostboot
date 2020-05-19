@@ -62,6 +62,17 @@ static const uint32_t DLP_LINK1_RX_LANE_CONTROL_FAILED_LEN = 9;
 //<< [DLP_LINK1_RX_LANE_CONTROL]
 // iohs/reg00046.H
 
+//>> [ATOMIC_LOCK_REG]
+static const uint64_t ATOMIC_LOCK_REG = 0x180f03ffull;
+
+static const uint32_t ATOMIC_LOCK_REG_LOCK_ENABLE = 0;
+static const uint32_t ATOMIC_LOCK_REG_ID = 1;
+static const uint32_t ATOMIC_LOCK_REG_ID_LEN = 4;
+static const uint32_t ATOMIC_LOCK_REG_ACTIVITY = 8;
+static const uint32_t ATOMIC_LOCK_REG_ACTIVITY_LEN = 8;
+//<< [ATOMIC_LOCK_REG]
+// iohs/reg00046.H
+
 //>>THE END<<
 
 #ifndef __PPE_HCODE__

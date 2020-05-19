@@ -271,6 +271,78 @@ static const uint32_t SCAN32_SCAN32_REG_LEN = 32;
 //<< [SCAN32]
 // eq/reg00001.H
 
+//>> [QME_SWHR]
+static const uint64_t QME_SWHR = 0x200e014cull;
+
+static const uint32_t QME_SWHR_SPC_WKUP_HISTORY_C0 = 0;
+static const uint32_t QME_SWHR_SPC_WKUP_HISTORY_C0_LEN = 4;
+static const uint32_t QME_SWHR_QME_SSH_SRC_SPC_WKUP_RECENT_SET = 4;
+static const uint32_t QME_SWHR_QME_SSH_SRC_SPC_WKUP_RECENT_SET_LEN = 2;
+static const uint32_t QME_SWHR_QME_SSH_SRC_SPC_WKUP_RECENT_CLR = 6;
+static const uint32_t QME_SWHR_QME_SSH_SRC_SPC_WKUP_RECENT_CLR_LEN = 2;
+static const uint32_t QME_SWHR_QME_SSH_SRC_SPC_WKUP_RECENT_ACT = 8;
+static const uint32_t QME_SWHR_QME_SSH_SRC_SPC_WKUP_RECENT_ACT_LEN = 2;
+static const uint32_t QME_SWHR_QME_SSH_SRC_SPC_WKUP_RECENT_DRP = 10;
+static const uint32_t QME_SWHR_QME_SSH_SRC_SPC_WKUP_RECENT_DRP_LEN = 2;
+static const uint32_t QME_SWHR_QME_SPWU_OTR_SPECIAL_WKUP_REQ = 12;
+static const uint32_t QME_SWHR_QME_SPWU_FSP_SPECIAL_WKUP_REQ = 13;
+static const uint32_t QME_SWHR_QME_SPWU_OCC_SPECIAL_WKUP_REQ = 14;
+static const uint32_t QME_SWHR_QME_SPWU_HYP_SPECIAL_WKUP_REQ = 15;
+static const uint32_t QME_SWHR_SPC_WKUP_HISTORY_C1 = 16;
+static const uint32_t QME_SWHR_SPC_WKUP_HISTORY_C1_LEN = 4;
+// ERROR Duplicate Dial         static const uint32_t QME_SWHR_QME_SSH_SRC_SPC_WKUP_RECENT_SET = 20;
+// ERROR Duplicate Dial         static const uint32_t QME_SWHR_QME_SSH_SRC_SPC_WKUP_RECENT_SET_LEN = 2;
+// ERROR Duplicate Dial         static const uint32_t QME_SWHR_QME_SSH_SRC_SPC_WKUP_RECENT_CLR = 22;
+// ERROR Duplicate Dial         static const uint32_t QME_SWHR_QME_SSH_SRC_SPC_WKUP_RECENT_CLR_LEN = 2;
+// ERROR Duplicate Dial         static const uint32_t QME_SWHR_QME_SSH_SRC_SPC_WKUP_RECENT_ACT = 24;
+// ERROR Duplicate Dial         static const uint32_t QME_SWHR_QME_SSH_SRC_SPC_WKUP_RECENT_ACT_LEN = 2;
+// ERROR Duplicate Dial         static const uint32_t QME_SWHR_QME_SSH_SRC_SPC_WKUP_RECENT_DRP = 26;
+// ERROR Duplicate Dial         static const uint32_t QME_SWHR_QME_SSH_SRC_SPC_WKUP_RECENT_DRP_LEN = 2;
+// ERROR Duplicate Dial         static const uint32_t QME_SWHR_QME_SPWU_OTR_SPECIAL_WKUP_REQ = 28;
+// ERROR Duplicate Dial         static const uint32_t QME_SWHR_QME_SPWU_FSP_SPECIAL_WKUP_REQ = 29;
+// ERROR Duplicate Dial         static const uint32_t QME_SWHR_QME_SPWU_OCC_SPECIAL_WKUP_REQ = 30;
+// ERROR Duplicate Dial         static const uint32_t QME_SWHR_QME_SPWU_HYP_SPECIAL_WKUP_REQ = 31;
+static const uint32_t QME_SWHR_SPC_WKUP_HISTORY_C2 = 32;
+static const uint32_t QME_SWHR_SPC_WKUP_HISTORY_C2_LEN = 4;
+// ERROR Duplicate Dial         static const uint32_t QME_SWHR_QME_SSH_SRC_SPC_WKUP_RECENT_SET = 36;
+// ERROR Duplicate Dial         static const uint32_t QME_SWHR_QME_SSH_SRC_SPC_WKUP_RECENT_SET_LEN = 2;
+// ERROR Duplicate Dial         static const uint32_t QME_SWHR_QME_SSH_SRC_SPC_WKUP_RECENT_CLR = 38;
+// ERROR Duplicate Dial         static const uint32_t QME_SWHR_QME_SSH_SRC_SPC_WKUP_RECENT_CLR_LEN = 2;
+// ERROR Duplicate Dial         static const uint32_t QME_SWHR_QME_SSH_SRC_SPC_WKUP_RECENT_ACT = 40;
+// ERROR Duplicate Dial         static const uint32_t QME_SWHR_QME_SSH_SRC_SPC_WKUP_RECENT_ACT_LEN = 2;
+// ERROR Duplicate Dial         static const uint32_t QME_SWHR_QME_SSH_SRC_SPC_WKUP_RECENT_DRP = 42;
+// ERROR Duplicate Dial         static const uint32_t QME_SWHR_QME_SSH_SRC_SPC_WKUP_RECENT_DRP_LEN = 2;
+// ERROR Duplicate Dial         static const uint32_t QME_SWHR_QME_SPWU_OTR_SPECIAL_WKUP_REQ = 44;
+// ERROR Duplicate Dial         static const uint32_t QME_SWHR_QME_SPWU_FSP_SPECIAL_WKUP_REQ = 45;
+// ERROR Duplicate Dial         static const uint32_t QME_SWHR_QME_SPWU_OCC_SPECIAL_WKUP_REQ = 46;
+// ERROR Duplicate Dial         static const uint32_t QME_SWHR_QME_SPWU_HYP_SPECIAL_WKUP_REQ = 47;
+static const uint32_t QME_SWHR_SPC_WKUP_HISTORY_C3 = 48;
+static const uint32_t QME_SWHR_SPC_WKUP_HISTORY_C3_LEN = 4;
+// ERROR Duplicate Dial         static const uint32_t QME_SWHR_QME_SSH_SRC_SPC_WKUP_RECENT_SET = 52;
+// ERROR Duplicate Dial         static const uint32_t QME_SWHR_QME_SSH_SRC_SPC_WKUP_RECENT_SET_LEN = 2;
+// ERROR Duplicate Dial         static const uint32_t QME_SWHR_QME_SSH_SRC_SPC_WKUP_RECENT_CLR = 54;
+// ERROR Duplicate Dial         static const uint32_t QME_SWHR_QME_SSH_SRC_SPC_WKUP_RECENT_CLR_LEN = 2;
+// ERROR Duplicate Dial         static const uint32_t QME_SWHR_QME_SSH_SRC_SPC_WKUP_RECENT_ACT = 56;
+// ERROR Duplicate Dial         static const uint32_t QME_SWHR_QME_SSH_SRC_SPC_WKUP_RECENT_ACT_LEN = 2;
+// ERROR Duplicate Dial         static const uint32_t QME_SWHR_QME_SSH_SRC_SPC_WKUP_RECENT_DRP = 58;
+// ERROR Duplicate Dial         static const uint32_t QME_SWHR_QME_SSH_SRC_SPC_WKUP_RECENT_DRP_LEN = 2;
+// ERROR Duplicate Dial         static const uint32_t QME_SWHR_QME_SPWU_OTR_SPECIAL_WKUP_REQ = 60;
+// ERROR Duplicate Dial         static const uint32_t QME_SWHR_QME_SPWU_FSP_SPECIAL_WKUP_REQ = 61;
+// ERROR Duplicate Dial         static const uint32_t QME_SWHR_QME_SPWU_OCC_SPECIAL_WKUP_REQ = 62;
+// ERROR Duplicate Dial         static const uint32_t QME_SWHR_QME_SPWU_HYP_SPECIAL_WKUP_REQ = 63;
+//<< [QME_SWHR]
+// eq/reg00001.H
+
+//>> [QME_SWPR0]
+static const uint64_t QME_SWPR0 = 0x200e0090ull;
+
+static const uint32_t QME_SWPR0_BAR = 0;
+static const uint32_t QME_SWPR0_BAR_LEN = 27;
+static const uint32_t QME_SWPR0_SIZE = 44;
+static const uint32_t QME_SWPR0_SIZE_LEN = 15;
+//<< [QME_SWPR0]
+// eq/reg00001.H
+
 //>>THE END<<
 
 #ifndef __PPE_HCODE__

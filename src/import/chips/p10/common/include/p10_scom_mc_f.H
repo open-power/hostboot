@@ -121,6 +121,14 @@ static const uint32_t SCOMFIR_MCFGPM0A_SMF_UPPER_ADDRESS_LEN = 19;
 //<< [SCOMFIR_MCFGPM0A]
 // mc/reg00015.H
 
+//>> [TIMEOUT_REG]
+static const uint64_t TIMEOUT_REG = 0x0c0f0010ull;
+
+static const uint32_t TIMEOUT_REG_INT_TIMEOUT = 0;
+static const uint32_t TIMEOUT_REG_INT_TIMEOUT_LEN = 2;
+//<< [TIMEOUT_REG]
+// mc/reg00015.H
+
 //>>THE END<<
 
 #ifndef __PPE_HCODE__

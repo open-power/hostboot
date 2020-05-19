@@ -296,6 +296,102 @@ static const uint32_t TOD_PRI_PORT_1_CTRL_REG_REG_0X02_SPARE_28_31_LEN = 4;
 //<< [TOD_PRI_PORT_1_CTRL_REG]
 // perv/reg00004.H
 
+//>> [REC_ERR_REG3]
+static const uint64_t REC_ERR_REG3 = 0x000f0014ull;
+
+static const uint32_t REC_ERR_REG3_48_RESPONSE_BIT = 0;
+static const uint32_t REC_ERR_REG3_48_ERROR_CODE = 1;
+static const uint32_t REC_ERR_REG3_48_ERROR_CODE_LEN = 3;
+static const uint32_t REC_ERR_REG3_49_RESPONSE_BIT = 4;
+static const uint32_t REC_ERR_REG3_49_ERROR_CODE = 5;
+static const uint32_t REC_ERR_REG3_49_ERROR_CODE_LEN = 3;
+static const uint32_t REC_ERR_REG3_50_RESPONSE_BIT = 8;
+static const uint32_t REC_ERR_REG3_50_ERROR_CODE = 9;
+static const uint32_t REC_ERR_REG3_50_ERROR_CODE_LEN = 3;
+static const uint32_t REC_ERR_REG3_51_RESPONSE_BIT = 12;
+static const uint32_t REC_ERR_REG3_51_ERROR_CODE = 13;
+static const uint32_t REC_ERR_REG3_51_ERROR_CODE_LEN = 3;
+static const uint32_t REC_ERR_REG3_52_RESPONSE_BIT = 16;
+static const uint32_t REC_ERR_REG3_52_ERROR_CODE = 17;
+static const uint32_t REC_ERR_REG3_52_ERROR_CODE_LEN = 3;
+static const uint32_t REC_ERR_REG3_53_RESPONSE_BIT = 20;
+static const uint32_t REC_ERR_REG3_53_ERROR_CODE = 21;
+static const uint32_t REC_ERR_REG3_53_ERROR_CODE_LEN = 3;
+static const uint32_t REC_ERR_REG3_54_RESPONSE_BIT = 24;
+static const uint32_t REC_ERR_REG3_54_ERROR_CODE = 25;
+static const uint32_t REC_ERR_REG3_54_ERROR_CODE_LEN = 3;
+static const uint32_t REC_ERR_REG3_55_RESPONSE_BIT = 28;
+static const uint32_t REC_ERR_REG3_55_ERROR_CODE = 29;
+static const uint32_t REC_ERR_REG3_55_ERROR_CODE_LEN = 3;
+static const uint32_t REC_ERR_REG3_56_RESPONSE_BIT = 32;
+static const uint32_t REC_ERR_REG3_56_ERROR_CODE = 33;
+static const uint32_t REC_ERR_REG3_56_ERROR_CODE_LEN = 3;
+static const uint32_t REC_ERR_REG3_57_RESPONSE_BIT = 36;
+static const uint32_t REC_ERR_REG3_57_ERROR_CODE = 37;
+static const uint32_t REC_ERR_REG3_57_ERROR_CODE_LEN = 3;
+static const uint32_t REC_ERR_REG3_58_RESPONSE_BIT = 40;
+static const uint32_t REC_ERR_REG3_58_ERROR_CODE = 41;
+static const uint32_t REC_ERR_REG3_58_ERROR_CODE_LEN = 3;
+static const uint32_t REC_ERR_REG3_59_RESPONSE_BIT = 44;
+static const uint32_t REC_ERR_REG3_59_ERROR_CODE = 45;
+static const uint32_t REC_ERR_REG3_59_ERROR_CODE_LEN = 3;
+static const uint32_t REC_ERR_REG3_60_RESPONSE_BIT = 48;
+static const uint32_t REC_ERR_REG3_60_ERROR_CODE = 49;
+static const uint32_t REC_ERR_REG3_60_ERROR_CODE_LEN = 3;
+static const uint32_t REC_ERR_REG3_61_RESPONSE_BIT = 52;
+static const uint32_t REC_ERR_REG3_61_ERROR_CODE = 53;
+static const uint32_t REC_ERR_REG3_61_ERROR_CODE_LEN = 3;
+static const uint32_t REC_ERR_REG3_62_RESPONSE_BIT = 56;
+static const uint32_t REC_ERR_REG3_62_ERROR_CODE = 57;
+static const uint32_t REC_ERR_REG3_62_ERROR_CODE_LEN = 3;
+static const uint32_t REC_ERR_REG3_63_RESPONSE_BIT = 60;
+static const uint32_t REC_ERR_REG3_63_ERROR_CODE = 61;
+static const uint32_t REC_ERR_REG3_63_ERROR_CODE_LEN = 3;
+//<< [REC_ERR_REG3]
+// perv/reg00004.H
+
+//>> [SPATTN]
+static const uint64_t SPATTN = 0x00040002ull;
+
+static const uint32_t SPATTN_ANY_SPATTN = 0;
+static const uint32_t SPATTN_RESERVED1S = 1;
+static const uint32_t SPATTN_RESERVED2S = 2;
+static const uint32_t SPATTN_RESERVED3S = 3;
+static const uint32_t SPATTN_PERV = 4;
+static const uint32_t SPATTN_IN05 = 5;
+static const uint32_t SPATTN_IN06 = 6;
+static const uint32_t SPATTN_IN07 = 7;
+static const uint32_t SPATTN_IN08 = 8;
+static const uint32_t SPATTN_IN09 = 9;
+static const uint32_t SPATTN_IN10 = 10;
+static const uint32_t SPATTN_IN11 = 11;
+static const uint32_t SPATTN_IN12 = 12;
+static const uint32_t SPATTN_IN13 = 13;
+static const uint32_t SPATTN_IN14 = 14;
+static const uint32_t SPATTN_IN15 = 15;
+static const uint32_t SPATTN_IN16 = 16;
+static const uint32_t SPATTN_IN17 = 17;
+static const uint32_t SPATTN_IN18 = 18;
+static const uint32_t SPATTN_IN19 = 19;
+static const uint32_t SPATTN_IN20 = 20;
+static const uint32_t SPATTN_IN21 = 21;
+static const uint32_t SPATTN_IN22 = 22;
+static const uint32_t SPATTN_IN23 = 23;
+static const uint32_t SPATTN_IN24 = 24;
+static const uint32_t SPATTN_IN25 = 25;
+static const uint32_t SPATTN_IN26 = 26;
+static const uint32_t SPATTN_IN27 = 27;
+static const uint32_t SPATTN_IN28 = 28;
+static const uint32_t SPATTN_IN29 = 29;
+static const uint32_t SPATTN_IN30 = 30;
+static const uint32_t SPATTN_IN31 = 31;
+static const uint32_t SPATTN_IN32 = 32;
+static const uint32_t SPATTN_IN33 = 33;
+static const uint32_t SPATTN_IN34 = 34;
+static const uint32_t SPATTN_IN35 = 35;
+//<< [SPATTN]
+// perv/reg00004.H
+
 //>>THE END<<
 
 #ifndef __PPE_HCODE__

@@ -450,6 +450,20 @@ static const uint32_t PB_PTLSCOM10_FP23_CFG_3_PRS_SPARE_LEN = 6;
 //<< [PB_PTLSCOM10_FP23_CFG]
 // proc/reg00021.H
 
+//>> [PB_BRIDGE_NHTM_SC_HTM_TRIG]
+static const uint64_t PB_BRIDGE_NHTM_SC_HTM_TRIG = 0x03011c85ull;
+
+static const uint32_t PB_BRIDGE_NHTM_SC_HTM_TRIG_START = 0;
+static const uint32_t PB_BRIDGE_NHTM_SC_HTM_TRIG_STOP = 1;
+static const uint32_t PB_BRIDGE_NHTM_SC_HTM_TRIG_PAUSE = 2;
+static const uint32_t PB_BRIDGE_NHTM_SC_HTM_TRIG_STOP_ALT = 3;
+static const uint32_t PB_BRIDGE_NHTM_SC_HTM_TRIG_RESET = 4;
+static const uint32_t PB_BRIDGE_NHTM_SC_HTM_TRIG_MARK_VALID = 5;
+static const uint32_t PB_BRIDGE_NHTM_SC_HTM_TRIG_MARK_TYPE = 6;
+static const uint32_t PB_BRIDGE_NHTM_SC_HTM_TRIG_MARK_TYPE_LEN = 10;
+//<< [PB_BRIDGE_NHTM_SC_HTM_TRIG]
+// proc/reg00022.H
+
 //>>THE END<<
 
 #ifndef __PPE_HCODE__

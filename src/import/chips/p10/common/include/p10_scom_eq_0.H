@@ -358,6 +358,71 @@ static const uint32_t XSTOP_MASK_53 = 53;
 //<< [XSTOP_MASK]
 // eq/reg00000.H
 
+//>> [QME_PSREQ]
+static const uint64_t QME_PSREQ = 0x200e0130ull;
+
+static const uint32_t QME_PSREQ_PSTATE_REQ_C0 = 0;
+static const uint32_t QME_PSREQ_PSTATE_REQ_C0_LEN = 8;
+static const uint32_t QME_PSREQ_PSTATE_REQ_C1 = 8;
+static const uint32_t QME_PSREQ_PSTATE_REQ_C1_LEN = 8;
+static const uint32_t QME_PSREQ_PSTATE_REQ_C2 = 16;
+static const uint32_t QME_PSREQ_PSTATE_REQ_C2_LEN = 8;
+static const uint32_t QME_PSREQ_PSTATE_REQ_C3 = 24;
+static const uint32_t QME_PSREQ_PSTATE_REQ_C3_LEN = 8;
+static const uint32_t QME_PSREQ_PSTATE_REQ_QUAD = 32;
+static const uint32_t QME_PSREQ_PSTATE_REQ_QUAD_LEN = 8;
+static const uint32_t QME_PSREQ_RECENT_CORE_NUM = 42;
+static const uint32_t QME_PSREQ_RECENT_CORE_NUM_LEN = 2;
+static const uint32_t QME_PSREQ_PSTATE_UPDATE = 44;
+static const uint32_t QME_PSREQ_PSTATE_UPDATE_LEN = 4;
+static const uint32_t QME_PSREQ_QME_QMCR_CORE_PARTIAL_GOOD = 48;
+static const uint32_t QME_PSREQ_QME_QMCR_CORE_PARTIAL_GOOD_LEN = 4;
+static const uint32_t QME_PSREQ_QME_QMCR_AUTO_PMCR_UPDATE = 52;
+static const uint32_t QME_PSREQ_QME_QMCR_PMCR_RECENT_MODE = 53;
+static const uint32_t QME_PSREQ_PMCR_PIG_PENDING = 55;
+//<< [QME_PSREQ]
+// eq/reg00000.H
+
+//>> [QME_QHTMODE]
+static const uint64_t QME_QHTMODE = 0x200e01a0ull;
+
+static const uint32_t QME_QHTMODE_HTM_ENABLE = 0;
+static const uint32_t QME_QHTMODE_MODE_WRAP = 1;
+static const uint32_t QME_QHTMODE_DIS_TSTAMP = 2;
+static const uint32_t QME_QHTMODE_SINGLE_TSTAMP = 3;
+//<< [QME_QHTMODE]
+// eq/reg00000.H
+
+//>> [QME_RCOCR]
+static const uint64_t QME_RCOCR = 0x200e017cull;
+
+static const uint32_t QME_RCOCR_0_RESCLK_CONTROL = 0;
+static const uint32_t QME_RCOCR_0_RESCLK_CONTROL_LEN = 8;
+static const uint32_t QME_RCOCR_1_RESCLK_CONTROL = 8;
+static const uint32_t QME_RCOCR_1_RESCLK_CONTROL_LEN = 8;
+static const uint32_t QME_RCOCR_2_RESCLK_CONTROL = 16;
+static const uint32_t QME_RCOCR_2_RESCLK_CONTROL_LEN = 8;
+static const uint32_t QME_RCOCR_3_RESCLK_CONTROL = 24;
+static const uint32_t QME_RCOCR_3_RESCLK_CONTROL_LEN = 8;
+static const uint32_t QME_RCOCR_0_RESCLK_ACTUAL = 32;
+static const uint32_t QME_RCOCR_0_RESCLK_ACTUAL_LEN = 8;
+static const uint32_t QME_RCOCR_1_RESCLK_ACTUAL = 40;
+static const uint32_t QME_RCOCR_1_RESCLK_ACTUAL_LEN = 8;
+static const uint32_t QME_RCOCR_2_RESCLK_ACTUAL = 48;
+static const uint32_t QME_RCOCR_2_RESCLK_ACTUAL_LEN = 8;
+static const uint32_t QME_RCOCR_3_RESCLK_ACTUAL = 56;
+static const uint32_t QME_RCOCR_3_RESCLK_ACTUAL_LEN = 8;
+//<< [QME_RCOCR]
+// eq/reg00000.H
+
+//>> [QME_RCTAR3]
+static const uint64_t QME_RCTAR3 = 0x200e019cull;
+
+static const uint32_t QME_RCTAR3_DATA = 0;
+static const uint32_t QME_RCTAR3_DATA_LEN = 64;
+//<< [QME_RCTAR3]
+// eq/reg00000.H
+
 //>>THE END<<
 
 #ifndef __PPE_HCODE__

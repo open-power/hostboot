@@ -97,6 +97,60 @@ static const uint32_t CYA_BITS_BITS1_RSVD3_LEN = 3;
 //<< [CYA_BITS]
 // omi/reg00014.H
 
+//>> [ERROR_MASK]
+static const uint64_t ERROR_MASK = 0x0c011412ull;
+
+static const uint32_t ERROR_MASK_47 = 16;
+static const uint32_t ERROR_MASK_46 = 17;
+static const uint32_t ERROR_MASK_45 = 18;
+static const uint32_t ERROR_MASK_44 = 19;
+static const uint32_t ERROR_MASK_43 = 20;
+static const uint32_t ERROR_MASK_42 = 21;
+static const uint32_t ERROR_MASK_41 = 22;
+static const uint32_t ERROR_MASK_40 = 23;
+static const uint32_t ERROR_MASK_39 = 24;
+static const uint32_t ERROR_MASK_38 = 25;
+static const uint32_t ERROR_MASK_37 = 26;
+static const uint32_t ERROR_MASK_36 = 27;
+static const uint32_t ERROR_MASK_35 = 28;
+static const uint32_t ERROR_MASK_34 = 29;
+static const uint32_t ERROR_MASK_33 = 30;
+static const uint32_t ERROR_MASK_32 = 31;
+static const uint32_t ERROR_MASK_31 = 32;
+static const uint32_t ERROR_MASK_30 = 33;
+static const uint32_t ERROR_MASK_29 = 34;
+static const uint32_t ERROR_MASK_28 = 35;
+static const uint32_t ERROR_MASK_27 = 36;
+static const uint32_t ERROR_MASK_26 = 37;
+static const uint32_t ERROR_MASK_25 = 38;
+static const uint32_t ERROR_MASK_24 = 39;
+static const uint32_t ERROR_MASK_23 = 40;
+static const uint32_t ERROR_MASK_22 = 41;
+static const uint32_t ERROR_MASK_21 = 42;
+static const uint32_t ERROR_MASK_20 = 43;
+static const uint32_t ERROR_MASK_19 = 44;
+static const uint32_t ERROR_MASK_18 = 45;
+static const uint32_t ERROR_MASK_17 = 46;
+static const uint32_t ERROR_MASK_16 = 47;
+static const uint32_t ERROR_MASK_15 = 48;
+static const uint32_t ERROR_MASK_14 = 49;
+static const uint32_t ERROR_MASK_13 = 50;
+static const uint32_t ERROR_MASK_12 = 51;
+static const uint32_t ERROR_MASK_11 = 52;
+static const uint32_t ERROR_MASK_10 = 53;
+static const uint32_t ERROR_MASK_09 = 54;
+static const uint32_t ERROR_MASK_08 = 55;
+static const uint32_t ERROR_MASK_07 = 56;
+static const uint32_t ERROR_MASK_06 = 57;
+static const uint32_t ERROR_MASK_05 = 58;
+static const uint32_t ERROR_MASK_04 = 59;
+static const uint32_t ERROR_MASK_03 = 60;
+static const uint32_t ERROR_MASK_02 = 61;
+static const uint32_t ERROR_MASK_01 = 62;
+static const uint32_t ERROR_MASK_00 = 63;
+//<< [ERROR_MASK]
+// omi/reg00014.H
+
 //>>THE END<<
 
 #ifndef __PPE_HCODE__

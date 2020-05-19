@@ -100,6 +100,50 @@ static const uint32_t QME_EITR_INTERRUPT_TYPE_LEN = 64;
 //<< [QME_EITR]
 // eq/reg00005.H
 
+//>> [QME_DB0]
+static const uint64_t QME_DB0 = 0x200e0100ull;
+
+static const uint32_t QME_DB0_NUMBER = 0;
+static const uint32_t QME_DB0_NUMBER_LEN = 8;
+static const uint32_t QME_DB0_DATA = 8;
+static const uint32_t QME_DB0_DATA_LEN = 56;
+//<< [QME_DB0]
+// eq/reg00005.H
+
+//>> [ERROR_STATUS]
+static const uint64_t ERROR_STATUS = 0x2003000full;
+
+static const uint32_t ERROR_STATUS_PCB_WRITE_NOT_ALLOWED_ERR = 0;
+static const uint32_t ERROR_STATUS_PCB_READ_NOT_ALLOWED_ERR = 1;
+static const uint32_t ERROR_STATUS_PCB_PARITY_ON_CMD_ERR = 2;
+static const uint32_t ERROR_STATUS_PCB_ADDRESS_NOT_VALID_ERR = 3;
+static const uint32_t ERROR_STATUS_PCB_PARITY_ON_ADDR_ERR = 4;
+static const uint32_t ERROR_STATUS_PCB_PARITY_ON_DATA_ERR = 5;
+static const uint32_t ERROR_STATUS_PCB_PROTECTED_ACCESS_INVALID_ERR = 6;
+static const uint32_t ERROR_STATUS_PCB_PARITY_ON_SPCIF_ERR = 7;
+static const uint32_t ERROR_STATUS_PCB_WRITE_AND_OPCG_IP_ERR = 8;
+static const uint32_t ERROR_STATUS_SCAN_READ_AND_OPCG_IP_ERR = 9;
+static const uint32_t ERROR_STATUS_CLOCK_CMD_CONFLICT_ERR = 10;
+static const uint32_t ERROR_STATUS_SCAN_COLLISION_ERR = 11;
+static const uint32_t ERROR_STATUS_PREVENTED_SCAN_COLLISION_ERR = 12;
+static const uint32_t ERROR_STATUS_OPCG_TRIGGER_ERR = 13;
+static const uint32_t ERROR_STATUS_PHASE_CNT_CORRUPTION_ERR = 14;
+static const uint32_t ERROR_STATUS_CLOCK_CMD_PREVENTED_ERR = 15;
+static const uint32_t ERROR_STATUS_PARITY_ON_OPCG_SM_ERR = 16;
+static const uint32_t ERROR_STATUS_PARITY_ON_CLOCK_MUX_REG_ERR = 17;
+static const uint32_t ERROR_STATUS_PARITY_ON_OPCG_REG_ERR = 18;
+static const uint32_t ERROR_STATUS_PARITY_ON_SYNC_CONFIG_REG_ERR = 19;
+static const uint32_t ERROR_STATUS_PARITY_ON_XSTOP_REG_ERR = 20;
+static const uint32_t ERROR_STATUS_PARITY_ON_GPIO_REG_ERR = 21;
+static const uint32_t ERROR_STATUS_CLKCMD_REQUEST_ERR = 22;
+static const uint32_t ERROR_STATUS_CBS_PROTOCOL_ERR = 23;
+static const uint32_t ERROR_STATUS_VITL_ALIGN_ERR = 24;
+static const uint32_t ERROR_STATUS_UNIT_SYNC_LVL_ERR = 25;
+static const uint32_t ERROR_STATUS_PARITY_ON_SELFBOOT_CMD_STATE_ERR = 26;
+static const uint32_t ERROR_STATUS_OPCG_STOPPED_BY_PCB_ERR = 27;
+//<< [ERROR_STATUS]
+// eq/reg00005.H
+
 //>>THE END<<
 
 #ifndef __PPE_HCODE__

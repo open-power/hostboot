@@ -116,6 +116,21 @@ static const uint32_t L2_L2MISC_L2CERRS_PHYP_PURGE_CMD_REG_ERR = 29;
 //<< [L2_L2MISC_L2CERRS_PHYP_PURGE_CMD_REG]
 // c/reg00012.H
 
+//>> [CPMS_DHCR]
+static const uint64_t CPMS_DHCR = 0x200e0e54ull;
+
+static const uint32_t CPMS_DHCR_FREEZE_HISTORY_ON_LARGE = 0;
+static const uint32_t CPMS_DHCR_RESET_DHDR_ON_FDIR_WRITE = 1;
+static const uint32_t CPMS_DHCR_ADJACENT_WARN_RECORD_MODE = 2;
+static const uint32_t CPMS_DHCR_SPARE = 3;
+static const uint32_t CPMS_DHCR_SPARE_LEN = 2;
+static const uint32_t CPMS_DHCR_EVENT_HISTORY_SELECT = 5;
+static const uint32_t CPMS_DHCR_EVENT_HISTORY_SELECT_LEN = 3;
+static const uint32_t CPMS_DHCR_EVENT_COUNT = 8;
+static const uint32_t CPMS_DHCR_EVENT_COUNT_LEN = 8;
+//<< [CPMS_DHCR]
+// c/reg00012.H
+
 //>>THE END<<
 
 #ifndef __PPE_HCODE__

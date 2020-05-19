@@ -226,6 +226,19 @@ static const uint32_t QME_EINR_INTERRUPT_INPUT_LEN = 64;
 //<< [QME_EINR]
 // eq/reg00014.H
 
+//>> [QME_PCBSII]
+static const uint64_t QME_PCBSII = 0x200e0038ull;
+
+static const uint32_t QME_PCBSII_PCB_REQ_ACK = 0;
+static const uint32_t QME_PCBSII_PCB_RSP_P = 1;
+static const uint32_t QME_PCBSII_PCB_RSP_VLD = 4;
+static const uint32_t QME_PCBSII_PCB_RSP_INFO = 5;
+static const uint32_t QME_PCBSII_PCB_RSP_INFO_LEN = 3;
+static const uint32_t QME_PCBSII_QUAD_ID = 33;
+static const uint32_t QME_PCBSII_QUAD_ID_LEN = 3;
+//<< [QME_PCBSII]
+// eq/reg00014.H
+
 //>>THE END<<
 
 #ifndef __PPE_HCODE__

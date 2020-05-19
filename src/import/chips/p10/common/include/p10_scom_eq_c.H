@@ -202,6 +202,104 @@ static const uint32_t QME_RCIMR_X3_LEN = 5;
 //<< [QME_RCIMR]
 // eq/reg00012.H
 
+//>> [QME_PPEDBG]
+static const uint64_t QME_PPEDBG_RW = 0x200e0244ull;
+static const uint64_t QME_PPEDBG_WO_CLEAR = 0x200e0247ull;
+static const uint64_t QME_PPEDBG_WO_OR = 0x200e0246ull;
+
+static const uint32_t QME_PPEDBG_EN_DBG = 0;
+static const uint32_t QME_PPEDBG_HALT_ON_XSTOP = 1;
+static const uint32_t QME_PPEDBG_HALT_ON_TRIG = 2;
+static const uint32_t QME_PPEDBG_EN_COVERAGE_MODE = 3;
+static const uint32_t QME_PPEDBG_EN_INTR_ADDR = 4;
+static const uint32_t QME_PPEDBG_EN_TRACE_EXTRA = 5;
+static const uint32_t QME_PPEDBG_EN_TRACE_STALL = 6;
+static const uint32_t QME_PPEDBG_EN_WAIT_CYCLES = 7;
+static const uint32_t QME_PPEDBG_EN_FULL_SPEED = 8;
+static const uint32_t QME_PPEDBG_DIS_FLOW_CHANGE = 9;
+static const uint32_t QME_PPEDBG_TRACE_MODE_SEL = 10;
+static const uint32_t QME_PPEDBG_TRACE_MODE_SEL_LEN = 2;
+static const uint32_t QME_PPEDBG_EN_MARK_TRACE = 12;
+static const uint32_t QME_PPEDBG_EN_EE_TRACE = 13;
+static const uint32_t QME_PPEDBG_TRACE_LOWER_SEL1 = 14;
+static const uint32_t QME_PPEDBG_TRACE_LOWER_SEL1_LEN = 2;
+static const uint32_t QME_PPEDBG_FIR_TRIGGER = 16;
+static const uint32_t QME_PPEDBG_MIB_GPIO = 17;
+static const uint32_t QME_PPEDBG_MIB_GPIO_LEN = 3;
+static const uint32_t QME_PPEDBG_TRACE_DATA_SEL = 20;
+static const uint32_t QME_PPEDBG_TRACE_DATA_SEL_LEN = 4;
+static const uint32_t QME_PPEDBG_QHTM_TRACE_SEL = 25;
+static const uint32_t QME_PPEDBG_TRACE_EXT_SEL0 = 26;
+static const uint32_t QME_PPEDBG_TRACE_MODE_SEL1 = 27;
+static const uint32_t QME_PPEDBG_TRACE_DATA_SEL1 = 28;
+static const uint32_t QME_PPEDBG_TRACE_DATA_SEL1_LEN = 4;
+//<< [QME_PPEDBG]
+// eq/reg00012.H
+
+//>> [QME_PTSR]
+static const uint64_t QME_PTSR = 0x200e013cull;
+
+static const uint32_t QME_PTSR_0_DATA = 0;
+static const uint32_t QME_PTSR_0_DATA_LEN = 8;
+static const uint32_t QME_PTSR_1_DATA = 8;
+static const uint32_t QME_PTSR_1_DATA_LEN = 8;
+static const uint32_t QME_PTSR_2_DATA = 16;
+static const uint32_t QME_PTSR_2_DATA_LEN = 8;
+static const uint32_t QME_PTSR_3_DATA = 24;
+static const uint32_t QME_PTSR_3_DATA_LEN = 8;
+static const uint32_t QME_PTSR_4_DATA = 32;
+static const uint32_t QME_PTSR_4_DATA_LEN = 8;
+static const uint32_t QME_PTSR_5_DATA = 40;
+static const uint32_t QME_PTSR_5_DATA_LEN = 8;
+static const uint32_t QME_PTSR_6_DATA = 48;
+static const uint32_t QME_PTSR_6_DATA_LEN = 8;
+static const uint32_t QME_PTSR_7_DATA = 56;
+static const uint32_t QME_PTSR_7_DATA_LEN = 8;
+//<< [QME_PTSR]
+// eq/reg00012.H
+
+//>> [QME_RCTAR1]
+static const uint64_t QME_RCTAR1 = 0x200e0194ull;
+
+static const uint32_t QME_RCTAR1_DATA = 0;
+static const uint32_t QME_RCTAR1_DATA_LEN = 64;
+//<< [QME_RCTAR1]
+// eq/reg00012.H
+
+//>> [QME_SCOM_XIRAMGA]
+static const uint64_t QME_SCOM_XIRAMGA = 0x200e0208ull;
+
+static const uint32_t QME_SCOM_XIRAMGA_QME_SCOM_XIRAMEDR_IR = 0;
+static const uint32_t QME_SCOM_XIRAMGA_QME_SCOM_XIRAMEDR_IR_LEN = 32;
+static const uint32_t QME_SCOM_XIRAMGA_SPRG0 = 32;
+static const uint32_t QME_SCOM_XIRAMGA_SPRG0_LEN = 32;
+//<< [QME_SCOM_XIRAMGA]
+// eq/reg00012.H
+
+//>> [QME_SCOM_XISIB]
+static const uint64_t QME_SCOM_XISIB = 0x200e0218ull;
+
+static const uint32_t QME_SCOM_XISIB_ADDR = 0;
+static const uint32_t QME_SCOM_XISIB_ADDR_LEN = 32;
+static const uint32_t QME_SCOM_XISIB_R_NW = 32;
+static const uint32_t QME_SCOM_XISIB_BUSY = 33;
+static const uint32_t QME_SCOM_XISIB_IMPRECISE_ERROR_PENDING = 34;
+static const uint32_t QME_SCOM_XISIB_RSP_INFO = 49;
+static const uint32_t QME_SCOM_XISIB_RSP_INFO_LEN = 3;
+static const uint32_t QME_SCOM_XISIB_RESET_PENDING = 61;
+static const uint32_t QME_SCOM_XISIB_IFETCH_PENDING = 62;
+static const uint32_t QME_SCOM_XISIB_DATAOP_PENDING = 63;
+//<< [QME_SCOM_XISIB]
+// eq/reg00012.H
+
+//>> [CPLT_MASK0]
+static const uint64_t CPLT_MASK0 = 0x20000101ull;
+
+static const uint32_t CPLT_MASK0_ITR_MASK = 0;
+static const uint32_t CPLT_MASK0_ITR_MASK_LEN = 32;
+//<< [CPLT_MASK0]
+// eq/reg00012.H
+
 //>>THE END<<
 
 #ifndef __PPE_HCODE__

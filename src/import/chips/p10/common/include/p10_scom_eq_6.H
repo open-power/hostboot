@@ -128,6 +128,38 @@ static const uint32_t QME_SCOM_XIVDR2_3_LEN = 32;
 //<< [QME_SCOM_XIVDR2]
 // eq/reg00006.H
 
+//>> [QME_PPEBAR]
+static const uint64_t QME_PPEBAR = 0x200e0050ull;
+
+static const uint32_t QME_PPEBAR_BASE = 8;
+static const uint32_t QME_PPEBAR_BASE_LEN = 36;
+static const uint32_t QME_PPEBAR_SIZE = 61;
+static const uint32_t QME_PPEBAR_SIZE_LEN = 3;
+//<< [QME_PPEBAR]
+// eq/reg00006.H
+
+//>> [QME_QHTMEM]
+static const uint64_t QME_QHTMEM = 0x200e01a4ull;
+
+static const uint32_t QME_QHTMEM_ALLOC = 0;
+static const uint32_t QME_QHTMEM_SCOPE = 1;
+static const uint32_t QME_QHTMEM_SCOPE_LEN = 3;
+static const uint32_t QME_QHTMEM_PRIORITY = 4;
+static const uint32_t QME_QHTMEM_BASE = 8;
+static const uint32_t QME_QHTMEM_BASE_LEN = 32;
+static const uint32_t QME_QHTMEM_SIZE = 40;
+static const uint32_t QME_QHTMEM_SIZE_LEN = 9;
+//<< [QME_QHTMEM]
+// eq/reg00006.H
+
+//>> [QME_RCTAR2]
+static const uint64_t QME_RCTAR2 = 0x200e0198ull;
+
+static const uint32_t QME_RCTAR2_DATA = 0;
+static const uint32_t QME_RCTAR2_DATA_LEN = 64;
+//<< [QME_RCTAR2]
+// eq/reg00006.H
+
 //>>THE END<<
 
 #ifndef __PPE_HCODE__

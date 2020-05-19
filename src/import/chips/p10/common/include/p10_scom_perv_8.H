@@ -336,6 +336,120 @@ static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL1_COPY_ROOT_CTRL1_COPY_REG_LEN = 3
 //<< [FSXCOMP_FSXLOG_ROOT_CTRL1_COPY]
 // perv/reg00016.H
 
+//>> [WOF]
+static const uint64_t WOF = 0x00040021ull;
+
+static const uint32_t WOF_ANY_WOF = 0;
+static const uint32_t WOF_RESERVED1W = 1;
+static const uint32_t WOF_ANY_LOCAL_XSTOP = 2;
+static const uint32_t WOF_RESERVED3W = 3;
+static const uint32_t WOF_PERV = 4;
+static const uint32_t WOF_IN05 = 5;
+static const uint32_t WOF_IN06 = 6;
+static const uint32_t WOF_IN07 = 7;
+static const uint32_t WOF_IN08 = 8;
+static const uint32_t WOF_IN09 = 9;
+static const uint32_t WOF_IN010 = 10;
+static const uint32_t WOF_IN011 = 11;
+static const uint32_t WOF_IN012 = 12;
+static const uint32_t WOF_IN013 = 13;
+static const uint32_t WOF_IN014 = 14;
+static const uint32_t WOF_IN015 = 15;
+static const uint32_t WOF_IN016 = 16;
+static const uint32_t WOF_IN017 = 17;
+static const uint32_t WOF_IN018 = 18;
+static const uint32_t WOF_IN019 = 19;
+static const uint32_t WOF_IN020 = 20;
+static const uint32_t WOF_IN021 = 21;
+static const uint32_t WOF_IN022 = 22;
+static const uint32_t WOF_IN023 = 23;
+static const uint32_t WOF_IN024 = 24;
+static const uint32_t WOF_IN025 = 25;
+static const uint32_t WOF_IN026 = 26;
+static const uint32_t WOF_IN027 = 27;
+static const uint32_t WOF_IN028 = 28;
+static const uint32_t WOF_IN029 = 29;
+static const uint32_t WOF_IN030 = 30;
+static const uint32_t WOF_IN031 = 31;
+static const uint32_t WOF_IN032 = 32;
+static const uint32_t WOF_IN033 = 33;
+static const uint32_t WOF_IN034 = 34;
+static const uint32_t WOF_IN035 = 35;
+static const uint32_t WOF_IN036 = 36;
+static const uint32_t WOF_IN037 = 37;
+static const uint32_t WOF_IN038 = 38;
+static const uint32_t WOF_IN039 = 39;
+static const uint32_t WOF_IN040 = 40;
+static const uint32_t WOF_IN041 = 41;
+static const uint32_t WOF_IN042 = 42;
+static const uint32_t WOF_IN043 = 43;
+static const uint32_t WOF_IN044 = 44;
+static const uint32_t WOF_IN045 = 45;
+static const uint32_t WOF_IN046 = 46;
+static const uint32_t WOF_IN047 = 47;
+static const uint32_t WOF_IN048 = 48;
+static const uint32_t WOF_IN049 = 49;
+static const uint32_t WOF_IN050 = 50;
+static const uint32_t WOF_IN051 = 51;
+static const uint32_t WOF_IN052 = 52;
+static const uint32_t WOF_IN053 = 53;
+//<< [WOF]
+// perv/reg00017.H
+
+//>> [REC_ERR_REG0]
+static const uint64_t REC_ERR_REG0 = 0x000f0011ull;
+
+static const uint32_t REC_ERR_REG0_MASTER_RESPONSE_BIT = 0;
+static const uint32_t REC_ERR_REG0_MASTER_ERROR_CODE = 1;
+static const uint32_t REC_ERR_REG0_MASTER_ERROR_CODE_LEN = 3;
+static const uint32_t REC_ERR_REG0_SLAVE1_RESPONSE_BIT = 4;
+static const uint32_t REC_ERR_REG0_SLAVE1_ERROR_CODE = 5;
+static const uint32_t REC_ERR_REG0_SLAVE1_ERROR_CODE_LEN = 3;
+static const uint32_t REC_ERR_REG0_SLAVE2_RESPONSE_BIT = 8;
+static const uint32_t REC_ERR_REG0_SLAVE2_ERROR_CODE = 9;
+static const uint32_t REC_ERR_REG0_SLAVE2_ERROR_CODE_LEN = 3;
+static const uint32_t REC_ERR_REG0_SLAVE3_RESPONSE_BIT = 12;
+static const uint32_t REC_ERR_REG0_SLAVE3_ERROR_CODE = 13;
+static const uint32_t REC_ERR_REG0_SLAVE3_ERROR_CODE_LEN = 3;
+static const uint32_t REC_ERR_REG0_SLAVE4_RESPONSE_BIT = 16;
+static const uint32_t REC_ERR_REG0_SLAVE4_ERROR_CODE = 17;
+static const uint32_t REC_ERR_REG0_SLAVE4_ERROR_CODE_LEN = 3;
+static const uint32_t REC_ERR_REG0_SLAVE5_RESPONSE_BIT = 20;
+static const uint32_t REC_ERR_REG0_SLAVE5_ERROR_CODE = 21;
+static const uint32_t REC_ERR_REG0_SLAVE5_ERROR_CODE_LEN = 3;
+static const uint32_t REC_ERR_REG0_SLAVE6_RESPONSE_BIT = 24;
+static const uint32_t REC_ERR_REG0_SLAVE6_ERROR_CODE = 25;
+static const uint32_t REC_ERR_REG0_SLAVE6_ERROR_CODE_LEN = 3;
+static const uint32_t REC_ERR_REG0_SLAVE7_RESPONSE_BIT = 28;
+static const uint32_t REC_ERR_REG0_SLAVE7_ERROR_CODE = 29;
+static const uint32_t REC_ERR_REG0_SLAVE7_ERROR_CODE_LEN = 3;
+static const uint32_t REC_ERR_REG0_SLAVE8_RESPONSE_BIT = 32;
+static const uint32_t REC_ERR_REG0_SLAVE8_ERROR_CODE = 33;
+static const uint32_t REC_ERR_REG0_SLAVE8_ERROR_CODE_LEN = 3;
+static const uint32_t REC_ERR_REG0_SLAVE9_RESPONSE_BIT = 36;
+static const uint32_t REC_ERR_REG0_SLAVE9_ERROR_CODE = 37;
+static const uint32_t REC_ERR_REG0_SLAVE9_ERROR_CODE_LEN = 3;
+static const uint32_t REC_ERR_REG0_SLAVE10_RESPONSE_BIT = 40;
+static const uint32_t REC_ERR_REG0_SLAVE10_ERROR_CODE = 41;
+static const uint32_t REC_ERR_REG0_SLAVE10_ERROR_CODE_LEN = 3;
+static const uint32_t REC_ERR_REG0_SLAVE11_RESPONSE_BIT = 44;
+static const uint32_t REC_ERR_REG0_SLAVE11_ERROR_CODE = 45;
+static const uint32_t REC_ERR_REG0_SLAVE11_ERROR_CODE_LEN = 3;
+static const uint32_t REC_ERR_REG0_SLAVE12_RESPONSE_BIT = 48;
+static const uint32_t REC_ERR_REG0_SLAVE12_ERROR_CODE = 49;
+static const uint32_t REC_ERR_REG0_SLAVE12_ERROR_CODE_LEN = 3;
+static const uint32_t REC_ERR_REG0_SLAVE13_RESPONSE_BIT = 52;
+static const uint32_t REC_ERR_REG0_SLAVE13_ERROR_CODE = 53;
+static const uint32_t REC_ERR_REG0_SLAVE13_ERROR_CODE_LEN = 3;
+static const uint32_t REC_ERR_REG0_SLAVE14_RESPONSE_BIT = 56;
+static const uint32_t REC_ERR_REG0_SLAVE14_ERROR_CODE = 57;
+static const uint32_t REC_ERR_REG0_SLAVE14_ERROR_CODE_LEN = 3;
+static const uint32_t REC_ERR_REG0_SLAVE15_RESPONSE_BIT = 60;
+static const uint32_t REC_ERR_REG0_SLAVE15_ERROR_CODE = 61;
+static const uint32_t REC_ERR_REG0_SLAVE15_ERROR_CODE_LEN = 3;
+//<< [REC_ERR_REG0]
+// perv/reg00016.H
+
 //>>THE END<<
 
 #ifndef __PPE_HCODE__

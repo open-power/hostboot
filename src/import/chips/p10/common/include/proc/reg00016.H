@@ -8565,6 +8565,56 @@ fapi_try_exit:
 }
 //<< GET_[PB_PTLSCOM10_FM0123_ERR_3_RTAG_MISC_PTY]
 
+//>> PREP_[TP_TCN1_N1_CPLT_CONF1_RW]
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PREP_TP_TCN1_N1_CPLT_CONF1_RW(const fapi2::Target<K, M, V>& i_target)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = TP_TCN1_N1_CPLT_CONF1_RW;
+#endif
+    return fapi2::current_err;
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+//<< PREP_[TP_TCN1_N1_CPLT_CONF1_RW]
+
+//>> GET_[TP_TCN1_N1_CPLT_CONF1_RW]
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode GET_TP_TCN1_N1_CPLT_CONF1_RW(const fapi2::Target<K, M, V>& i_target,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = TP_TCN1_N1_CPLT_CONF1_RW;
+#endif
+    return fapi2::getScom(i_target, TP_TCN1_N1_CPLT_CONF1_RW, o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+//<< GET_[TP_TCN1_N1_CPLT_CONF1_RW]
+
+//>> PUT_[TP_TCN1_N1_CPLT_CONF1_RW]
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PUT_TP_TCN1_N1_CPLT_CONF1_RW(const fapi2::Target<K, M, V>& i_target,
+        const uint64_t i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    FAPI_TRY(scomt::chkReg(TP_TCN1_N1_CPLT_CONF1_RW, TP_TCN1_N1_CPLT_CONF1_WO_CLEAR, TP_TCN1_N1_CPLT_CONF1_WO_OR));
+#endif
+    return fapi2::putScom(i_target, TP_TCN1_N1_CPLT_CONF1_RW, i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+//<< PUT_[TP_TCN1_N1_CPLT_CONF1_RW]
+
 //>>THE END<<
 
 #ifndef __PPE_HCODE__

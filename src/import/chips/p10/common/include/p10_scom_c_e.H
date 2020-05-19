@@ -198,6 +198,67 @@ static const uint32_t QME_CISR_REG_WKUP_REQUESTED = 63;
 //<< [QME_CISR]
 // c/reg00014.H
 
+//>> [CPMS_DESR]
+static const uint64_t CPMS_DESR = 0x200e0e5cull;
+
+static const uint32_t CPMS_DESR_COUNTA_FTC_ACTIVITY_SEL = 0;
+static const uint32_t CPMS_DESR_COUNTA_FTC_ACTIVITY_SEL_LEN = 3;
+static const uint32_t CPMS_DESR_COUNTA_FTC_EVENT_SEL = 3;
+static const uint32_t CPMS_DESR_COUNTA_FTC_EVENT_SEL_LEN = 3;
+static const uint32_t CPMS_DESR_COUNTB_FTC_ACTIVITY_SEL = 6;
+static const uint32_t CPMS_DESR_COUNTB_FTC_ACTIVITY_SEL_LEN = 3;
+static const uint32_t CPMS_DESR_COUNTB_FTC_EVENT_SEL = 9;
+static const uint32_t CPMS_DESR_COUNTB_FTC_EVENT_SEL_LEN = 3;
+static const uint32_t CPMS_DESR_COUNTC_FTC_ACTIVITY_SEL = 12;
+static const uint32_t CPMS_DESR_COUNTC_FTC_ACTIVITY_SEL_LEN = 3;
+static const uint32_t CPMS_DESR_COUNTC_FTC_EVENT_SEL = 15;
+static const uint32_t CPMS_DESR_COUNTC_FTC_EVENT_SEL_LEN = 3;
+static const uint32_t CPMS_DESR_COUNTA_FTC_STATE_SELECT = 18;
+static const uint32_t CPMS_DESR_COUNTA_FTC_STATE_SELECT_LEN = 3;
+static const uint32_t CPMS_DESR_COUNTB_FTC_STATE_SELECT = 21;
+static const uint32_t CPMS_DESR_COUNTB_FTC_STATE_SELECT_LEN = 3;
+static const uint32_t CPMS_DESR_COUNTC_FTC_STATE_SELECT = 24;
+static const uint32_t CPMS_DESR_COUNTC_FTC_STATE_SELECT_LEN = 3;
+static const uint32_t CPMS_DESR_FTC_INVERT_SEL = 27;
+static const uint32_t CPMS_DESR_FTC_INVERT_SEL_LEN = 3;
+static const uint32_t CPMS_DESR_FTC_SPARE = 30;
+static const uint32_t CPMS_DESR_FTC_SPARE_LEN = 2;
+static const uint32_t CPMS_DESR_FTC_EVENT_INVERT = 32;
+static const uint32_t CPMS_DESR_FTC_EVENT_INVERT_LEN = 3;
+static const uint32_t CPMS_DESR_STATEW_ENABLE = 35;
+static const uint32_t CPMS_DESR_STATEW_ENABLE_LEN = 3;
+static const uint32_t CPMS_DESR_STATEZ_ENABLE = 38;
+static const uint32_t CPMS_DESR_STATEZ_ENABLE_LEN = 3;
+static const uint32_t CPMS_DESR_SPARE_COUNT_SEL = 41;
+static const uint32_t CPMS_DESR_SECONDARY_QUAL_SEL = 42;
+static const uint32_t CPMS_DESR_SECONDARY_QUAL_SEL_LEN = 2;
+static const uint32_t CPMS_DESR_SECONDARY_EVENT_SEL = 44;
+static const uint32_t CPMS_DESR_SECONDARY_EVENT_SEL_LEN = 2;
+//<< [CPMS_DESR]
+// c/reg00014.H
+
+//>> [CPMS_DTTR]
+static const uint64_t CPMS_DTTR = 0x200e0e88ull;
+
+static const uint32_t CPMS_DTTR_CPMS_DTCR_CORE_DPT_RATE_LIMIT = 0;
+static const uint32_t CPMS_DTTR_CPMS_DTCR_CORE_DPT_RATE_LIMIT_LEN = 8;
+static const uint32_t CPMS_DTTR_T1_DPT_RATE_LIMIT = 8;
+static const uint32_t CPMS_DTTR_T1_DPT_RATE_LIMIT_LEN = 8;
+static const uint32_t CPMS_DTTR_T2_DPT_RATE_LIMIT = 16;
+static const uint32_t CPMS_DTTR_T2_DPT_RATE_LIMIT_LEN = 8;
+static const uint32_t CPMS_DTTR_T3_DPT_RATE_LIMIT = 24;
+static const uint32_t CPMS_DTTR_T3_DPT_RATE_LIMIT_LEN = 8;
+static const uint32_t CPMS_DTTR_CPMS_DTCR_CORE_DPT_INFLIGHT_LIMIT = 32;
+static const uint32_t CPMS_DTTR_CPMS_DTCR_CORE_DPT_INFLIGHT_LIMIT_LEN = 8;
+static const uint32_t CPMS_DTTR_T1_DPT_INFLIGHT_LIMIT = 40;
+static const uint32_t CPMS_DTTR_T1_DPT_INFLIGHT_LIMIT_LEN = 8;
+static const uint32_t CPMS_DTTR_T2_DPT_INFLIGHT_LIMIT = 48;
+static const uint32_t CPMS_DTTR_T2_DPT_INFLIGHT_LIMIT_LEN = 8;
+static const uint32_t CPMS_DTTR_T3_DPT_INFLIGHT_LIMIT = 56;
+static const uint32_t CPMS_DTTR_T3_DPT_INFLIGHT_LIMIT_LEN = 8;
+//<< [CPMS_DTTR]
+// c/reg00014.H
+
 //>>THE END<<
 
 #ifndef __PPE_HCODE__

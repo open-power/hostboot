@@ -102,6 +102,14 @@ static const uint32_t DLP_LINK0_ERROR_STATUS_INTERNAL_LEN = 26;
 //<< [DLP_LINK0_ERROR_STATUS]
 // iohs/reg00065.H
 
+//>> [TIMEOUT_REG]
+static const uint64_t TIMEOUT_REG = 0x180f0010ull;
+
+static const uint32_t TIMEOUT_REG_INT_TIMEOUT = 0;
+static const uint32_t TIMEOUT_REG_INT_TIMEOUT_LEN = 2;
+//<< [TIMEOUT_REG]
+// iohs/reg00068.H
+
 //>>THE END<<
 
 #ifndef __PPE_HCODE__

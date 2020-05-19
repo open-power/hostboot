@@ -271,6 +271,20 @@ static const uint32_t QME_PSCRS3_PLS_LEN = 4;
 //<< [QME_PSCRS3]
 // c/reg00007.H
 
+//>> [CPMS_CERRMSK]
+static const uint64_t CPMS_CERRMSK = 0x200e0e14ull;
+
+static const uint32_t CPMS_CERRMSK_PFET_SEQ_ERR_MASK = 0;
+static const uint32_t CPMS_CERRMSK_DDS_ERR_MASK = 1;
+static const uint32_t CPMS_CERRMSK_CLK_SYNC_ERR_MASK = 2;
+static const uint32_t CPMS_CERRMSK_DPT_ACCESS_MASK = 3;
+static const uint32_t CPMS_CERRMSK_PROXY_MASK = 4;
+static const uint32_t CPMS_CERRMSK_FTC_EVENT_MASK = 5;
+static const uint32_t CPMS_CERRMSK_FTC_EVENT_MASK_LEN = 3;
+static const uint32_t CPMS_CERRMSK_PITCH_MASK = 8;
+//<< [CPMS_CERRMSK]
+// c/reg00007.H
+
 //>>THE END<<
 
 #ifndef __PPE_HCODE__

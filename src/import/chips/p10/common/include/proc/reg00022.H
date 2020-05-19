@@ -1340,6 +1340,699 @@ fapi_try_exit:
 //<< GET_[TP_TPCHIP_OCC_OCI_GPE0_OCB_GPETSEL_FIT_SEL]
 
 
+//>> PREP_[PB_BRIDGE_NHTM_SC_HTM_TRIG]
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PREP_PB_BRIDGE_NHTM_SC_HTM_TRIG(const fapi2::Target<K, M, V>& i_target)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = PB_BRIDGE_NHTM_SC_HTM_TRIG;
+#endif
+    return fapi2::current_err;
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+//<< PREP_[PB_BRIDGE_NHTM_SC_HTM_TRIG]
+
+//>> GET_[PB_BRIDGE_NHTM_SC_HTM_TRIG]
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode GET_PB_BRIDGE_NHTM_SC_HTM_TRIG(const fapi2::Target<K, M, V>& i_target,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = PB_BRIDGE_NHTM_SC_HTM_TRIG;
+#endif
+    return fapi2::getScom(i_target, PB_BRIDGE_NHTM_SC_HTM_TRIG, o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+//<< GET_[PB_BRIDGE_NHTM_SC_HTM_TRIG]
+
+//>> PUT_[PB_BRIDGE_NHTM_SC_HTM_TRIG]
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PUT_PB_BRIDGE_NHTM_SC_HTM_TRIG(const fapi2::Target<K, M, V>& i_target,
+        const uint64_t i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    FAPI_TRY(scomt::chkReg(PB_BRIDGE_NHTM_SC_HTM_TRIG));
+#endif
+    return fapi2::putScom(i_target, PB_BRIDGE_NHTM_SC_HTM_TRIG, i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+//<< PUT_[PB_BRIDGE_NHTM_SC_HTM_TRIG]
+
+
+//>> SET_[PB_BRIDGE_NHTM_SC_HTM_TRIG_START]
+static inline fapi2::buffer<uint64_t>& SET_PB_BRIDGE_NHTM_SC_HTM_TRIG_START(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_BRIDGE_NHTM_SC_HTM_TRIG));
+#endif
+    return o_data.insertFromRight<PB_BRIDGE_NHTM_SC_HTM_TRIG_START,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("0:scom_proc Invalid dial access PB_BRIDGE_NHTM_SC_HTM_TRIG_START chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[PB_BRIDGE_NHTM_SC_HTM_TRIG_START]
+
+//>> SET_[PB_BRIDGE_NHTM_SC_HTM_TRIG_START]
+static inline fapi2::buffer<uint64_t>& SET_PB_BRIDGE_NHTM_SC_HTM_TRIG_START(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_BRIDGE_NHTM_SC_HTM_TRIG));
+#endif
+    return o_data.insertFromRight<PB_BRIDGE_NHTM_SC_HTM_TRIG_START,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("1:scom_proc Invalid dial access PB_BRIDGE_NHTM_SC_HTM_TRIG_START chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[PB_BRIDGE_NHTM_SC_HTM_TRIG_START]
+
+//>> SET_[PB_BRIDGE_NHTM_SC_HTM_TRIG_START]
+static inline fapi2::buffer<uint64_t>& SET_PB_BRIDGE_NHTM_SC_HTM_TRIG_START(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_BRIDGE_NHTM_SC_HTM_TRIG));
+#endif
+    return o_data.setBit<PB_BRIDGE_NHTM_SC_HTM_TRIG_START>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("2:scom_proc Invalid dial access PB_BRIDGE_NHTM_SC_HTM_TRIG_START chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[PB_BRIDGE_NHTM_SC_HTM_TRIG_START]
+
+//>> CLEAR_[PB_BRIDGE_NHTM_SC_HTM_TRIG_START]
+static inline fapi2::buffer<uint64_t>& CLEAR_PB_BRIDGE_NHTM_SC_HTM_TRIG_START(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_BRIDGE_NHTM_SC_HTM_TRIG));
+#endif
+    return o_data.clearBit<PB_BRIDGE_NHTM_SC_HTM_TRIG_START>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("3:scom_proc Invalid dial access PB_BRIDGE_NHTM_SC_HTM_TRIG_START chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< CLEAR_[PB_BRIDGE_NHTM_SC_HTM_TRIG_START]
+
+//>> GET_[PB_BRIDGE_NHTM_SC_HTM_TRIG_START]
+static inline fapi2::buffer<uint64_t>& GET_PB_BRIDGE_NHTM_SC_HTM_TRIG_START(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_BRIDGE_NHTM_SC_HTM_TRIG));
+#endif
+    return i_data.extractToRight<PB_BRIDGE_NHTM_SC_HTM_TRIG_START,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("4:scom_proc Invalid dial access PB_BRIDGE_NHTM_SC_HTM_TRIG_START chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[PB_BRIDGE_NHTM_SC_HTM_TRIG_START]
+
+//>> GET_[PB_BRIDGE_NHTM_SC_HTM_TRIG_START]
+static inline bool GET_PB_BRIDGE_NHTM_SC_HTM_TRIG_START(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_BRIDGE_NHTM_SC_HTM_TRIG));
+#endif
+    return i_data.getBit<PB_BRIDGE_NHTM_SC_HTM_TRIG_START>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("5:scom_proc Invalid dial access PB_BRIDGE_NHTM_SC_HTM_TRIG_START chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[PB_BRIDGE_NHTM_SC_HTM_TRIG_START]
+
+//>> SET_[PB_BRIDGE_NHTM_SC_HTM_TRIG_STOP]
+static inline fapi2::buffer<uint64_t>& SET_PB_BRIDGE_NHTM_SC_HTM_TRIG_STOP(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_BRIDGE_NHTM_SC_HTM_TRIG));
+#endif
+    return o_data.insertFromRight<PB_BRIDGE_NHTM_SC_HTM_TRIG_STOP,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("0:scom_proc Invalid dial access PB_BRIDGE_NHTM_SC_HTM_TRIG_STOP chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[PB_BRIDGE_NHTM_SC_HTM_TRIG_STOP]
+
+//>> SET_[PB_BRIDGE_NHTM_SC_HTM_TRIG_STOP]
+static inline fapi2::buffer<uint64_t>& SET_PB_BRIDGE_NHTM_SC_HTM_TRIG_STOP(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_BRIDGE_NHTM_SC_HTM_TRIG));
+#endif
+    return o_data.insertFromRight<PB_BRIDGE_NHTM_SC_HTM_TRIG_STOP,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("1:scom_proc Invalid dial access PB_BRIDGE_NHTM_SC_HTM_TRIG_STOP chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[PB_BRIDGE_NHTM_SC_HTM_TRIG_STOP]
+
+//>> SET_[PB_BRIDGE_NHTM_SC_HTM_TRIG_STOP]
+static inline fapi2::buffer<uint64_t>& SET_PB_BRIDGE_NHTM_SC_HTM_TRIG_STOP(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_BRIDGE_NHTM_SC_HTM_TRIG));
+#endif
+    return o_data.setBit<PB_BRIDGE_NHTM_SC_HTM_TRIG_STOP>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("2:scom_proc Invalid dial access PB_BRIDGE_NHTM_SC_HTM_TRIG_STOP chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[PB_BRIDGE_NHTM_SC_HTM_TRIG_STOP]
+
+//>> CLEAR_[PB_BRIDGE_NHTM_SC_HTM_TRIG_STOP]
+static inline fapi2::buffer<uint64_t>& CLEAR_PB_BRIDGE_NHTM_SC_HTM_TRIG_STOP(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_BRIDGE_NHTM_SC_HTM_TRIG));
+#endif
+    return o_data.clearBit<PB_BRIDGE_NHTM_SC_HTM_TRIG_STOP>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("3:scom_proc Invalid dial access PB_BRIDGE_NHTM_SC_HTM_TRIG_STOP chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< CLEAR_[PB_BRIDGE_NHTM_SC_HTM_TRIG_STOP]
+
+//>> GET_[PB_BRIDGE_NHTM_SC_HTM_TRIG_STOP]
+static inline fapi2::buffer<uint64_t>& GET_PB_BRIDGE_NHTM_SC_HTM_TRIG_STOP(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_BRIDGE_NHTM_SC_HTM_TRIG));
+#endif
+    return i_data.extractToRight<PB_BRIDGE_NHTM_SC_HTM_TRIG_STOP,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("4:scom_proc Invalid dial access PB_BRIDGE_NHTM_SC_HTM_TRIG_STOP chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[PB_BRIDGE_NHTM_SC_HTM_TRIG_STOP]
+
+//>> GET_[PB_BRIDGE_NHTM_SC_HTM_TRIG_STOP]
+static inline bool GET_PB_BRIDGE_NHTM_SC_HTM_TRIG_STOP(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_BRIDGE_NHTM_SC_HTM_TRIG));
+#endif
+    return i_data.getBit<PB_BRIDGE_NHTM_SC_HTM_TRIG_STOP>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("5:scom_proc Invalid dial access PB_BRIDGE_NHTM_SC_HTM_TRIG_STOP chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[PB_BRIDGE_NHTM_SC_HTM_TRIG_STOP]
+
+//>> SET_[PB_BRIDGE_NHTM_SC_HTM_TRIG_PAUSE]
+static inline fapi2::buffer<uint64_t>& SET_PB_BRIDGE_NHTM_SC_HTM_TRIG_PAUSE(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_BRIDGE_NHTM_SC_HTM_TRIG));
+#endif
+    return o_data.insertFromRight<PB_BRIDGE_NHTM_SC_HTM_TRIG_PAUSE,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("0:scom_proc Invalid dial access PB_BRIDGE_NHTM_SC_HTM_TRIG_PAUSE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[PB_BRIDGE_NHTM_SC_HTM_TRIG_PAUSE]
+
+//>> SET_[PB_BRIDGE_NHTM_SC_HTM_TRIG_PAUSE]
+static inline fapi2::buffer<uint64_t>& SET_PB_BRIDGE_NHTM_SC_HTM_TRIG_PAUSE(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_BRIDGE_NHTM_SC_HTM_TRIG));
+#endif
+    return o_data.insertFromRight<PB_BRIDGE_NHTM_SC_HTM_TRIG_PAUSE,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("1:scom_proc Invalid dial access PB_BRIDGE_NHTM_SC_HTM_TRIG_PAUSE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[PB_BRIDGE_NHTM_SC_HTM_TRIG_PAUSE]
+
+//>> SET_[PB_BRIDGE_NHTM_SC_HTM_TRIG_PAUSE]
+static inline fapi2::buffer<uint64_t>& SET_PB_BRIDGE_NHTM_SC_HTM_TRIG_PAUSE(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_BRIDGE_NHTM_SC_HTM_TRIG));
+#endif
+    return o_data.setBit<PB_BRIDGE_NHTM_SC_HTM_TRIG_PAUSE>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("2:scom_proc Invalid dial access PB_BRIDGE_NHTM_SC_HTM_TRIG_PAUSE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[PB_BRIDGE_NHTM_SC_HTM_TRIG_PAUSE]
+
+//>> CLEAR_[PB_BRIDGE_NHTM_SC_HTM_TRIG_PAUSE]
+static inline fapi2::buffer<uint64_t>& CLEAR_PB_BRIDGE_NHTM_SC_HTM_TRIG_PAUSE(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_BRIDGE_NHTM_SC_HTM_TRIG));
+#endif
+    return o_data.clearBit<PB_BRIDGE_NHTM_SC_HTM_TRIG_PAUSE>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("3:scom_proc Invalid dial access PB_BRIDGE_NHTM_SC_HTM_TRIG_PAUSE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< CLEAR_[PB_BRIDGE_NHTM_SC_HTM_TRIG_PAUSE]
+
+//>> GET_[PB_BRIDGE_NHTM_SC_HTM_TRIG_PAUSE]
+static inline fapi2::buffer<uint64_t>& GET_PB_BRIDGE_NHTM_SC_HTM_TRIG_PAUSE(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_BRIDGE_NHTM_SC_HTM_TRIG));
+#endif
+    return i_data.extractToRight<PB_BRIDGE_NHTM_SC_HTM_TRIG_PAUSE,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("4:scom_proc Invalid dial access PB_BRIDGE_NHTM_SC_HTM_TRIG_PAUSE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[PB_BRIDGE_NHTM_SC_HTM_TRIG_PAUSE]
+
+//>> GET_[PB_BRIDGE_NHTM_SC_HTM_TRIG_PAUSE]
+static inline bool GET_PB_BRIDGE_NHTM_SC_HTM_TRIG_PAUSE(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_BRIDGE_NHTM_SC_HTM_TRIG));
+#endif
+    return i_data.getBit<PB_BRIDGE_NHTM_SC_HTM_TRIG_PAUSE>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("5:scom_proc Invalid dial access PB_BRIDGE_NHTM_SC_HTM_TRIG_PAUSE chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[PB_BRIDGE_NHTM_SC_HTM_TRIG_PAUSE]
+
+//>> SET_[PB_BRIDGE_NHTM_SC_HTM_TRIG_STOP_ALT]
+static inline fapi2::buffer<uint64_t>& SET_PB_BRIDGE_NHTM_SC_HTM_TRIG_STOP_ALT(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_BRIDGE_NHTM_SC_HTM_TRIG));
+#endif
+    return o_data.insertFromRight<PB_BRIDGE_NHTM_SC_HTM_TRIG_STOP_ALT,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("0:scom_proc Invalid dial access PB_BRIDGE_NHTM_SC_HTM_TRIG_STOP_ALT chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[PB_BRIDGE_NHTM_SC_HTM_TRIG_STOP_ALT]
+
+//>> SET_[PB_BRIDGE_NHTM_SC_HTM_TRIG_STOP_ALT]
+static inline fapi2::buffer<uint64_t>& SET_PB_BRIDGE_NHTM_SC_HTM_TRIG_STOP_ALT(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_BRIDGE_NHTM_SC_HTM_TRIG));
+#endif
+    return o_data.insertFromRight<PB_BRIDGE_NHTM_SC_HTM_TRIG_STOP_ALT,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("1:scom_proc Invalid dial access PB_BRIDGE_NHTM_SC_HTM_TRIG_STOP_ALT chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[PB_BRIDGE_NHTM_SC_HTM_TRIG_STOP_ALT]
+
+//>> SET_[PB_BRIDGE_NHTM_SC_HTM_TRIG_STOP_ALT]
+static inline fapi2::buffer<uint64_t>& SET_PB_BRIDGE_NHTM_SC_HTM_TRIG_STOP_ALT(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_BRIDGE_NHTM_SC_HTM_TRIG));
+#endif
+    return o_data.setBit<PB_BRIDGE_NHTM_SC_HTM_TRIG_STOP_ALT>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("2:scom_proc Invalid dial access PB_BRIDGE_NHTM_SC_HTM_TRIG_STOP_ALT chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[PB_BRIDGE_NHTM_SC_HTM_TRIG_STOP_ALT]
+
+//>> CLEAR_[PB_BRIDGE_NHTM_SC_HTM_TRIG_STOP_ALT]
+static inline fapi2::buffer<uint64_t>& CLEAR_PB_BRIDGE_NHTM_SC_HTM_TRIG_STOP_ALT(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_BRIDGE_NHTM_SC_HTM_TRIG));
+#endif
+    return o_data.clearBit<PB_BRIDGE_NHTM_SC_HTM_TRIG_STOP_ALT>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("3:scom_proc Invalid dial access PB_BRIDGE_NHTM_SC_HTM_TRIG_STOP_ALT chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+//<< CLEAR_[PB_BRIDGE_NHTM_SC_HTM_TRIG_STOP_ALT]
+
+//>> GET_[PB_BRIDGE_NHTM_SC_HTM_TRIG_STOP_ALT]
+static inline fapi2::buffer<uint64_t>& GET_PB_BRIDGE_NHTM_SC_HTM_TRIG_STOP_ALT(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_BRIDGE_NHTM_SC_HTM_TRIG));
+#endif
+    return i_data.extractToRight<PB_BRIDGE_NHTM_SC_HTM_TRIG_STOP_ALT,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("4:scom_proc Invalid dial access PB_BRIDGE_NHTM_SC_HTM_TRIG_STOP_ALT chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[PB_BRIDGE_NHTM_SC_HTM_TRIG_STOP_ALT]
+
+//>> GET_[PB_BRIDGE_NHTM_SC_HTM_TRIG_STOP_ALT]
+static inline bool GET_PB_BRIDGE_NHTM_SC_HTM_TRIG_STOP_ALT(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_BRIDGE_NHTM_SC_HTM_TRIG));
+#endif
+    return i_data.getBit<PB_BRIDGE_NHTM_SC_HTM_TRIG_STOP_ALT>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("5:scom_proc Invalid dial access PB_BRIDGE_NHTM_SC_HTM_TRIG_STOP_ALT chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[PB_BRIDGE_NHTM_SC_HTM_TRIG_STOP_ALT]
+
+//>> SET_[PB_BRIDGE_NHTM_SC_HTM_TRIG_RESET]
+static inline fapi2::buffer<uint64_t>& SET_PB_BRIDGE_NHTM_SC_HTM_TRIG_RESET(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_BRIDGE_NHTM_SC_HTM_TRIG));
+#endif
+    return o_data.insertFromRight<PB_BRIDGE_NHTM_SC_HTM_TRIG_RESET,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("0:scom_proc Invalid dial access PB_BRIDGE_NHTM_SC_HTM_TRIG_RESET chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[PB_BRIDGE_NHTM_SC_HTM_TRIG_RESET]
+
+//>> SET_[PB_BRIDGE_NHTM_SC_HTM_TRIG_RESET]
+static inline fapi2::buffer<uint64_t>& SET_PB_BRIDGE_NHTM_SC_HTM_TRIG_RESET(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_BRIDGE_NHTM_SC_HTM_TRIG));
+#endif
+    return o_data.insertFromRight<PB_BRIDGE_NHTM_SC_HTM_TRIG_RESET,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("1:scom_proc Invalid dial access PB_BRIDGE_NHTM_SC_HTM_TRIG_RESET chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[PB_BRIDGE_NHTM_SC_HTM_TRIG_RESET]
+
+//>> SET_[PB_BRIDGE_NHTM_SC_HTM_TRIG_RESET]
+static inline fapi2::buffer<uint64_t>& SET_PB_BRIDGE_NHTM_SC_HTM_TRIG_RESET(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_BRIDGE_NHTM_SC_HTM_TRIG));
+#endif
+    return o_data.setBit<PB_BRIDGE_NHTM_SC_HTM_TRIG_RESET>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("2:scom_proc Invalid dial access PB_BRIDGE_NHTM_SC_HTM_TRIG_RESET chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[PB_BRIDGE_NHTM_SC_HTM_TRIG_RESET]
+
+//>> CLEAR_[PB_BRIDGE_NHTM_SC_HTM_TRIG_RESET]
+static inline fapi2::buffer<uint64_t>& CLEAR_PB_BRIDGE_NHTM_SC_HTM_TRIG_RESET(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_BRIDGE_NHTM_SC_HTM_TRIG));
+#endif
+    return o_data.clearBit<PB_BRIDGE_NHTM_SC_HTM_TRIG_RESET>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("3:scom_proc Invalid dial access PB_BRIDGE_NHTM_SC_HTM_TRIG_RESET chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< CLEAR_[PB_BRIDGE_NHTM_SC_HTM_TRIG_RESET]
+
+//>> GET_[PB_BRIDGE_NHTM_SC_HTM_TRIG_RESET]
+static inline fapi2::buffer<uint64_t>& GET_PB_BRIDGE_NHTM_SC_HTM_TRIG_RESET(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_BRIDGE_NHTM_SC_HTM_TRIG));
+#endif
+    return i_data.extractToRight<PB_BRIDGE_NHTM_SC_HTM_TRIG_RESET,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("4:scom_proc Invalid dial access PB_BRIDGE_NHTM_SC_HTM_TRIG_RESET chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[PB_BRIDGE_NHTM_SC_HTM_TRIG_RESET]
+
+//>> GET_[PB_BRIDGE_NHTM_SC_HTM_TRIG_RESET]
+static inline bool GET_PB_BRIDGE_NHTM_SC_HTM_TRIG_RESET(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_BRIDGE_NHTM_SC_HTM_TRIG));
+#endif
+    return i_data.getBit<PB_BRIDGE_NHTM_SC_HTM_TRIG_RESET>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("5:scom_proc Invalid dial access PB_BRIDGE_NHTM_SC_HTM_TRIG_RESET chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[PB_BRIDGE_NHTM_SC_HTM_TRIG_RESET]
+
+//>> SET_[PB_BRIDGE_NHTM_SC_HTM_TRIG_MARK_VALID]
+static inline fapi2::buffer<uint64_t>& SET_PB_BRIDGE_NHTM_SC_HTM_TRIG_MARK_VALID(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_BRIDGE_NHTM_SC_HTM_TRIG));
+#endif
+    return o_data.insertFromRight<PB_BRIDGE_NHTM_SC_HTM_TRIG_MARK_VALID,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("0:scom_proc Invalid dial access PB_BRIDGE_NHTM_SC_HTM_TRIG_MARK_VALID chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[PB_BRIDGE_NHTM_SC_HTM_TRIG_MARK_VALID]
+
+//>> SET_[PB_BRIDGE_NHTM_SC_HTM_TRIG_MARK_VALID]
+static inline fapi2::buffer<uint64_t>& SET_PB_BRIDGE_NHTM_SC_HTM_TRIG_MARK_VALID(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_BRIDGE_NHTM_SC_HTM_TRIG));
+#endif
+    return o_data.insertFromRight<PB_BRIDGE_NHTM_SC_HTM_TRIG_MARK_VALID,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("1:scom_proc Invalid dial access PB_BRIDGE_NHTM_SC_HTM_TRIG_MARK_VALID chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[PB_BRIDGE_NHTM_SC_HTM_TRIG_MARK_VALID]
+
+//>> SET_[PB_BRIDGE_NHTM_SC_HTM_TRIG_MARK_VALID]
+static inline fapi2::buffer<uint64_t>& SET_PB_BRIDGE_NHTM_SC_HTM_TRIG_MARK_VALID(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_BRIDGE_NHTM_SC_HTM_TRIG));
+#endif
+    return o_data.setBit<PB_BRIDGE_NHTM_SC_HTM_TRIG_MARK_VALID>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("2:scom_proc Invalid dial access PB_BRIDGE_NHTM_SC_HTM_TRIG_MARK_VALID chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[PB_BRIDGE_NHTM_SC_HTM_TRIG_MARK_VALID]
+
+//>> CLEAR_[PB_BRIDGE_NHTM_SC_HTM_TRIG_MARK_VALID]
+static inline fapi2::buffer<uint64_t>& CLEAR_PB_BRIDGE_NHTM_SC_HTM_TRIG_MARK_VALID(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_BRIDGE_NHTM_SC_HTM_TRIG));
+#endif
+    return o_data.clearBit<PB_BRIDGE_NHTM_SC_HTM_TRIG_MARK_VALID>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("3:scom_proc Invalid dial access PB_BRIDGE_NHTM_SC_HTM_TRIG_MARK_VALID chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+//<< CLEAR_[PB_BRIDGE_NHTM_SC_HTM_TRIG_MARK_VALID]
+
+//>> GET_[PB_BRIDGE_NHTM_SC_HTM_TRIG_MARK_VALID]
+static inline fapi2::buffer<uint64_t>& GET_PB_BRIDGE_NHTM_SC_HTM_TRIG_MARK_VALID(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_BRIDGE_NHTM_SC_HTM_TRIG));
+#endif
+    return i_data.extractToRight<PB_BRIDGE_NHTM_SC_HTM_TRIG_MARK_VALID,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("4:scom_proc Invalid dial access PB_BRIDGE_NHTM_SC_HTM_TRIG_MARK_VALID chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[PB_BRIDGE_NHTM_SC_HTM_TRIG_MARK_VALID]
+
+//>> GET_[PB_BRIDGE_NHTM_SC_HTM_TRIG_MARK_VALID]
+static inline bool GET_PB_BRIDGE_NHTM_SC_HTM_TRIG_MARK_VALID(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_BRIDGE_NHTM_SC_HTM_TRIG));
+#endif
+    return i_data.getBit<PB_BRIDGE_NHTM_SC_HTM_TRIG_MARK_VALID>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("5:scom_proc Invalid dial access PB_BRIDGE_NHTM_SC_HTM_TRIG_MARK_VALID chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[PB_BRIDGE_NHTM_SC_HTM_TRIG_MARK_VALID]
+
+//>> SET_[PB_BRIDGE_NHTM_SC_HTM_TRIG_MARK_TYPE]
+static inline fapi2::buffer<uint64_t>& SET_PB_BRIDGE_NHTM_SC_HTM_TRIG_MARK_TYPE(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_BRIDGE_NHTM_SC_HTM_TRIG));
+#endif
+    return o_data.insertFromRight<PB_BRIDGE_NHTM_SC_HTM_TRIG_MARK_TYPE,
+           PB_BRIDGE_NHTM_SC_HTM_TRIG_MARK_TYPE_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("0:scom_proc Invalid dial access PB_BRIDGE_NHTM_SC_HTM_TRIG_MARK_TYPE chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[PB_BRIDGE_NHTM_SC_HTM_TRIG_MARK_TYPE]
+
+//>> SET_[PB_BRIDGE_NHTM_SC_HTM_TRIG_MARK_TYPE]
+static inline fapi2::buffer<uint64_t>& SET_PB_BRIDGE_NHTM_SC_HTM_TRIG_MARK_TYPE(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_BRIDGE_NHTM_SC_HTM_TRIG));
+#endif
+    return o_data.insertFromRight<PB_BRIDGE_NHTM_SC_HTM_TRIG_MARK_TYPE,
+           PB_BRIDGE_NHTM_SC_HTM_TRIG_MARK_TYPE_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("1:scom_proc Invalid dial access PB_BRIDGE_NHTM_SC_HTM_TRIG_MARK_TYPE chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[PB_BRIDGE_NHTM_SC_HTM_TRIG_MARK_TYPE]
+
+//>> GET_[PB_BRIDGE_NHTM_SC_HTM_TRIG_MARK_TYPE]
+static inline fapi2::buffer<uint64_t>& GET_PB_BRIDGE_NHTM_SC_HTM_TRIG_MARK_TYPE(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_BRIDGE_NHTM_SC_HTM_TRIG));
+#endif
+    return i_data.extractToRight<PB_BRIDGE_NHTM_SC_HTM_TRIG_MARK_TYPE,
+           PB_BRIDGE_NHTM_SC_HTM_TRIG_MARK_TYPE_LEN>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("4:scom_proc Invalid dial access PB_BRIDGE_NHTM_SC_HTM_TRIG_MARK_TYPE chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[PB_BRIDGE_NHTM_SC_HTM_TRIG_MARK_TYPE]
+
 //>>THE END<<
 
 #ifndef __PPE_HCODE__

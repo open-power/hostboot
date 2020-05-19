@@ -84,6 +84,48 @@ static const uint32_t PB_PBCQ_PEPBREGS_PE_TOPOLOGY_REG0_PE_TOPOLOGY_ID_REG0_LEN 
 //<< [PB_PBCQ_PEPBREGS_PE_TOPOLOGY_REG0]
 // pec/reg00002.H
 
+//>> [SPATTN]
+static const uint64_t SPATTN = 0x08040002ull;
+
+static const uint32_t SPATTN_ANY_SPATTN = 0;
+static const uint32_t SPATTN_RESERVED1S = 1;
+static const uint32_t SPATTN_RESERVED2S = 2;
+static const uint32_t SPATTN_RESERVED3S = 3;
+static const uint32_t SPATTN_PERV = 4;
+static const uint32_t SPATTN_IN05 = 5;
+static const uint32_t SPATTN_IN06 = 6;
+static const uint32_t SPATTN_IN07 = 7;
+static const uint32_t SPATTN_IN08 = 8;
+static const uint32_t SPATTN_IN09 = 9;
+static const uint32_t SPATTN_IN10 = 10;
+static const uint32_t SPATTN_IN11 = 11;
+static const uint32_t SPATTN_IN12 = 12;
+static const uint32_t SPATTN_IN13 = 13;
+static const uint32_t SPATTN_IN14 = 14;
+static const uint32_t SPATTN_IN15 = 15;
+static const uint32_t SPATTN_IN16 = 16;
+static const uint32_t SPATTN_IN17 = 17;
+static const uint32_t SPATTN_IN18 = 18;
+static const uint32_t SPATTN_IN19 = 19;
+static const uint32_t SPATTN_IN20 = 20;
+static const uint32_t SPATTN_IN21 = 21;
+static const uint32_t SPATTN_IN22 = 22;
+static const uint32_t SPATTN_IN23 = 23;
+static const uint32_t SPATTN_IN24 = 24;
+static const uint32_t SPATTN_IN25 = 25;
+static const uint32_t SPATTN_IN26 = 26;
+static const uint32_t SPATTN_IN27 = 27;
+static const uint32_t SPATTN_IN28 = 28;
+static const uint32_t SPATTN_IN29 = 29;
+static const uint32_t SPATTN_IN30 = 30;
+static const uint32_t SPATTN_IN31 = 31;
+static const uint32_t SPATTN_IN32 = 32;
+static const uint32_t SPATTN_IN33 = 33;
+static const uint32_t SPATTN_IN34 = 34;
+static const uint32_t SPATTN_IN35 = 35;
+//<< [SPATTN]
+// pec/reg00002.H
+
 //>>THE END<<
 
 #ifndef __PPE_HCODE__

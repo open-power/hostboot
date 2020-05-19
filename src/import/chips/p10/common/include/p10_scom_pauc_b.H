@@ -190,6 +190,77 @@ static const uint32_t LOCAL_FIR_EXT_LOCAL_XSTOP = 63;
 //<< [LOCAL_FIR]
 // pauc/reg00011.H
 
+//>> [ATOMIC_LOCK_REG]
+static const uint64_t ATOMIC_LOCK_REG = 0x100f03ffull;
+
+static const uint32_t ATOMIC_LOCK_REG_LOCK_ENABLE = 0;
+static const uint32_t ATOMIC_LOCK_REG_ID = 1;
+static const uint32_t ATOMIC_LOCK_REG_ID_LEN = 4;
+static const uint32_t ATOMIC_LOCK_REG_ACTIVITY = 8;
+static const uint32_t ATOMIC_LOCK_REG_ACTIVITY_LEN = 8;
+//<< [ATOMIC_LOCK_REG]
+// pauc/reg00011.H
+
+//>> [RECOV]
+static const uint64_t RECOV = 0x10040001ull;
+
+static const uint32_t RECOV_ANY_RECOV = 0;
+static const uint32_t RECOV_RESERVED1R = 1;
+static const uint32_t RECOV_ANY_LOCAL_XSTOP = 2;
+static const uint32_t RECOV_RESERVED3R = 3;
+static const uint32_t RECOV_PERV = 4;
+static const uint32_t RECOV_IN05 = 5;
+static const uint32_t RECOV_IN06 = 6;
+static const uint32_t RECOV_IN07 = 7;
+static const uint32_t RECOV_IN08 = 8;
+static const uint32_t RECOV_IN09 = 9;
+static const uint32_t RECOV_IN10 = 10;
+static const uint32_t RECOV_IN11 = 11;
+static const uint32_t RECOV_IN12 = 12;
+static const uint32_t RECOV_IN13 = 13;
+static const uint32_t RECOV_IN14 = 14;
+static const uint32_t RECOV_IN15 = 15;
+static const uint32_t RECOV_IN16 = 16;
+static const uint32_t RECOV_IN17 = 17;
+static const uint32_t RECOV_IN18 = 18;
+static const uint32_t RECOV_IN19 = 19;
+static const uint32_t RECOV_IN20 = 20;
+static const uint32_t RECOV_IN21 = 21;
+static const uint32_t RECOV_IN22 = 22;
+static const uint32_t RECOV_IN23 = 23;
+static const uint32_t RECOV_IN24 = 24;
+static const uint32_t RECOV_IN25 = 25;
+static const uint32_t RECOV_IN26 = 26;
+static const uint32_t RECOV_IN27 = 27;
+static const uint32_t RECOV_IN28 = 28;
+static const uint32_t RECOV_IN29 = 29;
+static const uint32_t RECOV_IN30 = 30;
+static const uint32_t RECOV_IN31 = 31;
+static const uint32_t RECOV_IN32 = 32;
+static const uint32_t RECOV_IN33 = 33;
+static const uint32_t RECOV_IN34 = 34;
+static const uint32_t RECOV_IN35 = 35;
+static const uint32_t RECOV_IN36 = 36;
+static const uint32_t RECOV_IN37 = 37;
+static const uint32_t RECOV_IN38 = 38;
+static const uint32_t RECOV_IN39 = 39;
+static const uint32_t RECOV_IN40 = 40;
+static const uint32_t RECOV_IN41 = 41;
+static const uint32_t RECOV_IN42 = 42;
+static const uint32_t RECOV_IN43 = 43;
+static const uint32_t RECOV_IN44 = 44;
+static const uint32_t RECOV_IN45 = 45;
+static const uint32_t RECOV_IN46 = 46;
+static const uint32_t RECOV_IN47 = 47;
+static const uint32_t RECOV_IN48 = 48;
+static const uint32_t RECOV_IN49 = 49;
+static const uint32_t RECOV_IN50 = 50;
+static const uint32_t RECOV_IN51 = 51;
+static const uint32_t RECOV_IN52 = 52;
+static const uint32_t RECOV_IN53 = 53;
+//<< [RECOV]
+// pauc/reg00011.H
+
 //>>THE END<<
 
 #ifndef __PPE_HCODE__

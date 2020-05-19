@@ -4969,6 +4969,106 @@ fapi_try_exit:
 }
 //<< GET_[ERROR_REG_QME_FSM_ERROR]
 
+//>> PREP_[AXON_CPLT_CONF1_WO_CLEAR]
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PREP_AXON_CPLT_CONF1_WO_CLEAR(const fapi2::Target<K, M, V>& i_target)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = AXON_CPLT_CONF1_WO_CLEAR;
+#endif
+    return fapi2::current_err;
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+//<< PREP_[AXON_CPLT_CONF1_WO_CLEAR]
+
+//>> GET_[AXON_CPLT_CONF1_WO_CLEAR]
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode GET_AXON_CPLT_CONF1_WO_CLEAR(const fapi2::Target<K, M, V>& i_target,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = AXON_CPLT_CONF1_WO_CLEAR;
+#endif
+    return fapi2::getScom(i_target, AXON_CPLT_CONF1_WO_CLEAR, o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+//<< GET_[AXON_CPLT_CONF1_WO_CLEAR]
+
+//>> PUT_[AXON_CPLT_CONF1_WO_CLEAR]
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PUT_AXON_CPLT_CONF1_WO_CLEAR(const fapi2::Target<K, M, V>& i_target,
+        const uint64_t i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    FAPI_TRY(scomt::chkReg(AXON_CPLT_CONF1_RW, AXON_CPLT_CONF1_WO_CLEAR, AXON_CPLT_CONF1_WO_OR));
+#endif
+    return fapi2::putScom(i_target, AXON_CPLT_CONF1_WO_CLEAR, i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+//<< PUT_[AXON_CPLT_CONF1_WO_CLEAR]
+
+//>> PREP_[AXON_CPLT_CONF1_WO_OR]
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PREP_AXON_CPLT_CONF1_WO_OR(const fapi2::Target<K, M, V>& i_target)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = AXON_CPLT_CONF1_WO_OR;
+#endif
+    return fapi2::current_err;
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+//<< PREP_[AXON_CPLT_CONF1_WO_OR]
+
+//>> GET_[AXON_CPLT_CONF1_WO_OR]
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode GET_AXON_CPLT_CONF1_WO_OR(const fapi2::Target<K, M, V>& i_target,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = AXON_CPLT_CONF1_WO_OR;
+#endif
+    return fapi2::getScom(i_target, AXON_CPLT_CONF1_WO_OR, o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+//<< GET_[AXON_CPLT_CONF1_WO_OR]
+
+//>> PUT_[AXON_CPLT_CONF1_WO_OR]
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PUT_AXON_CPLT_CONF1_WO_OR(const fapi2::Target<K, M, V>& i_target, const uint64_t i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    FAPI_TRY(scomt::chkReg(AXON_CPLT_CONF1_RW, AXON_CPLT_CONF1_WO_CLEAR, AXON_CPLT_CONF1_WO_OR));
+#endif
+    return fapi2::putScom(i_target, AXON_CPLT_CONF1_WO_OR, i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+//<< PUT_[AXON_CPLT_CONF1_WO_OR]
+
+
 //>>THE END<<
 
 #ifndef __PPE_HCODE__

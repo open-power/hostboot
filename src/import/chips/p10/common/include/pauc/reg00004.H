@@ -3923,6 +3923,56 @@ fapi_try_exit:
 }
 //<< GET_[TRA0_TR0_TRACE_LO_DATA_REG_HOLD_ADDRESS]
 
+//>> PREP_[PHY_PPE_WRAP_ARB_CSCR_RW]
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PREP_PHY_PPE_WRAP_ARB_CSCR_RW(const fapi2::Target<K, M, V>& i_target)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = PHY_PPE_WRAP_ARB_CSCR_RW;
+#endif
+    return fapi2::current_err;
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+//<< PREP_[PHY_PPE_WRAP_ARB_CSCR_RW]
+
+//>> GET_[PHY_PPE_WRAP_ARB_CSCR_RW]
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode GET_PHY_PPE_WRAP_ARB_CSCR_RW(const fapi2::Target<K, M, V>& i_target,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = PHY_PPE_WRAP_ARB_CSCR_RW;
+#endif
+    return fapi2::getScom(i_target, PHY_PPE_WRAP_ARB_CSCR_RW, o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+//<< GET_[PHY_PPE_WRAP_ARB_CSCR_RW]
+
+//>> PUT_[PHY_PPE_WRAP_ARB_CSCR_RW]
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PUT_PHY_PPE_WRAP_ARB_CSCR_RW(const fapi2::Target<K, M, V>& i_target,
+        const uint64_t i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    FAPI_TRY(scomt::chkReg(PHY_PPE_WRAP_ARB_CSCR_RW, PHY_PPE_WRAP_ARB_CSCR_WO_CLEAR, PHY_PPE_WRAP_ARB_CSCR_WO_OR));
+#endif
+    return fapi2::putScom(i_target, PHY_PPE_WRAP_ARB_CSCR_RW, i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+//<< PUT_[PHY_PPE_WRAP_ARB_CSCR_RW]
+
 //>>THE END<<
 
 #ifndef __PPE_HCODE__

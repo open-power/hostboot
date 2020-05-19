@@ -49,6 +49,20 @@ static const uint32_t EC_PC_FIR_RAM_STATUS_LSU_EMPTY = 3;
 //<< [EC_PC_FIR_RAM_STATUS]
 // c/reg00010.H
 
+//>> [CPMS_DPMR]
+static const uint64_t CPMS_DPMR = 0x200e0ea0ull;
+
+static const uint32_t CPMS_DPMR_POWER_PROXY_ENABLE = 0;
+static const uint32_t CPMS_DPMR_PROXY_CAL_MODE = 1;
+static const uint32_t CPMS_DPMR_PIL_ENABLE = 2;
+static const uint32_t CPMS_DPMR_DDP_ENABLE = 3;
+static const uint32_t CPMS_DPMR_EMPATH_MODE_SEL = 4;
+static const uint32_t CPMS_DPMR_DDP_DDS_ADJUST_EN = 5;
+static const uint32_t CPMS_DPMR_SPARE = 6;
+static const uint32_t CPMS_DPMR_SPARE_LEN = 2;
+//<< [CPMS_DPMR]
+// c/reg00010.H
+
 //>>THE END<<
 
 #ifndef __PPE_HCODE__

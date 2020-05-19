@@ -234,6 +234,23 @@ static const uint32_t SPATTN_MASK_35 = 35;
 //<< [SPATTN_MASK]
 // eq/reg00003.H
 
+//>> [QME_PCBSID]
+static const uint64_t QME_PCBSID = 0x200e0034ull;
+
+static const uint32_t QME_PCBSID_EQ_VLD = 0;
+static const uint32_t QME_PCBSID_EQ_MERGING_SCHEME = 2;
+static const uint32_t QME_PCBSID_EQ_MERGING_SCHEME_LEN = 3;
+static const uint32_t QME_PCBSID_SP_ACK = 7;
+static const uint32_t QME_PCBSID_EQ_RD_NOT_WR = 8;
+static const uint32_t QME_PCBSID_EQ_P = 9;
+static const uint32_t QME_PCBSID_EQ_LOCAL_ADDR_P = 10;
+static const uint32_t QME_PCBSID_EQ_PORT = 12;
+static const uint32_t QME_PCBSID_EQ_PORT_LEN = 4;
+static const uint32_t QME_PCBSID_EQ_LOCAL_ADDR = 16;
+static const uint32_t QME_PCBSID_EQ_LOCAL_ADDR_LEN = 16;
+//<< [QME_PCBSID]
+// eq/reg00003.H
+
 //>>THE END<<
 
 #ifndef __PPE_HCODE__

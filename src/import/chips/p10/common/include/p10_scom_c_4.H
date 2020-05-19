@@ -156,6 +156,113 @@ static const uint32_t QME_SPWU_OCC_DONE = 4;
 //<< [QME_SPWU_OCC]
 // c/reg00004.H
 
+//>> [CPMS_CCCR]
+static const uint64_t CPMS_CCCR = 0x200e0e70ull;
+
+static const uint32_t CPMS_CCCR_COUNT_MODE = 0;
+static const uint32_t CPMS_CCCR_COUNT_MODE_LEN = 2;
+static const uint32_t CPMS_CCCR_COUNT_TYPE = 2;
+static const uint32_t CPMS_CCCR_COUNT_TYPE_LEN = 2;
+static const uint32_t CPMS_CCCR_COUNT_ENABLE_SEL = 4;
+static const uint32_t CPMS_CCCR_COUNT_ENABLE_SEL_LEN = 2;
+static const uint32_t CPMS_CCCR_INVERT_COUNT_ENABLE = 6;
+static const uint32_t CPMS_CCCR_COUNT_ALWAYS_SAMPLED = 7;
+static const uint32_t CPMS_CCCR_HI_THRESHOLD = 8;
+static const uint32_t CPMS_CCCR_HI_THRESHOLD_LEN = 8;
+static const uint32_t CPMS_CCCR_LO_THRESHOLD = 16;
+static const uint32_t CPMS_CCCR_LO_THRESHOLD_LEN = 8;
+static const uint32_t CPMS_CCCR_SPARE = 24;
+static const uint32_t CPMS_CCCR_SPARE_LEN = 2;
+//<< [CPMS_CCCR]
+// c/reg00004.H
+
+//>> [CPMS_DPCR]
+static const uint64_t CPMS_DPCR = 0x200e0ea4ull;
+
+static const uint32_t CPMS_DPCR_PROXY_SCALE_FACTOR = 0;
+static const uint32_t CPMS_DPCR_PROXY_SCALE_FACTOR_LEN = 12;
+static const uint32_t CPMS_DPCR_PROXY_LEAKAGE_CONSTANT = 12;
+static const uint32_t CPMS_DPCR_PROXY_LEAKAGE_CONSTANT_LEN = 8;
+static const uint32_t CPMS_DPCR_DDP_RECHARGE_VALUE = 20;
+static const uint32_t CPMS_DPCR_DDP_RECHARGE_VALUE_LEN = 7;
+//<< [CPMS_DPCR]
+// c/reg00004.H
+
+//>> [CPMS_PSSR]
+static const uint64_t CPMS_PSSR = 0x200e0e9cull;
+
+static const uint32_t CPMS_PSSR_ACCUM_ERROR = 0;
+static const uint32_t CPMS_PSSR_ACCUM_ERROR_LEN = 20;
+static const uint32_t CPMS_PSSR_AVG_FTX_PHASE0 = 20;
+static const uint32_t CPMS_PSSR_AVG_FTX_PHASE0_LEN = 8;
+static const uint32_t CPMS_PSSR_AVG_FTX_PHASE1 = 28;
+static const uint32_t CPMS_PSSR_AVG_FTX_PHASE1_LEN = 8;
+static const uint32_t CPMS_PSSR_AVG_FTX_TOTAL = 36;
+static const uint32_t CPMS_PSSR_AVG_FTX_TOTAL_LEN = 8;
+static const uint32_t CPMS_PSSR_PITCH_PERIOD_NUMBER = 44;
+static const uint32_t CPMS_PSSR_PITCH_PERIOD_NUMBER_LEN = 4;
+static const uint32_t CPMS_PSSR_PITCH_SUB_PERIOD = 48;
+static const uint32_t CPMS_PSSR_PITCH_SUB_PERIOD_LEN = 2;
+static const uint32_t CPMS_PSSR_PITCH_PERIOD_TIMER = 50;
+static const uint32_t CPMS_PSSR_PITCH_PERIOD_TIMER_LEN = 13;
+static const uint32_t CPMS_PSSR_PITCH_ACTIVE = 63;
+//<< [CPMS_PSSR]
+// c/reg00004.H
+
+//>> [QME_SSH_FSP]
+static const uint64_t QME_SSH_FSP = 0x200e0824ull;
+
+static const uint32_t QME_SSH_FSP_STOP_GATED = 0;
+static const uint32_t QME_SSH_FSP_SPECIAL_WKUP_DONE = 1;
+static const uint32_t QME_SSH_FSP_STOP_TRANSITION = 2;
+static const uint32_t QME_SSH_FSP_STOP_TRANSITION_LEN = 2;
+static const uint32_t QME_SSH_FSP_REQ_STOP_LEVEL = 4;
+static const uint32_t QME_SSH_FSP_REQ_STOP_LEVEL_LEN = 4;
+static const uint32_t QME_SSH_FSP_ACT_STOP_LEVEL = 8;
+static const uint32_t QME_SSH_FSP_ACT_STOP_LEVEL_LEN = 4;
+static const uint32_t QME_SSH_FSP_DEEPEST_REQ_STOP_LEVEL = 12;
+static const uint32_t QME_SSH_FSP_DEEPEST_REQ_STOP_LEVEL_LEN = 4;
+static const uint32_t QME_SSH_FSP_DEEPEST_ACT_STOP_LEVEL = 16;
+static const uint32_t QME_SSH_FSP_DEEPEST_ACT_STOP_LEVEL_LEN = 4;
+//<< [QME_SSH_FSP]
+// c/reg00004.H
+
+//>> [QME_SSH_HYP]
+static const uint64_t QME_SSH_HYP = 0x200e082cull;
+
+static const uint32_t QME_SSH_HYP_STOP_GATED = 0;
+static const uint32_t QME_SSH_HYP_SPECIAL_WKUP_DONE = 1;
+static const uint32_t QME_SSH_HYP_STOP_TRANSITION = 2;
+static const uint32_t QME_SSH_HYP_STOP_TRANSITION_LEN = 2;
+static const uint32_t QME_SSH_HYP_REQ_STOP_LEVEL = 4;
+static const uint32_t QME_SSH_HYP_REQ_STOP_LEVEL_LEN = 4;
+static const uint32_t QME_SSH_HYP_ACT_STOP_LEVEL = 8;
+static const uint32_t QME_SSH_HYP_ACT_STOP_LEVEL_LEN = 4;
+static const uint32_t QME_SSH_HYP_DEEPEST_REQ_STOP_LEVEL = 12;
+static const uint32_t QME_SSH_HYP_DEEPEST_REQ_STOP_LEVEL_LEN = 4;
+static const uint32_t QME_SSH_HYP_DEEPEST_ACT_STOP_LEVEL = 16;
+static const uint32_t QME_SSH_HYP_DEEPEST_ACT_STOP_LEVEL_LEN = 4;
+//<< [QME_SSH_HYP]
+// c/reg00004.H
+
+//>> [QME_SSH_OCC]
+static const uint64_t QME_SSH_OCC = 0x200e0828ull;
+
+static const uint32_t QME_SSH_OCC_STOP_GATED = 0;
+static const uint32_t QME_SSH_OCC_SPECIAL_WKUP_DONE = 1;
+static const uint32_t QME_SSH_OCC_STOP_TRANSITION = 2;
+static const uint32_t QME_SSH_OCC_STOP_TRANSITION_LEN = 2;
+static const uint32_t QME_SSH_OCC_REQ_STOP_LEVEL = 4;
+static const uint32_t QME_SSH_OCC_REQ_STOP_LEVEL_LEN = 4;
+static const uint32_t QME_SSH_OCC_ACT_STOP_LEVEL = 8;
+static const uint32_t QME_SSH_OCC_ACT_STOP_LEVEL_LEN = 4;
+static const uint32_t QME_SSH_OCC_DEEPEST_REQ_STOP_LEVEL = 12;
+static const uint32_t QME_SSH_OCC_DEEPEST_REQ_STOP_LEVEL_LEN = 4;
+static const uint32_t QME_SSH_OCC_DEEPEST_ACT_STOP_LEVEL = 16;
+static const uint32_t QME_SSH_OCC_DEEPEST_ACT_STOP_LEVEL_LEN = 4;
+//<< [QME_SSH_OCC]
+// c/reg00004.H
+
 //>>THE END<<
 
 #ifndef __PPE_HCODE__
