@@ -727,7 +727,7 @@ fapi2::ReturnCode explorer_scom(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP
             l_scom_buffer.insert<8, 11, 53, uint64_t>(l_def_REFRESH_INTERVAL );
             l_scom_buffer.insert<30, 10, 54, uint64_t>(l_TGT1_ATTR_MEM_EFF_DRAM_TRFC );
             l_scom_buffer.insert<40, 10, 54, uint64_t>(l_TGT1_ATTR_MEM_EFF_DRAM_TRFC_DLR );
-            l_scom_buffer.insert<5, 3, 61, uint64_t>(literal_3 );
+            l_scom_buffer.insert<5, 3, 61, uint64_t>(literal_0 );
             l_scom_buffer.insert<50, 11, 53, uint64_t>(l_def_REFR_CHECK_INTERVAL );
             FAPI_TRY(fapi2::putScom(TGT0, 0x8011434ull, l_scom_buffer));
         }
