@@ -73,13 +73,7 @@ using   namespace   TARGETING;
 //******************************************************************************
 void*    call_proc_pcie_scominit( void    *io_pArgs )
 {
-    IStepError l_stepError;
-
-/* TODO RTC:249139 -- Need to set necessary PCIe attributes
- * for later HWPs/FW to enable the PCIe devices. Discussions
- * still underway on how MRW + HWPs want this data represented
-
-    errlHndl_t l_err(nullptr);
+    errlHndl_t l_errl(nullptr);
     IStepError l_stepError;
     TARGETING::TargetHandleList l_procTargetList;
 
@@ -93,7 +87,7 @@ void*    call_proc_pcie_scominit( void    *io_pArgs )
     //  convert to fap2 target, and execute hwp
     for (const auto & curproc : l_procTargetList)
     {
-        l_errl = computeProcPcieConfigAttrs(l_cpu_target);
+        l_errl = computeProcPcieConfigAttrs(curproc);
         if(l_errl != nullptr)
         {
             // Any failure to configure PCIE that makes it to this handler
@@ -103,8 +97,8 @@ void*    call_proc_pcie_scominit( void    *io_pArgs )
                        ERR_MRK "call_proc_pcie_scominit> Failed in call to "
                        "computeProcPcieConfigAttrs for target with HUID = "
                        "0x%08X",
-                       l_cpu_target->getAttr<TARGETING::ATTR_HUID>() );
-            l_StepError.addErrorDetails(l_errl);
+                       curproc->getAttr<TARGETING::ATTR_HUID>() );
+            l_stepError.addErrorDetails(l_errl);
             errlCommit( l_errl, ISTEP_COMP_ID );
         }
 
@@ -115,18 +109,18 @@ void*    call_proc_pcie_scominit( void    *io_pArgs )
                    "Running p10_pcie_scominit HWP on "
                    "target HUID %.8X", TARGETING::get_huid(curproc) );
 
-        FAPI_INVOKE_HWP(l_err, p10_pcie_scominit, l_fapi2_proc_target);
+        FAPI_INVOKE_HWP(l_errl, p10_pcie_scominit, l_fapi2_proc_target);
 
-        if (l_err)
+        if (l_errl)
         {
             TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                      "ERROR : call p10_pcie_scominit HWP(): failed on target 0x%08X. "
                            TRACE_ERR_FMT,
                            get_huid(curproc),
-                           TRACE_ERR_ARGS(l_err));
+                           TRACE_ERR_ARGS(l_errl));
 
             // Capture Error
-            captureError(l_err, l_stepError, HWPF_COMP_ID, curproc);
+            captureError(l_errl, l_stepError, HWPF_COMP_ID, curproc);
 
             // Run HWP on all procs even if one reports an error
             continue;
@@ -140,7 +134,7 @@ void*    call_proc_pcie_scominit( void    *io_pArgs )
     }
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
              "call_proc_pcie_scominit exit" );
-**/
+
     // end task, returning any errorlogs to IStepDisp
     return l_stepError.getErrorHandle();
 }

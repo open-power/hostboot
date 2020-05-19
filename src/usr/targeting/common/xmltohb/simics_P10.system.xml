@@ -5661,6 +5661,14 @@
         <id>REL_POS</id>
         <default>0</default>
     </attribute>
+    <attribute>
+        <id>PROC_PCIE_PHB_ACTIVE_BASE</id>
+        <default>0,0,1</default>
+    </attribute>
+    <attribute>
+        <id>PROC_PCIE_LANE_REVERSAL_BASE</id>
+        <default>0,0,0</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -5705,6 +5713,14 @@
     <attribute>
         <id>REL_POS</id>
         <default>1</default>
+    </attribute>
+    <attribute>
+        <id>PROC_PCIE_PHB_ACTIVE_BASE</id>
+        <default>0,1,0</default>
+    </attribute>
+    <attribute>
+        <id>PROC_PCIE_LANE_REVERSAL_BASE</id>
+        <default>0,1,0</default>
     </attribute>
 </targetInstance>
 
@@ -5751,6 +5767,14 @@
         <id>REL_POS</id>
         <default>0</default>
     </attribute>
+    <attribute>
+        <id>PROC_PCIE_PHB_ACTIVE_BASE</id>
+        <default>1,0,0</default>
+    </attribute>
+    <attribute>
+        <id>PROC_PCIE_LANE_REVERSAL_BASE</id>
+        <default>0,0,0</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -5795,6 +5819,14 @@
     <attribute>
         <id>REL_POS</id>
         <default>1</default>
+    </attribute>
+    <attribute>
+        <id>PROC_PCIE_PHB_ACTIVE_BASE</id>
+        <default>1,1,1</default>
+    </attribute>
+    <attribute>
+        <id>PROC_PCIE_LANE_REVERSAL_BASE</id>
+        <default>1,0,1</default>
     </attribute>
 </targetInstance>
 
