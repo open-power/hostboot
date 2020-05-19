@@ -465,6 +465,24 @@ fapi_try_exit:
 }
 
 ///
+/// @brief Align the READ_PREAMBLE and WRITE_PREAMBLE to the si attribute bitmap
+///
+/// @param[in] i_read_pramble read preamble value
+/// @param[in] i_write_preamble write preamble value
+/// @return uint8_t attribute-friendly bitmap
+///
+static inline uint8_t align_preamble_to_attr(const uint8_t i_read_pramble, const uint8_t i_write_preamble)
+{
+    fapi2::buffer<uint8_t> l_si_preamble;
+
+    // Sets bits if the fields are true ( == 1 )
+    l_si_preamble.writeBit<fapi2::ENUM_ATTR_MEM_SI_DRAM_PREAMBLE_WRITE_PREAMBLE_BIT>(i_write_preamble);
+    l_si_preamble.writeBit<fapi2::ENUM_ATTR_MEM_SI_DRAM_PREAMBLE_READ_PREAMBLE_BIT>(i_read_pramble);
+
+    return l_si_preamble;
+}
+
+///
 /// @brief Shift the bits of the SPD field to match the attribute format
 /// @param[in] i_value ODT field value from SPD
 /// @return ATTR formatted uint8_t
@@ -494,7 +512,7 @@ static inline uint8_t align_odt_field_to_attr(const uint8_t i_value)
     l_value.clearBit<ODT2_OLD>();
     l_value.clearBit<ODT3_OLD>();
 
-    return l_value();
+    return l_value;
 }
 
 ///

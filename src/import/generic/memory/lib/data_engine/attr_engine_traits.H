@@ -1678,8 +1678,17 @@ struct attrEngineTraits<P, attr_si_engine_fields, attr_si_engine_fields::SI_DRAM
     static inline fapi2::ReturnCode get_value_to_set(const std::shared_ptr<efd::base_decoder>& i_efd_data,
             attr_integral_type& o_setting)
     {
-        i_efd_data->write_preamble(o_setting);
-        return i_efd_data->read_preamble(o_setting);
+        uint8_t l_read_preamble = 0;
+        uint8_t l_write_preamble = 0;
+
+        FAPI_TRY(i_efd_data->read_preamble(l_read_preamble));
+        FAPI_TRY(i_efd_data->write_preamble(l_write_preamble));
+
+        o_setting = static_cast<attr_integral_type>(
+                        mss::gen::align_preamble_to_attr(l_read_preamble, l_write_preamble));
+
+    fapi_try_exit:
+        return fapi2::current_err;
     }
 };
 
