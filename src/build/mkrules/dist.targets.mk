@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2013,2019
+# Contributors Listed Below - COPYRIGHT 2013,2020
 # [+] International Business Machines Corp.
 #
 #
@@ -332,6 +332,7 @@ fsp.tar_CONTENTS = \
     img/simics_CUMULUS_CDIMM_targeting.bin.unprotected \
     img/simics_AXONE_targeting.bin.protected \
     img/simics_AXONE_targeting.bin.unprotected \
+    obj/genfiles/config.h \
     obj/genfiles/fapiattrs.xml \
     obj/genfiles/attribute_types_sp.xml \
     obj/genfiles/target_types_sp.xml \
