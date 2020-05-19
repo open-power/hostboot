@@ -72,6 +72,10 @@
 #include <multicast_group_defs.H>
 #include <p10_hcd_memmap_base.H>
 #include <p10_fbc_utils.H>
+#include <p10_scom_proc_7.H>
+#include <p10_scom_proc_1.H>
+#include <p10_scom_proc_d.H>
+#include <p10_scom_proc_b.H>
 #ifndef __PPE__
     #include <p10_tod_utils.H>
 #endif
@@ -103,6 +107,9 @@ enum
     BCE_STALL_MAX           =   4,
     CPMR_BASE               =   (2 * 1024 * 1024),
     MBASE_SHIFT             =   5,
+    QME_PIG_REQ_INTR_TYPE   =   1,
+    QME_PIG_REQ_INTR_TYPE_LEN   = 4,
+    QME_PIG                 =   0x200e0030,
 };
 
 // -----------------------------------------------------------------------------
@@ -203,6 +210,7 @@ fapi2::ReturnCode qme_init(
 #ifndef __PPE__
     using namespace scomt::eq;
     using namespace scomt::perv;
+    using namespace scomt::proc;
 
     // RTC 245822
     // remove this to use the auto-generated value once it bit shows up in the headers.
@@ -259,6 +267,59 @@ fapi2::ReturnCode qme_init(
                           "ERROR: Failed To Clear QME Active Bit In QME Flag Register" );
             }
         }
+    }
+
+    //clearing OPIT TYPE A interrupts
+    {
+        fapi2::buffer<uint64_t> l_pigData;
+        fapi2::buffer<uint64_t> l_opitA0Data;
+        fapi2::buffer<uint64_t> l_opitA1Data;
+        fapi2::buffer<uint64_t> l_opitA2Data;
+        fapi2::buffer<uint64_t> l_opitA3Data;
+        bool l_intNotClr    =   true;
+        l_pigData.flush<0>();
+        l_opitA0Data.flush<0>();
+        l_opitA1Data.flush<0>();
+        l_opitA2Data.flush<0>();
+        l_opitA3Data.flush<0>();
+        l_pigData.insertFromRight( 0xA, QME_PIG_REQ_INTR_TYPE, QME_PIG_REQ_INTR_TYPE_LEN );
+
+        FAPI_TRY( putScom( l_eq_mc_and, QME_PIG, l_pigData ) );
+
+        do
+        {
+            getScom( l_eq_mc_and, TP_TPCHIP_OCC_OCI_OCB_OPITASV0, l_opitA0Data );
+            getScom( l_eq_mc_and, TP_TPCHIP_OCC_OCI_OCB_OPITASV1, l_opitA1Data );
+            getScom( l_eq_mc_and, TP_TPCHIP_OCC_OCI_OCB_OPITASV2, l_opitA2Data );
+            getScom( l_eq_mc_and, TP_TPCHIP_OCC_OCI_OCB_OPITASV3, l_opitA3Data );
+
+            l_opitA0Data = ( l_opitA0Data & l_opitA1Data & l_opitA2Data & l_opitA3Data );
+
+            if( l_opitA0Data == 0 )
+            {
+                l_intNotClr = false;
+                break;
+            }
+
+            fapi2::delay( QME_POLLTIME_MS * 1000 * 1000, QME_POLLTIME_MCYCLES * 1000 * 1000 );
+            l_timeout--;
+
+        }
+        while(( l_intNotClr ) && ( l_timeout > 0 ) );
+
+        FAPI_ASSERT( ( false == l_intNotClr ),
+                     fapi2::OPIT_INTERRUPT_NOT_CLEAR()
+                     .set_CHIP(i_target)
+                     .set_LOOP_COUNT(  l_timeout )
+                     .set_OPIT_AND( l_opitA0Data ),
+                     "Failed To Clear OPIT Interrupt");
+    }
+
+    l_timeout = TIMEOUT_COUNT;
+
+    if (is_sim)
+    {
+        l_timeout = SIM_TIMEOUT_COUNT;
     }
 
     {
