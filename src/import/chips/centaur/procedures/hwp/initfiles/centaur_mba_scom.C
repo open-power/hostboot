@@ -6530,7 +6530,7 @@ fapi2::ReturnCode centaur_mba_scom(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& 
 
             if (literal_1)
             {
-                l_scom_buffer.insert<4, 4, 60, uint64_t>(literal_0b0111 );
+                l_scom_buffer.insert<4, 4, 60, uint64_t>(literal_0b0000 );
             }
 
             if (literal_1)
