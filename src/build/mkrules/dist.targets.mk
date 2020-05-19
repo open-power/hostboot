@@ -306,6 +306,7 @@ fsp.tar_CONTENTS = \
     src/build/buildpnor/pnorLayoutFSP.xml \
     src/build/buildpnor/pnorLayoutP10.xml \
     $(if $(FAKEPNOR), src/build/buildpnor/pnorLayoutFake.xml, ) \
+    obj/genfiles/config.h \
     obj/genfiles/fapiattrs.xml \
     obj/genfiles/attribute_types_sp.xml \
     obj/genfiles/target_types_sp.xml \
