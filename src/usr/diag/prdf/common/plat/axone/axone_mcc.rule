@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2018,2019
+# Contributors Listed Below - COPYRIGHT 2018,2020
 # [+] International Business Machines Corp.
 #
 #
@@ -180,7 +180,7 @@ rule rDSTLFIR
 
 group gDSTLFIR
     filter singlebit,
-           cs_root_cause(0,4)
+           cs_root_cause(0,4,12,13,16,17,22,23)
 {
     /** DSTLFIR[0]
      *  AFU initiated Checkstop on Subchannel A
@@ -337,7 +337,8 @@ rule rUSTLFIR
 
 group gUSTLFIR
     filter singlebit,
-           cs_root_cause
+           cs_root_cause(0,1,2,3,27,28,35,36,37,38,39,40,41,42,43,44,49,50,51,
+                         52,53,54,55,56,59,60)
 {
     /** USTLFIR[0]
      *  Chan A unexpected data error
