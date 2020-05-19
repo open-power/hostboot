@@ -798,7 +798,10 @@
         <no_export/>
         <default>FULL_DIMM</default>
     </attribute>
-
+    <attribute>
+        <id>ATTR_PROC_FABRIC_TOPOLOGY_ID</id>
+        <global/>
+    </attribute>
     <attribute>
         <id>ATTR_PROC_FABRIC_TOPOLOGY_ID_TABLE</id>
         <persistency>volatile-zeroed</persistency>
