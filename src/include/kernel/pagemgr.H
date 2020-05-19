@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2010,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2010,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -33,6 +33,8 @@
 #include <kernel/console.H>
 #include <util/align.H>
 #include <sys/vfs.h>
+#include <utility>
+#include <array>
 
 /** @class PageManagerCore
  * @brief Manages the allocation of memory pages
@@ -114,6 +116,21 @@ class PageManagerCore
 
         size_t iv_available;            //!< free pages
         Util::Lockfree::Stack<page_t> iv_heap[BUCKETS]; //!< The heap
+
+        //!< Starting address of a heap memory range
+        using rangeAddr_t = uint64_t;
+
+        //!< Size of a heap memory range
+        using rangeSizeBytes_t = uint64_t;
+
+        //!< Heap memory range tracking element
+        using range_t = std::pair<rangeAddr_t,rangeSizeBytes_t>;
+
+        //!< Max number of heap memory ranges tracked by the kernel
+        static constexpr size_t MAX_HEAP_RANGES = 4;
+
+        //!< Heap memory range tracker
+        std::array<range_t,MAX_HEAP_RANGES> iv_ranges;
 
         /**
          * Find a page of proper size
