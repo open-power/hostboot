@@ -421,13 +421,13 @@ extern "C"
                 return ((iv_addr >> 9) & 0x7);
             }
 
-            /// @brief Modify SCOM address, update ring field value
+            /// @brief Modify SCOM address, update ring field value (bits 18:21)
             /// @param[in] i_ring Ring field value to write
             /// @retval none
             inline void setRingId(const uint8_t i_ring)
             {
-                iv_addr &= 0xFFFFFFFFFFFF03FFULL;
-                iv_addr |= ((i_ring & 0x3F) << 10);
+                iv_addr &= 0xFFFFFFFFFFFFC3FFULL;
+                iv_addr |= ((i_ring & 0xF) << 10);
                 return;
             }
 
