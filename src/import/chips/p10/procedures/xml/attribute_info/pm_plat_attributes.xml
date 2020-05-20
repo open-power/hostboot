@@ -619,7 +619,7 @@
     <description>
     pm_suspend_procedure will first put the system in safe mode and
     we have 2 methods to do that, one is thru occ and if that fails then will do thru pgpe.
-    On awan/cronus if we want to test procedure, OCC won't be running, 
+    On awan/cronus if we want to test procedure, OCC won't be running,
     hence will use this attribute to disable occ method
 
     Producer:Override
@@ -953,6 +953,7 @@
         OFF = 3
     </enum>
     <default>FAIL</default>
+    <overrideOnly/>
     <group>enablement</group>
   </attribute>
 
@@ -987,6 +988,7 @@
         OFF = 3
     </enum>
     <default>FAIL</default>
+    <overrideOnly/>
     <group>enablement</group>
   </attribute>
 
@@ -1021,6 +1023,7 @@
         OFF = 3
     </enum>
     <default>FAIL</default>
+    <overrideOnly/>
     <group>enablement</group>
   </attribute>
 
@@ -1469,10 +1472,8 @@
     <id>ATTR_WOF_VRATIO_VDD_COREON_OVERRIDE_10THPCT</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>
-    The percentage (in 0.1% units) of VDD DC leakage that is attributed to the
-    core region exclusive of the Matrix Multiply Accumulator (MMA) function.
-
-    Consumer:  p10_pstate_parameter_build -> PGPE Hcode
+    DEPRECATED.
+    TO BE DELETED IN DEFERENCE TO ATTR_WOF_VRATIO_VDD_10THPCT
 
     </description>
     <valueType>uint16</valueType>
@@ -1487,10 +1488,8 @@
     <id>ATTR_WOF_VRATIO_VDD_MMAON_OVERRIDE_10THPCT</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>
-    The percentage (in 0.1% units) of VDD DC leakage that is attributed to the
-    Matrix Multiply Accumulator (MMA) function with a core.
-
-    Consumer:  p10_pstate_parameter_build -> PGPE Hcode
+    DEPRECATED.
+    TO BE DELETED IN DEFERENCE TO ATTR_WOF_VRATIO_VDD_10THPCT
 
     </description>
     <valueType>uint8</valueType>
@@ -1505,10 +1504,8 @@
     <id>ATTR_WOF_VRATIO_VDD_L3ON_OVERRIDE_10THPCT</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>
-    The percentage (in 0.1% units) of VDD DC leakage that is attributed to the
-    L3 cache region associated with each core.
-
-    Consumer:  p10_pstate_parameter_build -> PGPE Hcode
+    DEPRECATED.
+    TO BE DELETED IN DEFERENCE TO ATTR_WOF_VRATIO_VDD_10THPCT
 
     </description>
     <valueType>uint16</valueType>
@@ -1523,10 +1520,8 @@
     <id>ATTR_WOF_VRATIO_VCS_COREON_OVERRIDE_10THPCT</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>
-    The percentage (in 0.1% units) of VCS DC leakage that is attributed to the
-    core region inclusive of the Matrix Multiply Accumulator (MMA) function.
-
-    Consumer:  p10_pstate_parameter_build -> PGPE Hcode
+    DEPRECATED.
+    TO BE DELETED IN DEFERENCE TO ATTR_WOF_VRATIO_VCS_10THPCT
 
     </description>
     <valueType>uint16</valueType>
@@ -1541,15 +1536,91 @@
     <id>ATTR_WOF_VRATIO_VCS_L3ON_OVERRIDE_10THPCT</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>
-    The percentage (in 0.1% units) of VCS DC leakage that is attributed to the
-    L3 region associated with each core.
-
-    Consumer:  p10_pstate_parameter_build -> PGPE Hcode
+    DEPRECATED.
+    TO BE DELETED IN DEFERENCE TO ATTR_WOF_VRATIO_VCS_10THPCT
 
     </description>
     <valueType>uint16</valueType>
     <platInit/>
     <default>00</default>
+    <overrideOnly/>
+    <group>wof</group>
+  </attribute>
+
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_WOF_VRATIO_VDD_10THPCT</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+    The percentage (in 0.1% units) of VDD power that is attributed to the
+    indicated region associated with each core/cache set.
+
+    [index] ->8 entries-:
+        0: CORE;
+        1: CACHE_BASE;          // This includes both clock and snoop AC power
+        2: RACETRACK_PER_CORE;  // Amount of racetrack allotment per coore
+        3: MMA;
+        4: Reserved;
+        5: Reserved;
+        6: Reserved;
+        7: Reserved;
+
+    Consumer:  p10_pstate_parameter_build -> PGPE Hcode
+
+    </description>
+    <valueType>uint16</valueType>
+    <array>8</array>
+    <platInit/>
+    <enum>
+        CORE                = 0,
+        CACHE_BASE          = 1,
+        RACETRACK_PER_CORE  = 2,
+        MMA                 = 3,
+        RESERVED4           = 4,
+        RESERVED5           = 5,
+        RESERVED6           = 6,
+        RESERVED7           = 7
+    </enum>
+    <default>700, 100, 0, 200, 0, 0, 0, 0</default>
+    <overrideOnly/>
+    <group>wof</group>
+  </attribute>
+
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_WOF_VRATIO_VCS_10THPCT</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+    The percentage (in 0.1% units) of VCS power that is attributed to the
+    indicated region associated with each core/cache set.
+
+    [index] ->8 entries-:
+        0: CORE;
+        1: CACHE_BASE;      // This includes both clock and snoop AC power
+        2: Reserved2;
+        3: Reserved3;
+        4: Reserved4;
+        5: Reserved5;
+        6: Reserved6;
+        7: Reserved7;
+
+    Consumer:  p10_pstate_parameter_build -> PGPE Hcode
+
+    </description>
+    <valueType>uint16</valueType>
+    <array>8</array>
+    <platInit/>
+    <enum>
+        CORE                = 0,
+        CACHE_BASE          = 1,
+        RESERVED2           = 2,
+        RESERVED3           = 3,
+        RESERVED4           = 4,
+        RESERVED5           = 5,
+        RESERVED6           = 6,
+        RESERVED7           = 7
+    </enum>
+    <default>200, 800, 0, 0, 0, 0, 0, 0</default>
     <overrideOnly/>
     <group>wof</group>
   </attribute>
