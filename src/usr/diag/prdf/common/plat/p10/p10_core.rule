@@ -384,7 +384,7 @@ group gEQ_L3_FIR
     /** EQ_L3_FIR[25]
      *  Cache inhibited op in L3 directory
      */
-    (rEQ_L3_FIR, bit(25)) ? self_M_level2_L_th_1;
+    (rEQ_L3_FIR, bit(25)) ? level2_M_self_L_th_1;
 
     /** EQ_L3_FIR[26]
      *  L3 line delete CE done

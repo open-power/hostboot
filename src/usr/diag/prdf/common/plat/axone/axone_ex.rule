@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2018
+# Contributors Listed Below - COPYRIGHT 2018,2020
 # [+] International Business Machines Corp.
 #
 #
@@ -715,7 +715,7 @@ group gL3FIR
     /** L3FIR[25]
      *  Cache inhitited op in L3 directory
      */
-    (rL3FIR, bit(25)) ? self_M_level2_L_th_1;
+    (rL3FIR, bit(25)) ? level2_M_self_L_th_1;
 
     /** L3FIR[26]
      *  L3 line delete CE done
