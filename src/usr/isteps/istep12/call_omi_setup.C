@@ -35,6 +35,9 @@
 #include    <trace/interface.H>
 #include    <initservice/taskargs.H>
 #include    <errl/errlentry.H>
+#include    <util/threadpool.H>
+#include    <sys/task.h>
+#include    <initservice/istepdispatcherif.H>
 
 #include    <isteps/hwpisteperror.H>
 #include    <errl/errludtarget.H>
@@ -57,11 +60,113 @@ using   namespace   ISTEPS_TRACE;
 
 namespace ISTEP_12
 {
+//
+// @brief Mutex to prevent threads from adding details to the step
+//        error log at the same time.
+mutex_t g_stepErrorMutex = MUTEX_INITIALIZER;
+
+/*******************************************************************************
+ * @brief base work item class for isteps (used by thread pool)
+ */
+class IStepWorkItem
+{
+    public:
+        virtual ~IStepWorkItem(){}
+        virtual void operator()() = 0;
+};
+
+/*******************************************************************************
+ * @brief Ocmb specific work item class
+ */
+class OcmbWorkItem: public IStepWorkItem
+{
+    private:
+        IStepError* iv_pStepError;
+        const TARGETING::Target* iv_pOcmb;
+
+    public:
+        /**
+         * @brief task function, called by threadpool to run the HWP on the
+         *        target
+         */
+         void operator()();
+
+        /**
+         * @brief ctor
+         *
+         * @param[in] i_Ocmb target Ocmb to operate on
+         * @param[in] i_istepError error accumulator for this istep
+         */
+        OcmbWorkItem(const TARGETING::Target& i_Ocmb,
+                       IStepError& i_stepError):
+            iv_pStepError(&i_stepError),
+            iv_pOcmb(&i_Ocmb) {}
+
+        // delete default copy/move constructors and operators
+        OcmbWorkItem() = delete;
+        OcmbWorkItem(const OcmbWorkItem& ) = delete;
+        OcmbWorkItem& operator=(const OcmbWorkItem& ) = delete;
+        OcmbWorkItem(OcmbWorkItem&&) = delete;
+        OcmbWorkItem& operator=(OcmbWorkItem&&) = delete;
+
+        /**
+         * @brief destructor
+         */
+        ~OcmbWorkItem(){};
+};
+
+//******************************************************************************
+void OcmbWorkItem::operator()()
+{
+    errlHndl_t l_err = nullptr;
+
+    // reset watchdog for each ocmb as this function can be very slow
+    INITSERVICE::sendProgressCode();
+
+    //  call the HWP with each target
+    fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP> l_fapi_ocmb_target
+      (iv_pOcmb);
+
+    TRACFCOMP(g_trac_isteps_trace,
+              "exp_omi_setup HWP target HUID 0x%.08x",
+              get_huid(iv_pOcmb));
+
+    FAPI_INVOKE_HWP(l_err, exp_omi_setup, l_fapi_ocmb_target);
+
+    //  process return code
+    if ( l_err )
+    {
+        TRACFCOMP(g_trac_isteps_trace,
+                  "ERROR : call exp_omi_setup HWP: failed on target 0x%08X. "
+                  TRACE_ERR_FMT,
+                  get_huid(iv_pOcmb),
+                  TRACE_ERR_ARGS(l_err));
+
+        //addErrorDetails may not be thread-safe.  Protect with mutex.
+        mutex_lock(&g_stepErrorMutex);
+
+        // Capture error
+        captureError(l_err, *iv_pStepError, HWPF_COMP_ID, iv_pOcmb);
+
+        mutex_unlock(&g_stepErrorMutex);
+    }
+    else
+    {
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                   "SUCCESS running exp_omi_setup HWP on target HUID %.8X.",
+                   TARGETING::get_huid(iv_pOcmb));
+    }
+}
+
+
 void* call_omi_setup (void *io_pArgs)
 {
     IStepError l_StepError;
     errlHndl_t l_err = nullptr;
     TRACFCOMP( g_trac_isteps_trace, "call_omi_setup entry" );
+    Util::ThreadPool<IStepWorkItem> threadpool;
+    constexpr size_t MAX_OCMB_THREADS = 4;
+    uint32_t l_numThreads = 0;
 
     do
     {
@@ -76,28 +181,43 @@ void* call_omi_setup (void *io_pArgs)
 
         for (const auto & l_ocmb_target : l_ocmbTargetList)
         {
-            //  call the HWP with each target
-            fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP> l_fapi_ocmb_target
-                (l_ocmb_target);
+            //  Create a new workitem from this membuf and feed it to the
+            //  thread pool for processing.  Thread pool handles workitem
+            //  cleanup.
+            threadpool.insert(new OcmbWorkItem(*l_ocmb_target,
+                                               l_StepError));
+        }
 
-            TRACFCOMP(g_trac_isteps_trace,
-                    "exp_omi_setup HWP target HUID 0x%.08x",
-                    get_huid(l_ocmb_target));
+        //Don't create more threads than we have targets
+        size_t l_numTargets = l_ocmbTargetList.size();
+        l_numThreads = std::min(MAX_OCMB_THREADS, l_numTargets);
 
-            FAPI_INVOKE_HWP(l_err, exp_omi_setup, l_fapi_ocmb_target);
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                  "Starting %llu thread(s) to handle %llu OCMB target(s)",
+                   l_numThreads, l_numTargets);
 
-            //  process return code
-            if ( l_err )
-            {
-                TRACFCOMP(g_trac_isteps_trace,
-                    "ERROR : call exp_omi_setup HWP: failed on target 0x%08X. "
-                    TRACE_ERR_FMT,
-                    get_huid(l_ocmb_target),
-                    TRACE_ERR_ARGS(l_err));
+        //Set the number of threads to use in the threadpool
+        Util::ThreadPoolManager::setThreadCount(l_numThreads);
 
-                // Capture error
-                captureError(l_err, l_StepError, HWPF_COMP_ID, l_ocmb_target);
-            }
+        //create and start worker threads
+        threadpool.start();
+
+        //wait for all workitems to complete, then clean up all threads.
+        l_err = threadpool.shutdown();
+        if(l_err)
+        {
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                      ERR_MRK"call_omi_setup: thread pool returned an error"
+                      TRACE_ERR_FMT,
+                      TRACE_ERR_ARGS(l_err));
+
+            //addErrorDetails may not be thread-safe.  Protect with mutex.
+            mutex_lock(&g_stepErrorMutex);
+
+            // Capture error
+            captureError(l_err, l_StepError, HWPF_COMP_ID, nullptr);
+
+            mutex_unlock(&g_stepErrorMutex);
         }
 
         // Do not continue if an error was encountered
