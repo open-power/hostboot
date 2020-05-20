@@ -2308,6 +2308,9 @@
       <id>CEC_IPL_TYPE</id>
     </attribute>
     <attribute>
+      <id>CHASSIS_LOCATION_CODE</id>
+    </attribute>
+    <attribute>
       <default>SYS</default>
       <id>CLASS</id>
     </attribute>
@@ -2484,6 +2487,9 @@
     </attribute>
     <attribute>
       <id>SYNC_BETWEEN_STEPS</id>
+    </attribute>
+    <attribute>
+      <id>SYS_LOCATION_CODE</id>
     </attribute>
     <attribute>
       <id>TEST_MAX_STRING</id>
