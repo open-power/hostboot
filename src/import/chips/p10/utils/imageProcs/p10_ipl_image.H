@@ -1896,7 +1896,9 @@ typedef enum
     P9_XIP_SECTION_HW_IOPXRAM   = P9_XIP_SECTIONS_PLUS(6),
     P9_XIP_SECTION_HW_OVERLAYS  = P9_XIP_SECTIONS_PLUS(7),
     P9_XIP_SECTION_HW_DYNAMIC   = P9_XIP_SECTIONS_PLUS(8),
-    P9_XIP_SECTIONS_HW          = P9_XIP_SECTIONS_PLUS(9) // # sections
+    P9_XIP_SECTION_HW_DYN_FEAT  = P9_XIP_SECTIONS_PLUS(9),
+    P9_XIP_SECTION_HW_DYN_SERV  = P9_XIP_SECTIONS_PLUS(10),
+    P9_XIP_SECTIONS_HW          = P9_XIP_SECTIONS_PLUS(11) // # sections
 } p9_xip_section_hw_t;
 
 #define P9_XIP_SECTION_NAMES_HW(var)      \
@@ -1909,7 +1911,9 @@ typedef enum
                          ".ioppe",        \
                          ".iopxram",      \
                          ".overlays",     \
-                         ".dynamic")
+                         ".dynamic",      \
+                         ".dyn_features", \
+                         ".dyn_services")
 
 /**************************************************************************/
 /* SBE Image                                                              */
