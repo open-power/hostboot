@@ -27,6 +27,73 @@
 
 #include "platform.h"
 
+#define CONVERT32(X) (X = htole32(X))
+#define CONVERT16(X) (X = htole16(X))
+
+int encode_pldm_state_effecter_pdr(struct pldm_state_effecter_pdr* const effecter,
+                                   const size_t allocation_size,
+                                   const void* const possible_states,
+                                   const size_t possible_states_size,
+                                   size_t* const actual_size)
+{
+    if (possible_states_size !=
+        (effecter->composite_effecter_count
+         * sizeof(struct state_effecter_possible_states))) {
+        *actual_size = 0;
+        return PLDM_ERROR;
+    }
+
+    *actual_size = (sizeof(struct pldm_state_effecter_pdr)
+                    + possible_states_size
+                    - sizeof(effecter->possible_states));
+
+    if (allocation_size < *actual_size) {
+        *actual_size = 0;
+        return PLDM_ERROR_INVALID_LENGTH;
+    }
+
+    effecter->hdr.version = 1;
+    effecter->hdr.type = PLDM_STATE_EFFECTER_PDR;
+    effecter->hdr.length = *actual_size;
+
+    memcpy(effecter->possible_states,
+           possible_states,
+           possible_states_size);
+
+    {
+        char* states_ptr = (char*)effecter->possible_states;
+
+        for (int i = 0; i < effecter->composite_effecter_count; ++i) {
+            struct state_effecter_possible_states* states
+                = (struct state_effecter_possible_states*)states_ptr;
+
+            CONVERT16(states->state_set_id);
+
+            states_ptr += (sizeof(*states)
+                           - sizeof(states->states)
+                           + states->possible_states_size);
+        }
+    }
+
+    // Convert effecter PDR body
+    CONVERT16(effecter->terminus_handle);
+    CONVERT16(effecter->effecter_id);
+    CONVERT16(effecter->entity_type);
+    CONVERT16(effecter->entity_instance);
+    CONVERT16(effecter->container_id);
+    CONVERT16(effecter->effecter_semantic_id);
+
+    // Convert header
+    CONVERT32(effecter->hdr.record_handle);
+    CONVERT16(effecter->hdr.record_change_num);
+    CONVERT16(effecter->hdr.length);
+
+    return PLDM_SUCCESS;
+}
+
+#undef CONVERT32
+#undef CONVERT16
+
 int encode_pldm_pdr_repository_chg_event_data(uint8_t event_data_format,
                                               uint8_t number_of_change_records,
                                               const uint8_t *event_data_operations,

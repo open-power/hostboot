@@ -36,26 +36,29 @@
 #include <pldm/extended/hb_pdrs.H>
 #include <pldm/extended/pldm_fru.H>
 #include "../extern/pdr.h"
+#include "../extern/platform.h"
 #include "../common/pldmtrace.H"
 
 // Targeting
 #include <targeting/common/targetservice.H>
 #include <targeting/common/utilFilter.H>
 #include <targeting/common/predicates/predicatehwas.H>
+#include <targeting/targplatutil.H>
 
 using namespace TARGETING;
+using namespace PLDM;
 
-namespace PLDM
+namespace
 {
 
-extern const std::array<fru_inventory_class, 2> fru_inventory_classes
-{{
-    { TARGETING::CLASS_CHIP, TARGETING::TYPE_PROC, ENTITY_TYPE_PROCESSOR_MODULE },
-    { TARGETING::CLASS_LOGICAL_CARD, TARGETING::TYPE_DIMM, ENTITY_TYPE_DIMM }
-}};
-
-void addHostbootPdrs(pldm_pdr* const io_repo,
-                     const terminus_id_t i_terminus_id)
+/* @brief Add Entity Association and FRU Record Set PDRs for FRUs that Hostboot
+ *        owns.
+ *
+ * @param[in/out] io_repo    The PDR repository to add PDRs to.
+ * @param[in] i_terminus_id  The host's terminus ID.
+ */
+void addEntityAssociationAndFruRecordSetPdrs(pldm_pdr* const io_repo,
+                                             const terminus_id_t i_terminus_id)
 {
     assert(io_repo != nullptr,
            "addHostbootPdrs: io_repo is nullptr");
@@ -129,6 +132,132 @@ void addHostbootPdrs(pldm_pdr* const io_repo,
     /* Serialize the tree into the PDR repository. */
 
     pldm_entity_association_pdr_add(enttree.get(), io_repo);
+}
+
+/* @brief Add the state effecter PDRs for OCC FRUs.
+ *
+ * @param[in/out] io_repo    The PDR repository to add PDRs to.
+ * @param[in] i_terminus_id  The Host's terminus ID.
+ * @param[in] i_target       The target to use the entity ID from for the effecter.
+ */
+void addOccStateEffecterPdrs(pldm_pdr* const io_repo,
+                             const terminus_id_t i_terminus_id,
+                             const Target* const i_target)
+{
+    const auto entity_id = i_target->getAttr<ATTR_PLDM_ENTITY_ID_INFO>();
+
+    // PLDM_ENTITY_ID_INFO is stored in little-endian
+    const uint16_t be_entity_type =  le16toh(entity_id.entityType);
+    const uint16_t be_entity_instance =  le16toh(entity_id.entityInstanceNumber);
+    const uint16_t be_container_id =  le16toh(entity_id.containerId);
+
+    const state_effecter_possible_states states =
+    {
+        .state_set_id = pldm_state_set_boot_restart_cause,
+        .possible_states_size = 1, // size of possible_states
+        .states =
+        {
+            enum_bit(pldm_state_set_boot_restart_cause_warm_reset)
+            | enum_bit(pldm_state_set_boot_restart_cause_hard_reset)
+        }
+    };
+
+    std::vector<uint8_t> encoded_pdr(sizeof(pldm_state_effecter_pdr) + sizeof(states));
+
+    const auto pdr = reinterpret_cast<pldm_state_effecter_pdr*>(encoded_pdr.data());
+
+    *pdr =
+    {
+        /// Header
+        .hdr =
+        {
+            .record_handle = 0, // ask libpldm to fill this out
+            .record_change_num = 0,
+            .length = 0 // will be filled out by the encoder
+        },
+
+        /// Body
+        .terminus_handle = i_terminus_id,
+
+        // Using the ORDINAL_ID of the target will let us associate with the
+        // correct target when we receive a SetStateEffecterStates command later
+        .effecter_id = static_cast<uint16_t>(i_target->getAttr<ATTR_ORDINAL_ID>()),
+
+        .entity_type = be_entity_type,
+        .entity_instance = be_entity_instance,
+        .container_id = be_container_id,
+
+        .effecter_semantic_id = 0, // PLDM defines no semantic IDs yet
+        .effecter_init = state_effecter_noInit,
+        .has_description_pdr = false,
+        .composite_effecter_count = 1
+    };
+
+    size_t actual_pdr_size = 0;
+
+    const int rc = encode_pldm_state_effecter_pdr(pdr,
+                                                  encoded_pdr.size(),
+                                                  &states,
+                                                  sizeof(states),
+                                                  &actual_pdr_size);
+
+    assert(rc == PLDM_SUCCESS,
+           "Failed to encoded OCC state effecter PDR");
+
+    const int AUTO_CALCULATE_RECORD_HANDLE = 0;
+
+    pldm_pdr_add(io_repo, encoded_pdr.data(), actual_pdr_size,
+                 AUTO_CALCULATE_RECORD_HANDLE);
+}
+
+/* @brief Add the state effecter and sensor PDRs for OCC FRUs.
+ *
+ * @param[in/out] io_repo    The PDR repository to add PDRs to.
+ * @param[in] i_terminus_id  The Host's terminus ID.
+ */
+void addOccStateControlPdrs(pldm_pdr* const io_repo,
+                            const terminus_id_t i_terminus_id)
+{
+    TargetHandleList targets;
+
+    getClassResources(targets,
+                      CLASS_UNIT,
+                      TYPE_OCC,
+                      UTIL_FILTER_PRESENT);
+
+    /* Get each OCC and add state effecter and sensor PDRs for it. */
+
+    for (const auto target : targets)
+    {
+        Target* const parent_proc = getImmediateParentByAffinity(target);
+
+        // The OCC state sensor/effecter PDRs are "attached" to the parent PROC
+        // of the OCC.
+        addOccStateEffecterPdrs(io_repo, i_terminus_id, parent_proc);
+    }
+}
+
+}
+
+namespace PLDM
+{
+
+extern const std::array<fru_inventory_class, 2> fru_inventory_classes
+{{
+    { TARGETING::CLASS_CHIP, TARGETING::TYPE_PROC, ENTITY_TYPE_PROCESSOR_MODULE },
+    { TARGETING::CLASS_LOGICAL_CARD, TARGETING::TYPE_DIMM, ENTITY_TYPE_DIMM }
+}};
+
+void addHostbootPdrs(pldm_pdr* const io_repo,
+                     const terminus_id_t i_terminus_id)
+{
+    PLDM_INF(ENTER_MRK"addHostbootPdrs");
+
+    addEntityAssociationAndFruRecordSetPdrs(io_repo, i_terminus_id);
+
+    addOccStateControlPdrs(io_repo, i_terminus_id);
+
+    PLDM_INF(EXIT_MRK"addHostbootPdrs");
 }
 
 }

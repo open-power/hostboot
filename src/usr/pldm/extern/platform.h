@@ -243,6 +243,56 @@ struct pldm_pdr_fru_record_set {
 	uint16_t container_id;
 } __attribute__((packed));
 
+/** @struct pldm_state_effecter_possible_states
+ *
+ * Structure representing a State Effecter Possible States field
+ * (see DSP 0248 v1.1.1 table 79)
+ */
+struct pldm_state_effecter_possible_states {
+    uint16_t state_set_id;
+    uint8_t possible_states_size;
+    uint8_t possible_states[1];
+} __attribute__((packed));
+
+/* @brief List of PLDM State Set types
+ */
+enum pldm_state_set_enumeration {
+    pldm_state_set_operational_running_status = 11,
+    pldm_state_set_boot_restart_cause = 192
+};
+
+/* @brief List of states for the Boot Restart Cause state set.
+ */
+enum pldm_state_set_boot_restart_cause_values {
+    pldm_state_set_boot_restart_cause_powered_up = 1,
+    pldm_state_set_boot_restart_cause_hard_reset = 2,
+    pldm_state_set_boot_restart_cause_warm_reset = 3,
+    pldm_state_set_boot_restart_cause_manual_hard_reset = 4,
+    pldm_state_set_boot_restart_cause_manual_warm_reset = 5,
+    pldm_state_set_boot_restart_cause_system_restart = 6,
+    pldm_state_set_boot_restart_cause_watchdog_timeout = 7
+};
+
+/* @brief List of states for the Operational Running Status state set.
+ */
+enum pldm_state_set_operational_running_status_values {
+    pldm_state_set_operational_running_status_starting = 1,
+    pldm_state_set_operational_running_status_stopping = 2,
+    pldm_state_set_operational_running_status_stopped = 3,
+    pldm_state_set_operational_running_status_in_service = 4,
+    pldm_state_set_operational_running_status_aborted = 5,
+    pldm_state_set_operational_running_status_dormant = 6
+};
+
+/* @brief Types of initialization for state effecters.
+ */
+enum pldm_state_effecter_init {
+    state_effecter_noInit,
+    state_effecter_useInitPDR,
+    state_effecter_enableEffecter,
+    state_effecter_disableEffecter
+};
+
 /** @struct pldm_state_effecter_pdr
  *
  *  Structure representing PLDM state effecter PDR
@@ -260,6 +310,27 @@ struct pldm_state_effecter_pdr {
 	uint8_t composite_effecter_count;
 	uint8_t possible_states[1];
 } __attribute__((packed));
+
+/** @brief Encode PLDM state effecter PDR
+ *
+ * @param[in/out] effecter               Structure to encode
+ * @param[in]     allocation_size        Size of effecter allocation in bytes
+ * @param[in]     possible_states        Possible effecter states
+ * @param[in]     num_possible_states    Size of possible effecter states in elements
+ * @param[out]    actual_size            Size of effecter PDR. Set to 0 on error.
+ * @return int    pldm_completion_codes  PLDM_SUCCESS if successful, PLDM_ERROR otherwise
+ *
+ * @note The effecter parameter will be encoded in-place.
+ * @note Caller is responsible for allocation of the effecter parameter. Caller
+ *       must allocate enough space for the base structure and the
+ *       effecter->possible_states array, otherwise the function will fail.
+ * @note effecter->hdr.length, .type, and .version will be set appropriately.
+ */
+int encode_pldm_state_effecter_pdr(struct pldm_state_effecter_pdr* effecter,
+                                   size_t allocation_size,
+                                   const void* possible_states,
+                                   size_t num_possible_states,
+                                   size_t* actual_size);
 
 /** @struct state_effecter_possible_states
  *
