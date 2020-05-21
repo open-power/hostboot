@@ -31,8 +31,8 @@
       Device type of I2C slave device
     </description>
     <enum>
-      ADS7138_ADC,
-      PCA9554A_GPIO_EXPANDER
+      ADS7138_ADC = 0,
+      PCA9554A_GPIO_EXPANDER = 1
     </enum>
     <valueType>uint8</valueType>
     <platInit/>
