@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -34,6 +34,7 @@
 #include <kernel/doorbell.H>
 #include <kernel/misc.H>
 #include <kernel/vmmmgr.H>
+#include <arch/magic.H>
 
 void MessageHandler::sendMessage(msg_sys_types_t i_type, void* i_key,
                                  void* i_data, task_t* i_task)

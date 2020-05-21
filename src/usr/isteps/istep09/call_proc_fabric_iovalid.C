@@ -39,6 +39,7 @@
 // Standard library
 #include <stdint.h>
 #include <map>
+#include <arch/magic.H>
 
 // Trace
 #include <trace/interface.H>
@@ -268,7 +269,18 @@ void* call_proc_fabric_iovalid(void* const io_pArgs)
                       get_huid(l_cpu_target),
                       TRACE_ERR_ARGS(l_errl));
 
-            captureError(l_errl, l_StepError, HWPF_COMP_ID, l_cpu_target);
+            //@FIXME-RTC:254475-Remove once this works everywhere
+            if( MAGIC_INST_CHECK_FEATURE(MAGIC_FEATURE__IGNORESMPFAIL) )
+            {
+                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                           "WORKAROUND> Ignoring error for now - p10_fabric_iovalid" );
+                l_errl->setSev(ERRORLOG::ERRL_SEV_INFORMATIONAL);
+                errlCommit( l_errl, HWPF_COMP_ID );
+            }
+            else
+            {
+                captureError(l_errl, l_StepError, HWPF_COMP_ID, l_cpu_target);
+            }
         }
     } // end of going through all processors
 

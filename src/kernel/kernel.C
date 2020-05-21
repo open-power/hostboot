@@ -46,6 +46,7 @@
 #include <kernel/block.H>
 #include <kernel/terminate.H>
 #include <arch/ppc.H>
+#include <arch/magic.H>
 
 #include <stdlib.h>
 

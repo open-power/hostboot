@@ -1,9 +1,8 @@
 # Note : Assumes these vars were setup in startup.simics
 # $hb_masterproc : name of master proc chip object
+# $vpo_compile : VPO mode or not
+# $hb_multiproc : enable multiple processors
 ##
-
-$enable_2proc = "0"
-@if 'HB_ENABLE_2PROC' in os.environ: simenv.enable_2proc = "1"
 
 $hb_pnor = ""
 $hb_pnor = (get-master-pnors)[0]
@@ -23,21 +22,33 @@ if ($hb_pnor == NIL) {
 }
 echo "Master PNOR is: "+$hb_pnor
 
-$vpo_compile = "0"
-@if 'VPO_COMPILE' in os.environ: simenv.vpo_compile = "1"
+###################################
+#EEPROM Cache
+###################################
+# Look for a custom pre-built copy first
+$found_custom_eecache = 0
+try {
+    $eccPreload = (lookup-file "%simics%/custom_eecache.bin")
+    $found_custom_eecache = 1
+} except { 
+    $found_custom_eecache = 0
+}
 
 if( $vpo_compile == "1" ) {
     echo "    - Skipping EECACHE preload (VPO Mode)"
-} else if( $enable_2proc == "1" )  {
-    echo "    - Skipping EECACHE preload (2 Proc)"
 } else {
-    # Only pre-load EECACHE when we don't have a valid EECACHE image
-    # in PNOR by default
-    $eccPreload = (lookup-file "%simics%/eecache_prebuilt.bin.ecc")
+    if( $found_custom_eecache == 1 ) {
+        #yep...
+    } else if( $hb_multiproc == 1 )  {
+        $eccPreload = (lookup-file "%simics%/eecache_2proc_prebuilt.bin.ecc")
+    } else {
+        $eccPreload = (lookup-file "%simics%/eecache_prebuilt.bin.ecc")
+    }
     # NOTE must change offset if PNOR layout changes EECACHE offsets
-    echo "    - Loading prebuilt EECACHE "+$eccPreload+" at 0x2C000 in PNOR"
+    echo "    - Loading EECACHE "+$eccPreload+" at 0x2C000 in PNOR"
     ($hb_pnor).load-file $eccPreload 0x2C000
 }
+###################################
 
 
 # Turn on all processor cec-chips
@@ -71,24 +82,19 @@ foreach $obj in (get-object-list ocmb -all){
 
 }
 
-# Enable the second processor
-if( $enable_2proc == "1" ) {
-    echo "**Enabling 2 processors"
+### Enable the second processor - @TODO-RTC:254475
 
-    # Connect up the missing cfams
-    connect backplane0.cnt_hfsi_link[1] backplane0.cnt_fsi_slave[0][1][1]
+# Connect up the missing cfams
+connect backplane0.cnt_hfsi_link[1] backplane0.cnt_fsi_slave[0][1][1]
 
-    # Set valid bit for Scratch Reg3/Reg6 in Scratch Reg8 bit 2/5
-    (get-master-procs)[0].cfam_cmp.lbus_map.write 0x2800 + 0x3F*4 0x24000000 4 -b
-    # Set bit24 for Scratch Reg6 - Master Proc
-    (get-master-procs)[0].cfam_cmp.lbus_map.write 0x2800 + 0x3D*4 0x00000080 4 -b
-}
+# Set valid bit for Scratch Reg3/Reg6 in Scratch Reg8 bit 2/5
+(get-master-procs)[0].cfam_cmp.lbus_map.write 0x2800 + 0x3F*4 0x24000000 4 -b
+# Set bit24 for Scratch Reg6 - Master Proc
+(get-master-procs)[0].cfam_cmp.lbus_map.write 0x2800 + 0x3D*4 0x00000080 4 -b
+
+#####
 
 # Force the localbus to default to the PIB side
 foreach $fsis in (get-object-list -all fsi_slave_t3_v6) {
     $fsis->enforce_lbo = FALSE
 }
-
-# Force the C4 pin to indicate master chip
-@conf.backplane0.dcm[0].chip[0].cfam_cmp.fsi2host_mbox.pib_regs_environment_status |= 0x0800000000000000
-

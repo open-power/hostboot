@@ -36,6 +36,7 @@
 //#include <mboxclientlib.H>
 #include <errl/errlentry.H>
 #include <errl/errlmanager.H>
+#include <arch/magic.H>
 #include "TodSvc.H"
 #include "TodControls.H"
 #include "TodProc.H"
@@ -376,6 +377,13 @@ errlHndl_t TodSvc::todInit()
         {
             TOD_ERR("TOD initialization failed for primary topology : HWP");
             l_errHdl->setSev(ERRORLOG::ERRL_SEV_UNRECOVERABLE);
+            //@FIXME-RTC:254475-Remove once this works everywhere
+            if( MAGIC_INST_CHECK_FEATURE(MAGIC_FEATURE__IGNORETODFAIL) )
+            {
+                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                           "WORKAROUND> Ignoring error for now - TodSvc::todInit" );
+                l_errHdl->setSev(ERRORLOG::ERRL_SEV_INFORMATIONAL);
+            }
             errlCommit(l_errHdl, TOD_COMP_ID);
             break;
         }

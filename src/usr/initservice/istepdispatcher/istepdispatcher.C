@@ -70,6 +70,7 @@
 #include <pnor/pnorif.H>
 #include <lpc/lpcif.H>
 #include <istep18/establish_system_smp.H>
+#include <arch/magic.H>                    
 
 #ifdef CONFIG_BMC_IPMI
 #include <ipmi/ipmiwatchdog.H>      //IPMI watchdog timer

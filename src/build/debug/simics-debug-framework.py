@@ -805,6 +805,26 @@ def magic_instruction_callback(user_arg, cpu, arg):
                                             byte_offset,
                                             byte_data))
 
+    if arg == 7058:   # MAGIC_CHECK_FEATURE
+        feature = cpu.r4
+        value = 0
+        if feature == 1:  #MAGIC_FEATURE__MULTIPROC
+            value = 1 if simenv.hb_multiproc == 1 else 0
+            if value != 0:
+                print "HB> MAGIC_FEATURE__MULTIPROC = %d" % (value)
+        elif feature == 2:  #MAGIC_FEATURE__IGNORESMPFAIL
+            value = 1 if simenv.hb_ignoresmpfail == 1 else 0
+            if value != 0:
+                print "HB> MAGIC_FEATURE__IGNORESMPFAIL = %d" % (value)
+        elif feature == 3:  #MAGIC_FEATURE__IGNORETODFAIL
+            value = 1 if simenv.hb_ignoretodfail == 1 else 0
+            if value != 0:
+                print "HB> MAGIC_FEATURE__IGNORETODFAIL = %d" % (value)
+        else:
+            print "MAGIC_CHECK_FEATURE> Unknown feature %d requested for" % (feature)
+        cpu.r3 = value
+
+
 # Continuous trace: Clear these files.
 rc = os.system( "rm -f hbTracMERG" )
 rc = os.system( "rm -f hbTracMERG1" )

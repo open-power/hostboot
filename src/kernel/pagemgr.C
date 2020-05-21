@@ -35,6 +35,7 @@
 #include <util/singleton.H>
 #include <kernel/console.H>
 #include <arch/ppc.H>
+#include <arch/magic.H>
 #include <util/locked/pqueue.H>
 #include <kernel/task.H>
 #include <kernel/taskmgr.H>

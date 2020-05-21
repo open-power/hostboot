@@ -52,6 +52,7 @@
 #include    <console/consoleif.H>
 #include    <sbe/sbereasoncodes.H>
 #include    <util/misc.H>
+#include    <arch/magic.H>
 
 #include    <errl/errludstring.H>
 #include    <errl/errludprintk.H>

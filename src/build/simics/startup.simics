@@ -154,12 +154,6 @@ if($vpo_compile == "0") { # no secureboot in VPO
 
 }
 
-if($machine_name == "p10_standalone") {
-    run-command-file (lookup-file hbfw/standalone.simics)
-} else {
-    run-command-file (lookup-file hbfw/combined.simics)
-}
-
 # Populate default APSS power readings for the OCC
 foreach $apss in (get-object-list -all type = apss_device) {
     ($apss)->adc_channel_val = [0x00000293, 0x00000287, 0x00000887, 0x00000877, 0x00000326, 0x000002f2, 0x00000214, 0x00000006, 0x00000003, 0x00000eb7, 0x0000001b, 0x00000013, 0x00000123, 0x000000fc, 0x000000f2, 0x00000008]
@@ -207,3 +201,46 @@ echo "Setting l3_base"
 foreach $proc in (get-all-procs) {
     $proc->l3_base=0xF0000000
 }
+
+#Enable extra processor support if asked to
+try {
+    #this access will fail if the runsim cmdline didn't specify anything
+    echo "Multiproc Enablement = "+$hb_multiproc
+} except {
+    $hb_multiproc = 0
+    @if 'HB_ENABLE_2PROC' in os.environ: simenv.hb_multiproc = 1
+    echo "Multiproc Enablement = "+$hb_multiproc
+}
+
+###Check for some workaround flags
+try {
+    echo "hb_ignoresmpfail = "+$hb_ignoresmpfail
+} except {
+    #default to ignoring known multiproc issues
+    if( $hb_multiproc == 1 ) {
+        $hb_ignoresmpfail = 1
+    } else {
+        $hb_ignoresmpfail = 0
+    }
+}
+try {
+    echo "hb_ignoretodfail = "+$hb_ignoretodfail
+} except {
+    #default to ignoring known multiproc issues
+    if( $hb_multiproc == 1 ) {
+        $hb_ignoretodfail = 1
+    } else {
+        $hb_ignoretodfail = 0
+    }
+}
+#####
+
+#
+# Always trigger our specific command files last
+#
+if($machine_name == "p10_standalone") {
+    run-command-file (lookup-file hbfw/standalone.simics)
+} else {
+    run-command-file (lookup-file hbfw/combined.simics)
+}
+

@@ -28,6 +28,7 @@
 #include <isteps/hwpisteperror.H>
 #include <initservice/isteps_trace.H>
 #include <fsi/fsiif.H>
+#include <arch/magic.H>
 
 
 //  targeting support
@@ -114,12 +115,22 @@ void* call_proc_build_smp (void *io_pArgs)
         {
             TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                        "ERROR : call p10_build_smp, PLID=0x%x", l_errl->plid());
-            // Create IStep error log and cross reference error that occurred
-            l_StepError.addErrorDetails(l_errl);
-            // Commit error
-            errlCommit( l_errl, HWPF_COMP_ID );
-
-            break;
+            //@FIXME-RTC:254475-Remove once this works everywhere
+            if( MAGIC_INST_CHECK_FEATURE(MAGIC_FEATURE__IGNORESMPFAIL) )
+            {
+                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                           "WORKAROUND> Ignoring error for now - p10_build_smp" );
+                l_errl->setSev(ERRORLOG::ERRL_SEV_INFORMATIONAL);
+                errlCommit( l_errl, HWPF_COMP_ID );
+            }
+            else
+            {
+                // Create IStep error log and cross reference error that occurred
+                l_StepError.addErrorDetails(l_errl);
+                // Commit error
+                errlCommit( l_errl, HWPF_COMP_ID );
+                break;
+            }
         }
 
         // At the point where we can now change the proc chips to use

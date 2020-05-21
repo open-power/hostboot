@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2010,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2010,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -40,6 +40,7 @@
 #include <kernel/misc.H>
 #include <kernel/cpumgr.H>
 #include <kernel/scheduler.H>
+#include <arch/magic.H>
 
 
 namespace ExceptionHandles

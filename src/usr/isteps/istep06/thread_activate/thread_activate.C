@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -46,7 +46,7 @@
 #include    <p10_thread_control.H>
 #include    <arch/pirformat.H>
 #include    <arch/pvrformat.H>
-#include    <arch/ppc.H>
+#include    <arch/magic.H>
 
 //  targeting support
 #include    <targeting/common/target.H>

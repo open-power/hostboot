@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -28,7 +28,7 @@
 #include <initservice/initserviceif.H>
 #include <errl/hberrltypes.H>
 #include <secureboot/service.H>
-#include <arch/ppc.H>
+#include <arch/magic.H>
 
 using namespace ERRORLOG;
 

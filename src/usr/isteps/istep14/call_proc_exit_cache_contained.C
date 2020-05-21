@@ -52,7 +52,7 @@
 
 #include <intr/interrupt.H>
 #include <isteps/mem_utils.H>
-#include <arch/ppc.H>
+#include <arch/magic.H>
 
 using   namespace   ISTEP;
 using   namespace   ISTEP_ERROR;

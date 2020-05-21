@@ -47,7 +47,7 @@
 #include <errl/errlmanager.H>
 
 // Magic instruction
-#include <arch/ppc.H>
+#include <arch/magic.H>
 
 // Attribute length info
 #include <mapattrmetadata.H>

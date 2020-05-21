@@ -23,7 +23,7 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 #include <util/misc.H>
-#include <arch/ppc.H>
+#include <arch/magic.H>
 
 namespace Util
 {
@@ -84,6 +84,18 @@ bool isConsoleStarted()
 void setIsConsoleStarted()
 {
     g_isConsoleStarted = true;
+}
+
+bool isMultiprocSupported() __attribute__((alias("__isMultiprocSupported")));
+extern "C" bool __isMultiprocSupported() NEVER_INLINE;
+
+bool __isMultiprocSupported()
+{
+#ifdef FORCE_SINGLE_CHIP
+    return false;
+#else
+    return MAGIC_INST_CHECK_FEATURE(MAGIC_FEATURE__MULTIPROC);
+#endif
 }
 
 };

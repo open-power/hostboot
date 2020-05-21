@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -38,6 +38,7 @@
 #include    <sys/misc.h>
 #include    <sys/time.h>
 #include    <usr/cxxtest/TestSuite.H>
+#include    <arch/magic.H>
 
 #include    <trace/interface.H>
 #include    <errl/errlentry.H>

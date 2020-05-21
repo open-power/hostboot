@@ -396,6 +396,7 @@ hb_simsetup()
     export_key_variables
     SIMICS_LEVEL=`cat ${PROJECT_ROOT}/src/build/citest/etc/simbuild`
     EECACHE_PREBUILT=`cat ${PROJECT_ROOT}/src/build/citest/etc/eecache_prebuilt`
+    EECACHE_PREBUILT2=`cat ${PROJECT_ROOT}/src/build/citest/etc/eecache_2proc_prebuilt`
 
     # Setup for P10 Standalone without ODE SB
 
@@ -432,6 +433,8 @@ hb_simsetup()
         cd ${STANDALONE_SIMICS} && ./INSTALL.sh
         echo "cp ${EECACHE_PREBUILT} ${STANDALONE_SIMICS}/eecache_prebuilt.bin.ecc"
         cp ${EECACHE_PREBUILT} ${STANDALONE_SIMICS}/eecache_prebuilt.bin.ecc
+        echo "cp ${EECACHE_PREBUILT2} ${STANDALONE_SIMICS}/eecache_2proc_prebuilt.bin.ecc"
+        cp ${EECACHE_PREBUILT2} ${STANDALONE_SIMICS}/eecache_2proc_prebuilt.bin.ecc
 
         exit 0
 

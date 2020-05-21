@@ -81,6 +81,12 @@ namespace Util
      *        daemon starts.
      */
     void setIsConsoleStarted();
+
+    /**
+     * @brief Checks if multiple processors are supported in the current
+     *        session..
+     */
+    bool isMultiprocSupported();
 };
 
 #endif

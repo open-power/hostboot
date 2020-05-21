@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -27,6 +27,7 @@
 #include <kernel/vmmmgr.H>
 #include <sys/mmio.h>
 #include <arch/ppc.H>
+#include <arch/magic.H>
 
 namespace Kernel
 {

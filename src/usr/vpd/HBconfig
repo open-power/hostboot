@@ -1,5 +1,5 @@
 config FORCE_SINGLE_CHIP
-    default y
+    default n
     help
         Force FSI and MVPD presence detect to remote processor chips to return
         false, causing Hostboot only to detect a single processor chip (master).

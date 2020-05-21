@@ -31,7 +31,7 @@
 #include <errl/errludtarget.H>
 
 #include <arch/pirformat.H>
-#include <arch/ppc.H>
+#include <arch/magic.H>
 #include <console/consoleif.H>
 
 //  targeting support

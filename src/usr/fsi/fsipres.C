@@ -33,6 +33,7 @@
 #include <hwas/common/hwasCallout.H>
 #include <targeting/common/predicates/predicatectm.H>
 #include <initservice/initserviceif.H>
+#include <util/misc.H>
 
 extern trace_desc_t* g_trac_fsi;
 
@@ -106,9 +107,20 @@ errlHndl_t procPresenceDetect(DeviceFW::OperationType i_opType,
     }
     else
     {
-#ifndef CONFIG_FORCE_SINGLE_CHIP
         fsi_present = isSlavePresent(i_target);
-#endif
+        if (fsi_present)
+        {
+            //@FIXME-RTC:254475-Remove once this works everywhere
+            if( !Util::isMultiprocSupported() )
+            {
+                TRACFCOMP(g_trac_fsi, "Ignoring secondary procs" );
+                fsi_present = false;
+            }
+            else
+            {
+                TRACFCOMP(g_trac_fsi, "FSI::procPresenceDetect> 0x%.8X target present", TARGETING::get_huid(i_target) );
+            }
+        }
     }
 
     // Next look for valid Module VPD
@@ -119,13 +131,12 @@ errlHndl_t procPresenceDetect(DeviceFW::OperationType i_opType,
     check_for_mvpd = fsi_present;
 #endif
 
-#ifdef CONFIG_FORCE_SINGLE_CHIP
     if ((i_target != TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL) &&
-        (i_target != l_masterChip))
+        (i_target != l_masterChip) &&
+        !Util::isMultiprocSupported() ) //@FIXME-RTC:254475
     {
         check_for_mvpd = false;
     }
-#endif
 
     if ( check_for_mvpd )
     {

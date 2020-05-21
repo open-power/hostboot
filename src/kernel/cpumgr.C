@@ -47,6 +47,7 @@
 #include <kernel/cpuid.H>
 #include <kernel/doorbell.H>
 #include <arch/pvrformat.H>
+#include <arch/magic.H>
 
 cpu_t** CpuManager::cv_cpus[KERNEL_MAX_SUPPORTED_NODES];
 bool CpuManager::cv_shutdown_requested = false;

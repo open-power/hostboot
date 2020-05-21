@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -40,6 +40,7 @@
 #include <targeting/common/targetservice.H>
 #include <initservice/initserviceif.H>
 #include <isteps/hwpisteperror.H>
+#include <arch/magic.H>
 
 #include <tod/TodTrace.H>
 #include <tod/TodSvc.H>
@@ -67,7 +68,17 @@ void * call_tod_setup(void *dummy)
                     TRACE_ERR_FMT,
                     TRACE_ERR_ARGS(l_errl));
             l_errl->collectTrace("ISTEPS_TRACE");
-            l_stepError.addErrorDetails( l_errl );
+            //@FIXME-RTC:254475-Remove once this works everywhere
+            if( MAGIC_INST_CHECK_FEATURE(MAGIC_FEATURE__IGNORETODFAIL) )
+            {
+                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                           "WORKAROUND> Ignoring error for now - TOD::todSetup" );
+                l_errl->setSev(ERRORLOG::ERRL_SEV_INFORMATIONAL);
+            }
+            else
+            {
+                l_stepError.addErrorDetails( l_errl );
+            }
             errlCommit( l_errl, TOD_COMP_ID );
         }
     }

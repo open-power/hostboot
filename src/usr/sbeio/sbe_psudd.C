@@ -40,7 +40,7 @@
 #include <sbeio/sbe_ffdc_package_parser.H>
 #include <sbeio/sbe_psudd.H>
 #include <sbeio/sbe_ffdc_parser.H>
-#include <arch/ppc.H>
+#include <arch/magic.H>
 #include <kernel/pagemgr.H>
 #include <sbeio/sbeioif.H>
 /* FIXME RTC: 210975

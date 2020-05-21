@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2014              */
+/* Contributors Listed Below - COPYRIGHT 2011,2020                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -32,6 +34,7 @@
 #include <cxxtest/TestSuite.H>
 #include <devicefw/userif.H>
 #include <targeting/common/commontargeting.H>
+#include <util/misc.H>
 
 using namespace TARGETING;
 using namespace DeviceFW;
@@ -124,9 +127,12 @@ class FSIPresTest : public CxxTest::TestSuite
                     }
                     else if (!present && !l_errl)
                     {
-                        TS_FAIL("FSI-PRES: No error performing "
-                                "read to non-present device. %x",
-                                 TARGETING::get_huid(*target));
+                        if( Util::isMultiprocSupported() )
+                        {
+                            TS_FAIL("FSI-PRES: No error performing "
+                                    "read to non-present device. %x",
+                                    TARGETING::get_huid(*target));
+                        }
                         TRACFCOMP(g_trac_fsi,
                                   "FSI-PRES: FSI-read did not fail. %x",
                                    TARGETING::get_huid(*target));

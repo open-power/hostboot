@@ -42,6 +42,7 @@
 #include <util/singleton.H>
 #include <kernel/doorbell.H>
 #include <arch/pvrformat.H>
+#include <arch/magic.H>
 
 extern "C"
     void kernel_shutdown(size_t, uint64_t, uint64_t, uint64_t,

@@ -29,6 +29,7 @@
 #include <sys/sync.h>
 #include <sys/mmio.h>
 #include <arch/ppc.H>
+#include <arch/magic.H>
 #ifndef BOOTLOADER
 #include <stdint.h>
 #include <kernel/console.H>
