@@ -342,6 +342,7 @@ RUNTIME_MODULES += $(if $(CONFIG_HTMGT),htmgt_rt)   # ~/src/usr/htmgt/runtime/
 #RUNTIME_MODULES += $(if $(CONFIG_NVDIMM),nvdimm_rt)
 #RUNTIME_MODULES += p9_cpuWkup
 RUNTIME_MODULES += $(if $(CONFIG_MCTP)$(CONFIG_MCTP_TESTCASES),mctp_rt) # ~/src/usr/mctp/runtime/
+RUNTIME_MODULES += $(if $(CONFIG_PLDM)$(CONFIG_PLDM_TESTCASES),pldm_rt) # ~/src/usr/pldm/runtime/
 
 
 # This is exported so that gcov knows the list of runtime modules to

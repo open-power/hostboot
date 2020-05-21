@@ -35,11 +35,11 @@
 #include <cstddef>
 #include "../../../src/usr/pldm/extern/base.h"
 #include <errl/errlentry.H>
+#include <pldm/pldm_const.H>
 
 namespace PLDM
 {
-    using terminus_id = uint16_t;
-
+#ifndef __HOSTBOOT_RUNTIME
     /**
     * @brief This function is intended to be used by the MCTP resource
     *        provider when they find a PLDM message and want the PLDM
@@ -53,6 +53,55 @@ namespace PLDM
     * @return errHndl_t   nullptr unless error occurs
     */
     errlHndl_t routeInboundMsg(const uint8_t * i_msg, size_t i_len);
+#else
+    /**
+    * @brief This function is intended to be used by the MCTP resource
+    *        provider when it finds a PLDM message and wants the PLDM
+    *        resource provider to handle it
+    *
+    * @param[in] i_next_msg  Buffer containing the next PLDM message found by
+    *                        MCTP that we want to attempt to cache at PLDM layer
+    * @param[in] i_len       Length of i_next_msg buffer
+    *
+    * @return pldmrp_rt_rc HBRT PLDM resource provider return code (see pldmrp_rt.H)
+    */
+    pldmrp_rt_rc cache_next_pldm_msg(const void * i_next_msg,
+                                     size_t i_len);
+
+    /**
+    * @brief This function will return the PLDM response, if there is one,
+    *        that HBRT's PLDM resource provider has cached.
+    *
+    * @return std::vector<uint8_t> Vector containing the next cached PLDM
+    *                              response if there is one
+    */
+    const std::vector<uint8_t> & get_next_response(void);
+
+    /**
+    * @brief Clear the byte vector containing the cached pldm response in the PLDM
+    *        resource provider
+    *
+    * @return void
+    */
+    void clear_next_response(void);
+
+    /**
+    * @brief This function will return the PLDM request, if there is one,
+    *        that HBRT's PLDM resource provider has cached.
+    *
+    * @return std::vector<uint8_t> Vector containing the next cached PLDM
+    *                              request if there is one
+    */
+    const std::vector<uint8_t> & get_next_request(void);
+
+    /**
+    * @brief Clear the byte vector containing the cached pldm request in the PLDM
+    *        resource provider
+    *
+    * @return void
+    */
+    void clear_next_request(void);
+#endif
 
     /**
     * @brief Copy the 3 byte header of a PLDM message into a

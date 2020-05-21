@@ -148,7 +148,7 @@ public:
 
     // The BMC TID is 1, HB is 2. It is important that the terminus IDs in the
     // system do not conflict with one another.
-    static constexpr terminus_id hostboot_terminus_id = 2;
+    static constexpr terminus_id_t hostboot_terminus_id = 2;
 
 private:
     std::unique_ptr<pldm_pdr, void(*)(pldm_pdr*)> iv_pdr_repo;

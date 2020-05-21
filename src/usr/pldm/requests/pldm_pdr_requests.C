@@ -304,7 +304,7 @@ errlHndl_t getRemotePdrRepository(pldm_pdr* const io_repo)
     return errl;
 }
 
-errlHndl_t sendRepositoryChangedEvent(const terminus_id i_tid,
+errlHndl_t sendRepositoryChangedEvent(const terminus_id_t i_tid,
                                       const pldm_pdr* const i_repo,
                                       const std::vector<pdr_handle_t>& i_handles)
 {

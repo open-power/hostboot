@@ -34,7 +34,6 @@ typedef uint8_t mctp_eid_t;
 
 namespace PLDM
 {
-
     using terminus_id_t = uint16_t;
 
     // These are Entity Types used in Entity Association PDRs
@@ -87,6 +86,16 @@ namespace PLDM
     // handle will always be 0x00000000
     const uint8_t GET_FIRST_PART = 0x01;
     const uint8_t INITIAL_TRANS_HNDL = 0x00000000;
+
+#ifdef __HOSTBOOT_RUNTIME
+    enum pldmrp_rt_rc : uint8_t
+    {
+        RC_PLDMRP_RT_SUCCESS   = 0,
+        RC_NEXT_RESPONSE_FULL  = 1,
+        RC_NEXT_REQUEST_FULL   = 2,
+        RC_INVALID_MESSAGE_LEN = 3
+    };
+#endif
 }
 
 #endif

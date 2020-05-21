@@ -42,6 +42,7 @@ namespace MCTP
         RC_CHANNEL_INACTIVE   = MCTP_COMP_ID | 0x01,
         RC_SEND_PLDM_FAIL     = MCTP_COMP_ID | 0x02,
         RC_INVALID_MSG_TYPE   = MCTP_COMP_ID | 0x03,
+        RC_ERROR_CACHING_MSG  = MCTP_COMP_ID | 0x04,
     };
 };
 #endif

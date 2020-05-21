@@ -36,27 +36,32 @@
 namespace MCTP
 {
 
-/* @brief addBmcErrorCallouts
+/* @brief addHypErrorCallouts
  *
- *        Collect MCTP traces, and add a high-priority callout to the BMC and a
- *        medium-priority callout to Hostboot to the error log.
+ *        Collect MCTP traces, and add a high-priority callout to the BMC,
+ *        a medium-priority callout to the hypervsior, and a low-priority
+ *        callout to Hostboot to the error log.
  *
  * @param[in] i_errl  Error log to modify
  */
-inline void addBmcErrorCallouts(const errlHndl_t i_errl)
+inline void addBmcAndHypErrorCallouts(const errlHndl_t i_errl)
 {
     assert(i_errl != nullptr,
            "i_errl is nullptr in addBmcErrorCallouts");
 
-    i_errl->collectTrace(MCTP_COMP_NAME);
+    i_errl->collectTrace(PLDM_COMP_NAME);
 
     // Call out service processor / BMC firmware as high priority
     i_errl->addProcedureCallout(HWAS::EPUB_PRC_SP_CODE,
                                 HWAS::SRCI_PRIORITY_HIGH);
 
-    // Call out Hostboot firmware as medium priority
-    i_errl->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
+    // Call out Hypervsior firmware as medium priority
+    i_errl->addProcedureCallout(HWAS::EPUB_PRC_PHYP_CODE,
                                 HWAS::SRCI_PRIORITY_MED);
+
+    // Call out Hostboot firmware as low priority
+    i_errl->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
+                                HWAS::SRCI_PRIORITY_LOW);
 }
 
 }

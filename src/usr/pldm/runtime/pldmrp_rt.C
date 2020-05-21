@@ -1,0 +1,110 @@
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/usr/pldm/runtime/pldmrp_rt.C $                            */
+/*                                                                        */
+/* OpenPOWER HostBoot Project                                             */
+/*                                                                        */
+/* Contributors Listed Below - COPYRIGHT 2020                             */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
+/*                                                                        */
+/* Licensed under the Apache License, Version 2.0 (the "License");        */
+/* you may not use this file except in compliance with the License.       */
+/* You may obtain a copy of the License at                                */
+/*                                                                        */
+/*     http://www.apache.org/licenses/LICENSE-2.0                         */
+/*                                                                        */
+/* Unless required by applicable law or agreed to in writing, software    */
+/* distributed under the License is distributed on an "AS IS" BASIS,      */
+/* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or        */
+/* implied. See the License for the specific language governing           */
+/* permissions and limitations under the License.                         */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
+
+/** @file  pldmrp_rt.C
+ *  @brief Source code for hbrt's PLDM resource provider.
+ */
+#include "../common/pldmtrace.H"
+#include "pldmrp_rt.H"
+#include <pldm/pldmif.H>
+#include <runtime/interface.h>
+
+using namespace PLDM;
+
+pldmrp_rt_rc PLDM::cache_next_pldm_msg(const void * const i_next_msg,
+                                       const size_t i_len)
+{
+    return Singleton<PldmRP>::instance().cache_next_pldm_msg(
+                                      static_cast<const uint8_t *>(i_next_msg),
+                                      i_len);
+}
+
+const std::vector<uint8_t> & PLDM::get_next_response(void)
+{
+    return Singleton<PldmRP>::instance().iv_next_response;
+}
+
+void PLDM::clear_next_response(void)
+{
+    Singleton<PldmRP>::instance().iv_next_response.clear();
+}
+
+const std::vector<uint8_t> & PLDM::get_next_request(void)
+{
+    return Singleton<PldmRP>::instance().iv_next_request;
+}
+
+void PLDM::clear_next_request(void)
+{
+    Singleton<PldmRP>::instance().iv_next_request.clear();
+}
+
+pldmrp_rt_rc PldmRP::cache_next_pldm_msg(const uint8_t * const i_next_msg,
+                                         const size_t i_len)
+{
+    pldmrp_rt_rc rc = RC_PLDMRP_RT_SUCCESS;
+    do{
+
+    if(i_len < sizeof(pldm_msg_hdr))
+    {
+        rc = RC_INVALID_MESSAGE_LEN;
+        break;
+    }
+
+    const pldm_msg_hdr * pldm_hdr =
+        reinterpret_cast<const pldm_msg_hdr *>(i_next_msg);
+
+    const uint8_t * const i_next_msg_end = i_next_msg + i_len;
+
+    // Update our cached request/response appropriately if they
+    // are empty, otherwise return a RC indicating we are full.
+    if(pldm_hdr->request)
+    {
+        if(iv_next_request.empty())
+        {
+            iv_next_request.assign(i_next_msg,
+                                   i_next_msg_end);
+        }
+        else
+        {
+            rc = RC_NEXT_REQUEST_FULL;
+        }
+    }
+    else
+    {
+        if(iv_next_response.empty())
+        {
+            iv_next_response.assign(i_next_msg,
+                                    i_next_msg_end);
+        }
+        else
+        {
+            rc = RC_NEXT_RESPONSE_FULL;
+        }
+    }
+
+    }while(0);
+    return rc;
+}

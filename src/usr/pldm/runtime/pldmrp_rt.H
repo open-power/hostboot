@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/include/usr/pldm/requests/pldm_pdr_requests.H $           */
+/* $Source: src/usr/pldm/runtime/pldmrp_rt.H $                            */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
@@ -22,50 +22,42 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+#ifndef PLDMRP_RT_H
+#define PLDMRP_RT_H
 
-/* @file pldm_pdr_requests.H
- *
- * Defines the interface for retrieving the BMC's list of PDRs.
+/** @file  pldmrp_rt.H
+ *  @brief Header for hbrt's PLDM resource provider.
  */
 
-#ifndef PLDM_PDR_REQUESTS_H
-#define PLDM_PDR_REQUESTS_H
-
-#include <errl/errlentry.H>
-#include <pldm/pldmif.H>
-
-// Struct representing PDR repository (see DSP0248 v1.2.0, section 8)
-struct pldm_pdr;
-
-namespace PLDM
+#include <vector>
+#include <pldm/pldm_const.H>
+class PldmRP
 {
+  public:
+      /** @brief cache_next_pldm_msg interface to attempt to cache the next pldm
+       *         request or response
+       *
+       * @param[in] i_next_msg  Buffer containing the next PLDM message found
+       *                        by MCTP that we want to attempt to store in the
+       *                        PLDM resource provider for later
+       * @param[in] i_len       Length of i_next_msg buffer
+       *
+       * @return int HBRT PLDM resource provider return codes (see pldmrp_rt.H)
+       */
+      PLDM::pldmrp_rt_rc cache_next_pldm_msg(const uint8_t * i_next_msg,
+                                       size_t i_len);
 
-using pdr_handle_t = uint32_t;
+      // these vector members will act as a cache for a single PLDM response or
+      // PLDM request. there should only be at most one of each cached at any
+      // given time
+      std::vector<uint8_t> iv_next_response;
+      std::vector<uint8_t> iv_next_request;
 
-static constexpr pdr_handle_t FIRST_PDR_HANDLE = 0,
-                              NO_MORE_PDR_HANDLES = 0;
+      // Constructor
+      PldmRP(void) {};
+  private:
+      // Disallow copying this class.
+      PldmRP& operator=(const PldmRP&) = delete;
+};
 
-/* @brief Retrieves the PDRs from the BMC and adds them to the given
- *        repository.
- *
- * @param[io/out] io_repo     Pointer to a PDR repository to store the BMC PDRs in.
- *                            Must not be nullptr.
- * @return        errlHndl_t  Error if any, otherwise nullptr.
- */
-errlHndl_t getRemotePdrRepository(pldm_pdr* io_repo);
-
-/* @brief Send a "PDR Repository Changed Event" to the BMC.
- *
- * @param[in] i_tid         The TID of the Hostboot PLDM terminus
- * @param[in] i_repo        PDR Repository containing the changed PDRs
- *                          (must not be nullptr)
- * @param[in] i_handles     The set of PDRs which have been added to the repository.
- * @return errlHndl_t       Error if any, otherwise nullptr.
- */
-errlHndl_t sendRepositoryChangedEvent(const terminus_id_t i_tid,
-                                      const pldm_pdr* i_repo,
-                                      const std::vector<pdr_handle_t>& i_handles);
-
-}
-
-#endif
+#endif //PLDMRP_RT_H

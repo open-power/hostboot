@@ -90,6 +90,7 @@ namespace PLDM
         RC_INVALID_RECORD_COUNT   = PLDM_COMP_ID | 0x16,
         RC_INVALID_LOCATION_CODE  = PLDM_COMP_ID | 0x17,
         RC_NO_LOCATION_CODE       = PLDM_COMP_ID | 0x18,
+        RC_RECV_FAIL              = PLDM_COMP_ID | 0x19,
     };
 }
 #endif

@@ -1,7 +1,7 @@
 # IBM_PROLOG_BEGIN_TAG
 # This is an automatically generated prolog.
 #
-# $Source: src/usr/pldm/makefile $
+# $Source: src/usr/pldm/runtime/makefile $
 #
 # OpenPOWER HostBoot Project
 #
@@ -22,12 +22,18 @@
 # permissions and limitations under the License.
 #
 # IBM_PROLOG_END_TAG
+HOSTBOOT_RUNTIME = 1
+ROOTPATH = ../../../..
+MODULE = pldm_rt
 
-ROOTPATH = ../../..
+include ../common/common.mk
 
-# Sub-directories that will compile into their own modules
-SUBDIRS += base.d
-SUBDIRS += extended.d
-SUBDIRS += runtime.d
+# From ../common/
+OBJS += ${PLDM_COMMON_OBJS}
+# From ../extern/
+OBJS += base.o
+OBJS += fru.o
+
+OBJS += pldmrp_rt.o
 
 include ${ROOTPATH}/config.mk

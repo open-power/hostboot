@@ -23,7 +23,7 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-/* @file pldm_request.H
+/** @file pldm_request.H
  *
  * Utilities for making/receiving PLDM requests.
  */
@@ -53,6 +53,13 @@
 #include <pldm/pldm_errl.H>
 #include <pldm/pldm_reasoncodes.H>
 
+#ifdef __HOSTBOOT_RUNTIME
+#include <mctp/mctp_const.H>
+#include <mctp/mctpif_rt.H>
+#include <runtime/interface.h>
+#include <sys/time.h>
+#endif
+
 using namespace ERRORLOG;
 
 namespace PLDM
@@ -69,7 +76,6 @@ constexpr uint8_t DEFAULT_INSTANCE_ID = 0x00;
 template<size_t MsgSize>
 struct mctp_pldm_msg
 {
-    // This is set by the MCTP stack
     decltype(MCTP::MCTP_MSG_TYPE_PLDM) mctp_message = 0;
 
     pldm_msg pldm_message { };
@@ -86,7 +92,6 @@ struct mctp_pldm_msg
 template<>
 struct mctp_pldm_msg<1>
 {
-    // This is set by the MCTP stack
     decltype(MCTP::MCTP_MSG_TYPE_PLDM) mctp_message = 0;
 
     pldm_msg pldm_message { };
@@ -104,7 +109,6 @@ struct mctp_pldm_msg<1>
 template<>
 struct mctp_pldm_msg<0>
 {
-    // This is set by the MCTP stack
     decltype(MCTP::MCTP_MSG_TYPE_PLDM) mctp_message = 0;
 
     pldm_msg pldm_message { };
@@ -126,10 +130,10 @@ struct mctp_pldm_msg<0>
  */
 template<size_t MsgSize, typename Encoder, typename... Args>
 errlHndl_t sendrecv_pldm_request(std::vector<uint8_t>& o_response_bytes,
-                                         const std::vector<uint8_t>& i_payload_bytes,
-                                         const msg_q_t i_msgQ,
-                                         const Encoder i_encoder,
-                                         Args... i_args)
+                                 const std::vector<uint8_t>& i_payload_bytes,
+                                 const msg_q_t i_msgQ,
+                                 const Encoder i_encoder,
+                                 Args... i_args)
 {
     errlHndl_t errl = nullptr;
     o_response_bytes.clear();
@@ -137,6 +141,8 @@ errlHndl_t sendrecv_pldm_request(std::vector<uint8_t>& o_response_bytes,
     std::vector<uint8_t> msgbuf_bytes(sizeof(mctp_pldm_msg<MsgSize>) + i_payload_bytes.size());
 
     const auto msgbuf = reinterpret_cast<mctp_pldm_msg<MsgSize>*>(msgbuf_bytes.data());
+
+    msgbuf_bytes[0] = MCTP::MCTP_MSG_TYPE_PLDM;
 
     pldm_msg* const pldm_request = &msgbuf->pldm_message;
 
@@ -153,6 +159,7 @@ errlHndl_t sendrecv_pldm_request(std::vector<uint8_t>& o_response_bytes,
                    encoder_rc);
         }
 
+#ifndef __HOSTBOOT_RUNTIME
         const std::unique_ptr<msg_t, decltype(&msg_free)> msg { msg_allocate(), msg_free };
         msg->data[0] = msgbuf_bytes.size();
         msg->extra_data = msgbuf_bytes.data();
@@ -194,6 +201,72 @@ errlHndl_t sendrecv_pldm_request(std::vector<uint8_t>& o_response_bytes,
 
         o_response_bytes.assign(extra_data.get(),
                                 extra_data.get() + msg->data[0]);
+#else
+        int return_code = MCTP::send_message(msgbuf_bytes);
+
+        if(return_code)
+        {
+            /*
+            * @errortype  ERRL_SEV_UNRECOVERABLE
+            * @moduleid   MOD_MAKE_PLDM_REQUEST
+            * @reasoncode RC_SEND_FAIL
+            * @userdata1  Return code returned by MCTP::send_message
+            * @userdata2  Header of pldm request
+            * @devdesc    Software problem, failed to decode PLDM message
+            * @custdesc   A software error occurred during host/bmc
+            *             communication
+            */
+            errl = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
+                                  MOD_MAKE_PLDM_REQUEST,
+                                  RC_SEND_FAIL,
+                                  return_code,
+                                  pldmHdrToUint64(*pldm_request),
+                                  ErrlEntry::NO_SW_CALLOUT);
+            addBmcAndHypErrorCallouts(errl);
+            errl->collectTrace(RUNTIME_COMP_NAME);
+            break;
+        }
+
+        uint8_t sleep_time_sec = 0;
+        do
+        {
+            return_code = MCTP::get_next_packet();
+            if(return_code)
+            {
+                if(return_code == HBRT_RC_NO_MCTP_PACKET)
+                {
+                    constexpr uint8_t one_sec = 1;
+                    constexpr uint8_t zero_nsec = 0;
+                    nanosleep(one_sec, zero_nsec);
+                    constexpr uint8_t sleep_timeout_sec = 90;
+                    if(++sleep_time_sec < sleep_timeout) { continue; }
+                }
+                /*
+                * @errortype  ERRL_SEV_UNRECOVERABLE
+                * @moduleid   MOD_MAKE_PLDM_REQUEST
+                * @reasoncode RC_RECV_FAIL
+                * @userdata1  Return code returned by MCTP::get_next_packet
+                * @userdata2  Header of pldm request
+                * @devdesc    Software problem, failed to get next PLDM message
+                * @custdesc   A software error occurred during host/bmc
+                *             communication
+                */
+                errl = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
+                                      MOD_MAKE_PLDM_REQUEST,
+                                      RC_RECV_FAIL,
+                                      return_code,
+                                      pldmHdrToUint64(*pldm_request),
+                                      ErrlEntry::ADD_SW_CALLOUT);
+
+                addBmcAndHypErrorCallouts(errl);
+                errl->collectTrace(RUNTIME_COMP_NAME);
+                break;
+            }
+        }while (PLDM::get_next_response().empty());
+
+        o_response_bytes = PLDM::get_next_response();
+        PLDM::clear_next_response();
+#endif
 
     } while (false);
 

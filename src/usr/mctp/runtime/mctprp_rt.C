@@ -46,6 +46,7 @@
 #include <errl/errlmanager.H>
 #include <mctp/mctp_errl.H>
 #include <mctp/mctp_reasoncodes.H>
+#include <pldm/pldmif.H>
 
 using namespace ERRORLOG;
 using namespace MCTP;
@@ -91,7 +92,7 @@ static void rx_message(uint8_t i_eid, void * i_data,
 {
    TRACDBIN(g_trac_mctp, "mctp rx_message:", i_msg, i_len);
 
-   auto msg_bytes = static_cast<const uint8_t *const >(i_msg);
+   auto msg_bytes = static_cast<const uint8_t *const>(i_msg);
 
    // First byte of the msg should be the MCTP payload type.
    // For now we only support PLDM over MCTP
@@ -99,8 +100,44 @@ static void rx_message(uint8_t i_eid, void * i_data,
    {
       case MCTP_MSG_TYPE_PLDM :
       {
-          //int rc = PLDM::cache_next_pldm_msg(i_msg, i_len);
-          //assert(rc == 0, "bad rc attempting to cache pldm message");
+          // Skip first byte of the MCTP payload which has the payload type.
+          // The PLDM layer is unaware of this byte.
+          PLDM::pldmrp_rt_rc rc =
+              PLDM::cache_next_pldm_msg(msg_bytes + sizeof(MCTP::message_type),
+                                        i_len - sizeof(MCTP::message_type));
+          if(rc)
+          {
+              uint64_t request_hdr_data = 0;
+              if(rc != PLDM::RC_INVALID_MESSAGE_LEN)
+              {
+                   request_hdr_data =
+                      PLDM::pldmHdrToUint64(
+                        *reinterpret_cast<const pldm_msg*>(msg_bytes + sizeof(MCTP::message_type)));
+              }
+              TRACFBIN(g_trac_mctp, "Failed to cache mctp payload:", i_msg, i_len);
+              /*
+              * @errortype  ERRL_SEV_PREDICTIVE
+              * @moduleid   MOD_RX_CALLBACK
+              * @reasoncode RC_ERROR_CACHING_MSG
+              * @userdata1[0:31]  HBRT PLDM RP Return Code
+              * @userdata1[32:63] Source MCTP Endpoint ID
+              * @userdata2        Header of PLDM message
+              * @devdesc    Unable to process PLDM message from the BMC
+              * @custdesc   A software error occurred during host/bmc
+              *             communication
+              */
+              errlHndl_t errl = new ErrlEntry(ERRL_SEV_PREDICTIVE,
+                                              MOD_RX_CALLBACK,
+                                              RC_ERROR_CACHING_MSG,
+                                              TWO_UINT32_TO_UINT64(
+                                                TO_UINT32(rc),
+                                                TO_UINT32(i_eid)),
+                                              request_hdr_data,
+                                              ErrlEntry::NO_SW_CALLOUT);
+
+              addBmcAndHypErrorCallouts(errl);
+              errlCommit(errl, MCTP_COMP_ID);
+          }
           break;
       }
       default :
@@ -117,7 +154,8 @@ static void rx_message(uint8_t i_eid, void * i_data,
           * @userdata1  MCTP Message Type (first byte of MCTP payload)
           * @userdata2  Source MCTP Endpoint ID
           * @devdesc    MCTP message of unknown type received
-          * @custdesc   A software error occured during system boot
+          * @custdesc   A software error occurred during host/bmc
+          *             communication
           */
           errlHndl_t errl = new ErrlEntry(ERRL_SEV_PREDICTIVE,
                                           MOD_RX_CALLBACK,
@@ -126,7 +164,7 @@ static void rx_message(uint8_t i_eid, void * i_data,
                                           i_eid,
                                           ErrlEntry::NO_SW_CALLOUT);
 
-          addBmcErrorCallouts(errl);
+          addBmcAndHypErrorCallouts(errl);
           errlCommit(errl, MCTP_COMP_ID);
           break;
       }
