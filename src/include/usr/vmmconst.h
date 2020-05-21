@@ -130,13 +130,6 @@ enum BlockPriority
 /** Hostboot reserved memory */
 #define VMM_HRMOR_OFFSET ((4 * GIGABYTE) - (256*MEGABYTE))
 #define VMM_HB_RSV_MEM_SIZE (256*MEGABYTE)
-/**Memory above the HRMOR that is used during Hostboot IPL**/
-#define VMM_HB_DATA_ABOVE_HRMOR (128*MEGABYTE)
-
-/** PHYP ATTN AREA OFFSET */
-/** This offset is relative to the lowest address in a given node */
-#define PHYP_ATTN_AREA_OFFSET (59*MEGABYTE)
-#define PHYP_ATTN_AREA_1_SIZE (1*KILOBYTE)
 
 /** Hardwired offsets from HRMOR to HOMER images in real mem */
 /** HOMER starts immediately after our HB memory */
@@ -215,7 +208,17 @@ enum BlockPriority
  *  Need to add (ATTR_HB_HRMOR_NODAL_BASE * hbinstance_num) to this
  *  address to get the physical address
  */
-#define VMM_INTERNODE_PRESERVED_MEMORY_ADDR (120 * MEGABYTE)
+#define VMM_INTERNODE_PRESERVED_MEMORY_SIZE (4*MEGABYTE)
+#define VMM_INTERNODE_PRESERVED_MEMORY_ADDR (VMM_HB_RSV_MEM_SIZE - \
+                                            VMM_INTERNODE_PRESERVED_MEMORY_SIZE)
+
+/** PHYP ATTN AREA OFFSET */
+/** This offset is relative to the HRMOR of a given node */
+#define PHYP_ATT_AREA_SIZE (64*MEGABYTE)
+#define PHYP_ATTN_AREA_OFFSET (VMM_INTERNODE_PRESERVED_MEMORY_ADDR - \
+                               PHYP_ATT_AREA_SIZE)
+#define PHYP_ATTN_AREA_1_SIZE (1*KILOBYTE)
+
 
 /**
  * Test Constants
@@ -240,37 +243,48 @@ enum BlockPriority
 
 
 /** Layout
- * (HRMOR+128)-(HRMOR+132MB): reserved/open (4MB)
- * (HRMOR+132MB)-(HRMOR+215MB): MCL_ADDR, MCL_TMP_ADDR, HDAT_TMP_ADDR (83MB)
- * (HRMOR+216MB)-(HRMOR+248MB):  TCE Table (needs to be 4-byte aligned) (32MB)
- * (HRMOR+248MB):       VMM_INTERNODE_PRESERVED_MEMORY_ADDR (see above) (8MB)
- * (HRMOR+256MB)-(HRMOR+384MB): See HB_HRMOR info above (with HOMERs, OCC, etc)
- *                              (128MB)
+ * (HRMOR+64MB)..(HRMOR+96MB): HOMER for each proc (32MB)
+ * (HRMOR+96MB)..(HRMOR+104MB): OCC Common (8MB)
+ * (HRMOR+104MB)..(HRMOR+105MB): Arch reg data (1MB)
+ * (HRMOR+105MB)..(HRMOR+106MB): HBRT Data TOC (hbrtTableOfContents_t)
+ * (HRMOR+106MB): Reserved mem start
+ * (HRMOR+(168MB-20KB)): Reserved mem end
+ * (HRMOR+(168MB-20KB))..(HRMOR+168MB): MCL_ADDR (20KB)
+ * (HRMOR+168MB)..(HRMOR+232MB): MCL_TMP_ADDR (64MB + PAGESIZE)
+ * (HRMOR+232MB)..(HRMOR+248MB): HDAT_TMP_ADDR (16MB)
+ * (HRMOR+248MB)..(HRMOR+252MB): TCE Table (needs to be 4-byte aligned) (4MB)
+ * (HRMOR+252MB)..(HRMOR+256MB): VMM_INTERNODE_PRESERVED_MEMORY_ADDR (4MB)
+ * (HRMOR+256MB): The end of usable memory
  */
+
+/* Reserved memory starts with HB TOC and ends on MCL_ADDR */
+#define RESERVED_MEM_MAX_SIZE (MCL_ADDR - VMM_HB_DATA_TOC_START_OFFSET)
+#define RESERVED_MEM_START_OFFSET (VMM_HB_DATA_TOC_START_OFFSET)
+#define RESERVED_MEM_END_OFFSET (MCL_ADDR)
 
 /** Two memory locations for MCL processing **/
 // Note: 2 spaces needed so the MCL can be initialized without wiping out PHYP
 // Location for the MCL itself to sit in.
-#define MCL_ADDR (4*MEGABYTE)
 #define MCL_SIZE (20*KILOBYTE)
+#define MCL_ADDR (MCL_TMP_ADDR - MCL_SIZE)
 // Location for PHYP to be loaded into and reused for all Master Container Lids
 // Verification is done in a temporary, non-secure area of mainstore memory,
 // then relocated to its final, secure location in mainstore.
-#define MCL_TMP_ADDR (MCL_ADDR + MCL_SIZE)
-#define MCL_TMP_SIZE ( (64 * MEGABYTE) + PAGESIZE )
+#define MCL_TMP_SIZE ((64 * MEGABYTE) + PAGESIZE)
+#define MCL_TMP_ADDR (HDAT_TMP_ADDR - MCL_TMP_SIZE)
 
 // Location for HDAT to be loaded into via TCEs by FSP
 // Verification is done in a temporary, non-secure area of mainstore memory,
 // then relocated to its final, secure location in mainstore.
-#define HDAT_TMP_ADDR (MCL_TMP_ADDR + MCL_TMP_SIZE)
 #define HDAT_TMP_SIZE (16 * MEGABYTE)
-
-/** Physical memory location of the TCE Table */
-/** - needs to be aligned on 4MB boundary     */
-#define TCE_TABLE_ADDR  (88*MEGABYTE)
+#define HDAT_TMP_ADDR (TCE_TABLE_ADDR - HDAT_TMP_SIZE)
 
 /** The TCE Table size is 512K entries each uint64_t (8 bytes) in size */
 #define TCE_TABLE_SIZE  ((512*KILOBYTE)*sizeof(uint64_t))
+
+/** Physical memory location of the TCE Table */
+/** - needs to be aligned on 4MB boundary     */
+#define TCE_TABLE_ADDR  (VMM_INTERNODE_PRESERVED_MEMORY_ADDR - TCE_TABLE_SIZE)
 
 /** Physical memory location used for Unsecure Memory Region Testing */
 /** - place it after TCE Table */

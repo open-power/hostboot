@@ -98,13 +98,13 @@ const uint8_t BITS_PER_BYTE = 8;
 
 const uint8_t HDAT_INVALID_NODE = 0xFF;
 
-// The upper limit of the hostboot reserved memory. Only applies to PHYP.
-const uint64_t HB_RES_MEM_UPPER_LIMIT = VMM_HRMOR_OFFSET + VMM_HB_RSV_MEM_SIZE;
+// The upper limit of the hostboot reserved memory.
+const uint64_t HB_RES_MEM_UPPER_LIMIT = VMM_HRMOR_OFFSET +
+                                        RESERVED_MEM_END_OFFSET;
 
-// The lower limit is Hostboot HRMOR + 64MB (if not mirroring)
-// The lower limit of the hostboot reserved memory. Do not allow to reserve
-// any memory below this limit. Only applies to PHYP.
-const uint64_t HB_RES_MEM_LOWER_LIMIT = VMM_HRMOR_OFFSET + VMM_MEMORY_SIZE;
+// The lower limit of the hostboot reserved memory.
+const uint64_t HB_RES_MEM_LOWER_LIMIT = VMM_HRMOR_OFFSET +
+                                        RESERVED_MEM_START_OFFSET;
 
 trace_desc_t *g_trac_runtime = nullptr;
 TRAC_INIT(&g_trac_runtime, RUNTIME_COMP_NAME, KILOBYTE);
@@ -1115,6 +1115,9 @@ errlHndl_t populate_HbRsvMem(uint64_t i_nodeId, bool i_master_node)
             }
         }
 
+        /* The primary reserved section should encompass the entirety of the
+         * Hostboot local memory space.  This data will be preserved across
+         * MPIPLs since the Hypervisor/OS will not touch it. */
         l_elog = setNextHbRsvMemEntry(HDAT::RHB_TYPE_PRIMARY,
                                       i_nodeId,
                                       l_hbAddr,
@@ -3711,8 +3714,6 @@ errlHndl_t openUntrustedSpCommArea(const uint64_t i_commBase)
     TRACFCOMP( g_trac_runtime, ENTER_MRK "openUntrustedSpCommArea()");
     errlHndl_t l_err = nullptr;
 
-// FIXME RTC: 210975 not needed for now
-#if 0
     do {
     TARGETING::Target * l_sys = nullptr;
     TARGETING::targetService().getTopLevelTarget(l_sys);
@@ -3860,7 +3861,7 @@ errlHndl_t openUntrustedSpCommArea(const uint64_t i_commBase)
             {
                 TRACFCOMP(g_trac_runtime, ERR_MRK "openUntrustedSpCommArea(): openUnsecureMemRegion() failed proc = 0x%X addr = 0x%016llx size = 0x%X",
                           l_id,
-                          RUNTIME::SP_HOST_UNTRUSTED_COMM_AREA_ADDR,
+                          i_commBase,
                           RUNTIME::SP_HOST_UNTRUSTED_COMM_AREA_SIZE);
                 break;
             }
@@ -3950,7 +3951,6 @@ errlHndl_t openUntrustedSpCommArea(const uint64_t i_commBase)
 
     TRACFCOMP( g_trac_runtime, EXIT_MRK"openUntrustedSpCommArea()");
 
-#endif
     return l_err;
 }
 
@@ -3965,7 +3965,6 @@ errlHndl_t getRsvdMemTraceBuf(uint64_t& o_RsvdMemAddress, uint64_t& o_size)
 {
     errlHndl_t l_elog = nullptr;
 
-/* FIXME RTC: 210975 not needed right now
     uint64_t l_rsvMemDataAddr = 0;
     uint64_t l_rsvMemDataSize = 0;
     hdatMsVpdRhbAddrRange_t* l_rngPtr = nullptr;
@@ -4031,7 +4030,6 @@ errlHndl_t getRsvdMemTraceBuf(uint64_t& o_RsvdMemAddress, uint64_t& o_size)
         }
 
     }while(0);
-*/
 
     return l_elog;
 
@@ -4152,10 +4150,7 @@ errlHndl_t verifyAndMovePayload(void)
     // Get Temporary Virtual Address To Payload
     // - Need to make Memory spaces HRMOR-relative
     uint64_t hrmorVal = cpu_spr_value(CPU_SPR_HRMOR);
-    // TODO RTC: 208809 this needs to be rebased properly. VMM_HB_DATA_ABOVE_HRMOR
-    // has been incorporated into MCL_TMP_ADDR in another commit.
-    uint64_t payload_tmp_phys_addr = hrmorVal + VMM_HB_DATA_ABOVE_HRMOR +
-                                     MCL_TMP_ADDR;
+    uint64_t payload_tmp_phys_addr = hrmorVal + MCL_TMP_ADDR;
     uint64_t payload_size          = MCL_TMP_SIZE;
 
     payload_tmp_virt_addr = mm_block_map(
@@ -4298,9 +4293,7 @@ errlHndl_t verifyAndMovePayload(void)
 
     // Move HDAT into its proper place after it was temporarily put into
     // HDAT_TMP_ADDR-relative-to-HRMOR (HDAT_TMP_SIZE) by the FSP via TCEs
-    // TODO RTC: 208809 this needs to be rebased properly. VMM_HB_DATA_ABOVE_HRMOR
-    // has been incorporated into HDAT_TMP_ADDR in another commit.
-    uint64_t hdat_tmp_phys_addr = hrmorVal + VMM_HB_DATA_ABOVE_HRMOR + HDAT_TMP_ADDR;
+    uint64_t hdat_tmp_phys_addr = hrmorVal + HDAT_TMP_ADDR;
 
     hdat_tmp_virt_addr = mm_block_map(
                             reinterpret_cast<void*>(hdat_tmp_phys_addr),

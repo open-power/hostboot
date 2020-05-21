@@ -107,8 +107,8 @@ MasterContainerLidMgr::MasterContainerLidMgr(const bool i_loadOnly)
 {
     // Need to make Memory spaces HRMOR-relative
     uint64_t hrmorVal = cpu_spr_value(CPU_SPR_HRMOR);
-    iv_mclAddr = hrmorVal + VMM_HB_DATA_ABOVE_HRMOR + MCL_ADDR;
-    iv_tmpAddr = hrmorVal + VMM_HB_DATA_ABOVE_HRMOR + MCL_TMP_ADDR;
+    iv_mclAddr = hrmorVal + MCL_ADDR;
+    iv_tmpAddr = hrmorVal + MCL_TMP_ADDR;
 
     initMcl();
 }
@@ -121,8 +121,8 @@ MasterContainerLidMgr::MasterContainerLidMgr(const void* i_pMcl,
 {
     // Need to make Memory spaces HRMOR-relative
     uint64_t hrmorVal = cpu_spr_value(CPU_SPR_HRMOR);
-    iv_mclAddr = hrmorVal + VMM_HB_DATA_ABOVE_HRMOR + MCL_ADDR;
-    iv_tmpAddr = hrmorVal + VMM_HB_DATA_ABOVE_HRMOR + MCL_TMP_ADDR;
+    iv_mclAddr = hrmorVal + MCL_ADDR;
+    iv_tmpAddr = hrmorVal + MCL_TMP_ADDR;
 
 
     initMcl(i_pMcl, i_size);

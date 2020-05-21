@@ -30,6 +30,7 @@
 #include <errl/errlentry.H>
 #include <devicefw/userif.H>
 #include <intr/interrupt.H>
+#include <sys/misc.h>
 #include <map>
 
 // Forward declarations
@@ -221,7 +222,8 @@ class UtilTceMgr
      *
      * @note  TCE_TABLE_ADDR and TCE_TABLE_SIZE are defined in vmmconst.h
      */
-    UtilTceMgr(uint64_t i_tableAddr = TCE_TABLE_ADDR + VMM_HB_DATA_ABOVE_HRMOR,
+    UtilTceMgr(uint64_t i_tableAddr = cpu_spr_value(CPU_SPR_HRMOR) +
+                                      TCE_TABLE_ADDR,
                size_t   i_tableSize = TCE_TABLE_SIZE);
 
     /**

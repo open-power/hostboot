@@ -238,13 +238,11 @@ enum SectionId
  */
 enum SbeUnsecureMemoryRegions
 {
-    SP_HOST_UNTRUSTED_COMM_AREA_ADDR = 0,
     SP_HOST_UNTRUSTED_COMM_AREA_SIZE = 64*MEGABYTE,
     SP_HOST_UNTRUSTED_OPAL_TRACE_ADDR = 0x31000000,
     SP_HOST_UNTRUSTED_OPAL_TRACE_SIZE = 1*MEGABYTE,
 
-    SP_HOST_ATTN_SIZE_LIMIT = (SP_HOST_UNTRUSTED_COMM_AREA_SIZE
-                                                    - PHYP_ATTN_AREA_OFFSET),
+    SP_HOST_ATTN_SIZE_LIMIT = (PHYP_ATT_AREA_SIZE),
 };
 
 /**
@@ -411,8 +409,7 @@ errlHndl_t getPayloadAttnAreaAddr(uint64_t& o_payloadTiAddr);
 inline uint64_t calcSpAttnAreaStart()
 {
     auto hrmorVal = cpu_spr_value(CPU_SPR_HRMOR);
-    return  (hrmorVal + VMM_HB_DATA_ABOVE_HRMOR + PHYP_ATTN_AREA_OFFSET)
-            | VmmManager::FORCE_PHYS_ADDR;
+    return  (hrmorVal + PHYP_ATTN_AREA_OFFSET) | VmmManager::FORCE_PHYS_ADDR;
 }
 
 /*

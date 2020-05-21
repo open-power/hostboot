@@ -362,9 +362,9 @@ void* call_host_start_payload (void *io_pArgs)
             break;
         }
 
-        // calculate lowest addressable memory location to be used as COMM base
+        // calculate the memory location to be used as COMM base
         uint64_t l_commBase = cpu_spr_value(CPU_SPR_HRMOR) +
-                              VMM_HB_DATA_ABOVE_HRMOR;
+                              PHYP_ATTN_AREA_OFFSET;
 
         //  - Call shutdown using payload base, and payload entry.
         //      - base/entry will be from system attributes
@@ -695,10 +695,10 @@ errlHndl_t broadcastShutdown ( uint64_t i_hbInstance )
 
         KernelIpc::start_payload_data_area.node_count = node_count;
 
-        // calculate lowest addressable memory location from the master node
+        // calculate the memory location from the master node
         // hrmor value and send to slave nodes
         const uint64_t l_commBase = cpu_spr_value(CPU_SPR_HRMOR) +
-                                    VMM_HB_DATA_ABOVE_HRMOR;
+                                    PHYP_ATTN_AREA_OFFSET;
 
         // send message to all other existing hb instances except this one.
         for(uint64_t drawer = 0; drawer < sizeof(node_map); ++drawer)
