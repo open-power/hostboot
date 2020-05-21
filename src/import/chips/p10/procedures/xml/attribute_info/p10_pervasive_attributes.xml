@@ -306,14 +306,35 @@
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
-  <id>ATTR_LPC_CONSOLE_CNFG</id>
+   <id>ATTR_LPC_CONSOLE_CNFG</id>
   <targetType>TARGET_TYPE_PROC_CHIP</targetType>
   <description>Indicates if LPC console is enabled on system</description>
   <valueType>uint8</valueType>
   <enum>ENABLE = 0x1,DISABLE = 0x0</enum>
   <default>ENABLE</default>
   <platInit/>
-  </attribute>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_SBE_SYS_CONFIG</id>
+  <targetType>TARGET_TYPE_SYSTEM</targetType>
+  <description>System Configuration information, which indicates the functional 
+  state for each processor, on the system. Each bit represents topology id of
+  a processor that is present.
+  </description>
+  <valueType>uint64</valueType>
+  <platInit/>
+  <mrwHide/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_EC_GARD</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>Capturing EC Gard Value</description>
+  <valueType>uint32</valueType>
+  <platInit/>
+  <mrwHide/>
+</attribute>
 <!-- ********************************************************************** -->
 <attribute>
   <id>ATTR_BOOT_PAU_DPLL_BYPASS</id>
