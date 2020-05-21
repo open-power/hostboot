@@ -210,142 +210,142 @@ group gPCI_NEST_FIR
            cs_root_cause
 {
     /** PCI_NEST_FIR[0]
-     *  PCI Nest FIR NFIR
+     *  BAR Parity Error
      */
-    (rPCI_NEST_FIR, bit(0)) ? defaultMaskedError;
+    (rPCI_NEST_FIR, bit(0)) ? parent_proc_th_1;
 
     /** PCI_NEST_FIR[1]
-     *  PCI Nest FIR NFIR
+     *  Non-BAR Parity Error
      */
     (rPCI_NEST_FIR, bit(1)) ? defaultMaskedError;
 
     /** PCI_NEST_FIR[2]
-     *  PCI Nest FIR NFIR
+     *  Power Bus to PEC CE
      */
-    (rPCI_NEST_FIR, bit(2)) ? defaultMaskedError;
+    (rPCI_NEST_FIR, bit(2)) ? self_th_32perDay;
 
     /** PCI_NEST_FIR[3]
-     *  PCI Nest FIR NFIR
+     *  Power Bus to PEC UE
      */
     (rPCI_NEST_FIR, bit(3)) ? defaultMaskedError;
 
     /** PCI_NEST_FIR[4]
-     *  PCI Nest FIR NFIR
+     *  Power Bus to PEC SUE
      */
     (rPCI_NEST_FIR, bit(4)) ? defaultMaskedError;
 
     /** PCI_NEST_FIR[5]
-     *  PCI Nest FIR NFIR
+     *  Array CE
      */
-    (rPCI_NEST_FIR, bit(5)) ? defaultMaskedError;
+    (rPCI_NEST_FIR, bit(5)) ? self_th_32perDay;
 
     /** PCI_NEST_FIR[6]
-     *  PCI Nest FIR NFIR
+     *  Array UE
      */
     (rPCI_NEST_FIR, bit(6)) ? defaultMaskedError;
 
     /** PCI_NEST_FIR[7]
-     *  PCI Nest FIR NFIR
+     *  Array SUE
      */
     (rPCI_NEST_FIR, bit(7)) ? defaultMaskedError;
 
     /** PCI_NEST_FIR[8]
-     *  PCI Nest FIR NFIR
+     *  Register Array Parity Error
      */
-    (rPCI_NEST_FIR, bit(8)) ? defaultMaskedError;
+    (rPCI_NEST_FIR, bit(8)) ? parent_proc_th_1;
 
     /** PCI_NEST_FIR[9]
-     *  PCI Nest FIR NFIR
+     *  Power Bus Interface Parity Error
      */
-    (rPCI_NEST_FIR, bit(9)) ? defaultMaskedError;
+    (rPCI_NEST_FIR, bit(9)) ? parent_proc_th_1;
 
     /** PCI_NEST_FIR[10]
-     *  PCI Nest FIR NFIR
+     *  Power Bus Data Hang
      */
     (rPCI_NEST_FIR, bit(10)) ? defaultMaskedError;
 
     /** PCI_NEST_FIR[11]
-     *  PCI Nest FIR NFIR
+     *  Power Bus Hang Error
      */
     (rPCI_NEST_FIR, bit(11)) ? defaultMaskedError;
 
     /** PCI_NEST_FIR[12]
-     *  PCI Nest FIR NFIR
+     *  RD ARE Error
      */
     (rPCI_NEST_FIR, bit(12)) ? defaultMaskedError;
 
     /** PCI_NEST_FIR[13]
-     *  PCI Nest FIR NFIR
+     *  Non-Rd ARE Error
      */
     (rPCI_NEST_FIR, bit(13)) ? defaultMaskedError;
 
     /** PCI_NEST_FIR[14]
-     *  PCI Nest FIR NFIR
+     *  PCI Hang Error
      */
     (rPCI_NEST_FIR, bit(14)) ? defaultMaskedError;
 
     /** PCI_NEST_FIR[15]
-     *  PCI Nest FIR NFIR
+     *  PCI Clock Error
      */
     (rPCI_NEST_FIR, bit(15)) ? defaultMaskedError;
 
     /** PCI_NEST_FIR[16]
-     *  PCI Nest FIR NFIR
+     *  AIB Fence
      */
     (rPCI_NEST_FIR, bit(16)) ? defaultMaskedError;
 
     /** PCI_NEST_FIR[17]
-     *  PCI Nest FIR NFIR
+     *  Hardware Error
      */
-    (rPCI_NEST_FIR, bit(17)) ? defaultMaskedError;
+    (rPCI_NEST_FIR, bit(17)) ? parent_proc_th_1;
 
     /** PCI_NEST_FIR[18]
-     *  PCI Nest FIR NFIR
+     *  Unsolicited Power Bus Data
      */
-    (rPCI_NEST_FIR, bit(18)) ? defaultMaskedError;
+    (rPCI_NEST_FIR, bit(18)) ? level2_th_1;
 
     /** PCI_NEST_FIR[19]
-     *  PCI Nest FIR NFIR
+     *  Unexpected Combined Response
      */
-    (rPCI_NEST_FIR, bit(19)) ? defaultMaskedError;
+    (rPCI_NEST_FIR, bit(19)) ? level2_th_1;
 
     /** PCI_NEST_FIR[20]
-     *  PCI Nest FIR NFIR
+     *  Invalid Combined Response
      */
-    (rPCI_NEST_FIR, bit(20)) ? defaultMaskedError;
+    (rPCI_NEST_FIR, bit(20)) ? level2_M_proc_L_th_1;
 
     /** PCI_NEST_FIR[21]
-     *  PCI Nest FIR NFIR
+     *  Power Bus Unsupported Size
      */
-    (rPCI_NEST_FIR, bit(21)) ? defaultMaskedError;
+    (rPCI_NEST_FIR, bit(21)) ? level2_M_proc_L_th_1;
 
     /** PCI_NEST_FIR[22]
-     *  PCI Nest FIR NFIR
+     *  Power Bus Unsupported Command
      */
-    (rPCI_NEST_FIR, bit(22)) ? defaultMaskedError;
+    (rPCI_NEST_FIR, bit(22)) ? level2_M_proc_L_th_1;
 
     /** PCI_NEST_FIR[23]
-     *  PCI Nest FIR NFIR
+     *  reserved
      */
     (rPCI_NEST_FIR, bit(23)) ? defaultMaskedError;
 
     /** PCI_NEST_FIR[24]
-     *  PCI Nest FIR NFIR
+     *  reserved
      */
     (rPCI_NEST_FIR, bit(24)) ? defaultMaskedError;
 
     /** PCI_NEST_FIR[25]
-     *  PCI Nest FIR NFIR
+     *  reserved
      */
     (rPCI_NEST_FIR, bit(25)) ? defaultMaskedError;
 
     /** PCI_NEST_FIR[26]
-     *  PCI Nest FIR NFIR
+     *  Software Defined
      */
     (rPCI_NEST_FIR, bit(26)) ? defaultMaskedError;
 
     /** PCI_NEST_FIR[27]
-     *  PCI Nest FIR NFIR
+     *  PEC SCOM Engine Error
      */
     (rPCI_NEST_FIR, bit(27)) ? defaultMaskedError;
 
@@ -368,32 +368,32 @@ group gPCI_FIR
            cs_root_cause
 {
     /** PCI_FIR[0]
-     *  PCI FIR
+     *  register parity error
      */
     (rPCI_FIR, bit(0)) ? defaultMaskedError;
 
     /** PCI_FIR[1]
-     *  PCI FIR
+     *  hardware error
      */
     (rPCI_FIR, bit(1)) ? defaultMaskedError;
 
     /** PCI_FIR[2]
-     *  PCI FIR
+     *  AIB interface error
      */
     (rPCI_FIR, bit(2)) ? defaultMaskedError;
 
     /** PCI_FIR[3]
-     *  PCI FIR
+     *  ETU reset error
      */
     (rPCI_FIR, bit(3)) ? defaultMaskedError;
 
     /** PCI_FIR[4]
-     *  PCI FIR
+     *  PEC SCOM error
      */
     (rPCI_FIR, bit(4)) ? defaultMaskedError;
 
     /** PCI_FIR[5]
-     *  PCI FIR
+     *  spare
      */
     (rPCI_FIR, bit(5)) ? defaultMaskedError;
 
@@ -416,322 +416,317 @@ group gPCI_ETU_FIR
            cs_root_cause
 {
     /** PCI_ETU_FIR[0]
-     *  See Outbound Error Status Register, bit 0 for deta
+     *  AIB_COMMAND_INVALID
      */
     (rPCI_ETU_FIR, bit(0)) ? defaultMaskedError;
 
     /** PCI_ETU_FIR[1]
-     *  See Outbound Error Status Register, bit 1/2 for de
+     *  AIB_ADDRESS_INVALID
      */
     (rPCI_ETU_FIR, bit(1)) ? defaultMaskedError;
 
     /** PCI_ETU_FIR[2]
-     *  See Outbound Error Status Register, bit 3/8 for de
+     *  AIB_ACCESS_ERROR
      */
     (rPCI_ETU_FIR, bit(2)) ? defaultMaskedError;
 
     /** PCI_ETU_FIR[3]
-     *  See Outbound Error Status Register, bit 28 for det
+     *  PAPR_OUTBOUND_INJECT_ERROR
      */
     (rPCI_ETU_FIR, bit(3)) ? defaultMaskedError;
 
     /** PCI_ETU_FIR[4]
-     *  See Outbound Error Status Register, bit 4/5/9/10/1
+     *  AIB_FATAL_CLASS_ERROR
      */
     (rPCI_ETU_FIR, bit(4)) ? defaultMaskedError;
 
     /** PCI_ETU_FIR[5]
-     *  ETU FIR Register
+     *  AIB_INF_CLASS_ERROR
      */
     (rPCI_ETU_FIR, bit(5)) ? defaultMaskedError;
 
     /** PCI_ETU_FIR[6]
-     *  See Outbound Error Status Register, bit 6 for deta
+     *  spare
      */
     (rPCI_ETU_FIR, bit(6)) ? defaultMaskedError;
 
     /** PCI_ETU_FIR[7]
-     *  See Outbound Error Status Register, bit 13/22 for 
+     *  PE_STOP_STATE_SIGNALED
      */
     (rPCI_ETU_FIR, bit(7)) ? defaultMaskedError;
 
     /** PCI_ETU_FIR[8]
-     *  See Outbound Error Status Register, bit 23/37/38/4
+     *  OUT_COMMON_ARRAY_FATAL_ERROR
      */
     (rPCI_ETU_FIR, bit(8)) ? defaultMaskedError;
 
     /** PCI_ETU_FIR[9]
-     *  See Outbound Error Status Register, bit 50/51/52 f
+     *  OUT_COMMON_LATCH_FATAL_ERROR
      */
     (rPCI_ETU_FIR, bit(9)) ? defaultMaskedError;
 
     /** PCI_ETU_FIR[10]
-     *  See Outbound Error Status Register, bit 19/20/21/5
+     *  OUT_COMMON_LOGIC_FATAL_ERROR
      */
     (rPCI_ETU_FIR, bit(10)) ? defaultMaskedError;
 
     /** PCI_ETU_FIR[11]
-     *  See Outbound Error Status Register, bit 16 for det
+     *  BLIF_OUT_INTERFACE_PARITY_ERROR
      */
     (rPCI_ETU_FIR, bit(11)) ? defaultMaskedError;
 
     /** PCI_ETU_FIR[12]
-     *  See Outbound Error Status Register, bit 17 for det
+     *  CFG_WRITE_CA_OR_UR_RESPONSE
      */
     (rPCI_ETU_FIR, bit(12)) ? defaultMaskedError;
 
     /** PCI_ETU_FIR[13]
-     *  See Outbound Error Status Register, bit 18 for det
+     *  MMIO_REQUEST_TIMEOUT
      */
     (rPCI_ETU_FIR, bit(13)) ? defaultMaskedError;
 
     /** PCI_ETU_FIR[14]
-     *  See Outbound Error Status Register, bit 56/57 for 
+     *  OUT_RRB_SOURCED_ERROR
      */
     (rPCI_ETU_FIR, bit(14)) ? defaultMaskedError;
 
     /** PCI_ETU_FIR[15]
-     *  See Outbound Error Status Register, bit 17 for det
+     *  CFG_LOGIC_SIGNALED_ERROR
      */
     (rPCI_ETU_FIR, bit(15)) ? defaultMaskedError;
 
     /** PCI_ETU_FIR[16]
-     *  See RSB Error Status Register, bit 00 for details.
+     *  RSB_REG_REQUEST_ADDRESS_ERROR
      */
     (rPCI_ETU_FIR, bit(16)) ? defaultMaskedError;
 
     /** PCI_ETU_FIR[17]
-     *  See RSB Error Status Register, bit 2/3/5 for detai
+     *  RSB_FDA_FATAL_ERROR
      */
     (rPCI_ETU_FIR, bit(17)) ? defaultMaskedError;
 
     /** PCI_ETU_FIR[18]
-     *  See RSB Error Status Register, bit 1/4 for details
+     *  RSB_FDA_INF_ERROR
      */
     (rPCI_ETU_FIR, bit(18)) ? defaultMaskedError;
 
     /** PCI_ETU_FIR[19]
-     *  See RSB Error Status Register, bit 9/10 for detail
+     *  RSB_FDB_FATAL_ERROR
      */
     (rPCI_ETU_FIR, bit(19)) ? defaultMaskedError;
 
     /** PCI_ETU_FIR[20]
-     *  See RSB Error Status Register, bit 8 for details.
+     *  RSB_FDB_INF_ERROR
      */
     (rPCI_ETU_FIR, bit(20)) ? defaultMaskedError;
 
     /** PCI_ETU_FIR[21]
-     *  See RSB Error Status Register, bit 7 for details.
+     *  RSB_ERR_FATAL_ERROR
      */
     (rPCI_ETU_FIR, bit(21)) ? defaultMaskedError;
 
     /** PCI_ETU_FIR[22]
-     *  See RSB Error Status Register, bit 6 for details.
+     *  RSB_ERR_INF_ERROR
      */
     (rPCI_ETU_FIR, bit(22)) ? defaultMaskedError;
 
     /** PCI_ETU_FIR[23]
-     *  See RSB Error Status Register, bit 13/14 for detai
+     *  RSB_DBG_FATAL_ERROR
      */
     (rPCI_ETU_FIR, bit(23)) ? defaultMaskedError;
 
     /** PCI_ETU_FIR[24]
-     *  See RSB Error Status Register, bit 12 for details.
+     *  RSB_DBG_INF_ERROR
      */
     (rPCI_ETU_FIR, bit(24)) ? defaultMaskedError;
 
     /** PCI_ETU_FIR[25]
-     *  See Outbound Error Status Register, bit 11 for det
+     *  PCIE_REQUEST_ACCESS_ERROR
      */
     (rPCI_ETU_FIR, bit(25)) ? defaultMaskedError;
 
     /** PCI_ETU_FIR[26]
-     *  See Outbound Error Status Register, bit 15/27 for 
+     *  RSB_BUS_LOGIC_ERROR
      */
     (rPCI_ETU_FIR, bit(26)) ? defaultMaskedError;
 
     /** PCI_ETU_FIR[27]
-     *  See RSB Error Status Register, bit 17/19 for detai
+     *  RSB_UVI_FATAL_ERROR
      */
     (rPCI_ETU_FIR, bit(27)) ? defaultMaskedError;
 
     /** PCI_ETU_FIR[28]
-     *  See RSB Error Status Register, bit 16/18 for detai
+     *  RSB_UVI_INF_ERROR
      */
     (rPCI_ETU_FIR, bit(28)) ? defaultMaskedError;
 
     /** PCI_ETU_FIR[29]
-     *  See RSB Error Status Register, bit 30/31 for detai
+     *  SCOM_FATAL_ERROR
      */
     (rPCI_ETU_FIR, bit(29)) ? defaultMaskedError;
 
     /** PCI_ETU_FIR[30]
-     *  See RSB Error Status Register, bit 28/29 for detai
+     *  SCOM_INF_ERROR
      */
     (rPCI_ETU_FIR, bit(30)) ? defaultMaskedError;
 
     /** PCI_ETU_FIR[31]
-     *  See RSB Error Status Register, bit 24/25/26 for de
+     *  PCIE_MACRO_ERROR_ACTIVE_STATUS
      */
     (rPCI_ETU_FIR, bit(31)) ? defaultMaskedError;
 
     /** PCI_ETU_FIR[32]
-     *  See ARB Error Status Register, bit 33 for details.
+     *  ARB_IODA_FATAL_ERROR
      */
     (rPCI_ETU_FIR, bit(32)) ? defaultMaskedError;
 
     /** PCI_ETU_FIR[33]
-     *  See ARB Error Status Register, bit 27 for details.
+     *  ARB_MSI_PE_MATCH_ERROR
      */
     (rPCI_ETU_FIR, bit(33)) ? defaultMaskedError;
 
     /** PCI_ETU_FIR[34]
-     *  See ARB Error Status Register, bit 02/03 for detai
+     *  ARB_MSI_ADDRESS_ERROR
      */
     (rPCI_ETU_FIR, bit(34)) ? defaultMaskedError;
 
     /** PCI_ETU_FIR[35]
-     *  See ARB Error Status Register, bit 26/28 for detai
+     *  ARB_TVT_ERROR
      */
     (rPCI_ETU_FIR, bit(35)) ? defaultMaskedError;
 
     /** PCI_ETU_FIR[36]
-     *  See ARB Error Status Register, bit 57 for details.
+     *  ARB_RCVD_FATAL_ERROR_MSG
      */
     (rPCI_ETU_FIR, bit(36)) ? defaultMaskedError;
 
     /** PCI_ETU_FIR[37]
-     *  See ARB Error Status Register, bit 58 for details.
+     *  ARB_RCVD_NONFATAL_ERROR_MSG
      */
     (rPCI_ETU_FIR, bit(37)) ? defaultMaskedError;
 
     /** PCI_ETU_FIR[38]
-     *  See ARB Error Status Register, bit 59 for details.
+     *  ARB_RCVD_CORRECTIBLE_ERROR_MSG
      */
     (rPCI_ETU_FIR, bit(38)) ? defaultMaskedError;
 
     /** PCI_ETU_FIR[39]
-     *  See Outbound Error Status Register, bit 39 for det
+     *  PAPR_INBOUND_INJECT_ERROR
      */
     (rPCI_ETU_FIR, bit(39)) ? defaultMaskedError;
 
     /** PCI_ETU_FIR[40]
-     *  See ARB Error Status Register, bit 4/7/8/9/10/11/1
+     *  ARB_COMMON_FATAL_ERROR
      */
     (rPCI_ETU_FIR, bit(40)) ? defaultMaskedError;
 
     /** PCI_ETU_FIR[41]
-     *  See ARB Error Status Register, bit 32/41 for detai
+     *  ARB_TABLE_BAR_DISABLED_ERROR
      */
     (rPCI_ETU_FIR, bit(41)) ? defaultMaskedError;
 
     /** PCI_ETU_FIR[42]
-     *  See ARB Error Status Register, bit 00/01/19 for de
+     *  ARB_BLIF_COMPLETION_ERROR
      */
     (rPCI_ETU_FIR, bit(42)) ? defaultMaskedError;
 
     /** PCI_ETU_FIR[43]
-     *  See ARB Error Status Register, bit 34/35 for detai
+     *  ARB_PCT_TIMEOUT_ERROR
      */
     (rPCI_ETU_FIR, bit(43)) ? defaultMaskedError;
 
     /** PCI_ETU_FIR[44]
-     *  See ARB Error Status Register, bit 5/20/25/29 for 
+     *  ARB_ECC_CORRECTABLE_ERROR
      */
     (rPCI_ETU_FIR, bit(44)) ? defaultMaskedError;
 
     /** PCI_ETU_FIR[45]
-     *  See ARB Error Status Register, bit 6/26/30/31 for 
+     *  ARB_ECC_UNCORRECTABLE_ERROR
      */
     (rPCI_ETU_FIR, bit(45)) ? defaultMaskedError;
 
     /** PCI_ETU_FIR[46]
-     *  See ARB Error Status Register, bit 24 for details.
+     *  ARB_TLP_POISON_SIGNALED
      */
     (rPCI_ETU_FIR, bit(46)) ? defaultMaskedError;
 
     /** PCI_ETU_FIR[47]
-     *  See ARB Error Status Register, bit 40 for details.
+     *  ARB_RTT_PENUM_INVALID_ERROR
      */
     (rPCI_ETU_FIR, bit(47)) ? defaultMaskedError;
 
     /** PCI_ETU_FIR[48]
-     *  See MRG Error Status Register, bit 08-16/22/23/26/
+     *  MRG_COMMON_FATAL_ERROR
      */
     (rPCI_ETU_FIR, bit(48)) ? defaultMaskedError;
 
     /** PCI_ETU_FIR[49]
-     *  See MRG Error Status Register, bit 51 for details.
+     *  MRG_TABLE_BAR_DISABLED_ERROR
      */
     (rPCI_ETU_FIR, bit(49)) ? defaultMaskedError;
 
     /** PCI_ETU_FIR[50]
-     *  See MRG Error Status Register, bit 40/56/58/60 for
+     *  MRG_ECC_CORRECTABLE_ERROR
      */
     (rPCI_ETU_FIR, bit(50)) ? defaultMaskedError;
 
     /** PCI_ETU_FIR[51]
-     *  See MRG Error Status Register, bit 41/57/59/61 for
+     *  MRG_ECC_UNCORRECTABLE_ERROR
      */
     (rPCI_ETU_FIR, bit(51)) ? defaultMaskedError;
 
     /** PCI_ETU_FIR[52]
-     *  See MRG Error Status Register, bit 24 for details.
+     *  MRG_AIB2_TX_TIMEOUT_ERROR
      */
     (rPCI_ETU_FIR, bit(52)) ? defaultMaskedError;
 
     /** PCI_ETU_FIR[53]
-     *  See MRG Error Status Register, bit 17/18 for detai
+     *  MRG_MRT_ERROR
      */
     (rPCI_ETU_FIR, bit(53)) ? defaultMaskedError;
 
-    /** PCI_ETU_FIR[54]
-     *  ETU FIR Register
+    /** PCI_ETU_FIR[54:55]
+     *  spare
      */
-    (rPCI_ETU_FIR, bit(54)) ? defaultMaskedError;
-
-    /** PCI_ETU_FIR[55]
-     *  ETU FIR Register
-     */
-    (rPCI_ETU_FIR, bit(55)) ? defaultMaskedError;
+    (rPCI_ETU_FIR, bit(54|55)) ? defaultMaskedError;
 
     /** PCI_ETU_FIR[56]
-     *  See TCE Error Status Register, bit 01/02 for detai
+     *  TCE_IODA_PAGE_ACCESS_ERROR
      */
     (rPCI_ETU_FIR, bit(56)) ? defaultMaskedError;
 
     /** PCI_ETU_FIR[57]
-     *  See TCE Error Status Register, bit 08 for details.
+     *  TCE_REQUEST_TIMEOUT_ERROR
      */
     (rPCI_ETU_FIR, bit(57)) ? defaultMaskedError;
 
     /** PCI_ETU_FIR[58]
-     *  See TCE Error Status Register, bit 13 for details.
+     *  TCE_UNEXPECTED_RESPONSE_ERROR
      */
     (rPCI_ETU_FIR, bit(58)) ? defaultMaskedError;
 
     /** PCI_ETU_FIR[59]
-     *  See TCE Error Status Register for details.
+     *  TCE_COMMON_FATAL_ERROR
      */
     (rPCI_ETU_FIR, bit(59)) ? defaultMaskedError;
 
     /** PCI_ETU_FIR[60]
-     *  See TCE Error Status Register, bit 09/11/25/27 for
+     *  TCE_ECC_CORRECTABLE_ERROR
      */
     (rPCI_ETU_FIR, bit(60)) ? defaultMaskedError;
 
     /** PCI_ETU_FIR[61]
-     *  See TCE Error Status Register, bit 10/12/26/28 for
+     *  TCE_ECC_UNCORRECTABLE_ERROR
      */
     (rPCI_ETU_FIR, bit(61)) ? defaultMaskedError;
 
     /** PCI_ETU_FIR[62]
-     *  ETU FIR Register
+     *  spare
      */
     (rPCI_ETU_FIR, bit(62)) ? defaultMaskedError;
 
     /** PCI_ETU_FIR[63]
-     *  FIR Internal Parity Error.
+     *  FIR_INTERNAL_PARITY_ERROR
      */
     (rPCI_ETU_FIR, bit(63)) ? defaultMaskedError;
 

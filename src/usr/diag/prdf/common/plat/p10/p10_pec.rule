@@ -440,62 +440,62 @@ group gPCI_LOCAL_FIR
     /** PCI_LOCAL_FIR[0]
      *  CFIR - Parity or PCB access error
      */
-    (rPCI_LOCAL_FIR, bit(0)) ? defaultMaskedError;
+    (rPCI_LOCAL_FIR, bit(0)) ? self_th_32perDay;
 
     /** PCI_LOCAL_FIR[1]
      *  CPLT_CTRL - PCB access error
      */
-    (rPCI_LOCAL_FIR, bit(1)) ? defaultMaskedError;
+    (rPCI_LOCAL_FIR, bit(1)) ? self_th_32perDay;
 
     /** PCI_LOCAL_FIR[2]
-     *  CC - PCB access error - read and clear nn03000F
+     *  CC - PCB access error -
      */
-    (rPCI_LOCAL_FIR, bit(2)) ? defaultMaskedError;
+    (rPCI_LOCAL_FIR, bit(2)) ? self_th_32perDay;
 
     /** PCI_LOCAL_FIR[3]
-     *  CC - Clock Control Error - read and clear nn03000F
+     *  CC - Clock Control Error -
      */
-    (rPCI_LOCAL_FIR, bit(3)) ? defaultMaskedError;
+    (rPCI_LOCAL_FIR, bit(3)) ? self_th_32perDay;
 
     /** PCI_LOCAL_FIR[4]
-     *  PSC - PSCOM access error - read and clear nn01001
+     *  PSC - PSCOM access error -
      */
-    (rPCI_LOCAL_FIR, bit(4)) ? defaultMaskedError;
+    (rPCI_LOCAL_FIR, bit(4)) ? self_th_32perDay;
 
     /** PCI_LOCAL_FIR[5]
-     *  PSC - internal or ring interface error - read and 
+     *  PSC - internal or ring interface error -
      */
-    (rPCI_LOCAL_FIR, bit(5)) ? defaultMaskedError;
+    (rPCI_LOCAL_FIR, bit(5)) ? self_th_32perDay;
 
     /** PCI_LOCAL_FIR[6]
-     *  THERM - pwr_comp_err, skitter_comp_err, scan_init_
+     *  THEM - internal err
      */
-    (rPCI_LOCAL_FIR, bit(6)) ? defaultMaskedError;
+    (rPCI_LOCAL_FIR, bit(6)) ? threshold_and_mask_self;
 
     /** PCI_LOCAL_FIR[7]
      *  THERM - pcb error
      */
-    (rPCI_LOCAL_FIR, bit(7)) ? defaultMaskedError;
+    (rPCI_LOCAL_FIR, bit(7)) ? threshold_and_mask_self;
 
     /** PCI_LOCAL_FIR[8]
      *  THERMTRIP - Critical temperature indicator
      */
-    (rPCI_LOCAL_FIR, bit(8)) ? defaultMaskedError;
+    (rPCI_LOCAL_FIR, bit(8)) ? threshold_and_mask_self;
 
     /** PCI_LOCAL_FIR[9]
      *  THERMTRIP - Fatal temperature indicator
      */
-    (rPCI_LOCAL_FIR, bit(9)) ? defaultMaskedError;
+    (rPCI_LOCAL_FIR, bit(9)) ? threshold_and_mask_self;
 
     /** PCI_LOCAL_FIR[10]
      *  VOLTTRIP - Voltage sense error
      */
-    (rPCI_LOCAL_FIR, bit(10)) ? defaultMaskedError;
+    (rPCI_LOCAL_FIR, bit(10)) ? threshold_and_mask_self;
 
     /** PCI_LOCAL_FIR[11]
      *  DBG - scom parity fail
      */
-    (rPCI_LOCAL_FIR, bit(11)) ? defaultMaskedError;
+    (rPCI_LOCAL_FIR, bit(11)) ? threshold_and_mask_self;
 
     /** PCI_LOCAL_FIR[12]
      *  reserved
@@ -540,12 +540,12 @@ group gPCI_LOCAL_FIR
     /** PCI_LOCAL_FIR[20]
      *  Trace00 - scom parity err
      */
-    (rPCI_LOCAL_FIR, bit(20)) ? defaultMaskedError;
+    (rPCI_LOCAL_FIR, bit(20)) ? self_th_32perDay;
 
     /** PCI_LOCAL_FIR[21]
      *  Trace01 - scom parity err - Unused in Axon,PCI
      */
-    (rPCI_LOCAL_FIR, bit(21)) ? defaultMaskedError;
+    (rPCI_LOCAL_FIR, bit(21)) ? self_th_32perDay;
 
     /** PCI_LOCAL_FIR[22]
      *  unused
@@ -780,62 +780,62 @@ group gPCI_IOP_FIR_0
     /** PCI_IOP_FIR_0[0]
      *  Correctable error in PH0 arrays
      */
-    (rPCI_IOP_FIR_0, bit(0)) ? defaultMaskedError;
+    (rPCI_IOP_FIR_0, bit(0)) ? self_th_32perDay;
 
     /** PCI_IOP_FIR_0[1]
      *  Uncorrectable error in PH0 arrays
      */
-    (rPCI_IOP_FIR_0, bit(1)) ? defaultMaskedError;
+    (rPCI_IOP_FIR_0, bit(1)) ? self_th_1;
 
     /** PCI_IOP_FIR_0[2]
      *  Correctable error in PH1 arrays
      */
-    (rPCI_IOP_FIR_0, bit(2)) ? defaultMaskedError;
+    (rPCI_IOP_FIR_0, bit(2)) ? self_th_32perDay;
 
     /** PCI_IOP_FIR_0[3]
      *  Uncorrectable error in PH1 arrays
      */
-    (rPCI_IOP_FIR_0, bit(3)) ? defaultMaskedError;
+    (rPCI_IOP_FIR_0, bit(3)) ? self_th_1;
 
     /** PCI_IOP_FIR_0[4]
      *  Correctable error from SCOM in WRAP0
      */
-    (rPCI_IOP_FIR_0, bit(4)) ? defaultMaskedError;
+    (rPCI_IOP_FIR_0, bit(4)) ? self_th_32perDay;
 
     /** PCI_IOP_FIR_0[5]
      *  Uncorrectable error from SCOM in WRAP0
      */
-    (rPCI_IOP_FIR_0, bit(5)) ? defaultMaskedError;
+    (rPCI_IOP_FIR_0, bit(5)) ? self_th_1;
 
     /** PCI_IOP_FIR_0[6]
      *  Correctable error from SCOM in WRAP1
      */
-    (rPCI_IOP_FIR_0, bit(6)) ? defaultMaskedError;
+    (rPCI_IOP_FIR_0, bit(6)) ? self_th_32perDay;
 
     /** PCI_IOP_FIR_0[7]
      *  Uncorrectable error from SCOM in WRAP1
      */
-    (rPCI_IOP_FIR_0, bit(7)) ? defaultMaskedError;
+    (rPCI_IOP_FIR_0, bit(7)) ? self_th_32perDay;
 
     /** PCI_IOP_FIR_0[8]
      *  Correctable error from SCRUB in WRAP0
      */
-    (rPCI_IOP_FIR_0, bit(8)) ? defaultMaskedError;
+    (rPCI_IOP_FIR_0, bit(8)) ? self_th_32perDay;
 
     /** PCI_IOP_FIR_0[9]
      *  Uncorrectable error from SCRUB in WRAP0
      */
-    (rPCI_IOP_FIR_0, bit(9)) ? defaultMaskedError;
+    (rPCI_IOP_FIR_0, bit(9)) ? self_th_1;
 
     /** PCI_IOP_FIR_0[10]
      *  Correctable error from SCRUB in WRAP1
      */
-    (rPCI_IOP_FIR_0, bit(10)) ? defaultMaskedError;
+    (rPCI_IOP_FIR_0, bit(10)) ? self_th_32perDay;
 
     /** PCI_IOP_FIR_0[11]
      *  Uncorrectable error from SCRUB in WRAP1
      */
-    (rPCI_IOP_FIR_0, bit(11)) ? defaultMaskedError;
+    (rPCI_IOP_FIR_0, bit(11)) ? self_th_1;
 
 };
 
@@ -860,62 +860,62 @@ group gPCI_IOP_FIR_1
     /** PCI_IOP_FIR_1[0]
      *  Correctable error in PH0 arrays
      */
-    (rPCI_IOP_FIR_1, bit(0)) ? defaultMaskedError;
+    (rPCI_IOP_FIR_1, bit(0)) ? self_th_32perDay;
 
     /** PCI_IOP_FIR_1[1]
      *  Uncorrectable error in PH0 arrays
      */
-    (rPCI_IOP_FIR_1, bit(1)) ? defaultMaskedError;
+    (rPCI_IOP_FIR_1, bit(1)) ? self_th_1;
 
     /** PCI_IOP_FIR_1[2]
      *  Correctable error in PH1 arrays
      */
-    (rPCI_IOP_FIR_1, bit(2)) ? defaultMaskedError;
+    (rPCI_IOP_FIR_1, bit(2)) ? self_th_32perDay;
 
     /** PCI_IOP_FIR_1[3]
      *  Uncorrectable error in PH1 arrays
      */
-    (rPCI_IOP_FIR_1, bit(3)) ? defaultMaskedError;
+    (rPCI_IOP_FIR_1, bit(3)) ? self_th_1;
 
     /** PCI_IOP_FIR_1[4]
      *  Correctable error from SCOM in WRAP0
      */
-    (rPCI_IOP_FIR_1, bit(4)) ? defaultMaskedError;
+    (rPCI_IOP_FIR_1, bit(4)) ? self_th_32perDay;
 
     /** PCI_IOP_FIR_1[5]
      *  Uncorrectable error from SCOM in WRAP0
      */
-    (rPCI_IOP_FIR_1, bit(5)) ? defaultMaskedError;
+    (rPCI_IOP_FIR_1, bit(5)) ? self_th_1;
 
     /** PCI_IOP_FIR_1[6]
      *  Correctable error from SCOM in WRAP1
      */
-    (rPCI_IOP_FIR_1, bit(6)) ? defaultMaskedError;
+    (rPCI_IOP_FIR_1, bit(6)) ? self_th_32perDay;
 
     /** PCI_IOP_FIR_1[7]
      *  Uncorrectable error from SCOM in WRAP1
      */
-    (rPCI_IOP_FIR_1, bit(7)) ? defaultMaskedError;
+    (rPCI_IOP_FIR_1, bit(7)) ? self_th_32perDay;
 
     /** PCI_IOP_FIR_1[8]
      *  Correctable error from SCRUB in WRAP0
      */
-    (rPCI_IOP_FIR_1, bit(8)) ? defaultMaskedError;
+    (rPCI_IOP_FIR_1, bit(8)) ? self_th_32perDay;
 
     /** PCI_IOP_FIR_1[9]
      *  Uncorrectable error from SCRUB in WRAP0
      */
-    (rPCI_IOP_FIR_1, bit(9)) ? defaultMaskedError;
+    (rPCI_IOP_FIR_1, bit(9)) ? self_th_1;
 
     /** PCI_IOP_FIR_1[10]
      *  Correctable error from SCRUB in WRAP1
      */
-    (rPCI_IOP_FIR_1, bit(10)) ? defaultMaskedError;
+    (rPCI_IOP_FIR_1, bit(10)) ? self_th_32perDay;
 
     /** PCI_IOP_FIR_1[11]
      *  Uncorrectable error from SCRUB in WRAP1
      */
-    (rPCI_IOP_FIR_1, bit(11)) ? defaultMaskedError;
+    (rPCI_IOP_FIR_1, bit(11)) ? self_th_1;
 
 };
 

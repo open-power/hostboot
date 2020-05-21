@@ -254,12 +254,12 @@ rule rEQ_L3_FIR
 
 group gEQ_L3_FIR
     filter singlebit,
-           cs_root_cause
+           cs_root_cause(5,8,11,17)
 {
     /** EQ_L3_FIR[0]
-     *  When this error occurs, no members are available f
+     *  No members available for a CGC.
      */
-    (rEQ_L3_FIR, bit(0)) ? defaultMaskedError;
+    (rEQ_L3_FIR, bit(0)) ? self_th_1;
 
     /** EQ_L3_FIR[1]
      *  L3 attempted to master a CP (Castout/Push) command
@@ -269,155 +269,155 @@ group gEQ_L3_FIR
     /** EQ_L3_FIR[2]
      *  Access attempted to use invalid topology table ent
      */
-    (rEQ_L3_FIR, bit(2)) ? defaultMaskedError;
+    (rEQ_L3_FIR, bit(2)) ? self_M_level2_L_th_1;
 
     /** EQ_L3_FIR[3]
-     *  This error indicates at least 1 CE and 1 UE have o
+     *  L3 cache CE and UE within a short period
      */
-    (rEQ_L3_FIR, bit(3)) ? defaultMaskedError;
+    (rEQ_L3_FIR, bit(3)) ? threshold_and_mask_self;
 
     /** EQ_L3_FIR[4]
-     *  CE detected along read dataflow. This may assert d
+     *  CE detected on L3 cache read
      */
-    (rEQ_L3_FIR, bit(4)) ? defaultMaskedError;
+    (rEQ_L3_FIR, bit(4)) ? l3_cache_ce;
 
     /** EQ_L3_FIR[5]
-     *  UE detected along read dataflow. May assert due to
+     *  UE detected on L3 cache read
      */
-    (rEQ_L3_FIR, bit(5)) ? defaultMaskedError;
+    (rEQ_L3_FIR, bit(5)) ? l3_cache_ue_UERE;
 
     /** EQ_L3_FIR[6]
-     *  SUE detected along read dataflow. May assert due t
+     *  SUE detected on L3 cache read
      */
     (rEQ_L3_FIR, bit(6)) ? defaultMaskedError;
 
     /** EQ_L3_FIR[7]
-     *  CE detected along write dataflow with data from Po
+     *  L3 cache write data CE from Power Bus
      */
-    (rEQ_L3_FIR, bit(7)) ? defaultMaskedError;
+    (rEQ_L3_FIR, bit(7)) ? self_th_32perDay;
 
     /** EQ_L3_FIR[8]
-     *  UE detected along write dataflow with data from Po
+     *  L3 cache write data UE from Power Bus
      */
-    (rEQ_L3_FIR, bit(8)) ? defaultMaskedError;
+    (rEQ_L3_FIR, bit(8)) ? self_th_1_UERE;
 
     /** EQ_L3_FIR[9]
-     *  SUE detected along write dataflow with data from P
+     *  L3 cache write data sue from Power Bus
      */
     (rEQ_L3_FIR, bit(9)) ? defaultMaskedError;
 
     /** EQ_L3_FIR[10]
-     *  CE detected along write dataflow with data from L2
+     *  L3 cache write data CE from L2
      */
-    (rEQ_L3_FIR, bit(10)) ? defaultMaskedError;
+    (rEQ_L3_FIR, bit(10)) ? self_th_32perDay;
 
     /** EQ_L3_FIR[11]
-     *  UE detected along write dataflow with data from L2
+     *  L3 cache write data UE from L2
      */
-    (rEQ_L3_FIR, bit(11)) ? defaultMaskedError;
+    (rEQ_L3_FIR, bit(11)) ? l3_cache_ue_UERE;
 
     /** EQ_L3_FIR[12]
-     *  SUE detected along write dataflow with data from L
+     *  L3 cache write SUE from L2
      */
     (rEQ_L3_FIR, bit(12)) ? defaultMaskedError;
 
     /** EQ_L3_FIR[13]
-     *  Directory CE Occured
+     *  L3 DIR read CE
      */
-    (rEQ_L3_FIR, bit(13)) ? defaultMaskedError;
+    (rEQ_L3_FIR, bit(13)) ? l3_dir_ce;
 
     /** EQ_L3_FIR[14]
-     *  Directory UE Occured
+     *  L3 Dir read UE
      */
-    (rEQ_L3_FIR, bit(14)) ? defaultMaskedError;
+    (rEQ_L3_FIR, bit(14)) ? self_th_1;
 
     /** EQ_L3_FIR[15]
-     *  Directory error occured but no error found during 
+     *  Dir error not found during corr seq.
      */
     (rEQ_L3_FIR, bit(15)) ? defaultMaskedError;
 
     /** EQ_L3_FIR[16]
      *  Received addr_error cresp on Snoop Machine or Cast
      */
-    (rEQ_L3_FIR, bit(16)) ? defaultMaskedError;
+    (rEQ_L3_FIR, bit(16)) ? self_M_level2_L_th_1;
 
     /** EQ_L3_FIR[17]
      *  Received addr_error cresp for Prefetch Operation
      */
-    (rEQ_L3_FIR, bit(17)) ? defaultMaskedError;
+    (rEQ_L3_FIR, bit(17)) ? self_M_level2_L_th_1;
 
     /** EQ_L3_FIR[18]
-     *  Asserts when the L3 returns presp_rty_other to a P
+     *  L3_PB_HANG_POLL
      */
     (rEQ_L3_FIR, bit(18)) ? defaultMaskedError;
 
     /** EQ_L3_FIR[19]
-     *  lru invalid count error. Violation of requirement 
+     *  Invalid LRU count error
      */
     (rEQ_L3_FIR, bit(19)) ? defaultMaskedError;
 
     /** EQ_L3_FIR[20]
-     *  spare20
+     *  Reserved
      */
     (rEQ_L3_FIR, bit(20)) ? defaultMaskedError;
 
     /** EQ_L3_FIR[21]
-     *  spare21
+     *  Reserved
      */
     (rEQ_L3_FIR, bit(21)) ? defaultMaskedError;
 
     /** EQ_L3_FIR[22]
-     *  spare22
+     *  Reserved
      */
     (rEQ_L3_FIR, bit(22)) ? defaultMaskedError;
 
     /** EQ_L3_FIR[23]
-     *  Prefetcj or Write Inject machine PowerBus data han
+     *  Prefetch or Write Inject machine PowerBus data han
      */
-    (rEQ_L3_FIR, bit(23)) ? defaultMaskedError;
+    (rEQ_L3_FIR, bit(23)) ? self_M_level2_L_th_1;
 
     /** EQ_L3_FIR[24]
-     *  Hardware Control Error. See Hardware Control Error
+     *  L3 Hw control err
      */
-    (rEQ_L3_FIR, bit(24)) ? defaultMaskedError;
+    (rEQ_L3_FIR, bit(24)) ? self_th_1;
 
     /** EQ_L3_FIR[25]
-     *  Cache Inhibited operation was hit in the L3 direct
+     *  Cache inhibited op in L3 directory
      */
-    (rEQ_L3_FIR, bit(25)) ? defaultMaskedError;
+    (rEQ_L3_FIR, bit(25)) ? self_M_level2_L_th_1;
 
     /** EQ_L3_FIR[26]
-     *  Snoop Machine or Read machine has performed a line
+     *  L3 line delete CE done
      */
     (rEQ_L3_FIR, bit(26)) ? defaultMaskedError;
 
     /** EQ_L3_FIR[27]
-     *  Indicates that this l3 has snooped an incoming lco
+     *  L3  snooped an incoming LCO
      */
-    (rEQ_L3_FIR, bit(27)) ? defaultMaskedError;
+    (rEQ_L3_FIR, bit(27)) ? self_M_level2_L_th_1;
 
     /** EQ_L3_FIR[28]
-     *  Indicates the LRU intended to victimize a line, bu
+     *  LRU intended to victimize a line, but invalid line
      */
-    (rEQ_L3_FIR, bit(28)) ? defaultMaskedError;
+    (rEQ_L3_FIR, bit(28)) ? l3_lru_parity_error;
 
     /** EQ_L3_FIR[29]
-     *  All members are either column or line deleted in s
+     *  L3 cache congruence class deleted
      */
-    (rEQ_L3_FIR, bit(29)) ? defaultMaskedError;
+    (rEQ_L3_FIR, bit(29)) ? self_th_1;
 
     /** EQ_L3_FIR[30]
-     *  Indicates that this l3 has snooped an incoming lco
+     *  Incoming LCO ID mismatch
      */
-    (rEQ_L3_FIR, bit(30)) ? defaultMaskedError;
+    (rEQ_L3_FIR, bit(30)) ? self_th_1;
 
     /** EQ_L3_FIR[31]
-     *  Received ack_dead or ed_ack_dead cresp on CO, SN o
+     *  L3 PowerBus Master Write CRESP ack_dead
      */
     (rEQ_L3_FIR, bit(31)) ? defaultMaskedError;
 
     /** EQ_L3_FIR[32]
-     *  Received ack_dead or ed_ack_dead cresp on PF opera
+     *  PB Master Read received ack_dead CRESP
      */
     (rEQ_L3_FIR, bit(32)) ? defaultMaskedError;
 
@@ -437,32 +437,32 @@ rule rEQ_NCU_FIR
 
 group gEQ_NCU_FIR
     filter singlebit,
-           cs_root_cause
+           cs_root_cause(3,4,7,8)
 {
     /** EQ_NCU_FIR[0]
-     *  H/W control error.
+     *  NCU store queue control error
      */
-    (rEQ_NCU_FIR, bit(0)) ? defaultMaskedError;
+    (rEQ_NCU_FIR, bit(0)) ? self_th_1;
 
     /** EQ_NCU_FIR[1]
      *  TLBIE control error.
      */
-    (rEQ_NCU_FIR, bit(1)) ? defaultMaskedError;
+    (rEQ_NCU_FIR, bit(1)) ? level2_M_self_L_th_1;
 
     /** EQ_NCU_FIR[2]
      *  TLBIE or SLBIEG received illegal fields from core.
      */
-    (rEQ_NCU_FIR, bit(2)) ? defaultMaskedError;
+    (rEQ_NCU_FIR, bit(2)) ? level2_M_self_L_th_1;
 
     /** EQ_NCU_FIR[3]
      *  Store address machine received addr_err cresp.
      */
-    (rEQ_NCU_FIR, bit(3)) ? defaultMaskedError;
+    (rEQ_NCU_FIR, bit(3)) ? self_M_level2_L_th_1;
 
     /** EQ_NCU_FIR[4]
      *  Load address machine received addr_err cresp.
      */
-    (rEQ_NCU_FIR, bit(4)) ? defaultMaskedError;
+    (rEQ_NCU_FIR, bit(4)) ? self_M_level2_L_th_1;
 
     /** EQ_NCU_FIR[5]
      *  Topology table error - tried accessing invalid ent
@@ -470,59 +470,59 @@ group gEQ_NCU_FIR
     (rEQ_NCU_FIR, bit(5)) ? defaultMaskedError;
 
     /** EQ_NCU_FIR[6]
-     *  One the NCU machines triggerd PB into early hang r
+     *  An NCU machine triggerd PB into early hang recover
      */
     (rEQ_NCU_FIR, bit(6)) ? defaultMaskedError;
 
     /** EQ_NCU_FIR[7]
      *  MSGSND received addr_err
      */
-    (rEQ_NCU_FIR, bit(7)) ? defaultMaskedError;
+    (rEQ_NCU_FIR, bit(7)) ? self_M_level2_L_th_1;
 
     /** EQ_NCU_FIR[8]
      *  Store data parity error from regfile detected.
      */
-    (rEQ_NCU_FIR, bit(8)) ? defaultMaskedError;
+    (rEQ_NCU_FIR, bit(8)) ? self_th_1_UERE;
 
     /** EQ_NCU_FIR[9]
      *  Store timed out on PB.
      */
-    (rEQ_NCU_FIR, bit(9)) ? defaultMaskedError;
+    (rEQ_NCU_FIR, bit(9)) ? threshold_and_mask_self;
 
     /** EQ_NCU_FIR[10]
      *  TLBIE master timed out on PB.
      */
-    (rEQ_NCU_FIR, bit(10)) ? defaultMaskedError;
+    (rEQ_NCU_FIR, bit(10)) ? level2_M_self_L_th_1;
 
     /** EQ_NCU_FIR[11]
      *  TLBIE snooper timed out waiting for core.
      */
-    (rEQ_NCU_FIR, bit(11)) ? defaultMaskedError;
+    (rEQ_NCU_FIR, bit(11)) ? level2_M_self_L_th_1;
 
     /** EQ_NCU_FIR[12]
      *  IMA received addr_err cresp.
      */
-    (rEQ_NCU_FIR, bit(12)) ? defaultMaskedError;
+    (rEQ_NCU_FIR, bit(12)) ? self_M_level2_L_th_1;
 
     /** EQ_NCU_FIR[13]
      *  TLBIE/sync machine received addr_err cresp.
      */
-    (rEQ_NCU_FIR, bit(13)) ? defaultMaskedError;
+    (rEQ_NCU_FIR, bit(13)) ? TBDDefaultCallout;
 
     /** EQ_NCU_FIR[14]
      *  PMISC received address error cresp.
      */
-    (rEQ_NCU_FIR, bit(14)) ? defaultMaskedError;
+    (rEQ_NCU_FIR, bit(14)) ? self_M_level2_L_th_1;
 
     /** EQ_NCU_FIR[15]
-     *  Spare fir bits.
+     *  cHTM logic received an invalid HTM/IMA packet
      */
-    (rEQ_NCU_FIR, bit(15)) ? defaultMaskedError;
+    (rEQ_NCU_FIR, bit(15)) ? self_M_level2_L_th_1;
 
     /** EQ_NCU_FIR[16]
      *  Spare fir bits.
      */
-    (rEQ_NCU_FIR, bit(16)) ? defaultMaskedError;
+    (rEQ_NCU_FIR, bit(16)) ? self_M_level2_L_th_1;
 
     /** EQ_NCU_FIR[17]
      *  Spare fir bits.
@@ -537,52 +537,22 @@ group gEQ_NCU_FIR
     /** EQ_NCU_FIR[19]
      *  PPE write received ack_dead
      */
-    (rEQ_NCU_FIR, bit(19)) ? defaultMaskedError;
+    (rEQ_NCU_FIR, bit(19)) ? level2_M_self_L_th_1;
 
     /** EQ_NCU_FIR[20]
      *  Darn ttype while darn not enabled.
      */
-    (rEQ_NCU_FIR, bit(20)) ? defaultMaskedError;
+    (rEQ_NCU_FIR, bit(20)) ? level2_M_self_L_th_1;
 
     /** EQ_NCU_FIR[21]
      *  Darn Address Error cresp.
      */
-    (rEQ_NCU_FIR, bit(21)) ? defaultMaskedError;
+    (rEQ_NCU_FIR, bit(21)) ? level2_M_self_L_th_1;
 
-    /** EQ_NCU_FIR[22]
-     *  Spare fir bits.
+    /** EQ_NCU_FIR[22:28]
+     *  spare
      */
-    (rEQ_NCU_FIR, bit(22)) ? defaultMaskedError;
-
-    /** EQ_NCU_FIR[23]
-     *  Spare fir bits.
-     */
-    (rEQ_NCU_FIR, bit(23)) ? defaultMaskedError;
-
-    /** EQ_NCU_FIR[24]
-     *  Spare fir bits.
-     */
-    (rEQ_NCU_FIR, bit(24)) ? defaultMaskedError;
-
-    /** EQ_NCU_FIR[25]
-     *  Spare fir bits.
-     */
-    (rEQ_NCU_FIR, bit(25)) ? defaultMaskedError;
-
-    /** EQ_NCU_FIR[26]
-     *  Spare fir bits.
-     */
-    (rEQ_NCU_FIR, bit(26)) ? defaultMaskedError;
-
-    /** EQ_NCU_FIR[27]
-     *  Spare fir bits.
-     */
-    (rEQ_NCU_FIR, bit(27)) ? defaultMaskedError;
-
-    /** EQ_NCU_FIR[28]
-     *  Spare fir bits.
-     */
-    (rEQ_NCU_FIR, bit(28)) ? defaultMaskedError;
+    (rEQ_NCU_FIR, bit(22|23|24|25|26|27|28)) ? defaultMaskedError;
 
 };
 
@@ -600,112 +570,112 @@ rule rEQ_L2_FIR
 
 group gEQ_L2_FIR
     filter singlebit,
-           cs_root_cause
+           cs_root_cause(1,17,18,20)
 {
     /** EQ_L2_FIR[0]
-     *  H/W Trigger Mechanism at point cache read occurs t
+     *  L2 cache read CE
      */
-    (rEQ_L2_FIR, bit(0)) ? defaultMaskedError;
+    (rEQ_L2_FIR, bit(0)) ? l2_cache_ce;
 
     /** EQ_L2_FIR[1]
-     *  H/W Trigger Mechanism at point cache read occurs t
+     *  L2 cache read UE
      */
-    (rEQ_L2_FIR, bit(1)) ? defaultMaskedError;
+    (rEQ_L2_FIR, bit(1)) ? l2_cache_ue_UERE;
 
     /** EQ_L2_FIR[2]
-     *  H/W Trigger Mechanism at point cache read occurs t
+     *  L2 cache read SUE
      */
     (rEQ_L2_FIR, bit(2)) ? defaultMaskedError;
 
     /** EQ_L2_FIR[3]
-     *  H/W intiated Line Delete occured (Id state injecte
+     *  Hw directory initiated line delete
      */
     (rEQ_L2_FIR, bit(3)) ? defaultMaskedError;
 
     /** EQ_L2_FIR[4]
-     *  L2 Castout where L2 cache read detected UE/SUE and
+     *  UE or SUE detected by on modified line
      */
     (rEQ_L2_FIR, bit(4)) ? defaultMaskedError;
 
     /** EQ_L2_FIR[5]
-     *  L2 Castout where L2 cache read detected UE/SUE and
+     *  UE or SUE detected on non-modified line
      */
     (rEQ_L2_FIR, bit(5)) ? defaultMaskedError;
 
     /** EQ_L2_FIR[6]
-     *  L2 corrected a CE in the L2 directory
+     *  L2 directory read CE
      */
-    (rEQ_L2_FIR, bit(6)) ? defaultMaskedError;
+    (rEQ_L2_FIR, bit(6)) ? l2_dir_ce;
 
     /** EQ_L2_FIR[7]
-     *  L2 detected a UE in the L2 directory
+     *  L2 directory read UE
      */
-    (rEQ_L2_FIR, bit(7)) ? defaultMaskedError;
+    (rEQ_L2_FIR, bit(7)) ? self_th_1;
 
     /** EQ_L2_FIR[8]
-     *  L2 detected a SBCE in the L2 directory
+     *  L2 directory CE due to stuck bit
      */
-    (rEQ_L2_FIR, bit(8)) ? defaultMaskedError;
+    (rEQ_L2_FIR, bit(8)) ? self_th_1;
 
     /** EQ_L2_FIR[9]
-     *  PEC attempted to repair and CO a SBCE condition bu
+     *  L2 directory stuck bit CE repair failed
      */
-    (rEQ_L2_FIR, bit(9)) ? defaultMaskedError;
+    (rEQ_L2_FIR, bit(9)) ? self_th_1;
 
     /** EQ_L2_FIR[10]
-     *  DEPRICATED: THIS FIR BIT SHOULD ALWAYS BE MASKED. 
+     *  Deprecated: Was Muliple l2 cache dir errors
      */
     (rEQ_L2_FIR, bit(10)) ? defaultMaskedError;
 
     /** EQ_L2_FIR[11]
-     *  LRU array has illegal valu in it(due to flipped bi
+     *  LRU read error detected
      */
-    (rEQ_L2_FIR, bit(11)) ? defaultMaskedError;
+    (rEQ_L2_FIR, bit(11)) ? self_th_32perDay;
 
     /** EQ_L2_FIR[12]
      *  RC timed out waiting for powerbus to return data.
      */
-    (rEQ_L2_FIR, bit(12)) ? defaultMaskedError;
+    (rEQ_L2_FIR, bit(12)) ? level2_th_1;
 
     /** EQ_L2_FIR[13]
      *  NCU timed out waiting for powerbus to return data.
      */
-    (rEQ_L2_FIR, bit(13)) ? defaultMaskedError;
+    (rEQ_L2_FIR, bit(13)) ? level2_th_1;
 
     /** EQ_L2_FIR[14]
      *  Internal h/w control error
      */
-    (rEQ_L2_FIR, bit(14)) ? defaultMaskedError;
+    (rEQ_L2_FIR, bit(14)) ? level2_M_proc_L_th_1;
 
     /** EQ_L2_FIR[15]
-     *  All members in a single congruence class has been 
+     *  LRU all members in a class line deleted
      */
-    (rEQ_L2_FIR, bit(15)) ? defaultMaskedError;
+    (rEQ_L2_FIR, bit(15)) ? self_th_1;
 
     /** EQ_L2_FIR[16]
-     *  Cache Inhibited Ld/St hit a line in the L2 cache. 
+     *  Cache Inhibited Ld/St hit a line in the L2 cache.
      */
-    (rEQ_L2_FIR, bit(16)) ? defaultMaskedError;
+    (rEQ_L2_FIR, bit(16)) ? self_th_1;
 
     /** EQ_L2_FIR[17]
-     *  RC was doing a fabric op on behalf of a load and g
+     *  (RC) load received pb cresp addr error
      */
-    (rEQ_L2_FIR, bit(17)) ? defaultMaskedError;
+    (rEQ_L2_FIR, bit(17)) ? self_M_level2_L_th_1;
 
     /** EQ_L2_FIR[18]
-     *  RC was doing a fabric op on behalf of a store and 
+     *  (RC) store received pb cresp addr error
      */
-    (rEQ_L2_FIR, bit(18)) ? defaultMaskedError;
+    (rEQ_L2_FIR, bit(18)) ? self_M_level2_L_th_1;
 
     /** EQ_L2_FIR[19]
      *  RC incoming Power Bus data had a CE error.
      */
-    (rEQ_L2_FIR, bit(19)) ? defaultMaskedError;
+    (rEQ_L2_FIR, bit(19)) ? l2_power_bus_ce;
 
     /** EQ_L2_FIR[20]
      *  RC incoming Power Bus data had a UE error.
      */
-    (rEQ_L2_FIR, bit(20)) ? defaultMaskedError;
+    (rEQ_L2_FIR, bit(20)) ? self_th_1_UERE;
 
     /** EQ_L2_FIR[21]
      *  RC incoming Power Bus data had a SUE error.
@@ -715,37 +685,37 @@ group gEQ_L2_FIR
     /** EQ_L2_FIR[22]
      *  Targetted nodal request got rty_inc cresp.
      */
-    (rEQ_L2_FIR, bit(22)) ? defaultMaskedError;
+    (rEQ_L2_FIR, bit(22)) ? self_th_1;
 
     /** EQ_L2_FIR[23]
-     *  RC was doing a fabric op on behalf of a load and g
+     *  RC fabric op Ld cresp addr error for hyp
      */
     (rEQ_L2_FIR, bit(23)) ? defaultMaskedError;
 
     /** EQ_L2_FIR[24]
      *  RCDAT read parity error.
      */
-    (rEQ_L2_FIR, bit(24)) ? defaultMaskedError;
+    (rEQ_L2_FIR, bit(24)) ? self_th_1;
 
     /** EQ_L2_FIR[25]
-     *  CO or SNP was doing a fabric op on behalf of a sto
+     *  L2 castout or CN cresp addr err
      */
-    (rEQ_L2_FIR, bit(25)) ? defaultMaskedError;
+    (rEQ_L2_FIR, bit(25)) ? self_M_level2_L_th_1;
 
     /** EQ_L2_FIR[26]
      *  LVDIR took a parity error.
      */
-    (rEQ_L2_FIR, bit(26)) ? defaultMaskedError;
+    (rEQ_L2_FIR, bit(26)) ? self_th_32perDay;
 
     /** EQ_L2_FIR[27]
-     *  bad topology table config software error
+     *  Bad topology table config software error
      */
-    (rEQ_L2_FIR, bit(27)) ? defaultMaskedError;
+    (rEQ_L2_FIR, bit(27)) ? level2_th_1;
 
     /** EQ_L2_FIR[28]
      *  Darn timed out waiting for data.
      */
-    (rEQ_L2_FIR, bit(28)) ? defaultMaskedError;
+    (rEQ_L2_FIR, bit(28)) ? self_th_1;
 
     /** EQ_L2_FIR[29]
      *  Early hang in L2.
@@ -753,52 +723,52 @@ group gEQ_L2_FIR
     (rEQ_L2_FIR, bit(29)) ? defaultMaskedError;
 
     /** EQ_L2_FIR[30]
-     *  Unexpected cast-out or push during chip_contained 
+     *  Unexpected cast-out or push during chip_contained
      */
     (rEQ_L2_FIR, bit(30)) ? defaultMaskedError;
 
     /** EQ_L2_FIR[31]
-     *  L2 FIR Register
+     *  reserved
      */
     (rEQ_L2_FIR, bit(31)) ? defaultMaskedError;
 
     /** EQ_L2_FIR[32]
-     *  PEC Phase3 timeout, recoverable problem, informati
+     *  Time out during PEC sequence trying to correct l2d
      */
     (rEQ_L2_FIR, bit(32)) ? defaultMaskedError;
 
     /** EQ_L2_FIR[33]
-     *  L2 FIR Register
+     *  reserved
      */
     (rEQ_L2_FIR, bit(33)) ? defaultMaskedError;
 
     /** EQ_L2_FIR[34]
-     *  L2 FIR Register
+     *  reserved
      */
     (rEQ_L2_FIR, bit(34)) ? defaultMaskedError;
 
     /** EQ_L2_FIR[35]
-     *  L2 FIR Register
+     *  reserved
      */
     (rEQ_L2_FIR, bit(35)) ? defaultMaskedError;
 
     /** EQ_L2_FIR[36]
-     *  Cache read CE and UE popped within a short hang pu
+     *  Cache CE and UE in short time period
      */
-    (rEQ_L2_FIR, bit(36)) ? defaultMaskedError;
+    (rEQ_L2_FIR, bit(36)) ? threshold_and_mask_self;
 
     /** EQ_L2_FIR[37]
-     *  L2 FIR Register
+     *  reserved
      */
     (rEQ_L2_FIR, bit(37)) ? defaultMaskedError;
 
     /** EQ_L2_FIR[38]
-     *  L2 FIR Register
+     *  reserved
      */
     (rEQ_L2_FIR, bit(38)) ? defaultMaskedError;
 
     /** EQ_L2_FIR[39]
-     *  L2 FIR Register
+     *  reserved
      */
     (rEQ_L2_FIR, bit(39)) ? defaultMaskedError;
 
@@ -825,32 +795,32 @@ group gEQ_CORE_FIR
     /** EQ_CORE_FIR[0]
      *  IFU SRAM recoverable error (ICACHE parity error, e
      */
-    (rEQ_CORE_FIR, bit(0)) ? defaultMaskedError;
+    (rEQ_CORE_FIR, bit(0)) ? self_th_5perHour;
 
     /** EQ_CORE_FIR[1]
      *  TC checkstop
      */
-    (rEQ_CORE_FIR, bit(1)) ? defaultMaskedError;
+    (rEQ_CORE_FIR, bit(1)) ? self_th_1;
 
     /** EQ_CORE_FIR[2]
      *  IFU RegFile recoverable error
      */
-    (rEQ_CORE_FIR, bit(2)) ? defaultMaskedError;
+    (rEQ_CORE_FIR, bit(2)) ? self_th_5perHour;
 
     /** EQ_CORE_FIR[3]
      *  IFU RegFile core checkstop
      */
-    (rEQ_CORE_FIR, bit(3)) ? defaultMaskedError;
+    (rEQ_CORE_FIR, bit(3)) ? self_th_1;
 
     /** EQ_CORE_FIR[4]
      *  IFU logic recoverable error
      */
-    (rEQ_CORE_FIR, bit(4)) ? defaultMaskedError;
+    (rEQ_CORE_FIR, bit(4)) ? self_th_5perHour;
 
     /** EQ_CORE_FIR[5]
      *  IFU logic core checkstop
      */
-    (rEQ_CORE_FIR, bit(5)) ? defaultMaskedError;
+    (rEQ_CORE_FIR, bit(5)) ? self_th_1;
 
     /** EQ_CORE_FIR[6]
      *  reserved
@@ -860,17 +830,17 @@ group gEQ_CORE_FIR
     /** EQ_CORE_FIR[7]
      *  VSU Inference Accumulator recoverable error
      */
-    (rEQ_CORE_FIR, bit(7)) ? defaultMaskedError;
+    (rEQ_CORE_FIR, bit(7)) ? self_th_5perHour;
 
     /** EQ_CORE_FIR[8]
      *  Recovery core checkstop
      */
-    (rEQ_CORE_FIR, bit(8)) ? defaultMaskedError;
+    (rEQ_CORE_FIR, bit(8)) ? self_th_1;
 
     /** EQ_CORE_FIR[9]
      *  VSU Slice Targeted File (STF) recoverable error
      */
-    (rEQ_CORE_FIR, bit(9)) ? defaultMaskedError;
+    (rEQ_CORE_FIR, bit(9)) ? self_th_5perHour;
 
     /** EQ_CORE_FIR[10]
      *  reserved
@@ -880,22 +850,22 @@ group gEQ_CORE_FIR
     /** EQ_CORE_FIR[11]
      *  ISU logic recoverable error
      */
-    (rEQ_CORE_FIR, bit(11)) ? defaultMaskedError;
+    (rEQ_CORE_FIR, bit(11)) ? self_th_5perHour;
 
     /** EQ_CORE_FIR[12]
      *  ISU logic core checkstop
      */
-    (rEQ_CORE_FIR, bit(12)) ? defaultMaskedError;
+    (rEQ_CORE_FIR, bit(12)) ? self_th_1;
 
     /** EQ_CORE_FIR[13]
      *  ISU recoverable if not in MT window
      */
-    (rEQ_CORE_FIR, bit(13)) ? defaultMaskedError;
+    (rEQ_CORE_FIR, bit(13)) ? self_th_5perHour;
 
     /** EQ_CORE_FIR[14]
      *  MCHK received while ME=0 - non recoverable
      */
-    (rEQ_CORE_FIR, bit(14)) ? defaultMaskedError;
+    (rEQ_CORE_FIR, bit(14)) ? self_th_1_SUE;
 
     /** EQ_CORE_FIR[15]
      *  UE from L2
@@ -915,7 +885,7 @@ group gEQ_CORE_FIR
     /** EQ_CORE_FIR[18]
      *  MMU TLB parity recoverable error
      */
-    (rEQ_CORE_FIR, bit(18)) ? defaultMaskedError;
+    (rEQ_CORE_FIR, bit(18)) ? self_th_5perHour;
 
     /** EQ_CORE_FIR[19]
      *  MMU SLB parity recoverable error
@@ -930,32 +900,32 @@ group gEQ_CORE_FIR
     /** EQ_CORE_FIR[21]
      *  MMU CXT recoverable error
      */
-    (rEQ_CORE_FIR, bit(21)) ? defaultMaskedError;
+    (rEQ_CORE_FIR, bit(21)) ? self_th_5perHour;
 
     /** EQ_CORE_FIR[22]
      *  MMU logic core checkstop
      */
-    (rEQ_CORE_FIR, bit(22)) ? defaultMaskedError;
+    (rEQ_CORE_FIR, bit(22)) ? self_th_1;
 
     /** EQ_CORE_FIR[23]
      *  MMU system checkstop
      */
-    (rEQ_CORE_FIR, bit(23)) ? defaultMaskedError;
+    (rEQ_CORE_FIR, bit(23)) ? self_th_1;
 
     /** EQ_CORE_FIR[24]
      *  VSU logic recoverable error
      */
-    (rEQ_CORE_FIR, bit(24)) ? defaultMaskedError;
+    (rEQ_CORE_FIR, bit(24)) ? self_th_5perHour;
 
     /** EQ_CORE_FIR[25]
      *  VSU logic core checkstop
      */
-    (rEQ_CORE_FIR, bit(25)) ? defaultMaskedError;
+    (rEQ_CORE_FIR, bit(25)) ? self_th_1;
 
     /** EQ_CORE_FIR[26]
      *  Thread in maintenance mode and receives recovery r
      */
-    (rEQ_CORE_FIR, bit(26)) ? defaultMaskedError;
+    (rEQ_CORE_FIR, bit(26)) ? level2_th_1;
 
     /** EQ_CORE_FIR[27]
      *  reserved
@@ -965,57 +935,57 @@ group gEQ_CORE_FIR
     /** EQ_CORE_FIR[28]
      *  PC system checkstop - Recoverable error received w
      */
-    (rEQ_CORE_FIR, bit(28)) ? defaultMaskedError;
+    (rEQ_CORE_FIR, bit(28)) ? self_th_1;
 
     /** EQ_CORE_FIR[29]
-     *  LSU SRAM recoverable error (DCACHE parity error, E
+     *  LSU SRAM recoverable error (DCACHE or ERAT PE,etc)
      */
-    (rEQ_CORE_FIR, bit(29)) ? defaultMaskedError;
+    (rEQ_CORE_FIR, bit(29)) ? self_th_5perHour;
 
     /** EQ_CORE_FIR[30]
      *  LSU set deleted
      */
-    (rEQ_CORE_FIR, bit(30)) ? defaultMaskedError;
+    (rEQ_CORE_FIR, bit(30)) ? self_th_1;
 
     /** EQ_CORE_FIR[31]
      *  LSU RegFile recoverable error
      */
-    (rEQ_CORE_FIR, bit(31)) ? defaultMaskedError;
+    (rEQ_CORE_FIR, bit(31)) ? self_th_5perHour;
 
     /** EQ_CORE_FIR[32]
      *  LSU RegFile core checkstop
      */
-    (rEQ_CORE_FIR, bit(32)) ? defaultMaskedError;
+    (rEQ_CORE_FIR, bit(32)) ? self_th_1;
 
     /** EQ_CORE_FIR[33]
      *  MMU TLB multi hit error occurred
      */
-    (rEQ_CORE_FIR, bit(33)) ? defaultMaskedError;
+    (rEQ_CORE_FIR, bit(33)) ? threshold_and_mask_self;
 
     /** EQ_CORE_FIR[34]
      *  MMU SLB multi hit error occurred
      */
-    (rEQ_CORE_FIR, bit(34)) ? defaultMaskedError;
+    (rEQ_CORE_FIR, bit(34)) ? threshold_and_mask_self;
 
     /** EQ_CORE_FIR[35]
      *  LSU ERAT multi hit error occurred
      */
-    (rEQ_CORE_FIR, bit(35)) ? defaultMaskedError;
+    (rEQ_CORE_FIR, bit(35)) ? threshold_and_mask_self;
 
     /** EQ_CORE_FIR[36]
      *  PC forward progress error
      */
-    (rEQ_CORE_FIR, bit(36)) ? defaultMaskedError;
+    (rEQ_CORE_FIR, bit(36)) ? self_th_1;
 
     /** EQ_CORE_FIR[37]
      *  LSU logic recoverable error
      */
-    (rEQ_CORE_FIR, bit(37)) ? defaultMaskedError;
+    (rEQ_CORE_FIR, bit(37)) ? self_th_5perHour;
 
     /** EQ_CORE_FIR[38]
      *  LSU logic core checkstop
      */
-    (rEQ_CORE_FIR, bit(38)) ? defaultMaskedError;
+    (rEQ_CORE_FIR, bit(38)) ? self_th_1;
 
     /** EQ_CORE_FIR[39]
      *  reserved
@@ -1030,7 +1000,7 @@ group gEQ_CORE_FIR
     /** EQ_CORE_FIR[41]
      *  LSU system checkstop
      */
-    (rEQ_CORE_FIR, bit(41)) ? defaultMaskedError;
+    (rEQ_CORE_FIR, bit(41)) ? self_th_1;
 
     /** EQ_CORE_FIR[42]
      *  reserved
@@ -1040,7 +1010,7 @@ group gEQ_CORE_FIR
     /** EQ_CORE_FIR[43]
      *  PC thread hang recoverable error
      */
-    (rEQ_CORE_FIR, bit(43)) ? defaultMaskedError;
+    (rEQ_CORE_FIR, bit(43)) ? self_level2_th_5perHour;
 
     /** EQ_CORE_FIR[44]
      *  reserved
@@ -1050,7 +1020,7 @@ group gEQ_CORE_FIR
     /** EQ_CORE_FIR[45]
      *  PC logic checkstop
      */
-    (rEQ_CORE_FIR, bit(45)) ? defaultMaskedError;
+    (rEQ_CORE_FIR, bit(45)) ? self_th_1;
 
     /** EQ_CORE_FIR[46]
      *  PC TimeBase Facility checkstop
@@ -1085,7 +1055,7 @@ group gEQ_CORE_FIR
     /** EQ_CORE_FIR[52]
      *  Hang Recovery Failed
      */
-    (rEQ_CORE_FIR, bit(52)) ? defaultMaskedError;
+    (rEQ_CORE_FIR, bit(52)) ? self_th_1;
 
     /** EQ_CORE_FIR[53]
      *  Core Hang detected
@@ -1100,7 +1070,7 @@ group gEQ_CORE_FIR
     /** EQ_CORE_FIR[55]
      *  Nest Hang detected
      */
-    (rEQ_CORE_FIR, bit(55)) ? defaultMaskedError;
+    (rEQ_CORE_FIR, bit(55)) ? self_M_level2_L_th_1;
 
     /** EQ_CORE_FIR[56]
      *  Other Core Chiplet recoverable error
@@ -1110,7 +1080,7 @@ group gEQ_CORE_FIR
     /** EQ_CORE_FIR[57]
      *  Other Core Chiplet core checkstop
      */
-    (rEQ_CORE_FIR, bit(57)) ? defaultMaskedError;
+    (rEQ_CORE_FIR, bit(57)) ? self_th_1;
 
     /** EQ_CORE_FIR[58]
      *  Other Core Chiplet system checkstop
@@ -1140,7 +1110,7 @@ group gEQ_CORE_FIR
     /** EQ_CORE_FIR[63]
      *  PHYP checkstop via SPRC/SPRD
      */
-    (rEQ_CORE_FIR, bit(63)) ? defaultMaskedError;
+    (rEQ_CORE_FIR, bit(63)) ? level2_th_1;
 
 };
 

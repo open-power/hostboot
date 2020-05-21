@@ -196,105 +196,105 @@ rule rMC_DSTL_FIR
 
 group gMC_DSTL_FIR
     filter singlebit,
-           cs_root_cause
+           cs_root_cause(0,4)
 {
     /** MC_DSTL_FIR[0]
      *  AFU initiated Checkstop on Subchannel A
      */
-    (rMC_DSTL_FIR, bit(0)) ? defaultMaskedError;
+    (rMC_DSTL_FIR, bit(0)) ? analyze_ocmb_chnl0_UERE;
 
     /** MC_DSTL_FIR[1]
-     *  AFU initiated Recoverable Attention on Subchannel 
+     *  AFU initiated Recoverable Attn on Subchannel A
      */
-    (rMC_DSTL_FIR, bit(1)) ? defaultMaskedError;
+    (rMC_DSTL_FIR, bit(1)) ? analyze_ocmb_chnl0;
 
     /** MC_DSTL_FIR[2]
-     *  AFU initiated Special Attention on Subchannel A
+     *  AFU initiated Special Attn on Subchannel A
      */
-    (rMC_DSTL_FIR, bit(2)) ? defaultMaskedError;
+    (rMC_DSTL_FIR, bit(2)) ? analyze_ocmb_chnl0;
 
     /** MC_DSTL_FIR[3]
-     *  AFU initiated Application Interrupt Attention on S
+     *  AFU initiated Application Interrupt Attn on Subcha
      */
     (rMC_DSTL_FIR, bit(3)) ? defaultMaskedError;
 
     /** MC_DSTL_FIR[4]
      *  AFU initiated Checkstop on Subchannel B
      */
-    (rMC_DSTL_FIR, bit(4)) ? defaultMaskedError;
+    (rMC_DSTL_FIR, bit(4)) ? analyze_ocmb_chnl1_UERE;
 
     /** MC_DSTL_FIR[5]
-     *  AFU initiated Recoverable Attention on Subchannel 
+     *  AFU initiated Recoverable Attn on Subchannel B
      */
-    (rMC_DSTL_FIR, bit(5)) ? defaultMaskedError;
+    (rMC_DSTL_FIR, bit(5)) ? analyze_ocmb_chnl1;
 
     /** MC_DSTL_FIR[6]
-     *  AFU initiated Special Attention on Subchannel B
+     *  AFU initiated Special Attn on Subchannel B
      */
-    (rMC_DSTL_FIR, bit(6)) ? defaultMaskedError;
+    (rMC_DSTL_FIR, bit(6)) ? analyze_ocmb_chnl1;
 
     /** MC_DSTL_FIR[7]
-     *  AFU initiated Application Interrupt Attention on S
+     *  AFU initiated Application Interrupt Attn on Subcha
      */
     (rMC_DSTL_FIR, bit(7)) ? defaultMaskedError;
 
     /** MC_DSTL_FIR[8]
      *  Error on parity bits protecting incoming command f
      */
-    (rMC_DSTL_FIR, bit(8)) ? defaultMaskedError;
+    (rMC_DSTL_FIR, bit(8)) ? self_th_1;
 
     /** MC_DSTL_FIR[9]
      *  A credit reset was attempted while rd and wdf buff
      */
-    (rMC_DSTL_FIR, bit(9)) ? defaultMaskedError;
+    (rMC_DSTL_FIR, bit(9)) ? self_th_1;
 
     /** MC_DSTL_FIR[10]
-     *  DSTL Configuration Register has taken a recoverabl
+     *  Config reg recoverable parity error
      */
-    (rMC_DSTL_FIR, bit(10)) ? defaultMaskedError;
+    (rMC_DSTL_FIR, bit(10)) ? self_th_1;
 
     /** MC_DSTL_FIR[11]
-     *  DSTL Configuration Register has taken a fatal pari
+     *  Config reg fatal parity error
      */
-    (rMC_DSTL_FIR, bit(11)) ? defaultMaskedError;
+    (rMC_DSTL_FIR, bit(11)) ? self_th_1;
 
     /** MC_DSTL_FIR[12]
-     *  DSTL Subchannel A, a counter took an underflow or 
+     *  Subchannel A counter error
      */
-    (rMC_DSTL_FIR, bit(12)) ? defaultMaskedError;
+    (rMC_DSTL_FIR, bit(12)) ? chnl0_omi_bus_th_1;
 
     /** MC_DSTL_FIR[13]
-     *  DSTL Subchannel B, a counter took an underflow or 
+     *  Subchannel B counter error
      */
-    (rMC_DSTL_FIR, bit(13)) ? defaultMaskedError;
+    (rMC_DSTL_FIR, bit(13)) ? chnl1_omi_bus_th_1;
 
     /** MC_DSTL_FIR[14]
-     *  DSTL Subchannel A timed out having valid commands 
+     *  Subchannel A valid cmd timeout error
      */
-    (rMC_DSTL_FIR, bit(14)) ? defaultMaskedError;
+    (rMC_DSTL_FIR, bit(14)) ? chnl0_omi_bus_th_32_perDay;
 
     /** MC_DSTL_FIR[15]
-     *  DSTL Subchannel B timed out having valid commands 
+     *  Subchannel B valid cmd timeout error
      */
-    (rMC_DSTL_FIR, bit(15)) ? defaultMaskedError;
+    (rMC_DSTL_FIR, bit(15)) ? chnl1_omi_bus_th_32_perDay;
 
     /** MC_DSTL_FIR[16]
-     *  DSTL has detected that attached buffer on subchann
+     *  Subchannel A buffer overuse error
      */
-    (rMC_DSTL_FIR, bit(16)) ? defaultMaskedError;
+    (rMC_DSTL_FIR, bit(16)) ? chnl0_ocmb_th_1;
 
     /** MC_DSTL_FIR[17]
-     *  DSTL has detected that attached buffer on subchann
+     *  Subchannel B buffer overuse error
      */
-    (rMC_DSTL_FIR, bit(17)) ? defaultMaskedError;
+    (rMC_DSTL_FIR, bit(17)) ? chnl1_ocmb_th_1;
 
     /** MC_DSTL_FIR[18]
-     *  DSTL Subchannel A observed link going down.
+     *  Subchannel A DL link down
      */
     (rMC_DSTL_FIR, bit(18)) ? defaultMaskedError;
 
     /** MC_DSTL_FIR[19]
-     *  DSTL Subchannel B observed link going down.
+     *  Subchannel B DL link down
      */
     (rMC_DSTL_FIR, bit(19)) ? defaultMaskedError;
 
@@ -309,14 +309,14 @@ group gMC_DSTL_FIR
     (rMC_DSTL_FIR, bit(21)) ? defaultMaskedError;
 
     /** MC_DSTL_FIR[22]
-     *  Channel timeout has occured on Subchannel A index.
+     *  DSTLFIR channel timeout on subch A
      */
-    (rMC_DSTL_FIR, bit(22)) ? defaultMaskedError;
+    (rMC_DSTL_FIR, bit(22)) ? chnl0_omi_bus_th_1;
 
     /** MC_DSTL_FIR[23]
-     *  Channel timeout has occured on Subchannel B index.
+     *  DSTLFIR channel timeout on subch B
      */
-    (rMC_DSTL_FIR, bit(23)) ? defaultMaskedError;
+    (rMC_DSTL_FIR, bit(23)) ? chnl1_omi_bus_th_1;
 
     /** MC_DSTL_FIR[24]
      *  Error info from decrypt
@@ -341,55 +341,55 @@ group gMC_DSTL_FIR
     /** MC_DSTL_FIR[28]
      *  Error info from decrypt
      */
-    (rMC_DSTL_FIR, bit(28)) ? defaultMaskedError;
+    (rMC_DSTL_FIR, bit(28)) ? self_th_1;
 
     /** MC_DSTL_FIR[29]
      *  Error info from encrypt
      */
-    (rMC_DSTL_FIR, bit(29)) ? defaultMaskedError;
+    (rMC_DSTL_FIR, bit(29)) ? self_th_1;
 
     /** MC_DSTL_FIR[30]
      *  Error info from encrypt
      */
-    (rMC_DSTL_FIR, bit(30)) ? defaultMaskedError;
+    (rMC_DSTL_FIR, bit(30)) ? self_th_1;
 
     /** MC_DSTL_FIR[31]
      *  Error info from encrypt
      */
-    (rMC_DSTL_FIR, bit(31)) ? defaultMaskedError;
+    (rMC_DSTL_FIR, bit(31)) ? self_th_1;
 
     /** MC_DSTL_FIR[32]
      *  Error info from encrypt
      */
-    (rMC_DSTL_FIR, bit(32)) ? defaultMaskedError;
+    (rMC_DSTL_FIR, bit(32)) ? self_th_1;
 
     /** MC_DSTL_FIR[33]
-     *  On Subchhanel A, received an AFU initiated Applica
+     *  Subchan A AFU Application Interrupt Attention whil
      */
-    (rMC_DSTL_FIR, bit(33)) ? defaultMaskedError;
+    (rMC_DSTL_FIR, bit(33)) ? self_th_1;
 
     /** MC_DSTL_FIR[34]
-     *  On Subchhanel B, received an AFU initiated Applica
+     *  Subchan B AFU Application Interrupt Attention whil
      */
-    (rMC_DSTL_FIR, bit(34)) ? defaultMaskedError;
+    (rMC_DSTL_FIR, bit(34)) ? self_th_1;
 
     /** MC_DSTL_FIR[35]
      *  A parity error local to Subchhanel A occurred.
      */
-    (rMC_DSTL_FIR, bit(35)) ? defaultMaskedError;
+    (rMC_DSTL_FIR, bit(35)) ? self_th_1;
 
     /** MC_DSTL_FIR[36]
      *  A parity error local to Subchhanel B occurred.
      */
-    (rMC_DSTL_FIR, bit(36)) ? defaultMaskedError;
+    (rMC_DSTL_FIR, bit(36)) ? self_th_1;
 
     /** MC_DSTL_FIR[37]
-     *  Spare FIR bit 37.
+     *  Reserved
      */
     (rMC_DSTL_FIR, bit(37)) ? defaultMaskedError;
 
     /** MC_DSTL_FIR[38]
-     *  Spare FIR bit 38.
+     *  Reserved
      */
     (rMC_DSTL_FIR, bit(38)) ? defaultMaskedError;
 
@@ -496,7 +496,7 @@ group gMC_USTL_FIR
     (rMC_USTL_FIR, bit(15)) ? defaultMaskedError;
 
     /** MC_USTL_FIR[16]
-     *  WDF UE detected a parity error on the CMT interfac
+     *  WDF CMD parity errror
      */
     (rMC_USTL_FIR, bit(16)) ? defaultMaskedError;
 
@@ -611,12 +611,12 @@ group gMC_USTL_FIR
     (rMC_USTL_FIR, bit(38)) ? defaultMaskedError;
 
     /** MC_USTL_FIR[39]
-     *  Unexpected read or write response received, chana
+     *  Bad response detected from chan a
      */
     (rMC_USTL_FIR, bit(39)) ? defaultMaskedError;
 
     /** MC_USTL_FIR[40]
-     *  Unexpected read or write response received, chanb
+     *  Bad response detected from chan b
      */
     (rMC_USTL_FIR, bit(40)) ? defaultMaskedError;
 
@@ -661,12 +661,12 @@ group gMC_USTL_FIR
     (rMC_USTL_FIR, bit(48)) ? defaultMaskedError;
 
     /** MC_USTL_FIR[49]
-     *  Data is valid in data buffers without a matching r
+     *  ChanA excessive data error
      */
     (rMC_USTL_FIR, bit(49)) ? defaultMaskedError;
 
     /** MC_USTL_FIR[50]
-     *  Data is valid in data buffers without a matching r
+     *  ChanB excessive data error
      */
     (rMC_USTL_FIR, bit(50)) ? defaultMaskedError;
 
@@ -711,12 +711,12 @@ group gMC_USTL_FIR
     (rMC_USTL_FIR, bit(58)) ? defaultMaskedError;
 
     /** MC_USTL_FIR[59]
-     *  A chana response with an invalid combination of dl
+     *  ChanA response invalid(dlength and/or dpart receiv
      */
     (rMC_USTL_FIR, bit(59)) ? defaultMaskedError;
 
     /** MC_USTL_FIR[60]
-     *  A chanb response with an invalid combination of dl
+     *  ChanB response invalid(dlength and/or dpart receiv
      */
     (rMC_USTL_FIR, bit(60)) ? defaultMaskedError;
 

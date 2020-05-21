@@ -2510,62 +2510,62 @@ group gTP_LOCAL_FIR
     /** TP_LOCAL_FIR[0]
      *  CFIR - Parity or PCB access error
      */
-    (rTP_LOCAL_FIR, bit(0)) ? defaultMaskedError;
+    (rTP_LOCAL_FIR, bit(0)) ? self_th_32perDay;
 
     /** TP_LOCAL_FIR[1]
      *  CPLT_CTRL - PCB access error
      */
-    (rTP_LOCAL_FIR, bit(1)) ? defaultMaskedError;
+    (rTP_LOCAL_FIR, bit(1)) ? self_th_32perDay;
 
     /** TP_LOCAL_FIR[2]
-     *  CC - PCB access error - read and clear nn03000F
+     *  CC - PCB access error
      */
-    (rTP_LOCAL_FIR, bit(2)) ? defaultMaskedError;
+    (rTP_LOCAL_FIR, bit(2)) ? self_th_32perDay;
 
     /** TP_LOCAL_FIR[3]
-     *  CC - Clock Control Error - read and clear nn03000F
+     *  CC - Clock Control Error
      */
-    (rTP_LOCAL_FIR, bit(3)) ? defaultMaskedError;
+    (rTP_LOCAL_FIR, bit(3)) ? self_th_32perDay;
 
     /** TP_LOCAL_FIR[4]
-     *  PSC - PSCOM access error - read and clear nn01001
+     *  PSC - PSCOM access error
      */
-    (rTP_LOCAL_FIR, bit(4)) ? defaultMaskedError;
+    (rTP_LOCAL_FIR, bit(4)) ? self_th_32perDay;
 
     /** TP_LOCAL_FIR[5]
-     *  PSC - internal or ring interface error - read and 
+     *  PSC - internal or ring interface error - read and
      */
-    (rTP_LOCAL_FIR, bit(5)) ? defaultMaskedError;
+    (rTP_LOCAL_FIR, bit(5)) ? self_th_32perDay;
 
     /** TP_LOCAL_FIR[6]
-     *  THERM - pwr_comp_err, skitter_comp_err, scan_init_
+     *  THERM - internal error
      */
-    (rTP_LOCAL_FIR, bit(6)) ? defaultMaskedError;
+    (rTP_LOCAL_FIR, bit(6)) ? self_th_1;
 
     /** TP_LOCAL_FIR[7]
      *  THERM - pcb error
      */
-    (rTP_LOCAL_FIR, bit(7)) ? defaultMaskedError;
+    (rTP_LOCAL_FIR, bit(7)) ? threshold_and_mask_self;
 
     /** TP_LOCAL_FIR[8]
      *  THERMTRIP - Critical temperature indicator
      */
-    (rTP_LOCAL_FIR, bit(8)) ? defaultMaskedError;
+    (rTP_LOCAL_FIR, bit(8)) ? threshold_and_mask_self;
 
     /** TP_LOCAL_FIR[9]
      *  THERMTRIP - Fatal temperature indicator
      */
-    (rTP_LOCAL_FIR, bit(9)) ? defaultMaskedError;
+    (rTP_LOCAL_FIR, bit(9)) ? threshold_and_mask_self;
 
     /** TP_LOCAL_FIR[10]
      *  VOLTTRIP - Voltage sense error
      */
-    (rTP_LOCAL_FIR, bit(10)) ? defaultMaskedError;
+    (rTP_LOCAL_FIR, bit(10)) ? threshold_and_mask_self;
 
     /** TP_LOCAL_FIR[11]
      *  DBG - scom parity fail
      */
-    (rTP_LOCAL_FIR, bit(11)) ? defaultMaskedError;
+    (rTP_LOCAL_FIR, bit(11)) ? threshold_and_mask_self;
 
     /** TP_LOCAL_FIR[12]
      *  reserved
@@ -2610,7 +2610,7 @@ group gTP_LOCAL_FIR
     /** TP_LOCAL_FIR[20]
      *  Trace00 - scom parity err
      */
-    (rTP_LOCAL_FIR, bit(20)) ? defaultMaskedError;
+    (rTP_LOCAL_FIR, bit(20)) ? self_th_32perDay;
 
     /** TP_LOCAL_FIR[21]
      *  ITR - FMU error
@@ -2620,27 +2620,27 @@ group gTP_LOCAL_FIR
     /** TP_LOCAL_FIR[22]
      *  ITR - PCB error
      */
-    (rTP_LOCAL_FIR, bit(22)) ? defaultMaskedError;
+    (rTP_LOCAL_FIR, bit(22)) ? self_th_32perDay;
 
     /** TP_LOCAL_FIR[23]
-     *  PCB Master - timeout - read and clear 000F001F - R
+     *  PCB Master - timeout
      */
-    (rTP_LOCAL_FIR, bit(23)) ? defaultMaskedError;
+    (rTP_LOCAL_FIR, bit(23)) ? self_th_32perDay;
 
     /** TP_LOCAL_FIR[24]
-     *  I2CM - Parity errors, Can be considered as recover
+     *  I2CM - Parity errors
      */
-    (rTP_LOCAL_FIR, bit(24)) ? defaultMaskedError;
+    (rTP_LOCAL_FIR, bit(24)) ? self_th_32perDay;
 
     /** TP_LOCAL_FIR[25]
      *  TOD - any error
      */
-    (rTP_LOCAL_FIR, bit(25)) ? defaultMaskedError;
+    (rTP_LOCAL_FIR, bit(25)) ? self_th_32perDay;
 
     /** TP_LOCAL_FIR[26]
      *  TOD - access error PIB
      */
-    (rTP_LOCAL_FIR, bit(26)) ? defaultMaskedError;
+    (rTP_LOCAL_FIR, bit(26)) ? self_th_32perDay;
 
     /** TP_LOCAL_FIR[27]
      *  TOD - unused tie0
@@ -2648,9 +2648,9 @@ group gTP_LOCAL_FIR
     (rTP_LOCAL_FIR, bit(27)) ? defaultMaskedError;
 
     /** TP_LOCAL_FIR[28]
-     *  PCB Slave - read and clear nn0F001F RECOV
+     *  PCB Slave error
      */
-    (rTP_LOCAL_FIR, bit(28)) ? defaultMaskedError;
+    (rTP_LOCAL_FIR, bit(28)) ? TBDDefaultCallout;
 
     /** TP_LOCAL_FIR[29]
      *  SBE - PPE int hardware error
@@ -2683,12 +2683,12 @@ group gTP_LOCAL_FIR
     (rTP_LOCAL_FIR, bit(34)) ? defaultMaskedError;
 
     /** TP_LOCAL_FIR[35]
-     *  SBE - unused tie0
+     *  unused
      */
     (rTP_LOCAL_FIR, bit(35)) ? defaultMaskedError;
 
     /** TP_LOCAL_FIR[36]
-     *  SBE - unused tie0
+     *  unused
      */
     (rTP_LOCAL_FIR, bit(36)) ? defaultMaskedError;
 
@@ -2698,9 +2698,9 @@ group gTP_LOCAL_FIR
     (rTP_LOCAL_FIR, bit(37)) ? defaultMaskedError;
 
     /** TP_LOCAL_FIR[38]
-     *  OTP - SCOM access errors & single ecc correctable 
+     *  OTP - SCOM access errors and single ecc correctabl
      */
-    (rTP_LOCAL_FIR, bit(38)) ? defaultMaskedError;
+    (rTP_LOCAL_FIR, bit(38)) ? self_th_32perDay;
 
     /** TP_LOCAL_FIR[39]
      *  TPIO External Trigger
@@ -2708,49 +2708,49 @@ group gTP_LOCAL_FIR
     (rTP_LOCAL_FIR, bit(39)) ? defaultMaskedError;
 
     /** TP_LOCAL_FIR[40]
-     *  PCB Master - DECMCAST_GRP_ERR - read and clear 000
+     *  PCB Master - DECMCAST_GRP_ERR
      */
-    (rTP_LOCAL_FIR, bit(40)) ? defaultMaskedError;
+    (rTP_LOCAL_FIR, bit(40)) ? self_th_32perDay;
 
     /** TP_LOCAL_FIR[41]
-     *  PCB Master - Parity ERR - read and clear 000F001F 
+     *  PCB Master - Parity ERR
      */
-    (rTP_LOCAL_FIR, bit(41)) ? defaultMaskedError;
+    (rTP_LOCAL_FIR, bit(41)) ? self_th_32perDay;
 
     /** TP_LOCAL_FIR[42]
      *  RCS - OSC0 Error
      */
-    (rTP_LOCAL_FIR, bit(42)) ? defaultMaskedError;
+    (rTP_LOCAL_FIR, bit(42)) ? self_th_32perDay;
 
     /** TP_LOCAL_FIR[43]
      *  RCS - OSC1 Error
      */
-    (rTP_LOCAL_FIR, bit(43)) ? defaultMaskedError;
+    (rTP_LOCAL_FIR, bit(43)) ? self_th_32perDay;
 
     /** TP_LOCAL_FIR[44]
      *  RCS - Delay line 0 unlock
      */
-    (rTP_LOCAL_FIR, bit(44)) ? defaultMaskedError;
+    (rTP_LOCAL_FIR, bit(44)) ? self_th_32perDay;
 
     /** TP_LOCAL_FIR[45]
      *  RCS - Delay line 1 unlock
      */
-    (rTP_LOCAL_FIR, bit(45)) ? defaultMaskedError;
+    (rTP_LOCAL_FIR, bit(45)) ? self_th_32perDay;
 
     /** TP_LOCAL_FIR[46]
      *  PIBMEM
      */
-    (rTP_LOCAL_FIR, bit(46)) ? defaultMaskedError;
+    (rTP_LOCAL_FIR, bit(46)) ? self_th_32perDay;
 
     /** TP_LOCAL_FIR[47]
      *  PIBMEM
      */
-    (rTP_LOCAL_FIR, bit(47)) ? defaultMaskedError;
+    (rTP_LOCAL_FIR, bit(47)) ? self_th_32perDay;
 
     /** TP_LOCAL_FIR[48]
-     *  OTP - Combination of ecc uncorrectable error and c
+     *  OTP - CE/UE combo
      */
-    (rTP_LOCAL_FIR, bit(48)) ? defaultMaskedError;
+    (rTP_LOCAL_FIR, bit(48)) ? self_th_32perDay;
 
     /** TP_LOCAL_FIR[49]
      *  DPLL_FIR_NEST_DCO_EMPTY
@@ -2785,27 +2785,27 @@ group gTP_LOCAL_FIR
     /** TP_LOCAL_FIR[55]
      *  SPI Master 0 Err
      */
-    (rTP_LOCAL_FIR, bit(55)) ? defaultMaskedError;
+    (rTP_LOCAL_FIR, bit(55)) ? self_th_32perDay;
 
     /** TP_LOCAL_FIR[56]
      *  SPI Master 1 Err
      */
-    (rTP_LOCAL_FIR, bit(56)) ? defaultMaskedError;
+    (rTP_LOCAL_FIR, bit(56)) ? self_th_32perDay;
 
     /** TP_LOCAL_FIR[57]
      *  SPI Master 2 Err
      */
-    (rTP_LOCAL_FIR, bit(57)) ? defaultMaskedError;
+    (rTP_LOCAL_FIR, bit(57)) ? self_th_32perDay;
 
     /** TP_LOCAL_FIR[58]
      *  SPI Master 3 Err
      */
-    (rTP_LOCAL_FIR, bit(58)) ? defaultMaskedError;
+    (rTP_LOCAL_FIR, bit(58)) ? self_th_32perDay;
 
     /** TP_LOCAL_FIR[59]
      *  SPI Master 4 Err
      */
-    (rTP_LOCAL_FIR, bit(59)) ? defaultMaskedError;
+    (rTP_LOCAL_FIR, bit(59)) ? self_th_32perDay;
 
     /** TP_LOCAL_FIR[60]
      *  unused
@@ -2846,24 +2846,24 @@ group gOCC_FIR
            cs_root_cause
 {
     /** OCC_FIR[0]
-     *  Input tied to 0.  Used by OCC Firmware to produce 
+     *  OCC_FW0
      */
     (rOCC_FIR, bit(0)) ? defaultMaskedError;
 
     /** OCC_FIR[1]
-     *  Input tied to 0.  Used by OCC Firmware to produce 
+     *  OCC_FW1
      */
     (rOCC_FIR, bit(1)) ? defaultMaskedError;
 
     /** OCC_FIR[2]
-     *  Input tied to 0. Used by STOP GPE code to indicate
+     *  OCC_CME_ERROR_NOTIFY
      */
     (rOCC_FIR, bit(2)) ? defaultMaskedError;
 
     /** OCC_FIR[3]
-     *  Input tied to 0.   Written by stop recovery firmwa
+     *  STOP_RECOVERY_NOTIFY_PRD
      */
-    (rOCC_FIR, bit(3)) ? defaultMaskedError;
+    (rOCC_FIR, bit(3)) ? TBDDefaultCallout;
 
     /** OCC_FIR[4]
      *  OCC Heartbeat Error
@@ -2893,12 +2893,12 @@ group gOCC_FIR
     /** OCC_FIR[9]
      *  GPE0 asserted an error condition that caused it to
      */
-    (rOCC_FIR, bit(9)) ? defaultMaskedError;
+    (rOCC_FIR, bit(9)) ? threshold_and_mask_self;
 
     /** OCC_FIR[10]
      *  GPE1 asserted an error condition that caused it to
      */
-    (rOCC_FIR, bit(10)) ? defaultMaskedError;
+    (rOCC_FIR, bit(10)) ? threshold_and_mask_self;
 
     /** OCC_FIR[11]
      *  GPE2 asserted an error condition that caused it to
@@ -2916,14 +2916,14 @@ group gOCC_FIR
     (rOCC_FIR, bit(13)) ? defaultMaskedError;
 
     /** OCC_FIR[14]
-     *  SRAM Uncorrectable Error (recoverable error)
+     *  SRAM UE
      */
-    (rOCC_FIR, bit(14)) ? defaultMaskedError;
+    (rOCC_FIR, bit(14)) ? self_th_1;
 
     /** OCC_FIR[15]
-     *  SRAM Correctable Error (masked (product); recovera
+     *  SRAM CE
      */
-    (rOCC_FIR, bit(15)) ? defaultMaskedError;
+    (rOCC_FIR, bit(15)) ? threshold_and_mask_self;
 
     /** OCC_FIR[16]
      *  GPE0 asserted a halt condition
@@ -2948,35 +2948,35 @@ group gOCC_FIR
     /** OCC_FIR[20]
      *  GPE0 attempted to write outside the region defined
      */
-    (rOCC_FIR, bit(20)) ? defaultMaskedError;
+    (rOCC_FIR, bit(20)) ? threshold_and_mask_self;
 
     /** OCC_FIR[21]
      *  GPE1 attempted to write outside the region defined
      */
-    (rOCC_FIR, bit(21)) ? defaultMaskedError;
+    (rOCC_FIR, bit(21)) ? threshold_and_mask_self;
 
     /** OCC_FIR[22]
      *  GPE2 attempted to write outside the region defined
      */
-    (rOCC_FIR, bit(22)) ? defaultMaskedError;
+    (rOCC_FIR, bit(22)) ? threshold_and_mask_self;
 
     /** OCC_FIR[23]
      *  GPE3 attempted to write outside the region defined
      */
-    (rOCC_FIR, bit(23)) ? defaultMaskedError;
+    (rOCC_FIR, bit(23)) ? threshold_and_mask_self;
 
     /** OCC_FIR[24]
-     *  Implemented but not used, inputs tied to 0
+     *  Reserved
      */
     (rOCC_FIR, bit(24)) ? defaultMaskedError;
 
     /** OCC_FIR[25]
-     *  Implemented but not used, inputs tied to 0
+     *  Reserved
      */
     (rOCC_FIR, bit(25)) ? defaultMaskedError;
 
     /** OCC_FIR[26]
-     *  External Trigger pin active (recoverable (product)
+     *  EXTERNAL_TRAP:
      */
     (rOCC_FIR, bit(26)) ? defaultMaskedError;
 
@@ -3001,64 +3001,64 @@ group gOCC_FIR
     (rOCC_FIR, bit(30)) ? defaultMaskedError;
 
     /** OCC_FIR[31]
-     *  PPC405 Stop Ack output asserted (recoverable -> lo
+     *  PPC405 Stop Ack output asserted
      */
     (rOCC_FIR, bit(31)) ? defaultMaskedError;
 
     /** OCC_FIR[32]
      *  OCB Direct Bridge Error - See OCCERRRPT2[8:11] for
      */
-    (rOCC_FIR, bit(32)) ? defaultMaskedError;
+    (rOCC_FIR, bit(32)) ? threshold_and_mask_self;
 
     /** OCC_FIR[33]
      *  OCB PIB Address Parity Error - (PIB read or write 
      */
-    (rOCC_FIR, bit(33)) ? defaultMaskedError;
+    (rOCC_FIR, bit(33)) ? threshold_and_mask_self;
 
     /** OCC_FIR[34]
      *  Indirect Channel Error
      */
-    (rOCC_FIR, bit(34)) ? defaultMaskedError;
+    (rOCC_FIR, bit(34)) ? threshold_and_mask_self;
 
     /** OCC_FIR[35]
      *  Parity error detected on OPIT interrupt bus. Inter
      */
-    (rOCC_FIR, bit(35)) ? defaultMaskedError;
+    (rOCC_FIR, bit(35)) ? threshold_and_mask_self;
 
     /** OCC_FIR[36]
      *  OPIT interrupt state machine error occurred.
      */
-    (rOCC_FIR, bit(36)) ? defaultMaskedError;
+    (rOCC_FIR, bit(36)) ? threshold_and_mask_self;
 
     /** OCC_FIR[37]
-     *  Implemented but not used.  Input tied to 0
+     *  Reserved
      */
-    (rOCC_FIR, bit(37)) ? defaultMaskedError;
+    (rOCC_FIR, bit(37)) ? threshold_and_mask_self;
 
     /** OCC_FIR[38]
-     *  Implemented but not used.  Input tied to 0
+     *  Reserved
      */
-    (rOCC_FIR, bit(38)) ? defaultMaskedError;
+    (rOCC_FIR, bit(38)) ? threshold_and_mask_self;
 
     /** OCC_FIR[39]
-     *  Implemented but not used.  Input tied to 0
+     *  Reserved
      */
-    (rOCC_FIR, bit(39)) ? defaultMaskedError;
+    (rOCC_FIR, bit(39)) ? threshold_and_mask_self;
 
     /** OCC_FIR[40]
-     *  Implemented but not used.  Input tied to 0
+     *  Reserved
      */
-    (rOCC_FIR, bit(40)) ? defaultMaskedError;
+    (rOCC_FIR, bit(40)) ? threshold_and_mask_self;
 
     /** OCC_FIR[41]
-     *  Implemented but not used.  Input tied to 0
+     *  Reserved
      */
-    (rOCC_FIR, bit(41)) ? defaultMaskedError;
+    (rOCC_FIR, bit(41)) ? threshold_and_mask_self;
 
     /** OCC_FIR[42]
      *  JTAG accelerator error
      */
-    (rOCC_FIR, bit(42)) ? defaultMaskedError;
+    (rOCC_FIR, bit(42)) ? threshold_and_mask_self;
 
     /** OCC_FIR[43]
      *  Any OCI Slave error occurreds
@@ -3068,57 +3068,57 @@ group gOCC_FIR
     /** OCC_FIR[44]
      *  PPC405 cache UE
      */
-    (rOCC_FIR, bit(44)) ? defaultMaskedError;
+    (rOCC_FIR, bit(44)) ? threshold_and_mask_self;
 
     /** OCC_FIR[45]
      *  PPC405 cache CE
      */
-    (rOCC_FIR, bit(45)) ? defaultMaskedError;
+    (rOCC_FIR, bit(45)) ? self_th_1;
 
     /** OCC_FIR[46]
      *  PPC405 Machine Check
      */
-    (rOCC_FIR, bit(46)) ? defaultMaskedError;
+    (rOCC_FIR, bit(46)) ? threshold_and_mask_self;
 
     /** OCC_FIR[47]
-     *  SRAM spare direct error Summary.  See OCCERRRPT2[0
+     *  SRAM spare direct error Summary
      */
-    (rOCC_FIR, bit(47)) ? defaultMaskedError;
+    (rOCC_FIR, bit(47)) ? threshold_and_mask_self;
 
     /** OCC_FIR[48]
-     *  SRAM Controller Error - A read, write, or parity e
+     *  Read, write, or parity error in the  SRAM tank con
      */
-    (rOCC_FIR, bit(48)) ? defaultMaskedError;
+    (rOCC_FIR, bit(48)) ? threshold_and_mask_self;
 
     /** OCC_FIR[49]
-     *  Implemented but notused.   Input tied to 0
+     *  Reserved
      */
-    (rOCC_FIR, bit(49)) ? defaultMaskedError;
+    (rOCC_FIR, bit(49)) ? threshold_and_mask_self;
 
     /** OCC_FIR[50]
-     *  Implemented but notused.   Input tied to 0
+     *  Reserved
      */
-    (rOCC_FIR, bit(50)) ? defaultMaskedError;
+    (rOCC_FIR, bit(50)) ? threshold_and_mask_self;
 
     /** OCC_FIR[51]
-     *  OCI slave error for GPE0 (see OCCERRPT for details
+     *  OCI slave error for GPE0
      */
-    (rOCC_FIR, bit(51)) ? defaultMaskedError;
+    (rOCC_FIR, bit(51)) ? threshold_and_mask_self;
 
     /** OCC_FIR[52]
-     *  OCI slave error for GPE1 (see OCCERRPT for details
+     *  OCI slave error for GPE1
      */
-    (rOCC_FIR, bit(52)) ? defaultMaskedError;
+    (rOCC_FIR, bit(52)) ? threshold_and_mask_self;
 
     /** OCC_FIR[53]
      *  OCI slave error for GPE2 (see OCCERRPT for details
      */
-    (rOCC_FIR, bit(53)) ? defaultMaskedError;
+    (rOCC_FIR, bit(53)) ? threshold_and_mask_self;
 
     /** OCC_FIR[54]
-     *  OCI slave error for GPE3 (see OCCERRPT for details
+     *  OCI slave error for GPE3
      */
-    (rOCC_FIR, bit(54)) ? defaultMaskedError;
+    (rOCC_FIR, bit(54)) ? threshold_and_mask_self;
 
     /** OCC_FIR[55]
      *  PPC405 ICU timeout on OCI  request
@@ -3128,30 +3128,30 @@ group gOCC_FIR
     /** OCC_FIR[56]
      *  PPC405 DCU timeout on OCI  request
      */
-    (rOCC_FIR, bit(56)) ? defaultMaskedError;
+    (rOCC_FIR, bit(56)) ? threshold_and_mask_self;
 
     /** OCC_FIR[57]
-     *  Used by OCC to indicate that a fault occurred (to 
+     *  Fault occurred (to achieve safe mode)
      */
-    (rOCC_FIR, bit(57)) ? defaultMaskedError;
+    (rOCC_FIR, bit(57)) ? threshold_and_mask_self;
 
     /** OCC_FIR[58]
      *  Used by OCC to notify another firmware entity that
      */
-    (rOCC_FIR, bit(58)) ? defaultMaskedError;
+    (rOCC_FIR, bit(58)) ? threshold_and_mask_self;
 
     /** OCC_FIR[59]
-     *  Implemented but not used.  Inputs tied to 0.
+     *  reserved
      */
     (rOCC_FIR, bit(59)) ? defaultMaskedError;
 
     /** OCC_FIR[60]
-     *  Implemented but not used.  Inputs tied to 0.
+     *  Reserved
      */
     (rOCC_FIR, bit(60)) ? defaultMaskedError;
 
     /** OCC_FIR[61]
-     *  Implemented but not used.  Inputs tied to 0.
+     *  Reserved
      */
     (rOCC_FIR, bit(61)) ? defaultMaskedError;
 
@@ -3219,42 +3219,42 @@ group gPBAO_FIR
     (rPBAO_FIR, bit(8)) ? defaultMaskedError;
 
     /** PBAO_FIR[9]
-     *  Illegal access to OCI Register. Invalid address, r
+     *  Illegal access to OCI Register
      */
     (rPBAO_FIR, bit(9)) ? defaultMaskedError;
 
     /** PBAO_FIR[10]
-     *  Push Write Error. Push queue did not get OCI ADDRA
+     *  Push Write Error.
      */
     (rPBAO_FIR, bit(10)) ? defaultMaskedError;
 
     /** PBAO_FIR[11]
-     *  Push Write Error. Push queue did not get OCI ADDRA
+     *  Push Write Error.
      */
     (rPBAO_FIR, bit(11)) ? defaultMaskedError;
 
     /** PBAO_FIR[12]
-     *  Illegal PBAX Flow.  See PBAERRRPT2 for more info.
+     *  Illegal PBAX Flow.
      */
     (rPBAO_FIR, bit(12)) ? defaultMaskedError;
 
     /** PBAO_FIR[13]
-     *  Illegal PBAX Flow.  See PBAERRRPT2 for more info.
+     *  Illegal PBAX Flow.
      */
     (rPBAO_FIR, bit(13)) ? defaultMaskedError;
 
     /** PBAO_FIR[14]
-     *  PBAXSND Reservation Error.  Reservation request an
+     *  PBAXSND Reservation Error.
      */
     (rPBAO_FIR, bit(14)) ? defaultMaskedError;
 
     /** PBAO_FIR[15]
-     *  PBAXISND Reservation Error.  Reservation request a
+     *  PBAXISND Reservation Error.
      */
     (rPBAO_FIR, bit(15)) ? defaultMaskedError;
 
     /** PBAO_FIR[16]
-     *  The htm fifo interface was not able to keep up wit
+     *  The htm fifo interface fequency variation error
      */
     (rPBAO_FIR, bit(16)) ? defaultMaskedError;
 
@@ -3493,62 +3493,62 @@ group gN0_LOCAL_FIR
     /** N0_LOCAL_FIR[0]
      *  CFIR - Parity or PCB access error
      */
-    (rN0_LOCAL_FIR, bit(0)) ? defaultMaskedError;
+    (rN0_LOCAL_FIR, bit(0)) ? self_th_32perDay;
 
     /** N0_LOCAL_FIR[1]
      *  CPLT_CTRL - PCB access error
      */
-    (rN0_LOCAL_FIR, bit(1)) ? defaultMaskedError;
+    (rN0_LOCAL_FIR, bit(1)) ? self_th_32perDay;
 
     /** N0_LOCAL_FIR[2]
-     *  CC - PCB access error - read and clear nn03000F
+     *  CC - PCB access error
      */
-    (rN0_LOCAL_FIR, bit(2)) ? defaultMaskedError;
+    (rN0_LOCAL_FIR, bit(2)) ? self_th_32perDay;
 
     /** N0_LOCAL_FIR[3]
-     *  CC - Clock Control Error - read and clear nn03000F
+     *  CC - Clock Control Error
      */
-    (rN0_LOCAL_FIR, bit(3)) ? defaultMaskedError;
+    (rN0_LOCAL_FIR, bit(3)) ? self_th_32perDay;
 
     /** N0_LOCAL_FIR[4]
-     *  PSC - PSCOM access error - read and clear nn01001
+     *  PSC - PSCOM access error
      */
-    (rN0_LOCAL_FIR, bit(4)) ? defaultMaskedError;
+    (rN0_LOCAL_FIR, bit(4)) ? self_th_32perDay;
 
     /** N0_LOCAL_FIR[5]
-     *  PSC - internal or ring interface error - read and 
+     *  PSC - internal or ring interface error
      */
-    (rN0_LOCAL_FIR, bit(5)) ? defaultMaskedError;
+    (rN0_LOCAL_FIR, bit(5)) ? self_th_32perDay;
 
     /** N0_LOCAL_FIR[6]
-     *  THERM - pwr_comp_err, skitter_comp_err, scan_init_
+     *  THERM  internal error
      */
-    (rN0_LOCAL_FIR, bit(6)) ? defaultMaskedError;
+    (rN0_LOCAL_FIR, bit(6)) ? threshold_and_mask_self;
 
     /** N0_LOCAL_FIR[7]
      *  THERM - pcb error
      */
-    (rN0_LOCAL_FIR, bit(7)) ? defaultMaskedError;
+    (rN0_LOCAL_FIR, bit(7)) ? threshold_and_mask_self;
 
     /** N0_LOCAL_FIR[8]
      *  THERMTRIP - Critical temperature indicator
      */
-    (rN0_LOCAL_FIR, bit(8)) ? defaultMaskedError;
+    (rN0_LOCAL_FIR, bit(8)) ? threshold_and_mask_self;
 
     /** N0_LOCAL_FIR[9]
      *  THERMTRIP - Fatal temperature indicator
      */
-    (rN0_LOCAL_FIR, bit(9)) ? defaultMaskedError;
+    (rN0_LOCAL_FIR, bit(9)) ? threshold_and_mask_self;
 
     /** N0_LOCAL_FIR[10]
      *  VOLTTRIP - Voltage sense error
      */
-    (rN0_LOCAL_FIR, bit(10)) ? defaultMaskedError;
+    (rN0_LOCAL_FIR, bit(10)) ? threshold_and_mask_self;
 
     /** N0_LOCAL_FIR[11]
-     *  DBG - scom parity fail
+     *  DBG scom parity fail
      */
-    (rN0_LOCAL_FIR, bit(11)) ? defaultMaskedError;
+    (rN0_LOCAL_FIR, bit(11)) ? threshold_and_mask_self;
 
     /** N0_LOCAL_FIR[12]
      *  reserved
@@ -3593,12 +3593,12 @@ group gN0_LOCAL_FIR
     /** N0_LOCAL_FIR[20]
      *  Trace00 - scom parity err
      */
-    (rN0_LOCAL_FIR, bit(20)) ? defaultMaskedError;
+    (rN0_LOCAL_FIR, bit(20)) ? self_th_32perDay;
 
     /** N0_LOCAL_FIR[21]
      *  Trace01 - scom parity err - Unused in Axon,PCI
      */
-    (rN0_LOCAL_FIR, bit(21)) ? defaultMaskedError;
+    (rN0_LOCAL_FIR, bit(21)) ? self_th_32perDay;
 
     /** N0_LOCAL_FIR[22]
      *  unused
@@ -3829,139 +3829,139 @@ group gINT_CQ_FIR
            cs_root_cause
 {
     /** INT_CQ_FIR[0]
-     *  Correctable ECC error detected while consuming dat
+     *  CE while consuming data from the PowerBus Data ram
      */
-    (rINT_CQ_FIR, bit(0)) ? defaultMaskedError;
+    (rINT_CQ_FIR, bit(0)) ? self_th_32perDay;
 
     /** INT_CQ_FIR[1]
-     *  Uncorrectable ECC error detected while consuming d
+     *  UE while consuming data from the PowerBus Data ram
      */
-    (rINT_CQ_FIR, bit(1)) ? defaultMaskedError;
+    (rINT_CQ_FIR, bit(1)) ? self_th_1;
 
     /** INT_CQ_FIR[2]
-     *  Special uncorrectable ECC error detected while con
+     *  SUE while consuming data from the PowerBus Data ra
      */
-    (rINT_CQ_FIR, bit(2)) ? defaultMaskedError;
+    (rINT_CQ_FIR, bit(2)) ? self_th_1_SUE;
 
     /** INT_CQ_FIR[3]
-     *  Correctable ECC error detected while reading the P
+     *  CE while reading the PowerBus Data In Array
      */
-    (rINT_CQ_FIR, bit(3)) ? defaultMaskedError;
+    (rINT_CQ_FIR, bit(3)) ? self_th_32perDay;
 
     /** INT_CQ_FIR[4]
-     *  Uncorrectable ECC error detected while reading the
+     *  UE detected while reading the PowerBus Data In Arr
      */
-    (rINT_CQ_FIR, bit(4)) ? defaultMaskedError;
+    (rINT_CQ_FIR, bit(4)) ? self_th_1;
 
     /** INT_CQ_FIR[5]
-     *  Correctable ECC error detected while reading the P
+     *  CE while reading the PowerBus Data Out Array
      */
-    (rINT_CQ_FIR, bit(5)) ? defaultMaskedError;
+    (rINT_CQ_FIR, bit(5)) ? self_th_32perDay;
 
     /** INT_CQ_FIR[6]
-     *  Uncorrectable ECC error detected while reading the
+     *  UE while reading the PowerBus Data Out Array
      */
-    (rINT_CQ_FIR, bit(6)) ? defaultMaskedError;
+    (rINT_CQ_FIR, bit(6)) ? self_th_1;
 
     /** INT_CQ_FIR[7]
-     *  Correctable ECC error detected while consuming dat
+     *  CE while consuming data on the AIB Data Bus
      */
-    (rINT_CQ_FIR, bit(7)) ? defaultMaskedError;
+    (rINT_CQ_FIR, bit(7)) ? self_th_32perDay;
 
     /** INT_CQ_FIR[8]
-     *  Uncorrectable ECC error detected while consuming d
+     *  UE while consuming data on the AIB Data Bus
      */
-    (rINT_CQ_FIR, bit(8)) ? defaultMaskedError;
+    (rINT_CQ_FIR, bit(8)) ? self_th_1;
 
     /** INT_CQ_FIR[9]
-     *  Received an unsolicited master Combined Response -
+     *  Received an unsolicited master Combined Response
      */
-    (rINT_CQ_FIR, bit(9)) ? defaultMaskedError;
+    (rINT_CQ_FIR, bit(9)) ? self_th_1;
 
     /** INT_CQ_FIR[10]
-     *  Received unsolicited PowerBus data - The rTag(0:11
+     *  Received unsolicited PowerBus data -
      */
-    (rINT_CQ_FIR, bit(10)) ? defaultMaskedError;
+    (rINT_CQ_FIR, bit(10)) ? self_th_1;
 
     /** INT_CQ_FIR[11]
      *  Parity error detected on AIB credit signals from P
      */
-    (rINT_CQ_FIR, bit(11)) ? defaultMaskedError;
+    (rINT_CQ_FIR, bit(11)) ? self_th_32perDay;
 
     /** INT_CQ_FIR[12]
      *  Parity error detected on AIB credit available sign
      */
-    (rINT_CQ_FIR, bit(12)) ? defaultMaskedError;
+    (rINT_CQ_FIR, bit(12)) ? self_th_1;
 
     /** INT_CQ_FIR[13]
      *  Parity error detected on AIB credit signals from V
      */
-    (rINT_CQ_FIR, bit(13)) ? defaultMaskedError;
+    (rINT_CQ_FIR, bit(13)) ? self_th_1;
 
     /** INT_CQ_FIR[14]
      *  Parity error detected on AIB credit available sign
      */
-    (rINT_CQ_FIR, bit(14)) ? defaultMaskedError;
+    (rINT_CQ_FIR, bit(14)) ? self_th_1;
 
     /** INT_CQ_FIR[15]
      *  Parity error detected on AIB Command Control
      */
-    (rINT_CQ_FIR, bit(15)) ? defaultMaskedError;
+    (rINT_CQ_FIR, bit(15)) ? self_th_1;
 
     /** INT_CQ_FIR[16]
      *  Parity error detected on AIB Command Bus
      */
-    (rINT_CQ_FIR, bit(16)) ? defaultMaskedError;
+    (rINT_CQ_FIR, bit(16)) ? self_th_1;
 
     /** INT_CQ_FIR[17]
      *  Parity error detected on AIB Data Control
      */
-    (rINT_CQ_FIR, bit(17)) ? defaultMaskedError;
+    (rINT_CQ_FIR, bit(17)) ? self_th_1;
 
     /** INT_CQ_FIR[18]
-     *  Parity error detected on one of the following Powe
+     *  Parity err detected in a PowerBus interface(Rcmdx,
      */
-    (rINT_CQ_FIR, bit(18)) ? defaultMaskedError;
+    (rINT_CQ_FIR, bit(18)) ? self_th_1;
 
     /** INT_CQ_FIR[19]
      *  Slave CI Store or CI Load to an improper location.
      */
-    (rINT_CQ_FIR, bit(19)) ? defaultMaskedError;
+    (rINT_CQ_FIR, bit(19)) ? self_th_1;
 
     /** INT_CQ_FIR[20]
      *  Slave CI Store or CI Load to an invalid Set Transl
      */
-    (rINT_CQ_FIR, bit(20)) ? defaultMaskedError;
+    (rINT_CQ_FIR, bit(20)) ? self_th_1;
 
     /** INT_CQ_FIR[21]
-     *  Slave CI Store or CI Load (that targets the IC_BAR
+     *  Slave CI Store or CI Load error (targeting IC_BAR)
      */
-    (rINT_CQ_FIR, bit(21)) ? defaultMaskedError;
+    (rINT_CQ_FIR, bit(21)) ? self_th_1;
 
     /** INT_CQ_FIR[22]
-     *  Slave CI Store or CI Load (that does not target th
+     *  Slave CI Store or CI Load error (not targetting IC
      */
-    (rINT_CQ_FIR, bit(22)) ? defaultMaskedError;
+    (rINT_CQ_FIR, bit(22)) ? threshold_and_mask_self;
 
     /** INT_CQ_FIR[23]
      *  Migration Register Table (MRT) access - invalid en
      */
-    (rINT_CQ_FIR, bit(23)) ? defaultMaskedError;
+    (rINT_CQ_FIR, bit(23)) ? self_th_1;
 
     /** INT_CQ_FIR[24]
-     *  Migration Register Table (MRT) access - The Table 
+     *  Migration Register Table (MRT) access - size error
      */
-    (rINT_CQ_FIR, bit(24)) ? defaultMaskedError;
+    (rINT_CQ_FIR, bit(24)) ? self_th_1;
 
     /** INT_CQ_FIR[25]
      *  SCOM satellite error
      */
-    (rINT_CQ_FIR, bit(25)) ? defaultMaskedError;
+    (rINT_CQ_FIR, bit(25)) ? self_th_1;
 
     /** INT_CQ_FIR[26]
-     *  Topology ID Index Translation Table Entry Invalid 
+     *  Topology ID Index Translation Table Entry Invalid
      */
-    (rINT_CQ_FIR, bit(26)) ? defaultMaskedError;
+    (rINT_CQ_FIR, bit(26)) ? self_M_level2_L_th_1;
 
     /** INT_CQ_FIR[27]
      *  Master Write Queue has flagged a PowerBus operatio
@@ -3989,24 +3989,24 @@ group gINT_CQ_FIR
     (rINT_CQ_FIR, bit(31)) ? defaultMaskedError;
 
     /** INT_CQ_FIR[32]
-     *  CI Load Queue has flagged an AIB data hang - Once 
+     *  CI Load Queue has flagged an AIB data hang
      */
     (rINT_CQ_FIR, bit(32)) ? defaultMaskedError;
 
     /** INT_CQ_FIR[33]
      *  Bad cResp received during a Master Write command.
      */
-    (rINT_CQ_FIR, bit(33)) ? defaultMaskedError;
+    (rINT_CQ_FIR, bit(33)) ? self_M_level2_L_th_1;
 
     /** INT_CQ_FIR[34]
      *  Bad cResp received during a Master Read command.
      */
-    (rINT_CQ_FIR, bit(34)) ? defaultMaskedError;
+    (rINT_CQ_FIR, bit(34)) ? self_M_level2_L_th_1;
 
     /** INT_CQ_FIR[35]
      *  Bad cResp received during a Master Interrupt comma
      */
-    (rINT_CQ_FIR, bit(35)) ? defaultMaskedError;
+    (rINT_CQ_FIR, bit(35)) ? self_th_1;
 
     /** INT_CQ_FIR[36]
      *  A Master Read machine received cResp of abort_trm 
@@ -4014,24 +4014,24 @@ group gINT_CQ_FIR
     (rINT_CQ_FIR, bit(36)) ? defaultMaskedError;
 
     /** INT_CQ_FIR[37]
-     *  Master Interrupt Protocol Error - The PowerBus cRe
+     *  Master Interrupt Protocol Error
      */
-    (rINT_CQ_FIR, bit(37)) ? defaultMaskedError;
+    (rINT_CQ_FIR, bit(37)) ? self_M_level2_L_th_1;
 
     /** INT_CQ_FIR[38]
-     *  Master Memory Op Targeted Secure Memory - VC or PC
+     *  Master Memory Op Targeted Secure Memory
      */
-    (rINT_CQ_FIR, bit(38)) ? defaultMaskedError;
+    (rINT_CQ_FIR, bit(38)) ? self_th_1;
 
     /** INT_CQ_FIR[39]
-     *  AIB Fence Raised - This bit is set whenever CQ, PC
+     *  AIB Fence Raised
      */
-    (rINT_CQ_FIR, bit(39)) ? defaultMaskedError;
+    (rINT_CQ_FIR, bit(39)) ? self_th_1;
 
     /** INT_CQ_FIR[40]
      *  Parity error detected on CQs configuration registe
      */
-    (rINT_CQ_FIR, bit(40)) ? defaultMaskedError;
+    (rINT_CQ_FIR, bit(40)) ? self_th_1;
 
     /** INT_CQ_FIR[41]
      *  Reserved
@@ -4039,114 +4039,114 @@ group gINT_CQ_FIR
     (rINT_CQ_FIR, bit(41)) ? defaultMaskedError;
 
     /** INT_CQ_FIR[42]
-     *  Command Queue (FSM) severe error summary.  See INT
+     *  Command Queue (FSM) severe error summary
      */
     (rINT_CQ_FIR, bit(42)) ? defaultMaskedError;
 
     /** INT_CQ_FIR[43]
      *  PC fatal error summary, as indicated on pc_cq_fata
      */
-    (rINT_CQ_FIR, bit(43)) ? defaultMaskedError;
+    (rINT_CQ_FIR, bit(43)) ? self_th_1;
 
     /** INT_CQ_FIR[44]
      *  PC fatal error summary, as indicated on pc_cq_fata
      */
-    (rINT_CQ_FIR, bit(44)) ? defaultMaskedError;
+    (rINT_CQ_FIR, bit(44)) ? self_th_1;
 
     /** INT_CQ_FIR[45]
      *  PC fatal error summary, as indicated on pc_cq_fata
      */
-    (rINT_CQ_FIR, bit(45)) ? defaultMaskedError;
+    (rINT_CQ_FIR, bit(45)) ? self_th_1;
 
     /** INT_CQ_FIR[46]
      *  PC fatal error summary, as indicated on pc_cq_fata
      */
-    (rINT_CQ_FIR, bit(46)) ? defaultMaskedError;
+    (rINT_CQ_FIR, bit(46)) ? self_th_1;
 
     /** INT_CQ_FIR[47]
      *  PC recoverable error summary, as indicated on pc_c
      */
-    (rINT_CQ_FIR, bit(47)) ? defaultMaskedError;
+    (rINT_CQ_FIR, bit(47)) ? self_th_1;
 
     /** INT_CQ_FIR[48]
      *  PC recoverable error summary, as indicated on pc_c
      */
-    (rINT_CQ_FIR, bit(48)) ? defaultMaskedError;
+    (rINT_CQ_FIR, bit(48)) ? self_th_1;
 
     /** INT_CQ_FIR[49]
      *  PC recoverable error summary, as indicated on pc_c
      */
-    (rINT_CQ_FIR, bit(49)) ? defaultMaskedError;
+    (rINT_CQ_FIR, bit(49)) ? self_th_1;
 
     /** INT_CQ_FIR[50]
      *  PC recoverable error summary, as indicated on pc_c
      */
-    (rINT_CQ_FIR, bit(50)) ? defaultMaskedError;
+    (rINT_CQ_FIR, bit(50)) ? self_th_1;
 
     /** INT_CQ_FIR[51]
      *  PC informational error summary, as indicated on pc
      */
-    (rINT_CQ_FIR, bit(51)) ? defaultMaskedError;
+    (rINT_CQ_FIR, bit(51)) ? threshold_and_mask_self;
 
     /** INT_CQ_FIR[52]
      *  PC informational error summary, as indicated on pc
      */
-    (rINT_CQ_FIR, bit(52)) ? defaultMaskedError;
+    (rINT_CQ_FIR, bit(52)) ? threshold_and_mask_self;
 
     /** INT_CQ_FIR[53]
      *  PC informational error summary, as indicated on pc
      */
-    (rINT_CQ_FIR, bit(53)) ? defaultMaskedError;
+    (rINT_CQ_FIR, bit(53)) ? threshold_and_mask_self;
 
     /** INT_CQ_FIR[54]
      *  PC informational error summary, as indicated on pc
      */
-    (rINT_CQ_FIR, bit(54)) ? defaultMaskedError;
+    (rINT_CQ_FIR, bit(54)) ? threshold_and_mask_self;
 
     /** INT_CQ_FIR[55]
      *  VC fatal error summary, as indicated on vc_cq_fata
      */
-    (rINT_CQ_FIR, bit(55)) ? defaultMaskedError;
+    (rINT_CQ_FIR, bit(55)) ? self_th_1;
 
     /** INT_CQ_FIR[56]
      *  VC fatal error summary, as indicated on vc_cq_fata
      */
-    (rINT_CQ_FIR, bit(56)) ? defaultMaskedError;
+    (rINT_CQ_FIR, bit(56)) ? self_th_1;
 
     /** INT_CQ_FIR[57]
      *  VC fatal error summary, as indicated on vc_cq_fata
      */
-    (rINT_CQ_FIR, bit(57)) ? defaultMaskedError;
+    (rINT_CQ_FIR, bit(57)) ? self_th_1;
 
     /** INT_CQ_FIR[58]
      *  VC recoverable error summary, as indicated on vc_c
      */
-    (rINT_CQ_FIR, bit(58)) ? defaultMaskedError;
+    (rINT_CQ_FIR, bit(58)) ? level2_M_self_L_th_32perDay;
 
     /** INT_CQ_FIR[59]
      *  VC recoverable error summary, as indicated on vc_c
      */
-    (rINT_CQ_FIR, bit(59)) ? defaultMaskedError;
+    (rINT_CQ_FIR, bit(59)) ? level2_M_self_L_th_32perDay;
 
     /** INT_CQ_FIR[60]
      *  VC recoverable error summary, as indicated on vc_c
      */
-    (rINT_CQ_FIR, bit(60)) ? defaultMaskedError;
+    (rINT_CQ_FIR, bit(60)) ? level2_M_self_L_th_32perDay;
 
     /** INT_CQ_FIR[61]
      *  VC informational error summary, as indicated on vc
      */
-    (rINT_CQ_FIR, bit(61)) ? defaultMaskedError;
+    (rINT_CQ_FIR, bit(61)) ? level2_M_self_L_th_32perDay;
 
     /** INT_CQ_FIR[62]
      *  VC informational error summary, as indicated on vc
      */
-    (rINT_CQ_FIR, bit(62)) ? defaultMaskedError;
+    (rINT_CQ_FIR, bit(62)) ? threshold_and_mask_self;
 
     /** INT_CQ_FIR[63]
      *  VC informational error summary, as indicated on vc
      */
-    (rINT_CQ_FIR, bit(63)) ? defaultMaskedError;
+    (rINT_CQ_FIR, bit(63)) ? threshold_and_mask_self;
 
 };
 
@@ -4171,17 +4171,17 @@ group gNX_CQ_FIR
     /** NX_CQ_FIR[0]
      *  PBI internal parity error
      */
-    (rNX_CQ_FIR, bit(0)) ? defaultMaskedError;
+    (rNX_CQ_FIR, bit(0)) ? self_th_1;
 
     /** NX_CQ_FIR[1]
      *  PowerBus CE error
      */
-    (rNX_CQ_FIR, bit(1)) ? defaultMaskedError;
+    (rNX_CQ_FIR, bit(1)) ? self_th_32perDay;
 
     /** NX_CQ_FIR[2]
      *  PowerBus UE error
      */
-    (rNX_CQ_FIR, bit(2)) ? defaultMaskedError;
+    (rNX_CQ_FIR, bit(2)) ? self_th_1;
 
     /** NX_CQ_FIR[3]
      *  PowerBus SUE error
@@ -4191,17 +4191,17 @@ group gNX_CQ_FIR
     /** NX_CQ_FIR[4]
      *  Inbound array CE error
      */
-    (rNX_CQ_FIR, bit(4)) ? defaultMaskedError;
+    (rNX_CQ_FIR, bit(4)) ? self_th_32perDay;
 
     /** NX_CQ_FIR[5]
      *  Inbound array UE error
      */
-    (rNX_CQ_FIR, bit(5)) ? defaultMaskedError;
+    (rNX_CQ_FIR, bit(5)) ? self_th_1;
 
     /** NX_CQ_FIR[6]
      *  Paste request rejected
      */
-    (rNX_CQ_FIR, bit(6)) ? defaultMaskedError;
+    (rNX_CQ_FIR, bit(6)) ? level2_th_1;
 
     /** NX_CQ_FIR[7]
      *  PowerBus command hang error
@@ -4211,17 +4211,17 @@ group gNX_CQ_FIR
     /** NX_CQ_FIR[8]
      *  PowerBus read address error
      */
-    (rNX_CQ_FIR, bit(8)) ? defaultMaskedError;
+    (rNX_CQ_FIR, bit(8)) ? self_th_1;
 
     /** NX_CQ_FIR[9]
      *  PowerBus write address error
      */
-    (rNX_CQ_FIR, bit(9)) ? defaultMaskedError;
+    (rNX_CQ_FIR, bit(9)) ? self_th_1;
 
     /** NX_CQ_FIR[10]
      *  PowerBus miscellaneous error
      */
-    (rNX_CQ_FIR, bit(10)) ? defaultMaskedError;
+    (rNX_CQ_FIR, bit(10)) ? self_th_1;
 
     /** NX_CQ_FIR[11]
      *  MMIO BAR parity error
@@ -4231,7 +4231,7 @@ group gNX_CQ_FIR
     /** NX_CQ_FIR[12]
      *  UMAC detected SUE on WC Interrupt
      */
-    (rNX_CQ_FIR, bit(12)) ? defaultMaskedError;
+    (rNX_CQ_FIR, bit(12)) ? self_th_1_SUE;
 
     /** NX_CQ_FIR[13]
      *  ACK_DEAD cresp received by read command
@@ -4244,54 +4244,54 @@ group gNX_CQ_FIR
     (rNX_CQ_FIR, bit(14)) ? defaultMaskedError;
 
     /** NX_CQ_FIR[15]
-     *  Reserved. Used to be PowerBus Link Abort in P9
+     *  Reserved
      */
     (rNX_CQ_FIR, bit(15)) ? defaultMaskedError;
 
     /** NX_CQ_FIR[16]
      *  Hang poll time expired on internal transfer
      */
-    (rNX_CQ_FIR, bit(16)) ? defaultMaskedError;
+    (rNX_CQ_FIR, bit(16)) ? self_th_1;
 
     /** NX_CQ_FIR[17]
      *  Parity error on ERAT arrays
      */
-    (rNX_CQ_FIR, bit(17)) ? defaultMaskedError;
+    (rNX_CQ_FIR, bit(17)) ? self_th_1;
 
     /** NX_CQ_FIR[18]
      *  Correctable error on ERAT arrays
      */
-    (rNX_CQ_FIR, bit(18)) ? defaultMaskedError;
+    (rNX_CQ_FIR, bit(18)) ? self_th_32perDay;
 
     /** NX_CQ_FIR[19]
      *  Uncorrectable error on ERAT arrays
      */
-    (rNX_CQ_FIR, bit(19)) ? defaultMaskedError;
+    (rNX_CQ_FIR, bit(19)) ? self_th_1;
 
     /** NX_CQ_FIR[20]
      *  Special uncorrectable error on ERAT arrays
      */
-    (rNX_CQ_FIR, bit(20)) ? defaultMaskedError;
+    (rNX_CQ_FIR, bit(20)) ? self_th_1_SUE;
 
     /** NX_CQ_FIR[21]
      *  Hang on checkin/checkout request to NMMU
      */
-    (rNX_CQ_FIR, bit(21)) ? defaultMaskedError;
+    (rNX_CQ_FIR, bit(21)) ? level2_th_1;
 
     /** NX_CQ_FIR[22]
      *  ERAT control logic error
      */
-    (rNX_CQ_FIR, bit(22)) ? defaultMaskedError;
+    (rNX_CQ_FIR, bit(22)) ? self_th_1;
 
     /** NX_CQ_FIR[23]
      *  Uncorrectable error on the Powerbus data for xlate
      */
-    (rNX_CQ_FIR, bit(23)) ? defaultMaskedError;
+    (rNX_CQ_FIR, bit(23)) ? self_th_1;
 
     /** NX_CQ_FIR[24]
      *  Special uncorrectable error on the Powerbus data f
      */
-    (rNX_CQ_FIR, bit(24)) ? defaultMaskedError;
+    (rNX_CQ_FIR, bit(24)) ? self_th_1_SUE;
 
     /** NX_CQ_FIR[25]
      *  ACK_DEAD cresp received by UMAC read command
@@ -4301,22 +4301,22 @@ group gNX_CQ_FIR
     /** NX_CQ_FIR[26]
      *  Link check aborted while waiting on UMAC data
      */
-    (rNX_CQ_FIR, bit(26)) ? defaultMaskedError;
+    (rNX_CQ_FIR, bit(26)) ? self_th_1;
 
     /** NX_CQ_FIR[27]
      *  Uncorrectable error on CRB QW0/4
      */
-    (rNX_CQ_FIR, bit(27)) ? defaultMaskedError;
+    (rNX_CQ_FIR, bit(27)) ? self_th_1;
 
     /** NX_CQ_FIR[28]
      *  Special uncorrectable error on CRB QW0/4
      */
-    (rNX_CQ_FIR, bit(28)) ? defaultMaskedError;
+    (rNX_CQ_FIR, bit(28)) ? self_th_1_SUE;
 
     /** NX_CQ_FIR[29]
      *  UMAC has detected a control logic error
      */
-    (rNX_CQ_FIR, bit(29)) ? defaultMaskedError;
+    (rNX_CQ_FIR, bit(29)) ? self_th_1;
 
     /** NX_CQ_FIR[30]
      *  Other SCOM satellite parity error
@@ -4331,32 +4331,32 @@ group gNX_CQ_FIR
     /** NX_CQ_FIR[32]
      *  A first noise source in the RNG has failed
      */
-    (rNX_CQ_FIR, bit(32)) ? defaultMaskedError;
+    (rNX_CQ_FIR, bit(32)) ? self_th_32perDay;
 
     /** NX_CQ_FIR[33]
      *  A second noise source in the RNG has failed
      */
-    (rNX_CQ_FIR, bit(33)) ? defaultMaskedError;
+    (rNX_CQ_FIR, bit(33)) ? self_th_32perDay;
 
     /** NX_CQ_FIR[34]
      *  RNG has detected a control logic error
      */
-    (rNX_CQ_FIR, bit(34)) ? defaultMaskedError;
+    (rNX_CQ_FIR, bit(34)) ? self_th_1;
 
     /** NX_CQ_FIR[35]
      *  NMMU has signaled local checkstop
      */
-    (rNX_CQ_FIR, bit(35)) ? defaultMaskedError;
+    (rNX_CQ_FIR, bit(35)) ? self_th_1;
 
     /** NX_CQ_FIR[36]
      *  VAS has signaled local checkstop
      */
-    (rNX_CQ_FIR, bit(36)) ? defaultMaskedError;
+    (rNX_CQ_FIR, bit(36)) ? self_th_1;
 
     /** NX_CQ_FIR[37]
      *  PBCQ has detected a control logic error
      */
-    (rNX_CQ_FIR, bit(37)) ? defaultMaskedError;
+    (rNX_CQ_FIR, bit(37)) ? self_th_1;
 
     /** NX_CQ_FIR[38]
      *  PBCQ has detected a failed link on an interrupt
@@ -4366,7 +4366,7 @@ group gNX_CQ_FIR
     /** NX_CQ_FIR[39]
      *  UMAC has detected an SUE on interrupt address
      */
-    (rNX_CQ_FIR, bit(39)) ? defaultMaskedError;
+    (rNX_CQ_FIR, bit(39)) ? self_th_1_SUE;
 
     /** NX_CQ_FIR[40]
      *  SMF error
@@ -4376,7 +4376,7 @@ group gNX_CQ_FIR
     /** NX_CQ_FIR[41]
      *  Topology index error detected in NX
      */
-    (rNX_CQ_FIR, bit(41)) ? defaultMaskedError;
+    (rNX_CQ_FIR, bit(41)) ? level2_th_1;
 
 };
 
@@ -4399,242 +4399,242 @@ group gNX_DMA_ENG_FIR
            cs_root_cause
 {
     /** NX_DMA_ENG_FIR[0]
-     *  DMA Hang Timer FIR bit
+     *  DMA hang timer expired
      */
-    (rNX_DMA_ENG_FIR, bit(0)) ? defaultMaskedError;
+    (rNX_DMA_ENG_FIR, bit(0)) ? self_th_1;
 
     /** NX_DMA_ENG_FIR[1]
-     *  SHM invalid state error FIR bit
+     *  SHM invalid state
      */
-    (rNX_DMA_ENG_FIR, bit(1)) ? defaultMaskedError;
+    (rNX_DMA_ENG_FIR, bit(1)) ? self_th_1;
 
     /** NX_DMA_ENG_FIR[2]
-     *  Reserved FIR bit 2
+     *  Reserved
      */
     (rNX_DMA_ENG_FIR, bit(2)) ? defaultMaskedError;
 
     /** NX_DMA_ENG_FIR[3]
-     *  Reserved FIR bit 3
+     *  Reserved
      */
     (rNX_DMA_ENG_FIR, bit(3)) ? defaultMaskedError;
 
     /** NX_DMA_ENG_FIR[4]
-     *  Channel 0 842 array corrected ECC error FIR bit
+     *  Channel 0 842 engine ECC CE
      */
-    (rNX_DMA_ENG_FIR, bit(4)) ? defaultMaskedError;
+    (rNX_DMA_ENG_FIR, bit(4)) ? self_th_32perDay;
 
     /** NX_DMA_ENG_FIR[5]
-     *  Channel 0 842 array uncorrectable ECC error FIR bi
+     *  Channel 0 842 engine ECC UE
      */
-    (rNX_DMA_ENG_FIR, bit(5)) ? defaultMaskedError;
+    (rNX_DMA_ENG_FIR, bit(5)) ? self_th_1;
 
     /** NX_DMA_ENG_FIR[6]
-     *  Channel 1 842 array corrected ECC error FIR bit
+     *  Channel 1 842 engine ECC CE
      */
-    (rNX_DMA_ENG_FIR, bit(6)) ? defaultMaskedError;
+    (rNX_DMA_ENG_FIR, bit(6)) ? self_th_32perDay;
 
     /** NX_DMA_ENG_FIR[7]
-     *  Channel 1 842 array uncorrectable ECC error FIR bi
+     *  Channel 1 842 engine ECC UE
      */
-    (rNX_DMA_ENG_FIR, bit(7)) ? defaultMaskedError;
+    (rNX_DMA_ENG_FIR, bit(7)) ? self_th_1;
 
     /** NX_DMA_ENG_FIR[8]
-     *  DMA non-zero CSB CC detected FIR bit. Lab use only
+     *  DMA Non-zero CSB CC detected
      */
     (rNX_DMA_ENG_FIR, bit(8)) ? defaultMaskedError;
 
     /** NX_DMA_ENG_FIR[9]
-     *  DMA array correctable ECC error FIR bit
+     *  DMA array ECC CE
      */
-    (rNX_DMA_ENG_FIR, bit(9)) ? defaultMaskedError;
+    (rNX_DMA_ENG_FIR, bit(9)) ? self_th_32perDay;
 
     /** NX_DMA_ENG_FIR[10]
-     *  DMA outbound write/inbound read correctable ECC er
+     *  DMA outbound write/inbound read ECC CE
      */
-    (rNX_DMA_ENG_FIR, bit(10)) ? defaultMaskedError;
+    (rNX_DMA_ENG_FIR, bit(10)) ? self_th_32perDay;
 
     /** NX_DMA_ENG_FIR[11]
-     *  Channel 4 Gzip array corrected ECC error FIR bit
+     *  Channel 4 GZIP ECC CE
      */
-    (rNX_DMA_ENG_FIR, bit(11)) ? defaultMaskedError;
+    (rNX_DMA_ENG_FIR, bit(11)) ? self_th_32perDay;
 
     /** NX_DMA_ENG_FIR[12]
-     *  Channel 4 Gzip array corrected ECC error FIR bit
+     *  Channel 4 GZIP ECC UE
      */
-    (rNX_DMA_ENG_FIR, bit(12)) ? defaultMaskedError;
+    (rNX_DMA_ENG_FIR, bit(12)) ? self_th_1;
 
     /** NX_DMA_ENG_FIR[13]
-     *  Channel 4 Gzip array parity error FIR bit
+     *  Channel 4 GZIP ECC PE
      */
-    (rNX_DMA_ENG_FIR, bit(13)) ? defaultMaskedError;
+    (rNX_DMA_ENG_FIR, bit(13)) ? self_th_1;
 
     /** NX_DMA_ENG_FIR[14]
-     *  Error from other SCOM satellites FIR bit
+     *  Error from other SCOM satellites
      */
     (rNX_DMA_ENG_FIR, bit(14)) ? defaultMaskedError;
 
     /** NX_DMA_ENG_FIR[15]
-     *  DMA invalid state error FIR bit
+     *  DMA invalid state error (unrecoverable)
      */
-    (rNX_DMA_ENG_FIR, bit(15)) ? defaultMaskedError;
+    (rNX_DMA_ENG_FIR, bit(15)) ? self_th_1;
 
     /** NX_DMA_ENG_FIR[16]
-     *  DMA invalid state error FIR bit. Unrecoverable des
+     *  DMA invalid state error (unrecoverable)
      */
-    (rNX_DMA_ENG_FIR, bit(16)) ? defaultMaskedError;
+    (rNX_DMA_ENG_FIR, bit(16)) ? self_th_1;
 
     /** NX_DMA_ENG_FIR[17]
-     *  DMA array uncorrectable ECC error FIR bit
+     *  DMA array ECC UE
      */
-    (rNX_DMA_ENG_FIR, bit(17)) ? defaultMaskedError;
+    (rNX_DMA_ENG_FIR, bit(17)) ? self_th_1;
 
     /** NX_DMA_ENG_FIR[18]
-     *  DMA outbound write/inbound read uncorrectable ECC 
+     *  DMA outbound write/inbound read ECC UE
      */
-    (rNX_DMA_ENG_FIR, bit(18)) ? defaultMaskedError;
+    (rNX_DMA_ENG_FIR, bit(18)) ? self_th_1;
 
     /** NX_DMA_ENG_FIR[19]
-     *  DMA inbound read error FIR bit
+     *  DMA inbound read error
      */
     (rNX_DMA_ENG_FIR, bit(19)) ? defaultMaskedError;
 
     /** NX_DMA_ENG_FIR[20]
-     *  Channel 0 842 invalid state error FIR bit
+     *  Channel 0 842 invalid state error
      */
-    (rNX_DMA_ENG_FIR, bit(20)) ? defaultMaskedError;
+    (rNX_DMA_ENG_FIR, bit(20)) ? self_th_1;
 
     /** NX_DMA_ENG_FIR[21]
-     *  Channel 1 842 invalid state error FIR bit
+     *  Channel 1 842 invalid state error
      */
-    (rNX_DMA_ENG_FIR, bit(21)) ? defaultMaskedError;
+    (rNX_DMA_ENG_FIR, bit(21)) ? self_th_1;
 
     /** NX_DMA_ENG_FIR[22]
-     *  Channel 2 SYM invalid state error FIR bit
+     *  Channel 2 SYM invalid state error
      */
-    (rNX_DMA_ENG_FIR, bit(22)) ? defaultMaskedError;
+    (rNX_DMA_ENG_FIR, bit(22)) ? self_th_1;
 
     /** NX_DMA_ENG_FIR[23]
-     *  Channel 3 SYMinvalid state error FIR bit
+     *  Channel 3 SYM invalid state error
      */
-    (rNX_DMA_ENG_FIR, bit(23)) ? defaultMaskedError;
+    (rNX_DMA_ENG_FIR, bit(23)) ? self_th_1;
 
     /** NX_DMA_ENG_FIR[24]
-     *  Channel 4 Gzip invalid state error FIR bit
+     *  Channel 4 GZIP invalid state error
      */
-    (rNX_DMA_ENG_FIR, bit(24)) ? defaultMaskedError;
+    (rNX_DMA_ENG_FIR, bit(24)) ? self_th_1;
 
     /** NX_DMA_ENG_FIR[25]
-     *  Reserved FIR bit 25
+     *  Reserved
      */
     (rNX_DMA_ENG_FIR, bit(25)) ? defaultMaskedError;
 
     /** NX_DMA_ENG_FIR[26]
-     *  Reserved FIR bit 26
+     *  Reserved
      */
     (rNX_DMA_ENG_FIR, bit(26)) ? defaultMaskedError;
 
     /** NX_DMA_ENG_FIR[27]
-     *  Reserved FIR bit 27
+     *  Reserved
      */
     (rNX_DMA_ENG_FIR, bit(27)) ? defaultMaskedError;
 
     /** NX_DMA_ENG_FIR[28]
-     *  Reserved FIR bit 28
+     *  Reserved
      */
     (rNX_DMA_ENG_FIR, bit(28)) ? defaultMaskedError;
 
     /** NX_DMA_ENG_FIR[29]
-     *  Reserved FIR bit 29
+     *  Reserved
      */
     (rNX_DMA_ENG_FIR, bit(29)) ? defaultMaskedError;
 
     /** NX_DMA_ENG_FIR[30]
-     *  Reserved FIR bit 30
+     *  Reserved
      */
     (rNX_DMA_ENG_FIR, bit(30)) ? defaultMaskedError;
 
     /** NX_DMA_ENG_FIR[31]
      *  UE error on CRB QW0 or QW4 FIR bit
      */
-    (rNX_DMA_ENG_FIR, bit(31)) ? defaultMaskedError;
+    (rNX_DMA_ENG_FIR, bit(31)) ? self_th_1;
 
     /** NX_DMA_ENG_FIR[32]
      *  SUE error on CRB QW0 or QW4 FIR bit
      */
-    (rNX_DMA_ENG_FIR, bit(32)) ? defaultMaskedError;
+    (rNX_DMA_ENG_FIR, bit(32)) ? self_th_1_SUE;
 
     /** NX_DMA_ENG_FIR[33]
-     *  SUE error on something other than CRB QW0 or QW4 F
+     *  SUE error on something other than CRB QW0 or QW4
      */
     (rNX_DMA_ENG_FIR, bit(33)) ? defaultMaskedError;
 
     /** NX_DMA_ENG_FIR[34]
-     *  Channel 0 842 watchdog timer expired FIR bit
+     *  Channel 0 842 watchdog timer expired
      */
-    (rNX_DMA_ENG_FIR, bit(34)) ? defaultMaskedError;
+    (rNX_DMA_ENG_FIR, bit(34)) ? self_th_32perDay;
 
     /** NX_DMA_ENG_FIR[35]
-     *  Channel 1 842 watchdog timer expired FIR bit
+     *  Channel 1 842 watchdog timer expired
      */
-    (rNX_DMA_ENG_FIR, bit(35)) ? defaultMaskedError;
+    (rNX_DMA_ENG_FIR, bit(35)) ? self_th_32perDay;
 
     /** NX_DMA_ENG_FIR[36]
-     *  Channel 2 SYM watchdog timer expired FIR bit
+     *  Channel 2 SYM watchdog timer expired
      */
-    (rNX_DMA_ENG_FIR, bit(36)) ? defaultMaskedError;
+    (rNX_DMA_ENG_FIR, bit(36)) ? self_th_32perDay;
 
     /** NX_DMA_ENG_FIR[37]
-     *  Channel 3 SYM watchdog timer expired FIR bit
+     *  Channel 3 SYM watchdog timer expired
      */
-    (rNX_DMA_ENG_FIR, bit(37)) ? defaultMaskedError;
+    (rNX_DMA_ENG_FIR, bit(37)) ? self_th_32perDay;
 
     /** NX_DMA_ENG_FIR[38]
-     *  Reserved FIR bit 38. Hypervisor can use to signal 
+     *  Hypervisor local checkstop
      */
-    (rNX_DMA_ENG_FIR, bit(38)) ? defaultMaskedError;
+    (rNX_DMA_ENG_FIR, bit(38)) ? self_th_1;
 
     /** NX_DMA_ENG_FIR[39]
-     *  Channel 4 Gzip watchdog timer expired FIR bit
+     *  Channel 4 GZIP watchdog timer expired
      */
-    (rNX_DMA_ENG_FIR, bit(39)) ? defaultMaskedError;
+    (rNX_DMA_ENG_FIR, bit(39)) ? self_th_32perDay;
 
     /** NX_DMA_ENG_FIR[40]
-     *  Reserved FIR bit 40
+     *  Reserved
      */
     (rNX_DMA_ENG_FIR, bit(40)) ? defaultMaskedError;
 
     /** NX_DMA_ENG_FIR[41]
-     *  Reserved FIR bit 41
+     *  Reserved
      */
     (rNX_DMA_ENG_FIR, bit(41)) ? defaultMaskedError;
 
     /** NX_DMA_ENG_FIR[42]
-     *  Reserved FIR bit 42
+     *  Reserved
      */
     (rNX_DMA_ENG_FIR, bit(42)) ? defaultMaskedError;
 
     /** NX_DMA_ENG_FIR[43]
-     *  Reserved FIR bit 43
+     *  Reserved
      */
     (rNX_DMA_ENG_FIR, bit(43)) ? defaultMaskedError;
 
     /** NX_DMA_ENG_FIR[44]
-     *  Reserved FIR bit 44
+     *  Reserved
      */
     (rNX_DMA_ENG_FIR, bit(44)) ? defaultMaskedError;
 
     /** NX_DMA_ENG_FIR[45]
-     *  Reserved FIR bit 45
+     *  Reserved
      */
     (rNX_DMA_ENG_FIR, bit(45)) ? defaultMaskedError;
 
     /** NX_DMA_ENG_FIR[46]
-     *  Reserved FIR bit 46
+     *  Reserved
      */
     (rNX_DMA_ENG_FIR, bit(46)) ? defaultMaskedError;
 
     /** NX_DMA_ENG_FIR[47]
-     *  Reserved FIR bit 47
+     *  Reserved
      */
     (rNX_DMA_ENG_FIR, bit(47)) ? defaultMaskedError;
 
@@ -4661,52 +4661,52 @@ group gVAS_FIR
     /** VAS_FIR[0]
      *  Hardware error detected in Egress logic
      */
-    (rVAS_FIR, bit(0)) ? defaultMaskedError;
+    (rVAS_FIR, bit(0)) ? self_th_1;
 
     /** VAS_FIR[1]
      *  Hardware error detected in Ingress logic
      */
-    (rVAS_FIR, bit(1)) ? defaultMaskedError;
+    (rVAS_FIR, bit(1)) ? self_th_1;
 
     /** VAS_FIR[2]
      *  Hardware error detected in CQ logic
      */
-    (rVAS_FIR, bit(2)) ? defaultMaskedError;
+    (rVAS_FIR, bit(2)) ? self_th_1;
 
     /** VAS_FIR[3]
      *  Hardware error detected in WC logic
      */
-    (rVAS_FIR, bit(3)) ? defaultMaskedError;
+    (rVAS_FIR, bit(3)) ? self_th_1;
 
     /** VAS_FIR[4]
      *  Hardware error detected in RG logic
      */
-    (rVAS_FIR, bit(4)) ? defaultMaskedError;
+    (rVAS_FIR, bit(4)) ? self_th_1;
 
     /** VAS_FIR[5]
      *  PowerBus parity error detected on CQ logic interfa
      */
-    (rVAS_FIR, bit(5)) ? defaultMaskedError;
+    (rVAS_FIR, bit(5)) ? self_th_1;
 
     /** VAS_FIR[6]
-     *  CQ logic detected PowerBus address error on CRESP 
+     *  CQ logic detected PowerBus address error on CRESP
      */
-    (rVAS_FIR, bit(6)) ? defaultMaskedError;
+    (rVAS_FIR, bit(6)) ? self_M_level2_L_th_1;
 
     /** VAS_FIR[7]
-     *  CQ logic detected PowerBus address error on CRESP 
+     *  CQ logic detected PowerBus address error on CRESP
      */
-    (rVAS_FIR, bit(7)) ? defaultMaskedError;
+    (rVAS_FIR, bit(7)) ? self_M_level2_L_th_1;
 
     /** VAS_FIR[8]
      *  Correctable ECC error detected in Egress logic
      */
-    (rVAS_FIR, bit(8)) ? defaultMaskedError;
+    (rVAS_FIR, bit(8)) ? self_th_5perHour;
 
     /** VAS_FIR[9]
      *  Correctable ECC error detected in Ingress logic
      */
-    (rVAS_FIR, bit(9)) ? defaultMaskedError;
+    (rVAS_FIR, bit(9)) ? self_th_5perHour;
 
     /** VAS_FIR[10]
      *  Correctable ECC error detected in CQ logic
@@ -4716,22 +4716,22 @@ group gVAS_FIR
     /** VAS_FIR[11]
      *  Correctable ECC error detected in WC logic
      */
-    (rVAS_FIR, bit(11)) ? defaultMaskedError;
+    (rVAS_FIR, bit(11)) ? self_th_5perHour;
 
     /** VAS_FIR[12]
      *  Correctable ECC error detected in RG logic
      */
-    (rVAS_FIR, bit(12)) ? defaultMaskedError;
+    (rVAS_FIR, bit(12)) ? self_th_5perHour;
 
     /** VAS_FIR[13]
-     *  ECC Correctable Error detected on CQ outbound Powe
+     *  ECC Correctable Error detected on CQ outbound PB
      */
-    (rVAS_FIR, bit(13)) ? defaultMaskedError;
+    (rVAS_FIR, bit(13)) ? self_th_5perHour;
 
     /** VAS_FIR[14]
-     *  ECC UNCorrectable Error detected on CQ outbound Po
+     *  ECC UNCorrectable Error detected on CQ outbound PB
      */
-    (rVAS_FIR, bit(14)) ? defaultMaskedError;
+    (rVAS_FIR, bit(14)) ? self_th_1;
 
     /** VAS_FIR[15]
      *  PowerBus state machine hang detected in CQ logic
@@ -4741,67 +4741,67 @@ group gVAS_FIR
     /** VAS_FIR[16]
      *  Uncorrectable ECC error detected in Egress logic
      */
-    (rVAS_FIR, bit(16)) ? defaultMaskedError;
+    (rVAS_FIR, bit(16)) ? self_th_1;
 
     /** VAS_FIR[17]
      *  Uncorrectable ECC error detected in Ingress logic
      */
-    (rVAS_FIR, bit(17)) ? defaultMaskedError;
+    (rVAS_FIR, bit(17)) ? self_th_1;
 
     /** VAS_FIR[18]
      *  Uncorrectable ECC error detected in CQ logic
      */
-    (rVAS_FIR, bit(18)) ? defaultMaskedError;
+    (rVAS_FIR, bit(18)) ? self_th_1;
 
     /** VAS_FIR[19]
      *  Uncorrectable ECC error detected in WC logic
      */
-    (rVAS_FIR, bit(19)) ? defaultMaskedError;
+    (rVAS_FIR, bit(19)) ? self_th_1;
 
     /** VAS_FIR[20]
      *  Uncorrectable ECC error detected in RG logic
      */
-    (rVAS_FIR, bit(20)) ? defaultMaskedError;
+    (rVAS_FIR, bit(20)) ? self_th_1;
 
     /** VAS_FIR[21]
      *  Parity error detected in Ingress logic
      */
-    (rVAS_FIR, bit(21)) ? defaultMaskedError;
+    (rVAS_FIR, bit(21)) ? self_th_1;
 
     /** VAS_FIR[22]
      *  Software cast error detected in Ingress logic
      */
-    (rVAS_FIR, bit(22)) ? defaultMaskedError;
+    (rVAS_FIR, bit(22)) ? self_th_1;
 
     /** VAS_FIR[23]
      *  VAS attempted to access a memory address which has
      */
-    (rVAS_FIR, bit(23)) ? defaultMaskedError;
+    (rVAS_FIR, bit(23)) ? self_th_1;
 
     /** VAS_FIR[24]
      *  ECC sue error detected in Egress logic
      */
-    (rVAS_FIR, bit(24)) ? defaultMaskedError;
+    (rVAS_FIR, bit(24)) ? self_th_1_SUE;
 
     /** VAS_FIR[25]
      *  ECC sue error detected in Ingress logic
      */
-    (rVAS_FIR, bit(25)) ? defaultMaskedError;
+    (rVAS_FIR, bit(25)) ? self_th_1_SUE;
 
     /** VAS_FIR[26]
      *  ECC sue error detected in CQ logic
      */
-    (rVAS_FIR, bit(26)) ? defaultMaskedError;
+    (rVAS_FIR, bit(26)) ? self_th_1_SUE;
 
     /** VAS_FIR[27]
      *  ECC sue error detected in WC logic
      */
-    (rVAS_FIR, bit(27)) ? defaultMaskedError;
+    (rVAS_FIR, bit(27)) ? self_th_1_SUE;
 
     /** VAS_FIR[28]
      *  ECC sue error detected in RG logic
      */
-    (rVAS_FIR, bit(28)) ? defaultMaskedError;
+    (rVAS_FIR, bit(28)) ? self_th_1_SUE;
 
     /** VAS_FIR[29]
      *  PowerBus link error detected on read operation in 
@@ -4821,7 +4821,7 @@ group gVAS_FIR
     /** VAS_FIR[32]
      *  Address error detected on hypervisor MMIO read
      */
-    (rVAS_FIR, bit(32)) ? defaultMaskedError;
+    (rVAS_FIR, bit(32)) ? self_th_1;
 
     /** VAS_FIR[33]
      *  Address error detected on OS MMIO read
@@ -4831,7 +4831,7 @@ group gVAS_FIR
     /** VAS_FIR[34]
      *  Address error detected on hypervisor MMIO write
      */
-    (rVAS_FIR, bit(34)) ? defaultMaskedError;
+    (rVAS_FIR, bit(34)) ? self_th_1;
 
     /** VAS_FIR[35]
      *  Address error detected on OS MMIO write
@@ -4841,7 +4841,7 @@ group gVAS_FIR
     /** VAS_FIR[36]
      *  non-8-Byte MMIO detected by hypervisor
      */
-    (rVAS_FIR, bit(36)) ? defaultMaskedError;
+    (rVAS_FIR, bit(36)) ? self_th_1;
 
     /** VAS_FIR[37]
      *  non-8-Byte MMIO detected by user or OS
@@ -4849,37 +4849,37 @@ group gVAS_FIR
     (rVAS_FIR, bit(37)) ? defaultMaskedError;
 
     /** VAS_FIR[38]
-     *  Unused - Was Write monitor operation attempted on 
+     *  Reserved
      */
     (rVAS_FIR, bit(38)) ? defaultMaskedError;
 
     /** VAS_FIR[39]
-     *  Unused - Was Multiple write monotor registers matc
+     *  Reserved
      */
     (rVAS_FIR, bit(39)) ? defaultMaskedError;
 
     /** VAS_FIR[40]
-     *  Unused - Was Page Migration Register is not valid
+     *  Reserved
      */
     (rVAS_FIR, bit(40)) ? defaultMaskedError;
 
     /** VAS_FIR[41]
-     *  Unused - Was Page Migration Register size does not
+     *  Reserved
      */
     (rVAS_FIR, bit(41)) ? defaultMaskedError;
 
     /** VAS_FIR[42]
      *  ASB_Notify sent but not claimed and interrupts wer
      */
-    (rVAS_FIR, bit(42)) ? defaultMaskedError;
+    (rVAS_FIR, bit(42)) ? self_th_1;
 
     /** VAS_FIR[43]
      *  Unused - Was Write monitor operation hit a window 
      */
-    (rVAS_FIR, bit(43)) ? defaultMaskedError;
+    (rVAS_FIR, bit(43)) ? self_th_1;
 
     /** VAS_FIR[44]
-     *  VAS rejected a PB paste command.  See window statu
+     *  VAS rejected a PB paste command.
      */
     (rVAS_FIR, bit(44)) ? defaultMaskedError;
 
@@ -4891,7 +4891,7 @@ group gVAS_FIR
     /** VAS_FIR[46]
      *  Incoming PowerBus parity error
      */
-    (rVAS_FIR, bit(46)) ? defaultMaskedError;
+    (rVAS_FIR, bit(46)) ? self_th_1;
 
     /** VAS_FIR[47]
      *  HW error from SCOM Satellite 1
@@ -4901,17 +4901,17 @@ group gVAS_FIR
     /** VAS_FIR[48]
      *  NX Local Checkstop
      */
-    (rVAS_FIR, bit(48)) ? defaultMaskedError;
+    (rVAS_FIR, bit(48)) ? self_th_1;
 
     /** VAS_FIR[49]
-     *  SCOM MMIO address offset error.  SCOM-initiated MM
+     *  SCOM MMIO address offset error
      */
     (rVAS_FIR, bit(49)) ? defaultMaskedError;
 
     /** VAS_FIR[50]
      *  TopoID Error Bit
      */
-    (rVAS_FIR, bit(50)) ? defaultMaskedError;
+    (rVAS_FIR, bit(50)) ? self_th_1;
 
     /** VAS_FIR[51]
      *  Unused bit
@@ -5303,62 +5303,62 @@ group gN1_LOCAL_FIR
     /** N1_LOCAL_FIR[0]
      *  CFIR - Parity or PCB access error
      */
-    (rN1_LOCAL_FIR, bit(0)) ? defaultMaskedError;
+    (rN1_LOCAL_FIR, bit(0)) ? self_th_32perDay;
 
     /** N1_LOCAL_FIR[1]
      *  CPLT_CTRL - PCB access error
      */
-    (rN1_LOCAL_FIR, bit(1)) ? defaultMaskedError;
+    (rN1_LOCAL_FIR, bit(1)) ? self_th_32perDay;
 
     /** N1_LOCAL_FIR[2]
-     *  CC - PCB access error - read and clear nn03000F
+     *  CC - PCB access error
      */
-    (rN1_LOCAL_FIR, bit(2)) ? defaultMaskedError;
+    (rN1_LOCAL_FIR, bit(2)) ? self_th_32perDay;
 
     /** N1_LOCAL_FIR[3]
-     *  CC - Clock Control Error - read and clear nn03000F
+     *  CC - Clock Control Error
      */
-    (rN1_LOCAL_FIR, bit(3)) ? defaultMaskedError;
+    (rN1_LOCAL_FIR, bit(3)) ? self_th_32perDay;
 
     /** N1_LOCAL_FIR[4]
-     *  PSC - PSCOM access error - read and clear nn01001
+     *  PSC - PSCOM access error
      */
-    (rN1_LOCAL_FIR, bit(4)) ? defaultMaskedError;
+    (rN1_LOCAL_FIR, bit(4)) ? self_th_32perDay;
 
     /** N1_LOCAL_FIR[5]
-     *  PSC - internal or ring interface error - read and 
+     *  PSC - internal or ring interface error
      */
-    (rN1_LOCAL_FIR, bit(5)) ? defaultMaskedError;
+    (rN1_LOCAL_FIR, bit(5)) ? self_th_32perDay;
 
     /** N1_LOCAL_FIR[6]
-     *  THERM - pwr_comp_err, skitter_comp_err, scan_init_
+     *  THERM - internal error
      */
-    (rN1_LOCAL_FIR, bit(6)) ? defaultMaskedError;
+    (rN1_LOCAL_FIR, bit(6)) ? threshold_and_mask_self;
 
     /** N1_LOCAL_FIR[7]
      *  THERM - pcb error
      */
-    (rN1_LOCAL_FIR, bit(7)) ? defaultMaskedError;
+    (rN1_LOCAL_FIR, bit(7)) ? threshold_and_mask_self;
 
     /** N1_LOCAL_FIR[8]
      *  THERMTRIP - Critical temperature indicator
      */
-    (rN1_LOCAL_FIR, bit(8)) ? defaultMaskedError;
+    (rN1_LOCAL_FIR, bit(8)) ? threshold_and_mask_self;
 
     /** N1_LOCAL_FIR[9]
      *  THERMTRIP - Fatal temperature indicator
      */
-    (rN1_LOCAL_FIR, bit(9)) ? defaultMaskedError;
+    (rN1_LOCAL_FIR, bit(9)) ? threshold_and_mask_self;
 
     /** N1_LOCAL_FIR[10]
      *  VOLTTRIP - Voltage sense error
      */
-    (rN1_LOCAL_FIR, bit(10)) ? defaultMaskedError;
+    (rN1_LOCAL_FIR, bit(10)) ? threshold_and_mask_self;
 
     /** N1_LOCAL_FIR[11]
      *  DBG - scom parity fail
      */
-    (rN1_LOCAL_FIR, bit(11)) ? defaultMaskedError;
+    (rN1_LOCAL_FIR, bit(11)) ? threshold_and_mask_self;
 
     /** N1_LOCAL_FIR[12]
      *  reserved
@@ -5403,12 +5403,12 @@ group gN1_LOCAL_FIR
     /** N1_LOCAL_FIR[20]
      *  Trace00 - scom parity err
      */
-    (rN1_LOCAL_FIR, bit(20)) ? defaultMaskedError;
+    (rN1_LOCAL_FIR, bit(20)) ? self_th_32perDay;
 
     /** N1_LOCAL_FIR[21]
-     *  Trace01 - scom parity err - Unused in Axon,PCI
+     *  Trace01 - scom parity err
      */
-    (rN1_LOCAL_FIR, bit(21)) ? defaultMaskedError;
+    (rN1_LOCAL_FIR, bit(21)) ? self_th_32perDay;
 
     /** N1_LOCAL_FIR[22]
      *  unused
@@ -5641,7 +5641,7 @@ group gMCD_FIR
     /** MCD_FIR[0]
      *  MCD array ECC uncorrectable error
      */
-    (rMCD_FIR, bit(0)) ? defaultMaskedError;
+    (rMCD_FIR, bit(0)) ? self_th_32perDay;
 
     /** MCD_FIR[1]
      *  MCD array ECC uncorrectable error
@@ -5651,12 +5651,12 @@ group gMCD_FIR
     /** MCD_FIR[2]
      *  MCD PowerBus address Parity error
      */
-    (rMCD_FIR, bit(2)) ? defaultMaskedError;
+    (rMCD_FIR, bit(2)) ? self_th_1;
 
     /** MCD_FIR[3]
      *  MCD invalid state error
      */
-    (rMCD_FIR, bit(3)) ? defaultMaskedError;
+    (rMCD_FIR, bit(3)) ? self_th_1;
 
     /** MCD_FIR[4]
      *  Hang poll timer expired on cl_probe
@@ -5671,17 +5671,17 @@ group gMCD_FIR
     /** MCD_FIR[6]
      *  MCD recieved a unsoliceted CRESP
      */
-    (rMCD_FIR, bit(6)) ? defaultMaskedError;
+    (rMCD_FIR, bit(6)) ? self_th_1;
 
     /** MCD_FIR[7]
      *  MCD powerbus ttag parity error
      */
-    (rMCD_FIR, bit(7)) ? defaultMaskedError;
+    (rMCD_FIR, bit(7)) ? self_th_1;
 
     /** MCD_FIR[8]
      *  MCD scom register update error
      */
-    (rMCD_FIR, bit(8)) ? defaultMaskedError;
+    (rMCD_FIR, bit(8)) ? self_th_1;
 
     /** MCD_FIR[9]
      *  MCD recieved a ack_dead_cresp
@@ -5691,7 +5691,7 @@ group gMCD_FIR
     /** MCD_FIR[10]
      *  MCD configuration register had a parity error
      */
-    (rMCD_FIR, bit(10)) ? defaultMaskedError;
+    (rMCD_FIR, bit(10)) ? self_th_1;
 
 };
 
@@ -5712,114 +5712,114 @@ group gPB_STATION_FIR_4
            cs_root_cause
 {
     /** PB_STATION_FIR_4[0]
-     *  protocol_error
+     *  protocol error
      */
-    (rPB_STATION_FIR_4, bit(0)) ? defaultMaskedError;
+    (rPB_STATION_FIR_4, bit(0)) ? level2_M_self_L_th_1;
 
     /** PB_STATION_FIR_4[1]
-     *  overflow_error
+     *  overflow error
      */
-    (rPB_STATION_FIR_4, bit(1)) ? defaultMaskedError;
+    (rPB_STATION_FIR_4, bit(1)) ? level2_M_self_L_th_1;
 
     /** PB_STATION_FIR_4[2]
-     *  hw_parity_error
+     *  hw parity error
      */
-    (rPB_STATION_FIR_4, bit(2)) ? defaultMaskedError;
+    (rPB_STATION_FIR_4, bit(2)) ? level2_M_self_L_th_1;
 
     /** PB_STATION_FIR_4[3]
-     *  fir_spare_3
+     *  spare
      */
     (rPB_STATION_FIR_4, bit(3)) ? defaultMaskedError;
 
     /** PB_STATION_FIR_4[4]
-     *  coherency_error
+     *  coherency error
      */
-    (rPB_STATION_FIR_4, bit(4)) ? defaultMaskedError;
+    (rPB_STATION_FIR_4, bit(4)) ? level2_M_self_L_th_1;
 
     /** PB_STATION_FIR_4[5]
-     *  cresp_addr_error
+     *  cresp addr error
      */
     (rPB_STATION_FIR_4, bit(5)) ? defaultMaskedError;
 
     /** PB_STATION_FIR_4[6]
-     *  cresp_error
+     *  cresp error
      */
-    (rPB_STATION_FIR_4, bit(6)) ? defaultMaskedError;
+    (rPB_STATION_FIR_4, bit(6)) ? level2_M_self_L_th_1;
 
     /** PB_STATION_FIR_4[7]
-     *  hang_recovery_limit_error
+     *  hang recovery limit error
      */
     (rPB_STATION_FIR_4, bit(7)) ? defaultMaskedError;
 
     /** PB_STATION_FIR_4[8]
-     *  fir_spare_8
+     *  spare
      */
     (rPB_STATION_FIR_4, bit(8)) ? defaultMaskedError;
 
     /** PB_STATION_FIR_4[9]
-     *  hang_recovery_gte_level1
+     *  hang recovery gte level1
      */
-    (rPB_STATION_FIR_4, bit(9)) ? defaultMaskedError;
+    (rPB_STATION_FIR_4, bit(9)) ? TBDDefaultCallout;
 
     /** PB_STATION_FIR_4[10]
-     *  force_mp_ipl
+     *  force MP- IPL
      */
-    (rPB_STATION_FIR_4, bit(10)) ? defaultMaskedError;
+    (rPB_STATION_FIR_4, bit(10)) ? level2_dump_SW;
 
     /** PB_STATION_FIR_4[11]
-     *  pb_cmd_snooper_error
+     *  snooper error
      */
-    (rPB_STATION_FIR_4, bit(11)) ? defaultMaskedError;
+    (rPB_STATION_FIR_4, bit(11)) ? level2_M_self_L_th_1;
 
     /** PB_STATION_FIR_4[12]
-     *  data_overflow_error
+     *  data overflow error
      */
-    (rPB_STATION_FIR_4, bit(12)) ? defaultMaskedError;
+    (rPB_STATION_FIR_4, bit(12)) ? level2_M_self_L_th_1;
 
     /** PB_STATION_FIR_4[13]
-     *  data_protocol_error
+     *  data protocol error
      */
-    (rPB_STATION_FIR_4, bit(13)) ? defaultMaskedError;
+    (rPB_STATION_FIR_4, bit(13)) ? level2_M_self_L_th_1;
 
     /** PB_STATION_FIR_4[14]
-     *  data_route_error
+     *  data route error
      */
-    (rPB_STATION_FIR_4, bit(14)) ? defaultMaskedError;
+    (rPB_STATION_FIR_4, bit(14)) ? level2_M_self_L_th_1;
 
     /** PB_STATION_FIR_4[15]
-     *  fir_compab_trigger
+     *  fir compab trigger
      */
     (rPB_STATION_FIR_4, bit(15)) ? defaultMaskedError;
 
     /** PB_STATION_FIR_4[16]
-     *  link0_protocol_error
+     *  link0 protocol error
      */
-    (rPB_STATION_FIR_4, bit(16)) ? defaultMaskedError;
+    (rPB_STATION_FIR_4, bit(16)) ? self_th_1;
 
     /** PB_STATION_FIR_4[17]
-     *  link0_overflow_error
+     *  link0 overflow error
      */
-    (rPB_STATION_FIR_4, bit(17)) ? defaultMaskedError;
+    (rPB_STATION_FIR_4, bit(17)) ? self_th_1;
 
     /** PB_STATION_FIR_4[18]
-     *  link0_hw_parity_error
+     *  link0 hw parity error
      */
-    (rPB_STATION_FIR_4, bit(18)) ? defaultMaskedError;
+    (rPB_STATION_FIR_4, bit(18)) ? self_th_1;
 
     /** PB_STATION_FIR_4[19]
-     *  link1_protocol_error
+     *  link1 protocol error
      */
-    (rPB_STATION_FIR_4, bit(19)) ? defaultMaskedError;
+    (rPB_STATION_FIR_4, bit(19)) ? self_th_1;
 
     /** PB_STATION_FIR_4[20]
-     *  link1_overflow_error
+     *  link1 overflow error
      */
-    (rPB_STATION_FIR_4, bit(20)) ? defaultMaskedError;
+    (rPB_STATION_FIR_4, bit(20)) ? self_th_1;
 
     /** PB_STATION_FIR_4[21]
-     *  link1_hw_parity_error
+     *  link1 hw parity error
      */
-    (rPB_STATION_FIR_4, bit(21)) ? defaultMaskedError;
+    (rPB_STATION_FIR_4, bit(21)) ? self_th_1;
 
 };
 
@@ -5840,114 +5840,114 @@ group gPB_STATION_FIR_5
            cs_root_cause
 {
     /** PB_STATION_FIR_5[0]
-     *  protocol_error
+     *  protocol error
      */
-    (rPB_STATION_FIR_5, bit(0)) ? defaultMaskedError;
+    (rPB_STATION_FIR_5, bit(0)) ? level2_M_self_L_th_1;
 
     /** PB_STATION_FIR_5[1]
-     *  overflow_error
+     *  overflow error
      */
-    (rPB_STATION_FIR_5, bit(1)) ? defaultMaskedError;
+    (rPB_STATION_FIR_5, bit(1)) ? level2_M_self_L_th_1;
 
     /** PB_STATION_FIR_5[2]
-     *  hw_parity_error
+     *  hw parity error
      */
-    (rPB_STATION_FIR_5, bit(2)) ? defaultMaskedError;
+    (rPB_STATION_FIR_5, bit(2)) ? level2_M_self_L_th_1;
 
     /** PB_STATION_FIR_5[3]
-     *  fir_spare_3
+     *  spare
      */
     (rPB_STATION_FIR_5, bit(3)) ? defaultMaskedError;
 
     /** PB_STATION_FIR_5[4]
-     *  coherency_error
+     *  coherency error
      */
-    (rPB_STATION_FIR_5, bit(4)) ? defaultMaskedError;
+    (rPB_STATION_FIR_5, bit(4)) ? level2_M_self_L_th_1;
 
     /** PB_STATION_FIR_5[5]
-     *  cresp_addr_error
+     *  cresp addr error
      */
     (rPB_STATION_FIR_5, bit(5)) ? defaultMaskedError;
 
     /** PB_STATION_FIR_5[6]
-     *  cresp_error
+     *  cresp error
      */
-    (rPB_STATION_FIR_5, bit(6)) ? defaultMaskedError;
+    (rPB_STATION_FIR_5, bit(6)) ? level2_M_self_L_th_1;
 
     /** PB_STATION_FIR_5[7]
-     *  hang_recovery_limit_error
+     *  hang recovery limit error
      */
     (rPB_STATION_FIR_5, bit(7)) ? defaultMaskedError;
 
     /** PB_STATION_FIR_5[8]
-     *  fir_spare_8
+     *  spare
      */
     (rPB_STATION_FIR_5, bit(8)) ? defaultMaskedError;
 
     /** PB_STATION_FIR_5[9]
-     *  hang_recovery_gte_level1
+     *  hang recovery gte level1
      */
-    (rPB_STATION_FIR_5, bit(9)) ? defaultMaskedError;
+    (rPB_STATION_FIR_5, bit(9)) ? TBDDefaultCallout;
 
     /** PB_STATION_FIR_5[10]
-     *  force_mp_ipl
+     *  force MP- IPL
      */
-    (rPB_STATION_FIR_5, bit(10)) ? defaultMaskedError;
+    (rPB_STATION_FIR_5, bit(10)) ? level2_dump_SW;
 
     /** PB_STATION_FIR_5[11]
-     *  pb_cmd_snooper_error
+     *  snooper error
      */
-    (rPB_STATION_FIR_5, bit(11)) ? defaultMaskedError;
+    (rPB_STATION_FIR_5, bit(11)) ? level2_M_self_L_th_1;
 
     /** PB_STATION_FIR_5[12]
-     *  data_overflow_error
+     *  data overflow error
      */
-    (rPB_STATION_FIR_5, bit(12)) ? defaultMaskedError;
+    (rPB_STATION_FIR_5, bit(12)) ? level2_M_self_L_th_1;
 
     /** PB_STATION_FIR_5[13]
-     *  data_protocol_error
+     *  data protocol error
      */
-    (rPB_STATION_FIR_5, bit(13)) ? defaultMaskedError;
+    (rPB_STATION_FIR_5, bit(13)) ? level2_M_self_L_th_1;
 
     /** PB_STATION_FIR_5[14]
-     *  data_route_error
+     *  data route error
      */
-    (rPB_STATION_FIR_5, bit(14)) ? defaultMaskedError;
+    (rPB_STATION_FIR_5, bit(14)) ? level2_M_self_L_th_1;
 
     /** PB_STATION_FIR_5[15]
-     *  fir_compab_trigger
+     *  fir compab trigger
      */
     (rPB_STATION_FIR_5, bit(15)) ? defaultMaskedError;
 
     /** PB_STATION_FIR_5[16]
-     *  link0_protocol_error
+     *  link0 protocol error
      */
-    (rPB_STATION_FIR_5, bit(16)) ? defaultMaskedError;
+    (rPB_STATION_FIR_5, bit(16)) ? self_th_1;
 
     /** PB_STATION_FIR_5[17]
-     *  link0_overflow_error
+     *  link0 overflow error
      */
-    (rPB_STATION_FIR_5, bit(17)) ? defaultMaskedError;
+    (rPB_STATION_FIR_5, bit(17)) ? self_th_1;
 
     /** PB_STATION_FIR_5[18]
-     *  link0_hw_parity_error
+     *  link0 hw parity error
      */
-    (rPB_STATION_FIR_5, bit(18)) ? defaultMaskedError;
+    (rPB_STATION_FIR_5, bit(18)) ? self_th_1;
 
     /** PB_STATION_FIR_5[19]
-     *  link1_protocol_error
+     *  link1 protocol error
      */
-    (rPB_STATION_FIR_5, bit(19)) ? defaultMaskedError;
+    (rPB_STATION_FIR_5, bit(19)) ? self_th_1;
 
     /** PB_STATION_FIR_5[20]
-     *  link1_overflow_error
+     *  link1 overflow error
      */
-    (rPB_STATION_FIR_5, bit(20)) ? defaultMaskedError;
+    (rPB_STATION_FIR_5, bit(20)) ? self_th_1;
 
     /** PB_STATION_FIR_5[21]
-     *  link1_hw_parity_error
+     *  link1 hw parity error
      */
-    (rPB_STATION_FIR_5, bit(21)) ? defaultMaskedError;
+    (rPB_STATION_FIR_5, bit(21)) ? self_th_1;
 
 };
 
@@ -5968,114 +5968,114 @@ group gPB_STATION_FIR_6
            cs_root_cause
 {
     /** PB_STATION_FIR_6[0]
-     *  protocol_error
+     *  protocol error
      */
-    (rPB_STATION_FIR_6, bit(0)) ? defaultMaskedError;
+    (rPB_STATION_FIR_6, bit(0)) ? level2_M_self_L_th_1;
 
     /** PB_STATION_FIR_6[1]
-     *  overflow_error
+     *  overflow error
      */
-    (rPB_STATION_FIR_6, bit(1)) ? defaultMaskedError;
+    (rPB_STATION_FIR_6, bit(1)) ? level2_M_self_L_th_1;
 
     /** PB_STATION_FIR_6[2]
-     *  hw_parity_error
+     *  hw parity error
      */
-    (rPB_STATION_FIR_6, bit(2)) ? defaultMaskedError;
+    (rPB_STATION_FIR_6, bit(2)) ? level2_M_self_L_th_1;
 
     /** PB_STATION_FIR_6[3]
-     *  fir_spare_3
+     *  spare
      */
     (rPB_STATION_FIR_6, bit(3)) ? defaultMaskedError;
 
     /** PB_STATION_FIR_6[4]
-     *  coherency_error
+     *  coherency error
      */
-    (rPB_STATION_FIR_6, bit(4)) ? defaultMaskedError;
+    (rPB_STATION_FIR_6, bit(4)) ? level2_M_self_L_th_1;
 
     /** PB_STATION_FIR_6[5]
-     *  cresp_addr_error
+     *  cresp addr error
      */
     (rPB_STATION_FIR_6, bit(5)) ? defaultMaskedError;
 
     /** PB_STATION_FIR_6[6]
-     *  cresp_error
+     *  cresp error
      */
-    (rPB_STATION_FIR_6, bit(6)) ? defaultMaskedError;
+    (rPB_STATION_FIR_6, bit(6)) ? level2_M_self_L_th_1;
 
     /** PB_STATION_FIR_6[7]
-     *  hang_recovery_limit_error
+     *  hang recovery limit error
      */
     (rPB_STATION_FIR_6, bit(7)) ? defaultMaskedError;
 
     /** PB_STATION_FIR_6[8]
-     *  fir_spare_8
+     *  spare
      */
     (rPB_STATION_FIR_6, bit(8)) ? defaultMaskedError;
 
     /** PB_STATION_FIR_6[9]
-     *  hang_recovery_gte_level1
+     *  hang recovery gte level1
      */
-    (rPB_STATION_FIR_6, bit(9)) ? defaultMaskedError;
+    (rPB_STATION_FIR_6, bit(9)) ? TBDDefaultCallout;
 
     /** PB_STATION_FIR_6[10]
-     *  force_mp_ipl
+     *  force MP- IPL
      */
-    (rPB_STATION_FIR_6, bit(10)) ? defaultMaskedError;
+    (rPB_STATION_FIR_6, bit(10)) ? level2_dump_SW;
 
     /** PB_STATION_FIR_6[11]
-     *  pb_cmd_snooper_error
+     *  snooper error
      */
-    (rPB_STATION_FIR_6, bit(11)) ? defaultMaskedError;
+    (rPB_STATION_FIR_6, bit(11)) ? level2_M_self_L_th_1;
 
     /** PB_STATION_FIR_6[12]
-     *  data_overflow_error
+     *  data overflow error
      */
-    (rPB_STATION_FIR_6, bit(12)) ? defaultMaskedError;
+    (rPB_STATION_FIR_6, bit(12)) ? level2_M_self_L_th_1;
 
     /** PB_STATION_FIR_6[13]
-     *  data_protocol_error
+     *  data protocol error
      */
-    (rPB_STATION_FIR_6, bit(13)) ? defaultMaskedError;
+    (rPB_STATION_FIR_6, bit(13)) ? level2_M_self_L_th_1;
 
     /** PB_STATION_FIR_6[14]
-     *  data_route_error
+     *  data route error
      */
-    (rPB_STATION_FIR_6, bit(14)) ? defaultMaskedError;
+    (rPB_STATION_FIR_6, bit(14)) ? level2_M_self_L_th_1;
 
     /** PB_STATION_FIR_6[15]
-     *  fir_compab_trigger
+     *  fir compab trigger
      */
     (rPB_STATION_FIR_6, bit(15)) ? defaultMaskedError;
 
     /** PB_STATION_FIR_6[16]
-     *  link0_protocol_error
+     *  link0 protocol error
      */
-    (rPB_STATION_FIR_6, bit(16)) ? defaultMaskedError;
+    (rPB_STATION_FIR_6, bit(16)) ? self_th_1;
 
     /** PB_STATION_FIR_6[17]
-     *  link0_overflow_error
+     *  link0 overflow error
      */
-    (rPB_STATION_FIR_6, bit(17)) ? defaultMaskedError;
+    (rPB_STATION_FIR_6, bit(17)) ? self_th_1;
 
     /** PB_STATION_FIR_6[18]
-     *  link0_hw_parity_error
+     *  link0 hw parity error
      */
-    (rPB_STATION_FIR_6, bit(18)) ? defaultMaskedError;
+    (rPB_STATION_FIR_6, bit(18)) ? self_th_1;
 
     /** PB_STATION_FIR_6[19]
-     *  link1_protocol_error
+     *  link1 protocol error
      */
-    (rPB_STATION_FIR_6, bit(19)) ? defaultMaskedError;
+    (rPB_STATION_FIR_6, bit(19)) ? self_th_1;
 
     /** PB_STATION_FIR_6[20]
-     *  link1_overflow_error
+     *  link1 overflow error
      */
-    (rPB_STATION_FIR_6, bit(20)) ? defaultMaskedError;
+    (rPB_STATION_FIR_6, bit(20)) ? self_th_1;
 
     /** PB_STATION_FIR_6[21]
-     *  link1_hw_parity_error
+     *  link1 hw parity error
      */
-    (rPB_STATION_FIR_6, bit(21)) ? defaultMaskedError;
+    (rPB_STATION_FIR_6, bit(21)) ? self_th_1;
 
 };
 
@@ -6096,114 +6096,114 @@ group gPB_STATION_FIR_7
            cs_root_cause
 {
     /** PB_STATION_FIR_7[0]
-     *  protocol_error
+     *  protocol error
      */
-    (rPB_STATION_FIR_7, bit(0)) ? defaultMaskedError;
+    (rPB_STATION_FIR_7, bit(0)) ? level2_M_self_L_th_1;
 
     /** PB_STATION_FIR_7[1]
-     *  overflow_error
+     *  overflow error
      */
-    (rPB_STATION_FIR_7, bit(1)) ? defaultMaskedError;
+    (rPB_STATION_FIR_7, bit(1)) ? level2_M_self_L_th_1;
 
     /** PB_STATION_FIR_7[2]
-     *  hw_parity_error
+     *  hw parity error
      */
-    (rPB_STATION_FIR_7, bit(2)) ? defaultMaskedError;
+    (rPB_STATION_FIR_7, bit(2)) ? level2_M_self_L_th_1;
 
     /** PB_STATION_FIR_7[3]
-     *  fir_spare_3
+     *  spare
      */
     (rPB_STATION_FIR_7, bit(3)) ? defaultMaskedError;
 
     /** PB_STATION_FIR_7[4]
-     *  coherency_error
+     *  coherency error
      */
-    (rPB_STATION_FIR_7, bit(4)) ? defaultMaskedError;
+    (rPB_STATION_FIR_7, bit(4)) ? level2_M_self_L_th_1;
 
     /** PB_STATION_FIR_7[5]
-     *  cresp_addr_error
+     *  cresp addr error
      */
     (rPB_STATION_FIR_7, bit(5)) ? defaultMaskedError;
 
     /** PB_STATION_FIR_7[6]
-     *  cresp_error
+     *  cresp error
      */
-    (rPB_STATION_FIR_7, bit(6)) ? defaultMaskedError;
+    (rPB_STATION_FIR_7, bit(6)) ? level2_M_self_L_th_1;
 
     /** PB_STATION_FIR_7[7]
-     *  hang_recovery_limit_error
+     *  hang recovery limit error
      */
     (rPB_STATION_FIR_7, bit(7)) ? defaultMaskedError;
 
     /** PB_STATION_FIR_7[8]
-     *  fir_spare_8
+     *  spare
      */
     (rPB_STATION_FIR_7, bit(8)) ? defaultMaskedError;
 
     /** PB_STATION_FIR_7[9]
-     *  hang_recovery_gte_level1
+     *  hang recovery gte level1
      */
-    (rPB_STATION_FIR_7, bit(9)) ? defaultMaskedError;
+    (rPB_STATION_FIR_7, bit(9)) ? TBDDefaultCallout;
 
     /** PB_STATION_FIR_7[10]
-     *  force_mp_ipl
+     *  force MP- IPL
      */
-    (rPB_STATION_FIR_7, bit(10)) ? defaultMaskedError;
+    (rPB_STATION_FIR_7, bit(10)) ? level2_dump_SW;
 
     /** PB_STATION_FIR_7[11]
-     *  pb_cmd_snooper_error
+     *  snooper error
      */
-    (rPB_STATION_FIR_7, bit(11)) ? defaultMaskedError;
+    (rPB_STATION_FIR_7, bit(11)) ? level2_M_self_L_th_1;
 
     /** PB_STATION_FIR_7[12]
-     *  data_overflow_error
+     *  data overflow error
      */
-    (rPB_STATION_FIR_7, bit(12)) ? defaultMaskedError;
+    (rPB_STATION_FIR_7, bit(12)) ? level2_M_self_L_th_1;
 
     /** PB_STATION_FIR_7[13]
-     *  data_protocol_error
+     *  data protocol error
      */
-    (rPB_STATION_FIR_7, bit(13)) ? defaultMaskedError;
+    (rPB_STATION_FIR_7, bit(13)) ? level2_M_self_L_th_1;
 
     /** PB_STATION_FIR_7[14]
-     *  data_route_error
+     *  data route error
      */
-    (rPB_STATION_FIR_7, bit(14)) ? defaultMaskedError;
+    (rPB_STATION_FIR_7, bit(14)) ? level2_M_self_L_th_1;
 
     /** PB_STATION_FIR_7[15]
-     *  fir_compab_trigger
+     *  fir compab trigger
      */
     (rPB_STATION_FIR_7, bit(15)) ? defaultMaskedError;
 
     /** PB_STATION_FIR_7[16]
-     *  link0_protocol_error
+     *  link0 protocol error
      */
-    (rPB_STATION_FIR_7, bit(16)) ? defaultMaskedError;
+    (rPB_STATION_FIR_7, bit(16)) ? self_th_1;
 
     /** PB_STATION_FIR_7[17]
-     *  link0_overflow_error
+     *  link0 overflow error
      */
-    (rPB_STATION_FIR_7, bit(17)) ? defaultMaskedError;
+    (rPB_STATION_FIR_7, bit(17)) ? self_th_1;
 
     /** PB_STATION_FIR_7[18]
-     *  link0_hw_parity_error
+     *  link0 hw parity error
      */
-    (rPB_STATION_FIR_7, bit(18)) ? defaultMaskedError;
+    (rPB_STATION_FIR_7, bit(18)) ? self_th_1;
 
     /** PB_STATION_FIR_7[19]
-     *  link1_protocol_error
+     *  link1 protocol error
      */
-    (rPB_STATION_FIR_7, bit(19)) ? defaultMaskedError;
+    (rPB_STATION_FIR_7, bit(19)) ? self_th_1;
 
     /** PB_STATION_FIR_7[20]
-     *  link1_overflow_error
+     *  link1 overflow error
      */
-    (rPB_STATION_FIR_7, bit(20)) ? defaultMaskedError;
+    (rPB_STATION_FIR_7, bit(20)) ? self_th_1;
 
     /** PB_STATION_FIR_7[21]
-     *  link1_hw_parity_error
+     *  link1 hw parity error
      */
-    (rPB_STATION_FIR_7, bit(21)) ? defaultMaskedError;
+    (rPB_STATION_FIR_7, bit(21)) ? self_th_1;
 
 };
 
@@ -6224,114 +6224,114 @@ group gPB_STATION_FIR_8
            cs_root_cause
 {
     /** PB_STATION_FIR_8[0]
-     *  protocol_error
+     *  protocol error
      */
-    (rPB_STATION_FIR_8, bit(0)) ? defaultMaskedError;
+    (rPB_STATION_FIR_8, bit(0)) ? level2_M_self_L_th_1;
 
     /** PB_STATION_FIR_8[1]
-     *  overflow_error
+     *  overflow error
      */
-    (rPB_STATION_FIR_8, bit(1)) ? defaultMaskedError;
+    (rPB_STATION_FIR_8, bit(1)) ? level2_M_self_L_th_1;
 
     /** PB_STATION_FIR_8[2]
-     *  hw_parity_error
+     *  hw parity error
      */
-    (rPB_STATION_FIR_8, bit(2)) ? defaultMaskedError;
+    (rPB_STATION_FIR_8, bit(2)) ? level2_M_self_L_th_1;
 
     /** PB_STATION_FIR_8[3]
-     *  fir_spare_3
+     *  spare
      */
     (rPB_STATION_FIR_8, bit(3)) ? defaultMaskedError;
 
     /** PB_STATION_FIR_8[4]
-     *  coherency_error
+     *  coherency error
      */
-    (rPB_STATION_FIR_8, bit(4)) ? defaultMaskedError;
+    (rPB_STATION_FIR_8, bit(4)) ? level2_M_self_L_th_1;
 
     /** PB_STATION_FIR_8[5]
-     *  cresp_addr_error
+     *  cresp addr error
      */
     (rPB_STATION_FIR_8, bit(5)) ? defaultMaskedError;
 
     /** PB_STATION_FIR_8[6]
-     *  cresp_error
+     *  cresp error
      */
-    (rPB_STATION_FIR_8, bit(6)) ? defaultMaskedError;
+    (rPB_STATION_FIR_8, bit(6)) ? level2_M_self_L_th_1;
 
     /** PB_STATION_FIR_8[7]
-     *  hang_recovery_limit_error
+     *  hang recovery limit error
      */
     (rPB_STATION_FIR_8, bit(7)) ? defaultMaskedError;
 
     /** PB_STATION_FIR_8[8]
-     *  fir_spare_8
+     *  spare
      */
     (rPB_STATION_FIR_8, bit(8)) ? defaultMaskedError;
 
     /** PB_STATION_FIR_8[9]
-     *  hang_recovery_gte_level1
+     *  hang recovery gte level1
      */
-    (rPB_STATION_FIR_8, bit(9)) ? defaultMaskedError;
+    (rPB_STATION_FIR_8, bit(9)) ? TBDDefaultCallout;
 
     /** PB_STATION_FIR_8[10]
-     *  force_mp_ipl
+     *  force MP- IPL
      */
-    (rPB_STATION_FIR_8, bit(10)) ? defaultMaskedError;
+    (rPB_STATION_FIR_8, bit(10)) ? level2_dump_SW;
 
     /** PB_STATION_FIR_8[11]
-     *  pb_cmd_snooper_error
+     *  snooper error
      */
-    (rPB_STATION_FIR_8, bit(11)) ? defaultMaskedError;
+    (rPB_STATION_FIR_8, bit(11)) ? level2_M_self_L_th_1;
 
     /** PB_STATION_FIR_8[12]
-     *  data_overflow_error
+     *  data overflow error
      */
-    (rPB_STATION_FIR_8, bit(12)) ? defaultMaskedError;
+    (rPB_STATION_FIR_8, bit(12)) ? level2_M_self_L_th_1;
 
     /** PB_STATION_FIR_8[13]
-     *  data_protocol_error
+     *  data protocol error
      */
-    (rPB_STATION_FIR_8, bit(13)) ? defaultMaskedError;
+    (rPB_STATION_FIR_8, bit(13)) ? level2_M_self_L_th_1;
 
     /** PB_STATION_FIR_8[14]
-     *  data_route_error
+     *  data route error
      */
-    (rPB_STATION_FIR_8, bit(14)) ? defaultMaskedError;
+    (rPB_STATION_FIR_8, bit(14)) ? level2_M_self_L_th_1;
 
     /** PB_STATION_FIR_8[15]
-     *  fir_compab_trigger
+     *  fir compab trigger
      */
     (rPB_STATION_FIR_8, bit(15)) ? defaultMaskedError;
 
     /** PB_STATION_FIR_8[16]
-     *  link0_protocol_error
+     *  link0 protocol error
      */
-    (rPB_STATION_FIR_8, bit(16)) ? defaultMaskedError;
+    (rPB_STATION_FIR_8, bit(16)) ? self_th_1;
 
     /** PB_STATION_FIR_8[17]
-     *  link0_overflow_error
+     *  link0 overflow error
      */
-    (rPB_STATION_FIR_8, bit(17)) ? defaultMaskedError;
+    (rPB_STATION_FIR_8, bit(17)) ? self_th_1;
 
     /** PB_STATION_FIR_8[18]
-     *  link0_hw_parity_error
+     *  link0 hw parity error
      */
-    (rPB_STATION_FIR_8, bit(18)) ? defaultMaskedError;
+    (rPB_STATION_FIR_8, bit(18)) ? self_th_1;
 
     /** PB_STATION_FIR_8[19]
-     *  link1_protocol_error
+     *  link1 protocol error
      */
-    (rPB_STATION_FIR_8, bit(19)) ? defaultMaskedError;
+    (rPB_STATION_FIR_8, bit(19)) ? self_th_1;
 
     /** PB_STATION_FIR_8[20]
-     *  link1_overflow_error
+     *  link1 overflow error
      */
-    (rPB_STATION_FIR_8, bit(20)) ? defaultMaskedError;
+    (rPB_STATION_FIR_8, bit(20)) ? self_th_1;
 
     /** PB_STATION_FIR_8[21]
-     *  link1_hw_parity_error
+     *  link1 hw parity error
      */
-    (rPB_STATION_FIR_8, bit(21)) ? defaultMaskedError;
+    (rPB_STATION_FIR_8, bit(21)) ? self_th_1;
 
 };
 
@@ -6352,114 +6352,114 @@ group gPB_STATION_FIR_9
            cs_root_cause
 {
     /** PB_STATION_FIR_9[0]
-     *  protocol_error
+     *  protocol error
      */
-    (rPB_STATION_FIR_9, bit(0)) ? defaultMaskedError;
+    (rPB_STATION_FIR_9, bit(0)) ? level2_M_self_L_th_1;
 
     /** PB_STATION_FIR_9[1]
-     *  overflow_error
+     *  overflow error
      */
-    (rPB_STATION_FIR_9, bit(1)) ? defaultMaskedError;
+    (rPB_STATION_FIR_9, bit(1)) ? level2_M_self_L_th_1;
 
     /** PB_STATION_FIR_9[2]
-     *  hw_parity_error
+     *  hw parity error
      */
-    (rPB_STATION_FIR_9, bit(2)) ? defaultMaskedError;
+    (rPB_STATION_FIR_9, bit(2)) ? level2_M_self_L_th_1;
 
     /** PB_STATION_FIR_9[3]
-     *  fir_spare_3
+     *  spare
      */
     (rPB_STATION_FIR_9, bit(3)) ? defaultMaskedError;
 
     /** PB_STATION_FIR_9[4]
-     *  coherency_error
+     *  coherency error
      */
-    (rPB_STATION_FIR_9, bit(4)) ? defaultMaskedError;
+    (rPB_STATION_FIR_9, bit(4)) ? level2_M_self_L_th_1;
 
     /** PB_STATION_FIR_9[5]
-     *  cresp_addr_error
+     *  cresp addr error
      */
     (rPB_STATION_FIR_9, bit(5)) ? defaultMaskedError;
 
     /** PB_STATION_FIR_9[6]
-     *  cresp_error
+     *  cresp error
      */
-    (rPB_STATION_FIR_9, bit(6)) ? defaultMaskedError;
+    (rPB_STATION_FIR_9, bit(6)) ? level2_M_self_L_th_1;
 
     /** PB_STATION_FIR_9[7]
-     *  hang_recovery_limit_error
+     *  hang recovery limit error
      */
     (rPB_STATION_FIR_9, bit(7)) ? defaultMaskedError;
 
     /** PB_STATION_FIR_9[8]
-     *  fir_spare_8
+     *  spare
      */
     (rPB_STATION_FIR_9, bit(8)) ? defaultMaskedError;
 
     /** PB_STATION_FIR_9[9]
-     *  hang_recovery_gte_level1
+     *  hang recovery gte level1
      */
-    (rPB_STATION_FIR_9, bit(9)) ? defaultMaskedError;
+    (rPB_STATION_FIR_9, bit(9)) ? TBDDefaultCallout;
 
     /** PB_STATION_FIR_9[10]
-     *  force_mp_ipl
+     *  force MP- IPL
      */
-    (rPB_STATION_FIR_9, bit(10)) ? defaultMaskedError;
+    (rPB_STATION_FIR_9, bit(10)) ? level2_dump_SW;
 
     /** PB_STATION_FIR_9[11]
-     *  pb_cmd_snooper_error
+     *  snooper error
      */
-    (rPB_STATION_FIR_9, bit(11)) ? defaultMaskedError;
+    (rPB_STATION_FIR_9, bit(11)) ? level2_M_self_L_th_1;
 
     /** PB_STATION_FIR_9[12]
-     *  data_overflow_error
+     *  data overflow error
      */
-    (rPB_STATION_FIR_9, bit(12)) ? defaultMaskedError;
+    (rPB_STATION_FIR_9, bit(12)) ? level2_M_self_L_th_1;
 
     /** PB_STATION_FIR_9[13]
-     *  data_protocol_error
+     *  data protocol error
      */
-    (rPB_STATION_FIR_9, bit(13)) ? defaultMaskedError;
+    (rPB_STATION_FIR_9, bit(13)) ? level2_M_self_L_th_1;
 
     /** PB_STATION_FIR_9[14]
-     *  data_route_error
+     *  data route error
      */
-    (rPB_STATION_FIR_9, bit(14)) ? defaultMaskedError;
+    (rPB_STATION_FIR_9, bit(14)) ? level2_M_self_L_th_1;
 
     /** PB_STATION_FIR_9[15]
-     *  fir_compab_trigger
+     *  fir compab trigger
      */
     (rPB_STATION_FIR_9, bit(15)) ? defaultMaskedError;
 
     /** PB_STATION_FIR_9[16]
-     *  link0_protocol_error
+     *  link0 protocol error
      */
-    (rPB_STATION_FIR_9, bit(16)) ? defaultMaskedError;
+    (rPB_STATION_FIR_9, bit(16)) ? self_th_1;
 
     /** PB_STATION_FIR_9[17]
-     *  link0_overflow_error
+     *  link0 overflow error
      */
-    (rPB_STATION_FIR_9, bit(17)) ? defaultMaskedError;
+    (rPB_STATION_FIR_9, bit(17)) ? self_th_1;
 
     /** PB_STATION_FIR_9[18]
-     *  link0_hw_parity_error
+     *  link0 hw parity error
      */
-    (rPB_STATION_FIR_9, bit(18)) ? defaultMaskedError;
+    (rPB_STATION_FIR_9, bit(18)) ? self_th_1;
 
     /** PB_STATION_FIR_9[19]
-     *  link1_protocol_error
+     *  link1 protocol error
      */
-    (rPB_STATION_FIR_9, bit(19)) ? defaultMaskedError;
+    (rPB_STATION_FIR_9, bit(19)) ? self_th_1;
 
     /** PB_STATION_FIR_9[20]
-     *  link1_overflow_error
+     *  link1 overflow error
      */
-    (rPB_STATION_FIR_9, bit(20)) ? defaultMaskedError;
+    (rPB_STATION_FIR_9, bit(20)) ? self_th_1;
 
     /** PB_STATION_FIR_9[21]
-     *  link1_hw_parity_error
+     *  link1 hw parity error
      */
-    (rPB_STATION_FIR_9, bit(21)) ? defaultMaskedError;
+    (rPB_STATION_FIR_9, bit(21)) ? self_th_1;
 
 };
 
@@ -6480,114 +6480,114 @@ group gPB_STATION_FIR_10
            cs_root_cause
 {
     /** PB_STATION_FIR_10[0]
-     *  protocol_error
+     *  protocol error
      */
-    (rPB_STATION_FIR_10, bit(0)) ? defaultMaskedError;
+    (rPB_STATION_FIR_10, bit(0)) ? level2_M_self_L_th_1;
 
     /** PB_STATION_FIR_10[1]
-     *  overflow_error
+     *  overflow error
      */
-    (rPB_STATION_FIR_10, bit(1)) ? defaultMaskedError;
+    (rPB_STATION_FIR_10, bit(1)) ? level2_M_self_L_th_1;
 
     /** PB_STATION_FIR_10[2]
-     *  hw_parity_error
+     *  hw parity error
      */
-    (rPB_STATION_FIR_10, bit(2)) ? defaultMaskedError;
+    (rPB_STATION_FIR_10, bit(2)) ? level2_M_self_L_th_1;
 
     /** PB_STATION_FIR_10[3]
-     *  fir_spare_3
+     *  spare
      */
     (rPB_STATION_FIR_10, bit(3)) ? defaultMaskedError;
 
     /** PB_STATION_FIR_10[4]
-     *  coherency_error
+     *  coherency error
      */
-    (rPB_STATION_FIR_10, bit(4)) ? defaultMaskedError;
+    (rPB_STATION_FIR_10, bit(4)) ? level2_M_self_L_th_1;
 
     /** PB_STATION_FIR_10[5]
-     *  cresp_addr_error
+     *  cresp addr error
      */
     (rPB_STATION_FIR_10, bit(5)) ? defaultMaskedError;
 
     /** PB_STATION_FIR_10[6]
-     *  cresp_error
+     *  cresp error
      */
-    (rPB_STATION_FIR_10, bit(6)) ? defaultMaskedError;
+    (rPB_STATION_FIR_10, bit(6)) ? level2_M_self_L_th_1;
 
     /** PB_STATION_FIR_10[7]
-     *  hang_recovery_limit_error
+     *  hang recovery limit error
      */
     (rPB_STATION_FIR_10, bit(7)) ? defaultMaskedError;
 
     /** PB_STATION_FIR_10[8]
-     *  fir_spare_8
+     *  spare
      */
     (rPB_STATION_FIR_10, bit(8)) ? defaultMaskedError;
 
     /** PB_STATION_FIR_10[9]
-     *  hang_recovery_gte_level1
+     *  hang recovery gte level1
      */
-    (rPB_STATION_FIR_10, bit(9)) ? defaultMaskedError;
+    (rPB_STATION_FIR_10, bit(9)) ? TBDDefaultCallout;
 
     /** PB_STATION_FIR_10[10]
-     *  force_mp_ipl
+     *  force MP- IPL
      */
-    (rPB_STATION_FIR_10, bit(10)) ? defaultMaskedError;
+    (rPB_STATION_FIR_10, bit(10)) ? level2_dump_SW;
 
     /** PB_STATION_FIR_10[11]
-     *  pb_cmd_snooper_error
+     *  snooper error
      */
-    (rPB_STATION_FIR_10, bit(11)) ? defaultMaskedError;
+    (rPB_STATION_FIR_10, bit(11)) ? level2_M_self_L_th_1;
 
     /** PB_STATION_FIR_10[12]
-     *  data_overflow_error
+     *  data overflow error
      */
-    (rPB_STATION_FIR_10, bit(12)) ? defaultMaskedError;
+    (rPB_STATION_FIR_10, bit(12)) ? level2_M_self_L_th_1;
 
     /** PB_STATION_FIR_10[13]
-     *  data_protocol_error
+     *  data protocol error
      */
-    (rPB_STATION_FIR_10, bit(13)) ? defaultMaskedError;
+    (rPB_STATION_FIR_10, bit(13)) ? level2_M_self_L_th_1;
 
     /** PB_STATION_FIR_10[14]
-     *  data_route_error
+     *  data route error
      */
-    (rPB_STATION_FIR_10, bit(14)) ? defaultMaskedError;
+    (rPB_STATION_FIR_10, bit(14)) ? level2_M_self_L_th_1;
 
     /** PB_STATION_FIR_10[15]
-     *  fir_compab_trigger
+     *  fir compab trigger
      */
     (rPB_STATION_FIR_10, bit(15)) ? defaultMaskedError;
 
     /** PB_STATION_FIR_10[16]
-     *  link0_protocol_error
+     *  link0 protocol error
      */
-    (rPB_STATION_FIR_10, bit(16)) ? defaultMaskedError;
+    (rPB_STATION_FIR_10, bit(16)) ? self_th_1;
 
     /** PB_STATION_FIR_10[17]
-     *  link0_overflow_error
+     *  link0 overflow error
      */
-    (rPB_STATION_FIR_10, bit(17)) ? defaultMaskedError;
+    (rPB_STATION_FIR_10, bit(17)) ? self_th_1;
 
     /** PB_STATION_FIR_10[18]
-     *  link0_hw_parity_error
+     *  link0 hw parity error
      */
-    (rPB_STATION_FIR_10, bit(18)) ? defaultMaskedError;
+    (rPB_STATION_FIR_10, bit(18)) ? self_th_1;
 
     /** PB_STATION_FIR_10[19]
-     *  link1_protocol_error
+     *  link1 protocol error
      */
-    (rPB_STATION_FIR_10, bit(19)) ? defaultMaskedError;
+    (rPB_STATION_FIR_10, bit(19)) ? self_th_1;
 
     /** PB_STATION_FIR_10[20]
-     *  link1_overflow_error
+     *  link1 overflow error
      */
-    (rPB_STATION_FIR_10, bit(20)) ? defaultMaskedError;
+    (rPB_STATION_FIR_10, bit(20)) ? self_th_1;
 
     /** PB_STATION_FIR_10[21]
-     *  link1_hw_parity_error
+     *  link1 hw parity error
      */
-    (rPB_STATION_FIR_10, bit(21)) ? defaultMaskedError;
+    (rPB_STATION_FIR_10, bit(21)) ? self_th_1;
 
 };
 
@@ -6608,114 +6608,114 @@ group gPB_STATION_FIR_11
            cs_root_cause
 {
     /** PB_STATION_FIR_11[0]
-     *  protocol_error
+     *  protocol error
      */
-    (rPB_STATION_FIR_11, bit(0)) ? defaultMaskedError;
+    (rPB_STATION_FIR_11, bit(0)) ? level2_M_self_L_th_1;
 
     /** PB_STATION_FIR_11[1]
-     *  overflow_error
+     *  overflow error
      */
-    (rPB_STATION_FIR_11, bit(1)) ? defaultMaskedError;
+    (rPB_STATION_FIR_11, bit(1)) ? level2_M_self_L_th_1;
 
     /** PB_STATION_FIR_11[2]
-     *  hw_parity_error
+     *  hw parity error
      */
-    (rPB_STATION_FIR_11, bit(2)) ? defaultMaskedError;
+    (rPB_STATION_FIR_11, bit(2)) ? level2_M_self_L_th_1;
 
     /** PB_STATION_FIR_11[3]
-     *  fir_spare_3
+     *  spare
      */
     (rPB_STATION_FIR_11, bit(3)) ? defaultMaskedError;
 
     /** PB_STATION_FIR_11[4]
-     *  coherency_error
+     *  coherency error
      */
-    (rPB_STATION_FIR_11, bit(4)) ? defaultMaskedError;
+    (rPB_STATION_FIR_11, bit(4)) ? level2_M_self_L_th_1;
 
     /** PB_STATION_FIR_11[5]
-     *  cresp_addr_error
+     *  cresp addr error
      */
     (rPB_STATION_FIR_11, bit(5)) ? defaultMaskedError;
 
     /** PB_STATION_FIR_11[6]
-     *  cresp_error
+     *  cresp error
      */
-    (rPB_STATION_FIR_11, bit(6)) ? defaultMaskedError;
+    (rPB_STATION_FIR_11, bit(6)) ? level2_M_self_L_th_1;
 
     /** PB_STATION_FIR_11[7]
-     *  hang_recovery_limit_error
+     *  hang recovery limit error
      */
     (rPB_STATION_FIR_11, bit(7)) ? defaultMaskedError;
 
     /** PB_STATION_FIR_11[8]
-     *  fir_spare_8
+     *  spare
      */
     (rPB_STATION_FIR_11, bit(8)) ? defaultMaskedError;
 
     /** PB_STATION_FIR_11[9]
-     *  hang_recovery_gte_level1
+     *  hang recovery gte level1
      */
-    (rPB_STATION_FIR_11, bit(9)) ? defaultMaskedError;
+    (rPB_STATION_FIR_11, bit(9)) ? TBDDefaultCallout;
 
     /** PB_STATION_FIR_11[10]
-     *  force_mp_ipl
+     *  force MP- IPL
      */
-    (rPB_STATION_FIR_11, bit(10)) ? defaultMaskedError;
+    (rPB_STATION_FIR_11, bit(10)) ? level2_dump_SW;
 
     /** PB_STATION_FIR_11[11]
-     *  pb_cmd_snooper_error
+     *  snooper error
      */
-    (rPB_STATION_FIR_11, bit(11)) ? defaultMaskedError;
+    (rPB_STATION_FIR_11, bit(11)) ? level2_M_self_L_th_1;
 
     /** PB_STATION_FIR_11[12]
-     *  data_overflow_error
+     *  data overflow error
      */
-    (rPB_STATION_FIR_11, bit(12)) ? defaultMaskedError;
+    (rPB_STATION_FIR_11, bit(12)) ? level2_M_self_L_th_1;
 
     /** PB_STATION_FIR_11[13]
-     *  data_protocol_error
+     *  data protocol error
      */
-    (rPB_STATION_FIR_11, bit(13)) ? defaultMaskedError;
+    (rPB_STATION_FIR_11, bit(13)) ? level2_M_self_L_th_1;
 
     /** PB_STATION_FIR_11[14]
-     *  data_route_error
+     *  data route error
      */
-    (rPB_STATION_FIR_11, bit(14)) ? defaultMaskedError;
+    (rPB_STATION_FIR_11, bit(14)) ? level2_M_self_L_th_1;
 
     /** PB_STATION_FIR_11[15]
-     *  fir_compab_trigger
+     *  fir compab trigger
      */
     (rPB_STATION_FIR_11, bit(15)) ? defaultMaskedError;
 
     /** PB_STATION_FIR_11[16]
-     *  link0_protocol_error
+     *  link0 protocol error
      */
-    (rPB_STATION_FIR_11, bit(16)) ? defaultMaskedError;
+    (rPB_STATION_FIR_11, bit(16)) ? self_th_1;
 
     /** PB_STATION_FIR_11[17]
-     *  link0_overflow_error
+     *  link0 overflow error
      */
-    (rPB_STATION_FIR_11, bit(17)) ? defaultMaskedError;
+    (rPB_STATION_FIR_11, bit(17)) ? self_th_1;
 
     /** PB_STATION_FIR_11[18]
-     *  link0_hw_parity_error
+     *  link0 hw parity error
      */
-    (rPB_STATION_FIR_11, bit(18)) ? defaultMaskedError;
+    (rPB_STATION_FIR_11, bit(18)) ? self_th_1;
 
     /** PB_STATION_FIR_11[19]
-     *  link1_protocol_error
+     *  link1 protocol error
      */
-    (rPB_STATION_FIR_11, bit(19)) ? defaultMaskedError;
+    (rPB_STATION_FIR_11, bit(19)) ? self_th_1;
 
     /** PB_STATION_FIR_11[20]
-     *  link1_overflow_error
+     *  link1 overflow error
      */
-    (rPB_STATION_FIR_11, bit(20)) ? defaultMaskedError;
+    (rPB_STATION_FIR_11, bit(20)) ? self_th_1;
 
     /** PB_STATION_FIR_11[21]
-     *  link1_hw_parity_error
+     *  link1 hw parity error
      */
-    (rPB_STATION_FIR_11, bit(21)) ? defaultMaskedError;
+    (rPB_STATION_FIR_11, bit(21)) ? self_th_1;
 
 };
 
@@ -6736,114 +6736,114 @@ group gPB_STATION_FIR_0
            cs_root_cause
 {
     /** PB_STATION_FIR_0[0]
-     *  protocol_error
+     *  protocol error
      */
-    (rPB_STATION_FIR_0, bit(0)) ? defaultMaskedError;
+    (rPB_STATION_FIR_0, bit(0)) ? level2_M_self_L_th_1;
 
     /** PB_STATION_FIR_0[1]
-     *  overflow_error
+     *  overflow error
      */
-    (rPB_STATION_FIR_0, bit(1)) ? defaultMaskedError;
+    (rPB_STATION_FIR_0, bit(1)) ? level2_M_self_L_th_1;
 
     /** PB_STATION_FIR_0[2]
-     *  hw_parity_error
+     *  hw parity error
      */
-    (rPB_STATION_FIR_0, bit(2)) ? defaultMaskedError;
+    (rPB_STATION_FIR_0, bit(2)) ? level2_M_self_L_th_1;
 
     /** PB_STATION_FIR_0[3]
-     *  fir_spare_3
+     *  spare
      */
     (rPB_STATION_FIR_0, bit(3)) ? defaultMaskedError;
 
     /** PB_STATION_FIR_0[4]
-     *  coherency_error
+     *  coherency error
      */
-    (rPB_STATION_FIR_0, bit(4)) ? defaultMaskedError;
+    (rPB_STATION_FIR_0, bit(4)) ? level2_M_self_L_th_1;
 
     /** PB_STATION_FIR_0[5]
-     *  cresp_addr_error
+     *  cresp addr error
      */
     (rPB_STATION_FIR_0, bit(5)) ? defaultMaskedError;
 
     /** PB_STATION_FIR_0[6]
-     *  cresp_error
+     *  cresp error
      */
-    (rPB_STATION_FIR_0, bit(6)) ? defaultMaskedError;
+    (rPB_STATION_FIR_0, bit(6)) ? level2_M_self_L_th_1;
 
     /** PB_STATION_FIR_0[7]
-     *  hang_recovery_limit_error
+     *  hang recovery limit error
      */
     (rPB_STATION_FIR_0, bit(7)) ? defaultMaskedError;
 
     /** PB_STATION_FIR_0[8]
-     *  fir_spare_8
+     *  spare
      */
     (rPB_STATION_FIR_0, bit(8)) ? defaultMaskedError;
 
     /** PB_STATION_FIR_0[9]
-     *  hang_recovery_gte_level1
+     *  hang recovery gte level1
      */
-    (rPB_STATION_FIR_0, bit(9)) ? defaultMaskedError;
+    (rPB_STATION_FIR_0, bit(9)) ? TBDDefaultCallout;
 
     /** PB_STATION_FIR_0[10]
-     *  force_mp_ipl
+     *  force MP- IPL
      */
-    (rPB_STATION_FIR_0, bit(10)) ? defaultMaskedError;
+    (rPB_STATION_FIR_0, bit(10)) ? level2_dump_SW;
 
     /** PB_STATION_FIR_0[11]
-     *  pb_cmd_snooper_error
+     *  snooper error
      */
-    (rPB_STATION_FIR_0, bit(11)) ? defaultMaskedError;
+    (rPB_STATION_FIR_0, bit(11)) ? level2_M_self_L_th_1;
 
     /** PB_STATION_FIR_0[12]
-     *  data_overflow_error
+     *  data overflow error
      */
-    (rPB_STATION_FIR_0, bit(12)) ? defaultMaskedError;
+    (rPB_STATION_FIR_0, bit(12)) ? level2_M_self_L_th_1;
 
     /** PB_STATION_FIR_0[13]
-     *  data_protocol_error
+     *  data protocol error
      */
-    (rPB_STATION_FIR_0, bit(13)) ? defaultMaskedError;
+    (rPB_STATION_FIR_0, bit(13)) ? level2_M_self_L_th_1;
 
     /** PB_STATION_FIR_0[14]
-     *  data_route_error
+     *  data route error
      */
-    (rPB_STATION_FIR_0, bit(14)) ? defaultMaskedError;
+    (rPB_STATION_FIR_0, bit(14)) ? level2_M_self_L_th_1;
 
     /** PB_STATION_FIR_0[15]
-     *  fir_compab_trigger
+     *  fir compab trigger
      */
     (rPB_STATION_FIR_0, bit(15)) ? defaultMaskedError;
 
     /** PB_STATION_FIR_0[16]
-     *  link0_protocol_error
+     *  link0 protocol error
      */
-    (rPB_STATION_FIR_0, bit(16)) ? defaultMaskedError;
+    (rPB_STATION_FIR_0, bit(16)) ? self_th_1;
 
     /** PB_STATION_FIR_0[17]
-     *  link0_overflow_error
+     *  link0 overflow error
      */
-    (rPB_STATION_FIR_0, bit(17)) ? defaultMaskedError;
+    (rPB_STATION_FIR_0, bit(17)) ? self_th_1;
 
     /** PB_STATION_FIR_0[18]
-     *  link0_hw_parity_error
+     *  link0 hw parity error
      */
-    (rPB_STATION_FIR_0, bit(18)) ? defaultMaskedError;
+    (rPB_STATION_FIR_0, bit(18)) ? self_th_1;
 
     /** PB_STATION_FIR_0[19]
-     *  link1_protocol_error
+     *  link1 protocol error
      */
-    (rPB_STATION_FIR_0, bit(19)) ? defaultMaskedError;
+    (rPB_STATION_FIR_0, bit(19)) ? self_th_1;
 
     /** PB_STATION_FIR_0[20]
-     *  link1_overflow_error
+     *  link1 overflow error
      */
-    (rPB_STATION_FIR_0, bit(20)) ? defaultMaskedError;
+    (rPB_STATION_FIR_0, bit(20)) ? self_th_1;
 
     /** PB_STATION_FIR_0[21]
-     *  link1_hw_parity_error
+     *  link1 hw parity error
      */
-    (rPB_STATION_FIR_0, bit(21)) ? defaultMaskedError;
+    (rPB_STATION_FIR_0, bit(21)) ? self_th_1;
 
 };
 
@@ -6864,114 +6864,114 @@ group gPB_STATION_FIR_1
            cs_root_cause
 {
     /** PB_STATION_FIR_1[0]
-     *  protocol_error
+     *  protocol error
      */
-    (rPB_STATION_FIR_1, bit(0)) ? defaultMaskedError;
+    (rPB_STATION_FIR_1, bit(0)) ? level2_M_self_L_th_1;
 
     /** PB_STATION_FIR_1[1]
-     *  overflow_error
+     *  overflow error
      */
-    (rPB_STATION_FIR_1, bit(1)) ? defaultMaskedError;
+    (rPB_STATION_FIR_1, bit(1)) ? level2_M_self_L_th_1;
 
     /** PB_STATION_FIR_1[2]
-     *  hw_parity_error
+     *  hw parity error
      */
-    (rPB_STATION_FIR_1, bit(2)) ? defaultMaskedError;
+    (rPB_STATION_FIR_1, bit(2)) ? level2_M_self_L_th_1;
 
     /** PB_STATION_FIR_1[3]
-     *  fir_spare_3
+     *  spare
      */
     (rPB_STATION_FIR_1, bit(3)) ? defaultMaskedError;
 
     /** PB_STATION_FIR_1[4]
-     *  coherency_error
+     *  coherency error
      */
-    (rPB_STATION_FIR_1, bit(4)) ? defaultMaskedError;
+    (rPB_STATION_FIR_1, bit(4)) ? level2_M_self_L_th_1;
 
     /** PB_STATION_FIR_1[5]
-     *  cresp_addr_error
+     *  cresp addr error
      */
     (rPB_STATION_FIR_1, bit(5)) ? defaultMaskedError;
 
     /** PB_STATION_FIR_1[6]
-     *  cresp_error
+     *  cresp error
      */
-    (rPB_STATION_FIR_1, bit(6)) ? defaultMaskedError;
+    (rPB_STATION_FIR_1, bit(6)) ? level2_M_self_L_th_1;
 
     /** PB_STATION_FIR_1[7]
-     *  hang_recovery_limit_error
+     *  hang recovery limit error
      */
     (rPB_STATION_FIR_1, bit(7)) ? defaultMaskedError;
 
     /** PB_STATION_FIR_1[8]
-     *  fir_spare_8
+     *  spare
      */
     (rPB_STATION_FIR_1, bit(8)) ? defaultMaskedError;
 
     /** PB_STATION_FIR_1[9]
-     *  hang_recovery_gte_level1
+     *  hang recovery gte level1
      */
-    (rPB_STATION_FIR_1, bit(9)) ? defaultMaskedError;
+    (rPB_STATION_FIR_1, bit(9)) ? TBDDefaultCallout;
 
     /** PB_STATION_FIR_1[10]
-     *  force_mp_ipl
+     *  force MP- IPL
      */
-    (rPB_STATION_FIR_1, bit(10)) ? defaultMaskedError;
+    (rPB_STATION_FIR_1, bit(10)) ? level2_dump_SW;
 
     /** PB_STATION_FIR_1[11]
-     *  pb_cmd_snooper_error
+     *  snooper error
      */
-    (rPB_STATION_FIR_1, bit(11)) ? defaultMaskedError;
+    (rPB_STATION_FIR_1, bit(11)) ? level2_M_self_L_th_1;
 
     /** PB_STATION_FIR_1[12]
-     *  data_overflow_error
+     *  data overflow error
      */
-    (rPB_STATION_FIR_1, bit(12)) ? defaultMaskedError;
+    (rPB_STATION_FIR_1, bit(12)) ? level2_M_self_L_th_1;
 
     /** PB_STATION_FIR_1[13]
-     *  data_protocol_error
+     *  data protocol error
      */
-    (rPB_STATION_FIR_1, bit(13)) ? defaultMaskedError;
+    (rPB_STATION_FIR_1, bit(13)) ? level2_M_self_L_th_1;
 
     /** PB_STATION_FIR_1[14]
-     *  data_route_error
+     *  data route error
      */
-    (rPB_STATION_FIR_1, bit(14)) ? defaultMaskedError;
+    (rPB_STATION_FIR_1, bit(14)) ? level2_M_self_L_th_1;
 
     /** PB_STATION_FIR_1[15]
-     *  fir_compab_trigger
+     *  fir compab trigger
      */
     (rPB_STATION_FIR_1, bit(15)) ? defaultMaskedError;
 
     /** PB_STATION_FIR_1[16]
-     *  link0_protocol_error
+     *  link0 protocol error
      */
-    (rPB_STATION_FIR_1, bit(16)) ? defaultMaskedError;
+    (rPB_STATION_FIR_1, bit(16)) ? self_th_1;
 
     /** PB_STATION_FIR_1[17]
-     *  link0_overflow_error
+     *  link0 overflow error
      */
-    (rPB_STATION_FIR_1, bit(17)) ? defaultMaskedError;
+    (rPB_STATION_FIR_1, bit(17)) ? self_th_1;
 
     /** PB_STATION_FIR_1[18]
-     *  link0_hw_parity_error
+     *  link0 hw parity error
      */
-    (rPB_STATION_FIR_1, bit(18)) ? defaultMaskedError;
+    (rPB_STATION_FIR_1, bit(18)) ? self_th_1;
 
     /** PB_STATION_FIR_1[19]
-     *  link1_protocol_error
+     *  link1 protocol error
      */
-    (rPB_STATION_FIR_1, bit(19)) ? defaultMaskedError;
+    (rPB_STATION_FIR_1, bit(19)) ? self_th_1;
 
     /** PB_STATION_FIR_1[20]
-     *  link1_overflow_error
+     *  link1 overflow error
      */
-    (rPB_STATION_FIR_1, bit(20)) ? defaultMaskedError;
+    (rPB_STATION_FIR_1, bit(20)) ? self_th_1;
 
     /** PB_STATION_FIR_1[21]
-     *  link1_hw_parity_error
+     *  link1 hw parity error
      */
-    (rPB_STATION_FIR_1, bit(21)) ? defaultMaskedError;
+    (rPB_STATION_FIR_1, bit(21)) ? self_th_1;
 
 };
 
@@ -6992,114 +6992,114 @@ group gPB_STATION_FIR_2
            cs_root_cause
 {
     /** PB_STATION_FIR_2[0]
-     *  protocol_error
+     *  protocol error
      */
-    (rPB_STATION_FIR_2, bit(0)) ? defaultMaskedError;
+    (rPB_STATION_FIR_2, bit(0)) ? level2_M_self_L_th_1;
 
     /** PB_STATION_FIR_2[1]
-     *  overflow_error
+     *  overflow error
      */
-    (rPB_STATION_FIR_2, bit(1)) ? defaultMaskedError;
+    (rPB_STATION_FIR_2, bit(1)) ? level2_M_self_L_th_1;
 
     /** PB_STATION_FIR_2[2]
-     *  hw_parity_error
+     *  hw parity error
      */
-    (rPB_STATION_FIR_2, bit(2)) ? defaultMaskedError;
+    (rPB_STATION_FIR_2, bit(2)) ? level2_M_self_L_th_1;
 
     /** PB_STATION_FIR_2[3]
-     *  fir_spare_3
+     *  spare
      */
     (rPB_STATION_FIR_2, bit(3)) ? defaultMaskedError;
 
     /** PB_STATION_FIR_2[4]
-     *  coherency_error
+     *  coherency error
      */
-    (rPB_STATION_FIR_2, bit(4)) ? defaultMaskedError;
+    (rPB_STATION_FIR_2, bit(4)) ? level2_M_self_L_th_1;
 
     /** PB_STATION_FIR_2[5]
-     *  cresp_addr_error
+     *  cresp addr error
      */
     (rPB_STATION_FIR_2, bit(5)) ? defaultMaskedError;
 
     /** PB_STATION_FIR_2[6]
-     *  cresp_error
+     *  cresp error
      */
-    (rPB_STATION_FIR_2, bit(6)) ? defaultMaskedError;
+    (rPB_STATION_FIR_2, bit(6)) ? level2_M_self_L_th_1;
 
     /** PB_STATION_FIR_2[7]
-     *  hang_recovery_limit_error
+     *  hang recovery limit error
      */
     (rPB_STATION_FIR_2, bit(7)) ? defaultMaskedError;
 
     /** PB_STATION_FIR_2[8]
-     *  fir_spare_8
+     *  spare
      */
     (rPB_STATION_FIR_2, bit(8)) ? defaultMaskedError;
 
     /** PB_STATION_FIR_2[9]
-     *  hang_recovery_gte_level1
+     *  hang recovery gte level1
      */
-    (rPB_STATION_FIR_2, bit(9)) ? defaultMaskedError;
+    (rPB_STATION_FIR_2, bit(9)) ? TBDDefaultCallout;
 
     /** PB_STATION_FIR_2[10]
-     *  force_mp_ipl
+     *  force MP- IPL
      */
-    (rPB_STATION_FIR_2, bit(10)) ? defaultMaskedError;
+    (rPB_STATION_FIR_2, bit(10)) ? level2_dump_SW;
 
     /** PB_STATION_FIR_2[11]
-     *  pb_cmd_snooper_error
+     *  snooper error
      */
-    (rPB_STATION_FIR_2, bit(11)) ? defaultMaskedError;
+    (rPB_STATION_FIR_2, bit(11)) ? level2_M_self_L_th_1;
 
     /** PB_STATION_FIR_2[12]
-     *  data_overflow_error
+     *  data overflow error
      */
-    (rPB_STATION_FIR_2, bit(12)) ? defaultMaskedError;
+    (rPB_STATION_FIR_2, bit(12)) ? level2_M_self_L_th_1;
 
     /** PB_STATION_FIR_2[13]
-     *  data_protocol_error
+     *  data protocol error
      */
-    (rPB_STATION_FIR_2, bit(13)) ? defaultMaskedError;
+    (rPB_STATION_FIR_2, bit(13)) ? level2_M_self_L_th_1;
 
     /** PB_STATION_FIR_2[14]
-     *  data_route_error
+     *  data route error
      */
-    (rPB_STATION_FIR_2, bit(14)) ? defaultMaskedError;
+    (rPB_STATION_FIR_2, bit(14)) ? level2_M_self_L_th_1;
 
     /** PB_STATION_FIR_2[15]
-     *  fir_compab_trigger
+     *  fir compab trigger
      */
     (rPB_STATION_FIR_2, bit(15)) ? defaultMaskedError;
 
     /** PB_STATION_FIR_2[16]
-     *  link0_protocol_error
+     *  link0 protocol error
      */
-    (rPB_STATION_FIR_2, bit(16)) ? defaultMaskedError;
+    (rPB_STATION_FIR_2, bit(16)) ? self_th_1;
 
     /** PB_STATION_FIR_2[17]
-     *  link0_overflow_error
+     *  link0 overflow error
      */
-    (rPB_STATION_FIR_2, bit(17)) ? defaultMaskedError;
+    (rPB_STATION_FIR_2, bit(17)) ? self_th_1;
 
     /** PB_STATION_FIR_2[18]
-     *  link0_hw_parity_error
+     *  link0 hw parity error
      */
-    (rPB_STATION_FIR_2, bit(18)) ? defaultMaskedError;
+    (rPB_STATION_FIR_2, bit(18)) ? self_th_1;
 
     /** PB_STATION_FIR_2[19]
-     *  link1_protocol_error
+     *  link1 protocol error
      */
-    (rPB_STATION_FIR_2, bit(19)) ? defaultMaskedError;
+    (rPB_STATION_FIR_2, bit(19)) ? self_th_1;
 
     /** PB_STATION_FIR_2[20]
-     *  link1_overflow_error
+     *  link1 overflow error
      */
-    (rPB_STATION_FIR_2, bit(20)) ? defaultMaskedError;
+    (rPB_STATION_FIR_2, bit(20)) ? self_th_1;
 
     /** PB_STATION_FIR_2[21]
-     *  link1_hw_parity_error
+     *  link1 hw parity error
      */
-    (rPB_STATION_FIR_2, bit(21)) ? defaultMaskedError;
+    (rPB_STATION_FIR_2, bit(21)) ? self_th_1;
 
 };
 
@@ -7120,114 +7120,114 @@ group gPB_STATION_FIR_3
            cs_root_cause
 {
     /** PB_STATION_FIR_3[0]
-     *  protocol_error
+     *  protocol error
      */
-    (rPB_STATION_FIR_3, bit(0)) ? defaultMaskedError;
+    (rPB_STATION_FIR_3, bit(0)) ? level2_M_self_L_th_1;
 
     /** PB_STATION_FIR_3[1]
-     *  overflow_error
+     *  overflow error
      */
-    (rPB_STATION_FIR_3, bit(1)) ? defaultMaskedError;
+    (rPB_STATION_FIR_3, bit(1)) ? level2_M_self_L_th_1;
 
     /** PB_STATION_FIR_3[2]
-     *  hw_parity_error
+     *  hw parity error
      */
-    (rPB_STATION_FIR_3, bit(2)) ? defaultMaskedError;
+    (rPB_STATION_FIR_3, bit(2)) ? level2_M_self_L_th_1;
 
     /** PB_STATION_FIR_3[3]
-     *  fir_spare_3
+     *  spare
      */
     (rPB_STATION_FIR_3, bit(3)) ? defaultMaskedError;
 
     /** PB_STATION_FIR_3[4]
-     *  coherency_error
+     *  coherency error
      */
-    (rPB_STATION_FIR_3, bit(4)) ? defaultMaskedError;
+    (rPB_STATION_FIR_3, bit(4)) ? level2_M_self_L_th_1;
 
     /** PB_STATION_FIR_3[5]
-     *  cresp_addr_error
+     *  cresp addr error
      */
     (rPB_STATION_FIR_3, bit(5)) ? defaultMaskedError;
 
     /** PB_STATION_FIR_3[6]
-     *  cresp_error
+     *  cresp error
      */
-    (rPB_STATION_FIR_3, bit(6)) ? defaultMaskedError;
+    (rPB_STATION_FIR_3, bit(6)) ? level2_M_self_L_th_1;
 
     /** PB_STATION_FIR_3[7]
-     *  hang_recovery_limit_error
+     *  hang recovery limit error
      */
     (rPB_STATION_FIR_3, bit(7)) ? defaultMaskedError;
 
     /** PB_STATION_FIR_3[8]
-     *  fir_spare_8
+     *  spare
      */
     (rPB_STATION_FIR_3, bit(8)) ? defaultMaskedError;
 
     /** PB_STATION_FIR_3[9]
-     *  hang_recovery_gte_level1
+     *  hang recovery gte level1
      */
-    (rPB_STATION_FIR_3, bit(9)) ? defaultMaskedError;
+    (rPB_STATION_FIR_3, bit(9)) ? TBDDefaultCallout;
 
     /** PB_STATION_FIR_3[10]
-     *  force_mp_ipl
+     *  force MP- IPL
      */
-    (rPB_STATION_FIR_3, bit(10)) ? defaultMaskedError;
+    (rPB_STATION_FIR_3, bit(10)) ? level2_dump_SW;
 
     /** PB_STATION_FIR_3[11]
-     *  pb_cmd_snooper_error
+     *  snooper error
      */
-    (rPB_STATION_FIR_3, bit(11)) ? defaultMaskedError;
+    (rPB_STATION_FIR_3, bit(11)) ? level2_M_self_L_th_1;
 
     /** PB_STATION_FIR_3[12]
-     *  data_overflow_error
+     *  data overflow error
      */
-    (rPB_STATION_FIR_3, bit(12)) ? defaultMaskedError;
+    (rPB_STATION_FIR_3, bit(12)) ? level2_M_self_L_th_1;
 
     /** PB_STATION_FIR_3[13]
-     *  data_protocol_error
+     *  data protocol error
      */
-    (rPB_STATION_FIR_3, bit(13)) ? defaultMaskedError;
+    (rPB_STATION_FIR_3, bit(13)) ? level2_M_self_L_th_1;
 
     /** PB_STATION_FIR_3[14]
-     *  data_route_error
+     *  data route error
      */
-    (rPB_STATION_FIR_3, bit(14)) ? defaultMaskedError;
+    (rPB_STATION_FIR_3, bit(14)) ? level2_M_self_L_th_1;
 
     /** PB_STATION_FIR_3[15]
-     *  fir_compab_trigger
+     *  fir compab trigger
      */
     (rPB_STATION_FIR_3, bit(15)) ? defaultMaskedError;
 
     /** PB_STATION_FIR_3[16]
-     *  link0_protocol_error
+     *  link0 protocol error
      */
-    (rPB_STATION_FIR_3, bit(16)) ? defaultMaskedError;
+    (rPB_STATION_FIR_3, bit(16)) ? self_th_1;
 
     /** PB_STATION_FIR_3[17]
-     *  link0_overflow_error
+     *  link0 overflow error
      */
-    (rPB_STATION_FIR_3, bit(17)) ? defaultMaskedError;
+    (rPB_STATION_FIR_3, bit(17)) ? self_th_1;
 
     /** PB_STATION_FIR_3[18]
-     *  link0_hw_parity_error
+     *  link0 hw parity error
      */
-    (rPB_STATION_FIR_3, bit(18)) ? defaultMaskedError;
+    (rPB_STATION_FIR_3, bit(18)) ? self_th_1;
 
     /** PB_STATION_FIR_3[19]
-     *  link1_protocol_error
+     *  link1 protocol error
      */
-    (rPB_STATION_FIR_3, bit(19)) ? defaultMaskedError;
+    (rPB_STATION_FIR_3, bit(19)) ? self_th_1;
 
     /** PB_STATION_FIR_3[20]
-     *  link1_overflow_error
+     *  link1 overflow error
      */
-    (rPB_STATION_FIR_3, bit(20)) ? defaultMaskedError;
+    (rPB_STATION_FIR_3, bit(20)) ? self_th_1;
 
     /** PB_STATION_FIR_3[21]
-     *  link1_hw_parity_error
+     *  link1 hw parity error
      */
-    (rPB_STATION_FIR_3, bit(21)) ? defaultMaskedError;
+    (rPB_STATION_FIR_3, bit(21)) ? self_th_1;
 
 };
 
@@ -7248,114 +7248,114 @@ group gPB_STATION_FIR_12
            cs_root_cause
 {
     /** PB_STATION_FIR_12[0]
-     *  protocol_error
+     *  protocol error
      */
-    (rPB_STATION_FIR_12, bit(0)) ? defaultMaskedError;
+    (rPB_STATION_FIR_12, bit(0)) ? level2_M_self_L_th_1;
 
     /** PB_STATION_FIR_12[1]
-     *  overflow_error
+     *  overflow error
      */
-    (rPB_STATION_FIR_12, bit(1)) ? defaultMaskedError;
+    (rPB_STATION_FIR_12, bit(1)) ? level2_M_self_L_th_1;
 
     /** PB_STATION_FIR_12[2]
-     *  hw_parity_error
+     *  hw parity error
      */
-    (rPB_STATION_FIR_12, bit(2)) ? defaultMaskedError;
+    (rPB_STATION_FIR_12, bit(2)) ? level2_M_self_L_th_1;
 
     /** PB_STATION_FIR_12[3]
-     *  fir_spare_3
+     *  spare
      */
     (rPB_STATION_FIR_12, bit(3)) ? defaultMaskedError;
 
     /** PB_STATION_FIR_12[4]
-     *  coherency_error
+     *  coherency error
      */
-    (rPB_STATION_FIR_12, bit(4)) ? defaultMaskedError;
+    (rPB_STATION_FIR_12, bit(4)) ? level2_M_self_L_th_1;
 
     /** PB_STATION_FIR_12[5]
-     *  cresp_addr_error
+     *  cresp addr error
      */
     (rPB_STATION_FIR_12, bit(5)) ? defaultMaskedError;
 
     /** PB_STATION_FIR_12[6]
-     *  cresp_error
+     *  cresp error
      */
-    (rPB_STATION_FIR_12, bit(6)) ? defaultMaskedError;
+    (rPB_STATION_FIR_12, bit(6)) ? level2_M_self_L_th_1;
 
     /** PB_STATION_FIR_12[7]
-     *  hang_recovery_limit_error
+     *  hang recovery limit error
      */
     (rPB_STATION_FIR_12, bit(7)) ? defaultMaskedError;
 
     /** PB_STATION_FIR_12[8]
-     *  fir_spare_8
+     *  spare
      */
     (rPB_STATION_FIR_12, bit(8)) ? defaultMaskedError;
 
     /** PB_STATION_FIR_12[9]
-     *  hang_recovery_gte_level1
+     *  hang recovery gte level1
      */
-    (rPB_STATION_FIR_12, bit(9)) ? defaultMaskedError;
+    (rPB_STATION_FIR_12, bit(9)) ? TBDDefaultCallout;
 
     /** PB_STATION_FIR_12[10]
-     *  force_mp_ipl
+     *  force MP- IPL
      */
-    (rPB_STATION_FIR_12, bit(10)) ? defaultMaskedError;
+    (rPB_STATION_FIR_12, bit(10)) ? level2_dump_SW;
 
     /** PB_STATION_FIR_12[11]
-     *  pb_cmd_snooper_error
+     *  snooper error
      */
-    (rPB_STATION_FIR_12, bit(11)) ? defaultMaskedError;
+    (rPB_STATION_FIR_12, bit(11)) ? level2_M_self_L_th_1;
 
     /** PB_STATION_FIR_12[12]
-     *  data_overflow_error
+     *  data overflow error
      */
-    (rPB_STATION_FIR_12, bit(12)) ? defaultMaskedError;
+    (rPB_STATION_FIR_12, bit(12)) ? level2_M_self_L_th_1;
 
     /** PB_STATION_FIR_12[13]
-     *  data_protocol_error
+     *  data protocol error
      */
-    (rPB_STATION_FIR_12, bit(13)) ? defaultMaskedError;
+    (rPB_STATION_FIR_12, bit(13)) ? level2_M_self_L_th_1;
 
     /** PB_STATION_FIR_12[14]
-     *  data_route_error
+     *  data route error
      */
-    (rPB_STATION_FIR_12, bit(14)) ? defaultMaskedError;
+    (rPB_STATION_FIR_12, bit(14)) ? level2_M_self_L_th_1;
 
     /** PB_STATION_FIR_12[15]
-     *  fir_compab_trigger
+     *  fir compab trigger
      */
     (rPB_STATION_FIR_12, bit(15)) ? defaultMaskedError;
 
     /** PB_STATION_FIR_12[16]
-     *  link0_protocol_error
+     *  link0 protocol error
      */
-    (rPB_STATION_FIR_12, bit(16)) ? defaultMaskedError;
+    (rPB_STATION_FIR_12, bit(16)) ? self_th_1;
 
     /** PB_STATION_FIR_12[17]
-     *  link0_overflow_error
+     *  link0 overflow error
      */
-    (rPB_STATION_FIR_12, bit(17)) ? defaultMaskedError;
+    (rPB_STATION_FIR_12, bit(17)) ? self_th_1;
 
     /** PB_STATION_FIR_12[18]
-     *  link0_hw_parity_error
+     *  link0 hw parity error
      */
-    (rPB_STATION_FIR_12, bit(18)) ? defaultMaskedError;
+    (rPB_STATION_FIR_12, bit(18)) ? self_th_1;
 
     /** PB_STATION_FIR_12[19]
-     *  link1_protocol_error
+     *  link1 protocol error
      */
-    (rPB_STATION_FIR_12, bit(19)) ? defaultMaskedError;
+    (rPB_STATION_FIR_12, bit(19)) ? self_th_1;
 
     /** PB_STATION_FIR_12[20]
-     *  link1_overflow_error
+     *  link1 overflow error
      */
-    (rPB_STATION_FIR_12, bit(20)) ? defaultMaskedError;
+    (rPB_STATION_FIR_12, bit(20)) ? self_th_1;
 
     /** PB_STATION_FIR_12[21]
-     *  link1_hw_parity_error
+     *  link1 hw parity error
      */
-    (rPB_STATION_FIR_12, bit(21)) ? defaultMaskedError;
+    (rPB_STATION_FIR_12, bit(21)) ? self_th_1;
 
 };
 
@@ -7376,114 +7376,114 @@ group gPB_STATION_FIR_13
            cs_root_cause
 {
     /** PB_STATION_FIR_13[0]
-     *  protocol_error
+     *  protocol error
      */
-    (rPB_STATION_FIR_13, bit(0)) ? defaultMaskedError;
+    (rPB_STATION_FIR_13, bit(0)) ? level2_M_self_L_th_1;
 
     /** PB_STATION_FIR_13[1]
-     *  overflow_error
+     *  overflow error
      */
-    (rPB_STATION_FIR_13, bit(1)) ? defaultMaskedError;
+    (rPB_STATION_FIR_13, bit(1)) ? level2_M_self_L_th_1;
 
     /** PB_STATION_FIR_13[2]
-     *  hw_parity_error
+     *  hw parity error
      */
-    (rPB_STATION_FIR_13, bit(2)) ? defaultMaskedError;
+    (rPB_STATION_FIR_13, bit(2)) ? level2_M_self_L_th_1;
 
     /** PB_STATION_FIR_13[3]
-     *  fir_spare_3
+     *  spare
      */
     (rPB_STATION_FIR_13, bit(3)) ? defaultMaskedError;
 
     /** PB_STATION_FIR_13[4]
-     *  coherency_error
+     *  coherency error
      */
-    (rPB_STATION_FIR_13, bit(4)) ? defaultMaskedError;
+    (rPB_STATION_FIR_13, bit(4)) ? level2_M_self_L_th_1;
 
     /** PB_STATION_FIR_13[5]
-     *  cresp_addr_error
+     *  cresp addr error
      */
     (rPB_STATION_FIR_13, bit(5)) ? defaultMaskedError;
 
     /** PB_STATION_FIR_13[6]
-     *  cresp_error
+     *  cresp error
      */
-    (rPB_STATION_FIR_13, bit(6)) ? defaultMaskedError;
+    (rPB_STATION_FIR_13, bit(6)) ? level2_M_self_L_th_1;
 
     /** PB_STATION_FIR_13[7]
-     *  hang_recovery_limit_error
+     *  hang recovery limit error
      */
     (rPB_STATION_FIR_13, bit(7)) ? defaultMaskedError;
 
     /** PB_STATION_FIR_13[8]
-     *  fir_spare_8
+     *  spare
      */
     (rPB_STATION_FIR_13, bit(8)) ? defaultMaskedError;
 
     /** PB_STATION_FIR_13[9]
-     *  hang_recovery_gte_level1
+     *  hang recovery gte level1
      */
-    (rPB_STATION_FIR_13, bit(9)) ? defaultMaskedError;
+    (rPB_STATION_FIR_13, bit(9)) ? TBDDefaultCallout;
 
     /** PB_STATION_FIR_13[10]
-     *  force_mp_ipl
+     *  force MP- IPL
      */
-    (rPB_STATION_FIR_13, bit(10)) ? defaultMaskedError;
+    (rPB_STATION_FIR_13, bit(10)) ? level2_dump_SW;
 
     /** PB_STATION_FIR_13[11]
-     *  pb_cmd_snooper_error
+     *  snooper error
      */
-    (rPB_STATION_FIR_13, bit(11)) ? defaultMaskedError;
+    (rPB_STATION_FIR_13, bit(11)) ? level2_M_self_L_th_1;
 
     /** PB_STATION_FIR_13[12]
-     *  data_overflow_error
+     *  data overflow error
      */
-    (rPB_STATION_FIR_13, bit(12)) ? defaultMaskedError;
+    (rPB_STATION_FIR_13, bit(12)) ? level2_M_self_L_th_1;
 
     /** PB_STATION_FIR_13[13]
-     *  data_protocol_error
+     *  data protocol error
      */
-    (rPB_STATION_FIR_13, bit(13)) ? defaultMaskedError;
+    (rPB_STATION_FIR_13, bit(13)) ? level2_M_self_L_th_1;
 
     /** PB_STATION_FIR_13[14]
-     *  data_route_error
+     *  data route error
      */
-    (rPB_STATION_FIR_13, bit(14)) ? defaultMaskedError;
+    (rPB_STATION_FIR_13, bit(14)) ? level2_M_self_L_th_1;
 
     /** PB_STATION_FIR_13[15]
-     *  fir_compab_trigger
+     *  fir compab trigger
      */
     (rPB_STATION_FIR_13, bit(15)) ? defaultMaskedError;
 
     /** PB_STATION_FIR_13[16]
-     *  link0_protocol_error
+     *  link0 protocol error
      */
-    (rPB_STATION_FIR_13, bit(16)) ? defaultMaskedError;
+    (rPB_STATION_FIR_13, bit(16)) ? self_th_1;
 
     /** PB_STATION_FIR_13[17]
-     *  link0_overflow_error
+     *  link0 overflow error
      */
-    (rPB_STATION_FIR_13, bit(17)) ? defaultMaskedError;
+    (rPB_STATION_FIR_13, bit(17)) ? self_th_1;
 
     /** PB_STATION_FIR_13[18]
-     *  link0_hw_parity_error
+     *  link0 hw parity error
      */
-    (rPB_STATION_FIR_13, bit(18)) ? defaultMaskedError;
+    (rPB_STATION_FIR_13, bit(18)) ? self_th_1;
 
     /** PB_STATION_FIR_13[19]
-     *  link1_protocol_error
+     *  link1 protocol error
      */
-    (rPB_STATION_FIR_13, bit(19)) ? defaultMaskedError;
+    (rPB_STATION_FIR_13, bit(19)) ? self_th_1;
 
     /** PB_STATION_FIR_13[20]
-     *  link1_overflow_error
+     *  link1 overflow error
      */
-    (rPB_STATION_FIR_13, bit(20)) ? defaultMaskedError;
+    (rPB_STATION_FIR_13, bit(20)) ? self_th_1;
 
     /** PB_STATION_FIR_13[21]
-     *  link1_hw_parity_error
+     *  link1 hw parity error
      */
-    (rPB_STATION_FIR_13, bit(21)) ? defaultMaskedError;
+    (rPB_STATION_FIR_13, bit(21)) ? self_th_1;
 
 };
 
@@ -7504,114 +7504,114 @@ group gPB_STATION_FIR_14
            cs_root_cause
 {
     /** PB_STATION_FIR_14[0]
-     *  protocol_error
+     *  protocol error
      */
-    (rPB_STATION_FIR_14, bit(0)) ? defaultMaskedError;
+    (rPB_STATION_FIR_14, bit(0)) ? level2_M_self_L_th_1;
 
     /** PB_STATION_FIR_14[1]
-     *  overflow_error
+     *  overflow error
      */
-    (rPB_STATION_FIR_14, bit(1)) ? defaultMaskedError;
+    (rPB_STATION_FIR_14, bit(1)) ? level2_M_self_L_th_1;
 
     /** PB_STATION_FIR_14[2]
-     *  hw_parity_error
+     *  hw parity error
      */
-    (rPB_STATION_FIR_14, bit(2)) ? defaultMaskedError;
+    (rPB_STATION_FIR_14, bit(2)) ? level2_M_self_L_th_1;
 
     /** PB_STATION_FIR_14[3]
-     *  fir_spare_3
+     *  spare
      */
     (rPB_STATION_FIR_14, bit(3)) ? defaultMaskedError;
 
     /** PB_STATION_FIR_14[4]
-     *  coherency_error
+     *  coherency error
      */
-    (rPB_STATION_FIR_14, bit(4)) ? defaultMaskedError;
+    (rPB_STATION_FIR_14, bit(4)) ? level2_M_self_L_th_1;
 
     /** PB_STATION_FIR_14[5]
-     *  cresp_addr_error
+     *  cresp addr error
      */
     (rPB_STATION_FIR_14, bit(5)) ? defaultMaskedError;
 
     /** PB_STATION_FIR_14[6]
-     *  cresp_error
+     *  cresp error
      */
-    (rPB_STATION_FIR_14, bit(6)) ? defaultMaskedError;
+    (rPB_STATION_FIR_14, bit(6)) ? level2_M_self_L_th_1;
 
     /** PB_STATION_FIR_14[7]
-     *  hang_recovery_limit_error
+     *  hang recovery limit error
      */
     (rPB_STATION_FIR_14, bit(7)) ? defaultMaskedError;
 
     /** PB_STATION_FIR_14[8]
-     *  fir_spare_8
+     *  spare
      */
     (rPB_STATION_FIR_14, bit(8)) ? defaultMaskedError;
 
     /** PB_STATION_FIR_14[9]
-     *  hang_recovery_gte_level1
+     *  hang recovery gte level1
      */
-    (rPB_STATION_FIR_14, bit(9)) ? defaultMaskedError;
+    (rPB_STATION_FIR_14, bit(9)) ? TBDDefaultCallout;
 
     /** PB_STATION_FIR_14[10]
-     *  force_mp_ipl
+     *  force MP- IPL
      */
-    (rPB_STATION_FIR_14, bit(10)) ? defaultMaskedError;
+    (rPB_STATION_FIR_14, bit(10)) ? level2_dump_SW;
 
     /** PB_STATION_FIR_14[11]
-     *  pb_cmd_snooper_error
+     *  snooper error
      */
-    (rPB_STATION_FIR_14, bit(11)) ? defaultMaskedError;
+    (rPB_STATION_FIR_14, bit(11)) ? level2_M_self_L_th_1;
 
     /** PB_STATION_FIR_14[12]
-     *  data_overflow_error
+     *  data overflow error
      */
-    (rPB_STATION_FIR_14, bit(12)) ? defaultMaskedError;
+    (rPB_STATION_FIR_14, bit(12)) ? level2_M_self_L_th_1;
 
     /** PB_STATION_FIR_14[13]
-     *  data_protocol_error
+     *  data protocol error
      */
-    (rPB_STATION_FIR_14, bit(13)) ? defaultMaskedError;
+    (rPB_STATION_FIR_14, bit(13)) ? level2_M_self_L_th_1;
 
     /** PB_STATION_FIR_14[14]
-     *  data_route_error
+     *  data route error
      */
-    (rPB_STATION_FIR_14, bit(14)) ? defaultMaskedError;
+    (rPB_STATION_FIR_14, bit(14)) ? level2_M_self_L_th_1;
 
     /** PB_STATION_FIR_14[15]
-     *  fir_compab_trigger
+     *  fir compab trigger
      */
     (rPB_STATION_FIR_14, bit(15)) ? defaultMaskedError;
 
     /** PB_STATION_FIR_14[16]
-     *  link0_protocol_error
+     *  link0 protocol error
      */
-    (rPB_STATION_FIR_14, bit(16)) ? defaultMaskedError;
+    (rPB_STATION_FIR_14, bit(16)) ? self_th_1;
 
     /** PB_STATION_FIR_14[17]
-     *  link0_overflow_error
+     *  link0 overflow error
      */
-    (rPB_STATION_FIR_14, bit(17)) ? defaultMaskedError;
+    (rPB_STATION_FIR_14, bit(17)) ? self_th_1;
 
     /** PB_STATION_FIR_14[18]
-     *  link0_hw_parity_error
+     *  link0 hw parity error
      */
-    (rPB_STATION_FIR_14, bit(18)) ? defaultMaskedError;
+    (rPB_STATION_FIR_14, bit(18)) ? self_th_1;
 
     /** PB_STATION_FIR_14[19]
-     *  link1_protocol_error
+     *  link1 protocol error
      */
-    (rPB_STATION_FIR_14, bit(19)) ? defaultMaskedError;
+    (rPB_STATION_FIR_14, bit(19)) ? self_th_1;
 
     /** PB_STATION_FIR_14[20]
-     *  link1_overflow_error
+     *  link1 overflow error
      */
-    (rPB_STATION_FIR_14, bit(20)) ? defaultMaskedError;
+    (rPB_STATION_FIR_14, bit(20)) ? self_th_1;
 
     /** PB_STATION_FIR_14[21]
-     *  link1_hw_parity_error
+     *  link1 hw parity error
      */
-    (rPB_STATION_FIR_14, bit(21)) ? defaultMaskedError;
+    (rPB_STATION_FIR_14, bit(21)) ? self_th_1;
 
 };
 
@@ -7688,114 +7688,114 @@ group gPB_STATION_FIR_15
            cs_root_cause
 {
     /** PB_STATION_FIR_15[0]
-     *  protocol_error
+     *  protocol error
      */
-    (rPB_STATION_FIR_15, bit(0)) ? defaultMaskedError;
+    (rPB_STATION_FIR_15, bit(0)) ? level2_M_self_L_th_1;
 
     /** PB_STATION_FIR_15[1]
-     *  overflow_error
+     *  overflow error
      */
-    (rPB_STATION_FIR_15, bit(1)) ? defaultMaskedError;
+    (rPB_STATION_FIR_15, bit(1)) ? level2_M_self_L_th_1;
 
     /** PB_STATION_FIR_15[2]
-     *  hw_parity_error
+     *  hw parity error
      */
-    (rPB_STATION_FIR_15, bit(2)) ? defaultMaskedError;
+    (rPB_STATION_FIR_15, bit(2)) ? level2_M_self_L_th_1;
 
     /** PB_STATION_FIR_15[3]
-     *  fir_spare_3
+     *  spare
      */
     (rPB_STATION_FIR_15, bit(3)) ? defaultMaskedError;
 
     /** PB_STATION_FIR_15[4]
-     *  coherency_error
+     *  coherency error
      */
-    (rPB_STATION_FIR_15, bit(4)) ? defaultMaskedError;
+    (rPB_STATION_FIR_15, bit(4)) ? level2_M_self_L_th_1;
 
     /** PB_STATION_FIR_15[5]
-     *  cresp_addr_error
+     *  cresp addr error
      */
     (rPB_STATION_FIR_15, bit(5)) ? defaultMaskedError;
 
     /** PB_STATION_FIR_15[6]
-     *  cresp_error
+     *  cresp error
      */
-    (rPB_STATION_FIR_15, bit(6)) ? defaultMaskedError;
+    (rPB_STATION_FIR_15, bit(6)) ? level2_M_self_L_th_1;
 
     /** PB_STATION_FIR_15[7]
-     *  hang_recovery_limit_error
+     *  hang recovery limit error
      */
     (rPB_STATION_FIR_15, bit(7)) ? defaultMaskedError;
 
     /** PB_STATION_FIR_15[8]
-     *  fir_spare_8
+     *  spare
      */
     (rPB_STATION_FIR_15, bit(8)) ? defaultMaskedError;
 
     /** PB_STATION_FIR_15[9]
-     *  hang_recovery_gte_level1
+     *  hang recovery gte level1
      */
-    (rPB_STATION_FIR_15, bit(9)) ? defaultMaskedError;
+    (rPB_STATION_FIR_15, bit(9)) ? TBDDefaultCallout;
 
     /** PB_STATION_FIR_15[10]
-     *  force_mp_ipl
+     *  force MP- IPL
      */
-    (rPB_STATION_FIR_15, bit(10)) ? defaultMaskedError;
+    (rPB_STATION_FIR_15, bit(10)) ? level2_dump_SW;
 
     /** PB_STATION_FIR_15[11]
-     *  pb_cmd_snooper_error
+     *  snooper error
      */
-    (rPB_STATION_FIR_15, bit(11)) ? defaultMaskedError;
+    (rPB_STATION_FIR_15, bit(11)) ? level2_M_self_L_th_1;
 
     /** PB_STATION_FIR_15[12]
-     *  data_overflow_error
+     *  data overflow error
      */
-    (rPB_STATION_FIR_15, bit(12)) ? defaultMaskedError;
+    (rPB_STATION_FIR_15, bit(12)) ? level2_M_self_L_th_1;
 
     /** PB_STATION_FIR_15[13]
-     *  data_protocol_error
+     *  data protocol error
      */
-    (rPB_STATION_FIR_15, bit(13)) ? defaultMaskedError;
+    (rPB_STATION_FIR_15, bit(13)) ? level2_M_self_L_th_1;
 
     /** PB_STATION_FIR_15[14]
-     *  data_route_error
+     *  data route error
      */
-    (rPB_STATION_FIR_15, bit(14)) ? defaultMaskedError;
+    (rPB_STATION_FIR_15, bit(14)) ? level2_M_self_L_th_1;
 
     /** PB_STATION_FIR_15[15]
-     *  fir_compab_trigger
+     *  fir compab trigger
      */
     (rPB_STATION_FIR_15, bit(15)) ? defaultMaskedError;
 
     /** PB_STATION_FIR_15[16]
-     *  link0_protocol_error
+     *  link0 protocol error
      */
-    (rPB_STATION_FIR_15, bit(16)) ? defaultMaskedError;
+    (rPB_STATION_FIR_15, bit(16)) ? self_th_1;
 
     /** PB_STATION_FIR_15[17]
-     *  link0_overflow_error
+     *  link0 overflow error
      */
-    (rPB_STATION_FIR_15, bit(17)) ? defaultMaskedError;
+    (rPB_STATION_FIR_15, bit(17)) ? self_th_1;
 
     /** PB_STATION_FIR_15[18]
-     *  link0_hw_parity_error
+     *  link0 hw parity error
      */
-    (rPB_STATION_FIR_15, bit(18)) ? defaultMaskedError;
+    (rPB_STATION_FIR_15, bit(18)) ? self_th_1;
 
     /** PB_STATION_FIR_15[19]
-     *  link1_protocol_error
+     *  link1 protocol error
      */
-    (rPB_STATION_FIR_15, bit(19)) ? defaultMaskedError;
+    (rPB_STATION_FIR_15, bit(19)) ? self_th_1;
 
     /** PB_STATION_FIR_15[20]
-     *  link1_overflow_error
+     *  link1 overflow error
      */
-    (rPB_STATION_FIR_15, bit(20)) ? defaultMaskedError;
+    (rPB_STATION_FIR_15, bit(20)) ? self_th_1;
 
     /** PB_STATION_FIR_15[21]
-     *  link1_hw_parity_error
+     *  link1 hw parity error
      */
-    (rPB_STATION_FIR_15, bit(21)) ? defaultMaskedError;
+    (rPB_STATION_FIR_15, bit(21)) ? self_th_1;
 
 };
 
@@ -7818,12 +7818,12 @@ group gPSIHB_FIR
     /** PSIHB_FIR[0]
      *  CE from PowerBus data
      */
-    (rPSIHB_FIR, bit(0)) ? defaultMaskedError;
+    (rPSIHB_FIR, bit(0)) ? self_th_32perDay;
 
     /** PSIHB_FIR[1]
      *  UE from PowerBus data
      */
-    (rPSIHB_FIR, bit(1)) ? defaultMaskedError;
+    (rPSIHB_FIR, bit(1)) ? self_th_1;
 
     /** PSIHB_FIR[2]
      *  SUE from PowerBus data
@@ -7851,39 +7851,39 @@ group gPSIHB_FIR
     (rPSIHB_FIR, bit(6)) ? defaultMaskedError;
 
     /** PSIHB_FIR[7]
-     *  Error bit set, ignores the interrupt mask
+     *  Error bit set
      */
     (rPSIHB_FIR, bit(7)) ? defaultMaskedError;
 
     /** PSIHB_FIR[8]
      *  Invalid TType Hit on PHB or FSP bar
      */
-    (rPSIHB_FIR, bit(8)) ? defaultMaskedError;
+    (rPSIHB_FIR, bit(8)) ? level2_M_self_L_th_1;
 
     /** PSIHB_FIR[9]
      *  Invalid CResp returned to command issued by PSIHB
      */
-    (rPSIHB_FIR, bit(9)) ? defaultMaskedError;
+    (rPSIHB_FIR, bit(9)) ? level2_M_self_L_th_1;
 
     /** PSIHB_FIR[10]
      *  PowerBus time out waiting for data grant
      */
-    (rPSIHB_FIR, bit(10)) ? defaultMaskedError;
+    (rPSIHB_FIR, bit(10)) ? level2_th_1;
 
     /** PSIHB_FIR[11]
-     *  PB parity error
+     *  PB parity error in a tag/addr bus
      */
-    (rPSIHB_FIR, bit(11)) ? defaultMaskedError;
+    (rPSIHB_FIR, bit(11)) ? level2_M_self_L_th_1;
 
     /** PSIHB_FIR[12]
      *  FSP tried access to trusted space
      */
-    (rPSIHB_FIR, bit(12)) ? defaultMaskedError;
+    (rPSIHB_FIR, bit(12)) ? level2_th_1;
 
     /** PSIHB_FIR[13]
      *  Unexpected PB CRESP or DATA
      */
-    (rPSIHB_FIR, bit(13)) ? defaultMaskedError;
+    (rPSIHB_FIR, bit(13)) ? level2_M_self_L_th_1;
 
     /** PSIHB_FIR[14]
      *  Interrupt register change while interrupt still pe
@@ -7893,32 +7893,32 @@ group gPSIHB_FIR
     /** PSIHB_FIR[15]
      *  PSI Interrupt address Error
      */
-    (rPSIHB_FIR, bit(15)) ? defaultMaskedError;
+    (rPSIHB_FIR, bit(15)) ? self_M_level2_L_th_1;
 
     /** PSIHB_FIR[16]
      *  OCC Interrupt address Error
      */
-    (rPSIHB_FIR, bit(16)) ? defaultMaskedError;
+    (rPSIHB_FIR, bit(16)) ? self_M_level2_L_th_1;
 
     /** PSIHB_FIR[17]
      *  FSI Interrupt address Error
      */
-    (rPSIHB_FIR, bit(17)) ? defaultMaskedError;
+    (rPSIHB_FIR, bit(17)) ? self_M_level2_L_th_1;
 
     /** PSIHB_FIR[18]
      *  LPC Interrupt address Error
      */
-    (rPSIHB_FIR, bit(18)) ? defaultMaskedError;
+    (rPSIHB_FIR, bit(18)) ? self_M_level2_L_th_1;
 
     /** PSIHB_FIR[19]
      *  LOCAL ERROR Interrupt address Error
      */
-    (rPSIHB_FIR, bit(19)) ? defaultMaskedError;
+    (rPSIHB_FIR, bit(19)) ? self_M_level2_L_th_1;
 
     /** PSIHB_FIR[20]
      *  HOST ERROR Interrupt address Error
      */
-    (rPSIHB_FIR, bit(20)) ? defaultMaskedError;
+    (rPSIHB_FIR, bit(20)) ? self_M_level2_L_th_1;
 
     /** PSIHB_FIR[21]
      *  PSI global error bit 0
@@ -7933,7 +7933,7 @@ group gPSIHB_FIR
     /** PSIHB_FIR[23]
      *  Upstream error
      */
-    (rPSIHB_FIR, bit(23)) ? defaultMaskedError;
+    (rPSIHB_FIR, bit(23)) ? level2_M_self_L_th_32perDay;
 
     /** PSIHB_FIR[24]
      *  Spare fir
@@ -8187,7 +8187,7 @@ group gPBAF_FIR
     (rPBAF_FIR, bit(10)) ? defaultMaskedError;
 
     /** PBAF_FIR[11]
-     *  PB OPERATIONAL Timeout detected when PBACFG[EXIT_O
+     *  PB OPERATIONAL Timeout detected
      */
     (rPBAF_FIR, bit(11)) ? defaultMaskedError;
 
@@ -8232,27 +8232,27 @@ group gPBAF_FIR
     (rPBAF_FIR, bit(19)) ? defaultMaskedError;
 
     /** PBAF_FIR[20]
-     *  Internal Logic Error.  See PBAERRRPT2 for more det
+     *  Internal Logic Error
      */
     (rPBAF_FIR, bit(20)) ? defaultMaskedError;
 
     /** PBAF_FIR[21]
-     *  Byte count is less than full cache line: Write ope
+     *  Byte count is less than full cache line
      */
     (rPBAF_FIR, bit(21)) ? defaultMaskedError;
 
     /** PBAF_FIR[22]
-     *  PBAXRCV Low data before High Data. See PBAXRCVSTAT
+     *  PBAXRCV Low data before High Data
      */
     (rPBAF_FIR, bit(22)) ? defaultMaskedError;
 
     /** PBAF_FIR[23]
-     *  PBAXRCV Low data timeout. See PBAXRCVSTAT[rcv_capt
+     *  PBAXRCV Low data timeout
      */
     (rPBAF_FIR, bit(23)) ? defaultMaskedError;
 
     /** PBAF_FIR[24]
-     *  PBAXRCV Reservation data timeout.  Reservation acq
+     *  PBAXRCV Reservation data timeout
      */
     (rPBAF_FIR, bit(24)) ? defaultMaskedError;
 
@@ -8277,22 +8277,22 @@ group gPBAF_FIR
     (rPBAF_FIR, bit(28)) ? defaultMaskedError;
 
     /** PBAF_FIR[29]
-     *  PB CRESP ACK Dead response received for Forwarded 
+     *  PB CRESP ACK Dead response received
      */
     (rPBAF_FIR, bit(29)) ? defaultMaskedError;
 
     /** PBAF_FIR[30]
-     *  PBAXIRCV Low data before High Data. See PBAXIRCVST
+     *  PBAXIRCV Low data before High Data
      */
     (rPBAF_FIR, bit(30)) ? defaultMaskedError;
 
     /** PBAF_FIR[31]
-     *  PBAXIRCV Low data timeout. See PBAXIRCVSTAT[rcv_ca
+     *  PBAXIRCV Low data timeout.
      */
     (rPBAF_FIR, bit(31)) ? defaultMaskedError;
 
     /** PBAF_FIR[32]
-     *  PBAXIRCV Reservation data timeout.  Reservation ac
+     *  PBAXIRCV Reservation data timeout
      */
     (rPBAF_FIR, bit(32)) ? defaultMaskedError;
 
@@ -8350,52 +8350,52 @@ group gLPC_FIR
            cs_root_cause
 {
     /** LPC_FIR[0]
-     *  OPB_Master_LS_received_a_transfer_size_value_unequ
+     *  OPB Master LS received transfer size unequal to 1 
      */
-    (rLPC_FIR, bit(0)) ? defaultMaskedError;
+    (rLPC_FIR, bit(0)) ? self_th_1;
 
     /** LPC_FIR[1]
-     *  OPB_Master_LS_received_a_invalid_command_no_ci_sto
+     *  OPB Master LS received an action 0 invalid command
      */
-    (rLPC_FIR, bit(1)) ? defaultMaskedError;
+    (rLPC_FIR, bit(1)) ? self_th_1;
 
     /** LPC_FIR[2]
-     *  OPB_Master_LS_received_a_address_which_was_not_ali
+     *  OPB Master LS received a address not aligned to re
      */
-    (rLPC_FIR, bit(2)) ? defaultMaskedError;
+    (rLPC_FIR, bit(2)) ? self_th_1;
 
     /** LPC_FIR[3]
-     *  OPB_Master_LS_detected_OPB_ErrAck_which_was_activa
+     *  OPB Master LS detected OPB ErrAck activated by the
      */
     (rLPC_FIR, bit(3)) ? defaultMaskedError;
 
     /** LPC_FIR[4]
-     *  the_OPB_arbiter_activated_the_OPB_Timeout_signal_T
+     *  The OPB arbiter activated OPB Timeout signal
      */
     (rLPC_FIR, bit(4)) ? defaultMaskedError;
 
     /** LPC_FIR[5]
-     *  the_OPB_Master_LS_was_not_able_to_end_the_requeste
+     *  OPB Master LS not able to end requested OPB access
      */
-    (rLPC_FIR, bit(5)) ? defaultMaskedError;
+    (rLPC_FIR, bit(5)) ? self_th_32perDay;
 
     /** LPC_FIR[6]
-     *  a parity_error_was_detected_in_the_OPB_Master_LS_c
+     *  A parity error was detected in the OPB Master LS c
      */
-    (rLPC_FIR, bit(6)) ? defaultMaskedError;
+    (rLPC_FIR, bit(6)) ? self_th_1;
 
     /** LPC_FIR[7]
-     *  a parity_error_was_detected_in_the_OPB_Master_LS_d
+     *  A parity error was detected in the OPB Master LS d
      */
-    (rLPC_FIR, bit(7)) ? defaultMaskedError;
+    (rLPC_FIR, bit(7)) ? self_th_1;
 
     /** LPC_FIR[8]
-     *  reserved_bit_1_tied_to_zero
+     *  reserved
      */
     (rLPC_FIR, bit(8)) ? defaultMaskedError;
 
     /** LPC_FIR[9]
-     *  reserved_bit_0_tied_to_zero
+     *  reserved
      */
     (rLPC_FIR, bit(9)) ? defaultMaskedError;
 

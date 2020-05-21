@@ -554,77 +554,22 @@ rule rPAU_FIR_1
 
 group gPAU_FIR_1
     filter singlebit,
-           cs_root_cause
+           cs_root_cause(13,14,15,17,37,39,40,41,42)
 {
-    /** PAU_FIR_1[0]
-     *  NDL Brick0 stall
+    /** PAU_FIR_1[0:11]
+     *  Reserved
      */
-    (rPAU_FIR_1, bit(0)) ? defaultMaskedError;
-
-    /** PAU_FIR_1[1]
-     *  NDL Brick0 nostall
-     */
-    (rPAU_FIR_1, bit(1)) ? defaultMaskedError;
-
-    /** PAU_FIR_1[2]
-     *  NDL Brick1 stall
-     */
-    (rPAU_FIR_1, bit(2)) ? defaultMaskedError;
-
-    /** PAU_FIR_1[3]
-     *  NDL Brick1 nostall
-     */
-    (rPAU_FIR_1, bit(3)) ? defaultMaskedError;
-
-    /** PAU_FIR_1[4]
-     *  NDL Brick2 stall
-     */
-    (rPAU_FIR_1, bit(4)) ? defaultMaskedError;
-
-    /** PAU_FIR_1[5]
-     *  NDL Brick2 nostall
-     */
-    (rPAU_FIR_1, bit(5)) ? defaultMaskedError;
-
-    /** PAU_FIR_1[6]
-     *  NDL Brick3 stall
-     */
-    (rPAU_FIR_1, bit(6)) ? defaultMaskedError;
-
-    /** PAU_FIR_1[7]
-     *  NDL Brick3 nostall
-     */
-    (rPAU_FIR_1, bit(7)) ? defaultMaskedError;
-
-    /** PAU_FIR_1[8]
-     *  NDL Brick4 stall
-     */
-    (rPAU_FIR_1, bit(8)) ? defaultMaskedError;
-
-    /** PAU_FIR_1[9]
-     *  NDL Brick4 nostall
-     */
-    (rPAU_FIR_1, bit(9)) ? defaultMaskedError;
-
-    /** PAU_FIR_1[10]
-     *  NDL Brick5 stall
-     */
-    (rPAU_FIR_1, bit(10)) ? defaultMaskedError;
-
-    /** PAU_FIR_1[11]
-     *  NDL Brick5 nostall
-     */
-    (rPAU_FIR_1, bit(11)) ? defaultMaskedError;
+    (rPAU_FIR_1, bit(0|1|2|3|4|5|6|7|8|9|10|11)) ? defaultMaskedError;
 
     /** PAU_FIR_1[12]
-     *  MISC Register ring error (noack, >1 ack)
+     *  MISC Register ring error
      */
-    (rPAU_FIR_1, bit(12)) ? defaultMaskedError;
+    (rPAU_FIR_1, bit(12)) ? self_th_32perDay;
 
     /** PAU_FIR_1[13]
      *  MISC Parity error from interrupt base real address
      */
-    (rPAU_FIR_1, bit(13)) ? defaultMaskedError;
+    (rPAU_FIR_1, bit(13)) ? self_th_1;
 
     /** PAU_FIR_1[14]
      *  MISC Parity error on Indirect SCOM Address registe
@@ -634,160 +579,160 @@ group gPAU_FIR_1
     /** PAU_FIR_1[15]
      *  MISC Parity error on MISC Control register
      */
-    (rPAU_FIR_1, bit(15)) ? defaultMaskedError;
+    (rPAU_FIR_1, bit(15)) ? self_th_1;
 
     /** PAU_FIR_1[16]
-     *  FIR1 Reserved, bit 16
+     *  Reserved
      */
     (rPAU_FIR_1, bit(16)) ? defaultMaskedError;
 
     /** PAU_FIR_1[17]
      *  ATS Invalid TVT entry (TCE Table Size = 0b00000)
      */
-    (rPAU_FIR_1, bit(17)) ? defaultMaskedError;
+    (rPAU_FIR_1, bit(17)) ? self_th_1;
 
     /** PAU_FIR_1[18]
-     *  ATS TVT Address range error (no xlate: EA out of r
+     *  ATS TVT Address range error
      */
-    (rPAU_FIR_1, bit(18)) ? defaultMaskedError;
+    (rPAU_FIR_1, bit(18)) ? self_th_1;
 
     /** PAU_FIR_1[19]
      *  ATS TCE Page access error during TCE cache lookup
      */
-    (rPAU_FIR_1, bit(19)) ? defaultMaskedError;
+    (rPAU_FIR_1, bit(19)) ? self_th_1;
 
     /** PAU_FIR_1[20]
      *  ATS Effective Address hit multiple TCE cache entri
      */
-    (rPAU_FIR_1, bit(20)) ? defaultMaskedError;
+    (rPAU_FIR_1, bit(20)) ? self_th_1;
 
     /** PAU_FIR_1[21]
      *  ATS TCE Page access error during TCE table-walk
      */
-    (rPAU_FIR_1, bit(21)) ? defaultMaskedError;
+    (rPAU_FIR_1, bit(21)) ? self_th_1;
 
     /** PAU_FIR_1[22]
      *  ATS Timeout on TCE tree walk
      */
-    (rPAU_FIR_1, bit(22)) ? defaultMaskedError;
+    (rPAU_FIR_1, bit(22)) ? self_th_1;
 
     /** PAU_FIR_1[23]
      *  ATS Parity error on TCE cache directory array
      */
-    (rPAU_FIR_1, bit(23)) ? defaultMaskedError;
+    (rPAU_FIR_1, bit(23)) ? self_th_1;
 
     /** PAU_FIR_1[24]
      *  ATS Parity error on TCE cache data array
      */
-    (rPAU_FIR_1, bit(24)) ? defaultMaskedError;
+    (rPAU_FIR_1, bit(24)) ? self_th_1;
 
     /** PAU_FIR_1[25]
      *  ATS ECC UE on Effective Address array
      */
-    (rPAU_FIR_1, bit(25)) ? defaultMaskedError;
+    (rPAU_FIR_1, bit(25)) ? self_th_1;
 
     /** PAU_FIR_1[26]
      *  ATS ECC CE on Effective Address array
      */
-    (rPAU_FIR_1, bit(26)) ? defaultMaskedError;
+    (rPAU_FIR_1, bit(26)) ? self_th_1;
 
     /** PAU_FIR_1[27]
      *  ATS ECC UE on TDRmem array (table-walk state machi
      */
-    (rPAU_FIR_1, bit(27)) ? defaultMaskedError;
+    (rPAU_FIR_1, bit(27)) ? self_th_1;
 
     /** PAU_FIR_1[28]
      *  ATS ECC CE on TDRmem array
      */
-    (rPAU_FIR_1, bit(28)) ? defaultMaskedError;
+    (rPAU_FIR_1, bit(28)) ? self_th_1;
 
     /** PAU_FIR_1[29]
      *  ATS ECC UE on CQ CTL DMA Read data to TDR_mem arra
      */
-    (rPAU_FIR_1, bit(29)) ? defaultMaskedError;
+    (rPAU_FIR_1, bit(29)) ? self_th_1;
 
     /** PAU_FIR_1[30]
      *  ATS ECC CE on CQ CTL DMA Read data to TDR_mem arra
      */
-    (rPAU_FIR_1, bit(30)) ? defaultMaskedError;
+    (rPAU_FIR_1, bit(30)) ? self_th_1;
 
     /** PAU_FIR_1[31]
      *  ATS Parity error on TVT entry
      */
-    (rPAU_FIR_1, bit(31)) ? defaultMaskedError;
+    (rPAU_FIR_1, bit(31)) ? self_th_1;
 
     /** PAU_FIR_1[32]
      *  ATS Parity error on IODA Address Register
      */
-    (rPAU_FIR_1, bit(32)) ? defaultMaskedError;
+    (rPAU_FIR_1, bit(32)) ? self_th_1;
 
     /** PAU_FIR_1[33]
      *  ATS Parity error on ATS Control Register
      */
-    (rPAU_FIR_1, bit(33)) ? defaultMaskedError;
+    (rPAU_FIR_1, bit(33)) ? self_th_1;
 
     /** PAU_FIR_1[34]
      *  ATS Parity error on ATS Timeout Control register
      */
-    (rPAU_FIR_1, bit(34)) ? defaultMaskedError;
+    (rPAU_FIR_1, bit(34)) ? self_th_1;
 
     /** PAU_FIR_1[35]
      *  ATS Invalid IODA Table Address Register Table Sele
      */
-    (rPAU_FIR_1, bit(35)) ? defaultMaskedError;
+    (rPAU_FIR_1, bit(35)) ? self_th_1;
 
     /** PAU_FIR_1[36]
-     *  ATS Reserved, macro bit 19
+     *  Reserved
      */
     (rPAU_FIR_1, bit(36)) ? defaultMaskedError;
 
     /** PAU_FIR_1[37]
-     *  kill xlate epoch timeout.
+     *  Kill xlate epoch timeout
      */
-    (rPAU_FIR_1, bit(37)) ? defaultMaskedError;
+    (rPAU_FIR_1, bit(37)) ? self_th_1;
 
     /** PAU_FIR_1[38]
-     *  XSL Reserved, macro bit 19.
+     *  PEE secure SMF not secure
      */
     (rPAU_FIR_1, bit(38)) ? defaultMaskedError;
 
     /** PAU_FIR_1[39]
-     *  XSL Reserved, macro bit 20.
+     *  XSL in suspend mode when OTL sends cmd
      */
-    (rPAU_FIR_1, bit(39)) ? defaultMaskedError;
+    (rPAU_FIR_1, bit(39)) ? self_th_1;
 
     /** PAU_FIR_1[40]
-     *  XSL Reserved, macro bit 21.
+     *  Unsupported page size
      */
-    (rPAU_FIR_1, bit(40)) ? defaultMaskedError;
+    (rPAU_FIR_1, bit(40)) ? self_th_1;
 
     /** PAU_FIR_1[41]
-     *  XSL Reserved, macro bit 22.
+     *  Unexpected XLATE release
      */
-    (rPAU_FIR_1, bit(41)) ? defaultMaskedError;
+    (rPAU_FIR_1, bit(41)) ? self_th_1;
 
     /** PAU_FIR_1[42]
-     *  XSL Reserved, macro bit 23.
+     *  Kill XLATE done fail
      */
-    (rPAU_FIR_1, bit(42)) ? defaultMaskedError;
+    (rPAU_FIR_1, bit(42)) ? self_th_1;
 
     /** PAU_FIR_1[43]
-     *  XSL Reserved, macro bit 24.
+     *  Reserved
      */
     (rPAU_FIR_1, bit(43)) ? defaultMaskedError;
 
     /** PAU_FIR_1[44]
-     *  XSL Reserved, macro bit 25.
+     *  XSL wrap parity error
      */
-    (rPAU_FIR_1, bit(44)) ? defaultMaskedError;
+    (rPAU_FIR_1, bit(44)) ? self_th_1;
 
     /** PAU_FIR_1[45]
-     *  XSL Reserved, macro bit 26.
+     *  XSL invalid PE handled from AME
      */
-    (rPAU_FIR_1, bit(45)) ? defaultMaskedError;
+    (rPAU_FIR_1, bit(45)) ? self_th_1;
 
     /** PAU_FIR_1[46]
-     *  XSL Reserved, macro bit 27.
+     *  Reserved
      */
     (rPAU_FIR_1, bit(46)) ? defaultMaskedError;
 
@@ -854,27 +799,22 @@ group gPAU_FIR_1
     /** PAU_FIR_1[59]
      *  AME ECC CE
      */
-    (rPAU_FIR_1, bit(59)) ? defaultMaskedError;
+    (rPAU_FIR_1, bit(59)) ? self_th_32perDay;
 
     /** PAU_FIR_1[60]
-     *  MISC Pervasive SCOM satellite signaled internal FS
+     *  Misc SCOM ring 0 sat 0 signalled internal FSM erro
      */
     (rPAU_FIR_1, bit(60)) ? defaultMaskedError;
 
     /** PAU_FIR_1[61]
-     *  MISC Pervasive SCOM satellite signaled internal FS
+     *  Misc SCOM ring 0 sat 1 signalled internal FSM erro
      */
     (rPAU_FIR_1, bit(61)) ? defaultMaskedError;
 
-    /** PAU_FIR_1[62]
-     *  Unused FIR
+    /** PAU_FIR_1[62:63]
+     *  Reserved
      */
-    (rPAU_FIR_1, bit(62)) ? defaultMaskedError;
-
-    /** PAU_FIR_1[63]
-     *  Unused FIR
-     */
-    (rPAU_FIR_1, bit(63)) ? defaultMaskedError;
+    (rPAU_FIR_1, bit(62|63)) ? defaultMaskedError;
 
 };
 
@@ -894,7 +834,7 @@ rule rPAU_FIR_2
 
 group gPAU_FIR_2
     filter singlebit,
-           cs_root_cause
+           cs_root_cause(4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,20,21,22,23,24,25,26,27,28,29,30,31,36,37,38,39,40,41,45,47,48,50,51,52,58,59,60)
 {
     /** PAU_FIR_2[0]
      *  OTL Brick2 translation fault
@@ -917,147 +857,147 @@ group gPAU_FIR_2
     (rPAU_FIR_2, bit(3)) ? defaultMaskedError;
 
     /** PAU_FIR_2[4]
-     *  OTL TL credit counter overflow caused by return_tl
+     *  OTL TL credit ctr overflow
      */
-    (rPAU_FIR_2, bit(4)) ? defaultMaskedError;
+    (rPAU_FIR_2, bit(4)) ? self_th_1;
 
     /** PAU_FIR_2[5]
-     *  OTL RX acTag specified in a command is outside the
+     *  OTL RX acTag invalid
      */
-    (rPAU_FIR_2, bit(5)) ? defaultMaskedError;
+    (rPAU_FIR_2, bit(5)) ? self_th_1;
 
     /** PAU_FIR_2[6]
      *  OTL RX acTag specified in the command points to an
      */
-    (rPAU_FIR_2, bit(6)) ? defaultMaskedError;
+    (rPAU_FIR_2, bit(6)) ? self_th_1;
 
     /** PAU_FIR_2[7]
      *  OTL RX reserved opcode used.
      */
-    (rPAU_FIR_2, bit(7)) ? defaultMaskedError;
+    (rPAU_FIR_2, bit(7)) ? self_th_1;
 
     /** PAU_FIR_2[8]
      *  OTL RX return_tl_credit command found outside slot
      */
-    (rPAU_FIR_2, bit(8)) ? defaultMaskedError;
+    (rPAU_FIR_2, bit(8)) ? self_th_1;
 
     /** PAU_FIR_2[9]
      *  OTL RX bad opcode and template combination.
      */
-    (rPAU_FIR_2, bit(9)) ? defaultMaskedError;
+    (rPAU_FIR_2, bit(9)) ? self_th_1;
 
     /** PAU_FIR_2[10]
      *  OTL RX unsupported template format.
      */
-    (rPAU_FIR_2, bit(10)) ? defaultMaskedError;
+    (rPAU_FIR_2, bit(10)) ? self_th_1;
 
     /** PAU_FIR_2[11]
      *  OTL RX bad template x00 format.
      */
-    (rPAU_FIR_2, bit(11)) ? defaultMaskedError;
+    (rPAU_FIR_2, bit(11)) ? self_th_1;
 
     /** PAU_FIR_2[12]
      *  OTL RX control flit overrun.
      */
-    (rPAU_FIR_2, bit(12)) ? defaultMaskedError;
+    (rPAU_FIR_2, bit(12)) ? self_th_1;
 
     /** PAU_FIR_2[13]
      *  OTL RX unexpected data flit.
      */
-    (rPAU_FIR_2, bit(13)) ? defaultMaskedError;
+    (rPAU_FIR_2, bit(13)) ? self_th_1;
 
     /** PAU_FIR_2[14]
      *  OTL RX DL link down.
      */
-    (rPAU_FIR_2, bit(14)) ? defaultMaskedError;
+    (rPAU_FIR_2, bit(14)) ? self_th_1;
 
     /** PAU_FIR_2[15]
      *  OTL RX bad data received on command.
      */
-    (rPAU_FIR_2, bit(15)) ? defaultMaskedError;
+    (rPAU_FIR_2, bit(15)) ? self_th_1;
 
     /** PAU_FIR_2[16]
      *  OTL RX bad data received on response.
      */
-    (rPAU_FIR_2, bit(16)) ? defaultMaskedError;
+    (rPAU_FIR_2, bit(16)) ? self_th_1;
 
     /** PAU_FIR_2[17]
      *  OTL RX AP response not allowed (CAPPTag not recogn
      */
-    (rPAU_FIR_2, bit(17)) ? defaultMaskedError;
+    (rPAU_FIR_2, bit(17)) ? self_th_1;
 
     /** PAU_FIR_2[18]
      *  OR of all OTL parity errors.
      */
-    (rPAU_FIR_2, bit(18)) ? defaultMaskedError;
+    (rPAU_FIR_2, bit(18)) ? self_th_1;
 
     /** PAU_FIR_2[19]
      *  OR of all OTL ECC CE errors.
      */
-    (rPAU_FIR_2, bit(19)) ? defaultMaskedError;
+    (rPAU_FIR_2, bit(19)) ? self_th_32perDay;
 
     /** PAU_FIR_2[20]
      *  OR of all OTL ECC UE errors.
      */
-    (rPAU_FIR_2, bit(20)) ? defaultMaskedError;
+    (rPAU_FIR_2, bit(20)) ? self_th_1;
 
     /** PAU_FIR_2[21]
      *  RXO OP Errors.
      */
-    (rPAU_FIR_2, bit(21)) ? defaultMaskedError;
+    (rPAU_FIR_2, bit(21)) ? self_th_1;
 
     /** PAU_FIR_2[22]
      *  RXO Internal Errors.
      */
-    (rPAU_FIR_2, bit(22)) ? defaultMaskedError;
+    (rPAU_FIR_2, bit(22)) ? self_th_1;
 
     /** PAU_FIR_2[23]
      *  OTL RXI fifo overrun.
      */
-    (rPAU_FIR_2, bit(23)) ? defaultMaskedError;
+    (rPAU_FIR_2, bit(23)) ? self_th_1;
 
     /** PAU_FIR_2[24]
-     *  OTL RXI control flit data run length invalid.
+     *  OTL RXI ctrl flit data run len invalid.
      */
-    (rPAU_FIR_2, bit(24)) ? defaultMaskedError;
+    (rPAU_FIR_2, bit(24)) ? self_th_1;
 
     /** PAU_FIR_2[25]
-     *  OTL RXI opcode utilizing dLength specifies dL=0b00
+     *  OTL RXI opcode specifies dL=0b00.
      */
-    (rPAU_FIR_2, bit(25)) ? defaultMaskedError;
+    (rPAU_FIR_2, bit(25)) ? self_th_1;
 
     /** PAU_FIR_2[26]
-     *  OTL RXI bad data received vc2.
+     *  OTL RXI bad data received vc2
      */
-    (rPAU_FIR_2, bit(26)) ? defaultMaskedError;
+    (rPAU_FIR_2, bit(26)) ? self_th_1;
 
     /** PAU_FIR_2[27]
-     *  OTL RXI dcp2 fifo overrun.
+     *  OTL RXI dcp2 fifo overrun
      */
-    (rPAU_FIR_2, bit(27)) ? defaultMaskedError;
+    (rPAU_FIR_2, bit(27)) ? self_th_1;
 
     /** PAU_FIR_2[28]
-     *  OTL RXI vc1 fifo overrun.
+     *  OTL RXI vc1 fifo overrun
      */
-    (rPAU_FIR_2, bit(28)) ? defaultMaskedError;
+    (rPAU_FIR_2, bit(28)) ? self_th_1;
 
     /** PAU_FIR_2[29]
-     *  OTL RXI vc2 fifo overrun.
+     *  OTL RXI vc2 fifo overrun
      */
-    (rPAU_FIR_2, bit(29)) ? defaultMaskedError;
+    (rPAU_FIR_2, bit(29)) ? self_th_1;
 
     /** PAU_FIR_2[30]
-     *  Opcode data length not supported.
+     *  OTL RXI Data link not supported
      */
-    (rPAU_FIR_2, bit(30)) ? defaultMaskedError;
+    (rPAU_FIR_2, bit(30)) ? self_th_1;
 
     /** PAU_FIR_2[31]
-     *  OTL TXI opcode error.
+     *  OTL TXI opcode error
      */
-    (rPAU_FIR_2, bit(31)) ? defaultMaskedError;
+    (rPAU_FIR_2, bit(31)) ? self_th_1;
 
     /** PAU_FIR_2[32]
-     *  malformed packet error type 4 (rxi_misc_error_fiel
+     *  OTL RXI reserved field not equal to 0
      */
     (rPAU_FIR_2, bit(32)) ? defaultMaskedError;
 
@@ -1067,49 +1007,49 @@ group gPAU_FIR_2
     (rPAU_FIR_2, bit(33)) ? defaultMaskedError;
 
     /** PAU_FIR_2[34]
-     *  OTL Reserved, macro bit 30.
+     *  Reserved
      */
     (rPAU_FIR_2, bit(34)) ? defaultMaskedError;
 
     /** PAU_FIR_2[35]
-     *  OTL Reserved, macro bit 31.
+     *  Reserved
      */
     (rPAU_FIR_2, bit(35)) ? defaultMaskedError;
 
     /** PAU_FIR_2[36]
      *  MMIO invalidate requested while one is in progress
      */
-    (rPAU_FIR_2, bit(36)) ? defaultMaskedError;
+    (rPAU_FIR_2, bit(36)) ? self_th_1;
 
     /** PAU_FIR_2[37]
      *  Unexpected ITAG returned on itag completion port 0
      */
-    (rPAU_FIR_2, bit(37)) ? defaultMaskedError;
+    (rPAU_FIR_2, bit(37)) ? self_th_1;
 
     /** PAU_FIR_2[38]
      *  Unexpected ITAG returned on itag completion port 1
      */
-    (rPAU_FIR_2, bit(38)) ? defaultMaskedError;
+    (rPAU_FIR_2, bit(38)) ? self_th_1;
 
     /** PAU_FIR_2[39]
      *  Unexpected Read PEE completion.
      */
-    (rPAU_FIR_2, bit(39)) ? defaultMaskedError;
+    (rPAU_FIR_2, bit(39)) ? self_th_1;
 
     /** PAU_FIR_2[40]
      *  Unexpected Checkout response.
      */
-    (rPAU_FIR_2, bit(40)) ? defaultMaskedError;
+    (rPAU_FIR_2, bit(40)) ? self_th_1;
 
     /** PAU_FIR_2[41]
      *  Translation request while SPAP is invalid.
      */
-    (rPAU_FIR_2, bit(41)) ? defaultMaskedError;
+    (rPAU_FIR_2, bit(41)) ? self_th_1;
 
     /** PAU_FIR_2[42]
      *  Read a PEE which was not valid.
      */
-    (rPAU_FIR_2, bit(42)) ? defaultMaskedError;
+    (rPAU_FIR_2, bit(42)) ? self_th_1_SUE;
 
     /** PAU_FIR_2[43]
      *  Bloom filter protection error.
@@ -1122,44 +1062,44 @@ group gPAU_FIR_2
     (rPAU_FIR_2, bit(44)) ? defaultMaskedError;
 
     /** PAU_FIR_2[45]
-     *  TA Translation request to an invalid TA.
+     *  TA translation request to an invalid TA
      */
-    (rPAU_FIR_2, bit(45)) ? defaultMaskedError;
+    (rPAU_FIR_2, bit(45)) ? self_th_1;
 
     /** PAU_FIR_2[46]
      *  correctable array error (SBE).
      */
-    (rPAU_FIR_2, bit(46)) ? defaultMaskedError;
+    (rPAU_FIR_2, bit(46)) ? self_th_32perDay;
 
     /** PAU_FIR_2[47]
      *  uncorrectable array error (UE or parity).
      */
-    (rPAU_FIR_2, bit(47)) ? defaultMaskedError;
+    (rPAU_FIR_2, bit(47)) ? self_th_1;
 
     /** PAU_FIR_2[48]
      *  S/TLBI buffer overflow.
      */
-    (rPAU_FIR_2, bit(48)) ? defaultMaskedError;
+    (rPAU_FIR_2, bit(48)) ? self_th_1;
 
     /** PAU_FIR_2[49]
-     *  SBE correctable error on Powerbus checkout respons
+     *  SBE CE on Pb cout rsp or PEE read data.
      */
-    (rPAU_FIR_2, bit(49)) ? defaultMaskedError;
+    (rPAU_FIR_2, bit(49)) ? self_th_32perDay;
 
     /** PAU_FIR_2[50]
-     *  UE  uncorrectable error on Powerbus checkout respo
+     *  UE on Pb cut rsp or PEE read data.
      */
-    (rPAU_FIR_2, bit(50)) ? defaultMaskedError;
+    (rPAU_FIR_2, bit(50)) ? self_th_1;
 
     /** PAU_FIR_2[51]
-     *  SUE error on Powerbus checkout response data or Po
+     *  SUE on Pb chkout rsp or Pb PEE rd data.
      */
-    (rPAU_FIR_2, bit(51)) ? defaultMaskedError;
+    (rPAU_FIR_2, bit(51)) ? self_th_1;
 
     /** PAU_FIR_2[52]
      *  PA mem_hit when bar mode is nonzero .
      */
-    (rPAU_FIR_2, bit(52)) ? defaultMaskedError;
+    (rPAU_FIR_2, bit(52)) ? self_th_1;
 
     /** PAU_FIR_2[53]
      *  XSL Reserved, macro bit 17.
@@ -1179,40 +1119,40 @@ group gPAU_FIR_2
     /** PAU_FIR_2[56]
      *  AME ECC UE on control information or state bit err
      */
-    (rPAU_FIR_2, bit(56)) ? defaultMaskedError;
+    (rPAU_FIR_2, bit(56)) ? self_th_1;
 
     /** PAU_FIR_2[57]
      *  AME ECC UE on control information or state bit err
      */
-    (rPAU_FIR_2, bit(57)) ? defaultMaskedError;
+    (rPAU_FIR_2, bit(57)) ? self_th_1;
 
     /** PAU_FIR_2[58]
      *  AME Logic errors that are contained within AME and
      */
-    (rPAU_FIR_2, bit(58)) ? defaultMaskedError;
+    (rPAU_FIR_2, bit(58)) ? self_th_1;
 
     /** PAU_FIR_2[59]
      *  AME Logic errors that can affect correctness of ex
      */
-    (rPAU_FIR_2, bit(59)) ? defaultMaskedError;
+    (rPAU_FIR_2, bit(59)) ? self_th_1;
 
     /** PAU_FIR_2[60]
      *  AME firmware-detected fatal error conditions
      */
-    (rPAU_FIR_2, bit(60)) ? defaultMaskedError;
+    (rPAU_FIR_2, bit(60)) ? self_th_1;
 
     /** PAU_FIR_2[61]
-     *  AME Reserved
+     *  Reserved
      */
     (rPAU_FIR_2, bit(61)) ? defaultMaskedError;
 
     /** PAU_FIR_2[62]
-     *  Unused FIR
+     *  Reserved
      */
     (rPAU_FIR_2, bit(62)) ? defaultMaskedError;
 
     /** PAU_FIR_2[63]
-     *  Unused FIR
+     *  Reserved
      */
     (rPAU_FIR_2, bit(63)) ? defaultMaskedError;
 

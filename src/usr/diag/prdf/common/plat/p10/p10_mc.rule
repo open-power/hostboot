@@ -506,62 +506,62 @@ group gMC_LOCAL_FIR
     /** MC_LOCAL_FIR[0]
      *  CFIR - Parity or PCB access error
      */
-    (rMC_LOCAL_FIR, bit(0)) ? defaultMaskedError;
+    (rMC_LOCAL_FIR, bit(0)) ? self_th_32perDay;
 
     /** MC_LOCAL_FIR[1]
      *  CPLT_CTRL - PCB access error
      */
-    (rMC_LOCAL_FIR, bit(1)) ? defaultMaskedError;
+    (rMC_LOCAL_FIR, bit(1)) ? self_th_32perDay;
 
     /** MC_LOCAL_FIR[2]
-     *  CC - PCB access error - read and clear nn03000F
+     *  CC - PCB access error
      */
-    (rMC_LOCAL_FIR, bit(2)) ? defaultMaskedError;
+    (rMC_LOCAL_FIR, bit(2)) ? self_th_32perDay;
 
     /** MC_LOCAL_FIR[3]
-     *  CC - Clock Control Error - read and clear nn03000F
+     *  CC - Clock Control Error
      */
-    (rMC_LOCAL_FIR, bit(3)) ? defaultMaskedError;
+    (rMC_LOCAL_FIR, bit(3)) ? self_th_32perDay;
 
     /** MC_LOCAL_FIR[4]
-     *  PSC - PSCOM access error - read and clear nn01001
+     *  PSC - PSCOM access error
      */
-    (rMC_LOCAL_FIR, bit(4)) ? defaultMaskedError;
+    (rMC_LOCAL_FIR, bit(4)) ? self_th_32perDay;
 
     /** MC_LOCAL_FIR[5]
-     *  PSC - internal or ring interface error - read and 
+     *  PSC - internal or ring interface error
      */
-    (rMC_LOCAL_FIR, bit(5)) ? defaultMaskedError;
+    (rMC_LOCAL_FIR, bit(5)) ? self_th_32perDay;
 
     /** MC_LOCAL_FIR[6]
-     *  THERM - pwr_comp_err, skitter_comp_err, scan_init_
+     *  THERM - Internal errors
      */
-    (rMC_LOCAL_FIR, bit(6)) ? defaultMaskedError;
+    (rMC_LOCAL_FIR, bit(6)) ? threshold_and_mask_self;
 
     /** MC_LOCAL_FIR[7]
      *  THERM - pcb error
      */
-    (rMC_LOCAL_FIR, bit(7)) ? defaultMaskedError;
+    (rMC_LOCAL_FIR, bit(7)) ? threshold_and_mask_self;
 
     /** MC_LOCAL_FIR[8]
      *  THERMTRIP - Critical temperature indicator
      */
-    (rMC_LOCAL_FIR, bit(8)) ? defaultMaskedError;
+    (rMC_LOCAL_FIR, bit(8)) ? threshold_and_mask_self;
 
     /** MC_LOCAL_FIR[9]
      *  THERMTRIP - Fatal temperature indicator
      */
-    (rMC_LOCAL_FIR, bit(9)) ? defaultMaskedError;
+    (rMC_LOCAL_FIR, bit(9)) ? threshold_and_mask_self;
 
     /** MC_LOCAL_FIR[10]
      *  VOLTTRIP - Voltage sense error
      */
-    (rMC_LOCAL_FIR, bit(10)) ? defaultMaskedError;
+    (rMC_LOCAL_FIR, bit(10)) ? threshold_and_mask_self;
 
     /** MC_LOCAL_FIR[11]
      *  DBG - scom parity fail
      */
-    (rMC_LOCAL_FIR, bit(11)) ? defaultMaskedError;
+    (rMC_LOCAL_FIR, bit(11)) ? threshold_and_mask_self;
 
     /** MC_LOCAL_FIR[12]
      *  reserved
@@ -606,12 +606,12 @@ group gMC_LOCAL_FIR
     /** MC_LOCAL_FIR[20]
      *  Trace00 - scom parity err
      */
-    (rMC_LOCAL_FIR, bit(20)) ? defaultMaskedError;
+    (rMC_LOCAL_FIR, bit(20)) ? self_th_32perDay;
 
     /** MC_LOCAL_FIR[21]
      *  Trace01 - scom parity err - Unused in Axon,PCI
      */
-    (rMC_LOCAL_FIR, bit(21)) ? defaultMaskedError;
+    (rMC_LOCAL_FIR, bit(21)) ? self_th_32perDay;
 
     /** MC_LOCAL_FIR[22]
      *  unused
@@ -846,124 +846,124 @@ group gMC_FIR
            cs_root_cause
 {
     /** MC_FIR[0]
-     *  If '1', a MC recoverable error was detected.  See 
+     *  MC internal recoverable error
      */
-    (rMC_FIR, bit(0)) ? defaultMaskedError;
+    (rMC_FIR, bit(0)) ? self_th_1;
 
     /** MC_FIR[1]
-     *  If 1, a MC non-recoverable error was detected.  Se
+     *  Mc internal non-recoverable error
      */
-    (rMC_FIR, bit(1)) ? defaultMaskedError;
+    (rMC_FIR, bit(1)) ? self_th_1;
 
     /** MC_FIR[2]
-     *  If '1', an PowerBus protocol error was detected. (
+     *  MC powerbus protocol error
      */
-    (rMC_FIR, bit(2)) ? defaultMaskedError;
+    (rMC_FIR, bit(2)) ? level2_th_1;
 
     /** MC_FIR[3]
-     *  If '1', a command was issued to inband address spa
+     *  MC inband bar with incorrect ttype
      */
-    (rMC_FIR, bit(3)) ? defaultMaskedError;
+    (rMC_FIR, bit(3)) ? TBDDefaultCallout;
 
     /** MC_FIR[4]
-     *  If '1', an address match on more that one Memory B
+     *  MC multiple BAR hit
      */
-    (rMC_FIR, bit(4)) ? defaultMaskedError;
+    (rMC_FIR, bit(4)) ? TBDDefaultCallout;
 
     /** MC_FIR[5]
-     *  If set, the ECC syndrome for PowerBus write data i
+     *  Commandlist early hang trigger activated
      */
     (rMC_FIR, bit(5)) ? defaultMaskedError;
 
     /** MC_FIR[6]
-     *  Reserved[6].
+     *  reserved
      */
     (rMC_FIR, bit(6)) ? defaultMaskedError;
 
     /** MC_FIR[7]
-     *  Reserved[7].
+     *  reserved
      */
     (rMC_FIR, bit(7)) ? defaultMaskedError;
 
     /** MC_FIR[8]
-     *  If '1', a command list state machine has timed out
+     *  Command list state machine timeout
      */
-    (rMC_FIR, bit(8)) ? defaultMaskedError;
+    (rMC_FIR, bit(8)) ? threshold_and_mask_self;
 
     /** MC_FIR[9]
-     *  Reserved[9].
+     *  reserved
      */
     (rMC_FIR, bit(9)) ? defaultMaskedError;
 
     /** MC_FIR[10]
-     *  Reserved[10].
+     *  reserved
      */
     (rMC_FIR, bit(10)) ? defaultMaskedError;
 
     /** MC_FIR[11]
-     *  If '1', a MCS WAT0 event has occurred.
+     *  WAT0 event occurred
      */
     (rMC_FIR, bit(11)) ? defaultMaskedError;
 
     /** MC_FIR[12]
-     *  If '1', a MCS WAT1 event has occurred.
+     *  WAT1 event occurred
      */
     (rMC_FIR, bit(12)) ? defaultMaskedError;
 
     /** MC_FIR[13]
-     *  If '1', a MCS WAT2 event has occurred.
+     *  WAT2 event occurred
      */
     (rMC_FIR, bit(13)) ? defaultMaskedError;
 
     /** MC_FIR[14]
-     *  If '1', a MCS WAT3 event has occurred.
+     *  WAT3 event occurred
      */
     (rMC_FIR, bit(14)) ? defaultMaskedError;
 
     /** MC_FIR[15]
      *  Plus One Prefetch generated command did not hit an
      */
-    (rMC_FIR, bit(15)) ? defaultMaskedError;
+    (rMC_FIR, bit(15)) ? self_th_1;
 
     /** MC_FIR[16]
      *  Plus One Prefetch generated command hit config or 
      */
-    (rMC_FIR, bit(16)) ? defaultMaskedError;
+    (rMC_FIR, bit(16)) ? self_th_1;
 
     /** MC_FIR[17]
      *  Parity Error in WAT/Debug config register.
      */
-    (rMC_FIR, bit(17)) ? defaultMaskedError;
+    (rMC_FIR, bit(17)) ? self_th_1;
 
     /** MC_FIR[18]
-     *  Reserved[18].
+     *  reserved
      */
     (rMC_FIR, bit(18)) ? defaultMaskedError;
 
     /** MC_FIR[19]
-     *  Reserved[19].
+     *  reserved
      */
     (rMC_FIR, bit(19)) ? defaultMaskedError;
 
     /** MC_FIR[20]
      *  Incoming Powerbus Command hit multiple valid confi
      */
-    (rMC_FIR, bit(20)) ? defaultMaskedError;
+    (rMC_FIR, bit(20)) ? self_th_1;
 
     /** MC_FIR[21]
-     *  Reserved[21].
+     *  reserved
      */
     (rMC_FIR, bit(21)) ? defaultMaskedError;
 
     /** MC_FIR[22]
-     *  Access to secure memory facility failed. Improper 
+     *  Secure mem facility access privilege error by orig
      */
     (rMC_FIR, bit(22)) ? defaultMaskedError;
 
     /** MC_FIR[23]
-     *  Caused by multiple sync commands being received by
+     *  Multiple sync cmds received by an MC, or while one
      */
-    (rMC_FIR, bit(23)) ? defaultMaskedError;
+    (rMC_FIR, bit(23)) ? self_th_1;
 
 };
 
@@ -988,42 +988,42 @@ group gMC_MISC_FIR
            cs_root_cause
 {
     /** MC_MISC_FIR[0]
-     *  WAT Debug Bus Attention. This is a way for the WAT
+     *  WAT Debug Bus Attention.
      */
     (rMC_MISC_FIR, bit(0)) ? defaultMaskedError;
 
     /** MC_MISC_FIR[1]
-     *  SCOM DBGSRC Register parity Error. Indicates that 
+     *  SCOM DBGSRC Register parity Error.
      */
     (rMC_MISC_FIR, bit(1)) ? defaultMaskedError;
 
     /** MC_MISC_FIR[2]
-     *  SCOM Recoverable Register Parity Error. This bit i
+     *  SCOM Recoverable Register Parity Error.
      */
-    (rMC_MISC_FIR, bit(2)) ? defaultMaskedError;
+    (rMC_MISC_FIR, bit(2)) ? self_th_1;
 
     /** MC_MISC_FIR[3]
-     *  Spare fir; hooked up to the parity error dectect o
+     *  spare
      */
     (rMC_MISC_FIR, bit(3)) ? defaultMaskedError;
 
     /** MC_MISC_FIR[4]
-     *  Indicates that an application interrupt was receiv
+     *  Application interrupt received from OCMB on channe
      */
     (rMC_MISC_FIR, bit(4)) ? defaultMaskedError;
 
     /** MC_MISC_FIR[5]
-     *  Indicates that an application interrupt was receiv
+     *  Application interrupt received from OCMB on channe
      */
     (rMC_MISC_FIR, bit(5)) ? defaultMaskedError;
 
     /** MC_MISC_FIR[6]
-     *  Indicates that an application interrupt was receiv
+     *  Application interrupt received from OCMB on channe
      */
     (rMC_MISC_FIR, bit(6)) ? defaultMaskedError;
 
     /** MC_MISC_FIR[7]
-     *  Indicates that an application interrupt was receiv
+     *  Application interrupt received from OCMB on channe
      */
     (rMC_MISC_FIR, bit(7)) ? defaultMaskedError;
 
@@ -1038,12 +1038,12 @@ group gMC_MISC_FIR
     (rMC_MISC_FIR, bit(9)) ? defaultMaskedError;
 
     /** MC_MISC_FIR[10]
-     *  Reserved Fir Bit 10.
+     *  Reserved
      */
     (rMC_MISC_FIR, bit(10)) ? defaultMaskedError;
 
     /** MC_MISC_FIR[11]
-     *  Reserved Fir Bit 11.
+     *  Reserved
      */
     (rMC_MISC_FIR, bit(11)) ? defaultMaskedError;
 

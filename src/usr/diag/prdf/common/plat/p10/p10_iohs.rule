@@ -324,62 +324,62 @@ group gIOHS_LOCAL_FIR
     /** IOHS_LOCAL_FIR[0]
      *  CFIR - Parity or PCB access error
      */
-    (rIOHS_LOCAL_FIR, bit(0)) ? defaultMaskedError;
+    (rIOHS_LOCAL_FIR, bit(0)) ? self_th_32perDay;
 
     /** IOHS_LOCAL_FIR[1]
      *  CPLT_CTRL - PCB access error
      */
-    (rIOHS_LOCAL_FIR, bit(1)) ? defaultMaskedError;
+    (rIOHS_LOCAL_FIR, bit(1)) ? self_th_32perDay;
 
     /** IOHS_LOCAL_FIR[2]
-     *  CC - PCB access error - read and clear nn03000F
+     *  CC - PCB access error
      */
-    (rIOHS_LOCAL_FIR, bit(2)) ? defaultMaskedError;
+    (rIOHS_LOCAL_FIR, bit(2)) ? self_th_32perDay;
 
     /** IOHS_LOCAL_FIR[3]
-     *  CC - Clock Control Error - read and clear nn03000F
+     *  CC - Clock Control Error
      */
-    (rIOHS_LOCAL_FIR, bit(3)) ? defaultMaskedError;
+    (rIOHS_LOCAL_FIR, bit(3)) ? self_th_32perDay;
 
     /** IOHS_LOCAL_FIR[4]
-     *  PSC - PSCOM access error - read and clear nn01001
+     *  PSC - PSCOM access error
      */
-    (rIOHS_LOCAL_FIR, bit(4)) ? defaultMaskedError;
+    (rIOHS_LOCAL_FIR, bit(4)) ? self_th_32perDay;
 
     /** IOHS_LOCAL_FIR[5]
-     *  PSC - internal or ring interface error - read and 
+     *  PSC - internal or ring interface error
      */
-    (rIOHS_LOCAL_FIR, bit(5)) ? defaultMaskedError;
+    (rIOHS_LOCAL_FIR, bit(5)) ? self_th_32perDay;
 
     /** IOHS_LOCAL_FIR[6]
      *  THERM - pwr_comp_err, skitter_comp_err, scan_init_
      */
-    (rIOHS_LOCAL_FIR, bit(6)) ? defaultMaskedError;
+    (rIOHS_LOCAL_FIR, bit(6)) ? threshold_and_mask_self;
 
     /** IOHS_LOCAL_FIR[7]
      *  THERM - pcb error
      */
-    (rIOHS_LOCAL_FIR, bit(7)) ? defaultMaskedError;
+    (rIOHS_LOCAL_FIR, bit(7)) ? threshold_and_mask_self;
 
     /** IOHS_LOCAL_FIR[8]
      *  THERMTRIP - Critical temperature indicator
      */
-    (rIOHS_LOCAL_FIR, bit(8)) ? defaultMaskedError;
+    (rIOHS_LOCAL_FIR, bit(8)) ? threshold_and_mask_self;
 
     /** IOHS_LOCAL_FIR[9]
      *  THERMTRIP - Fatal temperature indicator
      */
-    (rIOHS_LOCAL_FIR, bit(9)) ? defaultMaskedError;
+    (rIOHS_LOCAL_FIR, bit(9)) ? threshold_and_mask_self;
 
     /** IOHS_LOCAL_FIR[10]
      *  VOLTTRIP - Voltage sense error
      */
-    (rIOHS_LOCAL_FIR, bit(10)) ? defaultMaskedError;
+    (rIOHS_LOCAL_FIR, bit(10)) ? threshold_and_mask_self;
 
     /** IOHS_LOCAL_FIR[11]
      *  DBG - scom parity fail
      */
-    (rIOHS_LOCAL_FIR, bit(11)) ? defaultMaskedError;
+    (rIOHS_LOCAL_FIR, bit(11)) ? threshold_and_mask_self;
 
     /** IOHS_LOCAL_FIR[12]
      *  reserved
@@ -424,12 +424,12 @@ group gIOHS_LOCAL_FIR
     /** IOHS_LOCAL_FIR[20]
      *  Trace00 - scom parity err
      */
-    (rIOHS_LOCAL_FIR, bit(20)) ? defaultMaskedError;
+    (rIOHS_LOCAL_FIR, bit(20)) ? self_th_32perDay;
 
     /** IOHS_LOCAL_FIR[21]
      *  Trace01 - scom parity err - Unused in Axon,PCI
      */
-    (rIOHS_LOCAL_FIR, bit(21)) ? defaultMaskedError;
+    (rIOHS_LOCAL_FIR, bit(21)) ? self_th_32perDay;
 
     /** IOHS_LOCAL_FIR[22]
      *  unused
@@ -657,7 +657,7 @@ rule rIOHS_DLP_FIR
 
 group gIOHS_DLP_FIR
     filter singlebit,
-           cs_root_cause
+           cs_root_cause(54,55,56,57,58,59,60,61)
 {
     /** IOHS_DLP_FIR[0]
      *  OLL link0 trained
@@ -692,12 +692,12 @@ group gIOHS_DLP_FIR
     /** IOHS_DLP_FIR[6]
      *  link0 crc error
      */
-    (rIOHS_DLP_FIR, bit(6)) ? defaultMaskedError;
+    (rIOHS_DLP_FIR, bit(6)) ? threshold_and_mask_self;
 
     /** IOHS_DLP_FIR[7]
      *  link1 crc error
      */
-    (rIOHS_DLP_FIR, bit(7)) ? defaultMaskedError;
+    (rIOHS_DLP_FIR, bit(7)) ? threshold_and_mask_self;
 
     /** IOHS_DLP_FIR[8]
      *  link0 nak received
@@ -732,22 +732,22 @@ group gIOHS_DLP_FIR
     /** IOHS_DLP_FIR[14]
      *  link0 sl ecc correctable
      */
-    (rIOHS_DLP_FIR, bit(14)) ? defaultMaskedError;
+    (rIOHS_DLP_FIR, bit(14)) ? threshold_and_mask_self;
 
     /** IOHS_DLP_FIR[15]
      *  link1 sl ecc correctable
      */
-    (rIOHS_DLP_FIR, bit(15)) ? defaultMaskedError;
+    (rIOHS_DLP_FIR, bit(15)) ? threshold_and_mask_self;
 
     /** IOHS_DLP_FIR[16]
      *  link0 sl ecc ue
      */
-    (rIOHS_DLP_FIR, bit(16)) ? defaultMaskedError;
+    (rIOHS_DLP_FIR, bit(16)) ? threshold_and_mask_self;
 
     /** IOHS_DLP_FIR[17]
      *  link1 sl ecc ue
      */
-    (rIOHS_DLP_FIR, bit(17)) ? defaultMaskedError;
+    (rIOHS_DLP_FIR, bit(17)) ? threshold_and_mask_self;
 
     /** IOHS_DLP_FIR[18]
      *  link0 retrain threshold
@@ -852,12 +852,12 @@ group gIOHS_DLP_FIR
     /** IOHS_DLP_FIR[38]
      *  link0 prbs select error
      */
-    (rIOHS_DLP_FIR, bit(38)) ? defaultMaskedError;
+    (rIOHS_DLP_FIR, bit(38)) ? threshold_and_mask_self;
 
     /** IOHS_DLP_FIR[39]
      *  link1 prbs select error
      */
-    (rIOHS_DLP_FIR, bit(39)) ? defaultMaskedError;
+    (rIOHS_DLP_FIR, bit(39)) ? threshold_and_mask_self;
 
     /** IOHS_DLP_FIR[40]
      *  link0 tcomplete bad
@@ -872,102 +872,102 @@ group gIOHS_DLP_FIR
     /** IOHS_DLP_FIR[42]
      *  link0 no spare lane available
      */
-    (rIOHS_DLP_FIR, bit(42)) ? defaultMaskedError;
+    (rIOHS_DLP_FIR, bit(42)) ? TBDDefaultCallout;
 
     /** IOHS_DLP_FIR[43]
      *  link1 no spare lane available
      */
-    (rIOHS_DLP_FIR, bit(43)) ? defaultMaskedError;
+    (rIOHS_DLP_FIR, bit(43)) ? TBDDefaultCallout;
 
     /** IOHS_DLP_FIR[44]
      *  link0 spare done
      */
-    (rIOHS_DLP_FIR, bit(44)) ? defaultMaskedError;
+    (rIOHS_DLP_FIR, bit(44)) ? TBDDefaultCallout;
 
     /** IOHS_DLP_FIR[45]
      *  link1 spare done
      */
-    (rIOHS_DLP_FIR, bit(45)) ? defaultMaskedError;
+    (rIOHS_DLP_FIR, bit(45)) ? TBDDefaultCallout;
 
     /** IOHS_DLP_FIR[46]
      *  link0 too many crc errors
      */
-    (rIOHS_DLP_FIR, bit(46)) ? defaultMaskedError;
+    (rIOHS_DLP_FIR, bit(46)) ? TBDDefaultCallout;
 
     /** IOHS_DLP_FIR[47]
      *  link1 too many crc errors
      */
-    (rIOHS_DLP_FIR, bit(47)) ? defaultMaskedError;
+    (rIOHS_DLP_FIR, bit(47)) ? TBDDefaultCallout;
 
     /** IOHS_DLP_FIR[48]
      *  link0 npu/dlx error
      */
-    (rIOHS_DLP_FIR, bit(48)) ? defaultMaskedError;
+    (rIOHS_DLP_FIR, bit(48)) ? threshold_and_mask_self;
 
     /** IOHS_DLP_FIR[49]
      *  link1 npu/dlx error
      */
-    (rIOHS_DLP_FIR, bit(49)) ? defaultMaskedError;
+    (rIOHS_DLP_FIR, bit(49)) ? threshold_and_mask_self;
 
     /** IOHS_DLP_FIR[50]
      *  link0 osc switch
      */
-    (rIOHS_DLP_FIR, bit(50)) ? defaultMaskedError;
+    (rIOHS_DLP_FIR, bit(50)) ? threshold_and_mask_self;
 
     /** IOHS_DLP_FIR[51]
      *  link1 osc switch
      */
-    (rIOHS_DLP_FIR, bit(51)) ? defaultMaskedError;
+    (rIOHS_DLP_FIR, bit(51)) ? threshold_and_mask_self;
 
     /** IOHS_DLP_FIR[52]
      *  link0 correctable array error
      */
-    (rIOHS_DLP_FIR, bit(52)) ? defaultMaskedError;
+    (rIOHS_DLP_FIR, bit(52)) ? TBDDefaultCallout;
 
     /** IOHS_DLP_FIR[53]
      *  link1 correctable array error
      */
-    (rIOHS_DLP_FIR, bit(53)) ? defaultMaskedError;
+    (rIOHS_DLP_FIR, bit(53)) ? TBDDefaultCallout;
 
     /** IOHS_DLP_FIR[54]
      *  link0 uncorrectable array error
      */
-    (rIOHS_DLP_FIR, bit(54)) ? defaultMaskedError;
+    (rIOHS_DLP_FIR, bit(54)) ? TBDDefaultCallout;
 
     /** IOHS_DLP_FIR[55]
      *  link1 uncorrectable array error
      */
-    (rIOHS_DLP_FIR, bit(55)) ? defaultMaskedError;
+    (rIOHS_DLP_FIR, bit(55)) ? TBDDefaultCallout;
 
     /** IOHS_DLP_FIR[56]
      *  link0 training failed
      */
-    (rIOHS_DLP_FIR, bit(56)) ? defaultMaskedError;
+    (rIOHS_DLP_FIR, bit(56)) ? TBDDefaultCallout;
 
     /** IOHS_DLP_FIR[57]
      *  link1 training failed
      */
-    (rIOHS_DLP_FIR, bit(57)) ? defaultMaskedError;
+    (rIOHS_DLP_FIR, bit(57)) ? TBDDefaultCallout;
 
     /** IOHS_DLP_FIR[58]
      *  link0 unrecoverable error
      */
-    (rIOHS_DLP_FIR, bit(58)) ? defaultMaskedError;
+    (rIOHS_DLP_FIR, bit(58)) ? TBDDefaultCallout;
 
     /** IOHS_DLP_FIR[59]
      *  link1 unrecoverable error
      */
-    (rIOHS_DLP_FIR, bit(59)) ? defaultMaskedError;
+    (rIOHS_DLP_FIR, bit(59)) ? TBDDefaultCallout;
 
     /** IOHS_DLP_FIR[60]
      *  link0 internal error
      */
-    (rIOHS_DLP_FIR, bit(60)) ? defaultMaskedError;
+    (rIOHS_DLP_FIR, bit(60)) ? TBDDefaultCallout;
 
     /** IOHS_DLP_FIR[61]
      *  link1 internal error
      */
-    (rIOHS_DLP_FIR, bit(61)) ? defaultMaskedError;
+    (rIOHS_DLP_FIR, bit(61)) ? TBDDefaultCallout;
 
 };
 

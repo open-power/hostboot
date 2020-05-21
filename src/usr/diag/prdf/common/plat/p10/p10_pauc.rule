@@ -271,62 +271,62 @@ group gPAU_LOCAL_FIR
     /** PAU_LOCAL_FIR[0]
      *  CFIR - Parity or PCB access error
      */
-    (rPAU_LOCAL_FIR, bit(0)) ? defaultMaskedError;
+    (rPAU_LOCAL_FIR, bit(0)) ? self_th_32perDay;
 
     /** PAU_LOCAL_FIR[1]
      *  CPLT_CTRL - PCB access error
      */
-    (rPAU_LOCAL_FIR, bit(1)) ? defaultMaskedError;
+    (rPAU_LOCAL_FIR, bit(1)) ? self_th_32perDay;
 
     /** PAU_LOCAL_FIR[2]
-     *  CC - PCB access error - read and clear nn03000F
+     *  CC - PCB access error
      */
-    (rPAU_LOCAL_FIR, bit(2)) ? defaultMaskedError;
+    (rPAU_LOCAL_FIR, bit(2)) ? self_th_32perDay;
 
     /** PAU_LOCAL_FIR[3]
-     *  CC - Clock Control Error - read and clear nn03000F
+     *  CC - Clock Control Error
      */
-    (rPAU_LOCAL_FIR, bit(3)) ? defaultMaskedError;
+    (rPAU_LOCAL_FIR, bit(3)) ? self_th_32perDay;
 
     /** PAU_LOCAL_FIR[4]
-     *  PSC - PSCOM access error - read and clear nn01001
+     *  PSC - PSCOM access error
      */
-    (rPAU_LOCAL_FIR, bit(4)) ? defaultMaskedError;
+    (rPAU_LOCAL_FIR, bit(4)) ? self_th_32perDay;
 
     /** PAU_LOCAL_FIR[5]
-     *  PSC - internal or ring interface error - read and 
+     *  PSC - internal or ring interface error
      */
-    (rPAU_LOCAL_FIR, bit(5)) ? defaultMaskedError;
+    (rPAU_LOCAL_FIR, bit(5)) ? self_th_32perDay;
 
     /** PAU_LOCAL_FIR[6]
-     *  THERM - pwr_comp_err, skitter_comp_err, scan_init_
+     *  THERM - internal error
      */
-    (rPAU_LOCAL_FIR, bit(6)) ? defaultMaskedError;
+    (rPAU_LOCAL_FIR, bit(6)) ? threshold_and_mask_self;
 
     /** PAU_LOCAL_FIR[7]
      *  THERM - pcb error
      */
-    (rPAU_LOCAL_FIR, bit(7)) ? defaultMaskedError;
+    (rPAU_LOCAL_FIR, bit(7)) ? threshold_and_mask_self;
 
     /** PAU_LOCAL_FIR[8]
      *  THERMTRIP - Critical temperature indicator
      */
-    (rPAU_LOCAL_FIR, bit(8)) ? defaultMaskedError;
+    (rPAU_LOCAL_FIR, bit(8)) ? threshold_and_mask_self;
 
     /** PAU_LOCAL_FIR[9]
      *  THERMTRIP - Fatal temperature indicator
      */
-    (rPAU_LOCAL_FIR, bit(9)) ? defaultMaskedError;
+    (rPAU_LOCAL_FIR, bit(9)) ? threshold_and_mask_self;
 
     /** PAU_LOCAL_FIR[10]
      *  VOLTTRIP - Voltage sense error
      */
-    (rPAU_LOCAL_FIR, bit(10)) ? defaultMaskedError;
+    (rPAU_LOCAL_FIR, bit(10)) ? threshold_and_mask_self;
 
     /** PAU_LOCAL_FIR[11]
      *  DBG - scom parity fail
      */
-    (rPAU_LOCAL_FIR, bit(11)) ? defaultMaskedError;
+    (rPAU_LOCAL_FIR, bit(11)) ? threshold_and_mask_self;
 
     /** PAU_LOCAL_FIR[12]
      *  reserved
@@ -371,12 +371,12 @@ group gPAU_LOCAL_FIR
     /** PAU_LOCAL_FIR[20]
      *  Trace00 - scom parity err
      */
-    (rPAU_LOCAL_FIR, bit(20)) ? defaultMaskedError;
+    (rPAU_LOCAL_FIR, bit(20)) ? self_th_32perDay;
 
     /** PAU_LOCAL_FIR[21]
      *  Trace01 - scom parity err - Unused in Axon,PCI
      */
-    (rPAU_LOCAL_FIR, bit(21)) ? defaultMaskedError;
+    (rPAU_LOCAL_FIR, bit(21)) ? self_th_32perDay;
 
     /** PAU_LOCAL_FIR[22]
      *  unused
@@ -604,7 +604,7 @@ rule rPAU_PTL_FIR
 
 group gPAU_PTL_FIR
     filter singlebit,
-           cs_root_cause
+           cs_root_cause(4,8)
 {
     /** PAU_PTL_FIR[0]
      *  fmr00 trained. Even PTL, even half.
@@ -629,12 +629,12 @@ group gPAU_PTL_FIR
     /** PAU_PTL_FIR[4]
      *  dob01 ue
      */
-    (rPAU_PTL_FIR, bit(4)) ? defaultMaskedError;
+    (rPAU_PTL_FIR, bit(4)) ? self_th_1_UERE;
 
     /** PAU_PTL_FIR[5]
      *  dob01 ce
      */
-    (rPAU_PTL_FIR, bit(5)) ? defaultMaskedError;
+    (rPAU_PTL_FIR, bit(5)) ? self_th_32perDay;
 
     /** PAU_PTL_FIR[6]
      *  dob01 sue
@@ -644,17 +644,17 @@ group gPAU_PTL_FIR
     /** PAU_PTL_FIR[7]
      *  data outbound switch internal error - even PTL.
      */
-    (rPAU_PTL_FIR, bit(7)) ? defaultMaskedError;
+    (rPAU_PTL_FIR, bit(7)) ? TBDDefaultCallout;
 
     /** PAU_PTL_FIR[8]
      *  dob23 ue
      */
-    (rPAU_PTL_FIR, bit(8)) ? defaultMaskedError;
+    (rPAU_PTL_FIR, bit(8)) ? self_th_1_UERE;
 
     /** PAU_PTL_FIR[9]
      *  dob23 ce
      */
-    (rPAU_PTL_FIR, bit(9)) ? defaultMaskedError;
+    (rPAU_PTL_FIR, bit(9)) ? self_th_32perDay;
 
     /** PAU_PTL_FIR[10]
      *  dob23 sue
@@ -664,145 +664,145 @@ group gPAU_PTL_FIR
     /** PAU_PTL_FIR[11]
      *  data outbound switch internal error - odd PTL.
      */
-    (rPAU_PTL_FIR, bit(11)) ? defaultMaskedError;
+    (rPAU_PTL_FIR, bit(11)) ? TBDDefaultCallout;
 
     /** PAU_PTL_FIR[12]
      *  Even PTL, even framer internal error
      */
-    (rPAU_PTL_FIR, bit(12)) ? defaultMaskedError;
+    (rPAU_PTL_FIR, bit(12)) ? self_th_1;
 
     /** PAU_PTL_FIR[13]
      *  Even PTL, outbound switch cmd/presp/cresp internal
      */
-    (rPAU_PTL_FIR, bit(13)) ? defaultMaskedError;
+    (rPAU_PTL_FIR, bit(13)) ? self_th_1;
 
     /** PAU_PTL_FIR[14]
      *  Even PTL, odd framer internal error
      */
-    (rPAU_PTL_FIR, bit(14)) ? defaultMaskedError;
+    (rPAU_PTL_FIR, bit(14)) ? self_th_1;
 
     /** PAU_PTL_FIR[15]
      *  Odd PTL, even framer internal error
      */
-    (rPAU_PTL_FIR, bit(15)) ? defaultMaskedError;
+    (rPAU_PTL_FIR, bit(15)) ? self_th_1;
 
     /** PAU_PTL_FIR[16]
      *  Odd PTL, outbound switch cmd/presp/cresp internal 
      */
-    (rPAU_PTL_FIR, bit(16)) ? defaultMaskedError;
+    (rPAU_PTL_FIR, bit(16)) ? self_th_1;
 
     /** PAU_PTL_FIR[17]
      *  Odd PTL, odd framer internal error
      */
-    (rPAU_PTL_FIR, bit(17)) ? defaultMaskedError;
+    (rPAU_PTL_FIR, bit(17)) ? self_th_1;
 
     /** PAU_PTL_FIR[18]
      *  Even PTL, even parser internal error
      */
-    (rPAU_PTL_FIR, bit(18)) ? defaultMaskedError;
+    (rPAU_PTL_FIR, bit(18)) ? self_th_1;
 
     /** PAU_PTL_FIR[19]
      *  Even PTL, odd parser internal error
      */
-    (rPAU_PTL_FIR, bit(19)) ? defaultMaskedError;
+    (rPAU_PTL_FIR, bit(19)) ? self_th_1;
 
     /** PAU_PTL_FIR[20]
      *  Odd PTL, even parser internal error
      */
-    (rPAU_PTL_FIR, bit(20)) ? defaultMaskedError;
+    (rPAU_PTL_FIR, bit(20)) ? self_th_1;
 
     /** PAU_PTL_FIR[21]
      *  Odd PTL, odd parser internal error
      */
-    (rPAU_PTL_FIR, bit(21)) ? defaultMaskedError;
+    (rPAU_PTL_FIR, bit(21)) ? self_th_1;
 
     /** PAU_PTL_FIR[22]
      *  Even PTL, even link down
      */
-    (rPAU_PTL_FIR, bit(22)) ? defaultMaskedError;
+    (rPAU_PTL_FIR, bit(22)) ? TBDDefaultCallout;
 
     /** PAU_PTL_FIR[23]
      *  Even PTL, odd link down
      */
-    (rPAU_PTL_FIR, bit(23)) ? defaultMaskedError;
+    (rPAU_PTL_FIR, bit(23)) ? TBDDefaultCallout;
 
     /** PAU_PTL_FIR[24]
      *  Odd PTL, even link down
      */
-    (rPAU_PTL_FIR, bit(24)) ? defaultMaskedError;
+    (rPAU_PTL_FIR, bit(24)) ? TBDDefaultCallout;
 
     /** PAU_PTL_FIR[25]
      *  Odd PTL, odd link down
      */
-    (rPAU_PTL_FIR, bit(25)) ? defaultMaskedError;
+    (rPAU_PTL_FIR, bit(25)) ? TBDDefaultCallout;
 
     /** PAU_PTL_FIR[26]
      *  Even PTL data inbound switch internal error
      */
-    (rPAU_PTL_FIR, bit(26)) ? defaultMaskedError;
+    (rPAU_PTL_FIR, bit(26)) ? TBDDefaultCallout;
 
     /** PAU_PTL_FIR[27]
      *  Odd PTL data inbound switch internal error
      */
-    (rPAU_PTL_FIR, bit(27)) ? defaultMaskedError;
+    (rPAU_PTL_FIR, bit(27)) ? TBDDefaultCallout;
 
     /** PAU_PTL_FIR[28]
-     *  mailbox 00 special attention. Gets set to 1 when a
+     *  mailbox 00 special attention
      */
     (rPAU_PTL_FIR, bit(28)) ? defaultMaskedError;
 
     /** PAU_PTL_FIR[29]
-     *  mailbox 01 special attention. Gets set to 1 when a
+     *  mailbox 01 special attention
      */
     (rPAU_PTL_FIR, bit(29)) ? defaultMaskedError;
 
     /** PAU_PTL_FIR[30]
-     *  mailbox 10 special attention. Gets set to 1 when a
+     *  mailbox 10 special attention
      */
     (rPAU_PTL_FIR, bit(30)) ? defaultMaskedError;
 
     /** PAU_PTL_FIR[31]
-     *  mailbox 11 special attention. Gets set to 1 when a
+     *  mailbox 11 special attention
      */
     (rPAU_PTL_FIR, bit(31)) ? defaultMaskedError;
 
     /** PAU_PTL_FIR[32]
-     *  mailbox 20 special attention. Gets set to 1 when a
+     *  mailbox 20 special attention
      */
     (rPAU_PTL_FIR, bit(32)) ? defaultMaskedError;
 
     /** PAU_PTL_FIR[33]
-     *  mailbox 21 special attention. Gets set to 1 when a
+     *  mailbox 21 special attention
      */
     (rPAU_PTL_FIR, bit(33)) ? defaultMaskedError;
 
     /** PAU_PTL_FIR[34]
-     *  mailbox 30 special attention. Gets set to 1 when a
+     *  mailbox 30 special attention
      */
     (rPAU_PTL_FIR, bit(34)) ? defaultMaskedError;
 
     /** PAU_PTL_FIR[35]
-     *  mailbox 31 special attention. Gets set to 1 when a
+     *  mailbox 31 special attention
      */
     (rPAU_PTL_FIR, bit(35)) ? defaultMaskedError;
 
     /** PAU_PTL_FIR[36]
-     *  ptl0 spare
+     *  spare
      */
     (rPAU_PTL_FIR, bit(36)) ? defaultMaskedError;
 
     /** PAU_PTL_FIR[37]
-     *  ptl1 spare
+     *  spare
      */
     (rPAU_PTL_FIR, bit(37)) ? defaultMaskedError;
 
     /** PAU_PTL_FIR[38]
-     *  ptl2 spare
+     *  spare
      */
     (rPAU_PTL_FIR, bit(38)) ? defaultMaskedError;
 
     /** PAU_PTL_FIR[39]
-     *  ptl3 spare
+     *  spare
      */
     (rPAU_PTL_FIR, bit(39)) ? defaultMaskedError;
 
@@ -827,132 +827,132 @@ group gPAU_PHY_FIR
            cs_root_cause
 {
     /** PAU_PHY_FIR[0]
-     *  FIR Register - A RX state machine parity or mode r
+     *  RX state machine parity or mode register parity er
      */
-    (rPAU_PHY_FIR, bit(0)) ? defaultMaskedError;
+    (rPAU_PHY_FIR, bit(0)) ? TBDDefaultCallout;
 
     /** PAU_PHY_FIR[1]
-     *  FIR Register - A RX state machine parity or mode r
+     *  RX state machine parity or mode register parity er
      */
-    (rPAU_PHY_FIR, bit(1)) ? defaultMaskedError;
+    (rPAU_PHY_FIR, bit(1)) ? self_th_1;
 
     /** PAU_PHY_FIR[2]
-     *  FIR Register - A RX state machine parity or mode r
+     *  RX state machine parity or mode register parity er
      */
-    (rPAU_PHY_FIR, bit(2)) ? defaultMaskedError;
+    (rPAU_PHY_FIR, bit(2)) ? self_th_32perDay;
 
     /** PAU_PHY_FIR[3]
-     *  FIR Register - A RX state machine parity or mode r
+     *  RX state machine parity or mode register parity er
      */
-    (rPAU_PHY_FIR, bit(3)) ? defaultMaskedError;
+    (rPAU_PHY_FIR, bit(3)) ? TBDDefaultCallout;
 
     /** PAU_PHY_FIR[4]
-     *  FIR Register - A TX state machine parity or mode r
+     *  TX state machine parity or mode register parity er
      */
     (rPAU_PHY_FIR, bit(4)) ? defaultMaskedError;
 
     /** PAU_PHY_FIR[5]
-     *  FIR Register - A TX state machine parity or mode r
+     *  TX state machine parity or mode register parity er
      */
-    (rPAU_PHY_FIR, bit(5)) ? defaultMaskedError;
+    (rPAU_PHY_FIR, bit(5)) ? TBDDefaultCallout;
 
     /** PAU_PHY_FIR[6]
-     *  FIR Register - A TX state machine parity or mode r
+     *  TX state machine parity or mode register parity er
      */
     (rPAU_PHY_FIR, bit(6)) ? defaultMaskedError;
 
     /** PAU_PHY_FIR[7]
-     *  FIR Register - A TX state machine parity or mode r
+     *  TX state machine parity or mode register parity er
      */
     (rPAU_PHY_FIR, bit(7)) ? defaultMaskedError;
 
     /** PAU_PHY_FIR[8]
-     *  FIR Register - A TX ZCAL state machine parity or m
+     *  TX ZCAL state machine parity or mode register pari
      */
     (rPAU_PHY_FIR, bit(8)) ? defaultMaskedError;
 
     /** PAU_PHY_FIR[9]
-     *  FIR Register - A PPE internal error has occurred.
+     *  A PPE internal error has occurred.
      */
-    (rPAU_PHY_FIR, bit(9)) ? defaultMaskedError;
+    (rPAU_PHY_FIR, bit(9)) ? self_th_1;
 
     /** PAU_PHY_FIR[10]
-     *  FIR Register - A PPE external error has occurred.
+     *  A PPE external error has occurred.
      */
-    (rPAU_PHY_FIR, bit(10)) ? defaultMaskedError;
+    (rPAU_PHY_FIR, bit(10)) ? self_th_1;
 
     /** PAU_PHY_FIR[11]
-     *  FIR Register - A PPE Halt due to Watchdog or Inter
+     *  A PPE Halt due to Watchdog or Interrupt has occurr
      */
-    (rPAU_PHY_FIR, bit(11)) ? defaultMaskedError;
+    (rPAU_PHY_FIR, bit(11)) ? level2_th_1;
 
     /** PAU_PHY_FIR[12]
-     *  FIR Register - A PPE Halt due to Debug has occurre
+     *  A PPE Halt due to Debug has occurred.
      */
-    (rPAU_PHY_FIR, bit(12)) ? defaultMaskedError;
+    (rPAU_PHY_FIR, bit(12)) ? level2_th_1;
 
     /** PAU_PHY_FIR[13]
-     *  FIR Register - PPE Halted.
+     *  PPE Halted.
      */
-    (rPAU_PHY_FIR, bit(13)) ? defaultMaskedError;
+    (rPAU_PHY_FIR, bit(13)) ? self_th_1;
 
     /** PAU_PHY_FIR[14]
-     *  FIR Register - A PPE Watchdog Timeout has occurred
+     *  A PPE Watchdog Timeout has occurred.
      */
-    (rPAU_PHY_FIR, bit(14)) ? defaultMaskedError;
+    (rPAU_PHY_FIR, bit(14)) ? level2_th_1;
 
     /** PAU_PHY_FIR[15]
-     *  FIR Register - A PPE Array Scrub was missed.
+     *  A PPE Array Scrub was missed.
      */
-    (rPAU_PHY_FIR, bit(15)) ? defaultMaskedError;
+    (rPAU_PHY_FIR, bit(15)) ? threshold_and_mask_self;
 
     /** PAU_PHY_FIR[16]
-     *  FIR Register - A PPE Array uncorrectable error has
+     *  A PPE Array uncorrectable error has occurred.
      */
-    (rPAU_PHY_FIR, bit(16)) ? defaultMaskedError;
+    (rPAU_PHY_FIR, bit(16)) ? self_th_1;
 
     /** PAU_PHY_FIR[17]
-     *  FIR Register - A PPE Array correctable error has o
+     *  A PPE Array correctable error has occurred.
      */
-    (rPAU_PHY_FIR, bit(17)) ? defaultMaskedError;
+    (rPAU_PHY_FIR, bit(17)) ? self_th_32perDay;
 
     /** PAU_PHY_FIR[18]
-     *  FIR Register - A PPE Code Recal Abort has occurred
+     *  A PPE Code Recal Abort has occurred.
      */
     (rPAU_PHY_FIR, bit(18)) ? defaultMaskedError;
 
     /** PAU_PHY_FIR[19]
-     *  FIR Register - A PPE Code Fatal Error has occurred
+     *  A PPE Code Fatal Error has occurred.
      */
-    (rPAU_PHY_FIR, bit(19)) ? defaultMaskedError;
+    (rPAU_PHY_FIR, bit(19)) ? self_th_1;
 
     /** PAU_PHY_FIR[20]
-     *  FIR Register - A PPE Code Warning has occurred.
+     *  A PPE Code Warning has occurred.
      */
-    (rPAU_PHY_FIR, bit(20)) ? defaultMaskedError;
+    (rPAU_PHY_FIR, bit(20)) ? threshold_and_mask_self;
 
     /** PAU_PHY_FIR[21]
-     *  FIR Register - A PPE Code DFT Error has occurred.
+     *  A PPE Code DFT Error has occurred.
      */
     (rPAU_PHY_FIR, bit(21)) ? defaultMaskedError;
 
     /** PAU_PHY_FIR[22]
-     *  FIR Register - A PPE Code Recal Not Run has occurr
+     *  A PPE Code Recal Not Run has occurred.
      */
-    (rPAU_PHY_FIR, bit(22)) ? defaultMaskedError;
+    (rPAU_PHY_FIR, bit(22)) ? threshold_and_mask;
 
     /** PAU_PHY_FIR[23]
-     *  FIR Register - A PPE Code Thread Locked has occurr
+     *  A PPE Code Thread Locked has occurred.
      */
-    (rPAU_PHY_FIR, bit(23)) ? defaultMaskedError;
+    (rPAU_PHY_FIR, bit(23)) ? threshold_and_mask_self;
 
     /** PAU_PHY_FIR[24]
-     *  FIR Register - A PPE Code FIR 6 has occurred.
+     *  Reserved
      */
     (rPAU_PHY_FIR, bit(24)) ? defaultMaskedError;
 
     /** PAU_PHY_FIR[25]
-     *  FIR Register - A PPE Code FIR 7 has occurred.
+     *  Reserved
      */
     (rPAU_PHY_FIR, bit(25)) ? defaultMaskedError;
 
@@ -977,67 +977,67 @@ group gPAU_DL_FIR
            cs_root_cause
 {
     /** PAU_DL_FIR[0]
-     *  FIR Register - A RX state machine parity or mode r
+     *  RX state machine parity or mode register parity er
      */
     (rPAU_DL_FIR, bit(0)) ? defaultMaskedError;
 
     /** PAU_DL_FIR[1]
-     *  FIR Register - A RX state machine parity or mode r
+     *  RX state machine parity or mode register parity er
      */
     (rPAU_DL_FIR, bit(1)) ? defaultMaskedError;
 
     /** PAU_DL_FIR[2]
-     *  FIR Register - A RX state machine parity or mode r
+     *  RX state machine parity or mode register parity er
      */
     (rPAU_DL_FIR, bit(2)) ? defaultMaskedError;
 
     /** PAU_DL_FIR[3]
-     *  FIR Register - A RX state machine parity or mode r
+     *  RX state machine parity or mode register parity er
      */
     (rPAU_DL_FIR, bit(3)) ? defaultMaskedError;
 
     /** PAU_DL_FIR[4]
-     *  FIR Register - A TX state machine parity or mode r
+     *  TX state machine parity or mode register parity er
      */
     (rPAU_DL_FIR, bit(4)) ? defaultMaskedError;
 
     /** PAU_DL_FIR[5]
-     *  FIR Register - A TX state machine parity or mode r
+     *  TX state machine parity or mode register parity er
      */
     (rPAU_DL_FIR, bit(5)) ? defaultMaskedError;
 
     /** PAU_DL_FIR[6]
-     *  FIR Register - A TX state machine parity or mode r
+     *  TX state machine parity or mode register parity er
      */
     (rPAU_DL_FIR, bit(6)) ? defaultMaskedError;
 
     /** PAU_DL_FIR[7]
-     *  FIR Register - A TX state machine parity or mode r
+     *  TX state machine parity or mode register parity er
      */
     (rPAU_DL_FIR, bit(7)) ? defaultMaskedError;
 
     /** PAU_DL_FIR[8]
-     *  FIR Register - A TX ZCAL state machine parity or m
+     *  TX ZCAL state machine parity or mode register pari
      */
     (rPAU_DL_FIR, bit(8)) ? defaultMaskedError;
 
     /** PAU_DL_FIR[9]
-     *  FIR Register - A PPE internal error has occurred.
+     *  PPE internal error has occurred.
      */
     (rPAU_DL_FIR, bit(9)) ? defaultMaskedError;
 
     /** PAU_DL_FIR[10]
-     *  FIR Register - A PPE external error has occurred.
+     *  PPE external error has occurred.
      */
     (rPAU_DL_FIR, bit(10)) ? defaultMaskedError;
 
     /** PAU_DL_FIR[11]
-     *  FIR Register - A PPE Halt due to Watchdog or Inter
+     *  PPE Halt due to Watchdog or Interrupt has occurred
      */
     (rPAU_DL_FIR, bit(11)) ? defaultMaskedError;
 
     /** PAU_DL_FIR[12]
-     *  FIR Register - A PPE Halt due to Debug has occurre
+     *  PPE Halt due to Debug has occurred.
      */
     (rPAU_DL_FIR, bit(12)) ? defaultMaskedError;
 

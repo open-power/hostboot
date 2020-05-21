@@ -132,19 +132,19 @@ group gMC_OMI_DL_FIR
            cs_root_cause
 {
     /** MC_OMI_DL_FIR[0]
-     *  OMI-DL0 fatal_error - see error hold register(54 t
+     *  OMI-DL0 fatal error
      */
-    (rMC_OMI_DL_FIR, bit(0)) ? defaultMaskedError;
+    (rMC_OMI_DL_FIR, bit(0)) ? TBDDefaultCallout;
 
     /** MC_OMI_DL_FIR[1]
-     *  OMI-DL0 UE on data flit - see error hold register(
+     *  OMI-DL0 UE on data flit
      */
-    (rMC_OMI_DL_FIR, bit(1)) ? defaultMaskedError;
+    (rMC_OMI_DL_FIR, bit(1)) ? self_th_1;
 
     /** MC_OMI_DL_FIR[2]
-     *  OMI-DL0 CE on TL flit - see error hold register(48
+     *  OMI-DL0 CE on TL flit
      */
-    (rMC_OMI_DL_FIR, bit(2)) ? defaultMaskedError;
+    (rMC_OMI_DL_FIR, bit(2)) ? self_th_32perDay;
 
     /** MC_OMI_DL_FIR[3]
      *  OMI-DL0 detected a CRC error
@@ -157,19 +157,19 @@ group gMC_OMI_DL_FIR
     (rMC_OMI_DL_FIR, bit(4)) ? defaultMaskedError;
 
     /** MC_OMI_DL_FIR[5]
-     *  OMI-DL0 running in degraded mode - see error hold 
+     *  OMI-DL0 running in degraded mode
      */
-    (rMC_OMI_DL_FIR, bit(5)) ? defaultMaskedError;
+    (rMC_OMI_DL_FIR, bit(5)) ? TBDDefaultCallout;
 
     /** MC_OMI_DL_FIR[6]
-     *  OMI-DL0 parity error detection on a lane - see err
+     *  OMI-DL0 parity error detection on a lane
      */
     (rMC_OMI_DL_FIR, bit(6)) ? defaultMaskedError;
 
     /** MC_OMI_DL_FIR[7]
      *  OMI-DL0 retrained due to no forward progress
      */
-    (rMC_OMI_DL_FIR, bit(7)) ? defaultMaskedError;
+    (rMC_OMI_DL_FIR, bit(7)) ? TBDDefaultCallout;
 
     /** MC_OMI_DL_FIR[8]
      *  OMI-DL0 remote side initiated a retrain
@@ -179,12 +179,12 @@ group gMC_OMI_DL_FIR
     /** MC_OMI_DL_FIR[9]
      *  OMI-DL0 retrain due to internal error or software 
      */
-    (rMC_OMI_DL_FIR, bit(9)) ? defaultMaskedError;
+    (rMC_OMI_DL_FIR, bit(9)) ? TBDDefaultCallout;
 
     /** MC_OMI_DL_FIR[10]
-     *  OMI-DL0 threshold reached - see error hold registe
+     *  OMI-DL0 threshold reached
      */
-    (rMC_OMI_DL_FIR, bit(10)) ? defaultMaskedError;
+    (rMC_OMI_DL_FIR, bit(10)) ? TBDDefaultCallout;
 
     /** MC_OMI_DL_FIR[11]
      *  OMI-DL0 trained
@@ -232,19 +232,19 @@ group gMC_OMI_DL_FIR
     (rMC_OMI_DL_FIR, bit(19)) ? defaultMaskedError;
 
     /** MC_OMI_DL_FIR[20]
-     *  OMI-DL1 fatal_error - see error hold register(54 t
+     *  OMI-DL1 fatal error
      */
-    (rMC_OMI_DL_FIR, bit(20)) ? defaultMaskedError;
+    (rMC_OMI_DL_FIR, bit(20)) ? TBDDefaultCallout;
 
     /** MC_OMI_DL_FIR[21]
-     *  OMI-DL1 UE on data flit - see error hold register(
+     *  OMI-DL1 UE on data flit
      */
-    (rMC_OMI_DL_FIR, bit(21)) ? defaultMaskedError;
+    (rMC_OMI_DL_FIR, bit(21)) ? self_th_1;
 
     /** MC_OMI_DL_FIR[22]
-     *  OMI-DL1 CE on TL flit - see error hold register(48
+     *  OMI-DL1 CE on TL flit
      */
-    (rMC_OMI_DL_FIR, bit(22)) ? defaultMaskedError;
+    (rMC_OMI_DL_FIR, bit(22)) ? self_th_32perDay;
 
     /** MC_OMI_DL_FIR[23]
      *  OMI-DL1 detected a CRC error
@@ -257,19 +257,19 @@ group gMC_OMI_DL_FIR
     (rMC_OMI_DL_FIR, bit(24)) ? defaultMaskedError;
 
     /** MC_OMI_DL_FIR[25]
-     *  OMI-DL1 running in degraded mode - see error hold 
+     *  OMI-DL1 running in degraded mode
      */
-    (rMC_OMI_DL_FIR, bit(25)) ? defaultMaskedError;
+    (rMC_OMI_DL_FIR, bit(25)) ? TBDDefaultCallout;
 
     /** MC_OMI_DL_FIR[26]
-     *  OMI-DL1 parity error detection on a lane - see err
+     *  OMI-DL1 parity error detection on a lane
      */
     (rMC_OMI_DL_FIR, bit(26)) ? defaultMaskedError;
 
     /** MC_OMI_DL_FIR[27]
      *  OMI-DL1 retrained due to no forward progress
      */
-    (rMC_OMI_DL_FIR, bit(27)) ? defaultMaskedError;
+    (rMC_OMI_DL_FIR, bit(27)) ? TBDDefaultCallout;
 
     /** MC_OMI_DL_FIR[28]
      *  OMI-DL1 remote side initiated a retrain
@@ -279,12 +279,12 @@ group gMC_OMI_DL_FIR
     /** MC_OMI_DL_FIR[29]
      *  OMI-DL1 retrain due to internal error or software 
      */
-    (rMC_OMI_DL_FIR, bit(29)) ? defaultMaskedError;
+    (rMC_OMI_DL_FIR, bit(29)) ? TBDDefaultCallout;
 
     /** MC_OMI_DL_FIR[30]
-     *  OMI-DL1 threshold reached - see error hold registe
+     *  OMI-DL1 threshold reached
      */
-    (rMC_OMI_DL_FIR, bit(30)) ? defaultMaskedError;
+    (rMC_OMI_DL_FIR, bit(30)) ? TBDDefaultCallout;
 
     /** MC_OMI_DL_FIR[31]
      *  OMI-DL1 trained
@@ -332,102 +332,102 @@ group gMC_OMI_DL_FIR
     (rMC_OMI_DL_FIR, bit(39)) ? defaultMaskedError;
 
     /** MC_OMI_DL_FIR[40]
-     *  OMI-DL2 unused
+     *  Reserved
      */
     (rMC_OMI_DL_FIR, bit(40)) ? defaultMaskedError;
 
     /** MC_OMI_DL_FIR[41]
-     *  OMI-DL2 unused
+     *  Reserved
      */
     (rMC_OMI_DL_FIR, bit(41)) ? defaultMaskedError;
 
     /** MC_OMI_DL_FIR[42]
-     *  OMI-DL2 unused
+     *  Reserved
      */
     (rMC_OMI_DL_FIR, bit(42)) ? defaultMaskedError;
 
     /** MC_OMI_DL_FIR[43]
-     *  OMI-DL2 unused
+     *  Reserved
      */
     (rMC_OMI_DL_FIR, bit(43)) ? defaultMaskedError;
 
     /** MC_OMI_DL_FIR[44]
-     *  OMI-DL2 unused
+     *  Reserved
      */
     (rMC_OMI_DL_FIR, bit(44)) ? defaultMaskedError;
 
     /** MC_OMI_DL_FIR[45]
-     *  OMI-DL2 unused
+     *  Reserved
      */
     (rMC_OMI_DL_FIR, bit(45)) ? defaultMaskedError;
 
     /** MC_OMI_DL_FIR[46]
-     *  OMI-DL2 unused
+     *  Reserved
      */
     (rMC_OMI_DL_FIR, bit(46)) ? defaultMaskedError;
 
     /** MC_OMI_DL_FIR[47]
-     *  OMI-DL2 unused
+     *  Reserved
      */
     (rMC_OMI_DL_FIR, bit(47)) ? defaultMaskedError;
 
     /** MC_OMI_DL_FIR[48]
-     *  OMI-DL2 unused
+     *  Reserved
      */
     (rMC_OMI_DL_FIR, bit(48)) ? defaultMaskedError;
 
     /** MC_OMI_DL_FIR[49]
-     *  OMI-DL2 unused
+     *  Reserved
      */
     (rMC_OMI_DL_FIR, bit(49)) ? defaultMaskedError;
 
     /** MC_OMI_DL_FIR[50]
-     *  OMI-DL2 unused
+     *  Reserved
      */
     (rMC_OMI_DL_FIR, bit(50)) ? defaultMaskedError;
 
     /** MC_OMI_DL_FIR[51]
-     *  OMI-DL2 unused
+     *  Reserved
      */
     (rMC_OMI_DL_FIR, bit(51)) ? defaultMaskedError;
 
     /** MC_OMI_DL_FIR[52]
-     *  OMI-DL2 unused
+     *  Reserved
      */
     (rMC_OMI_DL_FIR, bit(52)) ? defaultMaskedError;
 
     /** MC_OMI_DL_FIR[53]
-     *  OMI-DL2 unused
+     *  Reserved
      */
     (rMC_OMI_DL_FIR, bit(53)) ? defaultMaskedError;
 
     /** MC_OMI_DL_FIR[54]
-     *  OMI-DL2 unused
+     *  Reserved
      */
     (rMC_OMI_DL_FIR, bit(54)) ? defaultMaskedError;
 
     /** MC_OMI_DL_FIR[55]
-     *  OMI-DL2 unused
+     *  Reserved
      */
     (rMC_OMI_DL_FIR, bit(55)) ? defaultMaskedError;
 
     /** MC_OMI_DL_FIR[56]
-     *  OMI-DL2 unused
+     *  Reserved
      */
     (rMC_OMI_DL_FIR, bit(56)) ? defaultMaskedError;
 
     /** MC_OMI_DL_FIR[57]
-     *  OMI-DL2 unused
+     *  Reserved
      */
     (rMC_OMI_DL_FIR, bit(57)) ? defaultMaskedError;
 
     /** MC_OMI_DL_FIR[58]
-     *  OMI-DL2 unused
+     *  Reserved
      */
     (rMC_OMI_DL_FIR, bit(58)) ? defaultMaskedError;
 
     /** MC_OMI_DL_FIR[59]
-     *  OMI-DL2 unused
+     *  Reserved
      */
     (rMC_OMI_DL_FIR, bit(59)) ? defaultMaskedError;
 

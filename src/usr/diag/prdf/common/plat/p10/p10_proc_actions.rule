@@ -23,6 +23,13 @@
 #
 # IBM_PROLOG_END_TAG
 
+actionclass level2_M_self_L_th_32perDay
+{
+    callout2ndLvlMed;
+    calloutSelfLowNoGard;
+    threshold32pday;
+};
+
 ###############################################################################
 # Analyze connected
 ###############################################################################
