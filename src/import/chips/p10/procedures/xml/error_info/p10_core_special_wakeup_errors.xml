@@ -102,4 +102,20 @@
     <ffdc>QME_EISR</ffdc>
   </hwpError>
   <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_INTERNAL_NO_TIMEOUT_DUETO_STOP0_BUG</rc>
+    <description>An internal RC suggesting that spl wakeup timeout did not occur due to HW529794
+    </description>
+  </hwpError>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_SPCWKUP_CORE_HW529794_TIMEOUT</rc>
+    <description>Special wakeup request to core chiplet timed out due to HW529794</description>
+    <ffdc>POLLCOUNT</ffdc>
+    <ffdc>SP_WKUP_REG_VALUE</ffdc>
+    <ffdc>ENTITY</ffdc>
+    <ffdc>CORE_TARGET</ffdc>
+    <ffdc>CORE_SSHSRC</ffdc>
+  </hwpError>
+  <!-- *********************************************************************** -->
 </hwpErrors>

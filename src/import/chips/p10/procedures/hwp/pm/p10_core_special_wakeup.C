@@ -35,6 +35,7 @@
 #include <p10_scom_c_7.H>
 #include <p10_ppe_c_7.H>
 #include <p10_scom_eq_c.H>
+#include <p10_scom_eq_1.H>
 #include <p10_core_special_wakeup.H>
 
 
@@ -119,6 +120,56 @@ fapi_try_exit:
 //************************************************************************************************
 
 /**
+ * @brief a workaround for DD1 HW bug which affects cores in STOP0
+ * @param[in] core target
+ * @return  FAPI2_RC_SUCCESS in case of SUCCESS else fapi2 return code.
+ */
+
+fapi2::ReturnCode handleHwWorkAround( const fapi2::Target < fapi2::TARGET_TYPE_CORE | fapi2::TARGET_TYPE_MULTICAST > &
+                                      i_target )
+{
+    fapi2::buffer<uint64_t> l_qmeIar;
+    fapi2::buffer<uint64_t> l_scrData;
+    fapi2::ReturnCode l_rc;
+    uint32_t l_pmState = 0;
+    auto l_coreList  =  i_target.getChildren< fapi2::TARGET_TYPE_CORE >( fapi2::TARGET_STATE_FUNCTIONAL );
+
+    for( auto l_core : l_coreList )
+    {
+        auto l_parentEq  =  l_core.getParent< fapi2::TARGET_TYPE_EQ >();
+        FAPI_TRY( getScom( l_parentEq, scomt::eq::QME_SCOM_XIDBGPRO, l_qmeIar ));
+
+        if( l_qmeIar.getBit( scomt::eq::QME_SCOM_XIDBGPRO_XSR_HS ) )
+        {
+            FAPI_INF("QME Halted" );
+            FAPI_TRY( getScom( l_core, scomt::c::QME_SCSR, l_scrData ) );
+
+            l_scrData.extractToRight< 60, 4 >( l_pmState );
+
+            if( ( l_scrData.getBit( scomt::c::QME_SCSR_PM_STATE_ACTIVE )) && ( ( l_pmState == 0 ) || ( l_pmState == 1 ) ) )
+            {
+                FAPI_INF( "Core in STOP 0" );
+                l_scrData.setBit( scomt::c::QME_SCSR_ASSERT_PM_EXIT ); // Enable exit from core STOP state
+                l_scrData.clearBit( scomt::c::QME_SCSR_AUTO_SPECIAL_WAKEUP_DISABLE ); // Enable auto-special wakeup
+                FAPI_TRY( putScom( l_core, scomt::c::QME_SCSR, l_scrData ) );
+
+            }
+        }
+        else
+        {
+            FAPI_INF( "QME Not Halted Or Core Not In STOP 0" );
+            fapi2::current_err  =  fapi2::RC_INTERNAL_NO_TIMEOUT_DUETO_STOP0_BUG;
+
+        }
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+//************************************************************************************************
+
+/**
  * @brief initiates special wakeup on a given core.
  * @param   i_target        P10 multicast core target.
  * @param   i_operation     Special wakeup opearation supported
@@ -132,13 +183,20 @@ fapi2::ReturnCode initiateSplWkup(
 {
     fapi2::buffer<uint64_t> l_data;
     fapi2::buffer<uint64_t> l_coreSshsrc;
-
-    uint32_t l_address      =   0;
+    fapi2::ATTR_CHIP_EC_FEATURE_SPL_WKUP_STOP0_HW529794_Type l_hw529794;
+    fapi2::ReturnCode l_rc;
+    const fapi2::Target < fapi2::TARGET_TYPE_PROC_CHIP >  l_procChip  =
+        i_target.getParent< fapi2::TARGET_TYPE_PROC_CHIP >();
     uint32_t l_retryDelay   =   p10specialWakeup::SPECIAL_WAKE_UP_POLL_INTERVAL_NS;
     uint32_t l_pollCount    =   p10specialWakeup::SPECIAL_WAKEUP_TIMEOUT_NS / l_retryDelay;
+    uint32_t l_address      =   0;
     fapi2::Target < fapi2::TARGET_TYPE_CORE | fapi2::TARGET_TYPE_MULTICAST,
           fapi2::MULTICAST_AND > l_ecMcAndTgt     =   i_target;
     l_address   =  p10specialWakeup::SpecialWakeupAddr[i_entity];
+
+    FAPI_ATTR_GET( fapi2::ATTR_CHIP_EC_FEATURE_SPL_WKUP_STOP0_HW529794,
+                   l_procChip,
+                   l_hw529794 );
 
     l_data.flush<0>();
 
@@ -167,6 +225,50 @@ fapi2::ReturnCode initiateSplWkup(
 
     }
     while( ( l_pollCount > 0 ) && ( !l_data.getBit< p10specialWakeup::SPWKUP_REQ_DONE_BIT >() ));
+
+    do
+    {
+
+        if( l_hw529794 && !l_data.getBit< p10specialWakeup::SPWKUP_REQ_DONE_BIT >() )
+        {
+            l_rc = handleHwWorkAround( i_target );
+
+            if( l_rc == (fapi2::ReturnCode )fapi2::RC_INTERNAL_NO_TIMEOUT_DUETO_STOP0_BUG )
+            {
+                break;
+            }
+
+            l_pollCount    =   p10specialWakeup::SPECIAL_WAKEUP_TIMEOUT_NS / l_retryDelay;
+
+            do
+            {
+                FAPI_TRY( fapi2::getScom( l_ecMcAndTgt, l_address, l_data ));
+                //FIXME check for hcode error log
+                fapi2::delay( l_retryDelay, 1000000 );
+                l_pollCount--;
+
+            }
+            while( ( l_pollCount > 0 ) && ( !l_data.getBit< p10specialWakeup::SPWKUP_REQ_DONE_BIT >() ));
+
+            FAPI_ASSERT( ( true == l_data.getBit< p10specialWakeup::SPWKUP_REQ_DONE_BIT >() ),
+                         fapi2::SPCWKUP_CORE_HW529794_TIMEOUT().
+                         set_POLLCOUNT( l_pollCount ).
+                         set_SP_WKUP_REG_VALUE( l_data ).
+                         set_ENTITY( i_entity ).
+                         set_CORE_TARGET( i_target ).
+                         set_CORE_SSHSRC( l_coreSshsrc ),
+                         "Core Special Wakeup Request Timed Out" );
+
+            FAPI_INF( "HW529794: Spl Wakeup Success !!!" );
+
+            l_data.flush<0>().setBit( scomt::c::QME_SCSR_ASSERT_PM_EXIT );
+            FAPI_TRY( fapi2::putScom( l_ecMcAndTgt, scomt::c::QME_SCSR_WO_CLEAR, l_data ));
+
+            goto fapi_try_exit; // workaround worked and we got the DONE on core in STOP0
+        }
+
+    }
+    while(0);
 
     FAPI_TRY( fapi2::getScom( l_ecMcAndTgt, scomt::c::QME_SSH_SRC, l_coreSshsrc ) );
 
