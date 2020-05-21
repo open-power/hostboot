@@ -316,6 +316,7 @@ enum cmd_id : uint8_t
     FW_PQM_VERTICAL_BATHTUB_GET              = 0x19,
     FW_PQM_2D_BATHTUB_GET                    = 0x1A,
     FW_PQM_FORCE_DELAY_LINE_UPDATE           = 0x22,
+    FW_TWI_POLL_ABORT                        = 0x23,
     FW_TWI_FFE_SETTINGS                      = 0x24,
 };
 
