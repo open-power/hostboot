@@ -38,9 +38,8 @@
 #include <pldm/pldm_response.H>
 #include "../common/pldmtrace.H"
 
-// MCTP
-#include <mctp/mctp_message_types.H>
-#include <mctp/mctp_const.H>
+// Targeting
+#include <targeting/common/utilFilter.H>
 
 // libpldm
 #include "../extern/platform.h"
@@ -51,8 +50,43 @@
 
 // Misc
 #include <errl/errlmanager.H>
+#include <runtime/interface.h>
 
 using namespace ERRORLOG;
+using namespace TARGETING;
+
+namespace
+{
+
+/* @brief find_proc_by_ordinal_id
+ *
+ * Find a present processor with the given ordinal ID.
+ *
+ * @param[in] i_ordinal_id  Ordinal ID of processor to search for
+ * @return Target*          Pointer to the present processor
+ *                          target with the given ordinal,
+ *                          or nullptr if none found.
+ */
+Target* find_proc_by_ordinal_id(const ATTR_ORDINAL_ID_type i_ordinal_id)
+{
+    Target* result = nullptr;
+
+    TargetHandleList procs;
+    getClassResources(procs, CLASS_CHIP, TYPE_PROC, UTIL_FILTER_PRESENT);
+
+    for (const auto proc : procs)
+    {
+        if (proc->getAttr<ATTR_ORDINAL_ID>() == i_ordinal_id)
+        {
+            result = proc;
+            break;
+        }
+    }
+
+    return result;
+}
+
+}
 
 namespace PLDM
 {
@@ -294,6 +328,181 @@ errlHndl_t handlePdrRepoChangeEventRequest(const msg_q_t i_msgQ,
     } while (false);
 
     PLDM_EXIT("handlePdrRepoChangeEventRequest");
+
+    return errl;
+}
+
+errlHndl_t handleSetStateEffecterStatesRequest(const msg_q_t i_msgQ,
+                                               const pldm_msg* const i_msg,
+                                               const size_t i_payload_len)
+{
+    PLDM_ENTER("handleSetStateEffecterStatesRequest");
+
+    errlHndl_t errl = nullptr;
+    uint8_t response_code = PLDM_SUCCESS;
+
+    /* Decode and verify the request */
+
+    Target* occ_proc = nullptr;
+    pldm_set_state_effecter_states_req req = { };
+
+    do
+    {
+        errl = decode_pldm_request(decode_set_state_effecter_states_req,
+                                   i_msg,
+                                   i_payload_len,
+                                   &req.effecter_id,
+                                   &req.comp_effecter_count,
+                                   req.field);
+
+        if (errl)
+        {
+            PLDM_ERR("Failed to decode PLDM Set State Effecter States request");
+            errlCommit(errl, PLDM_COMP_ID);
+            response_code = PLDM_ERROR;
+            break;
+        }
+
+        const ATTR_ORDINAL_ID_type proc_ordinal_id = req.effecter_id;
+
+        occ_proc = find_proc_by_ordinal_id(proc_ordinal_id);
+
+        if (!occ_proc)
+        {
+            PLDM_ERR("Received invalid state effecter ID 0x%x",
+                     req.effecter_id);
+
+            /*
+             * @errortype  ERRL_SEV_INFORMATIONAL
+             * @moduleid   MOD_HANDLE_SET_STATE_EFFECTER_STATES_REQUEST
+             * @reasoncode RC_INVALID_EFFECTER_ID
+             * @userdata1  Invalid effecter ID
+             * @devdesc    Software problem, invalid effecter ID from BMC
+             * @custdesc   A software error occurred during system boot
+             */
+            errl = new ErrlEntry(ERRL_SEV_INFORMATIONAL,
+                                 MOD_HANDLE_SET_STATE_EFFECTER_STATES_REQUEST,
+                                 RC_INVALID_EFFECTER_ID,
+                                 req.effecter_id,
+                                 0,
+                                 ErrlEntry::NO_SW_CALLOUT);
+
+            addBmcErrorCallouts(errl);
+            errlCommit(errl, PLDM_COMP_ID);
+            response_code = PLDM_PLATFORM_INVALID_EFFECTER_ID;
+            break;
+        }
+
+        if (req.comp_effecter_count != 1
+            || !req.field[0].set_request
+            || (req.field[0].effecter_state != enum_bit(pldm_state_set_boot_restart_cause_warm_reset)
+                && req.field[0].effecter_state != enum_bit(pldm_state_set_boot_restart_cause_hard_reset)))
+        {
+            PLDM_ERR("Received invalid state effecter set request "
+                     "(effecter 0x%x, PROC = 0x%08x, effecter count = %d, "
+                     "set_request = %d, effecter_state = %d)",
+                     req.effecter_id,
+                     get_huid(occ_proc),
+                     req.comp_effecter_count,
+                     req.field[0].set_request,
+                     req.field[0].effecter_state);
+
+            /*
+             * @errortype  ERRL_SEV_INFORMATIONAL
+             * @moduleid   MOD_HANDLE_SET_STATE_EFFECTER_STATES_REQUEST
+             * @reasoncode RC_INVALID_EFFECTER_STATE
+             * @userdata1  HUID of the PROC with the OCC that was being reset
+             * @userdata2[0:15]  Set request field of first effecter
+             * @userdata2[16:31] Effecter state of first effecter
+             * @userdata2[32:63] Effecter count
+             * @devdesc    Software problem, invalid effecter state from BMC
+             * @custdesc   A software error occurred during system boot
+             */
+            errl = new ErrlEntry(ERRL_SEV_INFORMATIONAL,
+                                 MOD_HANDLE_SET_STATE_EFFECTER_STATES_REQUEST,
+                                 RC_INVALID_EFFECTER_STATE,
+                                 get_huid(occ_proc),
+                                 TWO_UINT16_ONE_UINT32_TO_UINT64(req.field[0].set_request,
+                                                                 req.field[0].effecter_state,
+                                                                 req.comp_effecter_count),
+                                 ErrlEntry::NO_SW_CALLOUT);
+
+            addBmcErrorCallouts(errl);
+            errlCommit(errl, PLDM_COMP_ID);
+            response_code = PLDM_PLATFORM_INVALID_STATE_VALUE;
+            break;
+        }
+
+        /* Act on the request if the request was valid */
+
+        const auto hbrt_hyp_id = occ_proc->getAttr<ATTR_HBRT_HYP_ID>();
+
+        PLDM_INF("Attempting to reset OCC on PROC HUID = 0x%08x (HBRT ID = 0x%08x)",
+                 get_huid(occ_proc),
+                 hbrt_hyp_id);
+
+// @TODO RTC 254820: Remove the conditionals when this is moved into HBRT
+#ifdef __HOSTBOOT_RUNTIME
+        const int rc = HBRT::getRuntimeInterfaces()->reset_pm_complex(hbrt_hyp_id);
+#else
+        const int rc = 0;
+#endif
+
+        if (rc)
+        {
+            PLDM_ERR("handleSetStateEffecterStatesRequest: Failed to reset the PM complex "
+                     "on PROC HUID = 0x%08x",
+                     get_huid(occ_proc));
+
+            /*
+             * @errortype  ERRL_SEV_UNRECOVERABLE
+             * @moduleid   MOD_HANDLE_SET_STATE_EFFECTER_STATES_REQUEST
+             * @reasoncode RC_OCC_RESET_FAILED
+             * @userdata1  HUID of the PROC with the OCC that was reset
+             * @userdata2  Return code from reset_pm_complex
+             * @devdesc    Software problem, invalid event class received from BMC
+             * @custdesc   A software error occurred during system boot
+             */
+            errl = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
+                                 MOD_HANDLE_SET_STATE_EFFECTER_STATES_REQUEST,
+                                 RC_OCC_RESET_FAILED,
+                                 get_huid(occ_proc),
+                                 rc,
+                                 ErrlEntry::ADD_SW_CALLOUT);
+
+            errlCommit(errl, PLDM_COMP_ID);
+
+            // Question: do we want to reply with an error? Because technically
+            // PLDM didn't fail so saying PLDM_ERROR could be misleading.
+            response_code = PLDM_ERROR;
+            break;
+        }
+        else
+        {
+            PLDM_INF("Successfully reset OCC on PROC HUID = 0x%08x",
+                     get_huid(occ_proc));
+        }
+    } while (false);
+
+    /* Respond to the request */
+
+    if (!errl) {
+        errl =
+            send_pldm_response<PLDM_SET_STATE_EFFECTER_STATES_RESP_BYTES>
+            (i_msgQ,
+             encode_set_state_effecter_states_resp,
+             0, // No payload after the header
+             i_msg->hdr.instance_id,
+             response_code);
+
+        if (errl)
+        {
+            PLDM_ERR("Failed to send PLDM PDR Repository Changed event response");
+            errl->collectTrace(PLDM_COMP_NAME);
+        }
+    }
+
+    PLDM_EXIT("handleSetStateEffecterStatesRequest");
 
     return errl;
 }

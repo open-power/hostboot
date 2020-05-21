@@ -243,17 +243,6 @@ struct pldm_pdr_fru_record_set {
 	uint16_t container_id;
 } __attribute__((packed));
 
-/** @struct pldm_state_effecter_possible_states
- *
- * Structure representing a State Effecter Possible States field
- * (see DSP 0248 v1.1.1 table 79)
- */
-struct pldm_state_effecter_possible_states {
-    uint16_t state_set_id;
-    uint8_t possible_states_size;
-    uint8_t possible_states[1];
-} __attribute__((packed));
-
 /* @brief List of PLDM State Set types
  */
 enum pldm_state_set_enumeration {

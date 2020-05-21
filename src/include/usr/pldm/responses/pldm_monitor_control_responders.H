@@ -66,6 +66,20 @@ errlHndl_t handlePdrRepoChangeEventRequest(msg_q_t i_msgQ,
                                            const pldm_msg* i_msg,
                                            size_t i_payload_len);
 
+/* @brief handleSetStateEffecterStatesRequest
+ *
+ *        Handler for Set State Effecter States requests. (See DSP0248 v1.2.0
+ *        section 22.5 for details.)
+ *
+ * @param[in] i_msgQ         Handle to MCTP outbound request message queue
+ * @param[in] i_msg          The PLDM message received
+ * @param[in] i_payload_len  Length of PLDM message payload
+ * @return errlHndl_t        Error if any, otherwise nullptr.
+ */
+errlHndl_t handleSetStateEffecterStatesRequest(msg_q_t i_msgQ,
+                                               const pldm_msg* i_msg,
+                                               size_t i_payload_len);
+
 }
 
 #endif

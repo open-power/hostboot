@@ -86,7 +86,8 @@ struct msg_type_handler
 const msg_type_handler pldm_monitor_control_handlers[] =
 {
     { PLDM_GET_PDR, handleGetPdrRequest },
-    { PLDM_PLATFORM_EVENT_MESSAGE, handlePdrRepoChangeEventRequest }
+    { PLDM_PLATFORM_EVENT_MESSAGE, handlePdrRepoChangeEventRequest },
+    { PLDM_SET_STATE_EFFECTER_STATES, handleSetStateEffecterStatesRequest }
 };
 
 /*** Handlers for the MSG_FRU_DATA type ***/
