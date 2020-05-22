@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -77,7 +77,7 @@ typedef struct __attribute__((__packed__))  ddscData
 ///
 fapi2::ReturnCode p10_pm_get_poundw_bucket(
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
-    fapi2::ddscData_t& o_data);
+    fapi2::ddscData_t* o_data);
 
 
 #endif // _P10_PM_GET_POUND_W_BUCKET_H_

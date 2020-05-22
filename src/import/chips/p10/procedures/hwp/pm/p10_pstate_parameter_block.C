@@ -3076,7 +3076,7 @@ fapi2::ReturnCode PlatPmPPB::apply_extint_bias( )
 ///////////////////////////////////////////////////////////
 fapi2::ReturnCode PlatPmPPB::get_mvpd_poundW (void)
 {
-    fapi2::ddscData_t l_ddscBuf;
+    fapi2::ddscData_t *l_ddscBuf = new fapi2::ddscData_t;
     uint8_t    bucket_id        = 0;
     uint8_t    version_id       = 0;
 
@@ -3099,12 +3099,12 @@ fapi2::ReturnCode PlatPmPPB::get_mvpd_poundW (void)
         }
 
         // clear out buffer to known value before calling fapiGetMvpdField
-        memset(&l_ddscBuf, 0, sizeof(l_ddscBuf));
+        memset(l_ddscBuf, 0, sizeof(fapi2::ddscData_t));
 
         FAPI_TRY(p10_pm_get_poundw_bucket(iv_procChip, l_ddscBuf));
 
-        bucket_id = l_ddscBuf.bucketId;
-        version_id = l_ddscBuf.version;
+        bucket_id = l_ddscBuf->bucketId;
+        version_id = l_ddscBuf->version;
 
         FAPI_INF("#W bucket_id  = %u version_id = %u", bucket_id, version_id);
 
@@ -3126,7 +3126,7 @@ fapi2::ReturnCode PlatPmPPB::get_mvpd_poundW (void)
         {
             FAPI_INF("attribute ATTR_POUND_W_STATIC_DATA_ENABLE is NOT set");
             // copy the data to the pound w structure from the actual VPD image
-            memcpy (&iv_poundW_data, l_ddscBuf.ddscData, sizeof (l_ddscBuf.ddscData));
+            memcpy (&iv_poundW_data, l_ddscBuf->ddscData, sizeof (l_ddscBuf->ddscData));
         }
 
         // validate vid values
@@ -3158,6 +3158,7 @@ fapi2::ReturnCode PlatPmPPB::get_mvpd_poundW (void)
     while(0);
 
 fapi_try_exit:
+    delete l_ddscBuf;
     return fapi2::FAPI2_RC_SUCCESS;
 }
 

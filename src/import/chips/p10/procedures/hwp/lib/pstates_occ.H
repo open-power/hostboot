@@ -192,7 +192,7 @@ typedef struct
     // eg 8C/2100m = 8C/2.1Km = 3.809 -> 1000 = 3809
     uint32_t            altitude_temp_adj_degCpMm;
 
-} OCCPstateParmBlock_t __attribute__((aligned(128))) ;
+} OCCPstateParmBlock_t ;
 
 #ifdef __cplusplus
 } // end extern C

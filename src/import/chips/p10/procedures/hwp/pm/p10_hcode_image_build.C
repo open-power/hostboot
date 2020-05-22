@@ -1658,25 +1658,25 @@ fapi2::ReturnCode buildParameterBlock( CONST_FAPI2_PROC& i_procTgt, Homerlayout_
     FAPI_DBG( " >> buildParameterBlock " );
     ImgSectnSumm   l_sectn;
     i_ppmrBuildRecord.getSection( "PGPE Hcode", l_sectn );
-    PstateSuperStructure  l_pstateParamBlock;
-    memset( &l_pstateParamBlock, 0x00, sizeof(PstateSuperStructure) );
+    PstateSuperStructure  *l_pstateParamBlock = new PstateSuperStructure;
+    memset( l_pstateParamBlock, 0x00, sizeof(PstateSuperStructure) );
     uint8_t * l_pWofData    =   i_pChipHomer->iv_ppmrRegion.iv_wofTable;
     uint32_t  l_pstableSize =   PGPE_PSTATE_OUTPUT_TABLES_SIZE;
     uint32_t  l_wofSize     =   (uint32_t)OCC_WOF_TABLES_SIZE;
     uint32_t  l_tempOffset  =   l_sectn.iv_sectnOffset + l_sectn.iv_sectnLength;
     FAPI_DBG( "WOF Size before 0x%08x", l_wofSize);
 
-    FAPI_TRY( p10_pstate_parameter_block( i_procTgt, &l_pstateParamBlock, l_pWofData, l_wofSize ) );
+    FAPI_TRY( p10_pstate_parameter_block( i_procTgt, l_pstateParamBlock, l_pWofData, l_wofSize ) );
 
     FAPI_DBG( "PGPE Hcode Offset 0x%08x  Length 0x%08x  WOF Size 0x%08x",
                 l_sectn.iv_sectnOffset, l_sectn.iv_sectnLength, l_wofSize);
 
     memcpy( &i_pChipHomer->iv_ppmrRegion.iv_pgpeSramRegion[l_sectn.iv_sectnLength],
-            &l_pstateParamBlock.iv_globalppb, sizeof(GlobalPstateParmBlock_t) );
+            &l_pstateParamBlock->iv_globalppb, sizeof(GlobalPstateParmBlock_t) );
 
     i_ppmrBuildRecord.setSection( "GPSPB", l_tempOffset, sizeof(GlobalPstateParmBlock_t) );
 
-    memcpy( i_pChipHomer->iv_ppmrRegion.iv_occPstateParamBlock, &l_pstateParamBlock.iv_occppb,
+    memcpy( i_pChipHomer->iv_ppmrRegion.iv_occPstateParamBlock, &l_pstateParamBlock->iv_occppb,
             sizeof( OCCPstateParmBlock_t ) );
 
     i_ppmrBuildRecord.setSection( "OPSPB", OCC_PSTATE_PARAM_BLOCK_PPMR_OFFSET,
@@ -1691,6 +1691,7 @@ fapi2::ReturnCode buildParameterBlock( CONST_FAPI2_PROC& i_procTgt, Homerlayout_
     FAPI_DBG( " << buildParameterBlock " );
 
     fapi_try_exit:
+    delete l_pstateParamBlock;
     return fapi2::current_err;
 
 }

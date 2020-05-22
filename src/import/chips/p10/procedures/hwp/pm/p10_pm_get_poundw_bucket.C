@@ -5,7 +5,8 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
@@ -44,12 +45,12 @@
 // See doxygen in header file
 fapi2::ReturnCode p10_pm_get_poundw_bucket(
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
-    fapi2::ddscData_t& o_data)
+    fapi2::ddscData_t* o_data)
 {
     FAPI_DBG("Entering p10_pm_get_poundw_bucket ....");
 
     //clear the output variable
-    memset (&o_data, 0, sizeof(fapi2::ddscData_t));
+    memset (o_data, 0, sizeof(fapi2::ddscData_t));
     //Set up a char array to hold the bucket data from an attr read
     fapi2::ATTR_POUNDW_BUCKET_DATA_Type l_bucketAttr;
 
@@ -58,7 +59,7 @@ fapi2::ReturnCode p10_pm_get_poundw_bucket(
                            i_target,
                            l_bucketAttr));
 
-    memcpy(&o_data, l_bucketAttr, sizeof(o_data));
+    memcpy(o_data, l_bucketAttr, sizeof(l_bucketAttr));
 
 fapi_try_exit:
     FAPI_DBG("Exiting p10_pm_get_poundw_bucket ....");
