@@ -47,16 +47,20 @@
 #include <hwas/hwasPlat.H>
 #include <initservice/mboxRegs.H>
 
-//  $$  make sure these are disabled before checking in!!
-#define DISABLE_UNIT_TESTS        1
-#define DISABLE_MCS_UNIT_TESTS    1
-#define DISABLE_MBA_UNIT_TESTS    1
-#define DISABLE_MEM_UNIT_TESTS    1
-#define DISABLE_FC_UNIT_TESTS     1
-#define DISABLE_VERS_UNIT_TESTS   1
-//$$#define DISABLE_UNIT_TESTS        0
+// The defines below are here to modify mostly during
+// code development and debug to easily turn off and on
+// the various tests to isolate any problems that may
+// complicate the debug process.
 
-#define DISABLE_OMI_UNIT_TESTS    1
+#define DISABLE_UNIT_TESTS        0
+#define DISABLE_MCS_UNIT_TESTS    0 // standalone no TYPE_MCS
+#define DISABLE_MBA_UNIT_TESTS    0 // standalone no TYPE_MBA
+#define DISABLE_MEM_UNIT_TESTS    0 // standalone no TYPE_MEMBUF
+#define DISABLE_FC_UNIT_TESTS     0
+#define DISABLE_FC_CRASH_UNIT_TESTS  1 //keep disabled, core can crash
+#define DISABLE_VERS_UNIT_TESTS   0
+
+#define DISABLE_OMI_UNIT_TESTS    0
 
 #if DISABLE_OMI_UNIT_TESTS
 #define ENABLE_OMI_UNIT_TEST_1    0
@@ -72,7 +76,7 @@
 #define ENABLE_OMI_UNIT_TEST_5    1
 #endif
 
-#define TEST_SAVE_RESTORE_SYSTEM_STATE    0
+#define DISABLE_PEC_UNIT_TESTS 0 // standalone no TYPE_PEC
 
 #include <algorithm>
 
@@ -98,7 +102,7 @@ const ATTR_CHIPLET_ID_type ANY_CHIPLET = 0xFF;
  * @param[in] i_parent         The target whose children will be searched.
  * @param[in] i_targetType     The type of target the caller wants.
  * @param[in] i_chipletID      A chiplet ID or the special value ANY_CHIPLET.
- * @return    Target*          Pointer to a target. Never returns nullptr.
+ * @return    Target*          Pointer to a target.
  */
 Target* getAnyTargetByType(const Target& i_parent,
                            const ATTR_TYPE_type i_targetType,
@@ -109,6 +113,8 @@ Target* getAnyTargetByType(const Target& i_parent,
 
     Target* l_target = nullptr;
 
+    TS_INFO("getAnyTargetByType: l_targetList.size()=%d TYPE=0x%X",
+        l_targetList.size(), i_targetType);
     for (const auto target : l_targetList)
     {
         if (i_chipletID == ANY_CHIPLET
@@ -121,7 +127,8 @@ Target* getAnyTargetByType(const Target& i_parent,
 
     if (!l_target)
     {
-        TS_FAIL("getAnyTargetByType: Cannot find instance of target type %s "
+        TS_INFO("getAnyTargetByType: *WARNING* Cannot find "
+                "instance of target type %s "
                 "(chiplet id 0x%02x)",
                 attrToString<ATTR_TYPE>(i_targetType),
                 i_chipletID);
@@ -196,8 +203,7 @@ TargetHandleList getSortedPAUList(const Target& i_proc)
  */
 void saveSystemState()
 {
-    TargetHandle_t pSys;
-    targetService().getTopLevelTarget(pSys);
+    Target* pSys = UTIL::assertGetToplevelTarget();
 
     TargetHandleList pChildList;
     getChildAffinityTargets(pChildList, pSys, CLASS_NA, TYPE_NA, false);
@@ -211,12 +217,23 @@ void saveSystemState()
 
         // Store it in a scratch attribute for later
         l_child->setAttr<ATTR_SAVED_STATE_UINT8>(l_savedState);
+        TS_TRACE("saveSystemState: SAVED HWAS_STATE for "
+            "HUID=0x%X l_savedState=0x%X",
+            get_huid(l_child), l_savedState);
 
         // If this is a PERV target, store ATTR_PG
         if (l_child->getAttr<ATTR_TYPE>() == TYPE_PERV)
         {
             const ATTR_PG_SAVED_type l_savedAttrPg = l_child->getAttr<ATTR_PG>();
             l_child->setAttr<ATTR_PG_SAVED>(l_savedAttrPg);
+            TS_TRACE("saveSystemState: SAVED ATTR_PG for "
+                "HUID=0x%X l_savedAttrPg=0x%X",
+                get_huid(l_child), l_savedAttrPg);
+        }
+        else
+        {
+            TS_TRACE("saveSystemState: NOT SAVING ATTR_PG for HUID=0x%X",
+                get_huid(l_child));
         }
     }
 }
@@ -225,8 +242,7 @@ void saveSystemState()
  */
 void restoreSystemState()
 {
-    TargetHandle_t pSys;
-    targetService().getTopLevelTarget(pSys);
+    Target* pSys = UTIL::assertGetToplevelTarget();
 
     TargetHandleList pChildList;
     getChildAffinityTargets(pChildList, pSys, CLASS_NA, TYPE_NA, false);
@@ -238,15 +254,30 @@ void restoreSystemState()
 
         // Update current HwasState
         HwasState l_state = l_child->getAttr<ATTR_HWAS_STATE>();
+        TS_TRACE("restoreSystemState: Working with HUID=0x%X "
+            "functional=0x%X savedState=0x%X",
+            get_huid(l_child), l_state.functional, l_savedState);
 
         l_state.functional = l_savedState != 0;
 
+        TS_TRACE("restoreSystemState: SETTING HUID=0x%X "
+            "functional=0x%X savedState=0x%X",
+            get_huid(l_child), l_state.functional, l_savedState);
         l_child->setAttr<ATTR_HWAS_STATE>(l_state);
 
         // And if it's a PERV, restore ATTR_PG
         if (l_child->getAttr<ATTR_TYPE>() == TYPE_PERV)
         {
+            TS_TRACE("restoreSystemState: HUID=0x%X TYPE_PERV SETTING "
+                "ATTR_PG to ATTR_PG_SAVED 0x%X",
+                get_huid(l_child), l_child->getAttr<ATTR_PG_SAVED>());
             l_child->setAttr<ATTR_PG>(l_child->getAttr<ATTR_PG_SAVED>());
+        }
+        else
+        {
+            TS_TRACE("restoreSystemState: NO ATTR_PG RESTORE "
+                "HUID=0x%X NOT TYPE_PERV, but TYPE=0x%X",
+                get_huid(l_child), l_child->getAttr<ATTR_TYPE>());
         }
     }
 }
@@ -422,9 +453,11 @@ public:
 #endif
 
         // Apply fake gard to all MCs
+        TS_INFO("createFakeGardRecords l_mcList.size()=%d", l_mcList.size());
         for (auto const& l_mc: l_mcList)
         {
             errlHndl_t l_errHandler = nullptr;
+            TS_INFO("createFakeGardRecords working HUID=0x%X", get_huid(l_mc));
             l_errHandler = HWAS::theDeconfigGard().applyGardRecord(l_mc,
                 l_fakeGardRecord);
 
@@ -462,6 +495,7 @@ public:
 
         // Target attributes will be edited, save state to restore at the end
         // of testcase
+        TS_INFO("testHostbootSbeDeconfig Started");
         saveSystemState();
 
         TestHbSbePGDeconfig testHbSbeDeconfig;
@@ -490,6 +524,7 @@ public:
 
         // Restore saved Target state
         restoreSystemState();
+        TS_INFO("testHostbootSbeDeconfig Ended");
 
     }
 
@@ -501,8 +536,7 @@ public:
         // @TODO RTC 243399: Fix parent deconfig rules for new targets
         return;
 
-        TS_TRACE(INFO_MRK "testParentDeconfigRules: Started");
-        HWAS_INF("testParentDeconfigRules: Started");
+        TS_INFO("testParentDeconfigRules: Started");
 
         TARGETING::TargetIterator l_pTarget;
         for(    l_pTarget = TARGETING::targetService().begin();
@@ -518,7 +552,7 @@ public:
                   TARGETING::get_huid(*l_pTarget));
             }
         }
-        HWAS_INF("testParentDeconfigRules: Ended");
+        TS_INFO("testParentDeconfigRules: Ended");
     }
 
     /*
@@ -545,10 +579,9 @@ public:
 
     void testSaveRestoreState()
     {
-#if TEST_SAVE_RESTORE_SYSTEM_STATE
+#if !DISABLE_UNIT_TESTS
         // find an fc unit that we can play with
-        Target * pSys;
-        targetService().getTopLevelTarget(pSys);
+        Target* pSys = UTIL::assertGetToplevelTarget();
 
         PredicateCTM predFc(CLASS_UNIT, TYPE_FC);
         PredicateHwas predFunctional;
@@ -559,31 +592,36 @@ public:
         targetService().getAssociated( pFcList, pSys,
             TargetService::CHILD, TargetService::ALL, &checkExpr );
 
-        if (pFcList.empty())
+        do
         {
-            TS_FAIL("testSaveRestoreState: empty pFcList");
+            if (pFcList.empty())
+            {
+                TS_WARN("testSaveRestoreState: empty pFcList CLASS_UNIT, TYPE_FC");
+                break;
+            }
+            TargetHandle_t l_pTarget = *pFcList.begin();
+            saveSystemState();
+
+            // Get current HwasState.
+            HwasState l_state = l_pTarget->getAttr<ATTR_HWAS_STATE>();
+            HwasState l_originalState = l_state;
+
+            // Change it to something else
+            l_state.functional = !l_state.functional;
+
+            l_pTarget->setAttr<ATTR_HWAS_STATE>(l_state);
+
+            restoreSystemState();
+
+            HwasState l_restoState = l_pTarget->getAttr<ATTR_HWAS_STATE>();
+
+            if (l_restoState.functional != l_originalState.functional)
+            {
+                TS_FAIL("Original state not restored. original = %d, current = %d",
+                        l_originalState.functional, l_restoState.functional);
+            }
         }
-        TargetHandle_t l_pTarget = *pFcList.begin();
-        saveSystemState();
-
-        // Get current HwasState.
-        HwasState l_state = l_pTarget->getAttr<ATTR_HWAS_STATE>();
-        HwasState l_originalState = l_state;
-
-        // Change it to something else
-        l_state.functional = !l_state.functional;
-
-        l_pTarget->setAttr<ATTR_HWAS_STATE>(l_state);
-
-        restoreSystemState();
-
-        HwasState l_restoState = l_pTarget->getAttr<ATTR_HWAS_STATE>();
-
-        if (l_restoState.functional != l_originalState.functional)
-        {
-            TS_FAIL("Original state not restored. original = %d, current = %d",
-                    l_originalState.functional, l_restoState.functional);
-        }
+        while (0);
 #endif
     }
 
@@ -593,8 +631,7 @@ public:
      */
     void testDeconfigure2()
     {
-        TS_TRACE(INFO_MRK "testDeconfigure2: Started");
-        HWAS_INF("testDeconfigure2: Started");
+        TS_INFO("testDeconfigure2: Started");
 
         errlHndl_t l_pErr = nullptr;
         DeconfigGard::DeconfigureRecords_t l_records;
@@ -602,8 +639,7 @@ public:
         do
         {
             // find an fc unit that we can play with
-            Target * pSys;
-            targetService().getTopLevelTarget(pSys);
+            Target* pSys = UTIL::assertGetToplevelTarget();
 
             PredicateCTM predFc(CLASS_UNIT, TYPE_FC);
             PredicateHwas predFunctional;
@@ -614,9 +650,10 @@ public:
             targetService().getAssociated( pFcList, pSys,
                 TargetService::CHILD, TargetService::ALL, &checkExpr );
 
+            TS_INFO("testDeconfigure2: pFcList.size()=%d", pFcList.size());
             if (pFcList.empty())
             {
-                TS_FAIL("testDeconfigure2: empty pFcList");
+                TS_FAIL("testDeconfigure2: SKIPPING empty pFcList CLASS_UNIT, TYPE_FC");
                 break;
             }
             TargetHandle_t l_pTarget = *pFcList.begin();
@@ -642,7 +679,7 @@ public:
                 break;
             }
 
-            TS_TRACE(INFO_MRK "testDeconfigure2: Success. %d record",
+            TS_INFO("testDeconfigure2: Success. %d record",
                          l_records.size());
 
             // now delete it.
@@ -658,9 +695,10 @@ public:
                 break;
             }
 
-            TS_TRACE(INFO_MRK "testDeconfigure2: Success");
+            TS_INFO("testDeconfigure2: Success");
         }
         while (0);
+        TS_INFO("testDeconfigure2: Ended");
     }
 
 
@@ -670,28 +708,17 @@ public:
 
     void testDeconfigure3()
     {
-        TS_TRACE(INFO_MRK "testDeconfigure3: Started");
-#if DISABLE_FC_UNIT_TESTS
-        // these tests deconfigure and gard targets. and even though they
-        //  restore their state after the tests, since the cxxtests are
-        //  all run in parallel, during the time that a target is non-
-        //  functional due to this test, another test may be running that
-        //  might be adversly affected.
-        // tests are left in the code so that a developer can enable them
-        //  to test these specific functions - just keep in mind that there
-        //  could be side effects in other cxxtests.
-        TS_TRACE( " - SKIPPING -- other tests could be adversly affected");
-        HWAS_INF("testDeconfigure3: Skipped");
+        TS_INFO("testDeconfigure3: Started");
+#if DISABLE_UNIT_TESTS
+        TS_INFO( "testDeconfigure3 - SKIPPING -- other tests could be adversly affected");
 #else
-        HWAS_INF("testDeconfigure3: Started");
 
         errlHndl_t l_pErr = nullptr;
         saveSystemState();
         do
         {
             // find an fc unit that we can play with
-            Target * pSys;
-            targetService().getTopLevelTarget(pSys);
+            Target* pSys = UTIL::assertGetToplevelTarget();
 
             PredicateCTM predFc(CLASS_UNIT, TYPE_FC);
             PredicateHwas predFunctional;
@@ -702,12 +729,15 @@ public:
             targetService().getAssociated( pFcList, pSys,
                 TargetService::CHILD, TargetService::ALL, &checkExpr );
 
+            TS_INFO("testDeconfigure3: pFcList.size()=%d", pFcList.size());
             if (pFcList.empty())
             {
-                TS_FAIL("testDeconfigure3: empty pFcList");
+                TS_FAIL("testDeconfigure3: SKIPPING empty pFcList CLASS_UNIT, TYPE_FC");
                 break;
             }
             TargetHandle_t l_pTarget = *pFcList.begin();
+            TS_INFO("testDeconfigure3: Working with "
+                "HUID=0x%X", get_huid(l_pTarget));
 
             // Get the original HWAS_STATE of the target
             HwasState l_origState = l_pTarget->getAttr<ATTR_HWAS_STATE>();
@@ -740,7 +770,7 @@ public:
             // Reset the HWAS_STATE of the target
             l_pTarget->setAttr<ATTR_HWAS_STATE>(l_origState);
 
-            HWAS_INF(INFO_MRK "testDeconfigure3: Success");
+            TS_INFO("testDeconfigure3: Success");
         }
         while (0);
 
@@ -749,6 +779,7 @@ public:
             errlCommit(l_pErr,CXXTEST_COMP_ID);
         }
         restoreSystemState();
+        TS_INFO("testDeconfigure3: Ended");
 #endif
     }
 
@@ -757,20 +788,10 @@ public:
      */
     void testDeconfigure4()
     {
-        TS_TRACE(INFO_MRK "testDeconfigure4: Started");
-#if DISABLE_FC_UNIT_TESTS
-        // these tests deconfigure and gard targets. and even though they
-        //  restore their state after the tests, since the cxxtests are
-        //  all run in parallel, during the time that a target is non-
-        //  functional due to this test, another test may be running that
-        //  might be adversly affected.
-        // tests are left in the code so that a developer can enable them
-        //  to test these specific functions - just keep in mind that there
-        //  could be side effects in other cxxtests.
-        TS_TRACE( " - SKIPPING -- other tests could be adversly affected");
-        HWAS_INF("testDeconfigure4: Skipped");
+        TS_INFO("testDeconfigure4: Started");
+#if DISABLE_UNIT_TESTS
+        TS_INFO("testDeconfigure4 - SKIPPING -- other tests could be adversly affected");
 #else
-        HWAS_INF("testDeconfigure4: Started");
 
         errlHndl_t l_pErr = nullptr;
 
@@ -778,8 +799,7 @@ public:
         do
         {
             // find an fc unit that we can play with
-            Target * pSys;
-            targetService().getTopLevelTarget(pSys);
+            Target* pSys = UTIL::assertGetToplevelTarget();
 
             PredicateCTM predFc(CLASS_UNIT, TYPE_FC);
             PredicateHwas predFunctional;
@@ -790,12 +810,15 @@ public:
             targetService().getAssociated( pFcList, pSys,
                 TargetService::CHILD, TargetService::ALL, &checkExpr );
 
+            TS_INFO("testDeconfigure4: pFcList.size()=%d", pFcList.size());
             if (pFcList.empty())
             {
-                TS_FAIL("testDeconfigure4: empty pFcList");
+                TS_FAIL("testDeconfigure4: SKIPPING empty pFcList CLASS_UNIT, TYPE_FC");
                 break;
             }
             TargetHandle_t l_pTarget = *pFcList.begin();
+            TS_INFO("testDeconfigured4: Working with "
+                "HUID=0x%X", get_huid(l_pTarget));
 
             // Get the current HWAS_STATE of the target
             HwasState l_origState = l_pTarget->getAttr<ATTR_HWAS_STATE>();
@@ -830,7 +853,7 @@ public:
             // Reset the HWAS_STATE of the target
             l_pTarget->setAttr<ATTR_HWAS_STATE>(l_origState);
 
-            TS_TRACE(INFO_MRK "testDeconfigure4: Success");
+            TS_INFO("testDeconfigure4: Success");
         }
         while (0);
 
@@ -839,6 +862,7 @@ public:
             errlCommit(l_pErr,CXXTEST_COMP_ID);
         }
         restoreSystemState();
+        TS_INFO("testDeconfigure4: Ended");
 #endif
     }
 
@@ -848,29 +872,18 @@ public:
 
     void testDeconfigurePECTarget()
     {
-        TS_TRACE(INFO_MRK "testDeconfigurePECTarget: Started");
+        TS_INFO("testDeconfigurePECTarget: Started");
 
-#if DISABLE_UNIT_TESTS
-        // these tests deconfigure and gard targets. and even though they
-        //  restore their state after the tests, since the cxxtests are
-        //  all run in parallel, during the time that a target is non-
-        //  functional due to this test, another test may be running that
-        //  might be adversly affected.
-        // tests are left in the code so that a developer can enable them
-        //  to test these specific functions - just keep in mind that there
-        //  could be side effects in other cxxtests.
-        TS_TRACE( " - SKIPPING -- other tests could be adversly affected");
-        HWAS_INF("testDeconfigurePECTarget: Skipped");
+#if DISABLE_PEC_UNIT_TESTS
+        TS_INFO("testDeconfigurePECTarget - SKIPPING -- other tests could be adversly affected");
 #else
-        HWAS_INF("testDeconfigurePECTarget: Started");
 
         errlHndl_t l_pErr = nullptr;
 
         do
         {
             //Find a functional PEC Target for the deconfigure test
-            Target * pSys;
-            targetService().getTopLevelTarget(pSys);
+            Target* pSys = UTIL::assertGetToplevelTarget();
             PredicateCTM predPEC(CLASS_UNIT, TYPE_PEC);
             PredicateHwas predFunctional;
             predFunctional.poweredOn(true).present(true).functional(true);
@@ -881,9 +894,11 @@ public:
                 TargetService::CHILD, TargetService::ALL, &checkExpr );
 
             //Verify PEC list isn't empty
+            TS_INFO("testDeconfigurePECTarget: l_pecList.size()=%d",
+                l_pecList.size());
             if (l_pecList.empty())
             {
-                TS_FAIL("testDeconfigurePECTarget: empty l_pecList");
+                TS_INFO("testDeconfigurePECTarget: SKIPPING empty l_pecList CLASS_UNIT, TYPE_PEC");
                 break;
             }
 
@@ -929,8 +944,7 @@ public:
                 }
 
                 // Deconfigure the target PEC and check that works
-                l_pErr = theDeconfigGard().
-                        deconfigureTarget(*l_pec,
+                l_pErr = theDeconfigGard().deconfigureTarget(*l_pec,
                             DeconfigGard::DECONFIGURED_BY_PEC_DECONFIG);
                 if (l_pErr)
                 {
@@ -952,7 +966,7 @@ public:
                 //     deconfigured
                 for (const auto l_phb : l_phbList)
                 {
-                    TS_TRACE("testDeconfigurePECTarget: PHB: %.8X",
+                    TS_INFO("testDeconfigurePECTarget: PHB: %.8X",
                               get_huid(l_phb));
                     // Get the current HWAS_STATE of PHB
                     l_state = l_phb->getAttr<ATTR_HWAS_STATE>();
@@ -973,6 +987,8 @@ public:
             errlCommit(l_pErr,CXXTEST_COMP_ID);
         }
 
+        TS_INFO("testDeconfigurePECTarget: Ended");
+
 #endif
     }
 
@@ -981,28 +997,16 @@ public:
      */
     void testDeconfigurePECwithAllBadPHBs()
     {
-        TS_TRACE(INFO_MRK "testDeconfigurePECwithAllBadPHBs: Started");
-#if DISABLE_UNIT_TESTS
-        // these tests deconfigure and gard targets. and even though they
-        //  restore their state after the tests, since the cxxtests are
-        //  all run in parallel, during the time that a target is non-
-        //  functional due to this test, another test may be running that
-        //  might be adversly affected.
-        // tests are left in the code so that a developer can enable them
-        //  to test these specific functions - just keep in mind that there
-        //  could be side effects in other cxxtests.
-        TS_TRACE( " - SKIPPING -- other tests could be adversly affected");
-        HWAS_INF("testDeconfigurePECwithAllBadPHBs: Skipped");
+        TS_INFO("testDeconfigurePECwithAllBadPHBs: Started");
+#if DISABLE_PEC_UNIT_TESTS
+        TS_INFO("testDeconfigurePECwithAllBadPHBs - SKIPPING -- other tests could be adversly affected");
 #else
-        HWAS_INF("testDeconfigurePECwithAllBadPHBs: Started");
-
         errlHndl_t l_pErr = nullptr;
 
         do
         {
             //Find a functional PEC Target for the deconfigure test
-            Target * pSys;
-            targetService().getTopLevelTarget(pSys);
+            Target* pSys = UTIL::assertGetToplevelTarget();
             PredicateCTM predPEC(CLASS_UNIT, TYPE_PEC);
             PredicateHwas predFunctional;
             predFunctional.poweredOn(true).present(true).functional(true);
@@ -1013,9 +1017,10 @@ public:
                 TargetService::CHILD, TargetService::ALL, &checkExpr );
 
             //Verify PEC list isn't empty
+            TS_INFO("testDeconfigurePECwithAllBadPHBs: l_pecList.size()=%d", l_pecList.size());
             if (l_pecList.empty())
             {
-                TS_FAIL("testDeconfigurePECwithAllBadPHBs: empty l_pecList");
+                TS_INFO("testDeconfigurePECwithAllBadPHBs: SKIPPING empty l_pecList CLASS_UNIT, TYPE_PEC");
                 break;
             }
 
@@ -1099,6 +1104,7 @@ public:
         {
             errlCommit(l_pErr,CXXTEST_COMP_ID);
         }
+        TS_INFO("testDeconfigurePECwithAllBadPHBs: Ended");
 
 #endif
     }
@@ -1108,28 +1114,17 @@ public:
      */
     void testDeconfigureEQTarget()
     {
-        TS_TRACE(INFO_MRK "testDeconfigureEQTarget: Started");
-#if DISABLE_FC_UNIT_TESTS
-        // these tests deconfigure and gard targets. and even though they
-        //  restore their state after the tests, since the cxxtests are
-        //  all run in parallel, during the time that a target is non-
-        //  functional due to this test, another test may be running that
-        //  might be adversly affected.
-        // tests are left in the code so that a developer can enable them
-        //  to test these specific functions - just keep in mind that there
-        //  could be side effects in other cxxtests.
-        TS_TRACE( " - SKIPPING -- other tests could be adversly affected");
-        HWAS_INF("testDeconfigureEQTarget: Skipped");
+        TS_INFO("testDeconfigureEQTarget: Started");
+#if DISABLE_UNIT_TESTS
+        TS_INFO("testDeconfigureEQTarget - SKIPPING -- other tests could be adversly affected");
 #else
-        HWAS_INF("testDeconfigureEQTarget: Started");
 
         errlHndl_t l_pErr = nullptr;
 
         do
         {
             // find a eq unit that we can play with
-            Target * pSys;
-            targetService().getTopLevelTarget(pSys);
+            Target* pSys = UTIL::assertGetToplevelTarget();
 
             PredicateCTM predEq(CLASS_UNIT, TYPE_EQ);
             PredicateHwas predFunctional;
@@ -1140,9 +1135,10 @@ public:
             targetService().getAssociated( pEqList, pSys,
                 TargetService::CHILD, TargetService::ALL, &checkExpr );
 
+            TS_INFO("testDeconfigureEQTarget: pEqList.size()=%d", pEqList.size());
             if (pEqList.empty())
             {
-                TS_FAIL("testDeconfigureEQTarget: empty pFcList");
+                TS_FAIL("testDeconfigureEQTarget: SKIPPING empty pEqList CLASS_UNIT, TYPE_EQ");
                 break;
             }
             TargetHandle_t l_pTargetEQ = *pEqList.begin();
@@ -1150,6 +1146,8 @@ public:
             // Get the original HWAS_STATE of EQ
 
             HwasState l_state = l_pTargetEQ->getAttr<ATTR_HWAS_STATE>();
+            TS_INFO("testDeconfigureEQTarget: Working with EQ HUID=0x%X state=0x%X present=0x%X",
+                get_huid(l_pTargetEQ), l_state.functional, l_state.present);
             if (!l_state.functional)
             {
                 TS_FAIL("testDeconfigureEQTarget: EQ is non-functional before deconfiguration");
@@ -1158,8 +1156,11 @@ public:
 
             TargetHandleList pFcList, pCoreList[2];
             uint32_t cIndex = 0;
-            // get the list of Fcs
+            // get the list of FCs
             getChildAffinityTargets(pFcList, l_pTargetEQ, CLASS_NA ,TYPE_FC);
+
+            TS_INFO("testDeconfigureEQTarget: getChildAffinityTargets pFcList.size()=%d",
+                pFcList.size());
 
             if (pFcList.empty())
             {
@@ -1175,10 +1176,10 @@ public:
                    (pFc_it != pFcList.end()) || exitLoop; ++pFc_it)
             {
                 pFc = *pFc_it;
-                TS_TRACE("testDeconfigureEQTarget: FC: %.8X",
-                         get_huid(pFc));
                 // Get the original HWAS_STATE of FC
                 l_state = pFc->getAttr<ATTR_HWAS_STATE>();
+                TS_INFO("testDeconfigureEQTarget: Working with pFc: 0x%.8X state=0x%X",
+                         get_huid(pFc), l_state.functional);
                 if (!l_state.functional)
                 {
                     TS_FAIL("testDeconfigureEQTarget: FC is non-functional before deconfiguration");
@@ -1186,6 +1187,8 @@ public:
                 }
                 getChildAffinityTargets(pCoreList[cIndex],
                                     pFc, CLASS_NA ,TYPE_NA);
+                TS_INFO("testDeconfigureEQTarget: pCoreList[cIndex] HUID=0x%X pCoreList[cIndex].size()=%d",
+                    get_huid(pFc), pCoreList[cIndex].size());
                 if(pCoreList[cIndex].empty())
                 {
                     TS_FAIL("testDeconfigureEQTarget: empty pCoreList[%d]", cIndex);
@@ -1198,10 +1201,10 @@ public:
                        pChild_it != pCoreList[cIndex].end(); ++pChild_it)
                 {
                     pCore = *pChild_it;
-                    TS_TRACE("testDeconfigureEQTarget: Core: %.8X",
-                         get_huid(pCore));
                     // Get the original HWAS_STATE of the core
                     l_state = pCore->getAttr<ATTR_HWAS_STATE>();
+                    TS_INFO("testDeconfigureEQTarget: Working with Core: %.8X state=0x%X",
+                         get_huid(pCore), l_state.functional);
                     if (!l_state.functional)
                     {
                         TS_FAIL("testDeconfigureEQTarget: Core is non-functional before deconfiguration");
@@ -1218,6 +1221,8 @@ public:
             }
 
             // Deconfigure the target EQ
+            TS_INFO("testDeconfigureEQTarget: calling deconfigureTarget EQ HUID=0x%X",
+                get_huid(l_pTargetEQ));
             l_pErr = theDeconfigGard().
                     deconfigureTarget(*l_pTargetEQ,
                         DeconfigGard::DECONFIGURED_BY_EQ_DECONFIG);
@@ -1234,9 +1239,11 @@ public:
 
 
             l_state = l_pTargetEQ->getAttr<ATTR_HWAS_STATE>();
+            TS_INFO("testDeconfigureEQTarget: Working with EQ after deconfig attempt HUID=0x%X state=0x%X present=0x%X",
+                get_huid(l_pTargetEQ), l_state.functional, l_state.present);
             if (!l_state.functional)
             {
-                TS_FAIL("testDeconfigureEQTarget: EQ is not functional after deconfiguration attempt!");
+                TS_FAIL("testDeconfigureEQTarget: RESET EQ is not functional after deconfiguration attempt!");
                 // Reset the HWAS_STATE of EQ
                 l_state.functional = 1;
                 l_pTargetEQ->setAttr<ATTR_HWAS_STATE>(l_state);
@@ -1252,10 +1259,10 @@ public:
                    (pFc_it != pFcList.end()) || exitLoop; ++pFc_it)
             {
                 pFc = *pFc_it;
-                TS_TRACE("testDeconfigureEQTarget: FC: %.8X",
-                         get_huid(pFc));
                 // Get the HWAS_STATE of FC
                 l_state = pFc->getAttr<ATTR_HWAS_STATE>();
+                TS_INFO("testDeconfigureEQTarget: Working with pFc: %.8X state=0x%X",
+                         get_huid(pFc), l_state.functional);
                 if (!l_state.functional)
                 {
                     TS_FAIL("testDeconfigureEQTarget: FC is not functional after EQ deconfiguration");
@@ -1267,10 +1274,10 @@ public:
                        pChild_it != pCoreList[cIndex].end(); ++pChild_it)
                 {
                     pCore = *pChild_it;
-                    TS_TRACE("testDeconfigureEQTarget: Core: %.8X",
-                         get_huid(pCore));
                     // Get the HWAS_STATE of the core
                     l_state = pCore->getAttr<ATTR_HWAS_STATE>();
+                    TS_INFO("testDeconfigureEQTarget: Working with Core: %.8X state=0x%X",
+                         get_huid(pCore), l_state.functional);
                     if (!l_state.functional)
                     {
                         TS_FAIL("testDeconfigureEQTarget: Core is not functional after EQ deconfiguration");
@@ -1280,11 +1287,16 @@ public:
                     // Reset the HWAS_STATE of the core
                     l_state.functional = 1;
                     pCore->setAttr<ATTR_HWAS_STATE>(l_state);
+                    TS_INFO("testDeconfigureEQTarget: RESET to functional Core: %.8X state=0x%X",
+                         get_huid(pCore), l_state.functional);
                 } // for CHILD
+                l_state = pFc->getAttr<ATTR_HWAS_STATE>();
+                TS_INFO("testDeconfigureEQTarget: Working with FC: %.8X state=0x%X",
+                         get_huid(pFc), l_state.functional);
                 cIndex++;
             }
 
-            TS_TRACE(INFO_MRK "testDeconfigureEQTarget: Success");
+            TS_INFO("testDeconfigureEQTarget: Success");
         }
         while (0);
 
@@ -1292,6 +1304,7 @@ public:
         {
             errlCommit(l_pErr,CXXTEST_COMP_ID);
         }
+        TS_INFO("testDeconfigureEQTarget: Ended");
 #endif
     }
 
@@ -1300,28 +1313,18 @@ public:
      */
     void testDeconfigureAssoc1()
     {
-        TS_TRACE(INFO_MRK "testDeconfigureAssoc1: Started");
+        TS_INFO("testDeconfigureAssoc1: Started");
 #if DISABLE_MBA_UNIT_TESTS
-        // these tests deconfigure and gard targets. and even though they
-        //  restore their state after the tests, since the cxxtests are
-        //  all run in parallel, during the time that a target is non-
-        //  functional due to this test, another test may be running that
-        //  might be adversly affected.
-        // tests are left in the code so that a developer can enable them
-        //  to test these specific functions - just keep in mind that there
-        //  could be side effects in other cxxtests.
-        TS_TRACE( " - SKIPPING -- other tests could be adversly affected");
-        HWAS_INF("testDeconfigureAssoc1: Skipped");
+        TS_INFO("testDeconfigureAssoc1 - SKIPPING -- other tests could be adversly affected");
 #else
-        HWAS_INF("testDeconfigureAssoc1: Started");
 
+        saveSystemState();
         errlHndl_t l_pErr = nullptr;
 
         do
         {
             // find an MBA
-            Target * pSys;
-            targetService().getTopLevelTarget(pSys);
+            Target* pSys = UTIL::assertGetToplevelTarget();
 
             PredicateCTM predMba(CLASS_UNIT, TYPE_MBA);
             PredicateHwas predFunctional;
@@ -1332,9 +1335,10 @@ public:
             targetService().getAssociated( pMba, pSys,
                 TargetService::CHILD, TargetService::ALL, &checkExpr );
 
+            TS_INFO("testDeconfigureAssoc1: pMba.size()=%d", pMba.size());
             if (pMba.empty())
             {
-                TS_FAIL("testDeconfigureAssoc1: empty pMba");
+                TS_INFO("testDeconfigureAssoc1: SKIPPING empty pMba CLASS_UNIT, TYPE_MBA");
                 break;
             }
             //TargetHandle_t l_pTarget = *pMba.begin();
@@ -1344,8 +1348,7 @@ public:
             HwasState l_origState = l_pTarget->getAttr<ATTR_HWAS_STATE>();
 
             // Deconfigure the target.
-            l_pErr = theDeconfigGard().
-                    deconfigureTarget(*l_pTarget, 0xA101);
+            l_pErr = theDeconfigGard().deconfigureTarget(*l_pTarget, 0xA101);
             if (l_pErr)
             {
                 TS_FAIL("testDeconfigureAssoc1: Error from deconfigureTarget");
@@ -1374,7 +1377,7 @@ public:
             // Reset the HWAS_STATE of the target
             l_pTarget->setAttr<ATTR_HWAS_STATE>(l_origState);
 
-            TS_TRACE(INFO_MRK "testDeconfigureAssoc1: Success");
+            TS_INFO("testDeconfigureAssoc1: Success");
         }
         while (0);
 
@@ -1382,6 +1385,8 @@ public:
         {
             errlCommit(l_pErr,CXXTEST_COMP_ID);
         }
+        restoreSystemState();
+        TS_INFO("testDeconfigureAssoc1: Ended");
 #endif
     }
 
@@ -1390,28 +1395,18 @@ public:
      */
     void testDeconfigureAssoc2()
     {
-        TS_TRACE(INFO_MRK "testDeconfigureAssoc2: Started");
+        TS_INFO("testDeconfigureAssoc2: Started");
 #if DISABLE_MEM_UNIT_TESTS
-        // these tests deconfigure and gard targets. and even though they
-        //  restore their state after the tests, since the cxxtests are
-        //  all run in parallel, during the time that a target is non-
-        //  functional due to this test, another test may be running that
-        //  might be adversly affected.
-        // tests are left in the code so that a developer can enable them
-        //  to test these specific functions - just keep in mind that there
-        //  could be side effects in other cxxtests.
-        TS_TRACE( " - SKIPPING -- other tests could be adversly affected");
-        HWAS_INF("testDeconfigureAssoc2: Skipped");
+        TS_INFO("testDeconfigureAssoc2 - SKIPPING -- other tests could be adversly affected");
 #else
-        HWAS_INF("testDeconfigureAssoc2: Started");
 
+        saveSystemState();
         errlHndl_t l_pErr = nullptr;
 
         do
         {
             // find an MEMBUF
-            Target * pSys;
-            targetService().getTopLevelTarget(pSys);
+            Target* pSys = UTIL::assertGetToplevelTarget();
 
             PredicateCTM predMembuf(CLASS_CHIP, TYPE_MEMBUF);
             PredicateHwas predFunctional;
@@ -1422,9 +1417,10 @@ public:
             targetService().getAssociated( pMembuf, pSys,
                 TargetService::CHILD, TargetService::ALL, &checkExpr );
 
+            TS_INFO("testDeconfigureAssoc2: pMembuf.size()=%d", pMembuf.size());
             if (pMembuf.empty())
             {
-                TS_FAIL("testDeconfigureAssoc2: empty pMembuf");
+                TS_INFO("testDeconfigureAssoc2: SKIPPING empty pMembuf CLASS_CHIP, TYPE_MEMBUF");
                 break;
             }
             TargetHandle_t l_pTarget = *pMembuf.begin();
@@ -1453,7 +1449,7 @@ public:
             // Reset the HWAS_STATE of the target
             l_pTarget->setAttr<ATTR_HWAS_STATE>(l_origState);
 
-            TS_TRACE(INFO_MRK "testDeconfigureAssoc2: Success");
+            TS_INFO("testDeconfigureAssoc2: Success");
         }
         while (0);
 
@@ -1461,6 +1457,8 @@ public:
         {
             errlCommit(l_pErr,CXXTEST_COMP_ID);
         }
+        restoreSystemState();
+        TS_INFO("testDeconfigureAssoc2: Ended");
 #endif
     }
 
@@ -1469,28 +1467,18 @@ public:
      */
     void testDeconfigureAssoc3()
     {
-        TS_TRACE(INFO_MRK "testDeconfigureAssoc3: Started");
+        TS_INFO("testDeconfigureAssoc3: Started");
 #if DISABLE_UNIT_TESTS
-        // these tests deconfigure and gard targets. and even though they
-        //  restore their state after the tests, since the cxxtests are
-        //  all run in parallel, during the time that a target is non-
-        //  functional due to this test, another test may be running that
-        //  might be adversly affected.
-        // tests are left in the code so that a developer can enable them
-        //  to test these specific functions - just keep in mind that there
-        //  could be side effects in other cxxtests.
-        TS_TRACE( " - SKIPPING -- other tests could be adversly affected");
-        HWAS_INF("testDeconfigureAssoc3: Skipped");
+        TS_INFO("testDeconfigureAssoc3 - SKIPPING -- other tests could be adversly affected");
 #else
-        HWAS_INF("testDeconfigureAssoc3: Started");
 
+        saveSystemState();
         errlHndl_t l_pErr = nullptr;
 
         do
         {
             // find an DIMM
-            Target * pSys;
-            targetService().getTopLevelTarget(pSys);
+            Target* pSys = UTIL::assertGetToplevelTarget();
 
             PredicateCTM predDimm(CLASS_LOGICAL_CARD, TYPE_DIMM);
             PredicateHwas predFunctional;
@@ -1501,6 +1489,7 @@ public:
             targetService().getAssociated( pDimm, pSys,
                 TargetService::CHILD, TargetService::ALL, &checkExpr );
 
+            TS_INFO("testDeconfigureAssoc3: pDimm.size()=%d", pDimm.size());
             if (pDimm.empty())
             {
                 TS_FAIL("testDeconfigureAssoc3: empty pDimm");
@@ -1531,8 +1520,16 @@ public:
 
             // Reset the HWAS_STATE of the target
             l_pTarget->setAttr<ATTR_HWAS_STATE>(l_origState);
+            targetService().getAssociated( pDimm, pSys,
+                TargetService::CHILD, TargetService::ALL, &checkExpr );
+            TS_INFO("testDeconfigureAssoc3: pDimm.size()=%d", pDimm.size());
+            if (pDimm.empty())
+            {
+                TS_FAIL("testDeconfigureAssoc3: We should have some pDimm restored, but we are empty pDimm");
+                break;
+            }
 
-            TS_TRACE(INFO_MRK "testDeconfigureAssoc3: Success");
+            TS_INFO("testDeconfigureAssoc3: Success");
         }
         while (0);
 
@@ -1540,6 +1537,8 @@ public:
         {
             errlCommit(l_pErr,CXXTEST_COMP_ID);
         }
+        restoreSystemState();
+        TS_INFO("testDeconfigureAssoc3: Ended");
 #endif
     }
     /**
@@ -1547,28 +1546,18 @@ public:
      */
     void testDeconfigureAssoc4()
     {
-        TS_TRACE(INFO_MRK "testDeconfigureAssoc4: Started");
+        TS_INFO("testDeconfigureAssoc4: Started");
 #if DISABLE_MCS_UNIT_TESTS
-        // these tests deconfigure and gard targets. and even though they
-        //  restore their state after the tests, since the cxxtests are
-        //  all run in parallel, during the time that a target is non-
-        //  functional due to this test, another test may be running that
-        //  might be adversly affected.
-        // tests are left in the code so that a developer can enable them
-        //  to test these specific functions - just keep in mind that there
-        //  could be side effects in other cxxtests.
-        TS_TRACE( " - SKIPPING -- other tests could be adversly affected");
-        HWAS_INF("testDeconfigureAssoc4: Skipped");
+        TS_INFO("testDeconfigureAssoc4 - SKIPPING -- other tests could be adversly affected");
 #else
-        HWAS_INF("testDeconfigureAssoc4: Started");
 
+        saveSystemState();
         errlHndl_t l_pErr = nullptr;
 
         do
         {
             // find an MCS
-            Target * pSys;
-            targetService().getTopLevelTarget(pSys);
+            Target* pSys = UTIL::assertGetToplevelTarget();
 
             PredicateCTM predMcs(CLASS_UNIT, TYPE_MCS);
             PredicateHwas predFunctional;
@@ -1579,9 +1568,10 @@ public:
             targetService().getAssociated( pMcs, pSys,
                 TargetService::CHILD, TargetService::ALL, &checkExpr );
 
+            TS_INFO("testDeconfigureAssoc4: pMcs.size()=%d", pMcs.size());
             if (pMcs.empty())
             {
-                TS_FAIL("testDeconfigureAssoc4: empty pMcs");
+                TS_INFO("testDeconfigureAssoc4: SKIPPING empty pMcs CLASS_UNIT, TYPE_MCS");
                 break;
             }
             TargetHandle_t l_pTarget = *pMcs.begin();
@@ -1610,7 +1600,7 @@ public:
             // Reset the HWAS_STATE of the target
             l_pTarget->setAttr<ATTR_HWAS_STATE>(l_origState);
 
-            TS_TRACE(INFO_MRK "testDeconfigureAssoc4: Success");
+            TS_INFO("testDeconfigureAssoc4: Success");
         }
         while (0);
 
@@ -1618,6 +1608,8 @@ public:
         {
             errlCommit(l_pErr,CXXTEST_COMP_ID);
         }
+        restoreSystemState();
+        TS_INFO("testDeconfigureAssoc4: Ended");
 #endif
     }
 
@@ -1626,28 +1618,18 @@ public:
      */
     void testDeconfigureAssoc5()
     {
-        TS_TRACE(INFO_MRK "testDeconfigureAssoc5: Started");
+        TS_INFO("testDeconfigureAssoc5: Started");
 #if DISABLE_MBA_UNIT_TESTS
-        // these tests deconfigure and gard targets. and even though they
-        //  restore their state after the tests, since the cxxtests are
-        //  all run in parallel, during the time that a target is non-
-        //  functional due to this test, another test may be running that
-        //  might be adversely affected.
-        // tests are left in the code so that a developer can enable them
-        //  to test these specific functions - just keep in mind that there
-        //  could be side effects in other cxxtests.
-        TS_TRACE(" - SKIPPING -- other tests could be adversely affected");
-        HWAS_INF("testDeconfigureAssoc5: Skipped");
+        TS_INFO("testDeconfigureAssoc5 - SKIPPING -- other tests could be adversely affected");
 #else
-        HWAS_INF("testDeconfigureAssoc5: Started");
 
+        saveSystemState();
         errlHndl_t l_pErr = nullptr;
 
         do
         {
             // find a MBA, deconfigure the attached DIMMs
-            Target * pSys;
-            targetService().getTopLevelTarget(pSys);
+            Target* pSys = UTIL::assertGetToplevelTarget();
 
             PredicateCTM predMba(CLASS_UNIT, TYPE_MBA);
             PredicateHwas predFunctional;
@@ -1662,7 +1644,7 @@ public:
 
             if (pMbaList.empty())
             {
-                TS_FAIL("testDeconfigureAssoc5: empty MBA list");
+                TS_INFO("testDeconfigureAssoc5: SKIPPING empty pMbaList CLASS_UNIT, TYPE_MBA");
                 break;
             }
             TargetHandle_t l_pMba = pMbaList[0];
@@ -1729,7 +1711,7 @@ public:
                 l_pDimm->setAttr<ATTR_HWAS_STATE>(functionalHwasState);
             l_pMba->setAttr<ATTR_HWAS_STATE>(l_origState);
 
-            TS_TRACE(INFO_MRK "testDeconfigureAssoc5: Success");
+            TS_INFO("testDeconfigureAssoc5: Success");
         }
         while (0);
 
@@ -1737,6 +1719,8 @@ public:
         {
             errlCommit(l_pErr, CXXTEST_COMP_ID);
         }
+        restoreSystemState();
+        TS_INFO("testDeconfigureAssoc5: Ended");
 #endif
     }
 
@@ -1750,28 +1734,18 @@ public:
      */
     void testDeconfigureAssoc6()
     {
-        TS_TRACE(INFO_MRK "testDeconfigureAssoc6: Started");
+        TS_INFO("testDeconfigureAssoc6: Started");
 #if DISABLE_MEM_UNIT_TESTS
-        // these tests deconfigure and gard targets. and even though they
-        //  restore their state after the tests, since the cxxtests are
-        //  all run in parallel, during the time that a target is non-
-        //  functional due to this test, another test may be running that
-        //  might be adversly affected.
-        // tests are left in the code so that a developer can enable them
-        //  to test these specific functions - just keep in mind that there
-        //  could be side effects in other cxxtests.
-        TS_TRACE( " - SKIPPING -- other tests could be adversly affected");
-        HWAS_INF("testDeconfigureAssoc6: Skipped");
+        TS_INFO("testDeconfigureAssoc6 - SKIPPING -- other tests could be adversly affected");
 #else
-        HWAS_INF("testDeconfigureAssoc6: Started");
 
+        saveSystemState();
         errlHndl_t l_pErr = nullptr;
 
         do
         {
             // find an MEMBUF
-            Target * pSys;
-            targetService().getTopLevelTarget(pSys);
+            Target* pSys = UTIL::assertGetToplevelTarget();
 
             PredicateCTM predMembuf(CLASS_CHIP, TYPE_MEMBUF);
             PredicateHwas predFunctional;
@@ -1784,7 +1758,7 @@ public:
 
             if (pMembuf.empty())
             {
-                TS_FAIL("testDeconfigureAssoc6: empty pMembuf");
+                TS_INFO("testDeconfigureAssoc6: SKIPPING empty pMembuf CLASS_CHIP, TYPE_MEMBUF");
                 break;
             }
             TargetHandle_t l_pTarget = *pMembuf.begin();
@@ -1831,7 +1805,7 @@ public:
             l_pTarget->setAttr<ATTR_HWAS_STATE>(l_origState);
             l_parentTgt->setAttr<ATTR_HWAS_STATE>(l_parOrigState);
 
-            TS_TRACE(INFO_MRK "testDeconfigureAssoc6: Success");
+            TS_INFO("testDeconfigureAssoc6: Success");
         }
         while (0);
 
@@ -1839,6 +1813,8 @@ public:
         {
             errlCommit(l_pErr,CXXTEST_COMP_ID);
         }
+        restoreSystemState();
+        TS_INFO("testDeconfigureAssoc6: Ended");
 #endif
     }
 
@@ -1847,28 +1823,18 @@ public:
      */
     void testDeConfigFC2BadCores()
     {
-        TS_TRACE(INFO_MRK "testDeConfigFC2BadCores: Started");
+        TS_INFO("testDeConfigFC2BadCores: Started");
 #if DISABLE_FC_UNIT_TESTS
-        // these tests deconfigure and gard targets. and even though they
-        //  restore their state after the tests, since the cxxtests are
-        //  all run in parallel, during the time that a target is non-
-        //  functional due to this test, another test may be running that
-        //  might be adversly affected.
-        // tests are left in the code so that a developer can enable them
-        //  to test these specific functions - just keep in mind that there
-        //  could be side effects in other cxxtests.
-        TS_TRACE( " - SKIPPING -- other tests could be adversly affected");
-        HWAS_INF("testDeConfigFC2BadCores: Skipped");
+        TS_INFO("testDeConfigFC2BadCores - SKIPPING -- other tests could be adversly affected");
 #else
-        HWAS_INF("testDeConfigFC2BadCores: Started");
 
+        saveSystemState();
         errlHndl_t l_pErr = nullptr;
         do
         {
 
             // find an fc unit that we can play with
-            Target * pSys;
-            targetService().getTopLevelTarget(pSys);
+            Target* pSys = UTIL::assertGetToplevelTarget();
 
             PredicateCTM predFc(CLASS_UNIT, TYPE_FC);
             PredicateHwas predFunctional;
@@ -1881,17 +1847,19 @@ public:
             targetService().getAssociated( pFcList, pSys,
                 TargetService::CHILD, TargetService::ALL, &checkExpr );
 
+            TS_INFO("testDeConfigFC2BadCores: pFcList.size()=%d", pFcList.size());
             if (pFcList.empty())
             {
-                TS_FAIL("testDeConfigFC2BadCores: empty pFcList");
+                TS_FAIL("testDeConfigFC2BadCores: SKIPPING empty pFcList CLASS_UNIT, TYPE_FC");
                 break;
             }
 
             // Pick up first FC
             TargetHandle_t pFc = *pFcList.begin();
-            HWAS_INF("testDeConfigFC2BadCores FC: %.8X",
-                       get_huid(pFc));
             HwasState l_State, fc_State, ofc_State;
+            fc_State = pFc->getAttr<ATTR_HWAS_STATE>();
+            TS_INFO("testDeConfigFC2BadCores Working on first FC: %.8X state=0x%X",
+                       get_huid(pFc), fc_State.functional);
             TargetHandle_t pCore;
 
             // find all CHILD_BY_AFFINITY matches for this FC i.e. cores
@@ -1907,16 +1875,18 @@ public:
                    pChild_it != pCoreList.end(); ++pChild_it)
             {
                 pCore = *pChild_it;
-                HWAS_INF("testDeConfigFC2BadCores Core: %.8X",
-                         get_huid(pCore));
                 // Get the original HWAS_STATE of the target
                 l_State = pCore->getAttr<ATTR_HWAS_STATE>();
+                TS_INFO("testDeConfigFC2BadCores Core: %.8X orig state=0x%X",
+                         get_huid(pCore), l_State.functional);
                 l_State.functional  =   0 ;
                 pCore->setAttr<TARGETING::ATTR_HWAS_STATE>(l_State);
             } // for CHILD
 
             // Get the HWAS_STATE of FC
             ofc_State = pFc->getAttr<ATTR_HWAS_STATE>();
+            TS_INFO("testDeconfigFC2BadCores: FC: %.8X state=0x%X",
+                get_huid(pFc), ofc_State.functional);
             if (!ofc_State.functional)
             {
                 TS_FAIL("testDeConfigFC2BadCores: Fc non-functional, expected functional");
@@ -1935,6 +1905,8 @@ public:
 
             // Get the new HWAS_STATE FC
             fc_State = pFc->getAttr<ATTR_HWAS_STATE>();
+            TS_INFO("testDeconfigFC2BadCores: FC: %.8X new state=0x%X",
+                get_huid(pFc), fc_State.functional);
             if (fc_State.functional)
             {
                 TS_FAIL("testDeConfigFC2BadCores: Fc functional when cores non-functional");
@@ -1943,22 +1915,37 @@ public:
 
             // Reset the HWAS_STATE of FC
             pFc->setAttr<ATTR_HWAS_STATE>(ofc_State);
+            TS_INFO("testDeconfigFC2BadCores: RESETTING FC: %.8X setAttr to functional state=0x%X",
+                get_huid(pFc), ofc_State.functional);
 
             // reset all core states
             for (TargetHandleList::iterator pChild_it = pCoreList.begin();
                    pChild_it != pCoreList.end(); ++pChild_it)
             {
                 TargetHandle_t pCore = *pChild_it;
-                HWAS_INF("testDeConfigFC2BadCores Core: %.8X",
-                         get_huid(pCore));
                 // Get the original HWAS_STATE of the target
                 l_State = pCore->getAttr<ATTR_HWAS_STATE>();
+                TS_INFO("testDeConfigFC2BadCores Core: %.8X resetting from bad state=0x%X",
+                         get_huid(pCore), l_State.functional);
                 l_State.functional  =   1 ;
                 pCore->setAttr<TARGETING::ATTR_HWAS_STATE>(l_State);
             } // for CHILD
-            HWAS_INF(INFO_MRK "testDeConfigFC2BadCores: Success");
+            fc_State = pFc->getAttr<ATTR_HWAS_STATE>();
+            TS_INFO("testDeconfigFC2BadCores: RESTORED FC: %.8X restored should be functional state=0x%X",
+                get_huid(pFc), fc_State.functional);
+            if (!fc_State.functional)
+            {
+                TS_FAIL("testDeConfigFC2BadCores: CLEANUP FAILED to restore %.8X state=0x%X",
+                    get_huid(pFc), fc_State);
+                break;
+            }
+
+            TS_INFO("testDeConfigFC2BadCores: Success");
+
         }
         while (0);
+        restoreSystemState();
+        TS_INFO("testDeConfigFC2BadCores: Ended");
 
 #endif
     }
@@ -1969,28 +1956,18 @@ public:
 
     void testDeConfigFC1BadCore()
     {
-        TS_TRACE(INFO_MRK "testDeConfigFC1BadCore: Started");
+        TS_INFO("testDeConfigFC1BadCore: Started");
 #if DISABLE_FC_UNIT_TESTS
-        // these tests deconfigure and gard targets. and even though they
-        //  restore their state after the tests, since the cxxtests are
-        //  all run in parallel, during the time that a target is non-
-        //  functional due to this test, another test may be running that
-        //  might be adversly affected.
-        // tests are left in the code so that a developer can enable them
-        //  to test these specific functions - just keep in mind that there
-        //  could be side effects in other cxxtests.
-        TS_TRACE( " - SKIPPING -- other tests could be adversly affected");
-        HWAS_INF("testDeConfigFC1BadCore: Skipped");
+        TS_INFO("testDeConfigFC1BadCore - SKIPPING -- other tests could be adversly affected");
 #else
-        HWAS_INF("testDeConfigFC1BadCore: Started");
 
+        saveSystemState();
         errlHndl_t l_pErr = nullptr;
         do
         {
 
             // find an fc unit that we can play with
-            Target * pSys;
-            targetService().getTopLevelTarget(pSys);
+            Target* pSys = UTIL::assertGetToplevelTarget();
 
             PredicateCTM predFc(CLASS_UNIT, TYPE_FC);
             PredicateHwas predFunctional;
@@ -2003,22 +1980,33 @@ public:
             targetService().getAssociated( pFcList, pSys,
                 TargetService::CHILD, TargetService::ALL, &checkExpr );
 
+            TS_INFO("testDeConfigFC1BadCore: pFcList.size()=%d", pFcList.size());
             if (pFcList.empty())
             {
-                TS_FAIL("testDeConfigFC1BadCore: empty pFcList");
+                TS_FAIL("testDeConfigFC1BadCore: SKIPPING empty pFcList CLASS_UNIT, TYPE_FC");
                 break;
             }
 
             // Pick up first FC
             TargetHandle_t pFc = *pFcList.begin();
-            TS_TRACE("testDeConfigFC1BadCore FC: %.8X",
+            TS_INFO("testDeConfigFC1BadCore first FC pFc: %.8X",
                        get_huid(pFc));
             HwasState l_State, fc_State, ofc_State;
             TargetHandle_t pCore;
+            fc_State = pFc->getAttr<ATTR_HWAS_STATE>();
+            TS_INFO("testDeconfigFC1BadCore: START with FC %.8X state=0x%X",
+                get_huid(pFc), fc_State.functional);
+            if (!fc_State.functional)
+            {
+                TS_FAIL("testDeConfigFC1BadCore: UNCLEAN start FC %.8X state=0x%X",
+                    get_huid(pFc), fc_State.functional);
+                break;
+            }
 
             // find all CHILD_BY_AFFINITY matches for this FC i.e. cores
             // set state non-functional
             getChildAffinityTargets(pCoreList, pFc, CLASS_NA, TYPE_NA);
+            TS_INFO("testDeconfigFC1BadCore pCoreList.size=%d", pCoreList.size());
             if(pCoreList.empty())
             {
                 TS_FAIL("testDeconfigFC1BadCores: empty pCoreList");
@@ -2029,6 +2017,8 @@ public:
             TargetHandleList::iterator pChild_it = pCoreList.begin();
             pCore = *pChild_it;
             l_State = pCore->getAttr<ATTR_HWAS_STATE>();
+            TS_INFO("testDeConfigFC1BadCore Core: %.8X 1st core orig state=0x%X",
+                     get_huid(pCore), l_State.functional);
             l_State.functional  =   0 ;
             pCore->setAttr<TARGETING::ATTR_HWAS_STATE>(l_State);
 
@@ -2036,11 +2026,14 @@ public:
             ++pChild_it;
             pCore = *pChild_it;
             l_State = pCore->getAttr<ATTR_HWAS_STATE>();
+            TS_INFO("testDeConfigFC1BadCore Core: %.8X 2nd core orig state=0x%X",
+                     get_huid(pCore), l_State.functional);
             l_State.functional  =   1 ;
             pCore->setAttr<TARGETING::ATTR_HWAS_STATE>(l_State);
 
             // Get the HWAS_STATE of FC
             ofc_State = pFc->getAttr<ATTR_HWAS_STATE>();
+            TS_INFO("testDeConfigFC1BadCore: should be functional - FC ofc_State.functional=0x%X", ofc_State.functional);
             if (!ofc_State.functional)
             {
                 TS_FAIL("testDeConfigFC1BadCore: Fc non-functional, expected functional");
@@ -2049,6 +2042,8 @@ public:
 
             // Deconfigure the first core
             pCore = *pCoreList.begin();
+            TS_INFO("testDeConfigFC1BadCore: calling deconfigureTarget for pCore HUID=%.8X",
+                     get_huid(pCore));
             l_pErr = theDeconfigGard().deconfigureTarget(*pCore,
                           DeconfigGard::DECONFIGURED_BY_CORE_DECONFIG);
             if (l_pErr)
@@ -2059,9 +2054,22 @@ public:
 
             // Get the new HWAS_STATE FC
             fc_State = pFc->getAttr<ATTR_HWAS_STATE>();
-            if (!fc_State.functional)
+            TS_INFO("testDeConfigFC1BadCore FC should be non-functional with one BAD core fc_State.functional=0x%X", fc_State.functional);
+
+            if(is_fused_mode() && (!fc_State.functional))
             {
-                TS_FAIL("testDeConfigFC1BadCore: Fc non-functional when one core is functional");
+                TS_INFO("testDeConfigFC1BadCore: Case OK - FC non-functional with one BAD core is_fused_mode=0x%X fc_State.functional=0x%X",
+                         is_fused_mode(), fc_State.functional);
+            }
+            else if (is_fused_mode() && (fc_State.functional))
+            {
+                TS_FAIL("testDeConfigFC1BadCore: Case FAIL - FC and functional with one BAD core is_fused_mode=0x%X fc_State.functional=0x%X",
+                         is_fused_mode(), fc_State.functional);
+                break;
+            } else
+            {
+                TS_FAIL("testDeConfigFC1BadCore: Case FAIL - UNKNOWN Needs Investigation is_fused_mode=0x%X fc_State.functional=0x%X",
+                         is_fused_mode(), fc_State.functional);
                 break;
             }
 
@@ -2069,18 +2077,51 @@ public:
             pChild_it = pCoreList.begin();
             pCore = *pChild_it;
             l_State = pCore->getAttr<ATTR_HWAS_STATE>();
+            TS_INFO("testDeConfigFC1BadCore Core: %.8X 1st core current non-functional state=0x%X",
+                     get_huid(pCore), l_State.functional);
             l_State.functional  =   1 ;
             pCore->setAttr<TARGETING::ATTR_HWAS_STATE>(l_State);
+
+            HwasState Core1_State = pCore->getAttr<ATTR_HWAS_STATE>();
+            TS_INFO("testDeConfigFC1BadCore Core: %.8X 1st core reset should be functional state=0x%X",
+                     get_huid(pCore), Core1_State.functional);
+
+            fc_State = pFc->getAttr<ATTR_HWAS_STATE>();
+            TS_INFO("testDeConfigFC1BadCore CONFIRMING FC should be STILL -NOT- FUNCTIONAL 1st core reset to FUNCTIONAL fc_State.functional=0x%X", fc_State.functional);
 
             ++pChild_it;
             pCore = *pChild_it;
             l_State = pCore->getAttr<ATTR_HWAS_STATE>();
+            TS_INFO("testDeConfigFC1BadCore Core: %.8X 2nd core current non-functional state=0x%X",
+                     get_huid(pCore), l_State.functional);
             l_State.functional  =   1 ;
+            HwasState Core2_State = pCore->getAttr<ATTR_HWAS_STATE>();
+            TS_INFO("testDeConfigFC1BadCore Core: %.8X 2nd core reset should be functional state=0x%X",
+                     get_huid(pCore), Core2_State.functional);
             pCore->setAttr<TARGETING::ATTR_HWAS_STATE>(l_State);
 
-            TS_TRACE(INFO_MRK "testDeConfigFC1BadCore: Success");
+            fc_State = pFc->getAttr<ATTR_HWAS_STATE>();
+            TS_INFO("testDeConfigFC1BadCore CONFIRMING FC should STILL be -NOT- FUNCTIONAL 2nd core reset to FUNCTIONAL fc_State.functional=0x%X", fc_State.functional);
+
+            // Reset the HWAS_STATE of FC
+            pFc->setAttr<ATTR_HWAS_STATE>(ofc_State);
+            TS_INFO("testDeconfigFC1BadCore: RESETTING FC: %.8X setAttr to functional state=0x%X",
+                get_huid(pFc), ofc_State.functional);
+
+            // Get the HWAS_STATE of FC
+            ofc_State = pFc->getAttr<ATTR_HWAS_STATE>();
+            TS_INFO("testDeConfigFC1BadCore: should NOW be functional - FC ofc_State.functional=0x%X", ofc_State.functional);
+            if (!ofc_State.functional)
+            {
+                TS_FAIL("testDeConfigFC1BadCore: Fc non-functional, expected functional");
+                break;
+            }
+
+            TS_INFO("testDeConfigFC1BadCore: Success");
         }
         while (0);
+        restoreSystemState();
+        TS_INFO("testDeConfigFC1BadCore: Ended");
 
 #endif
     }
@@ -2090,29 +2131,19 @@ public:
      */
     void testDeConfigEQ2BadFCs()
     {
-        TS_TRACE(INFO_MRK "testDeConfigEQ2BadFCs: Started");
+        TS_INFO("testDeConfigEQ2BadFCs: Started");
 #if DISABLE_FC_UNIT_TESTS
-        // these tests deconfigure and gard targets. and even though they
-        //  restore their state after the tests, since the cxxtests are
-        //  all run in parallel, during the time that a target is non-
-        //  functional due to this test, another test may be running that
-        //  might be adversly affected.
-        // tests are left in the code so that a developer can enable them
-        //  to test these specific functions - just keep in mind that there
-        //  could be side effects in other cxxtests.
-        TS_TRACE( " - SKIPPING -- other tests could be adversly affected");
-        HWAS_INF("testDeConfigEQ2BadFCs: Skipped");
+        TS_INFO("testDeConfigEQ2BadFCs - SKIPPING -- other tests could be adversly affected");
 #else
-        HWAS_INF("testDeConfigEQ2BadFCs: Started");
 
+        saveSystemState();
         errlHndl_t l_pErr = nullptr;
 
         do
         {
 
             // find a eq unit that we can play with
-            Target * pSys;
-            targetService().getTopLevelTarget(pSys);
+            Target* pSys = UTIL::assertGetToplevelTarget();
 
             PredicateCTM predEq(CLASS_UNIT, TYPE_EQ);
             PredicateHwas predFunctional;
@@ -2125,6 +2156,8 @@ public:
             targetService().getAssociated( pEqList, pSys,
                 TargetService::CHILD, TargetService::ALL, &checkExpr );
 
+            TS_INFO("testDeConfigEQ2BadFCs: pEqList.size()=%d",
+                    pEqList.size());
             if (pEqList.empty())
             {
                 TS_FAIL("testDeConfigEQ2BadFCs: empty pEqList");
@@ -2133,7 +2166,7 @@ public:
 
             // Pick up first EQ
             TargetHandle_t pEq = *pEqList.begin();
-            TS_TRACE("testDeConfigEQ2BadFCs EQ: %.8X",
+            TS_INFO("testDeConfigEQ2BadFCs EQ: %.8X",
                        get_huid(pEq));
             HwasState l_State, eq_State, oeq_State;
             TargetHandle_t pFc;
@@ -2146,7 +2179,7 @@ public:
                    pChild_it != pFcList.end(); ++pChild_it)
             {
                 pFc = *pChild_it;
-                TS_TRACE("testDeConfigEQ2BadFCs FC: %.8X",
+                TS_INFO("testDeConfigEQ2BadFCs FC: %.8X",
                          get_huid(pFc));
                 // Get the original HWAS_STATE of the target
                 l_State = pFc->getAttr<ATTR_HWAS_STATE>();
@@ -2188,16 +2221,18 @@ public:
                    pChild_it != pFcList.end(); ++pChild_it)
             {
                 TargetHandle_t pFc = *pChild_it;
-                TS_TRACE("testDeConfigEQ2BadFCs FC: %.8X",
+                TS_INFO("testDeConfigEQ2BadFCs FC: %.8X",
                          get_huid(pFc));
                 // Get the original HWAS_STATE of the target
                 l_State = pFc->getAttr<ATTR_HWAS_STATE>();
                 l_State.functional  =   1 ;
                 pFc->setAttr<TARGETING::ATTR_HWAS_STATE>(l_State);
             } // for CHILD
-            TS_TRACE(INFO_MRK "testDeConfigEQ2BadFCs: Success");
+            TS_INFO("testDeConfigEQ2BadFCs: Success");
         }
         while (0);
+        restoreSystemState();
+        TS_INFO("testDeConfigEQ2BadFCs: Ended");
 
 #endif
     }
@@ -2208,28 +2243,18 @@ public:
 
     void testDeConfigEQ1BadFC()
     {
-        TS_TRACE(INFO_MRK "testDeConfigEQ1BadFC: Started");
+        TS_INFO("testDeConfigEQ1BadFC: Started");
 #if DISABLE_UNIT_TESTS
-        // these tests deconfigure and gard targets. and even though they
-        //  restore their state after the tests, since the cxxtests are
-        //  all run in parallel, during the time that a target is non-
-        //  functional due to this test, another test may be running that
-        //  might be adversly affected.
-        // tests are left in the code so that a developer can enable them
-        //  to test these specific functions - just keep in mind that there
-        //  could be side effects in other cxxtests.
-        TS_TRACE( " - SKIPPING -- other tests could be adversly affected");
-        HWAS_INF("testDeConfigEQ1BadFC: Skipped");
+        TS_INFO("testDeConfigEQ1BadFC - SKIPPING -- other tests could be adversly affected");
 #else
-        HWAS_INF("testDeConfigEQ1BadFC: Started");
 
+        saveSystemState();
         errlHndl_t l_pErr = nullptr;
         do
         {
 
             // find a eq unit that we can play with
-            Target * pSys;
-            targetService().getTopLevelTarget(pSys);
+            Target* pSys = UTIL::assertGetToplevelTarget();
 
             PredicateCTM predEq(CLASS_UNIT, TYPE_EQ);
             PredicateHwas predFunctional;
@@ -2242,6 +2267,7 @@ public:
             targetService().getAssociated( pEqList, pSys,
                 TargetService::CHILD, TargetService::ALL, &checkExpr );
 
+            TS_INFO("testDeConfigEQ1BadFC: pEqList.size()=%d", pEqList.size());
             if (pEqList.empty())
             {
                 TS_FAIL("testDeConfigEQ1BadFC: empty pEqList");
@@ -2250,7 +2276,7 @@ public:
 
             // Pick up first EQ
             TargetHandle_t pEq = *pEqList.begin();
-            TS_TRACE("testDeConfigEQ1BadFC EQ: %.8X", get_huid(pEq));
+            TS_INFO("testDeConfigEQ1BadFC EQ: %.8X", get_huid(pEq));
             HwasState l_State, eq_State, oeq_State;
 
             // find all CHILD_BY_AFFINITY matches for this FC i.e. cores
@@ -2263,21 +2289,32 @@ public:
             TargetHandleList::iterator pChild_it = pFcList.begin();
             pFc = *pChild_it;
             l_State = pFc->getAttr<ATTR_HWAS_STATE>();
+            TS_INFO("testDeConfigEQ1BadFC: PRE should be functional 1st Core %8.X state=0x%X",
+                get_huid(pFc), l_State.functional);
+
             l_State.functional  =   0 ;
             pFc->setAttr<TARGETING::ATTR_HWAS_STATE>(l_State);
+            TS_INFO("testDeConfigEQ1BadFC: POST should be non-functional 1st Core %8.X state=0x%X",
+                get_huid(pFc), l_State.functional);
 
             // Set second core state functional
             ++pChild_it;
             pFc = *pChild_it;
             l_State = pFc->getAttr<ATTR_HWAS_STATE>();
+            TS_INFO("testDeConfigEQ1BadFC: PRE should be functional 2nd Core %8.X state=0x%X",
+                get_huid(pFc), l_State.functional);
             l_State.functional  =   1 ;
             pFc->setAttr<TARGETING::ATTR_HWAS_STATE>(l_State);
+            TS_INFO("testDeConfigEQ1BadFC: POST should be functional 2nd Core %8.X state=0x%X",
+                get_huid(pFc), l_State.functional);
 
             // Get the HWAS_STATE of EQ
             oeq_State = pEq->getAttr<ATTR_HWAS_STATE>();
+            TS_INFO("testDeConfigEQ1BadFC: PRE should be functional EQ %8.X state=0x%X",
+                get_huid(pEq), oeq_State.functional);
             if (!oeq_State.functional)
             {
-                TS_FAIL("testDeConfigEQ1BadFC: Eq non-functional, expected functional");
+                TS_FAIL("testDeConfigEQ1BadFC: EQ non-functional, expected functional");
                 break;
             }
 
@@ -2293,9 +2330,11 @@ public:
 
             // Get the new HWAS_STATE FC
             eq_State = pEq->getAttr<ATTR_HWAS_STATE>();
+            TS_INFO("testDeConfigEQ1BadFC: PRE should be functional EQ %8.X state=0x%X",
+                get_huid(pEq), eq_State.functional);
             if (!eq_State.functional)
             {
-                TS_FAIL("testDeConfigEQ1BadFC: Eq non-functional, one core functional");
+                TS_FAIL("testDeConfigEQ1BadFC: EQ non-functional, one core functional");
                 break;
             }
 
@@ -2303,18 +2342,37 @@ public:
             pChild_it = pFcList.begin();
             pFc = *pChild_it;
             l_State = pFc->getAttr<ATTR_HWAS_STATE>();
+            TS_INFO("testDeConfigEQ1BadFC: PRE should be non-functional 1st Core %8.X state=0x%X",
+                get_huid(pFc), l_State.functional);
             l_State.functional  =   1 ;
             pFc->setAttr<TARGETING::ATTR_HWAS_STATE>(l_State);
+            TS_INFO("testDeConfigEQ1BadFC: POST should be functional 1st Core %8.X state=0x%X",
+                get_huid(pFc), l_State.functional);
 
             ++pChild_it;
             pFc = *pChild_it;
             l_State = pFc->getAttr<ATTR_HWAS_STATE>();
+            TS_INFO("testDeConfigEQ1BadFC: PRE should be functional 2nd Core %8.X state=0x%X",
+                get_huid(pFc), l_State.functional);
             l_State.functional  =   1 ;
             pFc->setAttr<TARGETING::ATTR_HWAS_STATE>(l_State);
+            TS_INFO("testDeConfigEQ1BadFC: POST should be functional 2nd Core %8.X state=0x%X",
+                get_huid(pFc), l_State.functional);
 
-            TS_TRACE(INFO_MRK "testDeConfigEQ1BadFC: Success");
+            targetService().getAssociated( pEqList, pSys,
+                TargetService::CHILD, TargetService::ALL, &checkExpr );
+
+            TS_INFO("testDeConfigEQ1BadFC: pEqList.size()=%d", pEqList.size());
+            if (pEqList.empty())
+            {
+                TS_FAIL("testDeConfigEQ1BadFC: We should have some pEqList, but we are empty pEqList");
+                break;
+            }
+            TS_INFO("testDeConfigEQ1BadFC: Success");
         }
         while (0);
+        restoreSystemState();
+        TS_INFO("testDeConfigEQ1BadFC: Ended");
 
 #endif
     }
@@ -2326,33 +2384,25 @@ public:
 
     void testDeConfigFCInFusedCoreMode()
     {
-        TS_TRACE(INFO_MRK "testDeConfigFCInFusedCoreMode: Started");
-#if DISABLE_FC_UNIT_TESTS
-        // these tests deconfigure and gard targets. and even though they
-        //  restore their state after the tests, since the cxxtests are
-        //  all run in parallel, during the time that a target is non-
-        //  functional due to this test, another test may be running that
-        //  might be adversly affected.
-        // tests are left in the code so that a developer can enable them
-        //  to test these specific functions - just keep in mind that there
-        //  could be side effects in other cxxtests.
-        TS_TRACE( " - SKIPPING -- other tests could be adversly affected");
-        HWAS_INF("testDeConfigFCInFusedCoreMode: Skipped");
+        TS_INFO("testDeConfigFCInFusedCoreMode: Started");
+#if DISABLE_FC_CRASH_UNIT_TESTS
+        TS_INFO("testDeConfigFCInFusedCoreMode - SKIPPING -- other tests could be adversly affected");
 #else
-        HWAS_INF("testDeConfigFCInFusedCoreMode: Started");
-
-        Target * pSys = nullptr;
-        targetService().getTopLevelTarget(pSys);
 
         // query original fuse mode
+        Target* pSys = UTIL::assertGetToplevelTarget();
         auto l_oFusedMode = pSys->getAttr<ATTR_FUSED_CORE_OPTION>();
-
+        TS_INFO("testDeConfigFCInFusedCoreMode l_oFusedMode=0x%X is_fused_mode=0x%X",
+            l_oFusedMode, is_fused_mode());
+        saveSystemState();
         errlHndl_t l_pErr = nullptr;
         do
         {
 
             // force fused core mode
             pSys->setAttr<ATTR_FUSED_CORE_OPTION>(FUSED_CORE_OPTION_USING_FUSED_CORES);
+            TS_INFO("testDeConfigFCInFusedCoreMode FORCED FUSED CORE MODE");
+
             if(!is_fused_mode())
             {
                 TS_FAIL("testDeConfigFCInFusedCoreMode: Unable to force fused core mode");
@@ -2371,22 +2421,27 @@ public:
             targetService().getAssociated( pFcList, pSys,
                 TargetService::CHILD, TargetService::ALL, &checkExpr );
 
+            TS_INFO("testDeConfigFCInFusedCoreMode: pFcList.size()=%d", pFcList.size());
             if (pFcList.empty())
             {
-                TS_FAIL("testDeConfigFCInFusedCoreMode: empty pFcList");
+                TS_WARN("testDeConfigFCInFusedCoreMode: SKIPPING empty pFcList CLASS_UNIT, TYPE_FC");
                 break;
             }
 
             // Pick up first FC
             TargetHandle_t pFc = *pFcList.begin();
-            TS_TRACE("testDeConfigFCInFusedCoreMode FC: %.8X",
+            TS_INFO("testDeConfigFCInFusedCoreMode FC: %.8X",
                        get_huid(pFc));
             HwasState l_State, fc_State, ofc_State;
             TargetHandle_t pCore;
 
             // find all CHILD_BY_AFFINITY matches for this FC i.e. cores
             // set state non-functional
+            TS_INFO("testDeConfigFCInFusedCoreMode: calling getChildAffinityTargets");
             getChildAffinityTargets(pCoreList, pFc, CLASS_NA ,TYPE_NA);
+            TS_INFO("testDeConfigFCInFusedCoreMode: back calling getChildAffinityTargets");
+            TS_INFO("testDeConfigFCInFusedCoreMode: pCoreList.size()=%d",
+                    pCoreList.size());
             if (pCoreList.empty())
             {
                 TS_FAIL("testDeConfigFCInFusedCoreMode: empty pCoreList");
@@ -2397,21 +2452,33 @@ public:
             TargetHandleList::iterator pChild_it = pCoreList.begin();
             pCore = *pChild_it;
             l_State = pCore->getAttr<ATTR_HWAS_STATE>();
+            TS_INFO("testDeConfigFCInFusedCoreMode: PRE should be functional 1st Core %8.X state=0x%X",
+                get_huid(pCore), l_State.functional);
             l_State.functional  =   0 ;
             pCore->setAttr<TARGETING::ATTR_HWAS_STATE>(l_State);
+            TS_INFO("testDeConfigFCInFusedCoreMode: POST should be non-functional 1st Core %8.X state=0x%X",
+                get_huid(pCore), l_State.functional);
+            // Crashes HERE ^^ when the core is made non-functional and
+            // we happen to be running on that core we stop
 
             // Set second core state functional
             ++pChild_it;
             pCore = *pChild_it;
             l_State = pCore->getAttr<ATTR_HWAS_STATE>();
+            TS_INFO("testDeConfigFCInFusedCoreMode: PRE should be functional 2nd Core %8.X state=0x%X",
+                get_huid(pCore), l_State.functional);
             l_State.functional  =   1 ;
             pCore->setAttr<TARGETING::ATTR_HWAS_STATE>(l_State);
+            TS_INFO("testDeConfigFCInFusedCoreMode: POST should be functional 2nd Core %8.X state=0x%X",
+                get_huid(pCore), l_State.functional);
 
             // Get the HWAS_STATE of FC
             ofc_State = pFc->getAttr<ATTR_HWAS_STATE>();
-            if (!ofc_State.functional)
+            TS_INFO("testDeConfigFCInFusedCoreMode: should be -NOT- functional FC %8.X state=0x%X",
+                get_huid(pCore), ofc_State.functional);
+            if (ofc_State.functional)
             {
-                TS_FAIL("testDeConfigFCInFusedCoreMode: Fc non-functional, expected functional");
+                TS_FAIL("testDeConfigFCInFusedCoreMode: FC functional, expected non-functional");
                 break;
             }
 
@@ -2427,20 +2494,26 @@ public:
 
             // Get the new HWAS_STATE FC
             fc_State = pFc->getAttr<ATTR_HWAS_STATE>();
+            TS_INFO("testDeConfigFCInFusedCoreMode: should be -NOT- functional FC %8.X state=0x%X",
+                get_huid(pFc), fc_State.functional);
             if (fc_State.functional)
             {
-                TS_FAIL("testDeConfigFCInFusedCoreMode: Fc functional in Fused Core Mode");
+                TS_FAIL("testDeConfigFCInFusedCoreMode: FC functional after deconfigure");
                 break;
             }
 
             // Reset FC state
             fc_State.functional = 1;
             pFc->setAttr<ATTR_HWAS_STATE>(fc_State);
+            TS_INFO("testDeConfigFCInFusedCoreMode: should be functional FC %8.X state=0x%X",
+                get_huid(pFc), fc_State.functional);
 
             // Set both cores state functional
             pChild_it = pCoreList.begin();
             pCore = *pChild_it;
             l_State = pCore->getAttr<ATTR_HWAS_STATE>();
+            TS_INFO("testDeConfigFCInFusedCoreMode: PRE should be non-functional 1st Core %8.X state=0x%X",
+                get_huid(pCore), l_State.functional);
             if (l_State.functional)
             {
                 TS_FAIL("testDeConfigFCInFusedCoreMode: Core1 is functional in Fused Core Mode");
@@ -2448,24 +2521,36 @@ public:
             }
             l_State.functional  =   1 ;
             pCore->setAttr<TARGETING::ATTR_HWAS_STATE>(l_State);
+            TS_INFO("testDeConfigFCInFusedCoreMode: POST should be functional 1st Core %8.X state=0x%X",
+                get_huid(pCore), l_State.functional);
 
             ++pChild_it;
             pCore = *pChild_it;
             l_State = pCore->getAttr<ATTR_HWAS_STATE>();
+            TS_INFO("testDeConfigFCInFusedCoreMode: PRE should be non-functional 2nd Core %8.X state=0x%X",
+                get_huid(pCore), l_State.functional);
             if (l_State.functional)
             {
-                TS_FAIL("testDeConfigFCInFusedCoreMode: Core2 is functional in Fused Core Mode");
+                TS_FAIL("testDeConfigFCInFusedCoreMode: Core2 is functional after deconfigure");
                 break;
             }
             l_State.functional  =   1 ;
             pCore->setAttr<TARGETING::ATTR_HWAS_STATE>(l_State);
+            TS_INFO("testDeConfigFCInFusedCoreMode: POST should be functional 2nd Core %8.X state=0x%X",
+                get_huid(pCore), l_State.functional);
 
-            TS_TRACE(INFO_MRK "testDeConfigFCInFusedCoreMode: Success");
+            TS_INFO("testDeConfigFCInFusedCoreMode: Success");
         }
         while (0);
 
         //restore original fused mode
+        TS_INFO("testDeConfigFCInFusedCoreMode PRE RESTORE ORIGINAL SAVED OFF OLD l_oFusedMode=0x%X is_fused_mode=0x%X",
+            l_oFusedMode, is_fused_mode());
         pSys->setAttr<ATTR_FUSED_CORE_OPTION>(l_oFusedMode);
+        TS_INFO("testDeConfigFCInFusedCoreMode POST RESTORE ORIGINAL SAVED OFF OLD l_oFusedMode=0x%X is_fused_mode=0x%X",
+            l_oFusedMode, is_fused_mode());
+        restoreSystemState();
+        TS_INFO("testDeConfigFCInFusedCoreMode: Ended");
 
 #endif
     }
@@ -2478,19 +2563,10 @@ public:
      */
     void testDefDeconfig1()
     {
-        TS_TRACE(INFO_MRK "testDefDeconfig1: Started");
-#if DISABLE_FC_UNIT_TESTS
-        // these tests deconfigure and gard targets. and even though they
-        //  restore their state after the tests, since the cxxtests are
-        //  all run in parallel, during the time that a target is non-
-        //  functional due to this test, another test may be running that
-        //  might be adversly affected.
-        // tests are left in the code so that a developer can enable them
-        //  to test these specific functions - just keep in mind that there
-        //  could be side effects in other cxxtests.
-        HWAS_INF("testDefDeconfig1: Skipped");
+        TS_INFO("testDefDeconfig1: Started");
+#if DISABLE_UNIT_TESTS
+        TS_INFO("testDefDeconfig1: Skipped");
 #else
-        HWAS_INF("testDefDeconfig1: Started");
 
         errlHndl_t l_pErr = nullptr;
         DeconfigGard::DeconfigureRecords_t l_records;
@@ -2499,8 +2575,7 @@ public:
         do
         {
             // find an fc unit that we can play with
-            Target * pSys;
-            targetService().getTopLevelTarget(pSys);
+            Target* pSys = UTIL::assertGetToplevelTarget();
 
             PredicateCTM predFc(CLASS_UNIT, TYPE_FC);
             PredicateHwas predFunctional;
@@ -2513,7 +2588,7 @@ public:
 
             if (pFcList.empty())
             {
-                TS_FAIL("testDefDeconfig1: empty pFcList");
+                TS_FAIL("testDefDeconfig1: SKIPPING empty pFcList CLASS_UNIT, TYPE_FC");
                 break;
             }
             TargetHandle_t l_pTarget = *pFcList.begin();
@@ -2529,7 +2604,7 @@ public:
 
             if (l_records.size() != 0)
             {
-                TS_TRACE(INFO_MRK "testDefDeconfig1: target has existing Deconfigure Record, skipping test");
+                TS_INFO("testDefDeconfig1: target has existing Deconfigure Record, SKIPPING test");
                 break;
             }
 
@@ -2572,7 +2647,7 @@ public:
             // Reset the HWAS_STATE of the target
             l_pTarget->setAttr<ATTR_HWAS_STATE>(l_origState);
 
-            TS_TRACE(INFO_MRK "testDefDeconfig1: Success");
+            TS_INFO("testDefDeconfig1: Success");
         }
         while (0);
 
@@ -2581,6 +2656,7 @@ public:
             errlCommit(l_pErr,CXXTEST_COMP_ID);
         }
         restoreSystemState();
+        TS_INFO("testDefDeconfig1: Ended");
 #endif
     }
 
@@ -2599,11 +2675,11 @@ public:
         if (l_pErr)
         {
             errlCommit(l_pErr,CXXTEST_COMP_ID);
-            TS_FAIL("testGard1: Error from getGardRecords(nullptr)");
+            TS_FAIL("testGard1: Error from getGardRecords with a nullptr");
         }
         else
         {
-            TS_INFO("testGard1: get(nullptr) Success. %d records",
+            TS_INFO("testGard1: Success typically zero records - %d records",
                      l_records.size());
         }
     }
@@ -2612,19 +2688,11 @@ public:
      *  @brief Test creating a GARD Record, getting the GARD Record and
      *         clearing the GARD Record
      */
-    void testGard4()
+    void testGard2()
     {
-        TS_INFO("testGard4: Started");
-#if DISABLE_FC_UNIT_TESTS
-        // these tests deconfigure and gard targets. and even though they
-        //  restore their state after the tests, since the cxxtests are
-        //  all run in parallel, during the time that a target is non-
-        //  functional due to this test, another test may be running that
-        //  might be adversly affected.
-        // tests are left in the code so that a developer can enable them
-        //  to test these specific functions - just keep in mind that there
-        //  could be side effects in other cxxtests.
-        TS_INFO( "testGard4 - SKIPPING -- other tests could be adversly affected");
+        TS_INFO("testGard2: Started");
+#if DISABLE_UNIT_TESTS
+        TS_INFO( "testGard2 - SKIPPING -- other tests could be adversly affected");
 #else
 
         errlHndl_t l_pErr = nullptr;
@@ -2633,8 +2701,131 @@ public:
         do
         {
             // find an fc unit that we can play with
-            Target * pSys;
-            targetService().getTopLevelTarget(pSys);
+            Target* pSys = UTIL::assertGetToplevelTarget();
+
+            PredicateCTM predFc(CLASS_UNIT, TYPE_FC);
+            PredicateHwas predFunctional;
+            predFunctional.poweredOn(true).present(true).functional(true);
+            PredicatePostfixExpr checkExpr;
+            checkExpr.push(&predFc).push(&predFunctional).And();
+            TargetHandleList pFcList;
+            targetService().getAssociated( pFcList, pSys,
+                TargetService::CHILD, TargetService::ALL, &checkExpr );
+
+            TS_INFO("testGard2: pFcList.size()=%d", pFcList.size());
+            if (pFcList.empty())
+            {
+                TS_FAIL("testGard2: SKIPPING empty pFcList CLASS_UNIT, TYPE_FC");
+                break;
+            }
+            TargetHandle_t l_pTarget = *pFcList.begin();
+
+            // Get any existing GARD Records for the target
+            TS_INFO("testGard2: Working with HUID=0x%X TYPE_FC", get_huid(l_pTarget));
+            l_pErr = theDeconfigGard().getGardRecords(l_pTarget, l_records);
+            if (l_pErr)
+            {
+                TS_FAIL("testGard2: Error from getGardRecords");
+                break;
+            }
+
+            if (l_records.size() != 0)
+            {
+                TS_INFO("testGard2: target has %d existing Gard Records, SKIPPING test",
+                         l_records.size());
+                break;
+            }
+
+            // Create a GARD Record for the target.
+            l_pErr = theDeconfigGard().
+                    platCreateGardRecord(l_pTarget, 0x12, GARD_Predictive);
+
+            if (l_pErr)
+            {
+                TS_FAIL("testGard2: Error from platCreateGardRecord");
+                break;
+            }
+
+            // Get the GARD Records for the target
+            l_pErr = theDeconfigGard().getGardRecords(l_pTarget, l_records);
+
+            if (l_pErr)
+            {
+                TS_FAIL("testGard2: Error from getGardRecords (2)");
+                break;
+            }
+
+            if (l_records.size() != 1)
+            {
+                TS_FAIL("testGard2: %d records for target, expected 1",
+                        l_records.size());
+                break;
+            }
+
+            if (l_records[0].iv_errorType != GARD_Predictive)
+            {
+                TS_FAIL("testGard2: Record errorType %d, expected predictive",
+                        l_records[0].iv_errorType);
+                break;
+            }
+
+            // Clear the GARD Records for the target
+            l_pErr = theDeconfigGard().clearGardRecords(l_pTarget);
+
+            if (l_pErr)
+            {
+                TS_FAIL("testGard2: Error from clearGardRecords");
+                break;
+            }
+
+            // Get the GARD Records for the target
+            l_records.clear();
+
+            l_pErr = theDeconfigGard().getGardRecords(l_pTarget, l_records);
+
+            if (l_pErr)
+            {
+                TS_FAIL("testGard2: Error from getGardRecords (3)");
+                break;
+            }
+
+            if (l_records.size() != 0)
+            {
+                TS_FAIL("testGard2: %d records for target, expected 0",
+                        l_records.size());
+                break;
+            }
+
+            TS_INFO("testGard2: Success");
+        }
+        while (0);
+
+        if (l_pErr)
+        {
+            errlCommit(l_pErr,CXXTEST_COMP_ID);
+        }
+        TS_INFO("testGard2: Ended");
+#endif
+    }
+
+    /**
+     *  @brief Test creating a GARD Record for a Target multiple times
+     */
+    void testGard3()
+    {
+        TS_INFO("testGard3: Started");
+#if DISABLE_UNIT_TESTS
+        TS_INFO( "testGard3 - SKIPPING -- other tests could be adversly affected");
+#else
+
+        saveSystemState();
+        errlHndl_t l_pErr = nullptr;
+        DeconfigGard::GardRecords_t l_records;
+
+        do
+        {
+            // find an fc unit that we can play with
+            Target* pSys = UTIL::assertGetToplevelTarget();
 
             PredicateCTM predFc(CLASS_UNIT, TYPE_FC);
             PredicateHwas predFunctional;
@@ -2647,13 +2838,143 @@ public:
 
             if (pFcList.empty())
             {
-                TS_FAIL("testGard4: empty pFcList");
+                TS_FAIL("testGard3: SKIPPING empty pFcList CLASS_UNIT, TYPE_FC");
                 break;
             }
             TargetHandle_t l_pTarget = *pFcList.begin();
+            TS_INFO("testGard3: Working with HUID=0x%X TYPE_FC", get_huid(l_pTarget));
 
             // Get any existing GARD Records for the target
             l_pErr = theDeconfigGard().getGardRecords(l_pTarget, l_records);
+
+            if (l_pErr)
+            {
+                TS_FAIL("testGard3: Error from getGardRecords");
+                break;
+            }
+
+            if (l_records.size() != 0)
+            {
+                TS_INFO("testGard3: target has %d existing Gard Records, SKIPPING test",
+                         l_records.size());
+                break;
+            }
+
+            // Create a GARD Record for the target.
+            l_pErr = theDeconfigGard().
+                    platCreateGardRecord(l_pTarget, 0x23, GARD_Predictive);
+
+            if (l_pErr)
+            {
+                TS_FAIL("testGard3: Error from platCreateGardRecord");
+                break;
+            }
+
+            // Create another GARD Record for the target
+            l_pErr = theDeconfigGard().
+                    platCreateGardRecord(l_pTarget, 0x45, GARD_Fatal);
+
+            if (l_pErr)
+            {
+                TS_FAIL("testGard3: Error from platCreateGardRecord (2)");
+                break;
+            }
+
+            // Get the GARD Records for the target
+            l_pErr = theDeconfigGard().getGardRecords(l_pTarget, l_records);
+
+            if (l_pErr)
+            {
+                TS_FAIL("testGard3: Error from getGardRecords (2)");
+                break;
+            }
+
+            if (l_records.size() != 1)
+            {
+                TS_FAIL("testGard3: %d records for target, expected 1",
+                        l_records.size());
+                break;
+            }
+
+            // Clear the GARD Record for the target
+            l_pErr = theDeconfigGard().clearGardRecords(l_pTarget);
+
+            if (l_pErr)
+            {
+                TS_FAIL("testGard3: Error from clearGardRecords");
+                break;
+            }
+
+            // Get the GARD Records for the target
+            l_records.clear();
+
+            l_pErr = theDeconfigGard().getGardRecords(l_pTarget, l_records);
+
+            if (l_pErr)
+            {
+                TS_FAIL("testGard3: Error from getGardRecords (3)");
+                break;
+            }
+
+            if (l_records.size() != 0)
+            {
+                TS_FAIL("testGard3: %d records for target, expected 0",
+                        l_records.size());
+                break;
+            }
+
+            TS_INFO("testGard3: Success");
+        }
+        while (0);
+
+        if (l_pErr)
+        {
+            errlCommit(l_pErr,CXXTEST_COMP_ID);
+        }
+        restoreSystemState();
+        TS_INFO("testGard3: Ended");
+#endif
+    }
+
+    /**
+     *  @brief Test creating a 2nd GARD Record overwrites manual gard
+     */
+    void testGard4()
+    {
+        TS_INFO("testGard4: Started");
+#if DISABLE_FC_UNIT_TESTS
+        TS_INFO("testGard4 - SKIPPING -- other tests could be adversly affected");
+#else
+
+        saveSystemState();
+        errlHndl_t l_pErr = nullptr;
+        DeconfigGard::GardRecords_t l_records;
+
+        do
+        {
+            // find an fc unit that we can play with
+            Target* pSys = UTIL::assertGetToplevelTarget();
+
+            PredicateCTM predFc(CLASS_UNIT, TYPE_FC);
+            PredicateHwas predFunctional;
+            predFunctional.poweredOn(true).present(true).functional(true);
+            PredicatePostfixExpr checkExpr;
+            checkExpr.push(&predFc).push(&predFunctional).And();
+            TargetHandleList pFcList;
+            targetService().getAssociated( pFcList, pSys,
+                TargetService::CHILD, TargetService::ALL, &checkExpr );
+
+            if (pFcList.empty())
+            {
+                TS_FAIL("testGard4: SKIPPING empty pFcList CLASS_UNIT, TYPE_FC");
+                break;
+            }
+            TargetHandle_t l_pTarget = *pFcList.begin();
+            TS_INFO("testGard4: Working with HUID=0x%X TYPE_FC", get_huid(l_pTarget));
+
+            // Get any existing GARD Records for the target
+            l_pErr = theDeconfigGard().getGardRecords(l_pTarget, l_records);
+
             if (l_pErr)
             {
                 TS_FAIL("testGard4: Error from getGardRecords");
@@ -2662,18 +2983,28 @@ public:
 
             if (l_records.size() != 0)
             {
-                TS_INFO("testGard4: target has %d existing Gard Records, skipping test",
+                TS_INFO("testGard4: target has %d existing Gard Records, SKIPPING test",
                          l_records.size());
                 break;
             }
 
             // Create a GARD Record for the target.
             l_pErr = theDeconfigGard().
-                    platCreateGardRecord(l_pTarget, 0x12, GARD_Predictive);
+                    platCreateGardRecord(l_pTarget, 0x23, GARD_User_Manual);
 
             if (l_pErr)
             {
                 TS_FAIL("testGard4: Error from platCreateGardRecord");
+                break;
+            }
+
+            // Create another GARD Record for the target - should overwrite
+            l_pErr = theDeconfigGard().
+                    platCreateGardRecord(l_pTarget, 0x46, GARD_Fatal);
+
+            if (l_pErr)
+            {
+                TS_FAIL("testGard4: Error from platCreateGardRecord (2)");
                 break;
             }
 
@@ -2693,14 +3024,15 @@ public:
                 break;
             }
 
-            if (l_records[0].iv_errorType != GARD_Predictive)
+            if ((l_records[0].iv_errlogEid != 0x46) ||
+                (l_records[0].iv_errorType != GARD_Fatal))
             {
-                TS_FAIL("testGard4: Record errorType %d, expected predictive",
-                        l_records[0].iv_errorType);
+                TS_FAIL("testGard4: unexpected data - errl 0x%X type %x",
+                    l_records[0].iv_errlogEid, l_records[0].iv_errorType);
                 break;
             }
 
-            // Clear the GARD Records for the target
+            // Clear the GARD Record for the target
             l_pErr = theDeconfigGard().clearGardRecords(l_pTarget);
 
             if (l_pErr)
@@ -2735,36 +3067,30 @@ public:
         {
             errlCommit(l_pErr,CXXTEST_COMP_ID);
         }
-        TS_INFO("testGard4: Ended");
+        restoreSystemState();
 #endif
     }
 
     /**
-     *  @brief Test creating a GARD Record for a Target multiple times
+     *  @brief Test getting and clearing all GARD Records
+     *
+     *  Creates one gard record then clearGardRecords for all.
      */
     void testGard5()
     {
         TS_INFO("testGard5: Started");
 #if DISABLE_FC_UNIT_TESTS
-        // these tests deconfigure and gard targets. and even though they
-        //  restore their state after the tests, since the cxxtests are
-        //  all run in parallel, during the time that a target is non-
-        //  functional due to this test, another test may be running that
-        //  might be adversly affected.
-        // tests are left in the code so that a developer can enable them
-        //  to test these specific functions - just keep in mind that there
-        //  could be side effects in other cxxtests.
-        TS_INFO( "testGard5 - SKIPPING -- other tests could be adversly affected");
+        TS_INFO("testGard5: - SKIPPING -- other tests could be adversly affected");
 #else
 
+        saveSystemState();
         errlHndl_t l_pErr = nullptr;
         DeconfigGard::GardRecords_t l_records;
 
         do
         {
             // find an fc unit that we can play with
-            Target * pSys;
-            targetService().getTopLevelTarget(pSys);
+            Target* pSys = UTIL::assertGetToplevelTarget();
 
             PredicateCTM predFc(CLASS_UNIT, TYPE_FC);
             PredicateHwas predFunctional;
@@ -2777,13 +3103,14 @@ public:
 
             if (pFcList.empty())
             {
-                TS_FAIL("testGard5: empty pFcList");
+                TS_FAIL("testGard5: SKIPPING empty pFcList CLASS_UNIT, TYPE_FC");
                 break;
             }
             TargetHandle_t l_pTarget = *pFcList.begin();
+            TS_INFO("testGard5: Working with HUID=0x%X TYPE_FC", get_huid(l_pTarget));
 
-            // Get any existing GARD Records for the target
-            l_pErr = theDeconfigGard().getGardRecords(l_pTarget, l_records);
+            // Get all existing GARD Records
+            l_pErr = theDeconfigGard().getGardRecords(nullptr, l_records);
 
             if (l_pErr)
             {
@@ -2793,14 +3120,14 @@ public:
 
             if (l_records.size() != 0)
             {
-                TS_INFO("testGard5: target has %d existing Gard Records, skipping test",
+                TS_INFO("testGard5: %d existing Gard Records, SKIPPING test",
                          l_records.size());
                 break;
             }
 
             // Create a GARD Record for the target.
             l_pErr = theDeconfigGard().
-                    platCreateGardRecord(l_pTarget, 0x23, GARD_Predictive);
+                    platCreateGardRecord(l_pTarget, 0x71, GARD_Predictive);
 
             if (l_pErr)
             {
@@ -2808,49 +3135,23 @@ public:
                 break;
             }
 
-            // Create another GARD Record for the target
-            l_pErr = theDeconfigGard().
-                    platCreateGardRecord(l_pTarget, 0x45, GARD_Fatal);
+            // Clear all GARD Records
+            l_pErr = theDeconfigGard().clearGardRecords(nullptr);
 
             if (l_pErr)
             {
-                TS_FAIL("testGard5: Error from platCreateGardRecord (2)");
+                TS_FAIL("testGard5: Error from clearGardRecords(nullptr)");
                 break;
             }
 
-            // Get the GARD Records for the target
-            l_pErr = theDeconfigGard().getGardRecords(l_pTarget, l_records);
+            // Get the GARD Records
+            l_records.clear();
+
+            l_pErr = theDeconfigGard().getGardRecords(nullptr, l_records);
 
             if (l_pErr)
             {
                 TS_FAIL("testGard5: Error from getGardRecords (2)");
-                break;
-            }
-
-            if (l_records.size() != 1)
-            {
-                TS_FAIL("testGard5: %d records for target, expected 1",
-                        l_records.size());
-                break;
-            }
-
-            // Clear the GARD Record for the target
-            l_pErr = theDeconfigGard().clearGardRecords(l_pTarget);
-
-            if (l_pErr)
-            {
-                TS_FAIL("testGard5: Error from clearGardRecords");
-                break;
-            }
-
-            // Get the GARD Records for the target
-            l_records.clear();
-
-            l_pErr = theDeconfigGard().getGardRecords(l_pTarget, l_records);
-
-            if (l_pErr)
-            {
-                TS_FAIL("testGard5: Error from getGardRecords (3)");
                 break;
             }
 
@@ -2869,141 +3170,161 @@ public:
         {
             errlCommit(l_pErr,CXXTEST_COMP_ID);
         }
-        TS_INFO("testGard5: Ended");
+        restoreSystemState();
 #endif
     }
 
     /**
-     *  @brief Test creating a 2nd GARD Record overwrites manual gard
+     *  @brief Test create GARD record, call collect GARD to confirm targets
+     *      are deconfigured, set changed bit ala HCDB, reprocess GARD to
+     *      confirm GARD record is deleted.
      */
     void testGard6()
     {
         TS_INFO("testGard6: Started");
 #if DISABLE_FC_UNIT_TESTS
-        // these tests deconfigure and gard targets. and even though they
-        //  restore their state after the tests, since the cxxtests are
-        //  all run in parallel, during the time that a target is non-
-        //  functional due to this test, another test may be running that
-        //  might be adversly affected.
-        // tests are left in the code so that a developer can enable them
-        //  to test these specific functions - just keep in mind that there
-        //  could be side effects in other cxxtests.
-        TS_INFO("testGard6 - SKIPPING -- other tests could be adversly affected");
+        TS_INFO("testGard6: - SKIPPING -- other tests could be adversly affected");
 #else
 
+        saveSystemState();
         errlHndl_t l_pErr = nullptr;
         DeconfigGard::GardRecords_t l_records;
 
         do
         {
+            l_pErr = theDeconfigGard().getGardRecords(nullptr, l_records);
+            if (l_pErr)
+            {
+                errlCommit(l_pErr,CXXTEST_COMP_ID);
+                TS_FAIL("testGard6: Error from getGardRecords");
+                break;
+            }
+
+            if (l_records.size() > 0)
+            {
+                TS_FAIL("testGard6: already GARD records here. %d records",
+                        l_records.size());
+                break;
+            }
             // find an fc unit that we can play with
-            Target * pSys;
-            targetService().getTopLevelTarget(pSys);
+
+            Target* pSys = UTIL::assertGetToplevelTarget();
 
             PredicateCTM predFc(CLASS_UNIT, TYPE_FC);
             PredicateHwas predFunctional;
             predFunctional.poweredOn(true).present(true).functional(true);
             PredicatePostfixExpr checkExpr;
             checkExpr.push(&predFc).push(&predFunctional).And();
+
             TargetHandleList pFcList;
             targetService().getAssociated( pFcList, pSys,
                 TargetService::CHILD, TargetService::ALL, &checkExpr );
 
+            TS_INFO("testGard6: pFcList.size()=%d", pFcList.size());
             if (pFcList.empty())
             {
-                TS_FAIL("testGard6: empty pFcList");
-                break;
-            }
-            TargetHandle_t l_pTarget = *pFcList.begin();
-
-            // Get any existing GARD Records for the target
-            l_pErr = theDeconfigGard().getGardRecords(l_pTarget, l_records);
-
-            if (l_pErr)
-            {
-                TS_FAIL("testGard6: Error from getGardRecords");
+                TS_WARN("testGard6: SKIPPING empty pFcList CLASS_UNIT, TYPE_FC");
                 break;
             }
 
-            if (l_records.size() != 0)
-            {
-                TS_TRACE(INFO_MRK "testGard6: target has %d existing Gard Records, skipping test",
-                         l_records.size());
-                break;
-            }
+            TargetHandle_t l_target = *pFcList.begin();
+            TS_INFO("testGard6: Working with HUID=0x%X TYPE_FC", get_huid(l_target));
 
-            // Create a GARD Record for the target.
+            // create GARD record, call 'doGard' step and confirm target is
+            //  deconfigured
             l_pErr = theDeconfigGard().
-                    platCreateGardRecord(l_pTarget, 0x23, GARD_User_Manual);
-
+                    platCreateGardRecord(l_target, 0x12, GARD_Void);
             if (l_pErr)
             {
                 TS_FAIL("testGard6: Error from platCreateGardRecord");
                 break;
             }
 
-            // Create another GARD Record for the target - should overwrite
-            l_pErr = theDeconfigGard().
-                    platCreateGardRecord(l_pTarget, 0x46, GARD_Fatal);
-
+            l_pErr = theDeconfigGard().getGardRecords(nullptr, l_records);
             if (l_pErr)
             {
-                TS_FAIL("testGard6: Error from platCreateGardRecord (2)");
+                errlCommit(l_pErr,CXXTEST_COMP_ID);
+                TS_FAIL("testGard6: Error from getGardRecords");
                 break;
             }
-
-            // Get the GARD Records for the target
-            l_pErr = theDeconfigGard().getGardRecords(l_pTarget, l_records);
-
-            if (l_pErr)
-            {
-                TS_FAIL("testGard6: Error from getGardRecords (2)");
-                break;
-            }
-
+            TS_INFO("testGard6: l_records.size()=%d should be 1 for doGard setup", l_records.size());
             if (l_records.size() != 1)
             {
-                TS_FAIL("testGard6: %d records for target, expected 1",
+                TS_FAIL("testGard6: should be 1 record; instead %d records",
                         l_records.size());
                 break;
             }
 
-            if ((l_records[0].iv_errlogEid != 0x46) ||
-                (l_records[0].iv_errorType != GARD_Fatal))
-            {
-                TS_FAIL("testGard6: unexpected data - errl 0x%X type %x",
-                    l_records[0].iv_errlogEid, l_records[0].iv_errorType);
-                break;
-            }
-
-            // Clear the GARD Record for the target
-            l_pErr = theDeconfigGard().clearGardRecords(l_pTarget);
-
+            l_pErr = collectGard();
             if (l_pErr)
             {
-                TS_FAIL("testGard6: Error from clearGardRecords");
+                TS_FAIL("testGard6: Error from collectGard");
                 break;
             }
 
-            // Get the GARD Records for the target
-            l_records.clear();
-
-            l_pErr = theDeconfigGard().getGardRecords(l_pTarget, l_records);
-
+            l_pErr = theDeconfigGard().getGardRecords(nullptr, l_records);
             if (l_pErr)
             {
-                TS_FAIL("testGard6: Error from getGardRecords (3)");
+                errlCommit(l_pErr,CXXTEST_COMP_ID);
+                TS_FAIL("testGard6: Error from getGardRecords 2");
+                break;
+            }
+            TS_INFO("testGard6: POST collectGard l_records.size()=%d should be 1 for doGard setup", l_records.size());
+            HwasState l_state = l_target->getAttr<ATTR_HWAS_STATE>();
+            TS_INFO("testGard6: l_state=0x%X", l_state);
+            if (l_records.size() != 1)
+            {
+                TS_WARN("testGard6: should be 1 record; instead %d records, check logs for "
+                        "Insufficient HW to continue IPL: (no func cores)",
+                        l_records.size());
+            }
+            else
+            {
+                if (l_state.functional)
+                {
+                    TS_FAIL("testGard6: target still functional, should have been non-functional");
+                    break;
+                }
+            }
+
+            // reset functional state
+            l_state.functional = true;
+            l_target->setAttr<ATTR_HWAS_STATE>(l_state);
+
+            // emulate HCDB - target changed, call collectGard and confirm
+            //  GARD record is gone and target is functional
+            update_hwas_changed_mask(l_target);
+            l_pErr = collectGard();
+            if (l_pErr)
+            {
+                TS_FAIL("testGard6: Error from collectGard2");
                 break;
             }
 
+            l_pErr = theDeconfigGard().getGardRecords(nullptr, l_records);
+            if (l_pErr)
+            {
+                errlCommit(l_pErr,CXXTEST_COMP_ID);
+                TS_FAIL("testGard6: Error from getGardRecords");
+                break;
+            }
+            TS_INFO("testGard6: l_records.size()=%d should be 0 for doGard setup", l_records.size());
             if (l_records.size() != 0)
             {
-                TS_FAIL("testGard6: %d records for target, expected 0",
+                TS_FAIL("testGard6: should be 0 records; instead %d records",
                         l_records.size());
                 break;
             }
 
-            TS_TRACE(INFO_MRK "testGard6: Success");
+            l_state = l_target->getAttr<ATTR_HWAS_STATE>();
+            TS_INFO("testGard6: l_state=0x%X", l_state);
+            if (!l_state.functional)
+            {
+                TS_FAIL("testGard6: target NOT functional");
+                break;
+            }
+
+            TS_INFO("testGard6: Success");
         }
         while (0);
 
@@ -3011,37 +3332,28 @@ public:
         {
             errlCommit(l_pErr,CXXTEST_COMP_ID);
         }
+        restoreSystemState();
 #endif
     }
 
     /**
-     *  @brief Test getting and clearing all GARD Records
-     *
-     *  Creates one gard record then clearGardRecords for all.
+     *  @brief Test CDM modes to restrict creating GARD records
      */
     void testGard7()
     {
         TS_INFO("testGard7: Started");
 #if DISABLE_FC_UNIT_TESTS
-        // these tests deconfigure and gard targets. and even though they
-        //  restore their state after the tests, since the cxxtests are
-        //  all run in parallel, during the time that a target is non-
-        //  functional due to this test, another test may be running that
-        //  might be adversly affected.
-        // tests are left in the code so that a developer can enable them
-        //  to test these specific functions - just keep in mind that there
-        //  could be side effects in other cxxtests.
-        TS_INFO("testGard7: - SKIPPING -- other tests could be adversly affected");
+        TS_INFO( "testGard7: - SKIPPING -- other tests could be adversly affected");
 #else
 
+        saveSystemState();
         errlHndl_t l_pErr = nullptr;
         DeconfigGard::GardRecords_t l_records;
 
         do
         {
             // find an fc unit that we can play with
-            Target * pSys;
-            targetService().getTopLevelTarget(pSys);
+            Target* pSys = UTIL::assertGetToplevelTarget();
 
             PredicateCTM predFc(CLASS_UNIT, TYPE_FC);
             PredicateHwas predFunctional;
@@ -3054,13 +3366,14 @@ public:
 
             if (pFcList.empty())
             {
-                TS_FAIL("testGard7: empty pFcList");
+                TS_FAIL("testGard7: SKIPPING empty pFcList CLASS_UNIT, TYPE_FC");
                 break;
             }
             TargetHandle_t l_pTarget = *pFcList.begin();
+            TS_INFO("testGard7: Working with HUID=0x%X TYPE_FC", get_huid(l_pTarget));
 
-            // Get all existing GARD Records
-            l_pErr = theDeconfigGard().getGardRecords(nullptr, l_records);
+            // Get any existing GARD Records for the target
+            l_pErr = theDeconfigGard().getGardRecords(l_pTarget, l_records);
 
             if (l_pErr)
             {
@@ -3070,14 +3383,23 @@ public:
 
             if (l_records.size() != 0)
             {
-                TS_TRACE(INFO_MRK "testGard7: %d existing Gard Records, skipping test",
+                TS_INFO("testGard7: target has %d existing Gard Records, SKIPPING test",
                          l_records.size());
                 break;
             }
 
-            // Create a GARD Record for the target.
+            // set Manufacturing policy to disabled,
+            //  test that gard record is not created
+            ATTR_CDM_POLICIES_type l_policies =
+                pSys->getAttr<ATTR_CDM_POLICIES>();
+            TS_INFO("testGard7: l_policies=0x%X", l_policies);
+            l_policies = CDM_POLICIES_MANUFACTURING_DISABLED;
+            TS_INFO("testGard7: DISABLED ? l_policies=0x%X", l_policies);
+            pSys->setAttr<ATTR_CDM_POLICIES>(l_policies);
+
+            // (try to) Create a GARD Record for the target.
             l_pErr = theDeconfigGard().
-                    platCreateGardRecord(l_pTarget, 0x71, GARD_Predictive);
+                    platCreateGardRecord(l_pTarget, 0x12, GARD_Fatal);
 
             if (l_pErr)
             {
@@ -3085,19 +3407,8 @@ public:
                 break;
             }
 
-            // Clear all GARD Records
-            l_pErr = theDeconfigGard().clearGardRecords(nullptr);
-
-            if (l_pErr)
-            {
-                TS_FAIL("testGard7: Error from clearGardRecords(nullptr)");
-                break;
-            }
-
-            // Get the GARD Records
-            l_records.clear();
-
-            l_pErr = theDeconfigGard().getGardRecords(nullptr, l_records);
+            // Get the GARD Records for the target - shouldn't be any
+            l_pErr = theDeconfigGard().getGardRecords(l_pTarget, l_records);
 
             if (l_pErr)
             {
@@ -3112,7 +3423,41 @@ public:
                 break;
             }
 
-            TS_TRACE(INFO_MRK "testGard7: Success");
+            // set Predictive policy to disabled
+            //  test that gard record isn't created
+            l_policies = CDM_POLICIES_PREDICTIVE_DISABLED;
+            pSys->setAttr<ATTR_CDM_POLICIES>(l_policies);
+
+            // (try to) Create a GARD Record for the target.
+            l_pErr = theDeconfigGard().
+                    platCreateGardRecord(l_pTarget, 0x12, GARD_Predictive);
+
+            if (l_pErr)
+            {
+                TS_FAIL("testGard7: Error from platCreateGardRecord");
+                break;
+            }
+
+            // Get the GARD Records for the target - shouldn't be any
+            l_pErr = theDeconfigGard().getGardRecords(l_pTarget, l_records);
+
+            if (l_pErr)
+            {
+                TS_FAIL("testGard7: Error from getGardRecords (2)");
+                break;
+            }
+
+            if (l_records.size() != 0)
+            {
+                TS_FAIL("testGard7: %d records for target, expected 0",
+                        l_records.size());
+                break;
+            }
+
+            // restore
+            l_policies = 0;
+            pSys->setAttr<ATTR_CDM_POLICIES>(l_policies);
+            TS_INFO("testGard7: Success");
         }
         while (0);
 
@@ -3120,29 +3465,21 @@ public:
         {
             errlCommit(l_pErr,CXXTEST_COMP_ID);
         }
+        restoreSystemState();
 #endif
     }
 
     /**
-     *  @brief Test create GARD record, call collect GARD to confirm targets
-     *      are deconfigured, set changed bit ala HCDB, reprocess GARD to
-     *      confirm GARD record is deleted.
+     *  @brief Test CDM modes to restrict processing GARD records
      */
     void testGard8()
     {
         TS_INFO("testGard8: Started");
 #if DISABLE_FC_UNIT_TESTS
-        // these tests deconfigure and gard targets. and even though they
-        //  restore their state after the tests, since the cxxtests are
-        //  all run in parallel, during the time that a target is non-
-        //  functional due to this test, another test may be running that
-        //  might be adversly affected.
-        // tests are left in the code so that a developer can enable them
-        //  to test these specific functions - just keep in mind that there
-        //  could be side effects in other cxxtests.
-        TS_INFO("testGard8: - SKIPPING -- other tests could be adversly affected");
+        TS_INFO( "testGard8 - SKIPPING -- other tests could be adversly affected");
 #else
 
+        saveSystemState();
         errlHndl_t l_pErr = nullptr;
         DeconfigGard::GardRecords_t l_records;
 
@@ -3162,10 +3499,9 @@ public:
                         l_records.size());
                 break;
             }
-            // find an fc unit that we can play with
 
-            Target * pSys;
-            targetService().getTopLevelTarget(pSys);
+            // find an fc unit that we can play with
+            Target* pSys = UTIL::assertGetToplevelTarget();
 
             PredicateCTM predFc(CLASS_UNIT, TYPE_FC);
             PredicateHwas predFunctional;
@@ -3179,16 +3515,17 @@ public:
 
             if (pFcList.empty())
             {
-                TS_FAIL("testGard8: empty pFcList");
+                TS_WARN("testGard8: SKIPPING empty pFcList CLASS_UNIT, TYPE_FC");
                 break;
             }
 
             TargetHandle_t l_target = *pFcList.begin();
+            TS_INFO("testGard8: Working with HUID=0x%X TYPE_FC", get_huid(l_target));
 
-            // create GARD record, call 'doGard' step and confirm target is
-            //  deconfigured
+            // create GARD record, set Policy, call 'doGard' step and confirm
+            //  target is NOT deconfigured
             l_pErr = theDeconfigGard().
-                    platCreateGardRecord(l_target, 0x12, GARD_Void);
+                    platCreateGardRecord(l_target, 0x12, GARD_Predictive);
             if (l_pErr)
             {
                 TS_FAIL("testGard8: Error from platCreateGardRecord");
@@ -3209,6 +3546,15 @@ public:
                 break;
             }
 
+            // set Manufacturing policy to disabled,
+            //  test that gard record is not created
+            ATTR_CDM_POLICIES_type l_policies =
+                pSys->getAttr<ATTR_CDM_POLICIES>();
+            TS_INFO("testGard8: l_policies=0x%X", l_policies);
+            l_policies = CDM_POLICIES_MANUFACTURING_DISABLED;
+            TS_INFO("testGard8: DISABLED ? l_policies=0x%X", l_policies);
+            pSys->setAttr<ATTR_CDM_POLICIES>(l_policies);
+
             l_pErr = collectGard();
             if (l_pErr)
             {
@@ -3217,23 +3563,36 @@ public:
             }
 
             HwasState l_state = l_target->getAttr<ATTR_HWAS_STATE>();
-            if (l_state.functional)
+            if (!l_state.functional)
             {
-                TS_FAIL("testGard8: target still functional");
+                TS_FAIL("testGard8: target NOT functional");
                 break;
             }
 
-            // reset functional state
-            l_state.functional = true;
-            l_target->setAttr<ATTR_HWAS_STATE>(l_state);
+            // set Predictive policy to disabled,
+            //  test that gard record is not created
+            l_policies = CDM_POLICIES_PREDICTIVE_DISABLED;
+            pSys->setAttr<ATTR_CDM_POLICIES>(l_policies);
 
-            // emulate HCDB - target changed, call collectGard and confirm
-            //  GARD record is gone and target is functional
-            update_hwas_changed_mask(l_target);
             l_pErr = collectGard();
             if (l_pErr)
             {
-                TS_FAIL("testGard8: Error from collectGard2");
+                TS_FAIL("testGard8: Error from collectGard");
+                break;
+            }
+
+            l_state = l_target->getAttr<ATTR_HWAS_STATE>();
+            if (!l_state.functional)
+            {
+                TS_FAIL("testGard8: target NOT functional");
+                break;
+            }
+
+            // Clear all GARD Records
+            l_pErr = theDeconfigGard().clearGardRecords(nullptr);
+            if (l_pErr)
+            {
+                TS_FAIL("testGard8: Error from clearGardRecords(nullptr)");
                 break;
             }
 
@@ -3251,307 +3610,6 @@ public:
                 break;
             }
 
-            l_state = l_target->getAttr<ATTR_HWAS_STATE>();
-            if (!l_state.functional)
-            {
-                TS_FAIL("testGard8: target NOT functional");
-                break;
-            }
-
-            TS_TRACE(INFO_MRK "testGard8: Success");
-        }
-        while (0);
-
-        if (l_pErr)
-        {
-            errlCommit(l_pErr,CXXTEST_COMP_ID);
-        }
-#endif
-    }
-
-    /**
-     *  @brief Test CDM modes to restrict creating GARD records
-     */
-    void testGard9()
-    {
-        TS_INFO("testGard9: Started");
-#if DISABLE_FC_UNIT_TESTS
-        // these tests deconfigure and gard targets. and even though they
-        //  restore their state after the tests, since the cxxtests are
-        //  all run in parallel, during the time that a target is non-
-        //  functional due to this test, another test may be running that
-        //  might be adversly affected.
-        // tests are left in the code so that a developer can enable them
-        //  to test these specific functions - just keep in mind that there
-        //  could be side effects in other cxxtests.
-        TS_INFO( "testGard9: - SKIPPING -- other tests could be adversly affected");
-#else
-
-        errlHndl_t l_pErr = nullptr;
-        DeconfigGard::GardRecords_t l_records;
-
-        do
-        {
-            // find an fc unit that we can play with
-            Target * pSys;
-            targetService().getTopLevelTarget(pSys);
-
-            PredicateCTM predFc(CLASS_UNIT, TYPE_FC);
-            PredicateHwas predFunctional;
-            predFunctional.poweredOn(true).present(true).functional(true);
-            PredicatePostfixExpr checkExpr;
-            checkExpr.push(&predFc).push(&predFunctional).And();
-            TargetHandleList pFcList;
-            targetService().getAssociated( pFcList, pSys,
-                TargetService::CHILD, TargetService::ALL, &checkExpr );
-
-            if (pFcList.empty())
-            {
-                TS_FAIL("testGard9: empty pFcList");
-                break;
-            }
-            TargetHandle_t l_pTarget = *pFcList.begin();
-
-            // Get any existing GARD Records for the target
-            l_pErr = theDeconfigGard().getGardRecords(l_pTarget, l_records);
-
-            if (l_pErr)
-            {
-                TS_FAIL("testGard9: Error from getGardRecords");
-                break;
-            }
-
-            if (l_records.size() != 0)
-            {
-                TS_INFO("testGard9: target has %d existing Gard Records, skipping test",
-                         l_records.size());
-                break;
-            }
-
-            // set Manufacturing policy to disabled,
-            //  test that gard record is not created
-            ATTR_CDM_POLICIES_type l_policies =
-                pSys->getAttr<ATTR_CDM_POLICIES>();
-            l_policies = CDM_POLICIES_MANUFACTURING_DISABLED;
-            pSys->setAttr<ATTR_CDM_POLICIES>(l_policies);
-
-            // (try to) Create a GARD Record for the target.
-            l_pErr = theDeconfigGard().
-                    platCreateGardRecord(l_pTarget, 0x12, GARD_Fatal);
-
-            if (l_pErr)
-            {
-                TS_FAIL("testGard9: Error from platCreateGardRecord");
-                break;
-            }
-
-            // Get the GARD Records for the target - shouldn't be any
-            l_pErr = theDeconfigGard().getGardRecords(l_pTarget, l_records);
-
-            if (l_pErr)
-            {
-                TS_FAIL("testGard9: Error from getGardRecords (2)");
-                break;
-            }
-
-            if (l_records.size() != 0)
-            {
-                TS_FAIL("testGard9: %d records for target, expected 0",
-                        l_records.size());
-                break;
-            }
-
-            // set Predictive policy to disabled
-            //  test that gard record isn't created
-            l_policies = CDM_POLICIES_PREDICTIVE_DISABLED;
-            pSys->setAttr<ATTR_CDM_POLICIES>(l_policies);
-
-            // (try to) Create a GARD Record for the target.
-            l_pErr = theDeconfigGard().
-                    platCreateGardRecord(l_pTarget, 0x12, GARD_Predictive);
-
-            if (l_pErr)
-            {
-                TS_FAIL("testGard9: Error from platCreateGardRecord");
-                break;
-            }
-
-            // Get the GARD Records for the target - shouldn't be any
-            l_pErr = theDeconfigGard().getGardRecords(l_pTarget, l_records);
-
-            if (l_pErr)
-            {
-                TS_FAIL("testGard9: Error from getGardRecords (2)");
-                break;
-            }
-
-            if (l_records.size() != 0)
-            {
-                TS_FAIL("testGard9: %d records for target, expected 0",
-                        l_records.size());
-                break;
-            }
-
-            // restore
-            l_policies = 0;
-            pSys->setAttr<ATTR_CDM_POLICIES>(l_policies);
-            TS_TRACE(INFO_MRK "testGard9: Success");
-        }
-        while (0);
-
-        if (l_pErr)
-        {
-            errlCommit(l_pErr,CXXTEST_COMP_ID);
-        }
-#endif
-    }
-
-    /**
-     *  @brief Test CDM modes to restrict processing GARD records
-     */
-    void testGard10()
-    {
-        TS_INFO("testGard10: Started");
-#if DISABLE_FC_UNIT_TESTS
-        // these tests deconfigure and gard targets. and even though they
-        //  restore their state after the tests, since the cxxtests are
-        //  all run in parallel, during the time that a target is non-
-        //  functional due to this test, another test may be running that
-        //  might be adversly affected.
-        // tests are left in the code so that a developer can enable them
-        //  to test these specific functions - just keep in mind that there
-        //  could be side effects in other cxxtests.
-        TS_INFO( "testGard10 - SKIPPING -- other tests could be adversly affected");
-#else
-
-        errlHndl_t l_pErr = nullptr;
-        DeconfigGard::GardRecords_t l_records;
-
-        do
-        {
-            l_pErr = theDeconfigGard().getGardRecords(nullptr, l_records);
-            if (l_pErr)
-            {
-                errlCommit(l_pErr,CXXTEST_COMP_ID);
-                TS_FAIL("testGard10: Error from getGardRecords");
-                break;
-            }
-
-            if (l_records.size() > 0)
-            {
-                TS_FAIL("testGard10: already GARD records here. %d records",
-                        l_records.size());
-                break;
-            }
-
-            // find an fc unit that we can play with
-            Target * pSys;
-            targetService().getTopLevelTarget(pSys);
-
-            PredicateCTM predFc(CLASS_UNIT, TYPE_FC);
-            PredicateHwas predFunctional;
-            predFunctional.poweredOn(true).present(true).functional(true);
-            PredicatePostfixExpr checkExpr;
-            checkExpr.push(&predFc).push(&predFunctional).And();
-
-            TargetHandleList pFcList;
-            targetService().getAssociated( pFcList, pSys,
-                TargetService::CHILD, TargetService::ALL, &checkExpr );
-
-            if (pFcList.empty())
-            {
-                TS_FAIL("testGard10: empty pFcList");
-                break;
-            }
-
-            TargetHandle_t l_target = *pFcList.begin();
-
-            // create GARD record, set Policy, call 'doGard' step and confirm
-            //  target is NOT deconfigured
-            l_pErr = theDeconfigGard().
-                    platCreateGardRecord(l_target, 0x12, GARD_Predictive);
-            if (l_pErr)
-            {
-                TS_FAIL("testGard10: Error from platCreateGardRecord");
-                break;
-            }
-
-            l_pErr = theDeconfigGard().getGardRecords(nullptr, l_records);
-            if (l_pErr)
-            {
-                errlCommit(l_pErr,CXXTEST_COMP_ID);
-                TS_FAIL("testGard10: Error from getGardRecords");
-                break;
-            }
-            if (l_records.size() != 1)
-            {
-                TS_FAIL("testGard10: should be 1 record; instead %d records",
-                        l_records.size());
-                break;
-            }
-
-            // set Manufacturing policy to disabled,
-            //  test that gard record is not created
-            ATTR_CDM_POLICIES_type l_policies =
-                pSys->getAttr<ATTR_CDM_POLICIES>();
-            l_policies = CDM_POLICIES_MANUFACTURING_DISABLED;
-            pSys->setAttr<ATTR_CDM_POLICIES>(l_policies);
-
-            l_pErr = collectGard();
-            if (l_pErr)
-            {
-                TS_FAIL("testGard10: Error from collectGard");
-                break;
-            }
-
-            HwasState l_state = l_target->getAttr<ATTR_HWAS_STATE>();
-            if (!l_state.functional)
-            {
-                TS_FAIL("testGard10: target NOT functional");
-                break;
-            }
-
-            // set Predictive policy to disabled,
-            //  test that gard record is not created
-            l_policies = CDM_POLICIES_PREDICTIVE_DISABLED;
-            pSys->setAttr<ATTR_CDM_POLICIES>(l_policies);
-
-            l_pErr = collectGard();
-            if (l_pErr)
-            {
-                TS_FAIL("testGard10: Error from collectGard");
-                break;
-            }
-
-            l_state = l_target->getAttr<ATTR_HWAS_STATE>();
-            if (!l_state.functional)
-            {
-                TS_FAIL("testGard10: target NOT functional");
-                break;
-            }
-
-            // Clear all GARD Records
-            l_pErr = theDeconfigGard().clearGardRecords(nullptr);
-            if (l_pErr)
-            {
-                TS_FAIL("testGard10: Error from clearGardRecords(nullptr)");
-                break;
-            }
-
-            l_pErr = theDeconfigGard().getGardRecords(nullptr, l_records);
-            if (l_pErr)
-            {
-                errlCommit(l_pErr,CXXTEST_COMP_ID);
-                TS_FAIL("testGard10: Error from getGardRecords");
-                break;
-            }
-            if (l_records.size() != 0)
-            {
-                TS_FAIL("testGard10: should be 0 records; instead %d records",
-                        l_records.size());
-                break;
-            }
-
             // create GARD record, set Policy, call 'doGard' step and confirm
             //  target is NOT deconfigured
 
@@ -3563,7 +3621,7 @@ public:
                     platCreateGardRecord(l_target, 0x12, GARD_Predictive);
             if (l_pErr)
             {
-                TS_FAIL("testGard10: Error from platCreateGardRecord");
+                TS_FAIL("testGard8: Error from platCreateGardRecord");
                 break;
             }
 
@@ -3571,12 +3629,12 @@ public:
             if (l_pErr)
             {
                 errlCommit(l_pErr,CXXTEST_COMP_ID);
-                TS_FAIL("testGard10: Error from getGardRecords");
+                TS_FAIL("testGard8: Error from getGardRecords");
                 break;
             }
             if (l_records.size() != 1)
             {
-                TS_FAIL("testGard10: should be 1 records; instead %d records",
+                TS_FAIL("testGard8: should be 1 records; instead %d records",
                         l_records.size());
                 break;
             }
@@ -3585,14 +3643,14 @@ public:
             l_pErr = theDeconfigGard().clearGardRecords(nullptr);
             if (l_pErr)
             {
-                TS_FAIL("testGard10: Error from clearGardRecords(nullptr)");
+                TS_FAIL("testGard8: Error from clearGardRecords(nullptr)");
                 break;
             }
 
             // restore
             l_policies = 0;
             pSys->setAttr<ATTR_CDM_POLICIES>(l_policies);
-            TS_TRACE(INFO_MRK "testGard10: Success");
+            TS_INFO("testGard8: Success");
         }
         while (0);
 
@@ -3600,6 +3658,7 @@ public:
         {
             errlCommit(l_pErr,CXXTEST_COMP_ID);
         }
+        restoreSystemState();
 #endif
     }
 
@@ -3608,21 +3667,14 @@ public:
      *      are deconfigured, set changed bit ala HCDB, reprocess GARD to
      *      confirm GARD record is deleted.
      */
-    void testGard11()
+    void testGard9()
     {
-        TS_INFO("testGard11: Started");
-#if DISABLE_FC_UNIT_TESTS
-        // these tests deconfigure and gard targets. and even though they
-        //  restore their state after the tests, since the cxxtests are
-        //  all run in parallel, during the time that a target is non-
-        //  functional due to this test, another test may be running that
-        //  might be adversly affected.
-        // tests are left in the code so that a developer can enable them
-        //  to test these specific functions - just keep in mind that there
-        //  could be side effects in other cxxtests.
-        TS_INFO( "testGard11 - SKIPPING -- other tests could be adversly affected");
+        TS_INFO("testGard9: Started");
+#if DISABLE_UNIT_TESTS
+        TS_INFO( "testGard9 - SKIPPING -- other tests could be adversly affected");
 #else
 
+        saveSystemState();
         errlHndl_t l_pErr = nullptr;
         DeconfigGard::GardRecords_t l_records;
 
@@ -3632,13 +3684,13 @@ public:
             if (l_pErr)
             {
                 errlCommit(l_pErr,CXXTEST_COMP_ID);
-                TS_FAIL("testGard11: Error from getGardRecords");
+                TS_FAIL("testGard9: Error from getGardRecords");
                 break;
             }
 
             if (l_records.size() > 0)
             {
-                TS_FAIL("testGard11: already GARD records here. %d records",
+                TS_FAIL("testGard9: already GARD records here. %d records",
                         l_records.size());
                 break;
             }
@@ -3659,8 +3711,7 @@ public:
             } // for
 
             // find an fc unit that we can play with
-            Target * pSys;
-            targetService().getTopLevelTarget(pSys);
+            Target* pSys = UTIL::assertGetToplevelTarget();
 
             PredicateCTM predFc(CLASS_UNIT, TYPE_FC);
             PredicateHwas predFunctional;
@@ -3672,20 +3723,23 @@ public:
             targetService().getAssociated( pFcList, pSys,
                 TargetService::CHILD, TargetService::ALL, &checkExpr );
 
+            TS_INFO("testGard9: pFcList.size=%d", pFcList.size());
             if (pFcList.empty())
             {
-                TS_FAIL("testGard11: empty pFcList");
+                TS_WARN("testGard9: SKIPPING empty pFcList CLASS_UNIT, TYPE_FC");
                 break;
             }
 
             TargetHandle_t l_target = *pFcList.begin();
+            TS_INFO("testGard9: Working with HUID=0x%X TYPE_FC", get_huid(l_target));
 
             // Save ATTR_BLOCK_SPEC_DECONFIG value
             TARGETING::ATTR_BLOCK_SPEC_DECONFIG_type l_orig_block_spec_deconfig
                 = pSys->getAttr<ATTR_BLOCK_SPEC_DECONFIG>();
+            TS_INFO("testGard9: l_orig_block_spec_deconfig=0x%X", l_orig_block_spec_deconfig);
 
             // Allow speculative deconfigs (clear ATTR_BLOCK_SPEC_DECONFIG)
-            HWAS_INF("testGard11: Allow speculative deconfigs");
+            TS_INFO("testGard9: Allow speculative deconfigs");
             pSys->setAttr<ATTR_BLOCK_SPEC_DECONFIG>(0);
 
             // create GARD record, call 'doGard' step and confirm target is
@@ -3694,7 +3748,7 @@ public:
                     platCreateGardRecord(l_target, 0x12, GARD_Predictive);
             if (l_pErr)
             {
-                TS_FAIL("testGard11: Error from platCreateGardRecord");
+                TS_FAIL("testGard9: Error from platCreateGardRecord");
                 break;
             }
 
@@ -3702,12 +3756,12 @@ public:
             if (l_pErr)
             {
                 errlCommit(l_pErr,CXXTEST_COMP_ID);
-                TS_FAIL("testGard11: Error from getGardRecords");
+                TS_FAIL("testGard9: Error from getGardRecords");
                 break;
             }
             if (l_records.size() != 1)
             {
-                TS_FAIL("testGard11: should be 1 record; instead %d records",
+                TS_FAIL("testGard9: should be 1 record; instead %d records",
                         l_records.size());
                 break;
             }
@@ -3719,19 +3773,20 @@ public:
             l_pErr = collectGard();
             if (l_pErr)
             {
-                TS_FAIL("testGard11: Error from collectGard");
+                TS_FAIL("testGard9: Error from collectGard");
                 break;
             }
 
             HwasState l_state = l_target->getAttr<ATTR_HWAS_STATE>();
+            TS_INFO("testGard9: Stage 1 l_state.functional=0x%X", l_state.functional);
             if (l_state.functional)
             {
-                TS_FAIL("testGard11: target still functional");
+                TS_FAIL("testGard9: target still functional");
                 break;
             }
 
             // Block speculative deconfigs(set ATTR_BLOCK_SPEC_DECONFIG)
-            HWAS_INF("testGard11: Block speculative deconfigs");
+            TS_INFO("testGard9: Block speculative deconfigs");
             pSys->setAttr<ATTR_BLOCK_SPEC_DECONFIG>(1);
 
             // restore functional state
@@ -3743,22 +3798,24 @@ public:
             l_pErr = collectGard();
             if (l_pErr)
             {
-                TS_FAIL("testGard11: Error from collectGard call 2");
+                TS_FAIL("testGard9: Error from collectGard call 2");
                 break;
             }
 
             TARGETING::ATTR_BLOCK_SPEC_DECONFIG_type l_block_spec_deconfig
                 = pSys->getAttr<ATTR_BLOCK_SPEC_DECONFIG>();
+            TS_INFO("testGard9: l_block_spec_deconfig=0x%X", l_block_spec_deconfig);
             if(l_block_spec_deconfig == 0)
             {
-                TS_FAIL("testGard11: block spec deconfig cleared");
+                TS_FAIL("testGard9: block spec deconfig cleared");
                 break;
             }
 
             l_state = l_target->getAttr<ATTR_HWAS_STATE>();
+            TS_INFO("testGard9: Stage 2 l_state.functional=0x%X", l_state.functional);
             if (!l_state.functional)
             {
-                TS_FAIL("testGard11: target NOT functional");
+                TS_FAIL("testGard9: target NOT functional");
                 break;
             }
 
@@ -3768,22 +3825,24 @@ public:
             l_pErr = collectGard();
             if (l_pErr)
             {
-                TS_FAIL("testGard11: Error from collectGard call 2");
+                TS_FAIL("testGard9: Error from collectGard call 2");
                 break;
             }
 
             l_block_spec_deconfig = pSys->getAttr<ATTR_BLOCK_SPEC_DECONFIG>();
+            TS_INFO("testGard9: l_block_spec_deconfig=0x%X", l_block_spec_deconfig);
             if(l_block_spec_deconfig != 0)
             {
-                TS_FAIL("testGard11: block spec deconfig NOT cleared, is %d",
+                TS_FAIL("testGard9: block spec deconfig NOT cleared, is %d",
                         l_block_spec_deconfig);
                 break;
             }
 
             l_state = l_target->getAttr<ATTR_HWAS_STATE>();
+            TS_INFO("testGard9: l_state.functional=0x%X", l_state.functional);
             if (!l_state.functional)
             {
-                TS_FAIL("testGard11: target NOT functional");
+                TS_FAIL("testGard9: target NOT functional");
                 break;
             }
 
@@ -3792,7 +3851,7 @@ public:
             l_target->setAttr<ATTR_HWAS_STATE>(l_state);
             pSys->setAttr<ATTR_BLOCK_SPEC_DECONFIG>(l_orig_block_spec_deconfig);
 
-            TS_TRACE(INFO_MRK "testGard11: Success");
+            TS_INFO("testGard9: Success");
         }
         while (0);
 
@@ -3800,9 +3859,166 @@ public:
         {
             errlCommit(l_pErr,CXXTEST_COMP_ID);
         }
+        restoreSystemState();
+        TS_INFO("testGard9: Ended");
 #endif
     }
 
+
+    /**
+     *  @brief Test garding types
+     *
+     *
+     */
+    void testGardTypes()
+    {
+        TS_INFO("testGardTypes: Started");
+#if DISABLE_VERS_UNIT_TESTS
+        TS_INFO( "testGardTypes - SKIPPING -- other tests could be adversly affected");
+#else
+        const uint32_t DUMMY_EID = 0x12;
+        errlHndl_t l_pErr = nullptr;
+        DeconfigGard::GardRecords_t l_records;
+        ATTR_DECONFIG_GARDABLE_type l_gardable;
+        uint8_t l_present;
+        struct testcase_t
+        {
+            ATTR_TYPE_type targetType;
+            ATTR_CHIPLET_ID_type chipletID;
+        }
+        static const testcases[] =
+        {
+            { TYPE_NMMU,      ANY_CHIPLET },
+            { TYPE_PEC,       ANY_CHIPLET },
+            { TYPE_MC,        ANY_CHIPLET },
+            { TYPE_PAUC,      ANY_CHIPLET },
+            { TYPE_PAU,       ANY_CHIPLET },
+            { TYPE_IOHS,      ANY_CHIPLET },
+            { TYPE_EQ,        ANY_CHIPLET },
+            { TYPE_PERV,      ANY_CHIPLET },
+            { TYPE_MCC,       ANY_CHIPLET },
+            { TYPE_OMI,       ANY_CHIPLET },
+            { TYPE_OMIC,      ANY_CHIPLET },
+            { TYPE_CORE,      ANY_CHIPLET },
+            { TYPE_IOHS,      ANY_CHIPLET },
+            { TYPE_MI,        ANY_CHIPLET },
+            { TYPE_FC,        ANY_CHIPLET },
+            { TYPE_TPM,       ANY_CHIPLET },
+        };
+
+        TargetHandleList l_procList;
+        getAllChips(l_procList, TYPE_PROC);
+
+        for (Target* const l_proc : l_procList)
+        {
+            for (const auto& l_testcase : testcases)
+            {
+                Target* const l_target = getAnyTargetByType(*l_proc,
+                    l_testcase.targetType,
+                    l_testcase.chipletID);
+                if (!l_target)
+                {
+                    TS_INFO("testGardTypes: NO l_target, CONTINUE");
+                    continue;
+                }
+                const char* const l_targetType = l_target->getAttrAsString<ATTR_TYPE>();
+                const auto l_huid = get_huid(l_target);
+                TS_INFO("testGardTypes: Working with HUID=0x%X l_targetType=%s",
+                    l_huid, l_targetType);
+
+                l_gardable = l_target->getAttr<ATTR_DECONFIG_GARDABLE>();
+                l_present = l_target->getAttr<ATTR_HWAS_STATE>().present;
+                TS_INFO("testGardTypes: l_gardable=0x%X l_present=0x%X", l_gardable, l_present);
+                if (l_target->getAttr<ATTR_HWAS_STATE>().functional)
+                {
+                    if (l_gardable && l_present)
+                    {
+                        TS_INFO("testGardTypes: GARDing HUID=0x%X TYPE=0x%X",
+                            l_huid, l_testcase.targetType);
+                        l_pErr = theDeconfigGard().platCreateGardRecord(l_target, DUMMY_EID, GARD_Predictive);
+                        if (l_pErr)
+                        {
+                            TS_FAIL("testGardTypes: Error from platCreateGardRecord HUID=0x%X",
+                                l_huid);
+                            break;
+                        }
+
+                        l_pErr = theDeconfigGard().getGardRecords(l_target, l_records);
+
+                        if (l_pErr)
+                        {
+                            TS_FAIL("testGardTypes: Error from getGardRecords HUID=0x%X",
+                                l_huid);
+                            break;
+                        }
+
+                        if (l_records.size() != 1)
+                        {
+                            TS_FAIL("testGardTypes: %d records for HUID=0x%X expected 1",
+                                l_huid, l_records.size());
+                            break;
+                        }
+
+                        // just a trace point
+                        l_pErr = theDeconfigGard().dumpGardRecords(nullptr, l_records);
+
+                        if (l_pErr)
+                        {
+                            TS_FAIL("testGardTypes: Error from dumpGardRecords");
+                            break;
+                        }
+
+                        l_pErr = theDeconfigGard().clearGardRecords(nullptr);
+                        if (l_pErr)
+                        {
+                            TS_FAIL("testGardTypes: Error from clearGardRecords");
+                            break;
+                        }
+
+                        l_records.clear();
+
+                        l_pErr = theDeconfigGard().getGardRecords(l_target, l_records);
+
+                        if (l_pErr)
+                        {
+                            TS_FAIL("testGardTypes: Error from getGardRecords HUID=0x%X",
+                                l_huid);
+                            break;
+                        }
+
+                        if (l_records.size() != 0)
+                        {
+                            TS_FAIL("testGardTypes: %d records for HUID=0x%X, expected 0",
+                                l_records.size(), l_huid);
+                            break;
+                        }
+                    }
+                    else
+                    {
+                        TS_INFO("testGardTypes: SKIPPING HUID=0x%X TYPE=0x%X -NOT- GARDABLE or Present",
+                            l_huid, l_testcase.targetType);
+                    }
+                }
+                else
+                {
+                    TS_INFO("testGardTypes: SKIPPING HUID=0x%X TYPE=0x%X NOT Functional, state.present=0x%X",
+                        l_huid, l_testcase.targetType, l_present);
+                }
+            }
+            if (l_pErr)
+            {
+                TS_FAIL("testGardTypes: Error processing");
+                break;
+            }
+        }
+
+        if (l_pErr)
+        {
+            errlCommit(l_pErr,CXXTEST_COMP_ID);
+        }
+        TS_INFO("testGardTypes: Ended");
+#endif
+    }
 
     /**
      *  @brief Test gard versioning
@@ -3845,7 +4061,7 @@ public:
             TS_INFO("testGardVersion: number to process is fullList.size=%d", fullList.size());
             if (fullList.empty())
             {
-                TS_FAIL("testGardVersion: empty pFcList");
+                TS_FAIL("testGardVersion: empty fullList");
                 break;
             }
 
@@ -3862,9 +4078,9 @@ public:
                 }
                 if (l_records.size() != 0)
                 {
-                    TS_INFO("testGardVersion: target has %d existing Gard Records, skipping test",
+                    TS_INFO("testGardVersion: target has %d existing Gard Records, SKIPPING test",
                              number_processed, l_records.size());
-                    break;
+                     break;
                 }
 
                 l_pErr = theDeconfigGard().
@@ -3898,7 +4114,6 @@ public:
                     break;
                 }
 
-                // test out dumping gard records
                 l_pErr = theDeconfigGard().dumpGardRecords(l_pTarget, l_records);
 
                 if (l_pErr)
@@ -3906,7 +4121,6 @@ public:
                     TS_FAIL("testGardVersion: Error from dumpGardRecords");
                     break;
                 }
-
                 // Specifically pass nullptr to perform clear ALL to test paths
                 l_pErr = theDeconfigGard().clearGardRecords(nullptr);
 
@@ -3926,7 +4140,6 @@ public:
                     break;
                 }
 
-                // test out dumping no gard records
                 l_pErr = theDeconfigGard().dumpGardRecords(l_pTarget, l_records);
 
                 if (l_pErr)
@@ -3973,11 +4186,8 @@ public:
      */
     void testDeconfigureAssocProc1()
     {
-        TS_TRACE(INFO_MRK "testDeconfigureAssocProc1: Started");
-
-        HWAS_INF("testDeconfigureAssocProc1: Skipping");
+        TS_INFO("testDeconfigureAssocProc1: Started");
 #if 0 //@TODO-RTC:246169
-        HWAS_INF("testDeconfigureAssocProc1: Started");
 
         // This test populates structs which contain information
         // regarding a processor and its child chiplet's linkage
@@ -4071,7 +4281,7 @@ public:
             l_tuletaProcs[2].iv_deconfigured == true &&
             l_tuletaProcs[3].iv_deconfigured == true)
         {
-            TS_TRACE(INFO_MRK "testDeconfigureAssocProc1: Success");
+            TS_INFO("testDeconfigureAssocProc1: Success");
         }
         else
         {
@@ -4086,11 +4296,8 @@ public:
      */
     void testDeconfigureAssocProc2()
     {
-        TS_TRACE(INFO_MRK "testDeconfigureAssocProc2: Started");
-
-        HWAS_INF("testDeconfigureAssocProc2: Skipping");
+        TS_INFO("testDeconfigureAssocProc2: Started");
 #if 0 //@TODO-RTC:246169
-        HWAS_INF("testDeconfigureAssocProc2: Started");
 
         // This test populates structs which contain information
         // regarding a processor and its child chiplet's linkage
@@ -4182,7 +4389,7 @@ public:
             l_tuletaProcs[2].iv_deconfigured == false &&
             l_tuletaProcs[3].iv_deconfigured == true)
         {
-            TS_TRACE(INFO_MRK "testDeconfigureAssocProc2: Success");
+            TS_INFO("testDeconfigureAssocProc2: Success");
         }
         else
         {
@@ -4196,11 +4403,8 @@ public:
      */
     void testDeconfigureAssocProc3()
     {
-        TS_TRACE(INFO_MRK "testDeconfigureAssocProc3: Started");
-
-        HWAS_INF("testDeconfigureAssocProc3: Skipping");
+        TS_INFO("testDeconfigureAssocProc3: Started");
 #if 0 //@TODO-RTC:246169
-        HWAS_INF("testDeconfigureAssocProc3: Started");
 
         // This test populates structs which contain information
         // regarding a processor and its child chiplet's linkage
@@ -4355,7 +4559,7 @@ public:
             l_orlenaProcs[6].iv_deconfigured == false &&
             l_orlenaProcs[7].iv_deconfigured == true)
         {
-            TS_TRACE(INFO_MRK "testDeconfigureAssocProc3: Success");
+            TS_INFO("testDeconfigureAssocProc3: Success");
         }
         else
         {
@@ -4370,11 +4574,8 @@ public:
      */
     void testDeconfigureAssocProc4()
     {
-        TS_TRACE(INFO_MRK "testDeconfigureAssocProc4: Started");
-
-        HWAS_INF("testDeconfigureAssocProc4: Skipping");
+        TS_INFO("testDeconfigureAssocProc4: Started");
 #if 0 //@TODO-RTC:246169
-        HWAS_INF("testDeconfigureAssocProc4: Started");
 
         // This test populates structs which contain information
         // regarding a processor and its child chiplet's linkage
@@ -4531,7 +4732,7 @@ public:
             l_orlenaProcs[6].iv_deconfigured == true &&
             l_orlenaProcs[7].iv_deconfigured == true)
         {
-            TS_TRACE(INFO_MRK "testDeconfigureAssocProc4: Success");
+            TS_INFO("testDeconfigureAssocProc4: Success");
         }
         else
         {
@@ -4546,11 +4747,8 @@ public:
      */
     void testDeconfigureAssocProc5()
     {
-        TS_TRACE(INFO_MRK "testDeconfigureAssocProc5: Started");
-
-        HWAS_INF("testDeconfigureAssocProc5: Skipping");
+        TS_INFO("testDeconfigureAssocProc5: Started");
 #if 0 //@TODO-RTC:246169
-        HWAS_INF("testDeconfigureAssocProc5: Started");
 
         // This test populates structs which contain information
         // regarding a processor and its child chiplet's linkage
@@ -4714,7 +4912,7 @@ public:
             l_orlenaProcs[6].iv_deconfigured == false &&
             l_orlenaProcs[7].iv_deconfigured == false)
         {
-            TS_TRACE(INFO_MRK "testDeconfigureAssocProc5: Success");
+            TS_INFO("testDeconfigureAssocProc5: Success");
         }
         else
         {
@@ -4729,11 +4927,8 @@ public:
      */
     void testDeconfigureAssocProc6()
     {
-        TS_TRACE(INFO_MRK "testDeconfigureAssocProc6: Started");
-
-        HWAS_INF("testDeconfigureAssocProc6: Skipping");
+        TS_INFO("testDeconfigureAssocProc6: Started");
 #if 0 //@TODO-RTC:246169
-        HWAS_INF("testDeconfigureAssocProc6: Started");
 
         // This test populates structs which contain information
         // regarding a processor and its child chiplet's linkage
@@ -4824,7 +5019,7 @@ public:
             l_brazosProcs[2].iv_deconfigured == false &&
             l_brazosProcs[3].iv_deconfigured == false)
         {
-            TS_TRACE(INFO_MRK "testDeconfigureAssocProc6: Success");
+            TS_INFO("testDeconfigureAssocProc6: Success");
         }
         else
         {
@@ -4839,8 +5034,9 @@ public:
      */
     void testDeconfigureAssocProc7()
     {
-        TS_TRACE(INFO_MRK "testDeconfigureAssocProc7: Started");
+        TS_INFO("testDeconfigureAssocProc7: Started");
 #if 1 // This failing test seems a bit out-dated and may be system specific.
+        //@TODO-RTC:246169 revisit this and remove or update
         // This test deconfigures proc2-xbus1 and proc3-xbus1 in a
         // TULETA-2S4U system. Even though this test
         // restores their states after the test, since the cxxtests are
@@ -4850,10 +5046,8 @@ public:
         // tests are left in the code so that a developer can enable them
         // to test these specific functions - just keep in mind that there
         // could be side effects in other cxxtests.
-        TS_TRACE( " - SKIPPING -- other tests could be adversly affected");
-        HWAS_INF("testDeconfigureAssocProc7: Skipped");
+        TS_INFO("testDeconfigureAssocProc7 - SKIPPING -- other tests could be adversly affected");
 #else
-        HWAS_INF("testDeconfigureAssocProc7: Started");
 
         errlHndl_t l_pErr = nullptr;
 
@@ -4967,7 +5161,7 @@ public:
                             "Error from deconfigureAssocProc");
                             break;
                 }
-                TS_TRACE(INFO_MRK "testDeconfigureAssocProc7: Success");
+                TS_INFO("testDeconfigureAssocProc7: Success");
                 // Reset the HWAS_STATE of the targets
                 l_pProc2Xbus1->setAttr<ATTR_HWAS_STATE>(l_proc2Xbus1OrigState);
                 l_pProc3Xbus1->setAttr<ATTR_HWAS_STATE>(l_proc3Xbus1OrigState);
@@ -4979,6 +5173,7 @@ public:
             }
         }while (0);
 #endif
+        TS_INFO("testDeconfigureAssocProc7: Ended");
     }
 
 
@@ -4988,11 +5183,8 @@ public:
      */
     void testDeconfigureAssocProc8()
     {
-        TS_TRACE(INFO_MRK "testDeconfigureAssocProc8: Started");
-
-        HWAS_INF("testDeconfigureAssocProc8: Skipping");
+        TS_INFO("testDeconfigureAssocProc8: Started");
 #if 0 //@TODO-RTC:246169
-        HWAS_INF("testDeconfigureAssocProc8: Started");
 
         // This test populates structs which contain information
         // regarding a processor and its child chiplet's linkage
@@ -5086,13 +5278,14 @@ public:
             l_tuletaProcs[2].iv_deconfigured == true &&
             l_tuletaProcs[3].iv_deconfigured == true)
         {
-            TS_TRACE(INFO_MRK "testDeconfigureAssocProc8: Success");
+            TS_INFO("testDeconfigureAssocProc8: Success");
         }
         else
         {
             TS_FAIL("testDeconfigureAssocProc8: incorrect configuration returned");
         }
 #endif //@TODO-RTC:246169
+        TS_INFO("testDeconfigureAssocProc8: Ended");
     }
 
     /**
@@ -5100,11 +5293,8 @@ public:
      */
     void testDeconfigureAssocProc9()
     {
-        TS_TRACE(INFO_MRK "testDeconfigureAssocProc9: Started");
-
-        HWAS_INF("testDeconfigureAssocProc9: Skipping");
+        TS_INFO("testDeconfigureAssocProc9: Started");
 #if 0 //@TODO-RTC:246169
-        HWAS_INF("testDeconfigureAssocProc9: Started");
 
         // This test populates structs which contain information
         // regarding a processor and its child chiplet's linkage
@@ -5187,13 +5377,14 @@ public:
             l_tuletaProcs[2].iv_deconfigured == true &&
             l_tuletaProcs[3].iv_deconfigured == true)
         {
-            TS_TRACE(INFO_MRK "testDeconfigureAssocProc9: Success");
+            TS_INFO("testDeconfigureAssocProc9: Success");
         }
         else
         {
             TS_FAIL("testDeconfigureAssocProc9: incorrect configuration returned");
         }
 #endif //@TODO-RTC:246169
+        TS_INFO("testDeconfigureAssocProc9: Ended");
     }
 
     /**
@@ -5201,11 +5392,8 @@ public:
      */
     void testDeconfigureAssocProc10()
     {
-        TS_TRACE(INFO_MRK "testDeconfigureAssocProc10: Started");
-
-        HWAS_INF("testDeconfigureAssocProc10: Skipping");
+        TS_INFO("testDeconfigureAssocProc10: Started");
 #if 0 //@TODO-RTC:246169
-        HWAS_INF("testDeconfigureAssocProc10: Started");
 
         // This test populates structs which contain information
         // regarding a processor and its child chiplet's linkage
@@ -5294,13 +5482,14 @@ public:
             l_brazosProcs[2].iv_deconfigured == false &&
             l_brazosProcs[3].iv_deconfigured == false)
         {
-            TS_TRACE(INFO_MRK "testDeconfigureAssocProc10: Success");
+            TS_INFO("testDeconfigureAssocProc10: Success");
         }
         else
         {
             TS_FAIL("testDeconfigureAssocProc10: incorrect configuration returned");
         }
 #endif //@TODO-RTC:246169
+        TS_INFO("testDeconfigureAssocProc10: Ended");
     }
 
     /**
@@ -5308,11 +5497,8 @@ public:
      */
     void testDeconfigureAssocProc11()
     {
-        TS_TRACE(INFO_MRK "testDeconfigureAssocProc11: Started");
-
-        HWAS_INF("testDeconfigureAssocProc11: Skipping");
+        TS_INFO("testDeconfigureAssocProc11: Started");
 #if 0 //@TODO-RTC:246169
-        HWAS_INF("testDeconfigureAssocProc11: Started");
 
         // This test populates structs which contain information
         // regarding a processor and its child chiplet's linkage
@@ -5401,13 +5587,14 @@ public:
             l_brazosProcs[2].iv_deconfigured == false &&
             l_brazosProcs[3].iv_deconfigured == false)
         {
-            TS_TRACE(INFO_MRK "testDeconfigureAssocProc11: Success");
+            TS_INFO("testDeconfigureAssocProc11: Success");
         }
         else
         {
             TS_FAIL("testDeconfigureAssocProc11: incorrect configuration returned");
         }
 #endif //@TODO-RTC:246169
+        TS_INFO("testDeconfigureAssocProc11: Ended");
     }
 
     /**
@@ -5415,11 +5602,8 @@ public:
      */
     void testDeconfigureAssocProc12()
     {
-        TS_TRACE(INFO_MRK "testDeconfigureAssocProc12: Started");
-
-        HWAS_INF("testDeconfigureAssocProc12: Skipping");
+        TS_INFO("testDeconfigureAssocProc12: Started");
 #if 0 //@TODO-RTC:246169
-        HWAS_INF("testDeconfigureAssocProc12: Started");
 
         // This test populates structs which contain information
         // regarding a processor and its child chiplet's linkage
@@ -5508,13 +5692,14 @@ public:
             l_brazosProcs[2].iv_deconfigured == false &&
             l_brazosProcs[3].iv_deconfigured == false)
         {
-            TS_TRACE(INFO_MRK "testDeconfigureAssocProc12: Success");
+            TS_INFO("testDeconfigureAssocProc12: Success");
         }
         else
         {
             TS_FAIL("testDeconfigureAssocProc12: incorrect configuration returned");
         }
 #endif //@TODO-RTC:246169
+        TS_INFO("testDeconfigureAssocProc12: Ended");
     }
 
     /**
@@ -5522,12 +5707,8 @@ public:
      */
     void testDeconfigureAssocProc13()
     {
-        TS_TRACE(INFO_MRK "testDeconfigureAssocProc13: Started");
-
-
-        HWAS_INF("testDeconfigureAssocProc13: Skipping");
+        TS_INFO("testDeconfigureAssocProc13: Started");
 #if 0 //@TODO-RTC:246169
-        HWAS_INF("testDeconfigureAssocProc13: Started");
 
         // This test populates structs which contain information
         // regarding a processor and its child chiplet's linkage
@@ -5619,13 +5800,14 @@ public:
             l_brazosProcs[2].iv_deconfigured == true &&
             l_brazosProcs[3].iv_deconfigured == false)
         {
-            TS_TRACE(INFO_MRK "testDeconfigureAssocProc13: Success");
+            TS_INFO("testDeconfigureAssocProc13: Success");
         }
         else
         {
             TS_FAIL("testDeconfigureAssocProc13: incorrect configuration returned");
         }
 #endif //@TODO-RTC:246169
+        TS_INFO("testDeconfigureAssocProc13: Ended");
     }
 
     // @brief Simple type/instance pair describing a component of an entity path
@@ -5720,8 +5902,8 @@ public:
                 l_index++)
             {
                 TargetHandle_t l_pPauc = l_funcPAUCTargetList[l_index];
-                if( (!l_pPauc->getAttr<ATTR_HWAS_STATE>().functional)
-                    && (l_pPauc->getAttr<ATTR_HWAS_STATE>().present) )
+                if ( (!l_pPauc->getAttr<ATTR_HWAS_STATE>().functional)
+                     && (l_pPauc->getAttr<ATTR_HWAS_STATE>().present) )
                 {
                     TS_FAIL("isPaucFunctional: PAUC%d not functional", l_index);
                     rc = false;
@@ -5856,8 +6038,7 @@ public:
      */
     void testdeconfigPresentByAssoc1()
     {
-        TS_TRACE(INFO_MRK "testDeconfigureAssocProc1: Started");
-        HWAS_INF("testdeconfigPresentByAssoc1: Started");
+        TS_INFO("testDeconfigPresentByAssoc1: Started");
 
         // This tests the scenario where there is 1 mc, mi, omic, mcc, omi and
         // ocmb, mem_port, and dimm
@@ -5906,7 +6087,7 @@ public:
             }
         }
 
-        TS_TRACE(INFO_MRK "testdeconfigPresentByAssoc1: Exit");
+        TS_INFO("testdeconfigPresentByAssoc1: Exit");
     }
 
     /**
@@ -5914,8 +6095,7 @@ public:
      */
     void testdeconfigPresentByAssoc2()
     {
-        TS_TRACE(INFO_MRK "testdeconfigPresentByAssoc2: Started");
-        HWAS_INF("testdeconfigPresentByAssoc2: Started");
+        TS_INFO("testdeconfigPresentByAssoc2: Started");
 
         // This test the scenario where MC Group 1 does not have any children
         // MC Group 0 is fully populated
@@ -5940,7 +6120,7 @@ public:
             TS_INFO("testdeconfigPresentByAssoc2: incorrect configuration returned");
         }
 
-        TS_TRACE(INFO_MRK "testdeconfigPresentByAssoc2: Exit");
+        TS_INFO("testdeconfigPresentByAssoc2: Exit");
     }
 
     /**
@@ -5948,8 +6128,7 @@ public:
      */
     void testdeconfigPresentByAssoc3()
     {
-        TS_TRACE(INFO_MRK "testdeconfigPresentByAssoc3: Started");
-        HWAS_INF("testdeconfigPresentByAssoc3: Started");
+        TS_INFO("testdeconfigPresentByAssoc3: Started");
 
         // This test the scenario where OMI group 1 is missing an OCMB chip so
         // it deconfigures the whole chain up to (but not including) the parent
@@ -5980,7 +6159,7 @@ public:
             TS_INFO("testdeconfigPresentByAssoc3: incorrect configuration returned");
         }
 
-        TS_TRACE(INFO_MRK "testdeconfigPresentByAssoc3: Exit");
+        TS_INFO("testdeconfigPresentByAssoc3: Exit");
     }
 
     /**
@@ -5988,8 +6167,7 @@ public:
      */
     void testdeconfigPresentByAssoc4()
     {
-        TS_TRACE(INFO_MRK "testdeconfigPresentByAssoc4: Started");
-        HWAS_INF("testdeconfigPresentByAssoc4: Started");
+        TS_INFO("testdeconfigPresentByAssoc4: Started");
 
         // This test the scenario where OCMB_CHIP Group 0 has no MEM_PORTs causing
         // MC Group 0 to also be deconfigured.
@@ -6024,7 +6202,7 @@ public:
             }
         }
 
-        TS_TRACE(INFO_MRK "testdeconfigPresentByAssoc4: Exit");
+        TS_INFO("testdeconfigPresentByAssoc4: Exit");
     }
 
     /**
@@ -6032,8 +6210,7 @@ public:
      */
     void testdeconfigPresentByAssoc5()
     {
-        TS_TRACE(INFO_MRK "testdeconfigPresentByAssoc5: Started");
-        HWAS_INF("testdeconfigPresentByAssoc5: Started");
+        TS_INFO("testdeconfigPresentByAssoc5: Started");
 
         // This test the scenario where a PMIC has no OCMB_CHIP parent, we make
         // sure the PMIC is deconfigured
@@ -6081,7 +6258,7 @@ public:
             }
         }
 
-        TS_TRACE(INFO_MRK "testdeconfigPresentByAssoc5: Exit");
+        TS_INFO("testdeconfigPresentByAssoc5: Exit");
     }
 
     /**
@@ -6089,8 +6266,7 @@ public:
      */
     void testdeconfigPresentByAssoc7()
     {
-        TS_TRACE(INFO_MRK "testdeconfigPresentByAssoc7: Started");
-        HWAS_INF("testdeconfigPresentByAssoc7: Started");
+        TS_INFO("testdeconfigPresentByAssoc7: Started");
 
         // This test the scenario where OMI Group 0 has no DIMMS
 
@@ -6144,7 +6320,7 @@ public:
             }
         }
 
-        TS_TRACE(INFO_MRK "testdeconfigPresentByAssoc7: Exit");
+        TS_INFO("testdeconfigPresentByAssoc7: Exit");
     }
 
     /**
@@ -6152,8 +6328,7 @@ public:
      */
     void testdeconfigPresentByAssoc8()
     {
-        TS_TRACE(INFO_MRK "testdeconfigPresentByAssoc8: Started");
-        HWAS_INF("testdeconfigPresentByAssoc8: Started");
+        TS_INFO("testdeconfigPresentByAssoc8: Started");
 
         // This test the scenario where each type is missing it's child
         //  and the cascade
@@ -6237,7 +6412,7 @@ public:
             }
         }
 
-        TS_TRACE(INFO_MRK "testdeconfigPresentByAssoc8: Exit");
+        TS_INFO("testdeconfigPresentByAssoc8: Exit");
     }
 
     /**
@@ -6245,8 +6420,7 @@ public:
      */
     void testdeconfigPresentByAssoc9()
     {
-        TS_TRACE(INFO_MRK "testdeconfigPresentByAssoc9: Started");
-        HWAS_INF("testdeconfigPresentByAssoc9: Started");
+        TS_INFO("testdeconfigPresentByAssoc9: Started");
 
         // This test the scenario where each type is missing it's parent
         //  and the cascade
@@ -6493,7 +6667,7 @@ public:
             }
         }
 
-        TS_TRACE(INFO_MRK "testdeconfigPresentByAssoc9: Exit");
+        TS_INFO("testdeconfigPresentByAssoc9: Exit");
     }
 
     /**
@@ -6567,7 +6741,7 @@ public:
         // Save the state of the system before we make any changes.
         saveSystemState();
 
-        TS_INFO(INFO_MRK "testDeconfigureAssocOMI1: Started");
+        TS_INFO("testDeconfigureAssocOMI1: Started");
 
         errlHndl_t l_pErr = nullptr;
 
@@ -6582,8 +6756,7 @@ public:
             }
 
             // find an MC
-            Target * pSys;
-            targetService().getTopLevelTarget(pSys);
+            Target* pSys = UTIL::assertGetToplevelTarget();
 
             PredicateCTM predMC(CLASS_UNIT, TYPE_MC);
             PredicateHwas predFunctional;
@@ -6595,18 +6768,20 @@ public:
             targetService().getAssociated(pMcList, pSys,
                 TargetService::CHILD, TargetService::ALL,
                 &checkExprMC);
-
+            TS_INFO("testDeconfigureAssocOMI1: pMcList.size()=%d", pMcList.size());
             if (pMcList.empty())
             {
                 TS_FAIL("testDeconfigureAssocOMI1: empty MC list");
                 break;
             }
             TargetHandle_t l_pMc = pMcList[0];
+            TS_INFO("testDeconfigureAssocOMI1: Working with HUID l_pMc=0x%X", get_huid(l_pMc));
 
             // find all OMIC targets
             TargetHandleList l_pOmicList;
             getChildChiplets(l_pOmicList, l_pMc, TYPE_OMIC);
 
+            TS_INFO("testDeconfigureAssocOMI1: l_pOmicList.size()=%d", l_pOmicList.size());
             if (l_pOmicList.empty())
             {
                 TS_FAIL("testDeconfigureAssocOMI1: empty OMIC list");
@@ -6617,6 +6792,7 @@ public:
             for (auto i = (l_pOmicList.size() - 1); i > 0; --i)
             {
                 TargetHandle_t l_pOmic = l_pOmicList[i];
+                TS_INFO("testDeconfigureAssocOMI1: Deconfiguring HUID l_pOmic=0x%X", get_huid(l_pOmic));
 
                 // Deconfigure the OMIC.
                 l_pErr = theDeconfigGard().
@@ -6640,6 +6816,7 @@ public:
 
             // deconfigure last functional OMIC
             TargetHandle_t l_pLastOmic = l_pOmicList[0];
+            TS_INFO("testDeconfigureAssocOMI1: Deconfiguring LAST HUID l_pLastOmic=0x%X", get_huid(l_pLastOmic));
             l_pErr = theDeconfigGard().deconfigureTarget(*l_pLastOmic, 0xA6);
             if (l_pErr)
             {
@@ -6668,6 +6845,7 @@ public:
 
         // Restore the state of the system prior to the test
         restoreSystemState();
+        TS_INFO("testDeconfigureAssocOMI1: Ended");
 
 #endif
     }
@@ -6683,31 +6861,33 @@ public:
         // Save the state of the system before we make any changes.
         saveSystemState();
 
-        TS_INFO(INFO_MRK "testDeconfigureAssocOMI2: Started");
+        TS_INFO("testDeconfigureAssocOMI2: Started");
 
         errlHndl_t l_pErr = nullptr;
 
         do
         {
             // find an MC
-            Target * pSys;
-            targetService().getTopLevelTarget(pSys);
+            Target* pSys = UTIL::assertGetToplevelTarget();
 
             TargetHandleList pMcList;
 
             getChildAffinityTargets(pMcList, pSys, CLASS_NA ,TYPE_MC, true);
 
+            TS_INFO("testDeconfigureAssocOMI2: pMcList.size()=%d", pMcList.size());
             if (pMcList.empty())
             {
                 TS_FAIL("testDeconfigureAssocOMI2: empty MC list");
                 break;
             }
             TargetHandle_t l_pMc = pMcList[0];
+            TS_INFO("testDeconfigureAssocOMI2: Working with HUID l_pMc=0x%X", get_huid(l_pMc));
 
             // find all functional OMIC targets
             TargetHandleList l_pOmicList;
             getChildChiplets(l_pOmicList, l_pMc, TYPE_OMIC, true);
 
+            TS_INFO("testDeconfigureAssocOMI2: l_pOmicList.size()=%d", l_pOmicList.size());
             if (l_pOmicList.empty())
             {
                 TS_FAIL("testDeconfigureAssocOMI2: empty OMIC list");
@@ -6722,6 +6902,7 @@ public:
                 TARGETING::CLASS_NA,
                 TYPE_PAUC,
                 TARGETING::UTIL_FILTER_ALL);
+            TS_INFO("testDeconfigureAssocOMI2: l_pPaucList.size()=%d", l_pPaucList.size());
             if (l_pPaucList.empty())
             {
                 TS_FAIL("testDeconfigureAssocOMI2: empty PAUC list");
@@ -6765,6 +6946,7 @@ public:
                     break;
                 }
             }
+            TS_INFO("testDeconfigureAssocOMI2: l_index=0x%X o_numPauc=0x%X", l_index, l_numPauc);
             if (l_index < l_numPauc)
             {
                 break;
@@ -6781,6 +6963,7 @@ public:
 
         // Restore the state of the system prior to the test
         restoreSystemState();
+        TS_INFO("testDeconfigureAssocOMI2: Ended");
 #endif
     }
 
@@ -6795,7 +6978,7 @@ public:
         // Save the state of the system before we make any changes.
         saveSystemState();
 
-        TS_INFO(INFO_MRK "testDeconfigureAssocOMI3: Started");
+        TS_INFO("testDeconfigureAssocOMI3: Started");
 
         errlHndl_t l_pErr = nullptr;
 
@@ -6809,13 +6992,13 @@ public:
                 break;
             }
 
-            Target * pSys;
-            targetService().getTopLevelTarget(pSys);
+            Target* pSys = UTIL::assertGetToplevelTarget();
 
             // find an OMIC
             TargetHandleList l_pOmicList;
             getChildChiplets(l_pOmicList, pSys, TYPE_OMIC, true);
 
+            TS_INFO("testDeconfigureAssocOMI3: l_pOmicList.size()=%d", l_pOmicList.size());
             if (l_pOmicList.empty())
             {
                 TS_FAIL("testDeconfigureAssocOMI3: empty OMIC list");
@@ -6823,6 +7006,7 @@ public:
             }
 
             TargetHandle_t l_pOmic = l_pOmicList[0];
+            TS_INFO("testDeconfigureAssocOMI3: Working with HUID l_pOmic=0x%X", get_huid(l_pOmic));
 
             // find all OMI targets
             TargetHandleList l_pOmiList;
@@ -6830,6 +7014,7 @@ public:
             getChildOmiTargetsByState(l_pOmiList, l_pOmic, CLASS_NA,
                                     TYPE_OMI, UTIL_FILTER_FUNCTIONAL);
 
+            TS_INFO("testDeconfigureAssocOMI3: l_pOmiList.size()=%d", l_pOmiList.size());
             if (l_pOmiList.empty())
             {
                 TS_FAIL("testDeconfigureAssocOMI3: empty OMI list");
@@ -6868,6 +7053,7 @@ public:
 
         // Restore the state of the system prior to the test
         restoreSystemState();
+        TS_INFO("testDeconfigureAssocOMI3: Ended");
 #endif
     }
 
@@ -6882,7 +7068,7 @@ public:
         // Save the state of the system before we make any changes.
         saveSystemState();
 
-        TS_INFO(INFO_MRK "testDeconfigureAssocOMI4: Started");
+        TS_INFO("testDeconfigureAssocOMI4: Started");
 
         errlHndl_t l_pErr = nullptr;
 
@@ -6896,13 +7082,13 @@ public:
                 break;
             }
 
-            Target * pSys;
-            targetService().getTopLevelTarget(pSys);
+            Target* pSys = UTIL::assertGetToplevelTarget();
 
             // find an OMIC
             TargetHandleList l_pOmicList;
             getChildChiplets(l_pOmicList, pSys, TYPE_OMIC, true);
 
+            TS_INFO("testDeconfigureAssocOMI4: l_pOmicList.size()=%d", l_pOmicList.size());
             if (l_pOmicList.empty())
             {
                 TS_FAIL("testDeconfigureAssocOMI4: empty OMIC list");
@@ -6910,12 +7096,14 @@ public:
             }
 
             TargetHandle_t l_pOmic = l_pOmicList[0];
+            TS_INFO("testDeconfigureAssocOMI4: Working with HUID l_pOmic=0x%X", get_huid(l_pOmic));
 
             // find all OMI targets
             TargetHandleList l_pOmiList;
             getChildOmiTargetsByState(l_pOmiList, l_pOmic, CLASS_NA,
                                     TYPE_OMI, UTIL_FILTER_FUNCTIONAL);
 
+            TS_INFO("testDeconfigureAssocOMI4: l_pOmiList.size()=%d", l_pOmiList.size());
             if (l_pOmiList.empty())
             {
                 TS_FAIL("testDeconfigureAssocOMI4: empty OMI list");
@@ -6949,6 +7137,7 @@ public:
 
             // deconfigure last functional OMI
             TargetHandle_t l_pLastOmi = l_pOmiList[0];
+            TS_INFO("testDeconfigureAssocOMI4: Deconfiguring LAST HUID l_pLastOmi=0x%X", get_huid(l_pLastOmi));
             l_pErr = theDeconfigGard().deconfigureTarget(*l_pLastOmi, 0xA6);
             if (l_pErr)
             {
@@ -6976,6 +7165,7 @@ public:
 
         // Restore the state of the system prior to the test
         restoreSystemState();
+        TS_INFO("testDeconfigureAssocOMI4: Ended");
 
 #endif
     }
@@ -6990,19 +7180,20 @@ public:
         // Save the state of the system before we make any changes.
         saveSystemState();
 
-        TS_INFO(INFO_MRK "testDeconfigureAssocOMI5: Started");
+        TS_INFO("testDeconfigureAssocOMI5: Started");
 
         errlHndl_t l_pErr = nullptr;
 
         do
         {
             // find a PAUC
-            Target * pSys;
-            targetService().getTopLevelTarget(pSys);
+            Target* pSys = UTIL::assertGetToplevelTarget();
 
             TargetHandleList pPaucList;
 
             getChildAffinityTargets(pPaucList, pSys, CLASS_NA ,TYPE_PAUC, true);
+
+            TS_INFO("testDeconfigureAssocOMI5: pPaucList.size()=%d", pPaucList.size());
 
             if (pPaucList.empty())
             {
@@ -7010,11 +7201,14 @@ public:
                 break;
             }
             TargetHandle_t l_pPauc = pPaucList[0];
+            TS_INFO("testDeconfigureAssocOMI5: Working with HUID l_pPauc=0x%X", get_huid(l_pPauc));
 
             // find all functional PAUC_CHILD targets (OMICs)
             TargetHandleList l_pOmicList;
             getChildPaucTargetsByState(l_pOmicList, l_pPauc, CLASS_NA,
                                     TYPE_OMIC, UTIL_FILTER_FUNCTIONAL);
+
+            TS_INFO("testDeconfigureAssocOMI5: l_pOmicList.size()=%d", l_pOmicList.size());
             if (l_pOmicList.empty())
             {
                 TS_FAIL("testDeconfigureAssocOMI5: empty OMIC list");
@@ -7053,6 +7247,7 @@ public:
 
         // Restore the state of the system prior to the test
         restoreSystemState();
+        TS_INFO("testDeconfigureAssocOMI5: Ended");
 #endif
     }
 
@@ -7078,7 +7273,7 @@ public:
      */
     void testHWASNMMU1DeconfigByPAU()
     {
-        TS_INFO( "testHWASNMMU1DeconfigByPAU entry" );
+        TS_INFO("testHWASNMMU1DeconfigByPAU: Started");
 
         static const pg_entry_t INVALID_PAU = 0xFFFFFFFF;
         static const pg_entry_t l_pauBadPgBit[] =
@@ -7196,7 +7391,7 @@ public:
             } while (l_pauDisableMask < (1 << NUM_PAU_PER_PROC));
         }
 
-        TS_INFO( "testHWASNMMU1DeconfigByPAU exit" );
+        TS_INFO("testHWASNMMU1DeconfigByPAU: Ended");
     }
 
     /**
@@ -7217,7 +7412,7 @@ public:
      */
     void testDeconfigureNMMU1ByPAU()
     {
-        TS_INFO(INFO_MRK "testDeconfigureNMMU1ByPAU: Started");
+        TS_INFO("testDeconfigureNMMU1ByPAU: Started");
 
         TargetHandleList l_procList;
         getAllChips(l_procList, TYPE_PROC);
@@ -7243,7 +7438,7 @@ public:
             {
                 saveSystemState();
 
-                HWAS_INF("testDeconfigureNMMU1ByPAU: Disabling PAUs with mask 0x%02x "
+                TS_INFO("testDeconfigureNMMU1ByPAU: Disabling PAUs with mask 0x%02x "
                          " (1 means disable the corresponding PAU)",
                          l_pauDisableMask);
 
@@ -7288,6 +7483,7 @@ public:
                 ++l_pauDisableMask;
             } while (l_pauDisableMask < (1 << NUM_PAU_PER_PROC));
         }
+        TS_INFO("testDeconfigureNMMU1ByPAU: Ended");
     }
 
     /**
@@ -7296,7 +7492,7 @@ public:
      */
     void testDeconfigureMask()
     {
-        TS_INFO(INFO_MRK "testDeconfigureMask: Started");
+        TS_INFO("testDeconfigureMask: Started");
 
         struct testcase_t
         {
@@ -7336,11 +7532,14 @@ public:
 
                 if (!l_target)
                 {
+                    TS_INFO("testDeconfigureMask: NO l_target, CONTINUE");
                     continue;
                 }
 
                 const char* const l_targetType = l_target->getAttrAsString<ATTR_TYPE>();
                 const auto l_huid = get_huid(l_target);
+                TS_INFO("testDeconfigureMask: Working with HUID=0x%X l_targetType=%s",
+                    l_huid, l_targetType);
 
                 Target* const l_perv = getTargetWithPGAttr(*l_target);
 
@@ -7361,22 +7560,29 @@ public:
                 {
                     if (l_testcase.gardable)
                     {
+                        TS_INFO("testDeconfigureMask: calling deconfigureTarget HUID=0x%X GARDABLE TYPE=0x%X",
+                            get_huid(l_target), l_testcase.targetType);
                         theDeconfigGard().deconfigureTarget(*l_target, 0);
-
                     }
                     else
                     {
                         // Setting HWAS state to non-functional
                         ATTR_HWAS_STATE_type l_hwasState
                             = l_target->getAttr<ATTR_HWAS_STATE>();
+                        TS_INFO("testDeconfigureMask: setting l_hwasState non-functional for HUID=0x%X TYPE=0x%X",
+                            get_huid(l_target), l_testcase.targetType);
                         l_hwasState.functional = false;
                         l_target->setAttr<ATTR_HWAS_STATE>(l_hwasState);
                         // Setting ATTR_PG to not-functional
                         updateAttrPG(*l_target, false);
+                        TS_INFO("testDeconfigureMask: SET PG non-functional for HUID=0x%X",
+                            get_huid(l_target));
 
                         // Check that ATTR_PG was deconfig
                         // by making sure that the deconfigured target has the
                         // right ATTR_PG bits set
+                        TS_INFO("testDeconfigureMask: ATTR_PG 0x%08X expect 0x%08X",
+                            l_perv->getAttr<ATTR_PG>(), l_testcase.attrPgBits);
                         if ((l_perv->getAttr<ATTR_PG>() & l_testcase.attrPgBits)
                             != l_testcase.attrPgBits)
                         {
@@ -7389,6 +7595,12 @@ public:
                         }
 
                     }
+                }
+                else
+                {
+                    TS_INFO("ELSE testDeconfigureMask: NOT FUNC for HUID=0x%X TYPE=0x%X",
+                        get_huid(l_target), l_testcase.targetType);
+
                 }
 
                 // Check that HWAS functional state was deconfig
@@ -7405,7 +7617,18 @@ public:
                 restoreSystemState();
             }
         }
-        TS_INFO(INFO_MRK "testDeconfigureMask: Ended");
+        for (Target* const l_proc : l_procList)
+        {
+            for (const auto& l_testcase : testcases)
+            {
+                TS_INFO("testDeconfigureMask calling getAnyTargetByType loop");
+                Target* const l_target = getAnyTargetByType(*l_proc,
+                                                            l_testcase.targetType,
+                                                            l_testcase.chipletID);
+                TS_INFO("testDeconfigureMask back l_target=0x%X calling getAnyTargetByType loop", get_huid(l_target));
+            }
+        }
+        TS_INFO("testDeconfigureMask: Ended");
     }
 };
 
@@ -7413,6 +7636,7 @@ public:
 #undef DISABLE_MBA_UNIT_TESTS
 #undef DISABLE_MEM_UNIT_TESTS
 #undef DISABLE_FC_UNIT_TESTS
+#undef DISABLE_FC_CRASH_UNIT_TESTS
 #undef DISABLE_OMI_UNIT_TESTS
 #undef DISABLE_VERS_UNIT_TESTS
 
