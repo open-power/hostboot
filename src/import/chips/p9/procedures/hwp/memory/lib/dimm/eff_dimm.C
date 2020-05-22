@@ -6133,7 +6133,7 @@ fapi2::ReturnCode eff_dimm::phy_seq_refresh()
 fapi2::ReturnCode eff_rdimm::odt_wr()
 {
     uint8_t l_mcs_attr[PORTS_PER_MCS][MAX_DIMM_PER_PORT][MAX_RANK_PER_DIMM] = {};
-    uint8_t l_vpd_odt[MAX_RANK_PER_DIMM];
+    uint8_t l_vpd_odt[MAX_RANK_PER_DIMM] = {};
 
     // Gets the VPD value
     FAPI_TRY( mss::vpd_mt_odt_wr(iv_dimm, &(l_vpd_odt[0])));
@@ -6303,7 +6303,7 @@ fapi_try_exit:
 fapi2::ReturnCode eff_rdimm::odt_rd()
 {
     uint8_t l_mcs_attr[PORTS_PER_MCS][MAX_DIMM_PER_PORT][MAX_RANK_PER_DIMM] = {};
-    uint8_t l_vpd_odt[MAX_RANK_PER_DIMM];
+    uint8_t l_vpd_odt[MAX_RANK_PER_DIMM] = {};
 
     // Gets the VPD value
     FAPI_TRY( mss::vpd_mt_odt_rd(iv_dimm, &(l_vpd_odt[0])));

@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2016
+# Contributors Listed Below - COPYRIGHT 2016,2020
 # [+] International Business Machines Corp.
 #
 #
@@ -23,6 +23,7 @@
 #
 # IBM_PROLOG_END_TAG
 HCODE_UTIL+=$(ROOTPATH)/chips/p9/procedures/hwp/lib/
+export HCODE_UTIL:=$(HCODE_UTIL)
 PROCEDURE = p9_scan_ring_util
 $(call ADD_MODULE_INCDIR,$(PROCEDURE),$(HCODE_UTIL))
 $(call BUILD_PROCEDURE)

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -3580,7 +3580,7 @@ fapi2::ReturnCode PlatPmPPB::get_mvpd_poundW (void)
 
                 memcpy( &l_poundwPerQuad.resistance_data, &l_poundw.resistance_data , LEGACY_RESISTANCE_ENTRY_SIZE );
                 l_poundwPerQuad.resistance_data.r_undervolt_allowed =   l_poundw.undervolt_tested;
-                memset(&l_vdmBuf.vdmData, 0, sizeof(l_vdmBuf));
+                memset(&l_vdmBuf.vdmData, 0, sizeof(l_vdmBuf.vdmData));
                 memcpy(&l_vdmBuf.vdmData, &l_poundwPerQuad, sizeof( PoundW_data_per_quad ) );
             }
 
@@ -3982,6 +3982,7 @@ void iddq_print(IddqTable* i_iddqt)
     const char*     idd_meas_str[IDDQ_MEASUREMENTS] = IDDQ_ARRAY_VOLTAGES_STR;
     char            l_buffer_str[1024];   // Temporary formatting string buffer
     char            l_line_str[1024];     // Formatted output line string
+    size_t          l_line_str_len;
 
     static const uint32_t IDDQ_DESC_SIZE = 56;
     static const uint32_t IDDQ_QUAD_SIZE = IDDQ_DESC_SIZE -
@@ -4042,7 +4043,14 @@ void iddq_print(IddqTable* i_iddqt)
 
     // Put out the measurement voltages to the trace.
     strcpy(l_line_str, "  Measurement voltages:");
-    sprintf(l_buffer_str, "%-*s ", IDDQ_DESC_SIZE, l_line_str);
+    // the length for l_line_str_len is added by extra 2: 1 for a space in format "%-*s ";
+    // another 1 for terminating null.
+
+    l_line_str_len = strlen(l_line_str) - 1;
+    snprintf(l_buffer_str, l_line_str_len, "%-*s ", IDDQ_DESC_SIZE, l_line_str);
+
+//    l_line_str_len = strlen(l_line_str)+ 2;
+//    snprintf(l_buffer_str, l_line_str_len, "%-*s ", IDDQ_DESC_SIZE, l_line_str);
     strcpy(l_line_str, l_buffer_str);
     strcpy(l_buffer_str, "");
 
@@ -4682,10 +4690,16 @@ fapi_try_exit:
     return fapi2::current_err;
 } // end of compute_boot_safe
 
+// Note: the caller to this macro function should make sure that the buffer _buffer
+//  should be large enough.
+// the length for _l_str_len (with _variable) is added by 4: 
+// 3 for 3 spaces in format " %*s%*s  ";
+// another 1 for terminating null.
 #define CENTER_STR(_buffer, _variable, _width)                  \
    {                                                            \
        int _w_ = _width-strlen(_variable)/2;                    \
-       sprintf(_buffer, " %*s%*s  ", _w_, _variable, _w_, "");  \
+       int _l_str_len = ((_w_ + strlen(_variable) + _w_) + 4);  \
+       snprintf(_buffer, _l_str_len, " %*s%*s  ", _w_, _variable, _w_, "");            \
    }
 
 #define HEX_DEC_STR(_buffer, _hex, _dec)                        \

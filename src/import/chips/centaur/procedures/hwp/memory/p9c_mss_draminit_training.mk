@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2016,2019
+# Contributors Listed Below - COPYRIGHT 2016,2020
 # [+] International Business Machines Corp.
 #
 #
@@ -34,5 +34,5 @@ lib${PROCEDURE}_DEPLIBS+=p9c_mss_access_delay_reg
 lib${PROCEDURE}_DEPLIBS+=p9c_mss_unmask_errors
 lib${PROCEDURE}_DEPLIBS+=p9c_mss_rowRepairFuncs
 lib${PROCEDURE}_DEPLIBS+=p9c_mss_row_repair
-$(eval $(call ADD_MEMORY_INCDIRS,$(PROCEDURE)))
+$(call ADD_MODULE_INCDIR,$(PROCEDURE),$(CEN_INCLUDES))
 $(call BUILD_PROCEDURE)

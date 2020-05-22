@@ -25,5 +25,5 @@
 -include 00p9a_common.mk
 
 PROCEDURE=p9a_omi_init
-$(eval $(call ADD_P9A_MEMORY_INCDIRS,$(PROCEDURE)))
+$(call ADD_MODULE_INCDIR,$(PROCEDURE),$(MSS_P9A_INCLUDES))
 $(call BUILD_PROCEDURE)

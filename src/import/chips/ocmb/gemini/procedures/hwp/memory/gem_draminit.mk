@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2019
+# Contributors Listed Below - COPYRIGHT 2019,2020
 # [+] International Business Machines Corp.
 #
 #
@@ -27,5 +27,5 @@
 -include 00gem_common.mk
 
 PROCEDURE=gem_draminit
-$(eval $(call ADD_GEM_MEMORY_INCDIRS,$(PROCEDURE)))
+$(call ADD_MODULE_INCDIR,$(PROCEDURE),$(MSS_GEM_INCLUDES))
 $(call BUILD_PROCEDURE)

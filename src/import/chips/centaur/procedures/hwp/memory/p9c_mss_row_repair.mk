@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2018
+# Contributors Listed Below - COPYRIGHT 2018,2020
 # [+] International Business Machines Corp.
 #
 #
@@ -25,7 +25,7 @@
 -include 00common.mk
 
 PROCEDURE=p9c_mss_row_repair
-$(eval $(call ADD_MEMORY_INCDIRS,$(PROCEDURE)))
+$(call ADD_MODULE_INCDIR,$(PROCEDURE),$(CEN_INCLUDES))
 lib${PROCEDURE}_DEPLIBS+=p9c_mss_ddr4_funcs
 lib${PROCEDURE}_DEPLIBS+=p9c_mss_funcs
 lib${PROCEDURE}_DEPLIBS+=p9c_dimmBadDqBitmapFuncs

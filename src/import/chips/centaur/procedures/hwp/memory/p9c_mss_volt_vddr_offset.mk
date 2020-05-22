@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2016,2018
+# Contributors Listed Below - COPYRIGHT 2016,2020
 # [+] International Business Machines Corp.
 #
 #
@@ -27,6 +27,6 @@
 -include 01common.mk
 
 PROCEDURE=p9c_mss_volt_vddr_offset
-$(eval $(call ADD_MEMORY_INCDIRS,$(PROCEDURE)))
+$(call ADD_MODULE_INCDIR,$(PROCEDURE),$(CEN_INCLUDES))
 lib${PROCEDURE}_DEPLIBS+=mss_dynamic_vid_utils
 $(call BUILD_PROCEDURE)

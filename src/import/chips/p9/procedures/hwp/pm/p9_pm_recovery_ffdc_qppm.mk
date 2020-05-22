@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2017
+# Contributors Listed Below - COPYRIGHT 2017,2020
 # [+] International Business Machines Corp.
 #
 #
@@ -27,5 +27,5 @@ QPPM_FFDC_INC=$(ROOTPATH)/chips/p9/procedures/hwp/pm/
 QPPM_FFDC_INC+=$(ROOTPATH)/chips/p9/procedures/hwp/lib
 QPPM_FFDC_INC+=$(ROOTPATH)/hwpf/fapi2/include
 lib$(PROCEDURE)_DEPLIBS += p9_pm_recovery_ffdc_base
-$(call ADD_MODULE_INCDIR,$(QPPM_FFDC_INC))
+$(call ADD_MODULE_INCDIR,$(PROCEDURE),$(QPPM_FFDC_INC))
 $(call BUILD_PROCEDURE)

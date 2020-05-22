@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2019
+# Contributors Listed Below - COPYRIGHT 2019,2020
 # [+] International Business Machines Corp.
 #
 #
@@ -25,5 +25,5 @@
 -include 00gemini_common.mk
 
 PROCEDURE=gem_getecid
-$(eval $(call ADD_GEM_MEMORY_INCDIRS,$(PROCEDURE)))
+$(call ADD_MODULE_INCDIR,$(PROCEDURE),$(MSS_GEM_INCLUDES))
 $(call BUILD_PROCEDURE)

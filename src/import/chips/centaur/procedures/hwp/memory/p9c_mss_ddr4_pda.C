@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -94,8 +94,8 @@ extern "C" {
     ///
     void PDA_MRS_Storage::generatePDAString()
     {
-        snprintf(pda_string, fapi2::MAX_ECMD_STRING_LEN,
-                 "ATTR_CEN_NAME 0x%08x ATTR_CEN_DATA 0x%02x MRS %d P %d DI %d R %d DR %d", attribute_name, attribute_data, MRS, port,
+        snprintf(pda_string, sizeof(pda_string),
+                 "NAME 0x%08x DATA 0x%02x MRS %d P %d DI %d R %d DR %d", attribute_name, attribute_data, MRS, port,
                  dimm, rank, dram);
     }
 

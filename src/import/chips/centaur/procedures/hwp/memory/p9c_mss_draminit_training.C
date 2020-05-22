@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -977,7 +977,7 @@ extern "C" {
                     FAPI_DBG("WR LVL DISABLE WORKAROUND: DISABLE Workaround being applied on  %s  PORT: %d RP: %d", mss::c_str(i_target),
                              l_port, l_rank_group);
 
-                    for(uint8_t l_block; l_block < MAX_BLOCKS_PER_RANK; l_block++)
+                    for(uint8_t l_block = 0; l_block < MAX_BLOCKS_PER_RANK; l_block++)
                     {
                         FAPI_TRY(fapi2::getScom(i_target, l_disable_reg[l_port][l_rank_group][l_block], l_data_buffer_64), "getScom Failed!");
                         l_data_buffer_64.extractToRight<DISABLE_BITS_NIBBLE0, DISABLE_BITS_LEN>
@@ -1446,7 +1446,7 @@ extern "C" {
                 //Check if rank group exists
                 if(l_primary_ranks_array[l_rank_group][l_port] != 255)
                 {
-                    for(uint8_t l_block; l_block < MAX_BLOCKS_PER_RANK; l_block++)
+                    for(uint8_t l_block = 0; l_block < MAX_BLOCKS_PER_RANK; l_block++)
                     {
                         FAPI_TRY(fapi2::getScom(i_target, l_dqs_rd_phase_select[l_port][l_rank_group][l_block], l_data_buffer_64));
                         FAPI_TRY(l_data_buffer_64.insertFromRight(l_dqsclk_phase_value_u8[l_rank_group][l_block][0][0], 48, 2));

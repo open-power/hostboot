@@ -199,18 +199,18 @@ class thermal_sensor_settings
         ~thermal_sensor_settings() = default;
 
         // Generic sensor fields
-        uint8_t iv_num_bytes_rw;
+        uint8_t iv_num_bytes_rw = 0;
 
         // External sensor fields
-        uint8_t iv_reg_offset;
+        uint8_t iv_reg_offset = 0;
 
         // On-chip/internal sensor fields
-        uint8_t iv_onchip_reg_offset_setting;
-        uint8_t iv_onchip_onchip_register_read_ops;
-        uint8_t iv_cmd_arg_8_onchip_reg_offset_0;
-        uint8_t iv_cmd_arg_9_onchip_reg_offset_0;
-        uint8_t iv_cmd_arg_10_onchip_reg_offset_1;
-        uint8_t iv_cmd_arg_11_onchip_reg_offset_1;
+        uint8_t iv_onchip_reg_offset_setting = 0;
+        uint8_t iv_onchip_onchip_register_read_ops = 0;
+        uint8_t iv_cmd_arg_8_onchip_reg_offset_0 = 0;
+        uint8_t iv_cmd_arg_9_onchip_reg_offset_0 = 0;
+        uint8_t iv_cmd_arg_10_onchip_reg_offset_1 = 0;
+        uint8_t iv_cmd_arg_11_onchip_reg_offset_1 = 0;
 };
 
 /// @brief cmd_flags bitmappings

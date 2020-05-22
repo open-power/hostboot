@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2015,2017
+# Contributors Listed Below - COPYRIGHT 2015,2020
 # [+] International Business Machines Corp.
 #
 #
@@ -25,6 +25,7 @@
 
 PROCEDURE=p9_pm_pfet_control
 FAPI2_PLAT_INCLUDE += $(ROOTPATH)/chips/p9/procedures/hwp/lib
+export FAPI2_PLAT_INCLUDE := $(FAPI2_PLAT_INCLUDE)
 $(call ADD_MODULE_SRCDIR,$(PROCEDURE),$(ROOTPATH)/chips/p9/procedures/hwp/lib/)
 lib$(PROCEDURE)_DEPLIBS += p9_common_poweronoff
 $(call BUILD_PROCEDURE)

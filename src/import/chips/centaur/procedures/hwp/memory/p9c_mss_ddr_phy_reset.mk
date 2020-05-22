@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2016,2017
+# Contributors Listed Below - COPYRIGHT 2016,2020
 # [+] International Business Machines Corp.
 #
 #
@@ -29,5 +29,5 @@ PROCEDURE=p9c_mss_ddr_phy_reset
 lib${PROCEDURE}_DEPLIBS+=p9c_dimmBadDqBitmapFuncs
 lib${PROCEDURE}_DEPLIBS+=p9c_mss_unmask_errors
 lib${PROCEDURE}_DEPLIBS+=p9c_mss_termination_control
-$(eval $(call ADD_MEMORY_INCDIRS,$(PROCEDURE)))
+$(call ADD_MODULE_INCDIR,$(PROCEDURE),$(CEN_INCLUDES))
 $(call BUILD_PROCEDURE)

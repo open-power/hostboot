@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2018,2019
+# Contributors Listed Below - COPYRIGHT 2018,2020
 # [+] International Business Machines Corp.
 #
 #
@@ -27,5 +27,7 @@
 -include 00p9a_common.mk
 
 PROCEDURE=p9a_mss_eff_config
-$(eval $(call ADD_P9A_MEMORY_INCDIRS,$(PROCEDURE)))
+$(call ADD_MODULE_INCDIR,$(PROCEDURE),$(MSS_P9A_INCLUDES))
+$(call ADD_MODULE_INCDIR,$(PROCEDURE),$(ROOTPATH)/chips/ocmb/common/procedures/hwp/pmic/lib/)
+$(call ADD_MODULE_INCDIR,$(PROCEDURE),$(ROOTPATH)/chips/ocmb/common/procedures/hwp/pmic/)
 $(call BUILD_PROCEDURE)

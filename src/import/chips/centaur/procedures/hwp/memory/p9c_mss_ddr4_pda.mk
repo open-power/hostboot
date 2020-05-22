@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2016,2018
+# Contributors Listed Below - COPYRIGHT 2016,2020
 # [+] International Business Machines Corp.
 #
 #
@@ -26,7 +26,7 @@
 # Include the macros and things for MSS procedures
 
 PROCEDURE=p9c_mss_ddr4_pda
-$(eval $(call ADD_MEMORY_INCDIRS,$(PROCEDURE)))
+$(call ADD_MODULE_INCDIR,$(PROCEDURE),$(CEN_INCLUDES))
 lib${PROCEDURE}_DEPLIBS+=p9c_mss_mrs6_DDR4
 lib${PROCEDURE}_DEPLIBS+=p9c_mss_access_delay_reg
 lib${PROCEDURE}_DEPLIBS+=p9c_mss_funcs

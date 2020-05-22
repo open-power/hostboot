@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018                             */
+/* Contributors Listed Below - COPYRIGHT 2018,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -40,6 +40,7 @@
 //------------------------------------------------------------------------------
 //  My Includes
 //------------------------------------------------------------------------------
+#include <math.h>
 #include <p9c_mss_util_to_throttle.H>
 #include <p9c_mss_bulk_pwr_throttles.H>
 #include <generic/memory/lib/utils/c_str.H>

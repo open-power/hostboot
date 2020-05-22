@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2017,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -87,11 +87,11 @@ fapi2::ReturnCode p9_pm_get_poundw_bucket(
                            i_target,
                            l_bucketAttr));
 
-    memcpy(&o_data,  l_bucketAttr, sizeof(o_data));
+    memcpy(&o_data,  l_bucketAttr, sizeof(l_bucketAttr));
 
 #ifdef    __VDM_TEST
 
-    memcpy( &o_data, dummy_attr, sizeof(o_data) );
+    memcpy( &o_data, dummy_attr, sizeof(dummy_attr) );
 
 #endif
 

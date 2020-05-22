@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2019
+# Contributors Listed Below - COPYRIGHT 2019,2020
 # [+] International Business Machines Corp.
 #
 #
@@ -26,5 +26,5 @@
 -include 00exp_common.mk
 
 PROCEDURE=exp_bulk_pwr_throttles
-$(eval $(call ADD_EXP_MEMORY_INCDIRS,$(PROCEDURE)))
+$(call ADD_MODULE_INCDIR,$(PROCEDURE),$(MSS_EXP_INCLUDES))
 $(call BUILD_PROCEDURE)

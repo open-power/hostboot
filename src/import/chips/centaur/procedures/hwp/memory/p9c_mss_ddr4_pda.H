@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -49,7 +49,7 @@ extern "C"
     class PDA_MRS_Storage
     {
         private:
-            char pda_string[fapi2::MAX_ECMD_STRING_LEN];
+            char pda_string[fapi2::MAX_ECMD_STRING_LEN + 14];
         public:
             uint8_t attribute_data;
             uint32_t attribute_name;
