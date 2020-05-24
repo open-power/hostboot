@@ -1200,6 +1200,43 @@ bool isDescFunctional(const TARGETING::TargetHandle_t &i_desc,
             break;
         }
 
+        // Only check PG rules if this target is descended from a PROC
+        // target (because PG rules only apply to PROCs). Additionally, FSP
+        // has targets that are descended from PROCs that should not be
+        // checked either. This will all be handled below.
+        {
+            TargetHandleList procParent, pervParent;
+
+            PredicateCTM predicate;
+            predicate.setType(TYPE_PROC);
+
+            // Get parent by containment
+            targetService().getAssociated(procParent,
+                                          i_desc,
+                                          TargetService::PARENT,
+                                          TargetService::ALL,
+                                          &predicate);
+
+            getParentPervasiveTargetsByState(pervParent,
+                                             i_desc,
+                                             CLASS_UNIT,
+                                             TYPE_PERV,
+                                             UTIL_FILTER_ALL);
+
+            bool lacksProcParent = procParent.empty(),
+                 lacksPervParent = pervParent.empty(),
+                 isPervType = i_desc->getAttr<ATTR_TYPE>() == TYPE_PERV;
+
+            // FSP only targets descended from PROC don't have a pervasive
+            // parent. So, if this descendent doesn't have a pervasive
+            // parent nor a proc parent then it's one of the FSP targets
+            // that shouldn't be checked.
+            if (lacksProcParent || (lacksPervParent && !isPervType))
+            {
+                break;
+            }
+        }
+
         // Since the target has at least one functional child (or no children),
         // next we must apply the correct partial good rules to determine
         // functionality.
@@ -1473,30 +1510,10 @@ errlHndl_t checkPartialGoodForDescendants(
                 parentState = false;
             }
 
-            // Only call isDescFunctional to check PG rules if this target is
-            // descended from a PROC target (because PG rules only apply to
-            // PROCs).
-            {
-                TargetHandleList list;
-
-                getParentAffinityTargetsByState(list,
-                                                pDesc,
-                                                CLASS_CHIP,
-                                                TYPE_PROC,
-                                                UTIL_FILTER_ALL);
-
-                if (!list.empty())
-                {
-                    descState = isDescFunctional(pDesc,
-                                                 i_pgData,
-                                                 targetStates,
-                                                 io_deconfigTargets);
-                }
-                else
-                {
-                    descState = true;
-                }
-            }
+            descState = isDescFunctional(pDesc,
+                                         i_pgData,
+                                         targetStates,
+                                         io_deconfigTargets);
 
             // If one descendant of the current parent is functional,
             // then the parent is functional and should be checked by
