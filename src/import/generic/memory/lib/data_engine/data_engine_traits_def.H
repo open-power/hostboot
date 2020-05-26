@@ -120,9 +120,10 @@ enum class attr_eff_engine_fields
     DRAM_MODULE_HEIGHT = 25,
     SPD_REVISION = 26,
     MODULE_MFG_ID = 27,
+    SPD_CONTENT_REVISION = 28,
 
     // Dispatcher set to last enum value
-    DISPATCHER = MODULE_MFG_ID,
+    DISPATCHER = SPD_CONTENT_REVISION,
 };
 
 ///

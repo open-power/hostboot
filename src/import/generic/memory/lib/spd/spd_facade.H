@@ -1941,6 +1941,20 @@ class facade final
         }
 
         ///
+        /// @brief Decodes SPD Content Revision -> SPD_CONTENT_REVISION
+        /// @param[out] o_output encoding from SPD
+        /// @return FAPI2_RC_SUCCESS if okay
+        ///
+        fapi2::ReturnCode spd_content_revision(uint8_t& o_output) const
+        {
+            FAPI_TRY( iv_dimm_module_decoder->spd_content_revision(o_output) );
+
+
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
+
+        ///
         /// @brief Decodes Voltage VIN_MTG Edge connector -> VIN_MGMT_NOMINAL
         /// @param[out] o_output encoding from SPD
         /// @return FAPI2_RC_SUCCESS if okay

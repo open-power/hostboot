@@ -815,6 +815,17 @@ class dimm_module_decoder
         }
 
         ///
+        /// @brief Decodes SPD Content Revision -> SPD_CONTENT_REVISION
+        /// @param[out] o_output encoding from SPD
+        /// @return FAPI2_RC_SUCCESS if okay
+        ///
+        virtual fapi2::ReturnCode spd_content_revision(uint8_t& o_output) const
+        {
+            o_output = 0;
+            return fapi2::FAPI2_RC_SUCCESS;
+        }
+
+        ///
         /// @brief Decodes Voltage VIN_MTG Edge connector -> VIN_MGMT_NOMINAL
         /// @param[out] o_output encoding from SPD
         /// @return FAPI2_RC_SUCCESS if okay

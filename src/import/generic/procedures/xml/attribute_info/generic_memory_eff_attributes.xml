@@ -933,4 +933,16 @@
     <mssAccessorName>spd_revision</mssAccessorName>
   </attribute>
 
+  <attribute>
+    <id>ATTR_MEM_EFF_SPD_CONTENT_REVISION</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      SPD content revision (SPD Byte 221)
+    </description>
+    <initToZero></initToZero>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <mssAccessorName>spd_content_revision</mssAccessorName>
+  </attribute>
+
 </attributes>

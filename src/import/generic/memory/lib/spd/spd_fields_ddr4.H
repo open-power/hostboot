@@ -941,6 +941,11 @@ class fields<DDR4, DDIMM_MODULE>
             HI_DDR_SPEED_RATIO_START = 4,
             HI_DDR_SPEED_RATIO_LEN = 4,
 
+            // Byte 221: SPD Content Revision
+            SPD_CONTENT_REVISION_BYTE = 221,
+            SPD_CONTENT_REVISION_START = 0,
+            SPD_CONTENT_REVISION_LEN = 8,
+
             // Byte 224: Voltage VIN_MTG Edge connector
             VIN_MGMT_BYTE = 224,
             VIN_MGMT_NOMINAL_START = 0,
@@ -1334,6 +1339,9 @@ class fields<DDR4, DDIMM_MODULE>
 
         // Byte 220: Host Interface Speed to DDR Interface Speed Ratio
         static constexpr field_t HI_DDR_SPEED_RATIO{HI_DDR_SPEED_RATIO_BYTE, HI_DDR_SPEED_RATIO_START, HI_DDR_SPEED_RATIO_LEN};
+
+        // Byte 221: SPD Content Revision
+        static constexpr field_t SPD_CONTENT_REVISION{SPD_CONTENT_REVISION_BYTE, SPD_CONTENT_REVISION_START, SPD_CONTENT_REVISION_LEN};
 
         // Byte 224: Voltage VIN_MTG Edge connector
         static constexpr field_t VIN_MGMT_NOMINAL{VIN_MGMT_BYTE, VIN_MGMT_NOMINAL_START, VIN_MGMT_NOMINAL_LEN};

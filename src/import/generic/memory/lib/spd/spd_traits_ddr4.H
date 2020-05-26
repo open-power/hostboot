@@ -4336,6 +4336,25 @@ class readerTraits < fields< DDR4, DDIMM_MODULE>::HI_DDR_SPEED_RATIO, R >
 /// @class readerTraits
 /// @brief trait structure to hold static SPD information
 /// @tparam R the revision of the SPD field
+/// @note SPD_CONTENT_REVISION field specialization
+/// @note valid for all revs
+///
+template< rev R >
+class readerTraits < fields< DDR4, DDIMM_MODULE>::SPD_CONTENT_REVISION, R >
+{
+    public:
+
+        static constexpr size_t COMPARISON_VAL = 0xFF;
+        static constexpr const char* FIELD_STR = "SPD content revision";
+
+        template <typename T>
+        using COMPARISON_OP = std::less_equal<T>;
+};
+
+///
+/// @class readerTraits
+/// @brief trait structure to hold static SPD information
+/// @tparam R the revision of the SPD field
 /// @note VIN_MGMT_NOMINAL field specialization
 /// @note valid for all revs
 ///
