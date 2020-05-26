@@ -109,7 +109,7 @@ public:
      * @return size_t Repository's PDR count
      */
     size_t pdrCount() const;
-
+#ifndef __HOSTBOOT_RUNTIME
     /* @brief  Send notification that the BMC's PDR repository has changed. This
      *         will cause one task blocking on awaitBmcPdrRepoChanged (on this
      *         object) to wake up.
@@ -137,6 +137,7 @@ public:
      *       will return immediately, even on subsequent invocations.
      */
     errlHndl_t awaitBmcPdrRepoChanged(size_t i_timeout_ms = TIMEOUT_NONE);
+#endif
 
     /* @brief  Collect the FRU Record Set IDs from all FRU Record Set PDRs for
      *         the given entity type.
@@ -158,8 +159,10 @@ private:
     // access_mutex when this object is destroyed.
     std::unique_ptr<mutex_t, void(*)(mutex_t*)> iv_access_mutex_owner;
 
+#ifndef __HOSTBOOT_RUNTIME
     // Holds a msg_q_t
     std::shared_ptr<void> iv_bmc_repo_changed_event_q;
+#endif
 
 protected:
     PdrManager();

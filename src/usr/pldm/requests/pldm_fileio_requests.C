@@ -22,9 +22,10 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-/* @file pldm_fileio_requests.C
- * This file contains the implementations of the APIs/wrappers for PLDM File IO
- * operations.
+
+/** @file  pldm_fileio_requests.C
+ *  @brief This file contains the implementations of the APIs/wrappers for PLDM File IO
+ *         request operations.
  */
 
 #include <vector>
@@ -62,8 +63,13 @@ errlHndl_t getFileTable(std::vector<uint8_t>& o_table)
     };
 
     std::vector<uint8_t>l_responseBytes;
+
+#ifndef __HOSTBOOT_RUNTIME
     const msg_q_t l_msgQ = msg_q_resolve(VFS_ROOT_MSG_PLDM_REQ_OUT);
     assert(l_msgQ, "getFileTable: message queue not found!");
+#else
+    const msg_q_t l_msgQ = nullptr;
+#endif
 
     do {
     l_errl = sendrecv_pldm_request<PLDM_GET_FILE_TABLE_REQ_BYTES>(
@@ -254,8 +260,12 @@ errlHndl_t getLidFileFromOffset(const uint32_t i_fileHandle,
              l_numTransfers, io_numBytesToRead);
 
     std::vector<uint8_t>l_responseBytes;
+#ifndef __HOSTBOOT_RUNTIME
     const msg_q_t l_msgQ = msg_q_resolve(VFS_ROOT_MSG_PLDM_REQ_OUT);
     assert(l_msgQ, "getLidFileFromOffset: message queue not found!");
+#else
+    const msg_q_t l_msgQ = nullptr;
+#endif
 
     do {
     for(size_t i = 0; i < l_numTransfers; ++i)

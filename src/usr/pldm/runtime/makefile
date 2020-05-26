@@ -29,10 +29,8 @@ MODULE = pldm_rt
 include ../common/common.mk
 
 # From ../common/
-OBJS += ${PLDM_COMMON_OBJS}
-# From ../extern/
-OBJS += base.o
-OBJS += fru.o
+OBJS += ${PLDM_BASE_COMMON_OBJS}
+OBJS += ${PLDM_EXTENDED_COMMON_OBJS}
 
 OBJS += pldmrp_rt.o
 

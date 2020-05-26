@@ -30,8 +30,28 @@
 
 COMMON_ROOTPATH = ../../../..
 
-PLDM_COMMON_OBJS += pldmtrace.o
-PLDM_COMMON_OBJS += pldm_utils.o
+PLDM_BASE_COMMON_OBJS += pldmtrace.o
+PLDM_BASE_COMMON_OBJS += pldm_utils.o
+# From ../extern/
+PLDM_BASE_COMMON_OBJS += base.o
+PLDM_BASE_COMMON_OBJS += utils.o
+
+# From ../extern/
+PLDM_EXTENDED_COMMON_OBJS += bios.o
+PLDM_EXTENDED_COMMON_OBJS += bios_table.o
+PLDM_EXTENDED_COMMON_OBJS += fru.o
+PLDM_EXTENDED_COMMON_OBJS += platform.o
+PLDM_EXTENDED_COMMON_OBJS += file_io.o
+PLDM_EXTENDED_COMMON_OBJS += pdr.o
+# From ../requests/
+PLDM_EXTENDED_COMMON_OBJS += pldm_fru_requests.o
+PLDM_EXTENDED_COMMON_OBJS += pldm_pdr_requests.o
+PLDM_EXTENDED_COMMON_OBJS += pldm_fileio_requests.o
+# From ../extended/
+PLDM_EXTENDED_COMMON_OBJS += hb_fru.o
+PLDM_EXTENDED_COMMON_OBJS += hb_pdrs.o
+PLDM_EXTENDED_COMMON_OBJS += pdr_manager.o
+PLDM_EXTENDED_COMMON_OBJS += pldm_fru.o
 
 # add these paths to VPATH so compiler knows
 # where to find the .C/.c files we need

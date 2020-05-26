@@ -101,8 +101,10 @@ namespace PLDM
 PdrManager::PdrManager()
     : iv_pdr_repo(nullptr, pldm_pdr_destroy),
       iv_access_mutex(MUTEX_INITIALIZER),
-      iv_access_mutex_owner(&iv_access_mutex, mutex_destroy),
-      iv_bmc_repo_changed_event_q(msg_q_create(), msg_q_destroy)
+      iv_access_mutex_owner(&iv_access_mutex, mutex_destroy)
+#ifndef __HOSTBOOT_RUNTIME
+      ,iv_bmc_repo_changed_event_q(msg_q_create(), msg_q_destroy)
+#endif
 {
     resetPdrs();
 }
@@ -194,6 +196,7 @@ std::vector<pdr_handle_t> PdrManager::getAllPdrHandles() const
     return pdrs;
 }
 
+
 std::vector<fru_record_set_id> PdrManager::findFruRecordSetIdsByType(const entity_type i_ent_type) const
 {
     const auto lock = scoped_mutex_lock(iv_access_mutex);
@@ -232,6 +235,7 @@ std::vector<fru_record_set_id> PdrManager::findFruRecordSetIdsByType(const entit
     return rsis;
 }
 
+#ifndef __HOSTBOOT_RUNTIME
 errlHndl_t PdrManager::notifyBmcPdrRepoChanged()
 {
     using namespace ERRORLOG;
@@ -305,6 +309,8 @@ errlHndl_t PdrManager::awaitBmcPdrRepoChanged(const size_t i_timeout_ms)
 
     return errl;
 }
+
+#endif
 
 PdrManager& thePdrManager()
 {

@@ -23,9 +23,9 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-/* @file pldm_pdr_requests.C
- *
- * @brief Implementation of PLDM PDR-related requester functions.
+/** @file  pldm_pdr_requests.C
+ *  @brief This file contains the implementations of the APIs/wrappers for PLDM PDR
+ *         request operations.
  */
 
 // Standard library
@@ -255,9 +255,13 @@ errlHndl_t getPDR(const msg_q_t i_msgQ,
  */
 errlHndl_t getAllPdrs(std::vector<pdr>& o_pdrs)
 {
+#ifndef __HOSTBOOT_RUNTIME
     const msg_q_t msgQ = msg_q_resolve(VFS_ROOT_MSG_PLDM_REQ_OUT);
     assert(msgQ != nullptr,
            "getAllPdrs: PLDM Req Out Message queue did not resolve properly!");
+#else
+    const msg_q_t msgQ = nullptr;
+#endif
 
     pdr_handle_t pdr_handle = FIRST_PDR_HANDLE; // getPDR updates this for us
     errlHndl_t errl = nullptr;
@@ -373,9 +377,13 @@ errlHndl_t sendRepositoryChangedEvent(const terminus_id_t i_tid,
         do
         {
             {
+#ifndef __HOSTBOOT_RUNTIME
                 const msg_q_t msgQ = msg_q_resolve(VFS_ROOT_MSG_PLDM_REQ_OUT);
                 assert(msgQ != nullptr,
                        "getAllPdrs: PLDM Req Out Message queue did not resolve properly!");
+#else
+                const msg_q_t msgQ = nullptr;
+#endif
 
                 std::vector<uint8_t> response_bytes;
 

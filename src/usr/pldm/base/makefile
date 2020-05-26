@@ -28,12 +28,8 @@ MODULE = pldm_base
 
 include ../common/common.mk
 
-# From ../extern/
-OBJS += base.o
-OBJS += utils.o
-
 # From ../common/
-OBJS += ${PLDM_COMMON_OBJS}
+OBJS += ${PLDM_BASE_COMMON_OBJS}
 # From this directory
 OBJS += pldm_msg_queues.o
 OBJS += pldm_base_init.o

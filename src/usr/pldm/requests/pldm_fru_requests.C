@@ -23,9 +23,9 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-/* @file pldm_fru_requests.C
- *
- * @brief Implementation of PLDM FRU-related requester functions.
+/** @file  pldm_fru_requests.C
+ *  @brief This file contains the implementations of the APIs/wrappers for PLDM FRU
+ *         request operations.
  */
 
 // System Headers
@@ -64,9 +64,13 @@ errlHndl_t getFruRecordTableMetaData(pldm_fru_record_table_metadata_t& o_table_m
 
     PLDM_ENTER("Enter getFruRecordTableMetaData");
 
+#ifndef __HOSTBOOT_RUNTIME
     msg_q_t msgQ = msg_q_resolve(VFS_ROOT_MSG_PLDM_REQ_OUT);
     assert(msgQ != nullptr,
             "Bug! PLDM Req Out Message queue did not resolve properly!");
+#else
+    msg_q_t msgQ = nullptr;
+#endif
 
     std::vector<uint8_t> response_bytes;
 
@@ -197,9 +201,13 @@ errlHndl_t getFruRecordTable(const size_t i_table_buffer_len,
 
     PLDM_ENTER("Enter getFruRecordTable buflen 0x%.08x",
                 i_table_buffer_len);
+#ifndef __HOSTBOOT_RUNTIME
     msg_q_t msgQ = msg_q_resolve(VFS_ROOT_MSG_PLDM_REQ_OUT);
     assert(msgQ != nullptr,
             "Bug! PLDM Req Out Message queue did not resolve properly!");
+#else
+    msg_q_t msgQ = nullptr;
+#endif
 
     std::vector<uint8_t> response_bytes;
 

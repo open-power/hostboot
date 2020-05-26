@@ -239,7 +239,7 @@ errlHndl_t sendrecv_pldm_request(std::vector<uint8_t>& o_response_bytes,
                     constexpr uint8_t zero_nsec = 0;
                     nanosleep(one_sec, zero_nsec);
                     constexpr uint8_t sleep_timeout_sec = 90;
-                    if(++sleep_time_sec < sleep_timeout) { continue; }
+                    if(++sleep_time_sec < sleep_timeout_sec) { continue; }
                 }
                 /*
                 * @errortype  ERRL_SEV_UNRECOVERABLE
@@ -256,7 +256,7 @@ errlHndl_t sendrecv_pldm_request(std::vector<uint8_t>& o_response_bytes,
                                       RC_RECV_FAIL,
                                       return_code,
                                       pldmHdrToUint64(*pldm_request),
-                                      ErrlEntry::ADD_SW_CALLOUT);
+                                      ErrlEntry::NO_SW_CALLOUT);
 
                 addBmcAndHypErrorCallouts(errl);
                 errl->collectTrace(RUNTIME_COMP_NAME);

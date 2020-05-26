@@ -28,25 +28,11 @@ MODULE = pldm_extended
 
 include ../common/common.mk
 
-# From ../extern/
-OBJS += bios.o
-OBJS += bios_table.o
-OBJS += fru.o
-OBJS += platform.o
-OBJS += file_io.o
-OBJS += pdr.o
-# From ../requests/
-OBJS += pldm_fru_requests.o
-OBJS += pldm_pdr_requests.o
-OBJS += pldm_fileio_requests.o
+OBJS += ${PLDM_EXTENDED_COMMON_OBJS}
 # From ../responses/
 OBJS += pldm_monitor_control_responders.o
 OBJS += pldm_fru_data_responders.o
 # From ../extended/
-OBJS += hb_pdrs.o
-OBJS += pdr_manager.o
-OBJS += hb_fru.o
-OBJS += pldm_fru.o
 OBJS += pldm_responder.o
 OBJS += pldm_extended_init.o
 
