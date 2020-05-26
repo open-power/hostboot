@@ -205,14 +205,7 @@ errlHndl_t PlatConfigurator::addDomainChips( TARGETING::TYPE i_type,
                            { TYPE_MC,     p10_mc   },
                            { TYPE_MCC,    p10_mcc  },
                            { TYPE_OMIC,   p10_omic }, } },
-        #ifdef __HOSTBOOT_MODULE
-        { POWER_CHIPID::EXPLORER_16, { { TYPE_OCMB_CHIP, explorer_ocmb }, } },
-        #endif
-        // TODO RTC 253274
-        // Once chip IDs are in FIPSs, we should be able to remove this.
-        #ifdef ESW_SIM_COMPILE
         { MODEL_OCMB, { { TYPE_OCMB_CHIP, explorer_ocmb }, } },
-        #endif
     };
 
     // Get references to factory objects.
@@ -228,17 +221,7 @@ errlHndl_t PlatConfigurator::addDomainChips( TARGETING::TYPE i_type,
     {
         uint32_t model = getChipModel( trgt );
 
-        #ifdef __HOSTBOOT_MODULE
-        // Special case for OCMBs (hostboot only issue for P9).
-        if ( MODEL_OCMB == model )
-        {
-             // Use the chip ID instead of model.
-            model = getChipId( trgt );
-
-            // Skip Gemini OCMBs. They can exist, but PRD won't support them.
-            if ( POWER_CHIPID::GEMINI_16 == model ) continue;
-        }
-        #endif
+        // TODO RTC 253274 - skip Gemini OCMBs
 
         // Ensure this model is supported.
         if ( fnMap.end() == fnMap.find(model) )
