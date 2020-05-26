@@ -611,6 +611,7 @@ def magic_instruction_callback(user_arg, cpu, arg):
         for othercpu in cpu_list:
             othercpu.urmor = cpu.urmor
             othercpu.hrmor = cpu.hrmor
+            othercpu.tb = cpu.tb
 
     if arg == 7022:  # MAGIC_SET_LOG_LEVEL
         if( not os.environ.has_key('ENABLE_HB_SIMICS_LOGS') ):
