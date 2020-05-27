@@ -117,9 +117,11 @@ void addExtMemMruData( const MemoryMru & i_memMru, errlHndl_t io_errl )
     bsb.setFieldJustify( curPos,  1, extMemMru.isX4Dram  ); curPos+= 1;
     bsb.setFieldJustify( curPos,  1, extMemMru.isValid   ); curPos+= 1;
 
-    BitString bs( sizeof(extMemMru.dqMapping)*8,
-                  (CPU_WORD *)extMemMru.dqMapping );
-    bsb.setString( bs, 0, bs.getBitLen(), curPos );
+    for ( uint8_t i = 0; i < sizeof(extMemMru.dqMapping); i++ )
+    {
+        bsb.setFieldJustify( curPos, 8, extMemMru.dqMapping[i] );
+        curPos += 8;
+    }
 
     // Add the extended MemoryMru to the error log.
     PRDF_ADD_FFDC( io_errl, bsb.getBufAddr(), sz_buf, ErrlVer1, ErrlMruData );
