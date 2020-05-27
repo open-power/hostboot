@@ -22,3 +22,89 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+
+///
+/// @file p10_fir_traits.H
+/// @brief Memory subsystem FIR support
+///
+// *HWP HWP Owner: Stephen Glancy <sglancy@us.ibm.com>
+// *HWP HWP Backup: Marc Gollub <gollub@us.ibm.com>
+// *HWP Team: Memory
+// *HWP Level: 3
+// *HWP Consumed by: FSP:HB
+
+#ifndef _P10_FIR_TRAITS_H_
+#define _P10_FIR_TRAITS_H_
+
+#include <fapi2.H>
+#include <p10_scom_mcc_2.H>
+#include <p10_scom_mcc_4.H>
+#include <p10_scom_mcc_8.H>
+#include <p10_scom_mcc_9.H>
+#include <p10_scom_mcc_a.H>
+#include <p10_scom_mcc_b.H>
+#include <p10_scom_mcc_c.H>
+#include <p10_scom_mcc_d.H>
+#include <p10_scom_mcc_e.H>
+#include <p10_scom_omic_3.H>
+#include <p10_scom_omic_7.H>
+#include <p10_scom_omic_f.H>
+#include <generic/memory/lib/utils/fir/gen_mss_fir.H>
+#include <generic/memory/lib/utils/shared/mss_generic_consts.H>
+
+namespace mss
+{
+
+///
+/// @brief FIR Register Traits for base DSTLFIR_MCC
+///
+template <>
+struct firTraits<scomt::mcc::DSTL_DSTLFIR_RW>
+{
+    static constexpr uint64_t REG = scomt::mcc::DSTL_DSTLFIR_RW;
+    static constexpr uint64_t ACT0 = scomt::mcc::DSTL_DSTLFIRACT0;
+    static constexpr uint64_t ACT1 = scomt::mcc::DSTL_DSTLFIRACT1;
+    static constexpr uint64_t MASK = scomt::mcc::DSTL_DSTLFIRMASK_RW;
+    static constexpr uint64_t MASK_AND = scomt::mcc::DSTL_DSTLFIRMASK_WO_AND;
+    static constexpr uint64_t MASK_OR = scomt::mcc::DSTL_DSTLFIRMASK_WO_OR;
+
+    // Target type of this register
+    static constexpr fapi2::TargetType T = fapi2::TARGET_TYPE_MCC;
+};
+
+///
+/// @brief FIR Register Traits for base USTL_USTLFIR_RW
+///
+template <>
+struct firTraits<scomt::mcc::USTL_USTLFIR_RW>
+{
+    static constexpr uint64_t REG = scomt::mcc::USTL_USTLFIR_RW;
+    static constexpr uint64_t ACT0 = scomt::mcc::USTL_USTLFIRACT0;
+    static constexpr uint64_t ACT1 = scomt::mcc::USTL_USTLFIRACT1;
+    static constexpr uint64_t MASK = scomt::mcc::USTL_USTLFIRMASK_RW;
+    static constexpr uint64_t MASK_AND = scomt::mcc::USTL_USTLFIRMASK_WO_AND;
+    static constexpr uint64_t MASK_OR = scomt::mcc::USTL_USTLFIRMASK_WO_OR;
+
+    // Target type of this register
+    static constexpr fapi2::TargetType T = fapi2::TARGET_TYPE_MCC;
+};
+
+///
+/// @brief FIR Register Traits for base MC_OMI_FIR_REG_RW
+///
+template <>
+struct firTraits<scomt::omic::MC_OMI_FIR_REG_RW>
+{
+    static constexpr uint64_t REG = scomt::omic::MC_OMI_FIR_REG_RW;
+    static constexpr uint64_t ACT0 = scomt::omic::MC_OMI_FIR_ACTION0_REG;
+    static constexpr uint64_t ACT1 = scomt::omic::MC_OMI_FIR_ACTION1_REG;
+    static constexpr uint64_t MASK = scomt::omic::MC_OMI_FIR_MASK_REG_RW;
+    static constexpr uint64_t MASK_AND = scomt::omic::MC_OMI_FIR_MASK_REG_WO_AND;
+    static constexpr uint64_t MASK_OR = scomt::omic::MC_OMI_FIR_MASK_REG_WO_OR;
+
+    // Target type of this register
+    static constexpr fapi2::TargetType T = fapi2::TARGET_TYPE_OMIC;
+};
+
+} // end mss ns
+#endif

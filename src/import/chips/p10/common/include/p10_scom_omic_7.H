@@ -39,6 +39,28 @@ namespace omic
 #endif
 
 
+//>> [MC_OMI_FIR_ACTION0_REG]
+//ERRCODE: // Some of the name targets not found in address targets: omic
+// No targets could be determined from the address.
+
+static const uint64_t MC_OMI_FIR_ACTION0_REG = 0x0c011406ull;
+
+static const uint32_t MC_OMI_FIR_ACTION0_REG_MC_OMI_FIR_ACTION0 = 0;
+static const uint32_t MC_OMI_FIR_ACTION0_REG_MC_OMI_FIR_ACTION0_LEN = 62;
+//<< [MC_OMI_FIR_ACTION0_REG]
+// omic/reg00007.H
+
+//>> [MC_OMI_FIR_ACTION1_REG]
+//ERRCODE: // Some of the name targets not found in address targets: omic
+// No targets could be determined from the address.
+
+static const uint64_t MC_OMI_FIR_ACTION1_REG = 0x0c011407ull;
+
+static const uint32_t MC_OMI_FIR_ACTION1_REG_MC_OMI_FIR_ACTION1 = 0;
+static const uint32_t MC_OMI_FIR_ACTION1_REG_MC_OMI_FIR_ACTION1_LEN = 62;
+//<< [MC_OMI_FIR_ACTION1_REG]
+// omic/reg00007.H
+
 //>>THE END<<
 
 #ifndef __PPE_HCODE__

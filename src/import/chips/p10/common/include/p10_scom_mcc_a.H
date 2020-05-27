@@ -39,6 +39,14 @@ namespace mcc
 #endif
 
 
+//>> [DSTL_DSTLFIRACT1]
+static const uint64_t DSTL_DSTLFIRACT1 = 0x0c010d07ull;
+
+static const uint32_t DSTL_DSTLFIRACT1_DSTLFIRACT1_ACTION_1 = 0;
+static const uint32_t DSTL_DSTLFIRACT1_DSTLFIRACT1_ACTION_1_LEN = 39;
+//<< [DSTL_DSTLFIRACT1]
+// mcc/reg00010.H
+
 //>>THE END<<
 
 #ifndef __PPE_HCODE__

@@ -1282,4 +1282,15 @@
     </callout>
   </hwpError>
 
+  <hwpError>
+    <rc>RC_MSS_INVALID_OMI_POSITION</rc>
+    <description> An invalid OMI position was found in FIR unmask function</description>
+    <ffdc>POSITION</ffdc>
+    <ffdc>OMI_TARGET</ffdc>
+    <callout>
+        <procedure>CODE</procedure>
+        <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
 </hwpErrors>

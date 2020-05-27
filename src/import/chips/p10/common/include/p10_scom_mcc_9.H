@@ -39,6 +39,16 @@ namespace mcc
 #endif
 
 
+//>> [DSTL_DSTLFIRMASK]
+static const uint64_t DSTL_DSTLFIRMASK_RW = 0x0c010d03ull;
+static const uint64_t DSTL_DSTLFIRMASK_WO_AND = 0x0c010d04ull;
+static const uint64_t DSTL_DSTLFIRMASK_WO_OR = 0x0c010d05ull;
+
+static const uint32_t DSTL_DSTLFIRMASK_DSTLFIRMASK_FIR_MASK = 0;
+static const uint32_t DSTL_DSTLFIRMASK_DSTLFIRMASK_FIR_MASK_LEN = 39;
+//<< [DSTL_DSTLFIRMASK]
+// mcc/reg00009.H
+
 //>>THE END<<
 
 #ifndef __PPE_HCODE__

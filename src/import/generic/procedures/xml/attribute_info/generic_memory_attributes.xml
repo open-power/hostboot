@@ -423,4 +423,17 @@
     <mssAccessorName>omi_dl_preipl_prbs_time</mssAccessorName>
   </attribute>
 
+  <attribute>
+    <id>ATTR_ENABLE_FIR_UNMASKING</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+      Enable FIR Unmasking for HWPs, applies to functions that are specifically referencing this attribute.
+    </description>
+    <valueType>uint8</valueType>
+    <enum> DISABLED = 0, ENABLED = 1 </enum>
+    <writeable/>
+    <initToZero/>
+    <mssAccessorName>enable_fir_unmasking</mssAccessorName>
+  </attribute>
+
 </attributes>

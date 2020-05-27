@@ -22,3 +22,38 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+
+#ifndef _HOST_MC_TRAITS_H_
+#define _HOST_MC_TRAITS_H_
+
+#include <fapi2.H>
+#include <p10_scom_mcc_4.H>
+#include <p10_scom_mcc_d.H>
+
+namespace mss
+{
+
+///
+/// @class mccTraits
+/// @tparam PT the proc type
+/// @brief A collection of register traits for the Host MCC
+///
+template<mss::proc_type PT>
+class mccTraits;
+
+///
+/// @class mccTraits
+/// @brief A collection of register traits for the Host MCC, P10 specialization
+///
+template<>
+class mccTraits<mss::proc_type::PROC_P10>
+{
+    public:
+        // P10 MCC registers - must be 64 bits
+        static constexpr uint64_t USTL_FAILMASK = scomt::mcc::USTL_USTLFAILMASK;
+        static constexpr uint64_t DSTL_CFG      = scomt::mcc::DSTL_DSTLCFG;
+        static constexpr uint64_t DSTL_CFG2     = scomt::mcc::DSTL_DSTLCFG2;
+};
+
+} // end mss ns
+#endif

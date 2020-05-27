@@ -39,6 +39,24 @@ namespace omic
 #endif
 
 
+//>> [MC_OMI_FIR_MASK_REG]
+//ERRCODE: // Some of the name targets not found in address targets: omic
+// No targets could be determined from the address.
+
+static const uint64_t MC_OMI_FIR_MASK_REG_RW = 0x0c011403ull;
+static const uint64_t MC_OMI_FIR_MASK_REG_WO_AND = 0x0c011404ull;
+static const uint64_t MC_OMI_FIR_MASK_REG_WO_OR = 0x0c011405ull;
+
+static const uint32_t MC_OMI_FIR_MASK_REG_DL0_FIR_ERROR_MASK = 0;
+static const uint32_t MC_OMI_FIR_MASK_REG_DL0_FIR_ERROR_MASK_LEN = 20;
+static const uint32_t MC_OMI_FIR_MASK_REG_DL1_FIR_ERROR_MASK = 20;
+static const uint32_t MC_OMI_FIR_MASK_REG_DL1_FIR_ERROR_MASK_LEN = 20;
+static const uint32_t MC_OMI_FIR_MASK_REG_DL2_FIR_ERROR_MASK = 40;
+static const uint32_t MC_OMI_FIR_MASK_REG_DL2_FIR_ERROR_MASK_LEN = 20;
+static const uint32_t MC_OMI_FIR_MASK_REG_PERF_MON_WRAPPED_MASK = 60;
+//<< [MC_OMI_FIR_MASK_REG]
+// omic/reg00003.H
+
 //>>THE END<<
 
 #ifndef __PPE_HCODE__
