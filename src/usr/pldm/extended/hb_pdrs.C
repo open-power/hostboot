@@ -134,6 +134,81 @@ void addEntityAssociationAndFruRecordSetPdrs(pldm_pdr* const io_repo,
     pldm_entity_association_pdr_add(enttree.get(), io_repo);
 }
 
+/* @brief Add the state sensor PDRs for OCC FRUs.
+ *
+ * @param[in/out] io_repo    The PDR repository to add PDRs to.
+ * @param[in] i_terminus_id  The Host's terminus ID.
+ * @param[in] i_target       The target to use the entity ID from for the sensor.
+ */
+void addOccStateSensorPdrs(pldm_pdr* const io_repo,
+                             const terminus_id_t i_terminus_id,
+                             const Target* const i_target)
+{
+    const auto entity_id = i_target->getAttr<ATTR_PLDM_ENTITY_ID_INFO>();
+
+    // PLDM_ENTITY_ID_INFO is stored in little-endian
+    const uint16_t be_entity_type =  le16toh(entity_id.entityType);
+    const uint16_t be_entity_instance =  le16toh(entity_id.entityInstanceNumber);
+    const uint16_t be_container_id =  le16toh(entity_id.containerId);
+
+    const state_sensor_possible_states states =
+    {
+        .state_set_id = pldm_state_set_operational_running_status,
+        .possible_states_size = 1, // size of possible_states
+        .states =
+        {
+            enum_bit(pldm_state_set_operational_running_status_stopped)
+            | enum_bit(pldm_state_set_operational_running_status_in_service)
+        }
+    };
+
+    std::vector<uint8_t> encoded_pdr(sizeof(pldm_state_sensor_pdr) + sizeof(states));
+
+    const auto pdr = reinterpret_cast<pldm_state_sensor_pdr*>(encoded_pdr.data());
+
+    *pdr =
+    {
+        /// Header
+        .hdr =
+        {
+            .record_handle = 0, // ask libpldm to fill this out
+            .record_change_num = 0,
+            .length = 0 // will be filled out by the encoder
+        },
+
+        /// Body
+        .terminus_handle = i_terminus_id,
+
+        // Using the ORDINAL_ID of the target will let us associate with the
+        // correct target when we send a PlatformEventMessage with the new state
+        .sensor_id = static_cast<uint16_t>(i_target->getAttr<ATTR_ORDINAL_ID>()),
+
+        .entity_type = be_entity_type,
+        .entity_instance = be_entity_instance,
+        .container_id = be_container_id,
+
+        .sensor_init = state_sensor_noInit,
+        .sensor_auxiliary_names_pdr = false,
+        .composite_sensor_count = 1
+    };
+
+    size_t actual_pdr_size = 0;
+
+    const int rc = encode_pldm_state_sensor_pdr(pdr,
+                                                encoded_pdr.size(),
+                                                &states,
+                                                sizeof(states),
+                                                &actual_pdr_size);
+
+    assert(rc == PLDM_SUCCESS,
+           "Failed to encoded OCC state sensor PDR");
+
+    const int AUTO_CALCULATE_RECORD_HANDLE = 0;
+
+    pldm_pdr_add(io_repo, encoded_pdr.data(), actual_pdr_size,
+                 AUTO_CALCULATE_RECORD_HANDLE);
+}
+
 /* @brief Add the state effecter PDRs for OCC FRUs.
  *
  * @param[in/out] io_repo    The PDR repository to add PDRs to.
@@ -234,6 +309,7 @@ void addOccStateControlPdrs(pldm_pdr* const io_repo,
         // The OCC state sensor/effecter PDRs are "attached" to the parent PROC
         // of the OCC.
         addOccStateEffecterPdrs(io_repo, i_terminus_id, parent_proc);
+        addOccStateSensorPdrs(io_repo, i_terminus_id, parent_proc);
     }
 }
 

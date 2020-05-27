@@ -243,6 +243,33 @@ struct pldm_pdr_fru_record_set {
 	uint16_t container_id;
 } __attribute__((packed));
 
+/** @struct pldm_state_sensor_pdr
+ *
+ *  Structure representing PLDM state sensor PDR
+ */
+struct pldm_state_sensor_pdr {
+	struct pldm_pdr_hdr hdr;
+	uint16_t terminus_handle;
+	uint16_t sensor_id;
+	uint16_t entity_type;
+	uint16_t entity_instance;
+	uint16_t container_id;
+	uint8_t sensor_init;
+	bool8_t sensor_auxiliary_names_pdr;
+	uint8_t composite_sensor_count;
+	uint8_t possible_states[1];
+} __attribute__((packed));
+
+/** @struct state_sensor_possible_states
+ *
+ *  Structure representing state enums for state sensor
+ */
+struct state_sensor_possible_states {
+	uint16_t state_set_id;
+	uint8_t possible_states_size;
+	bitfield8_t states[1];
+} __attribute__((packed));
+
 /* @brief List of PLDM State Set types
  */
 enum pldm_state_set_enumeration {
@@ -282,6 +309,15 @@ enum pldm_state_effecter_init {
     state_effecter_disableEffecter
 };
 
+/* @brief Types of initialization for state sensors.
+ */
+enum pldm_state_sensor_init {
+    state_sensor_noInit,
+    state_sensor_useInitPDR,
+    state_sensor_enableSensor,
+    state_sensor_disableSensor
+};
+
 /** @struct pldm_state_effecter_pdr
  *
  *  Structure representing PLDM state effecter PDR
@@ -300,26 +336,28 @@ struct pldm_state_effecter_pdr {
 	uint8_t possible_states[1];
 } __attribute__((packed));
 
-/** @brief Encode PLDM state effecter PDR
+/** @brief Encode PLDM state sensor PDR
  *
- * @param[in/out] effecter               Structure to encode
- * @param[in]     allocation_size        Size of effecter allocation in bytes
- * @param[in]     possible_states        Possible effecter states
- * @param[in]     num_possible_states    Size of possible effecter states in elements
- * @param[out]    actual_size            Size of effecter PDR. Set to 0 on error.
+ * @param[in/out] sensor                 Structure to encode. All members of sensor,
+ *                                       except those mentioned in the @note below, should
+ *                                       be initialized by the caller.
+ * @param[in]     allocation_size        Size of sensor allocation in bytes
+ * @param[in]     possible_states        Possible sensor states
+ * @param[in]     num_possible_states    Size of possible sensor states in bytes
+ * @param[out]    actual_size            Size of sensor PDR. Set to 0 on error.
  * @return int    pldm_completion_codes  PLDM_SUCCESS if successful, PLDM_ERROR otherwise
  *
- * @note The effecter parameter will be encoded in-place.
- * @note Caller is responsible for allocation of the effecter parameter. Caller
+ * @note The sensor parameter will be encoded in place.
+ * @note Caller is responsible for allocation of the sensor parameter. Caller
  *       must allocate enough space for the base structure and the
- *       effecter->possible_states array, otherwise the function will fail.
- * @note effecter->hdr.length, .type, and .version will be set appropriately.
+ *       sensor->possible_states array, otherwise the function will fail.
+ * @note sensor->hdr.length, .type, and .version will be set appropriately.
  */
-int encode_pldm_state_effecter_pdr(struct pldm_state_effecter_pdr* effecter,
-                                   size_t allocation_size,
-                                   const void* possible_states,
-                                   size_t num_possible_states,
-                                   size_t* actual_size);
+int encode_pldm_state_sensor_pdr(struct pldm_state_sensor_pdr* sensor,
+                                 size_t allocation_size,
+                                 const struct state_sensor_possible_states* possible_states,
+                                 size_t num_possible_states,
+                                 size_t* actual_size);
 
 /** @struct state_effecter_possible_states
  *
@@ -330,6 +368,29 @@ struct state_effecter_possible_states {
 	uint8_t possible_states_size;
 	bitfield8_t states[1];
 } __attribute__((packed));
+
+/** @brief Encode PLDM state effecter PDR
+ *
+ * @param[in/out] effecter               Structure to encode. All members of effecter,
+ *                                       except those mentioned in the @note below, should
+ *                                       be initialized by the caller.
+ * @param[in]     allocation_size        Size of effecter allocation in bytes
+ * @param[in]     possible_states        Possible effecter states
+ * @param[in]     num_possible_states    Size of possible effecter states in bytes
+ * @param[out]    actual_size            Size of effecter PDR. Set to 0 on error.
+ * @return int    pldm_completion_codes  PLDM_SUCCESS if successful, PLDM_ERROR otherwise
+ *
+ * @note The effecter parameter will be encoded in place.
+ * @note Caller is responsible for allocation of the effecter parameter. Caller
+ *       must allocate enough space for the base structure and the
+ *       effecter->possible_states array, otherwise the function will fail.
+ * @note effecter->hdr.length, .type, and .version will be set appropriately.
+ */
+int encode_pldm_state_effecter_pdr(struct pldm_state_effecter_pdr* effecter,
+                                   size_t allocation_size,
+                                   const struct state_effecter_possible_states* possible_states,
+                                   size_t possible_states_size,
+                                   size_t* actual_size);
 
 /** @struct set_effecter_state_field
  *

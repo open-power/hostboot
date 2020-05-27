@@ -32,13 +32,36 @@
 
 int encode_pldm_state_effecter_pdr(struct pldm_state_effecter_pdr* const effecter,
                                    const size_t allocation_size,
-                                   const void* const possible_states,
+                                   const struct state_effecter_possible_states* const possible_states,
                                    const size_t possible_states_size,
                                    size_t* const actual_size)
 {
-    if (possible_states_size !=
-        (effecter->composite_effecter_count
-         * sizeof(struct state_effecter_possible_states))) {
+    // Encode possible states
+
+    size_t calculated_possible_states_size = 0;
+
+    {
+        char* states_ptr = (char*)possible_states,
+            * const begin_states_ptr = states_ptr;
+
+        for (int i = 0; i < effecter->composite_effecter_count; ++i) {
+            struct state_effecter_possible_states* states
+                = (struct state_effecter_possible_states*)states_ptr;
+
+            CONVERT16(states->state_set_id);
+
+            states_ptr += (sizeof(*states)
+                           - sizeof(states->states)
+                           + states->possible_states_size);
+        }
+
+        calculated_possible_states_size = states_ptr - begin_states_ptr;
+    }
+
+    // Check lengths
+
+    if (possible_states_size != calculated_possible_states_size)
+    {
         *actual_size = 0;
         return PLDM_ERROR;
     }
@@ -52,6 +75,8 @@ int encode_pldm_state_effecter_pdr(struct pldm_state_effecter_pdr* const effecte
         return PLDM_ERROR_INVALID_LENGTH;
     }
 
+    // Encode rest of PDR
+
     effecter->hdr.version = 1;
     effecter->hdr.type = PLDM_STATE_EFFECTER_PDR;
     effecter->hdr.length = *actual_size;
@@ -59,21 +84,6 @@ int encode_pldm_state_effecter_pdr(struct pldm_state_effecter_pdr* const effecte
     memcpy(effecter->possible_states,
            possible_states,
            possible_states_size);
-
-    {
-        char* states_ptr = (char*)effecter->possible_states;
-
-        for (int i = 0; i < effecter->composite_effecter_count; ++i) {
-            struct state_effecter_possible_states* states
-                = (struct state_effecter_possible_states*)states_ptr;
-
-            CONVERT16(states->state_set_id);
-
-            states_ptr += (sizeof(*states)
-                           - sizeof(states->states)
-                           + states->possible_states_size);
-        }
-    }
 
     // Convert effecter PDR body
     CONVERT16(effecter->terminus_handle);
@@ -87,6 +97,74 @@ int encode_pldm_state_effecter_pdr(struct pldm_state_effecter_pdr* const effecte
     CONVERT32(effecter->hdr.record_handle);
     CONVERT16(effecter->hdr.record_change_num);
     CONVERT16(effecter->hdr.length);
+
+    return PLDM_SUCCESS;
+}
+
+int encode_pldm_state_sensor_pdr(struct pldm_state_sensor_pdr* const sensor,
+                                 const size_t allocation_size,
+                                 const struct state_sensor_possible_states* const possible_states,
+                                 const size_t possible_states_size,
+                                 size_t* const actual_size)
+{
+    // Encode possible states
+
+    size_t calculated_possible_states_size = 0;
+
+    {
+        char* states_ptr = (char*)possible_states,
+            * const begin_states_ptr = states_ptr;
+
+        for (int i = 0; i < sensor->composite_sensor_count; ++i) {
+            struct state_sensor_possible_states* states
+                = (struct state_sensor_possible_states*)states_ptr;
+
+            CONVERT16(states->state_set_id);
+
+            states_ptr += (sizeof(*states)
+                           - sizeof(states->states)
+                           + states->possible_states_size);
+        }
+
+        calculated_possible_states_size = states_ptr - begin_states_ptr;
+    }
+
+    // Check lengths
+
+    if (possible_states_size != calculated_possible_states_size)
+    {
+        *actual_size = 0;
+        return PLDM_ERROR;
+    }
+
+    *actual_size = (sizeof(struct pldm_state_sensor_pdr)
+                    + possible_states_size
+                    - sizeof(sensor->possible_states));
+
+    if (allocation_size < *actual_size) {
+        *actual_size = 0;
+        return PLDM_ERROR_INVALID_LENGTH;
+    }
+
+    // Encode rest of PDR
+
+    sensor->hdr.length = *actual_size;
+
+    memcpy(sensor->possible_states,
+           possible_states,
+           possible_states_size);
+
+    // Convert sensor PDR body
+    CONVERT16(sensor->terminus_handle);
+    CONVERT16(sensor->sensor_id);
+    CONVERT16(sensor->entity_type);
+    CONVERT16(sensor->entity_instance);
+    CONVERT16(sensor->container_id);
+
+    // Convert header
+    CONVERT32(sensor->hdr.record_handle);
+    CONVERT16(sensor->hdr.record_change_num);
+    CONVERT16(sensor->hdr.length);
 
     return PLDM_SUCCESS;
 }
