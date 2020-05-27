@@ -134,7 +134,7 @@ check_istep_modules: $(OBJS)
 GENCONFIG_TOOL = src/build/tools/hbGenConfig
 
 # At end of rule, create HB_FSP_RELEASE file if compiling with fsprelease.config
-# or create HB_P10_RELEASE if compiling with simics_p10.config
+# or create HB_P10_RELEASE if compiling with anything else
 $(GENDIR)/.$(notdir $(CONFIG_FILE)).config: \
     $(shell find -name HBconfig) \
     $(filter-out $(GENDIR)/.$(notdir $(CONFIG_FILE)).config,\
@@ -151,8 +151,7 @@ $(GENDIR)/.$(notdir $(CONFIG_FILE)).config: \
 	@rm -f $(HB_FSP_RELEASE)
 	@rm -f $(HB_P10_RELEASE)
     ifneq (,$(findstring fsprelease.config, $(strip $(CONFIG_FILE))))
-	    @touch $(HB_FSP_RELEASE)
-    endif
-    ifneq (,$(findstring simics_p10, $(strip $(CONFIG_FILE))))
-	    @touch $(HB_P10_RELEASE)
+	@touch $(HB_FSP_RELEASE)
+    else  # Use the standalone setup for anything else
+	@touch $(HB_P10_RELEASE)
     endif
