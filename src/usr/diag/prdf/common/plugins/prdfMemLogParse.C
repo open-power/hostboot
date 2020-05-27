@@ -2914,8 +2914,20 @@ void addDramSiteString( const MemoryMruData::ExtendedData & i_extMemMru,
 
     // Get the DQ indexes for site location tables, adjusting for spare DRAM, if
     // needed.
-    uint8_t dqIdx = mm.s.isMca ? symbol2Dq<TYPE_MCA>(symbol)
-                               : symbol2Dq<TYPE_MBA>(symbol);
+    uint8_t dqIdx = 0;
+    if ( mm.s.isMca )
+    {
+        dqIdx = symbol2Dq<TYPE_MCA>(symbol);
+    }
+    else if( mm.s.isOcmb )
+    {
+        dqIdx = symbol2Dq<TYPE_OCMB_CHIP>(symbol);
+    }
+    else
+    {
+        dqIdx = symbol2Dq<TYPE_MBA>(symbol);
+    }
+
     dqIdx = transDramSpare( dqIdx, mm.s.dramSpared );
 
     // Add the DRAM site info to the current data.
