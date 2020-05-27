@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2016,2019                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2016,2020                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -56,7 +56,7 @@
     <sbeError/>
     <rc>RC_P10_SPR_NAME_MAP_INIT_ERR</rc>
     <description>
-      SPR name map is not empty while try to initialize
+      SPR name map is not empty while try to initialize.
     </description>
     <callout>
       <procedure>CODE</procedure>
@@ -201,6 +201,32 @@
       Illegal reg type access
     </description>
     <ffdc>REGTYPE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <sbeError/>
+    <rc>RC_P10_RAM_TEST_ECMD_ERROR</rc>
+    <description>
+      ECMD error during RAM test
+    </description>
+    <ffdc>ECMD_RC</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <sbeError/>
+    <rc>RC_P10_RAM_TEST_GENERAL_ERROR</rc>
+    <description>
+      General error during RAM test
+    </description>
+    <ffdc>LINE_NUMBER</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
