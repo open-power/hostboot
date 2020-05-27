@@ -313,7 +313,7 @@ errlHndl_t handlePdrRepoChangeEventRequest(const msg_q_t i_msgQ,
             errl->collectTrace(PLDM_COMP_NAME);
             break;
         }
-
+#ifndef __HOSTBOOT_RUNTIME
         if (response_code == PLDM_SUCCESS)
         {
             errl = thePdrManager().notifyBmcPdrRepoChanged();
@@ -325,6 +325,7 @@ errlHndl_t handlePdrRepoChangeEventRequest(const msg_q_t i_msgQ,
                 break;
             }
         }
+#endif
     } while (false);
 
     PLDM_EXIT("handlePdrRepoChangeEventRequest");
@@ -443,7 +444,7 @@ errlHndl_t handleSetStateEffecterStatesRequest(const msg_q_t i_msgQ,
 
 // @TODO RTC 254820: Remove the conditionals when this is moved into HBRT
 #ifdef __HOSTBOOT_RUNTIME
-        const int rc = HBRT::getRuntimeInterfaces()->reset_pm_complex(hbrt_hyp_id);
+        const int rc = getRuntimeInterfaces()->reset_pm_complex(hbrt_hyp_id);
 #else
         const int rc = 0;
 #endif

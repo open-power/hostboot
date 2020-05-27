@@ -36,7 +36,7 @@
 namespace MCTP
 {
 
-/* @brief addHypErrorCallouts
+/* @brief addBmcAndHypErrorCallouts
  *
  *        Collect MCTP traces, and add a high-priority callout to the BMC,
  *        a medium-priority callout to the hypervsior, and a low-priority
@@ -49,7 +49,8 @@ inline void addBmcAndHypErrorCallouts(const errlHndl_t i_errl)
     assert(i_errl != nullptr,
            "i_errl is nullptr in addBmcErrorCallouts");
 
-    i_errl->collectTrace(PLDM_COMP_NAME);
+    i_errl->collectTrace(MCTP_COMP_NAME);
+    i_errl->collectTrace(RUNTIME_COMP_NAME);
 
     // Call out service processor / BMC firmware as high priority
     i_errl->addProcedureCallout(HWAS::EPUB_PRC_SP_CODE,

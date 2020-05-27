@@ -23,9 +23,9 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-/* @file  pldm_response.H
+/** @file  pldm_response.H
  *
- * @brief Contains utilities for sending and receiving PLDM responses.
+ *  @brief Contains utilities for sending and receiving PLDM responses.
  */
 #ifndef PLDM_RESPONSE_H__
 #define PLDM_RESPONSE_H__
@@ -36,7 +36,6 @@
 
 // PLDM/MCTP
 #include <mctp/mctp_const.H>
-#include <mctp/mctp_message_types.H>
 #include <pldm/pldm_reasoncodes.H>
 #include <pldm/pldm_errl.H>
 #include <pldm/pldmif.H>
@@ -48,6 +47,14 @@
 
 // Error handling
 #include <errl/errlentry.H>
+
+#ifdef __HOSTBOOT_RUNTIME
+#include <mctp/mctpif_rt.H>
+#include <runtime/interface.h>
+#include <sys/time.h>
+#endif
+
+using namespace ERRORLOG;
 
 namespace PLDM
 {
@@ -93,7 +100,6 @@ inline const size_t replace_payload_length_placeholder(const size_t i_payload_le
 template<size_t PayloadHeaderSize>
 struct pldm_response_t
 {
-    // Filled in by MCTP layer
     decltype(MCTP::MCTP_MSG_TYPE_PLDM) mctp_msg_type = 0;
 
     pldm_msg pldm_message { };
@@ -122,6 +128,7 @@ errlHndl_t send_pldm_response(const msg_q_t i_msgQ,
                               const size_t i_payload_size,
                               Args... i_args)
 {
+    errlHndl_t errl = nullptr;
     using response_t = pldm_response_t<PayloadHeaderSize>;
 
     // This is an arbitrary but hopefully unique value used to catch any
@@ -137,6 +144,7 @@ errlHndl_t send_pldm_response(const msg_q_t i_msgQ,
     // canary to make sure that it didn't get overwritten, and if it did, we
     // have detected an overflow and we assert.
     std::vector<uint8_t> response_alloc(mctp_message_size + sizeof(buffer_canary));
+    response_alloc[0] = MCTP::MCTP_MSG_TYPE_PLDM;
 
     memcpy(&response_alloc[mctp_message_size],
            &buffer_canary,
@@ -165,13 +173,13 @@ errlHndl_t send_pldm_response(const msg_q_t i_msgQ,
                i_encoder);
     }
 
+
+#ifndef __HOSTBOOT_RUNTIME
     std::unique_ptr<msg_t, decltype(&msg_free)> msg(msg_allocate(), msg_free);
 
     msg->type = MCTP::MSG_SEND_PLDM;
     msg->data[0] = mctp_message_size;
     msg->extra_data = response;
-
-    errlHndl_t errl = nullptr;
 
     {
         const int rc = msg_sendrecv(i_msgQ, msg.get());
@@ -187,12 +195,12 @@ errlHndl_t send_pldm_response(const msg_q_t i_msgQ,
              * @devdesc    Software problem, failed to send PLDM IPC message
              * @custdesc   A software error occurred during system boot
              */
-            errl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                           MOD_SEND_PLDM_RESPONSE,
-                                           RC_SEND_FAIL,
-                                           rc,
-                                           reinterpret_cast<uint64_t>(i_encoder),
-                                           ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+            errl = new ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                 MOD_SEND_PLDM_RESPONSE,
+                                 RC_SEND_FAIL,
+                                 rc,
+                                 reinterpret_cast<uint64_t>(i_encoder),
+                                 ErrlEntry::ADD_SW_CALLOUT);
         }
         else if (msg->data[1] != REQ_SUCCESS)
         {
@@ -201,6 +209,31 @@ errlHndl_t send_pldm_response(const msg_q_t i_msgQ,
 
         msg->extra_data = nullptr;
     }
+#else
+    // trim the buffer canary
+    response_alloc.resize(response_alloc.size()-sizeof(buffer_canary));
+    int return_code = MCTP::send_message(response_alloc);
+
+    if(return_code)
+    {
+        /*
+        * @errortype  ERRL_SEV_UNRECOVERABLE
+        * @moduleid   MOD_SEND_PLDM_RESPONSE
+        * @reasoncode RC_SEND_FAIL
+        * @userdata1  Return code returned by MCTP::send_message
+        * @userdata2  Header of pldm request
+        * @devdesc    Software problem, failed to send PLDM resp over MCTP
+        * @custdesc   A software error occurred during system runtime
+        */
+        errl = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
+                             MOD_SEND_PLDM_RESPONSE,
+                             RC_SEND_FAIL,
+                             return_code,
+                             pldmHdrToUint64(response->pldm_message),
+                             ErrlEntry::NO_SW_CALLOUT);
+        addBmcAndHypErrorCallouts(errl);
+    }
+#endif
 
     return errl;
 }
@@ -220,8 +253,6 @@ errlHndl_t decode_pldm_request(const Decoder i_decoder,
                                const size_t i_payload_len,
                                Args... i_args)
 {
-    using namespace ERRORLOG;
-
     errlHndl_t errl = nullptr;
 
     const int decoder_rc =

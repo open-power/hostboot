@@ -101,6 +101,14 @@ namespace PLDM
     * @return void
     */
     void clear_next_request(void);
+
+    /**
+    * @brief Process the next PLDM request cached by HBRT's PLDM resource
+    *        provider.
+    *
+    * @return errHndl_t   nullptr unless error occurs
+    */
+    errlHndl_t handle_next_pldm_request(void);
 #endif
 
     /**

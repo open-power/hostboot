@@ -223,7 +223,6 @@ errlHndl_t sendrecv_pldm_request(std::vector<uint8_t>& o_response_bytes,
                                   pldmHdrToUint64(*pldm_request),
                                   ErrlEntry::NO_SW_CALLOUT);
             addBmcAndHypErrorCallouts(errl);
-            errl->collectTrace(RUNTIME_COMP_NAME);
             break;
         }
 
@@ -259,7 +258,6 @@ errlHndl_t sendrecv_pldm_request(std::vector<uint8_t>& o_response_bytes,
                                       ErrlEntry::NO_SW_CALLOUT);
 
                 addBmcAndHypErrorCallouts(errl);
-                errl->collectTrace(RUNTIME_COMP_NAME);
                 break;
             }
         }while (PLDM::get_next_response().empty());

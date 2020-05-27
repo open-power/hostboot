@@ -115,6 +115,7 @@ const msg_category pldm_message_categories[] =
                                  std::size(pldm_fru_data_handlers) }
 };
 
+#ifndef __HOSTBOOT_RUNTIME
 /* Handler logic */
 
 // Static function used to launch task calling handle_inbound_req_messages on
@@ -126,6 +127,7 @@ void * handle_inbound_req_messages_task(void*)
     Singleton<pldmResponder>::instance().handle_inbound_req_messages();
     return nullptr;
 }
+#endif
 
 /* @brief send_cc_only_response
  *
@@ -169,7 +171,7 @@ void send_cc_only_response(const msg_q_t i_msgQ,
  * @param[in] i_msg       PLDM message handle
  * @return    errlHndl_t  Error if any, otherwise nullptr.
  */
-errlHndl_t handle_inbound_req(const msg_q_t i_msgQ, const msg_t* i_msg)
+errlHndl_t handle_inbound_req(const msg_q_t i_msgQ, const void* i_msg, const size_t i_msg_len)
 {
     PLDM_INF("Handling inbound PLDM request");
 
@@ -177,10 +179,10 @@ errlHndl_t handle_inbound_req(const msg_q_t i_msgQ, const msg_t* i_msg)
 
     do
     {
-        if (i_msg->data[0] < sizeof(pldm_msg_hdr))
+        if (i_msg_len < sizeof(pldm_msg_hdr))
         {
             PLDM_INF("PLDM request shorter than PLDM header size (%u < %u)",
-                     static_cast<uint32_t>(i_msg->data[0]),
+                     static_cast<uint32_t>(i_msg_len),
                      static_cast<uint32_t>(sizeof(pldm_msg_hdr)));
 
             /*
@@ -195,7 +197,7 @@ errlHndl_t handle_inbound_req(const msg_q_t i_msgQ, const msg_t* i_msg)
             errl = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
                                  MOD_HANDLE_INBOUND_REQ,
                                  RC_INVALID_LENGTH,
-                                 i_msg->data[0],
+                                 i_msg_len,
                                  sizeof(pldm_msg_hdr),
                                  ErrlEntry::NO_SW_CALLOUT);
 
@@ -203,14 +205,14 @@ errlHndl_t handle_inbound_req(const msg_q_t i_msgQ, const msg_t* i_msg)
             break;
         }
 
-        const pldm_msg* const pldm_message = reinterpret_cast<pldm_msg*>(i_msg->extra_data);
+        const pldm_msg* const pldm_message = reinterpret_cast<const pldm_msg* const>(i_msg);
         const uint64_t response_hdr_data = pldmHdrToUint64(*pldm_message);
-        const size_t payload_len = i_msg->data[0] - sizeof(pldm_msg_hdr);
+        const size_t payload_len = i_msg_len - sizeof(pldm_msg_hdr);
 
         /* Lookup the message category in the first-level dispatch table to get
          * the second-level dispatch table */
 
-        const auto category = static_cast<PLDM::msgq_msg_t>(i_msg->type);
+        const auto category = static_cast<PLDM::msgq_msg_t>(pldm_message->hdr.type);
 
         const auto cat_table =
             std::find_if(std::cbegin(pldm_message_categories),
@@ -360,6 +362,7 @@ errlHndl_t handle_inbound_req(const msg_q_t i_msgQ, const msg_t* i_msg)
 
 }
 
+#ifndef __HOSTBOOT_RUNTIME
 /* pldmResponder class implementation */
 
 extern msg_q_t g_inboundPldmReqMsgQ;  // pldm inbound request msgQ
@@ -376,7 +379,9 @@ void pldmResponder::handle_inbound_req_messages(void)
             msg_free
         };
 
-        errlHndl_t errl = handle_inbound_req(iv_mctpOutboundMsgQ, msg.get());
+        errlHndl_t errl = handle_inbound_req(iv_mctpOutboundMsgQ,
+                                             msg->extra_data,
+                                             msg->data[0]);
 
         if (errl)
         {
@@ -409,3 +414,19 @@ void pldmResponder::init(void)
 }
 
 pldmResponder::pldmResponder(void) : iv_mctpOutboundMsgQ(nullptr) {}
+#else
+
+errlHndl_t PLDM::handle_next_pldm_request(void)
+{
+    auto& next_pldm_request = PLDM::get_next_request();
+    assert (!next_pldm_request.empty(), "SW bug! we should never attempt to handle next pldm request if there is not one");
+    errlHndl_t errl = handle_inbound_req(nullptr,
+                                         next_pldm_request.data(),
+                                         next_pldm_request.size());
+    // clear the request we attempted to handle regardless
+    // if we were successful or not
+    PLDM::clear_next_request();
+    return errl;
+}
+
+#endif

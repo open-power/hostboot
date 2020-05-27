@@ -29,11 +29,6 @@ MODULE = pldm_extended
 include ../common/common.mk
 
 OBJS += ${PLDM_EXTENDED_COMMON_OBJS}
-# From ../responses/
-OBJS += pldm_monitor_control_responders.o
-OBJS += pldm_fru_data_responders.o
-# From ../extended/
-OBJS += pldm_responder.o
 OBJS += pldm_extended_init.o
 
 SUBDIRS += test.d

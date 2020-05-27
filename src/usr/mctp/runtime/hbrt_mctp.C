@@ -65,7 +65,6 @@ int __mctp_hbrtvirt_hostboot_mctp_send(const uint32_t i_len,
     {
         fw_msg_resp_size = fw_msg_req_size;
     }
-
     std::unique_ptr<hostInterfaces::hbrt_fw_msg, decltype(&free)> fw_msg_resp(
       static_cast<hostInterfaces::hbrt_fw_msg *>(malloc(fw_msg_resp_size)),free);
 
@@ -112,11 +111,12 @@ int __mctp_hbrtvirt_hostboot_mctp_receive(uint64_t * const io_len,
                 &fw_msg_resp->mctp_receive.receive_data,
                 (*io_len));
 
-        TRACDBIN(g_trac_mctp, "mctp receive: ", o_val, *io_len);
+        TRACDBIN(g_trac_mctp, "__mctp_hbrtvirt_hostboot_mctp_receive: mctp receive: ", o_val, *io_len);
     }
     else
     {
-        TRACFCOMP(g_trac_mctp, "ERRROR: mctp receive got rc %d", rc);
+        TRACFCOMP(g_trac_mctp, "__mctp_hbrtvirt_hostboot_mctp_receive: ERRROR: mctp receive got rc %d", rc);
+        TRACFBIN(g_trac_mctp, "__mctp_hbrtvirt_hostboot_mctp_receive: mctp receive: ", o_val, *io_len);
     }
 
     return rc;

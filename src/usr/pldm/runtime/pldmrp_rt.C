@@ -30,6 +30,7 @@
 #include "pldmrp_rt.H"
 #include <pldm/pldmif.H>
 #include <runtime/interface.h>
+#include <pldm/extended/pdr_manager.H>
 
 using namespace PLDM;
 
@@ -108,3 +109,23 @@ pldmrp_rt_rc PldmRP::cache_next_pldm_msg(const uint8_t * const i_next_msg,
     }while(0);
     return rc;
 }
+
+void init_pldm(void)
+{
+    PLDM_ENTER("init_pldm");
+    PLDM::thePdrManager().resetPdrs();
+    PLDM::thePdrManager().addLocalPdrs();
+    PLDM_EXIT("init_pldm");
+}
+
+struct registerinitPldm
+{
+    registerinitPldm()
+    {
+        // Register interface for Host to call
+        postInitCalls_t * rt_post = getPostInitCalls();
+        rt_post->callInitPldm = &init_pldm;
+    }
+};
+
+registerinitPldm g_registerinitPldm;

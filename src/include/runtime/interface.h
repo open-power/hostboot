@@ -1189,6 +1189,12 @@ struct postInitCalls_t
     void (*callInitMctp)();
 
     /**
+     * @brief Calls PldmRP::init which will initialize HBRT's end of
+     *        the PLDM communication between HBRT and the BMC
+     */
+    void (*callInitPldm)();
+
+    /**
      * @brief Sets up ErrlManager so it is ready for errors
      *
      */

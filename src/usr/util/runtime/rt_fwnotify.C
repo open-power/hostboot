@@ -23,6 +23,12 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
+/* @file  rt_fwnotify.C
+ *
+ * @brief Contains definition of firmware_notify which can be called from
+ *        by the hypervisor to control HBRT
+ */
+
 #include <sbeio/sbe_retry_handler.H>       // SbeRetryHandler
 #include <util/runtime/rt_fwreq_helper.H>  // firmware_request_helper
 #include <runtime/interface.h>             // g_hostInterfaces
@@ -33,6 +39,10 @@
 #include <targeting/translateTarget.H>     // RT_TARG::getHbTarget
 #include <targeting/common/target.H>       // TargetHandle_t, getTargetFromHuid
 #include <attributeenums.H>                // ATTRIBUTE_ID
+#include <mctp/mctpif_rt.H>                // MCTP::get_next_packet
+#include <mctp/mctp_errl.H>                // MCTP::addBmcAndHypErrorCallouts
+#include <pldm/pldmif.H>                   // PLDM::get_next_request
+#include <sys/time.h>                      // nanosleep
 
 using namespace TARGETING;
 using namespace RUNTIME;
@@ -436,6 +446,116 @@ void logGardEvent(const hostInterfaces::gard_event_t& i_gardEvent)
 
     TRACFCOMP(g_trac_runtime, EXIT_MRK"logGardEvent")
 }
+#if (defined(CONFIG_MCTP) || defined(CONFIG_MCTP_TESTCASES))
+/**
+ *  @brief Handle the next PLDM request if we have one cached, otherwise
+ *         attempt to read MCTP packets in an attempt to get a PLDM request.
+ *
+ *  @return void
+ **/
+void handleMctpAvailable(void)
+{
+    errlHndl_t errl = nullptr;
+
+    do{
+    auto& next_pldm_request = PLDM::get_next_request();
+    // if we have a complete pldm request waiting for us then
+    // handle it
+    if(!next_pldm_request.empty())
+    {
+        errl = PLDM::handle_next_pldm_request();
+        if(errl)
+        {
+            errlCommit(errl, RUNTIME_COMP_ID);
+        }
+        break;
+    }
+
+    int return_code = MCTP::get_next_packet();
+    TRACDCOMP(g_trac_hbrt, "handleMctpAvailable: initial get packet returned rc : %d ", return_code );
+    // if nothing is waiting for us right away then do
+    // not make an error, just break out.
+    // We expect to get more MCTP_AVAILABLE notifications
+    // than we need to process all of the packets
+    if(return_code)
+    {
+        if(return_code == HBRT_RC_NO_MCTP_PACKET)
+        {
+            // this will happen a lot so do not trace
+            break;
+        }
+        else
+        {
+            TRACFCOMP(g_trac_hbrt,
+                      "handleMctpAvailable: rc %d occurred while attempting to retrieve the first MCTP packet",
+                      return_code);
+        }
+    }
+    else
+    {
+        uint8_t sleep_time_sec = 0;
+        while(next_pldm_request.empty())
+        {
+            return_code = MCTP::get_next_packet();
+            if(return_code)
+            {
+                if(return_code == HBRT_RC_NO_MCTP_PACKET)
+                {
+                    constexpr uint8_t sleep_timeout_sec = 90;
+                    constexpr uint8_t one_sec = 1;
+                    constexpr uint8_t zero_nsec = 0;
+                    nanosleep(one_sec,zero_nsec);
+                    if(sleep_time_sec++ < sleep_timeout_sec)
+                    {
+                        continue;
+                    }
+                }
+                TRACFCOMP(g_trac_hbrt,
+                          "handleMctpAvailable: rc %d occurred while attempting to retrieve the next MCTP packet ",
+                          return_code);
+                break;
+             }
+        }
+    }
+
+    if(return_code)
+    {
+        /* @
+         * @errortype
+         * @severity         ERRL_SEV_PREDICTIVE
+         * @moduleid         MOD_RT_FIRMWARE_NOTIFY
+         * @reasoncode       RC_MCTP_AVAILABLE_ERR
+         * @userdata1        return code from MCTP::get_next_packet
+         * @userdata2        unused
+         * @devdesc          Error during MCTP message handling during hbrt
+         * @custdesc         Hardware error detected at runtime
+         */
+        errl = new ErrlEntry( ERRL_SEV_PREDICTIVE,
+                              MOD_RT_FIRMWARE_NOTIFY,
+                              RC_MCTP_AVAILABLE_ERR,
+                              return_code,
+                              0,
+                              ErrlEntry::NO_SW_CALLOUT);
+        errl->collectTrace(PLDM_COMP_NAME);
+        MCTP::addBmcAndHypErrorCallouts(errl);
+    }
+    else
+    {
+        errl = PLDM::handle_next_pldm_request();
+        if(errl)
+        {
+            TRACFCOMP(g_trac_hbrt,
+                      "handleMctpAvailable: an error occurred while attempting to handle the next pldm request");
+        }
+    }
+    }while(0);
+
+    if(errl)
+    {
+        errlCommit(errl, RUNTIME_COMP_ID);
+    }
+}
+#endif
 
 /**
  * @see  src/include/runtime/interface.h for definition of call
@@ -549,7 +669,16 @@ void firmware_notify( uint64_t i_len, void *i_data )
                 logGardEvent(l_hbrt_fw_msg->gard_event);
             } // END case hostInterfaces::HBRT_FW_MSG_TYPE_GARD_EVENT:
             break;
+#if (defined(CONFIG_MCTP) || defined(CONFIG_MCTP_TESTCASES))
+            case hostInterfaces::HBRT_FW_MSG_TYPE_MCTP_AVAILABLE:
+            {
+                TRACDCOMP(g_trac_runtime, "firmware_notify: "
+                "handling MCTP Available command");
 
+                handleMctpAvailable();
+            }// END case hostInterfaces::HBRT_FW_MSG_TYPE_MCTP_AVAILABLE:
+            break;
+#endif
             default:
             {
                 l_badMessage = true;

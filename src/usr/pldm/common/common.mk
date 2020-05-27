@@ -50,8 +50,12 @@ PLDM_EXTENDED_COMMON_OBJS += pldm_fileio_requests.o
 # From ../extended/
 PLDM_EXTENDED_COMMON_OBJS += hb_fru.o
 PLDM_EXTENDED_COMMON_OBJS += hb_pdrs.o
+PLDM_EXTENDED_COMMON_OBJS += pldm_responder.o
 PLDM_EXTENDED_COMMON_OBJS += pdr_manager.o
 PLDM_EXTENDED_COMMON_OBJS += pldm_fru.o
+# From ../responses/
+PLDM_EXTENDED_COMMON_OBJS += pldm_monitor_control_responders.o
+PLDM_EXTENDED_COMMON_OBJS += pldm_fru_data_responders.o
 
 # add these paths to VPATH so compiler knows
 # where to find the .C/.c files we need

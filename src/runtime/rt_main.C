@@ -154,6 +154,9 @@ runtimeInterfaces_t* rt_start(hostInterfaces_t* intf)
     // initialize MCTP
     rtPost->callInitMctp();
 
+    // initialize PLDM
+    rtPost->callInitPldm();
+
     // Make sure errlmanager is ready
     rtPost->callInitErrlManager();
 

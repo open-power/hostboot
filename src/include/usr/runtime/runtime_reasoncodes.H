@@ -152,6 +152,7 @@ namespace RUNTIME
         RC_LOG_GARD_EVENT              = RUNTIME_COMP_ID | 0x4B,
         RC_BAD_HOMER_PHYS_ADDR         = RUNTIME_COMP_ID | 0x4C,
         RC_COULD_NOT_MAP_RESET_REASON  = RUNTIME_COMP_ID | 0x4D,
+        RC_MCTP_AVAILABLE_ERR          = RUNTIME_COMP_ID | 0x4E,
     };
 
     enum UserDetailsTypes

@@ -69,6 +69,8 @@ namespace MCTP
 
 int MctpRP::get_next_packet(void)
 {
+    TRACDCOMP(g_trac_mctp,
+             "requesting next mctp packet");
     return mctp_hbrtvirt_rx_start(iv_hbrtvirt);
 }
 
@@ -134,7 +136,6 @@ static void rx_message(uint8_t i_eid, void * i_data,
                                                 TO_UINT32(i_eid)),
                                               request_hdr_data,
                                               ErrlEntry::NO_SW_CALLOUT);
-
               addBmcAndHypErrorCallouts(errl);
               errlCommit(errl, MCTP_COMP_ID);
           }
@@ -163,7 +164,6 @@ static void rx_message(uint8_t i_eid, void * i_data,
                                           *msg_bytes,
                                           i_eid,
                                           ErrlEntry::NO_SW_CALLOUT);
-
           addBmcAndHypErrorCallouts(errl);
           errlCommit(errl, MCTP_COMP_ID);
           break;
