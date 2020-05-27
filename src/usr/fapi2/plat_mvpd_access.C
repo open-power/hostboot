@@ -248,6 +248,7 @@ fapi2::ReturnCode MvpdKeywordXlate(const fapi2::MvpdKeyword i_fapiKeyword,
         {MVPD::pdW, MVPD_KEYWORD_PDW},
         {MVPD::AW,  MVPD_KEYWORD_AW},
         {MVPD::CI,  MVPD_KEYWORD_CI},
+        {MVPD::pdS, MVPD_KEYWORD_PDS},
 
         /*Keywords available in HB but not in FAPI enum*/
         //{MVPD::PM,  MVPD_KEYWORD_PM},
