@@ -249,7 +249,8 @@ void getRecordSetByIdAndType(const uint8_t* const i_pldm_fru_table_buf,
       if(le16toh(record_data->record_set_id) == i_record_set_id &&
          record_data->record_type == i_record_type )
       {
-          o_pldm_fru_table_buf.assign(in_table_cur_ptr,
+          o_pldm_fru_table_buf.insert(o_pldm_fru_table_buf.end(),
+                                      in_table_cur_ptr,
                                       in_table_cur_ptr + record_size);
           o_records_in_output_table++;
       }
@@ -627,9 +628,9 @@ errlHndl_t generate_ipz_formatted_vpd(const uint8_t* const i_pldm_fru_table_buf,
 
         if(record_data->record_type != PLDM_FRU_RECORD_TYPE_OEM)
         {
-            PLDM_ERR("generate_ipz_formatted_vpd: cannot process non-oem records in pldmFruRecordSetToIPZ. "
+            PLDM_ERR("generate_ipz_formatted_vpd: cannot process non-oem type 0x%02x in pldmFruRecordSetToIPZ. "
                      "Note: this is also a sanity check, this will be the first fail we hit if contents of"
-                     " i_pldm_fru_table_buf is junk.");
+                     " i_pldm_fru_table_buf is junk.", record_data->record_type);
             /*
             * @errortype  ERRL_SEV_UNRECOVERABLE
             * @moduleid   MOD_PLDM_FRU_TO_IPZ
@@ -726,10 +727,9 @@ errlHndl_t generate_ipz_formatted_vpd(const uint8_t* const i_pldm_fru_table_buf,
                 }
 
                 std::vector<uint16_t> record_keywords = record_keyword_field_map.at(record_name);
-                std::vector<uint16_t>::iterator it = std::find(record_keywords.begin(),
-                                                               record_keywords.end(),
-                                                               fru_tlv->type);
-                if(it == record_keywords.end())
+
+                if(fru_tlv->type < RT_FIELD_TYPE ||
+                   fru_tlv->type >= record_keywords.size())
                 {
                     PLDM_ERR("generate_ipz_formatted_vpd: Unsupported PLDM Fru Record Field Type %u for record 0x%04x found",
                              fru_tlv->type, record_name)
@@ -752,20 +752,17 @@ errlHndl_t generate_ipz_formatted_vpd(const uint8_t* const i_pldm_fru_table_buf,
                     break;
                 }
 
-                // use record_keyword_field_map to lookup the mapping of the
-                // fru entry field id to the IPZ record keyword
                 auto keyword_name_ptr =
-                      reinterpret_cast<uint8_t *>(&(*it));
+                      reinterpret_cast<uint8_t *>(&record_keywords[fru_tlv->type]);
 
                 PLDM_DBG("generate_ipz_formatted_vpd: found record 0x%.08x  keyword 0x%.04x",
                          record_name,
-                         *it);
+                         record_keywords[fru_tlv->type]);
 
                 // Add the keyword name, length, and value to the ipz_record
                 // we are building
-                std::copy(keyword_name_ptr,
-                          keyword_name_ptr + sizeof(*it),
-                          back_inserter(record_bytes));
+                record_bytes.push_back(*keyword_name_ptr);
+                record_bytes.push_back(*(keyword_name_ptr + 1));
 
                 record_bytes.push_back(fru_tlv->length);
 
@@ -832,8 +829,9 @@ errlHndl_t pldmFruRecordSetToIPZ(const uint8_t* const i_pldm_fru_table_buf,
                                  const uint16_t i_pldm_fru_record_count,
                                  std::vector<uint8_t>& o_ipz_vpd_buf)
 {
-    PLDM_ENTER("pldmFruRecordSetToIPZ: input fru record count %d",
-               i_pldm_fru_record_count );
+    PLDM_ENTER("pldmFruRecordSetToIPZ: input fru record count %d   i_pldm_fru_table_buf = %p",
+               i_pldm_fru_record_count,
+               i_pldm_fru_table_buf);
     errlHndl_t errl = nullptr;
 
     do{
@@ -1001,7 +999,7 @@ errlHndl_t cacheRemoteFruVpd()
                              table_ptr.get() );
     if(errl) { break; }
 
-    const bool CACHE_VPD = false;
+    const bool CACHE_VPD = true;
     const bool NO_CACHE_VPD = false;
 
     struct pldm_entity_to_targeting_mapping

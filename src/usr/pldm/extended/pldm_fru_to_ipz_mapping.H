@@ -47,6 +47,9 @@ enum valid_records : uint32_t
     VSYS = 0x56535953,
     LXR0 = 0x4C585230,
 };
+
+constexpr uint8_t RT_FIELD_TYPE = 2;
+
 // Order must match PLDM FRU IPZ Keyword Mapping Doc
 const uint16_t valid_vini_keywords[]
                 { 0xFFFF,  // invalid

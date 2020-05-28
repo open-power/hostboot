@@ -53,6 +53,7 @@
 #include <attributetraits.H>
 #ifdef CONFIG_PLDM
 #include <pldm/extended/pdr_manager.H>
+#include <pldm/extended/hb_fru.H>
 #endif
 #include <fapi2/plat_hwp_invoker.H>
 #include <fapi2/target.H>
@@ -692,6 +693,17 @@ void* host_discover_targets( void *io_pArgs )
 
 #if( defined(CONFIG_SUPPORT_EEPROM_CACHING) && !defined(CONFIG_SUPPORT_EEPROM_HWACCESS) )
         l_err = EEPROM::cacheEECACHEPartition();
+#endif
+
+#ifdef CONFIG_PLDM
+        l_err = PLDM::cacheRemoteFruVpd();
+        if (l_err)
+        {
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                      ERR_MRK"Failed to cache remote FRU info from the BMC");
+
+            captureError(l_err, l_stepError, ISTEP_COMP_ID);
+        }
 #endif
         if(nullptr == l_err)
         {
