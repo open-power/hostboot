@@ -2283,7 +2283,7 @@
   </targetType>
 
   <targetType>
-    <id>sys-sys-power10</id>
+    <id>sys</id>
     <parent>base</parent>
     <attribute>
       <default>affinity:sys-0</default>
@@ -2392,10 +2392,6 @@
       <id>MIRROR_BASE_ADDRESS</id>
     </attribute>
     <attribute>
-      <default>POWER10</default>
-      <id>MODEL</id>
-    </attribute>
-    <attribute>
       <id>MRW_DDR4_VDDR_MAX_LIMIT</id>
     </attribute>
     <attribute>
@@ -2481,6 +2477,9 @@
       <id>SP_FUNCTIONS</id>
     </attribute>
     <attribute>
+      <id>SUPPORTED_STOP_STATES</id>
+    </attribute>
+    <attribute>
       <id>SYNC_BETWEEN_STEPS</id>
     </attribute>
     <attribute>
@@ -2511,6 +2510,18 @@
     </attribute>
     <attribute>
       <id>USE_TCES_FOR_DMAS</id>
+    </attribute>
+    <attribute>
+      <id>XSCOM_BASE_ADDRESS</id>
+    </attribute>
+  </targetType>
+
+  <targetType>
+    <id>sys-sys-power10</id>
+    <parent>sys</parent>
+    <attribute>
+      <default>POWER10</default>
+      <id>MODEL</id>
     </attribute>
     <attribute>
       <default>0x000603FC00000000</default>

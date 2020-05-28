@@ -1013,9 +1013,6 @@ errlHndl_t HdatPcrd::hdatSetProcessorInfo(
             assert(l_pSysTarget != NULL);
         }
 
-//@TODO RTC 246357 missing attribute
-if (0)
-{
 #ifdef CONFIG_LOAD_PHYP_FROM_BOOTKERNEL
         //Disable all STOP states (for debug ease) when loading
         //PHYP from BOOTKERNEL partition.
@@ -1024,8 +1021,7 @@ if (0)
         iv_spPcrd->hdatChipData.hdatPcrdStopLevelSupport =
             l_pSysTarget->getAttr<TARGETING::ATTR_SUPPORTED_STOP_STATES>();
 #endif
-}
-        iv_spPcrd->hdatChipData.hdatPcrdStopLevelSupport = 0x00000000;
+
         iv_spPcrd->hdatChipData.hdatPcrdCheckstopAddr = HDAT_SW_CHKSTP_FIR_SCOM;
         iv_spPcrd->hdatChipData.hdatPcrdSpareBitNum   = HDAT_SW_CHKSTP_FIR_SCOM_BIT_POS;
 
