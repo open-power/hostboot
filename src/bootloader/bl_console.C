@@ -304,46 +304,56 @@ void bl_console::putChar(const char i_c)
             break;
         }
 
-        const uint64_t DELAY_NS = 100;
-        const size_t DELAY_LOOPS = 100000000;
-
-        uint8_t data = 0;
-        size_t loops = 0;
-
-        do
+        static unsigned char txRoom = CONSOLE::TX_FIFO_SIZE;
+        if(txRoom < CONSOLE::TX_FIFO_UNBLOCK_THRESHOLD)
         {
-            error = readUartReg(LSR, data);
+            uint8_t data = 0;
+            size_t loops = 0;
+
+            do
+            {
+                error = readUartReg(LSR, data);
+                if (error)
+                {
+                    break;
+                }
+
+                // Wait for idle or error status
+                if (data == LSR_BAD || (data & LSR_THRE))
+                {
+                    break;
+                }
+                nanosleep(0, CONSOLE::DELAY_NS);
+
+                loops++;
+            } while (loops < CONSOLE::DELAY_LOOPS);
+
             if (error)
             {
                 break;
             }
-
-            // Wait for idle or error status
-            if (data == LSR_BAD || (data & LSR_THRE))
+            else if (data == LSR_BAD)
             {
+                bl_console::console_fail = true;
                 break;
             }
-            nanosleep(0, DELAY_NS);
-
-            loops++;
-        } while (loops < DELAY_LOOPS);
-
-        if (error)
-        {
-            break;
-        }
-        else if (data == LSR_BAD)
-        {
-            bl_console::console_fail = true;
-            break;
-        }
-        else if (loops >= DELAY_LOOPS)
-        {
-            bl_console::console_fail = true;
-            break;
+            else if (loops >= CONSOLE::DELAY_LOOPS)
+            {
+                bl_console::console_fail = true;
+                break;
+            }
+            else
+            {
+                txRoom = CONSOLE::TX_FIFO_SIZE;
+            }
         }
 
         // Write character to FIFO
-        writeUartReg(THR, i_c);
+        error = writeUartReg(THR, i_c);
+        if(!error)
+        {
+            txRoom --;
+        }
+
     } while (0);
 }

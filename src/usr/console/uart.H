@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2020                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -38,6 +38,27 @@
 
 namespace CONSOLE
 {
+    /**
+     *  Enums used for controlling behavior of the TX FIFO
+     */
+    enum FIFO_CONTROL
+    {
+        // Max number of characters that can fit into the transmit FIFO at
+        // one time.
+        TX_FIFO_SIZE = 16,
+
+        // Start filling the FIFO without blocking when at least this many
+        // characters in the FIFO are free.
+        TX_FIFO_UNBLOCK_THRESHOLD = 1,
+
+        // If FIFO was not empty in the last polling interval, amount of time
+        // to wait before checking again, in nanoseconds.
+        DELAY_NS = 100,
+
+        // Number of times to poll for the FIFO to be empty before giving up.
+        DELAY_LOOPS = 100000000,
+    };
+
     namespace UARTREGS
     {
         /** UART Register Offsets */

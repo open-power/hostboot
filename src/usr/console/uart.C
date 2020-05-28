@@ -130,10 +130,9 @@ namespace CONSOLE
             if (iv_failed || !iv_initialized) { break; }
 
             // Wait for transmit FIFO to have space.
+            static unsigned char txRoom = CONSOLE::TX_FIFO_SIZE;
+            if(txRoom < CONSOLE::TX_FIFO_UNBLOCK_THRESHOLD)
             {
-                const uint64_t DELAY_NS = 100;
-                const uint64_t DELAY_LOOPS = 100000000;
-
                 uint8_t data = 0;
                 uint64_t loops = 0;
 
@@ -147,11 +146,11 @@ namespace CONSOLE
                     {
                         break;
                     }
-                    nanosleep(0, DELAY_NS);
+                    nanosleep(0, CONSOLE::DELAY_NS);
                     task_yield();
 
                     loops++;
-                } while( loops < DELAY_LOOPS);
+                } while( loops < CONSOLE::DELAY_LOOPS);
 
                 if (l_errl)
                 {
@@ -178,7 +177,7 @@ namespace CONSOLE
                                                 HWAS::SRCI_PRIORITY_MED);
                     break;
                 }
-                else if (loops >= DELAY_LOOPS)
+                else if (loops >= CONSOLE::DELAY_LOOPS)
                 {
                     printk("UART: FIFO timeout.\n");
                     iv_failed = true;
@@ -197,10 +196,18 @@ namespace CONSOLE
                                                 HWAS::SRCI_PRIORITY_MED);
                     break;
                 }
+                else
+                {
+                    txRoom = CONSOLE::TX_FIFO_SIZE;
+                }
             }
 
             // Write character to FIFO.
             l_errl = writeReg(THR, c);
+            if(!l_errl)
+            {
+                txRoom--;
+            }
 
         } while(0);
 
