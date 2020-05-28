@@ -277,6 +277,7 @@ fapi2::ReturnCode p10_fbc_eff_config_links(
     fapi2::ATTR_PROC_FABRIC_A_ATTACHED_CHIP_CNFG_Type l_a_en = { 0 };
     fapi2::ATTR_PROC_FABRIC_X_LINKS_CNFG_Type l_x_num = 0;
     fapi2::ATTR_PROC_FABRIC_A_LINKS_CNFG_Type l_a_num = 0;
+    uint8_t l_link_id = 0;
 
     // link/fabric ID on remote end; indexed by link ID on local end
     fapi2::ATTR_PROC_FABRIC_X_ATTACHED_LINK_ID_Type l_x_rem_link_id = { 0 };
@@ -364,7 +365,7 @@ fapi2::ReturnCode p10_fbc_eff_config_links(
     }
 
     // determine number of enabled X/A links respectively
-    for (uint8_t l_link_id = 0, l_x_num = 0, l_a_num = 0; l_link_id < P10_FBC_UTILS_MAX_LINKS; l_link_id++)
+    for (l_link_id = 0, l_x_num = 0, l_a_num = 0; l_link_id < P10_FBC_UTILS_MAX_LINKS; l_link_id++)
     {
         if (l_x_en[l_link_id])
         {

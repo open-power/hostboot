@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -36,6 +36,7 @@
 //------------------------------------------------------------------------------
 #include <p10_fbc_eff_config_aggregate.H>
 #include <p10_fbc_utils.H>
+#include <p10_smp_wrap.H>
 
 //------------------------------------------------------------------------------
 // Function definitions
@@ -207,6 +208,19 @@ fapi2::ReturnCode p10_fbc_eff_config_aggregate(
     uint8_t l_loc_fbc_chip_id;
     uint8_t l_loc_fbc_group_id;
     uint8_t l_loc_fbc_id;
+
+    ////////////////////////////////////////////////////////
+    // Skip aggregate link config in manufacturing mode
+    ////////////////////////////////////////////////////////
+    fapi2::ATTR_MFG_FLAGS_Type l_mfg_flags;
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MFG_FLAGS, FAPI_SYSTEM, l_mfg_flags),
+             "Error from FAPI_ATTR_GET (ATTR_MFG_FLAGS)");
+
+    if(l_mfg_flags[MFG_FLAGS_SMP_WRAP_CELL] == fapi2::ENUM_ATTR_MFG_FLAGS_MNFG_SMP_WRAP_CONFIG)
+    {
+        FAPI_DBG("Skipping aggregate links setup (MNFG_SMP_WRAP_CONFIG)");
+        goto fapi_try_exit;
+    }
 
     ////////////////////////////////////////////////////////
     // Read attributes

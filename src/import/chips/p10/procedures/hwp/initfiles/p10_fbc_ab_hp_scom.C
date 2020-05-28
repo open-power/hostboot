@@ -248,6 +248,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX0_EN_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<0, 1, 48, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX0_EN_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX0_EN_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<0, 1, 48, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX0_EN_NEXT_OFF );
+            }
 
             if (((l_TGT0_ATTR_PROC_FABRIC_A_ATTACHED_CHIP_ID[literal_0] == literal_0) && l_def_A0_ENABLED))
             {
@@ -361,6 +366,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX1_EN_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<1, 1, 48, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX1_EN_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX1_EN_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<1, 1, 48, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX1_EN_NEXT_OFF );
             }
 
             if (((l_TGT0_ATTR_PROC_FABRIC_A_ATTACHED_CHIP_ID[literal_1] == literal_0) && l_def_A1_ENABLED))
@@ -476,6 +486,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX2_EN_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<2, 1, 48, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX2_EN_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX2_EN_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<2, 1, 48, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX2_EN_NEXT_OFF );
+            }
 
             if (((l_TGT0_ATTR_PROC_FABRIC_A_ATTACHED_CHIP_ID[literal_2] == literal_0) && l_def_A2_ENABLED))
             {
@@ -589,6 +604,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX3_EN_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<3, 1, 48, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX3_EN_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX3_EN_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<3, 1, 48, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX3_EN_NEXT_OFF );
             }
 
             if (((l_TGT0_ATTR_PROC_FABRIC_A_ATTACHED_CHIP_ID[literal_3] == literal_0) && l_def_A3_ENABLED))
@@ -704,6 +724,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX4_EN_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<4, 1, 48, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX4_EN_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX4_EN_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<4, 1, 48, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX4_EN_NEXT_OFF );
+            }
 
             if (((l_TGT0_ATTR_PROC_FABRIC_A_ATTACHED_CHIP_ID[literal_4] == literal_0) && l_def_A4_ENABLED))
             {
@@ -817,6 +842,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX5_EN_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<5, 1, 48, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX5_EN_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX5_EN_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<5, 1, 48, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX5_EN_NEXT_OFF );
             }
 
             if (((l_TGT0_ATTR_PROC_FABRIC_A_ATTACHED_CHIP_ID[literal_5] == literal_0) && l_def_A5_ENABLED))
@@ -932,6 +962,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX6_EN_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<6, 1, 48, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX6_EN_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX6_EN_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<6, 1, 48, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX6_EN_NEXT_OFF );
+            }
 
             if (((l_TGT0_ATTR_PROC_FABRIC_A_ATTACHED_CHIP_ID[literal_6] == literal_0) && l_def_A6_ENABLED))
             {
@@ -1046,6 +1081,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX7_EN_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<7, 1, 48, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX7_EN_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX7_EN_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<7, 1, 48, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX7_EN_NEXT_OFF );
+            }
 
             if (((l_TGT0_ATTR_PROC_FABRIC_A_ATTACHED_CHIP_ID[literal_7] == literal_0) && l_def_A7_ENABLED))
             {
@@ -1159,6 +1199,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY0_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<0, 1, 48, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY0_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY0_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<0, 1, 48, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY0_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_0] == literal_0))
             {
@@ -1206,6 +1251,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY1_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<1, 1, 48, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY1_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY1_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<1, 1, 48, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY1_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_1] == literal_0))
@@ -1255,6 +1305,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY2_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<2, 1, 48, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY2_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY2_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<2, 1, 48, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY2_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_2] == literal_0))
             {
@@ -1302,6 +1357,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY3_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<3, 1, 48, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY3_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY3_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<3, 1, 48, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY3_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_3] == literal_0))
@@ -1351,6 +1411,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY4_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<4, 1, 48, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY4_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY4_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<4, 1, 48, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY4_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_4] == literal_0))
             {
@@ -1398,6 +1463,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY5_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<5, 1, 48, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY5_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY5_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<5, 1, 48, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY5_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_5] == literal_0))
@@ -1447,6 +1517,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY6_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<6, 1, 48, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY6_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY6_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<6, 1, 48, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY6_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_6] == literal_0))
             {
@@ -1494,6 +1569,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY7_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<7, 1, 48, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY7_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY7_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<7, 1, 48, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY7_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_7] == literal_0))
@@ -1543,6 +1623,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY8_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<8, 1, 48, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY8_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY8_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<8, 1, 48, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY8_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_8] == literal_0))
             {
@@ -1590,6 +1675,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY9_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<9, 1, 48, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY9_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY9_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<9, 1, 48, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY9_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_9] == literal_0))
@@ -1639,6 +1729,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY10_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<10, 1, 48, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY10_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY10_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<10, 1, 48, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY10_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_10] == literal_0))
             {
@@ -1686,6 +1781,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY11_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<11, 1, 48, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY11_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY11_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<11, 1, 48, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY11_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_11] == literal_0))
@@ -1735,6 +1835,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY12_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<12, 1, 48, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY12_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY12_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<12, 1, 48, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY12_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_12] == literal_0))
             {
@@ -1782,6 +1887,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY13_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<13, 1, 48, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY13_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY13_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<13, 1, 48, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY13_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_13] == literal_0))
@@ -1831,6 +1941,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY14_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<14, 1, 48, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY14_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY14_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<14, 1, 48, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY14_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_14] == literal_0))
             {
@@ -1878,6 +1993,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY15_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<15, 1, 48, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY15_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY15_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<15, 1, 48, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY15_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_15] == literal_0))
@@ -1932,6 +2052,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY16_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<0, 1, 48, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY16_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY16_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<0, 1, 48, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY16_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_16] == literal_0))
             {
@@ -1979,6 +2104,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY17_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<1, 1, 48, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY17_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY17_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<1, 1, 48, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY17_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_17] == literal_0))
@@ -2028,6 +2158,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY18_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<2, 1, 48, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY18_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY18_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<2, 1, 48, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY18_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_18] == literal_0))
             {
@@ -2075,6 +2210,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY19_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<3, 1, 48, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY19_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY19_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<3, 1, 48, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY19_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_19] == literal_0))
@@ -2124,6 +2264,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY20_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<4, 1, 48, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY20_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY20_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<4, 1, 48, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY20_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_20] == literal_0))
             {
@@ -2171,6 +2316,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY21_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<5, 1, 48, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY21_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY21_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<5, 1, 48, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY21_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_21] == literal_0))
@@ -2220,6 +2370,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY22_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<6, 1, 48, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY22_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY22_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<6, 1, 48, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY22_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_22] == literal_0))
             {
@@ -2267,6 +2422,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY23_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<7, 1, 48, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY23_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY23_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<7, 1, 48, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY23_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_23] == literal_0))
@@ -2316,6 +2476,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY24_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<8, 1, 48, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY24_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY24_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<8, 1, 48, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY24_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_24] == literal_0))
             {
@@ -2363,6 +2528,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY25_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<9, 1, 48, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY25_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY25_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<9, 1, 48, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY25_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_25] == literal_0))
@@ -2412,6 +2582,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY26_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<10, 1, 48, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY26_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY26_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<10, 1, 48, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY26_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_26] == literal_0))
             {
@@ -2459,6 +2634,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY27_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<11, 1, 48, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY27_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY27_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<11, 1, 48, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY27_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_27] == literal_0))
@@ -2508,6 +2688,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY28_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<12, 1, 48, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY28_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY28_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<12, 1, 48, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY28_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_28] == literal_0))
             {
@@ -2555,6 +2740,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY29_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<13, 1, 48, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY29_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY29_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<13, 1, 48, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY29_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_29] == literal_0))
@@ -2604,6 +2794,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY30_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<14, 1, 48, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY30_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY30_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<14, 1, 48, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY30_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_30] == literal_0))
             {
@@ -2651,6 +2846,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY31_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<15, 1, 48, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY31_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY31_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<15, 1, 48, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY31_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_31] == literal_0))
@@ -2794,6 +2994,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX0_EN_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<0, 1, 49, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX0_EN_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX0_EN_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<0, 1, 49, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX0_EN_NEXT_OFF );
+            }
 
             if (((l_TGT0_ATTR_PROC_FABRIC_A_ATTACHED_CHIP_ID[literal_0] == literal_0) && l_def_A0_ENABLED))
             {
@@ -2907,6 +3112,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX1_EN_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<1, 1, 49, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX1_EN_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX1_EN_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<1, 1, 49, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX1_EN_NEXT_OFF );
             }
 
             if (((l_TGT0_ATTR_PROC_FABRIC_A_ATTACHED_CHIP_ID[literal_1] == literal_0) && l_def_A1_ENABLED))
@@ -3022,6 +3232,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX2_EN_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<2, 1, 49, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX2_EN_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX2_EN_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<2, 1, 49, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX2_EN_NEXT_OFF );
+            }
 
             if (((l_TGT0_ATTR_PROC_FABRIC_A_ATTACHED_CHIP_ID[literal_2] == literal_0) && l_def_A2_ENABLED))
             {
@@ -3135,6 +3350,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX3_EN_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<3, 1, 49, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX3_EN_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX3_EN_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<3, 1, 49, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX3_EN_NEXT_OFF );
             }
 
             if (((l_TGT0_ATTR_PROC_FABRIC_A_ATTACHED_CHIP_ID[literal_3] == literal_0) && l_def_A3_ENABLED))
@@ -3250,6 +3470,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX4_EN_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<4, 1, 49, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX4_EN_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX4_EN_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<4, 1, 49, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX4_EN_NEXT_OFF );
+            }
 
             if (((l_TGT0_ATTR_PROC_FABRIC_A_ATTACHED_CHIP_ID[literal_4] == literal_0) && l_def_A4_ENABLED))
             {
@@ -3363,6 +3588,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX5_EN_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<5, 1, 49, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX5_EN_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX5_EN_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<5, 1, 49, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX5_EN_NEXT_OFF );
             }
 
             if (((l_TGT0_ATTR_PROC_FABRIC_A_ATTACHED_CHIP_ID[literal_5] == literal_0) && l_def_A5_ENABLED))
@@ -3478,6 +3708,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX6_EN_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<6, 1, 49, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX6_EN_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX6_EN_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<6, 1, 49, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX6_EN_NEXT_OFF );
+            }
 
             if (((l_TGT0_ATTR_PROC_FABRIC_A_ATTACHED_CHIP_ID[literal_6] == literal_0) && l_def_A6_ENABLED))
             {
@@ -3592,6 +3827,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX7_EN_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<7, 1, 49, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX7_EN_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX7_EN_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<7, 1, 49, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX7_EN_NEXT_OFF );
+            }
 
             if (((l_TGT0_ATTR_PROC_FABRIC_A_ATTACHED_CHIP_ID[literal_7] == literal_0) && l_def_A7_ENABLED))
             {
@@ -3705,6 +3945,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY0_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<0, 1, 49, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY0_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY0_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<0, 1, 49, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY0_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_0] == literal_0))
             {
@@ -3752,6 +3997,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY1_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<1, 1, 49, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY1_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY1_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<1, 1, 49, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY1_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_1] == literal_0))
@@ -3801,6 +4051,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY2_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<2, 1, 49, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY2_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY2_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<2, 1, 49, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY2_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_2] == literal_0))
             {
@@ -3848,6 +4103,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY3_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<3, 1, 49, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY3_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY3_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<3, 1, 49, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY3_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_3] == literal_0))
@@ -3897,6 +4157,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY4_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<4, 1, 49, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY4_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY4_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<4, 1, 49, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY4_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_4] == literal_0))
             {
@@ -3944,6 +4209,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY5_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<5, 1, 49, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY5_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY5_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<5, 1, 49, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY5_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_5] == literal_0))
@@ -3993,6 +4263,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY6_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<6, 1, 49, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY6_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY6_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<6, 1, 49, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY6_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_6] == literal_0))
             {
@@ -4040,6 +4315,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY7_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<7, 1, 49, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY7_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY7_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<7, 1, 49, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY7_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_7] == literal_0))
@@ -4089,6 +4369,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY8_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<8, 1, 49, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY8_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY8_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<8, 1, 49, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY8_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_8] == literal_0))
             {
@@ -4136,6 +4421,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY9_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<9, 1, 49, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY9_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY9_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<9, 1, 49, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY9_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_9] == literal_0))
@@ -4185,6 +4475,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY10_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<10, 1, 49, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY10_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY10_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<10, 1, 49, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY10_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_10] == literal_0))
             {
@@ -4232,6 +4527,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY11_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<11, 1, 49, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY11_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY11_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<11, 1, 49, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY11_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_11] == literal_0))
@@ -4281,6 +4581,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY12_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<12, 1, 49, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY12_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY12_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<12, 1, 49, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY12_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_12] == literal_0))
             {
@@ -4328,6 +4633,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY13_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<13, 1, 49, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY13_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY13_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<13, 1, 49, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY13_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_13] == literal_0))
@@ -4377,6 +4687,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY14_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<14, 1, 49, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY14_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY14_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<14, 1, 49, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY14_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_14] == literal_0))
             {
@@ -4424,6 +4739,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY15_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<15, 1, 49, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY15_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY15_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<15, 1, 49, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY15_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_15] == literal_0))
@@ -4478,6 +4798,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY16_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<0, 1, 49, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY16_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY16_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<0, 1, 49, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY16_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_16] == literal_0))
             {
@@ -4525,6 +4850,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY17_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<1, 1, 49, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY17_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY17_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<1, 1, 49, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY17_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_17] == literal_0))
@@ -4574,6 +4904,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY18_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<2, 1, 49, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY18_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY18_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<2, 1, 49, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY18_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_18] == literal_0))
             {
@@ -4621,6 +4956,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY19_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<3, 1, 49, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY19_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY19_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<3, 1, 49, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY19_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_19] == literal_0))
@@ -4670,6 +5010,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY20_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<4, 1, 49, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY20_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY20_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<4, 1, 49, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY20_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_20] == literal_0))
             {
@@ -4717,6 +5062,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY21_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<5, 1, 49, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY21_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY21_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<5, 1, 49, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY21_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_21] == literal_0))
@@ -4766,6 +5116,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY22_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<6, 1, 49, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY22_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY22_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<6, 1, 49, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY22_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_22] == literal_0))
             {
@@ -4813,6 +5168,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY23_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<7, 1, 49, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY23_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY23_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<7, 1, 49, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY23_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_23] == literal_0))
@@ -4862,6 +5222,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY24_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<8, 1, 49, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY24_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY24_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<8, 1, 49, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY24_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_24] == literal_0))
             {
@@ -4909,6 +5274,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY25_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<9, 1, 49, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY25_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY25_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<9, 1, 49, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY25_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_25] == literal_0))
@@ -4958,6 +5328,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY26_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<10, 1, 49, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY26_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY26_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<10, 1, 49, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY26_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_26] == literal_0))
             {
@@ -5005,6 +5380,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY27_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<11, 1, 49, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY27_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY27_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<11, 1, 49, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY27_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_27] == literal_0))
@@ -5054,6 +5434,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY28_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<12, 1, 49, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY28_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY28_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<12, 1, 49, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY28_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_28] == literal_0))
             {
@@ -5101,6 +5486,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY29_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<13, 1, 49, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY29_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY29_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<13, 1, 49, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY29_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_29] == literal_0))
@@ -5150,6 +5540,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY30_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<14, 1, 49, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY30_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY30_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<14, 1, 49, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY30_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_30] == literal_0))
             {
@@ -5197,6 +5592,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY31_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<15, 1, 49, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY31_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY31_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<15, 1, 49, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY31_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_31] == literal_0))
@@ -5340,6 +5740,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX0_EN_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<0, 1, 50, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX0_EN_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX0_EN_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<0, 1, 50, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX0_EN_NEXT_OFF );
+            }
 
             if (((l_TGT0_ATTR_PROC_FABRIC_A_ATTACHED_CHIP_ID[literal_0] == literal_0) && l_def_A0_ENABLED))
             {
@@ -5453,6 +5858,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX1_EN_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<1, 1, 50, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX1_EN_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX1_EN_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<1, 1, 50, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX1_EN_NEXT_OFF );
             }
 
             if (((l_TGT0_ATTR_PROC_FABRIC_A_ATTACHED_CHIP_ID[literal_1] == literal_0) && l_def_A1_ENABLED))
@@ -5568,6 +5978,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX2_EN_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<2, 1, 50, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX2_EN_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX2_EN_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<2, 1, 50, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX2_EN_NEXT_OFF );
+            }
 
             if (((l_TGT0_ATTR_PROC_FABRIC_A_ATTACHED_CHIP_ID[literal_2] == literal_0) && l_def_A2_ENABLED))
             {
@@ -5681,6 +6096,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX3_EN_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<3, 1, 50, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX3_EN_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX3_EN_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<3, 1, 50, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX3_EN_NEXT_OFF );
             }
 
             if (((l_TGT0_ATTR_PROC_FABRIC_A_ATTACHED_CHIP_ID[literal_3] == literal_0) && l_def_A3_ENABLED))
@@ -5796,6 +6216,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX4_EN_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<4, 1, 50, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX4_EN_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX4_EN_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<4, 1, 50, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX4_EN_NEXT_OFF );
+            }
 
             if (((l_TGT0_ATTR_PROC_FABRIC_A_ATTACHED_CHIP_ID[literal_4] == literal_0) && l_def_A4_ENABLED))
             {
@@ -5909,6 +6334,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX5_EN_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<5, 1, 50, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX5_EN_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX5_EN_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<5, 1, 50, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX5_EN_NEXT_OFF );
             }
 
             if (((l_TGT0_ATTR_PROC_FABRIC_A_ATTACHED_CHIP_ID[literal_5] == literal_0) && l_def_A5_ENABLED))
@@ -6024,6 +6454,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX6_EN_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<6, 1, 50, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX6_EN_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX6_EN_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<6, 1, 50, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX6_EN_NEXT_OFF );
+            }
 
             if (((l_TGT0_ATTR_PROC_FABRIC_A_ATTACHED_CHIP_ID[literal_6] == literal_0) && l_def_A6_ENABLED))
             {
@@ -6138,6 +6573,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX7_EN_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<7, 1, 50, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX7_EN_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX7_EN_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<7, 1, 50, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX7_EN_NEXT_OFF );
+            }
 
             if (((l_TGT0_ATTR_PROC_FABRIC_A_ATTACHED_CHIP_ID[literal_7] == literal_0) && l_def_A7_ENABLED))
             {
@@ -6251,6 +6691,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY0_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<0, 1, 50, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY0_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY0_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<0, 1, 50, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY0_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_0] == literal_0))
             {
@@ -6298,6 +6743,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY1_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<1, 1, 50, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY1_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY1_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<1, 1, 50, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY1_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_1] == literal_0))
@@ -6347,6 +6797,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY2_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<2, 1, 50, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY2_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY2_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<2, 1, 50, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY2_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_2] == literal_0))
             {
@@ -6394,6 +6849,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY3_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<3, 1, 50, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY3_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY3_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<3, 1, 50, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY3_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_3] == literal_0))
@@ -6443,6 +6903,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY4_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<4, 1, 50, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY4_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY4_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<4, 1, 50, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY4_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_4] == literal_0))
             {
@@ -6490,6 +6955,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY5_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<5, 1, 50, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY5_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY5_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<5, 1, 50, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY5_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_5] == literal_0))
@@ -6539,6 +7009,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY6_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<6, 1, 50, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY6_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY6_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<6, 1, 50, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY6_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_6] == literal_0))
             {
@@ -6586,6 +7061,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY7_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<7, 1, 50, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY7_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY7_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<7, 1, 50, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY7_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_7] == literal_0))
@@ -6635,6 +7115,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY8_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<8, 1, 50, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY8_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY8_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<8, 1, 50, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY8_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_8] == literal_0))
             {
@@ -6682,6 +7167,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY9_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<9, 1, 50, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY9_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY9_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<9, 1, 50, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY9_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_9] == literal_0))
@@ -6731,6 +7221,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY10_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<10, 1, 50, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY10_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY10_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<10, 1, 50, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY10_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_10] == literal_0))
             {
@@ -6778,6 +7273,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY11_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<11, 1, 50, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY11_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY11_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<11, 1, 50, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY11_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_11] == literal_0))
@@ -6827,6 +7327,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY12_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<12, 1, 50, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY12_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY12_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<12, 1, 50, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY12_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_12] == literal_0))
             {
@@ -6874,6 +7379,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY13_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<13, 1, 50, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY13_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY13_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<13, 1, 50, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY13_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_13] == literal_0))
@@ -6923,6 +7433,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY14_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<14, 1, 50, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY14_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY14_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<14, 1, 50, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY14_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_14] == literal_0))
             {
@@ -6970,6 +7485,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY15_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<15, 1, 50, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY15_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY15_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<15, 1, 50, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY15_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_15] == literal_0))
@@ -7024,6 +7544,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY16_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<0, 1, 50, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY16_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY16_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<0, 1, 50, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY16_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_16] == literal_0))
             {
@@ -7071,6 +7596,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY17_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<1, 1, 50, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY17_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY17_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<1, 1, 50, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY17_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_17] == literal_0))
@@ -7120,6 +7650,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY18_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<2, 1, 50, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY18_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY18_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<2, 1, 50, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY18_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_18] == literal_0))
             {
@@ -7167,6 +7702,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY19_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<3, 1, 50, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY19_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY19_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<3, 1, 50, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY19_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_19] == literal_0))
@@ -7216,6 +7756,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY20_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<4, 1, 50, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY20_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY20_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<4, 1, 50, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY20_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_20] == literal_0))
             {
@@ -7263,6 +7808,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY21_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<5, 1, 50, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY21_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY21_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<5, 1, 50, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY21_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_21] == literal_0))
@@ -7312,6 +7862,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY22_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<6, 1, 50, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY22_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY22_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<6, 1, 50, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY22_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_22] == literal_0))
             {
@@ -7359,6 +7914,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY23_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<7, 1, 50, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY23_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY23_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<7, 1, 50, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY23_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_23] == literal_0))
@@ -7408,6 +7968,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY24_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<8, 1, 50, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY24_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY24_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<8, 1, 50, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY24_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_24] == literal_0))
             {
@@ -7455,6 +8020,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY25_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<9, 1, 50, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY25_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY25_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<9, 1, 50, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY25_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_25] == literal_0))
@@ -7504,6 +8074,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY26_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<10, 1, 50, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY26_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY26_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<10, 1, 50, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY26_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_26] == literal_0))
             {
@@ -7551,6 +8126,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY27_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<11, 1, 50, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY27_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY27_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<11, 1, 50, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY27_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_27] == literal_0))
@@ -7600,6 +8180,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY28_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<12, 1, 50, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY28_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY28_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<12, 1, 50, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY28_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_28] == literal_0))
             {
@@ -7647,6 +8232,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY29_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<13, 1, 50, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY29_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY29_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<13, 1, 50, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY29_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_29] == literal_0))
@@ -7696,6 +8286,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY30_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<14, 1, 50, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY30_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY30_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<14, 1, 50, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY30_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_30] == literal_0))
             {
@@ -7743,6 +8338,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY31_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<15, 1, 50, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY31_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY31_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<15, 1, 50, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY31_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_31] == literal_0))
@@ -7886,6 +8486,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX0_EN_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<0, 1, 51, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX0_EN_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX0_EN_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<0, 1, 51, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX0_EN_NEXT_OFF );
+            }
 
             if (((l_TGT0_ATTR_PROC_FABRIC_A_ATTACHED_CHIP_ID[literal_0] == literal_0) && l_def_A0_ENABLED))
             {
@@ -7999,6 +8604,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX1_EN_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<1, 1, 51, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX1_EN_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX1_EN_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<1, 1, 51, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX1_EN_NEXT_OFF );
             }
 
             if (((l_TGT0_ATTR_PROC_FABRIC_A_ATTACHED_CHIP_ID[literal_1] == literal_0) && l_def_A1_ENABLED))
@@ -8114,6 +8724,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX2_EN_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<2, 1, 51, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX2_EN_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX2_EN_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<2, 1, 51, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX2_EN_NEXT_OFF );
+            }
 
             if (((l_TGT0_ATTR_PROC_FABRIC_A_ATTACHED_CHIP_ID[literal_2] == literal_0) && l_def_A2_ENABLED))
             {
@@ -8227,6 +8842,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX3_EN_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<3, 1, 51, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX3_EN_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX3_EN_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<3, 1, 51, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX3_EN_NEXT_OFF );
             }
 
             if (((l_TGT0_ATTR_PROC_FABRIC_A_ATTACHED_CHIP_ID[literal_3] == literal_0) && l_def_A3_ENABLED))
@@ -8342,6 +8962,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX4_EN_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<4, 1, 51, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX4_EN_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX4_EN_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<4, 1, 51, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX4_EN_NEXT_OFF );
+            }
 
             if (((l_TGT0_ATTR_PROC_FABRIC_A_ATTACHED_CHIP_ID[literal_4] == literal_0) && l_def_A4_ENABLED))
             {
@@ -8455,6 +9080,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX5_EN_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<5, 1, 51, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX5_EN_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX5_EN_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<5, 1, 51, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX5_EN_NEXT_OFF );
             }
 
             if (((l_TGT0_ATTR_PROC_FABRIC_A_ATTACHED_CHIP_ID[literal_5] == literal_0) && l_def_A5_ENABLED))
@@ -8570,6 +9200,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX6_EN_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<6, 1, 51, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX6_EN_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX6_EN_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<6, 1, 51, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX6_EN_NEXT_OFF );
+            }
 
             if (((l_TGT0_ATTR_PROC_FABRIC_A_ATTACHED_CHIP_ID[literal_6] == literal_0) && l_def_A6_ENABLED))
             {
@@ -8684,6 +9319,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX7_EN_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<7, 1, 51, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX7_EN_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX7_EN_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<7, 1, 51, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX7_EN_NEXT_OFF );
+            }
 
             if (((l_TGT0_ATTR_PROC_FABRIC_A_ATTACHED_CHIP_ID[literal_7] == literal_0) && l_def_A7_ENABLED))
             {
@@ -8797,6 +9437,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY0_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<0, 1, 51, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY0_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY0_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<0, 1, 51, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY0_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_0] == literal_0))
             {
@@ -8844,6 +9489,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY1_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<1, 1, 51, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY1_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY1_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<1, 1, 51, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY1_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_1] == literal_0))
@@ -8893,6 +9543,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY2_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<2, 1, 51, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY2_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY2_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<2, 1, 51, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY2_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_2] == literal_0))
             {
@@ -8940,6 +9595,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY3_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<3, 1, 51, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY3_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY3_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<3, 1, 51, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY3_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_3] == literal_0))
@@ -8989,6 +9649,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY4_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<4, 1, 51, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY4_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY4_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<4, 1, 51, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY4_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_4] == literal_0))
             {
@@ -9036,6 +9701,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY5_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<5, 1, 51, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY5_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY5_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<5, 1, 51, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY5_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_5] == literal_0))
@@ -9085,6 +9755,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY6_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<6, 1, 51, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY6_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY6_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<6, 1, 51, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY6_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_6] == literal_0))
             {
@@ -9132,6 +9807,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY7_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<7, 1, 51, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY7_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY7_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<7, 1, 51, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY7_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_7] == literal_0))
@@ -9181,6 +9861,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY8_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<8, 1, 51, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY8_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY8_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<8, 1, 51, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY8_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_8] == literal_0))
             {
@@ -9228,6 +9913,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY9_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<9, 1, 51, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY9_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY9_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<9, 1, 51, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY9_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_9] == literal_0))
@@ -9277,6 +9967,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY10_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<10, 1, 51, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY10_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY10_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<10, 1, 51, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY10_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_10] == literal_0))
             {
@@ -9324,6 +10019,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY11_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<11, 1, 51, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY11_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY11_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<11, 1, 51, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY11_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_11] == literal_0))
@@ -9373,6 +10073,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY12_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<12, 1, 51, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY12_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY12_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<12, 1, 51, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY12_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_12] == literal_0))
             {
@@ -9420,6 +10125,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY13_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<13, 1, 51, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY13_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY13_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<13, 1, 51, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY13_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_13] == literal_0))
@@ -9469,6 +10179,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY14_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<14, 1, 51, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY14_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY14_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<14, 1, 51, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY14_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_14] == literal_0))
             {
@@ -9516,6 +10231,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY15_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<15, 1, 51, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY15_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY15_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<15, 1, 51, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY15_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_15] == literal_0))
@@ -9570,6 +10290,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY16_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<0, 1, 51, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY16_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY16_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<0, 1, 51, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY16_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_16] == literal_0))
             {
@@ -9617,6 +10342,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY17_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<1, 1, 51, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY17_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY17_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<1, 1, 51, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY17_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_17] == literal_0))
@@ -9666,6 +10396,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY18_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<2, 1, 51, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY18_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY18_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<2, 1, 51, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY18_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_18] == literal_0))
             {
@@ -9713,6 +10448,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY19_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<3, 1, 51, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY19_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY19_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<3, 1, 51, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY19_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_19] == literal_0))
@@ -9762,6 +10502,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY20_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<4, 1, 51, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY20_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY20_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<4, 1, 51, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY20_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_20] == literal_0))
             {
@@ -9809,6 +10554,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY21_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<5, 1, 51, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY21_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY21_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<5, 1, 51, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY21_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_21] == literal_0))
@@ -9858,6 +10608,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY22_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<6, 1, 51, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY22_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY22_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<6, 1, 51, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY22_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_22] == literal_0))
             {
@@ -9905,6 +10660,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY23_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<7, 1, 51, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY23_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY23_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<7, 1, 51, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY23_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_23] == literal_0))
@@ -9954,6 +10714,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY24_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<8, 1, 51, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY24_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY24_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<8, 1, 51, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY24_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_24] == literal_0))
             {
@@ -10001,6 +10766,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY25_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<9, 1, 51, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY25_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY25_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<9, 1, 51, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY25_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_25] == literal_0))
@@ -10050,6 +10820,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY26_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<10, 1, 51, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY26_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY26_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<10, 1, 51, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY26_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_26] == literal_0))
             {
@@ -10097,6 +10872,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY27_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<11, 1, 51, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY27_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY27_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<11, 1, 51, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY27_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_27] == literal_0))
@@ -10146,6 +10926,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY28_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<12, 1, 51, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY28_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY28_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<12, 1, 51, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY28_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_28] == literal_0))
             {
@@ -10193,6 +10978,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY29_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<13, 1, 51, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY29_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY29_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<13, 1, 51, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY29_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_29] == literal_0))
@@ -10242,6 +11032,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY30_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<14, 1, 51, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY30_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY30_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<14, 1, 51, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY30_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_30] == literal_0))
             {
@@ -10289,6 +11084,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY31_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<15, 1, 51, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY31_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY31_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<15, 1, 51, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY31_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_31] == literal_0))
@@ -10432,6 +11232,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX0_EN_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<0, 1, 52, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX0_EN_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX0_EN_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<0, 1, 52, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX0_EN_NEXT_OFF );
+            }
 
             if (((l_TGT0_ATTR_PROC_FABRIC_A_ATTACHED_CHIP_ID[literal_0] == literal_0) && l_def_A0_ENABLED))
             {
@@ -10545,6 +11350,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX1_EN_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<1, 1, 52, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX1_EN_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX1_EN_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<1, 1, 52, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX1_EN_NEXT_OFF );
             }
 
             if (((l_TGT0_ATTR_PROC_FABRIC_A_ATTACHED_CHIP_ID[literal_1] == literal_0) && l_def_A1_ENABLED))
@@ -10660,6 +11470,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX2_EN_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<2, 1, 52, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX2_EN_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX2_EN_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<2, 1, 52, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX2_EN_NEXT_OFF );
+            }
 
             if (((l_TGT0_ATTR_PROC_FABRIC_A_ATTACHED_CHIP_ID[literal_2] == literal_0) && l_def_A2_ENABLED))
             {
@@ -10773,6 +11588,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX3_EN_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<3, 1, 52, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX3_EN_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX3_EN_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<3, 1, 52, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX3_EN_NEXT_OFF );
             }
 
             if (((l_TGT0_ATTR_PROC_FABRIC_A_ATTACHED_CHIP_ID[literal_3] == literal_0) && l_def_A3_ENABLED))
@@ -10888,6 +11708,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX4_EN_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<4, 1, 52, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX4_EN_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX4_EN_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<4, 1, 52, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX4_EN_NEXT_OFF );
+            }
 
             if (((l_TGT0_ATTR_PROC_FABRIC_A_ATTACHED_CHIP_ID[literal_4] == literal_0) && l_def_A4_ENABLED))
             {
@@ -11001,6 +11826,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX5_EN_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<5, 1, 52, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX5_EN_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX5_EN_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<5, 1, 52, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX5_EN_NEXT_OFF );
             }
 
             if (((l_TGT0_ATTR_PROC_FABRIC_A_ATTACHED_CHIP_ID[literal_5] == literal_0) && l_def_A5_ENABLED))
@@ -11116,6 +11946,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX6_EN_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<6, 1, 52, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX6_EN_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX6_EN_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<6, 1, 52, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX6_EN_NEXT_OFF );
+            }
 
             if (((l_TGT0_ATTR_PROC_FABRIC_A_ATTACHED_CHIP_ID[literal_6] == literal_0) && l_def_A6_ENABLED))
             {
@@ -11230,6 +12065,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX7_EN_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<7, 1, 52, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX7_EN_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX7_EN_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<7, 1, 52, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX7_EN_NEXT_OFF );
+            }
 
             if (((l_TGT0_ATTR_PROC_FABRIC_A_ATTACHED_CHIP_ID[literal_7] == literal_0) && l_def_A7_ENABLED))
             {
@@ -11343,6 +12183,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY0_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<0, 1, 52, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY0_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY0_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<0, 1, 52, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY0_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_0] == literal_0))
             {
@@ -11390,6 +12235,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY1_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<1, 1, 52, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY1_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY1_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<1, 1, 52, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY1_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_1] == literal_0))
@@ -11439,6 +12289,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY2_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<2, 1, 52, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY2_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY2_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<2, 1, 52, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY2_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_2] == literal_0))
             {
@@ -11486,6 +12341,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY3_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<3, 1, 52, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY3_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY3_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<3, 1, 52, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY3_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_3] == literal_0))
@@ -11535,6 +12395,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY4_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<4, 1, 52, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY4_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY4_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<4, 1, 52, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY4_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_4] == literal_0))
             {
@@ -11582,6 +12447,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY5_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<5, 1, 52, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY5_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY5_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<5, 1, 52, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY5_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_5] == literal_0))
@@ -11631,6 +12501,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY6_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<6, 1, 52, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY6_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY6_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<6, 1, 52, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY6_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_6] == literal_0))
             {
@@ -11678,6 +12553,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY7_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<7, 1, 52, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY7_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY7_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<7, 1, 52, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY7_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_7] == literal_0))
@@ -11727,6 +12607,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY8_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<8, 1, 52, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY8_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY8_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<8, 1, 52, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY8_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_8] == literal_0))
             {
@@ -11774,6 +12659,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY9_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<9, 1, 52, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY9_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY9_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<9, 1, 52, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY9_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_9] == literal_0))
@@ -11823,6 +12713,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY10_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<10, 1, 52, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY10_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY10_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<10, 1, 52, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY10_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_10] == literal_0))
             {
@@ -11870,6 +12765,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY11_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<11, 1, 52, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY11_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY11_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<11, 1, 52, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY11_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_11] == literal_0))
@@ -11919,6 +12819,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY12_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<12, 1, 52, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY12_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY12_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<12, 1, 52, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY12_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_12] == literal_0))
             {
@@ -11966,6 +12871,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY13_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<13, 1, 52, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY13_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY13_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<13, 1, 52, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY13_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_13] == literal_0))
@@ -12015,6 +12925,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY14_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<14, 1, 52, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY14_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY14_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<14, 1, 52, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY14_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_14] == literal_0))
             {
@@ -12062,6 +12977,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY15_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<15, 1, 52, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY15_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY15_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<15, 1, 52, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY15_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_15] == literal_0))
@@ -12116,6 +13036,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY16_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<0, 1, 52, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY16_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY16_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<0, 1, 52, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY16_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_16] == literal_0))
             {
@@ -12163,6 +13088,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY17_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<1, 1, 52, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY17_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY17_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<1, 1, 52, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY17_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_17] == literal_0))
@@ -12212,6 +13142,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY18_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<2, 1, 52, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY18_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY18_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<2, 1, 52, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY18_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_18] == literal_0))
             {
@@ -12259,6 +13194,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY19_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<3, 1, 52, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY19_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY19_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<3, 1, 52, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY19_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_19] == literal_0))
@@ -12308,6 +13248,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY20_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<4, 1, 52, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY20_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY20_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<4, 1, 52, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY20_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_20] == literal_0))
             {
@@ -12355,6 +13300,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY21_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<5, 1, 52, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY21_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY21_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<5, 1, 52, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY21_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_21] == literal_0))
@@ -12404,6 +13354,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY22_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<6, 1, 52, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY22_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY22_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<6, 1, 52, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY22_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_22] == literal_0))
             {
@@ -12451,6 +13406,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY23_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<7, 1, 52, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY23_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY23_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<7, 1, 52, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY23_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_23] == literal_0))
@@ -12500,6 +13460,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY24_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<8, 1, 52, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY24_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY24_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<8, 1, 52, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY24_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_24] == literal_0))
             {
@@ -12547,6 +13512,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY25_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<9, 1, 52, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY25_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY25_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<9, 1, 52, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY25_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_25] == literal_0))
@@ -12596,6 +13566,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY26_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<10, 1, 52, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY26_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY26_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<10, 1, 52, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY26_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_26] == literal_0))
             {
@@ -12643,6 +13618,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY27_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<11, 1, 52, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY27_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY27_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<11, 1, 52, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY27_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_27] == literal_0))
@@ -12692,6 +13672,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY28_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<12, 1, 52, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY28_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY28_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<12, 1, 52, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY28_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_28] == literal_0))
             {
@@ -12739,6 +13724,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY29_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<13, 1, 52, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY29_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY29_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<13, 1, 52, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY29_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_29] == literal_0))
@@ -12788,6 +13778,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY30_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<14, 1, 52, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY30_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY30_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<14, 1, 52, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY30_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_30] == literal_0))
             {
@@ -12835,6 +13830,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY31_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<15, 1, 52, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY31_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY31_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<15, 1, 52, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY31_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_31] == literal_0))
@@ -12978,6 +13978,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX0_EN_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<0, 1, 53, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX0_EN_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX0_EN_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<0, 1, 53, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX0_EN_NEXT_OFF );
+            }
 
             if (((l_TGT0_ATTR_PROC_FABRIC_A_ATTACHED_CHIP_ID[literal_0] == literal_0) && l_def_A0_ENABLED))
             {
@@ -13091,6 +14096,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX1_EN_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<1, 1, 53, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX1_EN_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX1_EN_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<1, 1, 53, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX1_EN_NEXT_OFF );
             }
 
             if (((l_TGT0_ATTR_PROC_FABRIC_A_ATTACHED_CHIP_ID[literal_1] == literal_0) && l_def_A1_ENABLED))
@@ -13206,6 +14216,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX2_EN_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<2, 1, 53, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX2_EN_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX2_EN_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<2, 1, 53, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX2_EN_NEXT_OFF );
+            }
 
             if (((l_TGT0_ATTR_PROC_FABRIC_A_ATTACHED_CHIP_ID[literal_2] == literal_0) && l_def_A2_ENABLED))
             {
@@ -13319,6 +14334,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX3_EN_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<3, 1, 53, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX3_EN_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX3_EN_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<3, 1, 53, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX3_EN_NEXT_OFF );
             }
 
             if (((l_TGT0_ATTR_PROC_FABRIC_A_ATTACHED_CHIP_ID[literal_3] == literal_0) && l_def_A3_ENABLED))
@@ -13434,6 +14454,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX4_EN_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<4, 1, 53, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX4_EN_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX4_EN_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<4, 1, 53, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX4_EN_NEXT_OFF );
+            }
 
             if (((l_TGT0_ATTR_PROC_FABRIC_A_ATTACHED_CHIP_ID[literal_4] == literal_0) && l_def_A4_ENABLED))
             {
@@ -13547,6 +14572,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX5_EN_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<5, 1, 53, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX5_EN_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX5_EN_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<5, 1, 53, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX5_EN_NEXT_OFF );
             }
 
             if (((l_TGT0_ATTR_PROC_FABRIC_A_ATTACHED_CHIP_ID[literal_5] == literal_0) && l_def_A5_ENABLED))
@@ -13662,6 +14692,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX6_EN_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<6, 1, 53, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX6_EN_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX6_EN_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<6, 1, 53, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX6_EN_NEXT_OFF );
+            }
 
             if (((l_TGT0_ATTR_PROC_FABRIC_A_ATTACHED_CHIP_ID[literal_6] == literal_0) && l_def_A6_ENABLED))
             {
@@ -13776,6 +14811,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX7_EN_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<7, 1, 53, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX7_EN_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX7_EN_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<7, 1, 53, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX7_EN_NEXT_OFF );
+            }
 
             if (((l_TGT0_ATTR_PROC_FABRIC_A_ATTACHED_CHIP_ID[literal_7] == literal_0) && l_def_A7_ENABLED))
             {
@@ -13889,6 +14929,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY0_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<0, 1, 53, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY0_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY0_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<0, 1, 53, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY0_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_0] == literal_0))
             {
@@ -13936,6 +14981,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY1_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<1, 1, 53, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY1_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY1_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<1, 1, 53, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY1_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_1] == literal_0))
@@ -13985,6 +15035,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY2_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<2, 1, 53, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY2_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY2_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<2, 1, 53, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY2_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_2] == literal_0))
             {
@@ -14032,6 +15087,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY3_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<3, 1, 53, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY3_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY3_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<3, 1, 53, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY3_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_3] == literal_0))
@@ -14081,6 +15141,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY4_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<4, 1, 53, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY4_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY4_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<4, 1, 53, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY4_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_4] == literal_0))
             {
@@ -14128,6 +15193,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY5_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<5, 1, 53, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY5_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY5_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<5, 1, 53, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY5_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_5] == literal_0))
@@ -14177,6 +15247,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY6_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<6, 1, 53, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY6_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY6_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<6, 1, 53, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY6_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_6] == literal_0))
             {
@@ -14224,6 +15299,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY7_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<7, 1, 53, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY7_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY7_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<7, 1, 53, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY7_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_7] == literal_0))
@@ -14273,6 +15353,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY8_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<8, 1, 53, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY8_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY8_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<8, 1, 53, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY8_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_8] == literal_0))
             {
@@ -14320,6 +15405,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY9_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<9, 1, 53, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY9_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY9_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<9, 1, 53, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY9_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_9] == literal_0))
@@ -14369,6 +15459,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY10_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<10, 1, 53, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY10_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY10_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<10, 1, 53, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY10_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_10] == literal_0))
             {
@@ -14416,6 +15511,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY11_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<11, 1, 53, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY11_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY11_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<11, 1, 53, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY11_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_11] == literal_0))
@@ -14465,6 +15565,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY12_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<12, 1, 53, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY12_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY12_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<12, 1, 53, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY12_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_12] == literal_0))
             {
@@ -14512,6 +15617,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY13_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<13, 1, 53, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY13_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY13_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<13, 1, 53, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY13_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_13] == literal_0))
@@ -14561,6 +15671,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY14_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<14, 1, 53, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY14_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY14_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<14, 1, 53, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY14_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_14] == literal_0))
             {
@@ -14608,6 +15723,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY15_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<15, 1, 53, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY15_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY15_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<15, 1, 53, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY15_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_15] == literal_0))
@@ -14662,6 +15782,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY16_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<0, 1, 53, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY16_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY16_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<0, 1, 53, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY16_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_16] == literal_0))
             {
@@ -14709,6 +15834,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY17_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<1, 1, 53, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY17_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY17_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<1, 1, 53, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY17_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_17] == literal_0))
@@ -14758,6 +15888,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY18_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<2, 1, 53, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY18_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY18_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<2, 1, 53, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY18_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_18] == literal_0))
             {
@@ -14805,6 +15940,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY19_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<3, 1, 53, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY19_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY19_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<3, 1, 53, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY19_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_19] == literal_0))
@@ -14854,6 +15994,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY20_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<4, 1, 53, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY20_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY20_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<4, 1, 53, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY20_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_20] == literal_0))
             {
@@ -14901,6 +16046,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY21_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<5, 1, 53, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY21_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY21_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<5, 1, 53, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY21_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_21] == literal_0))
@@ -14950,6 +16100,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY22_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<6, 1, 53, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY22_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY22_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<6, 1, 53, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY22_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_22] == literal_0))
             {
@@ -14997,6 +16152,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY23_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<7, 1, 53, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY23_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY23_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<7, 1, 53, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY23_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_23] == literal_0))
@@ -15046,6 +16206,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY24_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<8, 1, 53, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY24_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY24_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<8, 1, 53, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY24_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_24] == literal_0))
             {
@@ -15093,6 +16258,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY25_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<9, 1, 53, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY25_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY25_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<9, 1, 53, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY25_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_25] == literal_0))
@@ -15142,6 +16312,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY26_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<10, 1, 53, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY26_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY26_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<10, 1, 53, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY26_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_26] == literal_0))
             {
@@ -15189,6 +16364,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY27_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<11, 1, 53, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY27_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY27_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<11, 1, 53, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY27_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_27] == literal_0))
@@ -15238,6 +16418,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY28_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<12, 1, 53, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY28_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY28_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<12, 1, 53, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY28_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_28] == literal_0))
             {
@@ -15285,6 +16470,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY29_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<13, 1, 53, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY29_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY29_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<13, 1, 53, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY29_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_29] == literal_0))
@@ -15334,6 +16524,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY30_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<14, 1, 53, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY30_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY30_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<14, 1, 53, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY30_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_30] == literal_0))
             {
@@ -15381,6 +16576,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY31_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<15, 1, 53, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY31_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY31_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<15, 1, 53, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY31_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_31] == literal_0))
@@ -15524,6 +16724,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX0_EN_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<0, 1, 54, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX0_EN_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX0_EN_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<0, 1, 54, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX0_EN_NEXT_OFF );
+            }
 
             if (((l_TGT0_ATTR_PROC_FABRIC_A_ATTACHED_CHIP_ID[literal_0] == literal_0) && l_def_A0_ENABLED))
             {
@@ -15637,6 +16842,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX1_EN_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<1, 1, 54, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX1_EN_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX1_EN_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<1, 1, 54, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX1_EN_NEXT_OFF );
             }
 
             if (((l_TGT0_ATTR_PROC_FABRIC_A_ATTACHED_CHIP_ID[literal_1] == literal_0) && l_def_A1_ENABLED))
@@ -15752,6 +16962,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX2_EN_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<2, 1, 54, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX2_EN_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX2_EN_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<2, 1, 54, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX2_EN_NEXT_OFF );
+            }
 
             if (((l_TGT0_ATTR_PROC_FABRIC_A_ATTACHED_CHIP_ID[literal_2] == literal_0) && l_def_A2_ENABLED))
             {
@@ -15865,6 +17080,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX3_EN_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<3, 1, 54, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX3_EN_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX3_EN_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<3, 1, 54, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX3_EN_NEXT_OFF );
             }
 
             if (((l_TGT0_ATTR_PROC_FABRIC_A_ATTACHED_CHIP_ID[literal_3] == literal_0) && l_def_A3_ENABLED))
@@ -15980,6 +17200,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX4_EN_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<4, 1, 54, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX4_EN_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX4_EN_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<4, 1, 54, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX4_EN_NEXT_OFF );
+            }
 
             if (((l_TGT0_ATTR_PROC_FABRIC_A_ATTACHED_CHIP_ID[literal_4] == literal_0) && l_def_A4_ENABLED))
             {
@@ -16093,6 +17318,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX5_EN_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<5, 1, 54, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX5_EN_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX5_EN_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<5, 1, 54, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX5_EN_NEXT_OFF );
             }
 
             if (((l_TGT0_ATTR_PROC_FABRIC_A_ATTACHED_CHIP_ID[literal_5] == literal_0) && l_def_A5_ENABLED))
@@ -16208,6 +17438,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX6_EN_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<6, 1, 54, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX6_EN_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX6_EN_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<6, 1, 54, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX6_EN_NEXT_OFF );
+            }
 
             if (((l_TGT0_ATTR_PROC_FABRIC_A_ATTACHED_CHIP_ID[literal_6] == literal_0) && l_def_A6_ENABLED))
             {
@@ -16322,6 +17557,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX7_EN_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<7, 1, 54, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX7_EN_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX7_EN_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<7, 1, 54, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX7_EN_NEXT_OFF );
+            }
 
             if (((l_TGT0_ATTR_PROC_FABRIC_A_ATTACHED_CHIP_ID[literal_7] == literal_0) && l_def_A7_ENABLED))
             {
@@ -16435,6 +17675,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY0_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<0, 1, 54, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY0_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY0_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<0, 1, 54, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY0_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_0] == literal_0))
             {
@@ -16482,6 +17727,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY1_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<1, 1, 54, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY1_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY1_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<1, 1, 54, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY1_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_1] == literal_0))
@@ -16531,6 +17781,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY2_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<2, 1, 54, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY2_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY2_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<2, 1, 54, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY2_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_2] == literal_0))
             {
@@ -16578,6 +17833,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY3_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<3, 1, 54, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY3_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY3_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<3, 1, 54, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY3_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_3] == literal_0))
@@ -16627,6 +17887,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY4_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<4, 1, 54, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY4_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY4_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<4, 1, 54, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY4_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_4] == literal_0))
             {
@@ -16674,6 +17939,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY5_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<5, 1, 54, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY5_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY5_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<5, 1, 54, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY5_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_5] == literal_0))
@@ -16723,6 +17993,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY6_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<6, 1, 54, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY6_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY6_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<6, 1, 54, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY6_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_6] == literal_0))
             {
@@ -16770,6 +18045,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY7_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<7, 1, 54, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY7_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY7_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<7, 1, 54, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY7_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_7] == literal_0))
@@ -16819,6 +18099,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY8_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<8, 1, 54, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY8_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY8_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<8, 1, 54, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY8_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_8] == literal_0))
             {
@@ -16866,6 +18151,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY9_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<9, 1, 54, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY9_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY9_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<9, 1, 54, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY9_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_9] == literal_0))
@@ -16915,6 +18205,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY10_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<10, 1, 54, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY10_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY10_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<10, 1, 54, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY10_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_10] == literal_0))
             {
@@ -16962,6 +18257,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY11_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<11, 1, 54, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY11_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY11_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<11, 1, 54, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY11_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_11] == literal_0))
@@ -17011,6 +18311,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY12_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<12, 1, 54, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY12_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY12_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<12, 1, 54, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY12_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_12] == literal_0))
             {
@@ -17058,6 +18363,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY13_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<13, 1, 54, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY13_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY13_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<13, 1, 54, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY13_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_13] == literal_0))
@@ -17107,6 +18417,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY14_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<14, 1, 54, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY14_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY14_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<14, 1, 54, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY14_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_14] == literal_0))
             {
@@ -17154,6 +18469,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY15_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<15, 1, 54, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY15_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY15_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<15, 1, 54, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY15_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_15] == literal_0))
@@ -17208,6 +18528,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY16_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<0, 1, 54, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY16_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY16_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<0, 1, 54, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY16_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_16] == literal_0))
             {
@@ -17255,6 +18580,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY17_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<1, 1, 54, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY17_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY17_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<1, 1, 54, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY17_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_17] == literal_0))
@@ -17304,6 +18634,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY18_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<2, 1, 54, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY18_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY18_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<2, 1, 54, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY18_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_18] == literal_0))
             {
@@ -17351,6 +18686,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY19_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<3, 1, 54, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY19_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY19_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<3, 1, 54, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY19_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_19] == literal_0))
@@ -17400,6 +18740,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY20_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<4, 1, 54, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY20_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY20_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<4, 1, 54, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY20_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_20] == literal_0))
             {
@@ -17447,6 +18792,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY21_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<5, 1, 54, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY21_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY21_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<5, 1, 54, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY21_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_21] == literal_0))
@@ -17496,6 +18846,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY22_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<6, 1, 54, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY22_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY22_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<6, 1, 54, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY22_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_22] == literal_0))
             {
@@ -17543,6 +18898,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY23_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<7, 1, 54, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY23_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY23_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<7, 1, 54, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY23_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_23] == literal_0))
@@ -17592,6 +18952,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY24_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<8, 1, 54, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY24_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY24_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<8, 1, 54, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY24_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_24] == literal_0))
             {
@@ -17639,6 +19004,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY25_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<9, 1, 54, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY25_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY25_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<9, 1, 54, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY25_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_25] == literal_0))
@@ -17688,6 +19058,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY26_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<10, 1, 54, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY26_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY26_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<10, 1, 54, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY26_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_26] == literal_0))
             {
@@ -17735,6 +19110,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY27_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<11, 1, 54, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY27_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY27_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<11, 1, 54, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY27_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_27] == literal_0))
@@ -17784,6 +19164,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY28_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<12, 1, 54, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY28_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY28_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<12, 1, 54, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY28_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_28] == literal_0))
             {
@@ -17831,6 +19216,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY29_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<13, 1, 54, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY29_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY29_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<13, 1, 54, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY29_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_29] == literal_0))
@@ -17880,6 +19270,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY30_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<14, 1, 54, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY30_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY30_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<14, 1, 54, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY30_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_30] == literal_0))
             {
@@ -17927,6 +19322,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY31_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<15, 1, 54, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY31_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY31_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<15, 1, 54, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY31_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_31] == literal_0))
@@ -18070,6 +19470,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX0_EN_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<0, 1, 55, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX0_EN_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX0_EN_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<0, 1, 55, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX0_EN_NEXT_OFF );
+            }
 
             if (((l_TGT0_ATTR_PROC_FABRIC_A_ATTACHED_CHIP_ID[literal_0] == literal_0) && l_def_A0_ENABLED))
             {
@@ -18183,6 +19588,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX1_EN_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<1, 1, 55, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX1_EN_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX1_EN_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<1, 1, 55, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX1_EN_NEXT_OFF );
             }
 
             if (((l_TGT0_ATTR_PROC_FABRIC_A_ATTACHED_CHIP_ID[literal_1] == literal_0) && l_def_A1_ENABLED))
@@ -18298,6 +19708,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX2_EN_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<2, 1, 55, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX2_EN_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX2_EN_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<2, 1, 55, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX2_EN_NEXT_OFF );
+            }
 
             if (((l_TGT0_ATTR_PROC_FABRIC_A_ATTACHED_CHIP_ID[literal_2] == literal_0) && l_def_A2_ENABLED))
             {
@@ -18411,6 +19826,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX3_EN_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<3, 1, 55, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX3_EN_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX3_EN_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<3, 1, 55, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX3_EN_NEXT_OFF );
             }
 
             if (((l_TGT0_ATTR_PROC_FABRIC_A_ATTACHED_CHIP_ID[literal_3] == literal_0) && l_def_A3_ENABLED))
@@ -18526,6 +19946,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX4_EN_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<4, 1, 55, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX4_EN_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX4_EN_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<4, 1, 55, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX4_EN_NEXT_OFF );
+            }
 
             if (((l_TGT0_ATTR_PROC_FABRIC_A_ATTACHED_CHIP_ID[literal_4] == literal_0) && l_def_A4_ENABLED))
             {
@@ -18639,6 +20064,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX5_EN_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<5, 1, 55, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX5_EN_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX5_EN_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<5, 1, 55, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX5_EN_NEXT_OFF );
             }
 
             if (((l_TGT0_ATTR_PROC_FABRIC_A_ATTACHED_CHIP_ID[literal_5] == literal_0) && l_def_A5_ENABLED))
@@ -18754,6 +20184,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX6_EN_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<6, 1, 55, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX6_EN_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX6_EN_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<6, 1, 55, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX6_EN_NEXT_OFF );
+            }
 
             if (((l_TGT0_ATTR_PROC_FABRIC_A_ATTACHED_CHIP_ID[literal_6] == literal_0) && l_def_A6_ENABLED))
             {
@@ -18868,6 +20303,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX7_EN_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<7, 1, 55, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX7_EN_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX7_EN_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<7, 1, 55, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX7_EN_NEXT_OFF );
+            }
 
             if (((l_TGT0_ATTR_PROC_FABRIC_A_ATTACHED_CHIP_ID[literal_7] == literal_0) && l_def_A7_ENABLED))
             {
@@ -18981,6 +20421,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY0_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<0, 1, 55, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY0_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY0_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<0, 1, 55, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY0_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_0] == literal_0))
             {
@@ -19028,6 +20473,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY1_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<1, 1, 55, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY1_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY1_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<1, 1, 55, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY1_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_1] == literal_0))
@@ -19077,6 +20527,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY2_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<2, 1, 55, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY2_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY2_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<2, 1, 55, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY2_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_2] == literal_0))
             {
@@ -19124,6 +20579,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY3_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<3, 1, 55, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY3_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY3_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<3, 1, 55, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY3_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_3] == literal_0))
@@ -19173,6 +20633,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY4_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<4, 1, 55, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY4_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY4_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<4, 1, 55, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY4_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_4] == literal_0))
             {
@@ -19220,6 +20685,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY5_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<5, 1, 55, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY5_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY5_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<5, 1, 55, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY5_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_5] == literal_0))
@@ -19269,6 +20739,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY6_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<6, 1, 55, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY6_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY6_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<6, 1, 55, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY6_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_6] == literal_0))
             {
@@ -19316,6 +20791,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY7_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<7, 1, 55, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY7_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY7_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<7, 1, 55, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY7_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_7] == literal_0))
@@ -19365,6 +20845,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY8_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<8, 1, 55, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY8_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY8_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<8, 1, 55, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY8_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_8] == literal_0))
             {
@@ -19412,6 +20897,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY9_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<9, 1, 55, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY9_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY9_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<9, 1, 55, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY9_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_9] == literal_0))
@@ -19461,6 +20951,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY10_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<10, 1, 55, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY10_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY10_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<10, 1, 55, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY10_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_10] == literal_0))
             {
@@ -19508,6 +21003,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY11_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<11, 1, 55, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY11_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY11_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<11, 1, 55, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY11_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_11] == literal_0))
@@ -19557,6 +21057,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY12_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<12, 1, 55, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY12_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY12_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<12, 1, 55, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY12_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_12] == literal_0))
             {
@@ -19604,6 +21109,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY13_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<13, 1, 55, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY13_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY13_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<13, 1, 55, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY13_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_13] == literal_0))
@@ -19653,6 +21163,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY14_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<14, 1, 55, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY14_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY14_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<14, 1, 55, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY14_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_14] == literal_0))
             {
@@ -19700,6 +21215,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY15_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<15, 1, 55, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY15_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY15_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<15, 1, 55, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY15_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_15] == literal_0))
@@ -19754,6 +21274,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY16_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<0, 1, 55, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY16_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY16_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<0, 1, 55, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY16_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_16] == literal_0))
             {
@@ -19801,6 +21326,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY17_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<1, 1, 55, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY17_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY17_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<1, 1, 55, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY17_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_17] == literal_0))
@@ -19850,6 +21380,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY18_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<2, 1, 55, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY18_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY18_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<2, 1, 55, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY18_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_18] == literal_0))
             {
@@ -19897,6 +21432,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY19_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<3, 1, 55, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY19_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY19_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<3, 1, 55, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY19_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_19] == literal_0))
@@ -19946,6 +21486,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY20_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<4, 1, 55, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY20_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY20_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<4, 1, 55, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY20_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_20] == literal_0))
             {
@@ -19993,6 +21538,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY21_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<5, 1, 55, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY21_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY21_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<5, 1, 55, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY21_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_21] == literal_0))
@@ -20042,6 +21592,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY22_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<6, 1, 55, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY22_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY22_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<6, 1, 55, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY22_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_22] == literal_0))
             {
@@ -20089,6 +21644,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY23_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<7, 1, 55, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY23_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY23_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<7, 1, 55, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY23_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_23] == literal_0))
@@ -20138,6 +21698,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY24_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<8, 1, 55, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY24_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY24_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<8, 1, 55, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY24_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_24] == literal_0))
             {
@@ -20185,6 +21750,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY25_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<9, 1, 55, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY25_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY25_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<9, 1, 55, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY25_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_25] == literal_0))
@@ -20234,6 +21804,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY26_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<10, 1, 55, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY26_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY26_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<10, 1, 55, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY26_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_26] == literal_0))
             {
@@ -20281,6 +21856,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY27_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<11, 1, 55, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY27_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY27_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<11, 1, 55, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY27_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_27] == literal_0))
@@ -20330,6 +21910,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY28_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<12, 1, 55, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY28_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY28_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<12, 1, 55, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY28_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_28] == literal_0))
             {
@@ -20377,6 +21962,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY29_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<13, 1, 55, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY29_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY29_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<13, 1, 55, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY29_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_29] == literal_0))
@@ -20426,6 +22016,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY30_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<14, 1, 55, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY30_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY30_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<14, 1, 55, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY30_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_30] == literal_0))
             {
@@ -20473,6 +22068,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY31_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<15, 1, 55, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY31_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY31_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<15, 1, 55, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY31_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_31] == literal_0))
@@ -20616,6 +22216,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX0_EN_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<0, 1, 56, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX0_EN_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX0_EN_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<0, 1, 56, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX0_EN_NEXT_OFF );
+            }
 
             if (((l_TGT0_ATTR_PROC_FABRIC_A_ATTACHED_CHIP_ID[literal_0] == literal_0) && l_def_A0_ENABLED))
             {
@@ -20729,6 +22334,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX1_EN_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<1, 1, 56, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX1_EN_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX1_EN_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<1, 1, 56, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX1_EN_NEXT_OFF );
             }
 
             if (((l_TGT0_ATTR_PROC_FABRIC_A_ATTACHED_CHIP_ID[literal_1] == literal_0) && l_def_A1_ENABLED))
@@ -20844,6 +22454,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX2_EN_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<2, 1, 56, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX2_EN_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX2_EN_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<2, 1, 56, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX2_EN_NEXT_OFF );
+            }
 
             if (((l_TGT0_ATTR_PROC_FABRIC_A_ATTACHED_CHIP_ID[literal_2] == literal_0) && l_def_A2_ENABLED))
             {
@@ -20957,6 +22572,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX3_EN_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<3, 1, 56, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX3_EN_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX3_EN_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<3, 1, 56, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX3_EN_NEXT_OFF );
             }
 
             if (((l_TGT0_ATTR_PROC_FABRIC_A_ATTACHED_CHIP_ID[literal_3] == literal_0) && l_def_A3_ENABLED))
@@ -21072,6 +22692,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX4_EN_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<4, 1, 56, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX4_EN_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX4_EN_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<4, 1, 56, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX4_EN_NEXT_OFF );
+            }
 
             if (((l_TGT0_ATTR_PROC_FABRIC_A_ATTACHED_CHIP_ID[literal_4] == literal_0) && l_def_A4_ENABLED))
             {
@@ -21185,6 +22810,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX5_EN_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<5, 1, 56, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX5_EN_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX5_EN_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<5, 1, 56, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX5_EN_NEXT_OFF );
             }
 
             if (((l_TGT0_ATTR_PROC_FABRIC_A_ATTACHED_CHIP_ID[literal_5] == literal_0) && l_def_A5_ENABLED))
@@ -21300,6 +22930,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX6_EN_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<6, 1, 56, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX6_EN_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX6_EN_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<6, 1, 56, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX6_EN_NEXT_OFF );
+            }
 
             if (((l_TGT0_ATTR_PROC_FABRIC_A_ATTACHED_CHIP_ID[literal_6] == literal_0) && l_def_A6_ENABLED))
             {
@@ -21414,6 +23049,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX7_EN_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<7, 1, 56, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX7_EN_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX7_EN_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<7, 1, 56, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX7_EN_NEXT_OFF );
+            }
 
             if (((l_TGT0_ATTR_PROC_FABRIC_A_ATTACHED_CHIP_ID[literal_7] == literal_0) && l_def_A7_ENABLED))
             {
@@ -21527,6 +23167,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY0_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<0, 1, 56, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY0_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY0_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<0, 1, 56, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY0_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_0] == literal_0))
             {
@@ -21574,6 +23219,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY1_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<1, 1, 56, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY1_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY1_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<1, 1, 56, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY1_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_1] == literal_0))
@@ -21623,6 +23273,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY2_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<2, 1, 56, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY2_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY2_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<2, 1, 56, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY2_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_2] == literal_0))
             {
@@ -21670,6 +23325,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY3_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<3, 1, 56, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY3_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY3_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<3, 1, 56, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY3_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_3] == literal_0))
@@ -21719,6 +23379,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY4_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<4, 1, 56, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY4_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY4_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<4, 1, 56, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY4_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_4] == literal_0))
             {
@@ -21766,6 +23431,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY5_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<5, 1, 56, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY5_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY5_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<5, 1, 56, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY5_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_5] == literal_0))
@@ -21815,6 +23485,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY6_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<6, 1, 56, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY6_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY6_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<6, 1, 56, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY6_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_6] == literal_0))
             {
@@ -21862,6 +23537,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY7_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<7, 1, 56, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY7_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY7_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<7, 1, 56, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY7_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_7] == literal_0))
@@ -21911,6 +23591,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY8_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<8, 1, 56, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY8_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY8_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<8, 1, 56, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY8_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_8] == literal_0))
             {
@@ -21958,6 +23643,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY9_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<9, 1, 56, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY9_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY9_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<9, 1, 56, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY9_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_9] == literal_0))
@@ -22007,6 +23697,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY10_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<10, 1, 56, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY10_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY10_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<10, 1, 56, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY10_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_10] == literal_0))
             {
@@ -22054,6 +23749,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY11_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<11, 1, 56, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY11_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY11_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<11, 1, 56, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY11_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_11] == literal_0))
@@ -22103,6 +23803,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY12_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<12, 1, 56, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY12_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY12_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<12, 1, 56, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY12_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_12] == literal_0))
             {
@@ -22150,6 +23855,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY13_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<13, 1, 56, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY13_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY13_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<13, 1, 56, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY13_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_13] == literal_0))
@@ -22199,6 +23909,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY14_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<14, 1, 56, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY14_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY14_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<14, 1, 56, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY14_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_14] == literal_0))
             {
@@ -22246,6 +23961,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY15_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<15, 1, 56, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY15_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY15_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<15, 1, 56, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY15_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_15] == literal_0))
@@ -22300,6 +24020,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY16_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<0, 1, 56, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY16_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY16_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<0, 1, 56, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY16_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_16] == literal_0))
             {
@@ -22347,6 +24072,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY17_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<1, 1, 56, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY17_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY17_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<1, 1, 56, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY17_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_17] == literal_0))
@@ -22396,6 +24126,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY18_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<2, 1, 56, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY18_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY18_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<2, 1, 56, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY18_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_18] == literal_0))
             {
@@ -22443,6 +24178,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY19_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<3, 1, 56, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY19_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY19_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<3, 1, 56, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY19_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_19] == literal_0))
@@ -22492,6 +24232,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY20_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<4, 1, 56, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY20_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY20_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<4, 1, 56, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY20_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_20] == literal_0))
             {
@@ -22539,6 +24284,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY21_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<5, 1, 56, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY21_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY21_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<5, 1, 56, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY21_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_21] == literal_0))
@@ -22588,6 +24338,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY22_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<6, 1, 56, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY22_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY22_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<6, 1, 56, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY22_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_22] == literal_0))
             {
@@ -22635,6 +24390,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY23_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<7, 1, 56, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY23_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY23_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<7, 1, 56, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY23_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_23] == literal_0))
@@ -22684,6 +24444,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY24_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<8, 1, 56, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY24_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY24_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<8, 1, 56, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY24_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_24] == literal_0))
             {
@@ -22731,6 +24496,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY25_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<9, 1, 56, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY25_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY25_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<9, 1, 56, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY25_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_25] == literal_0))
@@ -22780,6 +24550,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY26_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<10, 1, 56, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY26_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY26_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<10, 1, 56, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY26_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_26] == literal_0))
             {
@@ -22827,6 +24602,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY27_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<11, 1, 56, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY27_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY27_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<11, 1, 56, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY27_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_27] == literal_0))
@@ -22876,6 +24656,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY28_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<12, 1, 56, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY28_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY28_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<12, 1, 56, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY28_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_28] == literal_0))
             {
@@ -22923,6 +24708,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY29_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<13, 1, 56, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY29_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY29_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<13, 1, 56, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY29_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_29] == literal_0))
@@ -22972,6 +24762,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY30_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<14, 1, 56, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY30_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY30_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<14, 1, 56, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY30_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_30] == literal_0))
             {
@@ -23019,6 +24814,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY31_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<15, 1, 56, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY31_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY31_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<15, 1, 56, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY31_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_31] == literal_0))
@@ -23162,6 +24962,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX0_EN_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<0, 1, 57, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX0_EN_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX0_EN_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<0, 1, 57, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX0_EN_NEXT_OFF );
+            }
 
             if (((l_TGT0_ATTR_PROC_FABRIC_A_ATTACHED_CHIP_ID[literal_0] == literal_0) && l_def_A0_ENABLED))
             {
@@ -23275,6 +25080,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX1_EN_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<1, 1, 57, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX1_EN_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX1_EN_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<1, 1, 57, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX1_EN_NEXT_OFF );
             }
 
             if (((l_TGT0_ATTR_PROC_FABRIC_A_ATTACHED_CHIP_ID[literal_1] == literal_0) && l_def_A1_ENABLED))
@@ -23390,6 +25200,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX2_EN_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<2, 1, 57, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX2_EN_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX2_EN_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<2, 1, 57, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX2_EN_NEXT_OFF );
+            }
 
             if (((l_TGT0_ATTR_PROC_FABRIC_A_ATTACHED_CHIP_ID[literal_2] == literal_0) && l_def_A2_ENABLED))
             {
@@ -23503,6 +25318,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX3_EN_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<3, 1, 57, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX3_EN_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX3_EN_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<3, 1, 57, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX3_EN_NEXT_OFF );
             }
 
             if (((l_TGT0_ATTR_PROC_FABRIC_A_ATTACHED_CHIP_ID[literal_3] == literal_0) && l_def_A3_ENABLED))
@@ -23618,6 +25438,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX4_EN_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<4, 1, 57, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX4_EN_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX4_EN_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<4, 1, 57, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX4_EN_NEXT_OFF );
+            }
 
             if (((l_TGT0_ATTR_PROC_FABRIC_A_ATTACHED_CHIP_ID[literal_4] == literal_0) && l_def_A4_ENABLED))
             {
@@ -23731,6 +25556,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX5_EN_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<5, 1, 57, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX5_EN_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX5_EN_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<5, 1, 57, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX5_EN_NEXT_OFF );
             }
 
             if (((l_TGT0_ATTR_PROC_FABRIC_A_ATTACHED_CHIP_ID[literal_5] == literal_0) && l_def_A5_ENABLED))
@@ -23846,6 +25676,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX6_EN_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<6, 1, 57, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX6_EN_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX6_EN_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<6, 1, 57, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX6_EN_NEXT_OFF );
+            }
 
             if (((l_TGT0_ATTR_PROC_FABRIC_A_ATTACHED_CHIP_ID[literal_6] == literal_0) && l_def_A6_ENABLED))
             {
@@ -23960,6 +25795,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX7_EN_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<7, 1, 57, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX7_EN_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX7_EN_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<7, 1, 57, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX7_EN_NEXT_OFF );
+            }
 
             if (((l_TGT0_ATTR_PROC_FABRIC_A_ATTACHED_CHIP_ID[literal_7] == literal_0) && l_def_A7_ENABLED))
             {
@@ -24073,6 +25913,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY0_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<0, 1, 57, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY0_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY0_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<0, 1, 57, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY0_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_0] == literal_0))
             {
@@ -24120,6 +25965,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY1_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<1, 1, 57, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY1_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY1_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<1, 1, 57, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY1_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_1] == literal_0))
@@ -24169,6 +26019,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY2_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<2, 1, 57, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY2_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY2_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<2, 1, 57, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY2_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_2] == literal_0))
             {
@@ -24216,6 +26071,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY3_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<3, 1, 57, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY3_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY3_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<3, 1, 57, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY3_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_3] == literal_0))
@@ -24265,6 +26125,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY4_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<4, 1, 57, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY4_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY4_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<4, 1, 57, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY4_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_4] == literal_0))
             {
@@ -24312,6 +26177,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY5_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<5, 1, 57, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY5_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY5_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<5, 1, 57, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY5_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_5] == literal_0))
@@ -24361,6 +26231,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY6_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<6, 1, 57, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY6_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY6_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<6, 1, 57, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY6_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_6] == literal_0))
             {
@@ -24408,6 +26283,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY7_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<7, 1, 57, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY7_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY7_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<7, 1, 57, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY7_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_7] == literal_0))
@@ -24457,6 +26337,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY8_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<8, 1, 57, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY8_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY8_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<8, 1, 57, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY8_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_8] == literal_0))
             {
@@ -24504,6 +26389,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY9_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<9, 1, 57, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY9_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY9_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<9, 1, 57, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY9_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_9] == literal_0))
@@ -24553,6 +26443,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY10_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<10, 1, 57, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY10_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY10_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<10, 1, 57, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY10_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_10] == literal_0))
             {
@@ -24600,6 +26495,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY11_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<11, 1, 57, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY11_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY11_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<11, 1, 57, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY11_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_11] == literal_0))
@@ -24649,6 +26549,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY12_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<12, 1, 57, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY12_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY12_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<12, 1, 57, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY12_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_12] == literal_0))
             {
@@ -24696,6 +26601,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY13_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<13, 1, 57, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY13_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY13_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<13, 1, 57, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY13_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_13] == literal_0))
@@ -24745,6 +26655,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY14_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<14, 1, 57, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY14_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY14_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<14, 1, 57, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY14_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_14] == literal_0))
             {
@@ -24792,6 +26707,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY15_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<15, 1, 57, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY15_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY15_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<15, 1, 57, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY15_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_15] == literal_0))
@@ -24846,6 +26766,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY16_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<0, 1, 57, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY16_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY16_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<0, 1, 57, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY16_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_16] == literal_0))
             {
@@ -24893,6 +26818,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY17_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<1, 1, 57, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY17_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY17_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<1, 1, 57, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY17_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_17] == literal_0))
@@ -24942,6 +26872,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY18_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<2, 1, 57, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY18_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY18_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<2, 1, 57, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY18_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_18] == literal_0))
             {
@@ -24989,6 +26924,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY19_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<3, 1, 57, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY19_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY19_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<3, 1, 57, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY19_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_19] == literal_0))
@@ -25038,6 +26978,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY20_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<4, 1, 57, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY20_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY20_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<4, 1, 57, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY20_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_20] == literal_0))
             {
@@ -25085,6 +27030,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY21_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<5, 1, 57, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY21_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY21_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<5, 1, 57, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY21_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_21] == literal_0))
@@ -25134,6 +27084,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY22_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<6, 1, 57, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY22_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY22_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<6, 1, 57, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY22_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_22] == literal_0))
             {
@@ -25181,6 +27136,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY23_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<7, 1, 57, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY23_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY23_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<7, 1, 57, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY23_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_23] == literal_0))
@@ -25230,6 +27190,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY24_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<8, 1, 57, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY24_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY24_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<8, 1, 57, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY24_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_24] == literal_0))
             {
@@ -25277,6 +27242,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY25_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<9, 1, 57, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY25_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY25_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<9, 1, 57, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY25_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_25] == literal_0))
@@ -25326,6 +27296,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY26_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<10, 1, 57, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY26_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY26_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<10, 1, 57, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY26_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_26] == literal_0))
             {
@@ -25373,6 +27348,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY27_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<11, 1, 57, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY27_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY27_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<11, 1, 57, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY27_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_27] == literal_0))
@@ -25422,6 +27402,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY28_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<12, 1, 57, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY28_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY28_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<12, 1, 57, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY28_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_28] == literal_0))
             {
@@ -25469,6 +27454,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY29_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<13, 1, 57, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY29_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY29_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<13, 1, 57, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY29_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_29] == literal_0))
@@ -25518,6 +27508,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY30_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<14, 1, 57, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY30_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY30_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<14, 1, 57, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY30_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_30] == literal_0))
             {
@@ -25565,6 +27560,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY31_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<15, 1, 57, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY31_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY31_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<15, 1, 57, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY31_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_31] == literal_0))
@@ -25708,6 +27708,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX0_EN_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<0, 1, 58, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX0_EN_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX0_EN_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<0, 1, 58, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX0_EN_NEXT_OFF );
+            }
 
             if (((l_TGT0_ATTR_PROC_FABRIC_A_ATTACHED_CHIP_ID[literal_0] == literal_0) && l_def_A0_ENABLED))
             {
@@ -25821,6 +27826,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX1_EN_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<1, 1, 58, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX1_EN_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX1_EN_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<1, 1, 58, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX1_EN_NEXT_OFF );
             }
 
             if (((l_TGT0_ATTR_PROC_FABRIC_A_ATTACHED_CHIP_ID[literal_1] == literal_0) && l_def_A1_ENABLED))
@@ -25936,6 +27946,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX2_EN_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<2, 1, 58, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX2_EN_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX2_EN_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<2, 1, 58, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX2_EN_NEXT_OFF );
+            }
 
             if (((l_TGT0_ATTR_PROC_FABRIC_A_ATTACHED_CHIP_ID[literal_2] == literal_0) && l_def_A2_ENABLED))
             {
@@ -26049,6 +28064,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX3_EN_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<3, 1, 58, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX3_EN_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX3_EN_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<3, 1, 58, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX3_EN_NEXT_OFF );
             }
 
             if (((l_TGT0_ATTR_PROC_FABRIC_A_ATTACHED_CHIP_ID[literal_3] == literal_0) && l_def_A3_ENABLED))
@@ -26164,6 +28184,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX4_EN_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<4, 1, 58, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX4_EN_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX4_EN_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<4, 1, 58, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX4_EN_NEXT_OFF );
+            }
 
             if (((l_TGT0_ATTR_PROC_FABRIC_A_ATTACHED_CHIP_ID[literal_4] == literal_0) && l_def_A4_ENABLED))
             {
@@ -26277,6 +28302,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX5_EN_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<5, 1, 58, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX5_EN_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX5_EN_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<5, 1, 58, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX5_EN_NEXT_OFF );
             }
 
             if (((l_TGT0_ATTR_PROC_FABRIC_A_ATTACHED_CHIP_ID[literal_5] == literal_0) && l_def_A5_ENABLED))
@@ -26392,6 +28422,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX6_EN_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<6, 1, 58, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX6_EN_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX6_EN_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<6, 1, 58, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX6_EN_NEXT_OFF );
+            }
 
             if (((l_TGT0_ATTR_PROC_FABRIC_A_ATTACHED_CHIP_ID[literal_6] == literal_0) && l_def_A6_ENABLED))
             {
@@ -26506,6 +28541,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX7_EN_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<7, 1, 58, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX7_EN_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX7_EN_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<7, 1, 58, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX7_EN_NEXT_OFF );
+            }
 
             if (((l_TGT0_ATTR_PROC_FABRIC_A_ATTACHED_CHIP_ID[literal_7] == literal_0) && l_def_A7_ENABLED))
             {
@@ -26619,6 +28659,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY0_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<0, 1, 58, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY0_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY0_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<0, 1, 58, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY0_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_0] == literal_0))
             {
@@ -26666,6 +28711,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY1_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<1, 1, 58, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY1_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY1_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<1, 1, 58, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY1_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_1] == literal_0))
@@ -26715,6 +28765,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY2_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<2, 1, 58, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY2_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY2_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<2, 1, 58, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY2_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_2] == literal_0))
             {
@@ -26762,6 +28817,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY3_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<3, 1, 58, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY3_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY3_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<3, 1, 58, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY3_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_3] == literal_0))
@@ -26811,6 +28871,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY4_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<4, 1, 58, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY4_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY4_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<4, 1, 58, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY4_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_4] == literal_0))
             {
@@ -26858,6 +28923,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY5_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<5, 1, 58, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY5_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY5_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<5, 1, 58, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY5_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_5] == literal_0))
@@ -26907,6 +28977,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY6_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<6, 1, 58, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY6_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY6_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<6, 1, 58, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY6_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_6] == literal_0))
             {
@@ -26954,6 +29029,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY7_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<7, 1, 58, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY7_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY7_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<7, 1, 58, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY7_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_7] == literal_0))
@@ -27003,6 +29083,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY8_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<8, 1, 58, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY8_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY8_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<8, 1, 58, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY8_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_8] == literal_0))
             {
@@ -27050,6 +29135,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY9_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<9, 1, 58, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY9_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY9_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<9, 1, 58, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY9_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_9] == literal_0))
@@ -27099,6 +29189,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY10_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<10, 1, 58, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY10_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY10_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<10, 1, 58, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY10_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_10] == literal_0))
             {
@@ -27146,6 +29241,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY11_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<11, 1, 58, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY11_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY11_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<11, 1, 58, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY11_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_11] == literal_0))
@@ -27195,6 +29295,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY12_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<12, 1, 58, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY12_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY12_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<12, 1, 58, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY12_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_12] == literal_0))
             {
@@ -27242,6 +29347,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY13_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<13, 1, 58, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY13_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY13_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<13, 1, 58, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY13_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_13] == literal_0))
@@ -27291,6 +29401,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY14_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<14, 1, 58, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY14_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY14_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<14, 1, 58, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY14_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_14] == literal_0))
             {
@@ -27338,6 +29453,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY15_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<15, 1, 58, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY15_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY15_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<15, 1, 58, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY15_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_15] == literal_0))
@@ -27392,6 +29512,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY16_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<0, 1, 58, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY16_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY16_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<0, 1, 58, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY16_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_16] == literal_0))
             {
@@ -27439,6 +29564,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY17_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<1, 1, 58, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY17_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY17_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<1, 1, 58, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY17_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_17] == literal_0))
@@ -27488,6 +29618,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY18_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<2, 1, 58, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY18_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY18_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<2, 1, 58, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY18_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_18] == literal_0))
             {
@@ -27535,6 +29670,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY19_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<3, 1, 58, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY19_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY19_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<3, 1, 58, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY19_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_19] == literal_0))
@@ -27584,6 +29724,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY20_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<4, 1, 58, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY20_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY20_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<4, 1, 58, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY20_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_20] == literal_0))
             {
@@ -27631,6 +29776,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY21_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<5, 1, 58, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY21_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY21_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<5, 1, 58, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY21_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_21] == literal_0))
@@ -27680,6 +29830,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY22_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<6, 1, 58, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY22_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY22_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<6, 1, 58, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY22_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_22] == literal_0))
             {
@@ -27727,6 +29882,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY23_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<7, 1, 58, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY23_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY23_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<7, 1, 58, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY23_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_23] == literal_0))
@@ -27776,6 +29936,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY24_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<8, 1, 58, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY24_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY24_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<8, 1, 58, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY24_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_24] == literal_0))
             {
@@ -27823,6 +29988,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY25_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<9, 1, 58, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY25_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY25_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<9, 1, 58, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY25_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_25] == literal_0))
@@ -27872,6 +30042,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY26_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<10, 1, 58, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY26_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY26_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<10, 1, 58, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY26_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_26] == literal_0))
             {
@@ -27919,6 +30094,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY27_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<11, 1, 58, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY27_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY27_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<11, 1, 58, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY27_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_27] == literal_0))
@@ -27968,6 +30148,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY28_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<12, 1, 58, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY28_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY28_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<12, 1, 58, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY28_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_28] == literal_0))
             {
@@ -28015,6 +30200,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY29_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<13, 1, 58, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY29_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY29_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<13, 1, 58, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY29_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_29] == literal_0))
@@ -28064,6 +30254,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY30_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<14, 1, 58, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY30_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY30_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<14, 1, 58, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY30_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_30] == literal_0))
             {
@@ -28111,6 +30306,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY31_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<15, 1, 58, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY31_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY31_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<15, 1, 58, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY31_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_31] == literal_0))
@@ -28254,6 +30454,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX0_EN_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<0, 1, 59, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX0_EN_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX0_EN_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<0, 1, 59, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX0_EN_NEXT_OFF );
+            }
 
             if (((l_TGT0_ATTR_PROC_FABRIC_A_ATTACHED_CHIP_ID[literal_0] == literal_0) && l_def_A0_ENABLED))
             {
@@ -28367,6 +30572,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX1_EN_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<1, 1, 59, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX1_EN_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX1_EN_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<1, 1, 59, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX1_EN_NEXT_OFF );
             }
 
             if (((l_TGT0_ATTR_PROC_FABRIC_A_ATTACHED_CHIP_ID[literal_1] == literal_0) && l_def_A1_ENABLED))
@@ -28482,6 +30692,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX2_EN_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<2, 1, 59, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX2_EN_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX2_EN_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<2, 1, 59, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX2_EN_NEXT_OFF );
+            }
 
             if (((l_TGT0_ATTR_PROC_FABRIC_A_ATTACHED_CHIP_ID[literal_2] == literal_0) && l_def_A2_ENABLED))
             {
@@ -28595,6 +30810,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX3_EN_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<3, 1, 59, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX3_EN_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX3_EN_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<3, 1, 59, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX3_EN_NEXT_OFF );
             }
 
             if (((l_TGT0_ATTR_PROC_FABRIC_A_ATTACHED_CHIP_ID[literal_3] == literal_0) && l_def_A3_ENABLED))
@@ -28710,6 +30930,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX4_EN_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<4, 1, 59, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX4_EN_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX4_EN_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<4, 1, 59, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX4_EN_NEXT_OFF );
+            }
 
             if (((l_TGT0_ATTR_PROC_FABRIC_A_ATTACHED_CHIP_ID[literal_4] == literal_0) && l_def_A4_ENABLED))
             {
@@ -28823,6 +31048,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX5_EN_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<5, 1, 59, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX5_EN_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX5_EN_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<5, 1, 59, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX5_EN_NEXT_OFF );
             }
 
             if (((l_TGT0_ATTR_PROC_FABRIC_A_ATTACHED_CHIP_ID[literal_5] == literal_0) && l_def_A5_ENABLED))
@@ -28938,6 +31168,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX6_EN_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<6, 1, 59, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX6_EN_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX6_EN_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<6, 1, 59, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX6_EN_NEXT_OFF );
+            }
 
             if (((l_TGT0_ATTR_PROC_FABRIC_A_ATTACHED_CHIP_ID[literal_6] == literal_0) && l_def_A6_ENABLED))
             {
@@ -29052,6 +31287,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX7_EN_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<7, 1, 59, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX7_EN_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX7_EN_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<7, 1, 59, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX7_EN_NEXT_OFF );
+            }
 
             if (((l_TGT0_ATTR_PROC_FABRIC_A_ATTACHED_CHIP_ID[literal_7] == literal_0) && l_def_A7_ENABLED))
             {
@@ -29165,6 +31405,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY0_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<0, 1, 59, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY0_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY0_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<0, 1, 59, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY0_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_0] == literal_0))
             {
@@ -29212,6 +31457,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY1_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<1, 1, 59, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY1_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY1_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<1, 1, 59, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY1_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_1] == literal_0))
@@ -29261,6 +31511,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY2_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<2, 1, 59, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY2_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY2_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<2, 1, 59, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY2_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_2] == literal_0))
             {
@@ -29308,6 +31563,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY3_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<3, 1, 59, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY3_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY3_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<3, 1, 59, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY3_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_3] == literal_0))
@@ -29357,6 +31617,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY4_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<4, 1, 59, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY4_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY4_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<4, 1, 59, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY4_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_4] == literal_0))
             {
@@ -29404,6 +31669,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY5_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<5, 1, 59, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY5_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY5_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<5, 1, 59, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY5_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_5] == literal_0))
@@ -29453,6 +31723,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY6_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<6, 1, 59, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY6_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY6_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<6, 1, 59, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY6_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_6] == literal_0))
             {
@@ -29500,6 +31775,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY7_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<7, 1, 59, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY7_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY7_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<7, 1, 59, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY7_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_7] == literal_0))
@@ -29549,6 +31829,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY8_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<8, 1, 59, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY8_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY8_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<8, 1, 59, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY8_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_8] == literal_0))
             {
@@ -29596,6 +31881,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY9_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<9, 1, 59, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY9_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY9_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<9, 1, 59, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY9_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_9] == literal_0))
@@ -29645,6 +31935,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY10_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<10, 1, 59, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY10_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY10_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<10, 1, 59, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY10_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_10] == literal_0))
             {
@@ -29692,6 +31987,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY11_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<11, 1, 59, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY11_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY11_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<11, 1, 59, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY11_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_11] == literal_0))
@@ -29741,6 +32041,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY12_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<12, 1, 59, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY12_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY12_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<12, 1, 59, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY12_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_12] == literal_0))
             {
@@ -29788,6 +32093,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY13_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<13, 1, 59, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY13_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY13_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<13, 1, 59, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY13_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_13] == literal_0))
@@ -29837,6 +32147,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY14_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<14, 1, 59, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY14_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY14_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<14, 1, 59, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY14_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_14] == literal_0))
             {
@@ -29884,6 +32199,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY15_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<15, 1, 59, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY15_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY15_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<15, 1, 59, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY15_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_15] == literal_0))
@@ -29938,6 +32258,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY16_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<0, 1, 59, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY16_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY16_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<0, 1, 59, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY16_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_16] == literal_0))
             {
@@ -29985,6 +32310,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY17_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<1, 1, 59, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY17_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY17_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<1, 1, 59, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY17_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_17] == literal_0))
@@ -30034,6 +32364,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY18_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<2, 1, 59, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY18_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY18_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<2, 1, 59, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY18_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_18] == literal_0))
             {
@@ -30081,6 +32416,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY19_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<3, 1, 59, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY19_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY19_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<3, 1, 59, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY19_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_19] == literal_0))
@@ -30130,6 +32470,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY20_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<4, 1, 59, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY20_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY20_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<4, 1, 59, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY20_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_20] == literal_0))
             {
@@ -30177,6 +32522,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY21_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<5, 1, 59, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY21_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY21_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<5, 1, 59, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY21_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_21] == literal_0))
@@ -30226,6 +32576,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY22_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<6, 1, 59, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY22_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY22_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<6, 1, 59, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY22_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_22] == literal_0))
             {
@@ -30273,6 +32628,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY23_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<7, 1, 59, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY23_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY23_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<7, 1, 59, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY23_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_23] == literal_0))
@@ -30322,6 +32682,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY24_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<8, 1, 59, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY24_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY24_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<8, 1, 59, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY24_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_24] == literal_0))
             {
@@ -30369,6 +32734,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY25_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<9, 1, 59, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY25_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY25_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<9, 1, 59, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY25_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_25] == literal_0))
@@ -30418,6 +32788,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY26_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<10, 1, 59, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY26_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY26_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<10, 1, 59, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY26_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_26] == literal_0))
             {
@@ -30465,6 +32840,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY27_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<11, 1, 59, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY27_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY27_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<11, 1, 59, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY27_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_27] == literal_0))
@@ -30514,6 +32894,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY28_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<12, 1, 59, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY28_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY28_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<12, 1, 59, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY28_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_28] == literal_0))
             {
@@ -30561,6 +32946,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY29_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<13, 1, 59, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY29_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY29_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<13, 1, 59, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY29_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_29] == literal_0))
@@ -30610,6 +33000,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY30_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<14, 1, 59, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY30_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY30_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<14, 1, 59, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY30_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_30] == literal_0))
             {
@@ -30657,6 +33052,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY31_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<15, 1, 59, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY31_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY31_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<15, 1, 59, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY31_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_31] == literal_0))
@@ -30800,6 +33200,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX0_EN_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<0, 1, 60, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX0_EN_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX0_EN_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<0, 1, 60, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX0_EN_NEXT_OFF );
+            }
 
             if (((l_TGT0_ATTR_PROC_FABRIC_A_ATTACHED_CHIP_ID[literal_0] == literal_0) && l_def_A0_ENABLED))
             {
@@ -30913,6 +33318,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX1_EN_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<1, 1, 60, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX1_EN_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX1_EN_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<1, 1, 60, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX1_EN_NEXT_OFF );
             }
 
             if (((l_TGT0_ATTR_PROC_FABRIC_A_ATTACHED_CHIP_ID[literal_1] == literal_0) && l_def_A1_ENABLED))
@@ -31028,6 +33438,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX2_EN_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<2, 1, 60, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX2_EN_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX2_EN_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<2, 1, 60, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX2_EN_NEXT_OFF );
+            }
 
             if (((l_TGT0_ATTR_PROC_FABRIC_A_ATTACHED_CHIP_ID[literal_2] == literal_0) && l_def_A2_ENABLED))
             {
@@ -31141,6 +33556,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX3_EN_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<3, 1, 60, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX3_EN_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX3_EN_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<3, 1, 60, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX3_EN_NEXT_OFF );
             }
 
             if (((l_TGT0_ATTR_PROC_FABRIC_A_ATTACHED_CHIP_ID[literal_3] == literal_0) && l_def_A3_ENABLED))
@@ -31256,6 +33676,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX4_EN_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<4, 1, 60, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX4_EN_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX4_EN_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<4, 1, 60, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX4_EN_NEXT_OFF );
+            }
 
             if (((l_TGT0_ATTR_PROC_FABRIC_A_ATTACHED_CHIP_ID[literal_4] == literal_0) && l_def_A4_ENABLED))
             {
@@ -31369,6 +33794,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX5_EN_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<5, 1, 60, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX5_EN_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX5_EN_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<5, 1, 60, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX5_EN_NEXT_OFF );
             }
 
             if (((l_TGT0_ATTR_PROC_FABRIC_A_ATTACHED_CHIP_ID[literal_5] == literal_0) && l_def_A5_ENABLED))
@@ -31484,6 +33914,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX6_EN_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<6, 1, 60, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX6_EN_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX6_EN_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<6, 1, 60, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX6_EN_NEXT_OFF );
+            }
 
             if (((l_TGT0_ATTR_PROC_FABRIC_A_ATTACHED_CHIP_ID[literal_6] == literal_0) && l_def_A6_ENABLED))
             {
@@ -31598,6 +34033,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX7_EN_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<7, 1, 60, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX7_EN_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX7_EN_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<7, 1, 60, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX7_EN_NEXT_OFF );
+            }
 
             if (((l_TGT0_ATTR_PROC_FABRIC_A_ATTACHED_CHIP_ID[literal_7] == literal_0) && l_def_A7_ENABLED))
             {
@@ -31711,6 +34151,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY0_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<0, 1, 60, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY0_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY0_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<0, 1, 60, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY0_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_0] == literal_0))
             {
@@ -31758,6 +34203,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY1_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<1, 1, 60, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY1_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY1_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<1, 1, 60, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY1_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_1] == literal_0))
@@ -31807,6 +34257,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY2_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<2, 1, 60, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY2_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY2_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<2, 1, 60, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY2_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_2] == literal_0))
             {
@@ -31854,6 +34309,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY3_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<3, 1, 60, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY3_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY3_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<3, 1, 60, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY3_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_3] == literal_0))
@@ -31903,6 +34363,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY4_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<4, 1, 60, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY4_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY4_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<4, 1, 60, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY4_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_4] == literal_0))
             {
@@ -31950,6 +34415,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY5_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<5, 1, 60, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY5_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY5_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<5, 1, 60, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY5_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_5] == literal_0))
@@ -31999,6 +34469,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY6_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<6, 1, 60, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY6_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY6_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<6, 1, 60, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY6_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_6] == literal_0))
             {
@@ -32046,6 +34521,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY7_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<7, 1, 60, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY7_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY7_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<7, 1, 60, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY7_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_7] == literal_0))
@@ -32095,6 +34575,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY8_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<8, 1, 60, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY8_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY8_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<8, 1, 60, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY8_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_8] == literal_0))
             {
@@ -32142,6 +34627,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY9_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<9, 1, 60, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY9_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY9_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<9, 1, 60, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY9_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_9] == literal_0))
@@ -32191,6 +34681,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY10_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<10, 1, 60, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY10_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY10_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<10, 1, 60, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY10_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_10] == literal_0))
             {
@@ -32238,6 +34733,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY11_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<11, 1, 60, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY11_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY11_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<11, 1, 60, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY11_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_11] == literal_0))
@@ -32287,6 +34787,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY12_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<12, 1, 60, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY12_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY12_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<12, 1, 60, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY12_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_12] == literal_0))
             {
@@ -32334,6 +34839,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY13_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<13, 1, 60, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY13_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY13_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<13, 1, 60, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY13_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_13] == literal_0))
@@ -32383,6 +34893,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY14_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<14, 1, 60, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY14_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY14_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<14, 1, 60, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY14_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_14] == literal_0))
             {
@@ -32430,6 +34945,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY15_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<15, 1, 60, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY15_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY15_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<15, 1, 60, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY15_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_15] == literal_0))
@@ -32484,6 +35004,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY16_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<0, 1, 60, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY16_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY16_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<0, 1, 60, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY16_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_16] == literal_0))
             {
@@ -32531,6 +35056,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY17_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<1, 1, 60, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY17_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY17_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<1, 1, 60, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY17_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_17] == literal_0))
@@ -32580,6 +35110,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY18_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<2, 1, 60, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY18_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY18_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<2, 1, 60, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY18_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_18] == literal_0))
             {
@@ -32627,6 +35162,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY19_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<3, 1, 60, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY19_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY19_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<3, 1, 60, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY19_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_19] == literal_0))
@@ -32676,6 +35216,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY20_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<4, 1, 60, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY20_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY20_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<4, 1, 60, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY20_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_20] == literal_0))
             {
@@ -32723,6 +35268,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY21_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<5, 1, 60, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY21_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY21_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<5, 1, 60, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY21_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_21] == literal_0))
@@ -32772,6 +35322,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY22_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<6, 1, 60, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY22_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY22_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<6, 1, 60, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY22_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_22] == literal_0))
             {
@@ -32819,6 +35374,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY23_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<7, 1, 60, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY23_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY23_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<7, 1, 60, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY23_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_23] == literal_0))
@@ -32868,6 +35428,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY24_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<8, 1, 60, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY24_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY24_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<8, 1, 60, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY24_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_24] == literal_0))
             {
@@ -32915,6 +35480,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY25_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<9, 1, 60, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY25_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY25_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<9, 1, 60, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY25_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_25] == literal_0))
@@ -32964,6 +35534,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY26_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<10, 1, 60, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY26_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY26_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<10, 1, 60, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY26_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_26] == literal_0))
             {
@@ -33011,6 +35586,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY27_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<11, 1, 60, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY27_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY27_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<11, 1, 60, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY27_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_27] == literal_0))
@@ -33060,6 +35640,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY28_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<12, 1, 60, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY28_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY28_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<12, 1, 60, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY28_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_28] == literal_0))
             {
@@ -33107,6 +35692,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY29_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<13, 1, 60, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY29_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY29_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<13, 1, 60, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY29_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_29] == literal_0))
@@ -33156,6 +35746,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY30_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<14, 1, 60, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY30_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY30_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<14, 1, 60, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY30_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_30] == literal_0))
             {
@@ -33203,6 +35798,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY31_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<15, 1, 60, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY31_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY31_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<15, 1, 60, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY31_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_31] == literal_0))
@@ -33346,6 +35946,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX0_EN_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<0, 1, 61, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX0_EN_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX0_EN_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<0, 1, 61, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX0_EN_NEXT_OFF );
+            }
 
             if (((l_TGT0_ATTR_PROC_FABRIC_A_ATTACHED_CHIP_ID[literal_0] == literal_0) && l_def_A0_ENABLED))
             {
@@ -33459,6 +36064,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX1_EN_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<1, 1, 61, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX1_EN_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX1_EN_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<1, 1, 61, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX1_EN_NEXT_OFF );
             }
 
             if (((l_TGT0_ATTR_PROC_FABRIC_A_ATTACHED_CHIP_ID[literal_1] == literal_0) && l_def_A1_ENABLED))
@@ -33574,6 +36184,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX2_EN_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<2, 1, 61, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX2_EN_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX2_EN_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<2, 1, 61, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX2_EN_NEXT_OFF );
+            }
 
             if (((l_TGT0_ATTR_PROC_FABRIC_A_ATTACHED_CHIP_ID[literal_2] == literal_0) && l_def_A2_ENABLED))
             {
@@ -33687,6 +36302,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX3_EN_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<3, 1, 61, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX3_EN_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX3_EN_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<3, 1, 61, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX3_EN_NEXT_OFF );
             }
 
             if (((l_TGT0_ATTR_PROC_FABRIC_A_ATTACHED_CHIP_ID[literal_3] == literal_0) && l_def_A3_ENABLED))
@@ -33802,6 +36422,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX4_EN_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<4, 1, 61, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX4_EN_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX4_EN_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<4, 1, 61, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX4_EN_NEXT_OFF );
+            }
 
             if (((l_TGT0_ATTR_PROC_FABRIC_A_ATTACHED_CHIP_ID[literal_4] == literal_0) && l_def_A4_ENABLED))
             {
@@ -33915,6 +36540,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX5_EN_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<5, 1, 61, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX5_EN_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX5_EN_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<5, 1, 61, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX5_EN_NEXT_OFF );
             }
 
             if (((l_TGT0_ATTR_PROC_FABRIC_A_ATTACHED_CHIP_ID[literal_5] == literal_0) && l_def_A5_ENABLED))
@@ -34030,6 +36660,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX6_EN_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<6, 1, 61, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX6_EN_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX6_EN_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<6, 1, 61, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX6_EN_NEXT_OFF );
+            }
 
             if (((l_TGT0_ATTR_PROC_FABRIC_A_ATTACHED_CHIP_ID[literal_6] == literal_0) && l_def_A6_ENABLED))
             {
@@ -34144,6 +36779,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX7_EN_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<7, 1, 61, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX7_EN_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX7_EN_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<7, 1, 61, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX7_EN_NEXT_OFF );
+            }
 
             if (((l_TGT0_ATTR_PROC_FABRIC_A_ATTACHED_CHIP_ID[literal_7] == literal_0) && l_def_A7_ENABLED))
             {
@@ -34257,6 +36897,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY0_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<0, 1, 61, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY0_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY0_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<0, 1, 61, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY0_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_0] == literal_0))
             {
@@ -34304,6 +36949,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY1_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<1, 1, 61, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY1_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY1_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<1, 1, 61, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY1_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_1] == literal_0))
@@ -34353,6 +37003,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY2_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<2, 1, 61, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY2_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY2_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<2, 1, 61, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY2_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_2] == literal_0))
             {
@@ -34400,6 +37055,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY3_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<3, 1, 61, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY3_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY3_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<3, 1, 61, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY3_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_3] == literal_0))
@@ -34449,6 +37109,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY4_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<4, 1, 61, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY4_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY4_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<4, 1, 61, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY4_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_4] == literal_0))
             {
@@ -34496,6 +37161,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY5_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<5, 1, 61, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY5_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY5_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<5, 1, 61, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY5_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_5] == literal_0))
@@ -34545,6 +37215,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY6_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<6, 1, 61, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY6_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY6_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<6, 1, 61, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY6_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_6] == literal_0))
             {
@@ -34592,6 +37267,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY7_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<7, 1, 61, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY7_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY7_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<7, 1, 61, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY7_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_7] == literal_0))
@@ -34641,6 +37321,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY8_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<8, 1, 61, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY8_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY8_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<8, 1, 61, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY8_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_8] == literal_0))
             {
@@ -34688,6 +37373,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY9_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<9, 1, 61, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY9_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY9_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<9, 1, 61, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY9_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_9] == literal_0))
@@ -34737,6 +37427,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY10_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<10, 1, 61, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY10_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY10_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<10, 1, 61, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY10_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_10] == literal_0))
             {
@@ -34784,6 +37479,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY11_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<11, 1, 61, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY11_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY11_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<11, 1, 61, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY11_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_11] == literal_0))
@@ -34833,6 +37533,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY12_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<12, 1, 61, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY12_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY12_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<12, 1, 61, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY12_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_12] == literal_0))
             {
@@ -34880,6 +37585,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY13_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<13, 1, 61, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY13_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY13_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<13, 1, 61, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY13_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_13] == literal_0))
@@ -34929,6 +37639,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY14_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<14, 1, 61, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY14_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY14_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<14, 1, 61, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY14_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_14] == literal_0))
             {
@@ -34976,6 +37691,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY15_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<15, 1, 61, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY15_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY15_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<15, 1, 61, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY15_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_15] == literal_0))
@@ -35030,6 +37750,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY16_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<0, 1, 61, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY16_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY16_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<0, 1, 61, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY16_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_16] == literal_0))
             {
@@ -35077,6 +37802,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY17_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<1, 1, 61, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY17_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY17_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<1, 1, 61, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY17_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_17] == literal_0))
@@ -35126,6 +37856,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY18_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<2, 1, 61, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY18_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY18_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<2, 1, 61, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY18_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_18] == literal_0))
             {
@@ -35173,6 +37908,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY19_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<3, 1, 61, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY19_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY19_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<3, 1, 61, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY19_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_19] == literal_0))
@@ -35222,6 +37962,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY20_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<4, 1, 61, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY20_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY20_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<4, 1, 61, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY20_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_20] == literal_0))
             {
@@ -35269,6 +38014,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY21_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<5, 1, 61, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY21_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY21_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<5, 1, 61, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY21_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_21] == literal_0))
@@ -35318,6 +38068,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY22_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<6, 1, 61, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY22_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY22_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<6, 1, 61, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY22_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_22] == literal_0))
             {
@@ -35365,6 +38120,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY23_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<7, 1, 61, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY23_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY23_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<7, 1, 61, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY23_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_23] == literal_0))
@@ -35414,6 +38174,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY24_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<8, 1, 61, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY24_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY24_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<8, 1, 61, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY24_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_24] == literal_0))
             {
@@ -35461,6 +38226,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY25_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<9, 1, 61, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY25_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY25_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<9, 1, 61, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY25_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_25] == literal_0))
@@ -35510,6 +38280,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY26_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<10, 1, 61, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY26_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY26_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<10, 1, 61, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY26_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_26] == literal_0))
             {
@@ -35557,6 +38332,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY27_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<11, 1, 61, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY27_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY27_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<11, 1, 61, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY27_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_27] == literal_0))
@@ -35606,6 +38386,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY28_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<12, 1, 61, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY28_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY28_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<12, 1, 61, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY28_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_28] == literal_0))
             {
@@ -35653,6 +38438,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY29_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<13, 1, 61, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY29_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY29_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<13, 1, 61, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY29_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_29] == literal_0))
@@ -35702,6 +38492,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY30_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<14, 1, 61, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY30_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY30_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<14, 1, 61, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY30_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_30] == literal_0))
             {
@@ -35749,6 +38544,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY31_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<15, 1, 61, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY31_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY31_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<15, 1, 61, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY31_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_31] == literal_0))
@@ -35892,6 +38692,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX0_EN_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<0, 1, 62, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX0_EN_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX0_EN_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<0, 1, 62, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX0_EN_NEXT_OFF );
+            }
 
             if (((l_TGT0_ATTR_PROC_FABRIC_A_ATTACHED_CHIP_ID[literal_0] == literal_0) && l_def_A0_ENABLED))
             {
@@ -36005,6 +38810,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX1_EN_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<1, 1, 62, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX1_EN_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX1_EN_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<1, 1, 62, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX1_EN_NEXT_OFF );
             }
 
             if (((l_TGT0_ATTR_PROC_FABRIC_A_ATTACHED_CHIP_ID[literal_1] == literal_0) && l_def_A1_ENABLED))
@@ -36120,6 +38930,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX2_EN_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<2, 1, 62, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX2_EN_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX2_EN_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<2, 1, 62, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX2_EN_NEXT_OFF );
+            }
 
             if (((l_TGT0_ATTR_PROC_FABRIC_A_ATTACHED_CHIP_ID[literal_2] == literal_0) && l_def_A2_ENABLED))
             {
@@ -36233,6 +39048,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX3_EN_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<3, 1, 62, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX3_EN_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX3_EN_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<3, 1, 62, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX3_EN_NEXT_OFF );
             }
 
             if (((l_TGT0_ATTR_PROC_FABRIC_A_ATTACHED_CHIP_ID[literal_3] == literal_0) && l_def_A3_ENABLED))
@@ -36348,6 +39168,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX4_EN_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<4, 1, 62, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX4_EN_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX4_EN_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<4, 1, 62, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX4_EN_NEXT_OFF );
+            }
 
             if (((l_TGT0_ATTR_PROC_FABRIC_A_ATTACHED_CHIP_ID[literal_4] == literal_0) && l_def_A4_ENABLED))
             {
@@ -36461,6 +39286,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX5_EN_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<5, 1, 62, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX5_EN_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX5_EN_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<5, 1, 62, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX5_EN_NEXT_OFF );
             }
 
             if (((l_TGT0_ATTR_PROC_FABRIC_A_ATTACHED_CHIP_ID[literal_5] == literal_0) && l_def_A5_ENABLED))
@@ -36576,6 +39406,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX6_EN_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<6, 1, 62, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX6_EN_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX6_EN_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<6, 1, 62, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX6_EN_NEXT_OFF );
+            }
 
             if (((l_TGT0_ATTR_PROC_FABRIC_A_ATTACHED_CHIP_ID[literal_6] == literal_0) && l_def_A6_ENABLED))
             {
@@ -36690,6 +39525,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX7_EN_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<7, 1, 62, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX7_EN_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX7_EN_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<7, 1, 62, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX7_EN_NEXT_OFF );
+            }
 
             if (((l_TGT0_ATTR_PROC_FABRIC_A_ATTACHED_CHIP_ID[literal_7] == literal_0) && l_def_A7_ENABLED))
             {
@@ -36803,6 +39643,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY0_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<0, 1, 62, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY0_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY0_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<0, 1, 62, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY0_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_0] == literal_0))
             {
@@ -36850,6 +39695,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY1_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<1, 1, 62, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY1_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY1_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<1, 1, 62, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY1_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_1] == literal_0))
@@ -36899,6 +39749,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY2_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<2, 1, 62, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY2_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY2_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<2, 1, 62, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY2_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_2] == literal_0))
             {
@@ -36946,6 +39801,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY3_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<3, 1, 62, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY3_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY3_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<3, 1, 62, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY3_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_3] == literal_0))
@@ -36995,6 +39855,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY4_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<4, 1, 62, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY4_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY4_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<4, 1, 62, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY4_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_4] == literal_0))
             {
@@ -37042,6 +39907,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY5_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<5, 1, 62, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY5_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY5_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<5, 1, 62, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY5_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_5] == literal_0))
@@ -37091,6 +39961,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY6_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<6, 1, 62, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY6_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY6_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<6, 1, 62, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY6_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_6] == literal_0))
             {
@@ -37138,6 +40013,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY7_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<7, 1, 62, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY7_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY7_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<7, 1, 62, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY7_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_7] == literal_0))
@@ -37187,6 +40067,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY8_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<8, 1, 62, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY8_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY8_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<8, 1, 62, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY8_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_8] == literal_0))
             {
@@ -37234,6 +40119,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY9_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<9, 1, 62, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY9_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY9_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<9, 1, 62, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY9_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_9] == literal_0))
@@ -37283,6 +40173,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY10_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<10, 1, 62, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY10_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY10_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<10, 1, 62, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY10_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_10] == literal_0))
             {
@@ -37330,6 +40225,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY11_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<11, 1, 62, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY11_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY11_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<11, 1, 62, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY11_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_11] == literal_0))
@@ -37379,6 +40279,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY12_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<12, 1, 62, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY12_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY12_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<12, 1, 62, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY12_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_12] == literal_0))
             {
@@ -37426,6 +40331,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY13_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<13, 1, 62, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY13_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY13_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<13, 1, 62, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY13_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_13] == literal_0))
@@ -37475,6 +40385,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY14_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<14, 1, 62, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY14_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY14_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<14, 1, 62, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY14_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_14] == literal_0))
             {
@@ -37522,6 +40437,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY15_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<15, 1, 62, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY15_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY15_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<15, 1, 62, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY15_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_15] == literal_0))
@@ -37576,6 +40496,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY16_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<0, 1, 62, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY16_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY16_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<0, 1, 62, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY16_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_16] == literal_0))
             {
@@ -37623,6 +40548,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY17_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<1, 1, 62, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY17_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY17_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<1, 1, 62, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY17_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_17] == literal_0))
@@ -37672,6 +40602,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY18_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<2, 1, 62, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY18_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY18_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<2, 1, 62, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY18_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_18] == literal_0))
             {
@@ -37719,6 +40654,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY19_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<3, 1, 62, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY19_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY19_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<3, 1, 62, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY19_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_19] == literal_0))
@@ -37768,6 +40708,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY20_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<4, 1, 62, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY20_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY20_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<4, 1, 62, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY20_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_20] == literal_0))
             {
@@ -37815,6 +40760,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY21_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<5, 1, 62, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY21_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY21_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<5, 1, 62, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY21_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_21] == literal_0))
@@ -37864,6 +40814,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY22_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<6, 1, 62, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY22_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY22_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<6, 1, 62, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY22_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_22] == literal_0))
             {
@@ -37911,6 +40866,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY23_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<7, 1, 62, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY23_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY23_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<7, 1, 62, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY23_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_23] == literal_0))
@@ -37960,6 +40920,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY24_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<8, 1, 62, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY24_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY24_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<8, 1, 62, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY24_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_24] == literal_0))
             {
@@ -38007,6 +40972,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY25_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<9, 1, 62, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY25_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY25_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<9, 1, 62, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY25_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_25] == literal_0))
@@ -38056,6 +41026,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY26_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<10, 1, 62, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY26_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY26_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<10, 1, 62, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY26_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_26] == literal_0))
             {
@@ -38103,6 +41078,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY27_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<11, 1, 62, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY27_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY27_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<11, 1, 62, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY27_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_27] == literal_0))
@@ -38152,6 +41132,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY28_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<12, 1, 62, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY28_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY28_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<12, 1, 62, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY28_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_28] == literal_0))
             {
@@ -38199,6 +41184,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY29_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<13, 1, 62, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY29_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY29_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<13, 1, 62, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY29_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_29] == literal_0))
@@ -38248,6 +41238,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY30_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<14, 1, 62, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY30_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY30_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<14, 1, 62, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY30_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_30] == literal_0))
             {
@@ -38295,6 +41290,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY31_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<15, 1, 62, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY31_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY31_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<15, 1, 62, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY31_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_31] == literal_0))
@@ -38438,6 +41438,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX0_EN_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<0, 1, 63, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX0_EN_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX0_EN_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<0, 1, 63, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX0_EN_NEXT_OFF );
+            }
 
             if (((l_TGT0_ATTR_PROC_FABRIC_A_ATTACHED_CHIP_ID[literal_0] == literal_0) && l_def_A0_ENABLED))
             {
@@ -38551,6 +41556,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX1_EN_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<1, 1, 63, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX1_EN_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX1_EN_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<1, 1, 63, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX1_EN_NEXT_OFF );
             }
 
             if (((l_TGT0_ATTR_PROC_FABRIC_A_ATTACHED_CHIP_ID[literal_1] == literal_0) && l_def_A1_ENABLED))
@@ -38666,6 +41676,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX2_EN_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<2, 1, 63, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX2_EN_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX2_EN_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<2, 1, 63, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX2_EN_NEXT_OFF );
+            }
 
             if (((l_TGT0_ATTR_PROC_FABRIC_A_ATTACHED_CHIP_ID[literal_2] == literal_0) && l_def_A2_ENABLED))
             {
@@ -38779,6 +41794,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX3_EN_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<3, 1, 63, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX3_EN_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX3_EN_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<3, 1, 63, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX3_EN_NEXT_OFF );
             }
 
             if (((l_TGT0_ATTR_PROC_FABRIC_A_ATTACHED_CHIP_ID[literal_3] == literal_0) && l_def_A3_ENABLED))
@@ -38894,6 +41914,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX4_EN_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<4, 1, 63, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX4_EN_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX4_EN_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<4, 1, 63, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX4_EN_NEXT_OFF );
+            }
 
             if (((l_TGT0_ATTR_PROC_FABRIC_A_ATTACHED_CHIP_ID[literal_4] == literal_0) && l_def_A4_ENABLED))
             {
@@ -39007,6 +42032,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX5_EN_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<5, 1, 63, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX5_EN_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX5_EN_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<5, 1, 63, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX5_EN_NEXT_OFF );
             }
 
             if (((l_TGT0_ATTR_PROC_FABRIC_A_ATTACHED_CHIP_ID[literal_5] == literal_0) && l_def_A5_ENABLED))
@@ -39122,6 +42152,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX6_EN_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<6, 1, 63, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX6_EN_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX6_EN_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<6, 1, 63, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX6_EN_NEXT_OFF );
+            }
 
             if (((l_TGT0_ATTR_PROC_FABRIC_A_ATTACHED_CHIP_ID[literal_6] == literal_0) && l_def_A6_ENABLED))
             {
@@ -39236,6 +42271,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX7_EN_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<7, 1, 63, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX7_EN_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_LINK_AX7_EN_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<7, 1, 63, uint64_t>(l_PB_PB_COM_PB_CFG_LINK_AX7_EN_NEXT_OFF );
+            }
 
             if (((l_TGT0_ATTR_PROC_FABRIC_A_ATTACHED_CHIP_ID[literal_7] == literal_0) && l_def_A7_ENABLED))
             {
@@ -39349,6 +42389,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY0_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<0, 1, 63, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY0_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY0_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<0, 1, 63, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY0_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_0] == literal_0))
             {
@@ -39396,6 +42441,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY1_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<1, 1, 63, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY1_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY1_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<1, 1, 63, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY1_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_1] == literal_0))
@@ -39445,6 +42495,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY2_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<2, 1, 63, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY2_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY2_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<2, 1, 63, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY2_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_2] == literal_0))
             {
@@ -39492,6 +42547,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY3_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<3, 1, 63, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY3_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY3_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<3, 1, 63, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY3_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_3] == literal_0))
@@ -39541,6 +42601,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY4_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<4, 1, 63, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY4_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY4_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<4, 1, 63, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY4_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_4] == literal_0))
             {
@@ -39588,6 +42653,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY5_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<5, 1, 63, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY5_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY5_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<5, 1, 63, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY5_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_5] == literal_0))
@@ -39637,6 +42707,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY6_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<6, 1, 63, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY6_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY6_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<6, 1, 63, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY6_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_6] == literal_0))
             {
@@ -39684,6 +42759,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY7_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<7, 1, 63, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY7_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY7_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<7, 1, 63, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY7_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_7] == literal_0))
@@ -39733,6 +42813,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY8_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<8, 1, 63, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY8_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY8_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<8, 1, 63, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY8_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_8] == literal_0))
             {
@@ -39780,6 +42865,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY9_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<9, 1, 63, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY9_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY9_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<9, 1, 63, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY9_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_9] == literal_0))
@@ -39829,6 +42919,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY10_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<10, 1, 63, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY10_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY10_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<10, 1, 63, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY10_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_10] == literal_0))
             {
@@ -39876,6 +42971,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY11_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<11, 1, 63, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY11_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY11_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<11, 1, 63, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY11_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_11] == literal_0))
@@ -39925,6 +43025,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY12_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<12, 1, 63, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY12_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY12_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<12, 1, 63, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY12_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_12] == literal_0))
             {
@@ -39972,6 +43077,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY13_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<13, 1, 63, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY13_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY13_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<13, 1, 63, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY13_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_13] == literal_0))
@@ -40021,6 +43131,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY14_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<14, 1, 63, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY14_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY14_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<14, 1, 63, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY14_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_14] == literal_0))
             {
@@ -40068,6 +43183,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY15_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<15, 1, 63, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY15_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY15_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<15, 1, 63, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY15_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_15] == literal_0))
@@ -40122,6 +43242,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY16_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<0, 1, 63, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY16_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY16_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<0, 1, 63, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY16_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_16] == literal_0))
             {
@@ -40169,6 +43294,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY17_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<1, 1, 63, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY17_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY17_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<1, 1, 63, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY17_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_17] == literal_0))
@@ -40218,6 +43348,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY18_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<2, 1, 63, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY18_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY18_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<2, 1, 63, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY18_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_18] == literal_0))
             {
@@ -40265,6 +43400,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY19_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<3, 1, 63, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY19_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY19_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<3, 1, 63, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY19_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_19] == literal_0))
@@ -40314,6 +43454,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY20_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<4, 1, 63, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY20_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY20_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<4, 1, 63, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY20_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_20] == literal_0))
             {
@@ -40361,6 +43506,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY21_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<5, 1, 63, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY21_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY21_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<5, 1, 63, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY21_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_21] == literal_0))
@@ -40410,6 +43560,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY22_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<6, 1, 63, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY22_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY22_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<6, 1, 63, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY22_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_22] == literal_0))
             {
@@ -40457,6 +43612,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY23_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<7, 1, 63, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY23_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY23_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<7, 1, 63, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY23_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_23] == literal_0))
@@ -40506,6 +43666,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY24_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<8, 1, 63, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY24_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY24_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<8, 1, 63, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY24_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_24] == literal_0))
             {
@@ -40553,6 +43718,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY25_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<9, 1, 63, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY25_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY25_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<9, 1, 63, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY25_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_25] == literal_0))
@@ -40602,6 +43772,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY26_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<10, 1, 63, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY26_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY26_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<10, 1, 63, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY26_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_26] == literal_0))
             {
@@ -40649,6 +43824,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY27_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<11, 1, 63, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY27_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY27_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<11, 1, 63, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY27_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_27] == literal_0))
@@ -40698,6 +43878,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY28_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<12, 1, 63, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY28_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY28_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<12, 1, 63, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY28_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_28] == literal_0))
             {
@@ -40745,6 +43930,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY29_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<13, 1, 63, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY29_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY29_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<13, 1, 63, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY29_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_29] == literal_0))
@@ -40794,6 +43984,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY30_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<14, 1, 63, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY30_VALID_NEXT_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY30_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<14, 1, 63, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY30_VALID_NEXT_OFF );
+            }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_30] == literal_0))
             {
@@ -40841,6 +44036,11 @@ fapi2::ReturnCode p10_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY31_VALID_NEXT_ON = 0xffff;
                 l_scom_buffer.insert<15, 1, 63, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY31_VALID_NEXT_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_PB_COM_PB_CFG_TID_ENTRY31_VALID_NEXT_OFF = 0x0;
+                l_scom_buffer.insert<15, 1, 63, uint64_t>(l_PB_PB_COM_PB_CFG_TID_ENTRY31_VALID_NEXT_OFF );
             }
 
             if ((l_TGT0_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE[literal_31] == literal_0))

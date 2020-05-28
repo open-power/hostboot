@@ -37,6 +37,7 @@
 #include <p10_build_smp.H>
 #include <p10_build_smp_fbc_ab.H>
 #include <p10_fbc_utils.H>
+#include <p10_smp_wrap.H>
 
 #include <p10_scom_proc.H>
 #include <p10_scom_pauc_6.H>
@@ -112,9 +113,15 @@ fapi2::ReturnCode p10_build_smp_process_chip(
     // set group master NEXT designation based on phase
     if (i_op == SMP_ACTIVATE_PHASE1)
     {
+        fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
+
+        fapi2::ATTR_MFG_FLAGS_Type l_mfg_flags;
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MFG_FLAGS, FAPI_SYSTEM, l_mfg_flags),
+                 "Error from FAPI_ATTR_GET (ATTR_MFG_FLAGS)");
+
         // each chip should match the flush state of the fabric logic
-        if (!io_smp_chip.master_chip_sys_curr ||
-            io_smp_chip.master_chip_group_curr)
+        if ((!io_smp_chip.master_chip_sys_curr || io_smp_chip.master_chip_group_curr)
+            && (l_mfg_flags[MFG_FLAGS_SMP_WRAP_CELL] != fapi2::ENUM_ATTR_MFG_FLAGS_MNFG_SMP_WRAP_CONFIG))
         {
             FAPI_DBG("Error: chip does not match flush state of fabric: sys_curr: %d, grp_curr: %d",
                      io_smp_chip.master_chip_sys_curr ? 1 : 0, io_smp_chip.master_chip_group_curr ? 1 : 0);
@@ -433,10 +440,12 @@ fapi2::ReturnCode p10_build_smp_validate_link(
         FAPI_TRY(PREP_DLP_FIR_REG_RW(i_iohs_target));
         l_dl_trained  = GET_DLP_FIR_REG_0_TRAINED(l_dl_fir_reg) &&
                         GET_DLP_FIR_REG_1_TRAINED(l_dl_fir_reg);
+
         FAPI_TRY(PREP_PB_PTL_FIR_REG_RW(l_pauc_target));
         l_tl_trained  = (i_link_id % 2) ?
                         (GET_PB_PTL_FIR_REG_FMR02_TRAINED(l_tl_fir_reg) && GET_PB_PTL_FIR_REG_FMR03_TRAINED(l_tl_fir_reg)) :
                         (GET_PB_PTL_FIR_REG_FMR00_TRAINED(l_tl_fir_reg) && GET_PB_PTL_FIR_REG_FMR01_TRAINED(l_tl_fir_reg));
+
         FAPI_TRY(PREP_CPLT_CONF1_RW(l_pauc_target));
         l_iovalid_set = (i_link_id % 2) ?
                         (GET_CPLT_CONF1_3_IOVALID_DC(l_cplt_conf1_reg) && GET_CPLT_CONF1_2_IOVALID_DC(l_cplt_conf1_reg)) :
@@ -446,10 +455,12 @@ fapi2::ReturnCode p10_build_smp_validate_link(
     {
         FAPI_TRY(PREP_DLP_FIR_REG_RW(i_iohs_target));
         l_dl_trained  = GET_DLP_FIR_REG_0_TRAINED(l_dl_fir_reg);
+
         FAPI_TRY(PREP_PB_PTL_FIR_REG_RW(l_pauc_target));
         l_tl_trained  = (i_link_id % 2) ?
                         (GET_PB_PTL_FIR_REG_FMR02_TRAINED(l_tl_fir_reg)) :
                         (GET_PB_PTL_FIR_REG_FMR00_TRAINED(l_tl_fir_reg));
+
         FAPI_TRY(PREP_CPLT_CONF1_RW(l_pauc_target));
         l_iovalid_set = (i_link_id % 2) ?
                         (GET_CPLT_CONF1_3_IOVALID_DC(l_cplt_conf1_reg)) :
@@ -459,10 +470,12 @@ fapi2::ReturnCode p10_build_smp_validate_link(
     {
         FAPI_TRY(PREP_DLP_FIR_REG_RW(i_iohs_target));
         l_dl_trained  = GET_DLP_FIR_REG_1_TRAINED(l_dl_fir_reg);
+
         FAPI_TRY(PREP_PB_PTL_FIR_REG_RW(l_pauc_target));
         l_tl_trained  = (i_link_id % 2) ?
                         (GET_PB_PTL_FIR_REG_FMR03_TRAINED(l_tl_fir_reg)) :
                         (GET_PB_PTL_FIR_REG_FMR01_TRAINED(l_tl_fir_reg));
+
         FAPI_TRY(PREP_CPLT_CONF1_RW(l_pauc_target));
         l_iovalid_set = (i_link_id % 2) ?
                         (GET_CPLT_CONF1_2_IOVALID_DC(l_cplt_conf1_reg)) :
@@ -635,6 +648,56 @@ fapi_try_exit:
 }
 
 ///
+/// @brief Update link attributes for manufacturing smp wrap config
+///        - Selects a valid link configuration for the first initial boot
+///        - Skips any updates when cycling through the various mfg wrap modes
+///
+/// @param[in] i_smp            Fully specified structure encapsulating SMP
+///
+/// @return fapi2::ReturnCode   FAPI2_RC_SUCCESS if success, else error code.
+///
+fapi2::ReturnCode p10_build_smp_mfg_config(
+    p10_build_smp_system& i_smp)
+{
+    FAPI_DBG("Start");
+
+    fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
+
+    fapi2::ATTR_MFG_FLAGS_Type l_mfg_flags;
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MFG_FLAGS, FAPI_SYSTEM, l_mfg_flags),
+             "Error from FAPI_ATTR_GET (ATTR_MFG_FLAGS)");
+
+    if(l_mfg_flags[MFG_FLAGS_SMP_WRAP_CELL] == fapi2::ENUM_ATTR_MFG_FLAGS_MNFG_SMP_WRAP_CONFIG)
+    {
+        fapi2::ATTR_IS_SIMULATION_Type l_sim_env;
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IS_SIMULATION, FAPI_SYSTEM, l_sim_env),
+                 "Error from FAPI_ATTR_GET (ATTR_IS_SIMULATION)");
+
+        for (auto g_iter = i_smp.groups.begin(); g_iter != i_smp.groups.end(); g_iter++)
+        {
+            for (auto p_iter = g_iter->second.chips.begin(); p_iter != g_iter->second.chips.end(); p_iter++)
+            {
+                fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP> l_target = *(p_iter->second.target);
+
+                fapi2::ATTR_PROC_FABRIC_X_LINKS_CNFG_Type l_num_links;
+                FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_X_LINKS_CNFG, l_target, l_num_links),
+                         "Error from FAPI_ATTR_GET (ATTR_PROC_FABRIC_X_LINKS_CNFG)");
+
+                if(l_num_links > 3) // only three links can be active at a time in mfg mode
+                {
+                    FAPI_TRY(p10_smp_wrap(l_target, l_sim_env ? MODEV : MODEA),
+                             "Error from p10_smp_wrap");
+                }
+            }
+        }
+    }
+
+fapi_try_exit:
+    FAPI_DBG("End");
+    return fapi2::current_err;
+}
+
+///
 /// @brief Update topology ID tables to represent all chips
 ///
 /// @param[in] i_smp            Fully specified structure encapsulating SMP
@@ -771,6 +834,10 @@ fapi2::ReturnCode p10_build_smp(
     // process HWP input vector of chips
     FAPI_TRY(p10_build_smp_insert_chips(i_chips, i_master_chip_sys_next, i_op, l_smp),
              "Error from p10_build_smp_insert_chips");
+
+    // update link attrs for manufacturing smp wrap config
+    FAPI_TRY(p10_build_smp_mfg_config(l_smp),
+             "Error from p10_build_smp_mfg_config");
 
     // check topology before continuing
     FAPI_TRY(p10_build_smp_check_topology(i_op, l_smp),

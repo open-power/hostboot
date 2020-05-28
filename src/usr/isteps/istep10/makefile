@@ -75,6 +75,7 @@ OBJS+=p10_putmemproc.o
 OBJS+=p10_getputmemproc_utils.o
 OBJS+=p10_adu_access.o
 OBJS+=p10_adu_setup.o
+OBJS+=p10_smp_wrap.o
 
 # Istep 10.2 -- host_slave_sbe_update
 OBJS+=p10_sbe_lpc_init.o
