@@ -266,61 +266,6 @@ errlHndl_t dimmPresenceDetect( DeviceFW::OperationType i_opType,
         }
 #endif
 
-        if( present && !err )
-        {
-            // Read ATTR_CLEAR_DIMM_SPD_ENABLE attribute
-            TARGETING::Target* l_sys = NULL;
-            TARGETING::targetService().getTopLevelTarget(l_sys);
-
-            TARGETING::ATTR_CLEAR_DIMM_SPD_ENABLE_type l_clearSPD =
-                l_sys->getAttr<TARGETING::ATTR_CLEAR_DIMM_SPD_ENABLE>();
-
-            // If SPD clear is enabled then write 0's into magic word for
-            // DIMM_BAD_DQ_DATA keyword
-            // Note: If there's an error from performing the clearing,
-            // just log the error and continue.
-            if (l_clearSPD)
-            {
-                size_t l_size = 0;
-
-                // Do a read to get the DIMM_BAD_DQ_DATA keyword size
-                err = deviceRead(i_target, NULL, l_size,
-                                 DEVICE_SPD_ADDRESS( DIMM_BAD_DQ_DATA ));
-                if (err)
-                {
-                    TRACFCOMP( g_trac_spd, ERR_MRK"dimmPresenceDetect() "
-                        "Error reading DIMM_BAD_DQ_DATA keyword size");
-                    errlCommit( err, VPD_COMP_ID );
-                }
-                else
-                {
-                    // Clear the data
-                    TRACFCOMP( g_trac_spd, "Clearing out BAD_DQ_DATA SPD on "
-                               "DIMM HUID 0x%X",
-                               TARGETING::get_huid(i_target));
-
-                    uint8_t * l_data = static_cast<uint8_t*>(malloc( l_size ));
-                    memset(l_data, 0, l_size);
-
-                    err = deviceWrite(i_target, l_data, l_size,
-                                     DEVICE_SPD_ADDRESS( DIMM_BAD_DQ_DATA ));
-                    if (err)
-                    {
-                        TRACFCOMP(g_trac_spd, ERR_MRK"dimmPresenceDetect() "
-                                  "Error trying to clear SPD on DIMM HUID 0x%X",
-                                  TARGETING::get_huid(i_target));
-                        errlCommit( err, VPD_COMP_ID );
-                    }
-
-                    // Free the memory
-                    if (NULL != l_data)
-                    {
-                        free(l_data);
-                    }
-                }
-            }
-        }
-
         // copy present value into output buffer so caller can read it
         memcpy( io_buffer, &present, presentSz );
         io_buflen = presentSz;
