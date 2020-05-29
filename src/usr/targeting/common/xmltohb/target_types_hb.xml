@@ -102,52 +102,7 @@
   <targetTypeExtension>
     <id>chip-processor-power10</id>
     <attribute>
-      <id>I2C_ENGINE_MUTEX_0</id>
-      <default>0</default>
-    </attribute>
-    <attribute>
-      <id>I2C_ENGINE_MUTEX_1</id>
-      <default>0</default>
-    </attribute>
-    <attribute>
-      <id>I2C_ENGINE_MUTEX_2</id>
-      <default>0</default>
-    </attribute>
-    <attribute>
-      <id>I2C_ENGINE_MUTEX_3</id>
-      <default>0</default>
-    </attribute>
-    <attribute>
-      <id>SPI_ENGINE_MUTEX_0</id>
-      <default>0</default>
-    </attribute>
-    <attribute>
-      <id>SPI_ENGINE_MUTEX_1</id>
-      <default>0</default>
-    </attribute>
-    <attribute>
-      <id>SPI_ENGINE_MUTEX_2</id>
-      <default>0</default>
-    </attribute>
-    <attribute>
-      <id>SPI_ENGINE_MUTEX_3</id>
-      <default>0</default>
-    </attribute>
-    <attribute>
-      <id>SPI_ENGINE_MUTEX_4</id>
-      <default>0</default>
-    </attribute>
-    <attribute>
-      <id>SPI_ENGINE_MUTEX_5</id>
-      <default>0</default>
-    </attribute>
-  </targetTypeExtension>
-
-  <targetTypeExtension>
-    <id>chip-processor-power9</id>
-    <attribute>
       <id>EEPROM_PAGE_ARRAY</id>
-      <default>2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2</default>
     </attribute>
     <attribute>
       <id>HB_NODE_COMM_ABUS_MUTEX</id>
@@ -156,39 +111,46 @@
       <id>HB_NODE_COMM_XBUS_MUTEX</id>
     </attribute>
     <attribute>
-      <id>HB_TARGET_SCOMABLE</id>
-    </attribute>
-    <attribute>
       <id>I2C_ENGINE_MUTEX_0</id>
-      <default>0</default>
     </attribute>
     <attribute>
       <id>I2C_ENGINE_MUTEX_1</id>
-      <default>0</default>
     </attribute>
     <attribute>
       <id>I2C_ENGINE_MUTEX_2</id>
-      <default>0</default>
     </attribute>
     <attribute>
       <id>I2C_ENGINE_MUTEX_3</id>
-      <default>0</default>
     </attribute>
     <attribute>
       <id>I2C_PAGE_MUTEX_0</id>
-      <default>0</default>
     </attribute>
     <attribute>
       <id>I2C_PAGE_MUTEX_1</id>
-      <default>0</default>
     </attribute>
     <attribute>
       <id>I2C_PAGE_MUTEX_2</id>
-      <default>0</default>
     </attribute>
     <attribute>
       <id>I2C_PAGE_MUTEX_3</id>
-      <default>0</default>
+    </attribute>
+    <attribute>
+      <id>SPI_ENGINE_MUTEX_0</id>
+    </attribute>
+    <attribute>
+      <id>SPI_ENGINE_MUTEX_1</id>
+    </attribute>
+    <attribute>
+      <id>SPI_ENGINE_MUTEX_2</id>
+    </attribute>
+    <attribute>
+      <id>SPI_ENGINE_MUTEX_3</id>
+    </attribute>
+    <attribute>
+      <id>SPI_ENGINE_MUTEX_4</id>
+    </attribute>
+    <attribute>
+      <id>SPI_ENGINE_MUTEX_5</id>
     </attribute>
     <attribute>
       <id>XSCOM_VIRTUAL_ADDR</id>
@@ -315,9 +277,6 @@
   <targetTypeExtension>
     <id>unit-core-power10</id>
     <attribute>
-      <id>HB_TARGET_SCOMABLE</id>
-    </attribute>
-    <attribute>
       <id>SPCWKUP_COUNT</id>
     </attribute>
   </targetTypeExtension>
@@ -332,17 +291,7 @@
   <targetTypeExtension>
     <id>unit-fc-power10</id>
     <attribute>
-      <id>HB_TARGET_SCOMABLE</id>
-    </attribute>
-    <attribute>
       <id>SPCWKUP_COUNT</id>
-    </attribute>
-  </targetTypeExtension>
-
-  <targetTypeExtension>
-    <id>unit-iohs-power10</id>
-    <attribute>
-      <id>HB_TARGET_SCOMABLE</id>
     </attribute>
   </targetTypeExtension>
 

@@ -189,12 +189,21 @@
         0 = PAGE_ZERO
         1 = PAGE_ONE
         2 = UNKNOWN_PAGE
+        Data Format: 4x16 array of uint16_t values.  The first index indicates
+            the engine number of the bus.  The second index indicates the port
+            number of the bus.  The value in the array is the I2C bus speed
+            used for that engine/port combination in KHz.
     </description>
     <simpleType>
       <uint8_t>
-        <default>2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2</default>
+        <default>
+           2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,
+           2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,
+           2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,
+           2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2
+        </default>
       </uint8_t>
-      <array>4,4</array>
+      <array>4,16</array>
     </simpleType>
     <persistency>volatile</persistency>
     <readable/>
@@ -477,29 +486,6 @@
     <readable/>
     <writeable/>
     <hbOnly/>
-  </attribute>
-
-  <attribute>
-    <id>HB_TARGET_SCOMABLE</id>
-    <description>
-        This attribute indicates if the target can be SCOMed.
-        It's used in FSP only but declared here because the attribute
-        is defined in chip_attributes.xml, which is a common file
-        between FSP and HB (without this, HB will get a compilation error).
-    </description>
-    <simpleType>
-      <uint8_t>
-        <default>0x0</default>
-      </uint8_t>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-    <hbOnly/>
-    <hwpfToHbAttrMap>
-      <id>ATTR_TARGET_SCOMABLE</id>
-      <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
   </attribute>
 
   <attribute>
