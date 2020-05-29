@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020                             */
+/* Contributors Listed Below - COPYRIGHT 2020,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -40,9 +40,9 @@ class mctpSendTest : public CxxTest::TestSuite
 {
     public:
 
-    // There is no real g_hostInterfaces in runtime test so this test is only
-    // making sure the mctp_send struct is defined in the hbrt_fw_msg
-    // struct's union.
+    // At this time there no good way to do end to end MCTP testing in
+    // standalone runtime tests so this test is only making sure the mctp_send
+    // struct is defined in the hbrt_fw_msg struct's union.
     void testFirmwareRequestMctpSend (void)
     {
         do {
@@ -58,20 +58,20 @@ class mctpSendTest : public CxxTest::TestSuite
         }
 
         // Test MCTP_SEND command
-        hostInterfaces::hbrt_fw_msg l_req_fw_msg;
+        hostInterfaces::hbrt_fw_msg l_req_fw_msg { };
         l_req_fw_msg.io_type =
               hostInterfaces::HBRT_FW_MSG_TYPE_MCTP_SEND;
-
-        // Generic Resp
-        hostInterfaces::hbrt_fw_msg l_resp_fw_msg;
-        size_t l_resp_fw_msg_size = sizeof(l_resp_fw_msg);
-        size_t rc = 0;
-
+        constexpr size_t l_req_fw_msg_size = hostInterfaces::HBRT_FW_MSG_BASE_SIZE +
+                                              sizeof(l_req_fw_msg.mctp_send);
         // send valid  MCTP msg
         l_req_fw_msg.mctp_send.send_data[0] = 0xFF;
 
-        rc = g_hostInterfaces->firmware_request(
-                                  sizeof(l_req_fw_msg), &l_req_fw_msg,
+        // Generic Resp
+        hostInterfaces::hbrt_fw_msg l_resp_fw_msg { };
+        size_t l_resp_fw_msg_size = sizeof(l_resp_fw_msg);
+
+        int rc = g_hostInterfaces->firmware_request(
+                                  l_req_fw_msg_size, &l_req_fw_msg,
                                   &l_resp_fw_msg_size, &l_resp_fw_msg);
 
         if(rc != 0)

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2020,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -44,9 +44,9 @@ class mctpReceiveTest : public CxxTest::TestSuite
 {
     public:
 
-    // There is no real g_hostInterfaces in runtime test so this test is only
-    // making sure the mctp_send struct is defined in the hbrt_fw_msg
-    // struct's union.
+    // At this time there no good way to do end to end MCTP testing in
+    // standalone runtime tests so this test is only making sure the
+    // mctp_receive struct is defined in the hbrt_fw_msg struct's union.
     void testFirmwareRequestMctpReceive (void)
     {
         do {
@@ -62,8 +62,8 @@ class mctpReceiveTest : public CxxTest::TestSuite
         }
 
         // Test MCTP_RECEIVE command
-        size_t l_req_fw_msg_size = hostInterfaces::HBRT_FW_MSG_BASE_SIZE;
-        hostInterfaces::hbrt_fw_msg l_req_fw_msg;
+        constexpr size_t l_req_fw_msg_size = hostInterfaces::HBRT_FW_MSG_BASE_SIZE;
+        hostInterfaces::hbrt_fw_msg l_req_fw_msg { };
         l_req_fw_msg.io_type = hostInterfaces::HBRT_FW_MSG_TYPE_MCTP_RECEIVE;
 
 
@@ -72,10 +72,7 @@ class mctpReceiveTest : public CxxTest::TestSuite
         std::unique_ptr<hostInterfaces::hbrt_fw_msg, decltype(&free)> l_resp_fw_msg(
             static_cast<hostInterfaces::hbrt_fw_msg *>(malloc( l_resp_fw_msg_size)), free);
 
-        // Expect AVAIL Resp
-        size_t rc = 0;
-
-        rc = g_hostInterfaces->firmware_request(
+        int rc = g_hostInterfaces->firmware_request(
                                   l_req_fw_msg_size, &l_req_fw_msg,
                                   &l_resp_fw_msg_size, l_resp_fw_msg.get());
 
