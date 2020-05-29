@@ -95,10 +95,10 @@ Layout Description - Used when building an FSP driver
         <ecc/>
     </section>
     <section>
-        <description>Eeprom Cache (516KB)</description>
+        <description>Eeprom Cache (1296KB)</description>
         <eyeCatch>EECACHE</eyeCatch>
         <physicalOffset>0x31000</physicalOffset>
-        <physicalRegionSize>0x81000</physicalRegionSize>
+        <physicalRegionSize>0x144000</physicalRegionSize>
         <side>sideless</side>
         <ecc/>
     </section>
