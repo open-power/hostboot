@@ -39,7 +39,6 @@ constexpr uint8_t MAX_BYTE_ADDR = 2;
 constexpr uint8_t EEPROM_MAX_RETRIES = 2;
 
 // EECACHE OP related consts
-constexpr uint8_t  INVALID_EEPROM_INDEX  = 0xFF;
 constexpr uint32_t UNSET_INTERNAL_OFFSET_VALUE = 0xFFFFFFFF;
 constexpr uint32_t UNSET_END_OF_CACHE_VALUE = UNSET_INTERNAL_OFFSET_VALUE;
 constexpr uint8_t  NUM_BYTE_UNIQUE_ID = 13;
@@ -293,7 +292,7 @@ struct EepromInfo_t
           cache entry along with a byte telling us if there has been
           an update detected on the eeprom this boot
  */
-struct EeepromEntryMetaData_t
+struct EepromEntryMetaData_t
 {
     uint64_t header_entry_address;
     uint64_t cache_entry_address;
@@ -304,7 +303,7 @@ struct EeepromEntryMetaData_t
                                    // they have been changed. This bit should get cleared after
                                    // all eeproms have been cached.
 
-    EeepromEntryMetaData_t()
+    EepromEntryMetaData_t()
       : header_entry_address(0),
         cache_entry_address(0),
         mark_target_changed(0)

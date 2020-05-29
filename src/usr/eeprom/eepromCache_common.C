@@ -131,8 +131,6 @@ errlHndl_t buildEepromRecordHeader(TARGETING::Target * i_target,
             }
         }
 
-
-
         // This is what we will compare w/ when we are going through the existing
         // caches in the eeprom to see if we have already cached something
         // Or if no matches are found we will copy this into the header
@@ -146,9 +144,6 @@ errlHndl_t buildEepromRecordHeader(TARGETING::Target * i_target,
             o_eepromRecordHeader.completeRecord.eepromAccess.i2cAccess.engine     = static_cast<uint8_t>(io_eepromInfo.accessAddr.i2c_addr.engine);
             o_eepromRecordHeader.completeRecord.eepromAccess.i2cAccess.devAddr    = static_cast<uint8_t>(io_eepromInfo.accessAddr.i2c_addr.devAddr);
             o_eepromRecordHeader.completeRecord.eepromAccess.i2cAccess.mux_select = static_cast<uint8_t>(io_eepromInfo.accessAddr.i2c_addr.i2cMuxBusSelector);
-
-            // Do not set valid bit nor internal offset here as we do not have
-            // enough information available to determine
         }
         else
         {
@@ -156,6 +151,13 @@ errlHndl_t buildEepromRecordHeader(TARGETING::Target * i_target,
             o_eepromRecordHeader.completeRecord.eepromAccess.spiAccess.engine     = static_cast<uint8_t>(io_eepromInfo.accessAddr.spi_addr.engine);
             o_eepromRecordHeader.completeRecord.eepromAccess.spiAccess.offset_KB = static_cast<uint16_t>(io_eepromInfo.accessAddr.spi_addr.roleOffset_KB);
         }
+
+        // Do not set valid bit nor internal offset here as we do not have
+        // enough information available to determine
+        o_eepromRecordHeader.completeRecord.internal_offset =
+            UNSET_INTERNAL_OFFSET_VALUE;
+        // cached_copy_valid defaults to the "unset" value when an
+        // eepromRecordHeader is constructed.
 
         if ((io_eepromInfo.eepromRole == VPD_PRIMARY) ||
             (io_eepromInfo.eepromRole == VPD_BACKUP))

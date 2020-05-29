@@ -237,7 +237,7 @@ errlHndl_t setIsValidCacheEntry(const eepromRecordHeader& i_eepromRecordHeader, 
                was set to true for the eeprom entry. Return FALSE otherwise.
 *
 */
-bool hasEeepromChanged(const eepromRecordHeader & i_eepromRecordHeader);
+bool hasEepromChanged(const eepromRecordHeader & i_eepromRecordHeader);
 
 /**
 *
@@ -248,7 +248,7 @@ bool hasEeepromChanged(const eepromRecordHeader & i_eepromRecordHeader);
 *
 * @return void
 */
-void setEeepromChanged(const eepromRecordHeader & i_eepromRecordHeader);
+void setEepromChanged(const eepromRecordHeader & i_eepromRecordHeader);
 
 
 /**

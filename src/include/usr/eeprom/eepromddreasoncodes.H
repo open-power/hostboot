@@ -63,6 +63,8 @@ enum eepromModuleId
     EEPROM_PERFORM_OP_HW                    = 0x0D,
     EEPROM_PERFORM_SPI_OP                   = 0x0E,
     EEPROM_GENERIC_CACHE                    = 0x0F,
+    EEPROM_FLUSH_TO_PNOR                    = 0x10,
+    EEPROM_FIND_EEPROM_HEADER_IN_CACHE      = 0x11,
 };
 
 /**
@@ -83,10 +85,10 @@ enum eepromReasonCode
     EEPROM_INVALID_ADDR_OFFSET_SIZE         = EEPROM_COMP_ID | 0x07,
     EEPROM_OVERFLOW_ERROR                   = EEPROM_COMP_ID | 0x08,
     EEPROM_I2C_WRITE_PAGE_SIZE_ZERO         = EEPROM_COMP_ID | 0x09,
-    EEPROM_FAILED_TO_FLUSH_CONTENTS         = EEPROM_COMP_ID | 0x0A,   // Error occured while trying to flush the mmio pages out
+    EEPROM_FAILED_TO_FLUSH_CONTENTS         = EEPROM_COMP_ID | 0x0A,   // Deprecated: Error occured while trying to flush the mmio pages out
                                                                        // containing contents of an EEPROM's cached data in the EECACHE
                                                                        // PNOR section
-    EEPROM_FAILED_TO_FLUSH_HEADER           = EEPROM_COMP_ID | 0x0B,   // Error occured while trying to flush the mmio page out
+    EEPROM_FAILED_TO_FLUSH_HEADER           = EEPROM_COMP_ID | 0x0B,   // Deprecated: Error occured while trying to flush the mmio page out
                                                                        // containing EECACHE header the to pnor
     EEPROM_I2C_MUX_PATH_ERROR               = EEPROM_COMP_ID | 0x0C,
     EEPROM_NOT_IN_CACHE                     = EEPROM_COMP_ID | 0x0D,
@@ -103,6 +105,9 @@ enum eepromReasonCode
                                                                        // (see structs defined in eeprom_const.H)
     EEPROM_INVALID_ACCESS_METHOD            = EEPROM_COMP_ID | 0x13,   // See EepromHwAccessMethodType in eeprom_const.H
     EEPROM_INVALID_LENGTH                   = EEPROM_COMP_ID | 0x14,
+
+    // Error occured while trying to flush the MMIO page out.
+    EEPROM_FAILED_TO_FLUSH_PAGE             = EEPROM_COMP_ID | 0x15,
 };
 
 enum UserDetailsTypes

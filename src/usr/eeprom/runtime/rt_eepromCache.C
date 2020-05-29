@@ -65,7 +65,7 @@ namespace EEPROM
 mutex_t g_eecacheMutex = MUTEX_INITIALIZER;
 
 uint64_t g_eecachePnorVaddr[MAX_NODES_PER_SYS] = {0,0,0,0,0,0,0,0};
-std::map<eepromRecordHeader, EeepromEntryMetaData_t> g_cachedEeproms[MAX_NODES_PER_SYS];
+std::map<eepromRecordHeader, EepromEntryMetaData_t> g_cachedEeproms[MAX_NODES_PER_SYS];
 
 // ------------------------------------------------------------------
 // rtEecacheInit
@@ -195,7 +195,7 @@ void printCurrentCachedEepromMap(void)
     mutex_lock(&g_eecacheMutex);
     for(int8_t i = 0; i < MAX_NODES_PER_SYS; i++)
     {
-        for(std::map<eepromRecordHeader, EeepromEntryMetaData_t>::iterator iter = g_cachedEeproms[i].begin();
+        for(std::map<eepromRecordHeader, EepromEntryMetaData_t>::iterator iter = g_cachedEeproms[i].begin();
             iter != g_cachedEeproms[i].end();
             ++iter)
         {
@@ -240,7 +240,7 @@ uint64_t lookupEepromCacheAddr(const eepromRecordHeader& i_eepromRecordHeader,
                                const uint8_t i_instance)
 {
     uint64_t l_vaddr = 0;
-    std::map<eepromRecordHeader, EeepromEntryMetaData_t>::iterator l_it;
+    std::map<eepromRecordHeader, EepromEntryMetaData_t>::iterator l_it;
 
     if (MAX_NODES_PER_SYS < i_instance)
     {
