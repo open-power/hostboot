@@ -768,8 +768,8 @@ void testMulticastCoreSelect()
     TARGETING::targetService().masterProcChipTargetHandle(l_proc);
     assert(l_proc, "testMulticastCoreSelect: master proc handle is nullptr");
 
-    // MCCORE_0 and MCCORE_2
-    uint32_t l_coreSelect = 0x8 | 0x2;
+    // MCCORE_0 only
+    uint32_t l_coreSelect = 0x8;
 
     fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>l_fapiProc(l_proc);
     auto l_eq = l_fapiProc.getMulticast<fapi2::MULTICAST_AND>(
@@ -855,7 +855,7 @@ void testMulticastCoreSelect()
     std::map<TARGETING::Target*, bool>l_coreTestTable = {
         {l_cores[0], true},
         {l_cores[1], false},
-        {l_cores[2], true},
+        {l_cores[2], false},
         {l_cores[3], false}, };
 
     // Read core 0 - the data should match the test data
