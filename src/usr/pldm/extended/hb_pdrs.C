@@ -151,6 +151,9 @@ void addOccStateSensorPdrs(pldm_pdr* const io_repo,
     const uint16_t be_entity_instance =  le16toh(entity_id.entityInstanceNumber);
     const uint16_t be_container_id =  le16toh(entity_id.containerId);
 
+    PLDM_INF("Adding state sensor PDR for HUID 0x%08x (ORDINAL_ID %d)",
+             get_huid(i_target), i_target->getAttr<ATTR_ORDINAL_ID>());
+
     const state_sensor_possible_states states =
     {
         .state_set_id = pldm_state_set_operational_running_status,
@@ -172,6 +175,8 @@ void addOccStateSensorPdrs(pldm_pdr* const io_repo,
         .hdr =
         {
             .record_handle = 0, // ask libpldm to fill this out
+            .version = 0, // will be filled out by the encoder
+            .type = 0, // will be filled out by the encoder
             .record_change_num = 0,
             .length = 0 // will be filled out by the encoder
         },
@@ -226,6 +231,9 @@ void addOccStateEffecterPdrs(pldm_pdr* const io_repo,
     const uint16_t be_entity_instance =  le16toh(entity_id.entityInstanceNumber);
     const uint16_t be_container_id =  le16toh(entity_id.containerId);
 
+    PLDM_INF("Adding state effecter PDR for 0x%08x (ORDINAL_ID %d)",
+             get_huid(i_target), i_target->getAttr<ATTR_ORDINAL_ID>());
+
     const state_effecter_possible_states states =
     {
         .state_set_id = pldm_state_set_boot_restart_cause,
@@ -247,6 +255,8 @@ void addOccStateEffecterPdrs(pldm_pdr* const io_repo,
         .hdr =
         {
             .record_handle = 0, // ask libpldm to fill this out
+            .version = 0, // will be filled out by the encoder
+            .type = 0, // will be filled out by the encoder
             .record_change_num = 0,
             .length = 0 // will be filled out by the encoder
         },

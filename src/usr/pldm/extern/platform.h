@@ -115,6 +115,8 @@ enum pldm_platform_commands {
 /** @brief PLDM PDR types
  */
 enum pldm_pdr_types {
+	PLDM_STATE_SENSOR_PDR = 4,
+	PLDM_NUMERIC_EFFECTER_PDR = 9,
 	PLDM_STATE_EFFECTER_PDR = 11,
 	PLDM_PDR_ENTITY_ASSOCIATION = 15,
 	PLDM_PDR_FRU_RECORD_SET = 20,
@@ -303,19 +305,19 @@ enum pldm_state_set_operational_running_status_values {
 /* @brief Types of initialization for state effecters.
  */
 enum pldm_state_effecter_init {
-    state_effecter_noInit,
-    state_effecter_useInitPDR,
-    state_effecter_enableEffecter,
-    state_effecter_disableEffecter
+    state_effecter_noInit = 0,
+    state_effecter_useInitPDR = 1,
+    state_effecter_enableEffecter = 2,
+    state_effecter_disableEffecter = 3
 };
 
 /* @brief Types of initialization for state sensors.
  */
 enum pldm_state_sensor_init {
-    state_sensor_noInit,
-    state_sensor_useInitPDR,
-    state_sensor_enableSensor,
-    state_sensor_disableSensor
+    state_sensor_noInit = 0,
+    state_sensor_useInitPDR = 1,
+    state_sensor_enableSensor = 2,
+    state_sensor_disableSensor = 3
 };
 
 /** @struct pldm_state_effecter_pdr
@@ -1036,6 +1038,28 @@ int encode_pldm_pdr_repository_chg_event_data(uint8_t event_data_format,
                                               struct pldm_pdr_repository_chg_event_data *event_data,
                                               size_t *actual_change_records_size,
                                               size_t max_change_records_size);
+
+/** @brief Encode event data for a PLDM Sensor Event
+ *  @param[out] event_data              The object to store the encoded event in
+ *  @param[in] event_data_size          Size of the allocation for event_data
+ *  @param[in] sensor_id                Sensor ID
+ *  @param[in] sensor_event_class       Sensor event class
+ *  @param[in] sensor_offset            Offset
+ *  @param[in] event_state              Event state
+ *  @param[in] previous_event_state     Previous event state
+ *  @param[out] actual_event_data_size  The real size in bytes of the event_data
+ *  @return int                         pldm_completion_codes
+ *  @note If event_data is NULL, then *actual_event_data_size will be set to
+ *        reflect the size of the event data, and PLDM_SUCCESS will be returned.
+ */
+int encode_pldm_sensor_event_data(struct pldm_sensor_event_data* event_data,
+                                  size_t event_data_size,
+                                  uint16_t sensor_id,
+                                  enum sensor_event_class_states sensor_event_class,
+                                  uint8_t sensor_offset,
+                                  uint8_t event_state,
+                                  uint8_t previous_event_state,
+                                  size_t* actual_event_data_size);
 
 /** @brief Encode PlatformEventMessage response data
  *  @param[in] instance_id - Message's instance id

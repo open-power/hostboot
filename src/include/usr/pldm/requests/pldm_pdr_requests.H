@@ -66,6 +66,24 @@ errlHndl_t sendRepositoryChangedEvent(const terminus_id_t i_tid,
                                       const pldm_pdr* i_repo,
                                       const std::vector<pdr_handle_t>& i_handles);
 
+using sensor_state_t = uint8_t;
+using sensor_id_t = uint16_t;
+
+/* @brief Send a Platform Event Message indicating a "Sensor State Changed"
+ *        event to the BMC.
+ *
+ * @param[in] i_tid            The TID of the Hostboot PLDM terminus
+ * @param[in] i_sensor_id      ID of the aggregate sensor that changed
+ * @param[in] i_sensor_offset  Offset of the sensor within the aggregate sensor
+ *                             that changed
+ * @param[in] i_sensor_state   New state of the sensor
+ * @return errlHndl_t          Error if any, otherwise nullptr.
+ */
+errlHndl_t sendSensorStateChangedEvent(terminus_id_t i_tid,
+                                       sensor_id_t i_sensor_id,
+                                       uint8_t i_sensor_offset,
+                                       sensor_state_t i_sensor_state);
+
 }
 
 #endif

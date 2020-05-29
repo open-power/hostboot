@@ -148,6 +148,8 @@ int encode_pldm_state_sensor_pdr(struct pldm_state_sensor_pdr* const sensor,
 
     // Encode rest of PDR
 
+    sensor->hdr.version = 1;
+    sensor->hdr.type = PLDM_STATE_SENSOR_PDR;
     sensor->hdr.length = *actual_size;
 
     memcpy(sensor->possible_states,
@@ -222,6 +224,42 @@ int encode_pldm_pdr_repository_chg_event_data(uint8_t event_data_format,
             (struct pldm_pdr_repository_change_record_data *)(record_data->change_entry
                                                               + record_data->number_of_change_entries);
     }
+
+    return PLDM_SUCCESS;
+}
+
+int encode_pldm_sensor_event_data(struct pldm_sensor_event_data* const event_data,
+                                  const size_t event_data_size,
+                                  const uint16_t sensor_id,
+                                  const enum sensor_event_class_states sensor_event_class,
+                                  const uint8_t sensor_offset,
+                                  const uint8_t event_state,
+                                  const uint8_t previous_event_state,
+                                  size_t* const actual_event_data_size)
+{
+    *actual_event_data_size = (sizeof(*event_data)
+                               - sizeof(event_data->event_class)
+                               + sizeof(struct pldm_sensor_event_state_sensor_state));
+
+    if (!event_data) {
+        return PLDM_SUCCESS;
+    }
+
+    if (event_data_size < *actual_event_data_size)
+    {
+        *actual_event_data_size = 0;
+        return PLDM_ERROR_INVALID_LENGTH;
+    }
+
+    event_data->sensor_id = htole32(sensor_id);
+    event_data->sensor_event_class_type = sensor_event_class;
+
+    struct pldm_sensor_event_state_sensor_state* const state_data
+        = (struct pldm_sensor_event_state_sensor_state*)event_data->event_class;
+
+    state_data->sensor_offset = sensor_offset;
+    state_data->event_state = event_state;
+    state_data->previous_event_state = previous_event_state;
 
     return PLDM_SUCCESS;
 }

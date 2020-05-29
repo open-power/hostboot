@@ -364,6 +364,8 @@ errlHndl_t handleSetStateEffecterStatesRequest(const msg_q_t i_msgQ,
             break;
         }
 
+        // We use the ordinal ID of the processor as the sensor ID for the state
+        // sensor.
         const ATTR_ORDINAL_ID_type proc_ordinal_id = req.effecter_id;
 
         occ_proc = find_proc_by_ordinal_id(proc_ordinal_id);
@@ -374,14 +376,14 @@ errlHndl_t handleSetStateEffecterStatesRequest(const msg_q_t i_msgQ,
                      req.effecter_id);
 
             /*
-             * @errortype  ERRL_SEV_INFORMATIONAL
+             * @errortype  ERRL_SEV_PREDICTIVE
              * @moduleid   MOD_HANDLE_SET_STATE_EFFECTER_STATES_REQUEST
              * @reasoncode RC_INVALID_EFFECTER_ID
              * @userdata1  Invalid effecter ID
              * @devdesc    Software problem, invalid effecter ID from BMC
              * @custdesc   A software error occurred during system boot
              */
-            errl = new ErrlEntry(ERRL_SEV_INFORMATIONAL,
+            errl = new ErrlEntry(ERRL_SEV_PREDICTIVE,
                                  MOD_HANDLE_SET_STATE_EFFECTER_STATES_REQUEST,
                                  RC_INVALID_EFFECTER_ID,
                                  req.effecter_id,
@@ -409,7 +411,7 @@ errlHndl_t handleSetStateEffecterStatesRequest(const msg_q_t i_msgQ,
                      req.field[0].effecter_state);
 
             /*
-             * @errortype  ERRL_SEV_INFORMATIONAL
+             * @errortype  ERRL_SEV_PREDICTIVE
              * @moduleid   MOD_HANDLE_SET_STATE_EFFECTER_STATES_REQUEST
              * @reasoncode RC_INVALID_EFFECTER_STATE
              * @userdata1  HUID of the PROC with the OCC that was being reset
@@ -419,7 +421,7 @@ errlHndl_t handleSetStateEffecterStatesRequest(const msg_q_t i_msgQ,
              * @devdesc    Software problem, invalid effecter state from BMC
              * @custdesc   A software error occurred during system boot
              */
-            errl = new ErrlEntry(ERRL_SEV_INFORMATIONAL,
+            errl = new ErrlEntry(ERRL_SEV_PREDICTIVE,
                                  MOD_HANDLE_SET_STATE_EFFECTER_STATES_REQUEST,
                                  RC_INVALID_EFFECTER_STATE,
                                  get_huid(occ_proc),

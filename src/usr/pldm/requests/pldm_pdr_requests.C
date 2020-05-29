@@ -467,4 +467,132 @@ errlHndl_t sendRepositoryChangedEvent(const terminus_id_t i_tid,
     return errl;
 }
 
+errlHndl_t sendSensorStateChangedEvent(const terminus_id_t i_tid,
+                                       const sensor_id_t i_sensor_id,
+                                       const uint8_t i_sensor_offset,
+                                       const sensor_state_t i_sensor_state)
+{
+    PLDM_ENTER("sendSensorStateChangedEvent (sensor id = %d, offset = %d, state = %d)",
+               i_sensor_id, i_sensor_offset, i_sensor_state);
+
+    errlHndl_t errl = nullptr;
+
+    /* Encode the platform change event data */
+
+    std::vector<uint8_t> event_data_bytes;
+
+    {
+        size_t actual_event_data_size = 0;
+        pldm_sensor_event_data* event_data = nullptr;
+
+        for (int i = 0; i < 2; ++i)
+        {
+            const int rc
+                = encode_pldm_sensor_event_data(event_data,
+                                                event_data_bytes.size(),
+                                                i_sensor_id,
+                                                PLDM_STATE_SENSOR_STATE,
+                                                i_sensor_offset,
+                                                i_sensor_state,
+                                                i_sensor_state,
+                                                &actual_event_data_size);
+
+            assert(rc == PLDM_SUCCESS,
+                   "encode_pldm_sensor_event_data failed in "
+                   " sendSensorStateChangedEvent, rc is %d",
+                   rc);
+
+            event_data_bytes.resize(actual_event_data_size);
+            event_data
+                = reinterpret_cast<pldm_sensor_event_data*>(event_data_bytes.data());
+        }
+    }
+
+    /* Send the event request */
+
+    do
+    {
+        {
+#ifdef __HOSTBOOT_RUNTIME
+            const msg_q_t msgQ = nullptr;
+#else
+            const msg_q_t msgQ = msg_q_resolve(VFS_ROOT_MSG_PLDM_REQ_OUT);
+            assert(msgQ != nullptr,
+                   "sendSensorStateChangedEvent: PLDM Req Out Message queue did not resolve properly!");
+#endif
+
+            std::vector<uint8_t> response_bytes;
+
+            // Value from DSP0248 section 16.6
+            const uint8_t DSP0248_V1_2_0_PLATFORM_EVENT_FORMAT_VERSION = 1;
+
+            errl = sendrecv_pldm_request<PLDM_PLATFORM_EVENT_MESSAGE_MIN_REQ_BYTES>
+                (response_bytes,
+                 event_data_bytes,
+                 msgQ,
+                 encode_platform_event_message_req,
+                 DEFAULT_INSTANCE_ID,
+                 DSP0248_V1_2_0_PLATFORM_EVENT_FORMAT_VERSION,
+                 i_tid,
+                 PLDM_PDR_REPOSITORY_CHG_EVENT,
+                 event_data_bytes.data(),
+                 event_data_bytes.size());
+
+            if (errl)
+            {
+                PLDM_INF("Failed to send/recv repository change event");
+                break;
+            }
+
+            uint8_t completion_code = PLDM_SUCCESS;
+            uint8_t status = 0;
+
+            errl =
+                decode_pldm_response(decode_platform_event_message_resp,
+                                     response_bytes,
+                                     &completion_code,
+                                     &status);
+
+            if (errl)
+            {
+                PLDM_INF("Failed to decode repository change event");
+                break;
+            }
+
+            if (completion_code != PLDM_SUCCESS)
+            {
+                PLDM_INF("Event completion code is not PLDM_SUCCESS, is %d (status = %d)",
+                         completion_code,
+                         status);
+
+                /*
+                 * @errortype  ERRL_SEV_UNRECOVERABLE
+                 * @moduleid   MOD_SEND_REPO_CHANGED_EVENT
+                 * @reasoncode RC_BAD_COMPLETION_CODE
+                 * @userdata1  Completion code returned from BMC
+                 * @userdata2  Status code returned from BMC
+                 * @devdesc    Software problem, PLDM Repo Changed notification unsuccessful
+                 * @custdesc   A software error occurred during system boot
+                 */
+                errl = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
+                                     MOD_SEND_REPO_CHANGED_EVENT,
+                                     RC_BAD_COMPLETION_CODE,
+                                     completion_code,
+                                     status,
+                                     ErrlEntry::NO_SW_CALLOUT);
+                errl->collectTrace(PLDM_COMP_NAME);
+                addBmcErrorCallouts(errl);
+                break;
+            }
+
+            PLDM_INF("Sent PDR Repository Changed Event successfully (code is %d, status is %d)",
+                     completion_code, status);
+        }
+    } while (false);
+
+    PLDM_EXIT("sendSensorStateChangedEvent");
+
+    return errl;
+}
+
 }
