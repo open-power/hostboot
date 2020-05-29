@@ -263,6 +263,11 @@ TARGETING::TargetHandle_t getTargetFromLocationCode(const std::vector<uint8_t>& 
 
         out_target = l_nodeEncList[0];
     }
+    else if (i_type == TARGETING::TYPE_SYS)
+    {
+        TARGETING::targetService().getTopLevelTarget(out_target);
+        assert(out_target != NULL);
+    }
 
     return out_target;
 }

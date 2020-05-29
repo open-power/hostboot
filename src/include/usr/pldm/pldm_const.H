@@ -37,12 +37,19 @@ namespace PLDM
     using terminus_id_t = uint16_t;
 
     // These are Entity Types used in Entity Association PDRs
-    enum entity_type : uint8_t
+    enum entity_type : uint16_t
     {
         // These values are from Table 15 in DSP0249 v1.1.0
+        ENTITY_TYPE_CHASSIS = 45,
         ENTITY_TYPE_BACKPLANE = 64,
         ENTITY_TYPE_DIMM = 66,
-        ENTITY_TYPE_PROCESSOR_MODULE = 67
+        ENTITY_TYPE_PROCESSOR_MODULE = 67,
+
+        // Chassis-specific entities
+        ENTITY_TYPE_LOGICAL_SYSTEM = 11521,
+
+        // These values are defined by IBM as OEM codes
+        ENTITY_TYPE_TPM = 24576
     };
     // These are the different types of PLDM message types we can expect
     // See DSP0245 v1.2.0 Table 1

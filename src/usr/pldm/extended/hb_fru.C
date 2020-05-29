@@ -46,6 +46,7 @@
 #include <vpd/ipz_vpd_consts.H>
 #include <eeprom/eepromif.H>
 #include <eeprom/eeprom_const.H>
+#include <targeting/common/target.H>
 
 using namespace ERRORLOG;
 
@@ -928,9 +929,63 @@ errlHndl_t pldmFruRecordSetToIPZ(const uint8_t* const i_pldm_fru_table_buf,
     return errl;
 }
 
+/* @brief Sets an attribute on a Target to a given string value
+ *
+ * @param[in] i_target  The target
+ * @param[in] i_value   The attribute value
+ * @return errlHndl_t   Error if the string is too long for the attribute
+ *
+ * @note The attribute to set is given in the template parameter
+ */
+template<TARGETING::ATTRIBUTE_ID AttrID>
+errlHndl_t setAttribute(TARGETING::Target* const i_target, const char* const i_value)
+{
+    errlHndl_t errl = nullptr;
+
+    do {
+        typename TARGETING::AttributeTraits<AttrID>::Type value = { };
+
+        // subtract 1 for the terminator
+        if (strlen(i_value) > sizeof(value) - 1)
+        {
+            PLDM_ERR("Location code from BMC is too long "
+                     "(expected no longer than %llu bytes, got %llu)",
+                     sizeof(value) - 1,
+                     strlen(i_value));
+
+            /*
+             * @errortype  ERRL_SEV_UNRECOVERABLE
+             * @moduleid   MOD_CACHE_REMOTE_FRU_VPD
+             * @reasoncode RC_OVERLONG_LOCATION_CODE
+             * @userdata1  Max length of location codes
+             * @userdata2  Length of location code
+             * @devdesc    Location code from BMC is too long to store in attribute
+             * @custdesc   A software error occurred during system boot
+             */
+            errl = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
+                                 MOD_CACHE_REMOTE_FRU_VPD,
+                                 RC_OVERLONG_LOCATION_CODE,
+                                 sizeof(value) - 1,
+                                 strlen(i_value),
+                                 ERRORLOG::ErrlEntry::NO_SW_CALLOUT);
+            addBmcErrorCallouts(errl);
+            break;
+        }
+
+        strcpy(value, i_value);
+        i_target->setAttr<AttrID>(value);
+    } while (false);
+
+    return errl;
+}
+
+using location_code_setter_t = errlHndl_t(*)(TARGETING::Target*, const char*);
+
 // see hb_fru.H for doxygen
 errlHndl_t cacheRemoteFruVpd()
 {
+    using namespace TARGETING;
+
     PLDM_ENTER("cacheRemoteFruVpd");
     errlHndl_t errl = nullptr;
     do{
@@ -946,30 +1001,42 @@ errlHndl_t cacheRemoteFruVpd()
                              table_ptr.get() );
     if(errl) { break; }
 
-    struct pldm_entity_to_targeting_mapping{
-      entity_type pldm_entity_type;
-      TARGETING::TYPE targeting_type;
-      EEPROM::EEPROM_ROLE device_role;
-      size_t max_expected_records;
-    };
+    const bool CACHE_VPD = false;
+    const bool NO_CACHE_VPD = false;
 
-    pldm_entity_to_targeting_mapping pldm_entity_to_targeting_map[] = {
-        { ENTITY_TYPE_BACKPLANE,
-          TARGETING::TYPE_NODE,
-          EEPROM::VPD_PRIMARY,
-          1}
-    };
-
-
-    for(const auto map_entry : pldm_entity_to_targeting_map)
+    struct pldm_entity_to_targeting_mapping
     {
-        // TODO RTC: 216059 enable this when api is available
-        // add byte vector to ipz_buf to save copying later
-//         auto device_rsis =
-//           PLDM::thePdrManager().findFruRecordSetIdsByType(
-//                                         map_entry.pldm_entity_type);
+        entity_type pldm_entity_type;
+        TARGETING::TYPE targeting_type;
+        EEPROM::EEPROM_ROLE device_role;
+        size_t max_expected_records;
+        bool cache_vpd = CACHE_VPD;
+        location_code_setter_t location_code_setter = nullptr;
+    };
 
-        std::vector<fru_record_set_id> device_rsis = { 0x0001 };
+    static const pldm_entity_to_targeting_mapping pldm_entity_to_targeting_map[] = {
+        { ENTITY_TYPE_BACKPLANE,
+          TYPE_NODE,
+          EEPROM::VPD_PRIMARY,
+          1},
+        { ENTITY_TYPE_CHASSIS,
+          TYPE_SYS,
+          EEPROM::VPD_PRIMARY,
+          1,
+          NO_CACHE_VPD,
+          setAttribute<ATTR_CHASSIS_LOCATION_CODE> },
+        { ENTITY_TYPE_LOGICAL_SYSTEM,
+          TYPE_SYS,
+          EEPROM::VPD_PRIMARY,
+          1,
+          NO_CACHE_VPD,
+          setAttribute<ATTR_SYS_LOCATION_CODE> }
+    };
+
+    for(const auto& map_entry : pldm_entity_to_targeting_map)
+    {
+         auto device_rsis
+             = thePdrManager().findFruRecordSetIdsByType(map_entry.pldm_entity_type);
 
         if(device_rsis.empty() ||
            device_rsis.size() > map_entry.max_expected_records)
@@ -1034,21 +1101,11 @@ errlHndl_t cacheRemoteFruVpd()
                 break;
             }
 
-            std::vector<uint8_t> ipz_record;
-            errl = PLDM::pldmFruRecordSetToIPZ(device_fru_records.data(),
-                                               records_in_set,
-                                               ipz_record);
-            if(errl)
-            {
-                PLDM_ERR("cacheRemoteFruVpd: An error occurred during pldmFruRecordSetToIPZ");
-                break;
-            }
-
             // lookup the location code in the fru records associated with this RSI
             std::vector<uint8_t> location_code;
             errl = PLDM::getRecordSetLocationCode(device_fru_records.data(),
-                                                 records_in_set,
-                                                 location_code);
+                                                  records_in_set,
+                                                  location_code);
 
             if(errl)
             {
@@ -1056,23 +1113,23 @@ errlHndl_t cacheRemoteFruVpd()
                 break;
             }
 
-            TARGETING::TargetHandle_t entity_target =
-                  TARGETING::getTargetFromLocationCode(location_code,
-                                                       map_entry.targeting_type);
+            TargetHandle_t entity_target =
+                getTargetFromLocationCode(location_code,
+                                          map_entry.targeting_type);
 
             if(entity_target == nullptr)
             {
                 PLDM_ERR("cacheRemoteFruVpd: Failed to find target associated w/ location code found");
                 /*
-                * @errortype  ERRL_SEV_UNRECOVERABLE
-                * @moduleid   MOD_CACHE_REMOTE_FRU_VPD
-                * @reasoncode RC_INVALID_LOCATION_CODE
-                * @userdata1  record set id we are looking up
-                * @userdata2  entity type
-                * @devdesc    Unable to find records associated with record
-                *             set id in fru record table
-                * @custdesc   A software error occurred during system boot
-                */
+                 * @errortype  ERRL_SEV_UNRECOVERABLE
+                 * @moduleid   MOD_CACHE_REMOTE_FRU_VPD
+                 * @reasoncode RC_INVALID_LOCATION_CODE
+                 * @userdata1  record set id we are looking up
+                 * @userdata2  entity type
+                 * @devdesc    Unable to find records associated with record
+                 *             set id in fru record table
+                 * @custdesc   A software error occurred during system boot
+                 */
                 errl = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
                                      MOD_CACHE_REMOTE_FRU_VPD,
                                      RC_INVALID_LOCATION_CODE,
@@ -1083,14 +1140,45 @@ errlHndl_t cacheRemoteFruVpd()
                 break;
             }
 
-            errl = EEPROM::cacheEepromBuffer(entity_target,
-                                             true,
-                                             ipz_record);
+            /* Set the location code of the target if necessary */
 
-            if(errl)
+            if (map_entry.location_code_setter)
             {
-                PLDM_ERR("cacheRemoteFruVpd: An error occurred during EEPROM::cacheEepromBuffer");
-                break;
+                errl = map_entry.location_code_setter(entity_target,
+                                                      reinterpret_cast<const char*>(location_code.data()));
+
+                if (errl)
+                {
+                    PLDM_ERR("Failed to set location code attribute on %s target (HUID 0x%08x)",
+                             attrToString<ATTR_TYPE>(entity_target->getAttr<ATTR_TYPE>()),
+                             get_huid(entity_target));
+                    break;
+                }
+            }
+
+            /* Cache VPD if necessary */
+
+            if (map_entry.cache_vpd == CACHE_VPD)
+            {
+                std::vector<uint8_t> ipz_record;
+                errl = PLDM::pldmFruRecordSetToIPZ(device_fru_records.data(),
+                                                   records_in_set,
+                                                   ipz_record);
+                if(errl)
+                {
+                    PLDM_ERR("cacheRemoteFruVpd: An error occurred during pldmFruRecordSetToIPZ");
+                    break;
+                }
+
+                errl = EEPROM::cacheEepromBuffer(entity_target,
+                                                 true,
+                                                 ipz_record);
+
+                if(errl)
+                {
+                    PLDM_ERR("cacheRemoteFruVpd: An error occurred during EEPROM::cacheEepromBuffer");
+                    break;
+                }
             }
         }
 
