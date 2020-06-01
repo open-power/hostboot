@@ -157,18 +157,18 @@ namespace TARGETING
         return Singleton<AttrRP>::instance()._notifyResourceReady(i_resource);
     }
 
-    errlHndl_t AttrRP::syncAllAttributesToFspOrBmc()
+    errlHndl_t AttrRP::syncAllAttributesToSP()
     {
-        return Singleton<AttrRP>::instance()._syncAllAttributesToFspOrBmc();
+        return Singleton<AttrRP>::instance()._syncAllAttributesToSP();
     }
 
-    errlHndl_t AttrRP::_syncAllAttributesToFspOrBmc() const
+    errlHndl_t AttrRP::_syncAllAttributesToSP() const
     {
         TRACFCOMP(g_trac_targeting, ENTER_MRK
-                  "AttrRP::_syncAllAttributesToFspOrBmc");
+                  "AttrRP::_syncAllAttributesToSP");
         auto pError = _sendAttrSyncMsg(MSG_INVOKE_ATTR_SYNC, true);
         TRACFCOMP(g_trac_targeting, EXIT_MRK
-                  "AttrRP::_syncAllAttributesToFspOrBmc");
+                  "AttrRP::_syncAllAttributesToSP");
         return pError;
     }
 
@@ -337,60 +337,75 @@ namespace TARGETING
     {
         errlHndl_t pError = nullptr;
 
-        do {
-
-        if(!iv_attrSyncPrimed)
+        do
         {
-            TRACFCOMP(g_trac_targeting, INFO_MRK "_invokeAttrSync: "
-                      "Attribute sync not primed; suppressing "
-                      "attribute sync.");
-            break;
-        }
-
-        // Nothing to do unless FSP is available to respond to the attribute
-        // sync request
-        if(!INITSERVICE::spBaseServicesEnabled())
-        {
-            TRACFCOMP(g_trac_targeting, INFO_MRK "_invokeAttrSync: "
-                      "FSP services not available; calling "
-                      "attribute sync for BMC.");
+            // Check for sync primed
+            if(!iv_attrSyncPrimed)
+            {
+                TRACFCOMP(g_trac_targeting, INFO_MRK "_invokeAttrSync: "
+                        "Attribute sync not primed; suppressing "
+                        "attribute sync.");
+                break;
+            }
+            // FSP
+            else if (INITSERVICE::spBaseServicesEnabled())
+            {
+                TRACFCOMP(g_trac_targeting, INFO_MRK "_invokeAttrSync: "
+                        "Calling attribute sync for FSP.");
+                pError = _invokeFspSync();
+            }
+            // BMC
+            else
+            {
 #ifdef CONFIG_DEVTREE
-                    // Test devtree sync
-                    DEVTREE::devtreeSyncAttrs();
+                TRACFCOMP(g_trac_targeting, INFO_MRK "_invokeAttrSync: "
+                        "Calling devtree attribute sync for BMC.");
+                DEVTREE::devtreeSyncAttrs();
 #endif
-            break;
-        }
+                break;
+            }
 
-        // Ensure that SBE is not quiesced (in which case mailbox related SBE
-        // FIFO traffic will not be serviced)
-        TARGETING::Target* pMasterProc=nullptr;
+        } while(0);
 
-        // Master processor is assumed to be functional since we're running on
-        // it; if  no functional master is found, we'll error out.
-        pError = TARGETING::targetService().queryMasterProcChipTargetHandle(
-                                                pMasterProc);
-        if(pError)
+        return pError;
+    }
+
+    errlHndl_t AttrRP::_invokeFspSync() const
+    {
+        errlHndl_t pError = nullptr;
+
+        do
         {
-            TRACFCOMP(g_trac_targeting, ERR_MRK "_invokeAttrSync: "
-                      "Failed to determine master processor target; "
-                      "suppressing attribute sync.");
-            break;
-        }
+            // Ensure that SBE is not quiesced (in which case mailbox
+            // related SBE FIFO traffic will not be serviced)
+            TARGETING::Target* pMasterProc=nullptr;
 
-        if(pMasterProc->getAttr<TARGETING::ATTR_ASSUME_SBE_QUIESCED>())
-        {
-            TRACFCOMP(g_trac_targeting, INFO_MRK "_invokeAttrSync; SBE "
-                      "is quiesced; suppressing attribute sync.");
-            break;
-        }
+            // Master processor is assumed to be functional since we're running
+            // on it; if  no functional master is found, we'll error out.
+            pError = TARGETING::
+                targetService().queryMasterProcChipTargetHandle(pMasterProc);
+            if(pError)
+            {
+                TRACFCOMP(g_trac_targeting, ERR_MRK "_invokeFspSync: "
+                          "Failed to determine master processor target; "
+                          "suppressing attribute sync.");
+                break;
+            }
 
-        pError = TARGETING::syncAllAttributesToFsp();
-        if(pError)
-        {
-            TRACFCOMP(g_trac_targeting, ERR_MRK "_invokeAttrSync: "
-                      "Failed syncing attributes to FSP.");
-            break;
-        }
+            if(pMasterProc->getAttr<TARGETING::ATTR_ASSUME_SBE_QUIESCED>())
+            {
+                TRACFCOMP(g_trac_targeting, INFO_MRK "_invokeFspSync; SBE "
+                          "is quiesced; suppressing attribute sync.");
+                break;
+            }
+
+            pError = TARGETING::syncAllAttributesToFsp();
+            if(pError)
+            {
+                TRACFCOMP(g_trac_targeting, ERR_MRK "_invokeFspSync: "
+                          "Failed syncing attributes to FSP.");
+                break;
+            }
 
         } while(0);
 

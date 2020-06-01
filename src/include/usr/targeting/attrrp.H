@@ -378,11 +378,11 @@ class AttrRP
         static errlHndl_t notifyResourceReady(RESOURCE i_resource);
 
         /**
-         *  @brief This is a static wrapper around _syncAllAttributesToFspOrBmc
+         *  @brief This is a static wrapper around _syncAllAttributesToSP
          *
-         *  @see _syncAllAttributesToFspOrBmc for documentation
+         *  @see _syncAllAttributesToSP for documentation
          */
-        static errlHndl_t syncAllAttributesToFspOrBmc();
+        static errlHndl_t syncAllAttributesToSP();
 
         /**
          *  @brief This is a static wrapper around _sendAttrOverridesAndSyncs
@@ -649,14 +649,14 @@ class AttrRP
         errlHndl_t _notifyResourceReady(RESOURCE i_resource) const;
 
         /**
-         *  @brief Forces attributes to sync down to FSP or BMC
+         *  @brief Forces attributes to sync down to SP (FSP/BMC)
          *
          *  @return errlHndl_t Error log handle
          *  @retval nullptr  Attribute synchronization successful
          *  @retval !nullptr Attribute synchronization failed; handle
          *      references valid error log
          */
-        errlHndl_t _syncAllAttributesToFspOrBmc() const;
+        errlHndl_t _syncAllAttributesToSP() const;
 
         /**
          *  @brief Send attribute overrides and sync down to FSP
@@ -686,18 +686,16 @@ class AttrRP
             bool            i_sync) const;
 
         /**
-         *  @brief Synchronizes attributes to FSP
+         *  @brief Synchronizes attributes to SP (FSP or BMC)
          *  *
          *  @par Detailed Description:
          *      During a user space initiated shutdown, the init service calls
          *      the resource provider shutdown handler which attempts to
-         *      synchronize attributes down to the FSP.  For this to succeed,
-         *      the FSP must be available, the mailbox must be online (and have
+         *      synchronize attributes down to the SP.  For this to succeed,
+         *      the SP must be available, the mailbox must be online (and have
          *      earlier called notifyResourceReady API to arm the
-         *      synchronization), and SBE must not be quiesced (or mailbox
-         *      traffic going through the SBE FIFO in secure mode will fail).
-         *      Various isteps also invoke attribute synchronization explicitly
-         *      via this API when needed.
+         *      synchronization). Various isteps also invoke attribute
+         *      synchronization explicitly via this API when needed.
          *
          *  @return errlHndl_t Error log handle
          *  @retval nullptr  Attribute synchronization successful
@@ -705,6 +703,21 @@ class AttrRP
          *      references valid error log
          */
         errlHndl_t _invokeAttrSync() const;
+
+        /**
+         *  @brief Synchronizes attributes to FSP
+         *  *
+         *  @par Detailed Description:
+         *      See _invokeAttrSync description above.
+         *      SBE must not be quiesced (or mailbox
+         *      traffic going through the SBE FIFO in secure mode will fail).
+         *
+         *  @return errlHndl_t Error log handle
+         *  @retval nullptr  Attribute synchronization successful
+         *  @retval !nullptr Attribute synchronization failed; handle
+         *      references valid error log
+         */
+        errlHndl_t _invokeFspSync() const;
 
         /**
          *  @brief Processes daemon messages

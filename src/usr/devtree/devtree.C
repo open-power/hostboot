@@ -315,7 +315,7 @@ void devtreeSyncAttrs()
         void* l_fdt = reinterpret_cast<void *>(l_devtreeInfo.vaddr);
 
 
-        // Get a list of all targets
+        // Get the sys target
         Target* l_sys = UTIL::assertGetToplevelTarget();
 
         // Get list of all other targets

@@ -35,9 +35,9 @@ namespace DEVTREE
 {
     enum devtreeModuleId
     {
-        HANDLE_DEVTREE_ERRORS       = 0x00,
-        DEVTREE_SYNC_ATTRS          = 0x01,
-        DEBUG_READ_CMP_DATA         = 0x02,
+        HANDLE_DEVTREE_ERRORS       = 0x01,
+        DEVTREE_SYNC_ATTRS          = 0x02,
+        DEBUG_READ_CMP_DATA         = 0x03,
     };
 
     enum devtreeReasonCode

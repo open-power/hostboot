@@ -322,7 +322,7 @@ namespace SBE
 
                 // Sync all attributes to FSP/BMC before we quiesce all the
                 // SBEs.
-                err = TARGETING::AttrRP::syncAllAttributesToFspOrBmc();
+                err = TARGETING::AttrRP::syncAllAttributesToSP();
                 if( err )
                 {
                     // Failed to sync all attributes to FSP/BMC; this is not
@@ -5626,7 +5626,7 @@ errlHndl_t sbeDoReboot( void )
         if (!g_do_hw_keys_hash_transition)
         {
             // Sync all attributes to the FSP/BMC before doing the Shutdown
-            err = TARGETING::AttrRP::syncAllAttributesToFspOrBmc();
+            err = TARGETING::AttrRP::syncAllAttributesToSP();
             if( err )
             {
                 // Something failed on the sync.  Commit the error here

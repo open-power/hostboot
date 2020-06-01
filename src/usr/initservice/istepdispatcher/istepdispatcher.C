@@ -70,7 +70,7 @@
 #include <pnor/pnorif.H>
 #include <lpc/lpcif.H>
 #include <istep18/establish_system_smp.H>
-#include <arch/magic.H>                    
+#include <arch/magic.H>
 
 #ifdef CONFIG_BMC_IPMI
 #include <ipmi/ipmiwatchdog.H>      //IPMI watchdog timer
@@ -1028,7 +1028,7 @@ errlHndl_t IStepDispatcher::doIstep(uint32_t i_istep,
                           INFO_MRK"doIstep: sync attributes to FSP");
 
                 errlHndl_t l_errl =
-                    TARGETING::AttrRP::syncAllAttributesToFspOrBmc();
+                    TARGETING::AttrRP::syncAllAttributesToSP();
 
                 if(l_errl)
                 {

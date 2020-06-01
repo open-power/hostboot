@@ -204,8 +204,8 @@ void* call_host_ipl_complete(void* const io_pArgs)
                       spAttnArea2Addr);
         }
 
-        // Sync attributes to Fsp
-        l_err = TARGETING::AttrRP::syncAllAttributesToFspOrBmc();
+        // Sync attributes to Fsp/Bmc
+        l_err = TARGETING::AttrRP::syncAllAttributesToSP();
 
         if (l_err)
         {

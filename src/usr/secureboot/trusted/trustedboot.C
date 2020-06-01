@@ -1345,7 +1345,7 @@ void tpmVerifyFunctionalPrimaryTpmExists(
                 // Sync the attributes to FSP or BMC if applicable.
                 // This will allow for FSP to attempt to perform
                 // TPM alignment check.
-                err = TARGETING::AttrRP::syncAllAttributesToFspOrBmc();
+                err = TARGETING::AttrRP::syncAllAttributesToSP();
                 if(err)
                 {
                     TRACFCOMP(g_trac_trustedboot, ERR_MRK

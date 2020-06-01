@@ -620,7 +620,7 @@ errlHndl_t handlePhysPresenceWindow(void)
            attr_open_window, attr_phys_pres_reipl);
 
     // Sync all attributes to FSP or BMC before powering off
-    err = TARGETING::AttrRP::syncAllAttributesToFspOrBmc();
+    err = TARGETING::AttrRP::syncAllAttributesToSP();
     if( err )
     {
         // Failed to sync all attributes to FSP/BMC; this is not
