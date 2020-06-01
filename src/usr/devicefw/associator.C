@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -211,12 +211,31 @@ namespace DeviceFW
                     " was attempted for which no driver has been registered : "
                     "i_opType=%d, i_accessType=%d, l_devType=%d",
                     i_opType, i_accessType, l_devType );
+
+            uint64_t l_userdata2 = l_devType;
+
+            // Dump the SCOM_SWITCHES attribute
+            if( (i_accessType == DeviceFW::SCOM)
+                || (i_accessType == DeviceFW::XSCOM)
+                || (i_accessType == DeviceFW::FSISCOM)
+                || (i_accessType == DeviceFW::IBSCOM)
+                || (i_accessType == DeviceFW::SBEFIFOSCOM)
+                || (i_accessType == DeviceFW::I2CSCOM) )
+            {
+                ATTR_SCOM_SWITCHES_type l_switches;
+                if( i_target->tryGetAttr<TARGETING::ATTR_SCOM_SWITCHES>(l_switches) )
+                {
+                    memcpy( &l_userdata2, &l_switches,
+                            std::min(sizeof(l_userdata2), sizeof(l_switches)) );
+                }
+            }
+
             /*@
              *  @errortype
              *  @moduleid       DEVFW_MOD_ASSOCIATOR
              *  @reasoncode     DEVFW_RC_NO_ROUTE_FOUND
              *  @userdata1      (OpType << 32) | (AccessType)
-             *  @userdata2      TargetType
+             *  @userdata2      (SCOM_SWITCHES << 32) | TargetType
              *
              *  @devdesc        A device driver operation was attempted for
              *                  which no driver has been registered.
@@ -225,8 +244,8 @@ namespace DeviceFW
                                    DEVFW_MOD_ASSOCIATOR,
                                    DEVFW_RC_NO_ROUTE_FOUND,
                                    TWO_UINT32_TO_UINT64(i_opType, i_accessType),
-                                   TO_UINT64(l_devType)
-                                  );
+                                   l_userdata2,
+                                   ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
         }
         else //This section is where the intended function is called
         {

@@ -329,6 +329,13 @@ void* call_host_runtime_setup (void *io_pArgs)
         bool l_activatePM = false;
 #endif
 
+        //@FIXME-CQ:SW493238
+        if( l_activatePM && Util::isMultiprocSupported() )
+        {
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                       "Skipping OCC Enablement/Reset in multiproc config");
+        }
+        else // end FIXME
         if(l_activatePM)
         {
             TARGETING::Target* l_failTarget = nullptr;

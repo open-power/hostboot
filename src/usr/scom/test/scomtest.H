@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -57,6 +57,10 @@ public:
   {
 
       TRACFCOMP( g_trac_scom, "ScomTest::test_FSISCOMreadWrite_proc> Start" );
+#ifdef __HOSTBOOT_RUNTIME
+      TRACFCOMP( g_trac_scom, "Not valid at runtime" );
+      return;
+#endif
 
       uint64_t fails = 0;
       uint64_t total = 0;
@@ -142,7 +146,7 @@ public:
                                DEVICE_SCOM_ADDRESS(test_data[x].addr) );
           if( l_err )
           {
-              TRACFCOMP(g_trac_scom, "ScomTest::test_FSISCOMreadWrite_proc> [%d] Write: Error from device : addr=0x%X, RC=%X", x,  test_data[x].addr, l_err->reasonCode() );
+              TRACFCOMP(g_trac_scom, "ScomTest::test_FSISCOMreadWrite_proc> [%d] Write: Error from device : addr=0x%.8X, RC=%.4X", x,  test_data[x].addr, l_err->reasonCode() );
               TS_FAIL( "ScomTest::test_FSISCOMreadWrite_proc> ERROR : Unexpected error log from write1" );
               fails++;
               errlCommit(l_err,SCOM_COMP_ID);
@@ -167,15 +171,15 @@ public:
                               DEVICE_SCOM_ADDRESS(test_data[x].addr) );
           if( l_err )
           {
-              TRACFCOMP(g_trac_scom, "ScomTest::test_FSISCOMreadWrite_proc> [%d] Read: Error from device : addr=0x%X, RC=%X", x,  test_data[x].addr, l_err->reasonCode() );
-              TS_FAIL( "ScomTest::test_FSISCOMreadWrite_proc> ERROR : Unexpected error log from write1" );
+              TRACFCOMP(g_trac_scom, "ScomTest::test_FSISCOMreadWrite_proc> [%d] Read: Error from device : addr=0x%.8X, RC=%.4X", x,  test_data[x].addr, l_err->reasonCode() );
+              TS_FAIL( "ScomTest::test_FSISCOMreadWrite_proc> ERROR : Unexpected error log from read1" );
               fails++;
               errlCommit(l_err,SCOM_COMP_ID);
           }
           else if(read_data[x] != test_data[x].data)
           {
-              TRACFCOMP(g_trac_scom, "ScomTest::test_FSISCOMreadWrite_proc> [%d] Read: Data miss-match : addr=0x%X, read_data=0x%llx, write_data=0x%llx", x, test_data[x].addr, read_data[x], test_data[x].data);
-              TS_FAIL( "ScomTest::test_FSISCOMreadWrite_proc> ERROR : Data miss-match between read and expected data" );
+              TRACFCOMP(g_trac_scom, "ScomTest::test_FSISCOMreadWrite_proc> [%d] Read: Data miss-match : addr=0x%.8X, read_data=0x%llx, write_data=0x%llx", x, test_data[x].addr, read_data[x], test_data[x].data);
+              TS_FAIL( "ScomTest::test_FSISCOMreadWrite_proc> ERROR : Data mis-match between read and expected data" );
               fails++;
           }
       }
@@ -289,16 +293,16 @@ public:
                                DEVICE_SCOM_ADDRESS(test_data[x].addr) );
           if(!test_data[x].isFail && l_err )
           {
-              TRACFCOMP(g_trac_scom, "ScomTest::test_IndirectScom> [%d] Write: Error from device : addr=0x%X, RC=%X", x,  test_data[x].addr, l_err->reasonCode() );
-              TS_FAIL( "ScomTest::test_IndirectScom> ERROR : Unexpected error log from device write: addr=0x%X, RC=%X ",  test_data[x].addr, l_err->reasonCode() );
+              TRACFCOMP(g_trac_scom, "ScomTest::test_IndirectScom> [%d] Write: Error from device : addr=0x%.8X, RC=%.4X", x,  test_data[x].addr, l_err->reasonCode() );
+              TS_FAIL( "ScomTest::test_IndirectScom> ERROR : Unexpected error log from device write: addr=0x%.8X, RC=%.4X ",  test_data[x].addr, l_err->reasonCode() );
               fails++;
               errlCommit(l_err,SCOM_COMP_ID);
               l_err = NULL;
           }
           else if(test_data[x].isFail && !l_err )
           {
-              TRACFCOMP(g_trac_scom, "ScomTest::test_IndirectScom> [%d] Write: Expected an Error from device write: addr=0x%X", x,  test_data[x].addr );
-              TS_FAIL( "ScomTest::test_IndirectScom> ERROR : Expected an error log from device write and did not get one : addr=0x%X",  test_data[x].addr );
+              TRACFCOMP(g_trac_scom, "ScomTest::test_IndirectScom> [%d] Write: Expected an Error from device write: addr=0x%.8X", x,  test_data[x].addr );
+              TS_FAIL( "ScomTest::test_IndirectScom> ERROR : Expected an error log from device write and did not get one : addr=0x%.8X",  test_data[x].addr );
               fails++;
           }
           else if(l_err)
@@ -340,16 +344,16 @@ public:
 
           if(!test_data[x].isFail && l_err )
           {
-              TRACFCOMP(g_trac_scom, "ScomTest::test_IndirectScomreadWrite> [%d] Read: Error from device : addr=0x%X, RC=%X", x,  test_data[x].addr, l_err->reasonCode() );
-              TS_FAIL( "ScomTest::test_IndirectScomreadWrite> ERROR : Unexpected error log from read device : addr=0x%X, RC=%X", test_data[x].addr, l_err->reasonCode() );
+              TRACFCOMP(g_trac_scom, "ScomTest::test_IndirectScomreadWrite> [%d] Read: Error from device : addr=0x%.8X, RC=%.4X", x,  test_data[x].addr, l_err->reasonCode() );
+              TS_FAIL( "ScomTest::test_IndirectScomreadWrite> ERROR : Unexpected error log from read device : addr=0x%.8X, RC=%.4X", test_data[x].addr, l_err->reasonCode() );
               fails++;
               errlCommit(l_err,SCOM_COMP_ID);
               l_err = NULL;
           }
           else if(test_data[x].isFail && !l_err )
           {
-              TRACFCOMP(g_trac_scom, "ScomTest::test_IndirectScom> [%d] Read: Expected an Error from device read : addr=0x%X", x,  test_data[x].addr );
-              TS_FAIL( "ScomTest::test_IndirectScom> ERROR : Expected an error log from device read and did not get one : addr=0x%X",  test_data[x].addr );
+              TRACFCOMP(g_trac_scom, "ScomTest::test_IndirectScom> [%d] Read: Expected an Error from device read : addr=0x%.8X", x,  test_data[x].addr );
+              TS_FAIL( "ScomTest::test_IndirectScom> ERROR : Expected an error log from device read and did not get one : addr=0x%.8X",  test_data[x].addr );
               fails++;
           }
           else if(!test_data[x].isFail &&
@@ -357,7 +361,7 @@ public:
                     (test_data[x].data & 0x000000000000FFFF))
                 )
           {
-              TRACFCOMP(g_trac_scom, "ScomTest::test_IndirectScomreadWrite> [%d] Read: Data miss-match : addr=0x%X, read_data=0x%llx, write_data=0x%llx", x, test_data[x].addr, read_data[x], test_data[x].data);
+              TRACFCOMP(g_trac_scom, "ScomTest::test_IndirectScomreadWrite> [%d] Read: Data miss-match : addr=0x%.8X, read_data=0x%llx, write_data=0x%llx", x, test_data[x].addr, read_data[x], test_data[x].data);
               TS_FAIL( "ScomTest::test_IndirectScomreadWrite> ERROR : Data miss-match between read and expected data  read_data" );
               fails++;
           }
@@ -471,16 +475,16 @@ public:
 
           if(!test_data[x].isFail && l_err )
           {
-              TRACFCOMP(g_trac_scom, "ScomTest::test_IndirectScomForm1_proc> [%d] Write: Error from device : addr=0x%X, RC=%X", x,  test_data[x].addr, l_err->reasonCode() );
-              TS_FAIL( "ScomTest::test_IndirectScomForm1_proc> ERROR : Unexpected error log from device write: addr=0x%X, RC=%X ",  test_data[x].addr, l_err->reasonCode() );
+              TRACFCOMP(g_trac_scom, "ScomTest::test_IndirectScomForm1_proc> [%d] Write: Error from device : addr=0x%.8X, RC=%.4X", x,  test_data[x].addr, l_err->reasonCode() );
+              TS_FAIL( "ScomTest::test_IndirectScomForm1_proc> ERROR : Unexpected error log from device write: addr=0x%.8X, RC=%.4X ",  test_data[x].addr, l_err->reasonCode() );
               fails++;
               errlCommit(l_err,SCOM_COMP_ID);
               l_err = NULL;
           }
           else if(test_data[x].isFail && !l_err )
           {
-              TRACFCOMP(g_trac_scom, "ScomTest::test_IndirectScomForm1_proc> [%d] Write: Expected an Error from device write: addr=0x%X", x,  test_data[x].addr );
-              TS_FAIL( "ScomTest::test_IndirectScomForm1_proc> ERROR : Expected an error log from device write and did not get one : addr=0x%X",  test_data[x].addr );
+              TRACFCOMP(g_trac_scom, "ScomTest::test_IndirectScomForm1_proc> [%d] Write: Expected an Error from device write: addr=0x%.8X", x,  test_data[x].addr );
+              TS_FAIL( "ScomTest::test_IndirectScomForm1_proc> ERROR : Expected an error log from device write and did not get one : addr=0x%.8X",  test_data[x].addr );
               fails++;
           }
           else if(l_err)
@@ -524,14 +528,14 @@ public:
 
           if(l_err)
           {
-              TRACFCOMP(g_trac_scom, "ScomTest::test_IndirectScomreadWriteForm1_proc> [%d] read written data: Unxpected Error from device : addr=0x%X, RC=%X", x,  read_addresses[x].addr, l_err->reasonCode() );
-              TS_FAIL( "ScomTest::test_IndirectScomreadWriteForm1_proc> ERROR : Unxpected Error on reading written data : addr=0x%X, RC=%X", read_addresses[x].addr, l_err->reasonCode() );
+              TRACFCOMP(g_trac_scom, "ScomTest::test_IndirectScomreadWriteForm1_proc> [%d] read written data: Unxpected Error from device : addr=0x%.8X, RC=%.4X", x,  read_addresses[x].addr, l_err->reasonCode() );
+              TS_FAIL( "ScomTest::test_IndirectScomreadWriteForm1_proc> ERROR : Unxpected Error on reading written data : addr=0x%.8X, RC=%.4X", read_addresses[x].addr, l_err->reasonCode() );
               fails++;
           }
           if((read_form1data[x] & 0x000000000000FFFF) !=
                 (test_data[x].data & 0x000000000000FFFF))
           {
-              TRACFCOMP(g_trac_scom, "ScomTest::test_IndirectScomreadWriteForm1_proc> [%d] Read: Data miss-match : addr=0x%X, read_form1data=0x%llx, write_data=0x%llx", x, read_addresses[x].addr, read_form1data[x], test_data[x].data);
+              TRACFCOMP(g_trac_scom, "ScomTest::test_IndirectScomreadWriteForm1_proc> [%d] Read: Data miss-match : addr=0x%.8X, read_form1data=0x%llx, write_data=0x%llx", x, read_addresses[x].addr, read_form1data[x], test_data[x].data);
               TS_FAIL( "ScomTest::test_IndirectScomreadWriteForm1_proc> ERROR : Data miss-match between read and expected data" );
               fails++;
           }
@@ -562,8 +566,8 @@ public:
           // Form1 doesn't support read so if we don't get an error back, that's bad
           if(!l_err)
           {
-              TRACFCOMP(g_trac_scom, "ScomTest::test_IndirectScomreadWriteForm1_proc> [%d] Read: Expected Error from device : addr=0x%X, RC=%X", x,  test_data[x].addr, l_err->reasonCode() );
-              TS_FAIL( "ScomTest::test_IndirectScomreadWriteForm1_proc> ERROR : Expected Error on READ : addr=0x%X, RC=%X", test_data[x].addr, l_err->reasonCode() );
+              TRACFCOMP(g_trac_scom, "ScomTest::test_IndirectScomreadWriteForm1_proc> [%d] Read: Expected Error from device : addr=0x%.8X, RC=%.4X", x,  test_data[x].addr, l_err->reasonCode() );
+              TS_FAIL( "ScomTest::test_IndirectScomreadWriteForm1_proc> ERROR : Expected Error on READ : addr=0x%.8X, RC=%.4X", test_data[x].addr, l_err->reasonCode() );
               fails++;
           }
           // else, if we are form1 and DO get an error back on read, that's expected.
@@ -786,14 +790,14 @@ public:
 
             if( l_err && !test_data[i].expectError)
             {
-                TS_FAIL( "ScomTest::test_P10_translate> ERROR : Unexpected error log from translating addr=0x%X for HUID 0x%X", test_data[i].initAddr,
+                TS_FAIL( "ScomTest::test_P10_translate> ERROR : Unexpected error log from translating addr=0x%.8X for HUID 0x%X", test_data[i].initAddr,
                           get_huid(test_data[i].target)) ;
                 errlCommit(l_err,SCOM_COMP_ID);
                 fails++;
             }
             else if(l_err == NULL && test_data[i].expectError)
             {
-                TS_FAIL( "ScomTest::test_P10_translate> ERROR : Expected an error and did not recieve one after translating addr=0x%X for HUID 0x%X",
+                TS_FAIL( "ScomTest::test_P10_translate> ERROR : Expected an error and did not recieve one after translating addr=0x%.8X for HUID 0x%X",
                         test_data[i].initAddr, get_huid(test_data[i].target)) ;
                 fails++;
             }
@@ -870,8 +874,8 @@ public:
           uint64_t addr;
           uint64_t data;
       } test_data[] = {
-          { scom_targets[PROC1],    0x01010803, 0x1234567887654321},
-          { scom_targets[PROC1],    0x02040004, 0x1122334455667788},
+          { scom_targets[PROC1],    0x03050019, 0x1234567887654321},
+          { scom_targets[PROC1],    0x02050019, 0x1122334455667788},
       };
       const uint64_t NUM_ADDRS = sizeof(test_data)/sizeof(test_data[0]);
 
@@ -900,7 +904,7 @@ public:
 
           if( l_err )
           {
-              TRACFCOMP(g_trac_scom, "ScomTest::test_MultiChipScomWrite_proc> [%d] Write: Error from device : addr=0x%X, RC=%X", x,  test_data[x].addr, l_err->reasonCode() );
+              TRACFCOMP(g_trac_scom, "ScomTest::test_MultiChipScomWrite_proc> [%d] Write: Error from device : addr=0x%.8X, RC=%.4X", x,  test_data[x].addr, l_err->reasonCode() );
               TS_FAIL( "ScomTest::test__MultiChipScomWrite_proc> ERROR : Unexpected error log from write1" );
               fails++;
               errlCommit(l_err,SCOM_COMP_ID);
@@ -929,39 +933,44 @@ public:
 
           if( l_err )
           {
-              TRACFCOMP(g_trac_scom, "ScomTest::test__MultiChipScomWrite_proc> [%d] XSCOM Read: Error from device : addr=0x%X, RC=%X", x,  test_data[x].addr, l_err->reasonCode() );
-              TS_FAIL( "ScomTest::test__MultiChipScomWrite_proc> ERROR : Unexpected error log from write1" );
+              TRACFCOMP(g_trac_scom, "ScomTest::test__MultiChipScomWrite_proc> [%d] XSCOM Read: Error from device : addr=0x%.8X, RC=%.4X", x,  test_data[x].addr, l_err->reasonCode() );
+              TS_FAIL( "ScomTest::test__MultiChipScomWrite_proc> ERROR : Unexpected error log from read1" );
               fails++;
               errlCommit(l_err,SCOM_COMP_ID);
           }
           else if(read_data[x] != test_data[x].data)
           {
-              TRACFCOMP(g_trac_scom, "ScomTest::test__MultiChipScomWrite_proc> [%d] XSCOM Read: Data miss-match : addr=0x%X, read_data=0x%llx, write_data=0x%llx", x, test_data[x].addr, read_data[x], test_data[x].data);
+              TRACFCOMP(g_trac_scom, "ScomTest::test__MultiChipScomWrite_proc> [%d] XSCOM Read: Data miss-match : addr=0x%.8X, read_data=0x%llx, write_data=0x%llx", x, test_data[x].addr, read_data[x], test_data[x].data);
               TS_FAIL( "ScomTest::test__MultiChipScomWrite_proc> ERROR : Data miss-match between read and expected data" );
               fails++;
           }
 
+
+#ifdef __HOSTBOOT_RUNTIME
+          TRACFCOMP( g_trac_scom, "Skipping alternative scom compare at runtime" );
+#else
           // Read the data back using FSIscom to make sure the data is the same.
           l_err = deviceOp(    DeviceFW::READ,
                                test_data[x].target,
                                &(read_data[x]),
                                op_size,
-                               DEVICE_FSISCOM_ADDRESS(test_data[x].addr) );
+                               DEVICE_SBEFIFOSCOM_ADDRESS(test_data[x].addr) );
 
 
           if( l_err )
           {
-              TRACFCOMP(g_trac_scom, "ScomTest::test__MultiChipScomWrite_proc> [%d] FSISCOM Read: Error from device : addr=0x%X, RC=%X", x,  test_data[x].addr, l_err->reasonCode() );
-              TS_FAIL( "ScomTest::test__MultiChipScomWrite_proc> ERROR : Unexpected error log from write1" );
+              TRACFCOMP(g_trac_scom, "ScomTest::test__MultiChipScomWrite_proc> [%d] SBEFIFOSCOM Read: Error from device : addr=0x%.8X, RC=%.4X", x,  test_data[x].addr, l_err->reasonCode() );
+              TS_FAIL( "ScomTest::test__MultiChipScomWrite_proc> ERROR : Unexpected error log from read2" );
               fails++;
               errlCommit(l_err,SCOM_COMP_ID);
           }
           else if(read_data[x] != test_data[x].data)
           {
-              TRACFCOMP(g_trac_scom, "ScomTest::test__MultiChipScomWrite_proc> [%d] FSISCOM Read: Data miss-match : addr=0x%X, read_data=0x%llx, write_data=0x%llx", x, test_data[x].addr, read_data[x], test_data[x].data);
+              TRACFCOMP(g_trac_scom, "ScomTest::test__MultiChipScomWrite_proc> [%d] SBEFIFOSCOM Read: Data miss-match : addr=0x%.8X, read_data=0x%llx, write_data=0x%llx", x, test_data[x].addr, read_data[x], test_data[x].data);
               TS_FAIL( "ScomTest::test__MultiChipScomWrite_proc> ERROR : Data miss-match between read and expected data" );
               fails++;
           }
+#endif //__HOSTBOOT_RUNTIME
 
       }
 
@@ -970,12 +979,16 @@ public:
   }
 
   /**
-   * @brief SCOM test via SBESCOM
+   * @brief SCOM test via SBEFIFOSCOM
    *
    */
-  void test_SBESCOMreadWrite_proc(void)
+  void test_SBEFIFOSCOMreadWrite_proc(void)
   {
-      TRACFCOMP( g_trac_scom, "ScomTest::test_SBESCOMreadWrite_proc> Start" );
+      TRACFCOMP( g_trac_scom, "ScomTest::test_SBEFIFOSCOMreadWrite_proc> Start" );
+#ifdef __HOSTBOOT_RUNTIME
+      TRACFCOMP( g_trac_scom, "Not valid at runtime" );
+      return;
+#endif
 
       uint64_t fails = 0;
       uint64_t total = 0;
@@ -1004,25 +1017,25 @@ public:
           //only run if the target exists
           if(scom_targets[x] == NULL)
           {
-              TRACFCOMP(g_trac_scom, "test_SBESCOMreadWrite_proc> Target %d does NOT exist to read", x);
+              TRACFCOMP(g_trac_scom, "test_SBEFIFOSCOMreadWrite_proc> Target %d does NOT exist to read", x);
               continue;
           }
           // skip the sentinel
           else if((TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL == scom_targets[x]))
           {
-              TRACFCOMP( g_trac_scom, "ScomTest::test_SBESCOMreadWrite_proc> Target %d is the MASTER Sentinal, exiting test", x );
+              TRACFCOMP( g_trac_scom, "ScomTest::test_SBEFIFOSCOMreadWrite_proc> Target %d is the MASTER Sentinal, exiting test", x );
               scom_targets[x] = NULL; //remove from our list
           }
           // skip if sbe scom is not enabled
           else if(0 == scom_targets[x]->getAttr<TARGETING::ATTR_SCOM_SWITCHES>().useSbeScom)
           {
-              TRACFCOMP( g_trac_scom, "ScomTest::test_SBESCOMreadWrite_proc> useSbeScom set to zero on target %d", x );
+              TRACFCOMP( g_trac_scom, "ScomTest::test_SBEFIFOSCOMreadWrite_proc> useSbeScom set to zero on target %d", x );
               scom_targets[x] = NULL; //remove from our list
           }
           else if (scom_targets[x]->getAttr<TARGETING::ATTR_HWAS_STATE>().functional != true)
           {
               // NIMBUS model falls through here
-              TRACDCOMP( g_trac_scom, "ScomTest::test_SBESCOMreadWrite_proc> Target %d is not functional", x );
+              TRACDCOMP( g_trac_scom, "ScomTest::test_SBEFIFOSCOMreadWrite_proc> Target %d is not functional", x );
               scom_targets[x] = NULL; //remove from our list
           }
       }
@@ -1058,7 +1071,7 @@ public:
           //only run if the target exists
           if(test_data[x].target == NULL)
           {
-              TRACFCOMP(g_trac_scom, "test_SBESCOMreadWrite_proc> Target %d does NOT exist to write", x);
+              TRACFCOMP(g_trac_scom, "test_SBEFIFOSCOMreadWrite_proc> Target %d does NOT exist to write", x);
               continue;
           }
 
@@ -1075,11 +1088,11 @@ public:
           l_err = deviceWrite( test_data[x].target,
                                &(test_data[x].data),
                                op_size,
-                               DEVICE_SCOM_ADDRESS(test_data[x].addr) );
+                               DEVICE_SCOM_ADDRESS(test_data[x].addr) );//fixme-change this to SBE
           if( l_err )
           {
-              TRACFCOMP(g_trac_scom, "ScomTest::test_SBESCOMreadWrite_proc> [%d] Write: Error from device : addr=0x%X, RC=%X", x,  test_data[x].addr, l_err->reasonCode() );
-              TS_FAIL( "ScomTest::test_SBESCOMreadWrite_proc> ERROR : Unexpected error log from write1" );
+              TRACFCOMP(g_trac_scom, "ScomTest::test_SBEFIFOSCOMreadWrite_proc> [%d] Write: Error from device : addr=0x%.8X, RC=%.4X", x,  test_data[x].addr, l_err->reasonCode() );
+              TS_FAIL( "ScomTest::test_SBEFIFOSCOMreadWrite_proc> ERROR : Unexpected error log from write1" );
               fails++;
               errlCommit(l_err,SCOM_COMP_ID);
           }
@@ -1109,20 +1122,20 @@ public:
                               DEVICE_SCOM_ADDRESS(test_data[x].addr) );
           if( l_err )
           {
-              TRACFCOMP(g_trac_scom, "ScomTest::test_SBESCOMreadWrite_proc> [%d] Read: Error from device : addr=0x%X, RC=%X", x,  test_data[x].addr, l_err->reasonCode() );
-              TS_FAIL( "ScomTest::test_SBESCOMreadWrite_proc> ERROR : Unexpected error log from write1" );
+              TRACFCOMP(g_trac_scom, "ScomTest::test_SBEFIFOSCOMreadWrite_proc> [%d] Read: Error from device : addr=0x%.8X, RC=%.4X", x,  test_data[x].addr, l_err->reasonCode() );
+              TS_FAIL( "ScomTest::test_SBEFIFOSCOMreadWrite_proc> ERROR : Unexpected error log from read1" );
               fails++;
               errlCommit(l_err,SCOM_COMP_ID);
           }
           else if(read_data[x] != test_data[x].data)
           {
-              TRACFCOMP(g_trac_scom, "ScomTest::test_SBESCOMreadWrite_proc> [%d] Read: Data miss-match : addr=0x%X, read_data=0x%llx, write_data=0x%llx", x, test_data[x].addr, read_data[x], test_data[x].data);
-              TS_FAIL( "ScomTest::test_SBESCOMreadWrite_proc> ERROR : Data miss-match between read and expected data" );
+              TRACFCOMP(g_trac_scom, "ScomTest::test_SBEFIFOSCOMreadWrite_proc> [%d] Read: Data miss-match : addr=0x%.8X, read_data=0x%llx, write_data=0x%llx", x, test_data[x].addr, read_data[x], test_data[x].data);
+              TS_FAIL( "ScomTest::test_SBEFIFOSCOMreadWrite_proc> ERROR : Data miss-match between read and expected data" );
               fails++;
           }
       }
 
-      TRACFCOMP( g_trac_scom, "ScomTest::test_SBESCOMreadWrite_proc> %d/%d fails", fails, total );
+      TRACFCOMP( g_trac_scom, "ScomTest::test_SBEFIFOSCOMreadWrite_proc> %d/%d fails", fails, total );
   }
 
 };

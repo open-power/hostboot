@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -504,12 +504,6 @@ public:
             targetService().begin(), targetService().end(),
             &procChipFilter);
 
-        // find a membuf target
-        PredicateCTM membufChipFilter(CLASS_CHIP,TYPE_MEMBUF);
-        TargetRangeFilter pMembuf(
-            targetService().begin(), targetService().end(),
-            &membufChipFilter);
-
         // find a dimm target
         PredicateCTM dimmChipFilter(CLASS_NA,TYPE_DIMM);
         TargetRangeFilter pDimm(
@@ -536,20 +530,17 @@ public:
                     DEVICE_SCOM_ADDRESS(0x000F000Full)).addToLog(errl);
         ErrlUserDetailsLogRegister(c_target,
                     DEVICE_MVPD_ADDRESS(3,0)).addToLog(errl);
-        // error:
-        ErrlUserDetailsLogRegister(c_target,
-                    DEVICE_FSI_ADDRESS(0x01028)).addToLog(errl);
-        // can't do this - use the addData methodology for driverif.H addresses
+        // error: This causes a sticky error in the 'hardware'
         //ErrlUserDetailsLogRegister(c_target,
-                    //DEVICE_FSISCOM_ADDRESS(0x000F000Full)).addToLog(errl);
+        //            DEVICE_FSI_ADDRESS(0x01028)).addToLog(errl);
 
         // more efficient - HUID then each register
         {
             ErrlUserDetailsLogRegister eudlr(c_target);
             eudlr.addData(DEVICE_SCOM_ADDRESS(0x000F000Full));
             eudlr.addData(DEVICE_MVPD_ADDRESS(3,0));
-            // error:
-            eudlr.addData(DEVICE_FSI_ADDRESS(0x01028));
+            // error: This causes a sticky error in the 'hardware'
+            //eudlr.addData(DEVICE_FSI_ADDRESS(0x1028));
             //TODO RTC: 123019 I2CM changes for P9
             //Need to uncomment this when this work is complete
 //          eudlr.addData(DEVICE_I2C_ADDRESS(0,0,0xAC));
@@ -592,11 +583,13 @@ public:
         ErrlUserDetailsLogRegister(c_target, &reg2_data, reg2_size,
                                    DEVICE_MVPD_ADDRESS(3,0)).addToLog(errl);
 
+        // error: This causes a sticky error in the 'hardware'
         uint32_t reg3_data = 0;
         size_t reg3_size = sizeof(reg3_data);
+        /*
         errl_deviceRead = DeviceFW::deviceRead(c_target,
                         &reg3_data, reg3_size,
-                        DEVICE_FSI_ADDRESS(0x01028));
+                        DEVICE_FSI_ADDRESS(0x1028));
 
         if (errl_deviceRead != NULL)
         {
@@ -609,7 +602,8 @@ public:
             TS_TRACE( "testLogRegister deviceRead DIDN'T return errl!");
         }
         ErrlUserDetailsLogRegister(c_target, &reg3_data, reg3_size,
-                DEVICE_FSI_ADDRESS(0x01028)).addToLog(errl);
+                DEVICE_FSI_ADDRESS(0x1028)).addToLog(errl);
+        */
 
         // more efficient - HUID then each register
         {
@@ -634,19 +628,6 @@ public:
                 DEVICE_MBOX_ADDRESS(0)).addToLog(errl);
 
 
-        if(*pMembuf != NULL)
-        {
-            c_target = *pMembuf;
-            ErrlUserDetailsTarget(c_target, "Target: pMembuf").addToLog(errl);
-
-            // HUID then each register
-            {
-                ErrlUserDetailsLogRegister eudlr(c_target);
-                eudlr.addData(DEVICE_FSI_ADDRESS(0x01028));
-                eudlr.addData(DEVICE_SCOM_ADDRESS(0x000F000Full));
-                eudlr.addToLog(errl);
-            }
-        }
         if(*pDimm != NULL)
         {
             c_target = *pDimm;

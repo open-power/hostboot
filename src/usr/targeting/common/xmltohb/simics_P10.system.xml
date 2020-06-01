@@ -380,7 +380,7 @@
     </attribute>
     <attribute>
         <id>PBAX_CHIPID</id>
-        <default>0x1</default>
+        <default>0x0</default>
     </attribute>
     <attribute>
         <id>PBAX_GROUPID</id>
@@ -489,7 +489,7 @@
     </attribute>
     <attribute>
         <id>PBAX_CHIPID</id>
-        <default>0x0</default>
+        <default>0x1</default>
     </attribute>
     <attribute>
         <id>PBAX_GROUPID</id>

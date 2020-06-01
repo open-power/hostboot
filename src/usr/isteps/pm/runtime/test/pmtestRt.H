@@ -47,6 +47,7 @@
 #include <hbotcompid.H>
 #include <targeting/runtime/rt_targeting.H>
 #include <sys/mm.h>
+#include <util/misc.H>
 
 /* FIXME RTC: 210975
 #include <stopreg/p9_stop_api.H>
@@ -150,6 +151,13 @@ class PMTest : public CxxTest::TestSuite
         int l_rc = 0;
 
         do {
+        //@FIXME-CQ:SW493238
+        if( Util::isMultiprocSupported() )
+        {
+            TS_INFO( "Skipping testLoadAndStartOcc in multiproc config");
+            break;
+        }
+
         l_errl = targetService().queryMasterProcChipTargetHandle(l_proc);
         if(l_errl)
         {

@@ -255,6 +255,23 @@ class RuntimeLoaderTest : public CxxTest::TestSuite
             return result;
         }
 
+        // Get the target for the given rt chipid
+        static TARGETING::Target* get_target_for_hbrt_id( uint32_t i_hbrtid )
+        {
+            TARGETING::TargetHandleList procChips;
+            getAllChips(procChips, TARGETING::TYPE_PROC, false);
+            for (const auto & l_procChip: procChips)
+            {
+                uint64_t l_instance =
+                    l_procChip->getAttr<TARGETING::ATTR_HBRT_HYP_ID>();
+                if(l_instance == i_hbrtid)
+                {
+                    return l_procChip;
+                }
+            }
+            return nullptr;
+        }
+
         static int rt_get_pm_complex_addresses(uint64_t i_chipId,
                                                uint64_t& o_homerAddr,
                                                uint64_t& o_occCommonAddr)
@@ -331,8 +348,7 @@ class RuntimeLoaderTest : public CxxTest::TestSuite
                       addr);
 
             errlHndl_t l_errl = nullptr;
-            TARGETING::Target* l_target =
-                        TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL;
+            TARGETING::Target* l_target = get_target_for_hbrt_id(chipid);
 
             // First attempt a real SCOM read
             size_t l_size = sizeof(uint64_t);
@@ -386,8 +402,7 @@ class RuntimeLoaderTest : public CxxTest::TestSuite
                       *data64);
 
             errlHndl_t l_errl = nullptr;
-            TARGETING::Target* l_target =
-                        TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL;
+            TARGETING::Target* l_target = get_target_for_hbrt_id(chipid);
 
             // First attempt a real SCOM write
             size_t l_size = sizeof(uint64_t);

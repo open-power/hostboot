@@ -42,6 +42,8 @@
 #include <sbeio/sbe_sp_intf.H>
 #include <sbe_fifodd.H>
 #include <sbe_fifo_buffer.H>
+#include <arch/magic.H>
+#include <algorithm>
 
 using namespace SBEIO;
 
@@ -59,12 +61,15 @@ class GetSBEFFDCTest : public CxxTest::TestSuite
      */
     void testgetSBEFFDC1(void)
     {
+        TS_TRACE("getSBEFFDCTest entry");
+
+        //@fixme-RTC:254961-Enable FFDC Test
+        TS_TRACE("Skipping testgetSBEFFDC1 - See RTC:254961");
+#if 0
         errlHndl_t l_errl = nullptr;
         uint32_t l_responseSize = SbeFifoRespBuffer::MSG_BUFFER_SIZE;
         uint32_t *l_pFifoResponse =
             reinterpret_cast<uint32_t *>(malloc(l_responseSize));
-
-        TS_TRACE("getSBEFFDCTest entry");
 
         //
         //  get a list of all functional procs in the system
@@ -84,7 +89,7 @@ class GetSBEFFDCTest : public CxxTest::TestSuite
             queryMasterProcChipTargetHandle(masterProcChipTargetHandle);
         if(l_errl)
         {
-            TS_FAIL("getSBEFFDCTest FAILED: query master proc, RC 0x.8X",
+            TS_FAIL("getSBEFFDCTest FAILED: query master proc, RC 0x%.8X",
                     l_errl->reasonCode());
 
             errlCommit( l_errl, CXXTEST_COMP_ID );
@@ -112,14 +117,16 @@ class GetSBEFFDCTest : public CxxTest::TestSuite
                 // Check that no error log was returned
                 if(l_errl != nullptr)
                 {
-                    TS_FAIL("getSBEFFDCTest FAILED: proc 0x%.8X, RC 0x.8X",
+                    TS_FAIL("getSBEFFDCTest FAILED: proc 0x%.8X, RC 0x%.8X",
                             TARGETING::get_huid(l_cpu_target),
                             l_errl->reasonCode());
-
-                    delete l_errl;
-                    l_errl = nullptr;
+                    errlCommit( l_errl, CXXTEST_COMP_ID );
                     break;
                 }
+
+                uint32_t dumpsize = std::min( l_responseSize, (uint32_t)256 );
+                TRACFCOMP(g_trac_sbeio,"response size=%d",l_responseSize);
+                TRACFBIN(g_trac_sbeio,"response",l_pFifoResponse, dumpsize);
 
                 // Find the status header after the return data, ie, FFDC
                 uint32_t l_size = 0;
@@ -144,7 +151,6 @@ class GetSBEFFDCTest : public CxxTest::TestSuite
                             TARGETING::get_huid(l_cpu_target),
                             l_pStatusHeader->magic,
                             SbeFifo::FIFO_STATUS_MAGIC);
-
                     break;
                 }
 
@@ -201,6 +207,7 @@ class GetSBEFFDCTest : public CxxTest::TestSuite
         free(l_pFifoResponse);
         l_pFifoResponse = nullptr;
 
+#endif
         TS_TRACE("getSBEFFDCTest exit");
     }
 };

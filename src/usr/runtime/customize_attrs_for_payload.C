@@ -130,17 +130,17 @@ errlHndl_t computeNonPhypRtTarget(
 
         if(targetingTargetType == TARGETING::TYPE_PROC)
         {
+            // PROC == Real Topology Id
             const auto topologyId =
                 i_pTarget->getAttr<TARGETING::ATTR_PROC_FABRIC_TOPOLOGY_ID>();
 
-            o_rtTargetId = PIR_t::createChipId(topologyId);
+            o_rtTargetId = topologyId;
         }
         else if(targetingTargetType == TARGETING::TYPE_CORE)
         {
-            // CORE
-            // 0b0100.0000.0000.0000.0000.GGGG.CCCP.PPPP
-            // GGGG is group, CCC is chip, PPPPP is core
-            auto pos = i_pTarget->getAttr<TARGETING::ATTR_CHIP_UNIT>();
+            // CORE == Same as PIR
+            // 0b0100.0000.0000.0000.0000.00TT.TT0C.CCCC
+            // where TTTT is topology, CCCCC is core
             const TARGETING::Target* procTarget = getParentChip(i_pTarget);
             if(procTarget == nullptr)
             {
@@ -148,20 +148,20 @@ errlHndl_t computeNonPhypRtTarget(
                 break;
             }
 
-            pError = computeNonPhypRtTarget(procTarget, o_rtTargetId);
-            if(pError)
-            {
-                break;
-            }
+            const auto topologyId =
+                procTarget->getAttr<TARGETING::ATTR_PROC_FABRIC_TOPOLOGY_ID>();
+            auto core = i_pTarget->getAttr<TARGETING::ATTR_CHIP_UNIT>();
 
-            o_rtTargetId = PIR_t::createCoreId(o_rtTargetId,pos);
+            PIR_t pir(topologyId,core);
+            
+            o_rtTargetId = pir.word >> PIR_t::BITS_AFTER_CORE;
             o_rtTargetId |= HBRT_CORE_TYPE;
         }
         else if( targetingTargetType == TARGETING::TYPE_OCMB_CHIP)
         {
-            // OCMB
-            // 0b1000.0000.0000.0000.0000.0GGG.GCCC.UUUU
-            // where GGGG is group, CCC is chip, UUUU is OMI chip unit
+            // OCMB == PROC with 4-bits of relative OMI
+            // 0b1000.0000.0000.0000.0000.0000.TTTT.UUUU
+            // where TTTT is topology, UUUU is OMI chip unit
             //
             TARGETING::TargetHandleList targetList;
 
@@ -223,7 +223,6 @@ errlHndl_t computeNonPhypRtTarget(
                 break;
             }
 
-            // GGGG = 0 by default, CCC = o_rtTargetId, UUUU = pos
             o_rtTargetId = (o_rtTargetId << RT_TARG::OCMB_ID_SHIFT);
             o_rtTargetId += pos;  // OMI chip unit acts as unique target position
             o_rtTargetId |= HBRT_OCMB_TYPE;

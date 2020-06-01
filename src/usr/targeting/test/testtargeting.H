@@ -829,136 +829,86 @@ class TargetingTestSuite : public CxxTest::TestSuite
                 TS_FAIL("Top level target handle is NULL");
                 break;
             }
-            // TODO RTC: 214286 Get 2 chip support working
-            // Read the toplogy mode (Chip is group OR Chip is node)
-            //    MODE0 = GGG_C (max 8x2)
-            //    MODE1 = GG_CC (max 4x4)
-//             const auto l_topoMode =
-//             l_sys->getAttr<ATTR_PROC_FABRIC_TOPOLOGY_MODE>();
-// 
-//             uint64_t l_procOffset = 0;
-// 
-//             TARGETING::TargetHandleList l_procTargetList;
-//             TARGETING::getAllChips(l_procTargetList, TARGETING::TYPE_PROC);
-// 
-//             TARGETING::Target* l_pProc1 = nullptr;
-// 
-//             for (const auto & l_proc_target : l_procTargetList)
-//             {
-//                 if(l_proc_target->getAttr<ATTR_CHIP_ID>() == 1)
-//             }
+
+            // Ideally we'd make this test more flexible, but since
+            //   we have a known config in standalone we can just
+            //   hardcode an assumption
+            // Assuming Topology Mode 0 (GGGC) and 1HOP_CHIP_IS_GROUP
 
             TARGETING::TargetHandleList l_ocmbTargetList;
             TARGETING::getAllChips(l_ocmbTargetList, TARGETING::TYPE_OCMB_CHIP);
 
-//             // proc 0's ocmbs
-            const uint64_t OCMB0_RT_ID = 0x80000000;
-            const uint64_t OCMB0_MMIO_BAR = 0x30400000000 | MEMMAP::MMIO_BASE;
-            const uint64_t OCMB8_RT_ID = 0x80000008;
-            const uint64_t OCMB8_MMIO_BAR = 0x30C00000000 | MEMMAP::MMIO_BASE;
-//             // proc 1's ocmbs
-//             const uint64_t OCMB16_RT_ID = 0x80000010;
-//             const uint64_t OCMB16_MMIO_BAR = 0x30400000000  | MEMMAP::MMIO_BASE | l_procOffset;
-//             const uint64_t OCMB24_RT_ID = 0x80000018;
-//             const uint64_t OCMB24_MMIO_BAR = 0x30C00000000 | MEMMAP::MMIO_BASE | l_procOffset;
 
-            const uint64_t CONFIG_SPACE_SIZE = 2 * GIGABYTE;
-            const uint64_t SM_MMIO_SPACE_OFFSET = 4 * GIGABYTE;
-            const uint64_t SM_MMIO_SPACE_SIZE = 128 * MEGABYTE;
-            const uint64_t IBM_MMIO_SPACE_OFFSET = SM_MMIO_SPACE_OFFSET + SM_MMIO_SPACE_SIZE;
+            // Values from P10_MMIO_Map_v1.10.xlsx
+            //                   0=g0c0         2=g1c0
+            //MC01-OCMB 0 CONFIG 6030400000000  6430400000000
+            //MC01-OCMB 1 CONFIG 6030480000000  6430480000000
+            //MC01-OCMB 0 MMIO   6030500000000  6430500000000
+            //MC01-OCMB 1 MMIO   6030580000000  6430580000000
+            //MC23-OCMB 2 CONFIG 6030600000000  6430600000000
+            //MC23-OCMB 2 CONFIG 6030600000000  6430600000000
+
+            constexpr uint64_t OCMB0_CONFIG =   0x6030400000000;
+            constexpr uint64_t OFFSET_TO_MMIO =     0x100000000;//4GB
+            constexpr uint64_t OFFSET_TO_ODD_OCMB =  0x80000000;//2GB
+            constexpr uint64_t PER_PROC_OFFSET = 0x400000000000;//64TB
+            constexpr uint64_t PER_MC_OFFSET =      0x200000000;//8GB
+
+            constexpr uint64_t CONFIG_SPACE_SIZE = OFFSET_TO_ODD_OCMB;
+            constexpr uint64_t SM_MMIO_SPACE_SIZE = 128 * MEGABYTE;                      
+            constexpr uint64_t SM_MMIO_SPACE_OFFSET = 0;
+            constexpr uint64_t IBM_MMIO_SPACE_OFFSET = SM_MMIO_SPACE_OFFSET
+                                                     + SM_MMIO_SPACE_SIZE; 
             // Actual MMIO SPACE for IBM scoms is only 16 MB but we reserve 
             // remainder of the entire 2 GB window
-            const uint64_t IBM_MMIO_SPACE_RSV_SIZE = 2 * GIGABYTE - SM_MMIO_SPACE_SIZE;
+            const uint64_t IBM_MMIO_SPACE_RSV_SIZE = 2 * GIGABYTE
+                                                     - SM_MMIO_SPACE_SIZE;
             const uint8_t SUPPORTS_8_BYTE = 8;
             const uint8_t SUPPORTS_4_BYTE = 4;
 
-            const TARGETING::ocmbMmioAddressRange_t EXPECTED_VALUES[4][3] {
-              // OCMB 0 info
-              {
-                  // Config Space
-                  TARGETING::ocmbMmioAddressRange_t(OCMB0_RT_ID,
-                                      OCMB0_MMIO_BAR,
-                                      CONFIG_SPACE_SIZE + OCMB0_MMIO_BAR - 1,
-                                      SUPPORTS_4_BYTE),
-                  // Super Micro MMIO Space
-                  TARGETING::ocmbMmioAddressRange_t(OCMB0_RT_ID,
-                                      OCMB0_MMIO_BAR + SM_MMIO_SPACE_OFFSET,
-                                      SM_MMIO_SPACE_SIZE + OCMB0_MMIO_BAR + SM_MMIO_SPACE_OFFSET - 1,
-                                      SUPPORTS_4_BYTE),
-                  // IBM MMIO Space
-                  TARGETING::ocmbMmioAddressRange_t(OCMB0_RT_ID,
-                                      OCMB0_MMIO_BAR + IBM_MMIO_SPACE_OFFSET,
-                                      IBM_MMIO_SPACE_RSV_SIZE + OCMB0_MMIO_BAR + IBM_MMIO_SPACE_OFFSET - 1,
-                                      SUPPORTS_8_BYTE)
-              },
-              // OCMB 8 info
-              {
-                  // Config Space
-                  TARGETING::ocmbMmioAddressRange_t(OCMB8_RT_ID,
-                                      OCMB8_MMIO_BAR,
-                                      CONFIG_SPACE_SIZE + OCMB8_MMIO_BAR - 1,
-                                      SUPPORTS_4_BYTE),
-                  // Super Micro MMIO Space
-                  TARGETING::ocmbMmioAddressRange_t(OCMB8_RT_ID,
-                                      OCMB8_MMIO_BAR + SM_MMIO_SPACE_OFFSET,
-                                      SM_MMIO_SPACE_SIZE + OCMB8_MMIO_BAR + SM_MMIO_SPACE_OFFSET - 1,
-                                      SUPPORTS_4_BYTE),
-                  // IBM MMIO Space
-                  TARGETING::ocmbMmioAddressRange_t(OCMB8_RT_ID,
-                                      OCMB8_MMIO_BAR + IBM_MMIO_SPACE_OFFSET,
-                                      IBM_MMIO_SPACE_RSV_SIZE + OCMB8_MMIO_BAR + IBM_MMIO_SPACE_OFFSET -1,
-                                      SUPPORTS_8_BYTE)
-              },
-//               // OCMB 16 info
-//               {
-//                   // Config Space
-//                   TARGETING::ocmbMmioAddressRange_t(OCMB16_RT_ID,
-//                                       OCMB16_MMIO_BAR,
-//                                       CONFIG_SPACE_SIZE + OCMB16_MMIO_BAR - 1,
-//                                       SUPPORTS_4_BYTE),
-//                   // Super Micro MMIO Space
-//                   TARGETING::ocmbMmioAddressRange_t(OCMB16_RT_ID,
-//                                       OCMB16_MMIO_BAR + SM_MMIO_SPACE_OFFSET,
-//                                       SM_MMIO_SPACE_SIZE + OCMB16_MMIO_BAR + SM_MMIO_SPACE_OFFSET - 1,
-//                                       SUPPORTS_4_BYTE),
-//                   // IBM MMIO Space
-//                   TARGETING::ocmbMmioAddressRange_t(OCMB16_RT_ID,
-//                                       OCMB16_MMIO_BAR + IBM_MMIO_SPACE_OFFSET,
-//                                       IBM_MMIO_SPACE_RSV_SIZE + OCMB16_MMIO_BAR + IBM_MMIO_SPACE_OFFSET - 1,
-//                                       SUPPORTS_8_BYTE)
-//               },
-//               // OCMB 24 info
-//               {
-//                   // Config Space
-//                   TARGETING::ocmbMmioAddressRange_t(OCMB24_RT_ID,
-//                                       OCMB24_MMIO_BAR,
-//                                       CONFIG_SPACE_SIZE + OCMB24_MMIO_BAR - 1,
-//                                       SUPPORTS_4_BYTE),
-//                   // Super Micro MMIO Space
-//                   TARGETING::ocmbMmioAddressRange_t(OCMB24_RT_ID,
-//                                       OCMB24_MMIO_BAR + SM_MMIO_SPACE_OFFSET,
-//                                       SM_MMIO_SPACE_SIZE + OCMB24_MMIO_BAR + SM_MMIO_SPACE_OFFSET - 1,
-//                                       SUPPORTS_4_BYTE),
-//                   // IBM MMIO Space
-//                   TARGETING::ocmbMmioAddressRange_t(OCMB24_RT_ID,
-//                                       OCMB24_MMIO_BAR + IBM_MMIO_SPACE_OFFSET,
-//                                       IBM_MMIO_SPACE_RSV_SIZE + OCMB24_MMIO_BAR + IBM_MMIO_SPACE_OFFSET - 1,
-//                                       SUPPORTS_8_BYTE)
-//               }
-            };
+            const uint64_t OCMB0_RT_ID = 0x80000000;
 
             for (const auto & l_ocmb_target : l_ocmbTargetList)
             {
+                // Generate expected values
                 TARGETING::ATTR_POSITION_type l_pos = l_ocmb_target->getAttr<TARGETING::ATTR_POSITION>();
-                // Only check first and last functional dimm for each proc
-                if( l_pos != 0 && l_pos != 8 && l_pos != 16 && l_pos != 24 )
-                {
-                    continue;
-                }
+
+                uint64_t exp_runtimeid = OCMB0_RT_ID;
+                exp_runtimeid += (l_pos%16);//16 OCMBs per PROC
+                exp_runtimeid += (l_pos/16)<<5;//4 for HBRT ID +1 to handle GGGC topology id
+
+                uint64_t exp_config = OCMB0_CONFIG;
+                exp_config += OFFSET_TO_ODD_OCMB*(l_pos%2);
+                exp_config += PER_MC_OFFSET*(l_pos/2);//2 OCMBs per MC
+                exp_config += PER_PROC_OFFSET*(l_pos/16);//16 OCMBs per PROC
+
+                uint64_t exp_mmio = exp_config + OFFSET_TO_MMIO;
+
+                // Config Space
+                TARGETING::ocmbMmioAddressRange_t exp_space_config(
+                                       exp_runtimeid,
+                                       exp_config,
+                                       exp_config + CONFIG_SPACE_SIZE - 1,
+                                       SUPPORTS_4_BYTE);
+                // Microchip MMIO Space
+                TARGETING::ocmbMmioAddressRange_t exp_space_mmio_mchp(
+                                       exp_runtimeid,
+                                       exp_mmio + SM_MMIO_SPACE_OFFSET,
+                                       exp_mmio + SM_MMIO_SPACE_OFFSET
+                                                + SM_MMIO_SPACE_SIZE - 1,
+                                       SUPPORTS_4_BYTE);
+                // IBM MMIO Space
+                TARGETING::ocmbMmioAddressRange_t exp_space_mmio_ibm(
+                                       exp_runtimeid,
+                                       exp_mmio + IBM_MMIO_SPACE_OFFSET,
+                                       exp_mmio + IBM_MMIO_SPACE_OFFSET
+                                                + IBM_MMIO_SPACE_RSV_SIZE - 1,
+                                       SUPPORTS_8_BYTE);
+
+                // Compute the ranges
+                l_tests++;
                 std::vector<TARGETING::ocmbMmioAddressRange_t> l_ranges;
                 l_errl = TARGETING::getMemTargetMmioInfo(l_ocmb_target, l_ranges);
-
-                l_tests++;
                 if(l_errl)
                 {
                     TS_FAIL("testGetMemTargetMmioInfo an error occured while attempted to read mmio infor from target 0x%.08x",
@@ -980,225 +930,64 @@ class TargetingTestSuite : public CxxTest::TestSuite
                     continue;
                 }
 
-                switch (l_pos)
+                //Note-making an assumption on the order the ranges are
+                // returned just to make the test easier to read
+
+                l_tests++;
+                if ( memcmp( &l_ranges[0], &exp_space_config, sizeof(TARGETING::ocmbMmioAddressRange_t )) != 0)
                 {
-                  case 0:
-                      l_tests++;
-                      if ( memcmp( &l_ranges[0], &EXPECTED_VALUES[0][0], sizeof(TARGETING::ocmbMmioAddressRange_t )) != 0)
-                      {
-                          TS_FAIL("testGetMemTargetMmioInfo::"
-                                    "OCMB0's CNFG space info did not match what was expected");
-                          l_fails++;
-                          TS_INFO("EXPECTED: id:0x%lx  start addr:0x%lx  end addr:0x%lx  8byteAccess:%s ",
-                                  EXPECTED_VALUES[0][0].hbrtId,
-                                  EXPECTED_VALUES[0][0].mmioBaseAddr,
-                                  EXPECTED_VALUES[0][0].mmioEndAddr,
-                                  EXPECTED_VALUES[0][0].accessSize == 8 ? "true" : "false");
-                          TS_INFO("ACTUAL: id:0x%lx  start addr:0x%lx  end addr:0x%lx  8byteAccess:%s ",
-                                  l_ranges[0].hbrtId,
-                                  l_ranges[0].mmioBaseAddr,
-                                  l_ranges[0].mmioEndAddr,
-                                  l_ranges[0].accessSize == 8 ? "true" : "false");
-                      }
-                      l_tests++;
-                      if ( memcmp( &l_ranges[1], &EXPECTED_VALUES[0][1], sizeof(TARGETING::ocmbMmioAddressRange_t )) != 0)
-                      {
-                          TS_FAIL("testGetMemTargetMmioInfo::"
-                                    "OCMB0's Super Micro MMIO space info did not match what was expected");
-                          l_fails++;
-                          TS_INFO("EXPECTED: id:0x%lx  start addr:0x%lx  end addr:0x%lx  8byteAccess:%s ",
-                                  EXPECTED_VALUES[0][1].hbrtId,
-                                  EXPECTED_VALUES[0][1].mmioBaseAddr,
-                                  EXPECTED_VALUES[0][1].mmioEndAddr,
-                                  EXPECTED_VALUES[0][1].accessSize == 8 ? "true" : "false");
-                          TS_INFO("ACTUAL: id:0x%lx  start addr:0x%lx  end addr:0x%lx  8byteAccess:%s ",
-                                  l_ranges[1].hbrtId,
-                                  l_ranges[1].mmioBaseAddr,
-                                  l_ranges[1].mmioEndAddr,
-                                  l_ranges[1].accessSize == 8 ? "true" : "false");
-                      }
-                      l_tests++;
-                      if ( memcmp( &l_ranges[2], &EXPECTED_VALUES[0][2], sizeof(TARGETING::ocmbMmioAddressRange_t )) != 0)
-                      {
-                          TS_FAIL("testGetMemTargetMmioInfo::"
-                                    "OCMB0's IBM MMIO space info did not match what was expected");
-                          l_fails++;
-                          TS_INFO("EXPECTED: id:0x%lx  start addr:0x%lx  end addr:0x%lx  8byteAccess:%s ",
-                                  EXPECTED_VALUES[0][2].hbrtId,
-                                  EXPECTED_VALUES[0][2].mmioBaseAddr,
-                                  EXPECTED_VALUES[0][2].mmioEndAddr,
-                                  EXPECTED_VALUES[0][2].accessSize == 8 ? "true" : "false");
-                          TS_INFO("ACTUAL: id:0x%lx  start addr:0x%lx  end addr:0x%lx  8byteAccess:%s ",
-                                  l_ranges[2].hbrtId,
-                                  l_ranges[2].mmioBaseAddr,
-                                  l_ranges[2].mmioEndAddr,
-                                  l_ranges[2].accessSize == 8 ? "true" : "false");
-                      }
-                      break;
-                  case 8:
-                      l_tests++;
-                      if ( memcmp( &l_ranges[0], &EXPECTED_VALUES[1][0], sizeof(TARGETING::ocmbMmioAddressRange_t )) != 0)
-                      {
-                          TS_FAIL("testGetMemTargetMmioInfo::"
-                                    "OCMB8's CNFG space info did not match what was expected");
-                          l_fails++;
-                          TS_INFO("EXPECTED: id:0x%lx  start addr:0x%lx  end addr:0x%lx  8byteAccess:%s ",
-                                  EXPECTED_VALUES[1][0].hbrtId,
-                                  EXPECTED_VALUES[1][0].mmioBaseAddr,
-                                  EXPECTED_VALUES[1][0].mmioEndAddr,
-                                  EXPECTED_VALUES[1][0].accessSize == 8 ? "true" : "false");
-                          TS_INFO("ACTUAL: id:0x%lx  start addr:0x%lx  end addr:0x%lx  8byteAccess:%s ",
-                                  l_ranges[0].hbrtId,
-                                  l_ranges[0].mmioBaseAddr,
-                                  l_ranges[0].mmioEndAddr,
-                                  l_ranges[0].accessSize == 8 ? "true" : "false");
-                      }
-                      l_tests++;
-                      if ( memcmp( &l_ranges[1], &EXPECTED_VALUES[1][1], sizeof(TARGETING::ocmbMmioAddressRange_t )) != 0)
-                      {
-                          TS_FAIL("testGetMemTargetMmioInfo::"
-                                    "OCMB8's Super Micro MMIO space info did not match what was expected");
-                          l_fails++;
-                          TS_INFO("EXPECTED: id:0x%lx  start addr:0x%lx  end addr:0x%lx  8byteAccess:%s ",
-                                  EXPECTED_VALUES[1][1].hbrtId,
-                                  EXPECTED_VALUES[1][1].mmioBaseAddr,
-                                  EXPECTED_VALUES[1][1].mmioEndAddr,
-                                  EXPECTED_VALUES[1][1].accessSize == 8 ? "true" : "false");
-                          TS_INFO("ACTUAL: id:0x%lx  start addr:0x%lx  end addr:0x%lx  8byteAccess:%s ",
-                                  l_ranges[1].hbrtId,
-                                  l_ranges[1].mmioBaseAddr,
-                                  l_ranges[1].mmioEndAddr,
-                                  l_ranges[1].accessSize == 8 ? "true" : "false");
-                      }
-                      l_tests++;
-                      if ( memcmp( &l_ranges[2], &EXPECTED_VALUES[1][2], sizeof(TARGETING::ocmbMmioAddressRange_t )) != 0)
-                      {
-                          TS_FAIL("testGetMemTargetMmioInfo::"
-                                    "OCMB8's IBM MMIO space info did not match what was expected");
-                          l_fails++;
-                          TS_INFO("EXPECTED: id:0x%lx  start addr:0x%lx  end addr:0x%lx  8byteAccess:%s ",
-                                  EXPECTED_VALUES[1][2].hbrtId,
-                                  EXPECTED_VALUES[1][2].mmioBaseAddr,
-                                  EXPECTED_VALUES[1][2].mmioEndAddr,
-                                  EXPECTED_VALUES[1][2].accessSize == 8 ? "true" : "false");
-                          TS_INFO("ACTUAL: id:0x%lx  start addr:0x%lx  end addr:0x%lx  8byteAccess:%s ",
-                                  l_ranges[2].hbrtId,
-                                  l_ranges[2].mmioBaseAddr,
-                                  l_ranges[2].mmioEndAddr,
-                                  l_ranges[2].accessSize == 8 ? "true" : "false");
-                      }
-                      break;
-//                   case 16:
-//                       l_tests++;
-//                       if ( memcmp( &l_ranges[0], &EXPECTED_VALUES[2][0], sizeof(TARGETING::ocmbMmioAddressRange_t )) != 0)
-//                       {
-//                           TS_FAIL("testGetMemTargetMmioInfo::"
-//                                     "OCMB16's CNFG space info did not match what was expected");
-//                           l_fails++;
-//                           TS_INFO("EXPECTED: id:0x%lx  start addr:0x%lx  end addr:0x%lx  8byteAccess:%s ",
-//                                   EXPECTED_VALUES[2][0].hbrtId,
-//                                   EXPECTED_VALUES[2][0].mmioBaseAddr,
-//                                   EXPECTED_VALUES[2][0].mmioEndAddr,
-//                                   EXPECTED_VALUES[2][0].accessSize == 8 ? "true" : "false");
-//                           TS_INFO("ACTUAL: id:0x%lx  start addr:0x%lx  end addr:0x%lx  8byteAccess:%s ",
-//                                   l_ranges[0].hbrtId,
-//                                   l_ranges[0].mmioBaseAddr,
-//                                   l_ranges[0].mmioEndAddr,
-//                                   l_ranges[0].accessSize == 8 ? "true" : "false");
-//                       }
-//                       l_tests++;
-//                       if ( memcmp( &l_ranges[1], &EXPECTED_VALUES[2][1], sizeof(TARGETING::ocmbMmioAddressRange_t )) != 0)
-//                       {
-//                           TS_FAIL("testGetMemTargetMmioInfo::"
-//                                     "OCMB16's Super Micro MMIO space info did not match what was expected");
-//                           l_fails++;
-//                           TS_INFO("EXPECTED: id:0x%lx  start addr:0x%lx  end addr:0x%lx  8byteAccess:%s ",
-//                                   EXPECTED_VALUES[2][1].hbrtId,
-//                                   EXPECTED_VALUES[2][1].mmioBaseAddr,
-//                                   EXPECTED_VALUES[2][1].mmioEndAddr,
-//                                   EXPECTED_VALUES[2][1].accessSize == 8 ? "true" : "false");
-//                           TS_INFO("ACTUAL: id:0x%lx  start addr:0x%lx  end addr:0x%lx  8byteAccess:%s ",
-//                                   l_ranges[1].hbrtId,
-//                                   l_ranges[1].mmioBaseAddr,
-//                                   l_ranges[1].mmioEndAddr,
-//                                   l_ranges[1].accessSize == 8 ? "true" : "false");
-//                       }
-//                       l_tests++;
-//                       if ( memcmp( &l_ranges[2], &EXPECTED_VALUES[2][2], sizeof(TARGETING::ocmbMmioAddressRange_t )) != 0)
-//                       {
-//                           TS_FAIL("testGetMemTargetMmioInfo::"
-//                                     "OCMB16's IBM MMIO space info did not match what was expected");
-//                           l_fails++;
-//                           TS_INFO("EXPECTED: id:0x%lx  start addr:0x%lx  end addr:0x%lx  8byteAccess:%s ",
-//                                   EXPECTED_VALUES[2][2].hbrtId,
-//                                   EXPECTED_VALUES[2][2].mmioBaseAddr,
-//                                   EXPECTED_VALUES[2][2].mmioEndAddr,
-//                                   EXPECTED_VALUES[2][2].accessSize == 8 ? "true" : "false");
-//                           TS_INFO("ACTUAL: id:0x%lx  start addr:0x%lx  end addr:0x%lx  8byteAccess:%s ",
-//                                   l_ranges[2].hbrtId,
-//                                   l_ranges[2].mmioBaseAddr,
-//                                   l_ranges[2].mmioEndAddr,
-//                                   l_ranges[2].accessSize == 8 ? "true" : "false");
-//                       }
-//                       break;
-//                   case 24:
-//                       l_tests++;
-//                       if ( memcmp( &l_ranges[0], &EXPECTED_VALUES[3][0], sizeof(TARGETING::ocmbMmioAddressRange_t )) != 0)
-//                       {
-//                           TS_FAIL("testGetMemTargetMmioInfo::"
-//                                     "OCMB24's CNFG space info did not match what was expected");
-//                           l_fails++;
-//                           TS_INFO("EXPECTED: id:0x%lx  start addr:0x%lx  end addr:0x%lx  8byteAccess:%s ",
-//                                   EXPECTED_VALUES[3][0].hbrtId,
-//                                   EXPECTED_VALUES[3][0].mmioBaseAddr,
-//                                   EXPECTED_VALUES[3][0].mmioEndAddr,
-//                                   EXPECTED_VALUES[3][0].accessSize == 8 ? "true" : "false");
-//                           TS_INFO("ACTUAL: id:0x%lx  start addr:0x%lx  end addr:0x%lx  8byteAccess:%s ",
-//                                   l_ranges[0].hbrtId,
-//                                   l_ranges[0].mmioBaseAddr,
-//                                   l_ranges[0].mmioEndAddr,
-//                                   l_ranges[0].accessSize == 8 ? "true" : "false");
-//                       }
-//                       l_tests++;
-//                       if ( memcmp( &l_ranges[1], &EXPECTED_VALUES[3][1], sizeof(TARGETING::ocmbMmioAddressRange_t )) != 0)
-//                       {
-//                           TS_FAIL("testGetMemTargetMmioInfo::"
-//                                     "OCMB24's Super Micro MMIO space info did not match what was expected");
-//                           l_fails++;
-//                           TS_TRACE("EXPECTED: id:0x%lx  start addr:0x%lx  end addr:0x%lx  8byteAccess:%s ",
-//                                   EXPECTED_VALUES[3][1].hbrtId,
-//                                   EXPECTED_VALUES[3][1].mmioBaseAddr,
-//                                   EXPECTED_VALUES[3][1].mmioEndAddr,
-//                                   EXPECTED_VALUES[3][1].accessSize == 8 ? "true" : "false");
-//                           TS_TRACE("ACTUAL: id:0x%lx  start addr:0x%lx  end addr:0x%lx  8byteAccess:%s ",
-//                                   l_ranges[1].hbrtId,
-//                                   l_ranges[1].mmioBaseAddr,
-//                                   l_ranges[1].mmioEndAddr,
-//                                   l_ranges[1].accessSize == 8 ? "true" : "false");
-//                       }
-//                       l_tests++;
-//                       if ( memcmp( &l_ranges[2], &EXPECTED_VALUES[3][2], sizeof(TARGETING::ocmbMmioAddressRange_t )) != 0)
-//                       {
-//                           TS_FAIL("testGetMemTargetMmioInfo::"
-//                                     "OCMB24's IBM MMIO space info did not match what was expected");
-//                           l_fails++;
-//                           TS_TRACE("EXPECTED: id:0x%lx  start addr:0x%lx  end addr:0x%lx  8byteAccess:%s ",
-//                                   EXPECTED_VALUES[3][2].hbrtId,
-//                                   EXPECTED_VALUES[3][2].mmioBaseAddr,
-//                                   EXPECTED_VALUES[3][2].mmioEndAddr,
-//                                   EXPECTED_VALUES[3][2].accessSize == 8 ? "true" : "false");
-//                           TS_TRACE("ACTUAL: id:0x%lx  start addr:0x%lx  end addr:0x%lx  8byteAccess:%s ",
-//                                   l_ranges[2].hbrtId,
-//                                   l_ranges[2].mmioBaseAddr,
-//                                   l_ranges[2].mmioEndAddr,
-//                                   l_ranges[2].accessSize == 8 ? "true" : "false");
-//                       }
-//                       break;
-                  default:
-                      TS_FAIL("testGetMemTargetMmioInfo::"
-                              "We are processing a position (%d) we don't support",
-                              l_pos);
-                      break;
+                    TS_FAIL("testGetMemTargetMmioInfo::"
+                            "OCMB %.8X CNFG space info did not match what was expected",
+                            TARGETING::get_huid(l_ocmb_target));
+                    l_fails++;
+                    TS_INFO("EXPECTED: id:0x%lx  start addr:0x%lx  end addr:0x%lx  8byteAccess:%s ",
+                            exp_space_config.hbrtId,
+                            exp_space_config.mmioBaseAddr,
+                            exp_space_config.mmioEndAddr,
+                            exp_space_config.accessSize == 8 ? "true" : "false");
+                    TS_INFO("ACTUAL  : id:0x%lx  start addr:0x%lx  end addr:0x%lx  8byteAccess:%s ",
+                            l_ranges[0].hbrtId,
+                            l_ranges[0].mmioBaseAddr,
+                            l_ranges[0].mmioEndAddr,
+                            l_ranges[0].accessSize == 8 ? "true" : "false");
+                }
+
+                l_tests++;
+                if ( memcmp( &l_ranges[1], &exp_space_mmio_mchp, sizeof(TARGETING::ocmbMmioAddressRange_t )) != 0)
+                {
+                    TS_FAIL("testGetMemTargetMmioInfo::"
+                            "OCMB %.8X Microchip MMIO space info did not match what was expected",
+                            TARGETING::get_huid(l_ocmb_target));
+                    l_fails++;
+                    TS_INFO("EXPECTED: id:0x%lx  start addr:0x%lx  end addr:0x%lx  8byteAccess:%s ",
+                            exp_space_mmio_mchp.hbrtId,
+                            exp_space_mmio_mchp.mmioBaseAddr,
+                            exp_space_mmio_mchp.mmioEndAddr,
+                            exp_space_mmio_mchp.accessSize == 8 ? "true" : "false");
+                    TS_INFO("ACTUAL  : id:0x%lx  start addr:0x%lx  end addr:0x%lx  8byteAccess:%s ",
+                            l_ranges[1].hbrtId,
+                            l_ranges[1].mmioBaseAddr,
+                            l_ranges[1].mmioEndAddr,
+                            l_ranges[1].accessSize == 8 ? "true" : "false");
+                }
+
+                l_tests++;
+                if ( memcmp( &l_ranges[2], &exp_space_mmio_ibm, sizeof(TARGETING::ocmbMmioAddressRange_t )) != 0)
+                {
+                    TS_FAIL("testGetMemTargetMmioInfo::"
+                            "OCMB %.8X IBM MMIO space info did not match what was expected",
+                            TARGETING::get_huid(l_ocmb_target));
+                    l_fails++;
+                    TS_INFO("EXPECTED: id:0x%lx  start addr:0x%lx  end addr:0x%lx  8byteAccess:%s ",
+                            exp_space_mmio_ibm.hbrtId,
+                            exp_space_mmio_ibm.mmioBaseAddr,
+                            exp_space_mmio_ibm.mmioEndAddr,
+                            exp_space_mmio_ibm.accessSize == 8 ? "true" : "false");
+                    TS_INFO("ACTUAL  : id:0x%lx  start addr:0x%lx  end addr:0x%lx  8byteAccess:%s ",
+                            l_ranges[2].hbrtId,
+                            l_ranges[2].mmioBaseAddr,
+                            l_ranges[2].mmioEndAddr,
+                            l_ranges[2].accessSize == 8 ? "true" : "false");
                 }
             }
         }while(0);

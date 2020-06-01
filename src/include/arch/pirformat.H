@@ -38,10 +38,10 @@ using namespace TARGETING;
 using namespace MEMMAP;
 
 /**
- * @brief Format of Processor Id Register (PIR) for P9
+ * @brief Format of Processor Id Register (PIR) for P10
  *
- *  SSSTTTTRPPPPPYY where
- *     S = spare, T = topology, P = proc, Y = thread, R = reserved
+ *  SSSTTTTRCCCCCYY where
+ *     S = spare, T = topology, C = core, Y = thread, R = reserved
  */
 struct PIR_t
 {
