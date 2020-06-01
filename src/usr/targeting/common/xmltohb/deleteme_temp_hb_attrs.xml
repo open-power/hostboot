@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2019                             -->
+<!-- Contributors Listed Below - COPYRIGHT 2019,2020                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -214,15 +214,6 @@
   <targetType>TARGET_TYPE_PROC_CHIP</targetType>
   <description>Capturing EQ Gard value</description>
   <valueType>uint8</valueType>
-  <platInit/>
-  <mrwHide/>
-</attribute>
-
-<attribute>
-  <id>ATTR_EC_GARD</id>
-  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
-  <description>Capturing EC Gard Value</description>
-  <valueType>uint32</valueType>
   <platInit/>
   <mrwHide/>
 </attribute>
