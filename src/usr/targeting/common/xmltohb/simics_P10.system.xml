@@ -17736,7 +17736,7 @@
     </attribute>
     <attribute>
         <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/proc-0/perv-33</default>
+        <default>physical:sys-0/node-0/proc-1/perv-33</default>
     </attribute>
 </targetInstance>
 
