@@ -142,8 +142,9 @@ namespace DUMP
         HDAT::hdatHDIFDataArray_t iv_regArrayHdr;
     } PACKED;
 
-    #define DUMP_ARCH_REG_TYPE_GPR	0x01
-    #define DUMP_ARCH_REG_TYPE_SPR	0x02
+    #define DUMP_ARCH_REG_TYPE_GPR 0x01
+    #define DUMP_ARCH_REG_TYPE_SPR 0x02
+    #define DUMP_ARCH_REG_TYPE_TIMA 0x03
 
     // Architected register data content entries
     union reg_t
@@ -162,11 +163,11 @@ namespace DUMP
         uint64_t regVal;
     } PACKED;
 
-    // Structure version used to share SPR/GPR register data between
+    // Structure version used to share TIMA/SPR/GPR register data between
     // SBE and HB
     #define REG_DUMP_SBE_HB_STRUCT_VER 0x1
 
-    // Structure version used to share SPR/GPR register data between
+    // Structure version used to share TIMA/SPR/GPR register data between
     // HB and OPAL
     #define REG_DUMP_HDAT_STRUCT_VER 0x1
 
@@ -190,12 +191,12 @@ namespace DUMP
     } PACKED;
 
     /**
-     *  @brief Defines the structure for storing the SPR/GPR register data
+     *  @brief Defines the structure for storing the TIMA/SPR/GPR register data
      *
      *  @var isRegDataValid   :'1'- Variable regVal will contain valid register 
      *                         '0'- Variable regVal will contain fapiRC value
      *
-     *  @var isLastReg        :'1' - Data is collected for the last SPR/GPR register
+     *  @var isLastReg        :'1' - Data is collected for the last TIMA/SPR/GPR register
      *                         '0' - otherwise.
      *
      *  @var isFfdcPresent    :'1' - Failing FAPI FFDC is shared
@@ -203,11 +204,11 @@ namespace DUMP
      *
      *  @var reserved0        :Reserved for future use and padding
      *
-     *  @var regType          :Indicates type of register(SPR/GPR)
+     *  @var regType          :Indicates type of register(TIMA/SPR/GPR)
      *
      *  @var reserved1        :Reserved for future use and padding
      *
-     *  @var regNum           :Address of the SPR/GPR register
+     *  @var regNum           :Address of the TIMA/SPR/GPR register
      *
      *  @var regVal           :if isRegDataValid is '0'  - Valid Register value
      *                            isRegDataValid is '!=0'- fapiRC value.

@@ -54,6 +54,7 @@ trace_desc_t* g_trac_dump = NULL;
 TRAC_INIT(&g_trac_dump, "DUMP", 4*KILOBYTE);
 
 #define SBE_FFDC_SIZE 128
+#define SIZE_TIMA_REG 8
 
 namespace DUMP
 {
@@ -93,9 +94,11 @@ typedef std::map<uint32_t, const char*>::iterator SPRNUM_MAP_IT;
     _op_(PSPB     ,159 )\
     _op_(DPDES    ,176 )\
     _op_(DAWR0    ,180 )\
+    _op_(DAWR1    ,181 )\
     _op_(RPR      ,186 )\
     _op_(CIABR    ,187 )\
     _op_(DAWRX0   ,188 )\
+    _op_(DAWRX1   ,189 )\
     _op_(HFSCR    ,190 )\
     _op_(VRSAVE   ,256 )\
     _op_(SPRG3_RU ,259 )\
@@ -132,6 +135,7 @@ typedef std::map<uint32_t, const char*>::iterator SPRNUM_MAP_IT;
     _op_(AMOR     ,349 )\
     _op_(TIR      ,446 )\
     _op_(PTCR     ,464 )\
+    _op_(HDEXCR   ,471 )\
     _op_(USPRG0   ,496 )\
     _op_(USPRG1   ,497 )\
     _op_(UDAR     ,499 )\
@@ -142,6 +146,9 @@ typedef std::map<uint32_t, const char*>::iterator SPRNUM_MAP_IT;
     _op_(UEIR     ,509 )\
     _op_(ACMCR    ,510 )\
     _op_(SMFCTRL  ,511 )\
+    _op_(SIER2    ,752 )\
+    _op_(SIER3    ,753 )\
+    _op_(MMCR3    ,754 )\
     _op_(SIER_RU  ,768 )\
     _op_(MMCR2_RU ,769 )\
     _op_(MMCRA_RU ,770 )\
@@ -181,6 +188,7 @@ typedef std::map<uint32_t, const char*>::iterator SPRNUM_MAP_IT;
     _op_(TAR      ,815 )\
     _op_(ASDR     ,816 )\
     _op_(PSSCR_SU ,823 )\
+    _op_(DEXCR    ,828 )\
     _op_(IC       ,848 )\
     _op_(VTB      ,849 )\
     _op_(LDBAR    ,850 )\
@@ -283,6 +291,11 @@ void replaceRegNumWithName( hostArchRegDataEntry *hostRegData )
             strncpy(hostRegData->reg.name, SPRNUM_MAP[hostRegData->reg.num], sizeof(reg_t));
         }
         //else unknown... leave as number for debug
+    }
+    else if (hostRegData->reg.type == DUMP_ARCH_REG_TYPE_TIMA)
+    {
+        snprintf(str,sizeof(reg_t), "TIMA%d\0", hostRegData->reg.num);
+        strncpy(hostRegData->reg.name, str, sizeof(reg_t));
     }
     //else unknown type... leave as number for debug
 
@@ -403,8 +416,8 @@ errlHndl_t copyArchitectedRegs(void)
         vMapSrcAddrBase = mm_block_map(pSrcAddrBase,
                                        VMM_ARCH_REG_DATA_SIZE_ALL_PROC);
 
-        TRACDCOMP(g_trac_dump, "src address [0x%X] [%p], destArrayaddr"
-                 " [%X] dest[%p] [%p]", srcAddr, vMapSrcAddrBase,
+        TRACFCOMP(g_trac_dump, "Node level Source address(same as ATTR_SBE_ARCH_DUMP_ADDR) [0x%16llx] [%p], destArrayaddr"
+                 " [0x%.16llx] Destination address [%p] [%p]", srcAddr, vMapSrcAddrBase,
                   procTableEntry->dstArrayAddr, pDstAddrBase, vMapDstAddrBase);
 
         // Get list of functional processor chips, in MPIPL path we
@@ -421,9 +434,8 @@ errlHndl_t copyArchitectedRegs(void)
             // and used for reference below to calculate all other addresses
             uint64_t procSrcAddr = (reinterpret_cast<uint64_t>(vMapSrcAddrBase)+
                                     procNum * VMM_ARCH_REG_DATA_PER_PROC_SIZE);
-            TRACDCOMP(g_trac_dump, "SBE Proc[%d] [%p]", procNum, procSrcAddr);
-            procNum++;
-
+            TRACDCOMP(g_trac_dump, "Proc[%d] Data Source Address[%p]", procNum, procSrcAddr);
+            TRACDCOMP(g_trac_dump, "VMM_ARCH_REG_DATA_PER_PROC_SIZE=0x%.8x",VMM_ARCH_REG_DATA_PER_PROC_SIZE);
             sbeArchRegDumpProcHdr_t *sbeProcHdr =
                        reinterpret_cast<sbeArchRegDumpProcHdr_t *>(procSrcAddr);
             uint16_t threadCount = sbeProcHdr->thread_cnt;
@@ -498,7 +510,8 @@ errlHndl_t copyArchitectedRegs(void)
                 errlCommit(l_err, DUMP_COMP_ID);
                 break;
             }
-
+            TRACDCOMP(g_trac_dump, "HYP Reserved Size=0x%.8x and actual size=0x%.8x",
+                      procTableEntry->dstArraySize,procTableEntry->capArraySize); 
             // Total Number of Threads possible in one Proc
             for(uint32_t idx = 0; idx < threadCount; idx++)
             {
@@ -512,6 +525,7 @@ errlHndl_t copyArchitectedRegs(void)
                           idx, procSrcAddr, dstTempAddr);
 
                 // Fill thread header info
+                regCount = sbeProcHdr->reg_cnt;
                 memset(hostHdr, 0x0, sizeof(hostHdr));
                 hostHdr->pir = sbeTdHdr->pir;
                 hostHdr->coreState = sbeTdHdr->coreState;
@@ -530,14 +544,13 @@ errlHndl_t copyArchitectedRegs(void)
                 procSrcAddr = reinterpret_cast<uint64_t>(procSrcAddr +
                                              sizeof(sbeArchRegDumpThreadHdr_t));
 
-                //Validate the CoreState to find if the buffer has register data
+                // TIMA (Thread Interrupt Management Area) is hardware structure
+                // of 0x40 consecutive bytes that holds per-physical thread 
+                // interrupt data. TIMA data is collection irrespective of the
+                // Core STOP State.
                 if (sbeTdHdr->coreState != 0)
                 {
-                    //Bump up the destination address to skip the memory
-                    //required to store the register details.
-                    dstTempAddr = reinterpret_cast<uint64_t>(dstTempAddr +
-                                     (regCount * sizeof(hostArchRegDataEntry)));
-                    continue;
+                    regCount = SIZE_TIMA_REG;
                 }
 
                 // Fill register data
@@ -560,6 +573,7 @@ errlHndl_t copyArchitectedRegs(void)
 
                     dstTempAddr = reinterpret_cast<uint64_t>(dstTempAddr +
                                                   sizeof(hostArchRegDataEntry));
+
                     //Update the SBE data source address to point to the
                     //next register data related to the same thread.
                     procSrcAddr = reinterpret_cast<uint64_t>(procSrcAddr +
@@ -583,6 +597,16 @@ errlHndl_t copyArchitectedRegs(void)
                         }
                         break;
                     }
+                }
+
+                // For cores with NON-ZERO stop states, only TIMA Register data
+                // will be collected. Need to update the destination address to
+                // skip the memory allocated for SPR/GPR data.
+                if (sbeTdHdr->coreState != 0)
+                {
+                    dstTempAddr = reinterpret_cast<uint64_t>(dstTempAddr +
+                                  (((sbeProcHdr->reg_cnt) - SIZE_TIMA_REG) *
+                                                 sizeof(hostArchRegDataEntry)));
                 }
             }
         }
