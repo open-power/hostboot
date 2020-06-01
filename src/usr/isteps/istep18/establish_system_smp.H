@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,6 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+
 #ifndef  __ESTABLISH_SYSTEM_SMP_ESTABLISH_SYSTEM_SMP_H
 #define  __ESTABLISH_SYSTEM_SMP_ESTABLISH_SYSTEM_SMP_H
 
@@ -51,7 +52,15 @@
 /******************************************************************************/
 // Includes
 /******************************************************************************/
-#include    <stdint.h>
+
+// Standard headers
+#include <stdint.h>                      // uint8_t, uint16_t, etc
+
+// Error logging
+#include <errl/errlentry.H>              // errlHndl_t
+
+// Targeting support
+#include <targeting/common/entitypath.H> // EntityPath
 
 namespace   ESTABLISH_SYSTEM_SMP
 {
@@ -71,7 +80,7 @@ namespace   ESTABLISH_SYSTEM_SMP
     *
     */
     struct iovalid_msg {
-        uint32_t               size;       //!Data length in bytes
+        uint32_t               size;       //! Data length in bytes
         uint16_t               type;       //! IPL/CCM type message
         uint16_t               count;      //! Number of drawers in data
         TARGETING::EntityPath drawers[0];  //! Place holder for data
@@ -86,15 +95,12 @@ namespace   ESTABLISH_SYSTEM_SMP
     };
 
     /**
-    *  @brief   host_coalesce_host
+    * @brief   host_coalesce_host
     *
-    *  Create single host image
+    * Create single host image. Configuring the link FIRs is done
+    * in istep 8.9 with HWP p10_smp_link_firs.
     *
-    *  param[in,out] io_pMsg - input message buffer
-    *                          also used for response message to FSP
-    *
-    *  return any errlogs to istep
-    *
+    * return any errlogs to istep
     */
     errlHndl_t call_host_coalesce_host( );
 
@@ -116,6 +122,7 @@ namespace   ESTABLISH_SYSTEM_SMP
     * @return error log handle
     */
     errlHndl_t blockInterrupts();
+
 };   // end namespace
 
 #endif

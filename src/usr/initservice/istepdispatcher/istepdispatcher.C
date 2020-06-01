@@ -2197,6 +2197,7 @@ void IStepDispatcher::handleIStepRequestMsg(msg_t * & io_pMsg)
 // ----------------------------------------------------------------------------
 void IStepDispatcher::handleProcFabIovalidMsg(msg_t * & io_pMsg)
 {
+#ifndef CONFIG_VPO_COMPILE
     TRACFCOMP(g_trac_initsvc, ENTER_MRK"IStepDispatcher::handleProcFabIovalidMsg");
 
     errlHndl_t err = NULL;
@@ -2261,24 +2262,10 @@ void IStepDispatcher::handleProcFabIovalidMsg(msg_t * & io_pMsg)
             errlCommit(err, INITSVC_COMP_ID);
             break;
         }
-        err = VFS::module_load("libp9_cpuWkup.so");
-        if (err)
-        {
-            TRACFCOMP(g_trac_initsvc, "handleProcFabIovalidMsg: Error loading libp9_cpuWkup.so,"
-                    " PLID = 0x%x",
-                      err->plid());
 
-            io_pMsg->data[0] = err->plid();
-            errlCommit(err, INITSVC_COMP_ID);
-            break;
-        }
-/* FIXME RTC: 210975 istep 18 stuff
         // Create child thread so that if there are problems, the istep
         //  dispatcher code continues
-        tid_t l_progTid = task_create(
-                ESTABLISH_SYSTEM_SMP::host_sys_fab_iovalid_processing,io_pMsg);
-*/
-        tid_t l_progTid = 0;
+        tid_t l_progTid = task_create(ESTABLISH_SYSTEM_SMP::host_sys_fab_iovalid_processing,io_pMsg);
 
         assert( l_progTid > 0 );
         //  wait here for the task to end.
@@ -2319,14 +2306,11 @@ void IStepDispatcher::handleProcFabIovalidMsg(msg_t * & io_pMsg)
                 // keep going, since we already responded back to the FSP
             }
 
-/* FIXME RTC: 210975 Disabling interrupt stuff
             //All interrupt sources are blocked, but intrp could have
             //pending EOI in message queue.  Send message to drain
             //the interrupt queue
             INTR::drainQueue();
-*/
 
-/* FIXME RTC: 210975 HWPs required for blockInterrupts aren't supported in P10 yet
             //Before stopping all the cores, we need to disable interrupts
             err = ESTABLISH_SYSTEM_SMP::blockInterrupts();
             if (err)
@@ -2335,7 +2319,6 @@ void IStepDispatcher::handleProcFabIovalidMsg(msg_t * & io_pMsg)
                            "ERROR: ESTABLISH_SYSTEM_SMP::blockInterrupts");
                 errlCommit(err, INITSVC_COMP_ID);
             }
-*/
 
             err = TRUSTEDBOOT::flushTpmQueue();
             if(err)
@@ -2390,6 +2373,7 @@ void IStepDispatcher::handleProcFabIovalidMsg(msg_t * & io_pMsg)
     }
 
     TRACFCOMP( g_trac_initsvc, EXIT_MRK"IStepDispatcher::handleProcFabIovalidMsg");
+#endif
 }
 
 
@@ -2813,11 +2797,13 @@ void IStepDispatcher::getIstepInfo ( uint8_t & o_iStep,
 // ----------------------------------------------------------------------------
 errlHndl_t  IStepDispatcher::handleCoalesceHostMsg()
 {
+    errlHndl_t err(nullptr);
+
+#ifndef CONFIG_VPO_COMPILE
     TRACFCOMP(g_trac_initsvc, ENTER_MRK"IStepDispatcher::handleCoalesceHostMsg");
 
-
     // Ensure the library is loaded
-    errlHndl_t err = VFS::module_load("libistep18.so");
+    err = VFS::module_load("libistep18.so");
 
     if (err)
     {
@@ -2826,7 +2812,6 @@ errlHndl_t  IStepDispatcher::handleCoalesceHostMsg()
     }
     else
     {
-/* FIXME RTC: 210975 this is istep 18 stuff; not needed right now
         err = ESTABLISH_SYSTEM_SMP::call_host_coalesce_host();
         if (err)
         {
@@ -2834,10 +2819,10 @@ errlHndl_t  IStepDispatcher::handleCoalesceHostMsg()
                       "call_host_coalese_host function LID = 0x%x",
                       err->plid());
         }
-*/
     }
 
     TRACFCOMP( g_trac_initsvc, EXIT_MRK"IStepDispatcher::handleCoalesceHostMsg");
+#endif
 
     return err;
 }

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2020                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -86,6 +86,7 @@ namespace fapi
         MOD_OCC_LOAD_HOST_DATA_TO_SRAM             = 0x2C,
         MOD_START_XZ_PAYLOAD                       = 0x2D,
         MOD_LOAD_OCC_IMAGE_DURING_IPL              = 0x2E,
+        MOD_VERIFY_IPC_CONNECTION                  = 0x2F,
     };
 
     /**

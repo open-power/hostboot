@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -35,681 +35,219 @@
  *  HWP_IGNORE_VERSION_CHECK
  *
  */
-
 /******************************************************************************/
 // Includes
 /******************************************************************************/
-#include <array>
-#include <stdint.h>
-#include <sys/time.h>
 
-#include <trace/interface.H>
-#include <initservice/taskargs.H>
-#include <errl/errlentry.H>
-
-#include <initservice/isteps_trace.H>
-#include <isteps/hwpisteperror.H>
-#include <errl/errludtarget.H>
-
-#include <istep_mbox_msgs.H>
-#include <vfs/vfs.H>
-
-//  targeting support
-#include <targeting/common/commontargeting.H>
-#include <targeting/common/utilFilter.H>
-#include <targeting/common/attributes.H>
-#include <targeting/targplatutil.H>
-
-/* FIXME RTC: 210975
-//  fapi support
-
-#include <fapi2.H>
-#include <fapi2/target.H>
-#include <fapi2/plat_hwp_invoker.H>
-*/
-#include <arch/pirformat.H>
-#include <isteps/hwpf_reasoncodes.H>
-
-
-#include <mbox/ipc_msg_types.H>
-#include <intr/interrupt.H>
-#include <secureboot/nodecommif.H>
-
-/* FIXME RTC: 210975
-//  Uncomment these files as they become available:
-// #include    "host_coalesce_host/host_coalesce_host.H"
-#include <p9_block_wakeup_intr.H>
-*/
-#include <initservice/istepdispatcherif.H>
-#include <isteps/hwpf_reasoncodes.H>
-
-
-#include "smp_unfencing_inter_enclosure_abus_links.H"
-/* FIXME RTC: 210975
-#include "p9_obus_extfir_setup.H"
-*/
+// Local header files
 #include "establish_system_smp.H"
 
-#include <secureboot/service_ext.H>
+// Standard headers
+#include <vector>
+#include <array>
+#include <stdint.h>                        // uint8_t, uint16_t, etc
+
+// Trace/Initservice
+#include <trace/interface.H>               // TRACFCOMP
+#include <initservice/isteps_trace.H>      // g_trac_isteps_trace
+#include <initservice/istepdispatcherif.H> // setAcceptIstepMessages
+#include <istep_mbox_msgs.H>               // INITSERVICE::HWSVR_MSG_SUCCESS
+
+// Error logging
+#include <errl/errlentry.H>                // errlHndl_t
+#include <errl/errludtarget.H>             // ErrlUserDetailsTarget
+
+// Targeting support
+#include <targeting/common/target.H>       // TargetHandleList, getAttr
+#include <targeting/common/utilFilter.H>   // getAllChips, getEncResources
+#include <targeting/common/entitypath.H>   // EntityPath
+#include <targeting/targplatutil.H>        // assertGetToplevelTarget
+#include <targeting/common/attributes.H>   // ATTR_*
+
+// Fapi support
+#include <fapi2/target.H>                  // fapi2::TARGET_TYPE_PROC_CHIP
+#include <fapi2/plat_hwp_invoker.H>        // FAPI_INVOKE_HWP
+#include <isteps/hwpf_reasoncodes.H>       // fapi::MOD_HOST_COALESCE_HOST
+
+// Systems support
+#include <sys/msg.h>                       // msg_t, msg_allocate, msg_q_t, etc
+#include <sys/time.h>                      // nanosleep, NS_PER_MSEC
+
+// Secure boot support
+#include <secureboot/nodecommif.H>         // SECUREBOOT::NODECOMM::nodeCommAbusExchange
+#include <secureboot/service_ext.H>        // SECUREBOOT::lockAbusSecMailboxes
+
+// HWP
+#include <p10_block_wakeup_intr.H>        // p10_block_wakeup_intr
+
+// Misc
+#include <mbox/ipc_msg_types.H>           // IPC::IPC_TEST_CONNECTION
+#include <arch/pirformat.H>               // PIR_t
 
 
-namespace   ESTABLISH_SYSTEM_SMP
+/******************************************************************************/
+// namespace shortcuts
+/******************************************************************************/
+using namespace ERRORLOG;
+using namespace TARGETING;
+using namespace ISTEPS_TRACE;
+
+namespace ESTABLISH_SYSTEM_SMP
 {
 
-using   namespace   ISTEP;
-using   namespace   ISTEP_ERROR;
-using   namespace   ERRORLOG;
-using   namespace   TARGETING;
+/// Forward declarations of local APIs
+// Support call for public API call_host_coalesce_host
+errlHndl_t verify_ipc_connection(ATTR_HB_EXISTING_IMAGE_type i_hbExistingImage);
+// Support call for local/private API verify_ipc_connection
+void* host_coalesce_timer ( void* i_msgQPtr );
+// Support call for public API host_sys_fab_iovalid_processing
+void set_is_master_drawer( const EntityPath *i_masterEntityPath );
 
 
 //******************************************************************************
-//host_coalesce_timer function
+//                                PUBLIC APIs
 //******************************************************************************
-void* host_coalesce_timer(void* i_msgQPtr)
-
-{
-    int rc=0;
-
-    msg_t* msg = msg_allocate();
-    msg->type = HOST_COALESCE_TIMER_MSG;
-    uint32_t l_time_ms =0;
-
-    msg_q_t* msgQ = static_cast<msg_q_t*>(i_msgQPtr);
-
-
-    //this loop will be broken when the main thread receives
-    //all the messages and the timer thread receives the
-    //HB_COALESCE_MSG_DONE message
-
-    do
-    {
-        if (l_time_ms < MAX_TIME_ALLOWED_MS)
-        {
-            msg->data[1] = CONTINUE_WAIT_FOR_MSGS;
-        }
-        else
-        {
-            // HOST_COALESCE_TIMER_MSG is sent to the main thread indicating
-            // timer expired so the main thread responds back with HB_COALESCE_MSG_DONE
-            // indicating the timer is not needed and exit the loop
-            msg->data[1]=TIME_EXPIRED;
-        }
-
-        rc= msg_sendrecv(*msgQ, msg);
-        if (rc)
-        {
-            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                        "coalesce host message timer failed msg sendrecv.");
-        }
-        if (msg->data[1] == HB_COALESCE_MSG_DONE)
-        {
-            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                        "coalesce host message timer not needed.");
-            break;
-        }
-
-        nanosleep(0,NS_PER_MSEC);
-        l_time_ms++;
-
-    }while(1);
-
-    msg_free(msg);
-
-    return NULL;
-}
 
 //******************************************************************************
-// call_host_coalesce_host function
+// call_host_coalesce_host
 //******************************************************************************
 errlHndl_t call_host_coalesce_host( )
 {
-    errlHndl_t  l_errl  =   NULL;
+    errlHndl_t l_err(nullptr);
 
-    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-               "call_host_coalesce_host entry" );
+    TRACFCOMP( g_trac_isteps_trace, ENTER_MRK"call_host_coalesce_host" );
 
-    std::vector<TARGETING::EntityPath> present_drawers;
+    auto l_hbExistingImage = UTIL::assertGetToplevelTarget()->getAttr<ATTR_HB_EXISTING_IMAGE>();
 
-
-    TARGETING::Target * sys = NULL;
-    TARGETING::targetService().getTopLevelTarget( sys );
-    if (sys == NULL)
+    if (0 == l_hbExistingImage)
     {
-        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-               "call_host_coalesce_host: error getting system target");
-        assert(0, "call_host_coalesce_host system target is NULL");
-    }
-
-    TARGETING::ATTR_HB_EXISTING_IMAGE_type hb_existing_image = 0;
-
-    hb_existing_image = sys->getAttr<TARGETING::ATTR_HB_EXISTING_IMAGE>();
-
-    // Set FIR mask bits for inactive OBUS links. The earlier SMP stitching
-    // steps should have caught any irregularities and deconfigured misbehaving
-    // processors, so it's assumed that any functional processors at
-    // this stage have OBUSes with accurate PEER_PATHs.  Thus, this algorithm
-    // only needs to confirm that each functional OBUS PEER_PATH is logically
-    // populated, and that it points to a node that is part of the current SMP.
-    TARGETING::TargetHandleList procs;
-    (void)TARGETING::getAllChips(procs,TYPE_PROC);
-    for(auto * const pProc : procs)
-    {
-        // This array (4 records, one per OBUS under a given processor)
-        // tracks whether each OBUS is part of the SMP (true) or not (false).
-        // Array index X holds state for an OBUS with relative position X
-        // within the current processor.
-        std::array<bool,4> obusSmpActive={false,false,false,false};
-
-        TARGETING::TargetHandleList obuses;
-        (void)TARGETING::getChildChiplets(obuses, pProc, TYPE_OBUS);
-        for(auto * const pObus : obuses)
-        {
-            TARGETING::EntityPath peerPath =
-                pObus->getAttr<TARGETING::ATTR_PEER_PATH>();
-            TARGETING::EntityPath::PathElement peerNode =
-                peerPath.pathElementOfType(TARGETING::TYPE_NODE);
-
-            if(peerNode.type == TARGETING::TYPE_NA)
-            {
-                auto peerPathStr = peerPath.toString();
-                TRACDCOMP(
-                    ISTEPS_TRACE::g_trac_isteps_trace,
-                    INFO_MRK "call_host_coalesce_host: "
-                    "OBUS with HUID of 0x%08X (child of PROC with HUID "
-                    "of 0x%08X) is not participating in SMP as "
-                    "its PEER_PATH (%s) has no valid node component",
-                    get_huid(pObus), get_huid(pProc),
-                    peerPathStr);
-                free(peerPathStr);
-                peerPathStr=nullptr;
-                continue;
-            }
-
-            decltype(hb_existing_image) mask = 0x1 <<
-                ((sizeof(hb_existing_image) * 8) -1);
-
-            if(!(hb_existing_image & (mask >> peerNode.instance)))
-            {
-                auto peerPathStr = peerPath.toString();
-                TRACDCOMP(
-                    ISTEPS_TRACE::g_trac_isteps_trace,
-                    INFO_MRK "call_host_coalesce_host: "
-                    "OBUS with HUID of 0x%08X (child of PROC with HUID "
-                    "of 0x%08X) is not participating in SMP as "
-                    "the node referenced in its PEER_PATH (%s) "
-                    "is not part of the SMP.  Mask of nodes participating "
-                    "in SMP = 0x%02X, peer node instance = %d",
-                    get_huid(pObus), get_huid(pProc),
-                    peerPathStr,
-                    hb_existing_image,
-                    peerNode.instance);
-                free(peerPathStr);
-                peerPathStr=nullptr;
-                continue;
-            }
-
-            const auto obusRelPos=pObus->getAttr<TARGETING::ATTR_REL_POS>();
-            assert(obusRelPos < obusSmpActive.size(),
-                "OBUS with HUID of 0x%08X has invalid relative position %d "
-                "(must be less than %d)",
-                get_huid(pObus),obusRelPos,obusSmpActive.size());
-
-            obusSmpActive[obusRelPos]=true;
-
-            TRACDCOMP(
-                ISTEPS_TRACE::g_trac_isteps_trace,
-                INFO_MRK "call_host_coalesce_host: "
-                "OBUS with HUID of 0x%08X (child of PROC with HUID "
-                "of 0x%08X) is participating in SMP",
-                get_huid(pObus), get_huid(pProc));
-        }
-
-/* FIXME RTC: 210975
-        fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP> fapi2Proc(pProc);
-
-        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-            "Running p9_obus_extfir_setup HWP on PROC with HUID of 0x%08X. "
-            "OBUS 0/1/2/3 active in SMP = %d/%d/%d/%d",
-            TARGETING::get_huid(pProc),
-            obusSmpActive[0],
-            obusSmpActive[1],
-            obusSmpActive[2],
-            obusSmpActive[3]);
-
-        FAPI_INVOKE_HWP(
-            l_errl,
-            p9_obus_extfir_setup,
-            fapi2Proc,
-            obusSmpActive[0],
-            obusSmpActive[1],
-            obusSmpActive[2],
-            obusSmpActive[3]);
-
-        if (l_errl)
-        {
-            TRACFCOMP(
-                ISTEPS_TRACE::g_trac_isteps_trace,
-                ERR_MRK "ERROR : p9_obus_extfir_setup" );
-            ErrlUserDetailsTarget(pProc).addToLog(l_errl);
-            l_errl->collectTrace("ISTEPS_TRACE");
-            errlCommit(l_errl,HWPF_COMP_ID);
-        }
-        else
-        {
-            TRACFCOMP(
-                ISTEPS_TRACE::g_trac_isteps_trace,
-                INFO_MRK "SUCCESS : p9_obus_extfir_setup" );
-        }
-*/
-
-    }
-
-    if (hb_existing_image == 0)
-    {
-        //single node system so do nothing
-        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-               "call_host_coalesce_host on a single node system is a no-op" );
+        // Single node system so do nothing
+        TRACFCOMP( g_trac_isteps_trace, INFO_MRK
+                   "call_host_coalesce_host on a single node system is a no-op" );
     }
     else
     {
-
-        // This msgQ catches the responses to messages sent from each
-        //node to verify the IPC connection
-        msg_q_t msgQ = msg_q_create();
-        l_errl = MBOX::msgq_register(MBOX::HB_COALESCE_MSGQ,msgQ);
-
-        if(l_errl)
-        {
-            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                "call_host_coalesce_host:msgq_register failed" );
-            return l_errl;
-        }
-
-        //multi-node system
-        uint8_t node_map[NUMBER_OF_POSSIBLE_DRAWERS];
-        uint64_t msg_count = 0;
-
-        bool rc = sys->tryGetAttr<TARGETING::ATTR_FABRIC_TO_PHYSICAL_NODE_MAP>
-            (node_map);
-        if (rc == false)
-        {
-            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                "call_host_coalesce_host:failed to get node map" );
-            assert(0,"call_host_coalesce_host:failed to get node map");
-        }
-
-        // The assertion is that the hostboot instance must be equal to
-        // the logical node we are running on. The ideal would be to have
-        // a function call that would return the HB instance number.
-        uint64_t this_node = PIR_t(task_getcpuid()).groupId;
-
-        //loop though all possible drawers whether they exist or not
-        // An invalid or non-existent logical node number in that drawer
-        // indicates that the drawerCount does not exist.
-        TARGETING::ATTR_HB_EXISTING_IMAGE_type mask = 0x0;
-        TARGETING::ATTR_HB_EXISTING_IMAGE_type master_node_mask = 0x0;
-
-        for(uint16_t drawerCount = 0; drawerCount < NUMBER_OF_POSSIBLE_DRAWERS; ++drawerCount)
-        {
-            uint16_t drawer = node_map[drawerCount];
-
-            if(drawer < NUMBER_OF_POSSIBLE_DRAWERS)
-            {
-
-                // set mask to msb
-                mask = 0x1 <<
-                    (NUMBER_OF_POSSIBLE_DRAWERS -1);
-
-                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                           "mask=%X,hb_existing_image=%X",
-                           mask,hb_existing_image);
-                if( 0 != ((mask >> drawerCount) & hb_existing_image ) )
-                {
-                    //The first nonzero bit in hb_existing_image represents the
-                    // master node, set mask for later comparison
-                    if (master_node_mask == 0)
-                    {
-                        master_node_mask = mask >> drawerCount;
-
-                        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                                "master_node_mask=0x%X",master_node_mask);
-                    }
-
-                    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                            "send coalesce host message to drawer %d",
-                            drawerCount );
-                    ++msg_count;
-                    msg_t * msg = msg_allocate();
-                    msg->type = IPC::IPC_TEST_CONNECTION;
-                    msg->data[0] = drawer;     // target drawer
-                    msg->data[1] = this_node;  // node to send a msg back to
-                    l_errl = MBOX::send(MBOX::HB_IPC_MSGQ, msg, drawer);
-                    if (l_errl)
-                    {
-                        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                                "MBOX::send failed");
-                        break;
-                    }
-                }
-            } else{
-                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                "ATTR_FABRIC_TO_PHYSICAL_NODE_MAP is out of bounds, loop %d, drawer %x",
-                           drawerCount, drawer);
-            }
-        }
-
-        //if the send failed we just want to indicate that the
-        //istep failed and not wait for messages to come back from
-        //the other nodes
-        if(l_errl == NULL)
-        {
-            // reset mask to msb
-            mask = 0x1 << (NUMBER_OF_POSSIBLE_DRAWERS -1);
-            //create mask to apply to hb_existing_image for this particular node
-            mask = mask >> this_node;
-
-            if (master_node_mask & (hb_existing_image & mask))
-            {
-                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                               "Master Node detected, continue allowing "
-                               "istep messages to this node.");
-                INITSERVICE::setAcceptIstepMessages(true);
-            }
-            else
-            {
-                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                               "This node is not the master node, no longer "
-                               "respond to istep messages.");
-                INITSERVICE::setAcceptIstepMessages(false);
-            }
-
-            //wait for all hb images to respond
-            //want to spawn a timer thread
-            tid_t l_progTid = task_create(
-                       ESTABLISH_SYSTEM_SMP::host_coalesce_timer,&msgQ);
-            assert( l_progTid > 0 ,"host_coalesce_timer failed");
-            while(msg_count)
-            {
-                msg_t* msg = msg_wait(msgQ);
-                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                        "coalesce host message for drawer %d completed.",
-                         msg->data[0]);
-                if (msg->type == HOST_COALESCE_TIMER_MSG)
-                {
-                    if (msg->data[1] == TIME_EXPIRED)
-                    {
-                        //timer has expired
-                        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                                "call_host_coalesce_host failed to "
-                                "receive messages from all hb images in time" );
-                        //tell the timer thread to exit
-                        msg->data[1] = HB_COALESCE_MSG_DONE;
-                        msg_respond(msgQ,msg);
-
-                        //generate an errorlog
-                        /*@
-                         *  @errortype      ERRL_SEV_CRITICAL_SYS_TERM
-                         *  @moduleid       fapi::MOD_HOST_COALESCE_HOST,
-                         *  @reasoncode     fapi::RC_HOST_TIMER_EXPIRED,
-                         *  @userdata1      MAX_TIME_ALLOWED_MS
-                         *  @userdata2      Number of nodes that have not
-                         *                  responded
-                         *
-                         *  @devdesc        messages from other nodes have
-                         *                  not returned in time
-                         */
-                        l_errl = new ERRORLOG::ErrlEntry(
-                                        ERRORLOG::ERRL_SEV_CRITICAL_SYS_TERM,
-                                        fapi::MOD_HOST_COALESCE_HOST,
-                                        fapi::RC_HOST_TIMER_EXPIRED,
-                                        MAX_TIME_ALLOWED_MS,
-                                        msg_count   );
-                        l_errl->collectTrace("ISTEPS_TRACE");
-                        l_errl->collectTrace("IPC");
-                        l_errl->collectTrace("MBOXMSG");
-                        return l_errl;
-
-                    }
-                    else if( msg->data[1] == CONTINUE_WAIT_FOR_MSGS)
-                    {
-                        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                            "coalesce host timer continue waiting message.");
-                        msg->data[1] =HB_COALESCE_WAITING_FOR_MSG;
-                        msg_respond(msgQ,msg);
-                    }
-                }
-                else if (msg->type == IPC::IPC_TEST_CONNECTION)
-                {
-                   TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                              "Got response from node %d", msg->data[0] );
-                    --msg_count;
-                    msg_free(msg);
-                }
-
-            }
-
-            //the msg_count should be 0 at this point to have
-            //exited from the loop above.  If the msg count
-            //is not zero then the timer must have expired
-            //and the code would have asserted
-            //Now need to tell the child timer thread to exit
-
-            //temp change while simics takes a long time for FLEETWOOD to IPL
-            //tmp check to tell the child timer thread to exit if didn't
-            //already timeout
-            if (msg_count ==0)
-            {
-                msg_t* msg = msg_wait(msgQ);
-                if (msg->type == HOST_COALESCE_TIMER_MSG)
-                {
-                    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                            "call_host_coalesce_host received all hb "
-                            "images in time");
-
-                    msg->data[1] = HB_COALESCE_MSG_DONE;
-                    msg_respond(msgQ,msg);
-                }
-            }
-
-            //wait for the child thread to end
-            int l_childsts =0;
-            void* l_childrc = NULL;
-            tid_t l_tidretrc = task_wait_tid(l_progTid,&l_childsts,&l_childrc);
-            if ((static_cast<int16_t>(l_tidretrc) < 0)
-                || (l_childsts != TASK_STATUS_EXITED_CLEAN ))
-            {
-                // the launched task failed or crashed,
-                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                    "task_wait_tid failed; l_tidretrc=0x%x, l_childsts=0x%x",
-                    l_tidretrc, l_childsts);
-
-                        //generate an errorlog
-                        /*@
-                         *  @errortype      ERRL_SEV_CRITICAL_SYS_TERM
-                         *  @moduleid       fapi::MOD_HOST_COALESCE_HOST,
-                         *  @reasoncode     fapi::RC_HOST_TIMER_THREAD_FAIL,,
-                         *  @userdata1      l_tidretrc,
-                         *  @userdata2      l_childsts,
-                         *
-                         *  @devdesc        host coalesce host timer thread
-                         *                  failed
-                         */
-                        l_errl = new ERRORLOG::ErrlEntry(
-                                        ERRORLOG::ERRL_SEV_CRITICAL_SYS_TERM,
-                                        fapi::MOD_HOST_COALESCE_HOST,
-                                        fapi::RC_HOST_TIMER_THREAD_FAIL,
-                                        l_tidretrc,
-                                        l_childsts);
-
-                        l_errl->collectTrace("ISTEPS_TRACE");
-                        return l_errl;
-            }
-        }
-
-        MBOX::msgq_unregister(MBOX::HB_COALESCE_MSGQ);
-        msg_q_destroy(msgQ);
-
-
+        // Verify the IPC connections
+        l_err = verify_ipc_connection(l_hbExistingImage);
     }
 
+    TRACFCOMP( g_trac_isteps_trace, EXIT_MRK"call_host_coalesce_host" );
 
+    return l_err;
+} // call_host_coalesce_host
 
-    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-               "call_host_coalesce_host exit" );
-
-    // end task, returning any errorlogs to IStepDisp
-    return l_errl;
-}
-
-static void set_is_master_drawer(TARGETING::EntityPath *master)
-{
-    // Figure out which node we are running on
-    TARGETING::Target *mproc = nullptr;
-    TARGETING::targetService().masterProcChipTargetHandle(mproc);
-
-    TARGETING::EntityPath epath =
-        mproc->getAttr<TARGETING::ATTR_PHYS_PATH>();
-
-    const TARGETING::EntityPath::PathElement pe =
-        epath.pathElementOfType(TARGETING::TYPE_NODE);
-
-    const TARGETING::EntityPath::PathElement mpe =
-        master->pathElementOfType(TARGETING::TYPE_NODE);
-
-    // get current node
-    TARGETING::Target *current = nullptr;
-    TARGETING::TargetHandleList l_nodelist;
-    getEncResources(l_nodelist, TARGETING::TYPE_NODE,
-                    TARGETING::UTIL_FILTER_FUNCTIONAL);
-    assert(l_nodelist.size() == 1, "ERROR, only looking for one node.");
-    current = l_nodelist[0];
-
-    if (pe.instance == mpe.instance)
-    {
-        // Current node is master, unset IS_SLAVE_DRAWER
-        current->setAttr<TARGETING::ATTR_IS_SLAVE_DRAWER>(0);
-    }
-    else
-    {
-        // Current node is not master, set IS_SLAVE_DRAWER
-        current->setAttr<TARGETING::ATTR_IS_SLAVE_DRAWER>(1);
-    }
-}
 
 //******************************************************************************
-// host_sys_fab_iovalid_processing function
+// host_sys_fab_iovalid_processing
 //******************************************************************************
-void *host_sys_fab_iovalid_processing(void* io_ptr )
+void* host_sys_fab_iovalid_processing(void* io_ptr )
 {
-    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-            "host_sys_fab_iovalid_processing entry" );
-    // input parameter is actually a msg_t pointer
+    TRACFCOMP( g_trac_isteps_trace, ENTER_MRK"host_sys_fab_iovalid_processing" );
+
+    // Input parameter is actually a msg_t pointer
     msg_t* io_pMsg = static_cast<msg_t *>(io_ptr);
-    // assume success, unless we hit an error later.
+
+    // Assume success, unless we hit an error later.
     io_pMsg->data[0] = INITSERVICE::HWSVR_MSG_SUCCESS;
 
     // if there is extra data, start processing it
-    if(io_pMsg->extra_data)
+    if (io_pMsg->extra_data)
     {
-        iovalid_msg * drawerData = (iovalid_msg *)io_pMsg->extra_data;
+        iovalid_msg* l_drawerData = reinterpret_cast<iovalid_msg *>(io_pMsg->extra_data);
 
         // setup a pointer to the first drawer entry in our data
-        TARGETING::EntityPath * ptr = drawerData->drawers;
+        EntityPath * l_entityPathPtr = l_drawerData->drawers;
 
-        const uint16_t drawerCount = drawerData->count;
-        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                "Master node %s List size = %d bytes Drawer count = %d",
-                ptr->toString(), drawerData->size, drawerCount);
+        // Cannot use the call 'toString' directly, must cache data and delete to avoid a memory leak.
+        char* l_masterNode = l_entityPathPtr->toString();
+        const uint16_t l_drawerCount = l_drawerData->count;
+        TRACFCOMP( g_trac_isteps_trace, INFO_MRK
+                   "Master node %s, List size = %d bytes, Drawer count = %d",
+                   l_masterNode, l_drawerData->size, l_drawerCount);
 
-        if (drawerCount > 0)
+        // Free the results from the call 'toString' to avoid a memory leak.
+        free(l_masterNode);
+        l_masterNode = nullptr;
+
+        if (l_drawerCount > 0)
         {
             // master node will be first node listed (lowest functional node)
-            set_is_master_drawer(ptr);
+            set_is_master_drawer(l_entityPathPtr);
         }
 
         // get FABRIC_TO_PHYSICAL_NODE_MAP
-        TARGETING::Target * sys = NULL;
-        TARGETING::targetService().getTopLevelTarget( sys );
-        assert(sys != NULL,"host_sys_fab_iovalid_processing system target is NULL");
+        Target * l_sys = UTIL::assertGetToplevelTarget();
 
-        uint8_t node_map[8];
-        bool rc = sys->tryGetAttr<TARGETING::ATTR_FABRIC_TO_PHYSICAL_NODE_MAP>
-                    (node_map);
-        assert(rc == true,"host_sys_fab_iovalid_processing:failed to get node map");
+        auto l_nodeMap = l_sys->getAttrAsStdArr<ATTR_FABRIC_TO_PHYSICAL_NODE_MAP>();
 
-        TARGETING::ATTR_HB_EXISTING_IMAGE_type hb_existing_image = 0;
+        ATTR_HB_EXISTING_IMAGE_type l_hbExistingImage = 0;
 
         // create a vector with the present drawers
-        std::vector<TARGETING::EntityPath> present_drawers;
+        std::vector<EntityPath> l_presentDrawers;
 
-        for(uint8_t i = 0; i < drawerCount; i++)
+        for (uint8_t i = 0; i < l_drawerCount; i++)
         {
-            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                    "list entry[%d] - %s", i, ptr->toString());
+            // Cannot use the call 'toString' directly, must cache data and
+            // delete to avoid a memory leak.
+            char* l_entityPath = l_entityPathPtr->toString();
+            TRACFCOMP( g_trac_isteps_trace, INFO_MRK"list entry[%d] - %s", i, l_entityPath);
 
-            present_drawers.push_back(*ptr);
+            // Free the results from the call 'toString' to avoid a memory leak.
+            free(l_entityPath);
+            l_entityPath = nullptr;
 
-            TARGETING::EntityPath::PathElement pe =
-                ptr->pathElementOfType(TARGETING::TYPE_NODE);
+            l_presentDrawers.push_back(*l_entityPathPtr);
 
-            // pe.instance is the drawer number - convert to logical node
-            uint8_t logical_node = node_map[pe.instance];
+            EntityPath::PathElement l_pathElement = l_entityPathPtr->pathElementOfType(TYPE_NODE);
+
+            // pathElement.instance is the drawer number - convert to logical node
+            uint8_t l_logicalNode = l_nodeMap[l_pathElement.instance];
 
             // set mask to msb of bitmap
-            TARGETING::ATTR_HB_EXISTING_IMAGE_type mask = 0x1 <<
-                (NUMBER_OF_POSSIBLE_DRAWERS -1);
+            ATTR_HB_EXISTING_IMAGE_type l_hbImageMask = 0x1 << (NUMBER_OF_POSSIBLE_DRAWERS -1);
 
             // set bit for this logical node.
-            hb_existing_image |= (mask >> logical_node);
+            l_hbExistingImage |= (l_hbImageMask >> l_logicalNode);
 
-            ptr++;
+            l_entityPathPtr++;
+        } // end for (uint8_t i = 0; i < l_drawerCount; i++)
+
+        l_sys->setAttr<ATTR_HB_EXISTING_IMAGE>(l_hbExistingImage);
+// @TODO: RTC 244858 Do not make calls to Secure Boot at this time.
+//#ifdef CONFIG_TPMDD
+#if 0
+        {  // CONFIG_TPMDD scoping
+            // Run Secure Node-to-Node Communication Procedure
+            TRACFCOMP( g_trac_isteps_trace, ERR_MRK
+                "host_sys_fab_iovalid_processing: l_hbExistingImage = 0x%X, "
+                "isMaster=%d.  Calling nodeCommAbusExchange()",
+                l_hbExistingImage, UTIL::isCurrentMasterNode());
+
+            errlHndl_t l_err = SECUREBOOT::NODECOMM::nodeCommAbusExchange();
+            if (l_err)
+            {
+                // Commit error here and the FSP will handle it
+                TRACFCOMP( g_trac_isteps_trace, ERR_MRK
+                    "host_sys_fab_iovalid_processing: nodeCommAbusExchange() "
+                    "returned err: plid=0x%X. Deleting err and continuing",
+                    l_err->plid());
+                l_err->collectTrace("ISTEPS_TRACE");
+                // Let the caller know that an error occurred
+                io_pMsg->data[0] = l_err->plid();
+                errlCommit(l_err, SECURE_COMP_ID);
+           }
+
+            // Lock the secure ABUS Link Mailboxes now
+            SECUREBOOT::lockAbusSecMailboxes();
         }
-
-        sys->setAttr<TARGETING::ATTR_HB_EXISTING_IMAGE>(hb_existing_image);
-
-#ifdef CONFIG_TPMDD
-        // Run Secure Node-to-Node Communication Procedure
-        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-            "host_sys_fab_iovalid_processing: hb_existing_image = 0x%X, "
-            "isMaster=%d.  Calling nodeCommAbusExchange()",
-            hb_existing_image, TARGETING::UTIL::isCurrentMasterNode());
-
-        errlHndl_t err = SECUREBOOT::NODECOMM::nodeCommAbusExchange();
-        if (err)
-        {
-            // Commit error here and the FSP will handle it
-            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,ERR_MRK
-                "host_sys_fab_iovalid_processing: nodeCommAbusExchange() "
-                "returned err: plid=0x%X. Deleting err and continuing",
-                err->plid());
-            err->collectTrace("ISTEPS_TRACE");
-            // Let the caller know that an error occurred
-            io_pMsg->data[0] = err->plid();
-            errlCommit(err, SECURE_COMP_ID);
-       }
-
-        // Lock the secure ABUS Link Mailboxes now
-        SECUREBOOT::lockAbusSecMailboxes();
 #endif
-
-        // after agreement, open a-busses as required
-        // @TODO RTC:187337 -- HB doesn't have the knowledge of attributes that
-        // p9_fab_iovalid requires at the moment. Currently, this is being called
-        // from the FSP. We need to figure out a way to gather that info from the
-        // FSP and re-enable this piece of code.
-//        l_errl = EDI_EI_INITIALIZATION::smp_unfencing_inter_enclosure_abus_links();
-//        if (l_errl)
-//        {
-//            io_pMsg->data[0] = l_errl->plid();
-//            errlCommit(l_errl, HWPF_COMP_ID);
-//        }
-    }
-    else
+    }  // end if (io_pMsg->extra_data)
+    else  // There is no extra data to process
     {
         // message needs to have at least one entry
         // in the drawer list, else we will say invalid msg
         io_pMsg->data[0] = INITSERVICE::HWSVR_INVALID_MESSAGE;
-    }
+    } // end if(io_pMsg->extra_data) ... else
 
     io_pMsg->data[1] = 0;
 
@@ -717,54 +255,400 @@ void *host_sys_fab_iovalid_processing(void* io_ptr )
     // IStepDispatcher::handleProcFabIovalidMsg()
     // which will also execute the procedure to winkle all cores
 
-    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-            "host_sys_fab_iovalid_processing exit data[0]=0x%X",
-            io_pMsg->data[0]);
-    return NULL;
-}
+    TRACFCOMP( g_trac_isteps_trace, EXIT_MRK
+               "host_sys_fab_iovalid_processing exit data[0]=0x%X",
+               io_pMsg->data[0]);
+
+    return nullptr;
+} // host_sys_fab_iovalid_processing
 
 
+//******************************************************************************
+// blockInterrupts
+//******************************************************************************
 errlHndl_t blockInterrupts()
 {
-    errlHndl_t l_errl = NULL;
+    errlHndl_t l_err(nullptr);
 
-/* FIXME RTC: 210975
     // Get all functional core units
-    TARGETING::TargetHandleList l_coreList;
+    TargetHandleList l_coreList;
     getAllChiplets(l_coreList, TYPE_CORE);
 
     for (auto l_core : l_coreList)
     {
+        TRACFCOMP( g_trac_isteps_trace, INFO_MRK
+                   "Running p10_block_wakeup_intr(ENABLE_BLOCK_EXIT) on EX target HUID %.8X",
+                   get_huid(l_core));
 
-        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-            "Running p9_block_wakeup_intr(SET) on EX target HUID %.8X",
-            TARGETING::get_huid(l_core));
+        fapi2::Target<fapi2::TARGET_TYPE_CORE> l_fapiCoreTarget(l_core);
 
-        fapi2::Target<fapi2::TARGET_TYPE_CORE> l_fapi2_core_target(l_core);
+        FAPI_INVOKE_HWP( l_err,
+                         p10_block_wakeup_intr,
+                         l_fapiCoreTarget,
+                         p10pmblockwkup::ENABLE_BLOCK_EXIT);
 
-        FAPI_INVOKE_HWP(l_errl,
-                        p9_block_wakeup_intr,
-                        l_fapi2_core_target,
-                        p9pmblockwkup::SET);
-        if ( l_errl )
+        if ( l_err )
         {
-            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                      "ERROR : p9_block_wakeup_intr(SET)" );
+            TRACFCOMP( g_trac_isteps_trace, ERR_MRK
+                       "ERROR : p10_block_wakeup_intr(ENABLE_BLOCK_EXIT)"
+                       TRACE_ERR_FMT,
+                       TRACE_ERR_ARGS(l_err) );
+
             // capture the target data in the elog
-            ErrlUserDetailsTarget(l_core).addToLog( l_errl );
-            errlCommit( l_errl, HWPF_COMP_ID );
+            ErrlUserDetailsTarget(l_core).addToLog( l_err );
+            errlCommit( l_err, HWPF_COMP_ID );
         }
         else
         {
-            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                       "SUCCESS : p9_block_wakeup_intr(SET)" );
+            TRACFCOMP( g_trac_isteps_trace, INFO_MRK
+                       "SUCCESS : p10_block_wakeup_intr(ENABLE_BLOCK_EXIT)" );
         }
     }
-    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-               "SUCCESS : p9_block_wakeup_intr(SET) on ALL cores" );
-*/
 
-    return l_errl;
-}
+    TRACFCOMP( g_trac_isteps_trace, EXIT_MRK
+               "SUCCESS : p10_block_wakeup_intr(ENABLE_BLOCK_EXIT) on ALL cores");
+
+    return l_err;
+}  // blockInterrupts
+
+
+//******************************************************************************
+//                                LOCAL API
+//******************************************************************************
+//******************************************************************************
+// verify_ipc_connection
+//******************************************************************************
+errlHndl_t verify_ipc_connection(ATTR_HB_EXISTING_IMAGE_type i_hbExistingImage)
+{
+    errlHndl_t l_err(nullptr);
+
+    Target * l_sys = UTIL::assertGetToplevelTarget();
+
+    do
+    {
+        // This l_msgQ catches the responses to messages sent from each
+        // node to verify the IPC connection
+        msg_q_t l_msgQ = msg_q_create();
+        l_err = MBOX::msgq_register(MBOX::HB_COALESCE_MSGQ, l_msgQ);
+
+        if (l_err)
+        {
+            TRACFCOMP( g_trac_isteps_trace, ERR_MRK
+                       "call_host_coalesce_host:msgq_register failed"
+                       TRACE_ERR_FMT,
+                       TRACE_ERR_ARGS(l_err) );
+            break;
+        }
+
+        // multi-node system
+        auto l_nodeMap = l_sys->getAttrAsStdArr<ATTR_FABRIC_TO_PHYSICAL_NODE_MAP>();
+
+        uint64_t l_msgCount(0);
+
+        // The assertion is that the hostboot instance must be equal to
+        // the logical node we are running on. The ideal would be to have
+        // a function call that would return the HB instance number.
+        uint64_t l_thisNode = PIR_t::groupFromPir(PIR_t(task_getcpuid()));
+
+        // Loop though all possible drawers whether they exist or not.
+        // An invalid or non-existent logical node number in that drawer
+        // indicates that the drawerCount does not exist.
+        decltype(i_hbExistingImage)  l_mask = 0x0;
+        decltype(i_hbExistingImage)  l_masterNodeMask = 0x0;
+
+        for ( uint16_t l_drawerCount = 0;
+              l_drawerCount < NUMBER_OF_POSSIBLE_DRAWERS;
+              ++l_drawerCount)
+        {
+            uint16_t l_drawer = l_nodeMap[l_drawerCount];
+
+            if (l_drawer < NUMBER_OF_POSSIBLE_DRAWERS)
+            {
+                // set l_mask to msb
+                l_mask = 0x1 << (NUMBER_OF_POSSIBLE_DRAWERS -1);
+
+                TRACFCOMP( g_trac_isteps_trace, INFO_MRK
+                           "mask=0x%02X, HB existing image=0x%02X",
+                           l_mask, i_hbExistingImage);
+                if ( 0 != ((l_mask >> l_drawerCount) & i_hbExistingImage ) )
+                {
+                    //The first nonzero bit in hb_existing_image represents the
+                    // master node, set mask for later comparison
+                    if (l_masterNodeMask == 0)
+                    {
+                        l_masterNodeMask = l_mask >> l_drawerCount;
+
+                        TRACFCOMP( g_trac_isteps_trace, INFO_MRK
+                                   "master_node_mask=0x%X",l_masterNodeMask);
+                    }
+
+                    TRACFCOMP( g_trac_isteps_trace, INFO_MRK
+                               "send coalesce host message to drawer %d",
+                               l_drawerCount );
+                    ++l_msgCount;
+                    msg_t * l_msg = msg_allocate();
+                    l_msg->type = IPC::IPC_TEST_CONNECTION;
+                    l_msg->data[0] = l_drawer;    // target drawer
+                    l_msg->data[1] = l_thisNode;  // node to send a msg back to
+                    l_err = MBOX::send(MBOX::HB_IPC_MSGQ, l_msg, l_drawer);
+                    if (l_err)
+                    {
+                        TRACFCOMP( g_trac_isteps_trace, ERR_MRK"MBOX::send failed"
+                                   TRACE_ERR_FMT,
+                                   TRACE_ERR_ARGS(l_err) );
+                        break;
+                    }
+                } // if( 0 != ((l_mask >> l_drawerCount) & hb_existing_image ) )
+            } // if (l_drawer < NUMBER_OF_POSSIBLE_DRAWERS)
+            else
+            {
+                TRACFCOMP( g_trac_isteps_trace, INFO_MRK
+                           "ATTR_FABRIC_TO_PHYSICAL_NODE_MAP is out of bounds, loop %d, drawer %x",
+                           l_drawerCount, l_drawer);
+            } // if (l_drawer < NUMBER_OF_POSSIBLE_DRAWERS) ... else ...
+        } // for ( uint16_t l_drawerCount = 0; ...
+
+        //if the send failed we just want to indicate that the
+        //istep failed and not wait for messages to come back from
+        //the other nodes
+        if (nullptr == l_err)
+        {
+            // reset mask to msb
+            l_mask = 0x1 << (NUMBER_OF_POSSIBLE_DRAWERS -1);
+            //create mask to apply to hb_existing_image for this particular node
+            l_mask = l_mask >> l_thisNode;
+
+            if (l_masterNodeMask & (i_hbExistingImage & l_mask))
+            {
+                TRACFCOMP( g_trac_isteps_trace, INFO_MRK
+                           "Master Node detected, continue allowing istep messages to this node.");
+                INITSERVICE::setAcceptIstepMessages(true);
+            }
+            else
+            {
+                TRACFCOMP( g_trac_isteps_trace, INFO_MRK
+                           "This node is not the master node, no longer respond to istep messages.");
+                INITSERVICE::setAcceptIstepMessages(false);
+            }
+
+            //wait for all hb images to respond
+            //want to spawn a timer thread
+            tid_t l_progTid = task_create(
+                       ESTABLISH_SYSTEM_SMP::host_coalesce_timer,&l_msgQ);
+            assert( l_progTid > 0 ,"host_coalesce_timer failed");
+            while (l_msgCount)
+            {
+                msg_t* l_msg = msg_wait(l_msgQ);
+                TRACFCOMP( g_trac_isteps_trace, INFO_MRK
+                           "coalesce host message for drawer %d completed.",
+                           l_msg->data[0]);
+                if (l_msg->type == HOST_COALESCE_TIMER_MSG)
+                {
+                    if (l_msg->data[1] == TIME_EXPIRED)
+                    {
+                        //timer has expired
+                        TRACFCOMP( g_trac_isteps_trace, ERR_MRK
+                                "call_host_coalesce_host failed to "
+                                "receive messages from all hb images in time" );
+                        //tell the timer thread to exit
+                        l_msg->data[1] = HB_COALESCE_MSG_DONE;
+                        msg_respond(l_msgQ, l_msg);
+
+                        //generate an errorlog
+                        /*@
+                         *  @errortype      ERRL_SEV_CRITICAL_SYS_TERM
+                         *  @moduleid       fapi::MOD_VERIFY_IPC_CONNECTION
+                         *  @reasoncode     fapi::RC_HOST_TIMER_EXPIRED
+                         *  @userdata1      MAX_TIME_ALLOWED_MS
+                         *  @userdata2      Number of nodes that have not
+                         *                  responded
+                         *
+                         *  @devdesc        messages from other nodes have
+                         *                  not returned in time
+                         *  @custdesc       Error encountered during IPL of the system
+                         */
+                        l_err = new ErrlEntry( ERRL_SEV_CRITICAL_SYS_TERM,
+                                               fapi::MOD_VERIFY_IPC_CONNECTION,
+                                               fapi::RC_HOST_TIMER_EXPIRED,
+                                               MAX_TIME_ALLOWED_MS,
+                                               l_msgCount );
+                        l_err->collectTrace("ISTEPS_TRACE");
+                        l_err->collectTrace("IPC");
+                        l_err->collectTrace("MBOXMSG");
+                        break;
+
+                    }
+                    else if( l_msg->data[1] == CONTINUE_WAIT_FOR_MSGS)
+                    {
+                        TRACFCOMP( g_trac_isteps_trace, INFO_MRK
+                                   "coalesce host timer continue waiting message.");
+                        l_msg->data[1] = HB_COALESCE_WAITING_FOR_MSG;
+                        msg_respond(l_msgQ, l_msg);
+                    }
+                }
+                else if (l_msg->type == IPC::IPC_TEST_CONNECTION)
+                {
+                   TRACFCOMP( g_trac_isteps_trace, INFO_MRK
+                              "Got response from node %d", l_msg->data[0] );
+                    --l_msgCount;
+                    msg_free(l_msg);
+                }
+
+            } // while (l_msgCount)
+
+            if (l_err)
+            {
+                break;
+            }
+
+            //the l_msgCount should be 0 at this point to have
+            //exited from the loop above.  If the msg count
+            //is not zero then the timer must have expired
+            //and the code would have asserted
+            //Now need to tell the child timer thread to exit
+
+            //temp change while simics takes a long time for Denali to IPL
+            //tmp check to tell the child timer thread to exit if didn't
+            //already timeout
+            if (l_msgCount ==0)
+            {
+                msg_t* l_msg = msg_wait(l_msgQ);
+                if (l_msg->type == HOST_COALESCE_TIMER_MSG)
+                {
+                    TRACFCOMP( g_trac_isteps_trace, INFO_MRK
+                               "call_host_coalesce_host received all hb images in time");
+
+                    l_msg->data[1] = HB_COALESCE_MSG_DONE;
+                    msg_respond(l_msgQ, l_msg);
+                }
+            } // if (l_msgCount ==0)
+
+            // Wait for the child thread to end
+            int l_childSts(0);
+            void* l_childRc(nullptr);
+            tid_t l_tidRetRc = task_wait_tid(l_progTid, &l_childSts, &l_childRc);
+            if ( (static_cast<int16_t>(l_tidRetRc) < 0)  ||
+                 (l_childSts != TASK_STATUS_EXITED_CLEAN ) )
+            {
+                // the launched task failed or crashed,
+                TRACFCOMP( g_trac_isteps_trace, ERR_MRK
+                           "task_wait_tid failed; l_tidRetRc=0x%x, l_childSts=0x%x",
+                           l_tidRetRc, l_childSts);
+
+                //generate an errorlog
+                /*@
+                 *  @errortype      ERRL_SEV_CRITICAL_SYS_TERM
+                 *  @moduleid       fapi::MOD_VERIFY_IPC_CONNECTION
+                 *  @reasoncode     fapi::RC_HOST_TIMER_THREAD_FAIL
+                 *  @userdata1      l_tidRetRc
+                 *  @userdata2      l_childSts
+                 *
+                 *  @devdesc        host coalesce host timer thread failed
+                 *  @custdesc       Error encountered during IPL of the system
+                 */
+                l_err = new ErrlEntry( ERRL_SEV_CRITICAL_SYS_TERM,
+                                       fapi::MOD_VERIFY_IPC_CONNECTION,
+                                       fapi::RC_HOST_TIMER_THREAD_FAIL,
+                                       l_tidRetRc,
+                                       l_childSts);
+
+                l_err->collectTrace("ISTEPS_TRACE");
+                break;
+            }
+        } // if (nullptr == l_err)
+
+        MBOX::msgq_unregister(MBOX::HB_COALESCE_MSGQ);
+        msg_q_destroy(l_msgQ);
+    } while (0);
+    return l_err;
+} // verify_ipc_connection
+
+
+//******************************************************************************
+// host_coalesce_timer
+//******************************************************************************
+void* host_coalesce_timer(void* i_msgQPtr)
+
+{
+    uint32_t l_rc(0);
+
+    msg_t* l_msg = msg_allocate();
+    l_msg->type = HOST_COALESCE_TIMER_MSG;
+    uint32_t l_timeMs(0);
+
+    msg_q_t* l_msgQ = static_cast<msg_q_t*>(i_msgQPtr);
+
+    // This loop will be broken when the main thread receives
+    // all the messages and the timer thread receives the
+    // HB_COALESCE_MSG_DONE message
+    do
+    {
+        if (l_timeMs < MAX_TIME_ALLOWED_MS)
+        {
+            l_msg->data[1] = CONTINUE_WAIT_FOR_MSGS;
+        }
+        else
+        {
+            // HOST_COALESCE_TIMER_MSG is sent to the main thread indicating
+            // timer expired so the main thread responds back with HB_COALESCE_MSG_DONE
+            // indicating the timer is not needed and exit the loop
+            l_msg->data[1] = TIME_EXPIRED;
+        }
+
+        l_rc = msg_sendrecv(*l_msgQ, l_msg);
+        if (l_rc)
+        {
+            TRACFCOMP( g_trac_isteps_trace, ERR_MRK
+                       "coalesce host message timer failed msg sendrecv.");
+        }
+
+        if (l_msg->data[1] == HB_COALESCE_MSG_DONE)
+        {
+            TRACFCOMP( g_trac_isteps_trace, INFO_MRK
+                       "coalesce host message timer not needed.");
+            break;
+        }
+
+        nanosleep(0, NS_PER_MSEC);
+        l_timeMs++;
+    } while(1);
+
+    msg_free(l_msg);
+
+    return nullptr;
+} // host_coalesce_timer
+
+//******************************************************************************
+// set_is_master_drawer
+//******************************************************************************
+void set_is_master_drawer(const EntityPath *i_masterEntityPath)
+{
+    // Figure out which node we are running on
+    Target *l_masterProc(nullptr);
+    targetService().masterProcChipTargetHandle(l_masterProc);
+
+    const EntityPath::PathElement l_masterProcPathElement(l_masterProc->getAttr<ATTR_PHYS_PATH>().
+                                                          pathElementOfType(TYPE_NODE) );
+
+    const EntityPath::PathElement l_masterPathElement(i_masterEntityPath->pathElementOfType(TYPE_NODE));
+
+    // get current node
+    TargetHandleList l_nodelist;
+    getEncResources(l_nodelist, TYPE_NODE, UTIL_FILTER_FUNCTIONAL);
+    assert(l_nodelist.size() == 1, "ERROR, only looking for one node.");
+
+    Target *l_currentNodeTarget(l_nodelist[0]);
+
+    if (l_masterProcPathElement.instance == l_masterPathElement.instance)
+    {
+        // Current node is master, unset IS_SLAVE_DRAWER
+        l_currentNodeTarget->setAttr<ATTR_IS_SLAVE_DRAWER>(0);
+    }
+    else
+    {
+        // Current node is not master, set IS_SLAVE_DRAWER
+        l_currentNodeTarget->setAttr<ATTR_IS_SLAVE_DRAWER>(1);
+    }
+} // set_is_master_drawer
 
 };   // end namespace

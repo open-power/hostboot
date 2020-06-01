@@ -22,37 +22,43 @@
 # permissions and limitations under the License.
 #
 # IBM_PROLOG_END_TAG
-ROOTPATH = ../../../..
 
+ROOTPATH = ../../../..
 MODULE = istep18
 
-PROCEDURES_PATH = ${ROOTPATH}/src/import/chips/p10/procedures/hwp
-EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/fapi2/include
+# Create some aliases for paths
+SRC_IMPORT_PATH = ${ROOTPATH}/src/import
+P10_PATH = ${SRC_IMPORT_PATH}/chips/p10
+P10_PROCEDURES_PATH = ${P10_PATH}/procedures/hwp
+
+# Add all the extra include paths
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/fapi2
-EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/utils/imageProcs
-EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/imageProcs
 EXTRAINCDIR += ${ROOTPATH}/src/usr/initservice/istepdispatcher
-EXTRAINCDIR += ${ROOTPATH}/src/usr/include/isteps
 EXTRAINCDIR += ${ROOTPATH}/src/usr/isteps
-EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/nest
-EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/scomt
-EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/lib
+EXTRAINCDIR += ${SRC_IMPORT_PATH}/chips/common/utils/imageProcs
+EXTRAINCDIR += ${SRC_IMPORT_PATH}/chips/common/utils/scomt
+EXTRAINCDIR += ${SRC_IMPORT_PATH}/hwpf/fapi2/include
+EXTRAINCDIR += ${P10_PROCEDURES_PATH}/lib
+EXTRAINCDIR += ${P10_PROCEDURES_PATH}/nest
+EXTRAINCDIR += ${P10_PROCEDURES_PATH}/pm
 
-## pointer to common HWP files
-OBJS += call_tod_init.o
+# Add the sub step object files
 OBJS += call_tod_setup.o
-#FIXME RTC: 216029 Istep 18 support for multinode stitching
-#OBJS += smp_unfencing_inter_enclosure_abus_links.o
-#OBJS += establish_system_smp.o
+OBJS += call_tod_init.o
+# Istep 18 support for multinode stitching
+OBJS += establish_system_smp.o
 
+# Include the makefiles to compile the HWPs needed by the sub steps
 include ${ROOTPATH}/procedure.rules.mk
-include ${PROCEDURES_PATH}/nest/p10_tod_init.mk
-include ${PROCEDURES_PATH}/nest/p10_tod_setup.mk
-include ${PROCEDURES_PATH}/nest/p10_tod_save_config.mk
+include ${P10_PROCEDURES_PATH}/nest/p10_tod_init.mk
+include ${P10_PROCEDURES_PATH}/nest/p10_tod_setup.mk
+include ${P10_PROCEDURES_PATH}/nest/p10_tod_save_config.mk
+include ${P10_PROCEDURES_PATH}/pm/p10_block_wakeup_intr.mk
+
+# Add the path where HWPs object files are located
+VPATH += ${P10_PROCEDURES_PATH}/nest
+VPATH += ${P10_PROCEDURES_PATH}/pm
+
+# Include the configuration after everything else has been added
 include ${ROOTPATH}/config.mk
 
-VPATH += ${PROCEDURES_PATH}
-VPATH += ${PROCEDURES_PATH}/pm
-VPATH += ${PROCEDURES_PATH}/nest
-VPATH += ${PROCEDURES_PATH}/lib
-VPATH += ${ROOTPATH}/src/usr/include/isteps

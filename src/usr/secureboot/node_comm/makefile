@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2018,2019
+# Contributors Listed Below - COPYRIGHT 2018,2020
 # [+] International Business Machines Corp.
 #
 #
@@ -22,21 +22,20 @@
 # permissions and limitations under the License.
 #
 # IBM_PROLOG_END_TAG
+
 ROOTPATH = ../../../..
 MODULE = node_comm
+include ../common/common.mk
 
-# FIXME RTC: 210975
-#include ../common/common.mk
-#SUBDIRS += test.d
+OBJS += node_comm_dd.o
+OBJS += node_comm_test.o
+OBJS += node_comm.o
+OBJS += node_comm_exchange.o
+OBJS += node_comm_transfer.o
 
-#OBJS += node_comm_dd.o
-#OBJS += node_comm_test.o
-#OBJS += node_comm.o
-#OBJS += node_comm_exchange.o
-#OBJS += node_comm_transfer.o
-
-#VPATH += $(ROOTPATH)/src/usr/targeting/common
+VPATH += $(ROOTPATH)/src/usr/targeting/common
 EXTRAINCDIR += $(ROOTPATH)/src/include/usr
 
 CFLAGS += -iquote ../
+
 include ${ROOTPATH}/config.mk
