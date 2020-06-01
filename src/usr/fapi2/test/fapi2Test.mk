@@ -36,6 +36,7 @@ EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/imageProcs/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/common/include/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/pm/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/accessors/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/lib/
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/targeting/common/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/ffdc/
 EXTRAINCDIR += ${ROOTPATH}/obj/genfiles/
@@ -45,6 +46,7 @@ EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/common/include/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/ffdc/
 EXTRAINCDIR += ${ROOTPATH}/src/usr/diag/attn/
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/diag/
+EXTRAINCDIR += ${ROOTPATH}/src/include/usr/eeprom/
 
 # TODO RTC: 210905 Uncomment the procedures below
 # Procedures
