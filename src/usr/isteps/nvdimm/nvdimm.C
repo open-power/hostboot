@@ -5498,10 +5498,12 @@ bool nvdimmArm(TargetHandleList &i_nvdimmTargetList)
 
         // Poll for a status update since it might not be updated immediately
         // Status update should be valid by 1ms (usual range: 300 - 400 us)
+        // but we want no chance of a false failure so we'll wait 100ms before
+        // we die.
         // A non-zero means the status has been updated
         l_data = 0x00;
-        int status_wait_time = NS_PER_MSEC; // wait 1 msec
-        while (l_data == 0x00 && status_wait_time > 0)
+        int status_wait_time = 100*NS_PER_MSEC; // wait 100 msec
+        while( (l_data == 0x00) && (status_wait_time > 0) )
         {
             // Check notification status and errors
             l_err = nvdimmReadReg(l_nvdimm, SET_EVENT_NOTIFICATION_STATUS, l_data);
