@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -813,6 +813,12 @@ void AttrOverrideSync::triggerAttrSync(fapi2::TargetType i_type,
         if(l_fType == fapi2::TARGET_TYPE_NONE)
         {
             continue; //not a FAPI2 target -- skip to next target
+        }
+
+        // TargetType field is limited to 32-bits at this time
+        if(l_fType > UINT32_MAX)
+        {
+            continue; // avoid sync issue - skip to next target
         }
 
         //Check to see if looking for a specific type/fapi_pos
