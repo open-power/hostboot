@@ -47,6 +47,7 @@
 ///     completion
 ///   - Start the QME to allow the Hcode to boot.
 ///   - Poll QME Flag bit for QME boot completion
+///   - set CUCR[PCB_SKEW_ADJ] per quad to equalize multicast times
 ///
 ///   - QME Hcode itself (not this procedure) will use the Block Copy Engine
 ///     to pull the Local Pstate Parameter Block and quad specific rings
@@ -66,6 +67,7 @@
 #include <p10_scom_proc_5.H>
 #include <p10_scom_c_7.H>
 #include <p10_scom_eq.H>
+#include <p10_scom_c.H>
 #include <p10_scom_perv.H>
 #include <multicast_group_defs.H>
 #include <p10_hcd_memmap_base.H>
@@ -120,6 +122,10 @@ fapi2::ReturnCode get_functional_chiplet_info(
     std::vector<uint64_t>& o_ppe_addr_list,
     std::vector< fapi2::Target<fapi2::TARGET_TYPE_EQ > >& o_eq_target_list );
 
+fapi2::ReturnCode pcb_skew_adj(
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target );
+
+
 // -----------------------------------------------------------------------------
 //  Function definitions
 // -----------------------------------------------------------------------------
@@ -153,6 +159,8 @@ fapi2::ReturnCode p10_pm_qme_init(
 
         // Boot the QME
         FAPI_TRY( qme_init( i_target ), "ERROR: Failed To Initialize  QME" );
+        // Adjust for EQ placement
+        FAPI_TRY( pcb_skew_adj( i_target ), "ERROR: Failed To adjust the PCB Skew" );
     }
 
     //-------------------------------
@@ -587,5 +595,58 @@ fapi2::ReturnCode initQmeBoot(
 
 fapi_try_exit:
     FAPI_INF("<< initQmeBoot");
+    return fapi2::current_err;
+}
+
+/// @brief Set the PCB Skew Adjustment per EQ and per core.
+/// @param [in] i_target Chip target
+/// @retval FAPI_RC_SUCCESS
+/// @retval ERROR defined in xml
+fapi2::ReturnCode pcb_skew_adj(
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target )
+{
+    using namespace scomt;
+    using namespace proc;
+    using namespace eq;
+    using namespace c;
+
+    FAPI_INF(">> pcb_skew_adj");
+
+    fapi2::buffer<uint64_t>  adjust_value;
+
+    auto l_eq_vector = i_target.getChildren<fapi2::TARGET_TYPE_EQ> (fapi2::TARGET_STATE_FUNCTIONAL);
+
+    // See which EQ(s) are active and deal with them
+    for (auto& eq : l_eq_vector)
+    {
+        fapi2::buffer<uint64_t> l_cucr;
+
+        auto l_core_vector = eq.getChildren<fapi2::TARGET_TYPE_CORE> (fapi2::TARGET_STATE_FUNCTIONAL);
+
+        fapi2::ATTR_CHIP_UNIT_POS_Type eq_pos;
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS,
+                               eq,
+                               eq_pos),
+                 "fapiGetAttribute of ATTR_CHIP_UNIT_POS failed");
+
+        // EQ 0 and 1 gets 0; EQ 2 and 3 gets 1; EQ 4 and 5 gets 2; EQ 6 and 7 gets 3
+        adjust_value = eq_pos >> 1;
+
+        for (auto& core : l_core_vector)
+        {
+            l_cucr.flush<0>().insertFromRight<CPMS_CUCR_PCB_SKEW_ADJ, CPMS_CUCR_PCB_SKEW_ADJ_LEN> (7);
+            FAPI_TRY( putScom( core, CPMS_CUCR_WO_CLEAR, l_cucr ) );
+
+            // Only EQs 2 through 7 get a new value
+            if (eq_pos > 1)
+            {
+                l_cucr.flush<0>().insertFromRight<CPMS_CUCR_PCB_SKEW_ADJ, CPMS_CUCR_PCB_SKEW_ADJ_LEN>(adjust_value);
+                FAPI_TRY( putScom( core, CPMS_CUCR_SCOM2, l_cucr ) );
+            }
+        }
+    }
+
+fapi_try_exit:
+    FAPI_INF("<< pcb_skew_adj");
     return fapi2::current_err;
 }
