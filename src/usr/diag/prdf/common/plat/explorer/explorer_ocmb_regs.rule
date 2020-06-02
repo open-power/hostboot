@@ -431,6 +431,108 @@
     };
 
     ############################################################################
+    # Explorer additional FFDC
+    ############################################################################
+
+    register CMN_CONFIG
+    {
+        name        "Explorer OMI-CMN Configuration Register";
+        scomaddr    0x0801280E;
+        capture     group default;
+    };
+
+    register PMU_CNTR
+    {
+        name        "Explorer PMU Counter Register";
+        scomaddr    0x0801280F;
+        capture     group default;
+    };
+
+    register DL0_CONFIG0
+    {
+        name        "Explorer OMI-DL0 Configuration0 Register";
+        scomaddr    0x08012810;
+        capture     group default;
+    };
+
+    register DL0_CONFIG1
+    {
+        name        "Explorer OMI_DL0 Configuration1 Register";
+        scomaddr    0x08012811;
+        capture     group default;
+    };
+
+    register DL0_ERROR_MASK
+    {
+        name        "Explorer DL0 Error Mask Register";
+        scomaddr    0x08012812;
+        capture     group default;
+    };
+
+    register DL0_ERROR_CAPTURE
+    {
+        name        "Explorer DL0 Error Capture Register";
+        scomaddr    0x08012814;
+        capture     group default;
+    };
+
+    register DL0_EDPL_MAX_COUNT
+    {
+        name        "Explorer DL0 EDPL Threshold Register";
+        scomaddr    0x08012815;
+        capture     group default;
+    };
+
+    register DL0_STATUS
+    {
+        name        "Explorer DL0 Status Register";
+        scomaddr    0x08012816;
+        capture     group default;
+    };
+
+    register DL0_TRAINING_STATUS
+    {
+        name        "Explorer DL0 Training Status Register";
+        scomaddr    0x08012817;
+        capture     group default;
+    };
+
+    register DL0_DLX_CONFIG
+    {
+        name        "Explorer PowerBus DL0 Endpoint Config Register";
+        scomaddr    0x08012818;
+        capture     group default;
+    };
+
+    register DL0_DLX_INFO
+    {
+        name        "Explorer DL0 Remote Information Register";
+        scomaddr    0x08012819;
+        capture     group default;
+    };
+
+    register DL0_ERROR_ACTION
+    {
+        name        "Explorer DL0 Error Action Register";
+        scomaddr    0x0801281D;
+        capture     group default;
+    };
+
+    register DL0_DEBUG_AID
+    {
+        name        "Explorer DL0 Debug Aid Register";
+        scomaddr    0x0801281E;
+        capture     group default;
+    };
+
+    register DL0_CYA_BITS
+    {
+        name        "Explorer PowerBus DL0 CYA Bits Register";
+        scomaddr    0x0801281F;
+        capture     group default;
+    };
+
+    ############################################################################
     # Misc
     ############################################################################
 
