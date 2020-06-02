@@ -500,6 +500,47 @@ errlHndl_t handlePhysPresenceWindow(void)
 
         doAttrCrossOver = true;
 
+        // Document special case if it's -ONLY- KEY_CLEAR_REQUEST_MFG
+        // NOTE: The check that this is an imprint driver was made in
+        // getKeyClearRequest()
+        if (keyClearRequests == KEY_CLEAR_REQUEST_MFG)
+        {
+            SB_INF("handlePhysPresenceWindow: Create an INFORMATIONAL Log to "
+                   "document special case of KEY_CLEAR_REQUEST_MFG (0x%.04X)",
+                   keyClearRequests);
+
+            /*@
+             * @errortype
+             * @moduleid          MOD_HANDLE_PHYS_PRES_WINDOW
+             * @reasoncode        RC_KEY_CLEAR_REQUEST_MFG
+             * @userdata1[0:31]   Value of Attribute Requesting an Open Window
+             * @userdata1[32:63]  Value of Key Clear Requests
+             * @userdata2[0:31]   Value of Attribute Physical Presence Asserted
+             * @userdata2[32:63]  Value of Attribute Physical Presence re-IPL
+             * @devdesc           Found special case of KEY_CLEAR_REQUEST_MFG;
+             *                    No Re-IPL is necessary
+             * @custdesc          Detected Special Key Clear Request
+             */
+            errlHndl_t err_info = new ErrlEntry(
+                                  ERRL_SEV_INFORMATIONAL,
+                                  MOD_HANDLE_PHYS_PRES_WINDOW,
+                                  RC_KEY_CLEAR_REQUEST_MFG,
+                                  TWO_UINT32_TO_UINT64(
+                                      attr_open_window,
+                                      keyClearRequests),
+                                  TWO_UINT32_TO_UINT64(
+                                      attr_phys_pres_asserted,
+                                      attr_phys_pres_reipl));
+            err_info->collectTrace( SECURE_COMP_NAME );
+
+            errlCommit( err_info, SECURE_COMP_ID );
+
+            // Also display a message to the console
+            #ifdef CONFIG_CONSOLE
+            CONSOLE::displayf(SECURE_COMP_NAME, "Detected KEY_CLEAR_REQUEST_MFG; No Physical Presence Detection Necessary\n");
+            #endif
+        }
+
         break;
     }
 

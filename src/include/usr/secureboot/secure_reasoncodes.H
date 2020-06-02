@@ -142,6 +142,7 @@ namespace SECUREBOOT
         RC_PHYS_PRES_ASSERTED               = SECURE_COMP_ID | 0x44,
         RC_PHYS_PRES_REIPL                  = SECURE_COMP_ID | 0x45,
         RC_CLEARING_KEY_CLEAR_SENSOR_FAILED = SECURE_COMP_ID | 0x46,
+        RC_KEY_CLEAR_REQUEST_MFG            = SECURE_COMP_ID | 0x47,
 
         // Reason codes 0xA0 - 0xEF reserved for trustedboot_reasoncodes.H
     };
