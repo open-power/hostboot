@@ -29,6 +29,11 @@
 #   Gerrit checkin.
 #
 
+if git log -n1 | grep -c git-subtree-dir; then
+    echo "Skipping copyright check on commits with git-subtree-dir tag"
+    exit 0
+fi
+
 export WORKSPACE_DIR=`pwd`
 export ADDCOPYRIGHT=${WORKSPACE_DIR}/src/build/tools/addCopyright
 

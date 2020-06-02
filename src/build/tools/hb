@@ -684,7 +684,11 @@ hb_objsizes()
 
 hb_copyright_check()
 {
-    git diff HEAD~1 --name-only | xargs addCopyright validate
+   if git log -n1 | grep -c git-subtree-dir; then
+      echo "Skipping copyright check on commits containing git-subtree-dir tag"
+   else
+      git diff HEAD~1 --name-only | xargs addCopyright validate
+   fi
 }
 
 hb_errlparser()
