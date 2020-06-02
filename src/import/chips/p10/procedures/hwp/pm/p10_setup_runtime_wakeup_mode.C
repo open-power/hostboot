@@ -69,7 +69,7 @@ fapi2::ReturnCode p10_setup_runtime_wakeup_mode(
     FAPI_INF("SMF Status : %s", l_smfConfig ? "Enabled" : "Disabled" );
 
     l_wakeupMode.setBit( p10hcd::QME_FLAGS_RUNTIME_WAKEUP_MODE );
-    l_wakeupMode.setBit( p10hcd::QME_FLAGS_HV_COMPATIBILTY_MODE );
+    l_wakeupMode.setBit( p10hcd::QME_FLAGS_SMF_DISABLE_MODE );
 
     if( l_smfConfig )
     {

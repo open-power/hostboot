@@ -138,7 +138,7 @@ enum PM_QME_FLAG_DEFS
     QME_FLAGS_HCODE_ERROR_INJECT            = 6,
     QME_FLAGS_HCODE_FIT_ERROR_INJECT        = 7,
     QME_FLAGS_TOD_SETUP_COMPLETE            = 8,
-    QME_FLAGS_HV_COMPATIBILTY_MODE          = 9,
+    QME_FLAGS_SMF_DISABLE_MODE              = 9,
     QME_FLAGS_RUNTIME_WAKEUP_MODE           = 10,
     QME_FLAGS_SPWU_CHECK_ENABLE             = 11,
     QME_FLAGS_RUNN_MODE                     = 13,
