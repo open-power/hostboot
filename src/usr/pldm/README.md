@@ -70,21 +70,49 @@ for more information).
     init function is called on the singleton
     - This occurs during extended_init when the pldm_extended module is loaded
 
-### pldm_runtime module (incomplete)
-**(Design under discussion)**
+### pldm_runtime module [src/usr/pldm/runtime/makefile](runtime/makefile)
+**Overview:** The pldm_runtime module contains all code to support PLDM for
+Hostboot during runtime. HBRT is single threaded and doesn't have access to
+internal msgQs so the logic for issuing and handling requests is different
+than IPL time.
+- [pldmrp_rt](runtime/pldmrp_rt.H)
+  - Contains the Singleton class, PldmRP, that manages the next_pldm_request
+    and next_pldm_response buffers. There should only be at most a single
+    request and a single response from the BMC at a time. Once the MCTP core
+    logic has received a complete message of type PLDM it will attempt to cache
+    that message with this class. If the message is a request and this
+    singleton already has a request cached, an error is returned to the MCTP
+    layer. The same goes for the case when the MCTP layer attempts to cache a
+    response when the singleton already has a cached response.
+- issuing requests to the BMC
+  - sendrecv_pldm_request function will detect if we are in HBRT and if so
+    will call MCTP::send_message and then perform a MCTP::get_next_packet until
+    we get a PLDM response.
+- responding to request from the BMC
+  - When the BMC issues Hostboot a PLDM request it will come over MCTP. During
+    HBRT, Hostboot does not have access to the LPC bus that MCTP traffic flows
+    on so the hypervisor must bridge the messages to us. When the hypervisor
+    sees a MCTP message addressed to EID 10 (HBRT's eid) then they will call
+    fw_notify with a MCTP_AVAILABLE message. HBRT will handle this message by
+    checking if we have a cached request and fufilling that request, or by
+    performing MCTP::get_next_packet calls until we get a request.
+  - One thing to note, there are many times where we expect the hypervisor to
+    send us more MCTP_AVAILABLE notifications than we need to process all of
+    the packets, so if we receive a notification, and we don't have a request
+    cached, and the first MCTP::get_next_packet returns NO_PACKET_AVAILABLE,
+    then we return immediately, assuming that this is an "extra" MCTP_AVAILABLE
+    notification.
 
 ## Supporting Libraries
 
-### Common Files  [src/usr/pldm/common/](common))
+### Common Files  [src/usr/pldm/common/](common)
 **Overview:** Anything that will be used in at least two of the modules
 described above.
 - [common.mk](common/common.mk)
   - Contains anything that gets duplicated between src/usr/pldm/base/makefile,
-    src/usr/pldm/extended/makefile (and someday src/usr/pldm/runtime/makefile.)
-    - Originally contains common vars VPATHS and PLDM_COMMON_OBJS, but could be
-      extended in the future
+    src/usr/pldm/extended/makefile and src/usr/pldm/runtime/makefile.
     - The items defined only need to be common between at least 2 of the modules
-      (ie. PLDM_COMMON_OBJS is only for runtime/base and not extended)
+      (ie. PLDM_COMMON_BASE_OBJS is only for runtime/base and not extended)
 - pldmtrace.H/C
   - [pldmtrace.C](common/pldmtrace.C) declares/initializes g_trac_pldm,
     which is the 4 KB non-blocking trace buffer
