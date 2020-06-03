@@ -49,7 +49,6 @@ EXTRAINCDIR += ${PRD_USR_PATH}/common/plat/p10
 EXTRAINCDIR += ${PRD_USR_PATH}/common/mnfgtools
 EXTRAINCDIR += ${PRD_USR_PATH}/mnfgtools
 EXTRAINCDIR += ${PRD_USR_PATH}/framework
-EXTRAINCDIR += ${PRD_USR_PATH}/occ_firdata
 EXTRAINCDIR += ${PRD_USR_PATH}/plat
 EXTRAINCDIR += ${PRD_USR_PATH}/plat/mem
 EXTRAINCDIR += ${PRD_USR_PATH}/plat/p9

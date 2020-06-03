@@ -117,9 +117,6 @@ bool parseCaptureData( void * i_buffer, uint32_t i_buflen,
 bool parsePfaData( void * i_buffer, uint32_t i_buflen,
                    ErrlUsrParser & i_parser );
 
-bool parsePnorFirData( uint8_t * i_buffer, uint32_t i_buflen,
-                       ErrlUsrParser & i_parser );
-
 //##############################################################################
 //##
 //##                          Utility Functions
@@ -478,12 +475,6 @@ bool parseCaptureData( void * i_buffer, uint32_t i_buflen,
             {
                 parseTodFfdcData( sigData, sigDataSize, i_parser );
             }
-/*
-            else if ( Util::hashString("OCC_CS_FFDC") == sigId)
-            {
-                parsePnorFirData( sigData, sigDataSize, i_parser );
-            }
-*/
             else if ( Util::hashString(LD_CR_FFDC::L2TITLE) == sigId )
             {
                 parseL2LdCrFfdc( sigData, sigDataSize, i_parser );
@@ -814,61 +805,6 @@ bool parseExtMemMru( void * i_buffer, uint32_t i_buflen,
         o_rc = false; // Dump the hex buffer at the end. This is temporary. Just
                       // until we are confident the parser works.
     }
-
-    return o_rc;
-}
-
-//------------------------------------------------------------------------------
-
-bool parsePnorFirData( uint8_t * i_buffer, uint32_t i_buflen,
-                       ErrlUsrParser & i_parser )
-{
-    using namespace PARSER;
-
-    bool o_rc = false;
-
-    i_parser.PrintString( " OCC_CS_FFDC", "" );
-
-    do
-    {
-        if ( NULL == i_buffer ) break;
-
-        size_t u16 = sizeof(uint16_t);
-        size_t u32 = sizeof(uint32_t);
-
-        // Make sure there is enough room for the header data.
-        if ( i_buflen < u32 ) break;
-
-        uint32_t noTrgts = i_buffer[0];
-        bool     full    = (1 == (i_buffer[1] >> 7));
-
-        i_parser.PrintNumber( "  # of targets", "%d", noTrgts );
-        i_parser.PrintBool(   "  PNOR buffer full",   full    );
-
-        uint32_t cnt = i_buffer[3];
-
-        // Make sure there is enough room for the SCOM error data.
-        if ( cnt * (u32 + u16) < i_buflen - u32 ) break;
-
-        uint32_t idx = u32;
-        for ( uint32_t i = 0; i < cnt; ++i )
-        {
-            uint32_t huid = 0; uint16_t scomErrs = 0;
-            memcpy( &huid,     &i_buffer[idx], u32 ); idx += u32;
-            memcpy( &scomErrs, &i_buffer[idx], u16 ); idx += u16;
-
-            char header[HEADER_SIZE];
-            snprintf( header, HEADER_SIZE, "  HUID = 0x%08x", huid );
-
-            char data[DATA_SIZE];
-            snprintf( data, DATA_SIZE, "SCOM Errors = %d", scomErrs );
-
-            i_parser.PrintString( header, data );
-        }
-
-        o_rc = true;
-
-    } while (0);
 
     return o_rc;
 }

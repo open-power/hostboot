@@ -36,7 +36,6 @@ PRD_INC_PATH = ${ROOTPATH}/src/include/usr/diag/prdf
 prd_vpath += ${PRD_SRC_PATH}
 prd_vpath += ${PRD_SRC_PATH}/framework
 prd_vpath += ${PRD_SRC_PATH}/mnfgtools
-prd_vpath += ${PRD_SRC_PATH}/occ_firdata
 prd_vpath += ${PRD_SRC_PATH}/plat
 
 # Internal PRD header paths
@@ -45,7 +44,6 @@ prd_incpath += ${PRD_INC_PATH}/common # Stored differently in FSP
 prd_incpath += ${PRD_SRC_PATH}
 prd_incpath += ${PRD_SRC_PATH}/framework
 prd_incpath += ${PRD_SRC_PATH}/mnfgtools
-prd_incpath += ${PRD_SRC_PATH}/occ_firdata
 prd_incpath += ${PRD_SRC_PATH}/plat
 prd_incpath += ${PRD_SRC_PATH}/plat/mem
 
