@@ -277,69 +277,6 @@ PRDF_PLUGIN_DEFINE_NS( p10_proc,     Proc, GetCheckstopInfo );
 
 //------------------------------------------------------------------------------
 
-int32_t isHostAttnFirAccessible(ExtensibleChip * i_chip, bool & o_isOkToAccess)
-{
-    // Host Processor side can always access the 'host' attn reg
-    // The FSP can not access it during IPL steps 15 thru 16.2
-    // Host attn is only needed for MS diag and runtime case.
-    o_isOkToAccess = atRuntime();
-
-#ifdef __HOSTBOOT_MODULE
-    o_isOkToAccess = true;
-#endif
-
-    return SUCCESS;
-}
-PRDF_PLUGIN_DEFINE_NS( axone_proc,   Proc, isHostAttnFirAccessible );
-PRDF_PLUGIN_DEFINE_NS( p10_proc,     Proc, isHostAttnFirAccessible );
-
-//------------------------------------------------------------------------------
-
-int32_t isUcsFirAccessible(ExtensibleChip * i_chip, bool & o_isOkToAccess)
-{
-    // Host Processor side can always access the 'unitCS' reg
-    // The FSP can not access it during IPL steps 15 thru 16.2
-    o_isOkToAccess = atRuntime();
-
-#ifdef CONFIG_ENABLE_CHECKSTOP_ANALYSIS
-    if (false == o_isOkToAccess)
-    {
-        // For checkstop analysis (non-FSP systems), we
-        // already collected registers in FIRDATA. Hence, we
-        // can attempt reading the unit CS FIR from this data.
-        Target   *l_sys = NULL;
-        targetService().getTopLevelTarget( l_sys );
-        assert(l_sys != NULL);
-
-        // ATTN code sets an attribute to indicate we are
-        // doing the analysis of FIR data from prior failure.
-        uint8_t l_doingAnalysis =
-                           CHKSTOP_ANALYSIS_ON_STARTUP_NOT_ANALYZING_DEFAULT;
-        l_sys->tryGetAttr<ATTR_CHKSTOP_ANALYSIS_ON_STARTUP>(l_doingAnalysis);
-
-        if (CHKSTOP_ANALYSIS_ON_STARTUP_ANALYZING_CHECKSTOP == l_doingAnalysis)
-        {
-            o_isOkToAccess = true;
-        }
-    }
-
-#else
-
-#ifdef __HOSTBOOT_MODULE
-    // Can read this reg at anytime from hostboot side
-    o_isOkToAccess = true;
-#endif
-
-#endif  // CONFIG_ENABLE_CHECKSTOP_ANALYSIS
-
-
-    return SUCCESS;
-}
-PRDF_PLUGIN_DEFINE_NS( axone_proc,   Proc, isUcsFirAccessible );
-PRDF_PLUGIN_DEFINE_NS( p10_proc,     Proc, isUcsFirAccessible );
-
-//------------------------------------------------------------------------------
-
 /** Call HW server rtn for Deadman Timer */
 int32_t handleDeadmanTimer( ExtensibleChip * i_chip,
                             STEP_CODE_DATA_STRUCT & io_sc )

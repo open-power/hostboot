@@ -159,14 +159,12 @@ actionclass threshold_and_mask_chnl1_ocmb_th_1
 
 actionclass analyze_ocmb_chnl0
 {
-    TBDDefaultCallout;
-#    try( funccall("checkOcmb_0"), analyze(connected(TYPE_OCMB_CHIP, 0)) );
+    analyze(connected(TYPE_OCMB_CHIP, 0));
 };
 
 actionclass analyze_ocmb_chnl1
 {
-    TBDDefaultCallout;
-#    try( funccall("checkOcmb_1"), analyze(connected(TYPE_OCMB_CHIP, 1)) );
+    analyze(connected(TYPE_OCMB_CHIP, 1));
 };
 
 actionclass analyze_ocmb_chnl0_UERE
