@@ -40,14 +40,8 @@
 //------------------------------------------------------------------------------
 #include <p10_pcie_scominit.H>
 #include <p10_pcie_scom.H>
-#include <p10_scom_pec_2.H>
-#include <p10_scom_pec_4.H>
-#include <p10_scom_pec_6.H>
-#include <p10_scom_pec_7.H>
-#include <p10_scom_pec_8.H>
-#include <p10_scom_pec_e.H>
-#include <p10_scom_pec_f.H>
-#include <p10_scom_phb_e.H>
+#include <p10_scom_pec.H>
+#include <p10_scom_phb.H>
 #include <p10_fbc_utils.H>
 #include <p10_iop_xram_utils.H>
 
@@ -133,6 +127,12 @@ p10_pcie_scominit(
         SET_CPLT_CTRL5_TC_CCFG_PIPE_LANEX_EXT_PLL_MODE_DC(l_data);
         SET_CPLT_CTRL5_TC_CCFG_PHYX_CR_PARA_SEL_DC(l_data);
         FAPI_TRY(PUT_CPLT_CTRL5_WO_OR(l_pec_target, l_data));
+
+        //Initialize PCI CPLT_CONF0
+        l_data = 0;
+        FAPI_TRY(PREP_CPLT_CONF0_WO_OR(l_pec_target));
+        l_data.setBit<CPLT_CONF0_TC_PIPE_LANEX_LANEPLL_BYPASS_MODE_DC, CPLT_CONF0_TC_PIPE_LANEX_LANEPLL_BYPASS_MODE_DC_LEN>();
+        FAPI_TRY(PUT_CPLT_CONF0_WO_OR(l_pec_target, l_data));
 
         //Initialize PCIIOPP.TOP[0,1].PIPEDOUTCTL2 for HW525901
         for (uint8_t l_top = 0; l_top < NUM_OF_IO_TOPS; l_top++)
