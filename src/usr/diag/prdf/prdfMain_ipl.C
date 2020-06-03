@@ -43,12 +43,6 @@
 #include <prdfOcmbDataBundle.H>
 #include <prdfMemBgScrub.H>
 
-// Custom compile configs
-
-#ifdef CONFIG_ENABLE_CHECKSTOP_ANALYSIS
-  #include <prdfFileRegisterAccess.H>
-#endif
-
 using namespace TARGETING;
 using namespace HWAS;
 
@@ -182,32 +176,5 @@ errlHndl_t startScrub( const TargetHandle_t i_trgt )
 
     #undef PRDF_FUNC
 }
-
-//------------------------------------------------------------------------------
-
-#ifdef CONFIG_ENABLE_CHECKSTOP_ANALYSIS
-
-errlHndl_t analyzeCheckStop( ATTENTION_VALUE_TYPE i_attentionType,
-                             const AttnList & i_attnList )
-{
-    PRDF_ENTER( "PRDF::analyzeCheckStop() Global attnType=%04X",
-                i_attentionType );
-
-    // install file Scom Accessor
-    FileScomAccessor * fileScomAccessor = new FileScomAccessor();
-    getScomService().setScomAccessor( *fileScomAccessor);
-
-    // Call main to analyze checkstop
-    errlHndl_t errl = main( i_attentionType, i_attnList );
-
-    // Uninstall file scom. setScomAccessor() will also free up
-    // memory for fileScomAccessor.
-    ScomAccessor * scomAccessor = new ScomAccessor();
-    getScomService().setScomAccessor( *scomAccessor);
-
-    return errl;
-}
-
-#endif // CONFIG_ENABLE_CHECKSTOP_ANALYSIS
 
 } // end namespace PRDF

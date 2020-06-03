@@ -40,12 +40,6 @@
 #include <util/singleton.H>
 #include <errl/errlmanager.H>
 
-// Custom compile configs
-
-#if !defined(__HOSTBOOT_RUNTIME) && defined(CONFIG_ENABLE_CHECKSTOP_ANALYSIS)
-  #include <prdf/prdfMain_ipl.H>
-#endif
-
 using namespace std;
 using namespace PRDF;
 using namespace TARGETING;

@@ -91,10 +91,6 @@
 
 #include <htmgt/htmgt.H>
 
-#ifdef CONFIG_ENABLE_CHECKSTOP_ANALYSIS
-  #include <diag/prdf/prdfWriteHomerFirData.H>
-#endif
-
 #if defined(__HOSTBOOT_RUNTIME) && defined(CONFIG_NVDIMM)
 #include <isteps/nvdimm/nvdimm.H>  // notify NVDIMM protection change
 #endif

@@ -122,9 +122,6 @@ prd_obj += prdfMain.o
 # framework
 prd_obj += prdfDumpResolution.o
 
-# occ_firdata/
-prd_obj += $(if $(CONFIG_ENABLE_CHECKSTOP_ANALYSIS), prdfWriteHomerFirData.o)
-
 # plat/
 prd_obj += prdfPlatServices.o
 prd_obj += prdfRasServices.o
@@ -138,15 +135,8 @@ ifneq (${HOSTBOOT_RUNTIME},1)
 # ./
 prd_obj += prdfMain_ipl.o
 
-# framework
-prd_obj += $(if $(CONFIG_ENABLE_CHECKSTOP_ANALYSIS), prdfFileRegisterAccess.o)
-
 # mnfgtools/
 prd_obj += prdfMfgSync.o
-
-# occ_firdata/
-prd_obj += $(if $(CONFIG_ENABLE_CHECKSTOP_ANALYSIS), prdfPnorFirDataReader.o)
-prd_obj += $(if $(CONFIG_ENABLE_CHECKSTOP_ANALYSIS), prdfReadPnorFirData.o)
 
 # plat/
 prd_obj += prdfPlatServices_ipl.o

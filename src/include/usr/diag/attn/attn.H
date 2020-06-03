@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -74,19 +74,6 @@ errlHndl_t stopService();
  * @retval[!0] Unexpected error occurred.
  */
 errlHndl_t checkForIplAttentions();
-
-#ifdef CONFIG_ENABLE_CHECKSTOP_ANALYSIS
-
-/**
- * @brief Called at beginning of the IPL to analyze any data saved by the OCC in
- *        the event of a previous system checkstop attention.
- *
- * @retval[0] No errors.
- * @retval[!0] Unexpected error occurred.
- */
-errlHndl_t checkForCSAttentions();
-
-#endif // CONFIG_ENABLE_CHECKSTOP_ANALYSIS
 
 }
 

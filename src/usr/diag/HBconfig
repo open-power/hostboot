@@ -3,9 +3,3 @@ config HBRT_PRD
     help
         Enable HBRT PRD.
 
-config ENABLE_CHECKSTOP_ANALYSIS
-    default n
-    help
-        Enable collection of FIR data for checkstops and
-        post-checkstop analysis by PRD on system reboot
-
