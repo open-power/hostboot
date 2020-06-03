@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -82,6 +82,7 @@ inline uint32_t extract_ddlevel( uint32_t i_cfamId )
 constexpr uint32_t NIMBUS       = 0x020D1049;
 constexpr uint32_t CUMULUS      = 0x020D4049;
 constexpr uint32_t AXONE        = 0x020D9049;
+constexpr uint32_t P10          = 0x020DA049;
 constexpr uint32_t CENTAUR      = 0x06039049;
 constexpr uint32_t EXPLORER     = 0x060D2000;
 constexpr uint32_t GEMINI       = 0x060DC000;
@@ -90,6 +91,7 @@ constexpr uint32_t GEMINI       = 0x060DC000;
 constexpr uint32_t NIMBUS_16       = 0x20D1;
 constexpr uint32_t CUMULUS_16      = 0x20D4;
 constexpr uint32_t AXONE_16        = 0x20D9;
+constexpr uint32_t P10_16          = 0x20A9;
 constexpr uint32_t CENTAUR_16      = 0x6039;
 constexpr uint32_t EXPLORER_16     = 0x60D2;
 constexpr uint32_t GEMINI_16       = 0x60DC;
