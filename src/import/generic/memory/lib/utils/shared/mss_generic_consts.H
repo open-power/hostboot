@@ -546,6 +546,7 @@ enum test_type
     RMWFIX_I = 50,
     W_INFINITE = 51,
     R_INFINITE = 52,
+    MARCH_RF = 53,
 };
 
 
