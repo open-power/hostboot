@@ -81,6 +81,7 @@ namespace ISTEP
         MOD_RESET_PM_COMPLEX                              = 0x32,
         MOD_SCOPED_HOMER_MAPPER_MAP                       = 0x33,
         MOD_SCOPED_HOMER_MAPPER_UNMAP                     = 0x34,
+        MOD_GET_RUNTIME_PM_ADDRESSES                      = 0x35,
     };
 
     /**
@@ -163,6 +164,7 @@ namespace ISTEP
         RC_BAD_INTERFACE_RETURN_CODE             = ISTEP_COMP_ID | 0x56,
         RC_COULD_NOT_MAP_HOMER                   = ISTEP_COMP_ID | 0x57,
         RC_COULD_NOT_UNMAP_HOMER                 = ISTEP_COMP_ID | 0x58,
+        RC_INVALID_PM_ADDRESS                    = ISTEP_COMP_ID | 0x59,
     };
 
 };

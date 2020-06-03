@@ -164,6 +164,7 @@ namespace HBPM
                 l_virt_addr = nullptr;
             }
 
+
             // Update the attributes for the current values
             i_proc_target->setAttr<ATTR_HOMER_PHYS_ADDR>(i_phys_addr);
             i_proc_target->setAttr<ATTR_HOMER_VIRT_ADDR>(
@@ -659,6 +660,13 @@ namespace HBPM
 
         do
         {
+
+            // Update the physical addresses prior to mapping to make sure
+            // they are current.
+            i_target->setAttr<ATTR_HOMER_PHYS_ADDR>(i_homerPhysAddr);
+            UTIL::assertGetToplevelTarget()->
+                setAttr<ATTR_OCC_COMMON_AREA_PHYS_ADDR>(i_commonPhysAddr);
+
             // Reset the PM complex for LOAD only
             if(PM_LOAD == i_mode)
             {
@@ -671,10 +679,6 @@ namespace HBPM
                     break;
                 }
             }
-
-            // Update the physical address prior to mapping to make sure
-            // it's current.
-            i_target->setAttr<ATTR_HOMER_PHYS_ADDR>(i_homerPhysAddr);
 
             // Map the HOMER into virual space.
             l_errl = l_homerMapper.map();

@@ -121,6 +121,20 @@ public:
     ScopedHomerMapper& operator=(const ScopedHomerMapper& i_rhs) = delete;
 
 private:
+
+#ifdef __HOSTBOOT_RUNTIME
+    /**
+     * @brief Fetch the HOMER and OCC common physical addresses. No-op in
+     *        non-runtime environments.
+     *
+     * @param[out] o_homer the HOMER physical address.
+     * @param[out] o_occCommon the OCC Common physical address.
+     * @return nullptr on success; non-nullptr on error.
+     */
+    errlHndl_t getRuntimePMAddresses(uint64_t& o_homer,
+                                     uint64_t& o_occCommon) const;
+#endif
+
     TARGETING::Target* iv_proc; // The proc on which to operate
     bool iv_mapped;             // Whether HOMER has been mapped for this proc
     uint64_t iv_homerVirtAddr;  // The virtual address where HOMER has been

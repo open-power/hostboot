@@ -25,6 +25,7 @@
 #include <isteps/pm/scopedHomerMapper.H>
 #include <targeting/common/mfgFlagAccessors.H>
 #include <initservice/isteps_trace.H>
+#include <initservice/initserviceif.H>
 #include <targeting/targplatutil.H>
 #include <runtime/interface.h>
 #include <isteps/pm/pm_common_ext.H>
@@ -96,62 +97,17 @@ errlHndl_t HBPM::ScopedHomerMapper::map()
     if(TARGETING::is_phyp_load())
     {
 #ifdef __HOSTBOOT_RUNTIME
-        uint64_t l_occCommonAddr = 0;
-        if(g_hostInterfaces->get_pm_complex_addresses == nullptr)
-        {
-            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                      ERR_MRK"ScopedHomerMapper::map: get_pm_complex_addresses is not provided!");
-            /**
-             * @errortype
-             * @reasoncode ISTEP::RC_PM_COMPLEX_ADDRESSES_NOT_FOUND
-             * @severity   ERRORLOG::ERRL_SEV_UNRECOVERABLE
-             * @moduleid   ISTEP::MOD_SCOPED_HOMER_MAPPER_MAP
-             * @userdata1  The HUID of the proc
-             * @devdesc    get_pm_complex_addresses interface is not provided
-             * @custdesc   A host failure occurred
-             */
-            l_errl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                       ISTEP::MOD_SCOPED_HOMER_MAPPER_MAP,
-                                       ISTEP::RC_PM_COMPLEX_ADDRESSES_NOT_FOUND,
-                                       TARGETING::get_huid(iv_proc),
-                                       0,
-                                       ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
-            l_errl->collectTrace(ISTEP_COMP_NAME);
-            break;
-        }
+        uint64_t l_occCommonPhysAddr = 0;
 
-        auto l_procChipId = iv_proc->getAttr<TARGETING::ATTR_HBRT_HYP_ID>();
-        int l_rc = g_hostInterfaces->get_pm_complex_addresses(l_procChipId,
-                                                              l_homerPhysAddr,
-                                                              l_occCommonAddr);
-        if(l_rc)
+        l_errl = getRuntimePMAddresses(l_homerPhysAddr, l_occCommonPhysAddr);
+        if(l_errl)
         {
-            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                      ERR_MRK"ScopedHomerMapper::map: get_pm_complex_addresses returned RC %d",
-                      l_rc);
-            /**
-             * @errortype
-             * @reasoncode ISTEP::RC_BAD_INTERFACE_RETURN_CODE
-             * @severity   ERRORLOG::ERRL_SEV_UNRECOVERABLE
-             * @moduleid   ISTEP::MOD_SCOPED_HOMER_MAPPER_MAP
-             * @userdata1  The return code of the PHYP interface
-             * @userdata2  The HUID of the proc
-             * @devdesc    The get_pm_complex_addresses returned an error rc
-             * @custdesc   A host failure occurred
-             */
-            l_errl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                           ISTEP::MOD_SCOPED_HOMER_MAPPER_MAP,
-                                           ISTEP::RC_BAD_INTERFACE_RETURN_CODE,
-                                           l_rc,
-                                           TARGETING::get_huid(iv_proc),
-                                           ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
-            l_errl->collectTrace(ISTEP_COMP_NAME);
             break;
         }
 
         iv_proc->setAttr<TARGETING::ATTR_HOMER_PHYS_ADDR>(l_homerPhysAddr);
         TARGETING::UTIL::assertGetToplevelTarget()->
-            setAttr<TARGETING::ATTR_OCC_COMMON_AREA_PHYS_ADDR>(l_occCommonAddr);
+        setAttr<TARGETING::ATTR_OCC_COMMON_AREA_PHYS_ADDR>(l_occCommonPhysAddr);
 #else
         // During IPL-time, we rely on the attribute to tell us what HOMER
         // phys address is, even in PHYP load.
@@ -204,6 +160,102 @@ errlHndl_t HBPM::ScopedHomerMapper::map()
 
     return l_errl;
 }
+
+#ifdef __HOSTBOOT_RUNTIME
+errlHndl_t HBPM::ScopedHomerMapper::getRuntimePMAddresses(uint64_t& o_homer,
+                                                    uint64_t& o_occCommon) const
+{
+    errlHndl_t l_errl = nullptr;
+    do {
+    if(INITSERVICE::spBaseServicesEnabled())
+    {
+        // On FSP systems, these will be supplied to us.
+        o_homer = iv_proc->getAttr<TARGETING::ATTR_HOMER_PHYS_ADDR>();
+        o_occCommon = TARGETING::UTIL::assertGetToplevelTarget()->
+            getAttr<TARGETING::ATTR_OCC_COMMON_AREA_PHYS_ADDR>();
+
+        // Error if either is not set
+        if(o_homer == 0 || o_occCommon == 0)
+        {
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                      ERR_MRK"ScopedHomerMapper::getRuntimePMAddresses: Invalid HOMER and/or OCC Common physical addresses; HOMER phys: 0x%016lx, OCC Common phys: 0x%016lx",
+                      o_homer, o_occCommon);
+            /**
+             * @errortype
+             * @reasoncode ISTEP::RC_INVALID_PM_ADDRESS
+             * @severity   ERRORLOG::ERRL_SEV_UNRECOVERABLE
+             * @moduleid   ISTEP::MOD_GET_RUNTIME_PM_ADDRESSES
+             * @userdata1  Provided HOMER Physical address
+             * @userdata2  Provided OCC Common Physical Address
+             * @devdesc    HOMER and/or OCC Common physical address is zero
+             * @custdesc   A host failure occurred
+             */
+            l_errl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                            ISTEP::MOD_GET_RUNTIME_PM_ADDRESSES,
+                                            ISTEP::RC_INVALID_PM_ADDRESS,
+                                            o_homer,
+                                            o_occCommon,
+                                            ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+            l_errl->collectTrace(ISTEP_COMP_NAME);
+        }
+        break;
+    }
+
+    if(g_hostInterfaces->get_pm_complex_addresses == nullptr)
+    {
+        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                  ERR_MRK"ScopedHomerMapper::getRuntimePMAddresses: get_pm_complex_addresses is not provided!");
+        /**
+         * @errortype
+         * @reasoncode ISTEP::RC_PM_COMPLEX_ADDRESSES_NOT_FOUND
+         * @severity   ERRORLOG::ERRL_SEV_UNRECOVERABLE
+         * @moduleid   ISTEP::MOD_GET_RUNTIME_PM_ADDRESSES
+         * @userdata1  The HUID of the proc
+         * @devdesc    get_pm_complex_addresses interface is not provided
+         * @custdesc   A host failure occurred
+         */
+         l_errl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                       ISTEP::MOD_GET_RUNTIME_PM_ADDRESSES,
+                                       ISTEP::RC_PM_COMPLEX_ADDRESSES_NOT_FOUND,
+                                       TARGETING::get_huid(iv_proc),
+                                       0,
+                                       ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+        l_errl->collectTrace(ISTEP_COMP_NAME);
+        break;
+    }
+
+    auto l_procChipId = iv_proc->getAttr<TARGETING::ATTR_HBRT_HYP_ID>();
+    int l_rc = g_hostInterfaces->get_pm_complex_addresses(l_procChipId,
+                                                          o_homer,
+                                                          o_occCommon);
+    if(l_rc)
+    {
+        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                  ERR_MRK"ScopedHomerMapper::getRuntimePMAddresses: get_pm_complex_addresses returned RC %d",
+                  l_rc);
+        /**
+         * @errortype
+         * @reasoncode ISTEP::RC_BAD_INTERFACE_RETURN_CODE
+         * @severity   ERRORLOG::ERRL_SEV_UNRECOVERABLE
+         * @moduleid   ISTEP::MOD_GET_RUNTIME_PM_ADDRESSES
+         * @userdata1  The return code of the PHYP interface
+         * @userdata2  The HUID of the proc
+         * @devdesc    The get_pm_complex_addresses returned an error rc
+         * @custdesc   A host failure occurred
+         */
+        l_errl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                         ISTEP::MOD_GET_RUNTIME_PM_ADDRESSES,
+                                         ISTEP::RC_BAD_INTERFACE_RETURN_CODE,
+                                         l_rc,
+                                         TARGETING::get_huid(iv_proc),
+                                         ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+        l_errl->collectTrace(ISTEP_COMP_NAME);
+        break;
+    }
+    } while(0);
+    return l_errl;
+}
+#endif
 
 errlHndl_t HBPM::ScopedHomerMapper::unmap()
 {
