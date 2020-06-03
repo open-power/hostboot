@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2012,2019
+# Contributors Listed Below - COPYRIGHT 2012,2020
 # [+] International Business Machines Corp.
 #
 #
@@ -42,11 +42,6 @@ VPATH += ${PRD_SRC_PATH}/occ_firdata
 #------------------------------------------------------------------------------
 OBJS += prdfsimMfgSync.o
 OBJS += prdfsimFspSyncSvc.o
-
-ifneq (${HOSTBOOT_RUNTIME},1)
-OBJS += prdfWriteHomerFirData.o
-TESTS += prdfTest_WriteHomerFir.H
-endif
 
 TESTS += prdfTest_MfgSync.H
 TESTS += prdfTest_ScomAccessInterface.H
