@@ -313,34 +313,6 @@ static const uint32_t XSTOP_MASK_53 = 53;
 //<< [XSTOP_MASK]
 // pauc/reg00000.H
 
-//>> [PB_PSAVE01_MISC_CFG]
-static const uint64_t PB_PSAVE01_MISC_CFG = 0x10011815ull;
-
-static const uint32_t PB_PSAVE01_MISC_CFG_HALF_LUC = 0;
-static const uint32_t PB_PSAVE01_MISC_CFG_HALF_LUC_LEN = 8;
-static const uint32_t PB_PSAVE01_MISC_CFG_HALF_HUC = 8;
-static const uint32_t PB_PSAVE01_MISC_CFG_HALF_HUC_LEN = 8;
-static const uint32_t PB_PSAVE01_MISC_CFG_HALF_LUT = 16;
-static const uint32_t PB_PSAVE01_MISC_CFG_HALF_LUT_LEN = 5;
-static const uint32_t PB_PSAVE01_MISC_CFG_HALF_HUT = 21;
-static const uint32_t PB_PSAVE01_MISC_CFG_HALF_HUT_LEN = 5;
-static const uint32_t PB_PSAVE01_MISC_CFG_HALF_SPARE = 26;
-static const uint32_t PB_PSAVE01_MISC_CFG_HALF_SPARE_LEN = 2;
-static const uint32_t PB_PSAVE01_MISC_CFG_QTR_LUC = 28;
-static const uint32_t PB_PSAVE01_MISC_CFG_QTR_LUC_LEN = 8;
-static const uint32_t PB_PSAVE01_MISC_CFG_QTR_HUC = 36;
-static const uint32_t PB_PSAVE01_MISC_CFG_QTR_HUC_LEN = 8;
-static const uint32_t PB_PSAVE01_MISC_CFG_QTR_LUT = 44;
-static const uint32_t PB_PSAVE01_MISC_CFG_QTR_LUT_LEN = 5;
-static const uint32_t PB_PSAVE01_MISC_CFG_QTR_HUT = 49;
-static const uint32_t PB_PSAVE01_MISC_CFG_QTR_HUT_LEN = 5;
-static const uint32_t PB_PSAVE01_MISC_CFG_QTR_SPARE = 54;
-static const uint32_t PB_PSAVE01_MISC_CFG_QTR_SPARE_LEN = 2;
-static const uint32_t PB_PSAVE01_MISC_CFG_WSIZE = 56;
-static const uint32_t PB_PSAVE01_MISC_CFG_WSIZE_LEN = 3;
-//<< [PB_PSAVE01_MISC_CFG]
-// pauc/reg00000.H
-
 //>> [PHY_SCOM_MAC_FIR_MASK_REG]
 static const uint64_t PHY_SCOM_MAC_FIR_MASK_REG_RW = 0x10012c03ull;
 static const uint64_t PHY_SCOM_MAC_FIR_MASK_REG_WO_AND = 0x10012c04ull;

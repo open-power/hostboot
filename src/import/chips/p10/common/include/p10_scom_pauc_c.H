@@ -69,34 +69,6 @@ static const uint32_t PCB_OPCG_STOP_PCB_OPCGSTOP = 0;
 //<< [PCB_OPCG_STOP]
 // pauc/reg00012.H
 
-//>> [PB_PSAVE23_MISC_CFG]
-static const uint64_t PB_PSAVE23_MISC_CFG = 0x10011817ull;
-
-static const uint32_t PB_PSAVE23_MISC_CFG_HALF_LUC = 0;
-static const uint32_t PB_PSAVE23_MISC_CFG_HALF_LUC_LEN = 8;
-static const uint32_t PB_PSAVE23_MISC_CFG_HALF_HUC = 8;
-static const uint32_t PB_PSAVE23_MISC_CFG_HALF_HUC_LEN = 8;
-static const uint32_t PB_PSAVE23_MISC_CFG_HALF_LUT = 16;
-static const uint32_t PB_PSAVE23_MISC_CFG_HALF_LUT_LEN = 5;
-static const uint32_t PB_PSAVE23_MISC_CFG_HALF_HUT = 21;
-static const uint32_t PB_PSAVE23_MISC_CFG_HALF_HUT_LEN = 5;
-static const uint32_t PB_PSAVE23_MISC_CFG_HALF_SPARE = 26;
-static const uint32_t PB_PSAVE23_MISC_CFG_HALF_SPARE_LEN = 2;
-static const uint32_t PB_PSAVE23_MISC_CFG_QTR_LUC = 28;
-static const uint32_t PB_PSAVE23_MISC_CFG_QTR_LUC_LEN = 8;
-static const uint32_t PB_PSAVE23_MISC_CFG_QTR_HUC = 36;
-static const uint32_t PB_PSAVE23_MISC_CFG_QTR_HUC_LEN = 8;
-static const uint32_t PB_PSAVE23_MISC_CFG_QTR_LUT = 44;
-static const uint32_t PB_PSAVE23_MISC_CFG_QTR_LUT_LEN = 5;
-static const uint32_t PB_PSAVE23_MISC_CFG_QTR_HUT = 49;
-static const uint32_t PB_PSAVE23_MISC_CFG_QTR_HUT_LEN = 5;
-static const uint32_t PB_PSAVE23_MISC_CFG_QTR_SPARE = 54;
-static const uint32_t PB_PSAVE23_MISC_CFG_QTR_SPARE_LEN = 2;
-static const uint32_t PB_PSAVE23_MISC_CFG_WSIZE = 56;
-static const uint32_t PB_PSAVE23_MISC_CFG_WSIZE_LEN = 3;
-//<< [PB_PSAVE23_MISC_CFG]
-// pauc/reg00012.H
-
 //>> [EPS_DBG_MODE_REG]
 static const uint64_t EPS_DBG_MODE_REG = 0x100107c0ull;
 

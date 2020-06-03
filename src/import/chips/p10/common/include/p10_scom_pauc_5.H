@@ -94,20 +94,6 @@ static const uint64_t SCAN_LONG_ROTATE = 0x10039000ull;
 //<< [SCAN_LONG_ROTATE]
 // pauc/reg00005.H
 
-//>> [PB_PSAVE23_MODE_CFG]
-static const uint64_t PB_PSAVE23_MODE_CFG = 0x10011816ull;
-
-static const uint32_t PB_PSAVE23_MODE_CFG_MODE = 0;
-static const uint32_t PB_PSAVE23_MODE_CFG_MODE_LEN = 2;
-static const uint32_t PB_PSAVE23_MODE_CFG_WIDTH = 2;
-static const uint32_t PB_PSAVE23_MODE_CFG_WIDTH_LEN = 3;
-static const uint32_t PB_PSAVE23_MODE_CFG_SPARE = 5;
-static const uint32_t PB_PSAVE23_MODE_CFG_SPARE_LEN = 3;
-static const uint32_t PB_PSAVE23_MODE_CFG_MIN_RAND_UC = 8;
-static const uint32_t PB_PSAVE23_MODE_CFG_MIN_RAND_UC_LEN = 8;
-//<< [PB_PSAVE23_MODE_CFG]
-// pauc/reg00005.H
-
 //>> [ERROR_STATUS]
 static const uint64_t ERROR_STATUS = 0x1003000full;
 
