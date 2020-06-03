@@ -577,7 +577,6 @@ static errlHndl_t exchange_pdrs()
     return l_err;
 }
 
-#if 0 // @TODO RTC 249981: Enable this code when the BMC is sending this event
 /* @brief Finish the PDR exchange by waiting on the BMC to send a "PDR
  *        Repository Changed" notification to us, and then refetching their PDR
  *        repository.
@@ -619,15 +618,22 @@ static errlHndl_t finish_pdr_exchange()
                       ERR_MRK"Failed to re-add remote PDRs to PDR manager");
             break;
         }
+
+        /* Assign the PLDM-aware targets their entity IDs */
+
+        l_err = PLDM::assignTargetEntityIds();
+
+        if (l_err)
+        {
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                      ERR_MRK"Failed to set PLDM entity IDs for targets");
+            break;
+        }
     } while (false);
 
-    // Assign the PLDM-aware targets their entity IDs
-
-    PLDM::assignTargetEntityIds();
 
     return l_err;
 }
-#endif // 0
 
 #endif // CONFIG_PLDM
 
@@ -868,7 +874,6 @@ void* host_discover_targets( void *io_pArgs )
 #if CONFIG_PLDM
     if (!pdr_exchange_failed)
     {
-#if 0 // @TODO RTC 249981: Enable this code when the BMC is sending this event
         l_err = finish_pdr_exchange();
 
         if (l_err)
@@ -877,7 +882,6 @@ void* host_discover_targets( void *io_pArgs )
                       ERR_MRK"PDR exchange failed");
             captureError(l_err, l_stepError, ISTEP_COMP_ID);
         }
-#endif // 0
     }
 #endif // CONFIG_PLDM
 

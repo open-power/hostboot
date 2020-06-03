@@ -161,11 +161,11 @@ errlHndl_t PLDM::assignTargetEntityIds()
 
         // We don't have a way to associate multiple backplane RSIDs (which is
         // created by the BMC) with Targets at this point, so throw an error
-        if (target_rsid.size() != 1)
+        if (target_rsid.size() > 1)
         {
             PLDM_ERR("Got %llu targets of type %s, expected 0 or 1",
-                     attrToString<ATTR_TYPE>(entity_info.target_type),
-                     target_rsid.size());
+                     target_rsid.size(),
+                     attrToString<ATTR_TYPE>(entity_info.target_type));
 
             /*
              * @errortype  ERRL_SEV_UNRECOVERABLE
@@ -196,7 +196,7 @@ errlHndl_t PLDM::assignTargetEntityIds()
                           entity_info.target_type,
                           UTIL_FILTER_PRESENT);
 
-        if (target.size() != 1)
+        if (target.size() != target_rsid.size())
         {
             /*
              * @errortype  ERRL_SEV_UNRECOVERABLE
@@ -218,11 +218,14 @@ errlHndl_t PLDM::assignTargetEntityIds()
             break;
         }
 
-        errl = updateTargetEntityIdAttribute(target[0], target_rsid[0]);
-
-        if (errl)
+        if (!target.empty())
         {
-            break;
+            errl = updateTargetEntityIdAttribute(target[0], target_rsid[0]);
+
+            if (errl)
+            {
+                break;
+            }
         }
     }
 

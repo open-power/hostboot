@@ -414,15 +414,11 @@ errlHndl_t sendRepositoryChangedEvent(const terminus_id_t i_tid,
                                     // logging (see DSP0248 1.2.0 section 16.6
                                     // for details)
 
-                /* @TODO RTC 252081: Uncomment this block when the BMC handles the
-                 * PdrRepositoryUpdate event. */
-#if 0
                 errl =
                     decode_pldm_response(decode_platform_event_message_resp,
                                          response_bytes,
                                          &completion_code,
                                          &status);
-#endif
 
                 if (errl)
                 {
