@@ -232,13 +232,6 @@ Layout Description
         <ecc/>
     </section>
     <section>
-        <description>FIRDATA (12K)</description>
-        <eyeCatch>FIRDATA</eyeCatch>
-        <physicalRegionSize>0x3000</physicalRegionSize>
-        <side>sideless</side>
-        <ecc/>
-    </section>
-    <section>
         <description>Memory Data (128K)</description>
         <eyeCatch>MEMD</eyeCatch>
         <physicalRegionSize>0x20000</physicalRegionSize>

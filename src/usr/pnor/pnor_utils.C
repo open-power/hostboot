@@ -419,7 +419,7 @@ const char * PNOR::SectionIdToString( uint32_t i_secIdIndex )
         "MVPD",        /**< PNOR::MODULE_VPD     : Module VPD */
         "NVRAM",       /**< PNOR::NVRAM          : OPAL Storage */
         "OCC",         /**< PNOR::OCC            : OCC LID */
-        "FIRDATA",     /**< PNOR::FIRDATA        : FIRs for checkstop analysis */
+        "FIRDATA",     /**< PNOR::FIRDATA        : DEPRECATED: FIRs for checkstop analysis */
         "ATTR_TMP",    /**< PNOR::ATTR_TMP       : Temporary Attribute Overrides */
         "ATTR_PERM",   /**< PNOR::ATTR_PERM      : Permanent Attribute Overrides */
         "CAPP",        /**< PNOR::CAPP           : CAPP LID */

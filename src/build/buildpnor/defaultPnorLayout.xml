@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2012,2019                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2012,2020                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -232,13 +232,6 @@ Layout Description
         <physicalRegionSize>0xB00000</physicalRegionSize>
         <side>sideless</side>
         <sha512Version/>
-        <ecc/>
-    </section>
-    <section>
-        <description>FIRDATA (12K)</description>
-        <eyeCatch>FIRDATA</eyeCatch>
-        <physicalRegionSize>0x3000</physicalRegionSize>
-        <side>sideless</side>
         <ecc/>
     </section>
     <section>

@@ -115,22 +115,7 @@ void RtPnor::init(errlHndl_t &io_taskRetErrl)
 {
     TRACFCOMP(g_trac_pnor, ENTER_MRK"RtPnor::init()");
 
-    PNOR::SectionInfo_t l_sectionInfo;
-
-    // Now find FIRDATA section for PRD
-    // PRD can't tell OCC where to put FIRDATA if it can't read PNOR
-    // unless we cache that info here first
-    // Note: Singleton<RtPnor>::instance() will force RtPnor constructor first
-    io_taskRetErrl = Singleton<RtPnor>::instance().getSectionInfo(
-                                              PNOR::FIRDATA, l_sectionInfo);
-    if (io_taskRetErrl)
-    {
-      TRACFCOMP(g_trac_pnor, "Rtnor: failed to read FIRDATA section" );
-    }
-    else
-    {
-      Singleton<RtPnor>::instance().setInitialized(true);
-    }
+    Singleton<RtPnor>::instance().setInitialized(true);
 
     TRACFCOMP(g_trac_pnor, EXIT_MRK"RtPnor::init()");
 }

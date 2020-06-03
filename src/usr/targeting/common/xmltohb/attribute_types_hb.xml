@@ -91,35 +91,6 @@
   </attribute>
 
   <attribute>
-    <description>
-      Are we doing checkstop analysis on
-      systems as we are booting back up based
-      on information captured in FIRDATA section.
-  </description>
-    <id>CHKSTOP_ANALYSIS_ON_STARTUP</id>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <simpleType>
-      <uint8_t/>
-    </simpleType>
-    <writeable/>
-    <hbOnly/>
-  </attribute>
-
-  <enumerationType>
-    <description>Enum for CHKSTOP_ANALYSIS_ON_STARTUP</description>
-    <enumerator>
-      <name>NOT_ANALYZING_DEFAULT</name>
-      <value>0</value>
-    </enumerator>
-    <enumerator>
-      <name>ANALYZING_CHECKSTOP</name>
-      <value>1</value>
-    </enumerator>
-    <id>CHKSTOP_ANALYSIS_ON_STARTUP</id>
-  </enumerationType>
-
-  <attribute>
     <id>CLEAR_DIMM_SPD_ENABLE</id>
     <description>
       Used to enable clearing of SPD on all present DIMMs. This attribute is

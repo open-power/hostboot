@@ -54,7 +54,7 @@ enum SectionId
     MODULE_VPD,     /**< Module VPD */
     NVRAM,          /**< Opal NVRAM */
     OCC,            /**< OCC image */
-    FIRDATA,        /**< FIR data for checkstop analysis */
+    FIRDATA,        /**< DEPRECATED: FIR data for checkstop analysis */
     ATTR_TMP,       /**< Temporary Attribute Override */
     ATTR_PERM,      /**< Permanent Attribute Override */
     CAPP,           /**< CAPP lid */
