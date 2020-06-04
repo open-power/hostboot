@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2017,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -63,8 +63,8 @@ fapi2::ReturnCode __getDimmRepairData( const fapi2::Target
         if ( l_errl )
         {
             FAPI_ERR( "__getDimmRepairData: Error from getTargetingTarget" );
-            errlCommit( l_errl, FAPI2_COMP_ID );
-            l_rc.setPlatDataPtr(reinterpret_cast<void *> (l_errl));
+             // Add the error log pointer as data to the ReturnCode
+            addErrlPtrToReturnCode(l_rc, l_errl);
             break;
         }
 

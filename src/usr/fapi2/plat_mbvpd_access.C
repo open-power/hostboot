@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017                             */
+/* Contributors Listed Below - COPYRIGHT 2017,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -37,6 +37,7 @@
 #include <hwpf_fapi2_reasoncodes.H>
 #include <devicefw/userif.H>
 #include <vpd/cvpdenums.H>
+#include <plat_utils.H>
 
 // Invalid chip unit
 const uint8_t MBVPD_INVALID_CHIP_UNIT = 0xFF;
@@ -110,7 +111,7 @@ fapi2::ReturnCode CvpdRecordXlate(const fapi2::MBvpdRecord i_fapiRecord,
         o_recordIndex  = MBVPD_INVALID_CHIP_UNIT;
 
         // Add the error log pointer as data to the ReturnCode
-        l_rc.setPlatDataPtr(reinterpret_cast<void *> (l_errl));
+        addErrlPtrToReturnCode(l_rc, l_errl);
     }
 
 
@@ -253,7 +254,7 @@ fapi2::ReturnCode CvpdKeywordXlate(const fapi2::MBvpdKeyword i_fapiKeyword,
         o_keywordIndex  = MBVPD_INVALID_CHIP_UNIT;
 
         // Add the error log pointer as data to the ReturnCode
-        l_rc.setPlatDataPtr(reinterpret_cast<void *> (l_errl));
+        addErrlPtrToReturnCode(l_rc, l_errl);
     }
 
     if(!l_rc)
@@ -319,7 +320,7 @@ fapi2::ReturnCode getMBvpdField
                     l_errl->plid());
 
             // Add the error log pointer as data to the ReturnCode
-            l_rc.setPlatDataPtr(reinterpret_cast<void *> (l_errl));
+            addErrlPtrToReturnCode(l_rc, l_errl);
 
             break;
         }
@@ -396,8 +397,7 @@ fapi2::ReturnCode setMBvpdField
                 l_errl->plid());
 
         // Add the error log pointer as data to the ReturnCode
-        l_rc.setPlatDataPtr(reinterpret_cast<void *> (l_errl));
-
+        addErrlPtrToReturnCode(l_rc, l_errl);
     }
 
     FAPI_DBG( "setMBvpdField: exit" );

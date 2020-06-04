@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -240,7 +240,7 @@ ReturnCode platPutRing(const Target<T>& i_target,
     {
         FAPI_ERR("platPutRing: deviceWrite returns error!");
         // Add the error log pointer as data to the ReturnCode
-        l_rc.setPlatDataPtr(reinterpret_cast<void *> (l_err));
+        addErrlPtrToReturnCode(l_rc, l_err);
     }
 
     if (l_traceit)

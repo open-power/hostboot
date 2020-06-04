@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -1223,9 +1223,8 @@ Target<T_SELF, M, V>::getOtherEnd(fapi2::Target<T, M, V>& o_target,
                                       NULL,
                                       NULL,
                                       true/*SW Error*/);
-        errlCommit(l_errl,FAPI2_COMP_ID);
         // Add the error log pointer as data to the ReturnCode
-        l_rc.setPlatDataPtr(reinterpret_cast<void *> (l_errl));
+        addErrlPtrToReturnCode(l_rc, l_errl);
 #endif
     }
     else if(l_peerTargetList.size() > 1)
@@ -1248,9 +1247,8 @@ Target<T_SELF, M, V>::getOtherEnd(fapi2::Target<T, M, V>& o_target,
                                       NULL,
                                       NULL,
                                       true/*SW Error*/);
-        errlCommit(l_errl,FAPI2_COMP_ID);
         // Add the error log pointer as data to the ReturnCode
-        l_rc.setPlatDataPtr(reinterpret_cast<void *> (l_err));
+        addErrlPtrToReturnCode(l_rc, l_err);
 #endif
     }
     else

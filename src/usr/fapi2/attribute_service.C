@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -208,7 +208,8 @@ ReturnCode getTargetingAttr(
     if (l_errl)
     {
         FAPI_ERR("getTargetingAttr: Error from getTargetingTarget");
-        l_rc.setPlatDataPtr(reinterpret_cast<void *> (l_errl));
+        // Add the error log pointer as data to the ReturnCode
+        addErrlPtrToReturnCode(l_rc, l_errl);
     }
     else
     {
@@ -246,7 +247,8 @@ ReturnCode getTargetingAttr(
                                              ),
                                              i_targAttrId);
 
-            l_rc.setPlatDataPtr(reinterpret_cast<void *> (l_errl));
+            // Add the error log pointer as data to the ReturnCode
+            addErrlPtrToReturnCode(l_rc, l_errl);
         }
     }
     return l_rc;
@@ -281,7 +283,8 @@ ReturnCode setTargetingAttr(
     if (l_errl)
     {
         FAPI_ERR("setTargetingAttr: Error from getTargetingTarget");
-        l_rc.setPlatDataPtr(reinterpret_cast<void *> (l_errl));
+        // Add the error log pointer as data to the ReturnCode
+        addErrlPtrToReturnCode(l_rc, l_errl);
     }
     else
     {
@@ -320,7 +323,8 @@ ReturnCode setTargetingAttr(
                                              ),
                                              i_targAttrId);
 
-            l_rc.setPlatDataPtr(reinterpret_cast<void *> (l_errl));
+            // Add the error log pointer as data to the ReturnCode
+            addErrlPtrToReturnCode(l_rc, l_errl);
         }
     }
     return l_rc;
@@ -344,7 +348,8 @@ ReturnCode platGetTargetName(const Target<TARGET_TYPE_ALL>& i_pFapiTarget,
         if (l_errl)
         {
             FAPI_ERR("platGetTargetName: Error from getTargetingTarget");
-            l_rc.setPlatDataPtr(reinterpret_cast<void *> (l_errl));
+            // Add the error log pointer as data to the ReturnCode
+            addErrlPtrToReturnCode(l_rc, l_errl);
             break;
         }
 
@@ -410,7 +415,8 @@ ReturnCode platGetTargetName(const Target<TARGET_TYPE_ALL>& i_pFapiTarget,
                                             getAttr<TARGETING::ATTR_TYPE>(),
                                             l_chipID));
 
-                l_rc.setPlatDataPtr(reinterpret_cast<void *> (l_errl));
+                // Add the error log pointer as data to the ReturnCode
+                addErrlPtrToReturnCode(l_rc, l_errl);
                 break;
             }
         }
@@ -441,7 +447,8 @@ ReturnCode platGetTargetName(const Target<TARGET_TYPE_ALL>& i_pFapiTarget,
                                             getAttr<TARGETING::ATTR_TYPE>(),
                                             l_model));
 
-            l_rc.setPlatDataPtr(reinterpret_cast<void *> (l_errl));
+            // Add the error log pointer as data to the ReturnCode
+            addErrlPtrToReturnCode(l_rc, l_errl);
             break;
         }
     } while (0);
@@ -465,7 +472,8 @@ ReturnCode platGetFunctional(const Target<TARGET_TYPE_ALL>& i_pFapiTarget,
     if (l_errl)
     {
         FAPI_ERR("platGetFunctional: Error from getTargetingTarget");
-        l_rc.setPlatDataPtr(reinterpret_cast<void *> (l_errl));
+        // Add the error log pointer as data to the ReturnCode
+        addErrlPtrToReturnCode(l_rc, l_errl);
     }
     else
     {
@@ -495,7 +503,8 @@ ReturnCode platGetTargetPos(const Target<TARGET_TYPE_ALL>& i_pFapiTarget,
     if (l_errl)
     {
         FAPI_ERR("platGetTargetPos: Error from getTargetingTarget");
-        l_rc.setPlatDataPtr(reinterpret_cast<void *> (l_errl));
+        // Add the error log pointer as data to the ReturnCode
+        addErrlPtrToReturnCode(l_rc, l_errl);
     }
     else
     {
@@ -540,7 +549,8 @@ ReturnCode platErrorOnSet( TARGETING::Target * i_pTargTarget,
 
     // attach our log to the fapi RC and return it
     ReturnCode l_rc;
-    l_rc.setPlatDataPtr(reinterpret_cast<void *> (l_errl));
+    // Add the error log pointer as data to the ReturnCode
+    addErrlPtrToReturnCode(l_rc, l_errl);
     return l_rc;
 }
 
@@ -571,7 +581,8 @@ ReturnCode platGetPoundVBucketData(const Target<TARGET_TYPE_ALL>& i_fapiTarget,
     if (l_errl)
     {
         FAPI_ERR("platGetPoundVBucketData: Error from getTargetingTarget");
-        rc.setPlatDataPtr(reinterpret_cast<void *> (l_errl));
+        // Add the error log pointer as data to the ReturnCode
+        addErrlPtrToReturnCode(rc, l_errl);
     }
     else
     {
@@ -600,7 +611,8 @@ ReturnCode platGetPoundWBucketData(const Target<TARGET_TYPE_ALL>& i_fapiTarget,
     if (l_errl)
     {
         FAPI_ERR("platGetPoundWBucketData: Error from getTargetingTarget");
-        rc.setPlatDataPtr(reinterpret_cast<void *> (l_errl));
+        // Add the error log pointer as data to the ReturnCode
+        addErrlPtrToReturnCode(rc, l_errl);
     }
     else
     {
@@ -843,7 +855,8 @@ ReturnCode __dimmUpdateDqBitmapEccByte(
         {
             FAPI_ERR( "__dimmUpdateDqBitmapEccByte: Error from "
                       "getTargetingTarget" );
-            l_rc.setPlatDataPtr(reinterpret_cast<void *> (l_errl));
+            // Add the error log pointer as data to the ReturnCode
+            addErrlPtrToReturnCode(l_rc, l_errl);
             break;
         }
 
@@ -853,7 +866,8 @@ ReturnCode __dimmUpdateDqBitmapEccByte(
         {
             FAPI_ERR( "__dimmUpdateDqBitmapEccByte: Failed to get "
                       "SPD::MODULE_MEMORY_BUS_WIDTH." );
-            l_rc.setPlatDataPtr(reinterpret_cast<void *> (l_errl));
+            // Add the error log pointer as data to the ReturnCode
+            addErrlPtrToReturnCode(l_rc, l_errl);
             break;
         }
 
@@ -1052,7 +1066,8 @@ ReturnCode __compareEccAndSpare(const Target<TARGET_TYPE_DIMM>& i_fapiDimm,
             if ( l_errl )
             {
                 FAPI_ERR("__compareEccAndSpare: Error from getTargetingTarget");
-                l_rc.setPlatDataPtr(reinterpret_cast<void *> (l_errl));
+                // Add the error log pointer as data to the ReturnCode
+                addErrlPtrToReturnCode(l_rc, l_errl);
                 break;
             }
 
@@ -1410,7 +1425,8 @@ ReturnCode fapiAttrGetBadDqBitmap(
         if ( l_errl )
         {
             FAPI_ERR( "fapiAttrGetBadDqBitmap: Error from getTargetingTarget" );
-            l_rc.setPlatDataPtr(reinterpret_cast<void *> (l_errl));
+            // Add the error log pointer as data to the ReturnCode
+            addErrlPtrToReturnCode(l_rc, l_errl);
             break;
         }
 
@@ -1430,7 +1446,8 @@ ReturnCode fapiAttrGetBadDqBitmap(
         {
             FAPI_ERR( "fapiAttrGetBadDqBitmap: Failed to read DIMM Bad DQ "
                       "data." );
-            l_rc.setPlatDataPtr(reinterpret_cast<void *> (l_errl));
+            // Add the error log pointer as data to the ReturnCode
+            addErrlPtrToReturnCode(l_rc, l_errl);
             break;
         }
 
@@ -1547,7 +1564,8 @@ ReturnCode fapiAttrSetBadDqBitmap(
         if ( l_errl )
         {
             FAPI_ERR( "fapiAttrSetBadDqBitmap: Error from getTargetingTarget" );
-            l_rc.setPlatDataPtr(reinterpret_cast<void *> (l_errl));
+            // Add the error log pointer as data to the ReturnCode
+            addErrlPtrToReturnCode(l_rc, l_errl);
             break;
         }
 
@@ -1608,7 +1626,8 @@ ReturnCode fapiAttrSetBadDqBitmap(
         {
             FAPI_ERR( "fapiAttrSetBadDqBitmap: Failed to read DIMM Bad DQ "
                       "data." );
-            l_rc.setPlatDataPtr(reinterpret_cast<void *> (l_errl));
+            // Add the error log pointer as data to the ReturnCode
+            addErrlPtrToReturnCode(l_rc, l_errl);
             break;
         }
 
@@ -1636,7 +1655,8 @@ ReturnCode fapiAttrSetBadDqBitmap(
         {
             FAPI_ERR( "fapiAttrSetBadDqBitmap: Failed to write DIMM "
                       "Bad DQ data." );
-            l_rc.setPlatDataPtr(reinterpret_cast<void *> (l_errl));
+            // Add the error log pointer as data to the ReturnCode
+            addErrlPtrToReturnCode(l_rc, l_errl);
             break;
         }
 
@@ -1704,7 +1724,8 @@ ReturnCode __isX4Dram( const Target<TARGET_TYPE_DIMM>& i_fapiDimm,
         {
             FAPI_ERR("__isX4Dram: Error getting dimm from getTargetingTarget");
             fapi2::ReturnCode l_rc;
-            l_rc.setPlatDataPtr(reinterpret_cast<void *> (l_errl));
+            // Add the error log pointer as data to the ReturnCode
+            addErrlPtrToReturnCode(l_rc, l_errl);
             return l_rc;
         }
         uint8_t l_dimmSlct =
@@ -1843,7 +1864,8 @@ ReturnCode getRowRepairData( const Target<TARGET_TYPE_ALL>& i_fapiTarget,
         if ( l_errl )
         {
             FAPI_ERR( "getRowRepairData: Error from getTargetingTarget" );
-            l_rc.setPlatDataPtr(reinterpret_cast<void *> (l_errl));
+            // Add the error log pointer as data to the ReturnCode
+            addErrlPtrToReturnCode(l_rc, l_errl);
             break;
         }
 
@@ -1860,7 +1882,8 @@ ReturnCode getRowRepairData( const Target<TARGET_TYPE_ALL>& i_fapiTarget,
         {
             FAPI_ERR( "getRowRepairData: Failed to call deviceRead to get "
                       "l_data." );
-            l_rc.setPlatDataPtr(reinterpret_cast<void *> (l_errl));
+            // Add the error log pointer as data to the ReturnCode
+            addErrlPtrToReturnCode(l_rc, l_errl);
             break;
         }
 
@@ -1923,7 +1946,8 @@ ReturnCode setRowRepairData( const Target<TARGET_TYPE_ALL>& i_fapiTarget,
         if ( l_errl )
         {
             FAPI_ERR( "setRowRepairData: Error from getTargetingTarget" );
-            l_rc.setPlatDataPtr(reinterpret_cast<void *> (l_errl));
+            // Add the error log pointer as data to the ReturnCode
+            addErrlPtrToReturnCode(l_rc, l_errl);
             break;
         }
 
@@ -1937,7 +1961,8 @@ ReturnCode setRowRepairData( const Target<TARGET_TYPE_ALL>& i_fapiTarget,
         {
             FAPI_ERR( "setRowRepairData: Failed to call deviceRead to get "
                       "l_data." );
-            l_rc.setPlatDataPtr(reinterpret_cast<void *> (l_errl));
+            // Add the error log pointer as data to the ReturnCode
+            addErrlPtrToReturnCode(l_rc, l_errl);
             break;
         }
 
@@ -1967,7 +1992,8 @@ ReturnCode setRowRepairData( const Target<TARGET_TYPE_ALL>& i_fapiTarget,
         {
             FAPI_ERR( "setRowRepairData: Failed to call deviceWrite to set "
                       "l_spdData." );
-            l_rc.setPlatDataPtr(reinterpret_cast<void *> (l_errl));
+            // Add the error log pointer as data to the ReturnCode
+            addErrlPtrToReturnCode(l_rc, l_errl);
             break;
         }
 
@@ -2033,7 +2059,8 @@ ReturnCode platGetControlCapableData(
     if (l_errl)
     {
         FAPI_ERR("platGetControlCapableData: Error from getTargetingTarget");
-        rc.setPlatDataPtr(reinterpret_cast<void *> (l_errl));
+        // Add the error log pointer as data to the ReturnCode
+        addErrlPtrToReturnCode(rc, l_errl);
     }
     else
     {
@@ -2076,7 +2103,8 @@ ReturnCode platGetDQAttrISDIMM(
     if (l_errl)
     {
         FAPI_ERR("platGetDQAttrISDIMM: Error from getTargetingTarget");
-        rc.setPlatDataPtr(reinterpret_cast<void *> (l_errl));
+        // Add the error log pointer as data to the ReturnCode
+        addErrlPtrToReturnCode(rc, l_errl);
     }
     else
     {
@@ -2127,7 +2155,8 @@ ReturnCode platGetDQSAttrISDIMM(
     if (l_errl)
     {
         FAPI_ERR("platGetDQSAttrISDIMM: Error from getTargetingTarget");
-        rc.setPlatDataPtr(reinterpret_cast<void *> (l_errl));
+        // Add the error log pointer as data to the ReturnCode
+        addErrlPtrToReturnCode(rc, l_errl);
     }
     else
     {
@@ -2177,7 +2206,8 @@ ReturnCode platGetMBvpdSensorMapPrimary(
     {
         FAPI_ERR("platGetMBvpdSensorMapPrimary: "
                                               "Error from getTargetingTarget");
-        rc.setPlatDataPtr(reinterpret_cast<void *> (l_errl));
+        // Add the error log pointer as data to the ReturnCode
+        addErrlPtrToReturnCode(rc, l_errl);
     }
     else
     {
@@ -2208,7 +2238,8 @@ ReturnCode platGetMBvpdSensorMapSecondary(
     {
         FAPI_ERR("platGetMBvpdSensorMapSecondary: "
                                               "Error from getTargetingTarget");
-        rc.setPlatDataPtr(reinterpret_cast<void *> (l_errl));
+        // Add the error log pointer as data to the ReturnCode
+        addErrlPtrToReturnCode(rc, l_errl);
     }
     else
     {
@@ -2239,7 +2270,8 @@ ReturnCode platGetMBvpdDramAddressMirroring(
     {
         FAPI_ERR("platGetMBvpdDramAddressMirroring: "
                                               "Error from getTargetingTarget");
-        rc.setPlatDataPtr(reinterpret_cast<void *> (l_errl));
+        // Add the error log pointer as data to the ReturnCode
+        addErrlPtrToReturnCode(rc, l_errl);
     }
     else
     {
@@ -2270,7 +2302,8 @@ ReturnCode platGetMBvpdDram2NModeEnabled(
     {
         FAPI_ERR("platGetMBvpdDram2NModeEnabled: "
                                               "Error from getTargetingTarget");
-        rc.setPlatDataPtr(reinterpret_cast<void *> (l_errl));
+        // Add the error log pointer as data to the ReturnCode
+        addErrlPtrToReturnCode(rc, l_errl);
     }
     else
     {
@@ -2304,7 +2337,8 @@ ReturnCode platGetMBvpdMemoryDataVersion(
             FAPI_ERR("platGetMBvpdMemoryDataVersion: "
                                            "Error from getTargetingTarget");
 
-            rc.setPlatDataPtr(reinterpret_cast<void *> (l_errl));
+            // Add the error log pointer as data to the ReturnCode
+            addErrlPtrToReturnCode(rc, l_errl);
             break;
         }
         else
@@ -2340,7 +2374,8 @@ ReturnCode platGetMBvpdSPDXRecordVersion(
     {
         FAPI_ERR("platGetMBvpdSPDXRecordVersion: "
                                               "Error from getTargetingTarget");
-        rc.setPlatDataPtr(reinterpret_cast<void *> (l_errl));
+        // Add the error log pointer as data to the ReturnCode
+        addErrlPtrToReturnCode(rc, l_errl);
     }
     else
     {
@@ -2370,7 +2405,8 @@ ReturnCode platGetMBvpdSpareDramData(
     if (l_errl)
     {
         FAPI_ERR("platGetMBvpdSpareDramData: Error from getTargetingTarget");
-        rc.setPlatDataPtr(reinterpret_cast<void *> (l_errl));
+        // Add the error log pointer as data to the ReturnCode
+        addErrlPtrToReturnCode(rc, l_errl);
     }
     else
     {
@@ -2402,7 +2438,8 @@ ReturnCode platGetMBvpdVersion(
         if (l_errl)
         {
             FAPI_ERR("platGetMBvpdVersion: Error from getTargetingTarget");
-            rc.setPlatDataPtr(reinterpret_cast<void *> (l_errl));
+            // Add the error log pointer as data to the ReturnCode
+            addErrlPtrToReturnCode(rc, l_errl);
         }
         else
         {
@@ -2440,7 +2477,8 @@ ReturnCode platGetMBvpdVersion(
                 FAPI_ERR("platGetMBvpdVersion: "
                                 "Error could not find an MBA parent for DIMM");
 
-                rc.setPlatDataPtr(reinterpret_cast<void *> (l_errl));
+                // Add the error log pointer as data to the ReturnCode
+                addErrlPtrToReturnCode(rc, l_errl);
                 break;
             }
             else if(l_mbaList.size() != 1)
@@ -2466,7 +2504,8 @@ ReturnCode platGetMBvpdVersion(
                          "Found multiple MBA chips while "
                          "seeking parent for DIMM");
 
-                rc.setPlatDataPtr(reinterpret_cast<void *> (l_errl));
+                // Add the error log pointer as data to the ReturnCode
+                addErrlPtrToReturnCode(rc, l_errl);
                 break;
             }
 
@@ -2502,7 +2541,8 @@ ReturnCode platGetMBvpdVoltageSettingData(
     {
         FAPI_ERR("platGetMBvpdVoltageSettingData: "
                                               "Error from getTargetingTarget");
-        rc.setPlatDataPtr(reinterpret_cast<void *> (l_errl));
+        // Add the error log pointer as data to the ReturnCode
+        addErrlPtrToReturnCode(rc, l_errl);
     }
     else
     {
@@ -2537,7 +2577,8 @@ ReturnCode platGetMBvpdAttr(
         if (l_errl)
         {
             FAPI_ERR("platGetMBvpdAttr: Error from getTargetingTarget");
-            rc.setPlatDataPtr(reinterpret_cast<void *> (l_errl));
+            // Add the error log pointer as data to the ReturnCode
+            addErrlPtrToReturnCode(rc, l_errl);
         }
         else
         {
@@ -2566,7 +2607,8 @@ ReturnCode platGetMBvpdAttr(
                                       hbSwError);
 
                     rc = ReturnCode(fapi2::RC_INVALID_TARGET_TYPE);
-                    rc.setPlatDataPtr(reinterpret_cast<void *> (l_errl));
+                    // Add the error log pointer as data to the ReturnCode
+                    addErrlPtrToReturnCode(rc, l_errl);
                     FAPI_ERR("platGetMBvpdAttr: Invalid Target Type.");
                     break;
                 }
@@ -2598,7 +2640,8 @@ ReturnCode platGetMBvpdAttr(
                                       TARGETING::get_huid(l_pTarget),
                                       hbSwError);
 
-                    rc.setPlatDataPtr(reinterpret_cast<void *> (l_errl));
+                    // Add the error log pointer as data to the ReturnCode
+                    addErrlPtrToReturnCode(rc, l_errl);
                     FAPI_ERR("platGetMBvpdAttr: Could not find a child mba "
                              "for the passed in membuf target."
                             );
@@ -2654,7 +2697,8 @@ ReturnCode getPllBucket(const Target<TARGET_TYPE_ALL>& i_fapiTarget,
     if(l_errl)
     {
         FAPI_ERR("getPllBucket: Error from getTargetingTarget");
-        l_rc.setPlatDataPtr(reinterpret_cast<void *> (l_errl));
+        // Add the error log pointer as data to the ReturnCode
+        addErrlPtrToReturnCode(l_rc, l_errl);
     }
     else
     {
@@ -2662,7 +2706,8 @@ ReturnCode getPllBucket(const Target<TARGET_TYPE_ALL>& i_fapiTarget,
         if (l_errl)
         {
             FAPI_ERR("getPllBucket: Error from getObusPllBucket");
-            l_rc.setPlatDataPtr(reinterpret_cast<void *> (l_errl));
+            // Add the error log pointer as data to the ReturnCode
+            addErrlPtrToReturnCode(l_rc, l_errl);
         }
     }
     return l_rc;
@@ -2688,7 +2733,8 @@ ReturnCode platGetMBvpdSlopeInterceptData(
     {
         FAPI_ERR("platGetMBvpdSPDXRecordVersion: "
                                               "Error from getTargetingTarget");
-        rc.setPlatDataPtr(reinterpret_cast<void *> (l_errl));
+        // Add the error log pointer as data to the ReturnCode
+        addErrlPtrToReturnCode(rc, l_errl);
     }
     else
     {
@@ -2750,7 +2796,8 @@ ReturnCode platGetFreqMcaMhz(const Target<TARGET_TYPE_ALL>& i_fapiTarget,
     if(l_errl)
     {
         FAPI_ERR("platGetFreqMcaMhz: Error from getTargetingTarget");
-        l_rc.setPlatDataPtr(reinterpret_cast<void *> (l_errl));
+        // Add the error log pointer as data to the ReturnCode
+        addErrlPtrToReturnCode(l_rc, l_errl);
     }
     else
     {
@@ -2879,7 +2926,8 @@ ReturnCode platGetMcPllBucket(const Target<TARGET_TYPE_ALL>& i_fapiTarget,
         if(l_errl)
         {
             FAPI_ERR("platGetMcPllBucket: Error from getTargetingTarget");
-            l_rc.setPlatDataPtr(reinterpret_cast<void *> (l_errl));
+            // Add the error log pointer as data to the ReturnCode
+            addErrlPtrToReturnCode(l_rc, l_errl);
             break;
         }
 
@@ -2888,7 +2936,8 @@ ReturnCode platGetMcPllBucket(const Target<TARGET_TYPE_ALL>& i_fapiTarget,
 
         if(l_errl)
         {
-            l_rc.setPlatDataPtr(reinterpret_cast<void *> (l_errl));
+            // Add the error log pointer as data to the ReturnCode
+            addErrlPtrToReturnCode(l_rc, l_errl);
             break;
         }
 
@@ -2954,7 +3003,8 @@ ReturnCode platGetMcPllBucket(const Target<TARGET_TYPE_ALL>& i_fapiTarget,
                               TARGETING::get_huid(l_sysTarget),
                               ERRORLOG::ErrlEntry::NO_SW_CALLOUT);
             l_errl->collectTrace(FAPI_IMP_TRACE_NAME, 256);
-            l_rc.setPlatDataPtr(reinterpret_cast<void *> (l_errl));
+            // Add the error log pointer as data to the ReturnCode
+            addErrlPtrToReturnCode(l_rc, l_errl);
             break;
         }
 
@@ -2986,7 +3036,8 @@ ReturnCode platGetFreqMcaMhz(const Target<TARGET_TYPE_ALL>& i_fapiTarget,
         if(l_errl)
         {
             FAPI_ERR("platGetFreqMcaMhz: Error from getTargetingTarget");
-            l_rc.setPlatDataPtr(reinterpret_cast<void *> (l_errl));
+            // Add the error log pointer as data to the ReturnCode
+            addErrlPtrToReturnCode(l_rc, l_errl);
             break;
         }
 
@@ -2995,7 +3046,8 @@ ReturnCode platGetFreqMcaMhz(const Target<TARGET_TYPE_ALL>& i_fapiTarget,
 
         if(l_errl)
         {
-            l_rc.setPlatDataPtr(reinterpret_cast<void *> (l_errl));
+            // Add the error log pointer as data to the ReturnCode
+            addErrlPtrToReturnCode(l_rc, l_errl);
             break;
         }
 
@@ -3054,7 +3106,8 @@ ReturnCode platGetFreqMcaMhz(const Target<TARGET_TYPE_ALL>& i_fapiTarget,
                               TWO_UINT32_TO_UINT64(l_omiFreq, l_omiVco),
                               TARGETING::get_huid(l_sysTarget),
                               ERRORLOG::ErrlEntry::NO_SW_CALLOUT);
-            l_rc.setPlatDataPtr(reinterpret_cast<void *> (l_errl));
+            // Add the error log pointer as data to the ReturnCode
+            addErrlPtrToReturnCode(l_rc, l_errl);
             break;
         }
 
@@ -3081,7 +3134,8 @@ ReturnCode platIncrementOcmbCounter(const Target<TARGET_TYPE_ALL>& i_fapiTarget,
     if (l_errl)
     {
         FAPI_ERR("platIncrementOcmbCounter: Error from getTargetingTarget");
-        rc.setPlatDataPtr(reinterpret_cast<void *> (l_errl));
+        // Add the error log pointer as data to the ReturnCode
+        addErrlPtrToReturnCode(rc, l_errl);
     }
     else
     {

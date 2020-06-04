@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -252,7 +252,8 @@ fapi2::ReturnCode platParseWOFTables(uint8_t* o_wofData)
         if(l_errl)
         {
             FAPI_ERR("platParseWOFTables getLidSize failed");
-            l_rc.setPlatDataPtr(reinterpret_cast<void *>(l_errl));
+            // Add the error log pointer as data to the ReturnCode
+            addErrlPtrToReturnCode(l_rc, l_errl);
             break;
         }
 
@@ -298,7 +299,8 @@ fapi2::ReturnCode platParseWOFTables(uint8_t* o_wofData)
                                TWO_UINT32_TO_UINT64(VMM_SIZE_WOFDATA_LID,
                                                     l_mm_rc),
                                ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
-                l_rc.setPlatDataPtr(reinterpret_cast<void *>(l_errl));
+                // Add the error log pointer as data to the ReturnCode
+                addErrlPtrToReturnCode(l_rc, l_errl);
                 break;
             }
 
@@ -330,7 +332,8 @@ fapi2::ReturnCode platParseWOFTables(uint8_t* o_wofData)
                                TWO_UINT32_TO_UINT64(VMM_SIZE_WOFDATA_LID,
                                                     l_mm_rc),
                                ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
-            l_rc.setPlatDataPtr(reinterpret_cast<void *>(l_errl));
+            // Add the error log pointer as data to the ReturnCode
+            addErrlPtrToReturnCode(l_rc, l_errl);
             break;
         }
 
@@ -346,7 +349,8 @@ fapi2::ReturnCode platParseWOFTables(uint8_t* o_wofData)
             FAPI_ERR("platParseWOFTables getLid failed "
                      "pLidImage %p imageSize %d",
                      l_pWofImage, l_lidImageSize);
-            l_rc.setPlatDataPtr(reinterpret_cast<void *>(l_errl));
+            // Add the error log pointer as data to the ReturnCode
+            addErrlPtrToReturnCode(l_rc, l_errl);
             break;
         }
 
@@ -381,7 +385,8 @@ fapi2::ReturnCode platParseWOFTables(uint8_t* o_wofData)
                                 l_lidNumber,
                                 l_img->version),
                              ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
-            l_rc.setPlatDataPtr(reinterpret_cast<void *>(l_errl));
+            // Add the error log pointer as data to the ReturnCode
+            addErrlPtrToReturnCode(l_rc, l_errl);
             break;
         }
 
@@ -410,7 +415,8 @@ fapi2::ReturnCode platParseWOFTables(uint8_t* o_wofData)
                                 WOF_IMAGE_VERSION),
                              l_lidNumber,
                              ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
-            l_rc.setPlatDataPtr(reinterpret_cast<void *>(l_errl));
+            // Add the error log pointer as data to the ReturnCode
+            addErrlPtrToReturnCode(l_rc, l_errl);
             break;
         }
 
@@ -466,7 +472,8 @@ fapi2::ReturnCode platParseWOFTables(uint8_t* o_wofData)
                                     l_ent,
                                     l_ver),
                                 ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
-                l_rc.setPlatDataPtr(reinterpret_cast<void *>(l_errl));
+                // Add the error log pointer as data to the ReturnCode
+                addErrlPtrToReturnCode(l_rc, l_errl);
                 break;
             }
 
@@ -496,7 +503,8 @@ fapi2::ReturnCode platParseWOFTables(uint8_t* o_wofData)
                                     MAX_WOF_TABLES_VERSION),
                                 l_ent,
                                 ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
-                l_rc.setPlatDataPtr(reinterpret_cast<void *>(l_errl));
+                // Add the error log pointer as data to the ReturnCode
+                addErrlPtrToReturnCode(l_rc, l_errl);
                 break;
             }
 
@@ -644,7 +652,8 @@ fapi2::ReturnCode platParseWOFTables(uint8_t* o_wofData)
 
             addWofCompareDataToErrl(l_errl, &l_match_data_fields, l_headers);
 
-            l_rc.setPlatDataPtr(reinterpret_cast<void *>(l_errl));
+            // Add the error log pointer as data to the ReturnCode
+            addErrlPtrToReturnCode(l_rc, l_errl);
             break;
         }
 
