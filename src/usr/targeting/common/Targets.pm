@@ -949,7 +949,6 @@ sub buildAffinity
             my $ocmb_aff = $node_aff . "/proc-$proc_num/mc-$mc_num/mi-$mi_num/mcc-$mcc_num/omi-$omi_num/ocmb_chip-0";
             $self->setAttribute($target, "AFFINITY_PATH", $ocmb_aff);
             $self->setAttribute($target, "PHYS_PATH", $ocmb_phys);
-
             $self->{targeting}{SYS}[0]{NODES}[$node]{OCMB_CHIPS}[$ocmb]{KEY} = $target;
             $self->setHuid($target, $sys_pos, $node, $ocmb);
 
@@ -1079,7 +1078,6 @@ sub buildAffinity
                     $omi_num %= 2;
                 }
             }
-
             my $dimm = $omi_chip_unit + ($maxInstance{"DDIMM"} * $proc_num);
             $self->{targeting}{SYS}[0]{NODES}[$node]{DIMMS}[$dimm]{KEY} = $target;
             $self->setAttribute($target, "PHYS_PATH", $node_phys . "/dimm-$dimm");
@@ -1090,12 +1088,14 @@ sub buildAffinity
             # no direct way to get the relative position to the proc. The
             # relationship between dimm and omi is 1:1, so we take the chip unit
             # of the corresponding omi as the relative position to the proc
-            $self->setAttribute($target, "FAPI_POS", $dimm);
+            # We want to multiply by 2 here to match the Cronus values
+            my $fapi_pos = $dimm * 2;
+            $self->setAttribute($target, "FAPI_POS", $fapi_pos);
             $self->setAttribute($target, "ORDINAL_ID", $dimm);
             $self->setAttribute($target, "REL_POS", 0);
             $self->setAttribute($target, "VPD_REC_NUM", $dimm);
 
-            my $dimm_num = $dimm;
+            my $dimm_num = $fapi_pos;
             if ($dimm < 10)
             {
                 $dimm_num = "0$dimm";
