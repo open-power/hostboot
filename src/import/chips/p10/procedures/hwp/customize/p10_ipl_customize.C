@@ -1630,12 +1630,14 @@ fapi2::ReturnCode fetch_and_insert_vpd_rings(
     for (eq = 0; eq < NUM_OF_QMES; eq++)
     {
 
-        // Make sure one of the current eq's cores is included in the requested bootCoreMask
-        if ( !( ( (QUAD0_CORES_MASK) >> (eq * CORES_PER_QME) ) & io_bootCoreMask ) )
-        {
-            // No cores from current eq are included in bootCoreMask. Skip to next eq.
-            continue;
-        }
+        // CMO-20200604:
+        // In p10, unlike in p9, the quads/QMEs are expected to always be good
+        // and active, and essentially part of the nest set of chiplets.  Therefore
+        // all QMEs, even if one or more of them have no EC cores indicated in the
+        // bootCoreMask, still need to come online and thus need instance rings
+        // like the eq_repr and eq_gptr_ovly. So the check we used to have here in
+        // p9 for whether any cores are indicated in the bootCoreMask for the
+        // current quad, and if not then skip this quad, has been deleted.
 
         for ( rpIndex = 0; rpIndex < NUM_RING_IDS; rpIndex++ )
         {
