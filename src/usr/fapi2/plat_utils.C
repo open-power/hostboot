@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -71,12 +71,41 @@ TRAC_INIT(&g_fapiMfgTd, FAPI_MFG_TRACE_NAME, 4*KILOBYTE);
 namespace fapi2
 {
 
-// Define global current_err
+// Define globals
+// g_platErrList stores error log pointers added to ReturnCodes via the
+//   setPlatDataPtr function within the HWP_INVOKE scope.  These error logs
+//   may or may not be deleted during HWP_INVOKE.  The remaining error logs
+//   on the list are deleted in hwpResetGlobals() at the end of the HWP_INVOKE
+//   sequence, thus avoiding a memory leak.
 #ifndef PLAT_NO_THREAD_LOCAL_STORAGE
 thread_local ReturnCode current_err;
+thread_local std::list<errlHndl_t> g_platErrList;
 #else
 ReturnCode current_err;
+std::list<errlHndl_t> g_platErrList;
 #endif
+
+
+///
+/// @brief Add error log pointer as data to the ReturnCode and also add it
+///        to the global error log list so we can delete it later
+///
+/// @param[in]  i_rc - ReturnCode reference
+/// @param[in]  i_err - Error log pointer
+///
+void addErrlPtrToReturnCode( fapi2::ReturnCode& i_rc,
+                             errlHndl_t i_err )
+{
+    assert(i_err != nullptr,
+           "addErrlPtrToReturnCode() called with errHndl_t = nullptr");
+
+    // Add the error log pointer as data to the ReturnCode
+    i_rc.setPlatDataPtr(reinterpret_cast<void *> (i_err));
+
+    // Add error to global list so we can delete it later
+    g_platErrList.push_back(i_err);
+}
+
 
 ///
 /// @brief Translates a FAPI callout priority to an HWAS callout priority
@@ -805,6 +834,9 @@ errlHndl_t rcToErrl(ReturnCode & io_rc,
         {
             // PLAT error, get the platform data from the return code
             FAPI_ERR("rcToErrl: PLAT error: 0x%08x", l_rcValue);
+
+            // Remove from the global error list
+            g_platErrList.remove(l_pError);
         }
         else if (nullptr == l_pError)
         {
@@ -931,7 +963,8 @@ void createPlatLog(
     // PLAT Data, HWP FFDC data, and Error Target associated with it.
     l_pError = rcToErrl(io_rc, l_sev);
 
-    io_rc.setPlatDataPtr(reinterpret_cast<void *>(l_pError));
+    // Add the error log pointer as data to the ReturnCode
+    addErrlPtrToReturnCode(io_rc, l_pError);
 
 }
 
@@ -949,6 +982,9 @@ void logError(
     createPlatLog( io_rc, i_sev );
 
     errlHndl_t l_pError = reinterpret_cast<errlHndl_t>(io_rc.getPlatDataPtr());
+
+    // Remove from the global error list
+    g_platErrList.remove(l_pError);
 
     // Commit the error log. This will delete the error log and set the handle
     // to NULL.
@@ -974,7 +1010,12 @@ void logError(
 ///
 void deletePlatformDataPointer(fapi2::ReturnCode & io_rc)
 {
-    delete(reinterpret_cast<errlHndl_t>(io_rc.getPlatDataPtr()));
+    errlHndl_t l_pError = reinterpret_cast<errlHndl_t>(io_rc.getPlatDataPtr());
+
+    // Remove from the global error list
+    g_platErrList.remove(l_pError);
+
+    delete(l_pError);
 }
 
 ///
@@ -1002,7 +1043,8 @@ void set_log_id( const Target<TARGET_TYPE_ALL>& i_fapiTrgt,
         errlHndl_t errl = reinterpret_cast<errlHndl_t>(io_rc.getPlatDataPtr());
         uint32_t plid = ERRL_GETPLID_SAFE(errl);
 
-        io_rc.setPlatDataPtr(reinterpret_cast<void*>(errl));
+        // Add the error log pointer as data to the ReturnCode
+        addErrlPtrToReturnCode(io_rc, errl);
 
         // Set the PLID in this attribute.
         if ( ! attrTrgt->trySetAttr<TARGETING::ATTR_PRD_HWP_PLID>(plid) )
@@ -1091,7 +1133,8 @@ fapi2::ReturnCode platSpecialWakeup(const Target<TARGET_TYPE_ALL>& i_target,
     errlHndl_t err_SW = WAKEUP::handleSpecialWakeup(l_target,l_option);
     if(err_SW)
     {
-        fapi_rc.setPlatDataPtr(reinterpret_cast<void *>(err_SW));
+        // Add the error log pointer as data to the ReturnCode
+        addErrlPtrToReturnCode(fapi_rc, err_SW);
     }
 
     // On Hostboot, processor cores cannot sleep so return success to the
@@ -1108,6 +1151,15 @@ void hwpResetGlobals(void)
     fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
     fapi2::opMode = fapi2::NORMAL;
     fapi2::setPIBErrorMask(0);
+
+    // Delete remaining error logs on global list
+    for( const auto & l_errl : g_platErrList )
+    {
+        delete(l_errl);
+    }
+
+    // Clear out the list
+    g_platErrList.clear();
 }
 
 

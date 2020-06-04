@@ -69,8 +69,8 @@ fapi2::ReturnCode dimmBadDqCheckParamGetBitmap( const fapi2::Target
         {
             FAPI_ERR( "dimmBadDqCheckParamGetBitmap: Error from "
                       "getTargetingTarget" );
-            errlCommit( l_errl, FAPI2_COMP_ID );
-            l_rc.setPlatDataPtr(reinterpret_cast<void *> (l_errl));
+            // Add the error log pointer as data to the ReturnCode
+            addErrlPtrToReturnCode(l_rc, l_errl);
             break;
         }
 

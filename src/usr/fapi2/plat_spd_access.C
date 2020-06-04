@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -36,6 +36,7 @@
 #include <fapi2_spd_access.H>
 #include <vpd/spdenums.H>
 #include <hwas/common/hwasCallout.H>
+#include <plat_utils.H>
 
 namespace fapi2
 {
@@ -170,7 +171,8 @@ fapi2::ReturnCode getSPD(
         FAPI_ERR("getSPD: Error getting SPD data for HUID=0x%.8X Size %d",
                 TARGETING::get_huid(l_pTarget),o_size);
 
-        l_rc.setPlatDataPtr(reinterpret_cast<void *>(l_errl));
+        // Add the error log pointer as data to the ReturnCode
+        addErrlPtrToReturnCode(l_rc, l_errl);
     }
 
     FAPI_DBG("getSPD: SPD data for HUID=0x%.8X Size %d Blob %d",

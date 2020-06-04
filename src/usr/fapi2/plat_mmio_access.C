@@ -397,7 +397,8 @@ ReturnCode platGetMMIO( const Target<TARGET_TYPE_ALL>& i_target,
 
     if (l_err)
     {
-        l_rc.setPlatDataPtr(reinterpret_cast<void *> (l_err));
+        // Add the error log pointer as data to the ReturnCode
+        addErrlPtrToReturnCode(l_rc, l_err);
     }
     else
     {
@@ -497,7 +498,8 @@ ReturnCode platPutMMIO( const Target<TARGET_TYPE_ALL>& i_target,
 
     if (l_err)
     {
-        l_rc.setPlatDataPtr(reinterpret_cast<void *> (l_err));
+        // Add the error log pointer as data to the ReturnCode
+        addErrlPtrToReturnCode(l_rc, l_err);
     }
 
     FAPI_DBG(EXIT_MRK "platPutMMIO");

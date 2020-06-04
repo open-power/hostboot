@@ -162,7 +162,8 @@ ReturnCode platGetScom(const Target<TARGET_TYPE_ALL>& i_target,
             FAPI_ERR("platGetScom: deviceRead returns error!");
             FAPI_ERR("fapiGetScom failed - Target %s, Addr %.16llX",
                      l_targName, l_scomAddr);
-            l_rc.setPlatDataPtr(reinterpret_cast<void *> (l_err));
+            // Add the error log pointer as data to the ReturnCode
+            addErrlPtrToReturnCode(l_rc, l_err);
             if(l_err->getErrorType() == SCOM::SCOM_MULTICAST_MISCOMPARE)
             {
                 l_rc.setRC(fapi2::FAPI2_RC_PLAT_MISCOMPARE);
@@ -242,7 +243,8 @@ ReturnCode platPutScom(const Target<TARGET_TYPE_ALL>& i_target,
             FAPI_ERR("platPutScom: deviceWrite returns error!");
             FAPI_ERR("platPutScom failed - Target %s, Addr %.16llX",
                      l_targName, l_scomAddr);
-                     l_rc.setPlatDataPtr(reinterpret_cast<void *> (l_err));
+            // Add the error log pointer as data to the ReturnCode
+            addErrlPtrToReturnCode(l_rc, l_err);
         }
     }
 
@@ -291,7 +293,9 @@ ReturnCode platPutScomUnderMask(const Target<TARGET_TYPE_ALL>& i_target,
         if (l_err && !(opMode & fapi2::IGNORE_HW_ERROR))
         {
             FAPI_ERR("platPutScomUnderMask: deviceRead returns error!");
-            l_rc.setPlatDataPtr(reinterpret_cast<void *> (l_err));
+
+            // Add the error log pointer as data to the ReturnCode
+            addErrlPtrToReturnCode(l_rc, l_err);
             break;
         }
         else if(l_err)
@@ -319,7 +323,9 @@ ReturnCode platPutScomUnderMask(const Target<TARGET_TYPE_ALL>& i_target,
         if (l_err && !(opMode & fapi2::IGNORE_HW_ERROR))
         {
             FAPI_ERR("platPutScomUnderMask: deviceWrite returns error!");
-            l_rc.setPlatDataPtr(reinterpret_cast<void *> (l_err));
+
+            // Add the error log pointer as data to the ReturnCode
+            addErrlPtrToReturnCode(l_rc, l_err);
             break;
         }
         else if (l_err)
@@ -497,7 +503,9 @@ ReturnCode platGetCfamRegister(const Target<TARGET_TYPE_ALL>& i_target,
             FAPI_ERR("platGetCfamRegister: getCfamChipTarget returns error!");
             FAPI_ERR("fapiGetCfamRegister failed - Target %s, Addr %.8X",
                       l_targName, i_address);
-            l_rc.setPlatDataPtr(reinterpret_cast<void *> (l_err));
+
+            // Add the error log pointer as data to the ReturnCode
+            addErrlPtrToReturnCode(l_rc, l_err);
             break;
         }
 
@@ -506,7 +514,9 @@ ReturnCode platGetCfamRegister(const Target<TARGET_TYPE_ALL>& i_target,
         if (l_err)
         {
             FAPI_ERR("platGetCfamRegister: verifyCfamAccessTarget returns error!");
-            l_rc.setPlatDataPtr(reinterpret_cast<void *> (l_err));
+
+            // Add the error log pointer as data to the ReturnCode
+            addErrlPtrToReturnCode(l_rc, l_err);
             break;
         }
 
@@ -524,7 +534,9 @@ ReturnCode platGetCfamRegister(const Target<TARGET_TYPE_ALL>& i_target,
         if (l_err)
         {
             FAPI_ERR("platGetCfamRegister: deviceRead returns error!");
-            l_rc.setPlatDataPtr(reinterpret_cast<void *> (l_err));
+
+            // Add the error log pointer as data to the ReturnCode
+            addErrlPtrToReturnCode(l_rc, l_err);
             break;
         }
 
@@ -574,7 +586,9 @@ ReturnCode platPutCfamRegister(const Target<TARGET_TYPE_ALL>& i_target,
         if (l_err)
         {
             FAPI_ERR("platPutCfamRegister: getCfamChipTarget returns error!");
-            l_rc.setPlatDataPtr(reinterpret_cast<void *> (l_err));
+
+            // Add the error log pointer as data to the ReturnCode
+            addErrlPtrToReturnCode(l_rc, l_err);
             break;
         }
 
@@ -583,7 +597,9 @@ ReturnCode platPutCfamRegister(const Target<TARGET_TYPE_ALL>& i_target,
         if (l_err)
         {
             FAPI_ERR("platPutCfamRegister: verifyCfamAccessTarget returns error!");
-            l_rc.setPlatDataPtr(reinterpret_cast<void *> (l_err));
+
+            // Add the error log pointer as data to the ReturnCode
+            addErrlPtrToReturnCode(l_rc, l_err);
             break;
         }
 
@@ -602,7 +618,9 @@ ReturnCode platPutCfamRegister(const Target<TARGET_TYPE_ALL>& i_target,
         if (l_err)
         {
             FAPI_ERR("platPutCfamRegister: deviceWrite returns error!");
-            l_rc.setPlatDataPtr(reinterpret_cast<void *> (l_err));
+
+            // Add the error log pointer as data to the ReturnCode
+            addErrlPtrToReturnCode(l_rc, l_err);
             break;
         }
 
@@ -705,7 +723,9 @@ ReturnCode platModifyCfamRegister(const Target<TARGET_TYPE_ALL>& i_target,
         if (l_err)
         {
             FAPI_ERR("platModifyCfamRegister: verifyCfamAccessTarget returns error!");
-            l_rc.setPlatDataPtr(reinterpret_cast<void *> (l_err));
+
+            // Add the error log pointer as data to the ReturnCode
+            addErrlPtrToReturnCode(l_rc, l_err);
             break;
         }
 
@@ -715,7 +735,9 @@ ReturnCode platModifyCfamRegister(const Target<TARGET_TYPE_ALL>& i_target,
         if (l_err)
         {
             FAPI_ERR("platModifyCfamRegister: getCfamChipTarget returns error!");
-            l_rc.setPlatDataPtr(reinterpret_cast<void *> (l_err));
+
+            // Add the error log pointer as data to the ReturnCode
+            addErrlPtrToReturnCode(l_rc, l_err);
             break;
         }
 
@@ -734,7 +756,9 @@ ReturnCode platModifyCfamRegister(const Target<TARGET_TYPE_ALL>& i_target,
         if (l_err)
         {
             FAPI_ERR("platModifyCfamRegister: deviceRead returns error!");
-            l_rc.setPlatDataPtr(reinterpret_cast<void *> (l_err));
+
+            // Add the error log pointer as data to the ReturnCode
+            addErrlPtrToReturnCode(l_rc, l_err);
             break;
         }
 
@@ -749,7 +773,9 @@ ReturnCode platModifyCfamRegister(const Target<TARGET_TYPE_ALL>& i_target,
         if (l_err)
         {
             FAPI_ERR("platModifyCfamRegister: deviceWrite returns error!");
-            l_rc.setPlatDataPtr(reinterpret_cast<void *> (l_err));
+
+            // Add the error log pointer as data to the ReturnCode
+            addErrlPtrToReturnCode(l_rc, l_err);
             break;
         }
 
@@ -774,8 +800,6 @@ ReturnCode platModifyCfamRegister(const Target<TARGET_TYPE_ALL>& i_target,
     FAPI_DBG(EXIT_MRK "platModifyCfamRegister");
     return l_rc;
 }
-
-
 
 //--------------------------------------------------------------------------
 // Operational Mode Error Functions

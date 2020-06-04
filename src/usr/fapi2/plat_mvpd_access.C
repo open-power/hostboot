@@ -37,6 +37,7 @@
 #include <hwpf_fapi2_reasoncodes.H>
 #include <devicefw/userif.H>
 #include <vpd/mvpdenums.H>
+#include <plat_utils.H>
 
 // Invalid chip unit
 const uint8_t MVPD_INVALID_CHIP_UNIT = 0xFF;
@@ -142,7 +143,7 @@ fapi2::ReturnCode MvpdRecordXlate(const fapi2::MvpdRecord i_fapiRecord,
         o_recordIndex  = MVPD_INVALID_CHIP_UNIT;
 
         // Add the error log pointer as data to the ReturnCode
-        l_rc.setPlatDataPtr(reinterpret_cast<void *> (l_errl));
+        addErrlPtrToReturnCode(l_rc, l_errl);
     }
     else if(mvpdFapiRecordToHbRecord[l_index].rec == MVPD::MVPD_INVALID_RECORD)
     {
@@ -167,7 +168,7 @@ fapi2::ReturnCode MvpdRecordXlate(const fapi2::MvpdRecord i_fapiRecord,
         o_recordIndex = mvpdFapiRecordToHbRecord[l_index].recIndex;
 
         // Add the error log pointer as data to the ReturnCode
-        l_rc.setPlatDataPtr(reinterpret_cast<void *> (l_errl));
+        addErrlPtrToReturnCode(l_rc, l_errl);
     }
 
 
@@ -296,7 +297,7 @@ fapi2::ReturnCode MvpdKeywordXlate(const fapi2::MvpdKeyword i_fapiKeyword,
         o_keywordIndex  = MVPD_INVALID_CHIP_UNIT;
 
         // Add the error log pointer as data to the ReturnCode
-        l_rc.setPlatDataPtr(reinterpret_cast<void *> (l_errl));
+        addErrlPtrToReturnCode(l_rc, l_errl);
     }
     else if(mvpdFapiKeywordToHbKeyword[l_index].keyword == MVPD::INVALID_MVPD_KEYWORD)
     {
@@ -321,7 +322,7 @@ fapi2::ReturnCode MvpdKeywordXlate(const fapi2::MvpdKeyword i_fapiKeyword,
         o_keywordIndex = mvpdFapiKeywordToHbKeyword[l_index].keywordIndex;
 
         // Add the error log pointer as data to the ReturnCode
-        l_rc.setPlatDataPtr(reinterpret_cast<void *> (l_errl));
+        addErrlPtrToReturnCode(l_rc, l_errl);
     }
 
     if(!l_rc)
@@ -387,8 +388,7 @@ fapi2::ReturnCode getMvpdField
                     l_errl->plid());
 
             // Add the error log pointer as data to the ReturnCode
-            l_rc.setPlatDataPtr(reinterpret_cast<void *> (l_errl));
-
+            addErrlPtrToReturnCode(l_rc, l_errl);
             break;
         }
 
@@ -464,8 +464,7 @@ fapi2::ReturnCode setMvpdField
                 l_errl->plid());
 
         // Add the error log pointer as data to the ReturnCode
-        l_rc.setPlatDataPtr(reinterpret_cast<void *> (l_errl));
-
+        addErrlPtrToReturnCode(l_rc, l_errl);
     }
 
     FAPI_DBG( "setMvpdField: exit" );

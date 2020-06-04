@@ -48,6 +48,16 @@ namespace fapi2
 static const PlatformType PLATFORM = PLAT_HOSTBOOT;
 
 ///
+/// @brief Add error log pointer as data to the ReturnCode and also add it
+///        to the global error log list so we can delete it later
+///
+/// @param[in]  i_rc - ReturnCode reference
+/// @param[in]  i_err - Error log pointer
+///
+void addErrlPtrToReturnCode(fapi2::ReturnCode& i_rc,
+                             errlHndl_t i_err);
+
+///
 ///  @brief This function answers the question, is scand tracing turned on?
 ///  The implementation of this function is specific to the platform.
 ///

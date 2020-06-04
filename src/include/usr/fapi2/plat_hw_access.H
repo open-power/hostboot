@@ -226,6 +226,8 @@ inline ReturnCode platPutRing(const Target<T>& i_target,
     return RC_UNSUPPORTED_OPERATION;
 };
 
+
+
 //--------------------------------------------------------------------------
 // Operational Mode Error Functions
 //--------------------------------------------------------------------------

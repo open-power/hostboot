@@ -140,7 +140,8 @@ fapi2::ReturnCode platGetVPD(
 
     if ( l_errl )
     {
-        l_rc.setPlatDataPtr(reinterpret_cast<void *> (l_errl));
+        // Add the error log pointer as data to the ReturnCode
+        addErrlPtrToReturnCode(l_rc, l_errl);
     }
 
     FAPI_DBG("platGetVPD(OCMB): exiting with %s",
