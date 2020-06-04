@@ -7,6 +7,7 @@
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
 <!-- Contributors Listed Below - COPYRIGHT 2020                             -->
+<!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
 <!-- Licensed under the Apache License, Version 2.0 (the "License");        -->
@@ -58,7 +59,7 @@
         <instance addr="0x27021412" reg_inst="31"/>
     </register>
     <capture_group node_inst="0:31">
-        <capture_register reg_inst="0:31" reg_name="EQ_CORE_THREAD_STATE"/>
+        <capture_register reg_inst="0:31" reg_name="CORE_THREAD_STATE"/>
     </capture_group>
     <!-- Each EQ_SPATTN will only report 4 of the possible 8 threads back to the
          CFIR_EQ_SPA. The reported threads are dependent on the core mode. In
@@ -74,14 +75,14 @@
             <expr type="lshift" value1="63">
                 <expr type="and">
                     <expr type="not">
-                        <expr type="reg" value1="EQ_CORE_THREAD_STATE"/>
+                        <expr type="reg" value1="CORE_THREAD_STATE"/>
                     </expr>
                     <expr type="int" value1="0x0000000000000001"/>
                 </expr>
             </expr>
             <expr type="lshift" value1="62">
                 <expr type="and">
-                    <expr type="reg" value1="EQ_CORE_THREAD_STATE"/>
+                    <expr type="reg" value1="CORE_THREAD_STATE"/>
                     <expr type="int" value1="0x0000000000000001"/>
                 </expr>
             </expr>
