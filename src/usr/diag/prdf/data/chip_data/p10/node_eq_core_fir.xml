@@ -194,13 +194,6 @@
         <instance addr="0x27022448" reg_inst="30"/>
         <instance addr="0x27021448" reg_inst="31"/>
     </register>
-    <capture_group node_inst="0:31">
-        <capture_register reg_inst="0:31" reg_name="EQ_CORE_FIR"/>
-        <capture_register reg_inst="0:31" reg_name="EQ_CORE_FIR_MASK"/>
-        <capture_register reg_inst="0:31" reg_name="EQ_CORE_FIR_ACT0"/>
-        <capture_register reg_inst="0:31" reg_name="EQ_CORE_FIR_ACT1"/>
-        <capture_register reg_inst="0:31" reg_name="EQ_CORE_FIR_WOF"/>
-    </capture_group>
     <rule attn_type="CS" node_inst="0:31">
         <!-- FIR & ~MASK & ~ACT0 & ~ACT1 -->
         <expr type="and">

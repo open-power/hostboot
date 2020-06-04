@@ -64,12 +64,6 @@
         <instance addr="0x1E040044" reg_inst="6"/>
         <instance addr="0x1F040044" reg_inst="7"/>
     </register>
-    <capture_group node_inst="0:7">
-        <capture_register reg_inst="0:7" reg_name="CFIR_IOHS_LOCAL_XSTOP"/>
-        <capture_register reg_inst="0:7" reg_name="CFIR_IOHS_LOCAL_XSTOP_MASK"/>
-        <capture_register reg_inst="0:7" reg_name="CFIR_IOHS_HOSTATTN"/>
-        <capture_register reg_inst="0:7" reg_name="CFIR_IOHS_HOSTATTN_MASK"/>
-    </capture_group>
     <rule attn_type="UCS" node_inst="0:7">
         <expr type="and">
             <expr type="reg" value1="CFIR_IOHS_LOCAL_XSTOP"/>

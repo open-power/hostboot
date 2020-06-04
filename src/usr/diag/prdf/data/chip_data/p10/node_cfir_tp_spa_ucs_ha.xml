@@ -42,14 +42,6 @@
     <register name="CFIR_TP_HOSTATTN_MASK">
         <instance addr="0x01040044" reg_inst="0"/>
     </register>
-    <capture_group node_inst="0">
-        <capture_register reg_inst="0" reg_name="CFIR_TP_SPATTN"/>
-        <capture_register reg_inst="0" reg_name="CFIR_TP_SPATTN_MASK"/>
-        <capture_register reg_inst="0" reg_name="CFIR_TP_LOCAL_XSTOP"/>
-        <capture_register reg_inst="0" reg_name="CFIR_TP_LOCAL_XSTOP_MASK"/>
-        <capture_register reg_inst="0" reg_name="CFIR_TP_HOSTATTN"/>
-        <capture_register reg_inst="0" reg_name="CFIR_TP_HOSTATTN_MASK"/>
-    </capture_group>
     <rule attn_type="SPA" node_inst="0">
         <expr type="and">
             <expr type="reg" value1="CFIR_TP_SPATTN"/>

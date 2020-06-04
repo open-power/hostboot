@@ -40,12 +40,6 @@
         <instance addr="0x08040044" reg_inst="0"/>
         <instance addr="0x09040044" reg_inst="1"/>
     </register>
-    <capture_group node_inst="0:1">
-        <capture_register reg_inst="0:1" reg_name="CFIR_PCI_SPATTN"/>
-        <capture_register reg_inst="0:1" reg_name="CFIR_PCI_SPATTN_MASK"/>
-        <capture_register reg_inst="0:1" reg_name="CFIR_PCI_HOSTATTN"/>
-        <capture_register reg_inst="0:1" reg_name="CFIR_PCI_HOSTATTN_MASK"/>
-    </capture_group>
     <rule attn_type="SPA" node_inst="0:1">
         <expr type="and">
             <expr type="reg" value1="CFIR_PCI_SPATTN"/>

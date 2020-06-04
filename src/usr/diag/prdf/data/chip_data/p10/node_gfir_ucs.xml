@@ -27,9 +27,6 @@
     <register name="GFIR_REG_UCS">
         <instance addr="0x50040003" reg_inst="0"/>
     </register>
-    <capture_group node_inst="0">
-        <capture_register reg_inst="0" reg_name="GFIR_REG_UCS"/>
-    </capture_group>
     <rule attn_type="UCS" node_inst="0">
         <expr type="reg" value1="GFIR_REG_UCS"/>
     </rule>

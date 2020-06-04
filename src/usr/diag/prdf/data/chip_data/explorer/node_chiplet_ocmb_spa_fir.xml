@@ -34,11 +34,6 @@
         <instance reg_inst="0" addr="0x08040007" />
     </register>
 
-    <capture_group node_inst="0">
-        <capture_register reg_name="CHIPLET_OCMB_SPA_FIR"      reg_inst="0" />
-        <capture_register reg_name="CHIPLET_OCMB_SPA_FIR_MASK" reg_inst="0" />
-    </capture_group>
-
     <rule attn_type="HA" node_inst="0">
         <!-- FIR & ~MASK -->
         <expr type="and">

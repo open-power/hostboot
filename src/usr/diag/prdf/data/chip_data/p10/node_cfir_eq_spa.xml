@@ -44,10 +44,6 @@
         <instance addr="0x26040042" reg_inst="6"/>
         <instance addr="0x27040042" reg_inst="7"/>
     </register>
-    <capture_group node_inst="0:7">
-        <capture_register reg_inst="0:7" reg_name="CFIR_EQ_SPATTN"/>
-        <capture_register reg_inst="0:7" reg_name="CFIR_EQ_SPATTN_MASK"/>
-    </capture_group>
     <rule attn_type="SPA" node_inst="0:7">
         <expr type="and">
             <expr type="reg" value1="CFIR_EQ_SPATTN"/>

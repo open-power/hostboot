@@ -64,12 +64,6 @@
         <instance addr="0x260E000c" reg_inst="6"/>
         <instance addr="0x270E000c" reg_inst="7"/>
     </register>
-    <capture_group node_inst="0:7">
-        <capture_register reg_inst="0:7" reg_name="EQ_QME_FIR"/>
-        <capture_register reg_inst="0:7" reg_name="EQ_QME_FIR_MASK"/>
-        <capture_register reg_inst="0:7" reg_name="EQ_QME_FIR_ACT0"/>
-        <capture_register reg_inst="0:7" reg_name="EQ_QME_FIR_ACT1"/>
-    </capture_group>
     <rule attn_type="CS" node_inst="0:7">
         <!-- FIR & ~MASK & ~ACT0 & ~ACT1 -->
         <expr type="and">

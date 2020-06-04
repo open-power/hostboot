@@ -40,12 +40,6 @@
         <instance addr="0x08040041" reg_inst="0"/>
         <instance addr="0x09040041" reg_inst="1"/>
     </register>
-    <capture_group node_inst="0:1">
-        <capture_register reg_inst="0:1" reg_name="CFIR_PCI_XSTOP"/>
-        <capture_register reg_inst="0:1" reg_name="CFIR_PCI_XSTOP_MASK"/>
-        <capture_register reg_inst="0:1" reg_name="CFIR_PCI_RECOV"/>
-        <capture_register reg_inst="0:1" reg_name="CFIR_PCI_RECOV_MASK"/>
-    </capture_group>
     <rule attn_type="CS" node_inst="0:1">
         <expr type="and">
             <expr type="reg" value1="CFIR_PCI_XSTOP"/>

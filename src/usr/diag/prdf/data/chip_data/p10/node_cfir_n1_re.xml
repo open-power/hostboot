@@ -30,10 +30,6 @@
     <register name="CFIR_N1_RECOV_MASK">
         <instance addr="0x03040041" reg_inst="0"/>
     </register>
-    <capture_group node_inst="0">
-        <capture_register reg_inst="0" reg_name="CFIR_N1_RECOV"/>
-        <capture_register reg_inst="0" reg_name="CFIR_N1_RECOV_MASK"/>
-    </capture_group>
     <rule attn_type="RE" node_inst="0">
         <expr type="and">
             <expr type="reg" value1="CFIR_N1_RECOV"/>

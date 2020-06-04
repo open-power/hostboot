@@ -7,6 +7,7 @@
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
 <!-- Contributors Listed Below - COPYRIGHT 2020                             -->
+<!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
 <!-- Licensed under the Apache License, Version 2.0 (the "License");        -->
@@ -91,10 +92,6 @@
         <instance addr="0x2702249a" reg_inst="30"/>
         <instance addr="0x2702149a" reg_inst="31"/>
     </register>
-    <capture_group node_inst="0:31">
-        <capture_register reg_inst="0:31" reg_name="EQ_SPATTN"/>
-        <capture_register reg_inst="0:31" reg_name="EQ_SPATTN_MASK"/>
-    </capture_group>
     <!-- In Normal Core mode, only threads 0-3 report to the CFIR_EQ_SPA. -->
     <rule attn_type="SPA" node_inst="0:31">
         <expr type="and">

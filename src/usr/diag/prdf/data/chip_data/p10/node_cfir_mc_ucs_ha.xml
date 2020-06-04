@@ -48,12 +48,6 @@
         <instance addr="0x0E040044" reg_inst="2"/>
         <instance addr="0x0F040044" reg_inst="3"/>
     </register>
-    <capture_group node_inst="0:3">
-        <capture_register reg_inst="0:3" reg_name="CFIR_MC_LOCAL_XSTOP"/>
-        <capture_register reg_inst="0:3" reg_name="CFIR_MC_LOCAL_XSTOP_MASK"/>
-        <capture_register reg_inst="0:3" reg_name="CFIR_MC_HOSTATTN"/>
-        <capture_register reg_inst="0:3" reg_name="CFIR_MC_HOSTATTN_MASK"/>
-    </capture_group>
     <rule attn_type="UCS" node_inst="0:3">
         <expr type="and">
             <expr type="reg" value1="CFIR_MC_LOCAL_XSTOP"/>

@@ -58,9 +58,6 @@
         <instance addr="0x27022412" reg_inst="30"/>
         <instance addr="0x27021412" reg_inst="31"/>
     </register>
-    <capture_group node_inst="0:31">
-        <capture_register reg_inst="0:31" reg_name="CORE_THREAD_STATE"/>
-    </capture_group>
     <!-- Each EQ_SPATTN will only report 4 of the possible 8 threads back to the
          CFIR_EQ_SPA. The reported threads are dependent on the core mode. In
          Normal Core Mode (CORE_THREAD_STATE[63]=0), only threads 0-3 report to

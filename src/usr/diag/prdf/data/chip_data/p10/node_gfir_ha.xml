@@ -27,9 +27,6 @@
     <register name="GFIR_REG_HA">
         <instance addr="0x50040004" reg_inst="0"/>
     </register>
-    <capture_group node_inst="0">
-        <capture_register reg_inst="0" reg_name="GFIR_REG_HA"/>
-    </capture_group>
     <rule attn_type="HA" node_inst="0">
         <expr type="reg" value1="GFIR_REG_HA"/>
     </rule>

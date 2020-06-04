@@ -32,10 +32,6 @@
         <instance addr="0x10040043" reg_inst="0"/>
         <instance addr="0x11040043" reg_inst="1"/>
     </register>
-    <capture_group node_inst="0:1">
-        <capture_register reg_inst="0:1" reg_name="CFIR_PAUE_LOCAL_XSTOP"/>
-        <capture_register reg_inst="0:1" reg_name="CFIR_PAUE_LOCAL_XSTOP_MASK"/>
-    </capture_group>
     <rule attn_type="UCS" node_inst="0:1">
         <expr type="and">
             <expr type="reg" value1="CFIR_PAUE_LOCAL_XSTOP"/>

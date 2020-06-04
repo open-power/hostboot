@@ -7,6 +7,7 @@
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
 <!-- Contributors Listed Below - COPYRIGHT 2020                             -->
+<!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
 <!-- Licensed under the Apache License, Version 2.0 (the "License");        -->
@@ -43,10 +44,6 @@
         <instance addr="0x26040041" reg_inst="6"/>
         <instance addr="0x27040041" reg_inst="7"/>
     </register>
-    <capture_group node_inst="0:7">
-        <capture_register reg_inst="0:7" reg_name="CFIR_EQ_RECOV"/>
-        <capture_register reg_inst="0:7" reg_name="CFIR_EQ_RECOV_MASK"/>
-    </capture_group>
     <rule attn_type="RE" node_inst="0:7">
         <expr type="and">
             <expr type="reg" value1="CFIR_EQ_RECOV"/>

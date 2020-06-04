@@ -274,19 +274,6 @@ sub __getReg($$$$)
     return { name => $name, instance => $inst_out };
 }
 
-sub __getCap($$)
-{
-    my ( $regs, $inst ) = @_;
-
-    my $cap_list = [];
-    for ( @{$regs} )
-    {
-        push @{$cap_list}, { reg_inst => $inst, reg_name => $_->{name} };
-    }
-
-    return { node_inst => $inst, capture_register => $cap_list };
-}
-
 sub __getExpr($$)
 {
     my ( $name, $config ) = @_;
@@ -330,8 +317,11 @@ sub __normalizeLocalFir($)
 
     return unless ( defined $node->{local_fir} );
 
+    # Note that the isolator will implicitly add all register referenced by the
+    # rules to the capture group. To reduce redundancy and overall file size, we
+    # won't add these registers to the capture group.
+
     $node->{register}      = [] unless ( defined $node->{register}      );
-    $node->{capture_group} = [] unless ( defined $node->{capture_group} );
     $node->{rule}          = [] unless ( defined $node->{rule}          );
 
     for my $l ( @{$node->{local_fir}} )
@@ -351,8 +341,6 @@ sub __normalizeLocalFir($)
         push @{$r}, __getReg($i, $t, "${n}_ACT2", 9) if ($l->{config} =~ /2/);
 
         push @{$node->{register}}, @{$r};
-
-        push @{$node->{capture_group}}, __getCap($r, $inst_range);
 
         for ( @{$l->{action}} )
         {
