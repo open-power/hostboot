@@ -114,7 +114,8 @@ void init_pldm(void)
 {
     PLDM_ENTER("init_pldm");
     PLDM::thePdrManager().resetPdrs();
-    PLDM::thePdrManager().addLocalPdrs();
+    // TODO RTC:255114 re-enable when PHYP supports PLDM request from HBRT during init
+//     PLDM::thePdrManager().addRemotePdrs();
     PLDM_EXIT("init_pldm");
 }
 
