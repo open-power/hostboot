@@ -42,6 +42,41 @@ enum p10_refclock_freq_t
 
 
 //
+// PCI
+//
+
+// constant defining number of PCI PLL frequency options ('buckets')
+// to be built into unsigned HW image (currently used/max)
+const uint8_t P10_NUM_PCI_PLL_BUCKETS = 1;
+const uint8_t P10_MAX_PCI_PLL_BUCKETS = 4;
+
+// PCI PLL bucket descriptor, defines bucket properties in terms of:
+// - required input reference clock freqeuncy (KHz)
+// - resultant output grid frequency (MHz)
+// - resultant output link frequency (MHz)
+struct p10_pci_pll_bucket_descriptor_t
+{
+    p10_refclock_freq_t refclock_freq_khz;  // PLL input frequency (KHz)
+    uint32_t            freq_grid_mhz;      // PCI chiplet grid frequency (MHz)  ATTR_FREQ_PCIE_MHZ
+};
+
+const p10_pci_pll_bucket_descriptor_t P10_PCI_PLL_BUCKETS[P10_NUM_PCI_PLL_BUCKETS] =
+{
+    { REFCLOCK_FREQ_100, 2000 },
+};
+
+
+//
+// filter PLLs
+//
+
+// constant defining number of filter PLL frequency options ('buckets')
+// to be built into unsigned HW image (currently used/max)
+const uint8_t P10_NUM_FILTER_PLL_BUCKETS = 1;
+const uint8_t P10_MAX_FILTER_PLL_BUCKETS = 4;
+
+
+//
 // MC
 //
 
@@ -51,7 +86,7 @@ const uint8_t P10_NUM_MC_PLL_BUCKETS = 4;
 const uint8_t P10_MAX_MC_PLL_BUCKETS = 8;
 
 // MC PLL bucket descriptor, defines bucket properties in terms of:
-// - required input referecnce clock freqeuncy (KHz)
+// - required input reference clock freqeuncy (KHz)
 // - resultant output grid frequency (MHz)
 // - resultant output link frequency (MHz)
 struct p10_mc_pll_bucket_descriptor_t
@@ -78,7 +113,7 @@ const p10_mc_pll_bucket_descriptor_t P10_MC_PLL_BUCKETS[P10_NUM_MC_PLL_BUCKETS] 
 // constant definining number of IOHS PLL frequency options ('buckets')
 // to be built into unsigned HW image (currently used/max)
 const uint8_t P10_NUM_IOHS_PLL_BUCKETS = 6;
-const uint8_t P10_MAX_IOHS_PLL_BUCKETS = 8;
+const uint8_t P10_MAX_IOHS_PLL_BUCKETS = 16;
 
 // IOHS PLL bucket descriptor, defines bucket properties in terms of:
 // - required input reference clock frequency (KHz)

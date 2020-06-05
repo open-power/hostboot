@@ -351,6 +351,7 @@ typedef struct
 #define TOR_INVALID_RS4_MAGIC                 INFRASTRUCT_NOOF_RCS + 24
 #define TOR_INVALID_RS4_VERSION               INFRASTRUCT_NOOF_RCS + 25
 #define TOR_INVALID_RS4_TYPE                  INFRASTRUCT_NOOF_RCS + 26
+#define TOR_RING_ID_MISMATCH                  INFRASTRUCT_NOOF_RCS + 27 //ringId and Rs4 mismatch
 
 // This function returns the main ring properties list associated w/the chip ID.
 int ringid_get_ringProps( ChipId_t           i_chipId,

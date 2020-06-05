@@ -25,14 +25,14 @@
 #ifndef _P10_RING_PROPERTIES_H_
 #define _P10_RING_PROPERTIES_H_
 
-static const uint8_t RING_TABLE_VERSION_DOC = 22;
+static const uint8_t RING_TABLE_VERSION_DOC = 23;
 static const uint8_t RING_TABLE_VERSION_MVPD = 22;
-static const uint8_t RING_TABLE_VERSION_EKB = 22;
+static const uint8_t RING_TABLE_VERSION_EKB = 23;
 
 #define RINGID_START_MVPD    (RingId_t)0
 #define RINGID_END_MVPD      (RingId_t)167
 #define RINGID_START_EKB     (RingId_t)256
-#define RINGID_END_EKB       (RingId_t)352
+#define RINGID_END_EKB       (RingId_t)410
 
 #define RING_INDEX_START_MVPD   (RingId_t)0
 #define RING_INDEX_START_EKB    (RingId_t)168
@@ -45,29 +45,29 @@ enum RingOffset
     perv_occ_gptr            = 0,
     perv_occ_time            = 1,
     sbe_gptr                 = 2,
-    sbe_time                 = 3,
-    perv_dpll_gptr           = 4,
-    perv_pll_gptr            = 5,
-    perv_fure                = 6,
-    sbe_fure                 = 7,
-    occ_fure                 = 8,
-    perv_dpll_func           = 9,
-    perv_dpll_bndy           = 10,
-    perv_dpll_time           = 11,
-    perv_pll_func            = 12,
-    perv_pll_bndy            = 13,
+    perv_dpll_gptr           = 3,
+    perv_pll_gptr            = 4,
+    perv_dpll_func           = 5,
+    perv_dpll_time           = 6,
+    perv_pll_func            = 7,
+    perv_func                = 8,
+    sbe_func                 = 9,
+    occ_func                 = 10,
+    perv_pll_bndy_bucket_0   = 11,
+    perv_pll_bndy_bucket_1   = 12,
+    perv_pll_bndy_bucket_2   = 13,
+    perv_pll_bndy_bucket_3   = 14,
     // Instance Rings
     perv_occ_repr            = (0 | INSTANCE_RING_MARK),
     pib_repr                 = (1 | INSTANCE_RING_MARK),
-    sbe_repr                 = (2 | INSTANCE_RING_MARK),
 };
 
 static const ChipletData_t g_chipletData =
 {
     0x01, // Base chiplet/instance ID.
     1,  // Number of chiplet instances
-    14, // 14 common rings for PERV Chiplet
-    3,  // 3 instance specific rings for PERV Chiplet
+    15, // 15 common rings for PERV Chiplet
+    2,  // 2 instance specific rings for PERV Chiplet
 };
 }; // end of namespace PERV
 
@@ -78,8 +78,8 @@ enum RingOffset
     // Common Rings
     n0_gptr                  = 0,
     n0_time                  = 1,
-    n0_fure                  = 2,
-    n0_abst                  = 3,
+    n0_abst                  = 2,
+    n0_func                  = 3,
     // Instance Rings
     n0_repr                  = (0 | INSTANCE_RING_MARK),
     n0_gptr_ovly             = (1 | INSTANCE_RING_MARK),
@@ -103,10 +103,10 @@ enum RingOffset
     n1_time                  = 1,
     n1_nmmu1_gptr            = 2,
     n1_nmmu1_time            = 3,
-    n1_fure                  = 4,
-    n1_nmmu1_fure            = 5,
-    n1_abst                  = 6,
-    n1_nmmu1_abst            = 7,
+    n1_abst                  = 4,
+    n1_nmmu1_abst            = 5,
+    n1_func                  = 6,
+    n1_nmmu1_func            = 7,
     // Instance Rings
     n1_repr                  = (0 | INSTANCE_RING_MARK),
     n1_nmmu1_repr            = (1 | INSTANCE_RING_MARK),
@@ -130,9 +130,12 @@ enum RingOffset
     pci_gptr                 = 0,
     pci_time                 = 1,
     pci_pll_gptr             = 2,
-    pci_fure                 = 3,
-    pci_pll_func             = 4,
-    pci_pll_bndy             = 5,
+    pci_pll_func             = 3,
+    pci_func                 = 4,
+    pci_pll_bndy_bucket_0    = 5,
+    pci_pll_bndy_bucket_1    = 6,
+    pci_pll_bndy_bucket_2    = 7,
+    pci_pll_bndy_bucket_3    = 8,
     // Instance Rings
     pci_repr                 = (0 | INSTANCE_RING_MARK),
 };
@@ -141,7 +144,7 @@ static const ChipletData_t g_chipletData =
 {
     0x08, // Base chiplet/instance ID.
     2,  // Number of chiplet instances
-    6,  // 6 common rings for PCI Chiplet
+    9,  // 9 common rings for PCI Chiplet
     1,  // 1 instance specific rings for PCI Chiplet
 };
 }; // end of namespace PCI
@@ -154,14 +157,16 @@ enum RingOffset
     mc_gptr                  = 0,
     mc_time                  = 1,
     mc_pll_gptr              = 2,
-    mc_fure                  = 3,
-    mc_pll_func              = 4,
-    mc_pll_bndy              = 5,
-    mc_pll_bndy_bucket_0     = 5,
-    mc_pll_bndy_bucket_1     = 6,
-    mc_pll_bndy_bucket_2     = 7,
-    mc_pll_bndy_bucket_3     = 8,
-    mc_pll_bndy_bucket_4     = 9,
+    mc_pll_func              = 3,
+    mc_pll_bndy_bucket_0     = 4,
+    mc_pll_bndy_bucket_1     = 5,
+    mc_pll_bndy_bucket_2     = 6,
+    mc_pll_bndy_bucket_3     = 7,
+    mc_pll_bndy_bucket_4     = 8,
+    mc_func                  = 9,
+    mc_pll_bndy_bucket_5     = 10,
+    mc_pll_bndy_bucket_6     = 11,
+    mc_pll_bndy_bucket_7     = 12,
     // Instance Rings
     mc_repr                  = (0 | INSTANCE_RING_MARK),
 };
@@ -170,7 +175,7 @@ static const ChipletData_t g_chipletData =
 {
     0x0C, // Base chiplet/instance ID.
     4,  // Number of chiplet instances
-    10, // 10 common rings for MC Chiplet
+    13, // 13 common rings for MC Chiplet
     1,  // 1 instance specific rings for MC Chiplet
 };
 }; // end of namespace MC
@@ -184,8 +189,8 @@ enum RingOffset
     pau0_time                = 1,
     pau0_pau0_gptr           = 2,
     pau0_pau0_time           = 3,
-    pau0_fure                = 4,
-    pau0_pau0_fure           = 5,
+    pau0_func                = 4,
+    pau0_pau0_func           = 5,
     // Instance Rings
     pau0_repr                = (0 | INSTANCE_RING_MARK),
     pau0_pau0_repr           = (1 | INSTANCE_RING_MARK),
@@ -210,8 +215,8 @@ enum RingOffset
     pau1_time                = 1,
     pau1_pau3_gptr           = 2,
     pau1_pau3_time           = 3,
-    pau1_fure                = 4,
-    pau1_pau3_fure           = 5,
+    pau1_func                = 4,
+    pau1_pau3_func           = 5,
     // Instance Rings
     pau1_repr                = (0 | INSTANCE_RING_MARK),
     pau1_pau3_repr           = (1 | INSTANCE_RING_MARK),
@@ -238,9 +243,9 @@ enum RingOffset
     pau2_pau4_time           = 3,
     pau2_pau5_gptr           = 4,
     pau2_pau5_time           = 5,
-    pau2_fure                = 6,
-    pau2_pau4_fure           = 7,
-    pau2_pau5_fure           = 8,
+    pau2_func                = 6,
+    pau2_pau4_func           = 7,
+    pau2_pau5_func           = 8,
     // Instance Rings
     pau2_repr                = (0 | INSTANCE_RING_MARK),
     pau2_pau4_repr           = (1 | INSTANCE_RING_MARK),
@@ -268,9 +273,9 @@ enum RingOffset
     pau3_pau6_time           = 3,
     pau3_pau7_gptr           = 4,
     pau3_pau7_time           = 5,
-    pau3_fure                = 6,
-    pau3_pau6_fure           = 7,
-    pau3_pau7_fure           = 8,
+    pau3_func                = 6,
+    pau3_pau6_func           = 7,
+    pau3_pau7_func           = 8,
     // Instance Rings
     pau3_repr                = (0 | INSTANCE_RING_MARK),
     pau3_pau6_repr           = (1 | INSTANCE_RING_MARK),
@@ -294,36 +299,39 @@ enum RingOffset
     // Common Rings
     iohs0_gptr               = 0,
     iohs0_time               = 1,
-    iohs0_ndl_gptr           = 2,
-    iohs0_ndl_time           = 3,
-    iohs0_pdl_gptr           = 4,
-    iohs0_pdl_time           = 5,
-    iohs0_pll_gptr           = 6,
-    iohs0_fure               = 7,
-    iohs0_ndl_fure           = 8,
-    iohs0_pdl_fure           = 9,
-    iohs0_pll_func           = 10,
-    iohs0_pll_bndy           = 11,
-    iohs0_pll_bndy_bucket_0  = 11,
-    iohs0_pll_bndy_bucket_1  = 12,
-    iohs0_pll_bndy_bucket_2  = 13,
-    iohs0_pll_bndy_bucket_3  = 14,
-    iohs0_pll_bndy_bucket_4  = 15,
-    iohs0_pll_bndy_bucket_5  = 16,
-    iohs0_pll_bndy_bucket_6  = 17,
-    iohs0_pll_bndy_bucket_7  = 18,
+    iohs0_pdl_gptr           = 2,
+    iohs0_pdl_time           = 3,
+    iohs0_pll_gptr           = 4,
+    iohs0_pll_func           = 5,
+    iohs0_pll_bndy_bucket_0  = 6,
+    iohs0_pll_bndy_bucket_1  = 7,
+    iohs0_pll_bndy_bucket_2  = 8,
+    iohs0_pll_bndy_bucket_3  = 9,
+    iohs0_pll_bndy_bucket_4  = 10,
+    iohs0_pll_bndy_bucket_5  = 11,
+    iohs0_pll_bndy_bucket_6  = 12,
+    iohs0_pll_bndy_bucket_7  = 13,
+    iohs0_func               = 14,
+    iohs0_pdl_func           = 15,
+    iohs0_pll_bndy_bucket_8  = 16,
+    iohs0_pll_bndy_bucket_9  = 17,
+    iohs0_pll_bndy_bucket_10 = 18,
+    iohs0_pll_bndy_bucket_11 = 19,
+    iohs0_pll_bndy_bucket_12 = 20,
+    iohs0_pll_bndy_bucket_13 = 21,
+    iohs0_pll_bndy_bucket_14 = 22,
+    iohs0_pll_bndy_bucket_15 = 23,
     // Instance Rings
     iohs0_repr               = (0 | INSTANCE_RING_MARK),
-    iohs0_ndl_repr           = (1 | INSTANCE_RING_MARK),
-    iohs0_pdl_repr           = (2 | INSTANCE_RING_MARK),
+    iohs0_pdl_repr           = (1 | INSTANCE_RING_MARK),
 };
 
 static const ChipletData_t g_chipletData =
 {
     0x18, // Base chiplet/instance ID.
     1,  // Number of chiplet instances
-    19, // 19 common rings for AXON0 Chiplet
-    3,  // 3 instance specific rings for AXON0 Chiplet
+    24, // 24 common rings for AXON0 Chiplet
+    2,  // 2 instance specific rings for AXON0 Chiplet
 };
 }; // end of namespace AXON0
 
@@ -334,27 +342,23 @@ enum RingOffset
     // Common Rings
     iohs1_gptr               = 0,
     iohs1_time               = 1,
-    iohs1_ndl_gptr           = 2,
-    iohs1_ndl_time           = 3,
-    iohs1_pdl_gptr           = 4,
-    iohs1_pdl_time           = 5,
-    iohs1_pll_gptr           = 6,
-    iohs1_fure               = 7,
-    iohs1_ndl_fure           = 8,
-    iohs1_pdl_fure           = 9,
-    iohs1_pll_func           = 10,
+    iohs1_pdl_gptr           = 2,
+    iohs1_pdl_time           = 3,
+    iohs1_pll_gptr           = 4,
+    iohs1_pll_func           = 5,
+    iohs1_func               = 6,
+    iohs1_pdl_func           = 7,
     // Instance Rings
     iohs1_repr               = (0 | INSTANCE_RING_MARK),
-    iohs1_ndl_repr           = (1 | INSTANCE_RING_MARK),
-    iohs1_pdl_repr           = (2 | INSTANCE_RING_MARK),
+    iohs1_pdl_repr           = (1 | INSTANCE_RING_MARK),
 };
 
 static const ChipletData_t g_chipletData =
 {
     0x19, // Base chiplet/instance ID.
     1,  // Number of chiplet instances
-    11, // 11 common rings for AXON1 Chiplet
-    3,  // 3 instance specific rings for AXON1 Chiplet
+    8,  // 8 common rings for AXON1 Chiplet
+    2,  // 2 instance specific rings for AXON1 Chiplet
 };
 }; // end of namespace AXON1
 
@@ -365,27 +369,23 @@ enum RingOffset
     // Common Rings
     iohs2_gptr               = 0,
     iohs2_time               = 1,
-    iohs2_ndl_gptr           = 2,
-    iohs2_ndl_time           = 3,
-    iohs2_pdl_gptr           = 4,
-    iohs2_pdl_time           = 5,
-    iohs2_pll_gptr           = 6,
-    iohs2_fure               = 7,
-    iohs2_ndl_fure           = 8,
-    iohs2_pdl_fure           = 9,
-    iohs2_pll_func           = 10,
+    iohs2_pdl_gptr           = 2,
+    iohs2_pdl_time           = 3,
+    iohs2_pll_gptr           = 4,
+    iohs2_pll_func           = 5,
+    iohs2_func               = 6,
+    iohs2_pdl_func           = 7,
     // Instance Rings
     iohs2_repr               = (0 | INSTANCE_RING_MARK),
-    iohs2_ndl_repr           = (1 | INSTANCE_RING_MARK),
-    iohs2_pdl_repr           = (2 | INSTANCE_RING_MARK),
+    iohs2_pdl_repr           = (1 | INSTANCE_RING_MARK),
 };
 
 static const ChipletData_t g_chipletData =
 {
     0x1A, // Base chiplet/instance ID.
     1,  // Number of chiplet instances
-    11, // 11 common rings for AXON2 Chiplet
-    3,  // 3 instance specific rings for AXON2 Chiplet
+    8,  // 8 common rings for AXON2 Chiplet
+    2,  // 2 instance specific rings for AXON2 Chiplet
 };
 }; // end of namespace AXON2
 
@@ -396,27 +396,23 @@ enum RingOffset
     // Common Rings
     iohs3_gptr               = 0,
     iohs3_time               = 1,
-    iohs3_ndl_gptr           = 2,
-    iohs3_ndl_time           = 3,
-    iohs3_pdl_gptr           = 4,
-    iohs3_pdl_time           = 5,
-    iohs3_pll_gptr           = 6,
-    iohs3_fure               = 7,
-    iohs3_ndl_fure           = 8,
-    iohs3_pdl_fure           = 9,
-    iohs3_pll_func           = 10,
+    iohs3_pdl_gptr           = 2,
+    iohs3_pdl_time           = 3,
+    iohs3_pll_gptr           = 4,
+    iohs3_pll_func           = 5,
+    iohs3_func               = 6,
+    iohs3_pdl_func           = 7,
     // Instance Rings
     iohs3_repr               = (0 | INSTANCE_RING_MARK),
-    iohs3_ndl_repr           = (1 | INSTANCE_RING_MARK),
-    iohs3_pdl_repr           = (2 | INSTANCE_RING_MARK),
+    iohs3_pdl_repr           = (1 | INSTANCE_RING_MARK),
 };
 
 static const ChipletData_t g_chipletData =
 {
     0x1B, // Base chiplet/instance ID.
     1,  // Number of chiplet instances
-    11, // 11 common rings for AXON3 Chiplet
-    3,  // 3 instance specific rings for AXON3 Chiplet
+    8,  // 8 common rings for AXON3 Chiplet
+    2,  // 2 instance specific rings for AXON3 Chiplet
 };
 }; // end of namespace AXON3
 
@@ -427,27 +423,23 @@ enum RingOffset
     // Common Rings
     iohs4_gptr               = 0,
     iohs4_time               = 1,
-    iohs4_ndl_gptr           = 2,
-    iohs4_ndl_time           = 3,
-    iohs4_pdl_gptr           = 4,
-    iohs4_pdl_time           = 5,
-    iohs4_pll_gptr           = 6,
-    iohs4_fure               = 7,
-    iohs4_ndl_fure           = 8,
-    iohs4_pdl_fure           = 9,
-    iohs4_pll_func           = 10,
+    iohs4_pdl_gptr           = 2,
+    iohs4_pdl_time           = 3,
+    iohs4_pll_gptr           = 4,
+    iohs4_pll_func           = 5,
+    iohs4_func               = 6,
+    iohs4_pdl_func           = 7,
     // Instance Rings
     iohs4_repr               = (0 | INSTANCE_RING_MARK),
-    iohs4_ndl_repr           = (1 | INSTANCE_RING_MARK),
-    iohs4_pdl_repr           = (2 | INSTANCE_RING_MARK),
+    iohs4_pdl_repr           = (1 | INSTANCE_RING_MARK),
 };
 
 static const ChipletData_t g_chipletData =
 {
     0x1C, // Base chiplet/instance ID.
     1,  // Number of chiplet instances
-    11, // 11 common rings for AXON4 Chiplet
-    3,  // 3 instance specific rings for AXON4 Chiplet
+    8,  // 8 common rings for AXON4 Chiplet
+    2,  // 2 instance specific rings for AXON4 Chiplet
 };
 }; // end of namespace AXON4
 
@@ -458,27 +450,23 @@ enum RingOffset
     // Common Rings
     iohs5_gptr               = 0,
     iohs5_time               = 1,
-    iohs5_ndl_gptr           = 2,
-    iohs5_ndl_time           = 3,
-    iohs5_pdl_gptr           = 4,
-    iohs5_pdl_time           = 5,
-    iohs5_pll_gptr           = 6,
-    iohs5_fure               = 7,
-    iohs5_ndl_fure           = 8,
-    iohs5_pdl_fure           = 9,
-    iohs5_pll_func           = 10,
+    iohs5_pdl_gptr           = 2,
+    iohs5_pdl_time           = 3,
+    iohs5_pll_gptr           = 4,
+    iohs5_pll_func           = 5,
+    iohs5_func               = 6,
+    iohs5_pdl_func           = 7,
     // Instance Rings
     iohs5_repr               = (0 | INSTANCE_RING_MARK),
-    iohs5_ndl_repr           = (1 | INSTANCE_RING_MARK),
-    iohs5_pdl_repr           = (2 | INSTANCE_RING_MARK),
+    iohs5_pdl_repr           = (1 | INSTANCE_RING_MARK),
 };
 
 static const ChipletData_t g_chipletData =
 {
     0x1D, // Base chiplet/instance ID.
     1,  // Number of chiplet instances
-    11, // 11 common rings for AXON5 Chiplet
-    3,  // 3 instance specific rings for AXON5 Chiplet
+    8,  // 8 common rings for AXON5 Chiplet
+    2,  // 2 instance specific rings for AXON5 Chiplet
 };
 }; // end of namespace AXON5
 
@@ -489,27 +477,23 @@ enum RingOffset
     // Common Rings
     iohs6_gptr               = 0,
     iohs6_time               = 1,
-    iohs6_ndl_gptr           = 2,
-    iohs6_ndl_time           = 3,
-    iohs6_pdl_gptr           = 4,
-    iohs6_pdl_time           = 5,
-    iohs6_pll_gptr           = 6,
-    iohs6_fure               = 7,
-    iohs6_ndl_fure           = 8,
-    iohs6_pdl_fure           = 9,
-    iohs6_pll_func           = 10,
+    iohs6_pdl_gptr           = 2,
+    iohs6_pdl_time           = 3,
+    iohs6_pll_gptr           = 4,
+    iohs6_pll_func           = 5,
+    iohs6_func               = 6,
+    iohs6_pdl_func           = 7,
     // Instance Rings
     iohs6_repr               = (0 | INSTANCE_RING_MARK),
-    iohs6_ndl_repr           = (1 | INSTANCE_RING_MARK),
-    iohs6_pdl_repr           = (2 | INSTANCE_RING_MARK),
+    iohs6_pdl_repr           = (1 | INSTANCE_RING_MARK),
 };
 
 static const ChipletData_t g_chipletData =
 {
     0x1E, // Base chiplet/instance ID.
     1,  // Number of chiplet instances
-    11, // 11 common rings for AXON6 Chiplet
-    3,  // 3 instance specific rings for AXON6 Chiplet
+    8,  // 8 common rings for AXON6 Chiplet
+    2,  // 2 instance specific rings for AXON6 Chiplet
 };
 }; // end of namespace AXON6
 
@@ -520,27 +504,23 @@ enum RingOffset
     // Common Rings
     iohs7_gptr               = 0,
     iohs7_time               = 1,
-    iohs7_ndl_gptr           = 2,
-    iohs7_ndl_time           = 3,
-    iohs7_pdl_gptr           = 4,
-    iohs7_pdl_time           = 5,
-    iohs7_pll_gptr           = 6,
-    iohs7_fure               = 7,
-    iohs7_ndl_fure           = 8,
-    iohs7_pdl_fure           = 9,
-    iohs7_pll_func           = 10,
+    iohs7_pdl_gptr           = 2,
+    iohs7_pdl_time           = 3,
+    iohs7_pll_gptr           = 4,
+    iohs7_pll_func           = 5,
+    iohs7_func               = 6,
+    iohs7_pdl_func           = 7,
     // Instance Rings
     iohs7_repr               = (0 | INSTANCE_RING_MARK),
-    iohs7_ndl_repr           = (1 | INSTANCE_RING_MARK),
-    iohs7_pdl_repr           = (2 | INSTANCE_RING_MARK),
+    iohs7_pdl_repr           = (1 | INSTANCE_RING_MARK),
 };
 
 static const ChipletData_t g_chipletData =
 {
     0x1F, // Base chiplet/instance ID.
     1,  // Number of chiplet instances
-    11, // 11 common rings for AXON7 Chiplet
-    3,  // 3 instance specific rings for AXON7 Chiplet
+    8,  // 8 common rings for AXON7 Chiplet
+    2,  // 2 instance specific rings for AXON7 Chiplet
 };
 }; // end of namespace AXON7
 
@@ -552,58 +532,50 @@ enum RingOffset
     eq_gptr                  = 0,
     eq_time                  = 1,
     eq_clkadj_gptr           = 2,
-    eq_clkadj_time           = 3,
-    ec_cl2_gptr              = 4,
-    ec_cl2_time              = 5,
-    ec_mma_gptr              = 6,
-    ec_mma_time              = 7,
-    ec_l3_gptr               = 8,
-    ec_l3_time               = 9,
-    eq_fure                  = 10,
-    eq_cmsk                  = 11,
-    eq_inex                  = 12,
-    eq_mode                  = 13,
-    eq_clkadj_fure           = 14,
-    eq_clkadj_cmsk           = 15,
-    eq_clkadj_inex           = 16,
-    eq_clkadj_mode           = 17,
-    ec_cl2_fure              = 18,
-    ec_cl2_cmsk              = 19,
-    ec_cl2_inex              = 20,
-    ec_cl2_mode              = 21,
-    ec_mma_fure              = 22,
-    ec_mma_cmsk              = 23,
-    ec_mma_inex              = 24,
-    ec_l3_fure               = 25,
-    ec_l3_cmsk               = 26,
-    ec_l3_inex               = 27,
-    ec_l3_mode               = 28,
-    ec_cl2_abst              = 29,
-    ec_mma_abst              = 30,
+    ec_cl2_gptr              = 3,
+    ec_cl2_time              = 4,
+    ec_mma_gptr              = 5,
+    ec_mma_time              = 6,
+    ec_l3_gptr               = 7,
+    ec_l3_time               = 8,
+    eq_cmsk                  = 9,
+    eq_mode                  = 10,
+    eq_clkadj_cmsk           = 11,
+    ec_cl2_cmsk              = 12,
+    ec_cl2_inex              = 13,
+    ec_cl2_mode              = 14,
+    ec_mma_cmsk              = 15,
+    ec_l3_cmsk               = 16,
+    ec_l3_inex               = 17,
+    ec_cl2_abst              = 18,
+    ec_mma_abst              = 19,
+    eq_func                  = 20,
+    eq_clkadj_func           = 21,
+    ec_cl2_func              = 22,
+    ec_mma_func              = 23,
+    ec_l3_func               = 24,
     // Instance Rings
     eq_repr                  = (0 | INSTANCE_RING_MARK),
-    eq_clkadj_repr           = (1 | INSTANCE_RING_MARK),
-    ec_cl2_repr              = (2 | INSTANCE_RING_MARK),
-    ec1_cl2_repr             = (3 | INSTANCE_RING_MARK),
-    ec2_cl2_repr             = (4 | INSTANCE_RING_MARK),
-    ec3_cl2_repr             = (5 | INSTANCE_RING_MARK),
-    ec_mma_repr              = (6 | INSTANCE_RING_MARK),
-    ec1_mma_repr             = (7 | INSTANCE_RING_MARK),
-    ec2_mma_repr             = (8 | INSTANCE_RING_MARK),
-    ec3_mma_repr             = (9 | INSTANCE_RING_MARK),
-    ec_l3_repr               = (10 | INSTANCE_RING_MARK),
-    ec1_l3_repr              = (11 | INSTANCE_RING_MARK),
-    ec2_l3_repr              = (12 | INSTANCE_RING_MARK),
-    ec3_l3_repr              = (13 | INSTANCE_RING_MARK),
-    eq_gptr_ovly             = (14 | INSTANCE_RING_MARK),
+    ec_cl2_repr              = (1 | INSTANCE_RING_MARK),
+    ec1_cl2_repr             = (2 | INSTANCE_RING_MARK),
+    ec2_cl2_repr             = (3 | INSTANCE_RING_MARK),
+    ec3_cl2_repr             = (4 | INSTANCE_RING_MARK),
+    ec1_mma_repr             = (5 | INSTANCE_RING_MARK),
+    ec2_mma_repr             = (6 | INSTANCE_RING_MARK),
+    ec3_mma_repr             = (7 | INSTANCE_RING_MARK),
+    ec_l3_repr               = (8 | INSTANCE_RING_MARK),
+    ec1_l3_repr              = (9 | INSTANCE_RING_MARK),
+    ec2_l3_repr              = (10 | INSTANCE_RING_MARK),
+    ec3_l3_repr              = (11 | INSTANCE_RING_MARK),
+    eq_gptr_ovly             = (12 | INSTANCE_RING_MARK),
 };
 
 static const ChipletData_t g_chipletData =
 {
     0x20, // Base chiplet/instance ID.
     8,  // Number of chiplet instances
-    31, // 31 common rings for EQ Chiplet
-    15, // 15 instance specific rings for EQ Chiplet
+    25, // 25 common rings for EQ Chiplet
+    13, // 13 instance specific rings for EQ Chiplet
 };
 }; // end of namespace EQ
 
@@ -617,8 +589,8 @@ static const RingProperties_t RING_PROPERTIES[NUM_RING_IDS] =
     {perv_occ_time           , "perv_occ_time"           , 0x01034907, PERV::perv_occ_time           , PERV_TYPE , RMRK_ROOT | RCLS_MVPD_PDG_TIME                       }, // 2
     {pib_repr                , "pib_repr"                , 0x01031006, PERV::pib_repr                , PERV_TYPE , RMRK_ROOT | RCLS_MVPD_PDR_NEST                       }, // 3
     {sbe_gptr                , "sbe_gptr"                , 0x01032002, PERV::sbe_gptr                , PERV_TYPE , RMRK_ROOT | RCLS_EKB_MVPD_PDG_OVLY                   }, // 4
-    {sbe_repr                , "sbe_repr"                , 0x01032006, PERV::sbe_repr                , PERV_TYPE , RMRK_ROOT | RCLS_MVPD_PDR_NEST                       }, // 5
-    {sbe_time                , "sbe_time"                , 0x01032007, PERV::sbe_time                , PERV_TYPE , RMRK_ROOT | RCLS_MVPD_PDG_TIME                       }, // 6
+    {HOLE_RING_ID            , "invalid"                 , UNDEFINED_SCOM_ADDR, UNDEFINED_RING_INDEX          , UNDEFINED_CHIPLET_TYPE, UNDEFINED_RING_CLASS                                 }, // 5
+    {HOLE_RING_ID            , "invalid"                 , UNDEFINED_SCOM_ADDR, UNDEFINED_RING_INDEX          , UNDEFINED_CHIPLET_TYPE, UNDEFINED_RING_CLASS                                 }, // 6
     {HOLE_RING_ID            , "invalid"                 , UNDEFINED_SCOM_ADDR, UNDEFINED_RING_INDEX          , UNDEFINED_CHIPLET_TYPE, UNDEFINED_RING_CLASS                                 }, // 7
     {perv_dpll_gptr          , "perv_dpll_gptr"          , 0x01030062, PERV::perv_dpll_gptr          , PERV_TYPE , RMRK_ROOT | RCLS_EKB_MVPD_PDG_OVLY                   }, // 8
     {perv_pll_gptr           , "perv_pll_gptr"           , 0x01030012, PERV::perv_pll_gptr           , PERV_TYPE , RMRK_ROOT | RCLS_EKB_MVPD_PDG_OVLY                   }, // 9
@@ -672,9 +644,9 @@ static const RingProperties_t RING_PROPERTIES[NUM_RING_IDS] =
     {iohs0_gptr              , "iohs0_gptr"              , 0x18036002, AXON0::iohs0_gptr             , AXON0_TYPE, RMRK_ROOT | RCLS_EKB_MVPD_PDG_OVLY                   }, // 57
     {iohs0_repr              , "iohs0_repr"              , 0x18036006, AXON0::iohs0_repr             , AXON0_TYPE, RMRK_ROOT | RCLS_MVPD_PDR_NEST                       }, // 58
     {iohs0_time              , "iohs0_time"              , 0x18036007, AXON0::iohs0_time             , AXON0_TYPE, RMRK_ROOT | RCLS_MVPD_PDG_TIME                       }, // 59
-    {iohs0_ndl_gptr          , "iohs0_ndl_gptr"          , 0x18030402, AXON0::iohs0_ndl_gptr         , AXON0_TYPE, RMRK_ROOT | RCLS_EKB_MVPD_PDG_OVLY                   }, // 60
-    {iohs0_ndl_repr          , "iohs0_ndl_repr"          , 0x18030406, AXON0::iohs0_ndl_repr         , AXON0_TYPE, RMRK_ROOT | RCLS_MVPD_PDR_NEST                       }, // 61
-    {iohs0_ndl_time          , "iohs0_ndl_time"          , 0x18030407, AXON0::iohs0_ndl_time         , AXON0_TYPE, RMRK_ROOT | RCLS_MVPD_PDG_TIME                       }, // 62
+    {HOLE_RING_ID            , "invalid"                 , UNDEFINED_SCOM_ADDR, UNDEFINED_RING_INDEX          , UNDEFINED_CHIPLET_TYPE, UNDEFINED_RING_CLASS                                 }, // 60
+    {HOLE_RING_ID            , "invalid"                 , UNDEFINED_SCOM_ADDR, UNDEFINED_RING_INDEX          , UNDEFINED_CHIPLET_TYPE, UNDEFINED_RING_CLASS                                 }, // 61
+    {HOLE_RING_ID            , "invalid"                 , UNDEFINED_SCOM_ADDR, UNDEFINED_RING_INDEX          , UNDEFINED_CHIPLET_TYPE, UNDEFINED_RING_CLASS                                 }, // 62
     {iohs0_pdl_gptr          , "iohs0_pdl_gptr"          , 0x18030202, AXON0::iohs0_pdl_gptr         , AXON0_TYPE, RMRK_ROOT | RCLS_EKB_MVPD_PDG_OVLY                   }, // 63
     {iohs0_pdl_repr          , "iohs0_pdl_repr"          , 0x18030206, AXON0::iohs0_pdl_repr         , AXON0_TYPE, RMRK_ROOT | RCLS_MVPD_PDR_NEST                       }, // 64
     {iohs0_pdl_time          , "iohs0_pdl_time"          , 0x18030207, AXON0::iohs0_pdl_time         , AXON0_TYPE, RMRK_ROOT | RCLS_MVPD_PDG_TIME                       }, // 65
@@ -682,9 +654,9 @@ static const RingProperties_t RING_PROPERTIES[NUM_RING_IDS] =
     {iohs1_gptr              , "iohs1_gptr"              , 0x19036002, AXON1::iohs1_gptr             , AXON1_TYPE, RMRK_ROOT | RCLS_EKB_MVPD_PDG_OVLY                   }, // 67
     {iohs1_repr              , "iohs1_repr"              , 0x19036006, AXON1::iohs1_repr             , AXON1_TYPE, RMRK_ROOT | RCLS_MVPD_PDR_NEST                       }, // 68
     {iohs1_time              , "iohs1_time"              , 0x19036007, AXON1::iohs1_time             , AXON1_TYPE, RMRK_ROOT | RCLS_MVPD_PDG_TIME                       }, // 69
-    {iohs1_ndl_gptr          , "iohs1_ndl_gptr"          , 0x19030402, AXON1::iohs1_ndl_gptr         , AXON1_TYPE, RMRK_ROOT | RCLS_EKB_MVPD_PDG_OVLY                   }, // 70
-    {iohs1_ndl_repr          , "iohs1_ndl_repr"          , 0x19030406, AXON1::iohs1_ndl_repr         , AXON1_TYPE, RMRK_ROOT | RCLS_MVPD_PDR_NEST                       }, // 71
-    {iohs1_ndl_time          , "iohs1_ndl_time"          , 0x19030407, AXON1::iohs1_ndl_time         , AXON1_TYPE, RMRK_ROOT | RCLS_MVPD_PDG_TIME                       }, // 72
+    {HOLE_RING_ID            , "invalid"                 , UNDEFINED_SCOM_ADDR, UNDEFINED_RING_INDEX          , UNDEFINED_CHIPLET_TYPE, UNDEFINED_RING_CLASS                                 }, // 70
+    {HOLE_RING_ID            , "invalid"                 , UNDEFINED_SCOM_ADDR, UNDEFINED_RING_INDEX          , UNDEFINED_CHIPLET_TYPE, UNDEFINED_RING_CLASS                                 }, // 71
+    {HOLE_RING_ID            , "invalid"                 , UNDEFINED_SCOM_ADDR, UNDEFINED_RING_INDEX          , UNDEFINED_CHIPLET_TYPE, UNDEFINED_RING_CLASS                                 }, // 72
     {iohs1_pdl_gptr          , "iohs1_pdl_gptr"          , 0x19030202, AXON1::iohs1_pdl_gptr         , AXON1_TYPE, RMRK_ROOT | RCLS_EKB_MVPD_PDG_OVLY                   }, // 73
     {iohs1_pdl_repr          , "iohs1_pdl_repr"          , 0x19030206, AXON1::iohs1_pdl_repr         , AXON1_TYPE, RMRK_ROOT | RCLS_MVPD_PDR_NEST                       }, // 74
     {iohs1_pdl_time          , "iohs1_pdl_time"          , 0x19030207, AXON1::iohs1_pdl_time         , AXON1_TYPE, RMRK_ROOT | RCLS_MVPD_PDG_TIME                       }, // 75
@@ -692,9 +664,9 @@ static const RingProperties_t RING_PROPERTIES[NUM_RING_IDS] =
     {iohs2_gptr              , "iohs2_gptr"              , 0x1A036002, AXON2::iohs2_gptr             , AXON2_TYPE, RMRK_ROOT | RCLS_EKB_MVPD_PDG_OVLY                   }, // 77
     {iohs2_repr              , "iohs2_repr"              , 0x1A036006, AXON2::iohs2_repr             , AXON2_TYPE, RMRK_ROOT | RCLS_MVPD_PDR_NEST                       }, // 78
     {iohs2_time              , "iohs2_time"              , 0x1A036007, AXON2::iohs2_time             , AXON2_TYPE, RMRK_ROOT | RCLS_MVPD_PDG_TIME                       }, // 79
-    {iohs2_ndl_gptr          , "iohs2_ndl_gptr"          , 0x1A030402, AXON2::iohs2_ndl_gptr         , AXON2_TYPE, RMRK_ROOT | RCLS_EKB_MVPD_PDG_OVLY                   }, // 80
-    {iohs2_ndl_repr          , "iohs2_ndl_repr"          , 0x1A030406, AXON2::iohs2_ndl_repr         , AXON2_TYPE, RMRK_ROOT | RCLS_MVPD_PDR_NEST                       }, // 81
-    {iohs2_ndl_time          , "iohs2_ndl_time"          , 0x1A030407, AXON2::iohs2_ndl_time         , AXON2_TYPE, RMRK_ROOT | RCLS_MVPD_PDG_TIME                       }, // 82
+    {HOLE_RING_ID            , "invalid"                 , UNDEFINED_SCOM_ADDR, UNDEFINED_RING_INDEX          , UNDEFINED_CHIPLET_TYPE, UNDEFINED_RING_CLASS                                 }, // 80
+    {HOLE_RING_ID            , "invalid"                 , UNDEFINED_SCOM_ADDR, UNDEFINED_RING_INDEX          , UNDEFINED_CHIPLET_TYPE, UNDEFINED_RING_CLASS                                 }, // 81
+    {HOLE_RING_ID            , "invalid"                 , UNDEFINED_SCOM_ADDR, UNDEFINED_RING_INDEX          , UNDEFINED_CHIPLET_TYPE, UNDEFINED_RING_CLASS                                 }, // 82
     {iohs2_pdl_gptr          , "iohs2_pdl_gptr"          , 0x1A030202, AXON2::iohs2_pdl_gptr         , AXON2_TYPE, RMRK_ROOT | RCLS_EKB_MVPD_PDG_OVLY                   }, // 83
     {iohs2_pdl_repr          , "iohs2_pdl_repr"          , 0x1A030206, AXON2::iohs2_pdl_repr         , AXON2_TYPE, RMRK_ROOT | RCLS_MVPD_PDR_NEST                       }, // 84
     {iohs2_pdl_time          , "iohs2_pdl_time"          , 0x1A030207, AXON2::iohs2_pdl_time         , AXON2_TYPE, RMRK_ROOT | RCLS_MVPD_PDG_TIME                       }, // 85
@@ -702,9 +674,9 @@ static const RingProperties_t RING_PROPERTIES[NUM_RING_IDS] =
     {iohs3_gptr              , "iohs3_gptr"              , 0x1B036002, AXON3::iohs3_gptr             , AXON3_TYPE, RMRK_ROOT | RCLS_EKB_MVPD_PDG_OVLY                   }, // 87
     {iohs3_repr              , "iohs3_repr"              , 0x1B036006, AXON3::iohs3_repr             , AXON3_TYPE, RMRK_ROOT | RCLS_MVPD_PDR_NEST                       }, // 88
     {iohs3_time              , "iohs3_time"              , 0x1B036007, AXON3::iohs3_time             , AXON3_TYPE, RMRK_ROOT | RCLS_MVPD_PDG_TIME                       }, // 89
-    {iohs3_ndl_gptr          , "iohs3_ndl_gptr"          , 0x1B030402, AXON3::iohs3_ndl_gptr         , AXON3_TYPE, RMRK_ROOT | RCLS_EKB_MVPD_PDG_OVLY                   }, // 90
-    {iohs3_ndl_repr          , "iohs3_ndl_repr"          , 0x1B030406, AXON3::iohs3_ndl_repr         , AXON3_TYPE, RMRK_ROOT | RCLS_MVPD_PDR_NEST                       }, // 91
-    {iohs3_ndl_time          , "iohs3_ndl_time"          , 0x1B030407, AXON3::iohs3_ndl_time         , AXON3_TYPE, RMRK_ROOT | RCLS_MVPD_PDG_TIME                       }, // 92
+    {HOLE_RING_ID            , "invalid"                 , UNDEFINED_SCOM_ADDR, UNDEFINED_RING_INDEX          , UNDEFINED_CHIPLET_TYPE, UNDEFINED_RING_CLASS                                 }, // 90
+    {HOLE_RING_ID            , "invalid"                 , UNDEFINED_SCOM_ADDR, UNDEFINED_RING_INDEX          , UNDEFINED_CHIPLET_TYPE, UNDEFINED_RING_CLASS                                 }, // 91
+    {HOLE_RING_ID            , "invalid"                 , UNDEFINED_SCOM_ADDR, UNDEFINED_RING_INDEX          , UNDEFINED_CHIPLET_TYPE, UNDEFINED_RING_CLASS                                 }, // 92
     {iohs3_pdl_gptr          , "iohs3_pdl_gptr"          , 0x1B030202, AXON3::iohs3_pdl_gptr         , AXON3_TYPE, RMRK_ROOT | RCLS_EKB_MVPD_PDG_OVLY                   }, // 93
     {iohs3_pdl_repr          , "iohs3_pdl_repr"          , 0x1B030206, AXON3::iohs3_pdl_repr         , AXON3_TYPE, RMRK_ROOT | RCLS_MVPD_PDR_NEST                       }, // 94
     {iohs3_pdl_time          , "iohs3_pdl_time"          , 0x1B030207, AXON3::iohs3_pdl_time         , AXON3_TYPE, RMRK_ROOT | RCLS_MVPD_PDG_TIME                       }, // 95
@@ -712,9 +684,9 @@ static const RingProperties_t RING_PROPERTIES[NUM_RING_IDS] =
     {iohs4_gptr              , "iohs4_gptr"              , 0x1C036002, AXON4::iohs4_gptr             , AXON4_TYPE, RMRK_ROOT | RCLS_EKB_MVPD_PDG_OVLY                   }, // 97
     {iohs4_repr              , "iohs4_repr"              , 0x1C036006, AXON4::iohs4_repr             , AXON4_TYPE, RMRK_ROOT | RCLS_MVPD_PDR_NEST                       }, // 98
     {iohs4_time              , "iohs4_time"              , 0x1C036007, AXON4::iohs4_time             , AXON4_TYPE, RMRK_ROOT | RCLS_MVPD_PDG_TIME                       }, // 99
-    {iohs4_ndl_gptr          , "iohs4_ndl_gptr"          , 0x1C030402, AXON4::iohs4_ndl_gptr         , AXON4_TYPE, RMRK_ROOT | RCLS_EKB_MVPD_PDG_OVLY                   }, // 100
-    {iohs4_ndl_repr          , "iohs4_ndl_repr"          , 0x1C030406, AXON4::iohs4_ndl_repr         , AXON4_TYPE, RMRK_ROOT | RCLS_MVPD_PDR_NEST                       }, // 101
-    {iohs4_ndl_time          , "iohs4_ndl_time"          , 0x1C030407, AXON4::iohs4_ndl_time         , AXON4_TYPE, RMRK_ROOT | RCLS_MVPD_PDG_TIME                       }, // 102
+    {HOLE_RING_ID            , "invalid"                 , UNDEFINED_SCOM_ADDR, UNDEFINED_RING_INDEX          , UNDEFINED_CHIPLET_TYPE, UNDEFINED_RING_CLASS                                 }, // 100
+    {HOLE_RING_ID            , "invalid"                 , UNDEFINED_SCOM_ADDR, UNDEFINED_RING_INDEX          , UNDEFINED_CHIPLET_TYPE, UNDEFINED_RING_CLASS                                 }, // 101
+    {HOLE_RING_ID            , "invalid"                 , UNDEFINED_SCOM_ADDR, UNDEFINED_RING_INDEX          , UNDEFINED_CHIPLET_TYPE, UNDEFINED_RING_CLASS                                 }, // 102
     {iohs4_pdl_gptr          , "iohs4_pdl_gptr"          , 0x1C030202, AXON4::iohs4_pdl_gptr         , AXON4_TYPE, RMRK_ROOT | RCLS_EKB_MVPD_PDG_OVLY                   }, // 103
     {iohs4_pdl_repr          , "iohs4_pdl_repr"          , 0x1C030206, AXON4::iohs4_pdl_repr         , AXON4_TYPE, RMRK_ROOT | RCLS_MVPD_PDR_NEST                       }, // 104
     {iohs4_pdl_time          , "iohs4_pdl_time"          , 0x1C030207, AXON4::iohs4_pdl_time         , AXON4_TYPE, RMRK_ROOT | RCLS_MVPD_PDG_TIME                       }, // 105
@@ -722,9 +694,9 @@ static const RingProperties_t RING_PROPERTIES[NUM_RING_IDS] =
     {iohs5_gptr              , "iohs5_gptr"              , 0x1D036002, AXON5::iohs5_gptr             , AXON5_TYPE, RMRK_ROOT | RCLS_EKB_MVPD_PDG_OVLY                   }, // 107
     {iohs5_repr              , "iohs5_repr"              , 0x1D036006, AXON5::iohs5_repr             , AXON5_TYPE, RMRK_ROOT | RCLS_MVPD_PDR_NEST                       }, // 108
     {iohs5_time              , "iohs5_time"              , 0x1D036007, AXON5::iohs5_time             , AXON5_TYPE, RMRK_ROOT | RCLS_MVPD_PDG_TIME                       }, // 109
-    {iohs5_ndl_gptr          , "iohs5_ndl_gptr"          , 0x1D030402, AXON5::iohs5_ndl_gptr         , AXON5_TYPE, RMRK_ROOT | RCLS_EKB_MVPD_PDG_OVLY                   }, // 110
-    {iohs5_ndl_repr          , "iohs5_ndl_repr"          , 0x1D030406, AXON5::iohs5_ndl_repr         , AXON5_TYPE, RMRK_ROOT | RCLS_MVPD_PDR_NEST                       }, // 111
-    {iohs5_ndl_time          , "iohs5_ndl_time"          , 0x1D030407, AXON5::iohs5_ndl_time         , AXON5_TYPE, RMRK_ROOT | RCLS_MVPD_PDG_TIME                       }, // 112
+    {HOLE_RING_ID            , "invalid"                 , UNDEFINED_SCOM_ADDR, UNDEFINED_RING_INDEX          , UNDEFINED_CHIPLET_TYPE, UNDEFINED_RING_CLASS                                 }, // 110
+    {HOLE_RING_ID            , "invalid"                 , UNDEFINED_SCOM_ADDR, UNDEFINED_RING_INDEX          , UNDEFINED_CHIPLET_TYPE, UNDEFINED_RING_CLASS                                 }, // 111
+    {HOLE_RING_ID            , "invalid"                 , UNDEFINED_SCOM_ADDR, UNDEFINED_RING_INDEX          , UNDEFINED_CHIPLET_TYPE, UNDEFINED_RING_CLASS                                 }, // 112
     {iohs5_pdl_gptr          , "iohs5_pdl_gptr"          , 0x1D030202, AXON5::iohs5_pdl_gptr         , AXON5_TYPE, RMRK_ROOT | RCLS_EKB_MVPD_PDG_OVLY                   }, // 113
     {iohs5_pdl_repr          , "iohs5_pdl_repr"          , 0x1D030206, AXON5::iohs5_pdl_repr         , AXON5_TYPE, RMRK_ROOT | RCLS_MVPD_PDR_NEST                       }, // 114
     {iohs5_pdl_time          , "iohs5_pdl_time"          , 0x1D030207, AXON5::iohs5_pdl_time         , AXON5_TYPE, RMRK_ROOT | RCLS_MVPD_PDG_TIME                       }, // 115
@@ -732,9 +704,9 @@ static const RingProperties_t RING_PROPERTIES[NUM_RING_IDS] =
     {iohs6_gptr              , "iohs6_gptr"              , 0x1E036002, AXON6::iohs6_gptr             , AXON6_TYPE, RMRK_ROOT | RCLS_EKB_MVPD_PDG_OVLY                   }, // 117
     {iohs6_repr              , "iohs6_repr"              , 0x1E036006, AXON6::iohs6_repr             , AXON6_TYPE, RMRK_ROOT | RCLS_MVPD_PDR_NEST                       }, // 118
     {iohs6_time              , "iohs6_time"              , 0x1E036007, AXON6::iohs6_time             , AXON6_TYPE, RMRK_ROOT | RCLS_MVPD_PDG_TIME                       }, // 119
-    {iohs6_ndl_gptr          , "iohs6_ndl_gptr"          , 0x1E030402, AXON6::iohs6_ndl_gptr         , AXON6_TYPE, RMRK_ROOT | RCLS_EKB_MVPD_PDG_OVLY                   }, // 120
-    {iohs6_ndl_repr          , "iohs6_ndl_repr"          , 0x1E030406, AXON6::iohs6_ndl_repr         , AXON6_TYPE, RMRK_ROOT | RCLS_MVPD_PDR_NEST                       }, // 121
-    {iohs6_ndl_time          , "iohs6_ndl_time"          , 0x1E030407, AXON6::iohs6_ndl_time         , AXON6_TYPE, RMRK_ROOT | RCLS_MVPD_PDG_TIME                       }, // 122
+    {HOLE_RING_ID            , "invalid"                 , UNDEFINED_SCOM_ADDR, UNDEFINED_RING_INDEX          , UNDEFINED_CHIPLET_TYPE, UNDEFINED_RING_CLASS                                 }, // 120
+    {HOLE_RING_ID            , "invalid"                 , UNDEFINED_SCOM_ADDR, UNDEFINED_RING_INDEX          , UNDEFINED_CHIPLET_TYPE, UNDEFINED_RING_CLASS                                 }, // 121
+    {HOLE_RING_ID            , "invalid"                 , UNDEFINED_SCOM_ADDR, UNDEFINED_RING_INDEX          , UNDEFINED_CHIPLET_TYPE, UNDEFINED_RING_CLASS                                 }, // 122
     {iohs6_pdl_gptr          , "iohs6_pdl_gptr"          , 0x1E030202, AXON6::iohs6_pdl_gptr         , AXON6_TYPE, RMRK_ROOT | RCLS_EKB_MVPD_PDG_OVLY                   }, // 123
     {iohs6_pdl_repr          , "iohs6_pdl_repr"          , 0x1E030206, AXON6::iohs6_pdl_repr         , AXON6_TYPE, RMRK_ROOT | RCLS_MVPD_PDR_NEST                       }, // 124
     {iohs6_pdl_time          , "iohs6_pdl_time"          , 0x1E030207, AXON6::iohs6_pdl_time         , AXON6_TYPE, RMRK_ROOT | RCLS_MVPD_PDG_TIME                       }, // 125
@@ -742,9 +714,9 @@ static const RingProperties_t RING_PROPERTIES[NUM_RING_IDS] =
     {iohs7_gptr              , "iohs7_gptr"              , 0x1F036002, AXON7::iohs7_gptr             , AXON7_TYPE, RMRK_ROOT | RCLS_EKB_MVPD_PDG_OVLY                   }, // 127
     {iohs7_repr              , "iohs7_repr"              , 0x1F036006, AXON7::iohs7_repr             , AXON7_TYPE, RMRK_ROOT | RCLS_MVPD_PDR_NEST                       }, // 128
     {iohs7_time              , "iohs7_time"              , 0x1F036007, AXON7::iohs7_time             , AXON7_TYPE, RMRK_ROOT | RCLS_MVPD_PDG_TIME                       }, // 129
-    {iohs7_ndl_gptr          , "iohs7_ndl_gptr"          , 0x1F030402, AXON7::iohs7_ndl_gptr         , AXON7_TYPE, RMRK_ROOT | RCLS_EKB_MVPD_PDG_OVLY                   }, // 130
-    {iohs7_ndl_repr          , "iohs7_ndl_repr"          , 0x1F030406, AXON7::iohs7_ndl_repr         , AXON7_TYPE, RMRK_ROOT | RCLS_MVPD_PDR_NEST                       }, // 131
-    {iohs7_ndl_time          , "iohs7_ndl_time"          , 0x1F030407, AXON7::iohs7_ndl_time         , AXON7_TYPE, RMRK_ROOT | RCLS_MVPD_PDG_TIME                       }, // 132
+    {HOLE_RING_ID            , "invalid"                 , UNDEFINED_SCOM_ADDR, UNDEFINED_RING_INDEX          , UNDEFINED_CHIPLET_TYPE, UNDEFINED_RING_CLASS                                 }, // 130
+    {HOLE_RING_ID            , "invalid"                 , UNDEFINED_SCOM_ADDR, UNDEFINED_RING_INDEX          , UNDEFINED_CHIPLET_TYPE, UNDEFINED_RING_CLASS                                 }, // 131
+    {HOLE_RING_ID            , "invalid"                 , UNDEFINED_SCOM_ADDR, UNDEFINED_RING_INDEX          , UNDEFINED_CHIPLET_TYPE, UNDEFINED_RING_CLASS                                 }, // 132
     {iohs7_pdl_gptr          , "iohs7_pdl_gptr"          , 0x1F030202, AXON7::iohs7_pdl_gptr         , AXON7_TYPE, RMRK_ROOT | RCLS_EKB_MVPD_PDG_OVLY                   }, // 133
     {iohs7_pdl_repr          , "iohs7_pdl_repr"          , 0x1F030206, AXON7::iohs7_pdl_repr         , AXON7_TYPE, RMRK_ROOT | RCLS_MVPD_PDR_NEST                       }, // 134
     {iohs7_pdl_time          , "iohs7_pdl_time"          , 0x1F030207, AXON7::iohs7_pdl_time         , AXON7_TYPE, RMRK_ROOT | RCLS_MVPD_PDG_TIME                       }, // 135
@@ -753,8 +725,8 @@ static const RingProperties_t RING_PROPERTIES[NUM_RING_IDS] =
     {eq_repr                 , "eq_repr"                 , 0x20034026, EQ::eq_repr                   , EQ_TYPE   , RMRK_ROOT | RCLS_MVPD_PDR_EQ                         }, // 138
     {eq_time                 , "eq_time"                 , 0x20034027, EQ::eq_time                   , EQ_TYPE   , RMRK_ROOT | RCLS_MVPD_PDG_TIME                       }, // 139
     {eq_clkadj_gptr          , "eq_clkadj_gptr"          , 0x20030012, EQ::eq_clkadj_gptr            , EQ_TYPE   , RMRK_ROOT | RCLS_EKB_MVPD_PDG_OVLY                   }, // 140
-    {eq_clkadj_repr          , "eq_clkadj_repr"          , 0x20030016, EQ::eq_clkadj_repr            , EQ_TYPE   , RMRK_ROOT | RCLS_MVPD_PDR_EQ                         }, // 141
-    {eq_clkadj_time          , "eq_clkadj_time"          , 0x20030017, EQ::eq_clkadj_time            , EQ_TYPE   , RMRK_ROOT | RCLS_MVPD_PDG_TIME                       }, // 142
+    {HOLE_RING_ID            , "invalid"                 , UNDEFINED_SCOM_ADDR, UNDEFINED_RING_INDEX          , UNDEFINED_CHIPLET_TYPE, UNDEFINED_RING_CLASS                                 }, // 141
+    {HOLE_RING_ID            , "invalid"                 , UNDEFINED_SCOM_ADDR, UNDEFINED_RING_INDEX          , UNDEFINED_CHIPLET_TYPE, UNDEFINED_RING_CLASS                                 }, // 142
     {ec_cl2_gptr             , "ec_cl2_gptr"             , 0x20032002, EQ::ec_cl2_gptr               , EQ_TYPE   , RMRK_ROOT | RCLS_EKB_MVPD_PDG_OVLY | RMRK_SCAN_BY_QME}, // 143
     {ec_cl2_repr             , "ec_cl2_repr"             , 0x20032006, EQ::ec_cl2_repr               , EQ_TYPE   , RMRK_ROOT | RCLS_MVPD_PDR_CORE | RMRK_SCAN_BY_QME    }, // 144
     {ec_cl2_time             , "ec_cl2_time"             , 0x20032007, EQ::ec_cl2_time               , EQ_TYPE   , RMRK_ROOT | RCLS_MVPD_PDG_TIME | RMRK_SCAN_BY_QME    }, // 145
@@ -762,7 +734,7 @@ static const RingProperties_t RING_PROPERTIES[NUM_RING_IDS] =
     {ec2_cl2_repr            , "ec2_cl2_repr"            , 0x20030806, EQ::ec2_cl2_repr              , EQ_TYPE   , RMRK_ROOT | RCLS_MVPD_PDR_CORE | RMRK_SCAN_BY_QME    }, // 147
     {ec3_cl2_repr            , "ec3_cl2_repr"            , 0x20030406, EQ::ec3_cl2_repr              , EQ_TYPE   , RMRK_ROOT | RCLS_MVPD_PDR_CORE | RMRK_SCAN_BY_QME    }, // 148
     {ec_mma_gptr             , "ec_mma_gptr"             , 0x20830002, EQ::ec_mma_gptr               , EQ_TYPE   , RMRK_ROOT | RCLS_EKB_MVPD_PDG_OVLY | RMRK_SCAN_BY_QME}, // 149
-    {ec_mma_repr             , "ec_mma_repr"             , 0x20830006, EQ::ec_mma_repr               , EQ_TYPE   , RMRK_ROOT | RCLS_MVPD_PDR_CORE | RMRK_SCAN_BY_QME    }, // 150
+    {HOLE_RING_ID            , "invalid"                 , UNDEFINED_SCOM_ADDR, UNDEFINED_RING_INDEX          , UNDEFINED_CHIPLET_TYPE, UNDEFINED_RING_CLASS                                 }, // 150
     {ec_mma_time             , "ec_mma_time"             , 0x20830007, EQ::ec_mma_time               , EQ_TYPE   , RMRK_ROOT | RCLS_MVPD_PDG_TIME | RMRK_SCAN_BY_QME    }, // 151
     {ec1_mma_repr            , "ec1_mma_repr"            , 0x20430006, EQ::ec1_mma_repr              , EQ_TYPE   , RMRK_ROOT | RCLS_MVPD_PDR_CORE | RMRK_SCAN_BY_QME    }, // 152
     {ec2_mma_repr            , "ec2_mma_repr"            , 0x20230006, EQ::ec2_mma_repr              , EQ_TYPE   , RMRK_ROOT | RCLS_MVPD_PDR_CORE | RMRK_SCAN_BY_QME    }, // 153
@@ -782,43 +754,43 @@ static const RingProperties_t RING_PROPERTIES[NUM_RING_IDS] =
     {eq_gptr_ovly            , "eq_gptr_ovly"            , 0x20034022, EQ::eq_gptr_ovly              , EQ_TYPE   , RMRK_ROOT | RCLS_MVPD_PDS_EQ                         }, // 167
 
     // EKB Rings:
-    {perv_fure               , "perv_fure"               , 0x0103410F, PERV::perv_fure               , PERV_TYPE , RMRK_ROOT | RCLS_EKB_RINGS                           }, // 256
-    {sbe_fure                , "sbe_fure"                , 0x0103200F, PERV::sbe_fure                , PERV_TYPE , RMRK_ROOT | RCLS_EKB_RINGS                           }, // 257
-    {occ_fure                , "occ_fure"                , 0x0103080F, PERV::occ_fure                , PERV_TYPE , RMRK_ROOT | RCLS_EKB_RINGS                           }, // 258
+    {HOLE_RING_ID            , "invalid"                 , UNDEFINED_SCOM_ADDR, UNDEFINED_RING_INDEX          , UNDEFINED_CHIPLET_TYPE, UNDEFINED_RING_CLASS                                 }, // 256
+    {HOLE_RING_ID            , "invalid"                 , UNDEFINED_SCOM_ADDR, UNDEFINED_RING_INDEX          , UNDEFINED_CHIPLET_TYPE, UNDEFINED_RING_CLASS                                 }, // 257
+    {HOLE_RING_ID            , "invalid"                 , UNDEFINED_SCOM_ADDR, UNDEFINED_RING_INDEX          , UNDEFINED_CHIPLET_TYPE, UNDEFINED_RING_CLASS                                 }, // 258
     {perv_dpll_func          , "perv_dpll_func"          , 0x01030060, PERV::perv_dpll_func          , PERV_TYPE , RMRK_ROOT | RCLS_EKB_RINGS                           }, // 259
-    {perv_dpll_bndy          , "perv_dpll_bndy"          , 0x01030068, PERV::perv_dpll_bndy          , PERV_TYPE , RMRK_ROOT | RCLS_EKB_RINGS                           }, // 260
+    {HOLE_RING_ID            , "invalid"                 , UNDEFINED_SCOM_ADDR, UNDEFINED_RING_INDEX          , UNDEFINED_CHIPLET_TYPE, UNDEFINED_RING_CLASS                                 }, // 260
     {perv_dpll_time          , "perv_dpll_time"          , 0x01030067, PERV::perv_dpll_time          , PERV_TYPE , RMRK_ROOT | RCLS_EKB_RINGS                           }, // 261
     {perv_pll_func           , "perv_pll_func"           , 0x01030010, PERV::perv_pll_func           , PERV_TYPE , RMRK_ROOT | RCLS_EKB_RINGS                           }, // 262
-    {perv_pll_bndy           , "perv_pll_bndy"           , 0x01030018, PERV::perv_pll_bndy           , PERV_TYPE , RMRK_ROOT | RCLS_EKB_RINGS                           }, // 263
-    {n0_fure                 , "n0_fure"                 , 0x0203640F, N0::n0_fure                   , N0_TYPE   , RMRK_ROOT | RCLS_EKB_RINGS                           }, // 264
-    {n1_fure                 , "n1_fure"                 , 0x0303540F, N1::n1_fure                   , N1_TYPE   , RMRK_ROOT | RCLS_EKB_RINGS                           }, // 265
-    {n1_nmmu1_fure           , "n1_nmmu1_fure"           , 0x0303020F, N1::n1_nmmu1_fure             , N1_TYPE   , RMRK_ROOT | RCLS_EKB_RINGS                           }, // 266
-    {pci_fure                , "pci_fure"                , 0x08037F8F, PCI::pci_fure                 , PCI_TYPE  , RMRK_ROOT | RCLS_EKB_RINGS                           }, // 267
+    {perv_pll_bndy           , "perv_pll_bndy"           , 0x01030018, UNDEFINED_RING_INDEX          , UNDEFINED_CHIPLET_TYPE , RMRK_ROOT | RMRK_HAS_DERIVS | RCLS_EKB_RINGS         }, // 263
+    {HOLE_RING_ID            , "invalid"                 , UNDEFINED_SCOM_ADDR, UNDEFINED_RING_INDEX          , UNDEFINED_CHIPLET_TYPE, UNDEFINED_RING_CLASS                                 }, // 264
+    {HOLE_RING_ID            , "invalid"                 , UNDEFINED_SCOM_ADDR, UNDEFINED_RING_INDEX          , UNDEFINED_CHIPLET_TYPE, UNDEFINED_RING_CLASS                                 }, // 265
+    {HOLE_RING_ID            , "invalid"                 , UNDEFINED_SCOM_ADDR, UNDEFINED_RING_INDEX          , UNDEFINED_CHIPLET_TYPE, UNDEFINED_RING_CLASS                                 }, // 266
+    {HOLE_RING_ID            , "invalid"                 , UNDEFINED_SCOM_ADDR, UNDEFINED_RING_INDEX          , UNDEFINED_CHIPLET_TYPE, UNDEFINED_RING_CLASS                                 }, // 267
     {pci_pll_func            , "pci_pll_func"            , 0x08030010, PCI::pci_pll_func             , PCI_TYPE  , RMRK_ROOT | RCLS_EKB_RINGS                           }, // 268
-    {pci_pll_bndy            , "pci_pll_bndy"            , 0x08030018, PCI::pci_pll_bndy             , PCI_TYPE  , RMRK_ROOT | RCLS_EKB_RINGS                           }, // 269
-    {mc_fure                 , "mc_fure"                 , 0x0C036F0F, MC::mc_fure                   , MC_TYPE   , RMRK_ROOT | RCLS_EKB_RINGS                           }, // 270
+    {pci_pll_bndy            , "pci_pll_bndy"            , 0x08030018, UNDEFINED_RING_INDEX          , UNDEFINED_CHIPLET_TYPE , RMRK_ROOT | RMRK_HAS_DERIVS | RCLS_EKB_RINGS         }, // 269
+    {HOLE_RING_ID            , "invalid"                 , UNDEFINED_SCOM_ADDR, UNDEFINED_RING_INDEX          , UNDEFINED_CHIPLET_TYPE, UNDEFINED_RING_CLASS                                 }, // 270
     {mc_pll_func             , "mc_pll_func"             , 0x0C030010, MC::mc_pll_func               , MC_TYPE   , RMRK_ROOT | RCLS_EKB_RINGS                           }, // 271
-    {mc_pll_bndy             , "mc_pll_bndy"             , 0x0C030018, MC::mc_pll_bndy               , MC_TYPE   , RMRK_ROOT | RMRK_HAS_DERIVS | RCLS_EKB_RINGS         }, // 272
+    {mc_pll_bndy             , "mc_pll_bndy"             , 0x0C030018, UNDEFINED_RING_INDEX          , UNDEFINED_CHIPLET_TYPE , RMRK_ROOT | RMRK_HAS_DERIVS | RCLS_EKB_RINGS         }, // 272
     {mc_pll_bndy_bucket_0    , "mc_pll_bndy_bucket_0"    , 0x0C030018, MC::mc_pll_bndy_bucket_0      , MC_TYPE   , RCLS_EKB_RINGS                                       }, // 273
     {mc_pll_bndy_bucket_1    , "mc_pll_bndy_bucket_1"    , 0x0C030018, MC::mc_pll_bndy_bucket_1      , MC_TYPE   , RCLS_EKB_RINGS                                       }, // 274
     {mc_pll_bndy_bucket_2    , "mc_pll_bndy_bucket_2"    , 0x0C030018, MC::mc_pll_bndy_bucket_2      , MC_TYPE   , RCLS_EKB_RINGS                                       }, // 275
     {mc_pll_bndy_bucket_3    , "mc_pll_bndy_bucket_3"    , 0x0C030018, MC::mc_pll_bndy_bucket_3      , MC_TYPE   , RCLS_EKB_RINGS                                       }, // 276
     {mc_pll_bndy_bucket_4    , "mc_pll_bndy_bucket_4"    , 0x0C030018, MC::mc_pll_bndy_bucket_4      , MC_TYPE   , RCLS_EKB_RINGS                                       }, // 277
-    {pau0_fure               , "pau0_fure"               , 0x1003430F, PAU0::pau0_fure               , PAU0_TYPE , RMRK_ROOT | RCLS_EKB_RINGS                           }, // 278
-    {pau0_pau0_fure          , "pau0_pau0_fure"          , 0x1003200F, PAU0::pau0_pau0_fure          , PAU0_TYPE , RMRK_ROOT | RCLS_EKB_RINGS                           }, // 279
-    {pau1_fure               , "pau1_fure"               , 0x1103430F, PAU1::pau1_fure               , PAU1_TYPE , RMRK_ROOT | RCLS_EKB_RINGS                           }, // 280
-    {pau1_pau3_fure          , "pau1_pau3_fure"          , 0x1103200F, PAU1::pau1_pau3_fure          , PAU1_TYPE , RMRK_ROOT | RCLS_EKB_RINGS                           }, // 281
-    {pau2_fure               , "pau2_fure"               , 0x1203430F, PAU2::pau2_fure               , PAU2_TYPE , RMRK_ROOT | RCLS_EKB_RINGS                           }, // 282
-    {pau2_pau4_fure          , "pau2_pau4_fure"          , 0x1203200F, PAU2::pau2_pau4_fure          , PAU2_TYPE , RMRK_ROOT | RCLS_EKB_RINGS                           }, // 283
-    {pau2_pau5_fure          , "pau2_pau5_fure"          , 0x1203100F, PAU2::pau2_pau5_fure          , PAU2_TYPE , RMRK_ROOT | RCLS_EKB_RINGS                           }, // 284
-    {pau3_fure               , "pau3_fure"               , 0x1303430F, PAU3::pau3_fure               , PAU3_TYPE , RMRK_ROOT | RCLS_EKB_RINGS                           }, // 285
-    {pau3_pau6_fure          , "pau3_pau6_fure"          , 0x1303200F, PAU3::pau3_pau6_fure          , PAU3_TYPE , RMRK_ROOT | RCLS_EKB_RINGS                           }, // 286
-    {pau3_pau7_fure          , "pau3_pau7_fure"          , 0x1303100F, PAU3::pau3_pau7_fure          , PAU3_TYPE , RMRK_ROOT | RCLS_EKB_RINGS                           }, // 287
-    {iohs0_fure              , "iohs0_fure"              , 0x1803600F, AXON0::iohs0_fure             , AXON0_TYPE, RMRK_ROOT | RCLS_EKB_RINGS                           }, // 288
-    {iohs0_ndl_fure          , "iohs0_ndl_fure"          , 0x1803040F, AXON0::iohs0_ndl_fure         , AXON0_TYPE, RMRK_ROOT | RCLS_EKB_RINGS                           }, // 289
-    {iohs0_pdl_fure          , "iohs0_pdl_fure"          , 0x1803020F, AXON0::iohs0_pdl_fure         , AXON0_TYPE, RMRK_ROOT | RCLS_EKB_RINGS                           }, // 290
+    {HOLE_RING_ID            , "invalid"                 , UNDEFINED_SCOM_ADDR, UNDEFINED_RING_INDEX          , UNDEFINED_CHIPLET_TYPE, UNDEFINED_RING_CLASS                                 }, // 278
+    {HOLE_RING_ID            , "invalid"                 , UNDEFINED_SCOM_ADDR, UNDEFINED_RING_INDEX          , UNDEFINED_CHIPLET_TYPE, UNDEFINED_RING_CLASS                                 }, // 279
+    {HOLE_RING_ID            , "invalid"                 , UNDEFINED_SCOM_ADDR, UNDEFINED_RING_INDEX          , UNDEFINED_CHIPLET_TYPE, UNDEFINED_RING_CLASS                                 }, // 280
+    {HOLE_RING_ID            , "invalid"                 , UNDEFINED_SCOM_ADDR, UNDEFINED_RING_INDEX          , UNDEFINED_CHIPLET_TYPE, UNDEFINED_RING_CLASS                                 }, // 281
+    {HOLE_RING_ID            , "invalid"                 , UNDEFINED_SCOM_ADDR, UNDEFINED_RING_INDEX          , UNDEFINED_CHIPLET_TYPE, UNDEFINED_RING_CLASS                                 }, // 282
+    {HOLE_RING_ID            , "invalid"                 , UNDEFINED_SCOM_ADDR, UNDEFINED_RING_INDEX          , UNDEFINED_CHIPLET_TYPE, UNDEFINED_RING_CLASS                                 }, // 283
+    {HOLE_RING_ID            , "invalid"                 , UNDEFINED_SCOM_ADDR, UNDEFINED_RING_INDEX          , UNDEFINED_CHIPLET_TYPE, UNDEFINED_RING_CLASS                                 }, // 284
+    {HOLE_RING_ID            , "invalid"                 , UNDEFINED_SCOM_ADDR, UNDEFINED_RING_INDEX          , UNDEFINED_CHIPLET_TYPE, UNDEFINED_RING_CLASS                                 }, // 285
+    {HOLE_RING_ID            , "invalid"                 , UNDEFINED_SCOM_ADDR, UNDEFINED_RING_INDEX          , UNDEFINED_CHIPLET_TYPE, UNDEFINED_RING_CLASS                                 }, // 286
+    {HOLE_RING_ID            , "invalid"                 , UNDEFINED_SCOM_ADDR, UNDEFINED_RING_INDEX          , UNDEFINED_CHIPLET_TYPE, UNDEFINED_RING_CLASS                                 }, // 287
+    {HOLE_RING_ID            , "invalid"                 , UNDEFINED_SCOM_ADDR, UNDEFINED_RING_INDEX          , UNDEFINED_CHIPLET_TYPE, UNDEFINED_RING_CLASS                                 }, // 288
+    {HOLE_RING_ID            , "invalid"                 , UNDEFINED_SCOM_ADDR, UNDEFINED_RING_INDEX          , UNDEFINED_CHIPLET_TYPE, UNDEFINED_RING_CLASS                                 }, // 289
+    {HOLE_RING_ID            , "invalid"                 , UNDEFINED_SCOM_ADDR, UNDEFINED_RING_INDEX          , UNDEFINED_CHIPLET_TYPE, UNDEFINED_RING_CLASS                                 }, // 290
     {iohs0_pll_func          , "iohs0_pll_func"          , 0x18030010, AXON0::iohs0_pll_func         , AXON0_TYPE, RMRK_ROOT | RCLS_EKB_RINGS                           }, // 291
-    {iohs0_pll_bndy          , "iohs0_pll_bndy"          , 0x18030018, AXON0::iohs0_pll_bndy         , AXON0_TYPE, RMRK_ROOT | RMRK_HAS_DERIVS | RCLS_EKB_RINGS         }, // 292
+    {iohs0_pll_bndy          , "iohs0_pll_bndy"          , 0x18030018, UNDEFINED_RING_INDEX          , UNDEFINED_CHIPLET_TYPE , RMRK_ROOT | RMRK_HAS_DERIVS | RCLS_EKB_RINGS         }, // 292
     {iohs0_pll_bndy_bucket_0 , "iohs0_pll_bndy_bucket_0" , 0x18030018, AXON0::iohs0_pll_bndy_bucket_0, AXON0_TYPE, RCLS_EKB_RINGS                                       }, // 293
     {iohs0_pll_bndy_bucket_1 , "iohs0_pll_bndy_bucket_1" , 0x18030018, AXON0::iohs0_pll_bndy_bucket_1, AXON0_TYPE, RCLS_EKB_RINGS                                       }, // 294
     {iohs0_pll_bndy_bucket_2 , "iohs0_pll_bndy_bucket_2" , 0x18030018, AXON0::iohs0_pll_bndy_bucket_2, AXON0_TYPE, RCLS_EKB_RINGS                                       }, // 295
@@ -827,58 +799,116 @@ static const RingProperties_t RING_PROPERTIES[NUM_RING_IDS] =
     {iohs0_pll_bndy_bucket_5 , "iohs0_pll_bndy_bucket_5" , 0x18030018, AXON0::iohs0_pll_bndy_bucket_5, AXON0_TYPE, RCLS_EKB_RINGS                                       }, // 298
     {iohs0_pll_bndy_bucket_6 , "iohs0_pll_bndy_bucket_6" , 0x18030018, AXON0::iohs0_pll_bndy_bucket_6, AXON0_TYPE, RCLS_EKB_RINGS                                       }, // 299
     {iohs0_pll_bndy_bucket_7 , "iohs0_pll_bndy_bucket_7" , 0x18030018, AXON0::iohs0_pll_bndy_bucket_7, AXON0_TYPE, RCLS_EKB_RINGS                                       }, // 300
-    {iohs1_fure              , "iohs1_fure"              , 0x1903600F, AXON1::iohs1_fure             , AXON1_TYPE, RMRK_ROOT | RCLS_EKB_RINGS                           }, // 301
-    {iohs1_ndl_fure          , "iohs1_ndl_fure"          , 0x1903040F, AXON1::iohs1_ndl_fure         , AXON1_TYPE, RMRK_ROOT | RCLS_EKB_RINGS                           }, // 302
-    {iohs1_pdl_fure          , "iohs1_pdl_fure"          , 0x1903020F, AXON1::iohs1_pdl_fure         , AXON1_TYPE, RMRK_ROOT | RCLS_EKB_RINGS                           }, // 303
+    {HOLE_RING_ID            , "invalid"                 , UNDEFINED_SCOM_ADDR, UNDEFINED_RING_INDEX          , UNDEFINED_CHIPLET_TYPE, UNDEFINED_RING_CLASS                                 }, // 301
+    {HOLE_RING_ID            , "invalid"                 , UNDEFINED_SCOM_ADDR, UNDEFINED_RING_INDEX          , UNDEFINED_CHIPLET_TYPE, UNDEFINED_RING_CLASS                                 }, // 302
+    {HOLE_RING_ID            , "invalid"                 , UNDEFINED_SCOM_ADDR, UNDEFINED_RING_INDEX          , UNDEFINED_CHIPLET_TYPE, UNDEFINED_RING_CLASS                                 }, // 303
     {iohs1_pll_func          , "iohs1_pll_func"          , 0x19030010, AXON1::iohs1_pll_func         , AXON1_TYPE, RMRK_ROOT | RCLS_EKB_RINGS                           }, // 304
-    {iohs2_fure              , "iohs2_fure"              , 0x1A03600F, AXON2::iohs2_fure             , AXON2_TYPE, RMRK_ROOT | RCLS_EKB_RINGS                           }, // 305
-    {iohs2_ndl_fure          , "iohs2_ndl_fure"          , 0x1A03040F, AXON2::iohs2_ndl_fure         , AXON2_TYPE, RMRK_ROOT | RCLS_EKB_RINGS                           }, // 306
-    {iohs2_pdl_fure          , "iohs2_pdl_fure"          , 0x1A03020F, AXON2::iohs2_pdl_fure         , AXON2_TYPE, RMRK_ROOT | RCLS_EKB_RINGS                           }, // 307
+    {HOLE_RING_ID            , "invalid"                 , UNDEFINED_SCOM_ADDR, UNDEFINED_RING_INDEX          , UNDEFINED_CHIPLET_TYPE, UNDEFINED_RING_CLASS                                 }, // 305
+    {HOLE_RING_ID            , "invalid"                 , UNDEFINED_SCOM_ADDR, UNDEFINED_RING_INDEX          , UNDEFINED_CHIPLET_TYPE, UNDEFINED_RING_CLASS                                 }, // 306
+    {HOLE_RING_ID            , "invalid"                 , UNDEFINED_SCOM_ADDR, UNDEFINED_RING_INDEX          , UNDEFINED_CHIPLET_TYPE, UNDEFINED_RING_CLASS                                 }, // 307
     {iohs2_pll_func          , "iohs2_pll_func"          , 0x1A030010, AXON2::iohs2_pll_func         , AXON2_TYPE, RMRK_ROOT | RCLS_EKB_RINGS                           }, // 308
-    {iohs3_fure              , "iohs3_fure"              , 0x1B03600F, AXON3::iohs3_fure             , AXON3_TYPE, RMRK_ROOT | RCLS_EKB_RINGS                           }, // 309
-    {iohs3_ndl_fure          , "iohs3_ndl_fure"          , 0x1B03040F, AXON3::iohs3_ndl_fure         , AXON3_TYPE, RMRK_ROOT | RCLS_EKB_RINGS                           }, // 310
-    {iohs3_pdl_fure          , "iohs3_pdl_fure"          , 0x1B03020F, AXON3::iohs3_pdl_fure         , AXON3_TYPE, RMRK_ROOT | RCLS_EKB_RINGS                           }, // 311
+    {HOLE_RING_ID            , "invalid"                 , UNDEFINED_SCOM_ADDR, UNDEFINED_RING_INDEX          , UNDEFINED_CHIPLET_TYPE, UNDEFINED_RING_CLASS                                 }, // 309
+    {HOLE_RING_ID            , "invalid"                 , UNDEFINED_SCOM_ADDR, UNDEFINED_RING_INDEX          , UNDEFINED_CHIPLET_TYPE, UNDEFINED_RING_CLASS                                 }, // 310
+    {HOLE_RING_ID            , "invalid"                 , UNDEFINED_SCOM_ADDR, UNDEFINED_RING_INDEX          , UNDEFINED_CHIPLET_TYPE, UNDEFINED_RING_CLASS                                 }, // 311
     {iohs3_pll_func          , "iohs3_pll_func"          , 0x1B030010, AXON3::iohs3_pll_func         , AXON3_TYPE, RMRK_ROOT | RCLS_EKB_RINGS                           }, // 312
-    {iohs4_fure              , "iohs4_fure"              , 0x1C03600F, AXON4::iohs4_fure             , AXON4_TYPE, RMRK_ROOT | RCLS_EKB_RINGS                           }, // 313
-    {iohs4_ndl_fure          , "iohs4_ndl_fure"          , 0x1C03040F, AXON4::iohs4_ndl_fure         , AXON4_TYPE, RMRK_ROOT | RCLS_EKB_RINGS                           }, // 314
-    {iohs4_pdl_fure          , "iohs4_pdl_fure"          , 0x1C03020F, AXON4::iohs4_pdl_fure         , AXON4_TYPE, RMRK_ROOT | RCLS_EKB_RINGS                           }, // 315
+    {HOLE_RING_ID            , "invalid"                 , UNDEFINED_SCOM_ADDR, UNDEFINED_RING_INDEX          , UNDEFINED_CHIPLET_TYPE, UNDEFINED_RING_CLASS                                 }, // 313
+    {HOLE_RING_ID            , "invalid"                 , UNDEFINED_SCOM_ADDR, UNDEFINED_RING_INDEX          , UNDEFINED_CHIPLET_TYPE, UNDEFINED_RING_CLASS                                 }, // 314
+    {HOLE_RING_ID            , "invalid"                 , UNDEFINED_SCOM_ADDR, UNDEFINED_RING_INDEX          , UNDEFINED_CHIPLET_TYPE, UNDEFINED_RING_CLASS                                 }, // 315
     {iohs4_pll_func          , "iohs4_pll_func"          , 0x1C030010, AXON4::iohs4_pll_func         , AXON4_TYPE, RMRK_ROOT | RCLS_EKB_RINGS                           }, // 316
-    {iohs5_fure              , "iohs5_fure"              , 0x1D03600F, AXON5::iohs5_fure             , AXON5_TYPE, RMRK_ROOT | RCLS_EKB_RINGS                           }, // 317
-    {iohs5_ndl_fure          , "iohs5_ndl_fure"          , 0x1D03040F, AXON5::iohs5_ndl_fure         , AXON5_TYPE, RMRK_ROOT | RCLS_EKB_RINGS                           }, // 318
-    {iohs5_pdl_fure          , "iohs5_pdl_fure"          , 0x1D03020F, AXON5::iohs5_pdl_fure         , AXON5_TYPE, RMRK_ROOT | RCLS_EKB_RINGS                           }, // 319
+    {HOLE_RING_ID            , "invalid"                 , UNDEFINED_SCOM_ADDR, UNDEFINED_RING_INDEX          , UNDEFINED_CHIPLET_TYPE, UNDEFINED_RING_CLASS                                 }, // 317
+    {HOLE_RING_ID            , "invalid"                 , UNDEFINED_SCOM_ADDR, UNDEFINED_RING_INDEX          , UNDEFINED_CHIPLET_TYPE, UNDEFINED_RING_CLASS                                 }, // 318
+    {HOLE_RING_ID            , "invalid"                 , UNDEFINED_SCOM_ADDR, UNDEFINED_RING_INDEX          , UNDEFINED_CHIPLET_TYPE, UNDEFINED_RING_CLASS                                 }, // 319
     {iohs5_pll_func          , "iohs5_pll_func"          , 0x1D030010, AXON5::iohs5_pll_func         , AXON5_TYPE, RMRK_ROOT | RCLS_EKB_RINGS                           }, // 320
-    {iohs6_fure              , "iohs6_fure"              , 0x1E03600F, AXON6::iohs6_fure             , AXON6_TYPE, RMRK_ROOT | RCLS_EKB_RINGS                           }, // 321
-    {iohs6_ndl_fure          , "iohs6_ndl_fure"          , 0x1E03040F, AXON6::iohs6_ndl_fure         , AXON6_TYPE, RMRK_ROOT | RCLS_EKB_RINGS                           }, // 322
-    {iohs6_pdl_fure          , "iohs6_pdl_fure"          , 0x1E03020F, AXON6::iohs6_pdl_fure         , AXON6_TYPE, RMRK_ROOT | RCLS_EKB_RINGS                           }, // 323
+    {HOLE_RING_ID            , "invalid"                 , UNDEFINED_SCOM_ADDR, UNDEFINED_RING_INDEX          , UNDEFINED_CHIPLET_TYPE, UNDEFINED_RING_CLASS                                 }, // 321
+    {HOLE_RING_ID            , "invalid"                 , UNDEFINED_SCOM_ADDR, UNDEFINED_RING_INDEX          , UNDEFINED_CHIPLET_TYPE, UNDEFINED_RING_CLASS                                 }, // 322
+    {HOLE_RING_ID            , "invalid"                 , UNDEFINED_SCOM_ADDR, UNDEFINED_RING_INDEX          , UNDEFINED_CHIPLET_TYPE, UNDEFINED_RING_CLASS                                 }, // 323
     {iohs6_pll_func          , "iohs6_pll_func"          , 0x1E030010, AXON6::iohs6_pll_func         , AXON6_TYPE, RMRK_ROOT | RCLS_EKB_RINGS                           }, // 324
-    {iohs7_fure              , "iohs7_fure"              , 0x1F03600F, AXON7::iohs7_fure             , AXON7_TYPE, RMRK_ROOT | RCLS_EKB_RINGS                           }, // 325
-    {iohs7_ndl_fure          , "iohs7_ndl_fure"          , 0x1F03040F, AXON7::iohs7_ndl_fure         , AXON7_TYPE, RMRK_ROOT | RCLS_EKB_RINGS                           }, // 326
-    {iohs7_pdl_fure          , "iohs7_pdl_fure"          , 0x1F03020F, AXON7::iohs7_pdl_fure         , AXON7_TYPE, RMRK_ROOT | RCLS_EKB_RINGS                           }, // 327
+    {HOLE_RING_ID            , "invalid"                 , UNDEFINED_SCOM_ADDR, UNDEFINED_RING_INDEX          , UNDEFINED_CHIPLET_TYPE, UNDEFINED_RING_CLASS                                 }, // 325
+    {HOLE_RING_ID            , "invalid"                 , UNDEFINED_SCOM_ADDR, UNDEFINED_RING_INDEX          , UNDEFINED_CHIPLET_TYPE, UNDEFINED_RING_CLASS                                 }, // 326
+    {HOLE_RING_ID            , "invalid"                 , UNDEFINED_SCOM_ADDR, UNDEFINED_RING_INDEX          , UNDEFINED_CHIPLET_TYPE, UNDEFINED_RING_CLASS                                 }, // 327
     {iohs7_pll_func          , "iohs7_pll_func"          , 0x1F030010, AXON7::iohs7_pll_func         , AXON7_TYPE, RMRK_ROOT | RCLS_EKB_RINGS                           }, // 328
-    {eq_fure                 , "eq_fure"                 , 0x2003402F, EQ::eq_fure                   , EQ_TYPE   , RMRK_ROOT | RCLS_EKB_RINGS                           }, // 329
+    {HOLE_RING_ID            , "invalid"                 , UNDEFINED_SCOM_ADDR, UNDEFINED_RING_INDEX          , UNDEFINED_CHIPLET_TYPE, UNDEFINED_RING_CLASS                                 }, // 329
     {eq_cmsk                 , "eq_cmsk"                 , 0x2003402A, EQ::eq_cmsk                   , EQ_TYPE   , RMRK_ROOT | RCLS_EKB_RINGS                           }, // 330
-    {eq_inex                 , "eq_inex"                 , 0x2003402B, EQ::eq_inex                   , EQ_TYPE   , RMRK_ROOT | RCLS_EKB_RINGS                           }, // 331
+    {HOLE_RING_ID            , "invalid"                 , UNDEFINED_SCOM_ADDR, UNDEFINED_RING_INDEX          , UNDEFINED_CHIPLET_TYPE, UNDEFINED_RING_CLASS                                 }, // 331
     {eq_mode                 , "eq_mode"                 , 0x20034021, EQ::eq_mode                   , EQ_TYPE   , RMRK_ROOT | RCLS_EKB_RINGS                           }, // 332
-    {eq_clkadj_fure          , "eq_clkadj_fure"          , 0x2003001F, EQ::eq_clkadj_fure            , EQ_TYPE   , RMRK_ROOT | RCLS_EKB_RINGS                           }, // 333
+    {HOLE_RING_ID            , "invalid"                 , UNDEFINED_SCOM_ADDR, UNDEFINED_RING_INDEX          , UNDEFINED_CHIPLET_TYPE, UNDEFINED_RING_CLASS                                 }, // 333
     {eq_clkadj_cmsk          , "eq_clkadj_cmsk"          , 0x2003001A, EQ::eq_clkadj_cmsk            , EQ_TYPE   , RMRK_ROOT | RCLS_EKB_RINGS                           }, // 334
-    {eq_clkadj_inex          , "eq_clkadj_inex"          , 0x2003001B, EQ::eq_clkadj_inex            , EQ_TYPE   , RMRK_ROOT | RCLS_EKB_RINGS                           }, // 335
-    {eq_clkadj_mode          , "eq_clkadj_mode"          , 0x20030011, EQ::eq_clkadj_mode            , EQ_TYPE   , RMRK_ROOT | RCLS_EKB_RINGS                           }, // 336
-    {ec_cl2_fure             , "ec_cl2_fure"             , 0x2003200F, EQ::ec_cl2_fure               , EQ_TYPE   , RMRK_ROOT | RCLS_EKB_RINGS | RMRK_SCAN_BY_QME        }, // 337
+    {HOLE_RING_ID            , "invalid"                 , UNDEFINED_SCOM_ADDR, UNDEFINED_RING_INDEX          , UNDEFINED_CHIPLET_TYPE, UNDEFINED_RING_CLASS                                 }, // 335
+    {HOLE_RING_ID            , "invalid"                 , UNDEFINED_SCOM_ADDR, UNDEFINED_RING_INDEX          , UNDEFINED_CHIPLET_TYPE, UNDEFINED_RING_CLASS                                 }, // 336
+    {HOLE_RING_ID            , "invalid"                 , UNDEFINED_SCOM_ADDR, UNDEFINED_RING_INDEX          , UNDEFINED_CHIPLET_TYPE, UNDEFINED_RING_CLASS                                 }, // 337
     {ec_cl2_cmsk             , "ec_cl2_cmsk"             , 0x2003200A, EQ::ec_cl2_cmsk               , EQ_TYPE   , RMRK_ROOT | RCLS_EKB_RINGS | RMRK_SCAN_BY_QME        }, // 338
     {ec_cl2_inex             , "ec_cl2_inex"             , 0x2003200B, EQ::ec_cl2_inex               , EQ_TYPE   , RMRK_ROOT | RCLS_EKB_RINGS | RMRK_SCAN_BY_QME        }, // 339
     {ec_cl2_mode             , "ec_cl2_mode"             , 0x20032001, EQ::ec_cl2_mode               , EQ_TYPE   , RMRK_ROOT | RCLS_EKB_RINGS | RMRK_SCAN_BY_QME        }, // 340
-    {ec_mma_fure             , "ec_mma_fure"             , 0x2083000F, EQ::ec_mma_fure               , EQ_TYPE   , RMRK_ROOT | RCLS_EKB_RINGS | RMRK_SCAN_BY_QME        }, // 341
+    {HOLE_RING_ID            , "invalid"                 , UNDEFINED_SCOM_ADDR, UNDEFINED_RING_INDEX          , UNDEFINED_CHIPLET_TYPE, UNDEFINED_RING_CLASS                                 }, // 341
     {ec_mma_cmsk             , "ec_mma_cmsk"             , 0x2083000A, EQ::ec_mma_cmsk               , EQ_TYPE   , RMRK_ROOT | RCLS_EKB_RINGS | RMRK_SCAN_BY_QME        }, // 342
-    {ec_mma_inex             , "ec_mma_inex"             , 0x2083000B, EQ::ec_mma_inex               , EQ_TYPE   , RMRK_ROOT | RCLS_EKB_RINGS | RMRK_SCAN_BY_QME        }, // 343
-    {ec_l3_fure              , "ec_l3_fure"              , 0x2003020F, EQ::ec_l3_fure                , EQ_TYPE   , RMRK_ROOT | RCLS_EKB_RINGS | RMRK_SCAN_BY_QME        }, // 344
+    {HOLE_RING_ID            , "invalid"                 , UNDEFINED_SCOM_ADDR, UNDEFINED_RING_INDEX          , UNDEFINED_CHIPLET_TYPE, UNDEFINED_RING_CLASS                                 }, // 343
+    {HOLE_RING_ID            , "invalid"                 , UNDEFINED_SCOM_ADDR, UNDEFINED_RING_INDEX          , UNDEFINED_CHIPLET_TYPE, UNDEFINED_RING_CLASS                                 }, // 344
     {ec_l3_cmsk              , "ec_l3_cmsk"              , 0x2003020A, EQ::ec_l3_cmsk                , EQ_TYPE   , RMRK_ROOT | RCLS_EKB_RINGS | RMRK_SCAN_BY_QME        }, // 345
     {ec_l3_inex              , "ec_l3_inex"              , 0x2003020B, EQ::ec_l3_inex                , EQ_TYPE   , RMRK_ROOT | RCLS_EKB_RINGS | RMRK_SCAN_BY_QME        }, // 346
-    {ec_l3_mode              , "ec_l3_mode"              , 0x20030201, EQ::ec_l3_mode                , EQ_TYPE   , RMRK_ROOT | RCLS_EKB_RINGS | RMRK_SCAN_BY_QME        }, // 347
+    {HOLE_RING_ID            , "invalid"                 , UNDEFINED_SCOM_ADDR, UNDEFINED_RING_INDEX          , UNDEFINED_CHIPLET_TYPE, UNDEFINED_RING_CLASS                                 }, // 347
     {n0_abst                 , "n0_abst"                 , 0x02036405, N0::n0_abst                   , N0_TYPE   , RMRK_ROOT | RCLS_EKB_RINGS                           }, // 348
     {n1_abst                 , "n1_abst"                 , 0x03035405, N1::n1_abst                   , N1_TYPE   , RMRK_ROOT | RCLS_EKB_RINGS                           }, // 349
     {n1_nmmu1_abst           , "n1_nmmu1_abst"           , 0x03030205, N1::n1_nmmu1_abst             , N1_TYPE   , RMRK_ROOT | RCLS_EKB_RINGS                           }, // 350
     {ec_cl2_abst             , "ec_cl2_abst"             , 0x20032005, EQ::ec_cl2_abst               , EQ_TYPE   , RMRK_ROOT | RCLS_EKB_RINGS                           }, // 351
     {ec_mma_abst             , "ec_mma_abst"             , 0x20830005, EQ::ec_mma_abst               , EQ_TYPE   , RMRK_ROOT | RCLS_EKB_RINGS                           }, // 352
+    {perv_func               , "perv_func"               , 0x01034100, PERV::perv_func               , PERV_TYPE , RMRK_ROOT | RCLS_EKB_RINGS                           }, // 353
+    {sbe_func                , "sbe_func"                , 0x01032000, PERV::sbe_func                , PERV_TYPE , RMRK_ROOT | RCLS_EKB_RINGS                           }, // 354
+    {occ_func                , "occ_func"                , 0x01030800, PERV::occ_func                , PERV_TYPE , RMRK_ROOT | RCLS_EKB_RINGS                           }, // 355
+    {perv_pll_bndy_bucket_0  , "perv_pll_bndy_bucket_0"  , 0x01030018, PERV::perv_pll_bndy_bucket_0  , PERV_TYPE , RCLS_EKB_RINGS                                       }, // 356
+    {perv_pll_bndy_bucket_1  , "perv_pll_bndy_bucket_1"  , 0x01030018, PERV::perv_pll_bndy_bucket_1  , PERV_TYPE , RCLS_EKB_RINGS                                       }, // 357
+    {perv_pll_bndy_bucket_2  , "perv_pll_bndy_bucket_2"  , 0x01030018, PERV::perv_pll_bndy_bucket_2  , PERV_TYPE , RCLS_EKB_RINGS                                       }, // 358
+    {perv_pll_bndy_bucket_3  , "perv_pll_bndy_bucket_3"  , 0x01030018, PERV::perv_pll_bndy_bucket_3  , PERV_TYPE , RCLS_EKB_RINGS                                       }, // 359
+    {n0_func                 , "n0_func"                 , 0x02036400, N0::n0_func                   , N0_TYPE   , RMRK_ROOT | RCLS_EKB_RINGS                           }, // 360
+    {n1_func                 , "n1_func"                 , 0x03035400, N1::n1_func                   , N1_TYPE   , RMRK_ROOT | RCLS_EKB_RINGS                           }, // 361
+    {n1_nmmu1_func           , "n1_nmmu1_func"           , 0x03030200, N1::n1_nmmu1_func             , N1_TYPE   , RMRK_ROOT | RCLS_EKB_RINGS                           }, // 362
+    {pci_func                , "pci_func"                , 0x08037F80, PCI::pci_func                 , PCI_TYPE  , RMRK_ROOT | RCLS_EKB_RINGS                           }, // 363
+    {pci_pll_bndy_bucket_0   , "pci_pll_bndy_bucket_0"   , 0x08030018, PCI::pci_pll_bndy_bucket_0    , PCI_TYPE  , RCLS_EKB_RINGS                                       }, // 364
+    {pci_pll_bndy_bucket_1   , "pci_pll_bndy_bucket_1"   , 0x08030018, PCI::pci_pll_bndy_bucket_1    , PCI_TYPE  , RCLS_EKB_RINGS                                       }, // 365
+    {pci_pll_bndy_bucket_2   , "pci_pll_bndy_bucket_2"   , 0x08030018, PCI::pci_pll_bndy_bucket_2    , PCI_TYPE  , RCLS_EKB_RINGS                                       }, // 366
+    {pci_pll_bndy_bucket_3   , "pci_pll_bndy_bucket_3"   , 0x08030018, PCI::pci_pll_bndy_bucket_3    , PCI_TYPE  , RCLS_EKB_RINGS                                       }, // 367
+    {mc_func                 , "mc_func"                 , 0x0C036F00, MC::mc_func                   , MC_TYPE   , RMRK_ROOT | RCLS_EKB_RINGS                           }, // 368
+    {mc_pll_bndy_bucket_5    , "mc_pll_bndy_bucket_5"    , 0x0C030018, MC::mc_pll_bndy_bucket_5      , MC_TYPE   , RCLS_EKB_RINGS                                       }, // 369
+    {mc_pll_bndy_bucket_6    , "mc_pll_bndy_bucket_6"    , 0x0C030018, MC::mc_pll_bndy_bucket_6      , MC_TYPE   , RCLS_EKB_RINGS                                       }, // 370
+    {mc_pll_bndy_bucket_7    , "mc_pll_bndy_bucket_7"    , 0x0C030018, MC::mc_pll_bndy_bucket_7      , MC_TYPE   , RCLS_EKB_RINGS                                       }, // 371
+    {pau0_func               , "pau0_func"               , 0x10034300, PAU0::pau0_func               , PAU0_TYPE , RMRK_ROOT | RCLS_EKB_RINGS                           }, // 372
+    {pau0_pau0_func          , "pau0_pau0_func"          , 0x10032000, PAU0::pau0_pau0_func          , PAU0_TYPE , RMRK_ROOT | RCLS_EKB_RINGS                           }, // 373
+    {pau1_func               , "pau1_func"               , 0x11034300, PAU1::pau1_func               , PAU1_TYPE , RMRK_ROOT | RCLS_EKB_RINGS                           }, // 374
+    {pau1_pau3_func          , "pau1_pau3_func"          , 0x11032000, PAU1::pau1_pau3_func          , PAU1_TYPE , RMRK_ROOT | RCLS_EKB_RINGS                           }, // 375
+    {pau2_func               , "pau2_func"               , 0x12034300, PAU2::pau2_func               , PAU2_TYPE , RMRK_ROOT | RCLS_EKB_RINGS                           }, // 376
+    {pau2_pau4_func          , "pau2_pau4_func"          , 0x12032000, PAU2::pau2_pau4_func          , PAU2_TYPE , RMRK_ROOT | RCLS_EKB_RINGS                           }, // 377
+    {pau2_pau5_func          , "pau2_pau5_func"          , 0x12031000, PAU2::pau2_pau5_func          , PAU2_TYPE , RMRK_ROOT | RCLS_EKB_RINGS                           }, // 378
+    {pau3_func               , "pau3_func"               , 0x13034300, PAU3::pau3_func               , PAU3_TYPE , RMRK_ROOT | RCLS_EKB_RINGS                           }, // 379
+    {pau3_pau6_func          , "pau3_pau6_func"          , 0x13032000, PAU3::pau3_pau6_func          , PAU3_TYPE , RMRK_ROOT | RCLS_EKB_RINGS                           }, // 380
+    {pau3_pau7_func          , "pau3_pau7_func"          , 0x13031000, PAU3::pau3_pau7_func          , PAU3_TYPE , RMRK_ROOT | RCLS_EKB_RINGS                           }, // 381
+    {iohs0_func              , "iohs0_func"              , 0x18036000, AXON0::iohs0_func             , AXON0_TYPE, RMRK_ROOT | RCLS_EKB_RINGS                           }, // 382
+    {iohs0_pdl_func          , "iohs0_pdl_func"          , 0x18030200, AXON0::iohs0_pdl_func         , AXON0_TYPE, RMRK_ROOT | RCLS_EKB_RINGS                           }, // 383
+    {iohs0_pll_bndy_bucket_8 , "iohs0_pll_bndy_bucket_8" , 0x18030018, AXON0::iohs0_pll_bndy_bucket_8, AXON0_TYPE, RCLS_EKB_RINGS                                       }, // 384
+    {iohs0_pll_bndy_bucket_9 , "iohs0_pll_bndy_bucket_9" , 0x18030018, AXON0::iohs0_pll_bndy_bucket_9, AXON0_TYPE, RCLS_EKB_RINGS                                       }, // 385
+    {iohs0_pll_bndy_bucket_10, "iohs0_pll_bndy_bucket_10", 0x18030018, AXON0::iohs0_pll_bndy_bucket_10, AXON0_TYPE, RCLS_EKB_RINGS                                       }, // 386
+    {iohs0_pll_bndy_bucket_11, "iohs0_pll_bndy_bucket_11", 0x18030018, AXON0::iohs0_pll_bndy_bucket_11, AXON0_TYPE, RCLS_EKB_RINGS                                       }, // 387
+    {iohs0_pll_bndy_bucket_12, "iohs0_pll_bndy_bucket_12", 0x18030018, AXON0::iohs0_pll_bndy_bucket_12, AXON0_TYPE, RCLS_EKB_RINGS                                       }, // 388
+    {iohs0_pll_bndy_bucket_13, "iohs0_pll_bndy_bucket_13", 0x18030018, AXON0::iohs0_pll_bndy_bucket_13, AXON0_TYPE, RCLS_EKB_RINGS                                       }, // 389
+    {iohs0_pll_bndy_bucket_14, "iohs0_pll_bndy_bucket_14", 0x18030018, AXON0::iohs0_pll_bndy_bucket_14, AXON0_TYPE, RCLS_EKB_RINGS                                       }, // 390
+    {iohs0_pll_bndy_bucket_15, "iohs0_pll_bndy_bucket_15", 0x18030018, AXON0::iohs0_pll_bndy_bucket_15, AXON0_TYPE, RCLS_EKB_RINGS                                       }, // 391
+    {iohs1_func              , "iohs1_func"              , 0x19036000, AXON1::iohs1_func             , AXON1_TYPE, RMRK_ROOT | RCLS_EKB_RINGS                           }, // 392
+    {iohs1_pdl_func          , "iohs1_pdl_func"          , 0x19030200, AXON1::iohs1_pdl_func         , AXON1_TYPE, RMRK_ROOT | RCLS_EKB_RINGS                           }, // 393
+    {iohs2_func              , "iohs2_func"              , 0x1A036000, AXON2::iohs2_func             , AXON2_TYPE, RMRK_ROOT | RCLS_EKB_RINGS                           }, // 394
+    {iohs2_pdl_func          , "iohs2_pdl_func"          , 0x1A030200, AXON2::iohs2_pdl_func         , AXON2_TYPE, RMRK_ROOT | RCLS_EKB_RINGS                           }, // 395
+    {iohs3_func              , "iohs3_func"              , 0x1B036000, AXON3::iohs3_func             , AXON3_TYPE, RMRK_ROOT | RCLS_EKB_RINGS                           }, // 396
+    {iohs3_pdl_func          , "iohs3_pdl_func"          , 0x1B030200, AXON3::iohs3_pdl_func         , AXON3_TYPE, RMRK_ROOT | RCLS_EKB_RINGS                           }, // 397
+    {iohs4_func              , "iohs4_func"              , 0x1C036000, AXON4::iohs4_func             , AXON4_TYPE, RMRK_ROOT | RCLS_EKB_RINGS                           }, // 398
+    {iohs4_pdl_func          , "iohs4_pdl_func"          , 0x1C030200, AXON4::iohs4_pdl_func         , AXON4_TYPE, RMRK_ROOT | RCLS_EKB_RINGS                           }, // 399
+    {iohs5_func              , "iohs5_func"              , 0x1D036000, AXON5::iohs5_func             , AXON5_TYPE, RMRK_ROOT | RCLS_EKB_RINGS                           }, // 400
+    {iohs5_pdl_func          , "iohs5_pdl_func"          , 0x1D030200, AXON5::iohs5_pdl_func         , AXON5_TYPE, RMRK_ROOT | RCLS_EKB_RINGS                           }, // 401
+    {iohs6_func              , "iohs6_func"              , 0x1E036000, AXON6::iohs6_func             , AXON6_TYPE, RMRK_ROOT | RCLS_EKB_RINGS                           }, // 402
+    {iohs6_pdl_func          , "iohs6_pdl_func"          , 0x1E030200, AXON6::iohs6_pdl_func         , AXON6_TYPE, RMRK_ROOT | RCLS_EKB_RINGS                           }, // 403
+    {iohs7_func              , "iohs7_func"              , 0x1F036000, AXON7::iohs7_func             , AXON7_TYPE, RMRK_ROOT | RCLS_EKB_RINGS                           }, // 404
+    {iohs7_pdl_func          , "iohs7_pdl_func"          , 0x1F030200, AXON7::iohs7_pdl_func         , AXON7_TYPE, RMRK_ROOT | RCLS_EKB_RINGS                           }, // 405
+    {eq_func                 , "eq_func"                 , 0x20034020, EQ::eq_func                   , EQ_TYPE   , RMRK_ROOT | RCLS_EKB_RINGS                           }, // 406
+    {eq_clkadj_func          , "eq_clkadj_func"          , 0x20030010, EQ::eq_clkadj_func            , EQ_TYPE   , RMRK_ROOT | RCLS_EKB_RINGS                           }, // 407
+    {ec_cl2_func             , "ec_cl2_func"             , 0x20032000, EQ::ec_cl2_func               , EQ_TYPE   , RMRK_ROOT | RCLS_EKB_RINGS | RMRK_SCAN_BY_QME        }, // 408
+    {ec_mma_func             , "ec_mma_func"             , 0x20830000, EQ::ec_mma_func               , EQ_TYPE   , RMRK_ROOT | RCLS_EKB_RINGS | RMRK_SCAN_BY_QME        }, // 409
+    {ec_l3_func              , "ec_l3_func"              , 0x20030200, EQ::ec_l3_func                , EQ_TYPE   , RMRK_ROOT | RCLS_EKB_RINGS | RMRK_SCAN_BY_QME        }, // 410
 };
 #endif
 
@@ -891,8 +921,8 @@ static const RingProperties_t RING_PROPERTIES[NUM_RING_IDS] =
     {PERV::perv_occ_time           , PERV_TYPE }, // 2
     {PERV::pib_repr                , PERV_TYPE }, // 3
     {PERV::sbe_gptr                , PERV_TYPE }, // 4
-    {PERV::sbe_repr                , PERV_TYPE }, // 5
-    {PERV::sbe_time                , PERV_TYPE }, // 6
+    {UNDEFINED_RING_INDEX          , UNDEFINED_CHIPLET_TYPE}, // 5
+    {UNDEFINED_RING_INDEX          , UNDEFINED_CHIPLET_TYPE}, // 6
     {UNDEFINED_RING_INDEX          , UNDEFINED_CHIPLET_TYPE}, // 7
     {PERV::perv_dpll_gptr          , PERV_TYPE }, // 8
     {PERV::perv_pll_gptr           , PERV_TYPE }, // 9
@@ -946,9 +976,9 @@ static const RingProperties_t RING_PROPERTIES[NUM_RING_IDS] =
     {AXON0::iohs0_gptr             , AXON0_TYPE}, // 57
     {AXON0::iohs0_repr             , AXON0_TYPE}, // 58
     {AXON0::iohs0_time             , AXON0_TYPE}, // 59
-    {AXON0::iohs0_ndl_gptr         , AXON0_TYPE}, // 60
-    {AXON0::iohs0_ndl_repr         , AXON0_TYPE}, // 61
-    {AXON0::iohs0_ndl_time         , AXON0_TYPE}, // 62
+    {UNDEFINED_RING_INDEX          , UNDEFINED_CHIPLET_TYPE}, // 60
+    {UNDEFINED_RING_INDEX          , UNDEFINED_CHIPLET_TYPE}, // 61
+    {UNDEFINED_RING_INDEX          , UNDEFINED_CHIPLET_TYPE}, // 62
     {AXON0::iohs0_pdl_gptr         , AXON0_TYPE}, // 63
     {AXON0::iohs0_pdl_repr         , AXON0_TYPE}, // 64
     {AXON0::iohs0_pdl_time         , AXON0_TYPE}, // 65
@@ -956,9 +986,9 @@ static const RingProperties_t RING_PROPERTIES[NUM_RING_IDS] =
     {AXON1::iohs1_gptr             , AXON1_TYPE}, // 67
     {AXON1::iohs1_repr             , AXON1_TYPE}, // 68
     {AXON1::iohs1_time             , AXON1_TYPE}, // 69
-    {AXON1::iohs1_ndl_gptr         , AXON1_TYPE}, // 70
-    {AXON1::iohs1_ndl_repr         , AXON1_TYPE}, // 71
-    {AXON1::iohs1_ndl_time         , AXON1_TYPE}, // 72
+    {UNDEFINED_RING_INDEX          , UNDEFINED_CHIPLET_TYPE}, // 70
+    {UNDEFINED_RING_INDEX          , UNDEFINED_CHIPLET_TYPE}, // 71
+    {UNDEFINED_RING_INDEX          , UNDEFINED_CHIPLET_TYPE}, // 72
     {AXON1::iohs1_pdl_gptr         , AXON1_TYPE}, // 73
     {AXON1::iohs1_pdl_repr         , AXON1_TYPE}, // 74
     {AXON1::iohs1_pdl_time         , AXON1_TYPE}, // 75
@@ -966,9 +996,9 @@ static const RingProperties_t RING_PROPERTIES[NUM_RING_IDS] =
     {AXON2::iohs2_gptr             , AXON2_TYPE}, // 77
     {AXON2::iohs2_repr             , AXON2_TYPE}, // 78
     {AXON2::iohs2_time             , AXON2_TYPE}, // 79
-    {AXON2::iohs2_ndl_gptr         , AXON2_TYPE}, // 80
-    {AXON2::iohs2_ndl_repr         , AXON2_TYPE}, // 81
-    {AXON2::iohs2_ndl_time         , AXON2_TYPE}, // 82
+    {UNDEFINED_RING_INDEX          , UNDEFINED_CHIPLET_TYPE}, // 80
+    {UNDEFINED_RING_INDEX          , UNDEFINED_CHIPLET_TYPE}, // 81
+    {UNDEFINED_RING_INDEX          , UNDEFINED_CHIPLET_TYPE}, // 82
     {AXON2::iohs2_pdl_gptr         , AXON2_TYPE}, // 83
     {AXON2::iohs2_pdl_repr         , AXON2_TYPE}, // 84
     {AXON2::iohs2_pdl_time         , AXON2_TYPE}, // 85
@@ -976,9 +1006,9 @@ static const RingProperties_t RING_PROPERTIES[NUM_RING_IDS] =
     {AXON3::iohs3_gptr             , AXON3_TYPE}, // 87
     {AXON3::iohs3_repr             , AXON3_TYPE}, // 88
     {AXON3::iohs3_time             , AXON3_TYPE}, // 89
-    {AXON3::iohs3_ndl_gptr         , AXON3_TYPE}, // 90
-    {AXON3::iohs3_ndl_repr         , AXON3_TYPE}, // 91
-    {AXON3::iohs3_ndl_time         , AXON3_TYPE}, // 92
+    {UNDEFINED_RING_INDEX          , UNDEFINED_CHIPLET_TYPE}, // 90
+    {UNDEFINED_RING_INDEX          , UNDEFINED_CHIPLET_TYPE}, // 91
+    {UNDEFINED_RING_INDEX          , UNDEFINED_CHIPLET_TYPE}, // 92
     {AXON3::iohs3_pdl_gptr         , AXON3_TYPE}, // 93
     {AXON3::iohs3_pdl_repr         , AXON3_TYPE}, // 94
     {AXON3::iohs3_pdl_time         , AXON3_TYPE}, // 95
@@ -986,9 +1016,9 @@ static const RingProperties_t RING_PROPERTIES[NUM_RING_IDS] =
     {AXON4::iohs4_gptr             , AXON4_TYPE}, // 97
     {AXON4::iohs4_repr             , AXON4_TYPE}, // 98
     {AXON4::iohs4_time             , AXON4_TYPE}, // 99
-    {AXON4::iohs4_ndl_gptr         , AXON4_TYPE}, // 100
-    {AXON4::iohs4_ndl_repr         , AXON4_TYPE}, // 101
-    {AXON4::iohs4_ndl_time         , AXON4_TYPE}, // 102
+    {UNDEFINED_RING_INDEX          , UNDEFINED_CHIPLET_TYPE}, // 100
+    {UNDEFINED_RING_INDEX          , UNDEFINED_CHIPLET_TYPE}, // 101
+    {UNDEFINED_RING_INDEX          , UNDEFINED_CHIPLET_TYPE}, // 102
     {AXON4::iohs4_pdl_gptr         , AXON4_TYPE}, // 103
     {AXON4::iohs4_pdl_repr         , AXON4_TYPE}, // 104
     {AXON4::iohs4_pdl_time         , AXON4_TYPE}, // 105
@@ -996,9 +1026,9 @@ static const RingProperties_t RING_PROPERTIES[NUM_RING_IDS] =
     {AXON5::iohs5_gptr             , AXON5_TYPE}, // 107
     {AXON5::iohs5_repr             , AXON5_TYPE}, // 108
     {AXON5::iohs5_time             , AXON5_TYPE}, // 109
-    {AXON5::iohs5_ndl_gptr         , AXON5_TYPE}, // 110
-    {AXON5::iohs5_ndl_repr         , AXON5_TYPE}, // 111
-    {AXON5::iohs5_ndl_time         , AXON5_TYPE}, // 112
+    {UNDEFINED_RING_INDEX          , UNDEFINED_CHIPLET_TYPE}, // 110
+    {UNDEFINED_RING_INDEX          , UNDEFINED_CHIPLET_TYPE}, // 111
+    {UNDEFINED_RING_INDEX          , UNDEFINED_CHIPLET_TYPE}, // 112
     {AXON5::iohs5_pdl_gptr         , AXON5_TYPE}, // 113
     {AXON5::iohs5_pdl_repr         , AXON5_TYPE}, // 114
     {AXON5::iohs5_pdl_time         , AXON5_TYPE}, // 115
@@ -1006,9 +1036,9 @@ static const RingProperties_t RING_PROPERTIES[NUM_RING_IDS] =
     {AXON6::iohs6_gptr             , AXON6_TYPE}, // 117
     {AXON6::iohs6_repr             , AXON6_TYPE}, // 118
     {AXON6::iohs6_time             , AXON6_TYPE}, // 119
-    {AXON6::iohs6_ndl_gptr         , AXON6_TYPE}, // 120
-    {AXON6::iohs6_ndl_repr         , AXON6_TYPE}, // 121
-    {AXON6::iohs6_ndl_time         , AXON6_TYPE}, // 122
+    {UNDEFINED_RING_INDEX          , UNDEFINED_CHIPLET_TYPE}, // 120
+    {UNDEFINED_RING_INDEX          , UNDEFINED_CHIPLET_TYPE}, // 121
+    {UNDEFINED_RING_INDEX          , UNDEFINED_CHIPLET_TYPE}, // 122
     {AXON6::iohs6_pdl_gptr         , AXON6_TYPE}, // 123
     {AXON6::iohs6_pdl_repr         , AXON6_TYPE}, // 124
     {AXON6::iohs6_pdl_time         , AXON6_TYPE}, // 125
@@ -1016,9 +1046,9 @@ static const RingProperties_t RING_PROPERTIES[NUM_RING_IDS] =
     {AXON7::iohs7_gptr             , AXON7_TYPE}, // 127
     {AXON7::iohs7_repr             , AXON7_TYPE}, // 128
     {AXON7::iohs7_time             , AXON7_TYPE}, // 129
-    {AXON7::iohs7_ndl_gptr         , AXON7_TYPE}, // 130
-    {AXON7::iohs7_ndl_repr         , AXON7_TYPE}, // 131
-    {AXON7::iohs7_ndl_time         , AXON7_TYPE}, // 132
+    {UNDEFINED_RING_INDEX          , UNDEFINED_CHIPLET_TYPE}, // 130
+    {UNDEFINED_RING_INDEX          , UNDEFINED_CHIPLET_TYPE}, // 131
+    {UNDEFINED_RING_INDEX          , UNDEFINED_CHIPLET_TYPE}, // 132
     {AXON7::iohs7_pdl_gptr         , AXON7_TYPE}, // 133
     {AXON7::iohs7_pdl_repr         , AXON7_TYPE}, // 134
     {AXON7::iohs7_pdl_time         , AXON7_TYPE}, // 135
@@ -1027,8 +1057,8 @@ static const RingProperties_t RING_PROPERTIES[NUM_RING_IDS] =
     {EQ::eq_repr                   , EQ_TYPE   }, // 138
     {EQ::eq_time                   , EQ_TYPE   }, // 139
     {EQ::eq_clkadj_gptr            , EQ_TYPE   }, // 140
-    {EQ::eq_clkadj_repr            , EQ_TYPE   }, // 141
-    {EQ::eq_clkadj_time            , EQ_TYPE   }, // 142
+    {UNDEFINED_RING_INDEX          , UNDEFINED_CHIPLET_TYPE}, // 141
+    {UNDEFINED_RING_INDEX          , UNDEFINED_CHIPLET_TYPE}, // 142
     {EQ::ec_cl2_gptr               , EQ_TYPE   }, // 143
     {EQ::ec_cl2_repr               , EQ_TYPE   }, // 144
     {EQ::ec_cl2_time               , EQ_TYPE   }, // 145
@@ -1036,7 +1066,7 @@ static const RingProperties_t RING_PROPERTIES[NUM_RING_IDS] =
     {EQ::ec2_cl2_repr              , EQ_TYPE   }, // 147
     {EQ::ec3_cl2_repr              , EQ_TYPE   }, // 148
     {EQ::ec_mma_gptr               , EQ_TYPE   }, // 149
-    {EQ::ec_mma_repr               , EQ_TYPE   }, // 150
+    {UNDEFINED_RING_INDEX          , UNDEFINED_CHIPLET_TYPE}, // 150
     {EQ::ec_mma_time               , EQ_TYPE   }, // 151
     {EQ::ec1_mma_repr              , EQ_TYPE   }, // 152
     {EQ::ec2_mma_repr              , EQ_TYPE   }, // 153
@@ -1056,43 +1086,43 @@ static const RingProperties_t RING_PROPERTIES[NUM_RING_IDS] =
     {EQ::eq_gptr_ovly              , EQ_TYPE   }, // 167
 
     // EKB Rings:
-    {PERV::perv_fure               , PERV_TYPE }, // 256
-    {PERV::sbe_fure                , PERV_TYPE }, // 257
-    {PERV::occ_fure                , PERV_TYPE }, // 258
+    {UNDEFINED_RING_INDEX          , UNDEFINED_CHIPLET_TYPE}, // 256
+    {UNDEFINED_RING_INDEX          , UNDEFINED_CHIPLET_TYPE}, // 257
+    {UNDEFINED_RING_INDEX          , UNDEFINED_CHIPLET_TYPE}, // 258
     {PERV::perv_dpll_func          , PERV_TYPE }, // 259
-    {PERV::perv_dpll_bndy          , PERV_TYPE }, // 260
+    {UNDEFINED_RING_INDEX          , UNDEFINED_CHIPLET_TYPE}, // 260
     {PERV::perv_dpll_time          , PERV_TYPE }, // 261
     {PERV::perv_pll_func           , PERV_TYPE }, // 262
-    {PERV::perv_pll_bndy           , PERV_TYPE }, // 263
-    {N0::n0_fure                   , N0_TYPE   }, // 264
-    {N1::n1_fure                   , N1_TYPE   }, // 265
-    {N1::n1_nmmu1_fure             , N1_TYPE   }, // 266
-    {PCI::pci_fure                 , PCI_TYPE  }, // 267
+    {UNDEFINED_RING_INDEX          , UNDEFINED_CHIPLET_TYPE}, // 263
+    {UNDEFINED_RING_INDEX          , UNDEFINED_CHIPLET_TYPE}, // 264
+    {UNDEFINED_RING_INDEX          , UNDEFINED_CHIPLET_TYPE}, // 265
+    {UNDEFINED_RING_INDEX          , UNDEFINED_CHIPLET_TYPE}, // 266
+    {UNDEFINED_RING_INDEX          , UNDEFINED_CHIPLET_TYPE}, // 267
     {PCI::pci_pll_func             , PCI_TYPE  }, // 268
-    {PCI::pci_pll_bndy             , PCI_TYPE  }, // 269
-    {MC::mc_fure                   , MC_TYPE   }, // 270
+    {UNDEFINED_RING_INDEX          , UNDEFINED_CHIPLET_TYPE}, // 269
+    {UNDEFINED_RING_INDEX          , UNDEFINED_CHIPLET_TYPE}, // 270
     {MC::mc_pll_func               , MC_TYPE   }, // 271
-    {MC::mc_pll_bndy               , MC_TYPE   }, // 272
+    {UNDEFINED_RING_INDEX          , UNDEFINED_CHIPLET_TYPE}, // 272
     {MC::mc_pll_bndy_bucket_0      , MC_TYPE   }, // 273
     {MC::mc_pll_bndy_bucket_1      , MC_TYPE   }, // 274
     {MC::mc_pll_bndy_bucket_2      , MC_TYPE   }, // 275
     {MC::mc_pll_bndy_bucket_3      , MC_TYPE   }, // 276
     {MC::mc_pll_bndy_bucket_4      , MC_TYPE   }, // 277
-    {PAU0::pau0_fure               , PAU0_TYPE }, // 278
-    {PAU0::pau0_pau0_fure          , PAU0_TYPE }, // 279
-    {PAU1::pau1_fure               , PAU1_TYPE }, // 280
-    {PAU1::pau1_pau3_fure          , PAU1_TYPE }, // 281
-    {PAU2::pau2_fure               , PAU2_TYPE }, // 282
-    {PAU2::pau2_pau4_fure          , PAU2_TYPE }, // 283
-    {PAU2::pau2_pau5_fure          , PAU2_TYPE }, // 284
-    {PAU3::pau3_fure               , PAU3_TYPE }, // 285
-    {PAU3::pau3_pau6_fure          , PAU3_TYPE }, // 286
-    {PAU3::pau3_pau7_fure          , PAU3_TYPE }, // 287
-    {AXON0::iohs0_fure             , AXON0_TYPE}, // 288
-    {AXON0::iohs0_ndl_fure         , AXON0_TYPE}, // 289
-    {AXON0::iohs0_pdl_fure         , AXON0_TYPE}, // 290
+    {UNDEFINED_RING_INDEX          , UNDEFINED_CHIPLET_TYPE}, // 278
+    {UNDEFINED_RING_INDEX          , UNDEFINED_CHIPLET_TYPE}, // 279
+    {UNDEFINED_RING_INDEX          , UNDEFINED_CHIPLET_TYPE}, // 280
+    {UNDEFINED_RING_INDEX          , UNDEFINED_CHIPLET_TYPE}, // 281
+    {UNDEFINED_RING_INDEX          , UNDEFINED_CHIPLET_TYPE}, // 282
+    {UNDEFINED_RING_INDEX          , UNDEFINED_CHIPLET_TYPE}, // 283
+    {UNDEFINED_RING_INDEX          , UNDEFINED_CHIPLET_TYPE}, // 284
+    {UNDEFINED_RING_INDEX          , UNDEFINED_CHIPLET_TYPE}, // 285
+    {UNDEFINED_RING_INDEX          , UNDEFINED_CHIPLET_TYPE}, // 286
+    {UNDEFINED_RING_INDEX          , UNDEFINED_CHIPLET_TYPE}, // 287
+    {UNDEFINED_RING_INDEX          , UNDEFINED_CHIPLET_TYPE}, // 288
+    {UNDEFINED_RING_INDEX          , UNDEFINED_CHIPLET_TYPE}, // 289
+    {UNDEFINED_RING_INDEX          , UNDEFINED_CHIPLET_TYPE}, // 290
     {AXON0::iohs0_pll_func         , AXON0_TYPE}, // 291
-    {AXON0::iohs0_pll_bndy         , AXON0_TYPE}, // 292
+    {UNDEFINED_RING_INDEX          , UNDEFINED_CHIPLET_TYPE}, // 292
     {AXON0::iohs0_pll_bndy_bucket_0, AXON0_TYPE}, // 293
     {AXON0::iohs0_pll_bndy_bucket_1, AXON0_TYPE}, // 294
     {AXON0::iohs0_pll_bndy_bucket_2, AXON0_TYPE}, // 295
@@ -1101,58 +1131,116 @@ static const RingProperties_t RING_PROPERTIES[NUM_RING_IDS] =
     {AXON0::iohs0_pll_bndy_bucket_5, AXON0_TYPE}, // 298
     {AXON0::iohs0_pll_bndy_bucket_6, AXON0_TYPE}, // 299
     {AXON0::iohs0_pll_bndy_bucket_7, AXON0_TYPE}, // 300
-    {AXON1::iohs1_fure             , AXON1_TYPE}, // 301
-    {AXON1::iohs1_ndl_fure         , AXON1_TYPE}, // 302
-    {AXON1::iohs1_pdl_fure         , AXON1_TYPE}, // 303
+    {UNDEFINED_RING_INDEX          , UNDEFINED_CHIPLET_TYPE}, // 301
+    {UNDEFINED_RING_INDEX          , UNDEFINED_CHIPLET_TYPE}, // 302
+    {UNDEFINED_RING_INDEX          , UNDEFINED_CHIPLET_TYPE}, // 303
     {AXON1::iohs1_pll_func         , AXON1_TYPE}, // 304
-    {AXON2::iohs2_fure             , AXON2_TYPE}, // 305
-    {AXON2::iohs2_ndl_fure         , AXON2_TYPE}, // 306
-    {AXON2::iohs2_pdl_fure         , AXON2_TYPE}, // 307
+    {UNDEFINED_RING_INDEX          , UNDEFINED_CHIPLET_TYPE}, // 305
+    {UNDEFINED_RING_INDEX          , UNDEFINED_CHIPLET_TYPE}, // 306
+    {UNDEFINED_RING_INDEX          , UNDEFINED_CHIPLET_TYPE}, // 307
     {AXON2::iohs2_pll_func         , AXON2_TYPE}, // 308
-    {AXON3::iohs3_fure             , AXON3_TYPE}, // 309
-    {AXON3::iohs3_ndl_fure         , AXON3_TYPE}, // 310
-    {AXON3::iohs3_pdl_fure         , AXON3_TYPE}, // 311
+    {UNDEFINED_RING_INDEX          , UNDEFINED_CHIPLET_TYPE}, // 309
+    {UNDEFINED_RING_INDEX          , UNDEFINED_CHIPLET_TYPE}, // 310
+    {UNDEFINED_RING_INDEX          , UNDEFINED_CHIPLET_TYPE}, // 311
     {AXON3::iohs3_pll_func         , AXON3_TYPE}, // 312
-    {AXON4::iohs4_fure             , AXON4_TYPE}, // 313
-    {AXON4::iohs4_ndl_fure         , AXON4_TYPE}, // 314
-    {AXON4::iohs4_pdl_fure         , AXON4_TYPE}, // 315
+    {UNDEFINED_RING_INDEX          , UNDEFINED_CHIPLET_TYPE}, // 313
+    {UNDEFINED_RING_INDEX          , UNDEFINED_CHIPLET_TYPE}, // 314
+    {UNDEFINED_RING_INDEX          , UNDEFINED_CHIPLET_TYPE}, // 315
     {AXON4::iohs4_pll_func         , AXON4_TYPE}, // 316
-    {AXON5::iohs5_fure             , AXON5_TYPE}, // 317
-    {AXON5::iohs5_ndl_fure         , AXON5_TYPE}, // 318
-    {AXON5::iohs5_pdl_fure         , AXON5_TYPE}, // 319
+    {UNDEFINED_RING_INDEX          , UNDEFINED_CHIPLET_TYPE}, // 317
+    {UNDEFINED_RING_INDEX          , UNDEFINED_CHIPLET_TYPE}, // 318
+    {UNDEFINED_RING_INDEX          , UNDEFINED_CHIPLET_TYPE}, // 319
     {AXON5::iohs5_pll_func         , AXON5_TYPE}, // 320
-    {AXON6::iohs6_fure             , AXON6_TYPE}, // 321
-    {AXON6::iohs6_ndl_fure         , AXON6_TYPE}, // 322
-    {AXON6::iohs6_pdl_fure         , AXON6_TYPE}, // 323
+    {UNDEFINED_RING_INDEX          , UNDEFINED_CHIPLET_TYPE}, // 321
+    {UNDEFINED_RING_INDEX          , UNDEFINED_CHIPLET_TYPE}, // 322
+    {UNDEFINED_RING_INDEX          , UNDEFINED_CHIPLET_TYPE}, // 323
     {AXON6::iohs6_pll_func         , AXON6_TYPE}, // 324
-    {AXON7::iohs7_fure             , AXON7_TYPE}, // 325
-    {AXON7::iohs7_ndl_fure         , AXON7_TYPE}, // 326
-    {AXON7::iohs7_pdl_fure         , AXON7_TYPE}, // 327
+    {UNDEFINED_RING_INDEX          , UNDEFINED_CHIPLET_TYPE}, // 325
+    {UNDEFINED_RING_INDEX          , UNDEFINED_CHIPLET_TYPE}, // 326
+    {UNDEFINED_RING_INDEX          , UNDEFINED_CHIPLET_TYPE}, // 327
     {AXON7::iohs7_pll_func         , AXON7_TYPE}, // 328
-    {EQ::eq_fure                   , EQ_TYPE   }, // 329
+    {UNDEFINED_RING_INDEX          , UNDEFINED_CHIPLET_TYPE}, // 329
     {EQ::eq_cmsk                   , EQ_TYPE   }, // 330
-    {EQ::eq_inex                   , EQ_TYPE   }, // 331
+    {UNDEFINED_RING_INDEX          , UNDEFINED_CHIPLET_TYPE}, // 331
     {EQ::eq_mode                   , EQ_TYPE   }, // 332
-    {EQ::eq_clkadj_fure            , EQ_TYPE   }, // 333
+    {UNDEFINED_RING_INDEX          , UNDEFINED_CHIPLET_TYPE}, // 333
     {EQ::eq_clkadj_cmsk            , EQ_TYPE   }, // 334
-    {EQ::eq_clkadj_inex            , EQ_TYPE   }, // 335
-    {EQ::eq_clkadj_mode            , EQ_TYPE   }, // 336
-    {EQ::ec_cl2_fure               , EQ_TYPE   }, // 337
+    {UNDEFINED_RING_INDEX          , UNDEFINED_CHIPLET_TYPE}, // 335
+    {UNDEFINED_RING_INDEX          , UNDEFINED_CHIPLET_TYPE}, // 336
+    {UNDEFINED_RING_INDEX          , UNDEFINED_CHIPLET_TYPE}, // 337
     {EQ::ec_cl2_cmsk               , EQ_TYPE   }, // 338
     {EQ::ec_cl2_inex               , EQ_TYPE   }, // 339
     {EQ::ec_cl2_mode               , EQ_TYPE   }, // 340
-    {EQ::ec_mma_fure               , EQ_TYPE   }, // 341
+    {UNDEFINED_RING_INDEX          , UNDEFINED_CHIPLET_TYPE}, // 341
     {EQ::ec_mma_cmsk               , EQ_TYPE   }, // 342
-    {EQ::ec_mma_inex               , EQ_TYPE   }, // 343
-    {EQ::ec_l3_fure                , EQ_TYPE   }, // 344
+    {UNDEFINED_RING_INDEX          , UNDEFINED_CHIPLET_TYPE}, // 343
+    {UNDEFINED_RING_INDEX          , UNDEFINED_CHIPLET_TYPE}, // 344
     {EQ::ec_l3_cmsk                , EQ_TYPE   }, // 345
     {EQ::ec_l3_inex                , EQ_TYPE   }, // 346
-    {EQ::ec_l3_mode                , EQ_TYPE   }, // 347
+    {UNDEFINED_RING_INDEX          , UNDEFINED_CHIPLET_TYPE}, // 347
     {N0::n0_abst                   , N0_TYPE   }, // 348
     {N1::n1_abst                   , N1_TYPE   }, // 349
     {N1::n1_nmmu1_abst             , N1_TYPE   }, // 350
     {EQ::ec_cl2_abst               , EQ_TYPE   }, // 351
     {EQ::ec_mma_abst               , EQ_TYPE   }, // 352
+    {PERV::perv_func               , PERV_TYPE }, // 353
+    {PERV::sbe_func                , PERV_TYPE }, // 354
+    {PERV::occ_func                , PERV_TYPE }, // 355
+    {PERV::perv_pll_bndy_bucket_0  , PERV_TYPE }, // 356
+    {PERV::perv_pll_bndy_bucket_1  , PERV_TYPE }, // 357
+    {PERV::perv_pll_bndy_bucket_2  , PERV_TYPE }, // 358
+    {PERV::perv_pll_bndy_bucket_3  , PERV_TYPE }, // 359
+    {N0::n0_func                   , N0_TYPE   }, // 360
+    {N1::n1_func                   , N1_TYPE   }, // 361
+    {N1::n1_nmmu1_func             , N1_TYPE   }, // 362
+    {PCI::pci_func                 , PCI_TYPE  }, // 363
+    {PCI::pci_pll_bndy_bucket_0    , PCI_TYPE  }, // 364
+    {PCI::pci_pll_bndy_bucket_1    , PCI_TYPE  }, // 365
+    {PCI::pci_pll_bndy_bucket_2    , PCI_TYPE  }, // 366
+    {PCI::pci_pll_bndy_bucket_3    , PCI_TYPE  }, // 367
+    {MC::mc_func                   , MC_TYPE   }, // 368
+    {MC::mc_pll_bndy_bucket_5      , MC_TYPE   }, // 369
+    {MC::mc_pll_bndy_bucket_6      , MC_TYPE   }, // 370
+    {MC::mc_pll_bndy_bucket_7      , MC_TYPE   }, // 371
+    {PAU0::pau0_func               , PAU0_TYPE }, // 372
+    {PAU0::pau0_pau0_func          , PAU0_TYPE }, // 373
+    {PAU1::pau1_func               , PAU1_TYPE }, // 374
+    {PAU1::pau1_pau3_func          , PAU1_TYPE }, // 375
+    {PAU2::pau2_func               , PAU2_TYPE }, // 376
+    {PAU2::pau2_pau4_func          , PAU2_TYPE }, // 377
+    {PAU2::pau2_pau5_func          , PAU2_TYPE }, // 378
+    {PAU3::pau3_func               , PAU3_TYPE }, // 379
+    {PAU3::pau3_pau6_func          , PAU3_TYPE }, // 380
+    {PAU3::pau3_pau7_func          , PAU3_TYPE }, // 381
+    {AXON0::iohs0_func             , AXON0_TYPE}, // 382
+    {AXON0::iohs0_pdl_func         , AXON0_TYPE}, // 383
+    {AXON0::iohs0_pll_bndy_bucket_8, AXON0_TYPE}, // 384
+    {AXON0::iohs0_pll_bndy_bucket_9, AXON0_TYPE}, // 385
+    {AXON0::iohs0_pll_bndy_bucket_10, AXON0_TYPE}, // 386
+    {AXON0::iohs0_pll_bndy_bucket_11, AXON0_TYPE}, // 387
+    {AXON0::iohs0_pll_bndy_bucket_12, AXON0_TYPE}, // 388
+    {AXON0::iohs0_pll_bndy_bucket_13, AXON0_TYPE}, // 389
+    {AXON0::iohs0_pll_bndy_bucket_14, AXON0_TYPE}, // 390
+    {AXON0::iohs0_pll_bndy_bucket_15, AXON0_TYPE}, // 391
+    {AXON1::iohs1_func             , AXON1_TYPE}, // 392
+    {AXON1::iohs1_pdl_func         , AXON1_TYPE}, // 393
+    {AXON2::iohs2_func             , AXON2_TYPE}, // 394
+    {AXON2::iohs2_pdl_func         , AXON2_TYPE}, // 395
+    {AXON3::iohs3_func             , AXON3_TYPE}, // 396
+    {AXON3::iohs3_pdl_func         , AXON3_TYPE}, // 397
+    {AXON4::iohs4_func             , AXON4_TYPE}, // 398
+    {AXON4::iohs4_pdl_func         , AXON4_TYPE}, // 399
+    {AXON5::iohs5_func             , AXON5_TYPE}, // 400
+    {AXON5::iohs5_pdl_func         , AXON5_TYPE}, // 401
+    {AXON6::iohs6_func             , AXON6_TYPE}, // 402
+    {AXON6::iohs6_pdl_func         , AXON6_TYPE}, // 403
+    {AXON7::iohs7_func             , AXON7_TYPE}, // 404
+    {AXON7::iohs7_pdl_func         , AXON7_TYPE}, // 405
+    {EQ::eq_func                   , EQ_TYPE   }, // 406
+    {EQ::eq_clkadj_func            , EQ_TYPE   }, // 407
+    {EQ::ec_cl2_func               , EQ_TYPE   }, // 408
+    {EQ::ec_mma_func               , EQ_TYPE   }, // 409
+    {EQ::ec_l3_func                , EQ_TYPE   }, // 410
 };
 #endif  // __PPE__
 

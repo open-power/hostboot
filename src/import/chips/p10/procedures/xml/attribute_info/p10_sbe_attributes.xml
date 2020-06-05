@@ -284,6 +284,14 @@
   </entry>
   <!-- sampled: mailbox 6 -->
   <entry>
+    <name>ATTR_FILTER_PLL_BUCKET</name>
+    <value>0x0</value>
+  </entry>
+  <entry>
+    <name>ATTR_PCI_PLL_BUCKET</name>
+    <value>0x0</value>
+  </entry>
+  <entry>
     <name>ATTR_CP_PLLTODFLT_BYPASS</name>
     <value>0x0</value>
   </entry>

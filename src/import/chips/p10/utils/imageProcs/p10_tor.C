@@ -210,6 +210,17 @@ int _tor_access_ring( void*          io_ringSection,   // Ring section ptr
 
             if (ringOffset)
             {
+                RingId_t ringIdRs4 = be16toh( ((CompressedScanData*)
+                                               ((uint8_t*)io_ringSection + ringOffset))->iv_ringId );
+
+                if (i_ringId != ringIdRs4)
+                {
+                    MY_ERR("ERROR: _tor_access_ring(): Requested ringId(=0x%03x) and RS4 header's"
+                           " ringId(=0x%03x) don't match for rpIndex=0x%03x\n",
+                           i_ringId, ringIdRs4, rpIndex);
+                    return TOR_RING_ID_MISMATCH;
+                }
+
                 rs4Size = be16toh( ((CompressedScanData*)
                                     ((uint8_t*)io_ringSection + ringOffset))->iv_size );
 

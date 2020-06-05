@@ -117,6 +117,24 @@
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
+  <id>ATTR_FILTER_PLL_BUCKET</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>Filter pll bucket selection</description>
+  <valueType>uint8</valueType>
+  <writeable/>
+  <initToZero/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_PCI_PLL_BUCKET</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>PCI pll bucket selection</description>
+  <valueType>uint8</valueType>
+  <writeable/>
+  <initToZero/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
   <id>ATTR_CP_PLLTODFLT_BYPASS</id>
   <targetType>TARGET_TYPE_PROC_CHIP</targetType>
   <description>
