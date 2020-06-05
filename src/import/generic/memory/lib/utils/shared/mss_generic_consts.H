@@ -916,7 +916,7 @@ enum rev : uint8_t
 /// @brief SPD module parameters
 /// @note helps distinguish SPD decoder sections
 ///
-enum parameters
+enum module_params
 {
     UNINITIALIZED,
     BASE_CNFG,

@@ -783,7 +783,7 @@ struct attrEngineTraits<P, exp::attr_eff_engine_fields, exp::attr_eff_engine_fie
     static fapi2::ReturnCode get_value_to_set(const spd::facade& i_spd_data,
             attr_integral_type& o_setting)
     {
-        return mss::gen::spd_revision_check_0_3(i_spd_data, &spd::facade::therm_sensor_0_availability, o_setting);
+        return i_spd_data.therm_sensor_0_availability(o_setting);
     }
 };
 
@@ -836,7 +836,7 @@ struct attrEngineTraits<P, exp::attr_eff_engine_fields, exp::attr_eff_engine_fie
     static fapi2::ReturnCode get_value_to_set(const spd::facade& i_spd_data,
             attr_integral_type& o_setting)
     {
-        return mss::gen::spd_revision_check_0_3(i_spd_data, &spd::facade::therm_sensor_0_type, o_setting);
+        return i_spd_data.therm_sensor_0_type(o_setting);
     }
 };
 
@@ -888,7 +888,7 @@ struct attrEngineTraits<P, exp::attr_eff_engine_fields, exp::attr_eff_engine_fie
     static fapi2::ReturnCode get_value_to_set(const spd::facade& i_spd_data,
             attr_integral_type& o_setting)
     {
-        return mss::gen::spd_revision_check_0_3(i_spd_data, &spd::facade::therm_sensor_0_usage, o_setting);
+        return i_spd_data.therm_sensor_0_usage(o_setting);
     }
 };
 
@@ -940,7 +940,7 @@ struct attrEngineTraits<P, exp::attr_eff_engine_fields, exp::attr_eff_engine_fie
     static fapi2::ReturnCode get_value_to_set(const spd::facade& i_spd_data,
             attr_integral_type& o_setting)
     {
-        return mss::gen::spd_revision_check_0_3(i_spd_data, &spd::facade::therm_sensor_0_i2c_address, o_setting);
+        return i_spd_data.therm_sensor_0_i2c_address(o_setting);
     }
 };
 
@@ -992,7 +992,7 @@ struct attrEngineTraits<P, exp::attr_eff_engine_fields, exp::attr_eff_engine_fie
     static fapi2::ReturnCode get_value_to_set(const spd::facade& i_spd_data,
             attr_integral_type& o_setting)
     {
-        return mss::gen::spd_revision_check_0_3(i_spd_data, &spd::facade::therm_sensor_1_availability, o_setting);
+        return i_spd_data.therm_sensor_1_availability(o_setting);
     }
 };
 
@@ -1045,7 +1045,7 @@ struct attrEngineTraits<P, exp::attr_eff_engine_fields, exp::attr_eff_engine_fie
     static fapi2::ReturnCode get_value_to_set(const spd::facade& i_spd_data,
             attr_integral_type& o_setting)
     {
-        return mss::gen::spd_revision_check_0_3(i_spd_data, &spd::facade::therm_sensor_1_type, o_setting);
+        return i_spd_data.therm_sensor_1_type(o_setting);
     }
 };
 
@@ -1097,7 +1097,7 @@ struct attrEngineTraits<P, exp::attr_eff_engine_fields, exp::attr_eff_engine_fie
     static fapi2::ReturnCode get_value_to_set(const spd::facade& i_spd_data,
             attr_integral_type& o_setting)
     {
-        return mss::gen::spd_revision_check_0_3(i_spd_data, &spd::facade::therm_sensor_1_usage, o_setting);
+        return i_spd_data.therm_sensor_1_usage(o_setting);
     }
 };
 
@@ -1149,7 +1149,7 @@ struct attrEngineTraits<P, exp::attr_eff_engine_fields, exp::attr_eff_engine_fie
     static fapi2::ReturnCode get_value_to_set(const spd::facade& i_spd_data,
             attr_integral_type& o_setting)
     {
-        return mss::gen::spd_revision_check_0_3(i_spd_data, &spd::facade::therm_sensor_1_i2c_address, o_setting);
+        return i_spd_data.therm_sensor_1_i2c_address(o_setting);
     }
 };
 
@@ -1201,7 +1201,7 @@ struct attrEngineTraits<P, exp::attr_eff_engine_fields, exp::attr_eff_engine_fie
     static fapi2::ReturnCode get_value_to_set(const spd::facade& i_spd_data,
             attr_integral_type& o_setting)
     {
-        return mss::gen::spd_revision_check_0_3(i_spd_data, &spd::facade::therm_sensor_differential_availability, o_setting);
+        return i_spd_data.therm_sensor_differential_availability(o_setting);
     }
 };
 
@@ -1254,7 +1254,7 @@ struct attrEngineTraits<P, exp::attr_eff_engine_fields, exp::attr_eff_engine_fie
     static fapi2::ReturnCode get_value_to_set(const spd::facade& i_spd_data,
             attr_integral_type& o_setting)
     {
-        return mss::gen::spd_revision_check_0_3(i_spd_data, &spd::facade::therm_sensor_differential_type, o_setting);
+        return i_spd_data.therm_sensor_differential_type(o_setting);
     }
 };
 
@@ -1306,7 +1306,7 @@ struct attrEngineTraits<P, exp::attr_eff_engine_fields, exp::attr_eff_engine_fie
     static fapi2::ReturnCode get_value_to_set(const spd::facade& i_spd_data,
             attr_integral_type& o_setting)
     {
-        return mss::gen::spd_revision_check_0_3(i_spd_data, &spd::facade::therm_sensor_differential_usage, o_setting);
+        return i_spd_data.therm_sensor_differential_usage(o_setting);
     }
 };
 
@@ -1358,7 +1358,7 @@ struct attrEngineTraits<P, exp::attr_eff_engine_fields, exp::attr_eff_engine_fie
     static fapi2::ReturnCode get_value_to_set(const spd::facade& i_spd_data,
             attr_integral_type& o_setting)
     {
-        return mss::gen::spd_revision_check_0_3(i_spd_data, &spd::facade::therm_sensor_differential_i2c_address, o_setting);
+        return i_spd_data.therm_sensor_differential_i2c_address(o_setting);
     }
 };
 
