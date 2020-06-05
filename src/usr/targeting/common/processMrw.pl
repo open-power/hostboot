@@ -680,95 +680,6 @@ sub errorCheckTheTargets
     }
 } # end sub errorCheckTheTargets
 
-# @function getLocationCode
-#
-# @brief Returns the location code for a given target.  The returned location
-#     code does -not- reflect the chassis location code prefix (including dash),
-#     but otherwise includes all other components of the final location code.
-#     It will be up to the firmware to dynamically add the chassis location code
-#     prefix to form a complete location code.
-#
-#     For example, if chip 0's full location code is: U78DA.ND1.1234567-P0-C0,
-#     this API will return it as P0-C0.
-#
-# @param[in] $i_targetObj Global target object (required)
-# @param[in] $i_target    The target to compute location code for (required)
-#
-# @return The unprefixed location code for the target, empty on error.
-sub getLocationCode
-{
-    my $i_targetObj = shift;
-    my $i_target = shift;
-    my $tempTarget = $i_target;
-
-    my @locationCodeArray = ();
-    my $arrayIndex = 0;
-    my $locationCode = '';
-    my $locationCodeType = '';
-    my $tempLocationCode = '';
-
-    if($i_targetObj->getTargetParent($tempTarget) ne '')
-    {
-        my $done = 0;
-        do
-        {
-            if(!defined $tempTarget)
-            {
-                $done = 1;
-            }
-            else
-            {
-                if(!$i_targetObj->isBadAttribute($tempTarget, "LOCATION_CODE"))
-                {
-                    $tempLocationCode = $i_targetObj->getAttribute($tempTarget,
-                        "LOCATION_CODE");
-                }
-                else
-                {
-                    $tempLocationCode = '';
-                }
-
-                if(!$i_targetObj->isBadAttribute($tempTarget,
-                        "LOCATION_CODE_TYPE"))
-                {
-                    $locationCodeType = $i_targetObj->getAttribute($tempTarget,
-                        "LOCATION_CODE_TYPE");
-                }
-                else
-                {
-                    $locationCodeType = '';
-                }
-
-                if($locationCodeType eq '' || $locationCodeType eq 'ASSEMBLY' ||
-                    $tempLocationCode eq '')
-                {
-                    $tempTarget = $i_targetObj->getTargetParent($tempTarget);
-                }
-                elsif($locationCodeType eq 'RELATIVE')
-                {
-                    $locationCodeArray[$arrayIndex++] = $tempLocationCode;
-                    $tempTarget = $i_targetObj->getTargetParent($tempTarget);
-                }
-                elsif($locationCodeType eq 'ABSOLUTE')
-                {
-                    $locationCodeArray[$arrayIndex++] = $tempLocationCode;
-                    $done = 1;
-                }
-            }
-
-        } while(!$done);
-    }
-
-    my $dash='';
-    for(my $i = $arrayIndex; $i > 0; $i--)
-    {
-        $locationCode = $locationCode.$dash.$locationCodeArray[$i-1];
-        $dash="-";
-    }
-
-    return $locationCode;
-}
-
 #--------------------------------------------------
 # @brief Write out the results to an XML file
 #
@@ -912,20 +823,6 @@ sub processNode
     my $sysParentPos = $targetObj->getAttribute($sysParent, "ORDINAL_ID");
     my $sysParentAffinity = $targetObj->getAttribute($sysParent, "AFFINITY_PATH");
     my $sysParentPhysical = $targetObj->getAttribute($sysParent, "PHYS_PATH");
-
-    # Hostboot does not model the backplane, just the node that holds the
-    # backplane, so compute the backplane's location code and set that value
-    # on the node target, then clear out the value on the backplane level.
-    foreach my $child (@{$targetObj->getTargetChildren($target)})
-    {
-        my $childTargetType = $targetObj->getTargetType($child);
-        if ($childTargetType eq "card-motherboard")
-        {
-            my $locationCode = getLocationCode($targetObj,$child);
-            $targetObj->setAttribute($target, "LOCATION_CODE",$locationCode);
-            $targetObj->setAttribute($child, "LOCATION_CODE","");
-        }
-    }
 
     # For high-end, multi-drawer systems there may be a control node that
     # contains service processor logic but no CEC (processor) logic. Thus,
@@ -1195,9 +1092,6 @@ sub processDdimmAndChildren
     my $nodeParentPos = $targetObj->getAttribute($nodeParent, "ORDINAL_ID");
     my $nodeParentAffinity =$targetObj->getAttribute($nodeParent, "AFFINITY_PATH");
     my $nodeParentPhysical = $targetObj->getAttribute($nodeParent, "PHYS_PATH");
-
-    my $locationCode = getLocationCode($targetObj,$target);
-    $targetObj->setAttribute($target, "LOCATION_CODE",$locationCode);
 
     # Get the FAPI_NAME by using the data gathered above.
     my $fapiName = $targetObj->getFapiName($type, $nodeParentPos, $dimmPosPerSystem);
@@ -1656,9 +1550,6 @@ sub processTpm
     my $nodeParentPos = $targetObj->getAttribute($nodeParent, "ORDINAL_ID");
     my $nodeParentAffinity = $targetObj->getAttribute($nodeParent, "AFFINITY_PATH");
     my $nodeParentPhysical = $targetObj->getAttribute($nodeParent, "PHYS_PATH");
-
-    my $locationCode = getLocationCode($targetObj,$target);
-    $targetObj->setAttribute($target, "LOCATION_CODE",$locationCode);
 
     # Get the TPM's position for further use below
     my $tpmPosPerSystem = $targetObj->getTargetPosition($target);
@@ -2434,14 +2325,19 @@ sub postProcessProcessor
     my $targetType = targetTypeSanityCheck($targetObj, $target, "PROC");
     validateTargetHasBeenPreProcessed($targetObj, $target);
 
-    # In serverwiz, processor instances are not unique because they are plugged
-    # into a socket, so processor instance unique attributes are socket level.
-    # The parent is guaranteed to be a module, the grandparent a socket
-    my $module_target = $targetObj->getTargetParent($target);
-    my $socket_target = $targetObj->getTargetParent($module_target);
+    #########################
+    ## In serverwiz, processor instances are not unique
+    ## because plugged into socket
+    ## so processor instance unique attributes are socket level.
+    ## The grandparent is guaranteed to be socket.
+    my $socket_target =
+       $targetObj->getTargetParent($targetObj->getTargetParent($target));
+    $targetObj->copyAttribute($socket_target,$target,"LOCATION_CODE");
 
-    my $locationCode = getLocationCode($targetObj,$target);
-    $targetObj->setAttribute($target, "LOCATION_CODE",$locationCode);
+    ## Module attibutes are inherited into the proc target
+    my $module_target =
+       $targetObj->getTargetParent($target);
+    $targetObj->copyAttribute($module_target,$target,"LOCATION_CODE");
 
     ## Copy PCIE attributes from socket
     ## Copy PBAX attributes from socket

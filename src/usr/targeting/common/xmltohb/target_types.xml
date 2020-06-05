@@ -1580,9 +1580,6 @@
       <id>KEY_TRANSITION_STATE</id>
     </attribute>
     <attribute>
-      <id>LOCATION_CODE</id>
-    </attribute>
-    <attribute>
       <default>POWER10</default>
       <id>MODEL</id>
     </attribute>
