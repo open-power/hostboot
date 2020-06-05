@@ -116,6 +116,7 @@ enum errlManagerNeeds
     MBOX,
     IPMI,
     ERRLDISP,
+    UPDATE_ATTRIB_VARS,  // Force the refresh/update of attribute variables
 } ;
 
 
@@ -307,6 +308,7 @@ private:
         ERRLOG_ACCESS_ERRLDISP_TYPE        = 0x00000037 | MBOX::FIRST_SECURE_MSG,
         ERRLOG_ACCESS_IPMI_TYPE            = 0x00000038 | MBOX::FIRST_SECURE_MSG,
         ERRLOG_FLUSH_TYPE                  = 0x00000039 | MBOX::FIRST_SECURE_MSG,
+        ERRLOG_UPDATE_ATTRIB_VARS_TYPE     = 0x00000040 | MBOX::FIRST_SECURE_MSG,
     };
 
     /**

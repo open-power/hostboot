@@ -365,9 +365,20 @@ void ErrlManager::errlogMsgHndlr ()
                     TARGETING::Target * sys = nullptr;
                     TARGETING::targetService().getTopLevelTarget( sys );
 
+                    // Cache current 'hidden error log enable' value for tracing
+                    auto l_hiddenErrLogsEnableOldValue = iv_hiddenErrLogsEnable;
+
                     // set whether we want to skip certain error logs or not.
                     iv_hiddenErrLogsEnable =
                           sys->getAttr<TARGETING::ATTR_HIDDEN_ERRLOGS_ENABLE>();
+
+                    TRACFCOMP( g_trac_errl, INFO_MRK
+                    "ErrlManager::errlogMsgHndlr(ERRLOG_ACCESS_TARG_TYPE"
+                    "(0x%02X)) - updating 'hidden error logs enable' "
+                    "from 0x%02X to 0x%02X",
+                    ERRLOG_ACCESS_TARG_TYPE,
+                    l_hiddenErrLogsEnableOldValue,
+                    iv_hiddenErrLogsEnable  );
 
                     TARGETING::SpFunctions spfn;
 
@@ -391,6 +402,29 @@ void ErrlManager::errlogMsgHndlr ()
 
                     //We are done with the msg
                     msg_free(theMsg);
+
+                    // go back and wait for a next msg
+                    break;
+                }
+            case ERRLOG_UPDATE_ATTRIB_VARS_TYPE:
+                {
+                    TARGETING::Target * sys(nullptr);
+                    TARGETING::targetService().getTopLevelTarget( sys );
+
+                    // Cache current 'hidden error log enable' value for tracing
+                    auto l_hiddenErrLogsEnableOldValue = iv_hiddenErrLogsEnable;
+
+                    // Refresh/update attribute vars
+                    iv_hiddenErrLogsEnable =
+                          sys->getAttr<TARGETING::ATTR_HIDDEN_ERRLOGS_ENABLE>();
+
+                    TRACFCOMP( g_trac_errl, INFO_MRK
+                    "ErrlManager::errlogMsgHndlr(ERRLOG_UPDATE_ATTRIB_VARS_TYPE"
+                    "(0x%02X)) - updating 'hidden error logs enable' "
+                    "from 0x%02X to 0x%02X",
+                    ERRLOG_UPDATE_ATTRIB_VARS_TYPE,
+                    l_hiddenErrLogsEnableOldValue,
+                    iv_hiddenErrLogsEnable  );
 
                     // go back and wait for a next msg
                     break;
@@ -943,6 +977,9 @@ void ErrlManager::sendResourcesMsg(errlManagerNeeds i_needs)
             break;
         case ERRLDISP:
             msg->type = ERRORLOG::ErrlManager::ERRLOG_ACCESS_ERRLDISP_TYPE;
+            break;
+        case UPDATE_ATTRIB_VARS:
+            msg->type = ERRORLOG::ErrlManager::ERRLOG_UPDATE_ATTRIB_VARS_TYPE;
             break;
         default:
         {

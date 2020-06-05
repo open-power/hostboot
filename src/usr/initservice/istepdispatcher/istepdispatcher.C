@@ -265,7 +265,16 @@ void IStepDispatcher::init(errlHndl_t &io_rtaskRetErrl)
                     break;
                 }
             }
-        }
+
+            TRACFCOMP( g_trac_initsvc, "IStepDispatcher: init: calling "
+                      "ERRORLOG::ErrlManager::errlResourceReady"
+                      "(ERRORLOG::UPDATE_ATTRIB_VARS(0x%02X))",
+                      ERRORLOG::UPDATE_ATTRIB_VARS );
+
+            // Inform ErrlManager to reread any attribute values that it may
+            // have cached away in the event that those values were overridden.
+            ERRORLOG::ErrlManager::errlResourceReady(ERRORLOG::UPDATE_ATTRIB_VARS);
+        }  // end if(!iv_spBaseServicesEnabled)
 
         iv_istepMode = l_pTopLevelTarget->getAttr<TARGETING::ATTR_ISTEP_MODE>();
 
