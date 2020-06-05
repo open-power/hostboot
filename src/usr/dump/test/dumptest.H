@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -424,16 +424,26 @@ class DumpTest: public CxxTest::TestSuite
 
             // copy the mapped VA to a VA pointer
             va_srcTableAddr = va_mapsrcTableAddr;
+            TS_INFO("UNEVENDEST 1 MAPPED SRC i=0x%X va_mapsrcTableAddr=0x%X "
+                "va_srcTableAddr=0x%X",
+                i, va_mapsrcTableAddr, va_srcTableAddr);
 
             // calculate offset based on page alignment.
             offset = src_data[index] - ALIGN_PAGE_DOWN(src_data[index]);
 
             // increment the offset to correct VA offset.
             va_srcTableAddr += (offset/(sizeof (uint64_t)));
+            TS_INFO("UNEVENDEST UPDATED SRC OFFSET i=0x%X va_srcTableAddr=0x%X",
+                i, va_srcTableAddr);
 
             memcpy(va_srcTableAddr, src_Inputdata[i], sizeof(src_Inputdata[i]));
+            TRACFBIN( g_trac_dump, "UNEVENDEST SETUP memcpy "
+                "from src_Inputdata[i] to va_srcTableAddr=",
+                src_Inputdata[i], sizeof(src_Inputdata[i]) );
 
             // unmap the previous src entry
+            TS_INFO("UNEVENDEST 1 UNMAPPING SRC i=0x%X va_mapsrcTableAddr=0x%X",
+                i, va_mapsrcTableAddr);
             int rc =
               mm_block_unmap(reinterpret_cast<void*>(va_mapsrcTableAddr));
 
@@ -483,14 +493,22 @@ class DumpTest: public CxxTest::TestSuite
 
                 // copy the mapped VA to a VA pointer we will
                 va_destTableAddr = va_mapdestTableAddr;
+                TS_INFO("UNEVENDEST 1 MAPPED DEST VERIFY i=0x%X "
+                    "va_mapdestTableAddr=0x%X va_destTableAddr=0x%X",
+                    i, va_mapdestTableAddr, va_destTableAddr);
 
                 // calculate offset based on page alignment.
                 offset = dst_data[index] - ALIGN_PAGE_DOWN(dst_data[index]);
 
                 // increment the offset to correct VA offset.
                 va_destTableAddr += (offset/(sizeof (uint64_t)));
+                TS_INFO("UNEVENDEST UPDATED DEST OFFSET i=0x%X "
+                    "va_destTableAddr=0x%X",
+                    i, va_destTableAddr);
 
                 paddr = mm_virt_to_phys(va_destTableAddr);
+                TS_INFO("UNEVENDEST index=0x%X paddr=0x%X dst_data[index]=0x%X",
+                    index, paddr, dst_data[index]);
 
                 if (paddr != dst_data[index])
                 {
@@ -501,6 +519,17 @@ class DumpTest: public CxxTest::TestSuite
                 }
 
                 //if entry need to compare destination data to second portion of previous src
+                TS_INFO("UNEVENDEST i=0x%X index=0x%X va_destTableAddr=0x%X"
+                    " src_Inputdata[i]=0x%X &src_Inputdata[i]=0x%X "
+                    "&src_Inputdata[1][4]=0x%X",
+                    i, index, va_destTableAddr, src_Inputdata[i],
+                    &src_Inputdata[i], &src_Inputdata[1][4]);
+                TRACFBIN( g_trac_dump, "UNEVENDEST va_destTableAddr=",
+                    va_destTableAddr, sizeof(va_destTableAddr) );
+                TRACFBIN( g_trac_dump, "UNEVENDEST src_Inputdata[i]=",
+                    src_Inputdata[i], sizeof(src_Inputdata[i]) );
+                TRACFBIN( g_trac_dump, "UNEVENDEST src_Inputdata[1][4]=",
+                    &src_Inputdata[1][4], sizeof(src_Inputdata[1][4]) );
                 if (i == 2)
                 {
                     src_rc = memcmp(va_destTableAddr, &src_Inputdata[1][4], dst_data[index+1]);
@@ -519,9 +548,12 @@ class DumpTest: public CxxTest::TestSuite
                 }
 
 
-                // unmap the previous src entry
+                // unmap the previous dest entry
+                TS_INFO("UNEVENDEST UNMAPPING DEST VERIFY i=0x%X "
+                    "va_mapdestTableAddr=0x%X",
+                    i, va_mapdestTableAddr);
                 int rc =
-                  mm_block_unmap(reinterpret_cast<void*>(va_mapsrcTableAddr));
+                  mm_block_unmap(reinterpret_cast<void*>(va_mapdestTableAddr));
 
                 if (rc != 0)
                 {
@@ -544,6 +576,9 @@ class DumpTest: public CxxTest::TestSuite
 
             // copy the mapped VA to a VA pointer we will
             va_destTableAddr = va_mapdestTableAddr;
+            TS_INFO("UNEVENDEST MAPPED DEST 4th ENTRY CHECK "
+                "va_mapdestTableAddr=0x%X va_destTableAddr=0x%X",
+                va_mapdestTableAddr, va_destTableAddr);
 
             // calculate offset based on page alignment.
             offset = dst_data[index] - ALIGN_PAGE_DOWN(dst_data[index]);
@@ -552,6 +587,9 @@ class DumpTest: public CxxTest::TestSuite
             va_destTableAddr += (offset/(sizeof (uint64_t)));
 
             paddr = mm_virt_to_phys(va_destTableAddr);
+            TS_INFO("UNEVENDEST 4th ENTRY CHECK index 0x%X "
+                "mm_virt_to_phys paddr=0x%X va_destTableAddr=0x%X",
+                index, paddr, va_destTableAddr);
 
             if (paddr != dst_data[index])
             {
@@ -571,13 +609,27 @@ class DumpTest: public CxxTest::TestSuite
             // Now loop through the data at this memory address and compare it to the data
             for (int j = 0; j<dataentries; j++)
             {
+                TS_INFO("UNEVENDEST WATCH i=0x%X j=0x%X dataIndex=0x%X "
+                    "src_Inputdata[i]=0x%X &src_Inputdata[i][dataIndex]=0x%X "
+                    "&va_destTableAddr[j]=0x%X",
+                    i, j, dataIndex, src_Inputdata[i],
+                    &src_Inputdata[i][dataIndex], &va_destTableAddr[j]);
+                TRACFBIN( g_trac_dump, "UNEVENDEST src_Inputdata[i][dataIndex]=",
+                    &src_Inputdata[i][dataIndex],
+                    sizeof(src_Inputdata[i][dataIndex]) );
+                TRACFBIN( g_trac_dump, "UNEVENDEST va_destTableAddr[j]=",
+                    &va_destTableAddr[j], sizeof(va_destTableAddr[j]) );
                 if (va_destTableAddr[j] != src_Inputdata[i][dataIndex])
                 {
                     // error
                     TRACFCOMP(g_trac_dump,
-                              "DumpTest::DumpCollectUnevenDest:3 : Data mismatch input data = %lX, outputdata = %lx",
-                               src_Inputdata[i][dataIndex], va_destTableAddr[j]);
-                    TS_FAIL( "DumpTest::DumpCollectUnevenDest:3 ERROR : Unexpected error data mismatch" );
+                        "DumpTest::DumpCollectUnevenDest:3 : "
+                        "WATCH Data mismatch input data = %lX "
+                        "outputdata = %lx",
+                        src_Inputdata[i][dataIndex],
+                        va_destTableAddr[j]);
+                    TS_FAIL( "DumpTest::DumpCollectUnevenDest:3 ERROR : "
+                        "Unexpected error data mismatch" );
                     break;
                 }
 
@@ -592,7 +644,10 @@ class DumpTest: public CxxTest::TestSuite
             }
 
 
-            // unmap the previous src entry
+            // unmap the previous dest entry
+            TS_INFO("UNEVENDEST UNMAPPING DEST 4th ENTRY CHECK "
+                "va_mapdestTableAddr=0x%X",
+                va_mapdestTableAddr);
             int rc =
               mm_block_unmap(reinterpret_cast<void*>(va_mapdestTableAddr));
 
