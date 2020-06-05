@@ -151,8 +151,10 @@ runtimeInterfaces_t* rt_start(hostInterfaces_t* intf)
     // apply temp overrides
     rtPost->callApplyTempOverrides();
 
+#ifdef CONFIG_MCTP
     // initialize MCTP
     rtPost->callInitMctp();
+#endif
 
     // initialize PLDM
     rtPost->callInitPldm();
