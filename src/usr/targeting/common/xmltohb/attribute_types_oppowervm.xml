@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2016                             -->
+<!-- Contributors Listed Below - COPYRIGHT 2016,2020                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -448,12 +448,13 @@
 
   <attribute>
     <id>PHYP_SYSTEM_TYPE</id>
-    <description>PHYP system type value for habanero
-            and barreleye (0x3015 and 0x3016 respectively).
-            The value is updated in the system xml.
+    <description>PHYP system type value for witherspoon
+        is 0x4024.
     </description>
     <simpleType>
-      <uint32_t/>
+      <uint32_t>
+        <default>0x40240000</default>
+      </uint32_t>
     </simpleType>
     <persistency>non-volatile</persistency>
     <readable/>
