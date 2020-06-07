@@ -2729,7 +2729,10 @@ sub postProcessApss {
     my $targetObj=shift;
     my $target=shift;
 
-    my $systemTarget = $targetObj->getTargetParent($target);
+    my $encTarget = $targetObj->getTargetParent($target);
+    my $nodeTarget = $targetObj->getTargetParent($encTarget);
+    my $systemTarget = $targetObj->getTargetParent($nodeTarget);
+
     my @sensors;
     my @channel_ids;
     my @channel_offsets;
@@ -2741,14 +2744,11 @@ sub postProcessApss {
     {
         if ($targetObj->getMrwType($child) eq "APSS_SENSOR")
         {
-            my $entity_id=$targetObj->
-                 getAttribute($child,"IPMI_ENTITY_ID");
-            my $sensor_id=$targetObj->
-                 getAttribute($child,"IPMI_SENSOR_ID");
-            my $sensor_type=$targetObj->
-                 getAttribute($child,"IPMI_SENSOR_TYPE");
-            my $sensor_evt=$targetObj->
-                 getAttribute($child,"IPMI_SENSOR_READING_TYPE");
+             #TODO add PLDM specific processing here
+             my $entity_id = 0;
+             my $sensor_id = 0;
+             my $sensor_type=0;
+             my $sensor_evt=0;
 
             #@fixme-RTC:175309-Remove deprecated support
             my $name;
@@ -2757,27 +2757,10 @@ sub postProcessApss {
             my $channel_gain;
             my $channel_offset;
             my $channel_ground;
-            # Temporarily allow both old and new attribute names until
-            #  all of the SW2 xmls get in sync
-            if (!$targetObj->isBadAttribute($child,"IPMI_SENSOR_NAME_SUFFIX") )
+
+            if ($targetObj->getTargetType($child) eq "apss.unit-adc-generic")
             {
-                # Using deprecated names
-                $name = $targetObj->
-                  getAttribute($child,"IPMI_SENSOR_NAME_SUFFIX");
-                $channel = $targetObj->
-                  getAttribute($child,"ADC_CHANNEL_ASSIGNMENT");
-                $channel_id = $targetObj->
-                  getAttribute($child,"ADC_CHANNEL_ID");
-                $channel_gain = $targetObj->
-                  getAttribute($child,"ADC_CHANNEL_GAIN");
-                $channel_offset = $targetObj->
-                  getAttribute($child,"ADC_CHANNEL_OFFSET");
-                $channel_ground = $targetObj->
-                  getAttribute($child,"ADC_CHANNEL_GROUND");
-            }
-            else
-            {
-                # Using correct/new names
+                #Using correct/new names for the APSS entries
                 $name = $targetObj->
                   getAttribute($child,"FUNCTION_NAME");
                 $channel = $targetObj->
@@ -2786,10 +2769,21 @@ sub postProcessApss {
                   getAttribute($child,"FUNCTION_ID");
                 $channel_gain = $targetObj->
                   getAttribute($child,"GAIN");
+
+                #Channel Gain is reprsented in decimal format in the MRW
+                # multiply by 1000 so it is a valid attribute value
+                $channel_gain = $channel_gain * 1000;
+
                 $channel_offset = $targetObj->
                   getAttribute($child,"OFFSET");
+
+                #Channel Offset is reprsented in decimal format in the MRW
+                # multiply by 1000 so it is a valid attribute value
+                $channel_offset = $channel_offset * 1000;
+
+#Temporarily use ADC_CHANNEL_GROUND until GND defined in MRW
                 $channel_ground = $targetObj->
-                  getAttribute($child,"GND");
+                  getAttribute($child,"ADC_CHANNEL_GROUND");
             }
 
             $name=~s/\n//g;
@@ -2801,6 +2795,7 @@ sub postProcessApss {
             {
                 $sensor_id_str = sprintf("0x%02X",oct($sensor_id));
             }
+
             if ($channel ne "")
             {
                 $sensors[$channel] = $sensor_id_str;
@@ -2874,6 +2869,7 @@ sub postProcessApss {
                  "APSS_GPIO_PORT_PINS",join(',',@gpios));
 
     convertNegativeNumbers($targetObj,$systemTarget,"ADC_CHANNEL_OFFSETS",32);
+
 } # end sub postProcessApss
 
 
@@ -3369,52 +3365,52 @@ sub postProcessIpmiSensors {
     {
         if ($targetObj->getMrwType($child) eq "IPMI_SENSOR")
         {
-            my $entity_id=$targetObj->
-                 getAttribute($child,"IPMI_ENTITY_ID");
-            my $sensor_type=$targetObj->
-                 getAttribute($child,"IPMI_SENSOR_TYPE");
-            my $name_suffix=$targetObj->
-                 getAttribute($child,"IPMI_SENSOR_NAME_SUFFIX");
-            my $sensor_id=$targetObj->
-                 getAttribute($child,"IPMI_SENSOR_ID");
-            my $sensor_evt=$targetObj->
-                 getAttribute($child,"IPMI_SENSOR_READING_TYPE");
+            #RTC TODO Address with PLDM Implementation
+#            my $entity_id=$targetObj->
+#                 getAttribute($child,"IPMI_ENTITY_ID");
+#            my $sensor_type=$targetObj->
+#                 getAttribute($child,"IPMI_SENSOR_TYPE");
+#            my $name_suffix=$targetObj->
+#                 getAttribute($child,"IPMI_SENSOR_NAME_SUFFIX");
+#            my $sensor_id=$targetObj->
+#                 getAttribute($child,"IPMI_SENSOR_ID");
+#            my $sensor_evt=$targetObj->
+#                 getAttribute($child,"IPMI_SENSOR_READING_TYPE");
 
-
-            $name_suffix=~s/\n//g;
-            $name_suffix=~s/\s+//g;
-            $name_suffix=~s/\t+//g;
-            my $sensor_name=$name_suffix;
-            if ($name ne "")
-            {
-                $sensor_name=$name."_".$name_suffix;
-            }
-            my $attribute_name="";
-            my $s=sprintf("0x%02X%02X,0x%02X",
-                  oct($sensor_type),oct($entity_id),oct($sensor_id));
-            push(@sensors,$s);
-            my $sensor_id_str = "";
-            if ($sensor_id ne "")
-            {
-                $sensor_id_str = sprintf("0x%02X",oct($sensor_id));
-            }
-            my $str=sprintf(
-                " %30s | %10s |  0x%02X  | 0x%02X |    0x%02x   |" .
-                " %4s | %4d | %4d | %10s | %s\n",
-                $sensor_name,$name,oct($entity_id),oct($sensor_type),
-                oct($sensor_evt), $sensor_id_str,$instance,$fru_id,
-                $huid,$target);
-
-            # Check that the sensor id hasn't already been used.  Don't check
-            # blank sensor ids.
-            if (($sensor_id ne "") && (++$sensorIdsCnt{$sensor_id} >= 2)) {
-                print "ERROR: Duplicate IPMI_SENSOR_ID ($sensor_id_str)" .
-                      " found in MRW.  Sensor name is $sensor_name.\n";
-                print "$str";
-                $targetObj->myExit(3);
-            }
-
-            $targetObj->writeReport($str);
+#            $name_suffix=~s/\n//g;
+#            $name_suffix=~s/\s+//g;
+#            $name_suffix=~s/\t+//g;
+#            my $sensor_name=$name_suffix;
+#            if ($name ne "")
+#            {
+#                $sensor_name=$name."_".$name_suffix;
+#            }
+#            my $attribute_name="";
+#            my $s=sprintf("0x%02X%02X,0x%02X",
+#                  oct($sensor_type),oct($entity_id),oct($sensor_id));
+#            push(@sensors,$s);
+#            my $sensor_id_str = "";
+#            if ($sensor_id ne "")
+#            {
+#                $sensor_id_str = sprintf("0x%02X",oct($sensor_id));
+#            }
+#            my $str=sprintf(
+#                " %30s | %10s |  0x%02X  | 0x%02X |    0x%02x   |" .
+#                " %4s | %4d | %4d | %10s | %s\n",
+#                $sensor_name,$name,oct($entity_id),oct($sensor_type),
+#                oct($sensor_evt), $sensor_id_str,$instance,$fru_id,
+#                $huid,$target);
+#
+#            # Check that the sensor id hasn't already been used.  Don't check
+#            # blank sensor ids.
+#            if (($sensor_id ne "") && (++$sensorIdsCnt{$sensor_id} >= 2)) {
+#                print "ERROR: Duplicate IPMI_SENSOR_ID ($sensor_id_str)" .
+#                      " found in MRW.  Sensor name is $sensor_name.\n";
+#                print "$str";
+#                $targetObj->myExit(3);
+#            }
+#
+#            $targetObj->writeReport($str);
         }
     }
     for (my $i=@sensors;$i<16;$i++)
