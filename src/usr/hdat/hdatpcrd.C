@@ -80,6 +80,7 @@ const HdatKeywordInfo l_mvpdKeywords[] =
 *******************************************************************************/
 static errlHndl_t hdatSetPcrdHdrs(hdatSpPcrd_t *i_pcrd)
 {
+    HDAT_ENTER();
     errlHndl_t l_errlHndl = NULL;
 
     i_pcrd->hdatHdr.hdatStructId       = HDAT_HDIF_STRUCT_ID;
@@ -128,6 +129,7 @@ static errlHndl_t hdatSetPcrdHdrs(hdatSpPcrd_t *i_pcrd)
     i_pcrd->hdatPcrdIntData[HDAT_PCRD_DA_EEPROM_PART].hdatOffset = 0;
     i_pcrd->hdatPcrdIntData[HDAT_PCRD_DA_EEPROM_PART].hdatSize   = 0;
 
+  HDAT_EXIT();
   return l_errlHndl;
 }
 
@@ -137,6 +139,7 @@ static errlHndl_t hdatSetPcrdHdrs(hdatSpPcrd_t *i_pcrd)
 HdatPcrd::HdatPcrd(errlHndl_t &o_errlHndl, const hdatMsAddr_t &i_msAddr)
     : iv_numPcrdEntries(0), iv_spPcrdEntrySize(0), iv_spPcrd(NULL)
 {
+    HDAT_ENTER();
     // Allocate the CHIP INFO section also
     iv_numPcrdEntries = HDAT_NUM_P7_PCRD_ENTRIES;
     iv_spPcrdEntrySize = sizeof(hdatSpPcrd_t) + HDAT_FULL_MVPD_SIZE +
@@ -148,6 +151,7 @@ HdatPcrd::HdatPcrd(errlHndl_t &o_errlHndl, const hdatMsAddr_t &i_msAddr)
                + sizeof(hdatHDIFVersionedDataArray_t)
                + (sizeof(hdatSpiDevData_t) * HDAT_PCRD_MAX_SPI_DEV)
                );
+     HDAT_DBG("iv_spPcrdEntrySize for one pcrd=0x%x",iv_spPcrdEntrySize);
 
     // Allocate space for each CHIP -- will use max amount to start
     uint64_t l_base_addr = ((uint64_t) i_msAddr.hi << 32) | i_msAddr.lo;
@@ -166,6 +170,7 @@ HdatPcrd::HdatPcrd(errlHndl_t &o_errlHndl, const hdatMsAddr_t &i_msAddr)
 
     HDAT_DBG("Constructor iv_spPcrd addr 0x%016llX virtual addr 0x%016llX",
                             (uint64_t) this->iv_spPcrd, (uint64_t)l_virt_addr);
+    HDAT_EXIT();
 }
 
 /*******************************************************************************
@@ -331,6 +336,8 @@ errlHndl_t HdatPcrd::hdatLoadPcrd(uint32_t &o_size, uint32_t &o_count)
                                     l_pProcTarget->getAttr<ATTR_SLCA_INDEX>();
             this->iv_spPcrd->hdatFruId.hdatResourceId =
                                     l_pProcTarget->getAttr<ATTR_SLCA_RID>();
+            HDAT_DBG("iv_spPcrd->hdatFruId.hdatResourceId=0x%8X",
+                       iv_spPcrd->hdatFruId.hdatResourceId);
 
             if (HDAT_PROC_NOT_INSTALLED == (HDAT_PROC_STAT_BITS &
                     this->iv_spPcrd->hdatChipData.hdatPcrdStatusFlags))
@@ -800,11 +807,12 @@ errlHndl_t HdatPcrd::hdatLoadPcrd(uint32_t &o_size, uint32_t &o_count)
             // smaller than 128 bytes, then you may need to bump it up
             l_addr += l_pad;
             this->iv_spPcrd = reinterpret_cast<hdatSpPcrd_t *>(l_addr);
+            HDAT_DBG("at the end of for loop iv_spPcrd=0x%08X",this->iv_spPcrd);
         }
-        o_size = (reinterpret_cast<uint8_t *> (this->iv_spPcrd)
-                        - l_offset ) / index ;
+        o_size = (reinterpret_cast<uint8_t *> (this->iv_spPcrd) - l_offset );
         o_count = index;
     }while(0);
+    HDAT_DBG("number of pcrd entries=0x%x,size=0x%x",o_count,o_size);
 
     HDAT_EXIT();
     return l_errl;
@@ -842,6 +850,8 @@ errlHndl_t HdatPcrd::hdatSetProcessorInfo(
         }
         iv_spPcrd->hdatChipData.hdatPcrdProcChipId =
             i_pProcTarget->getAttr<TARGETING::ATTR_ORDINAL_ID>();
+        HDAT_DBG("hdatPcrdProcChipId=0x%8X",
+                 iv_spPcrd->hdatChipData.hdatPcrdProcChipId);    
 
         iv_spPcrd->hdatChipData.hdatPcrdStatusFlags =
             isFunctional(i_pProcTarget)? i_procstatus : HDAT_PROC_NOT_USABLE;
@@ -949,6 +959,8 @@ errlHndl_t HdatPcrd::hdatSetProcessorInfo(
 
         iv_spPcrd->hdatChipData.hdatPcrdProcessorFruId =
                             i_pProcTarget->getAttr<TARGETING::ATTR_FRU_ID>();
+        HDAT_DBG("pcrd: ProcessorFruId=0x%8X",
+                             iv_spPcrd->hdatChipData.hdatPcrdProcessorFruId);
 
         uint32_t l_eclevel = 0;
         uint32_t l_chipId = 0;
@@ -1021,7 +1033,6 @@ errlHndl_t HdatPcrd::hdatSetProcessorInfo(
         iv_spPcrd->hdatChipData.hdatPcrdStopLevelSupport =
             l_pSysTarget->getAttr<TARGETING::ATTR_SUPPORTED_STOP_STATES>();
 #endif
-
         iv_spPcrd->hdatChipData.hdatPcrdCheckstopAddr = HDAT_SW_CHKSTP_FIR_SCOM;
         iv_spPcrd->hdatChipData.hdatPcrdSpareBitNum   = HDAT_SW_CHKSTP_FIR_SCOM_BIT_POS;
 
@@ -1081,6 +1092,5 @@ errlHndl_t HdatPcrd::fetch_pnor_data( hdatPcrdPnor_t& o_pnorData)
     return l_err;
 
     //will be implemented once api is available
-    
 }
 } // namespace HDATPcrd

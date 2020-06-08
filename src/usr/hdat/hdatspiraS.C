@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -515,7 +515,7 @@ errlHndl_t HdatSpiraS::loadDataArea( const hdat5Tuple_t& i_spirasHostEntry,
             {
                 HDAT_DBG("calling IO HUB from spiras");
                 l_err = hdatLoadIoData(l_addrToPass,l_size,l_count);
-                HDAT_DBG("returned size=0x%x,count=%d from iohub",
+                HDAT_DBG("returned from IO HUB size=0x%x,count=%d from iohub",
                 l_size,l_count);
             }
                  break;
@@ -732,7 +732,5 @@ void HdatSpiraS::getSpiraSEntry(hdatSpiraSDataAreas i_dataArea,
 
     HDAT_EXIT();
 }
-
-
 
 }//end namespace

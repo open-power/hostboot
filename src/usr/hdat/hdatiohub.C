@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -90,13 +90,23 @@ const HdatKeywordInfo l_pvpdKeywordsP10[] =
 extern trace_desc_t *g_trac_hdat;
 
 const uint32_t HDAT_MULTIPLE = 16;
+//@TODO:RTC 255790 HDAT: SCM verification and support in BMC
+//so that the code works for SCM and DCM seamlessly
 const uint32_t PROC0_NUM_SLOT_TABLE_AREAS = 4;
 const uint32_t PROC1_NUM_SLOT_TABLE_AREAS = 5;
-const uint32_t PROC0_NUM_SLOT_ENTRY_INFO  = 2;
-const uint32_t PROC1_NUM_SLOT_ENTRY_INFO  = 3;
-const uint32_t MAX_NUM_OF_PROCS           = 2;
-const uint32_t MAX_NUM_OF_SLOT_TABLE_AREAS = (PROC0_NUM_SLOT_TABLE_AREAS > PROC1_NUM_SLOT_TABLE_AREAS) ? PROC0_NUM_SLOT_TABLE_AREAS : PROC1_NUM_SLOT_TABLE_AREAS;
-const uint32_t MAX_NUM_OF_SLOT_ENTRY_INFO  = (PROC0_NUM_SLOT_ENTRY_INFO > PROC1_NUM_SLOT_ENTRY_INFO) ? PROC0_NUM_SLOT_ENTRY_INFO : PROC1_NUM_SLOT_ENTRY_INFO;
+const uint32_t PROC2_NUM_SLOT_TABLE_AREAS = 2;
+const uint32_t PROC3_NUM_SLOT_TABLE_AREAS = 3;
+const uint32_t PROC0_NUM_SLOT_ENTRY_INFO  = 4;
+const uint32_t PROC1_NUM_SLOT_ENTRY_INFO  = 5;
+const uint32_t PROC2_NUM_SLOT_ENTRY_INFO  = 2;
+const uint32_t PROC3_NUM_SLOT_ENTRY_INFO  = 3;
+//const uint32_t MAX_NUM_OF_PROCS           = 2;
+//const uint32_t MAX_NUM_OF_SLOT_TABLE_AREAS =
+  //             (PROC0_NUM_SLOT_TABLE_AREAS > PROC1_NUM_SLOT_TABLE_AREAS) ?
+    //           PROC0_NUM_SLOT_TABLE_AREAS : PROC1_NUM_SLOT_TABLE_AREAS;
+//const uint32_t MAX_NUM_OF_SLOT_ENTRY_INFO  =
+  //            (PROC0_NUM_SLOT_ENTRY_INFO > PROC1_NUM_SLOT_ENTRY_INFO) ?
+    //          PROC0_NUM_SLOT_ENTRY_INFO : PROC1_NUM_SLOT_ENTRY_INFO;
 
 //each PHB lane size
 const uint32_t NUM_OF_LANES_PER_PHB = 
@@ -108,99 +118,44 @@ static_assert( NUM_OF_LANES_PER_PHB ==
 
 // HARD codes of slot map area and entry structs
 // TODO:SW398487 : Need to replace this with PNOR : HDAT partition consumption.
-// The below hardcoding is for temporary purpose but still valid values from mrw.
+// The below hardcoding is for temporary purpose but still valid values from mrw
 // hdatSlotMapAreas got changed to reflect P10 Rainier model values
-/*
-hdatSlotMapArea_t   hdatSlotMapAreas[MAX_NUM_OF_PROCS][MAX_NUM_OF_SLOT_TABLE_AREAS] = {
+hdatSlotMapArea_t hdatSlotMapAreas[PROC0_NUM_SLOT_TABLE_AREAS + PROC1_NUM_SLOT_TABLE_AREAS + PROC2_NUM_SLOT_TABLE_AREAS + PROC3_NUM_SLOT_TABLE_AREAS]=
 {
-
-{ 1,0,0,0,0,0,0xFFFF,0,0,3,1,0,0,0,0,0,0,"SLOT3" },
-{ 2,0,1,0,1,0,0xFF00,0x1111,0,0,0,0,0,0,0,0,0,0},
-{ 3,2,0,3,0,0,0,0,0,0,0,0,0,0x104C,0x8241,0,0,0},
-{ 4,0,2,0,0,0,0x00FF,0,0,0,0,0,0,0,0,0,0,0},
-{ 5,4,0,3,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-{ 6,0,3,0,0,0,0xFF00,0,0,1,1,0,0,0,0,0,0,"SLOT1" },
-{ 7,0,4,0,0,0,0x00F0,0,0,0,0,0,0,0,0,0,0,0},
-{ 8,7,4,1,0,0,0,0,0,0,2,0,0,0x10B5,0x8725,0x10B5,0x8725,0},
-{ 10,8,4,2,0,0,0,0,0,0,0,1,10,0x10B5,0x8725,0x10B5,0x8725,0 },
-{ 11,10,4,3,0,0,0,0,0,0,0,0,0,0x10DE,0x1DB1,0x10DE,0x1DB1,"GPU0" },
-{ 12,8,4,2,0,0,0,0,0,0,0,1,11,0x10B5,0x8725,0x10B5,0x8725,0 },
-{ 13,12,4,3,0,0,0,0,0,0,0,0,0,0x10DE,0x1DB1,0x10DE,0x1DB1,"GPU1"},
-{ 14,8,4,2,0,0,0,0,0,0,0,1,12,0x10B5,0x8725,0x10B5,0x8725,0},
-{ 15,14,4,3,0,0,0,0,0,0,0,0,0,0x10DE,0x1DB1,0x10DE,0x1DB1,"GPU2"},
-{ 16,0,5,0,0,0,0x000F,0,0,0,0,0,0,0,0,0,0,0},
-{ 17,16,0,3,0,0,0,0,0,0,0,0,0,0,0,0,0,0}
-
-
-},
-{
-{ 18,0,0,0,0,0,0xFFFF,0,0,2,1,0,0,0,0,0,0,"SLOT2" },
-{ 19,0,3,0,0,0,0xFF00,0,0,1,1,0,0,0,0,0,0,"SLOT1" },
-{ 20,0,4,0,0,0,0x00F0,0,0,0,1,0,0,0,0,0,0,"SLOT0" },
-{ 21,0,5,0,0,0,0x000F,0,0,0,0,0,0,0,0,0,0,0},
-{ 22,21,5,1,0,0,0,0,0,0,2,1,1,0x10B5,0x8725,0x10B5,0x8725,0},
-{ 23,22,5,2,0,0,0,0,0,0,0,0,4,0x10B5,0x8725,0x10B5,0x8725,0 },
-{ 24,23,5,3,0,0,0,0,0,0,0,0,0,0x10DE,0x1DB1,0x10DE,0x1DB1,"GPU3" },
-{ 25,22,5,2,0,0,0,0,0,0,0,0,5,0x10B5,0x8725,0x10B5,0x8725,0 },
-{ 26,25,5,3,0,0,0,0,0,0,0,0,0,0x10DE,0x1DB1,0x10DE,0x1DB1,"GPU4" },
-{ 27,22,5,2,0,0,0,0,0,0,0,1,13,0x10B5,0x8725,0x10B5,0x8725,0 },
-{ 28,27,5,3,0,0,0,0,0,0,0,0,0,0x10DE,0x1DB1,0x10DE,0x1DB1,"GPU5" }
-},
-
-//Rainier Hub2 and Hub3 values:
-{
-
-{ 10,0,0,0,0,0,0xFFFF,0,0,0,1,0,0,0,0,0,0,0,"C11" },
-{ 11,0,3,0,0,0,0xFFFF,0,0,0,1,0,0,0,0,0,0,0,"C10" },
-
-},
-
-{
-
-{ 12,0,0,0,0,0,0xFF00,0,0,0,1,0,0,0,0,0,0,0,"C9" },
-{ 13,0,1,0,0,0,0x00FF,0,0,0,1,0,0,0,0,0,0,0,"C8" },
-{ 14,0,3,0,0,0,0xFFFF,0,0,0,1,0,0,0,0,0,0,0,"C7" },
-
-},
-
-};
-*/
-hdatSlotMapArea_t
-    hdatSlotMapAreas[MAX_NUM_OF_PROCS][MAX_NUM_OF_SLOT_TABLE_AREAS] =
-{
-
-{
-
 { 1,0,0,0,0,0,0xFF00,0,0,0,1,0,0,0,0,0,0,0,"C11" },
 { 2,0,1,0,0,0,0x00FF,0,0,0,1,0,0,0,0,0,0,0,"002" },
 { 3,0,2,0,0,0,0x000F,0,0,0,1,0,0,0,0,0,0,0,"001" },
 { 4,0,3,0,0,0,0xFFFF,0,0,0,1,0,0,0,0,0,0,0,"C10" },
-
-},
-
-{
-
 { 5,0,0,0,0,0,0xFF00,0,0,0,1,0,0,0,0,0,0,0,"C9" },
 { 6,0,1,0,0,0,0x00FF,0,0,0,1,0,0,0,0,0,0,0,"C8" },
 { 7,0,3,0,0,0,0xFF00,0,0,0,1,0,0,0,0,0,0,0,"C7" },
 { 8,0,4,0,0,0,0x00F0,0,0,0,1,0,0,0,0,0,0,0,"004" },
 { 9,0,5,0,0,0,0x000F,0,0,0,1,0,0,0,0,0,0,0,"003" },
-
-},
-
+{ 10,0,0,0,0,0,0xFFFF,0,0,0,1,0,0,0,0,0,0,0,"C4" },
+{ 11,0,3,0,0,0,0xFFFF,0,0,0,1,0,0,0,0,0,0,0,"C3" },
+{ 12,0,0,0,0,0,0xFF00,0,0,0,1,0,0,0,0,0,0,0,"C2" },
+{ 13,0,1,0,0,0,0x00FF,0,0,0,1,0,0,0,0,0,0,0,"C1" },
+{ 14,0,3,0,0,0,0xFFFF,0,0,0,1,0,0,0,0,0,0,0,"C0" }
 };
 
-hdatSlotEntryInfo_t hdatSlotMapEntries[MAX_NUM_OF_PROCS][MAX_NUM_OF_SLOT_ENTRY_INFO] = {
-{
-{ 1,0,0,0,0,0,0,0,0,0,0,0,0x2,0,0,0,0,0,0 },
-{ 6,0,0,0,0,0,0,0,0,0,0,0,0x2,0,0,0,0,0,0 }
-},
-{
-{ 18,0,0,0,0,0,0,0,0,0,0,0,0x2,0,0,0,0,0,0 },
-{ 19,0,0,0,0,0,0,0,0,0,0,0,0x2,0,0,0,0,0,0 },
-{ 20,0,0,0,0,0,0,0,0,0,0,0,0x2,0,0,0,0,0,0 }
-}
+
+hdatSlotEntryInfo_t hdatSlotMapEntries[PROC0_NUM_SLOT_ENTRY_INFO + PROC1_NUM_SLOT_ENTRY_INFO + PROC2_NUM_SLOT_ENTRY_INFO + PROC3_NUM_SLOT_ENTRY_INFO] = {
+{ 1,0,5,2040,256,2,0,0,0,0,0,25,46,4072,0,0,0,0,0,0 },
+{ 2,0,0,128, 0,  2,0,0,0,0,0,25,0, 32,  0,0,0,0,0,0 },
+{ 3,0,0,64,  0,  2,0,0,0,0,0,25,0, 32,  0,0,0,0,0,0 },
+{ 4,0,1,2040,256,2,0,0,0,0,0,25,46,4072,0,0,0,0,0,0 },
+{ 5,0,9,2040,256,2,0,0,0,0,0,25,46,4072,0,0,0,0,0,0 },
+{ 6,0,7,2040,256,2,0,0,0,0,0,25,46,4072,0,0,0,0,0,0 },
+{ 7,0,6,2040,256,2,0,0,0,0,0,25,46,4072,0,0,0,0,0,0 },
+{ 8,0,0,128, 0,  2,0,0,0,0,0,25,0, 32,  0,0,0,0,0,0 },
+{ 9,0,0,128, 0,  2,0,0,0,0,0,25,0, 32,  0,0,0,0,0,0 },
+{ 10,0,4,2040,256,2,0,0,0,0,0,25,46,4072,0,0,0,0,0 },
+{ 11,0,3,2040,256,2,0,0,0,0,0,25,46,4072,0,0,0,0,0 },
+{ 12,0,10,2040,256,2,0,0,0,0,0,25,46,4072,0,0,0,0,0 },
+{ 13,0,8, 2040,256,2,0,0,0,0,0,25,46,4072,0,0,0,0,0 },
+{ 14,0,2, 2040,256,2,0,0,0,0,0,25,46,4072,0,0,0,0,0 }
 };
+
 
 /*******************************************************************************
  * IO HUB constructor
@@ -298,7 +253,8 @@ HdatIoHubFru::~HdatIoHubFru()
 uint8_t * HdatIoHubFru::setIOHub(uint8_t * io_virt_addr,
                                  uint32_t& o_size)
 {
-    HDAT_DBG("virtual address=0x%016llX",
+    HDAT_ENTER();
+    HDAT_DBG("entered setIOHub with virtual address=0x%016llX",
               (uint64_t)io_virt_addr);
 
     uint8_t *l_temp = NULL, *l_ioMarker = NULL;
@@ -362,6 +318,8 @@ uint8_t * HdatIoHubFru::setIOHub(uint8_t * io_virt_addr,
 
     HDAT_DBG("writing io hub array from address=0x%016llX",
               (uint64_t)l_hdatHubEntry);
+    HDAT_DBG("number of hub array entries: 0x%x",
+                                             this->iv_hubArrayHdr.hdatArrayCnt);
 
     for ( uint8_t l_cnt = 0; l_cnt < this->iv_hubArrayHdr.hdatArrayCnt; l_cnt++)
     {
@@ -413,6 +371,7 @@ uint8_t * HdatIoHubFru::setIOHub(uint8_t * io_virt_addr,
     //next to write daughter card values
     //this should go to offset 820 usually
     uint32_t l_chldOffset = this->getChildOffset();
+    HDAT_DBG("l_chldOffset=0x%x",l_chldOffset);
     l_ioMarker += l_chldOffset;
 
     io_virt_addr = reinterpret_cast<uint8_t *>(l_ioMarker);
@@ -429,6 +388,7 @@ uint8_t * HdatIoHubFru::setIOHub(uint8_t * io_virt_addr,
              HDAT_DBG("writing daughter from address 0x%016llX",
                        (uint64_t)io_virt_addr);
              io_virt_addr = l_vpdObj->setVpd( io_virt_addr);
+             HDAT_ADD_PAD(io_virt_addr);
              l_daughterCount++;
 
              if (l_daughterCount < iv_actDaughterCnt)
@@ -441,25 +401,34 @@ uint8_t * HdatIoHubFru::setIOHub(uint8_t * io_virt_addr,
      else
      {
          HDAT_DBG("no daughter information to write");
+         HDAT_ADD_PAD(io_virt_addr);
      }
-    
-     HDAT_ADD_PAD(io_virt_addr);
+    HDAT_DBG("completed writing daughter card at address 0x%016llX",
+               (uint64_t)io_virt_addr);
 
      if( iv_slotMapInfoObjs.size() > 0 )
      {
+         HDAT_DBG("writing iv_slotMapInfoObjs number=%d",
+                                         iv_slotMapInfoObjs.size());
         for( auto &l_slotMapInfoEle : iv_slotMapInfoObjs)
         {
             io_virt_addr = l_slotMapInfoEle.setHdif(io_virt_addr);
-            memcpy(io_virt_addr, &iv_hdatSlotMapAreaArrayHdr, sizeof(hdatHDIFDataArray_t));
+            memcpy(io_virt_addr, &iv_hdatSlotMapAreaArrayHdr,
+                      sizeof(hdatHDIFDataArray_t));
             io_virt_addr += sizeof(hdatHDIFDataArray_t);
-            memcpy(io_virt_addr, iv_hdatSlotMapAreaPtr, sizeof(hdatSlotMapArea_t) * (iv_hdatSlotMapAreaArrayHdr.hdatArrayCnt));
-            io_virt_addr += sizeof(hdatSlotMapArea_t) * (iv_hdatSlotMapAreaArrayHdr.hdatArrayCnt);
-
-            HDAT_ADD_PAD(io_virt_addr);
-            memcpy(io_virt_addr, &iv_hdatSlotMapEntryArrayHdr, sizeof(hdatHDIFDataArray_t));
+            memcpy(io_virt_addr, iv_hdatSlotMapAreaPtr,
+                   sizeof(hdatSlotMapArea_t) *
+                   (iv_hdatSlotMapAreaArrayHdr.hdatArrayCnt));
+            io_virt_addr += sizeof(hdatSlotMapArea_t) *
+                     (iv_hdatSlotMapAreaArrayHdr.hdatArrayCnt);
+            memcpy(io_virt_addr, &iv_hdatSlotMapEntryArrayHdr,
+                   sizeof(hdatHDIFDataArray_t));
             io_virt_addr += sizeof(hdatHDIFDataArray_t);
-            memcpy(io_virt_addr, iv_hdatSlotMapEntryInfoPtr, sizeof(hdatSlotEntryInfo_t) * (iv_hdatSlotMapEntryArrayHdr.hdatArrayCnt));
-            io_virt_addr += sizeof(hdatSlotEntryInfo_t) * (iv_hdatSlotMapEntryArrayHdr.hdatArrayCnt);
+            memcpy(io_virt_addr, iv_hdatSlotMapEntryInfoPtr,
+                   sizeof(hdatSlotEntryInfo_t) *
+                        (iv_hdatSlotMapEntryArrayHdr.hdatArrayCnt));
+            io_virt_addr += sizeof(hdatSlotEntryInfo_t) *
+                          (iv_hdatSlotMapEntryArrayHdr.hdatArrayCnt);
         
             HDAT_ADD_PAD(io_virt_addr);
         }
@@ -467,7 +436,7 @@ uint8_t * HdatIoHubFru::setIOHub(uint8_t * io_virt_addr,
 
     HDAT_DBG("exiting with virtual address=0x%016llX",
               (uint64_t)io_virt_addr);
-    HDAT_ADD_PAD(io_virt_addr);
+    HDAT_EXIT();
     return io_virt_addr;
 }
 
@@ -495,7 +464,6 @@ errlHndl_t HdatIoHubFru::hdatGetDaughterInfoFromTarget(
 
     HDAT_ENTER();
     errlHndl_t l_errl = NULL;
-    o_DaughterRids.clear();
     uint32_t  dummy_slca_rid = 0;
     do
     {
@@ -538,7 +506,6 @@ errlHndl_t HdatIoHubFru::hdatGetDaughterInfoFromTarget(
             break;
         }
 
-        o_targetList.clear();
         getParentAffinityTargets(o_targetList,i_target,
                  TARGETING::CLASS_ENC,TARGETING::TYPE_NODE);
         if(o_targetList.empty())
@@ -568,7 +535,7 @@ errlHndl_t HdatIoHubFru::hdatGetDaughterInfoFromTarget(
         //o_DaughterRids.push_back(l_pNodeTarget->getAttr<ATTR_SLCA_RID>());
         o_DaughterRids.push_back(dummy_slca_rid);
         dummy_slca_rid++;
-
+        HDAT_DBG("o_targetList.size()=%d",o_targetList.size()); 
 
         //@TODO: RTC 148660 add the loop to fetch the pci slot and card
     }while(0);
@@ -579,11 +546,11 @@ errlHndl_t HdatIoHubFru::hdatGetDaughterInfoFromTarget(
 
 }//end hdatGetDaughterInfoFromTarget
 
+
 /******************************************************************************/
 // bldDaughterStruct
 /******************************************************************************/
-errlHndl_t HdatIoHubFru::bldDaughterStruct(const TARGETING::Target * i_target,
-                                           uint32_t i_index)
+errlHndl_t HdatIoHubFru::bldDaughterStruct(uint32_t i_hubArrayNum)
 {
     HDAT_ENTER();
     errlHndl_t l_errlHndl = NULL;
@@ -593,15 +560,48 @@ errlHndl_t HdatIoHubFru::bldDaughterStruct(const TARGETING::Target * i_target,
     TARGETING::TargetHandleList l_targetList;
     HdatVpd   *l_daughter = NULL;
 
-    HDAT_ENTER();
+    HDAT_DBG("entered bldDaughterStruct with num of hub array=%d",i_hubArrayNum);
 
-    l_errlHndl = hdatGetDaughterInfoFromTarget(i_target,
+    for(uint32_t i=0; i<i_hubArrayNum; i++)
+    {
+        uint32_t procOrdId= this->iv_hubArray[i].hdatIoHubId;
+        TARGETING::Target * i_target = nullptr;
+        TARGETING::PredicateCTM l_ctm1(TARGETING::CLASS_CHIP,
+                                       TARGETING::TYPE_PROC);
+        TARGETING::PredicateHwas l_predHwas;
+        l_predHwas.present(true);
+        TARGETING::PredicatePostfixExpr l_presentProc;
+        l_presentProc.push(&l_ctm1).push(&l_predHwas).And();
+        TARGETING::TargetRangeFilter l_proc(
+                   TARGETING::targetService().begin(),
+                   TARGETING::targetService().end(),
+                   &l_presentProc);
+        for (;l_proc;++l_proc)
+        {
+            i_target = *(l_proc);
+            uint32_t l_procOrdId = i_target->getAttr<TARGETING::ATTR_ORDINAL_ID>();
+            if(l_procOrdId == procOrdId)
+            {
+                break;
+            }
+            else
+            {
+                i_target = nullptr;
+            }
+        }
+
+        l_errlHndl = hdatGetDaughterInfoFromTarget(i_target,
                                                l_targetList,l_etRidArray);
+        if(l_errlHndl)
+        {
+            return l_errlHndl;
+        }
+    }
 
     if (NULL == l_errlHndl)
     {
         l_InstalledEtRidCnt = l_etRidArray.size();
-        HDAT_DBG("daughter count %d",l_InstalledEtRidCnt);
+        HDAT_DBG("daughter count l_InstalledEtRidCnt %d",l_InstalledEtRidCnt);
         iv_maxDaughters = l_InstalledEtRidCnt;
 
         iv_daughterPtrs = reinterpret_cast<HdatVpd **>(calloc(
@@ -611,10 +611,10 @@ errlHndl_t HdatIoHubFru::bldDaughterStruct(const TARGETING::Target * i_target,
         {
             for (uint32_t i=0; i<l_InstalledEtRidCnt; i++)
             {
-                HDAT_DBG("adding daughter %d",
-                         l_etRidArray[i]);
+                HDAT_DBG("adding daughter %d for rid=%d and target=0x%x",
+                         i,l_etRidArray[i],l_targetList[i]);
                 l_errlHndl = this->addDaughterCard(l_etRidArray[i],
-                                                   l_targetList[i], i_index);
+                                                   l_targetList[i], i);
 
                 if ( NULL != l_errlHndl )
                 {
@@ -653,8 +653,8 @@ errlHndl_t HdatIoHubFru::bldDaughterStruct(const TARGETING::Target * i_target,
      {
          for(l_loopCnt = 0;l_loopCnt < iv_actDaughterCnt;l_loopCnt++)
          {
-             /*l_daughter = *(HdatVpd **)((char *)iv_daughterPtrs +
-                                        l_loopCnt * sizeof(HdatVpd *));*/
+             HDAT_DBG("iv_actDaughterCnt=%d and l_loopCnt=%d",
+                                    iv_actDaughterCnt,l_loopCnt);
 
              l_daughter = *(reinterpret_cast<HdatVpd **>
                           (reinterpret_cast<char *>(iv_daughterPtrs) +
@@ -706,7 +706,7 @@ errlHndl_t HdatIoHubFru::addDaughterCard(uint32_t i_resourceId,
 
     l_vpdObj = NULL;
     l_vpdType = i_resourceId >> 8;
-    HDAT_DBG("vpd type= %x",l_vpdType);
+    HDAT_DBG("vpd type= %x, RID=%d,i_index=%d",l_vpdType,i_resourceId,i_index);
 
     // Ensure we are not trying to add more daughter cards than what we were
     // told to allow for on the constructor
@@ -750,7 +750,7 @@ errlHndl_t HdatIoHubFru::addDaughterCard(uint32_t i_resourceId,
             //@TODO RTC 216059 hostboot to read BP vpd via PLDM
             //l_vpdType can not be compared since there is no valid rid
             //for BP
-            HDAT_DBG("constructing BP vpd for daughter card");
+            HDAT_DBG("else constructing BP vpd for daughter card");
             l_vpdObj = new HdatVpd(l_errlHndl, i_resourceId,i_target,
                                       HDAT_KID_STRUCT_NAME,i_index,BP,
                                       pvpdDataP10,0,l_pvpdKeywordsP10);//values are not used
@@ -792,7 +792,11 @@ errlHndl_t HdatIoHubFru::addDaughterCard(uint32_t i_resourceId,
 
 
 
-errlHndl_t HdatIoHubFru::bldSlotMapInfoStruct(uint32_t i_numProc)
+//@TODO:RTC Story 255790 : HDAT: SCM verification and support in BMC
+//make change to correctly know about SCM or DCM architecture
+//decide about i_dcm variable
+errlHndl_t HdatIoHubFru::bldSlotMapInfoStruct(/*uint32_t i_numProc,*/int i_iohubNum,
+                                              bool i_dcm)
 {
 
     errlHndl_t l_errlHndl = NULL;
@@ -815,15 +819,14 @@ errlHndl_t HdatIoHubFru::bldSlotMapInfoStruct(uint32_t i_numProc)
                                            HDAT_SLOTMAP_INFO_VER);
         if(l_errlHndl == NULL)
         {
-                                    
-            l_errlHndl = hdatGetSlotMapTableAreas(i_numProc);
+            l_errlHndl = hdatGetSlotMapTableAreas(/*i_numProc,*/i_iohubNum,i_dcm);
             if(l_errlHndl != NULL)
             {
                 HDAT_ERR(" Slot Map Table Areas population failed");
                 break;
             }
         
-            l_errlHndl = hdatGetSlotMapEntryInfos(i_numProc);
+            l_errlHndl = hdatGetSlotMapEntryInfos(/*i_numProc,*/i_iohubNum,i_dcm);
             if(l_errlHndl != NULL)
             {
                 HDAT_ERR(" Slot Map Entry Infos population failed");
@@ -848,27 +851,143 @@ errlHndl_t HdatIoHubFru::bldSlotMapInfoStruct(uint32_t i_numProc)
 
 
 
-errlHndl_t HdatIoHubFru::hdatGetSlotMapTableAreas(uint32_t i_numProc)
+errlHndl_t HdatIoHubFru::hdatGetSlotMapTableAreas(/*uint32_t i_numProc,*/
+                                                  int i_iohubNum,bool i_dcm)
 {
     HDAT_ENTER();
     errlHndl_t l_errlHndl = NULL;
-    iv_hdatSlotMapAreaArrayHdr = { sizeof(hdatHDIFDataArray_t),
-                                   (i_numProc == 0)? PROC0_NUM_SLOT_TABLE_AREAS:PROC1_NUM_SLOT_TABLE_AREAS,
-                                   sizeof(hdatSlotMapArea_t),
-                                   sizeof(hdatSlotMapArea_t) };
-    memcpy(iv_hdatSlotMapAreaPtr, hdatSlotMapAreas[i_numProc] , sizeof(hdatSlotMapArea_t)*iv_hdatSlotMapAreaArrayHdr.hdatArrayCnt);
+    if (!i_dcm)
+    {
+        uint32_t arrayCount = 0;
+        auto startIndex = 0;
+        switch(i_iohubNum)
+        {
+            case 0: arrayCount = PROC0_NUM_SLOT_TABLE_AREAS;
+                    startIndex = 0;
+                    break;
+            case 1: arrayCount = PROC1_NUM_SLOT_TABLE_AREAS;
+                    startIndex = PROC0_NUM_SLOT_TABLE_AREAS;
+                    break;
+            case 2: arrayCount = PROC2_NUM_SLOT_TABLE_AREAS;
+                    startIndex = PROC0_NUM_SLOT_TABLE_AREAS +
+                                 PROC1_NUM_SLOT_TABLE_AREAS;
+                    break;
+            case 3: arrayCount = PROC3_NUM_SLOT_TABLE_AREAS;
+                    startIndex = PROC0_NUM_SLOT_TABLE_AREAS +
+                                 PROC1_NUM_SLOT_TABLE_AREAS +
+                                 PROC2_NUM_SLOT_TABLE_AREAS; 
+                    break;
+        }
+        iv_hdatSlotMapAreaArrayHdr = { sizeof(hdatHDIFDataArray_t),
+                          arrayCount,
+                          sizeof(hdatSlotMapArea_t),
+                          sizeof(hdatSlotMapArea_t) };
+        memcpy(iv_hdatSlotMapAreaPtr, (hdatSlotMapAreas+startIndex) , 
+           sizeof(hdatSlotMapArea_t)*iv_hdatSlotMapAreaArrayHdr.hdatArrayCnt);
+    }
+    else
+    {
+        uint32_t arrayCount = 0;
+        auto startIndex = 0;
+        if(i_iohubNum == 0)
+        {
+            arrayCount = PROC0_NUM_SLOT_TABLE_AREAS + PROC1_NUM_SLOT_TABLE_AREAS;
+            startIndex = 0;
+        }
+        else if(i_iohubNum == 1)
+        {
+            arrayCount = PROC2_NUM_SLOT_TABLE_AREAS + PROC3_NUM_SLOT_TABLE_AREAS;
+            startIndex = PROC0_NUM_SLOT_TABLE_AREAS + PROC1_NUM_SLOT_TABLE_AREAS;
+        }
+
+        iv_hdatSlotMapAreaArrayHdr = { sizeof(hdatHDIFDataArray_t), 
+           arrayCount,
+           sizeof(hdatSlotMapArea_t), sizeof(hdatSlotMapArea_t) };
+        memcpy(iv_hdatSlotMapAreaPtr, (hdatSlotMapAreas + startIndex) , 
+           sizeof(hdatSlotMapArea_t)*iv_hdatSlotMapAreaArrayHdr.hdatArrayCnt);
+        auto toPrintSlotMap= 
+                 reinterpret_cast<hdatSlotMapArea_t *>(iv_hdatSlotMapAreaPtr);
+        for(size_t i=0; i<iv_hdatSlotMapAreaArrayHdr.hdatArrayCnt;i++)
+        {
+            HDAT_DBG("printing slot map object %i",i);
+            HDAT_DBG("hdatEntryId=0x%x",toPrintSlotMap->hdatEntryId);
+            HDAT_DBG("hdatLaneMask=0x%x",toPrintSlotMap->hdatLaneMask);
+            HDAT_DBG("hdatSlotName=%s",toPrintSlotMap->hdatSlotName);
+            toPrintSlotMap++;
+        }
+    }
     HDAT_EXIT();
     return l_errlHndl;
 }
 
-errlHndl_t HdatIoHubFru::hdatGetSlotMapEntryInfos(uint32_t i_numProc)
+errlHndl_t HdatIoHubFru::hdatGetSlotMapEntryInfos(/*uint32_t i_numProc,*/
+                                                  int i_iohubNum, 
+                                                  bool i_dcm)
 {
     errlHndl_t l_errlHndl = NULL;
-    iv_hdatSlotMapEntryArrayHdr = { sizeof(hdatHDIFDataArray_t),
-                                    (i_numProc == 0)?PROC0_NUM_SLOT_ENTRY_INFO:PROC1_NUM_SLOT_ENTRY_INFO ,
-                                    sizeof(hdatSlotEntryInfo_t),
-                                    sizeof(hdatSlotEntryInfo_t) };
-    memcpy(iv_hdatSlotMapEntryInfoPtr, hdatSlotMapEntries[i_numProc], sizeof(hdatSlotEntryInfo_t)*iv_hdatSlotMapEntryArrayHdr.hdatArrayCnt);
+    if (!i_dcm)
+    {
+        uint32_t arrayCount = 0;
+        auto startIndex = 0;
+        switch(i_iohubNum)
+        {
+            case 0:
+            {
+                arrayCount =PROC0_NUM_SLOT_ENTRY_INFO;
+                startIndex = 0;
+            }
+            break;
+            case 1:
+            {
+                arrayCount = PROC1_NUM_SLOT_ENTRY_INFO;
+                startIndex = PROC0_NUM_SLOT_ENTRY_INFO;
+            }
+            break;
+            case 2:
+            {
+                arrayCount = PROC2_NUM_SLOT_ENTRY_INFO;
+                startIndex = PROC0_NUM_SLOT_ENTRY_INFO +
+                             PROC1_NUM_SLOT_ENTRY_INFO;
+            }
+            break;
+            case 3:
+            {
+                arrayCount = PROC3_NUM_SLOT_ENTRY_INFO;
+                startIndex = PROC0_NUM_SLOT_ENTRY_INFO +
+                             PROC1_NUM_SLOT_ENTRY_INFO +
+                             PROC2_NUM_SLOT_ENTRY_INFO;
+            }
+            break;
+        }
+
+        iv_hdatSlotMapEntryArrayHdr = { sizeof(hdatHDIFDataArray_t),
+                            arrayCount,
+                            sizeof(hdatSlotEntryInfo_t),
+                            sizeof(hdatSlotEntryInfo_t) };
+        memcpy(iv_hdatSlotMapEntryInfoPtr, (hdatSlotMapEntries+startIndex), 
+          sizeof(hdatSlotEntryInfo_t)*iv_hdatSlotMapEntryArrayHdr.hdatArrayCnt);
+    }
+    else
+    {
+        uint32_t arrayCount = 0;
+        auto startIndex = 0;
+        if(i_iohubNum == 0)
+        {
+            arrayCount = PROC0_NUM_SLOT_ENTRY_INFO + PROC1_NUM_SLOT_ENTRY_INFO;
+            startIndex = 0;
+        }
+        else if(i_iohubNum == 1)
+        {
+            arrayCount = PROC2_NUM_SLOT_ENTRY_INFO + PROC3_NUM_SLOT_ENTRY_INFO;
+            startIndex = PROC0_NUM_SLOT_ENTRY_INFO + PROC1_NUM_SLOT_ENTRY_INFO;
+        }
+        iv_hdatSlotMapEntryArrayHdr = { sizeof(hdatHDIFDataArray_t), 
+                          arrayCount,
+                          sizeof(hdatSlotEntryInfo_t), 
+                          sizeof(hdatSlotEntryInfo_t) };
+        memcpy(iv_hdatSlotMapEntryInfoPtr, (hdatSlotMapEntries + startIndex), 
+          sizeof(hdatSlotEntryInfo_t)*iv_hdatSlotMapEntryArrayHdr.hdatArrayCnt);
+    }
     return l_errlHndl;
 }   
 
@@ -887,7 +1006,6 @@ errlHndl_t hdatLoadIoData(const hdatMsAddr_t &i_msAddr,
     errlHndl_t l_err = NULL;
     uint32_t l_size = 0;
     uint64_t l_totKwdSize = 0 , l_totalSlotMapSize = 0;
-    IO_MAP l_iomap;
 
     o_size = 0;
     o_count = 0;
@@ -908,6 +1026,9 @@ errlHndl_t hdatLoadIoData(const hdatMsAddr_t &i_msAddr,
                    &l_presentProc);
 
         uint32_t l_numProcs = 0; //number of io entries
+        uint32_t l_procFruId{};
+        uint32_t l_prevFruId = 0xFFFF;
+        std::vector<HdatIoHubFru *>hdatIoHubFrus;
         for (;l_proc;++l_proc,l_numProcs++)  //so index will be same as l_proc
         {
             HDAT_DBG("for loop starting for index=%d",l_numProcs);
@@ -919,18 +1040,10 @@ errlHndl_t hdatLoadIoData(const hdatMsAddr_t &i_msAddr,
 
             l_rid = l_pProcTarget->getAttr<ATTR_SLCA_RID>();
             l_slcaIdx = l_pProcTarget->getAttr<ATTR_SLCA_INDEX>();
-
-            HDAT_DBG("got RID value as %d",l_rid);
+            l_procFruId = l_pProcTarget->getAttr<ATTR_FRU_ID>();
 
             uint32_t l_procOrdId =
                      l_pProcTarget->getAttr<TARGETING::ATTR_ORDINAL_ID>();
-            HDAT_DBG("got ordinal id as %d",l_procOrdId);
-
-
-            TARGETING::PredicateCTM l_pciPredicate(TARGETING::CLASS_UNIT,
-                                                   TARGETING::TYPE_PCI);
-            TARGETING::TargetHandleList l_pciList;
-
 
             //Add support for finding the card type
             //All values except HDAT_PROC_CARD is reverved
@@ -956,19 +1069,44 @@ errlHndl_t hdatLoadIoData(const hdatMsAddr_t &i_msAddr,
                 HDAT_ERR("Error in getting MRU ID");
                 break;
             }
-
-            HdatIoHubFru * fruData = new HdatIoHubFru(l_err,
+            //here check for SCM or DCM
+            //create a new HdatIoHubFru object each time for SCM which means
+            //a new HdatIoHubFru (eye catcher IO HUB) for each
+            //processor
+            //for DCM we should create a new hdatHubEntry_t in the
+            //iv_hubArray or create a new HdatIoHubFru object
+            //for proc0 and proc1 in DCM0 we will have 2hub array entry in
+            //io1
+            //check if there is any attribute for finding SCM vs DCM
+            //in fsp this is checked by comparing the fru id. if same
+            //then add a new hubentry in hub array otherwise create a 
+            //new HdatIoHubFru object
+            if(hdatIoHubFrus.size() == 0 ||
+                (l_procFruId != l_prevFruId))
+            {
+                l_prevFruId = l_procFruId;
+                HDAT_DBG("creating new fruData");
+             HdatIoHubFru * fruData = new HdatIoHubFru(l_err,
                                  l_rid,
                                  l_cardType,
                                  0,
                                  l_numProcs,
                                  l_slcaIdx);
+             hdatIoHubFrus.push_back(std::move(fruData));
 
-            hdatHubEntry_t *l_hub;
-
-            l_hub = reinterpret_cast<hdatHubEntry_t *>(reinterpret_cast<char *>
-                    (fruData->iv_hubArray) +
-                 fruData->iv_hubArrayHdr.hdatArrayCnt * sizeof(hdatHubEntry_t));
+            }
+            else
+            {
+                HDAT_DBG("adding to existing fruData");
+                //once the vector is created then l_hub will be added to the 
+                //end of the last fruData object in the vector
+            }
+            size_t lastElem = hdatIoHubFrus.size() - 1;
+            HDAT_DBG("setting l_hub->hdatIoHubId");
+            hdatHubEntry_t *l_hub = reinterpret_cast<hdatHubEntry_t *>
+                (reinterpret_cast<char *>(hdatIoHubFrus[lastElem]->iv_hubArray) 
+                + hdatIoHubFrus[lastElem]->iv_hubArrayHdr.hdatArrayCnt * 
+                sizeof(hdatHubEntry_t));
 
             // Save information about the I/O chip
             l_hub->hdatIoHubId = l_procOrdId;
@@ -981,11 +1119,12 @@ errlHndl_t hdatLoadIoData(const hdatMsAddr_t &i_msAddr,
             {
                 l_hub->hdatFlags = HDAT_HUB_NOT_USABLE;
             }
-            if (fruData->iv_hubStatus != 0)
+            if(hdatIoHubFrus[lastElem]->iv_hubStatus != 0)    
             {
                 // Replace status bits in hdatFlags with iv_hdatStatus
                 l_hub->hdatFlags &= ~HDAT_HUB_STATUS_MASK;
-                l_hub->hdatFlags |= fruData->iv_hubStatus;
+                //l_hub->hdatFlags |= fruData->iv_hubStatus;
+                l_hub->hdatFlags |= hdatIoHubFrus[lastElem]->iv_hubStatus;
             }
             HDAT_DBG("hdatFlags 1: %X",l_hub->hdatFlags);
 
@@ -1106,48 +1245,50 @@ errlHndl_t hdatLoadIoData(const hdatMsAddr_t &i_msAddr,
 
 
             //increment counts
-            fruData->iv_hubArrayHdr.hdatArrayCnt++;
+            hdatIoHubFrus[lastElem]->iv_hubArrayHdr.hdatArrayCnt++;
+            HDAT_DBG("fruData->iv_hubArrayHdr.hdatArrayCnt=0x%x",
+                       hdatIoHubFrus[lastElem]->iv_hubArrayHdr.hdatArrayCnt);
+        }//end of the for loop here
 
+        HDAT_DBG("number of fruData objects created=%d",hdatIoHubFrus.size());
+
+        int l_iohubNum = 0;//nth iohub object
+
+        for(auto fruData : hdatIoHubFrus)
+        {
             //build the daughter structure
-            l_err = fruData->bldDaughterStruct(l_pProcTarget,l_numProcs);
-
-
+            HDAT_DBG("calling bldDaughterStruct");
+            l_err = 
+               fruData->bldDaughterStruct(fruData->iv_hubArrayHdr.hdatArrayCnt);
             if ( l_err )
             {
                 HDAT_ERR("error in building daughter structure");
                 break;
             }
 
-            HDAT_DBG("fruData.bldDaughterStruct done");
-
+            //@TODO:RTC Story 255790 : HDAT: SCM verification and support in BMC
+            //how to know SCM vs DCM
             //build the slot map info structure
-            l_err = fruData->bldSlotMapInfoStruct(l_numProcs); 
- 
+            l_err = 
+             fruData->bldSlotMapInfoStruct(l_iohubNum,
+                                           true);//taking DCM by default 
             if ( l_err )
             {
                 HDAT_ERR("error in building Slot map info structure");
                 break;
             }
-                                                                                       
-            HDAT_DBG("fruData.bldSlotMapInfoStruct done, will insert to the map");
 
-            //insert the fru data to the map
-            l_iomap.insert(std::pair<uint32_t,HdatIoHubFru*>
-                                    (l_numProcs,fruData));
-            HDAT_DBG("done inserting into the map");
-
-            l_totKwdSize = fruData->getTotalIoKwdSize();
+            l_totKwdSize += fruData->getTotalIoKwdSize();
             HDAT_DBG("got l_totKwdSize=%x",l_totKwdSize);
             
-            l_totalSlotMapSize = fruData->iv_slotMapInfoObjs.size() *
+            l_totalSlotMapSize += fruData->iv_slotMapInfoObjs.size() *
                                  fruData->iv_slotMapInfoSize;
-
+            HDAT_DBG("slotmap size=0x%x",l_totalSlotMapSize);
+            l_iohubNum++;
         }//end for loop
 
-        o_count = l_numProcs;
-        HDAT_DBG("setting count same to index=%d,o_count=%d",
-                  l_numProcs,o_count);
-
+        o_count = hdatIoHubFrus.size();
+        HDAT_DBG("setting count o_count=%d",o_count);
 
         //calculate the virtual address to start writing at main memory
         //allocate space for iohub data
@@ -1166,7 +1307,6 @@ errlHndl_t hdatLoadIoData(const hdatMsAddr_t &i_msAddr,
 
         uint64_t i_base_addr_down = ALIGN_PAGE_DOWN(i_base_addr);
 
-        //l_numProcs carries the number of proc
         //allocate the memory
         HDAT_DBG("allocating memory (l_totalsize * l_numProcs)+l_totKwdSize=%x",
                   ((l_totalsize * l_numProcs)+ l_totKwdSize));
@@ -1186,15 +1326,13 @@ errlHndl_t hdatLoadIoData(const hdatMsAddr_t &i_msAddr,
                   (uint64_t)l_virtAddr,(uint64_t)l_virt_addr);
 
         //Iterate thru each FRU data and write to mainstore
-
-        IO_MAP::iterator l_itr;
-        for(l_itr = l_iomap.begin(); l_itr != l_iomap.end(); ++l_itr)
+        for(auto fruData : hdatIoHubFrus)
         {
             HDAT_DBG("writing to main memory");
             uint8_t* l_startAddr = l_virtAddr;
 
             //write to main memory
-            l_virtAddr= l_itr->second->setIOHub(l_virtAddr,l_size);
+            l_virtAddr= fruData->setIOHub(l_virtAddr,l_size);
 
             if ( l_size > o_size )
             {
@@ -1208,7 +1346,6 @@ errlHndl_t hdatLoadIoData(const hdatMsAddr_t &i_msAddr,
             HDAT_DBG("wrote pad of 0x%x size after io object",l_pad);
 
         }//done writing to memory
-
 
         //unmap the region
         int rc = 0;
@@ -1235,17 +1372,15 @@ errlHndl_t hdatLoadIoData(const hdatMsAddr_t &i_msAddr,
                           true);
         }
 
-        //erase the map
-        for (l_itr = l_iomap.begin(); l_itr != l_iomap.end();)
+        //free up the memory
+         for(size_t i=0; i < hdatIoHubFrus.size(); i++)
          {
-             //need to delete the object first
-             delete(l_itr->second);
-
-             l_iomap.erase(l_itr++);
-         }//end erasing
+             delete hdatIoHubFrus[i];
+         }
+         hdatIoHubFrus.clear();
+         
 
     }while(0);
-
 
     HDAT_EXIT();
     return l_err;

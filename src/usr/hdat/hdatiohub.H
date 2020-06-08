@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -174,6 +174,7 @@ struct hdatSlotEntryInfo_t
     uint32_t   hdatI2cCableCardPres;
     uint32_t   hdatI2cCableCardSlotEnable;
     uint32_t   hdatI2cMexFPGA;
+    uint32_t   reserved;
 } __attribute__ ((packed));
 
 enum hdatSlotMapDataPtrs
@@ -436,23 +437,19 @@ public:
    *       to P5IOC2.  If some other I/O card comes along with a need for
    *       daughter card structures, this rotuine will likely require changes.
    *
-   *
    * @pre None
    *
-   * @param i_target     - input parameter - TARGET value of the daughter
-   * @param i_index      - input parameter - instance number to be added
+   * @param i_hubArrayNum - input parameter - number of hub array in the hub fru
    *
    * @post A card's VPD definiton has been added to the object.  Heap storage
    *       has been allocated.
-   *
    *
    * @return A null error log handle if successful, else the return code pointed
    *         to by errlHndl_t contains one of:
    *
    * @retval HDAT_ALLOC_ERROR
    */
-  errlHndl_t bldDaughterStruct( const TARGETING::Target * i_target,
-                                uint32_t i_index );
+  errlHndl_t bldDaughterStruct(uint32_t i_hubArrayNum );
 
   /**
    * @brief Build the hypervisor data area structres for Slot Map structure.
@@ -461,19 +458,21 @@ public:
    *
    * @pre None
    *
-   * @param i_target     - input parameter - TARGET value of IO Hub ( proc)
-   * @param i_virtAddr   - input parameter - mainstore virtual address
+   * @param i_iohubNum - input parameter - tells which iohub object this
+   *                                       slotmap is getting built for
+   * @param i_dcm   - input parameter - DCM architecture or not
    *
    * @return A null error log handle if successful, else the return code pointed
    *         to by errlHndl_t contains one of:
    *
    */
 
-  errlHndl_t bldSlotMapInfoStruct(uint32_t i_numProc);
-                                           
+  errlHndl_t bldSlotMapInfoStruct(int i_iohubNum,
+                                  bool i_dcm = false);
 
-  errlHndl_t hdatGetSlotMapTableAreas(uint32_t i_numProc);
-  errlHndl_t hdatGetSlotMapEntryInfos(uint32_t i_numProc);
+
+  errlHndl_t hdatGetSlotMapTableAreas(int i_iohubNum, bool i_dcm = false);
+  errlHndl_t hdatGetSlotMapEntryInfos(int i_iohubNum, bool i_dcm = false);
 
   /*
    * @brief fetches all the daughter card information for a proc when the
@@ -504,8 +503,6 @@ public:
   */
 
   uint64_t getTotalIoKwdSize();
-
-
 
 
   /* @brief construct the iohub data. This function will be called from
@@ -579,16 +576,6 @@ public:
   hdatSlotEntryInfo_t  *iv_hdatSlotMapEntryInfoPtr;
 
 }; // end of HdatIoHubFru class
-
-
-
-/* @brief
- * map to store the pointers of iohub objects to write them to
- * memory later
- */
-
-
-typedef std::map<uint32_t,HdatIoHubFru*> IO_MAP;
 
 }  //namespace HDAT
 
