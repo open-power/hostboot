@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -1431,13 +1431,29 @@ errlHndl_t doMulticastWorkaround( DeviceFW::OperationType i_opType,
             if( !g_useMemChiplets
                 && ((l_unit >= P9_FIRST_MC) && (l_unit <= P9_LAST_MC)) )
             {
-                // Only access the mem chiplets if we're not in async mode
-                //  because we don't start clocks until later on in that case
-                auto l_syncMode =
-                i_target->getAttr<TARGETING::ATTR_MC_SYNC_MODE>();
-                if( l_syncMode == TARGETING::MC_SYNC_MODE_NOT_IN_SYNC )
+                using namespace TARGETING;
+
+                // Only access the mem chiplets if we're not in async mode on
+                // Nimbus systems, because we don't start clocks until later on
+                // in that case
+                TargetHandleList list;
+                PredicateCTM pred(CLASS_CHIP, TYPE_PROC);
+
+                targetService().getAssociated(list, i_target, TargetService::PARENT_BY_AFFINITY,
+                                              TargetService::ALL, &pred);
+
+                assert(list.size() <= 1,
+                       "Expected no more than one PROC parent on HUID 0x%08x",
+                       get_huid(i_target));
+
+                if (!list.empty() && list[0]->getAttr<ATTR_MODEL>() == MODEL_NIMBUS)
                 {
-                    continue;
+                    auto l_syncMode =
+                        i_target->getAttr<ATTR_MC_SYNC_MODE>();
+                    if( l_syncMode == MC_SYNC_MODE_NOT_IN_SYNC )
+                    {
+                        continue;
+                    }
                 }
             }
 #endif
