@@ -35,7 +35,7 @@
 #define __PSTATES_PGPE_H__
 
 #include <pstates_common.H>
-// #include <pstates_qme.h>
+
 
 /// PstateParmsBlock Magic Number
 ///
@@ -73,6 +73,24 @@ enum POUNDW_DDS_FIELDS
     SLOPEB_CYCLES           = 11,
     NUM_POUNDW_DDS_FIELDS   = 12
 };
+
+enum DDS_TRIP_MODE
+{
+    DDS_TRIP_MODE_CHIP      = 0x0,
+    DDS_TRIP_MODE_CORE      = 0x1,
+};
+
+enum DDS_TRIP_INTP_CTRL
+{
+    DDS_TRIP_INTP_CTRL_TRIP_OFFSET = 0x80,
+    DDS_TRIP_INTP_CTRL_DATA0       = 0x40,
+    DDS_TRIP_INTP_CTRL_DATA1       = 0x20,
+    DDS_TRIP_INTP_CTRL_DATA2       = 0x10,
+    DDS_TRIP_INTP_CTRL_LARGE       = 0x08,
+    DDS_TRIP_INTP_CTRL_SMALL       = 0x04,
+    DDS_TRIP_INTP_CTRL_SLOPEA      = 0x02,
+    DDS_TRIP_INTP_CTRL_SLOPEB      = 0x01
+};
 /// These define the Run-time rails that are controlled by the PGPE during
 /// Pstate operations.
 #define RUNTIME_RAILS       2
@@ -104,7 +122,10 @@ enum PGPE_FLAGS_IDX
     PGPE_FLAG_WOF_IPC_IMMEDIATE_MODE        = 11,
     PGPE_FLAG_PHANTOM_HALT_ENABLE           = 12,
     PGPE_FLAG_RVRM_ENABLE                   = 13,
-    PGPE_FLAG_MAX_DEFINED                   = 14
+    PGPE_FLAG_DDS_ENABLE                    = 14,
+    PGPE_FLAG_TRIP_MODE                     = 15,
+    PGPE_FLAG_TRIP_INTERPOLATION_CONTROL    = 16,
+    PGPE_FLAG_MAX_DEFINED                   = 17
 };
 
 /// Control Attributes
@@ -163,8 +184,8 @@ typedef struct
 
 } ResClkSetup_t;
 
-/// #W Entry Data Points as per V19
-typedef struct
+/// #W Entry Data Points as per V75
+typedef struct __attribute__((__packed__))
 {
     union
     {
@@ -173,10 +194,10 @@ typedef struct
         {
 
 #ifdef _BIG_ENDIAN
-            uint64_t spare1        : 6;
+            uint64_t delay_per_bin : 6;
             uint64_t calb_adj      : 2;
             uint64_t insrtn_dely   : 8;
-            uint64_t spare2        : 1;
+            uint64_t spare1        : 1;
             uint64_t trip_offset   : 3;
             uint64_t data0_select  : 4;
             uint64_t data1_select  : 4;
@@ -202,14 +223,16 @@ typedef struct
             uint64_t data1_select  : 4;
             uint64_t data0_select  : 4;
             uint64_t trip_offset   : 3;
-            uint64_t spare2        : 1;
+            uint64_t spare1        : 1;
             uint64_t insrtn_dely   : 8;
             uint64_t calb_adj      : 2;
-            uint64_t spare1        : 6;
+            uint64_t delay_per_bin : 6;
 #endif
         } fields;
     } ddsc;
-} PoundWEntry_t;
+}
+PoundWEntry_t;
+
 
 typedef struct
 {
@@ -218,30 +241,53 @@ typedef struct
         uint16_t value;
         struct
         {
-
 #ifdef _BIG_ENDIAN
-            uint16_t spare1          : 1;
-            uint16_t alt_trip_offset : 3;
-            uint16_t spare2          : 2;
-            uint16_t alt_cal_adjust  : 2;
+            uint16_t spare1          : 2;
+            uint16_t alt_cal_adj     : 2;
             uint16_t alt_delay       : 8;
+            uint16_t spare2          : 1;
+            uint16_t alt_trip_offset : 3;
 #else
-            uint16_t alt_delay       : 8;
-            uint16_t alt_cal_adjust  : 2;
-            uint16_t spare2          : 2;
             uint16_t alt_trip_offset : 3;
-            uint16_t spare1          : 1;
+            uint16_t spare2          : 1;
+            uint16_t alt_delay       : 8;
+            uint16_t alt_cal_adj     : 2;
+            uint16_t spare1          : 2;
 #endif
         } fields;
-    } alt_calibration_config;
-    uint16_t cal_core_freq;
+    } alt_cal;
+} PoundWEntry_AltCal_t;
+
+typedef struct
+{
+    union
+    {
+        uint8_t value;
+        struct
+        {
+#ifdef _BIG_ENDIAN
+            uint8_t target_actual_bin: 8;
+#else
+            uint8_t target_actual_bin: 8;
+#endif
+        } fields;
+    } target_act_bin;
+}
+PoundWEntry_TgtActBin_t;
+
+typedef struct __attribute__((__packed__))
+{
     uint16_t cal_vdd;
-    uint16_t alt_cal_core_freq;
     uint16_t alt_cal_vdd;
-} AltCalbCnfg_t;
+    uint16_t large_droop_vdd;
+    uint16_t worst_droop_min_vdd;
+    uint16_t worst_droop_max_vdd;
+    uint16_t non_perf_loss_vdd;
+}
+vdd_calibration;
 
 /// #W DPLL Settings
-typedef struct
+typedef struct __attribute__((__packed__))
 {
     union
     {
@@ -261,30 +307,35 @@ typedef struct
 #endif // _BIG_ENDIAN                       /// #W Other Settings
         } fields;
     };
-} PoundWDpllSettings_t;
+}
+PoundWDpllSettings_t;
 
 /// #W Other Settings
-typedef struct
+typedef struct __attribute__((__packed__))
 {
     uint8_t              dds_calibration_version;
     PoundWDpllSettings_t dpll_settings;
-    uint8_t              light_throttle_settings[10];
-    uint8_t              harsh_throttle_settings[10];
-    uint16_t             droop_freq_resp_reference;
-    uint64_t             large_droop_mode_reg_setting;
-    uint64_t             misc_droop_mode_reg_setting;
-    uint8_t              spare[287];
-} PoundWOther_t;
+    uint16_t             droop_freq_resp_reference_mhz;
+    uint64_t             droop_count_control; //DCCR
+    uint64_t             ftc_large_droop_mode_reg_setting; //FLMR
+    uint64_t             ftc_misc_droop_mode_reg_setting; //FMMR
+    uint8_t              calibration_bin;
+    uint8_t              spare[10];
+}
+PoundWOther_t;
 
 /// #W VPD Structure
 ///
 /// Part specific data to manage the Digital Droop Sensor (DDS)
-typedef struct
+typedef struct __attribute__((__packed__))
 {
-    AltCalbCnfg_t           calbCnfg[MAXIMUM_CORES][NUM_PV_POINTS];
     PoundWEntry_t           entry[MAXIMUM_CORES][NUM_PV_POINTS];
+    PoundWEntry_AltCal_t    entry_alt_cal[MAXIMUM_CORES][NUM_PV_POINTS];
+    PoundWEntry_TgtActBin_t entry_tgt_act_bin[MAXIMUM_CORES][NUM_PV_POINTS];
+    vdd_calibration         vdd_cal[NUM_PV_POINTS];
     PoundWOther_t           other;
-} PoundW_t;
+}
+PoundW_t;
 
 /// Voltage Regulation Module (VRM) Control Settings
 typedef struct
@@ -335,7 +386,7 @@ typedef struct
     uint32_t            dpll_pstate0_value;  // @todo why this and reference_frequency_khz?
 
     /// VPD operating points are biased but without load-line correction.
-    /// Frequencies are in MHz, voltages are specified in units of 1mV, currents
+    // Frequencies are in MHz, voltages are specified in units of 1mV, currents
     /// are specified in units of 10mA, and temperatures are specified in 0.5
     /// degrees C.
     PoundVOpPoint_t     operating_points_set[NUM_VPD_PTS_SET][NUM_PV_POINTS];
@@ -346,16 +397,13 @@ typedef struct
     SysPowerDistParms_t vdd_sysparm;
     SysPowerDistParms_t vcs_sysparm;
     SysPowerDistParms_t vdn_sysparm;
-    /// #W Other Settings
     VRMParms_t          ext_vrm_parms;
 
     uint32_t            safe_voltage_mv[SAFE_VOLTAGE_SIZE];
     uint32_t            safe_frequency_khz;
     uint32_t            safe_throttle_idx;
 
-    /// DDS Data
-    /// DDSParmBlock dds;
-    /// @todo need to define the DDS parm block
+    /// #W Entry(DDS)
     PoundWEntry_t       dds[MAXIMUM_CORES][NUM_PV_POINTS];
 
     /// The following are needed to generated the Pstate Table to HOMER.
@@ -440,25 +488,19 @@ typedef struct
     //The minimum value of VCS
     uint16_t vcs_floor_mv;
 
-    uint32_t pad1;
-    // Biased Compare VID operating points
-    // @todo RTC 201083 Add DDS GPPB values
-    // CompareVIDPoints_t vid_point_set[NUM_PV_POINTS];
+    uint32_t pad1; //Padding
 
-    // Biased Threshold operation points
-    // uint8_t threshold_set[NUM_PV_POINTS][NUM_THRESHOLD_POINTS];
+    /// #W Alternate Calibration Data
+    PoundWEntry_AltCal_t    dds_alt_cal[MAXIMUM_CORES][NUM_PV_POINTS];
 
-    // pstate-volt compare slopes
-    // int16_t ps_vid_compare_slopes[VPD_NUM_SLOPES_REGION];
+    /// #W Target Active Bin Data
+    PoundWEntry_TgtActBin_t dds_tgt_act_bin[MAXIMUM_CORES][NUM_PV_POINTS];
 
-    // pstate-volt threshold slopes
-    // int16_t ps_dds_thresh_slopes[VPD_NUM_SLOPES_REGION][NUM_THRESHOLD_POINTS];
+    /// #W Other (DDS Data)
+    PoundWOther_t   dds_other;
 
-    // Jump value operating points
-    // uint8_t jump_value_set[NUM_PV_POINTS][NUM_JUMP_VALUES];
-
-    // Jump-value slopes
-    // int16_t ps_dds_jump_slopes[VPD_NUM_SLOPES_REGION][NUM_JUMP_VALUES];
+    /// #W VDD Calibration(DDS Data)
+    vdd_calibration         vdd_cal[NUM_PV_POINTS];
 
 // __attribute__((packed, aligned(1024))) GlobalPstateParmBlock_t;
 } GlobalPstateParmBlock_t;

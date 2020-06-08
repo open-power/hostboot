@@ -901,9 +901,7 @@ fapi2::ReturnCode PlatPmPPB::gppb_init(
         //Bias values
         memcpy(&io_globalppb->poundv_biases_0p05pct,&iv_bias,sizeof(iv_bias));
 
-        // safe_voltage_mv TBD
-//        io_globalppb->safe_voltage_mv[VDD] = revle32(iv_attrs.attr_pm_safe_voltage_mv[VDD]);
-  //      io_globalppb->safe_voltage_mv[VCS] = revle32(iv_attrs.attr_pm_safe_voltage_mv[VCS]);
+        // safe_voltage_mv 
         io_globalppb->safe_voltage_mv[SAFE_VOLTAGE_VDD] = revle32(iv_attrs.attr_pm_safe_voltage_mv[VDD]);
         io_globalppb->safe_voltage_mv[SAFE_VOLTAGE_VCS] = revle32(iv_attrs.attr_pm_safe_voltage_mv[VCS]);
 
@@ -975,6 +973,13 @@ fapi2::ReturnCode PlatPmPPB::gppb_init(
         // Calculate pre-calculated slopes
         compute_PStateV_I_slope(io_globalppb);
 
+        //Copy over the DDS data
+        memcpy(&io_globalppb->dds, &iv_poundW_data.entry, sizeof(((PoundW_t*)0)->entry));
+        memcpy(&io_globalppb->dds_alt_cal, &iv_poundW_data.entry_alt_cal, sizeof(((PoundW_t*)0)->entry_alt_cal)); 
+        memcpy(&io_globalppb->dds_tgt_act_bin, &iv_poundW_data.entry_tgt_act_bin, (sizeof(((PoundW_t*)0)->entry_tgt_act_bin)));
+        memcpy(&io_globalppb->vdd_cal,  &iv_poundW_data.vdd_cal, (sizeof(((PoundW_t*)0)->vdd_cal)));
+        memcpy(&io_globalppb->dds_other, &iv_poundW_data.other, (sizeof(((PoundW_t*)0)->other)));
+
         //Compute dds slopes
         compute_dds_slopes(io_globalppb);
 
@@ -995,6 +1000,9 @@ fapi2::ReturnCode PlatPmPPB::gppb_init(
         io_globalppb->pgpe_flags[PGPE_FLAG_WOV_OVERVOLT_ENABLE] = iv_wov_overv_enabled;
         io_globalppb->pgpe_flags[PGPE_FLAG_DDS_COARSE_THROTTLE_ENABLE] = iv_attrs.attr_dds_coarse_thr_enable;
         io_globalppb->pgpe_flags[PGPE_FLAG_PMCR_MOST_RECENT_ENABLE] = iv_attrs.attr_pmcr_most_recent_enable;
+        io_globalppb->pgpe_flags[PGPE_FLAG_DDS_ENABLE] = iv_dds_enabled;
+        io_globalppb->pgpe_flags[PGPE_FLAG_TRIP_MODE] = iv_attrs.attr_dds_trip_mode;
+        io_globalppb->pgpe_flags[PGPE_FLAG_TRIP_INTERPOLATION_CONTROL] = iv_attrs.attr_dds_trip_interpolation_control;
         if (iv_attrs.attr_pgpe_hcode_function_enable == 0) {
             io_globalppb->pgpe_flags[PGPE_FLAG_OCC_IPC_IMMEDIATE_MODE] = 1;
             io_globalppb->pgpe_flags[PGPE_FLAG_WOF_IPC_IMMEDIATE_MODE] = 1;
@@ -1464,6 +1472,8 @@ FAPI_INF("%-60s[3] = 0x%08x %d", #attr_name, iv_attrs.attr_assign[3], iv_attrs.a
     DATABLOCK_GET_ATTR(ATTR_WOF_THROTTLE_CONTROL_LOOP_DISABLE,    FAPI_SYSTEM, attr_system_wof_throttle_control_loop_disable);
     DATABLOCK_GET_ATTR(ATTR_WOF_PITCH_ENABLE,               FAPI_SYSTEM, attr_system_pitch_enable);
     DATABLOCK_GET_ATTR(ATTR_WOF_THROTTLE_CONTROL_LOOP_MODE, FAPI_SYSTEM, attr_system_wof_throttle_control_loop_mode);
+    DATABLOCK_GET_ATTR(ATTR_DDS_TRIP_MODE,    FAPI_SYSTEM, attr_dds_trip_mode);
+    DATABLOCK_GET_ATTR(ATTR_DDS_TRIP_INTERPOLATION_CONTROL,    FAPI_SYSTEM, attr_dds_trip_interpolation_control);
 
     //TBD
     //DATABLOCK_GET_ATTR(ATTR_CHIP_EC_FEATURE_WOF_NOT_SUPPORTED, iv_procChip, attr_dd_wof_not_supported);
