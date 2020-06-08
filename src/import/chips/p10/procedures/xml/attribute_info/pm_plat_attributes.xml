@@ -231,6 +231,55 @@
 
   <!-- ********************************************************************* -->
   <attribute>
+    <id>ATTR_DDS_TRIP_MODE</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+    Indicates whether to calculate trip offsets per core or per chip. Default is per
+    chip.
+
+    CHIP or CORE 
+
+    Producer: MRWB
+    </description>
+    <valueType>uint8</valueType>
+    <platInit/>
+    <enum>
+        CHIP = 0x00,
+        CORE = 0x01
+    </enum>
+    <default>CHIP</default>
+    <initToZero/>
+    <group>dds</group>
+  </attribute>
+
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_DDS_TRIP_INTERPOLATION_CONTROL</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+    A bit vector to indicate which of FDCR items to interpolate. Multiple items
+    can be set to be interpolated.
+
+    Producer: MRWB
+    </description>
+    <valueType>uint8</valueType>
+    <platInit/>
+    <enum>
+        TRIP    = 0x80,
+        DATA0   = 0x40,
+        DATA1   = 0x20,
+        DATA2   = 0x10,
+        LARGE   = 0x8,
+        SMALL   = 0x4,
+        SLOPEA  = 0x2,
+        SLOPEB  = 0x1
+    </enum>
+    <initToZero/>
+    <group>dds</group>
+  </attribute>
+
+  <!-- ********************************************************************* -->
+  <attribute>
     <id>ATTR_DUMP_STOP_INFO_ENABLE_ERRORLOG</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>
