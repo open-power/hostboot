@@ -804,7 +804,11 @@
     </attribute>
     <attribute>
         <id>ATTR_PROC_FABRIC_TOPOLOGY_ID_TABLE</id>
-        <persistency>volatile-zeroed</persistency>
+        <persistency>volatile</persistency><!-- needs non-zero default -->
+    </attribute>
+    <attribute>
+        <id>ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE</id>
+        <persistency>volatile</persistency><!-- needs non-zero default -->
     </attribute>
     <attribute>
         <id>ATTR_PGPE_HCODE_FUNCTION_ENABLE</id>

@@ -1363,6 +1363,7 @@ sub writeFapi2PlatAttrMacrosHeaderFileContent {
                         # volatile-zeroed section and have a direct mapping
                         if (! exists $fapiAttr->{platInit})
                         {
+                            my $persistency = $attribute->{persistency};
                             if ($hwpfToHbAttrMap->{macro} ne "DIRECT")
                             {
                                 croak("FAPI non-platInit attr " .
@@ -1384,9 +1385,9 @@ sub writeFapi2PlatAttrMacrosHeaderFileContent {
                             else
                             {
                                 # Check that platInit attributes
-                                # have a non-volatile persistency
-                                if($attribute->{persistency} ne
-                                   "volatile-zeroed")
+                                # do not have a volatile persistency
+                                if( ($persistency ne "volatile-zeroed")
+                                    && ($persistency ne "volatile") )
                                 {
                                      croak("FAPI non-platInit attr " .
                                       "'$hwpfToHbAttrMap->{id}' is " .
