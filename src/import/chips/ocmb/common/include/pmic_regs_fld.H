@@ -52,8 +52,6 @@ struct pmicFields;
 template<>
 struct pmicFields<mss::pmic::product::JEDEC_COMPLIANT>
 {
-    static constexpr uint8_t R2F_SECURE_MODE                = 0x02;
-    static constexpr uint8_t R32_VR_ENABLE                  = 0x07;
     static constexpr uint8_t PMIC_DEVICE                    = 0x00;
 
     static constexpr uint8_t SWA_SWB_PHASE_MODE_SELECT      = 0x00;
@@ -138,6 +136,7 @@ struct pmicFields<mss::pmic::product::JEDEC_COMPLIANT>
 
     // R1A
     static constexpr uint8_t R1A_OUTPUT_POWER_SELECT = 0x01;
+    static constexpr uint8_t R1A_VIN_BULK_POWER_GOOD_THRESHOLD_VOLTAGE_MASK = 0b11100000;
 
     // R1B
     static constexpr uint8_t R1B_CURRENT_OR_POWER_METER_SELECT = 0x06;
@@ -164,6 +163,11 @@ struct pmicFields<mss::pmic::product::JEDEC_COMPLIANT>
     static constexpr uint8_t R2F_SWB_REGULATOR_CONTROL = 0x05;
     static constexpr uint8_t R2F_SWC_REGULATOR_CONTROL = 0x04;
     static constexpr uint8_t R2F_SWD_REGULATOR_CONTROL = 0x03;
+    static constexpr uint8_t R2F_SECURE_MODE           = 0x02;
+
+    // R32
+    static constexpr uint8_t R32_PWR_GOOD_IO_TYPE      = 0x05;
+    static constexpr uint8_t R32_VR_ENABLE             = 0x07;
 
     // R3B
     static constexpr uint8_t R3B_PMIC_CURRENT_CAPABILITY = 0x00;
