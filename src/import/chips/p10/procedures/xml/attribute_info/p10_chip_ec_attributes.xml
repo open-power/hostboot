@@ -196,8 +196,6 @@
     </chipEcFeature>
   </attribute>
   <!-- ******************************************************************** -->
-
-  <!-- ******************************************************************** -->
   <attribute>
     <id>ATTR_CHIP_EC_FEATURE_PARTIAL_IOP_XRAM_ACCESS_ALLOWED</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
@@ -249,5 +247,24 @@
     </chipEcFeature>
   </attribute>
   <!-- ******************************************************************** -->
-
+  <attribute>
+    <id>ATTR_CHIP_EC_FEATURE_HW529136</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      Cresp token manager link underflow with hotplug + full-qtr psave mode
+      Workaround is to disable DLR prior to any hotplug operations, and restore
+      the DLR enablement state after the hotplug operation completes.
+      Fixed in DD2.0, but leaving workaround enabled for P10 project.
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_P10</name>
+        <ec>
+          <value>0x10</value>
+          <test>GREATER_THAN_OR_EQUAL</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
+  <!-- ******************************************************************** -->
 </attributes>

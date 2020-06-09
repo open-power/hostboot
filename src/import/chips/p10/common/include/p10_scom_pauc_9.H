@@ -134,6 +134,20 @@ static const uint32_t XSTOP_IN53 = 53;
 //<< [XSTOP]
 // pauc/reg00009.H
 
+//>> [PB_PSAVE01_MODE_CFG]
+static const uint64_t PB_PSAVE01_MODE_CFG = 0x10011814ull;
+
+static const uint32_t PB_PSAVE01_MODE_CFG_MODE = 0;
+static const uint32_t PB_PSAVE01_MODE_CFG_MODE_LEN = 2;
+static const uint32_t PB_PSAVE01_MODE_CFG_WIDTH = 2;
+static const uint32_t PB_PSAVE01_MODE_CFG_WIDTH_LEN = 3;
+static const uint32_t PB_PSAVE01_MODE_CFG_SPARE = 5;
+static const uint32_t PB_PSAVE01_MODE_CFG_SPARE_LEN = 3;
+static const uint32_t PB_PSAVE01_MODE_CFG_MIN_RAND_UC = 8;
+static const uint32_t PB_PSAVE01_MODE_CFG_MIN_RAND_UC_LEN = 8;
+//<< [PB_PSAVE01_MODE_CFG]
+// pauc/reg00009.H
+
 //>>THE END<<
 
 #ifndef __PPE_HCODE__

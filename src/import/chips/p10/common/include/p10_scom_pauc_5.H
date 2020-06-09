@@ -128,6 +128,20 @@ static const uint32_t ERROR_STATUS_OPCG_STOPPED_BY_PCB_ERR = 27;
 //<< [ERROR_STATUS]
 // pauc/reg00005.H
 
+//>> [PB_PSAVE23_MODE_CFG]
+static const uint64_t PB_PSAVE23_MODE_CFG = 0x10011816ull;
+
+static const uint32_t PB_PSAVE23_MODE_CFG_MODE = 0;
+static const uint32_t PB_PSAVE23_MODE_CFG_MODE_LEN = 2;
+static const uint32_t PB_PSAVE23_MODE_CFG_WIDTH = 2;
+static const uint32_t PB_PSAVE23_MODE_CFG_WIDTH_LEN = 3;
+static const uint32_t PB_PSAVE23_MODE_CFG_SPARE = 5;
+static const uint32_t PB_PSAVE23_MODE_CFG_SPARE_LEN = 3;
+static const uint32_t PB_PSAVE23_MODE_CFG_MIN_RAND_UC = 8;
+static const uint32_t PB_PSAVE23_MODE_CFG_MIN_RAND_UC_LEN = 8;
+//<< [PB_PSAVE23_MODE_CFG]
+// pauc/reg00005.H
+
 //>>THE END<<
 
 #ifndef __PPE_HCODE__
