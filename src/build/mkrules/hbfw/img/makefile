@@ -64,6 +64,7 @@ ENGD_SRCPATH  = ${SRCPATH:S/hbfw\/img/engd\/href/g}
 SBEI_OBJPATH  = ${HBFW_OBJPATH:S/hbfw\/img/sbei\/sbfw\/img/g}
 ENGD_WOFPATH  = ${HBFW_OBJPATH:S/hbfw\/img/engd\/wofdata/g}
 ENGD_MEMDPATH = ${HBFW_OBJPATH:S/hbfw\/img/engd\/memd/g}
+ENGD_OCMBPATH = ${HBFW_OBJPATH:S/hbfw\/img/engd\/ocmbfw/g}
 HBFW_SIMPATH  = ${HBFW_OBJPATH:S/img/simics/g}
 SIMPATH       = ${HBFW_OBJPATH:S/hbfw\/img/..\/..\/simics/g}
 EDITED_LAYOUT_PATH = ${DUMMY:!pwd!}
@@ -84,9 +85,6 @@ hostboot_bootloader_SYMS=hbibl.syms
 
 IMAGE_EDIT_PROGRAM = ${editimgid:P}
 
-PKG_OCMBFW_SCRIPT = ${pkgOcmbFw.pl:P}
-UNPKGD_OCMBFW_IMG = ocmbfw.bin
-
 # Input default images
 BOOTLDR_IMG = hostboot_bootloader.bin
 HBBL_IMG = hbbl.bin
@@ -95,7 +93,8 @@ HBB_IMG = hostboot.bin
 HBB_ECC_IMG = hostboot.bin.ecc
 HBI_IMG =  hostboot_extended.bin
 HBRT_IMG = hostboot_runtime.bin
-OCMBFW_IMG = fwhdr.ocmbfw.bin
+OCMBFW_IMG = ${ENGD_OCMBPATH:Ffwhdr.ocmbfw.bin}
+
 BASE_IMAGES = ${BOOTLDR_IMG} ${HB_SECROM_IMG} ${HBB_IMG} ${HBI_IMG} ${HBRT_IMG}
 
 # Input fake images
@@ -256,16 +255,6 @@ cp_hbfiles: .SPECTARG
 gen_default_images: ${GEN_DEFAULT_IMAGES_DEPS}
 	currentsb -chain
 	ecc --inject ${HBB_IMG} --output ${HBB_ECC_IMG} --p8
-
-	# Create 4k ocmbfw image for now (all zeroes)
-	dd if=/dev/zero of=${UNPKGD_OCMBFW_IMG} bs=1024 count=4
-
-	# Add header to ocmbfw image
-	${PKG_OCMBFW_SCRIPT} --unpackagedBin ${UNPKGD_OCMBFW_IMG} --packagedBin ${OCMBFW_IMG} --timestamp "${DUMMY:!date!}" --vendorVersion "0.1" --vendorUrl "http://www.ibm.com"
-
-  # verify header sha512 hash value matches value calculated against image
-  # TODO RTC:195547 -- remove the skip when we have a good image packaged into the driver.
-	${PKG_OCMBFW_SCRIPT} --verify --packagedBin ${OCMBFW_IMG} --skipImageHashCheck
 
     # Remove offset from start of Bootloader image for HBBL partition
     # Actual code is offset from HRMOR by 12k = 12 1k-blocks (space
