@@ -692,6 +692,10 @@ errlHndl_t MasterContainerLidMgr::loadLids(CompInfo& io_compInfo,
                 l_remainSize -= l_lidSize;
             }
 
+        }
+
+        if(lidInfo.size == 0)
+        {
             // Update lid size
             lidInfo.size = l_lidSize;
         }
