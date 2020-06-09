@@ -263,6 +263,24 @@
   </hwpError>
 
   <hwpError>
+    <rc>RC_VIN_BULK_BELOW_TOLERANCE</rc>
+    <description>
+       The VIN_BULK read by the PMIC ADC was below the minimum tolerance.
+    </description>
+    <ffdc>NOMINAL_MV</ffdc>
+    <ffdc>MINIMUM_MV</ffdc>
+    <ffdc>ACTUAL_MV</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>MEDIUM</priority>
+    </callout>
+    <callout>
+      <target>PMIC_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
+  <hwpError>
     <rc>RC_INVALID_NUMBER_OF_I2C_DEVICES</rc>
     <description>
        Expected 4 GENERICI2CSLAVE targets: 2 GPIO expanders and 2 ADCs.

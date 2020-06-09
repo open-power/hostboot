@@ -115,32 +115,26 @@ fapi2::ReturnCode start_vr_enable(
     static constexpr auto J = mss::pmic::product::JEDEC_COMPLIANT;
     using REGS = pmicRegs<J>;
     using FIELDS = pmicFields<J>;
-
+    using CONSTS = mss::pmic::consts<J>;
 
     fapi2::buffer<uint8_t> l_programmable_mode_buffer;
     fapi2::buffer<uint8_t> l_vr_enable_buffer;
 
     // Enable programmable mode
-    FAPI_TRY(mss::pmic::i2c::reg_read_reverse_buffer(i_pmic_target, REGS::R2F, l_programmable_mode_buffer),
-             "start_vr_enable: Error reading address 0x%02hhX of %s to enable programmable mode operation",
-             REGS::R2F, mss::c_str(i_pmic_target));
+    FAPI_TRY(mss::pmic::i2c::reg_read_reverse_buffer(i_pmic_target, REGS::R2F, l_programmable_mode_buffer));
 
-    l_programmable_mode_buffer.writeBit<FIELDS::R2F_SECURE_MODE>(
-        mss::pmic::consts<mss::pmic::product::JEDEC_COMPLIANT>::PROGRAMMABLE_MODE);
+    l_programmable_mode_buffer.writeBit<FIELDS::R2F_SECURE_MODE>(CONSTS::PROGRAMMABLE_MODE);
 
-    FAPI_TRY(mss::pmic::i2c::reg_write_reverse_buffer(i_pmic_target, REGS::R2F, l_programmable_mode_buffer),
-             "start_vr_enable: Error writing address 0x%02hhX of %s to enable programmable mode operation",
-             REGS::R2F, mss::c_str(i_pmic_target));
+    FAPI_TRY(mss::pmic::i2c::reg_write_reverse_buffer(i_pmic_target, REGS::R2F, l_programmable_mode_buffer));
 
-    // Start VR Enable
-    // Write 1 to R2F(2)
+    // Next, start VR_ENABLE
+    FAPI_TRY(mss::pmic::i2c::reg_read_reverse_buffer(i_pmic_target, REGS::R32, l_vr_enable_buffer));
+
+    // Start VR Enable (1 --> Bit 7)
     l_vr_enable_buffer.setBit<FIELDS::R32_VR_ENABLE>();
 
     FAPI_INF("Executing VR_ENABLE for PMIC %s", mss::c_str(i_pmic_target));
-    FAPI_TRY(mss::pmic::i2c::reg_write_reverse_buffer(i_pmic_target, REGS::R32, l_vr_enable_buffer),
-             "start_vr_enable: Could not write to address 0x%02hhX of %s to execute VR Enable",
-             REGS::R32,
-             mss::c_str(i_pmic_target));
+    FAPI_TRY(mss::pmic::i2c::reg_write_reverse_buffer(i_pmic_target, REGS::R32, l_vr_enable_buffer));
 
     // At this point, the PWR_GOOD pin should begin to rise to high. This can't directly be checked via a register
     return fapi2::FAPI2_RC_SUCCESS;
@@ -521,6 +515,42 @@ fapi_try_exit:
 }
 
 ///
+/// @brief Enable pmics using manual mode (direct VR enable, no SPD fields)
+/// @param[in] i_pmics vector of PMICs to enable
+/// @return FAPI2_RC_SUCCESS iff success, else error
+///
+fapi2::ReturnCode enable_manual(const std::vector<fapi2::Target<fapi2::TARGET_TYPE_PMIC>>& i_pmics)
+{
+    using CONSTS = mss::pmic::consts<mss::pmic::product::JEDEC_COMPLIANT>;
+    using REGS = pmicRegs<mss::pmic::product::JEDEC_COMPLIANT>;
+    using FIELDS = pmicFields<mss::pmic::product::JEDEC_COMPLIANT>;
+
+    for (const auto& l_pmic : i_pmics)
+    {
+        fapi2::buffer<uint8_t> l_programmable_mode;
+        l_programmable_mode.writeBit<FIELDS::R2F_SECURE_MODE>(CONSTS::PROGRAMMABLE_MODE);
+
+        FAPI_INF("Enabling PMIC %s with default settings", mss::c_str(l_pmic));
+
+        // Check to make sure VIN_BULK measures above minimum voltage tolerance, ensuring the PMIC
+        // will function as expected
+        FAPI_TRY(mss::pmic::check_vin_bulk_good(l_pmic),
+                 "%s pmic_enable: check for VIN_BULK good either failed, or was below minimum voltage tolerance",
+                 mss::c_str(l_pmic));
+
+        // Enable programmable mode
+        FAPI_TRY(mss::pmic::i2c::reg_write_reverse_buffer(l_pmic, REGS::R2F, l_programmable_mode));
+
+        // Start VR Enable
+        FAPI_TRY(mss::pmic::start_vr_enable(l_pmic),
+                 "Error starting VR_ENABLE on PMIC %s", mss::c_str(l_pmic));
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
 /// @brief Function to enable PMIC using SPD settings
 ///
 /// @param[in] i_pmic_target - the pmic target
@@ -635,12 +665,11 @@ fapi2::ReturnCode enable_1u_2u(
     {
         for (const auto& l_pmic : l_pmics)
         {
-            // Poll to make sure PBULK reports good, then we can enable the chip and write/read registers
-            FAPI_TRY(mss::pmic::poll_for_pbulk_good(l_pmic),
-                     "pmic_enable: poll for pbulk good either failed, or returned not good status on PMIC %s",
+            // Check to make sure VIN_BULK reports good, then we can enable the chip and write/read registers
+            FAPI_TRY(check_vin_bulk_good(l_pmic),
+                     "pmic_enable: Check for VIN_BULK good either failed, or returned not good status on PMIC %s",
                      mss::c_str(l_pmic));
-
-            FAPI_TRY(mss::pmic::start_vr_enable(l_pmic));
+            FAPI_TRY(start_vr_enable(l_pmic));
         }
     }
     else
@@ -657,7 +686,7 @@ fapi2::ReturnCode enable_1u_2u(
             FAPI_TRY(mss::attr::get_mfg_id[get_relative_pmic_id(l_pmic)](i_ocmb_target, l_vendor_id));
 
             // Call the enable procedure
-            FAPI_TRY((mss::pmic::enable_spd(l_pmic, i_ocmb_target, l_vendor_id)),
+            FAPI_TRY((enable_spd(l_pmic, i_ocmb_target, l_vendor_id)),
                      "pmic_enable: Error enabling PMIC %s", mss::c_str(l_pmic));
         }
     }

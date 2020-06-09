@@ -50,42 +50,191 @@ namespace pmic
 {
 
 ///
-/// @brief polls PMIC for PBULK PWR_GOOD status
+/// @brief Checks PMIC for VIN_BULK above minimum tolerance
 ///
 /// @param[in] i_pmic_target PMIC target
-/// @return fapi2::ReturnCode success if good, error if polling fail or power not good
+/// @return fapi2::ReturnCode success if good, else, error code
 ///
-fapi2::ReturnCode poll_for_pbulk_good(
-    const fapi2::Target<fapi2::TargetType::TARGET_TYPE_PMIC>& i_pmic_target)
+fapi2::ReturnCode check_vin_bulk_good(
+    const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& i_pmic_target)
 {
     static constexpr auto J = mss::pmic::product::JEDEC_COMPLIANT;
     using REGS = pmicRegs<J>;
     using FIELDS = pmicFields<J>;
 
-    // Using default poll parameters
-    mss::poll_parameters l_poll_params;
+    const uint16_t ADC_VIN_BULK_SELECT = 5;
+    const uint16_t ADC_VIN_BULK_STEP = 70;
 
-    FAPI_ASSERT( mss::poll(i_pmic_target, l_poll_params, [&i_pmic_target]()->bool
+    fapi2::buffer<uint8_t> l_reg_contents;
+    uint16_t l_adc_readout = 0;
+    uint16_t l_calculated_vin_bulk = 0;
+    uint16_t l_vin_bulk_min = 0;
+
+    // Program the ADC select bits
+    FAPI_TRY(mss::pmic::i2c::reg_read(i_pmic_target, REGS::R30, l_reg_contents));
+    l_reg_contents.insertFromRight<FIELDS::R30_ADC_SELECT_START, FIELDS::R30_ADC_SELECT_LENGTH>(ADC_VIN_BULK_SELECT);
+    FAPI_TRY(mss::pmic::i2c::reg_write(i_pmic_target, REGS::R30, l_reg_contents));
+
+    // Enable the PMIC ADC
+    FAPI_TRY(enable_pmic_adc(i_pmic_target));
+
+    // Get PMIC ADC_READ register contents
+    FAPI_TRY(mss::pmic::i2c::reg_read(i_pmic_target, REGS::R31, l_reg_contents));
+    l_reg_contents.extractToRight<FIELDS::R31_ADC_READ_SETTING_START, FIELDS::R31_ADC_READ_SETTING_LENGTH>(l_adc_readout);
+
+    // Calculate ADC_READ value
+    l_calculated_vin_bulk = l_adc_readout * ADC_VIN_BULK_STEP;
+    FAPI_TRY(get_minimum_vin_bulk_threshold(i_pmic_target, l_vin_bulk_min));
+
+    // Disable the PMIC ADC
+    FAPI_TRY(disable_pmic_adc(i_pmic_target));
+
+    FAPI_DBG("VIN_BULK voltage %umV, minimum threshold %umV", l_calculated_vin_bulk, l_vin_bulk_min);
+
+    // Now verify the value is good (above minimum tolerance)
+    FAPI_ASSERT(l_calculated_vin_bulk >= l_vin_bulk_min,
+                fapi2::VIN_BULK_BELOW_TOLERANCE()
+                .set_MINIMUM_MV(l_vin_bulk_min)
+                .set_ACTUAL_MV(l_calculated_vin_bulk),
+                "%s VIN_BULK voltage %umV was lower than minimum threshold %umV",
+                mss::c_str(i_pmic_target), l_calculated_vin_bulk, l_vin_bulk_min);
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Get the minimum vin bulk threshold
+///
+/// @param[in] i_pmic_target PMIC target
+/// @param[out] o_vin_bulk_min VIN bulk minimum value
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
+///
+fapi2::ReturnCode get_minimum_vin_bulk_threshold(
+    const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& i_pmic_target,
+    uint16_t& o_vin_bulk_min)
+{
+    using REGS = pmicRegs<mss::pmic::product::JEDEC_COMPLIANT>;
+
+    fapi2::buffer<uint8_t> l_pmic_rev;
+    fapi2::buffer<uint8_t> l_vin_bulk_min_threshold;
+    bool l_pmic_is_ti = false;
+
+    FAPI_TRY(mss::pmic::i2c::reg_read(i_pmic_target, REGS::R3B_REVISION, l_pmic_rev));
+    FAPI_TRY(pmic_is_ti(i_pmic_target, l_pmic_is_ti));
+
+    // Use R1A value
+    FAPI_TRY(mss::pmic::i2c::reg_read(i_pmic_target, REGS::R1A, l_vin_bulk_min_threshold));
+
+    o_vin_bulk_min = get_minimum_vin_bulk_threshold_helper(
+                         l_vin_bulk_min_threshold,
+                         l_pmic_is_ti,
+                         l_pmic_rev);
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Helper function to get the minimum vin bulk threshold
+///
+/// @param[in] i_vin_bulk_min_threshold
+/// @param[in] i_is_ti PMIC is TI
+/// @param[in] i_rev PMIC revision
+/// return VIN bulk minimum value
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
+///
+uint16_t get_minimum_vin_bulk_threshold_helper(
+    const uint8_t i_vin_bulk_min_threshold,
+    const bool i_is_ti,
+    const uint8_t i_rev)
+{
+    using FIELDS = pmicFields<mss::pmic::product::JEDEC_COMPLIANT>;
+    const uint8_t IDT_C1_REV = 0x33;
+
+    static std::map<uint8_t, uint16_t> VIN_BULK_BITMAP =
     {
-        fapi2::buffer<uint8_t> l_pbulk_status_buffer;
+        // Reserved bitmaps are excluded. The PMICs will not allow writes of reserved bitmaps,
+        // so these could never appear.
+        {0b00100000, 9500},
+        {0b01000000, 8500},
+        {0b01100000, 7500},
+        {0b10000000, 6500},
+        {0b10100000, 5500},
+        {0b11000000, 4250},
+    };
 
-        FAPI_TRY(mss::pmic::i2c::reg_read_reverse_buffer(i_pmic_target, REGS::R08, l_pbulk_status_buffer),
-        "pmic_enable: Could not read 0x%02hhX on %s ", REGS::R08, mss::c_str(i_pmic_target));
+    // If TI or IDT >= C1
+    if (i_is_ti || (i_rev >= IDT_C1_REV))
+    {
+        uint16_t l_mapped_vin_bulk = 0;
 
-        return l_pbulk_status_buffer.getBit<FIELDS::R08_VIN_BULK_INPUT_PWR_GOOD_STATUS>() ==
-        mss::pmic::consts<mss::pmic::product::JEDEC_COMPLIANT>::PWR_GOOD;
+        // The 3 relevant bits are left-aligned, so they will line up with the VIN_BULK_BITMAP
+        l_mapped_vin_bulk = VIN_BULK_BITMAP[i_vin_bulk_min_threshold
+                                            & FIELDS::R1A_VIN_BULK_POWER_GOOD_THRESHOLD_VOLTAGE_MASK];
 
-    fapi_try_exit:
-        // No ack, return false and continue polling
-        return false;
-    }),
-    fapi2::MSS_PMIC_I2C_POLLING_TIMEOUT()
-    .set_TARGET(i_pmic_target)
-    .set_FUNCTION(mss::POLL_FOR_PBULK_GOOD),
-    "I2C read from %s either did not ACK or VIN_BULK did not respond with PWR_GOOD status",
-    mss::c_str(i_pmic_target) );
+        return l_mapped_vin_bulk;
 
-    return fapi2::FAPI2_RC_SUCCESS;
+    }
+    else // IDT Pre-C1. Bug in the ADC in these parts means that we should check 4V flat.
+    {
+        return 4000;
+    }
+}
+
+///
+/// @brief Disable the ADC for the pmic
+///
+/// @param[in] i_pmic_target PMIC target
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
+///
+fapi2::ReturnCode disable_pmic_adc(const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& i_pmic_target)
+{
+    using REGS = pmicRegs<mss::pmic::product::JEDEC_COMPLIANT>;
+    using FIELDS = pmicFields<mss::pmic::product::JEDEC_COMPLIANT>;
+
+    fapi2::buffer<uint8_t> l_reg_contents;
+
+    // Disable the ADC
+    FAPI_TRY(mss::pmic::i2c::reg_read(i_pmic_target, REGS::R30, l_reg_contents));
+
+    if (l_reg_contents.getBit<FIELDS::R30_ADC_ENABLE>() == mss::ON)
+    {
+        l_reg_contents.clearBit<FIELDS::R30_ADC_ENABLE>();
+        FAPI_TRY(mss::pmic::i2c::reg_write(i_pmic_target, REGS::R30, l_reg_contents));
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Enable the ADC for the pmic
+///
+/// @param[in] i_pmic_target PMIC target
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
+///
+fapi2::ReturnCode enable_pmic_adc(const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& i_pmic_target)
+{
+    using REGS = pmicRegs<mss::pmic::product::JEDEC_COMPLIANT>;
+    using FIELDS = pmicFields<mss::pmic::product::JEDEC_COMPLIANT>;
+
+    fapi2::buffer<uint8_t> l_reg_contents;
+    const uint8_t ADC_DELAY_AFTER_ENABLE_MS = 25;
+
+    // Enable the ADC
+    FAPI_TRY(mss::pmic::i2c::reg_read(i_pmic_target, REGS::R30, l_reg_contents));
+
+    if (l_reg_contents.getBit<FIELDS::R30_ADC_ENABLE>() == mss::OFF)
+    {
+        l_reg_contents.setBit<FIELDS::R30_ADC_ENABLE>();
+        FAPI_TRY(mss::pmic::i2c::reg_write(i_pmic_target, REGS::R30, l_reg_contents));
+    }
+
+    // wait for result registers to be updated
+    // could be a newly programmed ADC_SELECT value, so delay even if ADC was already enabled
+    FAPI_TRY(fapi2::delay((mss::DELAY_1MS * ADC_DELAY_AFTER_ENABLE_MS),
+                          (mss::DELAY_1US * ADC_DELAY_AFTER_ENABLE_MS)));
 
 fapi_try_exit:
     return fapi2::current_err;

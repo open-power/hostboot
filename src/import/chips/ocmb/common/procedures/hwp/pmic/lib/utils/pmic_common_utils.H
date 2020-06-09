@@ -126,13 +126,54 @@ inline std::vector<fapi2::Target<fapi2::TARGET_TYPE_PMIC>> get_valid_pmics_for_i
 }
 
 ///
-/// @brief polls PMIC for PBULK PWR_GOOD status
+/// @brief Checks PMIC for VIN_BULK above minimum tolerance
 ///
 /// @param[in] i_pmic_target PMIC target
-/// @return fapi2::ReturnCode success if good, error if polling fail or power not good
+/// @return fapi2::ReturnCode success if good, else, error code
 ///
-fapi2::ReturnCode poll_for_pbulk_good(
-    const fapi2::Target<fapi2::TargetType::TARGET_TYPE_PMIC>& i_pmic_target);
+fapi2::ReturnCode check_vin_bulk_good(
+    const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& i_pmic_target);
+
+///
+/// @brief Get the minimum vin bulk threshold
+///
+/// @param[in] i_pmic_target PMIC target
+/// @param[out] o_vin_bulk_min VIN bulk minimum value
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
+///
+fapi2::ReturnCode get_minimum_vin_bulk_threshold(
+    const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& i_pmic_target,
+    uint16_t& o_vin_bulk_min);
+
+///
+/// @brief Helper function to get the minimum vin bulk threshold
+///
+/// @param[in] i_vin_bulk_min_threshold
+/// @param[in] i_is_ti PMIC is TI
+/// @param[in] i_rev PMIC revision
+/// return VIN bulk minimum value
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
+///
+uint16_t get_minimum_vin_bulk_threshold_helper(
+    const uint8_t i_vin_bulk_min_threshold,
+    const bool i_is_ti,
+    const uint8_t i_rev);
+
+///
+/// @brief Disable the ADC for the pmic
+///
+/// @param[in] i_pmic_target PMIC target
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
+///
+fapi2::ReturnCode disable_pmic_adc(const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& i_pmic_target);
+
+///
+/// @brief Enable the ADC for the pmic
+///
+/// @param[in] i_pmic_target PMIC target
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
+///
+fapi2::ReturnCode enable_pmic_adc(const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& i_pmic_target);;
 
 ///
 /// @brief Unlocks PMIC vendor region

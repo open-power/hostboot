@@ -286,6 +286,9 @@ struct consts<mss::pmic::product::JEDEC_COMPLIANT>
     static constexpr uint8_t PROGRAMMABLE_MODE          = 0x01;
     static constexpr uint8_t SECURE_MODE                = 0x00;
 
+    static constexpr uint8_t PWR_GOOD_IO_TYPE_OUTPUT    = 0x00;
+    static constexpr uint8_t PWR_GOOD_IO_TYPE_IO        = 0x01;
+
     static constexpr uint8_t SINGLE_PHASE               = 0x0;
     static constexpr uint8_t DUAL_PHASE                 = 0x1;
 
