@@ -33,7 +33,10 @@
 // *HWP Level: 2
 // *HWP Consumed by: FSP:HB
 
+#include <lib/shared/exp_defaults.H>
 #include <lib/shared/exp_consts.H>
+#include <lib/ccs/ccs_traits_explorer.H>
+#include <lib/dimm/exp_mrs_traits.H>
 #include <lib/inband/exp_inband.H>
 #include <generic/memory/lib/utils/c_str.H>
 #include <generic/memory/lib/utils/mss_bad_bits.H>
@@ -42,9 +45,10 @@
 #include <lib/phy/exp_train_handler.H>
 #include <lib/shared/exp_consts.H>
 #include <generic/memory/mss_git_data_helper.H>
+#include <generic/memory/lib/utils/fir/gen_mss_unmask.H>
+#include <generic/memory/lib/utils/mss_generic_check.H>
+#include <lib/workarounds/exp_mr_workarounds.H>
 #include <mss_generic_system_attribute_getters.H>
-#include <explorer_scom_addresses.H>
-#include <explorer_scom_addresses_fld.H>
 
 extern "C"
 {
@@ -66,6 +70,9 @@ extern "C"
 
         FAPI_TRY(mss::exp::setup_phy_params(i_target, l_phy_params),
                  "Failed setup_phy_params() for %s", mss::c_str(i_target));
+
+        FAPI_TRY(mss::exp::print_phy_params(i_target, l_phy_params),
+                 "Failed print_phy_params() for %s", mss::c_str(i_target));
 
         // Copy the PHY initialization parameters into the internal buffer of Explorer
         FAPI_TRY( mss::exp::ib::putUserInputMsdg(i_target, l_phy_params, l_crc),
@@ -103,6 +110,15 @@ extern "C"
             FAPI_TRY(mss::exp::host_fw_phy_init_with_eye_capture(i_target, l_crc, l_phy_params));
         }
 
+        // Loops through the ports and issues the MRS based workarounds over CCS
+        for(const auto& l_port : mss::find_targets<fapi2::TARGET_TYPE_MEM_PORT>(i_target))
+        {
+            FAPI_TRY(mss::exp::workarounds::updates_mode_registers(l_port));
+        }
+
+        // Unmask registers after draminit training
+        FAPI_TRY(mss::unmask::after_draminit_training(i_target), "%s Failed after_draminit_training", mss::c_str(i_target));
+
         return fapi2::FAPI2_RC_SUCCESS;
 
     fapi_try_exit:
@@ -113,6 +129,7 @@ extern "C"
         // Due to the RAS/PRD requirements, we need to check for FIR's
         // If any FIR's have lit up, this draminit fail could have been caused by the FIR, rather than bad hardware
         // So, let PRD retrigger this step to see if we can resolve the issue
-        return mss::check::fir_or_pll_fail<mss::mc_type::EXPLORER>(i_target, fapi2::current_err);
+        return mss::check::fir_or_pll_fail<mss::mc_type::EXPLORER, mss::check::firChecklist::DRAMINIT>(i_target,
+                fapi2::current_err);
     }
 }

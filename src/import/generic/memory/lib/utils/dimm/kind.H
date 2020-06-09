@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -33,17 +33,41 @@
 // *HWP Level: 3
 // *HWP Consumed by: HB:FSP
 
-#ifndef _GEN_MSS_KIND_H_
-#define _GEN_MSS_KIND_H_
+#ifndef _GENERIC_KIND_H_
+#define _GENERIC_KIND_H_
 
 #include <fapi2.H>
 
 #include <generic/memory/lib/mss_generic_attribute_getters.H>
 #include <generic/memory/lib/utils/c_str.H>
 #include <generic/memory/lib/utils/shared/mss_generic_consts.H>
+#include <generic/memory/lib/utils/find.H>
 
 namespace mss
 {
+
+///
+/// @brief DIMM kinds of DIMM/DRAM used to descriminate in templates.
+/// @note These must be contiguous and unique
+///
+enum kind_t
+{
+    // The default, base, etc. kind. Used to define the function
+    // which would be in a base class. Also used to stop the
+    // metaprogramming recursion of the dispatcher functions.
+    DEFAULT_KIND = 0,
+
+    // DIMM type and DRAM Generation representation
+    KIND_RDIMM_EMPTY = 1,
+    KIND_RDIMM_DDR4 = 2,
+    KIND_LRDIMM_EMPTY = 3,
+    KIND_LRDIMM_DDR4 = 4,
+
+    // Used to force dispatching looking for overloads
+    // This moust always be one more than that largest
+    // kind_t.
+    FORCE_DISPATCH = 4 + 1,
+};
 
 namespace dimm
 {
@@ -155,7 +179,8 @@ class kind
             FAPI_TRY( mss::attr::get_hybrid( i_target, iv_hybrid ));
             FAPI_TRY( mss::attr::get_hybrid_memory_type( i_target, iv_hybrid_memory_type ));
             FAPI_TRY( mss::attr::get_rcd_mfg_id(i_target, iv_rcd_mfgid) );
-            FAPI_TRY( mss::attr::get_dram_module_height(i_target, iv_module_height) );
+            FAPI_TRY( mss::attr::get_dram_module_height(mss::find_target<fapi2::TARGET_TYPE_OCMB_CHIP>(i_target),
+                      iv_module_height) );
             return;
 
         fapi_try_exit:

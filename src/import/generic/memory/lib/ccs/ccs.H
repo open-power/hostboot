@@ -140,8 +140,9 @@ class instruction_t
         /// @param[in] i_rank_config the rank configuration
         /// @return fapi2::ReturnCode fapi2::FAPI2_RC_SUCCESS if ok
         ///
-        fapi2::ReturnCode configure_rank(const fapi2::Target<TT::PORT_TARGET_TYPE>& i_target,
-                                         const rank_configuration i_rank_config )
+        fapi2::ReturnCode configure_rank(
+            const fapi2::Target<TT::PORT_TARGET_TYPE>& i_target,
+            const rank_configuration i_rank_config )
         {
             // If this instrunction is set to not update the rank, then don't update the rank
             if(!iv_update_rank)
@@ -182,8 +183,8 @@ class instruction_t
                 constexpr uint64_t NON_DIMM_CS = 0b11;
 
                 // Assigns the CS based upon which DIMM we're at
-                const auto CS01 = l_is_dimm0 ? TT::CS_N[l_dimm_rank].first : NON_DIMM_CS;
-                const auto CS23 = l_is_dimm0 ? NON_DIMM_CS : TT::CS_N[l_dimm_rank].first;
+                const uint64_t CS01 = l_is_dimm0 ? TT::CS_N[l_dimm_rank].first : NON_DIMM_CS;
+                const uint64_t CS23 = l_is_dimm0 ? NON_DIMM_CS : TT::CS_N[l_dimm_rank].first;
 
                 // Setup that rank
                 arr0.insertFromRight<TT::ARR0_DDR_CSN_0_1,
@@ -201,8 +202,11 @@ class instruction_t
                 const bool l_is_dimm0 = iv_rank < TT::CCS_MAX_RANK_PER_DIMM;
 
                 // Assigns the CS based upon which DIMM we're at
-                const auto CS01 = l_is_dimm0 ? TT::CS_ND[l_dimm_rank].first : TT::CS_ND[l_dimm_rank].second;
-                const auto CS23 = l_is_dimm0 ? TT::CS_ND[l_dimm_rank].second : TT::CS_ND[l_dimm_rank].first;
+                const uint64_t CS01 = l_is_dimm0 ? TT::CS_ND[l_dimm_rank].first : TT::CS_ND[l_dimm_rank].second;
+                uint64_t CS23 = l_is_dimm0 ? TT::CS_ND[l_dimm_rank].second : TT::CS_ND[l_dimm_rank].first;
+
+                // Set CS23 <-- CS01 if CS needs to be tied
+                FAPI_TRY(TT::cs_tied(i_target, CS01, CS23));
 
                 // Setup that rank
                 arr0.insertFromRight<TT::ARR0_DDR_CSN_0_1,
@@ -215,7 +219,7 @@ class instruction_t
                 // 1) we are DIMM1
                 // 2) our DIMM rank is greater than the maximum allowed number of ranks on DIMM1
                 // So, we pass always if we're DIMM0, or if our DIMM rank is less than the maximum number of DIMM's on rank 1
-                FAPI_ASSERT(l_dimm_rank < TT::CCS_MAX_RANKS_DIMM1 || l_is_dimm0,
+                FAPI_ASSERT((l_dimm_rank < TT::CCS_MAX_RANKS_DIMM1) || l_is_dimm0,
                             fapi2::MSS_INVALID_RANK()
                             .set_PORT_TARGET(i_target)
                             .set_RANK(iv_rank)
@@ -500,12 +504,16 @@ inline instruction_t des_command(const uint16_t i_idle = 0)
 /// @brief Converts an ODT attribute to CCS array input
 /// @tparam TT the CCS traits of the chiplet which executes the CCS instruction
 /// @param[in] i_attr_value ODT attribute value
-/// @return CCS value for the ODT's
+/// @param[in] i_target PORT target type
+/// @param[out] CCS value for the ODT's
+/// @return FAPI2_RC_SUCCESS iff success, else error code
 ///
-inline uint8_t convert_odt_attr_to_ccs(const fapi2::buffer<uint8_t>& i_attr_value)
+template< typename TT = ccsTraits<DEFAULT_MC_TYPE> >
+inline fapi2::ReturnCode convert_odt_attr_to_ccs(
+    const fapi2::buffer<uint8_t>& i_attr_value,
+    const fapi2::Target<TT::PORT_TARGET_TYPE>& i_target,
+    uint8_t& o_ccs_value)
 {
-    using TT = ccsTraits<DEFAULT_MC_TYPE>;
-
     // ODT value buffer
     fapi2::buffer<uint8_t> l_ccs_value;
     l_ccs_value.template writeBit<TT::CCS_ODT_DIMM0_R0>(i_attr_value.template getBit<TT::ATTR_ODT_DIMM0_R0>())
@@ -514,7 +522,13 @@ inline uint8_t convert_odt_attr_to_ccs(const fapi2::buffer<uint8_t>& i_attr_valu
     .template writeBit<TT::CCS_ODT_DIMM1_R0>(i_attr_value.template getBit<TT::ATTR_ODT_DIMM1_R0>())
     .template writeBit<TT::CCS_ODT_DIMM1_R1>(i_attr_value.template getBit<TT::ATTR_ODT_DIMM1_R1>());
 
-    return uint8_t(l_ccs_value);
+    // Set ODT_DIMM1_R0 & R1 <-- ODT_DIMM0_R0 & R1 if CS/ODt needs to be tied
+    FAPI_TRY(TT::odt_tied(i_target, l_ccs_value));
+
+    o_ccs_value = uint8_t(l_ccs_value);
+
+fapi_try_exit:
+    return fapi2::current_err;
 }
 
 ///
@@ -1066,14 +1080,26 @@ fapi_try_exit:
 }
 
 ///
-/// @brief Execute a set of CCS instructions - multiple ports
-/// @tparam P  the port type for this CCS engine
+/// @brief Configures the chip to properly execute CCS instructions
 /// @tparam MC the MC type on which to operate
+/// @tparam P  the port type for this CCS engine - derived from i_ports
+/// @param[in] i_ports the vector of ports
+/// @return FAPI2_RC_SUCCSS iff ok
+/// @note Code location for pre CCS execute workarounds
+///
+template< mss::mc_type MC, fapi2::TargetType P>
+fapi2::ReturnCode setup_to_execute(const std::vector< fapi2::Target<P> >& i_ports);
+
+///
+/// @brief Cleans up the chip from executing CCS instructions
+/// @tparam MC the MC type on which to operate
+/// @tparam P  the port type for this CCS engine - derived from i_ports
 /// @param[in] i_program the vector of instructions
 /// @param[in] i_ports the vector of ports
 /// @return FAPI2_RC_SUCCSS iff ok
+/// @note Code location for post CCS execute workarounds
 ///
-template< fapi2::TargetType P, mss::mc_type MC>
+template< mss::mc_type MC, fapi2::TargetType P>
 fapi2::ReturnCode cleanup_from_execute(const ccs::program& i_program,
                                        const std::vector< fapi2::Target<P> >& i_ports);
 
@@ -1184,9 +1210,9 @@ fapi2::ReturnCode update_initial_delays( const fapi2::Target<T>& i_target,
 /// @return FAPI2_RC_SUCCSS iff ok
 ///
 template< fapi2::TargetType T, fapi2::TargetType P, typename TT = ccsTraits<DEFAULT_MC_TYPE> >
-fapi2::ReturnCode execute( const fapi2::Target<T>& i_target,
-                           ccs::program& i_program,
-                           const std::vector< fapi2::Target<P> >& i_ports)
+static inline fapi2::ReturnCode execute( const fapi2::Target<T>& i_target,
+        ccs::program& i_program,
+        const std::vector< fapi2::Target<P> >& i_ports)
 {
     // Subtract one for the idle we insert at the end
     constexpr size_t CCS_INSTRUCTION_DEPTH = TT::CCS_ARRAY_LEN - 1;
@@ -1201,6 +1227,9 @@ fapi2::ReturnCode execute( const fapi2::Target<T>& i_target,
 
     std::vector<rank_configuration> l_rank_configs;
     FAPI_TRY(get_rank_config(i_target, l_rank_configs));
+
+    // Pre CCS execution configuration
+    FAPI_TRY(setup_to_execute<DEFAULT_MC_TYPE>(i_ports));
 
     // Stop the CCS engine just for giggles - it might be running ...
     FAPI_TRY( start_stop(i_target, mss::states::STOP), "Error in ccs::execute" );
@@ -1283,7 +1312,7 @@ fapi2::ReturnCode execute( const fapi2::Target<T>& i_target,
     }
 
     // Cleans up after executing the CCS program (runs workarounds if needed)
-    FAPI_TRY((cleanup_from_execute<P, DEFAULT_MC_TYPE>(i_program, i_ports)));
+    FAPI_TRY((cleanup_from_execute<DEFAULT_MC_TYPE>(i_program, i_ports)));
 
 fapi_try_exit:
     i_program.iv_instructions.clear();
@@ -1301,9 +1330,9 @@ fapi_try_exit:
 /// @return FAPI2_RC_SUCCSS iff ok
 ///
 template< fapi2::TargetType T, fapi2::TargetType P, typename TT = ccsTraits<DEFAULT_MC_TYPE> >
-fapi2::ReturnCode execute( const fapi2::Target<T>& i_target,
-                           ccs::program& i_program,
-                           const fapi2::Target<P>& i_port)
+static inline fapi2::ReturnCode execute( const fapi2::Target<T>& i_target,
+        ccs::program& i_program,
+        const fapi2::Target<P>& i_port)
 {
     // Mmm. Might want to find a better way to do this - seems expensive. BRS
     std::vector< fapi2::Target<P> > l_ports{ i_port };

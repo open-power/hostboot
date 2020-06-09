@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2018,2019                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2018,2020                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -171,4 +171,51 @@
         <platInit/>
         <mssAccessorName>ocmb_exp_boot_config_adaptation_mode</mssAccessorName>
     </attribute>
+
+    <attribute>
+        <id>ATTR_OMI_FFE_SETTINGS_COMMAND</id>
+        <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+        <description>
+            Enable execution of FW_TWI_FFE_SETTINGS command
+            on Explorer. Defaults to DISABLE.
+        </description>
+        <valueType>uint8</valueType>
+        <enum>
+            DISABLE = 0,
+            ENABLE = 1
+        </enum>
+        <default>DISABLE</default>
+        <platInit/>
+        <overrideOnly/>
+        <mssAccessorName>omi_ffe_settings_command</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_OMI_FFE_PRE_CURSOR</id>
+        <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+        <description>
+            OMI FFE pre-cursor setting. Maximum 32, but cannot be 32 if
+            ATTR_OMI_FFE_POST_CURSOR is also 32. Default 0.
+        </description>
+        <valueType>uint32</valueType>
+        <default>0</default>
+        <initToZero/>
+        <writeable/>
+        <mssAccessorName>omi_ffe_pre_cursor</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_OMI_FFE_POST_CURSOR</id>
+        <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+        <description>
+            OMI FFE post-cursor setting. Maximum 32, but cannot be 32 if
+            ATTR_OMI_FFE_PRE_CURSOR is also 32. Default 0.
+        </description>
+        <valueType>uint32</valueType>
+        <default>0</default>
+        <initToZero/>
+        <writeable/>
+        <mssAccessorName>omi_ffe_post_cursor</mssAccessorName>
+    </attribute>
+
 </attributes>

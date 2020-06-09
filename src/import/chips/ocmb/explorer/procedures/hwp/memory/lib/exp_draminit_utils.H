@@ -37,7 +37,6 @@
 #define __MSS_EXP_DRAMINIT_UTILS__
 
 #include <fapi2.H>
-#include <lib/shared/exp_defaults.H>
 #include <lib/dimm/exp_rank.H>
 #include <lib/shared/exp_consts.H>
 #include <exp_data_structs.H>
@@ -46,6 +45,7 @@
 #include <generic/memory/lib/utils/c_str.H>
 #include <generic/memory/lib/utils/find.H>
 #include <generic/memory/lib/utils/mss_buffer_utils.H>
+#include <generic/memory/lib/utils/fir/gen_mss_unmask.H>
 #include <lib/phy/exp_train_display.H>
 #include <lib/phy/exp_train_handler.H>
 #include <exp_data_structs.H>
@@ -310,6 +310,15 @@ fapi2::ReturnCode setup_phy_params(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_C
                                    user_input_msdg& o_param );
 
 ///
+/// @brief Print user_input_msdg structure
+/// @param[in] i_target the fapi2 target
+/// @param[in] i_phy_params the phy params data struct
+/// @return FAPI2_RC_SUCCESS iff okay
+///
+fapi2::ReturnCode print_phy_params(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+                                   const user_input_msdg& i_phy_params);
+
+///
 /// @class phy_params_t
 /// @brief Structure of variables
 ///
@@ -458,12 +467,14 @@ class phy_params
 
             // We're in quad encoded mode IF
             // 1) 4R per DIMM
-            // 2) we have an RDIMM
+            // 2) we have an RCD
             FAPI_TRY(mss::attr::get_num_master_ranks_per_dimm(i_target, l_master_ranks));
             {
-                const bool l_has_rcd = iv_params.iv_dimm_type[0] == fapi2::ENUM_ATTR_MEM_EFF_DIMM_TYPE_RDIMM ||
-                                       iv_params.iv_dimm_type[0] == fapi2::ENUM_ATTR_MEM_EFF_DIMM_TYPE_LRDIMM;
+                bool l_has_rcd = false;
                 const bool l_4r = l_master_ranks[0] == fapi2::ENUM_ATTR_MEM_EFF_NUM_MASTER_RANKS_PER_DIMM_4R;
+
+                FAPI_TRY(mss::unmask::has_rcd<mss::mc_type::EXPLORER>(i_target, l_has_rcd));
+
                 iv_params.iv_encoded_quadcs = (l_has_rcd && l_4r) ? MSDG_QUAD_ENCODE_MODE : MSDG_DUAL_DIRECT_MODE;
             }
 
@@ -630,9 +641,16 @@ class phy_params
                     io_phy_params.DimmType = MSDG_RDIMM;
                     break;
 
-                // TK this will need to be updated for the 4U explorer card
-                // For 1U/2U (what we're working on now), the DDIMM means an unregistered MC to DRAM interface
+                // DDIMM can either have an unregistered MC to DRAM interface (1U/2U) or RCD (4U)
                 case fapi2::ENUM_ATTR_MEM_EFF_DIMM_TYPE_DDIMM:
+                    {
+                        bool l_has_rcd = false;
+
+                        FAPI_TRY(mss::unmask::has_rcd<mss::mc_type::EXPLORER>(iv_target, l_has_rcd));
+                        io_phy_params.DimmType = l_has_rcd ? MSDG_RDIMM : MSDG_UDIMM;
+                        break;
+                    }
+
                 case fapi2::ENUM_ATTR_MEM_EFF_DIMM_TYPE_UDIMM:
                     io_phy_params.DimmType = MSDG_UDIMM;
                     break;
@@ -1338,6 +1356,17 @@ class phy_params
             memcpy(&io_phy_params.ATxDly_B[0][0], &iv_params.iv_atxdly_b[0], DRAMINIT_NUM_ADDR_DELAYS);
             return fapi2::FAPI2_RC_SUCCESS;
         }
+
+        ///
+        /// @brief Get the value for parameter iv_encoded_quadcs
+        /// @return iv_encoded_quadcs value
+        /// @note thi funciton is for unit testing
+        ///
+        uint16_t get_EncodedQuadCs() const
+        {
+            return iv_params.iv_encoded_quadcs;
+        }
+
 };
 
 namespace check

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -35,6 +35,7 @@
 
 #include <lib/shared/exp_defaults.H>
 #include <exp_scrub.H>
+#include <lib/utils/mss_exp_conversions.H>
 #include <lib/mcbist/exp_memdiags.H>
 
 extern "C"

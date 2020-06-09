@@ -43,6 +43,7 @@
 #include <generic/memory/lib/utils/shared/mss_generic_consts.H>
 #include <generic/memory/lib/mss_generic_attribute_getters.H>
 #include <generic/memory/lib/ccs/ccs_traits.H>
+#include <lib/exp_attribute_accessors_manual.H>
 
 ///
 /// @class ccsTraits
@@ -193,6 +194,34 @@ class ccsTraits<mss::mc_type::EXPLORER>
             STAT_HUNG = 0x0ull,
         };
 
+        // Map bits in the ARR0 register(s) to MRS address bits. Should be traits related to ARR0. BRS
+        enum address_bits
+        {
+            A0 = 0,
+            A1 = 1,
+            A2 = 2,
+            A3 = 3,
+            A4 = 4,
+            A5 = 5,
+            A6 = 6,
+            A7 = 7,
+            A8 = 8,
+            A9 = 9,
+            A10 = 10,
+            A11 = 11,
+            A12 = 12,
+            A13 = 13,
+            A14 = ARR0_DDR_ADDRESS_14,
+            A15 = ARR0_DDR_ADDRESS_15,
+            A16 = ARR0_DDR_ADDRESS_16,
+            A17 = ARR0_DDR_ADDRESS_17,
+
+            // Only kind of address bits ... <shrug>
+            BA0 = 17,
+            BA1 = 18,
+            BG0 = 19,
+            BG1 = 15,
+        };
 
         // CSN Regular Settings
         static constexpr std::pair<uint64_t, uint64_t> CS_N[mss::MAX_RANK_PER_DIMM] =
@@ -228,6 +257,61 @@ class ccsTraits<mss::mc_type::EXPLORER>
             // CS0 H CS1 H => CS2 => H CS3 => L Rank 3
             { 0b11, 0b10 },
         };
+
+        ///
+        /// @brief Get and perform CS tied operation if needed
+        ///
+        /// @param[in] i_target PORT target type
+        /// @param[in] i_CS01 CS01
+        /// @param[in,out] io_CS23 CS23, to overwrite if tied
+        /// @return fapi2::ReturnCode fapi2::FAPI2_RC_SUCCESS iff success, else error code
+        ///
+        static fapi2::ReturnCode cs_tied(
+            const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
+            const uint64_t i_CS01,
+            uint64_t& io_CS23)
+        {
+            bool l_cs_tied = false;
+            FAPI_TRY(mss::get_cs_tied(i_target, l_cs_tied));
+
+            if (l_cs_tied)
+            {
+                // Overwrite CS23 with CS01
+                io_CS23 = i_CS01;
+            }
+
+            // Else, not tied, and we leave them alone
+
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
+
+        ///
+        /// @brief Tie DIMM0 and DIMM1 ODTs if needed, when CS's are tied
+        ///
+        /// @param[in] i_target PORT target type
+        /// @param[in,out] io_ccs_value CCS values with ODT fields
+        /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
+        ///
+        static fapi2::ReturnCode odt_tied(
+            const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
+            fapi2::buffer<uint8_t>& io_ccs_value)
+        {
+            bool l_cs_tied = false;
+            FAPI_TRY(mss::get_cs_tied(i_target, l_cs_tied));
+
+            if (l_cs_tied)
+            {
+                // Overwrite DIMM1 ODTs with DIMM0's, since they are mirrored
+                // when the CS's are mirrored
+                io_ccs_value.template writeBit<CCS_ODT_DIMM1_R0>(io_ccs_value.template getBit<CCS_ODT_DIMM0_R0>());
+                io_ccs_value.template writeBit<CCS_ODT_DIMM1_R1>(io_ccs_value.template getBit<CCS_ODT_DIMM0_R1>());
+            }
+
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
+
 
         ///
         /// @brief Gets the attribute for checking our rank configuration

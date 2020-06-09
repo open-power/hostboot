@@ -102,7 +102,7 @@
          desc="internal temp sensor tripped a threshold">
     </bit>
 
-    <bit pos="22" attn_type="UNIT_CS"
+    <bit pos="22" attn_type="RE"
          desc="GPBC_FATAL_ERROR">
         <action id="predefined" name="self_th_1" />
     </bit>
@@ -144,9 +144,8 @@
         <action id="predefined" name="self_th_32perDay" />
     </bit>
 
-    <bit pos="38" attn_type="RE"
+    <bit pos="38" attn_type="MASKED"
          desc="DDR4 PHY interrupt">
-        <action id="predefined" name="ddr4_phy_interrupt" />
     </bit>
 
     <bit pos="39:46" attn_type="RE"

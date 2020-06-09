@@ -43,6 +43,7 @@
 #include <generic/memory/mss_git_data_helper.H>
 #include <generic/memory/lib/mss_generic_attribute_getters.H>
 #include <generic/memory/lib/utils/shared/mss_generic_consts.H>
+#include <generic/memory/lib/utils/mss_generic_check.H>
 #include <mss_generic_system_attribute_getters.H>
 
 extern "C"
@@ -57,6 +58,7 @@ extern "C"
     {
         mss::display_git_commit_info("exp_omi_train");
 
+        fapi2::ReturnCode l_rc(fapi2::FAPI2_RC_SUCCESS);
         uint8_t l_sim = 0;
         FAPI_TRY(mss::attr::get_is_simulation(l_sim));
 
@@ -78,7 +80,7 @@ extern "C"
             FAPI_TRY(mss::exp::omi::train::setup_fw_boot_config(i_target, l_data));
 
             // Sets DL_TRAIN field
-            FAPI_TRY(mss::exp::i2c::boot_cfg::set_dl_layer_boot_mode(i_target, l_data, l_dl_layer_boot_mode));
+            FAPI_TRY(mss::exp::i2c::boot_cfg::set_dl_layer_boot_mode( i_target, l_data, l_dl_layer_boot_mode ));
 
             // Issues the command and checks for completion
             FAPI_TRY(mss::exp::i2c::boot_config(i_target, l_data));
@@ -92,13 +94,17 @@ extern "C"
             if (l_ocmb_is_explorer)
             {
                 // Explorer & P10 environment should see a busy status until auto train is kicked off from both sides
-                FAPI_TRY(mss::exp::i2c::check_fw_status_busy(i_target));
+                l_rc = mss::exp::i2c::check_fw_status_busy(i_target);
+
+                // If BOOT_CONFIG_1 failed or timed out, we need to check some FIRs
+                FAPI_TRY( (mss::check::fir_or_pll_fail<mss::mc_type::EXPLORER, mss::check::firChecklist::OMI>(i_target, l_rc)) );
             }
             else
             {
                 // Gemini should return success code
                 FAPI_TRY(mss::exp::i2c::fw_status(i_target, mss::DELAY_1MS, 100));
             }
+
         }
 
     fapi_try_exit:

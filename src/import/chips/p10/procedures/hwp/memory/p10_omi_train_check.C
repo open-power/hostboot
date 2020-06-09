@@ -72,7 +72,7 @@ fapi2::ReturnCode p10_omi_train_check(const fapi2::Target<fapi2::TARGET_TYPE_OMI
 
     while (l_tries < MAX_LOOP_COUNT && !(mss::omi::state_machine_success(l_state_machine_state)))
     {
-        // HW delay from P9A results
+        // HW delay from P10 results
         // Sim delay from VBU testing
         fapi2::delay(500 * mss::DELAY_1MS, 50 * mss::DELAY_1MS);
 

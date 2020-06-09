@@ -34,6 +34,7 @@
 // *HWP Consumed by: Memory
 
 #include <fapi2.H>
+#include <lib/shared/exp_defaults.H>
 #include <exp_omi_setup.H>
 #include <generic/memory/lib/utils/c_str.H>
 #include <lib/exp_attribute_accessors_manual.H>
@@ -44,6 +45,9 @@
 #include <generic/memory/lib/mss_generic_attribute_getters.H>
 #include <generic/memory/lib/mss_generic_system_attribute_getters.H>
 #include <generic/memory/lib/utils/shared/mss_generic_consts.H>
+#include <generic/memory/lib/utils/fir/gen_mss_unmask.H>
+#include <generic/memory/lib/utils/mss_generic_check.H>
+#include <mss_generic_system_attribute_getters.H>
 
 extern "C"
 {
@@ -53,13 +57,16 @@ extern "C"
     /// @param[in] i_target the OCMB target to operate on
     /// @return FAPI2_RC_SUCCESS iff ok
     ///
-    fapi2::ReturnCode exp_omi_setup(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target)
+    fapi2::ReturnCode exp_omi_setup( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target)
     {
         mss::display_git_commit_info("exp_omi_setup");
+        fapi2::ReturnCode l_rc(fapi2::FAPI2_RC_SUCCESS);
         uint8_t l_gem_menterp_workaround = 0;
+        uint8_t l_enable_ffe_settings = 0;
 
         // Declares variables
         std::vector<uint8_t> l_boot_config_data;
+        std::vector<uint8_t> l_ffe_setup_data;
 
         // BOOT CONFIG 0
         uint8_t l_dl_layer_boot_mode = fapi2::ENUM_ATTR_MSS_OCMB_EXP_BOOT_CONFIG_DL_LAYER_BOOT_MODE_NON_DL_TRAINING;
@@ -67,25 +74,47 @@ extern "C"
         uint8_t l_sim = 0;
         FAPI_TRY(mss::attr::get_is_simulation(l_sim));
 
+        // Skip the rest if we are in sim
+        if (l_sim)
+        {
+            FAPI_INF("Sim, exiting exp_omi_setup %s", mss::c_str(i_target));
+            return fapi2::FAPI2_RC_SUCCESS;
+        }
+
+        // FFE Setup
+        FAPI_TRY(mss::attr::get_omi_ffe_settings_command(i_target, l_enable_ffe_settings));
+
+        if (l_enable_ffe_settings == fapi2::ENUM_ATTR_OMI_FFE_SETTINGS_COMMAND_ENABLE)
+        {
+            FAPI_TRY(mss::exp::omi::ffe_setup(i_target, l_ffe_setup_data));
+            FAPI_TRY(mss::exp::i2c::send_ffe_settings(i_target, l_ffe_setup_data));
+            FAPI_TRY(mss::exp::i2c::fw_status(i_target, mss::DELAY_1MS, 100));
+        }
+
         // Gets the data setup
         FAPI_TRY(mss::exp::omi::train::setup_fw_boot_config(i_target, l_boot_config_data));
 
         // Sanity check: set dl_layer_boot_mode to NON DL TRAINING (0b00 == default)
-        FAPI_TRY(mss::exp::i2c::boot_cfg::set_dl_layer_boot_mode(i_target, l_boot_config_data, l_dl_layer_boot_mode));
+        FAPI_TRY(mss::exp::i2c::boot_cfg::set_dl_layer_boot_mode( i_target, l_boot_config_data, l_dl_layer_boot_mode ));
 
         // Issues the command and checks for completion
         // Note: This does not kick off OMI training
         FAPI_TRY(mss::exp::i2c::boot_config(i_target, l_boot_config_data));
 
-        // Skip the rest if we are in sim
-        if (l_sim)
-        {
-            FAPI_INF("Sim, exiting exp_omi_setup after boot_config 0 %s", mss::c_str(i_target));
-            return fapi2::FAPI2_RC_SUCCESS;
-        }
-
         // Check FW status for success
-        FAPI_TRY(mss::exp::i2c::fw_status(i_target, mss::DELAY_1MS, 100));
+        // Note: Extended polling count from 100 to 1000 to account for longer Boot_config_0 sequence
+        // in Explorer FW CL-384401.
+        l_rc = mss::exp::i2c::fw_status(i_target, mss::DELAY_1MS, 1000);
+
+        // Note: It's still under discussion whether FIRs will be lit if BOOT_CONFIG_0 fails, and if
+        // the registers will be clocked so we can read them. Disabling FIR checking until this
+        // gets resolved.
+#ifdef FIRS_AVAIL_AFTER_BOOT_CONFIG_0_FAIL
+        // If BOOT_CONFIG_0 failed or timed out, we need to check some FIRs
+        FAPI_TRY( (mss::check::fir_or_pll_fail<mss::mc_type::EXPLORER, mss::check::firChecklist::OMI>(i_target, l_rc)) );
+#else
+        FAPI_TRY(l_rc, "%s BOOT_CONFIG_0 either failed or timed out", mss::c_str(i_target));
+#endif
 
         FAPI_TRY(mss::exp::workarounds::omi::gem_menterp(i_target, l_gem_menterp_workaround));
 
@@ -138,6 +167,9 @@ extern "C"
         // Perform p10 workaround
         // Train mode 6 (state 3)
         FAPI_TRY(mss::exp::workarounds::omi::pre_training_prbs(i_target));
+
+        // Unmask FIRs
+        FAPI_TRY(mss::unmask::after_mc_omi_setup<mss::mc_type::EXPLORER>(i_target));
 
     fapi_try_exit:
         return fapi2::current_err;

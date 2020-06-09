@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -98,6 +98,9 @@ enum rail
     SWD = 3,
 };
 
+///
+/// @brief pmic attr_eff_engine_fields
+///
 enum class attr_eff_engine_fields
 {
     // Template recursive base case
@@ -156,11 +159,18 @@ enum class attr_eff_engine_fields
 
     PMIC0_MFG_ID                        = 43,
     PMIC1_MFG_ID                        = 44,
+
     PMIC0_SEQUENCE                      = 45,
     PMIC1_SEQUENCE                      = 46,
 
+    PMIC0_REDUNDANCY                    = 47,
+    PMIC1_REDUNDANCY                    = 48,
+
+    PMIC0_REVISION                      = 49,
+    PMIC1_REVISION                      = 50,
+
     // Dispatcher set to last enum value
-    DISPATCHER = PMIC1_SEQUENCE,
+    DISPATCHER = PMIC1_REVISION,
 };
 
 ///
@@ -224,6 +234,12 @@ enum ffdc_codes
 
     SET_PMIC0_SEQUENCE                      = 0x107E,
     SET_PMIC1_SEQUENCE                      = 0x107F,
+
+    SET_PMIC0_REDUNDANCY                    = 0x1080,
+    SET_PMIC1_REDUNDANCY                    = 0x1081,
+
+    SET_PMIC0_REVISION                      = 0x1082,
+    SET_PMIC1_REVISION                      = 0x1083,
 };
 
 ///
@@ -247,8 +263,11 @@ struct consts<mss::pmic::product::JEDEC_COMPLIANT>
 
     static constexpr uint8_t VENDOR_PASSWORD_LOW        = 0x73;
     static constexpr uint8_t VENDOR_PASSWORD_HIGH       = 0x94;
+
+    // Codes below for R39
     static constexpr uint8_t UNLOCK_VENDOR_REGION       = 0x40;
     static constexpr uint8_t LOCK_VENDOR_REGION         = 0x00;
+    static constexpr uint8_t CLEAR_R04_TO_R07           = 0x74;
     static constexpr uint8_t BURN_R40_TO_R4F            = 0x81;
     static constexpr uint8_t BURN_R50_TO_R5F            = 0x82;
     static constexpr uint8_t BURN_R60_TO_R6F            = 0x85; // TI spec says 0x83, is that a deviation or a typo?

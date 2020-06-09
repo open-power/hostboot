@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2015,2019                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2015,2020                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -265,16 +265,4 @@
     </callout>
   </hwpError>
 
- <hwpError>
-    <rc>RC_MSS_MIN_UTILIZATION_ERROR</rc>
-    <description>
-        The input utilization is less than the minimum utilization allowed.
-    </description>
-    <ffdc>INPUT_UTIL_VALUE</ffdc>
-    <ffdc>MIN_UTIL_VALUE</ffdc>
-    <callout>
-      <procedure>CODE</procedure>
-      <priority>HIGH</priority>
-    </callout>
-  </hwpError>
 </hwpErrors>

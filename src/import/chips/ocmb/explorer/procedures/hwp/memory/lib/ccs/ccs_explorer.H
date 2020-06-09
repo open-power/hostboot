@@ -44,9 +44,6 @@ namespace mss
 {
 namespace ccs
 {
-
-// This file ties the two needed header files together
-
 } // namespace ccs
 } // namespace mss
 

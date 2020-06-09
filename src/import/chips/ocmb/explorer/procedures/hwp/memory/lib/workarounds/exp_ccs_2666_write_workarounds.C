@@ -22,3 +22,94 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+
+///
+/// @file exp_ccs_2666_workarounds.H
+/// @brief Workarounds for explorer CCS write issue at 2666
+///
+// *HWP HWP Owner: Stephen Glancy <sglancy@us.ibm.com>
+// *HWP HWP Backup:  Mark Pizzutillo <Mark.Pizzutillo@ibm.com>
+// *HWP Team: Memory
+// *HWP Level: 2
+// *HWP Consumed by: Memory
+
+#include <lib/shared/exp_defaults.H>
+#include <lib/ccs/ccs_traits_explorer.H>
+#include <lib/dimm/exp_mrs_traits.H>
+#include <fapi2.H>
+#include <lib/workarounds/exp_ccs_2666_write_workarounds.H>
+#include <lib/workarounds/exp_mr_workarounds.H>
+#include <mss_generic_attribute_getters.H>
+#include <generic/memory/lib/utils/shared/mss_generic_consts.H>
+#include <generic/memory/lib/utils/fir/gen_mss_unmask.H>
+#include <generic/memory/lib/dimm/ddr4/mrs_load_ddr4.H>
+#include <lib/dimm/exp_rank.H>
+#include <lib/ccs/ccs_explorer.H>
+
+namespace mss
+{
+namespace exp
+{
+namespace workarounds
+{
+
+///
+/// @brief Determine if the CCS 2666 write workaround is needed
+/// @param[in] i_target port target on which to operate
+/// @param[out] o_is_needed true if the workaround needs to be run
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success
+///
+fapi2::ReturnCode is_ccs_2666_write_needed(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
+        bool& o_is_needed)
+{
+    constexpr uint64_t FREQ_NEEDS_WORKAROUND = mss::DIMM_SPEED_2666;
+    constexpr bool NO_RCD = false;
+
+    uint64_t l_freq = 0;
+    bool l_has_rcd = false;
+    o_is_needed = false;
+
+    FAPI_TRY(mss::attr::get_freq(i_target, l_freq));
+    FAPI_TRY(mss::unmask::has_rcd(i_target, l_has_rcd));
+
+    // The workaround is needed if we're at 2666 and do not have an RCD
+    o_is_needed = (l_freq == FREQ_NEEDS_WORKAROUND) &&
+                  (l_has_rcd == NO_RCD);
+    FAPI_DBG("%s freq:%lu, RCD:%s, workaround %s needed",
+             mss::c_str(i_target), l_freq, l_has_rcd ? "yes" : "no", o_is_needed ? "is" : "not");
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Updates CAS write latency if the workaround is needed
+/// @param[in] i_target port target on which to operate
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success
+/// @note This is the first part of the CCS 2666 write workaround
+/// The CWL needs to be increased to 18 for 2666 (non RDIMM)
+/// This will put a non-zero value in the WRDATA_DLY, allowing for good CCS writes
+///
+fapi2::ReturnCode update_cwl(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target)
+{
+    constexpr uint64_t WORKAROUND_CWL = 18;
+    bool l_is_needed = false;
+
+    FAPI_TRY(is_ccs_2666_write_needed(i_target, l_is_needed));
+
+    // If the workaround is not needed, skip it
+    if(l_is_needed == false)
+    {
+        return fapi2::FAPI2_RC_SUCCESS;
+    }
+
+    // Update the CWL to the workaround value
+    FAPI_TRY(mss::attr::set_dram_cwl(i_target, WORKAROUND_CWL));
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+} // workarounds
+} // exp
+} // mss

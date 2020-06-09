@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -795,10 +795,10 @@ class fields<DDR4, DDIMM_MODULE>
         enum
         {
 
-            // Byte 192: SPD Revision for bytes 192->447
-            SPD_REV_BYTE = 192,
-            SPD_REVISION_START = 0,
-            SPD_REVISION_LEN = 8,
+            // Byte 192: SPD Revision DDIMM Module Type (bytes 192->447)
+            SPD_REV_DDIMM_MODULE_BYTE = 192,
+            SPD_REV_DDIMM_MODULE_START = 0,
+            SPD_REV_DDIMM_MODULE_LEN = 8,
 
             // Byte 193: Module Height
             MODULE_HEIGHT_BYTE = 193,
@@ -1083,8 +1083,10 @@ class fields<DDR4, DDIMM_MODULE>
             PMIC0_SWD_ORDER_START = 4,
             PMIC0_SWD_ORDER_LEN = 4,
 
-            // Byte 246: PMIC0 Phase Combination
+            // Byte 246: PMIC0 Phase Combination and redundancy
             PMIC0_PHASE_COMBIN_BYTE = 246,
+            PMIC0_REDUNDANCY_START = 0,
+            PMIC0_REDUNDANCY_LEN = 1,
             PMIC0_PHASE_COMBIN_START = 4,
             PMIC0_PHASE_COMBIN_LEN = 4,
 
@@ -1172,10 +1174,65 @@ class fields<DDR4, DDIMM_MODULE>
             PMIC1_SWD_ORDER_START = 4,
             PMIC1_SWD_ORDER_LEN = 4,
 
-            // Byte 259: PMIC1 Phase Combination
+            // Byte 259: PMIC1 Phase Combination and Redundancy
             PMIC1_PHASE_COMBIN_BYTE = 259,
+            PMIC1_REDUNDANCY_START = 0,
+            PMIC1_REDUNDANCY_LEN = 1,
             PMIC1_PHASE_COMBIN_START = 4,
             PMIC1_PHASE_COMBIN_LEN = 4,
+
+            // Byte 264
+            MODULE_RCD_BYTE = 264,
+            MODULE_RCD_START = 6,
+            MODULE_RCD_LEN = 2,
+
+            // Byte 268: Thermal Sensor 0 Profile
+            THERM_SENSOR_0_PROFILE_BYTE = 268,
+            THERM_SENSOR_0_AVAIL_START = 0,
+            THERM_SENSOR_0_AVAIL_LEN = 1,
+            THERM_SENSOR_0_TYPE_START = 1,
+            THERM_SENSOR_0_TYPE_LEN = 4,
+            THERM_SENSOR_0_USAGE_START = 5,
+            THERM_SENSOR_0_USAGE_LEN = 3,
+
+            // Byte 269: Thermal Sensor 0 I2C Address
+            THERM_SENSOR_0_I2C_ADDRESS_BYTE = 269,
+            THERM_SENSOR_0_I2C_ADDRESS_START = 0,
+            THERM_SENSOR_0_I2C_ADDRESS_LEN = 8,
+
+            // Byte 270: Thermal Sensor 1 Profile
+            THERM_SENSOR_1_PROFILE_BYTE = 270,
+            THERM_SENSOR_1_AVAIL_START = 0,
+            THERM_SENSOR_1_AVAIL_LEN = 1,
+            THERM_SENSOR_1_TYPE_START = 1,
+            THERM_SENSOR_1_TYPE_LEN = 4,
+            THERM_SENSOR_1_USAGE_START = 5,
+            THERM_SENSOR_1_USAGE_LEN = 3,
+
+            // Byte 271: Thermal Sensor 1 I2C Address
+            THERM_SENSOR_1_I2C_ADDRESS_BYTE = 271,
+            THERM_SENSOR_1_I2C_ADDRESS_START = 0,
+            THERM_SENSOR_1_I2C_ADDRESS_LEN = 8,
+
+            // Byte 272: Differential Buffer Thermal Sensor Profile
+            THERM_SENSOR_DIFF_PROFILE_BYTE = 272,
+            THERM_SENSOR_DIFF_AVAIL_START = 0,
+            THERM_SENSOR_DIFF_AVAIL_LEN = 1,
+            THERM_SENSOR_DIFF_TYPE_START = 1,
+            THERM_SENSOR_DIFF_TYPE_LEN = 4,
+            THERM_SENSOR_DIFF_USAGE_START = 5,
+            THERM_SENSOR_DIFF_USAGE_LEN = 3,
+
+            // Byte 273: Differential Buffer Thermal Sensor I2C Address
+            THERM_SENSOR_DIFF_I2C_ADDRESS_BYTE = 273,
+            THERM_SENSOR_DIFF_I2C_ADDRESS_START = 0,
+            THERM_SENSOR_DIFF_I2C_ADDRESS_LEN = 8,
+
+            // Byte 512-513
+            MODULE_MFG_ID_CODE_LSB_BYTE = 512,
+            MODULE_MFG_ID_CODE_MSB_BYTE = 513,
+            MODULE_MFG_ID_CODE_START = 0,
+            MODULE_MFG_ID_CODE_LEN = 8,
 
             // Byte 552-553
             DRAM_MFR_ID_CODE_LSB_BYTE = 552,
@@ -1192,8 +1249,8 @@ class fields<DDR4, DDIMM_MODULE>
         // Second field - start bit
         // Third field - bit length
 
-        // Byte 192: SPD Revision for bytes 192->447
-        static constexpr field_t SPD_REVISION{SPD_REV_BYTE, SPD_REVISION_START, SPD_REVISION_LEN};
+        // Byte 192: SPD Revision DDIMM Module Bytes (192->447)
+        static constexpr field_t SPD_REV_DDIMM_MODULE{SPD_REV_DDIMM_MODULE_BYTE, SPD_REV_DDIMM_MODULE_START, SPD_REV_DDIMM_MODULE_LEN};
 
         // Byte 193: Module Height
         static constexpr field_t MODULE_BASE_HEIGHT{MODULE_HEIGHT_BYTE, MODULE_BASE_HEIGHT_START, MODULE_BASE_HEIGHT_LEN};
@@ -1360,8 +1417,9 @@ class fields<DDR4, DDIMM_MODULE>
         static constexpr field_t PMIC0_SWD_DELAY{PMIC0_SWD_DELAY_BYTE, PMIC0_SWD_DELAY_START, PMIC0_SWD_DELAY_LEN};
         static constexpr field_t PMIC0_SWD_ORDER{PMIC0_SWD_DELAY_BYTE, PMIC0_SWD_ORDER_START, PMIC0_SWD_ORDER_LEN};
 
-        // Byte 246: PMIC0 Phase Combination
+        // Byte 246: PMIC0 Phase Combination / Redundancy
         static constexpr field_t PMIC0_PHASE_COMBIN{PMIC0_PHASE_COMBIN_BYTE, PMIC0_PHASE_COMBIN_START, PMIC0_PHASE_COMBIN_LEN};
+        static constexpr field_t PMIC0_REDUNDANCY{PMIC0_PHASE_COMBIN_BYTE, PMIC0_REDUNDANCY_START, PMIC0_REDUNDANCY_LEN};
 
         // Byte 247: PMIC1 SWA Voltage Setting
         static constexpr field_t PMIC1_SWA_VOLT_SET{PMIC1_SWA_VOLT_SET_BYTE, PMIC1_SWA_VOLT_SET_START, PMIC1_SWA_VOLT_SET_LEN};
@@ -1413,6 +1471,42 @@ class fields<DDR4, DDIMM_MODULE>
 
         // Byte 259: PMIC1 Phase Combination
         static constexpr field_t PMIC1_PHASE_COMBIN{PMIC1_PHASE_COMBIN_BYTE, PMIC1_PHASE_COMBIN_START, PMIC1_PHASE_COMBIN_LEN};
+        static constexpr field_t PMIC1_REDUNDANCY{PMIC1_PHASE_COMBIN_BYTE, PMIC1_REDUNDANCY_START, PMIC1_REDUNDANCY_LEN};
+
+        // Byte 264: Registered Clock Drivers (RCD)
+        static constexpr field_t MODULE_RCD{MODULE_RCD_BYTE, MODULE_RCD_START, MODULE_RCD_LEN};
+
+        // Byte 268: Thermal Sensor 0 Profile
+        static constexpr field_t THERM_SENSOR_0_AVAIL{THERM_SENSOR_0_PROFILE_BYTE, THERM_SENSOR_0_AVAIL_START, THERM_SENSOR_0_AVAIL_LEN};
+        static constexpr field_t THERM_SENSOR_0_USAGE{THERM_SENSOR_0_PROFILE_BYTE, THERM_SENSOR_0_USAGE_START, THERM_SENSOR_0_USAGE_LEN};
+        static constexpr field_t THERM_SENSOR_0_TYPE{THERM_SENSOR_0_PROFILE_BYTE, THERM_SENSOR_0_TYPE_START, THERM_SENSOR_0_TYPE_LEN};
+
+        // Byte 269: Thermal Sensor 0 I2C Address
+        static constexpr field_t THERM_SENSOR_0_I2C_ADDRESS{THERM_SENSOR_0_I2C_ADDRESS_BYTE, THERM_SENSOR_0_I2C_ADDRESS_START, THERM_SENSOR_0_I2C_ADDRESS_LEN};
+
+        // Byte 271: Thermal Sensor 1 Profile
+        static constexpr field_t THERM_SENSOR_1_AVAIL{THERM_SENSOR_1_PROFILE_BYTE, THERM_SENSOR_1_AVAIL_START, THERM_SENSOR_1_AVAIL_LEN};
+        static constexpr field_t THERM_SENSOR_1_USAGE{THERM_SENSOR_1_PROFILE_BYTE, THERM_SENSOR_1_USAGE_START, THERM_SENSOR_1_USAGE_LEN};
+        static constexpr field_t THERM_SENSOR_1_TYPE{THERM_SENSOR_1_PROFILE_BYTE, THERM_SENSOR_1_TYPE_START, THERM_SENSOR_1_TYPE_LEN};
+
+        // Byte 271: Thermal Sensor 1 I2C Address
+        static constexpr field_t THERM_SENSOR_1_I2C_ADDRESS{THERM_SENSOR_1_I2C_ADDRESS_BYTE, THERM_SENSOR_1_I2C_ADDRESS_START, THERM_SENSOR_1_I2C_ADDRESS_LEN};
+
+        // Byte DIFF7DIFF: Differential Sensor Profile
+        static constexpr field_t THERM_SENSOR_DIFF_AVAIL{THERM_SENSOR_DIFF_PROFILE_BYTE, THERM_SENSOR_DIFF_AVAIL_START, THERM_SENSOR_DIFF_AVAIL_LEN};
+        static constexpr field_t THERM_SENSOR_DIFF_USAGE{THERM_SENSOR_DIFF_PROFILE_BYTE, THERM_SENSOR_DIFF_USAGE_START, THERM_SENSOR_DIFF_USAGE_LEN};
+        static constexpr field_t THERM_SENSOR_DIFF_TYPE{THERM_SENSOR_DIFF_PROFILE_BYTE, THERM_SENSOR_DIFF_TYPE_START, THERM_SENSOR_DIFF_TYPE_LEN};
+
+        // Byte 273: Differential Sensor I2C Address
+        static constexpr field_t THERM_SENSOR_DIFF_I2C_ADDRESS{THERM_SENSOR_DIFF_I2C_ADDRESS_BYTE, THERM_SENSOR_DIFF_I2C_ADDRESS_START, THERM_SENSOR_DIFF_I2C_ADDRESS_LEN};
+
+        // MANF Section:
+        // Section is not standardized across dimm types, so these fields will live in the
+        // ddimm specific section
+
+        // Byte 512 and 513 Module MFG ID
+        static constexpr field_t MODULE_MFG_ID_CODE_LSB{MODULE_MFG_ID_CODE_LSB_BYTE, MODULE_MFG_ID_CODE_START, MODULE_MFG_ID_CODE_LEN};
+        static constexpr field_t MODULE_MFG_ID_CODE_MSB{MODULE_MFG_ID_CODE_MSB_BYTE, MODULE_MFG_ID_CODE_START, MODULE_MFG_ID_CODE_LEN};
 
         // Byte 552 and 553: DRAM manufacturing ID for DDIMMs
         static constexpr field_t DRAM_MFR_ID_CODE_LSB{DRAM_MFR_ID_CODE_LSB_BYTE, DRAM_MFR_ID_CODE_START, DRAM_MFR_ID_CODE_LEN};

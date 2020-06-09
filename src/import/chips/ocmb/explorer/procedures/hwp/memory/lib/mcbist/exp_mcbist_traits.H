@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -44,7 +44,7 @@
 #include <lib/shared/exp_consts.H>
 #include <generic/memory/lib/utils/shared/mss_generic_consts.H>
 #include <generic/memory/lib/utils/mcbist/gen_mss_mcbist_address.H>
-#include <generic/memory/lib/utils/mcbist/gen_mss_mcbist_traits.H>
+#include <generic/memory/lib/utils/mcbist/gen_mss_mcbist.H>
 
 namespace mss
 {
@@ -244,6 +244,8 @@ class mcbistTraits< mss::mc_type::EXPLORER, fapi2::TARGET_TYPE_OCMB_CHIP>
         static constexpr uint64_t MCBAMR1A0Q_REG = EXPLR_MCBIST_MCBAMR1A0Q;
         static constexpr uint64_t MCBAMR2A0Q_REG = EXPLR_MCBIST_MCBAMR2A0Q;
         static constexpr uint64_t MCBAMR3A0Q_REG = EXPLR_MCBIST_MCBAMR3A0Q;
+        static constexpr uint64_t LFSR_REG = EXPLR_MCBIST_MCBLFSRA0Q;
+        static const std::vector<uint64_t> LFSR_MASK_VALUES;
 
         // All of the pattern registers are calculated off of this base
         static constexpr uint64_t PATTERN0_REG = EXPLR_MCBIST_MCBFD0Q;
@@ -292,6 +294,10 @@ class mcbistTraits< mss::mc_type::EXPLORER, fapi2::TARGET_TYPE_OCMB_CHIP>
 
         enum
         {
+            // The start/end address config registers have common lengths and bits, just including 1 below
+            MCB_ADDR_CONFIG = EXPLR_MCBIST_MCBEA0Q_CFG_END_ADDR_0,
+            MCB_ADDR_CONFIG_LEN = EXPLR_MCBIST_MCBEA0Q_CFG_END_ADDR_0_LEN,
+
             // Subtest control bits. These are the same in all '16 bit subtest' field
             COMPL_1ST_CMD = EXPLR_MCBIST_MCBMR0Q_MCBIST_CFG_TEST00_COMPL_1ST_CMD,
             COMPL_2ND_CMD = EXPLR_MCBIST_MCBMR0Q_MCBIST_CFG_TEST00_COMPL_2ND_CMD,
@@ -469,6 +475,9 @@ class mcbistTraits< mss::mc_type::EXPLORER, fapi2::TARGET_TYPE_OCMB_CHIP>
             CFG_AMAP_COL2 = EXPLR_MCBIST_MCBAMR3A0Q_CFG_AMAP_COL2,
             CFG_AMAP_COL2_LEN = EXPLR_MCBIST_MCBAMR3A0Q_CFG_AMAP_COL2_LEN,
 
+            LFSR_MASK = EXPLR_MCBIST_MCBLFSRA0Q_CFG_LFSR_MASK_A0,
+            LFSR_MASK_LEN = EXPLR_MCBIST_MCBLFSRA0Q_CFG_LFSR_MASK_A0_LEN,
+
             CFG_DATA_ROT_SEED1 = EXPLR_MCBIST_MCBDRSRQ_CFG_DATA_ROT_SEED,
             CFG_DATA_ROT_SEED1_LEN = EXPLR_MCBIST_MCBDRSRQ_CFG_DATA_ROT_SEED_LEN,
             CFG_DATA_ROT = EXPLR_MCBIST_MCBDRCRQ_CFG_DATA_ROT,
@@ -552,9 +561,10 @@ class mcbistTraits< mss::mc_type::EXPLORER, fapi2::TARGET_TYPE_OCMB_CHIP>
             //MCBIST FIR mask
             MCB_PROGRAM_COMPLETE = EXPLR_MCBIST_MCBISTFIRQ_MCBIST_PROGRAM_COMPLETE,
             MCB_WAT_DEBUG_ATTN = EXPLR_MCBIST_MCBISTFIRQ_WAT_DEBUG_ATTN,
+            MCB_DATA_ERROR = EXPLR_MCBIST_MCBISTFIRQ_MCBIST_DATA_ERROR,
 
             //XLT address valid offset
-            XLT0_SLOT1_D_VALUE     = EXPLR_MCBIST_MBXLT0Q_SLOT1_D_VALUE,
+            XLT0_SLOT1_D_VALID     = EXPLR_MCBIST_MBXLT0Q_SLOT1_VALID,
             XLT0_SLOT0_M1_VALID    = EXPLR_MCBIST_MBXLT0Q_SLOT0_M1_VALID,
             XLT0_SLOT0_M0_VALID    = EXPLR_MCBIST_MBXLT0Q_SLOT0_M0_VALID,
             XLT0_SLOT0_S2_VALID    = EXPLR_MCBIST_MBXLT0Q_SLOT0_S2_VALID,

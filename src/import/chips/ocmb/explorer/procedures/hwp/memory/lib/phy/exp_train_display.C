@@ -34,6 +34,7 @@
 // *HWP Consumed by: FSP:HB
 
 #include <fapi2.H>
+#include <lib/shared/exp_defaults.H>
 #include <lib/shared/exp_consts.H>
 #include <generic/memory/lib/utils/shared/mss_generic_consts.H>
 #include <generic/memory/lib/utils/index.H>

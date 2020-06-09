@@ -34,6 +34,9 @@
 // *HWP Consumed by: FSP:HB
 
 // fapi2
+#include <fapi2.H>
+
+// mss lib
 #include <p10_mss_freq.H>
 
 #include <lib/freq/p10_freq_traits.H>
@@ -45,6 +48,7 @@
 #include <generic/memory/lib/utils/count_dimm.H>
 #include <generic/memory/lib/utils/freq/gen_mss_freq.H>
 #include <generic/memory/mss_git_data_helper.H>
+#include <lib/plug_rules/p10_plug_rules.H>
 
 ///
 /// @brief Calculate and save off DIMM frequencies
@@ -91,6 +95,7 @@ fapi2::ReturnCode p10_mss_freq( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP
 
     }
 
+    // Set frequency attributes
     FAPI_TRY(mss::generate_freq<mss::proc_type::PROC_P10>(i_target));
 
 fapi_try_exit:

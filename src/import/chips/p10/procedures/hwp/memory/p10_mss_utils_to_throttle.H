@@ -22,3 +22,29 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+
+#ifndef __P10_MSS_UTILS_TO_THROTTLE__
+#define __P10_MSS_UTILS_TO_THROTTLE__
+
+#include <fapi2.H>
+#include <vector>
+
+typedef fapi2::ReturnCode (*p10_mss_utils_to_throttle_FP_t) (const
+        std::vector< fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP> >&);
+
+extern "C"
+{
+
+    ///
+    /// @brief Determines throttle and power values for a given port databus utilization.
+    /// @param[in] i_targets vector of OCMB_CHIPs to set throttle and power attributes on
+    /// @return FAPI2_RC_SUCCESS iff ok
+    /// @note ATTR_MSS_MEM_THROTTLED_N_COMMANDS_PER_SLOT will be set to worst case of all slots passed in
+    /// @note output ATTR_MSS_MEM_THROTTLED_N_COMMANDS_PER_SLOT, ATTR_MSS_MEM_THROTTLED_N_COMMANDS_PER_PORT, and ATTR_MSS_PORT_MAXPOWER
+    /// @note Does not set runtime throttles or set registers to throttle values`
+    ///
+    fapi2::ReturnCode p10_mss_utils_to_throttle(const std::vector <fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP> >&
+            i_targets);
+}
+
+#endif

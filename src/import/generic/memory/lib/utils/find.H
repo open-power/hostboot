@@ -150,6 +150,18 @@ inline fapi2::Target<M> find_target( const fapi2::Target<T>& i_target)
 }
 
 ///
+/// @brief find the OCMB_CHIP given a DIMM
+/// @param[in] i_target the fapi2 target DIMM
+/// @return a OCMB_CHIP target.
+///
+template<>
+inline fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP> find_target(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target)
+{
+    return i_target.getParent<fapi2::TARGET_TYPE_MEM_PORT>()
+           .getParent<fapi2::TARGET_TYPE_OCMB_CHIP>();
+}
+
+///
 /// @brief find the PROC_CHIP given a OCMB_CHIP
 /// @param[in] i_target the fapi2 target OCMB_CHIP
 /// @return a PROC_CHIP target.
@@ -195,27 +207,6 @@ find_targets( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
             auto l_these_ocmbs( l_omi.getChildren<fapi2::TARGET_TYPE_OCMB_CHIP>(i_state) );
             l_ocmbs.insert(l_ocmbs.end(), l_these_ocmbs.begin(), l_these_ocmbs.end());
         }
-    }
-
-    return l_ocmbs;
-}
-
-///
-/// @brief find all the OCMB_CHIPs connected to a OMIC
-/// @param[in] i_target a fapi2::Target OMIC
-/// @return a vector of fapi2::TARGET_TYPE_OCMB_CHIP
-///
-template<>
-inline std::vector< fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP> >
-find_targets( const fapi2::Target<fapi2::TARGET_TYPE_OMIC>& i_target,
-              fapi2::TargetState i_state )
-{
-    std::vector< fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP> > l_ocmbs;
-
-    for (const auto& l_omi : i_target.getChildren<fapi2::TARGET_TYPE_OMI>(i_state))
-    {
-        auto l_these_ocmbs( l_omi.getChildren<fapi2::TARGET_TYPE_OCMB_CHIP>(i_state) );
-        l_ocmbs.insert(l_ocmbs.end(), l_these_ocmbs.begin(), l_these_ocmbs.end());
     }
 
     return l_ocmbs;

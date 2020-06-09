@@ -55,6 +55,7 @@ struct attrEngineTraits<proc_type::PROC_P10, pre_data_init_fields, pre_data_init
 {
     using attr_type = fapi2::ATTR_MEM_EFF_DIMM_TYPE_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
+    using attr_type_to_set = attr_integral_type;
     static constexpr fapi2::TargetType TARGET_TYPE = fapi2::ATTR_MEM_EFF_DIMM_TYPE_TargetType;
     static constexpr generic_ffdc_codes FFDC_CODE = SET_DIMM_TYPE;
 
@@ -104,7 +105,7 @@ struct attrEngineTraits<proc_type::PROC_P10, pre_data_init_fields, pre_data_init
             // All others reserved or not supported
         };
 
-        const auto l_dimm = i_spd_data.get_dimm_target();
+        const auto l_dimm = i_spd_data.get_target();
 
         attr_integral_type l_base_module_type = 0;
         FAPI_TRY( i_spd_data.base_module(l_base_module_type),
@@ -128,6 +129,7 @@ struct attrEngineTraits<proc_type::PROC_P10, pre_data_init_fields, pre_data_init
 {
     using attr_type = fapi2::ATTR_MEM_EFF_DRAM_GEN_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
+    using attr_type_to_set = attr_integral_type;
     static constexpr fapi2::TargetType TARGET_TYPE = fapi2::ATTR_MEM_EFF_DRAM_GEN_TargetType;
     static constexpr generic_ffdc_codes FFDC_CODE = SET_DRAM_GEN;
 
@@ -175,7 +177,7 @@ struct attrEngineTraits<proc_type::PROC_P10, pre_data_init_fields, pre_data_init
             // Other key bytes reserved or not supported
         };
 
-        const auto l_dimm = i_spd_data.get_dimm_target();
+        const auto l_dimm = i_spd_data.get_target();
 
         attr_integral_type l_device_type = 0;
         FAPI_TRY( i_spd_data.device_type(l_device_type),
@@ -199,6 +201,7 @@ struct attrEngineTraits<proc_type::PROC_P10, pre_data_init_fields, pre_data_init
 {
     using attr_type = fapi2::ATTR_MEM_EFF_HOST_TO_DDR_SPEED_RATIO_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
+    using attr_type_to_set = attr_integral_type;
     static constexpr fapi2::TargetType TARGET_TYPE = fapi2::ATTR_MEM_EFF_HOST_TO_DDR_SPEED_RATIO_TargetType;
     static constexpr generic_ffdc_codes FFDC_CODE = SET_HOST_TO_DDR_SPEED_RATIO;
 
@@ -253,7 +256,7 @@ struct attrEngineTraits<proc_type::PROC_P10, pre_data_init_fields, pre_data_init
             // All others reserved or not supported
         };
 
-        const auto l_dimm = i_spd_data.get_dimm_target();
+        const auto l_dimm = i_spd_data.get_target();
 
         attr_integral_type l_value = 0;
         FAPI_TRY( i_spd_data.host_to_ddr_speed_ratio(l_value),
@@ -277,6 +280,7 @@ struct attrEngineTraits<proc_type::PROC_P10, pre_data_init_fields, pre_data_init
 {
     using attr_type = fapi2::ATTR_MEM_EFF_HYBRID_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
+    using attr_type_to_set = attr_integral_type;
     static constexpr fapi2::TargetType TARGET_TYPE = fapi2::ATTR_MEM_EFF_HYBRID_TargetType;
     static constexpr generic_ffdc_codes FFDC_CODE = SET_HYBRID;
 
@@ -325,7 +329,7 @@ struct attrEngineTraits<proc_type::PROC_P10, pre_data_init_fields, pre_data_init
             // All others reserved or not supported
         };
 
-        const auto l_dimm = i_spd_data.get_dimm_target();
+        const auto l_dimm = i_spd_data.get_target();
 
         attr_integral_type l_spd_hybrid_type = 0;
         FAPI_TRY(i_spd_data.hybrid(l_spd_hybrid_type),
@@ -349,6 +353,7 @@ struct attrEngineTraits<proc_type::PROC_P10, pre_data_init_fields, pre_data_init
 {
     using attr_type = fapi2::ATTR_MEM_EFF_HYBRID_MEMORY_TYPE_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
+    using attr_type_to_set = attr_integral_type;
     static constexpr fapi2::TargetType TARGET_TYPE = fapi2::ATTR_MEM_EFF_HYBRID_MEMORY_TYPE_TargetType;
     static constexpr generic_ffdc_codes FFDC_CODE = SET_HYBRID_MEDIA;
 
@@ -397,7 +402,7 @@ struct attrEngineTraits<proc_type::PROC_P10, pre_data_init_fields, pre_data_init
             {1, fapi2::ENUM_ATTR_MEM_EFF_HYBRID_MEMORY_TYPE_NVDIMM},
             // All others reserved or not supported
         };
-        const auto l_dimm = i_spd_data.get_dimm_target();
+        const auto l_dimm = i_spd_data.get_target();
         attr_integral_type l_spd_hybrid_media = 0;
 
         FAPI_TRY( i_spd_data.hybrid_media(l_spd_hybrid_media),
@@ -421,6 +426,7 @@ struct attrEngineTraits<proc_type::PROC_P10, pre_data_init_fields, pre_data_init
 {
     using attr_type = fapi2::ATTR_MEM_EFF_NUM_MASTER_RANKS_PER_DIMM_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
+    using attr_type_to_set = attr_integral_type;
     static constexpr fapi2::TargetType TARGET_TYPE = fapi2::ATTR_MEM_EFF_NUM_MASTER_RANKS_PER_DIMM_TargetType;
     static constexpr generic_ffdc_codes FFDC_CODE = SET_MRANKS;
 
@@ -469,7 +475,7 @@ struct attrEngineTraits<proc_type::PROC_P10, pre_data_init_fields, pre_data_init
             {3, fapi2::ENUM_ATTR_MEM_EFF_NUM_MASTER_RANKS_PER_DIMM_4R},
         };
 
-        const auto l_dimm = i_spd_data.get_dimm_target();
+        const auto l_dimm = i_spd_data.get_target();
 
         attr_integral_type l_master_ranks_spd = 0;
         FAPI_TRY( i_spd_data.num_package_ranks_per_dimm(l_master_ranks_spd),
@@ -494,6 +500,7 @@ struct attrEngineTraits<proc_type::PROC_P10, pre_data_init_fields, pre_data_init
 
     using attr_type = fapi2::ATTR_MEM_EFF_DIMM_RANKS_CONFIGED_Type;
     using attr_integral_type = std::remove_all_extents<attr_type>::type;
+    using attr_type_to_set = attr_integral_type;
     static const fapi2::TargetType TARGET_TYPE = fapi2::ATTR_MEM_EFF_DIMM_RANKS_CONFIGED_TargetType;
     static constexpr generic_ffdc_codes FFDC_CODE = SET_DIMM_RANKS_CNFG;
 
@@ -541,7 +548,7 @@ struct attrEngineTraits<proc_type::PROC_P10, pre_data_init_fields, pre_data_init
                        l_master_ranks)) );
 
         FAPI_TRY( l_ranks_configed.setBit(0, l_master_ranks),
-                  "%s. Failed to setBit", spd::c_str(i_spd_data.get_dimm_target()) );
+                  "%s. Failed to setBit", spd::c_str(i_spd_data.get_target()) );
 
         o_setting = l_ranks_configed;
 
@@ -550,6 +557,6 @@ struct attrEngineTraits<proc_type::PROC_P10, pre_data_init_fields, pre_data_init
     }
 };
 
-}//mss
+} // namespace mss
 
 #endif

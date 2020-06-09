@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -186,8 +186,6 @@ fapi2::ReturnCode select_omi_freq(const std::map< fapi2::Target<fapi2::TARGET_TY
                                   const uint32_t i_omi_freq,
                                   uint32_t& o_selected_omi_freq)
 {
-    FAPI_INF("---- In select_omi_freq ----");
-
     switch(i_equal_dimm_speed)
     {
         // If we resolved to equal speeds ...

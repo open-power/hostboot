@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -37,9 +37,9 @@
 #define _MSS_ECC_H_
 
 #include <fapi2.H>
-#include <generic/memory/lib/utils/mcbist/gen_mss_mcbist.H>
 #include <generic/memory/lib/utils/mcbist/gen_mss_mcbist_address.H>
 #include <generic/memory/lib/utils/shared/mss_generic_consts.H>
+#include <generic/memory/lib/utils/mcbist/gen_mss_mcbist.H>
 #include <generic/memory/lib/ecc/ecc_traits.H>
 #include <generic/memory/lib/ecc/galois.H>
 #include <generic/memory/lib/ecc/hw_mark_store.H>
@@ -772,19 +772,6 @@ inline fapi2::ReturnCode get_mce_symbol_count( const fapi2::Target<T>& i_target,
 fapi_try_exit:
     return fapi2::current_err;
 }
-
-///
-/// @brief Clear all MAINT.ECC counters
-/// @tparam T the fapi2::TargetType - derived
-/// @param[in] i_target the fapi2 target
-/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
-///
-template< fapi2::TargetType T >
-inline fapi2::ReturnCode clear_all_counters( const fapi2::Target<T>& i_target )
-{
-    return ( mss::mcbist::reset_errors(i_target) );
-}
-
 
 } // close namespace ecc
 

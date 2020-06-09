@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,13 +22,16 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+
 ///
 /// @file p10_mss_voltage.C
-/// @brief P10 specializations for voltage library
+/// @brief Axone specializations for voltage library
 ///
-/// *HWP HW Maintainer: Louis Stermole <stermole@us.ibm.com>
-/// *HWP FW Maintainer: Christian Geddes <crgeddes@us.ibm.com>
-/// *HWP Consumed by: HB
+// *HWP HWP Owner: Louis Stermole <stermole@us.ibm.com>
+// *HWP HWP Backup: Stephen Glancy <sglancy@us.ibm.com>
+// *HWP Team: Memory
+// *HWP Level: 3
+// *HWP Consumed by: HB:FSP
 
 #include <fapi2.H>
 #include <vector>
@@ -79,7 +82,7 @@ fapi2::ReturnCode get_supported_voltages<mss::mc_type::EXPLORER, mss::spd::devic
     // Get DIMM for each port
     for ( const auto& l_cache : l_spd_facades )
     {
-        const auto l_dimm = l_cache.get_dimm_target();
+        const auto l_dimm = l_cache.get_target();
         uint8_t l_dimm_nominal = 0;
         uint8_t l_dimm_endurant = 0;
 

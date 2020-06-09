@@ -61,9 +61,6 @@ namespace power_thermal
 fapi2::ReturnCode pwr_throttles( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
                                  const mss::throttle_type i_throttle_type)
 {
-    FAPI_INF("Start pwr_throttles for %s type throttling for %s",
-             (( i_throttle_type == mss::throttle_type::THERMAL) ? "THERMAL" : "POWER"), mss::c_str(i_target));
-
     if (mss::count_dimm (i_target) == 0)
     {
         return fapi2::FAPI2_RC_SUCCESS;
@@ -109,7 +106,6 @@ fapi2::ReturnCode pwr_throttles( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHI
         FAPI_TRY(mss::attr::set_mem_throttled_n_commands_per_port( l_port_target, l_port));
     }
 
-    FAPI_INF("End pwr_throttles for %s", mss::c_str(i_target));
     return fapi2::current_err;
 
 fapi_try_exit:
@@ -128,9 +124,6 @@ fapi_try_exit:
 fapi2::ReturnCode equalize_throttles( const std::vector< fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP> >& i_targets,
                                       const mss::throttle_type i_throttle_type)
 {
-    FAPI_INF("Start equalize_throttles for %s type throttling",
-             (( i_throttle_type == mss::throttle_type::THERMAL) ? "THERMAL" : "POWER"));
-
     std::vector< fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT> > l_exceeded_power;
 
     // Set all of the throttles to the lowest value per port for performance reasons
@@ -143,7 +136,6 @@ fapi2::ReturnCode equalize_throttles( const std::vector< fapi2::Target<fapi2::TA
         fapi2::current_err = fapi2::FAPI2_RC_FALSE;
     }
 
-    FAPI_INF("End equalize_throttles");
     return fapi2::current_err;
 
 fapi_try_exit:

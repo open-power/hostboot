@@ -156,8 +156,8 @@ struct pmicFields<mss::pmic::product::JEDEC_COMPLIANT>
     // R2B - bit positions flipped (0 is for bit7, 1 is for bit6, etc)
     static constexpr uint8_t R2B_LDO_1P8_VOLT_SETTING_START     = 0x00;
     static constexpr uint8_t R2B_LDO_1P8_VOLT_SETTING_LENGTH    = 0x02;
-    static constexpr uint8_t R2B_LDO_1P0_VOLT_SETTING_START     = 0x05;
-    static constexpr uint8_t R2B_LDO_1P0_VOLT_SETTING_LENGTH    = 0x02;
+    static constexpr uint8_t R2B_LDO_1P1_VOLT_SETTING_START     = 0x05;
+    static constexpr uint8_t R2B_LDO_1P1_VOLT_SETTING_LENGTH    = 0x02;
 
     // R2F
     static constexpr uint8_t R2F_SWA_REGULATOR_CONTROL = 0x06;

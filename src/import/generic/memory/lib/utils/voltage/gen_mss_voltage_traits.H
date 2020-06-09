@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -51,7 +51,7 @@ template< mss::mc_type P, mss::spd::device_type D >
 class voltage_traits;
 
 ///
-/// @class Traits and policy class for voltage code - specialization for the AXONE processor type, DDR4 device type
+/// @class Traits and policy class for voltage code - specialization for the P10 processor type, DDR4 device type
 ///
 template<>
 class voltage_traits<mss::mc_type::EXPLORER, mss::spd::device_type::DDR4>

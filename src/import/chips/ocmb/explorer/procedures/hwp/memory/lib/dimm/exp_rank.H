@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -113,6 +113,35 @@ inline size_t get_dimm_from_rank(const uint64_t i_rank)
     using TT = rankTraits<mss::mc_type::EXPLORER>;
     return i_rank / TT::MAX_RANKS_PER_DIMM;
 }
+
+///
+/// @brief Return a vector of rank numbers which represent the ranks for this dimm
+/// @param[in] i_dimm_target TARGET_TYPE_DIMM
+/// @param[out] o_ranks a vector of ranks for dimm (numbers)
+/// @return FAPI2_RC_SUCCESS iff all is ok
+///
+template<>
+inline fapi2::ReturnCode ranks_on_dimm_helper<mss::mc_type::EXPLORER>(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>&
+        i_dimm_target,
+        std::vector<uint64_t>& o_ranks)
+{
+    std::vector<uint64_t> l_ranks;
+    std::vector<mss::rank::info<>> l_vect;
+
+    FAPI_TRY( mss::rank::ranks_on_dimm<mss::mc_type::EXPLORER>(i_dimm_target, l_vect) );
+
+    // Loop through and get ranks or each
+    for (const auto l_rank_info : l_vect)
+    {
+        l_ranks.push_back( l_rank_info.get_dimm_rank() );
+    }
+
+    o_ranks = l_ranks;
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
 
 } // namespace rank
 } // namespace mss

@@ -38,18 +38,86 @@
 
 #include <fapi2.H>
 #include <lib/shared/exp_consts.H>
-#include <lib/shared/exp_defaults.H>
 #include <lib/dimm/exp_rank.H>
 #include <exp_data_structs.H>
 #include <generic/memory/lib/utils/endian_utils.H>
 #include <generic/memory/lib/utils/mss_bad_bits.H>
-#include <generic/memory/lib/mss_generic_attribute_setters.H>
-#include <generic/memory/lib/mss_generic_attribute_getters.H>
+#include <mss_explorer_attribute_getters.H>
+#include <mss_explorer_attribute_setters.H>
 
 namespace mss
 {
 namespace exp
 {
+
+///
+/// @brief Holds all the masks for the MR attributes in MRs data
+/// @note The values here are in terms of where they will be in the cronus buffers
+///
+enum mrs_bits : uint16_t
+{
+    // MR0 Values
+    MR0_EFF_DRAM_RBT = 12,
+    MR0_EFF_DRAM_TM = 8,
+    MR0_EFF_DRAM_DLL_RESET = 7,
+    MR0_EFF_BURST_LENGTH = 14,
+    MR0_EFF_BURST_LENGTH_LEN = 2,
+
+    // MR1 Values
+    MR1_EFF_DRAM_DLL_ENABLE = 15,
+    MR1_EFF_DRAM_ODIC = 13,
+    MR1_EFF_DRAM_ODIC_LEN = 2,
+    MR1_EFF_DRAM_AL = 11,
+    MR1_EFF_DRAM_AL_LEN = 2,
+    MR1_EFF_DRAM_WR_LVL_ENABLE = 8,
+    MR1_EFF_DRAM_RTT_NOM = 5,
+    MR1_EFF_DRAM_RTT_NOM_LEN = 3,
+    MR1_EFF_DRAM_TDQS = 4,
+    MR1_EFF_DRAM_OUTPUT_BUFFER = 3,
+
+    // MR2 Values
+    MR2_EFF_DRAM_LPASR = 8,
+    MR2_EFF_DRAM_LPASR_LEN = 2,
+    MR2_EFF_DRAM_RTT_WR = 4,
+    MR2_EFF_DRAM_RTT_WR_LEN = 3,
+
+    // MR3 Values
+    MR3_EFF_MPR_MODE = 13, // Needs confirmation
+    MR3_EFF_MPR_PAGE = 14,
+    MR3_EFF_MPR_PAGE_LEN = 2,
+    MR3_EFF_GEARDOWN_MODE = 12,
+    MR3_EFF_PER_DRAM_ACCESS = 11,
+    MR3_EFF_TEMP_READOUT = 10,
+    MR3_EFF_CRC_WR_LATENCY = 5,
+    MR3_EFF_CRC_WR_LATENCY_LEN = 2,
+    MR3_EFF_MPR_RD_FORMAT = 3,
+    MR3_EFF_MPR_RD_FORMAT_LEN = 2,
+
+    // MR4 Values
+    MR4_EFF_MAX_POWERDOWN_MODE = 14,
+    MR4_EFF_INTERNAL_VREF_MONITOR = 11,
+    MR4_EFF_SELF_REF_ABORT = 6,
+    MR4_EFF_RD_PREAMBLE_TRAIN = 5,
+    MR4_EFF_RD_PREAMBLE = 4,
+    MR4_EFF_WR_PREAMBLE = 3,
+
+    // MR5 Values
+    MR5_EFF_CRC_ERROR_CLEAR = 12,
+    MR5_EFF_CA_PARITY_ERROR_STATUS = 11,
+    MR5_EFF_ODT_INPUT_BUFF = 10,
+    MR5_EFF_CA_PARITY = 6,
+    MR5_EFF_DATA_MASK = 5,
+    MR5_EFF_WRITE_DBI = 4,
+    MR5_EFF_READ_DBI = 3,
+    MR5_EFF_DRAM_RTT_PARK = 7,
+    MR5_EFF_DRAM_RTT_PARK_LEN = 3,
+
+    // MR6 Values
+    MR6_VREFDQ_TRAINING_VALUE = 10,
+    MR6_VREFDQ_TRAINING_VALUE_LEN = 6,
+    MR6_VREFDQ_TRAINING_RANGE = 9,
+    MR6_VREFDQ_TRAINING_ENABLE = 8,
+};
 
 ///
 /// @brief Read eye capture response data from explorer data buffer
@@ -171,6 +239,15 @@ inline void read_eye_capture_response<user_2d_eye_response_2_msdg>(const fapi2::
 }
 
 ///
+/// @brief Parse the MRS data from the response to correct attributes
+/// @param[in] i_target OCMB chip
+/// @param[in] i_resp MRS response struct
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success
+///
+fapi2::ReturnCode parse_mrs_data_attributes(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+        const user_response_mrs_msdg_t& i_resp);
+
+///
 /// @brief Read the common block of fields from the training response structs
 ///
 /// @tparam T training repsonse struct type
@@ -238,6 +315,9 @@ fapi2::ReturnCode read_tm_err_mrs_rc_response(const fapi2::Target<fapi2::TARGET_
                  .set_MAX_INDEX(sizeof(T)),
                  "%s Failed to convert from data to host_fw_response_struct data size %u expected size %u",
                  mss::c_str(i_target), i_data.size(), sizeof(T));
+
+    // Set MR attributes based on settings
+    FAPI_TRY( parse_mrs_data_attributes(i_target, io_resp.mrs_resp));
 
     return fapi2::FAPI2_RC_SUCCESS;
 

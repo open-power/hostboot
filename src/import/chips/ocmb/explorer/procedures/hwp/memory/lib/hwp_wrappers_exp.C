@@ -6,6 +6,7 @@
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
 /* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
@@ -98,7 +99,10 @@ fapi2::ReturnCode exp_background_scrub( const fapi2::Target<fapi2::TARGET_TYPE_O
                                         const mss::mcbist::speed i_speed,
                                         const mss::mcbist::address& i_address )
 {
-    return mss::memdiags::background_scrub<mss::mc_type::EXPLORER>(i_target, i_stop, i_speed, i_address);
+    return mss::memdiags::mss_firmware_background_scrub_helper<mss::mc_type::EXPLORER>(i_target,
+            i_stop,
+            i_speed,
+            i_address);
 }
 
 ///
@@ -134,6 +138,20 @@ fapi2::ReturnCode exp_continue_cmd( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_
                                     const mss::mcbist::speed i_speed )
 {
     return mss::memdiags::continue_cmd<mss::mc_type::EXPLORER>(i_target, i_end, i_stop, i_speed);
+}
+
+///
+/// @brief Restore DRAM repairs wrapper for Explorer
+/// @param[in] i_target A target representing a port
+/// @param[in,out] io_repairs_applied bit mask, where a bit set means a rank had repairs applied (bit0 = rank0, etc)
+/// @param[in,out] io_repairs_exceeded bit mask, where a bit set means a DIMM had more bad bits than could be repaired (bit0 = DIMM0 etc)
+/// @return FAPI2_RC_SUCCESS iff ok
+///
+fapi2::ReturnCode exp_restore_repairs( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+                                       fapi2::buffer<uint8_t>& io_repairs_applied,
+                                       fapi2::buffer<uint8_t>& io_repairs_exceeded )
+{
+    return mss::restore_repairs<mss::mc_type::EXPLORER>(i_target, io_repairs_applied, io_repairs_exceeded);
 }
 
 ///

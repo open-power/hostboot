@@ -22,3 +22,27 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+
+///
+/// @file p10_plug_rules.H
+/// @brief Enforcement of rules for plugging in DIMM
+///
+// *HWP HWP Owner: Stephen Glancy <sglancy@us.ibm.com>
+// *HWP HWP Backup: Andre Marin <aamarin@us.ibm.com>
+// *HWP Team: Memory
+// *HWP Level: 3
+// *HWP Consumed by: FSP:HB
+
+#ifndef _P10_PLUG_RULES_H_
+#define _P10_PLUG_RULES_H_
+
+namespace mss
+{
+
+namespace plug_rule
+{
+
+} // ns plug_rule
+} // ns mss
+
+#endif // _P10_PLUG_RULES_H_

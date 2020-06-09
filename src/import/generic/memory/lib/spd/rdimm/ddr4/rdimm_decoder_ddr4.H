@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -90,7 +90,7 @@ class decoder<DDR4, RDIMM_MODULE, R > : public dimm_module_decoder
         /// @brief Gets decoder target
         /// @return fapi2::Target<fapi2::TARGET_TYPE_DIMM>
         ///
-        virtual fapi2::Target<fapi2::TARGET_TYPE_DIMM> get_dimm_target() const
+        virtual fapi2::Target<fapi2::TARGET_TYPE_DIMM> get_target() const
         {
             return iv_target;
         }

@@ -35,6 +35,7 @@
     <ffdc>DL0_STATUS</ffdc>
     <ffdc>DL0_TRAINING_STATUS</ffdc>
     <ffdc>DL0_CONFIG1</ffdc>
+    <ffdc>DL0_ERROR_HOLD</ffdc>
     <ffdc>OMI_FREQ</ffdc>
     <callout>
         <target>OCMB_TARGET</target>
@@ -50,6 +51,38 @@
     <gard>
         <target>OCMB_TARGET</target>
     </gard>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_FFE_CURSOR_OVERFLOW</rc>
+    <description>
+      Sum of FFE pre-cursor and post-cursor needs to be less than 64
+    </description>
+    <ffdc>TARGET</ffdc>
+    <ffdc>PRE_CURSOR</ffdc>
+    <ffdc>POST_CURSOR</ffdc>
+    <callout>
+        <procedure>CODE</procedure>
+        <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_EXP_OMI_BUMP_SL_WORKAROUND_ERROR</rc>
+    <description>
+      bump_sl_workaround received an invalid lane input
+    </description>
+    <ffdc>OCMB_TARGET</ffdc>
+    <ffdc>LANE_INPUT</ffdc>
+    <ffdc>MAX_LANE</ffdc>
+    <callout>
+        <target>OCMB_TARGET</target>
+        <priority>HIGH</priority>
+    </callout>
+    <callout>
+        <bus>OMI_TARGET, OCMB_TARGET</bus>
+        <priority>HIGH</priority>
+    </callout>
   </hwpError>
   <!-- ******************************************************************** -->
 </hwpErrors>

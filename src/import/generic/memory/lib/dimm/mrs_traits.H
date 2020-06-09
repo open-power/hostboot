@@ -22,3 +22,28 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+
+///
+/// @file mrs_traits.H
+/// @brief MRS traits declaration
+///
+// *HWP HWP Owner: Matthew Hickman <Matthew.Hickman@ibm.com>
+// *HWP HWP Backup: Andre Marin <aamarin@us.ibm.com>
+// *HWP Team: Memory
+// *HWP Level: 3
+// *HWP Consumed by: HB:FSP
+
+#ifndef _GENERIC_MRS_TRAITS_H_
+#define _GENERIC_MRS_TRAITS_H_
+
+#include <generic/memory/lib/utils/shared/mss_generic_consts.H>
+
+///
+/// @class mrsTraits
+/// @brief MRS Engine traits and addresses
+/// @tparam MC The memory controller type of the traits
+///
+template< mss::mc_type MC >
+class mrsTraits;
+
+#endif

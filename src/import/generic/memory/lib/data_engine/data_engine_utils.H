@@ -54,8 +54,10 @@ namespace mss
 
 ///
 /// @brief Alias for function pointer to spd_facade timing methods
+/// @tparam DT data type
 ///
-using spd_facade_fptr = fapi2::ReturnCode (spd::facade::*)(int64_t& o_timing_in_mtb) const;
+template <typename DT>
+using spd_facade_fptr = fapi2::ReturnCode (spd::facade::*)(DT& o_field) const;
 
 ///
 /// @brief Algorithm to calculate SPD timings in nCK
@@ -74,7 +76,7 @@ template < typename ET,
 inline fapi2::ReturnCode calc_spd_time_in_ps(const spd::facade& i_spd,
         OT& o_timing_in_ps)
 {
-    const auto l_dimm = i_spd.get_dimm_target();
+    const auto l_dimm = i_spd.get_target();
     int64_t l_timing_mtb = 0;
     int64_t l_timing_ftb = 0;
     int64_t l_mtb = 0;
@@ -113,7 +115,7 @@ template < typename ET,
 inline fapi2::ReturnCode calc_spd_time_in_nck(const spd::facade& i_spd,
         OT& o_timing_in_nck)
 {
-    const auto l_dimm = i_spd.get_dimm_target();
+    const auto l_dimm = i_spd.get_target();
 
     // Calculate the DIMM speed in picoseconds (a.k.a tCK == clock period)
     int64_t l_tck_in_ps = 0;
@@ -146,50 +148,75 @@ namespace gen
 {
 
 ///
-/// @brief Helper to get the target associated with the SPD facade
-/// @param[in] i_data the SPD data
-/// return a fapi2 DIMM target
+/// @class get
+/// @brief get struct base class
+/// @tparam T TargetType with which to use
+/// @tparam DT the data type
 ///
-static inline fapi2::Target<fapi2::TARGET_TYPE_DIMM> get_target(const spd::facade& i_data)
-{
-    return i_data.get_dimm_target();
-}
+template <fapi2::TargetType T, typename DT>
+struct get;
 
 ///
-/// @brief Helper to get the target associated with the EFD decoder
-/// @param[in] i_data the EFD data
-/// return a fapi2 DIMM target
+/// @class get<fapi2::TARGET_TYPE_OCMB_CHIP, mss::spd::facade>
+/// @brief Get target struct for TARGET_TYPE_OCMB_CHIP and spd::facade specialization
+/// @note For any attributes we denote as TARGET_TYPE_OCMB_CHIP, the SPD field will populate it,
+///       but loses any concept of dual drop.
 ///
-static inline fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP> get_target(const std::shared_ptr<efd::base_decoder>& i_data)
+template <>
+struct get<fapi2::TARGET_TYPE_OCMB_CHIP, mss::spd::facade>
 {
-    return i_data->get_ocmb_target();
-}
+    ///
+    /// @brief Get target for TARGET_TYPE_OCMB_CHIP and mss::spd::facade
+    ///
+    /// @param[in] i_data mss::spd::facade data
+    /// @return fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP> Attribute target type
+    ///
+    static fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP> target(const mss::spd::facade& i_data)
+    {
+        return mss::find_target<fapi2::TARGET_TYPE_OCMB_CHIP>(
+                   mss::find_target<fapi2::TARGET_TYPE_MEM_PORT>(i_data.get_target()));
+    }
+};
 
 ///
-/// @brief Helper function to get the target associated with generic attribute setting
-/// @param[in] i_target
-/// return a fapi2 MEM_PORT target
+/// @class get<T, spd::facade>
+/// @brief get struct for spd::facade specialization with default target type
+/// @tparam T TargetType with which to use
 ///
-static inline fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT> get_attr_target(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>&
-        i_target)
+template <>
+struct get<fapi2::TARGET_TYPE_MEM_PORT, spd::facade>
 {
-    return mss::find_target<fapi2::TARGET_TYPE_MEM_PORT>(i_target);
-}
+    ///
+    /// @brief Get target for spd::facade and default target type for SPD attrs (MEM_PORT)
+    ///
+    /// @param[in] i_data spd::facade data
+    /// @return fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT> Attribute target type
+    ///
+    static fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT> target(const spd::facade& i_data)
+    {
+        return mss::find_target<fapi2::TARGET_TYPE_MEM_PORT>(i_data.get_target());
+    }
+};
 
 ///
-/// @brief Helper function to get the target associated with generic attribute setting
-/// @param[in] i_target
-/// return a fapi2 MEM_PORT target
+/// @class Get get<T, std::shared_ptr<efd::base_decoder>>
+/// @brief get struct for efd::base_decoder specialization with default target type
+/// @tparam T TargetType with which to use
 ///
-inline fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT> get_attr_target(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>&
-        i_target)
+template <>
+struct get<fapi2::TARGET_TYPE_MEM_PORT, std::shared_ptr<efd::base_decoder>>
 {
-    // Explorer has only one MEM_PORT per OCMB, so we are looking for the 0th pos relative to the OCMB
-    // Will need to update to take into account a mem_channel index in VPDinfo if we ever support this.
-    // Per FW, for the DDIMM case we can't support unique settings per channel because the SPD
-    // doesn't know about anything outside of the DDIMM itself.
-    return mss::find_targets<fapi2::TARGET_TYPE_MEM_PORT>(i_target)[0];
-}
+    ///
+    /// @brief Get target for std::shared_ptr<efd::base_decoder> and default target type for EFD attrs (MEM_PORT)
+    ///
+    /// @param[in] i_data std::shared_ptr<efd::base_decoder> data
+    /// @return fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT> Attribute target type
+    ///
+    static fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT> target(const std::shared_ptr<efd::base_decoder>& i_data)
+    {
+        return mss::find_targets<fapi2::TARGET_TYPE_MEM_PORT>(i_data->get_target())[0];
+    }
+};
 
 ///
 /// @brief Helper function to update the structure that holds attr data
@@ -207,43 +234,22 @@ template < size_t X,
            size_t Y,
            typename T,
            typename FFDC >
-inline fapi2::ReturnCode update_data(const std::shared_ptr<efd::base_decoder>& i_efd_data,
-                                     const T i_setting,
-                                     const FFDC i_ffdc_code,
-                                     T (&o_data)[X][Y])
+fapi2::ReturnCode update_data(const std::shared_ptr<efd::base_decoder>& i_efd_data,
+                              const T i_setting,
+                              const FFDC i_ffdc_code,
+                              T (&o_data)[X][Y])
 {
-    const auto l_ocmb = i_efd_data->get_ocmb_target();
+    const auto l_ocmb = i_efd_data->get_target();
 
     // mss::index of rank number will % 4 (RANKS_PER_DIMM) to get us the corresponding dimm
     const auto l_dimm_index = i_efd_data->get_rank() / mss::MAX_RANK_PER_DIMM;
     const auto l_dimm_rank = i_efd_data->get_rank() % mss::MAX_RANK_PER_DIMM;
 
-    FAPI_ASSERT( l_dimm_index < X,
-                 fapi2::MSS_OUT_OF_BOUNDS_INDEXING()
-                 .set_INDEX(l_dimm_index)
-                 .set_LIST_SIZE(X)
-                 .set_FUNCTION(i_ffdc_code)
-                 .set_TARGET(l_ocmb),
-                 "Dimm index (%d) was larger than max (%d) on %s",
-                 l_dimm_index,
-                 X,
-                 mss::spd::c_str(l_ocmb) );
-
-    FAPI_ASSERT( l_dimm_rank < Y,
-                 fapi2::MSS_OUT_OF_BOUNDS_INDEXING()
-                 .set_INDEX(l_dimm_rank)
-                 .set_LIST_SIZE(X)
-                 .set_FUNCTION(i_ffdc_code)
-                 .set_TARGET(l_ocmb),
-                 "Rank index (%d) was larger than max (%d) on %s",
-                 l_dimm_rank,
-                 Y,
-                 mss::spd::c_str(l_ocmb) );
+    FAPI_TRY( check::index_within_bounds(l_ocmb, l_dimm_index, X, i_ffdc_code) );
+    FAPI_TRY( check::index_within_bounds(l_ocmb, l_dimm_rank, Y, i_ffdc_code) );
 
     FAPI_DBG("Updating data[%d][%d] with %d for %s", l_dimm_index, l_dimm_rank, i_setting, spd::c_str(l_ocmb));
     o_data[l_dimm_index][l_dimm_rank] = i_setting;
-
-    return fapi2::FAPI2_RC_SUCCESS;
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -251,42 +257,33 @@ fapi_try_exit:
 
 ///
 /// @brief Helper function to update the structure that holds attr data
-/// @tparam X size of 1st array index
+/// @tparam DT data type
 /// @tparam T Input/output data type
 /// @tparam FFDC the FFDC type
+/// @tparam X size of 1st array index
 /// @param[in] i_data the SPD data
-/// @param[in] i_target the DIMM target
 /// @param[in] i_setting array to set
 /// @param[in] i_ffdc_code FFDC function code
 /// @param[out] o_data attribute data structure to set
+/// @warn DT requires an adaptor that supports get_target()
 /// @return FAPI2_RC_SUCCESS iff okay
 ///
-template < size_t X,
+template < typename DT,
            typename T,
-           typename FFDC >
-inline fapi2::ReturnCode update_data( const spd::facade& i_spd_data,
-                                      const T i_setting,
-                                      const FFDC i_ffdc_code,
-                                      T (&o_data)[X])
+           typename FFDC,
+           size_t X >
+fapi2::ReturnCode update_data( const DT& i_data,
+                               const T i_setting,
+                               const FFDC i_ffdc_code,
+                               T (&o_data)[X])
 {
-    const auto l_dimm = i_spd_data.get_dimm_target();
+    const auto l_dimm = i_data.get_target();
     const size_t l_dimm_index = mss::index(l_dimm);
 
-    FAPI_ASSERT( l_dimm_index < X,
-                 fapi2::MSS_OUT_OF_BOUNDS_INDEXING()
-                 .set_INDEX(l_dimm_index)
-                 .set_LIST_SIZE(X)
-                 .set_FUNCTION(i_ffdc_code)
-                 .set_TARGET(l_dimm),
-                 "Dimm index (%d) was larger than max (%d) on %s",
-                 l_dimm_index,
-                 X,
-                 mss::spd::c_str(l_dimm) );
+    FAPI_TRY( check::index_within_bounds(l_dimm, l_dimm_index, X, i_ffdc_code) );
 
     FAPI_DBG("Updating data[%d] with %d for %s", l_dimm_index, i_setting, spd::c_str(l_dimm));
     o_data[l_dimm_index] = i_setting;
-
-    return fapi2::FAPI2_RC_SUCCESS;
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -308,28 +305,17 @@ template < fapi2::TargetType T,
            typename IT,
            typename FFDC,
            size_t X >
-inline fapi2::ReturnCode update_data( const fapi2::Target<T>& i_target,
-                                      const IT i_setting,
-                                      const FFDC i_ffdc_code,
-                                      IT (&o_data)[X])
+fapi2::ReturnCode update_data( const fapi2::Target<T>& i_target,
+                               const IT i_setting,
+                               const FFDC i_ffdc_code,
+                               IT (&o_data)[X])
 {
     const size_t l_dimm_index = mss::index(i_target);
 
-    FAPI_ASSERT( l_dimm_index < X,
-                 fapi2::MSS_OUT_OF_BOUNDS_INDEXING()
-                 .set_INDEX(l_dimm_index)
-                 .set_LIST_SIZE(X)
-                 .set_FUNCTION(i_ffdc_code)
-                 .set_TARGET(i_target),
-                 "Dimm index (%d) was larger than max (%d) on %s",
-                 l_dimm_index,
-                 X,
-                 mss::spd::c_str(i_target) );
+    FAPI_TRY( check::index_within_bounds(i_target, l_dimm_index, X, i_ffdc_code) );
 
     FAPI_DBG("Updating data[%d] with %d for %s", l_dimm_index, i_setting, spd::c_str(i_target));
     o_data[l_dimm_index] = i_setting;
-
-    return fapi2::FAPI2_RC_SUCCESS;
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -347,19 +333,20 @@ fapi_try_exit:
 /// @param[out] o_data output to set
 /// @return FAPI2_RC_SUCCESS iff okay
 ///
-template < fapi2::TargetType T,
-           typename IT,
-           typename FFDC,
-           typename OT >
-inline fapi2::ReturnCode update_data( const fapi2::Target<T>& i_target,
-                                      const IT i_setting,
-                                      const FFDC i_ffdc_code,
-                                      OT& o_data )
+template <fapi2::TargetType T,
+          typename IT,
+          typename FFDC,
+          typename OT>
+inline fapi2::ReturnCode update_data(const fapi2::Target<T>& i_target,
+                                     const IT& i_setting,
+                                     const FFDC i_ffdc_code,
+                                     OT& o_data)
 {
     FAPI_DBG("Updating data with %d for %s", i_setting, spd::c_str(i_target));
     o_data = i_setting;
     return fapi2::FAPI2_RC_SUCCESS;
 }
+
 ///
 /// @brief Helper function to update the structure that holds attr data
 /// @tparam DT the data type
@@ -372,16 +359,15 @@ inline fapi2::ReturnCode update_data( const fapi2::Target<T>& i_target,
 /// @param[out] o_data output to set
 /// @return FAPI2_RC_SUCCESS iff okay
 ///
-template < typename DT,
-           typename IT,
-           typename FFDC,
-           typename OT >
-inline fapi2::ReturnCode update_data( const DT& i_data,
-                                      const IT i_setting,
-                                      const FFDC i_ffdc_code,
-                                      OT& o_data )
+template <typename DT,
+          typename IT,
+          typename FFDC,
+          typename OT>
+inline fapi2::ReturnCode update_data(const DT& i_data,
+                                     const IT& i_setting,
+                                     const FFDC i_ffdc_code,
+                                     OT& o_data)
 {
-    FAPI_DBG("Updating data with %d for %s", i_setting, spd::c_str(get_target(i_data)));
     o_data = i_setting;
     return fapi2::FAPI2_RC_SUCCESS;
 }
@@ -430,13 +416,10 @@ template< typename TT,
           typename DT,
           typename IT >
 inline fapi2::ReturnCode set_field(const DT& i_data,
-                                   const IT i_setting)
+                                   const IT& i_setting)
 {
     // Grab the target associated w/the data (e.g. SPD or EFD)
-    const auto l_data_target = get_target(i_data);
-
-    // Grab the target associated w/the attribute to set
-    const auto l_attr_target = get_attr_target(l_data_target);
+    const auto l_attr_target = get<TT::TARGET_TYPE, DT>::target(i_data);
 
     // Get the attribute data in its entirety
     typename TT::attr_type l_attr_list = {};
@@ -446,6 +429,8 @@ inline fapi2::ReturnCode set_field(const DT& i_data,
     // Update the portion of interest (can vary per dimm and/or rank)
     FAPI_TRY( update_data(i_data, i_setting, TT::FFDC_CODE, l_attr_list),
               "Failed update_data()");
+
+    FAPI_DBG("Updating data with %d for %s", i_setting, spd::c_str(l_attr_target));
 
     // Set the contents back to the attribute
     FAPI_TRY( TT::set_attr(l_attr_target, l_attr_list),
@@ -512,7 +497,38 @@ static inline uint8_t align_odt_field_to_attr(const uint8_t i_value)
     return l_value();
 }
 
-}// gen
-}//mss
+///
+/// @brief Check for SPD Revision 0.3, set o_field accordingly, for use with thermal sensor fields
+///
+/// @tparam DT Data type (uint8_t, uint16_t, etc.)
+/// @param[in] i_spd_data SPD facade
+/// @param[in] i_spd_field_fp SPD field function pointer
+/// @param[out] o_field field to set with result
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
+/// @note TK This should eventually be replaced with a proper SPD revision checking API
+///
+template <typename DT>
+static inline fapi2::ReturnCode spd_revision_check_0_3(
+    const spd::facade& i_spd_data,
+    spd_facade_fptr<DT> i_spd_field_fp,
+    DT& o_field)
+{
+    uint8_t l_revision = 0;
+    FAPI_TRY(i_spd_data.revision(l_revision));
+
+    // If >= 0.3, set to value, else, the bytes are garbage, set to 0
+    if (l_revision >= mss::spd::rev::V0_3)
+    {
+        return (i_spd_data.*i_spd_field_fp)(o_field);
+    }
+
+    o_field = 0;
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+} // namespace gen
+} // namespace mss
 
 #endif

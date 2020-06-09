@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2015,2019
+# Contributors Listed Below - COPYRIGHT 2015,2020
 # [+] International Business Machines Corp.
 #
 #
@@ -85,7 +85,7 @@ sub print_help
     print("  This perl script will parse attribute XML files and create the following files:\n");
     print("  - <prefix>_attribute_getters.H.       Contains the attribute getters, based on the xml\n");
     print("  - <prefix>_attribute_setters.H.       Contains the attribute setters, based on the xml\n");
-    print("  Note that the system argument must be one of the following: NIMBUS, AXONE\n");
+    print("  Note that the system argument must be one of the following: NIMBUS, P10\n");
     exit(1);
 }
 

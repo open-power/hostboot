@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -47,22 +47,31 @@
 
 constexpr uint16_t SPD_PMIC0_I2C_BYTE = 260;
 constexpr uint16_t SPD_PMIC1_I2C_BYTE = 261;
+constexpr uint16_t SPD_PMIC0_REDUNDANT_I2C_BYTE = 262;
+constexpr uint16_t SPD_PMIC1_REDUNDANT_I2C_BYTE = 263;
 
+// Since we'll pass in numbers 0-3 we'll denote the PMICs as such,
+// PMIC2 = redundant 0
+// PMIC3 = redundant 1
 constexpr uint8_t PMIC0 = 0;
 constexpr uint8_t PMIC1 = 1;
+constexpr uint8_t PMIC2 = 2;
+constexpr uint8_t PMIC3 = 3;
 
 // Mapping from PMIC ID to SPD byte
 static const std::vector<uint16_t> PMIC_I2C_ADDR_VECTOR =
 {
-    SPD_PMIC0_I2C_BYTE, // [0 == PMIC0]
-    SPD_PMIC1_I2C_BYTE  // [1 == PMIC1]
+    SPD_PMIC0_I2C_BYTE,             // 0 == PMIC0
+    SPD_PMIC1_I2C_BYTE,             // 1 == PMIC1
+    SPD_PMIC0_REDUNDANT_I2C_BYTE,   // 2 == PMIC2 (redundant 0)
+    SPD_PMIC1_REDUNDANT_I2C_BYTE,   // 3 == PMIC3 (redundant 1)
 };
 
 ///
 /// @brief Get the pmic i2c address for the given PMIC ID
 ///
 /// @param[in] i_spd SPD binary
-/// @param[in] i_pmic_id PMIC ID (0,1)
+/// @param[in] i_pmic_id PMIC ID (0,1,2,3)
 /// @return uint8_t I2C address for the given PMIC ID
 /// @note May need to be changed to support 4U SPD
 ///

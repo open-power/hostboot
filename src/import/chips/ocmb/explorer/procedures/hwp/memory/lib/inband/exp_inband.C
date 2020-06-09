@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -494,7 +494,7 @@ fapi2::ReturnCode host_fw_response_struct_from_little_endian(const fapi2::Target
                 mss::c_str(i_target), i_data.size(), sizeof(host_fw_response_struct));
 
 //TODO CQ: SW461052 Correct MMIO CRC responses
-#ifndef CONFIG_P10_BRING_UP
+#ifndef __HOSTBOOT_MODULE
     FAPI_ASSERT(l_crc == o_response.response_header_crc,
                 fapi2::EXP_INBAND_RSP_CRC_ERR()
                 .set_COMPUTED(l_crc)
@@ -517,9 +517,10 @@ fapi2::ReturnCode poll_for_response_ready(const fapi2::Target<fapi2::TARGET_TYPE
 {
     // NUM_LOOPS is based on EXP_FW_DDR_PHY_INIT command, which completes in ~370ms in HW.
     // We initially delay 8ms, so we should only need to poll for ~360ms here.
-    // We're waiting 20ms between polls, so we should only need about 18 loops here,
-    // but we make it 200 to be safe. Max timeout is (200 x 20ms) = 4 seconds
-    constexpr uint64_t NUM_LOOPS = 200;
+    // Update: for MDS parts training takes on the order of 23 seconds with UART attached.
+    // We're waiting 20ms between polls so we poll 1300 times.
+    // Max timeout is (1300 x 20ms) = 26 seconds
+    constexpr uint64_t NUM_LOOPS = 1300;
 
     // So, why aren't we using the memory team's polling API?
     // This is a base function that will be utilized by the platform code

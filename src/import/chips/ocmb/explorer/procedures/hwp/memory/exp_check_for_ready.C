@@ -38,6 +38,9 @@
 #include <exp_check_for_ready.H>
 #include <lib/i2c/exp_i2c.H>
 #include <generic/memory/mss_git_data_helper.H>
+#include <generic/memory/lib/utils/shared/mss_generic_consts.H>
+#include <mss_explorer_attribute_getters.H>
+#include <mss_generic_system_attribute_getters.H>
 
 extern "C"
 {
@@ -50,10 +53,24 @@ extern "C"
     {
         mss::display_git_commit_info("exp_check_for_ready");
 
-        FAPI_TRY(mss::exp::i2c::exp_check_for_ready_helper(i_target));
+        uint8_t l_sim = 0;
+        FAPI_TRY(mss::attr::get_is_simulation(l_sim));
+
+        if (l_sim)
+        {
+            FAPI_INF("Sim, skipping exp_check_for_ready %s", mss::c_str(i_target));
+            return fapi2::FAPI2_RC_SUCCESS;
+        }
+
+        {
+            fapi2::ATTR_MSS_CHECK_FOR_READY_TIMEOUT_Type l_poll_count = 0;
+            FAPI_TRY(mss::attr::get_check_for_ready_timeout(i_target, l_poll_count));
+            FAPI_TRY(mss::exp::i2c::exp_check_for_ready_helper(i_target, l_poll_count, mss::DELAY_1MS));
+        }
 
     fapi_try_exit:
         return fapi2::current_err;
+
     }
 
 }// extern C

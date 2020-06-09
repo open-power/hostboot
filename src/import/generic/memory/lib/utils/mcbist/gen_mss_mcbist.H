@@ -40,11 +40,12 @@
 
 #include <generic/memory/lib/utils/poll.H>
 #include <generic/memory/lib/utils/memory_size.H>
+#include <generic/memory/lib/utils/mc/gen_mss_port.H>
 #include <generic/memory/lib/utils/mcbist/gen_mss_mcbist_patterns.H>
 #include <generic/memory/lib/utils/mcbist/gen_mss_mcbist_settings.H>
 #include <generic/memory/lib/utils/mcbist/gen_mss_mcbist_traits.H>
+#include <generic/memory/lib/utils/conversions.H>
 #include <generic/memory/lib/utils/num.H>
-#include <generic/memory/lib/utils/mc/gen_mss_port.H>
 
 namespace mss
 {
@@ -723,6 +724,41 @@ inline subtest_t<MC, T, TT> read_write_subtest()
     return l_subtest;
 }
 
+
+///
+/// @brief Return a write read subtest - configured simply
+/// @tparam MC the mc type of the T
+/// @tparam T the fapi2::TargetType - derived
+/// @tparam TT the mcbistTraits associated with T - derived
+/// @return mss::mcbist::subtest_t
+/// @note Turns on ECC mode for the returned subtest - caller can turn it off
+/// @note Configures for start/end address select bit as address config register 0
+///
+template< mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T = mss::mcbistMCTraits<MC>::MC_TARGET_TYPE, typename TT = mcbistTraits<MC, T> >
+inline subtest_t<MC, T, TT> write_read_subtest()
+{
+    // Starts life full of 0's
+    subtest_t<MC, T, TT> l_subtest;
+
+    // 0:3   = 0011 - we want subtest type to be a Write Read (WR)
+    l_subtest.iv_mcbmr.template insertFromRight<TT::OP_TYPE, TT::OP_TYPE_LEN>(op_type::WRITE_READ);
+
+    // - Not a special subtest, so no other configs associated
+    // 4     = 0    - we don't want to complement data for our Writes
+    // 5:6   = 00   - don't know whether we complement 2nd and 3rd subcommand, caller to fix
+    // 7     = 0    - forward address generation
+    // 8     = 0    - non random address generation
+    // - Don't need to set up anything for LFSRs
+    // 9:11  = 000  - Fixed data mode
+
+    // 14:15 = 0 address select config registers 0
+
+    // By default we want to turn on ECC. Caller can turn it off.
+    l_subtest.change_ecc_mode(mss::ON);
+
+    return l_subtest;
+}
+
 ///
 /// @brief Return a read write read subtest - configured simply
 /// @tparam MC the mc type of the T
@@ -738,8 +774,76 @@ inline subtest_t<MC, T, TT> read_write_read_subtest()
     // Starts life full of 0's
     subtest_t<MC, T, TT> l_subtest;
 
-    // 0:3   = 0100 - we want subtest type to be a Read Write Read (RWR)          7
+    // 0:3   = 0100 - we want subtest type to be a Read Write Read (RWR)
     l_subtest.iv_mcbmr.template insertFromRight<TT::OP_TYPE, TT::OP_TYPE_LEN>(op_type::READ_WRITE_READ);
+
+    // - Not a special subtest, so no other configs associated
+    // 4     = 0    - we don't want to complement data for our Writes
+    // 5:6   = 00   - don't know whether we complement 2nd and 3rd subcommand, caller to fix
+    // 7     = 0    - forward address generation
+    // 8     = 0    - non random address generation
+    // - Don't need to set up anything for LFSRs
+    // 9:11  = 000  - Fixed data mode
+
+    // 14:15 = 0 address select config registers 0
+
+    // By default we want to turn on ECC. Caller can turn it off.
+    l_subtest.change_ecc_mode(mss::ON);
+
+    return l_subtest;
+}
+
+///
+/// @brief Return a read read write subtest - configured simply
+/// @tparam MC the mc type of the T
+/// @tparam T the fapi2::TargetType - derived
+/// @tparam TT the mcbistTraits associated with T - derived
+/// @return mss::mcbist::subtest_t
+/// @note Turns on ECC mode for the returned subtest - caller can turn it off
+/// @note Configures for start/end address select bit as address config register 0
+///
+template< mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T = mss::mcbistMCTraits<MC>::MC_TARGET_TYPE, typename TT = mcbistTraits<MC, T> >
+inline subtest_t<MC, T, TT> read_read_write_subtest()
+{
+    // Starts life full of 0's
+    subtest_t<MC, T, TT> l_subtest;
+
+    // 0:3   = 1000 - we want subtest type to be a Read Read Write (RRW)
+    l_subtest.iv_mcbmr.template insertFromRight<TT::OP_TYPE, TT::OP_TYPE_LEN>(op_type::READ_READ_WRITE);
+
+    // - Not a special subtest, so no other configs associated
+    // 4     = 0    - we don't want to complement data for our Writes
+    // 5:6   = 00   - don't know whether we complement 2nd and 3rd subcommand, caller to fix
+    // 7     = 0    - forward address generation
+    // 8     = 0    - non random address generation
+    // - Don't need to set up anything for LFSRs
+    // 9:11  = 000  - Fixed data mode
+
+    // 14:15 = 0 address select config registers 0
+
+    // By default we want to turn on ECC. Caller can turn it off.
+    l_subtest.change_ecc_mode(mss::ON);
+
+    return l_subtest;
+}
+
+///
+/// @brief Return a read write write subtest - configured simply
+/// @tparam MC the mc type of the T
+/// @tparam T the fapi2::TargetType - derived
+/// @tparam TT the mcbistTraits associated with T - derived
+/// @return mss::mcbist::subtest_t
+/// @note Turns on ECC mode for the returned subtest - caller can turn it off
+/// @note Configures for start/end address select bit as address config register 0
+///
+template< mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T = mss::mcbistMCTraits<MC>::MC_TARGET_TYPE, typename TT = mcbistTraits<MC, T> >
+inline subtest_t<MC, T, TT> read_write_write_subtest()
+{
+    // Starts life full of 0's
+    subtest_t<MC, T, TT> l_subtest;
+
+    // 0:3   = 0101 - we want subtest type to be a Read Write Write (RWW)
+    l_subtest.iv_mcbmr.template insertFromRight<TT::OP_TYPE, TT::OP_TYPE_LEN>(op_type::READ_WRITE_WRITE);
 
     // - Not a special subtest, so no other configs associated
     // 4     = 0    - we don't want to complement data for our Writes
@@ -972,7 +1076,7 @@ class program
         program():
             iv_parameters(0),
             iv_addr_gen(0),
-            iv_test_type(CENSHMOO), // Used as default
+            iv_test_type(WRITE_READ_SF_FIX), // Used as default
             iv_addr_map0(0),
             iv_addr_map1(0),
             iv_addr_map2(0),
@@ -1975,7 +2079,7 @@ class program
         /// @note Assumes data is right aligned
         /// @return the fixed width address config
         ///
-        inline uint64_t get_fixed_width()
+        inline uint64_t get_fixed_width() const
         {
             uint64_t l_fixed_width = 0;
             iv_addr_gen.extractToRight<TT::FIXED_WIDTH, TT::FIXED_WIDTH_LEN>(l_fixed_width);
@@ -2129,7 +2233,7 @@ class program
         inline fapi2::ReturnCode process_errors( const fapi2::Target<T> i_target ) const
         {
             // MCBIST error traits
-            using ET = mcbistMCTraits<DEFAULT_MC_TYPE>;
+            using ET = mcbistMCTraits<MC>;
 
             // Until reading the error array is documented, comparison errors 'just' result in
             // a flag indicating there was a problem on port.
@@ -3287,8 +3391,8 @@ inline fapi2::ReturnCode load_fifo_mode( const fapi2::Target<T>& i_target, const
     // Turns on FIFO mode
     constexpr mss::states FIFO_ON = mss::states::ON;
 
-    FAPI_TRY(mss::configure_wrq(i_target, FIFO_ON));
-    FAPI_TRY(mss::configure_rrq(i_target, FIFO_ON));
+    FAPI_TRY( configure_wrq(i_target, FIFO_ON) );
+    FAPI_TRY( configure_rrq(i_target, FIFO_ON) );
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -3724,6 +3828,23 @@ fapi_try_exit:
 }
 
 } // namespace mcbist
+
+namespace ecc
+{
+
+///
+/// @brief Clear all MAINT.ECC counters
+/// @tparam T the fapi2::TargetType - derived
+/// @param[in] i_target the fapi2 target
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+///
+template< fapi2::TargetType T >
+inline fapi2::ReturnCode clear_all_counters( const fapi2::Target<T>& i_target )
+{
+    return ( mss::mcbist::reset_errors(i_target) );
+}
+
+} // namespace ecc
 
 } // namespace mss
 

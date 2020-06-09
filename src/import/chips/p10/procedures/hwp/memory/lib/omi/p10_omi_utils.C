@@ -38,6 +38,7 @@
 #include <p10_scom_omi.H>
 #include <p10_scom_omic.H>
 #include <lib/workarounds/p10_omi_workarounds.H>
+#include <generic/memory/lib/utils/shared/mss_generic_consts.H>
 
 namespace mss
 {
@@ -210,7 +211,7 @@ fapi2::ReturnCode setup_mc_config0(
     // CFG_DL0_128_130_ENCODING_ENABLED: dl0 128/130 encoding enabled
     scomt::omi::SET_CONFIG0_128_130_ENCODING_ENABLED(mss::states::OFF, l_val);
 
-    // Should "ideally" be 5us, but real-world tests lead us to 60ms in P9A
+    // Should "ideally" be 5us, but real-world tests lead us to 60ms in P10
     // P10 is expected to operate the same, so this value should be ok
     scomt::omi::SET_CONFIG0_PHY_CNTR_LIMIT(
         l_sim ? mss::omi::phy_ctr_mode::PHY_CTR_MODE_50US :

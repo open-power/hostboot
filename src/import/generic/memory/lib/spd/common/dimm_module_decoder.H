@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -83,7 +83,7 @@ class dimm_module_decoder
         /// @brief Gets decoder target
         /// @return fapi2::Target<fapi2::TARGET_TYPE_DIMM>
         ///
-        virtual fapi2::Target<fapi2::TARGET_TYPE_DIMM> get_dimm_target() const
+        virtual fapi2::Target<fapi2::TARGET_TYPE_DIMM> get_target() const
         {
             return iv_target;
         }
@@ -104,6 +104,17 @@ class dimm_module_decoder
         virtual void set_data(const std::vector<uint8_t>& i_spd_data)
         {
             iv_data = i_spd_data;
+        }
+
+        ///
+        /// @brief Decodes SPD Revision -> SPD_REVISION
+        /// @param[out] o_output encoding from SPD
+        /// @return FAPI2_RC_SUCCESS if okay
+        ///
+        virtual fapi2::ReturnCode revision(uint8_t& o_output) const
+        {
+            o_output = 0;
+            return fapi2::FAPI2_RC_SUCCESS;
         }
 
         ///
@@ -559,11 +570,11 @@ class dimm_module_decoder
         // DDIMM information from here on out
         //////////////////////////////////////////
         ///
-        /// @brief Decodes SPD Revision for bytes 192->447 -> SPD_REVISION
+        /// @brief Decodes SPD Revision for bytes 192->447 -> SPD_REV_DDIMM_MODULE
         /// @param[out] o_output encoding from SPD
         /// @return FAPI2_RC_SUCCESS if okay
         ///
-        virtual fapi2::ReturnCode ddimm_spd_revision(uint8_t& o_output) const
+        virtual fapi2::ReturnCode ddimm_module_spd_revision(uint8_t& o_output) const
         {
             o_output = 0;
             return fapi2::FAPI2_RC_SUCCESS;
@@ -1492,11 +1503,33 @@ class dimm_module_decoder
         }
 
         ///
+        /// @brief Decodes PMIC0 Redundancy
+        /// @param[out] o_output encoding from SPD
+        /// @return FAPI2_RC_SUCCESS if okay
+        ///
+        virtual fapi2::ReturnCode pmic0_redundancy(uint8_t& o_output) const
+        {
+            o_output = 0;
+            return fapi2::FAPI2_RC_SUCCESS;
+        }
+
+        ///
         /// @brief Decodes PMIC0 Sequence Order
         /// @param[out] o_output encoding from SPD
         /// @return FAPI2_RC_SUCCESS if okay
         ///
         virtual fapi2::ReturnCode sequence_pmic0(uint8_t& o_output) const
+        {
+            o_output = 0;
+            return fapi2::FAPI2_RC_SUCCESS;
+        }
+
+        ///
+        /// @brief Decodes PMIC1 Redundancy
+        /// @param[out] o_output encoding from SPD
+        /// @return FAPI2_RC_SUCCESS if okay
+        ///
+        virtual fapi2::ReturnCode pmic1_redundancy(uint8_t& o_output) const
         {
             o_output = 0;
             return fapi2::FAPI2_RC_SUCCESS;
@@ -1514,6 +1547,149 @@ class dimm_module_decoder
         }
 
         ///
+        /// @brief Decodes Thermal Sensor 0 Availability
+        /// @param[out] o_output encoding from SPD
+        /// @return FAPI2_RC_SUCCESS if okay
+        ///
+        virtual fapi2::ReturnCode therm_sensor_0_availability(uint8_t& o_output) const
+        {
+            o_output = 0;
+            return fapi2::FAPI2_RC_SUCCESS;
+        }
+
+        ///
+        /// @brief Decodes Thermal Sensor 0 Type
+        /// @param[out] o_output encoding from SPD
+        /// @return FAPI2_RC_SUCCESS if okay
+        ///
+        virtual fapi2::ReturnCode therm_sensor_0_type(uint8_t& o_output) const
+        {
+            o_output = 0;
+            return fapi2::FAPI2_RC_SUCCESS;
+        }
+
+        ///
+        /// @brief Decodes Thermal Sensor 0 Usage
+        /// @param[out] o_output encoding from SPD
+        /// @return FAPI2_RC_SUCCESS if okay
+        ///
+        virtual fapi2::ReturnCode therm_sensor_0_usage(uint8_t& o_output) const
+        {
+            o_output = 0;
+            return fapi2::FAPI2_RC_SUCCESS;
+        }
+
+        ///
+        /// @brief Decodes Thermal Sensor 0 I2C Address
+        /// @param[out] o_output encoding from SPD
+        /// @return FAPI2_RC_SUCCESS if okay
+        ///
+        virtual fapi2::ReturnCode therm_sensor_0_i2c_address(uint8_t& o_output) const
+        {
+            o_output = 0;
+            return fapi2::FAPI2_RC_SUCCESS;
+        }
+
+        ///
+        /// @brief Decodes Thermal Sensor 1 Availability
+        /// @param[out] o_output encoding from SPD
+        /// @return FAPI2_RC_SUCCESS if okay
+        ///
+        virtual fapi2::ReturnCode therm_sensor_1_availability(uint8_t& o_output) const
+        {
+            o_output = 0;
+            return fapi2::FAPI2_RC_SUCCESS;
+        }
+
+        ///
+        /// @brief Decodes Thermal Sensor 1 Type
+        /// @param[out] o_output encoding from SPD
+        /// @return FAPI2_RC_SUCCESS if okay
+        ///
+        virtual fapi2::ReturnCode therm_sensor_1_type(uint8_t& o_output) const
+        {
+            o_output = 0;
+            return fapi2::FAPI2_RC_SUCCESS;
+        }
+
+        ///
+        /// @brief Decodes Thermal Sensor 1 Usage
+        /// @param[out] o_output encoding from SPD
+        /// @return FAPI2_RC_SUCCESS if okay
+        ///
+        virtual fapi2::ReturnCode therm_sensor_1_usage(uint8_t& o_output) const
+        {
+            o_output = 0;
+            return fapi2::FAPI2_RC_SUCCESS;
+        }
+
+        ///
+        /// @brief Decodes Thermal Sensor 1 I2C Address
+        /// @param[out] o_output encoding from SPD
+        /// @return FAPI2_RC_SUCCESS if okay
+        ///
+        virtual fapi2::ReturnCode therm_sensor_1_i2c_address(uint8_t& o_output) const
+        {
+            o_output = 0;
+            return fapi2::FAPI2_RC_SUCCESS;
+        }
+
+        ///
+        /// @brief Decodes Thermal Sensor Differential Availability
+        /// @param[out] o_output encoding from SPD
+        /// @return FAPI2_RC_SUCCESS if okay
+        ///
+        virtual fapi2::ReturnCode therm_sensor_differential_availability(uint8_t& o_output) const
+        {
+            o_output = 0;
+            return fapi2::FAPI2_RC_SUCCESS;
+        }
+
+        ///
+        /// @brief Decodes Thermal Sensor Differential Type
+        /// @param[out] o_output encoding from SPD
+        /// @return FAPI2_RC_SUCCESS if okay
+        ///
+        virtual fapi2::ReturnCode therm_sensor_differential_type(uint8_t& o_output) const
+        {
+            o_output = 0;
+            return fapi2::FAPI2_RC_SUCCESS;
+        }
+
+        ///
+        /// @brief Decodes Thermal Sensor Differential Usage
+        /// @param[out] o_output encoding from SPD
+        /// @return FAPI2_RC_SUCCESS if okay
+        ///
+        virtual fapi2::ReturnCode therm_sensor_differential_usage(uint8_t& o_output) const
+        {
+            o_output = 0;
+            return fapi2::FAPI2_RC_SUCCESS;
+        }
+
+        ///
+        /// @brief Decodes Thermal Sensor Differential I2C Address
+        /// @param[out] o_output encoding from SPD
+        /// @return FAPI2_RC_SUCCESS if okay
+        ///
+        virtual fapi2::ReturnCode therm_sensor_differential_i2c_address(uint8_t& o_output) const
+        {
+            o_output = 0;
+            return fapi2::FAPI2_RC_SUCCESS;
+        }
+
+        ///
+        /// @brief Decodes module Manufacturer ID code
+        /// @param[out] o_value module manufacturing id code
+        /// @return FAPI2_RC_SUCCESS iff okay
+        ///
+        virtual fapi2::ReturnCode module_manufacturer_id_code( uint16_t& o_value ) const
+        {
+            o_value = 0;
+            return fapi2::FAPI2_RC_SUCCESS;
+        }
+
+        ///
         /// @brief Decodes DRAM Manufacturer ID code
         /// @param[out] o_value dram manufacturing id code
         /// @return FAPI2_RC_SUCCESS iff okay
@@ -1521,6 +1697,18 @@ class dimm_module_decoder
         virtual fapi2::ReturnCode dram_manufacturer_id_code( uint16_t& o_value ) const
         {
             o_value = 0;
+            return fapi2::FAPI2_RC_SUCCESS;
+        }
+
+
+        ///
+        /// @brief Decodes Registered Clock Drivers (RCD)
+        /// @param[out] o_output encoding from SPD
+        /// @return FAPI2_RC_SUCCESS if okay
+        ///
+        virtual fapi2::ReturnCode module_rcd(uint8_t& o_output) const
+        {
+            o_output = 0;
             return fapi2::FAPI2_RC_SUCCESS;
         }
 };

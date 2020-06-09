@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -41,6 +41,7 @@
 
 #include <lib/mc/exp_port.H>
 #include <generic/memory/mss_git_data_helper.H>
+#include <generic/memory/lib/utils/fir/gen_mss_unmask.H>
 
 extern "C"
 {
@@ -52,7 +53,6 @@ extern "C"
     fapi2::ReturnCode exp_draminit_mc( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target )
     {
         mss::display_git_commit_info("exp_draminit_mc");
-
 
         FAPI_INF("%s Start exp_draminit MC", mss::c_str(i_target));
 
@@ -91,18 +91,26 @@ extern "C"
         // Enable periodic short zq cal
         FAPI_TRY( mss::enable_zq_cal(i_target), "%s Failed enable_zq_cal", mss::c_str(i_target) );
 
+        // Enable periodic mem calibration
+        FAPI_TRY( mss::enable_periodic_cal<mss::mc_type::EXPLORER>(i_target), "%s Failed enable_periodic_cal",
+                  mss::c_str(i_target) );
+
         // Enable ecc checking
-        FAPI_TRY( mss::enable_read_ecc(i_target), "%s Failed enable_read_ecc", mss::c_str(i_target) );
+        FAPI_TRY( mss::enable_read_ecc<mss::mc_type::EXPLORER>(i_target), "%s Failed enable_read_ecc", mss::c_str(i_target) );
 
         // Apply marks from OCMB VPD
-        FAPI_TRY( mss::apply_mark_store(i_target), "%s Failed enable_read_ecc", mss::c_str(i_target) );
+        FAPI_TRY(mss::apply_mark_store(i_target), "%s Failed apply_mark_store", mss::c_str(i_target));
 
-        // TODO: Move mss::unmask::after_draminit_mc to generic and call it
-        // At this point the DDR interface must be monitored for memory errors. Memory related FIRs should be unmasked.
-        //FAPI_TRY( mss::unmask::after_draminit_mc(i_target), "%s Failed after_draminit_mc", mss::c_str(i_target) );
+        // Unmask registers after draminit_mc
+        FAPI_TRY(mss::unmask::after_draminit_mc(i_target), "%s Failed after_draminit_mc", mss::c_str(i_target));
+
+        // TODO: Implement apply row repairs and perform fir_or_pll_fail for firChecklist::CCS
+
+        FAPI_INF("%s End exp_draminit MC", mss::c_str(i_target));
+        return fapi2::FAPI2_RC_SUCCESS;
 
     fapi_try_exit:
-        FAPI_INF("%s End exp_draminit MC", mss::c_str(i_target));
+
         return fapi2::current_err;
     }
 }

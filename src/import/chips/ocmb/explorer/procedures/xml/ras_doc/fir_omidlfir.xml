@@ -50,7 +50,7 @@
         <action id="predefined" name="dl_fatal_error" />
     </bit>
 
-    <bit pos="1" attn_type="RE"
+    <bit pos="1" attn_type="UNIT_CS"
          desc="OMI-DL0 UE on data flit">
         <note>
             See DL0_ERROR_HOLD[50:51]

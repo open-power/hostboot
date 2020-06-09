@@ -42,6 +42,7 @@
 #include <lib/utils/pmic_common_utils.H>
 #include <generic/memory/lib/utils/poll.H>
 #include <generic/memory/lib/utils/c_str.H>
+#include <mss_pmic_attribute_accessors_manual.H>
 
 namespace mss
 {
@@ -189,6 +190,37 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
+///
+/// @brief Calculate target voltage for PMIC from attribute settings
+///
+/// @param[in] i_ocmb_target OCMB parent target of pmic of PMIC (holds the attributes)
+/// @param[in] i_id ID of pmic (0,1)
+/// @param[in] i_rail RAIL to calculate voltage for
+/// @param[out] o_volt_bitmap output bitmap
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success
+///
+fapi2::ReturnCode calculate_voltage_bitmap_from_attr(
+    const fapi2::Target<fapi2::TargetType::TARGET_TYPE_OCMB_CHIP>& i_ocmb_target,
+    const mss::pmic::id i_id,
+    const uint8_t i_rail,
+    uint8_t& o_volt_bitmap)
+{
+    uint8_t l_volt = 0;
+    int8_t l_volt_offset = 0;
+    int8_t l_efd_volt_offset = 0;
+
+    // Get the attributes corresponding to the rail and PMIC indices
+    FAPI_TRY(mss::attr::get_volt_setting[i_rail][i_id](i_ocmb_target, l_volt));
+    FAPI_TRY(mss::attr::get_volt_offset[i_rail][i_id](i_ocmb_target, l_volt_offset));
+    FAPI_TRY(mss::attr::get_efd_volt_offset[i_rail][i_id](i_ocmb_target, l_efd_volt_offset));
+
+    // Set output buffer
+    o_volt_bitmap = l_volt + l_volt_offset + l_efd_volt_offset;
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
 namespace status
 {
 
@@ -302,14 +334,15 @@ fapi2::ReturnCode check_pmic(
         bool l_status_error = false;
 
         // if we exit from this try, there were i2c errors
-        FAPI_TRY(mss::pmic::status::check_fields(i_pmic_target, mss::pmic::status::IDT_SPECIFIC_STATUS_FIELDS, l_status_error));
+        FAPI_TRY(mss::pmic::status::check_fields(i_pmic_target, "PMIC_WARNING_BIT",
+                 mss::pmic::status::IDT_SPECIFIC_STATUS_FIELDS, l_status_error));
     }
 
     {
         bool l_status_error = false;
 
         // if we exit from this try, there were i2c errors
-        FAPI_TRY(mss::pmic::status::check_fields(i_pmic_target, mss::pmic::status::STATUS_FIELDS, l_status_error));
+        FAPI_TRY(mss::pmic::status::check_fields(i_pmic_target, "ERROR", mss::pmic::status::STATUS_FIELDS, l_status_error));
         o_error = l_status_error;
     }
 
@@ -327,6 +360,7 @@ fapi2::ReturnCode clear(const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& i_pmic_tar
 {
     using REGS = pmicRegs<mss::pmic::product::JEDEC_COMPLIANT>;
     using FIELDS = pmicFields<mss::pmic::product::JEDEC_COMPLIANT>;
+    using CONSTS = mss::pmic::consts<mss::pmic::product::JEDEC_COMPLIANT>;
 
     fapi2::buffer<uint8_t> l_reg_contents;
     FAPI_TRY(mss::pmic::i2c::reg_read_reverse_buffer(i_pmic_target, REGS::R14, l_reg_contents));
@@ -334,6 +368,10 @@ fapi2::ReturnCode clear(const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& i_pmic_tar
     // Write to clear
     l_reg_contents.setBit<FIELDS::R14_GLOBAL_CLEAR_STATUS>();
     FAPI_TRY(mss::pmic::i2c::reg_write_reverse_buffer(i_pmic_target, REGS::R14, l_reg_contents));
+
+    // Clear host region codes
+    l_reg_contents = CONSTS::CLEAR_R04_TO_R07;
+    FAPI_TRY(mss::pmic::i2c::reg_write(i_pmic_target, REGS::R39_COMMAND_CODES, l_reg_contents));
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -343,12 +381,14 @@ fapi_try_exit:
 /// @brief Check an individual set of PMIC status codes
 ///
 /// @param[in] i_pmic_target PMIC target
+/// @param[in] i_error_type error type for the PMIC in question
 /// @param[in] i_statuses STATUS object to check
 /// @param[out] o_error At least one error bit was found to be set
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error in case of an I2C read error
 ///
 fapi2::ReturnCode check_fields(
     const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& i_pmic_target,
+    const char* i_error_type,
     const std::vector<std::pair<uint8_t, std::vector<status_field>>>& i_statuses,
     bool& o_error)
 {
@@ -364,8 +404,9 @@ fapi2::ReturnCode check_fields(
             if (l_reg_contents.getBit(l_status.l_reg_field))
             {
                 // Print it out
-                FAPI_ERR("%s :: REG 0x%02x bit %u was set on %s",
+                FAPI_ERR("%s %s :: REG 0x%02x bit %u was set on %s",
                          l_status.l_error_description,
+                         i_error_type,
                          l_reg_bit_pair.first,
                          l_status.l_reg_field,
                          mss::c_str(i_pmic_target));

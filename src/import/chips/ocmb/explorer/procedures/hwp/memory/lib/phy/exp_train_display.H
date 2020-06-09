@@ -38,7 +38,6 @@
 
 #include <fapi2.H>
 #include <lib/shared/exp_consts.H>
-#include <lib/shared/exp_defaults.H>
 #include <lib/dimm/exp_rank.H>
 #include <generic/memory/lib/utils/shared/mss_generic_consts.H>
 #include <generic/memory/lib/utils/index.H>
@@ -265,7 +264,7 @@ inline fapi2::ReturnCode display_response_timing(const fapi2::Target<fapi2::TARG
         FAPI_TRY(mss::rank::ranks_on_port<>(l_port, l_rank_info_vect));
 
         // DFIMRL_DDRCLK_trained training result
-        FAPI_INF("%s DFIMRL_DDRCLK_trained: %u", mss::c_str(i_target), i_training_info.tm_resp.DFIMRL_DDRCLK_trained);
+        FAPI_MFG("%s DFIMRL_DDRCLK_trained: %u", mss::c_str(i_target), i_training_info.tm_resp.DFIMRL_DDRCLK_trained);
 
         // RD to RD
         FAPI_MFG("%s RD-to-RD      :  0  1  2  3", mss::c_str(i_target));

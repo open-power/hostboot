@@ -228,7 +228,6 @@ class freq_scoreboard
 
                 if (l_it == i_freq_list.end())
                 {
-                    FAPI_INF("Removing freq %d on port %d since it's not supported", iv_freq_values[l_index], i_port_pos);
                     iv_supported_port_freqs[i_port_pos][l_index] = false;
                 }
             }

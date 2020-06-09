@@ -22,3 +22,51 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+
+///
+/// @file exp_ccs_2666_workarounds.H
+/// @brief Workarounds for explorer CCS write issue at 2666
+///
+// *HWP HWP Owner: Stephen Glancy <sglancy@us.ibm.com>
+// *HWP HWP Backup:  Mark Pizzutillo <Mark.Pizzutillo@ibm.com>
+// *HWP Team: Memory
+// *HWP Level: 2
+// *HWP Consumed by: Memory
+
+#ifndef _EXP_CCS_2666_WRITE_WORKAROUNDS_H_
+#define _EXP_CCS_2666_WRITE_WORKAROUNDS_H_
+
+#include <fapi2.H>
+#include <lib/ccs/ccs_explorer.H>
+
+namespace mss
+{
+namespace exp
+{
+namespace workarounds
+{
+
+///
+/// @brief Determine if the CCS 2666 write workaround is needed
+/// @param[in] i_target port target on which to operate
+/// @param[out] o_is_needed true if the workaround needs to be run
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success
+///
+fapi2::ReturnCode is_ccs_2666_write_needed(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
+        bool& o_is_needed);
+
+///
+/// @brief Updates CAS write latency if the workaround is needed
+/// @param[in] i_target port target on which to operate
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success
+/// @note This is the first part of the CCS 2666 write workaround
+/// The CWL needs to be increased to 18 for 2666 (non RDIMM)
+/// This will put a non-zero value in the WRDATA_DLY, allowing for good CCS writes
+///
+fapi2::ReturnCode update_cwl(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target);
+
+} // workarounds
+} // exp
+} // mss
+
+#endif

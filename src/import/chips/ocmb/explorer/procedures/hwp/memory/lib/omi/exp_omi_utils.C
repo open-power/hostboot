@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -41,6 +41,7 @@
 #include <mss_explorer_attribute_getters.H>
 #include <generic/memory/lib/mss_generic_system_attribute_getters.H>
 #include <lib/shared/exp_consts.H>
+#include <p10_scom_omi_a.H>
 
 namespace mss
 {
@@ -72,6 +73,11 @@ fapi2::ReturnCode setup_omi_dl0_config0(
     // CFG_DL0_HALF_WIDTH_BACKOFF_ENABLE: dl0 x4 backoff enabled
     l_config0.writeBit<EXPLR_DLX_DL0_CONFIG0_CFG_HALF_WIDTH_BACKOFF_ENABLE>(i_dl_x4_backoff_en);
 
+    // CFG_DL0_CFG_TL_CREDITS: dl0 TL credits - Maximum number of credits that can be sent to the TL
+    l_config0.insertFromRight<EXPLR_DLX_DL0_CONFIG0_CFG_CFG_TL_CREDITS, EXPLR_DLX_DL0_CONFIG0_CFG_CFG_TL_CREDITS_LEN>
+    (OPTIMAL_NUM_TL_CREDITS);
+
+
     // CFG_DL0_TRAIN_MODE: dl0 train mode
     l_config0.insertFromRight<EXPLR_DLX_DL0_CONFIG0_CFG_TRAIN_MODE,
                               EXPLR_DLX_DL0_CONFIG0_CFG_TRAIN_MODE_LEN>(i_train_mode);
@@ -84,6 +90,42 @@ fapi2::ReturnCode setup_omi_dl0_config0(
     // All other bits will be left at their default values
     FAPI_TRY( fapi2::putScom(i_target, EXPLR_DLX_DL0_CONFIG0, l_config0),
               "Error writing EXPLR_DLX_DL0_CONFIG0 on %s", mss::c_str(i_target));
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Sets up the FFE_SETTINGS command
+/// @param[in] i_target target on which the code is operating
+/// @param[out] o_data data for the FFE_SETTINGS command
+/// @return fapi2::ReturnCode - FAPI2_RC_SUCCESS iff get is OK
+///
+fapi2::ReturnCode ffe_setup( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+                             std::vector<uint8_t>& o_data )
+{
+    constexpr uint32_t MAX_CURSOR_SUM = 63;
+
+    uint32_t l_pre_cursor = 0;
+    uint32_t l_post_cursor = 0;
+
+    FAPI_TRY(mss::attr::get_omi_ffe_pre_cursor(i_target, l_pre_cursor));
+    FAPI_TRY(mss::attr::get_omi_ffe_post_cursor(i_target, l_post_cursor));
+
+    FAPI_ASSERT((l_pre_cursor + l_post_cursor) < MAX_CURSOR_SUM,
+                fapi2::MSS_FFE_CURSOR_OVERFLOW().
+                set_TARGET(i_target).
+                set_PRE_CURSOR(l_pre_cursor).
+                set_POST_CURSOR(l_post_cursor),
+                "%s Sum of FFE pre-cursor %d and post-cursor %d needs to be less than 64",
+                mss::c_str(i_target), l_pre_cursor, l_post_cursor);
+
+    // Clears o_data, just in case
+    o_data.clear();
+    o_data.assign(mss::exp::i2c::FW_TWI_FFE_SETTINGS_BYTE_LEN, 0);
+
+    FAPI_TRY(mss::exp::i2c::ffe_settings::set_pre_cursor( i_target, o_data, l_pre_cursor ));
+    FAPI_TRY(mss::exp::i2c::ffe_settings::set_post_cursor( i_target, o_data, l_post_cursor ));
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -151,7 +193,7 @@ fapi_try_exit:
 ///
 /// @brief Check the OMI train status on the OCMB chip
 ///
-/// @param[in] i_target OCMB chil
+/// @param[in] i_target OCMB chip
 /// @param[out] o_state_machine_state training state mahcine
 /// @param[out] o_omi_training_status training status
 /// @return fapi2::ReturnCode
@@ -169,6 +211,38 @@ fapi2::ReturnCode omi_train_status(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_C
     o_state_machine_state = 0;
     l_omi_status.extractToRight<EXPLR_DLX_DL0_STATUS_STS_TRAINING_STATE_MACHINE,
                                 EXPLR_DLX_DL0_STATUS_STS_TRAINING_STATE_MACHINE_LEN>(o_state_machine_state);
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Poll for OMI training completion
+///
+/// @param[in] i_target OCMB target
+/// @param[out] o_state_machine_state state machine state
+/// @param[out] o_omi_status omi status register buffer
+/// @return fapi2::ReturnCode
+///
+fapi2::ReturnCode poll_for_training_completion(
+    const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+    uint8_t& o_state_machine_state,
+    fapi2::buffer<uint64_t>& o_omi_status)
+{
+    constexpr uint8_t MAX_LOOP_COUNT = 10;  // Retry times
+    uint8_t l_tries = 0;
+
+    do
+    {
+        // Delay
+        fapi2::delay(500 * mss::DELAY_1MS, 10 * mss::DELAY_1MS);
+
+        // Check OMI training status
+        FAPI_TRY(mss::exp::omi::train::omi_train_status(i_target, o_state_machine_state, o_omi_status));
+        l_tries++;
+
+    }
+    while (l_tries < MAX_LOOP_COUNT && o_state_machine_state != STATE_MACHINE_SUCCESS);
 
 fapi_try_exit:
     return fapi2::current_err;

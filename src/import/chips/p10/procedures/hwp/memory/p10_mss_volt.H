@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -27,10 +27,11 @@
 /// @file p10_mss_volt.H
 /// @brief Calculate and save off rail voltages
 ///
-
-/// *HWP HW Maintainer: Louis Stermole <stermole@us.ibm.com>
-/// *HWP FW Maintainer: Glenn Miles <milesg@ibm.com>
-/// *HWP Consumed by: HB
+// *HWP HWP Owner: Louis Stermole <stermole@us.ibm.com>
+// *HWP HWP Backup: Andre A. Marin <aamarin@us.ibm.com>
+// *HWP Team: Memory
+// *HWP Level: 3
+// *HWP Consumed by: FSP:HB
 
 #ifndef P10_MSS_VOLT_H_
 #define P10_MSS_VOLT_H_
@@ -46,7 +47,7 @@ extern "C"
     ///
     /// @brief Calculate and save off rail voltages
     /// @param[in] i_targets vector of ports (e.g., MEM_PORT)
-    /// @return FAPI2_RC_SUCCESS if ok
+    /// @return FAPI2_RC_SUCCESS iff ok
     ///
     fapi2::ReturnCode p10_mss_volt( const std::vector< fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT> >& i_targets );
 }

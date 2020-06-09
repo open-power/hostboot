@@ -206,4 +206,42 @@
     </gard>
   </hwpError>
 
+  <hwpError>
+    <rc>RC_PMIC_MISMATCHING_VENDOR_IDS</rc>
+    <description>
+       The PMIC vendor ID defined in the SPD did not match the ID of the PMIC.
+       Exiting due to possibly incorrect voltage settings.
+    </description>
+    <ffdc>VENDOR_ATTR</ffdc>
+    <ffdc>VENDOR_REG</ffdc>
+    <ffdc>PMIC_TARGET</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>MEDIUM</priority>
+    </callout>
+    <callout>
+      <target>PMIC_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_PMIC_MISMATCHING_REVISIONS</rc>
+    <description>
+       The PMIC revision register value did not match the SPD value.
+       Exiting due to possibly incorrect voltage settings.
+    </description>
+    <ffdc>REVISION_ATTR</ffdc>
+    <ffdc>REVISION_REG</ffdc>
+    <ffdc>PMIC_TARGET</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>MEDIUM</priority>
+    </callout>
+    <callout>
+      <target>PMIC_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
 </hwpErrors>

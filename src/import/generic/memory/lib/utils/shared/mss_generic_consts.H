@@ -132,6 +132,7 @@ enum generic_sizes
 {
     NUM_MAX_FREQS = 5,             ///< Used for ATTR_MAX_ALLOWED_DIMM_FREQ
     MARK_STORE_COUNT = 8,          ///< Elements in a VPD mark/store array
+    MAX_RANK_PER_DIMM_ATTR = 4,    ///< Elements in a per-rank attribute array
 };
 
 ///
@@ -192,6 +193,7 @@ enum generic_ffdc_codes
     DDIMM_RAWCARD_DECODE = 0x103a,
     INIT_RANK_INFO = 0x103B,
     BIAS_PMIC_FROM_SPD = 0x103C,
+    PMIC_ENABLE_SPD = 0x103D,
     SET_DRAM_WIDTH = 0x1040,
 
     SET_SI_VREF_DRAM_WR = 0x1041,
@@ -270,6 +272,13 @@ enum generic_ffdc_codes
 
     SET_RCD_MFG_ID = 0x109B,
     SET_DRAM_MODULE_HEIGHT = 0x109C,
+    SET_SPD_REVISION = 0x109D,
+
+    MRS_MIRROR_MODE = 0x109E,
+    MRS01_GEN = 0x109F,
+    MRS02_GEN = 0x10A0,
+    SET_MODULE_MFG_ID = 0x10A1,
+    PDA_WR_VREF_LATCH_CONTAINER = 0x10A2,
 };
 
 ///
@@ -313,6 +322,24 @@ enum ddr_dimm_speeds
     DDR4_MAX_SPEED = 3200,
     DDR5_MIN_SPEED = 3200,
     DDR5_MAX_SPEED = 4800,
+};
+
+///
+/// @brief DDR4 JEDEC constants
+///
+enum ddr4_consts
+{
+    // WR VREF JEDEC values - we're using em in multiple places, so let's define them in one
+    // Single range max is the maximum range for a single WR VREF range in JEDEC - 0b110010
+    WR_VREF_SINGLE_RANGE_MAX = 0b110010,
+    // Crossover range is where the top of Range 2 (the lower range) equals the bottom of Range 1 (the upper range)
+    WR_VREF_CROSSOVER_RANGE  = 0b011000,
+    // Max range is computed from single range max (50) + the crossover range (24)
+    WR_VREF_MAX_COMPOSITE_RANGE = WR_VREF_SINGLE_RANGE_MAX + WR_VREF_CROSSOVER_RANGE,
+
+    // Yes, Range 1 is 0 and Range 2 is 1
+    WR_VREF_RANGE1 = 0,
+    WR_VREF_RANGE2 = 1,
 };
 
 enum states
@@ -462,7 +489,7 @@ enum op_type
 enum test_type
 {
     USER_MODE = 0,
-    CENSHMOO = 1,
+    WRITE_READ_SF_FIX = 1,
     SUREFAIL = 2,
     MEMWRITE = 3,
     MEMREAD = 4,
@@ -498,7 +525,7 @@ enum test_type
     R_INFINITE1 = 34,
     R_INFINITE_RF = 35,
     MARCH = 36,
-    SIMPLE_FIX_RF = 37,
+    WRITE_READ_SF_RF = 37,
     SHMOO_STRESS = 38,
     SIMPLE_RAND_RA = 39,
     SIMPLE_FIX_RA = 40,
@@ -926,6 +953,7 @@ namespace spd
 enum rev : uint8_t
 {
     V0_0 = 0x00, ///< represents Rev 0.0
+    V0_3 = 0x03, ///< represents Rev 0.3
     V1_0 = 0x10, ///< represents Rev 1.0
     V1_1 = 0x11, ///< represents Rev 1.1
     V1_2 = 0x12, ///< represents Rev 1.2
@@ -935,7 +963,7 @@ enum rev : uint8_t
     GEN_SEC_MAX = V1_1,
     RDIMM_MAX = V1_1,
     LRDIMM_MAX = V1_2,
-    DDIMM_MAX = V0_0,
+    DDIMM_MAX = V0_3,
 };
 
 ///
@@ -1038,6 +1066,7 @@ struct mcTypeTraits<mc_type::EXPLORER>
     {
         MC_PER_PROC = 2,
         MI_PER_MC = 2,
+        OMIC_PER_MC = 3,
         MCC_PER_MI = 2,
         OMI_PER_MCC = 2,
         OCMB_PER_OMI = 1,

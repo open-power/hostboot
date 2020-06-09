@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -111,9 +111,56 @@ enum class attr_eff_engine_fields
     MRAM_SUPPORT = 8,
     SPD_CL_SUPPORTED = 9,
     ADDRESS_MIRROR = 10,
+    MODULE_THERMAL_SENSORS = 11,
+
+    THERM_SENSOR_0_AVAIL = 12,
+    THERM_SENSOR_0_TYPE = 13,
+    THERM_SENSOR_0_USAGE = 14,
+    THERM_SENSOR_0_I2C_ADDR = 15,
+
+    THERM_SENSOR_1_AVAIL = 16,
+    THERM_SENSOR_1_TYPE = 17,
+    THERM_SENSOR_1_USAGE = 18,
+    THERM_SENSOR_1_I2C_ADDR = 19,
+
+    THERM_SENSOR_DIFF_AVAIL = 20,
+    THERM_SENSOR_DIFF_TYPE = 21,
+    THERM_SENSOR_DIFF_USAGE = 22,
+    THERM_SENSOR_DIFF_I2C_ADDR = 23,
+
+    SUPPORTED_RCD = 24,
 
     // Dispatcher set to last enum value
-    DISPATCHER = ADDRESS_MIRROR,
+    DISPATCHER = SUPPORTED_RCD,
+};
+
+///
+/// @brief enum list of explorer RC response msdg to set
+///
+enum class attr_rc_resp_engine_fields
+{
+    // Template recursive base case
+    ATTR_EFF_BASE_CASE = 0,
+
+    // Attrs to set
+    F0RC00 = 1,
+    F0RC01 = 2,
+    F0RC03 = 3,
+    F0RC04 = 4,
+    F0RC05 = 5,
+    F0RC0B = 6,
+    F0RC0E = 7,
+    F0RC0F = 8,
+    F0RC1X = 9,
+    F0RC7X = 10,
+    F1RC00 = 11,
+    F1RC02 = 12,
+    F1RC03 = 13,
+    F1RC04 = 14,
+    F1RC05 = 15,
+
+    // Dispatcher set to last enum value
+    DISPATCHER = F1RC05,
 };
 
 ///
@@ -130,6 +177,8 @@ enum sizes
     MAX_MRANK_PER_PORT = MAX_DIMM_PER_PORT * MAX_RANK_PER_DIMM,
     MAX_BYTES_PER_PORT = MAX_DQ_BITS_PER_PORT / BITS_PER_BYTE,
     MAX_NIBBLES_PER_PORT = MAX_DQ_BITS_PER_PORT / BITS_PER_NIBBLE,
+    MAX_RCW_RESP_ARRAY_SIZE = 27,
+
 };
 
 #endif
@@ -158,6 +207,40 @@ enum ffdc_codes
     SET_MRAM_SUPPORT = 0x1049,
     SET_SPD_CL_SUPPORTED = 0x1050,
     SET_SERDES_FREQ = 0x1051,
+    SET_MODULE_THERMAL_SENSORS = 0x1052,
+
+    SET_THERM_SENSOR_0_AVAIL = 0x1053,
+    SET_THERM_SENSOR_0_TYPE = 0x1054,
+    SET_THERM_SENSOR_0_USAGE = 0x1055,
+    SET_THERM_SENSOR_0_I2C_ADDR = 0x1056,
+
+    SET_THERM_SENSOR_1_AVAIL = 0x1057,
+    SET_THERM_SENSOR_1_TYPE = 0x1058,
+    SET_THERM_SENSOR_1_USAGE = 0x1059,
+    SET_THERM_SENSOR_1_I2C_ADDR = 0x105A,
+
+    SET_THERM_SENSOR_DIFF_AVAIL = 0x105B,
+    SET_THERM_SENSOR_DIFF_TYPE = 0x105C,
+    SET_THERM_SENSOR_DIFF_USAGE = 0x105D,
+    SET_THERM_SENSOR_DIFF_I2C_ADDR = 0x105E,
+
+    READ_RC_RSP_FIELD = 0x105F,
+    SET_F0RC00 = 0x1060,
+    SET_F0RC01 = 0x1061,
+    SET_F0RC03 = 0x1062,
+    SET_F0RC04 = 0x1063,
+    SET_F0RC05 = 0x1064,
+    SET_F0RC0B = 0x1065,
+    SET_F0RC0E = 0x1066,
+    SET_F0RC0F = 0x1067,
+    SET_F0RC1X = 0x1068,
+    SET_F0RC7X = 0x1069,
+    SET_F1RC00 = 0x106A,
+    SET_F1RC02 = 0x106B,
+    SET_F1RC03 = 0x106C,
+    SET_F1RC04 = 0x106D,
+    SET_F1RC05 = 0x106E,
+    SET_SUPPORTED_RCD = 0x106F,
 };
 
 ///
@@ -231,7 +314,8 @@ enum cmd_id : uint8_t
     FW_PQM_HORIZONTAL_BATHTUB_GET            = 0x18,
     FW_PQM_VERTICAL_BATHTUB_GET              = 0x19,
     FW_PQM_2D_BATHTUB_GET                    = 0x1A,
-    EXP_FW_PQM_FORCE_DELAY_LINE_UPDATE       = 0x22,
+    FW_PQM_FORCE_DELAY_LINE_UPDATE           = 0x22,
+    FW_TWI_FFE_SETTINGS                      = 0x24,
 };
 
 ///
@@ -242,6 +326,7 @@ enum sizes
     // 32-bit commands
     FW_BOOT_CONFIG_BYTE_LEN = 4,
     FW_STATUS_BYTE_LEN      = 5,
+    FW_TWI_FFE_SETTINGS_BYTE_LEN = 8,
 
     FW_WRITE_REG_DATA_SIZE  = 0x08,
     FW_REG_ADDR_LATCH_SIZE  = 0x04,
@@ -331,7 +416,7 @@ enum addrSide
     RHS = 0x01
 };
 
-}// i2c
+} // namespace i2c
 
 #ifndef __PPE__
 namespace omi
@@ -396,10 +481,10 @@ enum response_arg
     ERROR_CODE = 1,
 };
 
-}// omi
+} // namespace omi
 #endif
 
-}// exp
-}// mss
+} // namespace exp
+} // namespace mss
 
 #endif

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -75,6 +75,16 @@ struct fields
     static constexpr mss::field_t<mss::endian::BIG> CMD_ID{0, 0, 8};
     static constexpr mss::field_t<mss::endian::BIG> STATUS_CODE{1, 0, 8};
     static constexpr mss::field_t<mss::endian::BIG> BOOT_STAGE{2, 6, 2};
+
+    // Part of EXP_FW_TWI_FFE_SETTINGS
+    static constexpr mss::field_t<mss::endian::BIG> FFE_POST_CURSOR_BYTE0{0, 0, 8};
+    static constexpr mss::field_t<mss::endian::BIG> FFE_POST_CURSOR_BYTE1{1, 0, 8};
+    static constexpr mss::field_t<mss::endian::BIG> FFE_POST_CURSOR_BYTE2{2, 0, 8};
+    static constexpr mss::field_t<mss::endian::BIG> FFE_POST_CURSOR_BYTE3{3, 0, 8};
+    static constexpr mss::field_t<mss::endian::BIG> FFE_PRE_CURSOR_BYTE0{4, 0, 8};
+    static constexpr mss::field_t<mss::endian::BIG> FFE_PRE_CURSOR_BYTE1{5, 0, 8};
+    static constexpr mss::field_t<mss::endian::BIG> FFE_PRE_CURSOR_BYTE2{6, 0, 8};
+    static constexpr mss::field_t<mss::endian::BIG> FFE_PRE_CURSOR_BYTE3{7, 0, 8};
 };
 
 ///
@@ -234,6 +244,118 @@ struct fieldTraits<fields::BOOT_STAGE>
 {
     static constexpr uint8_t COMPARISON_VAL = 0x03;
     static constexpr const char* FIELD_STR = "Boot Stage";
+
+    template <typename T>
+    using COMPARISON_OP = std::less_equal<T>;
+};
+
+///
+/// @class fieldTraits - FFE_PRE_CURSOR_BYTE0 specialization
+/// @brief Traits assoiated with the Explorer I2C commands
+///
+template<>
+struct fieldTraits<fields::FFE_PRE_CURSOR_BYTE0>
+{
+    static constexpr uint8_t COMPARISON_VAL = 0x00;
+    static constexpr const char* FIELD_STR = "FFE Pre-cursor, byte 0";
+
+    template <typename T>
+    using COMPARISON_OP = std::less_equal<T>;
+};
+
+///
+/// @class fieldTraits - FFE_PRE_CURSOR_BYTE1 specialization
+/// @brief Traits assoiated with the Explorer I2C commands
+///
+template<>
+struct fieldTraits<fields::FFE_PRE_CURSOR_BYTE1>
+{
+    static constexpr uint8_t COMPARISON_VAL = 0x00;
+    static constexpr const char* FIELD_STR = "FFE Pre-cursor, byte 1";
+
+    template <typename T>
+    using COMPARISON_OP = std::less_equal<T>;
+};
+
+///
+/// @class fieldTraits - FFE_PRE_CURSOR_BYTE2 specialization
+/// @brief Traits assoiated with the Explorer I2C commands
+///
+template<>
+struct fieldTraits<fields::FFE_PRE_CURSOR_BYTE2>
+{
+    static constexpr uint8_t COMPARISON_VAL = 0x00;
+    static constexpr const char* FIELD_STR = "FFE Pre-cursor, byte 2";
+
+    template <typename T>
+    using COMPARISON_OP = std::less_equal<T>;
+};
+
+///
+/// @class fieldTraits - FFE_PRE_CURSOR_BYTE3 specialization
+/// @brief Traits assoiated with the Explorer I2C commands
+///
+template<>
+struct fieldTraits<fields::FFE_PRE_CURSOR_BYTE3>
+{
+    static constexpr uint8_t COMPARISON_VAL = 0x20;
+    static constexpr const char* FIELD_STR = "FFE Pre-cursor, byte 3";
+
+    template <typename T>
+    using COMPARISON_OP = std::less_equal<T>;
+};
+
+///
+/// @class fieldTraits - FFE_POST_CURSOR_BYTE0 specialization
+/// @brief Traits assoiated with the Explorer I2C commands
+///
+template<>
+struct fieldTraits<fields::FFE_POST_CURSOR_BYTE0>
+{
+    static constexpr uint8_t COMPARISON_VAL = 0x00;
+    static constexpr const char* FIELD_STR = "FFE Post-cursor, byte 0";
+
+    template <typename T>
+    using COMPARISON_OP = std::less_equal<T>;
+};
+
+///
+/// @class fieldTraits - FFE_POST_CURSOR_BYTE1 specialization
+/// @brief Traits assoiated with the Explorer I2C commands
+///
+template<>
+struct fieldTraits<fields::FFE_POST_CURSOR_BYTE1>
+{
+    static constexpr uint8_t COMPARISON_VAL = 0x00;
+    static constexpr const char* FIELD_STR = "FFE Post-cursor, byte 1";
+
+    template <typename T>
+    using COMPARISON_OP = std::less_equal<T>;
+};
+
+///
+/// @class fieldTraits - FFE_POST_CURSOR_BYTE2 specialization
+/// @brief Traits assoiated with the Explorer I2C commands
+///
+template<>
+struct fieldTraits<fields::FFE_POST_CURSOR_BYTE2>
+{
+    static constexpr uint8_t COMPARISON_VAL = 0x00;
+    static constexpr const char* FIELD_STR = "FFE Post-cursor, byte 2";
+
+    template <typename T>
+    using COMPARISON_OP = std::less_equal<T>;
+};
+
+///
+/// @class fieldTraits - FFE_POST_CURSOR_BYTE3 specialization
+/// @brief Traits assoiated with the Explorer I2C commands
+///
+template<>
+struct fieldTraits<fields::FFE_POST_CURSOR_BYTE3>
+{
+    static constexpr uint8_t COMPARISON_VAL = 0x20;
+    static constexpr const char* FIELD_STR = "FFE Post-cursor, byte 3";
 
     template <typename T>
     using COMPARISON_OP = std::less_equal<T>;
@@ -510,6 +632,131 @@ inline fapi2::ReturnCode set_fw_mode(const fapi2::Target<fapi2::TARGET_TYPE_OCMB
 }// boot_cfg
 
 #endif
+
+namespace ffe_settings
+{
+
+///
+/// @brief FFE_PRE_CURSOR getter
+/// @param[in] i_target the OCMB target
+/// @param[in] i_data the buffer as a reference to a vector
+/// @param[out] o_setting
+/// @return FAPI2_RC_SUCCESS iff okay
+///
+inline fapi2::ReturnCode get_pre_cursor(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+                                        const std::vector<uint8_t>& i_data,
+                                        uint32_t& o_setting)
+{
+    uint8_t l_byte0 = 0;
+    uint8_t l_byte1 = 0;
+    uint8_t l_byte2 = 0;
+    uint8_t l_byte3 = 0;
+    fapi2::buffer<uint32_t> l_output;
+
+    FAPI_TRY(get_field<fields::FFE_PRE_CURSOR_BYTE0>(i_target, i_data, l_byte0));
+    FAPI_TRY(get_field<fields::FFE_PRE_CURSOR_BYTE1>(i_target, i_data, l_byte1));
+    FAPI_TRY(get_field<fields::FFE_PRE_CURSOR_BYTE2>(i_target, i_data, l_byte2));
+    FAPI_TRY(get_field<fields::FFE_PRE_CURSOR_BYTE3>(i_target, i_data, l_byte3));
+
+    l_output.insertFromRight<0, BITS_PER_BYTE>(l_byte0);
+    l_output.insertFromRight<8, BITS_PER_BYTE>(l_byte1);
+    l_output.insertFromRight<16, BITS_PER_BYTE>(l_byte2);
+    l_output.insertFromRight<24, BITS_PER_BYTE>(l_byte3);
+
+    o_setting = l_output;
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief FFE_PRE_CURSOR setter
+/// @param[in] i_target the OCMB target
+/// @param[in] i_setting the value to set
+/// @param[in,out] io_data the buffer as a reference to a vector
+/// @return FAPI2_RC_SUCCESS iff okay
+///
+inline fapi2::ReturnCode set_pre_cursor(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+                                        std::vector<uint8_t>& io_data,
+                                        const uint32_t i_setting)
+{
+    uint8_t l_byte = 0;
+    fapi2::buffer<uint32_t> l_input(i_setting);
+
+    l_input.extractToRight<0, BITS_PER_BYTE>(l_byte);
+    FAPI_TRY(set_field<fields::FFE_PRE_CURSOR_BYTE0>(i_target, io_data, l_byte));
+    l_input.extractToRight<8, BITS_PER_BYTE>(l_byte);
+    FAPI_TRY(set_field<fields::FFE_PRE_CURSOR_BYTE1>(i_target, io_data, l_byte));
+    l_input.extractToRight<16, BITS_PER_BYTE>(l_byte);
+    FAPI_TRY(set_field<fields::FFE_PRE_CURSOR_BYTE2>(i_target, io_data, l_byte));
+    l_input.extractToRight<24, BITS_PER_BYTE>(l_byte);
+    FAPI_TRY(set_field<fields::FFE_PRE_CURSOR_BYTE3>(i_target, io_data, l_byte));
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief FFE_POST_CURSOR getter
+/// @param[in] i_target the OCMB target
+/// @param[in] i_data the buffer as a reference to a vector
+/// @param[out] o_setting
+/// @return FAPI2_RC_SUCCESS iff okay
+///
+inline fapi2::ReturnCode get_post_cursor(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+        const std::vector<uint8_t>& i_data,
+        uint32_t& o_setting)
+{
+    uint8_t l_byte0 = 0;
+    uint8_t l_byte1 = 0;
+    uint8_t l_byte2 = 0;
+    uint8_t l_byte3 = 0;
+    fapi2::buffer<uint32_t> l_output;
+
+    FAPI_TRY(get_field<fields::FFE_POST_CURSOR_BYTE0>(i_target, i_data, l_byte0));
+    FAPI_TRY(get_field<fields::FFE_POST_CURSOR_BYTE1>(i_target, i_data, l_byte1));
+    FAPI_TRY(get_field<fields::FFE_POST_CURSOR_BYTE2>(i_target, i_data, l_byte2));
+    FAPI_TRY(get_field<fields::FFE_POST_CURSOR_BYTE3>(i_target, i_data, l_byte3));
+
+    l_output.insertFromRight<0, BITS_PER_BYTE>(l_byte0);
+    l_output.insertFromRight<8, BITS_PER_BYTE>(l_byte1);
+    l_output.insertFromRight<16, BITS_PER_BYTE>(l_byte2);
+    l_output.insertFromRight<24, BITS_PER_BYTE>(l_byte3);
+
+    o_setting = l_output;
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief FFE_POST_CURSOR setter
+/// @param[in] i_target the OCMB target
+/// @param[in] i_setting the value to set
+/// @param[in,out] io_data the buffer as a reference to a vector
+/// @return FAPI2_RC_SUCCESS iff okay
+///
+inline fapi2::ReturnCode set_post_cursor(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+        std::vector<uint8_t>& io_data,
+        const uint32_t i_setting)
+{
+    uint8_t l_byte = 0;
+    fapi2::buffer<uint32_t> l_input(i_setting);
+
+    l_input.extractToRight<0, BITS_PER_BYTE>(l_byte);
+    FAPI_TRY(set_field<fields::FFE_POST_CURSOR_BYTE0>(i_target, io_data, l_byte));
+    l_input.extractToRight<8, BITS_PER_BYTE>(l_byte);
+    FAPI_TRY(set_field<fields::FFE_POST_CURSOR_BYTE1>(i_target, io_data, l_byte));
+    l_input.extractToRight<16, BITS_PER_BYTE>(l_byte);
+    FAPI_TRY(set_field<fields::FFE_POST_CURSOR_BYTE2>(i_target, io_data, l_byte));
+    l_input.extractToRight<24, BITS_PER_BYTE>(l_byte);
+    FAPI_TRY(set_field<fields::FFE_POST_CURSOR_BYTE3>(i_target, io_data, l_byte));
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+}// ffe_settings
 
 namespace status
 {

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -3690,11 +3690,11 @@ class readerTraits< fields<DDR4, LRDIMM_MODULE>::DATA_BUFFER_GAIN_ADJUST, R >
 /// @class readerTraits
 /// @brief trait structure to hold static SPD information
 /// @tparam R the revision of the SPD field
-/// @note SPD_REVISION field specialization
+/// @note SPD_REV_DDIMM_MODULE field specialization
 /// @note valid for all revs
 ///
 template< rev R >
-class readerTraits < fields< DDR4, DDIMM_MODULE>::SPD_REVISION, R >
+class readerTraits < fields< DDR4, DDIMM_MODULE>::SPD_REV_DDIMM_MODULE, R >
 {
     public:
 
@@ -5061,6 +5061,25 @@ class readerTraits < fields< DDR4, DDIMM_MODULE>::PMIC0_SWD_ORDER, R >
 /// @class readerTraits
 /// @brief trait structure to hold static SPD information
 /// @tparam R the revision of the SPD field
+/// @note PMIC0_REDUNDANCY field specialization
+/// @note valid for all revs
+///
+template< rev R >
+class readerTraits < fields< DDR4, DDIMM_MODULE>::PMIC0_REDUNDANCY, R >
+{
+    public:
+
+        static constexpr size_t COMPARISON_VAL = 0x01;
+        static constexpr const char* FIELD_STR = "PMIC0 Redundancy";
+
+        template <typename T>
+        using COMPARISON_OP = std::less_equal<T>;
+};
+
+///
+/// @class readerTraits
+/// @brief trait structure to hold static SPD information
+/// @tparam R the revision of the SPD field
 /// @note PMIC0_PHASE_COMBIN field specialization
 /// @note valid for all revs
 ///
@@ -5536,6 +5555,25 @@ class readerTraits < fields< DDR4, DDIMM_MODULE>::PMIC1_SWD_ORDER, R >
 /// @class readerTraits
 /// @brief trait structure to hold static SPD information
 /// @tparam R the revision of the SPD field
+/// @note PMIC1_REDUNDANCY field specialization
+/// @note valid for all revs
+///
+template< rev R >
+class readerTraits < fields< DDR4, DDIMM_MODULE>::PMIC1_REDUNDANCY, R >
+{
+    public:
+
+        static constexpr size_t COMPARISON_VAL = 0x01;
+        static constexpr const char* FIELD_STR = "PMIC1 Redundancy";
+
+        template <typename T>
+        using COMPARISON_OP = std::less_equal<T>;
+};
+
+///
+/// @class readerTraits
+/// @brief trait structure to hold static SPD information
+/// @tparam R the revision of the SPD field
 /// @note PMIC1_PHASE_COMBIN field specialization
 /// @note valid for all revs
 ///
@@ -5549,6 +5587,272 @@ class readerTraits < fields< DDR4, DDIMM_MODULE>::PMIC1_PHASE_COMBIN, R >
 
         template <typename T>
         using COMPARISON_OP = std::less_equal<T>;
+};
+
+///
+/// @class readerTraits
+/// @brief trait structure to hold static SPD information
+/// @tparam R the revision of the SPD field
+/// @note THERM_SENSOR_0_AVAIL field specialization
+/// @note valid for all revs
+///
+template< rev R >
+class readerTraits < fields< DDR4, DDIMM_MODULE>::THERM_SENSOR_0_AVAIL, R >
+{
+    public:
+
+        static constexpr size_t COMPARISON_VAL = 0b1;
+        static constexpr const char* FIELD_STR = "Thermal Sensor 0 Availability";
+
+        template <typename T>
+        using COMPARISON_OP = std::less_equal<T>;
+};
+
+///
+/// @class readerTraits
+/// @brief trait structure to hold static SPD information
+/// @tparam R the revision of the SPD field
+/// @note THERM_SENSOR_0_USAGE field specialization
+/// @note valid for all revs
+///
+template< rev R >
+class readerTraits < fields< DDR4, DDIMM_MODULE>::THERM_SENSOR_0_USAGE, R >
+{
+    public:
+
+        static constexpr size_t COMPARISON_VAL = 0b101;
+        static constexpr const char* FIELD_STR = "Thermal Sensor 0 Usage";
+
+        template <typename T>
+        using COMPARISON_OP = std::less_equal<T>;
+};
+
+///
+/// @class readerTraits
+/// @brief trait structure to hold static SPD information
+/// @tparam R the revision of the SPD field
+/// @note THERM_SENSOR_0_TYPE field specialization
+/// @note valid for all revs
+///
+template< rev R >
+class readerTraits < fields< DDR4, DDIMM_MODULE>::THERM_SENSOR_0_TYPE, R >
+{
+    public:
+
+        static constexpr size_t COMPARISON_VAL = 0b0010;
+        static constexpr const char* FIELD_STR = "Thermal Sensor 0 Type";
+
+        template <typename T>
+        using COMPARISON_OP = std::less_equal<T>;
+};
+
+///
+/// @class readerTraits
+/// @brief trait structure to hold static SPD information
+/// @tparam R the revision of the SPD field
+/// @note THERM_SENSOR_0_I2C_ADDRESS field specialization
+/// @note valid for all revs
+///
+template< rev R >
+class readerTraits < fields< DDR4, DDIMM_MODULE>::THERM_SENSOR_0_I2C_ADDRESS, R >
+{
+    public:
+
+        static constexpr size_t COMPARISON_VAL = 0xFF;
+        static constexpr const char* FIELD_STR = "Thermal Sensor 0 I2C Address";
+
+        template <typename T>
+        using COMPARISON_OP = std::less_equal<T>;
+};
+
+///
+/// @class readerTraits
+/// @brief trait structure to hold static SPD information
+/// @tparam R the revision of the SPD field
+/// @note THERM_SENSOR_1_AVAIL field specialization
+/// @note valid for all revs
+///
+template< rev R >
+class readerTraits < fields< DDR4, DDIMM_MODULE>::THERM_SENSOR_1_AVAIL, R >
+{
+    public:
+
+        static constexpr size_t COMPARISON_VAL = 0b1;
+        static constexpr const char* FIELD_STR = "Thermal Sensor 1 Availability";
+
+        template <typename T>
+        using COMPARISON_OP = std::less_equal<T>;
+};
+
+///
+/// @class readerTraits
+/// @brief trait structure to hold static SPD information
+/// @tparam R the revision of the SPD field
+/// @note THERM_SENSOR_1_USAGE field specialization
+/// @note valid for all revs
+///
+template< rev R >
+class readerTraits < fields< DDR4, DDIMM_MODULE>::THERM_SENSOR_1_USAGE, R >
+{
+    public:
+
+        static constexpr size_t COMPARISON_VAL = 0b101;
+        static constexpr const char* FIELD_STR = "Thermal Sensor 1 Usage";
+
+        template <typename T>
+        using COMPARISON_OP = std::less_equal<T>;
+};
+
+///
+/// @class readerTraits
+/// @brief trait structure to hold static SPD information
+/// @tparam R the revision of the SPD field
+/// @note THERM_SENSOR_1_TYPE field specialization
+/// @note valid for all revs
+///
+template< rev R >
+class readerTraits < fields< DDR4, DDIMM_MODULE>::THERM_SENSOR_1_TYPE, R >
+{
+    public:
+
+        static constexpr size_t COMPARISON_VAL = 0b0010;
+        static constexpr const char* FIELD_STR = "Thermal Sensor 1 Type";
+
+        template <typename T>
+        using COMPARISON_OP = std::less_equal<T>;
+};
+
+///
+/// @class readerTraits
+/// @brief trait structure to hold static SPD information
+/// @tparam R the revision of the SPD field
+/// @note THERM_SENSOR_1_I2C_ADDRESS field specialization
+/// @note valid for all revs
+///
+template< rev R >
+class readerTraits < fields< DDR4, DDIMM_MODULE>::THERM_SENSOR_1_I2C_ADDRESS, R >
+{
+    public:
+
+        static constexpr size_t COMPARISON_VAL = 0xFF;
+        static constexpr const char* FIELD_STR = "Thermal Sensor 1 I2C Address";
+
+        template <typename T>
+        using COMPARISON_OP = std::less_equal<T>;
+};
+
+///
+/// @class readerTraits
+/// @brief trait structure to hold static SPD information
+/// @tparam R the revision of the SPD field
+/// @note THERM_SENSOR_DIFF_AVAIL field specialization
+/// @note valid for all revs
+///
+template< rev R >
+class readerTraits < fields< DDR4, DDIMM_MODULE>::THERM_SENSOR_DIFF_AVAIL, R >
+{
+    public:
+
+        static constexpr size_t COMPARISON_VAL = 0b1;
+        static constexpr const char* FIELD_STR = "Differential Thermal Sensor Availability";
+
+        template <typename T>
+        using COMPARISON_OP = std::less_equal<T>;
+};
+
+///
+/// @class readerTraits
+/// @brief trait structure to hold static SPD information
+/// @tparam R the revision of the SPD field
+/// @note THERM_SENSOR_DIFF_USAGE field specialization
+/// @note valid for all revs
+///
+template< rev R >
+class readerTraits < fields< DDR4, DDIMM_MODULE>::THERM_SENSOR_DIFF_USAGE, R >
+{
+    public:
+
+        static constexpr size_t COMPARISON_VAL = 0b10;
+        static constexpr const char* FIELD_STR = "Differential Thermal Sensor Usage";
+
+        template <typename T>
+        using COMPARISON_OP = std::less_equal<T>;
+};
+
+///
+/// @class readerTraits
+/// @brief trait structure to hold static SPD information
+/// @tparam R the revision of the SPD field
+/// @note THERM_SENSOR_DIFF_TYPE field specialization
+/// @note valid for all revs
+///
+template< rev R >
+class readerTraits < fields< DDR4, DDIMM_MODULE>::THERM_SENSOR_DIFF_TYPE, R >
+{
+    public:
+
+        static constexpr size_t COMPARISON_VAL = 0b0010;
+        static constexpr const char* FIELD_STR = "Differential Thermal Sensor Type";
+
+        template <typename T>
+        using COMPARISON_OP = std::less_equal<T>;
+};
+
+///
+/// @class readerTraits
+/// @brief trait structure to hold static SPD information
+/// @tparam R the revision of the SPD field
+/// @note THERM_SENSOR_DIFF_I2C_ADDRESS field specialization
+/// @note valid for all revs
+///
+template< rev R >
+class readerTraits < fields< DDR4, DDIMM_MODULE>::THERM_SENSOR_DIFF_I2C_ADDRESS, R >
+{
+    public:
+
+        static constexpr size_t COMPARISON_VAL = 0xFF;
+        static constexpr const char* FIELD_STR = "Differential Thermal Sensor I2C Address";
+
+        template <typename T>
+        using COMPARISON_OP = std::less_equal<T>;
+};
+
+///
+/// @class readerTraits
+/// @brief trait structure to hold static SPD information
+/// @tparam R the revision of the SPD field
+/// @note MODULE_MFG_ID_CODE_LSB field specialization
+/// @note valid for all revisions
+///
+template< rev R >
+class readerTraits < fields<DDR4, DDIMM_MODULE>::MODULE_MFG_ID_CODE_LSB, R >
+{
+    public:
+
+        static constexpr size_t COMPARISON_VAL = 0x00;
+        static constexpr const char* FIELD_STR = "Module manufacturer ID code, LSB";
+
+        template <typename T>
+        using COMPARISON_OP = std::greater_equal<T>;
+};
+
+///
+/// @class readerTraits
+/// @brief trait structure to hold static SPD information
+/// @tparam R the revision of the SPD field
+/// @note MODULE_MFG_ID_CODE_MSB field specialization
+/// @note valid for all revisions
+///
+template< rev R >
+class readerTraits < fields<DDR4, DDIMM_MODULE>::MODULE_MFG_ID_CODE_MSB, R >
+{
+    public:
+
+        static constexpr size_t COMPARISON_VAL = 0x00;
+        static constexpr const char* FIELD_STR = "Module manufacturer ID code, MSB";
+
+        template <typename T>
+        using COMPARISON_OP = std::greater_equal<T>;
 };
 
 ///
@@ -5587,6 +5891,25 @@ class readerTraits < fields<DDR4, DDIMM_MODULE>::DRAM_MFR_ID_CODE_MSB, R >
 
         template <typename T>
         using COMPARISON_OP = std::greater_equal<T>;
+};
+
+///
+/// @class readerTraits
+/// @brief trait structure to hold static SPD information
+/// @tparam R the revision of the SPD field
+/// @note MODULE_RCD field specialization
+/// @note valid for all revisions
+///
+template< rev R >
+class readerTraits < fields<DDR4, DDIMM_MODULE>::MODULE_RCD, R >
+{
+    public:
+
+        static constexpr size_t COMPARISON_VAL = 0x01;
+        static constexpr const char* FIELD_STR = "Registered Clock Drivers (RCD)";
+
+        template <typename T>
+        using COMPARISON_OP = std::less_equal<T>;
 };
 
 }// spd
