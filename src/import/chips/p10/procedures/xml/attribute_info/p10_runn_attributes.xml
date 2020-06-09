@@ -170,4 +170,56 @@
   </enum>
 </attribute>
 <!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_RUNN_MASTER_SEED</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>
+    Master seed used to seed the RNG for generating thread seeds for
+    exercisers.
+  </description>
+  <valueType>uint64</valueType>
+  <initToZero/>
+  <platInit/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_RUNN_CORE_SEED_SELECT</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>
+    Specify a core whose exerciser thread seeds should be duplicated across all
+    other cores. Example: ATTR_RUNN_CORE_SEED_SELECT=CORE05, then when
+    generating exerciser seeds, every other core would first seed the RNG w/
+    ATTR_RUNN_MASTER_SEED and then discard values until CORE05 before
+    generating per-thread seeds.
+
+    The default behavior is to randomize each core independently by using
+    ATTR_RUNN_CORE_SEED_SELECT=RANDOM.
+  </description>
+  <valueType>uint8</valueType>
+  <initToZero/>
+  <enum>
+    RANDOM=0x00,
+    CORE00=0x01, CORE08=0x09, CORE16=0x11, CORE24=0x19,
+    CORE01=0x02, CORE09=0x0a, CORE17=0x12, CORE25=0x1a,
+    CORE02=0x03, CORE10=0x0b, CORE18=0x13, CORE26=0x1b,
+    CORE03=0x04, CORE11=0x0c, CORE19=0x14, CORE27=0x1c,
+    CORE04=0x05, CORE12=0x0d, CORE20=0x15, CORE28=0x1d,
+    CORE05=0x06, CORE13=0x0e, CORE21=0x16, CORE29=0x1e,
+    CORE06=0x07, CORE14=0x0f, CORE22=0x17, CORE30=0x1f,
+    CORE07=0x08, CORE15=0x10, CORE23=0x18, CORE31=0x20
+  </enum>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_RUNN_THREAD_SEEDS</id>
+  <targetType>TARGET_TYPE_CORE</targetType>
+  <description>
+    Actual exerciser seed values for each thread. Can be specified via
+    attribute seedfile and qualified with 'CONST'.
+  </description>
+  <valueType>uint64</valueType>
+  <array>4</array>
+  <writeable/>
+</attribute>
+<!-- ********************************************************************** -->
 </attributes>
