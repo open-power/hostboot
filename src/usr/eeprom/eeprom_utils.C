@@ -486,7 +486,9 @@ errlHndl_t eepromReadAttributes ( TARGETING::Target * i_target,
             }
             else if ( eepromData.byteAddrOffset == 0x1 )
             {
-                io_eepromAddr.accessAddr.i2c_addr.addrSize = ONE_BYTE_ADDR_PAGESELECT;
+                //@fixme-CQ:SW493992 - lie and force to 2 bytes because MRW is wrong
+                //io_eepromAddr.accessAddr.i2c_addr.addrSize = ONE_BYTE_ADDR_PAGESELECT;
+                io_eepromAddr.accessAddr.i2c_addr.addrSize = TWO_BYTE_ADDR;
             }
             else if ( eepromData.byteAddrOffset == 0x0 )
             {
