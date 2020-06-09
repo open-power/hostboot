@@ -41,12 +41,13 @@
 #include <explorer_scom_addresses_fld.H>
 #include <explorer_scom_addresses_fld_fixes.H>
 #include <lib/exp_attribute_accessors_manual.H>
+#include <lib/utils/mss_exp_conversions.H>
+#include <mss_explorer_attribute_getters.H>
 #include <lib/shared/exp_consts.H>
 #include <lib/dimm/exp_rank.H>
 #include <generic/memory/lib/utils/mc/gen_mss_port.H>
 #include <generic/memory/lib/utils/shared/mss_generic_consts.H>
 #include <mss_generic_attribute_getters.H>
-#include <mss_explorer_attribute_getters.H>
 
 namespace mss
 {
@@ -75,6 +76,7 @@ class portTraits< mss::mc_type::EXPLORER >
         static constexpr uint64_t REFRESH_REG = EXPLR_SRQ_MBAREF0Q;
         static constexpr uint64_t STR0Q_REG = EXPLR_SRQ_MBASTR0Q;
         static constexpr uint64_t ECC_REG = EXPLR_RDF_RECR;
+        static constexpr uint64_t CTCR_REG = EXPLR_RDF_CTCR;
         static constexpr uint64_t DSM0Q_REG = EXPLR_SRQ_MBA_DSM0Q;
         static constexpr uint64_t FWMS_REG = EXPLR_RDF_FWMS0;
 
@@ -105,11 +107,42 @@ class portTraits< mss::mc_type::EXPLORER >
             PORT_FAIL_DISABLE = EXPLR_SRQ_MBA_FARB0Q_CFG_PORT_FAIL_DISABLE,
             DFI_INIT_START = EXPLR_SRQ_MBA_FARB0Q_CFG_INIT_START,
             RCD_RECOVERY_DISABLE = EXPLR_SRQ_MBA_FARB0Q_CFG_DISABLE_RCD_RECOVERY,
+            BW_WINDOW_SIZE = EXPLR_SRQ_MBA_FARB0Q_CFG_BW_WINDOW_SIZE,
+            BW_WINDOW_SIZE_LEN = EXPLR_SRQ_MBA_FARB0Q_CFG_BW_WINDOW_SIZE_LEN,
+            BW_SNAPSHOT = EXPLR_SRQ_MBA_FARB6Q_CFG_BW_SNAPSHOT,
+            BW_SNAPSHOT_LEN = EXPLR_SRQ_MBA_FARB6Q_CFG_BW_SNAPSHOT_LEN,
 
+            RECR_ENABLE_MPE_NOISE_WINDOW = EXPLR_RDF_RECR_MBSECCQ_ENABLE_MPE_NOISE_WINDOW,
             RECR_ENABLE_UE_NOISE_WINDOW = EXPLR_RDF_RECR_MBSECCQ_ENABLE_UE_NOISE_WINDOW,
             RECR_TCE_CORRECTION = EXPLR_RDF_RECR_MBSECCQ_ENABLE_TCE_CORRECTION,
             RECR_MBSECCQ_DATA_INVERSION = EXPLR_RDF_RECR_MBSECCQ_DATA_INVERSION,
             RECR_MBSECCQ_DATA_INVERSION_LEN = EXPLR_RDF_RECR_MBSECCQ_DATA_INVERSION_LEN,
+            RECR_RETRY_UNMARKED_ERRORS = EXPLR_RDF_RECR_RETRY_UNMARKED_ERRORS,
+            RECR_CFG_MAINT_USE_TIMERS = EXPLR_RDF_RECR_CFG_MAINT_USE_TIMERS,
+            RECR_MBSECCQ_MAINT_NO_RETRY_UE = EXPLR_RDF_RECR_MBSECCQ_MAINT_NO_RETRY_UE,
+            RECR_MBSECCQ_MAINT_NO_RETRY_MPE = EXPLR_RDF_RECR_MBSECCQ_MAINT_NO_RETRY_MPE,
+
+            CFG_CTRLUPD_AFTER_ERR = EXPLR_SRQ_MBA_FARB9Q_CFG_CTRLUPD_AFTER_ERR,
+            CFG_MC_PER_CAL_ENABLE = EXPLR_SRQ_MBA_FARB9Q_CFG_MC_PER_CAL_ENABLE,
+            CFG_MC_PER_CAL_INTERVAL_TB = EXPLR_SRQ_MBA_FARB9Q_CFG_MC_PER_CAL_INTERVAL_TB,
+            CFG_MC_PER_CAL_INTERVAL_TB_LEN = EXPLR_SRQ_MBA_FARB9Q_CFG_MC_PER_CAL_INTERVAL_TB_LEN,
+            CFG_MC_PER_CAL_INTERVAL = EXPLR_SRQ_MBA_FARB9Q_CFG_MC_PER_CAL_INTERVAL,
+            CFG_MC_PER_CAL_INTERVAL_LEN = EXPLR_SRQ_MBA_FARB9Q_CFG_MC_PER_CAL_INTERVAL_LEN,
+            CFG_MC_PER_CAL_FIXED_RUN_LENGTH_EN = EXPLR_SRQ_MBA_FARB9Q_CFG_MC_PER_CAL_FIXED_RUN_LENGTH_EN,
+            CFG_MC_PER_CAL_RUN_LENGTH = EXPLR_SRQ_MBA_FARB9Q_CFG_MC_PER_CAL_RUN_LENGTH,
+            CFG_MC_PER_CAL_RUN_LENGTH_LEN = EXPLR_SRQ_MBA_FARB9Q_CFG_MC_PER_CAL_RUN_LENGTH_LEN,
+            CFG_MC_PER_CAL_CTRLUPD_MIN = EXPLR_SRQ_MBA_FARB9Q_CFG_MC_PER_CAL_CTRLUPD_MIN,
+            CFG_MC_PER_CAL_CTRLUPD_MIN_LEN = EXPLR_SRQ_MBA_FARB9Q_CFG_MC_PER_CAL_CTRLUPD_MIN_LEN,
+
+            CTCR_MPE_TIMER = EXPLR_RDF_CTCR_MPE_TIMER,
+            CTCR_MPE_TIMER_LEN = EXPLR_RDF_CTCR_MPE_TIMER_LEN,
+            CTCR_MPE_TIMEBASE = EXPLR_RDF_CTCR_MPE_TIMEBASE,
+            CTCR_MPE_TIMEBASE_LEN = EXPLR_RDF_CTCR_MPE_TIMEBASE_LEN,
+            CTCR_UE_TIMER = EXPLR_RDF_CTCR_UE_TIMER,
+            CTCR_UE_TIMER_LEN = EXPLR_RDF_CTCR_UE_TIMER_LEN,
+            CTCR_UE_TIMEBASE = EXPLR_RDF_CTCR_UE_TIMEBASE,
+            CTCR_UE_TIMEBASE_LEN = EXPLR_RDF_CTCR_UE_TIMEBASE_LEN,
+            CTCR_UE_LOCKOUT_ENABLE = EXPLR_RDF_CTCR_UE_LOCKOUT_ENABLE,
 
             DSM0Q_RDTAG_DLY = EXPLR_SRQ_MBA_DSM0Q_CFG_RDTAG_DLY,
             DSM0Q_RDTAG_DLY_LEN = EXPLR_SRQ_MBA_DSM0Q_CFG_RDTAG_DLY_LEN,
@@ -159,6 +192,22 @@ inline fapi2::ReturnCode reorder_queue_setting<mss::mc_type::EXPLORER>(
 }
 
 ///
+/// @brief ATTR_MEM_EFF_DIMM_SPARE getter
+/// @param[in] const ref to the TARGET_TYPE_DIMM
+/// @param[out] uint32_t&[] array reference to store the value
+/// @return fapi2::ReturnCode - FAPI2_RC_SUCCESS iff get is OK
+/// @note  Spare DRAM availability. Used in various locations and is computed in mss_eff_cnfg.
+/// Array indexes are [DIMM][RANK]
+///
+template<>
+inline fapi2::ReturnCode dimm_spare< mss::mc_type::EXPLORER >(
+    const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+    uint8_t (&o_array)[mss::MAX_RANK_PER_DIMM_ATTR])
+{
+    return mss::attr::get_dimm_spare(i_target, o_array);
+}
+
+///
 /// @brief Change the state of the force_str bit - mc_type::EXPLORER specialization
 /// @tparam MC the memory controller type
 /// @param[in] i_target the target
@@ -181,7 +230,6 @@ inline fapi2::ReturnCode change_force_str<DEFAULT_MC_TYPE>(
 fapi_try_exit:
     return fapi2::current_err;
 }
-
 
 }// mss
 
