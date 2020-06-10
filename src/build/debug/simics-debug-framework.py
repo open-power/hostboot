@@ -760,11 +760,20 @@ def magic_instruction_callback(user_arg, cpu, arg):
         # tracMERG.  Once we extract the trace buffer, we need to reset
         # mailbox scratch 1 (to 0) so that the trace daemon knows it can
         # continue.
-        cmd1 = "(%s)->image.save %s 0x%x %d"%(
-                mem_object,\
-                tracbin[node_num],\
-                hb_tracBinaryBuffer,\
-                hb_tracBinaryBufferSz)
+        # Newer simics versions (5.0.210) and newer only allow overwriting
+        # an image by specifying that as a command line parameter
+        if(conf.sim.version >= 5239):
+            cmd1 = "(%s)->image.save %s 0x%x %d -overwrite"%(
+                    mem_object,\
+                    tracbin[node_num],\
+                    hb_tracBinaryBuffer,\
+                    hb_tracBinaryBufferSz)
+        else:
+            cmd1 = "(%s)->image.save %s 0x%x %d"%(
+                    mem_object,\
+                    tracbin[node_num],\
+                    hb_tracBinaryBuffer,\
+                    hb_tracBinaryBufferSz)
 
 
         cmd2 = "(shell \"(fsp-trace ./%s -s %s/hbotStringFile | sort -s -k 1,1 >> %s 2>/dev/null) || true\")"\
