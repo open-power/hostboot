@@ -6474,10 +6474,10 @@
       <array>16</array>
       <uint16_t>
         <default>
-            0x7777,0x7777,0x7777,0x7777,
-            0x7777,0x7777,0x7777,0x7777,
-            0x7777,0x7777,0x7777,0x7777,
-            0x7777,0x7777,0x7777,0x7777
+            0x5454,0x5454,0x5454,0x5454,
+            0x5454,0x5454,0x5454,0x5454,
+            0x5454,0x5454,0x5454,0x5454,
+            0x5454,0x5454,0x5454,0x5454,
         </default>
       </uint16_t>
     </simpleType>
@@ -6497,6 +6497,35 @@
                 Bit 12:15 - dn_tx_preset
     </description>
     <id>PROC_PCIE_LANE_EQUALIZATION_GEN4</id>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <simpleType>
+      <array>16</array>
+      <uint16_t>
+        <default>
+            0x7777,0x7777,0x7777,0x7777,
+            0x7777,0x7777,0x7777,0x7777,
+            0x7777,0x7777,0x7777,0x7777,
+            0x7777,0x7777,0x7777,0x7777
+        </default>
+      </uint16_t>
+    </simpleType>
+  </attribute>
+
+  <attribute>
+    <description>PCIE Lane Equalization values for each PHB
+        Creator: MRW
+        Purpose: Holds settings which are loaded into the HW to optimize the
+            PCIE lane signal eye between the chips + PCIE Gen5 endpoints
+        Data Format: 16 entries of 16 bytes of EQ data per PHB.  Each PHB has an EQ
+            value for each of its 16 lanes.  Each value is a uint16 formatted as
+            follows:
+                Bit 0:3   - up_rx_hint (bit 0 reserved)
+                Bit 4:7   - up_tx_preset
+                Bit 8:11  - dn_rx_hint (bit 0 reserved)
+                Bit 12:15 - dn_tx_preset
+    </description>
+    <id>PROC_PCIE_LANE_EQUALIZATION_GEN5</id>
     <persistency>non-volatile</persistency>
     <readable/>
     <simpleType>

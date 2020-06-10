@@ -4526,6 +4526,15 @@
     <attribute>
       <id>PARENT_PERVASIVE</id>
     </attribute>
+    <attribute>
+      <id>PROC_PCIE_LANE_EQUALIZATION_GEN3</id>
+    </attribute>
+    <attribute>
+      <id>PROC_PCIE_LANE_EQUALIZATION_GEN4</id>
+    </attribute>
+    <attribute>
+      <id>PROC_PCIE_LANE_EQUALIZATION_GEN5</id>
+    </attribute>
   </targetType>
 
   <!-- PHB
