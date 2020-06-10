@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -1485,6 +1485,14 @@ errlHndl_t populate_hbSecurebootData ( void )
         memset(l_sysParmsPtr->hdatHwKeyHashValue,0,
                 sizeof(l_sysParmsPtr->hdatHwKeyHashValue));
 #endif
+
+        // Populate FW Secure Version
+        // TODO RTC 254577 - put in real value
+        // Clear for now
+        l_sysParmsPtr->hdatFwSecureVersion = 0;
+        TRACFCOMP(g_trac_runtime, INFO_MRK"populate_hbSecurebootData: "
+                  "Setting hdatFwSecureVersion to 0x%.2X",
+                  l_sysParmsPtr->hdatFwSecureVersion);
 
     } while(0);
 
