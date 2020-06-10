@@ -51,6 +51,7 @@
 
 // HWP
 #include    <exp_omi_setup.H>
+#include    <p10_omi_setup.H>
 
 using   namespace   ISTEP;
 using   namespace   ISTEP_ERROR;
@@ -76,13 +77,13 @@ class IStepWorkItem
 };
 
 /*******************************************************************************
- * @brief Ocmb specific work item class
+ * @brief Omic specific work item class
  */
-class OcmbWorkItem: public IStepWorkItem
+class OmicWorkItem: public IStepWorkItem
 {
     private:
         IStepError* iv_pStepError;
-        const TARGETING::Target* iv_pOcmb;
+        const Target* iv_pOmic;
 
     public:
         /**
@@ -94,67 +95,127 @@ class OcmbWorkItem: public IStepWorkItem
         /**
          * @brief ctor
          *
-         * @param[in] i_Ocmb target Ocmb to operate on
+         * @param[in] i_Omic target Omic to operate on
          * @param[in] i_istepError error accumulator for this istep
          */
-        OcmbWorkItem(const TARGETING::Target& i_Ocmb,
+        OmicWorkItem(const Target& i_Omic,
                        IStepError& i_stepError):
             iv_pStepError(&i_stepError),
-            iv_pOcmb(&i_Ocmb) {}
+            iv_pOmic(&i_Omic) {}
 
         // delete default copy/move constructors and operators
-        OcmbWorkItem() = delete;
-        OcmbWorkItem(const OcmbWorkItem& ) = delete;
-        OcmbWorkItem& operator=(const OcmbWorkItem& ) = delete;
-        OcmbWorkItem(OcmbWorkItem&&) = delete;
-        OcmbWorkItem& operator=(OcmbWorkItem&&) = delete;
+        OmicWorkItem() = delete;
+        OmicWorkItem(const OmicWorkItem& ) = delete;
+        OmicWorkItem& operator=(const OmicWorkItem& ) = delete;
+        OmicWorkItem(OmicWorkItem&&) = delete;
+        OmicWorkItem& operator=(OmicWorkItem&&) = delete;
 
         /**
          * @brief destructor
          */
-        ~OcmbWorkItem(){};
+        ~OmicWorkItem(){};
 };
 
 //******************************************************************************
-void OcmbWorkItem::operator()()
+void OmicWorkItem::operator()()
 {
     errlHndl_t l_err = nullptr;
 
-    // reset watchdog for each ocmb as this function can be very slow
+    // reset watchdog for each omic as this function can be very slow
     INITSERVICE::sendProgressCode();
 
-    //  call the HWP with each target
-    fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP> l_fapi_ocmb_target
-      (iv_pOcmb);
+    // call exp_omi_setup first with each target's associated OCMB
+    // call p10_omi_setup second with each target
+    fapi2::Target<fapi2::TARGET_TYPE_OMIC> l_fapi_omic_target
+      (iv_pOmic);
 
-    TRACFCOMP(g_trac_isteps_trace,
-              "exp_omi_setup HWP target HUID 0x%.08x",
-              get_huid(iv_pOcmb));
+    // each OMIC could have up to 2 child OMIs
+    auto l_childOMIs =
+        l_fapi_omic_target.getChildren<fapi2::TARGET_TYPE_OMI>();
 
-    FAPI_INVOKE_HWP(l_err, exp_omi_setup, l_fapi_ocmb_target);
-
-    //  process return code
-    if ( l_err )
+    // Loop through the OMIs and find their child OCMB
+    // Run exp_omi_setup with the OCMB
+    for (auto omi : l_childOMIs)
     {
-        TRACFCOMP(g_trac_isteps_trace,
-                  "ERROR : call exp_omi_setup HWP: failed on target 0x%08X. "
+        // Get the OCMB from the OMI
+        auto l_childOCMB =
+            omi.getChildren<fapi2::TARGET_TYPE_OCMB_CHIP>();
+        if (l_childOCMB.size() == 1)
+        {
+            auto ocmb = l_childOCMB[0];
+            TARGETING::Target * l_ocmbTarget = ocmb.get();
+            TRACFCOMP(g_trac_isteps_trace,
+                INFO_MRK"exp_omi_setup HWP target HUID 0x%.08x ",
+                get_huid(iv_pOmic));
+
+            FAPI_INVOKE_HWP(l_err, exp_omi_setup, ocmb);
+
+            //  process return code
+            if ( l_err )
+            {
+                TRACFCOMP(g_trac_isteps_trace,
+                  ERR_MRK"call exp_omi_setup HWP: failed on target 0x%08X. "
                   TRACE_ERR_FMT,
-                  get_huid(iv_pOcmb),
+                  get_huid(l_ocmbTarget),
                   TRACE_ERR_ARGS(l_err));
 
-        //addErrorDetails may not be thread-safe.  Protect with mutex.
-        mutex_lock(&g_stepErrorMutex);
+                // addErrorDetails may not be thread-safe.  Protect with mutex.
+                mutex_lock(&g_stepErrorMutex);
 
-        // Capture error
-        captureError(l_err, *iv_pStepError, HWPF_COMP_ID, iv_pOcmb);
+                // Capture error
+                captureError(l_err, *iv_pStepError, HWPF_COMP_ID, l_ocmbTarget);
 
-        mutex_unlock(&g_stepErrorMutex);
+                mutex_unlock(&g_stepErrorMutex);
+            }
+            else
+            {
+                TRACFCOMP(g_trac_isteps_trace,
+                   INFO_MRK"SUCCESS running exp_omi_setup HWP on target HUID %.8X. ",
+                   get_huid(l_ocmbTarget));
+            }
+        }
+    }
+
+    // Any deconfigs happening above are delayed, so need to exit
+    // early if istep errors out
+    if (!iv_pStepError->isNull())
+    {
+        TRACFCOMP(g_trac_isteps_trace,
+                INFO_MRK "call_omi_setup exited early because exp_omi_setup "
+                "had failures");
     }
     else
     {
-        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                   "SUCCESS running exp_omi_setup HWP on target HUID %.8X.",
-                   TARGETING::get_huid(iv_pOcmb));
+        // Run p10_omi_setup on the OMIC target
+        TRACFCOMP(g_trac_isteps_trace,
+            INFO_MRK"p10_omi_setup HWP target HUID 0x%.08x ",
+            get_huid(iv_pOmic));
+
+        FAPI_INVOKE_HWP(l_err, p10_omi_setup, l_fapi_omic_target);
+
+        // process return code
+        if (l_err)
+        {
+            TRACFCOMP(g_trac_isteps_trace,
+                ERR_MRK"call p10_omi_setup HWP: failed on target 0x%08X. "
+                TRACE_ERR_FMT,
+                get_huid(iv_pOmic),
+                TRACE_ERR_ARGS(l_err));
+
+            // addErrorDetails may not be thread-safe. Proect with mutex.
+            mutex_lock(&g_stepErrorMutex);
+
+            // Capture error
+            captureError(l_err, *iv_pStepError, HWPF_COMP_ID, iv_pOmic);
+
+            mutex_unlock(&g_stepErrorMutex);
+        }
+        else
+        {
+            TRACFCOMP(g_trac_isteps_trace,
+                INFO_MRK"SUCCESS running p10_omi_setup HWP on target HUID %.8X.",
+                get_huid(iv_pOmic));
+        }
     }
 }
 
@@ -163,9 +224,9 @@ void* call_omi_setup (void *io_pArgs)
 {
     IStepError l_StepError;
     errlHndl_t l_err = nullptr;
-    TRACFCOMP( g_trac_isteps_trace, "call_omi_setup entry" );
+    TRACFCOMP( g_trac_isteps_trace, ENTER_MRK"call_omi_setup " );
     Util::ThreadPool<IStepWorkItem> threadpool;
-    constexpr size_t MAX_OCMB_THREADS = 4;
+    constexpr size_t MAX_OMIC_THREADS = 2;
     uint32_t l_numThreads = 0;
 
     do
@@ -173,27 +234,27 @@ void* call_omi_setup (void *io_pArgs)
         // 12.6.a exp_omi_setup.C
         //        - Set any register (via I2C) on the Explorer before OMI is
         //          trained
-        TargetHandleList l_ocmbTargetList;
-        getAllChips(l_ocmbTargetList, TYPE_OCMB_CHIP);
+        TargetHandleList l_omicTargetList;
+        getAllChiplets(l_omicTargetList, TYPE_OMIC);
         TRACFCOMP(g_trac_isteps_trace,
-                "call_omi_setup: %d OCMBs found",
-                l_ocmbTargetList.size());
+                INFO_MRK"call_omi_setup: %d OMICs found ",
+                l_omicTargetList.size());
 
-        for (const auto & l_ocmb_target : l_ocmbTargetList)
+        for (const auto & l_omic_target : l_omicTargetList)
         {
             //  Create a new workitem from this membuf and feed it to the
             //  thread pool for processing.  Thread pool handles workitem
             //  cleanup.
-            threadpool.insert(new OcmbWorkItem(*l_ocmb_target,
+            threadpool.insert(new OmicWorkItem(*l_omic_target,
                                                l_StepError));
         }
 
         //Don't create more threads than we have targets
-        size_t l_numTargets = l_ocmbTargetList.size();
-        l_numThreads = std::min(MAX_OCMB_THREADS, l_numTargets);
+        size_t l_numTargets = l_omicTargetList.size();
+        l_numThreads = std::min(MAX_OMIC_THREADS, l_numTargets);
 
-        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                  "Starting %llu thread(s) to handle %llu OCMB target(s)",
+        TRACFCOMP(g_trac_isteps_trace,
+                  INFO_MRK"Starting %llu thread(s) to handle %llu OMIC target(s) ",
                    l_numThreads, l_numTargets);
 
         //Set the number of threads to use in the threadpool
@@ -206,18 +267,13 @@ void* call_omi_setup (void *io_pArgs)
         l_err = threadpool.shutdown();
         if(l_err)
         {
-            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                      ERR_MRK"call_omi_setup: thread pool returned an error"
+            TRACFCOMP(g_trac_isteps_trace,
+                      ERR_MRK"call_omi_setup: thread pool returned an error "
                       TRACE_ERR_FMT,
                       TRACE_ERR_ARGS(l_err));
 
-            //addErrorDetails may not be thread-safe.  Protect with mutex.
-            mutex_lock(&g_stepErrorMutex);
-
             // Capture error
             captureError(l_err, l_StepError, HWPF_COMP_ID, nullptr);
-
-            mutex_unlock(&g_stepErrorMutex);
         }
 
         // Do not continue if an error was encountered
@@ -225,17 +281,12 @@ void* call_omi_setup (void *io_pArgs)
         {
             TRACFCOMP( g_trac_isteps_trace,
                 INFO_MRK "call_omi_setup exited early because exp_omi_setup "
-                "had failures" );
+                "had failures");
             break;
         }
-
-        // 12.6.b p10_omi_setup.C
-        //        - File does not currently exist
-        //        - TODO: RTC 248244
-
     } while (0);
 
-    TRACFCOMP(g_trac_isteps_trace, "call_omi_setup exit" );
+    TRACFCOMP(g_trac_isteps_trace, EXIT_MRK"call_omi_setup ");
 
     // end task, returning any errorlogs to IStepDisp
     return l_StepError.getErrorHandle();

@@ -38,37 +38,70 @@
 #include    <errl/errludtarget.H>
 
 #include    <initservice/isteps_trace.H>
+#include    <istepHelperFuncs.H>          // captureError
 
-//  targeting support.
-#include    <targeting/common/commontargeting.H>
-#include    <targeting/common/utilFilter.H>
+#include    <fapi2/plat_hwp_invoker.H>
 
-//Fapi Support
-#include    <config.h>
+//HWP
+#include    <p10_io_omi_pre_trainadv.H>
 
 
 using   namespace   ISTEP;
 using   namespace   ISTEP_ERROR;
-using   namespace   ERRORLOG;
+using   namespace   ISTEPS_TRACE;
 using   namespace   TARGETING;
-
 
 namespace ISTEP_12
 {
+
 void* call_omi_pre_trainadv (void *io_pArgs)
 {
     IStepError l_StepError;
+    errlHndl_t l_err = nullptr;
 
-    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, "call_omi_pre_trainadv entry");
+    TargetHandleList l_procTargetList;
+    getAllChips(l_procTargetList, TYPE_PROC);
+    TRACFCOMP(g_trac_isteps_trace, ENTER_MRK"call_omi_pre_trainadv. "
+        "%d PROCs found", l_procTargetList.size());
 
-    // 12.5.a p10_io_dmi_pre_trainadv.C (OMI/OCMB pair)
-    //        - Currently empty
-    //        - Debug routine for IO Characterization
-    //        - TODO: RTC 248244
+    // 12.5.a p10_io_omi_pre_trainadv.C
+    //        - Debug routine for IO characterization
+    for (const auto & l_proc_target : l_procTargetList)
+    {
+        TRACFCOMP(g_trac_isteps_trace,
+            INFO_MRK"p10_io_omi_pre_trainadv HWP target HUID 0x%.8x ",
+            get_huid(l_proc_target));
 
-    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, "call_omi_pre_trainadv exit");
+        //  call the HWP with each target
+        fapi2::Target <fapi2::TARGET_TYPE_PROC_CHIP> l_fapi_proc_target
+                (l_proc_target);
+
+        FAPI_INVOKE_HWP(l_err, p10_io_omi_pre_trainadv, l_fapi_proc_target);
+
+        //  process return code.
+        if ( l_err )
+        {
+            TRACFCOMP(g_trac_isteps_trace,
+                ERR_MRK"call p10_io_omi_pre_trainadv HWP(): failed on "
+                "target 0x%08X. " TRACE_ERR_FMT,
+                get_huid(l_proc_target),
+                TRACE_ERR_ARGS(l_err));
+
+            // Capture error
+            captureError(l_err, l_StepError, HWPF_COMP_ID, l_proc_target);
+        }
+        else
+        {
+            TRACFCOMP(g_trac_isteps_trace,
+                     INFO_MRK"SUCCESS : p10_io_omi_pre_trainadv HWP ");
+        }
+    }
+
+    TRACFCOMP(g_trac_isteps_trace, EXIT_MRK"call_omi_pre_trainadv ");
+
     // end task, returning any errorlogs to IStepDisp
     return l_StepError.getErrorHandle();
 }
 
 };
+

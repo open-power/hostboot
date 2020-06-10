@@ -25,8 +25,6 @@
 ROOTPATH = ../../../..
 MODULE = istep12
 
-# FIXME RTC: 210975
-
 P10_PROCEDURES_PATH = ${ROOTPATH}/src/import/chips/p10/procedures
 P10_IO_HWP_PATH     = $(P10_PROCEDURES_PATH)/hwp/io
 P10_NEST_HWP_PATH   = $(P10_PROCEDURES_PATH)/hwp/nest
@@ -82,6 +80,7 @@ VPATH += ${EXPLORER_HWP_PATH}/lib/workarounds
 VPATH += ${P10_MEMORY_HWP_PATH}
 
 OBJS += exp_omi_setup.o
+OBJS += p10_omi_setup.o
 OBJS += exp_omi_train.o
 OBJS += p10_omi_train.o
 OBJS += exp_omi_train_check.o
@@ -94,6 +93,7 @@ OBJS += p10_omi_init.o
 OBJS += p10_omi_init_scom.o
 OBJS += p10_disable_ocmb_i2c.o
 OBJS += exp_getecid.o
+OBJS += p10_io_omi_pre_trainadv.o
 OBJS += p10_io_omi_post_trainadv.o
 
 include ${ROOTPATH}/config.mk
