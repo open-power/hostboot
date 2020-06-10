@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2019
+# Contributors Listed Below - COPYRIGHT 2019,2020
 # [+] International Business Machines Corp.
 #
 #
@@ -76,5 +76,12 @@
         scomaddr    0x07010A05;
         capture     group never;
         access      write_only;
+    };
+
+    register USTLSTATUS
+    {
+        name        "P9 MCC USTL Status Register";
+        scomaddr    0x07010A0A;
+        capture     group default;
     };
 
