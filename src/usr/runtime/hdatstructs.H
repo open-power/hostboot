@@ -276,7 +276,7 @@ struct hdatSysParms_t
     uint16_t hdatDispWheel;
     uint32_t hdatNestFreq;             // Nest Clock Frequency in MHz
     uint8_t  hdatSplitCoreMode;        // Split Core Mode
-    uint8_t  hdatReserved4;            // Reserved
+    uint8_t  hdatFwSecureVersion;      // FW Secure Version
     uint16_t hdatKeyClearRequest;      // Host FW key clear requests
     uint8_t  hdatSystemVendorName[64]; // System Vendor Name
     uint16_t hdatSysSecuritySetting;   // System Security Settings
