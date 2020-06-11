@@ -450,6 +450,28 @@ static const uint32_t REC_ERR_REG0_SLAVE15_ERROR_CODE_LEN = 3;
 //<< [REC_ERR_REG0]
 // perv/reg00016.H
 
+//>> [OTPC_M_STATUS_REGISTER]
+static const uint64_t OTPC_M_STATUS_REGISTER = 0x00010002ull;
+
+static const uint32_t OTPC_M_STATUS_REGISTER_ADDR_NVLD = 0;
+static const uint32_t OTPC_M_STATUS_REGISTER_WRITE_NVLD = 1;
+static const uint32_t OTPC_M_STATUS_REGISTER_READ_NVLD = 2;
+static const uint32_t OTPC_M_STATUS_REGISTER_INVLD_CMD_ERR = 3;
+static const uint32_t OTPC_M_STATUS_REGISTER_CORR_ERR = 4;
+static const uint32_t OTPC_M_STATUS_REGISTER_UNCORR_ERROR = 5;
+static const uint32_t OTPC_M_STATUS_REGISTER_DATA_REG_0_31 = 6;
+static const uint32_t OTPC_M_STATUS_REGISTER_DATA_REG_0_31_LEN = 32;
+static const uint32_t OTPC_M_STATUS_REGISTER_CTRL_BUSY = 44;
+static const uint32_t OTPC_M_STATUS_REGISTER_DCOMP_ERR = 45;
+static const uint32_t OTPC_M_STATUS_REGISTER_INVLD_PRGM_ERR = 46;
+static const uint32_t OTPC_M_STATUS_REGISTER_COMMAND_COMPLETE = 52;
+static const uint32_t OTPC_M_STATUS_REGISTER_RDWR_OP_BUSY = 54;
+static const uint32_t OTPC_M_STATUS_REGISTER_DCOMP_ENGINE_BUSY = 55;
+static const uint32_t OTPC_M_STATUS_REGISTER_RD_DATA_COUNT = 56;
+static const uint32_t OTPC_M_STATUS_REGISTER_RD_DATA_COUNT_LEN = 8;
+//<< [OTPC_M_STATUS_REGISTER]
+// perv/reg00016.H
+
 //>>THE END<<
 
 #ifndef __PPE_HCODE__
