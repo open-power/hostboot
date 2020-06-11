@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -198,7 +198,7 @@ void _deconfigPhbsBasedOnPhbMask(
                 // if so, then mark it inactive in the phbActiveMask.
                 if (!l_phb->getAttr<ATTR_HWAS_STATE>().functional)
                 {
-                    io_phbActiveMask &= ~(1 >> (bitsToRightShift - l_phbNum));
+                    io_phbActiveMask &= ~(1 << (bitsToRightShift - l_phbNum));
                 }
             }
         } // PHB loop
