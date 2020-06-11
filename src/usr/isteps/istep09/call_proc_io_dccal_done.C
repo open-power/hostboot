@@ -92,11 +92,9 @@ void* call_proc_io_dccal_done(void* const io_pArgs)
         fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP> l_procChip(l_handle);
 
         errlHndl_t l_errl = nullptr;
-        /* TODO RTC 208826: Enable when IStep 8 starts the IOHS/OMI init
         FAPI_INVOKE_HWP(l_errl,
                         p10_io_init_done,
                         l_procChip);
-        */
 
         if (l_errl)
         {
