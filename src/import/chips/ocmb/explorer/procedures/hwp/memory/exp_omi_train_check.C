@@ -41,6 +41,7 @@
 #include <lib/i2c/exp_i2c.H>
 #include <lib/omi/exp_omi_utils.H>
 #include <generic/memory/lib/utils/shared/mss_generic_consts.H>
+#include <generic/memory/lib/utils/mss_generic_check.H>
 
 ///
 /// @brief Check that the OCMB's omi state machine is in its expected state after OMI training
@@ -55,6 +56,7 @@ fapi2::ReturnCode exp_omi_train_check(const fapi2::Target<fapi2::TARGET_TYPE_OCM
     FAPI_INF("%s Start exp_omi_train_check", mss::c_str(i_target));
 
     const auto& l_omi = mss::find_target<fapi2::TARGET_TYPE_OMI>(i_target);
+    const auto& l_mc = mss::find_target<fapi2::TARGET_TYPE_MC>(l_omi);
     const auto& l_proc = mss::find_target<fapi2::TARGET_TYPE_PROC_CHIP>(i_target);
 
     // Declares variables
@@ -113,6 +115,7 @@ fapi2::ReturnCode exp_omi_train_check(const fapi2::Target<fapi2::TARGET_TYPE_OCM
                 fapi2::EXP_OMI_TRAIN_ERR()
                 .set_OCMB_TARGET(i_target)
                 .set_OMI_TARGET(l_omi)
+                .set_MC_TARGET(l_mc)
                 .set_EXPECTED_SM_STATE(STATE_MACHINE_SUCCESS)
                 .set_ACTUAL_SM_STATE(l_state_machine_state)
                 .set_DL0_STATUS(l_omi_status)
@@ -158,6 +161,7 @@ fapi2::ReturnCode exp_omi_train_check(const fapi2::Target<fapi2::TARGET_TYPE_OCM
     return fapi2::FAPI2_RC_SUCCESS;
 
 fapi_try_exit:
-    return fapi2::current_err;
+    // If OMI training failed or timed out, we need to check some FIRs
+    return mss::check::fir_or_pll_fail<mss::mc_type::EXPLORER, mss::check::firChecklist::OMI>(i_target, fapi2::current_err);
 
 }// exp_omi_train_check

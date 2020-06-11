@@ -37,7 +37,15 @@
 #ifndef __P9A_MC_SCOM_ADDRESSES_FIXES_H
 #define __P9A_MC_SCOM_ADDRESSES_FIXES_H
 
+static const uint64_t P9A_MC_REG0_DL0_ERROR_ACTION                          = 0x0701335Dull;
+static const uint64_t P9A_MC_REG0_DL1_ERROR_ACTION                          = 0x0701336Dull;
+static const uint64_t P9A_MC_REG0_DL2_ERROR_ACTION                          = 0x0701337Dull;
+static const uint64_t P9A_MC_REG1_DL0_ERROR_ACTION                          = 0x0701339Dull;
+static const uint64_t P9A_MC_REG1_DL1_ERROR_ACTION                          = 0x070133ADull;
+static const uint64_t P9A_MC_REG1_DL2_ERROR_ACTION                          = 0x070133BDull;
 static const uint64_t P9A_MC_REG2_DL0_ERROR_ACTION                          = 0x070133DDull;
+static const uint64_t P9A_MC_REG2_DL1_ERROR_ACTION                          = 0x070133EDull;
+static const uint64_t P9A_MC_REG2_DL2_ERROR_ACTION                          = 0x070133FDull;
 
 static const uint64_t P9A_MC_REG2_DL0_RMT_CONFIG                            = 0x070133D8ull;
 

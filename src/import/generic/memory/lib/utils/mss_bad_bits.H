@@ -103,6 +103,7 @@ inline fapi2::ReturnCode record_bad_bits( const fapi2::Target<T>& i_target, cons
 
     // Note: using success here will cause an RC to not be logged
     // We can still see if we do have a FIR error though
+    // NOTE: calling GENERIC bad_fir_bits to cover this case in HB -- GENERIC firChecklist not specified (see bad_fir_bits for more details)
     fapi2::ReturnCode l_rc(fapi2::FAPI2_RC_SUCCESS);
     FAPI_TRY((mss::check::bad_fir_bits<MC, mss::check::firChecklist::GENERIC, T>(i_target, l_rc, l_fir_error)),
              "%s took an error while checking FIR's",

@@ -45,6 +45,7 @@
 #include <generic/memory/lib/utils/shared/mss_generic_consts.H>
 #include <lib/mc/omi.H>
 #include <generic/memory/mss_git_data_helper.H>
+#include <generic/memory/lib/utils/mss_generic_check.H>
 
 ///
 /// @brief Check the omi status in Axone side
@@ -81,6 +82,7 @@ fapi2::ReturnCode p9a_omi_train_check( const fapi2::Target<fapi2::TARGET_TYPE_OM
     }
 
     const auto& l_proc = mss::find_target<fapi2::TARGET_TYPE_PROC_CHIP>(l_ocmbs[0]);
+    const auto& l_mc = mss::find_target<fapi2::TARGET_TYPE_MC>(i_target);
 
     FAPI_TRY(mss::mc::omi_train_status(i_target, l_state_machine_state, l_omi_status));
 
@@ -106,6 +108,7 @@ fapi2::ReturnCode p9a_omi_train_check( const fapi2::Target<fapi2::TARGET_TYPE_OM
 
     FAPI_ASSERT(l_state_machine_state == STATE_MACHINE_SUCCESS,
                 fapi2::P9A_OMI_TRAIN_ERR()
+                .set_MC_TARGET(l_mc)
                 .set_OMI_TARGET(i_target)
                 .set_OCMB_TARGET(l_ocmbs[0])
                 .set_EXPECTED_SM_STATE(STATE_MACHINE_SUCCESS)
@@ -155,6 +158,7 @@ fapi2::ReturnCode p9a_omi_train_check( const fapi2::Target<fapi2::TARGET_TYPE_OM
     return fapi2::FAPI2_RC_SUCCESS;
 
 fapi_try_exit:
-    return fapi2::current_err;
+    // If OMI training failed or timed out, we need to check some FIRs
+    return mss::check::fir_or_pll_fail<mss::mc_type::EXPLORER, mss::check::firChecklist::OMI>(i_target, fapi2::current_err);
 
 }// p9a_omi_train_check
