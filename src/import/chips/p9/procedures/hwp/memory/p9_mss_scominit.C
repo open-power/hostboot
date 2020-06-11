@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -45,6 +45,7 @@
 #include <lib/mc/mc.H>
 #include <lib/fir/unmask.H>
 #include <lib/utils/find_magic.H>
+#include <lib/power_thermal/throttle.H>
 
 using fapi2::TARGET_TYPE_MCA;
 using fapi2::TARGET_TYPE_MCBIST;
@@ -90,7 +91,7 @@ fapi2::ReturnCode p9_mss_scominit( const fapi2::Target<TARGET_TYPE_MCBIST>& i_ta
             }
 
             FAPI_INF("mca thermal throttle scominit for %s", mss::c_str(l_mca_target));
-            FAPI_TRY(mss::mc::thermal_throttle_scominit(l_mca_target));
+            FAPI_TRY(mss::power_thermal::thermal_throttle_scominit<mss::mc_type::NIMBUS>(l_mca_target));
         }
 
         // ... but we do scominit PHY's with no DIMM. There are no attributes needed and we need

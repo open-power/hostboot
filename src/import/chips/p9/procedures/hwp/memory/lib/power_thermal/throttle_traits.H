@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -38,6 +38,8 @@
 
 #include <fapi2.H>
 #include <generic/memory/lib/utils/power_thermal/gen_throttle_traits.H>
+#include <p9_mc_scom_addresses.H>
+#include <p9_mc_scom_addresses_fld.H>
 
 namespace mss
 {
@@ -139,6 +141,65 @@ class throttle_traits<mss::mc_type::NIMBUS>
 
         // Definition is in chip folder
         static const std::vector< std::pair<uint8_t , uint8_t> > DIMM_TYPE_MAP;
+
+        // Throttle values
+        static constexpr uint64_t NM_RAS_WEIGHT = 0b000;
+        static constexpr uint64_t NM_CAS_WEIGHT = 0b001;
+
+        static constexpr uint64_t MAXALL_MINALL = 0b000;
+
+        // Wait 959 refresh intervals of idle before powering down all ranks
+        static constexpr uint64_t MIN_DOMAIN_REDUCTION_TIME = 959;
+
+        // Wait 1023 refresh intervals of idle before going into STR on all ranks
+        // 1023 is the max allowed value
+        static constexpr uint64_t ENTER_STR_TIME = 1023;
+
+        // Set to disable permanently due to hardware design bug (HW403028) that won't be changed
+        static constexpr bool CFG_NM_CHANGE_AFTER_SYNC_VALUE = false;
+
+        // Scom register definitions
+        static constexpr uint64_t MBARPC0Q_REG = MCA_MBARPC0Q;
+        static constexpr uint64_t FARB3Q_REG = MCA_MBA_FARB3Q;
+        static constexpr uint64_t FARB4Q_REG = MCA_MBA_FARB4Q;
+        static constexpr uint64_t STR0Q_REG = MCA_MBASTR0Q;
+
+        // Scom register field definition
+        enum
+        {
+            RUNTIME_N_SLOT = MCA_MBA_FARB3Q_CFG_NM_N_PER_SLOT,
+            RUNTIME_N_SLOT_LEN = MCA_MBA_FARB3Q_CFG_NM_N_PER_SLOT_LEN,
+            RUNTIME_N_PORT = MCA_MBA_FARB3Q_CFG_NM_N_PER_PORT,
+            RUNTIME_N_PORT_LEN = MCA_MBA_FARB3Q_CFG_NM_N_PER_PORT_LEN,
+            RUNTIME_M = MCA_MBA_FARB3Q_CFG_NM_M,
+            RUNTIME_M_LEN = MCA_MBA_FARB3Q_CFG_NM_M_LEN,
+            CFG_RAS_WEIGHT = MCA_MBA_FARB3Q_CFG_NM_RAS_WEIGHT,
+            CFG_RAS_WEIGHT_LEN = MCA_MBA_FARB3Q_CFG_NM_RAS_WEIGHT_LEN,
+            CFG_CAS_WEIGHT = MCA_MBA_FARB3Q_CFG_NM_CAS_WEIGHT,
+            CFG_CAS_WEIGHT_LEN = MCA_MBA_FARB3Q_CFG_NM_CAS_WEIGHT_LEN,
+            CFG_NM_CHANGE_AFTER_SYNC = MCA_MBA_FARB3Q_CFG_NM_CHANGE_AFTER_SYNC,
+
+            EMERGENCY_M = MCA_MBA_FARB4Q_EMERGENCY_M,
+            EMERGENCY_M_LEN = MCA_MBA_FARB4Q_EMERGENCY_M_LEN,
+            EMERGENCY_N = MCA_MBA_FARB4Q_EMERGENCY_N,
+            EMERGENCY_N_LEN = MCA_MBA_FARB4Q_EMERGENCY_N_LEN,
+
+            CFG_MIN_MAX_DOMAINS = MCA_MBARPC0Q_CFG_MIN_MAX_DOMAINS,
+            CFG_MIN_MAX_DOMAINS_LEN = MCA_MBARPC0Q_CFG_MIN_MAX_DOMAINS_LEN,
+            CFG_MIN_DOMAIN_REDUCTION_ENABLE = MCA_MBARPC0Q_CFG_MIN_DOMAIN_REDUCTION_ENABLE,
+            CFG_MIN_DOMAIN_REDUCTION_TIME = MCA_MBARPC0Q_CFG_MIN_DOMAIN_REDUCTION_TIME,
+            CFG_MIN_DOMAIN_REDUCTION_TIME_LEN = MCA_MBARPC0Q_CFG_MIN_DOMAIN_REDUCTION_TIME_LEN,
+
+            // Note these are not implemented in Nimbus, so should not be used!
+            // These are only included to allow the generic function to compile
+            CFG_LP_CTRL_ENABLE = MCA_MBARPC0Q_RESERVED_0_1,
+            CFG_LP_DATA_ENABLE = MCA_MBARPC0Q_RESERVED_0_1,
+
+            CFG_STR_ENABLE = MCA_MBASTR0Q_CFG_STR_ENABLE,
+            CFG_ENTER_STR_TIME = MCA_MBASTR0Q_CFG_ENTER_STR_TIME,
+            CFG_ENTER_STR_TIME_LEN = MCA_MBASTR0Q_CFG_ENTER_STR_TIME_LEN,
+            CFG_DIS_CLK_IN_STR = MCA_MBASTR0Q_CFG_DIS_CLK_IN_STR,
+        };
 };
 }//power_thermal
 }// mss

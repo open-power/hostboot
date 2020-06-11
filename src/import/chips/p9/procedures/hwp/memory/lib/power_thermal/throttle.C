@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -109,6 +109,144 @@ fapi2::ReturnCode set_runtime_m_and_watt_limit( const std::vector< fapi2::Target
     return fapi2::FAPI2_RC_SUCCESS;
 fapi_try_exit:
     FAPI_ERR("Error setting power_thermal attributes MSS_WATT_TARGET");
+    return fapi2::current_err;
+}
+
+///
+/// @brief set the safemode throttle register
+/// @param[in] i_target the port target
+/// @return fapi2::FAPI2_RC_SUCCESS iff ok
+/// @note sets FARB4Q
+/// @note used to set throttle window (N throttles  / M clocks)
+/// @note NIMBUS specialization
+///
+template<>
+fapi2::ReturnCode set_safemode_throttles<mss::mc_type::NIMBUS>(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target)
+{
+    using TT = throttle_traits<mss::mc_type::NIMBUS>;
+
+    fapi2::buffer<uint64_t> l_data;
+    fapi2::ATTR_MSS_MRW_SAFEMODE_MEM_THROTTLED_N_COMMANDS_PER_PORT_Type l_throttle_per_port = 0;
+    fapi2::ATTR_MSS_MRW_MEM_M_DRAM_CLOCKS_Type l_throttle_denominator = 0;
+
+    FAPI_TRY(mss::attr::get_mrw_mem_m_dram_clocks(l_throttle_denominator), "Error in set_nm_support" );
+    FAPI_TRY(mss::attr::get_mrw_safemode_mem_throttled_n_commands_per_port(l_throttle_per_port));
+
+    FAPI_TRY(fapi2::getScom(i_target, TT::FARB4Q_REG, l_data));
+
+    l_data.insertFromRight<TT::EMERGENCY_M, TT::EMERGENCY_M_LEN>(l_throttle_denominator);
+    l_data.insertFromRight<TT::EMERGENCY_N, TT::EMERGENCY_N_LEN>(l_throttle_per_port);
+
+    FAPI_TRY(fapi2::putScom(i_target, TT::FARB4Q_REG, l_data));
+
+    return fapi2::FAPI2_RC_SUCCESS;
+
+fapi_try_exit:
+    FAPI_ERR("%s Error setting safemode throttles", mss::c_str(i_target));
+    return fapi2::current_err;
+}
+
+///
+/// @brief set the PWR CNTRL register
+/// @param[in] i_target the port target
+/// @return fapi2::FAPI2_RC_SUCCESS if ok
+/// @note NIMBUS specialization
+///
+template<>
+fapi2::ReturnCode set_pwr_cntrl_reg<mss::mc_type::NIMBUS>(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target)
+{
+    using TT = throttle_traits<mss::mc_type::NIMBUS>;
+
+    fapi2::ATTR_MSS_MRW_POWER_CONTROL_REQUESTED_Type l_pwr_cntrl = 0;
+    fapi2::buffer<uint64_t> l_data;
+
+    FAPI_TRY(mss::attr::get_mrw_power_control_requested(l_pwr_cntrl));
+    FAPI_TRY(fapi2::getScom(i_target, TT::MBARPC0Q_REG, l_data));
+
+    l_data.insertFromRight<TT::CFG_MIN_MAX_DOMAINS, TT::CFG_MIN_MAX_DOMAINS_LEN>(TT::MAXALL_MINALL);
+
+    // Write data if PWR_CNTRL_REQUESTED includes power down
+    switch (l_pwr_cntrl)
+    {
+        case fapi2::ENUM_ATTR_MSS_MRW_POWER_CONTROL_REQUESTED_PD_AND_STR:
+        case fapi2::ENUM_ATTR_MSS_MRW_POWER_CONTROL_REQUESTED_POWER_DOWN:
+        case fapi2::ENUM_ATTR_MSS_MRW_POWER_CONTROL_REQUESTED_PD_AND_STR_CLK_STOP:
+            l_data.setBit<TT::CFG_MIN_DOMAIN_REDUCTION_ENABLE>();
+            break;
+
+        case fapi2::ENUM_ATTR_MSS_MRW_POWER_CONTROL_REQUESTED_OFF:
+            l_data.clearBit<TT::CFG_MIN_DOMAIN_REDUCTION_ENABLE>();
+            break;
+
+        default:
+            FAPI_ASSERT( false,
+                         fapi2::MSS_UNSUPPORTED_MRW_POWER_CONTROL_REQUESTED()
+                         .set_VALUE(l_pwr_cntrl),
+                         "%s ATTR_MSS_MRW_POWER_CONTROL_REQUESTED not set correctly in MRW: l_pwr_cntrl",
+                         mss::c_str(i_target),
+                         l_pwr_cntrl);
+            break;
+    }
+
+    //Set the MIN_DOMAIN_REDUCTION time
+    l_data.insertFromRight<TT::CFG_MIN_DOMAIN_REDUCTION_TIME, TT::CFG_MIN_DOMAIN_REDUCTION_TIME_LEN>
+    (TT::MIN_DOMAIN_REDUCTION_TIME);
+
+    FAPI_TRY(fapi2::putScom(i_target, TT::MBARPC0Q_REG, l_data));
+
+    return fapi2::FAPI2_RC_SUCCESS;
+fapi_try_exit:
+    FAPI_ERR("%s Error setting power control register MBARPC0Q", mss::c_str(i_target));
+    return fapi2::current_err;
+}
+
+///
+/// @brief set the STR register
+/// @param[in] i_target the port target
+/// @return fapi2::FAPI2_RC_SUCCESS if ok
+/// @note NIMBUS specialization
+///
+template<>
+fapi2::ReturnCode set_str_reg<mss::mc_type::NIMBUS>(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target)
+{
+    using TT = throttle_traits<mss::mc_type::NIMBUS>;
+
+    fapi2::ATTR_MSS_MRW_POWER_CONTROL_REQUESTED_Type l_str_enable = 0;
+    fapi2::buffer<uint64_t> l_data;
+
+    FAPI_TRY(mss::attr::get_mrw_power_control_requested(l_str_enable));
+    FAPI_TRY(fapi2::getScom(i_target, TT::STR0Q_REG, l_data));
+
+    //Write bit if STR should be enabled
+    switch (l_str_enable)
+    {
+        case fapi2::ENUM_ATTR_MSS_MRW_POWER_CONTROL_REQUESTED_PD_AND_STR:
+        case fapi2::ENUM_ATTR_MSS_MRW_POWER_CONTROL_REQUESTED_PD_AND_STR_CLK_STOP:
+            l_data.setBit<TT::CFG_STR_ENABLE>();
+            break;
+
+        case fapi2::ENUM_ATTR_MSS_MRW_POWER_CONTROL_REQUESTED_POWER_DOWN:
+        case fapi2::ENUM_ATTR_MSS_MRW_POWER_CONTROL_REQUESTED_OFF:
+            l_data.clearBit<TT::CFG_STR_ENABLE>();
+            break;
+
+        default:
+            FAPI_ASSERT( false,
+                         fapi2::MSS_UNSUPPORTED_MRW_POWER_CONTROL_REQUESTED()
+                         .set_VALUE(l_str_enable),
+                         "%s ATTR_MSS_MRW_POWER_CONTROL_REQUESTED not set correctly in MRW: l_pwr_cntrl",
+                         mss::c_str(i_target),
+                         l_str_enable);
+            break;
+    }
+
+    l_data.insertFromRight<TT::CFG_ENTER_STR_TIME, TT::CFG_ENTER_STR_TIME_LEN>(TT::ENTER_STR_TIME);
+
+    FAPI_TRY(fapi2::putScom(i_target, TT::STR0Q_REG, l_data));
+
+    return fapi2::FAPI2_RC_SUCCESS;
+fapi_try_exit:
+    FAPI_ERR("%s Error setting the STR register MBASTR0Q", mss::c_str(i_target));
     return fapi2::current_err;
 }
 

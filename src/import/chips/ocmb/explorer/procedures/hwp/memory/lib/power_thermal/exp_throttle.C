@@ -34,11 +34,11 @@
 // *HWP Consumed by: FSP:HB
 
 #include <lib/shared/exp_defaults.H>
-// fapi2
 #include <fapi2.H>
 
 #include <lib/shared/exp_consts.H>
 #include <lib/power_thermal/exp_throttle.H>
+#include <lib/power_thermal/exp_throttle_traits.H>
 #include <mss_explorer_attribute_getters.H>
 #include <mss_explorer_attribute_setters.H>
 #include <generic/memory/lib/utils/count_dimm.H>
@@ -144,7 +144,44 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
+///
+/// @brief set the safemode throttle register
+/// @param[in] i_target the port target
+/// @return fapi2::FAPI2_RC_SUCCESS if ok
+/// @note sets FARB4Q
+/// @note used to set throttle window (N throttles  / M clocks)
+/// @note EXPLORER specialization
+///
+template<>
+fapi2::ReturnCode set_safemode_throttles<mss::mc_type::EXPLORER>(
+    const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target)
+{
+    using TT = throttle_traits<mss::mc_type::EXPLORER>;
 
+    fapi2::buffer<uint64_t> l_data;
+    fapi2::ATTR_MSS_MRW_MEM_M_DRAM_CLOCKS_Type l_throttle_denominator = 0;
+    uint32_t l_throttle_per_port = 0;
+    fapi2::ATTR_MSS_MRW_SAFEMODE_DRAM_DATABUS_UTIL_Type l_util_per_port = 0;
+
+    FAPI_TRY(mss::attr::get_mrw_safemode_dram_databus_util(l_util_per_port));
+    FAPI_TRY(mss::attr::get_mrw_mem_m_dram_clocks(l_throttle_denominator));
+
+    FAPI_TRY(fapi2::getScom(i_target, TT::FARB4Q_REG, l_data));
+
+    // l_util_per_port is in c%, so convert to % when calling calc_n_from_dram_util
+    l_throttle_per_port = calc_n_from_dram_util((l_util_per_port / PERCENT_CONVERSION), l_throttle_denominator);
+
+    l_data.insertFromRight<TT::EMERGENCY_M, TT::EMERGENCY_M_LEN>(l_throttle_denominator);
+    l_data.insertFromRight<TT::EMERGENCY_N, TT::EMERGENCY_N_LEN>(l_throttle_per_port);
+
+    FAPI_TRY(fapi2::putScom(i_target, TT::FARB4Q_REG, l_data));
+
+    return fapi2::FAPI2_RC_SUCCESS;
+
+fapi_try_exit:
+    FAPI_ERR("%s Error setting safemode throttles", mss::c_str(i_target));
+    return fapi2::current_err;
+}
 
 }//namespace power_thermal
 }//namespace mss

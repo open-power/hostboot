@@ -1184,6 +1184,18 @@
   </hwpError>
 
   <hwpError>
+    <rc>RC_MSS_UNSUPPORTED_MRW_POWER_CONTROL_REQUESTED</rc>
+    <description>
+      The value of ATTR_MSS_MRW_POWER_CONTROL_REQUESTED is unsupported
+    </description>
+    <ffdc>VALUE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
+  <hwpError>
     <rc>RC_MSS_TOO_MANY_PRIMARY_RANKS_ON_DIMM</rc>
     <description>
         Too many primary ranks were seen on the dimm according

@@ -38,6 +38,7 @@
 #include <lib/shared/mss_const.H>
 #include <lib/shared/nimbus_defaults.H>
 #include <lib/dimm/mrs_traits_nimbus.H>
+#include <lib/power_thermal/throttle.H>
 #include <lib/mc/mc.H>
 #include <lib/dimm/rank.H>
 #include <lib/mss_attribute_accessors.H>
@@ -320,8 +321,8 @@ fapi2::ReturnCode self_refresh_exit( const fapi2::Target<fapi2::TARGET_TYPE_MCA>
     FAPI_TRY(change_maint_addr_mode_en(i_target, mss::states::LOW));
 
     // Restore MBASTR0Q and MBARPC0Q to the original values based on MRW
-    FAPI_TRY(mss::mc::set_pwr_cntrl_reg(i_target));
-    FAPI_TRY(mss::mc::set_str_reg(i_target));
+    FAPI_TRY(mss::power_thermal::set_pwr_cntrl_reg<mss::mc_type::NIMBUS>(i_target));
+    FAPI_TRY(mss::power_thermal::set_str_reg<mss::mc_type::NIMBUS>(i_target));
 
 fapi_try_exit:
     return fapi2::current_err;

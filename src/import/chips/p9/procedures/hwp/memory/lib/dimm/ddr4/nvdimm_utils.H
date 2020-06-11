@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -32,6 +32,9 @@
 // *HWP Team: Memory
 // *HWP Level: 3
 // *HWP Consumed by: FSP:HB
+
+#ifndef _MSS_NVDIMM_UTILS_NIMBUS_H_
+#define _MSS_NVDIMM_UTILS_NIMBUS_H_
 
 #include <fapi2.H>
 #include <lib/utils/nimbus_find.H>
@@ -281,3 +284,4 @@ inline void get_wr_vref_composite_value_helper(const fapi2::buffer<uint64_t> i_d
 }//ns nvdimm
 
 }//ns mss
+#endif
