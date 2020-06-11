@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2018
+# Contributors Listed Below - COPYRIGHT 2018,2020
 # [+] International Business Machines Corp.
 #
 #
@@ -27,9 +27,12 @@
 # Analyze connected
 ################################################################################
 
-actionclass analyzeConnectedNPU0    { analyze(connected(TYPE_NPU,     0)); };
-actionclass analyzeConnectedNPU1    { analyze(connected(TYPE_NPU,     1)); };
-actionclass analyzeConnectedNPU2    { analyze(connected(TYPE_NPU,     2)); };
+# NPU targets do not exist in the Swift MRWs. So we will forgo analysis to any
+# FIRs on an NPU target.
+actionclass analyzeConnectedNPU0    { threshold_and_mask; };
+actionclass analyzeConnectedNPU1    { threshold_and_mask; };
+actionclass analyzeConnectedNPU2    { threshold_and_mask; };
+
 actionclass analyzeConnectedOBUS1   { analyze(connected(TYPE_OBUS,    1)); };
 actionclass analyzeConnectedOBUS2   { analyze(connected(TYPE_OBUS,    2)); };
 actionclass analyzeConnectedXBUS0   { analyze(connected(TYPE_XBUS,    0)); };
