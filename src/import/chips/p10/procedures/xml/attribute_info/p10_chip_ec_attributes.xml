@@ -318,6 +318,7 @@
     </chipEcFeature>
   </attribute>
   <!-- ******************************************************************** -->
+
   <attribute>
     <id>ATTR_CHIP_EC_FEATURE_HW533775</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
@@ -511,4 +512,22 @@
   </attribute>
 
   <!-- ******************************************************************** -->
+  <attribute>
+   <id>ATTR_CHIP_EC_FEATURE_HW530359_XSL_PARITY</id>
+   <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+   <description>
+     Disable XSL Parity Fir Bit from fencing and killing PAU
+     updated pau init files to workaround XSL error HW530359 for DD1
+   </description>
+   <chipEcFeature>
+     <chip>
+       <name>ENUM_ATTR_NAME_P10</name>
+       <ec>
+         <value>0x10</value>
+         <test>EQUAL</test>
+       </ec>
+     </chip>
+   </chipEcFeature>
+  </attribute>
+
 </attributes>

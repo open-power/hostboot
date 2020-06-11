@@ -43,6 +43,7 @@ constexpr uint64_t literal_4 = 4;
 constexpr uint64_t literal_0 = 0;
 constexpr uint64_t literal_0b0100 = 0b0100;
 constexpr uint64_t literal_0x0000b04500ac0000 = 0x0000b04500ac0000;
+constexpr uint64_t literal_0x0007000005f20000 = 0x0007000005f20000;
 constexpr uint64_t literal_0x0007000005f60000 = 0x0007000005f60000;
 constexpr uint64_t literal_0x0000000000000010 = 0x0000000000000010;
 constexpr uint64_t literal_0x0fffefff0fe5b8f8 = 0x0fffefff0fe5b8f8;
@@ -89,6 +90,9 @@ fapi2::ReturnCode p10_pau_scom(const fapi2::Target<fapi2::TARGET_TYPE_PAU>& TGT0
         uint64_t l_def_LCO_TARGETS_MIN_CHIP = l_TGT1_ATTR_PROC_LCO_TARGETS_MIN[fapi2::ENUM_ATTR_PROC_LCO_TARGETS_MIN_CHIP];
         uint64_t l_def_LCO_TARGETS_MIN_WEST = l_TGT1_ATTR_PROC_LCO_TARGETS_MIN[fapi2::ENUM_ATTR_PROC_LCO_TARGETS_MIN_WEST];
         uint64_t l_def_LCO_TARGETS_MIN_EAST = l_TGT1_ATTR_PROC_LCO_TARGETS_MIN[fapi2::ENUM_ATTR_PROC_LCO_TARGETS_MIN_EAST];
+        fapi2::ATTR_CHIP_EC_FEATURE_HW530359_XSL_PARITY_Type l_TGT1_ATTR_CHIP_EC_FEATURE_HW530359_XSL_PARITY;
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_HW530359_XSL_PARITY, TGT1,
+                               l_TGT1_ATTR_CHIP_EC_FEATURE_HW530359_XSL_PARITY));
         fapi2::buffer<uint64_t> l_scom_buffer;
         {
             FAPI_TRY(fapi2::getScom( TGT0, 0x10010802ull, l_scom_buffer ));
@@ -221,7 +225,15 @@ fapi2::ReturnCode p10_pau_scom(const fapi2::Target<fapi2::TARGET_TYPE_PAU>& TGT0
         {
             FAPI_TRY(fapi2::getScom( TGT0, 0x10010b3bull, l_scom_buffer ));
 
-            l_scom_buffer.insert<0, 64, 0, uint64_t>(literal_0x0007000005f60000 );
+            if (l_TGT1_ATTR_CHIP_EC_FEATURE_HW530359_XSL_PARITY)
+            {
+                l_scom_buffer.insert<0, 64, 0, uint64_t>(literal_0x0007000005f20000 );
+            }
+            else if (literal_1)
+            {
+                l_scom_buffer.insert<0, 64, 0, uint64_t>(literal_0x0007000005f60000 );
+            }
+
             FAPI_TRY(fapi2::putScom(TGT0, 0x10010b3bull, l_scom_buffer));
         }
         {
