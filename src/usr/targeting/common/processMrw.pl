@@ -3621,8 +3621,7 @@ sub processFsi
             my $proc_type = $targetObj->getAttribute($parentTarget, "PROC_MASTER_TYPE");
             if ($proc_type eq "ACTING_MASTER" || $proc_type eq "MASTER_CANDIDATE" )
             {
-                my $fcid = $targetObj->getAttribute($parentTarget,"FABRIC_CHIP_ID");
-                if($fcid eq 1)
+                if (getTopologyId($targetObj, $parentTarget) == 1)
                 {
                   $altfsiswitch = 1;
                 }
@@ -3634,8 +3633,7 @@ sub processFsi
             my $proc_type = $targetObj->getAttribute($fsi_child_target, "PROC_MASTER_TYPE");
             if ($proc_type eq "ACTING_MASTER" || $proc_type eq "MASTER_CANDIDATE" )
             {
-                my $fcid = $targetObj->getAttribute($fsi_child_target,"FABRIC_CHIP_ID");
-                if($fcid eq 1)
+                if (getTopologyId($targetObj, $fsi_child_target) == 1)
                 {
                   $flip_port = 1;
                 }
