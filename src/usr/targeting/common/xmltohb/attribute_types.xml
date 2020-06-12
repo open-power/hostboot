@@ -4149,9 +4149,6 @@
     <enumerator>
       <name>UCD90120A</name>
     </enumerator>
-    <enumerator>
-      <name>UCD9090A</name>
-    </enumerator>
     <id>MODEL</id>
   </enumerationType>
 

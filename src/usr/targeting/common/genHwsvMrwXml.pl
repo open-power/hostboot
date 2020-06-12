@@ -1873,8 +1873,7 @@ for my $i ( 0 .. $#I2Cdevices )
     }
     elsif(   ($I2Cdevices[$i]{i2c_part_type}   eq "hotplug-controller")
           && (   ($I2Cdevices[$i]{i2c_part_id} eq "UCD9090")
-              || ($I2Cdevices[$i]{i2c_part_id} eq "UCD90120A")
-              || ($I2Cdevices[$i]{i2c_part_id} eq "UCD9090A")))
+              || ($I2Cdevices[$i]{i2c_part_id} eq "UCD90120A")))
     {
         push @{$ucdI2cIndex{"n${node}p${position}"}} , $i;
     }
@@ -6263,10 +6262,6 @@ sub generate_ucd
     {
         $targetType = "ucd90120a";
     }
-    elsif ($I2Cdevices[$i]{i2c_part_id} eq "UCD9090A")
-    {
-        $targetType = "ucd9090a";
-    }
     else
     {
         die "UCD type " . $I2Cdevices[$i]{i2c_part_id} . " not supported.";
@@ -7172,9 +7167,7 @@ sub addI2cBusSpeedArray
                            ($I2Cdevices[$i]{i2c_part_id}
                            eq "UCD90120A") ||
                            ($I2Cdevices[$i]{i2c_part_id}
-                           eq "UCD9090") ||
-                           ($I2Cdevices[$i]{i2c_part_id}
-                           eq "UCD9090A")
+                           eq "UCD9090")
                          )
                        )
                     ) ||

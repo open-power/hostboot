@@ -2358,18 +2358,6 @@
   </targetType>
 
   <targetType>
-    <id>ucd9090A</id>
-    <parent>i2c-power-sequencer</parent>
-    <attribute>
-      <id>MODEL</id>
-      <default>UCD9090A</default>
-    </attribute>
-    <attribute>
-      <id>UCD_MFR_REVISION_OVERRIDE</id>
-    </attribute>
-  </targetType>
-
-  <targetType>
     <id>unit</id>
     <parent>base</parent>
     <attribute>
