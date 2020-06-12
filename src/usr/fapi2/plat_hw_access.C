@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -41,7 +41,6 @@
 #include <fapi2/plat_hw_access.H>
 #include <scom/errlud_pib.H>
 
-#include <scan/scanif.H>
 #include <hw_access_def.H>
 #include <arch/ppc.H>
 
@@ -58,9 +57,6 @@ const uint32_t CFAM_ADDRESS_MASK = 0x1FF;
 
 // Bits 0-6 are engine offset
 const uint32_t CFAM_ENGINE_OFFSET = 0xFE00;
-
-// Function prototypes
-uint64_t platGetDDScanMode(const uint32_t i_ringMode);
 
 // Operational mode for scom operations (ignore errors, wakeup core, etc.)
 #ifndef PLAT_NO_THREAD_LOCAL_STORAGE
@@ -779,240 +775,7 @@ ReturnCode platModifyCfamRegister(const Target<TARGET_TYPE_ALL>& i_target,
     return l_rc;
 }
 
-/// @brief Platform-level implementation called by getRing()
-ReturnCode platGetRing(const Target<TARGET_TYPE_ALL>& i_target,
-                       const scanRingId_t i_address,
-                       variable_buffer& o_data,
-                       const RingMode i_ringMode)
-{
-    FAPI_DBG(ENTER_MRK "platGetRing");
 
-    // Note: Trace is placed here in plat code because PPE doesn't support
-    //       trace in common fapi2_hw_access.H
-    bool l_traceit = platIsScanTraceEnabled();
-
-    ReturnCode l_rc;
-    errlHndl_t l_err = nullptr;
-
-    // Extract the component pointer
-    TARGETING::Target* l_target = i_target.get();
-
-    // Grab the name of the target
-    TARGETING::ATTR_FAPI_NAME_type l_targName = {0};
-    fapi2::toString(i_target, l_targName, sizeof(l_targName));
-
-    // Output buffer must be set to ring's len by user
-    uint64_t l_ringLen = o_data.getBitLength();
-    uint64_t l_flag = platGetDDScanMode(i_ringMode);
-    size_t l_size = o_data.getLength<uint8_t>();
-    l_err = deviceRead(l_target,
-                       o_data.pointer(),
-                       l_size,
-                       DEVICE_SCAN_ADDRESS(i_address, l_ringLen, l_flag));
-    if (l_err)
-    {
-        FAPI_ERR("platGetRing: deviceRead returns error!");
-        FAPI_ERR("fapiGetRing failed - Target %s, Addr %.16llX",
-                  l_targName, i_address);
-        l_rc.setPlatDataPtr(reinterpret_cast<void *> (l_err));
-    }
-
-    if (l_traceit)
-    {
-        uint64_t l_data = o_data.get<uint64_t>();
-        FAPI_SCAN("TRACE : GETRING     :  %s : %.16llX %.16llX",
-                  l_targName,
-                  i_address,
-                  l_data);
-    }
-
-    FAPI_DBG(EXIT_MRK "platGetRing");
-    return l_rc;
-}
-
-
-/// @brief Platform-level implementation called by putRing()
-inline ReturnCode platPutRing(const Target<TARGET_TYPE_ALL>& i_target,
-                              const scanRingId_t i_address,
-                              variable_buffer& i_data,
-                              const RingMode i_ringMode)
-{
-    FAPI_DBG(ENTER_MRK "platPutRing");
-    ReturnCode l_rc;
-    errlHndl_t l_err = nullptr;
-
-    // Note: Trace is placed here in plat code because PPE doesn't support
-    //       trace in common fapi2_hw_access.H
-    bool l_traceit = platIsScanTraceEnabled();
-
-    // Extract the component pointer
-    TARGETING::Target* l_target = i_target.get();
-
-    // Grab the name of the target
-    TARGETING::ATTR_FAPI_NAME_type l_targName = {0};
-    fapi2::toString(i_target, l_targName, sizeof(l_targName));
-
-    // Output buffer must be set to ring's len by user
-    uint64_t l_ringLen = i_data.getBitLength();
-    uint64_t l_flag = platGetDDScanMode(i_ringMode);
-    size_t l_size = i_data.getLength<uint8_t>();
-    l_err = deviceWrite(l_target,
-                        i_data.pointer(),
-                        l_size,
-                        DEVICE_SCAN_ADDRESS(i_address, l_ringLen, l_flag));
-    if (l_err)
-    {
-        FAPI_ERR("platPutRing: deviceRead returns error!");
-        FAPI_ERR("fapiPutRing failed - Target %s, Addr %.16llX",
-                  l_targName, i_address);
-        // Add the error log pointer as data to the ReturnCode
-        l_rc.setPlatDataPtr(reinterpret_cast<void *> (l_err));
-    }
-
-    if (l_traceit)
-    {
-        uint64_t l_data = i_data.get<uint64_t>();
-        FAPI_SCAN("TRACE : PUTRING     :  %s : %.16llX %.16llX",
-                  l_targName,
-                  i_address,
-                  l_data);
-    }
-
-    FAPI_DBG(EXIT_MRK "platPutRing");
-    return l_rc;
-}
-
-
-/// @brief Platform-level implementation called by modifyRing()
-ReturnCode platModifyRing(const Target<TARGET_TYPE_ALL>& i_target,
-                          const scanRingId_t i_address,
-                          const variable_buffer& i_data,
-                          const ChipOpModifyMode i_modifyMode,
-                          const RingMode i_ringMode)
-{
-    FAPI_DBG(ENTER_MRK "platModifyRing");
-
-    // TODO RTC:152489 - story to finish this modifyRing
-    FAPI_ERR("platModifyRing: not supported yet");
-    assert(0,"platModifyRing not supported yet.");
-
-    ReturnCode l_rc;
-    errlHndl_t l_err = nullptr;
-    variable_buffer l_current_data(i_data);
-
-    // Note: Trace is placed here in plat code because PPE doesn't support
-    //       trace in common fapi2_hw_access.H
-    bool l_traceit = platIsScanTraceEnabled();
-
-    // Grab the name of the target
-    TARGETING::ATTR_FAPI_NAME_type l_targName = {0};
-    fapi2::toString(i_target, l_targName, sizeof(l_targName));
-
-    do
-    {
-        // Extract the component pointer
-        TARGETING::Target* l_target = i_target.get();
-
-        // --------------------
-        // Read current value
-        // --------------------
-        uint64_t l_ringLen = l_current_data.getBitLength();
-        uint64_t l_flag = platGetDDScanMode(i_ringMode);
-        size_t l_size = l_current_data.getLength<uint8_t>();
-        l_err = deviceRead(l_target,
-                           l_current_data.pointer(),
-                           l_size,
-                           DEVICE_SCAN_ADDRESS(i_address, l_ringLen, l_flag));
-        if (l_err)
-        {
-            FAPI_ERR("platModifyRing: deviceRead returns error!");
-            FAPI_ERR("platModifyRing failed - Target %s, Addr %.16llX",
-                  l_targName, i_address);
-
-            // Add the error log pointer as data to the ReturnCode
-            l_rc.setPlatDataPtr(reinterpret_cast<void *> (l_err));
-
-            // break out if read fails
-            break;
-        }
-
-        // ----------------------
-        // Applying modification
-        // ----------------------
-        /* TODO-RTC:151261 - re-enable when variable_buffer operations supported
-        if (fapi2::CHIP_OP_MODIFY_MODE_OR == i_modifyMode)
-        {
-            l_current_data |= i_data;
-        }
-        else if (fapi2::CHIP_OP_MODIFY_MODE_AND == i_modifyMode)
-        {
-            l_current_data &= i_data;
-        }
-        else
-        {
-            l_current_data ^= i_data;
-        } */
-
-
-        // -------------------------
-        // Write back updated data
-        // -------------------------
-        l_err = deviceWrite(l_target,
-                        l_current_data.pointer(),
-                        l_size,
-                        DEVICE_SCAN_ADDRESS(i_address, l_ringLen, l_flag));
-        if (l_err)
-        {
-            FAPI_ERR("platModifyRing: deviceWrite returns error!");
-            FAPI_ERR("platModifyRing failed - Target %s, Addr %.16llX",
-                  l_targName, i_address);
-            // Add the error log pointer as data to the ReturnCode
-            l_rc.setPlatDataPtr(reinterpret_cast<void *> (l_err));
-            break;
-        }
-
-    } while (0);
-
-    if (l_traceit)
-    {
-        uint64_t l_data = l_current_data.get<uint64_t>();
-        FAPI_SCAN("TRACE : MODIFYRING  :  %s : %.16llX %.16llX",
-                  l_targName,
-                  i_address,
-                  l_data);
-    }
-    FAPI_DBG(EXIT_MRK "platModifyRing");
-    return l_rc;
-}
-
-//******************************************************************************
-// platGetDDScanMode function
-//******************************************************************************
-uint64_t platGetDDScanMode(const uint32_t i_ringMode)
-{
-    uint32_t l_scanMode = 0;
-
-    if ( ((i_ringMode & fapi2::RING_MODE_SET_PULSE_NO_OPCG_COND) ==
-                fapi2::RING_MODE_SET_PULSE_NO_OPCG_COND) ||
-            ((i_ringMode & fapi2::RING_MODE_SET_PULSE_NSL) ==
-             fapi2::RING_MODE_SET_PULSE_NSL) ||
-            ((i_ringMode & fapi2::RING_MODE_SET_PULSE_SL) ==
-             fapi2::RING_MODE_SET_PULSE_SL) ||
-            ((i_ringMode & fapi2::RING_MODE_SET_PULSE_ALL) ==
-             fapi2::RING_MODE_SET_PULSE_ALL) )
-    {
-        l_scanMode |= SCAN::SET_PULSE;
-    }
-
-    // Header Check
-    if ((i_ringMode & fapi2::RING_MODE_NO_HEADER_CHECK) ==
-            fapi2::RING_MODE_NO_HEADER_CHECK )
-    {
-        l_scanMode |= SCAN::NO_HEADER_CHECK;
-    }
-
-    return l_scanMode;
-}
 
 //--------------------------------------------------------------------------
 // Operational Mode Error Functions

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -157,10 +157,15 @@ ReturnCode platModifyCfamRegister(const Target<TARGET_TYPE_ALL>& i_target,
 /// @param[out] o_data     Buffer that holds data read from HW target.
 /// @param[in]  i_ringMode Ring operation mode.
 /// @return fapi2::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
-ReturnCode platGetRing(const Target<TARGET_TYPE_ALL>& i_target,
+inline ReturnCode platGetRing(const Target<TARGET_TYPE_ALL>& i_target,
                               const scanRingId_t i_address,
                               variable_buffer& o_data,
-                              const RingMode i_ringMode);
+                              const RingMode i_ringMode)
+{
+    FAPI_ERR("platGetRing: not supported");
+    assert(0,"platGetRing not supported.");
+    return RC_UNSUPPORTED_OPERATION;
+};
 
 
 /// @brief Read-modify-write a ring on a chip.
@@ -171,11 +176,17 @@ ReturnCode platGetRing(const Target<TARGET_TYPE_ALL>& i_target,
 /// @param[in] i_modifyMode The modify mode (or/and/xor)
 /// @param[in] i_ringMode   Ring operation mode.
 /// @return fapi2::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
-ReturnCode platModifyRing(const Target<TARGET_TYPE_ALL>& i_target,
+inline ReturnCode platModifyRing(const Target<TARGET_TYPE_ALL>& i_target,
                              const scanRingId_t i_address,
                              const variable_buffer& i_data,
                              const ChipOpModifyMode i_modifyMode,
-                             const RingMode i_ringMode);
+                             const RingMode i_ringMode)
+{
+    FAPI_ERR("platModifyRing: not supported");
+    assert(0,"platModifyRing not supported.");
+    return RC_UNSUPPORTED_OPERATION;
+};
+
 
 
 // This will be used in future Cumulus code
@@ -186,10 +197,16 @@ ReturnCode platModifyRing(const Target<TARGET_TYPE_ALL>& i_target,
 ///                         to be written
 /// @param[in] i_ringMode   Ring operation mode.
 /// @return fapi2::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
-ReturnCode platPutRing(const Target<TARGET_TYPE_ALL>& i_target,
+inline ReturnCode platPutRing(const Target<TARGET_TYPE_ALL>& i_target,
                        const scanRingId_t i_address,
                        variable_buffer& i_data,
-                       const RingMode i_ringMode);
+                       const RingMode i_ringMode)
+{
+    FAPI_ERR("platPutRing: not supported");
+    assert(0,"platPutRing not supported.");
+    return RC_UNSUPPORTED_OPERATION;
+};
+
 
 
 /// @brief Writes a ring to a chip, the ring id will be passed to the SBE
@@ -200,62 +217,14 @@ ReturnCode platPutRing(const Target<TARGET_TYPE_ALL>& i_target,
 /// @param[in] i_ringMode Ring operation mode.
 /// @return fapi2::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
 template<TargetType T>
-ReturnCode platPutRing(const Target<T>& i_target,
+inline ReturnCode platPutRing(const Target<T>& i_target,
                        const RingId_t i_ringID,
                        const RingMode i_ringMode)
 {
-    FAPI_DBG("Entering: platPutRing() with RingId_t");
-    ReturnCode l_rc  = FAPI2_RC_SUCCESS;
-    errlHndl_t l_err = NULL;
-
-    // Note: Trace is placed here in plat code because PPE doesn't support
-    //       trace in common fapi2_hw_access.H
-    bool l_traceit = platIsScanTraceEnabled();
-
-    //convert const RingId_t to RingId_t
-    RingId_t l_ringID = reinterpret_cast<RingId_t>(i_ringID);
-
-    // Extract the component pointer
-    TARGETING::Target* l_target = i_target.get();
-
-    // Grab the name of the target
-    TARGETING::ATTR_FAPI_NAME_type l_targName = {0};
-    fapi2::toString(i_target, l_targName, sizeof(l_targName));
-
-    uint64_t l_flag = platGetDDScanMode(i_ringMode);
-    size_t l_size   = (size_t) 0;
-
-    FAPI_DBG("platPutRing  l_target : %.16llX i_targetType %.16llX",
-            l_target,
-            l_target->getAttr<TARGETING::ATTR_TYPE>());
-
-    FAPI_DBG("platPutRing  l_RingID :"
-            " %.16llX i_ringMode %.16llX l_flag %.16llX",
-            static_cast<uint64_t>(l_ringID), i_ringMode, l_flag );
-
-    l_err = deviceWrite(l_target,
-            nullptr,
-            l_size,
-            DEVICE_SCAN_SBE_ADDRESS(l_ringID,i_ringMode,l_flag));
-
-    if(l_err)
-    {
-        FAPI_ERR("platPutRing: deviceWrite returns error!");
-        // Add the error log pointer as data to the ReturnCode
-        l_rc.setPlatDataPtr(reinterpret_cast<void *> (l_err));
-    }
-
-    if (l_traceit)
-    {
-        FAPI_SCAN("TRACE : PUTRING w RingId_t    :  %s : %.16llX",
-                l_targName,
-                static_cast<uint64_t>(l_ringID));
-    }
-
-    FAPI_DBG(EXIT_MRK "platPutRing() with RingId_t");
-    return l_rc;
-
-}
+    FAPI_ERR("platPutRing: not supported");
+    assert(0,"platPutRing not supported.");
+    return RC_UNSUPPORTED_OPERATION;
+};
 
 //--------------------------------------------------------------------------
 // Operational Mode Error Functions

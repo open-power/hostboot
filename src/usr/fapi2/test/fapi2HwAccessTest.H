@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -150,40 +150,6 @@ void test_fapi2HwAccess()
                           // a false negative on the next case (future?)
         }
 
-
-// this test should only be run before HOSTBOOT runtime
-// otherwise it will trigger false positive test result
-
-#ifndef __HOSTBOOT_RUNTIME
-
-#if 0 //@fixme-RTC:170587
-        //this test should not be run at runtime
-        numTests++;
-        FAPI_INVOKE_HWP(l_errl, p10_platPutRingWRingId_t_pass);
-        if(l_errl)
-        {
-            TS_FAIL("Error from p10_platPutRingWRingId_t_pass !!");
-            numFails++;
-            errlCommit(l_errl,FAPI2_COMP_ID);
-            delete l_errl; // delete unexpected error log so we dont get
-                           // a false negative on the next case
-        }
-#endif
-
-#endif
-
-        numTests++;
-        FAPI_INVOKE_HWP(l_errl, p10_ringtest_getring_fail, fapi2_procTarget);
-        if(l_errl != nullptr)
-        {
-            delete l_errl; // delete expected error log
-        }
-        else
-        {
-            TS_FAIL("No error from p10_ringtest_getring_fail !!");
-            numFails++;
-        }
-
         numTests++;
         uint8_t failed = 0;
         FAPI_INVOKE_HWP(l_errl,
@@ -209,41 +175,6 @@ void test_fapi2HwAccess()
             numFails++;
             errlCommit(l_errl,FAPI2_COMP_ID);
         }
-
-#if 0 // TODO-RTC:151428 - need simics support for these to pass
-        numTests++;
-        FAPI_INVOKE_HWP(l_errl, p10_ringtest_modring_fail, fapi2_procTarget);
-        if(l_errl != nullptr)
-        {
-            delete l_errl; // delete expected error log
-        }
-        else
-        {
-            TS_FAIL("No error from  p10_ringtest_modring_fail!!");
-            numFails++;
-        }
-
-        numTests++;
-        FAPI_INVOKE_HWP(l_errl, p10_ringtest_getring_pass, fapi2_procTarget);
-        if (l_errl)
-        {
-            TS_FAIL("Error from  p10_ringtest_getring_pass!!");
-            numFails++;
-            errlCommit(l_errl,FAPI2_COMP_ID);
-            delete l_errl; // delete unexpected error log so we dont get
-                           // a false negative on the next case
-        }
-        numTests++;
-        FAPI_INVOKE_HWP(l_errl, p10_ringtest_modring_pass, fapi2_procTarget);
-        if (l_errl)
-        {
-            TS_FAIL("Error from  p10_ringtest_modring_pass!!");
-            numFails++;
-            errlCommit(l_errl,FAPI2_COMP_ID);
-            delete l_errl; // delete unexpected error log so we dont get
-                          // a false negative on the next case
-        }
-#endif
 
     }while(0);
 

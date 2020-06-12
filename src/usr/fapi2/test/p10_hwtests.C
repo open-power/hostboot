@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -34,7 +34,6 @@
 #include <errl/errlentry.H>
 #include <xscom/piberror.H>
 #include <plat_hwp_invoker.H>
-#include <p10_ringId.H>
 
 fapi2::ReturnCode p10_scomtest_getscom_fail(
                fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
@@ -197,128 +196,6 @@ fapi2::ReturnCode p10_cfamtest_putcfam_pass(
     return fapi2::current_err;
 
 }
-
-
-fapi2::ReturnCode p10_ringtest_getring_fail(
-               fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
-{
-    fapi2::variable_buffer l_ringdata(64);
-
-    FAPI_INF("Entering p10_ringtest_getring_fail...");
-
-    FAPI_INF("Do getring on proc target");
-    FAPI_TRY(fapi2::getRing(i_target,
-                            (scanRingId_t)(0x22334455),
-                            l_ringdata,
-                            fapi2::RING_MODE_HEADER_CHECK));
-
- fapi_try_exit:
-
-    FAPI_INF("Exiting p10_ringtest_getring_fail...");
-
-    return fapi2::current_err;
-
-}
-
-
-fapi2::ReturnCode p10_ringtest_modring_fail(
-               fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
-{
-    fapi2::variable_buffer l_ringdata;
-    l_ringdata.resize(861);
-
-    FAPI_INF("Entering p10_ringtest_modring_fail...");
-
-    FAPI_INF("Do modifyRing on proc target");
-    FAPI_TRY(fapi2::modifyRing(i_target,
-                               (scanRingId_t)0x22334455,
-                               l_ringdata,
-                               fapi2::CHIP_OP_MODIFY_MODE_OR,
-                               fapi2::RING_MODE_HEADER_CHECK));
-
- fapi_try_exit:
-
-    FAPI_INF("Exiting p10_ringtest_modring_fail...");
-
-    return fapi2::current_err;
-
-}
-
-
-fapi2::ReturnCode p10_ringtest_getring_pass(
-               fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
-{
-    fapi2::variable_buffer l_ringdata;
-    l_ringdata.resize(861);
-
-    FAPI_INF("Entering p10_ringtest_getring_pass...");
-
-    FAPI_INF("Do getring on proc target");
-    FAPI_TRY(fapi2::getRing(i_target,
-                            (scanRingId_t)0x00030088,
-                            l_ringdata,
-                            fapi2::RING_MODE_HEADER_CHECK));
-
- fapi_try_exit:
-
-    FAPI_INF("Exiting p10_ringtest_getring_pass...");
-
-    return fapi2::current_err;
-
-}
-
-
-fapi2::ReturnCode p10_ringtest_modring_pass(
-               fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
-{
-    uint32_t bit32_array[861];
-    uint32_t length;
-
-    for (length = 0; length < 861; length++)
-    {
-        bit32_array[length] = length;
-    }
-
-    fapi2::variable_buffer l_ringdata(bit32_array, length, 32 * 861);
-
-    FAPI_INF("Entering p10_ringtest_modring_pass...");
-
-    FAPI_INF("Do putring on proc target");
-    FAPI_TRY(fapi2::modifyRing(i_target,
-                               (scanRingId_t)0x00030088,
-                               l_ringdata,
-                               fapi2::CHIP_OP_MODIFY_MODE_OR,
-                               fapi2::RING_MODE_HEADER_CHECK));
-
- fapi_try_exit:
-
-    FAPI_INF("Exiting p10_ringtest_modring_pass...");
-    return fapi2::current_err;
-
-}
-
-fapi2::ReturnCode p10_platPutRingWRingId_t_pass()
-{
-    //every test is displayed this way via FAPI_INF
-    FAPI_INF("Entering p10_platPutRingWRingId_t_pass ...");
-    // get the master proc
-    TARGETING::Target * l_procTest;
-    TARGETING::targetService().masterProcChipTargetHandle(l_procTest);
-    fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>
-    l_fapi2CpuTarget((l_procTest));
-
-    fapi2::ReturnCode l_status =
-            fapi2::putRing(l_fapi2CpuTarget, n0_fure,
-                    fapi2::RING_MODE_SET_PULSE_NO_OPCG_COND);
-
-    if(l_status!= fapi2::FAPI2_RC_SUCCESS)
-    {
-        TS_FAIL("p10_platPutRingWRingId_t_pass>> proc test - failed");
-    }
-
-    return l_status;
-}
-
 
 fapi2::ReturnCode p10_opmodetest_ignorehwerr(
                 fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,

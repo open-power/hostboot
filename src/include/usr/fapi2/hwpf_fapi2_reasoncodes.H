@@ -134,6 +134,8 @@ namespace fapi2
         RC_UNKNOWN_OCMB_CHIP_TYPE      = FAPI2_COMP_ID | 0x42,
         RC_INVALID_BUFFER_SIZE         = FAPI2_COMP_ID | 0x43,
 
+        RC_UNSUPPORTED_OPERATION       = FAPI2_COMP_ID | 0xF0,
+
         // HWP generated errors
         RC_HWP_GENERATED_ERROR         = HWPF_COMP_ID | 0x0f,
 
@@ -145,6 +147,7 @@ namespace fapi2
         RC_PROC_FREQ_MISMATCH          = HWPF_COMP_ID | 0x33,
 
         RC_INVALID_SPD_DRAM_GEN        = FAPI2_COMP_ID | 0x34,
+
     };
 
     /**
