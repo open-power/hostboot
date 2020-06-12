@@ -816,6 +816,23 @@
 
   <!-- ********************************************************************* -->
   <attribute>
+      <id>ATTR_WOF_INDEX_SELECT</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+    Selects the WOF table from a set of WOF tables
+
+    Valid values:  0, 1, 2, 3
+
+    Consumers: Hostboot firmware
+    </description>
+    <valueType>uint8</valueType>
+    <platInit/>
+    <initToZero/>
+    <group>wof</group>
+  </attribute>
+
+  <!-- ********************************************************************* -->
+  <attribute>
     <id>ATTR_WOF_THROTTLE_CONTROL_LOOP_DISABLE</id>
     <targetType>TARGET_TYPE_SYSTEM</targetType>
     <description>
@@ -840,7 +857,6 @@
     <initToZero/>
     <group>enablement</group>
   </attribute>
-
  <!-- ********************************************************************* -->
   <attribute>
     <id>ATTR_WOF_PITCH_ENABLE</id>
@@ -968,6 +984,7 @@
         FALSE=0,
         TRUE=1
     </enum>
+    <initToZero/>
     <group>enablement</group>
   </attribute>
 
