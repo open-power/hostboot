@@ -564,6 +564,7 @@ void*    call_mss_eff_config( void *io_pArgs )
     {
         TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, INFO_MRK"SMF_MEM_AMT_KEY was not found in NVRAM; 0 SMF memory will be distributed.");
     }
+#endif
 
     l_err = SECUREBOOT::SMF::distributeSmfMem();
     if(l_err)
@@ -586,7 +587,6 @@ void*    call_mss_eff_config( void *io_pArgs )
             errlCommit( l_err, ISTEP_COMP_ID);
         }
     }
-#endif
 
     } while (0);
 
