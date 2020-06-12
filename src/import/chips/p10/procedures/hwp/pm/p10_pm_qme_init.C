@@ -199,6 +199,8 @@ fapi_try_exit:
 fapi2::ReturnCode qme_init(
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target )
 {
+    // Function not supported on SBE platform
+#ifndef __PPE__
     using namespace scomt::eq;
     using namespace scomt::perv;
 
@@ -366,6 +368,9 @@ fapi2::ReturnCode qme_init(
 
 fapi_try_exit:
     FAPI_IMP("<< qme_init");
+#else
+    FAPI_IMP("!! qme_start not supported on SBE platform.");
+#endif  // SBE Platform
     return fapi2::current_err;
 }
 
@@ -464,6 +469,9 @@ fapi2::ReturnCode init_topo_id_tables(
 fapi_try_exit:
     return fapi2::current_err;
 }
+
+// Function not supported on SBE platform
+#ifndef __PPE__
 
 /// @brief Kicks off the boot flow of QME.
 /// @param [in] i_target Chip target
@@ -597,6 +605,8 @@ fapi_try_exit:
     FAPI_INF("<< initQmeBoot");
     return fapi2::current_err;
 }
+
+#endif  // SBE Platform
 
 /// @brief Set the PCB Skew Adjustment per EQ and per core.
 /// @param [in] i_target Chip target

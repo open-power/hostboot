@@ -365,11 +365,14 @@ fapi_try_exit:
 ///
 /// @return FAPI2_RC_SUCCESS on success, else error.
 ///
+
 fapi2::ReturnCode
 pba_slave_setup(
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
     const PBA_PHASE i_phase)
 {
+    // Function not supported on SBE platform
+#ifndef __PPE__
     using namespace scomt::proc;
 
     fapi2::buffer<uint64_t>  l_data(64);
@@ -501,6 +504,9 @@ pba_slave_setup(
 
 fapi_try_exit:
     FAPI_IMP("<< pba_slave_setup");
+#else
+    FAPI_IMP("!! pba_slave_setup not supported on SBE platform.");
+#endif
     return fapi2::current_err;
 }  // end pba_slave_setup
 
@@ -617,6 +623,8 @@ fapi_try_exit:
 fapi2::ReturnCode pba_start(
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
 {
+    // Function not supported on SBE platform
+#ifndef __PPE__
     FAPI_IMP(">> pba_start ...");
 
     using namespace scomt::proc;
@@ -695,6 +703,9 @@ fapi2::ReturnCode pba_start(
 
 fapi_try_exit:
     FAPI_IMP("<< pba_start ...");
+#else
+    FAPI_IMP("!! pba_start not supported on SBE platform.");
+#endif
     return fapi2::current_err;
 }
 

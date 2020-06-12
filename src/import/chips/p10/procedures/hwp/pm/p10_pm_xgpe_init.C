@@ -76,6 +76,8 @@ static const uint32_t TIMEOUT_COUNT = XGPE_TIMEOUT_MS / XGPE_POLLTIME_MS;
 fapi2::ReturnCode xgpe_start(
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
 {
+    // Function not supported on SBE platform
+#ifndef __PPE__
     using namespace scomt::proc;
 
     fapi2::buffer<uint64_t> l_data64;
@@ -210,6 +212,10 @@ fapi2::ReturnCode xgpe_start(
 
 fapi_try_exit:
     FAPI_IMP("<< xgpe_start......");
+#else
+    FAPI_IMP("!!! xgpe_start not supported on SBE platform");
+#endif
+
     return fapi2::current_err;
 }
 

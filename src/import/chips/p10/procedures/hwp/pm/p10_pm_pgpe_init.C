@@ -76,6 +76,8 @@ static const uint32_t TIMEOUT_COUNT = PGPE_TIMEOUT_MS / PGPE_POLLTIME_MS;
 fapi2::ReturnCode pgpe_start(
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
 {
+    // Function not supported no SBE platform
+#ifndef __PPE__
     using namespace scomt::proc;
 
     fapi2::buffer<uint64_t> l_data64;
@@ -262,6 +264,9 @@ fapi2::ReturnCode pgpe_start(
 
 fapi_try_exit:
     FAPI_IMP("<< pgpe_start......");
+#else
+    FAPI_IMP("!!! pgpe_start not supported on SBE platform");
+#endif
     return fapi2::current_err;
 }
 
