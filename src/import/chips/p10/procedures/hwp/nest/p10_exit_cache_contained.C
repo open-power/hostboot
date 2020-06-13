@@ -58,25 +58,6 @@ const uint32_t MCD_RECOVERY_VG_COUNT = 0x7FFF;
 
 const uint32_t MCD_VGC_AVAIL_GROUPS = 0xFFFF;
 
-// FIR
-const uint8_t MCD_ENABLED_NUM_FIR_INITS = 4;
-
-static const uint64_t MCD_ENABLED_FIR_REG_SCOM_ADDRS[] =
-{
-    scomt::proc::MCD_MCC_FIR_REG_RW,
-    scomt::proc::MCD_FIR_MASK_REG_RW,
-    scomt::proc::MCD_FIR_ACTION0_REG,
-    scomt::proc::MCD_FIR_ACTION1_REG
-};
-
-static const uint64_t MCD_ENABLED_FIR_REG_SCOM_DATA_VALS[] =
-{
-    0x0000000000000000ULL,
-    0x4C60000000000000ULL,
-    0x0000000000000000ULL,
-    0x8000000000000000ULL
-};
-
 // range configuration registers
 enum mcd_range_reg_t
 {
@@ -261,17 +242,6 @@ p10_exit_cache_contained_add_mcd_base_inits(
         fapi2::ATTR_PROC_FABRIC_PRESENT_GROUPS_Type l_fabric_present_groups = 0;
         fapi2::buffer<uint64_t> l_mcd_rec_data = 0;
         fapi2::buffer<uint64_t> l_mcd_rec_valid_mask = 0;
-
-        for (uint8_t i = 0; i < MCD_ENABLED_NUM_FIR_INITS; i++)
-        {
-            FAPI_TRY(p10_gen_xscom_init(i_target,
-                                        l_cu_pairing,
-                                        MCD_ENABLED_FIR_REG_SCOM_ADDRS[i],
-                                        MCD_ENABLED_FIR_REG_SCOM_DATA_VALS[i],
-                                        l_valid_mask,
-                                        o_xscom_inits),
-                     "Error from p10_gen_xscom_init (enabled, FIR init %d)", i);
-        }
 
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_PRESENT_GROUPS,
                                i_target_sys,

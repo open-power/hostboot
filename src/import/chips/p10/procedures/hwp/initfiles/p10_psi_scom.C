@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -29,9 +29,6 @@
 
 using namespace fapi2;
 
-constexpr uint64_t literal_0b0011111100000010000001101111 = 0b0011111100000010000001101111;
-constexpr uint64_t literal_0b0000000000000000000000000000 = 0b0000000000000000000000000000;
-constexpr uint64_t literal_0b1100000000101000000000010000 = 0b1100000000101000000000010000;
 constexpr uint64_t literal_0x000 = 0x000;
 constexpr uint64_t literal_0b00000 = 0b00000;
 
@@ -43,24 +40,6 @@ fapi2::ReturnCode p10_psi_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>
         FAPI_TRY(FAPI_ATTR_GET_PRIVILEGED(fapi2::ATTR_NAME, TGT0, l_chip_id));
         FAPI_TRY(FAPI_ATTR_GET_PRIVILEGED(fapi2::ATTR_EC, TGT0, l_chip_ec));
         fapi2::buffer<uint64_t> l_scom_buffer;
-        {
-            FAPI_TRY(fapi2::getScom( TGT0, 0x3011d03ull, l_scom_buffer ));
-
-            l_scom_buffer.insert<0, 28, 36, uint64_t>(literal_0b0011111100000010000001101111 );
-            FAPI_TRY(fapi2::putScom(TGT0, 0x3011d03ull, l_scom_buffer));
-        }
-        {
-            FAPI_TRY(fapi2::getScom( TGT0, 0x3011d06ull, l_scom_buffer ));
-
-            l_scom_buffer.insert<0, 28, 36, uint64_t>(literal_0b0000000000000000000000000000 );
-            FAPI_TRY(fapi2::putScom(TGT0, 0x3011d06ull, l_scom_buffer));
-        }
-        {
-            FAPI_TRY(fapi2::getScom( TGT0, 0x3011d07ull, l_scom_buffer ));
-
-            l_scom_buffer.insert<0, 28, 36, uint64_t>(literal_0b1100000000101000000000010000 );
-            FAPI_TRY(fapi2::putScom(TGT0, 0x3011d07ull, l_scom_buffer));
-        }
         {
             FAPI_TRY(fapi2::getScom( TGT0, 0x3011d0full, l_scom_buffer ));
 
