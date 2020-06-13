@@ -154,8 +154,12 @@ fapi2::ReturnCode get_topology_idx(
 {
     FAPI_DBG("start");
 
+    fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
     fapi2::ATTR_PROC_FABRIC_TOPOLOGY_ID_Type l_fabric_topology_id = 0;
     fapi2::ATTR_PROC_FABRIC_TOPOLOGY_MODE_Type l_fabric_topology_mode = 0;
+
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_TOPOLOGY_MODE, FAPI_SYSTEM, l_fabric_topology_mode),
+             "Error from FPAI_ATTR_GET (ATTR_PROC_FABRIC_TOPOLOGY_MODE)");
 
     //Determine which Topology ID to use (EFF vs HB)
     // EFF_TOPOLOGY_ID - This would be used to provide calling HWPs with the
