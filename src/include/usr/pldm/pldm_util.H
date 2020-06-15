@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/include/usr/pldm/extended/hb_pdrs.H $                     */
+/* $Source: src/include/usr/pldm/pldm_util.H $                            */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
@@ -23,45 +23,26 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-/* @file hb_pdrs.H
+/** @file pldm_util.H
  *
- * Defines the interface for adding Hostboot's PDRs to a PDR repository.
+ *  @brief PLDM utility functions and macros.
  */
 
-#ifndef HB_PDRS_H
-#define HB_PDRS_H
+#ifndef PLDM_UTIL_H
+#define PLDM_UTIL_H
 
-#include <pldm/requests/pldm_pdr_requests.H>
-#include <targeting/common/target.H>
-#include <pldm/pldm_const.H>
-
-namespace PLDM
-{
-/*
- * This table contains info on how to add each target type's info to the
- * assocation tree.
- */
-
-struct fru_inventory_class
-{
-    TARGETING::ATTR_CLASS_type targetClass;
-    TARGETING::TYPE targetType;
-    entity_type entityType;
-};
-
-extern const std::array<fru_inventory_class, 2> fru_inventory_classes;
-
-/* @brief Adds Hostboot's PDRs to the given PDR repository.
- *        These PDRs are:
- *        1) FRU Record Set PDRs, one for each DIMM and PROC
- *        2) Entity Association PDRs, one for each relationship between the
- *           DIMMs/PROCs and the Backplane.
- *
- * @param[in/out] io_repository        The repository to add the PDRs to. Must not
- *                                     be nullptr.
- */
-void addHostbootPdrs(pldm_pdr* io_repository);
-
-}
+#ifdef __HOSTBOOT_RUNTIME
+// For Hostboot Runtime we just use nullptr as the message queue parameter to
+// the various send/receive functions.
+#define MSG_Q_RESOLVE(FUNC, QNAME) nullptr
+#else
+#define MSG_Q_RESOLVE(FUNC, QNAME)                                      \
+    ({                                                                  \
+    const msg_q_t msgQ = msg_q_resolve(QNAME);                          \
+    assert(msgQ != nullptr,                                             \
+           FUNC ": PLDM Req Out Message queue did not resolve properly!"); \
+    msgQ;                                                               \
+    })
+#endif
 
 #endif

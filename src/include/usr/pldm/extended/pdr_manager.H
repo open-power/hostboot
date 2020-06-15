@@ -178,9 +178,17 @@ public:
     // @TODO RTC 256140: Remove this function when the BMC normalizes all PDRs
     bool findEntityByTypeAndId(pldm_entity& io_entity) const;
 
-    // The BMC TID is 1, HB is 2. It is important that the terminus IDs in the
-    // system do not conflict with one another.
-    static constexpr terminus_id_t hostboot_terminus_id = 2;
+    /* @brief Hostboot's PLDM Terminus ID.
+     * @return terminus_id_t Hostboot's current terminus ID.
+     */
+    static terminus_id_t hostbootTerminusId()
+    {
+        // The BMC TID is 1, HB is 2. It is important that the terminus IDs in
+        // the system do not conflict with one another. The implementation of
+        // this function will change if/when we implement the SetTID PLDM
+        // command.
+        return 2;
+    }
 
 private:
     std::unique_ptr<pldm_pdr, void(*)(pldm_pdr*)> iv_pdr_repo;

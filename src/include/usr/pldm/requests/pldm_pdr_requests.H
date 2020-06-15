@@ -37,6 +37,11 @@
 // Struct representing PDR repository (see DSP0248 v1.2.0, section 8)
 struct pldm_pdr;
 
+namespace TARGETING
+{
+class Target;
+}
+
 namespace PLDM
 {
 
@@ -56,14 +61,12 @@ errlHndl_t getRemotePdrRepository(pldm_pdr* io_repo);
 
 /* @brief Send a "PDR Repository Changed Event" to the BMC.
  *
- * @param[in] i_tid         The TID of the Hostboot PLDM terminus
  * @param[in] i_repo        PDR Repository containing the changed PDRs
  *                          (must not be nullptr)
  * @param[in] i_handles     The set of PDRs which have been added to the repository.
  * @return errlHndl_t       Error if any, otherwise nullptr.
  */
-errlHndl_t sendRepositoryChangedEvent(const terminus_id_t i_tid,
-                                      const pldm_pdr* i_repo,
+errlHndl_t sendRepositoryChangedEvent(const pldm_pdr* i_repo,
                                       const std::vector<pdr_handle_t>& i_handles);
 
 using sensor_state_t = uint8_t;
@@ -72,17 +75,30 @@ using sensor_id_t = uint16_t;
 /* @brief Send a Platform Event Message indicating a "Sensor State Changed"
  *        event to the BMC.
  *
- * @param[in] i_tid            The TID of the Hostboot PLDM terminus
  * @param[in] i_sensor_id      ID of the aggregate sensor that changed
  * @param[in] i_sensor_offset  Offset of the sensor within the aggregate sensor
  *                             that changed
  * @param[in] i_sensor_state   New state of the sensor
  * @return errlHndl_t          Error if any, otherwise nullptr.
  */
-errlHndl_t sendSensorStateChangedEvent(terminus_id_t i_tid,
-                                       sensor_id_t i_sensor_id,
+errlHndl_t sendSensorStateChangedEvent(sensor_id_t i_sensor_id,
                                        uint8_t i_sensor_offset,
                                        sensor_state_t i_sensor_state);
+
+enum occ_state : sensor_state_t
+{
+    occ_state_stopped,
+    occ_state_in_service
+};
+
+/* @brief Send a platform event indicating that the state of the OCC has changed
+ *
+ * @param[in] i_proc_target  The PROC target containing the relevant OCC
+ * @param[in] i_new_state    The new state of the OCC
+ * @return errlHndl_t        Error if any, otherwise nullptr
+ */
+errlHndl_t sendOccStateChangedEvent(const TARGETING::Target* i_proc_target,
+                                    occ_state i_new_state);
 
 }
 

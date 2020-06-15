@@ -53,10 +53,7 @@ public:
         using repo_ptr = std::unique_ptr<pldm_pdr, decltype(&pldm_pdr_destroy)>;
         const repo_ptr repo { pldm_pdr_init(), pldm_pdr_destroy };
 
-        // Just use terminus 0, doesn't matter for the test
-        const int terminus_id = 0;
-
-        PLDM::addHostbootPdrs(repo.get(), terminus_id);
+        PLDM::addHostbootPdrs(repo.get());
 
         const pldm_pdr_types pdrTypes[] =
         {

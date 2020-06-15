@@ -36,6 +36,7 @@
 // PLDM
 #include <pldm/extended/hb_pdrs.H>
 #include <pldm/extended/pldm_fru.H>
+#include <pldm/extended/pdr_manager.H>
 #include "../extern/pdr.h"
 #include "../extern/platform.h"
 #include "../common/pldmtrace.H"
@@ -342,14 +343,14 @@ extern const std::array<fru_inventory_class, 2> fru_inventory_classes
     { TARGETING::CLASS_LOGICAL_CARD, TARGETING::TYPE_DIMM, ENTITY_TYPE_DIMM }
 }};
 
-void addHostbootPdrs(pldm_pdr* const io_repo,
-                     const terminus_id_t i_terminus_id)
+void addHostbootPdrs(pldm_pdr* const io_repo)
 {
     PLDM_INF(ENTER_MRK"addHostbootPdrs");
 
-    addEntityAssociationAndFruRecordSetPdrs(io_repo, i_terminus_id);
+    addEntityAssociationAndFruRecordSetPdrs(io_repo,
+                                            thePdrManager().hostbootTerminusId());
 
-    addOccStateControlPdrs(io_repo, i_terminus_id);
+    addOccStateControlPdrs(io_repo, thePdrManager().hostbootTerminusId());
 
     PLDM_INF(EXIT_MRK"addHostbootPdrs");
 }

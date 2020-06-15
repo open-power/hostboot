@@ -23,9 +23,9 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-/** @file  pldm_pdr_requests.C
- *  @brief This file contains the implementations of the APIs/wrappers for PLDM PDR
- *         request operations.
+/* @file pldm_pdr_requests.C
+ *
+ * @brief Implementation of PLDM PDR-related requester functions.
  */
 
 // Standard library
@@ -53,6 +53,7 @@
 #include <pldm/pldm_request.H>
 #include <pldm/extended/pdr_manager.H>
 #include "../common/pldmtrace.H"
+#include <pldm/pldm_util.H>
 
 // This is the name of the outgoing PLDM message queue.
 extern const char* VFS_ROOT_MSG_PLDM_REQ_OUT;
@@ -255,13 +256,7 @@ errlHndl_t getPDR(const msg_q_t i_msgQ,
  */
 errlHndl_t getAllPdrs(std::vector<pdr>& o_pdrs)
 {
-#ifndef __HOSTBOOT_RUNTIME
-    const msg_q_t msgQ = msg_q_resolve(VFS_ROOT_MSG_PLDM_REQ_OUT);
-    assert(msgQ != nullptr,
-           "getAllPdrs: PLDM Req Out Message queue did not resolve properly!");
-#else
-    const msg_q_t msgQ = nullptr;
-#endif
+    const msg_q_t msgQ = MSG_Q_RESOLVE("getAllPdrs", VFS_ROOT_MSG_PLDM_REQ_OUT);
 
     pdr_handle_t pdr_handle = FIRST_PDR_HANDLE; // getPDR updates this for us
     errlHndl_t errl = nullptr;
@@ -309,8 +304,7 @@ errlHndl_t getRemotePdrRepository(pldm_pdr* const io_repo)
     return errl;
 }
 
-errlHndl_t sendRepositoryChangedEvent(const terminus_id_t i_tid,
-                                      const pldm_pdr* const i_repo,
+errlHndl_t sendRepositoryChangedEvent(const pldm_pdr* const i_repo,
                                       const std::vector<pdr_handle_t>& i_handles)
 {
     PLDM_ENTER("sendRepositoryChangedEvent");
@@ -378,13 +372,7 @@ errlHndl_t sendRepositoryChangedEvent(const terminus_id_t i_tid,
         do
         {
             {
-#ifndef __HOSTBOOT_RUNTIME
-                const msg_q_t msgQ = msg_q_resolve(VFS_ROOT_MSG_PLDM_REQ_OUT);
-                assert(msgQ != nullptr,
-                       "sendRepositoryChangedEvent: PLDM Req Out Message queue did not resolve properly!");
-#else
-                const msg_q_t msgQ = nullptr;
-#endif
+                const msg_q_t msgQ = MSG_Q_RESOLVE("sendRepositoryChangedEvent", VFS_ROOT_MSG_PLDM_REQ_OUT);
 
                 std::vector<uint8_t> response_bytes;
 
@@ -398,7 +386,7 @@ errlHndl_t sendRepositoryChangedEvent(const terminus_id_t i_tid,
                      encode_platform_event_message_req,
                      DEFAULT_INSTANCE_ID,
                      DSP0248_V1_2_0_PLATFORM_EVENT_FORMAT_VERSION,
-                     i_tid,
+                     thePdrManager().hostbootTerminusId(),
                      PLDM_PDR_REPOSITORY_CHG_EVENT,
                      event_data_bytes.data(),
                      event_data_bytes.size());
@@ -464,8 +452,7 @@ errlHndl_t sendRepositoryChangedEvent(const terminus_id_t i_tid,
     return errl;
 }
 
-errlHndl_t sendSensorStateChangedEvent(const terminus_id_t i_tid,
-                                       const sensor_id_t i_sensor_id,
+errlHndl_t sendSensorStateChangedEvent(const sensor_id_t i_sensor_id,
                                        const uint8_t i_sensor_offset,
                                        const sensor_state_t i_sensor_state)
 {
@@ -510,13 +497,8 @@ errlHndl_t sendSensorStateChangedEvent(const terminus_id_t i_tid,
     do
     {
         {
-#ifdef __HOSTBOOT_RUNTIME
-            const msg_q_t msgQ = nullptr;
-#else
-            const msg_q_t msgQ = msg_q_resolve(VFS_ROOT_MSG_PLDM_REQ_OUT);
-            assert(msgQ != nullptr,
-                   "sendSensorStateChangedEvent: PLDM Req Out Message queue did not resolve properly!");
-#endif
+            const msg_q_t msgQ = MSG_Q_RESOLVE("sendSensorStateChangedEvent",
+                                               VFS_ROOT_MSG_PLDM_REQ_OUT);
 
             std::vector<uint8_t> response_bytes;
 
@@ -530,7 +512,7 @@ errlHndl_t sendSensorStateChangedEvent(const terminus_id_t i_tid,
                  encode_platform_event_message_req,
                  DEFAULT_INSTANCE_ID,
                  DSP0248_V1_2_0_PLATFORM_EVENT_FORMAT_VERSION,
-                 i_tid,
+                 thePdrManager().hostbootTerminusId(),
                  PLDM_SENSOR_EVENT,
                  event_data_bytes.data(),
                  event_data_bytes.size());
@@ -590,6 +572,18 @@ errlHndl_t sendSensorStateChangedEvent(const terminus_id_t i_tid,
     PLDM_EXIT("sendSensorStateChangedEvent");
 
     return errl;
+}
+
+errlHndl_t sendOccStateChangedEvent(const TARGETING::Target* const i_proc_target,
+                                    const occ_state i_new_state)
+{
+    // The Processor entities only have one sensor associated with them, and it
+    // is at index 0.
+    constexpr int OCC_STATE_SENSOR_INDEX = 0;
+
+    return sendSensorStateChangedEvent(i_proc_target->getAttr<TARGETING::ATTR_ORDINAL_ID>(),
+                                       OCC_STATE_SENSOR_INDEX,
+                                       i_new_state);
 }
 
 }

@@ -127,7 +127,7 @@ void PdrManager::addLocalPdrs()
 {
     const auto lock = scoped_mutex_lock(iv_access_mutex);
 
-    return addHostbootPdrs(iv_pdr_repo.get(), hostboot_terminus_id);
+    return addHostbootPdrs(iv_pdr_repo.get());
 }
 
 size_t PdrManager::pdrCount() const
@@ -164,8 +164,7 @@ errlHndl_t PdrManager::sendPdrRepositoryChangeEvent(const std::vector<pdr_handle
 {
     const auto lock = scoped_mutex_lock(iv_access_mutex);
 
-    return sendRepositoryChangedEvent(hostboot_terminus_id,
-                                      iv_pdr_repo.get(),
+    return sendRepositoryChangedEvent(iv_pdr_repo.get(),
                                       i_handles);
 }
 
