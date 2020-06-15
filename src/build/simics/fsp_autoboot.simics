@@ -1,0 +1,43 @@
+# Pass this script into the 'user_script_to_run' variable when starting runsim
+# The script will do the following
+# - Wait for FSP standby
+# - Automatically link /nfs to local $hb_nfsdir
+# - Disable most of the automatic recovery features
+# - Start a regular poweron IPL
+echo "***Loading fsp_autoboot.simics***"
+
+try {
+    echo "Using NFS dir from "+$hb_nfsdir
+} except {
+    echo "*** No NFS dir found - please set $hb_nfsdir variable"
+}
+
+script-branch {
+    # wait for FSP standby
+    fsp2_minicomA.con.wait-for-string "Attempting to automatically enable redundancy"
+    echo "***Triggering boot script***"
+    fsp2_minicomA.con.input "smgr mfgState\n"
+
+    # Link nfs
+    if defined hb_nfsdir {
+       fsp2_minicomA.con.input "rm -rf /nfs; ln -sf /host/"+$hb_nfsdir+"/ /nfs\n"
+    }
+
+    # Turn off recovery, reboots, dumps, failovers
+    fsp2_minicomA.con.input "fsptelinit --disablerecovery\n"
+    fsp2_minicomA.con.input "panlexec -f2 -mM\n"
+    fsp2_minicomA.con.input "sysdump -sp disableAll\n"
+    fsp2_minicomA.con.input "registry -Hw dscv/DisableRedundancy 0x01\n"
+
+    # Restart hwsvd - useful if you are patching targeting
+    #fsp2_minicomA.con.input "killall hwsvd; /nfs/test/hwsvd; sleep 5; istep buildhwmodel\n"
+
+    # clear the original errors out
+    fsp2_minicomA.con.input "errl -p\n"
+
+    # start fsp traces
+    #fsp2_minicomA.con.input "rm /nfs/fsptrace.txt; fsp-trace -r; fsp-trace -s /maint/trexStringFile -o /nfs/fsptrace.txt -P\n"
+
+    # start the ipl
+    fsp2_minicomA.con.input "plckIPLRequest 1\n"
+}
