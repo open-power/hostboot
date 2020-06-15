@@ -55,7 +55,7 @@
 #include <fapi2/plat_hwp_invoker.H>      // FAPI_INVOKE_HWP
 
 // HWP
-#include <lib/shared/p10_defaults.H>     // mss::DEFAULT_MC_TYPE, needed by gen_mss_unmask.H
+#include <lib/shared/exp_defaults.H>     // mss::DEFAULT_MC_TYPE, needed by gen_mss_unmask.H
 // Using a long path to ensure that the correct file for P10 is used
 #include <generic/memory/lib/utils/fir/gen_mss_unmask.H> // mss::unmask::after_memdiags
 #include <generic/memory/lib/utils/mc/gen_mss_port.H>    // mss::reset_reorder_queue_settings
