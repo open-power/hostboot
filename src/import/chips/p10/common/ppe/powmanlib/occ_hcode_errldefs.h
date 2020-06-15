@@ -103,6 +103,7 @@ typedef enum
     ERRL_USR_DTL_DASH_XGPE      = 0x09,
     ERRL_USR_DTL_DASH_QME       = 0x0A,
 #endif
+    ERRL_USR_DTL_SR_FFDC        = 0x0B,
 } ERRL_USR_DETAIL_TYPE;
 
 // These are the possible OCC States.
