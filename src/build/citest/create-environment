@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2014,2019
+# Contributors Listed Below - COPYRIGHT 2014,2020
 # [+] International Business Machines Corp.
 #
 #
@@ -62,7 +62,14 @@ export bbsrc=$BACKING_BUILD/src
 # Populate simics directories.
 
 SIMICS_LEVEL=`cat ${PROJECT_ROOT}/src/build/citest/etc/simbuild`
-EECACHE_PREBUILT=`cat ${PROJECT_ROOT}/src/build/citest/etc/eecache_prebuilt`
+
+if [[ ! -z "${VPO_COMPILE}" ]]; then
+    # EECACHE to be used for VPO
+    EECACHE_PREBUILT=`cat ${PROJECT_ROOT}/src/build/citest/etc/eecache_vpo_prebuilt`
+else
+    # EECACHE to be used for other Standalone builds
+    EECACHE_PREBUILT=`cat ${PROJECT_ROOT}/src/build/citest/etc/eecache_prebuilt`
+fi
 
 if [[ $SETUP_FOR_STANDALONE -eq 1 ]];then
 
