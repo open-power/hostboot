@@ -2896,9 +2896,19 @@ sub postProcessApss {
                 # multiply by 1000 so it is a valid attribute value
                 $channel_offset = $channel_offset * 1000;
 
-#Temporarily use ADC_CHANNEL_GROUND until GND defined in MRW
-                $channel_ground = $targetObj->
-                  getAttribute($child,"ADC_CHANNEL_GROUND");
+                #Temporarily leave use of ADC_CHANNEL_GROUND as a backup
+                #to transition from old to new MRW
+                if ($targetObj->doesAttributeExistForTarget($child,"GND"))
+                {
+                    $channel_ground = $targetObj->
+                      getAttribute($child,"GND");
+                }
+                else
+                {
+                    #Temporarily use old attribute to help with MRW transition
+                    $channel_ground = $targetObj->
+                      getAttribute($child,"ADC_CHANNEL_GROUND");
+                }
             }
 
             $name=~s/\n//g;
