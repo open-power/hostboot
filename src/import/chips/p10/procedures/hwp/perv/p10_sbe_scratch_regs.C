@@ -626,8 +626,10 @@ fapi2::ReturnCode p10_sbe_scratch_regs_update(
         fapi2::ATTR_RUNN_MODE_Type l_attr_runn_mode;
         fapi2::ATTR_DISABLE_HBBL_VECTORS_Type l_attr_disable_hbbl_vectors;
         fapi2::ATTR_SBE_SELECT_EX_POLICY_Type l_attr_sbe_select_ex_policy;
+        fapi2::ATTR_CLOCKSTOP_ON_XSTOP_Type l_attr_clockstop_on_xstop;
         fapi2::ATTR_CLOCK_MUX_IOHS_LCPLL_INPUT_Type l_attr_clock_mux_iohs_lcpll_input;
         fapi2::ATTR_CLOCK_MUX_PCI_LCPLL_INPUT_Type l_attr_clock_mux_pci_lcpll_input;
+        uint8_t l_clockstop_on_xstop = ATTR_CLOCKSTOP_ON_XSTOP_DISABLED;
 
         FAPI_DBG("Reading ATTR_SYSTEM_IPL_PHASE");
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SYSTEM_IPL_PHASE, FAPI_SYSTEM, l_attr_system_ipl_phase),
@@ -677,6 +679,31 @@ fapi2::ReturnCode p10_sbe_scratch_regs_update(
                  "Error from FAPI_ATTR_GET (ATTR_SBE_SELECT_EX_POLICY)");
         l_scratch5_reg.insertFromRight<ATTR_SBE_SELECT_EX_POLICY_STARTBIT, ATTR_SBE_SELECT_EX_POLICY_LENGTH>
         (l_attr_sbe_select_ex_policy);
+
+        FAPI_DBG("Reading ATTR_CLOCKSTOP_ON_XSTOP");
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CLOCKSTOP_ON_XSTOP, i_target_chip, l_attr_clockstop_on_xstop),
+                 "Error from FAPI_ATTR_GET (ATTR_CLOCKSTOP_ON_XSTOP)");
+
+        if (l_attr_clockstop_on_xstop == fapi2::ENUM_ATTR_CLOCKSTOP_ON_XSTOP_STOP_ON_XSTOP)
+        {
+            l_clockstop_on_xstop = ATTR_CLOCKSTOP_ON_XSTOP_XSTOP;
+        }
+        else if (l_attr_clockstop_on_xstop == fapi2::ENUM_ATTR_CLOCKSTOP_ON_XSTOP_STOP_ON_XSTOP_AND_SPATTN)
+        {
+            l_clockstop_on_xstop = ATTR_CLOCKSTOP_ON_XSTOP_XSTOP_SPATTN;
+        }
+        else if (l_attr_clockstop_on_xstop == fapi2::ENUM_ATTR_CLOCKSTOP_ON_XSTOP_STOP_ON_STAGED_XSTOP)
+        {
+            l_clockstop_on_xstop = ATTR_CLOCKSTOP_ON_XSTOP_STAGED_XSTOP;
+        }
+        else
+        {
+            FAPI_INF("Unexpected value 0x%02x for ATTR_CLOCKSTOP_ON_XSTOP, defaulting to DISABLED",
+                     l_attr_clockstop_on_xstop);
+        }
+
+        l_scratch5_reg.insertFromRight<ATTR_CLOCKSTOP_ON_XSTOP_STARTBIT, ATTR_CLOCKSTOP_ON_XSTOP_LENGTH>
+        (l_clockstop_on_xstop);
 
         FAPI_DBG("Reading IOHS PLL mux attributes");
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CLOCK_MUX_IOHS_LCPLL_INPUT, i_target_chip, l_attr_clock_mux_iohs_lcpll_input),

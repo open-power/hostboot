@@ -317,7 +317,7 @@
 <attribute>
   <id>ATTR_SBE_SYS_CONFIG</id>
   <targetType>TARGET_TYPE_SYSTEM</targetType>
-  <description>System Configuration information, which indicates the functional 
+  <description>System Configuration information, which indicates the functional
   state for each processor, on the system. Each bit represents topology id of
   a processor that is present.
   </description>
@@ -333,6 +333,27 @@
   <valueType>uint32</valueType>
   <platInit/>
   <mrwHide/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_CLOCKSTOP_ON_XSTOP</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>
+  Set up the chip so that all chiplet clocks are
+  automatically stopped in case of a checkstop. Possible enum values:
+  DISABLED - Don't stop clocks on any error
+  STOP_ON_XSTOP - Stop on either an xstop in the local chiplet
+     or on a system xstop coming in from outside the chiplet
+  STOP_ON_XSTOP_AND_SPATTN - Like above, plus special attentions
+  STOP_ON_STAGED_XSTOP - Stop _only_ on an incoming staged system xstop
+     to ensure that all chiplets stop in the same instant. This will result
+     in a longer delay between the original error and the clocks stopping.
+  </description>
+  <valueType>uint8</valueType>
+  <enum>DISABLED = 0x00, STOP_ON_XSTOP = 0x7B, STOP_ON_XSTOP_AND_SPATTN = 0x5B, STOP_ON_STAGED_XSTOP = 0xFD</enum>
+  <writeable/>
+  <platInit/>
+  <initToZero/>
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>

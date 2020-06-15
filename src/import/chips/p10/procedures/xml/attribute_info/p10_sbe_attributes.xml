@@ -262,6 +262,10 @@
     <value>0x0</value>
   </entry>
   <entry>
+    <name>ATTR_CLOCKSTOP_ON_XSTOP</name>
+    <value>0x0</value>
+  </entry>
+  <entry>
     <name>ATTR_CP_REFCLOCK_SELECT</name>
     <value>0x0</value>
   </entry>
