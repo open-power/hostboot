@@ -95,14 +95,14 @@ class MctpRP
       *
       * @return errlHndl_t return 0 on success and an error log if there is a fail
       */
-      errlHndl_t _mctp_process_version(void);
+      errlHndl_t _mctp_channel_init(void);
 
       // Private Member Variables
       struct mctp_binding_hostlpc *iv_hostlpc; // ptr to hostlpc binding struct
       struct mctp *iv_mctp;                    // ptr to struct that has business logic
       msg_q_t     iv_inboundMsgQ;              // MCTP inbound messages
       msg_q_t     iv_outboundMsgQ;             // MCTP outbound messages
-      bool        iv_channelActive;            // MCTP channel ready for traffic
+      volatile bool iv_channelActive;          // MCTP channel ready for traffic
       uint16_t    iv_mctpVersion;              // MCTP version negotiated during initialization
 
       // Disallow copying this class.

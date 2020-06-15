@@ -234,7 +234,7 @@ void MctpRP::handle_inbound_messages(void)
               // register during the initization sequence to notify us they
               // have filled out info in the config section of the lpc space
               // and has activated the KCS interface
-              l_errl = this->_mctp_process_version();
+              l_errl = this->_mctp_channel_init();
 
               if(l_errl)
               {
@@ -372,7 +372,7 @@ void MctpRP::handle_outbound_messages(void)
 }
 
 
-errlHndl_t MctpRP::_mctp_process_version(void)
+errlHndl_t MctpRP::_mctp_channel_init(void)
 {
     errlHndl_t l_errl = nullptr;
 do
@@ -394,13 +394,13 @@ do
     }
 
     // Verify that the channel is active
-    if(!(l_status & KCS_STATUS_CHANNEL_ACTIVE))
+    if(iv_channelActive && !(l_status & KCS_STATUS_CHANNEL_ACTIVE))
     {
         TRACFCOMP(g_trac_mctp,
-                  "mctp_process_version: Error ! Channel is not active!" );
+                  "_mctp_channel_init: Error ! KCS status reports channel as inactive when HB thinks its active!" );
         /*@errorlog
         * @errortype       ERRL_SEV_UNRECOVERABLE
-        * @moduleid        MOD_MCTP_PROCESS_VER
+        * @moduleid        MOD_MCTP_CHANNEL_INIT
         * @reasoncode      RC_CHANNEL_INACTIVE
         * @userdata1       kcs status register value
         * @userdata2       mctp version
@@ -412,22 +412,24 @@ do
         *
         */
         l_errl = new ErrlEntry(ERRL_SEV_UNRECOVERABLE, // severity
-                               MOD_MCTP_PROCESS_VER,   // moduleid
+                               MOD_MCTP_CHANNEL_INIT,   // moduleid
                                RC_CHANNEL_INACTIVE,    // reason code
                                l_status, // KCS status register value
                                iv_hostlpc->lpc_hdr->negotiated_ver, // version
                                ErrlEntry::ADD_SW_CALLOUT);
     }
-    else
+    else if(!iv_channelActive && (l_status & KCS_STATUS_CHANNEL_ACTIVE))
     {
         iv_channelActive = true;
         // Read the negotiated version from the lpcmap hdr that the bmc should
         // have set prior to setting the KCS_STATUS_CHANNEL_ACTIVE bit
         iv_mctpVersion = iv_hostlpc->lpc_hdr->negotiated_ver;
         TRACFCOMP(g_trac_mctp,
-                  "mctp_process_version: Negotiated version is : %d",
+                  "_mctp_channel_init: Negotiated version is : %d",
                   iv_mctpVersion);
     }
+
+    //else if none of the conditions above are met, the DUMMY_COMMAND is a no op
 
 }while(0);
 

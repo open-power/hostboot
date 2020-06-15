@@ -32,7 +32,7 @@ namespace MCTP
     enum MCTPModuleId
     {
         MOD_MCTP_INVALID      = 0x00, // Zero is an invalid module id
-        MOD_MCTP_PROCESS_VER  = 0x01, // _mctp_process_version
+        MOD_MCTP_CHANNEL_INIT = 0x01, // _mctp_channel_init
         MOD_HANDLE_OUTBOUND   = 0x02, // handle_outbound_messages
         MOD_RX_CALLBACK       = 0x03, // rx_message
     };
