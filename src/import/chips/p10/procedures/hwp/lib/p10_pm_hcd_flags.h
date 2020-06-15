@@ -135,8 +135,8 @@ enum PM_QME_FLAG_DEFS
     QME_FLAGS_STOP11_ENTRY_REQUESTED        = 2,
     QME_FLAGS_DEBUG_TRAP_ENABLE             = 4,
     QME_FLAGS_DEBUG_HALT_ENABLE             = 5,
-    QME_FLAGS_HCODE_ERROR_INJECT            = 6,
-    QME_FLAGS_HCODE_FIT_ERROR_INJECT        = 7,
+    QME_FLAGS_STOP_ENTRY_INJECT             = 6,
+    QME_FLAGS_STOP_EXIT_INJECT              = 7,
     QME_FLAGS_TOD_SETUP_COMPLETE            = 8,
     QME_FLAGS_SMF_DISABLE_MODE              = 9,
     QME_FLAGS_RUNTIME_WAKEUP_MODE           = 10,
@@ -148,6 +148,8 @@ enum PM_QME_FLAG_DEFS
     QME_FLAGS_PGPE_HB_LOSS_SAFE_MODE        = 18,
     QME_FLAGS_RCLK_OPERABLE                 = 19,
     QME_FLAGS_DDS_OPERABLE                  = 20,
+    QME_FLAGS_SRAM_SBE_MODE                 = 21,
+    QME_FLAGS_SRAM_GPE_MODE                 = 22,
     QME_FLAGS_RUNNING_EPM                   = 62,
     QME_FLAGS_RUNNING_SIMICS                = 63
 };

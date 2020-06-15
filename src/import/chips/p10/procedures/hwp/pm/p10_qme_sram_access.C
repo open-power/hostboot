@@ -42,6 +42,11 @@
 #include "p10_scom_eq.H"
 
 using namespace scomt::eq;
+enum DELAY_VALUE
+{
+    NS_DELAY = 1000000,// 1,000,000 ns = 1ms
+    SIM_CYCLE_DELAY = 1000
+};
 
 // ----------------------------------------------------------------------
 // Constants
@@ -107,7 +112,9 @@ fapi2::ReturnCode p10_qme_sram_access_internal(
 
     fapi2::buffer<uint64_t> l_data64;
     fapi2::buffer<uint64_t> l_qsar;
+    fapi2::buffer<uint64_t> l_qscr;
     qmesram::Op     l_op;
+    uint32_t l_timeout = 0;
 
     // These are initialized before being used.
     // Not doing an initial assignment to 0 to save space on the SBE.
@@ -138,6 +145,41 @@ fapi2::ReturnCode p10_qme_sram_access_internal(
                     fapi2::QME_SRAM_ACCESS_ERROR().set_ADDRESS(i_start_address),
                     "Invalid QME Start address alignment");
     }
+
+    //Check the qme sram ownership access
+    FAPI_TRY(fapi2::getScom(i_qme_target, QME_FLAGS_RW, l_data64));
+    FAPI_TRY(fapi2::getScom(i_qme_target, QME_QSCR_RW, l_qscr));
+
+    l_timeout = 100; //wait for 100 ms
+    FAPI_DBG("Waiting for the ownership and access mode to be cleared");
+
+    while (l_data64.getBit(22) || l_qscr.getBit(QME_QSCR_SRAM_ACCESS_MODE))
+    {
+        FAPI_TRY(fapi2::delay(NS_DELAY, SIM_CYCLE_DELAY));
+
+        if (!l_timeout)
+        {
+            break;
+        }
+
+        FAPI_TRY(fapi2::getScom(i_qme_target, QME_FLAGS_RW, l_data64));
+        FAPI_TRY(fapi2::getScom(i_qme_target, QME_QSCR_RW, l_qscr));
+        l_timeout--;
+    }
+
+    if (!l_timeout)
+    {
+        FAPI_ERR("QME SRAM is not accessible , need to be retried");
+        FAPI_ASSERT(false,
+                    fapi2::QME_SRAM_ACCESS_DENIED().
+                    set_EQ_TARGET(i_qme_target).set_QME_FLAG(l_data64).
+                    set_QSCR(l_qscr),
+                    "Invalid QME access denied");
+    }
+
+    //Set the SBE ownership bit
+    l_data64.flush<0>().setBit(21);
+    FAPI_TRY(fapi2::putScom(i_qme_target, QME_FLAGS_WO_OR, l_data64));
 
     // Set the QME SRAM address as defined by 16:28 (64k)
     l_norm_address = i_start_address & 0x0000FFF8;
@@ -255,6 +297,13 @@ fapi2::ReturnCode p10_qme_sram_access_internal(
 
             break;
     }
+
+    //Clear the SBE ownership bit
+    l_data64.flush<0>().setBit(21);
+    FAPI_TRY(fapi2::putScom(i_qme_target, QME_FLAGS_WO_CLEAR, l_data64));
+
+    l_data64.flush<0>().setBit<QME_QSCR_SRAM_ACCESS_MODE>();
+    FAPI_TRY(fapi2::putScom(i_qme_target, QME_QSCR_WO_CLEAR, l_data64));  // clear autoincrement
 
     // Number of bytes accessed
     if (i_useByteBuf)

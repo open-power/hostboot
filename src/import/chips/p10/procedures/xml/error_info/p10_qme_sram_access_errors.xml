@@ -6,6 +6,7 @@
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
 <!-- Contributors Listed Below - COPYRIGHT 2015,2020                        -->
+<!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
 <!-- Licensed under the Apache License, Version 2.0 (the "License");        -->
@@ -34,4 +35,18 @@
       <priority>HIGH</priority>
     </callout>
   </hwpError>
+  <!-- *********************************************************************-->
+  <hwpError>
+    <rc>RC_QME_SRAM_ACCESS_DENIED</rc>
+    <description>Qme sram access denied because ownership is not yet released
+    </description>
+    <ffdc>EQ_TARGET</ffdc>
+    <ffdc>QME_FLAG</ffdc>
+    <ffdc>QSCR</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
 </hwpErrors>
