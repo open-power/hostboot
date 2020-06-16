@@ -1210,11 +1210,11 @@ namespace SBE
                                  l_ringSectionBufSize,
                                  SYSPHASE_HB_SBE,
                                  (void*)RING_BUF1_VADDR,
-                                 (uint32_t)MAX_RING_BUF_SIZE,
+                                 (uint32_t)XIPC_RING_BUF1_SIZE,
                                  (void*)RING_BUF2_VADDR,
-                                 (uint32_t)MAX_RING_BUF_SIZE,
+                                 (uint32_t)XIPC_RING_BUF2_SIZE,
                                  (void*)RING_BUF3_VADDR,
-                                 (uint32_t)MAX_RING_BUF_SIZE,
+                                 (uint32_t)XIPC_RING_BUF3_SIZE,
                                  procIOMask ); // Bits(0:31) = EC00:EC31
 
                 // Check for no error and use of input cores

@@ -249,9 +249,9 @@ namespace HBPM
             l_fapiTarg(i_target);
 
         void *l_buffer1 = (void*)malloc(HW_IMG_RING_SIZE);
-        void *l_buffer2 = (void*)malloc(WORK_BUF_SIZE);
-        void *l_buffer3 = (void*)malloc(WORK_BUF_SIZE);
-        void *l_buffer4 = (void*)malloc(WORK_BUF_SIZE);
+        void *l_buffer2 = (void*)malloc(XIPC_RING_BUF1_SIZE);
+        void *l_buffer3 = (void*)malloc(XIPC_RING_BUF2_SIZE);
+        void *l_buffer4 = (void*)malloc(XIPC_RING_BUF3_SIZE);
 
         do
         {
@@ -340,11 +340,11 @@ namespace HBPM
                              l_buffer1,
                              HW_IMG_RING_SIZE,
                              l_buffer2,
-                             WORK_BUF_SIZE,
+                             XIPC_RING_BUF1_SIZE,
                              l_buffer3,
-                             WORK_BUF_SIZE,
+                             XIPC_RING_BUF2_SIZE,
                              l_buffer4,
-                             WORK_BUF_SIZE);
+                             XIPC_RING_BUF3_SIZE);
 
             if (l_errl)
             {

@@ -42,7 +42,7 @@
 #include <pnor/ecc.H>                 // PNOR::ECC::eccStatus
 #include <util/utilxipimage.H>        // Util::imageBuild_t
 #include <vector>
-#include <p10_infrastruct_help.H>     // MAX_RING_BUF_SIZE
+#include <p10_infrastruct_help.H>     // XIPC_RING_BUF{1,2,3}_SIZE
 
 namespace SBE
 {
@@ -101,9 +101,9 @@ namespace SBE
         FIXED_SEEPROM_WORK_SPACE = 512 * 1024,
         SBE_IMG_VADDR = VMM_VADDR_SBE_UPDATE, // 3G address
         RING_BUF1_VADDR = FIXED_SEEPROM_WORK_SPACE + SBE_IMG_VADDR,
-        RING_BUF2_VADDR = RING_BUF1_VADDR + MAX_RING_BUF_SIZE,
-        RING_BUF3_VADDR = RING_BUF2_VADDR + MAX_RING_BUF_SIZE,
-        RING_SEC_VADDR  = RING_BUF3_VADDR + MAX_RING_BUF_SIZE,
+        RING_BUF2_VADDR = RING_BUF1_VADDR + XIPC_RING_BUF1_SIZE,
+        RING_BUF3_VADDR = RING_BUF2_VADDR + XIPC_RING_BUF2_SIZE,
+        RING_SEC_VADDR  = RING_BUF3_VADDR + XIPC_RING_BUF3_SIZE,
         //NOTE: recycling the same memory space for different
         //steps in the process.
         SBE_ECC_IMG_VADDR = RING_BUF1_VADDR,

@@ -347,9 +347,9 @@ void* host_build_stop_image (void *io_pArgs)
 
     // allocate four temporary work buffers
     void* l_temp_buffer1 = malloc(HW_IMG_RING_SIZE);
-    void* l_temp_buffer2 = malloc(MAX_RING_BUF_SIZE);
-    void* l_temp_buffer3 = malloc(MAX_RING_BUF_SIZE);
-    void* l_temp_buffer4 = malloc(MAX_RING_BUF_SIZE);
+    void* l_temp_buffer2 = malloc(XIPC_RING_BUF1_SIZE);
+    void* l_temp_buffer3 = malloc(XIPC_RING_BUF2_SIZE);
+    void* l_temp_buffer4 = malloc(XIPC_RING_BUF3_SIZE);
     do  {
         //Determine top-level system target
         TARGETING::Target* l_sys = nullptr;
@@ -523,11 +523,11 @@ void* host_build_stop_image (void *io_pArgs)
                                  l_temp_buffer1,
                                  HW_IMG_RING_SIZE,
                                  l_temp_buffer2,
-                                 MAX_RING_BUF_SIZE,
+                                 XIPC_RING_BUF1_SIZE,
                                  l_temp_buffer3,
-                                 MAX_RING_BUF_SIZE,
+                                 XIPC_RING_BUF2_SIZE,
                                  l_temp_buffer4,
-                                 MAX_RING_BUF_SIZE);
+                                 XIPC_RING_BUF3_SIZE);
 
                 if ( l_errl )
                 {
