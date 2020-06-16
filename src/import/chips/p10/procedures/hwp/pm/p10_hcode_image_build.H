@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -71,7 +71,7 @@ extern "C"
     enum
     {
         HW_IMG_RING_SIZE    =  MAX_SEEPROM_IMAGE_SIZE,
-        WORK_BUF_SIZE       =  MAX_RING_BUF_SIZE,
+        WORK_BUF_SIZE       =  MAX_RING_BUF_SIZE
     };
 
     /**

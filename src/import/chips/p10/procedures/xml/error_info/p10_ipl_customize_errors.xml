@@ -123,20 +123,6 @@
   </hwpError>
   <!-- ********************************************************************* -->
   <hwpError>
-    <rc>RC_XIPC_MVPD_RING_SIZE_MESS</rc>
-    <description>VPD ring's size exceeds max ring buffer size</description>
-    <ffdc>CHIP_TARGET</ffdc>
-    <ffdc>RING_ID</ffdc>
-    <ffdc>CHIPLET_ID</ffdc>
-    <ffdc>RING_BUFFER_SIZE</ffdc>
-    <ffdc>MVPD_RING_SIZE</ffdc>
-    <callout>
-      <procedure>CODE</procedure>
-      <priority>HIGH</priority>
-    </callout>
-  </hwpError>
-  <!-- ********************************************************************* -->
-  <hwpError>
     <rc>RC_XIPC_MVPD_RING_SIZE_TOO_BIG</rc>
     <description>VPD ring's size exceed allowed ring buffer space</description>
     <ffdc>CHIP_TARGET</ffdc>
@@ -438,6 +424,19 @@
   </hwpError>
   <!-- ********************************************************************* -->
   <hwpError>
+    <rc>RC_XIPC_RS4_OVERLAY_ERROR</rc>
+    <description>rs4_overlay() failed</description>
+    <ffdc>CHIP_TARGET</ffdc>
+    <ffdc>RING_ID</ffdc>
+    <ffdc>LOCAL_RC</ffdc>
+    <ffdc>OCCURRENCE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- ********************************************************************* -->
+  <hwpError>
     <rc>RC_XIPC_RS4_DECOMPRESS_ERROR</rc>
     <description>_rs4_decompress() failed</description>
     <ffdc>CHIP_TARGET</ffdc>
@@ -589,23 +588,6 @@
     <ffdc>FEATURE</ffdc>
     <ffdc>MAX_RING_BUF_SIZE</ffdc>
     <ffdc>LOCAL_RC</ffdc>
-    <callout>
-      <procedure>CODE</procedure>
-      <priority>HIGH</priority>
-    </callout>
-  </hwpError>
-  <!-- ********************************************************************* -->
-  <hwpError>
-    <rc>RC_XIPC_DYNAMIC_BITS_CONFLICT</rc>
-    <description>Bit conflict found while processing dynamic rings</description>
-    <ffdc>CHIP_TARGET</ffdc>
-    <ffdc>RING_ID</ffdc>
-    <ffdc>DYNBIT</ffdc>
-    <ffdc>FEATURE_VEC_ACC</ffdc>
-    <ffdc>FEATURE</ffdc>
-    <ffdc>DATA_DYNACC</ffdc>
-    <ffdc>DATA_DYN</ffdc>
-    <ffdc>OCCURRENCE</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>

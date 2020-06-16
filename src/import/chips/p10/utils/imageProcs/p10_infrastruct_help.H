@@ -51,6 +51,17 @@ const uint32_t  MAX_RT_IMAGE_SIZE           = 1024 * 1024;   // Max Runtime size
 const uint32_t  MAX_RING_BUF_SIZE       = 650000;        // Max ring buffer size (for two rings)
 const uint32_t  MAX_RING_BUF_SIZE_TOOL  = 450000;        // Max ring buf size for tools.
 
+const uint32_t  RS4_RING_BUF_SIZE   = 64 * 1024;         // Max RS4 size set to max size of ring section.
+const uint32_t  OVLY_WORK_BUF_SIZE  = 4 * RS4_RING_BUF_SIZE; // Used for Raw4 overlays op
+
+// Buffer sizes to be passed to ipl_customize directly from platform or via hcode_image_build
+enum XIP_CUSTOMIZE_BUFFER_SIZES
+{
+    XIPC_RING_BUF1_SIZE =  RS4_RING_BUF_SIZE,
+    XIPC_RING_BUF2_SIZE =  RS4_RING_BUF_SIZE,
+    XIPC_RING_BUF3_SIZE =  OVLY_WORK_BUF_SIZE,
+};
+
 const uint32_t  MAX_OVERRIDES_SIZE      = 2 * 1024;      // Max overrides ring section size.
 
 // @HBBL_SIZE_SYNC@

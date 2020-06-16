@@ -272,6 +272,21 @@ rs4_decompress( uint8_t** o_data_str,
                 const CompressedScanData* i_rs4 );
 
 
+
+/// Get the raw bit length of an RS4 string by decompressing the string and
+/// counting the bits along the way but ** without ** saving the raw
+/// decompressed bit stream (ie, zero buffer space required).
+///
+/// \param[out] o_length  The length of the [raw] decompressed bit string
+///
+/// \param[in] i_rs4  A pointer to the RS4 ring to be decompressed
+///
+/// \returns See \ref scan_compression_codes
+int
+rs4_get_raw_bit_length( uint32_t& o_length,
+                        const CompressedScanData* i_rs4 );
+
+
 /// Determine if an RS4 compressed scan string is all 0
 ///
 /// \param[in] i_data A pointer to the CompressedScanData header + data to be
@@ -293,54 +308,33 @@ MyBool_t
 rs4_is_ovrd(const CompressedScanData* i_rs4);
 
 
-/// Embed CMSK ring into an RS4 ring
-///
-/// \param[inout] io_rs4 A pointer to the CompressedScanData [header + data]
-///
-/// \param[in] i_rs4_cmsk A pointer to the cmsk CompressedScanData header + data to be embedded
-///
-/// \param[in] i_bOverride A flag specifying: true: override, false: flush, 0xff: context
-///
-/// \returns See \ref scan_compression_codes
-int rs4_embed_cmsk( CompressedScanData** io_rs4,
-                    CompressedScanData* i_rs4_cmsk );
+// API for overlaying one RS4 ring onto another RS4 ring (without decompression)
+//
+// API arguments:
+// o_rs4Final : The final overlaid output RS4 ring plus three raw4 rings
+// i_workBufSize:  Size of buffer to hold final overlaid RS4 ring plus three raw4 rings
+// i_rs4Tgt :   The ring to be overlaid. Note that buffer can be shared with rs4Final.
+// i_rs4Ovly :  The overlay ring. Note that buffer can be shared with rs4Final.
+// i_type :     The iv_type to program into final RS4 header
+// i_selector : The iv_selector to program into final RS4 header
+// i_ovlyMode : 0:Ovly is boss, 1:No bit conflicts (dynamic accummulation)
+// i_dbgl :     0:No add'l debug output,  1:Add'l debug trace outputs
+//
+// Assumptions:
+// - The two input rings must match wrt flush type, ringId, scanAddr, selector.
+// - All buffers are caller managed.
+// - If either of the input RS4 rings are empty, or do not contain a valid RS4
+//   ring, this is an error.
+int
+rs4_overlay( CompressedScanData* o_rs4Final,
+             const uint32_t i_workBufSize,
+             const CompressedScanData* i_rs4Tgt,
+             const CompressedScanData* i_rs4Ovly,
+             const uint8_t i_ivType,
+             const Rs4Selector_t i_selector,
+             const uint8_t i_ovlyMode,
+             const uint8_t i_dbgl = 0 );
 
-
-/// Extract Stump & CMSK rings from an RS4 ring (assumes pre-allocated ring buffers)
-///
-/// \param[in] i_rs4  A pointer to the input hybrid CMSK RS4 ring and which must contain
-/// boto CompressedScanData header + RS4 encoded data string.
-///
-/// \param[in] i_size  Size of buffers to hold the output Stump and CMSK RS4 rings.
-///
-/// \param[out] o_rs4_stump  A pointer to a pre-allocated buffer that must be big
-/// enough to hold the Stump CompressedScanData [header + data].
-///
-/// \param[out] o_rs4_cmsk  A pointer to a pre-allocated buffer that must be big
-/// enough to hold the Cmsk CompressedScanData [header + data].
-///
-/// \returns See \ref scan_compression_codes
-int _rs4_extract_cmsk( const CompressedScanData* i_rs4,
-                       size_t                    i_size,
-                       CompressedScanData*       o_rs4_stump,
-                       CompressedScanData*       o_rs4_cmsk );
-
-
-/// Extract Stump & CMSK rings from an RS4 ring (local allocation of ring buffers)
-///
-/// \param[in] i_rs4  A pointer to the input hybrid CMSK RS4 ring and which must contain
-/// boto CompressedScanData header + RS4 encoded data string.
-///
-/// \param[out] o_rs4_stump  A pointer to a locally allocated buffer that holds the
-/// Stump CompressedScanData [header + data].  The calling code must free the buffer.
-///
-/// \param[out] o_rs4_cmsk  A pointer to a locally allocated buffer that holds the
-/// Cmsk CompressedScanData [header + data].  The calling code must free the buffer.
-///
-/// \returns See \ref scan_compression_codes
-int rs4_extract_cmsk( const CompressedScanData* i_rs4,
-                      CompressedScanData**      o_rs4_stump,
-                      CompressedScanData**      o_rs4_cmsk );
 
 #endif  // __ASSEMBLER__
 
@@ -404,6 +398,16 @@ int rs4_extract_cmsk( const CompressedScanData* i_rs4,
 #define UNDEFINED_RS4_SELECTOR (Rs4Selector_t)0xffff
 #define MAX_RS4_SELECTOR       (Rs4Selector_t)0xff // Practical upper limit of 255
 
+
+/// Overlay modes
+///
+enum OVERLAY_MODE
+{
+    OVLY_MODE_RAW4TEST = (uint8_t)0, //Do Raw4 (de)Xpress steps only, copy Tgt to Final buf
+    OVLY_MODE_BOSS     = (uint8_t)1, //rs4Ovly encodings overrule rs4Target
+    OVLY_MODE_ACC      = (uint8_t)2, //rs4Ovly and rs4Target must agree (dynamic acc mode)
+};
+
 /// \defgroup scan_compression_codes Scan Compression Return Codes
 ///
 /// @{
@@ -416,30 +420,16 @@ int rs4_extract_cmsk( const CompressedScanData* i_rs4,
 #define SCAN_COMPRESSION_NO_MEMORY (uint8_t)1
 
 /// Magic number mismatch on scan decompression
-#define SCAN_DECOMPRESSION_MAGIC_ERROR (uint8_t)2
+#define SCAN_COMPRESSION_MAGIC_ERROR (uint8_t)2
 
-/// Decompression size error
-///
-/// Decompression produced a string of a size different than indicated in the
-/// header, indicating either a bug or data corruption.  Note that the entire
-/// application should be considered corrupted if this error occurs since it
-/// may not be discovered until after the decompression buffer is
-/// overrun. This error may also be returned by rs4_redundant() in the event
-/// of inconsistencies in the compressed string.
-#define SCAN_DECOMPRESSION_SIZE_ERROR (uint8_t)3
+/// RS4 size error
+#define SCAN_COMPRESSION_RS4_SIZE_ERROR (uint8_t)3
 
 /// A buffer would overflow
-///
-/// Either the caller-supplied memory buffer to _rs4_decompress() was too
-/// small to contain the decompressed string, or a caller-supplied buffer to
-/// _rs4_compress() was not large enough to hold the worst-case compressed
-/// string.
 #define SCAN_COMPRESSION_BUFFER_OVERFLOW (uint8_t)4
 
-/// Inconsistent input data
-///
-/// 1 in data is masked by 0 in care mask
-#define SCAN_COMPRESSION_INPUT_ERROR (uint8_t)5
+/// Bad input data - data=1 is masked by care=0
+#define SCAN_COMPRESSION_CAREDATA_CONFLICT (uint8_t)5
 
 /// Invalid transition in state machine
 #define SCAN_COMPRESSION_STATE_ERROR (uint8_t)6
@@ -450,6 +440,17 @@ int rs4_extract_cmsk( const CompressedScanData* i_rs4,
 /// Invalid iv_type value
 #define SCAN_COMPRESSION_IV_TYPE_ERROR (uint8_t)8
 
+/// Generic Raw4 compression error
+#define SCAN_COMPRESSION_RAW4_ERROR (uint8_t)9
+
+/// Header mismatch between two RS4 rings
+#define SCAN_COMPRESSION_HEADERS_DONT_MATCH (uint8_t)10
+
+/// Invalid Overlay mode
+#define SCAN_COMPRESSION_INVALID_OVERLAY_MODE (uint8_t)11
+
+/// Overlay bit conflict
+#define SCAN_COMPRESSION_OVERLAY_BIT_CONFLICT (uint8_t)12
 /// @}
 
 #endif  //  __P10_SCAN_COMPRESSION_H__

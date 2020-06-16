@@ -166,16 +166,16 @@ extern "C"
 ///                                         RT_QME:
 ///                                             In:  >=MAX_SBE_SEEPROM_SIZE
 ///                                             Out: Final size of QME .rings section
-/// @param[in] i_sysPhase                => ={HB_SBE, RT_QME}
+/// @param[in] i_sysPhase                => ={HB_SBE, RT_QME, HB_MEAS}
 /// @param[in] i_ringBuf1                => Caller supplied ring work buffer 1
 /// @param[in] i_ringBufSize1            => Max size of buffer 1
-///                                         (Should equal MAX_RING_BUF_SIZE)
+///                                         (Should equal RS4_RING_BUF_SIZE)
 /// @param[in] i_ringBuf2                => Caller supplied ring work buffer 2
 /// @param[in] i_ringBufSize2            => Max size of buffer 2
-///                                         (Should equal MAX_RING_BUF_SIZE)
+///                                         (Should equal RS4_RING_BUF_SIZE)
 /// @param[in] i_ringBuf3                => Caller supplied ring work buffer 3
 /// @param[in] i_ringBufSize3            => Max size of buffer 3
-///                                         (Should equal MAX_RING_BUF_SIZE)
+///                                         (Should equal OVLY_WORK_BUF_SIZE)
 /// @param[in/out] io_bootCoreMask       => In: Mask of the desired boot cores
 ///                                         Out: Actual boot cores filled
 ///                                         (Only used in HB_SBE sysPhase)
