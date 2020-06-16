@@ -340,7 +340,7 @@ errlHndl_t  xScomDoOp(DeviceFW::OperationType i_opType,
 {
 
     // Build the XSCom address (relative to group 0, chip 0)
-    XSComP9Address l_mmioAddr(i_xscomAddr);
+    XSComP10Address l_mmioAddr(i_xscomAddr);
 
     // Get the offset
     uint64_t l_offset = l_mmioAddr.offset();
@@ -471,11 +471,14 @@ uint64_t* getCpuIdVirtualAddress( XSComBase_t& o_mmioAddr )
  * @param[in]  i_target        Target of the CPU that the xscom is for
  * @param[in]  i_virtAddr      virtual address of the CPU that the xscom is
  *                             targeted for
+ * @param[in]  i_mXSComStatus  The XSCOM error, from a previous XSCOM call,
+ *                             that caused this method to be called.
  *
  * @return none
  */
 void resetScomEngine(TARGETING::Target* i_target,
-                           uint64_t* i_virtAddr)
+                              uint64_t* i_virtAddr,
+                        const uint64_t  i_mXSComStatus)
 {
     errlHndl_t l_err = NULL;
     HMER l_hmer;
@@ -488,9 +491,10 @@ void resetScomEngine(TARGETING::Target* i_target,
         {0x00090018, CurThreadCpu}, //XSCOM_RCVED_STAT_REG
         {0x00090012, TargetCpu}, //XSCOM_LOG_REG
         {0x00090013, TargetCpu}, //XSCOM_ERR_REG
+        {0x000A0009, TargetCpu}, //Flush stale state out of the ADU
     };
 
-    TRACFCOMP(g_trac_xscom,"resetScomEngine: XSCOM RESET INTIATED");
+    TRACFCOMP(g_trac_xscom, ENTER_MRK"resetScomEngine");
 
     // Loop through the registers you want to write to 0
     for (size_t i = 0; i<(sizeof(XscomAddr)/sizeof(XscomAddr[0])); i++)
@@ -506,6 +510,22 @@ void resetScomEngine(TARGETING::Target* i_target,
         else
         {
             l_virtAddr = i_virtAddr;
+        }
+
+        if ((0x000A0009 == XscomAddr[i].addr) && (i_mXSComStatus != PIB::PIB_TIMEOUT))
+        {
+            // Cause of the previous error was *NOT* an HMER timeout, no need to
+            // flush stale state out of the ADU.
+            // Continue to next XSCOM address ...
+            continue;
+        }
+        else
+        {
+            // If the XSCOM register is 0x000A0009 and the cause of error is a
+            // PIB::PIB_TIMEOUT, then need to flush stale state out of the ADU.
+            // This resolves issue associated with CQ:HW530410.
+            TRACFCOMP(g_trac_xscom, INFO_MRK "resetScomEngine: Previous XSCOM caused a time out error, "
+                                             "flushing the stale state out of the ADU." );
         }
 
         //*********************************************************
@@ -526,7 +546,13 @@ void resetScomEngine(TARGETING::Target* i_target,
             delete l_err;
             l_err = nullptr;
 
-            TRACFCOMP(g_trac_xscom,ERR_MRK "XSCOM RESET FAILED: XscomAddr = %.16llx, VAddr=%llx",XscomAddr[i], l_virtAddr );
+            TRACFCOMP(g_trac_xscom, ERR_MRK "resetScomEngine: RESET FAILED: XscomAddr = %.16llx, VAddr=%llx",
+                                             XscomAddr[i], l_virtAddr );
+        }
+        else
+        {
+            TRACFCOMP(g_trac_xscom, INFO_MRK "resetScomEngine: RESET SUCCEEDED: XscomAddr = %.16llx, VAddr=%llx",
+                                              XscomAddr[i], l_virtAddr );
         }
 
         // unmap the device now that we are done with the scom to that area.
@@ -534,9 +560,9 @@ void resetScomEngine(TARGETING::Target* i_target,
         {
             mmio_dev_unmap(reinterpret_cast<void*>(l_virtAddr));
         }
-    }
+    } // for (size_t i = 0; i<(sizeof(XscomAddr)/sizeof(XscomAddr[0])); i++)
 
-    return;
+    TRACFCOMP(g_trac_xscom, EXIT_MRK"resetScomEngine");
 }
 
 /**
@@ -694,7 +720,8 @@ errlHndl_t xscomPerformOp(DeviceFW::OperationType i_opType,
 
             // still need to reset the scomEngine.
             resetScomEngine(i_target,
-                            l_virtAddr);
+                            l_virtAddr,
+                            l_hmer.mXSComStatus);
         }
         else if (l_err)
         {
@@ -705,7 +732,8 @@ errlHndl_t xscomPerformOp(DeviceFW::OperationType i_opType,
 
             // reset the scomEngine.
             resetScomEngine(i_target,
-                            l_virtAddr);
+                            l_virtAddr,
+                            l_hmer.mXSComStatus);
 
             // Add traces to errorlog..
             l_err->collectTrace("XSCOM",1024);
@@ -762,7 +790,7 @@ uint64_t generate_mmio_addr( TARGETING::Target* i_proc,
       i_proc->getAttr<TARGETING::ATTR_XSCOM_BASE_ADDRESS>();
 
     // Build the XSCom address (relative to group 0, chip 0)
-    XSComP9Address l_mmioAddr(i_scomAddr);
+    XSComP10Address l_mmioAddr(i_scomAddr);
 
     // Compute value relative to target chip
     l_returnAddr = l_XSComBaseAddr + l_mmioAddr;

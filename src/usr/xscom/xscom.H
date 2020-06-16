@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -87,7 +87,7 @@ errlHndl_t xscomPerformOp(DeviceFW::OperationType i_opType,
                           va_list i_args);
 
 /**
- *  @brief  Abstracts HMER register of a POWER9 chip
+ *  @brief  Abstracts HMER register of a POWER10 chip
  */
 class HMER
 {
@@ -145,19 +145,19 @@ public:
 
 /**
  *  @brief  This class contains necessary information to build an XSCOM
- *  address for a POWER9 chip.
+ *  address for a POWER10 chip.
  */
-class XSComP9Address
+class XSComP10Address
 {
   public:
     /**
-     * @brief Constructor of XSComP9Address class
+     * @brief Constructor of XSComP10Address class
      *
      * @param[in]   i_addr          PCB address of the register being accessed
      *
      * @return  None
      */
-    ALWAYS_INLINE inline XSComP9Address(const XSComAddress_t i_addr);
+    ALWAYS_INLINE inline XSComP10Address(const XSComAddress_t i_addr);
 
     /**
      * @brief Conversion operator
@@ -175,8 +175,8 @@ class XSComP9Address
     /**
       * @brief   Disabled copy constructor and assignment operator
       */
-    XSComP9Address(const XSComP9Address& i_right);
-    XSComP9Address& operator=(const XSComP9Address& right);
+    XSComP10Address(const XSComP10Address& i_right);
+    XSComP10Address& operator=(const XSComP10Address& right);
 
     // Layout of XSCOM address parts
     union
@@ -194,7 +194,7 @@ class XSComP9Address
         } mAddressParts;
     };
 
-}; // End XSComP9Address class
+}; // End XSComP10Address class
 
 //-----------------------------------------------------------------------
 // In-line functions
@@ -202,7 +202,7 @@ class XSComP9Address
 
 ////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////
-XSComP9Address::XSComP9Address(const XSComAddress_t i_addr)
+XSComP10Address::XSComP10Address(const XSComAddress_t i_addr)
 :mMmioAddress(0)
 {
     // Relative address of Group 0, chip 0
@@ -213,14 +213,14 @@ XSComP9Address::XSComP9Address(const XSComAddress_t i_addr)
 
 ////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////
-XSComP9Address::operator uint64_t() const
+XSComP10Address::operator uint64_t() const
 {
     return mMmioAddress;
 }
 
 ////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////
-uint64_t XSComP9Address::offset(void) const
+uint64_t XSComP10Address::offset(void) const
 {
     return (mMmioAddress / sizeof(uint64_t));
 }
