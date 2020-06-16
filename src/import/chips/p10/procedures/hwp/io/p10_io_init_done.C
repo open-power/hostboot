@@ -71,6 +71,42 @@ fapi2::ReturnCode p10_io_init_done_check_thread_done(
         o_done = false;
     }
 
+    FAPI_TRY(p10_io_ppe_ext_cmd_done_tx_zcal_pl[i_thread].getData(i_pauc_target, l_data, true));
+
+    FAPI_DBG("Thread: %d, ext_cmd_done_tx_zcal_pl: 0x%llx", i_thread, l_data);
+
+    if (l_data == 0)
+    {
+        o_done = false;
+    }
+
+    FAPI_TRY(p10_io_ppe_ext_cmd_done_tx_ffe_pl[i_thread].getData(i_pauc_target, l_data, true));
+
+    FAPI_DBG("Thread: %d, ext_cmd_done_tx_ffe_pl: 0x%llx", i_thread, l_data);
+
+    if (l_data == 0)
+    {
+        o_done = false;
+    }
+
+    FAPI_TRY(p10_io_ppe_ext_cmd_done_power_on_pl[i_thread].getData(i_pauc_target, l_data, true));
+
+    FAPI_DBG("Thread: %d, ext_cmd_done_power_on_pl: 0x%llx", i_thread, l_data);
+
+    if (l_data == 0)
+    {
+        o_done = false;
+    }
+
+    FAPI_TRY(p10_io_ppe_ext_cmd_done_tx_fifo_init_pl[i_thread].getData(i_pauc_target, l_data, true));
+
+    FAPI_DBG("Thread: %d, ext_cmd_done_tx_fifo_init_pl: 0x%llx", i_thread, l_data);
+
+    if (l_data == 0)
+    {
+        o_done = false;
+    }
+
 fapi_try_exit:
     return fapi2::current_err;
 }
@@ -87,7 +123,7 @@ fapi2::ReturnCode p10_io_init_done(const fapi2::Target<fapi2::TARGET_TYPE_PROC_C
     auto l_pauc_targets = i_target.getChildren<fapi2::TARGET_TYPE_PAUC>();
 
     //Poll for done
-    const int POLLING_LOOPS = 100;
+    const int POLLING_LOOPS = 200;
 
     for (int l_try = 0; l_try < POLLING_LOOPS && !l_done; l_try++)
     {

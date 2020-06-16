@@ -275,8 +275,11 @@ fapi2::ReturnCode p10_io_ext_req_all(const fapi2::Target<fapi2::TARGET_TYPE_PROC
         for (auto i = 0; i < P10_IO_LIB_NUMBER_OF_THREADS; i++)
         {
             FAPI_TRY(p10_io_ppe_ext_cmd_req_hw_reg_init_pg[i].putData(l_pauc_target, 1));
-            //TODO: Add zcal once implemented/documented
             FAPI_TRY(p10_io_ppe_ext_cmd_req_dccal_pl[i].putData(l_pauc_target, 1));
+            FAPI_TRY(p10_io_ppe_ext_cmd_req_tx_zcal_pl[i].putData(l_pauc_target, 1));
+            FAPI_TRY(p10_io_ppe_ext_cmd_req_tx_ffe_pl[i].putData(l_pauc_target, 1));
+            FAPI_TRY(p10_io_ppe_ext_cmd_req_power_on_pl[i].putData(l_pauc_target, 1));    //TODO: Not as documented
+            FAPI_TRY(p10_io_ppe_ext_cmd_req_tx_fifo_init_pl[i].putData(l_pauc_target, 1));//TODO: Not as documented
         }
     }
 
