@@ -309,16 +309,6 @@ hb_workon()
 
 hb_prime()
 {
-
-    RED_HAT_DIST=`sed "s/^.*release \([0-9]*\)\..*$/rh\1/" /etc/redhat-release`
-    if [[ $RED_HAT_DIST == "rh7" ]]; then
-        echo "Error. You're currently working on a RHEL 7 machine and HB"
-        echo "development environment can't yet run \"hb prime\" on it."
-        echo "Please try again on a RHEL 6 machine."
-        echo "RED_HAT_DIST: $RED_HAT_DIST"
-        exit 1
-    fi
-
     export_key_variables
 
     # Priming for P10 Standalone without ODE SB
