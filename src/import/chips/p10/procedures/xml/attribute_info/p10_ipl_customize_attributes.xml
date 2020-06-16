@@ -97,7 +97,8 @@
       RUNN_USE_QME_TB_SRC           = 0x0000010000000000,
       HV_INITS                      = 0x0000008000000000,
       MMA_STATIC_POWEROFF           = 0x0000004000000000,
-      RUNN_CONTAINED_DUMP           = 0x0000002000000000
+      RUNN_CONTAINED_DUMP           = 0x0000002000000000,
+      UV_INITS                      = 0x0000001000000000
     </enum>
   </attribute>
   <!-- ********************************************************************** -->

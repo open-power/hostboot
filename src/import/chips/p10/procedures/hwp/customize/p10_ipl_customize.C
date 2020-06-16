@@ -3527,10 +3527,10 @@ ReturnCode p10_ipl_customize (
                      set_OCCURRENCE(8),
                      "Failed to retrieve ATTR_SMF_CONFIG" );
 
-        if(l_attrSmfConfig == fapi2::ENUM_ATTR_SMF_CONFIG_DISABLED)
+        if(l_attrSmfConfig == fapi2::ENUM_ATTR_SMF_CONFIG_ENABLED)
         {
-            FAPI_DBG("Applying Dynamic Init Runtime Feature: HV_INITS");
-            featureVec |= fapi2::ENUM_ATTR_DYNAMIC_INIT_FEATURE_VEC_HV_INITS;
+            FAPI_DBG("Applying Dynamic Init Runtime Feature: UV_INITS");
+            featureVec |= fapi2::ENUM_ATTR_DYNAMIC_INIT_FEATURE_VEC_UV_INITS;
         }
 
         l_fapiRc2 = FAPI_ATTR_GET(fapi2::ATTR_SYSTEM_MMA_POWERON_DISABLE, FAPI_SYSTEM, l_attrSystemMmaPoweronDisable);
