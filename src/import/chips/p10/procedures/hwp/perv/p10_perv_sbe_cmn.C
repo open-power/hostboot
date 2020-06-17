@@ -934,6 +934,9 @@ fapi2::ReturnCode p10_perv_sbe_cmn_setup_putring(
             {
                 if((ring->pg_bit == IGNORE_PG) || (l_data64.getBit(ring->pg_bit)))
                 {
+                    FAPI_DBG("Calling putRing on %s, Chiplet ID: %#010lX",
+                             ringid_get_ring_name(ring->ring_id), l_chipletID);
+
                     if(ring->targ == TARGET_CHIP)
                     {
                         FAPI_TRY(fapi2::putRing(i_target_chip, ring->ring_id),
