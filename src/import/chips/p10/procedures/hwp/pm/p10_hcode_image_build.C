@@ -647,16 +647,31 @@ fapi2::ReturnCode buildXpmrHeader( Homerlayout_t* i_pChipHomer, ImageBuildRecord
 
 /**
  * @brief   populates few fields of XGPE image  header in HOMER.
+ * @param[in]   i_procTgt       fapi2 target for P10 chip
  * @param[in]   i_pChipHomer    models P10's HOMER.
  * @param[in]   i_xpmrBuildRecord     XPMR region image build metadata
  * @return      fapi2 return code.
  */
-fapi2::ReturnCode buildXgpeHeader( Homerlayout_t* i_pChipHomer, ImageBuildRecord & i_xpmrBuildRecord )
+fapi2::ReturnCode buildXgpeHeader( CONST_FAPI2_PROC& i_procTgt,
+                                   Homerlayout_t* i_pChipHomer, 
+                                   ImageBuildRecord & i_xpmrBuildRecord )
 {
     ImgSectnSumm   l_sectn;
+    uint32_t attrVal = 0;
     i_xpmrBuildRecord.getSection( "XGPE Hcode", l_sectn );
     XgpeHeader_t * pXgpeHeader   =
-            ( XgpeHeader_t *) &i_pChipHomer->iv_xpmrRegion.iv_xgpeSramRegion[XGPE_INT_VECTOR_SIZE];
+        ( XgpeHeader_t *) &i_pChipHomer->iv_xpmrRegion.iv_xgpeSramRegion[XGPE_INT_VECTOR_SIZE];
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CORE_THROTTLE_ASSERT_COUNT,
+                i_procTgt,
+                attrVal),
+            "Error from FAPI_ATTR_GET for ATTR_CORE_THROTTLE_ASSERT_COUNT");
+    pXgpeHeader->g_xgpe_coreThrottleAssertCnt =     attrVal;
+
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CORE_THROTTLE_DEASSERT_COUNT,
+                i_procTgt,
+                attrVal),
+            "Error from FAPI_ATTR_GET for ATTR_CORE_THROTTLE_DEASSERT_COUNT");
+    pXgpeHeader->g_xgpe_coreThrottleDeAssertCnt =     attrVal;
 
     pXgpeHeader->g_xgpe_hcodeLength         =   l_sectn.iv_sectnLength;
     pXgpeHeader->g_xgpe_sysResetAddress     =   XGPE_SRAM_BASE_ADDR + PPE_RESET_VECTOR;
@@ -675,6 +690,7 @@ fapi2::ReturnCode buildXgpeHeader( Homerlayout_t* i_pChipHomer, ImageBuildRecord
     FAPI_DBG( "==========================================================" );
 #endif
 
+fapi_try_exit:
     return fapi2::current_err;
 }
 
@@ -793,7 +809,7 @@ fapi2::ReturnCode buildXpmrImage( CONST_FAPI2_PROC& i_procTgt,
         FAPI_TRY( buildXpmrHeader( i_pChipHomer, l_xgpeBuildRecord ),
                   "Failed To Build XPMR Header" );
 
-        FAPI_TRY( buildXgpeHeader( i_pChipHomer, l_xgpeBuildRecord ),
+        FAPI_TRY( buildXgpeHeader(i_procTgt, i_pChipHomer, l_xgpeBuildRecord ),
                   "Failed To Build XGPE Header" );
     }
 

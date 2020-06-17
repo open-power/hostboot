@@ -111,9 +111,11 @@ enum PM_GPE_OCCFLG3_DEFS
     AUX_THREAD_ACTIVE                       = 18,
     XGPE_PM_COMPLEX_SUSPENDED               = 19,
     PM_COMPLEX_SUSPENDED                    = 19,  // Leaving a generic for use in p10_pm_suspend.
+    CORE_THROT_INJECT_RESP                  = 27,
+    CORE_THROT_INJECT_RESP_LEN              = 2,
     CORE_THROT_CONTIN_CHANGE_ENABLE         = 29,
     CORE_THROT_SINGLE_EVENT_INJECT          = 30,
-    CORE_THROT_TYPE_SEL                     = 31,
+    FORCE_LEGACY_THROTTLE                   = 31,
 };
 
 //Enum form of OCC FLAG2.
