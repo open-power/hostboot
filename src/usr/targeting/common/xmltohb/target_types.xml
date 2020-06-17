@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2012,2019                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2012,2020                        -->
 <!-- [+] Google Inc.                                                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
@@ -931,6 +931,9 @@
     <attribute>
     <id>X_EREPAIR_THRESHOLD_FIELD</id>
   </attribute>
+  <attribute>
+    <id>SECURE_VERSION_LOCKIN_POLICY</id>
+  </attribute>
   <attribute><id>O_EREPAIR_THRESHOLD_FIELD</id></attribute>
   <attribute><id>DMI_EREPAIR_THRESHOLD_FIELD</id></attribute>
   <attribute><id>X_EREPAIR_THRESHOLD_MNFG</id></attribute>
@@ -1013,6 +1016,9 @@
   </attribute>
   <attribute>
     <id>HDAT_HBRT_SECTION_SIZE</id>
+  </attribute>
+  <attribute>
+    <id>SECURE_VERSION_SEEPROM</id>
   </attribute>
   <attribute>
     <id>VPD_REC_NUM</id>
