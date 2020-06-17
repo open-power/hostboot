@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2018,2019
+# Contributors Listed Below - COPYRIGHT 2018,2020
 # [+] International Business Machines Corp.
 #
 #
@@ -28,6 +28,36 @@
 ################################################################################
 
 actionclass analyzeENHCAFIR { analyze(gENHCAFIR); };
+
+###############################################################################
+# Special handling for NPU FIR bits (only gard for checkstop errors)
+###############################################################################
+
+actionclass npu_th_1
+{
+    funccall("calloutNpuMed");
+    threshold1;
+};
+
+actionclass npu_th_32perDay
+{
+    funccall("calloutNpuMed");
+    threshold32pday;
+};
+
+actionclass npu_M_level2_L_th_1
+{
+    funccall("calloutNpuMed");
+    callout2ndLvlLow;
+    threshold1;
+};
+
+actionclass npu_M_level2_L_th_32perDay
+{
+    funccall("calloutNpuMed");
+    callout2ndLvlLow;
+    threshold32pday;
+};
 
 ###############################################################################
 # Analyze connected

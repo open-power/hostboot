@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2016,2019
+# Contributors Listed Below - COPYRIGHT 2016,2020
 # [+] International Business Machines Corp.
 #
 #
@@ -6759,42 +6759,42 @@ group gNPU0FIR
     /** NPU0FIR[0]
      *  NTL array CE
      */
-    (rNPU0FIR, bit(0)) ? self_th_32perDay;
+    (rNPU0FIR, bit(0)) ? npu_th_32perDay;
 
     /** NPU0FIR[1]
      *  NTL header array UE
      */
-    (rNPU0FIR, bit(1)) ? self_th_1;
+    (rNPU0FIR, bit(1)) ? npu_th_1;
 
     /** NPU0FIR[2]
      *  NTL Data Array UE
      */
-    (rNPU0FIR, bit(2)) ? self_th_1;
+    (rNPU0FIR, bit(2)) ? npu_th_1;
 
     /** NPU0FIR[3]
      *  NTL NVLInk Control/Header/AE PE
      */
-    (rNPU0FIR, bit(3)) ? self_th_1;
+    (rNPU0FIR, bit(3)) ? npu_th_1;
 
     /** NPU0FIR[4]
      *  NTL NVLink Data Parity error
      */
-    (rNPU0FIR, bit(4)) ? self_th_1;
+    (rNPU0FIR, bit(4)) ? npu_th_1;
 
     /** NPU0FIR[5]
      *  NTL NVLink Malformed Packet
      */
-    (rNPU0FIR, bit(5)) ? self_th_1;
+    (rNPU0FIR, bit(5)) ? npu_th_1;
 
     /** NPU0FIR[6]
      *  NTL NVLink Unsupported Packet
      */
-    (rNPU0FIR, bit(6)) ? self_th_1;
+    (rNPU0FIR, bit(6)) ? npu_th_1;
 
     /** NPU0FIR[7]
      *  NTL NVLink Config errors
      */
-    (rNPU0FIR, bit(7)) ? self_th_1;
+    (rNPU0FIR, bit(7)) ? npu_th_1;
 
     /** NPU0FIR[8]
      *  NTL NVLink CRC errors or LMD=Stomp
@@ -6804,12 +6804,12 @@ group gNPU0FIR
     /** NPU0FIR[9]
      *  NTL PRI errors
      */
-    (rNPU0FIR, bit(9)) ? self_th_1;
+    (rNPU0FIR, bit(9)) ? npu_th_1;
 
     /** NPU0FIR[10]
      *  NTL logic error
      */
-    (rNPU0FIR, bit(10)) ? self_th_1;
+    (rNPU0FIR, bit(10)) ? npu_th_1;
 
     /** NPU0FIR[11]
      *  NTL LMD=Data Posion
@@ -6824,7 +6824,7 @@ group gNPU0FIR
     /** NPU0FIR[13]
      *  CQ CTL/SM ASBE Array single-bit CE
      */
-    (rNPU0FIR, bit(13)) ? self_th_32perDay;
+    (rNPU0FIR, bit(13)) ? npu_th_32perDay;
 
     /** NPU0FIR[14]
      *  CQ CTL/SM PBR PowerBus Recoverable err
@@ -6834,12 +6834,12 @@ group gNPU0FIR
     /** NPU0FIR[15]
      *  CQ CTL/SM REG Register ring error
      */
-    (rNPU0FIR, bit(15)) ? self_th_32perDay;
+    (rNPU0FIR, bit(15)) ? npu_th_32perDay;
 
     /** NPU0FIR[16]
      *  Data UE for MMIO store data
      */
-    (rNPU0FIR, bit(16)) ? self_th_1;
+    (rNPU0FIR, bit(16)) ? npu_th_1;
 
     /** NPU0FIR[17]
      *  spare
@@ -6849,12 +6849,12 @@ group gNPU0FIR
     /** NPU0FIR[18]
      *  CQ CTL/SM NCF NVLink config error
      */
-    (rNPU0FIR, bit(18)) ? self_th_1;
+    (rNPU0FIR, bit(18)) ? npu_th_1;
 
     /** NPU0FIR[19]
      *  CQ CTL/SM NVF NVLink fatal error
      */
-    (rNPU0FIR, bit(19)) ? self_th_1;
+    (rNPU0FIR, bit(19)) ? npu_th_1;
 
     /** NPU0FIR[20]
      *  spare
@@ -6864,32 +6864,33 @@ group gNPU0FIR
     /** NPU0FIR[21]
      *  CQ CTL/SM AUE Array UE
      */
-    (rNPU0FIR, bit(21)) ? self_th_1;
+    (rNPU0FIR, bit(21)) ? npu_th_1;
 
     /** NPU0FIR[22]
      *  CQ CTL/SM PBP PowerBus parity error
      */
-    (rNPU0FIR, bit(22)) ? self_th_1;
+    (rNPU0FIR, bit(22)) ? npu_th_1;
 
     /** NPU0FIR[23]
      *  CQ CTL/SM PBF PowerBus Fatal Error
      */
-    (rNPU0FIR, bit(23)) ? self_M_level2_L_th_1;
+    (rNPU0FIR, bit(23)) ? npu_M_level2_L_th_1;
 
     /** NPU0FIR[24]
      *  PowerBus configuration error
      */
+    # No special handling required because 'self_L' is already NO_GARD.
     (rNPU0FIR, bit(24)) ? level2_M_self_L_th_1;
 
     /** NPU0FIR[25]
      *  CQ CTL/SM FWD Forward-Progress error
      */
-    (rNPU0FIR, bit(25)) ? self_th_1;
+    (rNPU0FIR, bit(25)) ? npu_th_1;
 
     /** NPU0FIR[26]
      *  CQ CTL/SM NLG NPU Logic error
      */
-    (rNPU0FIR, bit(26)) ? self_th_1;
+    (rNPU0FIR, bit(26)) ? npu_th_1;
 
     /** NPU0FIR[27]
      *  CQ CTL/SM  UT=1 to frozen PE error
@@ -6904,37 +6905,37 @@ group gNPU0FIR
     /** NPU0FIR[29]
      *  CQ DAT ECC UE/SUE on data/BE arrays
      */
-    (rNPU0FIR, bit(29)) ? self_th_1;
+    (rNPU0FIR, bit(29)) ? npu_th_1;
 
     /** NPU0FIR[30]
      *  CQ DAT ECC CE on data/BE arrays
      */
-    (rNPU0FIR, bit(30)) ? self_M_level2_L_th_32perDay;
+    (rNPU0FIR, bit(30)) ? npu_M_level2_L_th_32perDay;
 
     /** NPU0FIR[31]
      *  CQ DAT parity error on data/BE latches
      */
-    (rNPU0FIR, bit(31)) ? self_th_1;
+    (rNPU0FIR, bit(31)) ? npu_th_1;
 
     /** NPU0FIR[32]
      *  CQ DAT parity errs on config regs
      */
-    (rNPU0FIR, bit(32)) ? self_th_1;
+    (rNPU0FIR, bit(32)) ? npu_th_1;
 
     /** NPU0FIR[33]
      *  CQ DAT parity errs/PowerBus rtag
      */
-    (rNPU0FIR, bit(33)) ? self_th_1;
+    (rNPU0FIR, bit(33)) ? npu_th_1;
 
     /** NPU0FIR[34]
      *  CQ DAT parity errs nternal state latches
      */
-    (rNPU0FIR, bit(34)) ? self_th_1;
+    (rNPU0FIR, bit(34)) ? npu_th_1;
 
     /** NPU0FIR[35]
      *  CQ DAT logic error
      */
-    (rNPU0FIR, bit(35)) ? self_th_1;
+    (rNPU0FIR, bit(35)) ? npu_th_1;
 
     /** NPU0FIR[36]
      *  Future SUE
@@ -6954,32 +6955,32 @@ group gNPU0FIR
     /** NPU0FIR[40]
      *  XTS internal logic error
      */
-    (rNPU0FIR, bit(40)) ? self_th_1;
+    (rNPU0FIR, bit(40)) ? npu_th_1;
 
     /** NPU0FIR[41]
      *  XTS correctable errs in XTS SRAM
      */
-    (rNPU0FIR, bit(41)) ? self_M_level2_L_th_32perDay;
+    (rNPU0FIR, bit(41)) ? npu_M_level2_L_th_32perDay;
 
     /** NPU0FIR[42]
      *  XTS Ues in XTS internal SRAM
      */
-    (rNPU0FIR, bit(42)) ? self_th_1;
+    (rNPU0FIR, bit(42)) ? npu_th_1;
 
     /** NPU0FIR[43]
      *  XTS CE on incoming stack transactions
      */
-    (rNPU0FIR, bit(43)) ? self_M_level2_L_th_32perDay;
+    (rNPU0FIR, bit(43)) ? npu_M_level2_L_th_32perDay;
 
     /** NPU0FIR[44]
      *  XTS  errs incoming stack transaction
      */
-    (rNPU0FIR, bit(44)) ? self_th_1;
+    (rNPU0FIR, bit(44)) ? npu_th_1;
 
     /** NPU0FIR[45]
      *  XTS errs on incoming PBUS transaction
      */
-    (rNPU0FIR, bit(45)) ? self_th_1;
+    (rNPU0FIR, bit(45)) ? npu_th_1;
 
     /** NPU0FIR[46]
      *  XTS Translate Request Fail
@@ -7034,7 +7035,7 @@ group gNPU1FIR
     /** NPU1FIR[0]
      *  NDL Brick0 stall
      */
-    (rNPU1FIR, bit(0)) ? self_th_1;
+    (rNPU1FIR, bit(0)) ? npu_th_1;
 
     /** NPU1FIR[1]
      *  NDL Brick0 nostall
@@ -7044,7 +7045,7 @@ group gNPU1FIR
     /** NPU1FIR[2]
      *  NDL Brick1 stall
      */
-    (rNPU1FIR, bit(2)) ? self_th_1;
+    (rNPU1FIR, bit(2)) ? npu_th_1;
 
     /** NPU1FIR[3]
      *  NDL Brick1 nostall
@@ -7054,7 +7055,7 @@ group gNPU1FIR
     /** NPU1FIR[4]
      *  NDL Brick2 stall
      */
-    (rNPU1FIR, bit(4)) ? self_th_1;
+    (rNPU1FIR, bit(4)) ? npu_th_1;
 
     /** NPU1FIR[5]
      *  NDL Brick2 nostall
@@ -7064,7 +7065,7 @@ group gNPU1FIR
     /** NPU1FIR[6]
      *  NDL Brick3 stall
      */
-    (rNPU1FIR, bit(6)) ? self_th_1;
+    (rNPU1FIR, bit(6)) ? npu_th_1;
 
     /** NPU1FIR[7]
      *  NDL Brick3 nostall
@@ -7074,7 +7075,7 @@ group gNPU1FIR
     /** NPU1FIR[8]
      *  NDL Brick4 stall
      */
-    (rNPU1FIR, bit(8)) ? self_th_1;
+    (rNPU1FIR, bit(8)) ? npu_th_1;
 
     /** NPU1FIR[9]
      *  NDL Brick4 nostall
@@ -7084,7 +7085,7 @@ group gNPU1FIR
     /** NPU1FIR[10]
      *  NDL Brick5 stall
      */
-    (rNPU1FIR, bit(10)) ? self_th_1;
+    (rNPU1FIR, bit(10)) ? npu_th_1;
 
     /** NPU1FIR[11]
      *  NDL Brick5 nostall
@@ -7094,22 +7095,22 @@ group gNPU1FIR
     /** NPU1FIR[12]
      *  MISC Register ring error (ie noack)
      */
-    (rNPU1FIR, bit(12)) ? self_th_32perDay;
+    (rNPU1FIR, bit(12)) ? npu_th_32perDay;
 
     /** NPU1FIR[13]
      *  MISC Parity error from ibr addr regi
      */
-    (rNPU1FIR, bit(13)) ? self_th_1;
+    (rNPU1FIR, bit(13)) ? npu_th_1;
 
     /** NPU1FIR[14]
      *  MISC Parity error on SCOM D/A addr reg
      */
-    (rNPU1FIR, bit(14)) ? self_th_1;
+    (rNPU1FIR, bit(14)) ? npu_th_1;
 
     /** NPU1FIR[15]
      *  MISC Parity error on MISC Cntrl reg
      */
-    (rNPU1FIR, bit(15)) ? self_th_1;
+    (rNPU1FIR, bit(15)) ? npu_th_1;
 
     /** NPU1FIR[16]
      *  MISC NMMU signaled Local Checkstop
@@ -7134,7 +7135,7 @@ group gNPU1FIR
     /** NPU1FIR[20]
      *  ATS Effective Address hit multiple TCE
      */
-    (rNPU1FIR, bit(20)) ? self_th_1;
+    (rNPU1FIR, bit(20)) ? npu_th_1;
 
     /** NPU1FIR[21]
      *  ATS TCE Page access error
@@ -7144,72 +7145,72 @@ group gNPU1FIR
     /** NPU1FIR[22]
      *  ATS Timeout on TCE tree walk
      */
-    (rNPU1FIR, bit(22)) ? self_th_1;
+    (rNPU1FIR, bit(22)) ? npu_th_1;
 
     /** NPU1FIR[23]
      *  ATS Parity error on TCE cache dir array
      */
-    (rNPU1FIR, bit(23)) ? self_th_32perDay;
+    (rNPU1FIR, bit(23)) ? npu_th_32perDay;
 
     /** NPU1FIR[24]
      *  ATS Parity error on TCE cache data array
      */
-    (rNPU1FIR, bit(24)) ? self_th_32perDay;
+    (rNPU1FIR, bit(24)) ? npu_th_32perDay;
 
     /** NPU1FIR[25]
      *  ATS ECC UE on Effective Address array
      */
-    (rNPU1FIR, bit(25)) ? self_th_1;
+    (rNPU1FIR, bit(25)) ? npu_th_1;
 
     /** NPU1FIR[26]
      *  ATS ECC CE on Effective Address array
      */
-    (rNPU1FIR, bit(26)) ? self_th_32perDay;
+    (rNPU1FIR, bit(26)) ? npu_th_32perDay;
 
     /** NPU1FIR[27]
      *  ATS ECC UE on TDRmem array
      */
-    (rNPU1FIR, bit(27)) ? self_th_1;
+    (rNPU1FIR, bit(27)) ? npu_th_1;
 
     /** NPU1FIR[28]
      *  ATS ECC CE on TDRmem array
      */
-    (rNPU1FIR, bit(28)) ? self_th_1;
+    (rNPU1FIR, bit(28)) ? npu_th_1;
 
     /** NPU1FIR[29]
      *  ATS ECC UE on CQ CTL DMA Read
      */
-    (rNPU1FIR, bit(29)) ? self_th_1;
+    (rNPU1FIR, bit(29)) ? npu_th_1;
 
     /** NPU1FIR[30]
      *  ATS ECC CE on CQ CTL DMA Read
      */
-    (rNPU1FIR, bit(30)) ? self_th_32perDay;
+    (rNPU1FIR, bit(30)) ? npu_th_32perDay;
 
     /** NPU1FIR[31]
      *  ATS Parity error on TVT entry
      */
-    (rNPU1FIR, bit(31)) ? self_th_1;
+    (rNPU1FIR, bit(31)) ? npu_th_1;
 
     /** NPU1FIR[32]
      *  ATS Parity err on IODA Address Reg
      */
-    (rNPU1FIR, bit(32)) ? self_th_1;
+    (rNPU1FIR, bit(32)) ? npu_th_1;
 
     /** NPU1FIR[33]
      *  ATS Parity error on ATS Control Register
      */
-    (rNPU1FIR, bit(33)) ? self_th_1;
+    (rNPU1FIR, bit(33)) ? npu_th_1;
 
     /** NPU1FIR[34]
      *  ATS Parity error on ATS reg
      */
-    (rNPU1FIR, bit(34)) ? self_th_1;
+    (rNPU1FIR, bit(34)) ? npu_th_1;
 
     /** NPU1FIR[35]
      *  ATS Invalid IODA Table Select entry
      */
-    (rNPU1FIR, bit(35)) ? self_th_1;
+    (rNPU1FIR, bit(35)) ? npu_th_1;
 
     /** NPU1FIR[36:58]
      *  Reserved
@@ -7279,112 +7280,112 @@ group gNPU2FIR
     /** NPU2FIR[4]
      *  OTL TL credit ctr overflow
      */
-    (rNPU2FIR, bit(4)) ? self_th_1;
+    (rNPU2FIR, bit(4)) ? npu_th_1;
 
     /** NPU2FIR[5]
      *  OTL RX acTag invalid
      */
-    (rNPU2FIR, bit(5)) ? self_th_1;
+    (rNPU2FIR, bit(5)) ? npu_th_1;
 
     /** NPU2FIR[6]
      *  OTL RX acTag points to an invalid entry.
      */
-    (rNPU2FIR, bit(6)) ? self_th_1;
+    (rNPU2FIR, bit(6)) ? npu_th_1;
 
     /** NPU2FIR[7]
      *  OTL RX reserved opcode used.
      */
-    (rNPU2FIR, bit(7)) ? self_th_1;
+    (rNPU2FIR, bit(7)) ? npu_th_1;
 
     /** NPU2FIR[8]
      *  OTL RX rtn_tl_credit cmd outside slot0.
      */
-    (rNPU2FIR, bit(8)) ? self_th_1;
+    (rNPU2FIR, bit(8)) ? npu_th_1;
 
     /** NPU2FIR[9]
      *  OTL RX bad opcode and template combo
      */
-    (rNPU2FIR, bit(9)) ? self_th_1;
+    (rNPU2FIR, bit(9)) ? npu_th_1;
 
     /** NPU2FIR[10]
      *  OTL RX unsupported template format.
      */
-    (rNPU2FIR, bit(10)) ? self_th_1;
+    (rNPU2FIR, bit(10)) ? npu_th_1;
 
     /** NPU2FIR[11]
      *  OTL RX bad template x00 format.
      */
-    (rNPU2FIR, bit(11)) ? self_th_1;
+    (rNPU2FIR, bit(11)) ? npu_th_1;
 
     /** NPU2FIR[12]
      *  OTL RX control flit overrun.
      */
-    (rNPU2FIR, bit(12)) ? self_th_1;
+    (rNPU2FIR, bit(12)) ? npu_th_1;
 
     /** NPU2FIR[13]
      *  OTL RX unexpected data flit.
      */
-    (rNPU2FIR, bit(13)) ? self_th_1;
+    (rNPU2FIR, bit(13)) ? npu_th_1;
 
     /** NPU2FIR[14]
      *  OTL RX DL link down.
      */
-    (rNPU2FIR, bit(14)) ? self_th_1;
+    (rNPU2FIR, bit(14)) ? npu_th_1;
 
     /** NPU2FIR[15]
      *  OTL RX bad data received on command.
      */
-    (rNPU2FIR, bit(15)) ? self_th_1;
+    (rNPU2FIR, bit(15)) ? npu_th_1;
 
     /** NPU2FIR[16]
      *  OTL RX bad data received on response.
      */
-    (rNPU2FIR, bit(16)) ? self_th_1;
+    (rNPU2FIR, bit(16)) ? npu_th_1;
 
     /** NPU2FIR[17]
      *  OTL RX AP response not allowed
      */
-    (rNPU2FIR, bit(17)) ? self_th_1;
+    (rNPU2FIR, bit(17)) ? npu_th_1;
 
     /** NPU2FIR[18]
      *  OR of all OTL parity errors.
      */
-    (rNPU2FIR, bit(18)) ? self_th_1;
+    (rNPU2FIR, bit(18)) ? npu_th_1;
 
     /** NPU2FIR[19]
      *  OR of all OTL ECC CE errors.
      */
-    (rNPU2FIR, bit(19)) ? self_th_32perDay;
+    (rNPU2FIR, bit(19)) ? npu_th_32perDay;
 
     /** NPU2FIR[20]
      *  OR of all OTL ECC UE errors.
      */
-    (rNPU2FIR, bit(20)) ? self_th_1;
+    (rNPU2FIR, bit(20)) ? npu_th_1;
 
     /** NPU2FIR[21]
      *  RXO OP Errors.
      */
-    (rNPU2FIR, bit(21)) ? self_th_1;
+    (rNPU2FIR, bit(21)) ? npu_th_1;
 
     /** NPU2FIR[22]
      *  RXO Internal Errors.
      */
-    (rNPU2FIR, bit(22)) ? self_th_1;
+    (rNPU2FIR, bit(22)) ? npu_th_1;
 
     /** NPU2FIR[23]
      *  OTL RXI fifo overrun.
      */
-    (rNPU2FIR, bit(23)) ? self_th_1;
+    (rNPU2FIR, bit(23)) ? npu_th_1;
 
     /** NPU2FIR[24]
      *  OTL RXI ctrl flit data run len invalid.
      */
-    (rNPU2FIR, bit(24)) ? self_th_1;
+    (rNPU2FIR, bit(24)) ? npu_th_1;
 
     /** NPU2FIR[25]
      *  OTL RXI opcode specifies dL=0b00.
      */
-    (rNPU2FIR, bit(25)) ? self_th_1;
+    (rNPU2FIR, bit(25)) ? npu_th_1;
 
     /** NPU2FIR[26:35]
      *  spare
@@ -7394,42 +7395,42 @@ group gNPU2FIR
     /** NPU2FIR[36]
      *  MMIO invalidate while one in progress.
      */
-    (rNPU2FIR, bit(36)) ? self_th_1;
+    (rNPU2FIR, bit(36)) ? npu_th_1;
 
     /** NPU2FIR[37]
      *  Unexpected ITAG on itag completion pt 0
      */
-    (rNPU2FIR, bit(37)) ? self_th_1;
+    (rNPU2FIR, bit(37)) ? npu_th_1;
 
     /** NPU2FIR[38]
      *  Unexpected ITAG on itag completion pt 1
      */
-    (rNPU2FIR, bit(38)) ? self_th_1;
+    (rNPU2FIR, bit(38)) ? npu_th_1;
 
     /** NPU2FIR[39]
      *  Unexpected Read PEE completion.
      */
-    (rNPU2FIR, bit(39)) ? self_th_1;
+    (rNPU2FIR, bit(39)) ? npu_th_1;
 
     /** NPU2FIR[40]
      *  Unexpected Checkout response.
      */
-    (rNPU2FIR, bit(40)) ? self_th_1;
+    (rNPU2FIR, bit(40)) ? npu_th_1;
 
     /** NPU2FIR[41]
      *  Translation request but SPAP is invalid.
      */
-    (rNPU2FIR, bit(41)) ? self_th_1;
+    (rNPU2FIR, bit(41)) ? npu_th_1;
 
     /** NPU2FIR[42]
      *  Read a PEE which was not valid.
      */
-    (rNPU2FIR, bit(42)) ? self_th_1;
+    (rNPU2FIR, bit(42)) ? npu_th_1;
 
     /** NPU2FIR[43]
      *  Bloom filter protection error.
      */
-    (rNPU2FIR, bit(43)) ? self_th_1;
+    (rNPU2FIR, bit(43)) ? npu_th_1;
 
     /** NPU2FIR[44:45]
      *  spare
@@ -7439,32 +7440,32 @@ group gNPU2FIR
     /** NPU2FIR[46]
      *  correctable array error (SBE).
      */
-    (rNPU2FIR, bit(46)) ? self_th_32perDay;
+    (rNPU2FIR, bit(46)) ? npu_th_32perDay;
 
     /** NPU2FIR[47]
      *  array error (UE or parity).
      */
-    (rNPU2FIR, bit(47)) ? self_th_1;
+    (rNPU2FIR, bit(47)) ? npu_th_1;
 
     /** NPU2FIR[48]
      *  S/TLBI buffer overflow.
      */
-    (rNPU2FIR, bit(48)) ? self_th_1;
+    (rNPU2FIR, bit(48)) ? npu_th_1;
 
     /** NPU2FIR[49]
      *  SBE CE on Pb cout rsp or PEE read data.
      */
-    (rNPU2FIR, bit(49)) ? self_th_32perDay;
+    (rNPU2FIR, bit(49)) ? npu_th_32perDay;
 
     /** NPU2FIR[50]
      *  UE on Pb cut rsp or PEE read data.
      */
-    (rNPU2FIR, bit(50)) ? self_th_1;
+    (rNPU2FIR, bit(50)) ? npu_th_1;
 
     /** NPU2FIR[51]
      *  SUE on Pb chkout rsp or Pb PEE rd data.
      */
-    (rNPU2FIR, bit(51)) ? self_th_1;
+    (rNPU2FIR, bit(51)) ? npu_th_1;
 
     /** NPU2FIR[52]
      *  XSL Reserved, macro bit 16.

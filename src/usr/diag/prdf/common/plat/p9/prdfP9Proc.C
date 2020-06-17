@@ -579,6 +579,28 @@ PRDF_PLUGIN_DEFINE_NS( axone_proc,   Proc, handleIntCqFirPcRecovError );
 
 //------------------------------------------------------------------------------
 
+/**
+ * @brief  Special action for NPU FIR bits. Only gard on checkstop attentions.
+ * @param  i_chip A P9 chip.
+ * @param  io_sc  The step code data struct.
+ * @return SUCCESS
+ */
+int32_t calloutNpuMed(ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc)
+{
+    // Only gard if there is a checkstop.
+    GARD_POLICY gard = (CHECK_STOP == io_sc.service_data->getPrimaryAttnType())
+                            ? GARD : NO_GARD;
+
+    // Callout processor since there are no NPU targets.
+    io_sc.service_data->SetCallout(i_chip->getTrgt(), MRU_MED, gard);
+
+    return SUCCESS;
+}
+PRDF_PLUGIN_DEFINE_NS(nimbus_proc,  Proc, calloutNpuMed);
+PRDF_PLUGIN_DEFINE_NS(cumulus_proc, Proc, calloutNpuMed);
+
+//------------------------------------------------------------------------------
+
 // We never got support for NPU target on Axone so we are ignoring NPU
 // attentions by masking the FIRs at the chiplet level.
 int32_t axoneNpuWorkaround(ExtensibleChip * i_chip,
