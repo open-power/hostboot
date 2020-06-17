@@ -1180,9 +1180,12 @@ fapi2::ReturnCode PlatPmPPB::oppb_init(
         //pstate_max_throttle
         i_occppb->pstate_max_throttle =  revle32(pstate_min + iv_attrs.attr_throttle_pstate_number_limit);
 
+        //VDD voltage (in mV) associated with cores in retention
         i_occppb->vdd_vret_mv =  l_rvrm_rvid << 3;
-
         i_occppb->vdd_vret_mv = revle32(i_occppb->vdd_vret_mv);
+
+        // Altitude temperature adjustment (in (degrees Celcius/km)*1000)
+        i_occppb->altitude_temp_adj_degCpMm =  revle32(uint32_t(iv_attrs.attr_system_wof_altitude_temp_adjustment));
 
     }while(0);
 
@@ -1491,10 +1494,10 @@ FAPI_INF("%-60s[3] = 0x%08x %d", #attr_name, iv_attrs.attr_assign[3], iv_attrs.a
     DATABLOCK_GET_ATTR(ATTR_WOF_THROTTLE_CONTROL_LOOP_MODE, FAPI_SYSTEM, attr_system_wof_throttle_control_loop_mode);
     DATABLOCK_GET_ATTR(ATTR_DDS_TRIP_MODE,    FAPI_SYSTEM, attr_dds_trip_mode);
     DATABLOCK_GET_ATTR(ATTR_DDS_TRIP_INTERPOLATION_CONTROL,    FAPI_SYSTEM, attr_dds_trip_interpolation_control);
+    DATABLOCK_GET_ATTR(ATTR_WOF_ALTITUDE_TEMP_ADJUSTMENT, FAPI_SYSTEM, attr_system_wof_altitude_temp_adjustment);
 
     //TBD
     //DATABLOCK_GET_ATTR(ATTR_CHIP_EC_FEATURE_WOF_NOT_SUPPORTED, iv_procChip, attr_dd_wof_not_supported);
-
 
     DATABLOCK_GET_ATTR(ATTR_FREQ_DPLL_REFCLOCK_KHZ,   FAPI_SYSTEM, freq_proc_refclock_khz);
     DATABLOCK_GET_ATTR(ATTR_PROC_DPLL_DIVIDER,        iv_procChip, proc_dpll_divider);
