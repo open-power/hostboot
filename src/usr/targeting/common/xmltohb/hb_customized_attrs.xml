@@ -62,6 +62,13 @@
           <writeable/>
      </attribute>
 
+    <!-- Dynamic Init settings will come from BIOS/ASM or lab override -->
+    <attribute>
+        <id>ATTR_DYNAMIC_INIT_MODE_VEC</id>
+        <no_export/>
+	<writeable/>
+    </attribute>
+
      <attribute>
           <id>ATTR_PG_MVPD</id>
           <default>0xFFFFFFFF</default>
