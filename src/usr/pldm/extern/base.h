@@ -38,44 +38,44 @@ extern "C" {
 /** @brief PLDM Types
  */
 enum pldm_supported_types {
-  PLDM_BASE = 0x00,
-  PLDM_PLATFORM = 0x02,
-  PLDM_BIOS = 0x03,
-  PLDM_FRU = 0x04,
-  PLDM_OEM = 0x3F,
+	PLDM_BASE = 0x00,
+	PLDM_PLATFORM = 0x02,
+	PLDM_BIOS = 0x03,
+	PLDM_FRU = 0x04,
+	PLDM_OEM = 0x3F,
 };
 
 /** @brief PLDM Commands
  */
 enum pldm_supported_commands {
-  PLDM_GET_TID = 0x2,
-  PLDM_GET_PLDM_VERSION = 0x3,
-  PLDM_GET_PLDM_TYPES = 0x4,
-  PLDM_GET_PLDM_COMMANDS = 0x5
+	PLDM_GET_TID = 0x2,
+	PLDM_GET_PLDM_VERSION = 0x3,
+	PLDM_GET_PLDM_TYPES = 0x4,
+	PLDM_GET_PLDM_COMMANDS = 0x5
 };
 
 /** @brief PLDM base codes
  */
 enum pldm_completion_codes {
-  PLDM_SUCCESS = 0x00,
-  PLDM_ERROR = 0x01,
-  PLDM_ERROR_INVALID_DATA = 0x02,
-  PLDM_ERROR_INVALID_LENGTH = 0x03,
-  PLDM_ERROR_NOT_READY = 0x04,
-  PLDM_ERROR_UNSUPPORTED_PLDM_CMD = 0x05,
-  PLDM_ERROR_INVALID_PLDM_TYPE = 0x20
+	PLDM_SUCCESS = 0x00,
+	PLDM_ERROR = 0x01,
+	PLDM_ERROR_INVALID_DATA = 0x02,
+	PLDM_ERROR_INVALID_LENGTH = 0x03,
+	PLDM_ERROR_NOT_READY = 0x04,
+	PLDM_ERROR_UNSUPPORTED_PLDM_CMD = 0x05,
+	PLDM_ERROR_INVALID_PLDM_TYPE = 0x20
 };
 
 enum transfer_op_flag {
-  PLDM_GET_NEXTPART = 0,
-  PLDM_GET_FIRSTPART = 1,
+	PLDM_GET_NEXTPART = 0,
+	PLDM_GET_FIRSTPART = 1,
 };
 
 enum transfer_resp_flag {
-  PLDM_START = 0x01,
-  PLDM_MIDDLE = 0x02,
-  PLDM_END = 0x04,
-  PLDM_START_AND_END = 0x05,
+	PLDM_START = 0x01,
+	PLDM_MIDDLE = 0x02,
+	PLDM_END = 0x04,
+	PLDM_START_AND_END = 0x05,
 };
 
 /** @enum MessageType
@@ -83,10 +83,10 @@ enum transfer_resp_flag {
  *  The different message types supported by the PLDM specification.
  */
 typedef enum {
-  PLDM_RESPONSE ,     //!< PLDM response
-  PLDM_REQUEST,       //!< PLDM request
-  PLDM_RESERVED,      //!< Reserved
-  PLDM_ASYNC_REQUEST_NOTIFY, //!< Unacknowledged PLDM request messages
+	PLDM_RESPONSE,		   //!< PLDM response
+	PLDM_REQUEST,		   //!< PLDM request
+	PLDM_RESERVED,		   //!< Reserved
+	PLDM_ASYNC_REQUEST_NOTIFY, //!< Unacknowledged PLDM request messages
 } MessageType;
 
 #define PLDM_INSTANCE_MAX 31
@@ -104,7 +104,8 @@ typedef enum {
 /* Response data has only one version and does not contain the checksum */
 #define PLDM_GET_VERSION_RESP_BYTES 10
 
-#define PLDM_VERSION 0
+#define PLDM_VERSION_0 0
+#define PLDM_CURRENT_VERSION PLDM_VERSION_0
 
 /** @struct pldm_msg_hdr
  *
@@ -112,25 +113,25 @@ typedef enum {
  */
 struct pldm_msg_hdr {
 #if defined(__LITTLE_ENDIAN_BITFIELD)
-  uint8_t instance_id : 5; //!< Instance ID
-  uint8_t reserved : 1;    //!< Reserved
-  uint8_t datagram : 1;    //!< Datagram bit
-  uint8_t request : 1;     //!< Request bit
+	uint8_t instance_id : 5; //!< Instance ID
+	uint8_t reserved : 1;	 //!< Reserved
+	uint8_t datagram : 1;	 //!< Datagram bit
+	uint8_t request : 1;	 //!< Request bit
 #elif defined(__BIG_ENDIAN_BITFIELD)
-  uint8_t request : 1;     //!< Request bit
-  uint8_t datagram : 1;    //!< Datagram bit
-  uint8_t reserved : 1;    //!< Reserved
-  uint8_t instance_id : 5; //!< Instance ID
+	uint8_t request : 1;	 //!< Request bit
+	uint8_t datagram : 1;	 //!< Datagram bit
+	uint8_t reserved : 1;	 //!< Reserved
+	uint8_t instance_id : 5; //!< Instance ID
 #endif
 
 #if defined(__LITTLE_ENDIAN_BITFIELD)
-  uint8_t type : 6;       //!< PLDM type
-  uint8_t header_ver : 2; //!< Header version
+	uint8_t type : 6;	//!< PLDM type
+	uint8_t header_ver : 2; //!< Header version
 #elif defined(__BIG_ENDIAN_BITFIELD)
-  uint8_t header_ver : 2;  //!< Header version
-  uint8_t type : 6;  //!< PLDM type
+	uint8_t header_ver : 2;	 //!< Header version
+	uint8_t type : 6;	 //!< PLDM type
 #endif
-  uint8_t command; //!< PLDM command code
+	uint8_t command; //!< PLDM command code
 } __attribute__((packed));
 
 /** @struct pldm_msg
@@ -138,8 +139,8 @@ struct pldm_msg_hdr {
  * Structure representing PLDM message
  */
 struct pldm_msg {
-  struct pldm_msg_hdr hdr; //!< PLDM message header
-  uint8_t payload[1]; //!< &payload[0] is the beginning of the payload
+	struct pldm_msg_hdr hdr; //!< PLDM message header
+	uint8_t payload[1]; //!< &payload[0] is the beginning of the payload
 } __attribute__((packed));
 
 /** @struct pldm_header_info
@@ -148,11 +149,11 @@ struct pldm_msg {
  *  pack_pldm_header and unpack_pldm_header API.
  */
 struct pldm_header_info {
-  MessageType msg_type;    //!< PLDM message type
-  uint8_t instance;  //!< PLDM instance id
-  uint8_t pldm_type;       //!< PLDM type
-  uint8_t command;   //!< PLDM command code
-  uint8_t completion_code; //!< PLDM completion code, applies for response
+	MessageType msg_type;	 //!< PLDM message type
+	uint8_t instance;	 //!< PLDM instance id
+	uint8_t pldm_type;	 //!< PLDM type
+	uint8_t command;	 //!< PLDM command code
+	uint8_t completion_code; //!< PLDM completion code, applies for response
 };
 
 /** @struct pldm_get_types_resp
@@ -160,9 +161,9 @@ struct pldm_header_info {
  *  Structure representing PLDM get types response.
  */
 struct pldm_get_types_resp {
-  uint8_t completion_code; //!< completion code
-  bitfield8_t types[8]; //!< each bit represents whether a given PLDM Type
-            //!< is supported
+	uint8_t completion_code; //!< completion code
+	bitfield8_t types[8]; //!< each bit represents whether a given PLDM Type
+			      //!< is supported
 } __attribute__((packed));
 
 /** @struct pldm_get_commands_req
@@ -170,9 +171,9 @@ struct pldm_get_types_resp {
  *  Structure representing PLDM get commands request.
  */
 struct pldm_get_commands_req {
-  uint8_t type;    //!< PLDM Type for which command support information is
-       //!< being requested
-  ver32_t version; //!< version for the specified PLDM Type
+	uint8_t type;	 //!< PLDM Type for which command support information is
+			 //!< being requested
+	ver32_t version; //!< version for the specified PLDM Type
 } __attribute__((packed));
 
 /** @struct pldm_get_commands_resp
@@ -180,9 +181,9 @@ struct pldm_get_commands_req {
  *  Structure representing PLDM get commands response.
  */
 struct pldm_get_commands_resp {
-  uint8_t completion_code;  //!< completion code
-  bitfield8_t commands[32]; //!< each bit represents whether a given PLDM
-          //!< command is supported
+	uint8_t completion_code;  //!< completion code
+	bitfield8_t commands[32]; //!< each bit represents whether a given PLDM
+				  //!< command is supported
 } __attribute__((packed));
 
 /** @struct pldm_get_version_req
@@ -190,11 +191,11 @@ struct pldm_get_commands_resp {
  *  Structure representing PLDM get version request.
  */
 struct pldm_get_version_req {
-  uint32_t
-      transfer_handle; //!< handle to identify PLDM version data transfer
-  uint8_t transfer_opflag; //!< PLDM GetVersion operation flag
-  uint8_t type; //!< PLDM Type for which version information is being
-          //!< requested
+	uint32_t
+	    transfer_handle; //!< handle to identify PLDM version data transfer
+	uint8_t transfer_opflag; //!< PLDM GetVersion operation flag
+	uint8_t type; //!< PLDM Type for which version information is being
+		      //!< requested
 } __attribute__((packed));
 
 /** @struct pldm_get_version_resp
@@ -203,11 +204,11 @@ struct pldm_get_version_req {
  */
 
 struct pldm_get_version_resp {
-  uint8_t completion_code;       //!< completion code
-  uint32_t next_transfer_handle; //!< next portion of PLDM version data
-               //!< transfer
-  uint8_t transfer_flag;   //!< PLDM GetVersion transfer flag
-  uint8_t version_data[1];       //!< PLDM GetVersion version field
+	uint8_t completion_code;       //!< completion code
+	uint32_t next_transfer_handle; //!< next portion of PLDM version data
+				       //!< transfer
+	uint8_t transfer_flag;	       //!< PLDM GetVersion transfer flag
+	uint8_t version_data[1];       //!< PLDM GetVersion version field
 } __attribute__((packed));
 
 /** @struct pldm_get_tid_resp
@@ -216,8 +217,8 @@ struct pldm_get_version_resp {
  */
 
 struct pldm_get_tid_resp {
-  uint8_t completion_code; //!< completion code
-  uint8_t tid;     //!< PLDM GetTID TID field
+	uint8_t completion_code; //!< completion code
+	uint8_t tid;		 //!< PLDM GetTID TID field
 } __attribute__((packed));
 
 /**
@@ -230,10 +231,10 @@ struct pldm_get_tid_resp {
  *
  * @return 0 on success, otherwise PLDM error codes.
  * @note   Caller is responsible for alloc and dealloc of msg
-           and hdr params
+ *         and hdr params
  */
 int pack_pldm_header(const struct pldm_header_info *hdr,
-         struct pldm_msg_hdr *msg);
+		     struct pldm_msg_hdr *msg);
 
 /**
  * @brief Unpack the PLDM header from the PLDM message.
@@ -243,10 +244,10 @@ int pack_pldm_header(const struct pldm_header_info *hdr,
  *
  * @return 0 on success, otherwise PLDM error codes.
  * @note   Caller is responsible for alloc and dealloc of msg
-           and hdr params
+ *         and hdr params
  */
 int unpack_pldm_header(const struct pldm_msg_hdr *msg,
-           struct pldm_header_info *hdr);
+		       struct pldm_header_info *hdr);
 
 /* Requester */
 
@@ -264,6 +265,12 @@ int encode_get_types_req(uint8_t instance_id, struct pldm_msg *msg);
 
 /** @brief Decode a GetPLDMTypes response message
  *
+ *  Note:
+ *  * If the return value is not PLDM_SUCCESS, it represents a
+ * transport layer error.
+ *  * If the completion_code value is not PLDM_SUCCESS, it represents a
+ * protocol layer error and all the out-parameters are invalid.
+ *
  *  @param[in] msg - Response message
  *  @param[in] payload_length - Length of response message payload
  *  @param[out] completion_code - Pointer to response msg's PLDM completion code
@@ -272,7 +279,7 @@ int encode_get_types_req(uint8_t instance_id, struct pldm_msg *msg);
  *  @return pldm_completion_codes
  */
 int decode_get_types_resp(const struct pldm_msg *msg, size_t payload_length,
-        uint8_t *completion_code, bitfield8_t *types);
+			  uint8_t *completion_code, bitfield8_t *types);
 
 /* GetPLDMCommands */
 
@@ -287,9 +294,15 @@ int decode_get_types_resp(const struct pldm_msg *msg, size_t payload_length,
  *         'msg.payload'
  */
 int encode_get_commands_req(uint8_t instance_id, uint8_t type, ver32_t version,
-          struct pldm_msg *msg);
+			    struct pldm_msg *msg);
 
 /** @brief Decode a GetPLDMCommands response message
+ *
+ *  Note:
+ *  * If the return value is not PLDM_SUCCESS, it represents a
+ * transport layer error.
+ *  * If the completion_code value is not PLDM_SUCCESS, it represents a
+ * protocol layer error and all the out-parameters are invalid.
  *
  *  @param[in] msg - Response message
  *  @param[in] payload_length - Length of reponse message payload
@@ -299,7 +312,7 @@ int encode_get_commands_req(uint8_t instance_id, uint8_t type, ver32_t version,
  *  @return pldm_completion_codes
  */
 int decode_get_commands_resp(const struct pldm_msg *msg, size_t payload_length,
-           uint8_t *completion_code, bitfield8_t *commands);
+			     uint8_t *completion_code, bitfield8_t *commands);
 
 /* GetPLDMVersion */
 
@@ -318,10 +331,16 @@ int decode_get_commands_resp(const struct pldm_msg *msg, size_t payload_length,
  *         'msg.payload'
  */
 int encode_get_version_req(uint8_t instance_id, uint32_t transfer_handle,
-         uint8_t transfer_opflag, uint8_t type,
-         struct pldm_msg *msg);
+			   uint8_t transfer_opflag, uint8_t type,
+			   struct pldm_msg *msg);
 
 /** @brief Decode a GetPLDMVersion response message
+ *
+ *  Note:
+ *  * If the return value is not PLDM_SUCCESS, it represents a
+ * transport layer error.
+ *  * If the completion_code value is not PLDM_SUCCESS, it represents a
+ * protocol layer error and all the out-parameters are invalid.
  *
  *  @param[in] msg - Response message
  *  @param[in] payload_length - Length of reponse message payload
@@ -331,13 +350,19 @@ int encode_get_version_req(uint8_t instance_id, uint32_t transfer_handle,
  *  @return pldm_completion_codes
  */
 int decode_get_version_resp(const struct pldm_msg *msg, size_t payload_length,
-          uint8_t *completion_code,
-          uint32_t *next_transfer_handle,
-          uint8_t *transfer_flag, ver32_t *version);
+			    uint8_t *completion_code,
+			    uint32_t *next_transfer_handle,
+			    uint8_t *transfer_flag, ver32_t *version);
 
 /* GetTID */
 
 /** @brief Decode a GetTID response message
+ *
+ *  Note:
+ *  * If the return value is not PLDM_SUCCESS, it represents a
+ * transport layer error.
+ *  * If the completion_code value is not PLDM_SUCCESS, it represents a
+ * protocol layer error and all the out-parameters are invalid.
  *
  *  @param[in] msg - Response message
  *  @param[in] payload_length - Length of response message payload
@@ -346,7 +371,7 @@ int decode_get_version_resp(const struct pldm_msg *msg, size_t payload_length,
  *  @return pldm_completion_codes
  */
 int decode_get_tid_resp(const struct pldm_msg *msg, size_t payload_length,
-      uint8_t *completion_code, uint8_t *tid);
+			uint8_t *completion_code, uint8_t *tid);
 
 /* Responder */
 
@@ -364,7 +389,7 @@ int decode_get_tid_resp(const struct pldm_msg *msg, size_t payload_length,
  *         'msg.payload'
  */
 int encode_get_types_resp(uint8_t instance_id, uint8_t completion_code,
-        const bitfield8_t *types, struct pldm_msg *msg);
+			  const bitfield8_t *types, struct pldm_msg *msg);
 
 /* GetPLDMCommands */
 
@@ -377,7 +402,7 @@ int encode_get_types_resp(uint8_t instance_id, uint8_t completion_code,
  *  @return pldm_completion_codes
  */
 int decode_get_commands_req(const struct pldm_msg *msg, size_t payload_length,
-          uint8_t *type, ver32_t *version);
+			    uint8_t *type, ver32_t *version);
 
 /** @brief Create a PLDM response message for GetPLDMCommands
  *
@@ -391,7 +416,7 @@ int decode_get_commands_req(const struct pldm_msg *msg, size_t payload_length,
  *         'msg.payload'
  */
 int encode_get_commands_resp(uint8_t instance_id, uint8_t completion_code,
-           const bitfield8_t *commands, struct pldm_msg *msg);
+			     const bitfield8_t *commands, struct pldm_msg *msg);
 
 /* GetPLDMVersion */
 
@@ -410,9 +435,9 @@ int encode_get_commands_resp(uint8_t instance_id, uint8_t completion_code,
  *         'msg.payload'
  */
 int encode_get_version_resp(uint8_t instance_id, uint8_t completion_code,
-          uint32_t next_transfer_handle,
-          uint8_t transfer_flag, const ver32_t *version_data,
-          size_t version_size, struct pldm_msg *msg);
+			    uint32_t next_transfer_handle,
+			    uint8_t transfer_flag, const ver32_t *version_data,
+			    size_t version_size, struct pldm_msg *msg);
 
 /** @brief Decode a GetPLDMVersion request message
  *
@@ -424,8 +449,8 @@ int encode_get_version_resp(uint8_t instance_id, uint8_t completion_code,
  *  @return pldm_completion_codes
  */
 int decode_get_version_req(const struct pldm_msg *msg, size_t payload_length,
-         uint32_t *transfer_handle, uint8_t *transfer_opflag,
-         uint8_t *type);
+			   uint32_t *transfer_handle, uint8_t *transfer_opflag,
+			   uint8_t *type);
 
 /* Requester */
 
@@ -452,7 +477,7 @@ int encode_get_tid_req(uint8_t instance_id, struct pldm_msg *msg);
  *         'msg.payload'
  */
 int encode_get_tid_resp(uint8_t instance_id, uint8_t completion_code,
-      uint8_t tid, struct pldm_msg *msg);
+			uint8_t tid, struct pldm_msg *msg);
 
 /** @brief Create a PLDM response message containing only cc
  *
@@ -464,7 +489,7 @@ int encode_get_tid_resp(uint8_t instance_id, uint8_t completion_code,
  *  @return pldm_completion_codes
  */
 int encode_cc_only_resp(uint8_t instance_id, uint8_t type, uint8_t command,
-      uint8_t cc, struct pldm_msg *msg);
+			uint8_t cc, struct pldm_msg *msg);
 
 #ifdef __cplusplus
 }

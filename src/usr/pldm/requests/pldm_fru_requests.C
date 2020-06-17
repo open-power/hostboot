@@ -231,13 +231,16 @@ errlHndl_t getFruRecordTable(const size_t i_table_buffer_len,
       pldmHdrToUint64(*reinterpret_cast<pldm_msg*>(response_bytes.data()));
 
     pldm_get_fru_record_table_resp response = { };
+    size_t table_data_len = 0;
 
     errl =
         decode_pldm_response(decode_get_fru_record_table_resp,
-                              response_bytes,
-                              &response.completion_code,
-                              &response.next_data_transfer_handle,
-                              &response.transfer_flag);
+                             response_bytes,
+                             &response.completion_code,
+                             &response.next_data_transfer_handle,
+                             &response.transfer_flag,
+                             o_table_buffer,
+                             &table_data_len);
 
     if(errl)
     {
@@ -270,27 +273,12 @@ errlHndl_t getFruRecordTable(const size_t i_table_buffer_len,
         break;
     }
 
-    // offset to the ptr holding the response bytes to get a ptr to the fru
-    // record table data in the response. The goal here is to get a ptr to the
-    // "Portion of FRU Record Table" field of the response in table 10 of
-    // DSP0257 v1.0.0.
-    uint8_t * const table_data = response_bytes.data() +   // ptr to start of response
-                                   sizeof(pldm_msg_hdr) +  // skip over pldm header
-                                   offsetof(pldm_get_fru_record_table_resp, // offset to table data
-                                            fru_record_table_data);
-
-    // Remove the size of the return values that are not included in the
-    // size returned from the getFruRecordTableMetaData request
-    const size_t table_data_len = response_bytes.size() - sizeof(pldm_msg_hdr) -
-                                  (sizeof(response.completion_code) +
-                                   sizeof(response.next_data_transfer_handle) +
-                                   sizeof(response.transfer_flag) +
-                                   FRU_TABLE_CHECKSUM_SIZE);
-
     // The table returned could have some padding at the end we do not want.
     // Just make sure the padding it within a valid range (0-3 bytes)
-    if(table_data_len < i_table_buffer_len ||
-        table_data_len - i_table_buffer_len > 3)
+    // @TODO RTC 256353: Fix this check
+    if(false &&
+       (table_data_len < i_table_buffer_len ||
+        table_data_len - i_table_buffer_len > 3))
     {
         // The buffer that was returnd from BMC that contains table info does
         // not match the size that the get fru table meta data cmd told us
@@ -319,9 +307,8 @@ errlHndl_t getFruRecordTable(const size_t i_table_buffer_len,
         break;
     }
 
-    TRACDBIN( PLDM::g_trac_pldm,"Table Buffer:", table_data, i_table_buffer_len);
+    TRACDBIN( PLDM::g_trac_pldm,"Table Buffer:", o_table_buffer, i_table_buffer_len);
     // Use i_table_buffer_len to avoid copying the extra padding we dont care about.
-    memcpy(o_table_buffer, table_data, i_table_buffer_len);
 
     }while(0);
 

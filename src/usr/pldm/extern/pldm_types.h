@@ -92,4 +92,6 @@ typedef union {
 	} __attribute__((packed)) bits;
 } bitfield32_t;
 
+typedef float real32_t;
+
 #endif /* PLDM_TYPES_H */

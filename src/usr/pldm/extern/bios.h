@@ -34,6 +34,7 @@ extern "C" {
 #include <stdint.h>
 
 #include "base.h"
+#include "utils.h"
 
 /* Response lengths are inclusive of completion code */
 #define PLDM_GET_DATE_TIME_RESP_BYTES 8
@@ -46,58 +47,58 @@ extern "C" {
 #define PLDM_GET_BIOS_ATTR_CURR_VAL_BY_HANDLE_MIN_RESP_BYTES 6
 
 enum pldm_bios_completion_codes {
-  PLDM_BIOS_TABLE_UNAVAILABLE = 0x83,
-  PLDM_INVALID_BIOS_TABLE_DATA_INTEGRITY_CHECK = 0x84,
-  PLDM_INVALID_BIOS_TABLE_TYPE = 0x85,
-  PLDM_INVALID_BIOS_ATTR_HANDLE = 0x88,
+	PLDM_BIOS_TABLE_UNAVAILABLE = 0x83,
+	PLDM_INVALID_BIOS_TABLE_DATA_INTEGRITY_CHECK = 0x84,
+	PLDM_INVALID_BIOS_TABLE_TYPE = 0x85,
+	PLDM_INVALID_BIOS_ATTR_HANDLE = 0x88,
 };
 enum pldm_bios_commands {
-  PLDM_GET_BIOS_TABLE = 0x01,
-  PLDM_SET_BIOS_ATTRIBUTE_CURRENT_VALUE = 0x07,
-  PLDM_GET_BIOS_ATTRIBUTE_CURRENT_VALUE_BY_HANDLE = 0x08,
-  PLDM_GET_DATE_TIME = 0x0c,
-  PLDM_SET_DATE_TIME = 0x0d,
+	PLDM_GET_BIOS_TABLE = 0x01,
+	PLDM_SET_BIOS_ATTRIBUTE_CURRENT_VALUE = 0x07,
+	PLDM_GET_BIOS_ATTRIBUTE_CURRENT_VALUE_BY_HANDLE = 0x08,
+	PLDM_GET_DATE_TIME = 0x0c,
+	PLDM_SET_DATE_TIME = 0x0d,
 };
 
 enum pldm_bios_table_types {
-  PLDM_BIOS_STRING_TABLE,
-  PLDM_BIOS_ATTR_TABLE,
-  PLDM_BIOS_ATTR_VAL_TABLE,
+	PLDM_BIOS_STRING_TABLE,
+	PLDM_BIOS_ATTR_TABLE,
+	PLDM_BIOS_ATTR_VAL_TABLE,
 };
 
 struct pldm_bios_string_table_entry {
-  uint16_t string_handle;
-  uint16_t string_length;
-  char name[1];
+	uint16_t string_handle;
+	uint16_t string_length;
+	char name[1];
 } __attribute__((packed));
 
 struct pldm_bios_attr_table_entry {
-  uint16_t attr_handle;
-  uint8_t attr_type;
-  uint16_t string_handle;
-  uint8_t metadata[1];
+	uint16_t attr_handle;
+	uint8_t attr_type;
+	uint16_t string_handle;
+	uint8_t metadata[1];
 } __attribute__((packed));
 
 struct pldm_bios_enum_attr {
-  uint8_t num_possible_values;
-  uint16_t indices[1];
+	uint8_t num_possible_values;
+	uint16_t indices[1];
 } __attribute__((packed));
 
 struct pldm_bios_attr_val_table_entry {
-  uint16_t attr_handle;
-  uint8_t attr_type;
-  uint8_t value[1];
+	uint16_t attr_handle;
+	uint8_t attr_type;
+	uint8_t value[1];
 } __attribute__((packed));
 
 enum pldm_bios_attribute_type {
-  PLDM_BIOS_ENUMERATION = 0x0,
-  PLDM_BIOS_STRING = 0x1,
-  PLDM_BIOS_PASSWORD = 0x2,
-  PLDM_BIOS_INTEGER = 0x3,
-  PLDM_BIOS_ENUMERATION_READ_ONLY = 0x80,
-  PLDM_BIOS_STRING_READ_ONLY = 0x81,
-  PLDM_BIOS_PASSWORD_READ_ONLY = 0x82,
-  PLDM_BIOS_INTEGER_READ_ONLY = 0x83,
+	PLDM_BIOS_ENUMERATION = 0x0,
+	PLDM_BIOS_STRING = 0x1,
+	PLDM_BIOS_PASSWORD = 0x2,
+	PLDM_BIOS_INTEGER = 0x3,
+	PLDM_BIOS_ENUMERATION_READ_ONLY = 0x80,
+	PLDM_BIOS_STRING_READ_ONLY = 0x81,
+	PLDM_BIOS_PASSWORD_READ_ONLY = 0x82,
+	PLDM_BIOS_INTEGER_READ_ONLY = 0x83,
 };
 
 /** @struct pldm_get_bios_table_req
@@ -105,9 +106,9 @@ enum pldm_bios_attribute_type {
  *  structure representing GetBIOSTable request packet
  */
 struct pldm_get_bios_table_req {
-  uint32_t transfer_handle;
-  uint8_t transfer_op_flag;
-  uint8_t table_type;
+	uint32_t transfer_handle;
+	uint8_t transfer_op_flag;
+	uint8_t table_type;
 } __attribute__((packed));
 
 /** @struct pldm_get_bios_table_resp
@@ -115,10 +116,10 @@ struct pldm_get_bios_table_req {
  *  structure representing GetBIOSTable response packet
  */
 struct pldm_get_bios_table_resp {
-  uint8_t completion_code;
-  uint32_t next_transfer_handle;
-  uint8_t transfer_flag;
-  uint8_t table_data[1];
+	uint8_t completion_code;
+	uint32_t next_transfer_handle;
+	uint8_t transfer_flag;
+	uint8_t table_data[1];
 } __attribute__((packed));
 
 /** @struct pldm_get_date_time_resp
@@ -126,13 +127,13 @@ struct pldm_get_bios_table_resp {
  *  Structure representing PLDM get date time response
  */
 struct pldm_get_date_time_resp {
-  uint8_t completion_code; //!< completion code
-  uint8_t seconds;   //!< Seconds in BCD format
-  uint8_t minutes;   //!< Minutes in BCD format
-  uint8_t hours;     //!< Hours in BCD format
-  uint8_t day;     //!< Day of the month in BCD format
-  uint8_t month;     //!< Month in BCD format
-  uint16_t year;     //!< Year in BCD format
+	uint8_t completion_code; //!< completion code
+	uint8_t seconds;	 //!< Seconds in BCD format
+	uint8_t minutes;	 //!< Minutes in BCD format
+	uint8_t hours;		 //!< Hours in BCD format
+	uint8_t day;		 //!< Day of the month in BCD format
+	uint8_t month;		 //!< Month in BCD format
+	uint16_t year;		 //!< Year in BCD format
 } __attribute__((packed));
 
 /** @struct pldm_set_date_time_req
@@ -141,12 +142,12 @@ struct pldm_get_date_time_resp {
  *
  */
 struct pldm_set_date_time_req {
-  uint8_t seconds; //!< Seconds in BCD format
-  uint8_t minutes; //!< Minutes in BCD format
-  uint8_t hours;   //!< Hours in BCD format
-  uint8_t day;     //!< Day of the month in BCD format
-  uint8_t month;   //!< Month in BCD format
-  uint16_t year;   //!< Year in BCD format
+	uint8_t seconds; //!< Seconds in BCD format
+	uint8_t minutes; //!< Minutes in BCD format
+	uint8_t hours;	 //!< Hours in BCD format
+	uint8_t day;	 //!< Day of the month in BCD format
+	uint8_t month;	 //!< Month in BCD format
+	uint16_t year;	 //!< Year in BCD format
 } __attribute__((packed));
 
 /** @struct pldm_only_cc_resp
@@ -154,7 +155,7 @@ struct pldm_set_date_time_req {
  *  Structure representing PLDM responses only have completion code
  */
 struct pldm_only_cc_resp {
-  uint8_t completion_code;
+	uint8_t completion_code;
 } __attribute__((packed));
 
 /** @struct pldm_get_bios_attribute_current_value_by_handle_req
@@ -162,9 +163,9 @@ struct pldm_only_cc_resp {
  *  structure representing GetBIOSAttributeCurrentValueByHandle request packet
  */
 struct pldm_get_bios_attribute_current_value_by_handle_req {
-  uint32_t transfer_handle;
-  uint8_t transfer_op_flag;
-  uint16_t attribute_handle;
+	uint32_t transfer_handle;
+	uint8_t transfer_op_flag;
+	uint16_t attribute_handle;
 } __attribute__((packed));
 
 /** @struct pldm_get_bios_attribute_current_value_by_handle_resp
@@ -172,10 +173,10 @@ struct pldm_get_bios_attribute_current_value_by_handle_req {
  *  structure representing GetBIOSAttributeCurrentValueByHandle response
  */
 struct pldm_get_bios_attribute_current_value_by_handle_resp {
-  uint8_t completion_code;
-  uint32_t next_transfer_handle;
-  uint8_t transfer_flag;
-  uint8_t attribute_data[1];
+	uint8_t completion_code;
+	uint32_t next_transfer_handle;
+	uint8_t transfer_flag;
+	uint8_t attribute_data[1];
 } __attribute__((packed));
 
 /** @struct pldm_set_bios_attribute_current_value_req
@@ -184,9 +185,9 @@ struct pldm_get_bios_attribute_current_value_by_handle_resp {
  *
  */
 struct pldm_set_bios_attribute_current_value_req {
-  uint32_t transfer_handle;
-  uint8_t transfer_flag;
-  uint8_t attribute_data[1];
+	uint32_t transfer_handle;
+	uint8_t transfer_flag;
+	uint8_t attribute_data[1];
 } __attribute__((packed));
 
 /** @struct pldm_set_bios_attribute_current_value_resp
@@ -195,8 +196,8 @@ struct pldm_set_bios_attribute_current_value_req {
  *
  */
 struct pldm_set_bios_attribute_current_value_resp {
-  uint8_t completion_code;
-  uint32_t next_transfer_handle;
+	uint8_t completion_code;
+	uint32_t next_transfer_handle;
 } __attribute__((packed));
 
 /* Requester */
@@ -216,6 +217,12 @@ int encode_get_date_time_req(uint8_t instance_id, struct pldm_msg *msg);
 
 /** @brief Decode a GetDateTime response message
  *
+ *  Note:
+ *  * If the return value is not PLDM_SUCCESS, it represents a
+ * transport layer error.
+ *  * If the completion_code value is not PLDM_SUCCESS, it represents a
+ * protocol layer error and all the out-parameters are invalid.
+ *
  *  @param[in] msg - Response message
  *  @param[in] payload_length - Length of response message payload
  *  @param[out] completion_code - Pointer to response msg's PLDM completion code
@@ -228,9 +235,9 @@ int encode_get_date_time_req(uint8_t instance_id, struct pldm_msg *msg);
  *  @return pldm_completion_codes
  */
 int decode_get_date_time_resp(const struct pldm_msg *msg, size_t payload_length,
-            uint8_t *completion_code, uint8_t *seconds,
-            uint8_t *minutes, uint8_t *hours, uint8_t *day,
-            uint8_t *month, uint16_t *year);
+			      uint8_t *completion_code, uint8_t *seconds,
+			      uint8_t *minutes, uint8_t *hours, uint8_t *day,
+			      uint8_t *month, uint16_t *year);
 
 /* SetBiosAttributeCurrentValue */
 
@@ -255,11 +262,17 @@ int encode_set_bios_attribute_current_value_req(
 
 /** @brief Decode a SetBiosAttributeCurrentValue response message
  *
+ *  Note:
+ *  * If the return value is not PLDM_SUCCESS, it represents a
+ * transport layer error.
+ *  * If the completion_code value is not PLDM_SUCCESS, it represents a
+ * protocol layer error and all the out-parameters are invalid.
+ *
  *  @param[in] msg - Response message
  *  @param[in] payload_length - Length of response message payload
  *  @param[out] completion_code - Pointer to response msg's PLDM completion code
  *  @param[out] next_transfer_handle - Pointer to a handle that identify the
- * next portion of the transfer
+ *              next portion of the transfer
  *  @return pldm_completion_codes
  */
 int decode_set_bios_attribute_current_value_resp(
@@ -287,9 +300,9 @@ int decode_set_bios_attribute_current_value_resp(
  */
 
 int encode_get_date_time_resp(uint8_t instance_id, uint8_t completion_code,
-            uint8_t seconds, uint8_t minutes, uint8_t hours,
-            uint8_t day, uint8_t month, uint16_t year,
-            struct pldm_msg *msg);
+			      uint8_t seconds, uint8_t minutes, uint8_t hours,
+			      uint8_t day, uint8_t month, uint16_t year,
+			      struct pldm_msg *msg);
 
 /* GetBIOSTable */
 
@@ -307,9 +320,9 @@ int encode_get_date_time_resp(uint8_t instance_id, uint8_t completion_code,
  *  @return pldm_completion_codes
  */
 int encode_get_bios_table_resp(uint8_t instance_id, uint8_t completion_code,
-             uint32_t next_transfer_handle,
-             uint8_t transfer_flag, uint8_t *table_data,
-             size_t payload_length, struct pldm_msg *msg);
+			       uint32_t next_transfer_handle,
+			       uint8_t transfer_flag, uint8_t *table_data,
+			       size_t payload_length, struct pldm_msg *msg);
 
 /** @brief Encode  GetBIOSTable request packet
  *
@@ -322,8 +335,8 @@ int encode_get_bios_table_resp(uint8_t instance_id, uint8_t completion_code,
  *  @return pldm_completion_codes
  */
 int encode_get_bios_table_req(uint8_t instance_id, uint32_t transfer_handle,
-            uint8_t transfer_op_flag, uint8_t table_type,
-            struct pldm_msg *msg);
+			      uint8_t transfer_op_flag, uint8_t table_type,
+			      struct pldm_msg *msg);
 
 /** @brief Decode GetBIOSTable request packet
  *
@@ -336,8 +349,8 @@ int encode_get_bios_table_req(uint8_t instance_id, uint32_t transfer_handle,
  *  @return pldm_completion_codes
  */
 int decode_get_bios_table_req(const struct pldm_msg *msg, size_t payload_length,
-            uint32_t *transfer_handle,
-            uint8_t *transfer_op_flag, uint8_t *table_type);
+			      uint32_t *transfer_handle,
+			      uint8_t *transfer_op_flag, uint8_t *table_type);
 
 /** @brief Decode GetBIOSTable response packet
  *
@@ -353,12 +366,43 @@ int decode_get_bios_table_req(const struct pldm_msg *msg, size_t payload_length,
  *  @return pldm_completion_codes
  */
 int decode_get_bios_table_resp(const struct pldm_msg *msg,
-             size_t payload_length, uint8_t *completion_code,
-             uint32_t *next_transfer_handle,
-             uint8_t *transfer_flag,
-             size_t *bios_table_offset);
+			       size_t payload_length, uint8_t *completion_code,
+			       uint32_t *next_transfer_handle,
+			       uint8_t *transfer_flag,
+			       size_t *bios_table_offset);
 
 /* GetBIOSAttributeCurrentValueByHandle */
+
+/** @brief Decode GetBIOSAttributeCurrentValueByHandle request packet
+ *
+ *  @param[in] instance_id - Message's instance id
+ *  @param[in] transfer_handle - Handle to identify a BIOS attribute transfer
+ *  @param[in] transfer_op_flag - Flag to indicate the start of a multipart
+ *                                 transfer
+ *  @param[in] attribute_handle - Handle to identify the BIOS attribute
+ *  @param[out] msg - Message will be written to this
+ *  @return pldm_completion_codes
+ */
+int encode_get_bios_attribute_current_value_by_handle_req(
+    uint8_t instance_id, uint32_t transfer_handle, uint8_t transfer_op_flag,
+    uint16_t attribute_handle, struct pldm_msg *msg);
+
+/** @brief Decode GetBIOSAttributeCurrentValueByHandle response packet
+ *
+ *  @param[in] msg - Response message
+ *  @param[in] payload_length - Length of response message payload
+ *  @param[out] completion_code - PLDM completion code
+ *  @param[out] next_transfer_handle - handle to identify the next portion of
+ * the transfer
+ *  @param[out] transfer_flag - To indicate what part of the transfer this
+ *                             response represents
+ *  @param[out] attribute_data - contains current value of attribute
+ *  @return pldm_completion_codes
+ */
+int decode_get_bios_attribute_current_value_by_handle_resp(
+    const struct pldm_msg *msg, size_t payload_length, uint8_t *completion_code,
+    uint32_t *next_transfer_handle, uint8_t *transfer_flag,
+    struct variable_field *attribute_data);
 
 /** @brief Decode GetBIOSAttributeCurrentValueByHandle request packet
  *
@@ -402,17 +446,16 @@ int encode_get_bios_current_value_by_handle_resp(
  *  @param[in] payload_length - Length of request message payload
  *  @param[out] transfer_handle - Handle to identify a BIOS table transfer
  *  @param[out] transfer_flag - Flag to indicate what part of the transfer
- * this request represents
- *  @param[out] attribute_data - Contains current value of attribute
- *  @param[out] attribute_length - Pointer to length of attribute
+ *                              this request represents
+ *  @param[out] attribute - Struct variable_field, contains a pointer to the
+ *                          attribute field in the buffer of \p msg, \p msg must
+ *                          be valid when \p attribute is used.
  *  @return pldm_completion_codes
  */
-int decode_set_bios_attribute_current_value_req(const struct pldm_msg *msg,
-            size_t payload_length,
-            uint32_t *transfer_handle,
-            uint8_t *transfer_flag,
-            uint8_t *attribute_data,
-            size_t *attribute_length);
+int decode_set_bios_attribute_current_value_req(
+    const struct pldm_msg *msg, size_t payload_length,
+    uint32_t *transfer_handle, uint8_t *transfer_flag,
+    struct variable_field *attribute);
 
 /** @brief Create a PLDM response message for SetBiosAttributeCurrentValue
  *
@@ -422,9 +465,9 @@ int decode_set_bios_attribute_current_value_req(const struct pldm_msg *msg,
  *  @param[out] msg - Message will be written to this
  */
 int encode_set_bios_attribute_current_value_resp(uint8_t instance_id,
-             uint8_t completion_code,
-             uint32_t next_transfer_handle,
-             struct pldm_msg *msg);
+						 uint8_t completion_code,
+						 uint32_t next_transfer_handle,
+						 struct pldm_msg *msg);
 
 /** @brief Create a PLDM request message for SetDateTime
  *
@@ -442,9 +485,9 @@ int encode_set_bios_attribute_current_value_resp(uint8_t instance_id,
  *         'msg.body.payload'
  */
 int encode_set_date_time_req(uint8_t instance_id, uint8_t seconds,
-           uint8_t minutes, uint8_t hours, uint8_t day,
-           uint8_t month, uint16_t year, struct pldm_msg *msg,
-           size_t payload_length);
+			     uint8_t minutes, uint8_t hours, uint8_t day,
+			     uint8_t month, uint16_t year, struct pldm_msg *msg,
+			     size_t payload_length);
 
 /** @brief Decode a SetDateTime request message
  *
@@ -459,8 +502,8 @@ int encode_set_date_time_req(uint8_t instance_id, uint8_t seconds,
  *  @return pldm_completion_codes
  */
 int decode_set_date_time_req(const struct pldm_msg *msg, size_t payload_length,
-           uint8_t *seconds, uint8_t *minutes, uint8_t *hours,
-           uint8_t *day, uint8_t *month, uint16_t *year);
+			     uint8_t *seconds, uint8_t *minutes, uint8_t *hours,
+			     uint8_t *day, uint8_t *month, uint16_t *year);
 
 /** @brief Create a PLDM response message for SetDateTime
  *
@@ -473,9 +516,15 @@ int decode_set_date_time_req(const struct pldm_msg *msg, size_t payload_length,
  *         'msg.body.payload'
  */
 int encode_set_date_time_resp(uint8_t instance_id, uint8_t completion_code,
-            struct pldm_msg *msg, size_t payload_length);
+			      struct pldm_msg *msg, size_t payload_length);
 
 /** @brief Decode a SetDateTime response message
+ *
+ *  Note:
+ *  * If the return value is not PLDM_SUCCESS, it represents a
+ * transport layer error.
+ *  * If the completion_code value is not PLDM_SUCCESS, it represents a
+ * protocol layer error and all the out-parameters are invalid.
  *
  *  @param[in] msg - Response message
  *  @param[in] payload_length - Length of response message payload
@@ -483,7 +532,7 @@ int encode_set_date_time_resp(uint8_t instance_id, uint8_t completion_code,
  *  @return pldm_completion_codes
  */
 int decode_set_date_time_resp(const struct pldm_msg *msg, size_t payload_length,
-            uint8_t *completion_code);
+			      uint8_t *completion_code);
 
 #ifdef __cplusplus
 }

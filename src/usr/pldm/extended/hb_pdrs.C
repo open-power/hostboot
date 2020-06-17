@@ -31,6 +31,7 @@
 
 // Standard library
 #include <memory>
+#include <algorithm>
 
 // PLDM
 #include <pldm/extended/hb_pdrs.H>
@@ -50,6 +51,10 @@ using namespace PLDM;
 
 namespace
 {
+
+// Used with the libpldm pldm_pdr_add API
+const bool PDR_IS_NOT_REMOTE = false;
+const int PDR_AUTO_CALCULATE_RECORD_HANDLE = 0;
 
 /* @brief Add Entity Association and FRU Record Set PDRs for FRUs that Hostboot
  *        owns.
@@ -94,6 +99,11 @@ void addEntityAssociationAndFruRecordSetPdrs(pldm_pdr* const io_repo,
                           entity.targetType,
                           UTIL_FILTER_PRESENT);
 
+        std::sort(begin(targets), end(targets),
+                  [](const Target* const t1, const Target* const t2) {
+                      return t1->getAttr<ATTR_POSITION>() < t2->getAttr<ATTR_POSITION>();
+                  });
+
         for (size_t i = 0; i < targets.size(); ++i)
         {
             pldm_entity pldmEntity
@@ -131,7 +141,7 @@ void addEntityAssociationAndFruRecordSetPdrs(pldm_pdr* const io_repo,
 
     /* Serialize the tree into the PDR repository. */
 
-    pldm_entity_association_pdr_add(enttree.get(), io_repo);
+    pldm_entity_association_pdr_add(enttree.get(), io_repo, false);
 }
 
 /* @brief Add the state sensor PDRs for OCC FRUs.
@@ -208,10 +218,9 @@ void addOccStateSensorPdrs(pldm_pdr* const io_repo,
     assert(rc == PLDM_SUCCESS,
            "Failed to encoded OCC state sensor PDR");
 
-    const int AUTO_CALCULATE_RECORD_HANDLE = 0;
-
     pldm_pdr_add(io_repo, encoded_pdr.data(), actual_pdr_size,
-                 AUTO_CALCULATE_RECORD_HANDLE);
+                 PDR_AUTO_CALCULATE_RECORD_HANDLE,
+                 PDR_IS_NOT_REMOTE);
 }
 
 /* @brief Add the state effecter PDRs for OCC FRUs.
@@ -289,10 +298,9 @@ void addOccStateEffecterPdrs(pldm_pdr* const io_repo,
     assert(rc == PLDM_SUCCESS,
            "Failed to encoded OCC state effecter PDR");
 
-    const int AUTO_CALCULATE_RECORD_HANDLE = 0;
-
     pldm_pdr_add(io_repo, encoded_pdr.data(), actual_pdr_size,
-                 AUTO_CALCULATE_RECORD_HANDLE);
+                 PDR_AUTO_CALCULATE_RECORD_HANDLE,
+                 PDR_IS_NOT_REMOTE);
 }
 
 /* @brief Add the state effecter and sensor PDRs for OCC FRUs.

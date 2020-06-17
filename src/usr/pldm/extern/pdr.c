@@ -33,12 +33,12 @@ typedef struct pldm_pdr_record {
 	uint32_t size;
 	uint8_t *data;
 	struct pldm_pdr_record *next;
+	bool is_remote;
 } pldm_pdr_record;
 
 typedef struct pldm_pdr {
 	uint32_t record_count;
 	uint32_t size;
-	uint32_t last_used_record_handle;
 	pldm_pdr_record *first;
 	pldm_pdr_record *last;
 } pldm_pdr;
@@ -69,21 +69,22 @@ static void add_record(pldm_pdr *repo, pldm_pdr_record *record)
 		repo->last = record;
 	}
 	repo->size += record->size;
-	repo->last_used_record_handle = record->record_handle;
 	++repo->record_count;
 }
 
 static inline uint32_t get_new_record_handle(const pldm_pdr *repo)
 {
 	assert(repo != NULL);
-	assert(repo->last_used_record_handle != UINT32_MAX);
+	uint32_t last_used_hdl =
+	    repo->last != NULL ? repo->last->record_handle : 0;
+	assert(last_used_hdl != UINT32_MAX);
 
-	return repo->last_used_record_handle + 1;
+	return last_used_hdl + 1;
 }
 
 static pldm_pdr_record *make_new_record(const pldm_pdr *repo,
 					const uint8_t *data, uint32_t size,
-					uint32_t record_handle)
+					uint32_t record_handle, bool is_remote)
 {
 	assert(repo != NULL);
 	assert(size != 0);
@@ -93,6 +94,7 @@ static pldm_pdr_record *make_new_record(const pldm_pdr *repo,
 	record->record_handle =
 	    record_handle == 0 ? get_new_record_handle(repo) : record_handle;
 	record->size = size;
+	record->is_remote = is_remote;
 	if (data != NULL) {
 		record->data = malloc(size);
 		assert(record->data != NULL);
@@ -115,13 +117,13 @@ static pldm_pdr_record *make_new_record(const pldm_pdr *repo,
 }
 
 uint32_t pldm_pdr_add(pldm_pdr *repo, const uint8_t *data, uint32_t size,
-		      uint32_t record_handle)
+		      uint32_t record_handle, bool is_remote)
 {
 	assert(size != 0);
 	assert(data != NULL);
 
 	pldm_pdr_record *record =
-	    make_new_record(repo, data, size, record_handle);
+	    make_new_record(repo, data, size, record_handle, is_remote);
 	add_record(repo, record);
 
 	return record->record_handle;
@@ -133,7 +135,6 @@ pldm_pdr *pldm_pdr_init()
 	assert(repo != NULL);
 	repo->record_count = 0;
 	repo->size = 0;
-	repo->last_used_record_handle = 0;
 	repo->first = NULL;
 	repo->last = NULL;
 
@@ -217,8 +218,6 @@ pldm_pdr_find_record_by_type(const pldm_pdr *repo, uint8_t pdr_type,
 			     uint32_t *size)
 {
 	assert(repo != NULL);
-	assert(data != NULL);
-	assert(size != NULL);
 
 	pldm_pdr_record *record = repo->first;
 	if (curr_record != NULL) {
@@ -227,14 +226,18 @@ pldm_pdr_find_record_by_type(const pldm_pdr *repo, uint8_t pdr_type,
 	while (record != NULL) {
 		struct pldm_pdr_hdr *hdr = (struct pldm_pdr_hdr *)record->data;
 		if (hdr->type == pdr_type) {
-			*size = record->size;
-			*data = record->data;
+			if (data && size) {
+				*size = record->size;
+				*data = record->data;
+			}
 			return record;
 		}
 		record = record->next;
 	}
 
-	*size = 0;
+	if (size) {
+		*size = 0;
+	}
 	return NULL;
 }
 
@@ -261,6 +264,13 @@ uint32_t pldm_pdr_get_record_handle(const pldm_pdr *repo,
 	return record->record_handle;
 }
 
+inline bool pldm_pdr_record_is_remote(const pldm_pdr_record *record)
+{
+	assert(record != NULL);
+
+	return record->is_remote;
+}
+
 uint32_t pldm_pdr_add_fru_record_set(pldm_pdr *repo, uint16_t terminus_handle,
 				     uint16_t fru_rsi, uint16_t entity_type,
 				     uint16_t entity_instance_num,
@@ -285,7 +295,7 @@ uint32_t pldm_pdr_add_fru_record_set(pldm_pdr *repo, uint16_t terminus_handle,
 	fru->entity_instance_num = htole16(entity_instance_num);
 	fru->container_id = htole16(container_id);
 
-	return pldm_pdr_add(repo, data, size, 0);
+	return pldm_pdr_add(repo, data, size, 0, false);
 }
 
 const pldm_pdr_record *pldm_pdr_fru_record_set_find_by_rsi(
@@ -309,7 +319,8 @@ const pldm_pdr_record *pldm_pdr_fru_record_set_find_by_rsi(
 		if (fru->fru_rsi == htole16(fru_rsi)) {
 			*terminus_handle = le16toh(fru->terminus_handle);
 			*entity_type = le16toh(fru->entity_type);
-			*entity_instance_num = le16toh(fru->entity_instance_num);
+			*entity_instance_num =
+			    le16toh(fru->entity_instance_num);
 			*container_id = le16toh(fru->container_id);
 			return curr_record;
 		}
@@ -518,7 +529,8 @@ uint8_t pldm_entity_get_num_children(pldm_entity_node *node,
 static void _entity_association_pdr_add_entry(pldm_entity_node *curr,
 					      pldm_pdr *repo, uint16_t size,
 					      uint8_t contained_count,
-					      uint8_t association_type)
+					      uint8_t association_type,
+					      bool is_remote)
 {
 	uint8_t pdr[size];
 	uint8_t *start = pdr;
@@ -560,11 +572,11 @@ static void _entity_association_pdr_add_entry(pldm_entity_node *curr,
 		node = node->next_sibling;
 	}
 
-	pldm_pdr_add(repo, pdr, size, 0);
+	pldm_pdr_add(repo, pdr, size, 0, is_remote);
 }
 
 static void entity_association_pdr_add_entry(pldm_entity_node *curr,
-					     pldm_pdr *repo)
+					     pldm_pdr *repo, bool is_remote)
 {
 	uint8_t num_logical_children =
 	    pldm_entity_get_num_children(curr, PLDM_ENTITY_ASSOCIAION_LOGICAL);
@@ -578,7 +590,7 @@ static void entity_association_pdr_add_entry(pldm_entity_node *curr,
 		    (num_logical_children * sizeof(pldm_entity));
 		_entity_association_pdr_add_entry(
 		    curr, repo, logical_pdr_size, num_logical_children,
-		    PLDM_ENTITY_ASSOCIAION_LOGICAL);
+		    PLDM_ENTITY_ASSOCIAION_LOGICAL, is_remote);
 	}
 
 	if (num_physical_children) {
@@ -588,25 +600,146 @@ static void entity_association_pdr_add_entry(pldm_entity_node *curr,
 		    (num_physical_children * sizeof(pldm_entity));
 		_entity_association_pdr_add_entry(
 		    curr, repo, physical_pdr_size, num_physical_children,
-		    PLDM_ENTITY_ASSOCIAION_PHYSICAL);
+		    PLDM_ENTITY_ASSOCIAION_PHYSICAL, is_remote);
 	}
 }
 
-static void entity_association_pdr_add(pldm_entity_node *curr, pldm_pdr *repo)
+static void entity_association_pdr_add(pldm_entity_node *curr, pldm_pdr *repo,
+				       bool is_remote)
 {
 	if (curr == NULL) {
 		return;
 	}
-	entity_association_pdr_add_entry(curr, repo);
-	entity_association_pdr_add(curr->next_sibling, repo);
-	entity_association_pdr_add(curr->first_child, repo);
+	entity_association_pdr_add_entry(curr, repo, is_remote);
+	entity_association_pdr_add(curr->next_sibling, repo, is_remote);
+	entity_association_pdr_add(curr->first_child, repo, is_remote);
 }
 
 void pldm_entity_association_pdr_add(pldm_entity_association_tree *tree,
-				     pldm_pdr *repo)
+				     pldm_pdr *repo, bool is_remote)
 {
 	assert(tree != NULL);
 	assert(repo != NULL);
 
-	entity_association_pdr_add(tree->root, repo);
+	entity_association_pdr_add(tree->root, repo, is_remote);
+}
+
+void pldm_pdr_remove_remote_pdrs(pldm_pdr *repo)
+{
+	assert(repo != NULL);
+	bool removed = false;
+
+	pldm_pdr_record *record = repo->first;
+	pldm_pdr_record *prev = NULL;
+	while (record != NULL) {
+		pldm_pdr_record *next = record->next;
+		if (record->is_remote == true) {
+			if (repo->first == record) {
+				repo->first = next;
+			} else {
+				prev->next = next;
+			}
+			if (repo->last == record) {
+				repo->last = prev;
+			}
+			if (record->data) {
+				free(record->data);
+			}
+			--repo->record_count;
+			repo->size -= record->size;
+			free(record);
+			removed = true;
+		} else {
+			prev = record;
+		}
+		record = next;
+	}
+
+	if (removed == true) {
+		record = repo->first;
+		uint32_t record_handle = 0;
+		while (record != NULL) {
+			record->record_handle = ++record_handle;
+			if (record->data != NULL) {
+				struct pldm_pdr_hdr *hdr =
+				    (struct pldm_pdr_hdr *)(record->data);
+				hdr->record_handle =
+				    htole32(record->record_handle);
+			}
+			record = record->next;
+		}
+	}
+}
+
+void entity_association_tree_find(pldm_entity_node *node, pldm_entity *entity,
+				  pldm_entity_node **out)
+{
+	if (node == NULL) {
+		return;
+	}
+
+	if (node->entity.entity_type == entity->entity_type &&
+	    node->entity.entity_instance_num == entity->entity_instance_num) {
+		entity->entity_container_id = node->entity.entity_container_id;
+		*out = node;
+		return;
+	}
+
+	entity_association_tree_find(node->next_sibling, entity, out);
+	entity_association_tree_find(node->first_child, entity, out);
+}
+
+pldm_entity_node *
+pldm_entity_association_tree_find(pldm_entity_association_tree *tree,
+				  pldm_entity *entity)
+{
+	assert(tree != NULL);
+
+	pldm_entity_node *node = NULL;
+	entity_association_tree_find(tree->root, entity, &node);
+	return node;
+}
+
+void pldm_entity_association_pdr_extract(const uint8_t *pdr, uint16_t pdr_len,
+					 size_t *num_entities,
+					 pldm_entity **entities)
+{
+	assert(pdr != NULL);
+	assert(pdr_len >= sizeof(struct pldm_pdr_hdr) +
+			      sizeof(struct pldm_pdr_entity_association));
+
+	struct pldm_pdr_hdr *hdr = (struct pldm_pdr_hdr *)pdr;
+	assert(hdr->type == PLDM_PDR_ENTITY_ASSOCIATION);
+
+	const uint8_t *start = (uint8_t *)pdr;
+	const uint8_t *end =
+	    start + sizeof(struct pldm_pdr_hdr) + le16toh(hdr->length);
+	start += sizeof(struct pldm_pdr_hdr);
+	struct pldm_pdr_entity_association *entity_association_pdr =
+	    (struct pldm_pdr_entity_association *)start;
+	*num_entities = entity_association_pdr->num_children + 1;
+	assert(*num_entities >= 2);
+	*entities = malloc(sizeof(pldm_entity) * *num_entities);
+	assert(*entities != NULL);
+	assert(start + sizeof(struct pldm_pdr_entity_association) +
+		   sizeof(pldm_entity) * (*num_entities - 2) ==
+	       end);
+	(*entities)->entity_type =
+	    le16toh(entity_association_pdr->container.entity_type);
+	(*entities)->entity_instance_num =
+	    le16toh(entity_association_pdr->container.entity_instance_num);
+	(*entities)->entity_container_id =
+	    le16toh(entity_association_pdr->container.entity_container_id);
+	pldm_entity *curr_entity = entity_association_pdr->children;
+	size_t i = 1;
+	while (i < *num_entities) {
+		(*entities + i)->entity_type =
+		    le16toh(curr_entity->entity_type);
+		(*entities + i)->entity_instance_num =
+		    le16toh(curr_entity->entity_instance_num);
+		(*entities + i)->entity_container_id =
+		    le16toh(curr_entity->entity_container_id);
+		++curr_entity;
+		++i;
+	}
 }

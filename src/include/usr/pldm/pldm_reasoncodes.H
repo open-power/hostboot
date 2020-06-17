@@ -99,6 +99,7 @@ namespace PLDM
         RC_OCC_RESET_FAILED         = PLDM_COMP_ID | 0x1C,
         RC_OVERLONG_LOCATION_CODE   = PLDM_COMP_ID | 0x1D,
         RC_RECV_FAIL                = PLDM_COMP_ID | 0x1E,
+        RC_MISSING_ENTITY_ID        = PLDM_COMP_ID | 0x1F,
     };
 }
 #endif

@@ -67,6 +67,12 @@ namespace std
         using type = decltype(__unique_ptr_pointer_type_helper<T, Deleter>(0));
     };
 
+    template<typename T, typename Deleter>
+    struct unique_ptr_pointer_type<T[], Deleter>
+    {
+        using type = T*;
+    };
+
     template <typename T>
     struct default_delete
     {

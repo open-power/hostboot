@@ -206,7 +206,7 @@ bool is_time_legal(uint8_t seconds, uint8_t minutes, uint8_t hours, uint8_t day,
 	if (month < 1 || month > 12) {
 		return false;
 	}
-	static const int days[13] = {0,  31, 28, 31, 30, 31, 30,
+	static const int days[13] = {0,	 31, 28, 31, 30, 31, 30,
 				     31, 31, 30, 31, 30, 31};
 	int rday = days[month];
 	if (month == 2 &&

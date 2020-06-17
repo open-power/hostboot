@@ -301,7 +301,8 @@ errlHndl_t getRemotePdrRepository(pldm_pdr* const io_repo)
             pldm_pdr_add(io_repo,
                          pdr.data.data(),
                          pdr.data.size(),
-                         pdr.record_handle);
+                         pdr.record_handle,
+                         false);
         }
     }
 
@@ -330,7 +331,7 @@ errlHndl_t sendRepositoryChangedEvent(const terminus_id_t i_tid,
         std::vector<uint8_t> event_data_bytes;
 
         {
-            const uint8_t event_data_operation = RECORDS_ADDED;
+            const uint8_t event_data_operation = PLDM_RECORDS_ADDED;
             const size_t num_changed_pdrs = i_handles.size();
 
             assert(num_changed_pdrs <= UINT8_MAX,
@@ -380,7 +381,7 @@ errlHndl_t sendRepositoryChangedEvent(const terminus_id_t i_tid,
 #ifndef __HOSTBOOT_RUNTIME
                 const msg_q_t msgQ = msg_q_resolve(VFS_ROOT_MSG_PLDM_REQ_OUT);
                 assert(msgQ != nullptr,
-                       "getAllPdrs: PLDM Req Out Message queue did not resolve properly!");
+                       "sendRepositoryChangedEvent: PLDM Req Out Message queue did not resolve properly!");
 #else
                 const msg_q_t msgQ = nullptr;
 #endif
