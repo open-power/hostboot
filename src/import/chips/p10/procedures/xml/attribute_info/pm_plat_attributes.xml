@@ -237,7 +237,7 @@
     Indicates whether to calculate trip offsets per core or per chip. Default is per
     chip.
 
-    CHIP or CORE 
+    CHIP or CORE
 
     Producer: MRWB
     </description>
@@ -2536,6 +2536,78 @@
     <platInit/>
     <initToZero/>
     <overrideOnly/>
+    <group>wof</group>
+  </attribute>
+
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_WOF_DCCR_VALUE</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+        Value to set into the Droop Count Control Register to establish the light
+        and heavy droop thresholds.
+
+        0:3   DTT_LARGE_OFFSET
+        Used for both DTT[01]_EVENT_SEL="100".This field is added to the
+        Large Droop Bin (FDCR[LARGE_DROOP_DETECT]+ FDCR[TRIP_OFFSET] +
+        FDCR[CAL_ADJ]) to select the target DDS_DATAbin location for "dirty"
+        timing margin.
+
+        4:7   DTT0_THRESH_SCALE
+        Droop Throttle Threshold0 Scale Factor (4-bit) for use by the following field.
+
+        8:15  DTT0_THRESH_VALUE
+        Droop Throttle Threshold0 Compare Value (8-bit). When the 24-bit
+        DroopThrottle Count0 meets or exceeds this field times 2^(16-DTT0_THRESH_SCALE),
+        an encoded event corresponding toCUCR.QME_EVENTS_PENDING bit 60 is sent to QME
+        to set the TTSR.
+
+        16:19 DTT1_THRESH_SCALE
+        Droop Throttle Threshold1 Scale Factor (4-bit) for use by the following field.
+
+        20:17 DTT1_THRESH_VALUE
+        Droop Throttle Threshold1 Compare Value (8-bit). When the 24-bit
+        DroopThrottle Count1 meets or exceeds this field times 2^(16-DTT0_THRESH_SCALE),
+        an encoded event corresponding toCUCR.QME_EVENTS_PENDING bit 60 is sent to QME
+        to set the TTSR.
+
+        28:30 DTT1_EVENT_SEL
+        Chooses which event increments DMSR DROOP0_COUNT, when this field is:
+
+        000: DROOP_COUNT0 disabled
+
+        Single occurrence of a droop event leading to performance loss
+        selects what to compare with FTC Event Data(4:6)
+
+        001: "110" rising edge of a small throttle response
+        010: "111" rising edge of a large throttle response
+        011: "110" or "111" rising edge of a either throttle response
+
+        Raw timing margin from 0 to 15 bins above the Large detect point.
+
+        100: Cycles that the bin selected by LARGE_DROOP_DETECT plus
+        TRIP_OFFSET plus 4-bit DTT_LARGE_OFFSET was '0' (indicating loss of
+        timing margin).
+
+        How long actually throttling at a "full rate"including due to predicted
+        response (slope and adj and ddp) selects what to compare with
+        FTC Event Data(4:6)
+
+        101:"110" or ("01X" and NOT ("011" and Event Data(7))) meaning number of
+        cycles that small throttle was present and not in recovery phase
+        110: "111`" or 100" meaning number of cycles that large droop was
+        presentand not in either recovery phase
+        111: either small or large throttle present and not in recovery (OR
+        of the twoabove)
+
+        31:33 DTT1_EVENT_SEL
+        Chooses which event increments DMSR DROOP0_COUNT.  See DTT0_EVENT_SEL
+
+        Consumer: p10_pm_pgpe_init
+    </description>
+    <valueType>uint64</valueType>
+    <platInit/>
+    <initToZero/>
     <group>wof</group>
   </attribute>
 
