@@ -1718,6 +1718,12 @@
       <id>PARENT_DECONFIG_RULES</id>
     </attribute>
     <attribute>
+      <id>PCIE_NVME_CCIN</id>
+    </attribute>
+    <attribute>
+      <id>PCIE_NVME_PHB_CONFIG</id>
+    </attribute>
+    <attribute>
       <id>SECURE_VERSION_SEEPROM</id>
     </attribute>
     <attribute>

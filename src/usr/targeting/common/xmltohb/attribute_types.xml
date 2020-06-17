@@ -5547,13 +5547,91 @@
   </attribute>
 
   <attribute>
-    <description>Base Address of PCI 32 bit Memory Space</description>
-    <id>PCI_BASE_ADDRS_32</id>
+    <description>Custom Card Identification Number (CCIN) of the NVME Backplane</description>
+    <id>PCIE_NVME_CCIN</id>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <writeable/>
+    <no_export/>
+    <simpleType>
+      <uint64_t/>
+    </simpleType>
+  </attribute>
+
+  <attribute>
+    <description>Designates the System PHB Configuration for NVME Backplanes
+        Creator: MRW
+        Purpose: Used by FW to know which PHBs to deconfigure based on NVME Backplane
+        Data Format: 2x2 array of uint64_t values. The first entry in each array
+            is the CCIN of the NVME backplane. The 2nd entry is a bit definition
+            to show which PHBs on which Procs are disabled. This is also going to
+            emulate the ATTR_PROC_PCIE_PHB_ACTIVE_BASE format. The bit set to 1
+            signals the particular PHB is disabled.
+                bit 0,1,2: Proc0 Pec0 PHB0/1/2
+                bit 3: reserved
+                bit 4,5,6: Proc0 Pec1 PHB0/1/2
+                bit 7: reserved
+
+                bit 8,9,10: Proc1 Pec0 PHB0/1/2
+                bit 11: reserved
+                bit 12,13,14: Proc1 Pec1 PHB0/1/2
+                bit 15: reserved
+
+                bit 16,17,18: Proc2 Pec0 PHB0/1/2
+                bit 19: reserved
+                bit 20,21,22: Proc2 Pec1 PHB0/1/2
+                bit 23: reserved
+
+                bit 24,25,26: Proc3 Pec0 PHB0/1/2
+                bit 27: reserved
+                bit 28,29,30: Proc3 Pec1 PHB0/1/2
+                bit 31: reserved
+
+                bit 32,33,34: Proc4 Pec0 PHB0/1/2
+                bit 35: reserved
+                bit 36,37,38: Proc4 Pec1 PHB0/1/2
+                bit 39: reserved
+
+                bit 40,41,42: Proc5 Pec0 PHB0/1/2
+                bit 43: reserved
+                bit 44,45,46: Proc5 Pec1 PHB0/1/2
+                bit 47: reserved
+
+                bit 48,49,50: Proc6 Pec0 PHB0/1/2
+                bit 52: reserved
+                bit 52,53,54: Proc6 Pec1 PHB0/1/2
+                bit 55: reserved
+
+                bit 56,57,58: Proc7 Pec0 PHB0/1/2
+                bit 59: reserved
+                bit 60,61,62: Proc7 Pec1 PHB0/1/2
+                bit 63: reserved
+
+           Example: [0x1234, 0x0000, 0x4567, 0x0040080000000000]
+                [0x1234, 0x00000000] -- For NVME Backplane with CCIN 0x1234:
+                           Do not deconfigure any PHBs on any Procs
+
+                [0x4567, 0x0040080000000000) -- For NVME Backplane with CCIN 0x4567:
+                       00 - Do not deconfigure any PHBs on Proc0
+                       40 - Deconfigure PHB1 on Proc1 Pec0
+                       08 - Deconfigure PHB0 on Proc2 Pec1
+                       00 - Do not deconfigure any PHBs on Proc3
+                       00 - Do not deconfigure any PHBs on Proc4
+                       00 - Do not deconfigure any PHBs on Proc5
+                       00 - Do not deconfigure any PHBs on Proc6
+                       00 - Do not deconfigure any PHBs on Proc7
+    </description>
+    <id>PCIE_NVME_PHB_CONFIG</id>
     <persistency>non-volatile</persistency>
     <readable/>
     <simpleType>
-      <array>4</array>
-      <uint64_t/>
+      <array>2,2</array>
+      <uint64_t>
+        <default>
+            0,0,
+            0,0
+        </default>
+      </uint64_t>
     </simpleType>
   </attribute>
 
