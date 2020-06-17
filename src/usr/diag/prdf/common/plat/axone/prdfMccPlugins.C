@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -84,57 +84,6 @@ int32_t PostAnalysis( ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc )
     return SUCCESS;
 }
 PRDF_PLUGIN_DEFINE( axone_mcc, PostAnalysis );
-
-//##############################################################################
-//
-//                                  DSTLFIR
-//
-//##############################################################################
-
-/**
- * @brief  Plugin function called to avoid analyzing to a checkstop on an OCMB.
- * @param  i_chip A MCC chip.
- * @param  io_sc  The step code data struct.
- * @param  i_pos  Position of the OMI/OCMB relative to the MCC.
- * @return SUCCESS if the primary attn is CS, else PRD_SCAN_COMM_REGISTER_ZERO.
- */
-int32_t checkOcmb( ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc,
-                   uint8_t i_pos )
-{
-    int32_t rc = PRD_SCAN_COMM_REGISTER_ZERO;
-
-    #ifdef CONFIG_ENABLE_CHECKSTOP_ANALYSIS
-    // We do not have support for the OCMB in the checkstop analysis path.
-    // As such, we will simply indicate there is an attention from the OCMB and
-    // add second level support and both sides of the bus as callouts.
-    if ( CHECK_STOP == io_sc.service_data->getPrimaryAttnType() )
-    {
-        TargetHandle_t omi = getConnectedChild( i_chip->getTrgt(), TYPE_OMI,
-                                                i_pos );
-        ExtensibleChip * ocmb = getConnectedChild( i_chip, TYPE_OCMB_CHIP,
-                                                   i_pos );
-
-        io_sc.service_data->SetCallout( LEVEL2_SUPPORT, MRU_MED, NO_GARD );
-        io_sc.service_data->SetCallout( omi, MRU_LOW, NO_GARD );
-        io_sc.service_data->SetCallout( ocmb->getTrgt(), MRU_LOW, NO_GARD );
-
-        rc = SUCCESS;
-    }
-    #endif
-
-    return rc;
-}
-
-#define CHECK_OCMB_PLUGIN( POS ) \
-int32_t checkOcmb_##POS( ExtensibleChip * i_chip, \
-                         STEP_CODE_DATA_STRUCT & io_sc ) \
-{ \
-    return checkOcmb( i_chip, io_sc, POS ); \
-} \
-PRDF_PLUGIN_DEFINE( axone_mcc, checkOcmb_##POS );
-
-CHECK_OCMB_PLUGIN( 0 );
-CHECK_OCMB_PLUGIN( 1 );
 
 } // end namespace axone_mcc
 

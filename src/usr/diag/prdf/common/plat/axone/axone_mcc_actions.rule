@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2018,2019
+# Contributors Listed Below - COPYRIGHT 2018,2020
 # [+] International Business Machines Corp.
 #
 #
@@ -55,6 +55,16 @@ actionclass chnl0_ocmb
 actionclass chnl1_ocmb
 {
     callout(connected(TYPE_OCMB_CHIP,1), MRU_MED);
+};
+
+actionclass chnl0_ocmb_L
+{
+    callout(connected(TYPE_OCMB_CHIP,0), MRU_LOW);
+};
+
+actionclass chnl1_ocmb_L
+{
+    callout(connected(TYPE_OCMB_CHIP,1), MRU_LOW);
 };
 
 actionclass chnl0_omi_bus
@@ -162,14 +172,30 @@ actionclass analyzeUSTLFIR { analyze(gUSTLFIR); };
 # Analyze connected
 ################################################################################
 
+actionclass defaultCallout_chnl0_th_1
+{
+    callout2ndLvlMed;
+    chnl0_omi_L;
+    chnl0_ocmb_L;
+    threshold1;
+};
+
+actionclass defaultCallout_chnl1_th_1
+{
+    callout2ndLvlMed;
+    chnl1_omi_L;
+    chnl1_ocmb_L;
+    threshold1;
+};
+
 actionclass analyze_ocmb_chnl0
 {
-    try( funccall("checkOcmb_0"), analyze(connected(TYPE_OCMB_CHIP, 0)) );
+    try( analyze(connected(TYPE_OCMB_CHIP, 0)), defaultCallout_chnl0_th_1 );
 };
 
 actionclass analyze_ocmb_chnl1
 {
-    try( funccall("checkOcmb_1"), analyze(connected(TYPE_OCMB_CHIP, 1)) );
+    try( analyze(connected(TYPE_OCMB_CHIP, 1)), defaultCallout_chnl1_th_1 );
 };
 
 actionclass analyze_ocmb_chnl0_UERE

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -126,6 +126,18 @@ int32_t ClearServiceCallFlag_mnfgInfo( ExtensibleChip * i_chip,
 PRDF_PLUGIN_DEFINE_NS(nimbus_proc,  CommonPlugins, ClearServiceCallFlag_mnfgInfo);
 PRDF_PLUGIN_DEFINE_NS(cumulus_proc, CommonPlugins, ClearServiceCallFlag_mnfgInfo);
 PRDF_PLUGIN_DEFINE_NS(axone_proc,   CommonPlugins, ClearServiceCallFlag_mnfgInfo);
+
+/**
+ * @brief   Analyze for unit checkstops on this target.
+ * @param   i_chip The chip.
+ * @param   io_sc  Step code data struct
+ * @returns SUCCESS always
+ */
+int32_t analyzeUcs( ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc )
+{
+    return i_chip->Analyze( io_sc, UNIT_CS );
+}
+PRDF_PLUGIN_DEFINE_NS(axone_mc, CommonPlugins, analyzeUcs);
 
 /**
  * @brief   Will change the gard state of any NVDIMMs in the callout list to

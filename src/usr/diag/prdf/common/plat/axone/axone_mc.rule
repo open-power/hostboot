@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2018,2019
+# Contributors Listed Below - COPYRIGHT 2018,2020
 # [+] International Business Machines Corp.
 #
 #
@@ -201,12 +201,17 @@ rule rMC_CHIPLET_FIR
   CHECK_STOP:
      MC_CHIPLET_CS_FIR       & ~MC_CHIPLET_FIR_MASK & `1fffffffffffffff`;
   RECOVERABLE:
-    (MC_CHIPLET_RE_FIR >> 2) & ~MC_CHIPLET_FIR_MASK & `1fffffffffffffff`;
+    (MC_CHIPLET_RE_FIR >> 2) & ~MC_CHIPLET_FIR_MASK & `3fffffffffffffff`;
 };
 
 group gMC_CHIPLET_FIR attntype CHECK_STOP, RECOVERABLE
     filter singlebit
 {
+    /** MC_CHIPLET_FIR[2]
+     *  Active UNIT_CS attention on this MC
+     */
+    (rMC_CHIPLET_FIR, bit(2)) ? analyzeMcUcs;
+
     /** MC_CHIPLET_FIR[3]
      *  Attention from MC_LFIR
      */
