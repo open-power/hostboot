@@ -74,8 +74,11 @@ using namespace pm_pstate_parameter_block;
                  iv_attr_mvpd_data[i].ics_rdp_ac_10ma == 0 || \
                  iv_attr_mvpd_data[i].ics_rdp_dc_10ma == 0 || \
                  iv_attr_mvpd_data[i].vdd_vmin == 0)
-        //         iv_attr_mvpd_data[i].irt_rdp_ac_10ma == 0 ||
-          //       iv_attr_mvpd_data[i].irt_rdp_dc_10ma == 0 ||
+
+// TODO; need to reenable when RT values are guarenteed to be present
+//                 iv_attr_mvpd_data[i].rt_tdp_ac_10ma == 0 ||
+//                 iv_attr_mvpd_data[i].rt_tdp_dc_10ma == 0 ||
+
 
 #define POUNDV_POINTS_PRINT(i,suffix)   \
                   .set_FREQUENCY_##suffix(iv_attr_mvpd_data[i].frequency_mhz)  \
@@ -89,8 +92,8 @@ using namespace pm_pstate_parameter_block;
                  .set_ICS_TDP_DC_##suffix(iv_attr_mvpd_data[i].ics_tdp_dc_10ma) \
                  .set_ICS_RDP_AC_##suffix(iv_attr_mvpd_data[i].ics_rdp_ac_10ma) \
                  .set_ICS_RDP_DC_##suffix(iv_attr_mvpd_data[i].ics_rdp_dc_10ma) \
-                 .set_ICS_RDP_AC_##suffix(iv_attr_mvpd_data[i].irt_rdp_ac_10ma) \
-                 .set_ICS_RDP_DC_##suffix(iv_attr_mvpd_data[i].irt_rdp_dc_10ma) \
+                 .set_ICS_RDP_AC_##suffix(iv_attr_mvpd_data[i].rt_tdp_ac_10ma) \
+                 .set_ICS_RDP_DC_##suffix(iv_attr_mvpd_data[i].rt_tdp_dc_10ma) \
                  .set_VDD_VMIN_##suffix(iv_attr_mvpd_data[i].vdd_vmin)
 
 //w => N_L (w > 7 is invalid)
@@ -106,10 +109,26 @@ using namespace pm_pstate_parameter_block;
     { state = 0; }
 
 #define POUNDV_SLOPE_CHECK(x,y)   x > y ? " is GREATER (ERROR!) than " : " is less than "
-#define HEX_DEC_STR(_buffer, _hex, _dec)                        \
+
+#define PRINT_LEAD1(_buffer, _format, _var1)                    \
+    {                                                           \
+        char _temp_buffer[64];                                  \
+        strcpy(_buffer,"");                                     \
+        sprintf(_temp_buffer, _format, _var1);                 \
+        strcat(_buffer, _temp_buffer);                          \
+    }
+
+#define HEX_DEC_STR(_buffer, _value)                            \
    {                                                            \
        char _temp_buffer[64];                                   \
-       sprintf(_temp_buffer, " %04X (%4d) ", _dec, _hex);       \
+       sprintf(_temp_buffer, "0x%04X (%5d)  ", _value, _value); \
+       strcat(_buffer, _temp_buffer);                           \
+   }
+
+#define HEX_STR(_buffer, _value)                                \
+   {                                                            \
+       char _temp_buffer[64];                                   \
+       sprintf(_temp_buffer, "0x%04X  ", _value);               \
        strcat(_buffer, _temp_buffer);                           \
    }
 
@@ -235,10 +254,9 @@ const uint8_t g_vpd_PVData[] =
 };
 */
 
-
 //Sample data to verify functionality
-//
-// WOF sample data
+////
+//// WOF sample data
 const uint8_t g_wofData[] =
 {
     0x57, 0x46, 0x54, 0x48  /*MAGIC CODE WFTH*/,
@@ -250,7 +268,7 @@ const uint8_t g_wofData[] =
     0x20                    /*core count*/,//16
     0x0C, 0xE4              /*Vcs start*/,
     0x0D, 0x05              /*Vcs step*/,
-    0x00, 0x06              /*Vcs size*/,
+    0x00, 0x04              /*Vcs size*/,
     0x09, 0xC4              /*Vdd start*/,
     0x01, 0xF4              /*Vdd step*/,
     0x00, 0x1A              /*Vdd size*/,
@@ -259,7 +277,7 @@ const uint8_t g_wofData[] =
     0x00, 0x0C              /*Vratio size*/,
     0x13, 0x88              /*IO start*/,
     0x13, 0x88              /*IO step*/,
-    0x00, 0x04               /*IO size*/,
+    0x00, 0x06              /*IO size*/,
     0x00, 0x17              /*AC start*/,
     0x00, 0x02              /*AC step*/,
     0x00, 0x4               /*AC size*/,
@@ -284,67 +302,46 @@ const uint8_t g_wofData[] =
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
 };
 
-//Sample data to verify functionality
-//
-// WOF sample data
-WofTablesHeader_t g_wofData2 =
+// These values are for dummy VPD having a 3100MHz UT frequency
+const uint8_t g_static_vrt[] =
 {
-    revle32(0x57465448)      ,    /*MAGIC CODE WFTH*/
-            0,0,0            ,    /*Reserved [3]*/
-               1             ,    /*header version*/
-    revle16(  16)            ,    /*VRT block size*/
-    revle16(   4)            ,    /*VRT header size*/
-    revle16(   1)            ,    /*VRT data size*/
-               1             ,    /*OCS mode*/
-              32             ,    /*core count*/ //16
-    revle16(3300)            ,    /*Vcs start*/
-    revle16(3333)            ,    /*Vcs step*/
-    revle16(   6)            ,    /*Vcs size*/
-    revle16(2500)            ,    /*Vdd start*/
-    revle16( 500)            ,    /*Vdd step*/
-    revle16(  26)            ,    /*Vdd size*/
-    revle16(3125)            ,    /*Vratio start*/
-    revle16( 625)            ,    /*Vratio step*/ //16
-    revle16(  12)            ,    /*Vratio size*/
-    revle16(2000)            ,    /*IO start*/
-    revle16(2500)            ,    /*IO step*/
-    revle16(   4)            ,    /*IO size*/
-    revle16(  21)            ,    /*AC start*/
-    revle16(   2)            ,    /*AC step*/
-    revle16(   4)            ,    /*AC size*/
-    revle16(2000)            ,    /*Sort Throttle Freq*/ //16
-    revle16( 250)            ,    /*Socket Power*/
-    revle16(3500)            ,    /*SPT Freq*/
-    revle16( 350)            ,    /*RDP Curr*/
-    revle16( 375)            ,    /*Boost Curr*/
-               4             ,    /*TDP VCS Ceff index*/
-              20             ,    /*TDP VDD Ceff index*/
-               2             ,    /*TDP IO Powr index*/
-               1             ,    /*TDP Amb Cond index*/
-              50             ,    /*IO full Wattage*/
-              10             ,    /*IO Disabled wattage*/
-    revle16(3800)            ,    /*Sort UltraTurbo Freq*/ //16
-    revle32(0x20200125)      ,    /*table time stamp*/
-            0,0,0,0          ,    /*reserved[4]*/
-                                  /*table version*/ //16 First
-                                  /*package name*/ //16 First
+            //Index
+    0x70,   //  0
+    0x6f,   //  1
+    0x6e,   //  2
+    0x6d,   //  3
+    0x6c,   //  4
+    0x6b,   //  5
+    0x58,   //  6
+    0x54,   //  7
+    0x50,   //  8
+    0x4C,   //  9
+    0x48,   //  10
+    0x44    //  11
 };
 
 
-//Sample VRT data
-const uint8_t g_sysvrtData[] =
+// These values are for parts having a 4000MHz UT frequency
+const uint8_t g_static_vrt_hw[] =
 {
-    0x56,       // Magic_code 1B "V")
-    0x83,        //Byte 0: Type (1b) Content (1b) Ver(2b) IO_id(2b) AC_id(2b)
-    0x00,            // vcs percentage(1B)
-    0x00,            // vdd percentage(1B)
-    0xA8, 0xA8, 0xA8, 0xA8, 0xA8, 0xA8, 0xA8, 0xA8,
-    0xA8, 0xA8, 0xA8, 0xA8
+            //Index
+    0xb4,   //  0
+    0xb4,   //  1
+    0xb4,   //  2
+    0xb4,   //  3
+    0xb4,   //  4
+    0xb2,   //  5
+    0xac,   //  6
+    0xa6,   //  7
+    0xa1,   //  8
+    0x9d,   //  9
+    0x98,   //  10
+    0x93    //  11
 };
 
 
 
-char const* vpdSetStr[] = PV_OP_STR;
+char const* vpdSetStr[] = VPD_PT_SET_STR;
 char const* region_names[] = VPD_OP_SLOPES_REGION_ORDER_STR;
 
 using namespace pm_pstate_parameter_block;
@@ -359,12 +356,14 @@ p10_pstate_parameter_block( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i
                            uint32_t& io_size)
 {
     FAPI_DBG("> p10_pstate_parameter_block");
+
     PlatPmPPB *l_pmPPB = new PlatPmPPB(i_target);
     GlobalPstateParmBlock_t *l_globalppb = new GlobalPstateParmBlock_t;
     OCCPstateParmBlock_t l_occppb;;
 
     do
     {
+
         //Instantiate pstate object
 
         FAPI_ASSERT(l_pmPPB->iv_init_error == false,
@@ -487,413 +486,358 @@ void gppb_print(GlobalPstateParmBlock_t* i_gppb)
     char                    l_buffer[BUFFSIZE];
     char                    l_temp_buffer[BUFFSIZE];
     const char*     pv_op_str[NUM_OP_POINTS] = PV_OP_STR;
-    //const char*     prt_region_names[VPD_NUM_SLOPES_REGION] = VPD_OP_SLOPES_REGION_ORDER_STR;
+    const char*     prt_region_names[VPD_NUM_SLOPES_REGION] = VPD_OP_SLOPES_REGION_ORDER_STR;
+    const char*     prt_rail_names[RUNTIME_RAILS] = RUNTIME_RAIL_STR;
+    const char*     prt_dds_slope_names[NUM_POUNDW_DDS_FIELDS] = POUNDW_DDS_FIELDS_STR;
     char vlt_str[][4] = {"VDD","VCS"};
     // Put out the endian-corrected scalars
     FAPI_INF("---------------------------------------------------------------------------------------");
-    FAPI_INF("Global Pstate Parameter Block @ %p", i_gppb);
+    FAPI_INF("Global Pstate Parameter Block");
     FAPI_INF("---------------------------------------------------------------------------------------");
 
-    FAPI_INF("%-20s : %04X (%3d)",
-             "Reference Frequency",
-             revle32(i_gppb->reference_frequency_khz),
+//    strcpy(l_buffer,"");
+//    sprintf (l_temp_buffer, "  %-20s : ","Frequency Ref  (KHz)");
+//    strcat(l_buffer, l_temp_buffer);
+
+    PRINT_LEAD1(l_buffer, "%-20s : ","Frequency Ref  (KHz)");
+    HEX_DEC_STR(l_buffer,
              revle32(i_gppb->reference_frequency_khz));
-    FAPI_INF("%-20s : %04X (%3d)",
-             "Frequency Step Size",
-             revle32(i_gppb->frequency_step_khz),
+    FAPI_INF("%s", l_buffer);
+
+    PRINT_LEAD1(l_buffer, "%-20s : ","Frequency Step (KHz)");
+    HEX_DEC_STR(l_buffer,
              revle32(i_gppb->frequency_step_khz));
+    FAPI_INF("%s", l_buffer);
 
-    FAPI_INF("%-20s : %04X (%3d) ",
-             "Core Ceiling Frequency",
-             revle32(i_gppb->frequency_ceiling_khz),
+    PRINT_LEAD1(l_buffer, "%-20s : ","Frequency Ceil (KHz)");
+    HEX_DEC_STR(l_buffer,
              revle32(i_gppb->frequency_ceiling_khz));
+    FAPI_INF("%s", l_buffer);
 
-    FAPI_INF("%-20s : %04X (%3d) ",
-             "PAU Frequency",
-             revle32(i_gppb->occ_complex_frequency_mhz),
+    PRINT_LEAD1(l_buffer, "%-20s : ","Frequency OCC  (MHz)");
+    HEX_DEC_STR(l_buffer,
              revle32(i_gppb->occ_complex_frequency_mhz));
+    FAPI_INF("%s", l_buffer);
 
-
-    FAPI_INF("Operating Points:  Frequency     VDD(mV)  IDD_TDP_AC(10mA)   IDD_TDP_DC(10mA)  IDD_RDP_AC(10mA)  IDD_RDP_DC(10mA)");
-
+    FAPI_INF("Operating Points:          Freq(MHz)         VDD(mV)       IDTAC(10mA)     IDTDC(10mA)     IDRAC(10mA)     IDRDC(10mA)");
     for (uint32_t i = 0; i < NUM_OP_POINTS; i++)
     {
         strcpy(l_buffer,"");
-        sprintf (l_temp_buffer, "  %-18s : ",pv_op_str[i]);
+        sprintf (l_temp_buffer, "  %-20s : ",pv_op_str[i]);
         strcat(l_buffer, l_temp_buffer);
 
         HEX_DEC_STR(l_buffer,
-                revle32(i_gppb->operating_points_set[0][i].frequency_mhz),
                 revle32(i_gppb->operating_points_set[0][i].frequency_mhz));
 
         HEX_DEC_STR(l_buffer,
-                revle32(i_gppb->operating_points_set[0][i].vdd_mv),
                 revle32(i_gppb->operating_points_set[0][i].vdd_mv));
 
         HEX_DEC_STR(l_buffer,
-                revle32(i_gppb->operating_points_set[0][i].idd_tdp_ac_10ma),
                 revle32(i_gppb->operating_points_set[0][i].idd_tdp_ac_10ma));
 
         HEX_DEC_STR(l_buffer,
-                revle32(i_gppb->operating_points_set[0][i].idd_tdp_dc_10ma),
                 revle32(i_gppb->operating_points_set[0][i].idd_tdp_dc_10ma));
 
         HEX_DEC_STR(l_buffer,
-                revle32(i_gppb->operating_points_set[0][i].idd_rdp_ac_10ma),
                 revle32(i_gppb->operating_points_set[0][i].idd_rdp_ac_10ma));
 
         HEX_DEC_STR(l_buffer,
-                revle32(i_gppb->operating_points_set[0][i].idd_rdp_dc_10ma),
                 revle32(i_gppb->operating_points_set[0][i].idd_rdp_dc_10ma));
 
         FAPI_INF("%s", l_buffer);
     }
 
-    FAPI_INF("Operating Points:  VCS(mV)  ICS_TDP_AC(10mA)   ICS_TDP_DC(10mA)  ICS_RDP_AC(10mA)  IDD_RDP_DC(10mA)");
-
+    FAPI_INF("Operating Points:          Freq(MHz)         VCS(mV)       ICTAC(10mA)     ICTDC(10mA)     ICRAC(10mA)     IDRDC(10mA)");
     for (uint32_t i = 0; i < NUM_OP_POINTS; i++)
     {
-        strcpy(l_buffer,"");
-        sprintf (l_temp_buffer, "  %-18s : ",pv_op_str[i]);
-        strcat(l_buffer, l_temp_buffer);
+        PRINT_LEAD1(l_buffer, "  %-20s : ",pv_op_str[i]);
 
         HEX_DEC_STR(l_buffer,
-                revle32(i_gppb->operating_points_set[0][i].vcs_mv),
+                revle32(i_gppb->operating_points_set[0][i].frequency_mhz));
+
+        HEX_DEC_STR(l_buffer,
                 revle32(i_gppb->operating_points_set[0][i].vcs_mv));
 
         HEX_DEC_STR(l_buffer,
-                revle32(i_gppb->operating_points_set[0][i].ics_tdp_ac_10ma),
                 revle32(i_gppb->operating_points_set[0][i].ics_tdp_ac_10ma));
 
         HEX_DEC_STR(l_buffer,
-                revle32(i_gppb->operating_points_set[0][i].ics_tdp_dc_10ma),
                 revle32(i_gppb->operating_points_set[0][i].ics_tdp_dc_10ma));
 
         HEX_DEC_STR(l_buffer,
-                revle32(i_gppb->operating_points_set[0][i].ics_rdp_ac_10ma),
                 revle32(i_gppb->operating_points_set[0][i].ics_rdp_ac_10ma));
 
         HEX_DEC_STR(l_buffer,
-                revle32(i_gppb->operating_points_set[0][i].ics_rdp_dc_10ma),
                 revle32(i_gppb->operating_points_set[0][i].ics_rdp_dc_10ma));
 
         FAPI_INF("%s", l_buffer);
     }
-    FAPI_INF("Operating Points:  RT_AC(mHz)   VDD_vmin(mV)  RT_DC(10mA) ");
 
+    FAPI_INF("Operating Points:          Freq_GB(mHz)    VDD_vmin(mV)  IDD_POW(10mA) CORE_POWR_TEMP(0.5C)");
     for (uint32_t i = 0; i < NUM_OP_POINTS; i++)
     {
-        strcpy(l_buffer,"");
-        sprintf (l_temp_buffer, "  %-18s : ",pv_op_str[i]);
-        strcat(l_buffer, l_temp_buffer);
+        PRINT_LEAD1(l_buffer, "  %-20s : ",pv_op_str[i]);
 
         HEX_DEC_STR(l_buffer,
-                revle32(i_gppb->operating_points_set[0][i].irt_rdp_ac_10ma),
-                revle32(i_gppb->operating_points_set[0][i].irt_rdp_ac_10ma));
-
-        HEX_DEC_STR(l_buffer,
-                revle32(i_gppb->operating_points_set[0][i].vdd_vmin),
                 revle32(i_gppb->operating_points_set[0][i].vdd_vmin));
 
         HEX_DEC_STR(l_buffer,
-                revle32(i_gppb->operating_points_set[0][i].irt_rdp_dc_10ma),
-                revle32(i_gppb->operating_points_set[0][i].irt_rdp_dc_10ma));
+                revle32(i_gppb->operating_points_set[0][i].rt_tdp_ac_10ma));
 
+        HEX_DEC_STR(l_buffer,
+                revle32(i_gppb->operating_points_set[0][i].rt_tdp_dc_10ma));
 
         FAPI_INF("%s", l_buffer);
     }
 
 
 
-    FAPI_INF("System Parameters:              VDD         VCS         VDN")
-    strcpy(l_buffer,"");
-    sprintf(l_temp_buffer, "  %-30s :", "Load line (uOhm)");
-    strcat(l_buffer, l_temp_buffer);
+    FAPI_INF("System Parameters:           VDD           VCS           VDN")
+
+    PRINT_LEAD1(l_buffer, "  %-20s : ", "Load line (uOhm)");
+    HEX_DEC_STR(l_buffer,
+            revle32(i_gppb->vdd_sysparm.loadline_uohm));
 
     HEX_DEC_STR(l_buffer,
-                revle32(i_gppb->vdd_sysparm.loadline_uohm),
-                revle32(i_gppb->vdd_sysparm.loadline_uohm));
-    HEX_DEC_STR(l_buffer,
-            revle32(i_gppb->vcs_sysparm.loadline_uohm),
             revle32(i_gppb->vcs_sysparm.loadline_uohm));
 
     HEX_DEC_STR(l_buffer,
-            revle32(i_gppb->vdn_sysparm.loadline_uohm),
             revle32(i_gppb->vdn_sysparm.loadline_uohm));
     FAPI_INF("%s", l_buffer);
 
-    strcpy(l_buffer,"");
-    sprintf(l_temp_buffer, "  %-30s :", "Distribution Loss (uOhm)");
-    strcat(l_buffer, l_temp_buffer);
-
+    PRINT_LEAD1(l_buffer, "  %-20s : ", "Dist Loss (uOhm)");
     HEX_DEC_STR(l_buffer,
-            revle32(i_gppb->vdd_sysparm.distloss_uohm),
             revle32(i_gppb->vdd_sysparm.distloss_uohm));
     HEX_DEC_STR(l_buffer,
-            revle32(i_gppb->vcs_sysparm.distloss_uohm),
             revle32(i_gppb->vcs_sysparm.distloss_uohm));
     HEX_DEC_STR(l_buffer,
-            revle32(i_gppb->vdn_sysparm.distloss_uohm),
             revle32(i_gppb->vdn_sysparm.distloss_uohm));
     FAPI_INF("%s", l_buffer);
 
-    strcpy(l_buffer,"");
-    sprintf(l_temp_buffer, "  %-30s :", "Offset (uV)");
-    strcat(l_buffer, l_temp_buffer);
-
+    PRINT_LEAD1(l_buffer, "  %-20s : ", "Offset (uV)");
     HEX_DEC_STR(l_buffer,
-            revle32(i_gppb->vdd_sysparm.distoffset_uv),
             revle32(i_gppb->vdd_sysparm.distoffset_uv));
     HEX_DEC_STR(l_buffer,
-            revle32(i_gppb->vcs_sysparm.distoffset_uv),
             revle32(i_gppb->vcs_sysparm.distoffset_uv));
     HEX_DEC_STR(l_buffer,
-            revle32(i_gppb->vdn_sysparm.distoffset_uv),
             revle32(i_gppb->vdn_sysparm.distoffset_uv));
     FAPI_INF("%s", l_buffer);
 
     FAPI_INF("Safe Parameters:");
-    FAPI_INF("  %-30s : %04X (%3d) ",
-             "Frequency",
-             revle32(i_gppb->safe_frequency_khz),
-             revle32(i_gppb->safe_frequency_khz));
-    FAPI_INF("  %-30s : %04X (%3d) ",
-             "Voltage",
-             revle32(i_gppb->safe_voltage_mv[SAFE_VOLTAGE_VDD]),
-             revle32(i_gppb->safe_voltage_mv[SAFE_VOLTAGE_VDD]));
 
-    FAPI_INF("External VRM Parameters:");
+    PRINT_LEAD1(l_buffer, "  %-20s : ", "Frequency (KHz)");
+    HEX_DEC_STR(l_buffer,
+             revle32(i_gppb->safe_frequency_khz));
+    FAPI_INF("%s", l_buffer);
+             ;
+    PRINT_LEAD1(l_buffer, "  %-20s : ", "Voltage (mV)");
+    HEX_DEC_STR(l_buffer,
+             revle32(i_gppb->safe_voltage_mv[SAFE_VOLTAGE_VDD]));
+    FAPI_INF("%s", l_buffer);
+
+    FAPI_INF("\nExternal VRM Parameters:");
     for (auto i=0; i < RUNTIME_RAILS; ++i)
     {
-        FAPI_INF("  %-30s : %04X (%3d) ",
-                "%s VRM Transition Start",
-                revle32(i_gppb->ext_vrm_parms.transition_start_ns[i]),
-                revle32(i_gppb->ext_vrm_parms.transition_start_ns[i]),
-                vlt_str[i]);
-        FAPI_INF("  %-30s : %04X (%3d) ",
-                "%s VRM Transition Rate - Rising",
-                revle32(i_gppb->ext_vrm_parms.transition_rate_inc_uv_per_us[i]),
-                revle32(i_gppb->ext_vrm_parms.transition_rate_inc_uv_per_us[i]),
-                vlt_str[i]);
-        FAPI_INF("  %-30s : %04X (%3d) ",
-                "%s VRM Transition Rate - Falling",
-                revle32(i_gppb->ext_vrm_parms.transition_rate_dec_uv_per_us[i]),
-                revle32(i_gppb->ext_vrm_parms.transition_rate_dec_uv_per_us[i]),
-                vlt_str[i]);
-        FAPI_INF("  %-30s : %04X (%3d) ",
-                "%s VRM Settling Time (us)",
-                revle32(i_gppb->ext_vrm_parms.transition_rate_dec_uv_per_us[i]),
-                revle32(i_gppb->ext_vrm_parms.transition_rate_dec_uv_per_us[i]),
-                vlt_str[i]);
-        FAPI_INF("  %-30s : %04X (%3d) ",
-                "%s VRM Transition Step Size (mV)",
-                revle32(i_gppb->ext_vrm_parms.step_size_mv[i]),
-                revle32(i_gppb->ext_vrm_parms.step_size_mv[i]),
-                vlt_str[i]);
+        strcpy(l_buffer,"");
+        HEX_DEC_STR(l_buffer,
+             revle32(i_gppb->ext_vrm_parms.transition_start_ns[i]));
+        FAPI_INF("  %-3s %-24s : %s ",
+                vlt_str[i],
+                "Trans Start (ns)",
+                l_buffer);
+
+        strcpy(l_buffer,"");
+        HEX_DEC_STR(l_buffer,
+                revle32(i_gppb->ext_vrm_parms.transition_rate_inc_uv_per_us[i]));
+        FAPI_INF("  %-3s %-24s : %s ",
+                vlt_str[i],
+                "Trans Rate-Incr (uv/us)",
+                l_buffer);
+
+        strcpy(l_buffer,"");
+        HEX_DEC_STR(l_buffer,
+                revle32(i_gppb->ext_vrm_parms.transition_rate_dec_uv_per_us[i]));
+        FAPI_INF("  %-3s %-24s : %s ",
+                vlt_str[i],
+                "Trans Rate-Decr (uv/us)",
+                l_buffer);
+
+        strcpy(l_buffer,"");
+        HEX_DEC_STR(l_buffer,
+                revle32(i_gppb->ext_vrm_parms.stabilization_time_us[i]));
+        FAPI_INF("  %-3s %-24s : %s ",
+                vlt_str[i],
+                "Stabl Time (us)",
+                l_buffer);
+
+        strcpy(l_buffer,"");
+        HEX_DEC_STR(l_buffer,
+               revle32(i_gppb->ext_vrm_parms.step_size_mv[i]));
+        FAPI_INF("  %-3s %-24s : %s ",
+                vlt_str[i],
+                "Trans Step Size (uV)",
+                l_buffer);
     }
 
-#define PRINT_GPPB_SLOPES(type) \
-    for (auto  j = 0; j < VPD_NUM_SLOPES_REGION; ++j) \
+#define xstr(s) str(s)
+#define str(s) #s
+#define PRINT_GPPB_SLOPES(_buffer, _member) \
     { \
-        sprintf(l_temp_buffer, " %s  ", prt_region_names[j]); \
-        strcat(l_buffer, l_temp_buffer); \
-    } \
-    FAPI_INF("%s", l_buffer); \
-    for (auto i = 0; i < NUM_VPD_PTS_SET; ++i) \
-    { \
-        sprintf(l_buffer, " %-16s : ", vpdSetStr[i]); \
-        for (auto j = 0; j < VPD_NUM_SLOPES_REGION; ++j) \
+        char _temp_buffer[64]; \
+        sprintf(_buffer,  "  %-25s", xstr(_member)); \
+        FAPI_INF("%s", _buffer); \
+        for (auto i = 0; i < NUM_VPD_PTS_SET; ++i) \
         { \
-            for (auto x = 0; x < RUNTIME_RAILS; ++x) \
+            sprintf(_buffer, "  %20s (%s) : ", vpdSetStr[i], "hex"); \
+            for (auto j = 0; j < VPD_NUM_SLOPES_REGION; ++j) \
             { \
-                sprintf(l_temp_buffer, "%6s%04X%7s ", \
-                        " ",revle16(type[x][i][j])," "); \
-                strcat(l_buffer, l_temp_buffer); \
+                for (auto x = 0; x < RUNTIME_RAILS; ++x) \
+                { \
+                    sprintf(_temp_buffer, "0x%04X%1s ", \
+                            revle16(i_gppb->_member[x][i][j])," "); \
+                    strcat(_buffer, _temp_buffer); \
+                } \
+                strcat(_buffer, " "); \
             } \
+            FAPI_INF("%s", _buffer); \
         } \
-        FAPI_INF("%s", l_buffer); \
+        FAPI_INF(""); \
+        for (auto i = 0; i < NUM_VPD_PTS_SET; ++i) \
+        { \
+            sprintf(_buffer, "  %20s (%s) : ", vpdSetStr[i], "dec"); \
+            for (auto j = 0; j < VPD_NUM_SLOPES_REGION; ++j) \
+            { \
+                for (auto x = 0; x < RUNTIME_RAILS; ++x) \
+                { \
+                    sprintf(_temp_buffer, "%6.3f%1s ", \
+                            (float)(revle16(i_gppb->_member[x][i][j])) / (1 << VID_SLOPE_FP_SHIFT_12)," "); \
+                    strcat(_buffer, _temp_buffer); \
+                } \
+                strcat(_buffer, " "); \
+            } \
+            FAPI_INF("%s", _buffer); \
+        } \
+        FAPI_INF(""); \
     }
-//Need to revisit this.. because traces are not aligned correctly
-#if 0
-    sprintf(l_buffer, "ps_voltage_slopes:");
-    sprintf( l_temp_buffer,  "%5s", "");
-    strcat(l_buffer, l_temp_buffer);
-    PRINT_GPPB_SLOPES(i_gppb->ps_voltage_slopes);
 
-    sprintf(l_buffer, "voltage_ps_slopes:");
-    sprintf( l_temp_buffer,  "%5s", "");
-    strcat(l_buffer, l_temp_buffer);
-    PRINT_GPPB_SLOPES(i_gppb->voltage_ps_slopes);
-
-    sprintf(l_buffer, "ps_ac_current_tdp:");
-    sprintf( l_temp_buffer,  "%5s", "");
-    strcat(l_buffer, l_temp_buffer);
-    PRINT_GPPB_SLOPES(i_gppb->ps_ac_current_tdp);
-
-    sprintf(l_buffer, "ac_current_ps_tdp:");
-    sprintf( l_temp_buffer,  "%5s", "");
-    strcat(l_buffer, l_temp_buffer);
-    PRINT_GPPB_SLOPES(i_gppb->ac_current_ps_tdp);
-
-    sprintf(l_buffer, "ps_dc_current_tdp:");
-    sprintf( l_temp_buffer,  "%5s", "");
-    strcat(l_buffer, l_temp_buffer);
-    PRINT_GPPB_SLOPES(i_gppb->ps_dc_current_tdp);
-
-    sprintf(l_buffer, "dc_current_ps_tdp:");
-    sprintf( l_temp_buffer,  "%5s", "");
-    strcat(l_buffer, l_temp_buffer);
-    PRINT_GPPB_SLOPES(i_gppb->dc_current_ps_tdp);
-
-    sprintf(l_buffer, "ps_ac_current_rdp:");
-    sprintf( l_temp_buffer,  "%5s", "");
-    strcat(l_buffer, l_temp_buffer);
-    PRINT_GPPB_SLOPES(i_gppb->ps_ac_current_rdp);
-
-    sprintf(l_buffer, "ac_current_ps_rdp:");
-    sprintf( l_temp_buffer,  "%5s", "");
-    strcat(l_buffer, l_temp_buffer);
-    PRINT_GPPB_SLOPES(i_gppb->ac_current_ps_rdp);
-
-    sprintf(l_buffer, "ps_dc_current_rdp:");
-    sprintf( l_temp_buffer,  "%5s", "");
-    strcat(l_buffer, l_temp_buffer);
-    PRINT_GPPB_SLOPES(i_gppb->ps_dc_current_rdp);
-
-    sprintf(l_buffer, "dc_current_ps_rdp:");
-    sprintf( l_temp_buffer,  "%5s", "");
-    strcat(l_buffer, l_temp_buffer);
-    PRINT_GPPB_SLOPES(i_gppb->dc_current_ps_rdp);
-
-    sprintf(l_buffer, "ps_dds_delay_slopes:");
-    sprintf( l_temp_buffer,  "%5s", "");
+    sprintf(l_buffer, "%-22s", "Pstate Slopes / Region");
+    sprintf(l_temp_buffer, "%-10s", "");
     strcat(l_buffer, l_temp_buffer);
     for (auto  j = 0; j < VPD_NUM_SLOPES_REGION; ++j)
     {
-        sprintf(l_temp_buffer, " %s  ", prt_region_names[j]);
+        sprintf(l_temp_buffer, "   %s       ", prt_region_names[j]);
         strcat(l_buffer, l_temp_buffer);
     }
-    FAPI_INF("%s", l_buffer);
-    for (auto i = 0; i < NUM_VPD_PTS_SET; ++i)
-    {
-        sprintf(l_buffer, " %-16s : ", vpdSetStr[i]);
-        for (auto j = 0; j < VPD_NUM_SLOPES_REGION; ++j)
-        {
-            for (auto x = 0; x < MAXIMUM_CORES; ++x)
-            {
-                sprintf(l_temp_buffer, "%6s%04X%7s ",
-                        " ",revle16(i_gppb->ps_dds_delay_slopes[i][x][j])," ");
-                strcat(l_buffer, l_temp_buffer);
-            }
-        }
-        FAPI_INF("%s", l_buffer);
-    }
+    FAPI_INF("%s",l_buffer);
 
-    sprintf(l_buffer, "ps_dds_slopes:");
-    sprintf( l_temp_buffer,  "%5s", "");
+    sprintf(l_buffer,  "%-31s", "");
+    for (auto  j = 0; j < VPD_NUM_SLOPES_REGION; ++j)
+    {
+        for (auto x = 0; x < RUNTIME_RAILS; ++x)
+        {
+            sprintf(l_temp_buffer, "  %s   ", prt_rail_names[x]);
+            strcat(l_buffer, l_temp_buffer);
+        }
+        strcat(l_buffer, " ");
+    }
+    FAPI_INF("%s", l_buffer);
+
+    PRINT_GPPB_SLOPES(l_buffer, ps_voltage_slopes);
+    PRINT_GPPB_SLOPES(l_buffer, ps_voltage_slopes);
+    PRINT_GPPB_SLOPES(l_buffer, voltage_ps_slopes);
+    PRINT_GPPB_SLOPES(l_buffer, ps_ac_current_tdp);
+    PRINT_GPPB_SLOPES(l_buffer, ac_current_ps_tdp);
+    PRINT_GPPB_SLOPES(l_buffer, ps_dc_current_tdp);
+    PRINT_GPPB_SLOPES(l_buffer, dc_current_ps_tdp);
+    PRINT_GPPB_SLOPES(l_buffer, ps_ac_current_rdp);
+    PRINT_GPPB_SLOPES(l_buffer, ac_current_ps_rdp);
+    PRINT_GPPB_SLOPES(l_buffer, ps_dc_current_rdp);
+    PRINT_GPPB_SLOPES(l_buffer, dc_current_ps_rdp);
+
+    int i = VPD_PT_SET_RAW;
+
+    sprintf(l_buffer, "%-28s", "ps_dds_delay_slopes (C0)");
+    sprintf(l_temp_buffer, "%-2s", "");
     strcat(l_buffer, l_temp_buffer);
     for (auto  j = 0; j < VPD_NUM_SLOPES_REGION; ++j)
     {
-        sprintf(l_temp_buffer, " %s  ", prt_region_names[j]);
+        sprintf(l_temp_buffer, " %s ", prt_region_names[j]);
+        strcat(l_buffer, l_temp_buffer);
+    }
+    FAPI_INF("%s",l_buffer);
+
+    sprintf(l_buffer, " %21s (%s) : ", vpdSetStr[i], "hex");
+    for (auto j = 0; j < VPD_NUM_SLOPES_REGION; ++j)
+    {
+        sprintf(l_temp_buffer, "0x%04X%3s",
+                revle16(i_gppb->ps_dds_delay_slopes[i][0][j])," ");
         strcat(l_buffer, l_temp_buffer);
     }
     FAPI_INF("%s", l_buffer);
-    for (auto i = 0; i < NUM_VPD_PTS_SET; ++i)
+
+    sprintf(l_buffer, "%-28s", "ps_dds_slopes (C0) Raw");
+    sprintf(l_temp_buffer, "%-2s", "");
+    strcat(l_buffer, l_temp_buffer);
+    for (auto  j = 0; j < VPD_NUM_SLOPES_REGION; ++j)
     {
-        sprintf(l_buffer, " %-16s : ", vpdSetStr[i]);
+        sprintf(l_temp_buffer, " %s ", prt_region_names[j]);
+        strcat(l_buffer, l_temp_buffer);
+    }
+    FAPI_INF("%s",l_buffer);
+
+    for (uint8_t dds_cnt = TRIP_OFFSET; dds_cnt < NUM_POUNDW_DDS_FIELDS; ++dds_cnt)
+    {
+        sprintf(l_buffer, " %21s (%s) : ", prt_dds_slope_names[dds_cnt], "hex");
         for (auto j = 0; j < VPD_NUM_SLOPES_REGION; ++j)
         {
-            for (uint8_t dds_cnt = TRIP_OFFSET; dds_cnt < NUM_POUNDW_DDS_FIELDS; ++dds_cnt)
-            {
-                for (auto x = 0; x < MAXIMUM_CORES; ++x)
-                {
-                    sprintf(l_temp_buffer, "%6s%04X%7s ",
-                            " ",revle16(i_gppb->ps_dds_slopes[dds_cnt][i][x][j])," ");
-                    strcat(l_buffer, l_temp_buffer);
-                }
-            }
+            sprintf(l_temp_buffer, "0x%04X%3s",
+                    revle16(i_gppb->ps_dds_slopes[dds_cnt][i][0][j])," ");
+            strcat(l_buffer, l_temp_buffer);
         }
         FAPI_INF("%s", l_buffer);
     }
-#endif
-
-
 
     sprintf(l_buffer, "AVS Bus topology:");
     FAPI_INF("%s", l_buffer);
 
-    strcpy(l_buffer,"");
-    sprintf(l_temp_buffer, "  %-30s :", "VDD AVS BUS NUM");
-    strcat(l_buffer, l_temp_buffer);
-
-    HEX_DEC_STR(l_buffer,
-            revle32(i_gppb->avs_bus_topology.vdd_avsbus_num),
-            revle32(i_gppb->avs_bus_topology.vdd_avsbus_num));
+    PRINT_LEAD1(l_buffer, "  %-26s : ", "VDD AVS BUS NUM");
+    HEX_STR(l_buffer,
+            i_gppb->avs_bus_topology.vdd_avsbus_num);
     FAPI_INF("%s", l_buffer);
 
-    strcpy(l_buffer,"");
-    sprintf(l_temp_buffer, "  %-30s :", "VDD AVS BUS RAIL SELECT");
-    strcat(l_buffer, l_temp_buffer);
-
-    HEX_DEC_STR(l_buffer,
-            revle32(i_gppb->avs_bus_topology.vdd_avsbus_rail),
-            revle32(i_gppb->avs_bus_topology.vdd_avsbus_rail));
+    PRINT_LEAD1(l_buffer, "  %-26s : ", "VDD AVS BUS RAIL SELECT");
+    HEX_STR(l_buffer,
+            i_gppb->avs_bus_topology.vdd_avsbus_rail);
     FAPI_INF("%s", l_buffer);
 
-    strcpy(l_buffer,"");
-    sprintf(l_temp_buffer, "  %-30s :", "VCS AVS BUS NUM");
-    strcat(l_buffer, l_temp_buffer);
-
-    HEX_DEC_STR(l_buffer,
-            revle32(i_gppb->avs_bus_topology.vcs_avsbus_num),
-            revle32(i_gppb->avs_bus_topology.vcs_avsbus_num));
+    PRINT_LEAD1(l_buffer, "  %-26s : ", "VCS AVS BUS NUM");
+    HEX_STR(l_buffer,
+            i_gppb->avs_bus_topology.vcs_avsbus_num);
     FAPI_INF("%s", l_buffer);
 
-    strcpy(l_buffer,"");
-    sprintf(l_temp_buffer, "  %-30s :", "VCS AVS BUS RAIL SELECT");
-    strcat(l_buffer, l_temp_buffer);
-
-    HEX_DEC_STR(l_buffer,
-            revle32(i_gppb->avs_bus_topology.vcs_avsbus_rail),
-            revle32(i_gppb->avs_bus_topology.vcs_avsbus_rail));
+    PRINT_LEAD1(l_buffer, "  %-26s : ", "VCS AVS BUS RAIL SELECT");
+    HEX_STR(l_buffer,
+            i_gppb->avs_bus_topology.vcs_avsbus_rail);
     FAPI_INF("%s", l_buffer);
 
-    strcpy(l_buffer,"");
-    sprintf(l_temp_buffer, "  %-30s :", "VDN AVS BUS NUM");
-    strcat(l_buffer, l_temp_buffer);
-
-    HEX_DEC_STR(l_buffer,
-            revle32(i_gppb->avs_bus_topology.vdn_avsbus_num),
-            revle32(i_gppb->avs_bus_topology.vdn_avsbus_num));
+    PRINT_LEAD1(l_buffer, "  %-26s : ", "VDN AVS BUS NUM");
+    HEX_STR(l_buffer,
+            i_gppb->avs_bus_topology.vdn_avsbus_num);
     FAPI_INF("%s", l_buffer);
 
-    strcpy(l_buffer,"");
-    sprintf(l_temp_buffer, "  %-30s :", "VDN AVS BUS RAIL SELECT");
-    strcat(l_buffer, l_temp_buffer);
-
-    HEX_DEC_STR(l_buffer,
-            revle32(i_gppb->avs_bus_topology.vdn_avsbus_rail),
-            revle32(i_gppb->avs_bus_topology.vdn_avsbus_rail));
+    PRINT_LEAD1(l_buffer, "  %-26s : ", "VDN AVS BUS RAIL SELECT");
+    HEX_STR(l_buffer,
+            i_gppb->avs_bus_topology.vdn_avsbus_rail);
     FAPI_INF("%s", l_buffer);
 
-    strcpy(l_buffer,"");
-    sprintf(l_temp_buffer, "  %-30s :", "VIO AVS BUS NUM");
-    strcat(l_buffer, l_temp_buffer);
-
-    HEX_DEC_STR(l_buffer,
-            revle32(i_gppb->avs_bus_topology.vio_avsbus_num),
-            revle32(i_gppb->avs_bus_topology.vio_avsbus_num));
+    PRINT_LEAD1(l_buffer, "  %-26s : ", "VIO AVS BUS NUM");
+    HEX_STR(l_buffer,
+            i_gppb->avs_bus_topology.vio_avsbus_num);
     FAPI_INF("%s", l_buffer);
 
-    strcpy(l_buffer,"");
-    sprintf(l_temp_buffer, "  %-30s :", "VII AVS BUS RAIL SELECT");
-    strcat(l_buffer, l_temp_buffer);
-
-    HEX_DEC_STR(l_buffer,
-            revle32(i_gppb->avs_bus_topology.vio_avsbus_rail),
-            revle32(i_gppb->avs_bus_topology.vio_avsbus_rail));
-
-    strcat(l_buffer, l_temp_buffer);
+    PRINT_LEAD1(l_buffer, "  %-26s : ", "VII AVS BUS RAIL SELECT");
+    HEX_STR(l_buffer,
+            i_gppb->avs_bus_topology.vio_avsbus_rail);
     FAPI_INF("%s", l_buffer);
 
     FAPI_INF("---------------------------------------------------------------------------------------");
@@ -1022,10 +966,10 @@ fapi2::ReturnCode PlatPmPPB::gppb_init(
                 io_globalppb->operating_points_set[i][j].ics_tdp_ac_10ma = revle32(iv_operating_points[i][j].ics_tdp_ac_10ma);
                 io_globalppb->operating_points_set[i][j].ics_tdp_dc_10ma = revle32(iv_operating_points[i][j].ics_tdp_ac_10ma);
                 io_globalppb->operating_points_set[i][j].vdd_vmin        = revle32(iv_operating_points[i][j].vdd_vmin);
-                io_globalppb->operating_points_set[i][j].irt_rdp_ac_10ma =
-                    revle32(iv_operating_points[i][j].irt_rdp_ac_10ma);
-                io_globalppb->operating_points_set[i][j].irt_rdp_dc_10ma =
-                    revle32(iv_operating_points[i][j].irt_rdp_dc_10ma);
+                io_globalppb->operating_points_set[i][j].rt_tdp_ac_10ma =
+                    revle32(iv_operating_points[i][j].rt_tdp_ac_10ma);
+                io_globalppb->operating_points_set[i][j].rt_tdp_dc_10ma =
+                    revle32(iv_operating_points[i][j].rt_tdp_dc_10ma);
                 io_globalppb->operating_points_set[i][j].pstate          = iv_operating_points[i][j].pstate;
             }
         }
@@ -1073,6 +1017,8 @@ fapi2::ReturnCode PlatPmPPB::gppb_init(
         io_globalppb->pgpe_flags[PGPE_FLAG_OCS_DISABLE] = !is_ocs_enabled();
         io_globalppb->pgpe_flags[PGPE_FLAG_WOF_ENABLE] = iv_wof_enabled;
         io_globalppb->pgpe_flags[PGPE_FLAG_WOV_UNDERVOLT_ENABLE] = iv_wov_underv_enabled;
+
+
         io_globalppb->pgpe_flags[PGPE_FLAG_WOV_OVERVOLT_ENABLE] = iv_wov_overv_enabled;
         io_globalppb->pgpe_flags[PGPE_FLAG_DDS_COARSE_THROTTLE_ENABLE] = iv_attrs.attr_dds_coarse_thr_enable;
         io_globalppb->pgpe_flags[PGPE_FLAG_PMCR_MOST_RECENT_ENABLE] = iv_attrs.attr_pmcr_most_recent_enable;
@@ -1093,7 +1039,6 @@ fapi2::ReturnCode PlatPmPPB::gppb_init(
         }
         io_globalppb->pgpe_flags[PGPE_FLAG_PHANTOM_HALT_ENABLE] = iv_attrs.attr_phantom_halt_enable;
         io_globalppb->pgpe_flags[PGPE_FLAG_RVRM_ENABLE] = iv_rvrm_enabled;
-
         io_globalppb->vcs_vdd_offset_mv= revle16(uint16_t(iv_attrs.attr_vcs_vdd_offset_mv & 0xFF));//Attribute is 1-byte only so truncate it
         io_globalppb->vcs_floor_mv  = revle16(iv_attrs.attr_vcs_floor_mv);
 
@@ -1109,14 +1054,12 @@ fapi2::ReturnCode PlatPmPPB::gppb_init(
         io_globalppb->wov_overv_step_incr_pct         = iv_attrs.attr_wov_overv_step_incr_pct;
         io_globalppb->wov_overv_step_decr_pct         = iv_attrs.attr_wov_overv_step_decr_pct;
         io_globalppb->wov_overv_max_pct               = iv_attrs.attr_wov_overv_max_pct;
-
         if (io_globalppb->wov_underv_vmin_mv == 0)
         {
             io_globalppb->wov_underv_vmin_mv = revle16(uint16_t(revle32(io_globalppb->safe_voltage_mv[SAFE_VOLTAGE_VDD])));
             FAPI_INF("WOV_VMIN_MV=%u",revle16(io_globalppb->wov_underv_vmin_mv));
             FAPI_INF("SafeVoltage=%u",revle32(io_globalppb->safe_voltage_mv[SAFE_VOLTAGE_VDD]));
         }
-
 
     } while (0);
 
@@ -1164,10 +1107,10 @@ fapi2::ReturnCode PlatPmPPB::oppb_init(
             i_occppb->operating_points[i].ics_tdp_ac_10ma = revle32(iv_attr_mvpd_poundV_biased[i].ics_tdp_ac_10ma);
             i_occppb->operating_points[i].ics_tdp_dc_10ma = revle32(iv_attr_mvpd_poundV_biased[i].ics_tdp_ac_10ma);
             i_occppb->operating_points[i].vdd_vmin        = revle32(iv_attr_mvpd_poundV_biased[i].vdd_vmin);
-            i_occppb->operating_points[i].irt_rdp_ac_10ma =
-            revle32(iv_attr_mvpd_poundV_biased[i].irt_rdp_ac_10ma);
-            i_occppb->operating_points[i].irt_rdp_dc_10ma =
-            revle32(iv_attr_mvpd_poundV_biased[i].irt_rdp_dc_10ma);
+            i_occppb->operating_points[i].rt_tdp_ac_10ma =
+            revle32(iv_attr_mvpd_poundV_biased[i].rt_tdp_ac_10ma);
+            i_occppb->operating_points[i].rt_tdp_dc_10ma =
+            revle32(iv_attr_mvpd_poundV_biased[i].rt_tdp_dc_10ma);
             i_occppb->operating_points[i].pstate          = iv_attr_mvpd_poundV_biased[i].pstate;
         }
 
@@ -1278,11 +1221,10 @@ void oppb_print(OCCPstateParmBlock_t* i_oppb)
     // Put out the endian-corrected scalars
 
     FAPI_INF("---------------------------------------------------------------------------------------");
-    FAPI_INF("OCC Pstate Parameter Block @ %p", i_oppb);
+    FAPI_INF("OCC Pstate Parameter Block");
     FAPI_INF("---------------------------------------------------------------------------------------");
 
-    FAPI_INF("Operating Points:  Frequency     VDD(mV)  IDD_TDP_AC(10mA)   IDD_TDP_DC(10mA)  IDD_RDP_AC(10mA)  IDD_RDP_DC(10mA)");
-
+    FAPI_INF("Operating Points:          Freq(MHz)         VDD(mV)       IDTAC(10mA)     IDTDC(10mA)     IDRAC(10mA)     IDRDC(10mA)");
     for (uint32_t i = 0; i < NUM_OP_POINTS; i++)
     {
         strcpy(l_buffer,"");
@@ -1290,34 +1232,21 @@ void oppb_print(OCCPstateParmBlock_t* i_oppb)
         strcat(l_buffer, l_temp_buffer);
 
         HEX_DEC_STR(l_buffer,
-                revle32(i_oppb->operating_points[i].frequency_mhz),
                 revle32(i_oppb->operating_points[i].frequency_mhz));
-
         HEX_DEC_STR(l_buffer,
-                revle32(i_oppb->operating_points[i].vdd_mv),
                 revle32(i_oppb->operating_points[i].vdd_mv));
-
         HEX_DEC_STR(l_buffer,
-                revle32(i_oppb->operating_points[i].idd_tdp_ac_10ma),
                 revle32(i_oppb->operating_points[i].idd_tdp_ac_10ma));
-
         HEX_DEC_STR(l_buffer,
-                revle32(i_oppb->operating_points[i].idd_tdp_dc_10ma),
                 revle32(i_oppb->operating_points[i].idd_tdp_dc_10ma));
-
         HEX_DEC_STR(l_buffer,
-                revle32(i_oppb->operating_points[i].idd_rdp_ac_10ma),
                 revle32(i_oppb->operating_points[i].idd_rdp_ac_10ma));
-
         HEX_DEC_STR(l_buffer,
-                revle32(i_oppb->operating_points[i].idd_rdp_dc_10ma),
                 revle32(i_oppb->operating_points[i].idd_rdp_dc_10ma));
-
         FAPI_INF("%s", l_buffer);
     }
 
-    FAPI_INF("Operating Points:  VCS(mV)  ICS_TDP_AC(10mA)   ICS_TDP_DC(10mA)  ICS_RDP_AC(10mA)  IDD_RDP_DC(10mA)");
-
+    FAPI_INF("Operating Points:          Freq(MHz)         VCS(mV)       ICTAC(10mA)     ICTDC(10mA)     ICRAC(10mA)     ICRDC(10mA)");
     for (uint32_t i = 0; i < NUM_OP_POINTS; i++)
     {
         strcpy(l_buffer,"");
@@ -1325,29 +1254,20 @@ void oppb_print(OCCPstateParmBlock_t* i_oppb)
         strcat(l_buffer, l_temp_buffer);
 
         HEX_DEC_STR(l_buffer,
-                revle32(i_oppb->operating_points[i].vcs_mv),
                 revle32(i_oppb->operating_points[i].vcs_mv));
-
         HEX_DEC_STR(l_buffer,
-                revle32(i_oppb->operating_points[i].ics_tdp_ac_10ma),
                 revle32(i_oppb->operating_points[i].ics_tdp_ac_10ma));
-
         HEX_DEC_STR(l_buffer,
-                revle32(i_oppb->operating_points[i].ics_tdp_dc_10ma),
                 revle32(i_oppb->operating_points[i].ics_tdp_dc_10ma));
-
         HEX_DEC_STR(l_buffer,
-                revle32(i_oppb->operating_points[i].ics_rdp_ac_10ma),
                 revle32(i_oppb->operating_points[i].ics_rdp_ac_10ma));
-
         HEX_DEC_STR(l_buffer,
-                revle32(i_oppb->operating_points[i].ics_rdp_dc_10ma),
                 revle32(i_oppb->operating_points[i].ics_rdp_dc_10ma));
 
         FAPI_INF("%s", l_buffer);
     }
-    FAPI_INF("Operating Points:  RT_AC(10ma)   VDD_vmin(mV)  RT_DC(10mA)");
 
+    FAPI_INF("Operating Points:          Freq_GB(mHz)    VDD_vmin(mV)  IDD_POW(10mA) CORE_POWR_TEMP(0.5C)");
     for (uint32_t i = 0; i < NUM_OP_POINTS; i++)
     {
         strcpy(l_buffer,"");
@@ -1355,23 +1275,20 @@ void oppb_print(OCCPstateParmBlock_t* i_oppb)
         strcat(l_buffer, l_temp_buffer);
 
         HEX_DEC_STR(l_buffer,
-                revle32(i_oppb->operating_points[i].irt_rdp_ac_10ma),
-                revle32(i_oppb->operating_points[i].irt_rdp_ac_10ma));
-
-        HEX_DEC_STR(l_buffer,
-                revle32(i_oppb->operating_points[i].vdd_vmin),
                 revle32(i_oppb->operating_points[i].vdd_vmin));
-
         HEX_DEC_STR(l_buffer,
-                revle32(i_oppb->operating_points[i].irt_rdp_dc_10ma),
-                revle32(i_oppb->operating_points[i].irt_rdp_dc_10ma));
+                revle32(i_oppb->operating_points[i].rt_tdp_ac_10ma));
+        HEX_DEC_STR(l_buffer,
+                revle32(i_oppb->operating_points[i].rt_tdp_dc_10ma));
 
         FAPI_INF("%s", l_buffer);
     }
 
+    FAPI_INF("System Parameters:                          VDD           VCS           VDN");
+    strcpy(l_buffer,"");
+    sprintf(l_temp_buffer, "  %-26s :", "Load line (uOhm)");
+    strcat(l_buffer, l_temp_buffer);
 
-    FAPI_INF("System Parameters:              VDD         VCS         VDN");
-    sprintf(l_buffer, "   Load line (uOhm)         ");
     sprintf(l_temp_buffer, " %04X (%3d) ",
             revle32(i_oppb->vdd_sysparm.loadline_uohm),
             revle32(i_oppb->vdd_sysparm.loadline_uohm));
@@ -1388,7 +1305,10 @@ void oppb_print(OCCPstateParmBlock_t* i_oppb)
     strcat(l_buffer, l_temp_buffer);
     FAPI_INF("%s", l_buffer);
 
-    sprintf(l_buffer, "   Distribution Loss (uOhm) ");
+    strcpy(l_buffer,"");
+    sprintf(l_temp_buffer, "  %-26s :", "Dist Loss (uOhm)");
+    strcat(l_buffer, l_temp_buffer);
+
     sprintf(l_temp_buffer, " %04X (%3d) ",
             revle32(i_oppb->vdd_sysparm.distloss_uohm),
             revle32(i_oppb->vdd_sysparm.distloss_uohm));
@@ -1405,7 +1325,10 @@ void oppb_print(OCCPstateParmBlock_t* i_oppb)
     strcat(l_buffer, l_temp_buffer);
     FAPI_INF("%s", l_buffer);
 
-    sprintf(l_buffer, "   Offset (uV)              ");
+    strcpy(l_buffer,"");
+    sprintf(l_temp_buffer, "  %-26s :", "Offset (uV)");
+    strcat(l_buffer, l_temp_buffer);
+
     sprintf(l_temp_buffer, " %04X (%3d) ",
             revle32(i_oppb->vdd_sysparm.distoffset_uv),
             revle32(i_oppb->vdd_sysparm.distoffset_uv));
@@ -1422,27 +1345,33 @@ void oppb_print(OCCPstateParmBlock_t* i_oppb)
     strcat(l_buffer, l_temp_buffer);
     FAPI_INF("%s", l_buffer);
 
-    FAPI_INF("Frequency Minumum (kHz):     0x%04X (%3d)",
+    FAPI_INF("%-28s : 0x%04X (%3d)",
+             "Frequency Minumum (kHz)",
              revle32(i_oppb->frequency_min_khz),
              revle32(i_oppb->frequency_min_khz));
 
-    FAPI_INF("Frequency Maximum (kHz):     0x%04X (%3d)",
+    FAPI_INF("%-28s : 0x%04X (%3d)",
+             "Frequency Maximum (kHz)",
              revle32(i_oppb->frequency_max_khz),
              revle32(i_oppb->frequency_max_khz));
 
-    FAPI_INF("Frequency Ceiling (kHz):     0x%04X (%3d)",
+    FAPI_INF("%-28s : 0x%04X (%3d)",
+             "Frequency Ceiling (kHz)",
              revle32(i_oppb->frequency_ceiling_khz),
              revle32(i_oppb->frequency_ceiling_khz));
 
-    FAPI_INF("Frequency Step (kHz):        0x%04X (%3d)",
+     FAPI_INF("%-28s : 0x%04X (%3d)",
+             "Frequency Step (kHz)",
              revle32(i_oppb->frequency_step_khz),
              revle32(i_oppb->frequency_step_khz));
 
-    FAPI_INF("Pstate of Minimum Frequency: 0x%02X (%3d)",
+    FAPI_INF("%-28s : 0x%04X (%3d)",
+             "Frequency Minimum (Pstate)",
              revle32(i_oppb->pstate_min),
              revle32(i_oppb->pstate_min));
 
-    FAPI_INF("OCC Complex Frequency (MHz): 0x%02X (%3d)",
+    FAPI_INF("%-28s : 0x%04X (%3d)",
+             "Frequency OCC Complex (MHz)",
              revle32(i_oppb->occ_complex_frequency_mhz),
              revle32(i_oppb->occ_complex_frequency_mhz));
 
@@ -1451,6 +1380,66 @@ void oppb_print(OCCPstateParmBlock_t* i_oppb)
 
     FAPI_INF("---------------------------------------------------------------------------------------");
 }
+
+///////////////////////////////////////////////////////////
+////////    wfth_print
+///////////////////////////////////////////////////////////
+void wfth_print(WofTablesHeader_t* i_wfth)
+{
+    // Put out the endian-corrected scalars
+
+#define WFTH_PRINT8(_member, _hexwidth, _decwidth) \
+FAPI_INF("%-25s = 0x%0*X (%0*d)", #_member, _hexwidth, i_wfth->_member, _decwidth, i_wfth->_member); \
+
+#define WFTH_PRINT16(_member, _hexwidth, _decwidth) \
+FAPI_INF("%-25s = 0x%0*X (%0*d)", #_member, _hexwidth, revle16(i_wfth->_member), _decwidth, revle16(i_wfth->_member)); \
+
+#define WFTH_PRINT32(_member, _hexwidth, _decwidth) \
+FAPI_INF("%-25s = 0x%0*X (%0*d)", #_member, _hexwidth, revle32(i_wfth->_member), _decwidth, revle32(i_wfth->_member)); \
+
+#define WFTH_PRINTS(_member) \
+FAPI_INF("%-25s = %s", #_member, i_wfth->_member);
+
+    FAPI_INF("---------------------------------------------------------------------------------------");
+    FAPI_INF("WOF Table Header");
+    FAPI_INF("---------------------------------------------------------------------------------------");
+
+    WFTH_PRINTS (magic_number.text);
+    WFTH_PRINT8 (header_version,            4, 1);
+    WFTH_PRINT8 (vrt_block_size,            4, 5);
+    WFTH_PRINT8 (ocs_mode,                  4, 1);
+    WFTH_PRINT8 (core_count,                4, 2);
+    WFTH_PRINT16(vcs_start,                 4, 5);
+    WFTH_PRINT16(vcs_step,                  4, 5);
+    WFTH_PRINT16(vcs_size,                  4, 5);
+    WFTH_PRINT16(vdd_start,                 4, 5);
+    WFTH_PRINT16(vdd_step,                  4, 5);
+    WFTH_PRINT16(vdd_size,                  4, 5);
+    WFTH_PRINT16(vratio_start,              4, 5);
+    WFTH_PRINT16(vratio_step,               4, 5);
+    WFTH_PRINT16(vratio_size,               4, 5);
+    WFTH_PRINT16(io_start,                  4, 5);
+    WFTH_PRINT16(io_step,                   4, 5);
+    WFTH_PRINT16(io_size,                   4, 5);
+    WFTH_PRINT16(amb_cond_start,            4, 5);
+    WFTH_PRINT16(amb_cond_step,             4, 5);
+    WFTH_PRINT16(amb_cond_size,             4, 5);
+    WFTH_PRINT16(socket_power_w,            4, 5);
+    WFTH_PRINT16(sort_power_freq_mhz,       4, 5);
+    WFTH_PRINT16(rdp_current_a,             4, 5);
+    WFTH_PRINT16(boost_current_a,           4, 5);
+    WFTH_PRINT8 (vcs_tdp_ceff_indx,         4, 5);
+    WFTH_PRINT8 (vdd_tdp_ceff_indx,         4, 5);
+    WFTH_PRINT8 (io_tdp_pwr_indx,           4, 5);
+    WFTH_PRINT8 (amb_cond_tdp_indx,         4, 5);
+//    WFTH_PRINT8(io_tdp_w,                  4 ,5);
+//    WFTH_PRINT8(io_dis_w,                  4 ,5);
+    WFTH_PRINT16(sort_ultraturbo_freq_mhz,  4, 5);
+    WFTH_PRINT16(table_date_timestamp,     8, 0);
+    WFTH_PRINTS(table_version);
+    WFTH_PRINTS(package_name);
+}
+
 ///////////////////////////////////////////////////////////
 ////////  attr_init
 ///////////////////////////////////////////////////////////
@@ -1493,19 +1482,19 @@ void PlatPmPPB::attr_init( void )
 
 #define DATABLOCK_GET_ATTR(attr_name, target, attr_assign) \
 FAPI_TRY(FAPI_ATTR_GET(fapi2::attr_name, target, iv_attrs.attr_assign),"Attribute read failed"); \
-FAPI_INF("%-60s = 0x%08x %d", #attr_name, iv_attrs.attr_assign, iv_attrs.attr_assign);
+FAPI_INF("%-54s    = 0x%08x %d", #attr_name, iv_attrs.attr_assign, iv_attrs.attr_assign);
 
 #define DATABLOCK_GET_ATTR_2(attr_name, target, attr_assign) \
 FAPI_TRY(FAPI_ATTR_GET(fapi2::attr_name, target, iv_attrs.attr_assign),"Attribute read failed"); \
-FAPI_INF("%-60s[0] = 0x%08x %d", #attr_name, iv_attrs.attr_assign[0], iv_attrs.attr_assign[0]);\
-FAPI_INF("%-60s[1] = 0x%08x %d", #attr_name, iv_attrs.attr_assign[1], iv_attrs.attr_assign[1]);
+FAPI_INF("%-54s[0] = 0x%08x %d", #attr_name, iv_attrs.attr_assign[0], iv_attrs.attr_assign[0]);\
+FAPI_INF("%-54s[1] = 0x%08x %d", #attr_name, iv_attrs.attr_assign[1], iv_attrs.attr_assign[1]);
 
 #define DATABLOCK_GET_ATTR_4(attr_name, target, attr_assign) \
 FAPI_TRY(FAPI_ATTR_GET(fapi2::attr_name, target, iv_attrs.attr_assign),"Attribute read failed"); \
-FAPI_INF("%-60s[0] = 0x%08x %d", #attr_name, iv_attrs.attr_assign[0], iv_attrs.attr_assign[0]);\
-FAPI_INF("%-60s[1] = 0x%08x %d", #attr_name, iv_attrs.attr_assign[1], iv_attrs.attr_assign[1]);\
-FAPI_INF("%-60s[2] = 0x%08x %d", #attr_name, iv_attrs.attr_assign[2], iv_attrs.attr_assign[2]);\
-FAPI_INF("%-60s[3] = 0x%08x %d", #attr_name, iv_attrs.attr_assign[3], iv_attrs.attr_assign[3]);
+FAPI_INF("%-54s[0] = 0x%08x %d", #attr_name, iv_attrs.attr_assign[0], iv_attrs.attr_assign[0]);\
+FAPI_INF("%-54s[1] = 0x%08x %d", #attr_name, iv_attrs.attr_assign[1], iv_attrs.attr_assign[1]);\
+FAPI_INF("%-54s[2] = 0x%08x %d", #attr_name, iv_attrs.attr_assign[2], iv_attrs.attr_assign[2]);\
+FAPI_INF("%-54s[3] = 0x%08x %d", #attr_name, iv_attrs.attr_assign[3], iv_attrs.attr_assign[3]);
 
     // Frequency attributes
     DATABLOCK_GET_ATTR(ATTR_SYSTEM_PSTATE0_FREQ_MHZ, FAPI_SYSTEM, attr_pstate0_freq_mhz);
@@ -1605,7 +1594,7 @@ FAPI_INF("%-60s[3] = 0x%08x %d", #attr_name, iv_attrs.attr_assign[3], iv_attrs.a
     if (!(iv_attrs._attr_name)) \
     { \
        iv_attrs._attr_name = _attr_default; \
-       FAPI_INF("Setting %-44s         = 0x%08x %d (internal default)", \
+       FAPI_INF("Setting %-46s    = 0x%08x %d (internal default)", \
                 #_attr_name, iv_attrs._attr_name, iv_attrs._attr_name); \
     }
 
@@ -1614,9 +1603,9 @@ FAPI_INF("%-60s[3] = 0x%08x %d", #attr_name, iv_attrs.attr_assign[3], iv_attrs.a
     { \
        iv_attrs._attr_name[0] = _attr_default_0; \
        iv_attrs._attr_name[1] = _attr_default_1; \
-       FAPI_INF("Setting %-44s[0]      = 0x%08x %d (internal default)", \
+       FAPI_INF("Setting %-46s[0] = 0x%08x %d (internal default)", \
                 #_attr_name, iv_attrs._attr_name[0], iv_attrs._attr_name[0]); \
-       FAPI_INF("Setting %-44s[1]      = 0x%08x %d (internal default)", \
+       FAPI_INF("Setting %-46s[1] = 0x%08x %d (internal default)", \
                 #_attr_name, iv_attrs._attr_name[1], iv_attrs._attr_name[1]); \
     }
 
@@ -1627,13 +1616,13 @@ FAPI_INF("%-60s[3] = 0x%08x %d", #attr_name, iv_attrs.attr_assign[3], iv_attrs.a
        iv_attrs._attr_name[1] = _attr_default_1; \
        iv_attrs._attr_name[2] = _attr_default_2; \
        iv_attrs._attr_name[3] = _attr_default_3; \
-       FAPI_INF("Setting %-44s[0]      = 0x%08x %d (internal default)", \
+       FAPI_INF("Setting %-46s[0] = 0x%08x %d (internal default)", \
                 #_attr_name, iv_attrs._attr_name[0], iv_attrs._attr_name[0]); \
-       FAPI_INF("Setting %-44s[1]      = 0x%08x %d (internal default)", \
+       FAPI_INF("Setting %-46s[1] = 0x%08x %d (internal default)", \
                 #_attr_name, iv_attrs._attr_name[1], iv_attrs._attr_name[1]); \
-       FAPI_INF("Setting %-44s[2]      = 0x%08x %d (internal default)", \
+       FAPI_INF("Setting %-46s[2] = 0x%08x %d (internal default)", \
                 #_attr_name, iv_attrs._attr_name[2], iv_attrs._attr_name[2]); \
-       FAPI_INF("Setting %-44s[3]      = 0x%08x %d (internal default)", \
+       FAPI_INF("Setting %-46s[3] = 0x%08x %d (internal default)", \
                 #_attr_name, iv_attrs._attr_name[3], iv_attrs._attr_name[3]); \
     }
 
@@ -1744,13 +1733,13 @@ FAPI_INF("%-60s[3] = 0x%08x %d", #attr_name, iv_attrs.attr_assign[3], iv_attrs.a
 
 #define SET_ATTR(attr_name, target, attr_assign) \
     FAPI_TRY(FAPI_ATTR_SET(attr_name, target, attr_assign),"Attribute set failed"); \
-    FAPI_INF("%-60s = 0x%08x %d", #attr_name, attr_assign, attr_assign);
+    FAPI_INF("%-54s    = 0x%08x %d", #attr_name, attr_assign, attr_assign);
 
     //Set default values
     SET_ATTR(fapi2::ATTR_PSTATES_ENABLED, iv_procChip, iv_pstates_enabled);
     SET_ATTR(fapi2::ATTR_RESCLK_ENABLED,  iv_procChip, iv_resclk_enabled);
     SET_ATTR(fapi2::ATTR_DDS_ENABLED,     iv_procChip, iv_dds_enabled);
-    SET_ATTR(fapi2::ATTR_RVRM_ENABLED,     iv_procChip, iv_rvrm_enabled);
+    SET_ATTR(fapi2::ATTR_RVRM_ENABLED,    iv_procChip, iv_rvrm_enabled);
     SET_ATTR(fapi2::ATTR_WOF_ENABLED,     iv_procChip, iv_wof_enabled);
     //SET_ATTR(fapi2::ATTR_WOV_UNDERV_ENABLED, iv_procChip, iv_wov_underv_enabled);
     //SET_ATTR(fapi2::ATTR_WOV_OVERV_ENABLED, iv_procChip, iv_wov_overv_enabled);
@@ -2241,19 +2230,19 @@ fapi2::ReturnCode PlatPmPPB::get_mvpd_poundV()
 #endif
             l_buffer_inc += 1;
 
-            //irt_rdp_ac_10ma
-            iv_attr_mvpd_poundV_raw[i].irt_rdp_ac_10ma = (uint32_t) *l_buffer_inc;
-            FAPI_INF("#V data = 0x%04X  %-6d", iv_attr_mvpd_poundV_raw[i].irt_rdp_ac_10ma,
-                    iv_attr_mvpd_poundV_raw[i].irt_rdp_ac_10ma);
+            //rt_tdp_ac_10ma
+            iv_attr_mvpd_poundV_raw[i].rt_tdp_ac_10ma = (uint32_t) *l_buffer_inc;
+            FAPI_INF("#V data = 0x%04X  %-6d", iv_attr_mvpd_poundV_raw[i].rt_tdp_ac_10ma,
+                    iv_attr_mvpd_poundV_raw[i].rt_tdp_ac_10ma);
 
             l_buffer_inc += 2;
 
-            //irt_rdp_dc_10ma
-            iv_attr_mvpd_poundV_raw[i].irt_rdp_dc_10ma = (uint32_t) *l_buffer_inc;
-            FAPI_INF("#V data = 0x%04X  %-6d", iv_attr_mvpd_poundV_raw[i].irt_rdp_dc_10ma,
-                    iv_attr_mvpd_poundV_raw[i].irt_rdp_dc_10ma);
+            //rt_tdp_dc_10ma
+            iv_attr_mvpd_poundV_raw[i].rt_tdp_dc_10ma = (uint32_t) *l_buffer_inc;
+            FAPI_INF("#V data = 0x%04X  %-6d", iv_attr_mvpd_poundV_raw[i].rt_tdp_dc_10ma,
+                    iv_attr_mvpd_poundV_raw[i].rt_tdp_dc_10ma);
 
-            // irt_rdp_dc_10ma(wbyte) + spare (2byte)
+            // rt_tdp_dc_10ma(wbyte) + spare (2byte)
             l_buffer_inc += 4;
         }
 
@@ -2583,7 +2572,7 @@ fapi2::ReturnCode PlatPmPPB::chk_valid_poundv(
         for (i = 0; i <= NUM_PV_POINTS - 1; i++)
         {
             FAPI_INF("Checking for Zero valued %s data in each #V operating point (%s) " \
-                    "f=%u v=%u i=%u i=%u i=%u i=%u v=%u i=%u i=%u i=%u i=%u f=%u v=%u i=%u t=%u ",
+                    "f=%u vd=%u idtac=%u idtdc=%u idrac=%u idrdc=%u vc=%u ictac=%u ictdc=%u icrac=%u icrdc=%u vdmin=%u irtrac=%u irtrdc=%u ",
                     (i_biased_state) ? "biased" : "non-biased",
                     pv_op_str[i],
                     iv_attr_mvpd_data[i].frequency_mhz,
@@ -2598,8 +2587,8 @@ fapi2::ReturnCode PlatPmPPB::chk_valid_poundv(
                     iv_attr_mvpd_data[i].ics_rdp_ac_10ma,
                     iv_attr_mvpd_data[i].ics_rdp_dc_10ma,
                     iv_attr_mvpd_data[i].vdd_vmin,
-                    iv_attr_mvpd_data[i].irt_rdp_ac_10ma,
-                    iv_attr_mvpd_data[i].irt_rdp_dc_10ma
+                    iv_attr_mvpd_data[i].rt_tdp_ac_10ma,
+                    iv_attr_mvpd_data[i].rt_tdp_dc_10ma
                     );
 
             if (is_wof_enabled() &&
@@ -2820,10 +2809,10 @@ fapi2::ReturnCode PlatPmPPB::chk_valid_poundv(
                     iv_attr_mvpd_data[i].ics_rdp_dc_10ma) ||
                     (iv_attr_mvpd_data[i - 1].vdd_vmin >
                     iv_attr_mvpd_data[i].vdd_vmin) ||
-                    (iv_attr_mvpd_data[i - 1].irt_rdp_ac_10ma >
-                    iv_attr_mvpd_data[i].irt_rdp_ac_10ma) ||
-                    (iv_attr_mvpd_data[i - 1].irt_rdp_ac_10ma >
-                    iv_attr_mvpd_data[i].irt_rdp_ac_10ma))
+                    (iv_attr_mvpd_data[i - 1].rt_tdp_ac_10ma >
+                    iv_attr_mvpd_data[i].rt_tdp_ac_10ma) ||
+                    (iv_attr_mvpd_data[i - 1].rt_tdp_ac_10ma >
+                    iv_attr_mvpd_data[i].rt_tdp_ac_10ma))
 
                 {
                     iv_pstates_enabled = false;
@@ -2895,13 +2884,13 @@ fapi2::ReturnCode PlatPmPPB::chk_valid_poundv(
                             POUNDV_SLOPE_CHECK(iv_attr_mvpd_data[i - 1].vdd_vmin,
                                 iv_attr_mvpd_data[i].vdd_vmin),pv_op_str[i], iv_attr_mvpd_data[i].vdd_vmin);
                     FAPI_INF("%s TDP RT AC value %u is %s %s TDP RT AC value %u",
-                            pv_op_str[i - 1], iv_attr_mvpd_data[i - 1].irt_rdp_ac_10ma,
-                            POUNDV_SLOPE_CHECK(iv_attr_mvpd_data[i - 1].irt_rdp_ac_10ma,
-                                iv_attr_mvpd_data[i].irt_rdp_ac_10ma),pv_op_str[i], iv_attr_mvpd_data[i].irt_rdp_ac_10ma);
+                            pv_op_str[i - 1], iv_attr_mvpd_data[i - 1].rt_tdp_ac_10ma,
+                            POUNDV_SLOPE_CHECK(iv_attr_mvpd_data[i - 1].rt_tdp_ac_10ma,
+                                iv_attr_mvpd_data[i].rt_tdp_ac_10ma),pv_op_str[i], iv_attr_mvpd_data[i].rt_tdp_ac_10ma);
                     FAPI_INF("%s TDP RT DC value %u is %s %s TDP RT DC value %u",
-                            pv_op_str[i - 1], iv_attr_mvpd_data[i - 1].irt_rdp_dc_10ma,
-                            POUNDV_SLOPE_CHECK(iv_attr_mvpd_data[i - 1].irt_rdp_dc_10ma,
-                                iv_attr_mvpd_data[i].irt_rdp_dc_10ma),pv_op_str[i], iv_attr_mvpd_data[i].irt_rdp_dc_10ma);
+                            pv_op_str[i - 1], iv_attr_mvpd_data[i - 1].rt_tdp_dc_10ma,
+                            POUNDV_SLOPE_CHECK(iv_attr_mvpd_data[i - 1].rt_tdp_dc_10ma,
+                                iv_attr_mvpd_data[i].rt_tdp_dc_10ma),pv_op_str[i], iv_attr_mvpd_data[i].rt_tdp_dc_10ma);
                     if (i_biased_state)
                     {
                         if (attr_poundv_validity_halt_disable)
@@ -3054,14 +3043,14 @@ void PlatPmPPB::update_vpd_pts_value()
                         iv_attr_mvpd_poundV_raw[l_cf3_ut_idx].vdd_vmin,
                         CF1_3_PERCENTAGE);
 
-                POUNDV_POINT_CALC (iv_attr_mvpd_poundV_raw[i].irt_rdp_ac_10ma,
-                        iv_attr_mvpd_poundV_raw[l_ps_cf3_idx].irt_rdp_ac_10ma,
-                        iv_attr_mvpd_poundV_raw[l_cf3_ut_idx].irt_rdp_ac_10ma,
+                POUNDV_POINT_CALC (iv_attr_mvpd_poundV_raw[i].rt_tdp_ac_10ma,
+                        iv_attr_mvpd_poundV_raw[l_ps_cf3_idx].rt_tdp_ac_10ma,
+                        iv_attr_mvpd_poundV_raw[l_cf3_ut_idx].rt_tdp_ac_10ma,
                         CF1_3_PERCENTAGE);
 
-                POUNDV_POINT_CALC (iv_attr_mvpd_poundV_raw[i].irt_rdp_dc_10ma,
-                        iv_attr_mvpd_poundV_raw[l_ps_cf3_idx].irt_rdp_dc_10ma,
-                        iv_attr_mvpd_poundV_raw[l_cf3_ut_idx].irt_rdp_dc_10ma,
+                POUNDV_POINT_CALC (iv_attr_mvpd_poundV_raw[i].rt_tdp_dc_10ma,
+                        iv_attr_mvpd_poundV_raw[l_ps_cf3_idx].rt_tdp_dc_10ma,
+                        iv_attr_mvpd_poundV_raw[l_cf3_ut_idx].rt_tdp_dc_10ma,
                         CF1_3_PERCENTAGE);
 
         } //end of if
@@ -3285,7 +3274,7 @@ fapi2::ReturnCode PlatPmPPB::get_mvpd_poundW (void)
         FAPI_DBG("get_mvpd_poundW: VDM enable = %d, WOF enable %d",
                 is_dds_enabled(), is_wof_enabled());
 
-        // Exit if both VDM and WOF is disabled
+        // Exit if both DDS and WOF is disabled
         if ((!is_dds_enabled() && !is_wof_enabled()))
         {
             FAPI_INF("   get_mvpd_poundW: BOTH VDM and WOF are disabled.  Skipping remaining checks");
@@ -3519,15 +3508,14 @@ void iddq_print(IddqTable_t* i_iddqt)
     // get IQ version and advance pointer 1-byte
     FAPI_INF("  IDDQ Version Number = %u", i_iddqt->iddq_version);
     FAPI_INF("  Sort Info:");
-    FAPI_INF("    Good Cores             = %02d", i_iddqt->good_normal_cores_per_sort);
-    FAPI_INF("    Good cores per Cache01 = %02d", i_iddqt->good_normal_cores_per_EQs[0]);
-    FAPI_INF("    Good cores per Cache23 = %02d", i_iddqt->good_normal_cores_per_EQs[1]);
-    FAPI_INF("    Good cores per Cache45 = %02d", i_iddqt->good_normal_cores_per_EQs[2]);
-    FAPI_INF("    Good cores per Cache67 = %02d", i_iddqt->good_normal_cores_per_EQs[3]);
+    FAPI_INF("    %-24s : %02d", "Good Cores",             i_iddqt->good_normal_cores_per_sort);
+    FAPI_INF("    %-24s : %02d", "Good cores per Cache01", i_iddqt->good_normal_cores_per_EQs[0]);
+    FAPI_INF("    %-24s : %02d", "Good cores per Cache23", i_iddqt->good_normal_cores_per_EQs[1]);
+    FAPI_INF("    %-24s : %02d", "Good cores per Cache45", i_iddqt->good_normal_cores_per_EQs[2]);
+    FAPI_INF("    %-24s : %02d", "Good cores per Cache67", i_iddqt->good_normal_cores_per_EQs[3]);
 
-    FAPI_INF("  MMA state %d",i_iddqt->mma_not_active);
-
-    FAPI_INF("  MMA leakage percent %d",i_iddqt->mma_off_leakage_pct);
+    FAPI_INF("  %-27s : %d", "MMA state", i_iddqt->mma_not_active);
+    FAPI_INF("  %-27s : %d", "MMA leakage percent", i_iddqt->mma_off_leakage_pct);
 
     // All IQ IDDQ measurements are at 5mA resolution. The OCC wants to
     // consume these at 1mA values.  thus, all values are multiplied by
@@ -3546,7 +3534,7 @@ void iddq_print(IddqTable_t* i_iddqt)
 
     for (i = 0; i < IDDQ_MEASUREMENTS; i++)
     {
-        sprintf(l_buffer_str, "  %*sV  ", 5, idd_meas_str[i]);
+        sprintf(l_buffer_str, "  %*sV ", 5, idd_meas_str[i]);
         strcat(l_line_str, l_buffer_str);
     }
 
@@ -3561,7 +3549,7 @@ void iddq_print(IddqTable_t* i_iddqt)
 
 // Temps are all 1B quantities.  Not endianess issues.
 #define IDDQ_TEMP_EXTRACT(_member) \
-        sprintf(l_buffer_str, "   %4.1f ", ((double)i_iddqt->_member)/2); \
+        sprintf(l_buffer_str, "    %4.1f ", ((double)i_iddqt->_member)/2); \
         strcat(l_line_str, l_buffer_str);
 
     // get IVDDQ measurements with all good cores ON
@@ -3575,7 +3563,7 @@ void iddq_print(IddqTable_t* i_iddqt)
     FAPI_INF("%s", l_line_str);
 
     // get IVDDQ measurements with all cores and caches OFF
-    IDDQ_TRACE ("  IVDDQ all cores and caches OFF:", IDDQ_DESC_SIZE);
+    IDDQ_TRACE ("  IVDDQ all cores, caches OFF:", IDDQ_DESC_SIZE);
 
     for (i = 0; i < IDDQ_MEASUREMENTS; i++)
     {
@@ -3585,7 +3573,7 @@ void iddq_print(IddqTable_t* i_iddqt)
     FAPI_INF("%s", l_line_str);;
 
     // get IVDDQ measurements with all good cores OFF and caches ON
-    IDDQ_TRACE ("  IVDDQ all good cores OFF and caches ON:", IDDQ_DESC_SIZE);
+    IDDQ_TRACE ("  IVDDQ all good cores OFF, caches ON:", IDDQ_DESC_SIZE);
 
     for (i = 0; i < IDDQ_MEASUREMENTS; i++)
     {
@@ -3597,7 +3585,7 @@ void iddq_print(IddqTable_t* i_iddqt)
     // get IVDDQ measurements with all good cores in each quad
     for (i = 0; i < MAXIMUM_EQ_SETS; i++)
     {
-        IDDQ_TRACE ("  IVDDQ all good cores ON and caches ON:", IDDQ_QUAD_SIZE);
+        IDDQ_TRACE ("  IVDDQ all good cores ON, caches ON:", IDDQ_QUAD_SIZE);
         sprintf(l_buffer_str, "Quad %d:", i);
         strcat(l_line_str, l_buffer_str);
 
@@ -3620,7 +3608,7 @@ void iddq_print(IddqTable_t* i_iddqt)
     FAPI_INF("%s", l_line_str);
 
     // get ICSQ measurements with all cores and caches OFF
-    IDDQ_TRACE ("  ICSQ all cores and caches OFF:", IDDQ_DESC_SIZE);
+    IDDQ_TRACE ("  ICSQ all cores, caches OFF:", IDDQ_DESC_SIZE);
 
     for (i = 0; i < IDDQ_MEASUREMENTS; i++)
     {
@@ -3630,7 +3618,7 @@ void iddq_print(IddqTable_t* i_iddqt)
     FAPI_INF("%s", l_line_str);;
 
     // get ICSQ measurements with all good cores OFF and caches ON
-    IDDQ_TRACE ("  ICSQ all good cores OFF and caches ON:", IDDQ_DESC_SIZE);
+    IDDQ_TRACE ("  ICSQ all good cores OFF, caches ON:", IDDQ_DESC_SIZE);
 
     for (i = 0; i < IDDQ_MEASUREMENTS; i++)
     {
@@ -3642,7 +3630,7 @@ void iddq_print(IddqTable_t* i_iddqt)
     // get ICSQ measurements with all good cores in each quad
     for (i = 0; i < MAXIMUM_EQ_SETS; i++)
     {
-        IDDQ_TRACE ("  ICSQ all good cores ON and caches ON:", IDDQ_QUAD_SIZE);
+        IDDQ_TRACE ("  ICSQ all good cores ON, caches ON", IDDQ_QUAD_SIZE);
         sprintf(l_buffer_str, "Quad %d:", i);
         strcat(l_line_str, l_buffer_str);
 
@@ -3655,7 +3643,7 @@ void iddq_print(IddqTable_t* i_iddqt)
     }
 
     // get average temperature measurements with all good cores ON
-    IDDQ_TRACE ("  Average temp all good cores ON:",IDDQ_DESC_SIZE);
+    IDDQ_TRACE ("  Avg temp all good cores ON:",IDDQ_DESC_SIZE);
 
     for (i = 0; i < IDDQ_MEASUREMENTS; i++)
     {
@@ -3665,7 +3653,7 @@ void iddq_print(IddqTable_t* i_iddqt)
     FAPI_INF("%s", l_line_str);
 
     // get average temperature measurements with all cores and caches OFF
-    IDDQ_TRACE ("  Average temp all cores OFF, caches OFF:", IDDQ_DESC_SIZE);
+    IDDQ_TRACE ("  Avg temp all cores OFF, caches OFF:", IDDQ_DESC_SIZE);
 
     for (i = 0; i < IDDQ_MEASUREMENTS; i++)
     {
@@ -3675,7 +3663,7 @@ void iddq_print(IddqTable_t* i_iddqt)
     FAPI_INF("%s", l_line_str);
 
     // get average temperature measurements with all good cores OFF and caches ON
-    IDDQ_TRACE ("  Average temp all good cores OFF, caches ON:",IDDQ_DESC_SIZE);
+    IDDQ_TRACE ("  Avg temp all good cores OFF, caches ON:",IDDQ_DESC_SIZE);
 
     for (i = 0; i < IDDQ_MEASUREMENTS; i++)
     {
@@ -3803,8 +3791,8 @@ void PlatPmPPB::interpolate_freq_pt(const uint32_t freq,
     INTERPOLATE_FREQ( freq, ROUND_UP,   region, ics_rdp_dc_10ma,    ip->ics_rdp_dc_10ma);
 
     ip->vdd_vmin = iv_attr_mvpd_poundV_raw[region].vdd_vmin;
-    ip->irt_rdp_ac_10ma = iv_attr_mvpd_poundV_raw[region].irt_rdp_ac_10ma;
-    ip->irt_rdp_dc_10ma = iv_attr_mvpd_poundV_raw[region].irt_rdp_dc_10ma;
+    ip->rt_tdp_ac_10ma = iv_attr_mvpd_poundV_raw[region].rt_tdp_ac_10ma;
+    ip->rt_tdp_dc_10ma = iv_attr_mvpd_poundV_raw[region].rt_tdp_dc_10ma;
 }
 
 
@@ -3970,10 +3958,10 @@ void PlatPmPPB::compute_vpd_pts()
             iv_attr_mvpd_poundV_biased[p].ics_rdp_dc_10ma;
         iv_operating_points[VPD_PT_SET_BIASED][p].vdd_vmin =
             iv_attr_mvpd_poundV_biased[p].vdd_vmin;
-        iv_operating_points[VPD_PT_SET_BIASED][p].irt_rdp_ac_10ma =
-            iv_attr_mvpd_poundV_biased[p].irt_rdp_ac_10ma;
-        iv_operating_points[VPD_PT_SET_BIASED][p].irt_rdp_dc_10ma =
-            iv_attr_mvpd_poundV_biased[p].irt_rdp_dc_10ma;
+        iv_operating_points[VPD_PT_SET_BIASED][p].rt_tdp_ac_10ma =
+            iv_attr_mvpd_poundV_biased[p].rt_tdp_ac_10ma;
+        iv_operating_points[VPD_PT_SET_BIASED][p].rt_tdp_dc_10ma =
+            iv_attr_mvpd_poundV_biased[p].rt_tdp_dc_10ma;
         iv_operating_points[VPD_PT_SET_BIASED][p].pstate =
             iv_attr_mvpd_poundV_biased[p].pstate;
     }
@@ -4051,10 +4039,10 @@ void PlatPmPPB::compute_vpd_pts()
             iv_attr_mvpd_poundV_biased[p].ics_rdp_dc_10ma;
         iv_operating_points[VPD_PT_SET_BIASED_SYSP][p].vdd_vmin =
                    iv_attr_mvpd_poundV_biased[p].vdd_vmin;
-        iv_operating_points[VPD_PT_SET_BIASED_SYSP][p].irt_rdp_ac_10ma =
-                   iv_attr_mvpd_poundV_biased[p].irt_rdp_ac_10ma;
-        iv_operating_points[VPD_PT_SET_BIASED_SYSP][p].irt_rdp_dc_10ma =
-                   iv_attr_mvpd_poundV_biased[p].irt_rdp_dc_10ma;
+        iv_operating_points[VPD_PT_SET_BIASED_SYSP][p].rt_tdp_ac_10ma =
+                   iv_attr_mvpd_poundV_biased[p].rt_tdp_ac_10ma;
+        iv_operating_points[VPD_PT_SET_BIASED_SYSP][p].rt_tdp_dc_10ma =
+                   iv_attr_mvpd_poundV_biased[p].rt_tdp_dc_10ma;
         iv_operating_points[VPD_PT_SET_BIASED_SYSP][p].pstate =
                    iv_attr_mvpd_poundV_biased[p].pstate;
         iv_operating_points[VPD_PT_SET_BIASED_SYSP][p].frequency_mhz =
@@ -4669,7 +4657,7 @@ void PlatPmPPB::compute_PStateV_I_slope(
                                     NORMAL, l_voltage_mv_max,l_voltage_mv_min,
                                     l_pstate_max,l_pstate_min)
 
-                FAPI_DBG("%s ps_voltage_slopes [%s][%s] 0x%04x %d",vlt_str[rails],
+                FAPI_DBG("%s ps_voltage_slopes   [%s][%s] 0x%04x %d",vlt_str[rails],
                         vpdSetStr[pt_set], region_names[region],
                         revle16(o_gppb->ps_voltage_slopes[rails][pt_set][region]),
                         revle16(o_gppb->ps_voltage_slopes[rails][pt_set][region]));
@@ -4682,7 +4670,7 @@ void PlatPmPPB::compute_PStateV_I_slope(
                                     INVERTED, l_voltage_mv_max,l_voltage_mv_min,
                                     l_pstate_max,l_pstate_min)
 
-                FAPI_DBG("%s voltage_ps_slopes [%s][%s] 0x%04x %d", vlt_str[rails],
+                FAPI_DBG("%s voltage_ps_slopes   [%s][%s] 0x%04x %d", vlt_str[rails],
                         vpdSetStr[pt_set], region_names[region],
                         revle16(o_gppb->voltage_ps_slopes[rails][pt_set][region]),
                         revle16(o_gppb->voltage_ps_slopes[rails][pt_set][region]));
@@ -4721,7 +4709,7 @@ void PlatPmPPB::compute_PStateV_I_slope(
                                     NORMAL, l_current_10ma_ac_tdp_max,l_current_10ma_ac_tdp_min,
                                     l_pstate_max,l_pstate_min)
 
-                FAPI_DBG(" %s AC ps_ac_current_tdp[%s][%s] 0x%04x %d", cur_str[rails], vpdSetStr[pt_set], region_names[region],
+                FAPI_DBG("%s AC ps_ac_current_tdp[%s][%s] 0x%04x %d", cur_str[rails], vpdSetStr[pt_set], region_names[region],
                         revle16(o_gppb->ps_ac_current_tdp[rails][pt_set][region]),
                         revle16(o_gppb->ps_ac_current_tdp[rails][pt_set][region]));
 
@@ -4761,7 +4749,7 @@ void PlatPmPPB::compute_PStateV_I_slope(
                 COMPUTE_V_I_SLOPES(o_gppb->ps_ac_current_rdp[rails][pt_set][region],
                                     NORMAL, l_current_10ma_ac_rdp_max,l_current_10ma_ac_rdp_min,
                                     l_pstate_max,l_pstate_min)
-                FAPI_DBG(" %s AC ps_ac_current_rdp[%s][%s] 0x%04x %d", cur_str[rails], vpdSetStr[pt_set], region_names[region],
+                FAPI_DBG("%s AC ps_ac_current_rdp[%s][%s] 0x%04x %d", cur_str[rails], vpdSetStr[pt_set], region_names[region],
                         revle16(o_gppb->ps_ac_current_rdp[rails][pt_set][region]),
                         revle16(o_gppb->ps_ac_current_rdp[rails][pt_set][region]));
 
@@ -4915,6 +4903,7 @@ fapi2::ReturnCode PlatPmPPB::update_vrt(
     uint32_t l_freq_khz = 0;
     uint32_t l_step_freq_khz;
     Pstate   l_ps;
+    uint8_t  l_temp = 0;
 
     l_step_freq_khz = (iv_frequency_step_khz);
     FAPI_DBG("l_step_freq_khz = 0x%X (%d)", l_step_freq_khz, l_step_freq_khz);
@@ -4927,12 +4916,14 @@ fapi2::ReturnCode PlatPmPPB::update_vrt(
     o_vrt_data->vrtHeader.fields.type         = (*i_pBuffer & 0x80) >> 7;
     o_vrt_data->vrtHeader.fields.content      = (*i_pBuffer & 0x40) >> 6;
     o_vrt_data->vrtHeader.fields.version      = (*i_pBuffer & 0x30) >> 4;
-    o_vrt_data->vrtHeader.fields.io_id        = (*i_pBuffer & 0x0C) >> 2;
-    o_vrt_data->vrtHeader.fields.ac_id        = *i_pBuffer & 0x03;
+    l_temp                                    = (*i_pBuffer & 0x0F);   // upper 4 bits of 5
     i_pBuffer++;
-    o_vrt_data->vrtHeader.fields.vcs_ceff_ratio_pct  = *i_pBuffer;
+    o_vrt_data->vrtHeader.fields.io_id        = (l_temp << 1) | ((*i_pBuffer & 0x80) >> 7);
+    o_vrt_data->vrtHeader.fields.ac_id        = (*i_pBuffer & 0x7C) >> 2;  // 5 bits of 5
+    l_temp                                    = (*i_pBuffer & 0x03);  // upper 2 bits of 5
     i_pBuffer++;
-    o_vrt_data->vrtHeader.fields.vdd_ceff_ratio_pct  = *i_pBuffer;
+    o_vrt_data->vrtHeader.fields.vcs_ceff_id  = (l_temp << 6) | ((*i_pBuffer & 0xE0) >> 5);
+    o_vrt_data->vrtHeader.fields.vdd_ceff_id  = (*i_pBuffer & 0x1F);
     i_pBuffer++;
 
     //find type
@@ -4943,7 +4934,8 @@ fapi2::ReturnCode PlatPmPPB::update_vrt(
 
     // Filtering Tracing output to only only QID of 0
     bool b_output_trace = false;
-    if (o_vrt_data->vrtHeader.fields.io_id == 3 &&
+    if (o_vrt_data->vrtHeader.fields.vdd_ceff_id == 25 &&
+        o_vrt_data->vrtHeader.fields.io_id == 5 &&
         o_vrt_data->vrtHeader.fields.ac_id == 3)
     {
         b_output_trace = true;
@@ -4952,19 +4944,18 @@ fapi2::ReturnCode PlatPmPPB::update_vrt(
     if (b_output_trace)
     {
         strcpy(l_line_str, "VRT:");
-        sprintf(l_buffer_str, " %X Type %X Content %d Ver %d IO %d AC %d",
-                revle16(o_vrt_data->vrtHeader.fields.marker),
-                revle16(o_vrt_data->vrtHeader.fields.type),
+        sprintf(l_buffer_str, " %X Type %X Content %d Ver %d IO %d AC %d VCS %d VDD %2d  ",
+                o_vrt_data->vrtHeader.fields.marker,
+                o_vrt_data->vrtHeader.fields.type,
                 o_vrt_data->vrtHeader.fields.content,
                 o_vrt_data->vrtHeader.fields.version,
                 o_vrt_data->vrtHeader.fields.io_id,
-                o_vrt_data->vrtHeader.fields.ac_id);
+                o_vrt_data->vrtHeader.fields.ac_id,
+                o_vrt_data->vrtHeader.fields.vcs_ceff_id,
+                o_vrt_data->vrtHeader.fields.vdd_ceff_id);
         strcat(l_line_str, l_buffer_str);
+        FAPI_INF("%s ", l_line_str)
     }
-
-    const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
-
-
     // Get the frequency biases in place and check that they all match
     double f_freq_bias = 0;
     int freq_bias_value_hp = 0;
@@ -4977,14 +4968,16 @@ fapi2::ReturnCode PlatPmPPB::update_vrt(
                     f_freq_bias);
 
     //Initialize VRT data part
+
     for (l_index_0 = 0; l_index_0 < WOF_VRT_SIZE; ++l_index_0)
     {
+        strcpy(l_line_str, "    ");
         strcpy(l_buffer_str, "");
 
-        // Offset MHz*1000 (khz) + step (khz) * sysvalue
+        // Offset MHz*1000 (khz) + step (khz) * (sysvalue - 60)
         float l_freq_raw_khz;
         float l_freq_biased_khz;
-        l_freq_raw_khz = (float)(1000 * 1000 + (l_step_freq_khz * (*i_pBuffer)));
+        l_freq_raw_khz = (float)(1000 * 1000 + (l_step_freq_khz * ((*i_pBuffer) - 60)));
 
         l_freq_biased_khz = l_freq_raw_khz * f_freq_bias;
 
@@ -5008,17 +5001,8 @@ fapi2::ReturnCode PlatPmPPB::update_vrt(
         // Translate to Pstate.  The called function will clip to the
         // legal range.  The rc is only interesting if we care that
         // the pstate was clipped;  in this case, we don't.
-        freq2pState(l_freq_khz, &l_ps);
-
+        freq2pState(l_freq_khz, &l_ps, ROUND_SLOW);
         o_vrt_data->data[l_index_0] = l_ps;
-
-        if (b_output_trace)
-        {
-            sprintf(l_buffer_str, "[%2d] 0x%2X %4d; ",
-                    l_index_0,
-                    l_ps,  l_freq_khz / 1000);
-            strcat(l_line_str, l_buffer_str);
-        }
 
         // Trace the last 8 values of the 24 for debug. As this is
         // in a loop that is processing over 1000 tables, the last
@@ -5026,9 +5010,10 @@ fapi2::ReturnCode PlatPmPPB::update_vrt(
         // is correct without overfilling the HB trace buffer.
         if (b_output_trace)
         {
+            sprintf(l_buffer_str, "[%2d] PS 0x%02X MHz %4d",
+                    l_index_0, o_vrt_data->data[l_index_0],  l_freq_khz / 1000);
+            strcat(l_line_str, l_buffer_str);
             FAPI_INF("%s ", l_line_str);
-            strcpy(l_buffer_str, "");
-            strcpy(l_line_str, "    ");
         }
 
         i_pBuffer++;
@@ -5090,8 +5075,17 @@ fapi2::ReturnCode PlatPmPPB::wof_init(
             FAPI_DBG("ATTR_SYS_VRT_STATIC_DATA_ENABLE is SET");
 
             // Copy base WOF header data
-            memcpy (l_wof_table_data, &g_wofData2, sizeof(WofTablesHeader_t));
+            memcpy (l_wof_table_data, &g_wofData, sizeof(WofTablesHeader_t));
             uint32_t l_index = sizeof(WofTablesHeader_t);
+
+            uint64_t* ptr = (uint64_t*) l_wof_table_data;
+            for (auto x = 0; x <8; ++x)
+            {
+
+                FAPI_INF("Raw wof_table_data (may be big or little endian based on platform) @  offset  %02d = %016llX", x, *ptr);
+                ptr++;
+            }
+
 
             WofTablesHeader_t* p_wfth;
             p_wfth = reinterpret_cast<WofTablesHeader_t*>(l_wof_table_data);
@@ -5101,14 +5095,35 @@ fapi2::ReturnCode PlatPmPPB::wof_init(
             strcpy(p_wfth->table_version, "Denali.20200125");
             strcpy(p_wfth->package_name,  "DENALI_DCM");
 
-            FAPI_INF("l_vcs_start before %d l_vdd_start %d  l_io_start %d  l_ac_start %d",
-                    p_wfth->vcs_start, p_wfth->vdd_start, p_wfth->io_start, p_wfth->amb_cond_start );
+            FAPI_INF("before l_vcs_start %d (0x%X) l_vdd_start %d (0x%X) l_io_start %d (0x%X) l_ac_start %d (0x%X) ",
+                        revle16(p_wfth->vcs_start),
+                        revle16(p_wfth->vcs_start),
+                        revle16(p_wfth->vdd_start),
+                        revle16(p_wfth->vdd_start),
+                        revle16(p_wfth->io_start),
+                        revle16(p_wfth->io_start),
+                        revle16(p_wfth->amb_cond_start),
+                        revle16(p_wfth->amb_cond_start) );
 
-            uint16_t l_vcs_start = revle16(p_wfth->vcs_start);
-            uint16_t l_vdd_start = revle16(p_wfth->vdd_start);
+            FAPI_INF("before l_vcs_size %d (0x%X) l_vdd_size %d (0x%X) l_io_size %d (0x%X) l_ac_size %d (0x%X) ",
+                        revle16(p_wfth->vcs_size),
+                        revle16(p_wfth->vcs_size),
+                        revle16(p_wfth->vdd_size),
+                        revle16(p_wfth->vdd_size),
+                        revle16(p_wfth->io_size),
+                        revle16(p_wfth->io_size),
+                        revle16(p_wfth->amb_cond_size),
+                        revle16(p_wfth->amb_cond_size) );
 
-            uint16_t l_vcs_step = revle16(p_wfth->vcs_step);
-            uint16_t l_vdd_step = revle16(p_wfth->vdd_step);
+            FAPI_INF("before l_vcs_step %d (0x%X) l_vdd_step %d (0x%X) l_io_step %d (0x%X) l_ac_step %d (0x%X) ",
+                        revle16(p_wfth->vcs_step),
+                        revle16(p_wfth->vcs_step),
+                        revle16(p_wfth->vdd_step),
+                        revle16(p_wfth->vdd_step),
+                        revle16(p_wfth->io_step),
+                        revle16(p_wfth->io_step),
+                        revle16(p_wfth->amb_cond_step),
+                        revle16(p_wfth->amb_cond_step) );
 
             l_vcs_size = revle16(p_wfth->vcs_size);
             l_vdd_size = revle16(p_wfth->vdd_size);
@@ -5121,36 +5136,38 @@ fapi2::ReturnCode PlatPmPPB::wof_init(
             l_vrt.vrtHeader.fields.content = 0;    // CeffRatio
             l_vrt.vrtHeader.fields.version = 0;    // 12 entry
 
-            uint8_t l_svrt_value_dec = (100) / 16.667;
-            FAPI_DBG("l_svrt_value_dec %02X", l_svrt_value_dec);
-            l_vrt.data[0] = (3900 - 1000) / 16.667;
-            for (auto i = 1; i < WOF_VRT_SIZE; ++i)
-            {
-                l_vrt.data[i] = l_vrt.data[i-1] - l_svrt_value_dec;
-            }
-
-            FAPI_INF("VRT default: l_vrt fields value 0x%08X marker %X type %d content %d io %01d ac %01d vc %02d vd %02d",
-                    l_vrt.vrtHeader.value,
-                    l_vrt.vrtHeader.fields.marker,
-                    l_vrt.vrtHeader.fields.type,
-                    l_vrt.vrtHeader.fields.content,
-                    l_vrt.vrtHeader.fields.io_id,
-                    l_vrt.vrtHeader.fields.ac_id,
-                    l_vrt.vrtHeader.fields.vcs_ceff_ratio_pct,
-                    l_vrt.vrtHeader.fields.vdd_ceff_ratio_pct
-                    );
+            FAPI_INF("VRT default: l_vrt fields value 0x%08X marker %X type %d content %d io %02d ac %02d vc %02d vd %02d",
+                                    l_vrt.vrtHeader.value,
+                                    l_vrt.vrtHeader.fields.marker,
+                                    l_vrt.vrtHeader.fields.type,
+                                    l_vrt.vrtHeader.fields.content,
+                                    l_vrt.vrtHeader.fields.io_id,
+                                    l_vrt.vrtHeader.fields.ac_id,
+                                    l_vrt.vrtHeader.fields.vcs_ceff_id,
+                                    l_vrt.vrtHeader.fields.vdd_ceff_id
+                                    );
 
             for (auto i = 0; i < WOF_VRT_SIZE; ++i)
             {
-                FAPI_INF("l_vrt data $d %02X", i, l_vrt.data[i]);
+                fapi2::ATTR_IS_IBM_SIMULATION_Type is_sim;
+                FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IS_IBM_SIMULATION, FAPI_SYSTEM, is_sim));
+                if (is_sim)
+                {
+                    l_vrt.data[i] = g_static_vrt[i];
+                }
+                else
+                {
+                    l_vrt.data[i] = g_static_vrt_hw[i];
+                }
+                FAPI_INF("Static System VRT data[%02d] = 0x%X", i, l_vrt.data[i]);
             }
 
             for (uint32_t vcs = 0; vcs < l_vcs_size; ++vcs)
             {
-                l_vrt.vrtHeader.fields.vcs_ceff_ratio_pct = l_vcs_start/100 + (vcs * l_vcs_step / 100);
+                l_vrt.vrtHeader.fields.vcs_ceff_id = vcs;
                 for (uint32_t vdd = 0; vdd < l_vdd_size; ++vdd)
                 {
-                    l_vrt.vrtHeader.fields.vdd_ceff_ratio_pct = l_vdd_start/100 + (vdd * l_vdd_step / 100);
+                    l_vrt.vrtHeader.fields.vdd_ceff_id = vdd;
                     for (uint32_t io = 0; io < l_io_size; ++io)
                     {
                         l_vrt.vrtHeader.fields.io_id = io;
@@ -5161,6 +5178,17 @@ fapi2::ReturnCode PlatPmPPB::wof_init(
                             l_vrt.vrtHeader.value = revle32(l_vrt.vrtHeader.value); // Store to structure in BE
                             memcpy((*l_wof_table_data + l_index), &l_vrt, sizeof (l_vrt));
                             l_vrt.vrtHeader.value = revle32(l_vrt.vrtHeader.value); // Restore the fixed structure
+
+                            FAPI_DBG("VRT default: l_vrt fields value 0x%08X marker %X type %d content %d io %02d ac %02d vc %02d vd %02d",
+                                    l_vrt.vrtHeader.value,
+                                    l_vrt.vrtHeader.fields.marker,
+                                    l_vrt.vrtHeader.fields.type,
+                                    l_vrt.vrtHeader.fields.content,
+                                    l_vrt.vrtHeader.fields.io_id,
+                                    l_vrt.vrtHeader.fields.ac_id,
+                                    l_vrt.vrtHeader.fields.vcs_ceff_id,
+                                    l_vrt.vrtHeader.fields.vdd_ceff_id
+                                    );
 
                             l_index += sizeof (l_vrt);
                         }
@@ -5177,7 +5205,7 @@ fapi2::ReturnCode PlatPmPPB::wof_init(
 
             // Read System VRT data
             l_rc = FAPI_ATTR_GET(fapi2::ATTR_WOF_TABLE_DATA,
-                    FAPI_SYSTEM,
+                    iv_procChip,
                     (*l_wof_table_data));
             if (l_rc)
             {
@@ -5199,8 +5227,8 @@ fapi2::ReturnCode PlatPmPPB::wof_init(
         //Validate WOF header part
         WofTablesHeader_t* p_wfth;
         p_wfth = reinterpret_cast<WofTablesHeader_t*>(o_buf);
-        // TODO:  checking on endianess with real WOF tables.
-        FAPI_INF("WFTH: %X", revle32(p_wfth->magic_number.value));
+
+        wfth_print(p_wfth);
 
         bool l_wof_header_data_state = 1;
         VALIDATE_WOF_HEADER_DATA(
@@ -5273,16 +5301,16 @@ fapi2::ReturnCode PlatPmPPB::wof_init(
 
         uint32_t l_total_index = l_vcs_size * l_vdd_size * l_io_size * l_ac_size;
 
-        FAPI_INF("WOF: l_vcs_size %02d, l_vdd_size %02d",l_vcs_size,l_vdd_size);
-        FAPI_INF("WOF: l_io_size  %02d,  l_ac_size %02d",l_io_size,l_ac_size);
-        FAPI_INF("WOF: l_total_index  %02d", l_total_index);
+        FAPI_INF("WOF: vcs_size %02d, vdd_size %02d io_size %02d, ac_size %02d",
+                        l_vcs_size, l_vdd_size, l_io_size,l_ac_size);
+        FAPI_INF("WOF: total_index  %02d", l_total_index);
 
         // Convert system vrt to homer vrt
         for (uint32_t vrt_index = 0;
                 vrt_index < l_total_index;
                 ++vrt_index)
         {
-            FAPI_INF ("l_wof_table_index %d vrt_index %d", l_wof_table_index, vrt_index);
+            FAPI_DBG ("l_wof_table_index %d vrt_index %d", l_wof_table_index, vrt_index);
             FAPI_DBG("Addresses: *l_wof_table_data %p  *l_wof_table_data+l_wof_table_index %p",
                     *l_wof_table_data,  (*l_wof_table_data) + l_wof_table_index);
 
@@ -5296,13 +5324,13 @@ fapi2::ReturnCode PlatPmPPB::wof_init(
                 FAPI_TRY(l_rc);  // Exit the function as a fail
             }
 
-            FAPI_INF("VRT post update: index %04d  l_vrt fields marker %X io %01d ac %01d vc %02d vd %02d",
+            FAPI_DBG("VRT post update: index %04d  l_vrt fields marker %X io %01d ac %01d vc %02d vd %02d",
                     l_wof_table_index,
                     l_vrt.vrtHeader.fields.marker,
                     l_vrt.vrtHeader.fields.io_id,
                     l_vrt.vrtHeader.fields.ac_id,
-                    l_vrt.vrtHeader.fields.vcs_ceff_ratio_pct,
-                    l_vrt.vrtHeader.fields.vdd_ceff_ratio_pct
+                    l_vrt.vrtHeader.fields.vcs_ceff_id,
+                    l_vrt.vrtHeader.fields.vdd_ceff_id
                     );
 
             // Check for "V" at the start of the magic number
@@ -5534,7 +5562,7 @@ fapi2::ReturnCode PlatPmPPB::pm_set_frequency()
         //   and same value will be initialized to ATTR_FREQ_SYSTEM_CORE_CEIL_MHZ
         // - Max value of PSAV will be initialized to ATTR_FREQ_SYSTEM_CORE_FLOOR_MHZ
         // - Min value of WOFBae will be initialized to ATTR_NOMINAL_FREQ_MHZ
-
+        iv_attrs.attr_pstate0_freq_mhz = 0;
         for (auto l_proc_target : sys_target.getChildren<fapi2::TARGET_TYPE_PROC_CHIP>())
         {
 

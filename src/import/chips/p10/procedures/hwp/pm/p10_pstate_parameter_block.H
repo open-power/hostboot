@@ -775,6 +775,14 @@ extern "C"
     iddq_print(IddqTable_t* i_iddqt);
 
     /// -------------------------------------------------------------------
+    /// @brief  Print the WOF Table Header
+    /// @param[in]  i_iwfth pointer to wfth structure to output
+    /// @return void
+    /// -------------------------------------------------------------------
+    void
+    wfth_print(WofTablesHeader_t* i_wfth);
+
+    /// -------------------------------------------------------------------
     /// @brief Populate Pstate super structure from VPD data
     /// @param[in]    i_target          => Chip Target
     /// @param[inout] *io_pss           => pointer to pstate superstructure

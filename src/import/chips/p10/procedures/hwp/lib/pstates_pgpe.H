@@ -75,6 +75,22 @@ enum POUNDW_DDS_FIELDS
     NUM_POUNDW_DDS_FIELDS   = 12
 };
 
+#define POUNDW_DDS_FIELDS_STR   \
+    {                               \
+        "TRIP_OFFSET",               \
+        "DATA0_OFFSET",              \
+        "DATA1_OFFSET",              \
+        "DATA2_OFFSET",              \
+        "LARGE_DROOP_DETECT",        \
+        "SMALL_DROOP_DETECT",        \
+        "SLOPEA_START_DETECT",       \
+        "SLOPEA_END_DETECT",         \
+        "SLOPEB_START_DETECT",       \
+        "SLOPEB_END_DETECT",         \
+        "SLOPEA_CYCLES",             \
+        "SLOPEB_CYCLES"              \
+    }
+
 enum DDS_TRIP_MODE
 {
     DDS_TRIP_MODE_CHIP      = 0x0,
@@ -99,6 +115,7 @@ enum DDS_TRIP_INTP_CTRL
 #define RUNTIME_RAIL_VCS    1
 #define RUNTIME_RAIL_IDD    0
 #define RUNTIME_RAIL_ICS    1
+#define RUNTIME_RAIL_STR { "VDD", "VCS"}
 
 
 /// These defines resonant clock data structures constants

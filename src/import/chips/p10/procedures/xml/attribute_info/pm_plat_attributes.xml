@@ -1603,7 +1603,7 @@
   <!-- ********************************************************************* -->
   <attribute>
     <id>ATTR_WOF_TABLE_DATA</id>
-    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>
     WOF data from SEEPROM which contains WOF header data + VRT data (vrt +
     for 6 Vcs, 26 Vdd, 4 IO, 4 AC)

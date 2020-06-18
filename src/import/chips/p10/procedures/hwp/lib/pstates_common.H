@@ -129,13 +129,13 @@
 #define REGION_UT_FMAX              6
 #define VPD_OP_SLOPES_REGION_ORDER {REGION_CF0_CF1, REGION_CF1_CF2, REGION_CF2_CF3, REGION_CF3_CF4, REGION_CF4_CF5, REGION_CF5_CF6, REGION_CF6_CF7,}
 #define VPD_OP_SLOPES_REGION_ORDER_STR { \
-        "CF0_CF1      ", \
-        "CF1_CF2      ", \
-        "CF2_CF3      ", \
-        "CF3_CF4      ", \
-        "CF4_CF5      ", \
-        "CF5_CF6      ", \
-        "CF6_CF7      ", \
+        "CF0_CF1", \
+        "CF1_CF2", \
+        "CF2_CF3", \
+        "CF3_CF4", \
+        "CF4_CF5", \
+        "CF5_CF6", \
+        "CF6_CF7", \
     }
 
 
@@ -218,8 +218,8 @@ typedef struct
     uint32_t ics_rdp_ac_10ma;
     uint32_t ics_rdp_dc_10ma;
     uint32_t vdd_vmin;
-    uint32_t irt_rdp_ac_10ma;
-    uint32_t irt_rdp_dc_10ma;
+    uint32_t rt_tdp_ac_10ma;
+    uint32_t rt_tdp_dc_10ma;
     uint32_t pad32;
     uint8_t  pstate;        // Pstate of this VpdOperating
     uint8_t  pad[3];        // Alignment padding
@@ -443,7 +443,9 @@ typedef struct
     ///    Number of Ambient Condition indexes
     uint16_t amb_cond_size;
 
-    uint16_t reserved1;
+    /// Frequency at which throttling is used for further reduction of Ceff
+    /// Overages
+    uint16_t sort_throttle_freq_mhz;
 
     ///  ---- Double word 6 -----
 
@@ -478,8 +480,8 @@ typedef struct
     /// Thermal Design Point (TDP) IO Wattage (Watts)
     uint8_t  io_tdp_w;
 
-    /// IO TDP Disabled wattage
-    uint8_t  io_dis_w;
+    /// IO Minumum wattage
+    uint8_t  io_min_w;
 
     /// Core Sort UltraTurbo Frequency (in MHz)
     uint16_t sort_ultraturbo_freq_mhz;
@@ -519,15 +521,15 @@ typedef struct
             uint32_t    type                : 1;
             uint32_t    content             : 1;
             uint32_t    version             : 2;
-            uint32_t    io_id               : 2;
-            uint32_t    ac_id               : 2;
-            uint32_t    vcs_ceff_ratio_pct  : 8;
-            uint32_t    vdd_ceff_ratio_pct  : 8;
+            uint32_t    io_id               : 5;
+            uint32_t    ac_id               : 5;
+            uint32_t    vcs_ceff_id         : 5;
+            uint32_t    vdd_ceff_id         : 5;
 #else
-            uint32_t    vdd_ceff_ratio_pct  : 8;
-            uint32_t    vcs_ceff_ratio_pct  : 8;
-            uint32_t    ac_id               : 2;
-            uint32_t    io_id               : 2;
+            uint32_t    vdd_ceff_id         : 5;
+            uint32_t    vcs_ceff_id         : 5;
+            uint32_t    ac_id               : 5;
+            uint32_t    io_id               : 5;
             uint32_t    version             : 2;
             uint32_t    content             : 1;
             uint32_t    type                : 1;
@@ -539,10 +541,10 @@ typedef struct
 } VRT_header_t;
 
 #define WOF_CEF_VDD_SIZE  26    // Indexes: 5% to 150% in 5% steps
-#define WOF_CEF_VCS_SIZE  6     // Indexes: 33%, 66%, 100%, 133%, 166%, 200%
-#define WOF_IO_SIZE       4     // Indexes: Max-Min/4 to 100% in Max-Min/3 steps
+#define WOF_CEF_VCS_SIZE  4     // Indexes: 50%, 100%, 150%, 200%
+#define WOF_IO_SIZE       6     // Indexes: Max-Min/6 to 100% in Max-Min/5 steps
 #define WOF_AMBCOND_SIZE  4     // Indexes: Max-Min/4 to 100% in Max-Min/3 steps
-#define WOF_VRT_SIZE      12    // Indexes: 31.25% to 100% in 6.25% steps
+#define WOF_VRT_SIZE      12    // Indexes: 31.25% to 100% in 6.25% stepsw
 
 /// WOF Voltage Ratio Tables (VRT) -- 16B
 typedef struct
