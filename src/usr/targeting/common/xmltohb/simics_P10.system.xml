@@ -521,14 +521,10 @@
         <id>FAPI_NAME</id>
         <default>pu.nmmu:k0:n0:s0:p00:c0</default>
     </attribute>
-<!-- TODO: RTC 208936 FAPI POS needs EKB changes -->
-<!--
     <attribute>
         <id>FAPI_POS</id>
         <default>0</default>
     </attribute>
-
--->
     <attribute>
         <id>HUID</id>
         <default>0x004F0000</default>
@@ -570,13 +566,10 @@
         <id>FAPI_NAME</id>
         <default>pu.nmmu:k0:n0:s0:p00:c1</default>
     </attribute>
-<!-- TODO: RTC 208936 FAPI POS needs EKB changes -->
-<!--
     <attribute>
         <id>FAPI_POS</id>
         <default>1</default>
     </attribute>
--->
     <attribute>
         <id>HUID</id>
         <default>0x004F0001</default>
@@ -618,14 +611,10 @@
         <id>FAPI_NAME</id>
         <default>pu.nmmu:k0:n0:s0:p01:c0</default>
     </attribute>
-<!-- TODO: RTC 208936 FAPI POS needs EKB changes -->
-<!--
     <attribute>
         <id>FAPI_POS</id>
         <default>0</default>
     </attribute>
-
--->
     <attribute>
         <id>HUID</id>
         <default>0x004F0002</default>
@@ -667,13 +656,10 @@
         <id>FAPI_NAME</id>
         <default>pu.nmmu:k0:n0:s0:p01:c1</default>
     </attribute>
-<!-- TODO: RTC 208936 FAPI POS needs EKB changes -->
-<!--
     <attribute>
         <id>FAPI_POS</id>
         <default>1</default>
     </attribute>
--->
     <attribute>
         <id>HUID</id>
         <default>0x004F0003</default>
@@ -1443,13 +1429,10 @@
         <id>FAPI_NAME</id>
         <default>pu.fc:k0:n0:s0:p00:c0</default>
     </attribute>
-<!-- TODO: RTC 208936 FAPI POS needs EKB changes -->
-<!--
     <attribute>
         <id>FAPI_POS</id>
         <default>0</default>
     </attribute>
--->
     <attribute>
         <id>HUID</id>
         <default>0x00530000</default>
@@ -1487,13 +1470,10 @@
         <id>FAPI_NAME</id>
         <default>pu.fc:k0:n0:s0:p00:c1</default>
     </attribute>
-<!-- TODO: RTC 208936 FAPI POS needs EKB changes -->
-<!--
     <attribute>
         <id>FAPI_POS</id>
         <default>1</default>
     </attribute>
--->
     <attribute>
         <id>HUID</id>
         <default>0x00530001</default>
@@ -1531,13 +1511,10 @@
         <id>FAPI_NAME</id>
         <default>pu.fc:k0:n0:s0:p00:c2</default>
     </attribute>
-<!-- TODO: RTC 208936 FAPI POS needs EKB changes -->
-<!--
     <attribute>
         <id>FAPI_POS</id>
         <default>2</default>
     </attribute>
--->
     <attribute>
         <id>HUID</id>
         <default>0x00530002</default>
@@ -1575,13 +1552,10 @@
         <id>FAPI_NAME</id>
         <default>pu.fc:k0:n0:s0:p00:c3</default>
     </attribute>
-<!-- TODO: RTC 208936 FAPI POS needs EKB changes -->
-<!--
     <attribute>
         <id>FAPI_POS</id>
         <default>3</default>
     </attribute>
--->
     <attribute>
         <id>HUID</id>
         <default>0x00530003</default>
@@ -1619,13 +1593,10 @@
         <id>FAPI_NAME</id>
         <default>pu.fc:k0:n0:s0:p00:c4</default>
     </attribute>
-<!-- TODO: RTC 208936 FAPI POS needs EKB changes -->
-<!--
     <attribute>
         <id>FAPI_POS</id>
         <default>4</default>
     </attribute>
--->
     <attribute>
         <id>HUID</id>
         <default>0x00530004</default>
@@ -1663,13 +1634,10 @@
         <id>FAPI_NAME</id>
         <default>pu.fc:k0:n0:s0:p00:c5</default>
     </attribute>
-<!-- TODO: RTC 208936 FAPI POS needs EKB changes -->
-<!--
     <attribute>
         <id>FAPI_POS</id>
         <default>5</default>
     </attribute>
--->
     <attribute>
         <id>HUID</id>
         <default>0x00530005</default>
@@ -1707,13 +1675,10 @@
         <id>FAPI_NAME</id>
         <default>pu.fc:k0:n0:s0:p00:c6</default>
     </attribute>
-<!-- TODO: RTC 208936 FAPI POS needs EKB changes -->
-<!--
     <attribute>
         <id>FAPI_POS</id>
         <default>6</default>
     </attribute>
--->
     <attribute>
         <id>HUID</id>
         <default>0x00530006</default>
@@ -1751,13 +1716,10 @@
         <id>FAPI_NAME</id>
         <default>pu.fc:k0:n0:s0:p00:c7</default>
     </attribute>
-<!-- TODO: RTC 208936 FAPI POS needs EKB changes -->
-<!--
     <attribute>
         <id>FAPI_POS</id>
         <default>7</default>
     </attribute>
--->
     <attribute>
         <id>HUID</id>
         <default>0x00530007</default>
@@ -1795,13 +1757,10 @@
         <id>FAPI_NAME</id>
         <default>pu.fc:k0:n0:s0:p00:c8</default>
     </attribute>
-<!-- TODO: RTC 208936 FAPI POS needs EKB changes -->
-<!--
     <attribute>
         <id>FAPI_POS</id>
         <default>8</default>
     </attribute>
--->
     <attribute>
         <id>HUID</id>
         <default>0x00530008</default>
@@ -1839,13 +1798,10 @@
         <id>FAPI_NAME</id>
         <default>pu.fc:k0:n0:s0:p00:c9</default>
     </attribute>
-<!-- TODO: RTC 208936 FAPI POS needs EKB changes -->
-<!--
     <attribute>
         <id>FAPI_POS</id>
         <default>9</default>
     </attribute>
--->
     <attribute>
         <id>HUID</id>
         <default>0x00530009</default>
@@ -1883,13 +1839,10 @@
         <id>FAPI_NAME</id>
         <default>pu.fc:k0:n0:s0:p00:c10</default>
     </attribute>
-<!-- TODO: RTC 208936 FAPI POS needs EKB changes -->
-<!--
     <attribute>
         <id>FAPI_POS</id>
         <default>10</default>
     </attribute>
--->
     <attribute>
         <id>HUID</id>
         <default>0x0053000a</default>
@@ -1927,13 +1880,10 @@
         <id>FAPI_NAME</id>
         <default>pu.fc:k0:n0:s0:p00:c11</default>
     </attribute>
-<!-- TODO: RTC 208936 FAPI POS needs EKB changes -->
-<!--
     <attribute>
         <id>FAPI_POS</id>
         <default>11</default>
     </attribute>
--->
     <attribute>
         <id>HUID</id>
         <default>0x0053000b</default>
@@ -1971,13 +1921,10 @@
         <id>FAPI_NAME</id>
         <default>pu.fc:k0:n0:s0:p00:c12</default>
     </attribute>
-<!-- TODO: RTC 208936 FAPI POS needs EKB changes -->
-<!--
     <attribute>
         <id>FAPI_POS</id>
         <default>12</default>
     </attribute>
--->
     <attribute>
         <id>HUID</id>
         <default>0x0053000c</default>
@@ -2015,13 +1962,10 @@
         <id>FAPI_NAME</id>
         <default>pu.fc:k0:n0:s0:p00:c13</default>
     </attribute>
-<!-- TODO: RTC 208936 FAPI POS needs EKB changes -->
-<!--
     <attribute>
         <id>FAPI_POS</id>
         <default>13</default>
     </attribute>
--->
     <attribute>
         <id>HUID</id>
         <default>0x0053000d</default>
@@ -2059,13 +2003,10 @@
         <id>FAPI_NAME</id>
         <default>pu.fc:k0:n0:s0:p00:c14</default>
     </attribute>
-<!-- TODO: RTC 208936 FAPI POS needs EKB changes -->
-<!--
     <attribute>
         <id>FAPI_POS</id>
         <default>14</default>
     </attribute>
--->
     <attribute>
         <id>HUID</id>
         <default>0x0053000e</default>
@@ -2103,13 +2044,10 @@
         <id>FAPI_NAME</id>
         <default>pu.fc:k0:n0:s0:p00:c15</default>
     </attribute>
-<!-- TODO: RTC 208936 FAPI POS needs EKB changes -->
-<!--
     <attribute>
         <id>FAPI_POS</id>
         <default>15</default>
     </attribute>
--->
     <attribute>
         <id>HUID</id>
         <default>0x0053000f</default>
@@ -2147,13 +2085,10 @@
         <id>FAPI_NAME</id>
         <default>pu.fc:k0:n0:s0:p01:c0</default>
     </attribute>
-<!-- TODO: RTC 208936 FAPI POS needs EKB changes -->
-<!--
     <attribute>
         <id>FAPI_POS</id>
         <default>16</default>
     </attribute>
--->
     <attribute>
         <id>HUID</id>
         <default>0x00530010</default>
@@ -2191,13 +2126,10 @@
         <id>FAPI_NAME</id>
         <default>pu.fc:k0:n0:s0:p01:c1</default>
     </attribute>
-<!-- TODO: RTC 208936 FAPI POS needs EKB changes -->
-<!--
     <attribute>
         <id>FAPI_POS</id>
         <default>17</default>
     </attribute>
--->
     <attribute>
         <id>HUID</id>
         <default>0x00530011</default>
@@ -2235,13 +2167,10 @@
         <id>FAPI_NAME</id>
         <default>pu.fc:k0:n0:s0:p01:c2</default>
     </attribute>
-<!-- TODO: RTC 208936 FAPI POS needs EKB changes -->
-<!--
     <attribute>
         <id>FAPI_POS</id>
         <default>18</default>
     </attribute>
--->
     <attribute>
         <id>HUID</id>
         <default>0x00530012</default>
@@ -2279,13 +2208,10 @@
         <id>FAPI_NAME</id>
         <default>pu.fc:k0:n0:s0:p01:c3</default>
     </attribute>
-<!-- TODO: RTC 208936 FAPI POS needs EKB changes -->
-<!--
     <attribute>
         <id>FAPI_POS</id>
         <default>19</default>
     </attribute>
--->
     <attribute>
         <id>HUID</id>
         <default>0x00530013</default>
@@ -2323,13 +2249,10 @@
         <id>FAPI_NAME</id>
         <default>pu.fc:k0:n0:s0:p01:c4</default>
     </attribute>
-<!-- TODO: RTC 208936 FAPI POS needs EKB changes -->
-<!--
     <attribute>
         <id>FAPI_POS</id>
         <default>20</default>
     </attribute>
--->
     <attribute>
         <id>HUID</id>
         <default>0x00530014</default>
@@ -2367,13 +2290,10 @@
         <id>FAPI_NAME</id>
         <default>pu.fc:k0:n0:s0:p01:c5</default>
     </attribute>
-<!-- TODO: RTC 208936 FAPI POS needs EKB changes -->
-<!--
     <attribute>
         <id>FAPI_POS</id>
         <default>21</default>
     </attribute>
--->
     <attribute>
         <id>HUID</id>
         <default>0x00530015</default>
@@ -2411,13 +2331,10 @@
         <id>FAPI_NAME</id>
         <default>pu.fc:k0:n0:s0:p01:c6</default>
     </attribute>
-<!-- TODO: RTC 208936 FAPI POS needs EKB changes -->
-<!--
     <attribute>
         <id>FAPI_POS</id>
         <default>22</default>
     </attribute>
--->
     <attribute>
         <id>HUID</id>
         <default>0x00530016</default>
@@ -2455,13 +2372,10 @@
         <id>FAPI_NAME</id>
         <default>pu.fc:k0:n0:s0:p01:c7</default>
     </attribute>
-<!-- TODO: RTC 208936 FAPI POS needs EKB changes -->
-<!--
     <attribute>
         <id>FAPI_POS</id>
         <default>23</default>
     </attribute>
--->
     <attribute>
         <id>HUID</id>
         <default>0x00530017</default>
@@ -2499,13 +2413,10 @@
         <id>FAPI_NAME</id>
         <default>pu.fc:k0:n0:s0:p01:c8</default>
     </attribute>
-<!-- TODO: RTC 208936 FAPI POS needs EKB changes -->
-<!--
     <attribute>
         <id>FAPI_POS</id>
         <default>24</default>
     </attribute>
--->
     <attribute>
         <id>HUID</id>
         <default>0x00530018</default>
@@ -2543,13 +2454,10 @@
         <id>FAPI_NAME</id>
         <default>pu.fc:k0:n0:s0:p01:c9</default>
     </attribute>
-<!-- TODO: RTC 208936 FAPI POS needs EKB changes -->
-<!--
     <attribute>
         <id>FAPI_POS</id>
         <default>25</default>
     </attribute>
--->
     <attribute>
         <id>HUID</id>
         <default>0x00530019</default>
@@ -2587,13 +2495,10 @@
         <id>FAPI_NAME</id>
         <default>pu.fc:k0:n0:s0:p01:c10</default>
     </attribute>
-<!-- TODO: RTC 208936 FAPI POS needs EKB changes -->
-<!--
     <attribute>
         <id>FAPI_POS</id>
         <default>26</default>
     </attribute>
--->
     <attribute>
         <id>HUID</id>
         <default>0x0053001a</default>
@@ -2631,13 +2536,10 @@
         <id>FAPI_NAME</id>
         <default>pu.fc:k0:n0:s0:p01:c11</default>
     </attribute>
-<!-- TODO: RTC 208936 FAPI POS needs EKB changes -->
-<!--
     <attribute>
         <id>FAPI_POS</id>
         <default>27</default>
     </attribute>
--->
     <attribute>
         <id>HUID</id>
         <default>0x0053001b</default>
@@ -2675,13 +2577,10 @@
         <id>FAPI_NAME</id>
         <default>pu.fc:k0:n0:s0:p01:c12</default>
     </attribute>
-<!-- TODO: RTC 208936 FAPI POS needs EKB changes -->
-<!--
     <attribute>
         <id>FAPI_POS</id>
         <default>28</default>
     </attribute>
--->
     <attribute>
         <id>HUID</id>
         <default>0x0053001c</default>
@@ -2719,13 +2618,10 @@
         <id>FAPI_NAME</id>
         <default>pu.fc:k0:n0:s0:p01:c13</default>
     </attribute>
-<!-- TODO: RTC 208936 FAPI POS needs EKB changes -->
-<!--
     <attribute>
         <id>FAPI_POS</id>
         <default>29</default>
     </attribute>
--->
     <attribute>
         <id>HUID</id>
         <default>0x0053001d</default>
@@ -2763,13 +2659,10 @@
         <id>FAPI_NAME</id>
         <default>pu.fc:k0:n0:s0:p01:c14</default>
     </attribute>
-<!-- TODO: RTC 208936 FAPI POS needs EKB changes -->
-<!--
     <attribute>
         <id>FAPI_POS</id>
         <default>30</default>
     </attribute>
--->
     <attribute>
         <id>HUID</id>
         <default>0x0053001e</default>
@@ -2807,13 +2700,10 @@
         <id>FAPI_NAME</id>
         <default>pu.fc:k0:n0:s0:p01:c15</default>
     </attribute>
-<!-- TODO: RTC 208936 FAPI POS needs EKB changes -->
-<!--
     <attribute>
         <id>FAPI_POS</id>
         <default>31</default>
     </attribute>
--->
     <attribute>
         <id>HUID</id>
         <default>0x0053001f</default>
@@ -6475,13 +6365,10 @@
         <id>FAPI_NAME</id>
         <default>pu.pauc:k0:n0:s0:p00:c0</default>
     </attribute>
-<!-- TODO: RTC 208936 FAPI POS needs EKB changes -->
-<!--
     <attribute>
         <id>FAPI_POS</id>
         <default>0</default>
     </attribute>
--->
     <attribute>
         <id>HUID</id>
         <default>0x00520000</default>
@@ -6523,13 +6410,10 @@
         <id>FAPI_NAME</id>
         <default>pu.pauc:k0:n0:s0:p00:c1</default>
     </attribute>
-<!-- TODO: RTC 208936 FAPI POS needs EKB changes -->
-<!--
     <attribute>
         <id>FAPI_POS</id>
         <default>1</default>
     </attribute>
--->
     <attribute>
         <id>HUID</id>
         <default>0x00520001</default>
@@ -6571,13 +6455,10 @@
         <id>FAPI_NAME</id>
         <default>pu.pauc:k0:n0:s0:p00:c2</default>
     </attribute>
-<!-- TODO: RTC 208936 FAPI POS needs EKB changes -->
-<!--
     <attribute>
         <id>FAPI_POS</id>
         <default>2</default>
     </attribute>
--->
     <attribute>
         <id>HUID</id>
         <default>0x00520002</default>
@@ -6619,13 +6500,10 @@
         <id>FAPI_NAME</id>
         <default>pu.pauc:k0:n0:s0:p00:c3</default>
     </attribute>
-<!-- TODO: RTC 208936 FAPI POS needs EKB changes -->
-<!--
     <attribute>
         <id>FAPI_POS</id>
         <default>3</default>
     </attribute>
--->
     <attribute>
         <id>HUID</id>
         <default>0x00520003</default>
@@ -6667,13 +6545,10 @@
         <id>FAPI_NAME</id>
         <default>pu.pauc:k0:n0:s0:p01:c0</default>
     </attribute>
-<!-- TODO: RTC 208936 FAPI POS needs EKB changes -->
-<!--
     <attribute>
         <id>FAPI_POS</id>
         <default>4</default>
     </attribute>
--->
     <attribute>
         <id>HUID</id>
         <default>0x00520004</default>
@@ -6715,13 +6590,10 @@
         <id>FAPI_NAME</id>
         <default>pu.pauc:k0:n0:s0:p01:c1</default>
     </attribute>
-<!-- TODO: RTC 208936 FAPI POS needs EKB changes -->
-<!--
     <attribute>
         <id>FAPI_POS</id>
         <default>5</default>
     </attribute>
--->
     <attribute>
         <id>HUID</id>
         <default>0x00520005</default>
@@ -6763,13 +6635,10 @@
         <id>FAPI_NAME</id>
         <default>pu.pauc:k0:n0:s0:p01:c2</default>
     </attribute>
-<!-- TODO: RTC 208936 FAPI POS needs EKB changes -->
-<!--
     <attribute>
         <id>FAPI_POS</id>
         <default>6</default>
     </attribute>
--->
     <attribute>
         <id>HUID</id>
         <default>0x00520006</default>
@@ -6811,13 +6680,10 @@
         <id>FAPI_NAME</id>
         <default>pu.pauc:k0:n0:s0:p01:c3</default>
     </attribute>
-<!-- TODO: RTC 208936 FAPI POS needs EKB changes -->
-<!--
     <attribute>
         <id>FAPI_POS</id>
         <default>7</default>
     </attribute>
--->
     <attribute>
         <id>HUID</id>
         <default>0x00520007</default>
@@ -6863,13 +6729,10 @@
         <id>FAPI_NAME</id>
         <default>pu.iohs:k0:n0:s0:p00:c0</default>
     </attribute>
-<!-- TODO: RTC 208936 FAPI POS needs EKB changes -->
-<!--
     <attribute>
         <id>FAPI_POS</id>
         <default>0</default>
     </attribute>
--->
     <attribute>
         <id>HUID</id>
         <default>0x00510000</default>
@@ -6927,13 +6790,10 @@
         <id>FAPI_NAME</id>
         <default>pu.iohs:k0:n0:s0:p00:c1</default>
     </attribute>
-<!-- TODO: RTC 208936 FAPI POS needs EKB changes -->
-<!--
     <attribute>
         <id>FAPI_POS</id>
         <default>1</default>
     </attribute>
--->
     <attribute>
         <id>HUID</id>
         <default>0x00510001</default>
@@ -6983,13 +6843,10 @@
         <id>FAPI_NAME</id>
         <default>pu.iohs:k0:n0:s0:p00:c2</default>
     </attribute>
-<!-- TODO: RTC 208936 FAPI POS needs EKB changes -->
-<!--
     <attribute>
         <id>FAPI_POS</id>
         <default>2</default>
     </attribute>
--->
     <attribute>
         <id>HUID</id>
         <default>0x00510002</default>
@@ -7047,13 +6904,10 @@
         <id>FAPI_NAME</id>
         <default>pu.iohs:k0:n0:s0:p00:c3</default>
     </attribute>
-<!-- TODO: RTC 208936 FAPI POS needs EKB changes -->
-<!--
     <attribute>
         <id>FAPI_POS</id>
         <default>3</default>
     </attribute>
--->
     <attribute>
         <id>HUID</id>
         <default>0x00510003</default>
@@ -7103,13 +6957,10 @@
         <id>FAPI_NAME</id>
         <default>pu.iohs:k0:n0:s0:p00:c4</default>
     </attribute>
-<!-- TODO: RTC 208936 FAPI POS needs EKB changes -->
-<!--
     <attribute>
         <id>FAPI_POS</id>
         <default>4</default>
     </attribute>
--->
     <attribute>
         <id>HUID</id>
         <default>0x00510004</default>
@@ -7159,13 +7010,10 @@
         <id>FAPI_NAME</id>
         <default>pu.iohs:k0:n0:s0:p00:c5</default>
     </attribute>
-<!-- TODO: RTC 208936 FAPI POS needs EKB changes -->
-<!--
     <attribute>
         <id>FAPI_POS</id>
         <default>5</default>
     </attribute>
--->
     <attribute>
         <id>HUID</id>
         <default>0x00510005</default>
@@ -7215,13 +7063,10 @@
         <id>FAPI_NAME</id>
         <default>pu.iohs:k0:n0:s0:p00:c6</default>
     </attribute>
-<!-- TODO: RTC 208936 FAPI POS needs EKB changes -->
-<!--
     <attribute>
         <id>FAPI_POS</id>
         <default>6</default>
     </attribute>
--->
     <attribute>
         <id>HUID</id>
         <default>0x00510006</default>
@@ -7279,13 +7124,10 @@
         <id>FAPI_NAME</id>
         <default>pu.iohs:k0:n0:s0:p00:c7</default>
     </attribute>
-<!-- TODO: RTC 208936 FAPI POS needs EKB changes -->
-<!--
     <attribute>
         <id>FAPI_POS</id>
         <default>7</default>
     </attribute>
--->
     <attribute>
         <id>HUID</id>
         <default>0x00510007</default>
@@ -7335,13 +7177,10 @@
         <id>FAPI_NAME</id>
         <default>pu.iohs:k0:n0:s0:p01:c0</default>
     </attribute>
-<!-- TODO: RTC 208936 FAPI POS needs EKB changes -->
-<!--
     <attribute>
         <id>FAPI_POS</id>
         <default>8</default>
     </attribute>
--->
     <attribute>
         <id>HUID</id>
         <default>0x00510008</default>
@@ -7391,13 +7230,10 @@
         <id>FAPI_NAME</id>
         <default>pu.iohs:k0:n0:s0:p01:c1</default>
     </attribute>
-<!-- TODO: RTC 208936 FAPI POS needs EKB changes -->
-<!--
     <attribute>
         <id>FAPI_POS</id>
         <default>9</default>
     </attribute>
--->
     <attribute>
         <id>HUID</id>
         <default>0x00510009</default>
@@ -7455,13 +7291,10 @@
         <id>FAPI_NAME</id>
         <default>pu.iohs:k0:n0:s0:p01:c2</default>
     </attribute>
-<!-- TODO: RTC 208936 FAPI POS needs EKB changes -->
-<!--
     <attribute>
         <id>FAPI_POS</id>
         <default>10</default>
     </attribute>
--->
     <attribute>
         <id>HUID</id>
         <default>0x0051000a</default>
@@ -7511,13 +7344,10 @@
         <id>FAPI_NAME</id>
         <default>pu.iohs:k0:n0:s0:p01:c3</default>
     </attribute>
-<!-- TODO: RTC 208936 FAPI POS needs EKB changes -->
-<!--
     <attribute>
         <id>FAPI_POS</id>
         <default>11</default>
     </attribute>
--->
     <attribute>
         <id>HUID</id>
         <default>0x0051000B</default>
@@ -7567,13 +7397,10 @@
         <id>FAPI_NAME</id>
         <default>pu.iohs:k0:n0:s0:p01:c4</default>
     </attribute>
-<!-- TODO: RTC 208936 FAPI POS needs EKB changes -->
-<!--
     <attribute>
         <id>FAPI_POS</id>
         <default>12</default>
     </attribute>
--->
     <attribute>
         <id>HUID</id>
         <default>0x0051000C</default>
@@ -7631,13 +7458,10 @@
         <id>FAPI_NAME</id>
         <default>pu.iohs:k0:n0:s0:p01:c5</default>
     </attribute>
-<!-- TODO: RTC 208936 FAPI POS needs EKB changes -->
-<!--
     <attribute>
         <id>FAPI_POS</id>
         <default>13</default>
     </attribute>
--->
     <attribute>
         <id>HUID</id>
         <default>0x0051000D</default>
@@ -7687,13 +7511,10 @@
         <id>FAPI_NAME</id>
         <default>pu.iohs:k0:n0:s0:p01:c6</default>
     </attribute>
-<!-- TODO: RTC 208936 FAPI POS needs EKB changes -->
-<!--
     <attribute>
         <id>FAPI_POS</id>
         <default>14</default>
     </attribute>
--->
     <attribute>
         <id>HUID</id>
         <default>0x0051000E</default>
@@ -7743,13 +7564,10 @@
         <id>FAPI_NAME</id>
         <default>pu.iohs:k0:n0:s0:p01:c7</default>
     </attribute>
-<!-- TODO: RTC 208936 FAPI POS needs EKB changes -->
-<!--
     <attribute>
         <id>FAPI_POS</id>
         <default>15</default>
     </attribute>
--->
     <attribute>
         <id>HUID</id>
         <default>0x0051000F</default>
@@ -7803,13 +7621,10 @@
         <id>FAPI_NAME</id>
         <default>pu.pau:k0:n0:s0:p00:c0</default>
     </attribute>
-<!-- TODO: RTC 208936 FAPI POS needs EKB changes -->
-<!--
     <attribute>
         <id>FAPI_POS</id>
         <default>0</default>
     </attribute>
--->
     <attribute>
         <id>HUID</id>
         <default>0x00500000</default>
@@ -7851,13 +7666,10 @@
         <id>FAPI_NAME</id>
         <default>pu.pau:k0:n0:s0:p00:c3</default>
     </attribute>
-<!-- TODO: RTC 208936 FAPI POS needs EKB changes -->
-<!--
     <attribute>
         <id>FAPI_POS</id>
         <default>3</default>
     </attribute>
--->
     <attribute>
         <id>HUID</id>
         <default>0x00500003</default>
@@ -7899,13 +7711,10 @@
         <id>FAPI_NAME</id>
         <default>pu.pau:k0:n0:s0:p00:c4</default>
     </attribute>
-<!-- TODO: RTC 208936 FAPI POS needs EKB changes -->
-<!--
     <attribute>
         <id>FAPI_POS</id>
         <default>4</default>
     </attribute>
--->
     <attribute>
         <id>HUID</id>
         <default>0x00500004</default>
@@ -7947,13 +7756,10 @@
         <id>FAPI_NAME</id>
         <default>pu.pau:k0:n0:s0:p00:c5</default>
     </attribute>
-<!-- TODO: RTC 208936 FAPI POS needs EKB changes -->
-<!--
     <attribute>
         <id>FAPI_POS</id>
         <default>5</default>
     </attribute>
--->
     <attribute>
         <id>HUID</id>
         <default>0x00500005</default>
@@ -7995,13 +7801,10 @@
         <id>FAPI_NAME</id>
         <default>pu.pau:k0:n0:s0:p00:c6</default>
     </attribute>
-<!-- TODO: RTC 208936 FAPI POS needs EKB changes -->
-<!--
     <attribute>
         <id>FAPI_POS</id>
         <default>6</default>
     </attribute>
--->
     <attribute>
         <id>HUID</id>
         <default>0x00500006</default>
@@ -8043,13 +7846,10 @@
         <id>FAPI_NAME</id>
         <default>pu.pau:k0:n0:s0:p00:c7</default>
     </attribute>
-<!-- TODO: RTC 208936 FAPI POS needs EKB changes -->
-<!--
     <attribute>
         <id>FAPI_POS</id>
         <default>7</default>
     </attribute>
--->
     <attribute>
         <id>HUID</id>
         <default>0x00500007</default>
@@ -8091,13 +7891,10 @@
         <id>FAPI_NAME</id>
         <default>pu.pau:k0:n0:s0:p01:c0</default>
     </attribute>
-<!-- TODO: RTC 208936 FAPI POS needs EKB changes -->
-<!--
     <attribute>
         <id>FAPI_POS</id>
         <default>8</default>
     </attribute>
--->
     <attribute>
         <id>HUID</id>
         <default>0x00500008</default>
@@ -8139,13 +7936,10 @@
         <id>FAPI_NAME</id>
         <default>pu.pau:k0:n0:s0:p01:c3</default>
     </attribute>
-<!-- TODO: RTC 208936 FAPI POS needs EKB changes -->
-<!--
     <attribute>
         <id>FAPI_POS</id>
         <default>9</default>
     </attribute>
--->
     <attribute>
         <id>HUID</id>
         <default>0x00500009</default>
@@ -8187,13 +7981,10 @@
         <id>FAPI_NAME</id>
         <default>pu.pau:k0:n0:s0:p01:c4</default>
     </attribute>
-<!-- TODO: RTC 208936 FAPI POS needs EKB changes -->
-<!--
     <attribute>
         <id>FAPI_POS</id>
         <default>12</default>
     </attribute>
--->
     <attribute>
         <id>HUID</id>
         <default>0x0050000C</default>
@@ -8235,13 +8026,10 @@
         <id>FAPI_NAME</id>
         <default>pu.pau:k0:n0:s0:p01:c5</default>
     </attribute>
-<!-- TODO: RTC 208936 FAPI POS needs EKB changes -->
-<!--
     <attribute>
         <id>FAPI_POS</id>
         <default>13</default>
     </attribute>
--->
     <attribute>
         <id>HUID</id>
         <default>0x0050000D</default>
@@ -8283,13 +8071,10 @@
         <id>FAPI_NAME</id>
         <default>pu.pau:k0:n0:s0:p01:c6</default>
     </attribute>
-<!-- TODO: RTC 208936 FAPI POS needs EKB changes -->
-<!--
     <attribute>
         <id>FAPI_POS</id>
         <default>14</default>
     </attribute>
--->
     <attribute>
         <id>HUID</id>
         <default>0x0050000E</default>
@@ -8331,13 +8116,10 @@
         <id>FAPI_NAME</id>
         <default>pu.pau:k0:n0:s0:p01:c7</default>
     </attribute>
-<!-- TODO: RTC 208936 FAPI POS needs EKB changes -->
-<!--
     <attribute>
         <id>FAPI_POS</id>
         <default>15</default>
     </attribute>
--->
     <attribute>
         <id>HUID</id>
         <default>0x0050000F</default>
@@ -8387,13 +8169,10 @@
         <id>FAPI_NAME</id>
         <default>pu.mc:k0:n0:s0:p00:c0</default>
     </attribute>
-<!-- TODO: RTC 208936 Creating a common parent between P9 and P10 didn't work in this case -->
-<!--
     <attribute>
         <id>FAPI_POS</id>
         <default>0</default>
     </attribute>
--->
     <attribute>
         <id>HUID</id>
         <default>0x00440000</default>
@@ -8444,13 +8223,10 @@
         <id>FAPI_NAME</id>
         <default>pu.mc:k0:n0:s0:p00:c1</default>
     </attribute>
-<!-- TODO: RTC 208936 Creating a common parent between P9 and P10 didn't work in this case -->
-<!--
     <attribute>
         <id>FAPI_POS</id>
         <default>1</default>
     </attribute>
--->
     <attribute>
         <id>HUID</id>
         <default>0x00440001</default>
@@ -8501,13 +8277,10 @@
         <id>FAPI_NAME</id>
         <default>pu.mc:k0:n0:s0:p00:c2</default>
     </attribute>
-<!-- TODO: RTC 208936 Creating a common parent between P9 and P10 didn't work in this case -->
-<!--
     <attribute>
         <id>FAPI_POS</id>
         <default>2</default>
     </attribute>
--->
     <attribute>
         <id>HUID</id>
         <default>0x00440002</default>
@@ -8558,13 +8331,10 @@
         <id>FAPI_NAME</id>
         <default>pu.mc:k0:n0:s0:p00:c3</default>
     </attribute>
-<!-- TODO: RTC 208936 Creating a common parent between P9 and P10 didn't work in this case -->
-<!--
     <attribute>
         <id>FAPI_POS</id>
         <default>3</default>
     </attribute>
--->
     <attribute>
         <id>HUID</id>
         <default>0x00440003</default>
@@ -8615,13 +8385,10 @@
         <id>FAPI_NAME</id>
         <default>pu.mc:k0:n0:s0:p01:c0</default>
     </attribute>
-<!-- TODO: RTC 208936 Creating a common parent between P9 and P10 didn't work in this case -->
-<!--
     <attribute>
         <id>FAPI_POS</id>
         <default>4</default>
     </attribute>
--->
     <attribute>
         <id>HUID</id>
         <default>0x00440004</default>
@@ -8672,13 +8439,10 @@
         <id>FAPI_NAME</id>
         <default>pu.mc:k0:n0:s0:p01:c1</default>
     </attribute>
-<!-- TODO: RTC 208936 Creating a common parent between P9 and P10 didn't work in this case -->
-<!--
     <attribute>
         <id>FAPI_POS</id>
         <default>5</default>
     </attribute>
--->
     <attribute>
         <id>HUID</id>
         <default>0x00440005</default>
@@ -8729,13 +8493,10 @@
         <id>FAPI_NAME</id>
         <default>pu.mc:k0:n0:s0:p01:c2</default>
     </attribute>
-<!-- TODO: RTC 208936 Creating a common parent between P9 and P10 didn't work in this case -->
-<!--
     <attribute>
         <id>FAPI_POS</id>
         <default>6</default>
     </attribute>
--->
     <attribute>
         <id>HUID</id>
         <default>0x00440006</default>
@@ -8786,13 +8547,10 @@
         <id>FAPI_NAME</id>
         <default>pu.mc:k0:n0:s0:p01:c3</default>
     </attribute>
-<!-- TODO: RTC 208936 Creating a common parent between P9 and P10 didn't work in this case -->
-<!--
     <attribute>
         <id>FAPI_POS</id>
         <default>7</default>
     </attribute>
--->
     <attribute>
         <id>HUID</id>
         <default>0x00440007</default>
