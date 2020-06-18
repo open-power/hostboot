@@ -1,0 +1,89 @@
+<!-- IBM_PROLOG_BEGIN_TAG                                                   -->
+<!-- This is an automatically generated prolog.                             -->
+<!--                                                                        -->
+<!-- $Source: src/import/chips/p10/procedures/xml/error_info/p10_perst_phb.xml $ -->
+<!--                                                                        -->
+<!-- OpenPOWER HostBoot Project                                             -->
+<!--                                                                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2020                             -->
+<!-- [+] International Business Machines Corp.                              -->
+<!--                                                                        -->
+<!--                                                                        -->
+<!-- Licensed under the Apache License, Version 2.0 (the "License");        -->
+<!-- you may not use this file except in compliance with the License.       -->
+<!-- You may obtain a copy of the License at                                -->
+<!--                                                                        -->
+<!--     http://www.apache.org/licenses/LICENSE-2.0                         -->
+<!--                                                                        -->
+<!-- Unless required by applicable law or agreed to in writing, software    -->
+<!-- distributed under the License is distributed on an "AS IS" BASIS,      -->
+<!-- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or        -->
+<!-- implied. See the License for the specific language governing           -->
+<!-- permissions and limitations under the License.                         -->
+<!--                                                                        -->
+<!-- IBM_PROLOG_END_TAG                                                     -->
+<!-- Error definitions for p10_perst_phb procedure -->
+
+<hwpErrors>
+  <!-- ********************************************************************* -->
+  <hwpError>
+    <rc>RC_P10_PHB_PERST_ACTION_INVALID_ARGS_ERR</rc>
+    <description>
+      Invalid PERST action input.
+    </description>
+    <ffdc>TARGET</ffdc>
+    <ffdc>PERSTACTION</ffdc>
+    <!-- Add procedure callout -->
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- ********************************************************************* -->
+  <hwpError>
+    <rc>RC_P10_PHB_PERST_PBCQ_CQ_NOT_IDLE</rc>
+    <description>
+      PBCQ CQ did not go to idle after getting reset.
+    </description>
+    <ffdc>TARGET</ffdc>
+    <ffdc>NFIR_ADDR</ffdc>
+    <ffdc>NFIR_DATA</ffdc>
+    <ffdc>PHB_RESET_ADDR</ffdc>
+    <ffdc>PHB_RESET_DATA</ffdc>
+    <ffdc>CQ_STAT_ADDR</ffdc>
+    <ffdc>CQ_STAT_DATA</ffdc>
+    <!-- Add hw callout -->
+    <callout>
+      <target>TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <!-- Add procedure callout -->
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>LOW</priority>
+    </callout>
+  </hwpError>
+  <!-- ********************************************************************* -->
+  <hwpError>
+    <rc>RC_P10_PHB_PERST_NFIR_NOT_CLEARED</rc>
+    <description>
+      Attempt to clear PCI Nest FIR Register is unsuccessful.
+    </description>
+    <ffdc>TARGET</ffdc>
+    <ffdc>NFIR_ADDR</ffdc>
+    <ffdc>NFIR_DATA</ffdc>
+    <ffdc>PFIR_ADDR</ffdc>
+    <ffdc>PFIR_DATA</ffdc>
+    <!-- Add hw callout -->
+    <callout>
+      <target>TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <!-- Add procedure callout -->
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>LOW</priority>
+    </callout>
+  </hwpError>
+  <!-- ********************************************************************* -->
+</hwpErrors>
