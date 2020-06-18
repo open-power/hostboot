@@ -5398,7 +5398,7 @@
     <readable/>
     <simpleType>
       <uint64_t>
-        <default>256</default>
+        <default>0</default>
       </uint64_t>
     </simpleType>
     <writeable/>
