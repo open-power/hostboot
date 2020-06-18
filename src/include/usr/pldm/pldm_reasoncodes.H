@@ -59,11 +59,12 @@ namespace PLDM
         MOD_GENERATE_PT_ENTRIES       = 0x12, // generate_pt_entries
         MOD_CACHE_REMOTE_FRU_VPD      = 0x13, // get fru records and add to eecache
         MOD_GET_LOCATION_CODE         = 0x14, // getRecordSetLocationCode
+        MOD_SEND_SENSOR_STATE_CHANGED_EVENT = 0x15, // sendSensorStateChangedEvent
 
         // handleSetStateEffecterStatesRequest
-        MOD_HANDLE_SET_STATE_EFFECTER_STATES_REQUEST = 0x15,
+        MOD_HANDLE_SET_STATE_EFFECTER_STATES_REQUEST = 0x16,
 
-        MOD_PLDM_ENTITY_IDS           = 0x16, // pldm_entity_ids.C
+        MOD_PLDM_ENTITY_IDS           = 0x17, // pldm_entity_ids.C
     };
 
     enum PLDMReasonCode

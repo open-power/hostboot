@@ -530,13 +530,13 @@ errlHndl_t sendSensorStateChangedEvent(const terminus_id_t i_tid,
                  DEFAULT_INSTANCE_ID,
                  DSP0248_V1_2_0_PLATFORM_EVENT_FORMAT_VERSION,
                  i_tid,
-                 PLDM_PDR_REPOSITORY_CHG_EVENT,
+                 PLDM_SENSOR_EVENT,
                  event_data_bytes.data(),
                  event_data_bytes.size());
 
             if (errl)
             {
-                PLDM_INF("Failed to send/recv repository change event");
+                PLDM_INF("Failed to send/recv sensor state change event");
                 break;
             }
 
@@ -551,7 +551,7 @@ errlHndl_t sendSensorStateChangedEvent(const terminus_id_t i_tid,
 
             if (errl)
             {
-                PLDM_INF("Failed to decode repository change event");
+                PLDM_INF("Failed to decode sensor state change response");
                 break;
             }
 
@@ -563,15 +563,15 @@ errlHndl_t sendSensorStateChangedEvent(const terminus_id_t i_tid,
 
                 /*
                  * @errortype  ERRL_SEV_UNRECOVERABLE
-                 * @moduleid   MOD_SEND_REPO_CHANGED_EVENT
+                 * @moduleid   MOD_SEND_SENSOR_STATE_CHANGED_EVENT
                  * @reasoncode RC_BAD_COMPLETION_CODE
                  * @userdata1  Completion code returned from BMC
                  * @userdata2  Status code returned from BMC
-                 * @devdesc    Software problem, PLDM Repo Changed notification unsuccessful
+                 * @devdesc    Software problem, Sensor State Changed notification unsuccessful
                  * @custdesc   A software error occurred during system boot
                  */
                 errl = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
-                                     MOD_SEND_REPO_CHANGED_EVENT,
+                                     MOD_SEND_SENSOR_STATE_CHANGED_EVENT,
                                      RC_BAD_COMPLETION_CODE,
                                      completion_code,
                                      status,
@@ -581,7 +581,7 @@ errlHndl_t sendSensorStateChangedEvent(const terminus_id_t i_tid,
                 break;
             }
 
-            PLDM_INF("Sent PDR Repository Changed Event successfully (code is %d, status is %d)",
+            PLDM_INF("Sent Sensor State Changed Event successfully (code is %d, status is %d)",
                      completion_code, status);
         }
     } while (false);
