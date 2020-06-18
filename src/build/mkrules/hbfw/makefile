@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2012,2017
+# Contributors Listed Below - COPYRIGHT 2012,2020
 # [+] International Business Machines Corp.
 #
 #
@@ -38,7 +38,7 @@ EXPINC_SUBDIRS   += fsp
 OBJECTS_SUBDIRS  +=
 EXPLIB_SUBDIRS   += fsp
 EXPSHLIB_SUBDIRS += fsp
-STANDARD_SUBDIRS += fsp img simics
+STANDARD_SUBDIRS += fsp img
 RUNBVT_SUBDIRS   +=
 
 .elseif (${CONTEXT} == "x86.nfp")
