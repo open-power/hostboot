@@ -1,14 +1,15 @@
+
+# The directory of the startup.simics script. Any other necessary scripts/tools are located here.
+# This path should be prepended to any lookup-file in the same directory
+$hb_script_location = (lookup-file "%script%/")
+
 # We need to add the script directory in the P10 simics model
-if defined hb_script_to_run {
-    $hb_script_to_run = (lookup-file $hb_script_to_run)
-    $hb_script_location = (python "''.join(map('/'.__add__,\""+$hb_script_to_run+"\"[1:].split('/')[0:-1]))")
-    $script_dir = (python "''.join(map('/'.__add__,\""+$hb_script_location+"\"[1:].split('/')[0:-1]))")
-    add-directory $script_dir
-}
+add-directory $hb_script_location
+
 #Display Simics Search Path
 list-directories
 
-$hb_startup_path = (lookup-file hbfw/startup.simics)
+$hb_startup_path = (lookup-file -query ($hb_script_location + "/startup.simics"))
 $cur_path = (env PATH)
 $cur_path = $cur_path+":"+$hb_script_location
 python "os.environ['HB_TOOLPATH'] = \""+$hb_script_location+"\""
@@ -60,10 +61,10 @@ foreach $socket in (range 0 $maxSockets) {
 
 # Load HB debug tools.
 try {
-    run-python-file (lookup-file hbfw/simics-debug-framework.py)
+    run-python-file (lookup-file -query ($hb_script_location + "/simics-debug-framework.py"))
 }   except { echo "ERROR: Failed to load Simics debug framework (simics-debug-framework.py)" }
 try {
-    run-python-file (lookup-file hbfw/hb-simdebug.py)
+    run-python-file (lookup-file -query ($hb_script_location + "/hb-simdebug.py"))
 } except { echo "ERROR: Failed to load Hostboot debug tools (hb-simdebug.py)" }
 
 
@@ -71,7 +72,7 @@ try {
 if defined bmc_files {
     if $bmc_files != NIL {
         # load EECACHE creation tool
-        run-python-file (lookup-file hbfw/eecache-gen.py)
+        run-python-file (lookup-file -query ($hb_script_location + "/eecache-gen.py"))
 
         #echo "Find eecache file name from: "+$bmc_files
         @simenv.eecache_file = find_eecache_file( simenv.bmc_files )
@@ -97,7 +98,7 @@ if defined bmc_files {
             # check if ECC needs to be added to the EECACHE file
             if defined eecacheEcc {
                 # load ECC tools
-                run-python-file (lookup-file hbfw/ecc.py)
+                run-python-file (lookup-file -query ($hb_script_location + "/ecc.py"))
 
                 # pad the eecache file to nearest 4K boundary
                 @alignFileByValue( simenv.eecache_file, 4096 )
@@ -239,8 +240,8 @@ try {
 # Always trigger our specific command files last
 #
 if($machine_name == "p10_standalone") {
-    run-command-file (lookup-file hbfw/standalone.simics)
+    run-command-file (lookup-file -query ($hb_script_location + "/standalone.simics"))
 } else {
-    run-command-file (lookup-file hbfw/combined.simics)
+    run-command-file (lookup-file -query ($hb_script_location + "/combined.simics"))
 }
 
