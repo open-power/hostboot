@@ -97,6 +97,8 @@ int __mctp_hbrtvirt_hostboot_mctp_receive(uint64_t * const io_len,
     hostInterfaces::hbrt_fw_msg * fw_msg_resp =
       reinterpret_cast<hostInterfaces::hbrt_fw_msg *>(o_val);
 
+    TRACDBIN(g_trac_mctp, "__mctp_hbrtvirt_hostboot_mctp_receive: mctp receive request: ", fw_msg_req, fw_msg_req_size);
+
     int rc =  g_hostInterfaces->firmware_request(fw_msg_req_size,
                                                  fw_msg_req,
                                                  io_len,
@@ -113,9 +115,10 @@ int __mctp_hbrtvirt_hostboot_mctp_receive(uint64_t * const io_len,
 
         TRACDBIN(g_trac_mctp, "__mctp_hbrtvirt_hostboot_mctp_receive: mctp receive: ", o_val, *io_len);
     }
-    else
+    else if (rc != HBRT_RC_NO_MCTP_PACKET)
     {
-        TRACFCOMP(g_trac_mctp, "__mctp_hbrtvirt_hostboot_mctp_receive: ERRROR: mctp receive got rc %d", rc);
+        TRACFCOMP(g_trac_mctp, "__mctp_hbrtvirt_hostboot_mctp_receive: ERRROR: mctp receive got rc 0x%.08X printing 0x%.016llx bytes",
+                  rc, *io_len);
         TRACFBIN(g_trac_mctp, "__mctp_hbrtvirt_hostboot_mctp_receive: mctp receive: ", o_val, *io_len);
     }
 
