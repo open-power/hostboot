@@ -103,7 +103,7 @@ SBE_SEEPROM_HDR_BIN_DD1 := ${STANDALONEDIR}/pnor/sbe_seeprom.hdr.bin.DD1
 
 # # Input fake images
 HBD_FAKE = ${BASEIMAGESDIR}/vbu_P10_targeting.bin
-EECACHE_IMG = ${STANDALONEDIR}/simics/eecache_prebuilt.bin.ecc
+EECACHE_IMG = ${STANDALONEDIR}/simics/eecache_vpo_prebuilt.bin.ecc
 
 # Output final images
 HBBL_FINAL_IMG := HBBL.bin

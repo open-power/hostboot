@@ -103,7 +103,7 @@ HBD_FAKE_IMG = vbu_P10_targeting.bin
 VPO_FAKE_MVPD = vpo_sysmvpd.dat
 VPO_FAKE_DJVPD = vpo_djvpd.dat
 VPO_FAKE_DVPD = dvpd.dat
-EECACHE_FAKE_IMG = ${SIMPATH:Feecache_prebuilt.bin.ecc}
+EECACHE_FAKE_IMG = ${SIMPATH:Feecache_prebuilt_for_fake_img.bin.ecc}
 FAKE_IMAGES = ${HBI_FAKE_IMG} ${VPO_FAKE_MVPD} ${VPO_FAKE_DJVPD} ${VPO_FAKE_DVPD} ${HBD_FAKE_IMG}
 DEFAULT_INPUT_IMAGES = ${BASE_IMAGES} ${HBB_ECC_IMG} ${HBBL_IMG} ${FAKE_IMAGES} ${OCMBFW_IMG}
 
