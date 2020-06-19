@@ -299,7 +299,5 @@ if [[ $HB_STANDALONE -eq 1 ]] && [ $PNOR_LAYOUT_SELECTED != "FSP" ];then
 
 fi
 
-# Distribute to ODE SB
 cd $REPO_ROOT/src/build/mkrules
 make -rR ${DEBUG:=} -f dist.targets.mk $TARGET
-
