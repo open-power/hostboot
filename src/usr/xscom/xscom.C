@@ -512,21 +512,24 @@ void resetScomEngine(TARGETING::Target* i_target,
             l_virtAddr = i_virtAddr;
         }
 
-        if ((0x000A0009 == XscomAddr[i].addr) && (i_mXSComStatus != PIB::PIB_TIMEOUT))
+        if (0x000A0009 == XscomAddr[i].addr)
         {
-            // Cause of the previous error was *NOT* an HMER timeout, no need to
-            // flush stale state out of the ADU.
-            // Continue to next XSCOM address ...
-            continue;
-        }
-        else
-        {
-            // If the XSCOM register is 0x000A0009 and the cause of error is a
-            // PIB::PIB_TIMEOUT, then need to flush stale state out of the ADU.
-            // This resolves issue associated with CQ:HW530410.
-            TRACFCOMP(g_trac_xscom, INFO_MRK "resetScomEngine: Previous XSCOM caused a time out error, "
-                                             "flushing the stale state out of the ADU." );
-        }
+            if (i_mXSComStatus != PIB::PIB_TIMEOUT)
+            {
+                // Cause of the previous error was *NOT* an HMER timeout, no need to
+                // flush stale state out of the ADU.
+                // Continue to next XSCOM address ...
+                continue;
+            }
+            else
+            {
+                // If the XSCOM register is 0x000A0009 and the cause of error is a
+                // PIB::PIB_TIMEOUT, then need to flush stale state out of the ADU.
+                // This resolves issue associated with CQ:HW530410.
+                TRACFCOMP(g_trac_xscom, INFO_MRK "resetScomEngine: Previous XSCOM caused a time out error, "
+                                                 "flushing the stale state out of the ADU." );
+            }
+        } // if (0x000A0009 == XscomAddr[i].addr)
 
         //*********************************************************
         // Write SCOM ADDR To reset the XSCOM ENGINE

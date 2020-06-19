@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -31,13 +31,36 @@
  *  @brief Test case for XSCOM code
 */
 
+#include <sys/mmio.h>
 #include <cxxtest/TestSuite.H>
 #include <errl/errlmanager.H>
 #include <errl/errlentry.H>
 #include <devicefw/userif.H>
+#include <devicefw/driverif.H>
 #include <xscom/xscomreasoncodes.H>
-
+#include <xscom.H>
+#include <xscom/piberror.H>
 extern trace_desc_t* g_trac_xscom;
+
+// Forward declare these XSCOM methods because they are not declared in the
+// xscom header file (xscom.H) but only in the C file (xscom.C).
+namespace XSCOM
+{
+errlHndl_t xScomDoOp(DeviceFW::OperationType i_opType,
+                     uint64_t* i_virtAddr,
+                     uint64_t i_xscomAddr,
+                     void* io_buffer,
+                     size_t& io_buflen,
+                     HMER &io_hmer);
+
+errlHndl_t getTargetVirtualAddress(TARGETING::Target* i_target,
+                                           uint64_t*& o_virtAddr);
+
+void resetScomEngine(TARGETING::Target* i_target,
+                              uint64_t* i_virtAddr,
+                        const uint64_t  i_mXSComStatus);
+};
+
 
 using namespace TARGETING;
 
@@ -366,6 +389,100 @@ public:
 
         return;
     }
+
+
+    /**
+     * @brief XSCOM test #4
+     *        read to an invalid address to force error path, then set the HMER
+     *        xscom status to PIB_TIMEOUT to force the timeout path in the
+     *        resetScomEngine method.
+     */
+    void testXscom4(void)
+    {
+        TARGETING::TargetService& l_targetService = TARGETING::targetService();
+        TARGETING::Target* l_testTarget(nullptr);
+        l_targetService.masterProcChipTargetHandle( l_testTarget );
+        assert(l_testTarget != nullptr);
+        errlHndl_t l_err(nullptr);
+
+        XSCOM::HMER l_hmer;
+        uint64_t *l_virtAddr(nullptr);
+        uint64_t l_xscomAddr(0x01001111);
+        uint64_t l_readData(0);
+        uint64_t l_readDataSize(sizeof(l_readData));
+
+        l_err = XSCOM::getTargetVirtualAddress(l_testTarget, l_virtAddr);
+        assert(l_err == nullptr, "testXscom4: ERROR: Unexpected fail with call to XSCOM::getTargetVirtualAddress");
+
+        // Pin this thread to current CPU
+        task_affinity_pin();
+
+        // Lock other XSCom in this same thread from running
+        mutex_t* l_XSComMutex = mmio_xscom_mutex();
+        mutex_lock(l_XSComMutex);
+
+        l_err = XSCOM::xScomDoOp(DeviceFW::READ, l_virtAddr, l_xscomAddr, &l_readData,
+                          l_readDataSize, l_hmer);
+
+        assert(l_hmer.mXSComStatus == PIB::PIB_INVALID_ADDRESS, "testXscom4: ERROR: Unexpected HMER status");
+
+        if (l_err)
+        {
+            bool l_failAsExpected(true);
+
+            if (l_err->reasonCode() != XSCOM::XSCOM_STATUS_ERR)
+            {
+                TS_FAIL("testXscom4(negative test): XSCom read failed with unexpected reason "
+                        "code (0x%.4X), was expecting reason code XSCOM::XSCOM_STATUS_ERR (0x%.4X)",
+                        l_err->reasonCode(),
+                        XSCOM::XSCOM_STATUS_ERR);
+                l_failAsExpected = false;
+            }
+
+            if (l_err->moduleId() != XSCOM::XSCOM_DO_OP)
+            {
+                TS_FAIL("testXscom4(negative test): XSCom read failed with unexpected module "
+                        "ID (0x%.2X), was expecting module ID XSCOM::XSCOM_DO_OP (0x%.2X)",
+                        l_err->moduleId(),
+                        XSCOM::XSCOM_DO_OP);
+                l_failAsExpected = false;
+            }
+
+            if (l_failAsExpected)
+            {
+                TS_TRACE("testXscom4(negative test): XSCom read *successfully* failed as expected: invalid addr");
+                // This is an expected failure, no need to log it.
+                delete l_err;
+                l_err = nullptr;
+
+            }
+            else
+            {
+                TS_TRACE("testXscom4(negative test): XSCom read had an unexpected failure");
+                errlCommit(l_err, XSCOM_COMP_ID);
+            }
+        }
+        else
+        {
+            TS_FAIL("testXscom4(negative test): XSCom read did not fail with bad address");
+        }
+
+        /// Regardless if fail was on an unexpected failure or not, still want to
+        /// reset the SCOM engine.
+        // Spoof the timeout error ... set the HMER status to a timeout error.
+        // This is the only way I know how to test a timeout error. Unfortunately,
+        // to confirm the test worked, is to visually inspect the trace output
+        // for a statement such as, "XSCOM caused a time out error".
+        // Reset the scomEngine with timeout error
+        l_hmer.mXSComStatus = PIB::PIB_TIMEOUT;
+        XSCOM::resetScomEngine(l_testTarget, l_virtAddr, l_hmer.mXSComStatus);
+
+        // Unlock
+        mutex_unlock(l_XSComMutex);
+
+        // Done, un-pin
+        task_affinity_unpin();
+    }; // void testXscom4(void)
 
 };
 

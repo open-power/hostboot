@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2011,2019
+# Contributors Listed Below - COPYRIGHT 2011,2020
 # [+] International Business Machines Corp.
 #
 #
@@ -22,9 +22,18 @@
 # permissions and limitations under the License.
 #
 # IBM_PROLOG_END_TAG
-ROOTPATH = ../../../..
 
+ROOTPATH = ../../../..
 MODULE = testxscom
+
+SCOM_PATH += ${ROOTPATH}/src/usr/xscom
+
+VPATH += ${SCOM_PATH}
+
+EXTRAINCDIR += ${SCOM_PATH}
+
+OBJS += xscom.o
+
 TESTS = *.H
 
 include ${ROOTPATH}/config.mk
