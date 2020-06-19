@@ -2872,9 +2872,7 @@ errlHndl_t DeconfigGard::dumpGardRecords(
             tmp_str = nullptr;
             HWAS_INF("dumpGardRecords: o_records record.iv_errlogEid=0x%X", record.iv_errlogEid);
             HWAS_INF("dumpGardRecords: o_records record.iv_errorType=0x%X", record.iv_errorType);
-#ifdef CONFIG_GARD_VERSIONING
             HWAS_INF_BIN("dumpGardRecords: o_records uniqueId", &record.uniqueId, sizeof(record.uniqueId));
-#endif
         }
     }
     while (0);

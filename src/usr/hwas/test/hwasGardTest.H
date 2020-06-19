@@ -442,15 +442,10 @@ public:
             TYPE_MC, UTIL_FILTER_ALL);
 
         // Fake manual gard
-#ifndef CONFIG_GARD_VERSIONING
-        DeconfigGard::GardRecord l_fakeGardRecord =
-            {0, EntityPath(EntityPath::PATH_NA), 0, GARD_User_Manual, 0, 0};
-#else
         DeconfigGard::GardRecord l_fakeGardRecord =
             {0, EntityPath(EntityPath::PATH_NA), 0, GARD_User_Manual, 0, 0};
         strcpy(reinterpret_cast<char *>(l_fakeGardRecord.uniqueId.ibm11S.serialNum), "FAKE_SN12345");
         strcpy(reinterpret_cast<char *>(l_fakeGardRecord.uniqueId.ibm11S.partNum), "FAKE_PN");
-#endif
 
         // Apply fake gard to all MCs
         TS_INFO("createFakeGardRecords l_mcList.size()=%d", l_mcList.size());
@@ -581,6 +576,7 @@ public:
     {
 #if !DISABLE_UNIT_TESTS
         // find an fc unit that we can play with
+        TS_INFO("testSaveRestoreState: Started");
         Target* pSys = UTIL::assertGetToplevelTarget();
 
         PredicateCTM predFc(CLASS_UNIT, TYPE_FC);
@@ -622,6 +618,7 @@ public:
             }
         }
         while (0);
+        TS_INFO("testSaveRestoreState: Ended");
 #endif
     }
 

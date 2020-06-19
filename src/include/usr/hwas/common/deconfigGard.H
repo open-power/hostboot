@@ -249,25 +249,6 @@ public:
     static const uint8_t PREVIOUS_GARD_VERSION_LAYOUT = 0x0;
     static const uint8_t CURRENT_GARD_VERSION_LAYOUT = 0x1;
 
-#ifndef CONFIG_GARD_VERSIONING
-    struct GardRecord
-    {
-        uint32_t              iv_recordId;
-        TARGETING::EntityPath iv_targetId;
-        uint32_t              iv_errlogEid;
-        uint8_t               iv_errorType; //from hwasCallout.H GARD_ErrorType
-        uint8_t               iv_ResourceRecovery;
-        uint8_t               iv_padding[6];
-    };
-
-    typedef std::vector<GardRecord> GardRecords_t;
-    typedef struct GardRecord GardRecord;
-
-    typedef std::vector<GardRecord>::iterator GardRecordsItr_t;
-    typedef std::vector<GardRecord>::const_iterator GardRecordsCItr_t;
-
-#else
-
     struct GardRecord
     {
         uint32_t              iv_recordId;       // all F's invalid gard record
@@ -313,8 +294,6 @@ public:
 
     typedef std::vector<GardRecord>::iterator GardRecordsItr_t;
     typedef std::vector<GardRecord>::const_iterator GardRecordsCItr_t;
-
-#endif
 
     /**
      * @struct DeconfigureRecord
