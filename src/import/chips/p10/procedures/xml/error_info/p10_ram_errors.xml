@@ -233,4 +233,53 @@
     </callout>
   </hwpError>
   <!-- ******************************************************************** -->
+  <hwpError>
+    <sbeError/>
+    <rc>RC_P10_RAM_HW533775_FUSED_CORE_SEARCH_ERROR</rc>
+    <description>
+      Unable to find fused core partner for target of RAM operation
+    </description>
+    <ffdc>CORE_TARGET</ffdc>
+    <ffdc>THREAD</ffdc>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_RAM_CORE_REGISTERS</id>
+      <targetType>TARGET_TYPE_CORE</targetType>
+      <target>CORE_TARGET</target>
+    </collectRegisterFfdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <target>CORE_TARGET</target>
+      <priority>LOW</priority>
+    </callout>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <sbeError/>
+    <rc>RC_P10_RAM_HW533775_RECOVERY_ERROR</rc>
+    <description>
+      Timeout waiting for core FIR to clear after injecting recovery
+    </description>
+    <ffdc>CORE_TARGET</ffdc>
+    <ffdc>CORE_FIR_POLL_TARGET</ffdc>
+    <ffdc>THREAD</ffdc>
+    <ffdc>CORE_FIR</ffdc>
+    <ffdc>HID</ffdc>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_RAM_CORE_REGISTERS</id>
+      <targetType>TARGET_TYPE_CORE</targetType>
+      <target>CORE_TARGET</target>
+    </collectRegisterFfdc>
+    <callout>
+      <target>CORE_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>LOW</priority>
+    </callout>
+  </hwpError>
+  <!-- ******************************************************************** -->
 </hwpErrors>

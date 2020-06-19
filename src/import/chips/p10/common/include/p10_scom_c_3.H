@@ -209,6 +209,36 @@ static const uint32_t QME_CSIR_PMSR_INSTR_DATA_LEN = 22;
 //<< [QME_CSIR]
 // c/reg00003.H
 
+//>> [EC_PC_PMU_SPRCOR_HID]
+static const uint64_t EC_PC_PMU_SPRCOR_HID = 0x20020415ull;
+
+static const uint32_t EC_PC_PMU_SPRCOR_HID_ONE_PPC = 0;
+static const uint32_t EC_PC_PMU_SPRCOR_HID_EN_INSTRUC_TRACE = 1;
+static const uint32_t EC_PC_PMU_SPRCOR_HID_FLUSH_IC = 2;
+static const uint32_t EC_PC_PMU_SPRCOR_HID_EN_ATTN = 3;
+static const uint32_t EC_PC_PMU_SPRCOR_HID_HILE = 4;
+static const uint32_t EC_PC_PMU_SPRCOR_HID_DIS_RECOVERY = 5;
+static const uint32_t EC_PC_PMU_SPRCOR_HID_MEGAMOUTH = 6;
+static const uint32_t EC_PC_PMU_SPRCOR_HID_PREFETCH_RESET = 7;
+static const uint32_t EC_PC_PMU_SPRCOR_HID_RADIX_MODE = 8;
+static const uint32_t EC_PC_PMU_SPRCOR_HID_DCACHE_PARTITIONED = 9;
+static const uint32_t EC_PC_PMU_SPRCOR_HID_ICACHE_PARTITIONED = 10;
+static const uint32_t EC_PC_PMU_SPRCOR_HID_HID_SPARE_11 = 11;
+static const uint32_t EC_PC_PMU_SPRCOR_HID_HID_SPARE_12 = 12;
+static const uint32_t EC_PC_PMU_SPRCOR_HID_HID_SPARE_13 = 13;
+static const uint32_t EC_PC_PMU_SPRCOR_HID_HID_SPARE_14 = 14;
+//<< [EC_PC_PMU_SPRCOR_HID]
+// c/reg00003.H
+
+//>> [EC_PC_FIR_RECOV_FWD_PROG_CTRL]
+static const uint64_t EC_PC_FIR_RECOV_FWD_PROG_CTRL = 0x2002044bull;
+
+static const uint32_t EC_PC_FIR_RECOV_FWD_PROG_CTRL_RESET_FWD_PROG = 0;
+static const uint32_t EC_PC_FIR_RECOV_FWD_PROG_CTRL_FWD_PROG_THOLD = 1;
+static const uint32_t EC_PC_FIR_RECOV_FWD_PROG_CTRL_FWD_PROG_THOLD_LEN = 3;
+//<< [EC_PC_FIR_RECOV_FWD_PROG_CTRL]
+// c/reg00003.H
+
 //>>THE END<<
 
 #ifndef __PPE_HCODE__

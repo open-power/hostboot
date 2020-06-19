@@ -554,4 +554,8 @@
     <name>ATTR_CHIP_EC_FEATURE_PARTIAL_IOP_XRAM_ACCESS_ALLOWED</name>
     <virtual/>
   </entry>
+  <entry>
+    <name>ATTR_CHIP_EC_FEATURE_HW533775</name>
+    <virtual/>
+  </entry>
 </entries>

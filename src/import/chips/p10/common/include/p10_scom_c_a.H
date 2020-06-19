@@ -63,6 +63,76 @@ static const uint32_t CPMS_DPMR_SPARE_LEN = 2;
 //<< [CPMS_DPMR]
 // c/reg00010.H
 
+//>> [EC_PC_FIR_CORE_WOF]
+static const uint64_t EC_PC_FIR_CORE_WOF = 0x20020448ull;
+
+static const uint32_t EC_PC_FIR_CORE_WOF_IF_SRAM_REC_ERROR = 0;
+static const uint32_t EC_PC_FIR_CORE_WOF_TC_FIR_XSTOP_ERROR = 1;
+static const uint32_t EC_PC_FIR_CORE_WOF_IF_RFILE_REC_ERROR = 2;
+static const uint32_t EC_PC_FIR_CORE_WOF_IF_RFILE_XSTOP_ERROR = 3;
+static const uint32_t EC_PC_FIR_CORE_WOF_IF_LOG_REC_ERROR = 4;
+static const uint32_t EC_PC_FIR_CORE_WOF_IF_LOG_XSTOP_ERROR = 5;
+static const uint32_t EC_PC_FIR_CORE_WOF_UNUSED_6 = 6;
+static const uint32_t EC_PC_FIR_CORE_WOF_VS_VSMM_ACC_ERROR = 7;
+static const uint32_t EC_PC_FIR_CORE_WOF_PC_RECOV_XSTOP_ERROR = 8;
+static const uint32_t EC_PC_FIR_CORE_WOF_VS_STF_ERROR = 9;
+static const uint32_t EC_PC_FIR_CORE_WOF_UNUSED_10 = 10;
+static const uint32_t EC_PC_FIR_CORE_WOF_SD_LOG_REC_ERROR = 11;
+static const uint32_t EC_PC_FIR_CORE_WOF_SD_LOG_XSTOP_ERROR = 12;
+static const uint32_t EC_PC_FIR_CORE_WOF_SD_NOT_MT_CI_REC_ERROR = 13;
+static const uint32_t EC_PC_FIR_CORE_WOF_SD_MCHK_AND_ME_EQ_0_ERROR = 14;
+static const uint32_t EC_PC_FIR_CORE_WOF_SD_L2_UE_ERROR = 15;
+static const uint32_t EC_PC_FIR_CORE_WOF_SD_L2_UE_OVER_THRES_ERROR = 16;
+static const uint32_t EC_PC_FIR_CORE_WOF_SD_L2_CI_UE_ERROR = 17;
+static const uint32_t EC_PC_FIR_CORE_WOF_MU_TLB_P_ERROR = 18;
+static const uint32_t EC_PC_FIR_CORE_WOF_MU_SLB_P_ERROR = 19;
+static const uint32_t EC_PC_FIR_CORE_WOF_UNUSED_20 = 20;
+static const uint32_t EC_PC_FIR_CORE_WOF_MU_CXT_P_ERROR = 21;
+static const uint32_t EC_PC_FIR_CORE_WOF_MU_LOG_XSTOP_ERROR = 22;
+static const uint32_t EC_PC_FIR_CORE_WOF_MU_SYS_XSTOP_ERROR = 23;
+static const uint32_t EC_PC_FIR_CORE_WOF_VS_LOG_REC_ERROR = 24;
+static const uint32_t EC_PC_FIR_CORE_WOF_VS_LOG_XSTOP_ERROR = 25;
+static const uint32_t EC_PC_FIR_CORE_WOF_PC_RECOV_IN_MAINT_ERROR = 26;
+static const uint32_t EC_PC_FIR_CORE_WOF_UNUSED_27 = 27;
+static const uint32_t EC_PC_FIR_CORE_WOF_PC_SYS_XSTOP_ERROR = 28;
+static const uint32_t EC_PC_FIR_CORE_WOF_LS_SRAM_PARITY_ERROR = 29;
+static const uint32_t EC_PC_FIR_CORE_WOF_LS_SETDELETE_ERROR = 30;
+static const uint32_t EC_PC_FIR_CORE_WOF_LS_RFILE_REC_ERROR = 31;
+static const uint32_t EC_PC_FIR_CORE_WOF_LS_RFILE_XSTOP_ERROR = 32;
+static const uint32_t EC_PC_FIR_CORE_WOF_MU_TLB_MULTIHIT_ERROR = 33;
+static const uint32_t EC_PC_FIR_CORE_WOF_MU_SLB_MULTIHIT_ERROR = 34;
+static const uint32_t EC_PC_FIR_CORE_WOF_LS_DERAT_MULTIHIT_ERROR = 35;
+static const uint32_t EC_PC_FIR_CORE_WOF_PC_FWD_PROGRESS_ERROR = 36;
+static const uint32_t EC_PC_FIR_CORE_WOF_LS_LOG_REC_ERROR = 37;
+static const uint32_t EC_PC_FIR_CORE_WOF_LS_LOG_XSTOP_ERROR = 38;
+static const uint32_t EC_PC_FIR_CORE_WOF_UNUSED_39 = 39;
+static const uint32_t EC_PC_FIR_CORE_WOF_UNUSED_40 = 40;
+static const uint32_t EC_PC_FIR_CORE_WOF_LS_SYS_XSTOP_ERROR = 41;
+static const uint32_t EC_PC_FIR_CORE_WOF_UNUSED_42 = 42;
+static const uint32_t EC_PC_FIR_CORE_WOF_PC_THREAD_HANG_REC_ERROR = 43;
+static const uint32_t EC_PC_FIR_CORE_WOF_UNUSED_44 = 44;
+static const uint32_t EC_PC_FIR_CORE_WOF_PC_LOG_XSTOP_ERROR = 45;
+static const uint32_t EC_PC_FIR_CORE_WOF_PC_TFX_XSTOP_ERROR = 46;
+static const uint32_t EC_PC_FIR_CORE_WOF_PC_TFAC_XSTOP_ERROR = 47;
+static const uint32_t EC_PC_FIR_CORE_WOF_UNUSED_48 = 48;
+static const uint32_t EC_PC_FIR_CORE_WOF_UNUSED_49 = 49;
+static const uint32_t EC_PC_FIR_CORE_WOF_UNUSED_50 = 50;
+static const uint32_t EC_PC_FIR_CORE_WOF_UNUSED_51 = 51;
+static const uint32_t EC_PC_FIR_CORE_WOF_PC_HANG_RECOVERY_FAILED = 52;
+static const uint32_t EC_PC_FIR_CORE_WOF_PC_CORE_HANG_DETECT_ERROR = 53;
+static const uint32_t EC_PC_FIR_CORE_WOF_UNUSED_54 = 54;
+static const uint32_t EC_PC_FIR_CORE_WOF_PC_NEST_HANG_DETECT_ERROR = 55;
+static const uint32_t EC_PC_FIR_CORE_WOF_PC_OTHER_CORE_CHIPLET_REC_ERROR = 56;
+static const uint32_t EC_PC_FIR_CORE_WOF_PC_OTHER_CORE_CHIPLET_XSTOP_ERROR = 57;
+static const uint32_t EC_PC_FIR_CORE_WOF_PC_OTHER_CORE_CHIPLET_SYS_XSTOP_ERROR = 58;
+static const uint32_t EC_PC_FIR_CORE_WOF_PC_SCOM_ERROR = 59;
+static const uint32_t EC_PC_FIR_CORE_WOF_PC_XSTOP_ON_DBG_TRIGGER_ERROR = 60;
+static const uint32_t EC_PC_FIR_CORE_WOF_PC_FW_INJ_REC_ERROR = 61;
+static const uint32_t EC_PC_FIR_CORE_WOF_PC_FW_INJ_XSTOP_ERROR = 62;
+static const uint32_t EC_PC_FIR_CORE_WOF_PC_PHYP_XSTOP_ERROR = 63;
+//<< [EC_PC_FIR_CORE_WOF]
+// c/reg00010.H
+
 //>>THE END<<
 
 #ifndef __PPE_HCODE__
