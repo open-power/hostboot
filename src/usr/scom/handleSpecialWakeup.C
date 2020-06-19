@@ -109,6 +109,7 @@ errlHndl_t callWakeupHyp(TARGETING::Target* i_target,
     errlHndl_t l_errl = NULL;
 
 #ifdef __HOSTBOOT_RUNTIME
+#if 0 // FIXME RTC 256452 currently special wakeup causes HBRT issues/hangs
     TARGETING::TYPE l_type = i_target->getAttr<TARGETING::ATTR_TYPE>();
 
     // Check for valid interface function
@@ -254,7 +255,7 @@ errlHndl_t callWakeupHyp(TARGETING::Target* i_target,
             break;
         }
     }
-
+#endif // FIXME RTC 256452
 #else
 
     assert( false, "Cannot use host wakeup in IPL code!!" );
