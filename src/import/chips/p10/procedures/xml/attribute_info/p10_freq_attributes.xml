@@ -148,6 +148,17 @@
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
+  <id>ATTR_PLL_BUCKET_BUILD_INDEX</id>
+  <targetType>TARGET_TYPE_SYSTEM</targetType>
+  <description>
+    Build-time only attribute used to harvest PLL bucket settings
+  </description>
+  <valueType>uint8</valueType>
+  <default>0</default>
+  <writeable/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
   <id>ATTR_FREQ_OMI_MHZ</id>
   <targetType>TARGET_TYPE_PROC_CHIP</targetType>
   <description>
