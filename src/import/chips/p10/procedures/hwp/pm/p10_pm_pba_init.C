@@ -447,8 +447,8 @@ pba_slave_setup(
     l_data.flush<0>();
     PREP_TP_TPBR_PBA_PBAO_PBASLVCTL1(i_target);
     SET_TP_TPBR_PBA_PBAO_PBASLVCTL1_ENABLE(                                                  l_data);
-    SET_TP_TPBR_PBA_PBAO_PBASLVCTL0_MID_MATCH_VALUE( (OCI_MASTER_ID_ICU & OCI_MASTER_ID_DCU), l_data);
-    SET_TP_TPBR_PBA_PBAO_PBASLVCTL0_MID_CARE_MASK(   (OCI_MASTER_ID_ICU & OCI_MASTER_ID_DCU), l_data);
+    SET_TP_TPBR_PBA_PBAO_PBASLVCTL1_MID_MATCH_VALUE( (OCI_MASTER_ID_ICU & OCI_MASTER_ID_DCU), l_data);
+    SET_TP_TPBR_PBA_PBAO_PBASLVCTL1_MID_CARE_MASK(   (OCI_MASTER_ID_ICU & OCI_MASTER_ID_DCU), l_data);
     SET_TP_TPBR_PBA_PBAO_PBASLVCTL1_READ_TTYPE(       PBA_READ_TTYPE_CL_RD_NC,               l_data);
     SET_TP_TPBR_PBA_PBAO_PBASLVCTL1_READ_PREFETCH_CTL(PBA_READ_PREFETCH_NONE,                l_data);
     SET_TP_TPBR_PBA_PBAO_PBASLVCTL1_WRITE_TTYPE(      PBA_WRITE_TTYPE_DMA_PR_WR,             l_data);
@@ -628,10 +628,11 @@ fapi2::ReturnCode pba_start(
     std::vector<uint64_t> l_topo_scoms;
 
     // Resetting PBACFGs (O and F) back values from HW spec
+    PREP_TP_TPBR_PBA_PBAO_PBAOCFG(i_target);
     FAPI_TRY(PUT_TP_TPBR_PBA_PBAO_PBAOCFG(i_target, l_data64));
 
-    PREP_TP_TPBR_PBA_PBAF_PBAFCFG(i_target);
     l_data64.flush<0>();
+    PREP_TP_TPBR_PBA_PBAF_PBAFCFG(i_target);
     SET_TP_TPBR_PBA_PBAF_PBAFCFG_PBREQ_SLVFW_MAX_PRIORITY(                     l_data64);
     SET_TP_TPBR_PBA_PBAF_PBAFCFG_PBREQ_BCE_MAX_PRIORITY(                       l_data64);
     SET_TP_TPBR_PBA_PBAF_PBAFCFG_PBREQ_OPER_HANG_DIV(       PBA_OPER_HANG_DIV, l_data64);
@@ -640,7 +641,9 @@ fapi2::ReturnCode pba_start(
 
     // Clear the PBAF and PBA0 FIRs
     l_data64.flush<0>();
+    PREP_TP_TPBR_PBA_PBAF_PBAFIR_RW(i_target);
     FAPI_TRY(PUT_TP_TPBR_PBA_PBAF_PBAFIR_RW(i_target, l_data64));
+    PREP_TP_TPBR_PBA_PBAO_PBAFIR_RW(i_target);
     FAPI_TRY(PUT_TP_TPBR_PBA_PBAO_PBAFIR_RW(i_target, l_data64));
 
     // No action required for the following registers:

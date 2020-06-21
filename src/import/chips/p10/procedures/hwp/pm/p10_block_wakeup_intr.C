@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -159,11 +159,14 @@ p10_block_wakeup_intr(
     }
 
     //set QME SCRB[Ignore STOP Exits]
+    PREP_QME_SCRB_WO_OR(l_eq);
     PUT_QME_SCRB_WO_OR(l_eq, l_scrb_data);
 
+    PREP_TP_TPCHIP_OCC_OCI_OCB_OCCFLG3_WO_OR(l_proc);
     PUT_TP_TPCHIP_OCC_OCI_OCB_OCCFLG3_WO_OR(l_proc, l_occflg3_data);
 
     //OISR0 - set GPE3_FUNC_TRIGGER (that signals xgpe)
+    PREP_TP_TPCHIP_OCC_OCI_OCB_OISR0_WO_OR(l_proc);
     l_data64.flush<0>().setBit<11>();
     PUT_TP_TPCHIP_OCC_OCI_OCB_OISR0_WO_OR(l_proc, l_data64);
 
@@ -202,9 +205,11 @@ p10_block_wakeup_intr(
     //OCCFLG3 clear bit 11,12,13
     l_occflg3_data = BIT64(XGPE_IGNORE_STOP_ENTRIES) | BIT64(XGPE_IGNORE_STOP_ACTION) |
                      BIT64(XGPE_IGNORE_STOP_EXITS);
+    PREP_TP_TPCHIP_OCC_OCI_OCB_OCCFLG3_WO_CLEAR(l_proc);
     PUT_TP_TPCHIP_OCC_OCI_OCB_OCCFLG3_WO_CLEAR(l_proc, l_occflg3_data);
 
     //clear QME SCRB[Ignore STOP Exits]
+    PREP_QME_SCRB_WO_CLEAR(l_eq);
     PUT_QME_SCRB_WO_CLEAR(l_eq, l_scrb_data);
 
 

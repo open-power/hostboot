@@ -286,8 +286,11 @@ fapi2::ReturnCode p10_pm_occ_control
     {
         FAPI_DBG("Writing to Boot Vector 0-2 Registers");
 
+        PREP_TP_TPCHIP_OCC_SRAM_CTL_SRBV0(i_target);
         FAPI_TRY(PUT_TP_TPCHIP_OCC_SRAM_CTL_SRBV0(i_target, l_data64));
+        PREP_TP_TPCHIP_OCC_SRAM_CTL_SRBV1(i_target);
         FAPI_TRY(PUT_TP_TPCHIP_OCC_SRAM_CTL_SRBV1(i_target, l_data64));
+        PREP_TP_TPCHIP_OCC_SRAM_CTL_SRBV2(i_target);
         FAPI_TRY(PUT_TP_TPCHIP_OCC_SRAM_CTL_SRBV2(i_target, l_data64));
 
         if (i_ppc405_boot_ctrl == occ_ctrl::PPC405_BOOT_SRAM)
@@ -310,6 +313,7 @@ fapi2::ReturnCode p10_pm_occ_control
             l_data64.flush<0>().insertFromRight(PPC405_BRANCH_OLD_INSTR, 0, 32);
         }
 
+        PREP_TP_TPCHIP_OCC_SRAM_CTL_SRBV3(i_target);
         FAPI_TRY(PUT_TP_TPCHIP_OCC_SRAM_CTL_SRBV3(i_target, l_data64));
     }
 
@@ -322,21 +326,25 @@ fapi2::ReturnCode p10_pm_occ_control
 
         case occ_ctrl::PPC405_RESET_OFF:
 
+            PREP_TP_TPCHIP_OCC_OCI_OCB_PIB_OCR_WO_CLEAR(i_target);
             FAPI_TRY(PUT_TP_TPCHIP_OCC_OCI_OCB_PIB_OCR_WO_CLEAR(i_target,
                      BIT64(TP_TPCHIP_OCC_OCI_OCB_PIB_OCR_CORE_RESET)));
             break;
 
         case occ_ctrl::PPC405_RESET_ON:
+            PREP_TP_TPCHIP_OCC_OCI_OCB_PIB_OCR_WO_OR(i_target);
             FAPI_TRY(PUT_TP_TPCHIP_OCC_OCI_OCB_PIB_OCR_WO_OR(i_target,
                      BIT64(TP_TPCHIP_OCC_OCI_OCB_PIB_OCR_CORE_RESET)));
             break;
 
         case occ_ctrl::PPC405_HALT_OFF:
+            PREP_TP_TPCHIP_OCC_OCI_OCB_PIB_OJCFG_WO_AND(i_target);
             FAPI_TRY(PUT_TP_TPCHIP_OCC_OCI_OCB_PIB_OJCFG_WO_AND(i_target,
                      ~BIT64(TP_TPCHIP_OCC_OCI_OCB_PIB_OJCFG_DBG_HALT)));
             break;
 
         case occ_ctrl::PPC405_HALT_ON:
+            PREP_TP_TPCHIP_OCC_OCI_OCB_PIB_OJCFG_WO_OR(i_target);
             FAPI_TRY(PUT_TP_TPCHIP_OCC_OCI_OCB_PIB_OJCFG_WO_OR(i_target,
                      BIT64(TP_TPCHIP_OCC_OCI_OCB_PIB_OJCFG_DBG_HALT)));
             break;
@@ -377,12 +385,13 @@ fapi2::ReturnCode p10_pm_occ_control
                      BIT64(TP_TPCHIP_OCC_OCI_SCOM_OCCLFIR_PPC405_DBGSTOPACK)));
 
             // Halt the 405 and verify that it is halted
+            PREP_TP_TPCHIP_OCC_OCI_OCB_PIB_OJCFG_WO_OR(i_target);
             FAPI_TRY(PUT_TP_TPCHIP_OCC_OCI_OCB_PIB_OJCFG_WO_OR(i_target,
                      BIT64(TP_TPCHIP_OCC_OCI_OCB_PIB_OJCFG_DBG_HALT)));
 
             FAPI_TRY(fapi2::delay(NS_DELAY, SIM_CYCLE_DELAY));
 
-
+            PREP_TP_TPCHIP_OCC_OCI_SCOM_OCCLFIR_WO_AND(i_target);
             FAPI_TRY(PUT_TP_TPCHIP_OCC_OCI_SCOM_OCCLFIR_WO_AND(i_target,
                      ~BIT64(TP_TPCHIP_OCC_OCI_SCOM_OCCLFIR_PPC405_DBGSTOPACK)));
 
@@ -394,14 +403,18 @@ fapi2::ReturnCode p10_pm_occ_control
             }
 
             // Put 405 into reset, unhalt 405 and clear the halted FIR bit.
+            PREP_TP_TPCHIP_OCC_OCI_OCB_PIB_OCR_WO_OR(i_target);
             FAPI_TRY(PUT_TP_TPCHIP_OCC_OCI_OCB_PIB_OCR_WO_OR(i_target,
                      BIT64(TP_TPCHIP_OCC_OCI_OCB_PIB_OCR_CORE_RESET)));
+            PREP_TP_TPCHIP_OCC_OCI_OCB_PIB_OJCFG_WO_AND(i_target);
             FAPI_TRY(PUT_TP_TPCHIP_OCC_OCI_OCB_PIB_OJCFG_WO_AND(i_target,
                      ~BIT64(TP_TPCHIP_OCC_OCI_OCB_PIB_OJCFG_DBG_HALT)));
+            PREP_TP_TPCHIP_OCC_OCI_SCOM_OCCLFIR_WO_AND(i_target);
             FAPI_TRY(PUT_TP_TPCHIP_OCC_OCI_SCOM_OCCLFIR_WO_AND(i_target,
                      ~BIT64(TP_TPCHIP_OCC_OCI_SCOM_OCCLFIR_PPC405_DBGSTOPACK)));
 
             // Restore the original FIR mask
+            PREP_TP_TPCHIP_OCC_OCI_SCOM_OCCLFIRMASK_RW(i_target);
             FAPI_TRY(PUT_TP_TPCHIP_OCC_OCI_SCOM_OCCLFIRMASK_RW(i_target, l_firMask));
             break;
 
@@ -409,14 +422,17 @@ fapi2::ReturnCode p10_pm_occ_control
 
             FAPI_INF("Starting the PPC405");
             // Clear the halt bit
+            PREP_TP_TPCHIP_OCC_OCI_OCB_PIB_OJCFG_WO_AND(i_target);
             FAPI_TRY(PUT_TP_TPCHIP_OCC_OCI_OCB_PIB_OJCFG_WO_AND(i_target,
                      ~BIT64(TP_TPCHIP_OCC_OCI_OCB_PIB_OJCFG_DBG_HALT)));
 
             // Set the reset bit
+            PREP_TP_TPCHIP_OCC_OCI_OCB_PIB_OCR_WO_OR(i_target);
             FAPI_TRY(PUT_TP_TPCHIP_OCC_OCI_OCB_PIB_OCR_WO_OR(i_target,
                      BIT64(TP_TPCHIP_OCC_OCI_OCB_PIB_OCR_CORE_RESET)));
 
             // Clear the reset bit
+            PREP_TP_TPCHIP_OCC_OCI_OCB_PIB_OCR_WO_CLEAR(i_target);
             FAPI_TRY(PUT_TP_TPCHIP_OCC_OCI_OCB_PIB_OCR_WO_CLEAR(i_target,
                      BIT64(TP_TPCHIP_OCC_OCI_OCB_PIB_OCR_CORE_RESET)));
             break;
