@@ -927,10 +927,12 @@ inline std::vector<Target<K_CHILD, M, V> >
     // OCMB -> MEM_PORT
     // OCMB -> DIMM
     // OCMB -> PMIC
+    // OCMB -> GENERICI2CSLAVE
     static_assert(!((T_SELF == fapi2::TARGET_TYPE_OCMB_CHIP) &&
                     (K_CHILD != fapi2::TARGET_TYPE_MEM_PORT) &&
                     (K_CHILD != fapi2::TARGET_TYPE_DIMM) &&
-                    (K_CHILD != fapi2::TARGET_TYPE_PMIC)),
+                    (K_CHILD != fapi2::TARGET_TYPE_PMIC) &&
+                    (K_CHILD != fapi2::TARGET_TYPE_GENERICI2CSLAVE)),
                   "improper child of fapi2::TARGET_TYPE_OCMB_CHIP");
 
     // valid children for MEM_PORT
