@@ -468,6 +468,148 @@ static const uint32_t PSI_MAC_SCOM_REGS_TX_MODE_PVTPL_ENC_LEN = 2;
 //<< [PSI_MAC_SCOM_REGS_TX_MODE]
 // proc/reg00042.H
 
+//>> [TP_TCN0_N0_EPS_FIR_LOCAL_ACTION1]
+static const uint64_t TP_TCN0_N0_EPS_FIR_LOCAL_ACTION1 = 0x02040107ull;
+
+static const uint32_t TP_TCN0_N0_EPS_FIR_LOCAL_ACTION1_00 = 0;
+static const uint32_t TP_TCN0_N0_EPS_FIR_LOCAL_ACTION1_01 = 1;
+static const uint32_t TP_TCN0_N0_EPS_FIR_LOCAL_ACTION1_02 = 2;
+static const uint32_t TP_TCN0_N0_EPS_FIR_LOCAL_ACTION1_03 = 3;
+static const uint32_t TP_TCN0_N0_EPS_FIR_LOCAL_ACTION1_04 = 4;
+static const uint32_t TP_TCN0_N0_EPS_FIR_LOCAL_ACTION1_05 = 5;
+static const uint32_t TP_TCN0_N0_EPS_FIR_LOCAL_ACTION1_06 = 6;
+static const uint32_t TP_TCN0_N0_EPS_FIR_LOCAL_ACTION1_07 = 7;
+static const uint32_t TP_TCN0_N0_EPS_FIR_LOCAL_ACTION1_08 = 8;
+static const uint32_t TP_TCN0_N0_EPS_FIR_LOCAL_ACTION1_09 = 9;
+static const uint32_t TP_TCN0_N0_EPS_FIR_LOCAL_ACTION1_10 = 10;
+static const uint32_t TP_TCN0_N0_EPS_FIR_LOCAL_ACTION1_11 = 11;
+static const uint32_t TP_TCN0_N0_EPS_FIR_LOCAL_ACTION1_12 = 12;
+static const uint32_t TP_TCN0_N0_EPS_FIR_LOCAL_ACTION1_13 = 13;
+static const uint32_t TP_TCN0_N0_EPS_FIR_LOCAL_ACTION1_14 = 14;
+static const uint32_t TP_TCN0_N0_EPS_FIR_LOCAL_ACTION1_15 = 15;
+static const uint32_t TP_TCN0_N0_EPS_FIR_LOCAL_ACTION1_16 = 16;
+static const uint32_t TP_TCN0_N0_EPS_FIR_LOCAL_ACTION1_17 = 17;
+static const uint32_t TP_TCN0_N0_EPS_FIR_LOCAL_ACTION1_18 = 18;
+static const uint32_t TP_TCN0_N0_EPS_FIR_LOCAL_ACTION1_19 = 19;
+static const uint32_t TP_TCN0_N0_EPS_FIR_LOCAL_ACTION1_20 = 20;
+static const uint32_t TP_TCN0_N0_EPS_FIR_LOCAL_ACTION1_21 = 21;
+static const uint32_t TP_TCN0_N0_EPS_FIR_LOCAL_ACTION1_22 = 22;
+static const uint32_t TP_TCN0_N0_EPS_FIR_LOCAL_ACTION1_23 = 23;
+static const uint32_t TP_TCN0_N0_EPS_FIR_LOCAL_ACTION1_24 = 24;
+static const uint32_t TP_TCN0_N0_EPS_FIR_LOCAL_ACTION1_25 = 25;
+static const uint32_t TP_TCN0_N0_EPS_FIR_LOCAL_ACTION1_26 = 26;
+static const uint32_t TP_TCN0_N0_EPS_FIR_LOCAL_ACTION1_27 = 27;
+static const uint32_t TP_TCN0_N0_EPS_FIR_LOCAL_ACTION1_28 = 28;
+static const uint32_t TP_TCN0_N0_EPS_FIR_LOCAL_ACTION1_29 = 29;
+static const uint32_t TP_TCN0_N0_EPS_FIR_LOCAL_ACTION1_30 = 30;
+static const uint32_t TP_TCN0_N0_EPS_FIR_LOCAL_ACTION1_31 = 31;
+static const uint32_t TP_TCN0_N0_EPS_FIR_LOCAL_ACTION1_32 = 32;
+static const uint32_t TP_TCN0_N0_EPS_FIR_LOCAL_ACTION1_33 = 33;
+static const uint32_t TP_TCN0_N0_EPS_FIR_LOCAL_ACTION1_34 = 34;
+static const uint32_t TP_TCN0_N0_EPS_FIR_LOCAL_ACTION1_35 = 35;
+static const uint32_t TP_TCN0_N0_EPS_FIR_LOCAL_ACTION1_36 = 36;
+static const uint32_t TP_TCN0_N0_EPS_FIR_LOCAL_ACTION1_37 = 37;
+static const uint32_t TP_TCN0_N0_EPS_FIR_LOCAL_ACTION1_38 = 38;
+static const uint32_t TP_TCN0_N0_EPS_FIR_LOCAL_ACTION1_39 = 39;
+static const uint32_t TP_TCN0_N0_EPS_FIR_LOCAL_ACTION1_40 = 40;
+static const uint32_t TP_TCN0_N0_EPS_FIR_LOCAL_ACTION1_41 = 41;
+static const uint32_t TP_TCN0_N0_EPS_FIR_LOCAL_ACTION1_42 = 42;
+static const uint32_t TP_TCN0_N0_EPS_FIR_LOCAL_ACTION1_43 = 43;
+static const uint32_t TP_TCN0_N0_EPS_FIR_LOCAL_ACTION1_44 = 44;
+static const uint32_t TP_TCN0_N0_EPS_FIR_LOCAL_ACTION1_45 = 45;
+static const uint32_t TP_TCN0_N0_EPS_FIR_LOCAL_ACTION1_46 = 46;
+static const uint32_t TP_TCN0_N0_EPS_FIR_LOCAL_ACTION1_47 = 47;
+static const uint32_t TP_TCN0_N0_EPS_FIR_LOCAL_ACTION1_48 = 48;
+static const uint32_t TP_TCN0_N0_EPS_FIR_LOCAL_ACTION1_49 = 49;
+static const uint32_t TP_TCN0_N0_EPS_FIR_LOCAL_ACTION1_50 = 50;
+static const uint32_t TP_TCN0_N0_EPS_FIR_LOCAL_ACTION1_51 = 51;
+static const uint32_t TP_TCN0_N0_EPS_FIR_LOCAL_ACTION1_52 = 52;
+static const uint32_t TP_TCN0_N0_EPS_FIR_LOCAL_ACTION1_53 = 53;
+static const uint32_t TP_TCN0_N0_EPS_FIR_LOCAL_ACTION1_54 = 54;
+static const uint32_t TP_TCN0_N0_EPS_FIR_LOCAL_ACTION1_55 = 55;
+static const uint32_t TP_TCN0_N0_EPS_FIR_LOCAL_ACTION1_56 = 56;
+static const uint32_t TP_TCN0_N0_EPS_FIR_LOCAL_ACTION1_57 = 57;
+static const uint32_t TP_TCN0_N0_EPS_FIR_LOCAL_ACTION1_58 = 58;
+static const uint32_t TP_TCN0_N0_EPS_FIR_LOCAL_ACTION1_59 = 59;
+static const uint32_t TP_TCN0_N0_EPS_FIR_LOCAL_ACTION1_60 = 60;
+static const uint32_t TP_TCN0_N0_EPS_FIR_LOCAL_ACTION1_61 = 61;
+static const uint32_t TP_TCN0_N0_EPS_FIR_LOCAL_ACTION1_62 = 62;
+static const uint32_t TP_TCN0_N0_EPS_FIR_LOCAL_ACTION1_63 = 63;
+//<< [TP_TCN0_N0_EPS_FIR_LOCAL_ACTION1]
+// proc/reg00042.H
+
+//>> [TP_TCN1_N1_EPS_FIR_LOCAL_MASK]
+static const uint64_t TP_TCN1_N1_EPS_FIR_LOCAL_MASK_RW = 0x03040103ull;
+static const uint64_t TP_TCN1_N1_EPS_FIR_LOCAL_MASK_WO_AND = 0x03040104ull;
+static const uint64_t TP_TCN1_N1_EPS_FIR_LOCAL_MASK_WO_OR = 0x03040105ull;
+
+static const uint32_t TP_TCN1_N1_EPS_FIR_LOCAL_MASK_00 = 0;
+static const uint32_t TP_TCN1_N1_EPS_FIR_LOCAL_MASK_01 = 1;
+static const uint32_t TP_TCN1_N1_EPS_FIR_LOCAL_MASK_02 = 2;
+static const uint32_t TP_TCN1_N1_EPS_FIR_LOCAL_MASK_03 = 3;
+static const uint32_t TP_TCN1_N1_EPS_FIR_LOCAL_MASK_04 = 4;
+static const uint32_t TP_TCN1_N1_EPS_FIR_LOCAL_MASK_05 = 5;
+static const uint32_t TP_TCN1_N1_EPS_FIR_LOCAL_MASK_06 = 6;
+static const uint32_t TP_TCN1_N1_EPS_FIR_LOCAL_MASK_07 = 7;
+static const uint32_t TP_TCN1_N1_EPS_FIR_LOCAL_MASK_08 = 8;
+static const uint32_t TP_TCN1_N1_EPS_FIR_LOCAL_MASK_09 = 9;
+static const uint32_t TP_TCN1_N1_EPS_FIR_LOCAL_MASK_10 = 10;
+static const uint32_t TP_TCN1_N1_EPS_FIR_LOCAL_MASK_11 = 11;
+static const uint32_t TP_TCN1_N1_EPS_FIR_LOCAL_MASK_12 = 12;
+static const uint32_t TP_TCN1_N1_EPS_FIR_LOCAL_MASK_13 = 13;
+static const uint32_t TP_TCN1_N1_EPS_FIR_LOCAL_MASK_14 = 14;
+static const uint32_t TP_TCN1_N1_EPS_FIR_LOCAL_MASK_15 = 15;
+static const uint32_t TP_TCN1_N1_EPS_FIR_LOCAL_MASK_16 = 16;
+static const uint32_t TP_TCN1_N1_EPS_FIR_LOCAL_MASK_17 = 17;
+static const uint32_t TP_TCN1_N1_EPS_FIR_LOCAL_MASK_18 = 18;
+static const uint32_t TP_TCN1_N1_EPS_FIR_LOCAL_MASK_19 = 19;
+static const uint32_t TP_TCN1_N1_EPS_FIR_LOCAL_MASK_20 = 20;
+static const uint32_t TP_TCN1_N1_EPS_FIR_LOCAL_MASK_21 = 21;
+static const uint32_t TP_TCN1_N1_EPS_FIR_LOCAL_MASK_22 = 22;
+static const uint32_t TP_TCN1_N1_EPS_FIR_LOCAL_MASK_23 = 23;
+static const uint32_t TP_TCN1_N1_EPS_FIR_LOCAL_MASK_24 = 24;
+static const uint32_t TP_TCN1_N1_EPS_FIR_LOCAL_MASK_25 = 25;
+static const uint32_t TP_TCN1_N1_EPS_FIR_LOCAL_MASK_26 = 26;
+static const uint32_t TP_TCN1_N1_EPS_FIR_LOCAL_MASK_27 = 27;
+static const uint32_t TP_TCN1_N1_EPS_FIR_LOCAL_MASK_28 = 28;
+static const uint32_t TP_TCN1_N1_EPS_FIR_LOCAL_MASK_29 = 29;
+static const uint32_t TP_TCN1_N1_EPS_FIR_LOCAL_MASK_30 = 30;
+static const uint32_t TP_TCN1_N1_EPS_FIR_LOCAL_MASK_31 = 31;
+static const uint32_t TP_TCN1_N1_EPS_FIR_LOCAL_MASK_32 = 32;
+static const uint32_t TP_TCN1_N1_EPS_FIR_LOCAL_MASK_33 = 33;
+static const uint32_t TP_TCN1_N1_EPS_FIR_LOCAL_MASK_34 = 34;
+static const uint32_t TP_TCN1_N1_EPS_FIR_LOCAL_MASK_35 = 35;
+static const uint32_t TP_TCN1_N1_EPS_FIR_LOCAL_MASK_36 = 36;
+static const uint32_t TP_TCN1_N1_EPS_FIR_LOCAL_MASK_37 = 37;
+static const uint32_t TP_TCN1_N1_EPS_FIR_LOCAL_MASK_38 = 38;
+static const uint32_t TP_TCN1_N1_EPS_FIR_LOCAL_MASK_39 = 39;
+static const uint32_t TP_TCN1_N1_EPS_FIR_LOCAL_MASK_40 = 40;
+static const uint32_t TP_TCN1_N1_EPS_FIR_LOCAL_MASK_41 = 41;
+static const uint32_t TP_TCN1_N1_EPS_FIR_LOCAL_MASK_42 = 42;
+static const uint32_t TP_TCN1_N1_EPS_FIR_LOCAL_MASK_43 = 43;
+static const uint32_t TP_TCN1_N1_EPS_FIR_LOCAL_MASK_44 = 44;
+static const uint32_t TP_TCN1_N1_EPS_FIR_LOCAL_MASK_45 = 45;
+static const uint32_t TP_TCN1_N1_EPS_FIR_LOCAL_MASK_46 = 46;
+static const uint32_t TP_TCN1_N1_EPS_FIR_LOCAL_MASK_47 = 47;
+static const uint32_t TP_TCN1_N1_EPS_FIR_LOCAL_MASK_48 = 48;
+static const uint32_t TP_TCN1_N1_EPS_FIR_LOCAL_MASK_49 = 49;
+static const uint32_t TP_TCN1_N1_EPS_FIR_LOCAL_MASK_50 = 50;
+static const uint32_t TP_TCN1_N1_EPS_FIR_LOCAL_MASK_51 = 51;
+static const uint32_t TP_TCN1_N1_EPS_FIR_LOCAL_MASK_52 = 52;
+static const uint32_t TP_TCN1_N1_EPS_FIR_LOCAL_MASK_53 = 53;
+static const uint32_t TP_TCN1_N1_EPS_FIR_LOCAL_MASK_54 = 54;
+static const uint32_t TP_TCN1_N1_EPS_FIR_LOCAL_MASK_55 = 55;
+static const uint32_t TP_TCN1_N1_EPS_FIR_LOCAL_MASK_56 = 56;
+static const uint32_t TP_TCN1_N1_EPS_FIR_LOCAL_MASK_57 = 57;
+static const uint32_t TP_TCN1_N1_EPS_FIR_LOCAL_MASK_58 = 58;
+static const uint32_t TP_TCN1_N1_EPS_FIR_LOCAL_MASK_59 = 59;
+static const uint32_t TP_TCN1_N1_EPS_FIR_LOCAL_MASK_60 = 60;
+static const uint32_t TP_TCN1_N1_EPS_FIR_LOCAL_MASK_61 = 61;
+static const uint32_t TP_TCN1_N1_EPS_FIR_LOCAL_MASK_62 = 62;
+static const uint32_t TP_TCN1_N1_EPS_FIR_LOCAL_MASK_63 = 63;
+//<< [TP_TCN1_N1_EPS_FIR_LOCAL_MASK]
+// proc/reg00042.H
+
 //>>THE END<<
 
 #ifndef __PPE_HCODE__

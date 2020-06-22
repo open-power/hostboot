@@ -160,6 +160,29 @@ static const uint32_t QME_RCTAR2_DATA_LEN = 64;
 //<< [QME_RCTAR2]
 // eq/reg00006.H
 
+//>> [LOCAL_XSTOP_MASK]
+static const uint64_t LOCAL_XSTOP_MASK_RW = 0x20040043ull;
+static const uint64_t LOCAL_XSTOP_MASK_WO_CLEAR = 0x20040063ull;
+static const uint64_t LOCAL_XSTOP_MASK_WO_OR = 0x20040053ull;
+
+static const uint32_t LOCAL_XSTOP_MASK_01 = 1;
+static const uint32_t LOCAL_XSTOP_MASK_02 = 2;
+static const uint32_t LOCAL_XSTOP_MASK_03 = 3;
+static const uint32_t LOCAL_XSTOP_MASK_04 = 4;
+static const uint32_t LOCAL_XSTOP_MASK_05 = 5;
+static const uint32_t LOCAL_XSTOP_MASK_06 = 6;
+static const uint32_t LOCAL_XSTOP_MASK_07 = 7;
+static const uint32_t LOCAL_XSTOP_MASK_08 = 8;
+static const uint32_t LOCAL_XSTOP_MASK_09 = 9;
+static const uint32_t LOCAL_XSTOP_MASK_10 = 10;
+static const uint32_t LOCAL_XSTOP_MASK_11 = 11;
+static const uint32_t LOCAL_XSTOP_MASK_12 = 12;
+static const uint32_t LOCAL_XSTOP_MASK_13 = 13;
+static const uint32_t LOCAL_XSTOP_MASK_14 = 14;
+static const uint32_t LOCAL_XSTOP_MASK_15 = 15;
+//<< [LOCAL_XSTOP_MASK]
+// eq/reg00006.H
+
 //>>THE END<<
 
 #ifndef __PPE_HCODE__

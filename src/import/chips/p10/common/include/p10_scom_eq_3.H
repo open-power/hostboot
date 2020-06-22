@@ -251,6 +251,28 @@ static const uint32_t QME_PCBSID_EQ_LOCAL_ADDR_LEN = 16;
 //<< [QME_PCBSID]
 // eq/reg00003.H
 
+//>> [LOCAL_XSTOP]
+static const uint64_t LOCAL_XSTOP = 0x20040003ull;
+
+static const uint32_t LOCAL_XSTOP_ANY_LOCAL_XSTOP = 0;
+static const uint32_t LOCAL_XSTOP_RESERVED1L = 1;
+static const uint32_t LOCAL_XSTOP_RESERVED2L = 2;
+static const uint32_t LOCAL_XSTOP_RESERVED3L = 3;
+static const uint32_t LOCAL_XSTOP_PERV = 4;
+static const uint32_t LOCAL_XSTOP_IN05 = 5;
+static const uint32_t LOCAL_XSTOP_IN06 = 6;
+static const uint32_t LOCAL_XSTOP_IN07 = 7;
+static const uint32_t LOCAL_XSTOP_IN08 = 8;
+static const uint32_t LOCAL_XSTOP_IN09 = 9;
+static const uint32_t LOCAL_XSTOP_IN10 = 10;
+static const uint32_t LOCAL_XSTOP_IN11 = 11;
+static const uint32_t LOCAL_XSTOP_IN12 = 12;
+static const uint32_t LOCAL_XSTOP_IN13 = 13;
+static const uint32_t LOCAL_XSTOP_IN14 = 14;
+static const uint32_t LOCAL_XSTOP_IN15 = 15;
+//<< [LOCAL_XSTOP]
+// eq/reg00003.H
+
 //>>THE END<<
 
 #ifndef __PPE_HCODE__

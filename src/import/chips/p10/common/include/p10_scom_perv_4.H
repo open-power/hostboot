@@ -327,6 +327,33 @@ static const uint32_t REC_ERR_REG2_47_ERROR_CODE_LEN = 3;
 //<< [REC_ERR_REG2]
 // perv/reg00008.H
 
+//>> [XSTOP1]
+static const uint64_t XSTOP1 = 0x0003000cull;
+
+static const uint32_t XSTOP1_ENABLE = 0;
+static const uint32_t XSTOP1_WAIT_SNOPA = 1;
+static const uint32_t XSTOP1_TRIGGER_OPCG_GO = 2;
+static const uint32_t XSTOP1_WAIT_ALWAYS = 3;
+static const uint32_t XSTOP1_REGION_PERV = 4;
+static const uint32_t XSTOP1_REGION_UNIT1 = 5;
+static const uint32_t XSTOP1_REGION_UNIT2 = 6;
+static const uint32_t XSTOP1_REGION_UNIT3 = 7;
+static const uint32_t XSTOP1_REGION_UNIT4 = 8;
+static const uint32_t XSTOP1_REGION_UNIT5 = 9;
+static const uint32_t XSTOP1_REGION_UNIT6 = 10;
+static const uint32_t XSTOP1_REGION_UNIT7 = 11;
+static const uint32_t XSTOP1_REGION_UNIT8 = 12;
+static const uint32_t XSTOP1_REGION_UNIT9 = 13;
+static const uint32_t XSTOP1_REGION_UNIT10 = 14;
+static const uint32_t XSTOP1_REGION_UNIT11 = 15;
+static const uint32_t XSTOP1_REGION_UNIT12 = 16;
+static const uint32_t XSTOP1_REGION_UNIT13 = 17;
+static const uint32_t XSTOP1_REGION_UNIT14 = 18;
+static const uint32_t XSTOP1_WAIT_CYCLES = 48;
+static const uint32_t XSTOP1_WAIT_CYCLES_LEN = 12;
+//<< [XSTOP1]
+// perv/reg00009.H
+
 //>>THE END<<
 
 #ifndef __PPE_HCODE__

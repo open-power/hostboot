@@ -583,6 +583,127 @@ static const uint32_t FSXCOMP_FSXLOG_ROOT_CTRL8_CLEAR_ROOT_CTRL8_24_31_LEN = 8;
 //<< [FSXCOMP_FSXLOG_ROOT_CTRL8_CLEAR]
 // perv/reg00000.H
 
+//>> [HOSTATTN]
+static const uint64_t HOSTATTN = 0x00040004ull;
+
+static const uint32_t HOSTATTN_ANY_HOSTATTN = 0;
+static const uint32_t HOSTATTN_RESERVED1H = 1;
+static const uint32_t HOSTATTN_RESERVED2H = 2;
+static const uint32_t HOSTATTN_RESERVED3H = 3;
+static const uint32_t HOSTATTN_PERV = 4;
+static const uint32_t HOSTATTN_IN05 = 5;
+static const uint32_t HOSTATTN_IN06 = 6;
+static const uint32_t HOSTATTN_IN07 = 7;
+static const uint32_t HOSTATTN_IN08 = 8;
+static const uint32_t HOSTATTN_IN09 = 9;
+static const uint32_t HOSTATTN_IN10 = 10;
+static const uint32_t HOSTATTN_IN11 = 11;
+static const uint32_t HOSTATTN_IN12 = 12;
+static const uint32_t HOSTATTN_IN13 = 13;
+static const uint32_t HOSTATTN_IN14 = 14;
+static const uint32_t HOSTATTN_IN15 = 15;
+static const uint32_t HOSTATTN_IN16 = 16;
+static const uint32_t HOSTATTN_IN17 = 17;
+static const uint32_t HOSTATTN_IN18 = 18;
+static const uint32_t HOSTATTN_IN19 = 19;
+static const uint32_t HOSTATTN_IN20 = 20;
+static const uint32_t HOSTATTN_IN21 = 21;
+static const uint32_t HOSTATTN_IN22 = 22;
+static const uint32_t HOSTATTN_IN23 = 23;
+static const uint32_t HOSTATTN_IN24 = 24;
+static const uint32_t HOSTATTN_IN25 = 25;
+static const uint32_t HOSTATTN_IN26 = 26;
+static const uint32_t HOSTATTN_IN27 = 27;
+static const uint32_t HOSTATTN_IN28 = 28;
+static const uint32_t HOSTATTN_IN29 = 29;
+static const uint32_t HOSTATTN_IN30 = 30;
+static const uint32_t HOSTATTN_IN31 = 31;
+static const uint32_t HOSTATTN_IN32 = 32;
+static const uint32_t HOSTATTN_IN33 = 33;
+static const uint32_t HOSTATTN_IN34 = 34;
+static const uint32_t HOSTATTN_IN35 = 35;
+static const uint32_t HOSTATTN_IN36 = 36;
+static const uint32_t HOSTATTN_IN37 = 37;
+static const uint32_t HOSTATTN_IN38 = 38;
+static const uint32_t HOSTATTN_IN39 = 39;
+static const uint32_t HOSTATTN_IN40 = 40;
+static const uint32_t HOSTATTN_IN41 = 41;
+static const uint32_t HOSTATTN_IN42 = 42;
+static const uint32_t HOSTATTN_IN43 = 43;
+static const uint32_t HOSTATTN_IN44 = 44;
+static const uint32_t HOSTATTN_IN45 = 45;
+static const uint32_t HOSTATTN_IN46 = 46;
+static const uint32_t HOSTATTN_IN47 = 47;
+static const uint32_t HOSTATTN_IN48 = 48;
+static const uint32_t HOSTATTN_IN49 = 49;
+static const uint32_t HOSTATTN_IN50 = 50;
+static const uint32_t HOSTATTN_IN51 = 51;
+static const uint32_t HOSTATTN_IN52 = 52;
+static const uint32_t HOSTATTN_IN53 = 53;
+//<< [HOSTATTN]
+// perv/reg00000.H
+
+//>> [HOSTATTN_MASK]
+static const uint64_t HOSTATTN_MASK_RW = 0x00040044ull;
+static const uint64_t HOSTATTN_MASK_WO_CLEAR = 0x00040064ull;
+static const uint64_t HOSTATTN_MASK_WO_OR = 0x00040054ull;
+
+static const uint32_t HOSTATTN_MASK_01 = 1;
+static const uint32_t HOSTATTN_MASK_02 = 2;
+static const uint32_t HOSTATTN_MASK_03 = 3;
+static const uint32_t HOSTATTN_MASK_04 = 4;
+static const uint32_t HOSTATTN_MASK_05 = 5;
+static const uint32_t HOSTATTN_MASK_06 = 6;
+static const uint32_t HOSTATTN_MASK_07 = 7;
+static const uint32_t HOSTATTN_MASK_08 = 8;
+static const uint32_t HOSTATTN_MASK_09 = 9;
+static const uint32_t HOSTATTN_MASK_10 = 10;
+static const uint32_t HOSTATTN_MASK_11 = 11;
+static const uint32_t HOSTATTN_MASK_12 = 12;
+static const uint32_t HOSTATTN_MASK_13 = 13;
+static const uint32_t HOSTATTN_MASK_14 = 14;
+static const uint32_t HOSTATTN_MASK_15 = 15;
+static const uint32_t HOSTATTN_MASK_16 = 16;
+static const uint32_t HOSTATTN_MASK_17 = 17;
+static const uint32_t HOSTATTN_MASK_18 = 18;
+static const uint32_t HOSTATTN_MASK_19 = 19;
+static const uint32_t HOSTATTN_MASK_20 = 20;
+static const uint32_t HOSTATTN_MASK_21 = 21;
+static const uint32_t HOSTATTN_MASK_22 = 22;
+static const uint32_t HOSTATTN_MASK_23 = 23;
+static const uint32_t HOSTATTN_MASK_24 = 24;
+static const uint32_t HOSTATTN_MASK_25 = 25;
+static const uint32_t HOSTATTN_MASK_26 = 26;
+static const uint32_t HOSTATTN_MASK_27 = 27;
+static const uint32_t HOSTATTN_MASK_28 = 28;
+static const uint32_t HOSTATTN_MASK_29 = 29;
+static const uint32_t HOSTATTN_MASK_30 = 30;
+static const uint32_t HOSTATTN_MASK_31 = 31;
+static const uint32_t HOSTATTN_MASK_32 = 32;
+static const uint32_t HOSTATTN_MASK_33 = 33;
+static const uint32_t HOSTATTN_MASK_34 = 34;
+static const uint32_t HOSTATTN_MASK_35 = 35;
+static const uint32_t HOSTATTN_MASK_36 = 36;
+static const uint32_t HOSTATTN_MASK_37 = 37;
+static const uint32_t HOSTATTN_MASK_38 = 38;
+static const uint32_t HOSTATTN_MASK_39 = 39;
+static const uint32_t HOSTATTN_MASK_40 = 40;
+static const uint32_t HOSTATTN_MASK_41 = 41;
+static const uint32_t HOSTATTN_MASK_42 = 42;
+static const uint32_t HOSTATTN_MASK_43 = 43;
+static const uint32_t HOSTATTN_MASK_44 = 44;
+static const uint32_t HOSTATTN_MASK_45 = 45;
+static const uint32_t HOSTATTN_MASK_46 = 46;
+static const uint32_t HOSTATTN_MASK_47 = 47;
+static const uint32_t HOSTATTN_MASK_48 = 48;
+static const uint32_t HOSTATTN_MASK_49 = 49;
+static const uint32_t HOSTATTN_MASK_50 = 50;
+static const uint32_t HOSTATTN_MASK_51 = 51;
+static const uint32_t HOSTATTN_MASK_52 = 52;
+static const uint32_t HOSTATTN_MASK_53 = 53;
+//<< [HOSTATTN_MASK]
+// perv/reg00000.H
+
 //>>THE END<<
 
 #ifndef __PPE_HCODE__
