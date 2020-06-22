@@ -6734,6 +6734,10 @@
         <default>0</default>
     </attribute>
     <attribute>
+        <id>FREQ_IOHS_MHZ</id>
+        <default>2000</default>
+    </attribute>
+    <attribute>
         <id>HUID</id>
         <default>0x00510000</default>
     </attribute>
@@ -6795,6 +6799,10 @@
         <default>1</default>
     </attribute>
     <attribute>
+        <id>FREQ_IOHS_MHZ</id>
+        <default>2000</default>
+    </attribute>
+    <attribute>
         <id>HUID</id>
         <default>0x00510001</default>
     </attribute>
@@ -6846,6 +6854,10 @@
     <attribute>
         <id>FAPI_POS</id>
         <default>2</default>
+    </attribute>
+    <attribute>
+        <id>FREQ_IOHS_MHZ</id>
+        <default>2000</default>
     </attribute>
     <attribute>
         <id>HUID</id>
@@ -6909,6 +6921,10 @@
         <default>3</default>
     </attribute>
     <attribute>
+        <id>FREQ_IOHS_MHZ</id>
+        <default>2000</default>
+    </attribute>
+    <attribute>
         <id>HUID</id>
         <default>0x00510003</default>
     </attribute>
@@ -6960,6 +6976,10 @@
     <attribute>
         <id>FAPI_POS</id>
         <default>4</default>
+    </attribute>
+    <attribute>
+        <id>FREQ_IOHS_MHZ</id>
+        <default>2000</default>
     </attribute>
     <attribute>
         <id>HUID</id>
@@ -7015,6 +7035,10 @@
         <default>5</default>
     </attribute>
     <attribute>
+        <id>FREQ_IOHS_MHZ</id>
+        <default>2000</default>
+    </attribute>
+    <attribute>
         <id>HUID</id>
         <default>0x00510005</default>
     </attribute>
@@ -7066,6 +7090,10 @@
     <attribute>
         <id>FAPI_POS</id>
         <default>6</default>
+    </attribute>
+    <attribute>
+        <id>FREQ_IOHS_MHZ</id>
+        <default>2000</default>
     </attribute>
     <attribute>
         <id>HUID</id>
@@ -7129,6 +7157,10 @@
         <default>7</default>
     </attribute>
     <attribute>
+        <id>FREQ_IOHS_MHZ</id>
+        <default>2000</default>
+    </attribute>
+    <attribute>
         <id>HUID</id>
         <default>0x00510007</default>
     </attribute>
@@ -7182,6 +7214,10 @@
         <default>8</default>
     </attribute>
     <attribute>
+        <id>FREQ_IOHS_MHZ</id>
+        <default>2000</default>
+    </attribute>
+    <attribute>
         <id>HUID</id>
         <default>0x00510008</default>
     </attribute>
@@ -7233,6 +7269,10 @@
     <attribute>
         <id>FAPI_POS</id>
         <default>9</default>
+    </attribute>
+    <attribute>
+        <id>FREQ_IOHS_MHZ</id>
+        <default>2000</default>
     </attribute>
     <attribute>
         <id>HUID</id>
@@ -7296,6 +7336,10 @@
         <default>10</default>
     </attribute>
     <attribute>
+        <id>FREQ_IOHS_MHZ</id>
+        <default>2000</default>
+    </attribute>
+    <attribute>
         <id>HUID</id>
         <default>0x0051000a</default>
     </attribute>
@@ -7349,6 +7393,10 @@
         <default>11</default>
     </attribute>
     <attribute>
+        <id>FREQ_IOHS_MHZ</id>
+        <default>2000</default>
+    </attribute>
+    <attribute>
         <id>HUID</id>
         <default>0x0051000B</default>
     </attribute>
@@ -7400,6 +7448,10 @@
     <attribute>
         <id>FAPI_POS</id>
         <default>12</default>
+    </attribute>
+    <attribute>
+        <id>FREQ_IOHS_MHZ</id>
+        <default>2000</default>
     </attribute>
     <attribute>
         <id>HUID</id>
@@ -7463,6 +7515,10 @@
         <default>13</default>
     </attribute>
     <attribute>
+        <id>FREQ_IOHS_MHZ</id>
+        <default>2000</default>
+    </attribute>
+    <attribute>
         <id>HUID</id>
         <default>0x0051000D</default>
     </attribute>
@@ -7516,6 +7572,10 @@
         <default>14</default>
     </attribute>
     <attribute>
+        <id>FREQ_IOHS_MHZ</id>
+        <default>2000</default>
+    </attribute>
+    <attribute>
         <id>HUID</id>
         <default>0x0051000E</default>
     </attribute>
@@ -7567,6 +7627,10 @@
     <attribute>
         <id>FAPI_POS</id>
         <default>15</default>
+    </attribute>
+    <attribute>
+        <id>FREQ_IOHS_MHZ</id>
+        <default>2000</default>
     </attribute>
     <attribute>
         <id>HUID</id>
