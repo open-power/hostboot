@@ -55,10 +55,11 @@ class PageManagerCore
         };
 
         /**
-         * Default Constructor
+         * Constructor
+         * @param[in] i_supports_coalesce, Does this instance support coalesce
          */
-        PageManagerCore()
-            : iv_available(0) {}
+        PageManagerCore(bool i_supports_coalesce)
+            : iv_available(0), iv_supports_coalesce(i_supports_coalesce) {}
 
         /**
          * Add memory to the page manager
@@ -115,6 +116,8 @@ class PageManagerCore
     private:
 
         size_t iv_available;            //!< free pages
+        bool iv_supports_coalesce;      //!< coalesce supported for this instance
+
         Util::Lockfree::Stack<page_t> iv_heap[BUCKETS]; //!< The heap
 
         //!< Starting address of a heap memory range
@@ -260,8 +263,8 @@ class PageManager
         uint64_t iv_pagesTotal;         //!< Total number o fpages
         Spinlock iv_lock;               //!< lock for allocating
 
-        PageManagerCore iv_heap;        //!< Main heap
-        PageManagerCore iv_heapKernel;  //!< kernel heap for out-of-mem
+        PageManagerCore iv_heap{ true };        //!< Main heap, allow coalesce
+        PageManagerCore iv_heapKernel{ false }; //!< kernel heap for out-of-mem, no coalesce
 };
 
 #endif

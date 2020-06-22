@@ -75,23 +75,31 @@ void PageManagerCore::addMemory( size_t i_addr, size_t i_pageCount )
         length -= (1 << page_length);
     }
 
-    // Update set of registered heap memory ranges to support heap coalescing.
-    // It is a critical error for the last range to already be registered when
-    // this API is invoked.
-    kassert(!iv_ranges.back().first);
-    for(auto& range : iv_ranges)
+    // Only check range if coalesce is allowed
+    if (iv_supports_coalesce)
     {
-        // Range value of 0 indicates a free range to use, since Hostboot cannot
-        // ever start the heap at an address of 0.
-        if(!range.first)
+        // Update set of registered heap memory ranges to support heap coalescing.
+        // It is a critical error for the last range to already be registered when
+        // this API is invoked.
+        kassert(!iv_ranges.back().first);
+        for(auto& range : iv_ranges)
         {
-            range.first=i_addr;
-            range.second=i_pageCount*PAGE_SIZE;
-            break;
-        }
+            // Range value of 0 indicates a free range to use, since Hostboot cannot
+            // ever start the heap at an address of 0.
+            if(!range.first)
+            {
+                range.first=i_addr;
+                range.second=i_pageCount*PAGE_SIZE;
+                break;
+            }
 
-        // Can't ever start a range at/below that of an existing range.
-        kassert(i_addr > range.first);
+            // Can't ever start a range at/below that of an existing range.
+            if (i_addr <= range.first)
+            {
+                printk("i_addr <= range.first 0x%lx <= 0x%lx\n", i_addr, (size_t)range.first);
+            }
+            kassert(i_addr > range.first);
+        }
     }
     __sync_add_and_fetch(&iv_available, i_pageCount);
 }
@@ -455,6 +463,12 @@ void PageManager::_coalesce( void )
 // Coalsesce adjacent free memory blocks
 void PageManagerCore::coalesce( void )
 {
+    if (!iv_supports_coalesce)
+    {
+        printkd("PAGEMGRCORE coalesce not supported for this instance\n");
+        return;
+    }
+
     // Look at all the "free buckets" and find blocks to merge
     // Since this is binary, all merges will be from the same free bucket
     // Each bucket is a stack of non-allocated memory blocks of the same size
