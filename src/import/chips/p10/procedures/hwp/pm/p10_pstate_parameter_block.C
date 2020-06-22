@@ -980,6 +980,22 @@ fapi2::ReturnCode PlatPmPPB::gppb_init(
         memcpy(&io_globalppb->vdd_cal,  &iv_poundW_data.vdd_cal, (sizeof(((PoundW_t*)0)->vdd_cal)));
         memcpy(&io_globalppb->dds_other, &iv_poundW_data.other, (sizeof(((PoundW_t*)0)->other)));
 
+        //If ATTR_DDS_BIAS_ENABLE = ON, use the ALT_TRIP_OFFSET, ALT_CAL_ADJ,
+        //ALT_DELAY values for each core instead of TRIP_OFFSET, CAL_ADJ, DELAY.
+        if (iv_attrs.attr_dds_bias_enable)
+        {
+            for (uint8_t i = 0; i < MAXIMUM_CORES; i++)
+            {
+                for (uint8_t j = 0; j < NUM_OP_POINTS; j++)
+                {
+                    io_globalppb->dds[i][j].ddsc.fields.trip_offset = io_globalppb->dds_alt_cal[i][j].alt_cal.fields.alt_trip_offset;
+                    io_globalppb->dds[i][j].ddsc.fields.insrtn_dely = io_globalppb->dds_alt_cal[i][j].alt_cal.fields.alt_delay;
+                    io_globalppb->dds[i][j].ddsc.fields.calb_adj    = io_globalppb->dds_alt_cal[i][j].alt_cal.fields.alt_cal_adj;
+                }
+            }
+
+        }
+
         //Compute dds slopes
         compute_dds_slopes(io_globalppb);
 
@@ -1465,6 +1481,7 @@ FAPI_INF("%-60s[3] = 0x%08x %d", #attr_name, iv_attrs.attr_assign[3], iv_attrs.a
 
     DATABLOCK_GET_ATTR(ATTR_SYSTEM_PGPE_CURRENT_READ_DISABLE, iv_procChip, attr_system_current_read_disable);
     DATABLOCK_GET_ATTR(ATTR_SYSTEM_OCS_DISABLE,         iv_procChip , attr_system_ocs_disable);
+    DATABLOCK_GET_ATTR(ATTR_DDS_BIAS_ENABLE, iv_procChip , attr_dds_bias_enable);
     DATABLOCK_GET_ATTR(ATTR_DDS_COARSE_THROTTLE_ENABLE, iv_procChip , attr_dds_coarse_thr_enable);
     DATABLOCK_GET_ATTR(ATTR_PMCR_MOST_RECENT_MODE,      iv_procChip , attr_pmcr_most_recent_enable);
     DATABLOCK_GET_ATTR(ATTR_PGPE_HCODE_FUNCTION_ENABLE, FAPI_SYSTEM , attr_pgpe_hcode_function_enable);

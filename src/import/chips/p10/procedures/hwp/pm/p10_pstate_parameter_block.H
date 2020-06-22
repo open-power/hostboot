@@ -136,6 +136,7 @@ typedef struct
     uint8_t attr_system_wof_throttle_control_loop_mode;
     uint8_t attr_dds_trip_mode;
     uint8_t attr_dds_trip_interpolation_control;
+    uint8_t attr_dds_bias_enable;
 
     uint8_t attr_dd_wof_not_supported;
     uint8_t attr_dd_dds_not_supported;
