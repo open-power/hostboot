@@ -79,6 +79,12 @@ enum MvpdRingStatus
     RING_SCAN
 };
 
+enum RingInsertionStage
+{
+    NON_EQ_INSTANCE_STAGE = 0,
+    EQ_INSTANCE_STAGE     = 1,
+};
+
 enum ChipletIdentifier
 {
     EQ_CHIPLET,

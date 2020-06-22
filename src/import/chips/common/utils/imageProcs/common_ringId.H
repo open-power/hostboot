@@ -395,8 +395,10 @@ MyBool_t ringid_is_mvpd_ring( ChipId_t  i_chipId,
                               RingId_t  i_ringId );
 
 // Check if ring is a GPTR ring
+/*
 MyBool_t ringid_is_gptr_ring( ChipId_t  i_chipId,
                               RingId_t  i_ringId );
+*/
 
 // Check if ring is a Common or Instance ring
 MyBool_t ringid_is_instance_ring( RingId_t  i_rpIndex);

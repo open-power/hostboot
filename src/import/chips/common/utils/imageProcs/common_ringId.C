@@ -320,12 +320,21 @@ int ringid_get_chipletIndex( ChipId_t        i_chipId,
 MyBool_t ringid_is_mvpd_ring( ChipId_t  i_chipId,
                               RingId_t  i_ringId )
 {
-    // Get the ring properties (rp) index
-    RingId_t rpIndex = P10_RID::ringid_convert_ringId_to_rpIndex(i_ringId);
+    RingId_t rpIndex = UNDEFINED_RING_ID;
 
     switch (i_chipId)
     {
         case CID_P10:
+
+            // Catch hole rings
+            if (i_ringId == HOLE_RING_ID)
+            {
+                return false;
+            }
+
+            // Get the ring properties (rp) index
+            rpIndex = P10_RID::ringid_convert_ringId_to_rpIndex(i_ringId);
+
             if (rpIndex >= P10_RID::NUM_RING_IDS)
             {
                 MY_ERR("ringid_is_mvpd_ring(): rpIndex(=0x%x) >= NUM_RING_IDS(=0x%x) not"
@@ -353,15 +362,24 @@ MyBool_t ringid_is_mvpd_ring( ChipId_t  i_chipId,
     return UNDEFINED_BOOLEAN;
 }
 
+/*
 MyBool_t ringid_is_gptr_ring( ChipId_t  i_chipId,
                               RingId_t  i_ringId )
 {
-    // Get the ring properties (rp) index
-    RingId_t rpIndex = P10_RID::ringid_convert_ringId_to_rpIndex(i_ringId);
+    RingId_t rpIndex = UNDEFINED_RING_ID;
 
     switch (i_chipId)
     {
         case CID_P10:
+            // Catch hole rings
+            if (i_ringId == HOLE_RING_ID)
+            {
+                return false;
+            }
+
+            // Get the ring properties (rp) index
+            rpIndex = P10_RID::ringid_convert_ringId_to_rpIndex(i_ringId);
+
             if (rpIndex >= P10_RID::NUM_RING_IDS)
             {
                 MY_ERR("ringid_is_gptr_ring(): rpIndex(=0x%x) >= NUM_RING_IDS(=0x%x) not"
@@ -388,6 +406,7 @@ MyBool_t ringid_is_gptr_ring( ChipId_t  i_chipId,
 
     return UNDEFINED_BOOLEAN;
 }
+*/
 
 
 MyBool_t ringid_is_instance_ring( RingId_t  i_rpIndex)

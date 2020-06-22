@@ -1135,8 +1135,8 @@ fapi2::ReturnCode _fetch_and_insert_vpd_rings(
     FAPI_ASSERT( l_rc == TOR_SUCCESS,
                  fapi2::XIPC_CODE_BUG().
                  set_CHIP_TARGET(i_procTarget).
-                 set_OCCURRENCE(3),
-                 "CODE BUG(3): ringid_check_ringId() failed w/rc=0x%08x. Calling code must make"
+                 set_OCCURRENCE(4),
+                 "CODE BUG(4): ringid_check_ringId() failed w/rc=0x%08x. Calling code must make"
                  " sure it passes valid ringId(=0x%x) to _fetch(). Fix calling code.\n",
                  l_rc, i_ringId);
 
@@ -1493,7 +1493,7 @@ fapi2::ReturnCode fetch_and_insert_vpd_rings(
     uint8_t l_ringStatusInMvpd            = RING_SCAN;
     bool    l_bImgOutOfSpace              = false;
     uint8_t l_eqNumWhenOutOfSpace         = 0xF;   // Assign invalid value to check for correctness of value when used
-    RingType_t l_ringType = 0xff; // 0:COMMON, 1:INSTANCE
+    uint8_t ringInsertionStage = NON_EQ_INSTANCE_STAGE; // 0:NON_EQ_INSTANCE_STAGE, 1:EQ_INSTANCE_STAGE
 
     // Initialize activeCoreMask to be filled up with EC column filling as it progresses
     uint32_t l_activeCoreMask  = 0x0;
@@ -1534,15 +1534,16 @@ fapi2::ReturnCode fetch_and_insert_vpd_rings(
     RingClass_t       ringClass;
     ChipletData_t*    l_chipletData;
     ChipletData_t*    l_chipletDataEQ, *l_chipletDataEC;
+    uint8_t           iInstance;
     uint8_t           l_chipletId;  // Nibbles {0,1} of scanScomAddr
     uint32_t          l_regionSel;  // Nibbles {2,4,5,6} of scanScomAddr (region select target)
     uint32_t          l_chipletSel; // Combination of chipletId and regionSel
 
 
-    // ----------------------------------------------------
-    // 1- Add all common rings (ie, non-EQ/core repr rings)
-    // ----------------------------------------------------
-    l_ringType = COMMON_RING;
+    // ---------------------------------------------------------------------------------
+    // 1- Add Common rings and Perv Instance rings (ie, all non-EQ/core Instance rings)
+    // ---------------------------------------------------------------------------------
+    ringInsertionStage = NON_EQ_INSTANCE_STAGE;
 
     for ( rpIndex = 0; rpIndex < NUM_RING_IDS; rpIndex++ )
     {
@@ -1579,61 +1580,66 @@ fapi2::ReturnCode fetch_and_insert_vpd_rings(
                          i_ringProps[rpIndex].chipletType,
                          i_ringProps[rpIndex].ringId );
 
-            l_chipletId = l_chipletData->chipletBaseId;
-            l_chipletSel = ((uint32_t)l_chipletId) << 24;
-
-            // Fetch COMMON rings (i.e., non repair rings)
-            // - Fetch all VPD rings for SBE.
-            // - Fetch QME scannable VPD rings for QME.
-
-            if ( i_sysPhase == SYSPHASE_HB_SBE   ||
-                 ( i_sysPhase == SYSPHASE_RT_QME && ( ringClass & RMRK_SCAN_BY_QME ) ) )
+            for (iInstance = 0; iInstance < l_chipletData->numChipletInstances; iInstance++)
             {
-                l_fapiRc = _fetch_and_insert_vpd_rings (
-                               i_procTarget,
-                               i_ringSection,
-                               io_ringSectionSize,
-                               i_maxRingSectionSize,
-                               l_overlaysSection,
-                               i_ddLevel,
-                               i_sysPhase,
-                               i_ringBuf1,
-                               i_ringBufSize1,
-                               i_ringBuf2,
-                               i_ringBufSize2,
-                               i_ringBuf3,
-                               i_ringBufSize3,
-                               i_ringProps,
-                               i_ringProps[rpIndex].ringId,
-                               l_chipletSel,
-                               l_ringStatusInMvpd,
-                               l_bImgOutOfSpace,
-                               io_bootCoreMask,
-                               i_idxFeatureMap,
-                               io_ringIdFeatureVecMap,
-                               i_numberOfFeatures,
-                               i_dynamicRingSection );
 
-                if (   (uint32_t)l_fapiRc == RC_XIPC_IMAGE_WOULD_OVERFLOW ||
-                       ( (uint32_t)l_fapiRc != RC_XIPC_RING_IS_REDUNDANT &&
-                         l_fapiRc != fapi2::FAPI2_RC_SUCCESS ) )
+                l_chipletId = l_chipletData->chipletBaseId + iInstance;
+                l_chipletSel = ((uint32_t)l_chipletId) << 24;
+
+                // Fetch Common and Perv Instance rings (i.e., non-Eq Instance rings)
+                // - Fetch all Mvpd rings for SBE.
+                // - Fetch QME scannable Mvpd rings for QME.
+
+                if ( i_sysPhase == SYSPHASE_HB_SBE   ||
+                     ( i_sysPhase == SYSPHASE_RT_QME && ( ringClass & RMRK_SCAN_BY_QME ) ) )
                 {
-                    fapi2::current_err = l_fapiRc;
-                    FAPI_ERR("_fetch_and_insert_vpd_rings() failed inserting VPD Common rings w/rc=0x%.8x",
-                             (uint64_t)fapi2::current_err );
-                    goto fapi_try_exit;
+                    l_fapiRc = _fetch_and_insert_vpd_rings (
+                                   i_procTarget,
+                                   i_ringSection,
+                                   io_ringSectionSize,
+                                   i_maxRingSectionSize,
+                                   l_overlaysSection,
+                                   i_ddLevel,
+                                   i_sysPhase,
+                                   i_ringBuf1,
+                                   i_ringBufSize1,
+                                   i_ringBuf2,
+                                   i_ringBufSize2,
+                                   i_ringBuf3,
+                                   i_ringBufSize3,
+                                   i_ringProps,
+                                   i_ringProps[rpIndex].ringId,
+                                   l_chipletSel,
+                                   l_ringStatusInMvpd,
+                                   l_bImgOutOfSpace,
+                                   io_bootCoreMask,
+                                   i_idxFeatureMap,
+                                   io_ringIdFeatureVecMap,
+                                   i_numberOfFeatures,
+                                   i_dynamicRingSection );
+
+                    if (   (uint32_t)l_fapiRc == RC_XIPC_IMAGE_WOULD_OVERFLOW ||
+                           ( (uint32_t)l_fapiRc != RC_XIPC_RING_IS_REDUNDANT &&
+                             l_fapiRc != fapi2::FAPI2_RC_SUCCESS ) )
+                    {
+                        fapi2::current_err = l_fapiRc;
+                        FAPI_ERR("_fetch_and_insert_vpd_rings() failed inserting NON_EQ_INSTANCE"
+                                 " Mvpd rings w/rc=0x%.8x",
+                                 (uint64_t)fapi2::current_err );
+                        goto fapi_try_exit;
+                    }
+
+                    FAPI_DBG("(CMN+PERVINST) io_ringSectionSize = %d", io_ringSectionSize);
+                    fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
                 }
-
-                FAPI_DBG("(CMN) io_ringSectionSize = %d", io_ringSectionSize);
-                fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
-            }
+            } // End of for(iInstance)
         }
-    }
+    } // End of for(rpIndex)
 
-    // --------------------------------------------------
-    // 2- Add all instance rings (ie, EQ/core repr rings)
-    // --------------------------------------------------
-    l_ringType = INSTANCE_RING;
+    // ------------------------------------------------------------
+    // 2- Add EQ-level instance rings (ie, EQ/core Instance rings)
+    // ------------------------------------------------------------
+    ringInsertionStage =  EQ_INSTANCE_STAGE;
 
     // Add all instance [QUAD-level] rings in order - EQ->EC.
     // Looking at the bootCoreMask start adding EQ first followed
@@ -1751,7 +1757,8 @@ fapi2::ReturnCode fetch_and_insert_vpd_rings(
                           l_fapiRc != fapi2::FAPI2_RC_SUCCESS )
                 {
                     fapi2::current_err = l_fapiRc;
-                    FAPI_ERR("_fetch_and_insert_vpd_rings() failed inserting VPD EQ Instance rings w/rc=0x%.8x",
+                    FAPI_ERR("_fetch_and_insert_vpd_rings() failed inserting EQ_INSTANCE"
+                             " Mvpd rings w/rc=0x%.8x",
                              (uint64_t)fapi2::current_err );
                     goto fapi_try_exit;
                 }
@@ -1906,7 +1913,7 @@ fapi2::ReturnCode fetch_and_insert_vpd_rings(
                                 (uint32_t)l_fapiRc == RC_MVPD_RING_NOT_FOUND ) &&
                               l_bImgOutOfSpace == false )
                     {
-                        FAPI_DBG("(INS) io_ringSectionSize = %d", io_ringSectionSize);
+                        FAPI_DBG("(EQINST) io_ringSectionSize = %d", io_ringSectionSize);
                         l_activeCoreMask |= (uint32_t)( 1 << ((NUM_OF_CORES - 1) - ec) );
                     }
 
@@ -1923,21 +1930,23 @@ fapi2::ReturnCode fetch_and_insert_vpd_rings(
 
 fapi_try_exit:
 
-    if( (l_ringType == COMMON_RING) &&
+    if( (ringInsertionStage == NON_EQ_INSTANCE_STAGE) &&
         (fapi2::current_err != fapi2::FAPI2_RC_SUCCESS) )
     {
         //Error handling:
-        //-when image would have run out-of-space if try to append common ring
-        //-Any other 'unknown/unexpected' error reported
+        //- When image runs out-of-space during insertion of common rings and perv instance rings
+        //- Any other 'unknown/unexpected' error reported
         io_bootCoreMask = 0;
         FAPI_IMP("bootCoreMask value: 0x%08x", io_bootCoreMask);
         FAPI_DBG("Exiting fetch_and_insert_vpd_rings w/rc=0x%08x", (uint32_t)fapi2::current_err);
         return fapi2::current_err;
     }
-    else if( (l_ringType == INSTANCE_RING) &&
+    else if( (ringInsertionStage == EQ_INSTANCE_STAGE) &&
              (fapi2::current_err != fapi2::FAPI2_RC_SUCCESS) )
     {
-        //Error handling: Any other 'unknown/unexpected' error reported
+        //Error handling:
+        //- When image runs out-of-space during insertion of EQ/core instance rings
+        //- Any other 'unknown/unexpected' error reported
         io_bootCoreMask = l_activeCoreMask;
         FAPI_IMP("bootCoreMask value: 0x%08x", io_bootCoreMask);
         FAPI_DBG("Exiting fetch_and_insert_vpd_rings w/rc=0x%08x", (uint32_t)fapi2::current_err);
@@ -2318,6 +2327,7 @@ ReturnCode p10_ipl_customize (
     std::map<RingId_t, uint64_t> ringIdFeatureVecMap;
     uint8_t*        ringIdFeatList = NULL;
     uint16_t        ringIdFeatListSize = 0;
+    uint16_t        listPos = 0;
     Rs4Selector_t   numberOfFeatures = 0;
     void*           baseRingSection = NULL;
     void*           dynamicRingSection = NULL;
@@ -3745,9 +3755,9 @@ ReturnCode p10_ipl_customize (
     // Produce the "anticipatory" dynamic inits debug list and, so far, append it only to
     // the Seeprom image. (Later, maybe PM team special delivery?)
     //
-    ringIdFeatListSize = ringIdFeatureVecMap.size() * (sizeof(ringIdFeatureVecMap));
+    ringIdFeatListSize = ringIdFeatureVecMap.size() * (sizeof(RingId_t) + sizeof(uint64_t));
 
-    FAPI_DBG("ringIdFeatListSize = %u", ringIdFeatListSize);
+    FAPI_DBG("ringIdFeatListSize =%u", ringIdFeatListSize);
 
     if (ringIdFeatListSize > RINGID_FEAT_LIST_MAX_SIZE)
     {
@@ -3762,6 +3772,7 @@ ReturnCode p10_ipl_customize (
     }
 
     ringIdFeatList = new uint8_t[ringIdFeatListSize];
+    listPos = 0;
 
     for( std::map<RingId_t, uint64_t>::iterator it = ringIdFeatureVecMap.begin();
          it != ringIdFeatureVecMap.end();
@@ -3769,14 +3780,20 @@ ReturnCode p10_ipl_customize (
     {
         FAPI_IMP("(ringId,featureVecAcc)=(0x%04x,0x%016llx)", it->first, it->second);
 
-        RingId_t* pKey = (RingId_t*)ringIdFeatList;
-        *pKey = htobe16(it->first);
-        ringIdFeatList += sizeof(it->first);
+        *(RingId_t*)(ringIdFeatList + listPos) = htobe16(it->first);
+        listPos += sizeof(it->first);
 
-        uint64_t* pData = (uint64_t*)ringIdFeatList;
-        *pData = htobe64(it->second);
-        ringIdFeatList += sizeof(it->second);
+        *(uint64_t*)(ringIdFeatList + listPos) = htobe64(it->second);
+        listPos += sizeof(it->second);
     }
+
+    FAPI_ASSERT( listPos == ringIdFeatListSize,
+                 fapi2::XIPC_CODE_BUG().
+                 set_CHIP_TARGET(i_procTarget).
+                 set_OCCURRENCE(5),
+                 "CODE BUG(5): Accummulated feature list size(=%u) does not match"
+                 " allocated list size(=%u)",
+                 listPos, ringIdFeatListSize );
 
 
     // Append .ringidfeatlist section to the Seeprom image
@@ -3784,7 +3801,7 @@ ReturnCode p10_ipl_customize (
     {
         l_rc = p9_xip_append( io_image,
                               P9_XIP_SECTION_SBE_RINGIDFEATLIST,
-                              ringIdFeatList,
+                              (void*)ringIdFeatList,
                               ringIdFeatListSize,
                               l_maxImageSize,
                               &l_sectionOffset,
@@ -3800,6 +3817,8 @@ ReturnCode p10_ipl_customize (
                      "ERROR(3): p9_xip_append() failed w/rc=0x%08x",
                      (uint32_t)l_rc );
     }
+
+    delete ringIdFeatList;
 
 
 
