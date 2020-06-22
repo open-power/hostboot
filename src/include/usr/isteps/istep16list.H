@@ -160,9 +160,6 @@ const DepModInfo g_istep16Dependancies =
         DEP_LIB(libpm.so),
         DEP_LIB(libimageprocs.so),
         DEP_LIB(libisteps_nest.so),
-#ifdef CONFIG_DEVTREE
-        DEP_LIB(libdevtree.so),
-#endif
         nullptr
     }
 };

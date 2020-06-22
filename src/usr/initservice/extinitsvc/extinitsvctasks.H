@@ -235,6 +235,22 @@ const TaskInfo g_exttaskinfolist[]   =   {
         },
 #endif
 
+
+#ifdef CONFIG_DEVTREE
+        /**
+         * @brief   Device tree sync
+         */
+        {
+            "libdevtree.so" ,                           // taskname
+            NULL,                                       // no pointer to fn
+            {
+                INIT_TASK,                          // task type
+                EXT_IMAGE,                          // Extended Module
+            }
+        },
+#endif
+
+
         /**
          * @brief   SCAN Device Driver
          */
