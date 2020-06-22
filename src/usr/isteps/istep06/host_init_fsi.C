@@ -76,32 +76,12 @@ void* host_init_fsi( void *io_pArgs )
             break;
         }
 
-        // Reset all I2C Masters if FSP is not running
-        if ( !INITSERVICE::spBaseServicesEnabled() )
+        // Reset all I2C Masters
+        l_err = i2cResetActiveMasters(I2C_ALL, false);
+        if (l_err)
         {
-            l_err = i2cResetActiveMasters(I2C_ALL, false);
-            if (l_err)
-            {
-                // Commit this error
-                errlCommit( l_err, ISTEP_COMP_ID );
-            }
-        }
-        else
-        {
-            // When MPIPLing (so the hardware isn't reset unless we do it
-            // manually), we reset all of the host engines, because the FSP
-            // can't reach them.
-            TARGETING::Target* l_pTopLevel = NULL;
-            TARGETING::targetService().getTopLevelTarget(l_pTopLevel);
-            assert(l_pTopLevel, "host_init_fsi: no TopLevelTarget");
-            if (l_pTopLevel->getAttr<TARGETING::ATTR_IS_MPIPL_HB>())
-            {
-                l_err = i2cResetActiveMasters(I2C_PROC_HOST, false, I2C_ENGINE_SELECT_ALL);
-                if (l_err)
-                {
-                    errlCommit(l_err, ISTEP_COMP_ID);
-                }
-            }
+            // Commit this error
+            errlCommit( l_err, ISTEP_COMP_ID );
         }
 
     } while (0);
