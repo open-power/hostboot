@@ -51,6 +51,7 @@
 // Misc
 #include <errl/errlmanager.H>
 #include <runtime/interface.h>
+#include <htmgt/htmgt.H>
 
 using namespace ERRORLOG;
 using namespace TARGETING;
@@ -438,53 +439,39 @@ errlHndl_t handleSetStateEffecterStatesRequest(const msg_q_t i_msgQ,
 
         /* Act on the request if the request was valid */
 
-        const auto hbrt_hyp_id = occ_proc->getAttr<ATTR_HBRT_HYP_ID>();
-
-        PLDM_INF("Attempting to reset OCC on PROC HUID = 0x%08x (HBRT ID = 0x%08x)",
-                 get_huid(occ_proc),
-                 hbrt_hyp_id);
-
-// @TODO RTC 254820: Remove the conditionals when this is moved into HBRT
-#ifdef __HOSTBOOT_RUNTIME
-        const int rc = getRuntimeInterfaces()->reset_pm_complex(hbrt_hyp_id);
-#else
-        const int rc = 0;
-#endif
-
-        if (rc)
+        if (occ_proc->getAttr<ATTR_HOMER_PHYS_ADDR>() == 0)
         {
-            PLDM_ERR("handleSetStateEffecterStatesRequest: Failed to reset the PM complex "
-                     "on PROC HUID = 0x%08x",
+            PLDM_ERR("handleSetStateEffecterStatesRequest: Failed to restart the OCC "
+                     "on PROC HUID = 0x%08x at IPL time "
+                     "(request too early - HOMER_PHYS_ADDR is 0)",
                      get_huid(occ_proc));
 
             /*
-             * @errortype  ERRL_SEV_UNRECOVERABLE
+             * @errortype  ERRL_SEV_PREDICTIVE
              * @moduleid   MOD_HANDLE_SET_STATE_EFFECTER_STATES_REQUEST
-             * @reasoncode RC_OCC_RESET_FAILED
-             * @userdata1  HUID of the PROC with the OCC that was reset
-             * @userdata2  Return code from reset_pm_complex
-             * @devdesc    Software problem, invalid event class received from BMC
+             * @reasoncode RC_OCC_RESET_TOO_SOON
+             * @userdata1  HUID of the PROC with the OCC that was being reset
+             * @devdesc    Software problem, BMC requested OCC reset too soon
              * @custdesc   A software error occurred during system boot
              */
-            errl = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
+            errl = new ErrlEntry(ERRL_SEV_PREDICTIVE,
                                  MOD_HANDLE_SET_STATE_EFFECTER_STATES_REQUEST,
-                                 RC_OCC_RESET_FAILED,
+                                 RC_OCC_RESET_TOO_SOON,
                                  get_huid(occ_proc),
-                                 rc,
-                                 ErrlEntry::ADD_SW_CALLOUT);
+                                 0,
+                                 ErrlEntry::NO_SW_CALLOUT);
 
+            addBmcErrorCallouts(errl);
             errlCommit(errl, PLDM_COMP_ID);
-
-            // Question: do we want to reply with an error? Because technically
-            // PLDM didn't fail so saying PLDM_ERROR could be misleading.
-            response_code = PLDM_ERROR;
+            response_code = PLDM_ERROR_NOT_READY;
             break;
         }
-        else
-        {
-            PLDM_INF("Successfully reset OCC on PROC HUID = 0x%08x",
-                     get_huid(occ_proc));
-        }
+
+        PLDM_INF("Restarting OCC on PROC HUID = 0x%08x...", get_huid(occ_proc));
+
+        HTMGT::processOccReset(occ_proc);
+
+        PLDM_INF("Restarted OCC on PROC HUID = 0x%08x", get_huid(occ_proc));
     } while (false);
 
     /* Respond to the request */

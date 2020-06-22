@@ -96,10 +96,10 @@ namespace PLDM
         RC_EXPECTED_UNIQUE_TARGET   = PLDM_COMP_ID | 0x19,
         RC_INVALID_EFFECTER_ID      = PLDM_COMP_ID | 0x1A,
         RC_INVALID_EFFECTER_STATE   = PLDM_COMP_ID | 0x1B,
-        RC_OCC_RESET_FAILED         = PLDM_COMP_ID | 0x1C,
-        RC_OVERLONG_LOCATION_CODE   = PLDM_COMP_ID | 0x1D,
-        RC_RECV_FAIL                = PLDM_COMP_ID | 0x1E,
-        RC_MISSING_ENTITY_ID        = PLDM_COMP_ID | 0x1F,
+        RC_MISSING_ENTITY_ID        = PLDM_COMP_ID | 0x1C,
+        RC_OCC_RESET_TOO_SOON       = PLDM_COMP_ID | 0x1D,
+        RC_OVERLONG_LOCATION_CODE   = PLDM_COMP_ID | 0x1E,
+        RC_RECV_FAIL                = PLDM_COMP_ID | 0x1F,
     };
 }
 #endif

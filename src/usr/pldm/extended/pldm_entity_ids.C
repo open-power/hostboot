@@ -118,6 +118,8 @@ errlHndl_t updateTargetEntityIdAttribute(Target* const i_target,
         break;
     }
 
+    // @TODO RTC 256140: Remove this function call when the BMC normalizes all
+    // PDRs
     if (!thePdrManager().findEntityByTypeAndId(ent))
     {
         PLDM_ERR("Cannot find normalized entity container ID in entity "
