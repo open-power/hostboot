@@ -34,75 +34,66 @@
 static const hang_pulse_t SETUP_HANG_COUNTERS_PERV[] =
 {
     {0, 16, 0},
-    {1, 4, 0},
-    {2, 18, 0},
-    {3, 1, 0},
     {5, 6, 0},
-    {6, 8, 0, 1}
-};
-
-static const hang_pulse_t SETUP_HANG_PULSE_FREQ[] =
-{
-    {0, 1, 0},
-    {1, 31, 0, 1}
+    {6, 7, 0, 1}
 };
 
 static const hang_pulse_t SETUP_HANG_COUNTERS_N0[] =
 {
     {0, 16, 0},
-    {1, 24, 0},
-    {2, 34, 0},
-    {3, 15, 0},
+    {1, 24, 1},
+    {3, 15, 1},
     {5, 6, 0},
-    {6, 8, 0, 1}
+    {6, 7, 0, 1}
 };
 
 static const hang_pulse_t SETUP_HANG_COUNTERS_N1[] =
 {
     {0, 16, 0},
-    {1, 23, 0},
-    {2, 15, 0},
-    {3, 19, 0},
+    {1, 22, 1},
+    {2, 16, 1},
+    {3, 20, 1},
+    {4, 17, 1},
     {5, 6, 0},
-    {6, 8, 0, 1}
+    {6, 7, 0, 1}
 };
 
 static const hang_pulse_t SETUP_HANG_COUNTERS_PCI[] =
 {
     {0, 16, 0},
-    {1, 44, 0},
+    {1, 43, 0},
     {5, 6, 0},
-    {6, 8, 0, 1}
+    {6, 7, 0, 1}
 };
 
 static const hang_pulse_t SETUP_HANG_COUNTERS_MC[] =
 {
     {0, 16, 0},
     {5, 6, 0},
-    {6, 8, 0, 1}
+    {6, 7, 0, 1}
 };
 
 static const hang_pulse_t SETUP_HANG_COUNTERS_IOHS[] =
 {
     {0, 16, 0},
     {5, 6, 0},
-    {6, 8, 0, 1}
+    {6, 7, 0, 1}
 };
 
 static const hang_pulse_t SETUP_HANG_COUNTERS_PAU[] =
 {
     {0, 16, 0},
-    {1, 4, 0},
+    {1, 3, 0},
     {5, 6, 0},
-    {6, 8, 0, 1}
+    {6, 7, 0, 1}
 };
 
 static const hang_pulse_t SETUP_HANG_COUNTERS_EQ[] =
 {
     {0, 16, 0},
-    {1, 23, 0},
+    {1, 21, 1},
     {5, 6, 0},
-    {6, 8, 0, 1}
+    {6, 7, 0, 1}
 };
 
 static const mc_setup_t ISTEP3_MC_GROUPS[] =
