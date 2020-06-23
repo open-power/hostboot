@@ -129,6 +129,25 @@ enum conversions
     DECI_TO_CENTI = 10,
 };
 
+///
+/// @brief ATTR_ROW_REPAIR_DATA Organization
+///
+enum row_repair_data
+{
+    ROW_REPAIR_BYTES_PER_RANK = 4,
+    ROW_REPAIR_DRAM_POS = 0,
+    ROW_REPAIR_DRAM_POS_LEN = 5,
+    ROW_REPAIR_SRANK = 5,
+    ROW_REPAIR_SRANK_LEN = 3,
+    ROW_REPAIR_BANK_GROUP = 8,
+    ROW_REPAIR_BANK_GROUP_LEN = 2,
+    ROW_REPAIR_BANK = 10,
+    ROW_REPAIR_BANK_LEN = 3,
+    ROW_REPAIR_ROW_ADDR = 13,
+    ROW_REPAIR_ROW_ADDR_LEN = 18,
+    ROW_REPAIR_VALID = 31,
+};
+
 enum generic_sizes
 {
     NUM_MAX_FREQS = 5,             ///< Used for ATTR_MAX_ALLOWED_DIMM_FREQ

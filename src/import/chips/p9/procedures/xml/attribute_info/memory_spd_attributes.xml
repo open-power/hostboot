@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2016,2018                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2016,2020                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -683,26 +683,6 @@
         <writeable/>
         <array>2 2 18</array>
         <mssAccessorName>eff_nibble_map</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_ROW_REPAIR_DATA</id>
-        <targetType>TARGET_TYPE_DIMM</targetType>
-        <description>
-          Row Repair Data for a DIMM target.
-          Data for 4 master ranks * 32 bits per row repair
-          Each row repair contains:
-          -5 bits:  DRAM position (x8: 0-9, x4: 0-19)
-          -3 bits:  slave ranks (0-7)
-          -2 bits:  bank group (0-3)
-          -3 bits:  bank (0-7)
-          -18 bits: row
-          -1 bits:  repair validity (0: repair is invalid, 1: repair is valid)
-        </description>
-        <initToZero></initToZero>
-        <valueType>uint8</valueType>
-        <writeable/>
-        <array>4 4</array>
     </attribute>
 
     <attribute>

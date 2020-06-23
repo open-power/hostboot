@@ -132,7 +132,8 @@ class ccsTraits<mss::mc_type::EXPLORER>
             ARR0_DDR_ADDRESS_0_13_LEN = EXPLR_MCBIST_CCS_INST_ARR0_00_DDR_ADDRESS_0_13_LEN,
             ARR0_DDR_ADDRESS_0_9 = EXPLR_MCBIST_CCS_INST_ARR0_00_DDR_ADDRESS_0_13, // Useful for rd/wr cmds
             ARR0_DDR_ADDRESS_0_9_LEN = 10, // CA bits are 9:0, total length of 10
-            ARR0_DDR_ADDRESS_10 = 10, // ADR10 is the 10th bit from the left in Nimbus ARR0
+            ARR0_DDR_ADDRESS_10 = 10, // ADR10 is the 10th bit from the left
+            ARR0_DDR_ADDRESS_12 = 12, // ADR12 is the 12th bit from the left
             ARR0_DDR_ADDRESS_17 = EXPLR_MCBIST_CCS_INST_ARR0_00_DDR_ADDRESS_17,
             ARR0_DDR_BANK_GROUP_1 = EXPLR_MCBIST_CCS_INST_ARR0_00_DDR_BANK_GROUP_1,
             ARR0_DDR_RESETN = EXPLR_MCBIST_CCS_INST_ARR0_00_DDR_RESETN,

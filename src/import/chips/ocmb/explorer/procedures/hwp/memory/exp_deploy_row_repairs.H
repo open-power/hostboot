@@ -22,3 +22,31 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+
+/// @file exp_deploy_row_repairs.H
+/// @brief Row Repair Procedure
+///
+// *HWP HWP Owner: Matthew Hickman <Matthew.Hickman@ibm.com>
+// *HWP HWP Backup: Louis Stermole <stermole@us.ibm.com>
+// *HWP Team: Memory
+// *HWP Level: 3
+// *HWP Consumed by: FSP:HB
+// EKB-Mirror-To: hostboot
+
+#ifndef __EXP_DEPLOY_ROW_REPAIR__
+#define __EXP_DELPOY_ROW_REPAIR__
+
+#include <fapi2.H>
+
+extern "C"
+{
+
+    ///
+    /// @brief Deploy SPPR row repair
+    /// @param[in] i_target_ocmb ocmb target
+    /// @return FAPI2_RC_SUCCESS iff successful
+    ///
+    fapi2::ReturnCode exp_deploy_row_repairs(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target_ocmb);
+
+}
+#endif

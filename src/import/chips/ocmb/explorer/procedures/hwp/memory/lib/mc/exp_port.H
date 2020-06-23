@@ -63,6 +63,9 @@ template<>
 class portTraits< mss::mc_type::EXPLORER >
 {
     public:
+        // MC_TYPE
+        static constexpr fapi2::TargetType MC_TARGET_TYPE = fapi2::TARGET_TYPE_OCMB_CHIP;
+
         // PORT_TYPE
         static constexpr fapi2::TargetType PORT_TYPE = fapi2::TARGET_TYPE_MEM_PORT;
 

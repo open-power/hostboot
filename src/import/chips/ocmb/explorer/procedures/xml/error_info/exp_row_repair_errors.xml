@@ -22,5 +22,62 @@
 <!-- permissions and limitations under the License.                         -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
+<!-- EKB-Mirror-To: hostboot                                                -->
 <hwpErrors>
+
+  <hwpError>
+    <rc>RC_EXP_DRAM_INDEX_OUT_OF_BOUNDS</rc>
+    <description>
+        Index supplied to row repair function out of bounds.
+    </description>
+    <ffdc>DIMM_TARGET</ffdc>
+    <ffdc>DRAM_WIDTH</ffdc>
+    <ffdc>INDEX</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>MEDIUM</priority>
+    </callout>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_EXP_ROW_REPAIR_ENTRY_OUT_OF_BOUNDS</rc>
+    <description>
+        Input supplied to row repair function out of bounds.
+    </description>
+    <ffdc>DIMM_TARGET</ffdc>
+    <ffdc>DRAM</ffdc>
+    <ffdc>DRAM_MAX</ffdc>
+    <ffdc>MRANK</ffdc>
+    <ffdc>SRANK</ffdc>
+    <ffdc>SRANK_MAX</ffdc>
+    <ffdc>BANK_GROUP</ffdc>
+    <ffdc>BANK_GROUP_MAX</ffdc>
+    <ffdc>BANK</ffdc>
+    <ffdc>BANK_MAX</ffdc>
+    <ffdc>ROW</ffdc>
+    <ffdc>ROW_MAX</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>MEDIUM</priority>
+    </callout>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_EXP_ROW_REPAIR_WITH_MNFG_REPAIRS_DISABLED</rc>
+    <description>
+        Valid row repair was requested while repairs are disabled.
+    </description>
+    <ffdc>DIMM_TARGET</ffdc>
+    <ffdc>DRAM</ffdc>
+    <ffdc>MRANK</ffdc>
+    <ffdc>SRANK</ffdc>
+    <ffdc>BANK_GROUP</ffdc>
+    <ffdc>BANK</ffdc>
+    <ffdc>ROW</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>MEDIUM</priority>
+    </callout>
+  </hwpError>
+
 </hwpErrors>
