@@ -798,6 +798,36 @@
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
+  <id>ATTR_PROC_L2_HASH_DISABLE</id>
+  <targetType>TARGET_TYPE_SYSTEM</targetType>
+  <description>
+    Disables the L2's address hashing
+  </description>
+  <valueType>uint8</valueType>
+  <enum>
+    OFF = 0x0,
+    ON = 0x1
+  </enum>
+  <writeable/>
+  <initToZero/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_PROC_L3_HASH_DISABLE</id>
+  <targetType>TARGET_TYPE_SYSTEM</targetType>
+  <description>
+    Disables the L3's address hashing
+  </description>
+  <valueType>uint8</valueType>
+  <enum>
+    OFF = 0x0,
+    ON = 0x1
+  </enum>
+  <writeable/>
+  <initToZero/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
   <id>ATTR_PROC_SBE_MCS_SETUP_REG_STATES</id>
   <targetType>TARGET_TYPE_PROC_CHIP</targetType>
   <description>
