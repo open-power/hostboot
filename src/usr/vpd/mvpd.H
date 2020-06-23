@@ -141,6 +141,7 @@ namespace MVPD
         { CI,  "CI" },
         { pdP, "#P" },
         { pdS, "#S" },
+        { MK,  "MK" },
 
         // -------------------------------------------------------------------
         // DO NOT USE!!  This is for test purposes ONLY!

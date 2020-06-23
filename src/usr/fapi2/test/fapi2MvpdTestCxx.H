@@ -190,6 +190,7 @@ public:
           { MVPD_RECORD_CP00, MVPD_KEYWORD_PDR, MVPD::CP00, MVPD::pdR },
           { MVPD_RECORD_CP00, MVPD_KEYWORD_PDS, MVPD::CP00, MVPD::pdS },
           { MVPD_RECORD_CP00, MVPD_KEYWORD_PG, MVPD::CP00, MVPD::PG },
+          { MVPD_RECORD_CP00, MVPD_KEYWORD_MK, MVPD::CP00, MVPD::MK },
       };
 
       TARGETING::TargetHandleList l_chipList;
