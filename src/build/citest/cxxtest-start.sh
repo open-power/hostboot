@@ -52,20 +52,21 @@ if [[ $SETUP_FOR_STANDALONE -eq 1 ]];then
     SBE_SCRIPTS_PATH=${STANDALONE_SIMICS}/targets/p10_standalone/sbeTest/
     SBE_SCRIPT_TO_RUN=${SBE_SCRIPTS_PATH}/sbe_startup_p10_standalone.simics
 
-    export START_SIMICS_CMD="\
-        runsim -m ${MACHINE} \
-        hb_script_to_run=${STARTUPSIMICS} \
-        pnor_img=${STANDALONE}/pnor/P10.pnor \
-        sbe_seeprom_img=${SBE_STANDALONE_IMG} \
-        sbe_meas_seeprom_img=${SBE_STANDALONE_MEASURE_IMG} \
-        sbe_otprom_img=${SBE_STANDALONE_OTPROM_IMG} \
-        sbe_script_to_run=${SBE_SCRIPT_TO_RUN} \
-        sbe_scripts_path=${SBE_SCRIPTS_PATH} \
-        enable_lpc_console=TRUE \
-        fused_core=TRUE \
-        xive_gen=2 \
-        bmc_files=/host/genEecache:/usr/local/share/pnor/EECACHE \
-        eecacheEcc=1"
+    export START_SIMICS_CMD=" runsim -m ${MACHINE}"
+    START_SIMICS_CMD+=" hb_script_to_run=${STARTUPSIMICS}"
+    START_SIMICS_CMD+=" pnor_img=${STANDALONE}/pnor/P10.pnor"
+    START_SIMICS_CMD+=" sbe_seeprom_img=${SBE_STANDALONE_IMG}"
+    START_SIMICS_CMD+=" sbe_meas_seeprom_img=${SBE_STANDALONE_MEASURE_IMG}"
+    START_SIMICS_CMD+=" sbe_otprom_img=${SBE_STANDALONE_OTPROM_IMG}"
+    START_SIMICS_CMD+=" sbe_script_to_run=${SBE_SCRIPT_TO_RUN}"
+    START_SIMICS_CMD+=" sbe_scripts_path=${SBE_SCRIPTS_PATH}"
+    START_SIMICS_CMD+=" enable_lpc_console=TRUE"
+    START_SIMICS_CMD+=" fused_core=TRUE"
+    START_SIMICS_CMD+=" xive_gen=2"
+    START_SIMICS_CMD+=" bmc_files=/host/genEecache:/usr/local/share/pnor/EECACHE"
+    START_SIMICS_CMD+=" eecacheEcc=1"
+    #@FIXME-RTC:254475-Remove once this works everywhere
+    START_SIMICS_CMD+=" hb_ignoresmpfail=0"
 
     if [ "$HOSTBOOT_PROFILE" ] ; then
         export SIMICS_MORECACHE=1

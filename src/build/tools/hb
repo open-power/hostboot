@@ -539,6 +539,8 @@ hb_startsimics()
             STARTSIMCMD+=(enable_lpc_console=TRUE)
             STARTSIMCMD+=(fused_core=TRUE)
             STARTSIMCMD+=(num_sockets=1)
+            #@FIXME-RTC:254475-Remove once this works everywhere
+            STARTSIMCMD+=(hb_ignoresmpfail=0)
         else
             # This allows to not run SBE automatically
             STARTSIMCMD+=(sbe_boot_mem=pibmem)

@@ -210,6 +210,7 @@ try {
     echo "Multiproc Enablement = "+$hb_multiproc
 }
 
+#@FIXME-RTC:254475-Remove once this works everywhere
 ###Check for some workaround flags
 try {
     echo "hb_ignoresmpfail = "+$hb_ignoresmpfail
