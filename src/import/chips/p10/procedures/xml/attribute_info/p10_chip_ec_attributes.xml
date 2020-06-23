@@ -128,6 +128,23 @@
   </attribute>
   <!-- ******************************************************************** -->
   <attribute>
+    <id>ATTR_CHIP_EC_FEATURE_HW534459</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      HW534459 - mask NCU ERR_RPT(26) since it can errantly go off.
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_P10</name>
+        <ec>
+          <value>0x10</value>
+          <test>EQUAL</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
+  <!-- ******************************************************************** -->
+  <attribute>
     <id>ATTR_CHIP_EC_FEATURE_MMA_CORE_ABIST_LINKED</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>
