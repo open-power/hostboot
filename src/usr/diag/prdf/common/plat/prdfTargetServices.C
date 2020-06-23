@@ -566,8 +566,10 @@ TargetHandle_t getConnectedChild( TargetHandle_t i_parent, TYPE i_childType,
             // only one in the list for OMI to OCMB connections).
             TargetHandle_t omi = getConnectedChild( i_parent, TYPE_OMI,
                                                     i_childPos );
-            PRDF_ASSERT( nullptr != omi );
-            o_child = getConnectedChild( omi, TYPE_OCMB_CHIP, 0 );
+            if ( nullptr != omi )
+            {
+                o_child = getConnectedChild( omi, TYPE_OCMB_CHIP, 0 );
+            }
         }
         // Default case, i_connPos should match the unit pos within the chip
         else
