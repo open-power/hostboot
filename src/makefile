@@ -282,6 +282,7 @@ TESTCASE_MODULES += testexpaccess
 TESTCASE_MODULES += testrtloader
 TESTCASE_MODULES += testexpupd
 TESTCASE_MODULES += testspi
+TESTCASE_MODULES += testspiserial
 TESTCASE_MODULES += testmmio
 TESTCASE_MODULES += testeeprom
 TESTCASE_MODULES += testdump

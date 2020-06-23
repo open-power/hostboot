@@ -1,7 +1,7 @@
 # IBM_PROLOG_BEGIN_TAG
 # This is an automatically generated prolog.
 #
-# $Source: src/usr/spi/test/makefile $
+# $Source: src/usr/spi/test/serial/makefile $
 #
 # OpenPOWER HostBoot Project
 #
@@ -22,20 +22,21 @@
 # permissions and limitations under the License.
 #
 # IBM_PROLOG_END_TAG
-ROOTPATH = ../../../..
+ROOTPATH = ../../../../..
 
-MODULE = testspi
+MODULE = testspiserial
 
-TESTS = testspi.H
+TESTS = testspiserial.H
 
-#HWP_PATH += ${ROOTPATH}/src/import/chips/p10/procedures
+HWP_PATH += ${ROOTPATH}/src/import/chips/p10/procedures
 
 #EXTRAINCDIR += ${ROOTPATH}/src/include/usr/
-#EXTRAINCDIR += ${ROOTPATH}/src/include/usr/fapi2/
-#EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/fapi2/include/
-#EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/imageProcs/
-#EXTRAINCDIR += ${HWP_PATH}/hwp/ffdc
+EXTRAINCDIR += ${ROOTPATH}/src/include/usr/fapi2/
+EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/fapi2/include/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/common/include/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/imageProcs/
+EXTRAINCDIR += ${HWP_PATH}/hwp/ffdc/
+EXTRAINCDIR += ${HWP_PATH}/hwp/spi/
 
-SUBDIRS += serial.d
 
 include ${ROOTPATH}/config.mk

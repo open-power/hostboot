@@ -45,9 +45,12 @@ namespace CxxTest
 //This is a list of testcases that are expected to run in a serial manner
 //   example: std::vector<const char *> CxxSerialTests{"libtestrtloader.so"};
 //
-//   libtesthwas and libtesteeprom in serial bucket since states may be
-//   altered which may adversely affect other tests
-std::vector<const char *> CxxSerialTests{"libtesthwas.so", "libtesteeprom.so"};
+//   libtesthwas, libtesteeprom, and libtestspiserial in serial bucket since
+//   states may be altered which may adversely affect other tests
+//
+std::vector<const char *> CxxSerialTests{ "libtesthwas.so",
+                                          "libtesteeprom.so",
+                                          "libtestspiserial.so" };
 
 //
 // TestSuite members
