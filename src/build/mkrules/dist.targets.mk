@@ -56,6 +56,7 @@ COPY_FILES = \
     src/build/debug/simics-debug-framework.pl:openpower-sim \
     src/build/simics/combined.simics:openpower-sim \
     src/build/simics/startup.simics:openpower-sim \
+    src/build/simics/morecache.simics:openpower-sim \
     src/build/simics/hb-simdebug.py:openpower-sim \
     src/build/simics/eecache-gen.py:openpower-sim \
     src/build/simics/ecc.py:openpower-sim \
@@ -247,6 +248,7 @@ TAR_FILES = \
 #
 simics.tar_CONTENTS = \
     src/build/mkrules/hbfw/simics/makefile \
+    src/build/simics/morecache.simics \
     src/build/simics/startup.simics \
     src/build/simics/standalone.simics \
     src/build/simics/combined.simics \

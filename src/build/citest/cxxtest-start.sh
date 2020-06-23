@@ -67,6 +67,9 @@ if [[ $SETUP_FOR_STANDALONE -eq 1 ]];then
         bmc_files=/host/genEecache:/usr/local/share/pnor/EECACHE \
         eecacheEcc=1"
 
+    if [ "$HOSTBOOT_PROFILE" ] ; then
+        export SIMICS_MORECACHE=1
+    fi
 fi
 
 #   Front end to autocitest - script to execute unit tests under simics.

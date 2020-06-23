@@ -559,6 +559,11 @@ hb_startsimics()
             fi
         fi
 
+        # For GCOV, tell simics to enable the larger backing cache.
+        if [ "$HOSTBOOT_PROFILE" ] ; then
+            export SIMICS_MORECACHE=1
+        fi
+
         # Create a file (simcmd) to run under vexec
         echo "cd ${STANDALONE_SIMICS}" > ${STANDALONE_SIMICS}/simcmd
         echo "${STARTSIMCMD[@]}" >> ${STANDALONE_SIMICS}/simcmd
@@ -812,5 +817,3 @@ cacheadd)
     exit 1
     ;;
 esac
-
-

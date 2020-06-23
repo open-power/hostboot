@@ -30,7 +30,7 @@ $found_custom_eecache = 0
 try {
     $eccPreload = (lookup-file "%simics%/custom_eecache.bin")
     $found_custom_eecache = 1
-} except { 
+} except {
     $found_custom_eecache = 0
 }
 
@@ -90,7 +90,8 @@ foreach $obj in (get-object-list ocmb -all){
 connect backplane0.cnt_hfsi_link[1] backplane0.cnt_fsi_slave[0][1][1]
 
 # Set valid bit for Scratch Reg3/Reg6 in Scratch Reg8 bit 2/5
-(get-master-procs)[0].cfam_cmp.lbus_map.write 0x2800 + 0x3F*4 0x24000000 4 -b
+$scratch = ((get-master-procs)[0].cfam_cmp.lbus_map.read 0x2800 + 0x3F*4 4 -b)
+(get-master-procs)[0].cfam_cmp.lbus_map.write 0x2800 + 0x3F*4 ($scratch | 0x24000000) 4 -b
 # Set bit24 for Scratch Reg6 - Master Proc
 (get-master-procs)[0].cfam_cmp.lbus_map.write 0x2800 + 0x3D*4 0x00000080 4 -b
 
