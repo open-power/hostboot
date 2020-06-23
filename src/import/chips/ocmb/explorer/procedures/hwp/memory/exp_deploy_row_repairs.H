@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/import/chips/ocmb/explorer/procedures/hwp/memory/lib/ccs/ccs_explorer.H $ */
+/* $Source: src/import/chips/ocmb/explorer/procedures/hwp/memory/exp_deploy_row_repairs.H $ */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -23,29 +23,30 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-///
-/// @file ccs_explorer.H
-/// @brief Run and manage the CCS engine
+/// @file exp_deploy_row_repairs.H
+/// @brief Row Repair Procedure
 ///
 // *HWP HWP Owner: Matthew Hickman <Matthew.Hickman@ibm.com>
-// *HWP HWP Backup: Stephen Glancy <sglancy@us.ibm.com>
+// *HWP HWP Backup: Louis Stermole <stermole@us.ibm.com>
 // *HWP Team: Memory
 // *HWP Level: 3
 // *HWP Consumed by: FSP:HB
+// EKB-Mirror-To: hostboot
 
-#ifndef _MSS_CCS_EXPLORER_H_
-#define _MSS_CCS_EXPLORER_H_
+#ifndef __EXP_DEPLOY_ROW_REPAIR__
+#define __EXP_DELPOY_ROW_REPAIR__
 
 #include <fapi2.H>
-#include <lib/ccs/ccs_traits_explorer.H>
-#include <generic/memory/lib/ccs/ccs.H>
 
-namespace mss
-{
-namespace ccs
+extern "C"
 {
 
-} // namespace ccs
-} // namespace mss
+    ///
+    /// @brief Deploy SPPR row repair
+    /// @param[in] i_target_ocmb ocmb target
+    /// @return FAPI2_RC_SUCCESS iff successful
+    ///
+    fapi2::ReturnCode exp_deploy_row_repairs(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target_ocmb);
 
+}
 #endif

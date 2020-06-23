@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/import/chips/ocmb/explorer/procedures/hwp/memory/lib/ccs/ccs_explorer.H $ */
+/* $Source: src/import/chips/ocmb/explorer/procedures/hwp/memory/lib/ccs/exp_bad_dq_bitmap_funcs.H $ */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -24,28 +24,44 @@
 /* IBM_PROLOG_END_TAG                                                     */
 
 ///
-/// @file ccs_explorer.H
-/// @brief Run and manage the CCS engine
+/// @file exp_bad_dq_bitmap_funcs.H
+/// @brief Functions that access the Bad DQ Bitmap.
 ///
-// *HWP HWP Owner: Matthew Hickman <Matthew.Hickman@ibm.com>
-// *HWP HWP Backup: Stephen Glancy <sglancy@us.ibm.com>
-// *HWP Team: Memory
-// *HWP Level: 3
-// *HWP Consumed by: FSP:HB
+/// *HWP HWP Owner: Matt Hickman <Matthew.Hickman@ibm.com>
+/// *HWP HWP Backup: Andre Marin <aamarin@us.ibm.com>
+/// *HWP Team: Memory
+/// *HWP Level: 2
+/// *HWP Consumed by: HB:CI
+/// EKB-Mirror-To: hostboot
+///
 
-#ifndef _MSS_CCS_EXPLORER_H_
-#define _MSS_CCS_EXPLORER_H_
+#ifndef __EXP_BAD_DQ_BITMAP_FUNCS__
+#define __EXP_BAD_DQ_BITMAP_FUNCS__
 
 #include <fapi2.H>
-#include <lib/ccs/ccs_traits_explorer.H>
-#include <generic/memory/lib/ccs/ccs.H>
+#include <generic/memory/lib/utils/shared/mss_generic_consts.H>
 
 namespace mss
 {
-namespace ccs
+namespace exp
 {
+///
+/// @brief Row Repair Utility function that gets the Bad DQ Bitmap.
+/// @param[in] i_rank Rank info to get bitmap
+/// @param[out] o_data Reference to data where Bad DQ bitmap is copied to
+/// @return FAPI2_RC_SUCCESS iff okay
+///
+fapi2::ReturnCode get_bad_dq_bitmap( const mss::rank::info<>& i_rank,
+                                     uint8_t o_data[BAD_DQ_BYTE_COUNT]);
 
-} // namespace ccs
+///
+/// @brief Row Repair Utility function that sets the Bad DQ Bitmap.
+/// @param[in] i_rank Rank info to get bitmap
+/// @param[in] i_data Reference to data where Bad DQ bitmap is copied to
+/// @return FAPI2_RC_SUCCESS iff okay
+///
+fapi2::ReturnCode set_bad_dq_bitmap( const mss::rank::info<>& i_rank,
+                                     const uint8_t i_data[BAD_DQ_BYTE_COUNT]);
+} // namespace exp
 } // namespace mss
-
 #endif
