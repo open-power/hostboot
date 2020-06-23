@@ -74,6 +74,7 @@ include ${ROOTPATH}/procedure.rules.mk
 
 # host_slave_sbe_config
 OBJS += p10_setup_sbe_config.o
+OBJS += p10_sbe_scratch_regs.o
 # proc_check_slave_sbe_seeprom_complete
 OBJS += p10_getecid.o
 
