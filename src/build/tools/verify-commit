@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2013,2018
+# Contributors Listed Below - COPYRIGHT 2013,2020
 # [+] International Business Machines Corp.
 #
 #
@@ -33,7 +33,7 @@ my $warningCount = 0;
 my $showAll = 0;
 
 use constant MAX_WARNINGS => 5;
-use constant MAX_CODE_LINE_LENGTH => 80;
+use constant MAX_CODE_LINE_LENGTH => 100;
 
 my $projectName = $ENV{'PROJECT_NAME'};
 # Relative path of import tree from project root
