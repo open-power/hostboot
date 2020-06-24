@@ -120,11 +120,8 @@ if defined bmc_files {
 
 
 # Determine security state
-$hw_security=(shell "echo $SECURITY_HW_POLICY")
-if($hw_security == "") {
-    # Assume default (no HW security) if not specified
-    $hw_security = "0"
-}
+$hw_security="0"
+@if 'SECURITY_HW_POLICY' in os.environ: simenv.hw_security = os.environ['SECURITY_HW_POLICY']
 
 if(($hw_security != "1") and ($hw_security != "0")) {
     # Emit warning and assume default
