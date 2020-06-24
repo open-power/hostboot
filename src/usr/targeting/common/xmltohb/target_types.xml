@@ -2536,6 +2536,14 @@
       <id>MODEL</id>
     </attribute>
     <attribute>
+      <!-- hack for mrw -->
+      <id>PULSE_MODE_ENABLE</id>
+    </attribute>
+    <attribute>
+      <!-- hack for mrw -->
+      <id>PULSE_MODE_VALUE</id>
+    </attribute>
+    <attribute>
       <default>0x000603FC00000000</default>
       <id>XSCOM_BASE_ADDRESS</id>
     </attribute>

@@ -80,12 +80,6 @@
          <id>ATTR_SECTOR_BUFFER_STRENGTH</id>
      </attribute>
      <attribute>
-         <id>ATTR_PULSE_MODE_ENABLE</id>
-     </attribute>
-     <attribute>
-         <id>ATTR_PULSE_MODE_VALUE</id>
-     </attribute>
-     <attribute>
          <id>ATTR_MSS_MRW_DRAM_WRITE_CRC</id>
          <default>0x0</default>
      </attribute>

@@ -6919,6 +6919,48 @@
   </attribute>
 
   <attribute>
+    <!-- hack for mrw -->
+    <description>enable the pulse mode</description>
+    <id>PULSE_MODE_ENABLE</id>
+    <persistency>volatile</persistency>
+    <readable/>
+    <simpleType>
+      <uint8_t>
+        <default>DISABLE</default>
+      </uint8_t>
+    </simpleType>
+    <no_export/>
+  </attribute>
+
+  <enumerationType>
+    <!-- hack for mrw -->
+    <description>enable the pulse mode</description>
+    <enumerator>
+      <name>ENABLE</name>
+      <value>0x1</value>
+    </enumerator>
+    <enumerator>
+      <name>DISABLE</name>
+      <value>0x0</value>
+    </enumerator>
+    <id>PULSE_MODE_ENABLE</id>
+  </enumerationType>
+
+  <attribute>
+    <!-- hack for mrw -->
+    <description>value for pulse mode</description>
+    <id>PULSE_MODE_VALUE</id>
+    <persistency>volatile</persistency>
+    <readable/>
+    <simpleType>
+      <uint8_t>
+        <default>0</default>
+      </uint8_t>
+    </simpleType>
+    <no_export/>
+  </attribute>
+
+  <attribute>
     <description>
        Raw value of system MTM
     </description>
