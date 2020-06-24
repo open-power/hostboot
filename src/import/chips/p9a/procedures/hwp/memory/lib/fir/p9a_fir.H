@@ -269,6 +269,7 @@ inline fapi2::ReturnCode setup_reg_dl_after_chiplet_scominit_helper(const fapi2:
     .setBit<P9A_MC_REG2_DL2_ERROR_MASK_34>()
     .setBit<P9A_MC_REG2_DL2_ERROR_MASK_33>()
     .setBit<P9A_MC_REG2_DL2_ERROR_MASK_32>()
+    .setBit<P9A_MC_REG2_DL2_ERROR_MASK_18>()
     .clearBit<P9A_MC_REG2_DL2_ERROR_MASK_17>()
     .clearBit<P9A_MC_REG2_DL2_ERROR_MASK_16>()
     .clearBit<P9A_MC_REG2_DL2_ERROR_MASK_15>()
