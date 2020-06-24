@@ -277,11 +277,21 @@ void cleanupChnlAttns<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
     // for subchannel 0 or DSTLFIR[4:7] for subchannel 1
     ExtensibleChip * mcc = getConnectedParent( i_chip, TYPE_MCC );
 
-    SCAN_COMM_REGISTER_CLASS * reg = mcc->getRegister( "DSTLFIR_AND" );
+    SCAN_COMM_REGISTER_CLASS * dstlfir_and = mcc->getRegister( "DSTLFIR_AND" );
 
-    reg->setAllBits();
-    reg->SetBitFieldJustified( chnlPos*4, 4, 0 );
-    reg->Write();
+    dstlfir_and->setAllBits();
+    dstlfir_and->SetBitFieldJustified( chnlPos*4, 4, 0 );
+    dstlfir_and->Write();
+
+    // To ensure that any unmasked OCMB FIR bit that it still on will cause
+    // an interrupt to the proc, we toggle the bits of the summary mask register
+    // on and off.
+    SCAN_COMM_REGISTER_CLASS * sum_mask = i_chip->getRegister( "SUM_MASK_REG" );
+    sum_mask->SetBitFieldJustified( 0, 5, 0x1F );
+    sum_mask->Write();
+
+    sum_mask->SetBitFieldJustified( 0, 5, 0 );
+    sum_mask->Write();
 
     #endif // Hostboot only
 
