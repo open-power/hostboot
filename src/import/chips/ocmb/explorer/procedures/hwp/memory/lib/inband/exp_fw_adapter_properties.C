@@ -177,9 +177,6 @@ fapi2::ReturnCode fw_adapter_properties_struct_from_little_endian(
     uint32_t l_response_spi_flash_size = 0;
     uint32_t l_response_error_buffer_size = 0;
 
-    FAPI_TRY(correctMMIOEndianForStruct(io_data));
-    FAPI_TRY(correctMMIOword_order(io_data));
-
     // Read out response into local variables first so we don't change o_response if we fail
     FAPI_TRY(readCrctEndian(io_data, l_idx, l_response_fw_number_of_images));
     FAPI_TRY(readCrctEndian(io_data, l_idx, l_response_boot_partion_id));
