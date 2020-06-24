@@ -70,7 +70,7 @@ OBJS += hwpistepud.o
 OBJS += istepHelperFuncs.o
 OBJS += pbusLinkSvc.o
 
-#OBJS += $(if $(CONFIG_OPENPOWER_VOLTMSG),openpower_vddr.o,hbToHwsvVoltageMsg.o)
+OBJS += $(if $(CONFIG_OPENPOWER_VOLTMSG),openpower_vddr.o,hbToHwsvVoltageMsg.o)
 
 #include ${ROOTPATH}/procedure.rules.mk
 include ${ROOTPATH}/config.mk

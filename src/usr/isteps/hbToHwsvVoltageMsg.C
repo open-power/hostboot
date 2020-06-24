@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -483,7 +483,14 @@ errlHndl_t HBToHwsvVoltageMsg::sendMsg(VOLT_MSG_TYPE i_msgType) const
                          fapi::RC_INCORRECT_MSG_TYPE, i_msgType);
             break;
         }
-        createVddrData(i_msgType, l_request);
+
+        // Make a default voltage settings request
+        hwsvPowrMemVoltDomainRequest_t l_defaultReq;
+        l_defaultReq.voltageMillivolts = VOLTAGE_SETTING_ALERT_DEFAULT;
+        // We need to specify a valid domain even though it won't be used
+        // in this case.
+        l_defaultReq.domain = VOLTAGE_DOMAIN_MEM_VDD;
+        l_request.push_back(l_defaultReq);
 
         // Send the request data
         l_err = sendRequestData( l_request, i_msgType );
@@ -805,15 +812,8 @@ errlHndl_t platform_enable_vddr()
 {
     errlHndl_t l_err = nullptr;
 
-    TARGETING::Target* pSysTarget = nullptr;
-    TARGETING::targetService().getTopLevelTarget(pSysTarget);
-    assert(
-        (pSysTarget != nullptr),
-        "platform_enable_vddr: Code bug!  System target was NULL.");
-
-    // only enable vddr if system supports dynamic voltage and MBOX available
-    if((pSysTarget->getAttr< TARGETING::ATTR_SUPPORTS_DYNAMIC_MEM_VOLT >() == 1)
-        && (INITSERVICE::spBaseServicesEnabled()))
+    // only enable vddr on FSP systems
+    if(INITSERVICE::spBaseServicesEnabled())
     {
         HBToHwsvVoltageMsg l_hbVddr;
 
@@ -821,21 +821,18 @@ errlHndl_t platform_enable_vddr()
         if (l_err)
         {
             TRACFCOMP(g_trac_volt,
-                      "ERROR 0x%.8X: call_host_enable_vddr to sendMsg"
-                      " returns error",
+                      "ERROR 0x%.8X: call_host_enable_vddr to sendMsg returns error",
                       l_err->reasonCode());
         }
         else
         {
-            TRACFCOMP( g_trac_volt,
-                       "SUCCESS :  host_enable_vddr()" );
+            TRACFCOMP(g_trac_volt, "SUCCESS :  host_enable_vddr()");
         }
     }
     else // no FSP/mbox services available
     {
-        TRACFCOMP(g_trac_volt,"call_host_enable_vddr"
-            " no-op because mbox not available or system"
-            " does not support dynamic voltages");
+        TRACFCOMP(g_trac_volt,
+                  "call_host_enable_vddr no-op because mbox is not available");
     }
 
     return l_err;
@@ -912,6 +909,8 @@ errlHndl_t platform_adjust_vddr_post_dram_init()
 ////////////////////////////////////////////////////////////////////////////////
 // platform_set_nest_voltages
 ////////////////////////////////////////////////////////////////////////////////
+#if 0 // TODO: RTC 256665 Currently causes compile issues. Uncomment if this is
+      // needed in the future.
 errlHndl_t platform_set_nest_voltages()
 {
     TRACFCOMP(g_trac_volt, "platform_set_nest_voltages>" );
@@ -1016,4 +1015,4 @@ errlHndl_t platform_set_nest_voltages()
     TRACFCOMP(g_trac_volt, "<platform_set_nest_voltages" );
     return l_err;
 }
-
+#endif

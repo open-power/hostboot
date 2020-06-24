@@ -39,7 +39,6 @@
 #include <istepHelperFuncs.H>     // captureError
 #include <fapi2/plat_hwp_invoker.H>
 #include <p10_setup_evid.H>
-#include <hbToHwsvVoltageMsg.H>        // platform_set_nest_voltages
 
 namespace ISTEP_08
 {

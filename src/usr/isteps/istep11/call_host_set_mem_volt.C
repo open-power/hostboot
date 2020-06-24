@@ -51,6 +51,8 @@
 #include <chipids.H>                    // for EXPLORER ID
 #include <pmic_enable.H>
 
+#include <platform_vddr.H>              // platform_enable_vddr
+
 using namespace ISTEPS_TRACE;
 using namespace ISTEP_ERROR;
 using namespace ERRORLOG;
@@ -66,6 +68,18 @@ void* call_host_set_mem_volt (void *io_pArgs)
 
     errlHndl_t  l_errl = nullptr;
     IStepError l_StepError;
+
+    do {
+    // Send voltage config down to FSP. This is a no-op on non-FSP systems.
+    l_errl = platform_enable_vddr();
+    if(l_errl)
+    {
+        TRACFCOMP(g_trac_isteps_trace, ERR_MRK"call_host_set_mem_volt: could not send voltage config to FSP"
+                  TRACE_ERR_FMT,
+                  TRACE_ERR_ARGS(l_errl));
+        captureError(l_errl, l_StepError, ISTEP_COMP_ID);
+        break;
+    }
 
     // Create a vector of Target pointers
     TargetHandleList l_chipList;
@@ -101,9 +115,11 @@ void* call_host_set_mem_volt (void *io_pArgs)
                       TRACE_ERR_ARGS(l_errl));
 
             // Capture error and continue to next OCMB
-            captureError(l_errl, l_StepError, HWPF_COMP_ID, l_ocmb);
+            captureError(l_errl, l_StepError, ISTEP_COMP_ID, l_ocmb);
         }
     }
+
+    } while(0);
 
     TRACFCOMP(g_trac_isteps_trace, EXIT_MRK"call_host_set_mem_volt");
     return l_StepError.getErrorHandle();
