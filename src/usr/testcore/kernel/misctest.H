@@ -46,17 +46,6 @@ class MiscTest : public CxxTest::TestSuite
             const auto smfEnabled = SECUREBOOT::SMF::isSmfEnabled();
             uint64_t smfMsrBit = smfEnabled ? MSR_SMF_MASK : 0;
 
-            // TODO RTC 252693
-            // Remove this once slave core workaround path is fixed to set the MSR SMF bit to 0
-            // when SMF is disabled in istep 16.
-            //
-            // In SIMICS and QME not enabled, the SMF bit is currently
-            // always being set
-            if(Util::requiresSlaveCoreWorkaround())
-            {
-                smfMsrBit = MSR_SMF_MASK;
-            }
-
             const uint64_t msrActual = cpu_spr_value(CPU_SPR_MSR);
             if ((WAKEUP_MSR_VALUE | smfMsrBit) != msrActual)
             {

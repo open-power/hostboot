@@ -92,7 +92,7 @@
         <id>SMF_MEM_AMT_REQUESTED</id>
         <!-- The minimum (nonzero) amount allowed - 256MB;
              used to exercise the memory distribution logic -->
-        <default>0x10000000</default>
+        <default>0x0</default>
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
@@ -171,7 +171,7 @@
     </attribute>
     <attribute>
       <id>SMF_CONFIG</id>
-      <default>0x01</default>
+      <default>0x0</default>
     </attribute>
     <attribute>
         <id>ADC_CHANNEL_FUNC_IDS</id>
