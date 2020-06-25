@@ -51,7 +51,7 @@
 // -----------------------------------------------------------------------------
 
 // Following constants hold an approximate value.
-static const uint32_t PGPE_TIMEOUT_MS       = 500;
+static const uint32_t PGPE_TIMEOUT_MS       = 600;
 static const uint32_t PGPE_TIMEOUT_MCYCLES  = 20;
 static const uint32_t PGPE_POLLTIME_MS      = 20;
 static const uint32_t PGPE_POLLTIME_MCYCLES = 2;
@@ -115,11 +115,6 @@ fapi2::ReturnCode pgpe_start(
     .setBit<p10hcd::PGPE_SAFE_MODE_ERROR>()
     .setBit<p10hcd::PGPE_CEFFOVR_CONTROL_LOOP>();
     FAPI_TRY(putScom(i_target, TP_TPCHIP_OCC_OCI_OCB_OCCFLG2_WO_CLEAR, l_occ_flag2));
-
-    FAPI_INF("Set OCC Flag 2 Register bits before starting...");
-    l_occ_flag2.flush<0>()
-    .setBit<p10hcd::PGPE_SAFE_MODE_ACTIVE>();
-    FAPI_TRY(putScom(i_target, TP_TPCHIP_OCC_OCI_OCB_OCCFLG2_WO_OR, l_occ_flag2));
 
     FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_SYSTEM_PSTATES_MODE,
                             FAPI_SYSTEM,
