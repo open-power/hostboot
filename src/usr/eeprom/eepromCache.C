@@ -62,9 +62,7 @@
 #include <initservice/taskargs.H>
 
 #include <errl/errludtarget.H>
-#ifdef CONFIG_CONSOLE
 #include <console/consoleif.H>
-#endif
 
 extern trace_desc_t* g_trac_eeprom;
 
@@ -304,7 +302,13 @@ errlHndl_t updateEecacheContents(TARGETING::Target*          i_target,
         reinterpret_cast<uint8_t *>(l_eecacheSectionHeader)
         + i_recordHeader.completeRecord.internal_offset;
 
+    char* l_pathstring = nullptr;
+
     do {
+        l_pathstring = i_target->getAttr<TARGETING::ATTR_PHYS_PATH>().toString();
+        CONSOLE::displayf(NULL,"Detected new part : %.8X (%s)",
+                          TARGETING::get_huid(i_target),
+                          l_pathstring);
 
         if(i_eepromBuffer == nullptr)
         {
@@ -384,6 +388,7 @@ errlHndl_t updateEecacheContents(TARGETING::Target*          i_target,
         }
     } while(0);
 
+    free(l_pathstring);
     return l_errl;
 }
 
@@ -728,6 +733,12 @@ errlHndl_t checkForEecacheEntryUpdate(
         }
         else
         {
+            char* l_pathstring = i_target->getAttr<TARGETING::ATTR_PHYS_PATH>().toString();
+            CONSOLE::displayf(NULL,"Detected part removal : %.8X (%s)",
+                              TARGETING::get_huid(i_target),
+                              l_pathstring);
+            free(l_pathstring);
+
             // Clear out the contents of the cache for this eeprom if we have
             // detected that it was once valid--indicating it was present at one
             // time--and is now showing up as not present. We want to clear the
