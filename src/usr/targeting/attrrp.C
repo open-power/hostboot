@@ -57,8 +57,6 @@
 #include <common_ringId.H>
 #include <fapi2.H>
 #include <fapi2/plat_hwp_invoker.H>
-#include <p9_sbe_ext_defs.H>
-#include <p9_get_sbe_msg_register.H>
 #include <sbeio/sbeioif.H>
 
 using namespace INITSERVICE;

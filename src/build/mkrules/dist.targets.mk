@@ -191,15 +191,10 @@ COPY_RENAME_FILES = \
     hbplugins/$(notdir $(file)):$(file):errltool) \
     $(foreach file, $(call ROOTPATH_WILDCARD,src/usr/scom/plugins/*.*), \
     hbplugins/$(notdir $(file)):$(file):errltool) \
-    $(foreach file, $(call ROOTPATH_WILDCARD,src/import/chips/p9/common/include/*.H), \
     hbplugins/prdf/$(notdir $(file)):$(file):errltool) \
     hwas/common/hwasCallout.H:src/include/usr/hwas/common/hwasCallout.H:errltool \
     devicefw/driverif.H:src/include/usr/devicefw/driverif.H:errltool \
-    devicefw/userif.H:src/include/usr/devicefw/userif.H:errltool \
-    hbplugins/prdf/p9_pm_recovery_ffdc_defines.H:src/import/chips/p9/procedures/hwp/pm/p9_pm_recovery_ffdc_defines.H:errltool \
-    hbplugins/prdf/p9_hcd_memmap_base.H:src/import/chips/p9/procedures/hwp/lib/p9_hcd_memmap_base.H:errltool \
-    hbplugins/prdf/p9_hcd_header_defs.H:src/import/chips/p9/procedures/hwp/lib/p9_hcd_header_defs.H:errltool \
-    hbplugins/prdf/p9_ppe_defs.H:src/import/chips/p9/procedures/hwp/lib/p9_ppe_defs.H:errltool
+    devicefw/userif.H:src/include/usr/devicefw/userif.H:errltool 
 
 #
 # Symbolic links created in the target.
