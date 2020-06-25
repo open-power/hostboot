@@ -427,6 +427,15 @@ do
         TRACFCOMP(g_trac_mctp,
                   "_mctp_channel_init: Negotiated version is : %d",
                   iv_mctpVersion);
+
+        if(iv_hostlpc->lpc_hdr->negotiated_ver >= 2)
+        {
+            TRACFCOMP(g_trac_mctp,
+                  "_mctp_channel_init: Setting packet size to be %ld",
+                      iv_hostlpc->lpc_hdr->rx_size );
+            iv_hostlpc->binding.pkt_size = iv_hostlpc->lpc_hdr->rx_size;
+        }
+
     }
 
     //else if none of the conditions above are met, the DUMMY_COMMAND is a no op

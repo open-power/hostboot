@@ -61,11 +61,7 @@ const uint8_t KCS_INIT        = 0x00;
 const uint8_t KCS_TX_BEGIN    = 0x01;
 const uint8_t KCS_RX_COMPLETE = 0x02;
 const uint8_t KCS_DUMMY       = 0xFF;
-// layout of TX/RX areas
-const uint32_t  rx_offset = 0x100;
-const uint32_t  rx_size   = 0x100;
-const uint32_t  tx_offset = 0x200;
-const uint32_t  tx_size   = 0x100;
+
 
 enum mctp_binding_lpc_kcs_reg {
   MCTP_LPC_KCS_REG_DATA = 0,

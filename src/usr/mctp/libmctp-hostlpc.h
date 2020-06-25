@@ -36,12 +36,14 @@ extern "C" {
   container_of(b, struct mctp_binding_hostlpc, binding)
 
 #define HOST_VER_MIN 1
-#define HOST_VER_CUR 1
+#define HOST_VER_CUR 2
 // EID is the MCTP endpoint ID, which aids in routing MCTP packets
 // theorectically we could assign these dynamically but for now
 // we are saying that BMC is EID 8 and hostboot IPL time is HOST_EID 9
 #define BMC_EID 8
 #define HOST_EID 9
+
+#define HOST_DESIRED_MTU 8192
 
 
 struct mctp_binding_hostlpc {

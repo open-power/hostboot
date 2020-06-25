@@ -97,7 +97,7 @@ static int mctp_binding_hostlpc_tx(struct mctp_binding *b,
     uint32_t len;
 
     len = mctp_pktbuf_size(pkt);
-    if (len > tx_size - sizeof(len)) {
+    if (len > hostlpc->lpc_hdr->tx_size - sizeof(len)) {
         mctp_prwarn("invalid TX len 0x%x", len);
         return -1;
     }
@@ -107,11 +107,11 @@ static int mctp_binding_hostlpc_tx(struct mctp_binding *b,
     // first write the length and ensure its big-endian
     uint32_t tmp = htobe32(len);
     hostlpc->ops.lpc_write(hostlpc->ops_data, &tmp,
-                           tx_offset, sizeof(tmp));
+                           hostlpc->lpc_hdr->tx_offset, sizeof(tmp));
 
     // then write the buffer to the tx space for len bytes
     hostlpc->ops.lpc_write(hostlpc->ops_data, mctp_pktbuf_hdr(pkt),
-                           tx_offset + sizeof(len), len);
+                           hostlpc->lpc_hdr->tx_offset + sizeof(len), len);
 
     mctp_binding_set_tx_enabled(b, false);
 
@@ -132,11 +132,11 @@ void mctp_hostlpc_rx_start(struct mctp_binding_hostlpc *hostlpc)
 
     // first read the length in big endian
     hostlpc->ops.lpc_read(hostlpc->ops_data, &len,
-                          rx_offset, sizeof(len));
+                          hostlpc->lpc_hdr->rx_offset, sizeof(len));
     len = be32toh(len);
 
-    // We cannot read lengths that exceed out pkt size the rx window
-    if (len > rx_size - sizeof(len)) {
+    // We cannot read lengths that exceed out pkt size
+    if (len > hostlpc->lpc_hdr->rx_size - sizeof(len)) {
         mctp_prwarn("invalid RX len 0x%x", len);
         return;
     }
@@ -160,7 +160,7 @@ void mctp_hostlpc_rx_start(struct mctp_binding_hostlpc *hostlpc)
     // after we get size and allocate the buffer then read the remainig
     // contents of the rx window
     hostlpc->ops.lpc_read(hostlpc->ops_data, mctp_pktbuf_hdr(pkt),
-                          rx_offset + sizeof(len), len);
+                          hostlpc->lpc_hdr->rx_offset + sizeof(len), len);
 
     mctp_bus_rx(&hostlpc->binding, pkt);
 
@@ -192,8 +192,13 @@ static int mctp_hostlpc_init_hb(struct mctp_binding_hostlpc *hostlpc)
 
     if( (l_data & KCS_STATUS_BMC_READY) && rc == 0)
     {
-        struct mctp_lpcmap_hdr *hdr;
-        hdr = hostlpc->lpc_hdr;
+        struct mctp_lpcmap_hdr *hdr = hostlpc->lpc_hdr;
+
+        // check if mtu negotiation is supported
+        if(hdr->bmc_ver_cur >= 2)
+        {
+            hdr->rx_size = HOST_DESIRED_MTU;
+        }
         hdr->host_ver_min = htobe16(HOST_VER_MIN);
         hdr->host_ver_cur = htobe16(HOST_VER_CUR);
         mctp_hostlpc_kcs_send(hostlpc, KCS_INIT);
