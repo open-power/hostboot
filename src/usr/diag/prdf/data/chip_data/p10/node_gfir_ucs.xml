@@ -25,7 +25,7 @@
 <!-- IBM_PROLOG_END_TAG                                                     -->
 <attn_node model_ec="P10_10" name="GFIR_UCS" reg_type="SCOM">
     <register name="GFIR_REG_UCS">
-        <instance addr="0x50040003" reg_inst="0"/>
+        <instance addr="0x570F002A" reg_inst="0"/>
     </register>
     <rule attn_type="UCS" node_inst="0">
         <expr type="reg" value1="GFIR_REG_UCS"/>

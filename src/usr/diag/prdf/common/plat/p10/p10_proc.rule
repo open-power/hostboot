@@ -50,7 +50,7 @@ chip p10_proc
     register GLOBAL_CS_FIR
     {
         name        "Global Checkstop Attention FIR";
-        scomaddr    0x500F001C;
+        scomaddr    0x570F001C;
         capture     group default;
     };
 
@@ -61,7 +61,7 @@ chip p10_proc
     register GLOBAL_RE_FIR
     {
         name        "Global Recoverable Attention FIR";
-        scomaddr    0x500F001B;
+        scomaddr    0x570F001B;
         capture     group default;
     };
 
@@ -72,7 +72,7 @@ chip p10_proc
     register GLOBAL_UCS_FIR
     {
         name        "Global Unit Checkstop Attention FIR";
-        scomaddr    0x50040003;
+        scomaddr    0x570F002A;
         capture     group default;
     };
 
@@ -83,7 +83,7 @@ chip p10_proc
     register GLOBAL_HA_FIR
     {
         name        "Global Host Attention FIR";
-        scomaddr    0x50040004;
+        scomaddr    0x570F002B;
         capture     group default;
     };
 
