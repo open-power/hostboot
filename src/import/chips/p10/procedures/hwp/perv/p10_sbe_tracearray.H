@@ -166,8 +166,7 @@ extern "C" {
 
     static inline uint16_t max_rows(const p10_tracearray_bus_id i_trace_bus)
     {
-        return ((i_trace_bus == PROC_TB_CORE0 || i_trace_bus == PROC_TB_CORE1) ?
-                P10_TRACEARRAY_NUM_CORE_ROWS : P10_TRACEARRAY_NUM_ROWS);
+        return P10_TRACEARRAY_NUM_ROWS;
     }
 
 } // extern "C"

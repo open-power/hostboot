@@ -58,8 +58,7 @@
 //                  Target Types               Target Types
 //-----------------------------------------------------------------------------------
 //                  | PROC_CHIP ---------------> PROC_CHIP  |
-//                  | CORE --------------------> CORE       |
-//                  |                       \--> EQ (L3,etc)|
+//                  | CORE --------------------> EQ (L3,etc)|
 //                  | EQ ----------------------> EQ         |
 //                  | --------------------------------------|
 //                  | IOHS --------------------> PERV       |
@@ -203,8 +202,6 @@ static const ta_def ta_defs[] =
     /* CORE */
     { { PROC_TB_L20 },                                            0x20, 0x07E2, 5 },
     { { PROC_TB_L21 },                                            0x20, 0x07E4, 5 },
-    { { PROC_TB_CORE0 },                                          0x20, 0x0832, 5 },
-    { { PROC_TB_CORE1 },                                          0x20, 0x0834, 5 },
     /* EQ */
     { { PROC_TB_L3_0, PROC_TB_NCU_0, PROC_TB_CLKADJ },            0x20, 0x03F0, 5 },
     { { PROC_TB_L3_1, PROC_TB_NCU_1 },                            0x20, 0x03F1, 5 },

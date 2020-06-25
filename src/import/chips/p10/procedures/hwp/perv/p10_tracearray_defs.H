@@ -41,15 +41,11 @@
 
 // maximum trace array entries supported by P10 chip design
 static const uint8_t P10_TRACEARRAY_NUM_ROWS = 128;
-static const uint16_t P10_TRACEARRAY_NUM_CORE_ROWS = 256;
 // bits to store per trace array entry
 static const uint8_t P10_TRACEARRAY_BITS_PER_ROW = 128;
 // maximum trace array size in bytes
 static const uint16_t PROC_TRACEARRAY_MAX_SIZE =
     (P10_TRACEARRAY_NUM_ROWS* P10_TRACEARRAY_BITS_PER_ROW) / 8;
-
-static const uint32_t PROC_TRACEARRAY_CORE_MAX_SIZE =
-    (P10_TRACEARRAY_NUM_CORE_ROWS* P10_TRACEARRAY_BITS_PER_ROW) / 8;
 
 //------------------------------------------------------------------------------
 // Structure definitions
@@ -134,8 +130,6 @@ enum p10_tracearray_bus_id
     /* Core regions - TARGET_TYPE_CORE */
     PROC_TB_L20,
     PROC_TB_L21,
-    PROC_TB_CORE0,
-    PROC_TB_CORE1,
 
     _PROC_TB_LAST_CORE_TARGET  = 0xE0,
     /* EQ chiplets passed by core - TARGET_TYPE_CORE */
