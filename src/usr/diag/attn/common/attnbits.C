@@ -152,11 +152,11 @@ bool getAddress(
 {
     static const RegAssoc first[] = {
 
-        {CHECK_STOP,  0x500f001c},
-        {RECOVERABLE, 0x500f001b},
-        {SPECIAL,     0x500f001a},
-        {UNIT_CS,     0x50040003},
-        {HOST_ATTN,   0x50040004},
+        {CHECK_STOP,  0x570F001C},
+        {RECOVERABLE, 0x570F001B},
+        {SPECIAL,     0x570F001A},
+        {UNIT_CS,     0x570F002A},
+        {HOST_ATTN,   0x570F002B},
     };
 
     static const RegAssoc * last = first +

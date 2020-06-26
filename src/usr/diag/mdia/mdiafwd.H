@@ -98,10 +98,10 @@ enum
     // proc regs
     IPOLL_MASK              = 0x000F0033,
     IPOLL_STATUS            = 0x000F0034,
-    GLOBAL_CS_FIR           = 0x500F001C,
-    GLOBAL_RE_FIR           = 0x500F001B,
-    GLOBAL_UCS_FIR          = 0x50040018,
-    GLOBAL_HA_FIR           = 0x50040009,
+    GLOBAL_CS_FIR           = 0x570F001C,
+    GLOBAL_RE_FIR           = 0x570F001B,
+    GLOBAL_UCS_FIR          = 0x570F002A,
+    GLOBAL_HA_FIR           = 0x570F002B,
 
     // mc chiplet registers
     MC0_CHIPLET_HA_FIR      = 0x07040009,
