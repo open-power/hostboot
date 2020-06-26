@@ -222,6 +222,76 @@ static const uint32_t LOCAL_XSTOP_IN15 = 15;
 //<< [LOCAL_XSTOP]
 // pauc/reg00003.H
 
+//>> [PB_FM0123_ERR]
+static const uint64_t PB_FM0123_ERR = 0x10011827ull;
+
+static const uint32_t PB_FM0123_ERR_0_CONTROL_ERROR = 0;
+static const uint32_t PB_FM0123_ERR_0_ADDR_PERR = 1;
+static const uint32_t PB_FM0123_ERR_0_CC0_CREDITERR = 2;
+static const uint32_t PB_FM0123_ERR_0_CC1_CREDITERR = 3;
+static const uint32_t PB_FM0123_ERR_0_CC2_CREDITERR = 4;
+static const uint32_t PB_FM0123_ERR_0_CC3_CREDITERR = 5;
+static const uint32_t PB_FM0123_ERR_0_DAT_HI_PERR = 6;
+static const uint32_t PB_FM0123_ERR_0_DAT_LO_PERR = 7;
+static const uint32_t PB_FM0123_ERR_0_FRAME_CREDITERR = 8;
+static const uint32_t PB_FM0123_ERR_0_INTERNAL_ERR = 9;
+static const uint32_t PB_FM0123_ERR_0_PRSP_PTYERR = 10;
+static const uint32_t PB_FM0123_ERR_0_TTAG_PERR = 11;
+static const uint32_t PB_FM0123_ERR_0_VC0_CREDITERR = 12;
+static const uint32_t PB_FM0123_ERR_0_VC1_CREDITERR = 13;
+static const uint32_t PB_FM0123_ERR_0_RTAG_PTYERR = 14;
+static const uint32_t PB_FM0123_ERR_0_RTAG_MISC_PTY = 15;
+static const uint32_t PB_FM0123_ERR_1_CONTROL_ERROR = 16;
+static const uint32_t PB_FM0123_ERR_1_ADDR_PERR = 17;
+static const uint32_t PB_FM0123_ERR_1_CC0_CREDITERR = 18;
+static const uint32_t PB_FM0123_ERR_1_CC1_CREDITERR = 19;
+static const uint32_t PB_FM0123_ERR_1_CC2_CREDITERR = 20;
+static const uint32_t PB_FM0123_ERR_1_CC3_CREDITERR = 21;
+static const uint32_t PB_FM0123_ERR_1_DAT_HI_PERR = 22;
+static const uint32_t PB_FM0123_ERR_1_DAT_LO_PERR = 23;
+static const uint32_t PB_FM0123_ERR_1_FRAME_CREDITERR = 24;
+static const uint32_t PB_FM0123_ERR_1_INTERNAL_ERR = 25;
+static const uint32_t PB_FM0123_ERR_1_PRSP_PTYERR = 26;
+static const uint32_t PB_FM0123_ERR_1_TTAG_PERR = 27;
+static const uint32_t PB_FM0123_ERR_1_VC0_CREDITERR = 28;
+static const uint32_t PB_FM0123_ERR_1_VC1_CREDITERR = 29;
+static const uint32_t PB_FM0123_ERR_1_RTAG_PTYERR = 30;
+static const uint32_t PB_FM0123_ERR_1_RTAG_MISC_PTY = 31;
+static const uint32_t PB_FM0123_ERR_2_CONTROL_ERROR = 32;
+static const uint32_t PB_FM0123_ERR_2_ADDR_PERR = 33;
+static const uint32_t PB_FM0123_ERR_2_CC0_CREDITERR = 34;
+static const uint32_t PB_FM0123_ERR_2_CC1_CREDITERR = 35;
+static const uint32_t PB_FM0123_ERR_2_CC2_CREDITERR = 36;
+static const uint32_t PB_FM0123_ERR_2_CC3_CREDITERR = 37;
+static const uint32_t PB_FM0123_ERR_2_DAT_HI_PERR = 38;
+static const uint32_t PB_FM0123_ERR_2_DAT_LO_PERR = 39;
+static const uint32_t PB_FM0123_ERR_2_FRAME_CREDITERR = 40;
+static const uint32_t PB_FM0123_ERR_2_INTERNAL_ERR = 41;
+static const uint32_t PB_FM0123_ERR_2_PRSP_PTYERR = 42;
+static const uint32_t PB_FM0123_ERR_2_TTAG_PERR = 43;
+static const uint32_t PB_FM0123_ERR_2_VC0_CREDITERR = 44;
+static const uint32_t PB_FM0123_ERR_2_VC1_CREDITERR = 45;
+static const uint32_t PB_FM0123_ERR_2_RTAG_PTYERR = 46;
+static const uint32_t PB_FM0123_ERR_2_RTAG_MISC_PTY = 47;
+static const uint32_t PB_FM0123_ERR_3_CONTROL_ERROR = 48;
+static const uint32_t PB_FM0123_ERR_3_ADDR_PERR = 49;
+static const uint32_t PB_FM0123_ERR_3_CC0_CREDITERR = 50;
+static const uint32_t PB_FM0123_ERR_3_CC1_CREDITERR = 51;
+static const uint32_t PB_FM0123_ERR_3_CC2_CREDITERR = 52;
+static const uint32_t PB_FM0123_ERR_3_CC3_CREDITERR = 53;
+static const uint32_t PB_FM0123_ERR_3_DAT_HI_PERR = 54;
+static const uint32_t PB_FM0123_ERR_3_DAT_LO_PERR = 55;
+static const uint32_t PB_FM0123_ERR_3_FRAME_CREDITERR = 56;
+static const uint32_t PB_FM0123_ERR_3_INTERNAL_ERR = 57;
+static const uint32_t PB_FM0123_ERR_3_PRSP_PTYERR = 58;
+static const uint32_t PB_FM0123_ERR_3_TTAG_PERR = 59;
+static const uint32_t PB_FM0123_ERR_3_VC0_CREDITERR = 60;
+static const uint32_t PB_FM0123_ERR_3_VC1_CREDITERR = 61;
+static const uint32_t PB_FM0123_ERR_3_RTAG_PTYERR = 62;
+static const uint32_t PB_FM0123_ERR_3_RTAG_MISC_PTY = 63;
+//<< [PB_FM0123_ERR]
+// pauc/reg00003.H
+
 //>>THE END<<
 
 #ifndef __PPE_HCODE__

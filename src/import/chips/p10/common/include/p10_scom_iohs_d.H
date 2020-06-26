@@ -39,6 +39,22 @@ namespace iohs
 #endif
 
 
+//>> [DLP_LINK1_QUALITY]
+static const uint64_t DLP_LINK1_QUALITY = 0x18011027ull;
+
+static const uint32_t DLP_LINK1_QUALITY_TX_BW = 1;
+static const uint32_t DLP_LINK1_QUALITY_TX_BW_LEN = 11;
+static const uint32_t DLP_LINK1_QUALITY_RX_BW = 13;
+static const uint32_t DLP_LINK1_QUALITY_RX_BW_LEN = 11;
+static const uint32_t DLP_LINK1_QUALITY_ERROR_RATE = 25;
+static const uint32_t DLP_LINK1_QUALITY_ERROR_RATE_LEN = 23;
+static const uint32_t DLP_LINK1_QUALITY_LINK_CAP_SLECC_SYN3 = 48;
+static const uint32_t DLP_LINK1_QUALITY_LINK_CAP_SLECC_SYN3_LEN = 8;
+static const uint32_t DLP_LINK1_QUALITY_SPARE_COUNTER_2 = 57;
+static const uint32_t DLP_LINK1_QUALITY_SPARE_COUNTER_2_LEN = 7;
+//<< [DLP_LINK1_QUALITY]
+// iohs/reg00056.H
+
 //>>THE END<<
 
 #ifndef __PPE_HCODE__

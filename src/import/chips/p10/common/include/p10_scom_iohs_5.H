@@ -73,6 +73,47 @@ static const uint32_t NET_CTRL1_PCB_ACCESS_LEN = 8;
 //<< [NET_CTRL1]
 // iohs/reg00023.H
 
+//>> [DLP_LINK0_INFO]
+static const uint64_t DLP_LINK0_INFO = 0x18011014ull;
+
+static const uint32_t DLP_LINK0_INFO_MAX_TIMEOUT = 0;
+static const uint32_t DLP_LINK0_INFO_MAX_TIMEOUT_LEN = 16;
+static const uint32_t DLP_LINK0_INFO_FRAME_CAP_VALID = 16;
+static const uint32_t DLP_LINK0_INFO_FRAME_CAP_INST = 17;
+static const uint32_t DLP_LINK0_INFO_FRAME_CAP_ADDR = 18;
+static const uint32_t DLP_LINK0_INFO_FRAME_CAP_ADDR_LEN = 6;
+static const uint32_t DLP_LINK0_INFO_FRAME_CAP_SYN = 24;
+static const uint32_t DLP_LINK0_INFO_FRAME_CAP_SYN_LEN = 8;
+static const uint32_t DLP_LINK0_INFO_REPLAY_CAP_VALID = 32;
+static const uint32_t DLP_LINK0_INFO_REPLAY_CAP_INST = 33;
+static const uint32_t DLP_LINK0_INFO_REPLAY_CAP_INST_LEN = 2;
+static const uint32_t DLP_LINK0_INFO_REPLAY_CAP_ADDR = 35;
+static const uint32_t DLP_LINK0_INFO_REPLAY_CAP_ADDR_LEN = 9;
+static const uint32_t DLP_LINK0_INFO_REPLAY_CAP_SYN = 44;
+static const uint32_t DLP_LINK0_INFO_REPLAY_CAP_SYN_LEN = 8;
+static const uint32_t DLP_LINK0_INFO_ACK_FIFO_CAP_VALID = 52;
+static const uint32_t DLP_LINK0_INFO_ACK_FIFO_CAP_ADDR = 55;
+static const uint32_t DLP_LINK0_INFO_ACK_FIFO_CAP_ADDR_LEN = 9;
+//<< [DLP_LINK0_INFO]
+// iohs/reg00020.H
+
+//>> [DLP_LINK1_SYN_CAPTURE]
+static const uint64_t DLP_LINK1_SYN_CAPTURE = 0x18011023ull;
+
+static const uint32_t DLP_LINK1_SYN_CAPTURE_CRC_SYN = 0;
+static const uint32_t DLP_LINK1_SYN_CAPTURE_CRC_SYN_LEN = 36;
+static const uint32_t DLP_LINK1_SYN_CAPTURE_SLECC_SYN0 = 36;
+static const uint32_t DLP_LINK1_SYN_CAPTURE_SLECC_SYN0_LEN = 8;
+static const uint32_t DLP_LINK1_SYN_CAPTURE_SLECC_SYN1 = 44;
+static const uint32_t DLP_LINK1_SYN_CAPTURE_SLECC_SYN1_LEN = 8;
+static const uint32_t DLP_LINK1_SYN_CAPTURE_SLECC_SYN2 = 52;
+static const uint32_t DLP_LINK1_SYN_CAPTURE_SLECC_SYN2_LEN = 8;
+static const uint32_t DLP_LINK1_SYN_CAPTURE_RESERVED = 60;
+static const uint32_t DLP_LINK1_SYN_CAPTURE_RESERVED_LEN = 3;
+static const uint32_t DLP_LINK1_SYN_CAPTURE_VALID = 63;
+//<< [DLP_LINK1_SYN_CAPTURE]
+// iohs/reg00020.H
+
 //>>THE END<<
 
 #ifndef __PPE_HCODE__

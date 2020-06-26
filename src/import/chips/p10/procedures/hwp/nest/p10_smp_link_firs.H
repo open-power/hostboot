@@ -48,11 +48,18 @@
 //------------------------------------------------------------------------------
 // Constant definitions
 //------------------------------------------------------------------------------
+
+// SMP FIR Action Types
+//   INACTIVE:  Mask FIR bits associated with the link
+//   RUNTIME:   Unmask FIR bits associated with the link
+//   CLEAR_ALL: Reset all FIR values to zero (including link trained bits)
+//   CLEAR_ERR: Reset FIRs associated with errors (preserves link trained bits)
 enum action_t
 {
     INACTIVE  = 0,
     RUNTIME   = 1,
-    CLEARFIRS = 2,
+    CLEAR_ALL = 2,
+    CLEAR_ERR = 3,
 };
 
 enum sublink_t
@@ -85,8 +92,8 @@ extern "C"
 /// @brief Setup the FIR mask and action registers for a given SMP link
 ///
 /// @param[in] i_iohs_target   Reference to IOHS target
-/// @param[in] i_sublink       Sub-link to apply settings to (both, even, odd)
-/// @param[in] i_action        Operational state to configure the FIRs for (inactive, runtime, clearfirs)
+/// @param[in] i_sublink       Sub-link to apply settings to
+/// @param[in] i_action        Operational state to configure the FIRs for
 ///
 /// @return FAPI_RC_SUCCESS if the setup completes successfully, else error code.
 ///
