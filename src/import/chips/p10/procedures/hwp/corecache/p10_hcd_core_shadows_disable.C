@@ -204,9 +204,22 @@ p10_hcd_core_shadows_disable(
         FAPI_TRY( HCD_GETMMIO_C( l_mc_or, MMIO_LOWADDR(QME_TFCSR), l_mmioData ) );
 
         MMIO_EXTRACT(MMIO_LOWBIT(34), 3, l_tfcsr_errors);
+
+        if( l_tfcsr_errors != 0 )
+        {
+            FAPI_DBG("Clear INCOMING/RUNTIME/STATE_ERR[%x] via PCR_TFCSR[34-36]", l_tfcsr_errors);
+            FAPI_TRY( HCD_PUTMMIO_C( i_target, MMIO_LOWADDR(QME_TFCSR_WO_CLEAR), MMIO_LOAD32L( BITS64SH(34, 3) ) ) );
+
+            FAPI_DBG("Assert TFAC_RESET via PCR_TFCSR[1]");
+            FAPI_TRY( HCD_PUTMMIO_C( i_target, QME_TFCSR_WO_OR, MMIO_1BIT(1) ) );
+
+            FAPI_DBG("Reset the core timefac to INACTIVE via PC.COMMON.TFX[1]");
+            FAPI_TRY( HCD_PUTSCOM_C( i_target, EC_PC_TFX_SM, BIT64(1) ) );
+        }
+
         FAPI_ASSERT((l_tfcsr_errors == 0),
                     fapi2::SHADOW_DIS_TFCSR_ERROR_CHECK_FAILED()
-                    .set_QME_TFCSR(l_mmioData)
+                    .set_QME_TFCSR(l_tfcsr_errors)
                     .set_CORE_TARGET(i_target),
                     "ERROR: Shadow Disable TFCSR Error Check Failed");
 

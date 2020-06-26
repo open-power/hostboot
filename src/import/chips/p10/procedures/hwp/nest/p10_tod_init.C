@@ -39,6 +39,7 @@
 #include <p10_tod_init.H>
 #include <p10_scom_perv.H>
 #include <p10_scom_eq.H>
+#include <p10_scom_c.H>
 #include <p10_pm_hcd_flags.h>
 #include <multicast_group_defs.H>
 #include <cstdint>
@@ -50,6 +51,7 @@
 using namespace scomt;
 using namespace scomt::perv;
 using namespace scomt::eq;
+using namespace scomt::c;
 
 //------------------------------------------------------------------------------
 // Constant definitions
@@ -643,8 +645,19 @@ fapi2::ReturnCode qme_tod_notify(
         auto l_eq_mc  =
             l_target.getMulticast<fapi2::TARGET_TYPE_EQ, fapi2::MULTICAST_OR >(fapi2::MCGROUP_GOOD_EQ);
 
+        FAPI_DBG("Inform QME that TOD is ready for TimeFac Shadowing");
         l_data64.flush<0>().setBit<p10hcd::QME_FLAGS_TOD_SETUP_COMPLETE>();
         FAPI_TRY( putScom( l_eq_mc, QME_FLAGS_WO_OR, l_data64 ) );
+
+        // do scom write to PC to put their state machine in standby so they will accept the TFAC data coming in.
+        FAPI_DBG("Reset the core timefac to ACTIVE via PC.COMMON.TFX[0-1]=0b01");
+
+        for (const auto& l_core_target :
+             l_target.getChildren<fapi2::TARGET_TYPE_CORE>(fapi2::TARGET_STATE_FUNCTIONAL) )
+        {
+            l_data64.flush<0>().setBit<1>();
+            FAPI_TRY( putScom( l_core_target, EC_PC_TFX_SM, l_data64 ) );
+        }
     }
 
     // recursively configure downstream nodes
