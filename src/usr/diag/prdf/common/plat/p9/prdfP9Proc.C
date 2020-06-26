@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -576,6 +576,52 @@ int32_t handleIntCqFirPcRecovError( ExtensibleChip * i_chip,
 PRDF_PLUGIN_DEFINE_NS( nimbus_proc,  Proc, handleIntCqFirPcRecovError );
 PRDF_PLUGIN_DEFINE_NS( cumulus_proc, Proc, handleIntCqFirPcRecovError );
 PRDF_PLUGIN_DEFINE_NS( axone_proc,   Proc, handleIntCqFirPcRecovError );
+
+//------------------------------------------------------------------------------
+
+// We never got support for NPU target on Axone so we are ignoring NPU
+// attentions by masking the FIRs at the chiplet level.
+int32_t axoneNpuWorkaround(ExtensibleChip * i_chip,
+                           STEP_CODE_DATA_STRUCT & io_sc)
+{
+    if (CHECK_STOP != io_sc.service_data->getPrimaryAttnType())
+    {
+        // NOTE: Return code from reads/writes will be ignored. We'll make our
+        //       best attempt to mask off everything so we don't get stuck in an
+        //       infinite loop.
+
+        SCAN_COMM_REGISTER_CLASS * mask;
+
+        // N1_CHIPLET_FIR[11:13]
+        mask = i_chip->getRegister("N1_CHIPLET_FIR_MASK");
+        mask->Read();
+        mask->SetBitFieldJustified(11, 3, 0x7);
+        mask->Write();
+
+        // N1_CHIPLET_UCS_FIR[6:8]
+        mask = i_chip->getRegister("N1_CHIPLET_UCS_FIR_MASK");
+        mask->Read();
+        mask->SetBitFieldJustified(6, 3, 0x7);
+        mask->Write();
+
+        // N3_CHIPLET_FIR[10:11,16,23:25]
+        mask = i_chip->getRegister("N3_CHIPLET_FIR_MASK");
+        mask->Read();
+        mask->SetBitFieldJustified(10, 2, 0x3);
+        mask->SetBitFieldJustified(16, 1, 0x1);
+        mask->SetBitFieldJustified(23, 3, 0x7);
+        mask->Write();
+
+        // N3_CHIPLET_UCS_FIR[3:8]
+        mask = i_chip->getRegister("N3_CHIPLET_UCS_FIR_MASK");
+        mask->Read();
+        mask->SetBitFieldJustified(3, 6, 0x3f);
+        mask->Write();
+    }
+
+    return SUCCESS;
+}
+PRDF_PLUGIN_DEFINE_NS(axone_proc, Proc, axoneNpuWorkaround);
 
 //------------------------------------------------------------------------------
 

@@ -29,9 +29,14 @@
 
 # NPU targets do not exist in the Swift MRWs. So we will forgo analysis to any
 # FIRs on an NPU target.
-actionclass analyzeConnectedNPU0    { threshold_and_mask; };
-actionclass analyzeConnectedNPU1    { threshold_and_mask; };
-actionclass analyzeConnectedNPU2    { threshold_and_mask; };
+actionclass axoneNpuWorkaround
+{
+    callout2ndLvlMed;
+    funccall("axoneNpuWorkaround");
+};
+actionclass analyzeConnectedNPU0    { axoneNpuWorkaround; };
+actionclass analyzeConnectedNPU1    { axoneNpuWorkaround; };
+actionclass analyzeConnectedNPU2    { axoneNpuWorkaround; };
 
 actionclass analyzeConnectedOBUS1   { analyze(connected(TYPE_OBUS,    1)); };
 actionclass analyzeConnectedOBUS2   { analyze(connected(TYPE_OBUS,    2)); };
