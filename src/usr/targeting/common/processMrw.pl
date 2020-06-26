@@ -4012,9 +4012,8 @@ sub processI2cSpeeds
                  setDimmTempAttributes($targetObj, $parent_target, $i2c);
             }
 
-            my $port=oct($targetObj->getAttribute($i2c->{SOURCE},"I2C_PORT"));
-            my $engine=oct($targetObj->getAttribute(
-                           $i2c->{SOURCE},"I2C_ENGINE"));
+            my $port=$targetObj->getAttribute($i2c->{SOURCE},"I2C_PORT");
+            my $engine=$targetObj->getAttribute($i2c->{SOURCE},"I2C_ENGINE");
             my $bus_speed=$targetObj->getBusAttribute(
                   $i2c->{SOURCE},$i2c->{BUS_NUM},"I2C_SPEED");
 
