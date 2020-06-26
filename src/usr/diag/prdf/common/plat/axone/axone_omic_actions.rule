@@ -30,36 +30,42 @@
 actionclass dl0_omi
 {
     capture(dl0_ffdc);
+    funccall("CollectOmiOcmbFfdc_0");
     callout(connected(TYPE_OMI,0), MRU_MED);
 };
 
 actionclass dl1_omi
 {
     capture(dl1_ffdc);
+    funccall("CollectOmiOcmbFfdc_1");
     callout(connected(TYPE_OMI,1), MRU_MED);
 };
 
 actionclass dl2_omi
 {
     capture(dl2_ffdc);
+    funccall("CollectOmiOcmbFfdc_2");
     callout(connected(TYPE_OMI,2), MRU_MED);
 };
 
 actionclass dl0_omi_bus
 {
     capture(dl0_ffdc);
+    funccall("CollectOmiOcmbFfdc_0");
     funccall("omiParentCalloutBusInterfacePlugin_0");
 };
 
 actionclass dl1_omi_bus
 {
     capture(dl1_ffdc);
+    funccall("CollectOmiOcmbFfdc_1");
     funccall("omiParentCalloutBusInterfacePlugin_1");
 };
 
 actionclass dl2_omi_bus
 {
     capture(dl2_ffdc);
+    funccall("CollectOmiOcmbFfdc_2");
     funccall("omiParentCalloutBusInterfacePlugin_2");
 };
 
@@ -67,6 +73,7 @@ actionclass dl2_omi_bus
 actionclass dl0_fatal_error
 {
     capture(dl0_ffdc);
+    funccall("CollectOmiOcmbFfdc_0");
     try( funccall("DlFatalError_0"), dl0_omi_bus );
     threshold1;
 };
@@ -75,6 +82,7 @@ actionclass dl0_fatal_error
 actionclass dl1_fatal_error
 {
     capture(dl1_ffdc);
+    funccall("CollectOmiOcmbFfdc_1");
     try( funccall("DlFatalError_1"), dl1_omi_bus );
     threshold1;
 };
@@ -83,6 +91,7 @@ actionclass dl1_fatal_error
 actionclass dl2_fatal_error
 {
     capture(dl2_ffdc);
+    funccall("CollectOmiOcmbFfdc_2");
     try( funccall("DlFatalError_2"), dl2_omi_bus );
     threshold1;
 };

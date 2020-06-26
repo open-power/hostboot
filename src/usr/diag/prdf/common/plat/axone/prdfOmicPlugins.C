@@ -25,8 +25,11 @@
 
 // Framework includes
 #include <iipServiceDataCollector.h>
+#include <iipSystem.h>
 #include <prdfExtensibleChip.H>
+#include <prdfGlobal_common.H>
 #include <prdfPluginMap.H>
+#include <UtilHash.H>
 
 // Platform includes
 #include <prdfMemUtils.H>
@@ -169,6 +172,68 @@ PRDF_PLUGIN_DEFINE( axone_omic, DlFatalError_##POS );
 DL_FATAL_ERROR_PLUGIN( 0 );
 DL_FATAL_ERROR_PLUGIN( 1 );
 DL_FATAL_ERROR_PLUGIN( 2 );
+
+/**
+ * @brief  Plugin function to collect OMI fail related FFDC from the appropriate
+ *         OCMB.
+ * @param  i_chip An OMIC chip.
+ * @param  io_sc  The step code data struct.
+ * @param  i_dl   The DL relative to the OMIC.
+ * @return SUCCESS.
+ */
+int32_t CollectOmiOcmbFfdc( ExtensibleChip * i_chip,
+                            STEP_CODE_DATA_STRUCT & io_sc, uint8_t i_dl )
+{
+    #define PRDF_FUNC "[axone_omic::CollectOmiOcmbFfdc] "
+
+    do
+    {
+        TargetHandle_t omiTrgt = getConnectedChild( i_chip->getTrgt(), TYPE_OMI,
+                                                    i_dl );
+        if ( nullptr == omiTrgt )
+        {
+            PRDF_ERR( PRDF_FUNC "Failed to get connected OMI from OMIC trgt "
+                      "huid=0x%08x.", i_chip->getHuid() );
+            break;
+        }
+        TargetHandle_t ocmbTrgt = getConnectedChild(omiTrgt, TYPE_OCMB_CHIP, 0);
+        if ( nullptr == ocmbTrgt )
+        {
+            PRDF_ERR( PRDF_FUNC "Failed to get connected OCMB from OMI trgt "
+                      "huid=0x%08x.", getHuid(omiTrgt) );
+            break;
+        }
+
+        ExtensibleChip * ocmbChip =
+            (ExtensibleChip *)systemPtr->GetChip(ocmbTrgt);
+        if ( nullptr == ocmbChip )
+        {
+            PRDF_ERR( PRDF_FUNC "Failed to get OCMB ExtensibleChip for trgt "
+                      "huid=0x%08x", getHuid(ocmbTrgt) );
+            break;
+        }
+
+        ocmbChip->CaptureErrorData( io_sc.service_data->GetCaptureData(),
+                                    Util::hashString("omi_ocmb_ffdc") );
+
+    }while(0);
+
+    return SUCCESS;
+
+    #undef PRDF_FUNC
+}
+
+#define OMI_OCMB_FFDC_PLUGIN( POS ) \
+int32_t CollectOmiOcmbFfdc_##POS( ExtensibleChip * i_chip, \
+                                  STEP_CODE_DATA_STRUCT & io_sc ) \
+{ \
+    return CollectOmiOcmbFfdc( i_chip, io_sc, POS ); \
+} \
+PRDF_PLUGIN_DEFINE( axone_omic, CollectOmiOcmbFfdc_##POS );
+
+OMI_OCMB_FFDC_PLUGIN( 0 );
+OMI_OCMB_FFDC_PLUGIN( 1 );
+OMI_OCMB_FFDC_PLUGIN( 2 );
 
 } // end namespace axone_omic
 

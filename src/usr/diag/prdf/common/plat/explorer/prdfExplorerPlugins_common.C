@@ -25,14 +25,19 @@
 
 // Framework includes
 #include <iipServiceDataCollector.h>
+#include <iipSystem.h>
 #include <prdfExtensibleChip.H>
+#include <prdfGlobal_common.H>
 #include <prdfPluginMap.H>
+#include <UtilHash.H>
 
 // Platform includes
 #include <prdfMemDbUtils.H>
 #include <prdfMemEccAnalysis.H>
 #include <prdfMemUtils.H>
 #include <prdfPlatServices.H>
+
+#include <stdio.h>
 
 using namespace TARGETING;
 
@@ -101,6 +106,44 @@ int32_t PostAnalysis( ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc )
     #undef PRDF_FUNC
 }
 PRDF_PLUGIN_DEFINE( explorer_ocmb, PostAnalysis );
+
+/**
+ * @brief  Plugin that collects OMI fail related FFDC registers from the OMIC.
+ * @param  i_chip An OCMB chip.
+ * @param  io_sc  The step code data struct.
+ * @return SUCCESS
+ */
+int32_t CollectOmiFfdc( ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc )
+{
+    #define PRDF_FUNC "[explorer_ocmb::CollectOmiFfdc] "
+
+    // Get the OMI and OMIC targets
+    TargetHandle_t omiTrgt = getConnectedParent( i_chip->getTrgt(), TYPE_OMI );
+    TargetHandle_t omicTrgt = getConnectedParent( omiTrgt, TYPE_OMIC );
+
+    // Get the FFDC for the appropriate DL
+    uint8_t omiPosRelOmic = omiTrgt->getAttr<ATTR_OMI_DL_GROUP_POS>(); // 0:2
+    char ffdcName[64];
+    sprintf( ffdcName, "dl%x_ffdc", omiPosRelOmic );
+
+    // Collect the capture data
+    ExtensibleChip * omicChip = (ExtensibleChip *)systemPtr->GetChip(omicTrgt);
+    if ( nullptr != omicChip )
+    {
+        omicChip->CaptureErrorData( io_sc.service_data->GetCaptureData(),
+                                    Util::hashString(ffdcName) );
+    }
+    else
+    {
+        PRDF_ERR( PRDF_FUNC "Failed to get OMIC ExtensibleChip for trgt "
+                  "huid=0x%08x.", getHuid(omicTrgt) );
+    }
+
+    return SUCCESS;
+
+    #undef PRDF_FUNC
+}
+PRDF_PLUGIN_DEFINE( explorer_ocmb, CollectOmiFfdc );
 
 
 //##############################################################################

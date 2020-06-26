@@ -412,5 +412,10 @@ actionclass analyzeTLXERR1
     analyze(gTLX_ERR1_REPORT);
     funccall("clearAndMaskTlxtRe");
 };
-actionclass analyzeOMIDLFIR  { analyze(gOMIDLFIR);  };
+actionclass analyzeOMIDLFIR
+{
+    capture(omi_ocmb_ffdc);
+    funccall("CollectOmiFfdc");
+    analyze(gOMIDLFIR);
+};
 
