@@ -107,9 +107,9 @@ enum
     BCE_STALL_MAX           =   4,
     CPMR_BASE               =   (2 * 1024 * 1024),
     MBASE_SHIFT             =   5,
-    QME_PIG_REQ_INTR_TYPE   =   1,
-    QME_PIG_REQ_INTR_TYPE_LEN   = 4,
-    QME_PIG                 =   0x200e0030,
+    QME_PIG_REQ_INT_TYPE    =   1,
+    QME_PIG_REQ_INT_TYPE_LEN   = 4,
+    QME_PIG_REG             =   0x200e0030,
 };
 
 // -----------------------------------------------------------------------------
@@ -282,9 +282,9 @@ fapi2::ReturnCode qme_init(
         l_opitA1Data.flush<0>();
         l_opitA2Data.flush<0>();
         l_opitA3Data.flush<0>();
-        l_pigData.insertFromRight( 0xA, QME_PIG_REQ_INTR_TYPE, QME_PIG_REQ_INTR_TYPE_LEN );
+        l_pigData.insertFromRight( 0xA, QME_PIG_REQ_INT_TYPE, QME_PIG_REQ_INT_TYPE_LEN );
 
-        FAPI_TRY( putScom( l_eq_mc_and, QME_PIG, l_pigData ) );
+        FAPI_TRY( putScom( l_eq_mc_and, QME_PIG_REG, l_pigData ) );
 
         do
         {
