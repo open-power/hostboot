@@ -26,7 +26,7 @@
 #define _P10_RING_PROPERTIES_H_
 
 static const uint8_t RING_TABLE_VERSION_DOC = 23;
-static const uint8_t RING_TABLE_VERSION_MVPD = 22;
+static const uint8_t RING_TABLE_VERSION_MVPD = 23;
 static const uint8_t RING_TABLE_VERSION_EKB = 23;
 
 #define RINGID_START_MVPD    (RingId_t)0
