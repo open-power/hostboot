@@ -1083,7 +1083,7 @@ fapi2::ReturnCode EffGroupingBaseSizeData::getRequestedBarList(
     }
 
     // OCC bar size requested
-    if (i_procAttrs.iv_smfBarSize > 0)
+    if (i_procAttrs.iv_occSandboxSize > 0)
     {
         iv_requestedBarsList.push_back(std::make_pair(OCC, i_procAttrs.iv_occSandboxSize));
     }
