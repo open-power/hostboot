@@ -98,8 +98,9 @@ inline fapi2::ReturnCode capture_status( const fapi2::Target<fapi2::TARGET_TYPE_
                  fapi2::MSS_EXP_I2C_FW_STATUS_INVALID_SIZE().
                  set_TARGET(i_target).
                  set_STATUS_CODE_SIZE(i_data.size()),
-                 "Data returned from FW_STATUS was incorrect length when attempting to print to error log. (%d when expecting %d)",
-                 i_data.size(), FW_STATUS_BYTE_LEN );
+                 "Data length returned from FW_STATUS was incorrect when attempting to print to error log. (%d when expecting %d)"
+                 TARGTIDFORMAT,
+                 i_data.size(), FW_STATUS_BYTE_LEN , MSSTARGID);
 
     for( const auto l_byte : i_data )
     {
