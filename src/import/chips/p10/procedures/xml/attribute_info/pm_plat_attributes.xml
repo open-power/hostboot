@@ -710,6 +710,29 @@
     <group>enablement</group>
   </attribute>
 
+   <attribute>
+    <id>ATTR_SYSTEM_RESCLK_ISTEP4_ENABLE</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+    Enables resonant clocks in the system at istep4
+
+    Producer: Override 
+    
+    Consumers: p10_hcd_core_startclocks.C 
+
+    </description>
+    <valueType>uint8</valueType>
+    <platInit/>
+    <enum>
+        OFF = 0x00,
+        ON = 0x01
+    </enum>
+    <default>OFF</default>
+    <overrideOnly/>
+    <group>enablement</group>
+  </attribute>
+
+
   <!-- ********************************************************************* -->
   <attribute>
     <id>ATTR_SYSTEM_RVRM_DISABLE</id>

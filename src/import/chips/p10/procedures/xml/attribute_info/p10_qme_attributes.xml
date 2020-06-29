@@ -72,6 +72,11 @@
            <value>0x0</value>
            <value>0x0</value>
   </entry>
+  <!-- needed from freq_attributes_xml for core/cache_scominit -->
+  <entry>
+          <name>ATTR_FREQ_CORE_BOOT_MHZ</name>
+          <value>0x0</value>
+  </entry>
   <!-- needed from pm_hwp_attributes_xml for core/cache_scominit -->
   <entry>
           <name>ATTR_CHIP_UNIT_POS</name>
@@ -93,6 +98,11 @@
   <entry>
           <name>ATTR_SMF_CONFIG</name>
           <value>0x1</value>
+  </entry>
+  <!-- needed from pm_plat_attributes_xml for core/cache_scominit -->
+  <entry>
+          <name>ATTR_SYSTEM_RESCLK_ISTEP4_ENABLE</name>
+          <value>0x0</value>
   </entry>
   <!-- needed for qme sim -->
   <entry>
