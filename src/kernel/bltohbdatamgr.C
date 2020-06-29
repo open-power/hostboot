@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2017,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -141,7 +141,18 @@ void BlToHbDataManager::initValid (const Bootloader::BlToHbData& i_data)
            (i_data.numKeyAddrPair * sizeof(Bootloader::keyAddrPair_t)));
 
     iv_data.cacheSizeMb = i_data.cacheSizeMb;
-    printk("Hostboot cache size=%d MB\n", iv_data.cacheSizeMb);
+    constexpr uint8_t min_cache_size_mb = 8;
+    if ( iv_data.cacheSizeMb < min_cache_size_mb )
+    {
+        printk("Sbe provided invalid cache size %d MB, this is expected on MPIPL. Defaulting to cache size=%d MB\n",
+               iv_data.cacheSizeMb,
+               min_cache_size_mb);
+        iv_data.cacheSizeMb = min_cache_size_mb;
+    }
+    else
+    {
+        printk("Hostboot cache size=%d MB\n", iv_data.cacheSizeMb);
+    }
 
     // Size of data that needs to be preserved and pinned.
     iv_preservedSize = ALIGN_PAGE(iv_data.secureRomSize +
