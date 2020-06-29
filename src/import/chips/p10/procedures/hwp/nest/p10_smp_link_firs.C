@@ -357,6 +357,8 @@ fapi2::ReturnCode p10_smp_link_firs_ext(
     using namespace scomt;
     using namespace scomt::proc;
 
+    fapi2::buffer<uint64_t> l_mask_value(0x0);
+
     if(!i_proc_target.isFunctional())
     {
         goto fapi_try_exit;
@@ -374,15 +376,14 @@ fapi2::ReturnCode p10_smp_link_firs_ext(
     FAPI_TRY(PUT_PB_COM_SCOM_ES3_EXTFIR_ACTION1_REG(i_proc_target, i_data.EXT_FIR_ACTION1),
              "Error from putScom (PB_COM_SCOM_ES3_EXTFIR_ACTION1_REG)");
 
-    FAPI_TRY(PREP_PB_COM_SCOM_ES3_EXTFIR_MASK_REG_WO_AND(i_proc_target),
-             "Error from prepScom (PB_COM_SCOM_ES3_EXTFIR_MASK_REG_WO_AND)");
-    FAPI_TRY(PUT_PB_COM_SCOM_ES3_EXTFIR_MASK_REG_WO_AND(i_proc_target, i_data.EXT_FIR_MASK_CLR),
-             "Error from putScom (PB_COM_SCOM_ES3_EXTFIR_MASK_REG_WO_AND)");
+    FAPI_TRY(GET_PB_COM_SCOM_ES3_EXTFIR_MASK_REG_RW(i_proc_target, l_mask_value),
+             "Error from getScom (PB_COM_SCOM_ES3_EXTFIR_MASK_REG_RW)");
 
-    FAPI_TRY(PREP_PB_COM_SCOM_ES3_EXTFIR_MASK_REG_WO_OR(i_proc_target),
-             "Error from prepScom (PB_COM_SCOM_ES3_EXTFIR_MASK_REG_WO_OR)");
-    FAPI_TRY(PUT_PB_COM_SCOM_ES3_EXTFIR_MASK_REG_WO_OR(i_proc_target, i_data.EXT_FIR_MASK_SET),
-             "Error from putScom (PB_COM_SCOM_ES3_EXTFIR_MASK_REG_WO_OR)");
+    l_mask_value &= i_data.EXT_FIR_MASK_CLR;
+    l_mask_value |= i_data.EXT_FIR_MASK_SET;
+
+    FAPI_TRY(PUT_PB_COM_SCOM_ES3_EXTFIR_MASK_REG_RW(i_proc_target, l_mask_value),
+             "Error from putScom (PB_COM_SCOM_ES3_EXTFIR_MASK_REG_RW)");
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -398,6 +399,8 @@ fapi2::ReturnCode p10_smp_link_firs_tl(
 {
     using namespace scomt;
     using namespace scomt::pauc;
+
+    fapi2::buffer<uint64_t> l_mask_value(0x0);
 
     if(!i_pauc_target.isFunctional())
     {
@@ -416,15 +419,14 @@ fapi2::ReturnCode p10_smp_link_firs_tl(
     FAPI_TRY(PUT_PB_PTL_FIR_ACTION1_REG(i_pauc_target, i_data.PTL_FIR_ACTION1),
              "Error from putScom (PB_PTL_FIR_ACTION1_REG)");
 
-    FAPI_TRY(PREP_PB_PTL_FIR_MASK_REG_WO_AND(i_pauc_target),
-             "Error from prepScom (PB_PTL_FIR_MASK_REG_WO_AND)");
-    FAPI_TRY(PUT_PB_PTL_FIR_MASK_REG_WO_AND(i_pauc_target, i_data.PTL_FIR_MASK_CLR),
-             "Error from putScom (PB_PTL_FIR_MASK_REG_WO_AND)");
+    FAPI_TRY(GET_PB_PTL_FIR_MASK_REG_RW(i_pauc_target, l_mask_value),
+             "Error from getScom (PB_PTL_FIR_MASK_REG_RW)");
 
-    FAPI_TRY(PREP_PB_PTL_FIR_MASK_REG_WO_OR(i_pauc_target),
-             "Error from putScom (PB_PTL_FIR_MASK_REG_WO_OR)");
-    FAPI_TRY(PUT_PB_PTL_FIR_MASK_REG_WO_OR(i_pauc_target, i_data.PTL_FIR_MASK_SET),
-             "Error from putScom (PB_PTL_FIR_MASK_REG_WO_OR)");
+    l_mask_value &= i_data.PTL_FIR_MASK_CLR;
+    l_mask_value |= i_data.PTL_FIR_MASK_SET;
+
+    FAPI_TRY(PUT_PB_PTL_FIR_MASK_REG_RW(i_pauc_target, l_mask_value),
+             "Error from putScom (PB_PTL_FIR_MASK_REG_RW)");
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -439,6 +441,8 @@ fapi2::ReturnCode p10_smp_link_firs_dl(
 {
     using namespace scomt;
     using namespace scomt::iohs;
+
+    fapi2::buffer<uint64_t> l_mask_value(0x0);
 
     if(!i_iohs_target.isFunctional())
     {
@@ -457,15 +461,14 @@ fapi2::ReturnCode p10_smp_link_firs_dl(
     FAPI_TRY(PUT_DLP_FIR_ACTION1_REG(i_iohs_target, i_data.DLP_FIR_ACTION1),
              "Error from putScom (DLP_FIR_ACTION1_REG)");
 
-    FAPI_TRY(PREP_DLP_FIR_MASK_REG_WO_AND(i_iohs_target),
-             "Error from prepScom (DLP_FIR_MASK_REG_WO_AND)");
-    FAPI_TRY(PUT_DLP_FIR_MASK_REG_WO_AND(i_iohs_target, i_data.DLP_FIR_MASK_CLR),
-             "Error from putScom (DLP_FIR_MASK_REG_WO_AND)");
+    FAPI_TRY(GET_DLP_FIR_MASK_REG_RW(i_iohs_target, l_mask_value),
+             "Error from getScom (DLP_FIR_MASK_REG_RW)");
 
-    FAPI_TRY(PREP_DLP_FIR_MASK_REG_WO_OR(i_iohs_target),
-             "Error from prepScom (DLP_FIR_MASK_REG_WO_OR)");
-    FAPI_TRY(PUT_DLP_FIR_MASK_REG_WO_OR(i_iohs_target, i_data.DLP_FIR_MASK_SET),
-             "Error from putScom (DLP_FIR_MASK_REG_WO_OR)");
+    l_mask_value &= i_data.DLP_FIR_MASK_CLR;
+    l_mask_value |= i_data.DLP_FIR_MASK_SET;
+
+    FAPI_TRY(PUT_DLP_FIR_MASK_REG_RW(i_iohs_target, l_mask_value),
+             "Error from putScom (DLP_FIR_MASK_REG_RW)");
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -481,6 +484,8 @@ fapi2::ReturnCode p10_smp_link_firs_phy(
 {
     using namespace scomt;
     using namespace scomt::pauc;
+
+    fapi2::buffer<uint64_t> l_mask_value(0x0);
 
     if(!i_pauc_target.isFunctional())
     {
@@ -499,15 +504,14 @@ fapi2::ReturnCode p10_smp_link_firs_phy(
     FAPI_TRY(PUT_PHY_SCOM_MAC_FIR_ACTION1_REG(i_pauc_target, i_data.PHY_FIR_ACTION1),
              "Error from putScom (PHY_SCOM_MAC_FIR_ACTION1_REG)");
 
-    FAPI_TRY(PREP_PHY_SCOM_MAC_FIR_MASK_REG_WO_AND(i_pauc_target),
-             "Error from prepScom (PHY_SCOM_MAC_FIR_MASK_REG_WO_AND)");
-    FAPI_TRY(PUT_PHY_SCOM_MAC_FIR_MASK_REG_WO_AND(i_pauc_target, i_data.PHY_FIR_MASK_CLR),
-             "Error from putScom (PHY_SCOM_MAC_FIR_MASK_REG_WO_AND)");
+    FAPI_TRY(GET_PHY_SCOM_MAC_FIR_MASK_REG_RW(i_pauc_target, l_mask_value),
+             "Error from getScom (PHY_SCOM_MAC_FIR_MASK_REG_RW)");
 
-    FAPI_TRY(PREP_PHY_SCOM_MAC_FIR_MASK_REG_WO_OR(i_pauc_target),
-             "Error from putScom (PHY_SCOM_MAC_FIR_MASK_REG_WO_OR)");
-    FAPI_TRY(PUT_PHY_SCOM_MAC_FIR_MASK_REG_WO_OR(i_pauc_target, i_data.PHY_FIR_MASK_SET),
-             "Error from putScom (PHY_SCOM_MAC_FIR_MASK_REG_WO_OR)");
+    l_mask_value &= i_data.PHY_FIR_MASK_CLR;
+    l_mask_value |= i_data.PHY_FIR_MASK_SET;
+
+    FAPI_TRY(PUT_PHY_SCOM_MAC_FIR_MASK_REG_RW(i_pauc_target, l_mask_value),
+             "Error from putScom (PHY_SCOM_MAC_FIR_MASK_REG_RW)");
 
 fapi_try_exit:
     return fapi2::current_err;

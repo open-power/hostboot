@@ -79,20 +79,17 @@ fapi2::ReturnCode p10_chiplet_fabric_scominit(
                 FAPI_TRY(p10_smp_link_firs(l_iohs, sublink_t::BOTH, action_t::INACTIVE),
                          "Error from p10_smp_link_firs when masking firs for all links");
             }
-
-            goto fapi_try_exit;
         }
     }
 
 
     for (auto l_iohs : l_iohs_targets)
     {
-        fapi2::ATTR_IOHS_CONFIG_MODE_Type l_iohs_config_mode;
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IOHS_CONFIG_MODE, l_iohs, l_iohs_config_mode),
-                 "Error from FAPI_ATTR_GET (ATTR_IOHS_CONFIG_MODE)");
+        fapi2::ATTR_PROC_FABRIC_LINK_ACTIVE_Type l_fabric_link_active;
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_LINK_ACTIVE, l_iohs, l_fabric_link_active),
+                 "Error from FAPI_ATTR_GET (ATTR_PROC_FABRIC_LINK_ACTIVE)");
 
-        if((l_iohs_config_mode == fapi2::ENUM_ATTR_IOHS_CONFIG_MODE_SMPX) ||
-           (l_iohs_config_mode == fapi2::ENUM_ATTR_IOHS_CONFIG_MODE_SMPA))
+        if(l_fabric_link_active == fapi2::ENUM_ATTR_PROC_FABRIC_LINK_ACTIVE_TRUE)
         {
             fapi2::ATTR_IOHS_DRAWER_INTERCONNECT_Type l_drawer_interconnect;
             FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IOHS_DRAWER_INTERCONNECT, l_iohs, l_drawer_interconnect),
@@ -141,7 +138,7 @@ fapi2::ReturnCode p10_chiplet_fabric_scominit(
 
                 // setup and unmask TL/DL FIRs
                 FAPI_TRY(p10_smp_link_firs(l_iohs, sublink_opt, action_t::RUNTIME),
-                         "Error from p10_smp_link_firs when configuring both sublinks for runtime operations");
+                         "Error from p10_smp_link_firs when configuring for runtime operations");
             }
         }
         else
