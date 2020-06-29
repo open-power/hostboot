@@ -23,4 +23,96 @@
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
 <hwpErrors>
+  <!-- ********************************************************************* -->
+  <hwpError>
+    <rc>RC_P10_DYNINIT_BITVEC_SAVE_ERROR</rc>
+    <description>Requested bit vector type can't be saved to platform attribute</description>
+    <ffdc>TYPE</ffdc>
+    <ffdc>SOURCE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- ********************************************************************* -->
+  <hwpError>
+    <rc>RC_P10_DYNINIT_BITVEC_RANGE_ERROR</rc>
+    <description>Requested bit position is out of range for bitvec</description>
+    <ffdc>BIT_COUNT</ffdc>
+    <ffdc>SIZE</ffdc>
+    <ffdc>TYPE</ffdc>
+    <ffdc>SOURCE</ffdc>
+    <ffdc>BIT_POS</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- ********************************************************************* -->
+  <hwpError>
+    <rc>RC_P10_BOOT_MODE_BITVEC_MERGE_ERROR</rc>
+    <description>Inconsistent input type or source values in bitvecs supplied to merge function</description>
+    <ffdc>HW_IMAGE_BIT_COUNT</ffdc>
+    <ffdc>HW_IMAGE_SIZE</ffdc>
+    <ffdc>HW_IMAGE_SOURCE</ffdc>
+    <ffdc>HW_IMAGE_TYPE</ffdc>
+    <ffdc>PLAT_BIT_COUNT</ffdc>
+    <ffdc>PLAT_SIZE</ffdc>
+    <ffdc>PLAT_SOURCE</ffdc>
+    <ffdc>PLAT_TYPE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- ********************************************************************* -->
+  <hwpError>
+    <rc>RC_P10_BOOT_MODE_BITVEC_PLAT_ERROR</rc>
+    <description>Platform requested bit position is out of range for HW image capabilities</description>
+    <ffdc>HW_IMAGE_BIT_COUNT</ffdc>
+    <ffdc>HW_IMAGE_SIZE</ffdc>
+    <ffdc>HW_IMAGE_SOURCE</ffdc>
+    <ffdc>HW_IMAGE_TYPE</ffdc>
+    <ffdc>PLAT_BIT_COUNT</ffdc>
+    <ffdc>PLAT_SIZE</ffdc>
+    <ffdc>PLAT_SOURCE</ffdc>
+    <ffdc>PLAT_TYPE</ffdc>
+    <ffdc>BIT_POS</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- ********************************************************************* -->
+  <hwpError>
+    <rc>RC_P10_BOOT_MODE_FEATURE_LOOKUP_ERROR</rc>
+    <description>Inconsistent input type in bitvecs supplied to HW image feature lookup function</description>
+    <ffdc>MODE_BIT_COUNT</ffdc>
+    <ffdc>MODE_SIZE</ffdc>
+    <ffdc>MODE_SOURCE</ffdc>
+    <ffdc>MODE_TYPE</ffdc>
+    <ffdc>FEATURE_BIT_COUNT</ffdc>
+    <ffdc>FEATURE_SIZE</ffdc>
+    <ffdc>FEATURE_SOURCE</ffdc>
+    <ffdc>FEATURE_TYPE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- ********************************************************************* -->
+  <hwpError>
+    <rc>RC_P10_BOOT_MODE_UNEQUAL_MC_FREQS</rc>
+    <description>Chip has unequal MC chiplet frequencies</description>
+    <ffdc>CHIP_TARGET</ffdc>
+    <ffdc>MC_UNIT1</ffdc>
+    <ffdc>MC_FREQ1</ffdc>
+    <ffdc>MC_UNIT2</ffdc>
+    <ffdc>MC_FREQ2</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- ********************************************************************* -->
 </hwpErrors>

@@ -40,6 +40,7 @@
     #include "win_sim_fapi.h"
 #else
     #include <p10_get_mvpd_ring.H>
+    #include <p10_boot_mode.H>
 #endif
 
 #include <p10_ipl_customize.H>
@@ -50,6 +51,7 @@
 #include <p10_infrastruct_help.H>
 #include <map>
 #include <p10_ipl_section_append.H>
+#include <p10_dyninit_bitvec.H>
 
 using namespace fapi2;
 
@@ -2307,205 +2309,6 @@ fapi_try_exit:
 } // End of   fetch_and_insert_vpd_rings()
 
 
-
-//  Function: apply_fbc_dyninits()
-//  Determines the fabric settings to apply based on system
-//  configuration and and sets the dynamic init vector.
-//
-//  Parameter list:
-//  const fapi::Target &i_procTarget:   Processor chip target.
-//  const fapi::Target &FAPI_SYSTEM:    System target.
-//  uint64_t& io_featureVec:            Bit vector of dynamic init features.
-//
-#ifndef WIN32
-fapi2::ReturnCode apply_fbc_dyninits(
-    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_procTarget,
-    const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>& FAPI_SYSTEM,
-    uint64_t& io_featureVec)
-{
-    FAPI_DBG("Entering apply_fbc_dyninits");
-
-    fapi2::ATTR_FREQ_CORE_FLOOR_MHZ_Type l_core_fmin;
-    fapi2::ATTR_FREQ_CORE_CEILING_MHZ_Type l_core_fmax;
-    fapi2::ATTR_FREQ_PAU_MHZ_Type l_fpau;
-    fapi2::ATTR_FREQ_MC_MHZ_Type l_fmc;
-    bool l_fmc_valid = false;
-    fapi2::ATTR_CHIP_UNIT_POS_Type l_mc_pos;
-    bool l_rt2pa_nominal    = false;
-    bool l_rt2pa_safe       = false;
-    bool l_pa2rt_turbo      = false;
-    bool l_pa2rt_nominal    = false;
-    bool l_pa2rt_safe       = false;
-    bool l_rt2mc_ultraturbo = false;
-    bool l_rt2mc_turbo      = false;
-    bool l_rt2mc_nominal    = false;
-    bool l_rt2mc_safe       = false;
-    bool l_mc2rt_ultraturbo = false;
-    bool l_mc2rt_turbo      = false;
-    bool l_mc2rt_nominal    = false;
-    bool l_mc2rt_safe       = false;
-
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_FREQ_PAU_MHZ, FAPI_SYSTEM, l_fpau),
-             "Error from FAPI_ATTR_GET (ATTR_FREQ_PAU_MHZ)");
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_FREQ_CORE_FLOOR_MHZ, i_procTarget, l_core_fmin),
-             "Error from FAPI_ATTR_GET (ATTR_FREQ_CORE_FLOOR_MHZ)");
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_FREQ_CORE_CEILING_MHZ, i_procTarget, l_core_fmax),
-             "Error from FAPI_ATTR_GET (ATTR_FREQ_CORE_CEILING_MHZ)");
-
-
-    // current ring infrastructure only supports only one common MC frequency across the chip
-    {
-        fapi2::ATTR_FREQ_MC_MHZ_Type l_fmc_common;
-        fapi2::ATTR_CHIP_UNIT_POS_Type l_mc_pos_common;
-
-        for (auto& l_mc_target : i_procTarget.getChildren<fapi2::TARGET_TYPE_MC>())
-        {
-            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, l_mc_target, l_mc_pos),
-                     "Error from FAPI_ATTR_GET (ATTR_CHIP_UNIT_POS_Type)");
-            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_FREQ_MC_MHZ, l_mc_target, l_fmc),
-                     "Error from FAPI_ATTR_GET (ATTR_FREQ_MC_MHZ)");
-
-            if (!l_fmc_valid)
-            {
-                l_fmc_common = l_fmc;
-                l_mc_pos_common = l_mc_pos;
-                l_fmc_valid = true;
-            }
-
-            FAPI_ASSERT(l_fmc_common == l_fmc,
-                        fapi2::XIPC_UNEQUAL_MC_FREQS().
-                        set_CHIP_TARGET(i_procTarget).
-                        set_MC_UNIT1(l_mc_pos_common).
-                        set_MC_FREQ1(l_fmc_common).
-                        set_MC_UNIT2(l_mc_pos).
-                        set_MC_FREQ2(l_fmc),
-                        "Chip has unequal MC chiplet frequencies");
-        }
-    }
-
-    // MC Fast Settings
-    if(l_fmc_valid && (l_fmc > 1610))
-    {
-        io_featureVec |= fapi2::ENUM_ATTR_DYNAMIC_INIT_FEATURE_VEC_MC_FAST;
-    }
-
-    // PBI Async Settings
-    // Frequency Ratio Definitions
-    //
-    // RT2PA
-    // RT->PAU NOMINAL when Nest Fmin >= 1/2 * Fpau
-    // RT->PAU SAFE    when Nest Fmin <  1/2 * Fpau
-    //
-    // PA2RT
-    // PAU->RF TURBO   when Fpau >= 4/2 * Nest Fmax
-    // PAU->RF NOMINAL when Fpau >= 3/2 * Nest Fmax and Fpau < 4/2 * Nest Fmax
-    // PAU->RF SAFE    when                             Fpau < 3/2 * Nest Fmax
-    //
-    // RT2MC
-    // RT->MC ULTRA_TURBO when Nest Fmin >= 3/2 * Fmc
-    // RT->MC TURBO       when Nest Fmin >= 2/2 * Fmc and Nest Fmin < 3/2 * Fmc
-    // RT->MC NOMINAL     when Nest Fmin >= 1/2 * Fmc and Nest Fmin < 2/2 * Fmc
-    // RT->MC SAFE        when                            Nest Fmin < 1/2 * Fmc
-    //
-    // MC2RT
-    // MC->RT ULTRA_TURBO when Fmc >= 4/2 * Nest Fmax
-    // MC->RT TURBO when       Fmc >= 3/2 * Nest Fmax and Fmc < 4/2 * Nest Fmax
-    // MC->RT NOMINAL when     Fmc >= 2/2 * Nest Fmax and Fmc < 3/2 * Nest Fmax
-    // MC->RT SAFE when                                   Fmc < 2/2 * Nest Fmax
-
-    l_rt2pa_nominal    = ((l_core_fmin) >= (l_fpau)) ? (true) : (false);
-    l_rt2pa_safe       = ((l_core_fmin)  < (l_fpau)) ? (true) : (false);
-
-    l_pa2rt_turbo      = ((     l_fpau) >= (    l_core_fmax))                                ? (true) : (false);
-    l_pa2rt_nominal    = (((4 * l_fpau) >= (3 * l_core_fmax)) && ((l_fpau) < (l_core_fmax))) ? (true) : (false);
-    l_pa2rt_safe       = (( 4 * l_fpau)  < (3 * l_core_fmax))                                ? (true) : (false);
-
-
-    if(l_fmc_valid)
-    {
-        l_rt2mc_ultraturbo = ( (l_core_fmin) >= (3 * l_fmc))                                   ? (true) : (false);
-        l_rt2mc_turbo      = (((l_core_fmin) >= (2 * l_fmc)) && ((l_core_fmin) < (3 * l_fmc))) ? (true) : (false);
-        l_rt2mc_nominal    = (((l_core_fmin) >= (    l_fmc)) && ((l_core_fmin) < (2 * l_fmc))) ? (true) : (false);
-        l_rt2mc_safe       = ( (l_core_fmin)  < (    l_fmc))                                   ? (true) : (false);
-
-        l_mc2rt_ultraturbo = ((     l_fmc) >= (    l_core_fmax))                                       ? (true) : (false);
-        l_mc2rt_turbo      = (((4 * l_fmc) >= (3 * l_core_fmax)) && ((    l_fmc) < (    l_core_fmax))) ? (true) : (false);
-        l_mc2rt_nominal    = (((2 * l_fmc) >= (    l_core_fmax)) && ((4 * l_fmc) < (3 * l_core_fmax))) ? (true) : (false);
-        l_mc2rt_safe       = (( 2 * l_fmc)  < (    l_core_fmax))                                       ? (true) : (false);
-    }
-
-    if(l_rt2pa_nominal)
-    {
-        io_featureVec |= ENUM_ATTR_DYNAMIC_INIT_FEATURE_VEC_RT2PA_NOMINAL;
-    }
-
-    if(l_rt2pa_safe)
-    {
-        io_featureVec |= ENUM_ATTR_DYNAMIC_INIT_FEATURE_VEC_RT2PA_SAFE;
-    }
-
-    if(l_pa2rt_turbo)
-    {
-        io_featureVec |= ENUM_ATTR_DYNAMIC_INIT_FEATURE_VEC_PA2RT_TURBO;
-    }
-
-    if(l_pa2rt_nominal)
-    {
-        io_featureVec |= ENUM_ATTR_DYNAMIC_INIT_FEATURE_VEC_PA2RT_NOMINAL;
-    }
-
-    if(l_pa2rt_safe)
-    {
-        io_featureVec |= ENUM_ATTR_DYNAMIC_INIT_FEATURE_VEC_PA2RT_SAFE;
-    }
-
-    if(l_rt2mc_ultraturbo)
-    {
-        io_featureVec |= ENUM_ATTR_DYNAMIC_INIT_FEATURE_VEC_RT2MC_ULTRATURBO;
-    }
-
-    if(l_rt2mc_turbo)
-    {
-        io_featureVec |= ENUM_ATTR_DYNAMIC_INIT_FEATURE_VEC_RT2MC_TURBO;
-    }
-
-    if(l_rt2mc_nominal)
-    {
-        io_featureVec |= ENUM_ATTR_DYNAMIC_INIT_FEATURE_VEC_RT2MC_NOMINAL;
-    }
-
-    if(l_rt2mc_safe)
-    {
-        io_featureVec |= ENUM_ATTR_DYNAMIC_INIT_FEATURE_VEC_RT2MC_SAFE;
-    }
-
-    if(l_mc2rt_ultraturbo)
-    {
-        io_featureVec |= ENUM_ATTR_DYNAMIC_INIT_FEATURE_VEC_MC2RT_ULTRATURBO;
-    }
-
-    if(l_mc2rt_turbo)
-    {
-        io_featureVec |= ENUM_ATTR_DYNAMIC_INIT_FEATURE_VEC_MC2RT_TURBO;
-    }
-
-    if(l_mc2rt_nominal)
-    {
-        io_featureVec |= ENUM_ATTR_DYNAMIC_INIT_FEATURE_VEC_MC2RT_NOMINAL;
-    }
-
-    if(l_mc2rt_safe)
-    {
-        io_featureVec |= ENUM_ATTR_DYNAMIC_INIT_FEATURE_VEC_MC2RT_SAFE;
-    }
-
-fapi_try_exit:
-    FAPI_DBG("Exiting apply_fbc_dyninits");
-    return fapi2::current_err;
-}
-//End of apply_fbc_dyninits
-#endif
-
 #ifndef WIN32
 fapi2::ReturnCode p10_ipl_customize (
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_procTarget,
@@ -2564,10 +2367,7 @@ ReturnCode p10_ipl_customize (
     RingId_t        ringId = UNDEFINED_RING_ID;
     RingId_t        rpIndex = UNDEFINED_RING_ID; // Ring properties (rp) index
 
-    uint64_t        featureVec = 0; // Dynamic inits feature vector from platform attribute
-    fapi2::ATTR_DYNAMIC_INIT_FEATURE_VEC_Type l_attrInitFeatureVec;
-    fapi2::ATTR_SYSTEM_IPL_PHASE_Type l_attrSystemIplPhase;
-    fapi2::ATTR_CONTAINED_IPL_TYPE_Type l_attrContainedIplType;
+    p10_dyninit_bitvec featureVec; // Dynamic inits feature vector
     std::map< Rs4Selector_t,  Rs4Selector_t> idxFeatureMap;
     std::map<RingId_t, uint64_t> ringIdFeatureVecMap;
     uint8_t*        ringIdFeatList = NULL;
@@ -3436,9 +3236,6 @@ ReturnCode p10_ipl_customize (
                  l_maxRingSectionSize, l_ringSectionBufSize, l_maxImageSize );
 
 
-#ifdef WIN32
-    featureVec = 0x1000000000000000ULL; // select Hostboot feature only for MFT customization
-#else
     //////////////////////////////////////////////////////////////////////////
     // CUSTOMIZE item:     Append Dynamic-on-Base rings to io_ringSectionBuf
     // System phase:       All phases
@@ -3455,141 +3252,34 @@ ReturnCode p10_ipl_customize (
     //            ring becomes the de facto Base ring.
     //////////////////////////////////////////////////////////////////////////
 
-    //
-    // Get the feature vector from the platform
-    //
-    l_fapiRc2 = FAPI_ATTR_GET(fapi2::ATTR_DYNAMIC_INIT_FEATURE_VEC,
-                              FAPI_SYSTEM,
-                              l_attrInitFeatureVec);
+#ifdef WIN32
+    // statically select only Hostboot dynamic init
+    featureVec.iv_bits.push_back(0x1000000000000000ULL);
+    featureVec.iv_bit_count = 3;
+    featureVec.iv_source = MERGED;
+    featureVec.iv_type = FEATURE;
+#else
+    // call p10_boot_mode HWP to calculate dynamic init vector
+    FAPI_EXEC_HWP(l_rc,
+                  p10_boot_mode,
+                  i_procTarget,
+                  i_hwImage,
+                  i_sysPhase,
+                  featureVec);
 
-    featureVec = (uint64_t)l_attrInitFeatureVec[0];
-
-    FAPI_ASSERT( l_fapiRc2 == fapi2::FAPI2_RC_SUCCESS,
-                 fapi2::XIPC_FAPI_ATTR_SVC_FAIL().
-                 set_CHIP_TARGET(i_procTarget).
-                 set_OCCURRENCE(5),
-                 "FAPI_ATTR_GET(ATTR_DYNAMIC_INIT_FEATURE_VEC) failed."
-                 " Unable to determine featureVec." );
-
-    FAPI_IMP("Dynamic inits featureVec = 0x%016llx (GET from plat attribute)", featureVec);
-
-    l_fapiRc2 = FAPI_ATTR_GET(fapi2::ATTR_SYSTEM_IPL_PHASE,
-                              FAPI_SYSTEM,
-                              l_attrSystemIplPhase);
-
-    FAPI_ASSERT( l_fapiRc2 == fapi2::FAPI2_RC_SUCCESS,
-                 fapi2::XIPC_FAPI_ATTR_SVC_FAIL().
-                 set_CHIP_TARGET(i_procTarget).
-                 set_OCCURRENCE(6),
-                 "Failed to retrieve the system IPL phase attribute" );
-
-    l_fapiRc2 = FAPI_ATTR_GET(fapi2::ATTR_CONTAINED_IPL_TYPE,
-                              FAPI_SYSTEM,
-                              l_attrContainedIplType);
-
-    FAPI_ASSERT( l_fapiRc2 == fapi2::FAPI2_RC_SUCCESS,
-                 fapi2::XIPC_FAPI_ATTR_SVC_FAIL().
-                 set_CHIP_TARGET(i_procTarget).
-                 set_OCCURRENCE(7),
-                 "Failed to retrieve the contained IPL type attribute" );
-
-    // Apply IPL dynamic inits
-    if ((l_attrSystemIplPhase == fapi2::ENUM_ATTR_SYSTEM_IPL_PHASE_HB_IPL) &&
-        (i_sysPhase == SYSPHASE_HB_SBE))
+    if (l_rc)
     {
-        featureVec |= fapi2::ENUM_ATTR_DYNAMIC_INIT_FEATURE_VEC_HOSTBOOT;
-
-        // apply fabric dynamic inits (skip for initial MFT customization)
-        FAPI_TRY(apply_fbc_dyninits(i_procTarget, FAPI_SYSTEM, featureVec),
-                 "Error applying fabric dynamic inits");
-    }
-    else if (l_attrSystemIplPhase == fapi2::ENUM_ATTR_SYSTEM_IPL_PHASE_CONTAINED_IPL)
-    {
-        featureVec |= fapi2::ENUM_ATTR_DYNAMIC_INIT_FEATURE_VEC_COMMON_CONTAINED;
-
-        if (l_attrContainedIplType == fapi2::ENUM_ATTR_CONTAINED_IPL_TYPE_CACHE)
-        {
-            featureVec |= fapi2::ENUM_ATTR_DYNAMIC_INIT_FEATURE_VEC_CACHE_CONTAINED;
-        }
-        else
-        {
-            featureVec |= fapi2::ENUM_ATTR_DYNAMIC_INIT_FEATURE_VEC_CHIP_CONTAINED;
-        }
-    }
-    else // Apply runtime dynamic inits
-    {
-        fapi2::ATTR_SMF_CONFIG_Type l_attrSmfConfig;
-        fapi2::ATTR_SYSTEM_MMA_POWERON_DISABLE_Type l_attrSystemMmaPoweronDisable;
-        fapi2::ATTR_MRW_L2_INCREASE_JITTER_Type l_attr_mrw_l2_increase_jitter;
-
-        l_fapiRc2 = FAPI_ATTR_GET(fapi2::ATTR_SMF_CONFIG, FAPI_SYSTEM, l_attrSmfConfig);
-
-        FAPI_ASSERT( l_fapiRc2 == fapi2::FAPI2_RC_SUCCESS,
-                     fapi2::XIPC_FAPI_ATTR_SVC_FAIL().
-                     set_CHIP_TARGET(i_procTarget).
-                     set_OCCURRENCE(8),
-                     "Failed to retrieve ATTR_SMF_CONFIG" );
-
-        if(l_attrSmfConfig == fapi2::ENUM_ATTR_SMF_CONFIG_ENABLED)
-        {
-            FAPI_DBG("Applying Dynamic Init Runtime Feature: UV_INITS");
-            featureVec |= fapi2::ENUM_ATTR_DYNAMIC_INIT_FEATURE_VEC_UV_INITS;
-        }
-
-        l_fapiRc2 = FAPI_ATTR_GET(fapi2::ATTR_SYSTEM_MMA_POWERON_DISABLE, FAPI_SYSTEM, l_attrSystemMmaPoweronDisable);
-
-        FAPI_ASSERT( l_fapiRc2 == fapi2::FAPI2_RC_SUCCESS,
-                     fapi2::XIPC_FAPI_ATTR_SVC_FAIL().
-                     set_CHIP_TARGET(i_procTarget).
-                     set_OCCURRENCE(9),
-                     "Failed to retrieve ATTR_SYSTEM_MMA_POWERON_DISABLE" );
-
-        if(l_attrSystemMmaPoweronDisable == fapi2::ENUM_ATTR_SYSTEM_MMA_POWERON_DISABLE_ON)
-        {
-            FAPI_DBG("Applying Dynamic Init Runtime Feature: HMMA_STATIC_POWEROFF");
-            featureVec |= fapi2::ENUM_ATTR_DYNAMIC_INIT_FEATURE_VEC_MMA_STATIC_POWEROFF;
-        }
-
-        l_fapiRc2 = FAPI_ATTR_GET(fapi2::ATTR_MRW_L2_INCREASE_JITTER, FAPI_SYSTEM, l_attr_mrw_l2_increase_jitter);
-
-        FAPI_ASSERT( l_fapiRc2 == fapi2::FAPI2_RC_SUCCESS,
-                     fapi2::XIPC_FAPI_ATTR_SVC_FAIL().
-                     set_CHIP_TARGET(i_procTarget).
-                     set_OCCURRENCE(10),
-                     "Failed to retrieve ATTR_MRW_L2_INCREASE_JITTER ");
-
-        if(l_attr_mrw_l2_increase_jitter == fapi2::ENUM_ATTR_MRW_L2_INCREASE_JITTER_TRUE)
-        {
-            FAPI_DBG("Applying Dynamic Init Runtime Feature: L2RC_HIGH_JITTER");
-            featureVec |= fapi2::ENUM_ATTR_DYNAMIC_INIT_FEATURE_VEC_L2RC_HIGH_JITTER;
-        }
-
-        // clear undesireable features
-        featureVec &= ~fapi2::ENUM_ATTR_DYNAMIC_INIT_FEATURE_VEC_HOSTBOOT;
-        featureVec &= ~fapi2::ENUM_ATTR_DYNAMIC_INIT_FEATURE_VEC_COMMON_CONTAINED;
-        featureVec &= ~fapi2::ENUM_ATTR_DYNAMIC_INIT_FEATURE_VEC_CACHE_CONTAINED;
-        featureVec &= ~fapi2::ENUM_ATTR_DYNAMIC_INIT_FEATURE_VEC_CHIP_CONTAINED;
+        FAPI_ERR("Error from p10_boot_mode");
+        fapi2::current_err = l_rc;
+        goto fapi_try_exit;
     }
 
-    l_attrInitFeatureVec[0] = (uint64_t)featureVec;
-    l_fapiRc2 = FAPI_ATTR_SET(fapi2::ATTR_DYNAMIC_INIT_FEATURE_VEC,
-                              FAPI_SYSTEM,
-                              l_attrInitFeatureVec);
-
-    FAPI_ASSERT( l_fapiRc2 == fapi2::FAPI2_RC_SUCCESS,
-                 fapi2::XIPC_FAPI_ATTR_SVC_FAIL().
-                 set_CHIP_TARGET(i_procTarget).
-                 set_OCCURRENCE(8),
-                 "Failed to set the dynamic init feature vector attribute" );
-
-#endif // WIN32
-
-    FAPI_IMP("Dynamic inits featureVec = 0x%016llx (SET to plat attribute)", featureVec);
+#endif
 
     // Index the features in a map
-    for(Rs4Selector_t feature = 0; feature < 64; feature++)
+    for (Rs4Selector_t feature = 0; feature < featureVec.iv_bit_count; feature++)
     {
-        if( featureVec & (0x8000000000000000 >> feature) )
+        if ( featureVec.iv_bits[feature / 64] & ( 0x8000000000000000 >> (feature % 64) ) )
         {
             idxFeatureMap.insert({numberOfFeatures, feature});
             numberOfFeatures++;

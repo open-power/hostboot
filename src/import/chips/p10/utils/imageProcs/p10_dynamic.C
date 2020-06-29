@@ -26,8 +26,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <unistd.h>
-#include <string>
+#include <endian.h>
 #include <p10_dynamic.H>
 
 ///////////////////////////////////////////////////////////////////////////
