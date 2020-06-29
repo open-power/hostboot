@@ -244,15 +244,6 @@ try {
     $hb_skipocc = 0
 }
 
-# spi_master_version will be set by newer simics levels
-#  spi_master_version=1 means to use the old logic, as does no value
-try {
-    echo "spi_master_version  = "+$spi_master_version
-} except {
-    $spi_master_version  = 1
-}
-#####
-
 # Handle the SIMICS_MORECACHE environment variable, if set, and enable more
 # backing caches
 run-command-file (lookup-file -query ($hb_script_location + "/morecache.simics"))

@@ -51,19 +51,6 @@
 #include <initservice/taskargs.H>
 #include <p10_scom_perv.H>
 #include <p10_spi_init_pib.H>
-#include <arch/magic.H>
-
-namespace OLDSPI {
-fapi2::ReturnCode
-spi_read( SpiControlHandle& i_handle, uint32_t i_address, uint32_t i_length,
-          SPI_ECC_CONTROL_STATUS i_eccStatus, uint8_t* o_buffer );
-
-fapi2::ReturnCode
-spi_write(SpiControlHandle& i_handle, uint32_t i_address,
-          uint32_t i_length,  uint8_t* i_buffer);
-
-};
-bool g_USE_OLD_SPI = false;
 
 constexpr uint64_t HOSTBOOT_PIB_MASTER_ID = 9;
 
@@ -373,15 +360,6 @@ errlHndl_t SpiOp::read(void*   o_buffer,
         // if iv_usingAdjustedBuffer is set to false then they are equal to
         // the requested offset and length and if iv_usingAdjustedBuffer is true
         // then we must use them anyway.
-        if( g_USE_OLD_SPI ) {
-        FAPI_INVOKE_HWP(errl,
-                        OLDSPI::spi_read,
-                        handle,
-                        iv_adjusted_offset,
-                        iv_adjusted_length,
-                        RAW_BYTE_ACCESS,
-                        iv_buffer);
-        } else {
         FAPI_INVOKE_HWP(errl,
                         spi_read,
                         handle,
@@ -389,7 +367,7 @@ errlHndl_t SpiOp::read(void*   o_buffer,
                         iv_adjusted_length,
                         RAW_BYTE_ACCESS,
                         iv_buffer);
-        }
+
         if (errl != nullptr)
         {
             TRACFCOMP(g_trac_spi, "SpiOp::read(): "
@@ -484,15 +462,6 @@ errlHndl_t SpiOp::write(void*   i_buffer,
             // TRANSACTION_ALIGNMENT bytes. Do a read using the adjusted buffer
             // size, modify the adjusted buffer with the data to be written,
             // then write that data back to the SPI device.
-            if( g_USE_OLD_SPI ) {
-            FAPI_INVOKE_HWP(errl,
-                            OLDSPI::spi_read,
-                            handle,
-                            iv_adjusted_offset,
-                            iv_adjusted_length,
-                            RAW_BYTE_ACCESS,
-                            iv_buffer);
-            } else {
             FAPI_INVOKE_HWP(errl,
                             spi_read,
                             handle,
@@ -500,7 +469,6 @@ errlHndl_t SpiOp::write(void*   i_buffer,
                             iv_adjusted_length,
                             RAW_BYTE_ACCESS,
                             iv_buffer);
-            }
             if (errl != nullptr)
             {
                 TRACFCOMP(g_trac_spi, "SpiOp::write(): "
@@ -533,21 +501,13 @@ errlHndl_t SpiOp::write(void*   i_buffer,
         // if iv_usingAdjustedBuffer is set to false then they are equal to
         // the requested offset and length and if iv_usingAdjustedBuffer is true
         // then we must use them anyway.
-        if( g_USE_OLD_SPI ) {
-        FAPI_INVOKE_HWP(errl,
-                        OLDSPI::spi_write,
-                        handle,
-                        iv_adjusted_offset,
-                        iv_adjusted_length,
-                        iv_buffer);
-        } else {
         FAPI_INVOKE_HWP(errl,
                         spi_write,
                         handle,
                         iv_adjusted_offset,
                         iv_adjusted_length,
                         iv_buffer);
-        }
+
         if (errl != nullptr)
         {
             TRACFCOMP(g_trac_spi, "SpiOp::write(): "
@@ -734,17 +694,6 @@ SpiOp::SpiOp(TARGETING::Target* i_target,
       iv_engine(i_engine)
 {
     iv_start_index = (iv_offset % TRANSACTION_ALIGNMENT);
-
-    if( MAGIC_INST_CHECK_FEATURE(MAGIC_FEATURE__USEOLDSPI) )
-    {
-        TRACFCOMP(g_trac_spi,"dc99> Using old SPI logic");
-        g_USE_OLD_SPI = true;
-    }
-    else
-    {
-        TRACFCOMP(g_trac_spi,"dc99> Using new SPI logic");
-    }
-
 
     // Calculate the adjusted parameters.
     setAdjustedOpArgs(i_buffer);

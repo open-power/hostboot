@@ -49,6 +49,4 @@ SUBDIRS += test.d
 
 include ${ROOTPATH}/procedure.rules.mk
 include ${HWP_PATH}/hwp/spi/p10_sbe_spi_cmd.mk
-OBJS += p10_sbe_spi_cmd_OLD.o
-
 include ${ROOTPATH}/config.mk
