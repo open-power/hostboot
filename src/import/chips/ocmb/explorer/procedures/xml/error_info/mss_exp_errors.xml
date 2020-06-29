@@ -392,6 +392,7 @@
     <ffdc>TARGET</ffdc>
     <ffdc>STATUS_CODE</ffdc>
     <ffdc>CMD_ID</ffdc>
+    <ffdc>STATUS_DATA</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>MEDIUM</priority>
@@ -414,6 +415,7 @@
     <ffdc>TARGET</ffdc>
     <ffdc>STATUS_CODE</ffdc>
     <ffdc>CMD_ID</ffdc>
+    <ffdc>STATUS_DATA</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>MEDIUM</priority>
@@ -435,6 +437,7 @@
     </description>
     <ffdc>TARGET</ffdc>
     <ffdc>STATUS_CODE</ffdc>
+    <ffdc>STATUS_DATA</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>MEDIUM</priority>
@@ -457,6 +460,7 @@
     <ffdc>TARGET</ffdc>
     <ffdc>BOOT_STAGE</ffdc>
     <ffdc>EXPECTED_BOOT_STAGE</ffdc>
+    <ffdc>STATUS_DATA</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>MEDIUM</priority>
@@ -487,6 +491,19 @@
     <deconfigure>
       <target>TARGET</target>
     </deconfigure>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_EXP_I2C_FW_STATUS_INVALID_SIZE</rc>
+    <description>
+      Received incorrect EXP_FW_STATUS data size
+    </description>
+    <ffdc>TARGET</ffdc>
+    <ffdc>STATUS_CODE_SIZE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>MEDIUM</priority>
+    </callout>
   </hwpError>
 
   <hwpError>
