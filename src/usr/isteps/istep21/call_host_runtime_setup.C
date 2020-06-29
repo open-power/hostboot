@@ -43,6 +43,7 @@
 #include <map>
 #include <sys/internode.h>
 #include <mbox/ipc_msg_types.H>
+#include <arch/magic.H>
 
 #include <secureboot/service.H>
 #include <secureboot/containerheader.H>
@@ -333,7 +334,7 @@ void* call_host_runtime_setup (void *io_pArgs)
 #endif
 
         //@FIXME-CQ:SW493238
-        if( l_activatePM && Util::isMultiprocSupported() )
+        if( l_activatePM && MAGIC_INST_CHECK_FEATURE(MAGIC_FEATURE__SKIPOCC) )
         {
             TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                        "Skipping OCC Enablement/Reset in multiproc config");

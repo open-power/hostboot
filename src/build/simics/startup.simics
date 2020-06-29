@@ -232,6 +232,12 @@ try {
         $hb_ignoretodfail = 0
     }
 }
+try {
+    echo "hb_skipocc = "+$hb_skipocc
+} except {
+    #default to running OCC
+    $hb_skipocc = 0
+}
 
 # spi_master_version will be set by newer simics levels
 #  spi_master_version=1 means to use the old logic, as does no value

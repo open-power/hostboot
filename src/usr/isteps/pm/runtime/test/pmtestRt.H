@@ -48,6 +48,7 @@
 #include <targeting/runtime/rt_targeting.H>
 #include <sys/mm.h>
 #include <util/misc.H>
+#include <arch/magic.H>
 
 /* FIXME RTC: 210975
 #include <stopreg/p9_stop_api.H>
@@ -152,7 +153,7 @@ class PMTest : public CxxTest::TestSuite
 
         do {
         //@FIXME-CQ:SW493238
-        if( Util::isMultiprocSupported() )
+        if( MAGIC_INST_CHECK_FEATURE(MAGIC_FEATURE__SKIPOCC) )
         {
             TS_INFO( "Skipping testLoadAndStartOcc in multiproc config");
             break;

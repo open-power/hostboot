@@ -262,6 +262,7 @@ constexpr uint8_t MAGIC_FEATURE__MULTIPROC     = 1;
 constexpr uint8_t MAGIC_FEATURE__IGNORESMPFAIL = 2;
 constexpr uint8_t MAGIC_FEATURE__IGNORETODFAIL = 3;
 constexpr uint8_t MAGIC_FEATURE__USEOLDSPI     = 4;
+constexpr uint8_t MAGIC_FEATURE__SKIPOCC       = 5;
 
 
 

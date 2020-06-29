@@ -843,6 +843,10 @@ def magic_instruction_callback(user_arg, cpu, arg):
             value = 1 if simenv.spi_master_version  == 1 else 0
             if value != 0:
                 print "HB> MAGIC_FEATURE__USEOLDSPI = %d" % (value)
+        elif feature == 5:  #MAGIC_FEATURE__SKIPOCC
+            value = 1 if simenv.hb_skipocc  == 1 else 0
+            if value != 0:
+                print "HB> MAGIC_FEATURE__SKIPOCC = %d" % (value)
         else:
             print "MAGIC_CHECK_FEATURE> Unknown feature %d requested for" % (feature)
         cpu.r3 = value
