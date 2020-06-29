@@ -53,6 +53,8 @@
 
 #include <platform_vddr.H>              // platform_enable_vddr
 
+#include <targeting/targplatutil.H>     // assertGetToplevelTarget
+
 using namespace ISTEPS_TRACE;
 using namespace ISTEP_ERROR;
 using namespace ERRORLOG;
@@ -70,15 +72,31 @@ void* call_host_set_mem_volt (void *io_pArgs)
     IStepError l_StepError;
 
     do {
-    // Send voltage config down to FSP. This is a no-op on non-FSP systems.
-    l_errl = platform_enable_vddr();
-    if(l_errl)
+
+    // Do not run voltage inits in MPIPL
+    if(!UTIL::assertGetToplevelTarget()->getAttr<ATTR_IS_MPIPL_HB>())
     {
-        TRACFCOMP(g_trac_isteps_trace, ERR_MRK"call_host_set_mem_volt: could not send voltage config to FSP"
-                  TRACE_ERR_FMT,
-                  TRACE_ERR_ARGS(l_errl));
-        captureError(l_errl, l_StepError, ISTEP_COMP_ID);
-        break;
+        // Disable voltage first (no-op on non-FSP systems)
+        l_errl = platform_disable_vddr();
+        if(l_errl)
+        {
+            TRACFCOMP(g_trac_isteps_trace, ERR_MRK"call_host_set_mem_volt: could not disable voltages"
+                      TRACE_ERR_FMT,
+                      TRACE_ERR_ARGS(l_errl));
+            captureError(l_errl, l_StepError, ISTEP_COMP_ID);
+            break;
+        }
+
+        // Send voltage config down to FSP. This is a no-op on non-FSP systems.
+        l_errl = platform_enable_vddr();
+        if(l_errl)
+        {
+            TRACFCOMP(g_trac_isteps_trace, ERR_MRK"call_host_set_mem_volt: could not send voltage config to FSP"
+                      TRACE_ERR_FMT,
+                      TRACE_ERR_ARGS(l_errl));
+            captureError(l_errl, l_StepError, ISTEP_COMP_ID);
+            break;
+        }
     }
 
     // Create a vector of Target pointers
