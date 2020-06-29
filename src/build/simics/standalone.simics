@@ -13,7 +13,6 @@ if ($hb_pnor == NIL) {
         @simenv.hb_pnor = quiet_run_command("get-master-pnor")[0]
         @SIM_get_object(simenv.hb_pnor[0])
     } except {
-        # Default to Nimbus name
         foreach $pnor in (get-object-list -all BmcCmp) {
             $hb_pnor = ($pnor)
         }
