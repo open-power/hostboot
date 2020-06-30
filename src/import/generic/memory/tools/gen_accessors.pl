@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2015,2019
+# Contributors Listed Below - COPYRIGHT 2015,2020
 # [+] International Business Machines Corp.
 #
 #
@@ -71,6 +71,7 @@ use lib $ENV{PROJECT_ROOT} . "/src/import/generic/memory/tools";    # Hostboot P
 
 use English;
 use Carp qw( croak );
+use open ':std', ':encoding(UTF-8)';
 use Getopt::Long;
 use gen_accessors qw( get_array_dimensions format_attr_description generate_accessor_methods );
 

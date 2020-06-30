@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2015,2018
+# Contributors Listed Below - COPYRIGHT 2015,2020
 # [+] International Business Machines Corp.
 #
 #
@@ -65,6 +65,7 @@ if ( ( $numArgs < 1 ) || ( $arg_output_dir eq undef ) )
 #------------------------------------------------------------------------------
 use Digest::MD5 qw(md5_hex);
 use XML::Simple;
+use open ':std', ':encoding(UTF-8)';
 my $xml = new XML::Simple( KeyAttr => [] );
 
 # Uncomment to enable debug output
