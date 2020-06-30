@@ -39,7 +39,10 @@
 #include <stdlib.h>
 #include <limits.h>
 
+
+
 // Other components
+#include <kernel/console.H>
 #include <sys/misc.h>
 #include <sys/mm.h>
 #include <sys/task.h>
@@ -475,6 +478,8 @@ static void initializeAttributes(TargetService& i_targetService,
         if(i_isMpipl)
         {
             l_pTopLevel->setAttr<ATTR_IS_MPIPL_HB>(1);
+
+            printk("Hostboot is performing a memory-preserving IPL (MPIPL).\n");
 
             //Clear out some attributes that could have stale data
             l_pTopLevel->setAttr<ATTR_HB_RSV_MEM_NEXT_SECTION>(0);
