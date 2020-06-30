@@ -35,11 +35,11 @@
   </entry>
   <entry>
     <name>ATTR_NAME</name>
-    <value>0xA</value>
+    <virtual/>
   </entry>
   <entry>
     <name>ATTR_EC</name>
-    <value>0x10</value>
+    <virtual/>
   </entry>
   <!-- customize-only attributes -->
   <entry>
