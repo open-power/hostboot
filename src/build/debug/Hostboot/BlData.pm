@@ -213,7 +213,7 @@ sub main
     my $blToHbAddrStr = sprintf("0x%08X", $blToHbAddr);
     # blToHbSize is the size of the bootloader -> hostboot data section (in bytes)
     # @DEP_ON_BL_TO_HB_SIZE all of the tags need to be kept in sync
-    my $blToHbSize = 2414;
+    my $blToHbSize = 2415;
     my $blToHb = ::readData($blToHbAddr,$blToHbSize);
     my $blToHbData = formatData($blToHb);
     $dataOffset += ::alignUp($blToHbSize, 16);

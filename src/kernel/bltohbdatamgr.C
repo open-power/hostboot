@@ -62,6 +62,8 @@ void BlToHbDataManager::print() const
         printkd("-- HW keys' Hash Addr = 0x%lX Size = 0x%lX\n",
                 getHwKeysHashAddr(),
                 iv_data.hwKeysHashSize);
+        printkd("-- Minimum FW Secure Version  = 0x%02X\n",
+                iv_data.min_secure_version);
         printkd("-- HBB header Addr = 0x%lX Size = 0x%lX\n", getHbbHeaderAddr(),
                iv_data.hbbHeaderSize);
         printkd("-- Reserved Size = 0x%lX\n", iv_preservedSize);
@@ -123,6 +125,7 @@ void BlToHbDataManager::initValid (const Bootloader::BlToHbData& i_data)
     iv_data.securityOverride   = i_data.securityOverride;
     iv_data.allowAttrOverrides = i_data.allowAttrOverrides;
     iv_data.secBackdoorBit = i_data.secBackdoorBit;
+    iv_data.min_secure_version = i_data.min_secure_version;
 
     // Populate the MMIO members
     kassert(i_data.lpcBAR>0);
@@ -281,6 +284,17 @@ const size_t BlToHbDataManager::getHwKeysHashSize() const
 {
     return iv_data.hwKeysHashSize;
 }
+
+const uint8_t BlToHbDataManager::getMinimumSecureVersion() const
+{
+    if(!iv_dataValid)
+    {
+        printk("E> BlToHbDataManager is invalid, cannot access Minimum Secure Version\n");
+        crit_assert(iv_dataValid);
+    }
+    return iv_data.min_secure_version;
+}
+
 
 const void* BlToHbDataManager::getHbbHeader() const
 {

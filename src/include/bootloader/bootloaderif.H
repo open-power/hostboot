@@ -40,6 +40,9 @@ namespace Bootloader{
 // Location of the HW Key Hash located at the end of the HBBL without ECC
 #define HBBL_HW_KEY_HASH_LOCATION  (MAX_HBBL_SIZE - sizeof(SHA512_t))
 
+// Location of Secure Version is the byte preceding HBBL_HW_KEY_HASH_LOCATION
+#define HBBL_SECURE_VERISON_LOCATION  (HBBL_HW_KEY_HASH_LOCATION - 1)
+
 // Size of exception vector reserved space at start of the HBBL section
 #define HBBL_EXCEPTION_VECTOR_SIZE (12 * KILOBYTE)
 
@@ -128,7 +131,8 @@ struct BlToHbData
                    lpcBAR(MEMMAP::MMIO_GROUP0_CHIP0_LPC_BASE_ADDR),
                    securityOverride(0), allowAttrOverrides(0),
                    sizeOfStructure(0), secBackdoorBit(0),
-                   cacheSizeMb(0), numKeyAddrPair(0)
+                   min_secure_version(0), cacheSizeMb(0),
+                   numKeyAddrPair(0)
     {
         memset(keyAddrStashData, 0, sizeof(keyAddrStashData));
     }
@@ -165,13 +169,14 @@ struct BlToHbData
     size_t sizeOfStructure;
     // Secure Setting - SBE Security Backdoor
     bool secBackdoorBit;
+    // FW Minimum Secure Version
+    uint8_t min_secure_version;
     // The cache size available to HB (in MB)
     uint16_t cacheSizeMb;
     // The number of keyAddrPair structures included in SBE to BL comm area
     size_t numKeyAddrPair;
     //keyAddr stash data
     keyAddrPair_t keyAddrStashData[MAX_KEY_ADDR_PAIRS];
-
 } __attribute__((packed));
 
 /**

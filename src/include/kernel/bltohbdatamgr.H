@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2017,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -131,6 +131,13 @@ class BlToHbDataManager
          * @return size_t     hwKeysHashSize
          */
         const size_t getHwKeysHashSize() const;
+
+        /*
+         * @brief Returns internal Minimum FW Secure Version
+         *
+         * @return uint8_t     min_secure_version
+         */
+        const uint8_t getMinimumSecureVersion() const;
 
         /*
          * @brief Returns internal pointer to hbbHeader
