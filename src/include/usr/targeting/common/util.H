@@ -83,37 +83,6 @@ namespace PROPERTIES
 
 }
 
-namespace UTIL
-{
-    // Better definition of RISK_LEVEL attribute settings
-    // WARNING: addition of risk levels that don't support SMF will have a
-    // significant effect on the behavior of SMF code. Please ensure that
-    // (at least) src/usr/secureboot/smf/smf_utils.C is updated
-    // accordingly!
-    typedef enum
-    {
-        // Compatibility modes
-        P9N22_P9C12_RUGBY_FAVOR_SECURITY               = 0x00,
-        P9N22_P9C12_RUGBY_FAVOR_PERFORMANCE            = 0x01,
-        P9N22_NO_RUGBY_MITIGATIONS                     = 0x02,
-        P9N22_P9N23_JAVA_PERF                          = 0x03,
-
-        // Native modes
-        P9N23_P9C13_NATIVE_MODE_MINIMUM                = 0x04,
-        P9N23_P9C13_NATIVE_SMF_RUGBY_FAVOR_SECURITY    = 0x04,
-        P9N23_P9C13_NATIVE_SMF_RUGBY_FAVOR_PERFORMANCE = 0x05,
-
-        // Axone modes (same as DD2.3 native mode)
-        P9A_RUGBY_FAVOR_SECURITY                       = 0x04,
-        P9A_RUGBY_FAVOR_PERFORMANCE                    = 0x05,
-        // The _LOWER numbered values are equivalent to the higher
-        //  values but they exist to maintain compatibility with
-        //  Nimbus DD2.3 settings.
-        P9A_RUGBY_FAVOR_SECURITY_LOWER                 = 0x00,
-        P9A_RUGBY_FAVOR_PERFORMANCE_LOWER              = 0x01,
-    } Risk_level;
-}
-
 /**
  * @brief Checks to see if we are running in a hardware simulation
  *    environment, i.e. VPO/VBU  (not Simics)

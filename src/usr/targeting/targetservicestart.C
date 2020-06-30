@@ -445,61 +445,6 @@ static void initializeAttributes(TargetService& i_targetService,
                 l_pTopLevel->setAttr<ATTR_ISTEP_MODE>(0);
             }
 
-            //Set the RISK_LEVEL ATTR based off of master Scratch regs if set
-            //otherwise use default level defined by system MRW
-            // Risk Level is a 4 bit value that is treated as an integer, but
-            //  there is a legacy mode that we need to maintain support for
-
-            // @TODO RTC 213021: evaluate whether to add this back b/c of dynamic
-            // inits
-            //ATTR_RISK_LEVEL_type l_riskLevel =
-            //  l_pTopLevel->getAttr<ATTR_MRW_DEFAULT_RISK_LEVEL>();
-
-            ATTR_RISK_LEVEL_type l_riskLevel = 0;
-
-            INITSERVICE::SPLESS::MboxScratch8_t l_scratch8;
-            l_scratch8.data32 =
-              i_masterScratch[INITSERVICE::SPLESS::MboxScratch8_t::REG_IDX];
-
-            // Scratch5:bit2 is legacy risk level bit for backward compatibility
-            INITSERVICE::SPLESS::MboxScratch5_t l_scratch5;
-            l_scratch5.data32 =
-              i_masterScratch[INITSERVICE::SPLESS::MboxScratch5_t::REG_IDX];
-
-            // @TODO RTC: 212818
-            // risk level is going away in P10, we need to figure out
-            // what to do with this
-            if( l_scratch5.deprecated.oldRiskLevel && l_scratch8.scratchRegValid.validHwpCtlFlags)
-            {
-                l_riskLevel = 1;
-            }
-            // Scratch3 has the real risk level if the valid bit is on
-            else if (l_scratch8.scratchRegValid.validFwMode)
-            {
-                INITSERVICE::SPLESS::MboxScratch3_t l_scratch3;
-                l_scratch3.data32 =
-                    i_masterScratch[INITSERVICE::SPLESS::MboxScratch3_t::REG_IDX];
-
-                // @TODO RTC: 212818
-                // risk level is going away in P10, need to find a
-                // replacement here
-                l_riskLevel = l_scratch3.fwModeCtlFlags.riskLevel;
-            }
-            else
-            {
-                // TODO RTC: 213021
-                // This attribute is no longer present; the only code that
-                // reads the attribute is a Nimbus only path dealing with
-                // pre-dynamic init risk levels.  Disable for P10 bringup.
-                #if 0
-                // MRW used to setup RISK_LEVEL
-                l_pTopLevel->setAttr<ATTR_RISK_LEVEL_ORIGIN>
-                    (RISK_LEVEL_ORIGIN_MRW);
-                #endif
-            }
-            TARG_INF( "Setting RISK_LEVEL=%d", l_riskLevel );
-            l_pTopLevel->setAttr<ATTR_RISK_LEVEL>(l_riskLevel);
-
             //Set the SBE Console enablement based on our console enablement
             ATTR_LPC_CONSOLE_CNFG_type l_console = LPC_CONSOLE_CNFG_ENABLE;
 #ifndef CONFIG_CONSOLE

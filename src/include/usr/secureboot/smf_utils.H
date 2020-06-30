@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018                             */
+/* Contributors Listed Below - COPYRIGHT 2018,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -48,17 +48,6 @@ extern const uint64_t MIN_MEM_RESERVED_FOR_HB;
  * @return true: SMF is enabled; false: SMF is disabled.
  */
 bool isSmfEnabled();
-
-/**
- * @brief Checks whether the system has the correct risk level to
- *        support SMF: SMF is supported on Axone by default or on
- *        NIMBUS or CUMULUS with risk level >= 4.
- *
- * @return nullptr: the current system supports SMF
- *         non-nullptr: an internal error occurred or the system
- *                      does not support SMF
- */
-errlHndl_t checkRiskLevelForSmf();
 
 } // namespace SMF
 

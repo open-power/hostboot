@@ -670,17 +670,6 @@ void HdatIplParms::hdatGetSystemParamters()
     }
     HDAT_DBG("after selective memory mirroring");
 
-    // Check both compat and native mode for relevant risk levels
-    ATTR_RISK_LEVEL_type l_risk = l_pSysTarget->getAttr<ATTR_RISK_LEVEL>();
-    if( !((l_risk == UTIL::P9N22_P9C12_RUGBY_FAVOR_SECURITY)
-          || (l_risk == UTIL::P9N23_P9C13_NATIVE_SMF_RUGBY_FAVOR_SECURITY)) )
-    {
-        // running in a mode that doesn't favor security, set elevated risk
-        this->iv_hdatIPLParams->iv_sysParms.hdatSystemAttributes |=
-          HDAT_RISK_LEVEL_ELEVATED;
-    }
-    HDAT_DBG("after risk level");
-
     //@TODO: RTC 142465 missing attribut
     //IS_MPIPL_SUPPORTED not present
    /* this->iv_hdatIPLParams->iv_sysParms.hdatSystemAttributes |=

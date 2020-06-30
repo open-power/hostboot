@@ -246,10 +246,8 @@ namespace SPLESS
                 DONOTUSE()
                 uint32_t reserved3                   :13;  //15:27 -- Available
 
-                // @TODO RTC: 212818
-                // The riskLevel field is being deprecated in P10 but
-                // is used in targetservicestart.C
-                uint32_t riskLevel                   :4;   //28:31
+                DONOTUSE() // Previously the risk_level field
+                uint32_t reserved4                   :4;   //28:31
             } fwModeCtlFlags;
         };
     };
@@ -389,21 +387,6 @@ namespace SPLESS
                 uint32_t majorStep           :8;    //16:23
                 uint32_t minorStep           :8;    //24:31
             } debug;
-
-            // @TODO RTC: 212818 The following struct is slated to be removed
-            // but the oldRiskLevel member is still used because there are no
-            // replacements yet.
-            struct
-            {
-                uint32_t              :1;    //0
-                uint32_t              :1;    //1
-                uint32_t oldRiskLevel :1;    //2
-                uint32_t              :1;    //3
-                uint32_t              :1;    //4
-                uint32_t              :1;    //5
-                uint32_t              :6;    //6:11
-                uint32_t              :20;   //12:31
-            } deprecated;
         };
     };
 

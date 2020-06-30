@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -48,62 +48,6 @@ bool isSmfEnabled()
     crit_assert(l_sys != nullptr);
     l_smfEnabled = l_sys->getAttr<TARGETING::ATTR_SMF_CONFIG>();
     return l_smfEnabled;
-}
-
-errlHndl_t checkRiskLevelForSmf()
-{
-    errlHndl_t l_errl = nullptr;
-
-    do {
-
-    TARGETING::Target* l_sys = nullptr;
-    TARGETING::targetService().getTopLevelTarget(l_sys);
-    crit_assert(l_sys);
-    auto l_riskLevel = l_sys->getAttr<TARGETING::ATTR_RISK_LEVEL>();
-
-    TARGETING::Target* l_pMasterProc = nullptr;
-    l_errl = TARGETING::targetService()
-                                .queryMasterProcChipTargetHandle(l_pMasterProc);
-    if(l_errl)
-    {
-        break;
-    }
-
-    auto l_masterProcModel = l_pMasterProc->getAttr<TARGETING::ATTR_MODEL>();
-
-    // SMF is enabled by default on Axone, so need to check the risk level
-    // only on P9C/P9N.
-    // WARNING: If more risk levels are added in the future that don't
-    // support SMF, the below check needs to be altered accordingly.
-    if(l_riskLevel <TARGETING::UTIL::P9N23_P9C13_NATIVE_SMF_RUGBY_FAVOR_SECURITY
-       && (
-            (l_masterProcModel == TARGETING::MODEL_CUMULUS) ||
-            (l_masterProcModel == TARGETING::MODEL_NIMBUS)
-          )
-      )
-    {
-        /*@
-        * @errortype
-        * @reasoncode  SECUREBOOT::RC_RISK_LEVEL_TOO_LOW
-        * @severity    ERRORLOG::ERRL_SEV_UNRECOVERABLE
-        * @moduleid    SECUREBOOT::MOD_CHECK_RISK_LEVEL_FOR_SMF
-        * @userdata1   Current risk level of the system
-        * @userdata2   Minimum risk level required
-        * @devdesc     SMF is enabled on the system of incorrect risk level
-        * @custdesc    A problem occurred during the IPL of the system.
-        */
-        l_errl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                       SECUREBOOT::MOD_CHECK_RISK_LEVEL_FOR_SMF,
-                                       SECUREBOOT::RC_RISK_LEVEL_TOO_LOW,
-                                       l_riskLevel,
-                                       TARGETING::UTIL::P9N23_P9C13_NATIVE_SMF_RUGBY_FAVOR_SECURITY,
-                                       ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
-        break;
-    }
-
-    } while(0);
-
-    return l_errl;
 }
 
 } // namespace SMF

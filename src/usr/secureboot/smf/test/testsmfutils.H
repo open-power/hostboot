@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -108,76 +108,6 @@ public:
         } while (0);
 
         TS_INFO(EXIT_MRK "testIsSmfEnabled");
-    }
-
-    /**
-     * @brief Test checkRiskLevelForSmf helper function
-     */
-    void testCheckRiskLevelForSmf() const
-    {
-        TS_INFO(ENTER_MRK "testCheckRiskLevelForSmf");
-        errlHndl_t l_errl = nullptr;
-
-        do {
-        if(!cv_isSmfLoaded)
-        {
-            break;
-        }
-
-        TARGETING::Target* l_masterProc = nullptr;
-
-        l_errl = TARGETING::targetService()
-                                 .queryMasterProcChipTargetHandle(l_masterProc);
-        if(l_errl)
-        {
-            TS_FAIL("testCheckRiskLevelForSmf: could not get master proc");
-            errlCommit(l_errl, CXXTEST_COMP_ID);
-            break;
-        }
-
-        if(l_masterProc->getAttr<TARGETING::ATTR_MODEL>() ==
-            TARGETING::MODEL_AXONE)
-        {
-            // SMF is enabled by default on Axone
-            l_errl = SECUREBOOT::SMF::checkRiskLevelForSmf();
-            if(l_errl)
-            {
-                TS_FAIL("testCheckRiskLevelForSmf: checkRiskLevelForSmf returned an error for Axone; plid = 0x%x", l_errl->plid());
-                errlCommit(l_errl, CXXTEST_COMP_ID);
-            }
-        }
-        else // NIMBUS or CUMULUS
-        {
-            TARGETING::Target* l_sys = nullptr;
-            TARGETING::targetService().getTopLevelTarget(l_sys);
-            l_sys->setAttr<TARGETING::ATTR_RISK_LEVEL>(
-                  TARGETING::UTIL::P9N23_P9C13_NATIVE_SMF_RUGBY_FAVOR_SECURITY);
-            l_errl = SECUREBOOT::SMF::checkRiskLevelForSmf();
-            if(l_errl)
-            {
-                TS_FAIL("testCheckRiskLevelForSmf: checkRiskLevelForSmf returned an error for CUMULUS/NIMBUS; plid = 0x%x", l_errl->plid());
-                errlCommit(l_errl, CXXTEST_COMP_ID);
-            }
-
-            l_sys->setAttr<TARGETING::ATTR_RISK_LEVEL>(
-                                        TARGETING::UTIL::P9N22_P9N23_JAVA_PERF);
-            l_errl = SECUREBOOT::SMF::checkRiskLevelForSmf();
-            if(!l_errl)
-            {
-                TS_FAIL("testCheckRiskLevelForSmf: expected error was not returned from checkRiskLevelForSmf");
-            }
-            else
-            {
-                if(l_errl->reasonCode() != SECUREBOOT::RC_RISK_LEVEL_TOO_LOW)
-                {
-                    TS_FAIL("testCheckRiskLevelForSmf: incorrect reason code returned from checkRiskLevelForSmf. Expected 0x%x; actual 0x%x", SECUREBOOT::RC_RISK_LEVEL_TOO_LOW, l_errl->reasonCode());
-                }
-                errlCommit(l_errl, CXXTEST_COMP_ID);
-            }
-        }
-        } while(0);
-
-        TS_INFO(EXIT_MRK "testCheckRiskLevelForSmf");
     }
 };
 
