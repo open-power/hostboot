@@ -799,6 +799,7 @@ void Target::getAttrTankTargetPosData(uint16_t & o_pos,
                     // Fail on nonsense values
                 case(TARGETING::CLASS_NA):
                 case(TARGETING::CLASS_MAX):
+                case(TARGETING::CLASS_INVALID):
                     targAssert(GET_ATTR_TANK_TARGET_POS_DATA, ATTR_CLASS);
             } // end swtich(l_class)
         }

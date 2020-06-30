@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -41,6 +41,14 @@
 
 #include <targeting/common/attributeTank.H>
 
+#include <attributeenums.H>
+#include <attributetraits.H>
+
+#include <targeting/common/commontargeting.H>
+#include <targeting/common/trace.H>
+#include <targeting/targplatutil.H>
+
+
 using namespace TARGETING;
 
 class AttributeTest: public CxxTest::TestSuite
@@ -70,6 +78,8 @@ public:
      *  @test Test the Copy Constructor Method
      */
     void testCopyConstructor(void);
+
+    void testGeneratedInvalidsForAttr(void);
 
     private:
 
@@ -1229,6 +1239,136 @@ void AttributeTest::testCopyConstructor(void)
     TRACFCOMP( g_trac_test, EXIT_MRK "testCopyConstructor "
                "num tests = %d  / num fails = %d", l_numTests, l_numFails);
 } // end testCopyConstructor
+
+// testGeneratedInvalidsForAttr
+void AttributeTest::testGeneratedInvalidsForAttr(void)
+{
+    TRACFCOMP( g_trac_test, ENTER_MRK " testGeneratedInvalidsForAttr" );
+
+    // Test stats
+    uint8_t l_numTests(0);
+    uint8_t l_numFails(0);
+
+    Target* sys = UTIL::assertGetToplevelTarget();
+
+    //tests for enums
+    TS_TRACE(INFO_MRK "Testing Attribute Enums");
+
+    auto test = KEY_CLEAR_REQUEST_INVALID;
+    TS_TRACE(INFO_MRK "Test1: KEY_CLEAR_REQUEST_INVALID = 0x%X", test);
+
+    auto defaultGet = sys->getAttr<ATTR_KEY_CLEAR_REQUEST>();
+    TS_TRACE(INFO_MRK "get default value for KEY_CLEAR_REQUEST = 0x%X", defaultGet);
+
+    //test setting the attribute with the INVALID value
+    test = KEY_CLEAR_REQUEST_INVALID;
+    sys->setAttr<ATTR_KEY_CLEAR_REQUEST>(test);
+    test = sys->getAttr<ATTR_KEY_CLEAR_REQUEST>();
+    TS_TRACE(INFO_MRK "set KEY_CLEAR_REQUEST to its INVALID value = 0x%X", test);
+
+    // test that the enum was properly set to its INVALID value
+    ++l_numTests;
+    if (test != KEY_CLEAR_REQUEST_INVALID)
+    {
+        TS_FAIL("test1 testGeneratedInvalidsForAttr: "
+                "set ATTR_KEY_CLEAR_REQUEST to KEY_CLEAR_REQUEST_INVALID failed "
+                "incorrect Attribute Values data returned"
+                "ATTR_KEY_CLEAR_REQUEST = 0x%X", test);
+        ++l_numFails;
+    }
+
+    // set it back to the default
+    sys->setAttr<ATTR_KEY_CLEAR_REQUEST>(defaultGet);
+
+    //// END OF FIRST TEST CASE ////
+
+    auto test2 = PAYLOAD_KIND_INVALID;
+    TS_TRACE(INFO_MRK "Test2: PAYLOAD_KIND_INVALID = 0x%X", test2);
+
+    auto defaultGet2 = sys->getAttr<ATTR_PAYLOAD_KIND>();
+    TS_TRACE(INFO_MRK "get default value for PAYLOAD_KIND = 0x%X", defaultGet2);
+
+    test2 = PAYLOAD_KIND_INVALID;
+    sys->setAttr<ATTR_PAYLOAD_KIND>(test2);
+    test2 = sys->getAttr<ATTR_PAYLOAD_KIND>();
+    TS_TRACE(INFO_MRK "set PAYLOAD_KIND to its INVALID value = 0x%X", test2);
+
+    ++l_numTests;
+    if (test2 != PAYLOAD_KIND_INVALID)
+    {
+        TS_FAIL("test2 testGeneratedInvalidsForAttr: "
+                "set ATTR_PAYLOAD_KIND to PAYLOAD_KIND_INVALID failed "
+                "incorrect Attribute Values data returned"
+                "ATTR_PAYLOAD_KIND = 0x%X", test2);
+        ++l_numFails;
+    }
+
+    sys->setAttr<ATTR_PAYLOAD_KIND>(defaultGet2);
+
+    //// END SECOND CASE ////
+
+    //test for traits
+    auto test3 = AttributeTraits<ATTR_PHYS_PRES_REQUEST_OPEN_WINDOW>()
+                 .PHYS_PRES_REQUEST_OPEN_WINDOW_INVALID;
+
+    TS_TRACE(INFO_MRK "Testing Attribute Traits");
+    TS_TRACE(INFO_MRK "Test3: PHYS_PRES_REQUEST_OPEN_WINDOW_INVALID = 0x%X", test3);
+
+    auto defaultGet3 = sys->getAttr<ATTR_PHYS_PRES_REQUEST_OPEN_WINDOW>();
+
+    TS_TRACE(INFO_MRK "get default value for PHYS_PRES_REQUEST_OPEN_WINDOW = 0x%X", defaultGet3);
+
+    sys->setAttr<ATTR_PHYS_PRES_REQUEST_OPEN_WINDOW>(test3);
+    test3 = sys->getAttr<ATTR_PHYS_PRES_REQUEST_OPEN_WINDOW>();
+    TS_TRACE(INFO_MRK "set PHYS_PRES_REQUEST_OPEN_WINDOW to its INVALID value = 0x%X", test3 );
+
+    ++l_numTests;
+    if (test3 != AttributeTraits<ATTR_PHYS_PRES_REQUEST_OPEN_WINDOW>()
+                 .PHYS_PRES_REQUEST_OPEN_WINDOW_INVALID)
+    {
+        TS_FAIL("test3 testGeneratedInvalidsForAttr: "
+                "set ATTR_PHYS_PRES_REQUEST_OPEN_WINDOW to "
+                "PHYS_PRES_REQUEST_OPEN_WINDOW_INVALID failed "
+                "incorrect Attribute Values data returned"
+                "ATTR_PHYS_PRES_REQUEST_OPEN_WINDOW = 0x%X", test3);
+        ++l_numFails;
+    }
+
+    sys->setAttr<ATTR_PHYS_PRES_REQUEST_OPEN_WINDOW>(defaultGet3);
+
+    //// END THIRD TEST CASE ////
+    //test for strings
+
+    TS_TRACE(INFO_MRK "Testing Attribute Strings");
+
+    auto test4 = PAYLOAD_KIND_INVALID;
+    auto defaultGet4 = sys->getAttr<ATTR_PAYLOAD_KIND>();
+    sys->setAttr<ATTR_PAYLOAD_KIND>(test4);
+
+    // must have 'hasStringConversion' specified in attributetraits.H
+    // and have a attrToString function in attributestrings.C
+    auto attrString = sys->getAttrAsString<ATTR_PAYLOAD_KIND>();
+
+    TS_TRACE(INFO_MRK "ATTR_PAYLOAD_KIND_INVALID = %s", attrString);
+
+    ++l_numTests;
+    if(strcmp(attrString, "INVALID") != 0)
+    {
+        TS_FAIL("test4 testGeneratedInvalidsForAttr: "
+                "PAYLOAD_KIND_INVALID to string failed "
+                "incorrect Attribute String returned"
+                "ATTR_PAYLOAD_KIND = %s", attrString);
+        ++l_numFails;
+    }
+
+
+    sys->setAttr<ATTR_PAYLOAD_KIND>(defaultGet4);
+    //// END FOURTH CASE ////
+
+    TRACFCOMP( g_trac_test, EXIT_MRK "testGeneratedInvalidsForAttr "
+                "num tests = %d  / num fails = %d", l_numTests, l_numFails);
+
+} //end testGeneratedInvalidsForAttr
 
 // compareAttributeHeader
 bool AttributeTest::compareAttributeHeader(

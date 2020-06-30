@@ -659,6 +659,7 @@ foreach my $attr (@rwPersistAttrs)
             print $rwAttrCFile ""
             . "            case $atype->{id}_$enumerations->{name}:\n";
         }
+        print $rwAttrCFile "            case $atype->{id}_INVALID:\n";
         print $rwAttrCFile "                break;\n"
         . "            default:\n"
         . "                handleEnumCheckFailure(this, ATTR_$attr->{id}, "
@@ -1781,6 +1782,7 @@ sub writeStringImplementationFileStrings {
 
     foreach my $attribute (@{$attributes->{attribute}})
     {
+        my $does_not_have_invalid = 1;
         if(exists $attribute->{simpleType})
         {
             my $simpleType = $attribute->{simpleType};
@@ -1810,6 +1812,13 @@ sub writeStringImplementationFileStrings {
                         $enumerator->{name},":\n";
                     print $outFile "            return \"",
                         $enumerator->{name},"\";\n";
+                    $does_not_have_invalid &&= not($enumerator->{name} =~m/INVALID/);
+                }
+                # add case for INVALIDs
+                if($does_not_have_invalid and not($enumerationType->{id}=~m/^TYPE$/))
+                {
+                    print $outFile "        case ", $attribute->{id}, "_INVALID:\n";
+                    print $outFile "            return \"INVALID\";\n";
                 }
 
                 print $outFile "        default:\n";
@@ -2179,7 +2188,7 @@ sub writeEnumFileAttrEnums {
     my $enumName = "";
     my $enumHex = "";
     my $enumHexValue = 0;
-
+    my $MAX_ENUM_LENGHT = 58;
     # Format below intentionally > 80 chars for clarity
 
     format ENUMFORMAT =
@@ -2191,6 +2200,8 @@ sub writeEnumFileAttrEnums {
 
     foreach my $enumerationType (@{$attributes->{enumerationType}})
     {
+        my $does_not_have_invalid = 1;
+
         print $outFile "/**\n";
         print $outFile wrapBrief( $enumerationType->{description} );
         print $outFile " */\n";
@@ -2226,10 +2237,14 @@ sub writeEnumFileAttrEnums {
             }
             $enumName = $enumerationType->{id} . "_" . $enumerator->{name};
 
+            # set flag if there is already an enum with an INVALID enumerator
+            # to be used after this inner loop has completed
+            $does_not_have_invalid &&= not($enumerator->{name} =~m/INVALID/);
+
             # enforce the implicit length requirement since the format command
             #  does not throw an error if we overrun
             my $enumsize = length($enumName);
-            if( $enumsize > 58 )
+            if( $enumsize > $MAX_ENUM_LENGHT)
             {
                print "    $enumName = $enumHex,\n";
             }
@@ -2238,6 +2253,29 @@ sub writeEnumFileAttrEnums {
                write;
             }
         }
+
+        # Add default invalid enum value
+        # - Place default invalid enum value at the end of list of specified enum values above
+        # - Assuming enums are of size uint32_t; therefore, using 0xFFFFFFFF for invalid value
+        # - Skip enums that already have enumerators with _INVALID on the end AND
+        # - Skip enum named TYPE, since src/include/usr/targeting/common/entitypath.H
+        #     only takes size of uint8 and complains about the extraneous F's
+        if($does_not_have_invalid and not($enumerationType->{id}=~m/^TYPE$/))
+        {
+            $enumHex = sprintf "0x%08X", 0xFFFFFFFF;
+
+            $enumName = $enumerationType->{id} . "_INVALID";
+            my $enumsize = length($enumName);
+            if( $enumsize > $MAX_ENUM_LENGHT )
+            {
+               print "    $enumName = $enumHex,\n";
+            }
+            else
+            {
+               write;
+            }
+        }
+
         print $outFile "};\n\n";
     }
 }
@@ -2755,13 +2793,30 @@ sub writeTraitFileTraits {
             print $outFile "    public:\n";
             print $outFile "        enum {",$traits," };\n";
             print $outFile "        typedef ", $type, " Type$dimensions;\n";
+
+            # In addition, add a default invalid value to traits definition for
+            # uint8_t ... uint64_t
+            print $outFile "#if __cplusplus >= 201103L \n";
+
+            if ($type eq "uint8_t") {
+                print $outFile "        ", $type," ", $attribute->{id},"_INVALID = 0xFF;\n";
+            }
+            elsif ($type eq "uint16_t") {
+                print $outFile "        ", $type," ", $attribute->{id},"_INVALID = 0xFFFF;\n";
+            }
+            elsif ($type eq "uint32_t") {
+                print $outFile "        ", $type," ", $attribute->{id},"_INVALID = 0xFFFFFFFF;\n";
+            }
+            elsif ($type eq "uint64_t") {
+                print $outFile "        ", $type," ", $attribute->{id},"_INVALID = 0xFFFFFFFFFFFFFFFF;\n";
+            }
+
+            # Append typedef for std::array if attr holds array value
             if ($stdArrAddOn ne "")
             {
-                # Append typedef for std::array if attr holds array value
-                print $outFile "#if __cplusplus >= 201103L \n";
                 print $outFile "        typedef $stdArrAddOn TypeStdArr;\n";
-                print $outFile "#endif\n";
             }
+            print $outFile "#endif\n";
             print $outFile "};\n\n";
 
             $typedefs .= "// Type aliases and/or sizes for ATTR_"
