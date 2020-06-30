@@ -1487,9 +1487,7 @@ errlHndl_t populate_hbSecurebootData ( void )
 #endif
 
         // Populate FW Secure Version
-        // TODO RTC 254577 - put in real value
-        // Clear for now
-        l_sysParmsPtr->hdatFwSecureVersion = 0;
+        l_sysParmsPtr->hdatFwSecureVersion = g_BlToHbDataManager.getSecureVersion();
         TRACFCOMP(g_trac_runtime, INFO_MRK"populate_hbSecurebootData: "
                   "Setting hdatFwSecureVersion to 0x%.2X",
                   l_sysParmsPtr->hdatFwSecureVersion);

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2017,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -36,6 +36,9 @@ namespace Bootloader{
 
 // Location of the HW Key Hash located at the end of the HBBL without ECC
 #define HBBL_HW_KEY_HASH_LOCATION  (MAX_HBBL_SIZE - sizeof(SHA512_t))
+
+// Location of Secure Version is the byte preceding HBBL_HW_KEY_HASH_LOCATION
+#define HBBL_SECURE_VERISON_LOCATION  (HBBL_HW_KEY_HASH_LOCATION - 1)
 
 // Size of exception vector reserved space at start of the HBBL section
 #define HBBL_EXCEPTION_VECTOR_SIZE (12 * KILOBYTE)
@@ -75,6 +78,7 @@ enum BlToHbDataVersion
     BLTOHB_SIZE             = 0x0000000900000005,
     BLTOHB_KEYADDR          = 0x0000000900000006,
     BLTOHB_BACKDOOR         = 0x0000000900000007,
+    BLTOHB_SECURE_VERSION   = 0x0000000900000008,
 };
 
 enum
@@ -125,7 +129,7 @@ struct BlToHbData
                    lpcBAR(MMIO_GROUP0_CHIP0_LPC_BASE_ADDR),
                    securityOverride(0), allowAttrOverrides(0),
                    sizeOfStructure(0), keyAddrStashData(0),
-                   secBackdoorBit(0) {}
+                   secBackdoorBit(0), secure_version(0) {}
 
     // Simple way to tell if data is valid
     uint64_t eyeCatch;
@@ -161,6 +165,8 @@ struct BlToHbData
     keyAddrPair_t  keyAddrStashData;
     // Secure Setting - SBE Security Backdoor
     bool secBackdoorBit;
+    // FW Secure Version
+    uint8_t secure_version;
 } __attribute__((packed));
 
 /**

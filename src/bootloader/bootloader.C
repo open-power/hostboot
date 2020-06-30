@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -151,6 +151,14 @@ namespace Bootloader{
             g_blData->blToHbData.hwKeysHash = reinterpret_cast<const void *>
                                                             (HW_KEYS_HASH_ADDR);
             g_blData->blToHbData.hwKeysHashSize = SHA512_DIGEST_LENGTH;
+
+            if (g_blData->blToHbData.version >= BLTOHB_SECURE_VERSION)
+            {
+                // Set Secure Version from the 1 byte before HW key hash pointer
+                memcpy(&g_blData->blToHbData.secure_version,
+                       reinterpret_cast<const void *>(SECURE_VERSION_ADDR),
+                       sizeof(g_blData->blToHbData.secure_version));
+            }
 
             // Set HBB header and size
             g_blData->blToHbData.hbbHeader = i_pHbbSrc;
@@ -327,6 +335,9 @@ namespace Bootloader{
             // Use current hw hash key
             memcpy (&l_hw_parms.hw_key_hash, g_blData->blToHbData.hwKeysHash,
                     sizeof(SHA512_t));
+
+            // Use current secure version
+            l_hw_parms.log = g_blData->blToHbData.secure_version;
 
             const auto l_container = reinterpret_cast<const ROM_container_raw*>
                                                                  (i_pContainer);
