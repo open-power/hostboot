@@ -79,7 +79,7 @@ int encode_pldm_state_effecter_pdr(struct pldm_state_effecter_pdr* const effecte
 
     effecter->hdr.version = 1;
     effecter->hdr.type = PLDM_STATE_EFFECTER_PDR;
-    effecter->hdr.length = *actual_size;
+    effecter->hdr.length = (*actual_size) - sizeof(struct pldm_pdr_hdr);
 
     memcpy(effecter->possible_states,
            possible_states,
@@ -150,7 +150,7 @@ int encode_pldm_state_sensor_pdr(struct pldm_state_sensor_pdr* const sensor,
 
     sensor->hdr.version = 1;
     sensor->hdr.type = PLDM_STATE_SENSOR_PDR;
-    sensor->hdr.length = *actual_size;
+    sensor->hdr.length = (*actual_size) - sizeof(struct pldm_pdr_hdr);
 
     memcpy(sensor->possible_states,
            possible_states,
