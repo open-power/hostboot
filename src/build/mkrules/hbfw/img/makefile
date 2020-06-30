@@ -249,8 +249,11 @@ update_image_id: cp_hbfiles validate_cfm_image_name
 validate_cfm_image_name: ${CFM_TEST_IMAGE:p} \
    	${HBFW_SIMPATH:F${${CFM_TEST_IMAGE:R}_SYMS}}
 
+# Copy ${BASE_IMAGES} to current directory and make sure they have
+# write permission to be able to be edited.
 cp_hbfiles: .SPECTARG
 	${BASE_IMAGES:@image@cp -f ${SRCPATH:F${image}} ${image};@}
+	chmod u+w ${BASE_IMAGES}
 
 gen_default_images: ${GEN_DEFAULT_IMAGES_DEPS}
 	currentsb -chain
