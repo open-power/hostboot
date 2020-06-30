@@ -227,10 +227,11 @@ GEN_STANDALONE_BIN_FILES = ${GEN_COMMON_BIN_FILES},TEST=EMPTY,TESTRO=EMPTY,TESTL
 	GEN_DEFAULT_BIN_FILES = ${GEN_COMMON_BIN_FILES},MEMD=${${ZZ_MEMD_IMG}:P},EECACHE=EMPTY,OCMBFW=${${OCMBFW_IMG}:P}
     .endif
     DEFAULT_PARAMS = --build-all --emit-eccless ${TARGET_TEST:b--test} ${HB_STANDALONE:b--hb-standalone} \
-		     ${CONFIG_SECUREBOOT:b--secureboot} --systemBinFiles ${GEN_DEFAULT_BIN_FILES} \
-		     --pnorLayout ${PNOR_LAYOUT} ${KEY_TRANSITION_PARAMS} ${CORRUPT_PARAMS} \
-		     --hwKeyHashFile ${IMPRINT_HW_KEY_HASH} \
-		     --editedLayoutLocation ${EDITED_LAYOUT_PATH}
+                     ${CONFIG_SECUREBOOT:b--secureboot} --systemBinFiles ${GEN_DEFAULT_BIN_FILES} \
+                     --pnorLayout ${PNOR_LAYOUT} ${KEY_TRANSITION_PARAMS} ${CORRUPT_PARAMS} \
+                     --hwKeyHashFile ${IMPRINT_HW_KEY_HASH} \
+                     --secure-version ${SIGNING_SECURITY_VERSION} \
+                     --editedLayoutLocation ${EDITED_LAYOUT_PATH}
 .else
     PNOR_LAYOUT = ${pnorLayoutFake.xml:P}
     # Parameters passed into GEN_PNOR_IMAGE_SCRIPT.
@@ -392,6 +393,7 @@ SYSTEM_SPECIFIC_PARAMS = --install-all --emit-eccless ${TARGET_TEST:b--test} ${C
 			 --systemBinFiles ${GEN_DENALI_BIN_FILES} \
 			 --systemBinFiles ${GEN_P10_BIN_FILES} \
 			 --hwKeyHashFile ${IMPRINT_HW_KEY_HASH} \
+                         --secure-version ${SIGNING_SECURITY_VERSION} \
 			 --editedLayoutLocation ${EDITED_LAYOUT_PATH}
 
 gen_system_specific_images_bypass_cache : dump-secureboot-config
