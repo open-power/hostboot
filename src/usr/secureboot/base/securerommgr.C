@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -71,14 +71,16 @@ errlHndl_t initializeSecureRomManager(void)
  * @brief Verify Signed Container
  */
 errlHndl_t verifyContainer(void * i_container,  const RomVerifyIds& i_ids,
-                           const SHA512_t* i_hwKeyHash)
+                           const SHA512_t* i_hwKeyHash,
+                           const uint8_t i_secureVersion)
 {
     errlHndl_t l_errl = nullptr;
 
     l_errl = Singleton<SecureRomManager>::instance().
                                        verifyContainer(i_container,
                                                        i_ids,
-                                                       i_hwKeyHash);
+                                                       i_hwKeyHash,
+                                                       i_secureVersion);
 
     return l_errl;
 }
@@ -165,6 +167,15 @@ void getHwKeyHash(SHA512_t o_hash)
 {
     return Singleton<SecureRomManager>::instance().getHwKeyHash(o_hash);
 }
+
+/*
+ * @brief  Externally available FW Secure Version retrieval function
+ */
+uint8_t getSecureVersion(void)
+{
+    return Singleton<SecureRomManager>::instance().getSecureVersion();
+}
+
 
 sbFuncVer_t getSecRomFuncVersion(const sbFuncType_t i_funcType)
 {
@@ -322,7 +333,8 @@ errlHndl_t SecureRomManager::initialize()
  */
 errlHndl_t SecureRomManager::verifyContainer(void * i_container,
                                              const RomVerifyIds& i_ids,
-                                             const SHA512_t* i_hwKeyHash)
+                                             const SHA512_t* i_hwKeyHash,
+                                             const uint8_t i_secureVersion)
 {
     TRACDCOMP(g_trac_secure,ENTER_MRK"SecureRomManager::verifyContainer(): "
               "i_container=%p", i_container);
@@ -358,6 +370,18 @@ errlHndl_t SecureRomManager::verifyContainer(void * i_container,
             memcpy (&l_hw_parms.hw_key_hash, i_hwKeyHash, sizeof(SHA512_t));
         }
 
+        // Set FW Secure Version
+        if (i_secureVersion == INVALID_SECURE_VERSION)
+        {
+            // Use system Secure Version
+            l_hw_parms.log = getSecureVersion();
+        }
+        else
+        {
+            // Use custom hw hash key
+            l_hw_parms.log = i_secureVersion;
+        }
+
         /*******************************************************************/
         /* Call ROM_verify() function via an assembly call                 */
         /*******************************************************************/
@@ -379,7 +403,6 @@ errlHndl_t SecureRomManager::verifyContainer(void * i_container,
                                (l_rom_verify_startAddr),
                                l_container,
                                &l_hw_parms);
-
 
         TRACUCOMP(g_trac_secure,"SecureRomManager::verifyContainer(): "
                   "Back from ROM_verify() via call_rom_verify: l_rc=0x%x, "
@@ -525,6 +548,15 @@ void SecureRomManager::getHwKeyHash()
     iv_key_hash  = reinterpret_cast<const SHA512_t*>(
                                            g_BlToHbDataManager.getHwKeysHash());
 }
+
+/**
+ * @brief Retrieves FW Secure Version
+ */
+uint8_t SecureRomManager::getSecureVersion()
+{
+    return g_BlToHbDataManager.getSecureVersion();
+}
+
 
 /**
  * @brief  Retrieve the internal hardware keys' hash from secure ROM object.

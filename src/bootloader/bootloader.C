@@ -120,7 +120,12 @@ namespace Bootloader{
                 g_blData->blToHbData.version = BLTOHB_KEYADDR;
                 break;
             case SBE_BACKDOOR_BIT_ADDED:
-                g_blData->blToHbData.version = BLTOHB_BACKDOOR;
+                // This case was setting version to BLTOHB_BACKDOOR,
+                // as that is the lastest SBE-specific case.
+                // However, HB needs to use an even later version,
+                // that is SBE-independent, so setting to BLTOHB_SECURE_VERSION
+                g_blData->blToHbData.version = BLTOHB_SECURE_VERSION;
+
                 break;
             default:
                 g_blData->blToHbData.version = BLTOHB_SIZE;

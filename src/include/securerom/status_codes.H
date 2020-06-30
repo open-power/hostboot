@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -90,6 +90,8 @@
 #define CODE_PROTECTION_TEST   0x0073
 
 #define ENTRY_VALID_TEST       0x0080
+
+#define SECURE_VERSION_TEST    0x0090
 
 #define PARTIAL                0x0002
 #define COMPLETED              0x0003
