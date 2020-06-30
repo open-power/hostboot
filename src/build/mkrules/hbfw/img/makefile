@@ -229,6 +229,7 @@ GEN_STANDALONE_BIN_FILES = ${GEN_COMMON_BIN_FILES},TEST=EMPTY,TESTRO=EMPTY,TESTL
                      ${CONFIG_SECUREBOOT:b--secureboot} --systemBinFiles ${GEN_DEFAULT_BIN_FILES} \
                      --pnorLayout ${PNOR_LAYOUT} ${KEY_TRANSITION_PARAMS} ${CORRUPT_PARAMS} \
                      --hwKeyHashFile ${IMPRINT_HW_KEY_HASH} \
+                     --secure-version ${SIGNING_SECURITY_VERSION} \
                      --editedLayoutLocation ${EDITED_LAYOUT_PATH}
 .else
     PNOR_LAYOUT = ${pnorLayoutFake.xml:P}
@@ -471,6 +472,7 @@ ZZ2UGEN4_HBD_FINAL_IMG = ZZ-2U-GEN4.HBD.bin
                              --systemBinFiles ${GEN_ZZGEN4_BIN_FILES} \
                              --systemBinFiles ${GEN_ZZ2UGEN4_BIN_FILES} \
                              --hwKeyHashFile ${IMPRINT_HW_KEY_HASH} \
+                             --secure-version ${SIGNING_SECURITY_VERSION} \
                              --editedLayoutLocation ${EDITED_LAYOUT_PATH}
 .else
     # Parameters passed into GEN_PNOR_IMAGE_SCRIPT.
