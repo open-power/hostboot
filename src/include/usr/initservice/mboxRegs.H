@@ -268,7 +268,7 @@ namespace SPLESS
             // P10 IPL flow doc
             struct
             {
-                // Maps to ATTR_I2C_BUS_DIV_REF
+                // Maps to ATTR_SPI_BUS_DIV_REF
                 union {
                     uint16_t value              :16; //0:15
 
@@ -279,7 +279,7 @@ namespace SPLESS
                     };
                 } refSpiBusDivider;                  //0:15
 
-                // Maps to ATTR_CORE_BOOT_FREQ_MHZ
+                // Maps to ATTR_FREQ_CORE_BOOT_MHZ
                 uint16_t coreBootFreqMhz        :16; //16:31
             } nestBootFreq;
 
@@ -434,16 +434,16 @@ namespace SPLESS
                 DONOTUSE()
                 uint32_t reserved2                :1; // 15
 
-                uint32_t fabricEffTopologyId      :4; // 16:19 ATTR_FABRIC_EFF_TOPOLOGY_ID
+                uint32_t fabricEffTopologyId      :4; // 16:19 ATTR_PROC_FABRIC_EFF_TOPOLOGY_ID
 
                 fabricTopologyMode_t
-                    fabricTopologyMode            :1; // 20    ATTR_FABRIC_TOPOLOGY_MODE
+                    fabricTopologyMode            :1; // 20    ATTR_PROC_FABRIC_TOPOLOGY_MODE
 
                 DONOTUSE()
                 uint32_t reserved3                :1; // 21
 
                 fabricBroadcastMode_t
-                    fabricBroadcastMode           :2; // 22:23 ATTR_FABRIC_BROADCAST_MODE
+                    fabricBroadcastMode           :2; // 22:23 ATTR_PROC_FABRIC_BROADCAST_MODE
 
                 // If this is set to 0 then this overrides the external C4 pin
                 // indicating master/slave; if this is set to 1 then use the
@@ -453,7 +453,7 @@ namespace SPLESS
                 DONOTUSE()
                 uint32_t reserved4                :3; // 25:27
 
-                uint32_t fabricTopologyId         :4; // 28:31 ATTR_FABRIC_TOPOLOGY_ID
+                uint32_t fabricTopologyId         :4; // 28:31 ATTR_PROC_FABRIC_TOPOLOGY_ID
             } masterSlaveNodeChipSel;
         };
     };
@@ -568,7 +568,7 @@ namespace SPLESS
             struct
             {
                                                   //       Maps to:
-                uint32_t pauPllFreqMhz       :16; //0:15   ATTR_PAU_FREQ_MHZ
+                uint32_t pauPllFreqMhz       :16; //0:15   ATTR_FREQ_PAU_MHZ
 
                 // These bitfields are the least-significant bits of the array
                 // entries in the attribute that they reflect

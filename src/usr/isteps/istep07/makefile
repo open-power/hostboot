@@ -46,6 +46,7 @@ OBJS += pmic_efd_processing.o
 OBJS += p10_fbc_utils.o
 #mss_eff_config - Need in istep07 to group memory
 OBJS += p10_mss_eff_grouping.o
+OBJS += p10_sbe_scratch_regs.o
 
 #Add all the extra include paths
 EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/fapi2/include/plat
@@ -69,10 +70,12 @@ EXTRAINCDIR += ${EXP_COMMON_PATH}/procedures/hwp/pmic/
 EXTRAINCDIR += ${EXP_COMMON_PATH}/procedures/hwp/pmic/lib/
 EXTRAINCDIR += $(ROOTPATH)/src/import/chips/ocmb/explorer/common/include/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/ocmb/explorer/procedures/hwp/memory/lib/inband/
+EXTRAINCDIR += $(PROCEDURES_PATH)/hwp/perv
 VPATH += ${HWP_PATH}
 VPATH += $(PROCEDURES_PATH)/hwp/nest
 VPATH += ${HWP_PATH_PMIC}/lib/eff_config
 VPATH += ${ROOTPATH}/src/import/chips/p10/utils/imageProcs/
+VPATH += $(PROCEDURES_PATH)/hwp/perv
 
 #Required include before all the procedure.mk are included
 include ${ROOTPATH}/procedure.rules.mk

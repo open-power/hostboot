@@ -69,36 +69,6 @@ void* call_host_secondary_sbe_config(void *io_pArgs)
     Target* l_pMasterProcTarget = nullptr;
     targetService().masterProcChipTargetHandle(l_pMasterProcTarget);
 
-    Target* l_sys = nullptr;
-    targetService().getTopLevelTarget(l_sys);
-    assert( l_sys != nullptr );
-
-    // Setup the boot flags attribute for the slaves based on the data
-    //  from the master proc
-    MboxScratch3_t l_scratch3;
-    const auto l_scratchRegs = l_sys->getAttrAsStdArr<TARGETING::ATTR_MASTER_MBOX_SCRATCH>();
-
-    l_scratch3.data32 = l_scratchRegs[MboxScratch3_t::REG_IDX];
-
-    // turn off the istep bit
-    l_scratch3.fwModeCtlFlags.istepMode = 0;
-
-    // write the attribute
-    l_sys->setAttr<ATTR_BOOT_FLAGS>(l_scratch3.data32);
-
-    TRACFCOMP(g_trac_isteps_trace, "ATTR_BOOT_FLAGS=%.8X", l_scratch3.data32);
-    if(l_scratch3.fwModeCtlFlags.overrideSecurity)
-    {
-        TRACFCOMP(g_trac_isteps_trace, INFO_MRK
-            "WARNING: Requesting security disable on non-master processors.");
-    }
-    if(l_scratch3.fwModeCtlFlags.allowAttrOverrides)
-    {
-        TRACFCOMP(g_trac_isteps_trace, INFO_MRK
-            "WARNING: Requesting allowing Attribute Overrides on "
-            "non-master processors even if secure mode.");
-    }
-
     // execute p10_setup_sbe_config.C for non-primary processor targets
     TargetHandleList l_cpuTargetList;
     getAllChips(l_cpuTargetList, TYPE_PROC);

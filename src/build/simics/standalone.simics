@@ -86,11 +86,29 @@ foreach $obj in (get-object-list ocmb -all){
 # Connect up the missing cfams
 try {connect backplane0.cnt_hfsi_link[1] backplane0.cnt_fsi_slave[0][1][1]} except {}
 
-# Set valid bit for Scratch Reg3/Reg6 in Scratch Reg8 bit 2/5
-$scratch = ((get-master-procs)[0].cfam_cmp.lbus_map.read 0x2800 + 0x3F*4 4 -b)
-(get-master-procs)[0].cfam_cmp.lbus_map.write 0x2800 + 0x3F*4 ($scratch | 0x24000000) 4 -b
-# Set bit24 for Scratch Reg6 - Master Proc
+###############################
+#Initialize Scratch Registers
+###############################
+
+# See src/include/usr/initservice/mboxRegs.H for scratch reg struct definitions
+
+# Scratch8:  Set valid bits for Regs 3/4/6/9/10 (Bits 2/3/5/8/9)
+(get-master-procs)[0].cfam_cmp.lbus_map.write 0x2800 + 0x3F*4 0x34C00000 4 -b
+
+# Scratch3:  Set fwModeCtlFlags (0:31) - Clear all flags
+(get-master-procs)[0].cfam_cmp.lbus_map.write 0x2800 + 0x3A*4 0x00000000 4 -b
+
+# Scratch4:  Set refSpiBusDivider (0:15) coreBootFreqMhz (16:31)
+(get-master-procs)[0].cfam_cmp.lbus_map.write 0x2800 + 0x3B*4 0x00410000 4 -b
+
+# Scratch6:  Set isMaster (Bit 24)
 (get-master-procs)[0].cfam_cmp.lbus_map.write 0x2800 + 0x3D*4 0x00000080 4 -b
+
+# Scratch9:  Set pauPllFreqMhz (0:15) mc(0-3)PllBucket (16:27) ndlMeshCtlSetup (28:31)
+(get-master-procs)[0].cfam_cmp.lbus_map.write 0x2800 + 0x180*4 0x09600000 4 -b
+
+# Scratch10: Set iohs<bucket>PllBucket (0:31) 4 bits/bucket
+(get-master-procs)[0].cfam_cmp.lbus_map.write 0x2800 + 0x181*4 0x33333333 4 -b
 
 #####
 
