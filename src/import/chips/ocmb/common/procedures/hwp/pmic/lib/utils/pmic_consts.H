@@ -493,7 +493,7 @@ namespace i2c
 enum opcode
 {
     READ  = 0x10,
-    WRITE = 0x80,
+    WRITE = 0x08,
 };
 };
 

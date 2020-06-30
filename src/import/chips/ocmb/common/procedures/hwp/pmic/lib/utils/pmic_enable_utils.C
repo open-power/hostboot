@@ -496,7 +496,7 @@ fapi2::ReturnCode enable_spd(
                 .set_VENDOR_ID(i_vendor_id),
                 "Unknown PMIC: %s with vendor ID 0x%04hhX",
                 mss::c_str(i_pmic_target),
-                uint8_t(i_vendor_id) );
+                uint16_t(i_vendor_id) );
 
     // Check that the PMIC vendor ID register matches the attribute
     // (and therefore has the correct settings)
@@ -505,7 +505,6 @@ fapi2::ReturnCode enable_spd(
     if (i_vendor_id == mss::pmic::vendor::IDT)
     {
         FAPI_TRY(mss::pmic::check::valid_idt_revisions(i_ocmb_target, i_pmic_target));
-
         FAPI_TRY(mss::pmic::bias_with_spd_settings<mss::pmic::vendor::IDT>(i_pmic_target, i_ocmb_target),
                  "enable_spd (IDT): Error biasing PMIC %s with SPD settings",
                  mss::c_str(i_pmic_target));
@@ -669,6 +668,8 @@ fapi2::ReturnCode validate_efuse_off(const fapi2::Target<fapi2::TARGET_TYPE_PMIC
     fapi2::buffer<uint8_t> l_reg_contents;
     FAPI_TRY(mss::pmic::i2c::reg_read(i_pmic_target, REGS::R31, l_reg_contents));
 
+    FAPI_DBG("R31 VIN_BULK Reading: 0x%02X", l_reg_contents);
+
     // Prior to turning on the efuse via the GPIO expander, we expect to see VIN below the
     // EFUSE_OFF_HIGH threshold, as power will not be applied.
     // Otherwise the efuse must be blown, and we should declare N-mode.
@@ -693,6 +694,8 @@ fapi2::ReturnCode validate_efuse_on(const fapi2::Target<fapi2::TARGET_TYPE_PMIC>
 {
     fapi2::buffer<uint8_t> l_reg_contents;
     FAPI_TRY(mss::pmic::i2c::reg_read(i_pmic_target, REGS::R31, l_reg_contents));
+
+    FAPI_DBG("R31 VIN_BULK Reading: 0x%02X", l_reg_contents);
 
     // After we turn on the efuse via the GPIO expander, power is applied to VIN_BULK,
     // and we should see a valid value within the range of EFUSE_ON_LOW --> HIGH, otherwise,
@@ -734,18 +737,23 @@ fapi2::ReturnCode setup_pmic_pair_and_gpio(
     FAPI_TRY(mss::pmic::i2c::reg_write(i_pmic0, REGS::R30, l_reg_contents));
     FAPI_TRY(mss::pmic::i2c::reg_write(i_pmic1, REGS::R30, l_reg_contents));
 
-    // Delay 5ms
-    fapi2::delay(5 * mss::common_timings::DELAY_1MS, mss::common_timings::DELAY_1US);
+    // Delay 25ms
+    fapi2::delay(25 * mss::common_timings::DELAY_1MS, mss::common_timings::DELAY_1MS);
 
     // Now, sampling VIN_BULK, which is protected by a fuse, we check that VIN_BULK does not read
     // more than 0.28V. If it does, then the fuse must be bad/blown, and we will declare N-mode.
+
     FAPI_TRY(mss::pmic::validate_efuse_off(i_pmic0));
     FAPI_TRY(mss::pmic::validate_efuse_off(i_pmic1));
 
     // Enable E-Fuse, set pin to output type (this will turn on the E-Fuse)
+    FAPI_DBG("Enabling EFUSE on %s", mss::c_str(i_gpio));
     l_reg_contents.flush<0>();
     l_reg_contents = mss::gpio::fields::CONFIGURATION_IO_MAP;
     FAPI_TRY(mss::pmic::i2c::reg_write(i_gpio, mss::gpio::regs::CONFIGURATION, l_reg_contents));
+
+    // Delay 30ms looked consistantly good in testing
+    fapi2::delay(30 * mss::common_timings::DELAY_1MS, mss::common_timings::DELAY_1MS);
 
     // E-Fuse turned on, so now we should expect to see VIN_BULK within the valid on-range,
     // else, outside limit we will declare N-mode
@@ -849,7 +857,7 @@ fapi2::ReturnCode matching_vendors(
 {
     using REGS = pmicRegs<mss::pmic::product::JEDEC_COMPLIANT>;
 
-    const uint8_t l_pmic_id = mss::index(i_pmic_target);
+    const uint8_t l_pmic_id = static_cast<uint8_t>(get_relative_pmic_id(i_pmic_target));
 
     uint16_t l_vendor_attr = 0;
     fapi2::buffer<uint8_t> l_vendor_reg0;
@@ -1033,9 +1041,9 @@ fapi2::ReturnCode enable_with_redundancy(
         // SPD enable
         FAPI_TRY(mss::pmic::enable_spd(l_target_info.iv_pmic0, i_ocmb_target, l_vendor_id_0));
         FAPI_TRY(mss::gpio::poll_input_port_ready(l_target_info.iv_gpio1, mss::gpio::fields::INPUT_PORT_REG_PMIC_PAIR0));
-        FAPI_TRY(mss::pmic::enable_spd(l_target_info.iv_pmic2, i_ocmb_target, l_vendor_id_1));
+        FAPI_TRY(mss::pmic::enable_spd(l_target_info.iv_pmic2, i_ocmb_target, l_vendor_id_0));
         FAPI_TRY(mss::gpio::poll_input_port_ready(l_target_info.iv_gpio2, mss::gpio::fields::INPUT_PORT_REG_PMIC_PAIR0));
-        FAPI_TRY(mss::pmic::enable_spd(l_target_info.iv_pmic1, i_ocmb_target, l_vendor_id_0));
+        FAPI_TRY(mss::pmic::enable_spd(l_target_info.iv_pmic1, i_ocmb_target, l_vendor_id_1));
         FAPI_TRY(mss::gpio::poll_input_port_ready(l_target_info.iv_gpio1, mss::gpio::fields::INPUT_PORT_REG_PMIC_PAIR1));
         FAPI_TRY(mss::pmic::enable_spd(l_target_info.iv_pmic3, i_ocmb_target, l_vendor_id_1));
         FAPI_TRY(mss::gpio::poll_input_port_ready(l_target_info.iv_gpio2, mss::gpio::fields::INPUT_PORT_REG_PMIC_PAIR1));

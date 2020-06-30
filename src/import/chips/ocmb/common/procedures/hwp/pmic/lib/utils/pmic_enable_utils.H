@@ -304,7 +304,7 @@ struct target_info_redundancy
         iv_pmic3 = PMICS[mss::pmic::id::PMIC3]; // Redundant PMIC1
 
         iv_adc1 = I2C_DEVICES[mss::generic_i2c_slave::ADC1];
-        iv_adc2 = I2C_DEVICES[mss::generic_i2c_slave::ADC1];
+        iv_adc2 = I2C_DEVICES[mss::generic_i2c_slave::ADC2];
         iv_gpio1 = I2C_DEVICES[mss::generic_i2c_slave::GPIO1];
         iv_gpio2 = I2C_DEVICES[mss::generic_i2c_slave::GPIO2];
 
