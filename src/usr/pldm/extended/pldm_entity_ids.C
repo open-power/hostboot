@@ -74,7 +74,8 @@ struct unique_entity_info
 const unique_entity_info foreign_entity_types[] =
 {
     { CLASS_ENC, TYPE_NODE, ENTITY_TYPE_BACKPLANE },
-    { CLASS_CHIP, TYPE_TPM, ENTITY_TYPE_TPM }
+    //TODO RTC: 246066 Enable when TPMs are detected by hostboot
+//     { CLASS_CHIP, TYPE_TPM, ENTITY_TYPE_TPM }
 };
 
 /* @brief Update the given target's PLDM_ENTITY_ID_INFO attribute
