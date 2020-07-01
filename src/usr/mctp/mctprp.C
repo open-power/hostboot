@@ -461,6 +461,12 @@ void MctpRP::register_mctp_bus(void)
     // associated with the iv_hostlpc binding which starts the
     // KCS init handshake with the BMC
     mctp_register_bus(iv_mctp, &iv_hostlpc->binding, HOST_EID);
+
+    // Start the poll kcs status daemon which will read the KCS status reg
+    // every 1 ms and if we see that the OBF bit in the KCS status register is
+    // set we will read the OBR KCS data reg and send a message to the
+    // handle_obf_status daemon
+    task_create(poll_kcs_status_task, NULL);
     return;
 }
 
@@ -485,24 +491,9 @@ void MctpRP::_init(void)
     task_create(handle_inbound_messages_task, NULL);
     task_create(handle_outbound_messages_task, NULL);
 
-    // Start the poll kcs status daemon which will read the KCS status reg
-    // every 1 ms and if we see that the OBF bit in the KCS status register is
-    // set we will read the OBR KCS data reg and send a message to the
-    // handle_obf_status daemon
-    task_create(poll_kcs_status_task, NULL);
-
-    // This ctx struct is a way to pass information we want into the mctp core
-    // logic the core logic will call the registered rx_message function with
-    // the ctx struct as a parm, this allows use to pass information about the
-    // context we are in to that func
-    struct ctx *ctx, _ctx;
-    ctx = &_ctx;
-    ctx->local_eid = HOST_EID;
-    ctx->mctp = iv_mctp;
-
     // Set the receive function to be rx_message which
     // will handle the message in the RX space accordingly
-    mctp_set_rx_all(ctx->mctp, rx_message, ctx);
+    mctp_set_rx_all(iv_mctp, rx_message, NULL);
 
     TRACFCOMP(g_trac_mctp, "MctpRP::_init exit");
     return;
@@ -520,5 +511,3 @@ MctpRP::MctpRP(void):
 
 // Set the function that will be called when mctp.so is loaded
 TASK_ENTRY_MACRO( MctpRP::init );
-
-
