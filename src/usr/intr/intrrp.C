@@ -171,7 +171,11 @@ errlHndl_t IntrRp::resetIntpForMpipl()
 
         // Clear out the PC registers that did not get properly cleared during
         // the SBE steps of MPIPL
-        clearIntPcRegs();
+        // TODO RTC:215215 re-enable when we get this working in simics
+        if(!Util::isSimicsRunning())
+        {
+            clearIntPcRegs();
+        }
 
         //Reset PSIHB Interrupt Space
         TRACFCOMP(g_trac_intr, "Reset PSIHB Interrupt Space");
