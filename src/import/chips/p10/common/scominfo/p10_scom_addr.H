@@ -233,6 +233,11 @@ extern "C"
         DLP_SAT_ID = 0x0,
     } p10_AXONE_SatId_t;
 
+    typedef enum
+    {
+        CLKADJ_SAT_ID = 0x4,
+    } p10_EQ_SatId_t;
+
     /// *************************************
     ///          Perv target table
     /// *************************************

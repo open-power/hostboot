@@ -101,7 +101,8 @@ extern "C"
                 // endpoint (0x1), all are core rings on the second
                 // PSCOM endpoint (0x2)
                 else if ( ((getEndpoint() == PSCOM_ENDPOINT) &&   // 0x1
-                           ((getEQRingId() != PERV_RING_ID) &&    // 0x1
+                           ((getEQRingId() != PERV_RING_ID ||     // 0x1
+                             getEQSatId() == CLKADJ_SAT_ID) &&    // 0x4
                             (getEQRingId() != QME_RING_ID))) ||   // 0x2
                           (getEndpoint() == PSCOM_2_ENDPOINT) )   // 0x2
                 {
