@@ -696,9 +696,6 @@
       <id>LOCATION_CODE</id>
     </attribute>
     <attribute>
-      <id>MC_PLL_BUCKET</id>
-    </attribute>
-    <attribute>
       <id>MODEL</id>
       <default>POWER10</default>
     </attribute>
@@ -2404,6 +2401,9 @@
     </attribute>
     <attribute>
       <id>MAX_PROC_CHIPS_PER_NODE</id>
+    </attribute>
+    <attribute>
+      <id>MC_PLL_BUCKET</id>
     </attribute>
     <attribute>
       <id>MFG_TRACE_ENABLE</id>
