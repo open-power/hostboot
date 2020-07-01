@@ -361,8 +361,6 @@ cd ${SANDBOXBASE}/src/hbfw/img/ \
 && mk -j16"
 
         # This command will copy the output binaries generated from buildPatch and drop them in $HB_NFS_DIR if it exists.
-        # Otherwise, it will drop them in $SANDBOXBASE/nfs/test/pnor/. This is done to ease setup for fsp_autoboot.simics
-        # or for users to manually mount the nfs/ dir to the FSP for faster patching.
         copyToNFS="cd ${SANDBOXBASE} && \
 mkdir -p \$HB_NFS_DIR/test/pnor \
 && cp ${SANDBOXBASE}/obj/ppc/hbfw/img/h*header.bin \$HB_NFS_DIR/test/pnor"
@@ -370,8 +368,7 @@ mkdir -p \$HB_NFS_DIR/test/pnor \
         # Stick the two commands together. They were separated for easier readability.
         prepareFspPatch="${buildPatch} && ${copyToNFS}"
 
-        # Execute the command in a ODE sandbox workon. Note, the default $HB_NFS_DIR env variable will not persist and must
-        # defined in the users own ODE workon environment.
+        # Execute the command in a ODE sandbox workon.
         execute_in_sandbox "${prepareFspPatch}" "ppc"
     fi
 }

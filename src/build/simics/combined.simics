@@ -1,1 +1,16 @@
-#Run Simics Command Specific to combined Service Processor + HBFW Model
+# Run Simics Command Specific to combined Service Processor + HBFW Model
+# Any new configs with specific commands should be given their own files.
+# DO NOT include system specific commands in this file.
+
+if($machine_name == "denali") {
+
+    # Trigger hostboot commands specific to denali
+    run-command-file (lookup-file -query ($hb_script_location + "/denali_hb.simics"))
+
+} else {
+    # Assume if we're not running a Denali that we're running one of the Rainier configs.
+
+    # Trigger Rainier specific commands
+    run-command-file (lookup-file -query ($hb_script_location + "/rainier_hb.simics"))
+
+}

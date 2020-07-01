@@ -56,6 +56,7 @@ COPY_FILES = \
     src/build/debug/simics-debug-framework.pl:openpower-sim \
     src/build/simics/combined.simics:openpower-sim \
     src/build/simics/startup.simics:openpower-sim \
+    src/build/simics/rainier_hb.simics:openpower-sim\
     src/build/simics/morecache.simics:openpower-sim \
     src/build/simics/hb-simdebug.py:openpower-sim \
     src/build/simics/eecache-gen.py:openpower-sim \
@@ -260,6 +261,10 @@ simics.tar_CONTENTS = \
     src/build/debug/ecmd-debug-framework.pl \
     src/build/debug/simics-debug-framework.py \
     src/build/debug/simics-debug-framework.pl \
+    src/build/simics/validate-hb-nfs-dir.py \
+    src/build/simics/fsp_autoboot.simics \
+    src/build/simics/denali_hb.simics \
+    src/build/simics/rainier_hb.simics \
     src/build/simics/eecache-gen.py \
     src/build/simics/ecc.py \
     $(addsuffix :Hostboot/, \
