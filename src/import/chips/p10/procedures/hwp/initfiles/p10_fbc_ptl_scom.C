@@ -500,6 +500,26 @@ fapi2::ReturnCode p10_fbc_ptl_scom(const fapi2::Target<fapi2::TARGET_TYPE_PAUC>&
                 l_scom_buffer.insert<56, 3, 61, uint64_t>(literal_0x1 );
             }
 
+            if ((l_def_AX0_ENABLED == literal_1))
+            {
+                l_scom_buffer.insert<36, 8, 56, uint64_t>(literal_0x01 );
+            }
+
+            if ((l_def_AX0_ENABLED == literal_1))
+            {
+                l_scom_buffer.insert<49, 5, 59, uint64_t>(literal_0x1C );
+            }
+
+            if ((l_def_AX0_ENABLED == literal_1))
+            {
+                l_scom_buffer.insert<28, 8, 56, uint64_t>(literal_0xFF );
+            }
+
+            if ((l_def_AX0_ENABLED == literal_1))
+            {
+                l_scom_buffer.insert<44, 5, 59, uint64_t>(literal_0x03 );
+            }
+
             FAPI_TRY(fapi2::putScom(TGT0, 0x10011815ull, l_scom_buffer));
         }
         {
@@ -545,6 +565,26 @@ fapi2::ReturnCode p10_fbc_ptl_scom(const fapi2::Target<fapi2::TARGET_TYPE_PAUC>&
             if ((l_def_AX1_ENABLED == literal_1))
             {
                 l_scom_buffer.insert<56, 3, 61, uint64_t>(literal_0x1 );
+            }
+
+            if ((l_def_AX1_ENABLED == literal_1))
+            {
+                l_scom_buffer.insert<36, 8, 56, uint64_t>(literal_0x01 );
+            }
+
+            if ((l_def_AX1_ENABLED == literal_1))
+            {
+                l_scom_buffer.insert<49, 5, 59, uint64_t>(literal_0x1C );
+            }
+
+            if ((l_def_AX1_ENABLED == literal_1))
+            {
+                l_scom_buffer.insert<28, 8, 56, uint64_t>(literal_0xFF );
+            }
+
+            if ((l_def_AX1_ENABLED == literal_1))
+            {
+                l_scom_buffer.insert<44, 5, 59, uint64_t>(literal_0x03 );
             }
 
             FAPI_TRY(fapi2::putScom(TGT0, 0x10011817ull, l_scom_buffer));
