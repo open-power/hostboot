@@ -535,7 +535,14 @@ static errlHndl_t exchange_pdrs()
 
         /* Add our own PDRs to our repository. */
 
-        PLDM::thePdrManager().addLocalPdrs();
+        l_err = PLDM::thePdrManager().addLocalPdrs();
+
+        if (l_err)
+        {
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                      ERR_MRK"Failed to add local PDR to pdr repository");
+            break;
+        }
 
         auto hb_pdr_handles = PLDM::thePdrManager().getAllPdrHandles();
 

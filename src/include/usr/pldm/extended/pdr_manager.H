@@ -73,8 +73,10 @@ public:
     errlHndl_t addRemotePdrs();
 
     /* @brief  Adds Hostboot PDRs to the repository.
+     *
+     * @return Error if any, otherwise nullptr.
      */
-    void addLocalPdrs();
+    errlHndl_t addLocalPdrs();
 
     /* @brief  Remove all PDRs from the repository.
      */

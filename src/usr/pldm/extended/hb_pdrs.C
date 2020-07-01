@@ -40,6 +40,7 @@
 #include "../extern/pdr.h"
 #include "../extern/platform.h"
 #include "../common/pldmtrace.H"
+#include <pldm/pldm_reasoncodes.H>
 
 // Targeting
 #include <targeting/common/targetservice.H>
@@ -49,6 +50,7 @@
 
 using namespace TARGETING;
 using namespace PLDM;
+using namespace ERRORLOG;
 
 namespace
 {
@@ -149,21 +151,16 @@ void addEntityAssociationAndFruRecordSetPdrs(pldm_pdr* const io_repo,
  *
  * @param[in/out] io_repo    The PDR repository to add PDRs to.
  * @param[in] i_terminus_id  The Host's terminus ID.
- * @param[in] i_target       The target to use the entity ID from for the sensor.
+ * @param[in] i_entity       The entity associated with the OCC sensor.
+ * @param[in] i_sensor_id    Will be used to fill in the sensor id field of the pdr
  */
-void addOccStateSensorPdrs(pldm_pdr* const io_repo,
-                             const terminus_id_t i_terminus_id,
-                             const Target* const i_target)
+errlHndl_t addOccStateSensorPdrs(pldm_pdr* const io_repo,
+                                 const terminus_id_t i_terminus_id,
+                                 const pldm_entity* const i_entity,
+                                 const uint16_t i_sensor_id)
 {
-    const auto entity_id = i_target->getAttr<ATTR_PLDM_ENTITY_ID_INFO>();
-
-    // PLDM_ENTITY_ID_INFO is stored in little-endian
-    const uint16_t be_entity_type =  le16toh(entity_id.entityType);
-    const uint16_t be_entity_instance =  le16toh(entity_id.entityInstanceNumber);
-    const uint16_t be_container_id =  le16toh(entity_id.containerId);
-
-    PLDM_INF("Adding state sensor PDR for HUID 0x%08x (ORDINAL_ID %d)",
-             get_huid(i_target), i_target->getAttr<ATTR_ORDINAL_ID>());
+    errlHndl_t errl = nullptr;
+    do{
 
     const state_sensor_possible_states states =
     {
@@ -197,11 +194,11 @@ void addOccStateSensorPdrs(pldm_pdr* const io_repo,
 
         // Using the ORDINAL_ID of the target will let us associate with the
         // correct target when we send a PlatformEventMessage with the new state
-        .sensor_id = static_cast<uint16_t>(i_target->getAttr<ATTR_ORDINAL_ID>()),
+        .sensor_id = i_sensor_id,
 
-        .entity_type = be_entity_type,
-        .entity_instance = be_entity_instance,
-        .container_id = be_container_id,
+        .entity_type = i_entity->entity_type,
+        .entity_instance = i_entity->entity_instance_num,
+        .container_id = i_entity->entity_container_id,
 
         .sensor_init = state_sensor_noInit,
         .sensor_auxiliary_names_pdr = false,
@@ -222,27 +219,25 @@ void addOccStateSensorPdrs(pldm_pdr* const io_repo,
     pldm_pdr_add(io_repo, encoded_pdr.data(), actual_pdr_size,
                  PDR_AUTO_CALCULATE_RECORD_HANDLE,
                  PDR_IS_NOT_REMOTE);
+    }while(0);
+
+    return errl;
 }
 
 /* @brief Add the state effecter PDRs for OCC FRUs.
  *
  * @param[in/out] io_repo    The PDR repository to add PDRs to.
  * @param[in] i_terminus_id  The Host's terminus ID.
- * @param[in] i_target       The target to use the entity ID from for the effecter.
+ * @param[in] i_entity       The entity associated with the OCC sensor.
+ * @param[in] i_effecter_id  Will be used to fill in the effecter id field of the pdr
  */
-void addOccStateEffecterPdrs(pldm_pdr* const io_repo,
-                             const terminus_id_t i_terminus_id,
-                             const Target* const i_target)
+errlHndl_t addOccStateEffecterPdrs(pldm_pdr* const io_repo,
+                                   const terminus_id_t i_terminus_id,
+                                   const pldm_entity* const i_entity,
+                                   const uint16_t i_effecter_id)
 {
-    const auto entity_id = i_target->getAttr<ATTR_PLDM_ENTITY_ID_INFO>();
-
-    // PLDM_ENTITY_ID_INFO is stored in little-endian
-    const uint16_t be_entity_type =  le16toh(entity_id.entityType);
-    const uint16_t be_entity_instance =  le16toh(entity_id.entityInstanceNumber);
-    const uint16_t be_container_id =  le16toh(entity_id.containerId);
-
-    PLDM_INF("Adding state effecter PDR for 0x%08x (ORDINAL_ID %d)",
-             get_huid(i_target), i_target->getAttr<ATTR_ORDINAL_ID>());
+    errlHndl_t errl = nullptr;
+    do{
 
     const state_effecter_possible_states states =
     {
@@ -276,11 +271,11 @@ void addOccStateEffecterPdrs(pldm_pdr* const io_repo,
 
         // Using the ORDINAL_ID of the target will let us associate with the
         // correct target when we receive a SetStateEffecterStates command later
-        .effecter_id = static_cast<uint16_t>(i_target->getAttr<ATTR_ORDINAL_ID>()),
+        .effecter_id = i_effecter_id,
 
-        .entity_type = be_entity_type,
-        .entity_instance = be_entity_instance,
-        .container_id = be_container_id,
+        .entity_type = i_entity->entity_type,
+        .entity_instance = i_entity->entity_instance_num,
+        .container_id = i_entity->entity_container_id,
 
         .effecter_semantic_id = 0, // PLDM defines no semantic IDs yet
         .effecter_init = state_effecter_noInit,
@@ -302,34 +297,88 @@ void addOccStateEffecterPdrs(pldm_pdr* const io_repo,
     pldm_pdr_add(io_repo, encoded_pdr.data(), actual_pdr_size,
                  PDR_AUTO_CALCULATE_RECORD_HANDLE,
                  PDR_IS_NOT_REMOTE);
+    }while(0);
+
+    return errl;
 }
 
 /* @brief Add the state effecter and sensor PDRs for OCC FRUs.
  *
  * @param[in/out] io_repo    The PDR repository to add PDRs to.
- * @param[in] i_terminus_id  The Host's terminus ID.
  */
-void addOccStateControlPdrs(pldm_pdr* const io_repo,
-                            const terminus_id_t i_terminus_id)
+errlHndl_t addOccStateControlPdrs(pldm_pdr* const io_repo)
 {
     TargetHandleList targets;
+    errlHndl_t errl = nullptr;
 
     getClassResources(targets,
                       CLASS_UNIT,
                       TYPE_OCC,
                       UTIL_FILTER_PRESENT);
 
+
     /* Get each OCC and add state effecter and sensor PDRs for it. */
 
     for (const auto target : targets)
     {
         Target* const parent_proc = getImmediateParentByAffinity(target);
+        pldm_entity entity { };
+        const auto parent_proc_rsi = getTargetFruRecordSetID(parent_proc);
+        terminus_id_t terminus_id = 0;
+        const bool entity_found =
+              pldm_pdr_fru_record_set_find_by_rsi(io_repo,
+                                                  parent_proc_rsi,
+                                                  &terminus_id,
+                                                  &entity.entity_type,
+                                                  &entity.entity_instance_num,
+                                                  &entity.entity_container_id);
+
+        if (!entity_found)
+        {
+            PLDM_ERR("addOccStateControlPdrs> Unable to find an entity matching RSI 0x%04x for HUID 0x%08x",
+                      parent_proc_rsi, get_huid(parent_proc));
+            /*
+            * @errortype  ERRL_SEV_UNRECOVERABLE
+            * @moduleid   MOD_ADD_OCC_PDRS
+            * @reasoncode RC_NO_ENTITY_FROM_RSID
+            * @userdata1  record set id of occ's parent processor
+            * @userdata2  HUID of target
+            * @devdesc    Unable to find the entity associated with this RSI
+            * @custdesc   A software error occurred during system boot
+            */
+            errl = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
+                                            MOD_ADD_OCC_PDRS,
+                                            RC_NO_ENTITY_FROM_RSID,
+                                            parent_proc_rsi,
+                                            get_huid(parent_proc),
+                                            ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+            break;
+        }
+
+        // Using the ORDINAL_ID of the target will let us associate with the
+        // correct target when we send a PlatformEventMessage with the new state
+        // or we receive a SetStateEffecterStates command later
+        const uint16_t proc_ordinal_id = static_cast<uint16_t>(parent_proc->getAttr<ATTR_ORDINAL_ID>());
 
         // The OCC state sensor/effecter PDRs are "attached" to the parent PROC
         // of the OCC.
-        addOccStateEffecterPdrs(io_repo, i_terminus_id, parent_proc);
-        addOccStateSensorPdrs(io_repo, i_terminus_id, parent_proc);
+        errl = addOccStateEffecterPdrs(io_repo, terminus_id, &entity, proc_ordinal_id);
+        if(errl)
+        {
+            PLDM_ERR("addOccStateControlPdrs> Error occurred adding occ state effecter PDR for HUID 0x%08X",
+                     get_huid(parent_proc));
+            break;
+        }
+        errl = addOccStateSensorPdrs(io_repo, terminus_id, &entity, proc_ordinal_id);
+        if(errl)
+        {
+            PLDM_ERR("addOccStateControlPdrs> Error occurred adding occ state sensor PDR for HUID 0x%08X",
+                     get_huid(parent_proc));
+            break;
+        }
     }
+
+    return errl;
 }
 
 }
@@ -343,16 +392,20 @@ extern const std::array<fru_inventory_class, 2> fru_inventory_classes
     { TARGETING::CLASS_LOGICAL_CARD, TARGETING::TYPE_DIMM, ENTITY_TYPE_DIMM }
 }};
 
-void addHostbootPdrs(pldm_pdr* const io_repo)
+errlHndl_t addHostbootPdrs(pldm_pdr* const io_repo)
 {
-    PLDM_INF(ENTER_MRK"addHostbootPdrs");
+    PLDM_ENTER("addHostbootPdrs");
+
+    errlHndl_t errl = nullptr;
 
     addEntityAssociationAndFruRecordSetPdrs(io_repo,
                                             thePdrManager().hostbootTerminusId());
 
-    addOccStateControlPdrs(io_repo, thePdrManager().hostbootTerminusId());
+    errl = addOccStateControlPdrs(io_repo);
 
-    PLDM_INF(EXIT_MRK"addHostbootPdrs");
+    PLDM_EXIT("addHostbootPdrs completed %s error", errl ? "with" : "without");
+
+    return errl;
 }
 
 }

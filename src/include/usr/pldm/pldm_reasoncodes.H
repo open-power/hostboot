@@ -65,6 +65,9 @@ namespace PLDM
         MOD_HANDLE_SET_STATE_EFFECTER_STATES_REQUEST = 0x16,
 
         MOD_PLDM_ENTITY_IDS           = 0x17, // pldm_entity_ids.C
+
+        //addOccStateControlPdrs
+        MOD_ADD_OCC_PDRS              = 0x18,
     };
 
     enum PLDMReasonCode

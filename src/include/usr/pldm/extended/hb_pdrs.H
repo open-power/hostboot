@@ -34,6 +34,7 @@
 #include <pldm/requests/pldm_pdr_requests.H>
 #include <targeting/common/target.H>
 #include <pldm/pldm_const.H>
+#include <errl/errlentry.H>
 
 namespace PLDM
 {
@@ -59,8 +60,9 @@ extern const std::array<fru_inventory_class, 2> fru_inventory_classes;
  *
  * @param[in/out] io_repository        The repository to add the PDRs to. Must not
  *                                     be nullptr.
+ * @return errlHndl_t    Error if any, otherwise nullptr.
  */
-void addHostbootPdrs(pldm_pdr* io_repository);
+errlHndl_t addHostbootPdrs(pldm_pdr* io_repository);
 
 }
 

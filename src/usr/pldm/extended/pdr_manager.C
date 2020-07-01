@@ -123,7 +123,7 @@ errlHndl_t PdrManager::addRemotePdrs()
     return getRemotePdrRepository(iv_pdr_repo.get());
 }
 
-void PdrManager::addLocalPdrs()
+errlHndl_t PdrManager::addLocalPdrs()
 {
     const auto lock = scoped_mutex_lock(iv_access_mutex);
 
