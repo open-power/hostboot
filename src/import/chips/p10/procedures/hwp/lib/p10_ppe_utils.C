@@ -465,8 +465,15 @@ fapi2::ReturnCode ppe_ram_read(
     fapi2::buffer<uint32_t>& o_data)
 {
     fapi2::buffer<uint64_t> l_data64;
+    fapi2::buffer<uint64_t> l_xsr;
     uint64_t t_addr;
+
     FAPI_TRY(ppe_poll_halt_state(i_target, i_ppe_type, i_ppe_instance_num));
+
+    //Save XSR
+    t_addr = ppe_get_xir_address(i_ppe_type, PPE_IDX_XIDBGPRO, i_ppe_instance_num);
+    FAPI_TRY(getScom(i_target, t_addr, l_xsr), "Error in GETSCOM");
+
     t_addr = ppe_get_xir_address(i_ppe_type, PPE_IDX_XIRAMEDR, i_ppe_instance_num);
     FAPI_TRY(fapi2::putScom(i_target, t_addr, i_instruction));
     FAPI_DBG("    RAMREAD i_instruction: 0X%16llX", i_instruction);
@@ -475,6 +482,10 @@ fapi2::ReturnCode ppe_ram_read(
     FAPI_TRY(fapi2::getScom(i_target, t_addr, l_data64), "Error in GETSCOM");
     l_data64.extractToRight(o_data, 32, 32);
     FAPI_DBG("    RAMREAD o_data: 0X%16llX", o_data);
+
+    //Restore XSR
+    t_addr = ppe_get_xir_address(i_ppe_type, PPE_IDX_XIDBGPRO, i_ppe_instance_num);
+    FAPI_TRY(putScom(i_target, t_addr, l_xsr), "Error in PUTSCOM");
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -490,14 +501,23 @@ fapi2::ReturnCode ppe_ram(
 )
 {
     fapi2::buffer<uint64_t> l_data64;
+    fapi2::buffer<uint64_t> l_xsr;
     FAPI_TRY(ppe_poll_halt_state(i_target, i_ppe_type, i_ppe_instance_num));
     uint64_t t_addr;
+
+    //Save XSR
+    t_addr = ppe_get_xir_address(i_ppe_type, PPE_IDX_XIDBGPRO, i_ppe_instance_num);
+    FAPI_TRY(getScom(i_target, t_addr, l_xsr), "Error in GETSCOM");
 
     l_data64.flush<0>().insertFromRight(i_instruction, 0, 32);
     t_addr = ppe_get_xir_address(i_ppe_type, PPE_IDX_XIRAMEDR, i_ppe_instance_num);
     FAPI_TRY(fapi2::putScom(i_target, t_addr, l_data64));
     FAPI_DBG("    RAMREAD i_instruction: 0X%16llX", i_instruction);
     FAPI_TRY(ppe_poll_halt_state(i_target, i_ppe_type, i_ppe_instance_num));
+
+    //Restore XSR
+    t_addr = ppe_get_xir_address(i_ppe_type, PPE_IDX_XIDBGPRO, i_ppe_instance_num);
+    FAPI_TRY(putScom(i_target, t_addr, l_xsr), "Error in PUTSCOM");
 
 fapi_try_exit:
     return fapi2::current_err;
