@@ -1,0 +1,44 @@
+<!-- IBM_PROLOG_BEGIN_TAG                                                   -->
+<!-- This is an automatically generated prolog.                             -->
+<!--                                                                        -->
+<!-- $Source: src/import/chips/p10/procedures/xml/error_info/p10_sbe_i2c_errors.xml $ -->
+<!--                                                                        -->
+<!-- OpenPOWER HostBoot Project                                             -->
+<!--                                                                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2018,2021                        -->
+<!-- [+] International Business Machines Corp.                              -->
+<!--                                                                        -->
+<!--                                                                        -->
+<!-- Licensed under the Apache License, Version 2.0 (the "License");        -->
+<!-- you may not use this file except in compliance with the License.       -->
+<!-- You may obtain a copy of the License at                                -->
+<!--                                                                        -->
+<!--     http://www.apache.org/licenses/LICENSE-2.0                         -->
+<!--                                                                        -->
+<!-- Unless required by applicable law or agreed to in writing, software    -->
+<!-- distributed under the License is distributed on an "AS IS" BASIS,      -->
+<!-- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or        -->
+<!-- implied. See the License for the specific language governing           -->
+<!-- permissions and limitations under the License.                         -->
+<!--                                                                        -->
+<!-- IBM_PROLOG_END_TAG                                                     -->
+<hwpErrors>
+    <hwpError>
+        <sbeError/>
+        <rc>RC_I2C_STATUS_ERROR</rc>
+        <description>I2C status error - one of the error bits set</description>
+        <ffdc>VALUE</ffdc>
+    </hwpError>
+    <hwpError>
+        <sbeError/>
+        <rc>RC_I2C_STATUS_INTR_ERROR</rc>
+        <description>I2C status error - one of the i2c interrupt hit</description>
+        <ffdc>STATUS</ffdc>
+        <ffdc>VALUE</ffdc>
+    </hwpError>
+    <hwpError>
+        <sbeError/>
+        <rc>RC_I2C_FIFO_TIMEOUT_ERROR</rc>
+        <description>I2C fifo condition error - timedout waiting for a condition</description>
+    </hwpError>
+</hwpErrors>
