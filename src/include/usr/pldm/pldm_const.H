@@ -73,19 +73,21 @@ namespace PLDM
         REQ_FAILED    = 0x01
     };
 
-    /* @brief Return an integer with a bit set in the position corresponding to the
-     *        given enumeration (starting from 1) and zeroes in the other positions.
-     *        Used for libpldm enumeration constants.
+    /* @brief Return an integer with a bit set in the position corresponding to
+     *        the given enumeration (starting from 0 = the least significant
+     *        bit) and zeroes in the other positions.  Used for libpldm
+     *        enumeration constants.
      *
      * @param[in] i_enumeration  The value to encode
      * @return uint32_t          Encoded bitmask
      *
-     * @example enum_bit(1) = 0x00000001
-     * @example enum_bit(4) = 0x00000008
+     * @example enum_bit(0) = 0x00000001
+     * @example enum_bit(1) = 0x00000002
+     * @example enum_bit(4) = 0x00000010
      */
     inline constexpr uint32_t enum_bit(unsigned int i_enumeration)
     {
-        return 1 << (i_enumeration - 1);
+        return 1 << i_enumeration;
     }
 
     // BMC currently does not support multi-part PLDM

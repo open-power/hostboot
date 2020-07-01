@@ -399,8 +399,8 @@ errlHndl_t handleSetStateEffecterStatesRequest(const msg_q_t i_msgQ,
 
         if (req.comp_effecter_count != 1
             || !req.field[0].set_request
-            || (req.field[0].effecter_state != enum_bit(pldm_state_set_boot_restart_cause_warm_reset)
-                && req.field[0].effecter_state != enum_bit(pldm_state_set_boot_restart_cause_hard_reset)))
+            || (req.field[0].effecter_state != pldm_state_set_boot_restart_cause_warm_reset
+                && req.field[0].effecter_state != pldm_state_set_boot_restart_cause_hard_reset))
         {
             PLDM_ERR("Received invalid state effecter set request "
                      "(effecter 0x%x, PROC = 0x%08x, effecter count = %d, "
