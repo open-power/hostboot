@@ -163,21 +163,6 @@ void* call_proc_build_smp (void *io_pArgs)
 
                     // Turn off SBE scom and turn on Xscom.
                     l_proc_target->setAttr<ATTR_SCOM_SWITCHES>(l_switches);
-
-                    // Reset the FSI2OPB logic on the new chips
-                    l_errl = FSI::resetPib2Opb(l_proc_target);
-                    if(l_errl)
-                    {
-                        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                                  "ERROR : resetPib2Opb on %.8X",
-                                  TARGETING::get_huid(l_proc_target));
-                        // Create IStep error log and
-                        // cross reference error that occurred
-                        l_StepError.addErrorDetails(l_errl);
-                        // Commit error
-                        errlCommit( l_errl, HWPF_COMP_ID );
-                        break;
-                    }
                 }
             }
 
