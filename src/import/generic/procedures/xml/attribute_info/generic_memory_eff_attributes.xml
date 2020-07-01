@@ -661,7 +661,7 @@
       DRAM Modlue Height
       Decodes SPD Byte 193
     </description>
-    <enum>1U = 0, 2U = 1, 4U = 2 </enum>
+    <enum>1U = 0, 2U = 1, 4U = 4 </enum>
     <initToZero></initToZero>
     <valueType>uint8</valueType>
     <writeable/>
