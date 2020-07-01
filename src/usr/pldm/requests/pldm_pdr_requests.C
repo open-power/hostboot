@@ -581,9 +581,24 @@ errlHndl_t sendOccStateChangedEvent(const TARGETING::Target* const i_proc_target
     // is at index 0.
     constexpr int OCC_STATE_SENSOR_INDEX = 0;
 
+    sensor_state_t new_occ_state = 0;
+
+    switch (i_new_state)
+    {
+    case occ_state_stopped:
+        new_occ_state = pldm_state_set_operational_running_status_stopped;
+        break;
+    case occ_state_in_service:
+        new_occ_state = pldm_state_set_operational_running_status_in_service;
+        break;
+    default:
+        assert(false, "Invalid state %d given to sendOccStateChangedEvent",
+               i_new_state);
+    }
+
     return sendSensorStateChangedEvent(i_proc_target->getAttr<TARGETING::ATTR_ORDINAL_ID>(),
                                        OCC_STATE_SENSOR_INDEX,
-                                       i_new_state);
+                                       new_occ_state);
 }
 
 }
