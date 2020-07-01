@@ -152,6 +152,7 @@ public:
                 // E>spiSetAccessMode(): An error occurred from p10_spi_init_fsi HWP call, RC=0x907
                 TS_INFO("testSpiSerialSetAccessModeFailure: FSI_ACCESS not allowed on master processor");
                 delete errl;
+                errl = nullptr;
             }
             else
             {

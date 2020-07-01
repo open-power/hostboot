@@ -571,6 +571,7 @@ errlHndl_t spiSetAccessMode(TARGETING::Target * i_spiMasterProc,
         else if (l_err2)
         {
             l_err = l_err2;
+            l_err2 = nullptr;
         }
     }
 
