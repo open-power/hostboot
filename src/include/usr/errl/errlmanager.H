@@ -70,6 +70,20 @@ namespace ERRORLOG
  */
 void errlCommit(errlHndl_t& io_err, compId_t i_committerComp );
 
+
+/**
+ *  @brief  Global function to log a large error log into multiple logs
+ *          Instead of removing latest log(s) to make enough room, this function
+ *          moves these logs into new error logs which point to original one's plid
+ *
+ *  @param[in/out] io_err           Error log handle to be committed
+ *  @param[in]     i_committerComp  Component committing the error log
+ *  @param[in]     i_keepTraces     Try to keep trace entries in first log
+ *
+ *  @return None
+ */
+void errlCommitAllowExtraLogs(errlHndl_t& io_err, compId_t i_committerComp, bool i_keepTraces );
+
 /**
  *  @brief  Global function to determine if INFO and Recovered errors
  *          should be skipped or forwarded
@@ -98,7 +112,7 @@ const uint8_t* getCachedVersionPartition();
  */
 size_t getCachedVersionPartitionSize();
 
-/*
+/**
  * @brief Call to ErrlManager to cache the VERSION PNOR partition into an
  *        internal buffer.
  *
@@ -141,91 +155,109 @@ class ErrlManager
 public:
 
     /**
-      *  @brief Commit an error log by sending it to the repository
-      *  Writes the log to PNOR where committed logs are kept.
-      *  If there's not enough room, remove the latest log(s) to make
-      *  enough room to commit this log.
-      *  The error log will be automatically deleted after the
-      *  commit.  The input handle will be set to NULL.
-      *  For Host Boot environment, there's no individual committer
-      *  (i.e. committer = Host Boot), so no component ID of
-      *  committer is specified.
-      *
-      *  @param[in,out] io_err  Error log handle to be committed
-      *
-      *  @return None
-      */
-     void commitErrLog(errlHndl_t& io_err, compId_t i_committerComp );
+     *  @brief Commit an error log by sending it to the repository
+     *  Writes the log to PNOR where committed logs are kept.
+     *  If there's not enough room, remove the latest log(s) to make
+     *  enough room to commit this log.
+     *  The error log will be automatically deleted after the
+     *  commit.  The input handle will be set to NULL.
+     *  For Host Boot environment, there's no individual committer
+     *  (i.e. committer = Host Boot), so no component ID of
+     *  committer is specified.
+     *
+     *  @param[in,out] io_err          Error log handle to be committed
+     *  @param[in]     i_comitterComp  Component committing the error log
+     *
+     *  @return None
+     */
+    void commitErrLog(errlHndl_t& io_err, compId_t i_committerComp );
 
-     /**
-      * @brief  Returns a unique error log ID
-      *
-      * This routine generates a unique Error ID and assign it to
-      * the input error log. Mutates iv_currLogId.
-      *
-      * @return  Unique generated error log ID
-      */
-     uint32_t getUniqueErrId();
 
-     /**
-      * @brief Sets the HWAS ProcessCallout function pointer
-      *
-      * This is called by HWAS to inform errlmanager that HWAS is loaded and
-      * therefore it can call HWAS to process callout information in an errlog
-      *
-      * It is a static function because a module cannot call an interface on a
-      * singleton in another module
-      */
-     static void setHwasProcessCalloutFn(HWAS::processCalloutFn i_fn);
+    /**
+     *  @brief  Acts like commitErrLog but instead of removing latest log(s) to
+     *          make enough room, this function moves these logs into new
+     *          informational error logs which point to original one's plid
+     *          Commits up to 5 informational logs for each original one
+     *
+     *  @param[in/out] io_err           Error log handle to be committed
+     *  @param[in]     i_committerComp  Component committing the error log
+     *  @param[in]     i_keepTraces     Try to keep trace entries in first log
+     *
+     *  @return None
+     */
+     void commitErrAllowExtraLogs(errlHndl_t& io_err,
+                                  compId_t i_committerComp,
+                                  bool i_keepTraces );
 
-     /**
-      * @brief Sends msg to errlmanager telling what resources are ready
-      *
-      * This is called by resources that the ErrlManager needs, which start up
-      * AFTER ErrlManager starts.
-      *
-      * It is a static function because a module cannot call an interface on a
-      * singleton in another module
-      */
-     static void errlResourceReady(errlManagerNeeds i_needs);
+    /**
+     * @brief  Returns a unique error log ID
+     *
+     * This routine generates a unique Error ID and assign it to
+     * the input error log. Mutates iv_currLogId.
+     *
+     * @return  Unique generated error log ID
+     */
+    uint32_t getUniqueErrId();
 
-     /**
-      * @brief Sends msg to errlmanager to ack sending of errl to BMC
-      *
-      * This is called by ipmi code once the SEL for the indicated errorlog
-      * has been successfully sent to the BMC
-      *
-      * It is a static function because a module cannot call an interface on a
-      * singleton in another module
-      */
-     static void errlAckErrorlog(uint32_t i_eid);
+    /**
+     * @brief Sets the HWAS ProcessCallout function pointer
+     *
+     * This is called by HWAS to inform errlmanager that HWAS is loaded and
+     * therefore it can call HWAS to process callout information in an errlog
+     *
+     * It is a static function because a module cannot call an interface on a
+     * singleton in another module
+     */
+    static void setHwasProcessCalloutFn(HWAS::processCalloutFn i_fn);
 
-     /**
-      * @brief Calls flush error logs
-      *
-      * This is called by doIstep after every istep to ensure that the error
-      * logs have been cleared out before checking if a reconfigure loop
-      * is needed
-      *
-      * It is a static function because a module cannot call an interface on a
-      * singleton in another module
-      */
-      static void callFlushErrorLogs();
+    /**
+     * @brief Sends msg to errlmanager telling what resources are ready
+     *
+     * This is called by resources that the ErrlManager needs, which start up
+     * AFTER ErrlManager starts.
+     *
+     * It is a static function because a module cannot call an interface on a
+     * singleton in another module
+     */
+    static void errlResourceReady(errlManagerNeeds i_needs);
 
-     /**
-      * @brief  Returns the HWAS ProcessCallout function pointer
-      *
-      * This is called by ErrlEntry::commit to get the HWAS ProcessCallout
-      * function pointer, this is called to process callout information in an
-      * errlog, if NULL is returned then the function cannot be called (because
-      * the HWAS module is not loaded)
-      *
-      * @return HWAS::processCalloutFn function pointer
-      */
-      HWAS::processCalloutFn getHwasProcessCalloutFn() const
-      {
-          return iv_hwasProcessCalloutFn;
-      }
+    /**
+     * @brief Sends msg to errlmanager to ack sending of errl to BMC
+     *
+     * This is called by ipmi code once the SEL for the indicated errorlog
+     * has been successfully sent to the BMC
+     *
+     * It is a static function because a module cannot call an interface on a
+     * singleton in another module
+     */
+   static void errlAckErrorlog(uint32_t i_eid);
+
+    /**
+     * @brief Calls flush error logs
+     *
+     * This is called by doIstep after every istep to ensure that the error
+     * logs have been cleared out before checking if a reconfigure loop
+     * is needed
+     *
+     * It is a static function because a module cannot call an interface on a
+     * singleton in another module
+     */
+    static void callFlushErrorLogs();
+
+    /**
+     * @brief  Returns the HWAS ProcessCallout function pointer
+     *
+     * This is called by ErrlEntry::commit to get the HWAS ProcessCallout
+     * function pointer, this is called to process callout information in an
+     * errlog, if NULL is returned then the function cannot be called (because
+     * the HWAS module is not loaded)
+     *
+     * @return HWAS::processCalloutFn function pointer
+     */
+    HWAS::processCalloutFn getHwasProcessCalloutFn() const
+    {
+        return iv_hwasProcessCalloutFn;
+    }
 
     /**
      * @brief Determines if any non-informational logs have been committed
@@ -233,7 +265,7 @@ public:
      *
      * @return true - A non-informational log has been committed.
      */
-     static bool errlCommittedThisBoot();
+    static bool errlCommittedThisBoot();
 
     /**
      * @brief Returns the cached VERSION partition, if any
@@ -248,20 +280,20 @@ public:
      */
     size_t getCachedVersionPartitionSize() const;
 
-     /**
-      * @brief Cache the VERSION PNOR partition into a member buffer. The
-      *        buffer is dynamically allocated here to hold the contents of the
-      *        partition. If any error occurs during the execution, the buffer
-      *        is deleted and the error is returned. This function is not
-      *        supposed to be called within ErrlManager message handler, since
-      *        the function itself makes synchronous calls to various message
-      *        handlers. Note that once the partition is cached, the cache is
-      *        never purged to make sure all possible error logs receive the
-      *        VERSION field. No-op on FSP systems.
-      *
-      * @return errlHndl_t nullptr on success; non-nullptr on error.
-      */
-     errlHndl_t cacheVersionPartition();
+    /**
+     * @brief Cache the VERSION PNOR partition into a member buffer. The
+     *        buffer is dynamically allocated here to hold the contents of the
+     *        partition. If any error occurs during the execution, the buffer
+     *        is deleted and the error is returned. This function is not
+     *        supposed to be called within ErrlManager message handler, since
+     *        the function itself makes synchronous calls to various message
+     *        handlers. Note that once the partition is cached, the cache is
+     *        never purged to make sure all possible error logs receive the
+     *        VERSION field. No-op on FSP systems.
+     *
+     * @return errlHndl_t nullptr on success; non-nullptr on error.
+     */
+    errlHndl_t cacheVersionPartition();
 
 
     /**

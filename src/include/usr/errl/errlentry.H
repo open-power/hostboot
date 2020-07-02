@@ -691,6 +691,20 @@ public:
     std::vector<void*> getUDSections(compId_t i_compId, uint8_t i_subSect);
 
     /**
+     * @brief Removes ErrlUD sections for this entry
+     * @param[in] i_maxSize Maximum flattenedSize() allowed
+     * @param[in] i_keep_trace_sections Do not delete trace sections
+     * @return Array of removed sections (caller responsible to delete memory)
+     */
+    std::vector<ErrlUD*> removeExcessiveUDsections(uint64_t i_maxSize, bool i_keep_trace_sections);
+
+    /**
+     * @brief Add this ErrlUD section to this errl entry
+     * @param[in] i_section ErrlUD section
+     */
+    void addUDSection( ErrlUD* i_section);
+
+    /**
      * @brief set iv_eselCallhomeInfoEvent
      *
      *      When true, send this error as a special callhome

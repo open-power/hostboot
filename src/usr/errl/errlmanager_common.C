@@ -1,3 +1,4 @@
+
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
@@ -42,6 +43,9 @@
 #include <map>
 #include <util/misc.H>
 
+#include <errl/errlreasoncodes.H>
+#include <targeting/common/targetservice.H>
+
 namespace ERRORLOG
 {
 
@@ -60,6 +64,12 @@ const uint32_t FIRST_BYTE_ERRLOG = 0xF0000000;
 void errlCommit(errlHndl_t& io_err, compId_t i_committerComp )
 {
     ERRORLOG::theErrlManager::instance().commitErrLog(io_err, i_committerComp );
+    return;
+}
+
+void errlCommitAllowExtraLogs(errlHndl_t& io_err, compId_t i_committerComp, bool i_keepTraces )
+{
+    ERRORLOG::theErrlManager::instance().commitErrAllowExtraLogs(io_err, i_committerComp, i_keepTraces );
     return;
 }
 
@@ -1096,5 +1106,168 @@ void ErrlManager::setErrlSkipFlag(errlHndl_t io_err)
             io_err->setSkipShowingLog(false);
     }
 } // setErrlSkipFlag
+
+void ErrlManager::commitErrAllowExtraLogs(errlHndl_t& io_err, compId_t i_committerComp, bool i_keepTraces )
+{
+    constexpr unsigned int MAX_EXTRA_LOGS_PER_ORIGINAL = 5;
+
+    // Additional sections are added to error log during commit time
+    // like backtrace, code level, etc...
+    // (varies between 740 and 800 bytes)
+    constexpr uint32_t COMMIT_ADDITIONAL_SECTIONS_SIZE = 800;
+
+    // flatten into buffer, truncate to max eSEL size
+    TARGETING::Target * sys = nullptr;
+    TARGETING::targetService().getTopLevelTarget( sys );
+    uint32_t l_maxErrLogSize;
+
+#ifdef CONFIG_BMC_IPMI
+    if ( !(sys &&
+         sys->tryGetAttr<TARGETING::ATTR_BMC_MAX_ERROR_LOG_SIZE>( l_maxErrLogSize )) )
+    {
+        // Can't get value from attribute, so
+        // use default IPMI value for max log size
+        l_maxErrLogSize =  IPMISEL::ESEL_MAX_SIZE_DEFAULT;
+        TRACFCOMP( g_trac_errl, INFO_MRK
+                   "commitErrAllowExtraLogs: "
+                   "Attribute ATTR_BMC_MAX_ERROR_LOG_SIZE not found, "
+                   "%d used", l_maxErrLogSize );
+    }
+    // Remove required selRecord size from maximum log size
+    if ( l_maxErrLogSize > sizeof(IPMISEL::selRecord) )
+    {
+        l_maxErrLogSize -= sizeof(IPMISEL::selRecord);
+    }
+#else
+    // default to 4K for all others
+    l_maxErrLogSize = 4096;
+#endif
+
+    // first remove any duplicate traces to help fit in one error log
+    io_err->removeDuplicateTraces();
+    uint64_t l_totalErrlSize = io_err->flattenedSize();
+
+    if (l_totalErrlSize > l_maxErrLogSize)
+    {
+        // Account for the sections added at commit time for each log
+        if (l_maxErrLogSize > COMMIT_ADDITIONAL_SECTIONS_SIZE)
+        {
+            l_maxErrLogSize -= COMMIT_ADDITIONAL_SECTIONS_SIZE;
+        }
+        TRACDCOMP( g_trac_errl, INFO_MRK
+                "commitErrAllowExtraLogs: size %d bytes > max size %d bytes",
+                l_totalErrlSize, l_maxErrLogSize );
+
+        std::vector<ErrlUD*> l_errlUDEntries = io_err->removeExcessiveUDsections(l_maxErrLogSize, i_keepTraces);
+
+        uint16_t l_reasonCode = io_err->reasonCode();
+        uint32_t l_plid = io_err->plid();
+
+        // Keep track of additional logs so they can be committed later
+        //  and EIDs added to the first original log
+        std::vector<errlHndl_t>l_additional_logs;
+
+        auto sectionVectorIt = l_errlUDEntries.begin();
+        for (unsigned int i = 0; (i < MAX_EXTRA_LOGS_PER_ORIGINAL) && (sectionVectorIt != l_errlUDEntries.end()); i++)
+        {
+            // Create an informational error log and tie it to original error log
+            /*@
+             * @errortype
+             * @moduleid     ERRORLOG::ERRL_COMMIT_EXTRA_LOGS_ID
+             * @reasoncode   ERRORLOG::ERRL_EXTRA_LOG_RC
+             * @userdata1    Original log reason code
+             * @userdata2    Extra log number
+             * @devdesc      Commit of extra data tied to original log
+             * @custdesc     Additional data log for original log
+             */
+            errlHndl_t l_newErrl = new ERRORLOG::ErrlEntry(
+                                      ERRL_SEV_INFORMATIONAL,
+                                      ERRORLOG::ERRL_COMMIT_EXTRA_LOGS_ID,
+                                      ERRORLOG::ERRL_EXTRA_LOG_RC,
+                                      l_reasonCode,
+                                      i);
+
+            // Associate this new error log with the original one
+            l_newErrl->plid(l_plid);
+
+            // Note: l_maxErrLogSize will always accommodate initial flat size
+            uint64_t l_sizeLeft = l_maxErrLogSize - l_newErrl->flattenedSize();
+
+            // Add entries until no more UD sections or
+            // error log can't hold another entry
+            int l_entriesAdded = 0;
+            while (l_sizeLeft && (sectionVectorIt != l_errlUDEntries.end()))
+            {
+                uint64_t l_udSize = (*sectionVectorIt)->flatSize();
+
+                TRACDCOMP( g_trac_errl, INFO_MRK
+                      "commitErrAllowExtraLogs: Current section size 0x%llX, size left in error 0x%llX",
+                      l_udSize, l_sizeLeft);
+
+                if ( l_sizeLeft >= l_udSize )
+                {
+                    l_newErrl->addUDSection(*sectionVectorIt);
+                    l_entriesAdded++;
+                    sectionVectorIt++;
+
+                    // Update how much size is left in error log
+                    // after this section was added
+                    l_sizeLeft -= l_udSize;
+                }
+                else
+                {
+                    // Section doesn't fit in error log
+                    break;
+                }
+            }
+            if (l_entriesAdded)
+            {
+                // store this additional error log to commit later
+                l_additional_logs.push_back(l_newErrl);
+            }
+            else
+            {
+                // just remove this error log as no entries added
+                delete l_newErrl;
+                l_newErrl = nullptr;
+                break;
+            }
+        } // end FOR loop creating extra logs
+
+        // Delete the non-committed UD sections left after extra logs
+        while(sectionVectorIt != l_errlUDEntries.end())
+        {
+            // Remove the ErrlUD* at this position
+            delete (*sectionVectorIt);
+
+            // Erase this entry from the vector and go to next one
+            sectionVectorIt = l_errlUDEntries.erase(sectionVectorIt);
+        }
+
+        // Add a user data section to keep track of additional logs associated
+        // with original error.  Note: using EID since eBMC may change plid
+        char l_log_count_str[150];
+        sprintf(l_log_count_str, "%d additional module 0x%02X rc 0x%04X logs associated with this error:",
+            l_additional_logs.size(), ERRORLOG::ERRL_COMMIT_EXTRA_LOGS_ID, ERRORLOG::ERRL_EXTRA_LOG_RC);
+        for (auto extraLog : l_additional_logs)
+        {
+            sprintf(l_log_count_str+strlen(l_log_count_str), " 0x%08X", extraLog->eid());
+        }
+        ErrlUD* l_ffdcSection = new ErrlUD(l_log_count_str, strlen(l_log_count_str), ERRL_COMP_ID, 1, ERRL_UDT_STRING);
+        io_err->addUDSection(l_ffdcSection);
+        commitErrLog(io_err, i_committerComp);
+
+        // now commit the additional logs
+        for (auto extraLog : l_additional_logs)
+        {
+            commitErrLog(extraLog, i_committerComp);
+        }
+    }
+    else
+    {
+        // just commit this error log (no need for extra logs)
+        commitErrLog(io_err, i_committerComp);
+    }
+}
 
 } // end namespace

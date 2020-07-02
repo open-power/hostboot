@@ -2476,5 +2476,56 @@ void ErrlEntry::addI2cDeviceCallout(const TARGETING::Target *i_i2cMaster,
 
 } // addI2cDeviceCallout
 
+std::vector<ErrlUD*> ErrlEntry::removeExcessiveUDsections(uint64_t i_maxSize, bool i_keep_trace_sections)
+{
+    std::vector<ErrlUD*> l_extra_sections;
+
+    uint64_t l_bytecount = iv_Private.flatSize() +
+                           iv_User.flatSize() +
+                           iv_Src.flatSize();
+
+
+    std::vector<ErrlUD*>::iterator it;
+    it = iv_SectionVector.begin();
+
+    while( it != iv_SectionVector.end())
+    {
+        // If UD section is a trace and still room in ErrlEntry
+        if ( i_keep_trace_sections &&
+             ((FIPS_ERRL_COMP_ID == (*it)->iv_header.iv_compId) &&
+              (FIPS_ERRL_UDT_HB_TRACE == (*it)->iv_header.iv_sst))
+             && (l_bytecount + (*it)->flatSize() <= i_maxSize) )
+        {
+            l_bytecount += (*it)->flatSize();
+            it++;
+        }
+        else
+        {
+            l_extra_sections.push_back(*it);
+            it = iv_SectionVector.erase(it);
+        }
+    }
+
+    it = l_extra_sections.begin();
+    while ( it != l_extra_sections.end() )
+    {
+        if ((l_bytecount + (*it)->flatSize()) <= i_maxSize)
+        {
+            l_bytecount += (*it)->flatSize();
+            iv_SectionVector.push_back(*it);
+            it = l_extra_sections.erase(it);
+        }
+        else
+        {
+            break;
+        }
+    }
+    return l_extra_sections;
+}
+
+void ErrlEntry::addUDSection( ErrlUD* i_section)
+{
+    iv_SectionVector.push_back(i_section);
+}
 
 } // End namespace
