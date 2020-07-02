@@ -54,8 +54,24 @@
 #include <pnortargeting.H>
 
 //******************************************************************************
-// Interface Definitions
+// Utility functions
 //******************************************************************************
+namespace TARGETING
+{
+    namespace UTIL
+    {
+        /**
+         *  @brief Returns the top level physical target
+         *
+         *  Returns the top level (usually system) target. If there is no top
+         *  level target, an assertion failure is triggered. Caller does not
+         *  need to check for a NULL top level target
+         *
+         *  @returns  The top level target, never NULL.
+         */
+        Target* assertGetToplevelTarget();
+    }; // namespace Util
+};
 
 //******************************************************************************
 // Method to access the targeting service externally

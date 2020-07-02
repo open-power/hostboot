@@ -315,10 +315,11 @@ class Target
          *  @retval Content and dimension varies, see xml file where the
          *      attribute's type is set
          */
-#ifdef __HOSTBOOT_MODULE
+// This code relies heavily on std::array which is supported by c++11 and beyond
+#if __cplusplus >= 201103L
         template<const ATTRIBUTE_ID A>
         typename AttributeTraits<A>::TypeStdArr getAttrAsStdArr() const;
-#endif
+#endif // __cplusplus >= 201103L
 
         /**
          *  @brief Tries to set the target's specified attribute value
@@ -1140,6 +1141,8 @@ const char* Target::getAttrAsString() const
     return attrToString<A>(l_attrValue);
 }
 
+// This code relies heavily on std::array which is supported by c++11 and beyond
+#if __cplusplus >= 201103L
 #ifdef __HOSTBOOT_MODULE
 template<const ATTRIBUTE_ID A>
 typename AttributeTraits<A>::TypeStdArr Target::getAttrAsStdArr() const
@@ -1155,7 +1158,8 @@ typename AttributeTraits<A>::TypeStdArr Target::getAttrAsStdArr() const
 
     return l_stdArr;
 }
-#endif
+#endif // __HOSTBOOT_MODULE
+#endif // __cplusplus >= 201103L
 
 // Function to set various frequency related attributes
 /**

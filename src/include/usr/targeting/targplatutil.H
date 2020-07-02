@@ -69,23 +69,6 @@ void dumpHBAttrs(uint32_t i_huid = 0);
 // is reserved for invalid sensor
 static const uint16_t INVALID_IPMI_SENSOR = 0xFF;
 
-/**
- *  @brief Returns the top level physical target
- *
- *  Returns the top level (usually system) target. If there is no top
- *  level target, an assertion failure is triggered. Caller does not
- *  need to check for a NULL top level target
- *
- *  @returns  The top level target, never NULL.
- */
-inline Target* assertGetToplevelTarget()
-{
-    Target* toplevelTarget = nullptr;
-    targetService().getTopLevelTarget(toplevelTarget);
-    assert(toplevelTarget, "Toplevel target is NULL");
-    return toplevelTarget;
-}
-
 /* @brief tryGetAttributes<Attrs...>
  *
  *        This is a utility template that iterates a list of attribute IDs,

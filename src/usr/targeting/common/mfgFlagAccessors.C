@@ -30,7 +30,7 @@
 // Includes
 //******************************************************************************
 #include <targeting/common/mfgFlagAccessors.H>
-#include <targeting/targplatutil.H> //TARGETING::UTIL::assertGetToplevelTarget()
+#include <targeting/common/targetservice.H> // TARGETING::UTIL::assertGetToplevelTarget
 
 namespace TARGETING
 {

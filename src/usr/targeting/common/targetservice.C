@@ -67,6 +67,32 @@
 #undef EXTRA_SANITY_CHECKING
 
 //******************************************************************************
+// Utility functions
+//******************************************************************************
+namespace TARGETING
+{
+    namespace UTIL
+    {
+        /**
+         *  @brief Returns the top level physical target
+         *
+         *  Returns the top level (usually system) target. If there is no top
+         *  level target, an assertion failure is triggered. Caller does not
+         *  need to check for a NULL top level target
+         *
+         *  @returns  The top level target, never NULL.
+         */
+        Target* assertGetToplevelTarget()
+        {
+            Target* toplevelTarget(NULL);
+            targetService().getTopLevelTarget(toplevelTarget);
+            TARG_ASSERT(toplevelTarget, "Toplevel target is NULL");
+            return toplevelTarget;
+        };
+    }; // namespace Util
+};
+
+//******************************************************************************
 // targetService
 //******************************************************************************
 
@@ -1981,6 +2007,7 @@ bool isThisMasterNodeTarget(const Target* const i_pTarget)
 #undef TARG_CLASS
 
 #undef TARG_NAMESPACE
+
 
 } // End namespace TARGETING
 
