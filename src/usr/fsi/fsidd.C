@@ -2303,7 +2303,7 @@ errlHndl_t FsiDD::initMasterControl(TARGETING::Target* i_master,
         {
             TRACFCOMP( g_trac_fsi, "Multiproc not yet supported. "
                 "Setting iv_slaves to 0 for corresponding "
-                "slave_index %llX", slave_index);
+                "slave_index 0x%llX", slave_index);
 
             iv_slaves[slave_index] = 0;
         }
