@@ -103,6 +103,7 @@ namespace PLDM
         RC_OCC_RESET_TOO_SOON       = PLDM_COMP_ID | 0x1D,
         RC_OVERLONG_LOCATION_CODE   = PLDM_COMP_ID | 0x1E,
         RC_RECV_FAIL                = PLDM_COMP_ID | 0x1F,
+        RC_MULTIPLE_AWAIT           = PLDM_COMP_ID | 0x20,
     };
 }
 #endif

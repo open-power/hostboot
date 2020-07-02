@@ -42,6 +42,7 @@
 #include <sys/msg.h>
 
 using namespace PLDM;
+using namespace ERRORLOG;
 
 namespace
 {
@@ -313,8 +314,6 @@ bool PdrManager::findEntityByTypeAndId(pldm_entity& io_entity) const
 #ifndef __HOSTBOOT_RUNTIME
 errlHndl_t PdrManager::notifyBmcPdrRepoChanged()
 {
-    using namespace ERRORLOG;
-
     errlHndl_t errl = nullptr;
 
     /* Get an owning handle to the notification message queue. If it is null,
@@ -360,15 +359,28 @@ errlHndl_t PdrManager::notifyBmcPdrRepoChanged()
 
 errlHndl_t PdrManager::awaitBmcPdrRepoChanged(const size_t i_timeout_ms)
 {
-    const auto lock = scoped_mutex_lock(iv_access_mutex);
-
     // @TODO RTC 249701: Add watchdog timer for the msg_wait below
     assert(i_timeout_ms == TIMEOUT_NONE,
            "awaitBmcPdrRepoChanged: timeout not supported");
 
     errlHndl_t errl = nullptr;
+    std::shared_ptr<void> msgq;
 
-    auto msgq = iv_bmc_repo_changed_event_q;
+    {
+        // We do not want to hold this lock when we go into the msg_wait loop
+        // below, otherwise we could deadlock if we're waiting on the BMC and
+        // then they issue a getPDR or similar request.
+        const auto lock = scoped_mutex_lock(iv_access_mutex);
+
+        // Get a local handle to the event queue to keep it alive while we use
+        // it.
+        msgq = iv_bmc_repo_changed_event_q;
+
+        // Null out the event queue so that it gets destroyed when we exit this
+        // function, to prevent messages from accumulating in the queue and
+        // never being dequeued.
+        iv_bmc_repo_changed_event_q = nullptr;
+    }
 
     if (msgq)
     {
@@ -376,10 +388,23 @@ errlHndl_t PdrManager::awaitBmcPdrRepoChanged(const size_t i_timeout_ms)
 
         msg_free(msg);
         msg = nullptr;
+    }
+    else
+    {
+        /*
+         * @errortype  ERRL_SEV_PREDICTIVE
+         * @moduleid   MOD_PDR_MANAGER
+         * @reasoncode RC_MULTIPLE_AWAIT
+         * @devdesc    Software problem, multiple awaits on PDR manager
+         * @custdesc   A software error occurred during system boot
+         */
+        errl = new ErrlEntry(ERRL_SEV_PREDICTIVE,
+                             MOD_PDR_MANAGER,
+                             RC_MULTIPLE_AWAIT,
+                             0,
+                             0,
+                             ErrlEntry::ADD_SW_CALLOUT);
 
-        // Null out the event queue to destroy it, to prevent messages from
-        // accumulating in the queue and never being dequeued.
-        iv_bmc_repo_changed_event_q = nullptr;
     }
 
     return errl;
