@@ -1027,6 +1027,7 @@ fapi2::ReturnCode PlatPmPPB::gppb_init(
             io_globalppb->pgpe_flags[PGPE_FLAG_WOF_IPC_IMMEDIATE_MODE] = 0;
         }
         io_globalppb->pgpe_flags[PGPE_FLAG_PHANTOM_HALT_ENABLE] = iv_attrs.attr_phantom_halt_enable;
+        io_globalppb->pgpe_flags[PGPE_FLAG_RVRM_ENABLE] = iv_rvrm_enabled;
 
         io_globalppb->vcs_vdd_offset_mv = iv_attrs.attr_vcs_vdd_offset_mv;
         io_globalppb->vcs_floor_mv  = iv_attrs.attr_vcs_floor_mv;
@@ -1478,6 +1479,7 @@ FAPI_INF("%-60s[3] = 0x%08x %d", #attr_name, iv_attrs.attr_assign[3], iv_attrs.a
 
     // Read IVRM,WOF and DPLL attributes
     DATABLOCK_GET_ATTR(ATTR_SYSTEM_WOF_DISABLE,    FAPI_SYSTEM, attr_system_wof_disable);
+    DATABLOCK_GET_ATTR(ATTR_SYSTEM_RVRM_DISABLE,    FAPI_SYSTEM, attr_system_rvrm_disable);
     DATABLOCK_GET_ATTR(ATTR_SYSTEM_DDS_DISABLE,    FAPI_SYSTEM, attr_system_dds_disable);
     DATABLOCK_GET_ATTR(ATTR_SYSTEM_RESCLK_DISABLE, FAPI_SYSTEM, attr_resclk_disable);
     DATABLOCK_GET_ATTR(ATTR_SYSTEM_PSTATES_MODE,   FAPI_SYSTEM, attr_pstate_mode);
@@ -2986,6 +2988,22 @@ bool PlatPmPPB::is_wof_enabled()
 } //end of is_wof_enabled
 
 ///////////////////////////////////////////////////////////
+////////  is_rvrm_enabled
+///////////////////////////////////////////////////////////
+bool PlatPmPPB::is_rvrm_enabled()
+{
+    uint8_t attr_system_rvrm_disable = false;
+    const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
+    FAPI_ATTR_GET(fapi2::ATTR_SYSTEM_RVRM_DISABLE, FAPI_SYSTEM, attr_system_rvrm_disable);
+
+    return
+        (!(attr_system_rvrm_disable) &&
+         iv_rvrm_enabled)
+        ? true : false;
+} //end of is_rvrm_enabled
+
+
+///////////////////////////////////////////////////////////
 ////////   apply_biased_values
 ///////////////////////////////////////////////////////////
 fapi2::ReturnCode PlatPmPPB::apply_biased_values ()
@@ -3980,42 +3998,35 @@ fapi2::ReturnCode PlatPmPPB::rvrm_enablement()
 {
     fapi2::ATTR_RVRM_VID_Type   l_rvrm_rvid;
     uint32_t l_rvrm_rvid_mv;
-    uint32_t l_present_boot_voltage;
     iv_rvrm_enabled = false;
 
-    fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
-    fapi2::ATTR_IS_SIMULATION_Type is_sim;
-    FAPI_TRY(FAPI_ATTR_GET( fapi2::ATTR_IS_SIMULATION, FAPI_SYSTEM, is_sim));
 
-    FAPI_INF("> PlatPmPPB:rvrm_enablement");
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_RVRM_VID,
-                iv_procChip,
-                l_rvrm_rvid));
+    do {
+        if (!is_rvrm_enabled())
+        {
+            FAPI_INF("RVRM is not enabled");
+            iv_rvrm_enabled = false;
+            break;
+        }
 
-    FAPI_DBG("Retention check VID: 0x%08X", l_rvrm_rvid);
+        fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
+        fapi2::ATTR_IS_SIMULATION_Type is_sim;
+        FAPI_TRY(FAPI_ATTR_GET( fapi2::ATTR_IS_SIMULATION, FAPI_SYSTEM, is_sim));
 
-    // Rentention VID has 8mV granularity
-    l_rvrm_rvid_mv = l_rvrm_rvid << 3;
+        FAPI_INF("> PlatPmPPB:rvrm_enablement");
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_RVRM_VID,
+                        iv_procChip,
+                        l_rvrm_rvid));
 
-    if (is_sim)
-    {
-        l_present_boot_voltage = iv_attrs.attr_boot_voltage_mv[VDD];
-    }
-    else
-    {
-        //Read the effective VDD voltage from hardware
-        FAPI_TRY(p10_setup_evid_voltageRead(iv_procChip,
-                    &iv_attrs.attr_avs_bus_num[VDD],
-                    &iv_attrs.attr_avs_bus_rail_select[VDD],
-                    &l_present_boot_voltage));
-    }
+        FAPI_DBG("Retention check VID: 0x%08X", l_rvrm_rvid);
 
-    FAPI_DBG("Present VDD voltage %08x, RVRM_RVID %08x, RVRM_DEADZONE %08x",
-             l_present_boot_voltage,l_rvrm_rvid_mv,iv_attrs.attr_rvrm_deadzone_mv);
-    if ( l_present_boot_voltage > (l_rvrm_rvid_mv + iv_attrs.attr_rvrm_deadzone_mv))
-    {
-        iv_rvrm_enabled = true;
-    }
+        // Rentention VID has 8mV granularity
+        l_rvrm_rvid_mv = l_rvrm_rvid << 3;
+
+        if (l_rvrm_rvid_mv == 0) {
+            iv_rvrm_enabled = false;
+        }
+    } while(0);
 
 fapi_try_exit:
     FAPI_INF("< PlatPmPPB:rvrm_enablement");

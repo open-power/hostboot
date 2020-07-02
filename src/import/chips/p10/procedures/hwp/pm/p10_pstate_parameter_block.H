@@ -124,6 +124,7 @@ typedef struct
     uint8_t attr_system_current_read_disable;
     uint8_t attr_system_ocs_disable;
     uint8_t attr_system_wof_disable;
+    uint8_t attr_system_rvrm_disable;
     uint8_t attr_system_dds_disable;
     uint8_t attr_dds_cal_pstate_enable;
     uint8_t attr_dds_coarse_thr_enable;
@@ -393,6 +394,12 @@ class PlatPmPPB
         /// @return enabled(true)/disabled (false)
         /// -----------------------------------------------------------------------
         bool is_wof_enabled();
+
+        /// -----------------------------------------------------------------------
+        /// @brief State of WOF feature
+        /// @return enabled(true)/disabled (false)
+        /// -----------------------------------------------------------------------
+        bool is_rvrm_enabled();
 
         /// -----------------------------------------------------------------------
         /// @brief State of DDSC feature
