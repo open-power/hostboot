@@ -62,37 +62,34 @@ enum p10_fbc_utils_addr_mode
 // Constant definitions
 //------------------------------------------------------------------------------
 
-#ifndef __PPE_QME
-    // address range definitions
-    const uint64_t P10_FBC_UTILS_FBC_MAX_ADDRESS = ((1ULL << 56) - 1ULL);
-    const uint64_t P10_FBC_UTILS_CACHELINE_MASK = 0x7FULL;
-    const uint64_t P10_FBC_UTILS_LAST_ADDR_IN_CACHELINE = 0x78ULL;
+// address range definitions
+const uint64_t P10_FBC_UTILS_FBC_MAX_ADDRESS = ((1ULL << 56) - 1ULL);
+const uint64_t P10_FBC_UTILS_CACHELINE_MASK = 0x7FULL;
+const uint64_t P10_FBC_UTILS_LAST_ADDR_IN_CACHELINE = 0x78ULL;
 
-    // cacheline size = 128B
-    const uint64_t FABRIC_CACHELINE_SIZE = 0x80;
+// cacheline size = 128B
+const uint64_t FABRIC_CACHELINE_SIZE = 0x80;
 
-    // fbc racetrack stations
-    const uint8_t FABRIC_NUM_STATIONS = 16;
+// fbc racetrack stations
+const uint8_t FABRIC_NUM_STATIONS = 16;
 
-    // fbc max number of iohs links
-    const uint8_t FABRIC_NUM_IOHS_LINKS = 8;
+// fbc max number of iohs links
+const uint8_t FABRIC_NUM_IOHS_LINKS = 8;
 
-    // max memory interleave = 16TB
-    const uint64_t MAX_INTERLEAVE_GROUP_SIZE = 0x0000100000000000ULL;
+// max memory interleave = 16TB
+const uint64_t MAX_INTERLEAVE_GROUP_SIZE = 0x0000100000000000ULL;
 
-    // fbc base address determination constants
-    const uint8_t FABRIC_ADDR_SMF_BIT = 12;
-    const uint64_t FABRIC_ADDR_SMF_MASK = 0x0008000000000000ULL;
-    const uint8_t FABRIC_ADDR_MSEL_START_BIT = 13;
-    const uint8_t FABRIC_ADDR_MSEL_END_BIT = 14;
-    const uint8_t FABRIC_ADDR_TOPO_ID_INDEX_START_BIT = 15;
-    const uint8_t FABRIC_ADDR_TOPO_ID_INDEX_END_BIT = 19;
+// fbc base address determination constants
+const uint8_t FABRIC_ADDR_SMF_BIT = 12;
+const uint64_t FABRIC_ADDR_SMF_MASK = 0x0008000000000000ULL;
+const uint8_t FABRIC_ADDR_MSEL_START_BIT = 13;
+const uint8_t FABRIC_ADDR_MSEL_END_BIT = 14;
+const uint8_t FABRIC_ADDR_TOPO_ID_INDEX_START_BIT = 15;
+const uint8_t FABRIC_ADDR_TOPO_ID_INDEX_END_BIT = 19;
 
-    // smp configuration definitions
-    const uint8_t P10_FBC_UTILS_MAX_LINKS = 8;
-    const uint8_t P10_FBC_UTILS_MAX_CHIPS = 8;
-
-#endif // !__PPE_QME
+// smp configuration definitions
+const uint8_t P10_FBC_UTILS_MAX_LINKS = 8;
+const uint8_t P10_FBC_UTILS_MAX_CHIPS = 8;
 
 //------------------------------------------------------------------------------
 // Function prototypes
@@ -156,7 +153,6 @@ fapi2::ReturnCode set_topology_id_tables(
 
 }; // namespace topo
 
-#ifndef __PPE_QME
 ///
 /// @brief Read FBC/ADU registers to determine state of fabric init and stop
 /// control signals
@@ -227,5 +223,4 @@ fapi2::ReturnCode p10_fbc_utils_get_topology_id(
     uint8_t& o_topology_group_id,
     uint8_t& o_topology_chip_id);
 
-#endif // !__PPE_QME
 #endif // _P10_FBC_UTILS_H_

@@ -291,6 +291,7 @@ fapi_try_exit:
 }
 
 #ifndef __PPE_QME
+
 fapi2::ReturnCode set_topology_id_tables(
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
 {
@@ -365,7 +366,6 @@ fapi_try_exit:
 #endif // !__PPE_QME
 }; // namespace topo
 
-#ifndef __PPE_QME
 ////////////////////////////////////////////////////////
 // p10_fbc_utils_get_fbc_state
 ////////////////////////////////////////////////////////
@@ -545,4 +545,3 @@ fapi_try_exit:
     FAPI_DBG("End");
     return fapi2::current_err;
 }
-#endif // !__PPE_QME
