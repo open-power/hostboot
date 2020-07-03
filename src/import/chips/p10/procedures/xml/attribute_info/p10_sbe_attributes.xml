@@ -531,7 +531,14 @@
     <name>ATTR_SYSTEM_SUSPEND_OCC_MODE</name>
     <value>0x0</value>
   </entry>
-
+  <entry>
+    <name>ATTR_SBE_SYS_CONFIG</name>
+    <value>0x8000000000000000</value>
+  </entry>
+  <entry>
+    <name>ATTR_EC_GARD</name>
+    <value>0x00</value>
+  </entry>
   <!-- HWP writeable attributes -->
   <entry>
     <name>ATTR_SCAN_CHIPLET_OVERRIDE</name>
