@@ -303,6 +303,35 @@
   </hwpError>
   <!-- *********************************************************************** -->
   <hwpError>
+    <rc>RC_QME_META_NOT_FOUND_IN_HW_IMG</rc>
+    <description>QME Meta Data not found in hardware image.
+    Note: 0xFFFFFFFF in field MAX_ALLOWED_SIZE is an invalid size suggesting that image
+    section is not found</description>
+    <ffdc>XIP_FAILURE_CODE</ffdc>
+    <ffdc>CHIP_TYPE</ffdc>
+    <ffdc>EC_LEVEL</ffdc>
+    <ffdc>MAX_ALLOWED_SIZE</ffdc>
+    <ffdc>ACTUAL_SIZE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_QME_META_QMEATMT_MAGIC_MISMATCH</rc>
+    <description>
+        hcode image build procedure checks magic header of meta data failed.
+    </description>
+    <ffdc>QMEATMT_MAGIC_WORD</ffdc>
+    <ffdc>QME_META_HEADER_ADDR</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- *********************************************************************** -->
+  <hwpError>
     <rc>RC_PGPE_IMG_NOT_FOUND_IN_HW_IMG</rc>
     <description>PGPE Image not found in hardware image</description>
     <ffdc>XIP_FAILURE_CODE</ffdc>

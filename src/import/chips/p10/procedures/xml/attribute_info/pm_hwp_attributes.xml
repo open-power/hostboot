@@ -25,17 +25,18 @@
 <attributes>
   <!-- ********************************************************************* -->
   <attribute>
-    <id>ATTR_MMA_OPERATING_MODE</id>
-    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <id>ATTR_SYSTEM_FUSED_CORE_PAIRED_DISABLE</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
     <description>
-        
+       Controls whether QMCR[FUSED_CORE_PAIR_MODE] gets set
     </description>
-    <enum>STATIC = 0x0, DYNAMIC = 0x1</enum>
-    <valueType>uint32</valueType>
+    <enum>FALSE = 0x0, TRUE = 0x1</enum>
+    <valueType>uint8</valueType>
     <writeable/>
     <initToZero/>
     <group>state</group>
   </attribute>
+
   <!-- ********************************************************************* -->
   <attribute>
     <id>ATTR_QME_STATE_LOSS_CORES</id>

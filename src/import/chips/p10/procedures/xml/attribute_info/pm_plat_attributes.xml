@@ -2185,6 +2185,20 @@
 
   <!-- ********************************************************************* -->
   <attribute>
+    <id>ATTR_FUSED_CORE_PAIRED_MODE_ENABLED</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+        Set when QMCR[FUSED_CORE_PAIR_MODE] is to be set by QME Hcode 
+    </description>
+    <enum>FALSE = 0x0, TRUE = 0x1</enum>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <initToZero/>
+    <group>state</group>
+  </attribute>
+
+  <!-- ********************************************************************* -->
+  <attribute>
     <id>ATTR_SYSTEM_MMA_POWEROFF_DISABLE</id>
     <targetType>TARGET_TYPE_SYSTEM</targetType>
     <description>

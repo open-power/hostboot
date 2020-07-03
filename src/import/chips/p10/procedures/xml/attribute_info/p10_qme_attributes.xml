@@ -29,17 +29,30 @@
 <!--    defined.                                                            -->
 <entries>
   <!-- ********************************************************************* -->
+  <!-- MUST READ BEFORE CHANGE:                                              -->
+  <!--      To Avoid Co-Reg Between Hcode_Image_Build and HW_Image           -->
+  <!--      Always adding new attributes to the end of the file              -->
+  <!-- ********************************************************************* -->
   <!-- must have ATTR_NAME and ATTR_EC for fapi2 plat support -->
   <entry>
            <name>ATTR_NAME</name>
-           <value>0x0</value>
+           <value>0xA</value>
   </entry>
   <entry>
            <name>ATTR_EC</name>
-           <value>0x0</value>
+           <value>0x10</value>
   </entry>
   <!-- ********************************************************************* -->
+  <!-- needed from fapi2 for any target position -->
+  <entry>
+          <name>ATTR_CHIP_UNIT_POS</name>
+          <value>0x0</value>
+  </entry>
   <!-- needed from nest_attributes_xml for core/cache_scominit -->
+  <entry>
+           <name>ATTR_PROC_FABRIC_BROADCAST_MODE</name>
+           <value>0x0</value>
+  </entry>
   <entry>
            <name>ATTR_PROC_FABRIC_TOPOLOGY_ID_TABLE</name>
            <value>0xff</value>
@@ -72,12 +85,31 @@
            <value>0x0</value>
            <value>0x0</value>
   </entry>
-  <!-- needed from pm_hwp_attributes_xml for core/cache_scominit -->
   <entry>
-          <name>ATTR_CHIP_UNIT_POS</name>
-          <value>0x0</value>
+           <name>ATTR_PROC_EPS_READ_CYCLES_T0</name>
   </entry>
-  <!-- needed for contained mode and runn mode -->
+  <entry>
+           <name>ATTR_PROC_EPS_READ_CYCLES_T1</name>
+  </entry>
+  <entry>
+           <name>ATTR_PROC_EPS_READ_CYCLES_T2</name>
+  </entry>
+  <entry>
+           <name>ATTR_PROC_EPS_WRITE_CYCLES_T1</name>
+  </entry>
+  <entry>
+           <name>ATTR_PROC_EPS_WRITE_CYCLES_T2</name>
+  </entry>
+  <entry>
+           <name>ATTR_PROC_NX_RNG_BAR_ENABLE</name>
+  </entry>
+  <entry>
+           <name>ATTR_PROC_NX_RNG_BAR_BASE_ADDR_OFFSET</name>
+  </entry>
+  <entry>
+           <name>ATTR_MEM_MIRROR_PLACEMENT_POLICY</name>
+  </entry>
+  <!-- needed from p10_ipl/runn_attributes for contained/runn mode -->
   <entry>
           <name>ATTR_SYSTEM_IPL_PHASE</name>
           <value>0x0</value>
@@ -92,15 +124,28 @@
   </entry>
   <entry>
           <name>ATTR_SMF_CONFIG</name>
-          <value>0x1</value>
+          <value>0x0</value>
   </entry>
-  <!-- needed for qme sim -->
+  <!-- needed from pm_plat_attributes for mma modes -->
+  <entry>
+          <name>ATTR_SYSTEM_MMA_POWEROFF_DELAY_POWEROF2_MS</name>
+          <value>0x0</value>
+  </entry>
+  <entry>
+          <name>ATTR_SYSTEM_MMA_POWERON_DISABLE</name>
+          <value>0x0</value>
+  </entry>
+  <entry>
+          <name>ATTR_SYSTEM_MMA_POWEROFF_DISABLE</name>
+          <value>0x0</value>
+  </entry>
+  <!-- needed for qme controls and modes -->
   <entry>
           <name>ATTR_QME_STATE_LOSS_CORES</name>
           <value>0x0</value>
   </entry>
   <entry>
-          <name>ATTR_MMA_OPERATING_MODE</name>
+          <name>ATTR_FUSED_CORE_PAIRED_MODE_ENABLED</name>
           <value>0x0</value>
   </entry>
   <!-- ********************************************************************* -->

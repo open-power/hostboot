@@ -89,6 +89,7 @@ include ${HWP_PM_PATH}/p10_pm_occ_firinit.mk
 include ${HWP_PM_PATH}/p10_pm_firinit.mk
 include ${HWP_PM_PATH}/p10_pm_pss_init.mk
 include ${HWP_PM_PATH}/p10_hcode_image_build.mk
+include ${HWP_PM_PATH}/p10_qme_build_attributes.mk
 include ${HWP_PM_PATH}/p10_pm_qme_init.mk
 include ${HWP_PM_PATH}/p10_pm_xgpe_init.mk
 include ${HWP_PM_PATH}/p10_pm_occ_gpe_init.mk

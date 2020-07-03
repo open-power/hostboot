@@ -1971,7 +1971,7 @@ typedef enum
                          ".lvl2_bl",           \
                          ".hcode",             \
                          ".rings",             \
-                         ".qme_meta_data")
+                         ".meta_data")
 
 /**************************************************************************/
 /* XGPE Image                                                             */
@@ -1994,7 +1994,7 @@ typedef enum
                          ".lvl2_bl",           \
                          ".hcode",             \
                          ".aux_task",          \
-                         ".xgpe_meta_data")
+                         ".meta_data")
 
 /**************************************************************************/
 /* PGPE Image                                                             */
@@ -2015,7 +2015,7 @@ typedef enum
                          ".lvl1_bl",           \
                          ".lvl2_bl",           \
                          ".hcode",             \
-                         ".pgpe_meta_data")
+                         ".meta_data")
 
 /**************************************************************************/
 /* Core Restore Image                                                     */

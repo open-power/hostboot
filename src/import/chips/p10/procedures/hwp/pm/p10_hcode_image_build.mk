@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2015,2019
+# Contributors Listed Below - COPYRIGHT 2015,2020
 # [+] International Business Machines Corp.
 #
 #
@@ -45,6 +45,7 @@ lib$(PROCEDURE)_DEPLIBS += p10_pm_utils
 lib$(PROCEDURE)_DEPLIBS += p10_pm_get_poundw_bucket
 lib$(PROCEDURE)_DEPLIBS += p10_pm_get_poundv_bucket
 lib$(PROCEDURE)_DEPLIBS += p10_qme_customize
+lib$(PROCEDURE)_DEPLIBS += p10_qme_build_attributes
 lib$(PROCEDURE)_DEPLIBS	+= p10_scan_compression
 lib$(PROCEDURE)_DEPLIBS	+= p10_tor
 lib$(PROCEDURE)_DEPLIBS += common_ringId
