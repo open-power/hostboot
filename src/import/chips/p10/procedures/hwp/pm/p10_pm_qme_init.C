@@ -284,14 +284,14 @@ fapi2::ReturnCode qme_init(
         l_opitA3Data.flush<0>();
         l_pigData.insertFromRight( 0xA, QME_PIG_REQ_INT_TYPE, QME_PIG_REQ_INT_TYPE_LEN );
 
-        FAPI_TRY( putScom( l_eq_mc_and, QME_PIG_REG, l_pigData ) );
+        FAPI_TRY( putScom( l_eq_mc_or, QME_PIG_REG, l_pigData ) );
 
         do
         {
-            getScom( l_eq_mc_and, TP_TPCHIP_OCC_OCI_OCB_OPITASV0, l_opitA0Data );
-            getScom( l_eq_mc_and, TP_TPCHIP_OCC_OCI_OCB_OPITASV1, l_opitA1Data );
-            getScom( l_eq_mc_and, TP_TPCHIP_OCC_OCI_OCB_OPITASV2, l_opitA2Data );
-            getScom( l_eq_mc_and, TP_TPCHIP_OCC_OCI_OCB_OPITASV3, l_opitA3Data );
+            FAPI_TRY( getScom( i_target, TP_TPCHIP_OCC_OCI_OCB_OPITASV0, l_opitA0Data ) );
+            FAPI_TRY( getScom( i_target, TP_TPCHIP_OCC_OCI_OCB_OPITASV1, l_opitA1Data ) );
+            FAPI_TRY( getScom( i_target, TP_TPCHIP_OCC_OCI_OCB_OPITASV2, l_opitA2Data ) );
+            FAPI_TRY( getScom( i_target, TP_TPCHIP_OCC_OCI_OCB_OPITASV3, l_opitA3Data ) );
 
             l_opitA0Data = ( l_opitA0Data & l_opitA1Data & l_opitA2Data & l_opitA3Data );
 
