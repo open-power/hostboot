@@ -111,6 +111,126 @@
   </attribute>
   <!-- ******************************************************************** -->
   <attribute>
+    <id>ATTR_CHIP_EC_FEATURE_HW513860</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      Itag stuck in same state for too long (wait4issue. lsu err inj, critical marked branch at NTC)
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_P10</name>
+        <ec>
+          <value>0x10</value>
+          <test>EQUAL</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
+  <!-- ******************************************************************** -->
+  <attribute>
+    <id>ATTR_CHIP_EC_FEATURE_HW515816</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      Critical Not Sent is valid however the Itag is already Finished For (NML, STF Error Inj)
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_P10</name>
+        <ec>
+          <value>0x10</value>
+          <test>EQUAL</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
+  <!-- ******************************************************************** -->
+  <attribute>
+    <id>ATTR_CHIP_EC_FEATURE_HW518235</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      IFU North error detected Recoverable iffec iffbc miss not pending error
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_P10</name>
+        <ec>
+          <value>0x10</value>
+          <test>EQUAL</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
+  <!-- ******************************************************************** -->
+  <attribute>
+    <id>ATTR_CHIP_EC_FEATURE_HW519417</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      hreset but t2 ict not empty - xfvc err inj
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_P10</name>
+        <ec>
+          <value>0x10</value>
+          <test>EQUAL</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
+  <!-- ******************************************************************** -->
+  <attribute>
+    <id>ATTR_CHIP_EC_FEATURE_HW522218</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      IBI Register Miscompare VSR (nml, dynamic set delete, lvewx)
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_P10</name>
+        <ec>
+          <value>0x10</value>
+          <test>EQUAL</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
+  <!-- ******************************************************************** -->
+  <attribute>
+    <id>ATTR_CHIP_EC_FEATURE_HW524075</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      VSU bugspray stf01_tag0x000_dw0_mismatch fires during recovery
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_P10</name>
+        <ec>
+          <value>0x10</value>
+          <test>EQUAL</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
+  <!-- ******************************************************************** -->
+  <attribute>
+    <id>ATTR_CHIP_EC_FEATURE_HW526954</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      IFU loses prefix address when taking 0xe60 HMI interrupt
+      and returns to the middle of the instruction
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_P10</name>
+        <ec>
+          <value>0x10</value>
+          <test>EQUAL</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
+  <!-- ******************************************************************** -->
+  <attribute>
     <id>ATTR_CHIP_EC_FEATURE_HW514623</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>
