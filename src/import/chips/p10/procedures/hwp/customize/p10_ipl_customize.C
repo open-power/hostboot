@@ -1246,8 +1246,8 @@ fapi2::ReturnCode process_target_and_dynamic_rings(
         //
         FAPI_DBG("ringId=0x%x: No Target ring found. Dynamic ring found.", i_ringId);
 
-        RingId_t ringIdTmp   = be16toh(((CompressedScanData*)targetRs4)->iv_ringId);
-        uint32_t scanAddrTmp = be32toh(((CompressedScanData*)targetRs4)->iv_scanAddr);
+        RingId_t ringIdTmp   = be16toh(((CompressedScanData*)dynRs4)->iv_ringId);
+        uint32_t scanAddrTmp = be32toh(((CompressedScanData*)dynRs4)->iv_scanAddr);
 
         finalTypeField = dynTypeField;
 
