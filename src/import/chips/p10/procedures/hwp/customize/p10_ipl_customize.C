@@ -3462,7 +3462,7 @@ ReturnCode p10_ipl_customize (
                               FAPI_SYSTEM,
                               l_attrInitFeatureVec);
 
-    featureVec = (uint64_t)l_attrInitFeatureVec;
+    featureVec = (uint64_t)l_attrInitFeatureVec[0];
 
     FAPI_ASSERT( l_fapiRc2 == fapi2::FAPI2_RC_SUCCESS,
                  fapi2::XIPC_FAPI_ATTR_SVC_FAIL().
