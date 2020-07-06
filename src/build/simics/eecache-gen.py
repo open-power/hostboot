@@ -38,6 +38,7 @@
 import os
 import cli
 import struct
+import sys
 
 ###########################################################################
 # version 1 header record
@@ -85,7 +86,6 @@ def write_i2c_eecache_record(f, huid, port, engine, devAddr, mux, size, offset, 
 #
 # See eeprom_const.H for header information
 # Version 1 only supports i2c
-# Version 2a - changes version 1 to version 2 (intermediate, just i2c)
 # Version 2 supports i2c and spi access (adds another byte to header size)
 #
 ###########################################################################
@@ -121,27 +121,7 @@ def hb_eecache_setup(file_name, version, verbose):
                 write_eecache_record_v1(f, 0, 0, 0, 0, 0, 0, 0xFFFFFFFF, 0);
 
         elif version == 2:
-            # version, written in 1 byte. (version 2 but no SPI access yet)
-            f.write(struct.pack('>B', 2));
-            # end of cache, written in 4 bytes
-            f.write(struct.pack('>i', 0x1270D));
-
-            # eepromRecordHeader for MVPD (proc 0)
-            write_i2c_eecache_record(f, 0x50000, 0, 1, 0xA0, 0xFF, 64, 0x70D, 0xC0);
-            # for DIMM port 0
-            write_i2c_eecache_record(f, 0x50000, 0, 3, 0xA0, 0xFF, 4, 0x1070D, 0xC0);
-            # for DIMM port 1
-            write_i2c_eecache_record(f, 0x50000, 1, 3, 0xA0, 0xFF, 4, 0x1170D, 0xC0);
-
-            # Note: These max eeprom counts come from src/include/usr/eeprom/eeprom_const.H
-            # For version 2, it is currently a max count of 100
-            # Given 3 records already filled out above, 97 more record headers
-            # can be filled out as empty
-            for _ in range(97):
-                write_i2c_eecache_record(f, 0, 0, 0, 0, 0, 0, 0xFFFFFFFF, 0);
-
-        else:
-            # version, written in 1 byte. Supports version 2 with SPI
+            # version, written in 1 byte. Supports version 2, i.e. I2C and SPI entries
             f.write(struct.pack('>B', 2));
             # end of cache, written in 4 bytes
             f.write(struct.pack('>i', 0x1270D));
@@ -158,6 +138,9 @@ def hb_eecache_setup(file_name, version, verbose):
             # can be filled out as empty
             for _ in range(97):
                 write_i2c_eecache_record(f, 0, 0, 0, 0, 0, 0, 0xFFFFFFFF, 0);
+        else:
+            # Non-supported version argument
+            sys.exit("Error: Non-supported Version Value passed into hb_eecache_setup(...)")
 
     ##################################### Populate Proc 0 Records ####################################
     # now add 64K mvpd record for processor 0 (0x50000)
@@ -267,7 +250,9 @@ def resolve_eecache_path( bmc_files_str, absolute_simics_eecache ):
 ###########################################################################
 # Generate eecache (MAIN FUNCTION)
 # @param eecache_file = local file to create for EECACHE
-# @param version = 1 or 2 (1 = i2c only, 2 = i2c version 2, 3 = i2c + spi)
+# @param version = 1 or 2
+#                - 1: i2c only
+#                - 2: i2c + spi
 ###########################################################################
 def eecache_gen(eecache_file, version):
     if eecache_file != None:

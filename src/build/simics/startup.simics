@@ -77,9 +77,9 @@ if defined bmc_files {
         #echo "Find eecache file name from: "+$bmc_files
         @simenv.eecache_file = find_eecache_file( simenv.bmc_files )
 
-        # Create EECACHE file using version 3 (SPI/I2C version)
+        # Create EECACHE file using version 2 (SPI/I2C version)
         # Note: this checks if eecache_file is None
-        @eecache_gen( simenv.eecache_file, 3 )
+        @eecache_gen( simenv.eecache_file, 2 )
 
         # generate file before looking it up here
         $hb_skip_eecache = 0;
@@ -236,7 +236,7 @@ try {
 # spi_master_version will be set by newer simics levels
 #  spi_master_version=1 means to use the old logic, as does no value
 try {
-    echo "spi_master_version  = "+$spi_master_version 
+    echo "spi_master_version  = "+$spi_master_version
 } except {
     $spi_master_version  = 1
 }
