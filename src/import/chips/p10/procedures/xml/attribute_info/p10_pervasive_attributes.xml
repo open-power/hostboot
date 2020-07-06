@@ -369,4 +369,24 @@
   <platInit/>
 </attribute>
 <!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_ORIG_FIR_SETTINGS_ACTION0</id>
+  <targetType>TARGET_TYPE_CORE</targetType>
+  <description>This attribute is saving the fir settings for action0. During
+          different points of the IPL we want to turn off unit checkstops.
+          This attribute saves the original value.</description>
+  <valueType>uint64</valueType>
+  <writeable/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_ORIG_FIR_SETTINGS_ACTION1</id>
+  <targetType>TARGET_TYPE_CORE</targetType>
+  <description>This attribute is saving the fir settings for action1. During
+          different points of the IPL we want to turn off unit checkstops.
+          This attribute saves the original value.</description>
+  <valueType>uint64</valueType>
+  <writeable/>
+</attribute>
+<!-- ********************************************************************** -->
 </attributes>
