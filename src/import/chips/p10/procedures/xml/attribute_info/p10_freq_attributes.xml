@@ -267,10 +267,12 @@
   <targetType>TARGET_TYPE_PROC_CHIP</targetType>
   <description>
     Ref clock SPI bus divider consumed by code running out of OTPROM
+    bits  0:11 - clock divider; fSPI = fPAU / 8 / (divider + 1); minimum allowed value is 4
+    bits 12:15 - receiver delay in fPAU/4 cycles; allowed range 0..7
   </description>
   <valueType>uint16</valueType>
   <writeable/>
-  <platInit/>
+  <default>0x0041</default>
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
