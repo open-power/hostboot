@@ -108,6 +108,10 @@
         <default>k0</default>
     </attribute>
     <attribute>
+        <id>FREQ_PCIE_MHZ</id>
+        <default>2000</default>
+    </attribute>
+    <attribute>
         <id>HUID</id>
         <default>0x00010000</default>
     </attribute>
@@ -15500,6 +15504,10 @@
         <default>2</default>
     </attribute>
     <attribute>
+        <id>CHIPLET_ID</id>
+        <default>2</default>
+    </attribute>
+    <attribute>
         <id>CLASS</id>
         <default>UNIT</default>
     </attribute>
@@ -15542,6 +15550,10 @@
     </attribute>
     <attribute>
         <id>CHIP_UNIT</id>
+        <default>3</default>
+    </attribute>
+    <attribute>
+        <id>CHIPLET_ID</id>
         <default>3</default>
     </attribute>
     <attribute>
@@ -15590,6 +15602,10 @@
         <default>8</default>
     </attribute>
     <attribute>
+        <id>CHIPLET_ID</id>
+        <default>8</default>
+    </attribute>
+    <attribute>
         <id>CLASS</id>
         <default>UNIT</default>
     </attribute>
@@ -15632,6 +15648,10 @@
     </attribute>
     <attribute>
         <id>CHIP_UNIT</id>
+        <default>9</default>
+    </attribute>
+    <attribute>
+        <id>CHIPLET_ID</id>
         <default>9</default>
     </attribute>
     <attribute>
@@ -15680,12 +15700,20 @@
         <default>12</default>
     </attribute>
     <attribute>
+        <id>CHIPLET_ID</id>
+        <default>12</default>
+    </attribute>
+    <attribute>
         <id>CLASS</id>
         <default>UNIT</default>
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
         <default>pu.perv:k0:n0:s0:p00:c12</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>12</default>
     </attribute>
     <attribute>
         <id>REL_POS</id>
@@ -15721,6 +15749,10 @@
         <default>13</default>
     </attribute>
     <attribute>
+        <id>CHIPLET_ID</id>
+        <default>13</default>
+    </attribute>
+    <attribute>
         <id>CLASS</id>
         <default>UNIT</default>
     </attribute>
@@ -15730,6 +15762,10 @@
     </attribute>
     <attribute>
         <id>REL_POS</id>
+        <default>13</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
         <default>13</default>
     </attribute>
     <attribute>
@@ -15762,12 +15798,20 @@
         <default>14</default>
     </attribute>
     <attribute>
+        <id>CHIPLET_ID</id>
+        <default>14</default>
+    </attribute>
+    <attribute>
         <id>CLASS</id>
         <default>UNIT</default>
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
         <default>pu.perv:k0:n0:s0:p00:c14</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>14</default>
     </attribute>
     <attribute>
         <id>REL_POS</id>
@@ -15803,12 +15847,20 @@
         <default>15</default>
     </attribute>
     <attribute>
+        <id>CHIPLET_ID</id>
+        <default>15</default>
+    </attribute>
+    <attribute>
         <id>CLASS</id>
         <default>UNIT</default>
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
         <default>pu.perv:k0:n0:s0:p00:c15</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>15</default>
     </attribute>
     <attribute>
         <id>REL_POS</id>
@@ -15841,6 +15893,10 @@
     </attribute>
     <attribute>
         <id>CHIP_UNIT</id>
+        <default>16</default>
+    </attribute>
+    <attribute>
+        <id>CHIPLET_ID</id>
         <default>16</default>
     </attribute>
     <attribute>
@@ -15889,6 +15945,10 @@
         <default>17</default>
     </attribute>
     <attribute>
+        <id>CHIPLET_ID</id>
+        <default>17</default>
+    </attribute>
+    <attribute>
         <id>CLASS</id>
         <default>UNIT</default>
     </attribute>
@@ -15934,6 +15994,10 @@
         <default>18</default>
     </attribute>
     <attribute>
+        <id>CHIPLET_ID</id>
+        <default>18</default>
+    </attribute>
+    <attribute>
         <id>CLASS</id>
         <default>UNIT</default>
     </attribute>
@@ -15976,6 +16040,10 @@
     </attribute>
     <attribute>
         <id>CHIP_UNIT</id>
+        <default>19</default>
+    </attribute>
+        <attribute>
+        <id>CHIPLET_ID</id>
         <default>19</default>
     </attribute>
     <attribute>
@@ -16024,6 +16092,10 @@
         <default>24</default>
     </attribute>
     <attribute>
+        <id>CHIPLET_ID</id>
+        <default>24</default>
+    </attribute>
+    <attribute>
         <id>CLASS</id>
         <default>UNIT</default>
     </attribute>
@@ -16069,6 +16141,10 @@
         <default>25</default>
     </attribute>
     <attribute>
+        <id>CHIPLET_ID</id>
+        <default>25</default>
+    </attribute>
+    <attribute>
         <id>FAPI_NAME</id>
         <default>pu.perv:k0:n0:s0:p00:c25</default>
     </attribute>
@@ -16106,6 +16182,10 @@
         <default>26</default>
     </attribute>
     <attribute>
+        <id>CHIPLET_ID</id>
+        <default>26</default>
+    </attribute>
+    <attribute>
         <id>FAPI_NAME</id>
         <default>pu.perv:k0:n0:s0:p00:c26</default>
     </attribute>
@@ -16140,6 +16220,10 @@
     </attribute>
     <attribute>
         <id>CHIP_UNIT</id>
+        <default>27</default>
+    </attribute>
+    <attribute>
+        <id>CHIPLET_ID</id>
         <default>27</default>
     </attribute>
     <attribute>
@@ -16188,6 +16272,10 @@
         <default>28</default>
     </attribute>
     <attribute>
+        <id>CHIPLET_ID</id>
+        <default>28</default>
+    </attribute>
+    <attribute>
         <id>CLASS</id>
         <default>UNIT</default>
     </attribute>
@@ -16230,6 +16318,10 @@
     </attribute>
     <attribute>
         <id>CHIP_UNIT</id>
+        <default>29</default>
+    </attribute>
+    <attribute>
+        <id>CHIPLET_ID</id>
         <default>29</default>
     </attribute>
     <attribute>
@@ -16278,6 +16370,10 @@
         <default>30</default>
     </attribute>
     <attribute>
+        <id>CHIPLET_ID</id>
+        <default>30</default>
+    </attribute>
+    <attribute>
         <id>CLASS</id>
         <default>UNIT</default>
     </attribute>
@@ -16320,6 +16416,10 @@
     </attribute>
     <attribute>
         <id>CHIP_UNIT</id>
+        <default>31</default>
+    </attribute>
+    <attribute>
+        <id>CHIPLET_ID</id>
         <default>31</default>
     </attribute>
     <attribute>
@@ -16368,6 +16468,10 @@
         <default>32</default>
     </attribute>
     <attribute>
+        <id>CHIPLET_ID</id>
+        <default>32</default>
+    </attribute>
+    <attribute>
         <id>FAPI_NAME</id>
         <default>pu.perv:k0:n0:s0:p00:c32</default>
     </attribute>
@@ -16402,6 +16506,10 @@
     </attribute>
     <attribute>
         <id>CHIP_UNIT</id>
+        <default>33</default>
+    </attribute>
+    <attribute>
+        <id>CHIPLET_ID</id>
         <default>33</default>
     </attribute>
     <attribute>
@@ -16442,6 +16550,10 @@
         <default>34</default>
     </attribute>
     <attribute>
+        <id>CHIPLET_ID</id>
+        <default>34</default>
+    </attribute>
+    <attribute>
         <id>FAPI_NAME</id>
         <default>pu.perv:k0:n0:s0:p00:c34</default>
     </attribute>
@@ -16476,6 +16588,10 @@
     </attribute>
     <attribute>
         <id>CHIP_UNIT</id>
+        <default>35</default>
+    </attribute>
+    <attribute>
+        <id>CHIPLET_ID</id>
         <default>35</default>
     </attribute>
     <attribute>
@@ -16516,6 +16632,10 @@
         <default>36</default>
     </attribute>
     <attribute>
+        <id>CHIPLET_ID</id>
+        <default>36</default>
+    </attribute>
+    <attribute>
         <id>FAPI_NAME</id>
         <default>pu.perv:k0:n0:s0:p00:c36</default>
     </attribute>
@@ -16550,6 +16670,10 @@
     </attribute>
     <attribute>
         <id>CHIP_UNIT</id>
+        <default>37</default>
+    </attribute>
+    <attribute>
+        <id>CHIPLET_ID</id>
         <default>37</default>
     </attribute>
     <attribute>
@@ -16590,6 +16714,10 @@
         <default>38</default>
     </attribute>
     <attribute>
+        <id>CHIPLET_ID</id>
+        <default>38</default>
+    </attribute>
+    <attribute>
         <id>FAPI_NAME</id>
         <default>pu.perv:k0:n0:s0:p00:c38</default>
     </attribute>
@@ -16627,6 +16755,10 @@
         <default>39</default>
     </attribute>
     <attribute>
+        <id>CHIPLET_ID</id>
+        <default>39</default>
+    </attribute>
+    <attribute>
         <id>FAPI_NAME</id>
         <default>pu.perv:k0:n0:s0:p00:c39</default>
     </attribute>
@@ -16661,6 +16793,10 @@
     </attribute>
     <attribute>
         <id>CHIP_UNIT</id>
+        <default>2</default>
+    </attribute>
+    <attribute>
+        <id>CHIPLET_ID</id>
         <default>2</default>
     </attribute>
     <attribute>
@@ -16709,6 +16845,10 @@
         <default>3</default>
     </attribute>
     <attribute>
+        <id>CHIPLET_ID</id>
+        <default>3</default>
+    </attribute>
+    <attribute>
         <id>CLASS</id>
         <default>UNIT</default>
     </attribute>
@@ -16751,6 +16891,10 @@
     </attribute>
     <attribute>
         <id>CHIP_UNIT</id>
+        <default>8</default>
+    </attribute>
+    <attribute>
+        <id>CHIPLET_ID</id>
         <default>8</default>
     </attribute>
     <attribute>
@@ -16799,6 +16943,10 @@
         <default>9</default>
     </attribute>
     <attribute>
+        <id>CHIPLET_ID</id>
+        <default>9</default>
+    </attribute>
+    <attribute>
         <id>CLASS</id>
         <default>UNIT</default>
     </attribute>
@@ -16844,6 +16992,10 @@
         <default>12</default>
     </attribute>
     <attribute>
+        <id>CHIPLET_ID</id>
+        <default>12</default>
+    </attribute>
+    <attribute>
         <id>CLASS</id>
         <default>UNIT</default>
     </attribute>
@@ -16852,8 +17004,12 @@
         <default>pu.perv:k0:n0:s0:p01:c12</default>
     </attribute>
     <attribute>
-        <id>REL_POS</id>
+        <id>FAPI_POS</id>
         <default>52</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>12</default>
     </attribute>
     <attribute>
         <id>TYPE</id>
@@ -16885,6 +17041,10 @@
         <default>13</default>
     </attribute>
     <attribute>
+        <id>CHIPLET_ID</id>
+        <default>13</default>
+    </attribute>
+    <attribute>
         <id>CLASS</id>
         <default>UNIT</default>
     </attribute>
@@ -16893,8 +17053,12 @@
         <default>pu.perv:k0:n0:s0:p01:c13</default>
     </attribute>
     <attribute>
-        <id>REL_POS</id>
+        <id>FAPI_POS</id>
         <default>53</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>13</default>
     </attribute>
     <attribute>
         <id>TYPE</id>
@@ -16926,6 +17090,10 @@
         <default>14</default>
     </attribute>
     <attribute>
+        <id>CHIPLET_ID</id>
+        <default>14</default>
+    </attribute>
+    <attribute>
         <id>CLASS</id>
         <default>UNIT</default>
     </attribute>
@@ -16934,8 +17102,12 @@
         <default>pu.perv:k0:n0:s0:p01:c14</default>
     </attribute>
     <attribute>
-        <id>REL_POS</id>
+        <id>FAPI_POS</id>
         <default>54</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>14</default>
     </attribute>
     <attribute>
         <id>TYPE</id>
@@ -16967,6 +17139,10 @@
         <default>15</default>
     </attribute>
     <attribute>
+        <id>CHIPLET_ID</id>
+        <default>15</default>
+    </attribute>
+    <attribute>
         <id>CLASS</id>
         <default>UNIT</default>
     </attribute>
@@ -16975,8 +17151,12 @@
         <default>pu.perv:k0:n0:s0:p01:c15</default>
     </attribute>
     <attribute>
-        <id>REL_POS</id>
+        <id>FAPI_POS</id>
         <default>55</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>15</default>
     </attribute>
     <attribute>
         <id>TYPE</id>
@@ -17008,6 +17188,10 @@
         <default>16</default>
     </attribute>
     <attribute>
+        <id>CHIPLET_ID</id>
+        <default>16</default>
+    </attribute>
+    <attribute>
         <id>CLASS</id>
         <default>UNIT</default>
     </attribute>
@@ -17021,7 +17205,7 @@
     </attribute>
     <attribute>
         <id>REL_POS</id>
-        <default>56</default>
+        <default>16</default>
     </attribute>
     <attribute>
         <id>TYPE</id>
@@ -17033,7 +17217,7 @@
     </attribute>
     <attribute>
         <id>ORDINAL_ID</id>
-        <default>16</default>
+        <default>56</default>
     </attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -17050,6 +17234,10 @@
     </attribute>
     <attribute>
         <id>CHIP_UNIT</id>
+        <default>17</default>
+    </attribute>
+    <attribute>
+        <id>CHIPLET_ID</id>
         <default>17</default>
     </attribute>
     <attribute>
@@ -17098,6 +17286,10 @@
         <default>18</default>
     </attribute>
     <attribute>
+        <id>CHIPLET_ID</id>
+        <default>18</default>
+    </attribute>
+    <attribute>
         <id>CLASS</id>
         <default>UNIT</default>
     </attribute>
@@ -17140,6 +17332,10 @@
     </attribute>
     <attribute>
         <id>CHIP_UNIT</id>
+        <default>19</default>
+    </attribute>
+    <attribute>
+        <id>CHIPLET_ID</id>
         <default>19</default>
     </attribute>
     <attribute>
@@ -17188,6 +17384,10 @@
         <default>24</default>
     </attribute>
     <attribute>
+        <id>CHIPLET_ID</id>
+        <default>24</default>
+    </attribute>
+    <attribute>
         <id>CLASS</id>
         <default>UNIT</default>
     </attribute>
@@ -17233,6 +17433,10 @@
         <default>25</default>
     </attribute>
     <attribute>
+        <id>CHIPLET_ID</id>
+        <default>25</default>
+    </attribute>
+    <attribute>
         <id>FAPI_NAME</id>
         <default>pu.perv:k0:n0:s0:p01:c25</default>
     </attribute>
@@ -17270,6 +17474,10 @@
         <default>26</default>
     </attribute>
     <attribute>
+        <id>CHIPLET_ID</id>
+        <default>26</default>
+    </attribute>
+    <attribute>
         <id>FAPI_NAME</id>
         <default>pu.perv:k0:n0:s0:p01:c26</default>
     </attribute>
@@ -17304,6 +17512,10 @@
     </attribute>
     <attribute>
         <id>CHIP_UNIT</id>
+        <default>27</default>
+    </attribute>
+    <attribute>
+        <id>CHIPLET_ID</id>
         <default>27</default>
     </attribute>
     <attribute>
@@ -17352,6 +17564,10 @@
         <default>28</default>
     </attribute>
     <attribute>
+        <id>CHIPLET_ID</id>
+        <default>28</default>
+    </attribute>
+    <attribute>
         <id>CLASS</id>
         <default>UNIT</default>
     </attribute>
@@ -17397,6 +17613,10 @@
         <default>29</default>
     </attribute>
     <attribute>
+        <id>CHIPLET_ID</id>
+        <default>29</default>
+    </attribute>
+    <attribute>
         <id>CLASS</id>
         <default>UNIT</default>
     </attribute>
@@ -17439,6 +17659,10 @@
     </attribute>
     <attribute>
         <id>CHIP_UNIT</id>
+        <default>30</default>
+    </attribute>
+        <attribute>
+        <id>CHIPLET_ID</id>
         <default>30</default>
     </attribute>
     <attribute>
@@ -17487,6 +17711,10 @@
         <default>31</default>
     </attribute>
     <attribute>
+        <id>CHIPLET_ID</id>
+        <default>31</default>
+    </attribute>
+    <attribute>
         <id>CLASS</id>
         <default>UNIT</default>
     </attribute>
@@ -17532,6 +17760,10 @@
         <default>32</default>
     </attribute>
     <attribute>
+        <id>CHIPLET_ID</id>
+        <default>32</default>
+    </attribute>
+    <attribute>
         <id>FAPI_NAME</id>
         <default>pu.perv:k0:n0:s0:p01:c32</default>
     </attribute>
@@ -17566,6 +17798,10 @@
     </attribute>
     <attribute>
         <id>CHIP_UNIT</id>
+        <default>33</default>
+    </attribute>
+    <attribute>
+        <id>CHIPLET_ID</id>
         <default>33</default>
     </attribute>
     <attribute>
@@ -17606,6 +17842,10 @@
         <default>34</default>
     </attribute>
     <attribute>
+        <id>CHIPLET_ID</id>
+        <default>34</default>
+    </attribute>
+    <attribute>
         <id>FAPI_NAME</id>
         <default>pu.perv:k0:n0:s0:p01:c34</default>
     </attribute>
@@ -17640,6 +17880,10 @@
     </attribute>
     <attribute>
         <id>CHIP_UNIT</id>
+        <default>35</default>
+    </attribute>
+    <attribute>
+        <id>CHIPLET_ID</id>
         <default>35</default>
     </attribute>
     <attribute>
@@ -17680,6 +17924,10 @@
         <default>36</default>
     </attribute>
     <attribute>
+        <id>CHIPLET_ID</id>
+        <default>36</default>
+    </attribute>
+    <attribute>
         <id>FAPI_NAME</id>
         <default>pu.perv:k0:n0:s0:p01:c36</default>
     </attribute>
@@ -17714,6 +17962,10 @@
     </attribute>
     <attribute>
         <id>CHIP_UNIT</id>
+        <default>37</default>
+    </attribute>
+    <attribute>
+        <id>CHIPLET_ID</id>
         <default>37</default>
     </attribute>
     <attribute>
@@ -17754,6 +18006,10 @@
         <default>38</default>
     </attribute>
     <attribute>
+        <id>CHIPLET_ID</id>
+        <default>38</default>
+    </attribute>
+    <attribute>
         <id>FAPI_NAME</id>
         <default>pu.perv:k0:n0:s0:p01:c38</default>
     </attribute>
@@ -17788,6 +18044,10 @@
     </attribute>
     <attribute>
         <id>CHIP_UNIT</id>
+        <default>39</default>
+    </attribute>
+    <attribute>
+        <id>CHIPLET_ID</id>
         <default>39</default>
     </attribute>
     <attribute>
