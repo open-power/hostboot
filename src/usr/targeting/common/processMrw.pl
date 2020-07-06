@@ -1937,7 +1937,17 @@ sub setCommonAttrForChiplet
     $targetObj->setAttribute($target, "PHYS_PATH",     $targetPhysical);
 
     my $pervasive_parent= getPervasiveForUnit($targetObj, "$targetType$targetPos");
-    if ($pervasive_parent ne "")
+
+    #In the situation the target being processed is the pervasive target the logic
+    # differs a little
+    if ($targetType eq "PERV")
+    {
+        #The chiplet_id can simply be set from the CHIP_UNIT value
+        my $chiplet_id = $targetObj->getAttribute($target, "CHIP_UNIT");
+        my $value = sprintf("0x%0.2X", $chiplet_id);
+        $targetObj->setAttribute($target, "CHIPLET_ID", $value);
+    }
+    elsif ($pervasive_parent ne "")
     {
         # Special case: FC does not have a PARENT_PERVASIVE
         if ($targetType ne "FC")
