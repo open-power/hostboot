@@ -113,9 +113,6 @@ pldmrp_rt_rc PldmRP::cache_next_pldm_msg(const uint8_t * const i_next_msg,
 void init_pldm(void)
 {
     PLDM_ENTER("init_pldm");
-    PLDM::thePdrManager().resetPdrs();
-    // TODO RTC:255114 re-enable when PHYP supports PLDM request from HBRT during init
-//     PLDM::thePdrManager().addRemotePdrs();
     PLDM_EXIT("init_pldm");
 }
 
