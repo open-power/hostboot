@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -529,58 +529,6 @@ void getAddresses( TrgtMap_t & io_targMap )
         0x1001181B, // L3 Edram Bank Fail
     };
 
-    io_targMap[TRGT_NPU][REG_FIR] =
-    {
-        0x05013C00, // NPU0FIR
-        0x05013C40, // NPU1FIR
-        0x05013C80, // NPU2FIR
-    };
-
-    io_targMap[TRGT_NPU][REG_REG] =
-    {
-        // There are over 90 registers captured for NPU0FIR, but that is too
-        // much for the limited space in the OP checkstop analysis design. The
-        // hardware team agreed this was the minimum set of registers needed
-        // for a checkstop. We have also been told most of these should have a
-        // zero value so they should not take up too much space.
-        0x05011018, // NPU_S0_CS_SM0_CERR_1
-        0x05011019, // NPU_S0_CS_SM0_CERR_2
-        0x05011048, // NPU_S0_CS_SM1_CERR_1
-        0x05011049, // NPU_S0_CS_SM1_CERR_2
-        0x05011078, // NPU_S0_CS_SM2_CERR_1
-        0x05011079, // NPU_S0_CS_SM2_CERR_2
-        0x050110A8, // NPU_S0_CS_SM3_CERR_1
-        0x050110A9, // NPU_S0_CS_SM3_CERR_2
-        0x050110DB, // NPU_S0_CS_CTL_CERR_1
-        0x050110FA, // NPU_S0_DAT_CERR_LOG_HOLD
-        0x050110FD, // NPU_S0_DAT_REM0
-        0x050110FE, // NPU_S0_DAT_REM1
-        0x05011218, // NPU_S1_CS_SM0_CERR_1
-        0x05011219, // NPU_S1_CS_SM0_CERR_2
-        0x05011248, // NPU_S1_CS_SM1_CERR_1
-        0x05011249, // NPU_S1_CS_SM1_CERR_2
-        0x05011278, // NPU_S1_CS_SM2_CERR_1
-        0x05011279, // NPU_S1_CS_SM2_CERR_2
-        0x050112A8, // NPU_S1_CS_SM3_CERR_1
-        0x050112A9, // NPU_S1_CS_SM3_CERR_2
-        0x050112DB, // NPU_S1_CS_CTL_CERR_1
-        0x050112FA, // NPU_S1_DAT_CERR_LOG_HOLD
-        0x050112FD, // NPU_S1_DAT_REM0
-        0x050112FE, // NPU_S1_DAT_REM1
-        0x05011418, // NPU_S2_CS_SM0_CERR_1
-        0x05011419, // NPU_S2_CS_SM0_CERR_2
-        0x05011448, // NPU_S2_CS_SM1_CERR_1
-        0x05011449, // NPU_S2_CS_SM1_CERR_2
-        0x05011478, // NPU_S2_CS_SM2_CERR_1
-        0x05011479, // NPU_S2_CS_SM2_CERR_2
-        0x050114A8, // NPU_S2_CS_SM3_CERR_1
-        0x050114A9, // NPU_S2_CS_SM3_CERR_2
-        0x050114DB, // NPU_S2_CS_CTL_CERR_1
-        0x050114FA, // NPU_S2_DAT_CERR_LOG_HOLD
-        0x050114FD, // NPU_S2_DAT_REM0
-        0x050114FE, // NPU_S2_DAT_REM1
-    };
-
     io_targMap[TRGT_MC][REG_GLBL] =
     {
         0x07040000, // MC_CHIPLET_CS_FIR
@@ -914,7 +862,6 @@ errlHndl_t getHwConfig( std::vector<HOMER_ChipInfo_t> & o_chipInfVector,
                 ci.hChipA.eqMask   = __getUnitMask(proc, TYPE_EQ,   i_curHw);
                 ci.hChipA.exMask   = __getUnitMask(proc, TYPE_EX,   i_curHw);
                 ci.hChipA.ecMask   = __getUnitMask(proc, TYPE_CORE, i_curHw);
-                ci.hChipA.npuMask  = __getUnitMask(proc, TYPE_NPU,  i_curHw);
                 ci.hChipA.mcMask   = __getUnitMask(proc, TYPE_MC,   i_curHw);
                 ci.hChipA.miMask   = __getUnitMask(proc, TYPE_MI,   i_curHw);
                 ci.hChipA.mccMask  = __getUnitMask(proc, TYPE_MCC,  i_curHw);
