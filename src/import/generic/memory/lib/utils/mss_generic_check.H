@@ -149,7 +149,7 @@ inline fapi2::ReturnCode fir_with_mask( const fapi2::Target<T>& i_target,
 
     // And print the information for debuggability
     FAPI_INF("%s %s on reg 0x%016lx value 0x%016lx and mask 0x%016lx value 0x%016lx", mss::c_str(i_target),
-             o_fir_error ? "has FIR's set" : "has no FIR's set", FIR_REG, l_fir, FIR_MASK, l_fir_mask.invert());
+             o_fir_error ? "has FIR's set" : "has no FIR's set", FIR_REG, l_fir, FIR_MASK, l_fir_mask);
 
 fapi_try_exit:
     return fapi2::current_err;
