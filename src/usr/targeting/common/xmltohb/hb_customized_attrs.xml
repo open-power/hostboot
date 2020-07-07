@@ -722,7 +722,7 @@
     </attribute>
 
     <attribute>
-        <id>ATTR_FABRIC_PRESENT_GROUPS</id>
+        <id>ATTR_PROC_FABRIC_PRESENT_GROUPS</id>
         <writeable/>
     </attribute>
 

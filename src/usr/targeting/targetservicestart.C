@@ -681,7 +681,7 @@ static void initializeAttributes(TargetService& i_targetService,
                 TARGETING::targetService().getTopLevelTarget(l_sys);
                 getAllChips(l_chips, TYPE_PROC, false);
 
-                ATTR_FABRIC_PRESENT_GROUPS_type l_fabric_groups = 0;
+                ATTR_PROC_FABRIC_PRESENT_GROUPS_type l_fabric_groups = 0;
 
                 for(auto l_chip : l_chips)
                 {
@@ -698,12 +698,13 @@ static void initializeAttributes(TargetService& i_targetService,
 
 
                     // Set the corresponding bit in fabric groups
-                    l_fabric_groups |= (1 <<
-                                       ((sizeof(ATTR_FABRIC_PRESENT_GROUPS_type)
-                                        * 8)
-                                        - l_groupId - 1));
+                    l_fabric_groups |=
+                                (1 <<
+                                ((sizeof(ATTR_PROC_FABRIC_PRESENT_GROUPS_type)
+                                * 8)
+                                - l_groupId - 1));
                 }
-                l_sys->setAttr<ATTR_FABRIC_PRESENT_GROUPS>(l_fabric_groups);
+                l_sys->setAttr<ATTR_PROC_FABRIC_PRESENT_GROUPS>(l_fabric_groups);
             }
         }
 
