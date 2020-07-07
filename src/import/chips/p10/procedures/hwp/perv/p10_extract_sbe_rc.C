@@ -128,7 +128,7 @@ fapi2::ReturnCode p10_extract_sbe_rc(const fapi2::Target<fapi2::TARGET_TYPE_PROC
     // PIBMEM address offset constant
     const uint32_t PIBMEM_ADDR_OFFSET = 0xFFF80000;
     const uint32_t PIBMEM_SCOM_OFFSET = 0x00080000;
-    const uint32_t NUM_OF_LOCATION = 4;
+    const uint32_t NUM_OF_LOCATION = 16;
     // Address Range constants
     const uint32_t OTPROM_MIN_RANGE  = 0x000C0000;
     const uint32_t OTPROM_MAX_RANGE  = 0x000C0378;
@@ -180,6 +180,20 @@ fapi2::ReturnCode p10_extract_sbe_rc(const fapi2::Target<fapi2::TARGET_TYPE_PROC
     fapi2::buffer<uint64_t> l_data64_dbg[NUM_OF_LOCATION];
     fapi2::buffer<uint32_t> l_data32_sb_cs;
     fapi2::buffer<uint64_t> l_data64_spi_status;
+    fapi2::buffer<uint64_t> l_data64_spi_config;
+    fapi2::buffer<uint64_t> l_data64_spi_clock_config;
+    fapi2::buffer<uint64_t> l_data64_spi0_status;
+    fapi2::buffer<uint64_t> l_data64_spi0_config;
+    fapi2::buffer<uint64_t> l_data64_spi0_clock_config;
+    fapi2::buffer<uint64_t> l_data64_spi1_status;
+    fapi2::buffer<uint64_t> l_data64_spi1_config;
+    fapi2::buffer<uint64_t> l_data64_spi1_clock_config;
+    fapi2::buffer<uint64_t> l_data64_spi2_status;
+    fapi2::buffer<uint64_t> l_data64_spi2_config;
+    fapi2::buffer<uint64_t> l_data64_spi2_clock_config;
+    fapi2::buffer<uint64_t> l_data64_spi3_status;
+    fapi2::buffer<uint64_t> l_data64_spi3_config;
+    fapi2::buffer<uint64_t> l_data64_spi3_clock_config;
     fapi2::buffer<uint64_t> l_data64_loc_lfr;
     bool l_ppe_halt_state = true;
     bool l_data_mchk = false;
@@ -196,8 +210,11 @@ fapi2::ReturnCode p10_extract_sbe_rc(const fapi2::Target<fapi2::TARGET_TYPE_PROC
     bool mseeprom_data_range = false;
     bool l_is_HB_module = false;
     bool l_pibmem_saveoff = false;
-    uint32_t HC, MCS, mem_error, sib_rsp_info, ppe_dbg_loc, pibmem_dbg_loc;
-    uint32_t spi_clk_div;
+    uint32_t HC, MCS, mem_error, ppe_dbg_loc, pibmem_dbg_loc;
+    uint32_t sib_rsp_info = 0;
+    uint32_t spi_clk_div_lfr = 0;
+    uint32_t spi_clk_div = 0;
+    uint32_t spi_config_val = 0;
     uint32_t SPRG0   = 272;
 
     FAPI_INF("p10_extract_sbe_rc : Entering ...");
@@ -337,12 +354,23 @@ fapi2::ReturnCode p10_extract_sbe_rc(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 l_data64_dbg[0].extractToRight(l_data32_srr0, 32, 32);
                 l_data64_dbg[1].extractToRight(l_data32_srr1,  0, 32);
                 l_data64_dbg[1].extractToRight(l_data32_isr , 32, 32);
-                l_data64_dbg[2].extractToRight(l_data64_spi_status, 0, 64);
-                l_data64_dbg[3].extractToRight(l_data32_lr  , 0, 32);
+                l_data64_dbg[2].extractToRight(l_data32_lr  , 0, 32);
+                l_data64_dbg[3].extractToRight(l_data64_spi0_status, 0, 64);
+                l_data64_dbg[4].extractToRight(l_data64_spi0_config, 0, 64);
+                l_data64_dbg[5].extractToRight(l_data64_spi0_clock_config, 0, 64);
+                l_data64_dbg[6].extractToRight(l_data64_spi1_status, 0, 64);
+                l_data64_dbg[7].extractToRight(l_data64_spi1_config, 0, 64);
+                l_data64_dbg[8].extractToRight(l_data64_spi1_clock_config, 0, 64);
+                l_data64_dbg[9].extractToRight(l_data64_spi2_status, 0, 64);
+                l_data64_dbg[10].extractToRight(l_data64_spi2_config, 0, 64);
+                l_data64_dbg[11].extractToRight(l_data64_spi2_clock_config, 0, 64);
+                l_data64_dbg[12].extractToRight(l_data64_spi3_status, 0, 64);
+                l_data64_dbg[13].extractToRight(l_data64_spi3_config, 0, 64);
+                l_data64_dbg[14].extractToRight(l_data64_spi3_clock_config, 0, 64);
                 FAPI_INF("p10_extract_sbe_rc : SRR0  : %#010lX", l_data32_srr0);
                 FAPI_INF("p10_extract_sbe_rc : SRR1  : %#010lX", l_data32_srr1);
                 FAPI_INF("p10_extract_sbe_rc : ISR   : %#010lX", l_data32_isr);
-                FAPI_INF("p10_extract_sbe_rc : SPI status   : %" PRIx64 "", l_data64_spi_status);
+                //FAPI_INF("p10_extract_sbe_rc : SPI status   : %" PRIx64 "", l_data64_spi_status);
                 FAPI_INF("p10_extract_sbe_rc : LR    : %#010lX", l_data32_lr);
             }
             else
@@ -972,17 +1000,21 @@ fapi2::ReturnCode p10_extract_sbe_rc(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                         "ERROR:Uncorrectable error occurred while accessing memory via fast access side");
         }
 
-        if(seeprom_addr_range && i_unsecure_mode && l_inst_mchk)  // || !i_set_sdb))
+        if(seeprom_addr_range && i_unsecure_mode && l_inst_mchk && !l_pibmem_saveoff)  // || !i_set_sdb))
         {
             if(bseeprom_addr_range)
             {
                 if(!(l_data64_loc_lfr.getBit<12>()))
                 {
                     FAPI_TRY(getScom(i_target_chip, scomt::proc::TP_TPCHIP_PIB_SPIMC_SPIMST0_STATUS_REG, l_data64_spi_status));
+                    FAPI_TRY(getScom(i_target_chip, scomt::proc::TP_TPCHIP_PIB_SPIMC_SPIMST0_CONFIG1, l_data64_spi_config));
+                    FAPI_TRY(getScom(i_target_chip, scomt::proc::TP_TPCHIP_PIB_SPIMC_SPIMST0_CLOCK_CONFIG, l_data64_spi_clock_config));
                 }
                 else
                 {
                     FAPI_TRY(getScom(i_target_chip, scomt::proc::TP_TPCHIP_PIB_SPIMC_SPIMST1_STATUS_REG, l_data64_spi_status));
+                    FAPI_TRY(getScom(i_target_chip, scomt::proc::TP_TPCHIP_PIB_SPIMC_SPIMST1_CONFIG1, l_data64_spi_config));
+                    FAPI_TRY(getScom(i_target_chip, scomt::proc::TP_TPCHIP_PIB_SPIMC_SPIMST1_CLOCK_CONFIG, l_data64_spi_clock_config));
                 }
             }
             else if(mseeprom_addr_range)
@@ -990,10 +1022,47 @@ fapi2::ReturnCode p10_extract_sbe_rc(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 if(!(l_data64_loc_lfr.getBit<13>()))
                 {
                     FAPI_TRY(getScom(i_target_chip, scomt::proc::TP_TPCHIP_PIB_SPIMC_SPIMST3_STATUS_REG, l_data64_spi_status));
+                    FAPI_TRY(getScom(i_target_chip, scomt::proc::TP_TPCHIP_PIB_SPIMC_SPIMST3_CONFIG1, l_data64_spi_config));
+                    FAPI_TRY(getScom(i_target_chip, scomt::proc::TP_TPCHIP_PIB_SPIMC_SPIMST3_CLOCK_CONFIG, l_data64_spi_clock_config));
                 }
                 else
                 {
                     FAPI_TRY(getScom(i_target_chip, scomt::proc::TP_TPCHIP_PIB_SPIMC_SPIMST2_STATUS_REG, l_data64_spi_status));
+                    FAPI_TRY(getScom(i_target_chip, scomt::proc::TP_TPCHIP_PIB_SPIMC_SPIMST2_CONFIG1, l_data64_spi_config));
+                    FAPI_TRY(getScom(i_target_chip, scomt::proc::TP_TPCHIP_PIB_SPIMC_SPIMST2_CLOCK_CONFIG, l_data64_spi_clock_config));
+                }
+            }
+        }
+        else if(l_pibmem_saveoff && l_inst_mchk)
+        {
+            if(bseeprom_addr_range)
+            {
+                if(!(l_data64_loc_lfr.getBit<12>()))
+                {
+                    l_data64_spi0_status.extractToRight(l_data64_spi_status, 0, 64);
+                    l_data64_spi0_config.extractToRight(l_data64_spi_config, 0, 64);
+                    l_data64_spi0_clock_config.extractToRight(l_data64_spi_clock_config, 0, 64);
+                }
+                else
+                {
+                    l_data64_spi1_status.extractToRight(l_data64_spi_status, 0, 64);
+                    l_data64_spi1_config.extractToRight(l_data64_spi_config, 0, 64);
+                    l_data64_spi1_clock_config.extractToRight(l_data64_spi_clock_config, 0, 64);
+                }
+            }
+            else if(mseeprom_addr_range)
+            {
+                if(!(l_data64_loc_lfr.getBit<13>()))
+                {
+                    l_data64_spi3_status.extractToRight(l_data64_spi_status, 0, 64);
+                    l_data64_spi3_config.extractToRight(l_data64_spi_config, 0, 64);
+                    l_data64_spi3_clock_config.extractToRight(l_data64_spi_clock_config, 0, 64);
+                }
+                else
+                {
+                    l_data64_spi2_status.extractToRight(l_data64_spi_status, 0, 64);
+                    l_data64_spi2_config.extractToRight(l_data64_spi_config, 0, 64);
+                    l_data64_spi2_clock_config.extractToRight(l_data64_spi_clock_config, 0, 64);
                 }
             }
         }
@@ -1091,15 +1160,35 @@ fapi2::ReturnCode p10_extract_sbe_rc(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             }
         }
 
-        if(seeprom_addr_range && (!l_pibmem_saveoff) && i_set_sdb && l_inst_mchk)
+        if(seeprom_addr_range && (i_set_sdb || i_unsecure_mode) && l_inst_mchk)
         {
             l_data32.flush<0>();
             l_data64_loc_lfr.extractToRight(l_data32, 0, 12);
+            spi_clk_div_lfr = l_data32;
+            l_data32.flush<0>();
+            l_data64_spi_clock_config.extractToRight(l_data32, 0, 12);
             spi_clk_div = l_data32;
+            l_data32.flush<0>();
+            l_data64_spi_config.extractToRight(l_data32, 0, 5);
+            spi_config_val = l_data32;
 
-            if(spi_clk_div < 0x4)
+            if(spi_clk_div_lfr < 0x4)
             {
-                FAPI_ERR("p10_extract_sbe_rc : Invalid sp clock divider value specified 0x%X", spi_clk_div);
+                FAPI_ERR("p10_extract_sbe_rc : Invalid spi clock divider value specified 0x%X", spi_clk_div_lfr);
+            }
+
+            if(l_pibmem_saveoff || i_unsecure_mode)
+            {
+                if(spi_clk_div_lfr != spi_clk_div)
+                {
+                    FAPI_ERR("p10_extract_sbe_rc : spi clock divider value is corrupted, clock divider value in SPI is 0x%X and in lfr is 0x%X",
+                             spi_clk_div, spi_clk_div_lfr);
+                }
+
+                if(spi_config_val != 0x1E)
+                {
+                    FAPI_ERR("p10_extract_sbe_rc : spi lock is lost,lock value is 0x%X", spi_config_val);
+                }
             }
 
             //-- MIB External Interface SIB Info
@@ -1120,17 +1209,22 @@ fapi2::ReturnCode p10_extract_sbe_rc(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             if(bseeprom_addr_range)
             {
                 o_return_action = P10_EXTRACT_SBE_RC::REIPL_UPD_SPI_CLK_DIV;
-                FAPI_ASSERT((!(spi_clk_div < 0x4)), fapi2::EXTRACT_SBE_RC_SPI_CLK_ERR()
+                FAPI_ASSERT((!(spi_clk_div_lfr < 0x4)), fapi2::EXTRACT_SBE_RC_SPI_CLK_ERR()
                             .set_TARGET_CHIP(i_target_chip),
-                            "Boot SEEPROM configured with invalid clock divider");
+                            "SBE LFR configured with invalid spi clock divider");
 
-                if(spi_clk_div < 0x4)
+                if(l_pibmem_saveoff || i_unsecure_mode)
                 {
-                    o_return_action = P10_EXTRACT_SBE_RC::REIPL_UPD_SEEPROM;
-                    FAPI_ASSERT((!(sib_rsp_info == 0x6)), fapi2::EXTRACT_SBE_RC_SPI_ECC_ERR()
+                    o_return_action = P10_EXTRACT_SBE_RC::RESTART_CBS;
+                    FAPI_ASSERT((!(spi_clk_div_lfr != spi_clk_div)), fapi2::EXTRACT_SBE_RC_SPI_CLK_ERR()
                                 .set_TARGET_CHIP(i_target_chip),
-                                "Boot SEEPROM uncorrectable ECC error detected");
+                                "Boot SEEPROM configured with invalid clock divider");
                 }
+
+                o_return_action = P10_EXTRACT_SBE_RC::REIPL_UPD_SEEPROM;
+                FAPI_ASSERT((!(sib_rsp_info == 0x6)), fapi2::EXTRACT_SBE_RC_SPI_ECC_ERR()
+                            .set_TARGET_CHIP(i_target_chip),
+                            "Boot SEEPROM uncorrectable ECC error detected");
 
                 o_return_action = P10_EXTRACT_SBE_RC::RESTART_SBE;
                 FAPI_ASSERT((!(sib_rsp_info == 0x4)), fapi2::EXTRACT_SBE_RC_SPI_SPRM_CFG_ERR()
@@ -1147,17 +1241,22 @@ fapi2::ReturnCode p10_extract_sbe_rc(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             if(mseeprom_addr_range)
             {
                 o_return_action = P10_EXTRACT_SBE_RC::REIPL_UPD_SPI_CLK_DIV;
-                FAPI_ASSERT((!(spi_clk_div < 0x4)), fapi2::EXTRACT_SBE_RC_SPI_CLK_ERR()
+                FAPI_ASSERT((!(spi_clk_div_lfr < 0x4)), fapi2::EXTRACT_SBE_RC_SPI_CLK_ERR()
                             .set_TARGET_CHIP(i_target_chip),
-                            "Measurement SEEPROM configured with invalid clock divider");
+                            "SBE LFR configured with invalid spi clock divider");
 
-                if(spi_clk_div < 0x4)
+                if(l_pibmem_saveoff || i_unsecure_mode)
                 {
-                    o_return_action = P10_EXTRACT_SBE_RC::REIPL_UPD_MSEEPROM;
-                    FAPI_ASSERT((!(sib_rsp_info == 0x6)), fapi2::EXTRACT_SBE_RC_SPI_ECC_ERR()
+                    o_return_action = P10_EXTRACT_SBE_RC::RESTART_CBS;
+                    FAPI_ASSERT((!(spi_clk_div_lfr != spi_clk_div)), fapi2::EXTRACT_SBE_RC_SPI_CLK_ERR()
                                 .set_TARGET_CHIP(i_target_chip),
-                                "Measurement SEEPROM uncorrectable ECC error detected");
+                                "Measurement SEEPROM configured with invalid clock divider");
                 }
+
+                o_return_action = P10_EXTRACT_SBE_RC::REIPL_UPD_MSEEPROM;
+                FAPI_ASSERT((!(sib_rsp_info == 0x6)), fapi2::EXTRACT_SBE_RC_SPI_ECC_ERR()
+                            .set_TARGET_CHIP(i_target_chip),
+                            "Measurement SEEPROM uncorrectable ECC error detected");
 
                 o_return_action = P10_EXTRACT_SBE_RC::RESTART_CBS;
                 FAPI_ASSERT((!(sib_rsp_info == 0x4)), fapi2::EXTRACT_SBE_RC_SPI_SPRM_CFG_ERR()
@@ -1240,6 +1339,106 @@ fapi2::ReturnCode p10_extract_sbe_rc(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                             "Scom error detected");
             }
 
+            if(pibmem_data_range && l_data_mchk) // PIBMEM status register read is allowed in both Secure & NonSecure mode
+            {
+                FAPI_DBG("p10_extract_sbe_rc : Reading PIBMEM status register");
+                FAPI_TRY(getScom(i_target_chip, scomt::proc::TP_TPCHIP_PIBMEM_CTRL_MAC_STATUS_REG, l_data64));
+                FAPI_DBG("p10_extract_sbe_rc : PIBMEM status : %" PRIx64 "", l_data64);
+
+                if(l_data64.getBit<scomt::proc::TP_TPCHIP_PIBMEM_CTRL_MAC_STATUS_REG_ADDR_INVALID_PIB>())
+                {
+                    FAPI_ERR("p10_extract_sbe_rc : PIBMEM::Address which PIB is trying to access in PIBMEM is not valid one in PIBMEM");
+                }
+
+                if(l_data64.getBit<scomt::proc::TP_TPCHIP_PIBMEM_CTRL_MAC_STATUS_REG_WRITE_INVALID_PIB>())
+                {
+                    FAPI_ERR("p10_extract_sbe_rc : PIBMEM::Address for which PIB is trying to write is not writable");
+                }
+
+                if(l_data64.getBit<scomt::proc::TP_TPCHIP_PIBMEM_CTRL_MAC_STATUS_REG_READ_INVALID_PIB>())
+                {
+                    FAPI_ERR("p10_extract_sbe_rc : PIBMEM::Address for which PIB is trying to read is not readable");
+                }
+
+                if(l_data64.getBit<scomt::proc::TP_TPCHIP_PIBMEM_CTRL_MAC_STATUS_REG_ECC_UNCORRECTED_ERROR_PIB>())
+                {
+                    FAPI_ERR("p10_extract_sbe_rc : PIBMEM::Uncorrectable error occurred while PIB memory read");
+                }
+
+                if(l_data64.getBit<scomt::proc::TP_TPCHIP_PIBMEM_CTRL_MAC_STATUS_REG_ECC_CORRECTED_ERROR_PIB>())
+                {
+                    FAPI_INF("p10_extract_sbe_rc : PIBMEM::Corrected error in PIB mem read");
+                }
+
+                if(l_data64.getBit<scomt::proc::TP_TPCHIP_PIBMEM_CTRL_MAC_STATUS_REG_BAD_ARRAY_ADDRESS_PIB>())
+                {
+                    FAPI_ERR("p10_extract_sbe_rc : PIBMEM::Wrong address accessd in indirect mode of operation from PIB side");
+                }
+
+                if(l_data64.getBit<scomt::proc::TP_TPCHIP_PIBMEM_CTRL_MAC_STATUS_REG_WRITE_RST_INTERRUPT_PIB>())
+                {
+                    FAPI_ERR("p10_extract_sbe_rc : PIBMEM::Reset occurred during write operation to PIBMEM from PIB side");
+                }
+
+                if(l_data64.getBit<scomt::proc::TP_TPCHIP_PIBMEM_CTRL_MAC_STATUS_REG_READ_RST_INTERRUPT_PIB>())
+                {
+                    FAPI_ERR("p10_extract_sbe_rc : PIBMEM::Reset occurred during read operation to PIBMEM from PIB side");
+                }
+
+                if(l_data64.getBit<scomt::proc::TP_TPCHIP_PIBMEM_CTRL_MAC_STATUS_REG_ADDR_INVALID_FACES>())
+                {
+                    FAPI_ERR("p10_extract_sbe_rc : PIBMEM::Address which is given by Fast acesss interface, to access in PIBMEM is not valid one in PIBMEM");
+                }
+
+                if(l_data64.getBit<scomt::proc::TP_TPCHIP_PIBMEM_CTRL_MAC_STATUS_REG_WRITE_INVALID_FACES>())
+                {
+                    FAPI_ERR("p10_extract_sbe_rc : PIBMEM::Address which is given by Fast acesss interface, to access in PIBMEM is not valid one in PIBMEM or not writable");
+                }
+
+                if(l_data64.getBit<scomt::proc::TP_TPCHIP_PIBMEM_CTRL_MAC_STATUS_REG_READ_INVALID_FACES>())
+                {
+                    FAPI_ERR("p10_extract_sbe_rc : PIBMEM::Address which is given by Fast acesss interface, to access is not readable");
+                }
+
+                if(l_data64.getBit<scomt::proc::TP_TPCHIP_PIBMEM_CTRL_MAC_STATUS_REG_ECC_UNCORRECTED_ERROR_FACES>())
+                {
+                    FAPI_ERR("p10_extract_sbe_rc : PIBMEM::Uncorrectable error occurred while fast acess interface read");
+                }
+
+                if(l_data64.getBit<scomt::proc::TP_TPCHIP_PIBMEM_CTRL_MAC_STATUS_REG_ECC_CORRECTED_ERROR_FACES>())
+                {
+                    FAPI_INF("p10_extract_sbe_rc : PIBMEM::Corrected error in fast acess read operation");
+                }
+
+                if(l_data64.getBit<scomt::proc::TP_TPCHIP_PIBMEM_CTRL_MAC_STATUS_REG_BAD_ARRAY_ADDRESS_FACES>())
+                {
+                    FAPI_ERR("p10_extract_sbe_rc : PIBMEM::Wrong address accessd in indirect mode of operation from fast acess interface");
+                }
+
+                if(l_data64.getBit<scomt::proc::TP_TPCHIP_PIBMEM_CTRL_MAC_STATUS_REG_WRITE_RST_INTERRUPT_FACES>())
+                {
+                    FAPI_ERR("p10_extract_sbe_rc : PIBMEM::Reset occurred during write operation to PIBMEM from fast acess side");
+                }
+
+                if(l_data64.getBit<scomt::proc::TP_TPCHIP_PIBMEM_CTRL_MAC_STATUS_REG_READ_RST_INTERRUPT_FACES>())
+                {
+                    FAPI_ERR("p10_extract_sbe_rc : PIBMEM::Reset occurred during read operation to PIBMEM from fast acess side");
+                }
+
+                //--  FAPI Asserts section for PIBMEM --//
+                o_return_action = P10_EXTRACT_SBE_RC::RESTART_SBE;
+                FAPI_ASSERT(l_data64.getBit<3>() != 1,
+                            fapi2::EXTRACT_SBE_RC_PIBMEM_ECC_ERR()
+                            .set_TARGET_CHIP(i_target_chip),
+                            "ERROR:Uncorrectable error occurred while accessing memory via PIB side");
+
+                o_return_action = P10_EXTRACT_SBE_RC::RESTART_SBE;
+                FAPI_ASSERT(l_data64.getBit<22>() != 1,
+                            fapi2::EXTRACT_SBE_RC_PIBMEM_ECC_ERR()
+                            .set_TARGET_CHIP(i_target_chip),
+                            "ERROR:Uncorrectable error occurred while accessing memory via fast access side");
+            }
+
             if(pibmem_data_range)
             {
                 //-- MIB External Interface MEM Info
@@ -1267,15 +1466,195 @@ fapi2::ReturnCode p10_extract_sbe_rc(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                             "Error detected during pibmem access");
             }
 
+            if(seeprom_data_range && i_unsecure_mode && !l_pibmem_saveoff)  // || !i_set_sdb))
+            {
+                if(bseeprom_data_range)
+                {
+                    if(!(l_data64_loc_lfr.getBit<12>()))
+                    {
+                        FAPI_TRY(getScom(i_target_chip, scomt::proc::TP_TPCHIP_PIB_SPIMC_SPIMST0_STATUS_REG, l_data64_spi_status));
+                        FAPI_TRY(getScom(i_target_chip, scomt::proc::TP_TPCHIP_PIB_SPIMC_SPIMST0_CONFIG1, l_data64_spi_config));
+                        FAPI_TRY(getScom(i_target_chip, scomt::proc::TP_TPCHIP_PIB_SPIMC_SPIMST0_CLOCK_CONFIG, l_data64_spi_clock_config));
+                    }
+                    else
+                    {
+                        FAPI_TRY(getScom(i_target_chip, scomt::proc::TP_TPCHIP_PIB_SPIMC_SPIMST1_STATUS_REG, l_data64_spi_status));
+                        FAPI_TRY(getScom(i_target_chip, scomt::proc::TP_TPCHIP_PIB_SPIMC_SPIMST1_CONFIG1, l_data64_spi_config));
+                        FAPI_TRY(getScom(i_target_chip, scomt::proc::TP_TPCHIP_PIB_SPIMC_SPIMST1_CLOCK_CONFIG, l_data64_spi_clock_config));
+                    }
+                }
+                else if(mseeprom_data_range)
+                {
+                    if(!(l_data64_loc_lfr.getBit<13>()))
+                    {
+                        FAPI_TRY(getScom(i_target_chip, scomt::proc::TP_TPCHIP_PIB_SPIMC_SPIMST3_STATUS_REG, l_data64_spi_status));
+                        FAPI_TRY(getScom(i_target_chip, scomt::proc::TP_TPCHIP_PIB_SPIMC_SPIMST3_CONFIG1, l_data64_spi_config));
+                        FAPI_TRY(getScom(i_target_chip, scomt::proc::TP_TPCHIP_PIB_SPIMC_SPIMST3_CLOCK_CONFIG, l_data64_spi_clock_config));
+                    }
+                    else
+                    {
+                        FAPI_TRY(getScom(i_target_chip, scomt::proc::TP_TPCHIP_PIB_SPIMC_SPIMST2_STATUS_REG, l_data64_spi_status));
+                        FAPI_TRY(getScom(i_target_chip, scomt::proc::TP_TPCHIP_PIB_SPIMC_SPIMST2_CONFIG1, l_data64_spi_config));
+                        FAPI_TRY(getScom(i_target_chip, scomt::proc::TP_TPCHIP_PIB_SPIMC_SPIMST2_CLOCK_CONFIG, l_data64_spi_clock_config));
+                    }
+                }
+            }
+            else if(l_pibmem_saveoff)
+            {
+                if(bseeprom_data_range)
+                {
+                    if(!(l_data64_loc_lfr.getBit<12>()))
+                    {
+                        l_data64_spi0_status.extractToRight(l_data64_spi_status, 0, 64);
+                        l_data64_spi0_config.extractToRight(l_data64_spi_config, 0, 64);
+                        l_data64_spi0_clock_config.extractToRight(l_data64_spi_clock_config, 0, 64);
+                    }
+                    else
+                    {
+                        l_data64_spi1_status.extractToRight(l_data64_spi_status, 0, 64);
+                        l_data64_spi1_config.extractToRight(l_data64_spi_config, 0, 64);
+                        l_data64_spi1_clock_config.extractToRight(l_data64_spi_clock_config, 0, 64);
+                    }
+                }
+                else if(mseeprom_data_range)
+                {
+                    if(!(l_data64_loc_lfr.getBit<13>()))
+                    {
+                        l_data64_spi3_status.extractToRight(l_data64_spi_status, 0, 64);
+                        l_data64_spi3_config.extractToRight(l_data64_spi_config, 0, 64);
+                        l_data64_spi3_clock_config.extractToRight(l_data64_spi_clock_config, 0, 64);
+                    }
+                    else
+                    {
+                        l_data64_spi2_status.extractToRight(l_data64_spi_status, 0, 64);
+                        l_data64_spi2_config.extractToRight(l_data64_spi_config, 0, 64);
+                        l_data64_spi2_clock_config.extractToRight(l_data64_spi_clock_config, 0, 64);
+                    }
+                }
+            }
+
+            if(seeprom_data_range && (i_unsecure_mode || l_pibmem_saveoff)) //!i_set_sdb))
+            {
+                if(l_data64_spi_status.getBit<scomt::proc::TP_TPCHIP_PIB_SPIMC_SPIMST0_STATUS_REG_SPI_STATUS_32>())
+                {
+                    FAPI_ERR("p10_extract_sbe_rc : SEEPROM : counter configuration register parity error");
+                }
+
+                if(l_data64_spi_status.getBit<scomt::proc::TP_TPCHIP_PIB_SPIMC_SPIMST0_STATUS_REG_SPI_STATUS_33>())
+                {
+                    FAPI_ERR("p10_extract_sbe_rc : SEEPROM : clock configuration register parity error");
+                }
+
+                if(l_data64_spi_status.getBit<scomt::proc::TP_TPCHIP_PIB_SPIMC_SPIMST0_STATUS_REG_SPI_STATUS_34>())
+                {
+                    FAPI_ERR("p10_extract_sbe_rc : SEEPROM : sequencer configuration register parity error");
+                }
+
+                if(l_data64_spi_status.getBit<scomt::proc::TP_TPCHIP_PIB_SPIMC_SPIMST0_STATUS_REG_SPI_STATUS_35>())
+                {
+                    FAPI_ERR("p10_extract_sbe_rc : SEEPROM : sequencer fsm error");
+                }
+
+                if(l_data64_spi_status.getBit<scomt::proc::TP_TPCHIP_PIB_SPIMC_SPIMST0_STATUS_REG_SPI_STATUS_36>())
+                {
+                    FAPI_ERR("p10_extract_sbe_rc : SEEPROM : shifter fsm error");
+                }
+
+                if(l_data64_spi_status.getBit<scomt::proc::TP_TPCHIP_PIB_SPIMC_SPIMST0_STATUS_REG_SPI_STATUS_37>())
+                {
+                    FAPI_ERR("p10_extract_sbe_rc : SEEPROM : pattern match register parity error");
+                }
+
+                if(l_data64_spi_status.getBit<scomt::proc::TP_TPCHIP_PIB_SPIMC_SPIMST0_STATUS_REG_SPI_STATUS_38>())
+                {
+                    FAPI_ERR("p10_extract_sbe_rc : SEEPROM : transmit data register parity error");
+                }
+
+                if(l_data64_spi_status.getBit<scomt::proc::TP_TPCHIP_PIB_SPIMC_SPIMST0_STATUS_REG_SPI_STATUS_38>())
+                {
+                    FAPI_ERR("p10_extract_sbe_rc : SEEPROM : transmit data register parity error");
+                }
+
+                if(l_data64_spi_status.getBit<scomt::proc::TP_TPCHIP_PIB_SPIMC_SPIMST0_STATUS_REG_SPI_STATUS_39>())
+                {
+                    FAPI_ERR("p10_extract_sbe_rc : SEEPROM : receive data register parity error");
+                }
+
+                if(l_data64_spi_status.getBit<scomt::proc::TP_TPCHIP_PIB_SPIMC_SPIMST0_STATUS_REG_SPI_STATUS_40>())
+                {
+                    FAPI_ERR("p10_extract_sbe_rc : SEEPROM : configuration register 1 parity error");
+                }
+
+                if(l_data64_spi_status.getBit<scomt::proc::TP_TPCHIP_PIB_SPIMC_SPIMST0_STATUS_REG_SPI_STATUS_42>())
+                {
+                    FAPI_ERR("p10_extract_sbe_rc : SEEPROM : error register parity error");
+                }
+
+                if(l_data64_spi_status.getBit<scomt::proc::TP_TPCHIP_PIB_SPIMC_SPIMST0_STATUS_REG_SPI_STATUS_43>())
+                {
+                    FAPI_ERR("p10_extract_sbe_rc : SEEPROM : ecc correctable error");
+                }
+
+                if(l_data64_spi_status.getBit<scomt::proc::TP_TPCHIP_PIB_SPIMC_SPIMST0_STATUS_REG_SPI_STATUS_44>())
+                {
+                    FAPI_ERR("p10_extract_sbe_rc : SEEPROM : ecc uncorrectable error");
+                }
+
+                if(l_data64_spi_status.getBit<scomt::proc::TP_TPCHIP_PIB_SPIMC_SPIMST0_STATUS_REG_SPI_STATUS_47>())
+                {
+                    FAPI_ERR("p10_extract_sbe_rc : SEEPROM : memory mapped SPI address overlap");
+                }
+
+                if(l_data64_spi_status.getBit<scomt::proc::TP_TPCHIP_PIB_SPIMC_SPIMST0_STATUS_REG_SPI_STATUS_48>())
+                {
+                    FAPI_ERR("p10_extract_sbe_rc : SEEPROM : general access violation");
+                }
+
+                if(l_data64_spi_status.getBit < scomt::proc::TP_TPCHIP_PIB_SPIMC_SPIMST0_STATUS_REG_SPI_STATUS_48 + 1 > ())
+                {
+                    FAPI_ERR("p10_extract_sbe_rc : SEEPROM : general access violation");
+                }
+
+                if(l_data64_spi_status.getBit<scomt::proc::TP_TPCHIP_PIB_SPIMC_SPIMST0_STATUS_REG_SPI_STATUS_50>())
+                {
+                    FAPI_ERR("p10_extract_sbe_rc : SEEPROM : port multiplexer error");
+                }
+
+                if(l_data64_spi_status.getBit<scomt::proc::TP_TPCHIP_PIB_SPIMC_SPIMST0_STATUS_REG_SPI_STATUS_51>())
+                {
+                    FAPI_ERR("p10_extract_sbe_rc : SEEPROM : address range error");
+                }
+            }
+
             if(bseeprom_data_range || mseeprom_data_range)
             {
                 l_data32.flush<0>();
                 l_data64_loc_lfr.extractToRight(l_data32, 0, 12);
+                spi_clk_div_lfr = l_data32;
+                l_data32.flush<0>();
+                l_data64_spi_clock_config.extractToRight(l_data32, 0, 12);
                 spi_clk_div = l_data32;
+                l_data32.flush<0>();
+                l_data64_spi_config.extractToRight(l_data32, 0, 5);
+                spi_config_val = l_data32;
 
-                if(spi_clk_div < 0x4)
+                if(spi_clk_div_lfr < 0x4)
                 {
-                    FAPI_ERR("p10_extract_sbe_rc : Invalid spi_clk_div specified 0x%X", spi_clk_div);
+                    FAPI_ERR("p10_extract_sbe_rc : Invalid spi_clk_div specified 0x%X", spi_clk_div_lfr);
+                }
+
+                if(l_pibmem_saveoff || i_unsecure_mode)
+                {
+                    if(spi_clk_div_lfr != spi_clk_div)
+                    {
+                        FAPI_ERR("p10_extract_sbe_rc : spi clock divider value is corrupted, clock divider value in SPI is 0x%X and in lfr is 0x%X",
+                                 spi_clk_div, spi_clk_div_lfr);
+                    }
+
+                    if(spi_config_val != 0x1E)
+                    {
+                        FAPI_ERR("p10_extract_sbe_rc : spi lock is lost,lock value is 0x%X", spi_config_val);
+                    }
                 }
             }
 
@@ -1283,17 +1662,22 @@ fapi2::ReturnCode p10_extract_sbe_rc(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
 
                 o_return_action = P10_EXTRACT_SBE_RC::REIPL_UPD_SPI_CLK_DIV;
-                FAPI_ASSERT((!(spi_clk_div < 0x4)), fapi2::EXTRACT_SBE_RC_SPI_CLK_ERR()
+                FAPI_ASSERT((!(spi_clk_div_lfr < 0x4)), fapi2::EXTRACT_SBE_RC_SPI_CLK_ERR()
                             .set_TARGET_CHIP(i_target_chip),
-                            "Boot SEEPROM configured with invalid clock divider");
+                            "SBE LFR configured with invalid spi clock divider");
 
-                if(spi_clk_div < 0x4)
+                if(l_pibmem_saveoff || i_unsecure_mode)
                 {
-                    o_return_action = P10_EXTRACT_SBE_RC::REIPL_UPD_SEEPROM;
-                    FAPI_ASSERT((!(sib_rsp_info == 0x6)), fapi2::EXTRACT_SBE_RC_SPI_ECC_ERR()
+                    o_return_action = P10_EXTRACT_SBE_RC::RESTART_CBS;
+                    FAPI_ASSERT((!(spi_clk_div_lfr != spi_clk_div)), fapi2::EXTRACT_SBE_RC_SPI_CLK_ERR()
                                 .set_TARGET_CHIP(i_target_chip),
-                                "Boot SEEPROM uncorrectable ECC error detected");
+                                "Boot SEEPROM configured with invalid clock divider");
                 }
+
+                o_return_action = P10_EXTRACT_SBE_RC::REIPL_UPD_SEEPROM;
+                FAPI_ASSERT((!(sib_rsp_info == 0x6)), fapi2::EXTRACT_SBE_RC_SPI_ECC_ERR()
+                            .set_TARGET_CHIP(i_target_chip),
+                            "Boot SEEPROM uncorrectable ECC error detected");
 
                 o_return_action = P10_EXTRACT_SBE_RC::RESTART_CBS;
                 FAPI_ASSERT((!(sib_rsp_info == 0x4)), fapi2::EXTRACT_SBE_RC_SPI_SPRM_CFG_ERR()
@@ -1309,17 +1693,22 @@ fapi2::ReturnCode p10_extract_sbe_rc(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             if(mseeprom_data_range)
             {
                 o_return_action = P10_EXTRACT_SBE_RC::REIPL_UPD_SPI_CLK_DIV;
-                FAPI_ASSERT((!(spi_clk_div < 0x4)), fapi2::EXTRACT_SBE_RC_SPI_CLK_ERR()
+                FAPI_ASSERT((!(spi_clk_div_lfr < 0x4)), fapi2::EXTRACT_SBE_RC_SPI_CLK_ERR()
                             .set_TARGET_CHIP(i_target_chip),
-                            "Measurement SEEPROM configured with invalid clock divider");
+                            "SBE LFR configured with invalid spi clock divider");
 
-                if(spi_clk_div < 0x4)
+                if(l_pibmem_saveoff || i_unsecure_mode)
                 {
-                    o_return_action = P10_EXTRACT_SBE_RC::REIPL_UPD_MSEEPROM;
-                    FAPI_ASSERT((!(sib_rsp_info == 0x6)), fapi2::EXTRACT_SBE_RC_SPI_ECC_ERR()
+                    o_return_action = P10_EXTRACT_SBE_RC::RESTART_CBS;
+                    FAPI_ASSERT((!(spi_clk_div_lfr != spi_clk_div)), fapi2::EXTRACT_SBE_RC_SPI_CLK_ERR()
                                 .set_TARGET_CHIP(i_target_chip),
-                                "Measurement SEEPROM uncorrectable ECC error detected");
+                                "Measurement SEEPROM configured with invalid clock divider");
                 }
+
+                o_return_action = P10_EXTRACT_SBE_RC::REIPL_UPD_MSEEPROM;
+                FAPI_ASSERT((!(sib_rsp_info == 0x6)), fapi2::EXTRACT_SBE_RC_SPI_ECC_ERR()
+                            .set_TARGET_CHIP(i_target_chip),
+                            "Measurement SEEPROM uncorrectable ECC error detected");
 
                 o_return_action = P10_EXTRACT_SBE_RC::RESTART_CBS;
                 FAPI_ASSERT((!(sib_rsp_info == 0x4)), fapi2::EXTRACT_SBE_RC_SPI_SPRM_CFG_ERR()
