@@ -978,6 +978,17 @@ inline std::vector<Target<K_CHILD, M, V> >
 
 
     std::vector<Target<K_CHILD>> l_children;
+    do{
+
+    if(K_CHILD == fapi2::TARGET_TYPE_GENERICI2CSLAVE)
+    {
+        // Hostboot does not support child lookups of this type
+        // so just return an emtpy list. We do not wait to assert
+        // or throw an error, we just want the list of children
+        // returned to be empty
+        break;
+    }
+
     //Get the platform target type of the current fapi2::target
     TARGETING::TYPE l_type = fapi2::convertFapi2TypeToTargeting(K_CHILD);
     TARGETING::TargetHandleList l_childList;
@@ -1064,6 +1075,9 @@ inline std::vector<Target<K_CHILD, M, V> >
         fapi2::Target<K_CHILD> l_target(*chipletIter);
         l_children.push_back(l_target);
     }
+
+    }while(0);
+
     FAPI_DBG(EXIT_MRK "getChildren. %d results", l_children.size());
 
     return l_children;
