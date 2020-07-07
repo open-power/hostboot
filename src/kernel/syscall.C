@@ -821,6 +821,9 @@ namespace Systemcalls
     void CpuNap(task_t *t)
     {
 
+        // This call prevents a live-lock situation.
+        CpuManager::executePeriodics(CpuManager::getCurrentCPU());
+
         uint32_t* instruction = static_cast<uint32_t*>(t->context.nip);
         if (STOP_INSTRUCTION == (*instruction)) // Verify 'nap' instruction,
                                                 // otherwise just return.
