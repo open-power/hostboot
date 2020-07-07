@@ -187,6 +187,21 @@ sub printXML
     }
 }
 
+#--------------------------------------------------
+# @brief Dump the attributes of the Target given
+#
+# @param [in] $self - The global target object.
+# @param [in] $target -The target to dump the attributes of.
+#--------------------------------------------------
+sub dumpTarget
+{
+    my $self   = shift;
+    my $target = shift;
+
+    print "target($target)\n";
+    print Dumper($self->getTarget($target));
+}
+
 sub printTarget
 {
     my $self   = shift;

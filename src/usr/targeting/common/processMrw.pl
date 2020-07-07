@@ -88,7 +88,7 @@ my %PARENT_PERVASIVE_OFFSET =
 # This value has an effect on attributes REL_POS, AFFINITY_PATH and PHYS_PATH.
 my %MAX_INST_PER_PARENT =
 (
-    PROC      => 8, # Number of PROCs per NODE
+    PROC      => 0, # Number of PROCs per NODE, gets set via call to setProcsPerNodeForSystem
     EQ        => 8, # Number of EQs per PROC
     FC        => 2, # Number of FCs per EQ
     CORE      => 2, # Number of COREs per FC
@@ -149,7 +149,7 @@ my %MAX_INST_PER_PROC =
     MEM_PORT   => getMaxInstPerParent("MC") * getMaxInstPerParent("MI") *
                   getMaxInstPerParent("MCC") * getMaxInstPerParent("OMI") *
                   getMaxInstPerParent("OCMB_CHIP") * getMaxInstPerParent("MEM_PORT"),
-    DDIMM      => getMaxInstPerParent("MC") * getMaxInstPerParent("MI") *
+    DIMM       => getMaxInstPerParent("MC") * getMaxInstPerParent("MI") *
                   getMaxInstPerParent("MCC") * getMaxInstPerParent("OMI") *
                   getMaxInstPerParent("OCMB_CHIP") * getMaxInstPerParent("MEM_PORT") *
                   getMaxInstPerParent("DIMM"),
@@ -268,6 +268,10 @@ sub main
     # Load the XML and process the file, extracting targets and associated
     # attributes, with their data, to the targets.
     loadXmlFile($targetObj);
+
+    # Set the PROCSs per NODE before proceeding. This must be done before
+    # any processing of the targets can be done.
+    setProcsPerNodeForSystem($targetObj);
 
     # First pass of processing the target hierarchy setting common attributes
     # such as FAPI_NAME, PHYS_PATH, AFFINITY_PATH, ORDINAL_ID, HUID and
@@ -398,6 +402,45 @@ sub getAndValidateCallerInputOptions
     $targetObj->{print_full_hierarchy} = $print_full_hierarchy;
     $targetObj->{print_hb_hierarchy} = $print_hb_hierarchy;
 } # end getAndValidateCallerInputOptions
+
+#--------------------------------------------------
+# @brief Set the PROCs per NODE for the current system
+#
+# @details For different systems, the number of PROCs per node can vary.  This
+#          method will set that info for a given system.  If the current system
+#          is not accounted for in this method, then this script will exit
+#          stating so.
+#
+# @param [in] $targetObj - The global target object.
+#--------------------------------------------------
+sub setProcsPerNodeForSystem
+{
+    my $targetObj = shift;
+    my $procsPerNode = 0;
+
+    my $systemName = $targetObj->getSystemName();
+    if ($systemName =~ /RAINIER/)
+    {
+        $procsPerNode = 4;
+    }
+    elsif ($systemName =~ /DENALI/)
+    {
+        $procsPerNode = 4;
+    }
+    elsif ($systemName =~ /EVEREST/)
+    {
+        $procsPerNode = 8;
+    }
+    else
+    {
+        select()->flush(); # flush buffer before spewing out error message
+        die "\nsetProcsPerNodeForSystem::ERROR: Cannot set the number of " .
+            "PROCs per node for system \'$systemName\'.\nPlease provide method " .
+            "\'setProcsPerNodeForSystem\' with this info for system " .
+            "\'$systemName\'.\nError";
+    }
+    $MAX_INST_PER_PARENT{"PROC"} = $procsPerNode;
+}
 
 #--------------------------------------------------
 # @brief Loads the MRW XML file
@@ -862,7 +905,7 @@ sub processSystem
 
     my $fapiName  = $targetObj->getFapiName($type);
 
-    # SYS target has PHYS_PATH and AFFINITY_PATH defined in the XML
+    # SYS target has PHYS_PATH and AFFINITY_PATH defined in the XML.
     # Also, there is no HUID for SYS
     $targetObj->setAttribute($target,"ORDINAL_ID", $sysPos);
     $targetObj->setAttribute($target,"FAPI_POS",   $sysPos);
@@ -938,25 +981,11 @@ sub processNode
         }
     }
 
-    # For high-end, multi-drawer systems there may be a control node that
-    # contains service processor logic but no CEC (processor) logic. Thus,
-    # the node count begins at 1 instead of zero and must be adjusted back to
-    # a zero based count to have affinity/physical paths remain CEC centric.
-    #
-    # To do this generically, we use a state (static) variable that will keep a
-    # running total of the number of nodes encountered in this mrw instead of
-    # the position that was provided to us in the xml.
-    state $nodePosPerSystem = -1;
-    # Setting the position to -1 and then incrementing it to 0 right away
-    # ensures that the variable is initialized to a valid starting value and
-    # that as more are processed the value is updated correctly before it's used
-    #
-    # The other reason to do it here as opposed to on exit allows us to keep the
-    # logic together to avoid coding mistakes in the future.
-    $nodePosPerSystem++;
+    # Get the position of this NODE per system (SYS)
+    my $nodePosPerSystem = getPerSystemNumericalValue($targetObj, $target);
 
     # Get the FAPI_NAME
-    my $fapiName = $targetObj->getFapiName($type);
+    my $nodeFapiName = $targetObj->getFapiName($type);
 
     # Construct the NODE's physical/affinity path with the retrieved info above
     my $nodeAffinity = $sysParentAffinity . "/node-$nodePosPerSystem";
@@ -966,7 +995,7 @@ sub processNode
     $targetObj->setHuid($target, $sysParentPos, $nodePosPerSystem);
     $targetObj->setAttribute($target, "ORDINAL_ID",    $nodePosPerSystem);
     $targetObj->setAttribute($target, "FAPI_POS",      $nodePosPerSystem);
-    $targetObj->setAttribute($target, "FAPI_NAME",     $fapiName);
+    $targetObj->setAttribute($target, "FAPI_NAME",     $nodeFapiName);
     $targetObj->setAttribute($target, "AFFINITY_PATH", $nodeAffinity);
     $targetObj->setAttribute($target, "PHYS_PATH",     $nodePhysical);
 
@@ -996,6 +1025,11 @@ sub processProcessorAndChildren
     # and make sure the target's parent has been processed.
     my $type = targetTypeSanityCheck($targetObj, $target, "PROC");
     validateParentHasBeenProcessed($targetObj, $target, "NODE");
+
+    # Validate that the PROCs are in numerical ordering based on the Topology ID.
+    # Validating this order will ensure the correct ordering of the PROC
+    # attributes POSITION and FAPI_POS.
+    validateProcTopologyIdOrdering($targetObj, $target);
 
     # Find the socket connector for this target
     my $socket = $target;
@@ -1032,6 +1066,9 @@ sub processProcessorAndChildren
                                                       $socketPosition,
                                                       $procPosPerSocket);
 
+    # Get the position of this PROC per system (SYS)
+    my $procPosPerSystem = getPerSystemNumericalValue($targetObj, $target);
+
     # Increment the number of PROCs, per NODE, for data gathering
     # @TODO RTC 247183 - This will be wrong for multi-node systems.
     #       The correct count can be found by taking the number of sockets per
@@ -1046,14 +1083,10 @@ sub processProcessorAndChildren
     my $nodeParentAffinity =$targetObj->getAttribute($nodeParent, "AFFINITY_PATH");
     my $nodeParentPhysical = $targetObj->getAttribute($nodeParent, "PHYS_PATH");
 
-    # @TODO Investigate if FABRIC_GROUP_ID and FABRIC_CHIP_ID are still needed
     # Copy the parent socket attributes FABRIC_GROUP_ID and FABRIC_CHIP_ID to
-    # the PROC.  Also use those values to calculate the FAPI position (FAPI_POS)
-    my $socketFabricGroupId = $targetObj->getAttribute($socket, "FABRIC_GROUP_ID");
-    my $socketFabricChipId  = $targetObj->getAttribute($socket, "FABRIC_CHIP_ID");
-    $targetObj->setAttribute($target, "FABRIC_GROUP_ID", $socketFabricGroupId);
-    $targetObj->setAttribute($target, "FABRIC_CHIP_ID",  $socketFabricChipId);
-    my $procFapiPos = ($socketFabricGroupId * NUM_PROCS_PER_GROUP) + $socketFabricChipId;
+    # the PROC.
+    $targetObj->copyAttribute($socket, $target, "FABRIC_GROUP_ID");
+    $targetObj->copyAttribute($socket, $target, "FABRIC_CHIP_ID");
 
     # Get the FAPI_NAME by using the data gathered above.
     my $fapiName = $targetObj->getFapiName($type, $nodeParentPos, $procPosPerNode);
@@ -1066,8 +1099,8 @@ sub processProcessorAndChildren
     # Now that we collected all the data we need, set some target attributes
     $targetObj->setHuid($target, $sysParentPos, $nodeParentPos, $procPosPerNode);
     $targetObj->setAttribute($target, "POSITION",      $procPosPerNode);
-    $targetObj->setAttribute($target, "ORDINAL_ID",    $procPosPerNode);
-    $targetObj->setAttribute($target, "FAPI_POS",      $procFapiPos);
+    $targetObj->setAttribute($target, "ORDINAL_ID",    $procPosPerSystem);
+    $targetObj->setAttribute($target, "FAPI_POS",      $procPosPerSystem);
     $targetObj->setAttribute($target, "FAPI_NAME",     $fapiName);
     $targetObj->setAttribute($target, "AFFINITY_PATH", $procAffinity);
     $targetObj->setAttribute($target, "PHYS_PATH",     $procPhysical);
@@ -1210,8 +1243,13 @@ sub processDdimmAndChildren
     my $staticAbsLocationCode = getStaticAbsLocationCode($targetObj,$target);
     $targetObj->setAttribute($target, "STATIC_ABS_LOCATION_CODE",$staticAbsLocationCode);
 
+    # In the future, to support planar configs, where there will be 2 DIMMs behind
+    # a mem port.Therefore the DIMM position will need to be an offset of 2.  Hard code
+    # the offset for now.
+    my $dimmFapiPosition = $dimmPosPerSystem * 2;
+
     # Get the FAPI_NAME by using the data gathered above.
-    my $fapiName = $targetObj->getFapiName($type, $nodeParentPos, $dimmPosPerSystem);
+    my $dimmFapiName = $targetObj->getFapiName($type, $nodeParentPos, $dimmFapiPosition);
 
     # Take advantage of previous work done on the NODEs.  Use the parent NODE's
     # affinity/physical path for our self and append the necessary data.
@@ -1222,8 +1260,8 @@ sub processDdimmAndChildren
     $targetObj->setHuid($target, $sysParentPos, $nodeParentPos, $dimmPosPerSystem);
     $targetObj->setAttribute($target, "POSITION",      $dimmPosPerSystem);
     $targetObj->setAttribute($target, "ORDINAL_ID",    $dimmPosPerSystem);
-    $targetObj->setAttribute($target, "FAPI_POS",      $dimmPosPerSystem);
-    $targetObj->setAttribute($target, "FAPI_NAME",     $fapiName);
+    $targetObj->setAttribute($target, "FAPI_POS",      $dimmFapiPosition);
+    $targetObj->setAttribute($target, "FAPI_NAME",     $dimmFapiName);
     $targetObj->setAttribute($target, "REL_POS",       $ddimmPosPerParent);
     $targetObj->setAttribute($target, "AFFINITY_PATH", $ddimmAffinity);
     $targetObj->setAttribute($target, "PHYS_PATH",     $ddimmPhysical);
@@ -1303,10 +1341,10 @@ sub processPmic
     # PMICs are not ordered, so take the PMIC's parent DDIMM
     # position, multiply it by the maximum PMICs per DDIMM,
     # then add the PMIC's instance:
-    # Ex. on a pmic0, dimm19 = pmic76   ((19 * 4) + 0)
-    # Ex. on a pmic1, dimm19 = pmic77   ((19 * 4) + 1)
-    # Ex. on a pmic2, dimm19 = pmic78   ((19 * 4) + 2)
-    # Ex. on a pmic3, dimm19 = pmic79   ((19 * 4) + 3)
+    # Ex. for pmic0, dimm19 = pmic76   ((19 * 4) + 0)
+    # Ex. for pmic1, dimm19 = pmic77   ((19 * 4) + 1)
+    # Ex. for pmic2, dimm19 = pmic78   ((19 * 4) + 2)
+    # Ex. for pmic3, dimm19 = pmic79   ((19 * 4) + 3)
 
     # Get some useful data from the PMIC parent's SYS, NODE and DDIMM targets
     my $sysParent = $targetObj->findParentByType($target, "SYS");
@@ -1342,7 +1380,7 @@ sub processPmic
     my $pmicPosPerSystem = ($ddimmParentPos * MAX_PMIC_PER_DDIMM) + $pmicInstancePos;
 
     # Get the FAPI_NAME by using the data gathered above
-    my $fapiName = $targetObj->getFapiName($targetType, $nodeParentPos, $pmicPosPerSystem);
+    my $pmicFapiName = $targetObj->getFapiName($targetType, $nodeParentPos, $pmicPosPerSystem);
 
     # Take advantage of previous work done on the DDIMMs and NODEs.  Use these
     # parent affinity/physical path for our self and append pmic to the end.
@@ -1353,18 +1391,18 @@ sub processPmic
     my $pmicPhysical = $nodeParentPhysical . "/pmic-" . $pmicPosPerSystem;
 
     # The FRU_ID comes from the parent ddimm
-    my $fruId = $targetObj->getAttribute($ddimmParent, "FRU_ID");
+    my $pmicFruId = $targetObj->getAttribute($ddimmParent, "FRU_ID");
 
     # Now that we collected all the data we need, set some target attributes
     $targetObj->setHuid($target, $sysParentPos, $nodeParentPos, $pmicPosPerSystem);
     $targetObj->setAttribute($target, "POSITION",      $pmicPosPerSystem);
     $targetObj->setAttribute($target, "ORDINAL_ID",    $pmicPosPerSystem);
     $targetObj->setAttribute($target, "FAPI_POS",      $pmicPosPerSystem);
-    $targetObj->setAttribute($target, "FAPI_NAME",     $fapiName);
+    $targetObj->setAttribute($target, "FAPI_NAME",     $pmicFapiName);
     $targetObj->setAttribute($target, "REL_POS",       $pmicInstancePos);
     $targetObj->setAttribute($target, "AFFINITY_PATH", $pmicAffinity);
     $targetObj->setAttribute($target, "PHYS_PATH",     $pmicPhysical);
-    $targetObj->setAttribute($target, "FRU_ID",        $fruId);
+    $targetObj->setAttribute($target, "FRU_ID",        $pmicFruId);
 
     # Set the FAPI_I2C_CONTROL_INFO attribute
     setFapi2AttributeForPmic($targetObj, $target);
@@ -1416,7 +1454,7 @@ sub processOcmbChipAndChildren
     my $ocmbPosPerParent = $ocmbPosPerSystem % getMaxInstPerParent($type);
 
     # Get the FAPI_NAME by using the data gathered above.
-    my $fapiName = $targetObj->getFapiName($type, $nodeParentPos, $ocmbPosPerSystem);
+    my $ocmbFapiName = $targetObj->getFapiName($type, $nodeParentPos, $ocmbPosPerSystem);
 
     # Take advantage of previous work done on the DDIMMs.  Use the parent DDIMM's
     # affinity path for our self, but remove trailing parts we don't want/need.
@@ -1428,17 +1466,16 @@ sub processOcmbChipAndChildren
     my $ocmbPhysical = $nodeParentPhysical . "/ocmb_chip-" . $ocmbPosPerSystem;
 
     # The FRU_ID comes from the parent ddimm
-    my $fruId = $targetObj->getAttribute($ddimmParent, "FRU_ID");
+    my $ocmbFruId = $targetObj->getAttribute($ddimmParent, "FRU_ID");
 
     # Now that we collected all the data we need, set some target attributes
     $targetObj->setHuid($target, $sysParentPos, $nodeParentPos, $ocmbPosPerSystem);
     $targetObj->setAttribute($target, "POSITION",      $ocmbPosPerSystem);
-    $targetObj->setAttribute($target, "VPD_REC_NUM",   $ocmbPosPerSystem);
     $targetObj->setAttribute($target, "FAPI_POS",      $ocmbPosPerSystem);
-    $targetObj->setAttribute($target, "FAPI_NAME",     $fapiName);
+    $targetObj->setAttribute($target, "FAPI_NAME",     $ocmbFapiName);
     $targetObj->setAttribute($target, "AFFINITY_PATH", $ocmbAffinity);
     $targetObj->setAttribute($target, "PHYS_PATH",     $ocmbPhysical);
-    $targetObj->setAttribute($target, "FRU_ID",        $fruId);
+    $targetObj->setAttribute($target, "FRU_ID",        $ocmbFruId);
 
     # Set the EEPROM_VPD_PRIMARY_INFO and FAPI_I2C_CONTROL_INFO attributes
     setEepromAndFapi2AttributesForOcmb($targetObj, $target);
@@ -1514,7 +1551,7 @@ sub processMemPort
 
     # Get the FAPI_NAME by using the data gathered above.
     my $chipPos = 0; # The chip position for MEM_PORT is 0
-    my $fapiName  = $targetObj->getFapiName($type, $nodeParentPos, $chipPos, $memPortPosPerSystem);
+    my $memPortFapiName  = $targetObj->getFapiName($type, $nodeParentPos, $chipPos, $memPortPosPerSystem);
 
     # Take advantage of previous work done on the DDIMMs.  Use the parent DDIMM's
     # affinity/physical path for our self and append the mem_port to the end.
@@ -1524,7 +1561,7 @@ sub processMemPort
     # Now that we collected all the data we need, set some target attributes
     $targetObj->setHuid($target, $sysParentPos, $nodeParentPos, $memPortPosPerSystem);
     $targetObj->setAttribute($target, "FAPI_POS",      $memPortPosPerSystem);
-    $targetObj->setAttribute($target, "FAPI_NAME",     $fapiName);
+    $targetObj->setAttribute($target, "FAPI_NAME",     $memPortFapiName);
     $targetObj->setAttribute($target, "REL_POS",       $memPortPosPerParent);
     $targetObj->setAttribute($target, "AFFINITY_PATH", $memPortAffinity);
     $targetObj->setAttribute($target, "PHYS_PATH",     $memPortPhysical);
@@ -1567,7 +1604,7 @@ sub processBmc
     my $bmcPosPerSystem = $targetObj->getTargetPosition($target);
 
     # Get the FAPI_NAME
-    my $fapiName  = $targetObj->getFapiName($type);
+    my $bmcFapiName  = $targetObj->getFapiName($type);
 
     # Take advantage of previous work done on the NODEs.  Use the parent NODE's
     # affinity/physical path for our self and append bmc to the end.
@@ -1578,7 +1615,7 @@ sub processBmc
     $targetObj->setHuid($target, $sysParentPos, $nodeParentPos, $bmcPosPerSystem);
     $targetObj->setAttribute($target, "ORDINAL_ID",    $bmcPosPerSystem);
     $targetObj->setAttribute($target, "FAPI_POS",      $bmcPosPerSystem);
-    $targetObj->setAttribute($target, "FAPI_NAME",     $fapiName);
+    $targetObj->setAttribute($target, "FAPI_NAME",     $bmcFapiName);
     $targetObj->setAttribute($target, "AFFINITY_PATH", $bmcAffinity);
     $targetObj->setAttribute($target, "PHYS_PATH",     $bmcPhysical);
 
@@ -1675,7 +1712,7 @@ sub processTpm
     my $tpmPosPerSystem = $targetObj->getTargetPosition($target);
 
     # Get the FAPI_NAME
-    my $fapiName  = $targetObj->getFapiName($type);
+    my $tpmFapiName  = $targetObj->getFapiName($type);
 
     # Take advantage of previous work done on the NODEs.  Use the parent NODE's
     # physical path for our self and append tpm to the end.  Use method
@@ -1687,7 +1724,7 @@ sub processTpm
     $targetObj->setHuid($target, $sysParentPos, $nodeParentPos, $tpmPosPerSystem);
     $targetObj->setAttribute($target, "ORDINAL_ID",    $tpmPosPerSystem);
     $targetObj->setAttribute($target, "FAPI_POS",      $tpmPosPerSystem);
-    $targetObj->setAttribute($target, "FAPI_NAME",     $fapiName);
+    $targetObj->setAttribute($target, "FAPI_NAME",     $tpmFapiName);
     $targetObj->setAttribute($target, "AFFINITY_PATH", $tpmAffinity);
     $targetObj->setAttribute($target, "PHYS_PATH",     $tpmPhysical);
 
@@ -1874,6 +1911,7 @@ sub setCommonAttrForChiplet
     my $procPos   = shift;
 
     my $targetType  = $targetObj->getType($target);
+
     # Make sure the target's parent has been processed.
     if ($targetType eq "PHB")
     {
@@ -1886,7 +1924,7 @@ sub setCommonAttrForChiplet
     }
 
     # Targets have the CHIP_UNIT (target position) attribute set, for the first
-    # PROC, which allows for all of the other numerical data to calculated.
+    # PROC, which allows for some of the other numerical data to calculated.
     my $targetPos = $targetObj->getAttribute($target, "CHIP_UNIT");
 
     # Calculate a per parent numerical value.  The per parent numerical value
@@ -1897,10 +1935,9 @@ sub setCommonAttrForChiplet
     # is used to populate the HUID.
     my $perProcNumValue = ($procPos * getMaxInstPerProc($targetType)) + $targetPos;
 
-    # Get a per SYS numerical value.  The per SYS numerical value is used
-    # to populate the attributes ORDINAL_ID and FAPI_POS.
-    my $perSysNumValue = ($nodePos  * getMaxInstPerParent("PROC") *
-                      getMaxInstPerProc($targetType)) + $perProcNumValue;
+    # Calculate the ORDINAL_ID. The ORDINAL_ID can have gaps if not all target
+    # instances are used. FAPI_POS also uses this value
+    my $ordinalId = calculateOrdinalId($targetType, $nodePos, $procPos, $targetPos);
 
     # Get the FAPI_NAME by using the data gathered above.
     my $fapiName = $targetObj->getFapiName($targetType, $nodePos, $procPos, $targetPos);
@@ -1929,8 +1966,8 @@ sub setCommonAttrForChiplet
 
     # Now that we collected all the data we need, set some target attributes
     $targetObj->setHuid($target, $sysPos, $nodePos, $perProcNumValue);
-    $targetObj->setAttribute($target, "ORDINAL_ID",    $perSysNumValue);
-    $targetObj->setAttribute($target, "FAPI_POS",      $perSysNumValue);
+    $targetObj->setAttribute($target, "ORDINAL_ID",    $ordinalId);
+    $targetObj->setAttribute($target, "FAPI_POS",      $ordinalId);
     $targetObj->setAttribute($target, "FAPI_NAME",     $fapiName);
     $targetObj->setAttribute($target, "REL_POS",       $perParentNumValue);
     $targetObj->setAttribute($target, "AFFINITY_PATH", $targetAffinity);
@@ -1959,12 +1996,6 @@ sub setCommonAttrForChiplet
 
         my $value = sprintf("0x%0.2X", $pervasive_parent);
         $targetObj->setAttribute($target, "CHIPLET_ID", $value);
-    }
-
-    # Special case: PAU's ORDINAL_ID's needs to be calculated
-    if ($targetType eq "PAU")
-    {
-        setPauOrdinalId($targetObj, $target);
     }
 
     # Save this target for retrieval later when printing the xml (sub printXML)
@@ -2331,6 +2362,7 @@ sub setEepromAndFapi2AttributesForOcmb
     }
 
     $targetObj->setAttributeField($target, $fapiName, "devAddr", $devAddr);
+
 } # end setEepromAndFapi2AttributesForOcmb
 
 #--------------------------------------------------
@@ -2391,6 +2423,136 @@ sub setFapi2AttributeForPmic
     $targetObj->setAttributeField($target, $fapiName, "devAddr", $devAddr);
 } # end setFapi2AttributeForPmic
 
+#--------------------------------------------------
+# @brief Validate that PROCs are being processed in Topology ID order.
+#
+# @details Having the PROCs being processed by Topology ID order, facilitates the
+#          assignment of attributes FAPI_POS, ORDINAL_ID, etc.  These attributes
+#          must follow the order of the Topology ID.
+#
+# @param[in] $targetObj - The global target object blob
+# @param[in] $target    - The PROC target
+#--------------------------------------------------
+sub validateProcTopologyIdOrdering
+{
+    my $targetObj = shift;
+    my $target    = shift;
+
+    # Sanity check.  Make sure we are processing the correct target type.
+    targetTypeSanityCheck($targetObj, $target, "PROC");
+
+    my $topologyId = getTopologyId($targetObj, $target);
+
+    if ($targetObj->{HB_TOPOLOGY_ID} eq undef)
+    {
+        # This is the first instance of getting a Topology ID so initialize
+        # with the given Topology ID.
+        $targetObj->{HB_TOPOLOGY_ID} = $topologyId;
+    }
+    elsif ($targetObj->{HB_TOPOLOGY_ID} >= $topologyId)
+    {
+        # If the cached Topology ID is greater than or equal to given Topology ID,
+        # this is an error, state so and exit.
+        select()->flush(); # flush buffer before spewing out error message
+        confess("\nvalidateProcTopologyIdOrdering: ERROR: PROC Fabric Topology " .
+                "ID($topologyId) for PROC($target)\nis either a duplicate " .
+                "Topology Id or the PROCs are not being processing in Topology " .
+                "ID order.\nError");
+    }
+    else
+    {
+        # This Topology ID is greater than previous ID, so far so good, cache the ID.
+        $targetObj->{HB_TOPOLOGY_ID} = $topologyId;
+    }
+}
+
+#--------------------------------------------------
+# @brief Returns a value that increases for every call of a given target type.
+#
+# @details This method will increment a counter for every time a target type
+#          is called, for that target type. This is useful if you need to keep
+#          track of how many times this target type has been encountered as is
+#          the case for the attribute FAPI_POS.
+#
+# @param[in] $targetObj - The global target object blob
+# @param[in] $target    - The target to get the next numerical value for
+#
+# @return A per system numerical value for target
+#--------------------------------------------------
+sub getPerSystemNumericalValue
+{
+    my $targetObj = shift;
+    my $target    = shift;
+
+    my $targetType = $targetObj->getType($target);
+
+    if ($targetObj->{HB_TARGET_INST_NUMERICAL_VALUE}->{$targetType} eq undef)
+    {
+        # This is the first time this target type has been encountered, start
+        # the counter, for this type, at 0.
+        $targetObj->{HB_TARGET_INST_NUMERICAL_VALUE}->{$targetType} = 0;
+    }
+    else
+    {
+        $targetObj->{HB_TARGET_INST_NUMERICAL_VALUE}->{$targetType}++;
+    }
+
+    return $targetObj->{HB_TARGET_INST_NUMERICAL_VALUE}->{$targetType};
+}
+
+#--------------------------------------------------
+# @brief Calculate the ordinal ID
+#
+# @details Calculate the ORDINAL_ID based on the target's position in relation
+#          to the NODE's and the PROC's position.
+
+#          Example: If there are 4 NODEs to a system (SYS), there are 2 PROCs
+#          per NODE and there are 10 targets per PROC.
+#          To find the ORDINAL_ID of the 3rd target that is behind the 2nd PROC
+#          which is behind the 3rd NODE:
+#                 1st NODE (position 0) (will use ORDINAL_IDs 0 .. 9 for PROC0 and 10 .. 19 for PROC1)
+#                 2nd NODE (position 1) (will use ORDINAL_IDs 20 .. 29 for PROC0 and 30 .. 39 for PROC1)
+#                 3rd NODE (position 2)
+#                     -> 1st PROC (position 0) (will use ORDINAL_IDs 40 .. 49 for PROC0)
+#                     -> 2nd PROC (position 1)
+#                        -> 1st target instance (position 0) (will use ORDINAL_ID 50)
+#                        -> 2nd target instance (position 1) (will use ORDINAL_ID 51)
+#                        -> 3rd target instance (position 2)   *Calculate the ORDINAL_ID??
+#         To calculate the ORDINAL_ID for this:
+#             1st) Calculate the offset for the 3rd NODE:
+#                  (NODE position (2)) * (number of PROCs per node (2)) * (number of targets per PROC (10)) =  40
+#             2nd) Calculate the offset for the 2nd PROC:
+#                  (PROC position (1) * (number of targets per PROC (10) = 10
+#             3rd) Get the target position within the PROC
+#                   2
+#             4th) add the numbers up to get ORDINAL_ID for target instance
+#                  40 + 10 + 2 = 52
+#
+# @param[in] $targetType - The type of the target
+# @param[in] $nodePos    - The NODE position for the target
+# @param[in] $procPos    - The PROC position for the target
+# @param[in] $targetPos  - The target position
+#
+# @return The Ordinal ID of the target
+#--------------------------------------------------
+sub calculateOrdinalId
+{
+    my $targetType = shift;
+    my $nodePos    = shift;
+    my $procPos    = shift;
+    my $targetPos  = shift;
+
+    my $numProcsPerNode = getMaxInstPerParent("PROC");
+    my $numTargetsPerProc = getMaxInstPerProc($targetType);
+
+    # Calculate the offset of NODE
+    # Calculate the offset of PROC
+    # Added above to target position
+    # See @details above for explanation
+    return ( ($nodePos * $numProcsPerNode * $numTargetsPerProc)  +
+             ($procPos * $numTargetsPerProc) +
+              $targetPos );
+}
 
 ################################################################################
 # Post processing subroutines
@@ -3174,7 +3336,11 @@ sub postProcessIohs
             my $childType = $targetObj->getType($child);
             if ($childType eq "ABUS")
             {
-                processSmpA($targetObj, $child, $target);
+                # The bus connection are one more level deep in the GroupA/GroupB target
+                foreach my $group (@{ $targetObj->getTargetChildren($child) })
+                {
+                    processSmpA($targetObj, $group, $target);
+                }
             }
         } # foreach my $child (@{ $targetObj->getTargetChildren($target) })
     }
@@ -3248,15 +3414,15 @@ sub processSmpX
         {
             # Don't nullify the configuration attributes
             my $nullifyFlag = false;
-            setCommonConfigAttributes($targetObj, $target, $parentTarget,
-                                      $busConnection, $nullifyFlag);
+            setCommonBusConfigAttributes($targetObj, $target, $parentTarget,
+                                         $busConnection, $nullifyFlag);
         }
         else
         {
             # Nullify the configuration attributes
             my $nullifyFlag = true;
-            setCommonConfigAttributes($targetObj, $target, $parentTarget,
-                                      $busConnection, $nullifyFlag);
+            setCommonBusConfigAttributes($targetObj, $target, $parentTarget,
+                                         $busConnection, $nullifyFlag);
         } # end (($system_config eq $wrapConfig ...
     } # end if ($busConnection ne "")
 } # end sub processSmpX
@@ -3343,24 +3509,21 @@ sub processSmpA
             # Don't nullify the configuration attributes
             my $nullifyFlag = false;
             ($busSrcTarget, $busDestTarget) =
-                   setCommonConfigAttributes($targetObj, $target, $parentTarget,
-                                             $busConnection, $nullifyFlag);
+                   setCommonBusConfigAttributes($targetObj, $target, $parentTarget,
+                                                $busConnection, $nullifyFlag);
 
-=comment
-Currently attribute EI_BUS_TX_MSBSWAP is not implemented.   Once implemented
-uncomment this block and reactivate this code snippet.
             # Set bus transmit MSBSWAP for both source and destination targets
             if ($targetObj->isBusConnBusAttrDefined($busConnection, "SOURCE_TX_MSBSWAP"))
             {
                 my $srcTxMsbSawp = $targetObj->getBusConnBusAttr($busConnection, "SOURCE_TX_MSBSWAP");
                 $targetObj->setAttribute($busSrcTarget, "EI_BUS_TX_MSBSWAP",  $srcTxMsbSawp);
             }
+
             if ($targetObj->isBusConnBusAttrDefined($busConnection, "DEST_TX_MSBSWAP"))
             {
                 my $destTxMsbSawp = $targetObj->getBusConnBusAttr($busConnection, "DEST_TX_MSBSWAP");
                 $targetObj->setAttribute($busDestTarget, "EI_BUS_TX_MSBSWAP",  $destTxMsbSawp);
             }
-=cut
 
             # Set the wrap config for both source and destination targets
             my $linkSet = "SET_NONE";
@@ -3369,6 +3532,7 @@ uncomment this block and reactivate this code snippet.
             {
                 $linkSet  = $targetObj->getBusConnBusAttr($busConnection, "MFG_WRAP_TEST_ABUS_LINKS_SET");
             }
+
             $targetObj->setAttribute($busSrcTarget,  "MFG_WRAP_TEST_ABUS_LINKS_SET", $linkSet);
             $targetObj->setAttribute($busDestTarget, "MFG_WRAP_TEST_ABUS_LINKS_SET", $linkSet);
         } # end if($applyConfiguration eq 1)
@@ -3389,7 +3553,7 @@ uncomment this block and reactivate this code snippet.
 #         $Var1 - The bus source absolute path
 #         $Var2 - The bus destination absolute path
 #--------------------------------------------------
-sub setCommonConfigAttributes
+sub setCommonBusConfigAttributes
 {
     my $targetObj      = shift;
     my $target         = shift;
@@ -3406,6 +3570,10 @@ sub setCommonConfigAttributes
     # Remove the ending, extraneous '/' character
     chop($busSrcPath);
     chop($busDestPath);
+
+    # SMPA has one more level of indirection, remove it
+    $busSrcPath =~ s/\/abus.*//g;
+    $busDestPath =~ s/\/abus.*//g;
 
     # Sanity check. The parent target paths should be made up of the source
     # path. If not, then there is an issue with the MRW or Targets.pm
@@ -3464,7 +3632,7 @@ sub setCommonConfigAttributes
     } # end if ( $nullifyFlag == false ) ... else ...
 
     return ($busSrcTarget, $busDestTarget);
-} # end sub setCommonConfigAttributes
+} # end sub setCommonBusConfigAttributes
 
 sub postProcessIpmiSensors {
     my $targetObj=shift;
@@ -4029,7 +4197,10 @@ sub processI2cSpeeds
 
             if ($bus_speed eq "" || $bus_speed==0) {
                 print "ERROR: I2C bus speed not defined for $i2c->{SOURCE}\n";
-                $targetObj->myExit(3);
+# @TODO 247183 Having issues with bus speed not being set for:
+# ERROR: I2C bus speed not defined for /sys/node-1/Tanager-1/proc_socket-0/blaise-0/power10-0/i2c-master-op0a-B
+# Once corrected will put exit back in
+                # $targetObj->myExit(3);
             }
 
             ## choose lowest bus speed
@@ -4491,67 +4662,6 @@ sub processPowerRails
 ################################################################################
 # Subroutines that support the post processing subroutines
 ################################################################################
-
-#--------------------------------------------------
-# @brief This will set the PAU's ordinal ID.
-#
-# @details For a given PROC, PAU1 and PAU2 (0-based) are not used.
-#          Normal calculation is done with the position of the PAU.  With PAU1
-#          and PAU2 not being used, the position is not sequential but the
-#          ordinal ID's for the used PAUs must be sequential.  There
-#          are gaps in the position which must be realigned to get a contiguous
-#          integer sequence.
-#
-# @details Need to take a sequence such as:
-#          0, 3, 4, 5, 6, 7, 8, 11, 12, 13, 14, 15
-#          transform to:
-#          0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11
-#          The sequence deviates after every 1st PAU in a given PROC.
-#          To find those numbers, look for every number that is a product
-#          of the maximum number of PAUs per PROC and the PROCs position.
-#          Then realign those numbers.
-#
-# @param [in] $targetObj - The global target object.
-# @param [in] $pauTarget - a target of type PAU
-#--------------------------------------------------
-sub setPauOrdinalId
-{
-    my $targetObj = shift;
-    my $pauTarget = shift;
-
-    # Verify that target type is of type PAU
-    my $targetType = $targetObj->getType($pauTarget);
-    if ($targetType ne "PAU")
-    {
-        select()->flush(); # flush buffer before spewing out error message
-        die "setPauOrdinalId: ERROR: Target type must be \"PAU\" not " .
-            "\"$targetType\". Error";
-    }
-
-    # Need to get the PROC for this PAU target
-    my $procParent = $targetObj->findParentByType($pauTarget, "PROC");
-
-    # Get the position of the PROC which is used to calculate the ORDINAL_ID
-    my $procPosition = $targetObj->getAttribute($procParent, "POSITION");
-
-    # Get the current ORDINAL_ID of the PAU, which will have numerical gaps.
-    my $targetOrdinalId = $targetObj->getAttribute($pauTarget, "ORDINAL_ID");
-
-    # Gaps begin on the 2nd ordinal id (1 for 0-based) for every proc.
-    my $maxInst = getMaxInstPerProc($targetType);
-    if ($targetOrdinalId >=
-        (($procPosition * $maxInst) + 1) )
-    {
-        $targetOrdinalId = $targetOrdinalId - (($procPosition + 1) * 2);
-    }
-    elsif ($targetOrdinalId > 0)  # Do not process 0
-    {
-        $targetOrdinalId = $targetOrdinalId - ($procPosition * 2);
-    }
-
-    $targetObj->setAttribute($pauTarget, "ORDINAL_ID", $targetOrdinalId);
-}
-
 #--------------------------------------------------
 # @brief Set up memory maps for certain attributes of the PROCS
 #--------------------------------------------------
@@ -4856,7 +4966,7 @@ sub validateTargetHasBeenPreProcessed($targetObj, $target)
          !($targetObj->getAttribute($target, "HB_TARGET_PROCESSED") == 1) )
     {
         select()->flush(); # flush buffer before spewing out error message
-        confess("\validateTargetHasBeenPreProcessed: ERROR: Target of type \"" .
+        confess("\nvalidateTargetHasBeenPreProcessed: ERROR: Target of type \"" .
                 $targetObj->getType($target) . "\" must be pre processed before " .
                 "post processing this target. Error");
     }
@@ -5676,10 +5786,10 @@ sub testGetTopologyIndex
 
     my $testPassed = true;
 
-    my $system_name = $targetObj->getAttribute('/sys-0',"SYSTEM_NAME");
+    my $system_name = $targetObj->getSystemName();
     if ($system_name =~ /RAINIER/i)
     {
-        print ">> Running testGetTopologyIndex \n";
+        print ">> Running RAINIER testGetTopologyIndex \n";
 
         # The different procs available
         use constant PROC_0 => "/sys-0/node-0/nisqually-0/proc_socket-0/godel-0/power10-0";
@@ -5713,7 +5823,7 @@ sub testGetTopologyIndex
                    "@fullProc[-1] but expected $expectedTopologyIndex \n";
         }
 
-        print "<< Running testGetTopologyIndex: test " .
+        print "<< Running RAINIER testGetTopologyIndex: test " .
               getPassFailString($testPassed) . "\n";
 
     } # end if ($system_name =~ /RAINIER/i)
@@ -5748,7 +5858,7 @@ sub testMaxInstPerProc
         OMI       => 16,
         OCMB_CHIP => 16,
         MEM_PORT  => 16,
-        DDIMM     => 16,
+        DIMM      => 16,
         PMIC      => 32,
         OMIC      => 8,
 
@@ -5885,6 +5995,66 @@ sub setTargetChipletId
         }
     }
 } # end sub setTargetChipletId
+
+#--------------------------------------------------
+# @brief This will set the PAU's ordinal ID.
+#
+# @details For a given PROC, PAU1 and PAU2 (0-based) are not used.
+#          Normal calculation is done with the position of the PAU.  With PAU1
+#          and PAU2 not being used, the position is not sequential but the
+#          ordinal ID's for the used PAUs must be sequential.  There
+#          are gaps in the position which must be realigned to get a contiguous
+#          integer sequence.
+#
+# @details Need to take a sequence such as:
+#          0, 3, 4, 5, 6, 7, 8, 11, 12, 13, 14, 15
+#          transform to:
+#          0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11
+#          The sequence deviates after every 1st PAU in a given PROC.
+#          To find those numbers, look for every number that is a product
+#          of the maximum number of PAUs per PROC and the PROCs position.
+#          Then realign those numbers.
+#
+# @param [in] $targetObj - The global target object.
+# @param [in] $pauTarget - a target of type PAU
+#--------------------------------------------------
+sub setPauOrdinalId
+{
+    my $targetObj = shift;
+    my $pauTarget = shift;
+
+    # Verify that target type is of type PAU
+    my $targetType = $targetObj->getType($pauTarget);
+    if ($targetType ne "PAU")
+    {
+        select()->flush(); # flush buffer before spewing out error message
+        die "setPauOrdinalId: ERROR: Target type must be \"PAU\" not " .
+            "\"$targetType\". Error";
+    }
+
+    # Need to get the PROC for this PAU target
+    my $procParent = $targetObj->findParentByType($pauTarget, "PROC");
+
+    # Get the position of the PROC which is used to calculate the ORDINAL_ID
+    my $procPosition = $targetObj->getAttribute($procParent, "POSITION");
+
+    # Get the current ORDINAL_ID of the PAU, which will have numerical gaps.
+    my $targetOrdinalId = $targetObj->getAttribute($pauTarget, "ORDINAL_ID");
+
+    # Gaps begin on the 2nd ordinal id (1 for 0-based) for every proc.
+    my $maxInst = getMaxInstPerProc($targetType);
+    if ($targetOrdinalId >=
+        (($procPosition * $maxInst) + 1) )
+    {
+        $targetOrdinalId = $targetOrdinalId - (($procPosition + 1) * 2);
+    }
+    elsif ($targetOrdinalId > 0)  # Do not process 0
+    {
+        $targetOrdinalId = $targetOrdinalId - ($procPosition * 2);
+    }
+
+    $targetObj->setAttribute($pauTarget, "ORDINAL_ID", $targetOrdinalId);
+}
 
 sub getI2cMapField
 {
