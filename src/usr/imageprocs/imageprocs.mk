@@ -52,14 +52,16 @@ EXTRAINCDIR += ${ROOTPATH}/src/import
 
 include ${ROOTPATH}/procedure.rules.mk
 
-include ${IPL_CUSTOMIZE_PATH}/p10_ipl_customize.mk
-include ${IPL_CUSTOMIZE_PATH}/p10_ipl_section_append.mk
-include ${HWP_IMAGEPROCS_PATH}/p10_ipl_image.mk
-include ${HWP_IMAGEPROCS_PATH}/p10_ddco.mk
-include ${HWP_IMAGEPROCS_PATH}/p10_tor.mk
-include ${HWP_IMAGEPROCS_PATH}/p10_ringId.mk
-include ${HWP_COMMON_IMAGEPROCS_PATH}/common_ringId.mk
-include ${HWP_IMAGEPROCS_PATH}/p10_scan_compression.mk
-include ${HWP_ACC_PATH}/p10_get_mvpd_ring.mk
-include ${HWP_ACC_PATH}/p10_mvpd_ring_funcs.mk
-
+OBJS += p10_ipl_customize.o
+OBJS += p10_ipl_section_append.o
+OBJS += p10_ipl_image.o
+OBJS += p10_ddco.o
+OBJS += p10_tor.o
+OBJS += p10_ringId.o
+OBJS += common_ringId.o
+OBJS += p10_scan_compression.o
+OBJS += p10_get_mvpd_ring.o
+OBJS += p10_mvpd_ring_funcs.o
+OBJS += p10_boot_mode.o
+OBJS += p10_dynamic.o
+OBJS += p10_dyninit_bitvec_utils.o
