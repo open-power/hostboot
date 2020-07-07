@@ -77,7 +77,8 @@ inline void display_rcw_8bit(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& 
                              const uint64_t i_rcw_number,
                              const uint8_t i_data)
 {
-    const uint64_t l_rcw_print_number = i_rcw_number - exp_struct_sizes::RCW_8BIT_CUTOFF;
+    // Offset by 1 since index 0 is really F*RC1X not F*RC0X
+    const uint64_t l_rcw_print_number = i_rcw_number - exp_struct_sizes::RCW_8BIT_CUTOFF + 1;
     FAPI_MFG("%s DIMM%u F%uRC%xX: 0x%02x", mss::c_str(i_target), i_dimm, i_func_space, l_rcw_print_number, i_data);
 }
 
