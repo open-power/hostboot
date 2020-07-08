@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -112,6 +112,7 @@ HdatIpmi::HdatIpmi(errlHndl_t &o_errlHndl, const hdatMsAddr_t &i_msAddr):
                 l_fruEntry.IPMISensorID = l_sensor[1];
                 l_fruEntry.IPMIEntityID = (uint8_t)(l_sensor[0] & 0x00FF);
                 l_fruEntry.IPMISensorType = (uint8_t)(l_sensor[0] >> 8);
+                l_fruEntry.Reserved = (uint8_t)(0xFF);
                 // OPAL doesn't like sensor types of 0xFF, so filter them out.
                 if( l_fruEntry.IPMISensorType != 0xFF )
                 {

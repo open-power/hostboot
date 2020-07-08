@@ -64,28 +64,35 @@ typedef uint64_t FDT_BITWISE fdt64_t;
 
 static inline uint16_t fdt16_to_cpu(fdt16_t x)
 {
+    //cppcheck-suppress objectIndex
     return (FDT_FORCE uint16_t)CPU_TO_FDT16(x);
 }
 static inline fdt16_t cpu_to_fdt16(uint16_t x)
 {
+
+    //cppcheck-suppress objectIndex
     return (FDT_FORCE fdt16_t)CPU_TO_FDT16(x);
 }
 
 static inline uint32_t fdt32_to_cpu(fdt32_t x)
 {
+    //cppcheck-suppress objectIndex
     return (FDT_FORCE uint32_t)CPU_TO_FDT32(x);
 }
 static inline fdt32_t cpu_to_fdt32(uint32_t x)
 {
+    //cppcheck-suppress objectIndex
     return (FDT_FORCE fdt32_t)CPU_TO_FDT32(x);
 }
 
 static inline uint64_t fdt64_to_cpu(fdt64_t x)
 {
+    //cppcheck-suppress objectIndex
     return (FDT_FORCE uint64_t)CPU_TO_FDT64(x);
 }
 static inline fdt64_t cpu_to_fdt64(uint64_t x)
 {
+    //cppcheck-suppress objectIndex
     return (FDT_FORCE fdt64_t)CPU_TO_FDT64(x);
 }
 #undef CPU_TO_FDT64

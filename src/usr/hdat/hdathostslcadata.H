@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -52,6 +52,29 @@ struct HDAT_slcaEntry_t
     uint16_t number_of_children_2B;     //number of children - 2 byte version
     uint8_t installed;                  //Is FRU installed
     uint8_t collected;                  //Is FRU VPD collected
+
+    HDAT_slcaEntry_t():fru_index(0xFFFF),
+                       fru_rid(0xFFFF),
+                       parent_index(0xFFFF),
+                       slca_reserved(0x3F),
+                       non_functional_redundant_copy(1),
+                       flag_embedded_pluggable(1),
+                       number_of_children(0xFF),
+                       first_child_index(0xFFFF),
+                       first_child_rid(0xFFFF),
+                       max_location_code_len(0x00),
+                       actual_location_code_len(0x00),
+                       first_redundant_index(0xFFFF),
+                       number_redundant_copies(0x00),
+                       reserved(0x00),
+                       number_of_children_2B(0x0000),
+                       installed(0xFF),
+                       collected(0xFF)
+                       {
+                            memset(&fru_id,0x0,sizeof(fru_id));
+                            memset(&location_code,0x0,sizeof(location_code));
+                       };
+
 };
 
 enum HDAT_FRUType_t
