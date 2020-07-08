@@ -239,7 +239,7 @@ UdEepromI2cParms::UdEepromI2cParms( uint8_t i_opType,
     }
     else
     {
-        l_muxPath = new char[1];
+        l_muxPath = (char*) malloc(1);
         l_muxPath[0] = '\0';
     }
 
@@ -382,7 +382,7 @@ UdEepromSpiParms::UdEepromSpiParms( uint8_t i_opType,
     }
     else
     {
-        l_masterPath = new char[1];
+        l_masterPath = (char*) malloc(1);
         l_masterPath[0] = '\0';
     }
 
