@@ -1878,22 +1878,27 @@ errlHndl_t populate_hbSecurebootData ( void )
 
 #ifdef CONFIG_KEY_CLEAR
         // If Physical Presence was not asserted, then mask off all bits
-        // except for Mfg bit in case of imprint drivers
+        // except for Mfg bits in case of imprint drivers
         // NOTE: Using the presence of a backdoor to assert we have an
         // imprint/development driver
         if ((phys_pres_asserted == 0) &&
             (key_clear_request != KEY_CLEAR_REQUEST_NONE))
         {
             if ((sbe_security_backdoor != 0) &&
-                (key_clear_request & KEY_CLEAR_REQUEST_MFG))
+                ((key_clear_request & KEY_CLEAR_REQUEST_MFG) ||
+                 (key_clear_request & KEY_CLEAR_REQUEST_MFG_ALL)))
             {
+                auto tmp_request = key_clear_request;
+                tmp_request &= (KEY_CLEAR_REQUEST_MFG |
+                                KEY_CLEAR_REQUEST_MFG_ALL);
+
                 TRACFCOMP(g_trac_runtime, INFO_MRK"populate_hbSecurebootData: "
                           "Physical Presence not asserted, but "
-                          "KEY_CLEAR_REQUEST_MFG bit is set for imprint driver."
-                          " Updating key_clear_request from 0x%.4X to 0x%.4X",
-                          key_clear_request, KEY_CLEAR_REQUEST_MFG);
-
-                key_clear_request = KEY_CLEAR_REQUEST_MFG;
+                          "KEY_CLEAR_REQUEST_MFG(_ALL) bit(s) is set for "
+                          "imprint driver. Updating key_clear_request from "
+                          "0x%.4X to 0x%.4X",
+                          key_clear_request, tmp_request);
+                key_clear_request = tmp_request;
             }
             else
             {
@@ -1908,18 +1913,21 @@ errlHndl_t populate_hbSecurebootData ( void )
         // Must mask off KEY_CLEAR_REQUEST_MFG for non-imprint drivers
         else if ((phys_pres_asserted != 0) &&
                  (sbe_security_backdoor == 0) &&
-                 (key_clear_request & KEY_CLEAR_REQUEST_MFG))
+                 (key_clear_request &
+                   (KEY_CLEAR_REQUEST_MFG | KEY_CLEAR_REQUEST_MFG_ALL)))
         {
             auto temp_key_clear_request =
                    static_cast<ATTR_KEY_CLEAR_REQUEST_type>(
-                     key_clear_request & ~KEY_CLEAR_REQUEST_MFG);
+                     key_clear_request &
+                       ~(KEY_CLEAR_REQUEST_MFG | KEY_CLEAR_REQUEST_MFG_ALL));
 
             TRACFCOMP(g_trac_runtime, INFO_MRK"populate_hbSecurebootData: "
                       "Physical Presence asserted on production driver with "
-                      "KEY_CLEAR_REQUEST_MFG bit (0x%.4X) set. "
+                      "KEY_CLEAR_REQUEST_MFG bit (0x%.4X) or "
+                      "KEY_CLEAR_REQUEST_MFG_ALL bit (0x%.4X) set. "
                       "Updating key_clear_request from 0x%.4X to 0x%.4X",
-                      KEY_CLEAR_REQUEST_MFG, key_clear_request,
-                      temp_key_clear_request);
+                      KEY_CLEAR_REQUEST_MFG, KEY_CLEAR_REQUEST_MFG_ALL,
+                      key_clear_request, temp_key_clear_request);
 
             key_clear_request = temp_key_clear_request;
         }

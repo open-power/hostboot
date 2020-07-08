@@ -227,23 +227,25 @@ void getKeyClearRequest(bool & o_requestPhysPres,
     getKeyClearRequestSensor(l_keyClearRequests);
 #endif
 
-    // First check if the KEY_CLEAR_REQUEST_MFG bit is set and we have a
-    // production driver; if so, clear this bit
+    // First check if either the KEY_CLEAR_REQUEST_MFG bit or the
+    // KEY_CLEAR_REQUEST_MFG_ALL bit are set and we have a production driver;
+    // if so, clear these bits.
     // Using the presence of a backdoor to assert we have an imprint/development
     // driver
     bool isImprintDriver = SECUREBOOT::getSbeSecurityBackdoor();
 
-    if ((l_keyClearRequests & KEY_CLEAR_REQUEST_MFG) &&
+    if (((l_keyClearRequests & KEY_CLEAR_REQUEST_MFG) ||
+         (l_keyClearRequests & KEY_CLEAR_REQUEST_MFG_ALL)) &&
         (isImprintDriver == false))
     {
-        // create a temporary vairable and clear the bit
+        // create a temporary variable and clear the bit
         uint16_t tmp = static_cast<uint16_t>(l_keyClearRequests);
-        tmp &= ~(KEY_CLEAR_REQUEST_MFG);
+        tmp &= ~(KEY_CLEAR_REQUEST_MFG | KEY_CLEAR_REQUEST_MFG_ALL);
 
-        SB_INF("getKeyClearRequest: KEY_CLEAR_REQUEST_MFG (0x%.04X) is set "
-               "on a production driver: 0x%.04X. Clearing this bit so new "
-               "value is 0x%.04X",
-                KEY_CLEAR_REQUEST_MFG,
+        SB_INF("getKeyClearRequest: Either/both KEY_CLEAR_REQUEST_MFG (0x%.04X)"
+               " or KEY_CLEAR_REQUEST_MFG_ALL (0x%.04X) is set on a production "
+               "driver: 0x%.04X. Clearing these bits so new value is 0x%.04X",
+                KEY_CLEAR_REQUEST_MFG, KEY_CLEAR_REQUEST_MFG_ALL,
                 l_keyClearRequests, tmp);
 
         // set output parameter to updated temporary variable
@@ -257,16 +259,20 @@ void getKeyClearRequest(bool & o_requestPhysPres,
     // physical presence assertion (defaulted to false above)
     if (l_keyClearRequests != KEY_CLEAR_REQUEST_NONE)
     {
-        // If it's -ONLY- KEY_CLEAR_REQUEST_MFG and an imprint driver
-        // then there's no need to request physical presence assertion
-        if ((l_keyClearRequests == KEY_CLEAR_REQUEST_MFG) &&
+        // If it's -ONLY- KEY_CLEAR_REQUEST_MFG or KEY_CLEAR_REQUEST_MFG_ALL
+        // and an imprint driver then there's no need to request physical
+        // presence assertion
+        if (((l_keyClearRequests == KEY_CLEAR_REQUEST_MFG) ||
+             (l_keyClearRequests == KEY_CLEAR_REQUEST_MFG_ALL)) &&
             (isImprintDriver == true))
         {
             o_requestPhysPres = false;
-            SB_INF("getKeyClearRequest: Only KEY_CLEAR_REQUEST_MFG (0x%.04X) is set "
-                   "on a imprint driver: 0x%.04X. No need to request physical "
+            SB_INF("getKeyClearRequest: Only KEY_CLEAR_REQUEST_MFG (0x%.04X) "
+                   "or KEY_CLEAR_REQUEST_MFG_ALL (0x%.04X) is set on an "
+                   "imprint driver: 0x%.04X. No need to request physical "
                    "presence assertion",
-                    KEY_CLEAR_REQUEST_MFG, l_keyClearRequests);
+                    KEY_CLEAR_REQUEST_MFG, KEY_CLEAR_REQUEST_MFG_ALL,
+                    l_keyClearRequests);
             o_requestPhysPres = false;
         }
         // Some bit(s) are set and therefore require physical presence assertion

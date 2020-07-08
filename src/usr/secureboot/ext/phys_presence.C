@@ -64,7 +64,7 @@ errlHndl_t detectPhysPresence(void)
     // Not supported in simics
     if (Util::isSimicsRunning())
     {
-        SB_ERR("detectPhysPresence: Skipping as not supported in simics");
+        SB_INF("detectPhysPresence: Skipping as not supported in simics");
 
         // Normally don't have multiple return statements, but
         // this solves having 2 do-while loops
@@ -487,7 +487,7 @@ errlHndl_t handlePhysPresenceWindow(void)
             (doesKeyClearRequestPhysPres == false))
     {
         SB_INF("handlePhysPresenceWindow: attr_open_window=0x%.2X: "
-               "and key_clear_req=%d so no need to open window "
+               "and doesKeyClearRequestPhysPres=%d so no need to open window "
                "(attr_phys_pres_asserted=0x%.2X)",
                attr_open_window, doesKeyClearRequestPhysPres,
                attr_phys_pres_asserted);
@@ -495,12 +495,15 @@ errlHndl_t handlePhysPresenceWindow(void)
         doAttrCrossOver = true;
 
         // Document special case if it's -ONLY- KEY_CLEAR_REQUEST_MFG
-        // NOTE: The check that this is ancimprint driver was made in
+        // or KEY_CLEAR_REQUEST_MFG_ALL
+        // NOTE: The check that this is an imprint driver was made in
         // getKeyClearRequest()
-        if (keyClearRequests == KEY_CLEAR_REQUEST_MFG)
+        if ((keyClearRequests == KEY_CLEAR_REQUEST_MFG) ||
+            (keyClearRequests == KEY_CLEAR_REQUEST_MFG_ALL))
         {
             SB_INF("handlePhysPresenceWindow: Create an INFORMATIONAL Log to "
-                   "document special case of KEY_CLEAR_REQUEST_MFG (0x%.04X)",
+                   "document special case(s) of KEY_CLEAR_REQUEST_MFG(_ALL) "
+                   "(0x%.04X)",
                    keyClearRequests);
 
             /*@
@@ -531,7 +534,7 @@ errlHndl_t handlePhysPresenceWindow(void)
 
             // Also display a message to the console
             #ifdef CONFIG_CONSOLE
-            CONSOLE::displayf(SECURE_COMP_NAME, "Detected KEY_CLEAR_REQUEST_MFG; No Physical Presence Detection Necessary\n");
+            CONSOLE::displayf(SECURE_COMP_NAME, "Detected KEY_CLEAR_REQUEST_MFG(_ALL); No Physical Presence Detection Necessary\n");
             #endif
         }
 

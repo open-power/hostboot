@@ -2928,7 +2928,16 @@
           Reserved bits
       </description>
       <name>RESERVED_1</name>
-      <value>0x2E00</value>
+      <value>0x2C00</value>
+    </enumerator>
+    <enumerator>
+      <description>
+          MFG mode and imprint driver only : Clear all latent sensitive data
+          and treat as genesis IPL for MFG processing. Same behavior as
+          KEY_CLEAR_ALL as well as clear/reset of any IBM sensitive data.
+      </description>
+      <name>MFG_ALL</name>
+      <value>0x0200</value>
     </enumerator>
     <enumerator>
       <description>
