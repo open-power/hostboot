@@ -363,24 +363,17 @@ errlHndl_t PdrManager::awaitBmcPdrRepoChanged(const size_t i_timeout_ms)
     assert(i_timeout_ms == TIMEOUT_NONE,
            "awaitBmcPdrRepoChanged: timeout not supported");
 
+    // This mutex protects this function from being called while another task is
+    // already waiting on a message.
+    static mutex_t wait_mutex = MUTEX_INITIALIZER;
+
     errlHndl_t errl = nullptr;
-    std::shared_ptr<void> msgq;
 
-    {
-        // We do not want to hold this lock when we go into the msg_wait loop
-        // below, otherwise we could deadlock if we're waiting on the BMC and
-        // then they issue a getPDR or similar request.
-        const auto lock = scoped_mutex_lock(iv_access_mutex);
+    const auto lock = scoped_mutex_lock(wait_mutex);
 
-        // Get a local handle to the event queue to keep it alive while we use
-        // it.
-        msgq = iv_bmc_repo_changed_event_q;
-
-        // Null out the event queue so that it gets destroyed when we exit this
-        // function, to prevent messages from accumulating in the queue and
-        // never being dequeued.
-        iv_bmc_repo_changed_event_q = nullptr;
-    }
+    // Get a local handle to the event queue to keep it alive while we use
+    // it.
+    std::shared_ptr<void> msgq = iv_bmc_repo_changed_event_q;
 
     if (msgq)
     {
@@ -388,6 +381,11 @@ errlHndl_t PdrManager::awaitBmcPdrRepoChanged(const size_t i_timeout_ms)
 
         msg_free(msg);
         msg = nullptr;
+
+        // Null out the event queue so that it gets destroyed when we exit this
+        // function, to prevent messages from accumulating in the queue and
+        // never being dequeued.
+        iv_bmc_repo_changed_event_q = nullptr;
     }
     else
     {
