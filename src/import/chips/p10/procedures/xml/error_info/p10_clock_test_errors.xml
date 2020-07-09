@@ -34,6 +34,18 @@
       <ffdc>READ_SNS1LTH</ffdc>
       <ffdc>ATTR_CP_REFCLOCK_SELECT_VALUE</ffdc>
       <ffdc>RCS_CLOCK_TEST_IN</ffdc>
+      <callout>
+        <hw>
+            <hwid>PROC_REF_CLOCK</hwid>
+            <refTarget>MASTER_CHIP</refTarget>
+            <clkPos>CLOCK_POS</clkPos>
+        </hw>
+        <priority>HIGH</priority>
+      </callout>
+      <callout>
+        <target>MASTER_CHIP</target>
+        <priority>MEDIUM</priority>
+      </callout>
    </hwpError>
   <!-- ******************************************************************** -->
 </hwpErrors>
