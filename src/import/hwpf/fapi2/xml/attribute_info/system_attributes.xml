@@ -34,6 +34,22 @@
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>
+    <id>ATTR_IS_SIMICS</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+       Returns the type of simics environment that the code is executing
+       inside.
+         0 = RealHW/AWAN. 
+         1 = Simics. 
+         2 = SUET. 
+    </description>
+    <valueType>uint8</valueType>
+    <enum>REALHW = 0x00, SIMICS = 0x01, SUET = 0x02</enum>
+    <platInit/>
+    <mssAccessorName>is_simics</mssAccessorName>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
     <id>ATTR_EXECUTION_PLATFORM</id>
     <targetType>TARGET_TYPE_SYSTEM</targetType>
     <description>
