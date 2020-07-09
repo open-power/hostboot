@@ -33,12 +33,14 @@
 #include <secureboot/service.H>
 #include <secureboot/phys_presence_if.H>
 #include <config.h>
+#include <targeting/targplatutil.H>
 
 namespace ISTEP_06
 {
 
 void* call_host_update_master_tpm( void *io_pArgs )
 {
+    using namespace TARGETING;
     ISTEP_ERROR::IStepError l_stepError;
 
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
@@ -47,6 +49,14 @@ void* call_host_update_master_tpm( void *io_pArgs )
     errlHndl_t l_err = nullptr;
 
     (void)SECUREBOOT::logPlatformSecurityConfiguration();
+
+
+    // Set Minimum Secure Version Attribute
+    // -- safe to do here because targeting is definitely up at this point
+    // -- NOTE: API asserts if there's any issues returning the node target
+    Target* node_tgt = TARGETING::UTIL::getCurrentNodeTarget();
+    node_tgt->setAttr<ATTR_SECURE_VERSION_SEEPROM>(SECUREBOOT::getMinimumSecureVersion());
+
 
 #ifdef CONFIG_TPMDD
     // Initialize the master TPM

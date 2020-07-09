@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -620,6 +620,7 @@ void logPlatformSecurityConfiguration(void)
      * @errortype
      * @moduleid   SECUREBOOT::MOD_SECURE_LOG_PLAT_SECURITY_CONFIG
      * @reasoncode SECUREBOOT::RC_SECURE_LOG_PLAT_SECURITY_CONFIG
+     * @userdata1  Minimum FW Secure Version
      * @devdesc    Planar jumper configuration
      * @custdesc   Planar jumper configuration
      */
@@ -627,11 +628,12 @@ void logPlatformSecurityConfiguration(void)
         ERRORLOG::ERRL_SEV_INFORMATIONAL,
         SECUREBOOT::MOD_SECURE_LOG_PLAT_SECURITY_CONFIG,
         SECUREBOOT::RC_SECURE_LOG_PLAT_SECURITY_CONFIG,
-        0,
+        getMinimumSecureVersion(),
         0);
     (void)addSecureUserDetailsToErrlog(
         pError);
     ERRORLOG::errlCommit(pError,SECURE_COMP_ID);
+
 }
 
 #ifndef __HOSTBOOT_RUNTIME

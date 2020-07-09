@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -66,15 +66,21 @@ namespace SECUREBOOT
         iv_enabled = (0 != (securitySwitchValue &
                             static_cast<uint64_t>(ProcSecurity::SabBit)));
 
-        SB_INF("getEnabled() state:%i",iv_enabled);
-        printk("SECUREBOOT::enabled() state:%i\n", iv_enabled);
+        auto l_min_secure_version = getMinimumSecureVersion();
+
+        SB_INF("getEnabled() state:%i, (minimum secure version=0x%.02X)",
+               iv_enabled,
+               l_min_secure_version);
+        printk("SECUREBOOT::enabled() state:%i (minimum secure version=0x%.02X)\n",
+               iv_enabled, l_min_secure_version);
 
         // Report if secure boot is disabled
         #ifdef CONFIG_SECUREBOOT
         if (!iv_enabled)
         {
             #ifdef CONFIG_CONSOLE
-            CONSOLE::displayf(SECURE_COMP_NAME, "Booting in non-secure mode.");
+            CONSOLE::displayf(SECURE_COMP_NAME, "Booting in non-secure mode (minimum secure version=0x%.02X)",
+                      l_min_secure_version);
             #endif
 
             uint64_t cbsValue = 0;
@@ -102,7 +108,8 @@ namespace SECUREBOOT
         else
         {
             #ifdef CONFIG_CONSOLE
-            CONSOLE::displayf(SECURE_COMP_NAME, "Booting in secure mode.");
+            CONSOLE::displayf(SECURE_COMP_NAME, "Booting in secure mode (minimum secure version=0x%.02X)",
+                      l_min_secure_version);
             #endif
         }
         #endif
