@@ -363,6 +363,7 @@ int32_t CheckErrorType( ExtensibleChip * i_chip, uint32_t & o_errType )
     #undef PRDF_FUNC
 }
 PRDF_PLUGIN_DEFINE_NS( axone_proc,   Proc, CheckErrorType );
+PRDF_PLUGIN_DEFINE_NS( p10_proc,   Proc, CheckErrorType );
 
 /**
  * @brief Clear Chiplet PCB slave reg parity errors
@@ -390,6 +391,7 @@ int32_t clearParityError( ExtensibleChip * i_chip,
     #undef PRDF_FUNC
 }
 PRDF_PLUGIN_DEFINE_NS( axone_proc,   Proc, clearParityError );
+PRDF_PLUGIN_DEFINE_NS( p10_proc,   Proc, clearParityError );
 
 /**
   * @brief Query the PLL chip for a PLL error on P9
@@ -425,6 +427,7 @@ int32_t QueryPll( ExtensibleChip * i_chip,
     #undef PRDF_FUNC
 }
 PRDF_PLUGIN_DEFINE_NS( axone_proc,   Proc, QueryPll );
+PRDF_PLUGIN_DEFINE_NS( p10_proc,   Proc, QueryPll );
 
 /**
   * @brief  Clear the PLL error for P9 Plugin
@@ -467,6 +470,7 @@ int32_t ClearPll( ExtensibleChip * i_chip,
     #undef PRDF_FUNC
 }
 PRDF_PLUGIN_DEFINE_NS( axone_proc,   Proc, ClearPll );
+PRDF_PLUGIN_DEFINE_NS( p10_proc,   Proc, ClearPll );
 
 int32_t ClearMfPll( ExtensibleChip * i_chip,
                         STEP_CODE_DATA_STRUCT & i_sc)
@@ -499,6 +503,7 @@ int32_t ClearMfPll( ExtensibleChip * i_chip,
     #undef PRDF_FUNC
 }
 PRDF_PLUGIN_DEFINE_NS( axone_proc,   Proc, ClearMfPll );
+PRDF_PLUGIN_DEFINE_NS( p10_proc,   Proc, ClearMfPll );
 
 /**
   * @brief Mask the PLL error for P9 Plugin
@@ -558,6 +563,7 @@ int32_t MaskPll( ExtensibleChip * i_chip,
     return SUCCESS;
 }
 PRDF_PLUGIN_DEFINE_NS( axone_proc,   Proc, MaskPll );
+PRDF_PLUGIN_DEFINE_NS( p10_proc,   Proc, MaskPll );
 
 /**
  * @brief   capture additional PLL FFDC
@@ -593,6 +599,7 @@ int32_t capturePllFfdc( ExtensibleChip * i_chip,
     #undef PRDF_FUNC
 }
 PRDF_PLUGIN_DEFINE_NS( axone_proc,   Proc, capturePllFfdc );
+PRDF_PLUGIN_DEFINE_NS( p10_proc,   Proc, capturePllFfdc );
 
 } // end namespace Proc
 

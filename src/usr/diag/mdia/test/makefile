@@ -44,13 +44,11 @@ EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/imageProcs
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/ffdc
 EXTRAINCDIR += ${ROOTPATH}/src/import/generic/memory/
 
-# FIXME RTC: 210975
-
-#OBJS += mdiafakesm.o
-#OBJS += mdiafakecm.o
+OBJS += mdiafakesm.o
+OBJS += mdiafakecm.o
 
 MODULE = testmdia
 
-#TESTS = mdiatestsm.H mdiatesttrace.H mdiatest.H mdiatestworkitem.H mdiatestmonitor.H mdiatestmba.H mdiaTestTimeoutFfdc.H
+TESTS = mdiatestsm.H mdiatesttrace.H mdiatest.H mdiatestworkitem.H mdiatestmonitor.H mdiatestmba.H mdiaTestTimeoutFfdc.H
 
 include ${ROOTPATH}/config.mk

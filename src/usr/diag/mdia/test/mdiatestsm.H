@@ -51,21 +51,7 @@ class MdiaSmTest : public CxxTest::TestSuite
         void getTargets(uint64_t i_count, TARGETING::TargetHandleList & o_list)
         {
             TargetHandleList tmp;
-
-            // Need to determine whether we are using MBA or MCBIST
-            fapi2::TargetType type = getMdiaTargetType();
-            if (fapi2::TARGET_TYPE_MBA_CHIPLET == type)
-            {
-                TARGETING::getAllChiplets(tmp, TYPE_MBA);
-            }
-            else if (fapi2::TARGET_TYPE_MCBIST == type)
-            {
-                TARGETING::getAllChiplets(tmp, TYPE_MCBIST);
-            }
-            else if (fapi2::TARGET_TYPE_OCMB_CHIP == type)
-            {
-                TARGETING::getAllChips(tmp, TYPE_OCMB_CHIP);
-            }
+            TARGETING::getAllChips(tmp, TYPE_OCMB_CHIP);
 
             TargetHandleList::iterator it = tmp.end();
 
@@ -626,15 +612,15 @@ class MdiaSmTest : public CxxTest::TestSuite
 
                 sm.setup(list);
 
-                TargetHandleList mcbistList;
-                getAllChiplets(mcbistList, TYPE_MCBIST);
+                TargetHandleList ocmbList;
+                getAllChips(ocmbList, TYPE_OCMB_CHIP);
 
-                if (mcbistList.size() > 0)
+                if (ocmbList.size() > 0)
                 {
-                    TargetHandle_t mcbist = mcbistList[0];
+                    TargetHandle_t ocmb = ocmbList[0];
 
                     MaintCommandEvent event;
-                    event.target = mcbist;
+                    event.target = ocmb;
                     event.type = COMMAND_COMPLETE;
                     bool rc = false;
 

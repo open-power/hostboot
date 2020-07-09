@@ -76,11 +76,11 @@ enum
 {
 
     // mcc dstlfir unit regs
-    DSTLFIR                 = 0x07010900,
-    DSTLFIR_MASK            = 0x07010903,
-    DSTLFIR_ACT0            = 0x07010906,
-    DSTLFIR_ACT1            = 0x07010907,
-    DSTLCFG2                = 0x0701090E,
+    DSTLFIR                 = 0x0C010D00,
+    DSTLFIR_MASK            = 0x0C010D03,
+    DSTLFIR_ACT0            = 0x0C010D06,
+    DSTLFIR_ACT1            = 0x0C010D07,
+    DSTLCFG2                = 0x0C010D0E,
 
     // ocmb mcbist unit regs
     OCMB_MCBIST_FIR         = 0x08011800,
@@ -104,10 +104,14 @@ enum
     GLOBAL_HA_FIR           = 0x570F002B,
 
     // mc chiplet registers
-    MC0_CHIPLET_HA_FIR      = 0x07040009,
-    MC0_CHIPLET_HA_FIR_MASK = 0x0704001a,
-    MC1_CHIPLET_HA_FIR      = 0x08040009,
-    MC1_CHIPLET_HA_FIR_MASK = 0x0804001a,
+    MC0_CHIPLET_HA_FIR      = 0x0C040004,
+    MC0_CHIPLET_HA_FIR_MASK = 0x0C040044,
+    MC1_CHIPLET_HA_FIR      = 0x0D040004,
+    MC1_CHIPLET_HA_FIR_MASK = 0x0D040044,
+    MC2_CHIPLET_HA_FIR      = 0x0E040004,
+    MC2_CHIPLET_HA_FIR_MASK = 0x0E040044,
+    MC3_CHIPLET_HA_FIR      = 0x0F040004,
+    MC3_CHIPLET_HA_FIR_MASK = 0x0F040044,
 };
 
 /**

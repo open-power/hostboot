@@ -6,6 +6,7 @@
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
 /* Contributors Listed Below - COPYRIGHT 2020                             */
+/* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
@@ -49,21 +50,7 @@ class MdiaTimeoutFfdcTest : public CxxTest::TestSuite
         TargetHandle_t getTarget()
         {
             TargetHandleList tmp;
-
-            // Need to determine whether we are using MBA, MCBIST, or OCMB
-            fapi2::TargetType type = getMdiaTargetType();
-            if (fapi2::TARGET_TYPE_MBA_CHIPLET == type)
-            {
-                TARGETING::getAllChiplets(tmp, TYPE_MBA);
-            }
-            else if (fapi2::TARGET_TYPE_MCBIST == type)
-            {
-                TARGETING::getAllChiplets(tmp, TYPE_MCBIST);
-            }
-            else if (fapi2::TARGET_TYPE_OCMB_CHIP == type)
-            {
-                TARGETING::getAllChips(tmp, TYPE_OCMB_CHIP);
-            }
+            TARGETING::getAllChips(tmp, TYPE_OCMB_CHIP);
 
             return tmp[0];
         }

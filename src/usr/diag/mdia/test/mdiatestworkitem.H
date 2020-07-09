@@ -49,8 +49,8 @@ class MdiaWorkItemTest : public CxxTest::TestSuite
             StateMachine s;
             WorkFlowProperties * notUsed = 0;
 
-            WorkItem wi1(s, notUsed, 2222, 0),
-                     wi2(s, notUsed, 1111, 0);
+            WorkItem wi1(s, notUsed, 2222),
+                     wi2(s, notUsed, 1111);
 
             if(wi2 < wi1)
             {

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -47,16 +47,16 @@ class OCCFIR:public CxxTest::TestSuite
 
         void TestRecoverable(void)
         {
-            if ( TARGETING::MODEL_NIMBUS == PRDF::PlatServices::getChipModel(
+            if ( TARGETING::MODEL_POWER10 == PRDF::PlatServices::getChipModel(
                     PRDF::PlatServices::getMasterProc() ) )
             {
                 PRDS_BEGIN("OCCFIR recoverable attention");
                 PRDS_ERROR_ENTRY("NODE{0}:PROC{0}", PRDF::RECOVERABLE);
-                PRDS_EXPECTED_SIGNATURE("NODE{0}:PROC{0}", 0x7d530000);
+                PRDS_EXPECTED_SIGNATURE("NODE{0}:PROC{0}", 0x58d90000);
                 // GLOBAL_RE_FIR set bit 1
-                PRDS_SCR_WRITE("NODE{0}:PROC{0}",0x500F001B , 0x4000000000000000);
-                // TP_CHIPLET_RE_FIR set bit 2
-                PRDS_SCR_WRITE("NODE{0}:PROC{0}", 0x01040001, 0x2000000000000000);
+                PRDS_SCR_WRITE("NODE{0}:PROC{0}",0x570F001B , 0x4000000000000000);
+                // TP_CHIPLET_RE_FIR set bit 5
+                PRDS_SCR_WRITE("NODE{0}:PROC{0}", 0x01040001, 0x0400000000000000);
                 // set bit 0
                 PRDS_SCR_WRITE("NODE{0}:PROC{0}", 0x01010800, 0x8000000000000000);
                 // ACT1
@@ -71,16 +71,16 @@ class OCCFIR:public CxxTest::TestSuite
 
         void  TestCheckStop(void)
         {
-            if ( TARGETING::MODEL_NIMBUS == PRDF::PlatServices::getChipModel(
+            if ( TARGETING::MODEL_POWER10 == PRDF::PlatServices::getChipModel(
                     PRDF::PlatServices::getMasterProc() ) )
             {
                 PRDS_BEGIN("OCCFIR checkstop attention");
                 PRDS_ERROR_ENTRY("NODE{0}:PROC{0}", PRDF::CHECK_STOP);
-                PRDS_EXPECTED_SIGNATURE("NODE{0}:PROC{0}", 0x7d530002);
-                // GLOBAL_RE_FIR set bit 1
-                PRDS_SCR_WRITE("NODE{0}:PROC{0}", 0x500F001C , 0x4000000000000000);
-                // TP_CHIPLET_RE_FIR set bit 4
-                PRDS_SCR_WRITE("NODE{0}:PROC{0}", 0x01040000, 0x0800000000000000);
+                PRDS_EXPECTED_SIGNATURE("NODE{0}:PROC{0}", 0x58d90002);
+                // GLOBAL_CS_FIR set bit 1
+                PRDS_SCR_WRITE("NODE{0}:PROC{0}", 0x570F001C , 0x4000000000000000);
+                // TP_CHIPLET_CS_FIR set bit 5
+                PRDS_SCR_WRITE("NODE{0}:PROC{0}", 0x01040000, 0x0400000000000000);
                 //set bit 2
                 PRDS_SCR_WRITE("NODE{0}:PROC{0}", 0x01010800, 0x2000000000000000);
                 // ACT1

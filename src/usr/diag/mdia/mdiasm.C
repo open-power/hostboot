@@ -129,7 +129,11 @@ void addTimeoutFFDC(TargetHandle_t i_target, errlHndl_t & io_log)
         MC0_CHIPLET_HA_FIR,
         MC0_CHIPLET_HA_FIR_MASK,
         MC1_CHIPLET_HA_FIR,
-        MC1_CHIPLET_HA_FIR_MASK ,
+        MC1_CHIPLET_HA_FIR_MASK,
+        MC2_CHIPLET_HA_FIR,
+        MC2_CHIPLET_HA_FIR_MASK,
+        MC3_CHIPLET_HA_FIR,
+        MC3_CHIPLET_HA_FIR_MASK,
     };
 
     // Get the parent OMI

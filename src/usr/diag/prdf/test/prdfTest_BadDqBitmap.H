@@ -48,13 +48,14 @@
 #include <prdfMemDqBitmap.H>
 #include <prdfPlatServices.H>
 #include <prdfTargetServices.H>
+#include <targeting/common/utilFilter.H>
 
 class WriteBadDqBitmap: public CxxTest::TestSuite
 {
 
 public:
 
-    void TestAxoneReadWriteBadDqBitmap(void)
+    void TestP10ReadWriteBadDqBitmap(void)
     {
         using namespace PRDF;
         using namespace TARGETING;
@@ -63,34 +64,21 @@ public:
         TargetHandle_t masterProc = nullptr;
         targetService().masterProcChipTargetHandle(masterProc);
 
-        // Axone only test
-        if ( MODEL_AXONE == masterProc->getAttr<ATTR_MODEL>() )
+        if ( MODEL_POWER10 == masterProc->getAttr<ATTR_MODEL>() )
         {
-            TS_INFO("- TestAxoneReadWriteBadDqBitmap - Start -");
+            TS_INFO("- TestP10ReadWriteBadDqBitmap - Start -");
 
             uint32_t rc = SUCCESS;
 
             // Get an OCMB
-            TargetHandle_t mc = getConnectedChild( masterProc, TYPE_MC, 0 );
-            if ( nullptr == mc )
-            {
-                TS_FAIL( "ERROR: Failed to get MC" );
-            }
-            TargetHandle_t omic = getConnectedChild( mc, TYPE_OMIC, 0 );
-            if ( nullptr == omic )
-            {
-                TS_FAIL( "ERROR: Failed to get OMIC" );
-            }
-            TargetHandle_t omi  = getConnectedChild( omic, TYPE_OMI, 0 );
-            if ( nullptr == omi )
-            {
-                TS_FAIL( "ERROR: Failed to get OMI" );
-            }
-            TargetHandle_t ocmb = getConnectedChild( omi, TYPE_OCMB_CHIP, 0 );
-            if ( nullptr == ocmb )
+            TargetHandleList ocmbList;
+            getAllChips( ocmbList, TYPE_OCMB_CHIP );
+            if ( ocmbList.empty() )
             {
                 TS_FAIL( "ERROR: Failed to get OCMB" );
             }
+            TargetHandle_t ocmb = ocmbList[0];
+
             // Make arbitrary initial data
             MemRank rank( 0 );
             const uint8_t initialBitmap[DQ_BITMAP::BITMAP_SIZE] =
@@ -123,7 +111,7 @@ public:
             {
                 if ( newData.at(0).bitmap[n] != initialBitmap[n] )
                 {
-                    TS_FAIL( "TestAxoneReadWriteBadDqBitmap: Incorrect data "
+                    TS_FAIL( "TestP10ReadWriteBadDqBitmap: Incorrect data "
                              "found. newData[%d]=0x%x initialBitmap[%d]=0x%x",
                              n, newData.at(0).bitmap[n], n, initialBitmap[n] );
                 }
@@ -136,7 +124,7 @@ public:
                 TS_FAIL( "ERROR: clearBadDqBitmap failed" );
             }
 
-            TS_INFO("- TestAxoneReadWriteBadDqBitmap - End -");
+            TS_INFO("- TestP10ReadWriteBadDqBitmap - End -");
 
         }
 

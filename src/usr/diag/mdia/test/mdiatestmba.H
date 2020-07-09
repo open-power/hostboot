@@ -55,11 +55,7 @@ class MdiaMbaTest : public CxxTest::TestSuite
             errlHndl_t err = nullptr;
 
             TargetHandleList list;
-            fapi2::TargetType type = getMdiaTargetType();
-            if ( fapi2::TARGET_TYPE_OCMB_CHIP == type )
-            {
-                TARGETING::getAllChips( list, TYPE_OCMB_CHIP );
-            }
+            TARGETING::getAllChips( list, TYPE_OCMB_CHIP );
 
             if( !list.empty() )
             {
