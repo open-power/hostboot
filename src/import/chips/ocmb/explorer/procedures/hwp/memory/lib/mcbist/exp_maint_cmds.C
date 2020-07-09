@@ -142,8 +142,8 @@ fapi2::ReturnCode spare_index(
     const uint8_t i_dram_spare1_index )
 {
     // Check for spare indeces out of range
-    FAPI_ASSERT(((i_dram_spare0_index < spare_to_symbol.size()) &&
-                 (i_dram_spare1_index < spare_to_symbol.size())),
+    FAPI_ASSERT(((i_dram_spare0_index < spare_to_symbol.size() || i_dram_spare0_index == SPARE_UNUSED) &&
+                 (i_dram_spare1_index < spare_to_symbol.size() || i_dram_spare1_index == SPARE_UNUSED)),
                 fapi2::EXP_MAINT_BAD_SPARE_INDEX()
                 .set_PORT_TARGET(i_target)
                 .set_SPARE0_INDEX(i_dram_spare0_index)
@@ -268,8 +268,8 @@ fapi2::ReturnCode do_steering(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& 
     // 200000 sim cycle delay for SIM mode
     constexpr uint64_t  SIM_MODE_DELAY = (2 * mss::DELAY_100US);
 
-    uint8_t l_spare0 = 0;
-    uint8_t l_spare1 = 0;
+    uint8_t l_spare0_symbol = 0;
+    uint8_t l_spare1_symbol = 0;
     steer_type l_target_spare;
 
     // Check for i_port_rank or i_symbol out of range
@@ -279,13 +279,13 @@ fapi2::ReturnCode do_steering(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& 
     //------------------------------------------------------
     // Determine which spare is free
     //------------------------------------------------------
-    FAPI_TRY(check_steering(i_target, i_port_rank, l_spare0, l_spare1));
+    FAPI_TRY(check_steering(i_target, i_port_rank, l_spare0_symbol, l_spare1_symbol));
 
-    if (l_spare0 == SPARE_UNUSED)
+    if (l_spare0_symbol == EXP_INVALID_SYMBOL)
     {
         l_target_spare = steer_type::DRAM_SPARE0;
     }
-    else if (l_spare1 == SPARE_UNUSED)
+    else if (l_spare1_symbol == EXP_INVALID_SYMBOL)
     {
         l_target_spare = steer_type::DRAM_SPARE1;
     }
