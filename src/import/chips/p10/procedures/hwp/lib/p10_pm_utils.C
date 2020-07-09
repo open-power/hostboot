@@ -489,6 +489,9 @@ fapi2::ReturnCode wof_validate_header(
 
     fapi2::ReturnCode l_rc = 0;
 
+    fapi2::ATTR_WOF_IO_START_Type l_io_start;
+    fapi2::ATTR_WOF_IO_STEP_Type l_io_step;
+    fapi2::ATTR_WOF_IO_COUNT_Type l_io_cnt;
     const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
     fapi2::ATTR_WOF_ENABLED_Type l_wof_enabled = fapi2::ENUM_ATTR_WOF_ENABLED_TRUE;
 
@@ -600,6 +603,15 @@ fapi2::ReturnCode wof_validate_header(
         {
             break;
         }
+
+        //Set IO attributes
+        //
+        l_io_start = revle16(p_wfth->io_start);
+        l_io_step  = revle16(p_wfth->io_step);
+        l_io_cnt   = revle16(p_wfth->io_size);
+        FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_WOF_IO_START, i_proc_target, l_io_start));
+        FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_WOF_IO_STEP, i_proc_target, l_io_step));
+        FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_WOF_IO_COUNT, i_proc_target, l_io_cnt));
 
         // Overrides are present only if the frequency and power fields are both
         // non-zero.  Thus, skip processing if either is zero.

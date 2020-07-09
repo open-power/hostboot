@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2019
+# Contributors Listed Below - COPYRIGHT 2019,2021
 # [+] International Business Machines Corp.
 #
 #
@@ -25,4 +25,7 @@
 PROCEDURE=p10_pm_xgpe_init
 $(call ADD_MODULE_SRCDIR,$(PROCEDURE),$(ROOTPATH)/chips/p10/procedures/hwp/lib)
 lib$(PROCEDURE)_DEPLIBS+=p10_pm_pba_init
+lib$(PROCEDURE)_DEPLIBS+=p10_pm_ocb_indir_access
+lib$(PROCEDURE)_DEPLIBS+=p10_pm_ocb_indir_setup_linear
+lib$(PROCEDURE)_DEPLIBS+=p10_pm_sram_access_utils
 $(call BUILD_PROCEDURE)
