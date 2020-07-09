@@ -125,9 +125,11 @@ static fapi2::ReturnCode p10_clock_test_latches(
     {
         FAPI_ASSERT(check_clockA,
                     fapi2::CLOCK_TEST_OUT_RCS_ERR()
+                    .set_MASTER_CHIP(i_target_chip)
                     .set_READ_SNS1LTH(l_data32)
                     .set_ATTR_CP_REFCLOCK_SELECT_VALUE(l_cp_refclck_select)
-                    .set_RCS_CLOCK_TEST_IN(set_rcs_clock_test_in),
+                    .set_RCS_CLOCK_TEST_IN(set_rcs_clock_test_in)
+                    .set_CLOCK_POS(fapi2::ENUM_ATTR_CP_REFCLOCK_SELECT_OSC0),
                     "Clock A is bad");
     }
 
@@ -135,9 +137,11 @@ static fapi2::ReturnCode p10_clock_test_latches(
     {
         FAPI_ASSERT(check_clockB,
                     fapi2::CLOCK_TEST_OUT_RCS_ERR()
+                    .set_MASTER_CHIP(i_target_chip)
                     .set_READ_SNS1LTH(l_data32)
                     .set_ATTR_CP_REFCLOCK_SELECT_VALUE(l_cp_refclck_select)
-                    .set_RCS_CLOCK_TEST_IN(set_rcs_clock_test_in),
+                    .set_RCS_CLOCK_TEST_IN(set_rcs_clock_test_in)
+                    .set_CLOCK_POS(fapi2::ENUM_ATTR_CP_REFCLOCK_SELECT_OSC0),
                     "Clock B is bad");
     }
 
