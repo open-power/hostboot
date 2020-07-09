@@ -112,26 +112,11 @@ struct parent_target_info
 // should go in this array.
 const parent_target_info targets_with_children[] =
 {
-    { TYPE_PAUC,                // Rule applies to PAUC targets
-      USE_CHIPLET_ID,           // Use the chiplet's ID as the PGV index
-
-      // Avoid setting the AG bits the PAUC target
-      VPD_CP00_PG_PAUC_ALWAYS_GOOD_MASK,
-
-      // Disable all-bad test for CUs 0 and 1 because they have IOHS children
-      // that do not have PAU children
-      cu_mask(0) | cu_mask(1)
-    },
-
     { TYPE_EQ,
       USE_CHIPLET_ID,
       VPD_CP00_PG_EQ_ALWAYS_GOOD_MASK,
       ALL_CHIP_UNITS
     },
-
-    // IOHS is not included in this list because while it does have a child
-    // (PAU), the child it has is not dependent on the IOHS's PG bits, and units
-    // for the PG bits it does have (NDL) are not represented by a target.
 };
 
 const pg_idx_t USE_PARENT_CHIPLET_ID = 0xFF;
@@ -165,8 +150,6 @@ const child_target_info targets_with_parents[] =
       // PGV entry that will make it go bad
       ~VPD_CP00_PG_PCI_ALL_GOOD },
 
-    // PAU are children of IOHS units even though their PG bits are in PAUC units
-    { TYPE_PAU,       TYPE_IOHS, USE_PARENT_CHIPLET_ID, ~VPD_CP00_PG_IOHS_ALL_GOOD },
     { TYPE_DIMM,      TYPE_MC,   USE_PARENT_CHIPLET_ID, ~VPD_CP00_PG_MC_ALL_GOOD },
     { TYPE_MEM_PORT,  TYPE_MC,   USE_PARENT_CHIPLET_ID, ~VPD_CP00_PG_MC_ALL_GOOD },
     { TYPE_OCMB_CHIP, TYPE_MC,   USE_PARENT_CHIPLET_ID, ~VPD_CP00_PG_MC_ALL_GOOD },
@@ -222,6 +205,7 @@ private:
     }
 
     bool checkPropagationOfBadState(
+            const char* const i_callerName,
             const TARGETING::TargetHandle_t &i_pParent,
             const TARGETING::TargetHandle_t &i_pChild,
             const partialGoodVector& i_pgData)
@@ -236,9 +220,10 @@ private:
         // return true.
         if (!HWAS::isDescFunctional(i_pChild, i_pgData, targetStates))
         {
-            TS_FAIL("testHWAScheckPartialGoodForDescendants> "
+            TS_FAIL("checkPropagationOfBadState (%s)> "
                     "i_pChild HUID 0x %08x "
                     "should be true",
+                    i_callerName,
                     get_huid(i_pChild));
         }
 
@@ -501,6 +486,65 @@ public:
         }
 
         TS_INFO( "testHWASisChipFunctional exit" );
+    }
+
+    /**
+     * @brief Test getParentIohsTargetsByState/getChildPauTargetsByState
+     */
+    void testIohsPauRelationshipAccessors()
+    {
+        TS_INFO(">testIohsPauRelationshipAccessors");
+
+        TargetHandleList paucs;
+        getAllChiplets(paucs, TYPE_PAUC, false);
+
+        for (const auto pauc : paucs)
+        {
+            TargetHandleList iohslist,
+                             paulist;
+            getChildAffinityTargetsByState(iohslist, pauc, CLASS_NA, TYPE_IOHS, UTIL_FILTER_ALL);
+
+            if (iohslist.empty())
+            {
+                TS_INFO("testIohsPauRelationshipAccessors: PAUC 0x%08x has no child IOHS targets",
+                        get_huid(pauc));
+            }
+
+            for (const auto iohs : iohslist)
+            {
+                if (iohs->getAttr<ATTR_IOHS_CONFIG_MODE>() == IOHS_CONFIG_MODE_OCAPI)
+                {
+                    TargetHandleList childpau;
+                    getChildPauTargetsByState(childpau, iohs, CLASS_NA, TYPE_PAU, UTIL_FILTER_ALL);
+
+                    if (childpau.size() > 1)
+                    {
+                        TS_FAIL("testIohsPauRelationshipAccessors: IOHS 0x%08x has multiple PAU children",
+                                get_huid(iohs));
+                    }
+                    else if (childpau.size() == 1)
+                    {
+                        TargetHandleList pauParent;
+                        getParentIohsTargetsByState(pauParent, childpau[0], CLASS_NA, TYPE_IOHS, UTIL_FILTER_ALL);
+
+                        if (pauParent.size() > 1)
+                        {
+                            TS_FAIL("testIohsPauRelationshipAccessors: IOHS 0x%08x's child PAU has multiple IOHS parents",
+                                    get_huid(iohs));
+                        } else if (pauParent[0] != iohs)
+                        {
+                            TS_FAIL("testIohsPauRelationshipAccessors: IOHS 0x%08x with child PAU 0x%08x "
+                                    "isn't that PAU's parent (is 0x%008x)",
+                                    get_huid(iohs),
+                                    get_huid(childpau[0]),
+                                    get_huid(pauParent[0]));
+                        }
+                    }
+                }
+            }
+        }
+
+        TS_INFO("<testIohsPauRelationshipAccessors");
     }
 
     /**
@@ -852,8 +896,8 @@ public:
 
                 TS_INFO("testHWAScheckMarkChildrenNonFunctional: "
                         "descendant functional - "
-                        "attr type 0x%08X, chip unit %d",
-                        l_type, l_chipUnit);
+                        "type %s, chip unit %d",
+                        l_type_str, l_chipUnit);
 
                 pg_entry_t l_pgIdx = 0;
 
@@ -865,7 +909,8 @@ public:
                 }
 
                 // Make sure we're starting out with good state at the beginning
-                if (!checkPropagationOfBadState(l_parentTarget,
+                if (!checkPropagationOfBadState(__func__,
+                                                l_parentTarget,
                                                 pDesc,
                                                 pgDataAllGood))
                 {
@@ -903,7 +948,8 @@ public:
                     // we're also bad
                     bad_pgData[l_pgIdx] |= l_targetInfo->parent_pg_entry_bits_to_set;
 
-                    if (checkPropagationOfBadState(l_parentTarget,
+                    if (checkPropagationOfBadState(__func__,
+                                                   l_parentTarget,
                                                    pDesc,
                                                    bad_pgData))
                     {

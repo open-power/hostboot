@@ -359,8 +359,8 @@ constexpr bool isProperParent(const TargetType i_child,
         {   TARGET_TYPE_DIMM      , TARGET_TYPE_MEM_PORT  },
         {   TARGET_TYPE_FC        , TARGET_TYPE_EQ        },
         {   TARGET_TYPE_IOHS
-          | TARGET_TYPE_OMIC      , TARGET_TYPE_PAUC      },
-        {   TARGET_TYPE_PAU       , TARGET_TYPE_IOHS      },
+          | TARGET_TYPE_OMIC
+          | TARGET_TYPE_PAU       , TARGET_TYPE_PAUC      },
         {   TARGET_TYPE_PHB       , TARGET_TYPE_PEC       },
         {   TARGET_TYPE_CORE      , TARGET_TYPE_FC        },
 

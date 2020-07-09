@@ -255,6 +255,18 @@ void markChildrenNonFunctional(const TARGETING::TargetHandle_t &i_parent,
  */
 TARGETING::Target* shouldPowerGateNMMU1(const TARGETING::Target& i_pProc);
 
+
+/**
+ * @brief Return a list of extra OCAPI IOHSes that need to be deconfigured
+ *        because there aren't enough PAUs to associate with all of them.
+ *
+ * @param[in]  i_pauc         The parent PAUC target
+ * @return TargetHandleList   List of targets to deconfigure.
+ */
+TARGETING::TargetHandleList
+disableExtraOcapiIohsTargets(const TARGETING::Target* i_pauc);
+
+
 /**
  * @deprecated
  * @brief platform specific code to determine the PR vector of the input

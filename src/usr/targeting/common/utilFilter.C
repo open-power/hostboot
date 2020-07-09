@@ -467,6 +467,89 @@ void getParentPaucTargetsByState(
                        TargetService::PAUC_PARENT);
 }
 
+void getParentIohsTargetsByState(
+          TARGETING::TargetHandleList& o_vector,
+    const Target* const                i_target,
+          CLASS                        i_class,
+          TYPE                         i_type,
+          ResourceState                i_state )
+{
+    o_vector.clear();
+
+    if (i_target->getAttr<ATTR_TYPE>() == TYPE_PAU)
+    {
+        TARGETING::TargetHandleList parentPauc;
+        getParentAffinityTargetsByState(parentPauc, i_target, CLASS_NA, TYPE_PAUC, UTIL_FILTER_ALL);
+
+        if (!parentPauc.empty())
+        {
+            TARGETING::TargetHandleList childIohs;
+            getChildAffinityTargetsByState(childIohs, parentPauc[0], i_class, i_type, i_state);
+
+            const int pau_chipunit = i_target->getAttr<ATTR_CHIP_UNIT>();
+
+            for (TARGETING::TargetHandleList::iterator pIohs = childIohs.begin();
+                 pIohs != childIohs.end();
+                 ++pIohs)
+            {
+                Target* const iohs = *pIohs;
+
+                // If IOHS_CONFIG_MODE is set to OCAPI, then consult
+                // IOHS_PHY_TO_PAU_MAPPING to get the parent IOHS.
+                if (iohs->getAttr<ATTR_IOHS_CONFIG_MODE>() == IOHS_CONFIG_MODE_OCAPI)
+                {
+                    if (iohs->getAttr<ATTR_IOHS_PHY_TO_PAU_MAPPING>() == pau_chipunit)
+                    {
+                        o_vector.push_back(iohs);
+                    }
+                }
+            }
+        }
+    }
+}
+
+void getChildPauTargetsByState(
+          TARGETING::TargetHandleList& o_vector,
+    const Target* const                i_target,
+          CLASS                        i_class,
+          TYPE                         i_type,
+          ResourceState                i_state )
+{
+    o_vector.clear();
+
+    if (i_target->getAttr<ATTR_TYPE>() == TYPE_IOHS)
+    {
+        TARGETING::TargetHandleList parentPauc;
+        getParentAffinityTargetsByState(parentPauc, i_target, CLASS_NA, TYPE_PAUC, UTIL_FILTER_ALL);
+
+        if (!parentPauc.empty())
+        {
+            TARGETING::TargetHandleList childPau;
+            getChildAffinityTargetsByState(childPau, parentPauc[0], i_class, i_type, i_state);
+
+            const int iohs_config_mode = i_target->getAttr<ATTR_IOHS_CONFIG_MODE>();
+            const int iohs_pau_mapping = i_target->getAttr<ATTR_IOHS_PHY_TO_PAU_MAPPING>();
+
+            for (TARGETING::TargetHandleList::iterator pPau = childPau.begin();
+                 pPau != childPau.end();
+                 ++pPau)
+            {
+                Target* const pau = *pPau;
+
+                // If IOHS_CONFIG_MODE is set to OCAPI, then consult
+                // IOHS_PHY_TO_PAU_MAPPING to get the parent IOHS.
+                if (iohs_config_mode == IOHS_CONFIG_MODE_OCAPI)
+                {
+                    if (iohs_pau_mapping == pau->getAttr<ATTR_CHIP_UNIT>())
+                    {
+                        o_vector.push_back(pau);
+                    }
+                }
+            }
+        }
+    }
+}
+
 Target* getTargetWithPGAttr(Target& i_target)
 {
     /* The input target's parent PERV target contains the PG attribute for that

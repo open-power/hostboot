@@ -388,6 +388,57 @@ void getChildPaucTargetsByState (
           ResourceState                i_state);
 
 /**
+ * @brief Given an input IOHS target, retrieves the associated PAU child. This
+ *        will be the PAU with the CHIP_UNIT equal to the one the IOHS
+ *        designates with IOHS_PHY_TO_PAU_MAPPING (if the IOHS's
+ *        IOHS_CONFIG_MODE is OCAPI). If there is no such PAU, then the returned
+ *        list is empty.
+ *
+ * @note o_vector is cleared of previous contents.
+ * @note There will be a maximum of 1 target returned, minimum of 0.
+ * @note If i_target is not an IOHS target, then no children are returned.
+ *
+ * @parm[out] o_vector, reference to vector of target pointers
+ * @parm[in]  i_target, source target to search from
+ * @parm[in]  i_class, class of the targets to be obtained
+ * @parm[in]  i_type, type of the targets to be obtained
+ * @parm[in]  i_state, specifies state the target should be in
+ *
+ * @return N/A
+ */
+void getChildPauTargetsByState(
+          TARGETING::TargetHandleList& o_vector,
+    const Target*                      i_target,
+          CLASS                        i_class,
+          TYPE                         i_type,
+          ResourceState                i_state );
+
+/**
+ * @brief Given an input PAU target, retrieves the associated IOHS parent. This
+ *        will be the IOHS with the IOHS_PHY_TO_PAU_MAPPING set to the PAU's
+ *        CHIP_UNIT (if the IOHS's IOHS_CONFIG_MODE is OCAPI). If no such IOHS
+ *        exists, the returned list is empty.
+ *
+ * @note o_vector is cleared of previous contents.
+ * @note There will be a maximum of 1 target returned, minimum of 0.
+ * @note If i_target is not a PAU target, then no parents are returned.
+ *
+ * @parm[out] o_vector, reference to vector of target pointers
+ * @parm[in]  i_target, source target to search from
+ * @parm[in]  i_class, class of the targets to be obtained
+ * @parm[in]  i_type, type of the targets to be obtained
+ * @parm[in]  i_state, specifies state the target should be in
+ *
+ * @return N/A
+ */
+void getParentIohsTargetsByState(
+          TARGETING::TargetHandleList& o_vector,
+    const Target*                      i_target,
+          CLASS                        i_class,
+          TYPE                         i_type,
+          ResourceState                i_state );
+
+/**
  * @brief Populate the o_vector with target object pointers which are
  *        affinity parents of the input target
  *

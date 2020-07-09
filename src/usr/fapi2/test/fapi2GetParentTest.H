@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -96,7 +96,7 @@ void test_fapi2GetParent()
     // IOHS Parent Test
     GET_PARENT_TEST_MACRO(MY_IOHS, TARGET_TYPE_IOHS, MY_PAUC, TARGET_TYPE_PAUC)
     // PAU Parent Test
-    GET_PARENT_TEST_MACRO(MY_PAU, TARGET_TYPE_PAU, MY_IOHS, TARGET_TYPE_IOHS)
+    GET_PARENT_TEST_MACRO(MY_PAU, TARGET_TYPE_PAU, MY_PAUC, TARGET_TYPE_PAUC)
     // PERV Parent Test
     GET_PARENT_TEST_MACRO(MY_PERV, TARGET_TYPE_PERV, MY_PROC, TARGET_TYPE_PROC_CHIP)
     ////End Common Targets

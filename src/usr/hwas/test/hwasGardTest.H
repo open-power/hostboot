@@ -5866,8 +5866,8 @@ public:
     }
 
     // @brief This function is called at the beginning of the
-    // runDeconfigPresentByAssocTest() test to deconfigure the PAUC chip and
-    // its children if the test requires it.
+    // runDeconfigPresentByAssocTest() test to deconfigure all PAUC chiplets and
+    // their children if the test requires it.
     static void deconfigPauc()
     {
         TargetHandleList l_funcPAUCTargetList;
@@ -5875,14 +5875,16 @@ public:
 
         if (!l_funcPAUCTargetList.empty())
         {
-            // Deconfigure the PAUC target
-            TargetHandle_t l_pPauc = l_funcPAUCTargetList[0];
-            TargetInfo l_paucinfo;
-            l_paucinfo.pThisTarget = l_pPauc;
-            l_paucinfo.affinityPath = l_pPauc->getAttr<ATTR_AFFINITY_PATH>();
-            l_paucinfo.type = l_pPauc->getAttr<ATTR_TYPE>();
-            l_paucinfo.reason = DeconfigGard::DECONFIGURED_BY_NO_PARENT_PAUC;
-            deconfigPresentByAssoc(l_paucinfo);
+            for (const auto l_pPauc : l_funcPAUCTargetList)
+            {
+                // Deconfigure the PAUC target
+                TargetInfo l_paucinfo;
+                l_paucinfo.pThisTarget = l_pPauc;
+                l_paucinfo.affinityPath = l_pPauc->getAttr<ATTR_AFFINITY_PATH>();
+                l_paucinfo.type = l_pPauc->getAttr<ATTR_TYPE>();
+                l_paucinfo.reason = DeconfigGard::DECONFIGURED_BY_NO_PARENT_PAUC;
+                deconfigPresentByAssoc(l_paucinfo);
+            }
         }
         else
         {
@@ -5923,6 +5925,26 @@ public:
         return rc;
     }
 
+    /* @brief Retrieve a target from affinity path.
+     *
+     * @param[in] i_path    Affinity path to entity from proc 0
+     * @param[out] o_epath  Affinity path to entity from proc 0
+     * @return Target*      Target if any at the given path, otherwise nullptr.
+     */
+    static Target* targetFromPath(const std::vector<entityPathComponent>& i_path,
+                           EntityPath& o_epath)
+    {
+        o_epath = EntityPath(EntityPath::PATH_AFFINITY);
+        o_epath.addLast(TYPE_SYS, 0).addLast(TYPE_NODE, 0).addLast(TYPE_PROC, 0);
+
+        for (const auto l_component : i_path)
+        {
+            o_epath.addLast(l_component.targetType, l_component.instance);
+        }
+
+        return targetService().toTarget(o_epath);
+    }
+
     /* @brief This function runs a test on presentByAssoc.
      *
      * It expects a list of entity paths and functionality expectations; it then
@@ -5944,9 +5966,6 @@ public:
 
         TargetHandleList l_targets;
 
-        EntityPath l_root(EntityPath::PATH_AFFINITY);
-        l_root.addLast(TYPE_SYS, 0).addLast(TYPE_NODE, 0).addLast(TYPE_PROC, 0);
-
         // Save the HWAS state of all targets so that we can restore the system
         // state after running the test
         saveSystemState();
@@ -5957,20 +5976,13 @@ public:
             deconfigPauc();
         }
 
-        // Start off with everything deconfigured
         deconfigAllMc();
 
         // Enable all targets listed in the test
         for (const auto& l_targetInfo : i_testPaths)
         {
-            auto l_entPath = l_root;
-
-            for (const auto l_component : l_targetInfo.entityPathComponents)
-            {
-                l_entPath.addLast(l_component.targetType, l_component.instance);
-            }
-
-            Target* const l_targ = targetService().toTarget(l_entPath);
+            EntityPath l_entPath;
+            Target* const l_targ = targetFromPath(l_targetInfo.entityPathComponents, l_entPath);
 
             if (!l_targ)
             {
@@ -5982,6 +5994,8 @@ public:
 
                 free(l_affinityPath);
                 l_affinityPath = nullptr;
+
+                restoreSystemState();
 
                 return false;
             }
@@ -7255,6 +7269,152 @@ public:
 #endif
     }
 
+    static void enableTarget(Target* const t)
+    {
+        auto hwasState = t->getAttr<ATTR_HWAS_STATE>();
+        hwasState.functional = 1;
+        t->setAttr<ATTR_HWAS_STATE>(hwasState);
+    }
+
+    static void disableTarget(Target* const t)
+    {
+        auto hwasState = t->getAttr<ATTR_HWAS_STATE>();
+        hwasState.functional = 0;
+        t->setAttr<ATTR_HWAS_STATE>(hwasState);
+    }
+
+    static bool isFunctional(Target* const t)
+    {
+        return t->getAttr<ATTR_HWAS_STATE>().functional;
+    }
+
+    /* @brief Test deconfiguring related IOHS and PAU targets
+     */
+    void testIohsPauDeconfigureRule()
+    {
+        TS_INFO(">testIohsPauDeconfigureRule");
+
+        // Grab some entities to work with.
+
+        EntityPath epath;
+        Target
+            * const pauc  = targetFromPath({ { TYPE_PAUC, 2}                   }, epath),
+            * const iohs0 = targetFromPath({ { TYPE_PAUC, 2}, { TYPE_IOHS, 0 } }, epath),
+            * const iohs1 = targetFromPath({ { TYPE_PAUC, 2}, { TYPE_IOHS, 1 } }, epath),
+            * const pau0  = targetFromPath({ { TYPE_PAUC, 2}, { TYPE_PAU,  0 } }, epath),
+            * const pau1  = targetFromPath({ { TYPE_PAUC, 2}, { TYPE_PAU,  1 } }, epath);
+
+        // Save to restore later
+        const auto oldMapping = iohs0->getAttr<ATTR_IOHS_PHY_TO_PAU_MAPPING>();
+
+        saveSystemState();
+
+        do
+        {
+
+        // Ensure that the targets we are using have the expected IOHS_CONFIG_MODE
+
+        if (iohs0->getAttr<ATTR_IOHS_CONFIG_MODE>() != IOHS_CONFIG_MODE_OCAPI)
+        {
+            TS_FAIL("testIohsPauDeconfigureRule: Expected IOHS 0x%08x to be in OCAPI mode",
+                    get_huid(iohs0));
+            break;
+        }
+
+        if (iohs1->getAttr<ATTR_IOHS_CONFIG_MODE>() == IOHS_CONFIG_MODE_OCAPI)
+        {
+            TS_FAIL("testIohsPauDeconfigureRule: Expected IOHS 0x%08x NOT to be in OCAPI mode",
+                    get_huid(iohs1));
+            break;
+        }
+
+        // Enable the targets we're working with, don't care what their state
+        // was before since we're not using them for anything other than deconfigure.
+        for (auto target : { pauc, iohs0, iohs1, pau0, pau1 })
+        {
+            enableTarget(target);
+        }
+
+        // Structure for our testcases
+        struct deconfiguration
+        {
+            bool pau0good, pau1good;
+            bool iohs0good, iohs1good;
+            ATTR_IOHS_PHY_TO_PAU_MAPPING_type iohs0mapping;
+        };
+
+        // constants for the testcases
+        const bool BAD = false, GOOD = true;
+        const ATTR_IOHS_PHY_TO_PAU_MAPPING_type INVALID = 0xFF;
+
+        // We're going to map IOHS 0 to PAU 1
+        const auto pau1unit = pau1->getAttr<ATTR_CHIP_UNIT>();
+
+        const deconfiguration testcases[] =
+        {
+         // Legend:
+         // { PAU0 , PAU1 , IOHS0 , IOHS1 , mapping }
+
+         // Test without a PAU mapping (i.e. pre-istep10 deconfigure)
+            { GOOD , GOOD , GOOD  , GOOD  , INVALID },
+            { BAD  , GOOD , GOOD  , GOOD  , INVALID },
+            { GOOD , BAD  , GOOD  , GOOD  , INVALID },
+            { BAD  , BAD  , BAD   , GOOD  , INVALID },
+
+         // Test with a PAU mapping (i.e. post-istep10 deconfigure)
+            { GOOD , GOOD , GOOD  , GOOD  , pau1unit },
+            { BAD  , GOOD , GOOD  , GOOD  , pau1unit },
+            { GOOD , BAD  , BAD   , GOOD  , pau1unit },
+            { BAD  , BAD  , BAD   , GOOD  , pau1unit },
+        };
+
+        // Iterate our list of testcases; deconfigure PAU0 and 1 as needed, and
+        // then check that IOHS0 and 1 are deconfigured if/as appropriate.
+        size_t test_index = 0;
+        for (const auto& testcase : testcases)
+        {
+            TS_INFO("testIohsPauDeconfigureRule: Running test index %lu", test_index);
+
+            iohs0->setAttr<ATTR_IOHS_PHY_TO_PAU_MAPPING>(testcase.iohs0mapping);
+
+            if (!testcase.pau0good) theDeconfigGard().deconfigureTarget(*pau0, 0);
+            if (!testcase.pau1good) theDeconfigGard().deconfigureTarget(*pau1, 0);
+
+            if (isFunctional(iohs0) != testcase.iohs0good)
+            {
+                TS_FAIL("testIohsPauDeconfigureRule: IOHS0 (0x%08x) is%s functional "
+                        "in testcase index %lu, expected the opposite",
+                        get_huid(iohs0),
+                        isFunctional(iohs0) ? "" : " not",
+                        test_index);
+            }
+
+            if (isFunctional(iohs1) != testcase.iohs1good)
+            {
+                TS_FAIL("testIohsPauDeconfigureRule: IOHS1 (0x%08x) is%s functional "
+                        "in testcase index %lu, expected the opposite",
+                        get_huid(iohs1),
+                        isFunctional(iohs1) ? "" : " not",
+                        test_index);
+            }
+
+            // Reset all functional states for the next test
+            restoreSystemState();
+
+            ++test_index;
+        }
+
+        } while (0);
+
+        // Restore the state that we modified
+
+        restoreSystemState();
+
+        iohs0->setAttr<ATTR_IOHS_PHY_TO_PAU_MAPPING>(oldMapping);
+
+        TS_INFO("<testIohsPauDeconfigureRule");
+    }
+
     /**
      * @brief Check the PG rules for PAUs 0, 4 and 5 to see whether NMMU 1 should
      *        be functional or power-gated based on PG information.
@@ -7280,6 +7440,7 @@ public:
         TS_INFO("testHWASNMMU1DeconfigByPAU: Started");
 
         static const pg_entry_t INVALID_PAU = 0xFFFFFFFF;
+
         static const pg_entry_t l_pauBadPgBit[] =
         {
             0x00040000,

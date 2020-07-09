@@ -53,7 +53,7 @@
      * Each P10 has 2 NMMU logic blocks
      * Each P10 has 4 PAUC chiplets
      *     Each PAUC has 2 IOHS units (a total of 8 per chip)
-     *         Each IOHS, except IOHS 1 and 2, has 1 PAU unit (a total of 6 per chip)
+     *     PAUC 0 and 1 have 1 child PAU unit each; PAUC 2 and 3 have 2 each (a total of 6 per chip)
      *     Each PAUC has a logical relationship with 2 OMIC units (a total of 8 per chip)
      * Each chiplet existing in an P10 has 1 equivalent PERV unit
      * Each P10 has 1 OCC unit
@@ -7023,7 +7023,11 @@
     </attribute>
     <attribute>
         <id>IOHS_CONFIG_MODE</id>
-        <default>SMPX</default>
+        <default>OCAPI</default>
+    </attribute>
+    <attribute>
+        <id>IOHS_PHY_TO_PAU_MAPPING</id>
+        <default>1</default>
     </attribute>
     <attribute>
         <id>IOHS_DRAWER_INTERCONNECT</id>
@@ -7700,14 +7704,14 @@
 
 <!-- ===================================================================== -->
 <!-- PAU Units -->
-<!-- 1 per IOHS, except IOHS1 and IOHS2, a total of 6 per proc -->
+<!-- 1 per PAUC 0 and 1, 2 per PAUC 2 and 3, a total of 6 per proc -->
 <!-- ===================================================================== -->
 <targetInstance>
-    <id>sys0node0proc0pauc0iohs0pau0</id>
+    <id>sys0node0proc0pauc0pau0</id>
     <type>unit-pau-power10</type>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/pauc-0/iohs-0/pau-0</default>
+        <default>affinity:sys-0/node-0/proc-0/pauc-0/pau-0</default>
     </attribute>
     <attribute>
         <id>CHIP_UNIT</id>
@@ -7739,7 +7743,7 @@
     </attribute>
     <attribute>
         <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/proc-0/pauc-0/iohs-0/pau-0</default>
+        <default>physical:sys-0/node-0/proc-0/pauc-0/pau-0</default>
     </attribute>
     <attribute>
         <id>REL_POS</id>
@@ -7748,11 +7752,11 @@
 </targetInstance>
 
 <targetInstance>
-    <id>sys0node0proc0pauc1iohs1pau0</id>
+    <id>sys0node0proc0pauc1pau0</id>
     <type>unit-pau-power10</type>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/pauc-1/iohs-1/pau-0</default>
+        <default>affinity:sys-0/node-0/proc-0/pauc-1/pau-0</default>
     </attribute>
     <attribute>
         <id>CHIP_UNIT</id>
@@ -7784,7 +7788,7 @@
     </attribute>
     <attribute>
         <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/proc-0/pauc-1/iohs-1/pau-0</default>
+        <default>physical:sys-0/node-0/proc-0/pauc-1/pau-0</default>
     </attribute>
     <attribute>
         <id>REL_POS</id>
@@ -7793,11 +7797,11 @@
 </targetInstance>
 
 <targetInstance>
-    <id>sys0node0proc0pauc2iohs0pau0</id>
+    <id>sys0node0proc0pauc2pau0</id>
     <type>unit-pau-power10</type>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/pauc-2/iohs-0/pau-0</default>
+        <default>affinity:sys-0/node-0/proc-0/pauc-2/pau-0</default>
     </attribute>
     <attribute>
         <id>CHIP_UNIT</id>
@@ -7829,7 +7833,7 @@
     </attribute>
     <attribute>
         <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/proc-0/pauc-2/iohs-0/pau-0</default>
+        <default>physical:sys-0/node-0/proc-0/pauc-2/pau-0</default>
     </attribute>
     <attribute>
         <id>REL_POS</id>
@@ -7838,11 +7842,11 @@
 </targetInstance>
 
 <targetInstance>
-    <id>sys0node0proc0pauc2iohs1pau0</id>
+    <id>sys0node0proc0pauc2pau1</id>
     <type>unit-pau-power10</type>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/pauc-2/iohs-1/pau-0</default>
+        <default>affinity:sys-0/node-0/proc-0/pauc-2/pau-1</default>
     </attribute>
     <attribute>
         <id>CHIP_UNIT</id>
@@ -7874,20 +7878,20 @@
     </attribute>
     <attribute>
         <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/proc-0/pauc-2/iohs-1/pau-0</default>
+        <default>physical:sys-0/node-0/proc-0/pauc-2/pau-1</default>
     </attribute>
     <attribute>
         <id>REL_POS</id>
-        <default>0</default>
+        <default>1</default>
     </attribute>
 </targetInstance>
 
 <targetInstance>
-    <id>sys0node0proc0pauc3iohs0pau0</id>
+    <id>sys0node0proc0pauc3pau0</id>
     <type>unit-pau-power10</type>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/pauc-3/iohs-0/pau-0</default>
+        <default>affinity:sys-0/node-0/proc-0/pauc-3/pau-0</default>
     </attribute>
     <attribute>
         <id>CHIP_UNIT</id>
@@ -7919,7 +7923,7 @@
     </attribute>
     <attribute>
         <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/proc-0/pauc-3/iohs-0/pau-0</default>
+        <default>physical:sys-0/node-0/proc-0/pauc-3/pau-0</default>
     </attribute>
     <attribute>
         <id>REL_POS</id>
@@ -7928,11 +7932,11 @@
 </targetInstance>
 
 <targetInstance>
-    <id>sys0node0proc0pauc3iohs1pau0</id>
+    <id>sys0node0proc0pauc3pau1</id>
     <type>unit-pau-power10</type>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/pauc-3/iohs-1/pau-0</default>
+        <default>affinity:sys-0/node-0/proc-0/pauc-3/pau-1</default>
     </attribute>
     <attribute>
         <id>CHIP_UNIT</id>
@@ -7964,20 +7968,20 @@
     </attribute>
     <attribute>
         <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/proc-0/pauc-3/iohs-1/pau-0</default>
+        <default>physical:sys-0/node-0/proc-0/pauc-3/pau-1</default>
     </attribute>
     <attribute>
         <id>REL_POS</id>
-        <default>0</default>
+        <default>1</default>
     </attribute>
 </targetInstance>
 
 <targetInstance>
-    <id>sys0node0proc1pauc0iohs0pau0</id>
+    <id>sys0node0proc1pauc0pau0</id>
     <type>unit-pau-power10</type>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-1/pauc-0/iohs-0/pau-0</default>
+        <default>affinity:sys-0/node-0/proc-1/pauc-0/pau-0</default>
     </attribute>
     <attribute>
         <id>CHIP_UNIT</id>
@@ -8009,7 +8013,7 @@
     </attribute>
     <attribute>
         <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/proc-1/pauc-0/iohs-0/pau-0</default>
+        <default>physical:sys-0/node-0/proc-1/pauc-0/pau-0</default>
     </attribute>
     <attribute>
         <id>REL_POS</id>
@@ -8018,11 +8022,11 @@
 </targetInstance>
 
 <targetInstance>
-    <id>sys0node0proc1pauc1iohs1pau0</id>
+    <id>sys0node0proc1pauc1pau0</id>
     <type>unit-pau-power10</type>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-1/pauc-1/iohs-1/pau-0</default>
+        <default>affinity:sys-0/node-0/proc-1/pauc-1/pau-0</default>
     </attribute>
     <attribute>
         <id>CHIP_UNIT</id>
@@ -8054,7 +8058,7 @@
     </attribute>
     <attribute>
         <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/proc-1/pauc-1/iohs-1/pau-0</default>
+        <default>physical:sys-0/node-0/proc-1/pauc-1/pau-0</default>
     </attribute>
     <attribute>
         <id>REL_POS</id>
@@ -8063,11 +8067,11 @@
 </targetInstance>
 
 <targetInstance>
-    <id>sys0node0proc1pauc2iohs0pau0</id>
+    <id>sys0node0proc1pauc2pau0</id>
     <type>unit-pau-power10</type>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-1/pauc-2/iohs-0/pau-0</default>
+        <default>affinity:sys-0/node-0/proc-1/pauc-2/pau-0</default>
     </attribute>
     <attribute>
         <id>CHIP_UNIT</id>
@@ -8099,7 +8103,7 @@
     </attribute>
     <attribute>
         <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/proc-1/pauc-2/iohs-0/pau-0</default>
+        <default>physical:sys-0/node-0/proc-1/pauc-2/pau-0</default>
     </attribute>
     <attribute>
         <id>REL_POS</id>
@@ -8108,11 +8112,11 @@
 </targetInstance>
 
 <targetInstance>
-    <id>sys0node0proc1pauc2iohs1pau0</id>
+    <id>sys0node0proc1pauc2pau1</id>
     <type>unit-pau-power10</type>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-1/pauc-2/iohs-1/pau-0</default>
+        <default>affinity:sys-0/node-0/proc-1/pauc-2/pau-1</default>
     </attribute>
     <attribute>
         <id>CHIP_UNIT</id>
@@ -8144,20 +8148,20 @@
     </attribute>
     <attribute>
         <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/proc-1/pauc-2/iohs-1/pau-0</default>
+        <default>physical:sys-0/node-0/proc-1/pauc-2/pau-1</default>
     </attribute>
     <attribute>
         <id>REL_POS</id>
-        <default>0</default>
+        <default>1</default>
     </attribute>
 </targetInstance>
 
 <targetInstance>
-    <id>sys0node0proc1pauc3iohs0pau0</id>
+    <id>sys0node0proc1pauc3pau0</id>
     <type>unit-pau-power10</type>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-1/pauc-3/iohs-0/pau-0</default>
+        <default>affinity:sys-0/node-0/proc-1/pauc-3/pau-0</default>
     </attribute>
     <attribute>
         <id>CHIP_UNIT</id>
@@ -8189,7 +8193,7 @@
     </attribute>
     <attribute>
         <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/proc-1/pauc-3/iohs-0/pau-0</default>
+        <default>physical:sys-0/node-0/proc-1/pauc-3/pau-0</default>
     </attribute>
     <attribute>
         <id>REL_POS</id>
@@ -8198,11 +8202,11 @@
 </targetInstance>
 
 <targetInstance>
-    <id>sys0node0proc1pauc3iohs1pau0</id>
+    <id>sys0node0proc1pauc3pau1</id>
     <type>unit-pau-power10</type>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-1/pauc-3/iohs-1/pau-0</default>
+        <default>affinity:sys-0/node-0/proc-1/pauc-3/pau-1</default>
     </attribute>
     <attribute>
         <id>CHIP_UNIT</id>
@@ -8234,11 +8238,11 @@
     </attribute>
     <attribute>
         <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/proc-1/pauc-3/iohs-1/pau-0</default>
+        <default>physical:sys-0/node-0/proc-1/pauc-3/pau-1</default>
     </attribute>
     <attribute>
         <id>REL_POS</id>
-        <default>0</default>
+        <default>1</default>
     </attribute>
 </targetInstance>
 
@@ -21636,4 +21640,3 @@
 <!-- ==== DDIMMs off second processor ==================================== -->
 
 </attributes>
-

@@ -83,7 +83,6 @@ TRAC_INIT(&g_trac_dbg_hwas, "HWAS",     1024 );
 TRAC_INIT(&g_trac_imp_hwas, "HWAS_I",   1024 );
 #endif
 
-
 Target* shouldPowerGateNMMU1(const Target& i_proc)
 {
     HWAS_ASSERT(i_proc.getAttr<ATTR_TYPE>() == TYPE_PROC,
@@ -134,6 +133,73 @@ Target* shouldPowerGateNMMU1(const Target& i_proc)
     return l_nmmu1;
 } // shouldPowerGateNMMU1
 
+/**
+ * @brief       simple helper fn to get and set hwas state to poweredOn,
+ *                  present, functional
+ *
+ * @param[in]   i_target        pointer to target that we're looking at
+ * @param[in]   i_present       boolean indicating present or not
+ * @param[in]   i_functional    boolean indicating functional or not
+ * @param[in]   i_errlEid       erreid that caused change to non-funcational;
+ *                              0 if not associated with an error or if
+ *                              functional is true
+ *
+ * @return      none
+ *
+ */
+void enableHwasState(Target *i_target,
+        bool i_present, bool i_functional,
+        uint32_t i_errlEid)
+{
+    HwasState hwasState = i_target->getAttr<ATTR_HWAS_STATE>();
+
+    if (i_functional == false)
+    {   // record the EID as a reason that we're marking non-functional
+        hwasState.deconfiguredByEid = i_errlEid;
+    }
+
+    hwasState.poweredOn     = true;
+    hwasState.present       = i_present;
+    hwasState.functional    = i_functional;
+
+    i_target->setAttr<ATTR_HWAS_STATE>( hwasState );
+}
+
+TargetHandleList disableExtraOcapiIohsTargets(const Target* const i_pauc)
+{
+    TargetHandleList pauHandleList;
+    getChildChiplets(pauHandleList, i_pauc, TYPE_PAU, true);
+
+    TargetHandleList iohsHandleList;
+    getChildChiplets(iohsHandleList, i_pauc, TYPE_IOHS, true);
+
+    // Toss out all the non-OCAPI IOHSes
+    for (auto iohs = iohsHandleList.begin(); iohs != iohsHandleList.end();)
+    {
+        if ((*iohs)->getAttr<ATTR_IOHS_CONFIG_MODE>() != IOHS_CONFIG_MODE_OCAPI)
+        {
+            iohs = iohsHandleList.erase(iohs);
+        }
+        else
+        {
+            ++iohs;
+        }
+    }
+
+    TargetHandleList deconfigureIohsList;
+
+    // Now if we have more OCAPI IOHSes than PAUs that could support them, add
+    // the extra ones to the disable list. It doesn't matter which ones we
+    // disable, since they will be mapped appropriately in the SCOM setup in
+    // istep 10.
+    for (size_t i = pauHandleList.size(); i < iohsHandleList.size(); ++i)
+    {
+        deconfigureIohsList.push_back(iohsHandleList[i]);
+    }
+
+    return deconfigureIohsList;
+}
+
 #ifndef __HOSTBOOT_RUNTIME
 
 // SORT functions that we'll use for PR keyword processing
@@ -179,38 +245,6 @@ void parseProcMemToUseIntoGrpChipId (uint8_t   i_proc_mem_to_use,
 {
     o_grp_id  = (i_proc_mem_to_use >> 3) & 0x0F;
     o_chip_id = i_proc_mem_to_use & 0x07;
-}
-
-/**
- * @brief       simple helper fn to get and set hwas state to poweredOn,
- *                  present, functional
- *
- * @param[in]   i_target        pointer to target that we're looking at
- * @param[in]   i_present       boolean indicating present or not
- * @param[in]   i_functional    boolean indicating functional or not
- * @param[in]   i_errlEid       erreid that caused change to non-funcational;
- *                              0 if not associated with an error or if
- *                              functional is true
- *
- * @return      none
- *
- */
-void enableHwasState(Target *i_target,
-        bool i_present, bool i_functional,
-        uint32_t i_errlEid)
-{
-    HwasState hwasState = i_target->getAttr<ATTR_HWAS_STATE>();
-
-    if (i_functional == false)
-    {   // record the EID as a reason that we're marking non-functional
-        hwasState.deconfiguredByEid = i_errlEid;
-    }
-
-    hwasState.poweredOn     = true;
-    hwasState.present       = i_present;
-    hwasState.functional    = i_functional;
-
-    i_target->setAttr<ATTR_HWAS_STATE>( hwasState );
 }
 
 errlHndl_t update_proc_mem_to_use (const Target* i_node)
@@ -1000,7 +1034,7 @@ errlHndl_t HWASDiscovery::discoverTargets()
         // rules
         {
             TargetHandleList l_chips;
-            getAllChips(l_chips, TYPE_PROC);
+            getAllChips(l_chips, TYPE_PROC, true);
 
             for (const Target* const l_chip : l_chips)
             {
@@ -1009,6 +1043,27 @@ errlHndl_t HWASDiscovery::discoverTargets()
                     enableHwasState(l_nmmu1,
                                     true, // NMMU 1 will always be present
                                     false,
+                                    DeconfigGard::DECONFIGURED_BY_INACTIVE_PAU);
+                }
+            }
+        }
+
+        // If PAUs got deconfigured, we need to ensure we don't try to use OCAPI
+        // IOHSes that won't have a corresponding PAU when the IOHS/PAU pairs
+        // get mapped.
+        {
+            TargetHandleList paucs;
+            getAllChiplets(paucs, TYPE_PAUC, true);
+
+            for (const auto pauc : paucs)
+            {
+                const auto iohsList = disableExtraOcapiIohsTargets(pauc);
+
+                for (const auto iohs : iohsList)
+                {
+                    enableHwasState(iohs,
+                                    true, // The IOHS started as functional, so must be present
+                                    false, // non-functional
                                     DeconfigGard::DECONFIGURED_BY_INACTIVE_PAU);
                 }
             }

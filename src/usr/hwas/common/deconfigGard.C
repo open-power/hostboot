@@ -424,7 +424,7 @@ void DeconfigGard::_deconfigureByAssoc(
     targetService().getAssociated(pChildList, &i_target,
         TargetService::CHILD, TargetService::ALL, &funcOrFco);
 
-    // Temporary list for OMI_CHILD and PAUC_CHILD since the
+    // Temporary list for special relationships since the
     // getChildxxxTargetsByState functions replace instead of append to the
     // list passed in
     TargetHandleList pTempList;
@@ -447,6 +447,11 @@ void DeconfigGard::_deconfigureByAssoc(
         // Add OMIC targets to the temp list.
         getChildPaucTargetsByState(pTempList, &i_target, CLASS_NA,
                                   TYPE_OMIC, UTIL_FILTER_FUNCTIONAL);
+    }
+    else if (l_targetType == TYPE_IOHS)
+    {
+        // We do NOT need to deconfigure the mapped PAU here, it can still be
+        // used for other links.
     }
 
     // Append the temporary list to the child list
@@ -671,7 +676,6 @@ void DeconfigGard::_deconfigParentAssoc(TARGETING::Target & i_target,
                                        i_deconfigRule);
                 }
 
-
                 break;
             } // TYPE_OMI
 
@@ -689,6 +693,46 @@ void DeconfigGard::_deconfigParentAssoc(TARGETING::Target & i_target,
                                        i_errlEid,
                                        nullptr,
                                        i_deconfigRule);
+                }
+
+                // Deconfigure the mapped partner OCAPI IOHS, if any. This won't
+                // do anything before Istep 10, where the mapping happens,
+                // because the mapping attribute isn't set yet.
+
+                TargetHandleList pIohsParentList;
+                getParentIohsTargetsByState(pIohsParentList,
+                        &i_target, CLASS_NA, TYPE_IOHS,
+                        UTIL_FILTER_FUNCTIONAL);
+
+                HWAS_ASSERT((pIohsParentList.size() <= 1),
+                            "HWAS _deconfigParentAssoc: got multiple IOHS parents of PAU target");
+
+                if (!pIohsParentList.empty())
+                {
+                    TargetHandle_t parentIohs = pIohsParentList[0];
+
+                    _deconfigureTarget(*parentIohs, i_errlEid, nullptr,
+                                       i_deconfigRule);
+                }
+
+                // Ensure that there are at least enough PAU units to satisfy
+                // the functional OCAPI IOHSes' requirements. This won't do
+                // anything after Istep 10, because there will be a one-to-one
+                // mapping between OCAPI IOHS targets, and we will already have
+                // deconfigured the partner above, if there was one.
+                Target* const parentPauc = getImmediateParentByAffinity(&i_target);
+
+                HWAS_ASSERT(parentPauc->getAttr<ATTR_TYPE>() == TYPE_PAUC,
+                            "Parent of PAU 0x%08x is not a PAUC, got %s",
+                            get_huid(&i_target),
+                            attrToString<ATTR_TYPE>(parentPauc->getAttr<ATTR_TYPE>()));
+
+                const auto iohsList
+                    = disableExtraOcapiIohsTargets(parentPauc);
+
+                for (const auto iohs : iohsList)
+                {
+                    _deconfigureTarget(*iohs, i_errlEid, nullptr, i_deconfigRule);
                 }
             } // TYPE_PAU
 
