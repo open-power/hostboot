@@ -38,7 +38,7 @@ EXPINC_SUBDIRS   += fsp
 OBJECTS_SUBDIRS  +=
 EXPLIB_SUBDIRS   += fsp
 EXPSHLIB_SUBDIRS += fsp
-STANDARD_SUBDIRS += fsp img
+STANDARD_SUBDIRS += fsp img simics
 RUNBVT_SUBDIRS   +=
 
 .elseif (${CONTEXT} == "x86.nfp")

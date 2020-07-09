@@ -227,10 +227,10 @@ LINK_FILES = \
 #     <file>[:<kept root of path>]
 #
 # Examples:
-#     src/hbfw/fsp/makefile on FSP is created from
-#     src/build/mkrules/hbfw/fsp/makefile on Hostboot and is added to the
-#     root of the fsp.tar file.
-#         fsp.tar_CONTENTS += src/build/mkrules/hbfw/fsp/makefile
+#     src/hbfw/simics/makefile on FSP is created from
+#     src/build/mkrules/hbfw/simics/makefile on Hostboot and is added to the
+#     root of the simics.tar file.
+#         simics.tar_CONTENTS += src/build/mkrules/hbfw/simics/makefile
 #
 #     src/hbfw/fsp/targeting/common/target.C on FSP is created from
 #     src/usr/targeting/common/target.C on Hostboot and is added to the
@@ -247,6 +247,7 @@ TAR_FILES = \
 # Tools for booting and debugging simics.
 #
 simics.tar_CONTENTS = \
+    src/build/mkrules/hbfw/simics/makefile \
     src/build/simics/morecache.simics \
     src/build/simics/startup.simics \
     src/build/simics/standalone.simics \
