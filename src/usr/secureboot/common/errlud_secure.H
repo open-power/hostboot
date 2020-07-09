@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2017,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -170,6 +170,7 @@ class UdSecuritySettings : public ERRORLOG::ErrlUserDetails
             uint8_t secAccessBit;
             uint8_t secOverride;
             uint8_t allowAttrOverride;
+            uint8_t minSecureVersion;
         };
 
 };
@@ -190,12 +191,18 @@ class UdVerifyInfo : public ERRORLOG::ErrlUserDetails
      *                    the blob that is being verified.
      *  @param[in] i_measuredHash  Measured SHA512 Hash
      *  @param[in] i_expectedHash  Expected SHA512 Hash
+     *  @param[in] i_min_secure_version  System Minimum FW Secure Version
+     *  @param[in] i_input_secure_version  Secure Version input to verify function
+     *  @param[in] i_container_secure_version  Secure Version from container header
      */
     UdVerifyInfo(const char* i_compId,
                  const uint64_t i_protectedSize,
                  const RomVerifyIds& i_ids,
                  const SHA512_t& i_measuredHash,
-                 const SHA512_t& i_expectedHash);
+                 const SHA512_t& i_expectedHash,
+                 const uint8_t i_min_secure_version,
+                 const uint8_t i_input_secure_version,
+                 const uint8_t i_container_secure_version);
 
     /**
      *  @brief Destructor

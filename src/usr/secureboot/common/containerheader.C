@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -266,6 +266,7 @@ void ContainerHeader::print() const
 
     /*---- Print ROM_sw_header_raw ----*/
     TRACFCOMP(g_trac_secure,"component_id \"%s\"", componentId());
+    TRACFCOMP(g_trac_secure,"secure version 0x%.2X", iv_headerInfo.sw_hdr.fw_secure_version);
     TRACFCOMP(g_trac_secure,"payload_size 0x%X", iv_headerInfo.sw_hdr.payload_size );
     TRACFBIN(g_trac_secure,"payload_hash", iv_headerInfo.sw_hdr.payload_hash, SHA512_DIGEST_LENGTH);
 
@@ -503,6 +504,11 @@ bool ContainerHeader::isValid() const
 const char* ContainerHeader::componentId() const
 {
     return iv_componentId;
+}
+
+const uint8_t ContainerHeader::secureVersion() const
+{
+    return iv_headerInfo.sw_hdr.fw_secure_version;
 }
 
 void ContainerHeader::parseFlags()

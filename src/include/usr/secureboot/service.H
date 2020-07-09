@@ -272,12 +272,12 @@ namespace SECUREBOOT
      void getHwKeyHash(SHA512_t o_hash);
 
     /**
-     * @brief Retrieve the internal FW Secure Version used to validate
+     * @brief Retrieve the internal Minimum FW Secure Version used to validate
      *     containers
      *
      * @return uint8_t    secure_version
      */
-     uint8_t getSecureVersion(void);
+     uint8_t getMinimumSecureVersion(void);
 
      /*
       * @brief Hash the concatenation of N Blobs

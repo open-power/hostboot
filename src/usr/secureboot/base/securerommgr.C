@@ -450,7 +450,7 @@ errlHndl_t SecureRomManager::verifyContainer(void * i_container,
                 ERRORLOG::errlCommit(l_hdrParseErr, RUNTIME_COMP_ID);
 
                 // Add UD data without data needed from Container Header
-                UdVerifyInfo("UNKNOWN", 0, i_ids, {}, {}).addToLog(l_errl);
+                UdVerifyInfo("UNKNOWN", 0, i_ids, {}, {}, 0, 0, 0).addToLog(l_errl);
             }
             else
             {
@@ -467,8 +467,12 @@ errlHndl_t SecureRomManager::verifyContainer(void * i_container,
                              l_conHdr.payloadTextSize(),
                              i_ids,
                              l_measuredHash,
-                             *l_conHdr.payloadTextHash()
-                            ).addToLog(l_errl);
+                             *l_conHdr.payloadTextHash(),
+                             getMinimumSecureVersion(),
+                             i_secureVersion,
+                             l_conHdr.secureVersion()
+                             ).addToLog(l_errl);
+
             }
 
             break;

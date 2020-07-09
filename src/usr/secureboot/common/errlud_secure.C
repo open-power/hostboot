@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -132,7 +132,7 @@ UdSecuritySettings::UdSecuritySettings()
 {
     // Set up Ud instance variables
     iv_CompId = SECURE_COMP_ID;
-    iv_Version = SECURE_UDT_VERSION_1;
+    iv_Version = SECURE_UDT_VERSION_2;
     iv_SubSection = SECURE_UDT_SECURITY_SETTINGS;
 
     char * l_pBuf = reinterpret_cast<char *>(reallocUsrBuf(
@@ -145,9 +145,14 @@ UdSecuritySettings::UdSecuritySettings()
     // 1 byte   : Security Override
     // 1 byte   : Allow Attribute Overrides
 
+    //***** Version SECURE_UDT_VERSION_2 Memory Layout *****
+    // The following is appended onto VERSION_1 for VERSION_2:
+    // 1 byte   : Minimum Secure Version
+
     l_pDetailsLayout->secAccessBit = 0xFF;
     l_pDetailsLayout->secOverride = 0xFF;
     l_pDetailsLayout->allowAttrOverride = 0xFF;
+    l_pDetailsLayout->minSecureVersion = 0xFF;
 
 #ifndef __HOSTBOOT_RUNTIME
     // Only check BlToHbData if it is valid, otherwise fields defaulted to 0xFF
@@ -156,6 +161,7 @@ UdSecuritySettings::UdSecuritySettings()
         l_pDetailsLayout->secAccessBit = g_BlToHbDataManager.getSecureAccessBit();
         l_pDetailsLayout->secOverride = g_BlToHbDataManager.getSecurityOverride();
         l_pDetailsLayout->allowAttrOverride = g_BlToHbDataManager.getAllowAttrOverrides();
+        l_pDetailsLayout->minSecureVersion = g_BlToHbDataManager.getMinimumSecureVersion();
     }
 #endif
 
@@ -174,11 +180,14 @@ UdVerifyInfo::UdVerifyInfo(const char* i_compId,
                            const uint64_t i_protectedSize,
                            const RomVerifyIds& i_ids,
                            const SHA512_t& i_measuredHash,
-                           const SHA512_t& i_expectedHash)
+                           const SHA512_t& i_expectedHash,
+                           const uint8_t i_min_secure_version,
+                           const uint8_t i_input_secure_version,
+                           const uint8_t i_container_secure_version)
 {
     // Set up Ud instance variables
     iv_CompId = SECURE_COMP_ID;
-    iv_Version = SECURE_UDT_VERSION_1;
+    iv_Version = SECURE_UDT_VERSION_2;
     iv_SubSection = SECURE_UDT_VERIFY_INFO;
 
     //***** Version SECURE_UDT_VERSION_1 Memory Layout *****
@@ -188,6 +197,12 @@ UdVerifyInfo::UdVerifyInfo(const char* i_compId,
     // 4*N bytes : IDs (PNOR id or LidID) multiplied by number of ids
     // 64 bytes  : Measured Hash
     // 64 bytes  : Expected Hash
+
+    //***** Version SECURE_UDT_VERSION_2 Memory Layout *****
+    // VERSION_2 appends the following:
+    // 1 byte    : Minimum FW Secure Version
+    // 1 byte    : Input Secure Version
+    // 1 byte    : Container Secure Version
 
     const size_t compSize=strlen(i_compId)+1;
     uint64_t protectedSize=i_protectedSize;
@@ -199,7 +214,8 @@ UdVerifyInfo::UdVerifyInfo(const char* i_compId,
         + sizeof(ids)
         + sizeof(idType)*ids
         + PARSER_SIZEOF_SHA512_t
-        + PARSER_SIZEOF_SHA512_t;
+        + PARSER_SIZEOF_SHA512_t
+        + 3 * sizeof(uint8_t); // For 3 Secure Versions
 
     auto l_pBuf = reinterpret_cast<char *>(reallocUsrBuf(totalSize));
     memcpy(l_pBuf,i_compId,compSize);
@@ -217,6 +233,18 @@ UdVerifyInfo::UdVerifyInfo(const char* i_compId,
     l_pBuf+=PARSER_SIZEOF_SHA512_t;
     memcpy(l_pBuf,i_expectedHash, PARSER_SIZEOF_SHA512_t);
     l_pBuf+=PARSER_SIZEOF_SHA512_t;
+
+    uint8_t tmp8 = static_cast<uint8_t>(i_min_secure_version);
+    memcpy(l_pBuf, &tmp8, sizeof(tmp8));
+    l_pBuf += sizeof(tmp8);
+
+    tmp8 = static_cast<uint8_t>(i_input_secure_version);
+    memcpy(l_pBuf, &tmp8, sizeof(tmp8));
+    l_pBuf += sizeof(tmp8);
+
+    tmp8 = static_cast<uint8_t>(i_container_secure_version);
+    memcpy(l_pBuf, &tmp8, sizeof(tmp8));
+    l_pBuf += sizeof(tmp8);
 }
 
 } // end SECUREBOOT namespace
