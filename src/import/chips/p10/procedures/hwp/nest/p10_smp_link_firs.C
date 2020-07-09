@@ -82,7 +82,6 @@ struct fir_registers
     uint64_t PHY_FIR_MASK_SEL[NUM_MASK_OPTS];
 };
 
-// @TODO RTC209314 Fill in actual FIR mask/action values
 struct fir_registers firs_inactive =
 {
     .FBC_EXT_FIR_ACTION0 = 0x0000000000000000,
@@ -90,109 +89,108 @@ struct fir_registers firs_inactive =
     .FBC_EXT_FIR_MASK    =
     {
         // bits to modify   , value to program
-        { 0xFFFFFFFFFFFFFFFF, 0xFFFFFFFFFFFFFFFF }, // iohs0
-        { 0xFFFFFFFFFFFFFFFF, 0xFFFFFFFFFFFFFFFF }, // iohs1
-        { 0xFFFFFFFFFFFFFFFF, 0xFFFFFFFFFFFFFFFF }, // iohs2
-        { 0xFFFFFFFFFFFFFFFF, 0xFFFFFFFFFFFFFFFF }, // iohs3
-        { 0xFFFFFFFFFFFFFFFF, 0xFFFFFFFFFFFFFFFF }, // iohs4
-        { 0xFFFFFFFFFFFFFFFF, 0xFFFFFFFFFFFFFFFF }, // iohs5
-        { 0xFFFFFFFFFFFFFFFF, 0xFFFFFFFFFFFFFFFF }, // iohs6
-        { 0xFFFFFFFFFFFFFFFF, 0xFFFFFFFFFFFFFFFF }, // iohs7
+        { 0x8000000000000000, 0xFFFFFFFFFFFFFFFF }, // iohs0
+        { 0x4000000000000000, 0xFFFFFFFFFFFFFFFF }, // iohs1
+        { 0x2000000000000000, 0xFFFFFFFFFFFFFFFF }, // iohs2
+        { 0x1000000000000000, 0xFFFFFFFFFFFFFFFF }, // iohs3
+        { 0x0800000000000000, 0xFFFFFFFFFFFFFFFF }, // iohs4
+        { 0x0400000000000000, 0xFFFFFFFFFFFFFFFF }, // iohs5
+        { 0x0200000000000000, 0xFFFFFFFFFFFFFFFF }, // iohs6
+        { 0x0100000000000000, 0xFFFFFFFFFFFFFFFF }, // iohs7
     },
-    .PB_PTL_FIR_ACTION0  = 0x0000000000000000,
-    .PB_PTL_FIR_ACTION1  = 0x0000000000000000,
+    .PB_PTL_FIR_ACTION0  = 0xF22003CFFFFFFFFF,
+    .PB_PTL_FIR_ACTION1  = 0xF66003CFFFFFFFFF,
     .PB_PTL_FIR_MASK     =
     {
         // both even/odd
         {
             // bits to modify   , value to program
-            { 0xFFFFFFFFFFFFFFFF, 0xFFFFFFFFFFFFFFFF }, // iohs0
-            { 0xFFFFFFFFFFFFFFFF, 0xFFFFFFFFFFFFFFFF }, // iohs1
-            { 0xFFFFFFFFFFFFFFFF, 0xFFFFFFFFFFFFFFFF }, // iohs2
-            { 0xFFFFFFFFFFFFFFFF, 0xFFFFFFFFFFFFFFFF }, // iohs3
-            { 0xFFFFFFFFFFFFFFFF, 0xFFFFFFFFFFFFFFFF }, // iohs4
-            { 0xFFFFFFFFFFFFFFFF, 0xFFFFFFFFFFFFFFFF }, // iohs5
-            { 0xFFFFFFFFFFFFFFFF, 0xFFFFFFFFFFFFFFFF }, // iohs6
-            { 0xFFFFFFFFFFFFFFFF, 0xFFFFFFFFFFFFFFFF }, // iohs7
+            { 0xCF0E332F0C000000, 0xFFFFFFFFFFFFFFFF }, // iohs0
+            { 0x30F1CCD0F3000000, 0xFFFFFFFFFFFFFFFF }, // iohs1
+            { 0xCF0E332F0C000000, 0xFFFFFFFFFFFFFFFF }, // iohs2
+            { 0x30F1CCD0F3000000, 0xFFFFFFFFFFFFFFFF }, // iohs3
+            { 0xCF0E332F0C000000, 0xFFFFFFFFFFFFFFFF }, // iohs4
+            { 0x30F1CCD0F3000000, 0xFFFFFFFFFFFFFFFF }, // iohs5
+            { 0xCF0E332F0C000000, 0xFFFFFFFFFFFFFFFF }, // iohs6
+            { 0x30F1CCD0F3000000, 0xFFFFFFFFFFFFFFFF }, // iohs7
         },
         // even only
         {
             // bits to modify   , value to program
-            { 0xFFFFFFFFFFFFFFFF, 0xFFFFFFFFFFFFFFFF }, // iohs0
-            { 0xFFFFFFFFFFFFFFFF, 0xFFFFFFFFFFFFFFFF }, // iohs1
-            { 0xFFFFFFFFFFFFFFFF, 0xFFFFFFFFFFFFFFFF }, // iohs2
-            { 0xFFFFFFFFFFFFFFFF, 0xFFFFFFFFFFFFFFFF }, // iohs3
-            { 0xFFFFFFFFFFFFFFFF, 0xFFFFFFFFFFFFFFFF }, // iohs4
-            { 0xFFFFFFFFFFFFFFFF, 0xFFFFFFFFFFFFFFFF }, // iohs5
-            { 0xFFFFFFFFFFFFFFFF, 0xFFFFFFFFFFFFFFFF }, // iohs6
-            { 0xFFFFFFFFFFFFFFFF, 0xFFFFFFFFFFFFFFFF }, // iohs7
+            { 0x8F08222C08000000, 0xFFFFFFFFFFFFFFFF }, // iohs0
+            { 0x20F18890C2000000, 0xFFFFFFFFFFFFFFFF }, // iohs1
+            { 0x8F08222C08000000, 0xFFFFFFFFFFFFFFFF }, // iohs2
+            { 0x20F18890C2000000, 0xFFFFFFFFFFFFFFFF }, // iohs3
+            { 0x8F08222C08000000, 0xFFFFFFFFFFFFFFFF }, // iohs4
+            { 0x20F18890C2000000, 0xFFFFFFFFFFFFFFFF }, // iohs5
+            { 0x8F08222C08000000, 0xFFFFFFFFFFFFFFFF }, // iohs6
+            { 0x20F18890C2000000, 0xFFFFFFFFFFFFFFFF }, // iohs7
         },
         // odd only
         {
             // bits to modify   , value to program
-            { 0xFFFFFFFFFFFFFFFF, 0xFFFFFFFFFFFFFFFF }, // iohs0
-            { 0xFFFFFFFFFFFFFFFF, 0xFFFFFFFFFFFFFFFF }, // iohs1
-            { 0xFFFFFFFFFFFFFFFF, 0xFFFFFFFFFFFFFFFF }, // iohs2
-            { 0xFFFFFFFFFFFFFFFF, 0xFFFFFFFFFFFFFFFF }, // iohs3
-            { 0xFFFFFFFFFFFFFFFF, 0xFFFFFFFFFFFFFFFF }, // iohs4
-            { 0xFFFFFFFFFFFFFFFF, 0xFFFFFFFFFFFFFFFF }, // iohs5
-            { 0xFFFFFFFFFFFFFFFF, 0xFFFFFFFFFFFFFFFF }, // iohs6
-            { 0xFFFFFFFFFFFFFFFF, 0xFFFFFFFFFFFFFFFF }, // iohs7
+            { 0x4F06112304000000, 0xFFFFFFFFFFFFFFFF }, // iohs0
+            { 0x10F0C45031000000, 0xFFFFFFFFFFFFFFFF }, // iohs1
+            { 0x4F06112304000000, 0xFFFFFFFFFFFFFFFF }, // iohs2
+            { 0x10F0C45031000000, 0xFFFFFFFFFFFFFFFF }, // iohs3
+            { 0x4F06112304000000, 0xFFFFFFFFFFFFFFFF }, // iohs4
+            { 0x10F0C45031000000, 0xFFFFFFFFFFFFFFFF }, // iohs5
+            { 0x4F06112304000000, 0xFFFFFFFFFFFFFFFF }, // iohs6
+            { 0x10F0C45031000000, 0xFFFFFFFFFFFFFFFF }, // iohs7
         },
     },
-    .DLP_FIR_ACTION0     = 0x0000000000000000,
-    .DLP_FIR_ACTION1     = 0x0000000000000000,
+    .DLP_FIR_ACTION0     = 0xFCFC3FFFFCC00003,
+    .DLP_FIR_ACTION1     = 0xFFFFFFFFFFFFFFFF,
     .DLP_FIR_MASK        =
     {
         // bits to modify   , value to program
         { 0xFFFFFFFFFFFFFFFF, 0xFFFFFFFFFFFFFFFF }, // both halves
-        { 0xFFFFFFFFFFFFFFFF, 0xFFFFFFFFFFFFFFFF }, // even only
-        { 0xFFFFFFFFFFFFFFFF, 0xFFFFFFFFFFFFFFFF }, // odd only
+        { 0xAAAAAAAAAAAAAAAA, 0xFFFFFFFFFFFFFFFF }, // even only
+        { 0x5555555555555555, 0xFFFFFFFFFFFFFFFF }, // odd only
     },
-    .PHY_FIR_ACTION0     = 0x0000000000000000,
-    .PHY_FIR_ACTION1     = 0x0000000000000000,
+    .PHY_FIR_ACTION0     = 0x8000000000000000,
+    .PHY_FIR_ACTION1     = 0xF47FDB0000000000,
     .PHY_FIR_MASK        =
     {
         // both even/odd
         {
             // bits to modify   , value to program
-            { 0xFFFFFFFFFFFFFFFF, 0xFFFFFFFFFFFFFFFF }, // iohs0
-            { 0xFFFFFFFFFFFFFFFF, 0xFFFFFFFFFFFFFFFF }, // iohs1
-            { 0xFFFFFFFFFFFFFFFF, 0xFFFFFFFFFFFFFFFF }, // iohs2
-            { 0xFFFFFFFFFFFFFFFF, 0xFFFFFFFFFFFFFFFF }, // iohs3
-            { 0xFFFFFFFFFFFFFFFF, 0xFFFFFFFFFFFFFFFF }, // iohs4
-            { 0xFFFFFFFFFFFFFFFF, 0xFFFFFFFFFFFFFFFF }, // iohs5
-            { 0xFFFFFFFFFFFFFFFF, 0xFFFFFFFFFFFFFFFF }, // iohs6
-            { 0xFFFFFFFFFFFFFFFF, 0xFFFFFFFFFFFFFFFF }, // iohs7
+            { 0xFFFFFC0000000000, 0xFFFFFFFFFFFFFFFF }, // iohs0
+            { 0xFFFFFC0000000000, 0xFFFFFFFFFFFFFFFF }, // iohs1
+            { 0xFFFFFC0000000000, 0xFFFFFFFFFFFFFFFF }, // iohs2
+            { 0xFFFFFC0000000000, 0xFFFFFFFFFFFFFFFF }, // iohs3
+            { 0xFFFFFC0000000000, 0xFFFFFFFFFFFFFFFF }, // iohs4
+            { 0xFFFFFC0000000000, 0xFFFFFFFFFFFFFFFF }, // iohs5
+            { 0xFFFFFC0000000000, 0xFFFFFFFFFFFFFFFF }, // iohs6
+            { 0xFFFFFC0000000000, 0xFFFFFFFFFFFFFFFF }, // iohs7
         },
         // even only
         {
             // bits to modify   , value to program
-            { 0xFFFFFFFFFFFFFFFF, 0xFFFFFFFFFFFFFFFF }, // iohs0
-            { 0xFFFFFFFFFFFFFFFF, 0xFFFFFFFFFFFFFFFF }, // iohs1
-            { 0xFFFFFFFFFFFFFFFF, 0xFFFFFFFFFFFFFFFF }, // iohs2
-            { 0xFFFFFFFFFFFFFFFF, 0xFFFFFFFFFFFFFFFF }, // iohs3
-            { 0xFFFFFFFFFFFFFFFF, 0xFFFFFFFFFFFFFFFF }, // iohs4
-            { 0xFFFFFFFFFFFFFFFF, 0xFFFFFFFFFFFFFFFF }, // iohs5
-            { 0xFFFFFFFFFFFFFFFF, 0xFFFFFFFFFFFFFFFF }, // iohs6
-            { 0xFFFFFFFFFFFFFFFF, 0xFFFFFFFFFFFFFFFF }, // iohs7
+            { 0x88FFFFC000000000, 0xFFFFFFFFFFFFFFFF }, // iohs0
+            { 0x88FFFFC000000000, 0xFFFFFFFFFFFFFFFF }, // iohs1
+            { 0x88FFFFC000000000, 0xFFFFFFFFFFFFFFFF }, // iohs2
+            { 0x88FFFFC000000000, 0xFFFFFFFFFFFFFFFF }, // iohs3
+            { 0x88FFFFC000000000, 0xFFFFFFFFFFFFFFFF }, // iohs4
+            { 0x88FFFFC000000000, 0xFFFFFFFFFFFFFFFF }, // iohs5
+            { 0x88FFFFC000000000, 0xFFFFFFFFFFFFFFFF }, // iohs6
+            { 0x88FFFFC000000000, 0xFFFFFFFFFFFFFFFF }, // iohs7
         },
         // odd only
         {
             // bits to modify   , value to program
-            { 0xFFFFFFFFFFFFFFFF, 0xFFFFFFFFFFFFFFFF }, // iohs0
-            { 0xFFFFFFFFFFFFFFFF, 0xFFFFFFFFFFFFFFFF }, // iohs1
-            { 0xFFFFFFFFFFFFFFFF, 0xFFFFFFFFFFFFFFFF }, // iohs2
-            { 0xFFFFFFFFFFFFFFFF, 0xFFFFFFFFFFFFFFFF }, // iohs3
-            { 0xFFFFFFFFFFFFFFFF, 0xFFFFFFFFFFFFFFFF }, // iohs4
-            { 0xFFFFFFFFFFFFFFFF, 0xFFFFFFFFFFFFFFFF }, // iohs5
-            { 0xFFFFFFFFFFFFFFFF, 0xFFFFFFFFFFFFFFFF }, // iohs6
-            { 0xFFFFFFFFFFFFFFFF, 0xFFFFFFFFFFFFFFFF }, // iohs7
+            { 0x44FFFFC000000000, 0xFFFFFFFFFFFFFFFF }, // iohs0
+            { 0x44FFFFC000000000, 0xFFFFFFFFFFFFFFFF }, // iohs1
+            { 0x44FFFFC000000000, 0xFFFFFFFFFFFFFFFF }, // iohs2
+            { 0x44FFFFC000000000, 0xFFFFFFFFFFFFFFFF }, // iohs3
+            { 0x44FFFFC000000000, 0xFFFFFFFFFFFFFFFF }, // iohs4
+            { 0x44FFFFC000000000, 0xFFFFFFFFFFFFFFFF }, // iohs5
+            { 0x44FFFFC000000000, 0xFFFFFFFFFFFFFFFF }, // iohs6
+            { 0x44FFFFC000000000, 0xFFFFFFFFFFFFFFFF }, // iohs7
         },
     },
 };
 
-// @TODO RTC209314 Fill in actual FIR mask/action values
 struct fir_registers firs_runtime =
 {
     .FBC_EXT_FIR_ACTION0 = 0x0000000000000000,
@@ -200,104 +198,104 @@ struct fir_registers firs_runtime =
     .FBC_EXT_FIR_MASK    =
     {
         // bits to modify   , value to program
-        { 0xFFFFFFFFFFFFFFFF, 0xFFFFFFFFFFFFFFFF }, // iohs0
-        { 0xFFFFFFFFFFFFFFFF, 0xFFFFFFFFFFFFFFFF }, // iohs1
-        { 0xFFFFFFFFFFFFFFFF, 0xFFFFFFFFFFFFFFFF }, // iohs2
-        { 0xFFFFFFFFFFFFFFFF, 0xFFFFFFFFFFFFFFFF }, // iohs3
-        { 0xFFFFFFFFFFFFFFFF, 0xFFFFFFFFFFFFFFFF }, // iohs4
-        { 0xFFFFFFFFFFFFFFFF, 0xFFFFFFFFFFFFFFFF }, // iohs5
-        { 0xFFFFFFFFFFFFFFFF, 0xFFFFFFFFFFFFFFFF }, // iohs6
-        { 0xFFFFFFFFFFFFFFFF, 0xFFFFFFFFFFFFFFFF }, // iohs7
+        { 0x8000000000000000, 0x7F00000000000000 }, // iohs0
+        { 0x4000000000000000, 0xBF00000000000000 }, // iohs1
+        { 0x2000000000000000, 0xDF00000000000000 }, // iohs2
+        { 0x1000000000000000, 0xEF00000000000000 }, // iohs3
+        { 0x0800000000000000, 0xF700000000000000 }, // iohs4
+        { 0x0400000000000000, 0xFB00000000000000 }, // iohs5
+        { 0x0200000000000000, 0xFD00000000000000 }, // iohs6
+        { 0x0100000000000000, 0xFE00000000000000 }, // iohs7
     },
-    .PB_PTL_FIR_ACTION0  = 0x0000000000000000,
-    .PB_PTL_FIR_ACTION1  = 0x0000000000000000,
+    .PB_PTL_FIR_ACTION0  = 0xF22003CFFFFFFFFF,
+    .PB_PTL_FIR_ACTION1  = 0xF66003CFFFFFFFFF,
     .PB_PTL_FIR_MASK     =
     {
         // both even/odd
         {
             // bits to modify   , value to program
-            { 0xFFFFFFFFFFFFFFFF, 0xFFFFFFFFFFFFFFFF }, // iohs0
-            { 0xFFFFFFFFFFFFFFFF, 0xFFFFFFFFFFFFFFFF }, // iohs1
-            { 0xFFFFFFFFFFFFFFFF, 0xFFFFFFFFFFFFFFFF }, // iohs2
-            { 0xFFFFFFFFFFFFFFFF, 0xFFFFFFFFFFFFFFFF }, // iohs3
-            { 0xFFFFFFFFFFFFFFFF, 0xFFFFFFFFFFFFFFFF }, // iohs4
-            { 0xFFFFFFFFFFFFFFFF, 0xFFFFFFFFFFFFFFFF }, // iohs5
-            { 0xFFFFFFFFFFFFFFFF, 0xFFFFFFFFFFFFFFFF }, // iohs6
-            { 0xFFFFFFFFFFFFFFFF, 0xFFFFFFFFFFFFFFFF }, // iohs7
+            { 0xCF0E332F0C000000, 0xF22003CFFFFFFFFF }, // iohs0
+            { 0x30F1CCD0F3000000, 0xF22003CFFFFFFFFF }, // iohs1
+            { 0xCF0E332F0C000000, 0xF22003CFFFFFFFFF }, // iohs2
+            { 0x30F1CCD0F3000000, 0xF22003CFFFFFFFFF }, // iohs3
+            { 0xCF0E332F0C000000, 0xF22003CFFFFFFFFF }, // iohs4
+            { 0x30F1CCD0F3000000, 0xF22003CFFFFFFFFF }, // iohs5
+            { 0xCF0E332F0C000000, 0xF22003CFFFFFFFFF }, // iohs6
+            { 0x30F1CCD0F3000000, 0xF22003CFFFFFFFFF }, // iohs7
         },
         // even only
         {
             // bits to modify   , value to program
-            { 0xFFFFFFFFFFFFFFFF, 0xFFFFFFFFFFFFFFFF }, // iohs0
-            { 0xFFFFFFFFFFFFFFFF, 0xFFFFFFFFFFFFFFFF }, // iohs1
-            { 0xFFFFFFFFFFFFFFFF, 0xFFFFFFFFFFFFFFFF }, // iohs2
-            { 0xFFFFFFFFFFFFFFFF, 0xFFFFFFFFFFFFFFFF }, // iohs3
-            { 0xFFFFFFFFFFFFFFFF, 0xFFFFFFFFFFFFFFFF }, // iohs4
-            { 0xFFFFFFFFFFFFFFFF, 0xFFFFFFFFFFFFFFFF }, // iohs5
-            { 0xFFFFFFFFFFFFFFFF, 0xFFFFFFFFFFFFFFFF }, // iohs6
-            { 0xFFFFFFFFFFFFFFFF, 0xFFFFFFFFFFFFFFFF }, // iohs7
+            { 0x8F08222C08000000, 0xF22003CFFFFFFFFF }, // iohs0
+            { 0x20F18890C2000000, 0xF22003CFFFFFFFFF }, // iohs1
+            { 0x8F08222C08000000, 0xF22003CFFFFFFFFF }, // iohs2
+            { 0x20F18890C2000000, 0xF22003CFFFFFFFFF }, // iohs3
+            { 0x8F08222C08000000, 0xF22003CFFFFFFFFF }, // iohs4
+            { 0x20F18890C2000000, 0xF22003CFFFFFFFFF }, // iohs5
+            { 0x8F08222C08000000, 0xF22003CFFFFFFFFF }, // iohs6
+            { 0x20F18890C2000000, 0xF22003CFFFFFFFFF }, // iohs7
         },
         // odd only
         {
             // bits to modify   , value to program
-            { 0xFFFFFFFFFFFFFFFF, 0xFFFFFFFFFFFFFFFF }, // iohs0
-            { 0xFFFFFFFFFFFFFFFF, 0xFFFFFFFFFFFFFFFF }, // iohs1
-            { 0xFFFFFFFFFFFFFFFF, 0xFFFFFFFFFFFFFFFF }, // iohs2
-            { 0xFFFFFFFFFFFFFFFF, 0xFFFFFFFFFFFFFFFF }, // iohs3
-            { 0xFFFFFFFFFFFFFFFF, 0xFFFFFFFFFFFFFFFF }, // iohs4
-            { 0xFFFFFFFFFFFFFFFF, 0xFFFFFFFFFFFFFFFF }, // iohs5
-            { 0xFFFFFFFFFFFFFFFF, 0xFFFFFFFFFFFFFFFF }, // iohs6
-            { 0xFFFFFFFFFFFFFFFF, 0xFFFFFFFFFFFFFFFF }, // iohs7
+            { 0x4F06112304000000, 0xF22003CFFFFFFFFF }, // iohs0
+            { 0x10F0C45031000000, 0xF22003CFFFFFFFFF }, // iohs1
+            { 0x4F06112304000000, 0xF22003CFFFFFFFFF }, // iohs2
+            { 0x10F0C45031000000, 0xF22003CFFFFFFFFF }, // iohs3
+            { 0x4F06112304000000, 0xF22003CFFFFFFFFF }, // iohs4
+            { 0x10F0C45031000000, 0xF22003CFFFFFFFFF }, // iohs5
+            { 0x4F06112304000000, 0xF22003CFFFFFFFFF }, // iohs6
+            { 0x10F0C45031000000, 0xF22003CFFFFFFFFF }, // iohs7
         },
     },
-    .DLP_FIR_ACTION0     = 0x0000000000000000,
-    .DLP_FIR_ACTION1     = 0x0000000000000000,
+    .DLP_FIR_ACTION0     = 0xFCFC3FFFFCC00003,
+    .DLP_FIR_ACTION1     = 0xFFFFFFFFFFFFFFFF,
     .DLP_FIR_MASK        =
     {
         // bits to modify   , value to program
-        { 0xFFFFFFFFFFFFFFFF, 0xFFFFFFFFFFFFFFFF }, // both halves
-        { 0xFFFFFFFFFFFFFFFF, 0xFFFFFFFFFFFFFFFF }, // even only
-        { 0xFFFFFFFFFFFFFFFF, 0xFFFFFFFFFFFFFFFF }, // odd only
+        { 0xFFFFFFFFFFFFFFFF, 0xFCFC3FFFFCC00003 }, // both halves
+        { 0xAAAAAAAAAAAAAAAA, 0xFCFC3FFFFCC00003 }, // even only
+        { 0x5555555555555555, 0xFCFC3FFFFCC00003 }, // odd only
     },
-    .PHY_FIR_ACTION0     = 0x0000000000000000,
-    .PHY_FIR_ACTION1     = 0x0000000000000000,
+    .PHY_FIR_ACTION0     = 0x8000000000000000,
+    .PHY_FIR_ACTION1     = 0xF47FDB0000000000,
     .PHY_FIR_MASK        =
     {
         // both even/odd
         {
             // bits to modify   , value to program
-            { 0xFFFFFFFFFFFFFFFF, 0xFFFFFFFFFFFFFFFF }, // iohs0
-            { 0xFFFFFFFFFFFFFFFF, 0xFFFFFFFFFFFFFFFF }, // iohs1
-            { 0xFFFFFFFFFFFFFFFF, 0xFFFFFFFFFFFFFFFF }, // iohs2
-            { 0xFFFFFFFFFFFFFFFF, 0xFFFFFFFFFFFFFFFF }, // iohs3
-            { 0xFFFFFFFFFFFFFFFF, 0xFFFFFFFFFFFFFFFF }, // iohs4
-            { 0xFFFFFFFFFFFFFFFF, 0xFFFFFFFFFFFFFFFF }, // iohs5
-            { 0xFFFFFFFFFFFFFFFF, 0xFFFFFFFFFFFFFFFF }, // iohs6
-            { 0xFFFFFFFFFFFFFFFF, 0xFFFFFFFFFFFFFFFF }, // iohs7
+            { 0xFFFFFC0000000000, 0x0B8024C000000000 }, // iohs0
+            { 0xFFFFFC0000000000, 0x0B8024C000000000 }, // iohs1
+            { 0xFFFFFC0000000000, 0x0B8024C000000000 }, // iohs2
+            { 0xFFFFFC0000000000, 0x0B8024C000000000 }, // iohs3
+            { 0xFFFFFC0000000000, 0x0B8024C000000000 }, // iohs4
+            { 0xFFFFFC0000000000, 0x0B8024C000000000 }, // iohs5
+            { 0xFFFFFC0000000000, 0x0B8024C000000000 }, // iohs6
+            { 0xFFFFFC0000000000, 0x0B8024C000000000 }, // iohs7
         },
         // even only
         {
             // bits to modify   , value to program
-            { 0xFFFFFFFFFFFFFFFF, 0xFFFFFFFFFFFFFFFF }, // iohs0
-            { 0xFFFFFFFFFFFFFFFF, 0xFFFFFFFFFFFFFFFF }, // iohs1
-            { 0xFFFFFFFFFFFFFFFF, 0xFFFFFFFFFFFFFFFF }, // iohs2
-            { 0xFFFFFFFFFFFFFFFF, 0xFFFFFFFFFFFFFFFF }, // iohs3
-            { 0xFFFFFFFFFFFFFFFF, 0xFFFFFFFFFFFFFFFF }, // iohs4
-            { 0xFFFFFFFFFFFFFFFF, 0xFFFFFFFFFFFFFFFF }, // iohs5
-            { 0xFFFFFFFFFFFFFFFF, 0xFFFFFFFFFFFFFFFF }, // iohs6
-            { 0xFFFFFFFFFFFFFFFF, 0xFFFFFFFFFFFFFFFF }, // iohs7
+            { 0x88FFFFC000000000, 0x0B8024C000000000 }, // iohs0
+            { 0x88FFFFC000000000, 0x0B8024C000000000 }, // iohs1
+            { 0x88FFFFC000000000, 0x0B8024C000000000 }, // iohs2
+            { 0x88FFFFC000000000, 0x0B8024C000000000 }, // iohs3
+            { 0x88FFFFC000000000, 0x0B8024C000000000 }, // iohs4
+            { 0x88FFFFC000000000, 0x0B8024C000000000 }, // iohs5
+            { 0x88FFFFC000000000, 0x0B8024C000000000 }, // iohs6
+            { 0x88FFFFC000000000, 0x0B8024C000000000 }, // iohs7
         },
         // odd only
         {
             // bits to modify   , value to program
-            { 0xFFFFFFFFFFFFFFFF, 0xFFFFFFFFFFFFFFFF }, // iohs0
-            { 0xFFFFFFFFFFFFFFFF, 0xFFFFFFFFFFFFFFFF }, // iohs1
-            { 0xFFFFFFFFFFFFFFFF, 0xFFFFFFFFFFFFFFFF }, // iohs2
-            { 0xFFFFFFFFFFFFFFFF, 0xFFFFFFFFFFFFFFFF }, // iohs3
-            { 0xFFFFFFFFFFFFFFFF, 0xFFFFFFFFFFFFFFFF }, // iohs4
-            { 0xFFFFFFFFFFFFFFFF, 0xFFFFFFFFFFFFFFFF }, // iohs5
-            { 0xFFFFFFFFFFFFFFFF, 0xFFFFFFFFFFFFFFFF }, // iohs6
-            { 0xFFFFFFFFFFFFFFFF, 0xFFFFFFFFFFFFFFFF }, // iohs7
+            { 0x44FFFFC000000000, 0x0B8024C000000000 }, // iohs0
+            { 0x44FFFFC000000000, 0x0B8024C000000000 }, // iohs1
+            { 0x44FFFFC000000000, 0x0B8024C000000000 }, // iohs2
+            { 0x44FFFFC000000000, 0x0B8024C000000000 }, // iohs3
+            { 0x44FFFFC000000000, 0x0B8024C000000000 }, // iohs4
+            { 0x44FFFFC000000000, 0x0B8024C000000000 }, // iohs5
+            { 0x44FFFFC000000000, 0x0B8024C000000000 }, // iohs6
+            { 0x44FFFFC000000000, 0x0B8024C000000000 }, // iohs7
         },
     },
 };
