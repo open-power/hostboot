@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -230,6 +230,7 @@ enum partTypeEnum
     BPM_CABLE_PART_TYPE             = 13, //Backup Power Module Cable for NVDIMM
     NV_CONTROLLER_PART_TYPE         = 14, //Controller for NVDIMM
     BPM_PART_TYPE                   = 15, //Backup Power Module for NVDIMM
+    OPEN_CAPI_ADAPTER_PART_TYPE     = 16, // Target is OBUS_BRICK
 
     LAST_PART_TYPE, //for looping in testcases
 };

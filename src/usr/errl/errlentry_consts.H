@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2017,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -169,6 +169,7 @@ const epubPartTypeToSub_t PART_TO_SUBSYS_TABLE[] =
     { HWAS::BPM_CABLE_PART_TYPE         , EPUB_MEMORY_SUBSYS   },
     { HWAS::NV_CONTROLLER_PART_TYPE     , EPUB_MEMORY_SUBSYS   },
     { HWAS::BPM_PART_TYPE               , EPUB_MEMORY_SUBSYS   },
+    { HWAS::OPEN_CAPI_ADAPTER_PART_TYPE , EPUB_IO_SUBSYS        },
 };
 
 struct epubSensorTypeToSub_t

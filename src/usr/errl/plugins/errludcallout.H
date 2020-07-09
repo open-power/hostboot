@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -152,6 +152,7 @@ case HWAS::_type: i_parser.PrintString( "Part Type", #_type); break;
                     case_PART_TYPE(BPM_CABLE_PART_TYPE)
                     case_PART_TYPE(NV_CONTROLLER_PART_TYPE)
                     case_PART_TYPE(BPM_PART_TYPE)
+                    case_PART_TYPE(OPEN_CAPI_ADAPTER_PART_TYPE)
 
                     default:
                         i_parser.PrintNumber( "Part Type", "UNKNOWN: 0x%X",
