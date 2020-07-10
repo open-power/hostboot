@@ -38,7 +38,12 @@ namespace Bootloader{
 #define HBBL_HW_KEY_HASH_LOCATION  (MAX_HBBL_SIZE - sizeof(SHA512_t))
 
 // Location of Secure Version is the byte preceding HBBL_HW_KEY_HASH_LOCATION
-#define HBBL_SECURE_VERISON_LOCATION  (HBBL_HW_KEY_HASH_LOCATION - 1)
+#define HBBL_SECURE_VERSION_LOCATION  (HBBL_HW_KEY_HASH_LOCATION - 1)
+
+// Location of Secure Version aligned down to the nearest uint64_t/8-byte
+// boundary for use in getting this information from locations that might already
+// have ECC applied
+#define HBBL_SECURE_VERSION_LOCATION_ALIGNED ALIGN_DOWN_8(HBBL_SECURE_VERSION_LOCATION)
 
 // Size of exception vector reserved space at start of the HBBL section
 #define HBBL_EXCEPTION_VECTOR_SIZE (12 * KILOBYTE)

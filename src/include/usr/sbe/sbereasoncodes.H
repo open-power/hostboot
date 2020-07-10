@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -107,6 +107,8 @@ enum sbeReasonCode
     SBE_UPDATE_DURING_MPIPL             = SBE_COMP_ID | 0x1B,
     SBE_BOOT_SIDE_DIRTY_BAD_PATH        = SBE_COMP_ID | 0x1C,
     SBE_UNSUPPORTED_EC                  = SBE_COMP_ID | 0x1D,
+    SBE_MISMATCHED_SECURE_VERSION       = SBE_COMP_ID | 0x1E,
+    SBE_SECUREBOOT_ESCAPE               = SBE_COMP_ID | 0x1F,
 };
 
 };  // end SBE

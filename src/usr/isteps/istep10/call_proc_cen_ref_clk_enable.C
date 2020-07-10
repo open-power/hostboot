@@ -489,23 +489,30 @@ void validateSecuritySettings()
     // masters to slaves
     std::vector<HashNode> l_hashes;
 
-    // master processor primary hash
+    // master processor primary hash and secure version
     SHA512_t l_masterHash = {0};
+    uint8_t l_masterSecureVersion = 0;
 
-    // master processor backup hash
+    // master processor backup hash and secure version
     SHA512_t l_backupHash = {0};
+    uint8_t l_backupSecureVersion = 0;
 
-    // slave processor primary hash (reset each time through the loop)
+    // slave processor primary hash and secure version
+    // (reset each time through the loop)
     SHA512_t l_slaveHashPri = {0};
+    uint8_t l_slaveSecureVersionPri = 0;
 
-    // slave processor backup hash (reset each time through the loop)
+    // slave processor backup hash and secure version
+    // (reset each time through the loop)
     SHA512_t l_slaveHashBac = {0};
+    uint8_t l_slaveSecureVersionBac = 0;
 
     // nodes for the hashes vector only to be added to vector as needed
     auto l_master = HashNode(l_masterHash, "master primary", SBE::SBE_SEEPROM0);
     auto l_backup = HashNode(l_backupHash, "master backup", SBE::SBE_SEEPROM1);
     auto l_slave = HashNode(l_slaveHashPri, "slave primary", SBE::SBE_SEEPROM0);
     auto l_slaveb = HashNode(l_slaveHashBac, "slave backup", SBE::SBE_SEEPROM1);
+
     // obtain the master processor target
     TARGETING::Target* mProc = nullptr;
     err = TARGETING::targetService().queryMasterProcChipTargetHandle(mProc);
@@ -571,19 +578,20 @@ void validateSecuritySettings()
 
     bool primaryReadFailAllowed = false;
 
-    // read the primary sbe HW keys' hash for the master processor
-    err = SBE::getHwKeyHashFromSbeImage(
-                                     mProc,
-                                     EEPROM::SBE_PRIMARY,
-                                     bootSide,
-                                     l_masterHash);
+    // read the primary sbe HW keys' hash and secure version for the master processor
+    err = SBE::getSecuritySettingsFromSbeImage(
+                                      mProc,
+                                      EEPROM::SBE_PRIMARY,
+                                      bootSide,
+                                      l_masterHash,
+                                      l_masterSecureVersion);
 
     if (err)
     {
         if (!mnfg_mode && bootSide != SBE::SBE_SEEPROM0)
         {
             primaryReadFailAllowed = true;
-            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, "It's a non-mnfg boot and we failed to read the master primary HW SBE Keys' hash from seeprom 0. Ignoring the error since we didn't boot from that seeprom");
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, "It's a non-mnfg boot and we failed to read the master primary HW SBE Keys' hash and Secure Version from seeprom 0. Ignoring the error since we didn't boot from that seeprom");
             err->collectTrace(ISTEP_COMP_NAME);
             ERRORLOG::errlCommit(err, ISTEP_COMP_ID);
         }
@@ -612,18 +620,19 @@ void validateSecuritySettings()
     bool backupReadFailAllowed = false;
 
     // read the backup sbe HW keys' hash for the master processor
-    err = SBE::getHwKeyHashFromSbeImage(
+    err = SBE::getSecuritySettingsFromSbeImage(
                                       mProc,
                                       EEPROM::SBE_BACKUP,
                                       bootSide,
-                                      l_backupHash);
+                                      l_backupHash,
+                                      l_backupSecureVersion);
 
     if (err)
     {
         if (!mnfg_mode && bootSide != SBE::SBE_SEEPROM1)
         {
             backupReadFailAllowed = true;
-            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, "It's a non-mnfg boot and we failed to read the master backup HW SBE Keys' hash from seeprom 1. Ignoring the error since we didn't boot from that seeprom");
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, "It's a non-mnfg boot and we failed to read the master backup HW SBE Keys' hash and Secure Version from seeprom 1. Ignoring the error since we didn't boot from that seeprom");
             err->collectTrace(ISTEP_COMP_NAME);
             ERRORLOG::errlCommit(err, ISTEP_COMP_ID);
         }
@@ -755,11 +764,12 @@ void validateSecuritySettings()
         bool skipPrimaryMatch = false;
 
         // read the primary sbe HW keys' hash for the current processor
-        err = SBE::getHwKeyHashFromSbeImage(
-                                         pProc,
-                                         EEPROM::SBE_PRIMARY,
-                                         bootSide,
-                                         l_slaveHashPri);
+        err = SBE::getSecuritySettingsFromSbeImage(
+                                          pProc,
+                                          EEPROM::SBE_PRIMARY,
+                                          bootSide,
+                                          l_slaveHashPri,
+                                          l_slaveSecureVersionPri);
 
         if (err)
         {
@@ -767,7 +777,7 @@ void validateSecuritySettings()
             if (!mnfg_mode && bootSide != SBE::SBE_SEEPROM0)
             {
                 skipPrimaryMatch = true;
-                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, "It's a non-mnfg boot and we failed to read the HW SBE Keys' hash from seeprom 0, HUID:0x%.8X. Ignoring the error since we didn't boot from that seeprom", TARGETING::get_huid(pProc));
+                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, "It's a non-mnfg boot and we failed to read the HW SBE Keys' hash and Secure Version from seeprom 0, HUID:0x%.8X. Ignoring the error since we didn't boot from that seeprom", TARGETING::get_huid(pProc));
                 err->collectTrace(ISTEP_COMP_NAME);
                 ERRORLOG::errlCommit(err, ISTEP_COMP_ID);
             }
@@ -797,17 +807,18 @@ void validateSecuritySettings()
         bool skipBackupMatch = false;
 
         // read the backup sbe HW keys' hash for the current processor
-        err = SBE::getHwKeyHashFromSbeImage(
-                                         pProc,
-                                         EEPROM::SBE_BACKUP,
-                                         bootSide,
-                                         l_slaveHashBac);
+        err = SBE::getSecuritySettingsFromSbeImage(
+                                          pProc,
+                                          EEPROM::SBE_BACKUP,
+                                          bootSide,
+                                          l_slaveHashBac,
+                                          l_slaveSecureVersionBac);
         if (err)
         {
             if (!mnfg_mode && bootSide != SBE::SBE_SEEPROM1)
             {
                 skipBackupMatch = true;
-                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, "It's a non-mnfg boot and we failed to read the HW SBE Keys' hash from seeprom 1, HUID:0x%.8X Ignoring the error since we didn't boot from that seeprom", TARGETING::get_huid(pProc));
+                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, "It's a non-mnfg boot and we failed to read the HW SBE Keys' hash and Secure Version from seeprom 1, HUID:0x%.8X Ignoring the error since we didn't boot from that seeprom", TARGETING::get_huid(pProc));
                 err->collectTrace(ISTEP_COMP_NAME);
                 ERRORLOG::errlCommit(err, ISTEP_COMP_ID);
             }

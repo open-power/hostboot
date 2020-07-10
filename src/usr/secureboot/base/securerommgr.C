@@ -365,7 +365,7 @@ errlHndl_t SecureRomManager::verifyContainer(void * i_container,
         }
         else
         {
-            // Use custom hw hash key
+            // Use custom hw hash key passed in by the caller
             memcpy (&l_hw_parms.hw_key_hash, i_hwKeyHash, sizeof(SHA512_t));
         }
 
@@ -377,7 +377,7 @@ errlHndl_t SecureRomManager::verifyContainer(void * i_container,
         }
         else
         {
-            // Use custom hw hash key
+            // Use custom Secure Version passed in by the caller
             l_hw_parms.log = i_secureVersion;
         }
 
