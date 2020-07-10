@@ -80,8 +80,8 @@ define MC = TGT3; # If referencing Attr from system, add "MC." in front
 define def_RDIMM_TYPE = (MP.ATTR_MEM_EFF_DIMM_TYPE[0] == 1 || MP.ATTR_MEM_EFF_DIMM_TYPE[0] == 3);
 define def_RDIMM_Add_latency = def_RDIMM_TYPE * MP.ATTR_MEM_RDIMM_BUFFER_DELAY;
 define def_IS_HW  = SYS.ATTR_IS_SIMULATION == 0;
-define def_IS_MICROSEMI_SIM = SYS.ATTR_IS_SIMULATION == 1;
-define def_IS_IBM_SIM = 0; # this is no longer needed, we left the associated formulas below for future proofing. 
+define def_IS_IBM_SIM = SYS.ATTR_IS_IBM_SIMULATION == 1;
+define def_IS_MICROSEMI_SIM = (SYS.ATTR_IS_SIMULATION == 1 && SYS.ATTR_IS_IBM_SIMULATION != 1);
 
 #--******************************************************************************
 #-- Systems Config
@@ -336,7 +336,7 @@ ispy  MB_SIM.SRQ.MBA_TMR1Q_CFG_ACT_TO_DIFF_RANK_DLY [when=S] {
 ispy  MB_SIM.SRQ.MBA_DSM0Q_CFG_RDTAG_DLY [when=S] {         # ATTR_MEM_EFF_DIMM_TYPE:  EMPTY = 0, RDIMM = 1, UDIMM = 2, LRDIMM = 3
   spyv, expr;
   MP.ATTR_MEM_EFF_DRAM_CL - 11 + def_RDIMM_Add_latency + MP.ATTR_MEM_EXP_DFIMRL_CLK,   def_IS_MICROSEMI_SIM;
-  MP.ATTR_MEM_EFF_DRAM_CL - 4  + def_RDIMM_Add_latency,                                def_IS_IBM_SIM;
+  MP.ATTR_MEM_EFF_DRAM_CL - 11 + def_RDIMM_Add_latency + MP.ATTR_MEM_EXP_DFIMRL_CLK,   def_IS_IBM_SIM;
   MP.ATTR_MEM_EFF_DRAM_CL - 11 + def_RDIMM_Add_latency + MP.ATTR_MEM_EXP_DFIMRL_CLK,   def_IS_HW; # Bringup good value - should be equal to the Microsemi value
 }
 
@@ -344,7 +344,7 @@ ispy  MB_SIM.SRQ.MBA_DSM0Q_CFG_RDDATA_EN_DLY [when=S] {         # ATTR_MEM_EFF_D
   spyv, expr;
 
   MP.ATTR_MEM_EFF_DRAM_CL - 9 + def_RDIMM_Add_latency  ,      def_IS_MICROSEMI_SIM;
-  MP.ATTR_MEM_EFF_DRAM_CL - 4 + def_RDIMM_Add_latency  ,      def_IS_IBM_SIM;
+  MP.ATTR_MEM_EFF_DRAM_CL - 9 + def_RDIMM_Add_latency  ,      def_IS_IBM_SIM;
   MP.ATTR_MEM_EFF_DRAM_CL - 9 + def_RDIMM_Add_latency  ,      def_IS_HW;             # Bringup good value - should be equal to the Microsemi value
 }
 
@@ -352,7 +352,7 @@ ispy  MB_SIM.SRQ.MBA_DSM0Q_CFG_RDCSLAT_DLY [when=S] {         # ATTR_MEM_EFF_DIM
   spyv, expr;
 
   MP.ATTR_MEM_EFF_DRAM_CL - 9 + def_RDIMM_Add_latency,      def_IS_MICROSEMI_SIM;
-  MP.ATTR_MEM_EFF_DRAM_CL - 4 + def_RDIMM_Add_latency,      def_IS_IBM_SIM;
+  MP.ATTR_MEM_EFF_DRAM_CL - 9 + def_RDIMM_Add_latency,      def_IS_IBM_SIM;
   MP.ATTR_MEM_EFF_DRAM_CL - 9 + def_RDIMM_Add_latency,      def_IS_HW;             # Bringup good value - should be equal to the Microsemi value
 }
 
@@ -366,7 +366,7 @@ ispy  MB_SIM.SRQ.MBA_DSM0Q_CFG_WRDATA_EN_DLY [when=S] {         # ATTR_MEM_EFF_D
   spyv, expr;
 
   MP.ATTR_MEM_DRAM_CWL - 7 + def_RDIMM_Add_latency,      def_IS_MICROSEMI_SIM;
-  MP.ATTR_MEM_DRAM_CWL - 2 + def_RDIMM_Add_latency,      def_IS_IBM_SIM;
+  MP.ATTR_MEM_DRAM_CWL - 7 + def_RDIMM_Add_latency,      def_IS_IBM_SIM;
   MP.ATTR_MEM_DRAM_CWL - 7 + def_RDIMM_Add_latency,      def_IS_HW;             # Bringup good value - should be equal to the Microsemi value
 }
 
@@ -374,7 +374,7 @@ ispy  MB_SIM.SRQ.MBA_DSM0Q_CFG_WRCSLAT_DLY [when=S] {         # ATTR_MEM_EFF_DIM
   spyv, expr;
 
   MP.ATTR_MEM_DRAM_CWL - 7 + def_RDIMM_Add_latency,      def_IS_MICROSEMI_SIM;
-  MP.ATTR_MEM_DRAM_CWL - 2 + def_RDIMM_Add_latency,      def_IS_IBM_SIM;
+  MP.ATTR_MEM_DRAM_CWL - 7 + def_RDIMM_Add_latency,      def_IS_IBM_SIM;
   MP.ATTR_MEM_DRAM_CWL - 7 + def_RDIMM_Add_latency,      def_IS_HW;             # Bringup good value - should be equal to the Microsemi value
 }
 

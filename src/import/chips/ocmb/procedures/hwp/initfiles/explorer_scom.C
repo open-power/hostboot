@@ -33,20 +33,20 @@ constexpr uint64_t literal_1 = 1;
 constexpr uint64_t literal_3 = 3;
 constexpr uint64_t literal_0 = 0;
 constexpr uint64_t literal_11 = 11;
-constexpr uint64_t literal_4 = 4;
 constexpr uint64_t literal_9 = 9;
 constexpr uint64_t literal_14 = 14;
 constexpr uint64_t literal_7 = 7;
-constexpr uint64_t literal_2 = 2;
 constexpr uint64_t literal_24 = 24;
 constexpr uint64_t literal_5 = 5;
 constexpr uint64_t literal_266 = 266;
 constexpr uint64_t literal_1866 = 1866;
+constexpr uint64_t literal_4 = 4;
 constexpr uint64_t literal_2668 = 2668;
 constexpr uint64_t literal_2934 = 2934;
 constexpr uint64_t literal_12 = 12;
 constexpr uint64_t literal_13 = 13;
 constexpr uint64_t literal_0b1000 = 0b1000;
+constexpr uint64_t literal_2 = 2;
 constexpr uint64_t literal_511 = 511;
 constexpr uint64_t literal_132 = 132;
 constexpr uint64_t literal_8 = 8;
@@ -101,9 +101,12 @@ fapi2::ReturnCode explorer_scom(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP
                                 const fapi2::Target<fapi2::TARGET_TYPE_MC>& TGT3)
 {
     {
+        fapi2::ATTR_IS_IBM_SIMULATION_Type l_TGT2_ATTR_IS_IBM_SIMULATION;
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IS_IBM_SIMULATION, TGT2, l_TGT2_ATTR_IS_IBM_SIMULATION));
         fapi2::ATTR_IS_SIMULATION_Type l_TGT2_ATTR_IS_SIMULATION;
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IS_SIMULATION, TGT2, l_TGT2_ATTR_IS_SIMULATION));
-        uint64_t l_def_IS_MICROSEMI_SIM = (l_TGT2_ATTR_IS_SIMULATION == literal_1);
+        uint64_t l_def_IS_MICROSEMI_SIM = ((l_TGT2_ATTR_IS_SIMULATION == literal_1)
+                                           && (l_TGT2_ATTR_IS_IBM_SIMULATION != literal_1));
         fapi2::ATTR_MEM_EXP_DFIMRL_CLK_Type l_TGT1_ATTR_MEM_EXP_DFIMRL_CLK;
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MEM_EXP_DFIMRL_CLK, TGT1, l_TGT1_ATTR_MEM_EXP_DFIMRL_CLK));
         fapi2::ATTR_MEM_RDIMM_BUFFER_DELAY_Type l_TGT1_ATTR_MEM_RDIMM_BUFFER_DELAY;
@@ -115,7 +118,7 @@ fapi2::ReturnCode explorer_scom(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP
         uint64_t l_def_RDIMM_Add_latency = (l_def_RDIMM_TYPE * l_TGT1_ATTR_MEM_RDIMM_BUFFER_DELAY);
         fapi2::ATTR_MEM_EFF_DRAM_CL_Type l_TGT1_ATTR_MEM_EFF_DRAM_CL;
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MEM_EFF_DRAM_CL, TGT1, l_TGT1_ATTR_MEM_EFF_DRAM_CL));
-        uint64_t l_def_IS_IBM_SIM = literal_0;
+        uint64_t l_def_IS_IBM_SIM = (l_TGT2_ATTR_IS_IBM_SIMULATION == literal_1);
         uint64_t l_def_IS_HW = (l_TGT2_ATTR_IS_SIMULATION == literal_0);
         fapi2::ATTR_MEM_DRAM_CWL_Type l_TGT1_ATTR_MEM_DRAM_CWL;
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MEM_DRAM_CWL, TGT1, l_TGT1_ATTR_MEM_DRAM_CWL));
@@ -257,7 +260,8 @@ fapi2::ReturnCode explorer_scom(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP
             }
             else if (l_def_IS_IBM_SIM)
             {
-                l_scom_buffer.insert<36, 6, 58, uint64_t>(((l_TGT1_ATTR_MEM_EFF_DRAM_CL - literal_4) + l_def_RDIMM_Add_latency) );
+                l_scom_buffer.insert<36, 6, 58, uint64_t>((((l_TGT1_ATTR_MEM_EFF_DRAM_CL - literal_11) + l_def_RDIMM_Add_latency) +
+                        l_TGT1_ATTR_MEM_EXP_DFIMRL_CLK) );
             }
             else if (l_def_IS_HW)
             {
@@ -271,7 +275,7 @@ fapi2::ReturnCode explorer_scom(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP
             }
             else if (l_def_IS_IBM_SIM)
             {
-                l_scom_buffer.insert<47, 5, 59, uint64_t>(((l_TGT1_ATTR_MEM_EFF_DRAM_CL - literal_4) + l_def_RDIMM_Add_latency) );
+                l_scom_buffer.insert<47, 5, 59, uint64_t>(((l_TGT1_ATTR_MEM_EFF_DRAM_CL - literal_9) + l_def_RDIMM_Add_latency) );
             }
             else if (l_def_IS_HW)
             {
@@ -284,7 +288,7 @@ fapi2::ReturnCode explorer_scom(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP
             }
             else if (l_def_IS_IBM_SIM)
             {
-                l_scom_buffer.insert<42, 5, 59, uint64_t>(((l_TGT1_ATTR_MEM_EFF_DRAM_CL - literal_4) + l_def_RDIMM_Add_latency) );
+                l_scom_buffer.insert<42, 5, 59, uint64_t>(((l_TGT1_ATTR_MEM_EFF_DRAM_CL - literal_9) + l_def_RDIMM_Add_latency) );
             }
             else if (l_def_IS_HW)
             {
@@ -310,7 +314,7 @@ fapi2::ReturnCode explorer_scom(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP
             }
             else if (l_def_IS_IBM_SIM)
             {
-                l_scom_buffer.insert<57, 5, 59, uint64_t>(((l_TGT1_ATTR_MEM_DRAM_CWL - literal_2) + l_def_RDIMM_Add_latency) );
+                l_scom_buffer.insert<57, 5, 59, uint64_t>(((l_TGT1_ATTR_MEM_DRAM_CWL - literal_7) + l_def_RDIMM_Add_latency) );
             }
             else if (l_def_IS_HW)
             {
@@ -323,7 +327,7 @@ fapi2::ReturnCode explorer_scom(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP
             }
             else if (l_def_IS_IBM_SIM)
             {
-                l_scom_buffer.insert<52, 5, 59, uint64_t>(((l_TGT1_ATTR_MEM_DRAM_CWL - literal_2) + l_def_RDIMM_Add_latency) );
+                l_scom_buffer.insert<52, 5, 59, uint64_t>(((l_TGT1_ATTR_MEM_DRAM_CWL - literal_7) + l_def_RDIMM_Add_latency) );
             }
             else if (l_def_IS_HW)
             {

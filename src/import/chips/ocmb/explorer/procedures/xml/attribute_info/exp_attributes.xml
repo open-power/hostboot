@@ -37,6 +37,16 @@
 
 <attributes>
     <attribute>
+        <id>ATTR_IS_IBM_SIMULATION</id>
+        <targetType>TARGET_TYPE_SYSTEM</targetType>
+        <description>
+            Attribute for IBM cycle simulation with OCMB+
+        </description>
+        <initToZero></initToZero>
+        <valueType>uint8</valueType>
+        <writeable/>
+    </attribute>
+    <attribute>
         <id>ATTR_MSS_OCMB_ENTERPRISE_MODE</id>
         <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
         <description>
