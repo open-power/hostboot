@@ -784,15 +784,17 @@ class SBEUpdateTest: public CxxTest::TestSuite
 
             total++;
             SHA512_t hash = {0};
-            err = getHwKeyHashFromSbeImage(sbeState.target,
-                                           EEPROM::SBE_BACKUP,
-                                           SBE_SEEPROM_INVALID,
-                                           hash);
+            uint8_t secure_version=0;
+            err = getSecuritySettingsFromSbeImage(sbeState.target,
+                                                  EEPROM::SBE_BACKUP,
+                                                  SBE_SEEPROM_INVALID,
+                                                  hash,
+                                                  secure_version);
 
             if(err)
             {
                 fails++;
-                TS_FAIL("testSbeUpdateTarget() - getHwKeyHashFromSbeImage() failed.");
+                TS_FAIL("testSbeUpdateTarget() - getSecuritySettingsFromSbeImage() failed.");
                 break;
             }
 

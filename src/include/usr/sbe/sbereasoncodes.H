@@ -110,6 +110,8 @@ enum sbeReasonCode
     SBE_HBBL_ID_NOT_FOUND               = SBE_COMP_ID | 0x1E,
     ERROR_FROM_XIP_DELETE_RINGS         = SBE_COMP_ID | 0x1F,
     ERROR_FROM_XIP_FIND_RINGS           = SBE_COMP_ID | 0x20,
+    SBE_MISMATCHED_SECURE_VERSION       = SBE_COMP_ID | 0x21,
+    SBE_SECUREBOOT_ESCAPE               = SBE_COMP_ID | 0x22,
 };
 
 };  // end SBE
