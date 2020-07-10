@@ -129,7 +129,7 @@ struct BlToHbData
                    lpcBAR(MMIO_GROUP0_CHIP0_LPC_BASE_ADDR),
                    securityOverride(0), allowAttrOverrides(0),
                    sizeOfStructure(0), keyAddrStashData(0),
-                   secBackdoorBit(0), secure_version(0) {}
+                   secBackdoorBit(0), min_secure_version(0) {}
 
     // Simple way to tell if data is valid
     uint64_t eyeCatch;
@@ -165,8 +165,8 @@ struct BlToHbData
     keyAddrPair_t  keyAddrStashData;
     // Secure Setting - SBE Security Backdoor
     bool secBackdoorBit;
-    // FW Secure Version
-    uint8_t secure_version;
+    // Minimum FW Secure Version
+    uint8_t min_secure_version;
 } __attribute__((packed));
 
 /**

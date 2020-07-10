@@ -62,7 +62,7 @@ class SecureRomManager
          *
          * @param[in] i_secureVersion  Custom FW Secure Version to test against
          *                             [default = INVALID_SECURE_VERSION, use internal
-         *                             Secure Version; otherwise, use i_secureVersion]
+         *                             Minimum Secure Version; otherwise, use i_secureVersion]
          *
          * @return errlHndl_t NULL on success
          */
@@ -93,12 +93,12 @@ class SecureRomManager
         void getHwKeyHash(SHA512_t o_hash);
 
         /**
-         * @brief Retrieve the internal FW Secure Version used to validate
+         * @brief Retrieve the internal Minimum FW Secure Version used to validate
          *     containers
          *
-         * @return uint8_t    secure_version
+         * @return uint8_t    min_secure_version
          */
-         uint8_t getSecureVersion(void);
+         uint8_t getMinimumSecureVersion(void);
 
         /*
          * @brief Hash the concatenation of N Blobs

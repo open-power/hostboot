@@ -133,11 +133,11 @@ class BlToHbDataManager
         const size_t getHwKeysHashSize() const;
 
         /*
-         * @brief Returns internal Secure Version
+         * @brief Returns internal Minimum Secure Version
          *
-         * @return uint8_t     secure_version
+         * @return uint8_t     min_secure_version
          */
-        const uint8_t getSecureVersion() const;
+        const uint8_t getMinimumSecureVersion() const;
 
         /*
          * @brief Returns internal pointer to hbbHeader
