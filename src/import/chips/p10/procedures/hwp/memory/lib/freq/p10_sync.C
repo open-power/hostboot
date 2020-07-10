@@ -269,4 +269,35 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
+///
+/// @brief Set system freq attributes based on selected OMI frequency
+/// @param[in] i_target proc chip target
+/// @param[in] i_omi_freq OMI frequency
+/// @return FAPI2_RC_SUCCESS iff successful
+/// @note i_omi_freq cannot be const due to FAPI_ATTR_SET not allowing const
+///
+fapi2::ReturnCode set_freq_system_attrs(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
+                                        uint32_t i_omi_freq)
+{
+    // l_mc_freq is the frequency of the memory controller mesh clock, which
+    // is always 1/16th of the OMI frequency. Note this is the MC in the host, not in the DDIMM.
+    constexpr uint32_t MC_TO_OMI_FREQ_RATIO = 16;
+
+    // Note that this also cannot be const due to the FAPI_ATTR_SET below
+    uint32_t l_mc_freq = i_omi_freq / MC_TO_OMI_FREQ_RATIO;
+
+    FAPI_INF("%s: Setting recommended OMI frequency in ATTR_FREQ_OMI_MHZ to %d", mss::c_str(i_target), i_omi_freq);
+    FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_FREQ_OMI_MHZ, i_target, i_omi_freq) );
+
+    for (const auto& l_mc : mss::find_targets<fapi2::TARGET_TYPE_MC>(i_target))
+    {
+        FAPI_INF("%s: Setting memory controller mesh clock frequency in ATTR_FREQ_MC_MHZ to %d",
+                 mss::c_str(l_mc), l_mc_freq);
+        FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_FREQ_MC_MHZ, l_mc, l_mc_freq) );
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
 }// mss

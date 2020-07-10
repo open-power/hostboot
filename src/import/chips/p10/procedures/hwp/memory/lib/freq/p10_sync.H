@@ -190,6 +190,16 @@ fapi2::ReturnCode select_omi_freq(const std::map< fapi2::Target<fapi2::TARGET_TY
                                   const uint32_t i_omi_freq,
                                   uint32_t& o_selected_omi_freq);
 
+
+///
+/// @brief Set system freq attributes based on selected OMI frequency
+/// @param[in] i_target proc chip target
+/// @param[in] i_omi_freq OMI frequency
+/// @return FAPI2_RC_SUCCESS iff successful
+/// @note i_omi_freq cannot be const due to FAPI_ATTR_SET not allowing const
+///
+fapi2::ReturnCode set_freq_system_attrs(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
+                                        uint32_t i_omi_freq);
 }// mss
 
 #endif

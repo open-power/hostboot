@@ -81,8 +81,7 @@ extern "C"
                                        l_selected_omi_freq) );
 
         // Set attributes.
-        FAPI_INF("%s: Setting recommended OMI frequency in ATTR_FREQ_OMI_MHZ to %d", mss::c_str(i_target), l_selected_omi_freq);
-        FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_FREQ_OMI_MHZ, i_target, l_selected_omi_freq) );
+        FAPI_TRY( mss::set_freq_system_attrs(i_target, l_selected_omi_freq) );
 
     fapi_try_exit:
         return fapi2::current_err;

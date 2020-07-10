@@ -136,6 +136,7 @@
     This clock is asynchronous to the nest and drives the MCU queues, and all the
     associated logic that drives the inputs to the OMI.
     This can be set differently for each memory controller in the chip.
+    This frequency is 1/16 of the OMI frequency.
   </description>
   <valueType>uint32</valueType>
   <enum>
@@ -145,6 +146,7 @@
     2000 = 2000
   </enum>
   <platInit/>
+  <writeable/>
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
