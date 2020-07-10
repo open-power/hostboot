@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -114,10 +114,10 @@ namespace SBE
     errlHndl_t updateSbeBootSeeprom(TARGETING::Target* i_target);
 
     /**
-     * @brief Retrieves the HW Key Hash from the Bootloader (HBBL) Section
-     *        of the SBE Image. By default, the image is read from a SBE
-     *        SEEPROM (where ECC is removed), but it also can be read from
-     *        a SBE Image in System Memory
+     * @brief Retrieves the HW Key Hash and the Secure Version from the
+     *        Bootloader (HBBL) Section of the SBE Image. By default, the
+     *        image is read from a SBE SEEPROM (where ECC is removed), but
+     *        it also can be read from a SBE Image in System Memory
      *
      * @param[in] i_target    Target Processor of the SBE SEEPPROM.
      *                        Assert if nullptr.
@@ -132,6 +132,8 @@ namespace SBE
      *
      * @param[out] o_hash     HW Key Hash returned from the Processor SEEPROM
      *
+     * @param[out] o_secure_Version Secure Version returned from the Processor SEEPROM
+     *
      * @param[in] i_image_ptr  Defaults to nullptr.
      *                         If nullptr, then read SBE Image from i_target
      *                         and i_seeprom.
@@ -140,10 +142,12 @@ namespace SBE
      *
      * @return errlHndl_t     Error log handle on failure; otherwise nullptr
      */
-    errlHndl_t getHwKeyHashFromSbeImage(TARGETING::Target* i_target,
-                                        EEPROM::eeprom_chip_types_t i_seeprom,
-                                        SHA512_t o_hash,
-                                        const void * i_image_ptr = nullptr);
+    errlHndl_t getSecuritySettingsFromSbeImage(
+                          TARGETING::Target* i_target,
+                          EEPROM::eeprom_chip_types_t i_seeprom,
+                          SHA512_t o_hash,
+                          uint8_t & o_secure_version,
+                          const void * i_image_ptr = nullptr);
 
     /**
      * @brief Loop through all active processor targets and compare both sides of

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -467,23 +467,30 @@ void validateSecuritySettings()
     // masters to slaves
     std::vector<HashNode> l_hashes;
 
-    // master processor primary hash
+    // master processor primary hash and secure version
     SHA512_t l_masterHash = {0};
+    uint8_t l_masterSecureVersion = 0;
 
-    // master processor backup hash
+    // master processor backup hash and secure version
     SHA512_t l_backupHash = {0};
+    uint8_t l_backupSecureVersion = 0;
 
-    // slave processor primary hash (reset each time through the loop)
+    // slave processor primary hash and secure version
+    // (reset each time through the loop)
     SHA512_t l_slaveHashPri = {0};
+    uint8_t l_slaveSecureVersionPri = 0;
 
-    // slave processor backup hash (reset each time through the loop)
+    // slave processor backup hash and secure version
+    // (reset each time through the loop)
     SHA512_t l_slaveHashBac = {0};
+    uint8_t l_slaveSecureVersionBac = 0;
 
     // nodes for the hashes vector only to be added to vector as needed
     auto l_master = HashNode(l_masterHash, "master primary", SBE::SBE_SEEPROM0);
     auto l_backup = HashNode(l_backupHash, "master backup", SBE::SBE_SEEPROM1);
     auto l_slave = HashNode(l_slaveHashPri, "slave primary", SBE::SBE_SEEPROM0);
     auto l_slaveb = HashNode(l_slaveHashBac, "slave backup", SBE::SBE_SEEPROM1);
+
     // obtain the master processor target
     TARGETING::Target* mProc = nullptr;
     err = TARGETING::targetService().queryMasterProcChipTargetHandle(mProc);
@@ -524,10 +531,12 @@ void validateSecuritySettings()
     }
 
     // read the primary sbe HW keys' hash for the master processor
-    err = SBE::getHwKeyHashFromSbeImage(
+    err = SBE::getSecuritySettingsFromSbeImage(
                                      mProc,
                                      EEPROM::SBE_PRIMARY,
-                                     l_masterHash);
+                                     l_masterHash,
+                                     l_masterSecureVersion);
+
     if (err)
     {
         auto plid = err->plid();
@@ -550,10 +559,13 @@ void validateSecuritySettings()
     }
 
     // read the backup sbe HW keys' hash for the master processor
-    err = SBE::getHwKeyHashFromSbeImage(
+    err = SBE::getSecuritySettingsFromSbeImage(
                                       mProc,
                                       EEPROM::SBE_BACKUP,
-                                      l_backupHash);
+                                      l_backupHash,
+                                      l_backupSecureVersion);
+
+
     if (err)
     {
         auto plid = err->plid();
@@ -647,10 +659,12 @@ void validateSecuritySettings()
         }
 
         // read the primary sbe HW keys' hash for the current processor
-        err = SBE::getHwKeyHashFromSbeImage(
+        err = SBE::getSecuritySettingsFromSbeImage(
                                          pProc,
                                          EEPROM::SBE_PRIMARY,
-                                         l_slaveHashPri);
+                                         l_slaveHashPri,
+                                         l_slaveSecureVersionPri);
+
         if (err)
         {
             auto plid = err->plid();
@@ -674,10 +688,11 @@ void validateSecuritySettings()
         }
 
         // read the backup sbe HW keys' hash for the current processor
-        err = SBE::getHwKeyHashFromSbeImage(
+        err = SBE::getSecuritySettingsFromSbeImage(
                                          pProc,
                                          EEPROM::SBE_BACKUP,
-                                         l_slaveHashBac);
+                                         l_slaveHashBac,
+                                         l_slaveSecureVersionBac);
         if (err)
         {
             auto plid = err->plid();
