@@ -516,6 +516,60 @@ static inline uint8_t align_odt_field_to_attr(const uint8_t i_value)
 }
 
 ///
+/// @brief Decodes RCV_IMP_DQ_DQS value depending on SPD revision
+/// @param[in] i_target OCMB target
+/// @param[in] i_odt_impedance encoded value from EFD
+/// @param[in] i_spd_rev SPD revision
+/// @param[out] o_setting value we want to set attr with
+/// @return FAPI2_RC_SUCCESS iff okay
+///
+static inline fapi2::ReturnCode decode_rcv_imp_dq_dqs(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP> i_target,
+        const uint8_t i_odt_impedance,
+        const uint8_t i_spd_rev,
+        uint8_t& o_setting)
+{
+    static const std::vector< std::pair<uint8_t, uint8_t> > ODT_IMP_MAP_0_3 =
+    {
+        // {key byte, PHY ODT IMP (ohms)}
+        {0b00000, fapi2::ENUM_ATTR_MEM_SI_MC_RCV_IMP_DQ_DQS_DISABLE},
+        {0b00001, fapi2::ENUM_ATTR_MEM_SI_MC_RCV_IMP_DQ_DQS_OHM_40},
+        {0b00010, fapi2::ENUM_ATTR_MEM_SI_MC_RCV_IMP_DQ_DQS_OHM_60},
+        {0b00011, fapi2::ENUM_ATTR_MEM_SI_MC_RCV_IMP_DQ_DQS_OHM_80},
+        {0b00100, fapi2::ENUM_ATTR_MEM_SI_MC_RCV_IMP_DQ_DQS_OHM_120},
+        {0b00101, fapi2::ENUM_ATTR_MEM_SI_MC_RCV_IMP_DQ_DQS_OHM_240},
+
+        // All others reserved
+    };
+
+    static const std::vector< std::pair<uint8_t, uint8_t> > ODT_IMP_MAP_NEWER =
+    {
+        // {key byte, PHY ODT IMP (ohms)}
+        {0b00000, fapi2::ENUM_ATTR_MEM_SI_MC_RCV_IMP_DQ_DQS_DISABLE},
+        {0b00001, fapi2::ENUM_ATTR_MEM_SI_MC_RCV_IMP_DQ_DQS_OHM_40},
+        {0b00010, fapi2::ENUM_ATTR_MEM_SI_MC_RCV_IMP_DQ_DQS_OHM_48},
+        {0b00011, fapi2::ENUM_ATTR_MEM_SI_MC_RCV_IMP_DQ_DQS_OHM_60},
+        {0b00100, fapi2::ENUM_ATTR_MEM_SI_MC_RCV_IMP_DQ_DQS_OHM_80},
+        {0b00101, fapi2::ENUM_ATTR_MEM_SI_MC_RCV_IMP_DQ_DQS_OHM_120},
+        {0b00110, fapi2::ENUM_ATTR_MEM_SI_MC_RCV_IMP_DQ_DQS_OHM_240},
+
+        // All others reserved
+    };
+
+    // Map SPD value to desired setting
+    if (i_spd_rev == spd::rev::V0_3)
+    {
+        FAPI_TRY(lookup_table_check(i_target, ODT_IMP_MAP_0_3, mss::SET_SI_MC_RCV_IMP_DQ_DQS, i_odt_impedance, o_setting));
+    }
+    else
+    {
+        FAPI_TRY(lookup_table_check(i_target, ODT_IMP_MAP_NEWER, mss::SET_SI_MC_RCV_IMP_DQ_DQS, i_odt_impedance, o_setting));
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
 /// @brief Check for SPD Revision 0.3, set o_field accordingly, for use with thermal sensor fields
 ///
 /// @tparam DT Data type (uint8_t, uint16_t, etc.)

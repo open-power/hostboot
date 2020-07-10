@@ -47,6 +47,7 @@
 #include <generic/memory/lib/spd/ddimm/efd_decoder.H>
 #include <generic/memory/lib/utils/dimm/mss_timing.H>
 #include <generic/memory/lib/spd/spd_utils.H>
+#include <generic/memory/lib/utils/shared/mss_generic_consts.H>
 
 namespace mss
 {
@@ -753,24 +754,16 @@ struct attrEngineTraits<P, attr_si_engine_fields, attr_si_engine_fields::SI_MC_R
             attr_integral_type& o_setting)
     {
         uint8_t l_odt_impedance = 0;
+        uint8_t l_spd_rev = 0;
 
-        static const std::vector< std::pair<uint8_t, uint8_t> > ODT_IMP_MAP =
-        {
-            // {key byte, PHY ODT IMP (ohms)}
-            {0b00000, fapi2::ENUM_ATTR_MEM_SI_MC_RCV_IMP_DQ_DQS_DISABLE},
-            {0b00001, fapi2::ENUM_ATTR_MEM_SI_MC_RCV_IMP_DQ_DQS_OHM_40},
-            {0b00010, fapi2::ENUM_ATTR_MEM_SI_MC_RCV_IMP_DQ_DQS_OHM_60},
-            {0b00011, fapi2::ENUM_ATTR_MEM_SI_MC_RCV_IMP_DQ_DQS_OHM_80},
-            {0b00100, fapi2::ENUM_ATTR_MEM_SI_MC_RCV_IMP_DQ_DQS_OHM_120},
-            {0b00101, fapi2::ENUM_ATTR_MEM_SI_MC_RCV_IMP_DQ_DQS_OHM_240},
-
-            // All others reserved
-        };
         const auto l_ocmb = i_efd_data->get_target();
+        const auto& l_ports = mss::find_targets<fapi2::TARGET_TYPE_MEM_PORT>(l_ocmb);
 
+        FAPI_TRY(mss::attr::get_spd_revision(l_ports[0], l_spd_rev));
         FAPI_TRY(i_efd_data->phy_odt_impedance(l_odt_impedance));
-        // Map SPD value to desired setting
-        FAPI_TRY(lookup_table_check(l_ocmb, ODT_IMP_MAP, mss::SET_SI_MC_RCV_IMP_DQ_DQS, l_odt_impedance, o_setting));
+
+        // Call helper function
+        FAPI_TRY(mss::gen::decode_rcv_imp_dq_dqs(l_ocmb, l_odt_impedance, l_spd_rev, o_setting));
 
     fapi_try_exit:
         return fapi2::current_err;
