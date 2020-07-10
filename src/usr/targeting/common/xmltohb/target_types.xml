@@ -2428,6 +2428,12 @@
       <id>ENABLED_THREADS</id>
     </attribute>
     <attribute>
+      <id>FIELD_TH_L2_LINE_DELETES</id>
+    </attribute>
+    <attribute>
+      <id>FIELD_TH_L3_LINE_DELETES</id>
+    </attribute>
+    <attribute>
       <id>FORCE_SRAM_MMIO_OVER_I2C</id>
     </attribute>
     <attribute>
@@ -2497,6 +2503,42 @@
     </attribute>
     <attribute>
       <id>MIRROR_BASE_ADDRESS</id>
+    </attribute>
+    <attribute>
+      <id>MNFG_TH_L2_CACHE_CES</id>
+    </attribute>
+    <attribute>
+      <id>MNFG_TH_L2_DIR_CES</id>
+    </attribute>
+    <attribute>
+      <id>MNFG_TH_L2_LINE_DELETES</id>
+    </attribute>
+    <attribute>
+      <id>MNFG_TH_L3_CACHE_CES</id>
+    </attribute>
+    <attribute>
+      <id>MNFG_TH_L3_DIR_CES</id>
+    </attribute>
+    <attribute>
+      <id>MNFG_TH_L3_LINE_DELETES</id>
+    </attribute>
+    <attribute>
+      <id>MNFG_TH_MEMORY_IMPES</id>
+    </attribute>
+    <attribute>
+      <id>MNFG_TH_MEMORY_IPL_SOFT_CE_TH_ALGO</id>
+    </attribute>
+    <attribute>
+      <id>MNFG_TH_MEMORY_IUES</id>
+    </attribute>
+    <attribute>
+      <id>MNFG_TH_MEMORY_RCD_PARITY_ERRORS</id>
+    </attribute>
+    <attribute>
+      <id>MNFG_TH_MEMORY_RT_RCE_PER_RANK</id>
+    </attribute>
+    <attribute>
+      <id>MNFG_TH_MEMORY_RT_SOFT_CE_TH_ALGO</id>
     </attribute>
     <attribute>
       <id>MRW_DDR4_VDDR_MAX_LIMIT</id>
