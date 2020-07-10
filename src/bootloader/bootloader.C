@@ -157,13 +157,10 @@ namespace Bootloader{
                                                             (HW_KEYS_HASH_ADDR);
             g_blData->blToHbData.hwKeysHashSize = SHA512_DIGEST_LENGTH;
 
-            if (g_blData->blToHbData.version >= BLTOHB_SECURE_VERSION)
-            {
-                // Set Secure Version from the 1 byte before HW key hash pointer
-                memcpy(&g_blData->blToHbData.secure_version,
-                       reinterpret_cast<const void *>(SECURE_VERSION_ADDR),
-                       sizeof(g_blData->blToHbData.secure_version));
-            }
+            // Set Minimum Secure Version from the 1 byte before HW key hash pointer
+            memcpy(&g_blData->blToHbData.min_secure_version,
+                   reinterpret_cast<const void *>(SECURE_VERSION_ADDR),
+                   sizeof(g_blData->blToHbData.min_secure_version));
 
             // Set HBB header and size
             g_blData->blToHbData.hbbHeader = i_pHbbSrc;
@@ -341,8 +338,8 @@ namespace Bootloader{
             memcpy (&l_hw_parms.hw_key_hash, g_blData->blToHbData.hwKeysHash,
                     sizeof(SHA512_t));
 
-            // Use current secure version
-            l_hw_parms.log = g_blData->blToHbData.secure_version;
+            // Use current minimum secure version from the system
+            l_hw_parms.log = g_blData->blToHbData.min_secure_version;
 
             const auto l_container = reinterpret_cast<const ROM_container_raw*>
                                                                  (i_pContainer);

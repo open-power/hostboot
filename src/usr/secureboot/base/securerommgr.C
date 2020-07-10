@@ -169,11 +169,11 @@ void getHwKeyHash(SHA512_t o_hash)
 }
 
 /*
- * @brief  Externally available FW Secure Version retrieval function
+ * @brief  Externally available Minimum FW Secure Version retrieval function
  */
-uint8_t getSecureVersion(void)
+uint8_t getMinimumSecureVersion(void)
 {
-    return Singleton<SecureRomManager>::instance().getSecureVersion();
+    return Singleton<SecureRomManager>::instance().getMinimumSecureVersion();
 }
 
 
@@ -373,8 +373,8 @@ errlHndl_t SecureRomManager::verifyContainer(void * i_container,
         // Set FW Secure Version
         if (i_secureVersion == INVALID_SECURE_VERSION)
         {
-            // Use system Secure Version
-            l_hw_parms.log = getSecureVersion();
+            // Use internal system Minimum Secure Version
+            l_hw_parms.log = getMinimumSecureVersion();
         }
         else
         {
@@ -550,11 +550,11 @@ void SecureRomManager::getHwKeyHash()
 }
 
 /**
- * @brief Retrieves FW Secure Version
+ * @brief Retrieves Minimum FW Secure Version
  */
-uint8_t SecureRomManager::getSecureVersion()
+uint8_t SecureRomManager::getMinimumSecureVersion()
 {
-    return g_BlToHbDataManager.getSecureVersion();
+    return g_BlToHbDataManager.getMinimumSecureVersion();
 }
 
 
