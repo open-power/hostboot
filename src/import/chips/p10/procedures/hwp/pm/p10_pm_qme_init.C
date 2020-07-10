@@ -485,9 +485,21 @@ fapi2::ReturnCode qme_halt(
                      "STOP Reset Timeout");
     }
 
+    FAPI_INF("Clear ASSERT_SPECIAL_WKUP_DONE and AUTO_SPECIAL_WAKEUP_DISABLE, Assert PM_EXIT if not STOP_GATED");
     l_data64.flush<0>().setBit < QME_SCSR_ASSERT_SPECIAL_WKUP_DONE > ();
     l_data64.setBit < QME_SCSR_AUTO_SPECIAL_WAKEUP_DISABLE > ();
     FAPI_TRY( putScom( core_mc_target_and, QME_SCSR_WO_CLEAR, l_data64 ) );
+
+    for ( auto l_core_target : i_target.getChildren<fapi2::TARGET_TYPE_CORE>( fapi2::TARGET_STATE_FUNCTIONAL ) )
+    {
+        FAPI_TRY( fapi2::getScom( l_core_target, scomt::c::QME_SSH_SRC, l_data64 ) );
+
+        if( l_data64.getBit<0>() != 1)
+        {
+            l_data64.flush<0>().setBit< QME_SCSR_ASSERT_PM_EXIT >();
+            FAPI_TRY( putScom( l_core_target, QME_SCSR_WO_OR, l_data64 ) );
+        }
+    }
 
     FAPI_INF("Clear QME_ACTIVE in OCC Flag Register...");
     l_data64.flush<0>().setBit<QME_ACTIVE>();
