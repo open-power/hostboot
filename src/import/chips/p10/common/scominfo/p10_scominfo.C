@@ -668,10 +668,17 @@ extern "C"
         // c: 0..31
         if (l_scom.isCoreTarget())
         {
-            o_chipUnitRelated = true;
-            // PU_C_CHIPUNIT
-            o_chipUnitPairing.push_back(p10_chipUnitPairing_t(PU_C_CHIPUNIT,
-                                        l_scom.getCoreTargetInstance()));
+            // prevent matching on CLKADJ SCOMs in ENGD build mode
+            if (!((l_scom.getEndpoint() == PSCOM_ENDPOINT) &&
+                  (l_scom.getEQRingId() == PERV_RING_ID) &&
+                  (l_scom.getEQSatId()  == CLKADJ_SAT_ID) &&
+                  (i_mode == P10_ENGD_BUILD_MODE)))
+            {
+                o_chipUnitRelated = true;
+                // PU_C_CHIPUNIT
+                o_chipUnitPairing.push_back(p10_chipUnitPairing_t(PU_C_CHIPUNIT,
+                                            l_scom.getCoreTargetInstance()));
+            }
         }
 
         // PEC registers which can be addressed by pec target type
@@ -718,7 +725,9 @@ extern "C"
         }
 
         // PAU registers
-        if (l_scom.isPauTarget())
+        if (l_scom.isPauTarget() &&
+            // prevent matching on PAU SCOMs in ENGD build mode
+            (i_mode != P10_ENGD_BUILD_MODE))
         {
             o_chipUnitRelated = true;
             // PU_PAU_CHIPUNIT
