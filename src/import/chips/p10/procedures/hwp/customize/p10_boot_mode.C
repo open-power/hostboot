@@ -576,6 +576,20 @@ add_plat_features_sbe(
         }
     }
 
+    {
+        fapi2::ATTR_CONTAINED_IPL_TYPE_Type l_attr_contained_ipl_type;
+
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CONTAINED_IPL_TYPE,
+                               i_target_sys,
+                               l_attr_contained_ipl_type));
+
+        if (l_attr_contained_ipl_type !=
+            fapi2::ENUM_ATTR_CONTAINED_IPL_TYPE_NONE)
+        {
+            FAPI_TRY(set_bit(i_bvec, CONTAINED_CLKOFFS, "CONTAINED_CLKOFFS"));
+        }
+    }
+
 fapi_try_exit:
     FAPI_DBG("End");
     return fapi2::current_err;
@@ -607,6 +621,7 @@ add_plat_features_sbe_contained(
                            l_attr_contained_ipl_type));
 
     FAPI_TRY(set_bit(i_bvec, COMMON_CONTAINED, "COMMON_CONTAINED"));
+    FAPI_TRY(set_bit(i_bvec, CONTAINED_CLKOFFS, "CONTAINED_CLKOFFS"));
 
     if (l_attr_contained_ipl_type == fapi2::ENUM_ATTR_CONTAINED_IPL_TYPE_CACHE)
     {
