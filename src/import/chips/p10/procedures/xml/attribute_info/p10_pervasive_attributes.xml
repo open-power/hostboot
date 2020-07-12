@@ -358,6 +358,19 @@
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
+  <id>ATTR_XSTOP_ON_SPATTN</id>
+  <targetType>TARGET_TYPE_SYSTEM</targetType>
+  <description>
+    Setup the option to checkstop on special attentions.
+  </description>
+  <valueType>uint8</valueType>
+  <enum>DISABLED = 0x00, ENABLED = 0x01</enum>
+  <writeable/>
+  <platInit/>
+  <initToZero/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
   <id>ATTR_BOOT_PAU_DPLL_BYPASS</id>
   <targetType>TARGET_TYPE_PROC_CHIP</targetType>
   <description>
