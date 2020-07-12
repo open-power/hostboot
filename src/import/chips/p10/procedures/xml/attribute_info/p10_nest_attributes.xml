@@ -31,9 +31,9 @@
       Define OMI Ref clock/Swizzle for OCMB/Explorer..
       Mapper from OMI unit id -> ROOT CNTL 7 refclk drive enable bit
       consumer: p10_ocmb_enable
-      </description>
+  </description>
   <valueType>uint8</valueType>
-  <platInit/>
+  <platInit>mrw</platInit>
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
@@ -66,8 +66,7 @@
     HEMISPHERE = 0x00,
     CHIP       = 0x01
   </enum>
-  <platInit/>
-  <initToZero/>
+  <platInit>mrw</platInit>
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
@@ -150,6 +149,7 @@
   <valueType>uint8</valueType>
   <writeable/>
   <platInit/>
+  <mrwHide/>
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
@@ -197,9 +197,10 @@
   </description>
   <valueType>uint8</valueType>
   <enum>
-    SMPX  = 0x0,
-    SMPA  = 0x1,
-    OCAPI = 0x3
+    SMPX   = 0x0,
+    SMPA   = 0x1,
+    OCAPI  = 0x2,
+    UNUSED = 0x3
   </enum>
   <platInit>mrw</platInit>
 </attribute>
@@ -607,7 +608,7 @@
     FULL_QUARTER = 0x0A,
     FULL_HALF    = 0x0C
   </enum>
-  <writeable/>
+  <platInit/>
   <initToZero/>
 </attribute>
 <!-- ********************************************************************** -->

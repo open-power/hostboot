@@ -39,6 +39,7 @@
     ON = 0x1
   </enum>
   <writeable/>
+  <mrwHide/>
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
@@ -77,6 +78,7 @@
   <valueType>uint64</valueType>
   <platInit/>
   <initToZero/>
+  <mrwHide/>
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
@@ -89,6 +91,7 @@
   </description>
   <valueType>uint64</valueType>
   <initToZero/>
+  <writeable/>
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
@@ -101,6 +104,7 @@
   </description>
   <valueType>uint64</valueType>
   <initToZero/>
+  <writeable/>
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
@@ -180,6 +184,7 @@
   <valueType>uint64</valueType>
   <initToZero/>
   <platInit/>
+  <mrwHide/>
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
@@ -209,6 +214,7 @@
   </enum>
   <default>RANDOM</default>
   <platInit/>
+  <mrwHide/>
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>

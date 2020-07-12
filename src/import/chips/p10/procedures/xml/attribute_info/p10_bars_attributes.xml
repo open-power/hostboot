@@ -39,6 +39,7 @@
   <valueType>uint64</valueType>
   <platInit/>
   <mrwHide/>
+  <default>0x000003FC00000000</default>
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
@@ -56,6 +57,7 @@
   <valueType>uint64</valueType>
   <platInit/>
   <mrwHide/>
+  <default>0x0000030000000000</default>
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
@@ -70,6 +72,7 @@
   <enum>DISABLE = 0x0, ENABLE = 0x1</enum>
   <platInit/>
   <mrwHide/>
+  <default>DISABLE</default>
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
@@ -86,6 +89,7 @@
   <valueType>uint64</valueType>
   <platInit/>
   <mrwHide/>
+  <default>0x0000030100000000</default>
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
@@ -114,6 +118,7 @@
   </enum>
   <platInit/>
   <mrwHide/>
+  <default>4_GB</default>
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
@@ -136,6 +141,7 @@
   </enum>
   <platInit/>
   <mrwHide/>
+  <default>256_MB</default>
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
@@ -167,6 +173,16 @@
   <platInit/>
   <array>8</array>
   <mrwHide/>
+  <default>
+    0x0000001200000000,
+    0x0000001300000000,
+    0x0000001400000000,
+    0x0000001500000000,
+    0x0000001600000000,
+    0x0000001700000000,
+    0x0000001800000000,
+    0x0000001900000000
+  </default>
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
@@ -198,6 +214,7 @@
   <valueType>uint64</valueType>
   <platInit/>
   <mrwHide/>
+  <default>0x0000030203000000</default>
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
@@ -229,6 +246,7 @@
   <valueType>uint64</valueType>
   <platInit/>
   <mrwHide/>
+  <default>0X00000302031D0000</default>
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
@@ -245,6 +263,7 @@
   <enum>DISABLE = 0x0, ENABLE = 0x1</enum>
   <platInit/>
   <mrwHide/>
+  <default>DISABLE</default>
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
@@ -260,6 +279,7 @@
   <valueType>uint64</valueType>
   <platInit/>
   <mrwHide/>
+  <initToZero/>
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>

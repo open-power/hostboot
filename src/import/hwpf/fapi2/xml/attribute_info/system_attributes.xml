@@ -211,6 +211,8 @@
     </enum>
     <platInit/>
     <mssAccessorName>mfg_flags</mssAccessorName>
+    <initToZero/>
+    <mrwHide/>
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>

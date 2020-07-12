@@ -36,6 +36,7 @@
     <valueType>uint8</valueType>
     <platInit/>
     <persistRuntime/>
+    <mrwHide/>
   </attribute>
   <!-- ********************************************************************** -->
   <attribute>
@@ -52,8 +53,10 @@
       larger than the physical SEEPROM size.
     </description>
     <valueType>uint32</valueType>
+    <default>0x80000</default>
     <platInit/>
     <persistRuntime/>
+    <mrwHide/>
   </attribute>
   <!-- ********************************************************************** -->
 </attributes>

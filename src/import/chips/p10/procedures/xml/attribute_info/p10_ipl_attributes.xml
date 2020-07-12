@@ -124,6 +124,7 @@
   <valueType>uint8</valueType>
   <enum>PRIMARY = 0x0,SECONDARY = 0x1</enum>
   <platInit/>
+  <default>PRIMARY</default>
   <mrwHide/>
 </attribute>
 <!-- ********************************************************************** -->
@@ -134,6 +135,7 @@
   <valueType>uint8</valueType>
   <enum>PRIMARY = 0x0,SECONDARY = 0x1</enum>
   <platInit/>
+  <default>PRIMARY</default>
   <mrwHide/>
 </attribute>
 <!-- ********************************************************************** -->
@@ -172,6 +174,7 @@
   <enum>ENABLE = 0x1, DISABLE = 0x0</enum>
   <writeable/>
   <platInit/>
+  <mrwHide/><!--  Firmware gets this value from the hardware -->
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>

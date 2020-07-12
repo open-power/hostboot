@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2018,2019                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2018,2020                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -33,6 +33,7 @@
   <valueType>uint8</valueType>
   <enum>DISABLE = 0x0, ENABLE = 0x1</enum>
   <platInit/>
+  <mrwHide/>
   <persistRuntime/>
 </attribute>
 <!-- ********************************************************************* -->
@@ -74,6 +75,7 @@
   </description>
   <valueType>uint64</valueType>
   <platInit/>
+  <mrwHide/>
   <persistRuntime/>
 </attribute>
 <!-- ********************************************************************* -->

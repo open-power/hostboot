@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2018,2019                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2018,2020                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -34,7 +34,7 @@
   <enum>NONE = 3, FIFTY_OHM = 2, ONE_HUNDRED_OHM = 0</enum>
   <valueType>uint8</valueType>
   <default>NONE</default>
-  <platInit/>
+  <platInit>mrw</platInit>
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
@@ -46,7 +46,7 @@
   <enum>NONE = 3, FIFTY_OHM = 2, ONE_HUNDRED_OHM = 0</enum>
   <valueType>uint8</valueType>
   <default>NONE</default>
-  <platInit/>
+  <platInit>mrw</platInit>
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
@@ -58,7 +58,7 @@
   <enum>NONE = 3, FIFTY_OHM = 2, ONE_HUNDRED_OHM = 0</enum>
   <valueType>uint8</valueType>
   <default>NONE</default>
-  <platInit/>
+  <platInit>mrw</platInit>
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
@@ -70,7 +70,7 @@
   <enum>NONE = 3, FIFTY_OHM = 2, ONE_HUNDRED_OHM = 0</enum>
   <valueType>uint8</valueType>
   <default>NONE</default>
-  <platInit/>
+  <platInit>mrw</platInit>
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
@@ -90,7 +90,7 @@
   <description>RCS PLL input for TOD Filter PLL</description>
   <valueType>uint8</valueType>
   <enum>SYS_REFCLOCK0 = 0x0, RCS_ASYNC_OUT = 0x2, RCS_SYNC_OUT = 0x1</enum>
-  <platInit/>
+  <platInit>mrw</platInit>
   <initToZero/>
 </attribute>
 <!-- ********************************************************************** -->
@@ -100,7 +100,7 @@
   <description>RCS PLL input for Nest Filter PLL</description>
   <valueType>uint8</valueType>
   <enum>SYS_REFCLOCK0 = 0x0, RCS_ASYNC_OUT = 0x2, RCS_SYNC_OUT = 0x1</enum>
-  <platInit/>
+  <platInit>mrw</platInit>
   <initToZero/>
 </attribute>
 <!-- ********************************************************************** -->
@@ -110,7 +110,7 @@
   <description>RCS PLL input for IO Filter PLL</description>
   <valueType>uint8</valueType>
   <enum>SYS_REFCLOCK0 = 0x0, RCS_ASYNC_OUT = 0x2, RCS_SYNC_OUT = 0x1</enum>
-  <platInit/>
+  <platInit>mrw</platInit>
   <initToZero/>
 </attribute>
 <!-- ********************************************************************** -->
@@ -120,7 +120,7 @@
   <description>RCS PLL input for IO Spread Spectrum Filter PLL</description>
   <valueType>uint8</valueType>
   <enum>SYS_REFCLOCK0 = 0x0, RCS_ASYNC_OUT = 0x2, RCS_SYNC_OUT = 0x1</enum>
-  <platInit/>
+  <platInit>mrw</platInit>
   <initToZero/>
 </attribute>
 <!-- ********************************************************************** -->
@@ -130,7 +130,7 @@
   <description>MUX 1 input</description>
   <valueType>uint8</valueType>
   <enum>MUX10 = 0, TCK = 1</enum>
-  <platInit/>
+  <platInit>mrw</platInit>
   <initToZero/>
 </attribute>
 <!-- ********************************************************************** -->
@@ -140,7 +140,7 @@
   <description>MUX 2a input</description>
   <valueType>uint8</valueType>
   <enum>PAU_DPLL = 0, MUX1 = 1</enum>
-  <platInit/>
+  <platInit>mrw</platInit>
   <initToZero/>
 </attribute>
 <!-- ********************************************************************** -->
@@ -150,7 +150,7 @@
   <description>MUX 2b input</description>
   <valueType>uint8</valueType>
   <enum>PAU_DPLL = 0, MUX1 = 1</enum>
-  <platInit/>
+  <platInit>mrw</platInit>
   <initToZero/>
 </attribute>
 <!-- ********************************************************************** -->
@@ -160,7 +160,7 @@
   <description>MUX 3 input</description>
   <valueType>uint8</valueType>
   <enum>NEST_DPLL = 0, MUX2B = 1</enum>
-  <platInit/>
+  <platInit>mrw</platInit>
   <initToZero/>
 </attribute>
 <!-- ********************************************************************** -->
@@ -170,7 +170,7 @@
   <description>PAU DPLL input from Filter PLLs</description>
   <valueType>uint8</valueType>
   <enum>PLLIOSSFLT = 0, PLLIOFLT = 1</enum>
-  <platInit/>
+  <platInit>mrw</platInit>
   <initToZero/>
 </attribute>
 <!-- ********************************************************************** -->
@@ -180,7 +180,7 @@
   <description>NEST DPLL input from Filter PLLs</description>
   <valueType>uint8</valueType>
   <enum> PLLIOSSFLT = 0, PLLIOFLT = 1</enum>
-  <platInit/>
+  <platInit>mrw</platInit>
   <initToZero/>
 </attribute>
 <!-- ********************************************************************** -->
@@ -190,7 +190,7 @@
   <description>OMI LCPLL input</description>
   <valueType>uint8</valueType>
   <enum>PLLTODFLT = 0, PLLNESTFLT = 2, PLLIOFLT = 1</enum>
-  <platInit/>
+  <platInit>mrw</platInit>
   <initToZero/>
 </attribute>
 <!-- ********************************************************************** -->
@@ -200,7 +200,7 @@
   <description>Mux 13 input</description>
   <valueType>uint8</valueType>
   <enum>PLLTODFLT = 0, PLLNESTFLT = 2, PLLIOFLT = 1</enum>
-  <platInit/>
+  <platInit>mrw</platInit>
   <initToZero/>
 </attribute>
 <!-- ********************************************************************** -->
@@ -210,7 +210,7 @@
   <description>Mux 14 input</description>
   <valueType>uint8</valueType>
   <enum>PLLNESTFLT = 0, PLLIOFLT = 1</enum>
-  <platInit/>
+  <platInit>mrw</platInit>
   <initToZero/>
 </attribute>
 <!-- ********************************************************************** -->
@@ -229,7 +229,7 @@
   </description>
   <valueType>uint8</valueType>
   <enum>PLLTODFLT = 0, MUX14 = 2, MUX13 = 1</enum>
-  <platInit/>
+  <platInit>mrw</platInit>
   <initToZero/>
   <array>8</array>
   <writeable/>
@@ -241,7 +241,7 @@
   <description>Mux 23 input from FPLL</description>
   <valueType>uint8</valueType>
   <enum>PLLTODFLT = 0, PLLIOSSFLT = 2, MUX0D = 1</enum>
-  <platInit/>
+  <platInit>mrw</platInit>
   <initToZero/>
 </attribute>
 <!-- ********************************************************************** -->
@@ -254,7 +254,7 @@
  </description>
   <valueType>uint8</valueType>
   <enum>MUX23 = 0, PCI_REFCLOCK0 = 2, PCI_REFCLOCK1 = 1</enum>
-  <platInit/>
+  <platInit>mrw</platInit>
   <initToZero/>
   <array>2</array>
   <writeable/>
@@ -270,7 +270,7 @@
   </description>
   <valueType>uint8</valueType>
   <enum>LPC_REFCLOCK = 0, PLLTODFLT = 1</enum>
-  <platInit/>
+  <platInit>mrw</platInit>
   <initToZero/>
 </attribute>
 <!-- ********************************************************************** -->

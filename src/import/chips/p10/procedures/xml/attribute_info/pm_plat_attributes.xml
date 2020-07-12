@@ -384,6 +384,7 @@
         ON = 0x01
     </enum>
     <initToZero/>
+    <overrideOnly/>
     <group>debug</group>
   </attribute>
 
@@ -405,6 +406,7 @@
         ON = 0x01
     </enum>
     <initToZero/>
+    <overrideOnly/>
     <group>debug</group>
   </attribute>
 
@@ -1373,7 +1375,7 @@
     </description>
     <valueType>uint8</valueType>
     <array>4</array>
-    <platInit/>
+    <platInit>mrw</platInit>
     <default>0</default>
     <group>vrm</group>
   </attribute>
@@ -1392,7 +1394,7 @@
     If default of 0 is read, HWP will set AVSBus frequency to 1MHz.
     </description>
     <valueType>uint32</valueType>
-    <platInit/>
+    <platInit>mrw</platInit>
     <initToZero/>
     <group>vrm</group>
   </attribute>
@@ -1419,7 +1421,7 @@
     </description>
     <valueType>uint8</valueType>
     <array>4</array>
-    <platInit/>
+    <platInit>mrw</platInit>
     <default>0</default>
     <group>vrm</group>
   </attribute>
