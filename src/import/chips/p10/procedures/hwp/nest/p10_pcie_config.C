@@ -55,8 +55,8 @@ const uint64_t NFIR_ACTION1_REG = 0x0000000000000000ULL;
 const uint64_t NFIR_MASK_REG    = 0xFFFFFFF000000000ULL;
 
 // PCI PBCQ Hardware Configuration Register field definitions
-const uint8_t PBCQ_HWCFG_HANG_POLL_SCALE = 0x1;
-const uint8_t PBCQ_HWCFG_DATA_POLL_SCALE = 0x1;
+const uint8_t PBCQ_HWCFG_HANG_POLL_SCALE = 0x0;
+const uint8_t PBCQ_HWCFG_DATA_POLL_SCALE = 0x2;
 const uint8_t PBCQ_HWCFG_HANG_PE_SCALE = 0x1;
 const uint8_t PBCQ_HWCFG_CACHE_INJ_MODE = 0x3;
 const uint8_t PBCQ_HWCFG_CACHE_INJ_RATE = 0x3;

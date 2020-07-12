@@ -33,9 +33,9 @@ constexpr uint64_t literal_0 = 0;
 constexpr uint64_t literal_2 = 2;
 constexpr uint64_t literal_0b1 = 0b1;
 constexpr uint64_t literal_1 = 1;
-constexpr uint64_t literal_0b011 = 0b011;
-constexpr uint64_t literal_0b01 = 0b01;
-constexpr uint64_t literal_7 = 7;
+constexpr uint64_t literal_0xFFFF = 0xFFFF;
+constexpr uint64_t literal_112 = 112;
+constexpr uint64_t literal_0x7 = 0x7;
 
 fapi2::ReturnCode p10_mi_omi_scom(const fapi2::Target<fapi2::TARGET_TYPE_MI>& TGT0,
                                   const fapi2::Target<fapi2::TARGET_TYPE_OMI>& TGT1, const fapi2::Target<fapi2::TARGET_TYPE_MCC>& TGT2,
@@ -116,8 +116,14 @@ fapi2::ReturnCode p10_mi_omi_scom(const fapi2::Target<fapi2::TARGET_TYPE_MI>& TG
 
             if ((l_TGT3_ATTR_SYS_DISABLE_MCU_TIMEOUTS == literal_0))
             {
-                constexpr auto l_MCP_PBI01_SCOMFIR_MCTO_SELECT_PB_HANG_PULSE_ON = 0x1;
-                l_scom_buffer.insert<0, 1, 63, uint64_t>(l_MCP_PBI01_SCOMFIR_MCTO_SELECT_PB_HANG_PULSE_ON );
+                constexpr auto l_MCP_PBI01_SCOMFIR_MCTO_SELECT_PB_HANG_PULSE_OFF = 0x0;
+                l_scom_buffer.insert<0, 1, 63, uint64_t>(l_MCP_PBI01_SCOMFIR_MCTO_SELECT_PB_HANG_PULSE_OFF );
+            }
+
+            if ((l_TGT3_ATTR_SYS_DISABLE_MCU_TIMEOUTS == literal_0))
+            {
+                constexpr auto l_MCP_PBI01_SCOMFIR_MCTO_SELECT_LOCAL_HANG_PULSE_ON = 0x1;
+                l_scom_buffer.insert<1, 1, 63, uint64_t>(l_MCP_PBI01_SCOMFIR_MCTO_SELECT_LOCAL_HANG_PULSE_ON );
             }
 
             if ((l_TGT3_ATTR_SYS_DISABLE_MCU_TIMEOUTS == literal_0))
@@ -144,17 +150,24 @@ fapi2::ReturnCode p10_mi_omi_scom(const fapi2::Target<fapi2::TARGET_TYPE_MI>& TG
                 l_scom_buffer.insert<34, 1, 63, uint64_t>(l_MCP_PBI01_SCOMFIR_MCTO_ENABLE_APO_HANG_ON );
             }
 
-            l_scom_buffer.insert<37, 3, 61, uint64_t>(literal_0b011 );
-            l_scom_buffer.insert<2, 2, 62, uint64_t>(literal_0b01 );
-
             if ((l_TGT3_ATTR_SYS_DISABLE_MCU_TIMEOUTS == literal_0))
             {
-                l_scom_buffer.insert<24, 8, 56, uint64_t>(literal_1 );
+                l_scom_buffer.insert<8, 16, 48, uint64_t>(literal_0xFFFF );
             }
 
             if ((l_TGT3_ATTR_SYS_DISABLE_MCU_TIMEOUTS == literal_0))
             {
-                l_scom_buffer.insert<5, 3, 61, uint64_t>(literal_7 );
+                l_scom_buffer.insert<24, 8, 56, uint64_t>(literal_112 );
+            }
+
+            if ((l_TGT3_ATTR_SYS_DISABLE_MCU_TIMEOUTS == literal_0))
+            {
+                l_scom_buffer.insert<5, 3, 61, uint64_t>(literal_0x7 );
+            }
+
+            if ((l_TGT3_ATTR_SYS_DISABLE_MCU_TIMEOUTS == literal_0))
+            {
+                l_scom_buffer.insert<37, 3, 61, uint64_t>(literal_2 );
             }
 
             FAPI_TRY(fapi2::putScom(TGT0, 0xc010c1bull, l_scom_buffer));
