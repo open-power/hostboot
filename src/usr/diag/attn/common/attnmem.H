@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -101,6 +101,14 @@ class MemOps : public AttentionOps
                 PRDF::AttnData &  i_AttnData,
                 const uint32_t  i_mcNumber,
                 TARGETING::TargetHandle_t  i_procTarg );
+
+        /**
+         * @brief resolveOcmbs Find ocmb attentions associated with input proc.
+         *
+         * @param[in/out] io_attentions List of attentions
+         */
+        void resolveOcmbs( const TARGETING::TargetHandle_t i_proc,
+                           AttentionList & io_attentions );
 
         /**
          * @brief dtor

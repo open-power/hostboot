@@ -91,6 +91,19 @@
   </attribute>
 
   <attribute>
+    <id>ATTN_CHK_OCMBS</id>
+    <description>
+      Used to tell ATTN code whether to check the OCMBs separately.
+    </description>
+    <simpleType>
+      <uint8_t/>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+  </attribute>
+
+  <attribute>
     <id>CLEAR_DIMM_SPD_ENABLE</id>
     <description>
       Used to enable clearing of SPD on all present DIMMs. This attribute is

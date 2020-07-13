@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -552,6 +552,100 @@ bool MemOps::resolve(
 
 
     return l_attnFound;
+}
+
+void MemOps::resolveOcmbs( const TargetHandle_t i_proc,
+                           AttentionList & io_attentions )
+{
+    // Do nothing if we are not on a system that supports OCMBs
+    TargetHandle_t primaryProc = nullptr;
+    getTargetService().masterProcChipTargetHandle( primaryProc );
+    ATTR_MODEL_type procModel = primaryProc->getAttr<ATTR_MODEL>();
+    if ( MODEL_AXONE != procModel )
+    {
+        return;
+    }
+
+    // Check the attribute whether we are at a point in the IPL where we can
+    // get attentions from the OCMBs but will not get interrupts.
+    TargetHandle_t sys = nullptr;
+    targetService().getTopLevelTarget( sys );
+    assert( sys != nullptr );
+    if ( 0 == sys->getAttr<ATTR_ATTN_CHK_OCMBS>() )
+    {
+        return;
+    }
+
+    // Get the list of OCMBs connected to the input proc
+    TargetHandleList ocmbList;
+
+    PredicateCTM          predOcmb( CLASS_CHIP, TYPE_OCMB_CHIP );
+    PredicateIsFunctional functional;
+    PredicatePostfixExpr  pred;
+    pred.push(&predOcmb).push(&functional).And();
+
+    targetService().getAssociated( ocmbList, i_proc,
+                                   TARGETING::TargetService::CHILD_BY_AFFINITY,
+                                   TARGETING::TargetService::ALL, &pred );
+
+    // Vector to denote the chiplet FIRs on the OCMB along with their respective
+    // masks and what attention type they check. NOTE: The order of the firList
+    // should be in order from highest to lowest priority attention to ensure
+    // the first attention we find is the highest priority one.
+    struct firInfo
+    {
+        uint32_t firAddr;
+        uint32_t firMask;
+        ATTENTION_VALUE_TYPE attnType;
+    };
+    static const std::vector<firInfo> firList
+    {
+        { 0x08040000, 0x08040002, UNIT_CS     }, // OCMB_CHIPLET_CS_FIR
+        { 0x08040001, 0x08040002, RECOVERABLE }, // OCMB_CHIPLET_RE_FIR
+        { 0x08040004, 0x08040007, HOST_ATTN   }, // OCMB_CHIPLET_SPA_FIR
+    };
+
+
+    for ( const auto & ocmb : ocmbList )
+    {
+        for ( const auto & fir : firList )
+        {
+            // Get the data from the chiplet FIR
+            uint64_t firData = 0;
+            errlHndl_t err = getScom( ocmb, fir.firAddr, firData );
+            if ( err )
+            {
+                errlCommit( err, ATTN_COMP_ID );
+                break;
+            }
+
+            // Get the data from the chiplet FIR mask
+            uint64_t firMaskData = 0;
+            err = getScom( ocmb, fir.firMask, firMaskData );
+            if ( err )
+            {
+                errlCommit( err, ATTN_COMP_ID );
+                break;
+            }
+
+            // Account for recoverable bits shifting
+            if ( RECOVERABLE == fir.attnType )
+            {
+                firData = firData >> 2;
+            }
+            // Check for any FIR bits on
+            if ( firData & ~firMaskData )
+            {
+                // If FIR bits are on, add the OCMB attn to the attn list
+                AttnData newData( ocmb, fir.attnType );
+                io_attentions.add( Attention(newData, this) );
+
+                // Add only the highest priority attention from each OCMB, so
+                // break out to the next chip once we've found one.
+                break;
+            }
+        }
+    }
 }
 
 MemOps::MemOps()

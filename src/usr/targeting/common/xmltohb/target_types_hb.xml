@@ -237,6 +237,9 @@
       <id>ATTN_CHK_ALL_PROCS</id>
     </attribute>
     <attribute>
+      <id>ATTN_CHK_OCMBS</id>
+    </attribute>
+    <attribute>
       <id>EARLY_TESTCASES_ISTEP</id>
     </attribute>
     <attribute>

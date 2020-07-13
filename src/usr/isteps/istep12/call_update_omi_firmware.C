@@ -56,6 +56,13 @@ void* call_update_omi_firmware (void *io_pArgs)
     IStepError l_StepError;
     TRACFCOMP( g_trac_isteps_trace, "call_update_omi_firmware entry" );
 
+    // Clear ATTR_ATTN_CHK_OCMBS to let ATTN know that interrupts from the OCMBs
+    // should now be enabled.
+    TargetHandle_t sys = nullptr;
+    targetService().getTopLevelTarget( sys );
+    assert( sys != nullptr );
+    sys->setAttr<ATTR_ATTN_CHK_OCMBS>(0);
+
     // Check if any explorer chips require a firmware update and update them
     // (skipped on MPIPL)
     if (UTIL::assertGetToplevelTarget()->getAttr<ATTR_IS_MPIPL_HB>())
