@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -38,6 +38,9 @@
 // Includes
 //------------------------------------------------------------------------------
 #include <p10_thread_control.H>
+
+static const uint64_t STEP_DELAY_POLLTIME_NS = 100000; //100usec
+static const uint64_t STEP_DELAY_SIM_CYCLES = 150000;
 
 using fapi2::TARGET_TYPE_CORE;
 
@@ -299,6 +302,7 @@ fapi2::ReturnCode p10_thread_control_query(
     FAPI_TRY(fapi2::getScom(i_target, EC_PC_THRCTL_TCTLCOM_RAS_STATUS, o_rasStatusReg),
              "p10_thread_control_query(): getScom() returns an error, "
              "Addr RAS_STATUS 0x%.16llX", EC_PC_THRCTL_TCTLCOM_RAS_STATUS);
+    FAPI_IMP("RAS_STATUS Reg [0x%08X %08X]", ((o_rasStatusReg >> 32) & 0xFFFFFFFF), (o_rasStatusReg & 0xFFFFFFFF));
 
     // Note: all threads must meet a given condition in order for the
     //       bit to be set.
@@ -615,6 +619,22 @@ fapi2::ReturnCode p10_thread_control_step(
 
         do
         {
+#ifdef __PPE__
+
+            if( SBE::isSimicsRunning() )
+            {
+                // In simulation SBE frequency is 500 MHz, Switch time b/w
+                // CPU's in simulation is 300 microsecs. SBE needs to poll more
+                // than 300us which allows P10 processor thread to execute.
+
+                // Adding delay b/w polls to achieve 300us delay
+                // sim_cycles = 500 MHz * 300us = 1,50,000
+                // Adding 100us delay per poll which allows STEP to complete in 3 polls
+                fapi2::delay(STEP_DELAY_POLLTIME_NS, STEP_DELAY_SIM_CYCLES);
+            }
+
+#endif
+
             FAPI_DBG("polling for step done. governor: %d", l_governor);
             FAPI_TRY(threads_step_done(i_target, i_threads, o_rasStatusReg, l_step_done),
                      "p10_thread_control_step: thread step issued but something "
