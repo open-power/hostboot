@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -79,7 +79,17 @@ fapi_try_exit:
     fapi2::Assert(false);
 }
 
+///
+/// @brief Check if any dimms exist that have RCD enabled - nimbus/DIMM specialization
+/// @param[in] i_target - the fapi2::Target we are starting from
+/// @param[out] o_has_rcd - true iff any DIMM with RCD detected
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff ok
+///
+template<>
+fapi2::ReturnCode has_rcd<mss::mc_type::NIMBUS>( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+        bool& o_has_rcd );
 
-} //ns dimm
-} //ns mss
+
+} //end dimm ns
+} //end mss ns
 #endif

@@ -45,6 +45,7 @@
 #include <lib/workarounds/ccs_workarounds.H>
 #include <lib/dimm/ddr4/mrs_load_ddr4_nimbus.H>
 #include <lib/dimm/ddr4/latch_wr_vref.H>
+#include <lib/dimm/nimbus_kind.H>
 
 using fapi2::TARGET_TYPE_MCBIST;
 using fapi2::TARGET_TYPE_DIMM;

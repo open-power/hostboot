@@ -36,6 +36,7 @@
 #include <generic/memory/lib/utils/scom.H>
 #include <generic/memory/lib/utils/find.H>
 #include <lib/shared/exp_defaults.H>
+#include <lib/dimm/exp_kind.H>
 #include <explorer_scom_addresses.H>
 #include <explorer_scom_addresses_fld.H>
 #include <lib/fir/exp_fir_traits.H>
@@ -49,92 +50,6 @@ namespace mss
 
 namespace unmask
 {
-
-///
-/// @brief Check if any dimms exist that have RCD enabled - explorer/DIMM specialization
-/// @param[in] i_target - the fapi2::Target we are starting from
-/// @param[out] o_has_rcd - true iff any DIMM with RCD detected
-/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff ok
-///
-template<>
-fapi2::ReturnCode has_rcd<mss::mc_type::EXPLORER>( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-        bool& o_has_rcd )
-{
-    // Assume RCD is not supported at beginning of check
-    o_has_rcd = false;
-
-    uint8_t l_dimm_type = 0;
-    uint8_t l_rcd_supported = 0;
-
-    FAPI_TRY(mss::attr::get_dimm_type(i_target, l_dimm_type));
-    FAPI_TRY(mss::attr::get_supported_rcd(i_target, l_rcd_supported));
-
-    // OR with tmp_rcd to maintain running true/false if RCD on *any* DIMM
-    o_has_rcd |= ((l_dimm_type == fapi2::ENUM_ATTR_MEM_EFF_DIMM_TYPE_RDIMM) ||
-                  (l_dimm_type == fapi2::ENUM_ATTR_MEM_EFF_DIMM_TYPE_LRDIMM));
-
-    o_has_rcd |= (l_rcd_supported == fapi2::ENUM_ATTR_MEM_EFF_SUPPORTED_RCD_RCD_PER_CHANNEL_1);
-
-fapi_try_exit:
-
-    return fapi2::current_err;
-}
-
-///
-/// @brief Check if any dimms exist that have RCD enabled - explorer/PORT specialization
-/// @param[in] i_target - the fapi2::Target we are starting from
-/// @param[out] o_has_rcd - true iff any DIMM with RCD detected
-/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff ok
-///
-template<>
-fapi2::ReturnCode has_rcd<mss::mc_type::EXPLORER>( const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
-        bool& o_has_rcd )
-{
-    // Assume RCD is not supported at beginning of check
-    o_has_rcd = false;
-
-    // Loop over all DIMM's and determine if we have an RCD
-    for(const auto& l_dimm : mss::find_targets<fapi2::TARGET_TYPE_DIMM>(i_target))
-    {
-        bool l_current_dimm_rcd = false;
-        FAPI_TRY(has_rcd<mss::mc_type::EXPLORER>(l_dimm, l_current_dimm_rcd));
-        o_has_rcd |= l_current_dimm_rcd;
-    }
-
-    return fapi2::FAPI2_RC_SUCCESS;
-
-fapi_try_exit:
-
-    return fapi2::current_err;
-}
-
-///
-/// @brief Check if any dimms exist that have RCD enabled - explorer/OCMB specialization
-/// @param[in] i_target - the fapi2::Target we are starting from
-/// @param[out] o_has_rcd - true iff any DIMM with RCD detected
-/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff ok
-///
-template<>
-fapi2::ReturnCode has_rcd<mss::mc_type::EXPLORER>( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
-        bool& o_has_rcd )
-{
-    // Assume RCD is not supported at beginning of check
-    o_has_rcd = false;
-
-    // Nested for loops to determine DIMM type if DIMMs exist
-    for (const auto& l_port : mss::find_targets<fapi2::TARGET_TYPE_MEM_PORT>(i_target))
-    {
-        bool l_current_port_rcd = false;
-        FAPI_TRY(has_rcd<mss::mc_type::EXPLORER>(l_port, l_current_port_rcd));
-        o_has_rcd |= l_current_port_rcd;
-    }
-
-    return fapi2::FAPI2_RC_SUCCESS;
-
-fapi_try_exit:
-
-    return fapi2::current_err;
-}
 
 ///
 /// @brief Unmask and setup actions performed after draminit_mc
@@ -160,7 +75,7 @@ fapi2::ReturnCode after_draminit_mc<mss::mc_type::EXPLORER>( const fapi2::Target
     FAPI_TRY(l_rc2, "unable to create fir::reg for EXPLR_SRQ_SRQFIRQ 0x%08X", EXPLR_SRQ_SRQFIRQ);
     FAPI_TRY(l_rc3, "unable to create fir::reg for EXPLR_RDF_FIR 0x%08X", EXPLR_RDF_FIR);
 
-    FAPI_TRY(mss::unmask::has_rcd<mss::mc_type::EXPLORER>(i_target, l_has_rcd));
+    FAPI_TRY(mss::dimm::has_rcd<mss::mc_type::EXPLORER>(i_target, l_has_rcd));
 
     // Write MCBISTFIR register per Explorer unmask spec
     FAPI_TRY(l_exp_mcbist_reg.attention<EXPLR_MCBIST_MCBISTFIRQ_MCBIST_PROGRAM_COMPLETE>()
@@ -340,7 +255,7 @@ fapi2::ReturnCode after_scominit<mss::mc_type::EXPLORER>( const fapi2::Target<fa
     FAPI_TRY(l_rc2, "for target %s unable to create fir::reg for EXPLR_TP_MB_UNIT_TOP_LOCAL_FIR 0x%0x",
              mss::c_str(i_target), EXPLR_TP_MB_UNIT_TOP_LOCAL_FIR);
 
-    FAPI_TRY(mss::unmask::has_rcd<mss::mc_type::EXPLORER>(i_target, l_has_rcd));
+    FAPI_TRY(mss::dimm::has_rcd<mss::mc_type::EXPLORER>(i_target, l_has_rcd));
 
     // Check if dimm is an ISDIMM with RCD
     if (l_has_rcd)
@@ -527,7 +442,7 @@ fapi2::ReturnCode after_memdiags<mss::mc_type::EXPLORER>( const fapi2::Target<fa
 
     // Determine if dimm is a DIMM with RCD
     // If so set RCD fir to recoverable
-    FAPI_TRY(mss::unmask::has_rcd<mss::mc_type::EXPLORER>(i_target, l_has_rcd));
+    FAPI_TRY(mss::dimm::has_rcd<mss::mc_type::EXPLORER>(i_target, l_has_rcd));
 
     // Check if OCMB has an RCD
     if (l_has_rcd)

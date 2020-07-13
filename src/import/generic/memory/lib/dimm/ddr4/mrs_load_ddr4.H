@@ -41,10 +41,10 @@
 #include <generic/memory/lib/utils/c_str.H>
 #include <generic/memory/lib/dimm/mrs_traits.H>
 #include <generic/memory/lib/dimm/mrs_load.H>
+#include <generic/memory/lib/utils/dimm/kind.H>
 #include <generic/memory/lib/utils/shared/mss_generic_consts.H>
 #include <generic/memory/lib/ccs/ccs_traits.H>
 #include <generic/memory/lib/ccs/ccs.H>
-#include <generic/memory/lib/utils/fir/gen_mss_unmask.H>
 
 namespace mss
 {
@@ -281,7 +281,7 @@ fapi2::ReturnCode mrs_engine( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_ta
 
 
     // Only issue b-side if we have an RCD
-    FAPI_TRY(mss::unmask::has_rcd<MC>( i_target, l_has_rcd ));
+    FAPI_TRY(mss::dimm::has_rcd<MC>( i_target, l_has_rcd ));
 
     if(l_has_rcd)
     {

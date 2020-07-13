@@ -36,12 +36,12 @@
 #include <lib/shared/exp_defaults.H>
 #include <lib/ccs/ccs_traits_explorer.H>
 #include <lib/dimm/exp_mrs_traits.H>
+#include <lib/dimm/exp_kind.H>
 #include <fapi2.H>
 #include <lib/workarounds/exp_ccs_2666_write_workarounds.H>
 #include <lib/workarounds/exp_mr_workarounds.H>
 #include <mss_generic_attribute_getters.H>
 #include <generic/memory/lib/utils/shared/mss_generic_consts.H>
-#include <generic/memory/lib/utils/fir/gen_mss_unmask.H>
 #include <generic/memory/lib/dimm/ddr4/mrs_load_ddr4.H>
 #include <lib/dimm/exp_rank.H>
 #include <lib/ccs/ccs_explorer.H>
@@ -70,7 +70,7 @@ fapi2::ReturnCode is_ccs_2666_write_needed(const fapi2::Target<fapi2::TARGET_TYP
     o_is_needed = false;
 
     FAPI_TRY(mss::attr::get_freq(i_target, l_freq));
-    FAPI_TRY(mss::unmask::has_rcd(i_target, l_has_rcd));
+    FAPI_TRY(mss::dimm::has_rcd<mss::mc_type::EXPLORER>(i_target, l_has_rcd));
 
     // The workaround is needed if we're at 2666 and do not have an RCD
     o_is_needed = (l_freq == FREQ_NEEDS_WORKAROUND) &&

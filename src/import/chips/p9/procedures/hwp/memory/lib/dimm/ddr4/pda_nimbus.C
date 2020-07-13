@@ -53,7 +53,7 @@
 #include <lib/phy/dp16.H>
 #include <lib/dimm/ddr4/pda_nimbus.H>
 #include <lib/workarounds/ccs_workarounds.H>
-
+#include <lib/dimm/nimbus_kind.H>
 
 namespace mss
 {

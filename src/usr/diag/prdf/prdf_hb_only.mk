@@ -221,6 +221,7 @@ prd_vpath += ${ROOTPATH}/src/import/chips/ocmb/explorer/procedures/hwp/memory/li
 prd_vpath += ${ROOTPATH}/src/import/chips/ocmb/explorer/procedures/hwp/memory/lib/ccs/
 prd_vpath += ${ROOTPATH}/src/import/chips/ocmb/explorer/procedures/hwp/memory/lib/fir/
 prd_vpath += ${ROOTPATH}/src/import/chips/ocmb/explorer/procedures/hwp/memory/lib/ecc/
+prd_vpath += ${ROOTPATH}/src/import/chips/ocmb/explorer/procedures/hwp/memory/lib/dimm/
 prd_vpath += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/memory/lib/utils/
 prd_vpath += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/memory/lib/phy/
 prd_vpath += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/memory/lib/spd/
@@ -286,6 +287,8 @@ prd_obj_no_sim += lrdimm_raw_cards.o
 prd_obj_no_sim += exp_unmask.o
 prd_obj_no_sim += exp_port.o
 prd_obj_no_sim += port.o
+prd_obj_no_sim += exp_kind.o
+prd_obj_no_sim += nimbus_kind.o
 
 ################################################################################
 # The following are hardware procedure utilities that we are pulling into the
