@@ -93,6 +93,7 @@ prd_incpath += ${ROOTPATH}/src/import/chips/ocmb/explorer/procedures/hwp/memory/
 prd_incpath += ${ROOTPATH}/src/import/chips/ocmb/explorer/procedures/hwp/memory/lib/dimm/
 prd_incpath += ${ROOTPATH}/src/import/chips/ocmb/explorer/procedures/hwp/memory/lib/shared/
 prd_incpath += ${ROOTPATH}/obj/genfiles/chips/ocmb/explorer/procedures/hwp/memory/lib/
+prd_incpath += ${ROOTPATH}/obj/genfiles/chips/ocmb/explorer/procedures/hwp/memory/lib/fir/
 prd_incpath += ${ROOTPATH}/obj/genfiles/generic/memory/lib/
 
 ################################################################################
@@ -191,6 +192,7 @@ prd_vpath += ${ROOTPATH}/src/import/chips/ocmb/explorer/procedures/hwp/memory/li
 prd_vpath += ${ROOTPATH}/src/import/chips/ocmb/explorer/procedures/hwp/memory/lib/ccs/
 prd_vpath += ${ROOTPATH}/src/import/chips/ocmb/explorer/procedures/hwp/memory/lib/fir/
 prd_vpath += ${ROOTPATH}/src/import/chips/ocmb/explorer/procedures/hwp/memory/lib/ecc/
+prd_vpath += ${ROOTPATH}/src/import/chips/ocmb/explorer/procedures/hwp/memory/lib/dimm/
 prd_vpath += ${ROOTPATH}/src/import/generic/memory/lib/spd/
 prd_vpath += ${ROOTPATH}/src/import/generic/memory/lib/spd/rdimm/ddr4/
 prd_vpath += ${ROOTPATH}/src/import/generic/memory/lib/spd/lrdimm/ddr4/
@@ -203,6 +205,7 @@ prd_obj_no_sim += exp_train_handler.o
 prd_obj_no_sim += exp_unmask.o
 prd_obj_no_sim += ecc_traits_explorer.o
 prd_obj_no_sim += exp_port.o
+prd_obj_no_sim += exp_kind.o
 
 ################################################################################
 # The following are hardware procedure utilities that we are pulling into the

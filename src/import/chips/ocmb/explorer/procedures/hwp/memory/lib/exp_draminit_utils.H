@@ -39,13 +39,13 @@
 #include <fapi2.H>
 #include <lib/dimm/exp_rank.H>
 #include <lib/shared/exp_consts.H>
+#include <lib/dimm/exp_kind.H>
 #include <exp_data_structs.H>
 #include <mss_generic_attribute_getters.H>
 #include <mss_explorer_attribute_getters.H>
 #include <generic/memory/lib/utils/c_str.H>
 #include <generic/memory/lib/utils/find.H>
 #include <generic/memory/lib/utils/mss_buffer_utils.H>
-#include <generic/memory/lib/utils/fir/gen_mss_unmask.H>
 #include <lib/phy/exp_train_display.H>
 #include <lib/phy/exp_train_handler.H>
 #include <exp_data_structs.H>
@@ -474,7 +474,7 @@ class phy_params
                 bool l_has_rcd = false;
                 const bool l_4r = l_master_ranks[0] == fapi2::ENUM_ATTR_MEM_EFF_NUM_MASTER_RANKS_PER_DIMM_4R;
 
-                FAPI_TRY(mss::unmask::has_rcd<mss::mc_type::EXPLORER>(i_target, l_has_rcd));
+                FAPI_TRY(mss::dimm::has_rcd<mss::mc_type::EXPLORER>(i_target, l_has_rcd));
 
                 iv_params.iv_encoded_quadcs = (l_has_rcd && l_4r) ? MSDG_QUAD_ENCODE_MODE : MSDG_DUAL_DIRECT_MODE;
             }
@@ -647,7 +647,7 @@ class phy_params
                     {
                         bool l_has_rcd = false;
 
-                        FAPI_TRY(mss::unmask::has_rcd<mss::mc_type::EXPLORER>(iv_target, l_has_rcd));
+                        FAPI_TRY(mss::dimm::has_rcd<mss::mc_type::EXPLORER>(iv_target, l_has_rcd));
                         io_phy_params.DimmType = l_has_rcd ? MSDG_RDIMM : MSDG_UDIMM;
                         break;
                     }
