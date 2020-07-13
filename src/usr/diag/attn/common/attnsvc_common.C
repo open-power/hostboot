@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -35,6 +35,7 @@
 #include "common/attnproc.H"
 #include "common/attnmem.H"
 #include "common/attntarget.H"
+#include <targeting/common/utilFilter.H>
 
 using namespace std;
 using namespace PRDF;
@@ -262,6 +263,7 @@ errlHndl_t ServiceCommon::handleAttentions(const TargetHandle_t i_proc)
     AttentionList attentions;
 
     ProcOps & procOps = getProcOps();
+    MemOps & memOps = getMemOps();
 
     do {
 
@@ -276,6 +278,9 @@ errlHndl_t ServiceCommon::handleAttentions(const TargetHandle_t i_proc)
                      get_huid( i_proc ));
            break;
        }
+
+       // Query the OCMBs for attentions if needed;
+       memOps.resolveOcmbs( i_proc, attentions );
 
        ATTN_TRACE("handleAttns %d active( PRD)", attentions.size() );
        if(!attentions.empty())

@@ -90,6 +90,19 @@
   </attribute>
 
   <attribute>
+    <id>ATTN_CHK_OCMBS</id>
+    <description>
+      Used to tell ATTN code whether to check the OCMBs separately.
+    </description>
+    <simpleType>
+      <uint8_t/>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+  </attribute>
+
+  <attribute>
     <id>CENTAUR_REGISTER_CACHE_PTR</id>
     <description>
         Pointer to Secure Boot Centaur SCOM register cache

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -207,6 +207,12 @@ void* call_dmi_pre_trainadv (void *io_pArgs)
 
 #endif
 
+    // Set ATTR_ATTN_CHK_OCMBS to let ATTN know that we may now get attentions
+    // from the OCMB, but interrupts from the OCMB are not enabled yet.
+    TargetHandle_t sys = nullptr;
+    targetService().getTopLevelTarget( sys );
+    assert( sys != nullptr );
+    sys->setAttr<ATTR_ATTN_CHK_OCMBS>(1);
 
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_dmi_pre_trainadv exit" );
     // end task, returning any errorlogs to IStepDisp

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -27,10 +27,12 @@
 #include <isteps/hwpisteperror.H>
 #include <initservice/isteps_trace.H>
 #include "platform_vddr.H"
+#include <targeting/common/commontargeting.H>
 
 using   namespace   ERRORLOG;
 using   namespace   ISTEP;
 using   namespace   ISTEP_ERROR;
+using   namespace   TARGETING;
 
 namespace ISTEP_13
 {
@@ -42,6 +44,13 @@ void* call_host_disable_memvolt (void *io_pArgs)
 
     TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
               ENTER_MRK"call_host_disable_memvolt");
+
+    // Clear ATTR_ATTN_CHK_OCMBS to let ATTN know that interrupts from the OCMBs
+    // should now be enabled.
+    TargetHandle_t sys = nullptr;
+    targetService().getTopLevelTarget( sys );
+    assert( sys != nullptr );
+    sys->setAttr<ATTR_ATTN_CHK_OCMBS>(0);
 
     // This function has Compile-time binding for desired platform
     l_err = platform_disable_vddr();
