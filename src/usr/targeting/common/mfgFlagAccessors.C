@@ -382,7 +382,7 @@ uint32_t getMfgFlagCellIndex(const MFG_FLAGS i_mfgFlag)
     // If the manufacturing flag value is greater than cell 3's max value, then
     // there is a s/w coding error.  It could be the flags got upgraded
     // and this method did not get adjusted.
-    assert(i_mfgFlag <= MFG_FLAG_CELL_3_MAX_VAL,
+    TARG_ASSERT(i_mfgFlag <= MFG_FLAG_CELL_3_MAX_VAL,
            "mfgFlagAccessors.C::getMfgFlagCellIndex: "
            "Manufacturing flag %d is greater than the maximum value of %d",
            i_mfgFlag, MFG_FLAG_CELL_3_MAX_VAL);

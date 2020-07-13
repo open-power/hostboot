@@ -226,7 +226,8 @@ class Target
          *  @retval true Attribute returned in o_attrValue
          *  @retval false Attribute not found; o_attValue not valid
          */
-#ifdef __HOSTBOOT_MODULE
+// This code relies heavily on std::array which is supported by c++11 and beyond
+#if __cplusplus >= 201103L
         template<const ATTRIBUTE_ID A>
         bool tryGetAttr(
             typename AttributeTraits<A>::TypeStdArr& o_attrValue) const;
@@ -391,7 +392,8 @@ class Target
          *  @retval true Attribute updated
          *  @retval false Attribute not updated
          */
-#ifdef __HOSTBOOT_MODULE
+// This code relies heavily on std::array which is supported by c++11 and beyond
+#if __cplusplus >= 201103L
         template<const ATTRIBUTE_ID A>
         bool trySetAttr(
             typename AttributeTraits<A>::TypeStdArr const& i_attrValue);
@@ -471,7 +473,8 @@ class Target
          *  @post Target's attribute value updated if it exists and if it
          *  suppports TypeStdArr type, otherwise routine asserts
          */
-#ifdef __HOSTBOOT_MODULE
+// This code relies heavily on std::array which is supported by c++11 and beyond
+#if __cplusplus >= 201103L
         template<const ATTRIBUTE_ID A>
         void setAttrFromStdArr(typename AttributeTraits<A>::TypeStdArr const&
             i_attrValue);
@@ -991,7 +994,8 @@ bool Target::tryGetAttr(typename AttributeTraits<A>::Type& o_attrValue) const
     return _tryGetAttr(A,sizeof(o_attrValue),&o_attrValue);
 }
 
-#ifdef __HOSTBOOT_MODULE
+// This code relies heavily on std::array which is supported by c++11 and beyond
+#if __cplusplus >= 201103L
 template<const ATTRIBUTE_ID A>
 bool Target::tryGetAttr(
     typename AttributeTraits<A>::TypeStdArr& o_attrValue) const
@@ -1025,7 +1029,8 @@ bool Target::trySetAttrNotSynced(
     return _trySetAttr(A,sizeof(i_attrValue),&i_attrValue);
 }
 
-#ifdef __HOSTBOOT_MODULE
+// This code relies heavily on std::array which is supported by c++11 and beyond
+#if __cplusplus >= 201103L
 template<const ATTRIBUTE_ID A>
 bool Target::trySetAttr(typename AttributeTraits<A>::TypeStdArr
     const& i_attrValue)
@@ -1083,7 +1088,8 @@ void Target::setAttr(typename AttributeTraits<A>::Type const& i_attrValue)
     }
 }
 
-#ifdef __HOSTBOOT_MODULE
+// This code relies heavily on std::array which is supported by c++11 and beyond
+#if __cplusplus >= 201103L
 template<const ATTRIBUTE_ID A>
 void Target::setAttrFromStdArr(typename AttributeTraits<A>::TypeStdArr const&
     i_attrValue)
@@ -1143,7 +1149,6 @@ const char* Target::getAttrAsString() const
 
 // This code relies heavily on std::array which is supported by c++11 and beyond
 #if __cplusplus >= 201103L
-#ifdef __HOSTBOOT_MODULE
 template<const ATTRIBUTE_ID A>
 typename AttributeTraits<A>::TypeStdArr Target::getAttrAsStdArr() const
 {
@@ -1158,7 +1163,6 @@ typename AttributeTraits<A>::TypeStdArr Target::getAttrAsStdArr() const
 
     return l_stdArr;
 }
-#endif // __HOSTBOOT_MODULE
 #endif // __cplusplus >= 201103L
 
 // Function to set various frequency related attributes
