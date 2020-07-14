@@ -1271,6 +1271,27 @@ sub processProcessor
                      "PROC_MEM_TO_USE", ( $targetObj->getAttribute($target,
                      "FABRIC_GROUP_ID") << 3));
     processPowerRails ($targetObj, $target);
+
+    # Set GPIO_INFO_PHYS_PRES for each proc to the same default even though
+    # it's only valid on the primary and alt-primary proc.
+    # It will only get called on the active primary processor during the IPL.
+
+    $targetObj->setAttributeField($target,"GPIO_INFO_PHYS_PRES",
+        "i2cMasterPath",$path);
+    $targetObj->setAttributeField($target,"GPIO_INFO_PHYS_PRES",
+        "port","0");
+    $targetObj->setAttributeField($target,"GPIO_INFO_PHYS_PRES",
+        "devAddr","0xC0");
+    $targetObj->setAttributeField($target,"GPIO_INFO_PHYS_PRES",
+        "engine","2");
+    $targetObj->setAttributeField($target,"GPIO_INFO_PHYS_PRES",
+        "windowOpenPin","0");
+    $targetObj->setAttributeField($target,"GPIO_INFO_PHYS_PRES",
+        "physicalPresencePin","1");
+    $targetObj->setAttributeField($target,"GPIO_INFO_PHYS_PRES",
+        "i2cMuxBusSelector","0xFF");
+    $targetObj->setAttributeField($target,"GPIO_INFO_PHYS_PRES",
+        "i2cMuxPath","physical:sys-0");
 }
 
 sub processPowerRails

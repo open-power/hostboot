@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2020                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -89,14 +89,16 @@ errlHndl_t gpioPerformOp(DeviceFW::OperationType i_opType,
             break;
         }
 
+        char * path_str = gpioInfo.i2cMasterPath.toString();
+
         TARGETING::TargetService& ts = TARGETING::targetService();
         TARGETING::Target * i2c_master = ts.toTarget(gpioInfo.i2cMasterPath);
 
         if( i2c_master == NULL )
         {
             TRACFCOMP( g_trac_gpio,ERR_MRK"gpioPerformOp() - "
-                       "I2C Target not found. Device type %d.",
-                       gpioInfo.deviceType );
+                       "I2C Target not found. Device type %d. entity path=%s",
+                       gpioInfo.deviceType, path_str );
             /*@
              * @errortype
              * @reasoncode       GPIO_I2C_TARGET_NOT_FOUND
@@ -116,8 +118,19 @@ errlHndl_t gpioPerformOp(DeviceFW::OperationType i_opType,
                                           true /*Add HB SW Callout*/ );
 
             err->collectTrace( GPIO_COMP_NAME );
+            ERRORLOG::ErrlUserDetailsString(path_str).addToLog(err);
+            free(path_str);
+            path_str=nullptr;
             break;
         }
+        else
+        {
+            TRACDCOMP( g_trac_gpio,INFO_MRK"gpioPerformOp() - "
+                       "I2C Target entity path=%s",
+                       path_str );
+        }
+        free(path_str);
+        path_str = nullptr;
 
         if( i_opType == DeviceFW::READ )
         {
