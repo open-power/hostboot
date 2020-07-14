@@ -288,6 +288,7 @@
     <valueType>uint8</valueType>
     <platInit/>
     <initToZero/>
+    <overrideOnly/>
     <group>debug</group>
   </attribute>
 
@@ -301,6 +302,7 @@
     <valueType>uint8</valueType>
     <platInit/>
     <initToZero/>
+    <overrideOnly/>
     <group>debug</group>
   </attribute>
 
@@ -718,9 +720,9 @@
     <description>
     Enables resonant clocks in the system at istep4
 
-    Producer: Override 
-    
-    Consumers: p10_hcd_core_startclocks.C 
+    Producer: Override
+
+    Consumers: p10_hcd_core_startclocks.C
 
     </description>
     <valueType>uint8</valueType>
@@ -753,6 +755,7 @@
         ON=1
     </enum>
     <default>OFF</default>
+    <overrideOnly/>
     <group>enablement</group>
   </attribute>
 
@@ -782,6 +785,7 @@
         OFF_SKIP_DD=2
     </enum>
     <default>OFF</default>
+    <overrideOnly/>
     <group>enablement</group>
   </attribute>
 
@@ -809,6 +813,7 @@
         ON=1
     </enum>
     <default>OFF</default>
+    <overrideOnly/>
     <group>enablement</group>
   </attribute>
 
@@ -836,6 +841,7 @@
         ON=1
     </enum>
     <default>OFF</default>
+    <overrideOnly/>
     <group>enablement</group>
   </attribute>
 
@@ -931,6 +937,7 @@
         DECINC = 0x1
     </enum>
     <default>BINARY</default>
+    <overrideOnly/>
     <group>wof</group>
   </attribute>
 
@@ -1010,6 +1017,7 @@
         TRUE=1
     </enum>
     <initToZero/>
+    <overrideOnly/>
     <group>enablement</group>
   </attribute>
 
@@ -1043,7 +1051,7 @@
         WARN = 2,
         OFF = 3
     </enum>
-    <default>FAIL</default>
+    <default>WARN</default>
     <overrideOnly/>
     <group>enablement</group>
   </attribute>
@@ -1078,7 +1086,7 @@
         WARN = 2,
         OFF = 3
     </enum>
-    <default>FAIL</default>
+    <default>WARN</default>
     <overrideOnly/>
     <group>enablement</group>
   </attribute>
@@ -1113,7 +1121,7 @@
         WARN = 2,
         OFF = 3
     </enum>
-    <default>FAIL</default>
+    <default>WARN</default>
     <overrideOnly/>
     <group>enablement</group>
   </attribute>
@@ -1210,6 +1218,7 @@
         CS1 = 0x01
     </enum>
     <initToZero/>
+    <overrideOnly/>
     <group>pss</group>
   </attribute>
 
@@ -1432,7 +1441,11 @@
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>
     Step size (binary in microvolts) to take upon external VRM voltage. This
-    provide a limit of the external VRMs steps.
+    provide a limit of the external VRMs steps and  is used as part of the
+    overall voltage time calculation.
+
+    The consuming code provides a default value of 50mv (5000uV) if this
+    attribute is zero.
 
     Consumer: p10_pstate_parameter_build -> p10_setup_evid Pstate Parameter
     (PSPB) for PGPE
@@ -1443,7 +1456,7 @@
     <valueType>uint32</valueType>
     <array>4</array>
     <platInit/>
-    <initToZero/>
+    <default>0</default>
     <group>vrm</group>
   </attribute>
 
@@ -1452,10 +1465,12 @@
     <id>ATTR_EXTERNAL_VRM_TRANSITION_RATE_DEC_UV_PER_US</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>
-    Transition rate (binary in microVolts per microsecond) of the VRM for an
-    transition.This is used as part of the overall voltage time calculation
-    provides a default value of 10000 uV/us (eg if this attribute is zero.
-    the fastest possible rate is limited to
+    Transition rate (binary in microVolts per microsecond) of the VRM for a
+    decreasing voltage transition. This is used as part of the overall voltage
+    time calculation.
+
+    The consuming code provides a default value of 10000 uV/us if this attribute
+    is zero.
 
     Consumer: p10_pstate_parameter_build -> Pstate Parameter Block (PSPB) for PGPE
 
@@ -1476,9 +1491,11 @@
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>
     Transition rate (binary in microVolts per microsecond) of the VRM for an
-    transition.This is used as part of the overall voltage time calculation
-    provides a default value of 10000 uV/us (eg if this attribute is zero.
-    the fastest possible rate is limited to
+    increasing voltage transition. This is used as part of the overall voltage
+    time calculation.
+
+    The consuming code provides a default value of 10000 uV/us if this attribute
+    is zero.
 
     Consumer: p10_pstate_parameter_build -> Pstate Parameter Block (PSPB) for PGPE
 
@@ -1499,10 +1516,13 @@
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>
     Time (binary in nanoseconds) to allow the voltage rail to stabilize before
-    transition to be fully complete. This value is used for both and
-    transitions as part of the overall voltage transition calculation.
-    provides a default value of 5000ns (5us) if this is zero. Note: the
-    delay is limited to 1ns.
+    transition to be fully complete. This applies to both increasing and
+    decreasing transitions as part of the overall voltage transition calculation.
+
+    The consuminug code provides a default value of 5000ns (5us) if this attribute
+    is zero.
+
+    Note: the smallest possible delay is limited to 1ns.
 
     Consumer: p10_pstate_parameter_build -> Pstate Parameter Block (PSPB) for PGPE
 
@@ -1523,10 +1543,14 @@
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>
     Delay (binary in nanoseconds) from the time the VRM receives the write
-    until the voltage actually moves.This value is used for both and
-    transitions as part of the overall voltage transition calculation.
-    provides a default value of 8000ns (eg 8us)) if attribute is zero. Note:
-    smallest possible delay is limited to 1ns.
+    until the voltage actually moves.  This value is used for both increasing
+    and decreasing transitions as part of the overall voltage transition
+    calculation.
+
+    The consuming code provides a default value of 8000ns (8us) if this attribute
+    is zero.
+
+    Note: the  smallest possible delay is limited to 1ns.
 
     Consumer: p10_pstate_parameter_build -> Pstate Parameter Block (PSPB) for PGPE
 
@@ -2092,6 +2116,7 @@
     <valueType>uint32</valueType>
     <platInit/>
     <initToZero/>
+    <overrideOnly/>
     <writeable/>
     <group>safe</group>
   </attribute>
@@ -2114,6 +2139,7 @@
     <array>2</array>
     <platInit/>
     <initToZero/>
+    <overrideOnly/>
     <writeable/>
     <group>safe</group>
   </attribute>
@@ -2140,6 +2166,7 @@
         TRUE=1
     </enum>
     <initToZero/>
+    <overrideOnly/>
     <writeable/>
     <group>enablement</group>
   </attribute>
@@ -2160,6 +2187,7 @@
     <valueType>uint64</valueType>
     <platInit/>
     <initToZero/>
+    <overrideOnly/>
     <group>smf</group>
   </attribute>
 
@@ -2181,6 +2209,7 @@
     <valueType>uint32</valueType>
     <platInit/>
     <initToZero/>
+    <overrideOnly/>
     <writeable/>
     <group>smf</group>
   </attribute>
@@ -2190,7 +2219,7 @@
     <id>ATTR_FUSED_CORE_PAIRED_MODE_ENABLED</id>
     <targetType>TARGET_TYPE_SYSTEM</targetType>
     <description>
-        Set when QMCR[FUSED_CORE_PAIR_MODE] is to be set by QME Hcode 
+        Set when QMCR[FUSED_CORE_PAIR_MODE] is to be set by QME Hcode
     </description>
     <enum>FALSE = 0x0, TRUE = 0x1</enum>
     <valueType>uint8</valueType>
@@ -2346,8 +2375,8 @@
     </description>
     <valueType>uint16</valueType>
     <platInit/>
-    <!-- Levels supported:  0, 2, 5, 11 -->
-    <default>0xA410</default>
+    <!-- Levels supported:  0, 2, 3, 11 -->
+    <default>0xB010</default>
     <group>enablement</group>
   </attribute>
 
@@ -2366,6 +2395,7 @@
     <valueType>uint16</valueType>
     <platInit/>
     <initToZero/>
+    <overrideOnly/>
     <group>enablement</group>
   </attribute>
 
