@@ -36,6 +36,7 @@
 #include "common/plat/mem/prdfMemCaptureData.H"
 #include "common/plat/mem/prdfMemDqBitmap.H"
 #include "common/plat/mem/prdfMemMark.H"
+#include "common/plat/mem/prdfMemExtraSig.H"
 #include "common/plat/mem/prdfMemSymbol.H"
 #include "common/plat/mem/prdfMemoryMru.H"
 #include <prdfPlatServices.H>

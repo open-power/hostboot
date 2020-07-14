@@ -33,6 +33,7 @@
 #include <prdfMemScrubUtils.H>
 #include <prdfMemTdFalseAlarm.H>
 #include <prdfMemTps.H>
+#include <prdfMemExtraSig.H>
 #include <prdfTargetServices.H>
 
 #include <exp_defaults.H>
