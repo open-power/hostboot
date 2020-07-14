@@ -3227,6 +3227,13 @@ public:
             TargetHandle_t l_target = *pFcList.begin();
             TS_INFO("testGard6: Working with HUID=0x%X TYPE_FC", get_huid(l_target));
 
+            //This test assumes the target chosen is not deemed a replacement target,
+            //   this distinction is important because gard records for targets that
+            //   are then found to be replaced are ignore, and we do not want that for
+            //   these tests. So set the HWAS_CHANGED_BIT_GARD to force this target
+            //   to not be seen as a replacement target
+            clear_hwas_changed_bit(l_target, HWAS_CHANGED_BIT_GARD);
+
             // create GARD record, call 'doGard' step and confirm target is
             //  deconfigured
             l_pErr = theDeconfigGard().
