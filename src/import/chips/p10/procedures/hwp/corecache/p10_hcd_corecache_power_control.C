@@ -80,6 +80,12 @@ const uint32_t HCD_PFET_SENSE_BITS[2][2] =
     { BIT32(0),    BIT32(2)    }   //VDD_ON,  VCS_ON
 };
 
+
+const uint32_t HCD_PFET_ACTUAL_MASKS[2] =
+{
+    BITS32(16, 8), BITS32(24, 8)   //VDD, VCS
+};
+
 const uint32_t HCD_CPMS_PFETCNTL[3] =
 {
     CPMS_CL2_PFETCNTL,
@@ -133,13 +139,11 @@ p10_hcd_corecache_power_control(
         l_isVCS = 1; // if MMA only perform VDD, see common bit flip below
     }
 
-#ifndef PFET_SENSE_POLL_DISABLE
     uint32_t                l_timeout         = 0;
-    uint32_t                l_pfet_senses     = 0;
+    uint32_t                l_pfet_stat       = 0;
     fapi2::Target < fapi2::TARGET_TYPE_SYSTEM > l_sys;
     fapi2::ATTR_RUNN_MODE_Type                  l_attr_runn_mode;
     FAPI_TRY( FAPI_ATTR_GET( fapi2::ATTR_RUNN_MODE, l_sys, l_attr_runn_mode ) );
-#endif
 
     FAPI_INF(">>p10_hcd_corecache_power_control[%x](b1x:L3,bx1:ON)", i_command);
 
@@ -176,7 +180,6 @@ p10_hcd_corecache_power_control(
         FAPI_TRY( HCD_PUTMMIO_C( i_target, HCD_CPMS_PFETCNTL_OR[l_isL3],
                                  MMIO_LOAD32H( HCD_PFET_SEQ_STATES[l_isON][l_isVCS] ) ) );
 
-#ifndef PFET_SENSE_POLL_DISABLE
 
         FAPI_DBG("Poll for PFET senses to be proper in PFETSTAT[]");
         l_timeout = HCD_CORECACHE_POW_CTRL_POLL_TIMEOUT_HW_NS /
@@ -186,14 +189,34 @@ p10_hcd_corecache_power_control(
         {
             FAPI_TRY( HCD_GETMMIO_C( i_target, HCD_CPMS_PFETSTAT[l_isL3], l_mmioData ) );
 
-            MMIO_GET32H(l_pfet_senses);
+            MMIO_GET32H(l_pfet_stat);
+
+#ifndef PFET_SENSE_POLL_DISABLE
+
+            FAPI_DBG("PFETSTAT %x expected_sense %x", l_pfet_stat, HCD_PFET_SENSE_BITS[l_isON][l_isVCS]);
 
             //use multicastAND to check 1
             if( ( !l_attr_runn_mode ) &&
-                ( l_pfet_senses & HCD_PFET_SENSE_BITS[l_isON][l_isVCS] ) )
+                ( l_pfet_stat & HCD_PFET_SENSE_BITS[l_isON][l_isVCS] ) )
             {
                 break;
             }
+
+#else
+
+            uint32_t expected_mask = l_isON ? HCD_PFET_ACTUAL_MASKS[l_isVCS] : 0;
+
+            FAPI_DBG("PFETSTAT %x expected_actual %x", l_pfet_stat, expected_mask);
+
+            if( ( !l_attr_runn_mode ) &&
+                ( ( l_pfet_stat & HCD_PFET_ACTUAL_MASKS[l_isVCS] ) == expected_mask ) )
+            {
+                // Introduce 100ns delay before doing next scom
+                fapi2::delay(100, 10000);
+                break;
+            }
+
+#endif
 
             // Debug read
             FAPI_TRY( HCD_GETMMIO_C( i_target, HCD_CPMS_PFETCNTL[l_isL3], l_mmioData ) );
@@ -204,17 +227,15 @@ p10_hcd_corecache_power_control(
         while( (--l_timeout) != 0 );
 
         FAPI_ASSERT( ( l_attr_runn_mode ?
-                       ( l_pfet_senses & HCD_PFET_SENSE_BITS[l_isON][l_isVCS] ) : (l_timeout != 0) ),
+                       ( l_pfet_stat & HCD_PFET_SENSE_BITS[l_isON][l_isVCS] ) : (l_timeout != 0) ),
                      fapi2::CORECACHE_POW_CTRL_TIMEOUT()
                      .set_POW_CTRL_POLL_TIMEOUT_HW_NS(HCD_CORECACHE_POW_CTRL_POLL_TIMEOUT_HW_NS)
-                     .set_PFET_SENSES(l_pfet_senses)
+                     .set_PFET_SENSES(l_pfet_stat)
                      .set_POW_COMMAND(l_isON)
                      .set_POW_HEADERS(l_isVCS)
                      .set_POW_DOMAINS(l_isL3)
                      .set_CORE_TARGET(i_target),
                      "ERROR: Core/Cache PFET Control Timeout");
-
-#endif
 
         FAPI_DBG("Reset PFET Sequencer State via PFETCNTL[0,1/2,3]");
         FAPI_TRY( HCD_PUTMMIO_C( i_target, HCD_CPMS_PFETCNTL_CLR[l_isL3], MMIO_LOAD32H( HCD_PFET_SEQ_STATES[1][l_isVCS] ) ) );

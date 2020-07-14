@@ -25,4 +25,5 @@
 PROCEDURE=p10_hcd_corecache_power_control
 $(call ADD_MODULE_SRCDIR,$(PROCEDURE),$(ROOTPATH)/chips/p10/common/include)
 $(call ADD_MODULE_SRCDIR,$(PROCEDURE),$(ROOTPATH)/chips/p10/procedures/hwp/lib)
+lib$(PROCEDURE)_COMMONFLAGS += -DPFET_SENSE_POLL_DISABLE
 $(call BUILD_PROCEDURE)
