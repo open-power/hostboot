@@ -547,7 +547,8 @@ void* host_discover_targets( void *io_pArgs )
          * BMC that we have done so. This will cause them to fetch the new PDRs
          * from us. This has to be done after presence detection. */
 
-        if (!pdr_exchange_failed && !l_err)
+        // TODO RTC: 208841 Determine why BMC is not doing its part of pdr exchange
+        if (!l_pTopLevel->getAttr<TARGETING::ATTR_IS_MPIPL_HB>() && !pdr_exchange_failed && !l_err)
         {
             l_err = exchange_pdrs();
 
@@ -659,7 +660,8 @@ void* host_discover_targets( void *io_pArgs )
     }
 
 #if CONFIG_PLDM
-    if (!pdr_exchange_failed)
+    // TODO RTC: 208841 Determine why BMC is not doing its part of pdr exchange
+    if (!l_pTopLevel->getAttr<TARGETING::ATTR_IS_MPIPL_HB>() && !pdr_exchange_failed)
     {
         l_err = finish_pdr_exchange();
 
