@@ -883,36 +883,15 @@ namespace HBPM
             if(l_errl)
             {
                 TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                          ERR_MRK"resetPMComplex: could not map HOMER virt!");
-                break;
+                          ERR_MRK"resetPMComplex: could not map HOMER virt!, ignoring error log and trying to make progress");
+                // Make the trace but ignore the error
+                delete l_errl;
+                l_errl = nullptr;
             }
 
             //Get homer image buffer
             void* l_homerVAddr = reinterpret_cast<void*>(
                                     l_homerMapper.getHomerVirtAddr());
-            if(l_homerVAddr == nullptr)
-            {
-                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                     ERR_MRK"resetPMComplex: returned HOMER VAddr is nullptr!");
-                /**
-                 * @errortype
-                 * @reasoncode ISTEP::RC_INVALID_HOMER_VADDR
-                 * @severity   ERRORLOG::ERRL_SEV_UNRECOVERABLE
-                 * @moduleid   ISTEP::MOD_RESET_PM_COMPLEX
-                 * @userdata1  HUID
-                 * @userdata2  HOMER Phys Addr
-                 * @devdesc    Could not map HOMER Physical address to virt
-                 * @custdesc   A host failure occurred
-                 */
-                l_errl = new ERRORLOG::ErrlEntry(
-                                    ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                    ISTEP::MOD_RESET_PM_COMPLEX,
-                                    ISTEP::RC_INVALID_HOMER_VADDR,
-                                    get_huid(i_target),
-                                    l_homerMapper.getHomerPhysAddr(),
-                                    ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
-                break;
-            }
             // If this target was already reset previously by the runtime
             //  deconfig logic, then skip it.
             // ATTR_HB_INITIATED_PM_RESET set to COMPLETE signifies that this
