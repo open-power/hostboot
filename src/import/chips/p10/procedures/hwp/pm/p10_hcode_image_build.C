@@ -50,6 +50,8 @@
 #include <p10_stop_api.H>
 #include <p10_pstate_parameter_block.H>
 #include <p10_qme_customize.H>
+#include <p10_qme_meta_data.H>
+#include <p10_qme_build_attributes.H>
 
 extern "C"
 {
@@ -164,6 +166,7 @@ class ImageBuildRecord
         iv_maxSizeList["QME Common Ring"]   =   QME_COMMON_RING_SIZE;
         iv_maxSizeList["QME Override Ring"] =   QME_OVERRIDE_RING_SIZE;
         iv_maxSizeList["QME Inst Sectn"]    =   QME_INST_RING_SIZE;
+        iv_maxSizeList["QME Meta Data"]     =   QME_HCODE_SIZE;
         iv_maxSizeList["QME SRAM Size"]     =   QME_SRAM_SIZE;
         iv_maxSizeList["SELF BIN"]          =   SMF_THREAD_LAUNCHER_SIZE;
         iv_maxSizeList["SELF"]              =   SELF_SAVE_RESTORE_REGION_SIZE;
@@ -1157,6 +1160,9 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
+
+
+
 //----------------------------------------------------------------------------------------------
 
 fapi2::ReturnCode buildQmeOverride( Homerlayout_t *i_pChipHomer, RingBufData & i_ringData,
@@ -1350,6 +1356,121 @@ fapi2::ReturnCode buildQmeHeader( CONST_FAPI2_PROC& i_procTgt, Homerlayout_t   *
 
    fapi_try_exit:
     FAPI_INF( "<< buildQmeHeader" )
+    return fapi2::current_err;
+}
+
+
+//----------------------------------------------------------------------------------------------
+
+/**
+ * @brief       builds QME Attributes
+ * @param[in]   i_pImageIn      points to HW Image
+ * @param[in]   i_procTgt       fapi2 target for P10 proc chip
+ * @param[in]   i_pChipHomer    models HOMER region of memory
+ * @param[in]   i_qmeBuildRecord    contains QME image build details.
+ * @param[in]   i_procFuncModel contains P10 chip configuration details.
+ * @return      fapi2 return code.
+ */
+fapi2::ReturnCode buildQmeAttributes( void* const i_pImageIn, 
+                                      CONST_FAPI2_PROC& i_procTgt, 
+                                      Homerlayout_t* i_pChipHomer,
+                                      ImageBuildRecord & i_qmeBuildRecord,
+                                      P10FuncModel &i_procFuncModel)
+{
+    FAPI_INF(">> buildQmeAttributes");
+
+    fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+    uint32_t rcTemp    = IMG_BUILD_SUCCESS;
+    uint64_t       magic_number = 0;
+    uint8_t        l_pair_mode  = 0;
+    uint8_t*       pQmeImg      = NULL;
+    uint8_t*       pQmeMeta     = NULL;
+    QmeAttrMeta_t* pQmeAttrMeta = NULL;
+    QmeHeader_t*   pQmeAttrTank = NULL;
+    P9XipSection   ppeSection;
+
+    const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SYSTEM_FUSED_CORE_PAIRED_DISABLE, FAPI_SYSTEM, l_pair_mode),
+             "Error From FAPI_ATTR_GET For ATTR_SYSTEM_FUSED_CORE_PAIRED_DISABLE");
+
+    // invert disable to enable
+    l_pair_mode = l_pair_mode ? 0 : 1;
+    FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_FUSED_CORE_PAIRED_MODE_ENABLED, FAPI_SYSTEM, l_pair_mode),
+             "Error From FAPI_ATTR_SET For ATTR_FUSED_CORE_PAIRED_MODE_ENABLED");
+
+    // =============================
+    // Get QME Image XIP Section
+
+    rcTemp = p9_xip_get_section( i_pImageIn, P9_XIP_SECTION_HW_QME, &ppeSection );
+
+    FAPI_DBG("QME Image: ppeSection.iv_offset = 0x%08X, ppeSection.iv_size = 0x%08X",
+             ppeSection.iv_offset, ppeSection.iv_size);
+
+    FAPI_ASSERT( ( IMG_BUILD_SUCCESS == rcTemp ),
+                 fapi2::QME_IMG_NOT_FOUND_IN_HW_IMG()
+                 .set_XIP_FAILURE_CODE( rcTemp )
+                 .set_EC_LEVEL( i_procFuncModel.getChipLevel() ),
+                 "Failed to find QME sub-image in HW Image" );
+
+    pQmeImg = ppeSection.iv_offset + (uint8_t*) (i_pImageIn );
+
+    // =============================
+    // Get QME Meta Data XIP Section
+
+    ppeSection.iv_offset      =   0;
+    ppeSection.iv_size        =   0;
+
+    rcTemp = p9_xip_get_section( pQmeImg, P9_XIP_SECTION_QME_META_DATA, &ppeSection );
+
+    FAPI_DBG("QME Meta: ppeSection.iv_offset = 0x%08X, ppeSection.iv_size = 0x%08X",
+             ppeSection.iv_offset, ppeSection.iv_size);
+
+    FAPI_ASSERT( ( IMG_BUILD_SUCCESS == rcTemp ),
+                 fapi2::QME_META_NOT_FOUND_IN_HW_IMG()
+                 .set_XIP_FAILURE_CODE( rcTemp )
+                 .set_EC_LEVEL( i_procFuncModel.getChipLevel() ),
+                 "Failed to find QME Meta Data in HW Image" );
+
+    // pointer to QME Meta Data of Attributes
+    pQmeMeta     = ppeSection.iv_offset + (uint8_t*) ( pQmeImg );
+    pQmeAttrMeta = (QmeAttrMeta_t*) pQmeMeta;
+
+    magic_number = (*((uint64_t*)pQmeAttrMeta));
+    magic_number = htobe64(magic_number); 
+    magic_number = magic_number >> 8;
+
+    FAPI_DBG("QME Meta Data Address 0x%08X Magic Number: %llx Magic Word: %s Version %x", 
+             pQmeAttrMeta, magic_number, pQmeAttrMeta->magic_word, pQmeAttrMeta->meta_data_version);
+    FAPI_DBG("System    Attributes Count %x Size %x", htobe16(pQmeAttrMeta->system_num_of_attrs), 
+                                                      htobe16(pQmeAttrMeta->system_num_of_bytes)); 
+    FAPI_DBG("Proc Chip Attributes Count %x Size %x", htobe16(pQmeAttrMeta->proc_chip_num_of_attrs), 
+                                                      htobe16(pQmeAttrMeta->proc_chip_num_of_bytes)); 
+    FAPI_DBG("Pervasive Attributes Count %x Size %x", htobe16(pQmeAttrMeta->perv_num_of_attrs), 
+                                                      htobe16(pQmeAttrMeta->perv_num_of_bytes)); 
+    FAPI_DBG("EC        Attributes Count %x Size %x", htobe16(pQmeAttrMeta->ec_num_of_attrs), 
+                                                      htobe16(pQmeAttrMeta->ec_num_of_bytes)); 
+    FAPI_DBG("EX        Attributes Count %x Size %x", htobe16(pQmeAttrMeta->ex_num_of_attrs), 
+                                                      htobe16(pQmeAttrMeta->ex_num_of_bytes)); 
+    FAPI_DBG("EQ        Attributes Count %x Size %x", htobe16(pQmeAttrMeta->eq_num_of_attrs), 
+                                                      htobe16(pQmeAttrMeta->eq_num_of_bytes)); 
+
+    FAPI_ASSERT( ( magic_number == QMEATMT_MAGIC_NUMBER ),
+                 fapi2::QME_META_QMEATMT_MAGIC_MISMATCH()
+                 .set_QMEATMT_MAGIC_WORD(magic_number)
+                 .set_QME_META_HEADER_ADDR(pQmeAttrMeta),
+                 "QMEATMT Magic Word Mismatch");
+
+    // Pointer to QME Attribute Tank in Hcode image, 
+    // where the value of attributes will be written to 
+
+    pQmeAttrTank = (QmeHeader_t*) & i_pChipHomer->iv_cpmrRegion.iv_qmeSramRegion[QME_ATTR_PTRS_OFFSET];
+
+    FAPI_DBG("QME Hcode Attribute Container Address = 0x%08X", pQmeAttrTank);
+    fapi2::current_err = p10_qme_build_attributes(i_procTgt, pQmeAttrTank, pQmeAttrMeta); 
+
+fapi_try_exit:
+
+    FAPI_INF("<< buildQmeAttributes");
     return fapi2::current_err;
 }
 
@@ -1629,7 +1750,10 @@ fapi2::ReturnCode buildCpmrImage( CONST_FAPI2_PROC& i_procTgt,
               "Failed To Build QME Ring Region" );
 
     FAPI_TRY( buildQmeHeader( i_procTgt, i_pChipHomer, l_qmeBuildRecord ),
-              "Failed To Build CME Image Header" );
+              "Failed To Build QME Image Header" );
+
+    FAPI_TRY( buildQmeAttributes( i_pImageIn, i_procTgt, i_pChipHomer, l_qmeBuildRecord, i_chipFuncModel ),
+              "Failed To Initialize QME Attributes In HOMER QME Hcode Image" );
 
     FAPI_TRY( buildCpmrHeader( i_procTgt, i_pChipHomer, l_fuseModeState, l_qmeBuildRecord ),
               "Failed To Build CPMR Header" );

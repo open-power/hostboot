@@ -109,6 +109,14 @@
   <entry>
            <name>ATTR_MEM_MIRROR_PLACEMENT_POLICY</name>
   </entry>
+  <entry>
+          <name>ATTR_PROC_L3_HASH_DISABLE</name>
+          <value>0x0</value>
+  </entry>
+  <entry>
+          <name>ATTR_PROC_L2_HASH_DISABLE</name>
+          <value>0x0</value>
+  </entry>
   <!-- needed from p10_ipl/runn_attributes for contained/runn mode -->
   <entry>
           <name>ATTR_SYSTEM_IPL_PHASE</name>

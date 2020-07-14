@@ -181,6 +181,28 @@ p10_qme_build_attributes(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_ch
 
     {
         uint8_t l_uint8_data = 0;
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_L3_HASH_DISABLE, l_sys_tgt, l_uint8_data),
+                 "Error From FAPI_ATTR_GET For ATTR_PROC_L3_HASH_DISABLE");
+
+        FAPI_DBG("ATTR_PROC_L3_HASH_DISABLE uint8_ Attribute Value: %x, Copy to Address: %x",
+                 l_uint8_data, i_pQmeAttrTank);
+        *(uint8_t*)i_pQmeAttrTank =  l_uint8_data ;
+        i_pQmeAttrTank = (uint8_t*)i_pQmeAttrTank + 1;
+    }
+
+    {
+        uint8_t l_uint8_data = 0;
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_L2_HASH_DISABLE, l_sys_tgt, l_uint8_data),
+                 "Error From FAPI_ATTR_GET For ATTR_PROC_L2_HASH_DISABLE");
+
+        FAPI_DBG("ATTR_PROC_L2_HASH_DISABLE uint8_ Attribute Value: %x, Copy to Address: %x",
+                 l_uint8_data, i_pQmeAttrTank);
+        *(uint8_t*)i_pQmeAttrTank =  l_uint8_data ;
+        i_pQmeAttrTank = (uint8_t*)i_pQmeAttrTank + 1;
+    }
+
+    {
+        uint8_t l_uint8_data = 0;
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SYSTEM_IPL_PHASE, l_sys_tgt, l_uint8_data),
                  "Error From FAPI_ATTR_GET For ATTR_SYSTEM_IPL_PHASE");
 
@@ -280,8 +302,8 @@ p10_qme_build_attributes(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_ch
     //  therefore, skip_size = dummy_size - (HIB_size - QI_size)
 
     {
-        const uint32_t TARGET_TYPE_SYSTEM_ATTR_TOTAL_SIZE = 71;
-        const uint32_t TARGET_TYPE_SYSTEM_ATTR_LIMIT_SIZE = 39;
+        const uint32_t TARGET_TYPE_SYSTEM_ATTR_TOTAL_SIZE = 73;
+        const uint32_t TARGET_TYPE_SYSTEM_ATTR_LIMIT_SIZE = 41;
 
         if( l_sys_bytes >= TARGET_TYPE_SYSTEM_ATTR_TOTAL_SIZE )
         {
@@ -296,7 +318,7 @@ p10_qme_build_attributes(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_ch
             if( l_sys_bytes < TARGET_TYPE_SYSTEM_ATTR_LIMIT_SIZE )
             {
                 FAPI_INF("ERROR: TARGET_TYPE_SYSTEM Attribute Co-Req Detected,\
-                         hw_image attr size %x, hcode_image_build attr size 71", l_sys_bytes);
+                         hw_image attr size %x, hcode_image_build attr size 73", l_sys_bytes);
                 FAPI_ASSERT(0, fapi2::QME_META_COREQ_PROTECT_FAIL()
                             .set_HW_IMAGE_ATTR_SIZE(l_sys_bytes)
                             .set_HCD_BUILD_ATTR_SIZE(TARGET_TYPE_SYSTEM_ATTR_TOTAL_SIZE),
@@ -312,7 +334,7 @@ p10_qme_build_attributes(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_ch
         leftover  = (8 - (alignment % 8)) % 8;
         i_pQmeAttrTank = (uint8_t*)i_pQmeAttrTank + skip_size + leftover;
 
-        FAPI_DBG("TARGET_TYPE_SYSTEM Image_Byte %d Build_Byte 71 Skip_Size %d Alignment %d Leftover %d",
+        FAPI_DBG("TARGET_TYPE_SYSTEM Image_Byte %d Build_Byte 73 Skip_Size %d Alignment %d Leftover %d",
                  l_sys_bytes, skip_size, alignment, leftover);
     }
 
