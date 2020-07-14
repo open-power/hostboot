@@ -73,6 +73,10 @@ ifdef DOCPPCHECK
 		if [ "$$exit_code" -eq 127 ]; then \
 			exit_code=0; \
 		fi; \
+	else \
+		cat .`basename $<`.cppcheck >> $(PROJECT_ROOT)/allCppcheckErrors; \
+		echo >> $(PROJECT_ROOT)/allCppcheckErrors; \
+		exit_code=0; \
 	fi; exit "$$exit_code"
 	C_CPPCHECK_COMMAND=$(C1) set -o pipefail && cd `dirname $<` && timeout 2m $(C_CHECK) `basename $<` 2>&1 | tee .`basename $<`.cppcheck; exit_code=$$? ; \
 	if [ "$$exit_code" -ne 1 ]; then \
@@ -80,6 +84,10 @@ ifdef DOCPPCHECK
 		if [ "$$exit_code" -eq 127 ]; then \
 			exit_code=0; \
 		fi; \
+	else \
+		cat .`basename $<`.cppcheck >> $(PROJECT_ROOT)/allCppcheckErrors; \
+		echo >> $(PROJECT_ROOT)/allCppcheckErrors; \
+		exit_code=0; \
 	fi; exit "$$exit_code"
 else
 	CXX_PRINT=
