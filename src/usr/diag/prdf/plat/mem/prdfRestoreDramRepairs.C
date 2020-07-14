@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -36,7 +36,7 @@
 #include "common/plat/mem/prdfMemCaptureData.H"
 #include "common/plat/mem/prdfMemDqBitmap.H"
 #include "common/plat/mem/prdfMemMark.H"
-#include "common/plat/mem/prdfP9McaExtraSig.H"
+#include "common/plat/mem/prdfMemExtraSig.H"
 #include "common/plat/mem/prdfMemSymbol.H"
 #include "common/plat/mem/prdfMemoryMru.H"
 #include <prdfPlatServices.H>

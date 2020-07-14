@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -38,7 +38,7 @@
 #include <prdfMemUtils.H>
 #include <prdfMemVcm.H>
 #include <prdfP9McaDataBundle.H>
-#include <prdfP9McaExtraSig.H>
+#include <prdfMemExtraSig.H>
 
 using namespace TARGETING;
 

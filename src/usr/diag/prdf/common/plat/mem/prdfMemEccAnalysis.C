@@ -30,7 +30,7 @@
 #include <prdfMemCaptureData.H>
 #include <prdfMemDbUtils.H>
 #include <prdfMemDqBitmap.H>
-#include <prdfP9McaExtraSig.H>
+#include <prdfMemExtraSig.H>
 #include <prdfPlatServices.H>
 
 #ifdef __HOSTBOOT_RUNTIME
