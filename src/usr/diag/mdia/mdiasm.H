@@ -36,11 +36,7 @@
 #include "mdiafwd.H"
 #include "mdiaglobals.H"
 #include <targeting/namedtarget.H>
-
-#include <exp_defaults.H>
-#include <exp_rank.H>
-#include <kind.H>
-#include <hwp_wrappers.H>
+#include <gen_mss_mcbist_patterns.H>
 
 namespace MDIA
 {
