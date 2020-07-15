@@ -354,6 +354,11 @@ uint8_t * HdatIoHubFru::setIOHub(uint8_t * io_virt_addr,
             l_hdatHubEntry->hdatLaneEqPHBGen4[l_phbcnt] =
                            this->iv_hubArray[l_cnt].hdatLaneEqPHBGen4[l_phbcnt];
         }
+        for ( uint16_t l_phbcnt = 0 ; l_phbcnt < HDAT_PHB_LANES; l_phbcnt++)
+        {
+            l_hdatHubEntry->hdatLaneEqPHBGen5[l_phbcnt] =
+                           this->iv_hubArray[l_cnt].hdatLaneEqPHBGen5[l_phbcnt];
+        }
 
         l_hdatHubEntry++;//increase by size of hdatHubEntry_t
 
@@ -1146,25 +1151,8 @@ errlHndl_t hdatLoadIoData(const hdatMsAddr_t &i_msAddr,
                 assert(l_pSysTarget != NULL);
             }
 
-            // DD1 workaround for Nimbus
-            if((l_procEcLevel & HDAT_PROC_EC_DD1) && (l_model == TARGETING::MODEL_NIMBUS))
-            {
-                 /*TODO RTC:216061 Re-enable when attr exists
-                if(l_pSysTarget->getAttr<ATTR_DD1_SLOW_PCI_REF_CLOCK>())
-                {
-                    l_hub->hdatMaxPCIeLinkSpeed = HDAT_PCIE_MAX_SPEED_GEN4;
-                }
-                else
-                {
-                    l_hub->hdatMaxPCIeLinkSpeed = HDAT_PCIE_MAX_SPEED_GEN2;
-                }
-                **/
-                l_hub->hdatMaxPCIeLinkSpeed = HDAT_PCIE_MAX_SPEED_GEN2;
-            }
-            else
-            {
-                l_hub->hdatMaxPCIeLinkSpeed = HDAT_PCIE_MAX_SPEED_GEN4;
-            }
+            // Setting the Maximum PCIe Link Training Speed
+            l_hub->hdatMaxPCIeLinkSpeed = HDAT_PCIE_MAX_SPEED_GEN5;
 
             l_hub->hdatEcLvl = l_procEcLevel;
             l_hub->hdatProcChipID = l_procOrdId;
@@ -1205,42 +1193,35 @@ errlHndl_t hdatLoadIoData(const hdatMsAddr_t &i_msAddr,
             // copy the lane data
             for(uint32_t l_idx = 0; l_idx<l_phbList.size(); ++l_idx)
             {
-                //@TODO RTC 246357 missing attribute
-                /*
                 TARGETING::ATTR_PROC_PCIE_LANE_EQUALIZATION_GEN3_type
                            l_laneEq3 = {0};
-
                 TARGETING::ATTR_PROC_PCIE_LANE_EQUALIZATION_GEN4_type
                            l_laneEq4 = {0};
-                           
-                //TARGETING::Target *l_phbTarget = l_phbList[l_idx];
-                
-                //@TODO RTC 246357 missing attribute
+                TARGETING::ATTR_PROC_PCIE_LANE_EQUALIZATION_GEN5_type
+                           l_laneEq5 = {0};
+
+                TARGETING::Target *l_phbTarget = l_phbList[l_idx];
+
                 assert( l_phbTarget->
                    tryGetAttr<TARGETING::ATTR_PROC_PCIE_LANE_EQUALIZATION_GEN3>(
                        l_laneEq3));
-                */
-                uint16_t l_laneEq3[] = {0x5454,0x5454,0x5454,0x5454,
-                                        0x5454,0x5454,0x5454,0x5454,
-                                        0x5454,0x5454,0x5454,0x5454,
-                                        0x5454,0x5454,0x5454,0x5454};
                 memcpy((l_hub->hdatLaneEqPHBGen3 +
                           l_idx*NUM_OF_LANES_PER_PHB), l_laneEq3,
                           NUM_OF_LANES_PER_PHB*2);
 
-               //@TODO RTC 246357 missing attribute
-               /* assert( l_phbTarget->
+                assert( l_phbTarget->
                    tryGetAttr<TARGETING::ATTR_PROC_PCIE_LANE_EQUALIZATION_GEN4>(
-                      l_laneEq4));*/
-
-                uint16_t l_laneEq4[] = {0x7777,0x7777,0x7777,0x7777,
-                                        0x7777,0x7777,0x7777,0x7777,
-                                        0x7777,0x7777,0x7777,0x7777,
-                                        0x7777,0x7777,0x7777,0x7777};
+                      l_laneEq4));
                 memcpy((l_hub->hdatLaneEqPHBGen4 +
                           l_idx*NUM_OF_LANES_PER_PHB),l_laneEq4,
                           NUM_OF_LANES_PER_PHB*2);
-                                      
+
+                assert( l_phbTarget->
+                   tryGetAttr<TARGETING::ATTR_PROC_PCIE_LANE_EQUALIZATION_GEN5>(
+                      l_laneEq5));
+                memcpy((l_hub->hdatLaneEqPHBGen5 +
+                          l_idx*NUM_OF_LANES_PER_PHB),l_laneEq5,
+                          NUM_OF_LANES_PER_PHB*2);
             }
 
 
