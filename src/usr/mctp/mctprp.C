@@ -35,6 +35,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/time.h>
+#include <kernel/console.H>
 // Userspace Headers
 #include <devicefw/userif.H>
 #include <errl/errlmanager.H>
@@ -435,6 +436,9 @@ do
                       iv_hostlpc->lpc_hdr->rx_size );
             iv_hostlpc->binding.pkt_size = iv_hostlpc->lpc_hdr->rx_size;
         }
+        printk("MCTP Version : %d    packet size : %d \n",
+               iv_hostlpc->lpc_hdr->negotiated_ver,
+               iv_hostlpc->binding.pkt_size);
 
     }
 
