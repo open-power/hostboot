@@ -766,6 +766,49 @@ fapi_try_exit:
 
 namespace check
 {
+
+///
+/// @brief Reset N Mode attributes
+///
+/// @param[in] i_target_info OCMB, PMIC and I2C target struct
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS, else error code
+/// @note For 4U only. Has no effect on 1U/2U.
+///
+fapi2::ReturnCode reset_n_mode_attrs(const target_info_redundancy& i_target_info)
+{
+    uint8_t l_n_mode = fapi2::ENUM_ATTR_MEM_PMIC_4U_N_MODE_N_PLUS_1_MODE;
+
+    FAPI_TRY(mss::attr::set_pmic_n_mode(i_target_info.iv_pmic0, l_n_mode));
+    FAPI_TRY(mss::attr::set_pmic_n_mode(i_target_info.iv_pmic1, l_n_mode));
+    FAPI_TRY(mss::attr::set_pmic_n_mode(i_target_info.iv_pmic2, l_n_mode));
+    FAPI_TRY(mss::attr::set_pmic_n_mode(i_target_info.iv_pmic3, l_n_mode));
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Check if the GPIOs are already enabled (efuse is on)
+///
+/// @param[in] i_target_info OCMB, PMIC and I2C target struct
+/// @param[out] o_already_enabled true if efuse already on, else false
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if success, else
+///
+fapi2::ReturnCode gpios_already_enabled(const target_info_redundancy& i_target_info, bool& o_already_enabled)
+{
+    fapi2::buffer<uint8_t> l_reg_contents;
+
+    // The procedure enables GPIO1 then GPIO2. If something went wrong enabling GPIO1,
+    // we couldn't proceed at all, so it would've bombed out by that point.
+    // (Ex. a fail on an i2c write or something). So, we check that GPIO2 is enabled to move forward.
+    FAPI_TRY(mss::pmic::i2c::reg_read(i_target_info.iv_gpio2, mss::gpio::regs::CONFIGURATION, l_reg_contents));
+
+    o_already_enabled = gpios_already_enabled_helper(l_reg_contents);
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
 ///
 /// @brief Check for the given 4 PMICs that their n-mode declarations are safe to continue the procedure
 ///
@@ -999,6 +1042,7 @@ fapi2::ReturnCode enable_with_redundancy(
     const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_ocmb_target,
     const mss::pmic::enable_mode i_mode)
 {
+    bool l_already_enabled = false;
     fapi2::buffer<uint8_t> l_reg_contents;
 
     // Grab the targets as a struct if they exist
@@ -1006,11 +1050,21 @@ fapi2::ReturnCode enable_with_redundancy(
     target_info_redundancy l_target_info(i_ocmb_target);
 
     // First set up independent PMIC pairs with their GPIO expander
-    FAPI_TRY(setup_pmic_pair_and_gpio(l_target_info.iv_pmic0, l_target_info.iv_pmic1, l_target_info.iv_gpio1));
-    FAPI_TRY(setup_pmic_pair_and_gpio(l_target_info.iv_pmic2, l_target_info.iv_pmic3, l_target_info.iv_gpio2));
+    FAPI_TRY(check::gpios_already_enabled(l_target_info, l_already_enabled));
 
-    // Now make sure the resulting n-mode states are valid before continuing
-    FAPI_TRY(check::valid_n_mode(l_target_info));
+    // If we are already enabled (12V on), skip all the GPIO initialization,
+    // 12V being on will cause the efuse N-mode checks to fail, anyway
+    if (!l_already_enabled)
+    {
+        // Reset N Mode attributes
+        FAPI_TRY(check::reset_n_mode_attrs(l_target_info));
+
+        FAPI_TRY(setup_pmic_pair_and_gpio(l_target_info.iv_pmic0, l_target_info.iv_pmic1, l_target_info.iv_gpio1));
+        FAPI_TRY(setup_pmic_pair_and_gpio(l_target_info.iv_pmic2, l_target_info.iv_pmic3, l_target_info.iv_gpio2));
+
+        // Now make sure the resulting n-mode states are valid before continuing
+        FAPI_TRY(check::valid_n_mode(l_target_info));
+    }
 
     // Now we're ready to kick off the regular PMIC enable. This process already includes setting
     // R2F bit 1 to set the PMIC into programmable/diagnostic mode

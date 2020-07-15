@@ -720,13 +720,42 @@ namespace check
 {
 
 ///
+/// @brief Reset N Mode attributes
+///
+/// @param[in] i_target_info OCMB, PMIC and I2C target struct
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS, else error code
+/// @note For 4U only. Has no effect on 1U/2U.
+///
+fapi2::ReturnCode reset_n_mode_attrs(const target_info_redundancy& i_target_info);
+
+///
+/// @brief Check if the GPIOs are already enabled (efuse is on)
+///
+/// @param[in] i_target_info OCMB, PMIC and I2C target struct
+/// @param[out] o_already_enabled true if efuse already on, else false
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if success, else
+///
+fapi2::ReturnCode gpios_already_enabled(const target_info_redundancy& i_target_info, bool& o_already_enabled);
+
+///
+/// @brief Helper function to check if GPIO is already enabled given config register contents
+///
+/// @param[in] i_config CONFIG register contents
+/// @return bool enabled true/false
+/// @note unit-testable helper function
+///
+inline bool gpios_already_enabled_helper(const uint8_t i_config)
+{
+    return (i_config == mss::gpio::fields::CONFIGURATION_IO_MAP);
+}
+
+///
 /// @brief Check for the given 4 PMICs that their n-mode declarations are safe to continue the procedure
 ///
 /// @param[in] i_target_info OCMB, PMIC and I2C target struct
 /// @return fapi2::ReturnCode RC_PMIC_REDUNDANT_PAIR_DOWN if pair declares n-mode, else SUCCESS if no issue
 ///
 fapi2::ReturnCode valid_n_mode(const target_info_redundancy& i_target_info);
-
 
 ///
 /// @brief Check for valid N-mode given the status of all 4 PMICs, assert out otherwise
