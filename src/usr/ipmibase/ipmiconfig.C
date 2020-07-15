@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -30,7 +30,7 @@
     // Information contained in the Get Interface Capabilities command
     //
     // Request to response time default, in seconds
-const uint8_t IPMI::g_bmc_timeout = 5;
+const uint8_t IPMI::g_bmc_timeout = 15;
 
     // Number of allowed outstanding requests default
 const uint8_t IPMI::g_outstanding_req = 0x01;
