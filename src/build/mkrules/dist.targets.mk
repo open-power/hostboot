@@ -54,6 +54,7 @@ COPY_FILES = \
     src/build/debug/ecmd-debug-framework.pl:openpower,openpower-sim \
     src/build/debug/simics-debug-framework.py:openpower-sim \
     src/build/debug/simics-debug-framework.pl:openpower-sim \
+    src/build/tools/eecache_editor.pl:openpower \
     src/build/simics/combined.simics:openpower-sim \
     src/build/simics/startup.simics:openpower-sim \
     src/build/simics/rainier_hb.simics:openpower-sim\
@@ -294,6 +295,7 @@ simics.tar_CONTENTS = \
 fsp.tar_CONTENTS = \
     obj/genfiles/hwp_id.html \
     src/build/mkrules/hbfw/fsp/makefile \
+    src/build/tools/eecache_editor.pl \
     src/build/buildpnor/wof-tables-img \
     src/build/buildpnor/memd_creation.pl \
     src/build/buildpnor/buildSbePart.pl \

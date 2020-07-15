@@ -28,7 +28,7 @@ use strict;
 use Getopt::Long;
 use File::Copy;
 use File::Basename;
-
+use Class::Struct;
 
 binmode STDOUT, ':bytes';
 
@@ -60,6 +60,7 @@ my $cacheIsValid = 0;     # Passed as an argument only when cache entry in
 my $masterInEeprom = 0;   # Passed as an argument only when cache entry in
                           # $newImagePath is master in EEPROM it comes from
 my $cacheSizeKB = 0;      # Expected size of cache in EECACHE
+my $setIsValid = 0;       # Passed as an argument to mark cached_copy_valid bit based on existence of --cacheIsValid arg
 
 # Goals of this tool:
 #
@@ -94,7 +95,20 @@ use constant VERSION_LATEST => 2;
 use constant EEPROM_ACCESS_I2C => 1;
 use constant EEPROM_ACCESS_SPI => 2;
 
+# Common fields between versions for I2C and SPI
+struct I2C_Entry_t => {
+    i2c_master_huid => '$',
+    port            => '$',
+    engine          => '$',
+    devAddr         => '$',
+    mux_select      => '$',
+};
 
+struct SPI_Entry_t => {
+    spi_master_huid => '$',
+    engine          => '$',
+    offset_KB       => '$',
+};
 
 my $eecacheVersion = VERSION_LATEST;
 
@@ -124,7 +138,8 @@ GetOptions("pnor:s"         => \$pnorBinaryPath,
            "cacheIsValid"   => \$cacheIsValid,
            "masterInEeprom" => \$masterInEeprom,
            "cacheSizeKB:o"  => \$cacheSizeKB,
-           "h"              => \$usage);
+           "h"              => \$usage,
+           "setIsValid"     => \$setIsValid);
 
 sub print_help()
 {
@@ -148,6 +163,7 @@ sub print_help()
     print "   --uniqueId    Combination of unique I2C Slave information, alternative to passing\n";
     print "                 information in 1 thing at a time\n";
     print "   --version     Version of eecache (default to latest if this isn't provided)\n";
+    print "   --setIsValid  Sets the cached_copy_valid bit based on --cacheIsValid arg.\n";
     print "   --verbose     Print extra information \n";
     print "   --help        Print this information  \n";
     print "\n ";
@@ -257,7 +273,6 @@ if( $usage )
 #                                      // cache is valid.
 #    master_eeprom              : 1,   // This bit marks this record as the master one (i.e. look at this one for change)
 #    unused                     : 6;
-
 # } PACKED completeRecord;
 
 # struct uniqueRecord
@@ -265,7 +280,6 @@ if( $usage )
 #    uint8_t uniqueID [NUM_BYTE_UNIQUE_ID];
 #    uint8_t metaData [sizeof(completeRecord) - NUM_BYTE_UNIQUE_ID];
 # } PACKED uniqueRecord;
-
 
 
 if( ($pnorBinaryPath eq "") &&
@@ -295,6 +309,8 @@ if ($eecacheVersion > VERSION_LATEST)
 
 if ($uniqueId eq "")
 {
+    # if no uniqueId was explicitly given, attempt to construct one with the other script args.
+    # This could produce an invalid uniqueId which will be checked for later.
     if ($eecacheVersion == VERSION_LATEST)
     {
         # devOffsetKB is specific to SPI access so check to see if it is valid
@@ -330,10 +346,10 @@ my $displayOnly = 0;
 
 unless (isUniqueIdValid($uniqueId))
 {
-    if( $clearEepromData )
+    if( $clearEepromData || $setIsValid )
     {
         print_help();
-        print "\n ERROR: Detecting that user is trying to --clear data without providing what info on what eeprom to clear. Exiting. \n\n";
+        print "\n ERROR: User is trying to change data without providing uniqueId of eeprom entry to change. Exiting. \n\n";
         exit 0;
     }
     $displayOnly = 1;
@@ -348,6 +364,7 @@ else
 my $input_fh;
 my $output_fh;
 
+# Open the file handles
 if($inputIsEntirePnor)
 {
     open $input_fh, '<', $pnorBinaryPath or die "failed to open $pnorBinaryPath: $!\n";
@@ -370,99 +387,82 @@ else
     else
     {
         open $output_fh, '+>:raw', $outFilePath or die "failed to open $outFilePath: $!\n";
-        copy($eecacheBinaryPath, $outFilePath) ;
+
+        # Often, the goal is to modify the EECACHE partition directly. So, copy the original EECACHE input to
+        # the output so there is a baseline to work with.
+        copy($eecacheBinaryPath, $outFilePath);
     }
 }
 
-
-# When not appending a new cache entry by using $appendSpiEntry or $appendI2cEntry, then
-# at this point we should know what we are trying to accomplish :
-#
-# IF ($displayOnly != 0) THEN we will only print a summary
-#
-# ELSE IF ($newImagePath != "") THEN we will write new contents if matching section found
-#
-# ELSE IF ($clear != 0) THEN clear the contents if matching section found
-#
-# ELSE if matching section found, then write contents to outfile
-
-
+# Useful data about the table of contents
+my $g_headerVersion = 0;
+my $g_tocEndOfCache = 0;
+my $g_tocEntrySizeBytes = 0;
+my $g_tocEntries = 0;
 
 # TODO handle entire PNOR
 if($inputIsEntirePnor)
 {
     #find EECACHE offset , seek to there
+    print "Modifying EECACHE partition from a full PNOR is not supported at this time\n";
 }
 else
 {
-    # Parse the larger binary blob to get just the Table of Contents
+    # Parse the larger binary blob to get just the Table of Contents.
+    # Additionally, sets up globals that get their values from the TOC.
     my $eecacheTOC = readEecacheToc($input_fh);
 
-    # The hashRef you key back has members: offset and size
-    # This represents offset and size of eeprom data in given
-    # binary.
-    my $hashRef = parseEecacheToc($eecacheTOC, $uniqueId);
+    my $hashRef = 0;
 
-    # if we are doing displayOnly then we are done, we can skip the following logic
+    # Unless we are appending, then we should parseEecacheToc.
+    unless ($appendSpiEntry || $appendI2cEntry)
+    {
+        # parseEecacheToc Does up to two things:
+        #   1. Prints out requested info based on script args
+        #   2. Searches for requested entry in EECACHE
+        $hashRef = parseEecacheToc($eecacheTOC, $uniqueId);
+        # The hashRef you get back has members:
+        #   entry_offset:  offset of cached EEPROM data in EECACHE partition
+        #   entry_size:    size of cached EEPROM data
+        #   header_offset: offset of EEPROM record header in EECACHE TOC
+        # NOTE: If the user didn't provide a unique ID to find or it wasn't found
+        #       then hashRef shouldn't be used.
+    }
+
+    # Don't execute any other features if we were just printing EECACHE contents
     if(!$displayOnly)
     {
 
         # Append new cache entry to EECACHE
         if ($appendSpiEntry || $appendI2cEntry)
         {
-            appendNewEntryWithData();
+            appendNewEntryWithData($eecacheTOC);
         }
-        # If the offset is 0, then no match was found
+        # entry_offset would never be 0 because that's the start of the EECACHE TOC
+        # so, if that was returned from parseEecacheToc then don't proceed.
         elsif($hashRef->{'entry_offset'} != 0)
         {
-            if($newImagePath ne "") # if a new image is available try to load it in
+            # Replace existing cached data
+            if($newImagePath ne "")
             {
-                # Pad new cache file if needed
-                my $inputImgPath = padFileIfNeeded($newImagePath, $hashRef->{'entry_size'});
-
-                # Open and read input img file to work with
-                my $inputImgSize = -s $inputImgPath;
-                my $imgOffset = hex $hashRef->{'entry_offset'};
-
-                my $inputImgHandle;
-                open $inputImgHandle, '<', $inputImgPath or die "failed to open $inputImgPath: $!\n";
-
-                my $newFileData;
-                read($inputImgHandle, $newFileData, $inputImgSize);
-
-                print("Inserting img: $inputImgPath\n");
-                print("Of size: $inputImgSize\n");
-                print("At entry offset: $imgOffset\n");
-
-                # seek to the offset inside EEACHE where this eeprom's cache
-                # lives and write the new file contents
-                seek($output_fh, $imgOffset , 0);
-                print $output_fh $newFileData;
-
-                close $inputImgHandle;
+                # if a new image is available try to load it in
+                replaceCachedEepromData($hashRef, $newImagePath);
             }
-            elsif($clearEepromData) # if we are told to clear the data do that
+            # Clear existing cached data
+            elsif($clearEepromData)
             {
-                print "Attempting Clearing starting at $hashRef->{'entry_offset'} $hashRef->{'header_offset'}!!!!!!!!\n";
-                my $byteOfOnes = pack("H2", "FF") ;
-                my $byteOfZeroes = pack("H2", "00") ;
-                seek($output_fh, $hashRef->{'entry_offset'} , 0);
-                for(my $i = 0; $i < $hashRef->{'entry_size'}; $i++)
-                {
-                    print $output_fh $byteOfOnes;
-                }
-
-        #       seek($output_fh, $hashRef->{'header_offset'} + 16, 0);
-        #       print $output_fh  $byteOfZeroes;
+                clearCachedEepromData($hashRef);
             }
+            # Change the cached_copy_valid bit based on existence of --cacheIsValid arg
+            elsif ($setIsValid)
+            {
+                # Update the cached_copy_valid bit for the entry.
+                setIsCacheCopyValid($hashRef, $cacheIsValid);
+            }
+            # Dump the binary info of the found entry for the user to have.
             else
             {
-                seek($input_fh, $hashRef->{'entry_offset'} , 0);
-                my $cur_pos = tell $input_fh;
-                print "reading $hashRef->{'entry_size'} from $cur_pos\n ";
-                my $cachedData;
-                read($input_fh, $cachedData, $hashRef->{'entry_size'});
-                print $output_fh $cachedData;
+                dumpCachedEepromData($hashRef);
             }
         }
     }
@@ -473,7 +473,6 @@ close $output_fh;
 
 # End of Main
 exit 0;
-
 
 
 # Subroutines
@@ -506,54 +505,57 @@ sub readEecacheToc {
         die "Failed to find valid TOC, version found = $eecache_toc_version. Latest version this tool supports is ".VERSION_LATEST;
     }
 
-    return $eecache_toc;
-}
-
-
-
-# Brief : Takes in binary blob representing EECACHE table of contents, as well as
-#         a uniqueID to match against, returns hash that contains size and offset of
-#         cached eeprom data inside EEACHE section
-#
-#  If verbose is set,
-sub parseEecacheToc {
-    my $eecacheTOC = shift;
-    my $idToMatch = shift;
+    # Setup TOC info globals
+    # struct eecacheSectionHeader
+    # {
+    #     uint8_t version;         // EECACHE_VERSION
+    #     uint32_t end_of_cache;   // End point of the last cache entry
+    #     eepromRecordHeader recordHeaders[MAX_EEPROMS_LATEST];
+    # } PACKED ;
+    my @tocInfo = unpack('H2 H8', "$eecache_toc");
+    $g_headerVersion = hex @tocInfo[0];
+    $g_tocEndOfCache = @tocInfo[1];
 
     # figure out what version of EECACHE header exists
-    my $headerVersion = 0;
-    my $tocEntrySizeBytes = 0;
-    my $tocEntries = 0;
-
-    my ($version) = unpack('H2', "$eecacheTOC");
-    if ($version == 0x01)
+    if ($g_headerVersion == 1)
     {
-        $headerVersion = 1;
-        $tocEntrySizeBytes = VERSION_1_TOC_ENTRY_SIZE_BYTES;
-        $tocEntries = VERSION_1_NUM_ENTRIES;
+        $g_tocEntrySizeBytes = VERSION_1_TOC_ENTRY_SIZE_BYTES;
+        $g_tocEntries = VERSION_1_NUM_ENTRIES;
     }
-    elsif ($version == 0x02)
+    elsif ($g_headerVersion == 2)
     {
-        $headerVersion = 2;
-        $tocEntrySizeBytes = VERSION_2_TOC_ENTRY_SIZE_BYTES;
-        $tocEntries = VERSION_2_NUM_ENTRIES;
+        $g_tocEntrySizeBytes = VERSION_2_TOC_ENTRY_SIZE_BYTES;
+        $g_tocEntries = VERSION_2_NUM_ENTRIES;
     }
     else
     {
-        die "Unsupported PNOR EECACHE level $version";
+        die "Unsupported PNOR EECACHE level $g_headerVersion";
     }
 
     # verify uniqueId was built against same version as PNOR's EECACHE
     if (isUniqueIdValid($uniqueId))
     {
-        unless (($headerVersion == $eecacheVersion))
+        unless (($g_headerVersion == $eecacheVersion))
         {
-            die "PNOR EECACHE version $headerVersion is not same as expected EECACHE version $eecacheVersion!" .
+            die "PNOR EECACHE version $g_headerVersion is not same as expected EECACHE version $eecacheVersion!\n" .
                 "Maybe changed expected with --version option";
         }
     }
 
-    # header entries start after on 6th byte
+    return $eecache_toc;
+}
+
+# Brief : Takes in binary blob representing EECACHE table of contents, as well as
+#         a uniqueID to match against, returns hash that contains size and offset of
+#         cached eeprom data inside EEACHE section, and the offset to the header entry
+#         in the table of contents.
+#
+#  If verbose is set, will print all entries found in TOC based on script args.
+sub parseEecacheToc {
+    my $eecacheTOC = shift;
+    my $idToMatch = shift;
+
+    # header entries start on 6th byte
     my $headerEntryOffset = 5;
 
     # this will end up being the return value
@@ -574,36 +576,25 @@ sub parseEecacheToc {
     my $entry_size = 0;
     my $entry_offset = 0;
     my $bitFieldByte = 0; # last byte of header
+    # Version 1 not filled in uniqueId
     my $entryUniqueID = "FFFFFFFFFFFFFFFF";
 
-    use Class::Struct;
-
-    struct I2C_Entry_t => {
-        i2c_master_huid => '$',
-        port            => '$',
-        engine          => '$',
-        devAddr         => '$',
-        mux_select      => '$',
-    };
-
-    struct SPI_Entry_t => {
-        spi_master_huid => '$',
-        engine          => '$',
-        offset_KB       => '$',
-    };
-
-    for(my $i = 0; $i < $tocEntries; $i++)
+    # Iterate over all entries in EECACHE TOC
+    for(my $i = 0; $i < $g_tocEntries; $i++)
     {
         my $eepromAccess = EEPROM_ACCESS_I2C;
         my $master_eeprom = 0xFF; # default to invalid master eeprom
 
-        my $entry = substr $eecacheTOC, $headerEntryOffset, $tocEntrySizeBytes;
+        my $entry = substr $eecacheTOC, $headerEntryOffset, $g_tocEntrySizeBytes;
 
         # update offset right away so we dont forget
-        $headerEntryOffset += $tocEntrySizeBytes;
+        $headerEntryOffset += $g_tocEntrySizeBytes;
+
+        # Struct to hold common variables
         my $entry_data;
 
-        if ($headerVersion == 1)
+        # Parse out data based on the various versions
+        if ($g_headerVersion == 1)
         {
             # see "Struct for Header Version 1" in top of file
 
@@ -630,7 +621,7 @@ sub parseEecacheToc {
             $cached_copy_size = @entryFields[5];
             $internal_offset = @entryFields[6];
         }
-        elsif ($headerVersion == 2)
+        elsif ($g_headerVersion == 2)
         {
             # see "Struct for Header Version 2" in top of file
 
@@ -688,60 +679,32 @@ sub parseEecacheToc {
 
         if(hexStrsEqual($entryUniqueID, $idToMatch))
         {
-            $entryInfo{entry_offset} = $internal_offset;
+            $entryInfo{entry_offset} = hex $internal_offset;
 
             # Converting hex string to int and multiplying by 1024
             # KB to Bytes
             $entryInfo{entry_size}   = (hex $cached_copy_size) * 1024;
-            $entryInfo{header_offset} = $headerEntryOffset - $tocEntrySizeBytes;
+            $entryInfo{header_offset} = $headerEntryOffset - $g_tocEntrySizeBytes;
 
-            $matchSummaryString =  "ENTRY FOUND ...\n";
-            if ($eepromAccess == EEPROM_ACCESS_I2C)
-            {
-                if ($headerVersion >= 2)
-                {
-                    $matchSummaryString .=
-                      "accessType               = 0x".$eepromAccess." I2C ACCESS\n";
-                }
-                $matchSummaryString .=
-                "Master I2C Huid          = 0x". $entry_data->i2c_master_huid ."\n".
-                "Port                     = 0x". $entry_data->port ."\n".
-                "Engine                   = 0x". $entry_data->engine ."\n".
-                "Device Address           = 0x". $entry_data->devAddr ."\n".
-                "Mux Select               = 0x". $entry_data->mux_select ."\n".
-                "Size of Cached Copy (KB) = 0x$cached_copy_size\n".
-                "Offset within EECACHE    = 0x$internal_offset\n".
-                "Cached copy valid ?      = 0x$cached_copy_valid (1st bit of 0x$bitFieldByte)\n";
-            }
-            else # EEPROM_ACCESS_SPI
-            {
-                if ($headerVersion >= 2)
-                {
-                    $matchSummaryString .=
-                      "accessType               = 0x".$eepromAccess." SPI ACCESS\n";
-                }
-                $matchSummaryString .=
-                "Master SPI Huid          = 0x". $entry_data->spi_master_huid ."\n".
-                "Engine                   = 0x". $entry_data->engine ."\n".
-                "Offset in EEPROM         = 0x". $entry_data->offset_KB ."\n".
-                "Size of Cached Copy (KB) = 0x$cached_copy_size\n".
-                "Offset within EECACHE    = 0x$internal_offset\n".
-                "Cached copy valid ?      = $cached_copy_valid (1st bit of 0x$bitFieldByte)\n";
-            }
-            if ($master_eeprom != 0xFF)
-            {
-                $matchSummaryString .=
-                "EEPROM master ?          = $master_eeprom (2nd bit of 0x$bitFieldByte)\n";
-            }
-            $matchSummaryString .=
-                "unique ID                = 0x$entryUniqueID \n\n";
+            $matchSummaryString =  "ENTRY FOUND ...\n\n";
+            $matchSummaryString = createEntryString($matchSummaryString,
+                                                    $entry_data,
+                                                    $cached_copy_size,
+                                                    $cached_copy_valid,
+                                                    $internal_offset,
+                                                    $master_eeprom,
+                                                    $bitFieldByte,
+                                                    $entryUniqueID,
+                                                    $eepromAccess);
 
             if(!$verbose)
             {
+                # User didn't ask for a print of all entries and we found what we were looking for.
                 last;
             }
         }
 
+        ### Book keeping for verbose printing ###
         if( !$cached_copy_valid )
         {
             # skip if this entry is not valid and told to just
@@ -757,75 +720,193 @@ sub parseEecacheToc {
         }
 
         my $entryString = "";
-        if ($eepromAccess == EEPROM_ACCESS_I2C)
-        {
-            if ($headerVersion >= 2)
-            {
-                $entryString .=
-                  "accessType               = 0x".$eepromAccess." I2C ACCESS\n";
-            }
-            $entryString .=
-            "Master I2C Huid          = 0x". $entry_data->i2c_master_huid ."\n".
-            "Port                     = 0x". $entry_data->port ."\n".
-            "Engine                   = 0x". $entry_data->engine ."\n".
-            "Device Address           = 0x". $entry_data->devAddr ."\n".
-            "Mux Select               = 0x". $entry_data->mux_select ."\n".
-            "Size of Cached Copy (KB) = 0x$cached_copy_size\n".
-            "Offset within EECACHE    = 0x$internal_offset\n".
-            "Cached copy valid ?      = $cached_copy_valid (1st bit of 0x$bitFieldByte)\n";
-        }
-        else
-        {
-            if ($headerVersion >= 2)
-            {
-                $entryString .=
-                  "accessType               = 0x".$eepromAccess." SPI ACCESS\n";
-            }
-            $entryString .=
-            "Master SPI Huid          = 0x". $entry_data->spi_master_huid ."\n".
-            "Engine                   = 0x". $entry_data->engine ."\n".
-            "Offset in EEPROM         = 0x". $entry_data->offset_KB ."\n".
-            "Size of Cached Copy (KB) = 0x$cached_copy_size\n".
-            "Offset within EECACHE    = 0x$internal_offset\n".
-            "Cached copy valid ?      = $cached_copy_valid (1st bit of 0x$bitFieldByte)\n";
-        }
-
-        if ($master_eeprom != 0xFF)
-        {
-            $entryString .=
-            "EEPROM master ?          = $master_eeprom (2nd bit of 0x$bitFieldByte)\n";
-        }
-        $entryString .=
-            "unique ID                = 0x$entryUniqueID \n\n";
-
-        printVerbose($entryString);
-    }
+        printVerbose(createEntryString($entryString,
+                                       $entry_data,
+                                       $cached_copy_size,
+                                       $cached_copy_valid,
+                                       $internal_offset,
+                                       $master_eeprom,
+                                       $bitFieldByte,
+                                       $entryUniqueID,
+                                       $eepromAccess));
+    } # end for(all EECACHE entries)
 
     printVerbose(
         "Summary :\n".
         "  Total Entry Count    : $totalEntryCount \n".
         "  Valid Entry Count    : $validEntryCount \n".
-        "  Max Possible Entries : $tocEntries\n\n");
-
-    print "\nmatchSummaryString: $matchSummaryString\n";
+        "  Max Possible Entries : $g_tocEntries\n\n");
 
     if($matchSummaryString ne "")
     {
         print $matchSummaryString;
     }
-    else
+    elsif(isUniqueIdValid($uniqueId))
     {
         # Skip failure message if not looking for a unique id match
-        if (isUniqueIdValid($uniqueId))
-        {
-            print "No Match Found! \n\n";
-        }
+        print "No Match Found! \n";
     }
 
     return \%entryInfo;
 }
 
+# @brief Changes the cached_copy_valid bit to the request setting in the header record.
+#
+# @param[in] $arg1      A hash reference that has the header_offset to be changed.
+# @param[in] $arg2      A boolean to dictate whether to set or unset cached_copy_valid
+#
+sub setIsCacheCopyValid
+{
+    my $hashRef = shift;
+    my $isValid = shift;
 
+    # Where to find the byte which contains the bit fields
+    use constant BIT_FIELD_LOCATION_V1 => 16;
+    use constant BIT_FIELD_LOCATION_V2 => 17;
+
+    # Where witin the byte the cached_copy_valid flag is.
+    use constant CACHED_COPY_VALID_FLAG => 7;
+
+    # Depending on the header version, the cached_copy_valid bit is located in a different place
+    if ($g_headerVersion == 1)
+    {
+        seek($output_fh, $hashRef->{'header_offset'} + BIT_FIELD_LOCATION_V1, 0);
+    }
+    elsif ($g_headerVersion == 2)
+    {
+        seek($output_fh, $hashRef->{'header_offset'} + BIT_FIELD_LOCATION_V2, 0);
+    }
+    else
+    {
+        die "Unsupported EECACHE header version: $g_headerVersion";
+    }
+
+    # Extract the bit field
+    my $bitField;
+    my $readBytes = read($output_fh, $bitField, 1);
+    die "Failed to read single byte" unless $readBytes == 1;
+
+    $bitField = hex unpack('H2', "$bitField");
+
+    # Set the bit to the requested setting
+    $bitField ^= (-$isValid ^ $bitField) & (1 << CACHED_COPY_VALID_FLAG);
+
+    if ($g_headerVersion == 1)
+    {
+        seek($output_fh, $hashRef->{'header_offset'} + BIT_FIELD_LOCATION_V1, 0);
+        print $output_fh pack('H2',sprintf('%02X', $bitField));
+    }
+    elsif ($g_headerVersion == 2)
+    {
+        seek($output_fh, $hashRef->{'header_offset'} + BIT_FIELD_LOCATION_V2, 0);
+        print $output_fh pack('H2',sprintf('%02X', $bitField));
+    }
+    else
+    {
+        die "Unsupported EECACHE header version: $g_headerVersion";
+    }
+
+    # Show the user the change
+    print "Searching for changed header entry in $outFilePath...";
+    # Reset file handle position to start of file.
+    seek($output_fh, 0, 0);
+    # Search for the same uniqueId to prove to user their changes took effect.
+    my $eecacheTOC = readEecacheToc($output_fh);
+    parseEecacheToc($eecacheTOC, $uniqueId);
+
+}
+
+# @brief Replaces the existing cached eeprom data of the given record with the new data given by $newImagePath
+#
+# @param[in] $arg1      A hash reference that has members: header_offset, entry_offset, and entry_size.
+#                       This is the cached entry to be changed.
+# @param[in] $arg2      A path to the eeprom data to replace the existing data.
+#
+sub replaceCachedEepromData
+{
+    my $hashRef = shift;
+    my $newImagePath = shift;
+
+    # Pad new cache file if needed
+    my $inputImgPath = padFileIfNeeded($newImagePath, $hashRef->{'entry_size'});
+
+    # Open and read input img file to work with
+    my $inputImgSize = -s $inputImgPath;
+    my $imgOffset = $hashRef->{'entry_offset'};
+
+    my $inputImgHandle;
+    open $inputImgHandle, '<', $inputImgPath or die "failed to open $inputImgPath: $!\n";
+
+    my $newFileData;
+    read($inputImgHandle, $newFileData, $inputImgSize);
+
+    print("Inserting img: $inputImgPath\n");
+    print("Of size: $inputImgSize\n");
+    print("At entry offset: $imgOffset\n");
+
+    # seek to the offset inside EEACHE where this eeprom's cache
+    # lives and write the new file contents
+    seek($output_fh, $imgOffset , 0);
+    print $output_fh $newFileData;
+
+    # Update the cached_copy_valid bit for the entry.
+    setIsCacheCopyValid($hashRef, 1);
+    close $inputImgHandle;
+}
+
+# @brief Clears the cached data of the given eeprom record header.
+#
+# @param[in] $arg1      A hash reference that has members: header_offset, entry_offset, and entry_size.
+#
+sub clearCachedEepromData
+{
+    my $hashRef = shift;
+
+    print "Clearing cached entry data\n";
+    print("At entry offset: $hashRef->{'entry_offset'}\n");
+    print("Of size: $hashRef->{'entry_size'}\n");
+
+    my $byteOfOnes = pack("H2", "FF");
+
+    seek($output_fh, $hashRef->{'entry_offset'} , 0);
+    for(my $i = 0; $i < $hashRef->{'entry_size'}; $i++)
+    {
+        print $output_fh $byteOfOnes;
+    }
+
+    # Update the cached_copy_valid bit for the entry.
+    setIsCacheCopyValid($hashRef, 0);
+}
+
+# @brief Dumps the cached data of the given eeprom record header out to a file.
+#
+# @param[in] $arg1      A hash reference that has members: header_offset, entry_offset, and entry_size.
+#
+sub dumpCachedEepromData
+{
+    my $hashRef = shift;
+
+    # Seek to the place in EECACHE where the cached data starts
+    seek($input_fh, $hashRef->{'entry_offset'}, 0);
+    # The position seeked to.
+    my $cur_pos = tell $input_fh;
+    die "Attempted to seek to $hashRef->{'entry_offset'} but instead seeked to $cur_pos"
+        unless $cur_pos == $hashRef->{'entry_offset'};
+
+    # Tell the user we're dumping the cached data out for them.
+    print "Reading $hashRef->{'entry_size'} bytes of cached data from offset $cur_pos and outputting to $outFilePath\n ";
+
+    my $cachedData;
+    my $readBytes = read($input_fh, $cachedData, $hashRef->{'entry_size'});
+    die "Read $readBytes but expected $hashRef->{'entry_size'}"
+        unless $readBytes == $hashRef->{'entry_size'};
+
+    # The output file already has the full EECACHE copied into it. Truncate and output a file only containing
+    # this entry's cached contents.
+    truncate $output_fh, 0;
+    print $output_fh $cachedData;
+
+}
 
 # @brief
 # Perform the following operation to the the EECACHE file ($output_fh)
@@ -835,45 +916,8 @@ sub parseEecacheToc {
 # - Update "end_of_cache" value in eecache's header
 sub appendNewEntryWithData
 {
-    ### Read TOC of EECACHE
-
     # Parse the larger binary blob to get just the Table of Contents
     my $eecacheTOC = readEecacheToc($output_fh);
-
-    ### Figure out version and end of cache address of EECACHE,
-    ### and TOC layout info
-
-    # Get TOC info
-    # struct eecacheSectionHeader
-    # {
-    #     uint8_t version;         // EECACHE_VERSION
-    #     uint32_t end_of_cache;   // End point of the last cache entry
-    #     eepromRecordHeader recordHeaders[MAX_EEPROMS_LATEST];
-    # } PACKED ;
-    my @tocInfo = unpack('H2 H8', "$eecacheTOC");
-    my $tocVersion = @tocInfo[0];
-
-    # figure out what version of EECACHE header exists
-    my $headerVersion = 0;
-    my $tocEntrySizeBytes = 0;
-    my $tocEntries = 0;
-
-    if ($tocVersion == 0x01)
-    {
-        $headerVersion = 1;
-        $tocEntrySizeBytes = VERSION_1_TOC_ENTRY_SIZE_BYTES;
-        $tocEntries = VERSION_1_NUM_ENTRIES;
-    }
-    elsif ($tocVersion == 0x02)
-    {
-        $headerVersion = 2;
-        $tocEntrySizeBytes = VERSION_2_TOC_ENTRY_SIZE_BYTES;
-        $tocEntries = VERSION_2_NUM_ENTRIES;
-    }
-    else
-    {
-        die "Unsupported PNOR EECACHE level $tocVersion";
-    }
 
     ### Find last TOC entry
 
@@ -884,11 +928,11 @@ sub appendNewEntryWithData
     # Loop until last filled-in TOC entry; keep track of last filled in
     # entry offset with $lastFilledTocEntryOffset
     my $i = 1;
-    for ($i; $i <= $tocEntries; $i++)
+    for ($i; $i <= $g_tocEntries; $i++)
     {
-        my $entry = substr $eecacheTOC, $headerEntryOffset, $tocEntrySizeBytes;
+        my $entry = substr $eecacheTOC, $headerEntryOffset, $g_tocEntrySizeBytes;
 
-        if (!isTocEntryFilledIn($headerVersion, $entry)) {
+        if (!isTocEntryFilledIn($g_headerVersion, $entry)) {
             # When the first not filled-in entry is found, stop looping through the entries.
             # This empty entry will be used to place the new entry.
             last; # break out of loop
@@ -896,10 +940,10 @@ sub appendNewEntryWithData
 
         $lastFilledTocEntry = $entry;
         $lastFilledTocEntryOffset = $headerEntryOffset;
-        $headerEntryOffset += $tocEntrySizeBytes; # Update entry offset
+        $headerEntryOffset += $g_tocEntrySizeBytes; # Update entry offset
     }
 
-    if ($i > $tocEntries)
+    if ($i > $g_tocEntries)
     {
         die "Error: No empty TOC entries were found where the new cache data could be placed in.";
     }
@@ -909,7 +953,7 @@ sub appendNewEntryWithData
     # Get offset in eecache and size of cache of last eecache entry
     my $entryCacheSizeKB;
     my $entryCacheOffset;
-    ($entryCacheSizeKB, $entryCacheOffset) = &getCachedCopyOffsetAndSize($headerVersion, $lastFilledTocEntry);
+    ($entryCacheSizeKB, $entryCacheOffset) = &getCachedCopyOffsetAndSize($g_headerVersion, $lastFilledTocEntry);
 
     my $newCacheEntryOffset = (hex $entryCacheOffset) + ((hex $entryCacheSizeKB) * 1024);
 
@@ -919,7 +963,7 @@ sub appendNewEntryWithData
 
     if ($appendSpiEntry)
     {
-        if ($headerVersion == 1)
+        if ($g_headerVersion == 1)
         {
             die "Error: Cannot insert SPI type entry to a Version 1 EECACHE file";
         }
@@ -928,19 +972,19 @@ sub appendNewEntryWithData
     }
     elsif ($appendSpiEntry)
     {
-        if ($headerVersion == 1)
+        if ($g_headerVersion == 1)
         {
             $newTocEntry = createTocEntryI2cV1($masterHuid, $port, $engine,
                 $devAddr, $muxSelect, $cacheSizeKB, $newCacheEntryOffset, $cacheIsValid);
         }
-        elsif ($headerVersion == 2)
+        elsif ($g_headerVersion == 2)
         {
             $newTocEntry = createTocEntryI2cV2($masterHuid, $port, $engine, $devAddr,
                 $muxSelect, $cacheSizeKB, $newCacheEntryOffset, $cacheIsValid, $masterInEeprom);
         }
     }
 
-    my $newTocEntryOffset = $lastFilledTocEntryOffset + $tocEntrySizeBytes;
+    my $newTocEntryOffset = $lastFilledTocEntryOffset + $g_tocEntrySizeBytes;
 
     print("Appending TOC entry for new cache at offset: $newTocEntryOffset\n");
 
@@ -975,7 +1019,7 @@ sub appendNewEntryWithData
     # Get offset in eecache and size of cache of newly added eecache entry
     my $newEntryCacheSizeKB;
     my $newEntryCacheOffset;
-    ($newEntryCacheSizeKB, $newEntryCacheOffset) = &getCachedCopyOffsetAndSize($headerVersion, $newTocEntry);
+    ($newEntryCacheSizeKB, $newEntryCacheOffset) = &getCachedCopyOffsetAndSize($g_headerVersion, $newTocEntry);
 
     my $newEndOfCache = (hex $newEntryCacheOffset) + ((hex $newEntryCacheSizeKB) * 1024);
     my $newEndOfCacheValue = pack('H8', sprintf("%08x", $newEndOfCache));
@@ -987,7 +1031,6 @@ sub appendNewEntryWithData
     print("\n");
     print("EECACHE header \"end_of_cache\" value is being updated from $newCacheEntryOffset bytes to $newEndOfCache bytes.\n");
     print("\n");
-
 }
 
 
@@ -1195,7 +1238,7 @@ sub createTocEntryI2cV1
 # @brief Given a TOC entry and header version of EECACHE, return tuple
 # containing the cache copy size in KB and cache copy offset.
 #
-# @param[in] $headerVersion header version, int
+# @param[in] $g_headerVersion header version, int
 # @param[in] $tocEntry TOC entry data from EECACHE
 #
 # @return Tuple ($entryCacheSizeKB, $entryCacheOffset)
@@ -1204,7 +1247,7 @@ sub createTocEntryI2cV1
 sub getCachedCopyOffsetAndSize
 {
     # Parse arguments
-    my $headerVersion = shift;
+    my $g_headerVersion = shift;
     my $tocEntry = shift;
 
     # Return variables
@@ -1212,14 +1255,14 @@ sub getCachedCopyOffsetAndSize
     my $entryCacheOffset;
 
     # Parse cache size and cache offset based on header version
-    if ($headerVersion == 1)
+    if ($g_headerVersion == 1)
     {
         # See Header Version 1 structs above
         my @entryFields = unpack('H8 H2 H2 H2 H2 H8 H8 H2', "$tocEntry");
         $entryCacheSizeKB = @entryFields[5];
         $entryCacheOffset = @entryFields[6];
     }
-    elsif ($headerVersion == 2)
+    elsif ($g_headerVersion == 2)
     {
         # See Header Version 2 structs above
         my $eepromAccess;
@@ -1254,7 +1297,7 @@ sub getCachedCopyOffsetAndSize
 # @brief Given a TOC entry and header version of EECACHE, compute
 # if the TOC entry is filled in or not and return answer.
 #
-# @param[in] $headerVersion header version, int
+# @param[in] $g_headerVersion header version, int
 # @param[in] $tocEntry TOC entry data from EECACHE
 #
 # @return Bool 1: true, entry is filled in
@@ -1262,20 +1305,20 @@ sub getCachedCopyOffsetAndSize
 sub isTocEntryFilledIn
 {
     # Parse arguments
-    my $headerVersion = shift;
+    my $g_headerVersion = shift;
     my $tocEntry = shift;
 
     # Return variable
     my $isEntryFilledIn = 0;
 
-    if ($headerVersion == 1)
+    if ($g_headerVersion == 1)
     {
         if (!hexStrsEqual(unpack('H8', $tocEntry), "ffffffff"))
         {
             $isEntryFilledIn = 1;
         }
     }
-    elsif ($headerVersion == 2)
+    elsif ($g_headerVersion == 2)
     {
         my $eepromAccess;
         ($eepromAccess) = unpack('H2', $tocEntry);
@@ -1302,13 +1345,86 @@ sub printVerbose {
   }
 }
 
+# @brief Creates a human-readable string from given data about a cached eeprom entry.
+#
+# @param[in] $arg1 The entry string to build off. Useful if you want to prepend with custom text
+# @param[in] $arg2 A struct containing common variables between eeprom record headers
+# @param[in] $arg3 cached_copy_size, size of data saved in cache (in KB)
+# @param[in] $arg4 cached_copy_valid, This bit is set when we think the contents
+#                  of the cache is valid, 0: false, 1: true
+# @param[in] $arg5 internal_offset, offset from start of EECACHE section where
+#                  cached data exists
+# @param[in] $arg6 master_eeprom, This bit marks this record as the master one,
+#                   0: false, 1: true
+# @param[in] $arg7 bitFieldByte, the byte that contains the bit fields for master_eeprom and cached_copy_valid
+# @param[in] $arg8 entryUniqueID, the unique id for this entry
+# @param[in] $arg9 eepromAccess, access type. I2C or SPI
+#
+# @return human-readable string of the entry
+sub createEntryString
+{
+    # Input parameters
+    my $entryString       = shift;
+    my $entry_data        = shift;
+    my $cached_copy_size  = shift;
+    my $cached_copy_valid = shift;
+    my $internal_offset   = shift;
+    my $master_eeprom     = shift;
+    my $bitFieldByte      = shift;
+    my $entryUniqueID     = shift;
+    my $eepromAccess      = shift;
+
+    if ($eepromAccess == EEPROM_ACCESS_I2C)
+    {
+        if ($g_headerVersion >= 2)
+        {
+            $entryString .=
+              "accessType               = 0x".$eepromAccess." I2C ACCESS\n";
+        }
+        $entryString .=
+        "Master I2C Huid          = 0x". $entry_data->i2c_master_huid ."\n".
+        "Port                     = 0x". $entry_data->port ."\n".
+        "Engine                   = 0x". $entry_data->engine ."\n".
+        "Device Address           = 0x". $entry_data->devAddr ."\n".
+        "Mux Select               = 0x". $entry_data->mux_select ."\n".
+        "Size of Cached Copy (KB) = 0x$cached_copy_size\n".
+        "Offset within EECACHE    = 0x$internal_offset\n".
+        "Cached copy valid ?      = $cached_copy_valid (1st bit of 0x$bitFieldByte)\n";
+    }
+    else
+    {
+        if ($g_headerVersion >= 2)
+        {
+            $entryString .=
+              "accessType               = 0x".$eepromAccess." SPI ACCESS\n";
+        }
+        $entryString .=
+        "Master SPI Huid          = 0x". $entry_data->spi_master_huid ."\n".
+        "Engine                   = 0x". $entry_data->engine ."\n".
+        "Offset in EEPROM         = 0x". $entry_data->offset_KB ."\n".
+        "Size of Cached Copy (KB) = 0x$cached_copy_size\n".
+        "Offset within EECACHE    = 0x$internal_offset\n".
+        "Cached copy valid ?      = $cached_copy_valid (1st bit of 0x$bitFieldByte)\n";
+    }
+
+    if ($master_eeprom != 0xFF)
+    {
+        $entryString .=
+        "EEPROM master ?          = 0x$master_eeprom (2nd bit of 0x$bitFieldByte)\n";
+    }
+    $entryString .=
+        "unique ID                = 0x$entryUniqueID \n\n";
+
+    return $entryString;
+}
+
 sub isUniqueIdValid
 {
     my ($uniqueId) = @_;
 
-    if( (($eecacheVersion == 1) && ($uniqueId == "00000000000000FF"))   ||
-        (($eecacheVersion == 2) && ($uniqueId == "0100000000000000FF")) ||
-        (($eecacheVersion == 2) && ($uniqueId == "020000000000000000")) )
+    if( (($eecacheVersion == 1) && ($uniqueId eq "00000000000000FF"))   ||
+        (($eecacheVersion == 2) && ($uniqueId eq "0100000000000000FF")) ||
+        (($eecacheVersion == 2) && ($uniqueId eq "020000000000000000")) )
     {
         return 0;
     }
