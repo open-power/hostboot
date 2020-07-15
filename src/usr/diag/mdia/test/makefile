@@ -42,13 +42,32 @@ EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/utils/imageProcs
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/utils/imageProcs/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/imageProcs
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/ffdc
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/common/include
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/memory
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/ffdc
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/memory/lib/mcbist
+EXTRAINCDIR += ${ROOTPATH}/src/import/
+EXTRAINCDIR += ${ROOTPATH}/src/include/usr/fapi2
+EXTRAINCDIR += ${ROOTPATH}/src/include/usr/targeting/common
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/utils/imageProcs
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/utils/imageProcs/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/imageProcs
+EXTRAINCDIR += ${ROOTPATH}/src/import/generic/memory/lib/utils/dimm/
+EXTRAINCDIR += ${ROOTPATH}/src/import/generic/memory/lib/utils/mcbist
 EXTRAINCDIR += ${ROOTPATH}/src/import/generic/memory/
+EXTRAINCDIR += ${ROOTPATH}/src/import/generic/memory/lib/prd/
+EXTRAINCDIR += ${ROOTPATH}/src/import/generic/memory/lib/utils/mcbist/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/ocmb/explorer/common/include/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/ocmb/explorer/procedures/hwp/memory/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/ocmb/explorer/procedures/hwp/memory/lib/shared/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/ocmb/explorer/procedures/hwp/memory/lib/dimm/
 
-OBJS += mdiafakesm.o
-OBJS += mdiafakecm.o
+
+#OBJS += mdiafakesm.o
+#OBJS += mdiafakecm.o
 
 MODULE = testmdia
 
-TESTS = mdiatestsm.H mdiatesttrace.H mdiatest.H mdiatestworkitem.H mdiatestmonitor.H mdiatestmba.H mdiaTestTimeoutFfdc.H
+#TESTS = mdiatestsm.H mdiatesttrace.H mdiatest.H mdiatestworkitem.H mdiatestmonitor.H mdiatestmba.H mdiaTestTimeoutFfdc.H
 
 include ${ROOTPATH}/config.mk

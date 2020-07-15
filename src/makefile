@@ -260,7 +260,7 @@ TESTCASE_MODULES += testtargeting
 TESTCASE_MODULES += testmemoize
 #TODO RTC 210975
 TESTCASE_MODULES += testprdf
-TESTCASE_MODULES += testmdia
+#TESTCASE_MODULES += testmdia
 TESTCASE_MODULES += testpirformat
 TESTCASE_MODULES += testi2c
 TESTCASE_MODULES += testmbox
