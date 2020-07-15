@@ -243,6 +243,8 @@ void TodDrawer::getPotentialMdmts(
     errlHndl_t l_errHdl = nullptr;
 
     const TARGETING::Target* l_procTarget = nullptr;
+    // Procs that are GARDed, but configured.
+    TodProcContainer l_usableGardedProcs;
 
     for(const auto & l_procItr : iv_todProcList)
     {
@@ -280,8 +282,9 @@ void TodDrawer::getPotentialMdmts(
             }
             else
             {
-                TOD_INF("PROC target 0x%.8x cannot be choosen as MDMT as"
-                "its garded",GETHUID(l_procTarget));
+                TOD_INF("PROC target 0x%.8x is not a preferred MDMT candidate"
+                        " as it's garded",GETHUID(l_procTarget));
+                l_usableGardedProcs.push_back(l_procItr);
             }
         }
         else
@@ -292,6 +295,16 @@ void TodDrawer::getPotentialMdmts(
         l_isGARDed = false;
 
     }//End of for loop
+
+    if (o_procList.empty() && !l_usableGardedProcs.empty())
+    {
+        // No MDMT candidates found. Instead of failing the istep, if we
+        // have GARDed (but functional) procs, consider them as candidates.
+        // This is because these procs may still be usable for the current IPL,
+        // and we don't want to fail the IPL here.
+        o_procList = std::move(l_usableGardedProcs);
+    }
+
     TOD_EXIT("TodDrawer::getPotentialMdmts");
 }
 
