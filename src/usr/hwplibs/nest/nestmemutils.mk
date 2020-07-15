@@ -36,6 +36,3 @@ EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/imageProcs
 VPATH += ${HWP_NEST_MEM_UTILS_PATH}
 
 include ${ROOTPATH}/procedure.rules.mk
-
-# FIXME RTC: 210975
-#include ${HWP_NEST_MEM_UTILS_PATH}/p10_putmemproc.mk

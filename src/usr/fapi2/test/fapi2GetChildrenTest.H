@@ -515,7 +515,7 @@ void test_fapi2GetChildrenFilter()
 {
     int numTests = 0;
     int numFails = 0;
-/* # FIXME RTC: 210975
+/* # FIXME RTC:257497
     uint32_t l_targetHuid = 0xFFFFFFFF;
     uint32_t l_actualSize = 0;
     uint32_t l_expectedSize = 0;
@@ -562,7 +562,7 @@ void test_fapi2GetChildrenFilter()
 
         // Start of the Tests
 /*
-# FIXME RTC: 210975
+# FIXME RTC:257497
 # src/import/chips/p10/common/include/target_filters.H has not yet defined
 # TARGET_FILTER_ALL_CORES, TARGET_FILTER_CORE1, and
 # TARGET_FILTER_SYNC_MODE_ALL_IO_EXCEPT_NEST which are used below.
@@ -634,7 +634,7 @@ void test_fapi2GetChildrenFilter()
 
     }while(0);
 
-    // # FIXME RTC: 210975
+    // # FIXME RTC:257497
     // if(l_actualSize != l_expectedSize)
     // {
     //     /*@

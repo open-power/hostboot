@@ -69,7 +69,7 @@
 #include <secureboot/service.H>
 #include <util/misc.H>
 
-//FIXME RTC: 210975 This needs to be removed when the constants are either moved to P10 XML
+//FIXME RTC:257292  This needs to be removed when the constants are either moved to P10 XML
 // or retired; it the latter case, the references to these constants need to be
 // removed too.
 namespace mss
@@ -762,7 +762,6 @@ ReturnCode __dimmGetDqBitmapSpareByte(
     uint8_t (&o_spareByte)[mss::MAX_RANK_PER_DIMM])
 {
     ReturnCode l_rc;
-    uint8_t l_ps = 0;
 
     // Spare DRAM Attribute: Returns spare DRAM availability for
     // all DIMMs associated with the target MCS.
@@ -782,8 +781,9 @@ ReturnCode __dimmGetDqBitmapSpareByte(
     // the port slct, just set the attribute in the space for port slct 0.
     FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_MEM_EFF_DIMM_SPARE, l_fapiMemPort,
                             l_dramSpare[0]) );
-    l_ps = 0;
 
+#if 0 //RTC:257292 
+    uint8_t l_ps = 0;
     // Iterate through each rank of this DIMM
     for ( uint8_t i = 0; i < mss::MAX_RANK_PER_DIMM; i++ )
     {
@@ -811,6 +811,7 @@ ReturnCode __dimmGetDqBitmapSpareByte(
                 break;
         }
     }
+#endif
     }
 
 fapi_try_exit:

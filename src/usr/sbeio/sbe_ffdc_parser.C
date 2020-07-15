@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -30,7 +30,7 @@
 #include <errl/errlmanager.H>
 #include <util/utilbyte.H>
 #include <sbeio/sbe_ffdc_parser.H>
-// FIXME RTC: 210975
+// FIXME RTC: 254961
 //#include <fapi2.H>
 
 /**
@@ -281,7 +281,7 @@ void SbeFFDCParser::addFFDCPackage(void * i_ffdcPackage,
 PIB::PibError  SbeFFDCParser::getPibRc(uint8_t i_index)
 {
     PIB::PibError l_pibRc   = PIB::PIB_NO_ERROR;
-/* FIXME RTC: 210975
+/* FIXME RTC: 254961
     //get the rc for this ffdc package
     auto l_fapiRc           = getPackageRC(i_index);
 

@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2012,2019
+# Contributors Listed Below - COPYRIGHT 2012,2020
 # [+] International Business Machines Corp.
 #
 #
@@ -24,9 +24,9 @@
 # IBM_PROLOG_END_TAG
 ROOTPATH = ../../../..
 MODULE = testruntime
-# FIXME RTC: 210975
+# FIXME RTC:257489
 #TESTS += $(if $(or $(CONFIG_EARLY_TESTCASES),${CONFIG_AXONE_BRING_UP}) ,,testpreverifiedlidmgr.H)
-#TESTS += test_checkHbResMemLimit.H
+TESTS += test_checkHbResMemLimit.H
 #@TODO RTC 132750
 #TESTS += hdatservicetest.H
 

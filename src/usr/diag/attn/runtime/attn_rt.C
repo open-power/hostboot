@@ -38,7 +38,7 @@
 #include <errno.h>
 #include <prdf/common/prdfMain_common.H>
 
-// TODO RTC: 210975
+// TODO RTC:257492
 //#include <p9_io_obus_firmask_save_restore.H>
 #include <fapi2/target.H>              // fapi2::Target
 #include <fapi2/plat_hwp_invoker.H>    // FAPI_INVOKE_HWP
@@ -72,7 +72,7 @@ namespace ATTN_RT
             for (const auto & l_target: l_targetList)
             {
                 (void)l_target;
-/* TODO RTC: 210975
+/* TODO RTC:257492
                 const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>l_fapi2Target(l_target);
                 // Restore firmask values that were stored in attributes after chiplet_scominit.
                 // Now that we are in HBRT , OBUS peer targets are known so it is okay to
@@ -89,7 +89,7 @@ namespace ATTN_RT
                 }
             }
 
-            // TODO RTC: 210975 re-enable PRD
+            // TODO RTC:257492 re-enable PRD
             //err = initialize();
             if (err)
             {

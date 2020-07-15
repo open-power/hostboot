@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -50,7 +50,7 @@
 #include <arch/ppc.H>
 #include <mbox/ipc_msg_types.H>
 
-/* FIXME RTC: 210975
+/* FIXME RTC: 256840
 #include <fapi2.H>
 #include <fapi2/target.H>
 #include <fapi2/plat_hwp_invoker.H>

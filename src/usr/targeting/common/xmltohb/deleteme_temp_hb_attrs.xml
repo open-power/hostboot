@@ -90,14 +90,6 @@
 </attribute>
 
 <attribute>
-  <id>ATTR_NEST_PLL_BUCKET</id>
-  <targetType>TARGET_TYPE_SYSTEM</targetType>
-  <description>Select Nest I2C and pll setting from one of the supported frequencies</description>
-  <valueType>uint8</valueType>
-  <platInit/>
-</attribute>
-
-<attribute>
   <id>ATTR_RISK_LEVEL</id>
   <targetType>TARGET_TYPE_SYSTEM</targetType>
   <description>HWP/Init "risk level" enabled. Used by HB to pass to HB driven
@@ -193,15 +185,6 @@
 </attribute>
 
 <attribute>
-  <id>ATTR_EQ_GARD</id>
-  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
-  <description>Capturing EQ Gard value</description>
-  <valueType>uint8</valueType>
-  <platInit/>
-  <mrwHide/>
-</attribute>
-
-<attribute>
   <id>ATTR_OPTICS_CONFIG_MODE</id>
   <targetType>TARGET_TYPE_OBUS</targetType>
   <description>
@@ -218,73 +201,6 @@
     CAPI = 0x1,
     NV = 0x2,
     OCAPI = 0x3
-  </enum>
-  <platInit/>
-</attribute>
-
-<attribute>
-  <id>ATTR_PROC_FABRIC_PUMP_MODE</id>
-  <targetType>TARGET_TYPE_SYSTEM</targetType>
-  <description>
-    Processor SMP Fabric broadcast scope configuration.
-    CHIP_IS_NODE = MODE1 = default
-    CHIP_IS_GROUP = MODE2
-    Provided by the MRW.
-  </description>
-  <valueType>uint8</valueType>
-  <enum>
-    CHIP_IS_NODE = 0x01,
-    CHIP_IS_GROUP = 0x02
-  </enum>
-  <platInit/>
-</attribute>
-
-<attribute>
-  <id>ATTR_MSS_VPD_DQ_MAP</id>
-  <targetType>TARGET_TYPE_MCS</targetType>
-  <description>
-    [PORT][Dimm DQ PIN]  The map from the Dual Inline Memory Module (DIMM) Data (DQ) Pin to the Module Package Data (DQ) Pinout
-  </description>
-  <initToZero></initToZero>
-  <valueType>uint8</valueType>
-  <writeable/>
-  <mssUnits></mssUnits>
-  <mssBlobStart>0</mssBlobStart>
-  <mssBlobLength>144</mssBlobLength>
-  <mssAccessorName>vpd_dq_map</mssAccessorName>
-  <array>2 72</array>
-</attribute>
-
-<attribute>
-  <id>ATTR_EFF_DIMM_SPARE</id>
-  <targetType>TARGET_TYPE_MCS</targetType>
-  <description>
-      Spare DRAM availability. Used in various locations and is computed in mss_eff_cnfg.
-      creator: mss_eff_cnfg consumer: various firmware notes: load from spd
-      OBSOLETE: Use ATTR_VPD_DIMM_SPARE
-  </description>
-  <initToZero></initToZero>
-  <valueType>uint8</valueType>
-  <enum>NO_SPARE = 0, LOW_NIBBLE = 1, HIGH_NIBBLE = 2, FULL_BYTE = 3</enum>
-  <writeable/>
-  <array> 2 2 4</array>
-</attribute>
-
-<attribute>
-  <id>ATTR_FREQ_MCA_MHZ</id>
-  <targetType>TARGET_TYPE_SYSTEM</targetType>
-  <description>
-    The frequency of the memory controller channel. In synchronous mode,
-    this is equivalent to ATTR_FREQ_PB_MHZ. This may be independently set
-    per pair of memory channels if operating in asynchronous mode,
-    but this configuration is not anticipated. This clock drives the MCU queues,
-    and all the associated logic that drives the inputs to the DMI and reads
-    its outputs.
-  </description>
-  <valueType>uint32</valueType>
-  <enum>
-    2000 = 2000,
-    2400 = 2400
   </enum>
   <platInit/>
 </attribute>
@@ -932,5 +848,16 @@
   <initToZero/>
   <platInit/>
 </attribute>
+
+
+<!-- @TODO-RTC:257499-Remove after reference dropped from HWSV -->
+<attribute>
+  <id>ATTR_NEST_PLL_BUCKET</id>
+  <targetType>TARGET_TYPE_SYSTEM</targetType>
+  <description>Select Nest I2C and pll setting from one of the supported frequencies</description>
+  <valueType>uint8</valueType>
+  <platInit/>
+</attribute>
+
 
 </attributes>

@@ -108,38 +108,7 @@ errlHndl_t VPD::vpd_load_rt_image(uint64_t & i_vpd_addr)
 
     do
     {
-#ifndef CONFIG_SUPPORT_EEPROM_CACHING
-        void* vptr = reinterpret_cast<void*>(i_vpd_addr);
-        uint8_t* vpd_ptr = reinterpret_cast<uint8_t*>(vptr);
-
-        err = bld_vpd_image(PNOR::DIMM_JEDEC_VPD,
-                                 vpd_ptr,
-                                 VMM_DIMM_JEDEC_VPD_SIZE);
-        if(err)
-        {
-            break;
-        }
-
-        vpd_ptr += VMM_DIMM_JEDEC_VPD_SIZE;
-        err = bld_vpd_image(PNOR::MODULE_VPD,
-                                 vpd_ptr,
-                                 VMM_MODULE_VPD_SIZE);
-        if(err)
-        {
-            break;
-        }
-
-       //@TODO RTC: 210975 CENTAUR_VPD fix
-        vpd_ptr += VMM_MODULE_VPD_SIZE;
-        err = bld_vpd_image(PNOR::EECACHE, // TODO RTC: 210975
-                                 vpd_ptr,
-                                 VMM_CENTAUR_VPD_SIZE);
-        if(err)
-        {
-            break;
-        }
-#else
-        // In Axone we store all contents of EEPROMs in EECACHE
+        // All of the VPD EEPROM contents are stored in EECACHE
         // so copy the EECACHE pnor section to the space in reserved
         // memory allocated for VPD.
         void* vptr = reinterpret_cast<void*>(i_vpd_addr);
@@ -152,97 +121,8 @@ errlHndl_t VPD::vpd_load_rt_image(uint64_t & i_vpd_addr)
         {
             break;
         }
-#endif
-
     } while( 0 );
 
     return err;
 }
 
-// External function see vpd_if.H
-errlHndl_t VPD::goldenSwitchUpdate(void)
-{
-    errlHndl_t err = NULL;
-
-    do
-    {
-#ifdef CONFIG_PNOR_TWO_SIDE_SUPPORT
-        // Do not write to the PNOR at runtime after booting from the
-        //  golden side of pnor
-        PNOR::SideInfo_t l_pnorInfo;
-        err = PNOR::getSideInfo( PNOR::WORKING, l_pnorInfo );
-        if( err )
-        {
-            break;
-        }
-        else if( l_pnorInfo.isGolden )
-        {
-            TARGETING::ATTR_VPD_SWITCHES_type l_switch;
-
-            // Find all the targets with VPD switches
-            for (TARGETING::TargetIterator target =
-                 TARGETING::targetService().begin();
-                 target != TARGETING::targetService().end();
-                 ++target)
-            {
-                if(target->tryGetAttr<TARGETING::ATTR_VPD_SWITCHES>(l_switch))
-                {
-                    l_switch.disableWriteToPnorRT = 1;
-                    target->setAttr<TARGETING::ATTR_VPD_SWITCHES>( l_switch );
-                }
-            }
-        }
-#endif
-    } while( 0 );
-
-    return err;
-}
-
-// External function see vpd_if.H
-errlHndl_t VPD::goldenCacheInvalidate(void)
-{
-    errlHndl_t err = NULL;
-
-    do
-    {
-        // In manufacturing mode the VPD PNOR cache needs to be cleared
-        // And the VPD ATTR switch and flags need to be reset
-        // Note: this code should do nothing when not in PNOR caching mode
-        // @todo RTC 118752 Use generic mfg-mode attr when available
-        bool l_invalidateCaches = TARGETING::areAllSrcsTerminating();
-
-#ifdef CONFIG_PNOR_TWO_SIDE_SUPPORT
-        // We also need to wipe the cache out after booting from the
-        //  golden side of pnor
-        if( !l_invalidateCaches )
-        {
-            PNOR::SideInfo_t l_pnorInfo;
-            err = PNOR::getSideInfo( PNOR::WORKING, l_pnorInfo );
-            if( err )
-            {
-                // commit the error but keep going
-                errlCommit(err, VPD_COMP_ID);
-                // force the caches to get wiped out just in case
-                l_invalidateCaches = true;
-            }
-            else if( l_pnorInfo.isGolden )
-            {
-                l_invalidateCaches = true;
-            }
-        }
-#endif
-
-        if( l_invalidateCaches )
-        {
-            // Invalidate the VPD Caches for all targets
-            err = invalidateAllPnorCaches(true);
-            if (err)
-            {
-                break;
-            }
-        }
-
-    } while( 0 );
-
-    return err;
-}

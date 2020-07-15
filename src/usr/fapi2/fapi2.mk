@@ -85,8 +85,6 @@ include ${ROOTPATH}/procedure.rules.mk
 
 include ${HWP_PATH_1}/hwp/accessors/ddimm_get_efd.mk
 
-# FIXME RTC: 210975
-
 #EKB Objects (mirrored in src/import)
 OBJS += error_info.o
 OBJS += ffdc.o
@@ -95,16 +93,10 @@ OBJS += p10_pm_get_poundv_bucket.o
 OBJS += p10_pm_get_poundw_bucket.o
 OBJS += p10_pm_get_poundv_bucket_attr.o
 OBJS += p10_pm_get_poundw_bucket_attr.o
+
+#Add any object files that are referenced for FFDC functions inside
+# error xmls
 #OBJS += p9_collect_some_ffdc.o
-#OBJS += p9_pib2pcb_mux_seq.o
-#OBJS += p9_collect_ppe_state.o
-#OBJS += p9_lpc_utils.o
-#OBJS += p9_collect_lpc_regs.o
-#OBJS += p9_ppe_state.o
-#OBJS += p9_ppe_utils.o
-#OBJS += p9_eq_clear_atomic_lock.o
-#VPATH += $(HWP_PATH_1)/hwp/memory/lib/rosetta_map
-#OBJS += rosetta_map.o
 
 #Generated Objects
 OBJS += fapi2_attribute_service.o

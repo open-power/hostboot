@@ -161,8 +161,6 @@ endif
 # else we get duplicate modules in the list which causes linker errors.
 export BASE_MODULES_GCOV_BLACKLIST:=$(BASE_MODULES)
 
- #FIXME RTC: 210975 Revisit this list and turn modules on as P10 EKB is updated
-
 EXTENDED_MODULES += istep06
 EXTENDED_MODULES += isteps
 EXTENDED_MODULES += targeting
@@ -212,14 +210,11 @@ EXTENDED_MODULES += fsiscom
 EXTENDED_MODULES += prdf
 EXTENDED_MODULES += mdia
 EXTENDED_MODULES += dump
-#EXTENDED_MODULES += p9_stop_util
-#EXTENDED_MODULES += p9_phbPerst
+#EXTENDED_MODULES += p9_phbPerst   @TODO-RTC:257500
 EXTENDED_MODULES += $(if $(CONFIG_SECUREBOOT),secureboot_ext)
 EXTENDED_MODULES += tod
 #EXTENDED_MODULES += fab_iovalid
-#EXTENDED_MODULES += isteps_io
 EXTENDED_MODULES += node_comm
-#EXTENDED_MODULES += $(if $(CONFIG_NVDIMM),nvdimm)
 EXTENDED_MODULES += $(if $(CONFIG_UCD_FLASH_UPDATES),ucd)
 EXTENDED_MODULES += $(if $(CONFIG_FSP_BUILD),,nvram)
 EXTENDED_MODULES += expupd
@@ -258,13 +253,11 @@ TESTCASE_MODULES += testxscom
 TESTCASE_MODULES += testkernel
 TESTCASE_MODULES += testtargeting
 TESTCASE_MODULES += testmemoize
-#TODO RTC 210975
 TESTCASE_MODULES += testprdf
 TESTCASE_MODULES += testmdia
 TESTCASE_MODULES += testpirformat
 TESTCASE_MODULES += testi2c
 TESTCASE_MODULES += testmbox
-#TESTCASE_MODULES += $(if $(or $(CONFIG_EARLY_TESTCASES),${CONFIG_AXONE_BRING_UP}) ,,testrtloader)
 TESTCASE_MODULES += testsbe
 TESTCASE_MODULES += testsbeio
 TESTCASE_MODULES += testerrl
@@ -273,7 +266,7 @@ TESTCASE_MODULES += testvpd
 TESTCASE_MODULES += testsyslib
 TESTCASE_MODULES += testtlsmod
 TESTCASE_MODULES += testscom
-#TESTCASE_MODULES += testruntime
+#TESTCASE_MODULES += testruntime   @TODO-RTC:257502
 TESTCASE_MODULES += testintr
 TESTCASE_MODULES += testfapi2
 TESTCASE_MODULES += $(if $(CONFIG_EARLY_TESTCASES) && $(FSP_BUILD) ,,testnvram)

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -146,22 +146,6 @@ namespace VPD
      *      error log.
      */
     errlHndl_t invalidateAllPnorCaches ( bool i_setHwOnly );
-
-    /**
-     * @brief This function checks for golden-side boot and updates
-     *        the VPD SWITCHES attribute if true
-     * @return errlHndl_t - NULL if successful, otherwise a pointer to the
-     *      error log.
-     */
-    errlHndl_t goldenSwitchUpdate ( void );
-
-    /**
-     * @brief This function checks for manufacturing mode or
-     *        golden-side boot and invalidates VPD PNOR cache if true
-     * @return errlHndl_t - NULL if successful, otherwise a pointer to the
-     *      error log.
-     */
-    errlHndl_t goldenCacheInvalidate ( void );
 
     /**
      * @brief Structure used to specify VPD overrides for runtime

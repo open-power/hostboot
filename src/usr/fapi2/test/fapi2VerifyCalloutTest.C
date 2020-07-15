@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2017,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -33,7 +33,7 @@ uint32_t rcTestCalloutDeconfigGard()
 {
     uint32_t l_result = 0;
 
-    // FIXME RTC: 210975
+    // FIXME RTC:257497
     // See body of p10_gardAndDeconfig
 #if 0
     errlHndl_t l_errl = NULL;
@@ -129,7 +129,7 @@ uint32_t rcTestCalloutDeconfigGard()
 uint32_t rcTestCalloutProcedure()
 {
     uint32_t l_result = 0;
-    // FIXME RTC: 210975
+    // FIXME RTC:257497
     // See body of p10_procedureCallout
 #if 0
     errlHndl_t l_errl = NULL;
@@ -196,7 +196,7 @@ uint32_t rcTestCalloutProcedure()
 uint32_t rcTestCalloutHw()
 {
     uint32_t l_result = 0;
-// FIXME RTC: 210975
+// FIXME RTC:257497
 // See body of p10_hwCallout
 #if 0
     errlHndl_t l_errl = NULL;
@@ -275,7 +275,7 @@ uint32_t rcTestCalloutHw()
 uint32_t rcTestCalloutDeconfig()
 {
     uint32_t l_result = 0;
-// FIXME RTC: 210975
+// FIXME RTC:257497
 // See body of p10_deconfigCallout
 #if 0
     errlHndl_t l_errl = NULL;
@@ -355,7 +355,7 @@ uint32_t rcTestCalloutDeconfig()
 uint32_t rcTestCalloutNoneDeconfig()
 {
     uint32_t l_result = 0;
-// FIXME RTC: 210975
+// FIXME RTC:257497
 // See body of p10_deconfigCalloutNone
 #if 0
     errlHndl_t l_errl = NULL;

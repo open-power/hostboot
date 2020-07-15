@@ -42,7 +42,7 @@
 #include <sbeio/sbe_ffdc_package_parser.H>
 #include <sbeio/sbe_ffdc_parser.H>
 #include <kernel/pagemgr.H>
-// FIXME RTC: 210975
+// FIXME RTC: 254961
 //#include <fapi2.H>
 //#include <set_sbe_error.H>
 #include <sbeio/sbe_sp_intf.H>
@@ -512,7 +512,7 @@ errlHndl_t SbeFifo::readResponse(TARGETING::Target * i_target,
                      continue;
                  }
 
-// FIXME RTC: 210975
+// FIXME RTC: 254961
 #if 0
                  uint32_t l_rc = l_package.rc;
                  // If fapiRC, add data to errorlog
@@ -682,7 +682,7 @@ errlHndl_t SbeFifo::waitDnFifoReady(TARGETING::Target * i_target,
                                      HWAS::GARD_NULL );
             }
 
-// FIXME RTC: 210975 no SbeRetryHandler yet
+// FIXME RTC: 248572 no SbeRetryHandler yet
 #if 0
             // Set the retry handler's mode to be informational, this will run
             // p9_extract_rc then TI the system on fsp-systems.

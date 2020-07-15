@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2015,2019
+# Contributors Listed Below - COPYRIGHT 2015,2020
 # [+] International Business Machines Corp.
 #
 #
@@ -29,7 +29,6 @@
 ROOTPATH = ../../../..
 MODULE = testfapi2
 
-# FIXME RTC: 210975
 include fapi2Test.mk
 
 ifdef TRACE_MB_VPD_ATTR_UNIT_TEST

@@ -280,7 +280,6 @@ void IStepDispatcher::init(errlHndl_t &io_rtaskRetErrl)
 #endif
 
 
-/* FIXME RTC: 210975
         //////////////////
         // Send to console which SBE side we are currently on
         //////////////////
@@ -291,19 +290,18 @@ void IStepDispatcher::init(errlHndl_t &io_rtaskRetErrl)
         // NOTE: can't just call SBE::getSbeBootSeeprom(..) as it isn't loaded
 
         uint64_t scomData = 0x0;
-        // Read PERV_SB_CS_SCOM 0x00050008
+        // Read Selfboot Control/Status register
         size_t op_size = sizeof(scomData);
         err = deviceRead( l_masterTarget,
                           &scomData,
                           op_size,
-                          DEVICE_SCOM_ADDRESS(PERV_SB_CS_SCOM) );
+                          DEVICE_SCOM_ADDRESS(0x00050008) );
         if( err )
         {
             TRACFCOMP( g_trac_initsvc, ERR_MRK"IStepDispatcher() - "
                        "Unable to find SBE boot side, Error "
-                       "reading SB CS SCOM (0x%.8X) from Target :"
+                       "reading SB CS SCOM (0x00050008) from Target :"
                        "HUID=0x%.8X, RC=0x%X, PLID=0x%lX",
-                       PERV_SB_CS_SCOM, // 0x00050008
                        TARGETING::get_huid(l_masterTarget),
                        ERRL_GETRC_SAFE(err),
                        ERRL_GETPLID_SAFE(err));
@@ -324,18 +322,15 @@ void IStepDispatcher::init(errlHndl_t &io_rtaskRetErrl)
             TRACFCOMP( g_trac_initsvc,
                 INFO_MRK"IStepDispatcher(): SBE boot side %d for proc=%.8X",
                 l_bootside, TARGETING::get_huid(l_masterTarget) );
+            printk( "SBE Boot Side = %d\n", l_bootside );
 
-
-            #ifdef CONFIG_CONSOLE
             // Sending to console SBE side
             CONSOLE::displayf( NULL,
                     "Booting from SBE side %d on master proc=%.8X",
                     l_bootside, TARGETING::get_huid(l_masterTarget) );
             CONSOLE::flush();
-            #endif
         }
         ////////////////
-*/
 
 
         if(iv_mailboxEnabled)

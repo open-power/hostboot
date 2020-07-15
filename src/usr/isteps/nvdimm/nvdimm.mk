@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2018,2019
+# Contributors Listed Below - COPYRIGHT 2018,2020
 # [+] International Business Machines Corp.
 #
 #
@@ -25,7 +25,7 @@
 # nvdimmm.mk should only be called when CONFIG_NVDIMM is set
 # Called by src/makefile with the condition that CONFIG_NVDIMM is defined
 
-# FIXME RTC: 210975
+# FIXME RTC:249244
 
 #PROCEDURE_PATH = ${ROOTPATH}/src/import/chips/p9/procedures
 

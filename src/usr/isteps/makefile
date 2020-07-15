@@ -40,15 +40,12 @@ SUBDIRS+=istep18.d
 SUBDIRS+=istep20.d
 SUBDIRS+=istep21.d
 SUBDIRS+=pm.d
-SUBDIRS+=p9_stop_util.d
 SUBDIRS+=mss.d
 SUBDIRS+=cpuWkup.d
 SUBDIRS+=p9_phbPerst.d
 SUBDIRS+=tod.d
 SUBDIRS+=fab_iovalid.d
 SUBDIRS+=nest.d
-SUBDIRS+=io.d
-SUBDIRS+=nvdimm.d
 SUBDIRS+=ucd.d
 SUBDIRS+=expupd.d
 

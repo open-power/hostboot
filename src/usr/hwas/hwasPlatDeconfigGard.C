@@ -57,7 +57,7 @@
 #include <util/runtime/rt_fwreq_helper.H>  // firmware_request_helper
 #include <errl/errludtarget.H>
 
-/* FIXME RTC: 210975 the P10 version of this HWP DNE yet
+/* FIXME RTC:257487 the P10 version of this HWP DNE yet
 // includes to support the fapi2 hwp call in
 // platDeconfigureTargetAtRuntime()
 #include <fapi2/target.H>
@@ -1276,7 +1276,7 @@ errlHndl_t DeconfigGard::platDeconfigureTargetAtRuntime(
             HWAS_INF("platDeconfigureTargetAtRuntime() - skippign call to resetPMComplex - ATTR_HB_INITIATED_PM_RESET=%d", l_pmResetInProgress );
         }
 
-// FIXME RTC: 210975
+// FIXME RTC:257487
 #if 0
         // get the parent proc and call the hwp to alert
         // pm not to attempt to manage this core anymore

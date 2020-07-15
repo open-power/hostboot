@@ -225,29 +225,6 @@
   </attribute>
 
   <attribute>
-    <!-- Need to add this explicitly to handle the Axone case -->
-    <id>FREQ_MCA_MHZ</id>
-    <description>
-        The frequency of the memory controller channel. In synchronous mode,
-        this is equivalent to ATTR_FREQ_PB_MHZ. This may be independently set
-        per pair of memory channels if operating in asynchronous mode,
-        but this configuration is not anticipated. This clock drives the MCU queues,
-        and all the associated logic that drives the inputs to the DMI and reads
-        its outputs
-    </description>
-    <simpleType>
-      <uint32_t/>
-    </simpleType>
-    <persistency>non-volatile</persistency>
-    <readable/>
-    <writeable/>
-    <hwpfToHbAttrMap>
-      <id>ATTR_FREQ_MCA_MHZ</id>
-      <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-  </attribute>
-
-  <attribute>
     <id>FSI_MASTER_MUTEX</id>
     <description>Mutex for FSI Master Operations</description>
     <simpleType>

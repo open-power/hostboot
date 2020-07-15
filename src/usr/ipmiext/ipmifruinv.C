@@ -1652,7 +1652,7 @@ errlHndl_t membufIpmiFruInv::buildChassisInfoArea(
 errlHndl_t membufIpmiFruInv::buildBoardInfoArea(
                                               std::vector<uint8_t> &io_data)
 {
-    // TODO RTC: 210975 revisit this function and either implement it or remove
+    // TODO RTC:257493 revisit this function and either implement it or remove
     // the references to it
     errlHndl_t l_errl = NULL;
     return l_errl;
@@ -1781,7 +1781,7 @@ errlHndl_t membufIpmiFruInv::addVpdData(std::vector<uint8_t> &io_data,
         bool i_ascii,
         bool i_typeLengthByte)
 {
-    // TODO RTC: 210975 revisit this function and either implement it or remove
+    // TODO RTC:257493 revisit this function and either implement it or remove
     // the references to it
     errlHndl_t l_errl = NULL;
 

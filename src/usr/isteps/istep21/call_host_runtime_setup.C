@@ -37,7 +37,6 @@
 #include <runtime/customize_attrs_for_payload.H>
 #include <targeting/common/mfgFlagAccessors.H>
 #include <targeting/targplatutil.H>
-#include <vpd/vpd_if.H>
 #include <util/utiltce.H>
 #include <util/utilmclmgr.H>
 #include <map>
@@ -422,19 +421,6 @@ void* call_host_runtime_setup (void *io_pArgs)
 #endif
 #endif
 
-        if( TARGETING::is_sapphire_load()
-            && (!INITSERVICE::spBaseServicesEnabled()) )
-        {
-            //@fixme-RTC:172836-broken for HDAT mode?
-            // Update the VPD switches for golden side boot
-            // Must do this before building the devtree
-            l_err = VPD::goldenSwitchUpdate();
-            if ( l_err )
-            {
-                break;
-            }
-        }
-
         // Update the MDRT Count and PDA Table Entries from Attribute
         TargetService& l_targetService = targetService();
         Target* l_sys = nullptr;
@@ -495,19 +481,6 @@ void* call_host_runtime_setup (void *io_pArgs)
                        "Failed hbRuntimeData setup" );
             // break from do loop if error occurred
             break;
-        }
-
-        if( !INITSERVICE::spBaseServicesEnabled() )
-        {
-            // Invalidate the VPD cache for golden side boot
-            // Also invalidate in manufacturing mode
-            // Must do this after saving away the VPD cache into mainstore,
-            //  i.e. after RUNTIME::populate_hbRuntimeData()
-            l_err = VPD::goldenCacheInvalidate();
-            if ( l_err )
-            {
-                break;
-            }
         }
 
         if (TCE::utilUseTcesForDmas())

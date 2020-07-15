@@ -621,8 +621,6 @@ class TargetingTestSuite : public CxxTest::TestSuite
 
     void testPciPhbTarget()
     {
-        // TODO RTC 208782 : Enable once PHB chiplets are marked functional
-/*
         TS_TRACE(ENTER_MRK "testPciPhbTarget" );
 
         using namespace ERRORLOG;
@@ -666,49 +664,7 @@ class TargetingTestSuite : public CxxTest::TestSuite
         }
 
         TS_TRACE(EXIT_MRK "testPciPhbTarget");
-*/
     }
-
-    void testNvTarget()
-    {
-        // TODO RTC 210975 : Need to replace OBUS_BRICK with something else for p10?
-/*
-        TS_TRACE(ENTER_MRK "testNvTarget" );
-
-        using namespace ERRORLOG;
-        using namespace TARGETING;
-
-        TargetHandleList l_targs;
-
-        getAllChiplets( l_targs, TYPE_OBUS_BRICK);
-        if(l_targs.size() == 0)
-        {
-            TS_FAIL("TYPE_OBUS_BRICK target incorrectly returned zero size");
-        }
-        else
-        {
-            TS_TRACE("Correctly returned non-zero number of NV units: %d",
-                     l_targs.size());
-        }
-
-        for (auto l_targ : l_targs)
-        {
-            // Do a basic validation of NV target by reading HUID
-            uint32_t l_huid = get_huid(l_targ);
-            if(l_huid == 0)
-            {
-                TS_FAIL("Failed to read HUID for a NV target");
-            }
-            else
-            {
-                TS_TRACE("NV HUID:0x%.8X",l_huid);
-            }
-        }
-
-        TS_TRACE(EXIT_MRK "testNvTarget");
-*/
-    }
-
 
     void testI2cMux()
     {

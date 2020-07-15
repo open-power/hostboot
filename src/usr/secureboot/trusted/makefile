@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2015,2019
+# Contributors Listed Below - COPYRIGHT 2015,2020
 # [+] International Business Machines Corp.
 #
 #
@@ -25,7 +25,7 @@
 ROOTPATH = ../../../..
 MODULE = secureboot_trusted
 
-# FIXME RTC: 210975
+# FIXME RTC:257489
 #PERV_HWP_PATH += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/perv
 
 #Hardware procedure includes

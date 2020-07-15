@@ -210,7 +210,6 @@ void ErrLogDisplay::displayPrdf (uint64_t i_ud1, uint64_t i_ud2)
     CONSOLE::displayf(NULL, "  PRD Signature            : 0x%X 0x%X",
                       l_huid, l_sig);
 
-#if 0 //FIXME RTC: 210975 errLogDisplay has ties to PRD
 #ifdef CONFIG_CONSOLE_OUTPUT_FFDCDISPLAY
     //Find the Target from the HUID
     TARGETING::Target* l_pTopLevel = NULL;
@@ -241,7 +240,6 @@ void ErrLogDisplay::displayPrdf (uint64_t i_ud1, uint64_t i_ud2)
                               l_fapiStr);
         }
     }
-#endif
 #endif
 }
 

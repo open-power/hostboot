@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2017,2019
+# Contributors Listed Below - COPYRIGHT 2017,2020
 # [+] International Business Machines Corp.
 #
 #
@@ -25,7 +25,7 @@
 ROOTPATH = ../../../..
 MODULE = p9_phbPerst
 
-# FIXME RTC: 210975
+# FIXME RTC:257500
 
 #PROCEDURES_PATH    = ${ROOTPATH}/src/import/chips/p9/procedures
 

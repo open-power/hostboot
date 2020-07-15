@@ -32,7 +32,7 @@
 #include <errl/errludtarget.H>
 #include <errl/errludcallout.H>
 #include <sbeio/sbe_attn.H>
-/* FIXME RTC: 210975
+/* FIXME RTC: 248572
 #include <fapi2/target.H>
 #include <fapi2/plat_hwp_invoker.H>
 #include <p9_extract_sbe_rc.H>
@@ -73,7 +73,7 @@ namespace SBEIO
             }
         }
 
-// @TODO: RTC 210975: Can't take advantage of SbeRetryHandler because it relies heavily on P9 code
+// @TODO: RTC 248572: Can't take advantage of SbeRetryHandler because it relies heavily on P9 code
 #if 0
         SbeRetryHandler l_sbeObj = SbeRetryHandler(
                       SbeRetryHandler::SBE_MODE_OF_OPERATION::ATTEMPT_REBOOT);
@@ -148,7 +148,7 @@ namespace SBEIO
         }
 #endif  // End: Can't take advantage of SbeRetryHandler because it relies heavily on P9 code
 #else
-// FIXME RTC: 210975
+// FIXME RTC: 248572
 #if 0
         const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP> l_fapi2ProcTarget(
                             const_cast<TARGETING::Target*> (i_procTarg));

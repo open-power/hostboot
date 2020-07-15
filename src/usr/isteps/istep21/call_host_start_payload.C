@@ -53,7 +53,7 @@
 //Fapi support
 #include <fapi2/target.H>
 #include <fapi2/plat_hwp_invoker.H>
-/* FIXME RTC: 210975
+/* FIXME RTC:257487
 #include <p9n2_quad_scom_addresses_fld.H>
 #include <p9_quad_scom_addresses.H>
 */
@@ -62,7 +62,7 @@
 #include <p10_int_scom.H>
 #include <sbeio/sbeioif.H>
 #include <runtime/runtime.H>
-/* FIXME RTC: 210975
+/* FIXME RTC:257487
 #include <p9_stop_api.H>
 */
 #include <kernel/memstate.H>
@@ -748,7 +748,7 @@ errlHndl_t enableCoreCheckstops()
 {
     errlHndl_t l_errl = nullptr;
 
-/* FIXME RTC: 210975 OR TODO RTC:214350 (Requires PM Complex enabled)
+/* FIXME RTC: 257487
     // If we're running on a PHYP system, we need
     // to switch back to running unit checkstops
     if(! is_sapphire_load() )

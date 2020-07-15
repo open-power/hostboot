@@ -43,8 +43,6 @@
 #include <hwpf_fapi2_reasoncodes.H>
 #include <attributeenums.H>
 #include <pnor/pnorif.H>
-// FIXME RTC: 210975
-//#include <p9_xip_image.h>
 #include <p10_tor.H>
 #include <p10_scan_compression.H>
 #include <scom/wakeup.H>

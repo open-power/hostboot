@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2020                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -196,16 +196,6 @@ namespace DeviceFW
         DeviceFW::MVPD, static_cast<uint64_t>(( i_record )),\
             static_cast<uint64_t>(( i_keyword )),\
             static_cast<uint64_t>(( i_location ))
-
-    // TODO RTC: 210975 potentially remove DEVICE_CVPD_ADDRESS
-    /**
-     * Construct the device addressing parameters for the CVPD device ops.
-     * @param[in] i_record - The enumeration of the CVPD record to access.
-     * @param[in] i_keyword - The enumeration of the CVPD keyword, located
-     *      within the i_record Record to access.
-     */
-    #define DEVICE_CVPD_ADDRESS( i_record, i_keyword )\
-        DEVICE_CVPD_FORCE_ADDRESS( i_record, i_keyword, VPD::AUTOSELECT )
 
     /**
      * Construct the device addressing parameters for the PVPD device ops.

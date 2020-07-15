@@ -63,7 +63,7 @@
 #include "tpmLogMgr.H"
 #include "base/trustedbootMsg.H"
 #include <secureboot/settings.H>
-/* FIXME RTC: 210975
+/* FIXME RTC:257489
 #include <fapi2.H>
 #include <plat_hwp_invoker.H>
 #include <p9_update_security_ctrl.H>
@@ -1133,7 +1133,7 @@ void tpmMarkFailed(TpmTarget* const i_pTpm,
         break;
     }
 
-/* FIXME RTC: 210975
+/* FIXME RTC:257489
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP> l_fapiTarg(l_proc);
 
     FAPI_INVOKE_HWP(l_err, p9_update_security_ctrl, l_fapiTarg);

@@ -1135,11 +1135,6 @@ namespace SBE
 
         do{
 
-            // Before doing any customization, we need to ensure that the
-            // ATTR_EC/EQ_GARD attributes are setup to reflect the
-            // current state of our targets
-            HWAS::setChipletGardsOnProc(i_target);
-
             // cast OUR type of target to a FAPI type of target.
             const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>
                 l_fapiTarg(i_target);

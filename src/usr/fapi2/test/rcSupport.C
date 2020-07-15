@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -87,7 +87,7 @@ fapi2::ReturnCode p10_registerFfdc_fail(
 {
     FAPI_INF("Enter p10_registerFfdc_fail...");
 
-/* FIXME RTC: 210975
+/* FIXME RTC:257497
     // TEST_ERROR_A needs src/import/chips/p9/procedures/xml/error_info/
     proc_example_errors.xml to be run through platCreateHwpErrParser.pl in
     fapi2.mk but it contains usage of p9_collect_some_ffdc.
@@ -113,12 +113,12 @@ fapi2::ReturnCode p10_procedureFfdc_fail()
 {
     FAPI_INF("Enter p10_procedureFfdc_fail...");
 
-/* FIXME RTC: 210975
+/* FIXME RTC:257497
     uint32_t pib = 0x0001;
 */
     fapi2::ReturnCode l_rc;
 
-/* FIXME RTC: 210975
+/* FIXME RTC:257497
     FAPI_ASSERT(0, fapi2::TEST_PROC_ERROR(fapi2::FAPI2_ERRL_SEV_RECOVERED,
                                           l_rc).set_parm1(pib));
 
@@ -140,7 +140,7 @@ fapi2::ReturnCode p10_gardAndDeconfig(
 {
     FAPI_INF("Enter p10_gardAndDeconfig...");
 
-/* FIXME RTC: 210975
+/* FIXME RTC:257497
     // TEST_ERROR_GARD_DECONFIG needs
     src/import/chips/p9/procedures/xml/error_info/proc_example_errors.xml to be
     run through platCreateHwpErrParser.pl in fapi2.mk but it contains usage of
@@ -166,7 +166,7 @@ fapi2::ReturnCode p10_deconfigCallout(
 {
     FAPI_INF("Enter p10_deconfigCallout...");
 
-/* FIXME RTC: 210975
+/* FIXME RTC:257497
     // TEST_ERROR_DECONFIG needs
     src/import/chips/p9/procedures/xml/error_info/proc_example_errors.xml to be
     run through platCreateHwpErrParser.pl in fapi2.mk but it contains usage of
@@ -192,7 +192,7 @@ fapi2::ReturnCode p10_deconfigCalloutNone(
 {
     FAPI_INF("Enter p10_deconfigCalloutNone...");
 
-/* FIXME RTC: 210975
+/* FIXME RTC:257497
     // TEST_ERROR_DECONFIG_NO_CALLOUT needs
     src/import/chips/p9/procedures/xml/error_info/proc_example_errors.xml to be
     run through platCreateHwpErrParser.pl in fapi2.mk but it contains usage of
@@ -217,7 +217,7 @@ fapi2::ReturnCode p10_procedureCallout()
 {
     FAPI_INF("Enter p10_procedureCallout...");
 
-/* FIXME RTC: 210975
+/* FIXME RTC:257497
     // TEST_ERROR_PROCEDURE_CALLOUT needs
     src/import/chips/p9/procedures/xml/error_info/proc_example_errors.xml to be
     run through platCreateHwpErrParser.pl in fapi2.mk but it contains usage of
@@ -243,7 +243,7 @@ fapi2::ReturnCode p10_hwCallout(
 {
     FAPI_INF("Enter p10_hwCallout...");
 
-/* FIXME RTC: 210975
+/* FIXME RTC:257497
     // TEST_ERROR_HW_CALLOUT needs
     src/import/chips/p9/procedures/xml/error_info/proc_example_errors.xml to be
     run through platCreateHwpErrParser.pl in fapi2.mk but it contains usage of
@@ -272,7 +272,7 @@ fapi2::ReturnCode p10ErrorWithBuffer(
 
     fapi2::buffer<uint64_t> l_userBuffer{FAPI2_TEST_BUFFER_VALUE};
 
-/* FIXME RTC: 210975
+/* FIXME RTC:257497
     //Parameter type for the p9_collect_some_ffdc function.
     //Can be 0x01 or 0x02. Has relevence for ErrorInfo objects
     //not related to this test.
@@ -281,7 +281,7 @@ fapi2::ReturnCode p10ErrorWithBuffer(
 
     fapi2::current_err = fapi2::FAPI2_RC_INVALID_PARAMETER;
 
-/* FIXME RTC: 210975
+/* FIXME RTC:257497
     FAPI_ASSERT(false,
                 fapi2::PROC_EXAMPLE_ERROR().set_BUFFER(l_userBuffer)
                                     .set_parm1(l_paramValue)
@@ -309,7 +309,7 @@ fapi2::ReturnCode p10ErrorWithVariableBuffer(
                                         VARIABLE_BUFFER_ELEMENTS*32
                                         );
 
-/* FIXME RTC: 210975
+/* FIXME RTC:257497
     //Parameter type for the p9_collect_some_ffdc function.
     //Can be 0x01 or 0x02. Has relevence for ErrorInfo objects
     //not related to this test
@@ -318,7 +318,7 @@ fapi2::ReturnCode p10ErrorWithVariableBuffer(
 
     fapi2::current_err = fapi2::FAPI2_RC_INVALID_PARAMETER;
 
-/* FIXME RTC: 210975
+/* FIXME RTC:257497
     FAPI_ASSERT(false,
                 fapi2::PROC_EXAMPLE_ERROR().set_BUFFER(l_userBuffer)
                                     .set_parm1(l_paramValue)

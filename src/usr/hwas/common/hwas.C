@@ -2842,46 +2842,8 @@ void presentByAssoc(TargetHandleList& i_targets)
 
 void setChipletGardsOnProc(TARGETING::Target * i_procTarget)
 {
-    TARGETING::TargetHandleList l_targetList;
-
-    TARGETING::ATTR_EQ_GARD_type l_eqGard = 0xFF;
-    TARGETING::ATTR_EC_GARD_type l_ecGard = 0xFFFFFFFF;
-
-    TARGETING::PredicateCTM l_eqs(TARGETING::CLASS_UNIT,
-                                  TARGETING::TYPE_EQ);
-
-    TARGETING::PredicateCTM l_ecs(TARGETING::CLASS_UNIT,
-                                  TARGETING::TYPE_CORE);
-
-    TARGETING::PredicateIsFunctional l_isFunctional;
-    TARGETING::PredicatePostfixExpr l_funcChipletFilter;
-
-    l_funcChipletFilter.push(&l_eqs).push(&l_ecs).Or().
-                        push(&l_isFunctional).And();
-
-    TARGETING::targetService().getAssociated(l_targetList,
-                                            i_procTarget,
-                                            TARGETING::TargetService::CHILD,
-                                            TARGETING::TargetService::ALL,
-                                            &l_funcChipletFilter);
-
-    for(auto & l_targ : l_targetList)
-    {
-        TARGETING::ATTR_CHIP_UNIT_type l_chipUnit =
-        l_targ->getAttr<TARGETING::ATTR_CHIP_UNIT>();
-        if((l_targ)->getAttr<TARGETING::ATTR_TYPE>() == TARGETING::TYPE_EQ)
-        {
-            l_eqGard &= ~(0x80 >> l_chipUnit );
-        }
-        else
-        {
-            l_ecGard &= ~(0x80000000 >> l_chipUnit );
-        }
-    }
-    HWAS_INF("EQ Gard Bit:0x%x EC Gard Bit:0x%08x on proc with HUID: 0x%lx ",
-                l_eqGard,l_ecGard, i_procTarget->getAttr<TARGETING::ATTR_HUID>());
-    i_procTarget->setAttr<TARGETING::ATTR_EQ_GARD>(l_eqGard);
-    i_procTarget->setAttr<TARGETING::ATTR_EC_GARD>(l_ecGard);
+    //@TODO-RTC:257499-Remove after HWSV removes references to it
+    HWAS_ERR("HWAS::setChipletGardsOnProc is deprecated");
 }//setChipletGardsOnProc
 
 bool mixedECsAllowed(TARGETING::ATTR_MODEL_type i_model,

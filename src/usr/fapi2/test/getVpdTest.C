@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -27,6 +27,8 @@
  * @file getVpdTest.C
  * @brief getVpd for MCA memory test cases
  */
+
+//RTC:257497-Update with new vpd targets and types
 
 #include <stdint.h>
 #include <cxxtest/TestSuite.H>

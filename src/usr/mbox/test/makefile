@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2012,2019
+# Contributors Listed Below - COPYRIGHT 2012,2020
 # [+] International Business Machines Corp.
 #
 #
@@ -25,7 +25,6 @@
 ROOTPATH = ../../../..
 
 MODULE = testmbox
-# FIXME RTC: 210975
-#TESTS = *.H
+TESTS = *.H
 
 include ${ROOTPATH}/config.mk

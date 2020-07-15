@@ -35,5 +35,5 @@ VPATH += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/io/
 
 ATTN_RT_OBJS += attn_rt.o
 ATTN_RT_OBJS += attnsvc.o
-# FIXME RTC: 210975
+# FIXME RTC:257492
 #ATTN_RT_OBJS += p9_io_obus_firmask_save_restore.o

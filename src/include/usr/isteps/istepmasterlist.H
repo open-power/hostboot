@@ -64,9 +64,6 @@
 
 //  isteps 1-5 run before hostboot
 
-//FIXME RTC: 210975 istepdispatcher.C includes this file and references all of
-// the isteps' function names, which creates many undefined symbols, since we're
-// only compiling isteps 6 and 7 at this time.
 #include    "istep06list.H"
 #include    "istep07list.H"
 #include    "istep08list.H"

@@ -178,6 +178,9 @@ static void initTargeting(errlHndl_t& io_pError)
     if(l_scratch3.fwModeCtlFlags.isMpipl)
     {
         TARG_INF("We are running MPIPL mode");
+        printk( "Boot is MPIPL.\n" );
+        CONSOLE::displayf( NULL,"Boot is MPIPL." );
+        CONSOLE::flush();
         l_isMpipl = true;
     }
     if(l_scratch3.fwModeCtlFlags.istepMode)

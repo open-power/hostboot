@@ -335,11 +335,11 @@ public:
             targetService().begin(), targetService().end(),
             &procChipFilter);
 
-        // find a membuf target
-        PredicateCTM membufChipFilter(CLASS_CHIP,TYPE_MEMBUF);
-        TargetRangeFilter pMembuf(
+        // find a OCMB target
+        PredicateCTM ocmbChipFilter(CLASS_CHIP,TYPE_OCMB_CHIP);
+        TargetRangeFilter pOcmb(
             targetService().begin(), targetService().end(),
-            &membufChipFilter);
+            &ocmbChipFilter);
 
         // find a dimm target
         PredicateCTM dimmChipFilter(CLASS_NA,TYPE_DIMM);
@@ -392,33 +392,32 @@ public:
         pProcEUDA.addToLog(errl);
 
 
-        if(*pMembuf != NULL)
+        if(*pOcmb != NULL)
         {
-            c_target = *pMembuf;
-            TS_TRACE( "testAttribute pMembuf %p", c_target);
+            c_target = *pOcmb;
+            TS_TRACE( "testAttribute pOcmb %p", c_target);
             ErrlUserDetailsTarget(c_target).addToLog(errl);
 
             // all attributes
             ErrlUserDetailsAttribute(c_target).addToLog(errl);
 
             // one HUID then each attribute
-            ErrlUserDetailsAttribute pMembufEUDA(c_target,ATTR_CHIP_ID);
-            pMembufEUDA.addData(ATTR_EC);
-            pMembufEUDA.addData(ATTR_CHIP_ID);
-            pMembufEUDA.addData(ATTR_MSS_VOLT_VDDR_MILLIVOLTS);
-            //pMembufEUDA.addData(ATTR_MSS_FREQ); // TODO RTC 210975
+            ErrlUserDetailsAttribute pOcmbEUDA(c_target,ATTR_CHIP_ID);
+            pOcmbEUDA.addData(ATTR_EC);
+            pOcmbEUDA.addData(ATTR_CHIP_ID);
+            pOcmbEUDA.addData(ATTR_MSS_OCMB_EXP_BOOT_CONFIG_SERDES_FREQUENCY);
 
             // skipped - not there
-            pMembufEUDA.addData(ATTR_SCRATCH_UINT8_1);
+            pOcmbEUDA.addData(ATTR_SCRATCH_UINT8_1);
 
             // skipped - write only
-            pMembufEUDA.addData(ATTR_DUMMY_WO);
+            pOcmbEUDA.addData(ATTR_DUMMY_WO);
 
             // skipped - read only
-            pMembufEUDA.addData(ATTR_CLASS);
+            pOcmbEUDA.addData(ATTR_CLASS);
 
             // done - write it out
-            pMembufEUDA.addToLog(errl);
+            pOcmbEUDA.addToLog(errl);
         }
 
         if(*pDimm != NULL)
@@ -434,8 +433,7 @@ public:
             ErrlUserDetailsAttribute pDimmEUDA(c_target,ATTR_CHIP_ID);
             pDimmEUDA.addData(ATTR_EC);
             pDimmEUDA.addData(ATTR_CHIP_ID);
-            pDimmEUDA.addData(ATTR_MSS_VOLT_VDDR_MILLIVOLTS);
-            //pDimmEUDA.addData(ATTR_MSS_FREQ); // TODO RTC 210975
+            pDimmEUDA.addData(ATTR_POS_ON_MEM_PORT);
 
             // skipped - not there
             pDimmEUDA.addData(ATTR_SCRATCH_UINT8_1);

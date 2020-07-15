@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -132,7 +132,7 @@ uint32_t rcTestDefaultConstructor()
 // the return code
 //******************************************************************************
 
-// FIXME RTC: 210975
+// FIXME RTC:257497
 // RC_TEST_ERROR_A required, in p9 comes from src/import/chips/p9/procedures/
 // xml/error_info/proc_example_errors.xml
 // There's no equivalent file in ekb-p10 yet.
@@ -1525,7 +1525,7 @@ uint32_t rcTestRcToErrl()
 }
 #endif //fips
 
-// FIXME RTC: 210975
+// FIXME RTC:257497
 // RC_TEST_ERROR_A required, in p9 comes from src/import/chips/p9/procedures/
 // xml/error_info/proc_example_errors.xml
 // There's no equivalent file in ekb-p10 yet.

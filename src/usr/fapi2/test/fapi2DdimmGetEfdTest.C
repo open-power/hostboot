@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -116,7 +116,7 @@ fapi2DdimmGetEfdTest::fapi2DdimmGetEfdTest()
     TARGETING::getAllChips(l_ocmbTargetList, TARGETING::TYPE_OCMB_CHIP, true);
     if (!l_ocmbTargetList.size())
     {
-        TS_FAIL("<< fapi2DdimmGetEfdTest: No valid TYPE_OCMB_CHIP target found. "
+        TS_FAIL("<< fapi2DdimmGetEfdTest: Not enough OCMB_CHIPs found. "
                 "Can not execute tests.");
         return;
     }
@@ -190,9 +190,10 @@ bool fapi2DdimmGetEfdTest::sanityCheckTest()
         l_sanityCheckTestPassed = false;
         ++iv_numFails;
         TS_FAIL("sanityCheckTest: Test configuration failed: "
-                "Should have found a match for frequency(%d) and master "
-                "rank(%d). Test is broken, please fix.",
-                iv_vpdInfo.iv_omi_freq_mhz, iv_vpdInfo.iv_rank);
+                "Should have found a match for frequency(%d) and master rank(%d) on %.8X",
+                iv_vpdInfo.iv_omi_freq_mhz,
+                iv_vpdInfo.iv_rank,
+                TARGETING::get_huid(iv_ocmbChipTarget));
     }
 
     FAPI_INF("<< sanityCheckTest");

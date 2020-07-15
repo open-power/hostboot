@@ -26,7 +26,7 @@ ROOTPATH = ../../../..
 MODULE = secureboot_ext
 SUBDIRS +=
 
-# FIXME RTC: 210975
+# FIXME RTC:257489
 #PERV_HWP_PATH = $(ROOTPATH)/src/import/chips/p9/procedures/hwp/perv
 
 #OBJS += $(if $(CONFIG_SECUREBOOT), service_ext.o)

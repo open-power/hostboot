@@ -77,20 +77,10 @@ EXTRAINCDIR += ${MSS_LIB}
 
 VPATH += ${MSS_LIB}
 
-# FIXME RTC: 210975
-
 #######
 # Add the specific files we need for HBRT
-#OBJS += c_str.o
-#OBJS += axone_c_str.o
-#OBJS += nimbus_c_str.o
-#OBJS += mcbist.o
-#OBJS += mcbist_workarounds.o
-#OBJS += rank.o
-#OBJS += memory_size.o
+OBJS += c_str.o
 OBJS += gen_mss_mcbist_patterns.o
-#OBJS += axone_pos.o
-#OBJS += nimbus_pos.o
 
 
 #HWP build tool

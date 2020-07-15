@@ -109,7 +109,7 @@ int main()
 {
     printk("Booting %s kernel...\n", "Hostboot");
     printk("%s\n\n", hbi_ImageId);
-    printk("CPU=%s  PIR=%ld\n",
+    printk("CPU=%s, PIR=%ld\n",
            ProcessorCoreTypeStrings[CpuID::getCpuType()],
            static_cast<uint64_t>(getPIR()));
     MAGIC_INST_PRINT_ISTEP(6,2);

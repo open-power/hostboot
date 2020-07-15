@@ -82,7 +82,7 @@
 
 #include <isteps/pm/scopedHomerMapper.H>
 
-/* FIXME RTC: 210975
+/* FIXME RTC: 257487
 #include    <p10_core_checkstop_handler.H>
 */
 #include    <p10_stop_api.H>
@@ -1350,7 +1350,7 @@ errlHndl_t core_checkstop_helper_hwp( const TARGETING::Target* i_core_target,
     {
         assert( i_core_target != NULL );
 
-/* FIXME RTC: 210975
+/* FIXME RTC: 257487
         const fapi2::Target<fapi2::TARGET_TYPE_CORE> l_fapi2_coreTarget(
                 const_cast<TARGETING::Target*> ( i_core_target ));
 
@@ -1392,7 +1392,7 @@ errlHndl_t core_checkstop_helper_homer()
                "core_checkstop_helper_homer");
 
     errlHndl_t l_errl = NULL;
-/* FIXME RTC: 210975
+/* FIXME RTC: 257487
     TARGETING::Target* l_sys = NULL;
     TARGETING::targetService().getTopLevelTarget(l_sys);
     assert( l_sys != NULL );

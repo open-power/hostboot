@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2018,2019
+# Contributors Listed Below - COPYRIGHT 2018,2020
 # [+] International Business Machines Corp.
 #
 #
@@ -26,7 +26,7 @@ ROOTPATH = ../../../../..
 
 MODULE = testsmf
 
-# FIXME RTC: 210975
+# FIXME RTC:257489
 #TESTS = testsmfutils.H
 #TESTS += testmemutils.H
 #TESTS += testsmf.H

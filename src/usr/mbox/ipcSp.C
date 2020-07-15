@@ -396,7 +396,7 @@ void IpcSp::msgHandler()
 
                 if(!err)
                 {
-/* FIXME RTC: 210975 don't need istep21 stuff yet
+/* FIXME RTC: 256840 update multinode frequency checks
                     uint64_t l_freqData1 =
                         reinterpret_cast<uint64_t>(msg->data[1]);
 
@@ -480,7 +480,7 @@ void IpcSp::msgHandler()
 
                 if (err) break;
 
-/* FIXME RTC: 210975 don't need istep21 stuff yet
+/* FIXME RTC: 257487 don't need istep21 stuff yet
                 err = ISTEP_21::enableCoreCheckstops();
 
                 if (err)

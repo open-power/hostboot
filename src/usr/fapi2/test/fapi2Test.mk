@@ -53,9 +53,7 @@ OBJS += p10_hwtests.o
 OBJS += rcSupport.o
 OBJS += fapi2TestUtils.o
 OBJS += fapi2DdimmGetEfdTest.o
-# FIXME RTC: 210975
-# Uses src/import/chips/p9/procedures/xml/attribute_info/memory_override_attributes.xml
-# and there is no p10 equivalent for it yet in EKB's ekb-p10 branch.
+# FIXME RTC:257497-Update to new target and vpd types
 #OBJS += getVpdTest.o
 OBJS += p10_pm_get_poundv_bucket.o
 OBJS += fapi2PlatGetVpdOcmbChipTest.o
@@ -79,7 +77,7 @@ endif
 
 TESTS += ${shell ls ${ROOTPATH}/src/usr/fapi2/test/*TestCxx.H | sort | xargs}
 
-# FIXME RTC: 210975
+# FIXME RTC:257497
 # Remove the following "filter-out" command after RTC is fixed.
 # Info: Can't include fapi2ChipEcTest.H in TESTS objects because it requires
 # attributes from src/import/chips/p9/procedures/xml/attribute_info/
@@ -88,19 +86,19 @@ TESTS += ${shell ls ${ROOTPATH}/src/usr/fapi2/test/*TestCxx.H | sort | xargs}
 # out to a gen file, but it doesn't have all the required attributes.
 TESTS := $(filter-out ${ROOTPATH}/src/usr/fapi2/test/fapi2ChipEcTest.H,$(TESTS))
 
-# FIXME RTC: 210975
+# FIXME RTC:257497
 # PROC_EXAMPLE_ERROR RC_PROC_EXAMPLE_ERROR_BUFFER required, which for p9 came
 # from: src/import/chips/p9/procedures/xml/error_info/proc_example_errors.xml
 # For p10 this file is not in the ekb-p10 branch yet:
 # http://habcap11p1.aus.stglabs.ibm.com:8080/source/xref/ekb-p10/chips/p10/procedures/xml/error_info/
 TESTS := $(filter-out ${ROOTPATH}/src/usr/fapi2/test/fapi2HwpErrorBufferTest.H,$(TESTS))
 
-# FIXME RTC: 210975
+# FIXME RTC:257497
 # Uses getVpdTest which has been commented out above
 TESTS := $(filter-out ${ROOTPATH}/src/usr/fapi2/test/fapi2GetVpdTest.H,$(TESTS))
 
-# FIXME RTC: 215621
-# Remove this filter when we have new dimmspd in simics
+# FIXME RTC:257497
+# Something seems to be resetting the data, getting different values compared to the boot
 TESTS := $(filter-out %/fapi2DdimmGetEfdTest.H,$(TESTS))
 
 # Will delete after enabling TESTS objects

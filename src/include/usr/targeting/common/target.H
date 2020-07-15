@@ -1165,17 +1165,6 @@ typename AttributeTraits<A>::TypeStdArr Target::getAttrAsStdArr() const
 }
 #endif // __cplusplus >= 201103L
 
-// Function to set various frequency related attributes
-/**
- * @brief - sets various attributes directly related to the nest frequency.
- *
- * @param[in] i_sys - top level system target to set attributes for
- * @param[in] i_newNestFreq - the new nest frequency to base all the attributes
- *                            off of.
- */
-void setFrequencyAttributes(Target * i_sys,
-                            uint32_t i_newNestFreq);
-
 // WARNING: The following #include imports any platform specific template
 // specializations for getAttr and tryGetAttr
 #include <targeting/adapters/targetadapter.H>

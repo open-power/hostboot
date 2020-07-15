@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2020                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -157,7 +157,7 @@ bool areTargetsGpioInfoEqual(
 static errlHndl_t for_each_vddr_domain_with_functional_memory(
     errlHndl_t (*func)(Target *))
 {
-    // TODO RTC: 210975 revisit this function and either implement it or
+    // TODO RTC:246369 revisit this function and either implement it or
     // remove the references to it
     errlHndl_t l_err = nullptr;
 
