@@ -246,11 +246,11 @@ namespace HTMGT
 
         if (safeModeNeeded)
         {
-            // Clear OCC active sensors
-            errlHndl_t err2 = setOccActiveSensors(false);
+            // Clear OCC enabled sensors
+            errlHndl_t err2 = setOccEnabledSensors(false);
             if (err2)
             {
-                TMGT_ERR("_buildOccs: Set OCC active sensor to false failed.");
+                TMGT_ERR("_buildOccs: Set OCC enabled sensors to false failed");
                 ERRORLOG::errlCommit(err2, HTMGT_COMP_ID);
             }
 
@@ -543,10 +543,10 @@ namespace HTMGT
         {
             if (false == int_flags_set(FLAG_RESET_DISABLED))
             {
-                err = setOccActiveSensors(false); // Set OCC sensor to inactive
+                err = setOccEnabledSensors(false); // Set OCC sensor to inactive
                 if( err )
                 {
-                    TMGT_ERR("_resetOccs: Set OCC sensors to inactive failed.");
+                    TMGT_ERR("_resetOccs: Set OCC enabled sensors to false failed");
                     // log and continue
                     ERRORLOG::errlCommit(err, HTMGT_COMP_ID);
                 }

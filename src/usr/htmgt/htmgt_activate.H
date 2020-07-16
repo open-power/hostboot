@@ -43,13 +43,13 @@ namespace HTMGT
 
 
     /**
-     * @brief Set active sensors for all OCCs so BMC can start communication
+     * @brief Set enabled sensor for all OCCs to allow BMC to OCC communication
      *
-     * @param[in] i_activate [true - set active | false - set inactive]
+     * @param[in] i_enabled [true - OCCs enabled | false - OCCs disabled]
      * @return  NULL if all sensors were updated, else error handle
      *
      */
-    errlHndl_t setOccActiveSensors(bool i_activate);
+    errlHndl_t setOccEnabledSensors(bool i_enabled);
 
 
     /**

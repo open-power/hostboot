@@ -147,28 +147,28 @@ namespace HTMGT
 
 
 
-    // Set active/inactive sensors for all OCCs so BMC can start communication
-    errlHndl_t setOccActiveSensors(bool i_activate)
+    // Set enabled sensors for all OCCs to allow BMC to OCC communication
+    errlHndl_t setOccEnabledSensors(bool i_enabled)
     {
         errlHndl_t l_err = NULL;
 
-        TMGT_INF("setOccActiveSensors: %s", i_activate?"active":"inactive");
+        TMGT_INF("setOccEnabledSensors: %s", i_enabled?"enabled":"disabled");
         std::vector<Occ*> occList = OccManager::getOccArray();
         for (std::vector<Occ*>::iterator itr = occList.begin();
              (itr < occList.end());
              ++itr)
         {
             Occ * occ = (*itr);
-            l_err = occ->ipmiSensor(i_activate);
+            l_err = occ->bmcSensor(i_enabled);
             if( l_err )
             {
-                TMGT_ERR("setOccActiveSensors failed. (OCC%d state:%d)",
+                TMGT_ERR("setOccEnabledSensors failed. (OCC%d state:%d)",
                          occ->getInstance(),
-                         i_activate);
+                         i_enabled);
 
-                TMGT_CONSOLE("setOccActiveSensors failed. (OCC%d state:%d)",
+                TMGT_CONSOLE("setOccEnabledSensors failed. (OCC%d state:%d)",
                          occ->getInstance(),
-                         i_activate);
+                         i_enabled);
 
                 ERRORLOG::errlCommit(l_err, HTMGT_COMP_ID);
             }

@@ -40,8 +40,8 @@
 #include <arch/ppc.H>
 #include <isteps/pm/occAccess.H>
 #include <errl/errludlogregister.H>
-
 #include <isteps/pm/pm_common_ext.H>
+#include <pldm/requests/pldm_pdr_requests.H>
 
 namespace HTMGT
 {
@@ -443,5 +443,20 @@ namespace HTMGT
 #endif
     }
 
+
+    // Notify BMC of OCC status
+    errlHndl_t Occ::bmcSensor(const bool i_enabled)
+    {
+        errlHndl_t pError = nullptr;
+#ifdef CONFIG_PLDM
+        const PLDM::occ_state new_state = ((i_enabled == true) ?
+                                           PLDM::occ_state_in_service :
+                                           PLDM::occ_state_stopped);
+        TARGETING::ConstTargetHandle_t procTarget =
+            TARGETING::getParentChip(iv_target);
+        pError = PLDM::sendOccStateChangedEvent(procTarget, new_state);
+#endif
+        return pError;
+    }
 
 } // end namespace

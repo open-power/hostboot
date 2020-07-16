@@ -28,9 +28,6 @@
 
 #include <stdint.h>
 #include <vector>
-#if defined(CONFIG_BMC_IPMI)
-#include <ipmi/ipmisensor.H>
-#endif
 
 
 namespace HTMGT
@@ -233,26 +230,13 @@ namespace HTMGT
 
 
             /**
-             * @brief Set IPMI OCC sensor state
-             * @param i_activate: true - set active
-             *                    false - set inactive
+             * @brief Set BMC OCC enabled sensor state
+             * @param i_enabled: true - OCC enabled
+             *                   false - OCC disabled
              *
              * @return error log on error
              */
-            errlHndl_t ipmiSensor(bool i_activate)
-            {
-                errlHndl_t pError = nullptr;
-
-// TODO: RTC 209572 Update with IPMI alternative
-#if 0
-#if defined(CONFIG_BMC_IPMI)
-                pError = SENSOR::OCCActiveSensor(iv_target).setState
-                    (i_activate ? SENSOR::OCCActiveSensor::OCC_ACTIVE :
-                                SENSOR::OCCActiveSensor::OCC_NOT_ACTIVE);
-#endif
-#endif
-                return pError;
-            }
+            errlHndl_t bmcSensor(const bool i_enabled);
 
 
             /**

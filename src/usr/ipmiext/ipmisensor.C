@@ -915,79 +915,6 @@ namespace SENSOR
     }
 
     //
-    // OCC Active Sensor - uses occ target
-    //
-    //
-    OCCActiveSensor::OCCActiveSensor( TARGETING::Target * i_pTarget )
-        :SensorBase(TARGETING::SENSOR_NAME_OCC_ACTIVE,
-                (TARGETING::ConstTargetHandle_t) i_pTarget )
-    {
-    };
-
-    //
-    // OCCActiveSensor destructor
-    //
-    //
-    OCCActiveSensor::~OCCActiveSensor(){};
-
-    // Convert the input status to the correct sensor offset value, then
-    // send the message to the BMC to update the event status for this sensor.
-    errlHndl_t OCCActiveSensor::setState( OccStateEnum i_state )
-    {
-        errlHndl_t l_err = NULL;
-
-        // assert the specified state
-        iv_msg->iv_assertion_mask = setMask(i_state);
-
-        // there are two offsets used with this sensor, when
-        // asserting one, we need to deassert the other as only
-        // one state is valid at any given time.
-        OccStateEnum other_state =
-            (i_state == OCC_ACTIVE) ? OCC_NOT_ACTIVE : OCC_ACTIVE;
-
-        iv_msg->iv_deassertion_mask = setMask( other_state );
-
-        l_err = writeSensorData();
-
-        return l_err;
-
-    };
-
-    // send the message to the BMC to read the event status for this sensor,
-    // will return true if the "disabled" state of the sensor is not
-    // asserted
-    bool OCCActiveSensor::isActive( )
-    {
-        getSensorReadingData l_data;
-
-        bool is_active = false;
-
-        // set the mask, but dont swap the bytes since we are using it locally
-        // not passing it in the set sensor cmd
-        uint16_t mask = setMask( OCC_ACTIVE, false );
-
-        errlHndl_t l_err = readSensorData( l_data );
-
-        if( l_err == NULL )
-        {
-            // check if "disabled" offset has been asserted -
-            // this would indicate that the OCC was not yet enabled
-            if( l_data.event_status & mask )
-            {
-                is_active = true;
-            }
-        }
-        else
-        {
-            // commit the error and return "not active" by default
-            errlCommit( l_err, IPMI_COMP_ID );
-        }
-
-        return is_active;
-    }
-
-
-    //
     // HostStausSensor constructor - uses system target
     //
     //
@@ -1367,13 +1294,6 @@ namespace SENSOR
             case TARGETING::SENSOR_NAME_FW_BOOT_PROGRESS:
                 {
                     offsets = ( 1 << SYSTEM_FIRMWARE_PROGRESS );
-                    break;
-                }
-            case TARGETING::SENSOR_NAME_OCC_ACTIVE:
-                {
-                    offsets = ( 1 << DEVICE_DISABLED ) |
-                              ( 1 << DEVICE_ENABLED );
-                    o_readType = DIGITAL_ENABLE_DISABLE;
                     break;
                 }
             case TARGETING::SENSOR_NAME_HOST_STATUS:

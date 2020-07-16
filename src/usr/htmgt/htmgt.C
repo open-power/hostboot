@@ -156,9 +156,9 @@ namespace HTMGT
                                 break;
                             }
 
-                            // Set active sensors for all OCCs,
+                            // Set enabled sensors for all OCCs,
                             // so BMC can start communication with OCCs
-                            l_err = setOccActiveSensors(true);
+                            l_err = setOccEnabledSensors(true);
                             if (l_err)
                             {
                                 // Continue even if failed to update sensor
