@@ -339,17 +339,20 @@ group gNMMU_FIR
     /** NMMU_FIR[8]
      *  SLB directory parity error detected.
      */
-    (rNMMU_FIR, bit(8)) ? self_th_1;
+    (rNMMU_FIR, bit(8)) ? self_th_32perDay;
+    # P10_10: CS self_th_1
 
     /** NMMU_FIR[9]
      *  SLB cache parity error detected.
      */
-    (rNMMU_FIR, bit(9)) ? self_th_1;
+    (rNMMU_FIR, bit(9)) ? self_th_32perDay;
+    # P10_10: CS self_th_1
 
     /** NMMU_FIR[10]
      *  SLB lru parity error detected.
      */
-    (rNMMU_FIR, bit(10)) ? self_th_1;
+    (rNMMU_FIR, bit(10)) ? self_th_32perDay;
+    # P10_10: CS self_th_1
 
     /** NMMU_FIR[11]
      *  SLB multi-hit error detected.
@@ -359,17 +362,20 @@ group gNMMU_FIR
     /** NMMU_FIR[12]
      *  TLB directory parity error detected.
      */
-    (rNMMU_FIR, bit(12)) ? self_th_1;
+    (rNMMU_FIR, bit(12)) ? self_th_32perDay;
+    # P10_10: CS self_th_1
 
     /** NMMU_FIR[13]
      *  TLB cache parity error detected.
      */
-    (rNMMU_FIR, bit(13)) ? self_th_1;
+    (rNMMU_FIR, bit(13)) ? self_th_32perDay;
+    # P10_10: CS self_th_1
 
     /** NMMU_FIR[14]
      *  TLB lru parity error detected.
      */
-    (rNMMU_FIR, bit(14)) ? self_th_1;
+    (rNMMU_FIR, bit(14)) ? self_th_32perDay;
+    # P10_10: CS self_th_1
 
     /** NMMU_FIR[15]
      *  TLB multi-hit error detected.
@@ -444,17 +450,19 @@ group gNMMU_FIR
     /** NMMU_FIR[29]
      *  Prefetch abort/fail detected
      */
-    (rNMMU_FIR, bit(29)) ? level2_th_1;
+    (rNMMU_FIR, bit(29)) ? defaultMaskedError;
 
     /** NMMU_FIR[30]
      *  Context cache array parity error detected
      */
-    (rNMMU_FIR, bit(30)) ? self_th_1;
+    (rNMMU_FIR, bit(30)) ? self_th_32perDay;
+    # P10_10: CS self_th_1
 
     /** NMMU_FIR[31]
      *  Radix pwc array parity error detected
      */
-    (rNMMU_FIR, bit(31)) ? self_th_1;
+    (rNMMU_FIR, bit(31)) ? self_th_32perDay;
+    # P10_10: CS self_th_1
 
     /** NMMU_FIR[32]
      *  Tablewalk sm control error detected
@@ -484,7 +492,7 @@ group gNMMU_FIR
     /** NMMU_FIR[37]
      *  Castout sm timeout error detected
      */
-    (rNMMU_FIR, bit(37)) ? self_th_1;
+    (rNMMU_FIR, bit(37)) ? defaultMaskedError;
 
     /** NMMU_FIR[38]
      *  Check-in sm timeout error detected
@@ -502,14 +510,15 @@ group gNMMU_FIR
     (rNMMU_FIR, bit(40)) ? defaultMaskedError;
 
     /** NMMU_FIR[41]
-     *  CP0 local checkstop error detected
+     *  fbc snoop invalidate filter parity error
      */
-    (rNMMU_FIR, bit(41)) ? defaultMaskedError;
+    (rNMMU_FIR, bit(41)) ? self_th_32perDay;
+    # P10_10: CS self_th_1
 
     /** NMMU_FIR[42]
-     *  CP1 local checkstop error detected
+     *  fabric purge threshold exceeded
      */
-    (rNMMU_FIR, bit(42)) ? defaultMaskedError;
+    (rNMMU_FIR, bit(42)) ? self_th_1;
 
     /** NMMU_FIR[43]
      *  NPU local checkstop error detected

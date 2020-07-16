@@ -384,7 +384,7 @@ group gEQ_L3_FIR
     /** EQ_L3_FIR[25]
      *  Cache inhibited op in L3 directory
      */
-    (rEQ_L3_FIR, bit(25)) ? level2_M_self_L_th_1;
+    (rEQ_L3_FIR, bit(25)) ? self_M_level2_L_th_1;
 
     /** EQ_L3_FIR[26]
      *  L3 line delete CE done
@@ -437,7 +437,7 @@ rule rEQ_NCU_FIR
 
 group gEQ_NCU_FIR
     filter singlebit,
-           cs_root_cause(3,4,7,8)
+           cs_root_cause(3,4,7,8,10,11)
 {
     /** EQ_NCU_FIR[0]
      *  NCU store queue control error
@@ -467,7 +467,7 @@ group gEQ_NCU_FIR
     /** EQ_NCU_FIR[5]
      *  Topology table error - tried accessing invalid ent
      */
-    (rEQ_NCU_FIR, bit(5)) ? defaultMaskedError;
+    (rEQ_NCU_FIR, bit(5)) ? level2_th_1;
 
     /** EQ_NCU_FIR[6]
      *  An NCU machine triggerd PB into early hang recover
@@ -517,12 +517,12 @@ group gEQ_NCU_FIR
     /** EQ_NCU_FIR[15]
      *  cHTM logic received an invalid HTM/IMA packet
      */
-    (rEQ_NCU_FIR, bit(15)) ? self_M_level2_L_th_1;
+    (rEQ_NCU_FIR, bit(15)) ? defaultMaskedError;
 
     /** EQ_NCU_FIR[16]
      *  Spare fir bits.
      */
-    (rEQ_NCU_FIR, bit(16)) ? self_M_level2_L_th_1;
+    (rEQ_NCU_FIR, bit(16)) ? defaultMaskedError;
 
     /** EQ_NCU_FIR[17]
      *  Spare fir bits.
@@ -535,9 +535,9 @@ group gEQ_NCU_FIR
     (rEQ_NCU_FIR, bit(18)) ? defaultMaskedError;
 
     /** EQ_NCU_FIR[19]
-     *  PPE write received ack_dead
+     *  Targeted nodal request got rty_inc cresp
      */
-    (rEQ_NCU_FIR, bit(19)) ? level2_M_self_L_th_1;
+    (rEQ_NCU_FIR, bit(19)) ? self_th_1;
 
     /** EQ_NCU_FIR[20]
      *  Darn ttype while darn not enabled.
@@ -570,7 +570,7 @@ rule rEQ_L2_FIR
 
 group gEQ_L2_FIR
     filter singlebit,
-           cs_root_cause(1,17,18,20)
+           cs_root_cause(1,12,13,17,18,20)
 {
     /** EQ_L2_FIR[0]
      *  L2 cache read CE

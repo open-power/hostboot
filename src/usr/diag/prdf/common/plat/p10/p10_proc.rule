@@ -3886,7 +3886,7 @@ group gINT_CQ_FIR
     /** INT_CQ_FIR[11]
      *  Parity error detected on AIB credit signals from P
      */
-    (rINT_CQ_FIR, bit(11)) ? self_th_32perDay;
+    (rINT_CQ_FIR, bit(11)) ? self_th_1;
 
     /** INT_CQ_FIR[12]
      *  Parity error detected on AIB credit available sign
@@ -3941,7 +3941,7 @@ group gINT_CQ_FIR
     /** INT_CQ_FIR[22]
      *  Slave CI Store or CI Load error (not targetting IC
      */
-    (rINT_CQ_FIR, bit(22)) ? threshold_and_mask_self;
+    (rINT_CQ_FIR, bit(22)) ? defaultMaskedError;
 
     /** INT_CQ_FIR[23]
      *  Migration Register Table (MRT) access - invalid en
@@ -4011,7 +4011,7 @@ group gINT_CQ_FIR
     /** INT_CQ_FIR[36]
      *  A Master Read machine received cResp of abort_trm 
      */
-    (rINT_CQ_FIR, bit(36)) ? defaultMaskedError;
+    (rINT_CQ_FIR, bit(36)) ? self_th_32perDay;
 
     /** INT_CQ_FIR[37]
      *  Master Interrupt Protocol Error
@@ -4041,7 +4041,7 @@ group gINT_CQ_FIR
     /** INT_CQ_FIR[42]
      *  Command Queue (FSM) severe error summary
      */
-    (rINT_CQ_FIR, bit(42)) ? defaultMaskedError;
+    (rINT_CQ_FIR, bit(42)) ? self_th_1;
 
     /** INT_CQ_FIR[43]
      *  PC fatal error summary, as indicated on pc_cq_fata
@@ -4086,22 +4086,22 @@ group gINT_CQ_FIR
     /** INT_CQ_FIR[51]
      *  PC informational error summary, as indicated on pc
      */
-    (rINT_CQ_FIR, bit(51)) ? threshold_and_mask_self;
+    (rINT_CQ_FIR, bit(51)) ? defaultMaskedError;
 
     /** INT_CQ_FIR[52]
      *  PC informational error summary, as indicated on pc
      */
-    (rINT_CQ_FIR, bit(52)) ? threshold_and_mask_self;
+    (rINT_CQ_FIR, bit(52)) ? defaultMaskedError;
 
     /** INT_CQ_FIR[53]
      *  PC informational error summary, as indicated on pc
      */
-    (rINT_CQ_FIR, bit(53)) ? threshold_and_mask_self;
+    (rINT_CQ_FIR, bit(53)) ? defaultMaskedError;
 
     /** INT_CQ_FIR[54]
      *  PC informational error summary, as indicated on pc
      */
-    (rINT_CQ_FIR, bit(54)) ? threshold_and_mask_self;
+    (rINT_CQ_FIR, bit(54)) ? defaultMaskedError;
 
     /** INT_CQ_FIR[55]
      *  VC fatal error summary, as indicated on vc_cq_fata
@@ -4136,17 +4136,17 @@ group gINT_CQ_FIR
     /** INT_CQ_FIR[61]
      *  VC informational error summary, as indicated on vc
      */
-    (rINT_CQ_FIR, bit(61)) ? level2_M_self_L_th_32perDay;
+    (rINT_CQ_FIR, bit(61)) ? defaultMaskedError;
 
     /** INT_CQ_FIR[62]
      *  VC informational error summary, as indicated on vc
      */
-    (rINT_CQ_FIR, bit(62)) ? threshold_and_mask_self;
+    (rINT_CQ_FIR, bit(62)) ? defaultMaskedError;
 
     /** INT_CQ_FIR[63]
      *  VC informational error summary, as indicated on vc
      */
-    (rINT_CQ_FIR, bit(63)) ? threshold_and_mask_self;
+    (rINT_CQ_FIR, bit(63)) ? defaultMaskedError;
 
 };
 
@@ -4166,7 +4166,7 @@ rule rNX_CQ_FIR
 
 group gNX_CQ_FIR
     filter singlebit,
-           cs_root_cause
+           cs_root_cause(16,21)
 {
     /** NX_CQ_FIR[0]
      *  PBI internal parity error
@@ -4299,9 +4299,9 @@ group gNX_CQ_FIR
     (rNX_CQ_FIR, bit(25)) ? defaultMaskedError;
 
     /** NX_CQ_FIR[26]
-     *  Link check aborted while waiting on UMAC data
+     *  Reserved
      */
-    (rNX_CQ_FIR, bit(26)) ? self_th_1;
+    (rNX_CQ_FIR, bit(26)) ? defaultMaskedError;
 
     /** NX_CQ_FIR[27]
      *  Uncorrectable error on CRB QW0/4
@@ -4396,7 +4396,7 @@ rule rNX_DMA_ENG_FIR
 
 group gNX_DMA_ENG_FIR
     filter singlebit,
-           cs_root_cause
+           cs_root_cause(0)
 {
     /** NX_DMA_ENG_FIR[0]
      *  DMA hang timer expired
@@ -4774,9 +4774,9 @@ group gVAS_FIR
     (rVAS_FIR, bit(22)) ? self_th_1;
 
     /** VAS_FIR[23]
-     *  VAS attempted to access a memory address which has
+     *  Reserved
      */
-    (rVAS_FIR, bit(23)) ? self_th_1;
+    (rVAS_FIR, bit(23)) ? defaultMaskedError;
 
     /** VAS_FIR[24]
      *  ECC sue error detected in Egress logic
@@ -4876,7 +4876,7 @@ group gVAS_FIR
     /** VAS_FIR[43]
      *  Unused - Was Write monitor operation hit a window 
      */
-    (rVAS_FIR, bit(43)) ? self_th_1;
+    (rVAS_FIR, bit(43)) ? defaultMaskedError;
 
     /** VAS_FIR[44]
      *  VAS rejected a PB paste command.
@@ -5581,24 +5581,24 @@ group gN1_LOCAL_FIR
     (rN1_LOCAL_FIR, bit(55)) ? defaultMaskedError;
 
     /** N1_LOCAL_FIR[56]
-     *  unused
+     *  Firmware signaled power bus quiesce failed
      */
-    (rN1_LOCAL_FIR, bit(56)) ? defaultMaskedError;
+    (rN1_LOCAL_FIR, bit(56)) ? self_th_1;
 
     /** N1_LOCAL_FIR[57]
-     *  unused
+     *  Firmware signaled deadman timer tigger occurred
      */
-    (rN1_LOCAL_FIR, bit(57)) ? defaultMaskedError;
+    (rN1_LOCAL_FIR, bit(57)) ? TBDDefaultCallout;
 
     /** N1_LOCAL_FIR[58]
-     *  unused
+     *  Firmware signaled power bus system quiesce failed
      */
-    (rN1_LOCAL_FIR, bit(58)) ? defaultMaskedError;
+    (rN1_LOCAL_FIR, bit(58)) ? self_th_1;
 
     /** N1_LOCAL_FIR[59]
-     *  unused
+     *  Fimware signaled power bus chip quiesce failed
      */
-    (rN1_LOCAL_FIR, bit(59)) ? defaultMaskedError;
+    (rN1_LOCAL_FIR, bit(59)) ? self_th_1;
 
     /** N1_LOCAL_FIR[60]
      *  unused
