@@ -44,21 +44,21 @@
     {
         name        "P9 Axone target DL0 Error Hold Register";
         scomaddr    0x07013353;
-        capture     group default;
+        capture     group dl0_ffdc;
     };
 
     register DL1_ERROR_HOLD
     {
         name        "P9 Axone target DL1 Error Hold Register";
         scomaddr    0x07013363;
-        capture     group default;
+        capture     group dl1_ffdc;
     };
 
     register DL2_ERROR_HOLD
     {
         name        "P9 Axone target DL2 Error Hold Register";
         scomaddr    0x07013373;
-        capture     group default;
+        capture     group dl2_ffdc;
     };
 
     ###########################################################################
@@ -69,14 +69,18 @@
     {
         name        "P9 OMI-CMN Configuration Register";
         scomaddr    0x0701334E;
-        capture     group default;
+        capture     group dl0_ffdc;
+        capture     group dl1_ffdc;
+        capture     group dl2_ffdc;
     };
 
     register PMU_CNTR
     {
         name        "P9 PMU Counter Register";
         scomaddr    0x0701334F;
-        capture     group default;
+        capture     group dl0_ffdc;
+        capture     group dl1_ffdc;
+        capture     group dl2_ffdc;
     };
 
     register DL0_CONFIG0
