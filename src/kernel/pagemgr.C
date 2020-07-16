@@ -412,7 +412,11 @@ void PageManager::_freePage(void* p, size_t n)
     size_t ks = iv_heapKernel.getFreePageCount();
     if(ks < KERNEL_HEAP_RESERVED_PAGES)
     {
-        ks = KERNEL_HEAP_RESERVED_PAGES - ks;
+        // Only request single page at a time to assure
+        // page is reclaimed, if too many pages requested
+        // the proper bucket size may not have availability
+        // during high pressure memory demands
+        ks = 1;
         PageManagerCore::page_t * page = iv_heap.allocatePage(ks);
         if(page)
         {
