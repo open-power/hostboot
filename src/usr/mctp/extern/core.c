@@ -129,7 +129,7 @@ void *mctp_pktbuf_data(struct mctp_pktbuf *pkt)
   return (void *)pkt->data + pkt->mctp_hdr_off + sizeof(struct mctp_hdr);
 }
 
-uint8_t mctp_pktbuf_size(struct mctp_pktbuf *pkt)
+size_t mctp_pktbuf_size(struct mctp_pktbuf *pkt)
 {
   return pkt->end - pkt->start;
 }
@@ -230,7 +230,7 @@ static int mctp_msg_ctx_add_pkt(struct mctp_msg_ctx *ctx,
 
     /* @todo: finer-grained allocation, size limits */
     if (!ctx->buf_alloc_size) {
-      new_alloc_size = 4096;
+      new_alloc_size = 8192;
     } else {
       new_alloc_size = ctx->buf_alloc_size * 2;
     }

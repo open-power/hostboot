@@ -96,8 +96,14 @@ int __mctp_hostlpc_hostboot_lpc_read(void *arg,
                                 static_cast<uint8_t*>(buf),
                                 len,
                                 DEVICE_LPC_ADDRESS(LPC::TRANS_FW,
-                                                    offset + LPC::LPCHC_MCTP_PLDM_BASE));
-    TRACDBIN(g_trac_mctp, "lpc read: ", buf, len);
+                                                  offset + LPC::LPCHC_MCTP_PLDM_BASE));
+    size_t i = 0;
+    while(i < len)
+    {
+       size_t print_amt = len - i > 1024 ? 1024: len - i;
+       TRACDBIN(g_trac_mctp, "lpc read: ", static_cast<uint8_t*>(buf) + i, print_amt);
+       i += print_amt;
+    }
     int l_rc = 0;
     if(l_err)
     {
