@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2012,2018                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2012,2020                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -641,6 +641,7 @@ consumer: various
 firmware notes: none</description>
     <valueType>uint8</valueType>
     <writeable/>
+    <enum>128GB = 128</enum>
     <array> 2 2</array>
 </attribute>
 
@@ -685,6 +686,7 @@ creator: mss_eff_cnfg
 consumer: various
 firmware notes: none</description>
     <valueType>uint8</valueType>
+    <enum>16Gb = 16</enum>
     <writeable/>
 </attribute>
 

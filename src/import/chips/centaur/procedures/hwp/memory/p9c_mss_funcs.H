@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -458,5 +458,13 @@ bool is_dimm_functional(const uint8_t i_valid_dimm_bitmap,
                         const uint8_t i_port,
                         const uint8_t i_dimm);
 
+///
+/// @brief Throttle for N MBA value if it's above the throttle limit
+/// @param[in] i_target MBA target
+/// @param[in,out] io_n_mba_throttle
+/// @return FAPI2_RC_SUCCESS iff okay
+///
+fapi2::ReturnCode ipl_n_mba_throttle_override(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& i_target,
+        fapi2::ATTR_CEN_MSS_MEM_THROTTLE_NUMERATOR_PER_MBA_Type& io_n_mba_throttle);
 #endif /* _MSS_FUNCS_H */
 

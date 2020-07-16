@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -36,7 +36,7 @@
 #define DIMMCONSTS_H_
 
 //TODO:RTC171671 : add namespace to consts
-enum consts : size_t
+enum centaur_consts : size_t
 {
     MAX_PORTS_PER_MBA = 2,         ///< Maximum number of ports on an MBA
     MAX_DIMM_PER_PORT = 2,         ///< Maximum number of DIMMs attached to an MBA PORT
@@ -96,6 +96,8 @@ enum consts : size_t
     MAX_DRAMS_PER_RANK_X8_ISDIMM = DATA_BYTES_PER_PORT + SP_ECC_BYTES_PER_PORT_ISDIMM,
     MAX_DRAMS_PER_RANK_X4_ISDIMM = MAX_DRAMS_PER_RANK_X8_ISDIMM * MAX_NIBBLES_PER_BYTE,
 
+    /// Dram data bus utilization is bus utilization / 4
+    DRAM_BUS_UTILS = 4,
 };
 
 enum ohm : size_t

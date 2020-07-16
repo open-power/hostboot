@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -41,6 +41,7 @@
 //  My Includes
 //------------------------------------------------------------------------------
 #include <p9c_mss_eff_config_thermal.H>
+#include <p9c_mss_funcs.H>
 #include <p9c_mss_bulk_pwr_throttles.H>
 #include <generic/memory/lib/utils/c_str.H>
 #include <dimmConsts.H>
@@ -721,6 +722,25 @@ extern "C" {
 
         FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_CEN_MSS_THROTTLE_CONTROL_CAS_WEIGHT,
                                i_target_mba, l_cas_increment));
+
+        // Avoid over-current warnings if necessary by throttling n_mba value
+        {
+            fapi2::ATTR_CEN_MSS_MEM_THROTTLE_NUMERATOR_PER_MBA_Type l_throttle_n_per_mba_override = {};
+
+            fapi2::ATTR_CEN_MSS_MEM_THROTTLE_NUMERATOR_PER_MBA_Type l_throttle_n_per_mba = {};
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_MSS_MEM_THROTTLE_NUMERATOR_PER_MBA,
+                                   i_target_mba, l_throttle_n_per_mba));
+
+            l_throttle_n_per_mba_override = l_throttle_n_per_mba;
+            FAPI_TRY(ipl_n_mba_throttle_override(i_target_mba, l_throttle_n_per_mba_override));
+
+            // There is no need to set the attribute if the original value didn't change
+            if(l_throttle_n_per_mba_override != l_throttle_n_per_mba)
+            {
+                FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_CEN_MSS_MEM_THROTTLE_NUMERATOR_PER_MBA,
+                                       i_target_mba, l_throttle_n_per_mba_override));
+            }
+        }
 
         FAPI_INF("*** mss_eff_config_thermal_throttles COMPLETE on %s ***",
                  mss::c_str(i_target_mba));

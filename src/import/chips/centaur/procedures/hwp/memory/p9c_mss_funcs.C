@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -3203,6 +3203,99 @@ fapi2::ReturnCode cs_decode(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& i_targe
         FAPI_TRY(o_csn_8.clearBit(i_addr.mrank));
         FAPI_DBG("%s Row: %x, Col: %x, Rank: %d, Bank: %d, Port: %d\n",
                  mss::c_str(i_target_mba), i_addr.row_addr, i_addr.col_addr, i_addr.mrank, i_addr.bank, i_addr.port);
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Helper function to check if we are a 128GB_16Gb_RDIMM
+/// @param[in] i_target MBA target
+/// @param[out] o_is_128GB_16Gb_RDIMM
+/// @return true iff we are a 128GB_16Gb_RDIMM, false otherwise
+///
+static fapi2::ReturnCode check_128GB_16Gb_RDIMM (const fapi2::Target<fapi2::TARGET_TYPE_MBA>& i_target,
+        bool& o_is_128GB_16Gb_RDIMM)
+{
+    fapi2::ATTR_CEN_EFF_DIMM_TYPE_Type l_dimm_type = {};
+    fapi2::ATTR_CEN_EFF_DIMM_SIZE_Type l_dimm_size = {};
+    fapi2::ATTR_CEN_EFF_DRAM_DENSITY_Type l_dram_density = {};
+
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_EFF_DIMM_TYPE, i_target, l_dimm_type));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_EFF_DIMM_SIZE, i_target, l_dimm_size));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_EFF_DRAM_DENSITY, i_target, l_dram_density));
+
+    // Should have at least one DIMM so checking DIMM[0][0] is safe
+    o_is_128GB_16Gb_RDIMM = (l_dimm_type == fapi2::ENUM_ATTR_CEN_EFF_DIMM_TYPE_RDIMM &&
+                             l_dram_density == fapi2::ENUM_ATTR_CEN_EFF_DRAM_DENSITY_16Gb &&
+                             l_dimm_size[0][0] == fapi2::ENUM_ATTR_CEN_EFF_DIMM_SIZE_128GB);
+
+fapi_try_exit:
+    return fapi2::current_err;
+};
+
+///
+/// @brief Helper function to calculate N_MBA throttle value
+/// @param[in] i_target MBA target
+/// @param[out] o_n_mba_throttle N_MBA throttle
+/// @return FAPI2_RC_SUCCESS iff okay
+///
+static fapi2::ReturnCode calc_ipl_n_mba_throttle(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& i_target,
+        fapi2::ATTR_CEN_MSS_MEM_THROTTLE_NUMERATOR_PER_MBA_Type& o_n_mba_throttle)
+{
+    // 68.75 desired utilization
+    constexpr double DESIRED_UTILIZATION = 0.6875;
+    fapi2::ATTR_MSS_MRW_MEM_M_DRAM_CLOCKS_Type l_dram_m_clocks = {};
+
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_MRW_MEM_M_DRAM_CLOCKS,
+                           fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(),
+                           l_dram_m_clocks));
+
+    o_n_mba_throttle = static_cast<uint32_t>( (DESIRED_UTILIZATION * l_dram_m_clocks) /  DRAM_BUS_UTILS );
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Throttle for N MBA value if it's above the throttle limit
+/// @param[in] i_target MBA target
+/// @param[in,out] io_n_mba_throttle
+/// @return FAPI2_RC_SUCCESS iff okay
+///
+fapi2::ReturnCode ipl_n_mba_throttle_override(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& i_target,
+        fapi2::ATTR_CEN_MSS_MEM_THROTTLE_NUMERATOR_PER_MBA_Type& io_n_mba_throttle)
+{
+    bool l_is_128GB_16Gb_RDIMM = false;
+
+    FAPI_TRY(check_128GB_16Gb_RDIMM(i_target, l_is_128GB_16Gb_RDIMM),
+             "Failed 128GB_16Gb_RDIMM check (attr acessor reads) for %s",
+             mss::c_str(i_target));
+
+    if(!l_is_128GB_16Gb_RDIMM)
+    {
+        FAPI_DBG("Skipping ipl_n_mba_throttle_override(), applied only to 128GB 16Gb RDIMMs for %s",
+                 mss::c_str(i_target));
+
+        return fapi2::FAPI2_RC_SUCCESS;
+    }
+
+    // Being here means we are a 128GB 16Gb RDIMM
+    {
+        fapi2::ATTR_CEN_MSS_MEM_THROTTLE_NUMERATOR_PER_MBA_Type l_desired_n_mba_throttle = {};
+
+        //  Calculate n_mba throttle using the desired dram data bus utilization
+        FAPI_TRY(calc_ipl_n_mba_throttle(i_target, l_desired_n_mba_throttle),
+                 "Failed calc_ipl_n_mba_throttle() for %s", mss::c_str(i_target));
+
+        // Only limit the n_mba_throttle value if the previously calculated value
+        //  is equal to or higher than our caculated n_mba_throttle using our
+        // desired utilization of 68.75%.
+        if (io_n_mba_throttle > l_desired_n_mba_throttle)
+        {
+            io_n_mba_throttle = l_desired_n_mba_throttle;
+        }// end if
     }
 
 fapi_try_exit:
