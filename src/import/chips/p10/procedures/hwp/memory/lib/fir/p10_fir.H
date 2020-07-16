@@ -34,6 +34,7 @@
 #include <p10_scom_omi_7.H>
 #include <lib/fir/p10_fir_traits.H>
 #include <lib/mc/host_mc_traits.H>
+#include <lib/workarounds/p10_fir_workarounds.H>
 #include <generic/memory/lib/utils/pos.H>
 #include <generic/memory/lib/utils/fir/gen_mss_fir.H>
 #include <generic/memory/lib/utils/shared/mss_generic_consts.H>
@@ -405,7 +406,15 @@ inline fapi2::ReturnCode after_p10_chiplet_scominit(const fapi2::Target<fapi2::T
     {
         fapi2::ReturnCode l_rc = fapi2::FAPI2_RC_SUCCESS;
         fapi2::ReturnCode l_setup_dstlfir_rc = fapi2::FAPI2_RC_SUCCESS;
+
+        // Create FIR reg
         mss::fir::reg<scomt::mcc::DSTL_DSTLFIR_RW> l_mcc_dstlfir_reg(l_mcc, l_rc);
+
+        // Get DD1 Workaround attr
+        const auto l_chip_target = mss::find_target<fapi2::TARGET_TYPE_PROC_CHIP>(i_target);
+        fapi2::ATTR_CHIP_EC_FEATURE_HW511630_HW520480_Type l_hw511630_hw520480;
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_HW511630_HW520480, l_chip_target, l_hw511630_hw520480),
+                 "Error from FAPI_ATTR_GET (ATTR_CHIP_EC_FEATURE_HW511630_HW520480)");
         FAPI_TRY(l_rc, "unable to create fir::reg for DSTL_DSTLFIR_RW 0x%08X", scomt::mcc::DSTL_DSTLFIR_RW);
 
         // Write DSTLFIR register per axone spec, TK, potential changes in P10
@@ -423,6 +432,12 @@ inline fapi2::ReturnCode after_p10_chiplet_scominit(const fapi2::Target<fapi2::T
         FAPI_TRY(l_setup_dstlfir_rc, "Error setting up fir reg 0x%016x for target %s",
                  scomt::mcc::DSTL_DSTLFIR_RW,
                  mss::c_str(i_target));
+
+        // Parse workaround for DD1
+        if (l_hw511630_hw520480)
+        {
+            FAPI_TRY( mss::workarounds::fir::dstl_dd1_workaround(l_mcc) );
+        }
     }
 
     return fapi2::FAPI2_RC_SUCCESS;

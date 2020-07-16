@@ -602,4 +602,24 @@
    </chipEcFeature>
   </attribute>
 
+  <!-- ******************************************************************** -->
+  <attribute>
+    <id>ATTR_CHIP_EC_FEATURE_HW511630_HW520480</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      P10 DD1 only; Combined into a single solution
+      HW511630 - Mask DSTLFIR[12,13,16,17]
+      HW520480 - Set DSTLFIR[20,21] to xstop
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_P10</name>
+        <ec>
+          <value>0x10</value>
+          <test>LESS_THAN_OR_EQUAL</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
+
 </attributes>
