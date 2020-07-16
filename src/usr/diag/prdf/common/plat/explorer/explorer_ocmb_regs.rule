@@ -352,7 +352,7 @@
     {
         name        "P9 OCMB target DL0 Error Hold Register";
         scomaddr    0x08012813;
-        capture     group default;
+        capture     group omi_ocmb_ffdc;
     };
 
     ###########################################################################
