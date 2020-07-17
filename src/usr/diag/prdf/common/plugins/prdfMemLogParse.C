@@ -60,6 +60,7 @@ using namespace TARGETING;
 //##############################################################################
 
 // Returns the DQ site index 0-71, or 72-79 if spared to DRAM
+template<TARGETING::TYPE T>
 uint8_t transDramSpare( uint8_t i_dq, bool i_isDramSpared )
 {
     uint8_t dqIdx = i_dq;
@@ -68,6 +69,25 @@ uint8_t transDramSpare( uint8_t i_dq, bool i_isDramSpared )
     {
         // The DRAM spare indexes are 72-79, so adjust this DQ to match.
         dqIdx = DQS_PER_DIMM + (i_dq % DQS_PER_BYTE);
+    }
+
+    return dqIdx;
+}
+
+template
+uint8_t transDramSpare<TYPE_MBA>( uint8_t i_dq, bool i_isDramSpared );
+template
+uint8_t transDramSpare<TYPE_MCA>( uint8_t i_dq, bool i_isDramSpared );
+
+template<>
+uint8_t transDramSpare<TYPE_OCMB_CHIP>( uint8_t i_dq, bool i_isDramSpared )
+{
+    uint8_t dqIdx = i_dq;
+
+    if ( i_isDramSpared )
+    {
+        // The DRAM spare indexes are 40-47, so adjust this DQ to match.
+        dqIdx = OCMB_SPARE_DQ_START + (i_dq % DQS_PER_BYTE);
     }
 
     return dqIdx;
@@ -221,14 +241,14 @@ void addDramSiteString( const MemoryMruData::ExtendedData & i_extMemMru,
     // Get the DQ indexes for site location tables, adjusting for spare DRAM, if
     // needed.
     uint8_t dqIdx = symbol2Dq<TYPE_OCMB_CHIP>(mm.s.symbol);
-    dqIdx = transDramSpare( dqIdx, mm.s.dramSpared );
+    dqIdx = transDramSpare<TYPE_OCMB_CHIP>( dqIdx, mm.s.dramSpared );
 
     // Add DQ info.
     char tmp[DATA_SIZE] = { '\0' };
     strcat( io_data, "DQ:" );
 
-    // There is only one DQ per symbol.
-    snprintf( tmp, DATA_SIZE, "%d", i_extMemMru.dqMapping[dqIdx] );
+    // DQs for OCMB have a 1-to-1 mapping
+    snprintf( tmp, DATA_SIZE, "%d", dqIdx );
 
     strcat( io_data, tmp );
 }
