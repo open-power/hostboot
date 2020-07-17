@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2019
+# Contributors Listed Below - COPYRIGHT 2019,2020
 # [+] International Business Machines Corp.
 #
 #
@@ -54,6 +54,14 @@
     {
         name        "P9 MCC target DSTLFIR atomic AND";
         scomaddr    0x07010901;
+        capture     group never;
+        access      write_only;
+    };
+
+    register DSTLFIR_OR
+    {
+        name        "P9 MCC target DSTLFIR atomic OR";
+        scomaddr    0x07010902;
         capture     group never;
         access      write_only;
     };

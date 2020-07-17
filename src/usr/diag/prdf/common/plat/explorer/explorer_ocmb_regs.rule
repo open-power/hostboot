@@ -571,10 +571,3 @@
         capture     group default;
     };
 
-    register SUM_MASK_REG
-    {
-        name        "P9 OCMB Summary Mask Register";
-        scomaddr    0x08040017;
-        capture     group never;
-    };
-
