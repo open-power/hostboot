@@ -693,15 +693,54 @@ void cleanupChnlAttns<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
     dstlfir_and->SetBitFieldJustified( chnlPos*4, 4, 0 );
     dstlfir_and->Write();
 
-    // To ensure that any unmasked OCMB FIR bit that it still on will cause
-    // an interrupt to the proc, we toggle the bits of the summary mask register
-    // on and off.
-    SCAN_COMM_REGISTER_CLASS * sum_mask = i_chip->getRegister( "SUM_MASK_REG" );
-    sum_mask->SetBitFieldJustified( 0, 5, 0x1F );
-    sum_mask->Write();
+    // After clearing the DSTLFIR, we now need to query the chiplet level FIRs
+    // of the OCMB and re-set the appropriate bits in the DSTLFIR for any
+    // attentions that are still active.
+    struct firInfo
+    {
+        const char * firAddr; // FIR name
+        const char * firMask; // FIR mask name
+        uint8_t bitPos;       // Relevant bit pos in the DSTLFIR to set
+    };
+    static const std::vector<firInfo> firList
+    {
+        { "OCMB_CHIPLET_CS_FIR",  "OCMB_CHIPLET_FIR_MASK",     0 },
+        { "OCMB_CHIPLET_RE_FIR",  "OCMB_CHIPLET_FIR_MASK",     1 },
+        { "OCMB_CHIPLET_SPA_FIR", "OCMB_CHIPLET_SPA_FIR_MASK", 2 },
+    };
 
-    sum_mask->SetBitFieldJustified( 0, 5, 0 );
-    sum_mask->Write();
+    for ( const auto & fir : firList )
+    {
+        SCAN_COMM_REGISTER_CLASS * reg = i_chip->getRegister( fir.firAddr );
+        SCAN_COMM_REGISTER_CLASS * msk = i_chip->getRegister( fir.firMask );
+
+        if ( SUCCESS == ( reg->Read() | msk->Read() ) )
+        {
+            uint64_t regData = reg->GetBitFieldJustified(0,64);
+            uint64_t mskData = msk->GetBitFieldJustified(0,64);
+
+            if ( 1 == fir.bitPos )
+            {
+                // Shift recoverable FIR bits
+                regData = regData >> 2;
+            }
+            if ( 0 != (regData & ~mskData) )
+            {
+                PRDF_TRAC( PRDF_FUNC "Re-setting DSTLFIR, attn found: %s "
+                           "regData=0x%x, mskData=0x%x", fir.firAddr, regData,
+                           mskData );
+                // Attention on, set bits in DSTLFIR
+                SCAN_COMM_REGISTER_CLASS * dstlfir_or =
+                    mcc->getRegister( "DSTLFIR_OR" );
+                dstlfir_or->SetBit( fir.bitPos + (4*chnlPos) );
+                if ( SUCCESS != dstlfir_or->Write() )
+                {
+                    PRDF_ERR( PRDF_FUNC "Write() failed on DSTLFIR_OR" );
+                    continue;
+                }
+            }
+        }
+    }
 
     #endif // Hostboot only
 
