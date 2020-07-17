@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -101,7 +101,7 @@ MemSymbol MemSymbol::fromGalois( TargetHandle_t i_trgt, const MemRank & i_rank,
 
 uint8_t MemSymbol::getDq() const
 {
-    uint8_t dq = DQS_PER_DIMM;
+    uint8_t dq = OCMB_DQS_PER_DIMM;
     TYPE trgtType = getTargetType( iv_trgt );
 
     if ( TYPE_MBA == trgtType )

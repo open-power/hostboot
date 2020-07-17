@@ -2744,6 +2744,7 @@ uint8_t transEccSpare( uint8_t i_symbol, bool i_isEccSpared )
 //------------------------------------------------------------------------------
 
 // Returns the DQ site index 0-71, or 72-79 if spared to DRAM
+template<TARGETING::TYPE T>
 uint8_t transDramSpare( uint8_t i_dq, bool i_isDramSpared )
 {
     uint8_t dqIdx = i_dq;
@@ -2752,6 +2753,25 @@ uint8_t transDramSpare( uint8_t i_dq, bool i_isDramSpared )
     {
         // The DRAM spare indexes are 72-79, so adjust this DQ to match.
         dqIdx = DQS_PER_DIMM + (i_dq % DQS_PER_BYTE);
+    }
+
+    return dqIdx;
+}
+
+template
+uint8_t transDramSpare<TYPE_MBA>( uint8_t i_dq, bool i_isDramSpared );
+template
+uint8_t transDramSpare<TYPE_MCA>( uint8_t i_dq, bool i_isDramSpared );
+
+template<>
+uint8_t transDramSpare<TYPE_OCMB_CHIP>( uint8_t i_dq, bool i_isDramSpared )
+{
+    uint8_t dqIdx = i_dq;
+
+    if ( i_isDramSpared )
+    {
+        // The DRAM spare indexes are 40-47, so adjust this DQ to match.
+        dqIdx = OCMB_SPARE_DQ_START + (i_dq % DQS_PER_BYTE);
     }
 
     return dqIdx;
@@ -2918,17 +2938,19 @@ void addDramSiteString( const MemoryMruData::ExtendedData & i_extMemMru,
     if ( mm.s.isMca )
     {
         dqIdx = symbol2Dq<TYPE_MCA>(symbol);
+        dqIdx = transDramSpare<TYPE_MCA>( dqIdx, mm.s.dramSpared );
     }
     else if( mm.s.isOcmb )
     {
         dqIdx = symbol2Dq<TYPE_OCMB_CHIP>(symbol);
+        dqIdx = transDramSpare<TYPE_OCMB_CHIP>( dqIdx, mm.s.dramSpared );
     }
     else
     {
         dqIdx = symbol2Dq<TYPE_MBA>(symbol);
+        dqIdx = transDramSpare<TYPE_MBA>( dqIdx, mm.s.dramSpared );
     }
 
-    dqIdx = transDramSpare( dqIdx, mm.s.dramSpared );
 
     // Add the DRAM site info to the current data.
     if ( i_extMemMru.isBufDimm ) // Centaur DIMMs only
@@ -2976,10 +2998,15 @@ void addDramSiteString( const MemoryMruData::ExtendedData & i_extMemMru,
         char tmp[DATA_SIZE] = { '\0' };
         strcat( io_data, "DQ:" );
 
-        if ( mm.s.isMca || mm.s.isOcmb ) // MCA, OCMB
+        if ( mm.s.isMca ) // MCA
         {
             // There is only one DQ per symbol.
             snprintf( tmp, DATA_SIZE, "%d", i_extMemMru.dqMapping[dqIdx] );
+        }
+        else if ( mm.s.isOcmb ) // OCMB
+        {
+            // DQs for OCMB have a 1-to-1 mapping
+            snprintf( tmp, DATA_SIZE, "%d", dqIdx );
         }
         else // MBA
         {
@@ -3193,8 +3220,8 @@ bool parseMemCeTable( uint8_t  * i_buffer, uint32_t i_buflen,
 
                 // Get the DRAM index for site location table.
                 uint8_t symbol  = transEccSpare( tmp, (1 == isEcc) );
-                uint8_t dqIdx   = transDramSpare( symbol2Dq<TYPE_MBA>(symbol),
-                                                  (1 == isSp) );
+                uint8_t dqIdx   = transDramSpare<TYPE_MBA>(
+                        symbol2Dq<TYPE_MBA>(symbol), (1 == isSp) );
                 uint8_t dramIdx = dqSiteIdx2DramSiteIdx( dqIdx, x4Dram );
 
                 dramSite_str = dramMap[dramIdx];
