@@ -72,6 +72,10 @@ EXTRAINCDIR += ${ROOTPATH}/src/usr/
 #Required include before all the procedure.mk are included
 include ${ROOTPATH}/procedure.rules.mk
 
+#TODO-RTC:257623-Consolidate this into 3rd-party module to avoid duplication
+OBJS += p10_setup_sbe_config.o
+OBJS += p10_sbe_scratch_regs.o
+
 #include $(PM_HWP_PATH)/p9_query_core_access_state.mk
 #include $(PM_HWP_PATH)/p9_query_cache_access_state.mk
 #include $(PM_HWP_PATH)/p9_quad_power_off.mk

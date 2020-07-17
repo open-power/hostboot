@@ -191,7 +191,7 @@ void print_system_info(void)
 
 /**
 *  @brief  Walk through list of PROC chip targets and send a continueMPIPL
-*          FIFO chip-op to all of the slave PROC chips
+*          FIFO chip-op to all of the secondary PROC chips
 *
 *  @return     errlHndl_t
 */
@@ -223,15 +223,14 @@ errlHndl_t sendContinueMpiplChipOp()
 }
 
 /**
-*  @brief  Walk through list of PROC chip targets and run p9_setup_sbe_config
-*          HWP on all of the slave PROC chips to ensure scratch regs are updated
+*  @brief  Walk through list of PROC chip targets and run p10_setup_sbe_config
+*          HWP on all of the secondary PROC chips to ensure scratch regs are updated
 *
 *  @return     errlHndl_t
 */
-errlHndl_t updateSlaveSbeScratchRegs()
+errlHndl_t updateSecondarySbeScratchRegs()
 {
     errlHndl_t l_err = nullptr;
-/* FIXME RTC: 215162
     TARGETING::TargetHandleList l_procChips;
     TARGETING::getAllChips(l_procChips, TARGETING::TYPE_PROC, true);
     TARGETING::PROC_SBE_MASTER_CHIP_ATTR l_is_master_chip = 1;
@@ -242,23 +241,22 @@ errlHndl_t updateSlaveSbeScratchRegs()
         if(!l_is_master_chip)
         {
             fapi2::Target <fapi2::TARGET_TYPE_PROC_CHIP> l_fapi_proc_target (l_chip);
-            // Run the setup_sbe_config hwp on all of the slave procs to make sure
+            // Run the setup_sbe_config hwp on all of the secondary procs to make sure
             // the scratch registers are up to date prior to sending the continueMPIPL
             // operation
             FAPI_INVOKE_HWP(l_err,
-                            p9_setup_sbe_config,
+                            p10_setup_sbe_config,
                             l_fapi_proc_target);
 
             if(l_err)
             {
                 TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                          "Failed during updateSlaveSbeScratchRegs request on this proc = %x",
+                          "Failed during updateSecondarySbeScratchRegs request on this proc = %x",
                           l_chip->getAttr<TARGETING::ATTR_HUID>());
                 break;
             }
         }
     }
-*/
     return l_err;
 }
 
@@ -467,15 +465,16 @@ void* host_discover_targets( void *io_pArgs )
             {
                 break;
             }
-            // Need to ensure slave SBE's scratch registers are
+
+            // Need to ensure secondary SBE's scratch registers are
             // up to date prior to sending continueMPIPL op
-            l_err = updateSlaveSbeScratchRegs();
+            l_err = updateSecondarySbeScratchRegs();
             if (l_err)
             {
                 break;
             }
 
-            // Send continue mpipl op to slave procs
+            // Send continue mpipl op to secondary procs
             l_err = sendContinueMpiplChipOp();
             if (l_err)
             {
