@@ -59,11 +59,78 @@ using   namespace   TARGETING;
 
 
 //******************************************************************************
+// _deconfigPhbsBasedOnPhbActive
+//******************************************************************************
+
+void _deconfigPhbsBasedOnPhbActive(
+    TARGETING::ConstTargetHandle_t const       i_pecTarget,
+    TARGETING::ATTR_PROC_PCIE_PHB_ACTIVE_typeStdArr& io_phbActive)
+{
+    uint8_t l_phbNum = 0;
+    errlHndl_t l_err = nullptr;
+
+    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+        ENTER_MRK "_deconfigPhbsBasedOnPhbActive: Proc target HUID = 0x%08X,"
+        " PHB active value = 0x%02X.", TARGETING::get_huid(i_pecTarget), io_phbActive);
+
+    // Get pec chip's PHB units
+    TARGETING::TargetHandleList l_phbList;
+    (void)TARGETING::getChildChiplets(
+        l_phbList, i_pecTarget, TARGETING::TYPE_PHB, false);
+
+    // io_phbActive is a 3 x uint8 array where each array entry is 1 (Active) or 0 (inactive)
+    // for (PHB0 , PHB1 , PHB2) for the given PEC the attribute is associated with
+    for (auto const & l_phb : l_phbList)
+    {
+        // Get the PHB unit number
+        l_phbNum = l_phb->getAttr<TARGETING::ATTR_CHIP_UNIT>();
+
+        //Check if this particular PHB is indicated as active
+        //via the attribute
+        if (io_phbActive[l_phbNum % io_phbActive.size()] == 0)
+        {
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                "PHB %d on PEC %d has been found INACTIVE. Deconfiguring PHB %d.",
+                  l_phbNum, i_pecTarget->getAttr<TARGETING::ATTR_CHIP_UNIT>(), l_phbNum);
+
+            l_err = HWAS::theDeconfigGard().deconfigureTarget(
+                 *l_phb, HWAS::DeconfigGard::DECONFIGURED_BY_PHB_DECONFIG);
+
+            if (l_err)
+            {
+                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, ERR_MRK
+                    "_deconfigPhbsBasedOnPhbMask: Error deconfiguring PHB "
+                    "%d  on PEC %d.", l_phbNum,
+                    i_pecTarget->getAttr<TARGETING::ATTR_HUID>());
+
+                ERRORLOG::errlCommit(l_err, ISTEP_COMP_ID);
+            }
+        }
+        else
+        {
+            // PHB is marked active, check if it is non-functional.
+            // if so, then mark it inactive in the phbActive Attribute.
+            if (!l_phb->getAttr<ATTR_HWAS_STATE>().functional)
+            {
+                io_phbActive[l_phbNum % io_phbActive.size()] = 0;
+            }
+        }
+    } // PHB loop
+
+    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+        EXIT_MRK "_deconfigPhbsBasedOnPhbActive: io_phbActive = 0x%02X",
+        io_phbActive);
+
+    return;
+}
+
+
+//******************************************************************************
 // computeProcPcieConfigAttrs
 //******************************************************************************
 errlHndl_t computeProcPcieConfigAttrs(TARGETING::Target * i_pProcChipTarget)
 {
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
         ENTER_MRK "computeProcPcieConfigAttrs: Proc chip target HUID = "
         "0x%08X.", TARGETING::get_huid(i_pProcChipTarget));
 
@@ -71,8 +138,8 @@ errlHndl_t computeProcPcieConfigAttrs(TARGETING::Target * i_pProcChipTarget)
 
     do
     {
-        assert((i_pProcChipTarget != NULL),"computeProcPcieConfigs was "
-            "passed in a NULL processor target");
+        assert((i_pProcChipTarget != nullptr),"computeProcPcieConfigs was "
+            "passed in a nullptr processor target");
 
         const TARGETING::ATTR_CLASS_type targetClass
             = i_pProcChipTarget->getAttr<TARGETING::ATTR_CLASS>();
@@ -95,20 +162,23 @@ errlHndl_t computeProcPcieConfigAttrs(TARGETING::Target * i_pProcChipTarget)
         // Iterate over every PEC to find its "BASE" settings
         for(auto l_pec : l_pecList)
         {
-            TARGETING::ATTR_PROC_PCIE_PHB_ACTIVE_BASE_type l_phb_active;
-            if (l_pec->tryGetAttr<ATTR_PROC_PCIE_PHB_ACTIVE_BASE>(l_phb_active))
-            {
-                l_pec->setAttr<ATTR_PROC_PCIE_PHB_ACTIVE>(l_phb_active);
-            }
+            //Get Base Attribute Settings
+            auto l_phb_active = l_pec->getAttrAsStdArr<ATTR_PROC_PCIE_PHB_ACTIVE_BASE>();
+            auto l_phb_lane = l_pec->getAttrAsStdArr<ATTR_PROC_PCIE_LANE_REVERSAL_BASE>();
 
-            TARGETING::ATTR_PROC_PCIE_LANE_REVERSAL_BASE_type l_phb_lane;
-            if (l_pec->tryGetAttr<ATTR_PROC_PCIE_LANE_REVERSAL_BASE>(l_phb_lane))
-            {
-                l_pec->setAttr<ATTR_PROC_PCIE_LANE_REVERSAL>(l_phb_lane);
-            }
+           //Deconfigure Targets + Modify Active Settings Based on Functional Targets
+           _deconfigPhbsBasedOnPhbActive(l_pec, l_phb_active);
+
+           //Set Attribute so HWP has reflection of PHB configuration
+           l_pec->setAttrFromStdArr<ATTR_PROC_PCIE_PHB_ACTIVE>(l_phb_active);
+           l_pec->setAttrFromStdArr<ATTR_PROC_PCIE_LANE_REVERSAL>(l_phb_lane);
         }
 
     } while(0);
+
+    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+        EXIT_MRK "computeProcPcieConfigAttrs: Proc chip target HUID = "
+        "0x%08X.", TARGETING::get_huid(i_pProcChipTarget));
 
     return pError;
 }
@@ -177,98 +247,6 @@ LaneWidth _laneMaskToLaneWidth(const uint16_t i_laneMask)
     }
 
     return laneWidth;
-}
-
-//******************************************************************************
-// _deconfigPhbsBasedOnPhbMask
-//******************************************************************************
-
-void _deconfigPhbsBasedOnPhbMask(
-    TARGETING::ConstTargetHandle_t const       i_procTarget,
-    TARGETING::ATTR_PROC_PCIE_PHB_ACTIVE_type& io_phbActiveMask)
-{
-    uint8_t l_phbNum = 0;
-    errlHndl_t l_err = NULL;
-
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-        ENTER_MRK "_deconfigPhbsBasedOnPhbMask: Proc target HUID = "
-        "0x%08X, PHB active mask = 0x%02X.", i_procTarget ?
-        i_procTarget->getAttr<TARGETING::ATTR_HUID>() : 0, io_phbActiveMask);
-
-    // PHB mask bits start at the left most bit - so we must shift the bits
-    // right in order to get the correct masks. This number below should
-    // always be 7.
-    const size_t bitsToRightShift =
-        (sizeof(io_phbActiveMask) * BITS_PER_BYTE) - 1;
-
-    // Get every PEC under the Proc
-    TARGETING::TargetHandleList l_pecList;
-    (void)TARGETING::getChildChiplets(
-        l_pecList, i_procTarget, TARGETING::TYPE_PEC, false);
-
-    for (auto const & l_pec : l_pecList)
-    {
-        // Get pec chip's PHB units
-        TARGETING::TargetHandleList l_phbList;
-        (void)TARGETING::getChildChiplets(
-            l_phbList, l_pec, TARGETING::TYPE_PHB, false);
-
-        // io_phbActiveMask is a bitmask whose leftmost bit corresponds to
-        // PHB0, followed by bits for PHB1, PHB2, PHB3, PHB4, and PBH5. The
-        // remaining bits are ignored. We need to compare each PHB mask to
-        // its respective PHB and deconfigure it if needed.
-        for (auto const & l_phb : l_phbList)
-        {
-            // Get the PHB unit number
-            l_phbNum = l_phb->getAttr<TARGETING::ATTR_CHIP_UNIT>();
-
-            // Subtract the PHB unit number from the constant bitsToRightShift
-            // in order to get the correct amount of bits to shift right.
-            // e.g. for PHB0, the unit number is 0, bitsToRightShift-0 = 7.
-            // We will shift io_phbActiveMask 7 bits right, which means we are
-            // examining bit 0 of the PHB mask. If it is not set - deconfigure
-            // the respective PHB
-            if (!((io_phbActiveMask >> (bitsToRightShift - l_phbNum)) & 1))
-            {
-                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                    "PHB %d on PEC %d has been found INACTIVE. Deconfiguring "
-                    "PHB %d.", l_phbNum,
-                    l_pec->getAttr<TARGETING::ATTR_CHIP_UNIT>(), l_phbNum);
-
-                l_err = HWAS::theDeconfigGard().deconfigureTarget(
-                     *l_phb, HWAS::DeconfigGard::DECONFIGURED_BY_PHB_DECONFIG);
-
-                if (l_err)
-                {
-                    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, ERR_MRK
-                        "_deconfigPhbsBasedOnPhbMask: Error deconfiguring PHB "
-                        "%d  on PEC %d.", l_phbNum,
-                        l_pec->getAttr<TARGETING::ATTR_HUID>());
-
-                    ERRORLOG::errlCommit(l_err, ISTEP_COMP_ID);
-
-                    // Try to deconfigure any other PHBs
-                    delete l_err;
-                    l_err = NULL;
-                }
-            }
-            else
-            {
-                // PHB is marked active, check if it is non-functional.
-                // if so, then mark it inactive in the phbActiveMask.
-                if (!l_phb->getAttr<ATTR_HWAS_STATE>().functional)
-                {
-                    io_phbActiveMask &= ~(1 << (bitsToRightShift - l_phbNum));
-                }
-            }
-        } // PHB loop
-    } // PEC loop
-
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-        EXIT_MRK "_deconfigPhbsBasedOnPhbMask: io_phbActiveMask = 0x%02X",
-        io_phbActiveMask);
-
-    return;
 }
 
 //******************************************************************************
