@@ -163,11 +163,11 @@
     Stop OPCG RUNN counter and clocks when a checkstop occurs.
   </description>
   <valueType>uint8</valueType>
-  <initToZero/>
   <enum>
     OFF = 0x0,
     ON  = 0x1
   </enum>
+  <default>ON</default>
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
