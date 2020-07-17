@@ -51,8 +51,9 @@
 #include <p10_infrastruct_help.H>
 #include <map>
 #include <p10_ipl_section_append.H>
-#include <p10_dyninit_bitvec.H>
-
+#ifndef WIN32
+    #include <p10_dyninit_bitvec.H>
+#endif
 using namespace fapi2;
 
 #ifndef WIN32
@@ -205,13 +206,17 @@ fapi_try_exit:
     FAPI_DBG("writeMboxRegs Exiting...");
     return fapi2::current_err;
 }
-
+#endif
 ///////////////////////////////////////////////////////////////////////////////
 // Table structure for the expanded raw scoms
 ///////////////////////////////////////////////////////////////////////////////
 ////////// 1B Command // 1B LAST ROW // 2B PAD // 4B ADDR // 8B DATA //////////
 //////////////////////////////// N ROWS ///////////////////////////////////////
+#ifdef WIN32
+int p10_expand_ring_util(
+#else
 fapi2::ReturnCode p10_expand_ring_util(
+#endif
     const uint8_t    i_chipletId,         // Chiplet to scan
     const uint64_t   i_scanRegionType,    // Scan region and type register value for ring
     uint8_t*         o_tbl_scom_data,     // Ptr to table of scoms per the struct
@@ -273,6 +278,7 @@ fapi2::ReturnCode p10_expand_ring_util(
     ringExpand_tbl_t row;
     row.cmd = EXPAND_RING_PUTSCOM_CMD;
     row.last_row = 0;
+    row.pad = 0;  // explictly set memory to 0 (WIN32 needs this)
 
     // Set up the scan type and region
     row.addr = SCAN_REGION_TYPE;
@@ -342,6 +348,7 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
+#ifndef WIN32
 fapi2::ReturnCode writePG(
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_procTarget,
     void* i_image)
@@ -1145,7 +1152,11 @@ fapi2::ReturnCode process_target_and_dynamic_rings(
 
     if(bDynRingFound)
     {
+#ifdef WIN32
+        io_ringIdFeatureVecMap.insert(std::make_pair(i_ringId, featureVecAcc));
+#else
         io_ringIdFeatureVecMap.insert({i_ringId, featureVecAcc});
+#endif
     }
 
     //
@@ -2337,6 +2348,7 @@ ReturnCode p10_ipl_customize (
 #else
     ReturnCode   l_fapiRc = fapi2::FAPI2_RC_SUCCESS;
     ReturnCode   l_fapiRc2 = fapi2::FAPI2_RC_SUCCESS;
+#define nullptr NULL
 #endif
     int             l_rc = 0; // Non-fapi RC
 
@@ -2366,8 +2378,9 @@ ReturnCode p10_ipl_customize (
     RingProperties_t* ringProps = nullptr; // Ring properties list
     RingId_t        ringId = UNDEFINED_RING_ID;
     RingId_t        rpIndex = UNDEFINED_RING_ID; // Ring properties (rp) index
-
+#ifndef WIN32
     p10_dyninit_bitvec featureVec; // Dynamic inits feature vector
+#endif
     std::map< Rs4Selector_t,  Rs4Selector_t> idxFeatureMap;
     std::map<RingId_t, uint64_t> ringIdFeatureVecMap;
     uint8_t*        ringIdFeatList = NULL;
@@ -2484,7 +2497,7 @@ ReturnCode p10_ipl_customize (
     // Make local copy of the [max] io_ringSectionBufSize before we start changing it
     l_ringSectionBufSize = io_ringSectionBufSize;
 
-#ifndef WIN32
+//#ifndef WIN32    this is where Joe had ifdef  mcs
 
     //-------------------------------------------
     // Verify that platform and Mvpd agree on:
@@ -2726,12 +2739,17 @@ ReturnCode p10_ipl_customize (
         uint32_t       sizeMvpdMKField = 0;
         uint8_t*       fullMKData = nullptr;
         const uint8_t  MVPD_MK_KWD_VER1 = 0x01;
-
+#ifndef WIN32
         fapi2::ATTR_SKEWADJ_CORE_PDLY_OVERRIDE_Type  l_attr_skewadj_core_pdly_override = 0;
         fapi2::ATTR_SKEWADJ_CACHE_PDLY_OVERRIDE_Type l_attr_skewadj_cache_pdly_override = 0;
         fapi2::ATTR_DCADJ_DCC_OVERRIDE_Type          l_attr_dcadj_dcc_override = 0;
         fapi2::ATTR_DCADJ_TARGET_OVERRIDE_Type       l_attr_dcadj_target_override = 0;
-
+#else
+        int l_attr_skewadj_core_pdly_override = 0;
+        int l_attr_skewadj_cache_pdly_override = 0;
+        int l_attr_dcadj_dcc_override = 0;
+        int l_attr_dcadj_target_override = 0;
+#endif
         // Get Mvpd MK level
         FAPI_TRY(getMvpdField(fapi2::MVPD_RECORD_CP00,
                               fapi2::MVPD_KEYWORD_MK,
@@ -2787,6 +2805,7 @@ ReturnCode p10_ipl_customize (
                                            (fullMKData[4]);
         }
 
+#ifndef WIN32
         // populate platform attribute state
         FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_SKEWADJ_CORE_PDLY_OVERRIDE,  i_procTarget, l_attr_skewadj_core_pdly_override));
         FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_SKEWADJ_CACHE_PDLY_OVERRIDE, i_procTarget, l_attr_skewadj_cache_pdly_override));
@@ -2798,12 +2817,17 @@ ReturnCode p10_ipl_customize (
         MBOX_ATTR_WRITE(ATTR_SKEWADJ_CACHE_PDLY_OVERRIDE, i_procTarget, io_image);
         MBOX_ATTR_WRITE(ATTR_DCADJ_DCC_OVERRIDE,          i_procTarget, io_image);
         MBOX_ATTR_WRITE(ATTR_DCADJ_TARGET_OVERRIDE,       i_procTarget, io_image);
-
+#else
+        MBOX_ATTR_WRITE(ATTR_SKEWADJ_CORE_PDLY_OVERRIDE,  l_attr_skewadj_core_pdly_override , io_image);
+        MBOX_ATTR_WRITE(ATTR_SKEWADJ_CACHE_PDLY_OVERRIDE, l_attr_skewadj_cache_pdly_override, io_image);
+        MBOX_ATTR_WRITE(ATTR_DCADJ_DCC_OVERRIDE,          l_attr_dcadj_dcc_override,          io_image);
+        MBOX_ATTR_WRITE(ATTR_DCADJ_TARGET_OVERRIDE,       l_attr_dcadj_target_override,       io_image);
+#endif
         delete fullMKData;
         fullMKData = NULL;
     }
 
-#endif
+//#endif     comment end Joe #ifndef WIN32
 
     ///////////////////////////////////////////////////////////////////////////
     // CUSTOMIZE item:  Removal of .toc, .fixed_toc and .strings and adjustment
@@ -3253,11 +3277,24 @@ ReturnCode p10_ipl_customize (
     //////////////////////////////////////////////////////////////////////////
 
 #ifdef WIN32
-    // statically select only Hostboot dynamic init
-    featureVec.iv_bits.push_back(0x1000000000000000ULL);
-    featureVec.iv_bit_count = 3;
-    featureVec.iv_source = MERGED;
-    featureVec.iv_type = FEATURE;
+    //// statically select only Hostboot dynamic init
+    //featureVec.iv_bits.push_back(0x1000000000000000ULL);
+    //featureVec.iv_bit_count = 3;
+    //featureVec.iv_source = MERGED;
+    //featureVec.iv_type = FEATURE;
+
+    uint64_t featureVec = 0x1000000000000000ULL;
+
+    // Index the features in a map
+    for(Rs4Selector_t feature = 0; feature < 64; feature++)
+    {
+        if( featureVec & (0x8000000000000000 >> feature) )
+        {
+            idxFeatureMap.insert(std::make_pair(numberOfFeatures, feature));
+            numberOfFeatures++;
+        }
+    }
+
 #else
     // call p10_boot_mode HWP to calculate dynamic init vector
     FAPI_EXEC_HWP(l_rc,
@@ -3274,8 +3311,6 @@ ReturnCode p10_ipl_customize (
         goto fapi_try_exit;
     }
 
-#endif
-
     // Index the features in a map
     for (Rs4Selector_t feature = 0; feature < featureVec.iv_bit_count; feature++)
     {
@@ -3285,6 +3320,8 @@ ReturnCode p10_ipl_customize (
             numberOfFeatures++;
         }
     }
+
+#endif
 
     //
     // Extract the .dynamic ring section from the HW image and process all Base
@@ -3789,6 +3826,7 @@ ReturnCode p10_ipl_customize (
     }
 
     delete ringIdFeatList;
+    ringIdFeatList = NULL;      // added mcsgro 07152020
 
 
 

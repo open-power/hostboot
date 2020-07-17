@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -25,6 +25,7 @@
 #ifndef _P10_IPL_SECTION_APPEND_H_
 #define _P10_IPL_SECTION_APPEND_H_
 
+#ifndef WIN32
 #include <fapi2.H>
 //------------------------------------------------------------------------------
 // Structure definitions
@@ -51,4 +52,31 @@ extern "C"
         uint32_t& io_image_size); // in: space available for enlarged XIP image
     // out: size of enlarged XIP image
 }
+#else
+//------------------------------------------------------------------------------
+// Structure definitions
+//------------------------------------------------------------------------------
+
+// function pointer typedef definition for HWP call support
+typedef int (*p10_ipl_section_append_FP_t)(
+    void*, uint32_t, uint32_t, void*, uint32_t&);
+
+//------------------------------------------------------------------------------
+// Constant definitions
+//------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
+// Function prototypes
+//------------------------------------------------------------------------------
+extern "C"
+{
+    int p10_ipl_section_append(
+        void*     i_section,      // Ptr to buffer that gets appended
+        uint32_t  i_section_size, // Size of buffer that gets appended
+        uint32_t  i_section_id,   // XIP section to be populated
+        void*     i_image,        // Ptr to XIP customize image (non-ecc)
+        uint32_t& io_image_size); // in: space available for enlarged XIP image
+    // out: size of enlarged XIP image
+}
+#endif
 #endif //_P10_IPL_SECTION_APPEND_H_

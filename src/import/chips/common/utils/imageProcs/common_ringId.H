@@ -26,7 +26,11 @@
 #ifndef _COMMON_RINGID_H_
 #define _COMMON_RINGID_H_
 
-#include <stdint.h>
+#ifdef WIN32
+    #include <win32_stdint.h>
+#else
+    #include <stdint.h>
+#endif
 #include <stddef.h>
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -158,12 +162,21 @@ static const uint64_t MVPD_MAGIC = 0x52540456484452; // "RT.VHDR"
 // this structure, all other fields before the magic word are declared as
 // undefined.  Further, since the magic word is an 8-byte entity that is not
 // on an 8-byte boundary, the structure is declared "packed".
+#ifndef WIN32
 typedef struct
 {
     uint8_t  undefined[14];
     uint64_t magic;  // Represents the 7-byte RT keyword field (+ 1-byte)
 } __attribute__((packed)) MvpdHeader_t;
-
+#else
+#pragma pack(push,1)
+typedef struct
+{
+    uint8_t  undefined[14];
+    uint64_t magic;  // Represents the 7-byte RT keyword field (+ 1-byte)
+} MvpdHeader_t;
+#pragma pack(pop)
+#endif
 // MVPD chip name (Corresponds to POWER platforms chip type, e.g CID_P10=0xa)
 enum MvpdChipName
 {
@@ -214,6 +227,24 @@ enum ChipId
 // MVPD_EQ:   Ring is in the EQ chiplet. (Needed for bootCoreMask in ipl_customize)
 // MVPD_CORE: Ring is in the core chiplet. (Needed for bootCoreMask in ipl_customize)
 //
+#ifdef WIN32
+enum RingMarker //: RingClass_t
+{
+    RMRK_ROOT         = (RingClass_t)0x1,         // ENGD root ring marker bit
+    RMRK_HAS_DERIVS   = (RingClass_t)(0x1 << 1),  // Ring has derivatives, e.g. has buckets
+    RMRK_EKB_RINGS    = (RingClass_t)(0x1 << 2),  // EKB .rings and .dynamic marker bit
+    RMRK_GPTR_OVLY    = (RingClass_t)(0x1 << 3),  // Gptr overlay ring marker bit
+    RMRK_TIME         = (RingClass_t)(0x1 << 4),  // Time ring marker bit
+    RMRK_MVPD_PDG     = (RingClass_t)(0x1 << 7),  // MVPD #G gptr/time ring marker bit
+    RMRK_MVPD_PDP     = (RingClass_t)(0x1 << 8),  // MVPD #P pll ring marker bit
+    RMRK_MVPD_PDR     = (RingClass_t)(0x1 << 9),  // MVPD #R repr ring marker bit
+    RMRK_MVPD_PDS     = (RingClass_t)(0x1 << 10), // MVPD #S dts ring marker bit
+    RMRK_MVPD_NEST    = (RingClass_t)(0x1 << 11), // NEST (non-EQ) ring marker bit
+    RMRK_MVPD_EQ      = (RingClass_t)(0x1 << 12), // EQ (non-core) ring marker bit
+    RMRK_MVPD_CORE    = (RingClass_t)(0x1 << 13), // Core ring marker bit
+    RMRK_SCAN_BY_QME  = (RingClass_t)(0x1 << 14), // QME scannable ring marker bit
+};
+#else
 enum RingMarker
 {
     RMRK_ROOT        = (RingClass_t)0b0000000000000001, // ENGD root ring marker bit
@@ -230,7 +261,7 @@ enum RingMarker
     RMRK_MVPD_CORE   = (RingClass_t)0b0010000000000000, // Core ring marker bit
     RMRK_SCAN_BY_QME = (RingClass_t)0b0100000000000000, // QME scannable ring marker bit
 };
-
+#endif
 //
 // Predefined ring classes
 // - The following ring classes are combining the above RingMarker bits to condense the

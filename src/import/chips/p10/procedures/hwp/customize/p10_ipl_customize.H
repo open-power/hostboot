@@ -26,7 +26,8 @@
 #define _P10_IPL_CUSTOMIZE_H_
 
 #ifndef WIN32
-#include <fapi2.H>
+    #include <fapi2.H>
+#endif
 #include <common_ringId.H>
 #define NUM_OF_CORES     (uint8_t)32
 #define NUM_OF_QMES      (uint8_t)8
@@ -111,7 +112,7 @@ typedef struct
 
 const uint8_t MAX_FILTER_PLL_BUCKETS = 4;
 
-
+#ifndef WIN32
 typedef fapi2::ReturnCode (*p10_ipl_customize_FP_t) (
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_proc_target,
     void*     i_hwImage,

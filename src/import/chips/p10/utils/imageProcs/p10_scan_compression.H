@@ -31,7 +31,15 @@
 
 #ifndef __ASSEMBLER__
 
-#include <stdint.h>
+#ifdef _WIN32
+    #include "win32_stdint.h"
+#else
+    #ifdef __sun
+        #include <sys/int_types.h>
+    #else
+        #include <stdint.h>
+    #endif
+#endif
 #include <common_ringId.H>
 
 /// Compressed Scan Chain Data Structure Format
@@ -365,19 +373,34 @@ int rs4_extract_cmsk( const CompressedScanData* i_rs4,
 
 /// Scan and Origination ring types (used for encoding RS4 header's iv_type)
 ///
-/// Scan type: Flush or Override (Governs scan controller setup)
-#define RS4_IV_TYPE_SCAN_MASK       (uint8_t)0b00000011
-#define RS4_IV_TYPE_SCAN_FLUSH      (uint8_t)0b00000001
-#define RS4_IV_TYPE_SCAN_OVRD       (uint8_t)0b00000010
-#define RS4_IV_TYPE_SCAN_CTX        (uint8_t)0b00000011
-/// Origination of ring: Base, Mvpd, Overlays, Dynamic, Overrides (Used for customized debug)
-#define RS4_IV_TYPE_ORIG_MASK       (uint8_t)0b01111100
-#define RS4_IV_TYPE_ORIG_BASE       (uint8_t)0b00000100 // Base (.{sbe,qme}.rings)
-#define RS4_IV_TYPE_ORIG_MVPD       (uint8_t)0b00001000 // Mvpd (#R/G/S/P)
-#define RS4_IV_TYPE_ORIG_OVLY       (uint8_t)0b00010000 // Overlays (.overlays)
-#define RS4_IV_TYPE_ORIG_DYN        (uint8_t)0b00100000 // Dynamic (.dynamic)
-#define RS4_IV_TYPE_ORIG_OVRD       (uint8_t)0b01000000 // Overrides (.overrides,.fa_ring_ovrd)
+#ifdef WIN32
+    /// Scan type: Flush or Override (Governs scan controller setup)
+    #define RS4_IV_TYPE_SCAN_MASK       (uint8_t)0x03  //0b00000011
+    #define RS4_IV_TYPE_SCAN_FLUSH      (uint8_t)0x01  //0b00000001
+    #define RS4_IV_TYPE_SCAN_OVRD       (uint8_t)0x02  //0b00000010
+    #define RS4_IV_TYPE_SCAN_CTX        (uint8_t)0x03  //0b00000011
+    /// Origination of ring: Base, Mvpd, Overlays, Dynamic, Overrides (Used for customized debug)
+    #define RS4_IV_TYPE_ORIG_MASK       (uint8_t)0x7c  //0b01111100
+    #define RS4_IV_TYPE_ORIG_BASE       (uint8_t)0x04  //0b00000100 // Base (.{sbe,qme}.rings)
+    #define RS4_IV_TYPE_ORIG_MVPD       (uint8_t)0x08  //0b00001000 // Mvpd (#R/G/S/P)
+    #define RS4_IV_TYPE_ORIG_OVLY       (uint8_t)0x10  //0b00010000 // Overlays (.overlays)
+    #define RS4_IV_TYPE_ORIG_DYN        (uint8_t)0x20  //0b00100000 // Dynamic (.dynamic)
+    #define RS4_IV_TYPE_ORIG_OVRD       (uint8_t)0x40  //0b01000000 // Overrides (.overrides,.fa_ring_ovrd)
 
+#else
+    /// Scan type: Flush or Override (Governs scan controller setup)
+    #define RS4_IV_TYPE_SCAN_MASK       (uint8_t)0b00000011
+    #define RS4_IV_TYPE_SCAN_FLUSH      (uint8_t)0b00000001
+    #define RS4_IV_TYPE_SCAN_OVRD       (uint8_t)0b00000010
+    #define RS4_IV_TYPE_SCAN_CTX        (uint8_t)0b00000011
+    /// Origination of ring: Base, Mvpd, Overlays, Dynamic, Overrides (Used for customized debug)
+    #define RS4_IV_TYPE_ORIG_MASK       (uint8_t)0b01111100
+    #define RS4_IV_TYPE_ORIG_BASE       (uint8_t)0b00000100 // Base (.{sbe,qme}.rings)
+    #define RS4_IV_TYPE_ORIG_MVPD       (uint8_t)0b00001000 // Mvpd (#R/G/S/P)
+    #define RS4_IV_TYPE_ORIG_OVLY       (uint8_t)0b00010000 // Overlays (.overlays)
+    #define RS4_IV_TYPE_ORIG_DYN        (uint8_t)0b00100000 // Dynamic (.dynamic)
+    #define RS4_IV_TYPE_ORIG_OVRD       (uint8_t)0b01000000 // Overrides (.overrides,.fa_ring_ovrd)
+#endif
 #define UNDEFINED_RS4_SELECTOR (Rs4Selector_t)0xffff
 #define MAX_RS4_SELECTOR       (Rs4Selector_t)0xff // Practical upper limit of 255
 

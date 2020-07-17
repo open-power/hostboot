@@ -22,11 +22,19 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+#ifdef WIN32
+    #include "win32_stdint.h"
+    #include "endian.h"
+    #include "win_sim_fapi.h"
+#endif
 #include <p10_ipl_section_append.H>
 #include <p10_ipl_image.H>
 
-
+#ifdef WIN32
+int p10_ipl_section_append(
+#else
 fapi2::ReturnCode p10_ipl_section_append(
+#endif
     void*     i_section,      // Ptr to buffer that gets appended
     uint32_t  i_section_size, // Size of buffer that gets appended
     uint32_t  i_section_id,   // XIP section to be populated
