@@ -88,6 +88,16 @@ my $G_ATTR_disp_axis_amb    = 'amb';
 my $G_ATTR_disp_axis_io     = 'io';
 my $G_ATTR_disp_axis_vratio = 'vratio';
 
+my $G_DEF_IO_POWER_SIZE = 6;
+my $G_DEF_VCS_CEFF_SIZE = 4;
+my $G_DEF_VDD_CEFF_SIZE = 26;
+my $G_DEF_AMB_COND_SIZE = 4;
+
+my $g_io_power_size;
+my $g_vcs_ceff_size;
+my $g_vdd_ceff_size;
+my $g_amb_cond_size;
+
 my $G_MIN_FREQ_ENCODE = 108;
 my $G_MAX_FREQ_ENCODE = 255;
 my $G_MIN_OVRG_ENCODE = 1;
@@ -357,16 +367,16 @@ use IO::File;
 our $p_log_lvl = $LOG_LVL_0;
 
 # Number of vcs_ceff_index values
-our $CSV_VCS_CEFF_INDEX_COUNT = 6;
+our $CSV_VCS_CEFF_INDEX_COUNT;
 
 # Number of vdd_ceff_index values
-our $CSV_VDD_CEFF_INDEX_COUNT = 26;
+our $CSV_VDD_CEFF_INDEX_COUNT;
 
 # Number of amb_cond_index values
-our $CSV_IO_POWER_INDEX_COUNT = 4;
+our $CSV_IO_POWER_INDEX_COUNT;
 
 # Number of amb_cond_index values
-our $CSV_AMB_COND_INDEX_COUNT = 4;
+our $CSV_AMB_COND_INDEX_COUNT;
 
 # Number ofvratio_index values
 our $CSV_VRATIO_INDEX_COUNT = 12;
@@ -478,6 +488,13 @@ sub new
     {
         $self->{$column} = undef;
     }
+
+    # set index counts from global variable read from command options
+    # or from default values.
+    $CSV_VCS_CEFF_INDEX_COUNT = $g_vcs_ceff_size;
+    $CSV_VDD_CEFF_INDEX_COUNT = $g_vdd_ceff_size;
+    $CSV_IO_POWER_INDEX_COUNT = $g_io_power_size;
+    $CSV_AMB_COND_INDEX_COUNT = $g_amb_cond_size;
 
     # Build four-dimensional array to hold VRTs. The dimensions include
     # vcs_ceff_index, vdd_ceff_index, io_power_index, and amb_cond_index.
@@ -965,14 +982,14 @@ sub _get_vrt
     return $vrt;
 }
 ################################################################################
-#  BinaryFile Class
+#  BinaryFileIO Class
 #
 # This class represents a binary file.  It is a wrapper around an IO::File
-# object.  BinaryFile provides methods that make it easier to read and write
+# object.  BinaryFileIO provides methods that make it easier to read and write
 # binary data.  The data is written in big-endian format.  This class does not
 # enforce any alignment/padding requirements.
 ################################################################################
-package BinaryFile;
+package BinaryFileIO;
 use IO::File;
 use Fcntl qw(SEEK_SET SEEK_CUR);    # Import constants for seek()
 our $p_log_lvl = $LOG_LVL_0;
@@ -1322,7 +1339,7 @@ our $p_log_lvl = $LOG_LVL_0;
 sub new
 {
     my ($class) = @_;
-    my $self = [];
+    my $self = [];    # anonymous array
     bless($self);
     return $self;
 }
@@ -1362,7 +1379,11 @@ sub read
     for ( my $i = 0; $i < $entry_count; $i++ )
     {
         my $entry = SectionTableEntry->new();
+
+        # read entry info of Section Table Entry from file.
         $entry->read($file);
+
+        # and save the entry to array of Section Table
         $self->add_entry($entry);
     }
 }
@@ -1481,19 +1502,19 @@ sub new
         $WOF_ATTR_core_count                => undef,
         $WOF_ATTR_vcs_start                 => undef,
         $WOF_ATTR_vcs_step                  => undef,
-        $WOF_ATTR_vcs_size                  => $WOF_TABLES_HEADER_VCS_SIZE,
+        $WOF_ATTR_vcs_size                  => undef,
         $WOF_ATTR_vdd_start                 => undef,
         $WOF_ATTR_vdd_step                  => undef,
-        $WOF_ATTR_vdd_size                  => $WOF_TABLES_HEADER_VDD_SIZE,
+        $WOF_ATTR_vdd_size                  => undef,
         $WOF_ATTR_vratio_start              => undef,
         $WOF_ATTR_vratio_step               => undef,
         $WOF_ATTR_vratio_size               => $WOF_TABLES_HEADER_VRATIO_SIZE,
         $WOF_ATTR_io_power_start            => undef,
         $WOF_ATTR_io_power_step             => undef,
-        $WOF_ATTR_io_power_size             => $WOF_TABLES_HEADER_IO_POWER_SIZE,
+        $WOF_ATTR_io_power_size             => undef,
         $WOF_ATTR_amb_cond_start            => undef,
         $WOF_ATTR_amb_cond_step             => undef,
-        $WOF_ATTR_amb_cond_size             => $WOF_TABLES_HEADER_AMB_COND_SIZE,
+        $WOF_ATTR_amb_cond_size             => undef,
         $WOF_ATTR_sort_throttl_freq_mhz     => undef,
         $WOF_ATTR_socket_power_w            => undef,
         $WOF_ATTR_sort_pwr_tgt_freq_mhz     => undef,
@@ -1533,6 +1554,9 @@ sub read
 {
     my ( $self, $file ) = @_;
     Log::log_print $p_log_lvl, "read():\n";
+
+    # before calling this function, the file pointer should already set to the start
+    # of the wof table header.
     my $pos = $file->get_pos();
 
     # Read field values from binary file
@@ -1586,7 +1610,7 @@ sub read
     elsif ( $actual_data_size < $WOF_TABLES_HEADER_SIZE )
     {
         my $padding_size = $WOF_TABLES_HEADER_SIZE - $actual_data_size;
-        $file->skip_bytes($padding_size);    # Reserved
+        $file->skip_bytes($padding_size);    # Reserved bytes
     }
 
     # Verify field values
@@ -1606,6 +1630,9 @@ sub write
 {
     my ( $self, $file ) = @_;
     Log::log_print $p_log_lvl, "write():\n";
+
+    # before calling this function, the file pointer should already set to the start
+    # of the wof table header.
     my $pos = $file->get_pos();
 
     # Write field values to binary file
@@ -1659,7 +1686,7 @@ sub write
     elsif ( $actual_data_size < $WOF_TABLES_HEADER_SIZE )
     {
         my $padding_size = $WOF_TABLES_HEADER_SIZE - $actual_data_size;
-        $file->fill_bytes( $padding_size, 0x00 );    # Padding
+        $file->fill_bytes( $padding_size, 0x00 );    # Reserved bytes.
     }
 }
 
@@ -1724,28 +1751,36 @@ our $VRT_HEADER_CONTENT     = 0;
 our $VRT_HEADER_VERSION     = 0;
 
 # in big endian notation
-our $VRTH_BITMASK_TYPE    = 0x80;    # bit 0 of the byte
-our $VRTH_BITMASK_CONTENT = 0x40;    # bit 1 of the byte
-our $VRTH_BITMASK_VERSION = 0x30;    # bits 2:3 of the byte
-our $VRTH_BITMASK_IO_ID   = 0x0C;    # bits 4:5 of the byte
-our $VRTH_BITMASK_AC_ID   = 0x03;    # bits 6:7 of the byte
+our $VRTH_BITMASK_TYPE            = 0x80;    # bit 0 of the byte
+our $VRTH_BITMASK_CONTENT         = 0x40;    # bit 1 of the byte
+our $VRTH_BITMASK_VERSION         = 0x30;    # bits 2:3 of the byte
+our $VRTH_BITMASK_IO_IDX_IN_VAL1  = 0x0F;
+our $VRTH_BITMASK_IO_IDX_IN_VAL2  = 0x80;
+our $VRTH_BITMASK_AC_IDX_IN_VAL2  = 0x7C;
+our $VRTH_BITMASK_VCS_IDX_IN_VAL2 = 0x03;
+our $VRTH_BITMASK_VCS_IDX_IN_VAL3 = 0xE0;
+our $VRTH_BITMASK_VDD_IDX_IN_VAL3 = 0x1F;
 
 # Starting positions of bit masks for VRT Header
-our $VRTH_BIT_POS_TYPE        = 7;
-our $VRTH_POS_BITMASK_CONTENT = 6;
-our $VRTH_BIT_POS_VERSION     = 4;
-our $VRTH_BIT_POS_IO_ID       = 2;
-our $VRTH_BIT_POS_AC_ID       = 0;
+our $VRTH_BIT_POS_TYPE            = 7;
+our $VRTH_BIT_POS_CONTENT         = 6;
+our $VRTH_BIT_POS_VERSION         = 4;
+our $VRTH_BIT_POS_IO_IDX_IN_VAL1  = -1;
+our $VRTH_BIT_POS_IO_IDX_IN_VAL2  = 7;
+our $VRTH_BIT_POS_AC_IDX_IN_VAL2  = 2;
+our $VRTH_BIT_POS_VCS_IDX_IN_VAL2 = -3;
+our $VRTH_BIT_POS_VCS_IDX_IN_VAL3 = 5;
+our $VRTH_BIT_POS_VDD_IDX_IN_VAL3 = 0;
 
 # Attribute names in the class
 our $VRTH_ATTR_magic_value = 'magic_value';
 our $VRTH_ATTR_type        = 'type';
 our $VRTH_ATTR_content     = 'content';
 our $VRTH_ATTR_version     = 'version';
-our $VRTH_ATTR_io_id       = 'io_id';
-our $VRTH_ATTR_ac_id       = 'ac_id';
-our $VRTH_ATTR_vcs_percent = 'vcs_percent';
-our $VRTH_ATTR_vdd_percent = 'vdd_percent';
+our $VRTH_ATTR_io_index    = 'io_index';
+our $VRTH_ATTR_ac_index    = 'ac_index';
+our $VRTH_ATTR_vcs_index   = 'vcs_index';
+our $VRTH_ATTR_vdd_index   = 'vdd_index';
 
 sub new
 {
@@ -1755,10 +1790,10 @@ sub new
         $VRTH_ATTR_type        => $VRT_HEADER_TYPE,
         $VRTH_ATTR_content     => $VRT_HEADER_CONTENT,
         $VRTH_ATTR_version     => $VRT_HEADER_VERSION,
-        $VRTH_ATTR_io_id       => undef,
-        $VRTH_ATTR_ac_id       => undef,
-        $VRTH_ATTR_vcs_percent => undef,
-        $VRTH_ATTR_vdd_percent => undef,
+        $VRTH_ATTR_io_index    => undef,
+        $VRTH_ATTR_ac_index    => undef,
+        $VRTH_ATTR_vcs_index   => undef,
+        $VRTH_ATTR_vdd_index   => undef,
     };
     bless($self);
     return $self;
@@ -1782,16 +1817,38 @@ sub read
     my ( $self, $file ) = @_;
     Log::log_print $p_log_lvl, "read():\n";
 
+    my $uint8_val1;
+    my $uint8_val2;
+    my $uint8_val3;
+
+    my $io_index;
+    my $ac_index;
+    my $vcs_index;
+    my $vdd_index;
+
     # Read field values from binary file
     $self->access( $VRTH_ATTR_magic_value, $file->read_ascii_text(1) );
-    my $uint8_val = $file->read_uint8();
-    $self->access( $VRTH_ATTR_type,    ( $uint8_val & $VRTH_BITMASK_TYPE ) >> $VRTH_BIT_POS_TYPE );
-    $self->access( $VRTH_ATTR_content, ( $uint8_val & $VRTH_BITMASK_CONTENT ) >> $VRTH_POS_BITMASK_CONTENT );
-    $self->access( $VRTH_ATTR_version, ( $uint8_val & $VRTH_BITMASK_VERSION ) >> $VRTH_BIT_POS_VERSION );
-    $self->access( $VRTH_ATTR_io_id,   ( $uint8_val & $VRTH_BITMASK_IO_ID ) >> $VRTH_BIT_POS_IO_ID );
-    $self->access( $VRTH_ATTR_ac_id,   ( $uint8_val & $VRTH_BITMASK_AC_ID ) >> $VRTH_BIT_POS_AC_ID );
-    $self->access( $VRTH_ATTR_vcs_percent, $file->read_uint8() );
-    $self->access( $VRTH_ATTR_vdd_percent, $file->read_uint8() );
+    $uint8_val1 = $file->read_uint8();
+    $uint8_val2 = $file->read_uint8();
+    $uint8_val3 = $file->read_uint8();
+
+    $self->access( $VRTH_ATTR_type,    ( $uint8_val1 & $VRTH_BITMASK_TYPE ) >> $VRTH_BIT_POS_TYPE );
+    $self->access( $VRTH_ATTR_content, ( $uint8_val1 & $VRTH_BITMASK_CONTENT ) >> $VRTH_BIT_POS_CONTENT );
+    $self->access( $VRTH_ATTR_version, ( $uint8_val1 & $VRTH_BITMASK_VERSION ) >> $VRTH_BIT_POS_VERSION );
+
+    $io_index =
+        ( ( $uint8_val1 & $VRTH_BITMASK_IO_IDX_IN_VAL1 ) << abs($VRTH_BIT_POS_IO_IDX_IN_VAL1) ) |
+        ( ( $uint8_val2 & $VRTH_BITMASK_IO_IDX_IN_VAL2 ) >> $VRTH_BIT_POS_IO_IDX_IN_VAL2 );
+    $ac_index = ( ( $uint8_val2 & $VRTH_BITMASK_AC_IDX_IN_VAL2 ) >> $VRTH_BIT_POS_AC_IDX_IN_VAL2 );
+    $vcs_index =
+        ( ( $uint8_val2 & $VRTH_BITMASK_VCS_IDX_IN_VAL2 ) << abs($VRTH_BIT_POS_VCS_IDX_IN_VAL2) ) |
+        ( ( $uint8_val3 & $VRTH_BITMASK_VCS_IDX_IN_VAL3 ) >> $VRTH_BIT_POS_VCS_IDX_IN_VAL3 );
+    $vdd_index = ( $uint8_val3 & $VRTH_BITMASK_VDD_IDX_IN_VAL3 );
+
+    $self->access( $VRTH_ATTR_io_index,  $io_index );
+    $self->access( $VRTH_ATTR_ac_index,  $ac_index );
+    $self->access( $VRTH_ATTR_vcs_index, $vcs_index );
+    $self->access( $VRTH_ATTR_vdd_index, $vdd_index );
 
     # Verify field values
     if ( $self->access($VRTH_ATTR_magic_value) ne $VRT_HEADER_MAGIC_VALUE )
@@ -1816,34 +1873,46 @@ sub write
     my ( $self, $file ) = @_;
     Log::log_print $p_log_lvl, "write():\n";
 
+    my $uint8_val1;
+    my $uint8_val2;
+    my $uint8_val3;
+
     # Write field values to binary file
     $file->write_ascii_text( $self->access($VRTH_ATTR_magic_value), 1 );
-    my $uint8_val =
+    $uint8_val1 =
         ( ( $self->access($VRTH_ATTR_type) << $VRTH_BIT_POS_TYPE ) & $VRTH_BITMASK_TYPE ) |
-        ( ( $self->access($VRTH_ATTR_content) << $VRTH_POS_BITMASK_CONTENT ) & $VRTH_BITMASK_CONTENT ) |
+        ( ( $self->access($VRTH_ATTR_content) << $VRTH_BIT_POS_CONTENT ) & $VRTH_BITMASK_CONTENT ) |
         ( ( $self->access($VRTH_ATTR_version) << $VRTH_BIT_POS_VERSION ) & $VRTH_BITMASK_VERSION ) |
-        ( ( $self->access($VRTH_ATTR_io_id) << $VRTH_BIT_POS_IO_ID ) & $VRTH_BITMASK_IO_ID ) |
-        ( ( $self->access($VRTH_ATTR_ac_id) << $VRTH_BIT_POS_AC_ID ) & $VRTH_BITMASK_AC_ID );
-    $file->write_uint8($uint8_val);
-    $file->write_uint8( $self->access($VRTH_ATTR_vcs_percent) );
-    $file->write_uint8( $self->access($VRTH_ATTR_vdd_percent) );
+        ( ( $self->access($VRTH_ATTR_io_index) >> abs($VRTH_BIT_POS_IO_IDX_IN_VAL1) ) & $VRTH_BITMASK_IO_IDX_IN_VAL1 );
+    $uint8_val2 =
+        ( ( $self->access($VRTH_ATTR_io_index) << $VRTH_BIT_POS_IO_IDX_IN_VAL2 ) & $VRTH_BITMASK_IO_IDX_IN_VAL2 ) |
+        ( ( $self->access($VRTH_ATTR_ac_index) << $VRTH_BIT_POS_AC_IDX_IN_VAL2 ) & $VRTH_BITMASK_AC_IDX_IN_VAL2 ) |
+        (
+        ( $self->access($VRTH_ATTR_vcs_index) >> abs($VRTH_BIT_POS_VCS_IDX_IN_VAL2) ) & $VRTH_BITMASK_VCS_IDX_IN_VAL2 );
+    $uint8_val3 =
+        ( ( $self->access($VRTH_ATTR_vcs_index) << $VRTH_BIT_POS_VCS_IDX_IN_VAL3 ) & $VRTH_BITMASK_VCS_IDX_IN_VAL3 ) |
+        ( $self->access($VRTH_ATTR_vdd_index) & $VRTH_BITMASK_VDD_IDX_IN_VAL3 );
+    $file->write_uint8($uint8_val1);
+    $file->write_uint8($uint8_val2);
+    $file->write_uint8($uint8_val3);
 }
 
 sub print
 {
-    my ($self) = @_;
+    my ( $self, $file ) = @_;
     Log::log_print $p_log_lvl, "print():\n";
+
+    $self->read($file);
 
     # Print header fields to stdout
     printf("VRT Header:\n");
-    printf( "  Magic Value: %s\n", $self->access($VRTH_ATTR_magic_value) );
-    printf( "  Type       : %u\n", $self->access($VRTH_ATTR_type) );
+    printf( "  Magic Value: %s,",  $self->access($VRTH_ATTR_magic_value) );
+    printf( "  Type       : %u",   $self->access($VRTH_ATTR_type) );
     printf( "  Version    : %u\n", $self->access($VRTH_ATTR_version) );
-    printf( "  Io_id      : %u\n", $self->access($VRTH_ATTR_io_id) );
-    printf( "  Ac_id      : %u\n", $self->access($VRTH_ATTR_ac_id) );
-    printf( "  Vcs percent: %u\n", $self->access($VRTH_ATTR_vcs_percent) );
-    printf( "  Vdd percent: %u\n", $self->access($VRTH_ATTR_vdd_percent) );
-    printf("\n");
+    printf( "  Io_index   : %u,",  $self->access($VRTH_ATTR_io_index) );
+    printf( "  Ac_index   : %u,",  $self->access($VRTH_ATTR_ac_index) );
+    printf( "  Vcs_index  : %u,",  $self->access($VRTH_ATTR_vcs_index) );
+    printf( "  Vdd_index  : %u\n", $self->access($VRTH_ATTR_vdd_index) );
 }
 
 ################################################################################
@@ -1874,9 +1943,9 @@ our $fmt_dec2                  = "%" . $FIELD_LEN3 . "d" . " ";
 our $fmt_flo                   = "%." . $FIELD_LEN2 . "f" . " ";
 
 # Attribute names in this class
-our $IMF_ATTR_file          = 'file';
-our $IMF_ATTR_image_header  = 'image_header';
-our $IMF_ATTR_section_table = 'section_table';
+our $IMF_ATTR_binary_file_io = 'file';
+our $IMF_ATTR_image_header   = 'image_header';
+our $IMF_ATTR_section_table  = 'section_table';
 
 sub new
 {
@@ -1885,9 +1954,9 @@ sub new
     # check to use global logging level.
     #  $p_log_lvl = $g_log_lvl if ( $g_use_global_log_lvl == 1 );
     my $self = {
-        $IMF_ATTR_file          => BinaryFile->new($file_name),
-        $IMF_ATTR_image_header  => ImageHeader->new(),
-        $IMF_ATTR_section_table => SectionTable->new(),
+        $IMF_ATTR_binary_file_io => BinaryFileIO->new($file_name),
+        $IMF_ATTR_image_header   => ImageHeader->new(),
+        $IMF_ATTR_section_table  => SectionTable->new(),
     };
     bless($self);
     return $self;
@@ -1912,13 +1981,13 @@ sub create
     Log::log_print $p_log_lvl, "create():\n";
 
     # Open image file for writing
-    $self->{$IMF_ATTR_file}->open('w');
+    $self->{$IMF_ATTR_binary_file_io}->open('w');
 
     # Write image file contents
     $self->_write(@csv_file_names);
 
     # Close image file
-    $self->{$IMF_ATTR_file}->close();
+    $self->{$IMF_ATTR_binary_file_io}->close();
 }
 
 sub list
@@ -1931,14 +2000,17 @@ sub list
     my $wof_tables_header;
 
     # Open image file for reading
-    $self->access($IMF_ATTR_file)->open('r');
+    $self->access($IMF_ATTR_binary_file_io)->open('r');
 
     # Read and print image header
     $self->_read_image_header();
     $self->access($IMF_ATTR_image_header)->print();
 
-    # Read and print section table
+    # Read section table Section Table pointed by into Section Table attribute,
+    # and file pointer is set file pointer to the end of Section Table.
     $self->_read_section_table();
+
+    # Print section table
     $self->access($IMF_ATTR_section_table)->print();
 
     # Loop through section table entries
@@ -1953,7 +2025,7 @@ sub list
         $entry = $self->access($IMF_ATTR_section_table)->get_entry($section_number);
 
         # Set file offset to the start of the section
-        $self->access($IMF_ATTR_file)->set_pos( $entry->access($STE_ATTR_section_offset) );
+        $self->access($IMF_ATTR_binary_file_io)->set_pos( $entry->access($STE_ATTR_section_offset) );
 
         # Read and print the WOF Tables Header at the start of the section
         $wof_tables_header = $self->_read_wof_tables_header();
@@ -1967,8 +2039,9 @@ sub list
         {
             $entry = $self->access($IMF_ATTR_section_table)->get_entry($i);
 
-            # Set file offset to the start of the section
-            $self->access($IMF_ATTR_file)->set_pos( $entry->access($STE_ATTR_section_offset) );
+            # Set file pointer to the start of the WOF Table Header of the i-th entry,
+            # which is stored as offset in the i-th entry in Section Table.
+            $self->access($IMF_ATTR_binary_file_io)->set_pos( $entry->access($STE_ATTR_section_offset) );
 
             # Read and print the WOF Tables Header at the start of the section
             $wof_tables_header = $self->_read_wof_tables_header();
@@ -1979,7 +2052,7 @@ sub list
     }
 
     # Close image file
-    $self->access($IMF_ATTR_file)->close();
+    $self->access($IMF_ATTR_binary_file_io)->close();
 }
 
 sub view
@@ -1991,7 +2064,7 @@ sub view
     Log::log_print $p_log_lvl, "  section_number: $section_number.\n";
 
     # Open image file for reading
-    $self->access($IMF_ATTR_file)->open('r');
+    $self->access($IMF_ATTR_binary_file_io)->open('r');
 
     # Read image header and section table
     $self->_read_image_header();
@@ -2004,7 +2077,85 @@ sub view
     );
 
     # Close image file
-    $self->access($IMF_ATTR_file)->close();
+    $self->access($IMF_ATTR_binary_file_io)->close();
+}
+
+sub squint
+{
+    my ( $self, $section_number, $vrt_index ) = @_;
+
+    Log::log_print $p_log_lvl, "squint():\n";
+
+    my $entry;
+    my $wof_tables_header;
+
+    # Open image file for reading
+    $self->access($IMF_ATTR_binary_file_io)->open('r');
+
+    # Read and print image header
+    $self->_read_image_header();
+    $self->access($IMF_ATTR_image_header)->print();
+
+    # Read section table Section Table pointed by into Section Table attribute,
+    # and file pointer is set file pointer to the end of Section Table.
+    $self->_read_section_table();
+
+    # Print section table
+    $self->access($IMF_ATTR_section_table)->print();
+
+    # validate $section_number
+    if ( !defined($section_number) )
+    {
+        die "Error: Option section_number $section_number is note defined.\n";
+    }
+    else
+    {
+        if (   ( $section_number < 0 )
+            or ( $section_number >= $self->access($IMF_ATTR_section_table)->entry_count() ) )
+        {
+            die "Error: Option section_number $section_number is invalid.\n";
+        }
+    }
+
+    $entry = $self->access($IMF_ATTR_section_table)->get_entry($section_number);
+
+    # Set file offset to the start of the section
+    $self->access($IMF_ATTR_binary_file_io)->set_pos( $entry->access($STE_ATTR_section_offset) );
+
+    # Read and print the WOF Tables Header at the start of the section
+    $wof_tables_header = $self->_read_wof_tables_header();
+
+    printf("Entry Number: $section_number\n");
+    $wof_tables_header->print();
+
+    my $io_power_size = $wof_tables_header->access($WOF_ATTR_io_power_size);
+    my $vcs_ceff_size = $wof_tables_header->access($WOF_ATTR_vcs_size);
+    my $vdd_ceff_size = $wof_tables_header->access($WOF_ATTR_vdd_size);
+    my $amb_cond_size = $wof_tables_header->access($WOF_ATTR_amb_cond_size);
+    my $max_vrt_index = ( $vcs_ceff_size * $vdd_ceff_size * $io_power_size * $amb_cond_size ) - 1;
+
+    # Nail down to the WOF table and to the VRT or loop through VRT.
+    if ( defined($vrt_index) )
+    {
+        if (   ( $vrt_index < 0 )
+            or ( $vrt_index > $max_vrt_index ) )
+        {
+            die "Error: Option vrt_index $vrt_index is invalid.\n";
+        }
+
+        $self->_print_vrt_header_by_index( $section_number, $vrt_index );
+    }
+    else
+    {
+        for ( my $i = 0; $i <= $max_vrt_index; $i++ )
+        {
+            $vrt_index = $i;
+            $self->_print_vrt_header_by_index( $section_number, $vrt_index );
+        }
+    }
+
+    # Close image file
+    $self->access($IMF_ATTR_binary_file_io)->close();
 }
 
 sub extract
@@ -2014,7 +2165,7 @@ sub extract
     Log::log_print $p_log_lvl, "  section_number: $section_number.\n";
 
     # Open image file for reading
-    $self->access($IMF_ATTR_file)->open('r');
+    $self->access($IMF_ATTR_binary_file_io)->open('r');
 
     # Read image header and section table
     $self->_read_image_header();
@@ -2024,7 +2175,7 @@ sub extract
     $self->_extract_section( $section_number, $output_file_name );
 
     # Close image file
-    $self->access($IMF_ATTR_file)->close();
+    $self->access($IMF_ATTR_binary_file_io)->close();
 }
 
 #------------------------------------------------------------------------------
@@ -2060,7 +2211,7 @@ sub _read_image_header
     Log::log_print $p_log_lvl, "_read_image_header():\n";
 
     # Read image header from image file
-    $self->access($IMF_ATTR_image_header)->read( $self->access($IMF_ATTR_file) );
+    $self->access($IMF_ATTR_image_header)->read( $self->access($IMF_ATTR_binary_file_io) );
 
     # Read past any padding
     $self->_read_padding();
@@ -2087,7 +2238,7 @@ sub _write_image_header
     $self->{$IMF_ATTR_image_header}->access( $IMH_ATTR_section_table_offset, $section_table_offset );
 
     # Write image header to image file
-    $self->{$IMF_ATTR_image_header}->write( $self->access($IMF_ATTR_file) );
+    $self->{$IMF_ATTR_image_header}->write( $self->access($IMF_ATTR_binary_file_io) );
 
     # Write any necessary padding so header ends on proper byte boundary
     $self->_write_padding();
@@ -2102,7 +2253,7 @@ sub _read_section_table
     my $entry_count = $self->{$IMF_ATTR_image_header}->access($IMH_ATTR_section_table_entry_count);
 
     # Read section table from image file
-    $self->access($IMF_ATTR_section_table)->read( $self->access($IMF_ATTR_file), $entry_count );
+    $self->access($IMF_ATTR_section_table)->read( $self->access($IMF_ATTR_binary_file_io), $entry_count );
 
     # Read past any padding following the section table
     $self->_read_padding();
@@ -2127,7 +2278,7 @@ sub _write_section_table
     }
 
     # Write section table to image file
-    $self->access($IMF_ATTR_section_table)->write( $self->access($IMF_ATTR_file) );
+    $self->access($IMF_ATTR_section_table)->write( $self->access($IMF_ATTR_binary_file_io) );
 
     # Write any necessary padding so table ends on proper byte boundary
     $self->_write_padding();
@@ -2142,10 +2293,10 @@ sub _update_section_table
     my $section_table_offset = $self->access($IMF_ATTR_image_header)->access($IMH_ATTR_section_table_offset);
 
     # Move to section table offset within image file
-    $self->access($IMF_ATTR_file)->set_pos($section_table_offset);
+    $self->access($IMF_ATTR_binary_file_io)->set_pos($section_table_offset);
 
     # Update section table in image file.  Write actual section offsets/sizes.
-    $self->access($IMF_ATTR_section_table)->write( $self->access($IMF_ATTR_file) );
+    $self->access($IMF_ATTR_section_table)->write( $self->access($IMF_ATTR_binary_file_io) );
 }
 
 sub _write_wof_section
@@ -2155,7 +2306,7 @@ sub _write_wof_section
     Log::log_print $p_log_lvl, "  section_number: $section_number.\n";
 
     # Get current file offset.  This is the offset to the start of the section.
-    my $section_offset = $self->access($IMF_ATTR_file)->get_pos();
+    my $section_offset = $self->access($IMF_ATTR_binary_file_io)->get_pos();
 
     # Create CSVFile object and parse the CSV data
     my $csv_file = CSVFile->new($csv_file_name);
@@ -2170,7 +2321,7 @@ sub _write_wof_section
 
     # Get current file offset.  This is one byte past the end of the section.
     # Calculate section size based on offsets.
-    my $current_offset = $self->access($IMF_ATTR_file)->get_pos();
+    my $current_offset = $self->access($IMF_ATTR_binary_file_io)->get_pos();
     my $section_size   = $current_offset - $section_offset;
 
     # Store section offset and size in section table entry
@@ -2197,10 +2348,10 @@ sub _extract_section
     my $entry = $self->access($IMF_ATTR_section_table)->get_entry($section_number);
 
     # Set image file offset to the start of the section
-    $self->access($IMF_ATTR_file)->set_pos( $entry->access($STE_ATTR_section_offset) );
+    $self->access($IMF_ATTR_binary_file_io)->set_pos( $entry->access($STE_ATTR_section_offset) );
 
     # Open output file for writing
-    my $output_file = BinaryFile->new($output_file_name);
+    my $output_file = BinaryFileIO->new($output_file_name);
     $output_file->open('w');
 
     # Copy section bytes from image file to output file
@@ -2209,7 +2360,7 @@ sub _extract_section
     while ( $bytes_left > 0 )
     {
         my $read_size = ( $bytes_left < $max_read_size ) ? $bytes_left : $max_read_size;
-        my $buffer = $self->access($IMF_ATTR_file)->read($read_size);
+        my $buffer = $self->access($IMF_ATTR_binary_file_io)->read($read_size);
         $output_file->write($buffer);
         $bytes_left -= $read_size;
     }
@@ -2227,7 +2378,15 @@ sub _read_wof_tables_header
     my $wof_tables_header = WOFTablesHeader->new();
 
     # Read header from image file
-    $wof_tables_header->read( $self->access($IMF_ATTR_file) );
+    $wof_tables_header->read( $self->access($IMF_ATTR_binary_file_io) );
+
+    # Set global size variables with values in WOF Table header,
+    # which were read from image file.
+    $g_io_power_size = $wof_tables_header->access($WOF_ATTR_io_power_size);
+    $g_vcs_ceff_size = $wof_tables_header->access($WOF_ATTR_vcs_size);
+    $g_vdd_ceff_size = $wof_tables_header->access($WOF_ATTR_vdd_size);
+    $g_amb_cond_size = $wof_tables_header->access($WOF_ATTR_amb_cond_size);
+
     return $wof_tables_header;
 }
 
@@ -2256,32 +2415,33 @@ sub _write_wof_tables_header
         int( $csv_file->access($CSV_ATTR_vcs_ceff_start) * $CSV_WOF_CONV_MULTIPLIER_PERCENT ) );
     $wof_tables_header->access( $WOF_ATTR_vcs_step,
         int( $csv_file->access($CSV_ATTR_vcs_ceff_step) * $CSV_WOF_CONV_MULTIPLIER_PERCENT ) );
+    $wof_tables_header->access( $WOF_ATTR_vcs_size, $g_vcs_ceff_size );
 
-    # vcs_ceff_size hardcoded in WOF_HEADER class.
     $wof_tables_header->access( $WOF_ATTR_vdd_start,
         int( $csv_file->access($CSV_ATTR_vdd_ceff_start) * $CSV_WOF_CONV_MULTIPLIER_PERCENT ) );
     $wof_tables_header->access( $WOF_ATTR_vdd_step,
         int( $csv_file->access($CSV_ATTR_vdd_ceff_step) * $CSV_WOF_CONV_MULTIPLIER_PERCENT ) );
+    $wof_tables_header->access( $WOF_ATTR_vdd_size, $g_vdd_ceff_size );
 
-    # vdd_ceff_size hardcoded in WOF_HEADER class.
     $wof_tables_header->access( $WOF_ATTR_vratio_start,
         int( $csv_file->access($CSV_ATTR_vratio_start) * $CSV_WOF_CONV_MULTIPLIER_PERCENT ) );
     $wof_tables_header->access( $WOF_ATTR_vratio_step,
         int( $csv_file->access($CSV_ATTR_vratio_step) * $CSV_WOF_CONV_MULTIPLIER_PERCENT ) );
 
     # vratio_size hardcoded in WOF_HEADER class.
+
     $wof_tables_header->access( $WOF_ATTR_io_power_start,
         int( $csv_file->access($CSV_ATTR_io_power_start) * $CSV_WOF_CONV_MULTIPLIER_VALUE ) );
     $wof_tables_header->access( $WOF_ATTR_io_power_step,
         int( $csv_file->access($CSV_ATTR_io_power_step) * $CSV_WOF_CONV_MULTIPLIER_VALUE ) );
+    $wof_tables_header->access( $WOF_ATTR_io_power_size, $g_io_power_size );
 
-    # io_power_size hardcoded in WOF_HEADER class.
     $wof_tables_header->access( $WOF_ATTR_amb_cond_start,
         int( $csv_file->access($CSV_ATTR_amb_cond_start) * $CSV_WOF_CONV_MULTIPLIER_VALUE ) );
     $wof_tables_header->access( $WOF_ATTR_amb_cond_step,
         int( $csv_file->access($CSV_ATTR_amb_cond_step) * $CSV_WOF_CONV_MULTIPLIER_VALUE ) );
+    $wof_tables_header->access( $WOF_ATTR_amb_cond_size, $g_amb_cond_size );
 
-    # amb_cond_size hardcoded in WOF_HEADER class.
     $wof_tables_header->access( $WOF_ATTR_sort_throttl_freq_mhz, $csv_file->access($CSV_ATTR_pdv_sort_throttle_freq) );
     $wof_tables_header->access( $WOF_ATTR_socket_power_w,        $csv_file->access($CSV_ATTR_socket_power) );
     $wof_tables_header->access( $WOF_ATTR_sort_pwr_tgt_freq_mhz, $csv_file->access($CSV_ATTR_pdv_sort_wof_base_freq) );
@@ -2300,7 +2460,7 @@ sub _write_wof_tables_header
     $wof_tables_header->access( $WOF_ATTR_package_name,         $csv_file->access($CSV_ATTR_package) );
 
     # Write header to image file
-    $wof_tables_header->write( $self->access($IMF_ATTR_file) );
+    $wof_tables_header->write( $self->access($IMF_ATTR_binary_file_io) );
     return $wof_tables_header;
 }
 
@@ -2311,26 +2471,26 @@ sub _print_wof_tables_header
     Log::log_print $p_log_lvl, "  WOF_ATTR_core_count:" . $wof_tables_header->access($WOF_ATTR_core_count) . "\n";
     Log::log_print $p_log_lvl, "  WOF_ATTR_vcs_start:" . $wof_tables_header->access($WOF_ATTR_vcs_start) . "\n";
     Log::log_print $p_log_lvl, "  WOF_ATTR_vcs_step:" . $wof_tables_header->access($WOF_ATTR_vcs_step) . "\n";
+    Log::log_print $p_log_lvl, "  WOF_ATTR_vcs_size:" . $wof_tables_header->access($WOF_ATTR_vcs_size) . "\n";
 
-    # vcs_ceff_size hardcoded in WOF_HEADER class.
     Log::log_print $p_log_lvl, "  WOF_ATTR_vdd_start:" . $wof_tables_header->access($WOF_ATTR_vdd_start) . "\n";
     Log::log_print $p_log_lvl, "  WOF_ATTR_vdd_step:" . $wof_tables_header->access($WOF_ATTR_vdd_step) . "\n";
+    Log::log_print $p_log_lvl, "  WOF_ATTR_vdd_size:" . $wof_tables_header->access($WOF_ATTR_vdd_size) . "\n";
 
-    # vdd_ceff_size hardcoded in WOF_HEADER class.
     Log::log_print $p_log_lvl, "  WOF_ATTR_vratio_start:" . $wof_tables_header->access($WOF_ATTR_vratio_start) . "\n";
     Log::log_print $p_log_lvl, "  WOF_ATTR_vratio_step:" . $wof_tables_header->access($WOF_ATTR_vratio_step) . "\n";
+    Log::log_print $p_log_lvl, "  WOF_ATTR_vratio_size:" . $wof_tables_header->access($WOF_ATTR_vratio_size) . "\n";
 
-    # vratio_size hardcoded in WOF_HEADER class.
     Log::log_print $p_log_lvl,
         "  WOF_ATTR_io_power_start:" . $wof_tables_header->access($WOF_ATTR_io_power_start) . "\n";
     Log::log_print $p_log_lvl, "  WOF_ATTR_io_power_step:" . $wof_tables_header->access($WOF_ATTR_io_power_step) . "\n";
+    Log::log_print $p_log_lvl, "  WOF_ATTR_io_power_size:" . $wof_tables_header->access($WOF_ATTR_io_power_size) . "\n";
 
-    # io_power_size hardcoded in WOF_HEADER class.
     Log::log_print $p_log_lvl,
         "  WOF_ATTR_amb_cond_start:" . $wof_tables_header->access($WOF_ATTR_amb_cond_start) . "\n";
     Log::log_print $p_log_lvl, "  WOF_ATTR_amb_cond_step:" . $wof_tables_header->access($WOF_ATTR_amb_cond_step) . "\n";
+    Log::log_print $p_log_lvl, "  WOF_ATTR_amb_cond_size:" . $wof_tables_header->access($WOF_ATTR_amb_cond_size) . "\n";
 
-    # amb_cond_size hardcoded in WOF_HEADER class.
     Log::log_print $p_log_lvl,
         "  WOF_ATTR_sort_throttl_freq_mhz:" . $wof_tables_header->access($WOF_ATTR_sort_throttl_freq_mhz) . "\n";
     Log::log_print $p_log_lvl,
@@ -2476,7 +2636,7 @@ sub _write_vrt
         my $wof_freq_sys = $self->_calc_system_vre( $column_index, $vrt, $csv_file, $wof_tables_header );
 
         # Write one-byte System VRT frequency value to image file
-        $self->access($IMF_ATTR_file)->write_uint8($wof_freq_sys);
+        $self->access($IMF_ATTR_binary_file_io)->write_uint8($wof_freq_sys);
     }
 }
 
@@ -2593,6 +2753,19 @@ sub _view_vrt_with_rows_cols
     $DIM_TYPE[2] = $DIM_ORDER_TYPE_MAP{2};
     $DIM_TYPE[3] = $DIM_ORDER_TYPE_MAP{3};
     $DIM_TYPE[4] = $DIM_ORDER_TYPE_MAP{4};
+
+    # get the order of rows index. It is the 2nd last one.
+    # the order of last index is $MAX_INDEX_COUNT - 1.
+    # step up by one:
+    my $rows_index_order  = $MAX_INDEX_COUNT - 2;
+    my $wof_tables_header = $self->_read_wof_tables_header();
+
+    $CSV_IO_POWER_INDEX_COUNT = $wof_tables_header->access($WOF_ATTR_io_power_size);
+    $CSV_VCS_CEFF_INDEX_COUNT = $wof_tables_header->access($WOF_ATTR_vcs_size);
+    $CSV_VDD_CEFF_INDEX_COUNT = $wof_tables_header->access($WOF_ATTR_vdd_size);
+    $CSV_AMB_COND_INDEX_COUNT = $wof_tables_header->access($WOF_ATTR_amb_cond_size);
+    $CSV_VRATIO_INDEX_COUNT   = $wof_tables_header->access($WOF_ATTR_vratio_size);
+
     my %DIM_TYPE_COUNT_MAP;
     $DIM_TYPE_COUNT_MAP{$G_ATTR_vcs_ceff_index} = $CSV_VCS_CEFF_INDEX_COUNT;
     $DIM_TYPE_COUNT_MAP{$G_ATTR_vdd_ceff_index} = $CSV_VDD_CEFF_INDEX_COUNT;
@@ -2600,11 +2773,6 @@ sub _view_vrt_with_rows_cols
     $DIM_TYPE_COUNT_MAP{$G_ATTR_amb_cond_index} = $CSV_AMB_COND_INDEX_COUNT;
     $DIM_TYPE_COUNT_MAP{$G_ATTR_vratio_index}   = $CSV_VRATIO_INDEX_COUNT;
 
-    # get the order of rows index. It is the 2nd last one.
-    # the order of last index is $MAX_INDEX_COUNT - 1.
-    # step up by one:
-    my $rows_index_order  = $MAX_INDEX_COUNT - 2;
-    my $wof_tables_header = $self->_read_wof_tables_header();
     my $rows_start =
         $wof_tables_header->access( $DIM_TYPE_WOF_START_MAP{ $DIM_TYPE[$rows_index_order] } ) / 100;
     my $rows_step =
@@ -2667,13 +2835,13 @@ sub _view_vrt_with_rows_cols
                             $DIM_INDEX[ $DIM_TYPE_ORDER_MAP{$G_ATTR_amb_cond_index} ],
                             $DIM_INDEX[ $DIM_TYPE_ORDER_MAP{$G_ATTR_vratio_index} ]
                         );
-                        $self->access($IMF_ATTR_file)->set_pos($offset);
+                        $self->access($IMF_ATTR_binary_file_io)->set_pos($offset);
 
                         # Print VRT column headings
                         my $column_width = $convert_to_mhz ? 4 : 2;
 
                         # Read WOF frequency value in one-byte System VRT format from image file
-                        my $wof_freq_sys = $self->access($IMF_ATTR_file)->read_uint8();
+                        my $wof_freq_sys = $self->access($IMF_ATTR_binary_file_io)->read_uint8();
                         $rows_cols_array[$index_loop3][$index_loop4] = $wof_freq_sys;
                     }
                 }
@@ -2860,7 +3028,7 @@ sub _verify_vrt_offset
     }
 
     # Set image file offset to the start of the section
-    $self->access($IMF_ATTR_file)->set_pos( $entry->access($STE_ATTR_section_offset) );
+    $self->access($IMF_ATTR_binary_file_io)->set_pos( $entry->access($STE_ATTR_section_offset) );
 
     # Read the WOF Tables Header at the start of the section
     my $wof_tables_header = $self->_read_wof_tables_header();
@@ -2877,39 +3045,28 @@ sub _verify_vrt_offset
     # are stored in a three-dimensional array within the file, where the first
     # dimension is vcs_ceff_index, and follows with dimensions: vdd_ceff_index,
     # io_power_index, amb_cond_index.
-    my $offset =
-        $self->access($IMF_ATTR_file)->get_pos() +
-        ( $vcs_ceff_index * ( $vdd_ceff_size * $io_power_size * $amb_cond_size * $vrt_block_size ) ) +
-        ( $vdd_ceff_index * ( $io_power_size * $amb_cond_size * $vrt_block_size ) ) +
-        ( $io_power_index * ( $amb_cond_size * $vrt_block_size ) ) +
-        ( $amb_cond_index * ($vrt_block_size) );
+    my $vrt_offset =
+        $self->access($IMF_ATTR_binary_file_io)->get_pos() +
+        ( $vcs_ceff_index * $vdd_ceff_size * $io_power_size * $amb_cond_size +
+            $vdd_ceff_index * $io_power_size * $amb_cond_size +
+            $io_power_index * $amb_cond_size +
+            $amb_cond_index ) *
+        $vrt_block_size;
 
-    $self->access($IMF_ATTR_file)->set_pos($offset);
+    $self->access($IMF_ATTR_binary_file_io)->set_pos($vrt_offset);
 
     # Read VRT Header values VRT format from image file
     my $vrt_header = $self->_read_vrt_header();
 
-    my $vrth_io_id       = $vrt_header->access($VRTH_ATTR_io_id);
-    my $vrth_ac_id       = $vrt_header->access($VRTH_ATTR_ac_id);
-    my $vrth_vcs_percent = $vrt_header->access($VRTH_ATTR_vcs_percent);
-    my $vrth_vdd_percen  = $vrt_header->access($VRTH_ATTR_vdd_percent);
+    my $vrth_io_id  = $vrt_header->access($VRTH_ATTR_io_index);
+    my $vrth_ac_id  = $vrt_header->access($VRTH_ATTR_ac_index);
+    my $vrth_vcs_id = $vrt_header->access($VRTH_ATTR_vcs_index);
+    my $vrth_vdd_id = $vrt_header->access($VRTH_ATTR_vdd_index);
 
     if (   ( $io_power_index != $vrth_io_id )
-        or ( $amb_cond_index != $vrth_ac_id ) )
-    {
-        return 0;
-    }
-    my $vcs_ceff_start = $wof_tables_header->access($WOF_ATTR_vcs_start);
-    my $vcs_ceff_step  = $wof_tables_header->access($WOF_ATTR_vcs_step);
-    my $vdd_ceff_start = $wof_tables_header->access($WOF_ATTR_vdd_start);
-    my $vdd_ceff_step  = $wof_tables_header->access($WOF_ATTR_vdd_step);
-
-    my $divde_val   = $CSV_WOF_CONV_MULTIPLIER_PERCENT / 100;
-    my $vcs_percent = ( $vcs_ceff_start + $vcs_ceff_step * $vcs_ceff_index ) / $divde_val;
-    my $vdd_percent = ( $vdd_ceff_start + $vdd_ceff_step * $vdd_ceff_index ) / $divde_val;
-
-    if (   ( $vcs_percent != $vrth_vcs_percent )
-        or ( $vdd_percent != $vrth_vdd_percen ) )
+        or ( $amb_cond_index != $vrth_ac_id )
+        or ( $vcs_ceff_index != $vrth_vcs_id )
+        or ( $vdd_ceff_index != $vrth_vdd_id ) )
     {
         return 0;
     }
@@ -2931,48 +3088,7 @@ sub _get_vrt_offset
     }
 
     # Set image file offset to the start of the section
-    $self->access($IMF_ATTR_file)->set_pos( $entry->access($STE_ATTR_section_offset) );
-
-    # Read the WOF Tables Header at the start of the section
-    my $wof_tables_header = $self->_read_wof_tables_header();
-
-    # Get sizes from WOF Header fields used to calculate offset
-    my $vrt_block_size = $wof_tables_header->access($WOF_ATTR_vrt_block_size);
-    my $vcs_ceff_size  = $wof_tables_header->access($WOF_ATTR_vcs_size);
-    my $vdd_ceff_size  = $wof_tables_header->access($WOF_ATTR_vdd_size);
-    my $io_power_size  = $wof_tables_header->access($WOF_ATTR_io_power_size);
-    my $amb_cond_size  = $wof_tables_header->access($WOF_ATTR_amb_cond_size);
-
-    # Calculate absolute offset to VRT within image file.  We just read the WOF
-    # Tables Header, so the current file offset is at the first VRT.  The VRTs
-    # are stored in a three-dimensional array within the file, where the first
-    # dimension is vcs_ceff_index, and follows with dimensions: vdd_ceff_index,
-    # io_power_index, amb_cond_index.
-    my $offset =
-        $self->access($IMF_ATTR_file)->get_pos() +
-        ( $vcs_ceff_index * ( $vdd_ceff_size * $io_power_size * $amb_cond_size * $vrt_block_size ) ) +
-        ( $vdd_ceff_index * ( $io_power_size * $amb_cond_size * $vrt_block_size ) ) +
-        ( $io_power_index * ( $amb_cond_size * $vrt_block_size ) ) +
-        ( $amb_cond_index * ($vrt_block_size) );
-    return $offset;
-}
-
-sub _get_vre_offset
-{
-    my ( $self, $section_number, $vcs_ceff_index, $vdd_ceff_index, $io_power_index, $amb_cond_index, $vratio_index ) =
-        @_;
-    Log::log_print $p_log_lvl, "_get_vrt_offset():\n";
-    Log::log_print $p_log_lvl, "  section_number: $section_number.\n";
-
-    # Get section table entry
-    my $entry = $self->access($IMF_ATTR_section_table)->get_entry($section_number);
-    if ( !defined($entry) )
-    {
-        die "Error: No Section Table Entry for section number:  $section_number.\n";
-    }
-
-    # Set image file offset to the start of the section
-    $self->access($IMF_ATTR_file)->set_pos( $entry->access($STE_ATTR_section_offset) );
+    $self->access($IMF_ATTR_binary_file_io)->set_pos( $entry->access($STE_ATTR_section_offset) );
 
     # Read the WOF Tables Header at the start of the section
     my $wof_tables_header = $self->_read_wof_tables_header();
@@ -2990,11 +3106,55 @@ sub _get_vre_offset
     # dimension is vcs_ceff_index, and follows with dimensions: vdd_ceff_index,
     # io_power_index, amb_cond_index.
     my $vrt_offset =
-        $self->access($IMF_ATTR_file)->get_pos() +
-        ( $vcs_ceff_index * ( $vdd_ceff_size * $io_power_size * $amb_cond_size * $vrt_block_size ) ) +
-        ( $vdd_ceff_index * ( $io_power_size * $amb_cond_size * $vrt_block_size ) ) +
-        ( $io_power_index * ( $amb_cond_size * $vrt_block_size ) ) +
-        ( $amb_cond_index * ($vrt_block_size) );
+        $self->access($IMF_ATTR_binary_file_io)->get_pos() +
+        ( $vcs_ceff_index * $vdd_ceff_size * $io_power_size * $amb_cond_size +
+            $vdd_ceff_index * $io_power_size * $amb_cond_size +
+            $io_power_index * $amb_cond_size +
+            $amb_cond_index ) *
+        $vrt_block_size;
+
+    return $vrt_offset;
+}
+
+sub _get_vre_offset
+{
+    my ( $self, $section_number, $vcs_ceff_index, $vdd_ceff_index, $io_power_index, $amb_cond_index, $vratio_index ) =
+        @_;
+    Log::log_print $p_log_lvl, "_get_vrt_offset():\n";
+    Log::log_print $p_log_lvl, "  section_number: $section_number.\n";
+
+    # Get section table entry
+    my $entry = $self->access($IMF_ATTR_section_table)->get_entry($section_number);
+    if ( !defined($entry) )
+    {
+        die "Error: No Section Table Entry for section number:  $section_number.\n";
+    }
+
+    # Set image file offset to the start of the section
+    $self->access($IMF_ATTR_binary_file_io)->set_pos( $entry->access($STE_ATTR_section_offset) );
+
+    # Read the WOF Tables Header at the start of the section
+    my $wof_tables_header = $self->_read_wof_tables_header();
+
+    # Get sizes from WOF Header fields used to calculate offset
+    my $vrt_block_size = $wof_tables_header->access($WOF_ATTR_vrt_block_size);
+    my $vcs_ceff_size  = $wof_tables_header->access($WOF_ATTR_vcs_size);
+    my $vdd_ceff_size  = $wof_tables_header->access($WOF_ATTR_vdd_size);
+    my $io_power_size  = $wof_tables_header->access($WOF_ATTR_io_power_size);
+    my $amb_cond_size  = $wof_tables_header->access($WOF_ATTR_amb_cond_size);
+
+    # Calculate absolute offset to VRT within image file.  We just read the WOF
+    # Tables Header, so the current file offset is at the first VRT.  The VRTs
+    # are stored in a three-dimensional array within the file, where the first
+    # dimension is vcs_ceff_index, and follows with dimensions: vdd_ceff_index,
+    # io_power_index, amb_cond_index.
+    my $vrt_offset =
+        $self->access($IMF_ATTR_binary_file_io)->get_pos() +
+        ( $vcs_ceff_index * $vdd_ceff_size * $io_power_size * $amb_cond_size +
+            $vdd_ceff_index * $io_power_size * $amb_cond_size +
+            $io_power_index * $amb_cond_size +
+            $amb_cond_index ) *
+        $vrt_block_size;
 
     # to get vre offset, first skip 4 bytes for VRT Header. Then skip the bytes of
     # the number of vre's.
@@ -3002,6 +3162,115 @@ sub _get_vre_offset
     return $vre_offset;
 }
 
+#
+# before calling this function, the file pointer must be set using
+# set_pos() function.
+#
+sub _print_vrt_header_by_index
+{
+    my ( $self, $section_number, $vrt_index ) = @_;
+    Log::log_print $p_log_lvl, "_print_vrt_header_by_index():\n";
+
+    # Create VRT header
+    my $vrt_header = VRTHeader->new();
+
+    my $vrt_offset = $self->_get_vrt_offset_by_index( $section_number, $vrt_index );
+
+    print "VRT index: $vrt_index, ";
+    print "VRT offset: $vrt_offset\n";
+
+    # set file pointer to the vrt block again.
+    $self->access($IMF_ATTR_binary_file_io)->set_pos($vrt_offset);
+    my $uint8_val;
+    print "VRT Block: ";
+    for ( my $i = 0; $i < 16; ++$i )
+    {
+        $uint8_val = $self->access($IMF_ATTR_binary_file_io)->read_uint8();
+        printf( "%02x", $uint8_val );
+        if ( $i != ( 16 - 1 ) )
+        {
+            print " ";
+        }
+        else
+        {
+            print "\n";
+        }
+    }
+
+    # set file pointer to the vrt block again.
+    $self->access($IMF_ATTR_binary_file_io)->set_pos($vrt_offset);
+
+    # print header from image file
+    $vrt_header->print( $self->access($IMF_ATTR_binary_file_io) );
+
+}
+
+sub _get_vrt_offset_by_index
+{
+    my ( $self, $section_number, $vrt_index ) = @_;
+
+    Log::log_print $p_log_lvl, "_get_vrt_offset_by_index():\n";
+    Log::log_print $p_log_lvl, "  section_number: $section_number.\n";
+    Log::log_print $p_log_lvl, "  vrt_index: $vrt_index.\n";
+
+    # validate $section_number
+    if ( !defined($section_number) )
+    {
+        die "Error: Option section_number $section_number is note defined.\n";
+    }
+    else
+    {
+        if (   ( $section_number < 0 )
+            or ( $section_number >= $self->access($IMF_ATTR_section_table)->entry_count() ) )
+        {
+            die "Error: Option section_number $section_number is invalid.\n";
+        }
+    }
+
+    # Get section table entry
+    my $entry = $self->access($IMF_ATTR_section_table)->get_entry($section_number);
+    if ( !defined($entry) )
+    {
+        die "Error: No Section Table Entry for section number:  $section_number.\n";
+    }
+
+    # Set image file offset to the start of the section table
+    $self->access($IMF_ATTR_binary_file_io)->set_pos( $entry->access($STE_ATTR_section_offset) );
+
+    # Read the WOF Tables Header at the start of the section
+    my $wof_tables_header = $self->_read_wof_tables_header();
+
+    # Get sizes from WOF Header fields used to calculate offset
+    my $vrt_block_size = $wof_tables_header->access($WOF_ATTR_vrt_block_size);
+    my $vcs_ceff_size  = $wof_tables_header->access($WOF_ATTR_vcs_size);
+    my $vdd_ceff_size  = $wof_tables_header->access($WOF_ATTR_vdd_size);
+    my $io_power_size  = $wof_tables_header->access($WOF_ATTR_io_power_size);
+    my $amb_cond_size  = $wof_tables_header->access($WOF_ATTR_amb_cond_size);
+
+    my $max_vrt_index = ( $vcs_ceff_size * $vdd_ceff_size * $io_power_size * $amb_cond_size ) - 1;
+
+    if ( defined($vrt_index) )
+    {
+        if (   ( $vrt_index < 0 )
+            or ( $vrt_index > $max_vrt_index ) )
+        {
+            die "Error: Option vrt_index $vrt_index is invalid.\n";
+        }
+    }
+
+    # Calculate absolute offset to VRT within image file.  We have just read the WOF
+    # Tables Header, so the current file offset is at the first VRT.  The VRTs
+    # are stored in a three-dimensional array within the file, where the first
+    # dimension is vcs_ceff_index, and follows with dimensions: vdd_ceff_index,
+    # io_power_index, amb_cond_index.
+    my $vrt_offset = $self->access($IMF_ATTR_binary_file_io)->get_pos() + $vrt_index * $vrt_block_size;
+    return $vrt_offset;
+}
+
+#
+# before calling this function, the file pointer must be set using
+# set_pos() function.
+#
 sub _read_vrt_header
 {
     my ($self) = @_;
@@ -3011,7 +3280,7 @@ sub _read_vrt_header
     my $vrt_header = VRTHeader->new();
 
     # Read header from image file
-    $vrt_header->read( $self->access($IMF_ATTR_file) );
+    $vrt_header->read( $self->access($IMF_ATTR_binary_file_io) );
     return $vrt_header;
 }
 
@@ -3025,14 +3294,6 @@ sub _write_vrt_header
     my $vdd_ceff_index = $vrt->access($VRT_ATTR_vdd_ceff_index);
     my $io_power_index = $vrt->access($VRT_ATTR_io_power_index);
     my $amb_cond_index = $vrt->access($VRT_ATTR_amb_cond_index);
-    my $vcs_percent    = ( $wof_tables_header->access($WOF_ATTR_vcs_start) / 100 +
-            $wof_tables_header->access($WOF_ATTR_vcs_step) / 100 * $vcs_ceff_index );
-    my $vdd_percent = ( $wof_tables_header->access($WOF_ATTR_vdd_start) / 100 +
-            $wof_tables_header->access($WOF_ATTR_vdd_step) / 100 * $vdd_ceff_index );
-    my $v1 = $wof_tables_header->access($WOF_ATTR_vcs_start);
-    my $v2 = $wof_tables_header->access($WOF_ATTR_vcs_step);
-    my $v3 = $wof_tables_header->access($WOF_ATTR_vdd_start);
-    my $v4 = $wof_tables_header->access($WOF_ATTR_vdd_step);
 
     # Create VRT header
     my $vrt_header = VRTHeader->new();
@@ -3042,13 +3303,13 @@ sub _write_vrt_header
     # fields that contain percentages are expressed as integer percents.  For
     # example, 25% is 25.  Thus, we need to multiply the CSV percentage values by
     # 100 to convert to integer percents.
-    $vrt_header->access( $VRTH_ATTR_io_id,       $vrt->access($VRT_ATTR_io_power_index) );
-    $vrt_header->access( $VRTH_ATTR_ac_id,       $vrt->access($VRT_ATTR_amb_cond_index) );
-    $vrt_header->access( $VRTH_ATTR_vcs_percent, $vcs_percent );
-    $vrt_header->access( $VRTH_ATTR_vdd_percent, $vdd_percent );
+    $vrt_header->access( $VRTH_ATTR_io_index,  $vrt->access($VRT_ATTR_io_power_index) );
+    $vrt_header->access( $VRTH_ATTR_ac_index,  $vrt->access($VRT_ATTR_amb_cond_index) );
+    $vrt_header->access( $VRTH_ATTR_vcs_index, $vrt->access($VRT_ATTR_vcs_ceff_index) );
+    $vrt_header->access( $VRTH_ATTR_vdd_index, $vrt->access($VRT_ATTR_vdd_ceff_index) );
 
     # Write header to image file
-    $vrt_header->write( $self->access($IMF_ATTR_file) );
+    $vrt_header->write( $self->access($IMF_ATTR_binary_file_io) );
 }
 
 sub _get_padding_count
@@ -3060,7 +3321,7 @@ sub _get_padding_count
     # If a file offset was not specified, get the current file offset
     if ( !defined($file_offset) )
     {
-        $file_offset = $self->access($IMF_ATTR_file)->get_pos();
+        $file_offset = $self->access($IMF_ATTR_binary_file_io)->get_pos();
     }
 
     # Return the padding needed to reach the correct alignment boundary
@@ -3076,7 +3337,7 @@ sub _read_padding
     if ( $padding_byte_count > 0 )
     {
         # Skip forward past the padding bytes
-        $self->access($IMF_ATTR_file)->skip_bytes($padding_byte_count);
+        $self->access($IMF_ATTR_binary_file_io)->skip_bytes($padding_byte_count);
     }
 }
 
@@ -3088,7 +3349,7 @@ sub _write_padding
     if ( $padding_byte_count > 0 )
     {
         # Write 0x00 in the padding bytes
-        $self->access($IMF_ATTR_file)->fill_bytes( $padding_byte_count, 0x00 );
+        $self->access($IMF_ATTR_binary_file_io)->fill_bytes( $padding_byte_count, 0x00 );
     }
 }
 ################################################################################
@@ -3104,11 +3365,13 @@ our $p_log_lvl = $LOG_LVL_0;
 our $OPT_ATTR_create           = 'create';
 our $OPT_ATTR_list             = 'list';
 our $OPT_ATTR_view             = 'view';
+our $OPT_ATTR_squint           = 'squint';
 our $OPT_ATTR_extract          = 'extract';
 our $OPT_ATTR_help             = 'help';
 our $OPT_ATTR_debug            = 'debug';
 our $OPT_ATTR_table_set_id     = 'tsi';
 our $OPT_ATTR_section_number   = 'section_number';
+our $OPT_ATTR_vrt_index        = 'vrt_index';
 our $OPT_ATTR_vcs_ceff_index   = $G_ATTR_vcs_ceff_index;
 our $OPT_ATTR_vdd_ceff_index   = $G_ATTR_vdd_ceff_index;
 our $OPT_ATTR_io_power_index   = $G_ATTR_io_power_index;
@@ -3116,6 +3379,10 @@ our $OPT_ATTR_amb_cond_index   = $G_ATTR_amb_cond_index;
 our $OPT_ATTR_vratio_index     = $G_ATTR_vratio_index;
 our $OPT_ATTR_outrows          = 'outrows';
 our $OPT_ATTR_outcols          = 'outcols';
+our $OPT_ATTR_io_power_size    = 'io_power_size';
+our $OPT_ATTR_vcs_ceff_size    = 'vcs_ceff_size';
+our $OPT_ATTR_vdd_ceff_size    = 'vdd_ceff_size';
+our $OPT_ATTR_amb_cond_size    = 'am_cond_size';
 our $OPT_ATTR_freq_format      = 'freq_format';
 our $OPT_ATTR_csv_files        = 'csv_files';
 our $OPT_ATTR_output_file      = 'output_file';
@@ -3146,6 +3413,7 @@ our %OPT_DISP_AXIS_TYPE_MAP = (
 our $OPTIONS_ACTION_CREATE  = $OPT_ATTR_create;
 our $OPTIONS_ACTION_LIST    = $OPT_ATTR_list;
 our $OPTIONS_ACTION_VIEW    = $OPT_ATTR_view;
+our $OPTIONS_ACTION_SQUINT  = $OPT_ATTR_squint;
 our $OPTIONS_ACTION_EXTRACT = $OPT_ATTR_extract;
 our $OPTIONS_ACTION_HELP    = $OPT_ATTR_help;
 
@@ -3169,6 +3437,7 @@ sub new
         $OPT_ATTR_help           => undef,
         $OPT_ATTR_debug          => undef,
         $OPT_ATTR_section_number => undef,
+        $OPT_ATTR_vrt_index      => undef,
         $OPT_ATTR_table_set_id   => undef,
         $OPT_ATTR_vcs_ceff_index => undef,
         $OPT_ATTR_vdd_ceff_index => undef,
@@ -3178,6 +3447,10 @@ sub new
         $OPT_ATTR_vratio_index   => undef,
         $OPT_ATTR_outrows        => undef,
         $OPT_ATTR_outcols        => undef,
+        $OPT_ATTR_io_power_size  => undef,
+        $OPT_ATTR_vcs_ceff_size  => undef,
+        $OPT_ATTR_vdd_ceff_size  => undef,
+        $OPT_ATTR_amb_cond_size  => undef,
         $OPT_ATTR_csv_files      => [],
         $OPT_ATTR_output_file    => undef,
     };
@@ -3205,7 +3478,8 @@ sub action
 
     # Return the action that was specified (if any)
     my $action = undef;
-    foreach my $option ( $OPT_ATTR_create, $OPT_ATTR_list, $OPT_ATTR_view, $OPT_ATTR_extract, $OPT_ATTR_help )
+    foreach my $option ( $OPT_ATTR_create, $OPT_ATTR_list, $OPT_ATTR_view, $OPT_ATTR_squint, $OPT_ATTR_extract,
+        $OPT_ATTR_help )
     {
         if ( defined( $self->{$option} ) )
         {
@@ -3263,11 +3537,13 @@ sub parse
             $OPT_ATTR_create . '=s',
             $OPT_ATTR_list . '=s',
             $OPT_ATTR_view . '=s',
+            $OPT_ATTR_squint . '=s',
             $OPT_ATTR_extract . '=s',
             $OPT_ATTR_help,
             $OPT_ATTR_debug,
             $OPT_ATTR_table_set_id . '=s',
             $OPT_ATTR_section_number . '=i',
+            $OPT_ATTR_vrt_index . '=i',
             $OPT_ATTR_vcs_ceff_index . '=i',
             $OPT_ATTR_vdd_ceff_index . '=i',
             $OPT_ATTR_io_power_index . '=i',
@@ -3275,6 +3551,10 @@ sub parse
             $OPT_ATTR_vratio_index . '=i',
             $OPT_ATTR_outrows . '=s',
             $OPT_ATTR_outcols . '=s',
+            $OPT_ATTR_io_power_size . '=i',
+            $OPT_ATTR_vcs_ceff_size . '=i',
+            $OPT_ATTR_vdd_ceff_size . '=i',
+            $OPT_ATTR_amb_cond_size . '=i',
             $OPT_ATTR_freq_format . '=s'
         )
         )
@@ -3304,6 +3584,10 @@ sub parse
     elsif ( $action eq $OPT_ATTR_view )
     {
         $self->_verify_view_options();
+    }
+    elsif ( $action eq $OPT_ATTR_squint )
+    {
+        $self->_verify_squint_options();
     }
     elsif ( $action eq $OPT_ATTR_extract )
     {
@@ -3354,6 +3638,10 @@ sub print_usage
         . "                                If both outrows and outcols are not set,\n"
         . "                                default for outrows set to io and,\n"
         . "                                default for outcols set to vratio.\n"
+        . "  --io_power_size               IO Power Size.\n"
+        . "  --vcs_ceff_size               VCS Ceff Size.\n"
+        . "  --vdd_ceff_size               VDD Ceff Size.\n"
+        . "  --amb_cond_size               Amb Cond Size.\n"
         . "  --freq_format                 Frequency display format.  Specify 'mhz' for\n"
         . "                                megahertz format or 'system' for System VRT\n"
         . "                                format.  Default is 'mhz'.\n"
@@ -3378,11 +3666,12 @@ sub _verify_create_options
     }
     Log::log_print $p_log_lvl, "  ARGV: " . join( ", ", @ARGV ) . ".\n";
 
-    # Verify no invalid options were specified
+    # Verify no invalid options were specified.
+    # Options listed below are invalid for this action.
     foreach my $option (
         $OPT_ATTR_list,           $OPT_ATTR_view,           $OPT_ATTR_extract,        $OPT_ATTR_help,
         $OPT_ATTR_vcs_ceff_index, $OPT_ATTR_vdd_ceff_index, $OPT_ATTR_io_power_index, $OPT_ATTR_amb_cond_index,
-        $OPT_ATTR_freq_format,    $OPT_ATTR_section_number,
+        $OPT_ATTR_freq_format,    $OPT_ATTR_section_number, $OPT_ATTR_squint,         $OPT_ATTR_vrt_index,
         )
     {
         if ( defined( $self->{$option} ) )
@@ -3399,6 +3688,40 @@ sub _verify_create_options
             die "Error: --$option is required with --create.\n";
         }
     }
+
+    # If optional --io_power_size was not specified, set it to the default value
+    if ( !defined( $self->access($OPT_ATTR_io_power_size) ) )
+    {
+        $self->access( $OPT_ATTR_io_power_size, $G_DEF_IO_POWER_SIZE );
+    }
+
+    # If optional --vcs_ceff_size was not specified, set it to the default value
+    if ( !defined( $self->access($OPT_ATTR_vcs_ceff_size) ) )
+    {
+        $self->access( $OPT_ATTR_vcs_ceff_size, $G_DEF_VCS_CEFF_SIZE );
+    }
+
+    # If optional --vdd_ceff_size was not specified, set it to the default value
+    if ( !defined( $self->access($OPT_ATTR_vdd_ceff_size) ) )
+    {
+        $self->access( $OPT_ATTR_vdd_ceff_size, $G_DEF_VDD_CEFF_SIZE );
+    }
+
+    # If optional --am_cond_size was not specified, set it to the default value
+    if ( !defined( $self->access($OPT_ATTR_amb_cond_size) ) )
+    {
+        $self->access( $OPT_ATTR_amb_cond_size, $G_DEF_AMB_COND_SIZE );
+    }
+
+    $g_io_power_size = $self->access($OPT_ATTR_io_power_size);
+    $g_vcs_ceff_size = $self->access($OPT_ATTR_vcs_ceff_size);
+    $g_vdd_ceff_size = $self->access($OPT_ATTR_vdd_ceff_size);
+    $g_amb_cond_size = $self->access($OPT_ATTR_amb_cond_size);
+
+    Log::log_print $p_log_lvl, "\$OPT_ATTR_amb_cond_size: $OPT_ATTR_amb_cond_size\n";
+    Log::log_print $p_log_lvl, "\$OPT_ATTR_vcs_ceff_size: $OPT_ATTR_vcs_ceff_size\n";
+    Log::log_print $p_log_lvl, "\$OPT_ATTR_vdd_ceff_size: $OPT_ATTR_vdd_ceff_size\n";
+    Log::log_print $p_log_lvl, "\$OPT_ATTR_amb_cond_size: $OPT_ATTR_amb_cond_size\n";
 
     # Treat any remaining (unparsed) command line arguments as CSV files or
     # CSV directory that contains the CSV files.
@@ -3451,11 +3774,12 @@ sub _verify_list_options
     my ($self) = @_;
     Log::log_print $p_log_lvl, "_verify_list_options():\n";
 
-    # Verify no invalid options were specified
+    # Verify no invalid options were specified.
+    # Options listed below are invalid for this action.
     foreach my $option (
         $OPT_ATTR_create,         $OPT_ATTR_view,           $OPT_ATTR_extract,        $OPT_ATTR_help,
         $OPT_ATTR_table_set_id,   $OPT_ATTR_vcs_ceff_index, $OPT_ATTR_vdd_ceff_index, $OPT_ATTR_io_power_index,
-        $OPT_ATTR_amb_cond_index, $OPT_ATTR_freq_format,
+        $OPT_ATTR_amb_cond_index, $OPT_ATTR_freq_format,    $OPT_ATTR_squint,         $OPT_ATTR_vrt_index,
         )
     {
         if ( defined( $self->{$option} ) )
@@ -3476,8 +3800,10 @@ sub _verify_view_options
     my ($self) = @_;
     Log::log_print $p_log_lvl, "_verify_view_options():\n";
 
+    # Options listed below are invalid for this action.
     # Verify no invalid options were specified
-    foreach my $option ( $OPT_ATTR_create, $OPT_ATTR_list, $OPT_ATTR_extract, $OPT_ATTR_help )
+    foreach my $option ( $OPT_ATTR_create, $OPT_ATTR_list, $OPT_ATTR_extract,
+        $OPT_ATTR_help, $OPT_ATTR_squint, $OPT_ATTR_vrt_index, )
     {
         if ( defined( $self->{$option} ) )
         {
@@ -3493,6 +3819,7 @@ sub _verify_view_options
     {
         die "Error: --outraw or outcol were specified incorrectly." . " Please specify both or ignore both.\n";
     }
+
     if (    !defined( $self->{$OPT_ATTR_outrows} )
         and !defined( $self->{$OPT_ATTR_outcols} ) )
     {
@@ -3533,54 +3860,45 @@ sub _verify_view_options
     # Verify --vcs_ceff_index value is valid
     if ( $self->access($OPT_ATTR_vcs_ceff_index) != -1 )
     {
-        if (   ( $self->access($OPT_ATTR_vcs_ceff_index) < 0 )
-            or ( $self->access($OPT_ATTR_vcs_ceff_index) >= $CSV_VCS_CEFF_INDEX_COUNT ) )
+        if ( $self->access($OPT_ATTR_vcs_ceff_index) < 0 )
         {
-            die "Error: Invalid --vcs_ceff_index value: Must be between 0 and "
-                . ( $CSV_VCS_CEFF_INDEX_COUNT - 1 ) . ".\n";
+            die "Error: Invalid --vcs_ceff_index value: Must equal or larger than 0.\n";
         }
     }
 
     # Verify --vdd_ceff_index value is valid
     if ( $self->access($OPT_ATTR_vdd_ceff_index) != -1 )
     {
-        if (   ( $self->access($OPT_ATTR_vdd_ceff_index) < 0 )
-            or ( $self->access($OPT_ATTR_vdd_ceff_index) >= $CSV_VDD_CEFF_INDEX_COUNT ) )
+        if ( $self->access($OPT_ATTR_vdd_ceff_index) < 0 )
         {
-            die "Error: Invalid --vdd_ceff_index value: Must be between 0 and "
-                . ( $CSV_VDD_CEFF_INDEX_COUNT - 1 ) . ".\n";
+            die "Error: Invalid --vdd_ceff_index value: Must equal or larger than 0.\n";
         }
     }
 
     # Verify --io_power_index value is valid
     if ( $self->access($OPT_ATTR_io_power_index) != -1 )
     {
-        if (   ( $self->access($OPT_ATTR_io_power_index) < 0 )
-            or ( $self->access($OPT_ATTR_io_power_index) >= $CSV_IO_POWER_INDEX_COUNT ) )
+        if ( $self->access($OPT_ATTR_io_power_index) < 0 )
         {
-            die "Error: Invalid --io_power_index value: Must be between 0 and "
-                . ( $CSV_IO_POWER_INDEX_COUNT - 1 ) . ".\n";
+            die "Error: Invalid --io_power_index value: Must equal or larger than 0.\n";
         }
     }
 
     # Verify -- amb_cond_index value is valid
     if ( $self->access($OPT_ATTR_amb_cond_index) != -1 )
     {
-        if (   ( $self->access($OPT_ATTR_amb_cond_index) < 0 )
-            or ( $self->access($OPT_ATTR_amb_cond_index) >= $CSV_AMB_COND_INDEX_COUNT ) )
+        if ( $self->access($OPT_ATTR_amb_cond_index) < 0 )
         {
-            die "Error: Invalid --amb_cond_index value: Must be between 0 and "
-                . ( $CSV_AMB_COND_INDEX_COUNT - 1 ) . ".\n";
+            die "Error: Invalid --amb_cond_index value: Must equal or larger than 0.\n";
         }
     }
 
     # Verify -- vratio_index value is valid
     if ( $self->access($OPT_ATTR_vratio_index) != -1 )
     {
-        if (   ( $self->access($OPT_ATTR_vratio_index) < 0 )
-            or ( $self->access($OPT_ATTR_vratio_index) >= $CSV_VRATIO_INDEX_COUNT ) )
+        if ( $self->access($OPT_ATTR_vratio_index) < 0 )
         {
-            die "Error: Invalid --vratio_index value: Must be between 0 and " . ( $CSV_VRATIO_INDEX_COUNT - 1 ) . ".\n";
+            die "Error: Invalid --vratio_index value: Must equal or larger than 0.\n";
         }
     }
 
@@ -3618,16 +3936,49 @@ sub _verify_view_options
     }
 }
 
+sub _verify_squint_options
+{
+    my ($self) = @_;
+    Log::log_print $p_log_lvl, "_verify_list_options():\n";
+
+    # Verify no invalid options were specified.
+    # Options listed below are invalid for this action.
+    foreach my $option (
+        $OPT_ATTR_create,         $OPT_ATTR_view,           $OPT_ATTR_extract,        $OPT_ATTR_help,
+        $OPT_ATTR_table_set_id,   $OPT_ATTR_vcs_ceff_index, $OPT_ATTR_vdd_ceff_index, $OPT_ATTR_io_power_index,
+        $OPT_ATTR_amb_cond_index, $OPT_ATTR_freq_format,    $OPT_ATTR_list,
+        )
+    {
+        if ( defined( $self->{$option} ) )
+        {
+            die "Error: --$option is not valid with --list.\n";
+        }
+    }
+
+    # Verify all required options were specified
+    if ( !defined( $self->{$OPT_ATTR_section_number} ) )
+    {
+        die "Error: --section_number is not specified..\n";
+    }
+
+    # Verify all required options were specified
+    if ( !defined( $self->{$OPT_ATTR_vrt_index} ) )
+    {
+        $OPT_ATTR_vrt_index = undef;
+    }
+}
+
 sub _verify_extract_options
 {
     my ($self) = @_;
     Log::log_print $p_log_lvl, "_verify_extract_options():\n";
 
-    # Verify no invalid options were specified
+    # Verify no invalid options were specified.
+    # Options listed below are invalid for this action.
     foreach my $option (
-        $OPT_ATTR_create,         $OPT_ATTR_list,           $OPT_ATTR_view,
-        $OPT_ATTR_help,           $OPT_ATTR_vcs_ceff_index, $OPT_ATTR_vdd_ceff_index,
-        $OPT_ATTR_io_power_index, $OPT_ATTR_amb_cond_index, $OPT_ATTR_freq_format
+        $OPT_ATTR_create,         $OPT_ATTR_list,           $OPT_ATTR_view,           $OPT_ATTR_help,
+        $OPT_ATTR_vcs_ceff_index, $OPT_ATTR_vdd_ceff_index, $OPT_ATTR_io_power_index, $OPT_ATTR_amb_cond_index,
+        $OPT_ATTR_freq_format,    $OPT_ATTR_squint,         $OPT_ATTR_vrt_index,
         )
     {
         if ( defined( $self->{$option} ) )
@@ -3661,12 +4012,14 @@ sub _verify_help_options
     my ($self) = @_;
     Log::log_print $p_log_lvl, "_verify_help_options():\n";
 
-    # Verify no invalid options were specified
+    # Verify no invalid options were specified.
+    # Options listed below are invalid for this action.
     foreach my $option (
         $OPT_ATTR_create,         $OPT_ATTR_list,           $OPT_ATTR_view,           $OPT_ATTR_extract,
         $OPT_ATTR_section_number, $OPT_ATTR_table_set_id,   $OPT_ATTR_vcs_ceff_index, $OPT_ATTR_vdd_ceff_index,
         $OPT_ATTR_io_power_index, $OPT_ATTR_amb_cond_index, $OPT_ATTR_outrows,        $OPT_ATTR_outcols,
-        $OPT_ATTR_freq_format,
+        $OPT_ATTR_freq_format,    $OPT_ATTR_squint,         $OPT_ATTR_vrt_index,      $OPT_ATTR_io_power_size,
+        $OPT_ATTR_vcs_ceff_size,  $OPT_ATTR_vdd_ceff_size,  $OPT_ATTR_amb_cond_size,
         )
     {
         if ( defined( $self->{$option} ) )
@@ -3754,6 +4107,21 @@ sub view_vrt_in_image_file
     );
 }
 
+sub squint_image_file_contents
+{
+    my ($options) = @_;
+
+    # Get relevant command line options
+    my $image_file_name = $options->image_file();
+
+    # List contents of specified image file
+    my $image_file     = ImageFile->new($image_file_name);
+    my $section_number = $options->access($OPT_ATTR_section_number);
+    my $vrt_index      = $options->access($OPT_ATTR_vrt_index);
+
+    $image_file->squint( $section_number, $vrt_index );
+}
+
 sub extract_from_image_file
 {
     my ($options) = @_;
@@ -3809,6 +4177,11 @@ elsif ( $action eq $OPTIONS_ACTION_VIEW )
 {
     Log::log_print $p_log_lvl, "Calling view_vrt_in_image_file().\n";
     view_vrt_in_image_file($options);
+}
+elsif ( $action eq $OPTIONS_ACTION_SQUINT )
+{
+    Log::log_print $p_log_lvl, "Calling squint_image_file_contents().\n";
+    squint_image_file_contents($options);
 }
 elsif ( $action eq $OPTIONS_ACTION_EXTRACT )
 {
