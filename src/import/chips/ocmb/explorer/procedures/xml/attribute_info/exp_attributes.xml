@@ -178,6 +178,7 @@
         </description>
         <valueType>uint16</valueType>
         <initToZero></initToZero>
+        <array>2</array>
         <writeable/>
         <mssAccessorName>exp_rcd_dic</mssAccessorName>
     </attribute>
@@ -190,6 +191,7 @@
         </description>
         <valueType>uint16</valueType>
         <initToZero></initToZero>
+        <array>2</array>
         <writeable/>
         <mssAccessorName>exp_rcd_voltage_ctrl</mssAccessorName>
     </attribute>
@@ -217,6 +219,7 @@
         </description>
         <initToZero></initToZero>
         <valueType>uint16</valueType>
+        <array>2</array>
         <writeable/>
         <mssAccessorName>exp_rcd_slew_rate</mssAccessorName>
     </attribute>

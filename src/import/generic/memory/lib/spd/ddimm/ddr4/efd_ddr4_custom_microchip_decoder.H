@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -1139,6 +1139,95 @@ class decoder<mss::spd::device_type::DDR4, DDR4_CUSTOM_MICROCHIP, R > : public b
             FAPI_TRY(( reader<fields_t::PMIC1_SWD_OFFSET_DIRECTION, R>(iv_target, iv_data, o_output)) );
 
         fapi_try_exit:
+            return fapi2::current_err;
+        }
+
+        ///
+        /// @brief Decodes RCD driver impedance control -> RCD_DIC
+        /// @param[out] o_output encoding from SPD
+        /// @return FAPI2_RC_SUCCESS if okay
+        ///
+        virtual fapi2::ReturnCode rcd_dic(uint16_t& o_output) const override
+        {
+            uint8_t l_byte = 0;
+
+            // In the EFD, byte0 is the MSB and byte1 if the LSB
+            FAPI_TRY(( reader<fields_t::RCD_DIC_0, R>(iv_target, iv_data, l_byte)) );
+            o_output = l_byte << BITS_PER_BYTE;
+            FAPI_TRY(( reader<fields_t::RCD_DIC_1, R>(iv_target, iv_data, l_byte)) );
+            o_output |= l_byte;
+            return fapi2::FAPI2_RC_SUCCESS;
+
+        fapi_try_exit:
+            o_output = 0;
+            return fapi2::current_err;
+        }
+
+        ///
+        /// @brief Decodes RCD voltage control -> EXP_RCD_VOLTAGE_CTRL
+        /// @param[out] o_output encoding from SPD
+        /// @return FAPI2_RC_SUCCESS if okay
+        ///
+        virtual fapi2::ReturnCode rcd_voltage_ctrl(uint16_t& o_output) const override
+        {
+            uint8_t l_byte = 0;
+
+            // In the EFD, byte0 is the MSB and byte1 if the LSB
+            FAPI_TRY(( reader<fields_t::RCD_VOLTAGE_CTRL_0, R>(iv_target, iv_data, l_byte)) );
+            o_output = l_byte << BITS_PER_BYTE;
+            FAPI_TRY(( reader<fields_t::RCD_VOLTAGE_CTRL_1, R>(iv_target, iv_data, l_byte)) );
+            o_output |= l_byte;
+            return fapi2::FAPI2_RC_SUCCESS;
+
+        fapi_try_exit:
+            o_output = 0;
+            return fapi2::current_err;
+        }
+
+        ///
+        /// @brief Decodes RCD Input Bus Termination -> DIMM_DDR4_F0RC7X
+        /// @param[out] o_output encoding from SPD
+        /// @return FAPI2_RC_SUCCESS if okay
+        ///
+        virtual fapi2::ReturnCode dimm_ddr4_f0rc7x(uint8_t& o_output) const override
+        {
+            FAPI_TRY(( reader<fields_t::RCD_IBT, R>(iv_target, iv_data, o_output)) );
+
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
+
+        ///
+        /// @brief Decodes RCD data buffer driver impedance control -> DIMM_DDR4_F1RC00
+        /// @param[out] o_output encoding from SPD
+        /// @return FAPI2_RC_SUCCESS if okay
+        ///
+        virtual fapi2::ReturnCode dimm_ddr4_f1rc00(uint8_t& o_output) const override
+        {
+            FAPI_TRY(( reader<fields_t::RCD_DB_DIC, R>(iv_target, iv_data, o_output)) );
+
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
+
+        ///
+        /// @brief Decodes RCD slew rate control -> RCD_SLEW_RATE
+        /// @param[out] o_output encoding from SPD
+        /// @return FAPI2_RC_SUCCESS if okay
+        ///
+        virtual fapi2::ReturnCode rcd_slew_rate(uint16_t& o_output) const override
+        {
+            uint8_t l_byte = 0;
+
+            // In the EFD, byte0 is the MSB and byte1 if the LSB
+            FAPI_TRY(( reader<fields_t::RCD_SLEW_RATE_CTRL_0, R>(iv_target, iv_data, l_byte)) );
+            o_output = l_byte << BITS_PER_BYTE;
+            FAPI_TRY(( reader<fields_t::RCD_SLEW_RATE_CTRL_1, R>(iv_target, iv_data, l_byte)) );
+            o_output |= l_byte;
+            return fapi2::FAPI2_RC_SUCCESS;
+
+        fapi_try_exit:
+            o_output = 0;
             return fapi2::current_err;
         }
 

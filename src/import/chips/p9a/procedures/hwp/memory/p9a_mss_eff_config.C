@@ -78,6 +78,7 @@ fapi2::ReturnCode p9a_mss_eff_config( const fapi2::Target<fapi2::TARGET_TYPE_MEM
 
         for (const auto& l_rank : l_ranks)
         {
+            uint8_t l_spd_rev = 0;
             std::shared_ptr<mss::efd::base_decoder> l_efd_data;
 
             // Get EFD size
@@ -93,7 +94,8 @@ fapi2::ReturnCode p9a_mss_eff_config( const fapi2::Target<fapi2::TARGET_TYPE_MEM
             FAPI_TRY( fapi2::getVPD(l_ocmb, l_vpd_info, l_vpd_raw.data()) );
 
             // Instantiate EFD decoder
-            FAPI_TRY( mss::efd::factory(l_ocmb, l_vpd_raw, l_vpd_info.iv_rank, l_efd_data) );
+            FAPI_TRY( mss::attr::get_spd_revision(i_target, l_spd_rev) );
+            FAPI_TRY( mss::efd::factory(l_ocmb, l_spd_rev, l_vpd_raw, l_vpd_info.iv_rank, l_efd_data) );
 
             // Set up SI ATTRS
             FAPI_TRY( (mss::gen::attr_engine<mss::proc_type::AXONE, mss::attr_si_engine_fields>::set(l_efd_data)) );

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -180,6 +180,126 @@ fapi_try_exit:
 }
 
 ///
+/// @brief Processes the RCD driver impedance control
+/// @param[in] i_target the target on which to operate
+/// @param[in] i_efd_data the EFD data to process
+/// @return fapi2::FAPI2_RC_SUCCESS iff function completes successfully
+///
+fapi2::ReturnCode rcd_dic(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+                          const std::shared_ptr<mss::efd::base_decoder>& i_efd_data)
+{
+    // Get the data
+    uint16_t l_rcd_dic = 0;
+
+    FAPI_TRY(mss::attr::get_exp_rcd_dic(i_target, l_rcd_dic));
+
+    // Update the values
+    FAPI_TRY(i_efd_data->rcd_dic(l_rcd_dic));
+
+    // Set the attribute
+    FAPI_TRY(mss::attr::set_exp_rcd_dic(i_target, l_rcd_dic));
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Processes the RCD voltage control
+/// @param[in] i_target the target on which to operate
+/// @param[in] i_efd_data the EFD data to process
+/// @return fapi2::FAPI2_RC_SUCCESS iff function completes successfully
+///
+fapi2::ReturnCode rcd_voltage_ctrl(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+                                   const std::shared_ptr<mss::efd::base_decoder>& i_efd_data)
+{
+    // Get the data
+    uint16_t l_rcd_voltage_ctrl = 0;
+
+    FAPI_TRY(mss::attr::get_exp_rcd_voltage_ctrl(i_target, l_rcd_voltage_ctrl));
+
+    // Update the values
+    FAPI_TRY(i_efd_data->rcd_voltage_ctrl(l_rcd_voltage_ctrl));
+
+    // Set the attribute
+    FAPI_TRY(mss::attr::set_exp_rcd_voltage_ctrl(i_target, l_rcd_voltage_ctrl));
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Processes the RCD Input Bus Termination (F0RC7x)
+/// @param[in] i_target the target on which to operate
+/// @param[in] i_efd_data the EFD data to process
+/// @return fapi2::FAPI2_RC_SUCCESS iff function completes successfully
+///
+fapi2::ReturnCode dimm_ddr4_f0rc7x(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+                                   const std::shared_ptr<mss::efd::base_decoder>& i_efd_data)
+{
+    // Get the data
+    uint8_t l_f0rc7x = 0;
+
+    FAPI_TRY(mss::attr::get_dimm_ddr4_f0rc7x(i_target, l_f0rc7x));
+
+    // Update the values
+    FAPI_TRY(i_efd_data->dimm_ddr4_f0rc7x(l_f0rc7x));
+
+    // Set the attribute
+    FAPI_TRY(mss::attr::set_dimm_ddr4_f0rc7x(i_target, l_f0rc7x));
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Processes the RCD data buffer driver impedance control (F1RC00)
+/// @param[in] i_target the target on which to operate
+/// @param[in] i_efd_data the EFD data to process
+/// @return fapi2::FAPI2_RC_SUCCESS iff function completes successfully
+///
+fapi2::ReturnCode dimm_ddr4_f1rc00(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+                                   const std::shared_ptr<mss::efd::base_decoder>& i_efd_data)
+{
+    // Get the data
+    uint8_t l_f1rc00 = 0;
+
+    FAPI_TRY(mss::attr::get_dimm_ddr4_f1rc00(i_target, l_f1rc00));
+
+    // Update the values
+    FAPI_TRY(i_efd_data->dimm_ddr4_f1rc00(l_f1rc00));
+
+    // Set the attribute
+    FAPI_TRY(mss::attr::set_dimm_ddr4_f1rc00(i_target, l_f1rc00));
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Processes the RCD slew rate control
+/// @param[in] i_target the target on which to operate
+/// @param[in] i_efd_data the EFD data to process
+/// @return fapi2::FAPI2_RC_SUCCESS iff function completes successfully
+///
+fapi2::ReturnCode rcd_slew_rate(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+                                const std::shared_ptr<mss::efd::base_decoder>& i_efd_data)
+{
+    // Get the data
+    uint16_t l_rcd_slew_rate = 0;
+
+    FAPI_TRY(mss::attr::get_exp_rcd_slew_rate(i_target, l_rcd_slew_rate));
+
+    // Update the values
+    FAPI_TRY(i_efd_data->rcd_slew_rate(l_rcd_slew_rate));
+
+    // Set the attribute
+    FAPI_TRY(mss::attr::set_exp_rcd_slew_rate(i_target, l_rcd_slew_rate));
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
 /// @brief Processes the CS command latency
 /// @param[in] i_target the target on which to operate
 /// @param[in] i_efd_data the EFD data to process
@@ -261,6 +381,11 @@ fapi2::ReturnCode process(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target
 {
     FAPI_TRY(init_vref_dq(i_target, i_efd_data));
     FAPI_TRY(init_phy_vref(i_target, i_efd_data));
+    FAPI_TRY(rcd_dic(i_target, i_efd_data));
+    FAPI_TRY(rcd_voltage_ctrl(i_target, i_efd_data));
+    FAPI_TRY(dimm_ddr4_f0rc7x(i_target, i_efd_data));
+    FAPI_TRY(dimm_ddr4_f1rc00(i_target, i_efd_data));
+    FAPI_TRY(rcd_slew_rate(i_target, i_efd_data));
     FAPI_TRY(cs_cmd_latency(i_target, i_efd_data));
     FAPI_TRY(ca_parity_latency(i_target, i_efd_data));
     FAPI_TRY(dfimrl_ddrclk(i_target, i_efd_data));

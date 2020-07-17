@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -1654,6 +1654,321 @@ class readerTraits
 
         static constexpr size_t COMPARISON_VAL = 0x01;
         static constexpr const char* FIELD_STR = "PMIC1 SWD Offset Direction";
+
+        template <typename T>
+        using COMPARISON_OP = std::less_equal<T>;
+};
+
+///
+/// @class readerTraits
+/// @brief trait structure to hold static SPD information
+/// @note RCD_DIC_0 field specialization
+/// @note rev 0.3 specialization
+///
+template< >
+class readerTraits
+    < fields< mss::spd::device_type::DDR4, mss::efd::id::DDR4_CUSTOM_MICROCHIP>::RCD_DIC_0, mss::spd::rev::V0_3 >
+{
+    public:
+
+        static constexpr size_t COMPARISON_VAL = 0x00;
+        static constexpr const char* FIELD_STR = "RCD driver impedance control Byte0";
+
+        template <typename T>
+        using COMPARISON_OP = std::equal_to<T>;
+};
+
+///
+/// @class readerTraits
+/// @brief trait structure to hold static SPD information
+/// @tparam R the revision of the SPD field
+/// @note RCD_DIC_0 field specialization
+/// @note valid for rev >= 0.4
+///
+template< mss::spd::rev R >
+class readerTraits
+    < fields< mss::spd::device_type::DDR4, mss::efd::id::DDR4_CUSTOM_MICROCHIP>::RCD_DIC_0, R >
+{
+    public:
+
+        static constexpr size_t COMPARISON_VAL = 0xFF;
+        static constexpr const char* FIELD_STR = "RCD driver impedance control Byte0";
+
+        template <typename T>
+        using COMPARISON_OP = std::less_equal<T>;
+};
+
+///
+/// @class readerTraits
+/// @brief trait structure to hold static SPD information
+/// @note RCD_DIC_1 field specialization
+/// @note rev 0.3 specialization
+///
+template< >
+class readerTraits
+    < fields< mss::spd::device_type::DDR4, mss::efd::id::DDR4_CUSTOM_MICROCHIP>::RCD_DIC_1, mss::spd::rev::V0_3 >
+{
+    public:
+
+        static constexpr size_t COMPARISON_VAL = 0x00;
+        static constexpr const char* FIELD_STR = "RCD driver impedance control Byte1";
+
+        template <typename T>
+        using COMPARISON_OP = std::equal_to<T>;
+};
+
+///
+/// @class readerTraits
+/// @brief trait structure to hold static SPD information
+/// @tparam R the revision of the SPD field
+/// @note RCD_DIC_1 field specialization
+/// @note valid for rev >= 0.4
+///
+template< mss::spd::rev R >
+class readerTraits
+    < fields< mss::spd::device_type::DDR4, mss::efd::id::DDR4_CUSTOM_MICROCHIP>::RCD_DIC_1, R >
+{
+    public:
+
+        // Bits 7-4 in this byte are reserved
+        static constexpr size_t COMPARISON_VAL = 0x0F;
+        static constexpr const char* FIELD_STR = "RCD driver impedance control Byte1";
+
+        template <typename T>
+        using COMPARISON_OP = std::less_equal<T>;
+};
+
+///
+/// @class readerTraits
+/// @brief trait structure to hold static SPD information
+/// @note RCD_VOLTAGE_CTRL_0 field specialization
+/// @note rev 0.3 specialization
+///
+template< >
+class readerTraits
+    < fields< mss::spd::device_type::DDR4, mss::efd::id::DDR4_CUSTOM_MICROCHIP>::RCD_VOLTAGE_CTRL_0, mss::spd::rev::V0_3 >
+{
+    public:
+
+        static constexpr size_t COMPARISON_VAL = 0x00;
+        static constexpr const char* FIELD_STR = "RCD voltage control Byte0";
+
+        template <typename T>
+        using COMPARISON_OP = std::equal_to<T>;
+};
+
+///
+/// @class readerTraits
+/// @brief trait structure to hold static SPD information
+/// @tparam R the revision of the SPD field
+/// @note RCD_VOLTAGE_CTRL_0 field specialization
+/// @note valid for rev >= 0.4
+///
+template< mss::spd::rev R >
+class readerTraits
+    < fields< mss::spd::device_type::DDR4, mss::efd::id::DDR4_CUSTOM_MICROCHIP>::RCD_VOLTAGE_CTRL_0, R >
+{
+    public:
+
+        // Bits 7-4 in this byte are reserved
+        static constexpr size_t COMPARISON_VAL = 0x0F;
+        static constexpr const char* FIELD_STR = "RCD voltage control Byte0";
+
+        template <typename T>
+        using COMPARISON_OP = std::less_equal<T>;
+};
+
+///
+/// @class readerTraits
+/// @brief trait structure to hold static SPD information
+/// @note RCD_VOLTAGE_CTRL_1 field specialization
+/// @note rev 0.3 specialization
+///
+template< >
+class readerTraits
+    < fields< mss::spd::device_type::DDR4, mss::efd::id::DDR4_CUSTOM_MICROCHIP>::RCD_VOLTAGE_CTRL_1, mss::spd::rev::V0_3 >
+{
+    public:
+
+        static constexpr size_t COMPARISON_VAL = 0x00;
+        static constexpr const char* FIELD_STR = "RCD voltage control Byte1";
+
+        template <typename T>
+        using COMPARISON_OP = std::equal_to<T>;
+};
+
+///
+/// @class readerTraits
+/// @brief trait structure to hold static SPD information
+/// @tparam R the revision of the SPD field
+/// @note RCD_VOLTAGE_CTRL_1 field specialization
+/// @note valid for rev >= 0.4
+///
+template< mss::spd::rev R >
+class readerTraits
+    < fields< mss::spd::device_type::DDR4, mss::efd::id::DDR4_CUSTOM_MICROCHIP>::RCD_VOLTAGE_CTRL_1, R >
+{
+    public:
+
+        static constexpr size_t COMPARISON_VAL = 0xFF;
+        static constexpr const char* FIELD_STR = "RCD voltage control Byte1";
+
+        template <typename T>
+        using COMPARISON_OP = std::less_equal<T>;
+};
+
+///
+/// @class readerTraits
+/// @brief trait structure to hold static SPD information
+/// @note RCD_IBT field specialization
+/// @note rev 0.3 specialization
+///
+template< >
+class readerTraits
+    < fields< mss::spd::device_type::DDR4, mss::efd::id::DDR4_CUSTOM_MICROCHIP>::RCD_IBT, mss::spd::rev::V0_3 >
+{
+    public:
+
+        static constexpr size_t COMPARISON_VAL = 0x00;
+        static constexpr const char* FIELD_STR = "RCD Input Bus Termination";
+
+        template <typename T>
+        using COMPARISON_OP = std::equal_to<T>;
+};
+
+///
+/// @class readerTraits
+/// @brief trait structure to hold static SPD information
+/// @tparam R the revision of the SPD field
+/// @note RCD_IBT field specialization
+/// @note valid for rev >= 0.4
+///
+template< mss::spd::rev R >
+class readerTraits
+    < fields< mss::spd::device_type::DDR4, mss::efd::id::DDR4_CUSTOM_MICROCHIP>::RCD_IBT, R >
+{
+    public:
+
+        static constexpr size_t COMPARISON_VAL = 0xFF;
+        static constexpr const char* FIELD_STR = "RCD Input Bus Termination";
+
+        template <typename T>
+        using COMPARISON_OP = std::less_equal<T>;
+};
+
+///
+/// @class readerTraits
+/// @brief trait structure to hold static SPD information
+/// @note RCD_DB_DIC field specialization
+/// @note rev 0.3 specialization
+///
+template< >
+class readerTraits
+    < fields< mss::spd::device_type::DDR4, mss::efd::id::DDR4_CUSTOM_MICROCHIP>::RCD_DB_DIC, mss::spd::rev::V0_3 >
+{
+    public:
+
+        static constexpr size_t COMPARISON_VAL = 0x00;
+        static constexpr const char* FIELD_STR = "RCD data buffer driver impedance control";
+
+        template <typename T>
+        using COMPARISON_OP = std::equal_to<T>;
+};
+
+///
+/// @class readerTraits
+/// @brief trait structure to hold static SPD information
+/// @tparam R the revision of the SPD field
+/// @note RCD_DB_DIC field specialization
+/// @note valid for rev >= 0.4
+///
+template< mss::spd::rev R >
+class readerTraits
+    < fields< mss::spd::device_type::DDR4, mss::efd::id::DDR4_CUSTOM_MICROCHIP>::RCD_DB_DIC, R >
+{
+    public:
+
+        // Bits 7-3 and 1 in this byte are reserved
+        static constexpr size_t COMPARISON_VAL = 0x05;
+        static constexpr const char* FIELD_STR = "RCD data buffer driver impedance control";
+
+        template <typename T>
+        using COMPARISON_OP = std::less_equal<T>;
+};
+
+///
+/// @class readerTraits
+/// @brief trait structure to hold static SPD information
+/// @note RCD_SLEW_RATE_CTRL_0 field specialization
+/// @note rev 0.3 specialization
+///
+template< >
+class readerTraits
+    < fields< mss::spd::device_type::DDR4, mss::efd::id::DDR4_CUSTOM_MICROCHIP>::RCD_SLEW_RATE_CTRL_0, mss::spd::rev::V0_3 >
+{
+    public:
+
+        static constexpr size_t COMPARISON_VAL = 0x00;
+        static constexpr const char* FIELD_STR = "RCD slew rate control Byte0";
+
+        template <typename T>
+        using COMPARISON_OP = std::equal_to<T>;
+};
+
+///
+/// @class readerTraits
+/// @brief trait structure to hold static SPD information
+/// @tparam R the revision of the SPD field
+/// @note RCD_SLEW_RATE_CTRL_0 field specialization
+/// @note valid for rev >= 0.4
+///
+template< mss::spd::rev R >
+class readerTraits
+    < fields< mss::spd::device_type::DDR4, mss::efd::id::DDR4_CUSTOM_MICROCHIP>::RCD_SLEW_RATE_CTRL_0, R >
+{
+    public:
+
+        static constexpr size_t COMPARISON_VAL = 0xFF;
+        static constexpr const char* FIELD_STR = "RCD slew rate control Byte0";
+
+        template <typename T>
+        using COMPARISON_OP = std::less_equal<T>;
+};
+
+///
+/// @class readerTraits
+/// @brief trait structure to hold static SPD information
+/// @note RCD_SLEW_RATE_CTRL_1 field specialization
+/// @note rev 0.3 specialization
+///
+template< >
+class readerTraits
+    < fields< mss::spd::device_type::DDR4, mss::efd::id::DDR4_CUSTOM_MICROCHIP>::RCD_SLEW_RATE_CTRL_1, mss::spd::rev::V0_3 >
+{
+    public:
+
+        static constexpr size_t COMPARISON_VAL = 0x00;
+        static constexpr const char* FIELD_STR = "RCD slew rate control Byte1";
+
+        template <typename T>
+        using COMPARISON_OP = std::equal_to<T>;
+};
+
+///
+/// @class readerTraits
+/// @brief trait structure to hold static SPD information
+/// @tparam R the revision of the SPD field
+/// @note RCD_SLEW_RATE_CTRL_1 field specialization
+/// @note valid for rev >= 0.4
+///
+template< mss::spd::rev R >
+class readerTraits
+    < fields< mss::spd::device_type::DDR4, mss::efd::id::DDR4_CUSTOM_MICROCHIP>::RCD_SLEW_RATE_CTRL_1, R >
+{
+    public:
+
+        static constexpr size_t COMPARISON_VAL = 0xFF;
+        static constexpr const char* FIELD_STR = "RCD slew rate control Byte1";
 
         template <typename T>
         using COMPARISON_OP = std::less_equal<T>;

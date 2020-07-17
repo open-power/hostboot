@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -438,6 +438,46 @@ class fields<mss::spd::device_type::DDR4, mss::efd::id::DDR4_CUSTOM_MICROCHIP>
             PMIC1_SWD_OFFSET_LEN = 7,
             PMIC1_SWD_OFFSET_DIRECTION_START = 7,
             PMIC1_SWD_OFFSET_DIRECTION_LEN = 1,
+
+            // Byte 96: RCD driver impedance control Byte0
+            RCD_DIC_0_BYTE = 96,
+            RCD_DIC_0_START = 0,
+            RCD_DIC_0_LEN = 8,
+
+            // Byte 97: RCD driver impedance control Byte1
+            RCD_DIC_1_BYTE = 97,
+            RCD_DIC_1_START = 0,
+            RCD_DIC_1_LEN = 8,
+
+            // Byte 98: RCD voltage control Byte0
+            RCD_VOLTAGE_CTRL_0_BYTE = 98,
+            RCD_VOLTAGE_CTRL_0_START = 0,
+            RCD_VOLTAGE_CTRL_0_LEN = 8,
+
+            // Byte 99: RCD voltage control Byte1
+            RCD_VOLTAGE_CTRL_1_BYTE = 99,
+            RCD_VOLTAGE_CTRL_1_START = 0,
+            RCD_VOLTAGE_CTRL_1_LEN = 8,
+
+            // Byte 100: RCD Input Bus Termination
+            RCD_IBT_BYTE = 100,
+            RCD_IBT_START = 0,
+            RCD_IBT_LEN = 8,
+
+            // Byte 101: RCD data buffer driver impedance control
+            RCD_DB_DIC_BYTE = 101,
+            RCD_DB_DIC_START = 0,
+            RCD_DB_DIC_LEN = 8,
+
+            // Byte 102: RCD slew rate control Byte0
+            RCD_SLEW_RATE_CTRL_0_BYTE = 102,
+            RCD_SLEW_RATE_CTRL_0_START = 0,
+            RCD_SLEW_RATE_CTRL_0_LEN = 8,
+
+            // Byte 103: RCD slew rate control Byte1
+            RCD_SLEW_RATE_CTRL_1_BYTE = 103,
+            RCD_SLEW_RATE_CTRL_1_START = 0,
+            RCD_SLEW_RATE_CTRL_1_LEN = 8,
         };
 
     public:
@@ -668,6 +708,30 @@ class fields<mss::spd::device_type::DDR4, mss::efd::id::DDR4_CUSTOM_MICROCHIP>
         // Byte 77: PMIC1 SWD Volt
         static constexpr field_t PMIC1_SWD_OFFSET{PMIC1_SWD_BYTE, PMIC1_SWD_OFFSET_START, PMIC1_SWD_OFFSET_LEN};
         static constexpr field_t PMIC1_SWD_OFFSET_DIRECTION{PMIC1_SWD_BYTE, PMIC1_SWD_OFFSET_DIRECTION_START, PMIC1_SWD_OFFSET_DIRECTION_LEN};
+
+        // Byte 96: RCD driver impedance control Byte0
+        static constexpr field_t RCD_DIC_0{RCD_DIC_0_BYTE, RCD_DIC_0_START, RCD_DIC_0_LEN};
+
+        // Byte 97: RCD driver impedance control Byte1
+        static constexpr field_t RCD_DIC_1{RCD_DIC_1_BYTE, RCD_DIC_1_START, RCD_DIC_1_LEN};
+
+        // Byte 98: RCD voltage control Byte0
+        static constexpr field_t RCD_VOLTAGE_CTRL_0{RCD_VOLTAGE_CTRL_0_BYTE, RCD_VOLTAGE_CTRL_0_START, RCD_VOLTAGE_CTRL_0_LEN};
+
+        // Byte 99: RCD voltage control Byte1
+        static constexpr field_t RCD_VOLTAGE_CTRL_1{RCD_VOLTAGE_CTRL_1_BYTE, RCD_VOLTAGE_CTRL_1_START, RCD_VOLTAGE_CTRL_1_LEN};
+
+        // Byte 100: RCD Input Bus Termination
+        static constexpr field_t RCD_IBT{RCD_IBT_BYTE, RCD_IBT_START, RCD_IBT_LEN};
+
+        // Byte 101: RCD data buffer driver impedance control
+        static constexpr field_t RCD_DB_DIC{RCD_DB_DIC_BYTE, RCD_DB_DIC_START, RCD_DB_DIC_LEN};
+
+        // Byte 102: RCD slew rate control Byte0
+        static constexpr field_t RCD_SLEW_RATE_CTRL_0{RCD_SLEW_RATE_CTRL_0_BYTE, RCD_SLEW_RATE_CTRL_0_START, RCD_SLEW_RATE_CTRL_0_LEN};
+
+        // Byte 103: RCD slew rate control Byte1
+        static constexpr field_t RCD_SLEW_RATE_CTRL_1{RCD_SLEW_RATE_CTRL_1_BYTE, RCD_SLEW_RATE_CTRL_1_START, RCD_SLEW_RATE_CTRL_1_LEN};
 };
 
 } // ns efd
