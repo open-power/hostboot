@@ -614,6 +614,7 @@
     </attribute>
 
     <attribute>
+          <!-- This is set dynamically based on the boot processor -->
           <id>ATTR_PROC_SBE_MASTER_CHIP</id>
           <writeable/>
     </attribute>

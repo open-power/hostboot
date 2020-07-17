@@ -42,7 +42,6 @@
 #include    <vpd/spdenums.H>
 
 
-
 namespace   ISTEP_07
 {
 
@@ -62,6 +61,9 @@ void*    host_mss_attr_cleanup( void *io_pArgs )
     IStepError l_StepError;
 
     TRACFCOMP( g_trac_isteps_trace, "host_mss_attr_cleanup entry");
+
+    //*****************************************************
+    //  Clear out any memory repairs from the DIMMS
 
     // Get all the functional Dimms
     errlHndl_t l_err = nullptr;
@@ -126,6 +128,30 @@ void*    host_mss_attr_cleanup( void *io_pArgs )
         }
     }
 
+    //*****************************************************
+    //  Setup any dynamic attributes
+
+    // Replicate HB memory mirroring policy into HWP policy
+    // Default to non mirror (so if tryGet fails just keep going)
+    Target* l_pTopLevel = NULL;
+    TARGETING::targetService().getTopLevelTarget(l_pTopLevel);
+    TARGETING::ATTR_PAYLOAD_IN_MIRROR_MEM_type l_mirror = 0x0;
+    l_pTopLevel->tryGetAttr<TARGETING::ATTR_PAYLOAD_IN_MIRROR_MEM>
+      (l_mirror);
+
+    if(l_mirror)
+    {
+        l_pTopLevel->setAttr<TARGETING::ATTR_MRW_HW_MIRRORING_ENABLE>
+          (TARGETING::MRW_HW_MIRRORING_ENABLE_REQUIRED);
+    }
+    else
+    {
+        l_pTopLevel->setAttr<TARGETING::ATTR_MRW_HW_MIRRORING_ENABLE>
+          (TARGETING::MRW_HW_MIRRORING_ENABLE_OFF);
+    }
+
+
+    //*******************************************
     TRACFCOMP( g_trac_isteps_trace, "host_mss_attr_cleanup exit");
 
     return l_StepError.getErrorHandle();
