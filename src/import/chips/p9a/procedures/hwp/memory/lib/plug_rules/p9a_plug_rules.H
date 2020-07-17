@@ -57,10 +57,10 @@ static const uint8_t LATEST_SPD_REV = 0x03;
 /// @note When adding new vendors, THIS NEEDS TO BE IN SORTED ORDER BY VENDOR ID ENCODING
 static const std::vector<std::pair<uint16_t, uint8_t>> LATEST_SPD_CONTENT_REV =
 {
+    {fapi2::ENUM_ATTR_MEM_EFF_MODULE_MFG_ID_SMART,      0x08}, // 0x0194
     {fapi2::ENUM_ATTR_MEM_EFF_MODULE_MFG_ID_US_MODULAR, 0x06}, // 0x04AB
     {fapi2::ENUM_ATTR_MEM_EFF_MODULE_MFG_ID_FUJITSU,    0x06}, // 0x8004
     {fapi2::ENUM_ATTR_MEM_EFF_MODULE_MFG_ID_MICRON,     0x08}, // 0x802C
-    {fapi2::ENUM_ATTR_MEM_EFF_MODULE_MFG_ID_SMART,      0x08}, // 0x8094
     {fapi2::ENUM_ATTR_MEM_EFF_MODULE_MFG_ID_SAMSUNG,    0x08}, // 0x80CE
 };
 
