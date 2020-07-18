@@ -50,7 +50,7 @@
 #include <p10_pm_pba_init.H>
 #include <p10_pm_firinit.H>
 #include <p10_pm_occ_firinit.H>
-
+#include <p10_check_proc_config.H>
 
 // Function pointer defintion
 typedef fapi2::ReturnCode (*p10_pm_start_FP_t) (

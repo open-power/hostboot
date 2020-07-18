@@ -152,6 +152,13 @@ fapi2::ReturnCode p10_pm_start(
     FAPI_TRY(p10_pm_glob_fir_trace(i_target, "After PGPE initialization"));
 
     //  ************************************************************************
+    //  Set up the configuration content in HOMER for the 24x7 function
+    //  ************************************************************************
+    FAPI_DBG("Executing p10_check_proc_config to create configuration settings for 24x7");
+    FAPI_EXEC_HWP(l_rc, p10_check_proc_config, i_target, i_pHomerImage);
+    FAPI_TRY(l_rc, "ERROR: Failed to initialize 24x7 configuration");
+
+    //  ************************************************************************
     //  Start OCC PPC405
     //  ************************************************************************
     FAPI_DBG("Executing p10_pm_occ_control to start OCC PPC405");

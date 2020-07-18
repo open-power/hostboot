@@ -1,11 +1,11 @@
 # IBM_PROLOG_BEGIN_TAG
 # This is an automatically generated prolog.
 #
-# $Source: src/import/chips/p10/procedures/hwp/pm/p10_pm_start.mk $
+# $Source: src/import/chips/p10/procedures/hwp/pm/p10_check_proc_config.mk $
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2019,2020
+# Contributors Listed Below - COPYRIGHT 2020
 # [+] International Business Machines Corp.
 #
 #
@@ -22,16 +22,8 @@
 # permissions and limitations under the License.
 #
 # IBM_PROLOG_END_TAG
-PROCEDURE=p10_pm_start
-lib$(PROCEDURE)_EXTRALIBS+=p10_pm_xgpe_init
-lib$(PROCEDURE)_EXTRALIBS+=p10_pm_pgpe_init
-lib$(PROCEDURE)_EXTRALIBS+=p10_pm_qme_init
-lib$(PROCEDURE)_EXTRALIBS+=p10_pm_pba_init
-lib$(PROCEDURE)_EXTRALIBS+=p10_pm_pss_init
-lib$(PROCEDURE)_EXTRALIBS+=p10_pm_firinit
-lib$(PROCEDURE)_EXTRALIBS+=p10_pm_ocb_init
-lib$(PROCEDURE)_EXTRALIBS+=p10_pm_occ_control
-lib$(PROCEDURE)_EXTRALIBS+=p10_check_proc_config
-$(call ADD_MODULE_SRCDIR,$(PROCEDURE),$(ROOTPATH)/chips/p10/procedures/hwp/lib)
-$(call ADD_MODULE_SRCDIR,$(PROCEDURE),$(ROOTPATH)/chips/p10/common/pmlib/include/registers)
+# EKB-Mirror-To: hostboot
+PROCEDURE=p10_check_proc_config
+HWP_INC+=$(ROOTPATH)/chips/p10/procedures/hwp/lib/
+$(call ADD_MODULE_INCDIR,$(PROCEDURE),$(HWP_INC))
 $(call BUILD_PROCEDURE)

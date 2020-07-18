@@ -95,6 +95,7 @@ include ${HWP_PM_PATH}/p10_pm_xgpe_init.mk
 include ${HWP_PM_PATH}/p10_pm_occ_gpe_init.mk
 include ${HWP_PM_PATH}/p10_pm_ocb_indir_setup_circular.mk
 include ${HWP_PM_PATH}/p10_scan_ring_util.mk
+include ${HWP_PM_PATH}/p10_check_proc_config.mk
 include ${HWP_STOPUTIL_PATH}/p10_stop_util.mk
 include ${HWP_STOPUTIL_PATH}/p10_stop_api.mk
 include ${HWP_PM_PATH}/p10_pm_set_homer_bar.mk
