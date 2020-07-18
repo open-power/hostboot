@@ -788,13 +788,14 @@
   <id>ATTR_IOHS_PHY_TO_PAU_MAPPING</id>
   <targetType>TARGET_TYPE_IOHS</targetType>
   <description>
-    Effective physical link to PAU mapping (given as chiplet ID).
+    Effective physical link to PAU mapping (given as unit ID).
     Should be considered valid only if ATTR_IOHS_CONFIG_MODE for
     the given link is configured as OCAPI.
   </description>
   <valueType>uint8</valueType>
+  <enum>INVALID = 0xff</enum>
   <writeable/>
-  <initToZero/>
+  <default>INVALID</default>
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
