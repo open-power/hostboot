@@ -42,8 +42,6 @@
 
 #include <p10_scom_proc.H>
 #include <p10_scom_iohs.H>
-#include <p10_scom_pauc_5.H>
-#include <p10_scom_pauc_9.H>
 
 //------------------------------------------------------------------------------
 // Constants
@@ -239,9 +237,6 @@ fapi2::ReturnCode p10_build_smp_sequence_adu(
     uint8_t l_data_unused[1];
     fapi2::ReturnCode l_rc;
 
-    // hw529136 parameters
-    uint64_t l_dlr_width[4][2]; // [pauc][even/odd link]
-
     switch (i_action)
     {
         case SWITCH_AB:
@@ -280,52 +275,6 @@ fapi2::ReturnCode p10_build_smp_sequence_adu(
         }
     }
 
-    // save and disable DLR state
-    if(i_action == SWITCH_AB)
-    {
-        FAPI_DBG("Saving DLR enable state");
-
-        for (auto g_iter = i_smp.groups.begin(); g_iter != i_smp.groups.end(); ++g_iter)
-        {
-            for (auto p_iter = g_iter->second.chips.begin(); p_iter != g_iter->second.chips.end(); ++p_iter)
-            {
-                fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP> l_target = *(p_iter->second.target);
-
-                fapi2::ATTR_CHIP_EC_FEATURE_HW529136_Type l_hw529136;
-                FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_HW529136, l_target, l_hw529136),
-                         "Error from FAPI_ATTR_GET (ATTR_CHIP_EC_FEATURE_HW529136)");
-
-                if(l_hw529136)
-                {
-                    for (auto l_pauc : l_target.getChildren<fapi2::TARGET_TYPE_PAUC>())
-                    {
-                        using namespace scomt::pauc;
-
-                        fapi2::buffer<uint64_t> l_psave_mode_cfg;
-
-                        fapi2::ATTR_CHIP_UNIT_POS_Type l_pauc_id;
-                        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, l_pauc, l_pauc_id),
-                                 "Error from FAPI_ATTR_GET (ATTR_CHIP_UNIT_POS)");
-
-                        FAPI_TRY(GET_PB_PSAVE01_MODE_CFG(l_pauc, l_psave_mode_cfg),
-                                 "Error from getScom (PB_PSAVE01_MODE_CFG)");
-                        GET_PB_PSAVE01_MODE_CFG_WIDTH(l_psave_mode_cfg, l_dlr_width[l_pauc_id][0]);
-                        SET_PB_PSAVE01_MODE_CFG_WIDTH(ENUM_PSAVE_WIDTH_DISABLED, l_psave_mode_cfg);
-                        FAPI_TRY(PUT_PB_PSAVE01_MODE_CFG(l_pauc, l_psave_mode_cfg),
-                                 "Error from putScom (PB_PSAVE01_MODE_CFG)");
-
-                        FAPI_TRY(GET_PB_PSAVE23_MODE_CFG(l_pauc, l_psave_mode_cfg),
-                                 "Error from getScom (PB_PSAVE23_MODE_CFG)");
-                        GET_PB_PSAVE23_MODE_CFG_WIDTH(l_psave_mode_cfg, l_dlr_width[l_pauc_id][1]);
-                        SET_PB_PSAVE23_MODE_CFG_WIDTH(ENUM_PSAVE_WIDTH_DISABLED, l_psave_mode_cfg);
-                        FAPI_TRY(PUT_PB_PSAVE23_MODE_CFG(l_pauc, l_psave_mode_cfg),
-                                 "Error from putScom (PB_PSAVE23_MODE_CFG)");
-                    }
-                }
-            }
-        }
-    }
-
     // perform action on specified chips
     FAPI_DBG("Performing action = %d", i_action);
 
@@ -352,50 +301,6 @@ fapi2::ReturnCode p10_build_smp_sequence_adu(
 
                 FAPI_TRY(fapi2::current_err,
                          "Error from p10_putmemproc");
-            }
-        }
-    }
-
-    // restore DLR state
-    if(i_action == SWITCH_AB)
-    {
-        FAPI_DBG("Restoring DLR enable state");
-
-        for (auto g_iter = i_smp.groups.begin(); g_iter != i_smp.groups.end(); ++g_iter)
-        {
-            for (auto p_iter = g_iter->second.chips.begin(); p_iter != g_iter->second.chips.end(); ++p_iter)
-            {
-                fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP> l_target = *(p_iter->second.target);
-
-                fapi2::ATTR_CHIP_EC_FEATURE_HW529136_Type l_hw529136;
-                FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_HW529136, l_target, l_hw529136),
-                         "Error from FAPI_ATTR_GET (ATTR_CHIP_EC_FEATURE_HW529136)");
-
-                if(l_hw529136)
-                {
-                    for (auto l_pauc : l_target.getChildren<fapi2::TARGET_TYPE_PAUC>())
-                    {
-                        using namespace scomt::pauc;
-
-                        fapi2::buffer<uint64_t> l_psave_mode_cfg;
-
-                        fapi2::ATTR_CHIP_UNIT_POS_Type l_pauc_id;
-                        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, l_pauc, l_pauc_id),
-                                 "Error from FAPI_ATTR_GET (ATTR_CHIP_UNIT_POS)");
-
-                        FAPI_TRY(GET_PB_PSAVE01_MODE_CFG(l_pauc, l_psave_mode_cfg),
-                                 "Error from getScom (PB_PSAVE01_MODE_CFG)");
-                        SET_PB_PSAVE01_MODE_CFG_WIDTH(l_dlr_width[l_pauc_id][0], l_psave_mode_cfg);
-                        FAPI_TRY(PUT_PB_PSAVE01_MODE_CFG(l_pauc, l_psave_mode_cfg),
-                                 "Error from putScom (PB_PSAVE01_MODE_CFG)");
-
-                        FAPI_TRY(GET_PB_PSAVE23_MODE_CFG(l_pauc, l_psave_mode_cfg),
-                                 "Error from getScom (PB_PSAVE23_MODE_CFG)");
-                        SET_PB_PSAVE23_MODE_CFG_WIDTH(l_dlr_width[l_pauc_id][1], l_psave_mode_cfg);
-                        FAPI_TRY(PUT_PB_PSAVE23_MODE_CFG(l_pauc, l_psave_mode_cfg),
-                                 "Error from putScom (PB_PSAVE23_MODE_CFG)");
-                    }
-                }
             }
         }
     }

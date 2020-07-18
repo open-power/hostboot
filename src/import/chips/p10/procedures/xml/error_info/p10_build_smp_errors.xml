@@ -197,4 +197,28 @@
   </callout>
 </hwpError>
 <!-- ******************************************************************** -->
+<hwpError>
+  <rc>RC_P10_BUILD_SMP_DLR_REM_ENDP_TARGET_ERR</rc>
+  <description>
+    No remote endpoint target found for given local link endpoint.
+  </description>
+  <ffdc>LOC_ENDP_TARGET</ffdc>
+  <callout>
+    <procedure>CODE</procedure>
+    <priority>HIGH</priority>
+  </callout>
+</hwpError>
+<!-- ******************************************************************** -->
+<hwpError>
+  <rc>RC_P10_BUILD_SMP_DLR_INVALID_MODE</rc>
+  <description>
+    Invalid DLR psave mode specified.
+  </description>
+  <ffdc>DLR_MODE</ffdc>
+  <callout>
+    <procedure>CODE</procedure>
+    <priority>HIGH</priority>
+  </callout>
+</hwpError>
+<!-- ******************************************************************** -->
 </hwpErrors>

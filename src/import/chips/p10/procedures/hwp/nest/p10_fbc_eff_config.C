@@ -244,7 +244,17 @@ fapi2::ReturnCode p10_fbc_eff_config_calc_epsilons(void)
                     l_eps_w[0] = EPSILON_W_T0_MR[l_freq_ratio];
                     l_eps_w[1] = EPSILON_W_T1_MR[l_freq_ratio];
                 }
-                else // DLR psave is not supported for 8-chips/group configuration
+                // Mid-range uses single 1x9 links, psave half mode looks like quarter of full width
+                else if ((l_dlr_mode == fapi2::ENUM_ATTR_PROC_FABRIC_DLR_PSAVE_MODE_HALF)
+                         || (l_dlr_mode == fapi2::ENUM_ATTR_PROC_FABRIC_DLR_PSAVE_MODE_FULL_HALF))
+                {
+                    l_eps_r[0] = EPSILON_R_T0_LQ[l_freq_ratio];
+                    l_eps_r[1] = EPSILON_R_T2_LQ[l_freq_ratio];
+                    l_eps_r[2] = EPSILON_R_T2_LQ[l_freq_ratio];
+                    l_eps_w[0] = EPSILON_W_T0_LQ[l_freq_ratio];
+                    l_eps_w[1] = EPSILON_W_T1_LQ[l_freq_ratio];
+                }
+                else // Quarter-width psave is not valid for mid-range
                 {
                     FAPI_ASSERT(false,
                                 fapi2::P10_FBC_EFF_CONFIG_EPSILON_UNSUPPORTED_DLR_PSAVE_MODE_ERR()

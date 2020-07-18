@@ -40,9 +40,22 @@
 #include <p10_smp_wrap.H>
 
 #include <p10_scom_proc.H>
+#include <p10_scom_pauc_5.H>
 #include <p10_scom_pauc_6.H>
+#include <p10_scom_pauc_9.H>
 #include <p10_scom_pauc_d.H>
+#include <p10_scom_iohs_2.H>
 #include <p10_scom_iohs_6.H>
+#include <p10_scom_iohs_9.H>
+
+//------------------------------------------------------------------------------
+// Constants
+//------------------------------------------------------------------------------
+const uint8_t ENUM_PSAVE_WIDTH_DISABLED     = 0b000;
+const uint8_t ENUM_PSAVE_WIDTH_QUARTER      = 0b001;
+const uint8_t ENUM_PSAVE_WIDTH_HALF         = 0b010;
+const uint8_t ENUM_PSAVE_WIDTH_FULL_QUARTER = 0b101;
+const uint8_t ENUM_PSAVE_WIDTH_FULL_HALF    = 0b110;
 
 //------------------------------------------------------------------------------
 // Function definitions
@@ -821,6 +834,324 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
+///
+/// @brief Disable dynamic lane reduction (dlr) on all links
+///
+/// @param[in] i_smp            Fully specified structure encapsulating SMP
+///
+/// @return fapi2::ReturnCode   FAPI2_RC_SUCCESS if success, else error code.
+///
+fapi2::ReturnCode p10_build_smp_dlr_disable(
+    p10_build_smp_system& i_smp)
+{
+    FAPI_DBG("Start");
+
+    for (auto g_iter = i_smp.groups.begin(); g_iter != i_smp.groups.end(); ++g_iter)
+    {
+        for (auto p_iter = g_iter->second.chips.begin(); p_iter != g_iter->second.chips.end(); ++p_iter)
+        {
+            fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP> l_target = *(p_iter->second.target);
+
+            fapi2::ATTR_CHIP_EC_FEATURE_HW529136_Type l_hw529136;
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_HW529136, l_target, l_hw529136),
+                     "Error from FAPI_ATTR_GET (ATTR_CHIP_EC_FEATURE_HW529136)");
+
+            if(l_hw529136)
+            {
+                for (auto l_pauc : l_target.getChildren<fapi2::TARGET_TYPE_PAUC>())
+                {
+                    using namespace scomt::pauc;
+
+                    fapi2::buffer<uint64_t> l_psave_mode_cfg;
+
+                    fapi2::ATTR_CHIP_UNIT_POS_Type l_pauc_id;
+                    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, l_pauc, l_pauc_id),
+                             "Error from FAPI_ATTR_GET (ATTR_CHIP_UNIT_POS)");
+
+                    FAPI_TRY(GET_PB_PSAVE01_MODE_CFG(l_pauc, l_psave_mode_cfg),
+                             "Error from getScom (PB_PSAVE01_MODE_CFG)");
+                    SET_PB_PSAVE01_MODE_CFG_WIDTH(ENUM_PSAVE_WIDTH_DISABLED, l_psave_mode_cfg);
+                    FAPI_TRY(PUT_PB_PSAVE01_MODE_CFG(l_pauc, l_psave_mode_cfg),
+                             "Error from putScom (PB_PSAVE01_MODE_CFG)");
+
+                    FAPI_TRY(GET_PB_PSAVE23_MODE_CFG(l_pauc, l_psave_mode_cfg),
+                             "Error from getScom (PB_PSAVE23_MODE_CFG)");
+                    SET_PB_PSAVE23_MODE_CFG_WIDTH(ENUM_PSAVE_WIDTH_DISABLED, l_psave_mode_cfg);
+                    FAPI_TRY(PUT_PB_PSAVE23_MODE_CFG(l_pauc, l_psave_mode_cfg),
+                             "Error from putScom (PB_PSAVE23_MODE_CFG)");
+                }
+            }
+        }
+    }
+
+fapi_try_exit:
+    FAPI_DBG("End");
+    return fapi2::current_err;
+}
+
+///
+/// @brief Enable dynamic lane reduction (dlr) on selected links
+///
+/// @param[in] i_smp            Fully specified structure encapsulating SMP
+///
+/// @return fapi2::ReturnCode   FAPI2_RC_SUCCESS if success, else error code.
+///
+fapi2::ReturnCode p10_build_smp_dlr_enable(
+    p10_build_smp_system& i_smp)
+{
+    FAPI_DBG("Start");
+
+    fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
+    fapi2::ATTR_PROC_FABRIC_DLR_PSAVE_MODE_Type l_dlr_mode;
+
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_DLR_PSAVE_MODE, FAPI_SYSTEM, l_dlr_mode),
+             "Error from FAPI_ATTR_GET (ATTR_PROC_FABRIC_DLR_PSAVE_MODE)");
+
+    if(l_dlr_mode == fapi2::ENUM_ATTR_PROC_FABRIC_DLR_PSAVE_MODE_DISABLED)
+    {
+        FAPI_DBG("Selected dlr psave mode is DISABLED, skipping dlr enablement");
+        goto fapi_try_exit;
+    }
+
+    FAPI_DBG("Selected dlr psave mode: 0x%x\n", l_dlr_mode);
+
+    for (auto g_iter = i_smp.groups.begin(); g_iter != i_smp.groups.end(); g_iter++)
+    {
+        for (auto p_iter = g_iter->second.chips.begin(); p_iter != g_iter->second.chips.end(); p_iter++)
+        {
+            fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP> l_target = *(p_iter->second.target);
+
+            for (auto l_loc_iohs : l_target.getChildren<fapi2::TARGET_TYPE_IOHS>())
+            {
+                char l_targetStr[fapi2::MAX_ECMD_STRING_LEN];
+                fapi2::toString(l_loc_iohs, l_targetStr, sizeof(l_targetStr));
+
+                fapi2::ATTR_PROC_FABRIC_LINK_ACTIVE_Type l_fbc_link_active;
+                FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_LINK_ACTIVE, l_loc_iohs, l_fbc_link_active),
+                         "Error from FAPI_ATTR_GET (ATTR_PROC_FABRIC_LINK_ACTIVE)");
+
+                if(l_fbc_link_active == fapi2::ENUM_ATTR_PROC_FABRIC_LINK_ACTIVE_TRUE)
+                {
+                    using namespace scomt::pauc;
+
+                    fapi2::Target<fapi2::TARGET_TYPE_PAUC> l_loc_pauc;
+                    fapi2::Target<fapi2::TARGET_TYPE_PAUC> l_rem_pauc;
+                    fapi2::Target<fapi2::TARGET_TYPE_IOHS> l_rem_iohs;
+                    fapi2::ATTR_CHIP_UNIT_POS_Type l_loc_iohs_id;
+                    fapi2::ATTR_CHIP_UNIT_POS_Type l_rem_iohs_id;
+                    fapi2::ATTR_CHIP_EC_FEATURE_HW522788_Type l_hw522788;
+                    fapi2::buffer<uint64_t> l_psave_mode_cfg;
+                    uint64_t l_psave_width = 0;
+                    fapi2::ReturnCode l_rc;
+
+                    // Verify that the link width and psave mode selected are valid
+                    // combinations to enable; full-width links can support any psave
+                    // mode, but half-width links can only support half psave modes
+
+                    fapi2::ATTR_IOHS_LINK_TRAIN_Type l_link_train;
+                    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IOHS_LINK_TRAIN, l_loc_iohs, l_link_train),
+                             "Error from FAPI_ATTR_GET (ATTR_IOHS_LINK_TRAIN)");
+
+                    bool l_half_link = ((l_link_train == fapi2::ENUM_ATTR_IOHS_LINK_TRAIN_EVEN_ONLY)
+                                        || (l_link_train == fapi2::ENUM_ATTR_IOHS_LINK_TRAIN_ODD_ONLY));
+
+                    bool l_psave_qtr = ((l_dlr_mode == fapi2::ENUM_ATTR_PROC_FABRIC_DLR_PSAVE_MODE_QUARTER)
+                                        || (l_dlr_mode == fapi2::ENUM_ATTR_PROC_FABRIC_DLR_PSAVE_MODE_FULL_QUARTER));
+
+                    if(l_half_link && l_psave_qtr)
+                    {
+                        FAPI_DBG("%s Skipping dlr enable: quarter-width psave on half links is unsupported", l_targetStr);
+                        continue;
+                    }
+
+                    // Only one end of the link connection should have psave enabled, the
+                    // remote end should have psave_width = disabled; determine the
+                    // psave state on the remote end before programming the psave mode
+                    // on the local end of the link
+
+                    l_rc = l_loc_iohs.getOtherEnd(l_rem_iohs);
+
+                    FAPI_ASSERT(!l_rc,
+                                fapi2::P10_BUILD_SMP_DLR_REM_ENDP_TARGET_ERR()
+                                .set_LOC_ENDP_TARGET(l_loc_iohs),
+                                "Unable to detect remote end of the link");
+
+                    l_rem_pauc = l_rem_iohs.getParent<fapi2::TARGET_TYPE_PAUC>();
+
+                    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, l_rem_iohs, l_rem_iohs_id),
+                             "Error from FAPI_ATTR_GET (ATTR_CHIP_UNIT_POS)");
+
+                    if((l_rem_iohs_id % 2) == 0)
+                    {
+                        FAPI_TRY(GET_PB_PSAVE01_MODE_CFG(l_rem_pauc, l_psave_mode_cfg),
+                                 "Error from getScom (PB_PSAVE01_MODE_CFG)");
+                        GET_PB_PSAVE01_MODE_CFG_WIDTH(l_psave_mode_cfg, l_psave_width);
+                    }
+                    else
+                    {
+                        FAPI_TRY(GET_PB_PSAVE23_MODE_CFG(l_rem_pauc, l_psave_mode_cfg),
+                                 "Error from getScom (PB_PSAVE23_MODE_CFG)");
+                        GET_PB_PSAVE23_MODE_CFG_WIDTH(l_psave_mode_cfg, l_psave_width);
+                    }
+
+                    if(l_psave_width != ENUM_PSAVE_WIDTH_DISABLED)
+                    {
+                        FAPI_DBG("%s Skipping dlr enable: psave on remote link endpoint already enabled", l_targetStr);
+                        continue;
+                    }
+
+                    // Remote link endpoint has psave_width = disabled, continue to
+                    // program the psave mode for the local link endpoint
+
+                    FAPI_DBG("%s Setting dlr enable: l_fbc_link_active = %d, l_link_train = %d",
+                             l_targetStr, l_fbc_link_active, l_link_train);
+
+                    switch(l_dlr_mode)
+                    {
+                        case fapi2::ENUM_ATTR_PROC_FABRIC_DLR_PSAVE_MODE_QUARTER:
+                            l_psave_width = ENUM_PSAVE_WIDTH_QUARTER;
+                            break;
+
+                        case fapi2::ENUM_ATTR_PROC_FABRIC_DLR_PSAVE_MODE_HALF:
+                            l_psave_width = ENUM_PSAVE_WIDTH_HALF;
+                            break;
+
+                        case fapi2::ENUM_ATTR_PROC_FABRIC_DLR_PSAVE_MODE_FULL_QUARTER:
+                            l_psave_width = ENUM_PSAVE_WIDTH_FULL_QUARTER;
+                            break;
+
+                        case fapi2::ENUM_ATTR_PROC_FABRIC_DLR_PSAVE_MODE_FULL_HALF:
+                            l_psave_width = ENUM_PSAVE_WIDTH_FULL_HALF;
+                            break;
+
+                        default:
+                            FAPI_ASSERT(false,
+                                        fapi2::P10_BUILD_SMP_DLR_INVALID_MODE()
+                                        .set_DLR_MODE(l_dlr_mode),
+                                        "Invalid dlr mode selected for configuration");
+                            break;
+                    }
+
+                    l_loc_pauc = l_loc_iohs.getParent<fapi2::TARGET_TYPE_PAUC>();
+
+                    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, l_loc_iohs, l_loc_iohs_id),
+                             "Error from FAPI_ATTR_GET (ATTR_CHIP_UNIT_POS)");
+
+                    if((l_loc_iohs_id % 2) == 0)
+                    {
+                        FAPI_TRY(GET_PB_PSAVE01_MODE_CFG(l_loc_pauc, l_psave_mode_cfg),
+                                 "Error from getScom (PB_PSAVE01_MODE_CFG)");
+                        SET_PB_PSAVE01_MODE_CFG_WIDTH(l_psave_width, l_psave_mode_cfg);
+                        FAPI_TRY(PUT_PB_PSAVE01_MODE_CFG(l_loc_pauc, l_psave_mode_cfg),
+                                 "Error from putScom (PB_PSAVE01_MODE_CFG)");
+                    }
+                    else
+                    {
+                        FAPI_TRY(GET_PB_PSAVE23_MODE_CFG(l_loc_pauc, l_psave_mode_cfg),
+                                 "Error from getScom (PB_PSAVE23_MODE_CFG)");
+                        SET_PB_PSAVE23_MODE_CFG_WIDTH(l_psave_width, l_psave_mode_cfg);
+                        FAPI_TRY(PUT_PB_PSAVE23_MODE_CFG(l_loc_pauc, l_psave_mode_cfg),
+                                 "Error from putScom (PB_PSAVE23_MODE_CFG)");
+                    }
+
+                    // HW522788 Checkstop on link retrain or high error rates if dlr is enabled for DD1
+                    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_HW522788, l_target, l_hw522788),
+                             "Error from FAPI_ATTR_GET (ATTR_CHIP_EC_FEATURE_HW522788)");
+
+                    if(l_hw522788)
+                    {
+                        using namespace scomt::iohs;
+
+                        fapi2::buffer<uint64_t> l_dlp_fir_data;
+                        fapi2::buffer<uint64_t> l_clear_data;
+
+                        bool l_evn_en = ((l_link_train == fapi2::ENUM_ATTR_IOHS_LINK_TRAIN_BOTH)
+                                         || (l_link_train == fapi2::ENUM_ATTR_IOHS_LINK_TRAIN_EVEN_ONLY));
+                        bool l_odd_en = ((l_link_train == fapi2::ENUM_ATTR_IOHS_LINK_TRAIN_BOTH)
+                                         || (l_link_train == fapi2::ENUM_ATTR_IOHS_LINK_TRAIN_ODD_ONLY));
+
+                        FAPI_TRY(PREP_DLP_FIR_REG_RW(l_loc_iohs));
+                        l_clear_data.flush<1>();
+
+                        if(l_evn_en)
+                        {
+                            CLEAR_DLP_FIR_REG_0_RETRAIN_THRESHOLD(l_clear_data);
+                            CLEAR_DLP_FIR_REG_0_LOSS_BLOCK_ALIGN(l_clear_data);
+                            CLEAR_DLP_FIR_REG_0_INVALID_BLOCK(l_clear_data);
+                            CLEAR_DLP_FIR_REG_0_DESKEW_ERROR(l_clear_data);
+                            CLEAR_DLP_FIR_REG_0_DESKEW_OVERFLOW(l_clear_data);
+                            CLEAR_DLP_FIR_REG_0_SW_RETRAIN(l_clear_data);
+                            CLEAR_DLP_FIR_REG_0_ACK_QUEUE_OVERFLOW(l_clear_data);
+                            CLEAR_DLP_FIR_REG_0_ACK_QUEUE_UNDERFLOW(l_clear_data);
+                            CLEAR_DLP_FIR_REG_0_NUM_REPLAY(l_clear_data);
+                            CLEAR_DLP_FIR_REG_0_TRAINING_SET_RECEIVED(l_clear_data);
+                            CLEAR_DLP_FIR_REG_0_SPARE_DONE(l_clear_data);
+                            CLEAR_DLP_FIR_REG_0_UNCORRECTABLE_ARRAY_ERROR(l_clear_data);
+                            CLEAR_DLP_FIR_REG_0_TRAINING_FAILED(l_clear_data);
+                            CLEAR_DLP_FIR_REG_0_UNRECOVERABLE_ERROR(l_clear_data);
+                            CLEAR_DLP_FIR_REG_0_INTERNAL_ERROR(l_clear_data);
+                        }
+
+                        if(l_odd_en)
+                        {
+                            CLEAR_DLP_FIR_REG_1_RETRAIN_THRESHOLD(l_clear_data);
+                            CLEAR_DLP_FIR_REG_1_LOSS_BLOCK_ALIGN(l_clear_data);
+                            CLEAR_DLP_FIR_REG_1_INVALID_BLOCK(l_clear_data);
+                            CLEAR_DLP_FIR_REG_1_DESKEW_ERROR(l_clear_data);
+                            CLEAR_DLP_FIR_REG_1_DESKEW_OVERFLOW(l_clear_data);
+                            CLEAR_DLP_FIR_REG_1_SW_RETRAIN(l_clear_data);
+                            CLEAR_DLP_FIR_REG_1_ACK_QUEUE_OVERFLOW(l_clear_data);
+                            CLEAR_DLP_FIR_REG_1_ACK_QUEUE_UNDERFLOW(l_clear_data);
+                            CLEAR_DLP_FIR_REG_1_NUM_REPLAY(l_clear_data);
+                            CLEAR_DLP_FIR_REG_1_TRAINING_SET_RECEIVED(l_clear_data);
+                            CLEAR_DLP_FIR_REG_1_SPARE_DONE(l_clear_data);
+                            CLEAR_DLP_FIR_REG_1_UNCORRECTABLE_ARRAY_ERROR(l_clear_data);
+                            CLEAR_DLP_FIR_REG_1_TRAINING_FAILED(l_clear_data);
+                            CLEAR_DLP_FIR_REG_1_UNRECOVERABLE_ERROR(l_clear_data);
+                            CLEAR_DLP_FIR_REG_1_INTERNAL_ERROR(l_clear_data);
+                        }
+
+                        FAPI_TRY(GET_DLP_FIR_MASK_REG_RW(l_loc_iohs, l_dlp_fir_data),
+                                 "Error from getScom (DLP_FIR_MASK_REG_RW)");
+                        FAPI_TRY(PUT_DLP_FIR_MASK_REG_RW(l_loc_iohs, l_dlp_fir_data & l_clear_data),
+                                 "Error from putScom (DLP_FIR_MASK_REG_RW)");
+                        FAPI_TRY(GET_DLP_FIR_ACTION0_REG(l_loc_iohs, l_dlp_fir_data),
+                                 "Error from getScom (DLP_FIR_ACTION0_REG)");
+                        FAPI_TRY(PUT_DLP_FIR_ACTION0_REG(l_loc_iohs, l_dlp_fir_data & l_clear_data),
+                                 "Error from putScom (DLP_FIR_ACTION0_REG)");
+                        FAPI_TRY(GET_DLP_FIR_ACTION1_REG(l_loc_iohs, l_dlp_fir_data),
+                                 "Error from getScom (DLP_FIR_ACTION1_REG)");
+                        FAPI_TRY(PUT_DLP_FIR_ACTION1_REG(l_loc_iohs, l_dlp_fir_data & l_clear_data),
+                                 "Error from putScom (DLP_FIR_ACTION1_REG)");
+
+                        FAPI_TRY(GET_DLP_FIR_MASK_REG_RW(l_rem_iohs, l_dlp_fir_data),
+                                 "Error from getScom (DLP_FIR_MASK_REG_RW)");
+                        FAPI_TRY(PUT_DLP_FIR_MASK_REG_RW(l_rem_iohs, l_dlp_fir_data & l_clear_data),
+                                 "Error from putScom (DLP_FIR_MASK_REG_RW)");
+                        FAPI_TRY(GET_DLP_FIR_ACTION0_REG(l_rem_iohs, l_dlp_fir_data),
+                                 "Error from getScom (DLP_FIR_ACTION0_REG)");
+                        FAPI_TRY(PUT_DLP_FIR_ACTION0_REG(l_rem_iohs, l_dlp_fir_data & l_clear_data),
+                                 "Error from putScom (DLP_FIR_ACTION0_REG)");
+                        FAPI_TRY(GET_DLP_FIR_ACTION1_REG(l_rem_iohs, l_dlp_fir_data),
+                                 "Error from getScom (DLP_FIR_ACTION1_REG)");
+                        FAPI_TRY(PUT_DLP_FIR_ACTION1_REG(l_rem_iohs, l_dlp_fir_data & l_clear_data),
+                                 "Error from putScom (DLP_FIR_ACTION1_REG)");
+                    }
+                }
+                else
+                {
+                    FAPI_DBG("%s Skipping dlr enable: l_fbc_link_active = %d",
+                             l_targetStr, l_fbc_link_active);
+                }
+            }
+        }
+    }
+
+fapi_try_exit:
+    FAPI_DBG("End");
+    return fapi2::current_err;
+}
+
 /// See doxygen comments in header file
 fapi2::ReturnCode p10_build_smp(
     std::vector<fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>>& i_chips,
@@ -851,10 +1182,18 @@ fapi2::ReturnCode p10_build_smp(
     FAPI_TRY(p10_build_smp_link_topo_tables(l_smp),
              "Error from p10_build_smp_topo_tables");
 
+    // disable dlr prior to activating new config
+    FAPI_TRY(p10_build_smp_dlr_disable(l_smp),
+             "Error from p10_build_smp_dlr_disable");
+
     // set fabric hotplug configuration registers (switch AB)
     // activates new SMP configuration for given phase1/phase2
     FAPI_TRY(p10_build_smp_set_fbc_ab(l_smp, i_op),
              "Error from p10_build_smp_set_fbc_ab");
+
+    // enable dlr after activating new config
+    FAPI_TRY(p10_build_smp_dlr_enable(l_smp),
+             "Error from p10_build_smp_dlr_enable");
 
 fapi_try_exit:
     FAPI_DBG("End");

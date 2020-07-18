@@ -510,7 +510,25 @@
     </chip>
   </chipEcFeature>
   </attribute>
-
+  <!-- ******************************************************************** -->
+  <attribute>
+  <id>ATTR_CHIP_EC_FEATURE_HW522788</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>
+    Numerous defects surrounding DLR with link retrains and high error rates
+    for DD1. Checkstop on indicators of link errors from the DLP FIR if DLR
+    is enabled to avoid encounters with the known issues.
+  </description>
+  <chipEcFeature>
+    <chip>
+     <name>ENUM_ATTR_NAME_P10</name>
+     <ec>
+       <value>0x10</value>
+       <test>EQUAL</test>
+     </ec>
+    </chip>
+  </chipEcFeature>
+  </attribute>
   <!-- ******************************************************************** -->
   <attribute>
    <id>ATTR_CHIP_EC_FEATURE_HW530359_XSL_PARITY</id>
