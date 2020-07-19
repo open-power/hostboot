@@ -55,6 +55,7 @@ TRAC_INIT(&g_trac_dump, "DUMP", 4*KILOBYTE);
 
 #define SBE_FFDC_SIZE 128
 #define SIZE_TIMA_REG 8
+#define SPR_ID_TYPE_NAME 0
 
 namespace DUMP
 {
@@ -565,8 +566,9 @@ errlHndl_t copyArchitectedRegs(void)
                     hostRegData->reg.num  = sbeRegData->regNum;
                     hostRegData->regVal  = sbeRegData->regVal;
 
-                    // If HOST type is PHYP replace register number with strings
-                    if (TARGETING::is_phyp_load())
+                    //If SPR needs to be identified by Name, then replace the
+                    //number with the names.
+                    if (procTableEntry->sprIdType == SPR_ID_TYPE_NAME)
                     {
                         replaceRegNumWithName(hostRegData);
                     }
