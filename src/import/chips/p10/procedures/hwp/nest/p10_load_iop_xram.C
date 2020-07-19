@@ -34,6 +34,7 @@
 // Includes
 //------------------------------------------------------------------------------
 #include <p10_load_iop_xram.H>
+#include <p10_pcie_scominit.H>
 #include <multicast_group_defs.H>
 #include <p10_ipl_image.H>
 #include <p10_iop_xram_utils.H>
@@ -162,6 +163,10 @@ fapi2::ReturnCode p10_load_iop_xram(
         FAPI_TRY(enableXramScrubber(l_target_mcast, static_cast<xramIopTopNum_t>(l_top)),
                  "p10_load_iop_xram: enableXramScrubber returns an error.");
     }
+
+    // Write CReg overrides through the CR Parallel Interface
+    // This is called here because phy reset has to be deasserted for CReg access
+    FAPI_TRY(p10_load_iop_override(i_target));
 
 fapi_try_exit:
     FAPI_DBG("End");

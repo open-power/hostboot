@@ -52,7 +52,24 @@
 const uint8_t TC_PCI_IOVALID_DC_START = 8;
 const uint8_t TC_PCI_SWAP_DC_START = 2;
 const uint8_t NUM_STACK_CONFIG = 3;
+const uint8_t NUM_OF_INSTANCES = 4;
 const uint64_t PIPEDOUTCTL2_OFFSET = 22;
+const uint64_t PIPEDOUTCTL0_OFFSET = 20;
+const uint8_t PIPEDOUTCTL0_RESERVED_63_59_START = 59;
+const uint8_t PIPEDOUTCTL0_RESERVED_63_59_LEN = 5;
+const uint8_t PIPEDOUTCTL0_63_59_VAL = 0xF;
+const uint64_t NANO_SEC_DELAY = 20000;
+const uint64_t SIM_CYC_DELAY = 512;
+
+const uint8_t FAST_RX_CONT_CAL_ADAPT_BIT = 60;
+const uint64_t  RAWLANEAONN_DIG_FAST_FLAGS_REG[NUM_OF_INSTANCES] =
+{
+    0x8000702B0801113F,
+    0x8001702B0801113F,
+    0x8000702B0801153F,
+    0x8001702B0801153F,
+};
+
 
 ///-----------------------------------------------------------------------------
 /// Function definitions
@@ -69,7 +86,6 @@ p10_pcie_scominit(
 
     fapi2::ReturnCode l_rc;
     fapi2::buffer<uint64_t> l_data;
-    std::vector<uint64_t> l_topo_table_scom_values;
 
     auto l_pec_targets = i_target.getChildren<fapi2::TARGET_TYPE_PEC>();
     auto l_phb_targets = i_target.getChildren<fapi2::TARGET_TYPE_PHB>();
@@ -126,6 +142,7 @@ p10_pcie_scominit(
         FAPI_TRY(PREP_CPLT_CTRL5_WO_OR(l_pec_target));
         SET_CPLT_CTRL5_TC_CCFG_PIPE_LANEX_EXT_PLL_MODE_DC(l_data);
         SET_CPLT_CTRL5_TC_CCFG_PHYX_CR_PARA_SEL_DC(l_data);
+        SET_CPLT_CTRL5_TC_CCFG_PHY_EXT_CTRL_SEL_DC(l_data);
         FAPI_TRY(PUT_CPLT_CTRL5_WO_OR(l_pec_target, l_data));
 
         //Initialize PCI CPLT_CONF0
@@ -139,12 +156,22 @@ p10_pcie_scominit(
         {
             l_data = 0;
             l_xramBaseReg = getXramBaseReg(static_cast<xramIopTopNum_t>(l_top));
+
             FAPI_TRY(fapi2::getScom(l_pec_target, l_xramBaseReg + PIPEDOUTCTL2_OFFSET, l_data), "Error from getScom 0x%.16llX",
                      l_xramBaseReg + PIPEDOUTCTL2_OFFSET);
-            l_data.setBit<PIPEDOUTCTL2_RATIO_ALIGN_DISABLE>();
+            l_data.setBit<PIPEDOUTCTL2_RATIO_ALIGN_POLARITY>();
+            l_data.clearBit<PIPEDOUTCTL2_RATIO_ALIGN_DISABLE>();
             FAPI_TRY(fapi2::putScom(l_pec_target, l_xramBaseReg + PIPEDOUTCTL2_OFFSET, l_data), "Error from putScom 0x%.16llX",
                      l_xramBaseReg + PIPEDOUTCTL2_OFFSET);
+
+            l_data = 0;
+            FAPI_TRY(fapi2::getScom(l_pec_target, l_xramBaseReg + PIPEDOUTCTL0_OFFSET, l_data), "Error from getScom 0x%.16llX",
+                     l_xramBaseReg + PIPEDOUTCTL0_OFFSET);
+            l_data.insertFromRight<PIPEDOUTCTL0_RESERVED_63_59_START, PIPEDOUTCTL0_RESERVED_63_59_LEN>(PIPEDOUTCTL0_63_59_VAL);
+            FAPI_TRY(fapi2::putScom(l_pec_target, l_xramBaseReg + PIPEDOUTCTL0_OFFSET, l_data), "Error from putScom 0x%.16llX",
+                     l_xramBaseReg + PIPEDOUTCTL0_OFFSET);
         }
+
     }
 
     // Reset PHBs
@@ -168,26 +195,42 @@ p10_pcie_scominit(
         goto fapi_try_exit;
     }
 
-    //Set topology id table
-    FAPI_TRY(topo::get_topology_table_scoms(i_target, l_topo_table_scom_values),
-             "Error forming topology ID table scom data");
+fapi_try_exit:
+    FAPI_DBG("End");
+    return fapi2::current_err;
+}
 
-    for (auto l_pec_target : l_pec_targets)
+
+/// ############################################################
+/// See doxygen in header file
+fapi2::ReturnCode p10_load_iop_override(
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
+{
+    FAPI_DBG("Start CReg Overrides");
+    using namespace scomt;
+    using namespace scomt::pec;
+
+    fapi2::ReturnCode l_rc;
+    fapi2::buffer<uint64_t> l_data;
+
+    // Loop through all configured PECs
+    for (auto l_pec_target : i_target.getChildren<fapi2::TARGET_TYPE_PEC>())
     {
-        FAPI_TRY(PREP_PB_PBCQ_PEPBREGS_PE_TOPOLOGY_REG0(l_pec_target));
-        FAPI_TRY(PUT_PB_PBCQ_PEPBREGS_PE_TOPOLOGY_REG0(l_pec_target, l_topo_table_scom_values[0]));
-
-        FAPI_TRY(PREP_PB_PBCQ_PEPBREGS_PE_TOPOLOGY_REG1(l_pec_target));
-        FAPI_TRY(PUT_PB_PBCQ_PEPBREGS_PE_TOPOLOGY_REG1(l_pec_target, l_topo_table_scom_values[1]));
-
-        FAPI_TRY(PREP_PB_PBCQ_PEPBREGS_PE_TOPOLOGY_REG2(l_pec_target));
-        FAPI_TRY(PUT_PB_PBCQ_PEPBREGS_PE_TOPOLOGY_REG2(l_pec_target, l_topo_table_scom_values[2]));
-
-        FAPI_TRY(PREP_PB_PBCQ_PEPBREGS_PE_TOPOLOGY_REG3(l_pec_target));
-        FAPI_TRY(PUT_PB_PBCQ_PEPBREGS_PE_TOPOLOGY_REG3(l_pec_target, l_topo_table_scom_values[3]));
+        //Disable FAST_RX_CONT_CAL_ADAPT per request from Synopsis
+        //PleaseI disable CCA (continuous calibration and adaptation algorithm for slow VT drift) by:
+        for (uint8_t i = 0; i < NUM_OF_INSTANCES ; i++)
+        {
+            l_data = 0;
+            FAPI_TRY(fapi2::getScom(l_pec_target, RAWLANEAONN_DIG_FAST_FLAGS_REG[i] , l_data),
+                     "Error from getScom 0x%.16llX", RAWLANEAONN_DIG_FAST_FLAGS_REG[i]);
+            l_data.setBit<FAST_RX_CONT_CAL_ADAPT_BIT>();
+            FAPI_DBG("RAWLANEAONN_DIG_FAST_FLAGS_REG 0x%.0x", l_data);
+            FAPI_TRY(fapi2::putScom(l_pec_target, RAWLANEAONN_DIG_FAST_FLAGS_REG[i] , l_data),
+                     "Error from putScom 0x%.16llX", RAWLANEAONN_DIG_FAST_FLAGS_REG[i]);
+        }
     }
 
 fapi_try_exit:
-    FAPI_DBG("End");
+    FAPI_DBG("End CReg Overrides");
     return fapi2::current_err;
 }

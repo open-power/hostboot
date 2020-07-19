@@ -53,6 +53,7 @@ EXTRAINCDIR += ${EXPLORER_HWP_PATH}/lib/
 EXTRAINCDIR += ${EXPLORER_HWP_PATH}/lib/inband/
 EXTRAINCDIR += ${EXPLORER_HWP_PATH}/lib/shared/
 EXTRAINCDIR += ${EXPLORER_COMMON_PATH}/include/
+EXTRAINCDIR += ${P10_PROCEDURE_PATH}/initfiles/
 
 # Add the sub step object files
 OBJS += call_mss_memdiag.o
@@ -95,6 +96,7 @@ OBJS += p10_sbe_instruct_start.o
 OBJS += p10_l3_flush.o
 OBJS += p10_l2_flush.o
 OBJS += p10_sbe_stop_hb.o
+OBJS += p10_pcie_scom.o
 
 # Add the path where HWPs object files are located
 VPATH += ${SRC_IMPORT_PATH}/chips/p10/common/scominfo/
@@ -103,5 +105,6 @@ VPATH += ${P10_PROCEDURE_PATH}/nest/
 VPATH += ${P10_PROCEDURE_PATH}/pm/
 VPATH += ${P10_PROCEDURE_PATH}/core/
 VPATH += ${EXPLORER_HWP_PATH}/
+VPATH += ${P10_PROCEDURE_PATH}/initfiles/
 
 include ${ROOTPATH}/config.mk
