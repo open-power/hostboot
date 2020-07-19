@@ -56,6 +56,9 @@ TRAC_INIT(&g_trac_dump, "DUMP", 4*KILOBYTE);
 #define SBE_FFDC_SIZE 128
 #define SIZE_TIMA_REG 8
 #define SPR_ID_TYPE_NAME 0
+//Minimum space required for Master Fused Core
+//and its 8 threads
+#define HYP_REQUIRED_MIN_REG_SIZE 0x5CC0
 
 namespace DUMP
 {
@@ -489,7 +492,22 @@ errlHndl_t copyArchitectedRegs(void)
             procTableEntry->capArraySize = procTableEntry->capArraySize +
                                           (procTableEntry->threadRegSize
                                            * threadCount);
-            if (procTableEntry->dstArraySize < procTableEntry->capArraySize)
+
+
+            bool collectMinimumDataMode = false;
+            //Validate the memory size allocated by the Hypervisor
+            //In case of Hypervisor pre-init failure, Hypervisor allocates memory to save off
+            //first fused core data
+            if(procTableEntry->dstArraySize ==  HYP_REQUIRED_MIN_REG_SIZE)
+            {
+                //HYP Pre-Init Failure cause.
+                collectMinimumDataMode = true;
+                //Data will be collected only for Master fused core of master proc
+                //Update the procDumpAreaEntry entries accordingly
+                threadCount = 8;//Fused core.
+                procTableEntry->capArraySize =  (procTableEntry->threadRegSize * threadCount);
+            }
+            else if(procTableEntry->dstArraySize < procTableEntry->capArraySize)
             {
                 /*@
                  * @errortype
@@ -498,6 +516,8 @@ errlHndl_t copyArchitectedRegs(void)
                  * @userdata1    Hypervisor reserved memory size
                  * @userdata2    Memory needed to copy architected
                  *               register data
+                 * @userdata3    Minimum memory required for copy architected
+                 *               register data(PRE_INIT failure case)
                  * @devdesc      Insufficient space to copy architected
                  *               registers
                  */
@@ -507,15 +527,19 @@ errlHndl_t copyArchitectedRegs(void)
                         DUMP_PDAT_INSUFFICIENT_SPACE,
                         procTableEntry->dstArraySize,
                         procTableEntry->capArraySize,
+                        HYP_REQUIRED_MIN_REG_SIZE,
                         ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
                 errlCommit(l_err, DUMP_COMP_ID);
                 break;
             }
-            TRACDCOMP(g_trac_dump, "HYP Reserved Size=0x%.8x and actual size=0x%.8x",
-                      procTableEntry->dstArraySize,procTableEntry->capArraySize); 
+
+            TRACFCOMP(g_trac_dump, "HYP Reserved Size=0x%.8x, actual size=0x%.8x and "
+            "Hypervisor Pre-Init failure(%d)", procTableEntry->dstArraySize,
+            procTableEntry->capArraySize,collectMinimumDataMode); 
             // Total Number of Threads possible in one Proc
             for(uint32_t idx = 0; idx < threadCount; idx++)
             {
+ 
                 sbeArchRegDumpThreadHdr_t *sbeTdHdr =
                      reinterpret_cast<sbeArchRegDumpThreadHdr_t *>(procSrcAddr);
 
@@ -610,6 +634,12 @@ errlHndl_t copyArchitectedRegs(void)
                                   (((sbeProcHdr->reg_cnt) - SIZE_TIMA_REG) *
                                                  sizeof(hostArchRegDataEntry)));
                 }
+            }
+            if(collectMinimumDataMode)
+            {
+                TRACFCOMP(g_trac_dump, "Hypervisor Pre-Init failure case. Copy data only related to "
+                "master procesor,master fused core!");
+                break;
             }
         }
         // Update Process Dump Area tuple
