@@ -200,6 +200,7 @@ const DepModInfo g_istep14Dependancies = {
         DEP_LIB(libisteps_mss.so),
         DEP_LIB(libpm.so),
         DEP_LIB(libruntime.so),
+        DEP_LIB(libthread_activate.so),
 // Once all the HWP calls are implemented and istep 14
 // is fully operational add this back in, if needed, else delete.
 //        DEP_LIB(libnestmemutils.so),

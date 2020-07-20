@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -191,6 +191,18 @@ namespace SBEIO
     */
     errlHndl_t sendExitCacheContainedOp(const uint8_t * i_argPtr,
                                         size_t    i_argSize );
+
+    /**
+    * @brief Send putSram chipop to the SBE via SBE FIFO
+    *
+    * @param[in]  i_argPtr  Buffer of Input arguments from HWP Call
+    *             i_argSize Size of Input argument data
+    *
+    * @return errlHndl_t Error log handle on failure.
+    */
+    errlHndl_t sendPutSramOp(const uint8_t * i_argPtr,
+                             size_t    i_argSize );
+
 
     /**
     * @brief Sends a PSU chipOp to stash away a key,addr pair on the SBE

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -115,6 +115,27 @@ class SbeFifo
         };
 
         /**
+         * @brief enums for FIFO PUT SRAM Messages
+         */
+        enum fifoPutSramMessage
+        {
+            SBE_FIFO_CMD_PUTSRAM           = 0x04,
+            /**
+            *   Command buffer layout (6 32-bit words)
+            *  |                 Length                          |
+            *  |  reserved  |   reserved   | 0xA4      |   0x04  |
+            *  |       Chiplet Id          | reserved* |   mode  |
+            *  |            SRAM Address 0:31                    |
+            *  |            SRAM Address 32:63                   |
+            *  |          Length of data (in bytes)              |
+            *  |              Data....                           |
+            *
+            *  reserved* has multicast bit as 0th bit
+            **/
+            PUTSRAM_CMD_BUF_LEN_IN_WORDS    = 6,
+        };
+
+        /**
         * @brief enums for FIFO Generic Messages
         */
         enum fifoGenericMessage
@@ -174,6 +195,44 @@ class SbeFifo
                 address[1] = 0;
             }
             ~fifoPutMemRequest()
+            {
+            };
+        } PACKED;
+
+        /**
+        * @brief Struct for FIFO PutSram request
+        *
+        */
+        struct fifoPutSramRequest
+        {
+            uint32_t wordCnt;
+            uint16_t reserved;
+            uint8_t  commandClass;
+            uint8_t  command;
+            uint16_t pervChipletId;
+            uint8_t  mcast : 1;
+            uint8_t  reserved1 : 7;
+            uint8_t  mode;
+            uint32_t address[2];   // address[0] = Address bits 0:31
+                                   // address[1] = Address bits 32:63
+            uint32_t dataLenBytes; // Must be multiple of 8 bytes
+            uint32_t data[];
+
+            fifoPutSramRequest() :
+               wordCnt(0),
+               reserved(0),
+               commandClass(SBE_FIFO_CLASS_MEMORY_ACCESS),
+               command(SBE_FIFO_CMD_PUTSRAM),
+               pervChipletId(0),
+               mcast(0),
+               reserved1(0),
+               mode(0),
+               dataLenBytes(0)
+            {
+                address[0] = 0;
+                address[1] = 0;
+            }
+            ~fifoPutSramRequest()
             {
             };
         } PACKED;
@@ -363,6 +422,20 @@ class SbeFifo
             struct       fapi2::ffdc_struct ffdc;  // ffdc data
             uint32_t     status_distance; // distance to status
             fifoPutMemResponse() {}
+        } PACKED;
+
+        /**
+         * @brief Struct for FIFO PutSram response
+         *
+         * The actual number of returned words varies based on whether there was
+         * an error.
+         */
+        struct fifoPutSramResponse
+        {
+            statusHeader status;
+            struct       fapi2::ffdc_struct ffdc;  // ffdc data
+            uint32_t     status_distance; // distance to status
+            fifoPutSramResponse() {}
         } PACKED;
 
         /**

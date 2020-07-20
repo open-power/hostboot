@@ -47,6 +47,7 @@ EXTRAINCDIR += ${SRC_IMPORT_PATH}/hwpf/fapi2/include
 EXTRAINCDIR += ${P10_PROCEDURE_PATH}/memory/
 EXTRAINCDIR += ${P10_PROCEDURE_PATH}/nest
 EXTRAINCDIR += ${P10_PROCEDURE_PATH}/pm/
+EXTRAINCDIR += ${P10_PROCEDURE_PATH}/core/
 EXTRAINCDIR += ${EXPLORER_HWP_PATH}/
 EXTRAINCDIR += ${EXPLORER_HWP_PATH}/lib/
 EXTRAINCDIR += ${EXPLORER_HWP_PATH}/lib/inband/
@@ -86,12 +87,21 @@ OBJS += p10_scominfo.o
 OBJS += p10_setup_mmio_bars.o
 OBJS += p10_throttle_sync.o
 OBJS += p10_write_xram.o
+OBJS += p10_sbe_exit_cache_contained.o
+OBJS += p10_sbe_apply_xscom_inits.o
+OBJS += p10_sbe_purge_hb.o
+OBJS += p10_revert_sbe_mcs_setup.o
+OBJS += p10_sbe_instruct_start.o
+OBJS += p10_l3_flush.o
+OBJS += p10_l2_flush.o
+OBJS += p10_sbe_stop_hb.o
 
 # Add the path where HWPs object files are located
 VPATH += ${SRC_IMPORT_PATH}/chips/p10/common/scominfo/
 VPATH += ${P10_PROCEDURE_PATH}/memory/
 VPATH += ${P10_PROCEDURE_PATH}/nest/
 VPATH += ${P10_PROCEDURE_PATH}/pm/
+VPATH += ${P10_PROCEDURE_PATH}/core/
 VPATH += ${EXPLORER_HWP_PATH}/
 
 include ${ROOTPATH}/config.mk

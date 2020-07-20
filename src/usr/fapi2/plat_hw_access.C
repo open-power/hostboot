@@ -842,28 +842,28 @@ uint8_t platGetPIBErrorMask(void)
 // --------------------------------------------------------------------------
 
 /**
- * @brief Determine if a given target is on the master proc chip
+ * @brief Determine if a given target is on the boot proc chip
  * @param[in]  i_Target   TARGETING::Target which op is being called on
- * @param[out] i_isMaster True if on master proc chip, false if not
+ * @param[out] i_isMaster True if on boot proc chip, false if not
  * @return errlHndl_t
  */
-errlHndl_t isOnMasterProc(TARGETING::Target * i_target, bool & o_isMaster)
+errlHndl_t isOnBootProc(TARGETING::Target * i_target, bool & o_isBootProc)
 {
     errlHndl_t l_errl = nullptr;
-    assert(i_target != nullptr, "isOnMasterProc:: Cannot pass nullptr target to isOnMasterProc");
-    TARGETING::Target* l_pMasterProcChip = nullptr;
+    assert(i_target != nullptr, "isOnBootProc:: Cannot pass nullptr target to isOnBootProc");
+    TARGETING::Target* l_pBootProcChip = nullptr;
     TARGETING::Target* l_pParentProcChip = nullptr;
-    TARGETING::targetService().masterProcChipTargetHandle( l_pMasterProcChip );
-    assert(l_pMasterProcChip != nullptr, "isOnMasterProc:: Unable to find the system's master proc chip target handle");
-    o_isMaster = false;
+    TARGETING::targetService().masterProcChipTargetHandle( l_pBootProcChip );
+    assert(l_pBootProcChip != nullptr, "isOnBootProc:: Unable to find the system's boot proc chip target handle");
+    o_isBootProc = false;
 
     // Target can be a chiplet or a proc, get the parent proc in case it's a chiplet
     l_errl = getCfamChipTarget(i_target, l_pParentProcChip);
     if(l_errl == nullptr)
     {
-        if(l_pMasterProcChip == l_pParentProcChip)
+        if(l_pBootProcChip == l_pParentProcChip)
         {
-            o_isMaster = true;
+            o_isBootProc = true;
         }
     }
     return l_errl;

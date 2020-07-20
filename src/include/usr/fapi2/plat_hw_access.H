@@ -275,12 +275,12 @@ void checkPibMask(errlHndl_t& io_errLog );
 // --------------------------------------------------------------------------
 
 /**
-* @brief Determine if a given target is on the master proc chip
+* @brief Determine if a given target is on the boot proc chip
 * @param[in]  i_Target   TARGETING::Target which op is being called on
-* @param[out] i_isMaster True if on master proc chip, false if not
+* @param[out] i_isBootProc True if on boot proc chip, false if not
 * @return errlHndl_t
 */
-errlHndl_t isOnMasterProc(TARGETING::Target * i_target, bool & o_isMaster);
+errlHndl_t isOnBootProc(TARGETING::Target * i_target, bool & o_isBootProc);
 
 /**
  * @brief Assemble a multicast address from the given SCOM address

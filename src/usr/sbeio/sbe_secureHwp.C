@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -34,6 +34,7 @@
 #include "sbe_fifodd.H"
 #include <sbeio/sbeioreasoncodes.H>
 #include <targeting/common/targetservice.H>
+#include <util/align.H>
 
 #define  DEBUG_TRACE  0   // 0 = disable
 extern trace_desc_t* g_trac_sbeio;
@@ -54,6 +55,19 @@ struct argData_t
     uint32_t dataLen;
     uint64_t dataLoc;
     uint32_t flags;
+} PACKED;
+
+struct putSramData_t
+{
+    // Byte array has to be used here because compiler cannot properly
+    // pack a fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>
+    uint8_t targ[sizeof(fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>)];
+    uint32_t pervChipletId;
+    bool     mcast;
+    uint8_t  mode;
+    uint64_t address;
+    uint32_t dataLenBytes;
+    uint64_t dataLoc;
 } PACKED;
 
 #define SBE_TRACD(printf_string,args...) \
@@ -143,7 +157,10 @@ namespace SBEIO
                                sizeof(l_fifoResponse));
             if (l_errl)
             {
-                SBE_TRACF("ERR_MRK: SBE Putmem chip-op call returns an error.");
+                TRACFCOMP(g_trac_sbeio,
+                        ERR_MRK"SBE Putmem chip-op ERROR : errorlog PLID=0x%x "
+                        TRACE_ERR_FMT,
+                        TRACE_ERR_ARGS(l_errl));
             }
 
             free(l_fifoRequest.dataPtr);
@@ -151,6 +168,123 @@ namespace SBEIO
         } while(0);
 
         SBE_TRACD(EXIT_MRK "putMemChipOpRequest");
+
+        return l_errl;
+    }
+
+    errlHndl_t sendPutSramOp(const uint8_t * i_argPtr,
+                             const size_t i_argSize)
+    {
+        errlHndl_t l_errl = nullptr;
+
+        SBE_TRACF(ENTER_MRK "sendPutSramOp");
+
+        do
+        {
+#if DEBUG_TRACE
+            for (uint32_t ii = 0; ii < i_argSize; ii++)
+            {
+                TRACFCOMP(g_trac_sbeio, "sendPutSramOp - i_argPtr[%d] = 0x%.2X", ii, i_argPtr[ii]);
+            }
+#endif
+
+            // Map input arg pointer into structure
+            const putSramData_t* l_argPtr =
+                reinterpret_cast<const putSramData_t*>(i_argPtr);
+
+            // Data length
+            if (l_argPtr->dataLenBytes % 8 != 0)
+            {
+                TRACFCOMP(g_trac_sbeio, "sendPutSramOp - dataLenBytes needs to be multiple of 8 bytes");
+            }
+            const uint32_t originalDataSizeBytes = l_argPtr->dataLenBytes;
+            const uint32_t alignedDataSizeBytes = ALIGN_8(l_argPtr->dataLenBytes);
+
+            // Setup command
+            SbeFifo::fifoPutSramRequest* l_fifoRequest =
+                reinterpret_cast<SbeFifo::fifoPutSramRequest*>
+                (malloc(sizeof(SbeFifo::fifoPutSramRequest) +
+                        alignedDataSizeBytes));
+            SbeFifo::fifoPutSramResponse l_fifoResponse;
+
+            fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP> l_fapiTarget =
+                *reinterpret_cast<const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>*>(&l_argPtr->targ[0]);
+            TARGETING::Target * l_target = l_fapiTarget.get();
+
+            // SBE chip-op interface requires address to be in lower 32 bits
+            // Address bits 0:31
+            l_fifoRequest->address[0] = 0;
+
+            // Address bits 32:63
+            l_fifoRequest->address[1] = l_argPtr->address >> 32;
+
+            // Data size in bytes
+            l_fifoRequest->dataLenBytes = alignedDataSizeBytes;
+
+            // Mode
+            l_fifoRequest->mode = l_argPtr->mode;
+
+            // Perv chiplet ID
+            l_fifoRequest->pervChipletId = l_argPtr->pervChipletId;
+
+            // Multicast bit
+            l_fifoRequest->mcast = l_argPtr->mcast;
+
+            // Command
+            l_fifoRequest->command = SbeFifo::SBE_FIFO_CMD_PUTSRAM;
+
+            // Command Class
+            l_fifoRequest->commandClass = SbeFifo::SBE_FIFO_CLASS_MEMORY_ACCESS;
+
+            // Command length
+            l_fifoRequest->wordCnt = SbeFifo::PUTSRAM_CMD_BUF_LEN_IN_WORDS +
+                (alignedDataSizeBytes / SbeFifo::BYTES_PER_WORD);
+            if (alignedDataSizeBytes % SbeFifo::BYTES_PER_WORD)
+            {
+                l_fifoRequest->wordCnt += 1;
+            }
+
+            // Copy over the SRAM data
+            memcpy(l_fifoRequest->data,
+                    reinterpret_cast<uint8_t*>(l_argPtr->dataLoc),
+                    originalDataSizeBytes);
+
+            // Clear out unused space after alignment
+            if (alignedDataSizeBytes > originalDataSizeBytes)
+            {
+                memset(reinterpret_cast<uint8_t*>(l_fifoRequest->data) + originalDataSizeBytes,
+                        0x00,
+                        alignedDataSizeBytes - originalDataSizeBytes);
+            }
+
+            SBE_TRACF("INFO_MRK: Target: 0x%.8X, Address: 0x%.16llX, Datalen: %d, "
+                    "Data[0]: 0x%.8X, Mode 0x%.4x, WordCnt: %d,"
+                    "PervChipletId: %d, Mcast: %d",
+                    TARGETING::get_huid(l_target),
+                    (static_cast<uint64_t>(l_fifoRequest->address[0]) << 32) | l_fifoRequest->address[1],
+                     l_fifoRequest->dataLenBytes,
+                     *l_fifoRequest->data,
+                     l_fifoRequest->mode,
+                     l_fifoRequest->wordCnt,
+                     l_fifoRequest->pervChipletId,
+                     l_fifoRequest->mcast);
+
+            l_errl = SbeFifo::getTheInstance().performFifoChipOp(
+                l_target,
+                reinterpret_cast<uint32_t *>(l_fifoRequest),
+                reinterpret_cast<uint32_t *>(&l_fifoResponse),
+                sizeof(l_fifoResponse));
+
+            if (l_errl)
+            {
+                SBE_TRACF(ERR_MRK "sendPutSramOp returned error from performFifoChipOp");
+            }
+
+            free(l_fifoRequest);
+            l_fifoRequest = nullptr;
+        } while(0);
+
+        SBE_TRACF(EXIT_MRK "sendPutSramOp");
 
         return l_errl;
     }
@@ -209,6 +343,17 @@ namespace SBEIO
                 SBE_TRACF(INFO_MRK "sendSecureHwpRequest: HWP %s was called.", i_hwpName);
                 //Send Exit Cache Containted Chip Op to the SBE
                 errl = sendExitCacheContainedOp(i_argPtr, i_argSize);
+                if (errl)
+                {
+                    SBE_TRACF(ERR_MRK "sendSecureHwpRequest: Error running %s.", i_hwpName);
+                    break;
+                }
+            }
+            else if (strcmp(i_hwpName, "p10_putsram") == 0)
+            {
+                SBE_TRACF(INFO_MRK "sendSecureHwpRequest: HWP %s was called.", i_hwpName);
+                // Send putSram chip op to the SBE
+                errl = sendPutSramOp(i_argPtr, i_argSize);
                 if (errl)
                 {
                     SBE_TRACF(ERR_MRK "sendSecureHwpRequest: Error running %s.", i_hwpName);

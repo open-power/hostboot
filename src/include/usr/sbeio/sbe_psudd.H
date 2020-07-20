@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -439,7 +439,6 @@ class SbePsu
                 uint64_t cd1_exitCacheContain_MbxReg3Reserved; // mbxReg3
             } PACKED;
 
-
             struct //setSystemConfig
             {
                 uint16_t cd7_SetSystemConfig_Reserved;
@@ -447,7 +446,7 @@ class SbePsu
                 uint16_t cd7_SetSystemConfig_SeqID;
                 uint8_t  cd7_SetSystemConfig_CommandClass;
                 uint8_t  cd7_SetSystemConfig_Command;
-                uint64_t cd7_SetSystemConfig_SystemFabricIdMap ;
+                uint64_t cd7_SetSystemConfig_SystemFabricIdMap;
                 uint64_t cd7_SetSystemConfig_MbxReg2reserved;
                 uint64_t cd7_SetSystemConfig_MbxReg3reserved;
             } PACKED;

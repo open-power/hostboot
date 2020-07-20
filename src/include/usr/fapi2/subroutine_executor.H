@@ -47,6 +47,9 @@
 
 // Debug trace
 #define  DEBUG_TRACE  0   // 0 = disable
+// Defining these two symbolically simplifies the include chain
+#define  PCI0_PERV_CHIPLET_ID 0x08
+#define  PCI1_PERV_CHIPLET_ID 0x09
 
 /**
 * @brief Given a hwp name, and its parameters, serialize the parameters and pass the serialized
@@ -90,6 +93,12 @@ errlHndl_t requestHwpViaSbe(const char * i_hwpName, Types... types)
     return l_errl;
 }
 
+// Macros that return the 1st argument
+#define _GET_1ST_ARG(N, ...) N
+
+// Macros that return the 2nd argument
+#define _GET_2ND_ARG(N, M, ...) M
+
 /** @brief Helper struct to force evaluation of constexpr expressions at
  *         compile-time.
  */
@@ -103,8 +112,7 @@ struct values_equal
 // to be run on the SBE.
 static constexpr const char* const hwp_whitelist[] =
 {
-  "p10_putmemproc",
-  "p10_putsram"
+  "p10_putmemproc"
 };
 
 /** @brief strcmp that can run at compile-time given constexpr arguments.
@@ -167,7 +175,33 @@ static constexpr bool is_hwp_whitelisted(const char* const name)
             { \
                 FAPI_INF("subroutine_executor: executing hwp %s via SBE chip-op", \
                           l_function); \
-                l_errl =  requestHwpViaSbe(l_function, _args); \
+                /* Check if the target exists on the boot proc*/ \
+                bool isBootProc = true; \
+                /* Read the target argument, which is the first argument in the list */ \
+                TARGETING::Target* l_target = \
+                    _GET_1ST_ARG(_args).get(); \
+                l_errl = fapi2::isOnBootProc(l_target, isBootProc); \
+                if (l_errl) \
+                { \
+                    FAPI_INF("subroutine_executor: Failed trying to determine if target was on boot proc chip"); \
+                    addErrlPtrToReturnCode(RC, l_errl); \
+                    l_errl = nullptr; \
+                    break; \
+                } \
+                /* Run hwp on host if targ is on boot proc or if PCI chiplet*/ \
+                if (strcmp(l_function, "p10_putsram") == 0 && \
+                        (isBootProc || \
+                         _GET_2ND_ARG(_args) == PCI0_PERV_CHIPLET_ID || \
+                         _GET_2ND_ARG(_args) == PCI1_PERV_CHIPLET_ID)) \
+                { \
+                    FAPI_INF("subroutine_executor:    isBootProc = %d .. executing hwp %s on host", \
+                            isBootProc, l_function); \
+                    FAPI_PLAT_EXEC_HWP(RC, FUNC, _args); \
+                } \
+                else \
+                { \
+                    l_errl =  requestHwpViaSbe(l_function, _args); \
+                } \
             } \
             break; \
         } while (0); \
