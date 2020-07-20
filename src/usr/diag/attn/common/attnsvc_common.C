@@ -282,7 +282,7 @@ errlHndl_t ServiceCommon::handleAttentions(const TargetHandle_t i_proc)
        // Query the OCMBs for attentions if needed;
        memOps.resolveOcmbs( i_proc, attentions );
 
-       ATTN_TRACE("handleAttns %d active( PRD)", attentions.size() );
+       ATTN_SLOW("handleAttns %d active( PRD)", attentions.size() );
        if(!attentions.empty())
        {
            err = getPrdWrapper().callPrd(attentions);

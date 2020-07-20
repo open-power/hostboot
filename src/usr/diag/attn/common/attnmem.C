@@ -557,12 +557,16 @@ bool MemOps::resolve(
 void MemOps::resolveOcmbs( const TargetHandle_t i_proc,
                            AttentionList & io_attentions )
 {
+
+    ATTN_SLOW( "MemOps::resolveOcmbs start" );
+
     // Do nothing if we are not on a system that supports OCMBs
     TargetHandle_t primaryProc = nullptr;
     getTargetService().masterProcChipTargetHandle( primaryProc );
     ATTR_MODEL_type procModel = primaryProc->getAttr<ATTR_MODEL>();
     if ( MODEL_AXONE != procModel )
     {
+        ATTN_SLOW( "MemOps::resolveOcmbs OCMBs only supported on Axone" );
         return;
     }
 
@@ -573,6 +577,7 @@ void MemOps::resolveOcmbs( const TargetHandle_t i_proc,
     assert( sys != nullptr );
     if ( 0 == sys->getAttr<ATTR_ATTN_CHK_OCMBS>() )
     {
+        ATTN_SLOW( "MemOps::resolveOcmbs ATTN_CHK_OCMBS not set" );
         return;
     }
 
@@ -605,7 +610,9 @@ void MemOps::resolveOcmbs( const TargetHandle_t i_proc,
         { 0x08040004, 0x08040007, HOST_ATTN   }, // OCMB_CHIPLET_SPA_FIR
     };
 
-
+    ATTN_SLOW( "MemOps::resolveOcmbs ATTN_CHK_OCMBS ocmbList size=%d",
+               ocmbList.size() );
+    bool attnFound = false;
     for ( const auto & ocmb : ocmbList )
     {
         for ( const auto & fir : firList )
@@ -615,6 +622,7 @@ void MemOps::resolveOcmbs( const TargetHandle_t i_proc,
             errlHndl_t err = getScom( ocmb, fir.firAddr, firData );
             if ( err )
             {
+                ATTN_SLOW( "MemOps::resolveOcmbs FIR getScom failed" );
                 errlCommit( err, ATTN_COMP_ID );
                 break;
             }
@@ -624,6 +632,7 @@ void MemOps::resolveOcmbs( const TargetHandle_t i_proc,
             err = getScom( ocmb, fir.firMask, firMaskData );
             if ( err )
             {
+                ATTN_SLOW( "MemOps::resolveOcmbs mask getScom failed" );
                 errlCommit( err, ATTN_COMP_ID );
                 break;
             }
@@ -636,16 +645,18 @@ void MemOps::resolveOcmbs( const TargetHandle_t i_proc,
             // Check for any FIR bits on
             if ( firData & ~firMaskData )
             {
+                ATTN_SLOW( "MemOps::resolveOcmbs found attn" );
                 // If FIR bits are on, add the OCMB attn to the attn list
-                AttnData newData( ocmb, fir.attnType );
+                AttnData newData( i_proc, fir.attnType );
                 io_attentions.add( Attention(newData, this) );
-
-                // Add only the highest priority attention from each OCMB, so
-                // break out to the next chip once we've found one.
+                attnFound = true;
                 break;
             }
         }
+        if ( attnFound ) break;
     }
+
+    ATTN_SLOW( "MemOps::resolveOcmbs end" );
 }
 
 MemOps::MemOps()

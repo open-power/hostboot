@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -110,7 +110,7 @@ errlHndl_t checkForIplAttentions()
 
     TargetHandleList::iterator tit = list.begin();
 
-    ATTN_TRACE("checkForIplAttentions: %d chips", list.size() );
+    ATTN_SLOW("checkForIplAttentions: %d chips", list.size() );
     while(tit != list.end())
     {
         err = Singleton<Service>::instance().handleAttentions(*tit);
