@@ -40,6 +40,7 @@
 //  targeting support
 #include <targeting/common/commontargeting.H>
 #include <targeting/common/utilFilter.H>
+#include <targeting/targplatutil.H>
 
 #include <fapi2/target.H>
 #include <fapi2/plat_hwp_invoker.H>
@@ -63,7 +64,7 @@ using   namespace   TARGETING;
 //******************************************************************************
 
 void _deconfigPhbsBasedOnPhbActive(
-    TARGETING::ConstTargetHandle_t const       i_pecTarget,
+    TARGETING::ConstTargetHandle_t const i_pecTarget,
     TARGETING::ATTR_PROC_PCIE_PHB_ACTIVE_typeStdArr& io_phbActive)
 {
     uint8_t l_phbNum = 0;
@@ -85,8 +86,8 @@ void _deconfigPhbsBasedOnPhbActive(
         // Get the PHB unit number
         l_phbNum = l_phb->getAttr<TARGETING::ATTR_CHIP_UNIT>();
 
-        //Check if this particular PHB is indicated as active
-        //via the attribute
+        //First check if this particular PHB is indicated as active
+        //via the PHB Active attribute
         if (io_phbActive[l_phbNum % io_phbActive.size()] == 0)
         {
             TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
@@ -124,6 +125,84 @@ void _deconfigPhbsBasedOnPhbActive(
     return;
 }
 
+//******************************************************************************
+// _modifyPhbsBasedonNVME
+//******************************************************************************
+
+void _modifyPhbActiveBasedonNVME(
+    TARGETING::ConstTargetHandle_t const i_pecTarget,
+    TARGETING::ConstTargetHandle_t const i_procTarget,
+    TARGETING::ATTR_PROC_PCIE_PHB_ACTIVE_typeStdArr& io_phbActive)
+{
+    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+        ENTER_MRK "_modifyPhbsBasedonNVME: Proc target HUID = 0x%08X,"
+        " PHB active value = 0x%02X.", TARGETING::get_huid(i_pecTarget), io_phbActive);
+
+    TARGETING::Target* l_nodeTgt = TARGETING::UTIL::getCurrentNodeTarget();
+    const auto i_nvmeCcin = l_nodeTgt->getAttr<ATTR_PCIE_NVME_CCIN>();
+    const auto i_nvmeConfig = l_nodeTgt->getAttrAsStdArr<ATTR_PCIE_NVME_PHB_CONFIG>();
+
+    uint8_t l_procNum = i_procTarget->getAttr<ATTR_POSITION>();
+    //Get Unique PEC Number for this PEC within the NODE -- This is will be used as an entry
+    // the PCIE_NVME_PHB_CONFIG to find the right bits for this particular PEC target
+    uint8_t l_pecNum = (l_procNum * NUM_PECS_PER_PROC) + i_pecTarget->getAttr<ATTR_CHIP_UNIT>();
+
+    for (auto const & l_nvmeEntry : i_nvmeConfig)
+    {
+        //Check if installed NVME backplane has any entries in PCIE_NVME_PHB_CONFIG
+        //  so any requisite PHBs can be disabled
+        if (i_nvmeCcin == l_nvmeEntry[0])
+        {
+            //Check if any of PHB0/PHB1/PHB2 are listed in the entry for this particular PEC
+            uint64_t l_phbMask = PHB_ANY_MASK >> (l_pecNum * (io_phbActive.size() + 1));
+            if (l_nvmeEntry[1] & l_phbMask)
+            {
+                //Isolate Specific PHBs to update the io_phbActive attribute
+                uint64_t l_phb0Mask = PHB0_MASK >> (l_pecNum * (io_phbActive.size() + 1));
+                uint64_t l_phb1Mask = PHB1_MASK >> (l_pecNum * (io_phbActive.size() + 1));
+                uint64_t l_phb2Mask = PHB2_MASK >> (l_pecNum * (io_phbActive.size() + 1));
+
+                if (l_nvmeEntry[1] & l_phb0Mask)
+                {
+                    if (io_phbActive[0])
+                    {
+                        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                                  "Disabling PHB0 on PEC:0x%x due to NVME Backplane Settings",
+                                  l_pecNum );
+                        //Disable PHB in Active Attribute
+                        io_phbActive[0] = 0;
+                    }
+                }
+                if (l_nvmeEntry[1] & l_phb1Mask)
+                {
+                    if (io_phbActive[1])
+                    {
+                        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                                  "Disabling PHB1 on PEC:0x%x due to NVME Backplane Settings",
+                                  l_pecNum );
+                        //Disable PHB in Active Attribute
+                        io_phbActive[1] = 0;
+                    }
+                }
+                if (l_nvmeEntry[1] & l_phb2Mask)
+                {
+                    if (io_phbActive[2])
+                    {
+                        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                                  "Disabling PHB2 on PEC:0x%x due to NVME Backplane Settings",
+                                  l_pecNum );
+                        //Disable PHB in Active Attribute
+                        io_phbActive[2] = 0;
+                    }
+                }
+            }
+            //No need to look at other entries since this entry was found
+            break;
+        }
+    }
+
+    return;
+}
 
 //******************************************************************************
 // computeProcPcieConfigAttrs
@@ -138,6 +217,7 @@ errlHndl_t computeProcPcieConfigAttrs(TARGETING::Target * i_pProcChipTarget)
 
     do
     {
+        //Validate we are in a good state to begin
         assert((i_pProcChipTarget != nullptr),"computeProcPcieConfigs was "
             "passed in a nullptr processor target");
 
@@ -166,7 +246,13 @@ errlHndl_t computeProcPcieConfigAttrs(TARGETING::Target * i_pProcChipTarget)
             auto l_phb_active = l_pec->getAttrAsStdArr<ATTR_PROC_PCIE_PHB_ACTIVE_BASE>();
             auto l_phb_lane = l_pec->getAttrAsStdArr<ATTR_PROC_PCIE_LANE_REVERSAL_BASE>();
 
-           //Deconfigure Targets + Modify Active Settings Based on Functional Targets
+           //Modify Active Settings Based on NVME Backplane Data
+           //  The deconfiguration of these possibly now inactive PHBs happens in the next
+           //     step: _deconfigPhbsBasedOnPhbActive()
+           _modifyPhbActiveBasedonNVME(l_pec, i_pProcChipTarget, l_phb_active);
+
+           //Modify Active Settings based on Non-Functional Targets +
+           //   Deconfigure Targets based on Inactive PHB Settings
            _deconfigPhbsBasedOnPhbActive(l_pec, l_phb_active);
 
            //Set Attribute so HWP has reflection of PHB configuration
@@ -184,7 +270,7 @@ errlHndl_t computeProcPcieConfigAttrs(TARGETING::Target * i_pProcChipTarget)
 }
 
 
-#if 0 // TODO RTC:249139 -- Need to set necessary PCIe attributes
+#if 0 // TODO RTC:250046 -- Delete all unused code when enabling Dynamic Bifurcation
 
 
 // Maps the iop number to a mask which indicates which
@@ -674,7 +760,7 @@ void setup_pcie_iovalid_enable(const TARGETING::Target * i_procTarget)
 }
 
 
-#endif // TODO RTC:249139 -- Need to set necessary PCIe attributes
+#endif // TODO RTC:250046
 
 
 };

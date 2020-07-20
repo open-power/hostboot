@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -73,6 +73,12 @@ struct LaneSet
 static const size_t MAX_LANE_GROUPS_PER_PEC = 4;
 
 /**
+ *  @brief Max Number of PEC Targets expected
+ *     per Processor target
+ */
+static const size_t NUM_PECS_PER_PROC = 2;
+
+/**
  *  @brief Struct for each row in PCIE IOP configuration table.
  *      Used by code to compute the IOP config and PHBs active mask.
  */
@@ -133,13 +139,11 @@ enum PhbToMAC
  */
 enum PhbActiveMask
 {
-    PHB_MASK_NA = 0x00, ///< Sentinel mask (loop terminations)
-    PHB0_MASK   = 0x80, ///< PHB0 enabled
-    PHB1_MASK   = 0x40, ///< PHB1 enabled
-    PHB2_MASK   = 0x20, ///< PHB2 enabled
-    PHB3_MASK   = 0x10, ///< PHB3 enabled
-    PHB4_MASK   = 0x08, ///< PHB4 enabled
-    PHB5_MASK   = 0x04, ///< PHB5 enabled
+    PHB_MASK_NA  = 0x0000000000000000, ///< Sentinel mask (loop terminations)
+    PHB0_MASK    = 0x8000000000000000, ///< PHB0 enabled
+    PHB1_MASK    = 0x4000000000000000, ///< PHB1 enabled
+    PHB2_MASK    = 0x2000000000000000, ///< PHB2 enabled
+    PHB_ANY_MASK = PHB0_MASK | PHB1_MASK | PHB2_MASK, ///< Any PHB Enabled
 };
 
 };

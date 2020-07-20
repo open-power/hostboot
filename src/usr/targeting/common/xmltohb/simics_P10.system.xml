@@ -305,6 +305,14 @@
         <default>0</default>
     </attribute>
     <attribute>
+        <id>PCIE_NVME_CCIN</id>
+        <default>0x9876</default>
+    </attribute>
+    <attribute>
+        <id>PCIE_NVME_PHB_CONFIG</id>
+        <default>0x9876,0x4008000000000000</default>
+    </attribute>
+    <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0</default>
     </attribute>
@@ -5667,7 +5675,7 @@
     </attribute>
     <attribute>
         <id>PROC_PCIE_PHB_ACTIVE_BASE</id>
-        <default>0,0,1</default>
+        <default>0,1,1</default>
     </attribute>
     <attribute>
         <id>PROC_PCIE_LANE_REVERSAL_BASE</id>
