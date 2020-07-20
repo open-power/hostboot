@@ -331,6 +331,16 @@ ReturnCode platGetSecurityMode(uint8_t & o_securityMode);
 /// @return ReturnCode           Always FAPI2_RC_SUCCESS, this cannot fail.
 ReturnCode platSetSecurityMode();
 
+/// @brief This function is called by the FAPI_ATTR_GET macro when getting
+/// the ATTR_IS_SIMICS. It should not be called directly.
+///
+/// @param[out] o_simicsMode     Provides the attribute contents to the caller
+/// @return ReturnCode           Always FAPI2_RC_SUCCESS, this cannot fail.
+///                              If a toplevel target cannot be found then
+///                              an assert triggers in the platform call
+///
+ReturnCode platGetSimicsMode(fapi2::ATTR_IS_SIMICS_Type& o_simicsMode);
+
 /* @TODO RTC 245732: Implement getPllBucket for IOHS
 /// @brief Function to be called by GETMACRO_OB[0,1,2,3]_PLL_BUCKET
 ///         functions
@@ -528,6 +538,14 @@ fapiToTargeting::ID, sizeof(VAL), &(VAL))
     AttrOverrideSync::getAttrOverrideFunc(ID, TARGET, &VAL)\
     ? fapi2::ReturnCode() : \
     fapi2::platAttrSvc::platGetSecurityMode(VAL)
+
+//------------------------------------------------------------------------------
+// MACRO to route ATTR_IS_SIMICS access to the correct HB function
+//------------------------------------------------------------------------------
+#define ATTR_IS_SIMICS_GETMACRO(ID, TARGET, VAL) \
+    AttrOverrideSync::getAttrOverrideFunc(ID, TARGET, &VAL)\
+    ? fapi2::ReturnCode() : \
+    fapi2::platAttrSvc::platGetSimicsMode(VAL)
 
 //----------------------------------------------------------------------------
 // MACRO to route ATTR_FREQ_MCA_MHZ access to the correct HB function

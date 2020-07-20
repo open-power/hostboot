@@ -67,6 +67,7 @@
 #include <util/utilcommonattr.H>
 
 #include <secureboot/service.H>
+#include <util/misc.H>
 
 //FIXME RTC: 210975 This needs to be removed when the constants are either moved to P10 XML
 // or retired; it the latter case, the references to these constants need to be
@@ -1750,6 +1751,22 @@ ReturnCode platGetSecurityMode(uint8_t & o_securityMode)
 ReturnCode platSetSecurityMode()
 {
     FAPI_INF("Set SECURITY_MODE ignored when called from FAPI code");
+    return fapi2::ReturnCode();
+}
+
+//******************************************************************************
+// fapi::platAttrSvc::platGetSimicsMode function
+//******************************************************************************
+ReturnCode platGetSimicsMode(uint8_t & o_simicsMode)
+{
+    if( Util::isSimicsRunning() )
+    {
+        o_simicsMode = fapi2::ENUM_ATTR_IS_SIMICS_SIMICS;
+    }
+    else
+    {
+        o_simicsMode = fapi2::ENUM_ATTR_IS_SIMICS_REALHW;
+    }
     return fapi2::ReturnCode();
 }
 
