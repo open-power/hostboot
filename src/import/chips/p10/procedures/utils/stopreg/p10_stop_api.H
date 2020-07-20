@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -99,6 +99,9 @@ typedef enum
     STOP_SAVE_SPR_ENTRY_MISSING          =  15,
     STOP_SAVE_MAX_ENTRY_REACHED          =  16,
     STOP_SAVE_SPR_BIT_POS_RESERVE        =  17,
+    STOP_AUTO_WAKEUP_BAD_IMG             =  18,
+    STOP_AUTO_WAKEUP_INVALID_MODE        =  19,
+    STOP_AUTO_INVALID_HEADER_INIT        =  20,
 } StopReturnCode_t;
 
 /**
@@ -232,6 +235,15 @@ StopReturnCode_t proc_stop_save_cpureg(  void* const i_pImage,
  *              There is no explicit effort to support any other use case.
  */
 StopReturnCode_t proc_stop_init_self_save(  void* const i_pImage, const uint32_t i_corePos );
+
+/**
+ * @brief   Enables or disables auto wakeup for a core upon entry into a  STOP 11 state.
+ * @param[in]   i_pImage    start address of homer image associated with processor.
+ * @param[in]   i_pir       value of processor identification register (PIR)
+ * @param[in]   i_mode       0 = disable;  1 = enable
+ * @return  SUCCESS if image is updated successfully, error code otherwise.
+*/
+StopReturnCode_t proc_stop_auto_wakeup( void*  i_pImage,  const uint64_t  i_pir,  const uint32_t  i_mode);
 
 #ifdef __cplusplus
 } // extern "C"

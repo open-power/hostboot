@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -204,6 +204,9 @@ HCD_CONST(CPMR_MAX_CORE_L2_SCOM_LENGTH,         0x5C)
 HCD_CONST(CPMR_MAX_QUAD_SCOM_OFFSET,            0x60)
 HCD_CONST(CPMR_MAX_QUAD_SCOM_LENGTH,            0x64)
 
+//Few fields are reserved
+HCD_CONST(AUTO_WAKEUP_CONTROL_OFFSET_BYTE,      0x80)
+HCD_CONST(AUTO_WAKEUP_CONTROL_LENGTH_BYTE,      0x84)
 /// Self Restore without SMF Support
 
 HCD_CONST(SELF_RESTORE_CPMR_OFFSET,             CPMR_HEADER_SIZE)
@@ -214,6 +217,10 @@ HCD_CONST(SELF_RESTORE_FFDC_PER_CORE,           864)
 HCD_CONST(SELF_RESTORE_FFDC_PER_CORE_IN_HOMER,  1024)
 HCD_CONST(SELF_RESTORE_FFDC_PER_QUAD_IN_HOMER,  (SELF_RESTORE_FFDC_PER_CORE_IN_HOMER * 4))
 HCD_CONST(SELF_RESTORE_FFDC_BLK_CNT,            27)
+
+//Auto Wakeup Vector
+HCD_CONST(AUTO_WAKEUP_CPMR_HDR_OFFSET,         0xE0)
+HCD_CONST(AUTO_WAKEUP_CPMR_HDR_LENGTH,         0x04)
 
 // Self Restore Region With SMF Support
 HCD_CONST(SMF_THREAD_LAUNCHER_SIZE,         1024)

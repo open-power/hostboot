@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -53,7 +53,7 @@
 #include <p10_qme_meta_data.H>
 #include <p10_qme_build_attributes.H>
 #include <p10_scan_compression.H>
-
+#include <p10_stop_util.H>
 
 extern "C"
 {
@@ -529,6 +529,106 @@ fapi2::ReturnCode validateInputArguments( void* const i_pImageIn, void* i_pImage
 
 fapi_try_exit:
     return fapi2::current_err;
+}
+
+//------------------------------------------------------------------------------
+
+/**
+ * @brief returns PIR value for a given core and thread.
+ * @param[in]   i_corePos       core position
+ * @param[in]   i_threadPos     thread position
+ * @param[in]   i_fuseMode      fuse status of core.
+ * @return      PIR value
+ */
+uint64_t getPirValue( uint32_t i_corePos, uint32_t i_threadPos, uint32_t i_fuseMode )
+{
+    using namespace stopImageSection;
+    uint64_t l_pir      = 0;
+    uint8_t  l_tempPir  = 0;
+    l_tempPir = 0;
+    l_tempPir = (i_corePos / MAX_CORES_PER_QUAD ) << MAX_CORES_PER_QUAD;
+    i_corePos = i_corePos % MAX_CORES_PER_QUAD;
+
+    switch( i_corePos )
+    {
+        case 0:
+            break;
+
+        case 1:
+            if( i_fuseMode )
+            {
+                l_tempPir |= FUSED_CORE_BIT3;
+            }
+            else
+            {
+                l_tempPir |= FUSED_CORE_BIT1;
+            }
+
+            break;
+
+        case 2:
+            l_tempPir |= FUSED_CORE_BIT0;
+            break;
+
+        case 3:
+            if( i_fuseMode )
+            {
+                l_tempPir |= ( FUSED_CORE_BIT0 | FUSED_CORE_BIT3 );
+            }
+            else
+            {
+                l_tempPir |= (FUSED_CORE_BIT0 | FUSED_CORE_BIT1 );
+            }
+
+            break;
+    }
+
+    switch( i_threadPos )
+    {
+        case 0:
+            break;
+
+        case 1:
+            if( i_fuseMode )
+            {
+                l_tempPir |= FUSED_CORE_BIT2;
+            }
+            else
+            {
+                l_tempPir |= FUSED_CORE_BIT3;
+            }
+
+            break;
+
+        case 2:
+            if( i_fuseMode )
+            {
+                l_tempPir |= FUSED_CORE_BIT1;
+            }
+            else
+            {
+                l_tempPir |= FUSED_CORE_BIT2;
+            }
+
+            break;
+
+        case 3:
+            if( i_fuseMode )
+            {
+                l_tempPir |= ( FUSED_CORE_BIT1 | FUSED_CORE_BIT2 );
+            }
+            else
+            {
+                l_tempPir |= ( FUSED_CORE_BIT2 | FUSED_CORE_BIT3);
+            }
+
+            break;
+    }
+
+    l_pir = l_tempPir;
+
+    return l_pir;
+
 }
 
 //------------------------------------------------------------------------------
@@ -1791,6 +1891,9 @@ fapi2::ReturnCode buildCpmrHeader( CONST_FAPI2_PROC& i_procTgt, Homerlayout_t   
 
     FAPI_TRY( buildScomHeader( i_procTgt, i_pChipHomer ) );
 
+    pCpmrHdr->iv_autoWkUpVectOffset     =   htobe32(AUTO_WAKEUP_CPMR_HDR_OFFSET);
+    pCpmrHdr->iv_autoWkUpVectLength     =   htobe32(AUTO_WAKEUP_CPMR_HDR_LENGTH);
+
 #ifndef __HOSTBOOT_MODULE
     FAPI_INF( "Max Core L2 SCOM Entry       0x%08x", htobe32( pCpmrHdr->iv_maxCoreL2ScomEntry) );
     FAPI_INF( "Max Cache L3 SCOM Entry      0x%08x",  htobe32( pCpmrHdr->iv_maxEqL3ScomEntry) );
@@ -1804,9 +1907,49 @@ fapi2::ReturnCode buildCpmrHeader( CONST_FAPI2_PROC& i_procTgt, Homerlayout_t   
     FAPI_INF( "SCOM Restore Length          0x%08x",  htobe32( pCpmrHdr->iv_scomRestoreLength ));
 
 #endif
+    FAPI_INF( "Auto Wakeup Vector Offset    0x%08x",  htobe32( pCpmrHdr->iv_autoWkUpVectOffset));
+    FAPI_INF( "Auto Wakeup Vector Length    0x%08x",  htobe32( pCpmrHdr->iv_autoWkUpVectLength));
 
  fapi_try_exit:
     FAPI_INF( "<< buildCpmrHeader" )
+    return fapi2::current_err;
+}
+
+//-------------------------------------------------------------------------------------------------------
+/**
+ * @brief creates Auto wakeup Vector.
+ * @param[in]   i_pHomerImage       points to P10 chip's HOMER.
+ * @param[in]   i_fuseMode          fuse status of core
+ * @param[in]   i_chipFuncModel     describes config details of the P10 chip
+ * @return      fapi2 return code
+ */
+fapi2::ReturnCode createAutoWakeupVector( void * const i_pHomerImage,
+                                          uint8_t i_fuseMode,
+                                          P10FuncModel & i_chipFuncModel  )
+{
+    FAPI_INF( ">> createAutoWakeupVector" );
+
+    uint64_t l_pir      =   0;
+    stopImageSection::StopReturnCode_t l_rc;
+
+    for( uint8_t l_corePos = 0; l_corePos < MAX_CORES_PER_CHIP; l_corePos++ )
+    {
+        if( i_chipFuncModel.isCoreFunctional( l_corePos ) )
+        {
+            l_pir = getPirValue( l_corePos, 0, i_fuseMode );
+            l_rc = stopImageSection::proc_stop_auto_wakeup( i_pHomerImage,
+                                                            l_pir,
+                                                            0x01 );
+            FAPI_ASSERT( ( !l_rc ),
+                         fapi2::AUTO_WAKEUP_VECTOR_CREATION_FAILED()
+                         .set_PIR( l_pir )
+                         .set_STOP_API_RC( l_rc ),
+                         "Failed To Create Auto Wakeup Vector For Core %d RC: %d", l_corePos, (uint32_t)l_rc  );
+        }
+    }
+
+fapi_try_exit:
+    FAPI_INF( "<< createAutoWakeupVector" );
     return fapi2::current_err;
 }
 
@@ -1963,6 +2106,13 @@ fapi2::ReturnCode buildCpmrImage( CONST_FAPI2_PROC& i_procTgt,
 
     FAPI_TRY( initCpmrAttribute( i_pChipHomer, l_qmeBuildRecord ),
               "Failed To Initialize CPMR Attribute" );
+
+    #ifdef __AUTO_WAKEUP_TEST_
+
+    FAPI_TRY( createAutoWakeupVector( i_pChipHomer, l_fuseModeState, i_chipFuncModel ),
+              "Failed To Create Auto Wakeup Vector" );
+    #endif
+
 fapi_try_exit:
 
     FAPI_INF("CPMR / QME built");
@@ -2360,8 +2510,8 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
-
 //-------------------------------------------------------------------------------------------------------
+
 
 /**
  * @brief       verifies overall image size for XGPE, QME and PGPE
@@ -2888,6 +3038,7 @@ fapi2::ReturnCode p10_hcode_image_build(    CONST_FAPI2_PROC& i_procTgt,
 
     FAPI_TRY( verifySramImageSize( pChipHomer, l_chipFuncModel ) ,
               "Image Size Check Failed " );
+
     FAPI_TRY( traceRs4ContainerSize( pChipHomer ),
         "Failed To Trace RS4 Size" );
 

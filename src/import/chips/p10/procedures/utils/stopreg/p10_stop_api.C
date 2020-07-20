@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -1830,6 +1830,71 @@ StopReturnCode_t proc_stop_init_self_save(  void* const i_pImage, const uint32_t
     return l_rc;
 }
 
+//-----------------------------------------------------------------------------------------------------
+
+StopReturnCode_t proc_stop_auto_wakeup( void  *i_pImage,  const uint64_t  i_pir,  const uint32_t i_mode )
+{
+    StopReturnCode_t l_rc;
+    uint32_t l_coreId           =   0;
+    uint32_t l_threadId         =   0;
+    uint8_t  *l_pVectorField    =   NULL;
+    uint32_t l_vectLength       =   0;
+    uint32_t l_tempWord         =   0;
+    uint32_t l_coreOffset       =   0;
+
+    MY_INF(">> proc_stop_init_self_save" );
+
+    do
+    {
+        if( !i_pImage )
+        {
+            l_rc    =   STOP_AUTO_WAKEUP_BAD_IMG;
+        }
+
+        l_rc    =   getCoreAndThread( i_pImage, i_pir, &l_coreId, &l_threadId );
+
+        if( l_rc )
+        {
+            break;
+        }
+
+        l_pVectorField  =   (uint8_t *) i_pImage + CPMR_HOMER_OFFSET + AUTO_WAKEUP_CONTROL_OFFSET_BYTE;
+        l_tempWord      =   *((uint32_t*)l_pVectorField);
+        l_tempWord      =   SWIZZLE_4_BYTE(l_tempWord );
+        l_vectLength    =   *((uint32_t*)( l_pVectorField + 4 ));
+        l_vectLength    =   SWIZZLE_4_BYTE( l_vectLength );
+        l_pVectorField  =   (uint8_t *) i_pImage + CPMR_HOMER_OFFSET + l_tempWord;
+        l_coreOffset    =   l_coreId >> 3;
+
+        if( l_coreOffset >= l_vectLength )
+        {
+            //CPMR Header not initialized with right vector length
+            l_rc    =   STOP_AUTO_INVALID_HEADER_INIT;
+            break;
+        }
+
+        l_pVectorField  =   l_pVectorField + l_coreOffset;
+        l_tempWord      =   *l_pVectorField;
+
+        if( i_mode )
+        {
+            //Enable Auto Wakeup
+            l_tempWord  =   ( l_tempWord | ( 0x80 >> ( l_coreId - ( l_coreOffset << 3 ) )));
+        }
+        else
+        {
+            //Disable Auto Wakeup
+            l_tempWord  =   ( l_tempWord & ~( 0x80 >> ( l_coreId - ( l_coreOffset << 3 ) )));
+        }
+
+        *l_pVectorField = (uint8_t )l_tempWord;
+
+    }while(0);
+
+    MY_INF("<< proc_stop_init_self_save" );
+
+    return l_rc;
+}
 //-----------------------------------------------------------------------------------------------------
 #ifdef __cplusplus
 } //namespace stopImageSection ends

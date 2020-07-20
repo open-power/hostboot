@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2019,2020                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2019,2021                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -513,9 +513,8 @@
   </hwpError>
   <!-- *********************************************************************** -->
   <hwpError>
-    <rc>RC_URMOR_RESTORE_ENTRY_FAILED</rc>
-    <description>hcode image build procedure failed to create URMOR restore entry. 
-       It is meant for test and debug environment.</description>
+    <rc>RC_AUTO_WAKEUP_VECTOR_CREATION_FAILED</rc>
+    <description>hcode image build failed to create auto wakeup vector in CPMR header</description>
     <ffdc>PIR</ffdc>
     <ffdc>STOP_API_RC</ffdc>
     <callout>
