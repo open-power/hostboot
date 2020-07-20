@@ -146,7 +146,7 @@ fapi2::ReturnCode p10_load_iop_xram(
                                  // p10_putsram will find valid multicast target.
                                  true,                  // Do multicast load
                                  l_mode,                // Access mode, not used here
-                                 0,                     // Load at offset 0
+                                 static_cast<uint64_t>(0), // Load at offset 0
                                  l_xramFwSize,
                                  l_xramFwDataPtr);
 

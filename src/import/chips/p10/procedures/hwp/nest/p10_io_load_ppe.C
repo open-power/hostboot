@@ -140,7 +140,7 @@ fapi2::ReturnCode p10_io_load_ppe(
                          PAU0_PERV_CHIPLET_ID,  // Set to PAU0 as default for multicast.
                          // p10_putsram will find valid multicast target.
                          true,                  // Do multicast load
-                         0,                     // Access mode, not used here
+                         static_cast<uint8_t>(0), // Access mode, not used here
                          SRAM_IO_PPE_IMAGE_OFFSET,
                          l_ioImgSize,
                          l_ioImgDataPtr);
@@ -157,7 +157,7 @@ fapi2::ReturnCode p10_io_load_ppe(
                              PAU0_PERV_CHIPLET_ID, // Set to PAU0 as default for multicast.
                              // p10_putsram will find valid multicast target.
                              true,                 // Do multicast load
-                             0,                    // Access mode, not used here
+                             static_cast<uint8_t>(0), // Access mode, not used here
                              MEM_REG_OFFSETS[ii],
                              l_memRegsImgSize,
                              l_memRegsImgDataPtr);
