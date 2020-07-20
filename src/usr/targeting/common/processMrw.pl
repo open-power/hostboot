@@ -645,6 +645,8 @@ sub pruneTargetAttributes
         if ($type eq "SYS")
         {
             $targetObj->deleteAttribute($target,"XSCOM_BASE_ADDRESS");
+            $targetObj->deleteAttribute($target,"PULSE_MODE_ENABLE");
+            $targetObj->deleteAttribute($target,"PULSE_MODE_VALUE");
         }
         elsif ($type eq "MEM_PORT")
         {

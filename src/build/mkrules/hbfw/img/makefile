@@ -361,7 +361,7 @@ ZEPPELIN_WOFDATA_IMG = ${ENGD_WOFPATH:Fzeppelin_wof_data.bin}
 DENALI_WOFDATA_IMG = ${ENGD_WOFPATH:Ffleetwood_wof_data.bin}
 # Create list of images for each node (in node order)
 # genPnorImages will handle multiple HBD=binfile pairs
-DENALI_HBD_IMG = ${HBFW_TARGPATH:FDENALI_hb_targeting.bin}
+DENALI_HBD_IMG = HBD=${${HBFW_TARGPATH:FDENALI_node_0_hb_targeting.bin}:P},HBD=${${HBFW_TARGPATH:FDENALI_node_1_hb_targeting.bin}:P},HBD=${${HBFW_TARGPATH:FDENALI_node_2_hb_targeting.bin}:P},HBD=${${HBFW_TARGPATH:FDENALI_node_3_hb_targeting.bin}:P}
 
 # Input fake images
 
@@ -373,7 +373,7 @@ P10_HCODE_FINAL_IMG = P10.HCODE.bin
 P10_SBE_FINAL_IMG = P10.SBE.bin
 P10_OCC_FINAL_IMG = P10.OCC.bin
 ## System Specific
-DENALI_HBD_FINAL_IMG = DENALI.HBD.bin
+DENALI_HBD_FINAL_IMG = DENALI.HBD_NODE_0.bin
 DENALI_WOFDATA_FINAL_IMG = DENALI.WOFDATA.bin
 # Fips has its own build process and will not use these, but rather what's
 # defined in fipsfs.db.
