@@ -107,7 +107,7 @@ errlHndl_t checkForIplAttentions()
 
     TargetHandleList::iterator tit = list.begin();
 
-    ATTN_TRACE("checkForIplAttentions: %d chips", list.size() );
+    ATTN_SLOW("checkForIplAttentions: %d chips", list.size() );
     while(tit != list.end())
     {
         err = Service::getGlobalInstance()->handleAttentions(*tit);

@@ -65,7 +65,7 @@ errlHndl_t PrdImpl::callPrd(const AttentionList & i_attentions)
 
     i_attentions.getAttnList(attnList);
 
-    ATTN_TRACE("callPrd with Attn Count of %d", attnList.size());
+    ATTN_SLOW("callPrd with Attn Count of %d", attnList.size());
 
     if(!attnList.empty())
     {
