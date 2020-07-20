@@ -444,6 +444,10 @@
     <id>chip-ocmb</id>
     <parent>chip</parent>
     <attribute>
+      <default>MEM</default>
+      <id>CDM_DOMAIN</id>
+    </attribute>
+    <attribute>
       <default>1</default>
       <id>DECONFIG_GARDABLE</id>
     </attribute>
@@ -2299,6 +2303,10 @@
     <id>pmic</id>
     <parent>asic</parent>
     <attribute>
+      <default>MEM</default>
+      <id>CDM_DOMAIN</id>
+    </attribute>
+    <attribute>
       <default>1</default>
       <id>DECONFIG_GARDABLE</id>
     </attribute>
@@ -2773,6 +2781,11 @@
       <id>CLASS</id>
     </attribute>
     <attribute>
+      <!-- GARD_APPLIED, RESRC_RECOV, HOSTSVC_HBEL, GARD -->
+      <default>0x00000039</default>
+      <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
+    </attribute>
+    <attribute>
       <id>MODEL</id>
       <default>POWER10</default>
     </attribute>
@@ -2862,6 +2875,10 @@
   <targetType>
     <id>unit-core</id>
     <parent>unit</parent>
+    <attribute>
+      <default>CPU</default>
+      <id>CDM_DOMAIN</id>
+    </attribute>
     <attribute>
       <default>CORE</default>
       <id>TYPE</id>
@@ -3126,6 +3143,10 @@
     <id>unit-fc-power10</id>
     <parent>unit</parent>
     <attribute>
+      <default>CPU</default>
+      <id>CDM_DOMAIN</id>
+    </attribute>
+    <attribute>
       <default>1</default>
       <id>DECONFIG_GARDABLE</id>
     </attribute>
@@ -3163,6 +3184,10 @@
   <targetType>
     <id>unit-iohs-power10</id>
     <parent>unit</parent>
+    <attribute>
+      <default>IO</default>
+      <id>CDM_DOMAIN</id>
+    </attribute>
     <attribute>
       <default>1</default>
       <id>DECONFIG_GARDABLE</id>
@@ -3294,6 +3319,10 @@
   <targetType>
     <id>unit-mc-power10</id>
     <parent>unit</parent>
+    <attribute>
+      <default>MEM</default>
+      <id>CDM_DOMAIN</id>
+    </attribute>
     <attribute>
       <id>DECONFIG_GARDABLE</id>
       <default>1</default>
@@ -3525,6 +3554,14 @@
   <targetType>
     <id>unit-mcc-power10</id>
     <parent>unit-mcc</parent>
+    <attribute>
+      <default>MEM</default>
+      <id>CDM_DOMAIN</id>
+    </attribute>
+    <attribute>
+      <default>1</default>
+      <id>DECONFIG_GARDABLE</id>
+    </attribute>
     <attribute>
       <id>PARENT_PERVASIVE</id>
     </attribute>
@@ -3812,6 +3849,10 @@
     <id>unit-nmmu-power10</id>
     <parent>unit</parent>
     <attribute>
+      <default>FABRIC</default>
+      <id>CDM_DOMAIN</id>
+    </attribute>
+    <attribute>
       <id>DECONFIG_GARDABLE</id>
       <default>1</default>
     </attribute>
@@ -3891,6 +3932,14 @@
   <targetType>
     <id>unit-nx-power10</id>
     <parent>unit</parent>
+    <attribute>
+      <default>FABRIC</default>
+      <id>CDM_DOMAIN</id>
+    </attribute>
+    <attribute>
+      <id>DECONFIG_GARDABLE</id>
+      <default>1</default>
+    </attribute>
     <attribute>
       <default>NX</default>
       <id>TYPE</id>
@@ -4245,6 +4294,14 @@
     <id>unit-omi-power10</id>
     <parent>unit-omi</parent>
     <attribute>
+      <id>CDM_DOMAIN</id>
+      <default>MEM</default>
+    </attribute>
+    <attribute>
+      <default>1</default>
+      <id>DECONFIG_GARDABLE</id>
+    </attribute>
+    <attribute>
       <id>OMIC_PARENT</id>
     </attribute>
     <attribute>
@@ -4321,6 +4378,14 @@
     <id>unit-omic-power10</id>
     <parent>unit-omic</parent>
     <attribute>
+      <id>CDM_DOMAIN</id>
+      <default>MEM</default>
+    </attribute>
+    <attribute>
+      <default>1</default>
+      <id>DECONFIG_GARDABLE</id>
+    </attribute>
+    <attribute>
       <id>PARENT_PERVASIVE</id>
     </attribute>
     <attribute>
@@ -4390,6 +4455,10 @@
     <id>unit-pauc-power10</id>
     <parent>unit</parent>
     <attribute>
+      <id>CDM_DOMAIN</id>
+      <default>IO</default>
+    </attribute>
+    <attribute>
       <default>1</default>
       <id>DECONFIG_GARDABLE</id>
     </attribute>
@@ -4414,6 +4483,10 @@
   <targetType>
     <id>unit-pec-power10</id>
     <parent>unit-pec</parent>
+    <attribute>
+      <id>CDM_DOMAIN</id>
+      <default>IO</default>
+    </attribute>
     <attribute>
       <default>1</default>
       <id>DECONFIG_GARDABLE</id>
@@ -4663,6 +4736,10 @@
   <targetType>
     <id>unit-phb-power10</id>
     <parent>unit-phb</parent>
+    <attribute>
+      <id>CDM_DOMAIN</id>
+      <default>IO</default>
+    </attribute>
     <attribute>
       <default>1</default>
       <id>DECONFIG_GARDABLE</id>
