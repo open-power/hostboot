@@ -171,7 +171,8 @@ fapi2::ReturnCode p10_io_init_done(const fapi2::Target<fapi2::TARGET_TYPE_PROC_C
     }
 
     FAPI_ASSERT(l_done,
-                fapi2::P10_IO_INIT_DONE_TIMEOUT_ERROR(),
+                fapi2::P10_IO_INIT_DONE_TIMEOUT_ERROR()
+                .set_TARGET(i_target),
                 "Timeout waiting on io init to complete");
 fapi_try_exit:
     return fapi2::current_err;
