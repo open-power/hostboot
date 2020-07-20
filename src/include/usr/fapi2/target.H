@@ -354,7 +354,8 @@ constexpr bool isProperParent(const TargetType i_child,
         {   TARGET_TYPE_OMI       , TARGET_TYPE_MCC       },
         {   TARGET_TYPE_OCMB_CHIP , TARGET_TYPE_OMI       },
         {   TARGET_TYPE_PMIC
-          | TARGET_TYPE_MEM_PORT  , TARGET_TYPE_OCMB_CHIP },
+          | TARGET_TYPE_MEM_PORT
+          | TARGET_TYPE_GENERICI2CSLAVE, TARGET_TYPE_OCMB_CHIP },
         {   TARGET_TYPE_DIMM      , TARGET_TYPE_MEM_PORT  },
         {   TARGET_TYPE_FC        , TARGET_TYPE_EQ        },
         {   TARGET_TYPE_IOHS
