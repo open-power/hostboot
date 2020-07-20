@@ -63,6 +63,7 @@ COPY_FILES = \
     src/build/simics/ecc.py:openpower-sim \
     src/build/debug/eSEL.pl:openpower,openpower-sim \
     src/build/debug/fsp-memdump.sh:tools,vpo \
+    src/build/debug/ffdcExpander:openpower,tools \
     src/build/tools/genIstepWaitOverride.pl:tools,openpower,openpower-sim \
     src/build/vpo/hb-dump:vpo \
     src/build/vpo/hb-istep:vpo \
@@ -194,7 +195,7 @@ COPY_RENAME_FILES = \
     hbplugins/prdf/$(notdir $(file)):$(file):errltool) \
     hwas/common/hwasCallout.H:src/include/usr/hwas/common/hwasCallout.H:errltool \
     devicefw/driverif.H:src/include/usr/devicefw/driverif.H:errltool \
-    devicefw/userif.H:src/include/usr/devicefw/userif.H:errltool 
+    devicefw/userif.H:src/include/usr/devicefw/userif.H:errltool
 
 #
 # Symbolic links created in the target.
@@ -351,6 +352,7 @@ fsp.tar_CONTENTS = \
     $(addsuffix :plugins/,\
         $(call ROOTPATH_WILDCARD,src/usr/isteps/nvdimm/plugins/*)) \
     src/build/debug/fsp-memdump.sh:src/build/debug/ \
+    src/build/debug/ffdcExpander:src/build/debug/ \
     obj/genfiles/hbfw_term_rc.H \
     obj/genfiles/srcListing \
     obj/genfiles/attrInfo.csv \
