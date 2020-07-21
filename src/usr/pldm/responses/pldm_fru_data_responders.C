@@ -250,9 +250,6 @@ void read_location_code_tlv(Target* const i_target,
     /* Read the chassis location code */
 
     {
-        /* @TODO RTC 250663: Uncomment this block when the CHASSIS_LOCATION_CODE
-                             attribute is defined.
-
         Target* const sys = UTIL::assertGetToplevelTarget();
 
         ATTR_CHASSIS_LOCATION_CODE_type location_code { };
@@ -265,7 +262,6 @@ void read_location_code_tlv(Target* const i_target,
 
         full_location_code.insert(end(full_location_code),
                                   location_code, location_code + strlen(location_code));
-        */
     }
 
     /* Append separator */
