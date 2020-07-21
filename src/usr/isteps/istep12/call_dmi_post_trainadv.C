@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -215,6 +215,15 @@ void* call_dmi_post_trainadv (void *io_pArgs)
         }
     }
 #endif
+
+    // Beyond this point, scoms to the OCMBs should be working, so clear the
+    // ATTR_ATTN_POLL_PLID attribute since attention won't need to check the
+    // PRD_HWP_PLID attribute before scomming the OCMBs anymore.
+    TargetHandle_t sys = nullptr;
+    targetService().getTopLevelTarget(sys);
+    assert(sys != nullptr);
+    sys->setAttr<ATTR_ATTN_POLL_PLID>(0);
+
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_dmi_post_trainadv exit" );
 
     // end task, returning any errorlogs to IStepDisp

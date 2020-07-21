@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -66,6 +66,15 @@ void* call_dmi_io_run_training (void *io_pArgs)
     errlHndl_t l_err = NULL;
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_dmi_io_run_training entry" );
+
+    // Starting beginning at this istep, we may be unable to scom the OCMBs
+    // until the next istep is complete, except in certain cases where the
+    // hardware procedure fails. Set ATTR_ATTN_POLL_PLID so ATTN knows to
+    // poll the PRD_HWP_PLID before scomming the OCMBs.
+    TargetHandle_t sys = nullptr;
+    targetService().getTopLevelTarget(sys);
+    assert(sys != nullptr);
+    sys->setAttr<ATTR_ATTN_POLL_PLID>(1);
 
     TARGETING::TargetHandleList l_procTargetList;
     getAllChips(l_procTargetList, TYPE_PROC);

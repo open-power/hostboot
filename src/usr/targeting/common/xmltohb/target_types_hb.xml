@@ -292,6 +292,9 @@
       <id>ATTN_CHK_OCMBS</id>
     </attribute>
     <attribute>
+      <id>ATTN_POLL_PLID</id>
+    </attribute>
+    <attribute>
       <id>CHKSTOP_ANALYSIS_ON_STARTUP</id>
     </attribute>
     <attribute>
