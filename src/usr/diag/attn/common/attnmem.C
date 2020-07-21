@@ -581,6 +581,17 @@ void MemOps::resolveOcmbs( const TargetHandle_t i_proc,
         return;
     }
 
+    // Check whether we are at a point in the IPL where we are unsure whether
+    // scoms to the OCMBs will work. In that case, we need to poll the
+    // PRD_HWP_PLID attribute to see whether we can do any OCMB scoms.
+    uint8_t pollData = 0;
+    bool pollPlid = false;
+    if (sys->tryGetAttr<ATTR_ATTN_POLL_PLID>(pollData) && (pollData != 0))
+    {
+        ATTN_SLOW( "MemOps::resolveOcmbs PRD_HWP_PLID must be polled" );
+        pollPlid = true;
+    }
+
     // Get the list of OCMBs connected to the input proc
     TargetHandleList ocmbList;
 
@@ -615,6 +626,16 @@ void MemOps::resolveOcmbs( const TargetHandle_t i_proc,
     bool attnFound = false;
     for ( const auto & ocmb : ocmbList )
     {
+        if ( pollPlid )
+        {
+            uint32_t plid = 0;
+            if ( ocmb->tryGetAttr<ATTR_PRD_HWP_PLID>(plid) && (0 == plid) )
+            {
+                // If the attribute is not set, skip this OCMB
+                ATTN_SLOW( "MemOps::resolveOcmbs PRD_HWP_PLID not set" );
+                continue;
+            }
+        }
         for ( const auto & fir : firList )
         {
             // Get the data from the chiplet FIR

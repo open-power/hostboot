@@ -69,6 +69,15 @@ void* call_omi_io_run_training (void *io_pArgs)
 
     do
     {
+        // Starting beginning at this istep, we may be unable to scom the OCMBs
+        // until the next istep is complete, except in certain cases where the
+        // hardware procedure fails. Set ATTR_ATTN_POLL_PLID so ATTN knows to
+        // poll the PRD_HWP_PLID before scomming the OCMBs.
+        TargetHandle_t sys = nullptr;
+        targetService().getTopLevelTarget(sys);
+        assert(sys != nullptr);
+        sys->setAttr<ATTR_ATTN_POLL_PLID>(1);
+
         // 12.7.a exp_omi_train.C
         TargetHandleList l_ocmbTargetList;
         getAllChips(l_ocmbTargetList, TYPE_OCMB_CHIP);

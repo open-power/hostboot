@@ -104,6 +104,19 @@
   </attribute>
 
   <attribute>
+    <id>ATTN_POLL_PLID</id>
+    <description>
+      Used to tell ATTN code to poll the PRD_HWP_PLID for OCMB analysis.
+    </description>
+    <simpleType>
+      <uint8_t/>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+  </attribute>
+
+  <attribute>
     <id>CLEAR_DIMM_SPD_ENABLE</id>
     <description>
       Used to enable clearing of SPD on all present DIMMs. This attribute is
