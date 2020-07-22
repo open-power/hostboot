@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -1394,8 +1394,12 @@ uint32_t applyRasPolicies( ExtensibleChip * i_chip, const MemRank & i_rank,
         io_sc.service_data->clearNvdimmMruListGard();
 
         #ifdef __HOSTBOOT_RUNTIME
-        // No more repairs left so no point doing any more TPS procedures.
-        MemDbUtils::banTps<T>( i_chip, i_rank );
+        // Only ban TPS for Centaur
+        if ( TYPE_MBA == T )
+        {
+            // No more repairs left so no point doing any more TPS procedures.
+            MemDbUtils::banTps<T>( i_chip, i_rank );
+        }
         #endif
     }
 
