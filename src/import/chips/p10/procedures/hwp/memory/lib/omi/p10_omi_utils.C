@@ -140,7 +140,7 @@ fapi2::ReturnCode setup_mc_config0(
     fapi2::buffer<uint64_t> l_val;
 
     // Maximum number of credits that can be sent to the TL
-    constexpr uint64_t CFG0_CFG_TL_CREDITS = 32;
+    constexpr uint64_t CFG0_CFG_TL_CREDITS = 18;
     constexpr uint64_t CONFIG0_VERSION = 9;
     constexpr uint64_t REPLAY_RSVD_ENTRIES = 0;
 
@@ -222,7 +222,7 @@ fapi2::ReturnCode setup_mc_config0(
     scomt::omi::SET_CONFIG0_RUNLANE_OVRD_ENABLE(mss::states::OFF, l_val);
 
     // CFG_DL0_PWRMGT_ENABLE: dl0 power management enabled
-    scomt::omi::SET_CONFIG0_PWRMGT_ENABLE(!l_sim, l_val);
+    scomt::omi::SET_CONFIG0_PWRMGT_ENABLE(mss::states::OFF, l_val);
 
     // CFG_DL0_QUARTER_WIDTH_BACKOFF_ENABLE: dl0 x1 backoff enabled
     scomt::omi::SET_CONFIG0_QUARTER_WIDTH_BACKOFF_ENABLE(mss::states::OFF, l_val);
