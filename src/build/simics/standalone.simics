@@ -35,8 +35,6 @@ try {
 
 if( $vpo_compile == "1" ) {
     echo "    - Skipping EECACHE preload (VPO Mode)"
-} else if( $hb_multiproc == 1 )  {  # temporarily skip this until eecache settles down
-    echo "    - Skipping EECACHE preload (Multiproc)"
 } else {
     if( $found_custom_eecache == 1 ) {
         #yep...
