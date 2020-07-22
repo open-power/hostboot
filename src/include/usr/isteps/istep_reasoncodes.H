@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -144,6 +144,7 @@ namespace ISTEP
         RC_UCD_IMG_NOT_IN_CONTAINER              = ISTEP_COMP_ID | 0x4F,
         RC_MM_UNMAP_FAILED                       = ISTEP_COMP_ID | 0x50,
         RC_CANNOT_BOOT_WITH_MISMATCHED_BARS      = ISTEP_COMP_ID | 0x51,
+        RC_MASTER_PROC_SECURE_VERSION_MISMATCH   = ISTEP_COMP_ID | 0x52,
     };
 
 };

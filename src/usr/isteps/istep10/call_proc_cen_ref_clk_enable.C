@@ -133,9 +133,12 @@ struct HashNode
     uint8_t* hash; /** SBE HW keys' hash for the named side */
     const char* name; /** Name of the side: either primary or backup */
     uint8_t side; /** A uint8_t value of 0 for primary or 1 for backup */
+    uint8_t* secure_version; /** Secure Version for the named side */
     HashNode(uint8_t* i_hash,
              const char* i_name,
-             uint8_t i_side) : hash(i_hash), name(i_name), side(i_side)
+             uint8_t i_side,
+             uint8_t* i_secure_version)
+             : hash(i_hash), name(i_name), side(i_side), secure_version(i_secure_version)
     {
     }
 };
@@ -149,19 +152,26 @@ union Mismatches
 {
     uint8_t val;
     struct {
-        uint8_t reserved : 4; /** unused */
-        uint8_t sabmis : 1; /** Value of 1 indicates the SAB bit didn't match,
-                             *  0 otherwise.
-                             */
-        uint8_t smdmis : 1; /** Value of 1 indicates the SMD bit did not match,
-                             *  0 otherwise.
-                             */
-        uint8_t primis : 1; /** Value of 1 indicates the primary SBE HW key's
-                             *  did not match, 0 otherwise.
-                             */
-        uint8_t bacmis : 1; /** Value of 1 indicates the backup SBE HW key's
-                             *  did not match, 0 otherwise.
-                             */
+        uint8_t reserved   : 2; /** unused */
+
+        uint8_t primisSV   : 1; /** Value of 1 indicates the primary SBE Secure Version
+                                 *  did not match, 0 otherwise.
+                                 */
+        uint8_t bacmisSV   : 1; /** Value of 1 indicates the backup SBE Secure Version
+                                 *  did not match, 0 otherwise.
+                                 */
+        uint8_t sabmis     : 1; /** Value of 1 indicates the SAB bit didn't match,
+                                 *  0 otherwise.
+                                 */
+        uint8_t smdmis     : 1; /** Value of 1 indicates the SMD bit did not match,
+                                 *  0 otherwise.
+                                 */
+        uint8_t primisHKH  : 1; /** Value of 1 indicates the primary SBE HW Keys' Hash
+                                 *  did not match, 0 otherwise.
+                                 */
+        uint8_t bacmisHKH  : 1; /** Value of 1 indicates the backup SBE HW Keys' Hash
+                                 *  did not match, 0 otherwise.
+                                 */
     };
 };
 
@@ -182,8 +192,8 @@ union Mismatches
  *      booting (and deconfigure the processor) or stop the IPL.
  *  @param[in] i_mismatches A bitstring of mismatch bits of type Mismatches
  *      corresponding to a mismatch of the SAB or SMD register or primary or
- *      secondary SBE HW Keys' Hash between the supplied target and the master
- *      processor. Optional parameter is for the RC_PROC_SECURITY_STATE_MISMATCH
+ *      secondary SBE HW Keys'Hash or Secure Version between the supplied target and the
+ *      master processor. Optional parameter is for the RC_PROC_SECURITY_STATE_MISMATCH
  *      case only and must be left as default (value of 0) for all other cases.
  */
 void handleProcessorSecurityError(TARGETING::Target* i_pProc,
@@ -205,8 +215,10 @@ void handleProcessorSecurityError(TARGETING::Target* i_pProc,
 
     ERRORLOG::errlSeverity_t l_severity = ERRORLOG::ERRL_SEV_UNRECOVERABLE;
 
+    // Look for the mismatch errors
     if (i_rc==RC_MASTER_PROC_SBE_KEYS_HASH_MISMATCH ||
-        i_rc==RC_PROC_SECURITY_STATE_MISMATCH)
+        i_rc==RC_PROC_SECURITY_STATE_MISMATCH ||
+        i_rc==RC_MASTER_PROC_SECURE_VERSION_MISMATCH)
     {
         if (i_rc==RC_PROC_SECURITY_STATE_MISMATCH)
         {
@@ -220,10 +232,16 @@ void handleProcessorSecurityError(TARGETING::Target* i_pProc,
                     "SAB is a %smatch", i_mismatches.sabmis? "mis": "");
             TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
                     "Primary SBE hash is a %smatch",
-                    i_mismatches.primis? "mis": "");
+                    i_mismatches.primisHKH? "mis": "");
             TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
                     "Backup SBE hash is a %smatch",
-                    i_mismatches.bacmis? "mis": "");
+                    i_mismatches.bacmisHKH? "mis": "");
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                    "Primary SBE Secure Version is a %smatch",
+                    i_mismatches.primisSV? "mis": "");
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                    "Backup SBE Secure Version is a %smatch",
+                    i_mismatches.bacmisSV? "mis": "");
         }
         else  // master proc sbe keys' hash mismatch
         {
@@ -244,12 +262,13 @@ void handleProcessorSecurityError(TARGETING::Target* i_pProc,
             ,i_rc);
         TRACDCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
             ERR_MRK"handleProcessorSecurityError: %s fail",
-        i_rc==RC_MASTER_PROC_PRIMARY_HASH_READ_FAIL?"Master primary hash read":
-        i_rc==RC_MASTER_PROC_BACKUP_HASH_READ_FAIL?"Master backup hash read":
+
+        i_rc==RC_MASTER_PROC_PRIMARY_HASH_READ_FAIL?"Master primary hash/SV read":
+        i_rc==RC_MASTER_PROC_BACKUP_HASH_READ_FAIL?"Master backup hash/SV read":
         i_rc==RC_MASTER_PROC_CBS_CONTROL_READ_FAIL?"Master CBS control read":
         i_rc==RC_MASTER_GET_SBE_BOOT_SEEPROM_FAIL?"Master get SBE boot Seeprom":
-        i_rc==RC_SLAVE_PROC_PRIMARY_HASH_READ_FAIL?"Slave primary hash read":
-        i_rc==RC_SLAVE_PROC_BACKUP_HASH_READ_FAIL?"Slave backup hash read":
+        i_rc==RC_SLAVE_PROC_PRIMARY_HASH_READ_FAIL?"Slave primary hash/SV read":
+        i_rc==RC_SLAVE_PROC_BACKUP_HASH_READ_FAIL?"Slave backup hash/SV read":
         i_rc==RC_SLAVE_PROC_CBS_CONTROL_READ_FAIL?"Slave CBS control read":
         i_rc==RC_SLAVE_GET_SBE_BOOT_SEEPROM_FAIL?"Slave get SBE Boot Seeprom":
         "unknown");
@@ -279,6 +298,7 @@ void handleProcessorSecurityError(TARGETING::Target* i_pProc,
     for(auto& hsh : i_hashes)
     {
         TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, ERR_MRK"handleProcessorSecurityError: %s hash: ", hsh.name);
+        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, ERR_MRK"handleProcessorSecurityError: Secure Version = 0x%.2X", *hsh.secure_version);
         TRACFBIN(ISTEPS_TRACE::g_trac_isteps_trace,
                 "Data = ",
                 reinterpret_cast<void*>(hsh.hash),
@@ -286,7 +306,8 @@ void handleProcessorSecurityError(TARGETING::Target* i_pProc,
         SECUREBOOT::UdTargetHwKeyHash(
                 i_pProc,
                 hsh.side,
-                hsh.hash).addToLog(err);
+                hsh.hash,
+                *hsh.secure_version).addToLog(err);
     }
 
     if (i_continue)
@@ -491,27 +512,31 @@ void validateSecuritySettings()
 
     // master processor primary hash and secure version
     SHA512_t l_masterHash = {0};
-    uint8_t l_masterSecureVersion = 0;
+    uint8_t l_masterSecureVersion[] = {INVALID_SECURE_VERSION};
 
     // master processor backup hash and secure version
     SHA512_t l_backupHash = {0};
-    uint8_t l_backupSecureVersion = 0;
+    uint8_t l_backupSecureVersion[] = {INVALID_SECURE_VERSION};
 
     // slave processor primary hash and secure version
     // (reset each time through the loop)
     SHA512_t l_slaveHashPri = {0};
-    uint8_t l_slaveSecureVersionPri = 0;
+    uint8_t l_slaveSecureVersionPri[] = {INVALID_SECURE_VERSION};
 
     // slave processor backup hash and secure version
     // (reset each time through the loop)
     SHA512_t l_slaveHashBac = {0};
-    uint8_t l_slaveSecureVersionBac = 0;
+    uint8_t l_slaveSecureVersionBac[] = {INVALID_SECURE_VERSION};
 
     // nodes for the hashes vector only to be added to vector as needed
-    auto l_master = HashNode(l_masterHash, "master primary", SBE::SBE_SEEPROM0);
-    auto l_backup = HashNode(l_backupHash, "master backup", SBE::SBE_SEEPROM1);
-    auto l_slave = HashNode(l_slaveHashPri, "slave primary", SBE::SBE_SEEPROM0);
-    auto l_slaveb = HashNode(l_slaveHashBac, "slave backup", SBE::SBE_SEEPROM1);
+    auto l_master = HashNode(l_masterHash, "master primary", SBE::SBE_SEEPROM0,
+                             l_masterSecureVersion);
+    auto l_backup = HashNode(l_backupHash, "master backup", SBE::SBE_SEEPROM1,
+                             l_backupSecureVersion);
+    auto l_slave = HashNode(l_slaveHashPri, "slave primary", SBE::SBE_SEEPROM0,
+                            l_slaveSecureVersionPri);
+    auto l_slaveb = HashNode(l_slaveHashBac, "slave backup", SBE::SBE_SEEPROM1,
+                             l_slaveSecureVersionBac);
 
     // obtain the master processor target
     TARGETING::Target* mProc = nullptr;
@@ -584,8 +609,7 @@ void validateSecuritySettings()
                                       EEPROM::SBE_PRIMARY,
                                       bootSide,
                                       l_masterHash,
-                                      l_masterSecureVersion);
-
+                                      *l_masterSecureVersion);
     if (err)
     {
         if (!mnfg_mode && bootSide != SBE::SBE_SEEPROM0)
@@ -625,7 +649,7 @@ void validateSecuritySettings()
                                       EEPROM::SBE_BACKUP,
                                       bootSide,
                                       l_backupHash,
-                                      l_backupSecureVersion);
+                                      *l_backupSecureVersion);
 
     if (err)
     {
@@ -664,10 +688,12 @@ void validateSecuritySettings()
     if (primaryReadFailAllowed)
     {
         memcpy(l_masterHash, l_backupHash, SHA512_DIGEST_LENGTH);
+        *l_masterSecureVersion = *l_backupSecureVersion;
     }
     else if (backupReadFailAllowed)
     {
         memcpy(l_backupHash, l_masterHash, SHA512_DIGEST_LENGTH);
+        *l_backupSecureVersion = *l_masterSecureVersion;
     }
     else if(memcmp(l_masterHash,l_backupHash, SHA512_DIGEST_LENGTH)!=0)
     {
@@ -695,8 +721,35 @@ void validateSecuritySettings()
 
         break;
     }
+    else if (*l_masterSecureVersion != *l_backupSecureVersion)
+    {
+        // add only the hashes relevant to the error to hashes vector
+        l_hashes.push_back(l_master);
+        l_hashes.push_back(l_backup);
+
+       bool l_continue = !SECUREBOOT::enabled();
+        /*@
+         * @errortype
+         * @reasoncode       ISTEP::RC_MASTER_PROC_SECURE_VERSION_MISMATCH
+         * @moduleid         ISTEP::MOD_VALIDATE_SECURITY_SETTINGS
+         * @severity         ERRL_SEV_UNRECOVERABLE
+         * @userdata1        Master Processor Target
+         * @devdesc          The primary SBE HW Keys' hash does not match
+         *                   the backup SBE HW Keys' hash, so we cannot
+         *                   guarantee platform security for the system
+         * @custdesc         Platform security problem detected
+         */
+        handleProcessorSecurityError(mProc,
+                                  ISTEP::RC_MASTER_PROC_SECURE_VERSION_MISMATCH,
+                                  l_hashes,
+                                  0,
+                                  l_continue); // stop IPL if secureboot enabled
+
+        break;
+    }
+
     TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-        "Master Primary SBE HW keys' hash successfully matches backup.");
+        "Master Primary SBE HW keys' hash and Secure Version successfully match backup.");
 
     for(auto pProc : l_procList)
     {
@@ -711,6 +764,8 @@ void validateSecuritySettings()
         // start with empty slave hashes each time through the loop
         memset(l_slaveHashPri,0,SHA512_DIGEST_LENGTH);
         memset(l_slaveHashBac,0,SHA512_DIGEST_LENGTH);
+        *l_slaveSecureVersionPri = INVALID_SECURE_VERSION;
+        *l_slaveSecureVersionBac = INVALID_SECURE_VERSION;
 
         // read the CBS control register of the current processor
         err = SECUREBOOT::getProcCbsControlRegister(l_procCbs, pProc);
@@ -769,7 +824,7 @@ void validateSecuritySettings()
                                           EEPROM::SBE_PRIMARY,
                                           bootSide,
                                           l_slaveHashPri,
-                                          l_slaveSecureVersionPri);
+                                          *l_slaveSecureVersionPri);
 
         if (err)
         {
@@ -812,7 +867,7 @@ void validateSecuritySettings()
                                           EEPROM::SBE_BACKUP,
                                           bootSide,
                                           l_slaveHashBac,
-                                          l_slaveSecureVersionBac);
+                                          *l_slaveSecureVersionBac);
         if (err)
         {
             if (!mnfg_mode && bootSide != SBE::SBE_SEEPROM1)
@@ -864,29 +919,42 @@ void validateSecuritySettings()
         // primary sbe hash mismatch
         if (!skipPrimaryMatch)
         {
-            l_mismatches.primis = memcmp(l_slaveHashPri,
-                                         l_masterHash,
-                                         SHA512_DIGEST_LENGTH) != 0;
+            l_mismatches.primisHKH = memcmp(l_slaveHashPri,
+                                            l_masterHash,
+                                            SHA512_DIGEST_LENGTH) != 0;
         }
 
         // backup sbe hash mismatch
         if (!skipBackupMatch)
         {
-            l_mismatches.bacmis = memcmp(l_slaveHashBac,
-                                         l_masterHash,
-                                         SHA512_DIGEST_LENGTH) != 0;
+            l_mismatches.bacmisHKH = memcmp(l_slaveHashBac,
+                                            l_masterHash,
+                                            SHA512_DIGEST_LENGTH) != 0;
+        }
+
+        // primary sbe secure version mismatch
+        if (!skipPrimaryMatch)
+        {
+            l_mismatches.primisSV = (*l_slaveSecureVersionPri != *l_masterSecureVersion);
+        }
+
+        // backup sbe secure version mismatch
+        if (!skipBackupMatch)
+        {
+            l_mismatches.bacmisSV = (*l_slaveSecureVersionBac != *l_masterSecureVersion);
         }
 
         // only provide the relevant hashes for error handling cases
-        if(l_mismatches.primis || l_mismatches.bacmis)
+        if(l_mismatches.primisHKH || l_mismatches.bacmisHKH ||
+           l_mismatches.primisSV  || l_mismatches.bacmisSV)
         {
             l_hashes.push_back(l_master);
         }
-        if(l_mismatches.primis)
+        if(l_mismatches.primisHKH || l_mismatches.primisSV)
         {
             l_hashes.push_back(l_slave);
         }
-        if(l_mismatches.bacmis)
+        if(l_mismatches.bacmisHKH || l_mismatches.bacmisSV)
         {
             l_hashes.push_back(l_slaveb);
         }
@@ -902,8 +970,9 @@ void validateSecuritySettings()
                 l_continue = false;
             }
             // In secure mode, do not continue booting when SBE HW keys' hashes
-            // are mismatched
-            if ((l_mismatches.primis || l_mismatches.bacmis)
+            // or Secure Verions are mismatched
+            if ((l_mismatches.primisHKH || l_mismatches.bacmisHKH ||
+                 l_mismatches.primisSV  || l_mismatches.bacmisSV)
                  && SECUREBOOT::enabled())
             {
                 l_continue = false;
@@ -914,6 +983,8 @@ void validateSecuritySettings()
              * @reasoncode       ISTEP::RC_PROC_SECURITY_STATE_MISMATCH
              * @moduleid         ISTEP::MOD_VALIDATE_SECURITY_SETTINGS
              * @userdata1        Processor Target
+             * @userdata2[58:58] Primary SBE Secure Version mismatch
+             * @userdata2[59:59] Backup SBE Secure Version mismatch
              * @userdata2[60:60] SAB bit mismatch
              * @userdata2[61:61] Jumper (SMD) bit mismatch
              * @userdata2[62:62] Primary SBE hash mismatch

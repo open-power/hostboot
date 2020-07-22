@@ -2299,7 +2299,7 @@ namespace SBE
                      "getSbeInfoState: end of HBBL - SV and HKH",
                      reinterpret_cast<uint8_t*>(
                                        reinterpret_cast<uint64_t>(hbblPnorPtr) +
-                                       HBBL_SECURE_VERSION_LOCATION-1),
+                                       HBBL_SECURE_VERSION_LOCATION),
                      sizeof(SHA512_t)+sizeof(hbbl_secure_version));
 
 
