@@ -262,10 +262,9 @@
       <description>
           Contains the settings for write/read reorder queue
       </description>
-      <default>REORDER</default>
-      <initToZero></initToZero>
       <writeable/>
       <enum>REORDER = 0, FIFO = 1</enum>
+      <initToZero></initToZero>
       <valueType>uint8</valueType>
       <writeable/>
       <mssAccessorName>exp_reorder_queue_setting</mssAccessorName>

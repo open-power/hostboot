@@ -198,7 +198,6 @@
             ATTR_OMI_FFE_POST_CURSOR is also 32. Default 0.
         </description>
         <valueType>uint32</valueType>
-        <default>0</default>
         <initToZero/>
         <writeable/>
         <mssAccessorName>omi_ffe_pre_cursor</mssAccessorName>
@@ -212,7 +211,6 @@
             ATTR_OMI_FFE_PRE_CURSOR is also 32. Default 0.
         </description>
         <valueType>uint32</valueType>
-        <default>0</default>
         <initToZero/>
         <writeable/>
         <mssAccessorName>omi_ffe_post_cursor</mssAccessorName>
