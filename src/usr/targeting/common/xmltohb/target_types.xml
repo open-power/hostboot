@@ -95,6 +95,9 @@
       <id>CLASS</id>
     </attribute>
     <attribute>
+      <id>FOUND_PRESENT_BY_SP</id>
+    </attribute>
+    <attribute>
       <id>LOCATION_CODE</id>
     </attribute>
   </targetType>
@@ -117,6 +120,9 @@
     </attribute>
     <attribute>
       <id>EC</id>
+    </attribute>
+    <attribute>
+      <id>FOUND_PRESENT_BY_SP</id>
     </attribute>
     <attribute>
       <id>FRU_ID</id>

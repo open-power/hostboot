@@ -1727,6 +1727,46 @@
     <writeable/>
   </attribute>
 
+  <enumerationType>
+    <default>NA</default>
+    <description>Defines presence detection states</description>
+    <enumerator>
+      <!-- SP did not attempt to discover this part -->
+      <name>NO_ATTEMPT</name>
+      <value>0x0</value>
+    </enumerator>
+    <enumerator>
+      <!-- Part was detected -->
+      <name>FOUND</name>
+      <value>0x1</value>
+    </enumerator>
+    <enumerator>
+      <!-- Discovery was attempted and found nothing -->
+      <name>MISSING</name>
+      <value>0x2</value>
+    </enumerator>
+    <id>FOUND_PRESENT_BY_SP</id>
+  </enumerationType>
+
+  <attribute>
+    <description>
+       Target (FRU) was detected as present by the service processor.
+       This is used by Hostboot as a cross-check with its own internal
+        detection code to ensure a consistent picture.
+    </description>
+    <id>FOUND_PRESENT_BY_SP</id>
+    <readable/>
+    <writeable/>
+    <simpleType>
+      <enumeration>
+        <id>FOUND_PRESENT_BY_SP</id>
+        <default>NO_ATTEMPT</default>
+      </enumeration>
+    </simpleType>
+    <no_export/>
+    <persistency>non-volatile</persistency>
+  </attribute>
+
   <attribute>
     <id>FREQ_CORE_CEILING_MHZ</id>
     <description>

@@ -429,6 +429,125 @@ static errlHndl_t finish_pdr_exchange()
 
 #endif // CONFIG_PLDM
 
+
+/**
+ * @brief Compare our presence detection with what the service
+ *.       processor saw.
+ * @param[in]  i_isetpErr  Istep error handling object.
+ */
+void crosscheck_sp_presence( ISTEP_ERROR::IStepError& i_istepErr )
+{
+    errlHndl_t l_errhdl = nullptr;
+
+    // Loop through every target to check any with the attribute
+    for( TARGETING::TargetIterator target = TARGETING::targetService().begin();
+         target != TARGETING::targetService().end();
+         ++target )
+    {
+        TARGETING::ATTR_FOUND_PRESENT_BY_SP_type sp_presence =
+          TARGETING::FOUND_PRESENT_BY_SP_NO_ATTEMPT;
+        if( !(target->tryGetAttr<TARGETING::ATTR_FOUND_PRESENT_BY_SP>(sp_presence)) )
+        {
+            // not relevant for this target
+            continue;
+        }
+
+        // check what we determined
+        bool hb_presence = target->getAttr<TARGETING::ATTR_HWAS_STATE>().present;
+
+        // SP did not attempt presence-detection, nothing to cross-check
+        if( TARGETING::FOUND_PRESENT_BY_SP_NO_ATTEMPT == sp_presence )
+        {
+            // nothing to do here
+            continue;
+        }
+        // HB sees it but the SP didn't
+        else if( hb_presence &&
+                 (TARGETING::FOUND_PRESENT_BY_SP_MISSING == sp_presence) )
+        {
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                      "%.8X detected by Hostboot but not by the Service Processor",
+                      TARGETING::get_huid(*target));
+            /*@
+             * @errortype
+             * @moduleid     ISTEP::MOD_DISCOVER_TARGETS
+             * @reasoncode   ISTEP::RC_PRESENCE_MISMATCH_SP
+             * @userdata1    HUID of missing target
+             * @devdesc      Hostboot detected a part that the service
+             *               processor did not.
+             * @custdesc     A problem occurred during the IPL
+             *               of the system.
+             */
+            l_errhdl = new ERRORLOG::ErrlEntry(
+                             ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                             ISTEP::MOD_DISCOVER_TARGETS,
+                             ISTEP::RC_PRESENCE_MISMATCH_SP,
+                             TARGETING::get_huid(*target),
+                             0);
+            // most likely to be a hardware issue of some kind
+            //  knock it out so we agree with the SP
+            l_errhdl->addHwCallout( *target,
+                                    HWAS::SRCI_PRIORITY_HIGH,
+                                    HWAS::DECONFIG,
+                                    HWAS::GARD_NULL );
+            // could also be a code bug on the SP
+            l_errhdl->addProcedureCallout( HWAS::EPUB_PRC_SP_CODE,
+                                           HWAS::SRCI_PRIORITY_MED );
+            l_errhdl->collectTrace(ISTEP_COMP_NAME,256);
+            l_errhdl->collectTrace(HWAS_COMP_NAME,256);
+
+            // Create IStep error log and cross ref error that occurred
+            captureError(l_errhdl, i_istepErr, ISTEP_COMP_ID);
+        }
+        // The SP sees it but HB didn't
+        else if( !hb_presence &&
+                 (TARGETING::FOUND_PRESENT_BY_SP_FOUND == sp_presence) )
+        {
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                      "%.8X detected by the Service Processor but not by Hostboot",
+                      TARGETING::get_huid(*target));
+            /*@
+             * @errortype
+             * @moduleid     ISTEP::MOD_DISCOVER_TARGETS
+             * @reasoncode   ISTEP::RC_PRESENCE_MISMATCH_HB
+             * @userdata1    HUID of missing target
+             * @devdesc      Hostboot did not detect a part that the service
+             *               processor found.
+             * @custdesc     A problem occurred during the IPL
+             *               of the system.
+             */
+            l_errhdl = new ERRORLOG::ErrlEntry(
+                             ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                             ISTEP::MOD_DISCOVER_TARGETS,
+                             ISTEP::RC_PRESENCE_MISMATCH_HB,
+                             TARGETING::get_huid(*target),
+                             0);
+            // most likely to be a hardware issue of some kind
+            //  knock it out so we agree with the SP
+            l_errhdl->addHwCallout( *target,
+                                    HWAS::SRCI_PRIORITY_HIGH,
+                                    HWAS::DECONFIG,
+                                    HWAS::GARD_NULL );
+            // could also be a code bug in HB
+            l_errhdl->addProcedureCallout( HWAS::EPUB_PRC_HB_CODE,
+                                           HWAS::SRCI_PRIORITY_MED );
+            l_errhdl->collectTrace(ISTEP_COMP_NAME,256);
+            l_errhdl->collectTrace(HWAS_COMP_NAME,256);
+            l_errhdl->collectTrace(FSI_COMP_NAME,256);
+            l_errhdl->collectTrace(I2C_COMP_NAME,256);
+            l_errhdl->collectTrace(SPI_COMP_NAME,256);
+            l_errhdl->collectTrace(EEPROM_COMP_NAME,256);
+
+            // Create IStep error log and cross ref error that occurred
+            captureError(l_errhdl, i_istepErr, ISTEP_COMP_ID);
+        }
+        // otherwise we match so we're fine
+    }
+}
+
+/**
+ * @brief host_discover_targets istep
+ */
 void* host_discover_targets( void *io_pArgs )
 {
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
@@ -633,16 +752,16 @@ void* host_discover_targets( void *io_pArgs )
 #endif
     }
 
-    // send DIMM/CORE/PROC sensor status to the BMC
-    //SENSOR::updateBMCSensorStatus();
 
-    // Retrieve the master processor chip
+    // Cross-check our list with what the SP saw
+    //  Any errors will be committed inline
+    crosscheck_sp_presence(l_stepError);
+
+    // Make the PSU call to get and apply the SBE Capabilities on the boot proc
     TARGETING::TargetHandle_t l_pMasterProcChip(nullptr);
     TARGETING::targetService().masterProcChipTargetHandle(l_pMasterProcChip);
     if (l_pMasterProcChip)
     {
-        // Make the PSU call to get and apply the SBE Capabilities
-
 #ifdef CONFIG_SBE_PRESENT
         l_err = SBEIO::getPsuSbeCapabilities(l_pMasterProcChip);
 #endif
@@ -652,6 +771,7 @@ void* host_discover_targets( void *io_pArgs )
             errlCommit (l_err, ISTEP_COMP_ID);
         }
     }  // end if (l_pMasterProcChip)
+
 
 #ifdef CONFIG_PRINT_SYSTEM_INFO
     print_system_info();

@@ -166,6 +166,8 @@ namespace ISTEP
         RC_COULD_NOT_UNMAP_HOMER                 = ISTEP_COMP_ID | 0x58,
         RC_INVALID_PM_ADDRESS                    = ISTEP_COMP_ID | 0x59,
         RC_SCRATCH_REG_ATTR_MISMATCH             = ISTEP_COMP_ID | 0x5A,
+        RC_PRESENCE_MISMATCH_HB                  = ISTEP_COMP_ID | 0x5B,
+        RC_PRESENCE_MISMATCH_SP                  = ISTEP_COMP_ID | 0x5C,
     };
 
 };

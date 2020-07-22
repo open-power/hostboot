@@ -337,6 +337,10 @@
         <id>FAPI_POS</id>
         <default>0</default>
     </attribute>
+    <attribute><!-- Force a FSP-only code path -->
+        <id>FOUND_PRESENT_BY_SP</id>
+        <default>FOUND</default>
+    </attribute>
     <attribute>
         <id>HUID</id>
         <default>0x00050000</default>
@@ -12773,6 +12777,10 @@
         <id>FAPI_POS</id>
         <default>8</default>
     </attribute>
+    <attribute><!-- Force a FSP-only code path -->
+        <id>FOUND_PRESENT_BY_SP</id>
+        <default>MISSING</default>
+    </attribute> 
     <attribute>
         <id>HUID</id>
         <default>0x004B0008</default>
