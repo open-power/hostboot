@@ -42,6 +42,8 @@
 #include <errl/errlmanager.H>
 #include <targeting/common/targetservice.H>
 #include <targeting/common/utilFilter.H>
+#include <initservice/initserviceif.H>
+#include <devicefw/userif.H>
 
 // Custom compile configs
 
@@ -168,4 +170,57 @@ errlHndl_t checkForIplAttentions()
     return l_plidElog;
 }
 
+void  setTrueMask_otherProcs( const TARGETING::TargetHandleList &i_allProcs )
+{
+    TARGETING::TargetHandle_t   l_PrimaryProcTarget = NULL;
+    bool            l_fspSystem = INITSERVICE::spBaseServicesEnabled();  // True on FSP
+    uint32_t        l_huid = 0;
+    errlHndl_t      l_err = NULL;
+    const uint16_t  ATTN_TRUEMASK_REG = 0x100D;   // cfam address
+    uint32_t        l_truemaskData = 0x60000002;  // Chkstop/Special/SBE Vital
+    size_t          l_size = sizeof(l_truemaskData);
+    uint16_t        l_fsiAddr = (ATTN_TRUEMASK_REG & 0xfe00) |
+                                ((ATTN_TRUEMASK_REG & 0x01ff) * 4);
+
+
+    ATTN_SLOW("setTrueMask_otherProcs - FSP %d",  l_fspSystem);
+
+    // The FSP interrupt handling will set the TRUEMASK regs on all procs.
+    // We don't want to interfere with that in hostboot or we could have issues.
+    // The eBMC needs these regs set though and it seems easiest to do in hostboot.
+    if ( false == l_fspSystem )
+    {
+        // BMC type box
+        // We need to skip setting on primary proc as we don't have FSI access to it.
+        // The BMC has to set the primary proc !!
+        getTargetService().masterProcChipTargetHandle(l_PrimaryProcTarget);
+
+        for (const auto & l_procTarget : i_allProcs)
+        {
+            if ( l_PrimaryProcTarget != l_procTarget )
+            {
+                // Trace which procs we are setting up
+                l_huid = TARGETING::get_huid(l_procTarget);
+                ATTN_SLOW( "Init TRUEMASK on Proc 0x%08X to 0x%08X",
+                           l_huid, l_truemaskData );
+
+                // Write the CFAM register on this processor
+                l_err = deviceWrite( l_procTarget, &l_truemaskData, l_size,
+                                     DEVICE_FSI_ADDRESS((uint64_t) l_fsiAddr) );
+                if (l_err)
+                {
+                    ATTN_SLOW("Failed to init TRUEMASK on 0x%08X", l_huid);
+                    errlCommit(l_err, ATTN_COMP_ID);
+                } // if failed writing TRUEMASK reg
+
+            } // if  NOT primary proc
+
+        } // end for loop on all input procs
+
+    } // end if NOT FSP
+
+    return;
 }
+
+
+} // end namespace ATTN

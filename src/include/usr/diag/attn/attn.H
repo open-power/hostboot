@@ -32,6 +32,7 @@
  */
 
 #include <errl/errlentry.H>
+#include <targeting/common/targetservice.H>
 
 // Custom compile configs
 
@@ -74,6 +75,20 @@ errlHndl_t stopService();
  * @retval[!0] Unexpected error occurred.
  */
 errlHndl_t checkForIplAttentions();
+
+/**
+ * @brief setTrueMask_otherProcs
+ *
+ * This will init the trueMASK (cfam reg) on processors
+ * other than the primary proc.  It should be called
+ * during IPL when the secondary procs are ready to
+ * become part of the system.
+ *
+ * NOTE: Does nothing on FSP systems.
+ *
+ * @retval  none
+ */
+void  setTrueMask_otherProcs( const TARGETING::TargetHandleList &i_allProcs );
 
 }
 

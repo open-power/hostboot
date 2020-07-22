@@ -40,6 +40,7 @@
 #include <initservice/istepdispatcherif.H> // INITSERVICE
 #include <initservice/initserviceif.H>
 #include <fapi2/plat_hwp_invoker.H>
+#include <diag/attn/attn.H>
 
 using namespace ISTEP;
 using namespace ISTEP_ERROR;
@@ -63,17 +64,27 @@ void send_analyzable_procs(void)
     TargetHandleList l_procsList;
     getAllChips(l_procsList, TYPE_PROC);
 
-    // now fill in the list with proc huids
-    for (const auto & l_cpu_target : l_procsList)
-    {
-        l_chipHuids.push_back(get_huid(l_cpu_target));
-    }
 
-    // send the message to alert ATTN to start monitoring these chips
-    l_err = sendAttnMonitorChipIdMsg(l_chipHuids);
-    if (l_err)
+    if(spBaseServicesEnabled())
     {
-        errlCommit(l_err, ISTEP_COMP_ID);
+        // now fill in the list with proc huids
+        for (const auto & l_cpu_target : l_procsList)
+        {
+            l_chipHuids.push_back(get_huid(l_cpu_target));
+        }
+
+        // send the message to alert ATTN to start monitoring these chips
+        l_err = sendAttnMonitorChipIdMsg(l_chipHuids);
+        if (l_err)
+        {
+            errlCommit(l_err, ISTEP_COMP_ID);
+        }
+    }
+    else
+    {
+        // not FSP, so set the TRUEMASK reg via hostboot code
+        // (FSP leg above tells the FSP to set the TRUEMASK)
+        ATTN::setTrueMask_otherProcs( l_procsList );
     }
 }
 
@@ -93,10 +104,8 @@ void* call_host_attnlisten_proc(void *io_pArgs)
 
     // Send list of functional procs that ATTN
     // can start monitoring for checkstop analysis
-    if(spBaseServicesEnabled())
-    {
-        send_analyzable_procs();
-    }
+    send_analyzable_procs();
+
 
     TRACFCOMP(g_trac_isteps_trace, EXIT_MRK"call_host_attnlisten_proc");
     return l_stepError.getErrorHandle();
