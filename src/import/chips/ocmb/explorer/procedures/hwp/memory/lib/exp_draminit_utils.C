@@ -445,10 +445,8 @@ fapi2::ReturnCode setup_cmd_params(
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_OCMB_COUNTER, i_target, l_counter));
     o_cmd.request_identifier = l_counter;
 
-    // With cmd_length > 0, data exists in the extended data buffer. Must set cmd_flags to 1. However,
-    // eye capture step 2 needs cmd_flags to be set to zero as defined in MCHP spec section 5.4.3 Eye Capture
-    // despite having data in the extended data buffer
-    o_cmd.cmd_flags = ((i_cmd_length > 0) && (i_phy_init_mode != phy_init_mode::EYE_CAPTURE_STEP_2)) ? 1 : 0;
+    // With cmd_length > 0, data exists in the extended data buffer. Must set cmd_flags to 1.
+    o_cmd.cmd_flags = (i_cmd_length > 0) ? 1 : 0;
 
     o_cmd.cmd_length = i_cmd_length;
     o_cmd.cmd_crc = i_cmd_data_crc;
