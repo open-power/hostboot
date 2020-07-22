@@ -533,6 +533,7 @@
     <ffdc>CMD_ID</ffdc>
     <ffdc>RSP_ID</ffdc>
     <ffdc>ERROR_CODE</ffdc>
+    <ffdc>EXTENDED_ERROR_CODE</ffdc>
     <ffdc>EXPECTED_REQID</ffdc>
     <ffdc>ACTUAL_REQID</ffdc>
     <callout>
