@@ -45,7 +45,7 @@ enum {
     PARSER_SIZEOF_SHA512_t           = 64,
     PARSER_SIZEOF_UINT32_t           =  4,
     PARSER_SIZEOF_UINT8_t            =  1,
-    PARSER_SIZEOF_TARGET_HKH_SECTION = 69,
+    PARSER_SIZEOF_TARGET_HKH_SECTION = 70,
 };
 
 //------------------------------------------------------------------------------
@@ -81,28 +81,34 @@ UdSystemHwKeyHash::~UdSystemHwKeyHash()
 //------------------------------------------------------------------------------
 UdTargetHwKeyHash::UdTargetHwKeyHash(const TARGETING::Target * i_target,
                                      const uint8_t i_side,
-                                     const SHA512_t i_hash)
+                                     const SHA512_t i_hash,
+                                     const uint8_t i_secure_version)
 {
     // Set up Ud instance variables
     iv_CompId = SECURE_COMP_ID;
-    iv_Version = SECURE_UDT_VERSION_1;
+    iv_Version = SECURE_UDT_VERSION_2;
     iv_SubSection = SECURE_UDT_TARGET_HW_KEY_HASH;
 
-    //***** Memory Layout *****
+    //***** Version SECURE_UDT_VERSION_1 Memory Layout *****
     // 4 bytes  : Target HUID
     // 1 byte   : SBE EEPROM (Primary or Backup)
     // 64 bytes : SHA512_t of Target HW Key Hash
 
+    //***** Version SECURE_UDT_VERSION_2 Memory Layout *****
+    // The following is appended onto VERSION_1 for VERSION_2:
+    // 1 byte   : Minimum Secure Version
+
     static_assert(sizeof(uint32_t)==PARSER_SIZEOF_UINT32_t, "Expected sizeof(uint32_t) is 4");
     static_assert(sizeof(uint8_t)==PARSER_SIZEOF_UINT8_t, "Expected sizeof(uint8_t) is 1");
     static_assert(sizeof(SHA512_t) == PARSER_SIZEOF_SHA512_t, "Expected SHA512_t size is 64 bytes");
-    static_assert((sizeof(uint32_t) + sizeof(uint8_t) + sizeof(SHA512_t)) == PARSER_SIZEOF_TARGET_HKH_SECTION,
-                  "Expected Buffer length is 69 bytes");
+    static_assert((sizeof(uint32_t) + sizeof(uint8_t) + sizeof(SHA512_t)+sizeof(uint8_t))
+                  == PARSER_SIZEOF_TARGET_HKH_SECTION, "Expected Buffer length is 70 bytes");
 
     char * l_pBuf = reinterpret_cast<char *>(
                           reallocUsrBuf(sizeof(uint32_t)
                                         +sizeof(uint8_t)
-                                        +sizeof(SHA512_t)));
+                                        +sizeof(SHA512_t)
+                                        +sizeof(uint8_t)));
 
     uint32_t tmp32 = 0;
     uint8_t tmp8 = 0;
@@ -117,6 +123,10 @@ UdTargetHwKeyHash::UdTargetHwKeyHash(const TARGETING::Target * i_target,
 
     memcpy(l_pBuf, i_hash, sizeof(SHA512_t));
     l_pBuf += sizeof(SHA512_t);
+
+    tmp8 = static_cast<uint8_t>(i_secure_version);
+    memcpy(l_pBuf, &tmp8, sizeof(tmp8));
+    l_pBuf += sizeof(tmp8);
 }
 
 //------------------------------------------------------------------------------

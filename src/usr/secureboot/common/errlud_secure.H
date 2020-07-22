@@ -90,14 +90,16 @@ class UdTargetHwKeyHash : public ERRORLOG::ErrlUserDetails
     /**
      *  @brief Constructor
      *
-     *  @param i_target       Processor Target containing HW Keys Hash
-     *  @param i_side         SEEPROM side used on the target:
-     *                        0=SBE_PRIMARY, 1=SBE_BACKUP
-     *  @param i_hash         Target HW Keys Hash represented by SHA512
+     *  @param i_target         Processor Target containing HW Keys Hash
+     *  @param i_side           SEEPROM side used on the target:
+     *                          0=SBE_PRIMARY, 1=SBE_BACKUP
+     *  @param i_hash           Target HW Keys Hash represented by SHA512
+     *  @param i_secure_version Target Secure Version
      */
     UdTargetHwKeyHash(const TARGETING::Target * i_target,
                       const uint8_t i_side,
-                      const SHA512_t i_hash);
+                      const SHA512_t i_hash,
+                      const uint8_t i_secure_version);
 
     /**
      *  @brief Destructor
