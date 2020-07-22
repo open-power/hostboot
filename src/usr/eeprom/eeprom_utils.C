@@ -1080,29 +1080,6 @@ void cacheEepromVpd(TARGETING::Target * i_target, bool i_present)
             errlCommit(errl, EEPROM_COMP_ID);
         }
     }
-
-    // Also try backup VPD
-    // TODO RTC: 206301 - backup VPD contains whether WOF data changed
-#if 0
-    TARGETING::EepromVpdBackupInfo eepromBackupData;
-    TARGETING::SpiEepromVpdBackupInfo spiEepromBackupData;
-    if ( i_target->tryGetAttr<TARGETING::ATTR_EEPROM_VPD_BACKUP_INFO>(eepromBackupData) ||
-         i_target->tryGetAttr<TARGETING::ATTR_SPI_EEPROM_VPD_BACKUP_INFO>
-          (spiEepromBackupData) )
-    {
-        TRACFCOMP(g_trac_eeprom,"Reading EEPROMs for target 0x%.8X, eeprom cache = %d VPD_BACKUP , target present = %d , eeprom type = %d",
-                  TARGETING::get_huid(i_target), DEVICE_CACHE_EEPROM_ADDRESS(i_present, EEPROM::VPD_BACKUP));
-        presentSize = sizeof(i_present);
-        errl = deviceRead(i_target, &i_present, presentSize,
-                        DEVICE_CACHE_EEPROM_ADDRESS(i_present, EEPROM::VPD_BACKUP));
-        if (errl != nullptr)
-        {
-            TRACFCOMP(g_trac_eeprom, "pTarget %.8X - failed reading backup VPD eeprom",
-                i_target->getAttr<TARGETING::ATTR_HUID>());
-            errlCommit(errl, EEPROM_COMP_ID);
-        }
-    }
-#endif
 }
 
 errlHndl_t cacheEepromBuffer(TARGETING::Target * const i_target,
@@ -1194,13 +1171,15 @@ void cacheEepromAncillaryRoles()
              (eepromTarget.deviceRole != SBE_BACKUP) )
         {
             bool present = true;
-            size_t presentSize = sizeof(present);
+            void * empty_buffer = nullptr;
+            size_t empty_size = 0;
+
             TRACFCOMP(g_trac_eeprom,"cacheEepromAncillaryRoles(): "
                 "Reading EEPROMs for target %.8X, eeprom cache = %d,"
                 " target present = %d , eeprom type = %d",
                 TARGETING::get_huid(eepromTarget.assocTarg),
                 DEVICE_CACHE_EEPROM_ADDRESS(present, eepromTarget.deviceRole));
-            errl = deviceRead(eepromTarget.assocTarg, &present, presentSize,
+            errl = deviceRead(eepromTarget.assocTarg, empty_buffer, empty_size,
                             DEVICE_CACHE_EEPROM_ADDRESS(present, eepromTarget.deviceRole));
             if (errl != nullptr)
             {

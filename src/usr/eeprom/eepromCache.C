@@ -367,8 +367,8 @@ errlHndl_t updateEecacheContents(TARGETING::Target*          i_target,
         }
 
         // Flush the page to make sure it gets to the PNOR
-        l_errl = flushToPnor(l_internalSectionAddr,
-                             sizeof(l_eepromLen));
+        l_errl = flushToPnor(l_internalSectionAddr, l_eepromLen);
+
         if(l_errl)
         {
             break;
@@ -1696,40 +1696,60 @@ void printTableOfContentsFromGlobalMemory(bool i_only_valid_entries)
 }
 
 
-void getMasterEepromCacheState(const eepromRecordHeader & i_eepromRecordHeader,
-                               bool & o_valid, bool & o_changed)
+errlHndl_t getMasterEepromCacheState(TARGETING::Target * i_assocTarg, bool & o_valid,
+                                     bool & o_changed)
 {
+    errlHndl_t l_errl = nullptr;
+
     o_valid = false;
     o_changed = false;
 
-    TRACSSBIN(g_trac_eeprom,
-              "getMasterEepromCacheState: Looking for",
-              &i_eepromRecordHeader,
-              sizeof(i_eepromRecordHeader));
+    // EECACHE record header for master eeprom record of i_assocTarg
+    eepromRecordHeader l_masterEepromRecHead;
+    eeprom_addr_t l_masterEepromInfo;
+    l_masterEepromInfo.eepromRole = EEPROM::VPD_PRIMARY;
 
-    // find master for this eeprom
-    // Map accesses are not thread safe, make sure this is always wrapped in mutex
-    recursive_mutex_lock(&g_eecacheMutex);
-    for (auto& cachedEeprom : g_cachedEeproms)
+    // Build l_masterEepromRecHead, then search for it in g_cachedEeproms.
+    // If a match is found, figure out if matched-record is valid and if it's changed.
+    do
     {
-        const eepromRecordHeader * pHeader = &cachedEeprom.first;
-        if (eepromsMatch(const_cast<eepromRecordHeader*>(&i_eepromRecordHeader),
-                         const_cast<eepromRecordHeader*>(pHeader)) &&
-           (pHeader->completeRecord.master_eeprom == 1) )
+        l_errl = buildEepromRecordHeader(i_assocTarg, l_masterEepromInfo, l_masterEepromRecHead);
+
+        if (l_errl)
         {
-            // At this point pHeader points to the master eeprom in g_cachedEeproms
-            // Use this header to find its equivalent in PNOR to check its validity
-            eepromRecordHeader * l_pnorEepromHeader =
-                reinterpret_cast<eepromRecordHeader *>(lookupEepromHeaderAddr(*pHeader));
-            if ( l_pnorEepromHeader != 0 )
-            {
-                o_valid = l_pnorEepromHeader->completeRecord.cached_copy_valid;
-            }
-            o_changed = cachedEeprom.second.mark_target_changed;
+            TRACSSCOMP( g_trac_eeprom, "getMasterEepromCacheState() unable to build master eeprom "
+                "record header for target HUID: 0x%.08X", get_huid(i_assocTarg));
             break;
         }
-    }
-    recursive_mutex_unlock(&g_eecacheMutex);
+
+        TRACSSBIN(g_trac_eeprom, "getMasterEepromCacheState: Looking for master eeprom",
+                  &l_masterEepromRecHead, sizeof(l_masterEepromRecHead));
+
+        // find master for this eeprom
+        // Map accesses are not thread safe, make sure this is always wrapped in mutex
+        recursive_mutex_lock(&g_eecacheMutex);
+        for (const auto& cachedEeprom : g_cachedEeproms)
+        {
+            const eepromRecordHeader * pHeader = &cachedEeprom.first;
+            if (eepromsMatch(&l_masterEepromRecHead, const_cast<eepromRecordHeader*>(pHeader)) &&
+                (pHeader->completeRecord.master_eeprom == 1) )
+            {
+                // At this point pHeader points to the master eeprom in g_cachedEeproms
+                // Use this header to find its equivalent in PNOR to check its validity
+                eepromRecordHeader * l_pnorEepromHeader =
+                    reinterpret_cast<eepromRecordHeader *>(lookupEepromHeaderAddr(*pHeader));
+                if (l_pnorEepromHeader)
+                {
+                    o_valid = l_pnorEepromHeader->completeRecord.cached_copy_valid;
+                }
+                o_changed = cachedEeprom.second.mark_target_changed;
+                break;
+            }
+        }
+        recursive_mutex_unlock(&g_eecacheMutex);
+    } while (0);
+
+    return l_errl;
 }
 
 
@@ -2047,17 +2067,22 @@ errlHndl_t isEepromInSync(TARGETING::Target * i_target,
         // Check if this matches master
         bool valid = false;
         bool changed = false;
-        getMasterEepromCacheState(i_eepromRecordHeader, valid, changed);
-        if ((changed != hasEepromChanged(i_eepromRecordHeader)) ||
-            (valid != i_eepromRecordHeader.completeRecord.cached_copy_valid))
+        // For all eeproms that are not the master eeprom, the cache state of the associated
+        // master eeprom is checked.
+        l_errl = getMasterEepromCacheState(i_target, valid, changed);
+        if (!l_errl)
         {
-            TRACSSCOMP( g_trac_eeprom,
-              "isEepromInSync() Eeprom w/ Role %d is not in sync."
-              " Master role %d/%d vs current role %d/%d (valid/changed)",
-              i_eepromType, valid, changed,
-              i_eepromRecordHeader.completeRecord.cached_copy_valid,
-              hasEepromChanged(i_eepromRecordHeader) );
-            o_isInSync = false;
+            if ((changed != hasEepromChanged(i_eepromRecordHeader)) ||
+            (valid != i_eepromRecordHeader.completeRecord.cached_copy_valid))
+            {
+                TRACSSCOMP( g_trac_eeprom,
+                  "isEepromInSync() Eeprom w/ Role %d is not in sync."
+                  " Master role %d/%d vs current role %d/%d (valid/changed)",
+                  i_eepromType, valid, changed,
+                  i_eepromRecordHeader.completeRecord.cached_copy_valid,
+                  hasEepromChanged(i_eepromRecordHeader) );
+                o_isInSync = false;
+            }
         }
     }
     return l_errl;

@@ -290,13 +290,15 @@ errlHndl_t clearEecache(eecacheSectionHeader * i_eecacheSectionHeaderPtr,
                         eepromRecordHeader & i_eepromRecordHeader);
 
 /**
- * @brief Lookup the current state of the eeprom based on master
- * @param[in] - i_eepromRecordHeader - record identifying eeprom to lookup
- * @param[out] - o_valid - true if eeprom is valid, else false
- * @param[out] - o_changed - true if eeprom has changed, else false
+ * @brief Figure out the current cache state of the master eeprom for a given proc Target (i_assocTarg).
+ *        It is expected that this proc target will have a VPD_PRIMARY record attached to itself.
+ * @param[in] - i_assocTarg - proc target associated with some eeprom record
+ * @param[out] - o_valid - true if master eeprom is valid, else false
+ * @param[out] - o_changed - true if master eeprom has changed, else false
+ * @return errlHndl_t - nullptr if successful, otherwise a pointer to an error log
  */
-void getMasterEepromCacheState(const eepromRecordHeader & i_eepromRecordHeader,
-                               bool & o_valid, bool & o_changed);
+errlHndl_t getMasterEepromCacheState(TARGETING::Target * i_assocTarg, bool & o_valid,
+                                     bool & o_changed);
 #else
 /**
 *
