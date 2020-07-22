@@ -528,9 +528,6 @@ public:
      */
     void testParentDeconfigRules()
     {
-        // @TODO RTC 243399: Fix parent deconfig rules for new targets
-        return;
-
         TS_INFO("testParentDeconfigRules: Started");
 
         TARGETING::TargetIterator l_pTarget;
