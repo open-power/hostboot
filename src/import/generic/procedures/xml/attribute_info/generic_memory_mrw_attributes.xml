@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2018,2019                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2018,2020                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -56,7 +56,6 @@
     <enum>FALSE = 0x00, TRUE = 0x01</enum>
     <platInit/>
     <default>FALSE</default>
-    <initToZero/>
     <mssAccessorName>mem_mrw_is_planar</mssAccessorName>
   </attribute>
 
@@ -74,7 +73,6 @@
     <valueType>uint16</valueType>
     <default>32</default>
     <platInit/>
-    <initToZero/>
     <mssAccessorName>mrw_safemode_mem_throttled_n_commands_per_port</mssAccessorName>
   </attribute>
 
@@ -104,7 +102,6 @@
     <default>0xfffff80000000794</default>
     <array>10</array>
     <platInit/>
-    <initToZero/>
     <mssAccessorName>mrw_thermal_memory_power_limit</mssAccessorName>
   </attribute>
 
@@ -133,7 +130,6 @@
     </description>
     <valueType>uint64</valueType>
     <platInit/>
-    <initToZero/>
     <array>100</array>
     <default>0xfffff8000384044C</default>
     <mssAccessorName>mrw_pwr_intercept</mssAccessorName>
@@ -164,7 +160,6 @@
     </description>
     <valueType>uint64</valueType>
     <platInit/>
-    <initToZero/>
     <array>100</array>
     <default>0xfffff800041A044C</default>
     <mssAccessorName>mrw_pwr_slope</mssAccessorName>
@@ -190,7 +185,6 @@
         DOUBLE_10_PERCENT_FASTER=3
     </enum>
     <default>0x0</default>
-    <initToZero/>
     <mssAccessorName>mrw_refresh_rate_request</mssAccessorName>
   </attribute>
 
@@ -205,7 +199,6 @@
     <valueType>uint8</valueType>
     <platInit/>
     <default>0x0</default>
-    <initToZero/>
     <mssAccessorName>mrw_dimm_power_curve_percent_uplift</mssAccessorName>
   </attribute>
 
@@ -220,7 +213,6 @@
     <valueType>uint8</valueType>
     <platInit/>
     <default>0x0</default>
-    <initToZero/>
     <mssAccessorName>mrw_dimm_power_curve_percent_uplift_idle</mssAccessorName>
   </attribute>
 
@@ -235,7 +227,6 @@
     <valueType>uint32</valueType>
     <platInit/>
     <default>0x00000200</default>
-    <initToZero/>
     <mssAccessorName>mrw_mem_m_dram_clocks</mssAccessorName>
   </attribute>
 
@@ -252,7 +243,6 @@
     <platInit/>
     <mssUnits>c%</mssUnits>
     <default>0x00002710</default>
-    <initToZero/>
     <mssAccessorName>mrw_max_dram_databus_util</mssAccessorName>
   </attribute>
 
@@ -267,7 +257,6 @@
     <enum>OFF = 0x00, POWER_DOWN = 0x01, PD_AND_STR = 0x02, PD_AND_STR_CLK_STOP = 0x03</enum>
     <platInit/>
     <default>OFF</default>
-    <initToZero/>
     <mssAccessorName>mrw_power_control_requested</mssAccessorName>
   </attribute>
 
@@ -282,7 +271,6 @@
     <enum>OFF = 0x00, POWER_DOWN = 0x01, PD_AND_STR = 0x02, PD_AND_STR_CLK_STOP = 0x03</enum>
     <platInit/>
     <default>OFF</default>
-    <initToZero/>
     <mssAccessorName>mrw_idle_power_control_requested</mssAccessorName>
   </attribute>
 
@@ -324,7 +312,6 @@
     <platInit/>
     <mssUnits>cW</mssUnits>
     <default>0x000006A4</default>
-    <initToZero/>
     <mssAccessorName>mrw_vmem_regulator_power_limit_per_dimm_ddr4</mssAccessorName>
   </attribute>
 
@@ -411,7 +398,6 @@
       FLY_4X = 6
     </enum>
     <platInit/>
-    <initToZero/>
     <default>NORMAL</default>
     <mssAccessorName>mrw_fine_refresh_mode</mssAccessorName>
   </attribute>
@@ -431,7 +417,6 @@
     <valueType>uint8</valueType>
     <enum>NORMAL = 0, EXTEND = 1</enum>
     <platInit/>
-    <initToZero/>
     <default>EXTEND</default>
     <mssAccessorName>mrw_temp_refresh_range</mssAccessorName>
   </attribute>
@@ -443,7 +428,6 @@
     <valueType>uint8</valueType>
     <enum>YES = 0, NO = 1</enum>
     <default>YES</default>
-    <initToZero/>
     <platInit/>
     <mssAccessorName>mrw_reset_delay_before_cal</mssAccessorName>
   </attribute>
@@ -511,7 +495,6 @@
     <enum>AUTO = 0, FORCE_TO_1N_MODE = 1, FORCE_TO_2N_MODE = 2 </enum>
     <mssUnits> encoded settings for 2N Mode </mssUnits>
     <platInit/>
-    <initToZero/>
     <default>AUTO</default>
     <mssAccessorName>mrw_dram_2n_mode</mssAccessorName>
   </attribute>
@@ -537,7 +520,6 @@
     </description>
     <valueType>uint8</valueType>
     <platInit/>
-    <initToZero/>
     <enum> DISABLE = 0, ENABLE = 1 </enum>
     <default> 0  </default>
     <mssAccessorName>mrw_temp_refresh_mode</mssAccessorName>
@@ -744,7 +726,6 @@
     <valueType>uint32</valueType>
     <default>0x000009C4</default>
     <platInit/>
-    <initToZero/>
     <mssAccessorName>mrw_safemode_dram_databus_util</mssAccessorName>
   </attribute>
 

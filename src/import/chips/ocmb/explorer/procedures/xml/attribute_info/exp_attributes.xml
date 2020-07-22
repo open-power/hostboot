@@ -255,10 +255,8 @@
       <description>
           Contains the settings for write/read reorder queue
       </description>
-      <default>REORDER</default>
-      <initToZero></initToZero>
-      <writeable/>
       <enum>REORDER = 0, FIFO = 1</enum>
+      <initToZero></initToZero>
       <valueType>uint8</valueType>
       <writeable/>
       <mssAccessorName>exp_reorder_queue_setting</mssAccessorName>
@@ -549,9 +547,8 @@
     <description>
       Explorer firmware version loaded in partition A
     </description>
-    <initToZero></initToZero>
     <valueType>uint32</valueType>
-    <default>0</default>
+    <initToZero/>
     <writeable/>
     <mssAccessorName>exp_fw_version_a</mssAccessorName>
   </attribute>
@@ -562,9 +559,8 @@
     <description>
       Explorer firmware version loaded in partition B
     </description>
-    <initToZero></initToZero>
     <valueType>uint32</valueType>
-    <default>0</default>
+    <initToZero/>
     <writeable/>
     <mssAccessorName>exp_fw_version_b</mssAccessorName>
   </attribute>
@@ -575,9 +571,8 @@
     <description>
       ID of Explorer partition that firmware was booted from
     </description>
-    <initToZero></initToZero>
     <valueType>uint32</valueType>
-    <default>0</default>
+    <initToZero/>
     <writeable/>
     <mssAccessorName>exp_fw_partition_id</mssAccessorName>
   </attribute>

@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2019                             -->
+<!-- Contributors Listed Below - COPYRIGHT 2019,2020                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -82,7 +82,6 @@
       <valueType>uint16</valueType>
       <default>32</default>
       <platInit/>
-      <initToZero/>
       <mssAccessorName>safemode_mem_throttled_n_commands_per_port</mssAccessorName>
     </attribute>
 

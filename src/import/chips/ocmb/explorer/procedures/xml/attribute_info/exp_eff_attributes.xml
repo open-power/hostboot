@@ -166,7 +166,6 @@
           AVAILABLE = 1
         </enum>
         <writeable/>
-        <default>NOT_AVAILABLE</default>
         <mssAccessorName>therm_sensor_0_availability</mssAccessorName>
     </attribute>
 
@@ -183,7 +182,6 @@
           AVAILABLE = 1
         </enum>
         <writeable/>
-        <default>NOT_AVAILABLE</default>
         <mssAccessorName>therm_sensor_0_secondary_availability</mssAccessorName>
     </attribute>
 
@@ -203,7 +201,6 @@
           EMC1412 = 2
         </enum>
         <writeable/>
-        <default>NO_SENSOR</default>
         <mssAccessorName>therm_sensor_0_type</mssAccessorName>
     </attribute>
 
@@ -224,7 +221,6 @@
           DRAM_AND_MEM_BUF_EXT = 5
         </enum>
         <writeable/>
-        <default>DISABLED</default>
         <mssAccessorName>therm_sensor_0_usage</mssAccessorName>
     </attribute>
 
@@ -253,7 +249,6 @@
           AVAILABLE = 1
         </enum>
         <writeable/>
-        <default>NOT_AVAILABLE</default>
         <mssAccessorName>therm_sensor_1_availability</mssAccessorName>
     </attribute>
 
@@ -270,7 +265,6 @@
           AVAILABLE = 1
         </enum>
         <writeable/>
-        <default>NOT_AVAILABLE</default>
         <mssAccessorName>therm_sensor_1_secondary_availability</mssAccessorName>
     </attribute>
 
@@ -290,7 +284,6 @@
           EMC1412 = 2
         </enum>
         <writeable/>
-        <default>NO_SENSOR</default>
         <mssAccessorName>therm_sensor_1_type</mssAccessorName>
     </attribute>
 
@@ -311,7 +304,6 @@
           DRAM_AND_MEM_BUF_EXT = 5
         </enum>
         <writeable/>
-        <default>DISABLED</default>
         <mssAccessorName>therm_sensor_1_usage</mssAccessorName>
     </attribute>
 
@@ -340,7 +332,6 @@
           AVAILABLE = 1
         </enum>
         <writeable/>
-        <default>NOT_AVAILABLE</default>
         <mssAccessorName>therm_sensor_differential_availability</mssAccessorName>
     </attribute>
 
@@ -360,7 +351,6 @@
           EMC1412 = 2
         </enum>
         <writeable/>
-        <default>NO_SENSOR</default>
         <mssAccessorName>therm_sensor_differential_type</mssAccessorName>
     </attribute>
 
@@ -380,7 +370,6 @@
           MB_INT_DTM_REM = 2
         </enum>
         <writeable/>
-        <default>DISABLED</default>
         <mssAccessorName>therm_sensor_differential_usage</mssAccessorName>
     </attribute>
 

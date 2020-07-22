@@ -109,10 +109,9 @@
       ARRAY[DIMM]
       OMI to DDR frequency ratio
     </description>
-    <initToZero></initToZero>
     <valueType>uint8</valueType>
-    <enum> 1_TO_1 = 1, 2_TO_1 = 2, 4_TO_1 = 4, 8_TO_1 = 8, 16_TO_1 = 16, 32_TO_1 = 32, 64_TO_1 = 64, 128_TO_1 = 128</enum>
-    <default>8</default>
+    <enum> UNINITIALIZED = 0, 1_TO_1 = 1, 2_TO_1 = 2, 4_TO_1 = 4, 8_TO_1 = 8, 16_TO_1 = 16, 32_TO_1 = 32, 64_TO_1 = 64, 128_TO_1 = 128</enum>
+    <initToZero></initToZero>
     <writeable/>
     <array>2</array>
     <mssUnit>ratio</mssUnit>
