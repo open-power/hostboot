@@ -361,7 +361,7 @@ ZEPPELIN_WOFDATA_IMG = ${ENGD_WOFPATH:Fzeppelin_wof_data.bin}
 DENALI_WOFDATA_IMG = ${ENGD_WOFPATH:Ffleetwood_wof_data.bin}
 # Create list of images for each node (in node order)
 # genPnorImages will handle multiple HBD=binfile pairs
-DENALI_HBD_IMG = HBD=${${HBFW_TARGPATH:FDENALI_node_0_hb_targeting.bin}:P},HBD=${${HBFW_TARGPATH:FDENALI_node_1_hb_targeting.bin}:P},HBD=${${HBFW_TARGPATH:FDENALI_node_2_hb_targeting.bin}:P},HBD=${${HBFW_TARGPATH:FDENALI_node_3_hb_targeting.bin}:P}
+DENALI_HBD_IMGS = HBD=${${HBFW_TARGPATH:FDENALI_node_0_hb_targeting.bin}:P},HBD=${${HBFW_TARGPATH:FDENALI_node_1_hb_targeting.bin}:P},HBD=${${HBFW_TARGPATH:FDENALI_node_2_hb_targeting.bin}:P},HBD=${${HBFW_TARGPATH:FDENALI_node_3_hb_targeting.bin}:P}
 
 # Input fake images
 
@@ -387,7 +387,7 @@ DENALI_WOFDATA_FINAL_IMG = DENALI.WOFDATA.bin
 .else
     GEN_P10_BIN_FILES = P10:SBE=${${P10_SBE_IMG}:P},HCODE=${${P10_HCODE_IMG}:P},OCC=${${P10_OCC_IMG}:P},HBD=${${P10_HBD_IMG}:P}
 .endif
-GEN_DENALI_BIN_FILES = DENALI:WOFDATA=${${DENALI_WOFDATA_IMG}:P},HBD=${DENALI_HBD_IMG}
+GEN_DENALI_BIN_FILES = DENALI:WOFDATA=${${DENALI_WOFDATA_IMG}:P},${DENALI_HBD_IMGS}
 SYSTEM_SPECIFIC_PARAMS = --install-all --emit-eccless ${TARGET_TEST:b--test} ${CONFIG_SECUREBOOT:b--secureboot}  \
 			 --pnorLayout ${PNOR_LAYOUT} ${CORRUPT_PARAMS} ${HB_STANDALONE:b--hb-standalone} \
 			 --systemBinFiles ${GEN_DENALI_BIN_FILES} \
