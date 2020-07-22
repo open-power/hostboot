@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -722,10 +722,15 @@ void AttrOverrideSync::triggerAttrSync(fapi2::TargetType i_type,
 
         TARGETING::EntityPath phys_path_ptr =
           l_pTarget->getAttr<TARGETING::ATTR_PHYS_PATH>();
-        FAPI_INF("triggerAttrSync: HUID 0x%X, fapi type[%x] [%s]",
-                 TARGETING::get_huid(l_pTarget), l_fType,
-                 phys_path_ptr.toString());
-
+        uint32_t l_fTypeBitPos = 0x0; //default to TARGET_TYPE_NONE
+        for(uint32_t i=0; i < 64 /*bits per dword*/; i++)
+        {
+            if (l_fType & (0x0000000000000001ULL << i))
+            {
+               l_fTypeBitPos = i;
+               break;
+            }
+        }
         //Need a generic fapi target to use later
         fapi2::Target<TARGET_TYPE_ALL> l_fapiTarget( l_pTarget);
 
@@ -734,6 +739,12 @@ void AttrOverrideSync::triggerAttrSync(fapi2::TargetType i_type,
         uint8_t l_unitPos = 0;
         uint8_t l_node = 0;
         l_pTarget->getAttrTankTargetPosData(l_pos, l_unitPos, l_node);
+
+        char * l_physString = phys_path_ptr.toString();
+        FAPI_INF("triggerAttrSync: HUID 0x%X, type num[%d] fapi type[%llx] [%s], [n%d:p%d:c%d]",
+                 TARGETING::get_huid(l_pTarget), l_fTypeBitPos, l_fType,
+                 l_physString, l_node, l_pos, l_unitPos);
+        free (l_physString);
 
         //Loop on all fapi ATTR under this target type
         size_t l_elems = 0;
@@ -785,7 +796,7 @@ void AttrOverrideSync::triggerAttrSync(fapi2::TargetType i_type,
             errlHndl_t l_pErr = fapi2::rcToErrl(l_rc);
             if(!l_pErr)
             {
-                iv_syncTank.setAttribute(l_attrs[i].iv_attrId, l_fType,
+                iv_syncTank.setAttribute(l_attrs[i].iv_attrId, l_fTypeBitPos,
                                          l_pos, l_unitPos, l_node, 0,
                                          l_bytes, l_buf);
             }

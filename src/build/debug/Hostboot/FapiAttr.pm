@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2016
+# Contributors Listed Below - COPYRIGHT 2016,2020
 # [+] International Business Machines Corp.
 #
 #
@@ -201,6 +201,8 @@ sub main
         if(($targetType ne $prevTType) || ($pos ne $prevPos) ||
            ($unitPos ne $prevUnitPos))
         {
+            #my $cro_str = cronusTargetStr( $targetType, $pos, $unitPos, $flag_node);
+            #::userDisplay "Target type [$targetType] : $cro_str";
             $prevTType = $targetType;
             $prevPos = $pos;
             $prevUnitPos = $unitPos;
@@ -403,37 +405,44 @@ sub cronusTargetStr()
 
     ## This array matches what is in fapi2/include/target_types.H
     my %types = (
-                 "00000000" => "none",
-                 "00000001" => "sys",
-                 "00000002" => "dimm",
-                 "00000004" => "pu",
-                 "00000008" => "memb",
-                 "00000010" => "pu.ex",
-                 "00000020" => "memb.mba",
-                 "00000040" => "pu.mcs",
-                 "00000080" => "pu.xbus",
-                 "00000100" => "pu.abus",
-                 "00000200" => "memb.l4",
-                 "00000400" => "pu.c",
-                 "00000800" => "pu.eq",
-                 "00001000" => "pu.mca",
-                 "00002000" => "pu.mcbist",
-                 "00004000" => "pu.mi",
-                 "00008000" => "pu.capp",
-                 "00010000" => "pu.dmi",
-                 "00020000" => "pu.obus",
-                 "00040000" => "pu.nv",
-                 "00080000" => "pu.sbe",
-                 "00100000" => "pu.ppe",
-                 "00200000" => "pu.perv",
-                 "00400000" => "pu.pec",
-                 "00800000" => "pu.phb",
-                 "01000000" => "pu.mc",
-                 "02000000" => "pu.omi",
-                 "04000000" => "pu.omic",
-                 "08000000" => "pu.mcc",
-                 "10000000" => "ocmb",
-                 "20000000" => "ocmb.mp"
+                 "00000000" => "sys",
+                 "00000001" => "dimm",
+                 "00000002" => "pu",
+                 "00000003" => "memb",
+                 "00000004" => "pu.ex",
+                 "00000005" => "memb.mba",
+                 "00000006" => "pu.mcs",
+                 "00000007" => "pu.xbus",
+                 "00000008" => "pu.abus",
+                 "00000009" => "memb.l4",
+                 "0000000a" => "pu.c",
+                 "0000000b" => "pu.eq",
+                 "0000000c" => "pu.mca",
+                 "0000000d" => "pu.mcbist",
+                 "0000000e" => "pu.mi",
+                 "0000000f" => "pu.capp",
+                 "00000010" => "pu.dmi",
+                 "00000011" => "pu.obus",
+                 "00000012" => "pu.nv",
+                 "00000013" => "pu.sbe",
+                 "00000014" => "pu.ppe",
+                 "00000015" => "pu.perv",
+                 "00000016" => "pu.pec",
+                 "00000017" => "pu.phb",
+                 "00000018" => "pu.mc",
+                 "00000019" => "pu.omi",
+                 "0000001a" => "pu.omic",
+                 "0000001b" => "pu.mcc",
+                 "0000001c" => "ocmb",
+                 "0000001d" => "ocmb.mp",
+                 "0000001e" => "pu.nmmu",
+                 "0000001f" => "reserved_z",
+                 "00000020" => "pu.pau",
+                 "00000021" => "pu.iohs",
+                 "00000022" => "pu.fc",
+                 "00000023" => "pmic",
+                 "00000024" => "pu.pauc",
+                 "00000025" => "geni2c",
                  );
 
     my $cro_type = $types{$targetType_hexstr};
