@@ -203,11 +203,11 @@ errlHndl_t initialize()
 
 bool __analyzeOcmbs( STEP_CODE_DATA_STRUCT & io_sc )
 {
+    bool attnFound = false;
+
     #ifdef __HOSTBOOT_MODULE
 
     PRDF_TRAC( "PRDF::__analyzeOcmbs enter" );
-
-    bool attnFound = false;
 
     ATTR_MODEL_type procModel = getChipModel( getMasterProc() );
     if ( MODEL_AXONE != procModel )
