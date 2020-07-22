@@ -135,32 +135,45 @@ public:
         char* l_databuf = static_cast<char*>(i_pBuffer);
         i_parser.PrintHeading("Target HW Key Hash");
 
-        //***** Memory Layout *****
+        //***** Version 1 Memory Layout *****
         // 4 bytes  : Target HUID
         // 1 byte   : SBE SEEPROM (Primary or Backup)
         // 64 bytes : SHA512_t of Target HW Key Hash
 
-        i_parser.PrintNumber("Target HUID","%.8lX",TO_UINT32(l_databuf));
-        l_databuf += sizeof(uint32_t);
+        // **** Version 2 Memory Layout ****
+        // Append this to the end of Version 1:
+        // 1 byte   : Minimum FW Secure Version
 
-        uint8_t side = TO_UINT8(l_databuf);
-        l_databuf += sizeof(uint8_t);
+        if (i_version >= 1)
+        {
+            i_parser.PrintNumber("Target HUID","%.8lX",TO_UINT32(l_databuf));
+            l_databuf += sizeof(uint32_t);
 
-        if( side == 0 )
-        {
-            i_parser.PrintNumber("SBE_PRIMARY","%.2X",side);
+            uint8_t side = TO_UINT8(l_databuf);
+            l_databuf += sizeof(uint8_t);
+
+            if( side == 0 )
+            {
+                i_parser.PrintNumber("SBE_PRIMARY","%.2X",side);
+            }
+            else if( side == 1 )
+            {
+                i_parser.PrintNumber("SBE_BACKUP","%.2X",side);
+            }
+            else
+            {
+                i_parser.PrintNumber("Unknown SBE","%.2X",side);
+            }
+
+            i_parser.PrintHexDump(l_databuf, UDPARSER_SIZEOF_SHA512_t);
+            l_databuf += UDPARSER_SIZEOF_SHA512_t;
         }
-        else if( side == 1 )
+        if (i_version >= 2)
         {
-            i_parser.PrintNumber("SBE_BACKUP","%.2X",side);
-        }
-        else
-        {
-            i_parser.PrintNumber("Unknown SBE","%.2X",side);
+            i_parser.PrintNumber("SBE FW Secure Version 0x","%.2lX",TO_UINT8(l_databuf));
+            l_databuf += sizeof(uint8_t);
         }
 
-        i_parser.PrintHexDump(l_databuf, UDPARSER_SIZEOF_SHA512_t);
-        l_databuf += UDPARSER_SIZEOF_SHA512_t;
     }
 
 private:
