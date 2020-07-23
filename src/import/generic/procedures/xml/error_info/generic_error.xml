@@ -555,6 +555,30 @@
   </hwpError>
 
   <hwpError>
+    <rc>RC_MSS_INVALID_DIMM_MODULE_RECEIVED_FOR_SPD_REV_FALLBACK</rc>
+    <description>
+      Unable to fall back SPD decoder to the highest decoded
+      revision for particular DIMM module.
+      Most likely a programming error or bad SPD.
+    </description>
+    <ffdc>DIMM_MODULE</ffdc>
+    <ffdc>SPD_REV</ffdc>
+    <ffdc>DRAM_GEN</ffdc>
+    <ffdc>DIMM_TARGET</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>MEDIUM</priority>
+    </callout>
+    <callout>
+      <target>DIMM_TARGET</target>
+      <priority>MEDIUM</priority>
+    </callout>
+    <deconfigure>
+      <target>DIMM_TARGET</target>
+    </deconfigure>
+  </hwpError>
+
+  <hwpError>
     <rc>RC_MSS_INVALID_SPD_RANK</rc>
     <description>
       Invalid rank passed into attribute engine.

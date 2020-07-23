@@ -171,9 +171,12 @@ class rev_fallback
         const module_key NVDIMM_DDR4_V1_0;
         const module_key NVDIMM_DDR4_V1_1;
 
+        const module_key DDIMM_DDR4_V0_3;
+
         std::map<module_key, uint8_t> iv_lrdimm_rev_map;
         std::map<module_key, uint8_t> iv_rdimm_rev_map;
         std::map<module_key, uint8_t> iv_nvdimm_rev_map;
+        std::map<module_key, uint8_t> iv_ddimm_rev_map;
         std::map< module_params, std::map<module_key, uint8_t> > iv_spd_param_map;
 
         ///
@@ -197,7 +200,7 @@ class rev_fallback
 /// @class module_factory
 /// @tparam T module decoder type (e.g. base_cnfg_decoder, dimm_module_decoder)
 /// @tparam TT defaulted to moduleFactoryTraits<T>
-/// @brief Factory method for SPD module parameters
+/// @brief Factory method for SPD module module_params
 ///
 template < typename T, typename TT = moduleFactoryTraits<T> >
 class module_factory
@@ -212,14 +215,14 @@ class module_factory
         module_factory(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
                        const std::vector<uint8_t>& i_spd_data):
             iv_target(i_target),
-            LRDIMM_DDR4_REV_1_0{ DDR4, LRDIMM_MODULE, rev::V1_0},
-            LRDIMM_DDR4_REV_1_1{ DDR4, LRDIMM_MODULE, rev::V1_1},
-            LRDIMM_DDR4_REV_1_2{ DDR4, LRDIMM_MODULE, rev::V1_2},
-            RDIMM_DDR4_REV_1_0 { DDR4, RDIMM_MODULE,  rev::V1_0},
-            RDIMM_DDR4_REV_1_1 { DDR4, RDIMM_MODULE,  rev::V1_1},
-            NVDIMM_DDR4_REV_1_0{ DDR4, NVDIMM_MODULE, rev::V1_0},
-            NVDIMM_DDR4_REV_1_1{ DDR4, NVDIMM_MODULE, rev::V1_1},
-            DDIMM_DDR4_REV_0_3 { DDR4, DDIMM_MODULE,  rev::V0_3}
+            LRDIMM_DDR4_REV_1_0 {DDR4, LRDIMM_MODULE, rev::V1_0},
+            LRDIMM_DDR4_REV_1_1 {DDR4, LRDIMM_MODULE, rev::V1_1},
+            LRDIMM_DDR4_REV_1_2 {DDR4, LRDIMM_MODULE, rev::V1_2},
+            RDIMM_DDR4_REV_1_0  {DDR4, RDIMM_MODULE,  rev::V1_0},
+            RDIMM_DDR4_REV_1_1  {DDR4, RDIMM_MODULE,  rev::V1_1},
+            NVDIMM_DDR4_REV_1_0 {DDR4, NVDIMM_MODULE, rev::V1_0},
+            NVDIMM_DDR4_REV_1_1 {DDR4, NVDIMM_MODULE, rev::V1_1},
+            DDIMM_DDR4_REV_0_3  {DDR4, DDIMM_MODULE,  rev::V0_3}
         {
             // Setup pre-defined maps available to search through
             init_map_vars(i_spd_data, iv_decoder_map);
@@ -444,13 +447,14 @@ class module_factory
         fapi2::ReturnCode try_fallback(module_key& io_key,
                                        std::shared_ptr<T>& o_decoder_ptr) const
         {
-            const uint8_t l_dimm_type = io_key.iv_module_type == RDIMM_MODULE ? RDIMM : LRDIMM;
-
             // Invalid DRAM gen is a hard fail
             FAPI_TRY(check::dram_gen(iv_target, io_key.iv_dram_gen, TT::MODULE_FACTORY_FFDC_CODE));
 
-            // Invalid DIMM type is a hard fail
-            FAPI_TRY(check::dimm_type(iv_target, l_dimm_type, TT::MODULE_FACTORY_FFDC_CODE));
+            {
+                const uint8_t l_dimm_type = io_key.iv_module_type == RDIMM_MODULE ? RDIMM : LRDIMM;
+                // Invalid DIMM type is a hard fail
+                FAPI_TRY(check::dimm_type(iv_target, l_dimm_type, TT::MODULE_FACTORY_FFDC_CODE));
+            }
 
             // We can circumvent SPD revision fails by using backward compatible revisions
             FAPI_TRY(find_backward_compatible_rev(io_key));
@@ -507,7 +511,7 @@ class factories
         std::vector<uint8_t> iv_spd_data;
         uint8_t iv_rev;
         uint8_t iv_dram_gen;
-        uint8_t iv_dimm_type;
+        uint8_t iv_base_module_type;
         uint8_t iv_hybrid;
         uint8_t iv_hybrid_media;
 

@@ -939,10 +939,10 @@ enum device_type
 };
 
 ///
-/// @brief DIMM type selector
+/// @brief Base module types
 /// @note values set to SPD settings
 ///
-enum dimm_type
+enum base_module_type
 {
     RDIMM = 0b0001,
     LRDIMM = 0b0100,

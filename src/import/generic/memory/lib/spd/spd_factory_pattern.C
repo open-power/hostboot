@@ -103,7 +103,8 @@ rev_fallback::rev_fallback(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_targe
     RDIMM_DDR4_V1_0{DDR4, RDIMM_MODULE, rev::V1_0},
     RDIMM_DDR4_V1_1{DDR4, RDIMM_MODULE, rev::V1_1},
     NVDIMM_DDR4_V1_0{DDR4, NVDIMM_MODULE, rev::V1_0},
-    NVDIMM_DDR4_V1_1{DDR4, NVDIMM_MODULE, rev::V1_1}
+    NVDIMM_DDR4_V1_1{DDR4, NVDIMM_MODULE, rev::V1_1},
+    DDIMM_DDR4_V0_3{DDR4, DDIMM_MODULE, rev::V0_3}
 {
     // Member variable initialization
     fapi2::buffer<uint8_t> l_buffer(i_key.iv_rev);
@@ -111,7 +112,7 @@ rev_fallback::rev_fallback(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_targe
     l_buffer.extractToRight<ADDITIONS_REV_START, LEN>(iv_additions_level);
 
     // Setup pre-defined maps available to search through
-    // 3 diff mappings because each map has an independently
+    // diff mappings because each map has an independently
     // managed revision.
     iv_rdimm_rev_map[RDIMM_DDR4_V1_0] = rev::V1_0;
     iv_rdimm_rev_map[RDIMM_DDR4_V1_1] = rev::V1_1;
@@ -123,10 +124,13 @@ rev_fallback::rev_fallback(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_targe
     iv_nvdimm_rev_map[NVDIMM_DDR4_V1_0] = rev::V1_1;
     iv_nvdimm_rev_map[NVDIMM_DDR4_V1_1] = rev::V1_1;
 
+    iv_ddimm_rev_map[DDIMM_DDR4_V0_3] = rev::V0_3;
+
     // Another small map to select the right map based on module
     iv_spd_param_map[RDIMM_MODULE] = iv_rdimm_rev_map;
     iv_spd_param_map[LRDIMM_MODULE] = iv_lrdimm_rev_map;
     iv_spd_param_map[NVDIMM_MODULE] = iv_nvdimm_rev_map;
+    iv_spd_param_map[DDIMM_MODULE] = iv_ddimm_rev_map;
 }
 
 ///
@@ -227,7 +231,7 @@ factories::factories(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
 {
     FAPI_TRY( (reader<init_fields::REVISION, spd::rev::GEN_SEC_MAX>(i_target, i_spd_data, iv_rev)),
               "Failed to read REVISION field for %s", spd::c_str(i_target) );
-    FAPI_TRY( (reader<init_fields::BASE_MODULE, spd::rev::GEN_SEC_MAX>(i_target, i_spd_data, iv_dimm_type)),
+    FAPI_TRY( (reader<init_fields::BASE_MODULE, spd::rev::GEN_SEC_MAX>(i_target, i_spd_data, iv_base_module_type)),
               "Failed to read BASE_MODULE field for %s", spd::c_str(i_target) );
     FAPI_TRY( (reader<init_fields::DEVICE_TYPE, spd::rev::GEN_SEC_MAX>(i_target, i_spd_data, iv_dram_gen)),
               "Failed to read DEVICE_TYPE field for %s", spd::c_str(i_target) );
@@ -293,7 +297,7 @@ fapi_try_exit:
 ///
 fapi2::ReturnCode factories::dimm_module_select_param(module_params& o_param) const
 {
-    switch(iv_dimm_type)
+    switch(iv_base_module_type)
     {
         case RDIMM:
         case SORDIMM:
@@ -311,12 +315,13 @@ fapi2::ReturnCode factories::dimm_module_select_param(module_params& o_param) co
 
         default:
             FAPI_ASSERT(false,
-                        fapi2::MSS_INVALID_DIMM_TYPE()
-                        .set_DIMM_TYPE(iv_dimm_type)
-                        .set_FUNCTION(DIMM_MODULE_PARAM_SELECT)
+                        fapi2::MSS_INVALID_DIMM_MODULE_RECEIVED_FOR_SPD_REV_FALLBACK()
+                        .set_DIMM_MODULE(iv_base_module_type)
+                        .set_SPD_REV(iv_rev)
+                        .set_DRAM_GEN(iv_dram_gen)
                         .set_DIMM_TARGET(iv_target),
-                        "Invalid DIMM type recieved (%d) for %s",
-                        iv_dimm_type, spd::c_str(iv_target));
+                        "Invalid DIMM module recieved (%d) for %s",
+                        iv_base_module_type, spd::c_str(iv_target));
             break;
     }
 
