@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -47,11 +47,11 @@ namespace spd
 /// @param[in] i_rev SPD revision
 ///
 module_key::module_key(const uint8_t i_dram_gen,
-                       const parameters i_spd_param,
+                       const module_params i_spd_param,
                        const uint8_t i_rev):
     iv_rev(i_rev),
     iv_dram_gen(i_dram_gen),
-    iv_param(i_spd_param)
+    iv_module_type(i_spd_param)
 {}
 
 ///
@@ -68,11 +68,11 @@ bool module_key::operator<(const module_key& i_rhs) const
         return iv_dram_gen < i_rhs.iv_dram_gen;
     }
 
-    // If we are here than iv_param == i_key.iv_param
+    // If we are here than iv_module_type == i_key.iv_module_type
     // Impose weak strict ordering for encoding_level
-    if( iv_param != i_rhs.iv_param)
+    if( iv_module_type != i_rhs.iv_module_type)
     {
-        return iv_param < i_rhs.iv_param;
+        return iv_module_type < i_rhs.iv_module_type;
     }
 
     // If we are here than iv_encoding_level == i_key.iv_encoding_leve
@@ -102,7 +102,8 @@ rev_fallback::rev_fallback(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_targe
     RDIMM_DDR4_V1_0{DDR4, RDIMM_MODULE, rev::V1_0},
     RDIMM_DDR4_V1_1{DDR4, RDIMM_MODULE, rev::V1_1},
     NVDIMM_DDR4_V1_0{DDR4, NVDIMM_MODULE, rev::V1_0},
-    NVDIMM_DDR4_V1_1{DDR4, NVDIMM_MODULE, rev::V1_1}
+    NVDIMM_DDR4_V1_1{DDR4, NVDIMM_MODULE, rev::V1_1},
+    DDIMM_DDR4_V0_3{DDR4, DDIMM_MODULE, rev::V0_3}
 {
     // Member variable initialization
     fapi2::buffer<uint8_t> l_buffer(i_key.iv_rev);
@@ -110,7 +111,7 @@ rev_fallback::rev_fallback(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_targe
     l_buffer.extractToRight<ADDITIONS_REV_START, LEN>(iv_additions_level);
 
     // Setup pre-defined maps available to search through
-    // 3 diff mappings because each map has an independently
+    // diff mappings because each map has an independently
     // managed revision.
     iv_rdimm_rev_map[RDIMM_DDR4_V1_0] = rev::V1_0;
     iv_rdimm_rev_map[RDIMM_DDR4_V1_1] = rev::V1_1;
@@ -122,10 +123,13 @@ rev_fallback::rev_fallback(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_targe
     iv_nvdimm_rev_map[NVDIMM_DDR4_V1_0] = rev::V1_1;
     iv_nvdimm_rev_map[NVDIMM_DDR4_V1_1] = rev::V1_1;
 
+    iv_ddimm_rev_map[DDIMM_DDR4_V0_3] = rev::V0_3;
+
     // Another small map to select the right map based on module
     iv_spd_param_map[RDIMM_MODULE] = iv_rdimm_rev_map;
     iv_spd_param_map[LRDIMM_MODULE] = iv_lrdimm_rev_map;
     iv_spd_param_map[NVDIMM_MODULE] = iv_nvdimm_rev_map;
+    iv_spd_param_map[DDIMM_MODULE] = iv_ddimm_rev_map;
 }
 
 ///
@@ -137,14 +141,14 @@ fapi2::ReturnCode rev_fallback::get_supported_rev(uint8_t& o_rev) const
 {
     std::map<module_key, uint8_t> l_map;
 
-    auto it = iv_spd_param_map.find(iv_key.iv_param);
+    auto it = iv_spd_param_map.find(iv_key.iv_module_type);
     FAPI_ASSERT(it != iv_spd_param_map.end(),
                 fapi2::MSS_INVALID_SPD_PARAMETER_RECEIVED()
-                .set_SPD_PARAM(iv_key.iv_param)
+                .set_SPD_PARAM(iv_key.iv_module_type)
                 .set_FUNCTION_CODE(GET_SUPPORTED_REV)
                 .set_TARGET(iv_target),
                 "Invalid SPD parameter received %d for %s",
-                iv_key.iv_param, spd::c_str(iv_target));
+                iv_key.iv_module_type, spd::c_str(iv_target));
 
     l_map = it->second;
     FAPI_TRY( check_encoding_level(l_map) );
@@ -226,7 +230,7 @@ factories::factories(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
 {
     FAPI_TRY( (reader<init_fields::REVISION, spd::rev::GEN_SEC_MAX>(i_target, i_spd_data, iv_rev)),
               "Failed to read REVISION field for %s", spd::c_str(i_target) );
-    FAPI_TRY( (reader<init_fields::BASE_MODULE, spd::rev::GEN_SEC_MAX>(i_target, i_spd_data, iv_dimm_type)),
+    FAPI_TRY( (reader<init_fields::BASE_MODULE, spd::rev::GEN_SEC_MAX>(i_target, i_spd_data, iv_base_module_type)),
               "Failed to read BASE_MODULE field for %s", spd::c_str(i_target) );
     FAPI_TRY( (reader<init_fields::DEVICE_TYPE, spd::rev::GEN_SEC_MAX>(i_target, i_spd_data, iv_dram_gen)),
               "Failed to read DEVICE_TYPE field for %s", spd::c_str(i_target) );
@@ -250,7 +254,7 @@ fapi_try_exit:
 ///
 fapi2::ReturnCode factories::create_decoder( std::shared_ptr<base_cnfg_decoder>& o_decoder_ptr ) const
 {
-    parameters l_param = UNINITIALIZED;
+    module_params l_param = UNINITIALIZED;
     FAPI_TRY(base_cfg_select_param(l_param));
 
     {
@@ -271,7 +275,7 @@ fapi_try_exit:
 ///
 fapi2::ReturnCode factories::create_decoder( std::shared_ptr<dimm_module_decoder>& o_decoder_ptr ) const
 {
-    parameters l_param = UNINITIALIZED;
+    module_params l_param = UNINITIALIZED;
     FAPI_TRY(dimm_module_select_param(l_param));
 
     {
@@ -290,9 +294,9 @@ fapi_try_exit:
 /// @param[out] o_param SPD parameter
 /// @return FAPI2_RC_SUCCESS iff okay
 ///
-fapi2::ReturnCode factories::dimm_module_select_param(parameters& o_param) const
+fapi2::ReturnCode factories::dimm_module_select_param(module_params& o_param) const
 {
-    switch(iv_dimm_type)
+    switch(iv_base_module_type)
     {
         case RDIMM:
         case SORDIMM:
@@ -310,12 +314,13 @@ fapi2::ReturnCode factories::dimm_module_select_param(parameters& o_param) const
 
         default:
             FAPI_ASSERT(false,
-                        fapi2::MSS_INVALID_DIMM_TYPE()
-                        .set_DIMM_TYPE(iv_dimm_type)
-                        .set_FUNCTION(DIMM_MODULE_PARAM_SELECT)
+                        fapi2::MSS_INVALID_DIMM_MODULE_RECEIVED_FOR_SPD_REV_FALLBACK()
+                        .set_DIMM_MODULE(iv_base_module_type)
+                        .set_SPD_REV(iv_rev)
+                        .set_DRAM_GEN(iv_dram_gen)
                         .set_DIMM_TARGET(iv_target),
-                        "Invalid DIMM type recieved (%d) for %s",
-                        iv_dimm_type, spd::c_str(iv_target));
+                        "Invalid DIMM module recieved (%d) for %s",
+                        iv_base_module_type, spd::c_str(iv_target));
             break;
     }
 
@@ -330,7 +335,7 @@ fapi_try_exit:
 /// @param[out] o_param SPD parameter
 /// @return FAPI2_RC_SUCCESS iff okay
 ///
-fapi2::ReturnCode factories::base_cfg_select_param(parameters& o_param) const
+fapi2::ReturnCode factories::base_cfg_select_param(module_params& o_param) const
 {
     if(iv_hybrid == HYBRID && iv_hybrid_media == NVDIMM_HYBRID)
     {

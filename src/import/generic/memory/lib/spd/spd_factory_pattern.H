@@ -87,7 +87,7 @@ struct module_key
 {
     uint8_t iv_rev;
     uint8_t iv_dram_gen;
-    parameters iv_param;
+    module_params iv_module_type;
 
     ///
     /// @brief default ctor
@@ -101,7 +101,7 @@ struct module_key
     /// @param[in] i_rev SPD revision
     ///
     module_key(const uint8_t i_dram_gen,
-               const parameters i_spd_param,
+               const module_params i_spd_param,
                const uint8_t i_rev);
 
     ///
@@ -171,10 +171,13 @@ class rev_fallback
         const module_key NVDIMM_DDR4_V1_0;
         const module_key NVDIMM_DDR4_V1_1;
 
+        const module_key DDIMM_DDR4_V0_3;
+
         std::map<module_key, uint8_t> iv_lrdimm_rev_map;
         std::map<module_key, uint8_t> iv_rdimm_rev_map;
         std::map<module_key, uint8_t> iv_nvdimm_rev_map;
-        std::map< parameters, std::map<module_key, uint8_t> > iv_spd_param_map;
+        std::map<module_key, uint8_t> iv_ddimm_rev_map;
+        std::map< module_params, std::map<module_key, uint8_t> > iv_spd_param_map;
 
         ///
         /// @brief Helper function to select the largest SPD revision
@@ -197,7 +200,7 @@ class rev_fallback
 /// @class module_factory
 /// @tparam T module decoder type (e.g. base_cnfg_decoder, dimm_module_decoder)
 /// @tparam TT defaulted to moduleFactoryTraits<T>
-/// @brief Factory method for SPD module parameters
+/// @brief Factory method for SPD module module_params
 ///
 template < typename T, typename TT = moduleFactoryTraits<T> >
 class module_factory
@@ -212,15 +215,14 @@ class module_factory
         module_factory(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
                        const std::vector<uint8_t>& i_spd_data):
             iv_target(i_target),
-            LRDIMM_DDR4_REV_1_0{ DDR4, LRDIMM_MODULE, rev::V1_0},
-            LRDIMM_DDR4_REV_1_1{ DDR4, LRDIMM_MODULE, rev::V1_1},
-            LRDIMM_DDR4_REV_1_2{ DDR4, LRDIMM_MODULE, rev::V1_2},
-            RDIMM_DDR4_REV_1_0 { DDR4, RDIMM_MODULE,  rev::V1_0},
-            RDIMM_DDR4_REV_1_1 { DDR4, RDIMM_MODULE,  rev::V1_1},
-            NVDIMM_DDR4_REV_1_0{ DDR4, NVDIMM_MODULE, rev::V1_0},
-            NVDIMM_DDR4_REV_1_1{ DDR4, NVDIMM_MODULE, rev::V1_1},
-            DDIMM_DDR4_REV_0_0 { DDR4, DDIMM_MODULE,  rev::V0_0},
-            DDIMM_DDR4_REV_0_3 { DDR4, DDIMM_MODULE,  rev::V0_3}
+            LRDIMM_DDR4_REV_1_0 {DDR4, LRDIMM_MODULE, rev::V1_0},
+            LRDIMM_DDR4_REV_1_1 {DDR4, LRDIMM_MODULE, rev::V1_1},
+            LRDIMM_DDR4_REV_1_2 {DDR4, LRDIMM_MODULE, rev::V1_2},
+            RDIMM_DDR4_REV_1_0  {DDR4, RDIMM_MODULE,  rev::V1_0},
+            RDIMM_DDR4_REV_1_1  {DDR4, RDIMM_MODULE,  rev::V1_1},
+            NVDIMM_DDR4_REV_1_0 {DDR4, NVDIMM_MODULE, rev::V1_0},
+            NVDIMM_DDR4_REV_1_1 {DDR4, NVDIMM_MODULE, rev::V1_1},
+            DDIMM_DDR4_REV_0_3  {DDR4, DDIMM_MODULE,  rev::V0_3}
         {
             // Setup pre-defined maps available to search through
             init_map_vars(i_spd_data, iv_decoder_map);
@@ -270,7 +272,6 @@ class module_factory
         const module_key RDIMM_DDR4_REV_1_1;
         const module_key NVDIMM_DDR4_REV_1_0;
         const module_key NVDIMM_DDR4_REV_1_1;
-        const module_key DDIMM_DDR4_REV_0_0;
         const module_key DDIMM_DDR4_REV_0_3;
 
         std::map< module_key, std::shared_ptr<T> > iv_decoder_map;
@@ -328,11 +329,9 @@ class module_factory
             //
 
             // Current emulation level
-            // Rev 0.0
-            // DDIMMs start out life w/the updated general section
-            o_map[DDIMM_DDR4_REV_0_0] = std::make_shared< decoder<DDR4, BASE_CNFG, rev::V0_0> >(iv_target, i_spd_data);
-
-            // Remains mostly the same. New thermal sensor fields and pmic redundancy fields
+            // Rev 0.3
+            // DDIMMs start out life w/the latest general SPD section
+            // From rev 0.0 to 0.3 New thermal sensor fields and pmic redundancy fields
             o_map[DDIMM_DDR4_REV_0_3] = std::make_shared< decoder<DDR4, BASE_CNFG, rev::V0_3> >(iv_target, i_spd_data);
 
         }
@@ -378,11 +377,10 @@ class module_factory
             //
 
             // Current emulation level
-            // Rev 0.0
+            // Rev 0.3
             // Life starts out at base revision level
-            o_map[DDIMM_DDR4_REV_0_0] = std::make_shared< decoder<DDR4, DDIMM_MODULE, rev::V0_0> >(iv_target, i_spd_data);
-
-            // Remains mostly the same. New thermal sensor fields and pmic redundancy fields
+            // DDIMMs start out life w/the latest general SPD section
+            // From rev 0.0 to 0.3 New thermal sensor fields and pmic redundancy fields
             o_map[DDIMM_DDR4_REV_0_3] = std::make_shared< decoder<DDR4, DDIMM_MODULE, rev::V0_3> >(iv_target, i_spd_data);
         }
 
@@ -423,7 +421,7 @@ class module_factory
                          .set_FUNCTION_CODE(FFDC_CODE)
                          .set_TARGET(iv_target),
                          "Failed to find a map value for the key (rev 0x%02, param %d, dram gen: %d",
-                         i_key.iv_rev, i_key.iv_param, i_key.iv_dram_gen);
+                         i_key.iv_rev, i_key.iv_module_type, i_key.iv_dram_gen);
 
             // Update SPD rev to fallback rev
             {
@@ -449,13 +447,14 @@ class module_factory
         fapi2::ReturnCode try_fallback(module_key& io_key,
                                        std::shared_ptr<T>& o_decoder_ptr) const
         {
-            const uint8_t l_dimm_type = io_key.iv_param == RDIMM_MODULE ? RDIMM : LRDIMM;
-
             // Invalid DRAM gen is a hard fail
             FAPI_TRY(check::dram_gen(iv_target, io_key.iv_dram_gen, TT::MODULE_FACTORY_FFDC_CODE));
 
-            // Invalid DIMM type is a hard fail
-            FAPI_TRY(check::dimm_type(iv_target, l_dimm_type, TT::MODULE_FACTORY_FFDC_CODE));
+            {
+                const uint8_t l_dimm_type = io_key.iv_module_type == RDIMM_MODULE ? RDIMM : LRDIMM;
+                // Invalid DIMM type is a hard fail
+                FAPI_TRY(check::dimm_type(iv_target, l_dimm_type, TT::MODULE_FACTORY_FFDC_CODE));
+            }
 
             // We can circumvent SPD revision fails by using backward compatible revisions
             FAPI_TRY(find_backward_compatible_rev(io_key));
@@ -512,7 +511,7 @@ class factories
         std::vector<uint8_t> iv_spd_data;
         uint8_t iv_rev;
         uint8_t iv_dram_gen;
-        uint8_t iv_dimm_type;
+        uint8_t iv_base_module_type;
         uint8_t iv_hybrid;
         uint8_t iv_hybrid_media;
 
@@ -521,14 +520,14 @@ class factories
         /// @param[out] o_param SPD parameter
         /// @return FAPI2_RC_SUCCESS iff okay
         ///
-        fapi2::ReturnCode dimm_module_select_param(parameters& o_param) const;
+        fapi2::ReturnCode dimm_module_select_param(module_params& o_param) const;
 
         ///
         /// @brief Helper to select SPD parameter for the base cfg
         /// @param[out] o_param SPD parameter
         /// @return FAPI2_RC_SUCCESS iff okay
         ///
-        fapi2::ReturnCode base_cfg_select_param(parameters& o_param) const;
+        fapi2::ReturnCode base_cfg_select_param(module_params& o_param) const;
 
 };
 

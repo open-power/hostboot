@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -98,7 +98,7 @@ class init_fields
 /// @tparam D DRAM device type (e.g. DDR4)
 /// @tparam S SPD parameter (e.g. RDIMM_MODULE, NVDIMM_MODULE)
 ///
-template <device_type D, parameters S>
+template <device_type D, module_params S>
 class fields;
 
 }// spd

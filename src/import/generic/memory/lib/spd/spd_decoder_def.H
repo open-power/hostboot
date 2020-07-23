@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -50,7 +50,7 @@ namespace spd
 /// @tparam R SPD revision (e.g. rev 1.1, 1.2, etc.)
 /// @brief Base SPD DRAM decoder
 ///
-template < device_type D, parameters S, rev R >
+template < device_type D, module_params S, rev R >
 class decoder;
 
 }// spd

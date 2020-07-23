@@ -863,8 +863,8 @@ class fields<DDR4, DDIMM_MODULE>
             NUM_DIMM_CHANNELS_LEN = 2,
             BUS_WIDTH_EXT_START = 2,
             BUS_WIDTH_EXT_LEN = 3,
-            DEVICE_WIDTH_START = 5,
-            DEVICE_WIDTH_LEN = 3,
+            CHANNEL_DATA_WIDTH_START = 5,
+            CHANNEL_DATA_WIDTH_LEN = 3,
 
             // Byte 203: Module Thermal Sensors
             THERMAL_SENSORS_BYTE = 203,
@@ -1288,7 +1288,7 @@ class fields<DDR4, DDIMM_MODULE>
         // Byte 202: Memory Channel Bus Width
         static constexpr field_t NUM_DIMM_CHANNELS{BUS_WIDTH_BYTE, NUM_DIMM_CHANNELS_START, NUM_DIMM_CHANNELS_LEN};
         static constexpr field_t BUS_WIDTH_EXT{BUS_WIDTH_BYTE, BUS_WIDTH_EXT_START, BUS_WIDTH_EXT_LEN};
-        static constexpr field_t DEVICE_WIDTH{BUS_WIDTH_BYTE, DEVICE_WIDTH_START, DEVICE_WIDTH_LEN};
+        static constexpr field_t CHANNEL_DATA_WIDTH{BUS_WIDTH_BYTE, CHANNEL_DATA_WIDTH_START, CHANNEL_DATA_WIDTH_LEN};
 
         // Byte 203: Module Thermal Sensors
         static constexpr field_t MOD_THERMAL_SENSOR{THERMAL_SENSORS_BYTE, MOD_THERMAL_SENSOR_START, MOD_THERMAL_SENSOR_LEN};

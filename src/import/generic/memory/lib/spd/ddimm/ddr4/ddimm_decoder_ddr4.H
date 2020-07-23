@@ -368,13 +368,13 @@ class decoder< DDR4, DDIMM_MODULE, R > : public dimm_module_decoder
         }
 
         ///
-        /// @brief Decodes Memory Channel Bus Width -> DEVICE_WIDTH
+        /// @brief Decodes Memory Channel Bus Width -> CHANNEL_DATA_WIDTH
         /// @param[out] o_output encoding from SPD
         /// @return FAPI2_RC_SUCCESS if okay
         ///
         virtual fapi2::ReturnCode memory_width_per_channel(uint8_t& o_output) const override
         {
-            FAPI_TRY( (mss::spd::reader<fields_t::DEVICE_WIDTH, R>(iv_target, iv_data, o_output)) );
+            FAPI_TRY( (mss::spd::reader<fields_t::CHANNEL_DATA_WIDTH, R>(iv_target, iv_data, o_output)) );
 
         fapi_try_exit:
             return fapi2::current_err;

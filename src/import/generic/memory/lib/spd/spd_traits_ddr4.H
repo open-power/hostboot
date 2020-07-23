@@ -4032,16 +4032,16 @@ class readerTraits < fields< DDR4, DDIMM_MODULE>::BUS_WIDTH_EXT, R >
 /// @class readerTraits
 /// @brief trait structure to hold static SPD information
 /// @tparam R the revision of the SPD field
-/// @note DEVICE_WIDTH field specialization
+/// @note CHANNEL_DATA_WIDTH field specialization
 /// @note valid for all revs
 ///
 template< rev R >
-class readerTraits < fields< DDR4, DDIMM_MODULE>::DEVICE_WIDTH, R >
+class readerTraits < fields< DDR4, DDIMM_MODULE>::CHANNEL_DATA_WIDTH, R >
 {
     public:
 
-        static constexpr size_t COMPARISON_VAL = 0x04;
-        static constexpr const char* FIELD_STR = "DRAM device width per channel";
+        static constexpr size_t COMPARISON_VAL = 0x05;
+        static constexpr const char* FIELD_STR = "Data width per channel";
 
         template <typename T>
         using COMPARISON_OP = std::less_equal<T>;
