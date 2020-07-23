@@ -1418,6 +1418,7 @@ uint32_t getTargetPosition( TargetHandle_t i_trgt )
                 case TYPE_OSC:
                 case TYPE_OSCPCICLK:
                 case TYPE_OSCREFCLK:
+                case TYPE_MFREFCLK:
                 case TYPE_MEMBUF:
                 case TYPE_OCMB_CHIP:
                     o_pos = i_trgt->getAttr<ATTR_POSITION>();
@@ -1971,60 +1972,68 @@ uint8_t getNumRanksPerDimm<TYPE_OCMB_CHIP>(TargetHandle_t i_trgt, uint8_t i_ds)
 //##
 //##############################################################################
 
-TARGETING::TargetHandle_t getClockId(TARGETING::TargetHandle_t
-                            i_pGivenTarget,
-                            TARGETING ::TYPE i_connType,
+TargetHandle_t getClockId(TargetHandle_t i_trgt, TARGETING::TYPE i_connType,
                             uint32_t i_oscPos)
 {
     #define PRDF_FUNC "[PlatServices::getClockId] "
 
-    TargetHandleList l_clockCardlist;
-    TargetHandle_t l_target = i_pGivenTarget;
-    TargetHandle_t o_pClockCardHandle = NULL;
+    // Check parameters.
+    PRDF_ASSERT(nullptr != i_trgt);
+    PRDF_ASSERT(i_oscPos < 2);
 
-    do
+    // If memory buffer is given, use the connected processor target.
+    if (TYPE_MEMBUF == getTargetType(i_trgt))
     {
-        // If membuf target, use the connected proc target
-        if(TYPE_MEMBUF == getTargetType(i_pGivenTarget))
-        {
-            l_target = getConnectedParent(i_pGivenTarget, TYPE_PROC);
-        }
+        i_trgt = getConnectedParent(i_trgt, TYPE_PROC);
+    }
 
-        PredicateIsFunctional l_funcFilter;
-        PredicateCTM l_oscFilter(CLASS_CHIP, i_connType);
-        PredicateCTM l_peerFilter(CLASS_UNIT,
-                                  (i_connType == TYPE_OSCREFCLK ?
-                                   TYPE_SYSREFCLKENDPT:TYPE_MFREFCLKENDPT));
-        PredicatePostfixExpr l_funcAndOscFilter, l_funcAndPeerFilter;
-        l_funcAndOscFilter.push(&l_oscFilter).push(&l_funcFilter).And();
-        l_funcAndPeerFilter.push(&l_peerFilter).push(&l_funcFilter).And();
+    // Get the peer and oscillator types.
+    TARGETING::TYPE peerType = TYPE_NA, oscType = TYPE_NA;
+    switch (i_connType)
+    {
+        case TYPE_OSCREFCLK:
+            peerType = TYPE_SYSREFCLKENDPT;
+            oscType  = TYPE_OSCREFCLK;
+            break;
 
-        //PROC <---> CLKTYPE <---> PEER <---> CLKTYPE <---> OSC
-        //Get the oscillators related to this proc
-        getPeerTargets( l_clockCardlist,    // List of connected OSCs
-                        l_target,           // to this proc
-                        // filter to get to clock endpoints
-                        &l_funcAndPeerFilter/*&l_peerFilter*/,
-                        // filter to get the driving OSC
-                        &l_funcAndOscFilter/*&l_oscFilter*/);
+        // TODO: The use of TYPE_OSCPCICLK appears to be carry-over from P8 and
+        //       probably should be replaced when there is time to investigate.
+        case TYPE_OSCPCICLK:
+            peerType = TYPE_MFREFCLKENDPT;
+            oscType  = (MODEL_NIMBUS == getChipModel(getMasterProc()))
+                            ? TYPE_OSCREFCLK : TYPE_MFREFCLK;
+            break;
 
-        for(TargetHandleList::iterator l_itr = l_clockCardlist.begin();
-            l_itr != l_clockCardlist.end();
-            ++l_itr)
-        {
-            PRDF_TRAC(PRDF_FUNC "OSC 0x%.8X, pos: %d is connected to "
-             "proc 0x%.8X, inputOscPos: %d", getHuid(*l_itr),
-             getTargetPosition(*l_itr), getHuid(l_target), i_oscPos);
+        default:
+            PRDF_ERR(PRDF_FUNC "Unsupported connection type: 0x%x", i_connType);
+            PRDF_ASSERT(false);
+    }
 
-            if ( i_oscPos == getTargetPosition(*l_itr) )
-            {
-                o_pClockCardHandle = *l_itr;
-            }
-        }
+    // Functional filter
+    PredicateIsFunctional funcFilter;
 
-    } while(0);
+    // Peer filter
+    PredicateCTM peerFilter(CLASS_UNIT, peerType);
+    PredicatePostfixExpr funcAndPeerFilter;
+    funcAndPeerFilter.push(&peerFilter).push(&funcFilter).And();
 
-    return o_pClockCardHandle;
+    // Result filter
+    PredicateCTM resultFilter(CLASS_CHIP, oscType);
+    PredicatePostfixExpr funcAndResultFilter;
+    funcAndResultFilter.push(&resultFilter).push(&funcFilter).And();
+
+    // PROC <---> CLKTYPE <---> PEER <---> CLKTYPE <---> OSC
+    // Get the list of oscillators related to this processor via the peer clock
+    // endpoint.
+    TargetHandleList list;
+    getPeerTargets(list, i_trgt, &funcAndPeerFilter, &funcAndResultFilter);
+
+    // Return the clock card for this position, if it exists.
+    auto itr = std::find_if(list.begin(), list.end(),
+                            [&](const TargetHandle_t & t)
+                            { return getTargetPosition(t) == i_oscPos; });
+
+    return (list.end() != itr) ? *itr : nullptr;
 
     #undef PRDF_FUNC
 }
