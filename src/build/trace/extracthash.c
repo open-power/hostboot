@@ -69,6 +69,7 @@ struct traceParseInfo
 const char* PARSEINFO_SECTION_NAME = "__traceData_parseInfo__DISCARD";
 /** String to replace with the basename of the source file. */
 const char* TRACEPP_REPLACE_WITH_FILENAME = "TRACEPP_INSERT_FILENAME";
+const char* TRACEPP_REPLACE_WITH_FILENAME_SHORT = "\xfe";
 
 /** Macro to verify errors from BFD library. */
 #define CHECK_ERR(i) \
@@ -301,9 +302,17 @@ void parse_traceinfo(bfd* inFile, asection* s)
         // Copy original filename from contents.
         new_node->file = strdup(parseInfo.file);
 
+        const char* replace_string = TRACEPP_REPLACE_WITH_FILENAME;
+
         // Copy original string from contents, calculate hash.
         char* replace_pos = strstr(parseInfo.string,
                                    TRACEPP_REPLACE_WITH_FILENAME);
+        if (NULL == replace_pos)
+        {
+            replace_string = TRACEPP_REPLACE_WITH_FILENAME_SHORT;
+            replace_pos = strstr(parseInfo.string, TRACEPP_REPLACE_WITH_FILENAME_SHORT);
+        }
+
         if (NULL != replace_pos)
         {
             char* filename = basename(new_node->file);
@@ -311,7 +320,7 @@ void parse_traceinfo(bfd* inFile, asection* s)
 
             size_t len_begin = replace_pos - parseInfo.string;
             size_t len_end = strlen(parseInfo.string + len_begin) -
-                             strlen(TRACEPP_REPLACE_WITH_FILENAME);
+                             strlen(replace_string);
             size_t length = len_begin + strlen(filename) + len_end +
                             strlen(filesep) + 1;
             new_node->string = malloc(length);
@@ -322,7 +331,7 @@ void parse_traceinfo(bfd* inFile, asection* s)
             strcat(new_node->string, filename);
             strcat(new_node->string, filesep);
             strcat(new_node->string, parseInfo.string + len_begin +
-                    strlen(TRACEPP_REPLACE_WITH_FILENAME));
+                    strlen(replace_string));
         }
         else
         {

@@ -42,8 +42,8 @@ VPATH += ${HWP_PATH}/hwp/spi/
 OBJS += spi.o
 OBJS += spidd.o
 OBJS += errlud_spi.o
-OBJS += ${HWP_PATH}/hwp/spi/p10_spi_init_pib.o
-OBJS += ${HWP_PATH}/hwp/spi/p10_spi_init_fsi.o
+OBJS += p10_spi_init_pib.o
+OBJS += p10_spi_init_fsi.o
 
 SUBDIRS += test.d
 
