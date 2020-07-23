@@ -49,7 +49,7 @@
 #include <arch/pvrformat.H>
 #include <arch/magic.H>
 
-cpu_t** CpuManager::cv_cpus[KERNEL_MAX_SUPPORTED_NODES];
+cpu_t* CpuManager::cv_cpus[KERNEL_MAX_SUPPORTED_CPUS_PER_INST] = {nullptr};
 bool CpuManager::cv_shutdown_requested = false;
 uint64_t CpuManager::cv_shutdown_status = 0;
 size_t CpuManager::cv_cpuSeq = 0;
@@ -63,30 +63,20 @@ const uint64_t MSR_SMF_MASK      = 0x0000000000400000;
 
 CpuManager::CpuManager() : iv_lastStartTimebase(0)
 {
-    for (int i = 0; i < KERNEL_MAX_SUPPORTED_NODES; i++)
-        cv_cpus[i] = NULL;
-
     memset(&cv_interactive_debug, '\0', sizeof(cv_interactive_debug));
 }
 
 cpu_t* CpuManager::getMasterCPU()
 {
-    for (int i = 0; i < KERNEL_MAX_SUPPORTED_NODES; i++)
+    for (int i = 0; i < KERNEL_MAX_SUPPORTED_CPUS_PER_INST; i++)
     {
-        if (NULL == cv_cpus[i])
+        if ((nullptr != cv_cpus[i]) && (cv_cpus[i]->master))
         {
-            continue;
-        }
-
-        for (int j = 0; j < KERNEL_MAX_SUPPORTED_CPUS_PER_NODE; j++)
-        {
-            if ((cv_cpus[i][j] != NULL) && (cv_cpus[i][j]->master))
-            {
-                return cv_cpus[i][j];
-            }
+            return cv_cpus[i];
         }
     }
-    return NULL;
+
+    return nullptr;
 }
 
 void CpuManager::init()
@@ -100,14 +90,12 @@ void CpuManager::init()
     // Determine number of threads on this core.
     size_t threads = getThreadCount();
 
-    // Set up CPU structure.
-    cv_cpus[getPIR() / KERNEL_MAX_SUPPORTED_CPUS_PER_NODE] =
-        new cpu_t*[KERNEL_MAX_SUPPORTED_CPUS_PER_NODE]();
-
     // Create CPU objects starting at the thread-0 for this core.
     size_t baseCpu = getCpuId() & ~(threads-1);
     for (size_t i = 0; i < threads; i++)
+    {
         Singleton<CpuManager>::instance().startCPU(i + baseCpu);
+    }
 }
 
 void CpuManager::init_slave_smp(cpu_t* cpu)
@@ -152,8 +140,6 @@ void CpuManager::requestShutdown(uint64_t i_status, uint32_t i_error_data)
                 if(c->master)
                     HeapManager::stats();
                 #endif
-
-
             }
 
             void activeMainWork()
@@ -191,20 +177,13 @@ void CpuManager::startCPU(ssize_t i)
         currentCPU = true;
     }
 
-    size_t nodeId = i / KERNEL_MAX_SUPPORTED_CPUS_PER_NODE;
-    size_t cpuId = i % KERNEL_MAX_SUPPORTED_CPUS_PER_NODE;
-
-    // Initialize node structure.
-    if (NULL == cv_cpus[nodeId])
-    {
-        cv_cpus[nodeId] = new cpu_t*[KERNEL_MAX_SUPPORTED_CPUS_PER_NODE]();
-    }
+    size_t cpuId = i;
 
     // Initialize CPU structure.
-    if (NULL == cv_cpus[nodeId][cpuId])
+    if (nullptr == cv_cpus[cpuId])
     {
         printkd("Start pir 0x%lx...", i);
-        cpu_t* cpu = cv_cpus[nodeId][cpuId] = new cpu_t();
+        cpu_t* cpu = cv_cpus[cpuId] = new cpu_t();
 
         // Initialize CPU.
         cpu->cpu = i;
@@ -409,8 +388,7 @@ void CpuManager::startCore(uint64_t pir,uint64_t i_threads)
     size_t threads = getThreadCount();
     pir = pir & ~(threads-1);
 
-    if (pir >=
-        (KERNEL_MAX_SUPPORTED_NODES * KERNEL_MAX_SUPPORTED_CPUS_PER_NODE))
+    if (pir >= KERNEL_MAX_SUPPORTED_CPUS_PER_INST)
     {
         TASK_SETRTN(TaskManager::getCurrentTask(), -ENXIO);
         return;
@@ -449,8 +427,7 @@ void CpuManager::wakeupCore(uint64_t pir,uint64_t i_threads)
     size_t threads = getThreadCount();
     pir = pir & ~(threads-1);
 
-    if (pir >=
-        (KERNEL_MAX_SUPPORTED_NODES * KERNEL_MAX_SUPPORTED_CPUS_PER_NODE))
+    if (pir >= KERNEL_MAX_SUPPORTED_CPUS_PER_INST)
     {
         TASK_SETRTN(TaskManager::getCurrentTask(), -ENXIO);
         return;

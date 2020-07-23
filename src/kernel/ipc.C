@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -121,7 +121,8 @@ int KernelIpc::updateRemoteIpcAddr(uint64_t i_Node, uint64_t i_RemoteAddr)
 int KernelIpc::qryLocalIpcInfo(uint64_t * i_pONode, uint64_t * i_pOAddr)
 {
     // determine node and remote address
-    uint64_t l_localNode = getPIR()/KERNEL_MAX_SUPPORTED_CPUS_PER_NODE;
+    // TODO RTC:258023 -- Fix l_localNode setting
+    uint64_t l_localNode = getPIR()/KERNEL_MAX_SUPPORTED_CPUS_PER_INST;
 
     uint64_t l_localAddr = reinterpret_cast<uint64_t>(&ipc_data_area);
     uint64_t l_hrmor = getHRMOR();

@@ -439,8 +439,7 @@ namespace KernelMisc
         // Wake up all the other threads.
         if(__sync_bool_compare_and_swap(&iv_firstThread, 0, 1))
         {
-            for(uint64_t i = 0; i < KERNEL_MAX_SUPPORTED_CPUS_PER_NODE *
-                                    KERNEL_MAX_SUPPORTED_NODES; i++)
+            for(uint64_t i = 0; i < KERNEL_MAX_SUPPORTED_CPUS_PER_INST; i++)
             {
                 cpu_t* slave = CpuManager::getCpu(i);
                 if ((NULL != slave) && (slave != cpu))

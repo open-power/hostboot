@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2010,2019
+# Contributors Listed Below - COPYRIGHT 2010,2020
 # [+] International Business Machines Corp.
 # [+] Joel Stanley
 #
@@ -372,14 +372,8 @@ _other_thread_spinlock_complete:
     ;// Get CPU object from thread ID.
     lis r2, _ZN10CpuManager7cv_cpusE@h
     ori r2, r2, _ZN10CpuManager7cv_cpusE@l
-    mfspr r1, PIR               ;// Extract node id.
-    extrwi r1, r1, 3, 18        ;// Match PIR format(KERNEL_MAX_SUPPORTED_CPUS_PER_NODE)
-    sldi r1, r1, 3
-    ldx r2, r1, r2              ;// Dereference to get on-node CPUs array.
-    cmpwi cr0, r2, 0            ;// Check for NULL node array.
-    beq- 1f
-    mfspr r1, PIR               ;// Extract on-node CPU id.
-    clrlslwi r1, r1, 22, 3
+    mfspr r1, PIR               ;// Extract CPU id.
+    clrlslwi r1, r1, 20, 3
     ldx r3, r1, r2              ;// Load CPU object.
     cmpwi cr0, r3, 0            ;// Check for NULL CPU object.
     beq- 1f
@@ -784,14 +778,8 @@ intvect_system_reset:
     ;// started yet.
     lis r2, _ZN10CpuManager7cv_cpusE@h
     ori r2, r2, _ZN10CpuManager7cv_cpusE@l
-    mfspr r1, PIR               ;// Extract node id.
-    extrwi r1, r1, 3, 18        ;// Match PIR format(KERNEL_MAX_SUPPORTED_CPUS_PER_NODE)
-    sldi r1, r1, 3
-    ldx r2, r1, r2              ;// Dereference to get on-node CPUs array.
-    cmpwi cr0, r2, 0            ;// Check for NULL node array.
-    beq- _start
-    mfspr r1, PIR               ;// Extract on-node CPU id.
-    clrlslwi r1, r1, 22, 3
+    mfspr r1, PIR               ;// Extract CPU id.
+    clrlslwi r1, r1, 20, 3
     ldx r2, r1, r2              ;// Load CPU object.
     cmpwi cr0, r2, 0            ;// Check for NULL CPU object.
     beq- _start

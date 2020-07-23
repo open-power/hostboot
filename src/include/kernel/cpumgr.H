@@ -92,21 +92,12 @@ class CpuManager
         static cpu_t* getCurrentCPU()
         {
             size_t pir = getPIR();
-            return cv_cpus[pir / KERNEL_MAX_SUPPORTED_CPUS_PER_NODE]
-                          [pir % KERNEL_MAX_SUPPORTED_CPUS_PER_NODE];
+            return cv_cpus[pir];
         }
         static cpu_t* getCpu(size_t i)
         {
-            cpu_t** c = cv_cpus[i / KERNEL_MAX_SUPPORTED_CPUS_PER_NODE];
-
-            if (NULL == c)
-            {
-                return NULL;
-            }
-            else
-            {
-                return c[i % KERNEL_MAX_SUPPORTED_CPUS_PER_NODE];
-            }
+            cpu_t* c = cv_cpus[i];
+            return c;
         }
 
         /** @brief Return pointer to master CPU object.
@@ -224,7 +215,7 @@ class CpuManager
         /** Per-CPU kernel structures.
          *
          *  There is one entry per hardware thread and they are stored as
-         *  a two dimensional array of (cpu_t*)s: cv_cpus[node][thread]
+         *  a one dimensional array of (cpu_t*)s: cv_cpus[thread]
          *
          *  This needs to be a global variable rather than an instance
          *  variable of a singleton because it is needed within the kernel
@@ -233,12 +224,11 @@ class CpuManager
          *  these structures.  Any changes to this structure needs to be
          *  kept in sync with the assembly code (ex. start.S).
          */
-        static cpu_t** cv_cpus[KERNEL_MAX_SUPPORTED_NODES];
+        static cpu_t* cv_cpus[KERNEL_MAX_SUPPORTED_CPUS_PER_INST];
 
-
-            /** Number of active CPUs.
-             *  Stored as "(seqID << 32) | cpus"
-             */
+        /** Number of active CPUs.
+         *  Stored as "(seqID << 32) | cpus"
+         */
         static uint64_t cv_cpuSeq;
 
         static uint8_t cv_forcedMemPeriodic;       //!<  force free / coalesce.

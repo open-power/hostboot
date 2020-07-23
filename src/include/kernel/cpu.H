@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2010,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2010,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -40,9 +40,10 @@
 // See BookIV PIR definition.
 #define KERNEL_MAX_SUPPORTED_NODES 4
 
-// This constant is coming from the PIR: GGGGPPPRCCCCCTT
-// 3-bits for chiP (P), 1-reserved bit, 5-Core bits (C), 2-for Thread (T)
-#define KERNEL_MAX_SUPPORTED_CPUS_PER_NODE (8 * 2 * 32 * 4) // ChipId, reserved bit, core, thread
+// Max Supported CPUs per HB Kernel Instance
+// This constant is coming from the PIR: OOOORCCCCCTT
+// 4-bits for tOpology (O), 1-reserved bit, 5-Core bits (C), 2-for Thread (T)
+#define KERNEL_MAX_SUPPORTED_CPUS_PER_INST (16 * 2 * 32 * 4)
 
 class Scheduler;
 
