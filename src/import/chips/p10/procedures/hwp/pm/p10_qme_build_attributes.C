@@ -103,6 +103,9 @@ p10_qme_build_attributes(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_ch
     }
 
     {
+        // 32b/64b data align at 4, 16b data align at 2
+        i_pQmeAttrTank = (uint8_t*)i_pQmeAttrTank + 2;
+
         uint32_t l_uint32_data = 0;
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_EPS_READ_CYCLES_T0, l_sys_tgt, l_uint32_data),
                  "Error From FAPI_ATTR_GET For ATTR_PROC_EPS_READ_CYCLES_T0");
@@ -302,8 +305,8 @@ p10_qme_build_attributes(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_ch
     //  therefore, skip_size = dummy_size - (HIB_size - QI_size)
 
     {
-        const uint32_t TARGET_TYPE_SYSTEM_ATTR_TOTAL_SIZE = 73;
-        const uint32_t TARGET_TYPE_SYSTEM_ATTR_LIMIT_SIZE = 41;
+        const uint32_t TARGET_TYPE_SYSTEM_ATTR_TOTAL_SIZE = 75;
+        const uint32_t TARGET_TYPE_SYSTEM_ATTR_LIMIT_SIZE = 43;
 
         if( l_sys_bytes >= TARGET_TYPE_SYSTEM_ATTR_TOTAL_SIZE )
         {
@@ -318,7 +321,7 @@ p10_qme_build_attributes(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_ch
             if( l_sys_bytes < TARGET_TYPE_SYSTEM_ATTR_LIMIT_SIZE )
             {
                 FAPI_INF("ERROR: TARGET_TYPE_SYSTEM Attribute Co-Req Detected,\
-                         hw_image attr size %x, hcode_image_build attr size 73", l_sys_bytes);
+                         hw_image attr size %x, hcode_image_build attr size 75", l_sys_bytes);
                 FAPI_ASSERT(0, fapi2::QME_META_COREQ_PROTECT_FAIL()
                             .set_HW_IMAGE_ATTR_SIZE(l_sys_bytes)
                             .set_HCD_BUILD_ATTR_SIZE(TARGET_TYPE_SYSTEM_ATTR_TOTAL_SIZE),
@@ -334,7 +337,7 @@ p10_qme_build_attributes(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_ch
         leftover  = (8 - (alignment % 8)) % 8;
         i_pQmeAttrTank = (uint8_t*)i_pQmeAttrTank + skip_size + leftover;
 
-        FAPI_DBG("TARGET_TYPE_SYSTEM Image_Byte %d Build_Byte 73 Skip_Size %d Alignment %d Leftover %d",
+        FAPI_DBG("TARGET_TYPE_SYSTEM Image_Byte %d Build_Byte 75 Skip_Size %d Alignment %d Leftover %d",
                  l_sys_bytes, skip_size, alignment, leftover);
     }
 
@@ -434,6 +437,9 @@ p10_qme_build_attributes(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_ch
     }
 
     {
+        // 32b/64b data align at 4, 16b data align at 2
+        i_pQmeAttrTank = (uint8_t*)i_pQmeAttrTank + 3;
+
         uint32_t l_uint32_data = 0;
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_QME_STATE_LOSS_CORES, i_chip_tgt, l_uint32_data),
                  "Error From FAPI_ATTR_GET For ATTR_QME_STATE_LOSS_CORES");
@@ -457,7 +463,7 @@ p10_qme_build_attributes(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_ch
     //  therefore, skip_size = dummy_size - (HIB_size - QI_size)
 
     {
-        const uint32_t TARGET_TYPE_PROC_CHIP_ATTR_TOTAL_SIZE = 25;
+        const uint32_t TARGET_TYPE_PROC_CHIP_ATTR_TOTAL_SIZE = 28;
 
         if( l_proc_bytes >= TARGET_TYPE_PROC_CHIP_ATTR_TOTAL_SIZE )
         {
@@ -475,7 +481,7 @@ p10_qme_build_attributes(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_ch
         leftover  = (8 - (alignment % 8)) % 8;
         i_pQmeAttrTank = (uint8_t*)i_pQmeAttrTank + skip_size + leftover;
 
-        FAPI_DBG("TARGET_TYPE_PROC_CHIP Image_Byte %d Build_Byte 25 Skip_Size %d Alignment %d Leftover %d",
+        FAPI_DBG("TARGET_TYPE_PROC_CHIP Image_Byte %d Build_Byte 28 Skip_Size %d Alignment %d Leftover %d",
                  l_proc_bytes, skip_size, alignment, leftover);
     }
 
