@@ -215,4 +215,16 @@ p10_sbe_scratch_regs_get_unit_num(
     const fapi2::Target<fapi2::TARGET_TYPE_PERV>& i_target_perv,
     const fapi2::TargetType i_type);
 
+
+///
+/// @brief Set all PLL BUCKET attributes
+///
+/// @param[in] i_target_chip          Processor chip target
+///
+/// @return fapi2::ReturnCode
+///
+fapi2::ReturnCode
+p10_sbe_scratch_regs_set_pll_buckets(
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target_chip);
+
 #endif // _P10_SBE_SCRATCH_REGS_H_

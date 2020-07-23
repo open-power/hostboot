@@ -376,6 +376,54 @@ fapi_try_exit:
 
 
 ///
+/// @brief Set all PLL BUCKET attributes
+///
+/// @param[in] i_target_chip          Processor chip target
+///
+/// @return fapi2::ReturnCode
+///
+fapi2::ReturnCode
+p10_sbe_scratch_regs_set_pll_buckets(
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target_chip)
+{
+    FAPI_DBG("Start");
+
+    fapi2::ATTR_FILTER_PLL_BUCKET_Type l_attr_filter_pll_bucket;
+    fapi2::ATTR_PCI_PLL_BUCKET_Type l_attr_pci_pll_bucket;
+    fapi2::ATTR_MC_PLL_BUCKET_Type l_attr_mc_pll_bucket = { 0 };
+    fapi2::ATTR_IOHS_PLL_BUCKET_Type l_attr_iohs_pll_bucket = { 0 };
+
+    FAPI_DBG("Setting up filter PLL bucket value");
+    FAPI_TRY(p10_sbe_scratch_regs_get_filter_pll_bucket(
+                 i_target_chip,
+                 l_attr_filter_pll_bucket),
+             "Error from p10_sbe_scratch_regs_get_filter_pll_bucket");
+
+    FAPI_DBG("Setting up PCI PLL bucket value");
+    FAPI_TRY(p10_sbe_scratch_regs_get_pci_pll_bucket(
+                 i_target_chip,
+                 l_attr_pci_pll_bucket),
+             "Error from p10_sbe_scratch_regs_get_pci_pll_bucket");
+
+    FAPI_DBG("Setting up MC PLL bucket values");
+    FAPI_TRY(p10_sbe_scratch_regs_get_mc_pll_bucket(
+                 i_target_chip,
+                 l_attr_mc_pll_bucket),
+             "Error from p10_sbe_scratch_regs_get_mc_pll_bucket");
+
+    FAPI_DBG("Setting up IOHS PLL bucket values");
+    FAPI_TRY(p10_sbe_scratch_regs_get_iohs_pll_bucket(
+                 i_target_chip,
+                 l_attr_iohs_pll_bucket),
+             "Error from p10_sbe_scratch_regs_get_iohs_pll_bucket");
+
+fapi_try_exit:
+    FAPI_DBG("End");
+    return fapi2::current_err;
+}
+
+
+///
 /// @brief Scratch register read function -- returns 32-bit scratch register data
 ///
 /// @param[in]  i_target_chip          Processor chip target
