@@ -39,25 +39,6 @@ namespace proc
 #endif
 
 
-//>> [MCD_MCC_FIR_REG]
-static const uint64_t MCD_MCC_FIR_REG_RW = 0x03010800ull;
-static const uint64_t MCD_MCC_FIR_REG_WO_AND = 0x03010801ull;
-static const uint64_t MCD_MCC_FIR_REG_WO_OR = 0x03010802ull;
-
-static const uint32_t MCD_MCC_FIR_REG_ARRAY_ECC_UE_ERR = 0;
-static const uint32_t MCD_MCC_FIR_REG_ARRAY_ECC_CE_ERR = 1;
-static const uint32_t MCD_MCC_FIR_REG_PB_ADDR_PARITY_ERR = 2;
-static const uint32_t MCD_MCC_FIR_REG_SM_OR_CASE_ERR = 3;
-static const uint32_t MCD_MCC_FIR_REG_CL_PROBE_PB_HANG_ERR = 4;
-static const uint32_t MCD_MCC_FIR_REG_CRESP_ADDR_ERR = 5;
-static const uint32_t MCD_MCC_FIR_REG_UNSOLICITED_CRESP_ERR = 6;
-static const uint32_t MCD_MCC_FIR_REG_TTAG_PARITY_ERR = 7;
-static const uint32_t MCD_MCC_FIR_REG_FIR_REG_UPDATE_ERR = 8;
-static const uint32_t MCD_MCC_FIR_REG_ACK_DEAD_CRESP_ERR = 9;
-static const uint32_t MCD_MCC_FIR_REG_CFG_REG_PARITY_ERR = 10;
-//<< [MCD_MCC_FIR_REG]
-// proc/reg00005.H
-
 //>> [NX_PBI_RNG_ST1]
 static const uint64_t NX_PBI_RNG_ST1 = 0x020110e2ull;
 
@@ -592,76 +573,6 @@ static const uint32_t TP_TPCHIP_OCC_OCI_OCB_OPITASV0_7 = 28;
 static const uint32_t TP_TPCHIP_OCC_OCI_OCB_OPITASV0_7_LEN = 4;
 //<< [TP_TPCHIP_OCC_OCI_OCB_OPITASV0]
 // proc/reg00008.H
-
-//>> [TP_TCN1_N1_EPS_FIR_LOCAL_ACTION1]
-static const uint64_t TP_TCN1_N1_EPS_FIR_LOCAL_ACTION1 = 0x03040107ull;
-
-static const uint32_t TP_TCN1_N1_EPS_FIR_LOCAL_ACTION1_00 = 0;
-static const uint32_t TP_TCN1_N1_EPS_FIR_LOCAL_ACTION1_01 = 1;
-static const uint32_t TP_TCN1_N1_EPS_FIR_LOCAL_ACTION1_02 = 2;
-static const uint32_t TP_TCN1_N1_EPS_FIR_LOCAL_ACTION1_03 = 3;
-static const uint32_t TP_TCN1_N1_EPS_FIR_LOCAL_ACTION1_04 = 4;
-static const uint32_t TP_TCN1_N1_EPS_FIR_LOCAL_ACTION1_05 = 5;
-static const uint32_t TP_TCN1_N1_EPS_FIR_LOCAL_ACTION1_06 = 6;
-static const uint32_t TP_TCN1_N1_EPS_FIR_LOCAL_ACTION1_07 = 7;
-static const uint32_t TP_TCN1_N1_EPS_FIR_LOCAL_ACTION1_08 = 8;
-static const uint32_t TP_TCN1_N1_EPS_FIR_LOCAL_ACTION1_09 = 9;
-static const uint32_t TP_TCN1_N1_EPS_FIR_LOCAL_ACTION1_10 = 10;
-static const uint32_t TP_TCN1_N1_EPS_FIR_LOCAL_ACTION1_11 = 11;
-static const uint32_t TP_TCN1_N1_EPS_FIR_LOCAL_ACTION1_12 = 12;
-static const uint32_t TP_TCN1_N1_EPS_FIR_LOCAL_ACTION1_13 = 13;
-static const uint32_t TP_TCN1_N1_EPS_FIR_LOCAL_ACTION1_14 = 14;
-static const uint32_t TP_TCN1_N1_EPS_FIR_LOCAL_ACTION1_15 = 15;
-static const uint32_t TP_TCN1_N1_EPS_FIR_LOCAL_ACTION1_16 = 16;
-static const uint32_t TP_TCN1_N1_EPS_FIR_LOCAL_ACTION1_17 = 17;
-static const uint32_t TP_TCN1_N1_EPS_FIR_LOCAL_ACTION1_18 = 18;
-static const uint32_t TP_TCN1_N1_EPS_FIR_LOCAL_ACTION1_19 = 19;
-static const uint32_t TP_TCN1_N1_EPS_FIR_LOCAL_ACTION1_20 = 20;
-static const uint32_t TP_TCN1_N1_EPS_FIR_LOCAL_ACTION1_21 = 21;
-static const uint32_t TP_TCN1_N1_EPS_FIR_LOCAL_ACTION1_22 = 22;
-static const uint32_t TP_TCN1_N1_EPS_FIR_LOCAL_ACTION1_23 = 23;
-static const uint32_t TP_TCN1_N1_EPS_FIR_LOCAL_ACTION1_24 = 24;
-static const uint32_t TP_TCN1_N1_EPS_FIR_LOCAL_ACTION1_25 = 25;
-static const uint32_t TP_TCN1_N1_EPS_FIR_LOCAL_ACTION1_26 = 26;
-static const uint32_t TP_TCN1_N1_EPS_FIR_LOCAL_ACTION1_27 = 27;
-static const uint32_t TP_TCN1_N1_EPS_FIR_LOCAL_ACTION1_28 = 28;
-static const uint32_t TP_TCN1_N1_EPS_FIR_LOCAL_ACTION1_29 = 29;
-static const uint32_t TP_TCN1_N1_EPS_FIR_LOCAL_ACTION1_30 = 30;
-static const uint32_t TP_TCN1_N1_EPS_FIR_LOCAL_ACTION1_31 = 31;
-static const uint32_t TP_TCN1_N1_EPS_FIR_LOCAL_ACTION1_32 = 32;
-static const uint32_t TP_TCN1_N1_EPS_FIR_LOCAL_ACTION1_33 = 33;
-static const uint32_t TP_TCN1_N1_EPS_FIR_LOCAL_ACTION1_34 = 34;
-static const uint32_t TP_TCN1_N1_EPS_FIR_LOCAL_ACTION1_35 = 35;
-static const uint32_t TP_TCN1_N1_EPS_FIR_LOCAL_ACTION1_36 = 36;
-static const uint32_t TP_TCN1_N1_EPS_FIR_LOCAL_ACTION1_37 = 37;
-static const uint32_t TP_TCN1_N1_EPS_FIR_LOCAL_ACTION1_38 = 38;
-static const uint32_t TP_TCN1_N1_EPS_FIR_LOCAL_ACTION1_39 = 39;
-static const uint32_t TP_TCN1_N1_EPS_FIR_LOCAL_ACTION1_40 = 40;
-static const uint32_t TP_TCN1_N1_EPS_FIR_LOCAL_ACTION1_41 = 41;
-static const uint32_t TP_TCN1_N1_EPS_FIR_LOCAL_ACTION1_42 = 42;
-static const uint32_t TP_TCN1_N1_EPS_FIR_LOCAL_ACTION1_43 = 43;
-static const uint32_t TP_TCN1_N1_EPS_FIR_LOCAL_ACTION1_44 = 44;
-static const uint32_t TP_TCN1_N1_EPS_FIR_LOCAL_ACTION1_45 = 45;
-static const uint32_t TP_TCN1_N1_EPS_FIR_LOCAL_ACTION1_46 = 46;
-static const uint32_t TP_TCN1_N1_EPS_FIR_LOCAL_ACTION1_47 = 47;
-static const uint32_t TP_TCN1_N1_EPS_FIR_LOCAL_ACTION1_48 = 48;
-static const uint32_t TP_TCN1_N1_EPS_FIR_LOCAL_ACTION1_49 = 49;
-static const uint32_t TP_TCN1_N1_EPS_FIR_LOCAL_ACTION1_50 = 50;
-static const uint32_t TP_TCN1_N1_EPS_FIR_LOCAL_ACTION1_51 = 51;
-static const uint32_t TP_TCN1_N1_EPS_FIR_LOCAL_ACTION1_52 = 52;
-static const uint32_t TP_TCN1_N1_EPS_FIR_LOCAL_ACTION1_53 = 53;
-static const uint32_t TP_TCN1_N1_EPS_FIR_LOCAL_ACTION1_54 = 54;
-static const uint32_t TP_TCN1_N1_EPS_FIR_LOCAL_ACTION1_55 = 55;
-static const uint32_t TP_TCN1_N1_EPS_FIR_LOCAL_ACTION1_56 = 56;
-static const uint32_t TP_TCN1_N1_EPS_FIR_LOCAL_ACTION1_57 = 57;
-static const uint32_t TP_TCN1_N1_EPS_FIR_LOCAL_ACTION1_58 = 58;
-static const uint32_t TP_TCN1_N1_EPS_FIR_LOCAL_ACTION1_59 = 59;
-static const uint32_t TP_TCN1_N1_EPS_FIR_LOCAL_ACTION1_60 = 60;
-static const uint32_t TP_TCN1_N1_EPS_FIR_LOCAL_ACTION1_61 = 61;
-static const uint32_t TP_TCN1_N1_EPS_FIR_LOCAL_ACTION1_62 = 62;
-static const uint32_t TP_TCN1_N1_EPS_FIR_LOCAL_ACTION1_63 = 63;
-//<< [TP_TCN1_N1_EPS_FIR_LOCAL_ACTION1]
-// proc/reg00006.H
 
 //>>THE END<<
 

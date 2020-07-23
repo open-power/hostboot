@@ -220,6 +220,33 @@ static const uint32_t PHY_SCOM_MAC_FIR_ACTION1_REG_FIR_ACTION1_LEN = 26;
 //<< [PHY_SCOM_MAC_FIR_ACTION1_REG]
 // pauc/reg00014.H
 
+//>> [XSTOP2]
+static const uint64_t XSTOP2 = 0x1003000dull;
+
+static const uint32_t XSTOP2_ENABLE = 0;
+static const uint32_t XSTOP2_WAIT_SNOPA = 1;
+static const uint32_t XSTOP2_TRIGGER_OPCG_GO = 2;
+static const uint32_t XSTOP2_WAIT_ALWAYS = 3;
+static const uint32_t XSTOP2_REGION_PERV = 4;
+static const uint32_t XSTOP2_REGION_UNIT1 = 5;
+static const uint32_t XSTOP2_REGION_UNIT2 = 6;
+static const uint32_t XSTOP2_REGION_UNIT3 = 7;
+static const uint32_t XSTOP2_REGION_UNIT4 = 8;
+static const uint32_t XSTOP2_REGION_UNIT5 = 9;
+static const uint32_t XSTOP2_REGION_UNIT6 = 10;
+static const uint32_t XSTOP2_REGION_UNIT7 = 11;
+static const uint32_t XSTOP2_REGION_UNIT8 = 12;
+static const uint32_t XSTOP2_REGION_UNIT9 = 13;
+static const uint32_t XSTOP2_REGION_UNIT10 = 14;
+static const uint32_t XSTOP2_REGION_UNIT11 = 15;
+static const uint32_t XSTOP2_REGION_UNIT12 = 16;
+static const uint32_t XSTOP2_REGION_UNIT13 = 17;
+static const uint32_t XSTOP2_REGION_UNIT14 = 18;
+static const uint32_t XSTOP2_WAIT_CYCLES = 48;
+static const uint32_t XSTOP2_WAIT_CYCLES_LEN = 12;
+//<< [XSTOP2]
+// pauc/reg00014.H
+
 //>>THE END<<
 
 #ifndef __PPE_HCODE__
