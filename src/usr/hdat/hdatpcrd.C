@@ -1037,16 +1037,53 @@ errlHndl_t HdatPcrd::hdatSetProcessorInfo(
         iv_spPcrd->hdatChipData.hdatPcrdCheckstopAddr = HDAT_SW_CHKSTP_FIR_SCOM;
         iv_spPcrd->hdatChipData.hdatPcrdSpareBitNum   = HDAT_SW_CHKSTP_FIR_SCOM_BIT_POS;
 
-        // @TODO RTC 254289 :  HDAT : Topology Id Table and Effective 
-        // Topology Id Changes in Rainier    
-        iv_spPcrd->hdatChipData.hdatPcrdTopologyIdTab[0] = l_procEffFabricTopoId*2;
-        for (uint8_t l_idx =1; l_idx <32; l_idx++)
-        {
-            iv_spPcrd->hdatChipData.hdatPcrdTopologyIdTab[l_idx] = 0xFF;
-        }
-        iv_spPcrd->hdatChipData.hdatPcrdTopologyIdIndex = 0;
-            
+        TARGETING::ATTR_PROC_FABRIC_TOPOLOGY_ID_TABLE_type l_topIdTable = {0};
 
+        //Get topology id table details
+        assert(l_pSysTarget->tryGetAttr<
+            TARGETING::ATTR_PROC_FABRIC_TOPOLOGY_ID_TABLE>(l_topIdTable));
+
+        uint8_t l_topologyMode =
+          l_pSysTarget->getAttr<TARGETING::ATTR_PROC_FABRIC_TOPOLOGY_MODE>();
+
+        uint8_t l_topIndex5bit = 0;
+        iv_spPcrd->hdatChipData.hdatPcrdTopologyIdIndex = 0;
+
+        //Fetch the 5 bit primary topology id index value
+        l_topIndex5bit = hdatGetPrimaryTopIdIndex(l_procEffFabricTopoId,
+            l_topologyMode);
+
+        HDAT_DBG("EffTopId4Bit=%d, RealTopId4Bit=%d, TopMode=%d,"
+            "TopIdx5bit=%d",  l_procEffFabricTopoId, l_procRealFabricTopoId,
+            l_topologyMode, l_topIndex5bit);
+
+        memset(iv_spPcrd->hdatChipData.hdatPcrdTopologyIdTab, 0xff,
+            sizeof(TARGETING::ATTR_PROC_FABRIC_TOPOLOGY_ID_TABLE_type));
+
+        uint8_t l_curentry = 0;
+        for (uint8_t l_idx = 0;
+             l_idx < sizeof(TARGETING::ATTR_PROC_FABRIC_TOPOLOGY_ID_TABLE_type);
+             l_idx++)
+        {
+            if (l_topIdTable[l_idx] == l_procRealFabricTopoId)
+            {
+                iv_spPcrd->hdatChipData.hdatPcrdTopologyIdTab[l_curentry] =
+                    l_idx;
+                // ATTR_PROC_FABRIC_TOPOLOGY_ID_TABLE indicates which physical
+                // processor owns each memory range. The index into the array is
+                // the 5-bit address range indicator, and the value is the
+                // physical topology id of the owning processor.
+                if ( l_idx == l_topIndex5bit )
+                {
+                    iv_spPcrd->hdatChipData.hdatPcrdTopologyIdIndex =
+                        l_curentry;
+                }
+                l_curentry++;
+            }
+        }
+
+        HDAT_DBG("PrimTopIdx=%d",
+            iv_spPcrd->hdatChipData.hdatPcrdTopologyIdIndex);
     }
     while(0);
     HDAT_EXIT();

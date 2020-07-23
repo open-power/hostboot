@@ -30,6 +30,9 @@
 //*TODO RTC:216061 Re-enable when attr exists #include <p9_frequency_buckets.H>
 #include <util/utilcommonattr.H>
 
+// To fetch topology id related structures
+#include <arch/memorymap.H>
+
 #define UINT16_IN_LITTLE_ENDIAN(x) (((x) >> 8) | ((x) << 8))
 #define HDAT_VPD_RECORD_START_TAG 0x84
 #define HDAT_VPD_RECORD_END_TAG 0x78
@@ -2331,5 +2334,37 @@ void hdatGetHostSpiDevInfo(std::vector<hdatSpiDevData_t>&o_spiDevEntries,
 
     HDAT_EXIT();
 }
+
+/******************************************************************************/
+// hdatGetPrimaryTopIdIndex
+/******************************************************************************/
+uint8_t hdatGetPrimaryTopIdIndex( const uint32_t i_procEffFabricTopoId,
+                                  const uint32_t i_topMod )
+{
+    HDAT_ENTER();
+
+    // The 5-bit topology index value is derived from the topology ID with below
+    // logic
+    // MODE0: GGGC -> GGG0C
+    // MODE1: GGCC -> 0GGCC
+    MEMMAP::topologyIdBits_t l_idBits;
+    l_idBits.topoId = i_procEffFabricTopoId;
+    MEMMAP::topologyIndexBits_t l_indexBits;
+    l_indexBits.topoIndex = 0;
+
+    if(i_topMod == TARGETING::PROC_FABRIC_TOPOLOGY_MODE_MODE0)
+    {
+        l_indexBits.mode0.group = l_idBits.mode0.group;
+        l_indexBits.mode0.chip  = l_idBits.mode0.chip;
+    }
+    else
+    {
+        l_indexBits.mode1.group = l_idBits.mode1.group;
+        l_indexBits.mode1.chip  = l_idBits.mode1.chip;
+    }
+
+    HDAT_EXIT();
+    return l_indexBits.topoIndex;
+};
 
 } //namespace HDAT

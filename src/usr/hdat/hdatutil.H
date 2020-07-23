@@ -713,6 +713,26 @@ void hdatGetMemTargetMmioInfo(TARGETING::Target* i_pTarget,
 void hdatGetHostSpiDevInfo(std::vector<hdatSpiDevData_t>&o_spiDevEntries,
     std::vector<hdatEepromPartData_t>&o_eepromPartEntries);
 
+/*******************************************************************************
+ * hdatGetPrimaryTopIdIndex
+ *
+ * @brief Routine returns the five bit primary topology index
+ *
+ * @pre None
+ *
+ * @post None
+ *
+ * @param[in] i_procEffFabricTopoId
+ *       Four bit effective topology id
+ * @param[in] i_topMod
+ *       The topology mode
+ *
+ * @return uint8_t Five bit primary topology id index
+ *
+*******************************************************************************/
+uint8_t hdatGetPrimaryTopIdIndex(const uint32_t i_procEffFabricTopoId,
+   const uint32_t i_topMod);
+
 };// end namespace
 
 #endif // HDATUTILITY_H
