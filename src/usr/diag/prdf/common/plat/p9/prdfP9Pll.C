@@ -344,14 +344,16 @@ int32_t CheckErrorType( ExtensibleChip * i_chip, uint32_t & o_errType )
             // Check TP, XBUS, OBUS and MC Chiplets for sys ref unlock
             if (CheckChipletPll(i_chip, TYPE_PROC) ||
                 CheckChipletPll(i_chip, TYPE_XBUS) ||
-                CheckChipletPll(i_chip, TYPE_OBUS) ||
                 CheckChipletPll(i_chip, TYPE_MC))
             {
                 o_errType |= SYS_PLL_UNLOCK;
             }
 
-            // Check PCIE chiplet for MF ref unlock
-            if (CheckChipletPll(i_chip, TYPE_PEC))
+            // Check PCIE chiplet for MF ref unlock. Note that PCI clocks drive
+            // the OBUS as well (for all modes includeing SMP, NV Link, and
+            // OpenCAPI).
+            if (CheckChipletPll(i_chip, TYPE_PEC) ||
+                CheckChipletPll(i_chip, TYPE_OBUS))
             {
                 o_errType |= PCI_PLL_UNLOCK;
             }
@@ -559,8 +561,20 @@ int32_t MaskPll( ExtensibleChip * i_chip,
 }
 PRDF_PLUGIN_DEFINE_NS( axone_proc,   Proc, MaskPll );
 
+//------------------------------------------------------------------------------
+
+void __capturePll(ExtensibleChip * i_procChip, STEP_CODE_DATA_STRUCT & io_sc,
+                  TARGETING::TYPE i_unitType)
+{
+    for (const auto& chip : getConnected(i_procChip, i_unitType))
+    {
+        chip->CaptureErrorData(io_sc.service_data->GetCaptureData(),
+                               Util::hashString("PllFIRs"));
+    }
+}
+
 /**
- * @brief   capture additional PLL FFDC
+ * @brief   Captures additional PLL registers for FFDC
  * @param   i_chip   P9 chip
  * @param   i_sc     service data collector
  * @returns Success
@@ -568,29 +582,19 @@ PRDF_PLUGIN_DEFINE_NS( axone_proc,   Proc, MaskPll );
 int32_t capturePllFfdc( ExtensibleChip * i_chip,
                         STEP_CODE_DATA_STRUCT & io_sc )
 {
-    #define PRDF_FUNC "[Proc::capturePllFfdc] "
-
     // Add FSI status reg
     PLL::captureFsiStatusReg<TYPE_PROC>( i_chip, io_sc );
 
-    // Add EX scom data
-    TargetHandleList exList = getConnectedChildren( i_chip->getTrgt(),
-                                                    TYPE_CORE );
-    ExtensibleChip * exChip;
-    TargetHandleList::iterator itr = exList.begin();
-    for( ; itr != exList.end(); ++itr)
-    {
-        exChip = (ExtensibleChip *)systemPtr->GetChip(*itr);
-        if( NULL == exChip ) continue;
-
-        exChip->CaptureErrorData(
-                io_sc.service_data->GetCaptureData(),
-                Util::hashString("PllFIRs"));
-    }
+    // Get the PLL registers for each unit on this chip. Note that the PROC and
+    // XBUS registers are already captured at this point.
+    __capturePll(i_chip, io_sc, TYPE_MC);      // Cumulus and Axone
+    __capturePll(i_chip, io_sc, TYPE_MCBIST);  // Nimbus
+    __capturePll(i_chip, io_sc, TYPE_OBUS);
+    __capturePll(i_chip, io_sc, TYPE_PEC);
+    __capturePll(i_chip, io_sc, TYPE_EQ);
+    __capturePll(i_chip, io_sc, TYPE_CORE);
 
     return SUCCESS;
-
-    #undef PRDF_FUNC
 }
 PRDF_PLUGIN_DEFINE_NS( axone_proc,   Proc, capturePllFfdc );
 
