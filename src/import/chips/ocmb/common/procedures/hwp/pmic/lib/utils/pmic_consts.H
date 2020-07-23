@@ -377,6 +377,8 @@ namespace gpio
 enum regs
 {
     INPUT_PORT_REG = 0x00,
+    EFUSE_OUTPUT = 0x01,
+    EFUSE_POLARITY = 0x02,
     CONFIGURATION = 0x03,
 };
 
@@ -387,6 +389,9 @@ enum fields
 {
     INPUT_PORT_REG_PMIC_PAIR0   = 2,
     INPUT_PORT_REG_PMIC_PAIR1   = 3,
+
+    EFUSE_OUTPUT_SETTING        = 0xFF,
+    EFUSE_POLARITY_SETTING      = 0x00,
 
     // 1's are inputs, 0's are outputs
     CONFIGURATION_IO_MAP        = 0xFC,

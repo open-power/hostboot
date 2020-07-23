@@ -79,106 +79,106 @@ using ADC_FIELDS = mss::adc::fields;
 // pair<REG,DATA>
 static const std::vector<std::pair<uint8_t, uint8_t>> ADC1_CH_INIT =
 {
-    // 29: Set channels to auto sequencing, all channels
+    // 33: Set channels to auto sequencing, all channels
     {ADC_REGS::AUTO_SEQ_CH_SEL, ADC_FIELDS::AUTO_SEQ_CH_SEL_ALL_AUTO_SEQUENCING},
-    // 30: Set auto sequence mode
+    // 34: Set auto sequence mode
     {ADC_REGS::SEQUENCE_CFG, ADC_FIELDS::SEQUENCE_CFG_AUTO_SEQUENCE},
 
     // CH 1
-    // 31: Keep upper limit at max, enable hysteresis
+    // 35: Keep upper limit at max, enable hysteresis
     {ADC_REGS::HYSTERESIS_CH1, ADC_FIELDS::HYSTERESIS_UPPER_LIMIT_MAX_ENABLE},
 
-    // 32: Keep default, may skip if not multibyte writing
+    // 36: Keep default, may skip if not multibyte writing
     {ADC_REGS::HIGH_TH_CH1, ADC_FIELDS::HIGH_TH_DEFAULT},
 
-    // 33: Set up so alert must persist for 4 consecutive readings
+    // 37: Set up so alert must persist for 4 consecutive readings
     {ADC_REGS::EVENT_COUNT_CH1, ADC_FIELDS::EVENT_COUNT_ADC1_CH1_ALERT_4_CONSECUTIVE_READINGS},
 
-    // 34: 1AB_VLOC (VDDR1) Low Threshold = 0.643 V
+    // 38: 1AB_VLOC (VDDR1) Low Threshold = 0.643 V
     {ADC_REGS::LOW_TH_CH1, ADC_FIELDS::LOW_TH_CH1_1AB_VLOC_LOW_THRESHOLD_643mv},
 
     // CH 2
-    // 35: Keep upper limit at max, enable hysteresis
+    // 39: Keep upper limit at max, enable hysteresis
     {ADC_REGS::HYSTERESIS_CH2, ADC_FIELDS::HYSTERESIS_UPPER_LIMIT_MAX_ENABLE},
 
-    // 36: Keep default, may skip if not multibyte writing
+    // 40: Keep default, may skip if not multibyte writing
     {ADC_REGS::HIGH_TH_CH2, ADC_FIELDS::HIGH_TH_DEFAULT},
 
-    // 37: Set up so alert must persist for 4 consecutive readings
+    // 41: Set up so alert must persist for 4 consecutive readings
     {ADC_REGS::EVENT_COUNT_CH2, ADC_FIELDS::EVENT_COUNT_ADC1_CH2_ALERT_4_CONSECUTIVE_READINGS},
 
-    // 38: 1C_VLOC (VIO) Low Threshold = 0.476 V
+    // 42: 1C_VLOC (VIO) Low Threshold = 0.476 V
     {ADC_REGS::LOW_TH_CH2, ADC_FIELDS::LOW_TH_CH2_1C_VLOC_LOW_THRESHOLD_476mv},
 
     // CH3
-    // 39: Keep upper limit at max, enable hysteresis
+    // 43: Keep upper limit at max, enable hysteresis
     {ADC_REGS::HYSTERESIS_CH3, ADC_FIELDS::HYSTERESIS_UPPER_LIMIT_MAX_ENABLE},
 
-    // 40: Keep default, may skip if not multibyte writing
+    // 44: Keep default, may skip if not multibyte writing
     {ADC_REGS::HIGH_TH_CH3, ADC_FIELDS::HIGH_TH_DEFAULT},
 
-    // 41: Set up so alert must persist for 4 consecutive readings
+    // 45: Set up so alert must persist for 4 consecutive readings
     {ADC_REGS::EVENT_COUNT_CH3, ADC_FIELDS::EVENT_COUNT_ADC1_CH3_ALERT_4_CONSECUTIVE_READINGS},
 
-    // 42: 1D_VLOC/2 (VPP) Low Threshold = 0.733 V
+    // 46: 1D_VLOC/2 (VPP) Low Threshold = 0.733 V
     {ADC_REGS::LOW_TH_CH3, ADC_FIELDS::LOW_TH_CH3_1D_VLOC_LOW_THRESHOLD_733mv},
 
     // CH 4
-    // 43: Keep upper limit at max, enable hysteresis
+    // 47: Keep upper limit at max, enable hysteresis
     {ADC_REGS::HYSTERESIS_CH4, ADC_FIELDS::HYSTERESIS_UPPER_LIMIT_MAX_ENABLE},
 
-    // 44: Keep default, may skip if not multibyte writing
+    // 48: Keep default, may skip if not multibyte writing
     {ADC_REGS::HIGH_TH_CH4, ADC_FIELDS::HIGH_TH_DEFAULT},
 
-    // 45: Set up so alert must persist for 4 consecutive readings
+    // 49: Set up so alert must persist for 4 consecutive readings
     {ADC_REGS::EVENT_COUNT_CH4, ADC_FIELDS::EVENT_COUNT_ADC1_CH4_ALERT_4_CONSECUTIVE_READINGS},
 
-    // 46: 2C_VLOC (VIO) Low Threshold = 0.476 V
+    // 50: 2C_VLOC (VIO) Low Threshold = 0.476 V
     {ADC_REGS::LOW_TH_CH4, ADC_FIELDS::LOW_TH_CH4_2C_VLOC_LOW_THRESHOLD_476mv},
 
     // CH 5
-    // 47: Keep upper limit at max, enable hysteresis
+    // 51: Keep upper limit at max, enable hysteresis
     {ADC_REGS::HYSTERESIS_CH5, ADC_FIELDS::HYSTERESIS_UPPER_LIMIT_MAX_ENABLE},
 
-    // 48: Keep default, may skip if not multibyte writing
+    // 52: Keep default, may skip if not multibyte writing
     {ADC_REGS::HIGH_TH_CH5, ADC_FIELDS::HIGH_TH_DEFAULT},
 
-    // 49: Set up so alert must persist for 4 consecutive readings
+    // 53: Set up so alert must persist for 4 consecutive readings
     {ADC_REGS::EVENT_COUNT_CH5, ADC_FIELDS::EVENT_COUNT_ADC1_CH5_ALERT_4_CONSECUTIVE_READINGS},
 
-    // 50: 2D_VLOC/2 (VPP) Low Threshold = 0.733 V
+    // 54: 2D_VLOC/2 (VPP) Low Threshold = 0.733 V
     {ADC_REGS::LOW_TH_CH5, ADC_FIELDS::LOW_TH_CH5_2D_VLOC_LOW_THRESHOLD_733mv},
 
     // CH 7
-    // 51: Keep upper limit at max, enable hysteresis
+    // 55: Keep upper limit at max, enable hysteresis
     {ADC_REGS::HYSTERESIS_CH7, ADC_FIELDS::HYSTERESIS_UPPER_LIMIT_MAX_ENABLE},
 
-    // 52: Keep default, may skip if not multibyte writing
+    // 56: Keep default, may skip if not multibyte writing
     {ADC_REGS::HIGH_TH_CH7, ADC_FIELDS::HIGH_TH_DEFAULT},
 
-    // 53: Set up so alert must persist for 4 consecutive readings
+    // 57: Set up so alert must persist for 4 consecutive readings
     {ADC_REGS::EVENT_COUNT_CH7, ADC_FIELDS::EVENT_COUNT_ADC1_CH7_ALERT_4_CONSECUTIVE_READINGS},
 
-    // 54: 2AB_VLOC Low (VDDR1) Threshold = 0.643 V
+    // 58: 2AB_VLOC Low (VDDR1) Threshold = 0.643 V
     {ADC_REGS::LOW_TH_CH7, ADC_FIELDS::LOW_TH_CH7_2AB_VLOC_LOW_THRESHOLD_643mv},
 
     // Finalize
-    // 55: Set channels to trigger an alert, only local voltages
+    // 59: Set channels to trigger an alert, only local voltages
     {ADC_REGS::ALERT_CH_SEL, ADC_FIELDS::ALERT_CH_SEL_ADC1_LOCAL_VOLTAGES_ALERT},
 
-    // 56: Set alert pin function to remain active high (not pulsed)
+    // 60: Set alert pin function to remain active high (not pulsed)
     {ADC_REGS::ALERT_PIN_CFG, ADC_FIELDS::ALERT_PIN_CFG_ACTIVE_HIGH},
 
-    // 57: Setup autonomous conversions and sampling speed
+    // 61: Setup autonomous conversions and sampling speed
     {ADC_REGS::OPMODE_CFG, ADC_FIELDS::OPMODE_CFG_AUTONOMOUS},
 
-    // 58: Set over sampling, 8 samples
+    // 62: Set over sampling, 8 samples
     {ADC_REGS::OSR_CFG, ADC_FIELDS::OSR_CFG_8_SAMPLE_OVERSAMPLING},
 
-    // 59: Enable digital window comparator and stats
+    // 63: Enable digital window comparator and stats
     {ADC_REGS::GENERAL_CFG, ADC_FIELDS::GENERAL_CFG_EN_DIGITAL_WINDOW_COMPARATOR_AND_STATS},
 
-    // 60: Enable Channel sequencing
+    // 64: Enable Channel sequencing
     {ADC_REGS::SEQUENCE_CFG, ADC_FIELDS::SEQUENCE_CFG_CHANNEL_SEQUENCING}
 };
 
@@ -186,81 +186,81 @@ static const std::vector<std::pair<uint8_t, uint8_t>> ADC1_CH_INIT =
 // pair<REG,DATA>
 static const std::vector<std::pair<uint8_t, uint8_t>> ADC2_CH_INIT =
 {
-    // 61: Set channels to auto sequencing, all channels
+    // 65: Set channels to auto sequencing, all channels
     {ADC_REGS::AUTO_SEQ_CH_SEL, ADC_FIELDS::AUTO_SEQ_CH_SEL_ALL_AUTO_SEQUENCING},
 
-    // 62: Set auto sequence mode
+    // 66: Set auto sequence mode
     {ADC_REGS::SEQUENCE_CFG, ADC_FIELDS::SEQUENCE_CFG_AUTO_SEQUENCE},
 
     // CH 2
-    // 63: Keep upper limit at max, enable hysteresis
+    // 67: Keep upper limit at max, enable hysteresis
     {ADC_REGS::HYSTERESIS_CH2, ADC_FIELDS::HYSTERESIS_UPPER_LIMIT_MAX_ENABLE},
 
-    // 64: Keep default, may skip if not multibyte writing
+    // 68: Keep default, may skip if not multibyte writing
     {ADC_REGS::HIGH_TH_CH2, ADC_FIELDS::HIGH_TH_DEFAULT},
 
-    // 65: Set up so alert must persist for 4 consecutive readings
+    // 69: Set up so alert must persist for 4 consecutive readings
     {ADC_REGS::EVENT_COUNT_CH2, ADC_FIELDS::EVENT_COUNT_ADC2_CH2_ALERT_4_CONSECUTIVE_READINGS},
 
-    // 66: 3C_VLOC (VDD) Low Threshold = 0.391 V
+    // 70: 3C_VLOC (VDD) Low Threshold = 0.391 V
     {ADC_REGS::LOW_TH_CH2, ADC_FIELDS::LOW_TH_CH2_3C_VLOC_LOW_THRESHOLD_391mv},
 
     // CH 3
-    // 67: Keep upper limit at max, enable hysteresis
+    // 71: Keep upper limit at max, enable hysteresis
     {ADC_REGS::HYSTERESIS_CH3, ADC_FIELDS::HYSTERESIS_UPPER_LIMIT_MAX_ENABLE},
 
-    // 68: Keep default, may skip if not multibyte writing
+    // 72: Keep default, may skip if not multibyte writing
     {ADC_REGS::HIGH_TH_CH3, ADC_FIELDS::HIGH_TH_DEFAULT},
 
-    // 69: Set up so alert must persist for 4 consecutive readings
+    // 73: Set up so alert must persist for 4 consecutive readings
     {ADC_REGS::EVENT_COUNT_CH3, ADC_FIELDS::EVENT_COUNT_ADC2_CH3_ALERT_4_CONSECUTIVE_READINGS},
 
-    // 70: 4AB_VLOC (VDDR2) Low Threshold = 0.643 V
+    // 74: 4AB_VLOC (VDDR2) Low Threshold = 0.643 V
     {ADC_REGS::LOW_TH_CH3, ADC_FIELDS::LOW_TH_CH3_4AB_VLOC_LOW_THRESHOLD_543mv},
 
     // CH 5
-    // 71: Keep upper limit at max, enable hysteresis
+    // 75: Keep upper limit at max, enable hysteresis
     {ADC_REGS::HYSTERESIS_CH5, ADC_FIELDS::HYSTERESIS_UPPER_LIMIT_MAX_ENABLE},
 
-    // 72: Keep default, may skip if not multibyte writing
+    // 76: Keep default, may skip if not multibyte writing
     {ADC_REGS::HIGH_TH_CH5, ADC_FIELDS::HIGH_TH_DEFAULT},
 
-    // 73: Set up so alert must persist for 4 consecutive readings
+    // 77: Set up so alert must persist for 4 consecutive readings
     {ADC_REGS::EVENT_COUNT_CH5, ADC_FIELDS::EVENT_COUNT_ADC2_CH5_ALERT_4_CONSECUTIVE_READINGS},
 
-    // 74: 4C_VLOC (VDD) Low Threshold = 0.391 V
+    // 78: 4C_VLOC (VDD) Low Threshold = 0.391 V
     {ADC_REGS::LOW_TH_CH5, ADC_FIELDS::LOW_TH_CH5_4C_VLOC_LOW_THRESHOLD_391mv},
 
     // CH 7
-    // 75: Keep upper limit at max, enable hysteresis
+    // 79: Keep upper limit at max, enable hysteresis
     {ADC_REGS::HYSTERESIS_CH7, ADC_FIELDS::HYSTERESIS_UPPER_LIMIT_MAX_ENABLE},
 
-    // 76: Keep default, may skip if not multibyte writing
+    // 80: Keep default, may skip if not multibyte writing
     {ADC_REGS::HIGH_TH_CH7, ADC_FIELDS::HIGH_TH_DEFAULT},
 
-    // 77: Set up so alert must persist for 4 consecutive readings
+    // 81: Set up so alert must persist for 4 consecutive readings
     {ADC_REGS::EVENT_COUNT_CH7, ADC_FIELDS::EVENT_COUNT_ADC2_CH7_ALERT_4_CONSECUTIVE_READINGS},
 
-    // 78: 3AB_VLOC (VDDR2) Low Threshold = 0.643 V
+    // 82: 3AB_VLOC (VDDR2) Low Threshold = 0.643 V
     {ADC_REGS::LOW_TH_CH7, ADC_FIELDS::LOW_TH_CH7_3AB_VLOC_LOW_THRESHOLD_543mv},
 
     // Finalize
-    // 79: Set channels to trigger an alert, only local voltages
+    // 83: Set channels to trigger an alert, only local voltages
     {ADC_REGS::ALERT_CH_SEL, ADC_FIELDS::ALERT_CH_SEL_ADC2_LOCAL_VOLTAGES_ALERT},
 
-    // 80: Set alert pin function to remain active high (not pulsed)
+    // 84: Set alert pin function to remain active high (not pulsed)
     {ADC_REGS::ALERT_PIN_CFG, ADC_FIELDS::ALERT_PIN_CFG_ACTIVE_HIGH},
 
-    // 81: Setup autonomous conversions and sampling speed
+    // 85: Setup autonomous conversions and sampling speed
     {ADC_REGS::OPMODE_CFG, ADC_FIELDS::OPMODE_CFG_AUTONOMOUS},
 
-    // 82: Set over sampling, 8 samples
+    // 86: Set over sampling, 8 samples
     {ADC_REGS::OSR_CFG, ADC_FIELDS::OSR_CFG_8_SAMPLE_OVERSAMPLING},
 
-    // 83: Enable digital window comparator and stats
+    // 87: Enable digital window comparator and stats
     {ADC_REGS::GENERAL_CFG, ADC_FIELDS::GENERAL_CFG_EN_DIGITAL_WINDOW_COMPARATOR_AND_STATS},
 
-    // 84: Enable Channel sequencing
+    // 88: Enable Channel sequencing
     {ADC_REGS::SEQUENCE_CFG, ADC_FIELDS::SEQUENCE_CFG_CHANNEL_SEQUENCING}
 };
 
@@ -690,6 +690,15 @@ fapi2::ReturnCode validate_efuse_off(const fapi2::Target<fapi2::TARGET_TYPE_PMIC
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS
 ///
 fapi2::ReturnCode validate_efuse_on(const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& i_pmic_target);
+
+///
+/// @brief Enable EFUSE according to 4U Functional Specification
+///
+/// @param[in] i_gpio GPIO target
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
+/// @note Corresponds to steps (6,7,8) & (16,17,18) in 4U DDIMM Functional Spec
+///
+fapi2::ReturnCode enable_efuse(const fapi2::Target<fapi2::TARGET_TYPE_GENERICI2CSLAVE>& i_gpio);
 
 ///
 /// @brief Set the up PMIC pair and matching GPIO expander prior to PMIC enable

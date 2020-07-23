@@ -712,6 +712,35 @@ fapi_try_exit:
 }
 
 ///
+/// @brief Enable EFUSE according to 4U Functional Specification
+///
+/// @param[in] i_gpio GPIO target
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
+/// @note Corresponds to steps (6,7,8) & (16,17,18) in 4U DDIMM Functional Spec
+///
+fapi2::ReturnCode enable_efuse(const fapi2::Target<fapi2::TARGET_TYPE_GENERICI2CSLAVE>& i_gpio)
+{
+    FAPI_DBG("Enabling EFUSE on %s", mss::c_str(i_gpio));
+    fapi2::buffer<uint8_t> l_reg_contents;
+
+    // Step 6 / 16
+    l_reg_contents = mss::gpio::fields::EFUSE_OUTPUT_SETTING;
+    FAPI_TRY(mss::pmic::i2c::reg_write(i_gpio, mss::gpio::regs::EFUSE_OUTPUT, l_reg_contents));
+
+    // Step 7 / 17
+    l_reg_contents = mss::gpio::fields::EFUSE_POLARITY_SETTING;
+    FAPI_TRY(mss::pmic::i2c::reg_write(i_gpio, mss::gpio::regs::EFUSE_POLARITY, l_reg_contents));
+
+    // Step 8 / 18
+    // Set pin to output type (this will turn on the E-Fuse)
+    l_reg_contents = mss::gpio::fields::CONFIGURATION_IO_MAP;
+    FAPI_TRY(mss::pmic::i2c::reg_write(i_gpio, mss::gpio::regs::CONFIGURATION, l_reg_contents));
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
 /// @brief Set the up PMIC pair and matching GPIO expander prior to PMIC enable
 ///
 /// @param[in] i_pmic0 PMIC target connected to GPIO expander
@@ -746,11 +775,8 @@ fapi2::ReturnCode setup_pmic_pair_and_gpio(
     FAPI_TRY(mss::pmic::validate_efuse_off(i_pmic0));
     FAPI_TRY(mss::pmic::validate_efuse_off(i_pmic1));
 
-    // Enable E-Fuse, set pin to output type (this will turn on the E-Fuse)
-    FAPI_DBG("Enabling EFUSE on %s", mss::c_str(i_gpio));
-    l_reg_contents.flush<0>();
-    l_reg_contents = mss::gpio::fields::CONFIGURATION_IO_MAP;
-    FAPI_TRY(mss::pmic::i2c::reg_write(i_gpio, mss::gpio::regs::CONFIGURATION, l_reg_contents));
+    // Enable E-Fuse
+    FAPI_TRY(enable_efuse(i_gpio));
 
     // Delay 30ms looked consistantly good in testing
     fapi2::delay(30 * mss::common_timings::DELAY_1MS, mss::common_timings::DELAY_1MS);
