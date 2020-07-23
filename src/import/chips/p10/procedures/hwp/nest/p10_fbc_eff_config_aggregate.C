@@ -212,11 +212,11 @@ fapi2::ReturnCode p10_fbc_eff_config_aggregate(
     ////////////////////////////////////////////////////////
     // Skip aggregate link config in manufacturing mode
     ////////////////////////////////////////////////////////
-    fapi2::ATTR_MFG_FLAGS_Type l_mfg_flags;
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MFG_FLAGS, FAPI_SYSTEM, l_mfg_flags),
-             "Error from FAPI_ATTR_GET (ATTR_MFG_FLAGS)");
+    bool l_smp_wrap_config;
+    FAPI_TRY(p10_smp_wrap_mfg_mode(l_smp_wrap_config),
+             "Error from p10_smp_wrap_mfg_mode");
 
-    if(l_mfg_flags[MFG_FLAGS_SMP_WRAP_CELL] == fapi2::ENUM_ATTR_MFG_FLAGS_MNFG_SMP_WRAP_CONFIG)
+    if(l_smp_wrap_config)
     {
         FAPI_DBG("Skipping aggregate links setup (MNFG_SMP_WRAP_CONFIG)");
         goto fapi_try_exit;

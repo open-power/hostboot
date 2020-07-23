@@ -70,11 +70,19 @@ extern "C"
 {
 
 ///
+/// @brief Determine whether manufacturing flags indicate smp wrap config
+///
+/// @param[out] o_smp_wrap_config   True if mfg flags indicate smp wrap config
+/// @return fapi::ReturnCode        FAPI2_RC_SUCCESS if success, else error code.
+///
+    fapi2::ReturnCode p10_smp_wrap_mfg_mode(
+        bool& o_smp_wrap_mode);
+
+///
 /// @brief Perform fabric/link reconfiguration for smp wrap mode
 ///
 /// @param[in] i_target             Reference to processor chip target
 /// @param[in] i_wrap_mode          Enumerated type representing SMP wrap mode
-///
 /// @return fapi::ReturnCode        FAPI2_RC_SUCCESS if success, else error code.
 ///
     fapi2::ReturnCode p10_smp_wrap(

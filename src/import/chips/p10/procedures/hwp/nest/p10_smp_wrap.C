@@ -125,6 +125,25 @@ struct wrap_mode_def MODEX_DEF =
 // Function definitions
 //------------------------------------------------------------------------------
 
+fapi2::ReturnCode p10_smp_wrap_mfg_mode(
+    bool& o_is_smp_wrap_mode)
+{
+    FAPI_DBG("Start");
+
+    fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
+
+    fapi2::ATTR_MFG_FLAGS_Type l_mfg_flags;
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MFG_FLAGS, FAPI_SYSTEM, l_mfg_flags),
+             "Error from FAPI_ATTR_GET (ATTR_MFG_FLAGS)");
+
+    o_is_smp_wrap_mode = (l_mfg_flags[MFG_FLAGS_SMP_WRAP_CELL] == fapi2::ENUM_ATTR_MFG_FLAGS_MNFG_SMP_WRAP_CONFIG) ?
+                         (true) : (false);
+
+fapi_try_exit:
+    FAPI_DBG("End");
+    return fapi2::current_err;
+}
+
 /// See doxygen comments in header file
 fapi2::ReturnCode p10_smp_wrap(
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
@@ -132,11 +151,28 @@ fapi2::ReturnCode p10_smp_wrap(
 {
     FAPI_DBG("Start");
 
+    fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
+    fapi2::ATTR_PROC_FABRIC_BROADCAST_MODE_Type l_broadcast_mode;
+    fapi2::ATTR_PROC_FABRIC_TOPOLOGY_ID_Type l_proc_id;
+    bool l_smp_wrap_config;
     struct wrap_mode_def l_def;
 
-    fapi2::ATTR_PROC_FABRIC_TOPOLOGY_ID_Type l_proc_id;
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_BROADCAST_MODE, FAPI_SYSTEM, l_broadcast_mode),
+             "Error from FAPI_ATTR_GET (ATTR_PROC_FABRIC_BROADCAST_MODE)");
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_TOPOLOGY_ID, i_target, l_proc_id),
              "Error from FAPI_ATTR_GET (ATTR_PROC_FABRIC_TOPOLOGY_ID)");
+
+    FAPI_TRY(p10_smp_wrap_mfg_mode(l_smp_wrap_config),
+             "Error from p10_smp_wrap_mfg_mode");
+
+    FAPI_ASSERT(l_smp_wrap_config == true,
+                fapi2::P10_SMP_WRAP_MFG_FLAGS_ERR(),
+                "Manufacturing flags must be set for smp wrap mode!");
+
+    FAPI_ASSERT(l_broadcast_mode == fapi2::ENUM_ATTR_PROC_FABRIC_BROADCAST_MODE_2HOP_CHIP_IS_NODE,
+                fapi2::P10_SMP_WRAP_UNSUPPORTED_BROADCAST_MODE()
+                .set_BROADCAST_MODE(l_broadcast_mode),
+                "Unsupported broadcast mode with smp wrap!");
 
     switch(i_wrap_mode)
     {

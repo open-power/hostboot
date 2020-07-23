@@ -128,13 +128,13 @@ fapi2::ReturnCode p10_build_smp_process_chip(
     {
         fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
 
-        fapi2::ATTR_MFG_FLAGS_Type l_mfg_flags;
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MFG_FLAGS, FAPI_SYSTEM, l_mfg_flags),
-                 "Error from FAPI_ATTR_GET (ATTR_MFG_FLAGS)");
+        bool l_smp_wrap_config;
+        FAPI_TRY(p10_smp_wrap_mfg_mode(l_smp_wrap_config),
+                 "Error from p10_smp_wrap_mfg_mode");
 
         // each chip should match the flush state of the fabric logic
         if ((!io_smp_chip.master_chip_sys_curr || io_smp_chip.master_chip_group_curr)
-            && (l_mfg_flags[MFG_FLAGS_SMP_WRAP_CELL] != fapi2::ENUM_ATTR_MFG_FLAGS_MNFG_SMP_WRAP_CONFIG))
+            && (!l_smp_wrap_config))
         {
             FAPI_DBG("Error: chip does not match flush state of fabric: sys_curr: %d, grp_curr: %d",
                      io_smp_chip.master_chip_sys_curr ? 1 : 0, io_smp_chip.master_chip_group_curr ? 1 : 0);
@@ -676,11 +676,11 @@ fapi2::ReturnCode p10_build_smp_mfg_config(
 
     fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
 
-    fapi2::ATTR_MFG_FLAGS_Type l_mfg_flags;
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MFG_FLAGS, FAPI_SYSTEM, l_mfg_flags),
-             "Error from FAPI_ATTR_GET (ATTR_MFG_FLAGS)");
+    bool l_smp_wrap_config;
+    FAPI_TRY(p10_smp_wrap_mfg_mode(l_smp_wrap_config),
+             "Error from p10_smp_wrap_mfg_mode");
 
-    if(l_mfg_flags[MFG_FLAGS_SMP_WRAP_CELL] == fapi2::ENUM_ATTR_MFG_FLAGS_MNFG_SMP_WRAP_CONFIG)
+    if(l_smp_wrap_config)
     {
         fapi2::ATTR_IS_SIMULATION_Type l_sim_env;
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IS_SIMULATION, FAPI_SYSTEM, l_sim_env),

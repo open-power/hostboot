@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2019
+# Contributors Listed Below - COPYRIGHT 2019,2020
 # [+] International Business Machines Corp.
 #
 #
@@ -24,4 +24,5 @@
 # IBM_PROLOG_END_TAG
 PROCEDURE=p10_fbc_eff_config_aggregate
 OBJS+=p10_fbc_utils.o
+OBJS+=p10_smp_wrap.o
 $(call BUILD_PROCEDURE)
