@@ -418,9 +418,9 @@ fapi2::ReturnCode callout_max_freq_empty_set<mss::proc_type::PROC_P10>(
                            .set_MSS_MAX_FREQ_2(l_max_mrw_freqs[2])
                            .set_MSS_MAX_FREQ_3(l_max_mrw_freqs[3])
                            .set_MSS_MAX_FREQ_4(l_max_mrw_freqs[4])
-                           .set_OMI_FREQ_0(fapi2::ENUM_ATTR_MSS_OCMB_EXP_BOOT_CONFIG_SERDES_FREQUENCY_SERDES_21_33GBPS)
-                           .set_OMI_FREQ_1(fapi2::ENUM_ATTR_MSS_OCMB_EXP_BOOT_CONFIG_SERDES_FREQUENCY_SERDES_23_46GBPS)
-                           .set_OMI_FREQ_2(fapi2::ENUM_ATTR_MSS_OCMB_EXP_BOOT_CONFIG_SERDES_FREQUENCY_SERDES_25_60GBPS)
+                           .set_OMI_FREQ_0(fapi2::ENUM_ATTR_FREQ_OMI_MHZ_21330)
+                           .set_OMI_FREQ_1(fapi2::ENUM_ATTR_FREQ_OMI_MHZ_23460)
+                           .set_OMI_FREQ_2(fapi2::ENUM_ATTR_FREQ_OMI_MHZ_25600)
                            .set_PORT_TARGET(l_port),
                            "%s didn't find a supported frequency for any ports in this domain", mss::c_str(l_port));
     }

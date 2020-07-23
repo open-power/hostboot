@@ -54,9 +54,9 @@ namespace mss
 // Note: these need to be sorted so binary search works
 static const std::vector<uint64_t> P10_OMI_FREQS =
 {
-    21330, // fapi2::ENUM_ATTR_MSS_OCMB_EXP_BOOT_CONFIG_SERDES_FREQUENCY_SERDES_21_33GBPS,
-    23460, // fapi2::ENUM_ATTR_MSS_OCMB_EXP_BOOT_CONFIG_SERDES_FREQUENCY_SERDES_23_46GBPS,
-    25600, // fapi2::ENUM_ATTR_MSS_OCMB_EXP_BOOT_CONFIG_SERDES_FREQUENCY_SERDES_25_60GBPS,
+    21330, // fapi2::ENUM_ATTR_FREQ_OMI_MHZ_21330,
+    23460, // fapi2::ENUM_ATTR_FREQ_OMI_MHZ_23460,
+    25600, // fapi2::ENUM_ATTR_FREQ_OMI_MHZ_25600,
 };
 
 ///
@@ -69,37 +69,6 @@ static const std::vector<uint64_t> P10_OMI_FREQS =
 inline bool rank_not_supported_in_vpd_config(const bool i_is_lr_dimm, const uint8_t i_dimm_rank)
 {
     return (i_is_lr_dimm && i_dimm_rank > 0);
-}
-
-///
-/// @brief Converts an OMI frequency attribute enum to the corresponding OMI frequency
-/// @param[in] i_omi_enum a frequency enum value that is to be converted
-/// @return the corresponding OMI frequency
-///
-inline uint64_t convert_omi_freq_attr_to_freq(const fapi2::ATTR_MSS_OCMB_EXP_BOOT_CONFIG_SERDES_FREQUENCY_Type
-        i_omi_enum)
-{
-    switch (i_omi_enum)
-    {
-        case fapi2::ENUM_ATTR_MSS_OCMB_EXP_BOOT_CONFIG_SERDES_FREQUENCY_SERDES_21_33GBPS:
-            return 21330;
-
-        case fapi2::ENUM_ATTR_MSS_OCMB_EXP_BOOT_CONFIG_SERDES_FREQUENCY_SERDES_23_46GBPS:
-            return 23460;
-
-        case fapi2::ENUM_ATTR_MSS_OCMB_EXP_BOOT_CONFIG_SERDES_FREQUENCY_SERDES_25_60GBPS:
-            return 25600;
-
-        default:
-            FAPI_ASSERT( false,
-                         fapi2::P10_MSS_UNSUPPORTED_OMI_FREQ()
-                         .set_OMI_FREQ_ENUM(i_omi_enum),
-                         "freq system saw an unsupported OMI frequency with enum value: %d",
-                         i_omi_enum );
-    }
-
-fapi_try_exit:
-    return 0;
 }
 
 ///
