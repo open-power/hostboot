@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -158,6 +158,7 @@ enum PM_CME_SCRATCH_DEFS
 //
 enum PM_CPPM_CSAR_DEFS
 {
+    CPPM_CSAR_PGPE_ACK_FOR_NACK_ON_PROLONGED_DROOP_W_CSAR_SET  = 26,
     CPPM_CSAR_FIT_HCODE_ERROR_INJECT                = 27,
     CPPM_CSAR_ENABLE_PSTATE_REGISTRATION_INTERLOCK  = 28,
     CPPM_CSAR_DISABLE_CME_NACK_ON_PROLONGED_DROOP   = 29,
