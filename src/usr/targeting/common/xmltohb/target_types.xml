@@ -2920,9 +2920,6 @@
     <attribute>
       <id>PARENT_PERVASIVE</id>
     </attribute>
-    <attribute>
-      <id>PREVIOUS_WAKEUP_FAIL</id>
-    </attribute>
   </targetType>
 
   <!-- CORE: Use same CORE target for both Nimbus and Cumulus
@@ -2962,9 +2959,6 @@
     </attribute>
     <attribute>
       <id>PARENT_PERVASIVE</id>
-    </attribute>
-    <attribute>
-      <id>PREVIOUS_WAKEUP_FAIL</id>
     </attribute>
   </targetType>
 

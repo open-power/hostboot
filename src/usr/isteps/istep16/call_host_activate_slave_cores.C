@@ -184,83 +184,10 @@ void* call_host_activate_slave_cores(void* const io_pArgs)
             }
         } // End of handle time out error
 
-        // Check if this core failed last time
-        ATTR_PREVIOUS_WAKEUP_FAIL_type l_prevFail
-          = l_core->getAttr<TARGETING::ATTR_PREVIOUS_WAKEUP_FAIL>();
-
-        // Create predictive error log if this is the first failure
-        //   AND the HWP didn't see a problem
-        if ((0 != rc) && (l_prevFail == 0) && (l_checkidle_eid == 0))
-        {
-            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                       "call_host_activate_slave_cores: "
-                       "Error from kernel %d on core 0x%016llX",
-                       rc,
-                       pir);
-            /*@
-             * @errortype
-             * @reasoncode  RC_BAD_RC
-             * @severity    ERRORLOG::ERRL_SEV_UNRECOVERABLE
-             * @moduleid    MOD_HOST_ACTIVATE_SLAVE_CORES
-             * @userdata1   PIR of failing core.
-             * @userdata2[00:31]   EID from p10_check_idle_stop_done().
-             * @userdata2[32:63]   rc of cpu_start_core().
-             *
-             * @devdesc Kernel returned error when trying to activate
-             *          core.
-             */
-            l_errl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                             MOD_HOST_ACTIVATE_SLAVE_CORES,
-                                             RC_BAD_RC,
-                                             pir,
-                                             TWO_UINT32_TO_UINT64(l_checkidle_eid,
-                                                                  rc));
-
-            // Going to assume some kind of SW error unless it fails
-            //  again
-            l_errl->addProcedureCallout( HWAS::EPUB_PRC_HB_CODE,
-                                         HWAS::SRCI_PRIORITY_HIGH);
-
-            // Callout core that failed to wake up.
-            l_errl->addHwCallout(l_core,
-                                 HWAS::SRCI_PRIORITY_LOW,
-                                 HWAS::NO_DECONFIG,
-                                 HWAS::GARD_NULL);
-
-            // Could be an interrupt issue
-            l_errl->collectTrace(INTR_TRACE_NAME,256);
-
-            // Throw printk in there too in case it is a kernel issue
-            ERRORLOG::ErrlUserDetailsPrintk().addToLog(l_errl);
-
-            // Add interesting ISTEP traces
-            l_errl->collectTrace(ISTEP_COMP_NAME,256);
-
-            // Choosing to ignore this intermittent error
-            l_errl->setSev(ERRORLOG::ERRL_SEV_INFORMATIONAL);
-            errlCommit( l_errl, HWPF_COMP_ID );
-
-            // Remember that we failed so we can gard the core if it
-            //  happens again on the reboot
-            l_prevFail = 1;
-            l_core->setAttr<TARGETING::ATTR_PREVIOUS_WAKEUP_FAIL>(l_prevFail);
-
-#ifdef CONFIG_BMC_IPMI
-            // Initiate a graceful power cycle
-            CONSOLE::displayf(ISTEP_COMP_NAME,
-                              "System Rebooting To Retry Recoverable Error");
-            CONSOLE::flush();
-            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                      "call_host_activate_slave_cores: requesting power cycle");
-            INITSERVICE::requestReboot();
-#endif
-
-            break;
-        }
-        // Create unrecoverable error log if this is a repeat
-        //  OR if the HWP hit something
-        else if (   (0 != rc)
-                    && ((l_prevFail > 0) || (l_checkidle_eid != 0)) )
+        // Create unrecoverable error log ourselves to knock out the
+        //  core in case the HWP didn't do a HW callout or if there
+        //  was no HWP error at all
+        if( 0 != rc )
         {
             TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                        "call_host_activate_slave_cores: "
@@ -272,18 +199,19 @@ void* call_host_activate_slave_cores(void* const io_pArgs)
              * @severity    ERRORLOG::ERRL_SEV_UNRECOVERABLE
              * @moduleid    MOD_HOST_ACTIVATE_SLAVE_CORES
              * @userdata1[00:31]   PIR of failing core.
-             * @userdata2[32:63]   Number of previous failures.
+             * @userdata2[32:63]   HUID of failing core.
              * @userdata2[00:31]   EID from p10_check_idle_stop_done().
              * @userdata2[32:63]   rc of cpu_start_core().
              *
              * @devdesc Kernel returned error when trying to activate
              *          core.
+             * @custdesc Unable to activate all hardware during boot..
              */
             l_errl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                              MOD_HOST_ACTIVATE_SLAVE_CORES,
                                              RC_SLAVE_CORE_WAKEUP_ERROR,
                                              TWO_UINT32_TO_UINT64(pir,
-                                                                  l_prevFail),
+                                                     TARGETING::get_huid(l_core)),
                                              TWO_UINT32_TO_UINT64(l_checkidle_eid,
                                                                   rc));
 
@@ -305,33 +233,8 @@ void* call_host_activate_slave_cores(void* const io_pArgs)
             l_stepError.addErrorDetails(l_errl);
             errlCommit(l_errl, HWPF_COMP_ID);
 
-            // We garded the core so we should zero out the fail
-            //  counter so the replacement doesn't get blamed
-            l_prevFail = 0;
-            l_core->setAttr<TARGETING::ATTR_PREVIOUS_WAKEUP_FAIL>(l_prevFail);
-
             break;
         }
-        // Zero out the counter if we passed
-        else if (l_prevFail > 0)
-        {
-            // Add to the list of passing cores so we can
-            //  clear ATTR_PREVIOUS_WAKEUP_FAIL later
-            l_startedCores.push_back(l_core);
-        }
-    }
-
-    // Clear out the wakeup_fail indicators only after every core has passed.
-    //  Doing this outside the loop helps mitigate the (unlikely) case where
-    //  a failure bounces between different cores on several consecutive boots.
-    for (const auto& l_core : l_startedCores)
-    {
-        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                  "call_host_activate_slave_cores: "
-                  "Resetting failure count for core %.8X",
-                  TARGETING::get_huid(l_core));
-        ATTR_PREVIOUS_WAKEUP_FAIL_type l_prevFail = 0;
-        l_core->setAttr<TARGETING::ATTR_PREVIOUS_WAKEUP_FAIL>(l_prevFail);
     }
 
     //Set SKIP_WAKEUP to false after all cores are powered on (16.2)
