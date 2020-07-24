@@ -4796,6 +4796,466 @@ fapi_try_exit:
 }
 //<< PUT_[TP_TPCHIP_OCC_OCI_OCB_OIRR0A_WO_OR]
 
+//>> PREP_[TP_TPBR_PSIHB_ESB_NOTIFY]
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PREP_TP_TPBR_PSIHB_ESB_NOTIFY(const fapi2::Target<K, M, V>& i_target)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = TP_TPBR_PSIHB_ESB_NOTIFY;
+#endif
+    return fapi2::current_err;
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+//<< PREP_[TP_TPBR_PSIHB_ESB_NOTIFY]
+
+//>> GET_[TP_TPBR_PSIHB_ESB_NOTIFY]
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode GET_TP_TPBR_PSIHB_ESB_NOTIFY(const fapi2::Target<K, M, V>& i_target,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = TP_TPBR_PSIHB_ESB_NOTIFY;
+#endif
+    return fapi2::getScom(i_target, TP_TPBR_PSIHB_ESB_NOTIFY, o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+//<< GET_[TP_TPBR_PSIHB_ESB_NOTIFY]
+
+//>> PUT_[TP_TPBR_PSIHB_ESB_NOTIFY]
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PUT_TP_TPBR_PSIHB_ESB_NOTIFY(const fapi2::Target<K, M, V>& i_target,
+        const uint64_t i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    FAPI_TRY(scomt::chkReg(TP_TPBR_PSIHB_ESB_NOTIFY));
+#endif
+    return fapi2::putScom(i_target, TP_TPBR_PSIHB_ESB_NOTIFY, i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+//<< PUT_[TP_TPBR_PSIHB_ESB_NOTIFY]
+
+
+//>> SET_[TP_TPBR_PSIHB_ESB_NOTIFY_ADDR]
+static inline fapi2::buffer<uint64_t>& SET_TP_TPBR_PSIHB_ESB_NOTIFY_ADDR(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TP_TPBR_PSIHB_ESB_NOTIFY));
+#endif
+    return o_data.insertFromRight<TP_TPBR_PSIHB_ESB_NOTIFY_ADDR,
+           TP_TPBR_PSIHB_ESB_NOTIFY_ADDR_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("0:scom_proc Invalid dial access TP_TPBR_PSIHB_ESB_NOTIFY_ADDR chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[TP_TPBR_PSIHB_ESB_NOTIFY_ADDR]
+
+//>> SET_[TP_TPBR_PSIHB_ESB_NOTIFY_ADDR]
+static inline fapi2::buffer<uint64_t>& SET_TP_TPBR_PSIHB_ESB_NOTIFY_ADDR(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TP_TPBR_PSIHB_ESB_NOTIFY));
+#endif
+    return o_data.insertFromRight<TP_TPBR_PSIHB_ESB_NOTIFY_ADDR,
+           TP_TPBR_PSIHB_ESB_NOTIFY_ADDR_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("1:scom_proc Invalid dial access TP_TPBR_PSIHB_ESB_NOTIFY_ADDR chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[TP_TPBR_PSIHB_ESB_NOTIFY_ADDR]
+
+//>> GET_[TP_TPBR_PSIHB_ESB_NOTIFY_ADDR]
+static inline fapi2::buffer<uint64_t>& GET_TP_TPBR_PSIHB_ESB_NOTIFY_ADDR(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TP_TPBR_PSIHB_ESB_NOTIFY));
+#endif
+    return i_data.extractToRight<TP_TPBR_PSIHB_ESB_NOTIFY_ADDR,
+           TP_TPBR_PSIHB_ESB_NOTIFY_ADDR_LEN>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("4:scom_proc Invalid dial access TP_TPBR_PSIHB_ESB_NOTIFY_ADDR chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[TP_TPBR_PSIHB_ESB_NOTIFY_ADDR]
+
+//>> SET_[TP_TPBR_PSIHB_ESB_NOTIFY_VALID]
+static inline fapi2::buffer<uint64_t>& SET_TP_TPBR_PSIHB_ESB_NOTIFY_VALID(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TP_TPBR_PSIHB_ESB_NOTIFY));
+#endif
+    return o_data.insertFromRight<TP_TPBR_PSIHB_ESB_NOTIFY_VALID,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("0:scom_proc Invalid dial access TP_TPBR_PSIHB_ESB_NOTIFY_VALID chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[TP_TPBR_PSIHB_ESB_NOTIFY_VALID]
+
+//>> SET_[TP_TPBR_PSIHB_ESB_NOTIFY_VALID]
+static inline fapi2::buffer<uint64_t>& SET_TP_TPBR_PSIHB_ESB_NOTIFY_VALID(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TP_TPBR_PSIHB_ESB_NOTIFY));
+#endif
+    return o_data.insertFromRight<TP_TPBR_PSIHB_ESB_NOTIFY_VALID,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("1:scom_proc Invalid dial access TP_TPBR_PSIHB_ESB_NOTIFY_VALID chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[TP_TPBR_PSIHB_ESB_NOTIFY_VALID]
+
+//>> SET_[TP_TPBR_PSIHB_ESB_NOTIFY_VALID]
+static inline fapi2::buffer<uint64_t>& SET_TP_TPBR_PSIHB_ESB_NOTIFY_VALID(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TP_TPBR_PSIHB_ESB_NOTIFY));
+#endif
+    return o_data.setBit<TP_TPBR_PSIHB_ESB_NOTIFY_VALID>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("2:scom_proc Invalid dial access TP_TPBR_PSIHB_ESB_NOTIFY_VALID chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[TP_TPBR_PSIHB_ESB_NOTIFY_VALID]
+
+//>> CLEAR_[TP_TPBR_PSIHB_ESB_NOTIFY_VALID]
+static inline fapi2::buffer<uint64_t>& CLEAR_TP_TPBR_PSIHB_ESB_NOTIFY_VALID(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TP_TPBR_PSIHB_ESB_NOTIFY));
+#endif
+    return o_data.clearBit<TP_TPBR_PSIHB_ESB_NOTIFY_VALID>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("3:scom_proc Invalid dial access TP_TPBR_PSIHB_ESB_NOTIFY_VALID chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< CLEAR_[TP_TPBR_PSIHB_ESB_NOTIFY_VALID]
+
+//>> GET_[TP_TPBR_PSIHB_ESB_NOTIFY_VALID]
+static inline fapi2::buffer<uint64_t>& GET_TP_TPBR_PSIHB_ESB_NOTIFY_VALID(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TP_TPBR_PSIHB_ESB_NOTIFY));
+#endif
+    return i_data.extractToRight<TP_TPBR_PSIHB_ESB_NOTIFY_VALID,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("4:scom_proc Invalid dial access TP_TPBR_PSIHB_ESB_NOTIFY_VALID chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[TP_TPBR_PSIHB_ESB_NOTIFY_VALID]
+
+//>> GET_[TP_TPBR_PSIHB_ESB_NOTIFY_VALID]
+static inline bool GET_TP_TPBR_PSIHB_ESB_NOTIFY_VALID(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TP_TPBR_PSIHB_ESB_NOTIFY));
+#endif
+    return i_data.getBit<TP_TPBR_PSIHB_ESB_NOTIFY_VALID>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("5:scom_proc Invalid dial access TP_TPBR_PSIHB_ESB_NOTIFY_VALID chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[TP_TPBR_PSIHB_ESB_NOTIFY_VALID]
+
+//>> PREP_[TP_TPBR_PSIHB_INTERRUPT_CONTROL]
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PREP_TP_TPBR_PSIHB_INTERRUPT_CONTROL(const fapi2::Target<K, M, V>& i_target)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = TP_TPBR_PSIHB_INTERRUPT_CONTROL;
+#endif
+    return fapi2::current_err;
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+//<< PREP_[TP_TPBR_PSIHB_INTERRUPT_CONTROL]
+
+//>> GET_[TP_TPBR_PSIHB_INTERRUPT_CONTROL]
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode GET_TP_TPBR_PSIHB_INTERRUPT_CONTROL(const fapi2::Target<K, M, V>& i_target,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = TP_TPBR_PSIHB_INTERRUPT_CONTROL;
+#endif
+    return fapi2::getScom(i_target, TP_TPBR_PSIHB_INTERRUPT_CONTROL, o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+//<< GET_[TP_TPBR_PSIHB_INTERRUPT_CONTROL]
+
+//>> PUT_[TP_TPBR_PSIHB_INTERRUPT_CONTROL]
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PUT_TP_TPBR_PSIHB_INTERRUPT_CONTROL(const fapi2::Target<K, M, V>& i_target,
+        const uint64_t i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    FAPI_TRY(scomt::chkReg(TP_TPBR_PSIHB_INTERRUPT_CONTROL));
+#endif
+    return fapi2::putScom(i_target, TP_TPBR_PSIHB_INTERRUPT_CONTROL, i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+//<< PUT_[TP_TPBR_PSIHB_INTERRUPT_CONTROL]
+
+
+//>> SET_[TP_TPBR_PSIHB_INTERRUPT_CONTROL_ESB_OR_LSI_INTERRUPTS]
+static inline fapi2::buffer<uint64_t>& SET_TP_TPBR_PSIHB_INTERRUPT_CONTROL_ESB_OR_LSI_INTERRUPTS(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TP_TPBR_PSIHB_INTERRUPT_CONTROL));
+#endif
+    return o_data.insertFromRight<TP_TPBR_PSIHB_INTERRUPT_CONTROL_ESB_OR_LSI_INTERRUPTS,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("0:scom_proc Invalid dial access TP_TPBR_PSIHB_INTERRUPT_CONTROL_ESB_OR_LSI_INTERRUPTS chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[TP_TPBR_PSIHB_INTERRUPT_CONTROL_ESB_OR_LSI_INTERRUPTS]
+
+//>> SET_[TP_TPBR_PSIHB_INTERRUPT_CONTROL_ESB_OR_LSI_INTERRUPTS]
+static inline fapi2::buffer<uint64_t>& SET_TP_TPBR_PSIHB_INTERRUPT_CONTROL_ESB_OR_LSI_INTERRUPTS(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TP_TPBR_PSIHB_INTERRUPT_CONTROL));
+#endif
+    return o_data.insertFromRight<TP_TPBR_PSIHB_INTERRUPT_CONTROL_ESB_OR_LSI_INTERRUPTS,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("1:scom_proc Invalid dial access TP_TPBR_PSIHB_INTERRUPT_CONTROL_ESB_OR_LSI_INTERRUPTS chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[TP_TPBR_PSIHB_INTERRUPT_CONTROL_ESB_OR_LSI_INTERRUPTS]
+
+//>> SET_[TP_TPBR_PSIHB_INTERRUPT_CONTROL_ESB_OR_LSI_INTERRUPTS]
+static inline fapi2::buffer<uint64_t>& SET_TP_TPBR_PSIHB_INTERRUPT_CONTROL_ESB_OR_LSI_INTERRUPTS(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TP_TPBR_PSIHB_INTERRUPT_CONTROL));
+#endif
+    return o_data.setBit<TP_TPBR_PSIHB_INTERRUPT_CONTROL_ESB_OR_LSI_INTERRUPTS>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("2:scom_proc Invalid dial access TP_TPBR_PSIHB_INTERRUPT_CONTROL_ESB_OR_LSI_INTERRUPTS chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[TP_TPBR_PSIHB_INTERRUPT_CONTROL_ESB_OR_LSI_INTERRUPTS]
+
+//>> CLEAR_[TP_TPBR_PSIHB_INTERRUPT_CONTROL_ESB_OR_LSI_INTERRUPTS]
+static inline fapi2::buffer<uint64_t>& CLEAR_TP_TPBR_PSIHB_INTERRUPT_CONTROL_ESB_OR_LSI_INTERRUPTS(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TP_TPBR_PSIHB_INTERRUPT_CONTROL));
+#endif
+    return o_data.clearBit<TP_TPBR_PSIHB_INTERRUPT_CONTROL_ESB_OR_LSI_INTERRUPTS>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("3:scom_proc Invalid dial access TP_TPBR_PSIHB_INTERRUPT_CONTROL_ESB_OR_LSI_INTERRUPTS chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< CLEAR_[TP_TPBR_PSIHB_INTERRUPT_CONTROL_ESB_OR_LSI_INTERRUPTS]
+
+//>> GET_[TP_TPBR_PSIHB_INTERRUPT_CONTROL_ESB_OR_LSI_INTERRUPTS]
+static inline fapi2::buffer<uint64_t>& GET_TP_TPBR_PSIHB_INTERRUPT_CONTROL_ESB_OR_LSI_INTERRUPTS(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TP_TPBR_PSIHB_INTERRUPT_CONTROL));
+#endif
+    return i_data.extractToRight<TP_TPBR_PSIHB_INTERRUPT_CONTROL_ESB_OR_LSI_INTERRUPTS,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("4:scom_proc Invalid dial access TP_TPBR_PSIHB_INTERRUPT_CONTROL_ESB_OR_LSI_INTERRUPTS chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[TP_TPBR_PSIHB_INTERRUPT_CONTROL_ESB_OR_LSI_INTERRUPTS]
+
+//>> GET_[TP_TPBR_PSIHB_INTERRUPT_CONTROL_ESB_OR_LSI_INTERRUPTS]
+static inline bool GET_TP_TPBR_PSIHB_INTERRUPT_CONTROL_ESB_OR_LSI_INTERRUPTS(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TP_TPBR_PSIHB_INTERRUPT_CONTROL));
+#endif
+    return i_data.getBit<TP_TPBR_PSIHB_INTERRUPT_CONTROL_ESB_OR_LSI_INTERRUPTS>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("5:scom_proc Invalid dial access TP_TPBR_PSIHB_INTERRUPT_CONTROL_ESB_OR_LSI_INTERRUPTS chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[TP_TPBR_PSIHB_INTERRUPT_CONTROL_ESB_OR_LSI_INTERRUPTS]
+
+//>> SET_[TP_TPBR_PSIHB_INTERRUPT_CONTROL_INTERRUPT_SM_RESET]
+static inline fapi2::buffer<uint64_t>& SET_TP_TPBR_PSIHB_INTERRUPT_CONTROL_INTERRUPT_SM_RESET(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TP_TPBR_PSIHB_INTERRUPT_CONTROL));
+#endif
+    return o_data.insertFromRight<TP_TPBR_PSIHB_INTERRUPT_CONTROL_INTERRUPT_SM_RESET,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("0:scom_proc Invalid dial access TP_TPBR_PSIHB_INTERRUPT_CONTROL_INTERRUPT_SM_RESET chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[TP_TPBR_PSIHB_INTERRUPT_CONTROL_INTERRUPT_SM_RESET]
+
+//>> SET_[TP_TPBR_PSIHB_INTERRUPT_CONTROL_INTERRUPT_SM_RESET]
+static inline fapi2::buffer<uint64_t>& SET_TP_TPBR_PSIHB_INTERRUPT_CONTROL_INTERRUPT_SM_RESET(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TP_TPBR_PSIHB_INTERRUPT_CONTROL));
+#endif
+    return o_data.insertFromRight<TP_TPBR_PSIHB_INTERRUPT_CONTROL_INTERRUPT_SM_RESET,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("1:scom_proc Invalid dial access TP_TPBR_PSIHB_INTERRUPT_CONTROL_INTERRUPT_SM_RESET chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[TP_TPBR_PSIHB_INTERRUPT_CONTROL_INTERRUPT_SM_RESET]
+
+//>> SET_[TP_TPBR_PSIHB_INTERRUPT_CONTROL_INTERRUPT_SM_RESET]
+static inline fapi2::buffer<uint64_t>& SET_TP_TPBR_PSIHB_INTERRUPT_CONTROL_INTERRUPT_SM_RESET(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TP_TPBR_PSIHB_INTERRUPT_CONTROL));
+#endif
+    return o_data.setBit<TP_TPBR_PSIHB_INTERRUPT_CONTROL_INTERRUPT_SM_RESET>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("2:scom_proc Invalid dial access TP_TPBR_PSIHB_INTERRUPT_CONTROL_INTERRUPT_SM_RESET chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[TP_TPBR_PSIHB_INTERRUPT_CONTROL_INTERRUPT_SM_RESET]
+
+//>> CLEAR_[TP_TPBR_PSIHB_INTERRUPT_CONTROL_INTERRUPT_SM_RESET]
+static inline fapi2::buffer<uint64_t>& CLEAR_TP_TPBR_PSIHB_INTERRUPT_CONTROL_INTERRUPT_SM_RESET(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TP_TPBR_PSIHB_INTERRUPT_CONTROL));
+#endif
+    return o_data.clearBit<TP_TPBR_PSIHB_INTERRUPT_CONTROL_INTERRUPT_SM_RESET>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("3:scom_proc Invalid dial access TP_TPBR_PSIHB_INTERRUPT_CONTROL_INTERRUPT_SM_RESET chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< CLEAR_[TP_TPBR_PSIHB_INTERRUPT_CONTROL_INTERRUPT_SM_RESET]
+
+//>> GET_[TP_TPBR_PSIHB_INTERRUPT_CONTROL_INTERRUPT_SM_RESET]
+static inline fapi2::buffer<uint64_t>& GET_TP_TPBR_PSIHB_INTERRUPT_CONTROL_INTERRUPT_SM_RESET(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TP_TPBR_PSIHB_INTERRUPT_CONTROL));
+#endif
+    return i_data.extractToRight<TP_TPBR_PSIHB_INTERRUPT_CONTROL_INTERRUPT_SM_RESET,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("4:scom_proc Invalid dial access TP_TPBR_PSIHB_INTERRUPT_CONTROL_INTERRUPT_SM_RESET chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[TP_TPBR_PSIHB_INTERRUPT_CONTROL_INTERRUPT_SM_RESET]
+
+//>> GET_[TP_TPBR_PSIHB_INTERRUPT_CONTROL_INTERRUPT_SM_RESET]
+static inline bool GET_TP_TPBR_PSIHB_INTERRUPT_CONTROL_INTERRUPT_SM_RESET(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(TP_TPBR_PSIHB_INTERRUPT_CONTROL));
+#endif
+    return i_data.getBit<TP_TPBR_PSIHB_INTERRUPT_CONTROL_INTERRUPT_SM_RESET>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("5:scom_proc Invalid dial access TP_TPBR_PSIHB_INTERRUPT_CONTROL_INTERRUPT_SM_RESET chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[TP_TPBR_PSIHB_INTERRUPT_CONTROL_INTERRUPT_SM_RESET]
 
 //>>THE END<<
 
