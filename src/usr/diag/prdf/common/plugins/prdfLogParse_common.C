@@ -57,6 +57,11 @@
 #include <hwas/common/hwasCallout.H>
 #include <netinet/in.h>
 
+// Portable formatting of uint64_t.  The ISO C99 standard requires
+// __STDC_FORMAT_MACROS to be defined in order for PRIx64 etc. to be defined.
+#define __STDC_FORMAT_MACROS
+#include <inttypes.h>
+
 //------------------------------------------------------------------------------
 // Data structures
 //------------------------------------------------------------------------------
@@ -500,8 +505,8 @@ bool parseCaptureData( void * i_buffer, uint32_t i_buflen,
                     memcpy( &tmpData2, &sigData[sz_unit32], sz_tmpData2 );
                 }
 
-                snprintf( sigDataString, 100, "(0x%016llX) 0x%08x 0x%08x",
-                          sigAddress, htonl(tmpData1), htonl(tmpData2) );
+                snprintf(sigDataString, 100, "(0x%016" PRIx64 ") 0x%08x 0x%08x",
+                         sigAddress, htonl(tmpData1), htonl(tmpData2) );
 
                 i_parser.PrintString( sigHeaderString, sigDataString );
             }

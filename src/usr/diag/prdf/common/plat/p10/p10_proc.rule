@@ -4171,17 +4171,17 @@ group gNX_CQ_FIR
     /** NX_CQ_FIR[0]
      *  PBI internal parity error
      */
-    (rNX_CQ_FIR, bit(0)) ? self_th_1;
+    (rNX_CQ_FIR, bit(0)) ? nx_th_1;
 
     /** NX_CQ_FIR[1]
      *  PowerBus CE error
      */
-    (rNX_CQ_FIR, bit(1)) ? self_th_32perDay;
+    (rNX_CQ_FIR, bit(1)) ? nx_th_32perDay;
 
     /** NX_CQ_FIR[2]
      *  PowerBus UE error
      */
-    (rNX_CQ_FIR, bit(2)) ? self_th_1;
+    (rNX_CQ_FIR, bit(2)) ? nx_th_1;
 
     /** NX_CQ_FIR[3]
      *  PowerBus SUE error
@@ -4191,12 +4191,12 @@ group gNX_CQ_FIR
     /** NX_CQ_FIR[4]
      *  Inbound array CE error
      */
-    (rNX_CQ_FIR, bit(4)) ? self_th_32perDay;
+    (rNX_CQ_FIR, bit(4)) ? nx_th_32perDay;
 
     /** NX_CQ_FIR[5]
      *  Inbound array UE error
      */
-    (rNX_CQ_FIR, bit(5)) ? self_th_1;
+    (rNX_CQ_FIR, bit(5)) ? nx_th_1;
 
     /** NX_CQ_FIR[6]
      *  Paste request rejected
@@ -4211,17 +4211,17 @@ group gNX_CQ_FIR
     /** NX_CQ_FIR[8]
      *  PowerBus read address error
      */
-    (rNX_CQ_FIR, bit(8)) ? self_th_1;
+    (rNX_CQ_FIR, bit(8)) ? nx_th_1;
 
     /** NX_CQ_FIR[9]
      *  PowerBus write address error
      */
-    (rNX_CQ_FIR, bit(9)) ? self_th_1;
+    (rNX_CQ_FIR, bit(9)) ? nx_th_1;
 
     /** NX_CQ_FIR[10]
      *  PowerBus miscellaneous error
      */
-    (rNX_CQ_FIR, bit(10)) ? self_th_1;
+    (rNX_CQ_FIR, bit(10)) ? nx_th_1;
 
     /** NX_CQ_FIR[11]
      *  MMIO BAR parity error
@@ -4231,7 +4231,7 @@ group gNX_CQ_FIR
     /** NX_CQ_FIR[12]
      *  UMAC detected SUE on WC Interrupt
      */
-    (rNX_CQ_FIR, bit(12)) ? self_th_1_SUE;
+    (rNX_CQ_FIR, bit(12)) ? nx_th_1_SUE;
 
     /** NX_CQ_FIR[13]
      *  ACK_DEAD cresp received by read command
@@ -4251,27 +4251,27 @@ group gNX_CQ_FIR
     /** NX_CQ_FIR[16]
      *  Hang poll time expired on internal transfer
      */
-    (rNX_CQ_FIR, bit(16)) ? self_th_1;
+    (rNX_CQ_FIR, bit(16)) ? nx_th_1;
 
     /** NX_CQ_FIR[17]
      *  Parity error on ERAT arrays
      */
-    (rNX_CQ_FIR, bit(17)) ? self_th_1;
+    (rNX_CQ_FIR, bit(17)) ? nx_th_1;
 
     /** NX_CQ_FIR[18]
      *  Correctable error on ERAT arrays
      */
-    (rNX_CQ_FIR, bit(18)) ? self_th_32perDay;
+    (rNX_CQ_FIR, bit(18)) ? nx_th_32perDay;
 
     /** NX_CQ_FIR[19]
      *  Uncorrectable error on ERAT arrays
      */
-    (rNX_CQ_FIR, bit(19)) ? self_th_1;
+    (rNX_CQ_FIR, bit(19)) ? nx_th_1;
 
     /** NX_CQ_FIR[20]
      *  Special uncorrectable error on ERAT arrays
      */
-    (rNX_CQ_FIR, bit(20)) ? self_th_1_SUE;
+    (rNX_CQ_FIR, bit(20)) ? nx_th_1_SUE;
 
     /** NX_CQ_FIR[21]
      *  Hang on checkin/checkout request to NMMU
@@ -4281,17 +4281,17 @@ group gNX_CQ_FIR
     /** NX_CQ_FIR[22]
      *  ERAT control logic error
      */
-    (rNX_CQ_FIR, bit(22)) ? self_th_1;
+    (rNX_CQ_FIR, bit(22)) ? nx_th_1;
 
     /** NX_CQ_FIR[23]
      *  Uncorrectable error on the Powerbus data for xlate
      */
-    (rNX_CQ_FIR, bit(23)) ? self_th_1;
+    (rNX_CQ_FIR, bit(23)) ? nx_th_1;
 
     /** NX_CQ_FIR[24]
      *  Special uncorrectable error on the Powerbus data f
      */
-    (rNX_CQ_FIR, bit(24)) ? self_th_1_SUE;
+    (rNX_CQ_FIR, bit(24)) ? nx_th_1_SUE;
 
     /** NX_CQ_FIR[25]
      *  ACK_DEAD cresp received by UMAC read command
@@ -4306,17 +4306,17 @@ group gNX_CQ_FIR
     /** NX_CQ_FIR[27]
      *  Uncorrectable error on CRB QW0/4
      */
-    (rNX_CQ_FIR, bit(27)) ? self_th_1;
+    (rNX_CQ_FIR, bit(27)) ? nx_th_1;
 
     /** NX_CQ_FIR[28]
      *  Special uncorrectable error on CRB QW0/4
      */
-    (rNX_CQ_FIR, bit(28)) ? self_th_1_SUE;
+    (rNX_CQ_FIR, bit(28)) ? nx_th_1_SUE;
 
     /** NX_CQ_FIR[29]
      *  UMAC has detected a control logic error
      */
-    (rNX_CQ_FIR, bit(29)) ? self_th_1;
+    (rNX_CQ_FIR, bit(29)) ? nx_th_1;
 
     /** NX_CQ_FIR[30]
      *  Other SCOM satellite parity error
@@ -4331,32 +4331,32 @@ group gNX_CQ_FIR
     /** NX_CQ_FIR[32]
      *  A first noise source in the RNG has failed
      */
-    (rNX_CQ_FIR, bit(32)) ? self_th_32perDay;
+    (rNX_CQ_FIR, bit(32)) ? nx_th_32perDay;
 
     /** NX_CQ_FIR[33]
      *  A second noise source in the RNG has failed
      */
-    (rNX_CQ_FIR, bit(33)) ? self_th_32perDay;
+    (rNX_CQ_FIR, bit(33)) ? nx_th_32perDay;
 
     /** NX_CQ_FIR[34]
      *  RNG has detected a control logic error
      */
-    (rNX_CQ_FIR, bit(34)) ? self_th_1;
+    (rNX_CQ_FIR, bit(34)) ? nx_th_1;
 
     /** NX_CQ_FIR[35]
      *  NMMU has signaled local checkstop
      */
-    (rNX_CQ_FIR, bit(35)) ? self_th_1;
+    (rNX_CQ_FIR, bit(35)) ? nx_th_1;
 
     /** NX_CQ_FIR[36]
      *  VAS has signaled local checkstop
      */
-    (rNX_CQ_FIR, bit(36)) ? self_th_1;
+    (rNX_CQ_FIR, bit(36)) ? nx_th_1;
 
     /** NX_CQ_FIR[37]
      *  PBCQ has detected a control logic error
      */
-    (rNX_CQ_FIR, bit(37)) ? self_th_1;
+    (rNX_CQ_FIR, bit(37)) ? nx_th_1;
 
     /** NX_CQ_FIR[38]
      *  PBCQ has detected a failed link on an interrupt
@@ -4366,7 +4366,7 @@ group gNX_CQ_FIR
     /** NX_CQ_FIR[39]
      *  UMAC has detected an SUE on interrupt address
      */
-    (rNX_CQ_FIR, bit(39)) ? self_th_1_SUE;
+    (rNX_CQ_FIR, bit(39)) ? nx_th_1_SUE;
 
     /** NX_CQ_FIR[40]
      *  SMF error
@@ -4401,12 +4401,12 @@ group gNX_DMA_ENG_FIR
     /** NX_DMA_ENG_FIR[0]
      *  DMA hang timer expired
      */
-    (rNX_DMA_ENG_FIR, bit(0)) ? self_th_1;
+    (rNX_DMA_ENG_FIR, bit(0)) ? nx_th_1;
 
     /** NX_DMA_ENG_FIR[1]
      *  SHM invalid state
      */
-    (rNX_DMA_ENG_FIR, bit(1)) ? self_th_1;
+    (rNX_DMA_ENG_FIR, bit(1)) ? nx_th_1;
 
     /** NX_DMA_ENG_FIR[2]
      *  Reserved
@@ -4421,22 +4421,22 @@ group gNX_DMA_ENG_FIR
     /** NX_DMA_ENG_FIR[4]
      *  Channel 0 842 engine ECC CE
      */
-    (rNX_DMA_ENG_FIR, bit(4)) ? self_th_32perDay;
+    (rNX_DMA_ENG_FIR, bit(4)) ? nx_th_32perDay;
 
     /** NX_DMA_ENG_FIR[5]
      *  Channel 0 842 engine ECC UE
      */
-    (rNX_DMA_ENG_FIR, bit(5)) ? self_th_1;
+    (rNX_DMA_ENG_FIR, bit(5)) ? nx_th_1;
 
     /** NX_DMA_ENG_FIR[6]
      *  Channel 1 842 engine ECC CE
      */
-    (rNX_DMA_ENG_FIR, bit(6)) ? self_th_32perDay;
+    (rNX_DMA_ENG_FIR, bit(6)) ? nx_th_32perDay;
 
     /** NX_DMA_ENG_FIR[7]
      *  Channel 1 842 engine ECC UE
      */
-    (rNX_DMA_ENG_FIR, bit(7)) ? self_th_1;
+    (rNX_DMA_ENG_FIR, bit(7)) ? nx_th_1;
 
     /** NX_DMA_ENG_FIR[8]
      *  DMA Non-zero CSB CC detected
@@ -4446,27 +4446,27 @@ group gNX_DMA_ENG_FIR
     /** NX_DMA_ENG_FIR[9]
      *  DMA array ECC CE
      */
-    (rNX_DMA_ENG_FIR, bit(9)) ? self_th_32perDay;
+    (rNX_DMA_ENG_FIR, bit(9)) ? nx_th_32perDay;
 
     /** NX_DMA_ENG_FIR[10]
      *  DMA outbound write/inbound read ECC CE
      */
-    (rNX_DMA_ENG_FIR, bit(10)) ? self_th_32perDay;
+    (rNX_DMA_ENG_FIR, bit(10)) ? nx_th_32perDay;
 
     /** NX_DMA_ENG_FIR[11]
      *  Channel 4 GZIP ECC CE
      */
-    (rNX_DMA_ENG_FIR, bit(11)) ? self_th_32perDay;
+    (rNX_DMA_ENG_FIR, bit(11)) ? nx_th_32perDay;
 
     /** NX_DMA_ENG_FIR[12]
      *  Channel 4 GZIP ECC UE
      */
-    (rNX_DMA_ENG_FIR, bit(12)) ? self_th_1;
+    (rNX_DMA_ENG_FIR, bit(12)) ? nx_th_1;
 
     /** NX_DMA_ENG_FIR[13]
      *  Channel 4 GZIP ECC PE
      */
-    (rNX_DMA_ENG_FIR, bit(13)) ? self_th_1;
+    (rNX_DMA_ENG_FIR, bit(13)) ? nx_th_1;
 
     /** NX_DMA_ENG_FIR[14]
      *  Error from other SCOM satellites
@@ -4476,22 +4476,22 @@ group gNX_DMA_ENG_FIR
     /** NX_DMA_ENG_FIR[15]
      *  DMA invalid state error (unrecoverable)
      */
-    (rNX_DMA_ENG_FIR, bit(15)) ? self_th_1;
+    (rNX_DMA_ENG_FIR, bit(15)) ? nx_th_1;
 
     /** NX_DMA_ENG_FIR[16]
      *  DMA invalid state error (unrecoverable)
      */
-    (rNX_DMA_ENG_FIR, bit(16)) ? self_th_1;
+    (rNX_DMA_ENG_FIR, bit(16)) ? nx_th_1;
 
     /** NX_DMA_ENG_FIR[17]
      *  DMA array ECC UE
      */
-    (rNX_DMA_ENG_FIR, bit(17)) ? self_th_1;
+    (rNX_DMA_ENG_FIR, bit(17)) ? nx_th_1;
 
     /** NX_DMA_ENG_FIR[18]
      *  DMA outbound write/inbound read ECC UE
      */
-    (rNX_DMA_ENG_FIR, bit(18)) ? self_th_1;
+    (rNX_DMA_ENG_FIR, bit(18)) ? nx_th_1;
 
     /** NX_DMA_ENG_FIR[19]
      *  DMA inbound read error
@@ -4501,27 +4501,27 @@ group gNX_DMA_ENG_FIR
     /** NX_DMA_ENG_FIR[20]
      *  Channel 0 842 invalid state error
      */
-    (rNX_DMA_ENG_FIR, bit(20)) ? self_th_1;
+    (rNX_DMA_ENG_FIR, bit(20)) ? nx_th_1;
 
     /** NX_DMA_ENG_FIR[21]
      *  Channel 1 842 invalid state error
      */
-    (rNX_DMA_ENG_FIR, bit(21)) ? self_th_1;
+    (rNX_DMA_ENG_FIR, bit(21)) ? nx_th_1;
 
     /** NX_DMA_ENG_FIR[22]
      *  Channel 2 SYM invalid state error
      */
-    (rNX_DMA_ENG_FIR, bit(22)) ? self_th_1;
+    (rNX_DMA_ENG_FIR, bit(22)) ? nx_th_1;
 
     /** NX_DMA_ENG_FIR[23]
      *  Channel 3 SYM invalid state error
      */
-    (rNX_DMA_ENG_FIR, bit(23)) ? self_th_1;
+    (rNX_DMA_ENG_FIR, bit(23)) ? nx_th_1;
 
     /** NX_DMA_ENG_FIR[24]
      *  Channel 4 GZIP invalid state error
      */
-    (rNX_DMA_ENG_FIR, bit(24)) ? self_th_1;
+    (rNX_DMA_ENG_FIR, bit(24)) ? nx_th_1;
 
     /** NX_DMA_ENG_FIR[25]
      *  Reserved
@@ -4556,12 +4556,12 @@ group gNX_DMA_ENG_FIR
     /** NX_DMA_ENG_FIR[31]
      *  UE error on CRB QW0 or QW4 FIR bit
      */
-    (rNX_DMA_ENG_FIR, bit(31)) ? self_th_1;
+    (rNX_DMA_ENG_FIR, bit(31)) ? nx_th_1;
 
     /** NX_DMA_ENG_FIR[32]
      *  SUE error on CRB QW0 or QW4 FIR bit
      */
-    (rNX_DMA_ENG_FIR, bit(32)) ? self_th_1_SUE;
+    (rNX_DMA_ENG_FIR, bit(32)) ? nx_th_1_SUE;
 
     /** NX_DMA_ENG_FIR[33]
      *  SUE error on something other than CRB QW0 or QW4
@@ -4571,32 +4571,32 @@ group gNX_DMA_ENG_FIR
     /** NX_DMA_ENG_FIR[34]
      *  Channel 0 842 watchdog timer expired
      */
-    (rNX_DMA_ENG_FIR, bit(34)) ? self_th_32perDay;
+    (rNX_DMA_ENG_FIR, bit(34)) ? nx_th_32perDay;
 
     /** NX_DMA_ENG_FIR[35]
      *  Channel 1 842 watchdog timer expired
      */
-    (rNX_DMA_ENG_FIR, bit(35)) ? self_th_32perDay;
+    (rNX_DMA_ENG_FIR, bit(35)) ? nx_th_32perDay;
 
     /** NX_DMA_ENG_FIR[36]
      *  Channel 2 SYM watchdog timer expired
      */
-    (rNX_DMA_ENG_FIR, bit(36)) ? self_th_32perDay;
+    (rNX_DMA_ENG_FIR, bit(36)) ? nx_th_32perDay;
 
     /** NX_DMA_ENG_FIR[37]
      *  Channel 3 SYM watchdog timer expired
      */
-    (rNX_DMA_ENG_FIR, bit(37)) ? self_th_32perDay;
+    (rNX_DMA_ENG_FIR, bit(37)) ? nx_th_32perDay;
 
     /** NX_DMA_ENG_FIR[38]
      *  Hypervisor local checkstop
      */
-    (rNX_DMA_ENG_FIR, bit(38)) ? self_th_1;
+    (rNX_DMA_ENG_FIR, bit(38)) ? nx_th_1;
 
     /** NX_DMA_ENG_FIR[39]
      *  Channel 4 GZIP watchdog timer expired
      */
-    (rNX_DMA_ENG_FIR, bit(39)) ? self_th_32perDay;
+    (rNX_DMA_ENG_FIR, bit(39)) ? nx_th_32perDay;
 
     /** NX_DMA_ENG_FIR[40]
      *  Reserved
