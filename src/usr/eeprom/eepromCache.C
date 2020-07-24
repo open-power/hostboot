@@ -155,7 +155,7 @@ void eepromInit(errlHndl_t & io_rtaskReturnErrl)
         // if nothing has been cached before then version should
         // be set to be the latest version of the struct available
         l_eecacheSectionHeaderPtr->version = EECACHE_VERSION_LATEST;
-        TRACDCOMP( g_trac_eeprom,
+        TRACSSCOMP( g_trac_eeprom,
                 "eepromInit() Found Empty Cache, set version of cache structure to be 0x%.02x",
                 EECACHE_VERSION_LATEST);
     }
@@ -238,7 +238,7 @@ errlHndl_t flushToPnor(void * i_vaddr, uint64_t i_size)
          * @reasoncode   EEPROM_FAILED_TO_FLUSH_PAGE
          * @userdata1    Requested Address
          * @userdata2    rc from mm_remove_pages
-         * @devdesc      cacheEeprom mm_remove_pages FLUSH failed
+         * @devdesc      flushToPnor mm_remove_pages FLUSH failed
          */
         l_errl = new ERRORLOG::ErrlEntry(
                 ERRORLOG::ERRL_SEV_UNRECOVERABLE,
@@ -371,6 +371,7 @@ errlHndl_t updateEecacheContents(TARGETING::Target*          i_target,
 
         if(l_errl)
         {
+            TRACFCOMP(g_trac_eeprom, ERR_MRK"updateEecacheContents(): Failed to flush write to PNOR");
             break;
         }
 
@@ -431,7 +432,7 @@ bool updateCacheMap(TARGETING::Target  *       i_target,
                 reinterpret_cast<uint64_t>(i_recordFromPnorToUpdate)))
     {
         TRACSSCOMP(g_trac_eeprom,
-                "cacheEeprom() Eeprom w/ Role %d, HUID 0x%.08X added to the global map of cached eeproms",
+                "updateCacheMap() Eeprom w/ Role %d, HUID 0x%.08X added to the global map of cached eeproms",
                 i_eepromType , TARGETING::get_huid(i_target));
     }
     else
@@ -445,7 +446,7 @@ bool updateCacheMap(TARGETING::Target  *       i_target,
             HWAS::markTargetChanged(i_target);
         }
         TRACSSCOMP(g_trac_eeprom,
-                "cacheEeprom() Eeprom w/ Role %d, HUID 0x%.08X already in global map of cached eeproms",
+                "updateCacheMap() Eeprom w/ Role %d, HUID 0x%.08X already in global map of cached eeproms",
                 i_eepromType, TARGETING::get_huid(i_target));
 
         // Cache entry has already been updated via another target
@@ -488,6 +489,10 @@ errlHndl_t updateEecacheHeader(
 
     l_errl = flushToPnor(io_pnorRecordToUpdate,
                          sizeof(eepromRecordHeader));
+    if (l_errl)
+    {
+        TRACFCOMP(g_trac_eeprom, ERR_MRK"updateEecacheHeader(): Failed to flush write to PNOR");
+    }
 
     return l_errl;
 }
@@ -727,7 +732,7 @@ errlHndl_t checkForEecacheEntryUpdate(
             }
             else
             {
-                TRACFCOMP(g_trac_eeprom, "cacheEeprom() - 0x%.8X target w/ %d eepromRole - eeprom is out of sync",
+                TRACFCOMP(g_trac_eeprom, "checkForEecacheEntryUpdate() - 0x%.8X target w/ %d eepromRole - eeprom is out of sync",
                         TARGETING::get_huid(i_target), i_eepromType);
             }
         }
@@ -1006,7 +1011,7 @@ errlHndl_t findEepromHeaderInPnorEecache(
             // Case 2: There is an open slot for the new cache entry. The caller
             // can verify that the same way that was done here and handle it.
             TRACFCOMP(g_trac_eeprom,
-                    "cacheEeprom() - no eecache record in PNOR found for "
+                    "findEepromHeaderInPnorEecache() - no eecache record in PNOR found for "
                     "%s %.8X target w/ eepromRole = %d -> empty slot %d",
                     i_present ? "present" : "non-present",
                     TARGETING::get_huid(i_target), i_eepromType, i);
@@ -1083,7 +1088,7 @@ errlHndl_t findEepromHeaderInPnorEecache(
             }
 
             TRACSSCOMP(g_trac_eeprom,
-                    "cacheEeprom() already found copy for eeprom role %d "
+                    "findEepromHeaderInPnorEecache() already found copy for eeprom role %d "
                     "for target w/ HUID 0x%08X in EECACHE table of contents"
                     " at 0x%X internal address",
                     i_eepromType, TARGETING::get_huid(i_target),
@@ -1319,7 +1324,7 @@ errlHndl_t genericEepromCache(DeviceFW::OperationType i_opType,
        io_buflen == 0)
     {
           TRACFCOMP(g_trac_eeprom,
-                    ERR_MRK"cacheEeprom: We were told to cache an empty buffer at %p for 0x%.08X role %d  ",
+                    ERR_MRK"genericEepromCache: We were told to cache an empty buffer at %p for 0x%.08X role %d  ",
                     io_buffer, TARGETING::get_huid(i_target), l_eepromType );
           /*@
           * @errortype    ERRORLOG::ERRL_SEV_PREDICTIVE
@@ -1392,7 +1397,7 @@ errlHndl_t setIsValidCacheEntry(const TARGETING::Target * i_target,
 
     do{
 
-        TRACDCOMP( g_trac_eeprom, ENTER_MRK"setIsValidCacheEntry() "
+        TRACSSCOMP( g_trac_eeprom, ENTER_MRK"setIsValidCacheEntry() "
                     "Target HUID 0x%.08X  Eeprom Role = %d  Enter",
                     TARGETING::get_huid(i_target), l_eepromInfo.eepromRole);
 
@@ -1418,7 +1423,7 @@ errlHndl_t setIsValidCacheEntry(const eepromRecordHeader& i_eepromRecordHeader, 
 
     do{
 
-        TRACDCOMP( g_trac_eeprom, ENTER_MRK"setIsValidCacheEntry(%d)", i_isValid);
+        TRACSSCOMP( g_trac_eeprom, ENTER_MRK"setIsValidCacheEntry(%d)", i_isValid);
 
         // Find the address of the header entry in the table of contents of the EECACHE pnor section
         l_eepromRecordHeaderToUpdate =
@@ -1493,29 +1498,13 @@ errlHndl_t setIsValidCacheEntry(const eepromRecordHeader& i_eepromRecordHeader, 
           getEepromHeaderUserData(i_eepromRecordHeader), i_isValid);
         l_eepromRecordHeaderToUpdate->completeRecord.cached_copy_valid = i_isValid;
 
-        // Flush the page to make sure it gets to the PNOR
-        int rc = mm_remove_pages( FLUSH,
-                                  l_eepromRecordHeaderToUpdate,
-                                  sizeof(eepromRecordHeader) );
-        if( rc )
+        l_errl = flushToPnor(l_eepromRecordHeaderToUpdate,
+                             sizeof(eepromRecordHeader));
+
+        if(l_errl)
         {
             TRACFCOMP(g_trac_eeprom,
-                      ERR_MRK"setIsValidCacheEntry:  Error from mm_remove_pages trying for flush header write to pnor, rc=%d",rc);
-            /*@
-            * @errortype
-            * @moduleid     EEPROM_INVALIDATE_CACHE
-            * @reasoncode   EEPROM_FAILED_TO_FLUSH_HEADER
-            * @userdata1    Requested Address
-            * @userdata2    rc from mm_remove_pages
-            * @devdesc      invalidateCache mm_remove_pages FLUSH failed
-            */
-            l_errl = new ERRORLOG::ErrlEntry(
-                            ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                            EEPROM_INVALIDATE_CACHE,
-                            EEPROM_FAILED_TO_FLUSH_HEADER,
-                            (uint64_t)l_eepromRecordHeaderToUpdate,
-                            TO_UINT64(rc),
-                            ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+                      ERR_MRK"setIsValidCacheEntry:  Error trying to flush header write to pnor");
             break;
         }
 
@@ -2055,7 +2044,6 @@ errlHndl_t isEepromInSync(TARGETING::Target * i_target,
             }
         }
 
-        // Enable this once reading seeproms is supported
         l_errl = VPD::ensureEepromCacheIsInSync(i_target,
                                                 l_eepromContentType,
                                                 o_isInSync);
@@ -2170,26 +2158,14 @@ errlHndl_t clearEecache(eecacheSectionHeader * i_eecacheSectionHeaderPtr,
             memset( l_internalSectionAddr, 0xFF, (l_recordHeaderToUpdate->completeRecord.cache_copy_size * KILOBYTE));
 
             // Flush the cleared page to make sure it gets to the PNOR
-            int rc = mm_remove_pages( FLUSH, l_internalSectionAddr, (l_recordHeaderToUpdate->completeRecord.cache_copy_size * KILOBYTE) );
-            if( rc )
+            l_errl = flushToPnor(l_internalSectionAddr,
+                                (l_recordHeaderToUpdate->completeRecord.cache_copy_size * KILOBYTE));
+            if(l_errl)
             {
-                TRACFCOMP( g_trac_eeprom,ERR_MRK"clearEepromCache:  Error from mm_remove_pages trying for flush contents write (PNOR address %p, length %lld) to pnor! rc=%d",
-                    l_internalSectionAddr, (l_recordHeaderToUpdate->completeRecord.cache_copy_size * KILOBYTE), rc );
-                /*@
-                * @errortype    ERRL_SEV_UNRECOVERABLE
-                * @moduleid     EEPROM_CLEAR_EECACHE
-                * @reasoncode   EEPROM_FAILED_TO_FLUSH_CONTENTS
-                * @userdata1    Requested Address in PNOR
-                * @userdata2    rc from mm_remove_pages
-                * @devdesc      cacheEeprom mm_remove_pages FLUSH failed
-                */
-                l_errl = new ERRORLOG::ErrlEntry(
-                                ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                EEPROM_CLEAR_EECACHE,
-                                EEPROM_FAILED_TO_FLUSH_CONTENTS,
-                                (uint64_t)l_internalSectionAddr,
-                                TO_UINT64(rc),
-                                ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+                TRACFCOMP(g_trac_eeprom,
+                          ERR_MRK"clearEepromCache(): "
+                          "Error from mm_remove_pages trying for flush contents write (PNOR address %p, length %lld) to pnor!",
+                          l_internalSectionAddr, (l_recordHeaderToUpdate->completeRecord.cache_copy_size * KILOBYTE));
                 break;
             }
 
@@ -2197,28 +2173,13 @@ errlHndl_t clearEecache(eecacheSectionHeader * i_eecacheSectionHeaderPtr,
             l_recordHeaderToUpdate->completeRecord.cached_copy_valid = 0;
 
             // Flush the page to make sure it gets to the PNOR
-            rc = mm_remove_pages( FLUSH,
-                                  l_recordHeaderToUpdate,
-                                  sizeof(eepromRecordHeader) );
-            if( rc )
+            l_errl = flushToPnor(l_recordHeaderToUpdate,
+                                  sizeof(eepromRecordHeader));
+            if(l_errl)
             {
                 TRACFCOMP(g_trac_eeprom,
-                          ERR_MRK"clearEepromCache:  Error from mm_remove_pages trying for flush header write to pnor, rc=%d",rc);
-                /*@
-                * @errortype    ERRL_SEV_UNRECOVERABLE
-                * @moduleid     EEPROM_CLEAR_EECACHE
-                * @reasoncode   EEPROM_FAILED_TO_FLUSH_HEADER
-                * @userdata1    Requested Address
-                * @userdata2    rc from mm_remove_pages
-                * @devdesc      clearEepromCache() header mm_remove_pages FLUSH failed
-                */
-                l_errl = new ERRORLOG::ErrlEntry(
-                                ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                EEPROM_CLEAR_EECACHE,
-                                EEPROM_FAILED_TO_FLUSH_HEADER,
-                                (uint64_t)l_recordHeaderToUpdate,
-                                TO_UINT64(rc),
-                                ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+                          ERR_MRK"clearEepromCache(): "
+                          "Error from mm_remove_pages trying for flush header write to pnor");
                 break;
             }
 
