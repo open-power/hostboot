@@ -246,7 +246,7 @@
   <valueType>uint64</valueType>
   <platInit/>
   <mrwHide/>
-  <default>0X00000302031D0000</default>
+  <default>0x00000302031D0000</default>
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
