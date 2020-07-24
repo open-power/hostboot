@@ -68,6 +68,7 @@ static const char* IOHS_3 = "IOHS3";
 static const char* IOHS_4 = "IOHS4";
 static const char* IOHS_5 = "IOHS5";
 static const char* IOHS_6 = "IOHS6";
+static const char* IOHS_7 = "IOHS7";
 //******************************************************************************
 //TodTopologyManager::TodTopologyManager
 //******************************************************************************
@@ -523,8 +524,9 @@ void TodTopologyManager::dumpTopology() const
     busnames[TOD_SETUP_BUS_IOHS2] = IOHS_2;
     busnames[TOD_SETUP_BUS_IOHS3] = IOHS_3;
     busnames[TOD_SETUP_BUS_IOHS4] = IOHS_4;
-    busnames[TOD_SETUP_BUS_IOHS0] = IOHS_5;
-    busnames[TOD_SETUP_BUS_IOHS0] = IOHS_6;
+    busnames[TOD_SETUP_BUS_IOHS5] = IOHS_5;
+    busnames[TOD_SETUP_BUS_IOHS6] = IOHS_6;
+    busnames[TOD_SETUP_BUS_IOHS7] = IOHS_7;
 
     static const char* topologynames[2] = {0};
     topologynames[TOD_PRIMARY] = TOD_PRIMARY_TOPOLOGY;
