@@ -40,6 +40,7 @@
 #include    <targeting/common/utilFilter.H>
 #include    <devicefw/userif.H>
 #include    <vpd/spdenums.H>
+#include    <util/misc.H>
 
 
 namespace   ISTEP_07
@@ -132,12 +133,18 @@ void*    host_mss_attr_cleanup( void *io_pArgs )
     //  Setup any dynamic attributes
 
     // Replicate HB memory mirroring policy into HWP policy
-    // Default to non mirror (so if tryGet fails just keep going)
-    Target* l_pTopLevel = NULL;
-    TARGETING::targetService().getTopLevelTarget(l_pTopLevel);
-    TARGETING::ATTR_PAYLOAD_IN_MIRROR_MEM_type l_mirror = 0x0;
-    l_pTopLevel->tryGetAttr<TARGETING::ATTR_PAYLOAD_IN_MIRROR_MEM>
-      (l_mirror);
+    Target* l_pTopLevel = UTIL::assertGetToplevelTarget();
+    auto l_mirror = l_pTopLevel->getAttr<TARGETING::ATTR_PAYLOAD_IN_MIRROR_MEM>();
+
+    // In Simics mode disable memory mirroring for now
+    // TODO RTC: 215700 to enable it back for P10 Sim
+    if(Util::isSimicsRunning())
+    {
+        l_mirror = false;
+        l_pTopLevel->setAttr<ATTR_PAYLOAD_IN_MIRROR_MEM>(0);
+        TRACFCOMP(g_trac_isteps_trace,
+                  INFO_MRK "Disabling memory mirroring temporarily");
+    }
 
     if(l_mirror)
     {

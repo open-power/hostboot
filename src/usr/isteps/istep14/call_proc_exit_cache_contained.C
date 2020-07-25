@@ -171,18 +171,6 @@ void* call_proc_exit_cache_contained (void *io_pArgs)
             l_mirrored = l_sys->getAttr<ATTR_PAYLOAD_IN_MIRROR_MEM>();
         }
 
-        // In Simics mode disable memory mirroring for now
-        // TODO RTC: 215700 to enable it back for P10 Sim
-        if(Util::isSimicsRunning())
-        {
-            l_mirrored = false;
-
-            l_sys->setAttr<ATTR_PAYLOAD_IN_MIRROR_MEM>(0);
-
-            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                              "Disabling memory mirroring temporarily");
-        }
-
         if(l_mirrored)
         {
 //TODO RTC: 215700 Enable Memory Mirroring
