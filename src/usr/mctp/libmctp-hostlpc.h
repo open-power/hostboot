@@ -43,7 +43,7 @@ extern "C" {
 #define BMC_EID 8
 #define HOST_EID 9
 
-#define HOST_DESIRED_MTU 8192
+#define HOST_DESIRED_MTU 32768
 
 
 struct mctp_binding_hostlpc {

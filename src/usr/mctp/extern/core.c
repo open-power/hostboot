@@ -230,7 +230,7 @@ static int mctp_msg_ctx_add_pkt(struct mctp_msg_ctx *ctx,
 
     /* @todo: finer-grained allocation, size limits */
     if (!ctx->buf_alloc_size) {
-      new_alloc_size = 8192;
+      new_alloc_size = 32768;
     } else {
       new_alloc_size = ctx->buf_alloc_size * 2;
     }
