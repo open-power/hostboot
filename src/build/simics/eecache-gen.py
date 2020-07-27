@@ -113,10 +113,10 @@ def hb_eecache_setup(file_name, version, verbose):
             # for DIMM port 1
             write_eecache_record_v1(f, 0x50001, 8, 3, 0xA0, 0xFF, 4,  0x23357, 0x80);
 
-            # Note: These max eeprom counts come from src/include/usr/eeprom/eeprom_const.H
+            # Note: The max eeprom counts come from src/include/usr/eeprom/eeprom_const.H
             # For version 1, it is currently a max count of 50
             # Given 6 records already filled out above, 44 more record headers
-            # can be filled out as empty
+            # should be filled out as empty
             for _ in range(44):
                 write_eecache_record_v1(f, 0, 0, 0, 0, 0, 0, 0xFFFFFFFF, 0);
 
@@ -124,19 +124,24 @@ def hb_eecache_setup(file_name, version, verbose):
             # version, written in 1 byte. Supports version 2, i.e. I2C and SPI entries
             f.write(struct.pack('>B', 2));
             # end of cache, written in 4 bytes
-            f.write(struct.pack('>i', 0x1270D));
+            # it's offset (0x1270D bytes) + size (160 KB) of the last entry
+            f.write(struct.pack('>i', 0x3A70D));
             # eepromRecordHeader for MVPD
+            # valid arg.: 0xC0 means valid and master record
             write_spi_eecache_record(f, 0x50000, 0x02, 0x00C0, 64, 0x70D, 0xC0);
             # for DIMM port 0
             write_i2c_eecache_record(f, 0x50000, 0, 3, 0xA0, 0xFF, 4, 0x1070D, 0xC0);
             # for DIMM port 1
             write_i2c_eecache_record(f, 0x50000, 1, 3, 0xA0, 0xFF, 4, 0x1170D, 0xC0);
+            # for WOF
+            # valid arg.: 0x80 means is valid but not master record
+            write_spi_eecache_record(f, 0x50000, 0x03, 0x0100, 160, 0x1270D, 0x80);
 
-            # Note: These max eeprom counts come from src/include/usr/eeprom/eeprom_const.H
+            # Note: The max eeprom counts come from src/include/usr/eeprom/eeprom_const.H
             # For version 2, it is currently a max count of 100
-            # Given 3 records already filled out above, 97 more record headers
-            # can be filled out as empty
-            for _ in range(97):
+            # Given 4 records already filled out above, 96 more record headers
+            # should be filled out as empty
+            for _ in range(96):
                 write_i2c_eecache_record(f, 0, 0, 0, 0, 0, 0, 0xFFFFFFFF, 0);
         else:
             # Non-supported version argument
@@ -177,6 +182,15 @@ def hb_eecache_setup(file_name, version, verbose):
         read_buf = image.iface.image.get(0, image.size) # interface takes start and length
 
         # Probably this file will be deleted once we write to BMC
+        with open(file_name, 'ab') as f:
+            f.write(read_buf)
+
+    # add 160K WOF record for processor 0
+    ret = cli.run_command("get-seeprom 0 0 3") # get ref to seeprom that has WOF for proc 0
+    if ret != None:
+        image = simics.SIM_get_object(ret)
+        # WOF data is at offset 0x40000 bytes in SEEPROM, and has a size of 0x28000 bytes
+        read_buf = image.iface.image.get(0x40000, 0x28000)
         with open(file_name, 'ab') as f:
             f.write(read_buf)
 
