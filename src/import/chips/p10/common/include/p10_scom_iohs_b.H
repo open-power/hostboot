@@ -73,6 +73,14 @@ static const uint32_t ATOMIC_LOCK_REG_ACTIVITY_LEN = 8;
 //<< [ATOMIC_LOCK_REG]
 // iohs/reg00046.H
 
+//>> [DLX_CONFIG]
+static const uint64_t DLX_CONFIG = 0x18011031ull;
+
+static const uint32_t DLX_CONFIG_CFG_DLX1 = 0;
+static const uint32_t DLX_CONFIG_CFG_DLX1_LEN = 32;
+//<< [DLX_CONFIG]
+// iohs/reg00046.H
+
 //>>THE END<<
 
 #ifndef __PPE_HCODE__

@@ -30,6 +30,8 @@
       exp_omi_train_check did not see expected trained status from OCMB DL0 status register
     </description>
     <ffdc>OCMB_TARGET</ffdc>
+    <ffdc>OMIC_TARGET</ffdc>
+    <ffdc>OMI_TARGET</ffdc>
     <ffdc>EXPECTED_SM_STATE</ffdc>
     <ffdc>ACTUAL_SM_STATE</ffdc>
     <ffdc>DL0_STATUS</ffdc>
@@ -37,6 +39,16 @@
     <ffdc>DL0_CONFIG1</ffdc>
     <ffdc>DL0_ERROR_HOLD</ffdc>
     <ffdc>OMI_FREQ</ffdc>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_EXP_OMI_TRAIN_ERR_INFO</id>
+      <target>OCMB_TARGET</target>
+      <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+    </collectRegisterFfdc>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_MC_OMI_TRAIN_ERR_INFO</id>
+      <target>OMIC_TARGET</target>
+      <targetType>TARGET_TYPE_OMIC</targetType>
+    </collectRegisterFfdc>
     <callout>
         <target>OCMB_TARGET</target>
         <priority>HIGH</priority>

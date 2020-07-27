@@ -112,6 +112,16 @@ static const uint32_t ERROR_ACTION_0_ACTION_LEN = 4;
 //<< [ERROR_ACTION]
 // omi/reg00022.H
 
+//>> [DLX_CONFIG]
+static const uint64_t DLX_CONFIG = 0x0c011418ull;
+
+static const uint32_t DLX_CONFIG_CFG_DLX0 = 32;
+static const uint32_t DLX_CONFIG_CFG_DLX0_LEN = 32;
+static const uint32_t DLX_CONFIG_CFG_DLX1 = 32;
+static const uint32_t DLX_CONFIG_CFG_DLX1_LEN = 32;
+//<< [DLX_CONFIG]
+// omi/reg00022.H
+
 //>>THE END<<
 
 #ifndef __PPE_HCODE__

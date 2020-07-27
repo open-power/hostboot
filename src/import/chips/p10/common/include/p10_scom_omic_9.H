@@ -39,6 +39,23 @@ namespace omic
 #endif
 
 
+//>> [PMU_CNTR]
+//ERRCODE: // Some of the name targets not found in address targets: omic
+// No targets could be determined from the address.
+
+static const uint64_t PMU_CNTR = 0x0c01140full;
+
+static const uint32_t PMU_CNTR_3 = 0;
+static const uint32_t PMU_CNTR_3_LEN = 16;
+static const uint32_t PMU_CNTR_2 = 16;
+static const uint32_t PMU_CNTR_2_LEN = 16;
+static const uint32_t PMU_CNTR_1 = 32;
+static const uint32_t PMU_CNTR_1_LEN = 16;
+static const uint32_t PMU_CNTR_0 = 48;
+static const uint32_t PMU_CNTR_0_LEN = 16;
+//<< [PMU_CNTR]
+// omic/reg00009.H
+
 //>>THE END<<
 
 #ifndef __PPE_HCODE__

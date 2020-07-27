@@ -55,6 +55,7 @@ fapi2::ReturnCode exp_omi_train_check(const fapi2::Target<fapi2::TARGET_TYPE_OCM
     FAPI_INF("%s Start exp_omi_train_check", mss::c_str(i_target));
 
     const auto& l_omi = mss::find_target<fapi2::TARGET_TYPE_OMI>(i_target);
+    const auto& l_omic = mss::find_target<fapi2::TARGET_TYPE_OMIC>(l_omi);
     const auto& l_proc = mss::find_target<fapi2::TARGET_TYPE_PROC_CHIP>(i_target);
 
     // Declares variables
@@ -100,6 +101,7 @@ fapi2::ReturnCode exp_omi_train_check(const fapi2::Target<fapi2::TARGET_TYPE_OCM
                 fapi2::EXP_OMI_TRAIN_ERR()
                 .set_OCMB_TARGET(i_target)
                 .set_OMI_TARGET(l_omi)
+                .set_OMIC_TARGET(l_omic)
                 .set_EXPECTED_SM_STATE(STATE_MACHINE_SUCCESS)
                 .set_ACTUAL_SM_STATE(l_state_machine_state)
                 .set_DL0_STATUS(l_omi_status)

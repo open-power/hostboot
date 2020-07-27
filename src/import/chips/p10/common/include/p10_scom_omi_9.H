@@ -39,6 +39,28 @@ namespace omi
 #endif
 
 
+//>> [EDPL_MAX_COUNT]
+static const uint64_t EDPL_MAX_COUNT = 0x0c011415ull;
+
+static const uint32_t EDPL_MAX_COUNT_7_MAX_COUNT = 0;
+static const uint32_t EDPL_MAX_COUNT_7_MAX_COUNT_LEN = 8;
+static const uint32_t EDPL_MAX_COUNT_6_MAX_COUNT = 8;
+static const uint32_t EDPL_MAX_COUNT_6_MAX_COUNT_LEN = 8;
+static const uint32_t EDPL_MAX_COUNT_5_MAX_COUNT = 16;
+static const uint32_t EDPL_MAX_COUNT_5_MAX_COUNT_LEN = 8;
+static const uint32_t EDPL_MAX_COUNT_4_MAX_COUNT = 24;
+static const uint32_t EDPL_MAX_COUNT_4_MAX_COUNT_LEN = 8;
+static const uint32_t EDPL_MAX_COUNT_3_MAX_COUNT = 32;
+static const uint32_t EDPL_MAX_COUNT_3_MAX_COUNT_LEN = 8;
+static const uint32_t EDPL_MAX_COUNT_2_MAX_COUNT = 40;
+static const uint32_t EDPL_MAX_COUNT_2_MAX_COUNT_LEN = 8;
+static const uint32_t EDPL_MAX_COUNT_1_MAX_COUNT = 48;
+static const uint32_t EDPL_MAX_COUNT_1_MAX_COUNT_LEN = 8;
+static const uint32_t EDPL_MAX_COUNT_0_MAX_COUNT = 56;
+static const uint32_t EDPL_MAX_COUNT_0_MAX_COUNT_LEN = 8;
+//<< [EDPL_MAX_COUNT]
+// omi/reg00018.H
+
 //>>THE END<<
 
 #ifndef __PPE_HCODE__

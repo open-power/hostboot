@@ -58,6 +58,7 @@ fapi2::ReturnCode p10_omi_train_check(const fapi2::Target<fapi2::TARGET_TYPE_OMI
     uint32_t l_omi_freq = 0;
 
     const auto& l_ocmbs = mss::find_targets<fapi2::TARGET_TYPE_OCMB_CHIP>(i_target);
+    const auto& l_omic = mss::find_target<fapi2::TARGET_TYPE_OMIC>(i_target);
 
     // Sanity check for no empty vector
     if (l_ocmbs.empty())
@@ -88,6 +89,7 @@ fapi2::ReturnCode p10_omi_train_check(const fapi2::Target<fapi2::TARGET_TYPE_OMI
 
     FAPI_ASSERT(mss::omi::state_machine_success(l_state_machine_state),
                 fapi2::P10_OMI_TRAIN_ERR()
+                .set_OMIC_TARGET(l_omic)
                 .set_OMI_TARGET(i_target)
                 .set_OCMB_TARGET(l_ocmbs[0])
                 .set_EXPECTED_SM_STATE(mss::omi::STATE_MACHINE_SUCCESS)

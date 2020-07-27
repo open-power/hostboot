@@ -35,6 +35,157 @@ namespace omi
 #endif
 
 
+//>> PREP_[DLX_INFO]
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PREP_DLX_INFO(const fapi2::Target<K, M, V>& i_target)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = DLX_INFO;
+#endif
+    return fapi2::current_err;
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+//<< PREP_[DLX_INFO]
+
+//>> GET_[DLX_INFO]
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode GET_DLX_INFO(const fapi2::Target<K, M, V>& i_target, fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = DLX_INFO;
+#endif
+    return fapi2::getScom(i_target, DLX_INFO, o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+//<< GET_[DLX_INFO]
+
+//>> PUT_[DLX_INFO]
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PUT_DLX_INFO(const fapi2::Target<K, M, V>& i_target, const uint64_t i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    FAPI_TRY(scomt::chkReg(DLX_INFO));
+#endif
+    return fapi2::putScom(i_target, DLX_INFO, i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+//<< PUT_[DLX_INFO]
+
+
+//>> SET_[DLX_INFO_DL0_STS_DLX_INFO]
+static inline fapi2::buffer<uint64_t>& SET_DLX_INFO_DL0_STS_DLX_INFO(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DLX_INFO));
+#endif
+    return o_data.insertFromRight<DLX_INFO_DL0_STS_DLX_INFO,
+           DLX_INFO_DL0_STS_DLX_INFO_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("0:scom_omi Invalid dial access DLX_INFO_DL0_STS_DLX_INFO chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[DLX_INFO_DL0_STS_DLX_INFO]
+
+//>> SET_[DLX_INFO_DL0_STS_DLX_INFO]
+static inline fapi2::buffer<uint64_t>& SET_DLX_INFO_DL0_STS_DLX_INFO(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DLX_INFO));
+#endif
+    return o_data.insertFromRight<DLX_INFO_DL0_STS_DLX_INFO,
+           DLX_INFO_DL0_STS_DLX_INFO_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("1:scom_omi Invalid dial access DLX_INFO_DL0_STS_DLX_INFO chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[DLX_INFO_DL0_STS_DLX_INFO]
+
+//>> GET_[DLX_INFO_DL0_STS_DLX_INFO]
+static inline fapi2::buffer<uint64_t>& GET_DLX_INFO_DL0_STS_DLX_INFO(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DLX_INFO));
+#endif
+    return i_data.extractToRight<DLX_INFO_DL0_STS_DLX_INFO,
+           DLX_INFO_DL0_STS_DLX_INFO_LEN>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("4:scom_omi Invalid dial access DLX_INFO_DL0_STS_DLX_INFO chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[DLX_INFO_DL0_STS_DLX_INFO]
+
+//>> SET_[DLX_INFO_DL1_STS_DLX_INFO]
+static inline fapi2::buffer<uint64_t>& SET_DLX_INFO_DL1_STS_DLX_INFO(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DLX_INFO));
+#endif
+    return o_data.insertFromRight<DLX_INFO_DL1_STS_DLX_INFO,
+           DLX_INFO_DL1_STS_DLX_INFO_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("0:scom_omi Invalid dial access DLX_INFO_DL1_STS_DLX_INFO chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[DLX_INFO_DL1_STS_DLX_INFO]
+
+//>> SET_[DLX_INFO_DL1_STS_DLX_INFO]
+static inline fapi2::buffer<uint64_t>& SET_DLX_INFO_DL1_STS_DLX_INFO(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DLX_INFO));
+#endif
+    return o_data.insertFromRight<DLX_INFO_DL1_STS_DLX_INFO,
+           DLX_INFO_DL1_STS_DLX_INFO_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("1:scom_omi Invalid dial access DLX_INFO_DL1_STS_DLX_INFO chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[DLX_INFO_DL1_STS_DLX_INFO]
+
+//>> GET_[DLX_INFO_DL1_STS_DLX_INFO]
+static inline fapi2::buffer<uint64_t>& GET_DLX_INFO_DL1_STS_DLX_INFO(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DLX_INFO));
+#endif
+    return i_data.extractToRight<DLX_INFO_DL1_STS_DLX_INFO,
+           DLX_INFO_DL1_STS_DLX_INFO_LEN>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("4:scom_omi Invalid dial access DLX_INFO_DL1_STS_DLX_INFO chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[DLX_INFO_DL1_STS_DLX_INFO]
+
 //>>THE END<<
 
 #ifndef __PPE_HCODE__
