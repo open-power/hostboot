@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2015,2019                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2015,2020                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -34,12 +34,40 @@
       <ffdc>CBS_CS_IDLE_VALUE</ffdc>
       <ffdc>LOOP_COUNT</ffdc>
       <ffdc>HW_DELAY</ffdc>
+      <callout>
+        <target>MASTER_CHIP</target>
+        <priority>HIGH</priority>
+      </callout>
+      <deconfigure>
+        <target>MASTER_CHIP</target>
+      </deconfigure>
+      <gard>
+        <target>MASTER_CHIP</target>
+      </gard>
     </hwpError>
   <!-- ******************************************************************** -->
     <hwpError>
       <rc>RC_VDN_PGOOD_NOT_SET</rc>
       <description>Nest power (VDN) Power Good indication not set</description>
       <ffdc>CBS_ENVSTAT_READ</ffdc>
+      <callout>
+        <!-- Call out the processor VRM -->
+        <hw>
+          <hwid>SPIVID_SLAVE_PART</hwid>
+          <refTarget>MASTER_CHIP</refTarget>
+        </hw>
+        <priority>HIGH</priority>
+      </callout>
+      <callout>
+        <target>MASTER_CHIP</target>
+        <priority>MEDIUM</priority>
+      </callout>
+      <deconfigure>
+        <target>MASTER_CHIP</target>
+      </deconfigure>
+      <gard>
+        <target>MASTER_CHIP</target>
+      </gard>
       </hwpError>
   <!-- ******************************************************************** -->
 </hwpErrors>
