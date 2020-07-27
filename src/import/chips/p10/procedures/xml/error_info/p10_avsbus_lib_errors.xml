@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2019                             -->
+<!-- Contributors Listed Below - COPYRIGHT 2019,2020                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -107,6 +107,7 @@
       <ffdc>TARGET</ffdc>
       <ffdc>BUS</ffdc>
       <ffdc>BRIDGE</ffdc>
+      <ffdc>ROOT_CTRL1</ffdc>
     <callout>
       <target>VRM</target>
       <priority>MEDIUM</priority>
@@ -129,6 +130,7 @@
       <ffdc>TARGET</ffdc>
       <ffdc>BUS</ffdc>
       <ffdc>BRIDGE</ffdc>
+      <ffdc>ROOT_CTRL1</ffdc>
     <callout>
       <target>VRM</target>
       <priority>MEDIUM</priority>

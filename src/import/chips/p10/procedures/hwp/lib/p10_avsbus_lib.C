@@ -503,6 +503,24 @@ avsValidateResponse(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
         FAPI_INF("Non-clean response received: Computed CRC vs %X Received CRC %X;  Full Response %08X",
                  l_rsp_computed_crc, l_rsp_rcvd_crc, l_rsp_data);
 
+
+        FAPI_TRY(getScom(i_target, scomt::proc::TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_ROOT_CTRL1_RW, l_data64));
+
+        if (!l_data64.getBit<scomt::proc::TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_ROOT_CTRL1_TP_RI_DC_B>())
+        {
+            FAPI_ERR("ERROR: AVS command failed. Receiver Inhibit in Root Control 1 is not set!!!");
+        }
+
+        if (!l_data64.getBit<scomt::proc::TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_ROOT_CTRL1_TP_DI1_DC_B>())
+        {
+            FAPI_ERR("ERROR: AVS command failed. Driver Inhibit 1 in Root Control 1 is not set!!!");
+        }
+
+        if (!l_data64.getBit<scomt::proc::TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_ROOT_CTRL1_TP_DI2_DC_B>())
+        {
+            FAPI_ERR("ERROR: AVS command failed. Driver Inhibit 2 in Root Control 1 is not set!!!");
+        }
+
         if(l_rsp_data == 0x00000000)
         {
             FAPI_DBG("ERROR: AVS command failed. All 0 response data received possibly due to AVSBus IO RI/DIs disabled.");
@@ -510,7 +528,9 @@ avsValidateResponse(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
                         fapi2::PM_AVSBUS_ZERO_RESP_ERROR()
                         .set_TARGET(i_target)
                         .set_BUS(i_avsBusNum)
-                        .set_BRIDGE(i_o2sBridgeNum),
+                        .set_ROOT_CTRL1(l_data64)
+                        .set_BRIDGE(i_o2sBridgeNum)
+                        .set_ROOT_CTRL1(l_data64),
                         "ERROR: AVS command failed. All 0 response data received possibly due to AVSBus IO RI/DIs disabled.");
         }
         else if(l_rsp_data == 0xFFFFFFFF)
@@ -520,7 +540,8 @@ avsValidateResponse(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
                         fapi2::PM_AVSBUS_NO_RESP_ERROR()
                         .set_TARGET(i_target)
                         .set_BUS(i_avsBusNum)
-                        .set_BRIDGE(i_o2sBridgeNum),
+                        .set_BRIDGE(i_o2sBridgeNum)
+                        .set_ROOT_CTRL1(l_data64),
                         "ERROR: AVS command failed. No response from VRM device, Check AVSBus interface connectivity to VRM in system.");
         }
         else if(l_rsp_rcvd_crc != l_rsp_computed_crc)

@@ -1530,7 +1530,7 @@ FAPI_INF("%-60s[3] = 0x%08x %d", #attr_name, iv_attrs.attr_assign[3], iv_attrs.a
     if (!(iv_attrs._attr_name)) \
     { \
        iv_attrs._attr_name = _attr_default; \
-       FAPI_INF("Setting %-44s = 0x%08x %d (internal default)", \
+       FAPI_INF("Setting %-44s         = 0x%08x %d (internal default)", \
                 #_attr_name, iv_attrs._attr_name, iv_attrs._attr_name); \
     }
 
@@ -1539,8 +1539,9 @@ FAPI_INF("%-60s[3] = 0x%08x %d", #attr_name, iv_attrs.attr_assign[3], iv_attrs.a
     { \
        iv_attrs._attr_name[0] = _attr_default_0; \
        iv_attrs._attr_name[1] = _attr_default_1; \
-       FAPI_INF("Setting %-44s[0] = 0x%08x %d (internal default) %-44s[0] = 0x%08x %d (internal default", \
-                #_attr_name, iv_attrs._attr_name[0], iv_attrs._attr_name[0],\
+       FAPI_INF("Setting %-44s[0]      = 0x%08x %d (internal default)", \
+                #_attr_name, iv_attrs._attr_name[0], iv_attrs._attr_name[0]); \
+       FAPI_INF("Setting %-44s[1]      = 0x%08x %d (internal default)", \
                 #_attr_name, iv_attrs._attr_name[1], iv_attrs._attr_name[1]); \
     }
 
@@ -1551,12 +1552,14 @@ FAPI_INF("%-60s[3] = 0x%08x %d", #attr_name, iv_attrs.attr_assign[3], iv_attrs.a
        iv_attrs._attr_name[1] = _attr_default_1; \
        iv_attrs._attr_name[2] = _attr_default_2; \
        iv_attrs._attr_name[3] = _attr_default_3; \
-       FAPI_INF("Setting %-44s[0] = 0x%08x %d (internal default) %-44s[0] = 0x%08x %d (internal default) " \
-                "%-44s[0] = 0x%08x %d (internal default) %-44s[0] = 0x%08x %d (internal default)", \
-                #_attr_name, iv_attrs._attr_name[0], iv_attrs._attr_name[0],\
-                #_attr_name, iv_attrs._attr_name[1], iv_attrs._attr_name[1],\
-                #_attr_name, iv_attrs._attr_name[2], iv_attrs._attr_name[2],\
-                #_attr_name, iv_attrs._attr_name[3], iv_attrs._attr_name[3]);\
+       FAPI_INF("Setting %-44s[0]      = 0x%08x %d (internal default)", \
+                #_attr_name, iv_attrs._attr_name[0], iv_attrs._attr_name[0]); \
+       FAPI_INF("Setting %-44s[1]      = 0x%08x %d (internal default)", \
+                #_attr_name, iv_attrs._attr_name[1], iv_attrs._attr_name[1]); \
+       FAPI_INF("Setting %-44s[2]      = 0x%08x %d (internal default)", \
+                #_attr_name, iv_attrs._attr_name[2], iv_attrs._attr_name[2]); \
+       FAPI_INF("Setting %-44s[3]      = 0x%08x %d (internal default)", \
+                #_attr_name, iv_attrs._attr_name[3], iv_attrs._attr_name[3]); \
     }
 
 
