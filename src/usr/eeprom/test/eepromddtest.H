@@ -269,6 +269,7 @@ class EEPROMTest: public CxxTest::TestSuite
                 uint64_t chip;      // Which EEPROM chip hung off of the target to access
                 uint64_t data;      // Data to write or compare to
                 size_t   size;      // Number of bytes to read/write
+                bool     cached;    // true for eeproms that are part of eecache
             } testData[] =
 
             {
@@ -285,68 +286,68 @@ class EEPROMTest: public CxxTest::TestSuite
                 // and RESTORE at the end of the test
                 //
                 // MVPD of processor - eeprom2 spi engine 2
-                {0x0000, VPD_PRIMARY, 0x000f17ba00000000, 4},
+                {0x0000, VPD_PRIMARY, 0xAABBCCDD00000000, 4, true},
 
                 // SBE Backup of processor - eeprom1 spi engine 1
-                {0x0009, SBE_BACKUP, 0x1122334455660000, 6},
+                {0x0009, SBE_BACKUP, 0x1122334455660000, 6, false},
 
                 // SBE Primary of processor - eeprom0 spi engine 0
-                {0x0801, SBE_PRIMARY, 0xaabb000000000000, 2},
+                {0x0801, SBE_PRIMARY, 0xaabb000000000000, 2, false},
 
                 // SBE Primary of processor - eeprom0 spi engine 0
-                {0x0000, SBE_PRIMARY, 0xaa00000000000000, 1},
+                {0x0000, SBE_PRIMARY, 0xaa00000000000000, 1, false},
 
                 // SBE Backup of processor - eeprom1 spi engine 1
                 // interesting boundary 0x07FF 2047
-                { 0x07FF, SBE_BACKUP, 0x1122334455660000, 6},
+                { 0x07FF, SBE_BACKUP, 0x1122334455660000, 6, false},
 
                 // SBE Primary of processor - eeprom0 spi engine 0
                 // interesting boundary 0x0800 2048
-                {0x0800, SBE_PRIMARY, 0xaabbcc0000000000, 3},
+                {0x0800, SBE_PRIMARY, 0xaabbcc0000000000, 3, false},
 
                 // SBE Primary of processor - eeprom0 spi engine 0
                 // interesting boundary 0x7F8
-                {MAX_LENGTH_TRNS-8, SBE_PRIMARY, 0xaabbcc0000000000, 3},
+                {MAX_LENGTH_TRNS-8, SBE_PRIMARY, 0xaabbcc0000000000, 3, false},
 
                 // SBE Backup of processor - eeprom1 spi engine 1
                 // interesting boundary 0xF9
-                {SEEPROM_PAGE_SIZE-7, SBE_BACKUP, 0x1122334455000000, 5},
+                {SEEPROM_PAGE_SIZE-7, SBE_BACKUP, 0x1122334455000000, 5, false},
 
                 // SBE Backup of processor - eeprom1 spi engine 1
                 // interesting boundary 0x0001
-                {0x0001, SBE_BACKUP, 0x1122000000000000, 2},
+                {0x0001, SBE_BACKUP, 0x1122000000000000, 2, false},
 
                 // SBE Backup of processor - eeprom1 spi engine 1
                 // interesting boundary 0x2FD
-                {SEEPROM_PAGE_SIZE*3-3, SBE_BACKUP, 0x1122334400000000, 7},
+                {SEEPROM_PAGE_SIZE*3-3, SBE_BACKUP, 0x1122334400000000, 7, false},
 
                 // SBE Primary of processor - eeprom0 spi engine 0
                 // interesting boundary 0x00FF 255
-                {0x00FF, SBE_PRIMARY, 0xaabbccdd00000000, 4},
+                {0x00FF, SBE_PRIMARY, 0xaabbccdd00000000, 4, false},
 
                 // SBE Backup of processor - eeprom 1 spi engine 1
                 // interesting boundary 0x6FB
-                {SEEPROM_PAGE_SIZE*7-5, SBE_BACKUP, 0xbad5adcabf0b7000, 7},
+                {SEEPROM_PAGE_SIZE*7-5, SBE_BACKUP, 0xbad5adcabf0b7000, 7, false},
 
                 // SBE Primary of processor - eeprom0 spi engine 0
                 // interesting boundary 0x0007
-                {0x0007, SBE_PRIMARY, 0x1122334400000000, 4},
+                {0x0007, SBE_PRIMARY, 0x1122334400000000, 4, false},
 
                 // SBE Backup of processor - eeprom1 spi engine 1
                 // interesting boundary 0x0100 256
-                {0x0100, SBE_BACKUP, 0x1122330000000000, 3},
+                {0x0100, SBE_BACKUP, 0x1122330000000000, 3, false},
 
                 // SBE Primary of processor - eeprom0 spi engine 0
                 // interesting boundary at end 0x7FFF8
-                {MAX_SBE_SEEPROM_SIZE-8, SBE_PRIMARY, 0x1122334455667788, 8},
+                {MAX_SBE_SEEPROM_SIZE-8, SBE_PRIMARY, 0x1122334455667788, 8, false},
 
                 // SBE Backup of processor - eeprom1 spi engine 1
                 // interesting boundary 0x0008
-                {0x0008, SBE_BACKUP, 0x1122330000000000, 3},
+                {0x0008, SBE_BACKUP, 0x1122330000000000, 3, false},
 
                 // SBE Primary of processor - eeprom0 spi engine 0
                 // interesting boundary 0x0101 257
-                {0x0101, SBE_PRIMARY, 0xaabbccddeeff0000, 6},
+                {0x0101, SBE_PRIMARY, 0xaabbccddeeff0000, 6, false},
 
             };
 
@@ -497,6 +498,105 @@ class EEPROMTest: public CxxTest::TestSuite
                             TS_INFO("testEEPROMReadWrite - Stage 3 READ VERIFIED "
                                     "cmd=%d out of %d",
                                     i, NUM_CMDS);
+                        }
+
+                        //@TODO-RTC:250100-Enable Enterprise VPD ECC
+                        // Writes to the actual SEEPROM are skipped until we have the
+                        //  ECC algorithm in place
+                        testData[i].cached = false;
+
+#if ( !(defined(CONFIG_SUPPORT_EEPROM_CACHING) && defined(CONFIG_SUPPORT_EEPROM_HWACCESS)) )
+                        // Skip this test if we don't have two data sources
+                        testData[i].cached = false;
+#endif
+
+                        // Stage 3b - READ the data we just WROTE via the direct paths
+                        //            to ensure proper write-through
+                        if( testData[i].cached )
+                        {
+                            // Read from CACHE
+                            data = 0x0ull; // always clear READ buffer
+                            err = deviceOp( DeviceFW::READ,
+                                            fullList[j],
+                                            &data,
+                                            testData[i].size,
+                                            DEVICE_EEPROM_ADDRESS(
+                                                                  testData[i].chip,
+                                                                  testData[i].offset,
+                                                                  EEPROM::CACHE));
+
+
+                            if(err)
+                            {
+                                TS_FAIL( "testEEPROMReadWrite - Stage 3b failed to READ the data via CACHE we "
+                                         "just WROTE on cmd=%d out of %d",
+                                         i, NUM_CMDS );
+                                errlCommit( err,
+                                            EEPROM_COMP_ID );
+                                delete err;
+                                fails++;
+                                continue;
+                            }
+                            TS_INFO("testEEPROMReadWrite - Stage 3b - READ via CACHE test data we "
+                                    "just WROTE 0x%016llx cmd=%d out of %d",
+                                    data, i, NUM_CMDS);
+                            if (data != testData[i].data)
+                            {
+                                // we fail instead of retry to aide in root cause analysis
+                                TS_FAIL("testEEPROMReadWrite - Stage 3b failed VERIFICATION via CACHE of WRITE "
+                                        "of desired test data on cmd=%d out of %d",
+                                        i, NUM_CMDS);
+                                fails++;
+                                continue;
+                            }
+                            else
+                            {
+                                TS_INFO("testEEPROMReadWrite - Stage 3b READ via CACHE VERIFIED "
+                                        "cmd=%d out of %d",
+                                        i, NUM_CMDS);
+                            }
+
+                            // Read from HARDWARE
+                            data = 0x0ull; // always clear READ buffer
+                            err = deviceOp( DeviceFW::READ,
+                                            fullList[j],
+                                            &data,
+                                            testData[i].size,
+                                            DEVICE_EEPROM_ADDRESS(
+                                                                  testData[i].chip,
+                                                                  testData[i].offset,
+                                                                  EEPROM::HARDWARE));
+
+
+                            if(err)
+                            {
+                                TS_FAIL( "testEEPROMReadWrite - Stage 3b failed to READ the data via HARDWARE we "
+                                         "just WROTE on cmd=%d out of %d",
+                                         i, NUM_CMDS );
+                                errlCommit( err,
+                                            EEPROM_COMP_ID );
+                                delete err;
+                                fails++;
+                                continue;
+                            }
+                            TS_INFO("testEEPROMReadWrite - Stage 3b - READ via HARDWARE test data we "
+                                    "just WROTE 0x%016llx cmd=%d out of %d",
+                                    data, i, NUM_CMDS);
+                            if (data != testData[i].data)
+                            {
+                                // we fail instead of retry to aide in root cause analysis
+                                TS_FAIL("testEEPROMReadWrite - Stage 3b failed VERIFICATION via HARDWARE of WRITE "
+                                        "of desired test data on cmd=%d out of %d",
+                                        i, NUM_CMDS);
+                                fails++;
+                                continue;
+                            }
+                            else
+                            {
+                                TS_INFO("testEEPROMReadWrite - Stage 3b READ via HARDWARE VERIFIED "
+                                        "cmd=%d out of %d",
+                                        i, NUM_CMDS);
+                            }
                         }
 
                         // Stage 4 - RESTORE the original data

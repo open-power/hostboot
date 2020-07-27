@@ -96,6 +96,15 @@ errlHndl_t eepromPerformSpiOpHW( DeviceFW::OperationType i_opType,
         }
         else if ( i_opType == DeviceFW::WRITE )
         {
+            //@TODO-RTC:250100-Enable Enterprise VPD ECC
+            // Need to skip writes to the actual SEEPROM until we have the
+            //  ECC algorithm in place or we'll corrupt the data
+            if( io_spiInfo.eepromRole == VPD_PRIMARY )
+            {
+                TRACFCOMP( g_trac_eeprom,"Skipping EEPROM write for module vpd" );
+                break;
+            }
+
             // total length to write via SPI
             const size_t totalLength = io_buflen;
 
