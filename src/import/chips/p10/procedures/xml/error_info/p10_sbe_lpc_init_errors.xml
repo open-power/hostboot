@@ -47,6 +47,23 @@
   </hwpError>
   <hwpError>
     <sbeError/>
+    <rc>RC_LPC_HELD_IN_RESET</rc>
+    <description>LPC bus is held in reset.</description>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <target>TARGET_CHIP</target>
+      <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+      <priority>MEDIUM</priority>
+    </callout>
+    <deconfigure>
+      <target>TARGET_CHIP</target>
+    </deconfigure>
+  </hwpError>
+  <hwpError>
+    <sbeError/>
     <rc>RC_LPC_OPB_ERROR</rc>
     <description>After LPC initialization, the OPB master indicated an error.</description>
     <ffdc>FFDC_TARGET_CHIP</ffdc>

@@ -73,7 +73,8 @@ fapi_try_exit:
 }
 
 static fapi2::ReturnCode reset_lpc_bus_via_master(
-    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target_chip)
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target_chip,
+    const bool i_leave_asserted)
 {
     fapi2::buffer<uint32_t> l_control;
 
@@ -86,9 +87,12 @@ static fapi2::ReturnCode reset_lpc_bus_via_master(
     //Give the bus some time to reset
     fapi2::delay(LPC_LRESET_DELAY_NS, LPC_LRESET_DELAY_NS);
 
-    //Clear bit 23 lpc_lreset_oe to stop driving the low reset
-    l_control.clearBit<LPC_LRESET_OE>();
-    FAPI_TRY(lpc_write(i_target_chip, LPCM_OPB_MASTER_CONTROL_REG, l_control), "Error deasserting LPC reset");
+    if (!i_leave_asserted)
+    {
+        //Clear bit 23 lpc_lreset_oe to stop driving the low reset
+        l_control.clearBit<LPC_LRESET_OE>();
+        FAPI_TRY(lpc_write(i_target_chip, LPCM_OPB_MASTER_CONTROL_REG, l_control), "Error deasserting LPC reset");
+    }
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -99,9 +103,11 @@ fapi2::ReturnCode p10_sbe_lpc_init(
 {
     fapi2::buffer<uint32_t> l_data32;
     uint8_t l_is_fsp = 0;
+    uint8_t l_is_primary_proc = 0;
     FAPI_DBG("p10_sbe_lpc_init: Entering ...");
 
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IS_SP_MODE, i_target_chip, l_is_fsp), "Error getting ATTR_IS_SP_MODE");
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_SBE_MASTER_CHIP, i_target_chip, l_is_primary_proc));
 
     /* The next two steps have to take place with the nest clock muxed into the LPC clock so all the logic sees its resets */
     FAPI_TRY(switch_lpc_clock_mux(i_target_chip, true));
@@ -114,10 +120,23 @@ fapi2::ReturnCode p10_sbe_lpc_init(
     //------------------------------------------------------------------------------------------
     //--- STEP 2: Issue an LPC bus reset
     //------------------------------------------------------------------------------------------
-    FAPI_TRY(reset_lpc_bus_via_master(i_target_chip));
+    FAPI_TRY(reset_lpc_bus_via_master(i_target_chip, !l_is_primary_proc));
 
     /* We can flip the LPC clock back to the external clock input now */
     FAPI_TRY(switch_lpc_clock_mux(i_target_chip, false));
+
+    if (!l_is_primary_proc)
+    {
+        // On secondary processors, leave the LPC bus in reset and skip initialization
+        return fapi2::FAPI2_RC_SUCCESS;
+    }
+
+    // Sanity check: Is LPC held in reset?
+    FAPI_TRY(lpc_read(i_target_chip, LPCM_OPB_MASTER_INTR_IN_REG, l_data32),
+             "Error reading OPB master interrupt input register");
+    FAPI_ASSERT(!l_data32.getBit<LPCM_OPB_MASTER_INTR_IN_REG_LRESET>(),
+                fapi2::LPC_HELD_IN_RESET().set_TARGET_CHIP(i_target_chip),
+                "LPC bus is held in reset");
 
     //------------------------------------------------------------------------------------------
     //--- STEP 3: Program settings in LPC Master and FPGA
