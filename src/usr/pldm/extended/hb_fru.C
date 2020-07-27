@@ -494,6 +494,11 @@ errlHndl_t generate_vtoc_record(std::vector<uint8_t>& o_vtoc_buf,
                         KEYWORD_SIZE_BYTE_SIZE + // 2 bytes (variable);
                         i_pad_bytes;
 
+    // subtract off the parts of the struct that are not included  in the 
+    // vtoc record length field
+    vtoc_len = vtoc_len -
+             sizeof(((vtoc_first_part *)0)->vtoc_rec_start) - // large resource
+             sizeof(((vtoc_first_part *)0)->vtoc_rec_len);    // record size bytes
     // make sure the vector the called passed us is empty
     o_vtoc_buf.clear();
 
@@ -512,7 +517,7 @@ errlHndl_t generate_vtoc_record(std::vector<uint8_t>& o_vtoc_buf,
     *vtoc_start_ptr = vtoc_first_part(vtoc_len, pt_kw_len);
 
     std::vector<pt_entry> pt_entries;
-    errl = generate_pt_entries(i_ipz_records, vtoc_len, pt_entries);
+    errl = generate_pt_entries(i_ipz_records, o_vtoc_buf.size(), pt_entries);
 
     if(errl)
     {
