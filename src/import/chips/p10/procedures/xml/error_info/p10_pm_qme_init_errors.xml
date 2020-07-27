@@ -191,7 +191,7 @@
     <ffdc>EX</ffdc>
     <ffdc>CHIP</ffdc>
     <callout>
-      <target>CODE</target>
+      <procedure>CODE</procedure>
       <priority>HIGH</priority>
     </callout>
     <callout>
@@ -235,7 +235,7 @@
       <priority>LOW</priority>
     </callout>
     <callout>
-      <target>CODE</target>
+      <procedure>CODE</procedure>
       <priority>HIGH</priority>
     </callout>
   </hwpError>

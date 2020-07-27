@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2019                             -->
+<!-- Contributors Listed Below - COPYRIGHT 2019,2020                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -32,7 +32,7 @@
       </description>
       <ffdc>CHIP</ffdc>
       <callout>
-        <target>CODE</target>
+        <procedure>CODE</procedure>
         <priority>HIGH</priority>
       </callout>
    </hwpError>
@@ -46,7 +46,7 @@
       <ffdc>TARGET</ffdc>
       <ffdc>ATTR_PROC_SBE_MCS_SETUP_SELECTED_MC</ffdc>
       <callout>
-        <target>CODE</target>
+        <procedure>CODE</procedure>
         <priority>HIGH</priority>
       </callout>
    </hwpError>

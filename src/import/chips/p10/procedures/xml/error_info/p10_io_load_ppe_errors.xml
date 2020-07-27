@@ -33,7 +33,7 @@
   <ffdc>TARGET</ffdc>
   <ffdc>HW_IMAGE</ffdc>
   <callout>
-    <target>CODE</target>
+    <procedure>CODE</procedure>
     <priority>HIGH</priority>
   </callout>
 </hwpError>
@@ -52,7 +52,7 @@
   <ffdc>MEMREGS_IMAGE_SIZE</ffdc>
   <ffdc>HW_IMAGE</ffdc>
   <callout>
-    <target>CODE</target>
+    <procedure>CODE</procedure>
     <priority>HIGH</priority>
   </callout>
 </hwpError>

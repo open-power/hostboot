@@ -32,7 +32,7 @@
   </description>
   <ffdc>OFFSET</ffdc>
   <callout>
-    <target>CODE</target>
+    <procedure>CODE</procedure>
     <priority>HIGH</priority>
   </callout>
 </hwpError>
@@ -46,7 +46,7 @@
   <ffdc>IOP_TOP</ffdc>
   <ffdc>XRAM_PHY</ffdc>
   <callout>
-    <target>CODE</target>
+    <procedure>CODE</procedure>
     <priority>HIGH</priority>
   </callout>
 </hwpError>
@@ -59,7 +59,7 @@
   </description>
   <ffdc>ACCESS_SIZE</ffdc>
   <callout>
-    <target>CODE</target>
+    <procedure>CODE</procedure>
     <priority>HIGH</priority>
   </callout>
 </hwpError>

@@ -285,7 +285,7 @@
     <ffdc>NUM_RANKS</ffdc>
     <ffdc>MAX_RANKS</ffdc>
     <callout>
-      <target>CODE</target>
+      <procedure>CODE</procedure>
       <priority>HIGH</priority>
     </callout>
   </hwpError>

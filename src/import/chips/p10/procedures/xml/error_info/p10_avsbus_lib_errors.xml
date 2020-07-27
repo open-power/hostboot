@@ -42,7 +42,7 @@
       <priority>MEDIUM</priority>
     </callout>
     <callout>
-      <target>CODE</target>
+      <procedure>CODE</procedure>
       <priority>LOW</priority>
     </callout>
     </hwpError>
@@ -72,7 +72,7 @@
       <priority>LOW</priority>
     </callout>
     <callout>
-      <target>CODE</target>
+      <procedure>CODE</procedure>
       <priority>MEDIUM</priority>
     </callout>
     </hwpError>
@@ -94,7 +94,7 @@
       <priority>LOW</priority>
     </callout>
     <callout>
-      <target>CODE</target>
+      <procedure>CODE</procedure>
       <priority>MEDIUM</priority>
     </callout>
     </hwpError>
@@ -117,7 +117,7 @@
       <priority>LOW</priority>
     </callout>
     <callout>
-      <target>CODE</target>
+      <procedure>CODE</procedure>
       <priority>HIGH</priority>
     </callout>
     </hwpError>
@@ -140,7 +140,7 @@
       <priority>LOW</priority>
     </callout>
     <callout>
-      <target>CODE</target>
+      <procedure>CODE</procedure>
       <priority>HIGH</priority>
     </callout>
     </hwpError>
@@ -162,7 +162,7 @@
       <priority>LOW</priority>
     </callout>
     <callout>
-      <target>CODE</target>
+      <procedure>CODE</procedure>
       <priority>LOW</priority>
     </callout>
     <callout>
@@ -188,7 +188,7 @@
       <priority>LOW</priority>
     </callout>
     <callout>
-      <target>CODE</target>
+      <procedure>CODE</procedure>
       <priority>LOW</priority>
     </callout>
     <callout>
@@ -214,7 +214,7 @@
       <priority>LOW</priority>
     </callout>
     <callout>
-      <target>CODE</target>
+      <procedure>CODE</procedure>
       <priority>LOW</priority>
     </callout>
     <callout>
@@ -232,7 +232,7 @@
       <ffdc>BUS</ffdc>
       <ffdc>BRIDGE</ffdc>
     <callout>
-      <target>CODE</target>
+      <procedure>CODE</procedure>
       <priority>HIGH</priority>
     </callout>
     <callout>

@@ -6,6 +6,7 @@
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
 <!-- Contributors Listed Below - COPYRIGHT 2019,2020                        -->
+<!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
 <!-- Licensed under the Apache License, Version 2.0 (the "License");        -->
@@ -35,7 +36,7 @@
   <ffdc>OFFSET</ffdc>
   <ffdc>BYTES</ffdc>
   <callout>
-    <target>CODE</target>
+    <procedure>CODE</procedure>
     <priority>HIGH</priority>
   </callout>
 </hwpError>
@@ -53,7 +54,7 @@
   <ffdc>OFFSET</ffdc>
   <ffdc>BYTES</ffdc>
   <callout>
-    <target>CODE</target>
+    <procedure>CODE</procedure>
     <priority>HIGH</priority>
   </callout>
 </hwpError>
@@ -69,7 +70,7 @@
   <ffdc>PERV_CHIPLET_ID</ffdc>
   <ffdc>OCC_MODE</ffdc>
   <callout>
-    <target>CODE</target>
+    <procedure>CODE</procedure>
     <priority>HIGH</priority>
   </callout>
 </hwpError>

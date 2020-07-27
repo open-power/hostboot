@@ -67,7 +67,7 @@
       <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     </collectRegisterFfdc>
     <callout>
-      <target>CODE</target>
+      <procedure>CODE</procedure>
       <priority>HIGH</priority>
     </callout>
   </hwpError>

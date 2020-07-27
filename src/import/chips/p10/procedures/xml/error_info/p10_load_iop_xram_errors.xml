@@ -6,6 +6,7 @@
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
 <!-- Contributors Listed Below - COPYRIGHT 2019,2020                        -->
+<!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
 <!-- Licensed under the Apache License, Version 2.0 (the "License");        -->
@@ -32,7 +33,7 @@
   <ffdc>TARGET</ffdc>
   <ffdc>HW_IMAGE</ffdc>
   <callout>
-    <target>CODE</target>
+    <procedure>CODE</procedure>
     <priority>HIGH</priority>
   </callout>
 </hwpError>
@@ -50,7 +51,7 @@
   <ffdc>XRAM_FW_DATA_PTR</ffdc>
   <ffdc>XRAM_FW_SIZE</ffdc>
   <callout>
-    <target>CODE</target>
+    <procedure>CODE</procedure>
     <priority>HIGH</priority>
   </callout>
 </hwpError>
@@ -71,7 +72,7 @@
     <target>TARGET</target>
   </deconfigure>
   <callout>
-    <target>CODE</target>
+    <procedure>CODE</procedure>
     <priority>LOW</priority>
   </callout>
 </hwpError>
