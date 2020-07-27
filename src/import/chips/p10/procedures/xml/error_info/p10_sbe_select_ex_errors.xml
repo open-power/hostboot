@@ -36,7 +36,7 @@
     <ffdc>CHIP</ffdc>
     <ffdc>CORE_NUM</ffdc>
     <callout>
-      <target>CODE</target>
+      <procedure>CODE</procedure>
       <priority>HIGH</priority>
     </callout>
     <callout>
@@ -55,7 +55,7 @@
     <ffdc>CORE_NUM</ffdc>
     <ffdc>FUSED_CORE_NUM_BASE</ffdc>
     <callout>
-      <target>CODE</target>
+      <procedure>CODE</procedure>
       <priority>HIGH</priority>
     </callout>_BACKING_CACHE
     <callout>
@@ -75,7 +75,7 @@
     <ffdc>ACTIVE_CORES_NUM</ffdc>
     <ffdc>ACTIVE_CORES_VEC</ffdc>
     <callout>
-      <target>CODE</target>
+      <procedure>CODE</procedure>
       <priority>LOW</priority>
     </callout>
     <callout>
@@ -98,7 +98,7 @@
     <ffdc>ACTIVE_CORES_VEC</ffdc>
     <ffdc>BACKING_CACHES_VEC</ffdc>
     <callout>
-      <target>CODE</target>
+      <procedure>CODE</procedure>
       <priority>LOW</priority>
     </callout>
     <callout>
@@ -122,7 +122,7 @@
     <ffdc>ACTIVE_CORES_VEC</ffdc>
     <ffdc>BACKING_CACHES_VEC</ffdc>
     <callout>
-      <target>CODE</target>
+      <procedure>CODE</procedure>
       <priority>LOW</priority>
     </callout>
     <callout>
