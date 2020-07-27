@@ -36,15 +36,16 @@ use Getopt::Long;
 use File::Basename;
 use feature "state";
 use Carp qw( croak confess );
-use List::Util qw(max);
+use List::Util "max";
 
 
 ################################################################################
 # Define some global constants/variables
 ################################################################################
+# FSP global constants.  Used by file processMrw_fsp.pm
 our %hwsvmrw_plugins;
 
-# Global constants
+# HB global constants
 use constant
 {
     # Define a true and false keyword
@@ -88,7 +89,7 @@ my %PARENT_PERVASIVE_OFFSET =
 # This value has an effect on attributes REL_POS, AFFINITY_PATH and PHYS_PATH.
 my %MAX_INST_PER_PARENT =
 (
-    PROC      => 0, # Number of PROCs per NODE, gets set via call to setProcsPerNodeForSystem
+    PROC      => 0, # Number of PROCs per NODE, gets set via call to setProcsPerNode
     EQ        => 8, # Number of EQs per PROC
     FC        => 2, # Number of FCs per EQ
     CORE      => 2, # Number of COREs per FC
@@ -98,7 +99,8 @@ my %MAX_INST_PER_PARENT =
     MCC       => 2, # Number of MCCs per MI
     OMI       => 2, # Number of OMIs per MCC/OMIC (has two parents 'a nuclear family')
     OCMB_CHIP => 1, # Number of OCMB_CHIPs per OMI
-    PMIC      => 2, # Number of PMICs per DIMM/logical OCMB
+    PMIC      => 4, # Number of PMICs per DIMM/logical OCMB.  Adjusted for future
+                    # systems.  Meaning, the current system may not have this many.
     MEM_PORT  => 1, # Number of MEM_PORTs per OCMB
     DIMM      => 1, # Number of DIMMs per MEM_PORT
 
@@ -200,7 +202,7 @@ Options:
                             fsp - process FSP targets in addition to HB targets
         -c <2N | w> = special configurations we want to run
                       2N - special 2 node config with extra ABUS links
-                      w - Special MST wrap config
+                      w - Special SMP wrap config
         -d = run in debug mode
         -f = force output file creation even when errors
         -fh = print the full hierarchy of the XML file
@@ -270,7 +272,7 @@ sub main
 
     # Set the PROCSs per NODE before proceeding. This must be done before
     # any processing of the targets can be done.
-    setProcsPerNodeForSystem($targetObj);
+    setProcsPerNode($targetObj);
 
     # First pass of processing the target hierarchy setting common attributes
     # such as FAPI_NAME, PHYS_PATH, AFFINITY_PATH, ORDINAL_ID, HUID and
@@ -406,39 +408,40 @@ sub getAndValidateCallerInputOptions
 # @brief Set the PROCs per NODE for the current system
 #
 # @details For different systems, the number of PROCs per node can vary.  This
-#          method will set that info for a given system.  If the current system
-#          is not accounted for in this method, then this script will exit
-#          stating so.
+#          method will programmatically calculate that value.
 #
 # @param [in] $targetObj - The global target object.
 #--------------------------------------------------
-sub setProcsPerNodeForSystem
+sub setProcsPerNode
 {
-    my $targetObj = shift;
-    my $procsPerNode = 0;
+    my $targetObj       = shift;
+    my $maxProcsPerNode = 0;
 
-    my $systemName = $targetObj->getSystemName();
-    if ($systemName =~ /RAINIER/)
+    foreach my $target (keys %{ $targetObj->getAllTargets() })
     {
-        $procsPerNode = 4;
-    }
-    elsif ($systemName =~ /DENALI/)
-    {
-        $procsPerNode = 4;
-    }
-    elsif ($systemName =~ /EVEREST/)
-    {
-        $procsPerNode = 8;
-    }
-    else
+        if ($targetObj->getType($target) eq "NODE")
+        {
+            my $localProcsPerNode = 0;
+            foreach my $child ($targetObj->getAllTargetChildren($target))
+            {
+                if ($targetObj->getType($child) eq "PROC")
+                {
+                    $localProcsPerNode++;
+                }
+            }
+            $maxProcsPerNode = max($maxProcsPerNode, $localProcsPerNode);
+        } # if ($targetObj->getType($target) eq "NODE")
+    } # foreach my $target (keys %{ $targetObj->getAllTargets() })
+
+    if ($maxProcsPerNode == 0)
     {
         select()->flush(); # flush buffer before spewing out error message
-        die "\nsetProcsPerNodeForSystem::ERROR: Cannot set the number of " .
-            "PROCs per node for system \'$systemName\'.\nPlease provide method " .
-            "\'setProcsPerNodeForSystem\' with this info for system " .
-            "\'$systemName\'.\nError";
+        die "\nsetProcsPerNode::ERROR: Unable to calculate the maximum " .
+            "PROCs per node, current value is 0.\n Error";
     }
-    $MAX_INST_PER_PARENT{"PROC"} = $procsPerNode;
+
+    $MAX_INST_PER_PARENT{"PROC"} = $maxProcsPerNode;
+    $targetObj->{NUM_PROCS_PER_NODE} = $maxProcsPerNode;
 }
 
 #--------------------------------------------------
@@ -647,16 +650,23 @@ sub pruneTargetAttributes
             $targetObj->deleteAttribute($target,"PULSE_MODE_ENABLE");
             $targetObj->deleteAttribute($target,"PULSE_MODE_VALUE");
         }
+        elsif ($type eq "DIMM")
+        {
+            $targetObj->deleteAttribute($target, "FRU_ID");
+        }
         elsif ($type eq "MEM_PORT")
         {
             $targetObj->deleteAttribute($target,
                                "EXP_SAFEMODE_MEM_THROTTLED_N_COMMANDS_PER_PORT");
         }
+        elsif ($type eq "OCMB_CHIP")
+        {
+            $targetObj->deleteAttribute($target, "FRU_ID");
+        }
         elsif ($type eq "PHB")
         {
             $targetObj->deleteAttribute($target,"DEVICE_ID");
             $targetObj->deleteAttribute($target,"HDDW_ORDER");
-            $targetObj->deleteAttribute($target,"MAX_POWER");
             $targetObj->deleteAttribute($target,"MGC_LOAD_SOURCE");
             $targetObj->deleteAttribute($target,"PCIE_32BIT_DMA_SIZE");
             $targetObj->deleteAttribute($target,"PCIE_32BIT_MMIO_SIZE");
@@ -720,15 +730,7 @@ sub errorCheckTheTargets
     # Check for errors
     foreach my $target (keys %{ $targetObj->getAllTargets() })
     {
-# TODO, RTC 215164. Having issues with power10-0 so wrapped errorCheck with if statement:
-# ERROR: EEPROM_VPD_PRIMARY_INFO/devAddr attribute is invalid (Target=/sys-0/node-0/nisqually-0/proc_socket-0/godel-0/power10-0)
-#	I2C connection to target is not defined
-# So I wrapped the errorCHeck with the if statement. Once SPI comes online,
-# then the if statement can be removed.
-        if ($target != "/sys-0/node-0/nisqually-0/proc_socket-0/godel-0/power10-0")
-        {
-            errorCheck($targetObj, $target);
-        }
+        errorCheck($targetObj, $target);
     }
 } # end sub errorCheckTheTargets
 
@@ -1058,9 +1060,10 @@ sub processProcessorAndChildren
     # DCMs (Dual Chip Module) will have 2 procs per socket
     # SCMs (Single Chip Module) will have 1 per socket
     # NOTE: It looks like this state variable is unused but it is setting
-    # $targetObj->{NUM_PROCS_PER_NODE} and doing so in a way that will only set
-    # it once.
+    # $targetObj->{NUMBER_PROCS_PER_SOCKET} and doing so in a way that will only
+    # set it once.
     state $NumberProcsPerSocket = findProcPerSocket($targetObj, $target);
+
 
     # Do the following math to get the unique position for a processor per node.
     my $procPosPerNode = calculateProcPositionPerNode($targetObj,
@@ -1069,12 +1072,6 @@ sub processProcessorAndChildren
 
     # Get the position of this PROC per system (SYS)
     my $procPosPerSystem = getPerSystemNumericalValue($targetObj, $target);
-
-    # Increment the number of PROCs, per NODE, for data gathering
-    # @TODO RTC 247183 - This will be wrong for multi-node systems.
-    #       The correct count can be found by taking the number of sockets per
-    #       node and multipling that by $NumberProcsPerSocket.
-    $targetObj->{NUM_PROCS_PER_NODE}++;
 
     # Get some useful info from the PROC parent's SYS and NODE targets
     my $sysParent = $targetObj->findParentByType($target, "SYS");
@@ -1144,13 +1141,13 @@ sub processDdimmAndChildren
     validateParentHasBeenProcessed($targetObj, $target, "NODE");
 
     # The DDIMMs are behind the DDIMM conectors, a one to one relationship.
-    # Get the DDIMM's position from the parent DDIMM connector
-    my $dimmPosPerSystem = $targetObj->getAttribute(
-                                $targetObj->getTargetParent($target),
-                                "POSITION");
+    # Get the DDIMM's ID from the parent DDIMM connector's position.
+    my $dimmId = $targetObj->getAttribute($targetObj->getTargetParent($target), "POSITION");
 
     my $ddimmAffinity = "ERR";
     my $ddimmPosPerParent = "ERR";
+    my $procPosRelativeToNode = "ERR";
+    my $omiId = 0;
 
     # Find connections for target (DIMM) of bus type ("OMI"), ignore
     # connections FROM this target ("") but find connections TO this target(1).
@@ -1158,7 +1155,6 @@ sub processDdimmAndChildren
     if ($conn ne "")
     {
         # Find the OMI bus connection to determine target values
-        my $procPosRelativeToNode = "ERR";
         my $mc_num   = "ERR";
         my $mi_num   = "ERR";
         my $mcc_num  = "ERR";
@@ -1216,6 +1212,7 @@ sub processDdimmAndChildren
             $mi_num = $targets[MI_INDEX]   % getMaxInstPerParent("MI");
             $mcc_num = $targets[MCC_INDEX] % getMaxInstPerParent("MCC");
             $omi_num = $targets[OMI_INDEX] % getMaxInstPerParent("OMI");
+            $omiId = $targets[OMI_INDEX];
 
             # The values for these are 0
             # NOTE: Going on the assumption that 1 OCMB per DDIMM with
@@ -1229,9 +1226,13 @@ sub processDdimmAndChildren
                              "mi-$mi_num/mcc-$mcc_num/omi-$omi_num/".
                              "ocmb_chip-$ocmb_num/mem_port-$mem_num/".
                              "dimm-$ddimmPosPerParent";
-
         } # end foreach my $conn (@{$conn->{CONN}})
     } # end if ($conn ne "")
+
+    # The DIMM position is not based on the DIMM's parent but on the OMI that it is associated with
+    my $dimmPosPerNode = $omiId +
+                        ( (getMaxInstPerProc("DIMM") / $targetObj->{NUMBER_PROCS_PER_SOCKET})
+                          * $procPosRelativeToNode );
 
     # Get some useful info from the DDIMM parent's SYS and NODE and targets
     my $sysParent = $targetObj->findParentByType($target, "SYS");
@@ -1241,12 +1242,19 @@ sub processDdimmAndChildren
     my $nodeParentAffinity =$targetObj->getAttribute($nodeParent, "AFFINITY_PATH");
     my $nodeParentPhysical = $targetObj->getAttribute($nodeParent, "PHYS_PATH");
 
-    my $staticAbsLocationCode = getStaticAbsLocationCode($targetObj,$target);
-    $targetObj->setAttribute($target, "STATIC_ABS_LOCATION_CODE",$staticAbsLocationCode);
+    ## Calculate the 'DIMM's Position per System (SYS)'
+    # The 'DIMM's Position per System' is based on the maximum number of DIMMs per
+    # NODE, multipled by the NODE's position.  Then add the DIMM's relative position
+    # to the NODE.
+    my $numDimmsPerNode = getMaxInstPerProc("DIMM") * getMaxInstPerParent("PROC");
+    my $dimmPosPerSystem = ($nodeParentPos * $numDimmsPerNode) + $dimmPosPerNode;
+
+    my $staticAbsLocationCode = getStaticAbsLocationCode($targetObj, $target);
+    $targetObj->setAttribute($target, "STATIC_ABS_LOCATION_CODE", $staticAbsLocationCode);
 
     # In the future, to support planar configs, where there will be 2 DIMMs behind
-    # a mem port.Therefore the DIMM position will need to be an offset of 2.  Hard code
-    # the offset for now.
+    # a mem port. Therefore the DIMM position will need to be an offset of 2.
+    # Hard code the offset for now.
     my $dimmFapiPosition = $dimmPosPerSystem * 2;
 
     # Get the FAPI_NAME by using the data gathered above.
@@ -1255,11 +1263,13 @@ sub processDdimmAndChildren
     # Take advantage of previous work done on the NODEs.  Use the parent NODE's
     # affinity/physical path for our self and append the necessary data.
     $ddimmAffinity = $nodeParentAffinity . $ddimmAffinity;
-    my $ddimmPhysical = $nodeParentPhysical . "/dimm-" . $dimmPosPerSystem;
+    my $ddimmPhysical = $nodeParentPhysical . "/dimm-" . $dimmId;
 
-    # Now that we collected all the data we need, set some target attributes
-    $targetObj->setHuid($target, $sysParentPos, $nodeParentPos, $dimmPosPerSystem);
-    $targetObj->setAttribute($target, "POSITION",      $dimmPosPerSystem);
+    ## Now that we collected all the data we need, set some target attributes
+    # The HUID needs to match the FAP_POS, in terms of being a multiple of 2,
+    # just as the FAPI_POS.
+    $targetObj->setHuid($target, $sysParentPos, $nodeParentPos, $dimmPosPerNode * 2);
+    $targetObj->setAttribute($target, "POSITION",      $dimmId);
     $targetObj->setAttribute($target, "ORDINAL_ID",    $dimmPosPerSystem);
     $targetObj->setAttribute($target, "FAPI_POS",      $dimmFapiPosition);
     $targetObj->setAttribute($target, "FAPI_NAME",     $dimmFapiName);
@@ -1271,8 +1281,8 @@ sub processDdimmAndChildren
     setEepromAttributeForDdimm($targetObj, $target);
 
     # Save this target for retrieval later when printing the xml (sub printXML)
-    $targetObj->{targeting}{SYS}[0]{NODES}[$nodeParentPos]
-                {DIMMS}[$dimmPosPerSystem]{KEY} = $target;
+    $targetObj->{targeting}{SYS}[$sysParentPos]{NODES}[$nodeParentPos]
+                {DIMMS}[$dimmPosPerNode]{KEY} = $target;
 
     # Mark this target as processed
     markTargetAsProcessed($targetObj, $target);
@@ -1292,12 +1302,12 @@ sub processDdimmAndChildren
         {
             # Update TYPE to PMIC, because it is set to N/A and that won't fly
             $childType = $targetObj->setAttribute($child, "TYPE", "PMIC");
-            processPmic($targetObj, $child);
+            processPmic($targetObj, $child, $dimmId);
             $foundPmic = true;
         }
         elsif ($childType eq "OCMB_CHIP")
         {
-            processOcmbChipAndChildren($targetObj, $child);
+            processOcmbChipAndChildren($targetObj, $child, $dimmId, $dimmPosPerNode);
             $foundOcmb = true;
         }
     }
@@ -1326,36 +1336,27 @@ sub processDdimmAndChildren
 #
 # @param[in] $targetObj - The global target object blob
 # @param[in] $target    - The PMIC target
+# @param[in] $dimmId    - The DIMM's ID, used to calculate the PMIC's ID
 #--------------------------------------------------
 sub processPmic
 {
     my $targetObj = shift;
     my $target    = shift;
+    my $dimmId    = shift;
 
     # Some sanity checks.  Make sure we are processing the correct target type
     # and make sure the target's parent has been processed.
     my $targetType = targetTypeSanityCheck($targetObj, $target, "PMIC");
     validateParentHasBeenProcessed($targetObj, $target);
 
-    use constant MAX_PMIC_PER_DDIMM => 4;
-
-    # PMICs are not ordered, so take the PMIC's parent DDIMM
-    # position, multiply it by the maximum PMICs per DDIMM,
-    # then add the PMIC's instance:
-    # Ex. for pmic0, dimm19 = pmic76   ((19 * 4) + 0)
-    # Ex. for pmic1, dimm19 = pmic77   ((19 * 4) + 1)
-    # Ex. for pmic2, dimm19 = pmic78   ((19 * 4) + 2)
-    # Ex. for pmic3, dimm19 = pmic79   ((19 * 4) + 3)
-
     # Get some useful data from the PMIC parent's SYS, NODE and DDIMM targets
     my $sysParent = $targetObj->findParentByType($target, "SYS");
     my $sysParentPos = $targetObj->getAttribute($sysParent, "ORDINAL_ID");
     my $nodeParent = $targetObj->findParentByType($target, "NODE");
     my $nodeParentPos = $targetObj->getAttribute($nodeParent, "ORDINAL_ID");
-    my $nodeParentAffinity = $targetObj->getAttribute($nodeParent, "AFFINITY_PATH");
     my $nodeParentPhysical = $targetObj->getAttribute($nodeParent, "PHYS_PATH");
     my $ddimmParent = $targetObj->findParentByType($target, "DIMM");
-    my $ddimmParentPos = $targetObj->getAttribute($ddimmParent, "POSITION");
+    my $ddimmParentPos = $targetObj->getAttribute($ddimmParent, "ORDINAL_ID");
     my $ddimmParentAffinity = $targetObj->getAttribute($ddimmParent, "AFFINITY_PATH");
 
     ## Get the instance name (pmic0, pmic1, etc) and extract the integral info.
@@ -1365,20 +1366,43 @@ sub processPmic
     my $pmicInstanceName = $targetObj->getInstanceName($target);
     my $pmicInstancePos = (split('c', $pmicInstanceName))[-1];
 
+    # Cache the PMIC's maximum instance per parent (DDIMM) for quick reference
+    my $maxPmicPerDdimm = getMaxInstPerParent("PMIC");
+
     # Do a quick sanity check.  Make sure the PMIC instance position is less
     # than what is expected it to be.
-    if ($pmicInstancePos >= MAX_PMIC_PER_DDIMM )
+    if ($pmicInstancePos >= $maxPmicPerDdimm )
     {
         select()->flush(); # flush buffer before spewing out error message
         die "\nprocessPmic: ERROR: The PMIC's instance position " .
             "($pmicInstancePos), extracted from instance name " .
             "\"$pmicInstanceName\", exceeds or is equal to the maximum PMIC " .
-            "per DIMM (" . MAX_PMIC_PER_DDIMM . "). Error" ;
+            "per DIMM (" . $maxPmicPerDdimm . "). Error" ;
     }
 
-    # Calculate the PMIC position based on the DDIMM's position per system
-    # and the PMIC instance position
-    my $pmicPosPerSystem = ($ddimmParentPos * MAX_PMIC_PER_DDIMM) + $pmicInstancePos;
+    ## PMIC ordering
+    # Ex. for pmic0, dimm19 = pmic76   ((19 * 4) + 0)
+    # Ex. for pmic1, dimm19 = pmic77   ((19 * 4) + 1)
+    # Ex. for pmic2, dimm19 = pmic78   ((19 * 4) + 2)
+    # Ex. for pmic3, dimm19 = pmic79   ((19 * 4) + 3)
+    ## Calculate the 'PMIC's Position Per System (SYS)'
+    # To calculate the PMIC's ordering, take the PMIC's parent DDIMM position,
+    # multiply it by the maximum PMICs per DDIMM, then add the PMIC's instance:
+    my $pmicPosPerSystem = ($ddimmParentPos * $maxPmicPerDdimm) + $pmicInstancePos;
+
+    ## Calculate the 'PMIC's Position per NODE'
+    # The 'PMIC's Position per NODE' is based on the maximum of PMICs per
+    # node which is the product of the maximum number of DIMM's per PROC times the
+    # maximum number of PROC's per NODE times the maxium PMIC's per DDIMM.
+    # PMIC is a 1 to 1 relation to the DDIMM, that is why the maximum DDIM per
+    # PROC is used.
+    # Mod that number with the system wide number to get PMIC position per NODE
+    my $totalMaxPmicPerNode = getMaxInstPerProc("DIMM") * getMaxInstPerParent("PROC") * $maxPmicPerDdimm;
+    my $pmicPosPerNode = $pmicPosPerSystem % $totalMaxPmicPerNode;
+
+    # The PMIC's ID is just a multiple of the DIMM's ID plus the PMIC's position
+    # relative to the DIMM.
+    my $pmicId = ($dimmId * $maxPmicPerDdimm) + $pmicInstancePos;
 
     # Get the FAPI_NAME by using the data gathered above
     my $pmicFapiName = $targetObj->getFapiName($targetType, $nodeParentPos, $pmicPosPerSystem);
@@ -1389,21 +1413,17 @@ sub processPmic
     $pmicAffinity    =~ s/\/dimm-\d+//;     # Drop the dimm info, not needed
     $pmicAffinity    =~ s/\/mem_port-\d+//; # Drop the mem_port info, not needed
     $pmicAffinity    = $pmicAffinity . "/pmic-" . $pmicInstancePos;
-    my $pmicPhysical = $nodeParentPhysical . "/pmic-" . $pmicPosPerSystem;
-
-    # The FRU_ID comes from the parent ddimm
-    my $pmicFruId = $targetObj->getAttribute($ddimmParent, "FRU_ID");
+    my $pmicPhysical = $nodeParentPhysical . "/pmic-" . $pmicId;
 
     # Now that we collected all the data we need, set some target attributes
-    $targetObj->setHuid($target, $sysParentPos, $nodeParentPos, $pmicPosPerSystem);
-    $targetObj->setAttribute($target, "POSITION",      $pmicPosPerSystem);
+    $targetObj->setHuid($target, $sysParentPos, $nodeParentPos, $pmicPosPerNode);
+    $targetObj->setAttribute($target, "POSITION",      $pmicId);
     $targetObj->setAttribute($target, "ORDINAL_ID",    $pmicPosPerSystem);
     $targetObj->setAttribute($target, "FAPI_POS",      $pmicPosPerSystem);
     $targetObj->setAttribute($target, "FAPI_NAME",     $pmicFapiName);
     $targetObj->setAttribute($target, "REL_POS",       $pmicInstancePos);
     $targetObj->setAttribute($target, "AFFINITY_PATH", $pmicAffinity);
     $targetObj->setAttribute($target, "PHYS_PATH",     $pmicPhysical);
-    $targetObj->setAttribute($target, "FRU_ID",        $pmicFruId);
 
     # Set the FAPI_I2C_CONTROL_INFO attribute
     setFapi2AttributeForPmic($targetObj, $target);
@@ -1423,11 +1443,16 @@ sub processPmic
 #
 # @param[in] $targetObj - The global target object blob
 # @param[in] $target    - The OCMB_CHIP target
+# @param[in] $ocmbId    - The OCMB_CHIP target's ID, derived from the DIMM's ID
+# @param[in] $ocmbPosPerNode - The OCMB position per NODE, derived from the
+#                              DIMM's position per NODE.
 #--------------------------------------------------
 sub processOcmbChipAndChildren
 {
-    my $targetObj = shift;
-    my $target    = shift;
+    my $targetObj        = shift;
+    my $target           = shift;
+    my $ocmbId           = shift;
+    my $ocmbPosPerNode   = shift;
 
     # Some sanity checks.  Make sure we are processing the correct target type
     # and make sure the target's parent has been processed.
@@ -1440,14 +1465,13 @@ sub processOcmbChipAndChildren
     my $nodeParent = $targetObj->findParentByType($target, "NODE");
     my $nodeParentPos = $targetObj->getAttribute($nodeParent, "ORDINAL_ID");
     my $nodeParentPhysical = $targetObj->getAttribute($nodeParent, "PHYS_PATH");
-    my $nodeParentAffinity = $targetObj->getAttribute($nodeParent, "AFFINITY_PATH");
     my $ddimmParent = $targetObj->findParentByType($target, "DIMM");
 
-    # Use the parent's DDIMM's position, per system, to set the OCMB's
-    # position, per system. IE, the position is an increasing sequential
+    # Use the parent's DDIMM's ORDINAL_ID, per system, to set the OCMB's
+    # ORDINAL_ID, per system. IE, the ORDINAL_ID is an increasing sequential
     # number, starting at 0, and ending with the last OCMB for the system
     # (target type SYS).
-    my $ocmbPosPerSystem = $targetObj->getAttribute($ddimmParent, "POSITION");
+    my $ocmbPosPerSystem = $targetObj->getAttribute($ddimmParent, "ORDINAL_ID");
 
     # Use the OCMB's position per system to calculate the OCMB's position per
     # parent.  This is done by taking the modulo of the OCMB's position per
@@ -1464,26 +1488,22 @@ sub processOcmbChipAndChildren
     $ocmbAffinity =~ s/\/mem_port.*//g;
 
     # Use the parent NODE's physical path to set the OCMB's physical path
-    my $ocmbPhysical = $nodeParentPhysical . "/ocmb_chip-" . $ocmbPosPerSystem;
-
-    # The FRU_ID comes from the parent ddimm
-    my $ocmbFruId = $targetObj->getAttribute($ddimmParent, "FRU_ID");
+    my $ocmbPhysical = $nodeParentPhysical . "/ocmb_chip-" . $ocmbId;
 
     # Now that we collected all the data we need, set some target attributes
-    $targetObj->setHuid($target, $sysParentPos, $nodeParentPos, $ocmbPosPerSystem);
-    $targetObj->setAttribute($target, "POSITION",      $ocmbPosPerSystem);
+    $targetObj->setHuid($target, $sysParentPos, $nodeParentPos, $ocmbPosPerNode);
+    $targetObj->setAttribute($target, "POSITION",      $ocmbId);
     $targetObj->setAttribute($target, "FAPI_POS",      $ocmbPosPerSystem);
     $targetObj->setAttribute($target, "FAPI_NAME",     $ocmbFapiName);
     $targetObj->setAttribute($target, "AFFINITY_PATH", $ocmbAffinity);
     $targetObj->setAttribute($target, "PHYS_PATH",     $ocmbPhysical);
-    $targetObj->setAttribute($target, "FRU_ID",        $ocmbFruId);
 
     # Set the EEPROM_VPD_PRIMARY_INFO and FAPI_I2C_CONTROL_INFO attributes
     setEepromAndFapi2AttributesForOcmb($targetObj, $target);
 
     # Save this target for retrieval later when printing the xml (sub printXML)
     $targetObj->{targeting}{SYS}[$sysParentPos]{NODES}[$nodeParentPos]
-                {OCMB_CHIPS}[$ocmbPosPerSystem]{KEY} = $target;
+                {OCMB_CHIPS}[$ocmbPosPerNode]{KEY} = $target;
 
     # Mark this target as processed
     markTargetAsProcessed($targetObj, $target);
@@ -1498,7 +1518,7 @@ sub processOcmbChipAndChildren
     {
         if ( ($targetObj->getType($child)) eq "MEM_PORT")
         {
-            processMemPort($targetObj, $child);
+            processMemPort($targetObj, $child, $ocmbPosPerNode);
             $foundMemPort = true;
         }
     }
@@ -1517,33 +1537,39 @@ sub processOcmbChipAndChildren
 #
 # @pre DIMM targets need to be processed beforehand
 #
+# @pre There is a 1 to 1 relationship with MEM_PORT and OCMB
+# @note This method will need to be updated if/when OCMB have multiple MEM_PORTs
+#
 # @param[in] $targetObj - The global target object blob
 # @param[in] $target    - The MEM_PORT target
+# @param[in] $memPortPosPerNode - The MEM_PORT position per NODE, derived from
+#                                 the OCMB's position per NODE.
 #--------------------------------------------------
 sub processMemPort
 {
-    my $targetObj = shift;
-    my $target    = shift;
+    my $targetObj         = shift;
+    my $target            = shift;
+    my $memPortPosPerNode = shift;
 
     # Some sanity checks.  Make sure we are processing the correct target type
     # and make sure the target's parent has been processed.
     my $type = targetTypeSanityCheck($targetObj, $target, "MEM_PORT");
     validateParentHasBeenProcessed($targetObj, $target);
 
-    # Get some useful info from the MEM_PORT parent's SYS, NODE and DDIMM targets
+    # Get some useful info from the MEM_PORT parent's SYS, NODE and OCMB targets
     my $sysParent = $targetObj->findParentByType($target, "SYS");
     my $sysParentPos = $targetObj->getAttribute($sysParent, "ORDINAL_ID");
     my $nodeParent = $targetObj->findParentByType($target, "NODE");
     my $nodeParentPos = $targetObj->getAttribute($nodeParent, "ORDINAL_ID");
-    my $ddimmParent = $targetObj->getTargetParent($target);
-    my $ddimmParentAffinity = $targetObj->getAttribute($ddimmParent, "AFFINITY_PATH");
-    my $ddimmParentPhysical = $targetObj->getAttribute($ddimmParent, "PHYS_PATH");
+    my $ocmbParent = $targetObj->getTargetParent($target);
+    my $ocmbParentAffinity = $targetObj->getAttribute($ocmbParent, "AFFINITY_PATH");
+    my $ocmbParentPhysical = $targetObj->getAttribute($ocmbParent, "PHYS_PATH");
 
-    # Use the parent DDIMM's position, per system, to set the MEM_PORT's
-    # position, per system. IE, the position is an increasing sequential
+    # Use the parent OCMB's FAPI_POS, per system, to set the MEM_PORT's
+    # FAPI_POS, per system. IE, the FAPI_POS is an increasing sequential
     # number, starting at 0, and ending with the last MEM_PORT for the system
     # (target type SYS).
-    my $memPortPosPerSystem = $targetObj->getAttribute($ddimmParent, "POSITION");
+    my $memPortPosPerSystem = $targetObj->getAttribute($ocmbParent, "FAPI_POS");
 
     # Use the MEM_PORT's position per system to calculate the MEM_PORT's
     # position per parent.  This is done by taking the modulo of the MEM_PORT's
@@ -1552,15 +1578,15 @@ sub processMemPort
 
     # Get the FAPI_NAME by using the data gathered above.
     my $chipPos = 0; # The chip position for MEM_PORT is 0
-    my $memPortFapiName  = $targetObj->getFapiName($type, $nodeParentPos, $chipPos, $memPortPosPerSystem);
+    my $memPortFapiName = $targetObj->getFapiName($type, $nodeParentPos, $chipPos, $memPortPosPerSystem);
 
     # Take advantage of previous work done on the DDIMMs.  Use the parent DDIMM's
     # affinity/physical path for our self and append the mem_port to the end.
-    my $memPortAffinity = $ddimmParentAffinity . "/mem_port-" . $memPortPosPerParent;
-    my $memPortPhysical = $ddimmParentPhysical . "/mem_port-" . $memPortPosPerParent;
+    my $memPortAffinity = $ocmbParentAffinity . "/mem_port-" . $memPortPosPerParent;
+    my $memPortPhysical = $ocmbParentPhysical . "/mem_port-" . $memPortPosPerParent;
 
     # Now that we collected all the data we need, set some target attributes
-    $targetObj->setHuid($target, $sysParentPos, $nodeParentPos, $memPortPosPerSystem);
+    $targetObj->setHuid($target, $sysParentPos, $nodeParentPos, $memPortPosPerNode);
     $targetObj->setAttribute($target, "FAPI_POS",      $memPortPosPerSystem);
     $targetObj->setAttribute($target, "FAPI_NAME",     $memPortFapiName);
     $targetObj->setAttribute($target, "REL_POS",       $memPortPosPerParent);
@@ -1842,30 +1868,26 @@ sub iterateOverChiplets
                 my $unit_ptr  = $targetObj->getTarget($child);
                 my $unit_type = $targetObj->getType($child);
 
-                #System XML has some sensor target as hidden children
-                #of targets. We don't care for sensors in this function
-                #So, we can avoid them with this conditional
+                # System XML has some sensor target as hidden children
+                # of targets. We don't care for sensors in this function nor
+                # for the XBUS and ABUS.
+                # These can be avoided with this conditional.
                 if ($unit_type ne "PCI" && $unit_type ne "NA" &&
                     $unit_type ne "FSI" && $unit_type ne "PSI" &&
                     $unit_type ne "SYSREFCLKENDPT" &&
-                    $unit_type ne "PCICLKENDPT" &&
-                    $unit_type ne "LPCREFCLKENDPT")
+                    $unit_type ne "PCICLKENDPT"    &&
+                    $unit_type ne "LPCREFCLKENDPT" &&
+                    $unit_type ne "ABUS"           &&
+                    $unit_type ne "XBUS" )
                 {
+                    #set common attrs for child
+                    setCommonAttrForChiplet($targetObj, $child,
+                                            $sys, $node, $proc);
 
-                    # @TODO Remove this check once ABUS and XBUS
-                    # have been removed from the MRW
-                    if (($targetObj->getType($child) ne "ABUS") &&
-                        ($targetObj->getType($child) ne "XBUS") )
-                    {
-                        #set common attrs for child
-                        setCommonAttrForChiplet($targetObj, $child,
-                                                $sys, $node, $proc);
+                    # Mark this target as processed
+                    markTargetAsProcessed($targetObj, $target);
 
-                        # Mark this target as processed
-                        markTargetAsProcessed($targetObj, $target);
-
-                        iterateOverChiplets($targetObj, $child, $sys, $node, $proc);
-                    }
+                    iterateOverChiplets($targetObj, $child, $sys, $node, $proc);
                 } # end if ($unit_type ne "PCI" && ...
             } # end if ($tgt_type eq "PEC") ... else
         } # end foreach my $child (@{ $targetObj->getTargetChildren($target) })
@@ -2517,7 +2539,7 @@ sub getPerSystemNumericalValue
 #
 # @details Calculate the ORDINAL_ID based on the target's position in relation
 #          to the NODE's and the PROC's position.
-
+#
 #          Example: If there are 4 NODEs to a system (SYS), there are 2 PROCs
 #          per NODE and there are 10 targets per PROC.
 #          To find the ORDINAL_ID of the 3rd target that is behind the 2nd PROC
@@ -2534,7 +2556,7 @@ sub getPerSystemNumericalValue
 #             1st) Calculate the offset for the 3rd NODE:
 #                  (NODE position (2)) * (number of PROCs per node (2)) * (number of targets per PROC (10)) =  40
 #             2nd) Calculate the offset for the 2nd PROC:
-#                  (PROC position (1) * (number of targets per PROC (10) = 10
+#                  (PROC position (1)) * (number of targets per PROC (10)) = 10
 #             3rd) Get the target position within the PROC
 #                   2
 #             4th) add the numbers up to get ORDINAL_ID for target instance
@@ -2557,8 +2579,8 @@ sub calculateOrdinalId
     my $numProcsPerNode = getMaxInstPerParent("PROC");
     my $numTargetsPerProc = getMaxInstPerProc($targetType);
 
-    # Calculate the offset of NODE
-    # Calculate the offset of PROC
+    # Calculate the offset of the NODE
+    # Calculate the offset of the PROC
     # Added above to target position
     # See @details above for explanation
     return ( ($nodePos * $numProcsPerNode * $numTargetsPerProc)  +
@@ -2775,7 +2797,6 @@ sub postProcessProcessor
 
     ## need to initialize the master processor's FSI connections here
     my $proc_type = $targetObj->getAttribute($target, "PROC_MASTER_TYPE");
-
     if ($proc_type eq "ACTING_MASTER" )
     {
         if($targetObj->isBadAttribute($target, "FSI_MASTER_TYPE"))
@@ -2805,7 +2826,8 @@ sub postProcessProcessor
         $targetObj->setAttributeField($target, "SCOM_SWITCHES", "useFsiScom",
             "1");
     }
-    ## Update bus speeds
+
+    ## Update bus speeds"
     processI2cSpeeds($targetObj,$target);
 
     ## these are hardcoded because code sets them properly
@@ -3368,6 +3390,7 @@ sub postProcessIohs
             }
         } # foreach my $child (@{ $targetObj->getTargetChildren($target) })
     } # end if ($iohsConfigMode eq "SMPA") ... elseif ...
+
 } # end sub postProcessIohs
 
 # @TODO RTC 256291: Remove this code
@@ -3812,58 +3835,65 @@ sub processFsi
         my $flip_port         = 0;
         my $altfsiswitch      = 0;
 
-        # If this is a proc that can be a master, then we need to set flip_port
+        #
+        # Primary = Current boot processor
+        # Secondary = All of the other processors
+        # (Alt) Boot Processor = Processor that can be used to boot Hostboot
+        #
+        # If this is a proc that can be a primary, then we need to set flip_port
         # attribute in FSI_OPTIONS. $flip_port tells us which FSI port to write to.
         # The default setting ( with flip_port not set) is to send instructions to port A.
-        # In High End systems there are 2 master capable procs per node.
-        # For the alt-master processor we need to set flip_port so that when it is master,
+        # In High End systems there are 2 primary capable procs per node.
+        # For the alt boot processor we need to set flip_port so that when it is primary,
         # it knows to send instructions to the B port. During processMrw
-        # we cannot determine which proc is master and which is the alt-master.
+        # we cannot determine which proc is primary and which is the alt boot processor.
         # We will set flipPort on both and the later clear flipPort when we determine
-        # which is actually master during hwsv init.
+        # which is actually primary during hwsv init.
 
-        #    FSP A is primary FSB B is backup
-        #   |--------|        |--------|
-        #   | FSP A  |        | FSP B  |
-        #   |  (M)   |        |    (M) |
-        #   |--------|        |--------|
-        #       |
-        #       V
-        #   |--------|        |--------|
-        #   |  (A)(B)|------->|(B) (A) |
-        #   | Master |        |Alt Mast|
-        #   |     (M)|        |(M)     |
-        #   |--------|\       |--------|
-        #          |   \
-        #         /     \
-        #        /       \
-        #   |--------|    \   |---------|
-        #   | (A) (B)|     \->|(A)  (B) |
-        #   | Slave  |        |  Slave  |
-        #   |        |        |         |
-        #   |--------|        |---------|
+        #   FSP A is primary FSB B is backup
+        #   |---------|        |---------|
+        #   | FSP A   |        | FSP B   |
+        #   |   (M)   |        |   (M)   |
+        #   |---------|        |---------|
+        #        |
+        #        V
+        #   |---------|        |---------|
+        #   | (A) (B) |------->| (B) (A) |
+        #   | Primary |        |Alt Boot |
+        #   |     (M) |        |Processor|
+        #   |         |        | (M)     |
+        #   |---------|\       |---------|
+        #          |    \
+        #         /      \
+        #        /        \
+        #   |---------|    \   |---------|
+        #   | (A) (B) |     \->| (A) (B) |
+        #   |Secondary|        |Secondary|
+        #   |         |        |         |
+        #   |---------|        |---------|
 
         #   FSP B is primary FSB A is backup
-        #
-        #   |--------|        |--------|
-        #   | FSP A  |        | FSP B  |
-        #   |  (M)   |        |    (M) |
-        #   |--------|        |--------|
+        #   |---------|        |---------|
+        #   | FSP A   |        | FSP B   |
+        #   |   (M)   |        |   (M)   |
+        #   |---------|        |---------|
         #                           |
         #                           V
-        #   |--------|        |--------|
-        #   |  (A)(B)|<-------|(M) (A) |
-        #   | Master |       /|Alt Mast|
-        #   |     (M)|      /||(B)     |
-        #   |--------|     / ||--------|
-        #                 /   \
-        #                /     \__
-        #               /         \
-        #   |--------| /      |---------|
-        #   |(A)  (B)|        |(A) (B)  |
-        #   | Slave  |        |  Slave  |
-        #   |        |        |         |
-        #   |--------|        |---------|
+        #   |---------|        |---------|
+        #   | (A) (B) |<-------| (M) (A) |
+        #   | Primary |        |Alt Boot |
+        #   |     (M) |        |Processor|
+        #   |         |      /|| (B)     |
+        #   |---------|     / ||---------|
+        #                  /   \
+        #                 /     \__
+        #                /         \
+        #   |---------| /      |---------|
+        #   | (A) (B) |        | (A) (B) |
+        #   |Secondary|        |Secondary|
+        #   |         |        |         |
+        #   |---------|        |---------|
+
         my $source_type = $targetObj->getType($parentTarget);
         if ( $source_type eq "PROC" )
         {
@@ -3876,6 +3906,7 @@ sub processFsi
                 }
             }
         }
+
         my $dest_type = $targetObj->getType($fsi_child_target);
         if ($dest_type eq "PROC" )
         {
@@ -4031,9 +4062,7 @@ sub processI2C
                 }
                 if ($tpm_model eq 2)
                 {
-                    # @TODO RTC 212201 use proper enum when <system>.xml supports it
-                    #$type = $targetObj->getEnumValue("HDAT_I2C_DEVICE_TYPE","TCG_I2C_TPM");
-                    $type = 0x15;
+                    $type = $targetObj->getEnumValue("HDAT_I2C_DEVICE_TYPE","TCG_I2C_TPM");
                 }
             }
             else
@@ -4258,10 +4287,7 @@ sub processI2cSpeeds
 
             if ($bus_speed eq "" || $bus_speed==0) {
                 print "ERROR: I2C bus speed not defined for $i2c->{SOURCE}\n";
-# @TODO 247183 Having issues with bus speed not being set for:
-# ERROR: I2C bus speed not defined for /sys/node-1/Tanager-1/proc_socket-0/blaise-0/power10-0/i2c-master-op0a-B
-# Once corrected will put exit back in
-                # $targetObj->myExit(3);
+                $targetObj->myExit(3);
             }
 
             ## choose lowest bus speed
@@ -4615,19 +4641,6 @@ sub postProcessPec
                                     "PCIE_64BIT_DMA_SIZE", $dma_size_64);
                                 $targetObj->setAttribute($phb_child,
                                     "ENTRY_FEATURES", "0x0001");
-
-                                # Only set MAX_POWER if it exisits in the system
-                                # xml. TODO to remove this check when system xml
-                                # is upated: RTC:175319
-                                if (!($targetObj->isBadAttribute
-                                    ($parent_target,"MAX_POWER")))
-                                {
-                                    my $maxSlotPower = $targetObj->getAttribute
-                                    ($parent_target, "MAX_POWER");
-                                    $targetObj->setAttribute($phb_child,
-                                        "MAX_POWER",$maxSlotPower);
-                                }
-
                             }
                             else
                             {
@@ -5145,21 +5158,12 @@ sub configureParentPervasiveData
         {
             my $value = getParentPervasiveOffset($targetType);
 
-            if ($targetType eq "CORE")
+            if ( ($targetType eq "CORE") || ($targetType eq "FC") )
             {
-                # The CORE pervasive parent value is not sequential.  It only
+                # The CORE/FC pervasive parent value is not sequential.  It only
                 # increases based on the parent lineage EQ which can be
                 # determined by the difference of the max instance per PROC
                 # for the CORE target to the EQ target.
-                my $TARGET_PER_EQ = getMaxInstPerProc($targetType)/getMaxInstPerProc("EQ");
-                $value += ($targetTypeValue/$TARGET_PER_EQ);
-            }
-            elsif ($targetType eq "FC")
-            {
-                # The FC pervasive parent value is not sequential.  It only
-                # increases based on the parent lineage EQ which can be
-                # determined by the difference of the max instance per PROC
-                # for the FC target to the EQ target.
                 my $TARGET_PER_EQ = getMaxInstPerProc($targetType)/getMaxInstPerProc("EQ");
                 $value += ($targetTypeValue/$TARGET_PER_EQ);
             }
@@ -5324,6 +5328,13 @@ sub setDimmTempAttributes
 
 #--------------------------------------------------
 # @brief Error checking
+#
+# @details This method only checks the single target passed in via the $target
+#          parameter.  The subset of targets, error checked, are contained
+#          in the hash variable '%attribute_checks'.
+#
+# @param[in] $targetObj - The global target object blob
+# @param[in] $target    - The target to error check
 #--------------------------------------------------
 sub errorCheck
 {
@@ -5337,8 +5348,11 @@ sub errorCheck
     ## also error checking after processing is complete vs during
     ## processing is easier
     my %attribute_checks = (
-        SYS         => ['SYSTEM_NAME'],#'OPAL_MODEL'],
-        PROC        => ['FSI_MASTER_CHIP', 'EEPROM_VPD_PRIMARY_INFO/devAddr'],
+        SYS         => ['SYSTEM_NAME'],
+        PROC        => ['FSI_MASTER_CHIP', 'FSI_MASTER_PORT'],
+        NODE        => ['EEPROM_VPD_PRIMARY_INFO/devAddr'],
+        OCMB_CHIP   => ['EEPROM_VPD_PRIMARY_INFO/devAddr'],
+        DIMM        => ['EEPROM_VPD_PRIMARY_INFO/devAddr'],
     );
     my %error_msg = (
         'EEPROM_VPD_PRIMARY_INFO/devAddr' =>
@@ -5350,6 +5364,17 @@ sub errorCheck
     my @errors;
     foreach my $attr (@{ $attribute_checks{$type} })
     {
+        if ( ($type eq "DIMM") &&
+             ($targetObj->getTargetType($target) =~ m/connector/))
+        {
+            # These are not the DIMMs you are looking for.  The DIMM connectors
+            # and the DIMM themselves both have type "DIMM". This check weeds out
+            # the dimm connectors.
+            # This method only inspects one target at a time.  Therfore,
+            # considering that this target is not of interest, then exit loop.
+            last;
+        }
+
         my ($a,         $v)     = split(/\|/, $attr);
         my ($a_complex, $field) = split(/\//, $a);
         if ($field ne "")

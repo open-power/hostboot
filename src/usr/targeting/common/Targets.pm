@@ -231,15 +231,14 @@ sub printTarget
     $target_id =~ s/\///g;
     $target_id =~ s/\-//g;
 
-    # If target is of type OCMB_CHIP, then remove "_chip" from target ID
     if ($target_TYPE eq "OCMB_CHIP")
     {
+        # If target is of type OCMB_CHIP, then remove "_chip" from target ID
         $target_id =~ s/_chip//g;
     }
-
-    # If target is of type MEM_PORT, then remove "_chip" and "mem_port" from target ID
-    if ($target_TYPE eq "MEM_PORT")
+    elsif ($target_TYPE eq "MEM_PORT")
     {
+        # If target is of type MEM_PORT, then remove "_chip" and "mem_port" from target ID
         $target_id =~ s/_chip//g;
         $target_id =~ s/mem_port/memport/g;
     }
@@ -995,6 +994,14 @@ sub setFsiAttributes
           $flip_port);
     $self->setAttributeField($target, "FSI_OPTION_FLAGS","reserved", "0");
 
+    # @TODO RTC:257628 This will need to be fixed when support for redundant
+    #                  fsps/bootprocs is implemented.
+    if ( ($self->getType($target) eq "PROC")              &&
+         ($self->getAttribute($target, "POSITION") == 0)     )
+    {
+        # The value of the FSI_MASTER_PORT for all PROCs at position 0 is 0xFF
+        $self->setAttribute($target, "FSI_MASTER_PORT", "0xFF");
+    }
 }
 
 ## remove target
