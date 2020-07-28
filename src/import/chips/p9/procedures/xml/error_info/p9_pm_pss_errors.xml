@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2015,2018                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2015,2020                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -67,7 +67,7 @@
       <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     </collectRegisterFfdc>
     <callout>
-      <target>CODE</target>
+      <procedure>CODE</procedure>
       <priority>HIGH</priority>
     </callout>
   </hwpError>

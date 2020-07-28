@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2015,2019
+# Contributors Listed Below - COPYRIGHT 2015,2020
 # [+] International Business Machines Corp.
 #
 #
@@ -1138,6 +1138,13 @@ foreach my $argnum ( 0 .. $#ARGV )
                 }
                 if ( exists $callout->{target} )
                 {
+                    # Catch error when using target for CODE callout (must use procedure)
+                    if ( $callout->{target} eq "CODE" )
+                    {
+                        print("parseErrorInfo.pl ERROR in $err->{rc}. Must use procedure tag for CODE callout.\n");
+                        exit(1);
+                    }
+
                     # Add the Target to cdgTargetHash to be processed with any
                     # deconfigure and GARD requests
                     $cdgTargetHash{ $callout->{target} }{callout} = 1;

@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2015,2017                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2015,2020                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -37,7 +37,7 @@
     <ffdc>CORE_NUM</ffdc>
     <ffdc>EQ_NUM</ffdc>
     <callout>
-      <target>CODE</target>
+      <procedure>CODE</procedure>
       <priority>HIGH</priority>
     </callout>
     <callout>
@@ -54,7 +54,7 @@
     </description>
     <ffdc>CHIP</ffdc>
     <callout>
-      <target>CODE</target>
+      <procedure>CODE</procedure>
       <priority>HIGH</priority>
     </callout>
     <callout>
@@ -71,7 +71,7 @@
     <ffdc>CHIP</ffdc>
     <ffdc>CORE_NUM</ffdc>
     <callout>
-      <target>CODE</target>
+      <procedure>CODE</procedure>
       <priority>HIGH</priority>
     </callout>
     <callout>
@@ -90,7 +90,7 @@
     <ffdc>CORE_NUM</ffdc>
     <ffdc>MASTER_NUM</ffdc>
     <callout>
-      <target>CODE</target>
+      <procedure>CODE</procedure>
       <priority>HIGH</priority>
     </callout>
     <callout>
