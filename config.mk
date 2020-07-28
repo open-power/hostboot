@@ -5,7 +5,9 @@
 #
 # OpenPOWER HostBoot Project
 #
-# COPYRIGHT International Business Machines Corp. 2010,2014
+# Contributors Listed Below - COPYRIGHT 2010,2020
+# [+] International Business Machines Corp.
+#
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -29,3 +31,4 @@ include $(MKRULESDIR)/util.mk
 include $(MKRULESDIR)/env.mk
 include $(MKRULESDIR)/rules.mk
 include $(MKRULESDIR)/passes.mk
+
