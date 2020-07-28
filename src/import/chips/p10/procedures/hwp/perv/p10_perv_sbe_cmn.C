@@ -632,13 +632,13 @@ fapi2::ReturnCode p10_perv_sbe_cmn_setup_multicast_groups(
     using namespace scomt;
     using namespace scomt::perv;
 
-    fapi2::buffer<uint64_t> present_chiplets, functional_chiplets, eqs_with_good_cores;
-    fapi2::buffer<uint64_t> ignore_pgood_cplt_status_mask, honor_pgood_cplt_status_mask,
-          honor_core_pgood_cplt_status_mask, honor_pgood_force_eq_cplt_status_mask;
+    fapi2::buffer<uint64_t> present_chiplets, functional_chiplets,
+          eqs_with_good_cores_attr, eqs_with_good_cores_reg;
+    fapi2::buffer<uint64_t> pgood_cplt_status_masks[NUM_PGOOD_CHOICES];
+    bool l_core_pgood_reg_known = false;
     const uint64_t CPLT_MC_MEMBERSHIP = 0xFC00000000000000;
     const uint64_t EQ_CHIPLET_MASK    = 0x00000000FF000000;
     int mc_count[64] = {0} ;
-    int i;
     uint32_t offset = 0;
     const mc_setup_t* l_group = i_setup_table;
     std::vector<fapi2::MulticastGroupMapping> l_group_map;
@@ -661,40 +661,28 @@ fapi2::ReturnCode p10_perv_sbe_cmn_setup_multicast_groups(
 
     FAPI_TRY(p10_perv_sbe_cmn_cplt_status(i_target_chip, fapi2::TARGET_STATE_PRESENT, present_chiplets));
     FAPI_TRY(p10_perv_sbe_cmn_cplt_status(i_target_chip, fapi2::TARGET_STATE_FUNCTIONAL, functional_chiplets));
-    FAPI_TRY(p10_perv_sbe_cmn_eqs_with_good_cores(i_target_chip, eqs_with_good_cores));
+    FAPI_TRY(p10_perv_sbe_cmn_eqs_with_good_cores(i_target_chip, false, eqs_with_good_cores_attr));
 
-    ignore_pgood_cplt_status_mask         = present_chiplets;
-    honor_pgood_cplt_status_mask          = functional_chiplets;
-    honor_core_pgood_cplt_status_mask     = (functional_chiplets & ~EQ_CHIPLET_MASK) | eqs_with_good_cores;
-    honor_pgood_force_eq_cplt_status_mask = functional_chiplets | (present_chiplets & EQ_CHIPLET_MASK);
+    pgood_cplt_status_masks[IGNORE_PGOOD]          = present_chiplets;
+    pgood_cplt_status_masks[HONOR_PGOOD]           = functional_chiplets;
+    pgood_cplt_status_masks[HONOR_CORE_PGOOD_ATTR] = (functional_chiplets & ~EQ_CHIPLET_MASK) | eqs_with_good_cores_attr;
+    pgood_cplt_status_masks[HONOR_PGOOD_FORCE_EQ]  = functional_chiplets | (present_chiplets & EQ_CHIPLET_MASK);
 
     while (true)
     {
-        fapi2::buffer<uint64_t> mc_group_members = l_group->members;
-
-        switch (l_group->pgood_type)
+        if (l_group->pgood_type == HONOR_CORE_PGOOD_REG && !l_core_pgood_reg_known)
         {
-            case IGNORE_PGOOD: // ignore pgood
-                mc_group_members &= ignore_pgood_cplt_status_mask;
-                break;
-
-            case HONOR_PGOOD: // honor pgood
-                mc_group_members &= honor_pgood_cplt_status_mask;
-                break;
-
-            case HONOR_CORE_PGOOD: // honor core pgood
-                mc_group_members &= honor_core_pgood_cplt_status_mask;
-                break;
-
-            case HONOR_PGOOD_FORCE_EQ: // honor pgood, but force all EQs on
-                mc_group_members &= honor_pgood_force_eq_cplt_status_mask;
-                break;
-
-            default:
-                FAPI_ERR("Invalid Pgood option");
+            // We calculate this valud only if it is requested since we're doing SCOMs to determine it,
+            // and at the beginning of istep 3 the chiplets are not initialized yet so we'd fail horribly
+            FAPI_TRY(p10_perv_sbe_cmn_eqs_with_good_cores(i_target_chip, true, eqs_with_good_cores_reg));
+            pgood_cplt_status_masks[HONOR_CORE_PGOOD_REG]  = (functional_chiplets & ~EQ_CHIPLET_MASK) | eqs_with_good_cores_reg;
+            l_core_pgood_reg_known = true;
         }
 
-        for ( i = 1; i < 64; i++)
+        fapi2::buffer<uint64_t> mc_group_members =
+            l_group->members & pgood_cplt_status_masks[l_group->pgood_type];
+
+        for (int i = 1; i < 64; i++)
         {
             const uint32_t chiplet_id = i;
 
@@ -777,12 +765,15 @@ fapi2::ReturnCode p10_perv_sbe_cmn_cplt_status(
 /// @brief Query a bitmask representing EQs with at least one good core
 ///
 /// @param[in]     i_target_chip        Reference to TARGET_TYPE_PROC_CHIP target
+/// @param[in]     i_use_reg_not_attr   If false, look at ATTR_PG; if true, look at CPLT_CTRL2
 /// @param[out]    o_cplt_status_mask   returns 64 bit mask value with each chiplet functional status
 /// @return  FAPI2_RC_SUCCESS if success, else error code.
 fapi2::ReturnCode p10_perv_sbe_cmn_eqs_with_good_cores(
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target_chip,
+    bool i_use_reg_not_attr,
     fapi2::buffer<uint64_t>& o_cplt_status_mask)
 {
+    using namespace scomt::perv;
 
     fapi2::Target<fapi2::TARGET_TYPE_PERV> l_chiplet ;
     fapi2::buffer<uint64_t> l_data64 = 0;
@@ -793,17 +784,25 @@ fapi2::ReturnCode p10_perv_sbe_cmn_eqs_with_good_cores(
 
     for (auto& targ : l_cplts)
     {
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PG, targ, l_read_attr_pg));
+        uint8_t l_good_cores = 0;
 
-        // ATTR_PG indicates a "good" core with 0b0
-        if (!l_read_attr_pg.getBit<13>() || !l_read_attr_pg.getBit<14>()
-            || !l_read_attr_pg.getBit<15>() || !l_read_attr_pg.getBit<16>())
+        if (i_use_reg_not_attr)
         {
-            l_data64.setBit(targ.getChipletNumber());
+            FAPI_TRY(fapi2::getScom(targ, CPLT_CTRL2_RW, l_data64));
+            l_data64.extract<5, 4>(l_good_cores);
+        }
+        else
+        {
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PG, targ, l_read_attr_pg));
+            // ATTR_PG indicates a "good" core with 0b0
+            l_read_attr_pg.invert().extract<13, 4>(l_good_cores);
+        }
+
+        if (l_good_cores)
+        {
+            o_cplt_status_mask.setBit(targ.getChipletNumber());
         }
     }
-
-    o_cplt_status_mask = l_data64;
 
 fapi_try_exit:
     return fapi2::current_err;

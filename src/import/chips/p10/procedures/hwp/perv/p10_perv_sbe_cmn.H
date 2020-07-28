@@ -95,10 +95,12 @@ enum mc_hw_group_t : uint8_t
 
 enum mc_pgood_type : uint8_t
 {
-    IGNORE_PGOOD,
+    IGNORE_PGOOD           = 0,
     HONOR_PGOOD,
     HONOR_PGOOD_FORCE_EQ,
-    HONOR_CORE_PGOOD,
+    HONOR_CORE_PGOOD_ATTR,
+    HONOR_CORE_PGOOD_REG,
+    NUM_PGOOD_CHOICES
 };
 
 /// @brief Describes the setup for a single multicast group
@@ -156,6 +158,7 @@ fapi2::ReturnCode p10_perv_sbe_cmn_cplt_status(
 
 fapi2::ReturnCode p10_perv_sbe_cmn_eqs_with_good_cores(
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target_chip,
+    bool i_use_reg_not_attr,
     fapi2::buffer<uint64_t>& o_cplt_status_mask);
 
 fapi2::ReturnCode p10_perv_sbe_cmn_align_chiplets(const
