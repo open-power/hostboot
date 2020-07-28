@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -25,7 +25,6 @@
 #ifndef __TPMDDIF_H
 #define __TPMDDIF_H
 
-#include "usr/devicefw/driverif.H"  // I2C_MUX::NOT_APPLICABLE
 
 namespace TPMDD
 {
@@ -41,15 +40,6 @@ enum tpm_op_types_t
     TPM_OP_FIRSTOP      = TPM_OP_READVENDORID
 };
 
-/**
-* @brief Enumerations to describe the type of devices to be accessed.
-*/
-enum tpm_addr_size_t
-{
-    ONE_BYTE_ADDR   = 1,
-    TWO_BYTE_ADDR   = 2,
-    LAST_DEVICE_TYPE
-};
 
 /**
  * @brief TPM Locality to address for operation
@@ -60,6 +50,7 @@ enum tpm_locality_t
     TPM_LOCALITY_2 = 2,
     TPM_LOCALITY_4 = 4,
 };
+
 
 /**
  * @brief TPM Models that are supported
@@ -76,6 +67,7 @@ enum tpm_model_t : uint8_t
     TPM_MODEL_75x          = 0x02,
 };
 
+
 /**
  * @brief Structure of common parameters needed by different parts of
  *      the code.
@@ -83,28 +75,20 @@ enum tpm_model_t : uint8_t
 struct tpm_info_t
 {
     tpm_op_types_t operation;    ///< TPM operation to perform
-    TARGETING::EntityPath i2cMasterPath; ///< I2C Master path
-    TARGETING::Target * i2cTarget; ///< I2C Master Target
+    TARGETING::EntityPath spiControllerPath; ///< SPI Controller path
+    TARGETING::Target * spiTarget; ///< SPI Controller Target
     TARGETING::Target * tpmTarget; ///< TPM Target
-
-    uint64_t busFreq;           ///< Bus speed in Hz
-    uint8_t port;               ///< I2C Master port
-    uint8_t engine;             ///< I2C Master engine
-    uint8_t tpmEnabled;         ///< TPM attribute defined as available
-    uint8_t devAddr;            ///< I2C Address
+    uint8_t spiEngine;          ///< SPI Controller engine for TPM
     size_t  offset;             ///< TPM Device register offset
-    tpm_addr_size_t addrSize;   ///< I2C Addr size
-
-    uint8_t i2cMuxBusSelector;  ///< The Selector for the I2C MUX
-    TARGETING::EntityPath i2cMuxPath;  ///< I2C MUX path
-
+    tpm_locality_t locality;    ///< TPM locality for SPI access
+    uint8_t tpmEnabled;         ///< TPM attribute defined as available
     uint8_t model;              ///< TPM Model
     uint8_t sts;                ///< STS
     uint8_t burstCount;         ///< burstCount
     uint8_t tpmHash;            ///< TPM Hash
     uint8_t wrFifo;             ///< Write FIFO
     uint8_t rdFifo;             ///< Read FIFO
-    uint8_t vendorIdOffset;     ///< Vendor ID Offset
+    uint16_t vendorIdOffset;    ///< Vendor ID Offset
     uint32_t vendorId;          ///< Vendor ID
 
     /**
@@ -112,18 +96,13 @@ struct tpm_info_t
      */
     tpm_info_t()
         : operation(TPM_OP_LASTOP),
-          i2cMasterPath(),
-          i2cTarget(nullptr),
+          spiControllerPath(),
+          spiTarget(nullptr),
           tpmTarget(nullptr),
-          busFreq(0),
-          port(0),
-          engine(0),
-          tpmEnabled(false),
-          devAddr(0),
+          spiEngine(0),
           offset(0),
-          addrSize(LAST_DEVICE_TYPE),
-          i2cMuxBusSelector(I2C_MUX::NOT_APPLICABLE),
-          i2cMuxPath(),
+          locality(TPM_LOCALITY_0),
+          tpmEnabled(0),
           model(TPM_MODEL_UNDETERMINED),
           sts(0),
           burstCount(0),
@@ -135,6 +114,7 @@ struct tpm_info_t
     {
     }
 };
+
 
 /**
  * @brief Determine if requested TPM is present and enabled in the system
@@ -151,11 +131,12 @@ struct tpm_info_t
  */
 bool tpmPresence (TARGETING::Target* i_pTpm);
 
+
 /**
  * @brief this function will read all of the associated attributes needed
  *      to access the intended TPM.  These attributes will be used to
- *      determine the type of I2C device as well as how to address it via
- *      the I2C device driver.
+ *      determine the type of SPI device as well as how to address it via
+ *      the SPI device driver.
  *
  * @param[in] i_target target node.
  *
@@ -169,8 +150,7 @@ bool tpmPresence (TARGETING::Target* i_pTpm);
  */
 errlHndl_t tpmReadAttributes ( TARGETING::Target * i_target,
                                tpm_info_t & io_tpmInfo,
-                               tpm_locality_t i_locality);
-
+                               tpm_locality_t i_locality );
 
 };  // end namespace TPMDD
 

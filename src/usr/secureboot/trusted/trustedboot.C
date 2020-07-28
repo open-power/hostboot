@@ -287,7 +287,7 @@ void* host_update_primary_tpm( void *io_pArgs )
                 // If TPM connected to acting master processor, it is
                 // primary; otherwise it is backup
                 TARGETING::TPM_ROLE tpmRole =
-                    (tpmData.i2cTarget == procTarget) ?
+                    (tpmData.spiTarget == procTarget) ?
                           TARGETING::TPM_ROLE_TPM_PRIMARY
                         : TARGETING::TPM_ROLE_TPM_BACKUP;
                 tpm->setAttr<TARGETING::ATTR_TPM_ROLE>(tpmRole);

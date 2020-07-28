@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -528,7 +528,40 @@ errlHndl_t tpmCmdStartup(TpmTarget* io_target)
             break;
 
         }
-        else if (TPM_SUCCESS != resp->responseCode)
+        else if (TPM_SUCCESS == resp->responseCode)
+        {
+            TRACFCOMP( g_trac_trustedboot,
+                "TPM STARTUP - TPM not initialized by SBE" );
+            // TODO RTC:211958 - change to predictive error and possibly remove commit
+            /*@
+             * @errortype
+             * @reasoncode      RC_TPM_START_SBE_SETUP_FAILED
+             * @severity        ERRL_SEV_INFORMATIONAL
+             * @moduleid        MOD_TPM_CMD_STARTUP
+             * @userdata1       responseCode
+             * @userdata2       TPM
+             * @devdesc         SBE failed to setup the TPM
+             * @custdesc        Failure detected in security subsystem
+             */
+             err = new ERRORLOG::ErrlEntry(
+                                ERRORLOG::ERRL_SEV_INFORMATIONAL,
+                                MOD_TPM_CMD_STARTUP,
+                                RC_TPM_START_SBE_SETUP_FAILED,
+                                resp->responseCode,
+                                TARGETING::get_huid(io_target),
+                                ERRORLOG::ErrlEntry::ADD_SW_CALLOUT );
+
+              err->collectTrace(SECURE_COMP_NAME);
+              err->collectTrace(TRBOOT_COMP_NAME);
+              errlCommit(err, TRBOOT_COMP_ID);
+        }
+        else if (TPM_RC_INITIALIZE == resp->responseCode)
+        {
+            // SBE should initalize the TPM so this is normal path
+            TRACFCOMP( g_trac_trustedboot,
+                      "TPM STARTUP - TPM already initialized" );
+        }
+        else
         {
             TRACFCOMP( g_trac_trustedboot,
                        "TPM STARTUP OP Fail Ret(0x%X) : ",

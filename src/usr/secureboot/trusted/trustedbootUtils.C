@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -63,6 +63,12 @@ errlHndl_t tpmTransmit(TpmTarget * io_target,
 
     do
     {
+        TRACDCOMP( g_trac_trustedboot,
+               ">>TPM OP TRANSMIT : BufLen %d : %016llx, cmdSize = %d",
+               static_cast<int>(i_bufsize),
+               *(reinterpret_cast<uint64_t*>(io_buffer)),
+               static_cast<int>(i_cmdSize) );
+
         // Send to the TPM
         err = deviceRead(io_target,
                          io_buffer,
@@ -70,11 +76,16 @@ errlHndl_t tpmTransmit(TpmTarget * io_target,
                          DEVICE_TPM_ADDRESS(TPMDD::TPM_OP_TRANSMIT,
                                             i_cmdSize,
                                             i_locality));
+        TRACDCOMP( g_trac_trustedboot,
+              "<<TPM OP TRANSMIT : BufLen %d : %016llx, cmdSize = %d DONE, rc=0x%X",
+               static_cast<int>(i_bufsize),
+               *(reinterpret_cast<uint64_t*>(io_buffer)),
+               static_cast<int>(i_cmdSize),
+               ERRL_GETRC_SAFE(err) );
         if (NULL != err)
         {
             break;
         }
-
 
     } while ( 0 );
 

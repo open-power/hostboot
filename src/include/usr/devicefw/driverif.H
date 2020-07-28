@@ -357,7 +357,7 @@ namespace DeviceFW
      * This macro defaults to skipping the ECC bytes.
      * @param[in] i_engine - Which SPI controller engine to use.
      * @param[in] i_offset - Offset to start read/writing from
-     * @param[in] i_locality - TPM locality (0-3)
+     * @param[in] i_locality - TPM locality (0-4)
      * @param[in] i_tpm - TPM target being accessed
      */
     #define DEVICE_SPI_TPM_ADDRESS(i_engine, i_offset, i_locality, i_tpm)\

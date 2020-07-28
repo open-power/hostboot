@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -53,7 +53,7 @@ enum tpmModuleId
     TPMDD_WRITE                            = 0x03,
     TPMDD_PREPAREADDRESS                   = 0x04,
     TPMDD_READATTRIBUTES                   = 0x05,
-    TPMDD_GETI2CMASTERTARGET               = 0x06,
+    TPMDD_GETI2CMASTERTARGET               = 0x06, // NO LONGER USED
     TPMDD_POLLFORCOMMMANDREADY             = 0x07,
     TPMDD_POLLFORDATAAVAIL                 = 0x08,
     TPMDD_WRITEFIFO                        = 0x09,
@@ -61,6 +61,7 @@ enum tpmModuleId
     TPMDD_READSTSREGVALID                  = 0x0B,
     TPMDD_TPMPRESENCEDETECT                = 0x0C,
     TPMDD_TPMPRESENCE                      = 0x0D,
+    TPMDD_GETSPICONTROLLERTARGET           = 0x0E,
 };
 
 /**
@@ -76,7 +77,7 @@ enum tpmReasonCode
     TPM_INVALID_DEVICE_TYPE              = TPMDD_COMP_ID | 0x02,
     TPM_ATTR_INFO_NOT_FOUND              = TPMDD_COMP_ID | 0x03,
     TPM_INVALID_CHIP                     = TPMDD_COMP_ID | 0x04,
-    TPM_I2C_MASTER_PATH_ERROR            = TPMDD_COMP_ID | 0x05,
+    TPM_I2C_MASTER_PATH_ERROR            = TPMDD_COMP_ID | 0x05,  // NO LONGER USED
     TPM_TARGET_NULL                      = TPMDD_COMP_ID | 0x06,
     TPM_INVALID_ADDR_OFFSET_SIZE         = TPMDD_COMP_ID | 0x07,
     TPM_OVERFLOW_ERROR                   = TPMDD_COMP_ID | 0x08,
@@ -86,9 +87,13 @@ enum tpmReasonCode
     TPM_BUS_SPEED_LOOKUP_FAIL            = TPMDD_COMP_ID | 0x0C,
     TPM_RC_TPM_NOT_DETECTED              = TPMDD_COMP_ID | 0x0D,
     TPM_RC_UNEXPECTED_VENDOR_ID          = TPMDD_COMP_ID | 0x0E,
-    TPM_RC_UNEXPECTED_FAMILY_ID          = TPMDD_COMP_ID | 0x0F,
+    TPM_RC_UNEXPECTED_FAMILY_ID          = TPMDD_COMP_ID | 0x0F, // NO LONGER USED
     TPM_ATTR_MODEL_NOT_FOUND             = TPMDD_COMP_ID | 0x10,
     TPM_ATTR_INVALID_MODEL               = TPMDD_COMP_ID | 0x11,
+    TPM_SPI_CONTROLLER_PATH_ERROR        = TPMDD_COMP_ID | 0x12,
+    TPM_ATTR_TPM_ENABLED_NOT_FOUND       = TPMDD_COMP_ID | 0x13,
+    TPM_EXTRA_DATA_AVAILABLE             = TPMDD_COMP_ID | 0x14,
+
 };
 
 };  // end TPMDD

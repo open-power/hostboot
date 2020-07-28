@@ -119,6 +119,7 @@ namespace TRUSTEDBOOT
         RC_TPM_BAD_RESP                  = TRBOOT_COMP_ID | 0xBC,
         RC_NO_TPM_LOG_MGR                = TRBOOT_COMP_ID | 0xBD,
         RC_TPM_IS_UNUSABLE               = TRBOOT_COMP_ID | 0xBE,
+        RC_TPM_START_SBE_SETUP_FAILED    = TRBOOT_COMP_ID | 0xBF,
     };
 #ifdef __cplusplus
 }

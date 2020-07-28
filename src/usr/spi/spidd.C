@@ -60,8 +60,8 @@ constexpr uint64_t HOSTBOOT_PIB_MASTER_ID = 9;
 trace_desc_t* g_trac_spi = nullptr;
 TRAC_INIT(&g_trac_spi, SPI_COMP_NAME, KILOBYTE);
 
-#define TRACUCOMP(args...)    TRACFCOMP(args)
-//#define TRACUCOMP(args...)
+//#define TRACUCOMP(args...)    TRACFCOMP(args)
+#define TRACUCOMP(args...)
 
 namespace SPI
 {
@@ -972,7 +972,7 @@ void SpiEepromOp::addCallouts(errlHndl_t& io_errl)
                                         HWAS::NO_DECONFIG,
                                         HWAS::GARD_NULL);
                 break;
-            case 4:  // TPM
+            case 4:  // TPM (handled by SpiTpmOp)
                 break;
             case 5:
                 // DUMP
@@ -1034,7 +1034,6 @@ errlHndl_t SpiTpmOp::read(void* o_buffer, size_t& io_buflen)
 {
     errlHndl_t errl = nullptr;
 
-/* TODO RTC:246066 - reenable when hwp is available
     TRACUCOMP(g_trac_spi, "SpiTpmOp::read() - calling "
             "spi_tpm_read_secure HWP with params: "
             "locality = %d, offset = 0x%llx, length = %d",
@@ -1048,7 +1047,7 @@ errlHndl_t SpiTpmOp::read(void* o_buffer, size_t& io_buflen)
                     iv_offset,
                     io_buflen,
                     reinterpret_cast<uint8_t*>(o_buffer));
-*/
+
     return errl;
 }
 
@@ -1056,9 +1055,8 @@ errlHndl_t SpiTpmOp::write(void* i_buffer, size_t& io_buflen)
 {
     errlHndl_t errl = nullptr;
 
-/* TODO RTC:246066 - reenable when hwp is available
     TRACUCOMP(g_trac_spi, "SpiTpmOp::write() - calling "
-            "spi_tpm_write_with_wait HWP with params:"
+            "spi_tpm_write_with_wait HWP with params: "
             "locality = %d, offset = 0x%llx, length = %d",
             iv_locality, iv_offset, io_buflen);
 
@@ -1070,7 +1068,7 @@ errlHndl_t SpiTpmOp::write(void* i_buffer, size_t& io_buflen)
                     iv_offset,
                     io_buflen,
                     reinterpret_cast<uint8_t*>(i_buffer));
-*/
+
     return errl;
 }
 
