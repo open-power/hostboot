@@ -153,6 +153,14 @@ Layout Description
         <ecc/>
     </section>
     <section>
+        <description>HCODE_LID Ref Image (1.125MB)</description>
+        <eyeCatch>HCODE_LID</eyeCatch>
+        <physicalRegionSize>0x120000</physicalRegionSize>
+        <sha512Version/>
+        <side>sideless</side>
+        <ecc/>
+    </section>
+    <section>
         <description>Hostboot Runtime Services for Sapphire (7.0MB)</description>
         <eyeCatch>HBRT</eyeCatch>
         <physicalRegionSize>0x700000</physicalRegionSize>
@@ -268,9 +276,9 @@ Layout Description
         <ecc/>
     </section>
     <section>
-        <description>HDAT Data (16K)</description>
+        <description>HDAT Data (32K)</description>
         <eyeCatch>HDAT</eyeCatch>
-        <physicalRegionSize>0x4000</physicalRegionSize>
+        <physicalRegionSize>0x8000</physicalRegionSize>
         <side>sideless</side>
         <sha512Version/>
         <ecc/>

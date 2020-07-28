@@ -349,7 +349,15 @@ ENGD_OBJPATH = ${HBFW_OBJPATH:S/hbfw\/img/engd\/href/g}
 ## Chip Specific
 P10_HBD_IMG = simics_P10_targeting.bin
 
+# Needs to also appear in /fips1010/src/fipsfs/engd.fipsfs.db
+# #hw ref image
+# ||hbfw/img/p10.hw_ref_image.header.bin|opt/fips/components/hwsv/p10.hw_ref_image.hdr.bin|p10cec(CP_755)|
+# ||hbfw/img/p10.hw_ref_image_lid.header.bin|opt/fips/components/hwsv/p10.hw_ref_image_lid.hdr.bin|p10cec(CP_755)|
 P10_HCODE_IMG = ${ENGD_SRCPATH:Fp10.hw_ref_image.bin}
+P10_HCODE_LID_IMG = p10.hw_ref_image_lid.bin
+
+hcode_lid: ${ENGD_SRCPATH:Fp10.hw_ref_image.bin}
+	cp ${ENGD_SRCPATH:Fp10.hw_ref_image.bin} ${P10_HCODE_LID_IMG}
 
 P10_OCC_IMG = ${bb}/images/ppc/lab/fs/p9le/rootfs/opt/extucode/81e00430.lid
 
@@ -370,6 +378,7 @@ DENALI_HBD_IMGS = HBD=${${HBFW_TARGPATH:FDENALI_node_0_hb_targeting.bin}:P},HBD=
 ## Chip Specific
 P10_HBD_FINAL_IMG = P10.HBD.bin
 P10_HCODE_FINAL_IMG = P10.HCODE.bin
+P10_HCODE_LID_FINAL_IMG = P10.HCODE_LID.bin
 P10_SBE_FINAL_IMG = P10.SBE.bin
 P10_OCC_FINAL_IMG = P10.OCC.bin
 ## System Specific
@@ -383,9 +392,9 @@ DENALI_WOFDATA_FINAL_IMG = DENALI.WOFDATA.bin
 # Decide which PNOR to build
 # Paramemters passed into GEN_PNOR_IMAGE_SCRIPT.
 .if (${PNOR_LAYOUT_SELECTED} == "STANDALONE")
-    GEN_P10_BIN_FILES = P10:SBE=${${P10_SBE_IMG}:P},HCODE=${${P10_HCODE_IMG}:P},OCC=${${P10_OCC_IMG}:P},HBD=${${P10_HBD_IMG}:P}
+    GEN_P10_BIN_FILES = P10:SBE=${${P10_SBE_IMG}:P},HCODE=${${P10_HCODE_IMG}:P},HCODE_LID=${${P10_HCODE_LID_IMG}:P},OCC=${${P10_OCC_IMG}:P},HBD=${${P10_HBD_IMG}:P}
 .else
-    GEN_P10_BIN_FILES = P10:SBE=${${P10_SBE_IMG}:P},HCODE=${${P10_HCODE_IMG}:P},OCC=${${P10_OCC_IMG}:P},HBD=${${P10_HBD_IMG}:P}
+    GEN_P10_BIN_FILES = P10:SBE=${${P10_SBE_IMG}:P},HCODE=${${P10_HCODE_IMG}:P},HCODE_LID=${${P10_HCODE_LID_IMG}:P},OCC=${${P10_OCC_IMG}:P},HBD=${${P10_HBD_IMG}:P}
 .endif
 GEN_DENALI_BIN_FILES = DENALI:WOFDATA=${${DENALI_WOFDATA_IMG}:P},${DENALI_HBD_IMGS}
 SYSTEM_SPECIFIC_PARAMS = --install-all --emit-eccless ${TARGET_TEST:b--test} ${CONFIG_SECUREBOOT:b--secureboot}  \
@@ -396,7 +405,7 @@ SYSTEM_SPECIFIC_PARAMS = --install-all --emit-eccless ${TARGET_TEST:b--test} ${C
                          --secure-version ${SIGNING_SECURITY_VERSION} \
 			 --editedLayoutLocation ${EDITED_LAYOUT_PATH}
 
-gen_system_specific_images_bypass_cache : dump-secureboot-config
+gen_system_specific_images_bypass_cache : dump-secureboot-config hcode_lid
 	# Call script to generate final bin file for chip/system specific images
 	export LD_PRELOAD=${SIGNING_LIBS} && echo "Fetching OpenSSL vesion(2):" && openssl version && ${GEN_PNOR_IMAGE_SCRIPT} ${SYSTEM_SPECIFIC_PARAMS} ${BUILD_TYPE_PARAMS} ${SIGN_MODE_ARG}
 
@@ -414,8 +423,8 @@ gen_system_specific_images: build_sbe_partitions .PMAKE
     HOSTBOOT_DEFAULT_SECTIONS = HBBL=${HBBL_FINAL_IMG},HBB=${HBB_FINAL_IMG},HBI=${HBI_FINAL_IMG},HBRT=${HBRT_FINAL_IMG},TEST=${TEST_FINAL_IMG},TESTRO=${TESTRO_FINAL_IMG},TESTLOAD=${TESTLOAD_FINAL_IMG},HBEL=${HBEL_FINAL_IMG},GUARD=${GUARD_FINAL_IMG},PAYLOAD=${PAYLOAD_FINAL_IMG},RINGOVD=${RINGOVD_FINAL_IMG},SBKT=${SBKT_FINAL_IMG}
 .endif
 
-DENALI_SECT = HBD=${DENALI_HBD_FINAL_IMG},SBE=${P10_SBE_FINAL_IMG},HCODE=${P10_HCODE_FINAL_IMG},OCC=${P10_OCC_FINAL_IMG},WOFDATA=${DENALI_WOFDATA_FINAL_IMG},EECACHE=${EECACHE_FINAL_IMG},OCMBFW=${OCMBFW_FINAL_IMG}
-P10_SECT = HBD=${P10_HBD_FINAL_IMG},SBE=${P10_SBE_FINAL_IMG},HCODE=${P10_HCODE_FINAL_IMG},OCC=${P10_OCC_FINAL_IMG},WOFDATA=${DENALI_WOFDATA_FINAL_IMG},EECACHE=${EECACHE_FINAL_IMG},OCMBFW=${OCMBFW_FINAL_IMG}
+DENALI_SECT = HBD=${DENALI_HBD_FINAL_IMG},SBE=${P10_SBE_FINAL_IMG},HCODE=${P10_HCODE_FINAL_IMG},HCODE_LID=${P10_HCODE_LID_FINAL_IMG},OCC=${P10_OCC_FINAL_IMG},WOFDATA=${DENALI_WOFDATA_FINAL_IMG},EECACHE=${EECACHE_FINAL_IMG},OCMBFW=${OCMBFW_FINAL_IMG}
+P10_SECT = HBD=${P10_HBD_FINAL_IMG},SBE=${P10_SBE_FINAL_IMG},HCODE=${P10_HCODE_FINAL_IMG},HCODE_LID=${P10_HCODE_LID_FINAL_IMG},OCC=${P10_OCC_FINAL_IMG},WOFDATA=${DENALI_WOFDATA_FINAL_IMG},EECACHE=${EECACHE_FINAL_IMG},OCMBFW=${OCMBFW_FINAL_IMG}
 
 
 .if (${PNOR_LAYOUT_SELECTED} == "P10")

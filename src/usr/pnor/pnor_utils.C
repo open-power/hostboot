@@ -363,6 +363,7 @@ bool PNOR::isEnforcedSecureSection(const uint32_t i_section)
                i_section == SBKT ||
                i_section == OCC ||
                i_section == HCODE ||
+               i_section == HCODE_LID ||
                i_section == HB_RUNTIME ||
                i_section == WOFDATA ||
                i_section == CAPP ||
@@ -442,6 +443,7 @@ const char * PNOR::SectionIdToString( uint32_t i_secIdIndex )
 #ifdef CONFIG_LOAD_PHYP_FROM_BOOTKERNEL
         "BOOTKERNEL",  /**< PNOR::BOOTKERNEL     : OPAL == petitboot,PHYP == PowerVM */
 #endif
+        "HCODE_LID",   /**< PNOR::HCODE_LID      : HCODE_LID Reference image */
 #endif
     };
 

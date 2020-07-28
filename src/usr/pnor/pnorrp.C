@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2020                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -435,6 +435,8 @@ errlHndl_t PnorRP::getSectionInfo( PNOR::SectionId i_section,
     //TRACDCOMP(g_trac_pnor, "PnorRP::getSectionInfo> i_section=%d", i_section );
     errlHndl_t l_errhdl = NULL;
     PNOR::SectionId id = i_section;
+    // Clear caller's hasHashTable since we only override when we find hash table
+    o_info.hasHashTable = false;
 
     do
     {

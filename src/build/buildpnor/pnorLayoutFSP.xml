@@ -144,6 +144,14 @@ Layout Description - Used when building an FSP driver
         <ecc/>
     </section>
     <section>
+        <description>HCODE_LID Ref Image (1.125MB)</description>
+        <eyeCatch>HCODE_LID</eyeCatch>
+        <physicalRegionSize>0x120000</physicalRegionSize>
+        <sha512Version/>
+        <side>sideless</side>
+        <ecc/>
+    </section>
+    <section>
         <description>Hostboot Runtime Services for Sapphire (6MB)</description>
         <eyeCatch>HBRT</eyeCatch>
         <physicalRegionSize>0x600000</physicalRegionSize>

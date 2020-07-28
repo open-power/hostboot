@@ -1,3 +1,9 @@
-# If this is uncommented, use this file for the HCODE image and
-# don't bother building the HCODE image.
+# If this is uncommented, use this file for the HCODE images and
+# don't bother building the HCODE images.
+#
+# If this is to be used, the two images must be present with unique names
+# The contents of the files may be identical, but we need two distinct file names to be used in the build processing
+# Examples - p10.hw_ref_image.bin and p10.hw_ref_image_lid.bin
+#
 #export HCODE_OVERRIDE_IMAGE=/gsa/ausgsa/projects/h/hostboot/simbuild/dependencies/hcode/6973a406404d56f7da532a7fce0e5caf21e28dea/p9a.hw_ref_image.bin
+#export HCODE_LID_OVERRIDE_IMAGE=/gsa/ausgsa/projects/h/hostboot/simbuild/dependencies/hcode/6973a406404d56f7da532a7fce0e5caf21e28dea/p9a.hw_ref_image.bin

@@ -48,12 +48,13 @@ const size_t lidIdStrLength = 9;
 //          The second Lid in the pair is the Container LID (Secure Header)
 static const PnorLidsMap PnorToLidsMap =
 {
-    { PNOR::TESTRO,  LidAndContainerLid(TEST_LIDID, INVALID_LIDID)},
-    { PNOR::VERSION, LidAndContainerLid(VERSION_LIDID, INVALID_LIDID)},
-    { PNOR::OCC,     LidAndContainerLid(OCC_LIDID, OCC_CONTAINER_LIDID)},
-    { PNOR::WOFDATA, LidAndContainerLid(WOF_LIDID, WOF_CONTAINER_LIDID)},
-    { PNOR::HCODE,   LidAndContainerLid(P10_HCODE_LIDID, HCODE_CONTAINER_LIDID)},
-    { PNOR::RINGOVD, LidAndContainerLid(HWREFIMG_RINGOVD_LIDID,INVALID_LIDID)},
+    { PNOR::TESTRO,      LidAndContainerLid(TEST_LIDID, INVALID_LIDID)},
+    { PNOR::VERSION,     LidAndContainerLid(VERSION_LIDID, INVALID_LIDID)},
+    { PNOR::OCC,         LidAndContainerLid(OCC_LIDID, OCC_CONTAINER_LIDID)},
+    { PNOR::WOFDATA,     LidAndContainerLid(WOF_LIDID, WOF_CONTAINER_LIDID)},
+    { PNOR::HCODE,       LidAndContainerLid(P10_HCODE_LIDID, HCODE_CONTAINER_LIDID)},
+    { PNOR::HCODE_LID,   LidAndContainerLid(P10_HCODE_LIDID, HCODE_CONTAINER_LIDID)},
+    { PNOR::RINGOVD,     LidAndContainerLid(HWREFIMG_RINGOVD_LIDID,INVALID_LIDID)},
 };
 
 LidAndContainerLid getPnorSecLidIds(const PNOR::SectionId i_sec)

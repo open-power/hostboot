@@ -197,6 +197,7 @@ generate_hcode_image()
     fi
 
     cp "$HCODE_IMAGE" ${PROJECT_ROOT}/standalone/staging/p10.hw_image.bin
+    cp "$HCODE_IMAGE" ${PROJECT_ROOT}/standalone/staging/p10.hw_image_lid.bin
 }
 
 FIRST_PARAM=$1

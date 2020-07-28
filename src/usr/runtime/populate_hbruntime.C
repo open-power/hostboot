@@ -914,6 +914,10 @@ errlHndl_t hbResvLoadSecureSection (const PNOR::SectionId i_sec,
               PNOR::SectionIdToString(i_sec));
 
     errlHndl_t l_elog = nullptr;
+    //RTC: 209485
+    //      PHASE 1 - First get HCODE_LID infrastructure in builds
+    //      PHASE 2 - Uncomment HCODE_LID override
+    PNOR::SectionId shadow_i_sec = i_sec;
 
 #ifdef CONFIG_SECUREBOOT
         auto l_sectionSecurelyLoaded = false;
@@ -921,16 +925,22 @@ errlHndl_t hbResvLoadSecureSection (const PNOR::SectionId i_sec,
 
     do {
 
+        if (i_sec == PNOR::HCODE)
+        {
+            //shadow_i_sec = PNOR::HCODE_LID;
+            TRACFCOMP( g_trac_runtime, "hbResvLoadSecureSection -PHASE2- will OVERRIDE to HCODE_LID shadow_i_sec %s",
+                PNOR::SectionIdToString(shadow_i_sec));
+        }
         // Check for inhibited sections
-        if(PNOR::isInhibitedSection(i_sec))
+        if(PNOR::isInhibitedSection(shadow_i_sec))
         {
             TRACFCOMP( g_trac_runtime, INFO_MRK"hbResvloadSecureSection() Skipping - Cannot load inhibited section %s",
-                      PNOR::SectionIdToString(i_sec));
+                      PNOR::SectionIdToString(shadow_i_sec));
             break;
         }
 
         PNOR::SectionInfo_t l_info;
-        l_elog = PNOR::getSectionInfo( i_sec, l_info );
+        l_elog = PNOR::getSectionInfo( shadow_i_sec, l_info );
         if(l_elog)
         {
             //No need to commit error here, it gets handled later
@@ -944,12 +954,12 @@ errlHndl_t hbResvLoadSecureSection (const PNOR::SectionId i_sec,
         if (l_info.secure)
         {
             // Securely Load PNOR section
-            l_elog = loadSecureSection(i_sec);
+            l_elog = loadSecureSection(shadow_i_sec);
             if (l_elog)
             {
                 TRACFCOMP( g_trac_runtime,
                            ERR_MRK"hbResvloadSecureSection() - Error from "
-                           "loadSecureSection(%s)", PNOR::SectionIdToString(i_sec));
+                           "loadSecureSection(%s)", PNOR::SectionIdToString(shadow_i_sec));
                 break;
             }
             l_sectionSecurelyLoaded = true;
@@ -988,7 +998,7 @@ errlHndl_t hbResvLoadSecureSection (const PNOR::SectionId i_sec,
         l_imgSize += PAGESIZE;
 
         // Load Pnor section into HB reserved memory
-        l_elog = PreVerifiedLidMgr::loadFromPnor(i_sec, l_pnorVaddr, l_imgSize);
+        l_elog = PreVerifiedLidMgr::loadFromPnor(shadow_i_sec, l_pnorVaddr, l_imgSize);
         if(l_elog)
         {
             break;
@@ -1001,12 +1011,12 @@ errlHndl_t hbResvLoadSecureSection (const PNOR::SectionId i_sec,
     if (l_sectionSecurelyLoaded )
     {
         // Unload Secure PNOR section
-        auto l_unloadErrlog = unloadSecureSection(i_sec);
+        auto l_unloadErrlog = unloadSecureSection(shadow_i_sec);
         if (l_unloadErrlog)
         {
             TRACFCOMP( g_trac_runtime,
                        ERR_MRK"hbResvloadSecureSection() - Error from "
-                       "unloadSecureSection(%s)", PNOR::SectionIdToString(i_sec));
+                       "unloadSecureSection(%s)", PNOR::SectionIdToString(shadow_i_sec));
             // Link unload error log to existing errorlog plid and commit error
             if(l_elog)
             {

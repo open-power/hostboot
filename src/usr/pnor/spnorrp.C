@@ -366,6 +366,7 @@ uint64_t SPnorRP::verifySections(SectionId i_id,
         // If hash table exists, need to adjust sizes
         if (l_info.hasHashTable)
         {
+            TRACFCOMP(g_trac_pnor, "PNOR::verifySections> hasHashTable FOUND l_info.name=%s", l_info.name);
             io_rec->hasHashTable = true;
             l_info.vaddr -= l_info.secureProtectedPayloadSize;
             l_info.size += l_info.secureProtectedPayloadSize;
@@ -417,10 +418,10 @@ uint64_t SPnorRP::verifySections(SectionId i_id,
         uint8_t* l_unsecuredAddr = l_tempAddr - VMM_VADDR_SPNOR_DELTA;
 
         TRACFCOMP(g_trac_pnor,"SPnorRP::verifySections section start address "
-                    "in temp space is 0x%.16llX, "
-                    "section start address in unsecured space is 0x%.16llX, "
+                    "in temp space l_tempAddr=0x%.16llX, "
+                    "section start address in unsecured space l_unsecureAddr=0x%.16llX, "
                     "l_info.size = 0x%.16llX, "
-                    "payload size = 0x%.16llX, ",
+                    "l_info.secureProtectedPayloadSize = 0x%.16llX, ",
                     l_tempAddr, l_unsecuredAddr, l_info.size,
                     l_info.secureProtectedPayloadSize);
 

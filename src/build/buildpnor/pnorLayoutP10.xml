@@ -288,5 +288,13 @@ Layout Description
         <sha512Version/> -->
         <side>sideless</side>
     </section>
+    <section>
+        <description>HCODE_LID Ref Image (1.125MB)</description>
+        <eyeCatch>HCODE_LID</eyeCatch>
+        <physicalRegionSize>0x120000</physicalRegionSize>
+        <sha512Version/>
+        <side>sideless</side>
+        <ecc/>
+    </section>
 
 </pnor>
