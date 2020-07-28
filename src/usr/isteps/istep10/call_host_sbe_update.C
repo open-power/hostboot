@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/isteps/istep10/call_host_slave_sbe_update.C $         */
+/* $Source: src/usr/isteps/istep10/call_host_sbe_update.C $               */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2020                             */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -244,14 +244,14 @@ errlHndl_t rediscoverI2CTargets(void)
     return err;
 }
 
-void* call_host_slave_sbe_update (void *io_pArgs)
+void* call_host_sbe_update (void *io_pArgs)
 {
     errlHndl_t  l_errl  =   NULL;
     IStepError l_StepError;
     bool l_testAltMaster = true;
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-               "call_host_slave_sbe_update entry" );
+               "call_host_sbe_update entry" );
     do
     {
 
@@ -363,7 +363,7 @@ void* call_host_slave_sbe_update (void *io_pArgs)
    } while (0);
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-               "call_host_slave_sbe_update exit" );
+               "call_host_sbe_update exit" );
 
     // end task, returning any errorlogs to IStepDisp
     return l_StepError.getErrorHandle();

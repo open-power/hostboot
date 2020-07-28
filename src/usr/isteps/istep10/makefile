@@ -47,7 +47,7 @@ EXTRAINCDIR += ${INITFILES_HWP_PATH}
 EXTRAINCDIR += ${PERV_HWP_PATH}
 
 OBJS += call_proc_build_smp.o
-OBJS += call_host_slave_sbe_update.o
+OBJS += call_host_sbe_update.o
 OBJS += call_host_secureboot_lockdown.o
 OBJS += call_proc_chiplet_scominit.o
 OBJS += call_proc_pau_scominit.o
@@ -77,7 +77,7 @@ OBJS+=p10_adu_access.o
 OBJS+=p10_adu_setup.o
 OBJS+=p10_smp_wrap.o
 
-# Istep 10.2 -- host_slave_sbe_update
+# Istep 10.2 -- host_sbe_update
 OBJS+=p10_sbe_lpc_init.o
 OBJS+=p10_lpc_utils.o
 

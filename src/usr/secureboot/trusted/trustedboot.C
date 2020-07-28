@@ -218,13 +218,13 @@ bool functionalPrimaryTpmExists()
     return exists;
 }
 
-void* host_update_master_tpm( void *io_pArgs )
+void* host_update_primary_tpm( void *io_pArgs )
 {
     errlHndl_t err = nullptr;
     bool unlock = false;
 
     TRACFCOMP(g_trac_trustedboot,ENTER_MRK
-        "host_update_master_tpm()");
+        "host_update_primary_tpm()");
 
     // Get all TPMs to setup our array
     TARGETING::TargetHandleList tpmList;
@@ -234,7 +234,7 @@ void* host_update_master_tpm( void *io_pArgs )
     assert(tpmList.size() <= MAX_TPMS_PER_NODE, "Too many TPMs found");
 
     TRACFCOMP(g_trac_trustedboot,INFO_MRK
-        "host_update_master_tpm: Found %d TPM(s) in blueprint",
+        "host_update_primary_tpm: Found %d TPM(s) in blueprint",
         tpmList.size());
 
     do
@@ -396,7 +396,7 @@ void* host_update_master_tpm( void *io_pArgs )
         if(pBackupTpm == nullptr)
         {
             TRACFCOMP( g_trac_trustedboot,INFO_MRK
-                       "host_update_master_tpm() "
+                       "host_update_primary_tpm() "
                        "Backup TPM unavailable "
                        "since it's not in the system blueprint.");
         }
@@ -438,7 +438,7 @@ void* host_update_master_tpm( void *io_pArgs )
     if(pPrimaryTpm)
     {
         TRACUCOMP( g_trac_trustedboot,
-                   "host_update_master_tpm() - "
+                   "host_update_primary_tpm() - "
                    "Primary TPM Present:%d Functional:%d Init Attempted:%d"
                    " Usable:%d",
                    pPrimaryTpm->getAttr<TARGETING::ATTR_HWAS_STATE>().
@@ -455,7 +455,7 @@ void* host_update_master_tpm( void *io_pArgs )
     if(pBackupTpm)
     {
         TRACUCOMP( g_trac_trustedboot,
-                   "host_update_master_tpm() - "
+                   "host_update_primary_tpm() - "
                    "Backup TPM Present:%d Functional:%d Init Attempted:%d "
                    "Usable: %d. "
                    "Backup TPM initialization is deferred to istep 10.14.",
@@ -469,7 +469,7 @@ void* host_update_master_tpm( void *io_pArgs )
     }
 
     TRACFCOMP( g_trac_trustedboot,EXIT_MRK
-        "host_update_master_tpm() - %s",
+        "host_update_primary_tpm() - %s",
         ((nullptr == err) ? "No Error" : "With Error") );
 
     return err;

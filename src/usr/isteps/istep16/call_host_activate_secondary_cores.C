@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/isteps/istep16/call_host_activate_slave_cores.C $     */
+/* $Source: src/usr/isteps/istep16/call_host_activate_secondary_cores.C $ */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2020                             */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,7 +22,6 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-
 #include <config.h>
 #include <errl/errlentry.H>
 #include <errno.h>
@@ -67,14 +66,14 @@ const int EXPECTED_STOP_STATE = 15;
 namespace ISTEP_16
 {
 
-void* call_host_activate_slave_cores(void* const io_pArgs)
+void* call_host_activate_secondary_cores(void* const io_pArgs)
 {
     IStepError  l_stepError;
     errlHndl_t  l_timeout_errl =   nullptr;
     errlHndl_t  l_errl         =   nullptr;
 
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-               "call_host_activate_slave_cores entry" );
+               "call_host_activate_secondary_cores entry" );
 
     // @@@@@    CUSTOM BLOCK:   @@@@@
 
@@ -131,7 +130,7 @@ void* call_host_activate_slave_cores(void* const io_pArgs)
         int rc = 0;
         const uint64_t en_threads = sys->getAttr<ATTR_ENABLED_THREADS>();
         TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                  "call_host_activate_slave_cores: Waking 0x%016llX.",
+                  "call_host_activate_secondary_cores: Waking 0x%016llX.",
                   pir);
 
         rc = cpu_start_core(pir, en_threads);
@@ -141,7 +140,7 @@ void* call_host_activate_slave_cores(void* const io_pArgs)
         if (-ETIME == rc)
         {
             TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                      "call_host_activate_slave_cores: "
+                      "call_host_activate_secondary_cores: "
                       "Time out rc from kernel %d on core 0x%016llX",
                       rc,
                       pir);
@@ -190,14 +189,14 @@ void* call_host_activate_slave_cores(void* const io_pArgs)
         if( 0 != rc )
         {
             TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                       "call_host_activate_slave_cores: "
+                       "call_host_activate_secondary_cores: "
                        "Core errors during wakeup on core 0x%016llX",
                        pir);
             /*@
              * @errortype
              * @reasoncode  RC_SLAVE_CORE_WAKEUP_ERROR
              * @severity    ERRORLOG::ERRL_SEV_UNRECOVERABLE
-             * @moduleid    MOD_HOST_ACTIVATE_SLAVE_CORES
+             * @moduleid    MOD_HOST_ACTIVATE_SECONDARY_CORES
              * @userdata1[00:31]   PIR of failing core.
              * @userdata2[32:63]   HUID of failing core.
              * @userdata2[00:31]   EID from p10_check_idle_stop_done().
@@ -208,7 +207,7 @@ void* call_host_activate_slave_cores(void* const io_pArgs)
              * @custdesc Unable to activate all hardware during boot..
              */
             l_errl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                             MOD_HOST_ACTIVATE_SLAVE_CORES,
+                                             MOD_HOST_ACTIVATE_SECONDARY_CORES,
                                              RC_SLAVE_CORE_WAKEUP_ERROR,
                                              TWO_UINT32_TO_UINT64(pir,
                                                      TARGETING::get_huid(l_core)),
@@ -247,10 +246,10 @@ void* call_host_activate_slave_cores(void* const io_pArgs)
     SCOM::enableSlaveCoreMulticast();
 
     TRACDCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-              "call_host_activate_slave_cores exit");
+              "call_host_activate_secondary_cores exit");
 
     // end task, returning any errorlogs to IStepDisp
     return l_stepError.getErrorHandle();
-} // end call_host_activate_slave_cores
+} // end call_host_activate_secondary_cores
 
 } // end namespace ISTEP_16

@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/isteps/istep08/call_proc_check_slave_sbe_seeprom_complete.C $ */
+/* $Source: src/usr/isteps/istep08/call_proc_check_secondary_sbe_seeprom_complete.C $ */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2020                             */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -23,10 +23,10 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 /**
- *  @file call_proc_check_slave_sbe_seeprom_complete.C
+ *  @file call_proc_check_secondary_sbe_seeprom_complete.C
  *
- *  Support file for IStep: proc_check_slave_sbe_seeprom_complete
- *   Slave SBE
+ *  Support file for IStep: proc_check_secondary_sbe_seeprom_complete
+ *   Secondary SBE
  *
  */
 
@@ -57,14 +57,14 @@ namespace ISTEP_08
 {
 
 //******************************************************************************
-// call_proc_check_slave_sbe_seeprom_complete function
+// call_proc_check_secondary_sbe_seeprom_complete function
 //******************************************************************************
-void* call_proc_check_slave_sbe_seeprom_complete( void *io_pArgs )
+void* call_proc_check_secondary_sbe_seeprom_complete( void *io_pArgs )
 {
     IStepError  l_stepError;
     errlHndl_t  l_errl = nullptr;
 
-    TRACFCOMP(g_trac_isteps_trace, ENTER_MRK"call_proc_check_slave_sbe_seeprom_complete");
+    TRACFCOMP(g_trac_isteps_trace, ENTER_MRK"call_proc_check_secondary_sbe_seeprom_complete");
 
     //
     //  get the master Proc target, we want to IGNORE this one.
@@ -79,7 +79,7 @@ void* call_proc_check_slave_sbe_seeprom_complete( void *io_pArgs )
     getAllChips(l_cpuTargetList, TYPE_PROC);
 
     TRACFCOMP(g_trac_isteps_trace,
-        "proc_check_slave_sbe_seeprom_complete: %d procs in the system.",
+        "proc_check_secondary_sbe_seeprom_complete: %d procs in the system.",
         l_cpuTargetList.size());
 
     // loop thru all the cpus
@@ -143,35 +143,35 @@ void* call_proc_check_slave_sbe_seeprom_complete( void *io_pArgs )
             l_switches.useSbeScom = 1;
 
             TRACFCOMP(g_trac_isteps_trace,
-                      "proc_check_slave_sbe_seeprom_complete: changing SCOM "
-                      "switches from 0x%.2X to 0x%.2X for proc 0x%.8X",
+                      "proc_check_secondary_sbe_seeprom_complete: changing SCOM"
+                      " switches from 0x%.2X to 0x%.2X for proc 0x%.8X",
                       l_switches_before,
                       l_switches,
                       get_huid(l_cpu_target));
             l_cpu_target->setAttr<ATTR_SCOM_SWITCHES>(l_switches);
 
             TRACFCOMP(g_trac_isteps_trace,
-                      "SUCCESS : proc_check_slave_sbe_seeprom_complete"
+                      "SUCCESS : proc_check_secondary_sbe_seeprom_complete"
                       " completed ok for proc 0x%.8X",
                       get_huid(l_cpu_target));
         }
         else
         {
             TRACFCOMP(g_trac_isteps_trace,
-                      "FAILURE : proc_check_slave_sbe_seeprom_complete"
+                      "FAILURE : proc_check_secondary_sbe_seeprom_complete"
                       "SBE for proc 0x%.8X did not reach runtime",
                       get_huid(l_cpu_target));
            /*@
             * @reasoncode RC_FAILED_TO_BOOT_SBE
             * @severity   ERRORLOG::ERRL_SEV_UNRECOVERABLE
-            * @moduleid   MOD_CHECK_SLAVE_SBE_SEEPROM_COMPLETE
+            * @moduleid   MOD_CHECK_SECONDARY_SBE_SEEPROM_COMPLETE
             * @userdata1  HUID of proc that failed to boot its SBE
             * @userdata2  Unused
             * @devdesc    Failed to boot a slave SBE
             * @custdesc   Processor Error
             */
             l_errl = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
-                                            MOD_CHECK_SLAVE_SBE_SEEPROM_COMPLETE,
+                                            MOD_CHECK_SECONDARY_SBE_SEEPROM_COMPLETE,
                                             RC_FAILED_TO_BOOT_SBE,
                                             get_huid(l_cpu_target),
                                             0);
@@ -273,7 +273,7 @@ void* call_proc_check_slave_sbe_seeprom_complete( void *io_pArgs )
 
     }  // end of going through all processors
 
-    TRACFCOMP(g_trac_isteps_trace, EXIT_MRK"call_proc_check_slave_sbe_seeprom_complete");
+    TRACFCOMP(g_trac_isteps_trace, EXIT_MRK"call_proc_check_secondary_sbe_seeprom_complete");
     return l_stepError.getErrorHandle();
 }
 

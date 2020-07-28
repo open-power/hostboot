@@ -28,9 +28,9 @@
 /**
  * @file    istep06list.H
  *
- * @note    IStep definition for Hostboot - Slave SBE
+ * @note    IStep definition for Hostboot - Secondary SBE
  *
- *  IStep 06    Slave SBE
+ *  IStep 06    Secondary SBE
  *  IPL FLow Doc        v0.98
  *
  *  06.1    host_bootloader
@@ -45,8 +45,8 @@
  *        : Build ipl parameters
  *  06.6    host_discover_targets
  *        : Builds targeting
- *  06.7    host_update_master_tpm
- *        : Update master TPM
+ *  06.7    host_update_primary_tpm
+ *        : Update primary TPM
  *  06.8    host_gard
  *        : Do Gard
  *  06.9    host_voltage_config
@@ -60,7 +60,7 @@ namespace ISTEP_06
 {
 
 /**
- * @brief   host_init_fsi   Setup the FSI links to slave chips (istep 6.5)
+ * @brief   host_init_fsi   Setup the FSI links to secondary chips (istep 6.5)
  *
  *  Call into the hwas platform-specific initHardware() function
  *  to init the FSI hardware.
@@ -100,14 +100,14 @@ void* host_set_ipl_parms( void *io_pArgs );
 void* host_discover_targets( void *io_pArgs );
 
 /**
- * @brief   call_host_update_master_tpm (istep 6.8)
+ * @brief   call_host_update_primary_tpm (istep 6.8)
  *
  *
  *  param[in,out] io_pArgs  -   (normally) a pointer to a TaskArgs struct,
  *                              or NULL.
  *  return  any error logs to istep
  */
-void* call_host_update_master_tpm( void *io_pArgs );
+void* call_host_update_primary_tpm( void *io_pArgs );
 
 /**
  * @brief   host_gard   Do Gard (istep 6.9)
@@ -178,8 +178,8 @@ const   TaskInfo    g_istep06[]  =   {
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP | MPIPL_OP, false }
         },
         {
-                ISTEPNAME(06,07,"host_update_master_tpm"),
-                ISTEP_06::call_host_update_master_tpm,
+                ISTEPNAME(06,07,"host_update_primary_tpm"),
+                ISTEP_06::call_host_update_primary_tpm,
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP | MPIPL_OP, false }
         },
         {

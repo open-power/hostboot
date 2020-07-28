@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2015,2019
+# Contributors Listed Below - COPYRIGHT 2015,2020
 # [+] International Business Machines Corp.
 #
 #
@@ -47,8 +47,8 @@ EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/ffdc/
 #EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/common/pmlib/include/registers/
 EXTRAINCDIR += ${ROOTPATH}/src/usr/isteps/
 
-OBJS += call_host_activate_master.o
-OBJS += call_host_activate_slave_cores.o
+OBJS += call_host_activate_boot_core.o
+OBJS += call_host_activate_secondary_cores.o
 OBJS += call_host_secure_rng.o
 OBJS += call_mss_scrub.o
 OBJS += call_host_ipl_complete.o

@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/isteps/istep08/call_host_slave_sbe_config.C $         */
+/* $Source: src/usr/isteps/istep08/call_host_secondary_sbe_config.C $     */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2020                             */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -23,10 +23,10 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 /**
- *  @file call_host_slave_sbe_config.C
+ *  @file call_host_secondary_sbe_config.C
  *
- *  Support file for IStep: host_slave_sbe_config
- *   Slave SBE
+ *  Support file for IStep: host_secondary_sbe_config
+ *   Secondary SBE
  *
  */
 
@@ -57,14 +57,14 @@ using namespace SBE;
 namespace ISTEP_08
 {
 //******************************************************************************
-// call_host_slave_sbe function
+// call_host_secondary_sbe function
 //******************************************************************************
-void* call_host_slave_sbe_config(void *io_pArgs)
+void* call_host_secondary_sbe_config(void *io_pArgs)
 {
     IStepError  l_stepError;
     errlHndl_t l_errl = nullptr;
 
-    TRACFCOMP(g_trac_isteps_trace, ENTER_MRK"call_host_slave_sbe_config");
+    TRACFCOMP(g_trac_isteps_trace, ENTER_MRK"call_host_secondary_sbe_config");
 
     Target* l_pMasterProcTarget = nullptr;
     targetService().masterProcChipTargetHandle(l_pMasterProcTarget);
@@ -137,14 +137,14 @@ void* call_host_slave_sbe_config(void *io_pArgs)
                           "ERROR : updateSbeBootSeeprom target %.8X"
                           TRACE_ERR_FMT,
                           get_huid(l_cpu_target),
-                          TRACE_ERR_ARGS(l_errl)); 
+                          TRACE_ERR_ARGS(l_errl));
 
                 captureError(l_errl, l_stepError, HWPF_COMP_ID, l_cpu_target);
             }
         }
     } // end of cycling through all processor chips
 
-    TRACFCOMP(g_trac_isteps_trace, EXIT_MRK"call_host_slave_sbe_config");
+    TRACFCOMP(g_trac_isteps_trace, EXIT_MRK"call_host_secondary_sbe_config");
     return l_stepError.getErrorHandle();
 
 }

@@ -33,8 +33,8 @@
  *
  *    10.01    proc_build_smp
  *           : Integrate P10 Islands into SMP
- *    10.02    host_slave_sbe_update
- *           : Update slave SBE
+ *    10.02    host_sbe_update
+ *           : Update SBE
  *    10.03    host_secureboot_lockdown
  *           :
  *    10.04    proc_chiplet_scominit
@@ -72,14 +72,14 @@ namespace   ISTEP_10
 void*    call_proc_build_smp( void    *io_pArgs );
 
 /**
- *  @brief   host_slave_sbe_update
+ *  @brief   host_sbe_update
  *
  *  param[in,out]   -   pointer to any arguments, usually NULL
  *
  *  return  any errlogs to istep
  *
  */
-void*    call_host_slave_sbe_update( void    *io_pArgs );
+void*    call_host_sbe_update( void    *io_pArgs );
 
 /**
  *  @brief   call_host_secureboot_lockdown
@@ -176,8 +176,8 @@ const   TaskInfo    g_istep10[]  =   {
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
         },
         {
-                ISTEPNAME(10,02,"host_slave_sbe_update"),
-                ISTEP_10::call_host_slave_sbe_update,
+                ISTEPNAME(10,02,"host_sbe_update"),
+                ISTEP_10::call_host_sbe_update,
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
         },
         {

@@ -28,7 +28,7 @@ ROOTPATH = ../../../..
 OBJS += host_init_fsi.o
 OBJS += host_set_ipl_parms.o
 OBJS += host_discover_targets.o
-OBJS += call_host_update_master_tpm.o
+OBJS += call_host_update_primary_tpm.o
 OBJS += host_gard.o
 OBJS += call_host_voltage_config.o
 

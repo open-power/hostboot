@@ -33,12 +33,12 @@
  *
  *    08.01    host_setup_sbe
  *           : Setup host sbe
- *    08.02    host_slave_sbe_config
- *           : Configure host slave sbe
+ *    08.02    host_secondary_sbe_config
+ *           : Configure host secondary sbe
  *    08.03    host_cbs_start
  *           : Start cbs
- *    08.04    proc_check_slave_sbe_seeprom_complete
- *           : Check Slave SBE Complete
+ *    08.04    proc_check_secondary_sbe_seeprom_complete
+ *           : Check Secondary SBE Complete
  *    08.05    host_attnlisten_proc
  *           : Start attention poll for all
  *    08.06    proc_fbc_eff_config
@@ -71,13 +71,13 @@ namespace ISTEP_08
 {
 
 /**
- *  @brief host_slave_sbe_config
+ *  @brief host_secondary_sbe_config
  *
  *  param[in,out]   -   pointer to any arguments, usually NULL
  *
  *  return any error logs to istep
  */
-void* call_host_slave_sbe_config(void *io_pArgs);
+void* call_host_secondary_sbe_config(void *io_pArgs);
 
 /**
  *  @brief call_host_setup_sbe
@@ -105,7 +105,7 @@ void* call_host_cbs_start(void *io_pArgs);
  *
  *  return any error logs to istep
  */
-void* call_proc_check_slave_sbe_seeprom_complete(void *io_pArgs);
+void* call_proc_check_secondary_sbe_seeprom_complete(void *io_pArgs);
 
 /**
  *  @brief call_host_attnlisten_proc
@@ -233,8 +233,8 @@ namespace   INITSERVICE
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP, false }
         },
         {
-                ISTEPNAME(08,02,"host_slave_sbe_config"),
-                ISTEP_08::call_host_slave_sbe_config,
+                ISTEPNAME(08,02,"host_secondary_sbe_config"),
+                ISTEP_08::call_host_secondary_sbe_config,
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP, false }
         },
         {
@@ -243,8 +243,8 @@ namespace   INITSERVICE
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP, false }
         },
         {
-                ISTEPNAME(08,04,"proc_check_slave_sbe_seeprom_complete"),
-                ISTEP_08::call_proc_check_slave_sbe_seeprom_complete,
+                ISTEPNAME(08,04,"proc_check_secondary_sbe_seeprom_complete"),
+                ISTEP_08::call_proc_check_secondary_sbe_seeprom_complete,
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP, false }
         },
         {

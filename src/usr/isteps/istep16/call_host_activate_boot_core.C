@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/isteps/istep16/call_host_activate_master.C $          */
+/* $Source: src/usr/isteps/istep16/call_host_activate_boot_core.C $       */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2020                             */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,8 +22,6 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-
-
 // Error Handling
 #include <errl/errlentry.H>
 #include <errl/errlmanager.H>
@@ -67,10 +65,10 @@ using namespace ISTEP_ERROR;
 namespace ISTEP_16
 {
 
-void* call_host_activate_master(void* const io_pArgs)
+void* call_host_activate_boot_core(void* const io_pArgs)
 {
     TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-              "call_host_activate_master entry");
+              "call_host_activate_boot_core entry");
 
     errlHndl_t l_errl = nullptr;
 
@@ -80,7 +78,7 @@ void* call_host_activate_master(void* const io_pArgs)
 
         // find the master core, i.e. the one we are running on
         TRACDCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                  "call_host_activate_master: Find master core:");
+                  "call_host_activate_boot_core: Find master core:");
 
         // Determine top-level system target
         Target* l_sys = nullptr;
@@ -138,17 +136,17 @@ void* call_host_activate_master(void* const io_pArgs)
                           l_fusedCoreID);
                 /*@
                 * @errortype
-                * @moduleid     ISTEP::MOD_HOST_ACTIVATE_MASTER
+                * @moduleid     ISTEP::MOD_HOST_ACTIVATE_BOOT_CORE
                 * @reasoncode   ISTEP::RC_NO_FUSED_CORE_TARGET
                 * @userdata1    Master-fused core id
                 * @userdata2    Master-fused processor chip huid
-                * @devdesc      activate_master> Could not find a target
-                *               for the master-fused core
+                * @devdesc      activate_boot_core> Could not find a target
+                *               for the boot-fused core
                 * @custdesc     A problem occurred during the IPL
                 *               of the system.
                 */
                 l_errl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                                 ISTEP::MOD_HOST_ACTIVATE_MASTER,
+                                                 ISTEP::MOD_HOST_ACTIVATE_BOOT_CORE,
                                                  ISTEP::RC_NO_FUSED_CORE_TARGET,
                                                  l_fusedCoreID,
                                                  get_huid(l_proc_target));
@@ -176,7 +174,7 @@ void* call_host_activate_master(void* const io_pArgs)
         if (l_errl)
         {
             TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                      "call_host_activate_master ERROR : "
+                      "call_host_activate_boot_core ERROR : "
                       "MBOX::reclaimDmaBfrsFromFsp");
 
             // If it not complete then thats okay, but we want to store the
@@ -194,7 +192,7 @@ void* call_host_activate_master(void* const io_pArgs)
         if (l_errl)
         {
             TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                      "call_host_activate_master ERROR : MBOX::suspend");
+                      "call_host_activate_boot_core ERROR : MBOX::suspend");
             break;
         }
 
@@ -217,7 +215,7 @@ void* call_host_activate_master(void* const io_pArgs)
                            });
 
             TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                      "call_host_activate_master: calling p10_gen_fbc_rt_settings "
+                      "call_host_activate_boot_core: calling p10_gen_fbc_rt_settings "
                       "for %d procs",
                       std::size(l_fapiProcs));
 
@@ -229,7 +227,7 @@ void* call_host_activate_master(void* const io_pArgs)
             if (l_errl)
             {
                 TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                          ERR_MRK"call_host_activate_master: Error in "
+                          ERR_MRK"call_host_activate_boot_core: Error in "
                           "p10_gen_fbc_rt_settings: "
                           TRACE_ERR_FMT,
                           TRACE_ERR_ARGS(l_errl));
@@ -239,7 +237,7 @@ void* call_host_activate_master(void* const io_pArgs)
         }
 
         TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                  "call_host_activate_master: About to start deadman loop... "
+                  "call_host_activate_boot_core: About to start deadman loop... "
                   "Target HUID %.8X",
                   get_huid(l_proc_target));
 
@@ -272,7 +270,7 @@ void* call_host_activate_master(void* const io_pArgs)
         // popping core out of winkle before SBE sees it.
 
         TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                  "call_host_activate_master: call p10_block_wakeup_intr(SET) "
+                  "call_host_activate_boot_core: call p10_block_wakeup_intr(SET) "
                   "Target HUID %.8x",
                   get_huid(l_fapi2_coreTarget.get()));
 
@@ -304,7 +302,7 @@ void* call_host_activate_master(void* const io_pArgs)
         if (l_fusedCore != nullptr)
         {
             TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                      "call_host_activated_master: call p10_block_wakeup_intr(SET) "
+                      "call_host_activate_boot_core: call p10_block_wakeup_intr(SET) "
                       "Target HUID %.8x",
                       get_huid(l_fapi2_fusedTarget.get()));
 
@@ -336,7 +334,7 @@ void* call_host_activate_master(void* const io_pArgs)
 
         //  put the master into winkle.
         TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                  "call_host_activate_master: put master into winkle...");
+                  "call_host_activate_boot_core: put boot core into winkle...");
 
         // Flush any lingering console traces first
         CONSOLE::flush();
@@ -345,13 +343,13 @@ void* call_host_activate_master(void* const io_pArgs)
         if (l_rc)
         {
             TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                      "ERROR : failed to winkle master, rc=0x%x",
+                      "ERROR : failed to winkle boot core, rc=0x%x",
                       l_rc);
             /*@
              * @errortype
-             * @reasoncode  RC_FAIL_MASTER_WINKLE
+             * @reasoncode  RC_FAIL_BOOT_CORE_WINKLE
              * @severity    ERRORLOG::ERRL_SEV_UNRECOVERABLE
-             * @moduleid    MOD_HOST_ACTIVATE_MASTER
+             * @moduleid    MOD_HOST_ACTIVATE_BOOT_CORE
              * @userdata1   return code from cpu_master_winkle
              * @userdata2   Fused core indicator
              *
@@ -359,8 +357,8 @@ void* call_host_activate_master(void* const io_pArgs)
              */
             l_errl =
                 new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                        MOD_HOST_ACTIVATE_MASTER,
-                                        RC_FAIL_MASTER_WINKLE,
+                                        MOD_HOST_ACTIVATE_BOOT_CORE,
+                                        RC_FAIL_BOOT_CORE_WINKLE,
                                         l_rc, l_isFusedMode);
             break;
         }
@@ -396,7 +394,7 @@ void* call_host_activate_master(void* const io_pArgs)
         if (l_errl)
         {
             TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                       "call_host_activate_master ERROR : MBOX::resume");
+                       "call_host_activate_boot_core ERROR : MBOX::resume");
             break;
         }
 
@@ -456,10 +454,10 @@ void* call_host_activate_master(void* const io_pArgs)
     CONSOLE::flush();
 
     TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-              "call_host_activate_master exit");
+              "call_host_activate_boot_core exit");
 
     // end task, returning any errorlogs to IStepDisp
     return l_stepError.getErrorHandle();
-} // end call_host_activate_master
+} // end call_host_activate_boot_core
 
 } // end namespace ISTEP_16

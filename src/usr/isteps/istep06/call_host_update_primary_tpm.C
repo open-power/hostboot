@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/isteps/istep06/call_host_update_master_tpm.C $        */
+/* $Source: src/usr/isteps/istep06/call_host_update_primary_tpm.C $       */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2020                             */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,7 +22,6 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-
 #include <stdint.h>
 #include <trace/interface.H>
 #include <errl/errlentry.H>
@@ -38,13 +37,13 @@
 namespace ISTEP_06
 {
 
-void* call_host_update_master_tpm( void *io_pArgs )
+void* call_host_update_primary_tpm( void *io_pArgs )
 {
     using namespace TARGETING;
     ISTEP_ERROR::IStepError l_stepError;
 
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-               "call_host_update_master_tpm entry" );
+               "call_host_update_primary_tpm entry" );
 
     errlHndl_t l_err = nullptr;
 
@@ -60,7 +59,7 @@ void* call_host_update_master_tpm( void *io_pArgs )
 
 #ifdef CONFIG_TPMDD
     // Initialize the master TPM
-    l_err = (errlHndl_t)TRUSTEDBOOT::host_update_master_tpm(io_pArgs);
+    l_err = (errlHndl_t)TRUSTEDBOOT::host_update_primary_tpm(io_pArgs);
     if (l_err)
     {
         l_stepError.addErrorDetails(l_err);
@@ -72,7 +71,7 @@ void* call_host_update_master_tpm( void *io_pArgs )
     if (l_err)
     {
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                   "call_host_update_master_tpm: Error back from "
+                   "call_host_update_primary_tpm: Error back from "
                    "SECUREBOOT::traceSecuritySettings: rc=0x%X, plid=0x%X",
                    ERRL_GETRC_SAFE(l_err), ERRL_GETPLID_SAFE(l_err));
         l_stepError.addErrorDetails(l_err);
@@ -85,7 +84,7 @@ void* call_host_update_master_tpm( void *io_pArgs )
     if (l_err)
     {
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                   "call_host_update_master_tpm: Error back from "
+                   "call_host_update_primary_tpm: Error back from "
                    "SECUREBOOT::detectPhysPresence: "
                    TRACE_ERR_FMT,
                    TRACE_ERR_ARGS(l_err));
@@ -95,7 +94,7 @@ void* call_host_update_master_tpm( void *io_pArgs )
 #endif
 
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-               "call_host_update_master_tpm exit" );
+               "call_host_update_primary_tpm exit" );
     return l_stepError.getErrorHandle();
 
 

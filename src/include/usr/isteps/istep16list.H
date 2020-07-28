@@ -48,24 +48,24 @@ namespace ISTEP_16
 {
 
 /**
- *  @brief   host_activate_master
+ *  @brief   host_activate_boot_core
  *
  *  param[in,out]   -   pointer to any arguments, usually NULL
  *
  *  return any errlogs to istep
  *
  */
-void* call_host_activate_master(void *io_pArgs);
+void* call_host_activate_boot_core(void *io_pArgs);
 
 /**
- *  @brief   host_activate_slave_cores
+ *  @brief   host_activate_secondary_cores
  *
  *  param[in,out]   -   pointer to any arguments, usually NULL
  *
  *  return  any errlogs to istep
  *
  */
-void* call_host_activate_slave_cores(void *io_pArgs);
+void* call_host_activate_secondary_cores(void *io_pArgs);
 
 /**
  *  @brief   host_secure_rng
@@ -119,13 +119,13 @@ namespace INITSERVICE
             { NONE, EXT_IMAGE, IPL_NOOP, false }
         },
         {
-            ISTEPNAME(16,01,"host_activate_master"),
-            ISTEP_16::call_host_activate_master,
+            ISTEPNAME(16,01,"host_activate_boot_core"),
+            ISTEP_16::call_host_activate_boot_core,
             { START_FN, EXT_IMAGE, NORMAL_IPL_OP | MPIPL_OP, false }
         },
         {
-            ISTEPNAME(16,02,"host_activate_slave_cores"),
-            ISTEP_16::call_host_activate_slave_cores,
+            ISTEPNAME(16,02,"host_activate_secondary_cores"),
+            ISTEP_16::call_host_activate_secondary_cores,
             { START_FN, EXT_IMAGE, NORMAL_IPL_OP | MPIPL_OP, true }
         },
         {

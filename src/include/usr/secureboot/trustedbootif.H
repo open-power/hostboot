@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -169,14 +169,14 @@ namespace TRUSTEDBOOT
     } TPM_Alg_Id;
 
     /**
-     * @brief Initialize trusted boot/TPM components for the master TPM
+     * @brief Initialize trusted boot/TPM components for the primary TPM
      *
      * @param[in] io_pArgs istep args
      *
      * @return errlHndl_t NULL if successful, otherwise a pointer to the
      *      error log.
      */
-    void* host_update_master_tpm( void *io_pArgs );
+    void* host_update_primary_tpm( void *io_pArgs );
 
     /**
      * @brief Extend a measurement into the TPM(s) and log atomically
