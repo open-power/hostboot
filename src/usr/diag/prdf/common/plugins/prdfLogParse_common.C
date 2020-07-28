@@ -779,15 +779,22 @@ bool parseExtMemMru( void * i_buffer, uint32_t i_buflen,
     }
     else
     {
+        // NOTE: The BitString and BitStringBuffer classes are not endian safe.
+        // As such, this is needed to ensure this works with non-PPC machines.
+        static const size_t sz_word  = sizeof(CPU_WORD);
+        CPU_WORD* buf = (CPU_WORD*)i_buffer;
+        for ( uint32_t i = 0; i < (i_buflen/sz_word); i++ )
+        {
+            buf[i] = ntohl(buf[i]);
+        }
 
-        BitString bs( (i_buflen*8), (CPU_WORD*)i_buffer );
+        BitString bs( (i_buflen*8), buf );
         uint32_t curPos = 0;
 
         MemoryMruData::ExtendedData extMemMru;
 
         // TODO RTC 179854
-        extMemMru.mmMeld.u  = ntohl( bs.getFieldJustify( curPos, 32 ) );
-                              curPos+=32;
+        extMemMru.mmMeld.u  = bs.getFieldJustify( curPos, 32 ); curPos+=32;
         extMemMru.isBufDimm = bs.getFieldJustify( curPos,  1 ); curPos+= 1;
         extMemMru.isX4Dram  = bs.getFieldJustify( curPos,  1 ); curPos+= 1;
         extMemMru.isValid   = bs.getFieldJustify( curPos,  1 ); curPos+= 1;

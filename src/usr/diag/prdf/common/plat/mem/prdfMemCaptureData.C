@@ -107,12 +107,13 @@ void addExtMemMruData( const MemoryMru & i_memMru, errlHndl_t io_errl )
 
     }while(0);
 
-    size_t sz_buf = sizeof(extMemMru);
+    static const size_t sz_word  = sizeof(CPU_WORD);
+    size_t sz_buf = ( (sizeof(extMemMru) + sz_word-1) / sz_word ) * sz_word;
     BitStringBuffer bsb( sz_buf*8 );
     uint32_t curPos = 0;
 
     // TODO RTC 179854
-    bsb.setFieldJustify( curPos, 32, htonl(extMemMru.mmMeld.u)  ); curPos+=32;
+    bsb.setFieldJustify( curPos, 32, extMemMru.mmMeld.u  ); curPos+=32;
     bsb.setFieldJustify( curPos,  1, extMemMru.isBufDimm ); curPos+= 1;
     bsb.setFieldJustify( curPos,  1, extMemMru.isX4Dram  ); curPos+= 1;
     bsb.setFieldJustify( curPos,  1, extMemMru.isValid   ); curPos+= 1;
@@ -121,6 +122,14 @@ void addExtMemMruData( const MemoryMru & i_memMru, errlHndl_t io_errl )
     {
         bsb.setFieldJustify( curPos, 8, extMemMru.dqMapping[i] );
         curPos += 8;
+    }
+
+    // NOTE: The BitString and BitStringBuffer classes are not endian safe. As
+    // such, this is needed to ensure this works with non-PPC machines.
+    CPU_WORD* bufAddr = bsb.getBufAddr();
+    for ( uint32_t i = 0; i < (sz_buf/sz_word); i++ )
+    {
+        bufAddr[i] = htonl(bufAddr[i]);
     }
 
     // Add the extended MemoryMru to the error log.
