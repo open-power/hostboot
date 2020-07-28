@@ -470,6 +470,7 @@ errlHndl_t HdatIoHubFru::hdatGetDaughterInfoFromTarget(
     HDAT_ENTER();
     errlHndl_t l_errl = NULL;
     uint32_t  dummy_slca_rid = 0;
+    TARGETING::TargetHandleList l_list;
     do
     {
         if ( NULL == i_target )
@@ -511,9 +512,10 @@ errlHndl_t HdatIoHubFru::hdatGetDaughterInfoFromTarget(
             break;
         }
 
-        getParentAffinityTargets(o_targetList,i_target,
+        getParentAffinityTargets(l_list,i_target,
                  TARGETING::CLASS_ENC,TARGETING::TYPE_NODE);
-        if(o_targetList.empty())
+        HDAT_DBG("l_list.size()=%d",l_list.size());
+        if(l_list.empty())
         {
             HDAT_ERR("hdatGetDaughterInfoFromTarget: node returned empty "
                      "Target list");
@@ -539,6 +541,7 @@ errlHndl_t HdatIoHubFru::hdatGetDaughterInfoFromTarget(
         //SLCA_RID not present for BP, will it be supported at all?
         //o_DaughterRids.push_back(l_pNodeTarget->getAttr<ATTR_SLCA_RID>());
         o_DaughterRids.push_back(dummy_slca_rid);
+        o_targetList.insert(o_targetList.end(),l_list.begin(),l_list.end());
         dummy_slca_rid++;
         HDAT_DBG("o_targetList.size()=%d",o_targetList.size()); 
 
@@ -570,6 +573,7 @@ errlHndl_t HdatIoHubFru::bldDaughterStruct(uint32_t i_hubArrayNum)
     for(uint32_t i=0; i<i_hubArrayNum; i++)
     {
         uint32_t procOrdId= this->iv_hubArray[i].hdatIoHubId;
+        HDAT_DBG("fetched procOrdId=0x%x",procOrdId);
         TARGETING::Target * i_target = nullptr;
         TARGETING::PredicateCTM l_ctm1(TARGETING::CLASS_CHIP,
                                        TARGETING::TYPE_PROC);
@@ -587,6 +591,7 @@ errlHndl_t HdatIoHubFru::bldDaughterStruct(uint32_t i_hubArrayNum)
             uint32_t l_procOrdId = i_target->getAttr<TARGETING::ATTR_ORDINAL_ID>();
             if(l_procOrdId == procOrdId)
             {
+                HDAT_DBG("found proc target for procOrdId=0x%x",l_procOrdId);
                 break;
             }
             else
@@ -594,9 +599,11 @@ errlHndl_t HdatIoHubFru::bldDaughterStruct(uint32_t i_hubArrayNum)
                 i_target = nullptr;
             }
         }
+        HDAT_DBG("before calling hdatGetDaughterInfoFromTarget l_targetList.size=%d",l_targetList.size());
 
         l_errlHndl = hdatGetDaughterInfoFromTarget(i_target,
                                                l_targetList,l_etRidArray);
+        HDAT_DBG("after hdatGetDaughterInfoFromTarget l_targetList.size=%d",l_targetList.size());
         if(l_errlHndl)
         {
             return l_errlHndl;
