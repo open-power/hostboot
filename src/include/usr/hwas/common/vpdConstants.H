@@ -97,10 +97,10 @@ const pg_entry_t VPD_CP00_PG_FSI_ALL_GOOD = 0xFFE03FFFu;
 const pg_mask_t VPD_CP00_PG_FSI_ALWAYS_GOOD_MASK = 0x000FC000u;
 const pg_idx_t VPD_CP00_PG_FSI_INDEX = 0;
 
-// UNSET: vital, perv, sbe, pib, occ, net, dpllpau, dpllnest, pllperv
-const pg_entry_t VPD_CP00_PG_PRV_ALL_GOOD = 0xFFE071FFu;
-// SET: perv, sbe, pib, occ, net, dpllpau, dpllnest, pllperv
-const pg_mask_t VPD_CP00_PG_PRV_ALWAYS_GOOD_MASK = 0x000F8E00u;
+// UNSET: vital, perv, sbe, pib, occ, net, iopsi, dpllpau, dpllnest, pllperv
+const pg_entry_t VPD_CP00_PG_PRV_ALL_GOOD = 0xFFE051FFu;
+// SET: perv, sbe, pib, occ, net, iopsi, dpllpau, dpllnest, pllperv
+const pg_mask_t VPD_CP00_PG_PRV_ALWAYS_GOOD_MASK = 0x000FAE00u;
 const pg_idx_t VPD_CP00_PG_PRV_INDEX = 1;
 
 // This is actually the "vital" bit but the functionality of the PERV targets
@@ -130,9 +130,9 @@ const pg_idx_t VPD_CP00_PG_EQ_INDEX[] =
     32, 33, 34, 35, 36, 37, 38, 39
 };
 
-// UNSET: vital, perv, ph5, pcs0, pcs1, pcs2, pcs3, psm0, psm1,
-//        psm2, psm3, pllpci
-const pg_entry_t VPD_CP00_PG_PCI_ALL_GOOD = 0xFFE001FFu;
+// UNSET: vital, perv, ph5, pcs0, pcs1, pcs2, pcs3, psm0, psm1, pllpci, pma0,
+//        pma1, pma2, pma3
+const pg_entry_t VPD_CP00_PG_PCI_ALL_GOOD = 0xFFE00C1Fu;
 // no always-good constant for PCI since it's not always-good for the chip
 
 const pg_entry_t VPD_CP00_PG_PCI_INDEX[] =
@@ -151,7 +151,10 @@ const pg_idx_t VPD_CP00_PG_PAUC_INDEX[] = {
 };
 
 // UNSET: perv, ioo, pdl/odl, pllaxon
-const pg_entry_t VPD_CP00_PG_IOHS_ALL_GOOD = 0xFFE33DFFu;
+// (Note: Even though the PG documentation says that the "ndl" bit is
+//        partial-good, it's actually always bad because we dropped NVLINK
+//        support (and therefore NDL) on P10.)
+const pg_entry_t VPD_CP00_PG_IOHS_ALL_GOOD = 0xFFE3BDFFu;
 
 // UNSET: perv, mc_emo, dl01, dl23, ioo0, ioo1, pllmc
 const pg_entry_t VPD_CP00_PG_MC_ALL_GOOD = 0xFFE21DFFu;

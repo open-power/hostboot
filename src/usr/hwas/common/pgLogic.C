@@ -54,9 +54,7 @@ namespace PARTIAL_GOOD
 
     // Checks the perv, ioo, pdl/odl, and pllaxon bits of the IOHS PGV entry.
     // Note that this bitmask does NOT check the partial-good NDL bit of the
-    // entry. There is no target for NDL, and a HWP is responsible for checking
-    // the NDL PG bit to determine whether the NVLINK is viable.
-    // TODO RTC 208782: Decide who/how should check NDL.
+    // entry as NVLINK was dropped for P10.
     const pg_mask_t IOHS_R1_PG_MASK = 0x000C4200;
 
     // Checks the EC+L2, L3 and MMA units of the EC PGV entry for core A in an
@@ -114,9 +112,9 @@ namespace PARTIAL_GOOD
     // instance.
     const pg_mask_t PERV_BIT_PG_MASK = 0x00100000;
 
-    // Check the perv, ph5, pcs0, pcs1, pcs2, pcs3, psm0, psm1, psm2, psm3, and
-    // pllpci bits of the PCI PGV entry.
-    const pg_mask_t PEC_PG_MASK = 0x000FFE00;
+    // Check the perv, ph5, pcs0, pcs1, pcs2, pcs3, psm0, psm1, pllpci, pma0,
+    // pma1, pma2, and pma3 bits of the PCI PGV entry.
+    const pg_mask_t PEC_PG_MASK = 0x000FF3E0;
 
     /// Special Masks that are applicable to many rules
 
