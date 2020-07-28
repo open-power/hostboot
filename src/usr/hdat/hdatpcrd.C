@@ -809,6 +809,9 @@ errlHndl_t HdatPcrd::hdatLoadPcrd(uint32_t &o_size, uint32_t &o_count)
         }
         o_size = (reinterpret_cast<uint8_t *> (this->iv_spPcrd) - l_offset );
         o_count = index;
+        //Take into account number of entries to get size of each entry
+        o_size = (o_size / o_count);
+
     }while(0);
     HDAT_DBG("number of pcrd entries=0x%x,size=0x%x",o_count,o_size);
 
