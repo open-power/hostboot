@@ -393,7 +393,7 @@ uint32_t ServiceDataCollector::Flatten(uint8_t * i_buffer, uint32_t & io_size) c
         buffer_append(current_ptr,l_huid);
         buffer_append(current_ptr,error_signature.getSigId());
         // callouts
-        buffer_append(current_ptr,xMruList.size());
+        buffer_append(current_ptr, (uint32_t)xMruList.size());
         for ( SDC_MRU_LIST::const_iterator i = xMruList.begin();
               i != xMruList.end(); ++i )
         {
@@ -403,7 +403,7 @@ uint32_t ServiceDataCollector::Flatten(uint8_t * i_buffer, uint32_t & io_size) c
             buffer_append( current_ptr, (uint32_t)i->gardState         );
         }
 
-        buffer_append(current_ptr, iv_SignatureList.size());
+        buffer_append(current_ptr,  (uint32_t)iv_SignatureList.size());
         for(PRDF_SIGNATURES::const_iterator i = iv_SignatureList.begin();
             i != iv_SignatureList.end(); ++i)
         {
