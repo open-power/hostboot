@@ -305,8 +305,8 @@ bool VPD::pvpdPresent( TARGETING::Target * i_target )
 
 #else
     return Singleton<PvpdFacade>::instance().hasVpdPresent( i_target,
-                                                            PVPD::OPFR,
-                                                            PVPD::VP );
+                                                            PVPD::VINI,
+                                                            PVPD::PN );
 #endif
 }
 

@@ -1215,62 +1215,7 @@ errlHndl_t backplaneIpmiFruInv::buildChassisInfoArea(
                                                   std::vector<uint8_t> &io_data)
 {
     errlHndl_t l_errl = NULL;
-
-    do {
-        //Set formatting data that goes at the beginning of the record
-        preFormatProcessing(io_data, false);
-        //Set Chassis Enclosure Type - Not Ascii
-        // Also, do not include type/length byte
-        l_errl = addVpdData(io_data, PVPD::OSYS, PVPD::ET, false, false);
-
-        //Support Legacy VPD without OSYS record
-        if (l_errl)
-        {
-            TRACFCOMP(g_trac_ipmi,"backplaneIpmiFruInv::buildChassisInfoArea - "
-                      " Using Legacy Chassis VPD Data");
-            //Delete errorlog and use Default data and Legacy VPD Fields
-            delete l_errl;
-            l_errl = NULL;
-
-            //Set default chassis type
-            io_data.push_back(IPMIFRUINV::DEFAULT_CHASSIS_TYPE);
-            //Set chassis part number - ascii formatted field
-            l_errl = addVpdData(io_data, PVPD::OPFR, PVPD::VP, true);
-            if (l_errl) { break; }
-            //Set chassis serial number - ascii formatted field
-            l_errl = addVpdData(io_data, PVPD::OPFR, PVPD::VS, true);
-            if (l_errl) { break; }
-        }
-        else
-        {
-            TRACFCOMP(g_trac_ipmi,"backplaneIpmiFruInv::buildChassisInfoArea - "
-                      " Using NEW OSYS RECORD FOR Chassis VPD Data");
-
-            //Set chassis part number - ascii formatted field
-            l_errl = addVpdData(io_data, PVPD::OSYS, PVPD::MM, true);
-            if (l_errl) { break; }
-
-            //Set chassis serial number - ascii formatted field
-            l_errl = addVpdData(io_data, PVPD::OSYS, PVPD::SS, true);
-            if (l_errl) { break; }
-
-        }
-
-        //Indicate no custom fields
-        io_data.push_back(IPMIFRUINV::TYPELENGTH_BYTE_NULL);
-        io_data.push_back(IPMIFRUINV::END_OF_CUSTOM_FIELDS);
-
-    } while (0);
-
-    //Complete record data formatting
-    postFormatProcessing(io_data);
-
-    if (l_errl)
-    {
-        TRACFCOMP(g_trac_ipmi,"backplaneIpmiFruInv::buildChassisInfoArea - "
-                  "Errors collecting chassis info data");
-    }
-
+/* TODO RTC: 257493 remove IPMI fru inventory code */
     return l_errl;
 }
 
@@ -1278,78 +1223,7 @@ errlHndl_t backplaneIpmiFruInv::buildBoardInfoArea(
                                               std::vector<uint8_t> &io_data)
 {
     errlHndl_t l_errl = NULL;
-
-    do {
-        //Set formatting data that goes at the beginning of the record
-        preFormatProcessing(io_data, true);
-
-        // Set Mfg Build date
-        // Grab VPD data into seperate data vector
-        std::vector<uint8_t> mfgDateData;
-        l_errl = addVpdData(mfgDateData, PVPD::OPFR, PVPD::MB, false, false);
-        if (l_errl) { break; }
-
-        // Pass that to the function that sets the Build date
-        setMfgData(io_data, mfgDateData);
-
-        //Set Vendor Name - ascii formatted data
-        l_errl = addVpdData(io_data, PVPD::OPFR, PVPD::VN, true);
-        if (l_errl) { break; }
-
-        //Set Product Name - ascii formatted data
-        l_errl = addVpdData(io_data, PVPD::OPFR, PVPD::DR, true);
-        if (l_errl) { break; }
-
-        //Set Product Serial number - ascii formatted data
-        TARGETING::ATTR_SERIAL_NUMBER_type l_sn = {'0'};
-        if( !( iv_target->
-                 tryGetAttr<TARGETING::ATTR_SERIAL_NUMBER>
-                     ( l_sn) ) )
-        {
-            // Should not fail. Need to use tryGetAttr due to complex type.
-            // Use zeros if fails.
-            TRACFCOMP(g_trac_ipmi,"backplaneIpmiFruInv::buildBoardInfoArea - "
-                  "Error getting serial number attribute");
-        }
-        // The attribute size is 18. The vpd is 16. Only use 16.
-        addCommonAttrData(io_data,
-                          (uint8_t *)&l_sn,
-                          VPD_SN_PN_VPD_SIZE);
-
-        //Set Product Part number - ascii formatted data
-        TARGETING::ATTR_PART_NUMBER_type l_pn = {'0'};
-        if( !( iv_target->
-                 tryGetAttr<TARGETING::ATTR_PART_NUMBER>
-                     ( l_pn) ) )
-        {
-            // Should not fail. Need to use tryGetAttr due to complex type.
-            // Use zeros if fails.
-            TRACFCOMP(g_trac_ipmi,"backplaneIpmiFruInv::buildBoardInfoArea - "
-                  "Error getting part number attribute");
-        }
-
-        // The attribute size is 18. The vpd is 16. Only use 16.
-        addCommonAttrData(io_data,
-                          (uint8_t *)&l_pn,
-                          VPD_SN_PN_VPD_SIZE);
-
-        //Push Fru File ID Byte - NULL
-        io_data.push_back(IPMIFRUINV::TYPELENGTH_BYTE_NULL);
-        //Indicate End of Custom Fields
-        io_data.push_back(IPMIFRUINV::END_OF_CUSTOM_FIELDS);
-
-
-    } while (0);
-
-    //Complete record data formatting
-    postFormatProcessing(io_data);
-
-    if (l_errl)
-    {
-        TRACFCOMP(g_trac_ipmi,"backplaneIpmiFruInv::buildBoardInfoArea - "
-                  "Errors collecting board info data");
-    }
-
+/* TODO RTC: 257493 remove IPMI fru inventory code */
     return l_errl;
 }
 

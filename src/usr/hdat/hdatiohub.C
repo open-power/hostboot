@@ -77,14 +77,16 @@ const HdatKeywordInfo l_pvpdKeywords[] =
 
 vpdData pvpdDataP10[] =
 {
-    { PVPD::OPFR, PVPD::VP },
-    { PVPD::OPFR, PVPD::VS },
+/* TODO RTC: 248085 validate p10 record/keywords */
+    { PVPD::VINI, PVPD::PN },
+    { PVPD::VINI, PVPD::SN },
+
 };
 
 const HdatKeywordInfo l_pvpdKeywordsP10[] =
 {
-    { PVPD::VP,  "VP" },
-    { PVPD::VS,  "VS" },
+    { PVPD::PN,  "PN" },
+    { PVPD::SN,  "SN" },
 };
 
 extern trace_desc_t *g_trac_hdat;

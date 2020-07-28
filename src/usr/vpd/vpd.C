@@ -550,9 +550,9 @@ errlHndl_t getPnAndSnRecordAndKeywords( TARGETING::Target * i_target,
         }
         else if( i_type == TARGETING::TYPE_NODE )
         {
-            io_record    = PVPD::OPFR;
-            io_keywordPN = PVPD::VP;
-            io_keywordSN = PVPD::VS;
+            io_record    = PVPD::VINI;
+            io_keywordPN = PVPD::PN;
+            io_keywordSN = PVPD::SN;
         }
         else
         {
@@ -830,16 +830,17 @@ errlHndl_t ensureCacheIsInSync ( TARGETING::Target * i_target )
 
         //Check the serial number and part number of the system if the previous
         //record/key pair matched. Note that this time the record/key pairs
-        //are OSYS/SS and OSYS/MM for serial number and part number,respectively
+        //are VSYS/SE and VSYS/TM for serial number and part number,respectively
         if(l_type == TARGETING::TYPE_NODE &&
            (l_matchSN && l_matchPN))
         {
 
             bool l_zeroPN = false;
             bool l_zeroSN = false;
+            // current pair is a guess
             l_err = l_ipvpd->cmpSeepromToZero(i_target,
-                                              PVPD::OSYS,
-                                              PVPD::MM,
+                                              PVPD::VSYS,
+                                              PVPD::TM,
                                               l_zeroPN);
             if(l_err)
             {
@@ -854,9 +855,10 @@ errlHndl_t ensureCacheIsInSync ( TARGETING::Target * i_target )
 
             }
 
+            // current pair is a guess
             l_err = l_ipvpd->cmpSeepromToZero(i_target,
-                                              PVPD::OSYS,
-                                              PVPD::SS,
+                                              PVPD::VSYS,
+                                              PVPD::SE,
                                               l_zeroSN);
             if(l_err)
             {
@@ -874,9 +876,10 @@ errlHndl_t ensureCacheIsInSync ( TARGETING::Target * i_target )
             //nonzero.
             if(!l_zeroPN)
             {
+                // current pair is a guess
                 l_err = l_ipvpd->cmpPnorToSeeprom(i_target,
-                                                  PVPD::OSYS,
-                                                  PVPD::MM,
+                                                  PVPD::VSYS,
+                                                  PVPD::TM,
                                                   l_matchPN);
                 if(l_err)
                 {
@@ -889,9 +892,10 @@ errlHndl_t ensureCacheIsInSync ( TARGETING::Target * i_target )
 
             if(!l_zeroSN)
             {
+                // current pair is a guess
                 l_err = l_ipvpd->cmpPnorToSeeprom(i_target,
-                                                  PVPD::OSYS,
-                                                  PVPD::SS,
+                                                  PVPD::VSYS,
+                                                  PVPD::SE,
                                                   l_matchSN);
                 if(l_err)
                 {

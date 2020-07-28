@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -57,9 +57,8 @@ namespace PVPD
         //      are in ascending order.
         // -------------------------------------------------------------------
         { VINI, "VINI" },
-        { OSYS, "OSYS" },
-        { OPFR, "OPFR" },
-        { VNDR, "VNDR" },
+        { VSYS, "VSYS" },
+        { LXR0, "LXR0" },
         // -------------------------------------------------------------------
         // DO NOT USE!!  This is for test purposes ONLY!
         { PVPD_TEST_RECORD, "TEST" },
@@ -105,6 +104,21 @@ namespace PVPD
         { LX,  "LX" },
         { MB,  "MB" },
         { NV,  "NV" },
+        { FG,  "FG" },
+        { HX,  "HX" },
+        { TS,  "TS" },
+        { BR,  "BR" },
+        { FV,  "FV" },
+        { ID,  "ID" },
+        { MN,  "MN" },
+        { RB,  "RB" },
+        { RG,  "RG" },
+        { SE,  "SE" },
+        { SG,  "SG" },
+        { SU,  "SU" },
+        { TM,  "TM" },
+        { TN,  "TN" },
+        { WN,  "WN" },
 
         // -------------------------------------------------------------------
         // DO NOT USE!!  This is for test purposes ONLY!
