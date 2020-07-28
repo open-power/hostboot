@@ -157,6 +157,10 @@ void* call_host_mpipl_service (void *io_pArgs)
 
             do
             {
+                //Fips950 firmware release should not be supporting MPIPL data
+                //collection for OPAL based systems.Hence the below code is 
+                //disabled.
+#if 0
                 //SBE collects architected register data for below combination
                 //of systems.Hence Copy architected register data from Reserved
                 //Memory to hypervisor memory.
@@ -178,7 +182,7 @@ void* call_host_mpipl_service (void *io_pArgs)
                         break;
                     }
                 }
-
+#endif
                 // send the start message
                 l_errMsg = DUMP::sendMboxMsg(DUMP::DUMP_MSG_START_MSG_TYPE);
 
@@ -196,20 +200,26 @@ void* call_host_mpipl_service (void *io_pArgs)
                     // message.
                 }
 
-                // Call the dump collect
-                l_err = DUMP::doDumpCollect();
-
-                // Got a Dump Collect error.. Commit the dumpCollect
-                // errorlog and then send an dump Error mbox message
-                // and FSP will decide what to do.
-                // We do not want dump Collect failures to terminate the
-                // istep.
-                if (l_err)
+                //Fips950 firmware release should not be supporting MPIPL data
+                //collection for OPAL based systems.Hence the below code is 
+                //disabled for OPAL
+                if(is_phyp_load()) 
                 {
-                    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                         "ERROR : returned from DUMP::HbDumpCopySrcToDest");
+                    // Call the dump collect
+                    l_err = DUMP::doDumpCollect();
 
-                    break;
+                    // Got a Dump Collect error.. Commit the dumpCollect
+                    // errorlog and then send an dump Error mbox message
+                    // and FSP will decide what to do.
+                    // We do not want dump Collect failures to terminate the
+                    // istep.
+                    if (l_err)
+                    {
+                        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                                "ERROR : returned from DUMP::HbDumpCopySrcToDest");
+
+                        break;
+                    }
                 }
 
             } while(0);
