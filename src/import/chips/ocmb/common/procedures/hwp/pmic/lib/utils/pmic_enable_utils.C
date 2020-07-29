@@ -320,6 +320,53 @@ fapi_try_exit:
 }
 
 ///
+/// @brief Set the current limiter warning registers via attributes
+///
+/// @param[in] i_pmic_target PMIC target
+/// @param[in] i_ocmb_target OCMB parent target of pmic
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
+///
+fapi2::ReturnCode set_current_limiter_warnings(
+    const fapi2::Target<fapi2::TargetType::TARGET_TYPE_PMIC>& i_pmic_target,
+    const fapi2::Target<fapi2::TargetType::TARGET_TYPE_OCMB_CHIP>& i_ocmb_target)
+{
+    using REGS = pmicRegs<mss::pmic::product::JEDEC_COMPLIANT>;
+    const mss::pmic::id l_id = get_relative_pmic_id(i_pmic_target);
+
+    // Quick handy array for the current limiter warning threshold registers
+    static const std::vector<uint8_t> CURRENT_LIMITER_REGS =
+    {
+        REGS::R1C, // SWA
+        REGS::R1D, // SWB
+        REGS::R1E, // SWC
+        REGS::R1F  // SWD
+    };
+
+    for (uint8_t l_rail_index = mss::pmic::rail::SWA; l_rail_index <= mss::pmic::rail::SWD; ++l_rail_index)
+    {
+        uint8_t l_warning_threshold = 0;
+        FAPI_TRY(mss::attr::get_current_warning[l_rail_index][l_id](i_ocmb_target, l_warning_threshold));
+
+        // If we have 0, then we either have an old SPD (< 0.4), or some bad values in there.
+        // In which case, we will leave the register alone at its default (3000mA warning)
+        if (l_warning_threshold > 0)
+        {
+            fapi2::buffer<uint8_t> l_reg_contents(l_warning_threshold);
+            FAPI_TRY(mss::pmic::i2c::reg_write(i_pmic_target, CURRENT_LIMITER_REGS[l_rail_index], l_reg_contents));
+        }
+        else
+        {
+            FAPI_INF("%s Warning: Current limiter attribute / SPD value for rail %s "
+                     "was read as 0mA, will not modify register (default: 3000mA)",
+                     mss::c_str(i_pmic_target), PMIC_RAIL_NAMES[l_rail_index]);
+        }
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
 /// @brief Set the startup seq register with the given parameters
 ///
 /// @param[in] i_pmic_target PMIC target

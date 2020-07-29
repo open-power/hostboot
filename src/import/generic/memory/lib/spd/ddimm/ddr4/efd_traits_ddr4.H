@@ -1662,6 +1662,326 @@ class readerTraits
 ///
 /// @class readerTraits
 /// @brief trait structure to hold static SPD information
+/// @tparam R the revision of the SPD field
+/// @note PMIC0_SWA_CURRENT_WARNING field specialization
+/// @note Valid for >= 0.4 revision
+///
+template< mss::spd::rev R >
+class readerTraits
+    < fields< mss::spd::device_type::DDR4, mss::efd::id::DDR4_CUSTOM_MICROCHIP>::PMIC0_SWA_CURRENT_WARNING, R >
+{
+    public:
+
+        static constexpr size_t COMPARISON_VAL = 0xFC;
+        static constexpr const char* FIELD_STR = "PMIC0 SWA Current Consumption Warning Threshold";
+
+        template <typename T>
+        using COMPARISON_OP = std::less_equal<T>;
+};
+
+///
+/// @class readerTraits
+/// @brief trait structure to hold static SPD information
+/// @tparam R the revision of the SPD field
+/// @note PMIC0_SWA_CURRENT_WARNING field specialization
+/// @note Revision 0.3
+///
+template<>
+class readerTraits
+    < fields< mss::spd::device_type::DDR4, mss::efd::id::DDR4_CUSTOM_MICROCHIP>::PMIC0_SWA_CURRENT_WARNING, mss::spd::rev::V0_3>
+{
+    public:
+
+        static constexpr size_t COMPARISON_VAL = 0x00;
+        static constexpr const char* FIELD_STR = "PMIC0 SWA Current Consumption Warning Threshold";
+
+        template <typename T>
+        using COMPARISON_OP = std::equal_to<T>;
+};
+
+///
+/// @class readerTraits
+/// @brief trait structure to hold static SPD information
+/// @tparam R the revision of the SPD field
+/// @note PMIC0_SWB_CURRENT_WARNING field specialization
+/// @note Valid for >= 0.4 revision
+///
+template< mss::spd::rev R >
+class readerTraits
+    < fields< mss::spd::device_type::DDR4, mss::efd::id::DDR4_CUSTOM_MICROCHIP>::PMIC0_SWB_CURRENT_WARNING, R >
+{
+    public:
+
+        static constexpr size_t COMPARISON_VAL = 0xFC;
+        static constexpr const char* FIELD_STR = "PMIC0 SWB Current Consumption Warning Threshold";
+
+        template <typename T>
+        using COMPARISON_OP = std::less_equal<T>;
+};
+
+///
+/// @class readerTraits
+/// @brief trait structure to hold static SPD information
+/// @tparam R the revision of the SPD field
+/// @note PMIC0_SWB_CURRENT_WARNING field specialization
+/// @note Revision 0.3
+///
+template<>
+class readerTraits
+    < fields< mss::spd::device_type::DDR4, mss::efd::id::DDR4_CUSTOM_MICROCHIP>::PMIC0_SWB_CURRENT_WARNING, mss::spd::rev::V0_3>
+{
+    public:
+
+        static constexpr size_t COMPARISON_VAL = 0x00;
+        static constexpr const char* FIELD_STR = "PMIC0 SWB Current Consumption Warning Threshold";
+
+        template <typename T>
+        using COMPARISON_OP = std::equal_to<T>;
+};
+
+///
+/// @class readerTraits
+/// @brief trait structure to hold static SPD information
+/// @tparam R the revision of the SPD field
+/// @note PMIC0_SWC_CURRENT_WARNING field specialization
+/// @note Valid for >= 0.4 revision
+///
+template< mss::spd::rev R >
+class readerTraits
+    < fields< mss::spd::device_type::DDR4, mss::efd::id::DDR4_CUSTOM_MICROCHIP>::PMIC0_SWC_CURRENT_WARNING, R >
+{
+    public:
+
+        static constexpr size_t COMPARISON_VAL = 0xFC;
+        static constexpr const char* FIELD_STR = "PMIC0 SWC Current Consumption Warning Threshold";
+
+        template <typename T>
+        using COMPARISON_OP = std::less_equal<T>;
+};
+
+///
+/// @class readerTraits
+/// @brief trait structure to hold static SPD information
+/// @tparam R the revision of the SPD field
+/// @note PMIC0_SWC_CURRENT_WARNING field specialization
+/// @note Revision 0.3
+///
+template<>
+class readerTraits
+    < fields< mss::spd::device_type::DDR4, mss::efd::id::DDR4_CUSTOM_MICROCHIP>::PMIC0_SWC_CURRENT_WARNING, mss::spd::rev::V0_3>
+{
+    public:
+
+        static constexpr size_t COMPARISON_VAL = 0x00;
+        static constexpr const char* FIELD_STR = "PMIC0 SWC Current Consumption Warning Threshold";
+
+        template <typename T>
+        using COMPARISON_OP = std::equal_to<T>;
+};
+
+///
+/// @class readerTraits
+/// @brief trait structure to hold static SPD information
+/// @tparam R the revision of the SPD field
+/// @note PMIC0_SWD_CURRENT_WARNING field specialization
+/// @note Valid for >= 0.4 revision
+///
+template< mss::spd::rev R >
+class readerTraits
+    < fields< mss::spd::device_type::DDR4, mss::efd::id::DDR4_CUSTOM_MICROCHIP>::PMIC0_SWD_CURRENT_WARNING, R >
+{
+    public:
+
+        static constexpr size_t COMPARISON_VAL = 0xFC;
+        static constexpr const char* FIELD_STR = "PMIC0 SWD Current Consumption Warning Threshold";
+
+        template <typename T>
+        using COMPARISON_OP = std::less_equal<T>;
+};
+
+///
+/// @class readerTraits
+/// @brief trait structure to hold static SPD information
+/// @tparam R the revision of the SPD field
+/// @note PMIC0_SWD_CURRENT_WARNING field specialization
+/// @note Revision 0.3
+///
+template<>
+class readerTraits
+    < fields< mss::spd::device_type::DDR4, mss::efd::id::DDR4_CUSTOM_MICROCHIP>::PMIC0_SWD_CURRENT_WARNING, mss::spd::rev::V0_3>
+{
+    public:
+
+        static constexpr size_t COMPARISON_VAL = 0x00;
+        static constexpr const char* FIELD_STR = "PMIC0 SWD Current Consumption Warning Threshold";
+
+        template <typename T>
+        using COMPARISON_OP = std::equal_to<T>;
+};
+
+///
+/// @class readerTraits
+/// @brief trait structure to hold static SPD information
+/// @tparam R the revision of the SPD field
+/// @note PMIC1_SWA_CURRENT_WARNING field specialization
+/// @note Valid for >= 0.4 revision
+///
+template< mss::spd::rev R >
+class readerTraits
+    < fields< mss::spd::device_type::DDR4, mss::efd::id::DDR4_CUSTOM_MICROCHIP>::PMIC1_SWA_CURRENT_WARNING, R >
+{
+    public:
+
+        static constexpr size_t COMPARISON_VAL = 0xFC;
+        static constexpr const char* FIELD_STR = "PMIC1 SWA Current Consumption Warning Threshold";
+
+        template <typename T>
+        using COMPARISON_OP = std::less_equal<T>;
+};
+
+///
+/// @class readerTraits
+/// @brief trait structure to hold static SPD information
+/// @tparam R the revision of the SPD field
+/// @note PMIC1_SWA_CURRENT_WARNING field specialization
+/// @note Revision 0.3
+///
+template<>
+class readerTraits
+    < fields< mss::spd::device_type::DDR4, mss::efd::id::DDR4_CUSTOM_MICROCHIP>::PMIC1_SWA_CURRENT_WARNING, mss::spd::rev::V0_3>
+{
+    public:
+
+        static constexpr size_t COMPARISON_VAL = 0x00;
+        static constexpr const char* FIELD_STR = "PMIC1 SWA Current Consumption Warning Threshold";
+
+        template <typename T>
+        using COMPARISON_OP = std::equal_to<T>;
+};
+
+///
+/// @class readerTraits
+/// @brief trait structure to hold static SPD information
+/// @tparam R the revision of the SPD field
+/// @note PMIC1_SWB_CURRENT_WARNING field specialization
+/// @note Valid for >= 0.4 revision
+///
+template< mss::spd::rev R >
+class readerTraits
+    < fields< mss::spd::device_type::DDR4, mss::efd::id::DDR4_CUSTOM_MICROCHIP>::PMIC1_SWB_CURRENT_WARNING, R >
+{
+    public:
+
+        static constexpr size_t COMPARISON_VAL = 0xFC;
+        static constexpr const char* FIELD_STR = "PMIC1 SWB Current Consumption Warning Threshold";
+
+        template <typename T>
+        using COMPARISON_OP = std::less_equal<T>;
+};
+
+///
+/// @class readerTraits
+/// @brief trait structure to hold static SPD information
+/// @tparam R the revision of the SPD field
+/// @note PMIC1_SWB_CURRENT_WARNING field specialization
+/// @note Revision 0.3
+///
+template<>
+class readerTraits
+    < fields< mss::spd::device_type::DDR4, mss::efd::id::DDR4_CUSTOM_MICROCHIP>::PMIC1_SWB_CURRENT_WARNING, mss::spd::rev::V0_3>
+{
+    public:
+
+        static constexpr size_t COMPARISON_VAL = 0x00;
+        static constexpr const char* FIELD_STR = "PMIC1 SWB Current Consumption Warning Threshold";
+
+        template <typename T>
+        using COMPARISON_OP = std::equal_to<T>;
+};
+
+///
+/// @class readerTraits
+/// @brief trait structure to hold static SPD information
+/// @tparam R the revision of the SPD field
+/// @note PMIC1_SWC_CURRENT_WARNING field specialization
+/// @note Valid for >= 0.4 revision
+///
+template< mss::spd::rev R >
+class readerTraits
+    < fields< mss::spd::device_type::DDR4, mss::efd::id::DDR4_CUSTOM_MICROCHIP>::PMIC1_SWC_CURRENT_WARNING, R >
+{
+    public:
+
+        static constexpr size_t COMPARISON_VAL = 0xFC;
+        static constexpr const char* FIELD_STR = "PMIC1 SWC Current Consumption Warning Threshold";
+
+        template <typename T>
+        using COMPARISON_OP = std::less_equal<T>;
+};
+
+///
+/// @class readerTraits
+/// @brief trait structure to hold static SPD information
+/// @tparam R the revision of the SPD field
+/// @note PMIC1_SWC_CURRENT_WARNING field specialization
+/// @note Revision 0.3
+///
+template<>
+class readerTraits
+    < fields< mss::spd::device_type::DDR4, mss::efd::id::DDR4_CUSTOM_MICROCHIP>::PMIC1_SWC_CURRENT_WARNING, mss::spd::rev::V0_3>
+{
+    public:
+
+        static constexpr size_t COMPARISON_VAL = 0x00;
+        static constexpr const char* FIELD_STR = "PMIC1 SWC Current Consumption Warning Threshold";
+
+        template <typename T>
+        using COMPARISON_OP = std::equal_to<T>;
+};
+
+///
+/// @class readerTraits
+/// @brief trait structure to hold static SPD information
+/// @tparam R the revision of the SPD field
+/// @note PMIC1_SWD_CURRENT_WARNING field specialization
+/// @note Valid for >= 0.4 revision
+///
+template< mss::spd::rev R >
+class readerTraits
+    < fields< mss::spd::device_type::DDR4, mss::efd::id::DDR4_CUSTOM_MICROCHIP>::PMIC1_SWD_CURRENT_WARNING, R >
+{
+    public:
+
+        static constexpr size_t COMPARISON_VAL = 0xFC;
+        static constexpr const char* FIELD_STR = "PMIC1 SWD Current Consumption Warning Threshold";
+
+        template <typename T>
+        using COMPARISON_OP = std::less_equal<T>;
+};
+
+///
+/// @class readerTraits
+/// @brief trait structure to hold static SPD information
+/// @tparam R the revision of the SPD field
+/// @note PMIC1_SWD_CURRENT_WARNING field specialization
+/// @note Revision 0.3
+///
+template<>
+class readerTraits
+    < fields< mss::spd::device_type::DDR4, mss::efd::id::DDR4_CUSTOM_MICROCHIP>::PMIC1_SWD_CURRENT_WARNING, mss::spd::rev::V0_3>
+{
+    public:
+
+        static constexpr size_t COMPARISON_VAL = 0x00;
+        static constexpr const char* FIELD_STR = "PMIC1 SWD Current Consumption Warning Threshold";
+
+        template <typename T>
+        using COMPARISON_OP = std::equal_to<T>;
+};
+
+///
+/// @class readerTraits
+/// @brief trait structure to hold static SPD information
 /// @note RCD_DIC_0 field specialization
 /// @note rev 0.3 specialization
 ///

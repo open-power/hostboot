@@ -439,6 +439,62 @@ class fields<mss::spd::device_type::DDR4, mss::efd::id::DDR4_CUSTOM_MICROCHIP>
             PMIC1_SWD_OFFSET_DIRECTION_START = 7,
             PMIC1_SWD_OFFSET_DIRECTION_LEN = 1,
 
+            // Byte 78: PMIC0 SWA Current Consumption Warning Threshold
+            // Note: These are pulled in including the two reserved bits [1:0], since this is
+            // exactly how it will be written to the PMIC registers
+            PMIC0_SWA_CURRENT_WARNING_BYTE = 78,
+            PMIC0_SWA_CURRENT_WARNING_START = 0,
+            PMIC0_SWA_CURRENT_WARNING_LEN = 8,
+
+            // Byte 79: PMIC0 SWB Current Consumption Warning Threshold
+            // Note: These are pulled in including the two reserved bits [1:0], since this is
+            // exactly how it will be written to the PMIC registers
+            PMIC0_SWB_CURRENT_WARNING_BYTE = 79,
+            PMIC0_SWB_CURRENT_WARNING_START = 0,
+            PMIC0_SWB_CURRENT_WARNING_LEN = 8,
+
+            // Byte 80: PMIC0 SWC Current Consumption Warning Threshold
+            // Note: These are pulled in including the two reserved bits [1:0], since this is
+            // exactly how it will be written to the PMIC registers
+            PMIC0_SWC_CURRENT_WARNING_BYTE = 80,
+            PMIC0_SWC_CURRENT_WARNING_START = 0,
+            PMIC0_SWC_CURRENT_WARNING_LEN = 8,
+
+            // Byte 80: PMIC0 SWD Current Consumption Warning Threshold
+            // Note: These are pulled in including the two reserved bits [1:0], since this is
+            // exactly how it will be written to the PMIC registers
+            PMIC0_SWD_CURRENT_WARNING_BYTE = 81,
+            PMIC0_SWD_CURRENT_WARNING_START = 0,
+            PMIC0_SWD_CURRENT_WARNING_LEN = 8,
+
+            // Byte 82: PMIC1 SWA Current Consumption Warning Threshold
+            // Note: These are pulled in including the two reserved bits [1:0], since this is
+            // exactly how it will be written to the PMIC registers
+            PMIC1_SWA_CURRENT_WARNING_BYTE = 82,
+            PMIC1_SWA_CURRENT_WARNING_START = 0,
+            PMIC1_SWA_CURRENT_WARNING_LEN = 8,
+
+            // Byte 83: PMIC1 SWB Current Consumption Warning Threshold
+            // Note: These are pulled in including the two reserved bits [1:0], since this is
+            // exactly how it will be written to the PMIC registers
+            PMIC1_SWB_CURRENT_WARNING_BYTE = 83,
+            PMIC1_SWB_CURRENT_WARNING_START = 0,
+            PMIC1_SWB_CURRENT_WARNING_LEN = 8,
+
+            // Byte 84: PMIC1 SWC Current Consumption Warning Threshold
+            // Note: These are pulled in including the two reserved bits [1:0], since this is
+            // exactly how it will be written to the PMIC registers
+            PMIC1_SWC_CURRENT_WARNING_BYTE = 84,
+            PMIC1_SWC_CURRENT_WARNING_START = 0,
+            PMIC1_SWC_CURRENT_WARNING_LEN = 8,
+
+            // Byte 85: PMIC1 SWD Current Consumption Warning Threshold
+            // Note: These are pulled in including the two reserved bits [1:0], since this is
+            // exactly how it will be written to the PMIC registers
+            PMIC1_SWD_CURRENT_WARNING_BYTE = 85,
+            PMIC1_SWD_CURRENT_WARNING_START = 0,
+            PMIC1_SWD_CURRENT_WARNING_LEN = 8,
+
             // Byte 96: RCD driver impedance control Byte0
             RCD_DIC_0_BYTE = 96,
             RCD_DIC_0_START = 0,
@@ -708,6 +764,30 @@ class fields<mss::spd::device_type::DDR4, mss::efd::id::DDR4_CUSTOM_MICROCHIP>
         // Byte 77: PMIC1 SWD Volt
         static constexpr field_t PMIC1_SWD_OFFSET{PMIC1_SWD_BYTE, PMIC1_SWD_OFFSET_START, PMIC1_SWD_OFFSET_LEN};
         static constexpr field_t PMIC1_SWD_OFFSET_DIRECTION{PMIC1_SWD_BYTE, PMIC1_SWD_OFFSET_DIRECTION_START, PMIC1_SWD_OFFSET_DIRECTION_LEN};
+
+        // Byte 78: PMIC0 SWA Current Warning Threshold
+        static constexpr field_t PMIC0_SWA_CURRENT_WARNING{PMIC0_SWA_CURRENT_WARNING_BYTE, PMIC0_SWA_CURRENT_WARNING_START, PMIC0_SWA_CURRENT_WARNING_LEN};
+
+        // Byte 79: PMIC0 SWB Current Warning Threshold
+        static constexpr field_t PMIC0_SWB_CURRENT_WARNING{PMIC0_SWB_CURRENT_WARNING_BYTE, PMIC0_SWB_CURRENT_WARNING_START, PMIC0_SWB_CURRENT_WARNING_LEN};
+
+        // Byte 80: PMIC0 SWC Current Warning Threshold
+        static constexpr field_t PMIC0_SWC_CURRENT_WARNING{PMIC0_SWC_CURRENT_WARNING_BYTE, PMIC0_SWC_CURRENT_WARNING_START, PMIC0_SWC_CURRENT_WARNING_LEN};
+
+        // Byte 81: PMIC0 SWD Current Warning Threshold
+        static constexpr field_t PMIC0_SWD_CURRENT_WARNING{PMIC0_SWD_CURRENT_WARNING_BYTE, PMIC0_SWD_CURRENT_WARNING_START, PMIC0_SWD_CURRENT_WARNING_LEN};
+
+        // Byte 82: PMIC1 SWA Current Warning Threshold
+        static constexpr field_t PMIC1_SWA_CURRENT_WARNING{PMIC1_SWA_CURRENT_WARNING_BYTE, PMIC1_SWA_CURRENT_WARNING_START, PMIC1_SWA_CURRENT_WARNING_LEN};
+
+        // Byte 83: PMIC1 SWB Current Warning Threshold
+        static constexpr field_t PMIC1_SWB_CURRENT_WARNING{PMIC1_SWB_CURRENT_WARNING_BYTE, PMIC1_SWB_CURRENT_WARNING_START, PMIC1_SWB_CURRENT_WARNING_LEN};
+
+        // Byte 84: PMIC1 SWC Current Warning Threshold
+        static constexpr field_t PMIC1_SWC_CURRENT_WARNING{PMIC1_SWC_CURRENT_WARNING_BYTE, PMIC1_SWC_CURRENT_WARNING_START, PMIC1_SWC_CURRENT_WARNING_LEN};
+
+        // Byte 85: PMIC1 SWD Current Warning Threshold
+        static constexpr field_t PMIC1_SWD_CURRENT_WARNING{PMIC1_SWD_CURRENT_WARNING_BYTE, PMIC1_SWD_CURRENT_WARNING_START, PMIC1_SWD_CURRENT_WARNING_LEN};
 
         // Byte 96: RCD driver impedance control Byte0
         static constexpr field_t RCD_DIC_0{RCD_DIC_0_BYTE, RCD_DIC_0_START, RCD_DIC_0_LEN};

@@ -168,6 +168,31 @@ static constexpr pmic_attr_ptr_signed get_efd_swd_voltage_offset[] =
     mss::attr::get_efd_pmic1_swd_voltage_offset
 };
 
+// Current limiter warnings (EFD)
+static constexpr pmic_attr_ptr get_swa_current_warning[] =
+{
+    mss::attr::get_pmic0_swa_current_warning,
+    mss::attr::get_pmic1_swa_current_warning
+};
+
+static constexpr pmic_attr_ptr get_swb_current_warning[] =
+{
+    mss::attr::get_pmic0_swb_current_warning,
+    mss::attr::get_pmic1_swb_current_warning
+};
+
+static constexpr pmic_attr_ptr get_swc_current_warning[] =
+{
+    mss::attr::get_pmic0_swc_current_warning,
+    mss::attr::get_pmic1_swc_current_warning
+};
+
+static constexpr pmic_attr_ptr get_swd_current_warning[] =
+{
+    mss::attr::get_pmic0_swd_current_warning,
+    mss::attr::get_pmic1_swd_current_warning
+};
+
 // These arrays allow us to dynamically choose the right attribute getter at runtime based on the rail and mss::pmic::id
 static constexpr const pmic_attr_ptr* get_volt_setting[] =
 {
@@ -200,6 +225,15 @@ static constexpr const pmic_attr_ptr_signed* get_efd_volt_offset[] =
     get_efd_swb_voltage_offset,
     get_efd_swc_voltage_offset,
     get_efd_swd_voltage_offset
+};
+
+// Current limiter warning threshold
+static constexpr const pmic_attr_ptr* get_current_warning[] =
+{
+    get_swa_current_warning,
+    get_swb_current_warning,
+    get_swc_current_warning,
+    get_swd_current_warning
 };
 
 // PMIC0/1 sequence order
@@ -275,159 +309,6 @@ static constexpr pmic_attr_ptr get_phase_comb[] =
     mss::attr::get_pmic0_phase_comb,
     mss::attr::get_pmic1_phase_comb
 };
-
-//--------------------
-// Attribute Setters
-//--------------------
-
-// Attribute setter FP type
-typedef fapi2::ReturnCode (*pmic_attr_setter_ptr)(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
-        uint8_t i_value);
-typedef fapi2::ReturnCode (*pmic_attr_setter_ptr_signed)(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
-        int8_t i_value);
-
-// Voltage Setting
-static constexpr pmic_attr_setter_ptr set_swa_voltage_setting[] =
-{
-    mss::attr::set_pmic0_swa_voltage_setting,
-    mss::attr::set_pmic1_swa_voltage_setting
-};
-static constexpr pmic_attr_setter_ptr set_swb_voltage_setting[] =
-{
-    mss::attr::set_pmic0_swb_voltage_setting,
-    mss::attr::set_pmic1_swb_voltage_setting
-};
-static constexpr pmic_attr_setter_ptr set_swc_voltage_setting[] =
-{
-    mss::attr::set_pmic0_swc_voltage_setting,
-    mss::attr::set_pmic1_swc_voltage_setting
-};
-static constexpr pmic_attr_setter_ptr set_swd_voltage_setting[] =
-{
-    mss::attr::set_pmic0_swd_voltage_setting,
-    mss::attr::set_pmic1_swd_voltage_setting
-};
-
-// Voltage Range Select
-static constexpr pmic_attr_setter_ptr set_swa_voltage_range_select[] =
-{
-    mss::attr::set_pmic0_swa_voltage_range_select,
-    mss::attr::set_pmic1_swa_voltage_range_select
-};
-static constexpr pmic_attr_setter_ptr set_swb_voltage_range_select[] =
-{
-    mss::attr::set_pmic0_swb_voltage_range_select,
-    mss::attr::set_pmic1_swb_voltage_range_select
-};
-static constexpr pmic_attr_setter_ptr set_swc_voltage_range_select[] =
-{
-    mss::attr::set_pmic0_swc_voltage_range_select,
-    mss::attr::set_pmic1_swc_voltage_range_select
-};
-static constexpr pmic_attr_setter_ptr set_swd_voltage_range_select[] =
-{
-    mss::attr::set_pmic0_swd_voltage_range_select,
-    mss::attr::set_pmic1_swd_voltage_range_select
-};
-
-// Voltage Offset
-static constexpr pmic_attr_setter_ptr_signed set_swa_voltage_offset[] =
-{
-    mss::attr::set_pmic0_swa_voltage_offset,
-    mss::attr::set_pmic1_swa_voltage_offset
-};
-static constexpr pmic_attr_setter_ptr_signed set_swb_voltage_offset[] =
-{
-    mss::attr::set_pmic0_swb_voltage_offset,
-    mss::attr::set_pmic1_swb_voltage_offset
-};
-static constexpr pmic_attr_setter_ptr_signed set_swc_voltage_offset[] =
-{
-    mss::attr::set_pmic0_swc_voltage_offset,
-    mss::attr::set_pmic1_swc_voltage_offset
-};
-static constexpr pmic_attr_setter_ptr_signed set_swd_voltage_offset[] =
-{
-    mss::attr::set_pmic0_swd_voltage_offset,
-    mss::attr::set_pmic1_swd_voltage_offset
-};
-
-// Sequence Delay
-static constexpr pmic_attr_setter_ptr set_swa_sequence_delay[] =
-{
-    mss::attr::set_pmic0_swa_sequence_delay,
-    mss::attr::set_pmic1_swa_sequence_delay
-};
-static constexpr pmic_attr_setter_ptr set_swb_sequence_delay[] =
-{
-    mss::attr::set_pmic0_swb_sequence_delay,
-    mss::attr::set_pmic1_swb_sequence_delay
-};
-static constexpr pmic_attr_setter_ptr set_swc_sequence_delay[] =
-{
-    mss::attr::set_pmic0_swc_sequence_delay,
-    mss::attr::set_pmic1_swc_sequence_delay
-};
-static constexpr pmic_attr_setter_ptr set_swd_sequence_delay[] =
-{
-    mss::attr::set_pmic0_swd_sequence_delay,
-    mss::attr::set_pmic1_swd_sequence_delay
-};
-
-// Sequence Order
-static constexpr pmic_attr_setter_ptr set_swa_sequence_order[] =
-{
-    mss::attr::set_pmic0_swa_sequence_order,
-    mss::attr::set_pmic1_swa_sequence_order
-};
-static constexpr pmic_attr_setter_ptr set_swb_sequence_order[] =
-{
-    mss::attr::set_pmic0_swb_sequence_order,
-    mss::attr::set_pmic1_swb_sequence_order
-};
-static constexpr pmic_attr_setter_ptr set_swc_sequence_order[] =
-{
-    mss::attr::set_pmic0_swc_sequence_order,
-    mss::attr::set_pmic1_swc_sequence_order
-};
-static constexpr pmic_attr_setter_ptr set_swd_sequence_order[] =
-{
-    mss::attr::set_pmic0_swd_sequence_order,
-    mss::attr::set_pmic1_swd_sequence_order
-};
-
-// Phase Combination
-static constexpr pmic_attr_setter_ptr set_phase_comb[] =
-{
-    mss::attr::set_pmic0_phase_comb,
-    mss::attr::set_pmic1_phase_comb
-};
-
-// Offset
-static constexpr pmic_attr_setter_ptr_signed set_efd_swa_voltage_offset[] =
-{
-    mss::attr::set_efd_pmic0_swa_voltage_offset,
-    mss::attr::set_efd_pmic1_swa_voltage_offset
-};
-
-static constexpr pmic_attr_setter_ptr_signed set_efd_swb_voltage_offset[] =
-{
-    mss::attr::set_efd_pmic0_swb_voltage_offset,
-    mss::attr::set_efd_pmic1_swb_voltage_offset
-};
-
-static constexpr pmic_attr_setter_ptr_signed set_efd_swc_voltage_offset[] =
-{
-    mss::attr::set_efd_pmic0_swc_voltage_offset,
-    mss::attr::set_efd_pmic1_swc_voltage_offset
-};
-
-static constexpr pmic_attr_setter_ptr_signed set_efd_swd_voltage_offset[] =
-{
-    mss::attr::set_efd_pmic0_swd_voltage_offset,
-    mss::attr::set_efd_pmic1_swd_voltage_offset
-};
-
 } // nss attr
 } // ns mss
 
