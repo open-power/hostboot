@@ -247,6 +247,142 @@ fapi_try_exit:
 }
 
 ///
+/// @brief Processes the EFD PMIC0 SWA Current Consumption Warning Threshold
+/// @param[in] i_target the target on which to operate
+/// @param[in] i_efd_data the EFD data to process
+/// @return fapi2::FAPI2_RC_SUCCESS iff function completes successfully
+///
+fapi2::ReturnCode pmic0_swa_current_warning(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+        const std::shared_ptr<mss::efd::base_decoder>& i_efd_data)
+{
+    uint8_t l_warning = 0;
+    FAPI_TRY(i_efd_data->pmic0_swa_current_warning(l_warning));
+    FAPI_TRY(mss::attr::set_pmic0_swa_current_warning(i_target, l_warning));
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Processes the EFD PMIC0 SWB Current Consumption Warning Threshold
+/// @param[in] i_target the target on which to operate
+/// @param[in] i_efd_data the EFD data to process
+/// @return fapi2::FAPI2_RC_SUCCESS iff function completes successfully
+///
+fapi2::ReturnCode pmic0_swb_current_warning(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+        const std::shared_ptr<mss::efd::base_decoder>& i_efd_data)
+{
+    uint8_t l_warning = 0;
+    FAPI_TRY(i_efd_data->pmic0_swb_current_warning(l_warning));
+    FAPI_TRY(mss::attr::set_pmic0_swb_current_warning(i_target, l_warning));
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Processes the EFD PMIC0 SWC Current Consumption Warning Threshold
+/// @param[in] i_target the target on which to operate
+/// @param[in] i_efd_data the EFD data to process
+/// @return fapi2::FAPI2_RC_SUCCESS iff function completes successfully
+///
+fapi2::ReturnCode pmic0_swc_current_warning(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+        const std::shared_ptr<mss::efd::base_decoder>& i_efd_data)
+{
+    uint8_t l_warning = 0;
+    FAPI_TRY(i_efd_data->pmic0_swc_current_warning(l_warning));
+    FAPI_TRY(mss::attr::set_pmic0_swc_current_warning(i_target, l_warning));
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Processes the EFD PMIC0 SWD Current Consumption Warning Threshold
+/// @param[in] i_target the target on which to operate
+/// @param[in] i_efd_data the EFD data to process
+/// @return fapi2::FAPI2_RC_SUCCESS iff function completes successfully
+///
+fapi2::ReturnCode pmic0_swd_current_warning(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+        const std::shared_ptr<mss::efd::base_decoder>& i_efd_data)
+{
+    uint8_t l_warning = 0;
+    FAPI_TRY(i_efd_data->pmic0_swd_current_warning(l_warning));
+    FAPI_TRY(mss::attr::set_pmic0_swd_current_warning(i_target, l_warning));
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Processes the EFD PMIC1 SWA Current Consumption Warning Threshold
+/// @param[in] i_target the target on which to operate
+/// @param[in] i_efd_data the EFD data to process
+/// @return fapi2::FAPI2_RC_SUCCESS iff function completes successfully
+///
+fapi2::ReturnCode pmic1_swa_current_warning(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+        const std::shared_ptr<mss::efd::base_decoder>& i_efd_data)
+{
+    uint8_t l_warning = 0;
+    FAPI_TRY(i_efd_data->pmic1_swa_current_warning(l_warning));
+    FAPI_TRY(mss::attr::set_pmic1_swa_current_warning(i_target, l_warning));
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Processes the EFD PMIC1 SWB Current Consumption Warning Threshold
+/// @param[in] i_target the target on which to operate
+/// @param[in] i_efd_data the EFD data to process
+/// @return fapi2::FAPI2_RC_SUCCESS iff function completes successfully
+///
+fapi2::ReturnCode pmic1_swb_current_warning(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+        const std::shared_ptr<mss::efd::base_decoder>& i_efd_data)
+{
+    uint8_t l_warning = 0;
+    FAPI_TRY(i_efd_data->pmic1_swb_current_warning(l_warning));
+    FAPI_TRY(mss::attr::set_pmic1_swb_current_warning(i_target, l_warning));
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Processes the EFD PMIC1 SWC Current Consumption Warning Threshold
+/// @param[in] i_target the target on which to operate
+/// @param[in] i_efd_data the EFD data to process
+/// @return fapi2::FAPI2_RC_SUCCESS iff function completes successfully
+///
+fapi2::ReturnCode pmic1_swc_current_warning(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+        const std::shared_ptr<mss::efd::base_decoder>& i_efd_data)
+{
+    uint8_t l_warning = 0;
+    FAPI_TRY(i_efd_data->pmic1_swc_current_warning(l_warning));
+    FAPI_TRY(mss::attr::set_pmic1_swc_current_warning(i_target, l_warning));
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Processes the EFD PMIC1 SWD Current Consumption Warning Threshold
+/// @param[in] i_target the target on which to operate
+/// @param[in] i_efd_data the EFD data to process
+/// @return fapi2::FAPI2_RC_SUCCESS iff function completes successfully
+///
+fapi2::ReturnCode pmic1_swd_current_warning(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+        const std::shared_ptr<mss::efd::base_decoder>& i_efd_data)
+{
+    uint8_t l_warning = 0;
+    FAPI_TRY(i_efd_data->pmic1_swd_current_warning(l_warning));
+    FAPI_TRY(mss::attr::set_pmic1_swd_current_warning(i_target, l_warning));
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
 /// @brief Process the EFD data and set attributes
 /// @param[in] i_target DIMM target on which to operate
 /// @param[in] i_efd_data the EFD data to process
@@ -264,6 +400,16 @@ fapi2::ReturnCode process(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_t
     FAPI_TRY(pmic1_swb_voltage_offset(i_target, i_efd_data));
     FAPI_TRY(pmic1_swc_voltage_offset(i_target, i_efd_data));
     FAPI_TRY(pmic1_swd_voltage_offset(i_target, i_efd_data));
+
+    FAPI_TRY(pmic0_swa_current_warning(i_target, i_efd_data));
+    FAPI_TRY(pmic0_swb_current_warning(i_target, i_efd_data));
+    FAPI_TRY(pmic0_swc_current_warning(i_target, i_efd_data));
+    FAPI_TRY(pmic0_swd_current_warning(i_target, i_efd_data));
+
+    FAPI_TRY(pmic1_swa_current_warning(i_target, i_efd_data));
+    FAPI_TRY(pmic1_swb_current_warning(i_target, i_efd_data));
+    FAPI_TRY(pmic1_swc_current_warning(i_target, i_efd_data));
+    FAPI_TRY(pmic1_swd_current_warning(i_target, i_efd_data));
 
 fapi_try_exit:
     return fapi2::current_err;

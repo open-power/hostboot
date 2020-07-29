@@ -365,6 +365,17 @@ fapi2::ReturnCode bias_with_spd_startup_seq(
     const mss::pmic::id i_id);
 
 ///
+/// @brief Set the current limiter warning registers via attributes
+///
+/// @param[in] i_pmic_target PMIC target
+/// @param[in] i_ocmb_target OCMB parent target of pmic
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
+///
+fapi2::ReturnCode set_current_limiter_warnings(
+    const fapi2::Target<fapi2::TargetType::TARGET_TYPE_PMIC>& i_pmic_target,
+    const fapi2::Target<fapi2::TargetType::TARGET_TYPE_OCMB_CHIP>& i_ocmb_target);
+
+///
 /// @brief Set the startup seq register with the given parameters
 ///
 /// @param[in] i_pmic_target PMIC target
@@ -583,6 +594,9 @@ inline fapi2::ReturnCode bias_with_spd_settings<mss::pmic::vendor::IDT>(
 
         // Startup sequence
         FAPI_TRY(mss::pmic::bias_with_spd_startup_seq(i_pmic_target, i_ocmb_target, l_relative_pmic_id));
+
+        // Current consumption
+        FAPI_TRY(mss::pmic::set_current_limiter_warnings(i_pmic_target, i_ocmb_target));
     }
 
 fapi_try_exit:
@@ -618,6 +632,9 @@ inline fapi2::ReturnCode bias_with_spd_settings<mss::pmic::vendor::TI>(
 
         // Startup sequence
         FAPI_TRY(mss::pmic::bias_with_spd_startup_seq(i_pmic_target, i_ocmb_target, l_relative_pmic_id));
+
+        // Current consumption
+        FAPI_TRY(mss::pmic::set_current_limiter_warnings(i_pmic_target, i_ocmb_target));
     }
 
 fapi_try_exit:

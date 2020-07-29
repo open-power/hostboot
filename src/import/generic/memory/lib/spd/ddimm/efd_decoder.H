@@ -1064,6 +1064,94 @@ class base_decoder
         }
 
         ///
+        /// @brief Decodes PMIC0 SWA Current Warning -> PMIC0_SWA_CURRENT_WARNING
+        /// @param[out] o_output encoding from SPD
+        /// @return FAPI2_RC_SUCCESS if okay
+        ///
+        virtual fapi2::ReturnCode pmic0_swa_current_warning(uint8_t& o_output) const
+        {
+            o_output = 0;
+            return fapi2::FAPI2_RC_SUCCESS;
+        }
+
+        ///
+        /// @brief Decodes PMIC0 SWB Current Warning -> PMIC0_SWB_CURRENT_WARNING
+        /// @param[out] o_output encoding from SPD
+        /// @return FAPI2_RC_SUCCESS if okay
+        ///
+        virtual fapi2::ReturnCode pmic0_swb_current_warning(uint8_t& o_output) const
+        {
+            o_output = 0;
+            return fapi2::FAPI2_RC_SUCCESS;
+        }
+
+        ///
+        /// @brief Decodes PMIC0 SWC Current Warning -> PMIC0_SWC_CURRENT_WARNING
+        /// @param[out] o_output encoding from SPD
+        /// @return FAPI2_RC_SUCCESS if okay
+        ///
+        virtual fapi2::ReturnCode pmic0_swc_current_warning(uint8_t& o_output) const
+        {
+            o_output = 0;
+            return fapi2::FAPI2_RC_SUCCESS;
+        }
+
+        ///
+        /// @brief Decodes PMIC0 SWD Current Warning -> PMIC0_SWD_CURRENT_WARNING
+        /// @param[out] o_output encoding from SPD
+        /// @return FAPI2_RC_SUCCESS if okay
+        ///
+        virtual fapi2::ReturnCode pmic0_swd_current_warning(uint8_t& o_output) const
+        {
+            o_output = 0;
+            return fapi2::FAPI2_RC_SUCCESS;
+        }
+
+        ///
+        /// @brief Decodes PMIC1 SWA Current Warning -> PMIC1_SWA_CURRENT_WARNING
+        /// @param[out] o_output encoding from SPD
+        /// @return FAPI2_RC_SUCCESS if okay
+        ///
+        virtual fapi2::ReturnCode pmic1_swa_current_warning(uint8_t& o_output) const
+        {
+            o_output = 0;
+            return fapi2::FAPI2_RC_SUCCESS;
+        }
+
+        ///
+        /// @brief Decodes PMIC1 SWB Current Warning -> PMIC1_SWB_CURRENT_WARNING
+        /// @param[out] o_output encoding from SPD
+        /// @return FAPI2_RC_SUCCESS if okay
+        ///
+        virtual fapi2::ReturnCode pmic1_swb_current_warning(uint8_t& o_output) const
+        {
+            o_output = 0;
+            return fapi2::FAPI2_RC_SUCCESS;
+        }
+
+        ///
+        /// @brief Decodes PMIC1 SWC Current Warning -> PMIC1_SWC_CURRENT_WARNING
+        /// @param[out] o_output encoding from SPD
+        /// @return FAPI2_RC_SUCCESS if okay
+        ///
+        virtual fapi2::ReturnCode pmic1_swc_current_warning(uint8_t& o_output) const
+        {
+            o_output = 0;
+            return fapi2::FAPI2_RC_SUCCESS;
+        }
+
+        ///
+        /// @brief Decodes PMIC1 SWD Current Warning -> PMIC1_SWD_CURRENT_WARNING
+        /// @param[out] o_output encoding from SPD
+        /// @return FAPI2_RC_SUCCESS if okay
+        ///
+        virtual fapi2::ReturnCode pmic1_swd_current_warning(uint8_t& o_output) const
+        {
+            o_output = 0;
+            return fapi2::FAPI2_RC_SUCCESS;
+        }
+
+        ///
         /// @brief Decodes Channels supported byte3
         /// @param[out] o_output encoding from SPD - multiple fields used
         /// @return FAPI2_RC_SUCCESS if okay
