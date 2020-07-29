@@ -71,7 +71,7 @@ void _deconfigPhbsBasedOnPhbActive(
     errlHndl_t l_err = nullptr;
 
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-        ENTER_MRK "_deconfigPhbsBasedOnPhbActive: Proc target HUID = 0x%08X,"
+        ENTER_MRK "_deconfigPhbsBasedOnPhbActive: PEC target HUID = 0x%08X,"
         " PHB active value = 0x%02X.", TARGETING::get_huid(i_pecTarget), io_phbActive);
 
     // Get pec chip's PHB units
@@ -135,7 +135,7 @@ void _modifyPhbActiveBasedonNVME(
     TARGETING::ATTR_PROC_PCIE_PHB_ACTIVE_typeStdArr& io_phbActive)
 {
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-        ENTER_MRK "_modifyPhbsBasedonNVME: Proc target HUID = 0x%08X,"
+        ENTER_MRK "_modifyPhbsBasedonNVME: PEC target HUID = 0x%08X,"
         " PHB active value = 0x%02X.", TARGETING::get_huid(i_pecTarget), io_phbActive);
 
     TARGETING::Target* l_nodeTgt = TARGETING::UTIL::getCurrentNodeTarget();
@@ -167,8 +167,8 @@ void _modifyPhbActiveBasedonNVME(
                     if (io_phbActive[0])
                     {
                         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                                  "Disabling PHB0 on PEC:0x%x due to NVME Backplane Settings",
-                                  l_pecNum );
+                            "Disabling PHB0 on PEC:0x%x due to NVME Backplane Settings (HUID 0x%x)",
+                            l_pecNum,  TARGETING::get_huid(i_pecTarget) );
                         //Disable PHB in Active Attribute
                         io_phbActive[0] = 0;
                     }
@@ -178,8 +178,8 @@ void _modifyPhbActiveBasedonNVME(
                     if (io_phbActive[1])
                     {
                         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                                  "Disabling PHB1 on PEC:0x%x due to NVME Backplane Settings",
-                                  l_pecNum );
+                            "Disabling PHB1 on PEC:0x%x due to NVME Backplane Settings (HUID 0x%x)",
+                            l_pecNum, TARGETING::get_huid(i_pecTarget) );
                         //Disable PHB in Active Attribute
                         io_phbActive[1] = 0;
                     }
@@ -189,8 +189,8 @@ void _modifyPhbActiveBasedonNVME(
                     if (io_phbActive[2])
                     {
                         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                                  "Disabling PHB2 on PEC:0x%x due to NVME Backplane Settings",
-                                  l_pecNum );
+                            "Disabling PHB2 on PEC:0x%x due to NVME Backplane Settings (HUID 0x%x)",
+                            l_pecNum, TARGETING::get_huid(i_pecTarget) );
                         //Disable PHB in Active Attribute
                         io_phbActive[2] = 0;
                     }
