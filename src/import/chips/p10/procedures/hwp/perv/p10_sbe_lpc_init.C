@@ -92,6 +92,9 @@ static fapi2::ReturnCode reset_lpc_bus_via_master(
         //Clear bit 23 lpc_lreset_oe to stop driving the low reset
         l_control.clearBit<LPC_LRESET_OE>();
         FAPI_TRY(lpc_write(i_target_chip, LPCM_OPB_MASTER_CONTROL_REG, l_control), "Error deasserting LPC reset");
+
+        //Give the bus some time after deassert
+        fapi2::delay(LPC_LRESET_DELAY_NS, LPC_LRESET_DELAY_NS);
     }
 
 fapi_try_exit:
