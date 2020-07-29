@@ -46,6 +46,8 @@ OBJS += call_mss_freq.o
 OBJS += call_mss_eff_config.o
 OBJS += call_mss_attr_update.o
 OBJS += host_mss_attr_cleanup.o
+OBJS += p9c_mss_funcs.o
+
 #mss_eff_config - Need in istep07 to group memory
 OBJS+=p9_mss_eff_grouping.o
 
@@ -55,6 +57,7 @@ EXTRAINCDIR += ${ROOTPATH}/src/include/usr/sbe/
 EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/fapi2/include/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/utils/
 EXTRAINCDIR += ${ROOTPATH}/src/import/generic/memory/lib/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/centaur/common/include/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/common/include/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/utils/imageProcs/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/imageProcs/
