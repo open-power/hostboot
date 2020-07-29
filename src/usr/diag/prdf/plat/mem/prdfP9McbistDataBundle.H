@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -90,9 +90,9 @@ class McbistDataBundle : public DataBundle
     // on a UE or CE on a rank. This is to prevent potential flooding of
     // maintenance UEs or CEs. The threshold will be 16 per rank for each.
     TimeBasedThreshold iv_ueStopCounter =
-        TimeBasedThreshold( 16, ThresholdResolution::TEN_HOURS );
+        TimeBasedThreshold( 16, ThresholdResolution::SEVEN_HOURS );
     TimeBasedThreshold iv_ceStopCounter =
-        TimeBasedThreshold( 16, ThresholdResolution::TEN_HOURS );
+        TimeBasedThreshold( 16, ThresholdResolution::SEVEN_HOURS );
 
     // If we stop on a UE or a CE, we will need to store the rank that the
     // error is on so that we can clear our respective thresholds if the
