@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2018,2019
+# Contributors Listed Below - COPYRIGHT 2018,2020
 # [+] International Business Machines Corp.
 #
 #
@@ -102,24 +102,6 @@ actionclass non_smp_masked
     funccall( "non_smp_masked" );
 };
 
-actionclass non_smp_callout_bus_th_1
-{
-    # NOTE: We cannot put the threshold action in this actionclass because it
-    #       will affect the SMP action in the try() statement. Therefore, the
-    #       plugin must handle the thresholding if in non-SMP mode.
-
-    # If NOT in SMP mode:
-    #  - calls out this OBUS
-    #  - indicates the probably may be somewhere between this OBUS and whatever
-    #    is on the other side (which we know nothing about)
-    #  - sets threshold
-    #  - sets service call
-    #  - returns SUCCESS
-    # Otherwise
-    #  - returns PRD_SCAN_COMM_REGISTER_ZERO
-    funccall( "non_smp_callout_bus_th_1" );
-};
-
 actionclass non_smp_callout_lvl2_th_1
 {
     # NOTE: We cannot put the threshold action in this actionclass because it
@@ -155,6 +137,30 @@ actionclass threshold_and_mask_self_non_smp_only
     try ( smp_masked, threshold_and_mask_self );
 };
 
+actionclass non_smp_callout_link_0_th_1
+{
+    # If NOT in SMP mode:
+    #  - Open CAPI so callout appropriate OBUS Brick
+    #  - sets threshold
+    #  - sets service call
+    #  - returns SUCCESS
+    # Otherwise
+    #  - returns PRD_SCAN_COMM_REGISTER_ZERO
+    funccall("non_smp_callout_link_0_th_1");
+};
+
+actionclass non_smp_callout_link_1_th_1
+{
+    # If NOT in SMP mode:
+    #  - Open CAPI so callout appropriate OBUS Brick
+    #  - sets threshold
+    #  - sets service call
+    #  - returns SUCCESS
+    # Otherwise
+    #  - returns PRD_SCAN_COMM_REGISTER_ZERO
+    funccall("non_smp_callout_link_1_th_1");
+};
+
 actionclass threshold_and_mask_self_smp_only
 {
     # SMP:     threshold_and_mask_self
@@ -178,16 +184,16 @@ actionclass obusSmpCallout_L1_smp_only
 
 actionclass spare_lane_degraded_mode_L0
 {
-    # SMP:     obusSmpCallout_th32_L0   (lane spare)
-    # Non-SMP: non_smp_callout_bus_th_1 (degraded mode)
-    try ( non_smp_callout_bus_th_1, obusSmpCallout_th32_L0 );
+    # SMP:     obusSmpCallout_th32_L0        (lane spare)
+    # Non-SMP: callout OpenCAPI adapter      (degraded mode)
+    try ( non_smp_callout_link_0_th_1 , obusSmpCallout_th32_L0 );
 };
 
 actionclass spare_lane_degraded_mode_L1
 {
-    # SMP:     obusSmpCallout_th32_L1   (lane spare)
-    # Non-SMP: non_smp_callout_bus_th_1 (degraded mode)
-    try ( non_smp_callout_bus_th_1, obusSmpCallout_th32_L1 );
+    # SMP:     obusSmpCallout_th32_L1        (lane spare)
+    # Non-SMP: callout OpenCAPI adapter      (degraded mode)
+    try ( non_smp_callout_link_1_th_1, obusSmpCallout_th32_L1 );
 };
 
 actionclass training_failure_L0
@@ -207,15 +213,15 @@ actionclass training_failure_L1
 actionclass unrecoverable_error_L0
 {
     # SMP:     obusSmpFailure_L0
-    # Non-SMP: non_smp_callout_bus_th_1
-    try ( non_smp_callout_bus_th_1, obusSmpFailure_L0 );
+    # Non-SMP: callout OpenCAPI adapter
+    try ( non_smp_callout_link_0_th_1, obusSmpFailure_L0 );
 };
 
 actionclass unrecoverable_error_L1
 {
     # SMP:     obusSmpFailure_L1
-    # Non-SMP: non_smp_callout_bus_th_1
-    try ( non_smp_callout_bus_th_1, obusSmpFailure_L1 );
+    # Non-SMP: callout OpenCAPI adapter
+    try ( non_smp_callout_link_1_th_1, obusSmpFailure_L1 );
 };
 
 actionclass internal_error_L0
