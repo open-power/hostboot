@@ -162,3 +162,15 @@ void setTiAreaScratchReg()
     l_tiAreaAddr |= getHRMOR();
     writeScratchReg(MMIO_SCRATCH_TI_AREA_LOCATION, l_tiAreaAddr);
 }
+
+
+//  SRC parser comments for early boot TI failures
+/*@
+ *  @errortype
+ *  @moduleid       KERNEL::MOD_KERNEL_INVALID
+ *  @reasoncode     KERNEL::RC_EARLY_BOOT_FAIL
+ *  @userdata1      <unused>
+ *  @userdata2      <unused>
+ *  @devdesc        Unknown TI from Hostboot
+ *  @custdesc       Firmware boot failure
+ */
