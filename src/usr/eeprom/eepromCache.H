@@ -107,7 +107,6 @@ errlHndl_t buildEepromRecordHeader(TARGETING::Target * i_target,
  */
 bool isEepromRecordPresent(const eepromRecordHeader& i_eepromRecordHeader);
 
-#ifndef CONFIG_SUPPORT_EEPROM_HWACCESS
 /**
  * @brief Pre-populates the global eecache map with the contents of the
  *        EECACHE PNOR partition
@@ -115,7 +114,6 @@ bool isEepromRecordPresent(const eepromRecordHeader& i_eepromRecordHeader);
  * @return nullptr on success; non-nullptr on error
  */
 errlHndl_t cacheEECACHEPartition();
-#endif
 
 #ifndef __HOSTBOOT_RUNTIME
 

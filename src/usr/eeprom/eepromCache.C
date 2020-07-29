@@ -1891,7 +1891,6 @@ uint64_t lookupEepromHeaderAddr(const eepromRecordHeader& i_eepromRecordHeader)
     return l_vaddr;
 }
 
-#ifndef CONFIG_SUPPORT_EEPROM_HWACCESS
 errlHndl_t cacheEECACHEPartition()
 {
     errlHndl_t l_errl = nullptr;
@@ -1945,7 +1944,6 @@ errlHndl_t cacheEECACHEPartition()
     }while(0);
     return l_errl;
 }
-#endif
 
 
 #if( defined(CONFIG_SUPPORT_EEPROM_CACHING) && !defined(CONFIG_SUPPORT_EEPROM_HWACCESS) )

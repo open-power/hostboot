@@ -458,6 +458,15 @@ void* host_discover_targets( void *io_pArgs )
                   "when the targeting service started");
         do
         {
+            // We will not perform presence detection and there should be a
+            // populated EECACHE from the previous IPL. This being said
+            // we must walk the EECACHE partition and populate the map
+            // we use in code to do EECACHE lookups.
+            l_err = EEPROM::cacheEECACHEPartition();
+            if (l_err)
+            {
+                break;
+            }
             // Need to ensure slave SBE's scratch registers are
             // up to date prior to sending continueMPIPL op
             l_err = updateSlaveSbeScratchRegs();
