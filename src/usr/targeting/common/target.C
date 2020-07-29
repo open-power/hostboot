@@ -607,78 +607,137 @@ void Target::getAttrTankTargetPosData(uint16_t & o_pos,
             *(reinterpret_cast<AttributeTraits<ATTR_PHYS_PATH>::Type *>(
                 l_pAttr));
 
+        // Walk the PHYS_PATH from top (sys) down element by element and set o_node, o_pos, and o_unitPos accordingly.
         for (uint32_t i = 0; i < l_physPath.size(); i++)
         {
+            // Grab the path element
             const EntityPath::PathElement & l_element = l_physPath[i];
 
-            if (l_element.type == TYPE_NODE)
+            // Check the type this element is
+            switch(l_element.type)
             {
-                o_node = l_element.instance;
-            }
-            else if ((l_element.type == TYPE_PROC) ||
-                     (l_element.type == TYPE_MEMBUF) ||
-                     (l_element.type == TYPE_DIMM) ||
-                     (l_element.type == TYPE_OCMB_CHIP) ||
-                     (l_element.type == TYPE_PMIC))
-            {
-                o_pos = l_element.instance;
-            }
-            else if ((l_element.type == TYPE_L4) ||
-                     (l_element.type == TYPE_MBA) ||
-                     (l_element.type == TYPE_MC) ||
-                     (l_element.type == TYPE_XBUS) ||
-                     (l_element.type == TYPE_ABUS) ||
-                     (l_element.type == TYPE_EQ) ||
-                     (l_element.type == TYPE_MCBIST) ||
-                     (l_element.type == TYPE_CAPP) ||
-                     (l_element.type == TYPE_OBUS) ||
-                     (l_element.type == TYPE_OBUS_BRICK) ||
-                     (l_element.type == TYPE_SBE) ||
-                     (l_element.type == TYPE_PPE) ||
-                     (l_element.type == TYPE_PERV) ||
-                     (l_element.type == TYPE_PEC) ||
-                     (l_element.type == TYPE_PHB) ||
-                     (l_element.type == TYPE_OMI) ||
-                     (l_element.type == TYPE_MCC) ||
-                     (l_element.type == TYPE_OMIC) ||
-                     (l_element.type == TYPE_MEM_PORT) ||
-                     (l_element.type == TYPE_NMMU) ||
-                     (l_element.type == TYPE_PAU) ||
-                     (l_element.type == TYPE_IOHS) ||
-                     (l_element.type == TYPE_PAUC))
-            {
-                o_unitPos = l_element.instance;
-            }
-            //Factor in that MCS and MCAs numbering is relative
-            //to their parent.  Thus MCA 1 behind MCS1 behind MCBIST 1
-            //is pos 7.  Below is the physical path showing containment:
-            // Physical:/Sys0/Node0/Proc0/MCBIST0/MCS0/MCA0 --> unitPos = 0
-            // Physical:/Sys0/Node0/Proc0/MCBIST0/MCS0/MCA1 --> unitPos = 1
-            // Physical:/Sys0/Node0/Proc0/MCBIST0/MCS1/MCA0 --> unitPos = 2
-            // Physical:/Sys0/Node0/Proc0/MCBIST0/MCS1/MCA1 --> unitPos = 3
-            // Physical:/Sys0/Node0/Proc0/MCBIST1/MCS0/MCA0 --> unitPos = 4
-            // etc
-            //
-            // physical:sys-0/node-0/proc-1/eq-1/ex-1/core-0 --> unitPos = 4
-            // physical:sys-0/node-0/proc-1/eq-1/ex-1/core-1 --> unitPos = 5
-            // physical:sys-0/node-0/proc-1/eq-2/ex-0/core-0 --> unitPos = 6
-            // physical:sys-0/node-0/proc-1/eq-2/ex-0/core-1 --> unitPos = 7
+                case(TYPE_NODE):
+                case(TYPE_CONTROL_NODE):
+                {
+                    // Element was a node, instance is the position value for the node.
+                    // ex. /sys-0/node-1/.../
+                    // instance == 1
+                    o_node = l_element.instance;
+                    break;
+                }
+                case(TYPE_PROC):
+                case(TYPE_MEMBUF):
+                case(TYPE_DIMM):
+                case(TYPE_OCMB_CHIP):
+                case(TYPE_PMIC):
+                case(TYPE_FSP):
+                case(TYPE_PNOR):
+                case(TYPE_APSS):
+                case(TYPE_DPSS):
+                {
+                    // Element was a CHIP, instance is the position value for the chip
+                    // ex. /sys-0/node-1/proc-2/.../
+                    // instance == 2
+                    // o_pos refers to the parent chip's position. In the above example some arbitrary child unit of a
+                    // proc is being looked up.
+                    o_pos = l_element.instance;
+                    break;
+                }
+                case(TYPE_MC):
+                case(TYPE_EQ):
+                case(TYPE_CAPP):
+                case(TYPE_PERV):
+                case(TYPE_PEC):
+                case(TYPE_PHB):
+                case(TYPE_OMI):
+                case(TYPE_MCC):
+                case(TYPE_OMIC):
+                case(TYPE_MEM_PORT):
+                case(TYPE_NMMU):
+                case(TYPE_PAU):
+                case(TYPE_IOHS):
+                case(TYPE_PAUC):
+                case(TYPE_CORE):
+                case(TYPE_MI):
+                case(TYPE_FC):
+                case(TYPE_NX):
+                case(TYPE_OCC):
+                {
+                    // Element was a UNIT. In this case, the attribute CHIP_UNIT has the correct position value.
+                    // processMrw.pl is responsible for calculating the right unit position so take that.
+                    void * l_pUnitPos = NULL;
+                    _getAttrPtr(ATTR_CHIP_UNIT, l_pUnitPos);
+                    if (l_pUnitPos)
+                    {
+                        AttributeTraits<ATTR_CHIP_UNIT>::Type & l_unitPos =
+                            *(reinterpret_cast<AttributeTraits<ATTR_CHIP_UNIT>::Type *>(l_pUnitPos));
 
-            //Note that this ALSO applies to EX/EC units relative to their
-            //quad.  So for now the magical number is "2" for everything
-            //TODO RTC 160598 -- find a better way to do this
-            else if ((l_element.type == TYPE_EX) ||
-                     (l_element.type == TYPE_CORE) ||
-                     (l_element.type == TYPE_MCS) ||
-                     (l_element.type == TYPE_MCA) ||
-                     (l_element.type == TYPE_MI)  ||
-                     (l_element.type == TYPE_DMI))
-            {
-                //previous o_unitPos was MCBIST/MCS or EQ/EX.
-                // Multiply by 2 and add in instance number
-                o_unitPos = (o_unitPos*P9_UNIT_PER_LEVEL) + l_element.instance;
-            }
-        }
+                        o_unitPos = l_unitPos;
+                    }
+                    break;
+                }
+                case(TYPE_XBUS):
+                case(TYPE_ABUS):
+                case(TYPE_OBUS):
+                case(TYPE_OBUS_BRICK):
+                case(TYPE_L2):
+                case(TYPE_L3):
+                case(TYPE_L4):
+                case(TYPE_NPU):
+                case(TYPE_SMPGROUP):
+                case(TYPE_SYS):
+                case(TYPE_PCI):
+                case(TYPE_OSC):
+                case(TYPE_TODCLK):
+                case(TYPE_OSCPCICLK):
+                case(TYPE_REFCLKENDPT):
+                case(TYPE_PORE):
+                case(TYPE_PCIESWITCH):
+                case(TYPE_MFREFCLKENDPT):
+                case(TYPE_TPM):
+                case(TYPE_SP):
+                case(TYPE_UART):
+                case(TYPE_PS):
+                case(TYPE_FAN):
+                case(TYPE_VRM):
+                case(TYPE_USB):
+                case(TYPE_ETH):
+                case(TYPE_PANEL):
+                case(TYPE_BMC):
+                case(TYPE_FLASH):
+                case(TYPE_SEEPROM):
+                case(TYPE_TMP):
+                case(TYPE_GPIO_EXPANDER):
+                case(TYPE_POWER_SEQUENCER):
+                case(TYPE_RTC):
+                case(TYPE_FANCTLR):
+                case(TYPE_MFREFCLK):
+                case(TYPE_I2C_MUX):
+                case(TYPE_FSI):
+                case(TYPE_PSI):
+                case(TYPE_SBE):
+                case(TYPE_PPE):
+                case(TYPE_MCS):
+                case(TYPE_MCA):
+                case(TYPE_DMI):
+                case(TYPE_MBA):
+                case(TYPE_MCBIST):
+                case(TYPE_EX):
+                case(TYPE_OSCREFCLK):
+                case(TYPE_PCICLKENDPT):
+                case(TYPE_SYSREFCLKENDPT):
+                case(TYPE_LPCREFCLKENDPT):
+                case(TYPE_NA):
+                case(TYPE_TEST_FAIL):
+                case(TYPE_LAST_IN_RANGE):
+                {
+                    // not supported. Assert to follow below.
+                    TRACFCOMP(g_trac_targeting, "getAttrTankTargetPosData(): Unsupported unit type found 0x%X",
+                              l_element.type);
+                    break;
+                }
+            } // end switch(l_element.type)
+        } // end for
 
         // Check that the correct values are returned
         _getAttrPtr(ATTR_CLASS, l_pAttr);
@@ -741,7 +800,7 @@ void Target::getAttrTankTargetPosData(uint16_t & o_pos,
                 case(TARGETING::CLASS_NA):
                 case(TARGETING::CLASS_MAX):
                     targAssert(GET_ATTR_TANK_TARGET_POS_DATA, ATTR_CLASS);
-            }
+            } // end swtich(l_class)
         }
         else
         {
