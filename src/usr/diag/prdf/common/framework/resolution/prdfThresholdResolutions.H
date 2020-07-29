@@ -103,11 +103,11 @@ class ThresholdResolution : public MaskResolution
 
     enum TimeBase
     {
-        ONE_SEC   = 1,
-        ONE_MIN   = ONE_SEC  * 60,
-        ONE_HOUR  = ONE_MIN  * 60,
-        TEN_HOURS = ONE_HOUR * 10,
-        ONE_DAY   = ONE_HOUR * 24,
+        ONE_SEC     = 1,
+        ONE_MIN     = ONE_SEC  * 60,
+        ONE_HOUR    = ONE_MIN  * 60,
+        SEVEN_HOURS = ONE_HOUR * 7,
+        ONE_DAY     = ONE_HOUR * 24,
 
         NONE = 0xffffffff,
     };
