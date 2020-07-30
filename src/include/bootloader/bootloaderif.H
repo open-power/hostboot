@@ -131,8 +131,8 @@ struct BlToHbData
                    lpcBAR(MEMMAP::MMIO_GROUP0_CHIP0_LPC_BASE_ADDR),
                    securityOverride(0), allowAttrOverrides(0),
                    sizeOfStructure(0), secBackdoorBit(0),
-                   min_secure_version(0), cacheSizeMb(0),
-                   numKeyAddrPair(0)
+                   cacheSizeMb(0), numKeyAddrPair(0),
+                   min_secure_version(0)
     {
         memset(keyAddrStashData, 0, sizeof(keyAddrStashData));
     }
@@ -169,14 +169,15 @@ struct BlToHbData
     size_t sizeOfStructure;
     // Secure Setting - SBE Security Backdoor
     bool secBackdoorBit;
-    // FW Minimum Secure Version
-    uint8_t min_secure_version;
     // The cache size available to HB (in MB)
     uint16_t cacheSizeMb;
     // The number of keyAddrPair structures included in SBE to BL comm area
     size_t numKeyAddrPair;
     //keyAddr stash data
     keyAddrPair_t keyAddrStashData[MAX_KEY_ADDR_PAIRS];
+    // FW Minimum Secure Version
+    uint8_t min_secure_version;
+
 } __attribute__((packed));
 
 /**
