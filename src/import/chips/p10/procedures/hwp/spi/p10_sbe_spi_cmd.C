@@ -558,33 +558,53 @@ spi_read( SpiControlHandle& i_handle, uint32_t i_address, uint32_t i_length,
 {
     fapi2::ReturnCode rc  = fapi2::FAPI2_RC_SUCCESS;
     uint32_t readlen = 0, i;
+    bool l_ecc = false;
+    is_ecc_on(i_handle, l_ecc);
 
-    if (i_length <= MAX_LENGTH_TRNS)
+    if ((i_eccStatus == RAW_BYTE_ACCESS) && (l_ecc))
     {
-        return spi_read_internal( i_handle, i_address,
-                                  i_length, o_buffer, i_eccStatus );
+        spi_set_ecc_off(i_handle);
     }
 
-    for(i = 0; i < i_length; i += MAX_LENGTH_TRNS)
+    do
     {
-        readlen = (i_length - i) < MAX_LENGTH_TRNS ?
-                  (i_length - i) : MAX_LENGTH_TRNS;
 
-        if (readlen == 0)
+        if (i_length <= MAX_LENGTH_TRNS)
         {
+            rc = spi_read_internal( i_handle, i_address,
+                                    i_length, o_buffer, i_eccStatus );
             break;
         }
 
-        rc = spi_read_internal( i_handle, i_address,
-                                readlen, o_buffer, i_eccStatus );
-
-        if (rc != fapi2::FAPI2_RC_SUCCESS)
+        for(i = 0; i < i_length; i += MAX_LENGTH_TRNS)
         {
-            return rc;
+            readlen = (i_length - i) < MAX_LENGTH_TRNS ?
+                      (i_length - i) : MAX_LENGTH_TRNS;
+
+            if (readlen == 0)
+            {
+                break;
+            }
+
+            rc = spi_read_internal( i_handle, i_address,
+                                    readlen, o_buffer, i_eccStatus );
+
+            if (rc != fapi2::FAPI2_RC_SUCCESS)
+            {
+                break;
+            }
+
+            i_address += readlen;
+            o_buffer = (uint8_t*)(reinterpret_cast<uint64_t>(o_buffer) + readlen);
         }
 
-        i_address += readlen;
-        o_buffer = (uint8_t*)(reinterpret_cast<uint64_t>(o_buffer) + readlen);
+    }
+    while(0);
+
+    // Restore ECC setting, if necessary
+    if ((i_eccStatus == RAW_BYTE_ACCESS) && (l_ecc))
+    {
+        spi_set_ecc_on(i_handle);
     }
 
     return rc;
