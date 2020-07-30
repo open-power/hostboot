@@ -227,7 +227,7 @@ struct hdatSpiDevData_t
     uint8_t  hdatSpiMasterEngine;
     uint8_t  hdatSpiMasterPort;
     uint16_t hdatReserved1;
-    uint16_t hdatSpiBusSpeed;
+    uint32_t hdatSpiBusSpeed;
     uint8_t  hdatSpiSlaveDevType;
     uint16_t hdatReserved2;
     uint8_t  hdatReserved3;
