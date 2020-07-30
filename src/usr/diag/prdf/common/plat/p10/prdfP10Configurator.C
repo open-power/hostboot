@@ -214,7 +214,6 @@ errlHndl_t PlatConfigurator::addDomainChips( TARGETING::TYPE i_type,
 
     // Generic empty PLL domain map
     PllDomainMap sysRefPllDmnMap;
-    PllDomainMap mfRefPllDmnMap;
 
     // Iterate all the targets for this type and add to given domain.
     for ( const auto & trgt : getFunctionalTargetList(i_type) )
@@ -261,9 +260,6 @@ errlHndl_t PlatConfigurator::addDomainChips( TARGETING::TYPE i_type,
                 addChipToPllDomain( CLOCK_DOMAIN_FAB, sysRefPllDmnMap,
                                     chip, trgt, TYPE_PROC,
                                     scanFac, resFac );
-                addChipToPllDomain( CLOCK_DOMAIN_IO, mfRefPllDmnMap,
-                                    chip, trgt, TYPE_PEC,
-                                    scanFac, resFac );
                 break;
 
             default: ;
@@ -273,8 +269,6 @@ errlHndl_t PlatConfigurator::addDomainChips( TARGETING::TYPE i_type,
     // Add the PLL domain maps to the PLL domain map list.
     if ( !sysRefPllDmnMap.empty() )
         io_pllDmnLst.push_back( sysRefPllDmnMap );
-    if ( !mfRefPllDmnMap.empty() )
-        io_pllDmnLst.push_back( mfRefPllDmnMap );
 
     // Flush rule table cache since objects are all built.
     Prdr::LoadChipCache::flushCache();

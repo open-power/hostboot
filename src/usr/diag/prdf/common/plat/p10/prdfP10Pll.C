@@ -303,6 +303,10 @@ int32_t CheckErrorType( ExtensibleChip * i_chip, uint32_t & o_errType )
     #define PRDF_FUNC "[Proc::CheckErrorType] "
     int32_t rc = SUCCESS;
 
+    // TODO: Currently disabling PLL error analysis until we are able to update
+    //       it for P10.
+    return SUCCESS;
+
     SCAN_COMM_REGISTER_CLASS * TP_LFIR =
                 i_chip->getRegister("TP_LFIR");
     SCAN_COMM_REGISTER_CLASS * TP_LFIRmask =
@@ -362,7 +366,6 @@ int32_t CheckErrorType( ExtensibleChip * i_chip, uint32_t & o_errType )
 
     #undef PRDF_FUNC
 }
-PRDF_PLUGIN_DEFINE_NS( axone_proc,   Proc, CheckErrorType );
 PRDF_PLUGIN_DEFINE_NS( p10_proc,   Proc, CheckErrorType );
 
 /**
@@ -390,7 +393,6 @@ int32_t clearParityError( ExtensibleChip * i_chip,
     return SUCCESS;
     #undef PRDF_FUNC
 }
-PRDF_PLUGIN_DEFINE_NS( axone_proc,   Proc, clearParityError );
 PRDF_PLUGIN_DEFINE_NS( p10_proc,   Proc, clearParityError );
 
 /**
@@ -426,7 +428,6 @@ int32_t QueryPll( ExtensibleChip * i_chip,
 
     #undef PRDF_FUNC
 }
-PRDF_PLUGIN_DEFINE_NS( axone_proc,   Proc, QueryPll );
 PRDF_PLUGIN_DEFINE_NS( p10_proc,   Proc, QueryPll );
 
 /**
@@ -469,7 +470,6 @@ int32_t ClearPll( ExtensibleChip * i_chip,
 
     #undef PRDF_FUNC
 }
-PRDF_PLUGIN_DEFINE_NS( axone_proc,   Proc, ClearPll );
 PRDF_PLUGIN_DEFINE_NS( p10_proc,   Proc, ClearPll );
 
 int32_t ClearMfPll( ExtensibleChip * i_chip,
@@ -502,7 +502,6 @@ int32_t ClearMfPll( ExtensibleChip * i_chip,
 
     #undef PRDF_FUNC
 }
-PRDF_PLUGIN_DEFINE_NS( axone_proc,   Proc, ClearMfPll );
 PRDF_PLUGIN_DEFINE_NS( p10_proc,   Proc, ClearMfPll );
 
 /**
@@ -562,7 +561,6 @@ int32_t MaskPll( ExtensibleChip * i_chip,
 
     return SUCCESS;
 }
-PRDF_PLUGIN_DEFINE_NS( axone_proc,   Proc, MaskPll );
 PRDF_PLUGIN_DEFINE_NS( p10_proc,   Proc, MaskPll );
 
 /**
@@ -598,7 +596,6 @@ int32_t capturePllFfdc( ExtensibleChip * i_chip,
 
     #undef PRDF_FUNC
 }
-PRDF_PLUGIN_DEFINE_NS( axone_proc,   Proc, capturePllFfdc );
 PRDF_PLUGIN_DEFINE_NS( p10_proc,   Proc, capturePllFfdc );
 
 } // end namespace Proc
