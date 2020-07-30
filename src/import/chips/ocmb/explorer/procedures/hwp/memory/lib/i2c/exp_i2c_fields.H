@@ -75,7 +75,7 @@ struct fields
     static constexpr mss::field_t<mss::endian::BIG> CMD_ID{0, 0, 8};
     static constexpr mss::field_t<mss::endian::BIG> STATUS_CODE{1, 0, 8};
     static constexpr mss::field_t<mss::endian::BIG> BOOT_STAGE{2, 6, 2};
-
+#ifndef __PPE__
     // Part of EXP_FW_TWI_FFE_SETTINGS
     static constexpr mss::field_t<mss::endian::BIG> FFE_POST_CURSOR_BYTE0{0, 0, 8};
     static constexpr mss::field_t<mss::endian::BIG> FFE_POST_CURSOR_BYTE1{1, 0, 8};
@@ -85,6 +85,7 @@ struct fields
     static constexpr mss::field_t<mss::endian::BIG> FFE_PRE_CURSOR_BYTE1{5, 0, 8};
     static constexpr mss::field_t<mss::endian::BIG> FFE_PRE_CURSOR_BYTE2{6, 0, 8};
     static constexpr mss::field_t<mss::endian::BIG> FFE_PRE_CURSOR_BYTE3{7, 0, 8};
+#endif
 };
 
 ///
@@ -249,6 +250,7 @@ struct fieldTraits<fields::BOOT_STAGE>
     using COMPARISON_OP = std::less_equal<T>;
 };
 
+#ifndef __PPE__
 ///
 /// @class fieldTraits - FFE_PRE_CURSOR_BYTE0 specialization
 /// @brief Traits assoiated with the Explorer I2C commands
@@ -360,6 +362,7 @@ struct fieldTraits<fields::FFE_POST_CURSOR_BYTE3>
     template <typename T>
     using COMPARISON_OP = std::less_equal<T>;
 };
+#endif
 
 ///
 /// @brief Explorer I2C field getter
@@ -631,7 +634,6 @@ inline fapi2::ReturnCode set_fw_mode(const fapi2::Target<fapi2::TARGET_TYPE_OCMB
 
 }// boot_cfg
 
-#endif
 
 namespace ffe_settings
 {
@@ -758,6 +760,7 @@ fapi_try_exit:
 
 }// ffe_settings
 
+#endif
 namespace status
 {
 
