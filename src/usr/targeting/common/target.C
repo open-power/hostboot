@@ -730,6 +730,7 @@ void Target::getAttrTankTargetPosData(uint16_t & o_pos,
                 case(TYPE_NA):
                 case(TYPE_TEST_FAIL):
                 case(TYPE_LAST_IN_RANGE):
+                case(TYPE_INVALID):
                 {
                     // not supported. Assert to follow below.
                     TRACFCOMP(g_trac_targeting, "getAttrTankTargetPosData(): Unsupported unit type found 0x%X",

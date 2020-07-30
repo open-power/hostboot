@@ -2188,7 +2188,8 @@ sub writeEnumFileAttrEnums {
     my $enumName = "";
     my $enumHex = "";
     my $enumHexValue = 0;
-    my $MAX_ENUM_LENGHT = 58;
+    # number of '<' in the 'format ENUMFORMAT' below
+    my $MAX_ENUM_LENGTH = 58;
     # Format below intentionally > 80 chars for clarity
 
     format ENUMFORMAT =
@@ -2222,6 +2223,7 @@ sub writeEnumFileAttrEnums {
                 # find type
                 my $simpleType = getAttributeType($enumerationType->{id},
                                                   $attributes);
+
                 if (exists $simpleType->{'uint64_t'})
                 {
                     $enumHex = sprintf "0x%08XULL", $enumHexValue;
@@ -2237,14 +2239,10 @@ sub writeEnumFileAttrEnums {
             }
             $enumName = $enumerationType->{id} . "_" . $enumerator->{name};
 
-            # set flag if there is already an enum with an INVALID enumerator
-            # to be used after this inner loop has completed
-            $does_not_have_invalid &&= not($enumerator->{name} =~m/INVALID/);
-
             # enforce the implicit length requirement since the format command
             #  does not throw an error if we overrun
             my $enumsize = length($enumName);
-            if( $enumsize > $MAX_ENUM_LENGHT)
+            if($enumsize > $MAX_ENUM_LENGTH)
             {
                print "    $enumName = $enumHex,\n";
             }
@@ -2252,21 +2250,65 @@ sub writeEnumFileAttrEnums {
             {
                write;
             }
+
+            # set flag if there is already an enum with an INVALID enumerator
+            $does_not_have_invalid &&= not($enumerator->{name} =~m/INVALID/);
         }
 
         # Add default invalid enum value
-        # - Place default invalid enum value at the end of list of specified enum values above
-        # - Assuming enums are of size uint32_t; therefore, using 0xFFFFFFFF for invalid value
-        # - Skip enums that already have enumerators with _INVALID on the end AND
-        # - Skip enum named TYPE, since src/include/usr/targeting/common/entitypath.H
-        #     only takes size of uint8 and complains about the extraneous F's
-        if($does_not_have_invalid and not($enumerationType->{id}=~m/^TYPE$/))
+        # - Place default invalid enum value at the end of list of enum values above
+        # - Calculate the number of bytes needed to store the largest enumerator per enum
+        #     and attempt to assign an INVALID with that size
+        # - Skip enums that already have enumerators with an INVALID
+        # - Skip enums that already have all F's assigned to an enumerator of the largest word size
+
+        my $stringMaxEValue = sprintf "%X", maxEnumValue($enumerationType);
+
+        my $attributeType = getAttributeType($enumerationType->{id}, $attributes);
+
+        # assume 8 nibbles (4 bytes) long for enums that are not of type
+        # (u)int8_t ... (u)int64_t
+        my $numF = 8;
+        # check the type hash list for int or uint type
+        foreach my $key (keys %{$attributeType})
         {
-            $enumHex = sprintf "0x%08X", 0xFFFFFFFF;
+            if($key =~ m/int/)
+            {
+                # extract the number of bits from the type
+                # and convert to number of nibbles for the following sprintf
+                ($numF) = $key =~ m/([0-9]+)/;
+                $numF /= 4;
+                last;
+            }
+        }
+
+        my $invalidEnumHex = sprintf "%${numF}X", 0xFF;
+        $invalidEnumHex  =~ tr/ /F/;
+        if($invalidEnumHex ne $stringMaxEValue and $does_not_have_invalid)
+        {
+            if (exists $attributeType->{'uint64_t'})
+            {
+               $enumHex = sprintf "0x%${numF}sULL", $invalidEnumHex;
+            }
+            elsif (exists $attributeType->{'int64_t'})
+            {
+               $enumHex = sprintf "0x%${numF}sLL", $invalidEnumHex;
+            }
+            elsif($enumerationType->{id}=~m/^TYPE$/)
+            {
+               # special case for the TYPE enum because in pldm_fru.C
+               # its size is restricted to 7 bits
+               $enumHex = sprintf "0x%08X", 0x0000007F;
+            }
+            else
+            {
+               # fill the remaining digits with 0's if needed
+               $enumHex = sprintf "0x%08s", $invalidEnumHex;
+            }
 
             $enumName = $enumerationType->{id} . "_INVALID";
             my $enumsize = length($enumName);
-            if( $enumsize > $MAX_ENUM_LENGHT )
+            if($enumsize > $MAX_ENUM_LENGTH)
             {
                print "    $enumName = $enumHex,\n";
             }
@@ -2698,6 +2740,7 @@ sub writeTraitFileTraits {
         my $type = "";
         my $dimensions = "";
         my $stdArrAddOn = ""; # Only used if attr holds array type
+        my $isEnumerationType = 0;
         if(exists $attribute->{simpleType})
         {
             my $simpleType = $attribute->{simpleType};
@@ -2710,6 +2753,7 @@ sub writeTraitFileTraits {
                         eq "XMLTOHB_USE_PARENT_ATTR_ID")
                     {
                         $type = $attribute->{id};
+                        $isEnumerationType = 1;
                     }
                     else
                     {
@@ -2795,20 +2839,28 @@ sub writeTraitFileTraits {
             print $outFile "        typedef ", $type, " Type$dimensions;\n";
 
             # In addition, add a default invalid value to traits definition for
-            # uint8_t ... uint64_t
+            # uint8_t ... uint64_t, int8_t ... int64_t
             print $outFile "#if __cplusplus >= 201103L \n";
 
-            if ($type eq "uint8_t") {
+            if ($type eq "uint8_t" or $type eq "int8_t") {
                 print $outFile "        ", $type," ", $attribute->{id},"_INVALID = 0xFF;\n";
             }
-            elsif ($type eq "uint16_t") {
+            elsif ($type eq "uint16_t" or $type eq "int16_t") {
                 print $outFile "        ", $type," ", $attribute->{id},"_INVALID = 0xFFFF;\n";
             }
-            elsif ($type eq "uint32_t") {
+            elsif ($type eq "uint32_t" or $type eq "int32_t") {
                 print $outFile "        ", $type," ", $attribute->{id},"_INVALID = 0xFFFFFFFF;\n";
             }
+            elsif ($type eq "int64_t") {
+                print $outFile "        ", $type," ", $attribute->{id},
+                               "_INVALID = 0xFFFFFFFFFFFFFFFFLL;\n";
+            }
             elsif ($type eq "uint64_t") {
-                print $outFile "        ", $type," ", $attribute->{id},"_INVALID = 0xFFFFFFFFFFFFFFFF;\n";
+                print $outFile "        ", $type," ", $attribute->{id},
+                               "_INVALID = 0xFFFFFFFFFFFFFFFFULL;\n";
+            }
+            elsif ($isEnumerationType) {
+                print $outFile "        uint32_t ", $attribute->{id},"_INVALID = 0xFFFFFFFF;\n";
             }
 
             # Append typedef for std::array if attr holds array value

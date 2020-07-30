@@ -106,6 +106,19 @@ public:
     bool compareAttributeValues(
                      const AttributeTank::Attribute* const l_attribute1,
                      const AttributeTank::Attribute* const l_attribute2);
+
+    /**
+     *  @test check that an Attribute Invalid value is assigned
+     *  to the maximum value for its size
+     *
+     *  @param[in] invalidEnumVal Attribute Invalid value to check
+     *
+     *  @return true if the Invalid Value is set to the max value, false otherwise
+     */
+    template<typename T>
+    bool isEnumMaxVal(const T invalidEnumVal);
+
+
 };  //  end class AttributeTest
 
 
@@ -1240,6 +1253,33 @@ void AttributeTest::testCopyConstructor(void)
                "num tests = %d  / num fails = %d", l_numTests, l_numFails);
 } // end testCopyConstructor
 
+// isEnumMaxVal
+template <typename T>
+bool AttributeTest::isEnumMaxVal(T invalidEnumVal)
+{
+    bool isMaxVal = false;
+    switch (sizeof(invalidEnumVal))
+    {
+        case 1:
+            isMaxVal = invalidEnumVal == 0xFF;
+            break;
+        case 2:
+            isMaxVal = invalidEnumVal == 0xFFFF;
+            break;
+        case 4:
+            isMaxVal = invalidEnumVal == 0xFFFFFFFF;
+            break;
+        case 8:
+            isMaxVal = invalidEnumVal == 0xFFFFFFFFFFFFFFFF;
+            break;
+        default:
+            isMaxVal = false;
+
+    }
+
+    return isMaxVal;
+} // end isEnumMaxVal
+
 // testGeneratedInvalidsForAttr
 void AttributeTest::testGeneratedInvalidsForAttr(void)
 {
@@ -1272,8 +1312,23 @@ void AttributeTest::testGeneratedInvalidsForAttr(void)
     {
         TS_FAIL("test1 testGeneratedInvalidsForAttr: "
                 "set ATTR_KEY_CLEAR_REQUEST to KEY_CLEAR_REQUEST_INVALID failed "
-                "incorrect Attribute Values data returned"
+                "incorrect Attribute Values data returned. "
                 "ATTR_KEY_CLEAR_REQUEST = 0x%X", test);
+        ++l_numFails;
+    }
+
+    // test that the invalid value is the max value for its size
+    TS_TRACE(INFO_MRK "size of KEY_CLEAR_REQUEST_INVALID is: %d",
+                       sizeof(KEY_CLEAR_REQUEST_INVALID));
+
+    ++l_numTests;
+    if (!isEnumMaxVal(KEY_CLEAR_REQUEST_INVALID))
+    {
+        TS_FAIL("test1 testGeneratedInvalidsForAttr: "
+                "KEY_CLEAR_REQUEST_INVALID not set to max value "
+                "KEY_CLEAR_REQUEST_INVALID = 0x%X, "
+                "expected %d byte(s) of 0xFF", KEY_CLEAR_REQUEST_INVALID,
+                 sizeof(KEY_CLEAR_REQUEST_INVALID));
         ++l_numFails;
     }
 
@@ -1298,8 +1353,22 @@ void AttributeTest::testGeneratedInvalidsForAttr(void)
     {
         TS_FAIL("test2 testGeneratedInvalidsForAttr: "
                 "set ATTR_PAYLOAD_KIND to PAYLOAD_KIND_INVALID failed "
-                "incorrect Attribute Values data returned"
+                "incorrect Attribute Values data returned. "
                 "ATTR_PAYLOAD_KIND = 0x%X", test2);
+        ++l_numFails;
+    }
+
+    TS_TRACE(INFO_MRK "size of PAYLOAD_KIND_INVALID is %d",
+                       sizeof(PAYLOAD_KIND_INVALID));
+
+    ++l_numTests;
+    if (!isEnumMaxVal(PAYLOAD_KIND_INVALID))
+    {
+        TS_FAIL("test1 testGeneratedInvalidsForAttr: "
+                "PAYLOAD_KIND_INVALID not set to max value "
+                "PAYLOAD_KIND_INVALID = 0x%X, "
+                "expected %d byte(s) of 0xFF", PAYLOAD_KIND_INVALID,
+                 sizeof(PAYLOAD_KIND_INVALID));
         ++l_numFails;
     }
 
@@ -1310,7 +1379,7 @@ void AttributeTest::testGeneratedInvalidsForAttr(void)
     //test for traits
     auto test3 = AttributeTraits<ATTR_PHYS_PRES_REQUEST_OPEN_WINDOW>()
                  .PHYS_PRES_REQUEST_OPEN_WINDOW_INVALID;
-
+    auto pprowInvalid = test3;
     TS_TRACE(INFO_MRK "Testing Attribute Traits");
     TS_TRACE(INFO_MRK "Test3: PHYS_PRES_REQUEST_OPEN_WINDOW_INVALID = 0x%X", test3);
 
@@ -1323,14 +1392,27 @@ void AttributeTest::testGeneratedInvalidsForAttr(void)
     TS_TRACE(INFO_MRK "set PHYS_PRES_REQUEST_OPEN_WINDOW to its INVALID value = 0x%X", test3 );
 
     ++l_numTests;
-    if (test3 != AttributeTraits<ATTR_PHYS_PRES_REQUEST_OPEN_WINDOW>()
-                 .PHYS_PRES_REQUEST_OPEN_WINDOW_INVALID)
+    if (test3 != pprowInvalid)
     {
         TS_FAIL("test3 testGeneratedInvalidsForAttr: "
                 "set ATTR_PHYS_PRES_REQUEST_OPEN_WINDOW to "
                 "PHYS_PRES_REQUEST_OPEN_WINDOW_INVALID failed "
-                "incorrect Attribute Values data returned"
+                "incorrect Attribute Values data returned. "
                 "ATTR_PHYS_PRES_REQUEST_OPEN_WINDOW = 0x%X", test3);
+        ++l_numFails;
+    }
+
+    TS_TRACE(INFO_MRK "size of PHYS_PRES_REQUEST_OPEN_WINDOW_INVALID is: %d",
+                       sizeof(pprowInvalid));
+
+    ++l_numTests;
+    if (!isEnumMaxVal(pprowInvalid))
+    {
+        TS_FAIL("test1 testGeneratedInvalidsForAttr: "
+                "PHYS_PRES_REQUEST_OPEN_WINDOW_INVALID not set to max value "
+                "PHYS_PRES_REQUEST_OPEN_WINDOW_INVALID = 0x%X, "
+                "expected %d byte(s) of 0xFF", pprowInvalid,
+                 sizeof(pprowInvalid));
         ++l_numFails;
     }
 
@@ -1346,7 +1428,7 @@ void AttributeTest::testGeneratedInvalidsForAttr(void)
     sys->setAttr<ATTR_PAYLOAD_KIND>(test4);
 
     // must have 'hasStringConversion' specified in attributetraits.H
-    // and have a attrToString function in attributestrings.C
+    // and have an attrToString function in attributestrings.C
     auto attrString = sys->getAttrAsString<ATTR_PAYLOAD_KIND>();
 
     TS_TRACE(INFO_MRK "ATTR_PAYLOAD_KIND_INVALID = %s", attrString);
@@ -1356,7 +1438,7 @@ void AttributeTest::testGeneratedInvalidsForAttr(void)
     {
         TS_FAIL("test4 testGeneratedInvalidsForAttr: "
                 "PAYLOAD_KIND_INVALID to string failed "
-                "incorrect Attribute String returned"
+                "incorrect Attribute String returned. "
                 "ATTR_PAYLOAD_KIND = %s", attrString);
         ++l_numFails;
     }
