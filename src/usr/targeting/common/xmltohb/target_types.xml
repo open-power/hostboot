@@ -1470,12 +1470,6 @@
       <id>PARENT_DECONFIG_RULES</id>
     </attribute>
     <attribute>
-      <id>PCI_BASE_ADDRS_32</id>
-    </attribute>
-    <attribute>
-      <id>PCI_BASE_ADDRS_64</id>
-    </attribute>
-    <attribute>
       <id>PHB_BASE_ADDRS</id>
     </attribute>
     <attribute>

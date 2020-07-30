@@ -5636,17 +5636,6 @@
   </attribute>
 
   <attribute>
-    <description>Base Address of PCI 64 bit Memory Space</description>
-    <id>PCI_BASE_ADDRS_64</id>
-    <persistency>non-volatile</persistency>
-    <readable/>
-    <simpleType>
-      <array>4</array>
-      <uint64_t/>
-    </simpleType>
-  </attribute>
-
-  <attribute>
     <id>PCI_REFCLOCK_RCVR_TERM</id>
     <description>
         Defines system specific value of PCI refclock receiver termination (FSI GP4 bits 10:11)
