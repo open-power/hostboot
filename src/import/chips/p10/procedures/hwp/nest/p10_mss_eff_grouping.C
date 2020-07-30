@@ -4328,10 +4328,6 @@ fapi2::ReturnCode set_MCFGPA_MCFGPMA_regData(
              "Error getting MI ATTR_CHIP_UNIT_POS, l_rc 0x%.8X",
              (uint64_t)fapi2::current_err);
 
-    // Prep buffer
-    FAPI_TRY(PREP_SCOMFIR_MCFGP0A(l_mi_target));
-    FAPI_TRY(PREP_SCOMFIR_MCFGPM0A(l_mi_target));
-
     // Hole0
     if (i_mccBarData.MCFGPA_HOLE_valid[0] == true)
     {
@@ -4339,8 +4335,10 @@ fapi2::ReturnCode set_MCFGPA_MCFGPMA_regData(
         // Normal and Flipped modes
 
         // MCFGPA HOLE0 valid
+        FAPI_TRY(PREP_SCOMFIR_MCFGP0A(l_mi_target));
         SET_SCOMFIR_MCFGP0A_HOLE_VALID(l_mcfgpa_scom_data);
         // MCFGPM0A HOLE0 valid
+        FAPI_TRY(PREP_SCOMFIR_MCFGPM0A(l_mi_target));
         SET_SCOMFIR_MCFGPM0A_HOLE_VALID(l_mcfgpma_scom_data);
 
         // Normal mode, but still set up mirrored equiv addressses
@@ -4348,9 +4346,11 @@ fapi2::ReturnCode set_MCFGPA_MCFGPMA_regData(
             fapi2::ENUM_ATTR_MEM_MIRROR_PLACEMENT_POLICY_NORMAL)   // Normal
         {
             // Non-mirrored Hole0 lower addr
+            FAPI_TRY(PREP_SCOMFIR_MCFGP0A(l_mi_target));
             SET_SCOMFIR_MCFGP0A_HOLE_LOWER_ADDRESS(i_mccBarData.MCFGPA_HOLE_LOWER_addr[0],
                                                    l_mcfgpa_scom_data);
             // Mirrored Hole0 lower addr (= non-mirrored lower addr << 1)
+            FAPI_TRY(PREP_SCOMFIR_MCFGPM0A(l_mi_target));
             SET_SCOMFIR_MCFGPM0A_HOLE_LOWER_ADDRESS(i_mccBarData.MCFGPA_HOLE_LOWER_addr[0] << 1,
                                                     l_mcfgpma_scom_data);
         }
@@ -4358,9 +4358,11 @@ fapi2::ReturnCode set_MCFGPA_MCFGPMA_regData(
         else
         {
             // Mirrored Hole0 lower addr
+            FAPI_TRY(PREP_SCOMFIR_MCFGPM0A(l_mi_target));
             SET_SCOMFIR_MCFGPM0A_HOLE_LOWER_ADDRESS(i_mccBarData.MCFGPMA_HOLE_LOWER_addr[0],
                                                     l_mcfgpma_scom_data);
             // Non-mirrored Hole0 lower addr (= mirrored lower addr >> 1)
+            FAPI_TRY(PREP_SCOMFIR_MCFGP0A(l_mi_target));
             SET_SCOMFIR_MCFGP0A_HOLE_LOWER_ADDRESS(i_mccBarData.MCFGPMA_HOLE_LOWER_addr[0] >> 1,
                                                    l_mcfgpa_scom_data);
         }
@@ -4373,11 +4375,14 @@ fapi2::ReturnCode set_MCFGPA_MCFGPMA_regData(
         // Normal and Flipped modes
 
         // MCFGPA SMF valid
+        FAPI_TRY(PREP_SCOMFIR_MCFGP0A(l_mi_target));
         SET_SCOMFIR_MCFGP0A_SMF_VALID(l_mcfgpa_scom_data);
-        // MCFGPMA SMF valid
-        SET_SCOMFIR_MCFGPM0A_SMF_VALID(l_mcfgpma_scom_data);
         // Non-mirrored Hole0 SMF extend end of range
         SET_SCOMFIR_MCFGP0A_SMF_EXTEND_TO_END_OF_RANGE(l_mcfgpa_scom_data);
+
+        // MCFGPMA SMF valid
+        FAPI_TRY(PREP_SCOMFIR_MCFGPM0A(l_mi_target));
+        SET_SCOMFIR_MCFGPM0A_SMF_VALID(l_mcfgpma_scom_data);
         // Mirrored Hole0 SMF extend end of range
         SET_SCOMFIR_MCFGPM0A_SMF_EXTEND_TO_END_OF_RANGE(l_mcfgpma_scom_data);
 
@@ -4386,6 +4391,7 @@ fapi2::ReturnCode set_MCFGPA_MCFGPMA_regData(
             fapi2::ENUM_ATTR_MEM_MIRROR_PLACEMENT_POLICY_NORMAL)   // Normal
         {
             // Non-mirrored Hole0 SMF lower addr
+            FAPI_TRY(PREP_SCOMFIR_MCFGP0A(l_mi_target));
             SET_SCOMFIR_MCFGP0A_SMF_LOWER_ADDRESS(i_mccBarData.MCFGPA_SMF_LOWER_addr,
                                                   l_mcfgpa_scom_data);
             // Non-mirrored Hole0 SMF upper addr
@@ -4393,6 +4399,7 @@ fapi2::ReturnCode set_MCFGPA_MCFGPMA_regData(
                                                   l_mcfgpa_scom_data);
 
             // Mirrored SMF lower addr (= non-mirrored lower addr << 1)
+            FAPI_TRY(PREP_SCOMFIR_MCFGPM0A(l_mi_target));
             SET_SCOMFIR_MCFGPM0A_SMF_LOWER_ADDRESS(i_mccBarData.MCFGPA_SMF_LOWER_addr << 1,
                                                    l_mcfgpma_scom_data);
             // Mirrored SMF upper addr (= non-mirrored upper addr << 1)
@@ -4404,6 +4411,7 @@ fapi2::ReturnCode set_MCFGPA_MCFGPMA_regData(
         else
         {
             // Mirrored SMF lower addr
+            FAPI_TRY(PREP_SCOMFIR_MCFGPM0A(l_mi_target));
             SET_SCOMFIR_MCFGPM0A_SMF_LOWER_ADDRESS(i_mccBarData.MCFGPMA_SMF_LOWER_addr,
                                                    l_mcfgpma_scom_data);
             // Mirrored SMF upper addr
@@ -4411,12 +4419,12 @@ fapi2::ReturnCode set_MCFGPA_MCFGPMA_regData(
                                                    l_mcfgpma_scom_data);
 
             // SMF lower addr ( = mirrored smf lower addr >> 1)
+            FAPI_TRY(PREP_SCOMFIR_MCFGP0A(l_mi_target));
             SET_SCOMFIR_MCFGP0A_SMF_LOWER_ADDRESS(i_mccBarData.MCFGPMA_SMF_LOWER_addr >> 1,
                                                   l_mcfgpa_scom_data);
             // SMF upper addr ( = mirrored smf upper addr >> 1)
             SET_SCOMFIR_MCFGP0A_SMF_UPPER_ADDRESS(i_mccBarData.MCFGPMA_SMF_LOWER_addr >> 1,
                                                   l_mcfgpa_scom_data);
-
         }
 
     }
