@@ -348,6 +348,10 @@ echo "Calling hbDistribute --hb-standalone "
     hbDistribute --hb-standalone $*
 
     if [[ $PNOR_LAYOUT_SELECTED == "FSP" ]] && [[ -n "${HB_NFS_DIR}"  ]]; then
+
+        mkdir -p ${HB_NFS_DIR}/test/pnor
+        cp -v ${PROJECT_ROOT}/img/hbotStringFile ${PROJECT_ROOT}/img/*.list.bz2 ${PROJECT_ROOT}/img/*.syms ${PROJECT_ROOT}/img/*.bin.modinfo ${HB_NFS_DIR}/test/pnor/
+
         # Below, in addition to creating hostboot patches, the pieces of auto-patching and auto-booting will be put in
         # place. For more information on how to properly setup and use FSP auto-patching and auto-booting in simics see
         # the README in src/build/simics
@@ -355,15 +359,14 @@ echo "Calling hbDistribute --hb-standalone "
         # The list of commands to build the hostboot code patches to be dropped in /nfs/test/pnor/ on the FSP
         # The command does the minimum necessary work to do that for time saving reasons. This will not build targeting
         # patches since that takes much more time and is done less often than just code patches.
-        buildPatch="cd ${SANDBOXBASE}/src/hbfw \
+        buildPatch="mkdir -p ${SANDBOXBASE}/src/hbfw && cd ${SANDBOXBASE}/src/hbfw \
 && mk expand_tars_fsp.tar expand_tars_simics.tar && \
 cd ${SANDBOXBASE}/src/hbfw/img/ \
 && mk -j16"
 
         # This command will copy the output binaries generated from buildPatch and drop them in $HB_NFS_DIR if it exists.
         copyToNFS="cd ${SANDBOXBASE} && \
-mkdir -p \$HB_NFS_DIR/test/pnor \
-&& cp ${SANDBOXBASE}/obj/ppc/hbfw/img/h*header.bin \$HB_NFS_DIR/test/pnor"
+cp ${SANDBOXBASE}/obj/ppc/hbfw/img/h*header.bin \$HB_NFS_DIR/test/pnor"
 
         # Stick the two commands together. They were separated for easier readability.
         prepareFspPatch="${buildPatch} && ${copyToNFS}"
