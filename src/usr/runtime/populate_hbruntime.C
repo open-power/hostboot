@@ -3305,7 +3305,6 @@ errlHndl_t sendSBESystemConfig( void )
     errlHndl_t  l_elog = nullptr;
     uint64_t l_systemFabricConfigurationMap = 0x0;
 
-
     do {
 
 
@@ -3327,16 +3326,14 @@ errlHndl_t sendSBESystemConfig( void )
         getAllChips( l_procChips, TARGETING::TYPE_PROC , true);
         for(auto l_proc : l_procChips)
         {
-            //Get fabric info from proc
-            uint8_t l_fabricChipId =
-              l_proc->getAttr<TARGETING::ATTR_FABRIC_CHIP_ID>();
-            uint8_t l_fabricGroupId =
-              l_proc->getAttr<TARGETING::ATTR_FABRIC_GROUP_ID>();
-            //Calculate what bit position this will be
-            uint8_t l_bitPos = l_fabricChipId + (MAX_PROCS_PER_NODE * l_fabricGroupId);
+            // Get fabric info from proc
+            uint8_t l_fabricTopoId =
+              l_proc->getAttr<TARGETING::ATTR_PROC_FABRIC_EFF_TOPOLOGY_ID>();
 
-            //Set the bit @ l_bitPos to be 1 because this is a functional proc
-            l_systemFabricConfigurationMap |= (0x8000000000000000 >> l_bitPos);
+            // Take topology ID X and set the Xth bit in a 16 bit integer
+            // and shift it over by 48 bits to fit 64 bits
+            // Math turns out to be shifting left by 63 - topology id
+            l_systemFabricConfigurationMap |= (1 << (63 - l_fabricTopoId));
         }
 
         // ATTR_HB_EXISTING_IMAGE only gets set on a multi-drawer system.

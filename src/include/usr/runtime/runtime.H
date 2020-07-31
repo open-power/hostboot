@@ -48,7 +48,6 @@ namespace RUNTIME
     // NUMBER_OF_POSSIBLE_DRAWERS definition here should be in sync with
     // src/usr/isteps/istep18/establish_system_smp.H's definition of the same constant.
     constexpr uint8_t NUMBER_OF_POSSIBLE_DRAWERS = 8;
-    constexpr uint8_t MAX_PROCS_PER_NODE = 8;
     constexpr uint8_t CONTINUE_WAIT_FOR_MSGS = 0x2;
     constexpr uint8_t TIME_EXPIRED=0x3;
 

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -49,9 +49,10 @@ namespace SBEIO
     * @brief Set the system configuration on the SBE so it is aware of
     *        the other procs in the system
     *
-    * @param[in] i_systemConfig uint64 where each bit represents a proc in that position
-    *        Bit position ATTR_PROC_FABRIC_CHIP_ID + (8 * ATTR_PROC_FABRIC_GROUP_ID) = 1
-    *        if that proc is present and functional.
+    * @param[in] i_systemConfig uint64 where each bit (0..15) represents
+    * a processor topology ID, such that if a processor is present and
+    * functional, the bit corresponding to its topology ID is set
+    *
     * @param[in] i_procChip The proc you would like to send the system config to
     *
     * @return errlHndl_t Error log handle on failure.

@@ -282,21 +282,17 @@ void IpcSp::msgHandler()
                 uint64_t l_systemFabricConfigurationMap = 0x0;
                 for(auto l_proc : l_procChips)
                 {
-                    //Get fabric info from proc
+                    // Get fabric info from proc
                     uint8_t l_fabricTopoId =
-                        l_proc->getAttr<TARGETING::ATTR_PROC_FABRIC_TOPOLOGY_ID>();
-                    uint8_t l_fabricChipId = 0;
-                    uint8_t l_fabricGroupId = 0;
-                    extractGroupAndChip(l_fabricTopoId, l_fabricGroupId, l_fabricChipId);
-                    //Calculate what bit position this will be
-                    uint8_t l_bitPos = l_fabricChipId + (RUNTIME::MAX_PROCS_PER_NODE * l_fabricGroupId);
-
-                    //Set the bit @ l_bitPos to be 1 because this is a functional proc
-                    l_systemFabricConfigurationMap |= (0x8000000000000000 >> l_bitPos);
+                        l_proc->getAttr<TARGETING::ATTR_PROC_FABRIC_EFF_TOPOLOGY_ID>();
+                    // Take topology ID X and set the Xth bit in a 16 bit integer
+                    // and shift it over by 48 bits to fit 64 bits
+                    // Math turns out to be shifting left by 63 - topology id
+                    l_systemFabricConfigurationMap |= (1 << (63 - l_fabricTopoId));
                 }
 
                 TRACFCOMP( g_trac_ipc,
-                           "IPC Query ChipInfo 0x%lx", l_systemFabricConfigurationMap);
+                           "IPC Query ChipInfo 0x%llX", l_systemFabricConfigurationMap);
 
                 //Send a response with this HB instances chip info
                 msg->extra_data = reinterpret_cast<uint64_t*>(l_systemFabricConfigurationMap);
