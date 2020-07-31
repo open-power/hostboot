@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -92,6 +92,15 @@ class MemAddr
      */
     template<TARGETING::TYPE T>
     static MemAddr fromMaintAddr( uint64_t i_addr );
+
+    /**
+     * @brief Creates a MemAddr from the current maintenance end address.
+     *        Needed for Centaur only because of the discrepancy in how the
+     *        start and end addresses are stored.
+     * @param i_addr 64-bit address.
+     */
+    template<TARGETING::TYPE T>
+    static MemAddr fromMaintEndAddr( uint64_t i_addr );
 
     /**
      * @brief  Converts internal data structure to a maintenance address.

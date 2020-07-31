@@ -563,7 +563,7 @@ uint32_t getMemAddrRange<TYPE_MBA>( ExtensibleChip * i_chip,
     if ( SUCCESS == o_rc )
     {
         o_startAddr = MemAddr::fromMaintAddr<TYPE_MBA>( (uint64_t)saddr );
-        o_endAddr   = MemAddr::fromMaintAddr<TYPE_MBA>( (uint64_t)eaddr );
+        o_endAddr   = MemAddr::fromMaintEndAddr<TYPE_MBA>( (uint64_t)eaddr );
     }
 
     return o_rc;
