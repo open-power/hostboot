@@ -384,7 +384,7 @@
 
     <attribute>
         <id>ATTR_POUND_V_STATIC_DATA_ENABLE</id>
-        <default>0</default>
+        <default>ON</default>
     </attribute>
 
     <attribute>
