@@ -56,7 +56,6 @@
 
 #include <return_code_defs.H>
 #include <algorithm>
-#include <cassert>
 
 namespace fapi2
 {
