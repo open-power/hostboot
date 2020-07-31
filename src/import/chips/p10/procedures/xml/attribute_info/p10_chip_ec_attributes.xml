@@ -531,6 +531,42 @@
   </attribute>
   <!-- ******************************************************************** -->
   <attribute>
+  <id>ATTR_CHIP_EC_FEATURE_FILTER_PLL_HW540133</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>
+    Adjust PLL calibration point by using observed BANDSEL to
+    program adjustment via CCALBANDSEL
+  </description>
+  <chipEcFeature>
+    <chip>
+     <name>ENUM_ATTR_NAME_P10</name>
+     <ec>
+       <value>0x10</value>
+       <test>EQUAL</test>
+     </ec>
+    </chip>
+  </chipEcFeature>
+  </attribute>
+  <!-- ******************************************************************** -->
+  <attribute>
+  <id>ATTR_CHIP_EC_FEATURE_TANK_PLL_HW540133</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>
+    Adjust PLL calibration point by using observed BANDSEL to
+    program adjustment via CCALBANDSEL
+  </description>
+  <chipEcFeature>
+    <chip>
+     <name>ENUM_ATTR_NAME_P10</name>
+     <ec>
+       <value>0x10</value>
+       <test>EQUAL</test>
+     </ec>
+    </chip>
+  </chipEcFeature>
+  </attribute>
+  <!-- ******************************************************************** -->
+  <attribute>
    <id>ATTR_CHIP_EC_FEATURE_HW530359_XSL_PARITY</id>
    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
    <description>
