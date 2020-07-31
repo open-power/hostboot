@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2015,2019
+# Contributors Listed Below - COPYRIGHT 2015,2020
 # [+] International Business Machines Corp.
 #
 #
@@ -51,6 +51,9 @@ OBJS += sbe_ffdc_package_parser.o
 OBJS += sbe_getCapabilities.o
 OBJS += sbe_securityListBinDump.o
 OBJS += sbe_exitCatcheContained.o
+OBJS += p10_extract_sbe_rc.o
+OBJS += p10_ppe_utils.o
+OBJS += p10_ppe_common.o
 
 # sbeio's sub directories
 SUBDIRS += test.d

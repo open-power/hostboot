@@ -32,12 +32,10 @@
 #include <errl/errludtarget.H>
 #include <errl/errludcallout.H>
 #include <sbeio/sbe_attn.H>
-/* FIXME RTC: 248572
 #include <fapi2/target.H>
 #include <fapi2/plat_hwp_invoker.H>
-#include <p9_extract_sbe_rc.H>
+#include <p10_extract_sbe_rc.H>
 #include <sbeio/sbe_retry_handler.H>
-*/
 #include <sbeio/sbeioreasoncodes.H>
 #include <sbeio/runtime/sbeio_attr_override.H>
 #include <sbeio/runtime/sbeio_vital_attn.H>
@@ -148,19 +146,17 @@ namespace SBEIO
         }
 #endif  // End: Can't take advantage of SbeRetryHandler because it relies heavily on P9 code
 #else
-// FIXME RTC: 248572
-#if 0
         const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP> l_fapi2ProcTarget(
                             const_cast<TARGETING::Target*> (i_procTarg));
 
-        //Unused in the context, but required for p9_extract_sbe_rc
-        P9_EXTRACT_SBE_RC::RETURN_ACTION l_ret =
-                P9_EXTRACT_SBE_RC::REIPL_UPD_SEEPROM;
+        //Unused in the context, but required for p10_extract_sbe_rc
+        P10_EXTRACT_SBE_RC::RETURN_ACTION l_ret =
+                P10_EXTRACT_SBE_RC::REIPL_UPD_SEEPROM;
 
-        FAPI_INVOKE_HWP(l_err, p9_extract_sbe_rc,
+        FAPI_INVOKE_HWP(l_err, p10_extract_sbe_rc,
                         l_fapi2ProcTarget, l_ret);
 
-        // p9_extract_sbe_rc should always return w/ an error
+        // p10_extract_sbe_rc should always return w/ an error
         // make sure at least some sort of error gets returned
         // because we are not attempting to recover anything
         if(!l_err)
@@ -172,7 +168,7 @@ namespace SBEIO
             * @userdata1  Huid of processor
             * @userdata2  Return action from extract_rc
             * @devdesc    We expected an error log to be returned from
-                          p9_extract_rc but there wasn't one
+                          p10_extract_rc but there wasn't one
             * @custdesc   Processor Error
             */
             l_err = new ERRORLOG::ErrlEntry(
@@ -182,7 +178,6 @@ namespace SBEIO
                                 TARGETING::get_huid(i_procTarg),
                                 l_ret);
         }
-#endif
 // If this code happens to get called on a FSP system during runtime we definitely do not
 // want to add a deconfig record. If we do it will cause conflict with HWSV code which might
 // be trying to handle the SBE error

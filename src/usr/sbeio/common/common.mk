@@ -47,3 +47,4 @@ VPATH += ${ROOTPATH}/src/usr/sbeio/common
 VPATH += ${ROOTPATH}/src/import/chips/p10/utils/imageProcs
 VPATH += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/perv/
 VPATH += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/sbe/
+VPATH += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/lib/

@@ -37,6 +37,9 @@ include ../common/common.mk
 OBJS += rt_sbeio.o
 OBJS += sbeio_attr_override.o
 OBJS += sbeio_vital_attn.o
+OBJS += p10_extract_sbe_rc.o
+OBJS += p10_ppe_utils.o
+OBJS += p10_ppe_common.o
 
 ## sbeio_rt's sub directories
 SUBDIRS += test.d

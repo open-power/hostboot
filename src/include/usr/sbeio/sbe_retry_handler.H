@@ -34,9 +34,7 @@
 
 #include <isteps/hwpisteperror.H>
 #include <p10_get_sbe_msg_register.H>
-/* TODO RTC: 248572
-#include <p9_extract_sbe_rc.H>
-*/
+#include <p10_extract_sbe_rc.H>
 #include <sys/time.h>
 
 namespace SBEIO
@@ -67,7 +65,7 @@ class SbeRetryHandler
 
         enum SBE_RESTART_METHOD
         {
-            START_CBS = 0,  // Use p9_start_cbs to restart the SBE
+            START_CBS = 0,  // Use p10_start_cbs to restart the SBE
             HRESET    = 1,  // Use Hreset to restart the SBE
         };
 
@@ -120,12 +118,10 @@ class SbeRetryHandler
             return iv_sbeRegister;
         }
 
-/* TODO: RTC 248572
-        inline P9_EXTRACT_SBE_RC::RETURN_ACTION getCurrentAction()
+        inline P10_EXTRACT_SBE_RC::RETURN_ACTION getCurrentAction()
         {
             return iv_currentAction;
         }
-*/
 
         inline SBE_REG_RETURN getCurrentSBEState()
         {
@@ -282,7 +278,7 @@ class SbeRetryHandler
         errlHndl_t switch_sbe_sides(TARGETING::Target * i_target);
 
         /**
-         * @brief This function handles the call to the p9_get_sbe_msg_handler.
+         * @brief This function handles the call to the p10_get_sbe_msg_handler.
          *        It will read the sbe msg register (Cfam 2809 or Scom 50009)
          *        and update iv_currentSBEState to reflect the state that
          *        the sbe's msg register is telling us
@@ -336,8 +332,7 @@ class SbeRetryHandler
         /*
          * @brief The current SBE return action that has to be taken
          */
-        // TODO RTC: 248572
-        //P9_EXTRACT_SBE_RC::RETURN_ACTION iv_currentAction;
+        P10_EXTRACT_SBE_RC::RETURN_ACTION iv_currentAction;
 
         /*
          * @brief The current SBE state - booted, failed, or deconfig

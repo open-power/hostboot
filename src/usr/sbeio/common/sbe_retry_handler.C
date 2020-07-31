@@ -38,8 +38,7 @@
 #include <errl/errlentry.H>
 #include <errl/errlmanager.H>
 #include <errl/errlreasoncodes.H>
-//TODO: RTC 248572
-//#include <p10_extract_sbe_rc.H>
+#include <p10_extract_sbe_rc.H>
 
 #include <fapi2/target.H>
 #include <fapi2/plat_hwp_invoker.H>
@@ -122,8 +121,7 @@ SbeRetryHandler::SbeRetryHandler(SBE_MODE_OF_OPERATION i_sbeMode,
 , iv_secureModeDisabled(false) //Per HW team this should always be 0
 , iv_masterErrorLogPLID(i_plid)
 , iv_switchSidesCount(0)
-// TODO: RTC 248572
-//, iv_currentAction(P10_EXTRACT_SBE_RC::ERROR_RECOVERED)
+, iv_currentAction(P10_EXTRACT_SBE_RC::ERROR_RECOVERED)
 , iv_currentSBEState(SBE_REG_RETURN::SBE_NOT_AT_RUNTIME)
 , iv_shutdownReturnCode(0)
 , iv_currentSideBootAttempts(1) // It is safe to assume that the current side has attempted to boot
@@ -240,8 +238,7 @@ void SbeRetryHandler::main_sbe_handler( TARGETING::Target * i_target )
         else
         {
             SBE_TRACF("main_sbe_handler(): SBE reports it was never booted, calling p10_sbe_extract_rc will fail. Setting action to be RESTART_SBE");
-            // TODO RTC: 248572
-            //this->iv_currentAction = P10_EXTRACT_SBE_RC::RESTART_SBE;
+            this->iv_currentAction = P10_EXTRACT_SBE_RC::RESTART_SBE;
         }
 
         // If the mode was marked as informational that means the caller did not want
@@ -291,12 +288,10 @@ void SbeRetryHandler::main_sbe_handler( TARGETING::Target * i_target )
                         // FIXME RTC: 248572
                         /*this->iv_currentAction*/ 0);
 
-            // FIXME RTC: 248572
-/*
             if(this->iv_currentAction == P10_EXTRACT_SBE_RC::NO_RECOVERY_ACTION)
             {
                 SBE_TRACF("main_sbe_handler(): We have concluded there are no further recovery actions to take, deconfiguring proc and exiting handler");
-                // There is no action possible. Gard and Callout the proc
+                /* There is no action possible. Gard and Callout the proc
                     * @errortype  ERRL_SEV_UNRECOVERABLE
                     * @moduleid   SBEIO_EXTRACT_RC_HANDLER
                     * @reasoncode SBEIO_NO_RECOVERY_ACTION
@@ -306,7 +301,6 @@ void SbeRetryHandler::main_sbe_handler( TARGETING::Target * i_target )
                     *             We're deconfiguring this proc
                     * @custdesc   Processor Error
                     */
-/*
                 l_errl = new ERRORLOG::ErrlEntry(
                             ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                             SBEIO_EXTRACT_RC_HANDLER,
@@ -328,19 +322,15 @@ void SbeRetryHandler::main_sbe_handler( TARGETING::Target * i_target )
                 this->iv_currentSBEState = SBE_REG_RETURN::PROC_DECONFIG;
                 break;
             }
-*/
 
             // if the bkp_seeprom or upd_seeprom, attempt to switch sides.
             // This is also dependent on the iv_switchSideCount.
             // Note: we do this for upd_seeprom because we don't support
             //       updating the seeprom during IPL time
-            /* FIXME RTC: 248572
             if((this->iv_currentAction ==
                             P10_EXTRACT_SBE_RC::REIPL_BKP_SEEPROM ||
                 this->iv_currentAction ==
                             P10_EXTRACT_SBE_RC::REIPL_UPD_SEEPROM))
-            */
-            if(0)
             {
                 // We cannot switch sides and perform an hreset if the seeprom's
                 // versions do not match. If this happens, log an error and stop
@@ -1026,17 +1016,16 @@ void SbeRetryHandler::sbe_run_extract_rc(TARGETING::Target * i_target)
     // wrong in p10_extract_sbe_rc and l_ret doesn't get set in that function
     // then we want to fall back on NO_RECOVERY which we will handle
     // accordingly in bestEffortCheck
-    //FIXME RTC 248572 P10_EXTRACT_SBE_RC::RETURN_ACTION l_ret =
-    //                 P10_EXTRACT_SBE_RC::NO_RECOVERY_ACTION;
+    P10_EXTRACT_SBE_RC::RETURN_ACTION l_ret =
+        P10_EXTRACT_SBE_RC::NO_RECOVERY_ACTION;
 
     // TODO RTC: 190528 Force FAPI_INVOKE_HWP to call FAPI_EXEC_HWP when FAPI_INVOKE
     //          is blocked by mutex
     // Note that it's possible we are calling this while we are already inside
     // of a FAPI_INVOKE_HWP call. This might cause issue w/ current_err
     // but unsure how to get around it.
-    // FIXME RTC 248572
-    //FAPI_EXEC_HWP(l_rc, p10_extract_sbe_rc, l_fapi2ProcTarget,
-    //              l_ret, iv_useSDB, iv_secureModeDisabled);
+    FAPI_EXEC_HWP(l_rc, p10_extract_sbe_rc, l_fapi2ProcTarget,
+                  l_ret, iv_useSDB, iv_secureModeDisabled);
 
     // Convert the returnCode into an UNRECOVERABLE error log which we will
     // associate w/ the caller's errlog via plid
@@ -1061,7 +1050,7 @@ void SbeRetryHandler::sbe_run_extract_rc(TARGETING::Target * i_target)
     {
         SBE_TRACF("Error: sbe_boot_fail_handler : p10_extract_sbe_rc HWP "
                   " returned action %d and errorlog PLID=0x%x, rc=0x%.4X",
-                  /* FIXME RTC: 248572 this->iv_currentAction*/ 0, l_errl->plid(), l_errl->reasonCode());
+                  this->iv_currentAction, l_errl->plid(), l_errl->reasonCode());
 
         l_errl->collectTrace(SBEIO_COMP_NAME,256);
         l_errl->collectTrace(FAPI_IMP_TRACE_NAME, 256);
@@ -1089,7 +1078,6 @@ void SbeRetryHandler::bestEffortCheck()
     // sure we have tried booting on this seeprom twice, and that we
     // have tried the other seeprom twice as well. If we have tried all of
     // those cases then we will fail out
-/* FIXME RTC: 248572
     if(this->iv_currentAction == P10_EXTRACT_SBE_RC::NO_RECOVERY_ACTION)
     {
         if (this->iv_currentSideBootAttempts < MAX_SIDE_BOOT_ATTEMPTS)
@@ -1141,7 +1129,6 @@ void SbeRetryHandler::bestEffortCheck()
             }
         }
     }
-*/
 }
 
 errlHndl_t SbeRetryHandler::switch_sbe_sides(TARGETING::Target * i_target)
