@@ -860,8 +860,11 @@ fapi2::ReturnCode process_target_and_dynamic_rings(
                              set_RING_ID(be16toh(((CompressedScanData*)dynRs4)->iv_ringId)).
                              set_LOCAL_RC(l_rc).
                              set_OCCURRENCE(2),
-                             "ERROR(2): rs4_overlay failed w/rc=0x%08x",
-                             l_rc );
+                             "ERROR(2): rs4_overlay failed w/rc=0x%08x during accumulation of"
+                             " dynamic rings for ringId=0x%x at featureVecAcc=0x%016lx and"
+                             " feature value=%u",
+                             l_rc, be16toh(((CompressedScanData*)dynRs4)->iv_ringId),
+                             featureVecAcc, nextFeature);
             }
         }
         else if( l_rc != TOR_DYN_RING_NOT_FOUND &&

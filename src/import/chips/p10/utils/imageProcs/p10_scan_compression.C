@@ -1764,7 +1764,7 @@ _overlay_nibble_pair( uint8_t&      o_pairFinal,
                 if(careOvly & mask)
                 {
                     // If both Tgt and Ovly want to change the latch, the data *MUST* agree
-                    if (careTgt & mask && dataTgt != dataOvly)
+                    if (careTgt & mask && ((dataTgt & mask) != (dataOvly & mask)) )
                     {
                         // Bit conflict!
                         MY_ERR("ERROR: _overlay_nibble_pair: Overlay bit conflict\n");
@@ -2057,7 +2057,8 @@ rs4_overlay( CompressedScanData* o_rs4Final,    // Holds rs4Final + raw4Tgt + ra
 
             if (rc)
             {
-                MY_ERR("ERROR: rs4_overlay: _raw4_overlay failed w/rc=0x%08x\n", rc);
+                MY_ERR("ERROR: rs4_overlay: _raw4_overlay failed for ringId=0x%x w/rc=0x%08x\n",
+                       ringIdTemp, rc);
                 return rc;
             }
 
@@ -2072,7 +2073,9 @@ rs4_overlay( CompressedScanData* o_rs4Final,    // Holds rs4Final + raw4Tgt + ra
 
             if (rc)
             {
-                MY_ERR("ERROR: rs4_overlay: _rs4_compress_from_raw4 failed w/rc=0x%08x (1)\n", rc);
+                MY_ERR("ERROR: rs4_overlay: _rs4_compress_from_raw4 failed for ringId=0x%x"
+                       " w/rc=0x%08x (1)\n",
+                       ringIdTemp, rc);
                 return rc;
             }
 
@@ -2091,7 +2094,9 @@ rs4_overlay( CompressedScanData* o_rs4Final,    // Holds rs4Final + raw4Tgt + ra
 
             if (rc)
             {
-                MY_ERR("ERROR: rs4_overlay: _rs4_compress_from_raw4 failed w/rc=0x%08x (2)\n", rc);
+                MY_ERR("ERROR: rs4_overlay: _rs4_compress_from_raw4 failed for ringId=0x%x"
+                       " w/rc=0x%08x (2)\n",
+                       ringIdTemp, rc);
                 return rc;
             }
 
