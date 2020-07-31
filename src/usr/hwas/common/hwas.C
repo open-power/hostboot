@@ -609,7 +609,7 @@ errlHndl_t discoverPmicTargetsAndEnable(const Target &i_sysTarget)
     do
     {
         // Only get PMIC targets
-        const PredicateCTM l_pmicPred(CLASS_ASIC, TYPE_PMIC);
+        const PredicateCTM l_pmicPred(CLASS_NA, TYPE_PMIC);
         TARGETING::PredicatePostfixExpr l_asicPredExpr;
         l_asicPredExpr.push(&l_pmicPred);
         TargetHandleList l_pPmicCheckPres;
