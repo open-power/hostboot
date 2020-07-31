@@ -39,6 +39,22 @@
 #include <p10_scom_omi.H>
 #include <p10_io_lib.H>
 
+class p10_io_init : public p10_io_ppe_cache_proc
+{
+    public:
+        fapi2::ReturnCode lane_reversal(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target);
+        fapi2::ReturnCode flush_mem_regs();
+        fapi2::ReturnCode flush_fw_regs();
+        fapi2::ReturnCode init_regs(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target);
+        fapi2::ReturnCode img_regs(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target);
+        fapi2::ReturnCode sim_speedup(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target);
+        fapi2::ReturnCode ext_req_all(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target);
+        fapi2::ReturnCode ext_req_set_lane_bits(const fapi2::Target<fapi2::TARGET_TYPE_PAUC>& i_pauc_target,
+                                                const std::vector<int>& i_lanes,
+                                                const int& i_thread);
+        fapi2::ReturnCode ext_req_lanes(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target);
+};
+
 ///
 /// @brief Write IOHS Per-Lane Hardware Data
 ///
@@ -110,7 +126,7 @@ fapi_try_exit:
 /// @param[in] i_target Chip target to setup
 ///
 /// @return fapi2::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
-fapi2::ReturnCode p10_io_init_lane_reversal(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
+fapi2::ReturnCode p10_io_init::lane_reversal(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
 {
     FAPI_DBG("Begin");
     fapi2::buffer<uint64_t> l_data;
@@ -140,7 +156,7 @@ fapi_try_exit:
 /// @brief Flushes the mem_regs cached values
 ///
 /// @return fapi2::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
-fapi2::ReturnCode p10_io_init_flush_mem_regs()
+fapi2::ReturnCode p10_io_init::flush_mem_regs()
 {
     FAPI_DBG("Begin");
 
@@ -158,7 +174,7 @@ fapi_try_exit:
 /// @brief Flushes the fw_regs cached values
 ///
 /// @return fapi2::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
-fapi2::ReturnCode p10_io_init_flush_fw_regs()
+fapi2::ReturnCode p10_io_init::flush_fw_regs()
 {
     FAPI_DBG("Begin");
 
@@ -178,7 +194,7 @@ fapi_try_exit:
 /// @param[in] i_target Chip target to start
 ///
 /// @return fapi2::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
-fapi2::ReturnCode p10_io_init_img_regs(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
+fapi2::ReturnCode p10_io_init::img_regs(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
 {
     FAPI_DBG("Begin");
     fapi2::buffer<uint64_t> l_data = 0;
@@ -255,7 +271,7 @@ fapi2::ReturnCode p10_io_init_img_regs(const fapi2::Target<fapi2::TARGET_TYPE_PR
 
         // Flush the data to the sram
         FAPI_TRY(p10_io_ppe_img_regs.flush());
-        FAPI_TRY(p10_io_init_flush_fw_regs());
+        FAPI_TRY(flush_fw_regs());
 
         // Start the ppe's
         FAPI_TRY(PREP_PHY_PPE_WRAP_XIXCR(l_pauc_target));
@@ -278,7 +294,7 @@ fapi_try_exit:
 /// @param[in] i_target Chip target to start
 ///
 /// @return fapi2::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
-fapi2::ReturnCode p10_io_init_regs(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
+fapi2::ReturnCode p10_io_init::init_regs(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
 {
     FAPI_DBG("Begin");
     using namespace scomt::pauc;
@@ -428,7 +444,7 @@ fapi2::ReturnCode p10_io_init_regs(const fapi2::Target<fapi2::TARGET_TYPE_PROC_C
         }
 
         // Flush the data to the sram
-        FAPI_TRY(p10_io_init_flush_mem_regs());
+        FAPI_TRY(flush_mem_regs());
 
     }
 
@@ -443,7 +459,7 @@ fapi_try_exit:
 /// @param[in] i_target Chip target to work with
 ///
 /// @return fapi2::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
-fapi2::ReturnCode p10_io_sim_speedup(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
+fapi2::ReturnCode p10_io_init::sim_speedup(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
 {
     FAPI_DBG("Begin");
     auto l_pauc_targets = i_target.getChildren<fapi2::TARGET_TYPE_PAUC>();
@@ -513,7 +529,7 @@ fapi_try_exit:
 /// @param[in] i_target Chip target to work with
 ///
 /// @return fapi2::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
-fapi2::ReturnCode p10_io_ext_req_all(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
+fapi2::ReturnCode p10_io_init::ext_req_all(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
 {
     FAPI_DBG("Begin");
     auto l_pauc_targets = i_target.getChildren<fapi2::TARGET_TYPE_PAUC>();
@@ -533,7 +549,7 @@ fapi2::ReturnCode p10_io_ext_req_all(const fapi2::Target<fapi2::TARGET_TYPE_PROC
     }
 
     //Write cached values to the chip
-    FAPI_TRY(p10_io_init_flush_fw_regs());
+    FAPI_TRY(flush_fw_regs());
 
 fapi_try_exit:
     FAPI_DBG("End");
@@ -548,7 +564,7 @@ fapi_try_exit:
 /// @param[in] i_thread The thread to set lane bits for
 ///
 /// @return fapi2::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
-fapi2::ReturnCode p10_io_ext_req_set_lane_bits(const fapi2::Target<fapi2::TARGET_TYPE_PAUC>& i_pauc_target,
+fapi2::ReturnCode p10_io_init::ext_req_set_lane_bits(const fapi2::Target<fapi2::TARGET_TYPE_PAUC>& i_pauc_target,
         const std::vector<int>& i_lanes,
         const int& i_thread)
 {
@@ -585,7 +601,7 @@ fapi_try_exit:
 /// @param[in] i_target Chip target to work with
 ///
 /// @return fapi2::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
-fapi2::ReturnCode p10_io_ext_req_lanes(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
+fapi2::ReturnCode p10_io_init::ext_req_lanes(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
 {
     FAPI_DBG("Begin");
     auto l_pauc_targets = i_target.getChildren<fapi2::TARGET_TYPE_PAUC>();
@@ -605,7 +621,7 @@ fapi2::ReturnCode p10_io_ext_req_lanes(const fapi2::Target<fapi2::TARGET_TYPE_PR
 
             FAPI_TRY(p10_io_get_iohs_lanes(l_iohs_target, l_lanes));
 
-            FAPI_TRY(p10_io_ext_req_set_lane_bits(l_pauc_target, l_lanes, l_thread));
+            FAPI_TRY(ext_req_set_lane_bits(l_pauc_target, l_lanes, l_thread));
         }
 
         for (auto l_omic_target : l_omic_targets)
@@ -618,13 +634,13 @@ fapi2::ReturnCode p10_io_ext_req_lanes(const fapi2::Target<fapi2::TARGET_TYPE_PR
 
             FAPI_TRY(p10_io_get_omic_lanes(l_omic_target, l_lanes));
 
-            FAPI_TRY(p10_io_ext_req_set_lane_bits(l_pauc_target, l_lanes, l_thread));
+            FAPI_TRY(ext_req_set_lane_bits(l_pauc_target, l_lanes, l_thread));
         }
 
     }
 
     //Write cached values to the chip
-    FAPI_TRY(p10_io_init_flush_fw_regs());
+    FAPI_TRY(flush_fw_regs());
 
 fapi_try_exit:
     FAPI_DBG("End");
@@ -641,13 +657,14 @@ fapi2::ReturnCode p10_io_init_start_ppe(const fapi2::Target<fapi2::TARGET_TYPE_P
 {
     const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> l_sys;
     uint8_t l_sim = 0;
+    p10_io_init l_proc;
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IS_SIMULATION, l_sys, l_sim));
 
-    FAPI_TRY(p10_io_init_lane_reversal(i_target));
+    FAPI_TRY(l_proc.lane_reversal(i_target));
 
-    FAPI_TRY(p10_io_init_img_regs(i_target));
+    FAPI_TRY(l_proc.img_regs(i_target));
 
-    FAPI_TRY(p10_io_init_regs(i_target));
+    FAPI_TRY(l_proc.init_regs(i_target));
 
     //Wait for reset to finish
     //FIXME: is there a way to tell when it's done?
@@ -655,11 +672,11 @@ fapi2::ReturnCode p10_io_init_start_ppe(const fapi2::Target<fapi2::TARGET_TYPE_P
 
     if (l_sim)
     {
-        FAPI_TRY(p10_io_sim_speedup(i_target));
+        FAPI_TRY(l_proc.sim_speedup(i_target));
     }
 
-    FAPI_TRY(p10_io_ext_req_lanes(i_target));
-    FAPI_TRY(p10_io_ext_req_all(i_target));
+    FAPI_TRY(l_proc.ext_req_lanes(i_target));
+    FAPI_TRY(l_proc.ext_req_all(i_target));
 
 fapi_try_exit:
     return fapi2::current_err;

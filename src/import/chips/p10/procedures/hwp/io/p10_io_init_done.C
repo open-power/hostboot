@@ -38,6 +38,16 @@
 #include <p10_io_init_start_ppe.H>
 #include <p10_io_lib.H>
 
+class p10_io_done : public p10_io_ppe_cache_proc
+{
+    public:
+        fapi2::ReturnCode p10_io_init_done_check_thread_done(
+            const fapi2::Target<fapi2::TARGET_TYPE_PAUC>& i_pauc_target,
+            const int& i_thread,
+            bool& o_done);
+
+};
+
 ///
 /// @brief Check done status for reg_init, dccal, lane power on, and fifo init for a thread
 ///
@@ -46,7 +56,7 @@
 /// @param[out] o_done Set to false if something isn't done
 ///
 /// @return fapi2::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
-fapi2::ReturnCode p10_io_init_done_check_thread_done(
+fapi2::ReturnCode p10_io_done::p10_io_init_done_check_thread_done(
     const fapi2::Target<fapi2::TARGET_TYPE_PAUC>& i_pauc_target,
     const int& i_thread,
     bool& o_done)
@@ -120,6 +130,7 @@ fapi_try_exit:
 fapi2::ReturnCode p10_io_init_done(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
 {
     bool l_done = false;
+    p10_io_done l_proc;
     auto l_pauc_targets = i_target.getChildren<fapi2::TARGET_TYPE_PAUC>();
 
     //Poll for done
@@ -149,7 +160,7 @@ fapi2::ReturnCode p10_io_init_done(const fapi2::Target<fapi2::TARGET_TYPE_PROC_C
 
                 FAPI_TRY(p10_io_get_iohs_thread(l_iohs_target, l_thread));
 
-                FAPI_TRY(p10_io_init_done_check_thread_done(l_pauc_target, l_thread, l_done ));
+                FAPI_TRY(l_proc.p10_io_init_done_check_thread_done(l_pauc_target, l_thread, l_done ));
 
             }
 
@@ -163,7 +174,7 @@ fapi2::ReturnCode p10_io_init_done(const fapi2::Target<fapi2::TARGET_TYPE_PROC_C
 
                 FAPI_TRY(p10_io_get_omic_thread(l_omic_target, l_thread));
 
-                FAPI_TRY(p10_io_init_done_check_thread_done(l_pauc_target, l_thread, l_done));
+                FAPI_TRY(l_proc.p10_io_init_done_check_thread_done(l_pauc_target, l_thread, l_done));
             }
         }
 
