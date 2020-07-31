@@ -22,7 +22,7 @@
 <!-- permissions and limitations under the License.                         -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
-<hwpErrors> 
+<hwpErrors>
    <!-- ******************************************************************** -->
    <hwpError>
       <sbeError/>
@@ -30,6 +30,17 @@
       <description>PLL Lock Not set</description>
       <ffdc>TARGET_CHIPLET</ffdc>
       <ffdc>PLL_READ</ffdc>
+   </hwpError>
+   <!-- ******************************************************************** -->
+   <hwpError>
+      <sbeError/>
+      <rc>RC_P10_SBE_CHIPLET_PLL_SETUP_CCALCOMP_TIMEOUT</rc>
+      <description>
+        Polling timeout reached waiting for CCALCOMP to resolve on PLL
+      </description>
+      <ffdc>TARGET</ffdc>
+      <ffdc>CHIPLET</ffdc>
+      <ffdc>UNCALIBRATED</ffdc>
    </hwpError>
    <!-- ******************************************************************** -->
 </hwpErrors>
