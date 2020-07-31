@@ -467,15 +467,9 @@ errlHndl_t handleSetStateEffecterStatesRequest(const msg_q_t i_msgQ,
             break;
         }
 
-        PLDM_INF("Restarting OCC on PROC HUID = 0x%08x...", get_huid(occ_proc));
-
-        HTMGT::processOccReset(occ_proc);
-
-        PLDM_INF("Restarted OCC on PROC HUID = 0x%08x", get_huid(occ_proc));
     } while (false);
 
-    /* Respond to the request */
-
+    /* Respond to the request notifying the BMC that we are going to attempt the OCC reset */
     if (!errl) {
         errl =
             send_pldm_response<PLDM_SET_STATE_EFFECTER_STATES_RESP_BYTES>
@@ -491,6 +485,12 @@ errlHndl_t handleSetStateEffecterStatesRequest(const msg_q_t i_msgQ,
             errl->collectTrace(PLDM_COMP_NAME);
         }
     }
+
+    PLDM_INF("Restarting OCC on PROC HUID = 0x%08x...", get_huid(occ_proc));
+
+    HTMGT::processOccReset(occ_proc);
+
+    PLDM_INF("Restarted OCC on PROC HUID = 0x%08x", get_huid(occ_proc));
 
     PLDM_EXIT("handleSetStateEffecterStatesRequest");
 
