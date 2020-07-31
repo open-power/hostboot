@@ -2722,6 +2722,10 @@
       <id>MODEL</id>
     </attribute>
     <attribute>
+      <default>1</default>
+      <id>RCD_PARITY_RECONFIG_LOOPS_ALLOWED</id>
+    </attribute>
+    <attribute>
       <default>0x000603FC00000000</default>
       <id>XSCOM_BASE_ADDRESS</id>
     </attribute>
