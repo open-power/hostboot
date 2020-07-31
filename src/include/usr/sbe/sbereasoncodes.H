@@ -108,6 +108,8 @@ enum sbeReasonCode
     SBE_BOOT_SIDE_DIRTY_BAD_PATH        = SBE_COMP_ID | 0x1C,
     SBE_UNSUPPORTED_EC                  = SBE_COMP_ID | 0x1D,
     SBE_HBBL_ID_NOT_FOUND               = SBE_COMP_ID | 0x1E,
+    ERROR_FROM_XIP_DELETE_RINGS         = SBE_COMP_ID | 0x1F,
+    ERROR_FROM_XIP_FIND_RINGS           = SBE_COMP_ID | 0x20,
 };
 
 };  // end SBE

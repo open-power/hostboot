@@ -932,11 +932,13 @@ namespace SBE
             const char* l_sectionId = ".hbbl";
             int xip_rc = p9_xip_find( i_image, l_sectionId, &l_xipItem );
 
+            // TODO: Revisit with RTC 258273 to see if we should keep or remove
+            // defensive logic
             // Check the return code
             if( xip_rc == P9_XIP_ITEM_NOT_FOUND || xip_rc == P9_XIP_DATA_NOT_PRESENT)
             {
                 TRACFCOMP( g_trac_sbe, "appendHbblToSbe(): "
-                           "p9_xip_find NON CONCLUSIVE clean first rc=0x%X", xip_rc);
+                           "p9_xip_find .hbbl NON CONCLUSIVE clean first rc=0x%X", xip_rc);
 
                 // Call p9_xip_delete_section to clean or delete existing HBBL image
                 // from SBE image
@@ -954,7 +956,7 @@ namespace SBE
                 if( xip_rc )
                 {
                     TRACFCOMP( g_trac_sbe, "appendHbblToSbe(): "
-                               "p9_xip_delete_section failed, rc=0x%X",
+                               "p9_xip_delete_section .hbbl failed, rc=0x%X",
                                xip_rc );
                     /*@
                      * @errortype
@@ -981,7 +983,7 @@ namespace SBE
             else
             {
                 TRACFCOMP( g_trac_sbe, "appendHbblToSbe(): p9_xip_find "
-                           "received unexpected return code, rc=0x%X",
+                           ".hbbl received unexpected return code, rc=0x%X",
                            xip_rc );
                 /*@
                  * @errortype
@@ -2383,6 +2385,87 @@ namespace SBE
             memcpy ( sbeHbblImgPtr,
                      sbePnorPtr,
                      sbePnorImageSize);
+
+            // TODO: Revisit with RTC 258273 to see if we should keep or remove
+            // defensive logic
+            const char* l_sectionId = ".rings";
+            P9XipItem l_xipItem;
+            int xip_rc = p9_xip_find(sbeHbblImgPtr, l_sectionId, &l_xipItem);
+
+            // Check the return code
+            if( xip_rc == P9_XIP_ITEM_NOT_FOUND || xip_rc == P9_XIP_DATA_NOT_PRESENT)
+            {
+                TRACFCOMP( g_trac_sbe, "getSbeInfoState(): "
+                           "p9_xip_find .rings NON CONCLUSIVE clean first rc=0x%X", xip_rc);
+
+                // Call p9_xip_delete_section to clean or delete existing RINGS image
+                // from SBE image
+                // Some xip calls keep same p9 prefix for p10
+                void *l_imageBuf =malloc(sbePnorImageSize);
+                xip_rc = p9_xip_delete_section(
+                                 sbeHbblImgPtr,
+                                 l_imageBuf,
+                                 sbePnorImageSize,
+                                 P9_XIP_SECTION_SBE_RINGS );
+                free(l_imageBuf);
+                l_imageBuf = nullptr;
+
+                // Check for error
+                if( xip_rc )
+                {
+                    TRACFCOMP( g_trac_sbe, ERR_MRK"getSbeInfoState(): "
+                               "p9_xip_delete_section .rings failed, rc=0x%X",
+                               xip_rc );
+                    /*@
+                     * @errortype
+                     * @moduleid     SBE_APPEND_HBBL
+                     * @reasoncode   ERROR_FROM_XIP_DELETE_RINGS
+                     * @userdata1    rc from p9_xip_delete
+                     * @userdata2    <unused>
+                     * @devdesc      Bad RC from p9_xip_delete
+                     * @custdesc     A problem occurred while updating processor
+                     *               boot code.
+                     */
+                    err = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
+                                        SBE_APPEND_HBBL,
+                                        ERROR_FROM_XIP_DELETE_RINGS,
+                                        xip_rc,
+                                        0,
+                                        ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+                    err->collectTrace(SBE_COMP_NAME);
+
+                    // exit loop
+                    break;
+                }
+            }
+            else
+            {
+                TRACFCOMP( g_trac_sbe, "getSbeInfoState(): p9_xip_find "
+                           ".rings received unexpected return code, rc=0x%X",
+                           xip_rc );
+                /*@
+                 * @errortype
+                 * @moduleid     SBE_APPEND_HBBL
+                 * @reasoncode   ERROR_FROM_XIP_FIND_RINGS
+                 * @userdata1    rc from p9_xip_find
+                 * @userdata2    <unused>
+                 * @devdesc      Bad RC from p9_xip_find
+                 * @custdesc     A problem occurred while updating processor
+                 *               boot code.
+                 */
+                err = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
+                                    SBE_APPEND_HBBL,
+                                    ERROR_FROM_XIP_FIND_RINGS,
+                                    xip_rc,
+                                    0,
+                                    ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+                err->collectTrace(SBE_COMP_NAME);
+                err->collectTrace(FAPI_IMP_TRACE_NAME,256);
+                err->collectTrace(FAPI_TRACE_NAME,384);
+
+                // exit loop
+                break;
+            }
 
             err = appendHbblToSbe(const_cast<void*>(hbblPnorPtr), // HBBL Image to append
                                   MAX_HBBL_SIZE, // Size of HBBL Image
