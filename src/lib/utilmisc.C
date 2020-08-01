@@ -91,12 +91,18 @@ extern "C" bool __isMultiprocSupported() NEVER_INLINE;
 
 bool __isMultiprocSupported()
 {
+    bool multiprocSupport = true;
+
 #ifdef FORCE_SINGLE_CHIP
-    return false;
+    multiprocSupport = false;
 #else
-    return MAGIC_INST_CHECK_FEATURE(MAGIC_FEATURE__MULTIPROC);
+    if (isSimicsRunning())
+    {
+        multiprocSupport = MAGIC_INST_CHECK_FEATURE(MAGIC_FEATURE__MULTIPROC);
+    }
 #endif
+
+    return multiprocSupport;
 }
 
 };
-
