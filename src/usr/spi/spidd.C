@@ -65,6 +65,8 @@ spi_write(SpiControlHandle& i_handle, uint32_t i_address,
 };
 bool g_USE_OLD_SPI = false;
 
+constexpr uint64_t HOSTBOOT_PIB_MASTER_ID = 9;
+
 // -----------------------------------------------------------------------------
 //      Trace definitions
 // -----------------------------------------------------------------------------
@@ -202,6 +204,34 @@ errlHndl_t spiPerformOp(DeviceFW::OperationType i_opType,
                                mutex_should_unlock);
         if (errl != nullptr)
         {
+            break;
+        }
+
+        // Take possession of the Atomic Lock
+        TRACDCOMP(g_trac_spi, "Grabbing atomic lock");
+        SpiControlHandle handle = spiOp.getSpiHandle();
+        FAPI_INVOKE_HWP( errl,
+                         spi_master_unlock,
+                         handle,
+                         HOSTBOOT_PIB_MASTER_ID );
+        if (errl != nullptr)
+        {
+            TRACFCOMP(g_trac_spi, "Failure trying to release atomic lock");
+            ERRORLOG::ErrlUserDetailsTarget(i_target, "Proc Target")
+              .addToLog(errl);
+            io_buflen = 0;
+            break;
+        }
+        FAPI_INVOKE_HWP( errl,
+                         spi_master_lock,
+                         handle,
+                         HOSTBOOT_PIB_MASTER_ID );
+        if (errl != nullptr)
+        {
+            TRACFCOMP(g_trac_spi, "Failure trying to grab atomic lock");
+            ERRORLOG::ErrlUserDetailsTarget(i_target, "Proc Target")
+              .addToLog(errl);
+            io_buflen = 0;
             break;
         }
 

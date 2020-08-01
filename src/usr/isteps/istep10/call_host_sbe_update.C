@@ -250,8 +250,9 @@ void* call_host_sbe_update (void *io_pArgs)
     IStepError l_StepError;
     bool l_testAltMaster = true;
 
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                "call_host_sbe_update entry" );
+
     do
     {
 
@@ -362,7 +363,7 @@ void* call_host_sbe_update (void *io_pArgs)
 
    } while (0);
 
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                "call_host_sbe_update exit" );
 
     // end task, returning any errorlogs to IStepDisp
