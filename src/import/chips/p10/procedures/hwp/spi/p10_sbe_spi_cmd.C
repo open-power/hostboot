@@ -47,12 +47,11 @@ using namespace fapi2;
 fapi2::ReturnCode
 spi_master_lock(SpiControlHandle& i_handle, uint64_t i_pib_master_id)
 {
-    uint32_t base_addr = (i_pib_master_id << 20) + i_handle.base_addr;
-    fapi2::buffer<uint64_t> data64 =
-        0x0800000000000000ULL + (i_pib_master_id << 60);
+    // The value written to the reg doesn't matter, only that bit zero is set
+    fapi2::buffer<uint64_t> data64 = 0x8000000000000000ULL;
 
     FAPI_TRY(putScom( i_handle.target_chip,
-                      base_addr + SPIM_CONFIGREG1, data64));
+                      i_handle.base_addr | SPIM_CONFIGREG1, data64));
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -61,11 +60,18 @@ fapi_try_exit:
 fapi2::ReturnCode
 spi_master_unlock(SpiControlHandle& i_handle, uint64_t i_pib_master_id)
 {
-    uint32_t base_addr = (i_pib_master_id << 20) + i_handle.base_addr;
-    fapi2::buffer<uint64_t> data64 = (i_pib_master_id << 60);
+    fapi2::buffer<uint64_t> data64 = 0;
 
+    // Figure out who owns it now so we can take it away
+    FAPI_TRY(getScom( i_handle.target_chip,
+                      i_handle.base_addr | SPIM_CONFIGREG1, data64));
+
+    // Clear the lock bit
+    data64.clearBit(0);
+
+    // Write it back
     FAPI_TRY(putScom( i_handle.target_chip,
-                      base_addr + SPIM_CONFIGREG1, data64) );
+                      i_handle.base_addr | SPIM_CONFIGREG1, data64) );
 
 fapi_try_exit:
     return fapi2::current_err;
