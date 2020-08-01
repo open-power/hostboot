@@ -52,6 +52,7 @@
 #include <attributeenums.H>                     // TYPE_PROC
 #include <targeting/common/utilFilter.H>        // getAllChips
 #include <util/misc.H>
+#include <sys/time.h>
 
 //  HWP call support
 #include <exp_check_for_ready.H>
@@ -69,6 +70,14 @@ void* call_ocmb_check_for_ready (void *io_pArgs)
 
     errlHndl_t  l_errl = nullptr;
     IStepError l_StepError;
+
+    //@FIXME-CQ:SW500250
+    if( !Util::isSimicsRunning() )
+    {
+        TRACFCOMP(g_trac_isteps_trace,
+                  "Waiting 20 seconds before polling Explorers");
+        nanosleep(20, 0);
+    }
 
     TargetHandleList functionalProcChipList;
 
@@ -97,9 +106,8 @@ void* call_ocmb_check_for_ready (void *io_pArgs)
             fapi2::Target <fapi2::TARGET_TYPE_OCMB_CHIP>
                                     l_fapi_ocmb_target(l_ocmb);
 
-            // TODO CQ:SW482291 Remove this retry workaround when ocmb
-            //                  check_for_ready timeout issue is resolved
-            uint8_t NUM_LOOPS = 10;
+            // Keeping this loop in here just in case we need it later
+            uint8_t NUM_LOOPS = 1;
             if( Util::isSimicsRunning() )
             {
                 NUM_LOOPS = 1;
