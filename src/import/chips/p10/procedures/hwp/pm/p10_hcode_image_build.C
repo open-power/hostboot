@@ -1021,6 +1021,7 @@ fapi2::ReturnCode buildQmeSpecificRing( CONST_FAPI2_PROC& i_procTgt, Homerlayout
     uint32_t l_localPsParam     =   0;
     uint32_t l_instSpecLength   =   l_localPsParam;
     uint32_t l_currentIndex     =   l_instRingOffset - QME_IMAGE_CPMR_OFFSET;
+    uint32_t l_instSpecbase     =   0;
     uint32_t l_workBufSize      =   i_ringData.iv_sizeWorkBuf1;
 
     FAPI_INF( "Qme Instance Ring Start Index 0x%08x", l_instRingOffset );
@@ -1029,6 +1030,7 @@ fapi2::ReturnCode buildQmeSpecificRing( CONST_FAPI2_PROC& i_procTgt, Homerlayout
     l_currentIndex      =   l_currentIndex + BCE_RD_BLOCK_SIZE - 1;
     l_currentIndex      =   (( l_currentIndex >> SHIFT_RD_BLOCK_SIZE ) << SHIFT_RD_BLOCK_SIZE );
     l_instRingOffset    =   l_currentIndex + QME_IMAGE_CPMR_OFFSET;
+    l_instSpecbase      =   l_currentIndex;
 
     for( uint8_t l_superChiplet = 0; l_superChiplet < MAX_QUADS_PER_CHIP;
          l_superChiplet++ )
@@ -1080,10 +1082,10 @@ fapi2::ReturnCode buildQmeSpecificRing( CONST_FAPI2_PROC& i_procTgt, Homerlayout
                                      0 ),
                  "Chiplet Specific Ring Customization Failed For QME" );
 
+        l_currentIndex  =  l_instSpecbase + (l_superChiplet*l_instSpecLength);
+
         memcpy( &i_pChipHomer->iv_cpmrRegion.iv_qmeSramRegion[l_currentIndex],
             i_ringData.iv_pWorkBuf1, l_workBufSize );
-
-        l_currentIndex  +=  l_instSpecLength;
 
     }
 
@@ -1371,8 +1373,8 @@ fapi2::ReturnCode buildQmeHeader( CONST_FAPI2_PROC& i_procTgt, Homerlayout_t   *
  * @param[in]   i_procFuncModel contains P10 chip configuration details.
  * @return      fapi2 return code.
  */
-fapi2::ReturnCode buildQmeAttributes( void* const i_pImageIn, 
-                                      CONST_FAPI2_PROC& i_procTgt, 
+fapi2::ReturnCode buildQmeAttributes( void* const i_pImageIn,
+                                      CONST_FAPI2_PROC& i_procTgt,
                                       Homerlayout_t* i_pChipHomer,
                                       ImageBuildRecord & i_qmeBuildRecord,
                                       P10FuncModel &i_procFuncModel)
@@ -1436,23 +1438,23 @@ fapi2::ReturnCode buildQmeAttributes( void* const i_pImageIn,
     pQmeAttrMeta = (QmeAttrMeta_t*) pQmeMeta;
 
     magic_number = (*((uint64_t*)pQmeAttrMeta));
-    magic_number = htobe64(magic_number); 
+    magic_number = htobe64(magic_number);
     magic_number = magic_number >> 8;
 
-    FAPI_DBG("QME Meta Data Address 0x%08X Magic Number: %llx Magic Word: %s Version %x", 
+    FAPI_DBG("QME Meta Data Address 0x%08X Magic Number: %llx Magic Word: %s Version %x",
              pQmeAttrMeta, magic_number, pQmeAttrMeta->magic_word, pQmeAttrMeta->meta_data_version);
-    FAPI_DBG("System    Attributes Count %x Size %x", htobe16(pQmeAttrMeta->system_num_of_attrs), 
-                                                      htobe16(pQmeAttrMeta->system_num_of_bytes)); 
-    FAPI_DBG("Proc Chip Attributes Count %x Size %x", htobe16(pQmeAttrMeta->proc_chip_num_of_attrs), 
-                                                      htobe16(pQmeAttrMeta->proc_chip_num_of_bytes)); 
-    FAPI_DBG("Pervasive Attributes Count %x Size %x", htobe16(pQmeAttrMeta->perv_num_of_attrs), 
-                                                      htobe16(pQmeAttrMeta->perv_num_of_bytes)); 
-    FAPI_DBG("EC        Attributes Count %x Size %x", htobe16(pQmeAttrMeta->ec_num_of_attrs), 
-                                                      htobe16(pQmeAttrMeta->ec_num_of_bytes)); 
-    FAPI_DBG("EX        Attributes Count %x Size %x", htobe16(pQmeAttrMeta->ex_num_of_attrs), 
-                                                      htobe16(pQmeAttrMeta->ex_num_of_bytes)); 
-    FAPI_DBG("EQ        Attributes Count %x Size %x", htobe16(pQmeAttrMeta->eq_num_of_attrs), 
-                                                      htobe16(pQmeAttrMeta->eq_num_of_bytes)); 
+    FAPI_DBG("System    Attributes Count %x Size %x", htobe16(pQmeAttrMeta->system_num_of_attrs),
+                                                      htobe16(pQmeAttrMeta->system_num_of_bytes));
+    FAPI_DBG("Proc Chip Attributes Count %x Size %x", htobe16(pQmeAttrMeta->proc_chip_num_of_attrs),
+                                                      htobe16(pQmeAttrMeta->proc_chip_num_of_bytes));
+    FAPI_DBG("Pervasive Attributes Count %x Size %x", htobe16(pQmeAttrMeta->perv_num_of_attrs),
+                                                      htobe16(pQmeAttrMeta->perv_num_of_bytes));
+    FAPI_DBG("EC        Attributes Count %x Size %x", htobe16(pQmeAttrMeta->ec_num_of_attrs),
+                                                      htobe16(pQmeAttrMeta->ec_num_of_bytes));
+    FAPI_DBG("EX        Attributes Count %x Size %x", htobe16(pQmeAttrMeta->ex_num_of_attrs),
+                                                      htobe16(pQmeAttrMeta->ex_num_of_bytes));
+    FAPI_DBG("EQ        Attributes Count %x Size %x", htobe16(pQmeAttrMeta->eq_num_of_attrs),
+                                                      htobe16(pQmeAttrMeta->eq_num_of_bytes));
 
     FAPI_ASSERT( ( magic_number == QMEATMT_MAGIC_NUMBER ),
                  fapi2::QME_META_QMEATMT_MAGIC_MISMATCH()
@@ -1460,13 +1462,13 @@ fapi2::ReturnCode buildQmeAttributes( void* const i_pImageIn,
                  .set_QME_META_HEADER_ADDR(pQmeAttrMeta),
                  "QMEATMT Magic Word Mismatch");
 
-    // Pointer to QME Attribute Tank in Hcode image, 
-    // where the value of attributes will be written to 
+    // Pointer to QME Attribute Tank in Hcode image,
+    // where the value of attributes will be written to
 
     pQmeAttrTank = (QmeHeader_t*) & i_pChipHomer->iv_cpmrRegion.iv_qmeSramRegion[QME_ATTR_PTRS_OFFSET];
 
     FAPI_DBG("QME Hcode Attribute Container Address = 0x%08X", pQmeAttrTank);
-    fapi2::current_err = p10_qme_build_attributes(i_procTgt, pQmeAttrTank, pQmeAttrMeta); 
+    fapi2::current_err = p10_qme_build_attributes(i_procTgt, pQmeAttrTank, pQmeAttrMeta);
 
 fapi_try_exit:
 

@@ -546,6 +546,66 @@ static const uint32_t TP_TPCHIP_PIB_SPIMC_SPIMST3_CONFIG1_PIB_MASTER_ID_LEN = 4;
 //<< [TP_TPCHIP_PIB_SPIMC_SPIMST3_CONFIG1]
 // proc/reg00053.H
 
+//>> [TP_TPCHIP_TPC_XSTOP]
+static const uint64_t TP_TPCHIP_TPC_XSTOP = 0x01040000ull;
+
+static const uint32_t TP_TPCHIP_TPC_XSTOP_ANY_XSTOP = 0;
+static const uint32_t TP_TPCHIP_TPC_XSTOP_SYSTEM_XSTOP = 1;
+static const uint32_t TP_TPCHIP_TPC_XSTOP_XSTOP_ANY_SPATTN = 2;
+static const uint32_t TP_TPCHIP_TPC_XSTOP_DBG_FIR_XSTOP_ON_TRIG = 3;
+static const uint32_t TP_TPCHIP_TPC_XSTOP_XSTOP_PERV = 4;
+static const uint32_t TP_TPCHIP_TPC_XSTOP_XSTOP_IN05 = 5;
+static const uint32_t TP_TPCHIP_TPC_XSTOP_XSTOP_IN06 = 6;
+static const uint32_t TP_TPCHIP_TPC_XSTOP_XSTOP_IN07 = 7;
+static const uint32_t TP_TPCHIP_TPC_XSTOP_XSTOP_IN08 = 8;
+static const uint32_t TP_TPCHIP_TPC_XSTOP_XSTOP_IN09 = 9;
+static const uint32_t TP_TPCHIP_TPC_XSTOP_XSTOP_IN10 = 10;
+static const uint32_t TP_TPCHIP_TPC_XSTOP_XSTOP_IN11 = 11;
+static const uint32_t TP_TPCHIP_TPC_XSTOP_XSTOP_IN12 = 12;
+static const uint32_t TP_TPCHIP_TPC_XSTOP_XSTOP_IN13 = 13;
+static const uint32_t TP_TPCHIP_TPC_XSTOP_XSTOP_IN14 = 14;
+static const uint32_t TP_TPCHIP_TPC_XSTOP_XSTOP_IN15 = 15;
+static const uint32_t TP_TPCHIP_TPC_XSTOP_XSTOP_IN16 = 16;
+static const uint32_t TP_TPCHIP_TPC_XSTOP_XSTOP_IN17 = 17;
+static const uint32_t TP_TPCHIP_TPC_XSTOP_XSTOP_IN18 = 18;
+static const uint32_t TP_TPCHIP_TPC_XSTOP_XSTOP_IN19 = 19;
+static const uint32_t TP_TPCHIP_TPC_XSTOP_XSTOP_IN20 = 20;
+static const uint32_t TP_TPCHIP_TPC_XSTOP_XSTOP_IN21 = 21;
+static const uint32_t TP_TPCHIP_TPC_XSTOP_XSTOP_IN22 = 22;
+static const uint32_t TP_TPCHIP_TPC_XSTOP_XSTOP_IN23 = 23;
+static const uint32_t TP_TPCHIP_TPC_XSTOP_XSTOP_IN24 = 24;
+static const uint32_t TP_TPCHIP_TPC_XSTOP_XSTOP_IN25 = 25;
+static const uint32_t TP_TPCHIP_TPC_XSTOP_XSTOP_IN26 = 26;
+static const uint32_t TP_TPCHIP_TPC_XSTOP_XSTOP_IN27 = 27;
+static const uint32_t TP_TPCHIP_TPC_XSTOP_XSTOP_IN28 = 28;
+static const uint32_t TP_TPCHIP_TPC_XSTOP_XSTOP_IN29 = 29;
+static const uint32_t TP_TPCHIP_TPC_XSTOP_XSTOP_IN30 = 30;
+static const uint32_t TP_TPCHIP_TPC_XSTOP_XSTOP_IN31 = 31;
+static const uint32_t TP_TPCHIP_TPC_XSTOP_XSTOP_IN32 = 32;
+static const uint32_t TP_TPCHIP_TPC_XSTOP_XSTOP_IN33 = 33;
+static const uint32_t TP_TPCHIP_TPC_XSTOP_XSTOP_IN34 = 34;
+static const uint32_t TP_TPCHIP_TPC_XSTOP_XSTOP_IN35 = 35;
+static const uint32_t TP_TPCHIP_TPC_XSTOP_XSTOP_IN36 = 36;
+static const uint32_t TP_TPCHIP_TPC_XSTOP_XSTOP_IN37 = 37;
+static const uint32_t TP_TPCHIP_TPC_XSTOP_XSTOP_IN38 = 38;
+static const uint32_t TP_TPCHIP_TPC_XSTOP_XSTOP_IN39 = 39;
+static const uint32_t TP_TPCHIP_TPC_XSTOP_XSTOP_IN40 = 40;
+static const uint32_t TP_TPCHIP_TPC_XSTOP_XSTOP_IN41 = 41;
+static const uint32_t TP_TPCHIP_TPC_XSTOP_XSTOP_IN42 = 42;
+static const uint32_t TP_TPCHIP_TPC_XSTOP_XSTOP_IN43 = 43;
+static const uint32_t TP_TPCHIP_TPC_XSTOP_XSTOP_IN44 = 44;
+static const uint32_t TP_TPCHIP_TPC_XSTOP_XSTOP_IN45 = 45;
+static const uint32_t TP_TPCHIP_TPC_XSTOP_XSTOP_IN46 = 46;
+static const uint32_t TP_TPCHIP_TPC_XSTOP_XSTOP_IN47 = 47;
+static const uint32_t TP_TPCHIP_TPC_XSTOP_XSTOP_IN48 = 48;
+static const uint32_t TP_TPCHIP_TPC_XSTOP_XSTOP_IN49 = 49;
+static const uint32_t TP_TPCHIP_TPC_XSTOP_XSTOP_IN50 = 50;
+static const uint32_t TP_TPCHIP_TPC_XSTOP_XSTOP_IN51 = 51;
+static const uint32_t TP_TPCHIP_TPC_XSTOP_XSTOP_IN52 = 52;
+static const uint32_t TP_TPCHIP_TPC_XSTOP_XSTOP_IN53 = 53;
+//<< [TP_TPCHIP_TPC_XSTOP]
+// proc/reg00053.H
+
 //>>THE END<<
 
 #ifndef __PPE_HCODE__
