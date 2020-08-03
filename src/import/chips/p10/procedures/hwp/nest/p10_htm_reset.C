@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -39,10 +39,11 @@
 #include <p10_htm_reset.H>
 #include <p10_htm_def.H>
 #include <p10_scom_proc.H>
+#include <p10_scom_c.H>
 #include <p10_htm_adu_ctrl.H>
 
 ///
-/// @brief Reset HTM
+/// @brief precheck HTM
 ///
 /// @param[in] i_target         Reference to target
 /// @param[in] i_pos            Position of HTM engine to reset
@@ -50,21 +51,18 @@
 /// @return FAPI2_RC_SUCCESS if success, else error code.
 ///
 template<fapi2::TargetType T>
-fapi2::ReturnCode resetHTM(const fapi2::Target<T>& i_target,
-                           const uint8_t i_pos);
+fapi2::ReturnCode precheck_resetHTM(const fapi2::Target<T>& i_target);
 
 /// TARGET_TYPE_PROC_CHIP (NHTM)
 template<>
-fapi2::ReturnCode resetHTM(
-    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
-    const uint8_t i_pos)
+fapi2::ReturnCode precheck_resetHTM(
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
 {
     using namespace scomt;
     using namespace scomt::proc;
     FAPI_DBG("Entering");
     fapi2::ReturnCode l_rc;
     fapi2::buffer<uint64_t> l_reg_data(0);
-    uint16_t l_htm_poll_count = 0;
 
     // Verify NHTMs are in "Complete" state
     // NHTM
@@ -75,25 +73,82 @@ fapi2::ReturnCode resetHTM(
                  fapi2::P10_NHTM_CTRL_BAD_STATE()
                  .set_TARGET(i_target)
                  .set_HTM_STATUS_REG(l_reg_data),
-                 "resetHTM: NHTM is not in Complete state, can't reset "
+                 "resetHTM: NHTM is not in COMPLETE state, can't reset "
                  "NHTM status 0x%016llX",
                  l_reg_data);
 
-    // Reset
-    FAPI_TRY(aduNHTMControl(i_target, PMISC_GLOBAL_HTM_RESET),
-             "resetHTM: aduNHTMControl returns an error");
+fapi_try_exit:
+    FAPI_DBG("Exiting");
+    return fapi2::current_err;
+}
+
+/// TARGET_TYPE_PROC_CHIP (CHTM)
+template<>
+fapi2::ReturnCode precheck_resetHTM(
+    const fapi2::Target<fapi2::TARGET_TYPE_CORE>& i_target)
+{
+    using namespace scomt;
+    using namespace scomt::c;
+    FAPI_DBG("Entering");
+    fapi2::ReturnCode l_rc;
+    fapi2::buffer<uint64_t> l_reg_data(0);
+    fapi2::ATTR_CHIP_UNIT_POS_Type l_corePos = 0;
+
+    // Get core pos to display if we get an error for some reason
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, i_target, l_corePos),
+             "Error getting ATTR_CHIP_UNIT_POS");
+
+    // Verify CHTM is in expected state
+    FAPI_TRY(GET_NC_NCCHTM_NCCHTSC_HTM_STAT(i_target, l_reg_data));
+
+    FAPI_ASSERT( GET_NC_NCCHTM_NCCHTSC_HTM_STAT_HTMCO_STATUS_COMPLETE(l_reg_data),
+                 fapi2::P10_CHTM_CTRL_BAD_STATE()
+                 .set_TARGET(i_target)
+                 .set_HTM_STATUS_REG(l_reg_data),
+                 "resetHTM: CHTM is not in COMPLETE state, can't reset "
+                 "CHTM status 0x%016llX\n"
+                 "core number %u",
+                 l_reg_data, l_corePos);
+
+fapi_try_exit:
+    FAPI_DBG("Exiting");
+    return fapi2::current_err;
+}
+
+///
+/// @brief postcheck HTM
+///
+/// @param[in] i_target         Reference to target
+/// @param[in] i_pos            Position of HTM engine to reset
+///
+/// @return FAPI2_RC_SUCCESS if success, else error code.
+///
+template<fapi2::TargetType T>
+fapi2::ReturnCode postcheck_resetHTM(const fapi2::Target<T>& i_target);
+
+/// TARGET_TYPE_PROC_CHIP (NHTM)
+template<>
+fapi2::ReturnCode postcheck_resetHTM(
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
+{
+    using namespace scomt;
+    using namespace scomt::proc;
+    FAPI_DBG("Entering");
+    fapi2::ReturnCode l_rc;
+    fapi2::buffer<uint64_t> l_reg_data(0);
+    uint16_t l_htm_poll_count = 0;
 
     while (l_htm_poll_count < P10_HTM_CTRL_TIMEOUT_COUNT)
     {
         FAPI_TRY(fapi2::delay(P10_HTM_CTRL_HW_NS_DELAY, P10_HTM_CTRL_SIM_CYCLE_DELAY),
-                 "resetHTML fapi_delay returns an error, l_rc 0x%.8X", (uint64_t) fapi2::current_err);
+                 "resetHTM fapi_delay returns an error, l_rc 0x%.8X", (uint64_t) fapi2::current_err);
 
         FAPI_TRY(GET_PB_BRIDGE_NHTM_SC_HTM_STAT(i_target, l_reg_data));
 
         if (GET_PB_BRIDGE_NHTM_SC_HTM_STAT_0_HTMCO_STATUS_READY(l_reg_data) &&
             GET_PB_BRIDGE_NHTM_SC_HTM_STAT_1_HTMCO_STATUS_READY(l_reg_data))
         {
-            FAPI_INF("NHTMs are in ready state", l_htm_poll_count);
+            FAPI_INF("NHTMs are in READY state, %u", l_htm_poll_count);
             break;
         }
 
@@ -113,17 +168,65 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
-/// TARGET_TYPE_CORE (CHTM)
 template<>
-fapi2::ReturnCode resetHTM(const fapi2::Target<fapi2::TARGET_TYPE_CORE>& i_target,
-                           const uint8_t i_pos)
-
+fapi2::ReturnCode postcheck_resetHTM(
+    const fapi2::Target<fapi2::TARGET_TYPE_CORE>& i_target)
 {
+    using namespace scomt;
+    using namespace scomt::c;
     FAPI_DBG("Entering");
     fapi2::ReturnCode l_rc;
+    fapi2::buffer<uint64_t> l_reg_data(0);
+    uint16_t l_htm_poll_count = 0;
+    fapi2::ATTR_CHIP_UNIT_POS_Type l_corePos = 0;
 
-    // Place holder to reset IMA trace.
+    // Get core pos to display if we get an error for some reason
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, i_target, l_corePos),
+             "Error getting ATTR_CHIP_UNIT_POS");
 
+    while (l_htm_poll_count < P10_HTM_CTRL_TIMEOUT_COUNT)
+    {
+        FAPI_TRY(fapi2::delay(P10_HTM_CTRL_HW_NS_DELAY, P10_HTM_CTRL_SIM_CYCLE_DELAY),
+                 "resetHTM fapi_delay returns an error, l_rc 0x%.8X", (uint64_t) fapi2::current_err);
+
+        FAPI_TRY(GET_NC_NCCHTM_NCCHTSC_HTM_STAT(i_target, l_reg_data));
+
+        if (GET_NC_NCCHTM_NCCHTSC_HTM_STAT_HTMCO_STATUS_READY(l_reg_data))
+        {
+            FAPI_INF("cHTM in READY state, %u", l_htm_poll_count);
+            break;
+        }
+
+        l_htm_poll_count++;
+    }
+
+    FAPI_ASSERT(GET_NC_NCCHTM_NCCHTSC_HTM_STAT_HTMCO_STATUS_READY(l_reg_data),
+                fapi2::P10_CHTM_CTRL_TIMEOUT()
+                .set_TARGET(i_target)
+                .set_DELAY_COUNT(l_htm_poll_count)
+                .set_HTM_STATUS_REG(l_reg_data),
+                "resetHTM: cHTM %u is not in READY state", l_corePos);
+
+fapi_try_exit:
+    FAPI_DBG("Exiting");
+    return fapi2::current_err;
+}
+
+///
+/// @brief Reset HTM
+///
+/// @param[in] i_target         Reference to target
+///
+/// @return FAPI2_RC_SUCCESS if success, else error code.
+///
+fapi2::ReturnCode resetHTM(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
+{
+    FAPI_DBG("Entering");
+
+    // Reset
+    FAPI_TRY(aduNHTMControl(i_target, PMISC_GLOBAL_HTM_RESET),
+             "resetHTM: aduNHTMControl returns an error");
+fapi_try_exit:
     FAPI_DBG("Exiting");
     return fapi2::current_err;
 }
@@ -140,6 +243,7 @@ fapi2::ReturnCode p10_htm_reset(
     uint8_t l_corePos = 0;
     auto l_modeRegList = std::vector<uint64_t>();
     auto l_coreChiplets = i_target.getChildren<fapi2::TARGET_TYPE_CORE>();
+    bool l_issue_command = false;
 
     uint8_t l_nhtmType;
     uint8_t l_chtmType[NUM_CHTM_ENGINES];
@@ -155,30 +259,55 @@ fapi2::ReturnCode p10_htm_reset(
              "p10_htm_reset: Error getting ATTR_CHTM_TRACE_TYPE, l_rc 0x%.8X",
              (uint64_t)fapi2::current_err);
 
-    // Reset NHTM trace
-    // Note: reset NHTM0 will also reset NHTM1 in global mode
+    // check if HTMs are ready to receive control command requested
     if (l_nhtmType != fapi2::ENUM_ATTR_NHTM_TRACE_TYPE_DISABLE)
     {
-        FAPI_TRY( resetHTM(i_target, 0),
-                  "p10_htm_reset: resetHTM() returns error NHTM"
-                  "l_rc 0x%.8X", (uint64_t)fapi2::current_err );
+        FAPI_TRY(precheck_resetHTM(i_target));
+        l_issue_command = true;
     }
 
-    // Reset CHTM
     for (auto l_core : l_coreChiplets)
     {
-        // Get the core position
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, l_core, l_corePos),
                  "Error getting ATTR_CHIP_UNIT_POS");
-        FAPI_DBG("Reset HTM on core %u....", l_corePos);
+
+        if (l_chtmType[l_corePos] == fapi2::ENUM_ATTR_CHTM_TRACE_TYPE_DMW)
+        {
+            FAPI_INF("IMA cHTM trace type does not allow resets, skipping on core %u", l_corePos);
+            continue;
+        }
 
         if (l_chtmType[l_corePos] != fapi2::ENUM_ATTR_CHTM_TRACE_TYPE_DISABLE)
         {
-            FAPI_TRY(resetHTM(l_core, l_corePos),
-                     "p10_htm_reset: resetHTM() returns error: CHTM %u, "
-                     "l_rc 0x%.8X", l_corePos, (uint64_t)fapi2::current_err );
+            FAPI_TRY(precheck_resetHTM(l_core));
+            l_issue_command = true;
         }
     }
+
+    // Issue single pMisc command to control the HTMs
+    if (l_issue_command)
+    {
+        FAPI_TRY(resetHTM(i_target));
+    }
+
+    // check if HTMs reached desired state, if trace type requested
+    if (l_nhtmType != fapi2::ENUM_ATTR_NHTM_TRACE_TYPE_DISABLE)
+    {
+        FAPI_TRY(postcheck_resetHTM(i_target));
+    }
+
+    for (auto l_core : l_coreChiplets)
+    {
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, l_core, l_corePos),
+                 "Error getting ATTR_CHIP_UNIT_POS");
+
+        if (l_chtmType[l_corePos] != fapi2::ENUM_ATTR_CHTM_TRACE_TYPE_DISABLE &&
+            l_chtmType[l_corePos] != fapi2::ENUM_ATTR_CHTM_TRACE_TYPE_DMW)
+        {
+            FAPI_TRY(postcheck_resetHTM(l_core));
+        }
+    }
+
 
 fapi_try_exit:
     FAPI_DBG("Exiting");

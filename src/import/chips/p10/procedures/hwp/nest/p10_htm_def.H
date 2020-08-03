@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -47,5 +47,14 @@ const uint32_t P10_HTM_CTRL_TIMEOUT_COUNT  = 20;   // HTM control time-out
 // HTM operations delay times for HW/sim
 const uint32_t P10_HTM_CTRL_HW_NS_DELAY     = 50000;
 const uint32_t P10_HTM_CTRL_SIM_CYCLE_DELAY = 50000;
+
+// cHTM IMA FSM definitions
+const uint32_t P10_IMA_STATUS_DISABLED = 11;
+const uint32_t P10_IMA_STATUS_IDLE     = 10;
+const uint32_t P10_IMA_STATUS_CLEAR    =  9;
+const uint32_t P10_IMA_STATUS_CAPTURE  =  8;
+const uint32_t P10_IMA_STATUS_WR_LDBAR =  7;
+const uint32_t P10_IMA_STATUS_WR_PDBAR =  6;
+const uint32_t P10_IMA_STATUS_ERROR    =  5;
 
 #endif // _P10_HTM_DEF_H_

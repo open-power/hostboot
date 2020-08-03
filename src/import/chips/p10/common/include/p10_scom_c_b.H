@@ -244,6 +244,23 @@ static const uint32_t QME_PSCRS1_PLS_LEN = 4;
 //<< [QME_PSCRS1]
 // c/reg00011.H
 
+//>> [NC_NCCHTM_NCCHTSC_HTM_MEM]
+static const uint64_t NC_NCCHTM_NCCHTSC_HTM_MEM = 0x20010681ull;
+
+static const uint32_t NC_NCCHTM_NCCHTSC_HTM_MEM_ALLOC = 0;
+static const uint32_t NC_NCCHTM_NCCHTSC_HTM_MEM_SCOPE = 1;
+static const uint32_t NC_NCCHTM_NCCHTSC_HTM_MEM_SCOPE_LEN = 3;
+static const uint32_t NC_NCCHTM_NCCHTSC_HTM_MEM_PRIORITY = 4;
+static const uint32_t NC_NCCHTM_NCCHTSC_HTM_MEM_SIZE_SMALL = 5;
+static const uint32_t NC_NCCHTM_NCCHTSC_HTM_MEM_SPARE = 6;
+static const uint32_t NC_NCCHTM_NCCHTSC_HTM_MEM_SPARE_LEN = 6;
+static const uint32_t NC_NCCHTM_NCCHTSC_HTM_MEM_BASE = 12;
+static const uint32_t NC_NCCHTM_NCCHTSC_HTM_MEM_BASE_LEN = 28;
+static const uint32_t NC_NCCHTM_NCCHTSC_HTM_MEM_SIZE = 40;
+static const uint32_t NC_NCCHTM_NCCHTSC_HTM_MEM_SIZE_LEN = 9;
+//<< [NC_NCCHTM_NCCHTSC_HTM_MEM]
+// c/reg00011.H
+
 //>>THE END<<
 
 #ifndef __PPE_HCODE__

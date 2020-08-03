@@ -7283,6 +7283,1029 @@ fapi_try_exit:
 //<< GET_[QME_CSIR_PMSR_INSTR_DATA]
 
 
+//>> PREP_[NC_NCCHTM_NCCHTSC_HTM_CTRL]
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PREP_NC_NCCHTM_NCCHTSC_HTM_CTRL(const fapi2::Target<K, M, V>& i_target)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = NC_NCCHTM_NCCHTSC_HTM_CTRL;
+#endif
+    return fapi2::current_err;
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+//<< PREP_[NC_NCCHTM_NCCHTSC_HTM_CTRL]
+
+//>> GET_[NC_NCCHTM_NCCHTSC_HTM_CTRL]
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode GET_NC_NCCHTM_NCCHTSC_HTM_CTRL(const fapi2::Target<K, M, V>& i_target,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = NC_NCCHTM_NCCHTSC_HTM_CTRL;
+#endif
+    return fapi2::getScom(i_target, NC_NCCHTM_NCCHTSC_HTM_CTRL, o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+//<< GET_[NC_NCCHTM_NCCHTSC_HTM_CTRL]
+
+//>> PUT_[NC_NCCHTM_NCCHTSC_HTM_CTRL]
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PUT_NC_NCCHTM_NCCHTSC_HTM_CTRL(const fapi2::Target<K, M, V>& i_target,
+        const uint64_t i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    FAPI_TRY(scomt::chkReg(NC_NCCHTM_NCCHTSC_HTM_CTRL));
+#endif
+    return fapi2::putScom(i_target, NC_NCCHTM_NCCHTSC_HTM_CTRL, i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+//<< PUT_[NC_NCCHTM_NCCHTSC_HTM_CTRL]
+
+
+//>> SET_[NC_NCCHTM_NCCHTSC_HTM_CTRL_TRIG]
+static inline fapi2::buffer<uint64_t>& SET_NC_NCCHTM_NCCHTSC_HTM_CTRL_TRIG(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(NC_NCCHTM_NCCHTSC_HTM_CTRL));
+#endif
+    return o_data.insertFromRight<NC_NCCHTM_NCCHTSC_HTM_CTRL_TRIG,
+           NC_NCCHTM_NCCHTSC_HTM_CTRL_TRIG_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("0:scom_c Invalid dial access NC_NCCHTM_NCCHTSC_HTM_CTRL_TRIG chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[NC_NCCHTM_NCCHTSC_HTM_CTRL_TRIG]
+
+//>> SET_[NC_NCCHTM_NCCHTSC_HTM_CTRL_TRIG]
+static inline fapi2::buffer<uint64_t>& SET_NC_NCCHTM_NCCHTSC_HTM_CTRL_TRIG(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(NC_NCCHTM_NCCHTSC_HTM_CTRL));
+#endif
+    return o_data.insertFromRight<NC_NCCHTM_NCCHTSC_HTM_CTRL_TRIG,
+           NC_NCCHTM_NCCHTSC_HTM_CTRL_TRIG_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("1:scom_c Invalid dial access NC_NCCHTM_NCCHTSC_HTM_CTRL_TRIG chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[NC_NCCHTM_NCCHTSC_HTM_CTRL_TRIG]
+
+//>> GET_[NC_NCCHTM_NCCHTSC_HTM_CTRL_TRIG]
+static inline fapi2::buffer<uint64_t>& GET_NC_NCCHTM_NCCHTSC_HTM_CTRL_TRIG(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(NC_NCCHTM_NCCHTSC_HTM_CTRL));
+#endif
+    return i_data.extractToRight<NC_NCCHTM_NCCHTSC_HTM_CTRL_TRIG,
+           NC_NCCHTM_NCCHTSC_HTM_CTRL_TRIG_LEN>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("4:scom_c Invalid dial access NC_NCCHTM_NCCHTSC_HTM_CTRL_TRIG chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[NC_NCCHTM_NCCHTSC_HTM_CTRL_TRIG]
+
+//>> SET_[NC_NCCHTM_NCCHTSC_HTM_CTRL_MTSPR_TRIG]
+static inline fapi2::buffer<uint64_t>& SET_NC_NCCHTM_NCCHTSC_HTM_CTRL_MTSPR_TRIG(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(NC_NCCHTM_NCCHTSC_HTM_CTRL));
+#endif
+    return o_data.insertFromRight<NC_NCCHTM_NCCHTSC_HTM_CTRL_MTSPR_TRIG,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("0:scom_c Invalid dial access NC_NCCHTM_NCCHTSC_HTM_CTRL_MTSPR_TRIG chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[NC_NCCHTM_NCCHTSC_HTM_CTRL_MTSPR_TRIG]
+
+//>> SET_[NC_NCCHTM_NCCHTSC_HTM_CTRL_MTSPR_TRIG]
+static inline fapi2::buffer<uint64_t>& SET_NC_NCCHTM_NCCHTSC_HTM_CTRL_MTSPR_TRIG(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(NC_NCCHTM_NCCHTSC_HTM_CTRL));
+#endif
+    return o_data.insertFromRight<NC_NCCHTM_NCCHTSC_HTM_CTRL_MTSPR_TRIG,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("1:scom_c Invalid dial access NC_NCCHTM_NCCHTSC_HTM_CTRL_MTSPR_TRIG chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[NC_NCCHTM_NCCHTSC_HTM_CTRL_MTSPR_TRIG]
+
+//>> SET_[NC_NCCHTM_NCCHTSC_HTM_CTRL_MTSPR_TRIG]
+static inline fapi2::buffer<uint64_t>& SET_NC_NCCHTM_NCCHTSC_HTM_CTRL_MTSPR_TRIG(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(NC_NCCHTM_NCCHTSC_HTM_CTRL));
+#endif
+    return o_data.setBit<NC_NCCHTM_NCCHTSC_HTM_CTRL_MTSPR_TRIG>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("2:scom_c Invalid dial access NC_NCCHTM_NCCHTSC_HTM_CTRL_MTSPR_TRIG chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[NC_NCCHTM_NCCHTSC_HTM_CTRL_MTSPR_TRIG]
+
+//>> CLEAR_[NC_NCCHTM_NCCHTSC_HTM_CTRL_MTSPR_TRIG]
+static inline fapi2::buffer<uint64_t>& CLEAR_NC_NCCHTM_NCCHTSC_HTM_CTRL_MTSPR_TRIG(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(NC_NCCHTM_NCCHTSC_HTM_CTRL));
+#endif
+    return o_data.clearBit<NC_NCCHTM_NCCHTSC_HTM_CTRL_MTSPR_TRIG>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("3:scom_c Invalid dial access NC_NCCHTM_NCCHTSC_HTM_CTRL_MTSPR_TRIG chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< CLEAR_[NC_NCCHTM_NCCHTSC_HTM_CTRL_MTSPR_TRIG]
+
+//>> GET_[NC_NCCHTM_NCCHTSC_HTM_CTRL_MTSPR_TRIG]
+static inline fapi2::buffer<uint64_t>& GET_NC_NCCHTM_NCCHTSC_HTM_CTRL_MTSPR_TRIG(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(NC_NCCHTM_NCCHTSC_HTM_CTRL));
+#endif
+    return i_data.extractToRight<NC_NCCHTM_NCCHTSC_HTM_CTRL_MTSPR_TRIG,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("4:scom_c Invalid dial access NC_NCCHTM_NCCHTSC_HTM_CTRL_MTSPR_TRIG chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[NC_NCCHTM_NCCHTSC_HTM_CTRL_MTSPR_TRIG]
+
+//>> GET_[NC_NCCHTM_NCCHTSC_HTM_CTRL_MTSPR_TRIG]
+static inline bool GET_NC_NCCHTM_NCCHTSC_HTM_CTRL_MTSPR_TRIG(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(NC_NCCHTM_NCCHTSC_HTM_CTRL));
+#endif
+    return i_data.getBit<NC_NCCHTM_NCCHTSC_HTM_CTRL_MTSPR_TRIG>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("5:scom_c Invalid dial access NC_NCCHTM_NCCHTSC_HTM_CTRL_MTSPR_TRIG chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[NC_NCCHTM_NCCHTSC_HTM_CTRL_MTSPR_TRIG]
+
+//>> SET_[NC_NCCHTM_NCCHTSC_HTM_CTRL_MTSPR_MARK]
+static inline fapi2::buffer<uint64_t>& SET_NC_NCCHTM_NCCHTSC_HTM_CTRL_MTSPR_MARK(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(NC_NCCHTM_NCCHTSC_HTM_CTRL));
+#endif
+    return o_data.insertFromRight<NC_NCCHTM_NCCHTSC_HTM_CTRL_MTSPR_MARK,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("0:scom_c Invalid dial access NC_NCCHTM_NCCHTSC_HTM_CTRL_MTSPR_MARK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[NC_NCCHTM_NCCHTSC_HTM_CTRL_MTSPR_MARK]
+
+//>> SET_[NC_NCCHTM_NCCHTSC_HTM_CTRL_MTSPR_MARK]
+static inline fapi2::buffer<uint64_t>& SET_NC_NCCHTM_NCCHTSC_HTM_CTRL_MTSPR_MARK(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(NC_NCCHTM_NCCHTSC_HTM_CTRL));
+#endif
+    return o_data.insertFromRight<NC_NCCHTM_NCCHTSC_HTM_CTRL_MTSPR_MARK,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("1:scom_c Invalid dial access NC_NCCHTM_NCCHTSC_HTM_CTRL_MTSPR_MARK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[NC_NCCHTM_NCCHTSC_HTM_CTRL_MTSPR_MARK]
+
+//>> SET_[NC_NCCHTM_NCCHTSC_HTM_CTRL_MTSPR_MARK]
+static inline fapi2::buffer<uint64_t>& SET_NC_NCCHTM_NCCHTSC_HTM_CTRL_MTSPR_MARK(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(NC_NCCHTM_NCCHTSC_HTM_CTRL));
+#endif
+    return o_data.setBit<NC_NCCHTM_NCCHTSC_HTM_CTRL_MTSPR_MARK>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("2:scom_c Invalid dial access NC_NCCHTM_NCCHTSC_HTM_CTRL_MTSPR_MARK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[NC_NCCHTM_NCCHTSC_HTM_CTRL_MTSPR_MARK]
+
+//>> CLEAR_[NC_NCCHTM_NCCHTSC_HTM_CTRL_MTSPR_MARK]
+static inline fapi2::buffer<uint64_t>& CLEAR_NC_NCCHTM_NCCHTSC_HTM_CTRL_MTSPR_MARK(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(NC_NCCHTM_NCCHTSC_HTM_CTRL));
+#endif
+    return o_data.clearBit<NC_NCCHTM_NCCHTSC_HTM_CTRL_MTSPR_MARK>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("3:scom_c Invalid dial access NC_NCCHTM_NCCHTSC_HTM_CTRL_MTSPR_MARK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< CLEAR_[NC_NCCHTM_NCCHTSC_HTM_CTRL_MTSPR_MARK]
+
+//>> GET_[NC_NCCHTM_NCCHTSC_HTM_CTRL_MTSPR_MARK]
+static inline fapi2::buffer<uint64_t>& GET_NC_NCCHTM_NCCHTSC_HTM_CTRL_MTSPR_MARK(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(NC_NCCHTM_NCCHTSC_HTM_CTRL));
+#endif
+    return i_data.extractToRight<NC_NCCHTM_NCCHTSC_HTM_CTRL_MTSPR_MARK,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("4:scom_c Invalid dial access NC_NCCHTM_NCCHTSC_HTM_CTRL_MTSPR_MARK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[NC_NCCHTM_NCCHTSC_HTM_CTRL_MTSPR_MARK]
+
+//>> GET_[NC_NCCHTM_NCCHTSC_HTM_CTRL_MTSPR_MARK]
+static inline bool GET_NC_NCCHTM_NCCHTSC_HTM_CTRL_MTSPR_MARK(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(NC_NCCHTM_NCCHTSC_HTM_CTRL));
+#endif
+    return i_data.getBit<NC_NCCHTM_NCCHTSC_HTM_CTRL_MTSPR_MARK>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("5:scom_c Invalid dial access NC_NCCHTM_NCCHTSC_HTM_CTRL_MTSPR_MARK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[NC_NCCHTM_NCCHTSC_HTM_CTRL_MTSPR_MARK]
+
+//>> SET_[NC_NCCHTM_NCCHTSC_HTM_CTRL_MARK]
+static inline fapi2::buffer<uint64_t>& SET_NC_NCCHTM_NCCHTSC_HTM_CTRL_MARK(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(NC_NCCHTM_NCCHTSC_HTM_CTRL));
+#endif
+    return o_data.insertFromRight<NC_NCCHTM_NCCHTSC_HTM_CTRL_MARK,
+           NC_NCCHTM_NCCHTSC_HTM_CTRL_MARK_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("0:scom_c Invalid dial access NC_NCCHTM_NCCHTSC_HTM_CTRL_MARK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[NC_NCCHTM_NCCHTSC_HTM_CTRL_MARK]
+
+//>> SET_[NC_NCCHTM_NCCHTSC_HTM_CTRL_MARK]
+static inline fapi2::buffer<uint64_t>& SET_NC_NCCHTM_NCCHTSC_HTM_CTRL_MARK(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(NC_NCCHTM_NCCHTSC_HTM_CTRL));
+#endif
+    return o_data.insertFromRight<NC_NCCHTM_NCCHTSC_HTM_CTRL_MARK,
+           NC_NCCHTM_NCCHTSC_HTM_CTRL_MARK_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("1:scom_c Invalid dial access NC_NCCHTM_NCCHTSC_HTM_CTRL_MARK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[NC_NCCHTM_NCCHTSC_HTM_CTRL_MARK]
+
+//>> GET_[NC_NCCHTM_NCCHTSC_HTM_CTRL_MARK]
+static inline fapi2::buffer<uint64_t>& GET_NC_NCCHTM_NCCHTSC_HTM_CTRL_MARK(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(NC_NCCHTM_NCCHTSC_HTM_CTRL));
+#endif
+    return i_data.extractToRight<NC_NCCHTM_NCCHTSC_HTM_CTRL_MARK,
+           NC_NCCHTM_NCCHTSC_HTM_CTRL_MARK_LEN>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("4:scom_c Invalid dial access NC_NCCHTM_NCCHTSC_HTM_CTRL_MARK chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[NC_NCCHTM_NCCHTSC_HTM_CTRL_MARK]
+
+//>> SET_[NC_NCCHTM_NCCHTSC_HTM_CTRL_DBG0_STOP]
+static inline fapi2::buffer<uint64_t>& SET_NC_NCCHTM_NCCHTSC_HTM_CTRL_DBG0_STOP(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(NC_NCCHTM_NCCHTSC_HTM_CTRL));
+#endif
+    return o_data.insertFromRight<NC_NCCHTM_NCCHTSC_HTM_CTRL_DBG0_STOP,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("0:scom_c Invalid dial access NC_NCCHTM_NCCHTSC_HTM_CTRL_DBG0_STOP chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[NC_NCCHTM_NCCHTSC_HTM_CTRL_DBG0_STOP]
+
+//>> SET_[NC_NCCHTM_NCCHTSC_HTM_CTRL_DBG0_STOP]
+static inline fapi2::buffer<uint64_t>& SET_NC_NCCHTM_NCCHTSC_HTM_CTRL_DBG0_STOP(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(NC_NCCHTM_NCCHTSC_HTM_CTRL));
+#endif
+    return o_data.insertFromRight<NC_NCCHTM_NCCHTSC_HTM_CTRL_DBG0_STOP,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("1:scom_c Invalid dial access NC_NCCHTM_NCCHTSC_HTM_CTRL_DBG0_STOP chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[NC_NCCHTM_NCCHTSC_HTM_CTRL_DBG0_STOP]
+
+//>> SET_[NC_NCCHTM_NCCHTSC_HTM_CTRL_DBG0_STOP]
+static inline fapi2::buffer<uint64_t>& SET_NC_NCCHTM_NCCHTSC_HTM_CTRL_DBG0_STOP(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(NC_NCCHTM_NCCHTSC_HTM_CTRL));
+#endif
+    return o_data.setBit<NC_NCCHTM_NCCHTSC_HTM_CTRL_DBG0_STOP>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("2:scom_c Invalid dial access NC_NCCHTM_NCCHTSC_HTM_CTRL_DBG0_STOP chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[NC_NCCHTM_NCCHTSC_HTM_CTRL_DBG0_STOP]
+
+//>> CLEAR_[NC_NCCHTM_NCCHTSC_HTM_CTRL_DBG0_STOP]
+static inline fapi2::buffer<uint64_t>& CLEAR_NC_NCCHTM_NCCHTSC_HTM_CTRL_DBG0_STOP(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(NC_NCCHTM_NCCHTSC_HTM_CTRL));
+#endif
+    return o_data.clearBit<NC_NCCHTM_NCCHTSC_HTM_CTRL_DBG0_STOP>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("3:scom_c Invalid dial access NC_NCCHTM_NCCHTSC_HTM_CTRL_DBG0_STOP chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< CLEAR_[NC_NCCHTM_NCCHTSC_HTM_CTRL_DBG0_STOP]
+
+//>> GET_[NC_NCCHTM_NCCHTSC_HTM_CTRL_DBG0_STOP]
+static inline fapi2::buffer<uint64_t>& GET_NC_NCCHTM_NCCHTSC_HTM_CTRL_DBG0_STOP(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(NC_NCCHTM_NCCHTSC_HTM_CTRL));
+#endif
+    return i_data.extractToRight<NC_NCCHTM_NCCHTSC_HTM_CTRL_DBG0_STOP,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("4:scom_c Invalid dial access NC_NCCHTM_NCCHTSC_HTM_CTRL_DBG0_STOP chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[NC_NCCHTM_NCCHTSC_HTM_CTRL_DBG0_STOP]
+
+//>> GET_[NC_NCCHTM_NCCHTSC_HTM_CTRL_DBG0_STOP]
+static inline bool GET_NC_NCCHTM_NCCHTSC_HTM_CTRL_DBG0_STOP(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(NC_NCCHTM_NCCHTSC_HTM_CTRL));
+#endif
+    return i_data.getBit<NC_NCCHTM_NCCHTSC_HTM_CTRL_DBG0_STOP>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("5:scom_c Invalid dial access NC_NCCHTM_NCCHTSC_HTM_CTRL_DBG0_STOP chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[NC_NCCHTM_NCCHTSC_HTM_CTRL_DBG0_STOP]
+
+//>> SET_[NC_NCCHTM_NCCHTSC_HTM_CTRL_DBG1_STOP]
+static inline fapi2::buffer<uint64_t>& SET_NC_NCCHTM_NCCHTSC_HTM_CTRL_DBG1_STOP(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(NC_NCCHTM_NCCHTSC_HTM_CTRL));
+#endif
+    return o_data.insertFromRight<NC_NCCHTM_NCCHTSC_HTM_CTRL_DBG1_STOP,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("0:scom_c Invalid dial access NC_NCCHTM_NCCHTSC_HTM_CTRL_DBG1_STOP chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[NC_NCCHTM_NCCHTSC_HTM_CTRL_DBG1_STOP]
+
+//>> SET_[NC_NCCHTM_NCCHTSC_HTM_CTRL_DBG1_STOP]
+static inline fapi2::buffer<uint64_t>& SET_NC_NCCHTM_NCCHTSC_HTM_CTRL_DBG1_STOP(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(NC_NCCHTM_NCCHTSC_HTM_CTRL));
+#endif
+    return o_data.insertFromRight<NC_NCCHTM_NCCHTSC_HTM_CTRL_DBG1_STOP,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("1:scom_c Invalid dial access NC_NCCHTM_NCCHTSC_HTM_CTRL_DBG1_STOP chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[NC_NCCHTM_NCCHTSC_HTM_CTRL_DBG1_STOP]
+
+//>> SET_[NC_NCCHTM_NCCHTSC_HTM_CTRL_DBG1_STOP]
+static inline fapi2::buffer<uint64_t>& SET_NC_NCCHTM_NCCHTSC_HTM_CTRL_DBG1_STOP(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(NC_NCCHTM_NCCHTSC_HTM_CTRL));
+#endif
+    return o_data.setBit<NC_NCCHTM_NCCHTSC_HTM_CTRL_DBG1_STOP>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("2:scom_c Invalid dial access NC_NCCHTM_NCCHTSC_HTM_CTRL_DBG1_STOP chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[NC_NCCHTM_NCCHTSC_HTM_CTRL_DBG1_STOP]
+
+//>> CLEAR_[NC_NCCHTM_NCCHTSC_HTM_CTRL_DBG1_STOP]
+static inline fapi2::buffer<uint64_t>& CLEAR_NC_NCCHTM_NCCHTSC_HTM_CTRL_DBG1_STOP(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(NC_NCCHTM_NCCHTSC_HTM_CTRL));
+#endif
+    return o_data.clearBit<NC_NCCHTM_NCCHTSC_HTM_CTRL_DBG1_STOP>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("3:scom_c Invalid dial access NC_NCCHTM_NCCHTSC_HTM_CTRL_DBG1_STOP chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< CLEAR_[NC_NCCHTM_NCCHTSC_HTM_CTRL_DBG1_STOP]
+
+//>> GET_[NC_NCCHTM_NCCHTSC_HTM_CTRL_DBG1_STOP]
+static inline fapi2::buffer<uint64_t>& GET_NC_NCCHTM_NCCHTSC_HTM_CTRL_DBG1_STOP(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(NC_NCCHTM_NCCHTSC_HTM_CTRL));
+#endif
+    return i_data.extractToRight<NC_NCCHTM_NCCHTSC_HTM_CTRL_DBG1_STOP,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("4:scom_c Invalid dial access NC_NCCHTM_NCCHTSC_HTM_CTRL_DBG1_STOP chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[NC_NCCHTM_NCCHTSC_HTM_CTRL_DBG1_STOP]
+
+//>> GET_[NC_NCCHTM_NCCHTSC_HTM_CTRL_DBG1_STOP]
+static inline bool GET_NC_NCCHTM_NCCHTSC_HTM_CTRL_DBG1_STOP(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(NC_NCCHTM_NCCHTSC_HTM_CTRL));
+#endif
+    return i_data.getBit<NC_NCCHTM_NCCHTSC_HTM_CTRL_DBG1_STOP>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("5:scom_c Invalid dial access NC_NCCHTM_NCCHTSC_HTM_CTRL_DBG1_STOP chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[NC_NCCHTM_NCCHTSC_HTM_CTRL_DBG1_STOP]
+
+//>> SET_[NC_NCCHTM_NCCHTSC_HTM_CTRL_RUN_STOP]
+static inline fapi2::buffer<uint64_t>& SET_NC_NCCHTM_NCCHTSC_HTM_CTRL_RUN_STOP(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(NC_NCCHTM_NCCHTSC_HTM_CTRL));
+#endif
+    return o_data.insertFromRight<NC_NCCHTM_NCCHTSC_HTM_CTRL_RUN_STOP,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("0:scom_c Invalid dial access NC_NCCHTM_NCCHTSC_HTM_CTRL_RUN_STOP chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[NC_NCCHTM_NCCHTSC_HTM_CTRL_RUN_STOP]
+
+//>> SET_[NC_NCCHTM_NCCHTSC_HTM_CTRL_RUN_STOP]
+static inline fapi2::buffer<uint64_t>& SET_NC_NCCHTM_NCCHTSC_HTM_CTRL_RUN_STOP(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(NC_NCCHTM_NCCHTSC_HTM_CTRL));
+#endif
+    return o_data.insertFromRight<NC_NCCHTM_NCCHTSC_HTM_CTRL_RUN_STOP,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("1:scom_c Invalid dial access NC_NCCHTM_NCCHTSC_HTM_CTRL_RUN_STOP chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[NC_NCCHTM_NCCHTSC_HTM_CTRL_RUN_STOP]
+
+//>> SET_[NC_NCCHTM_NCCHTSC_HTM_CTRL_RUN_STOP]
+static inline fapi2::buffer<uint64_t>& SET_NC_NCCHTM_NCCHTSC_HTM_CTRL_RUN_STOP(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(NC_NCCHTM_NCCHTSC_HTM_CTRL));
+#endif
+    return o_data.setBit<NC_NCCHTM_NCCHTSC_HTM_CTRL_RUN_STOP>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("2:scom_c Invalid dial access NC_NCCHTM_NCCHTSC_HTM_CTRL_RUN_STOP chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[NC_NCCHTM_NCCHTSC_HTM_CTRL_RUN_STOP]
+
+//>> CLEAR_[NC_NCCHTM_NCCHTSC_HTM_CTRL_RUN_STOP]
+static inline fapi2::buffer<uint64_t>& CLEAR_NC_NCCHTM_NCCHTSC_HTM_CTRL_RUN_STOP(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(NC_NCCHTM_NCCHTSC_HTM_CTRL));
+#endif
+    return o_data.clearBit<NC_NCCHTM_NCCHTSC_HTM_CTRL_RUN_STOP>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("3:scom_c Invalid dial access NC_NCCHTM_NCCHTSC_HTM_CTRL_RUN_STOP chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< CLEAR_[NC_NCCHTM_NCCHTSC_HTM_CTRL_RUN_STOP]
+
+//>> GET_[NC_NCCHTM_NCCHTSC_HTM_CTRL_RUN_STOP]
+static inline fapi2::buffer<uint64_t>& GET_NC_NCCHTM_NCCHTSC_HTM_CTRL_RUN_STOP(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(NC_NCCHTM_NCCHTSC_HTM_CTRL));
+#endif
+    return i_data.extractToRight<NC_NCCHTM_NCCHTSC_HTM_CTRL_RUN_STOP,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("4:scom_c Invalid dial access NC_NCCHTM_NCCHTSC_HTM_CTRL_RUN_STOP chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[NC_NCCHTM_NCCHTSC_HTM_CTRL_RUN_STOP]
+
+//>> GET_[NC_NCCHTM_NCCHTSC_HTM_CTRL_RUN_STOP]
+static inline bool GET_NC_NCCHTM_NCCHTSC_HTM_CTRL_RUN_STOP(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(NC_NCCHTM_NCCHTSC_HTM_CTRL));
+#endif
+    return i_data.getBit<NC_NCCHTM_NCCHTSC_HTM_CTRL_RUN_STOP>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("5:scom_c Invalid dial access NC_NCCHTM_NCCHTSC_HTM_CTRL_RUN_STOP chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[NC_NCCHTM_NCCHTSC_HTM_CTRL_RUN_STOP]
+
+//>> SET_[NC_NCCHTM_NCCHTSC_HTM_CTRL_CHIP0_STOP]
+static inline fapi2::buffer<uint64_t>& SET_NC_NCCHTM_NCCHTSC_HTM_CTRL_CHIP0_STOP(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(NC_NCCHTM_NCCHTSC_HTM_CTRL));
+#endif
+    return o_data.insertFromRight<NC_NCCHTM_NCCHTSC_HTM_CTRL_CHIP0_STOP,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("0:scom_c Invalid dial access NC_NCCHTM_NCCHTSC_HTM_CTRL_CHIP0_STOP chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[NC_NCCHTM_NCCHTSC_HTM_CTRL_CHIP0_STOP]
+
+//>> SET_[NC_NCCHTM_NCCHTSC_HTM_CTRL_CHIP0_STOP]
+static inline fapi2::buffer<uint64_t>& SET_NC_NCCHTM_NCCHTSC_HTM_CTRL_CHIP0_STOP(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(NC_NCCHTM_NCCHTSC_HTM_CTRL));
+#endif
+    return o_data.insertFromRight<NC_NCCHTM_NCCHTSC_HTM_CTRL_CHIP0_STOP,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("1:scom_c Invalid dial access NC_NCCHTM_NCCHTSC_HTM_CTRL_CHIP0_STOP chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[NC_NCCHTM_NCCHTSC_HTM_CTRL_CHIP0_STOP]
+
+//>> SET_[NC_NCCHTM_NCCHTSC_HTM_CTRL_CHIP0_STOP]
+static inline fapi2::buffer<uint64_t>& SET_NC_NCCHTM_NCCHTSC_HTM_CTRL_CHIP0_STOP(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(NC_NCCHTM_NCCHTSC_HTM_CTRL));
+#endif
+    return o_data.setBit<NC_NCCHTM_NCCHTSC_HTM_CTRL_CHIP0_STOP>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("2:scom_c Invalid dial access NC_NCCHTM_NCCHTSC_HTM_CTRL_CHIP0_STOP chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[NC_NCCHTM_NCCHTSC_HTM_CTRL_CHIP0_STOP]
+
+//>> CLEAR_[NC_NCCHTM_NCCHTSC_HTM_CTRL_CHIP0_STOP]
+static inline fapi2::buffer<uint64_t>& CLEAR_NC_NCCHTM_NCCHTSC_HTM_CTRL_CHIP0_STOP(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(NC_NCCHTM_NCCHTSC_HTM_CTRL));
+#endif
+    return o_data.clearBit<NC_NCCHTM_NCCHTSC_HTM_CTRL_CHIP0_STOP>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("3:scom_c Invalid dial access NC_NCCHTM_NCCHTSC_HTM_CTRL_CHIP0_STOP chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< CLEAR_[NC_NCCHTM_NCCHTSC_HTM_CTRL_CHIP0_STOP]
+
+//>> GET_[NC_NCCHTM_NCCHTSC_HTM_CTRL_CHIP0_STOP]
+static inline fapi2::buffer<uint64_t>& GET_NC_NCCHTM_NCCHTSC_HTM_CTRL_CHIP0_STOP(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(NC_NCCHTM_NCCHTSC_HTM_CTRL));
+#endif
+    return i_data.extractToRight<NC_NCCHTM_NCCHTSC_HTM_CTRL_CHIP0_STOP,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("4:scom_c Invalid dial access NC_NCCHTM_NCCHTSC_HTM_CTRL_CHIP0_STOP chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[NC_NCCHTM_NCCHTSC_HTM_CTRL_CHIP0_STOP]
+
+//>> GET_[NC_NCCHTM_NCCHTSC_HTM_CTRL_CHIP0_STOP]
+static inline bool GET_NC_NCCHTM_NCCHTSC_HTM_CTRL_CHIP0_STOP(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(NC_NCCHTM_NCCHTSC_HTM_CTRL));
+#endif
+    return i_data.getBit<NC_NCCHTM_NCCHTSC_HTM_CTRL_CHIP0_STOP>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("5:scom_c Invalid dial access NC_NCCHTM_NCCHTSC_HTM_CTRL_CHIP0_STOP chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[NC_NCCHTM_NCCHTSC_HTM_CTRL_CHIP0_STOP]
+
+//>> SET_[NC_NCCHTM_NCCHTSC_HTM_CTRL_CHIP1_STOP]
+static inline fapi2::buffer<uint64_t>& SET_NC_NCCHTM_NCCHTSC_HTM_CTRL_CHIP1_STOP(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(NC_NCCHTM_NCCHTSC_HTM_CTRL));
+#endif
+    return o_data.insertFromRight<NC_NCCHTM_NCCHTSC_HTM_CTRL_CHIP1_STOP,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("0:scom_c Invalid dial access NC_NCCHTM_NCCHTSC_HTM_CTRL_CHIP1_STOP chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[NC_NCCHTM_NCCHTSC_HTM_CTRL_CHIP1_STOP]
+
+//>> SET_[NC_NCCHTM_NCCHTSC_HTM_CTRL_CHIP1_STOP]
+static inline fapi2::buffer<uint64_t>& SET_NC_NCCHTM_NCCHTSC_HTM_CTRL_CHIP1_STOP(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(NC_NCCHTM_NCCHTSC_HTM_CTRL));
+#endif
+    return o_data.insertFromRight<NC_NCCHTM_NCCHTSC_HTM_CTRL_CHIP1_STOP,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("1:scom_c Invalid dial access NC_NCCHTM_NCCHTSC_HTM_CTRL_CHIP1_STOP chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[NC_NCCHTM_NCCHTSC_HTM_CTRL_CHIP1_STOP]
+
+//>> SET_[NC_NCCHTM_NCCHTSC_HTM_CTRL_CHIP1_STOP]
+static inline fapi2::buffer<uint64_t>& SET_NC_NCCHTM_NCCHTSC_HTM_CTRL_CHIP1_STOP(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(NC_NCCHTM_NCCHTSC_HTM_CTRL));
+#endif
+    return o_data.setBit<NC_NCCHTM_NCCHTSC_HTM_CTRL_CHIP1_STOP>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("2:scom_c Invalid dial access NC_NCCHTM_NCCHTSC_HTM_CTRL_CHIP1_STOP chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[NC_NCCHTM_NCCHTSC_HTM_CTRL_CHIP1_STOP]
+
+//>> CLEAR_[NC_NCCHTM_NCCHTSC_HTM_CTRL_CHIP1_STOP]
+static inline fapi2::buffer<uint64_t>& CLEAR_NC_NCCHTM_NCCHTSC_HTM_CTRL_CHIP1_STOP(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(NC_NCCHTM_NCCHTSC_HTM_CTRL));
+#endif
+    return o_data.clearBit<NC_NCCHTM_NCCHTSC_HTM_CTRL_CHIP1_STOP>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("3:scom_c Invalid dial access NC_NCCHTM_NCCHTSC_HTM_CTRL_CHIP1_STOP chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< CLEAR_[NC_NCCHTM_NCCHTSC_HTM_CTRL_CHIP1_STOP]
+
+//>> GET_[NC_NCCHTM_NCCHTSC_HTM_CTRL_CHIP1_STOP]
+static inline fapi2::buffer<uint64_t>& GET_NC_NCCHTM_NCCHTSC_HTM_CTRL_CHIP1_STOP(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(NC_NCCHTM_NCCHTSC_HTM_CTRL));
+#endif
+    return i_data.extractToRight<NC_NCCHTM_NCCHTSC_HTM_CTRL_CHIP1_STOP,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("4:scom_c Invalid dial access NC_NCCHTM_NCCHTSC_HTM_CTRL_CHIP1_STOP chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[NC_NCCHTM_NCCHTSC_HTM_CTRL_CHIP1_STOP]
+
+//>> GET_[NC_NCCHTM_NCCHTSC_HTM_CTRL_CHIP1_STOP]
+static inline bool GET_NC_NCCHTM_NCCHTSC_HTM_CTRL_CHIP1_STOP(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(NC_NCCHTM_NCCHTSC_HTM_CTRL));
+#endif
+    return i_data.getBit<NC_NCCHTM_NCCHTSC_HTM_CTRL_CHIP1_STOP>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("5:scom_c Invalid dial access NC_NCCHTM_NCCHTSC_HTM_CTRL_CHIP1_STOP chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[NC_NCCHTM_NCCHTSC_HTM_CTRL_CHIP1_STOP]
+
+//>> SET_[NC_NCCHTM_NCCHTSC_HTM_CTRL_SPARE1112]
+static inline fapi2::buffer<uint64_t>& SET_NC_NCCHTM_NCCHTSC_HTM_CTRL_SPARE1112(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(NC_NCCHTM_NCCHTSC_HTM_CTRL));
+#endif
+    return o_data.insertFromRight<NC_NCCHTM_NCCHTSC_HTM_CTRL_SPARE1112,
+           NC_NCCHTM_NCCHTSC_HTM_CTRL_SPARE1112_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("0:scom_c Invalid dial access NC_NCCHTM_NCCHTSC_HTM_CTRL_SPARE1112 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[NC_NCCHTM_NCCHTSC_HTM_CTRL_SPARE1112]
+
+//>> SET_[NC_NCCHTM_NCCHTSC_HTM_CTRL_SPARE1112]
+static inline fapi2::buffer<uint64_t>& SET_NC_NCCHTM_NCCHTSC_HTM_CTRL_SPARE1112(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(NC_NCCHTM_NCCHTSC_HTM_CTRL));
+#endif
+    return o_data.insertFromRight<NC_NCCHTM_NCCHTSC_HTM_CTRL_SPARE1112,
+           NC_NCCHTM_NCCHTSC_HTM_CTRL_SPARE1112_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("1:scom_c Invalid dial access NC_NCCHTM_NCCHTSC_HTM_CTRL_SPARE1112 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[NC_NCCHTM_NCCHTSC_HTM_CTRL_SPARE1112]
+
+//>> GET_[NC_NCCHTM_NCCHTSC_HTM_CTRL_SPARE1112]
+static inline fapi2::buffer<uint64_t>& GET_NC_NCCHTM_NCCHTSC_HTM_CTRL_SPARE1112(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(NC_NCCHTM_NCCHTSC_HTM_CTRL));
+#endif
+    return i_data.extractToRight<NC_NCCHTM_NCCHTSC_HTM_CTRL_SPARE1112,
+           NC_NCCHTM_NCCHTSC_HTM_CTRL_SPARE1112_LEN>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("4:scom_c Invalid dial access NC_NCCHTM_NCCHTSC_HTM_CTRL_SPARE1112 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[NC_NCCHTM_NCCHTSC_HTM_CTRL_SPARE1112]
+
+//>> SET_[NC_NCCHTM_NCCHTSC_HTM_CTRL_XSTOP_STOP]
+static inline fapi2::buffer<uint64_t>& SET_NC_NCCHTM_NCCHTSC_HTM_CTRL_XSTOP_STOP(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(NC_NCCHTM_NCCHTSC_HTM_CTRL));
+#endif
+    return o_data.insertFromRight<NC_NCCHTM_NCCHTSC_HTM_CTRL_XSTOP_STOP,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("0:scom_c Invalid dial access NC_NCCHTM_NCCHTSC_HTM_CTRL_XSTOP_STOP chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[NC_NCCHTM_NCCHTSC_HTM_CTRL_XSTOP_STOP]
+
+//>> SET_[NC_NCCHTM_NCCHTSC_HTM_CTRL_XSTOP_STOP]
+static inline fapi2::buffer<uint64_t>& SET_NC_NCCHTM_NCCHTSC_HTM_CTRL_XSTOP_STOP(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(NC_NCCHTM_NCCHTSC_HTM_CTRL));
+#endif
+    return o_data.insertFromRight<NC_NCCHTM_NCCHTSC_HTM_CTRL_XSTOP_STOP,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("1:scom_c Invalid dial access NC_NCCHTM_NCCHTSC_HTM_CTRL_XSTOP_STOP chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[NC_NCCHTM_NCCHTSC_HTM_CTRL_XSTOP_STOP]
+
+//>> SET_[NC_NCCHTM_NCCHTSC_HTM_CTRL_XSTOP_STOP]
+static inline fapi2::buffer<uint64_t>& SET_NC_NCCHTM_NCCHTSC_HTM_CTRL_XSTOP_STOP(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(NC_NCCHTM_NCCHTSC_HTM_CTRL));
+#endif
+    return o_data.setBit<NC_NCCHTM_NCCHTSC_HTM_CTRL_XSTOP_STOP>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("2:scom_c Invalid dial access NC_NCCHTM_NCCHTSC_HTM_CTRL_XSTOP_STOP chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[NC_NCCHTM_NCCHTSC_HTM_CTRL_XSTOP_STOP]
+
+//>> CLEAR_[NC_NCCHTM_NCCHTSC_HTM_CTRL_XSTOP_STOP]
+static inline fapi2::buffer<uint64_t>& CLEAR_NC_NCCHTM_NCCHTSC_HTM_CTRL_XSTOP_STOP(fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(NC_NCCHTM_NCCHTSC_HTM_CTRL));
+#endif
+    return o_data.clearBit<NC_NCCHTM_NCCHTSC_HTM_CTRL_XSTOP_STOP>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("3:scom_c Invalid dial access NC_NCCHTM_NCCHTSC_HTM_CTRL_XSTOP_STOP chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< CLEAR_[NC_NCCHTM_NCCHTSC_HTM_CTRL_XSTOP_STOP]
+
+//>> GET_[NC_NCCHTM_NCCHTSC_HTM_CTRL_XSTOP_STOP]
+static inline fapi2::buffer<uint64_t>& GET_NC_NCCHTM_NCCHTSC_HTM_CTRL_XSTOP_STOP(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(NC_NCCHTM_NCCHTSC_HTM_CTRL));
+#endif
+    return i_data.extractToRight<NC_NCCHTM_NCCHTSC_HTM_CTRL_XSTOP_STOP,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("4:scom_c Invalid dial access NC_NCCHTM_NCCHTSC_HTM_CTRL_XSTOP_STOP chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[NC_NCCHTM_NCCHTSC_HTM_CTRL_XSTOP_STOP]
+
+//>> GET_[NC_NCCHTM_NCCHTSC_HTM_CTRL_XSTOP_STOP]
+static inline bool GET_NC_NCCHTM_NCCHTSC_HTM_CTRL_XSTOP_STOP(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(NC_NCCHTM_NCCHTSC_HTM_CTRL));
+#endif
+    return i_data.getBit<NC_NCCHTM_NCCHTSC_HTM_CTRL_XSTOP_STOP>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("5:scom_c Invalid dial access NC_NCCHTM_NCCHTSC_HTM_CTRL_XSTOP_STOP chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[NC_NCCHTM_NCCHTSC_HTM_CTRL_XSTOP_STOP]
+
+//>> SET_[NC_NCCHTM_NCCHTSC_HTM_CTRL_SPARE1415]
+static inline fapi2::buffer<uint64_t>& SET_NC_NCCHTM_NCCHTSC_HTM_CTRL_SPARE1415(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(NC_NCCHTM_NCCHTSC_HTM_CTRL));
+#endif
+    return o_data.insertFromRight<NC_NCCHTM_NCCHTSC_HTM_CTRL_SPARE1415,
+           NC_NCCHTM_NCCHTSC_HTM_CTRL_SPARE1415_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("0:scom_c Invalid dial access NC_NCCHTM_NCCHTSC_HTM_CTRL_SPARE1415 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[NC_NCCHTM_NCCHTSC_HTM_CTRL_SPARE1415]
+
+//>> SET_[NC_NCCHTM_NCCHTSC_HTM_CTRL_SPARE1415]
+static inline fapi2::buffer<uint64_t>& SET_NC_NCCHTM_NCCHTSC_HTM_CTRL_SPARE1415(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(NC_NCCHTM_NCCHTSC_HTM_CTRL));
+#endif
+    return o_data.insertFromRight<NC_NCCHTM_NCCHTSC_HTM_CTRL_SPARE1415,
+           NC_NCCHTM_NCCHTSC_HTM_CTRL_SPARE1415_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("1:scom_c Invalid dial access NC_NCCHTM_NCCHTSC_HTM_CTRL_SPARE1415 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[NC_NCCHTM_NCCHTSC_HTM_CTRL_SPARE1415]
+
+//>> GET_[NC_NCCHTM_NCCHTSC_HTM_CTRL_SPARE1415]
+static inline fapi2::buffer<uint64_t>& GET_NC_NCCHTM_NCCHTSC_HTM_CTRL_SPARE1415(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(NC_NCCHTM_NCCHTSC_HTM_CTRL));
+#endif
+    return i_data.extractToRight<NC_NCCHTM_NCCHTSC_HTM_CTRL_SPARE1415,
+           NC_NCCHTM_NCCHTSC_HTM_CTRL_SPARE1415_LEN>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("4:scom_c Invalid dial access NC_NCCHTM_NCCHTSC_HTM_CTRL_SPARE1415 chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[NC_NCCHTM_NCCHTSC_HTM_CTRL_SPARE1415]
+
 //>>THE END<<
 
 #ifndef __PPE_HCODE__

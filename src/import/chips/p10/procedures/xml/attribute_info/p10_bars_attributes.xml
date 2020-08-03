@@ -341,6 +341,7 @@
   </description>
   <valueType>uint64</valueType>
   <array>32</array>
+  <initToZero/>
   <writeable/>
 </attribute>
 <!-- ********************************************************************* -->

@@ -43,304 +43,12 @@
 #include <p10_mss_eff_grouping.H>
 #include <p10_htm_setup.H>
 #include <p10_htm_def.H>
+#include <p10_htm_structs.H>
 #include <p10_htm_start.H>
 #include <p10_htm_reset.H>
 #include <p10_scom_proc.H>
 #include <p10_scom_c.H>
 #include <p10_scom_mcc.H>
-
-///----------------------------------------------------------------------------
-/// Constants
-///----------------------------------------------------------------------------
-const uint64_t IMA_EVENT_MASK_VALUE   = 0x0004008000000000;
-
-///----------------------------------------------------------------------------
-/// Struct HTM_CTRL_attrs_t
-///----------------------------------------------------------------------------
-///
-/// @struct HTM_CTRL_attrs_t
-/// Contains processor chip attribute values that are needed to perform
-/// the setup of HTM_CTRL register.
-/// The attributes are common for both NHTM and CHTM traces.
-///
-struct HTM_CTRL_attrs_t
-{
-    ///
-    /// @brief getAttrs
-    /// Function that reads all attributes needed to program HTM_CTRL reg.
-    ///
-    /// @param[in] i_target    Reference to processor chip target
-    ///
-    /// @return FAPI2_RC_SUCCESS if success, else error code.
-    ///
-    fapi2::ReturnCode getAttrs(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target);
-
-    // --------------------------------------
-    // Attributes to setup HTM_CTRL reg
-    // --------------------------------------
-    uint8_t    iv_nhtmCtrlTrig;            // ATTR_NHTM_CTRL_TRIG
-    uint8_t    iv_nhtmCtrlMark;            // ATTR_NHTM_CTRL_MARK
-    uint8_t    iv_chtmCtrlTrig;            // ATTR_CHTM_CTRL_TRIG
-    uint8_t    iv_chtmCtrlMark;            // ATTR_CHTM_CTRL_MARK
-    uint8_t    iv_ctrlDbg0Stop;            // ATTR_HTMSC_CTRL_DBG0_STOP
-    uint8_t    iv_ctrlDbg1Stop;            // ATTR_HTMSC_CTRL_DBG1_STOP
-    uint8_t    iv_ctrlRunStop;             // ATTR_HTMSC_CTRL_RUN_STOP
-    uint8_t    iv_ctrlOtherDbg0Stop;       // ATTR_HTMSC_CTRL_OTHER_DBG0_STOP (NHTM only)
-    uint8_t    iv_ctrlXstopStop;           // ATTR_HTMSC_CTRL_XSTOP_STOP
-    uint8_t    iv_ctrlChip0Stop;           // ATTR_HTMSC_CTRL_CHIP0_STOP (CHTM only)
-    uint8_t    iv_ctrlChip1Stop;           // ATTR_HTMSC_CTRL_CHIP1_STOP (CHTM only)
-};
-
-// See doxygen in struct definition.
-fapi2::ReturnCode HTM_CTRL_attrs_t::getAttrs(
-    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
-{
-    FAPI_DBG("Entering");
-    fapi2::ReturnCode l_rc;
-
-    // ATTR_NTMSC_CTRL_TRIG
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_NHTM_CTRL_TRIG, i_target, iv_nhtmCtrlTrig),
-             "getAttrs: Error getting ATTR_HTMSC_CTRL_TRIG, l_rc 0x%.8X",
-             (uint64_t)fapi2::current_err);
-
-    // ATTR_NTMSC_CTRL_MARK
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_NHTM_CTRL_MARK, i_target, iv_nhtmCtrlMark),
-             "getAttrs: Error getting ATTR_HTMSC_CTRL_MARK, l_rc 0x%.8X",
-             (uint64_t)fapi2::current_err);
-
-    // ATTR_CHTM_CTRL_MARK
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHTM_CTRL_TRIG, i_target, iv_chtmCtrlTrig),
-             "getAttrs: Error getting ATTR_HTMSC_CTRL_TRIG, l_rc 0x%.8X",
-             (uint64_t)fapi2::current_err);
-
-    // ATTR_NTMSC_CTRL_MARK
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHTM_CTRL_MARK, i_target, iv_chtmCtrlMark),
-             "getAttrs: Error getting ATTR_HTMSC_CTRL_MARK, l_rc 0x%.8X",
-             (uint64_t)fapi2::current_err);
-
-    // ATTR_HTMSC_CTRL_DBG0_STOP
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_HTMSC_CTRL_DBG0_STOP, i_target,
-                           iv_ctrlDbg0Stop),
-             "getAttrs: Error getting ATTR_HTMSC_CTRL_DBG0_STOP, l_rc 0x%.8X",
-             (uint64_t)fapi2::current_err);
-
-    // ATTR_HTMSC_CTRL_DBG1_STOP
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_HTMSC_CTRL_DBG1_STOP, i_target,
-                           iv_ctrlDbg1Stop),
-             "getAttrs: Error getting ATTR_HTMSC_CTRL_DBG1_STOP, l_rc 0x%.8X",
-             (uint64_t)fapi2::current_err);
-
-    // ATTR_HTMSC_CTRL_RUN_STOP
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_HTMSC_CTRL_RUN_STOP, i_target,
-                           iv_ctrlRunStop),
-             "getAttrs: Error getting ATTR_HTMSC_CTRL_RUN_STOP, l_rc 0x%.8X",
-             (uint64_t)fapi2::current_err);
-
-    // ATTR_HTMSC_CTRL_OTHER_DBG0_STOP (NHTM)
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_HTMSC_CTRL_OTHER_DBG0_STOP, i_target,
-                           iv_ctrlOtherDbg0Stop),
-             "getAttrs: Error getting ATTR_HTMSC_CTRL_OTHER_DBG0_STOP, l_rc 0x%.8X",
-             (uint64_t)fapi2::current_err);
-
-    // ATTR_HTMSC_CTRL_XSTOP_STOP
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_HTMSC_CTRL_XSTOP_STOP, i_target,
-                           iv_ctrlXstopStop),
-             "getAttrs: Error getting ATTR_HTMSC_CTRL_XSTOP_STOP, l_rc 0x%.8X",
-             (uint64_t)fapi2::current_err);
-
-    // ATTR_HTMSC_CTRL_CHIP0_STOP (CHTM)
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_HTMSC_CTRL_CHIP0_STOP, i_target,
-                           iv_ctrlChip0Stop),
-             "getAttrs: Error getting ATTR_HTMSC_CTRL_CHIP0_STOP, l_rc 0x%.8X",
-             (uint64_t)fapi2::current_err);
-
-    // ATTR_HTMSC_CTRL_CHIP1_STOP (CHTM)
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_HTMSC_CTRL_CHIP1_STOP, i_target,
-                           iv_ctrlChip1Stop),
-             "getAttrs: Error getting ATTR_HTMSC_CTRL_CHIP1_STOP, l_rc 0x%.8X",
-             (uint64_t)fapi2::current_err);
-
-    // Display generic HTM_CTRL attributes
-    FAPI_DBG("  ATTR_NHTM_CTRL_TRIG            0x%.8X", iv_nhtmCtrlTrig);
-    FAPI_DBG("  ATTR_NHTM_CTRL_MARK            0x%.8X", iv_nhtmCtrlMark);
-    FAPI_DBG("  ATTR_CHTM_CTRL_TRIG            0x%.8X", iv_chtmCtrlTrig);
-    FAPI_DBG("  ATTR_CHTM_CTRL_MARK            0x%.8X", iv_chtmCtrlMark);
-    FAPI_DBG("  ATTR_HTMSC_CTRL_DBG0_STOP       0x%.8X", iv_ctrlDbg0Stop);
-    FAPI_DBG("  ATTR_HTMSC_CTRL_DBG1_STOP       0x%.8X", iv_ctrlDbg1Stop);
-    FAPI_DBG("  ATTR_HTMSC_CTRL_RUN_STOP        0x%.8X", iv_ctrlRunStop);
-    FAPI_DBG("  ATTR_HTMSC_CTRL_OTHER_DBG0_STOP 0x%.8X", iv_ctrlOtherDbg0Stop);
-    FAPI_DBG("  ATTR_HTMSC_CTRL_XSTOP_STOP      0x%.8X", iv_ctrlXstopStop);
-    FAPI_DBG("  ATTR_HTMSC_CTRL_CHIP0_STOP      0x%.8X", iv_ctrlChip0Stop);
-    FAPI_DBG("  ATTR_HTMSC_CTRL_CHIP1_STOP      0x%.8X", iv_ctrlChip1Stop);
-
-fapi_try_exit:
-    FAPI_DBG("Exiting");
-    return fapi2::current_err;
-}
-
-///----------------------------------------------------------------------------
-/// Struct HTM_FILT_attrs_t
-///----------------------------------------------------------------------------
-///
-/// @struct HTM_FILT_attrs_t
-/// Contains all filter related attributes required to setup the HTM filters
-/// The CHTMs do not have filtering capabilities.
-///
-struct HTM_FILT_attrs_t
-{
-    ///
-    /// @brief getAttrs
-    /// Function that reads all attributes needed to program HTM_FILT regs.
-    ///
-    /// @param[in] i_target    Reference to processor chip target
-    ///
-    /// @return FAPI2_RC_SUCCESS if success, else error code.
-    ///
-    fapi2::ReturnCode getAttrs(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target);
-
-    // --------------------------------------
-    // Attributes to setup HTM_FILT registers
-    // --------------------------------------
-    uint8_t iv_filtStopOnMatch;          // ATTR_HTMSC_FILT_STOP_ON_MATCH
-    uint8_t iv_filtCrespPat;             // ATTR_HTMSC_FILT_CRESP_PAT
-    uint8_t iv_filtScopePat;             // ATTR_HTMSC_FILT_SCOPE_PAT
-    uint8_t iv_filtSourcePat;            // ATTR_HTMSC_FILT_SOURCE_PAT
-    uint8_t iv_filtPortPat;              // ATTR_HTMSC_FILT_PORT_PAT
-    uint8_t iv_filtCrespMask;            // ATTR_HTMSC_FILT_CRESP_MASK
-    uint8_t iv_filtScopeMask;            // ATTR_HTMSC_FILT_SCOPE_MASK
-    uint8_t iv_filtSourceMask;           // ATTR_HTMSC_FILT_SOURCE_MASK
-    uint8_t iv_filtPortMask;             // ATTR_HTMSC_FILT_PORT_MASK
-    uint8_t iv_filtFiltInvert;           // ATTR_HTMSC_FILT_TTAGFILT_INVERT
-    uint8_t iv_filtTtypePat;             // ATTR_HTMSC_TTYPEFILT_TTYPE_PAT
-    uint8_t iv_filtTtypeMask;            // ATTR_HTMSC_TTYPEFILT_TTYPE_MASK
-    uint8_t iv_filtTsizePat;             // ATTR_HTMSC_TTYPEFILT_TSIZE_PAT
-    uint8_t iv_filtTsizeMask;            // ATTR_HTMSC_TTYPEFILT_TSIZE_MASK
-    uint8_t iv_filtTtypeFiltInvert;      // ATTR_HTMSC_TTYPEFILT_INVERT
-    uint8_t iv_filtCrespFiltInvert;      // ATTR_HTMSC_CRESPFILT_INVERT
-    uint8_t iv_filtStopCycles;          // ATTR_HTMSC_FILT_STOP_CYCLES
-    uint32_t iv_filtTtagPat;             // ATTR_HTMSC_FILT_TTAG_PAT
-    uint32_t iv_filtTtagMask;            // ATTR_HTMSC_FILT_TTAG_MASK
-    uint64_t iv_filtAddrPat;             // ATTR_HTMSC_FILT_ADDR_PAT
-    uint64_t iv_filtAddrMask;            // ATTR_HTMSC_FILT_ADDR_MASK
-};
-
-// See doxygen in struct definition.
-fapi2::ReturnCode HTM_FILT_attrs_t::getAttrs(
-    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
-{
-    FAPI_DBG("Entering");
-    fapi2::ReturnCode l_rc;
-
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_HTMSC_FILT_STOP_ON_MATCH, i_target, iv_filtStopOnMatch),
-             "setup_NHTM_FILT: Error getting ATTR_HTMSC_FILT_STOP_ON_MATCH, l_rc 0x%.8X",
-             (uint64_t)fapi2::current_err);
-
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_HTMSC_FILT_STOP_CYCLES, i_target, iv_filtStopCycles),
-             "setup_NHTM_FILT: Error getting ATTR_HTMSC_FILT_STOP_CYCLES, l_rc 0x%.8X",
-             (uint64_t)fapi2::current_err);
-
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_HTMSC_FILT_TTAG_PAT, i_target, iv_filtTtagPat),
-             "setup_NHTM_FILT: Error getting ATTR_HTMSC_FILT_TTAG_PAT, l_rc 0x%.8X",
-             (uint64_t)fapi2::current_err);
-
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_HTMSC_FILT_TTAG_MASK, i_target, iv_filtTtagMask),
-             "setup_NHTM_FILT: Error getting ATTR_HTMSC_FILT_TTAG_MASK, l_rc 0x%.8X",
-             (uint64_t)fapi2::current_err);
-
-    // NOTE: TTYPE is in the same reg as the CRESP,TTAG,etc for STOP filters
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_HTMSC_FILT_CRESP_PAT, i_target, iv_filtCrespPat),
-             "setup_NHTM_CRESP_FILT: Error getting ATTR_HTMSC_FILT_CRESP_PAT, l_rc 0x%.8X",
-             (uint64_t)fapi2::current_err);
-
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_HTMSC_FILT_SCOPE_PAT, i_target, iv_filtScopePat),
-             "setup_NHTM_FILT: Error getting ATTR_HTMSC_FILT_SCOPE_PAT, l_rc 0x%.8X",
-             (uint64_t)fapi2::current_err);
-
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_HTMSC_FILT_SOURCE_PAT, i_target, iv_filtSourcePat),
-             "setup_NHTM_FILT: Error getting ATTR_HTMSC_FILT_SOURCE_PAT, l_rc 0x%.8X",
-             (uint64_t)fapi2::current_err);
-
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_HTMSC_FILT_PORT_PAT, i_target, iv_filtPortPat),
-             "setup_NHTM_FILT: Error getting ATTR_HTMSC_FILT_PORT_PAT, l_rc 0x%.8X",
-             (uint64_t)fapi2::current_err);
-
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_HTMSC_FILT_SCOPE_MASK, i_target, iv_filtScopeMask),
-             "setup_NHTM_FILT: Error getting ATTR_HTMSC_FILT_SCOPE_MASK, l_rc 0x%.8X",
-             (uint64_t)fapi2::current_err);
-
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_HTMSC_FILT_SOURCE_MASK, i_target, iv_filtSourceMask),
-             "setup_NHTM_FILT: Error getting ATTR_HTMSC_FILT_SOURCE_MASK, l_rc 0x%.8X",
-             (uint64_t)fapi2::current_err);
-
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_HTMSC_FILT_PORT_MASK, i_target, iv_filtPortMask),
-             "setup_NHTM_FILT: Error getting ATTR_HTMSC_FILT_PORT_MASK, l_rc 0x%.8X",
-             (uint64_t)fapi2::current_err);
-
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_HTMSC_FILT_CRESP_MASK, i_target, iv_filtCrespMask),
-             "setup_NHTM_FILT: Error getting ATTR_HTMSC_FILT_CRESP_MASK, l_rc 0x%.8X",
-             (uint64_t)fapi2::current_err);
-
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_HTMSC_TTAGFILT_INVERT, i_target, iv_filtFiltInvert),
-             "setup_NHTM_FILT: Error getting ATTR_HTMSC_TTAGFILT_INVERT, l_rc 0x%.8X",
-             (uint64_t)fapi2::current_err);
-
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_HTMSC_FILT_ADDR_PAT, i_target, iv_filtAddrPat),
-             "setup_NHTM_FILT: Error getting ATTR_HTMSC_FILT_ADDR_PAT, l_rc 0x%.8X",
-             (uint64_t)fapi2::current_err);
-
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_HTMSC_FILT_ADDR_MASK, i_target, iv_filtAddrMask),
-             "setup_NHTM_FILT: Error getting ATTR_HTMSC_FILT_ADDR_MASK, l_rc 0x%.8X",
-             (uint64_t)fapi2::current_err);
-
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_HTMSC_TTYPEFILT_PAT, i_target, iv_filtTtypePat),
-             "setup_NHTM_TTYPE_FILT: Error getting ATTR_HTMSC_TTYPEFILT_PAT, "
-             "l_rc 0x%.8X", (uint64_t)fapi2::current_err);
-
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_HTMSC_TSIZEFILT_PAT, i_target, iv_filtTsizePat),
-             "setup_NHTM_TTYPE_FILT: Error getting ATTR_HTMSC_TSIZEFILT_PAT, "
-             "l_rc 0x%.8X", (uint64_t)fapi2::current_err);
-
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_HTMSC_TTYPEFILT_MASK, i_target, iv_filtTtypeMask),
-             "setup_NHTM_TTYPE_FILT: Error getting ATTR_HTMSC_TTYPEFILT_MASK, l_rc 0x%.8X",
-             (uint64_t)fapi2::current_err);
-
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_HTMSC_TSIZEFILT_MASK, i_target, iv_filtTsizeMask),
-             "setup_NHTM_TTYPE_FILT: Error getting ATTR_HTMSC_TSIZEFILT_MASK, "
-             "l_rc 0x%.8X", (uint64_t)fapi2::current_err);
-
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_HTMSC_TTYPEFILT_INVERT, i_target, iv_filtTtypeFiltInvert),
-             "setup_NHTM_TTYPE_FILT: Error getting ATTR_HTMSC_TTYPEFILT_INVERT, l_rc 0x%.8X",
-             (uint64_t)fapi2::current_err);
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_HTMSC_CRESPFILT_INVERT, i_target, iv_filtCrespFiltInvert),
-             "setup_NHTM_TTYPE_FILT: Error getting ATTR_HTMSC_CRESPFILT_INVERT, l_rc 0x%.8X",
-             (uint64_t)fapi2::current_err);
-
-    FAPI_DBG("  ATTR_HTMSC_FILT_TTAG_PAT          0x%.8X", iv_filtTtagPat);
-    FAPI_DBG("  ATTR_HTMSC_FILT_TTAG_MASK         0x%.8X", iv_filtTtagMask);
-    FAPI_DBG("  ATTR_HTMSC_FILT_CRESP_PAT         0x%.8X", iv_filtCrespPat);
-    FAPI_DBG("  ATTR_HTMSC_FILT_CRESP_MASK        0x%.8X", iv_filtCrespMask);
-    FAPI_DBG("  ATTR_HTMSC_FILT_SCOPE_PAT         0x%.8X", iv_filtScopePat);
-    FAPI_DBG("  ATTR_HTMSC_FILT_SCOPE_MASK        0x%.8X", iv_filtScopeMask);
-    FAPI_DBG("  ATTR_HTMSC_FILT_PORT_PAT          0x%.8X", iv_filtPortPat);
-    FAPI_DBG("  ATTR_HTMSC_FILT_PORT_MASK         0x%.8X", iv_filtPortMask);
-    FAPI_DBG("  ATTR_HTMSC_FILT_SOURCE_PAT        0x%.8X", iv_filtSourcePat);
-    FAPI_DBG("  ATTR_HTMSC_FILT_SOURCE_MASK       0x%.8X", iv_filtSourceMask);
-    FAPI_DBG("  ATTR_HTMSC_TTYPEFILT_PAT          0x%.8X", iv_filtTtypePat);
-    FAPI_DBG("  ATTR_HTMSC_TTYPEFILT_MASK         0x%.8X", iv_filtTtypeMask);
-    FAPI_DBG("  ATTR_HTMSC_TSIZEFILT_PAT          0x%.8X", iv_filtTsizePat);
-    FAPI_DBG("  ATTR_HTMSC_TSIZEFILT_MASK         0x%.8X", iv_filtTsizeMask);
-    FAPI_DBG("  ATTR_HTMSC_FILT_ADDR_PAT          0x%.16X", iv_filtAddrPat);
-    FAPI_DBG("  ATTR_HTMSC_FILT_ADDR_MASK         0x%.16X", iv_filtAddrMask);
-    FAPI_DBG("  ATTR_HTMSC_FILT_STOP_ON_MATCH     0x%.8X", iv_filtStopOnMatch);
-    FAPI_DBG("  ATTR_HTMSC_FILT_STOP_CYCLES       0x%.8X", iv_filtStopCycles);
-    FAPI_DBG("  ATTR_HTMSC_TTAGFILT_INVERT        0x%.8X", iv_filtFiltInvert);
-    FAPI_DBG("  ATTR_HTMSC_TTYPEFILT_INVERT       0x%.8X", iv_filtTtypeFiltInvert);
-    FAPI_DBG("  ATTR_HTMSC_CRESPFILT_INVERT       0x%.8X", iv_filtCrespFiltInvert);
-
-fapi_try_exit:
-    FAPI_DBG("Exiting");
-    return fapi2::current_err;
-}
 
 ///
 /// @brief This function sets up CHTM_PDBAR reg for CHTM.
@@ -357,30 +65,34 @@ fapi2::ReturnCode setup_CHTM_PDBAR(
     FAPI_DBG("Entering");
     fapi2::ReturnCode l_rc;
     fapi2::buffer<uint64_t> l_cHTM_pdbar(0);
-    uint8_t l_uint8_attr = 0;
-    uint64_t l_uint64_attr = 0;
+    fapi2::ATTR_CHIP_UNIT_POS_Type l_corePos = 0;
+    uint8_t l_uint8_attr[NUM_CHTM_ENGINES];
+    uint64_t l_barAddr[NUM_CHTM_ENGINES];
 
     // Get the proc target to read attribute settings
     fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP> l_proc = i_target.getParent<fapi2::TARGET_TYPE_PROC_CHIP>();
 
+    // Get core number to index into array attributes
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, i_target, l_corePos),
+             "Error getting ATTR_CHIP_UNIT_POS");
+
     FAPI_TRY(PREP_NC_NCCHTM_NCCHTSC_HTM_IMA_PDBAR(i_target));
 
-    // P10 does not have Split Core functionality
+    // ATTR_HTMSC_IMA_PDBAR_ADDR
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_HTMSC_IMA_PDBAR_ADDR, l_proc,
+                           l_barAddr),
+             "setup_HTM_MEM: Error getting ATTR_HTMSC_IMA_PDBAR, "
+             "l_rc 0x%.8X", (uint64_t)fapi2::current_err);
+    FAPI_DBG("  ATTR_HTMSC_IMA_PDBAR_ADDR 0x%.16llX", l_barAddr[l_corePos]);
+    SET_NC_NCCHTM_NCCHTSC_HTM_IMA_PDBAR_HTMSC_IMA_PDBAR(l_barAddr[l_corePos] >> 11, l_cHTM_pdbar);
+
     // ATTR_HTMSC_IMA_PDBAR_SCOPE
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_HTMSC_IMA_PDBAR_SCOPE, l_proc,
                            l_uint8_attr),
              "setup_CHTM_PDBAR: Error getting ATTR_HTMSC_IMA_PDBAR_SCOPE, "
              "l_rc 0x%.8X", (uint64_t)fapi2::current_err);
-    FAPI_DBG("  ATTR_HTMSC_IMA_PDBAR_SCOPE 0x%.8X", l_uint8_attr);
-    SET_NC_NCCHTM_NCCHTSC_HTM_IMA_PDBAR_HTMSC_IMA_PDBAR_SCOPE(l_uint8_attr, l_cHTM_pdbar);
-
-    // ATTR_HTMSC_IMA_PDBAR_ADDR
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_HTMSC_IMA_PDBAR_ADDR, l_proc,
-                           l_uint64_attr),
-             "setup_CHTM_PDBAR: Error getting ATTR_HTMSC_IMA_PDBAR_ADDR, l_rc 0x%.8X",
-             (uint64_t)fapi2::current_err);
-    FAPI_DBG("  ATTR_HTMSC_IMA_PDBAR_ADDR 0x%.16llX", l_uint64_attr);
-    SET_NC_NCCHTM_NCCHTSC_HTM_IMA_PDBAR_HTMSC_IMA_PDBAR(l_uint64_attr, l_cHTM_pdbar);
+    FAPI_DBG("  ATTR_HTMSC_IMA_PDBAR_SCOPE 0x%.8X", l_uint8_attr[l_corePos]);
+    SET_NC_NCCHTM_NCCHTSC_HTM_IMA_PDBAR_HTMSC_IMA_PDBAR_SCOPE(l_uint8_attr[l_corePos], l_cHTM_pdbar);
 
 
     FAPI_INF("setupChtm: CHTM_PDBAR reg setup: 0x%016llX", l_cHTM_pdbar);
@@ -401,19 +113,67 @@ fapi_try_exit:
 /// @return FAPI2_RC_SUCCESS if success, else error code.
 ///
 fapi2::ReturnCode setup_IMA_EVENT_MASK(
-    const fapi2::Target<fapi2::TARGET_TYPE_CORE>& i_target)
+    const fapi2::Target<fapi2::TARGET_TYPE_CORE>& i_target,
+    const IMA_mask_attrs_t& i_imaMaskInfo)
 {
     using namespace scomt;
     using namespace scomt::c;
     FAPI_DBG("Entering");
     fapi2::ReturnCode l_rc;
-    fapi2::buffer<uint64_t> l_mask_data(IMA_EVENT_MASK_VALUE);
+    fapi2::buffer<uint64_t> l_mask_data(0);
+    fapi2::ATTR_CHIP_UNIT_POS_Type l_corePos = 0;
 
-    // Display IMA_EVENT_MASK reg setup value
-    FAPI_INF("setupChtm: IMA_EVENT_MASK reg setup: 0x%016llX", l_mask_data);
+    // Get core number to index into array attributes
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, i_target, l_corePos),
+             "Error getting ATTR_CHIP_UNIT_POS");
+
+    FAPI_TRY(PREP_EC_PC_IMA_EVENT_MASK(i_target));
+
+    FAPI_DBG("IMA Event Mask config on cHTM %u", l_corePos);
+
+    // ATTR_CHTM_HTMSC_IMA_EVENT_MASK_IC_TAP
+    FAPI_DBG("  ATTR_CHTM_HTMSC_IMA_EVENT_MASK_IC_TAP:          0x%08x", i_imaMaskInfo.iv_imaEventTap[l_corePos]);
+    SET_EC_PC_IMA_EVENT_MASK_IC_TAP(i_imaMaskInfo.iv_imaEventTap[l_corePos] & 0x07, l_mask_data);
+
+    // ATTR_CHTM_HTMSC_IMA_EVENT_MASK_DIS_WRAP
+    FAPI_DBG("  ATTR_CHTM_HTMSC_IMA_EVENT_MASK_DIS_WRAP:        0x%08x", i_imaMaskInfo.iv_imaDisWrap[l_corePos]);
+    (i_imaMaskInfo.iv_imaDisWrap[l_corePos] == fapi2::ENUM_ATTR_CHTM_HTMSC_IMA_EVENT_MASK_DIS_WRAP_DISABLE) ?
+    CLEAR_EC_PC_IMA_EVENT_MASK_DIS_WRAP(l_mask_data) :
+    SET_EC_PC_IMA_EVENT_MASK_DIS_WRAP(l_mask_data);
+
+    // ATTR_CHTM_HTMSC_IMA_EVENT_MASK_FREEZE_
+    FAPI_DBG("  ATTR_CHTM_HTMSC_IMA_EVENT_MASK_FREEZE:          0x%08x", i_imaMaskInfo.iv_imaFreeze[l_corePos]);
+    (i_imaMaskInfo.iv_imaFreeze[l_corePos] == fapi2::ENUM_ATTR_CHTM_HTMSC_IMA_EVENT_MASK_FREEZE_DISABLE) ?
+    CLEAR_EC_PC_IMA_EVENT_MASK_FREEZE(l_mask_data) :
+    SET_EC_PC_IMA_EVENT_MASK_FREEZE(l_mask_data);
+
+    // ATTR_CHTM_HTMSC_IMA_EVENT_MASK_EN_D_PRE
+    FAPI_DBG("  ATTR_CHTM_HTMSC_IMA_EVENT_MASK_EN_D_PRE:        0x%08x", i_imaMaskInfo.iv_imaEnDFetch[l_corePos]);
+    (i_imaMaskInfo.iv_imaEnDFetch[l_corePos] == fapi2::ENUM_ATTR_CHTM_HTMSC_IMA_EVENT_MASK_EN_D_PRE_DISABLE) ?
+    CLEAR_EC_PC_IMA_EVENT_MASK_EN_D_PRE(l_mask_data) :
+    SET_EC_PC_IMA_EVENT_MASK_EN_D_PRE(l_mask_data);
+
+    // ATTR_CHTM_HTMSC_IMA_EVENT_MASK_EN_I_PRE
+    FAPI_DBG("  ATTR_CHTM_HTMSC_IMA_EVENT_MASK_EN_I_PRE:        0x%08x", i_imaMaskInfo.iv_imaEnIFetch[l_corePos]);
+    (i_imaMaskInfo.iv_imaEnIFetch[l_corePos] == fapi2::ENUM_ATTR_CHTM_HTMSC_IMA_EVENT_MASK_EN_I_PRE_DISABLE) ?
+    CLEAR_EC_PC_IMA_EVENT_MASK_EN_I_PRE(l_mask_data) :
+    SET_EC_PC_IMA_EVENT_MASK_EN_I_PRE(l_mask_data);
+
+    // ATTR_CHTM_HTMSC_IMA_EVENT_MASK_ONE_EVENT
+    FAPI_DBG("  ATTR_CHTM_HTMSC_IMA_EVENT_MASK_ONE_EVENT:       0x%08x", i_imaMaskInfo.iv_imaOneEvent[l_corePos]);
+    (i_imaMaskInfo.iv_imaOneEvent[l_corePos] == fapi2::ENUM_ATTR_CHTM_HTMSC_IMA_EVENT_MASK_ONE_EVENT_DISABLE) ?
+    CLEAR_EC_PC_IMA_EVENT_MASK_ONE_EVENT(l_mask_data) :
+    SET_EC_PC_IMA_EVENT_MASK_ONE_EVENT(l_mask_data);
+
+    // ATTR_CHTM_HTMSC_IMA_EVENT_MASK_EVENT_VTID
+    FAPI_DBG("  ATTR_CHTM_HTMSC_IMA_EVENT_MASK_EVENT_VTID:      0x%08x", i_imaMaskInfo.iv_imaVTID[l_corePos]);
+    SET_EC_PC_IMA_EVENT_MASK_EVENT_VTID(i_imaMaskInfo.iv_imaVTID[l_corePos] & 0x03, l_mask_data);
+
+    // ATTR_CHTM_HTMSC_IMA_EVENT_MASK_EVENT_SELECT
+    FAPI_DBG("  ATTR_CHTM_HTMSC_IMA_EVENT_MASK_EVENT_SELECT:    0x%08x", i_imaMaskInfo.iv_imaEventSelect[l_corePos]);
+    SET_EC_PC_IMA_EVENT_MASK_EVENT_SELECT(i_imaMaskInfo.iv_imaEventSelect[l_corePos] & 0x1F, l_mask_data);
 
     //// Write HW
-    FAPI_TRY(PREP_EC_PC_IMA_EVENT_MASK(i_target));
     FAPI_TRY(PUT_EC_PC_IMA_EVENT_MASK(i_target, l_mask_data));
 
 fapi_try_exit:
@@ -438,14 +198,20 @@ fapi2::ReturnCode setup_NHTM_FILT(
     fapi2::buffer<uint64_t> l_nHTM_filt_data(0);
     fapi2::buffer<uint64_t> l_nHTM_t_filt_data(0);
     fapi2::buffer<uint64_t> l_nHTM_filt_addr_data(0);
+    fapi2::ATTR_CHIP_EC_FEATURE_CHTM_ENABLE_Type l_dd2 = 0;
     bool l_stop_on_match = 0;
     uint8_t l_HTM_mode = 0;
     uint32_t l_uint32_attr = 0;
     uint64_t mask_dummy = 0xFFFFFFFFFFFFFFFF;
 
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_CHTM_ENABLE, i_target, l_dd2),
+             "setup_NHTM_FILT: Error getting ATTR_CHIP_EC_FEATURE_CHTM_ENABLE, l_rc 0x%.8X",
+             (uint64_t)fapi2::current_err);
+    FAPI_DBG("EC_FEATURE_CHTM_ENABLE = 0x%.8X", l_dd2);
+
     // Only program OCC bits if OCC trace mode
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_NHTM_HTMSC_MODE_CONTENT_SEL, i_target, l_HTM_mode),
-             "setup_NHTM_FILT: Error getting ATTR_NHTM_HTMSC_MODE_CAPTURE, "
+             "setup_NHTM_FILT: Error getting ATTR_NHTM_HTMSC_CONTENT_SEL, "
              "l_rc 0x%.8X", (uint64_t)fapi2::current_err);
 
     if (l_HTM_mode == fapi2::ENUM_ATTR_NHTM_HTMSC_MODE_CONTENT_SEL_OCC)
@@ -508,13 +274,28 @@ fapi2::ReturnCode setup_NHTM_FILT(
             SET_PB_BRIDGE_NHTM_SC_HTM_FILT_FILT_CRESP_PAT(l_HTM_FILT.iv_filtCrespPat, l_nHTM_filt_data);
             SET_PB_BRIDGE_NHTM_SC_HTM_FILT_FILT_SCOPE_PAT(l_HTM_FILT.iv_filtScopePat, l_nHTM_filt_data);
             SET_PB_BRIDGE_NHTM_SC_HTM_FILT_FILT_SOURCE_PAT(l_HTM_FILT.iv_filtSourcePat, l_nHTM_filt_data);
-            SET_PB_BRIDGE_NHTM_SC_HTM_FILT_FILT_PORT_PAT(l_HTM_FILT.iv_filtPortPat, l_nHTM_filt_data);
             SET_PB_BRIDGE_NHTM_SC_HTM_FILT_FILT_SCOPE_MASK(~l_HTM_FILT.iv_filtScopeMask, l_nHTM_filt_data);
             SET_PB_BRIDGE_NHTM_SC_HTM_FILT_FILT_SOURCE_MASK(~l_HTM_FILT.iv_filtSourceMask, l_nHTM_filt_data);
-            SET_PB_BRIDGE_NHTM_SC_HTM_FILT_FILT_PORT_MASK(~l_HTM_FILT.iv_filtPortMask, l_nHTM_filt_data);
             SET_PB_BRIDGE_NHTM_SC_HTM_FILT_FILT_CRESP_MASK(~l_HTM_FILT.iv_filtCrespMask, l_nHTM_filt_data);
-            SET_PB_BRIDGE_NHTM_SC_HTM_FILT_FILT_OCC15TO16_MASK((mask_dummy & 0x3), l_nHTM_filt_data);
-            SET_PB_BRIDGE_NHTM_SC_HTM_FILT_FILT_OCC23TO26_MASK((mask_dummy & 0xF), l_nHTM_filt_data);
+
+            if (l_dd2)
+            {
+                FAPI_DBG("Program FILT for DD1");
+                SET_PB_BRIDGE_NHTM_SC_HTM_FILT_FILT_PORT_PAT(l_HTM_FILT.iv_filtPortPat, l_nHTM_filt_data);
+                SET_PB_BRIDGE_NHTM_SC_HTM_FILT_FILT_PORT_MASK(~l_HTM_FILT.iv_filtPortMask, l_nHTM_filt_data);
+                SET_PB_BRIDGE_NHTM_SC_HTM_FILT_FILT_OCC15TO16_MASK((mask_dummy & 0x3), l_nHTM_filt_data);
+                SET_PB_BRIDGE_NHTM_SC_HTM_FILT_FILT_OCC23TO26_MASK((mask_dummy & 0xF), l_nHTM_filt_data);
+            }
+            else
+            {
+                FAPI_DBG("Program FILT for DD2");
+                SET_P10_20_PB_BRIDGE_NHTM_SC_HTM_FILT_FILT_PORT_PAT_0(l_HTM_FILT.iv_filtPortPat, l_nHTM_filt_data); // p10:20
+                SET_P10_20_PB_BRIDGE_NHTM_SC_HTM_FILT_FILT_PORT_PAT_1(l_HTM_FILT.iv_filtPort1Pat, l_nHTM_filt_data); // p10:20
+                SET_P10_20_PB_BRIDGE_NHTM_SC_HTM_FILT_FILT_OCC24_PAT(l_nHTM_filt_data); // p10:20 always mask off
+                SET_P10_20_PB_BRIDGE_NHTM_SC_HTM_FILT_FILT_PORT_MASK_0(~l_HTM_FILT.iv_filtPortMask, l_nHTM_filt_data); // p10:20
+                SET_P10_20_PB_BRIDGE_NHTM_SC_HTM_FILT_FILT_PORT_MASK_1(~l_HTM_FILT.iv_filtPort1Mask, l_nHTM_filt_data); // p10:20
+                SET_P10_20_PB_BRIDGE_NHTM_SC_HTM_FILT_FILT_OCC24TO26_MASK((mask_dummy & 0x7), l_nHTM_filt_data); // p10:20
+            }
 
             (l_HTM_FILT.iv_filtFiltInvert == fapi2::ENUM_ATTR_HTMSC_TTAGFILT_INVERT_MATCH) ?
             CLEAR_PB_BRIDGE_NHTM_SC_HTM_FILT_TTAGFILT_INVERT(l_nHTM_filt_data) :
@@ -617,57 +398,55 @@ fapi_try_exit:
 /// @return FAPI2_RC_SUCCESS if success, else error code.
 ///
 template<fapi2::TargetType T>
-fapi2::ReturnCode setup_HTM_CTRL(const fapi2::Target<T>& i_target);
+fapi2::ReturnCode setup_HTM_CTRL(const fapi2::Target<T>& i_target,
+                                 const struct HTM_CTRL_attrs_t& i_HTM_CTRL);
 
 ///
 /// TARGET_TYPE_PROC_CHIP (NHTM trace)
 ///
 template<>
 fapi2::ReturnCode setup_HTM_CTRL(
-    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
+    const struct HTM_CTRL_attrs_t& i_HTM_CTRL)
 {
     using namespace scomt;
     using namespace scomt::proc;
     FAPI_DBG("Entering");
     fapi2::ReturnCode l_rc;
     fapi2::buffer<uint64_t> l_nHTM_ctrl_data(0);
-    HTM_CTRL_attrs_t l_HTM_CTRL;
 
     // Get the proc attributes needed to perform HTM_CTRL setup
-    FAPI_TRY(l_HTM_CTRL.getAttrs(i_target),
-             "l_HTM_CTRL.getAttrs() returns an error, l_rc 0x%.8X",
-             (uint64_t)fapi2::current_err);
 
     FAPI_TRY(PREP_PB_BRIDGE_NHTM_SC_HTM_CTRL(i_target));
 
     // Set CTRL_TRIG
-    SET_PB_BRIDGE_NHTM_SC_HTM_CTRL_TRIG(l_HTM_CTRL.iv_nhtmCtrlTrig, l_nHTM_ctrl_data);
+    SET_PB_BRIDGE_NHTM_SC_HTM_CTRL_TRIG(i_HTM_CTRL.iv_nhtmCtrlTrig, l_nHTM_ctrl_data);
 
     // Set CTRL_MARK
-    SET_PB_BRIDGE_NHTM_SC_HTM_CTRL_MARK(l_HTM_CTRL.iv_nhtmCtrlMark, l_nHTM_ctrl_data);
+    SET_PB_BRIDGE_NHTM_SC_HTM_CTRL_MARK(i_HTM_CTRL.iv_nhtmCtrlMark, l_nHTM_ctrl_data);
 
     // Set CTRL_DBG0_STOP
-    (l_HTM_CTRL.iv_ctrlDbg0Stop == fapi2::ENUM_ATTR_HTMSC_CTRL_DBG0_STOP_ENABLE) ?
+    (i_HTM_CTRL.iv_ctrlDbg0Stop == fapi2::ENUM_ATTR_HTMSC_CTRL_DBG0_STOP_ENABLE) ?
     SET_PB_BRIDGE_NHTM_SC_HTM_CTRL_DBG0_STOP(l_nHTM_ctrl_data) :
     CLEAR_PB_BRIDGE_NHTM_SC_HTM_CTRL_DBG0_STOP(l_nHTM_ctrl_data);
 
     // Set CTRL_DBG1_STOP
-    (l_HTM_CTRL.iv_ctrlDbg1Stop == fapi2::ENUM_ATTR_HTMSC_CTRL_DBG1_STOP_ENABLE) ?
+    (i_HTM_CTRL.iv_ctrlDbg1Stop == fapi2::ENUM_ATTR_HTMSC_CTRL_DBG1_STOP_ENABLE) ?
     SET_PB_BRIDGE_NHTM_SC_HTM_CTRL_DBG1_STOP(l_nHTM_ctrl_data) :
     CLEAR_PB_BRIDGE_NHTM_SC_HTM_CTRL_DBG1_STOP(l_nHTM_ctrl_data);
 
     // Set CTRL_RUN_STOP
-    (l_HTM_CTRL.iv_ctrlRunStop == fapi2::ENUM_ATTR_HTMSC_CTRL_RUN_STOP_ENABLE) ?
+    (i_HTM_CTRL.iv_ctrlRunStop == fapi2::ENUM_ATTR_HTMSC_CTRL_RUN_STOP_ENABLE) ?
     SET_PB_BRIDGE_NHTM_SC_HTM_CTRL_RUN_STOP(l_nHTM_ctrl_data) :
     CLEAR_PB_BRIDGE_NHTM_SC_HTM_CTRL_RUN_STOP(l_nHTM_ctrl_data);
 
     // Set CTRL_OTHER_DBG0_STOP
-    (l_HTM_CTRL.iv_ctrlOtherDbg0Stop == fapi2::ENUM_ATTR_HTMSC_CTRL_OTHER_DBG0_STOP_ENABLE) ?
+    (i_HTM_CTRL.iv_ctrlOtherDbg0Stop == fapi2::ENUM_ATTR_HTMSC_CTRL_OTHER_DBG0_STOP_ENABLE) ?
     SET_PB_BRIDGE_NHTM_SC_HTM_CTRL_OTHER_DBG0_STOP(l_nHTM_ctrl_data) :
     CLEAR_PB_BRIDGE_NHTM_SC_HTM_CTRL_OTHER_DBG0_STOP(l_nHTM_ctrl_data);
 
     // Set CTRL_XSTOP_STOP
-    (l_HTM_CTRL.iv_ctrlXstopStop == fapi2::ENUM_ATTR_HTMSC_CTRL_XSTOP_STOP_ENABLE) ?
+    (i_HTM_CTRL.iv_ctrlXstopStop == fapi2::ENUM_ATTR_HTMSC_CTRL_XSTOP_STOP_ENABLE) ?
     SET_PB_BRIDGE_NHTM_SC_HTM_CTRL_XSTOP_STOP(l_nHTM_ctrl_data) :
     CLEAR_PB_BRIDGE_NHTM_SC_HTM_CTRL_XSTOP_STOP(l_nHTM_ctrl_data);
 
@@ -688,14 +467,58 @@ fapi_try_exit:
 ///
 template<>
 fapi2::ReturnCode setup_HTM_CTRL(
-    const fapi2::Target<fapi2::TARGET_TYPE_CORE>& i_target)
+    const fapi2::Target<fapi2::TARGET_TYPE_CORE>& i_target,
+    const struct HTM_CTRL_attrs_t& i_HTM_CTRL)
 {
+    using namespace scomt;
+    using namespace scomt::c;
     FAPI_DBG("Entering");
     fapi2::ReturnCode l_rc;
+    fapi2::buffer<uint64_t> l_cHTM_ctrl_data(0);
 
     // For IMA trace, no need to program HTM_CTRL.
     // Place holder for other CHTM trace setup when they are supported.
+    FAPI_TRY(PREP_NC_NCCHTM_NCCHTSC_HTM_CTRL(i_target));
 
+    // Set CTRL_TRIG
+    SET_NC_NCCHTM_NCCHTSC_HTM_CTRL_TRIG(i_HTM_CTRL.iv_chtmCtrlTrig, l_cHTM_ctrl_data);
+
+    // Set CTRL_MARK
+    SET_NC_NCCHTM_NCCHTSC_HTM_CTRL_MARK(i_HTM_CTRL.iv_chtmCtrlMark, l_cHTM_ctrl_data);
+
+    // Set CTRL_DBG0_STOP
+    (i_HTM_CTRL.iv_ctrlDbg0Stop == fapi2::ENUM_ATTR_HTMSC_CTRL_DBG0_STOP_ENABLE) ?
+    SET_NC_NCCHTM_NCCHTSC_HTM_CTRL_DBG0_STOP(l_cHTM_ctrl_data) :
+    CLEAR_NC_NCCHTM_NCCHTSC_HTM_CTRL_DBG0_STOP(l_cHTM_ctrl_data);
+
+    // Set CTRL_DBG1_STOP
+    (i_HTM_CTRL.iv_ctrlDbg1Stop == fapi2::ENUM_ATTR_HTMSC_CTRL_DBG1_STOP_ENABLE) ?
+    SET_NC_NCCHTM_NCCHTSC_HTM_CTRL_DBG1_STOP(l_cHTM_ctrl_data) :
+    CLEAR_NC_NCCHTM_NCCHTSC_HTM_CTRL_DBG1_STOP(l_cHTM_ctrl_data);
+
+    // Set CTRL_RUN_STOP
+    (i_HTM_CTRL.iv_ctrlRunStop == fapi2::ENUM_ATTR_HTMSC_CTRL_RUN_STOP_ENABLE) ?
+    SET_NC_NCCHTM_NCCHTSC_HTM_CTRL_RUN_STOP(l_cHTM_ctrl_data) :
+    CLEAR_NC_NCCHTM_NCCHTSC_HTM_CTRL_RUN_STOP(l_cHTM_ctrl_data);
+
+    //// Set CTRL_OTHER_DBG0_STOP
+    //(i_HTM_CTRL.iv_ctrlOtherDbg0Stop == fapi2::ENUM_ATTR_HTMSC_CTRL_OTHER_DBG0_STOP_ENABLE) ?
+    //SET_NC_NCCHTM_NCCHTSC_HTM_CTRL_OTHER_DBG0_STOP(l_cHTM_ctrl_data) :
+    //CLEAR_NC_NCCHTM_NCCHTSC_HTM_CTRL_OTHER_DBG0_STOP(l_cHTM_ctrl_data);
+
+    // Set CTRL_XSTOP_STOP
+    (i_HTM_CTRL.iv_ctrlXstopStop == fapi2::ENUM_ATTR_HTMSC_CTRL_XSTOP_STOP_ENABLE) ?
+    SET_NC_NCCHTM_NCCHTSC_HTM_CTRL_XSTOP_STOP(l_cHTM_ctrl_data) :
+    CLEAR_NC_NCCHTM_NCCHTSC_HTM_CTRL_XSTOP_STOP(l_cHTM_ctrl_data);
+
+    // Display HTM_CTRL reg setup value
+    FAPI_INF("setup_HTM_CTRL: HTM_CTRL reg setup: 0x%016llX", l_cHTM_ctrl_data);
+
+    // Write data to HTM_CTRL
+    // Program both NHTM0 and NHTM1
+    FAPI_TRY(PUT_NC_NCCHTM_NCCHTSC_HTM_CTRL(i_target, l_cHTM_ctrl_data));
+
+fapi_try_exit:
     FAPI_DBG("Exiting");
     return fapi2::current_err;
 }
@@ -870,7 +693,7 @@ fapi2::ReturnCode setup_HTM_MEM(
 
     // Set mem size
     FAPI_DBG("  Small Mem Size          0x%.8X", (uint32_t)l_smallSize);
-    (l_smallSize == true) ?
+    (l_smallSize) ?
     SET_PB_BRIDGE_NHTM_SC_HTM_MEM_SIZE_SMALL(l_HTM_mem_data) :
     CLEAR_PB_BRIDGE_NHTM_SC_HTM_MEM_SIZE_SMALL(l_HTM_mem_data);
 
@@ -896,12 +719,87 @@ template<>
 fapi2::ReturnCode setup_HTM_MEM(
     const fapi2::Target<fapi2::TARGET_TYPE_CORE>& i_target)
 {
-    FAPI_DBG("Entering");
-    fapi2::ReturnCode l_rc;
-
     // For IMA trace, no need to program HTM_MEM.
     // Place holder for other CHTM trace setup when they are suppored.
+    using namespace scomt;
+    using namespace scomt::c;
+    FAPI_DBG("Entering");
+    fapi2::ReturnCode l_rc;
+    uint8_t l_uint8_attr = 0;
+    htm_size_t l_barHtmSize;
+    bool l_smallSize;
+    uint8_t l_corePos = 0;
+    uint64_t l_barAddr[NUM_CHTM_ENGINES];
+    uint64_t l_barSize[NUM_CHTM_ENGINES];
+    fapi2::buffer<uint64_t> l_HTM_mem_data = 0;
+    auto l_proc_chip = i_target.getParent<fapi2::TARGET_TYPE_PROC_CHIP>();
 
+    FAPI_TRY(PREP_NC_NCCHTM_NCCHTSC_HTM_MEM(i_target));
+
+    // Get core number to index into array attributes
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, i_target, l_corePos),
+             "Error getting ATTR_CHIP_UNIT_POS");
+
+    // ATTR_PROC_CHTM_BAR_BASE_ADDR
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_CHTM_BAR_BASE_ADDR, l_proc_chip,
+                           l_barAddr),
+             "setup_HTM_MEM: Error getting ATTR_PROC_CHTM_BAR_BASE_ADDR, "
+             "l_rc 0x%.8X", (uint64_t)fapi2::current_err);
+
+    // ATTR_PROC_CHTM_BAR_SIZES
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_CHTM_BAR_SIZES, l_proc_chip,
+                           l_barSize),
+             "setup_HTM_MEM: Error getting ATTR_PROC_CHTM_BAR_SIZES, "
+             "l_rc 0x%.8X", (uint64_t)fapi2::current_err);
+
+    // ATTR_HTMSC_MEM_SCOPE
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_HTMSC_MEM_SCOPE, l_proc_chip, l_uint8_attr),
+             "setup_HTM_MEM: Error getting ATTR_HTMSC_MEM_SCOPE, "
+             "l_rc 0x%.8X", (uint64_t)fapi2::current_err);
+    FAPI_DBG("  ATTR_HTMSC_MEM_SCOPE            0x%.8X", l_uint8_attr);
+    SET_NC_NCCHTM_NCCHTSC_HTM_MEM_SCOPE(l_uint8_attr, l_HTM_mem_data);
+
+    // ATTR_HTMSC_MEM_PRIORITY
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_HTMSC_MEM_PRIORITY, l_proc_chip, l_uint8_attr),
+             "setup_HTM_MEM: Error getting ATTR_HTMSC_MEM_PRIORITY, "
+             "l_rc 0x%.8X", (uint64_t)fapi2::current_err);
+    FAPI_DBG("  ATTR_HTMSC_MEM_PRIORITY         0x%.8X", l_uint8_attr);
+    (l_uint8_attr == fapi2::ENUM_ATTR_HTMSC_MEM_PRIORITY_LOW) ?
+    SET_NC_NCCHTM_NCCHTSC_HTM_MEM_PRIORITY(l_HTM_mem_data) :
+    CLEAR_NC_NCCHTM_NCCHTSC_HTM_MEM_PRIORITY(l_HTM_mem_data);
+
+    // Set base addr
+    // Right shift PROC HTM Bar Base addr 24 bits to align to 16MB trace memory.
+    FAPI_DBG("  ATTR_PROC_CHTM_BAR_BASE_ADDR 0x%.16llX", l_barAddr[l_corePos]);
+    SET_NC_NCCHTM_NCCHTSC_HTM_MEM_BASE(l_barAddr[l_corePos] >> 24, l_HTM_mem_data);
+
+    // Get HTM size
+    FAPI_TRY(getTraceMemSizeValues(l_barSize[l_corePos], l_barHtmSize, l_smallSize),
+             "getTraceMemSizeValues() returns error, l_rc 0x%.8X",
+             (uint64_t)fapi2::current_err);
+
+    // Set bar size (ATTR_PROC_CHTM_BAR_SIZES)
+    FAPI_DBG("  ATTR_PROC_CHTM_BAR_SIZE  %02d 0x%.16llX", l_corePos, l_barSize[l_corePos]);
+    FAPI_DBG("  HTMSC_SIZE 0x%.16llX", l_barHtmSize);
+    SET_NC_NCCHTM_NCCHTSC_HTM_MEM_SIZE(l_barHtmSize, l_HTM_mem_data);
+
+    // Set mem size
+    FAPI_DBG("  Small Mem Size          0x%.8X", (uint32_t)l_smallSize);
+    (l_smallSize) ?
+    SET_NC_NCCHTM_NCCHTSC_HTM_MEM_SIZE_SMALL(l_HTM_mem_data) :
+    CLEAR_NC_NCCHTM_NCCHTSC_HTM_MEM_SIZE_SMALL(l_HTM_mem_data);
+
+    // Display HTM_MEM value to write to HW
+    FAPI_INF("setup_HTM_MEM: HTM_MEM reg setup: 0x%016llX", l_HTM_mem_data);
+
+    // Write config data into HTM_MEM
+    // MEM_ALLOC must switch from 0->1 for this setup to complete
+    CLEAR_NC_NCCHTM_NCCHTSC_HTM_MEM_ALLOC(l_HTM_mem_data);
+    FAPI_TRY(PUT_NC_NCCHTM_NCCHTSC_HTM_MEM(i_target, l_HTM_mem_data));
+    SET_NC_NCCHTM_NCCHTSC_HTM_MEM_ALLOC(l_HTM_mem_data);
+    FAPI_TRY(PUT_NC_NCCHTM_NCCHTSC_HTM_MEM(i_target, l_HTM_mem_data));
+
+fapi_try_exit:
     FAPI_DBG("Exiting");
     return fapi2::current_err;
 }
@@ -910,20 +808,16 @@ fapi2::ReturnCode setup_HTM_MEM(
 ///
 /// @brief This function sets up the HTM_MODE register.
 ///
-/// @tparam T template parameter, passed in target.
 /// @param[in] i_target            Reference to HW target
 /// @param[in] i_traceType         Trace type
+/// @param[in] i_modeInfo          cHTM only mode info
 ///
 /// @return FAPI2_RC_SUCCESS if success, else error code.
 ///
-template<fapi2::TargetType T>
-fapi2::ReturnCode setup_HTM_MODE(const fapi2::Target<T>& i_target,
-                                 const uint8_t i_traceType);
 
 ///
 /// TARGET_TYPE_PROC_CHIP (NHTM trace)
 ///
-template<>
 fapi2::ReturnCode setup_HTM_MODE(
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
     const uint8_t i_traceType)
@@ -1052,108 +946,129 @@ fapi_try_exit:
 ///
 /// TARGET_TYPE_CORE (CHTM trace)
 ///
-template<>
 fapi2::ReturnCode setup_HTM_MODE(
     const fapi2::Target<fapi2::TARGET_TYPE_CORE>& i_target,
-    const uint8_t i_traceType)
+    const uint8_t i_traceType,
+    const cHTM_mode_attrs_t& i_modeInfo)
 {
     using namespace scomt;
     using namespace scomt::c;
     FAPI_DBG("Entering");
     fapi2::ReturnCode l_rc;
     fapi2::buffer<uint64_t> l_HTM_mode_data(0);
-    uint8_t l_uint8_attr = 0;
-    uint32_t l_uint32_attr = 0;
+    fapi2::ATTR_CHIP_UNIT_POS_Type l_corePos = 0;
 
-    // Setup data value to program HTM_MODE reg
-    // Note:
-    //    - i_traceType may be needed later when more trace type is supported.
-
-    // Get the proc target to read common CHTM attribute settings
-    fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP> l_proc = i_target.getParent<fapi2::TARGET_TYPE_PROC_CHIP>();
+    // Get core number to index into array attributes
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, i_target, l_corePos),
+             "Error getting ATTR_CHIP_UNIT_POS");
 
     // Enable HTM
+    FAPI_TRY(PREP_NC_NCCHTM_NCCHTSC_HTM_MODE(i_target));
     SET_NC_NCCHTM_NCCHTSC_HTM_MODE_HTM_ENABLE(l_HTM_mode_data);
 
-    // ATTR_CHTM_HTMSC_MODE_CONTENT_SEL
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHTM_HTMSC_MODE_CONTENT_SEL, l_proc,
-                           l_uint8_attr),
-             "setup_HTM_MODE: Error getting ATTR_CHTM_HTMSC_MODE_CONTENT_SEL, "
-             "l_rc 0x%.8X", (uint64_t)fapi2::current_err);
-    FAPI_DBG("  ATTR_CHTM_HTMSC_MODE_CONTENT_SEL      0x%.8X", l_uint8_attr);
-    SET_NC_NCCHTM_NCCHTSC_HTM_MODE_CONTENT_SEL(l_uint8_attr, l_HTM_mode_data);
+    // i_trace_type
+    FAPI_DBG("  ATTR_CHTM_TRACE_TYPE                  0x%.8X", i_traceType);
 
-    // ATTR_CHTM_HTMSC_MODE_CAPTURE
-    // For CHTM IMA mode (Direct Memory Write), Capture mode bit 4 is used
-    // to enable/disable IMA trace.  This bit will be controlled in
-    // p10_htm_start/stop for IMA instead.
+    if (i_traceType == fapi2::ENUM_ATTR_CHTM_TRACE_TYPE_CORE)
+    {
+        SET_P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_TRACE_ENABLE(l_HTM_mode_data);
+
+        // Setup Core specific features only if core tracing enabled
+
+        // ATTR_CHTM_HTMSC_MODE_CORE_INSTR_STALL
+        FAPI_DBG("  ATTR_CHTM_HTMSC_MODE_CORE_INSTR_STALL                   0x%.8X",
+                 i_modeInfo.iv_coreDisStall[l_corePos]);
+        (i_modeInfo.iv_coreDisStall[l_corePos] == fapi2::ENUM_ATTR_CHTM_HTMSC_MODE_CORE_INSTR_STALL_DISABLE) ?
+        CLEAR_NC_NCCHTM_NCCHTSC_HTM_MODE_DIS_STALL(l_HTM_mode_data) :
+        SET_NC_NCCHTM_NCCHTSC_HTM_MODE_DIS_STALL(l_HTM_mode_data);
+
+        // ATTR_CHTM_HTMSC_MODE_CORE_CAPTURE_TRACE_FULL_ON_ERROR
+        FAPI_DBG("  ATTR_CHTM_HTMSC_MODE_CORE_CAPTURE_TRACE_FULL_ON_ERROR   0x%.8X",
+                 i_modeInfo.iv_coreTraceFullStall[l_corePos]);
+        (i_modeInfo.iv_coreTraceFullStall[l_corePos] == fapi2::ENUM_ATTR_CHTM_MODE_CORE_CAPTURE_TRACE_FULL_ON_ERROR_DISABLE) ?
+        CLEAR_P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_CAPTURE_TRACE_FULL_ON_ERROR(l_HTM_mode_data) :
+        SET_P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_CAPTURE_TRACE_FULL_ON_ERROR(l_HTM_mode_data);
+    }
+    else if(i_traceType == fapi2::ENUM_ATTR_CHTM_TRACE_TYPE_LLAT)
+    {
+        SET_P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_TRACE_ENABLE(l_HTM_mode_data);
+
+        // Setup LLAT specific features only if LLAT tracing enabled
+
+        // ATTR_CHTM_MODE_LLAT_CAPTURE_FAIL_DISP_DIS
+        FAPI_DBG("  ATTR_CHTM_MODE_LLAT_CAPTURE_FAIL_DISP_DIS               0x%.8X",
+                 i_modeInfo.iv_llatCaptureDispDis[l_corePos]);
+        (i_modeInfo.iv_llatCaptureDispDis[l_corePos] == fapi2::ENUM_ATTR_CHTM_MODE_LLAT_CAPTURE_FAIL_DISP_DIS_DISABLE) ?
+        CLEAR_P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_CAPTURE_FAIL_DISP_DIS(l_HTM_mode_data) :
+        SET_P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_CAPTURE_FAIL_DISP_DIS(l_HTM_mode_data);
+
+        // ATTR_CHTM_MODE_LLAT_CAPTURE_STORE_DIS
+        FAPI_DBG("  ATTR_CHTM_MODE_LLAT_CAPTURE_STORE_DIS                   0x%.8X",
+                 i_modeInfo.iv_llatCaptureStorDis[l_corePos]);
+        (i_modeInfo.iv_llatCaptureStorDis[l_corePos] == fapi2::ENUM_ATTR_CHTM_MODE_LLAT_CAPTURE_STORE_DIS_DISABLE) ?
+        CLEAR_P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_CAPTURE_STORE_DIS(l_HTM_mode_data) :
+        SET_P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_CAPTURE_STORE_DIS(l_HTM_mode_data);
+
+        // ATTR_CHTM_MODE_LLAT_CAPTURE_PBL3_HIT_DIS
+        FAPI_DBG("  ATTR_CHTM_MODE_LLAT_CAPTURE_PBL3_HIT_DIS                0x%.8X",
+                 i_modeInfo.iv_llatCapturePBL3Dis[l_corePos]);
+        (i_modeInfo.iv_llatCapturePBL3Dis[l_corePos] == fapi2::ENUM_ATTR_CHTM_MODE_LLAT_CAPTURE_PBL3_HIT_DIS_DISABLE) ?
+        CLEAR_P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_CAPTURE_PBL3_HIT_DIS(l_HTM_mode_data) :
+        SET_P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_CAPTURE_PBL3_HIT_DIS(l_HTM_mode_data);
+
+        // ATTR_CHTM_MODE_LLAT_IMBEDDED_TS
+        FAPI_DBG("  ATTR_CHTM_MODE_LLAT_IMBEDDED_TS                         0x%.8X",
+                 i_modeInfo.iv_llatImbeddedTS[l_corePos]);
+        (i_modeInfo.iv_llatImbeddedTS[l_corePos] == fapi2::ENUM_ATTR_CHTM_MODE_LLAT_IMBEDDED_TS_DISABLE) ?
+        CLEAR_P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_IMBEDDED_TS(l_HTM_mode_data) :
+        SET_P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_LLAT_IMBEDDED_TS(l_HTM_mode_data);
+
+        // ATTR_CHTM_MODE_LLAT_PAUSE_ON_PURGE
+        FAPI_DBG("  ATTR_CHTM_MODE_LLAT_PAUSE_ON_PURGE                      0x%.8X",
+                 i_modeInfo.iv_coreTraceFullStall[l_corePos]);
+        (i_modeInfo.iv_coreTraceFullStall[l_corePos] == fapi2::ENUM_ATTR_CHTM_MODE_LLAT_PAUSE_ON_PURGE_DISABLE) ?
+        CLEAR_P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_LLAT_PAUSE_ON_PURGE(l_HTM_mode_data) :
+        SET_P10_20_NC_NCCHTM_NCCHTSC_HTM_MODE_CORE_LLAT_PAUSE_ON_PURGE(l_HTM_mode_data);
+    }
+    else if(i_traceType == fapi2::ENUM_ATTR_CHTM_TRACE_TYPE_DMW)
+    {
+        FAPI_INF("IMA trace enable set on start. Skip setting for now");
+    }
 
     // ATTR_HTMSC_MODE_WRAP
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_HTMSC_MODE_WRAP, l_proc,
-                           l_uint8_attr),
-             "setup_HTM_MODE: Error getting ATTR_HTMSC_MODE_WRAP, l_rc 0x%.8X",
-             (uint64_t)fapi2::current_err);
-    FAPI_DBG("  ATTR_HTMSC_MODE_WRAP                  0x%.8X", l_uint8_attr);
-    (l_uint8_attr == fapi2::ENUM_ATTR_HTMSC_MODE_WRAP_DISABLE) ?
+    FAPI_DBG("  ATTR_HTMSC_MODE_WRAP                                    0x%.8X", i_modeInfo.iv_chtmWrap[l_corePos]);
+    ( i_modeInfo.iv_chtmWrap[l_corePos] == fapi2::ENUM_ATTR_HTMSC_MODE_WRAP_DISABLE) ?
     CLEAR_NC_NCCHTM_NCCHTSC_HTM_MODE_WRAP(l_HTM_mode_data) :
     SET_NC_NCCHTM_NCCHTSC_HTM_MODE_WRAP(l_HTM_mode_data);
 
     // ATTR_HTMSC_MODE_DIS_TSTAMP
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_HTMSC_MODE_DIS_TSTAMP, l_proc,
-                           l_uint8_attr),
-             "setup_HTM_MODE: Error getting ATTR_HTMSC_MODE_DIS_TSTAMP, "
-             "l_rc 0x%.8X", (uint64_t)fapi2::current_err);
-    FAPI_DBG("  ATTR_HTMSC_MODE_DIS_TSTAMP            0x%.8X", l_uint8_attr);
-    (l_uint8_attr == fapi2::ENUM_ATTR_HTMSC_MODE_DIS_TSTAMP_DISABLE) ?
+    FAPI_DBG("  ATTR_HTMSC_MODE_DIS_TSTAMP                              0x%.8X", i_modeInfo.iv_disTimeStamp[l_corePos]);
+    ( i_modeInfo.iv_disTimeStamp[l_corePos] == fapi2::ENUM_ATTR_HTMSC_MODE_DIS_TSTAMP_DISABLE) ?
     CLEAR_NC_NCCHTM_NCCHTSC_HTM_MODE_DIS_TSTAMP(l_HTM_mode_data) :
     SET_NC_NCCHTM_NCCHTSC_HTM_MODE_DIS_TSTAMP(l_HTM_mode_data);
 
     // ATTR_HTMSC_MODE_SINGLE_TSTAMP
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_HTMSC_MODE_SINGLE_TSTAMP, l_proc,
-                           l_uint8_attr),
-             "setup_HTM_MODE: Error getting ATTR_HTMSC_MODE_SINGLE_TSTAMP, "
-             "l_rc 0x%.8X", (uint64_t)fapi2::current_err);
-    FAPI_DBG("  ATTR_HTMSC_MODE_SINGLE_TSTAMP         0x%.8X", l_uint8_attr);
-    (l_uint8_attr == fapi2::ENUM_ATTR_HTMSC_MODE_SINGLE_TSTAMP_DISABLE) ?
+    FAPI_DBG("  ATTR_HTMSC_MODE_SINGLE_TSTAMP                           0x%.8X", i_modeInfo.iv_singleTimeStamp[l_corePos]);
+    ( i_modeInfo.iv_singleTimeStamp[l_corePos] == fapi2::ENUM_ATTR_HTMSC_MODE_SINGLE_TSTAMP_DISABLE) ?
     CLEAR_NC_NCCHTM_NCCHTSC_HTM_MODE_SINGLE_TSTAMP(l_HTM_mode_data) :
     SET_NC_NCCHTM_NCCHTSC_HTM_MODE_SINGLE_TSTAMP(l_HTM_mode_data);
 
-    // ATTR_CHTM_HTMSC_MODE_CORE_INSTR_STALL
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHTM_HTMSC_MODE_CORE_INSTR_STALL, l_proc,
-                           l_uint8_attr),
-             "setup_HTM_MODE: Error gettting ATTR_CHTM_HTMSC_MODE_CORE_INSTR_STALL, "
-             "l_rc 0x%.8X", (uint64_t)fapi2::current_err);
-    FAPI_DBG("  ATTR_CHTM_HTMSC_MODE_CORE_INSTR_STALL           0x%.8X", l_uint8_attr);
-    (l_uint8_attr == fapi2::ENUM_ATTR_CHTM_HTMSC_MODE_CORE_INSTR_STALL_DISABLE) ?
-    SET_NC_NCCHTM_NCCHTSC_HTM_MODE_DIS_STALL(l_HTM_mode_data) :
-    CLEAR_NC_NCCHTM_NCCHTSC_HTM_MODE_DIS_STALL(l_HTM_mode_data);
 
     // ATTR_HTMSC_MODE_MARKERS_ONLY
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_HTMSC_MODE_MARKERS_ONLY, l_proc, l_uint8_attr),
-             "setup_HTM_MODE: Error getting ATTR_HTMSC_MODE_MARKERS_ONLY, "
-             "l_rc 0x%.8X", (uint64_t)fapi2::current_err);
-    FAPI_DBG("  ATTR_HTMSC_MODE_MARKERS_ONLY          0x%.8X", l_uint8_attr);
-    (l_uint8_attr == fapi2::ENUM_ATTR_HTMSC_MODE_MARKERS_ONLY_DISABLE) ?
-    SET_NC_NCCHTM_NCCHTSC_HTM_MODE_MARKERS_ONLY(l_HTM_mode_data) :
-    CLEAR_NC_NCCHTM_NCCHTSC_HTM_MODE_MARKERS_ONLY(l_HTM_mode_data);
+    FAPI_DBG("  ATTR_HTMSC_MODE_MARKERS_ONLY                            0x%.8X", i_modeInfo.iv_markOnly[l_corePos]);
+    ( i_modeInfo.iv_markOnly[l_corePos] == fapi2::ENUM_ATTR_HTMSC_MODE_MARKERS_ONLY_DISABLE) ?
+    CLEAR_NC_NCCHTM_NCCHTSC_HTM_MODE_MARKERS_ONLY(l_HTM_mode_data) :
+    SET_NC_NCCHTM_NCCHTSC_HTM_MODE_MARKERS_ONLY(l_HTM_mode_data);
 
     // ATTR_HTMSC_MODE_DIS_FORCE_GROUP_SCOPE
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_HTMSC_MODE_DIS_FORCE_GROUP_SCOPE,
-                           l_proc, l_uint8_attr),
-             "setup_HTM_MODE: Error getting ATTR_HTMSC_MODE_DIS_FORCE_GROUP_SCOPE, "
-             "l_rc 0x%.8X",  (uint64_t)fapi2::current_err);
-    FAPI_DBG("  ATTR_HTMSC_MODE_DIS_FORCE_GROUP_SCOPE 0x%.8X", l_uint8_attr);
-    (l_uint8_attr == fapi2::ENUM_ATTR_HTMSC_MODE_DIS_FORCE_GROUP_SCOPE_DISABLE) ?
-    SET_NC_NCCHTM_NCCHTSC_HTM_MODE_DIS_GROUP(l_HTM_mode_data) :
-    CLEAR_NC_NCCHTM_NCCHTSC_HTM_MODE_DIS_GROUP(l_HTM_mode_data);
+    FAPI_DBG("  ATTR_HTMSC_MODE_DIS_FORCE_GROUP_SCOPE                   0x%.8X", i_modeInfo.iv_disGroupScope[l_corePos]);
+    ( i_modeInfo.iv_disGroupScope[l_corePos] == fapi2::ENUM_ATTR_HTMSC_MODE_DIS_FORCE_GROUP_SCOPE_DISABLE) ?
+    CLEAR_NC_NCCHTM_NCCHTSC_HTM_MODE_DIS_GROUP(l_HTM_mode_data) :
+    SET_NC_NCCHTM_NCCHTSC_HTM_MODE_DIS_GROUP(l_HTM_mode_data);
 
     // ATTR_HTMSC_MODE_VGTARGET
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_HTMSC_MODE_VGTARGET, l_proc,
-                           l_uint32_attr),
-             "setup_HTM_MODE: Error getting ATTR_HTMSC_MODE_VGTARGET, l_rc 0x%.8X",
-             (uint64_t)fapi2::current_err);
-    FAPI_DBG("  ATTR_HTMSC_MODE_VGTARGET              0x%.8X", l_uint32_attr);
-    SET_NC_NCCHTM_NCCHTSC_HTM_MODE_VGTARGET(~l_uint32_attr, l_HTM_mode_data);
+    FAPI_DBG("  ATTR_HTMSC_MODE_VGTARGET                                0x%.8X", i_modeInfo.iv_vgTarget[l_corePos]);
+    SET_NC_NCCHTM_NCCHTSC_HTM_MODE_VGTARGET(~i_modeInfo.iv_vgTarget[l_corePos], l_HTM_mode_data);
 
     // Display HTM_MODE reg setup value
     FAPI_INF("setup_HTM_MODE: HTM_MODE reg setup: 0x%016llX", l_HTM_mode_data);
@@ -1261,6 +1176,30 @@ fapi2::ReturnCode getTraceTypes(
     fapi2::ReturnCode l_rc;
     char l_targetStr[fapi2::MAX_ECMD_STRING_LEN];
     uint8_t l_chtmTraceType[NUM_CHTM_ENGINES];
+    fapi2::ATTR_CHIP_EC_FEATURE_CHTM_ENABLE_Type l_chtmEnable = 0;
+    uint8_t l_acceptedChtmTraceTypes;
+
+    // Determine DD level to see if cHTM trace requested is valid
+
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_CHTM_ENABLE, i_target,
+                           l_chtmEnable),
+             "getTraceTypes: Error getting ATTR_CHIP_EC_FEATURE_CHTM_ENABLE, l_rc 0x%.8X",
+             (uint64_t)fapi2::current_err);
+    FAPI_DBG("EC_FEATURE_CHTM_ENABLE = 0x%.8X", l_chtmEnable);
+
+
+    if (l_chtmEnable)
+    {
+        l_acceptedChtmTraceTypes = fapi2::ENUM_ATTR_CHTM_TRACE_TYPE_DISABLE |
+                                   fapi2::ENUM_ATTR_CHTM_TRACE_TYPE_CORE    |
+                                   fapi2::ENUM_ATTR_CHTM_TRACE_TYPE_LLAT    |
+                                   fapi2::ENUM_ATTR_CHTM_TRACE_TYPE_DMW     ;
+    }
+    else
+    {
+        l_acceptedChtmTraceTypes = fapi2::ENUM_ATTR_CHTM_TRACE_TYPE_DISABLE |
+                                   fapi2::ENUM_ATTR_CHTM_TRACE_TYPE_DMW     ;
+    }
 
     // Display target
     fapi2::toString(i_target, l_targetStr, fapi2::MAX_ECMD_STRING_LEN);
@@ -1302,9 +1241,8 @@ fapi2::ReturnCode getTraceTypes(
     {
         if (o_chtmTraceType[ii] != fapi2::ENUM_ATTR_CHTM_TRACE_TYPE_DISABLE)
         {
-            // Currently only support CHTM DMW (IMA) type
-            FAPI_ASSERT( (o_chtmTraceType[ii] == fapi2::ENUM_ATTR_CHTM_TRACE_TYPE_DISABLE) ||
-                         (o_chtmTraceType[ii] == fapi2::ENUM_ATTR_CHTM_TRACE_TYPE_DMW),
+            // CHTM DMW (IMA) type supported for DD1. DD2 supports all cHTM trace types
+            FAPI_ASSERT( ((o_chtmTraceType[ii] & l_acceptedChtmTraceTypes) != 0),
                          fapi2::CHTM_TRACE_TYPE_NOT_SUPPORTED()
                          .set_CORE_POS(ii)
                          .set_CHTM_TRACE_TYPE(o_chtmTraceType[ii]),
@@ -1390,6 +1328,11 @@ extern "C" {
         uint8_t l_corePos = 0;
         auto l_coreChiplets = i_target.getChildren<fapi2::TARGET_TYPE_CORE>();
         bool l_htmEnabled = false;
+        bool l_chtmEnabled = false;
+        HTM_CTRL_attrs_t l_HTM_CTRL;
+        cHTM_mode_attrs_t l_cHTM_MODE;
+        IMA_mask_attrs_t l_cHTM_IMA;
+
 
         // ----------------------------------------------
         // Check if NTHM/CHTM trace is enabled
@@ -1405,6 +1348,11 @@ extern "C" {
         {
             l_htmEnabled = true;
 
+            // Get attributes for CTRL
+            FAPI_TRY(l_HTM_CTRL.getAttrs(i_target),
+                     "l_HTM_CTRL.getAttrs() returns an error, l_rc 0x%.8X",
+                     (uint64_t)fapi2::current_err);
+
             // 1. Check HW state
             FAPI_TRY(checkHtmState(i_target),
                      "checkHtmState() returns an error, l_rc 0x%.8X",
@@ -1417,11 +1365,11 @@ extern "C" {
 
             // 3. Setup HTM_MEM reg
             FAPI_TRY(setup_HTM_MEM(i_target),
-                     "setup_HTM_MODE() returns an error, l_rc 0x%.8X",
+                     "setup_HTM_MEM() returns an error, l_rc 0x%.8X",
                      (uint64_t)fapi2::current_err);
 
             // 4. Setup HTM_CTRL reg
-            FAPI_TRY(setup_HTM_CTRL(i_target),
+            FAPI_TRY(setup_HTM_CTRL(i_target, l_HTM_CTRL),
                      "setup_HTM_CTRL() returns an error, l_rc 0x%.8X",
                      (uint64_t)fapi2::current_err);
 
@@ -1440,8 +1388,8 @@ extern "C" {
             //   - PHYP will setup CHTM IMA trace, nothing to do during IPL.
             //   - IMA setup code is left here for reference only.  It should
             //     not be invoked unless ATTR_CHTM_TRACE_TYPE = DMW.
-            //   - Other CHTM trace types are not supported until Nimbus DD2.0.
-            //     ATTR_CHTM_TRACE_TYPE should be DISABLE for Nimbus 1.0.
+            //   - Other CHTM trace types are not supported until DD2.0.
+            //     ATTR_CHTM_TRACE_TYPE should be DISABLE for 1.0.
 
             // Get the core position
             FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, l_core, l_corePos),
@@ -1453,7 +1401,24 @@ extern "C" {
                 continue;
             }
 
-            l_htmEnabled = true;
+            if (!l_chtmEnabled)
+            {
+                // Get attributes for CTRL only once
+                FAPI_TRY(l_HTM_CTRL.getAttrs(i_target),
+                         "l_HTM_CTRL.getAttrs() returns an error, l_rc 0x%.8X",
+                         (uint64_t)fapi2::current_err);
+                // Get attributes for cHTM mode only once (theres a lot of 'em)
+                FAPI_TRY(l_cHTM_MODE.getAttrs(i_target),
+                         "l_cHTM_MODE.getAttrs() returns an error, l_rc 0x%.8X",
+                         (uint64_t)fapi2::current_err);
+                // Get attributes for IMA_EVENT_MASK only once (theres a lot of 'em)
+                FAPI_TRY(l_cHTM_IMA.getAttrs(i_target),
+                         "l_cHTM_IMA.getAttrs() returns an error, l_rc 0x%.8X",
+                         (uint64_t)fapi2::current_err);
+
+                l_chtmEnabled = true;
+            }
+
             FAPI_INF("p10_htm_setup: Setup CHTM for core unit %u", l_corePos);
 
             // 1. Check HW state
@@ -1470,19 +1435,33 @@ extern "C" {
                          (uint64_t)fapi2::current_err);
 
                 // 3. Setup IMA_EVENT_MASK
-                FAPI_TRY(setup_IMA_EVENT_MASK(l_core),
-                         "setup_CHTM_PDBAR() returns an error, l_rc 0x%.8X",
+                FAPI_TRY(setup_IMA_EVENT_MASK(l_core, l_cHTM_IMA),
+                         "setup_IMA_EVENT_MASK() returns an error, l_rc 0x%.8X",
                          (uint64_t)fapi2::current_err);
             }
 
             // 4. Setup HTM_MODE reg
-            FAPI_TRY(setup_HTM_MODE(l_core, l_chtmType[l_corePos]),
+            FAPI_TRY(setup_HTM_MODE(l_core, l_chtmType[l_corePos], l_cHTM_MODE),
                      "setup_HTM_MODE() returns an error, l_rc 0x%.8X",
                      (uint64_t)fapi2::current_err);
+
+
+            if (l_chtmType[l_corePos] != fapi2::ENUM_ATTR_CHTM_TRACE_TYPE_DMW)
+            {
+                // 5. Set HTM_CTRL reg
+                FAPI_TRY(setup_HTM_CTRL(l_core, l_HTM_CTRL),
+                         "setup_HTM_CTRL() returns an error, l_rc 0x%.8X",
+                         (uint64_t)fapi2::current_err);
+
+                // 6. Setup HTM_MEM reg
+                FAPI_TRY(setup_HTM_MEM(l_core),
+                         "setup_HTM_MEM() returns an error, l_rc 0x%8.X",
+                         (uint64_t) fapi2::current_err);
+            }
         }
 
         // Perform reset/start only if certain trace is enabled.
-        if (l_htmEnabled == true)
+        if (l_htmEnabled || l_chtmEnabled)
         {
             // ----------------------------------------------
             // Reserve HTM queues
@@ -1491,21 +1470,24 @@ extern "C" {
                      "setup_HTM_queues returns an error, l_rc 0x%.8X",
                      (uint64_t)fapi2::current_err);
 
-            // ----------------------------------------------
-            // Reset HTMs
-            // ----------------------------------------------
-            FAPI_TRY(p10_htm_reset(i_target),
-                     "p10_htm_reset() returns an error, l_rc 0x%.8X",
-                     (uint64_t)fapi2::current_err);
-
-            // ----------------------------------------------
-            // Start collect both NHTM and CHTM traces
-            // ----------------------------------------------
-            if (i_start == true)
+            if (i_start)
             {
-                FAPI_TRY(p10_htm_start(i_target),
-                         "p10_htm_start() returns an error, l_rc 0x%.8X",
+                // ----------------------------------------------
+                // Reset HTMs
+                // ----------------------------------------------
+                FAPI_TRY(p10_htm_reset(i_target),
+                         "p10_htm_reset() returns an error, l_rc 0x%.8X",
                          (uint64_t)fapi2::current_err);
+
+                // ----------------------------------------------
+                // Start collect both NHTM and CHTM traces
+                // ----------------------------------------------
+                if (i_start)
+                {
+                    FAPI_TRY(p10_htm_start(i_target),
+                             "p10_htm_start() returns an error, l_rc 0x%.8X",
+                             (uint64_t)fapi2::current_err);
+                }
             }
         }
 

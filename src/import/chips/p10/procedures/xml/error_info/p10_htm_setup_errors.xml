@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2015,2019                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2015,2020                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -80,6 +80,25 @@
     <rc>RC_P10_NHTM_CTRL_TIMEOUT</rc>
     <description>
         NHTM state machine change did not complete in allotted time.
+    </description>
+    <ffdc>TARGET</ffdc>
+    <ffdc>DELAY_COUNT</ffdc>
+    <ffdc>HTM_STATUS_REG</ffdc>
+    <callout>
+      <target>TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>LOW</priority>
+    </callout>
+    <!-- No need to deconfigure/gard chip as this is a debug functionality -->
+</hwpError>
+
+<hwpError>
+    <rc>RC_P10_CHTM_CTRL_TIMEOUT</rc>
+    <description>
+        CHTM state machine change did not complete in allotted time.
     </description>
     <ffdc>TARGET</ffdc>
     <ffdc>DELAY_COUNT</ffdc>

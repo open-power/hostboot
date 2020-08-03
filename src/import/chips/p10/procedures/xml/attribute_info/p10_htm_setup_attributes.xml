@@ -26,7 +26,9 @@
 <!-- XML file specifying attributes used by p10_htm_setup HW Procedures. -->
 
 <attributes>
-<!-- ********************************************************************** -->
+<!-- **********************************************************************
+        Attributes for Trace Type
+     ********************************************************************** -->
 <attribute>
   <id>ATTR_NHTM_TRACE_TYPE</id>
   <targetType>TARGET_TYPE_PROC_CHIP</targetType>
@@ -39,7 +41,7 @@
   <writeable/>
   <persistRuntime/>
 </attribute>
-<!-- ********************************************************************** -->
+
 <attribute>
   <id>ATTR_CHTM_TRACE_TYPE</id>
   <targetType>TARGET_TYPE_PROC_CHIP</targetType>
@@ -47,7 +49,90 @@
   </description>
   <valueType>uint8</valueType>
   <array>32</array>
-  <enum> DISABLE = 0x0, CORE = 0x1, LLAT = 0x2, PPE = 0x3, DMW = 0x4 </enum>
+  <enum> DISABLE = 0x0, CORE = 0x1, LLAT = 0x2, DMW = 0x3, CORE_AND_IMA = 0x4 </enum>
+  <initToZero/>
+  <writeable/>
+  <persistRuntime/>
+</attribute>
+
+<!-- **** NHTM attributes ***-->
+<!-- **************************************************
+        Attributes for HTM Collection Mode Register
+     ************************************************** -->
+
+<attribute>
+  <id>ATTR_NHTM_HTMSC_MODE_CONTENT_SEL</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description> Nest HTM: defines the NHTM trace mode.
+                HTM Collection Mode Register (1:2).
+                Only FABRIC is supported at this time.
+  </description>
+  <valueType>uint8</valueType>
+  <enum> FABRIC = 0x0, EVENT = 0x1, OCC = 0x2 </enum>
+  <initToZero/>
+  <writeable/>
+  <persistRuntime/>
+</attribute>
+
+<attribute>
+  <id>ATTR_NHTM_HTMSC_MODE_CAPTURE</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>
+      HTMSC_MODE_CAPTURE: HTM capture mode bit definition according to Trace Mode
+      When htm_mode_q(1 TO 2) == 00, i.e. FABRIC
+      456789012
+      0htmx0000 : Ignore HTM generated data writes
+      1htmx0000 : Capture htm generated data writes
+      x0htm0000 : Filtering ignored on PMISC (always trace PMISC and Report Hang)
+      x1htm0000 : Filtering applied on ttype = PMISC and ttype = report hang
+      xx00x0000 : CRESP Mode: Flush CRESP Queue to avoid overrun (default)
+      xx01x0000 : CRESP Mode: Reserved
+      xx10x0000 : CRESP Mode: Enable Precise CRESP Mode
+      xx11x0000 : CRESP Mode: Ignore CRESP
+      htmx00000 : Pre-Allocate maximum memory buffers (8)
+      htmx10000 : Pre-Allocate fewer memory buffers (4)
+      When htm_mode_q(1 TO 2) == 01, i.e. OTHER
+      00000htmx : Pre-Allocate maximum memory buffers (8)
+      00001htmx : Pre-Allocate fewer memory buffers (4)
+      0000xmmmx : mmm for optional external mux control
+      0000htmx0 : Both -other- trace buses to NHTM0
+      0000htmx1 : Other trace bus0 to nhtm0, trace bus1 to nhtm1. High BW
+      When htm_mode_q(1 TO 2) == 10, i.e. OCC
+      00000htm0 : Pre-Allocate maximum memory buffers (8)
+      00001htm0 : Pre-Allocate fewer memory buffers (4)
+      0000xmmm0 : mmm for optional external mux control
+  </description>
+  <valueType>uint16</valueType>
+  <default>0x0040</default>
+  <writeable/>
+  <persistRuntime/>
+</attribute>
+
+<attribute>
+  <id>ATTR_NHTM_HTMSC_MODE_SYNC_STAMP_FORCE</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description> Control the number of cycles to wait to force a synchronization
+                stamp or reset the timer.  For NHTM only.
+                HTM Collection Mode Register (19:21).
+  </description>
+  <valueType>uint8</valueType>
+  <initToZero/>
+  <writeable/>
+  <persistRuntime/>
+</attribute>
+
+<attribute>
+  <id>ATTR_NHTM_HTMSC_MODE_WRITETOIO</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description> Use space option. For NHTM only.
+                HTM Collection Mode Register (22).
+                0 = Use HTM_CL_Write op to target system memory.
+                    Do pre-allocation sequence. (default)
+                1 = Use ci_pr_st op to target anywhere else.
+                    Dont do pre-allocate sequence.
+  </description>
+  <valueType>uint8</valueType>
+  <enum> DISABLE = 0x0, ENABLE = 0x1 </enum>
   <initToZero/>
   <writeable/>
   <persistRuntime/>
@@ -272,6 +357,23 @@
                 HTM Filter Control Register (25:25).
                 In Fabric trace mode, defines the TTAG/Scope/Source pattern to
                 match in the RCMD and CRESP:
+                When DD1: program Port, this controls both HTMs
+                When DD2: program Port0 only
+  </description>
+  <valueType>uint8</valueType>
+  <initToZero/>
+  <writeable/>
+  <persistRuntime/>
+</attribute>
+
+<attribute>
+  <id>ATTR_HTMSC_FILT_PORT1_PAT</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description> Nest HTM: Filter Pattern.
+                HTM Filter Control Register (25:25).
+                In Fabric trace mode, defines the TTAG/Scope/Source pattern to
+                match in the RCMD and CRESP:
+                DD2 ONLY
   </description>
   <valueType>uint8</valueType>
   <initToZero/>
@@ -334,6 +436,7 @@
                 OCC commands are captured in OCC mode.
                 The inversion of this attribute value will be programmed into
                 bits 47:48 and 55:58 of HTM Ttype Filter Control Register.
+                When DD2 program only bits 
   </description>
   <valueType>uint32</valueType>
   <initToZero/>
@@ -388,6 +491,27 @@
                 OCC commands are captured in OCC mode.
                 The inversion of this attribute value will be programmed into
                 bits 54:54 of HTM Ttype Filter Control Register.
+                When DD1: program Port, this controls both HTMs
+                When DD2: program only Port0
+  </description>
+  <valueType>uint8</valueType>
+  <initToZero/>
+  <writeable/>
+  <persistRuntime/>
+</attribute>
+
+<attribute>
+  <id>ATTR_HTMSC_FILT_PORT1_MASK</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description> Nest HTM FABRIC: Pattern mask.
+                HTM Filter Control Register (54:54).
+                Pattern matching will apply only to bits set in this attribute.
+                If all bits are clear, no pattern/masking is done and all
+                Cresp/rcmd are captured in Fabric trace mode and all
+                OCC commands are captured in OCC mode.
+                The inversion of this attribute value will be programmed into
+                bits 54:54 of HTM Ttype Filter Control Register.
+                DD2 only
   </description>
   <valueType>uint8</valueType>
   <initToZero/>
@@ -411,240 +535,6 @@
   <persistRuntime/>
 </attribute>
 
-<!-- **************************************************
-        Attributes for HTM Collection Mode Register
-     ************************************************** -->
-
-<!-- **** NHTM attributes only ***
--->
-<attribute>
-  <id>ATTR_NHTM_HTMSC_MODE_CONTENT_SEL</id>
-  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
-  <description> Nest HTM: defines the NHTM trace mode.
-                HTM Collection Mode Register (1:2).
-                Only FABRIC is supported at this time.
-  </description>
-  <valueType>uint8</valueType>
-  <enum> FABRIC = 0x0, EVENT = 0x1, OCC = 0x2 </enum>
-  <initToZero/>
-  <writeable/>
-  <persistRuntime/>
-</attribute>
-
-<attribute>
-  <id>ATTR_NHTM_HTMSC_MODE_CAPTURE</id>
-  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
-  <description>
-      HTMSC_MODE_CAPTURE: HTM capture mode bit definition according to Trace Mode
-      When htm_mode_q(1 TO 2) == 00, i.e. FABRIC
-      456789012
-      0htmx0000 : Ignore HTM generated data writes
-      1htmx0000 : Capture htm generated data writes
-      x0htm0000 : Filtering ignored on PMISC (always trace PMISC and Report Hang)
-      x1htm0000 : Filtering applied on ttype = PMISC and ttype = report hang
-      xx00x0000 : CRESP Mode: Flush CRESP Queue to avoid overrun (default)
-      xx01x0000 : CRESP Mode: Reserved
-      xx10x0000 : CRESP Mode: Enable Precise CRESP Mode
-      xx11x0000 : CRESP Mode: Ignore CRESP
-      htmx00000 : Pre-Allocate maximum memory buffers (8)
-      htmx10000 : Pre-Allocate fewer memory buffers (4)
-      When htm_mode_q(1 TO 2) == 01, i.e. OTHER
-      00000htmx : Pre-Allocate maximum memory buffers (8)
-      00001htmx : Pre-Allocate fewer memory buffers (4)
-      0000xmmmx : mmm for optional external mux control
-      0000htmx0 : Both -other- trace buses to NHTM0
-      0000htmx1 : Other trace bus0 to nhtm0, trace bus1 to nhtm1. High BW
-      When htm_mode_q(1 TO 2) == 10, i.e. OCC
-      00000htm0 : Pre-Allocate maximum memory buffers (8)
-      00001htm0 : Pre-Allocate fewer memory buffers (4)
-      0000xmmm0 : mmm for optional external mux control
-  </description>
-  <valueType>uint16</valueType>
-  <default>0x0040</default>
-  <writeable/>
-  <persistRuntime/>
-</attribute>
-
-<attribute>
-  <id>ATTR_NHTM_HTMSC_MODE_SYNC_STAMP_FORCE</id>
-  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
-  <description> Control the number of cycles to wait to force a synchronization
-                stamp or reset the timer.  For NHTM only.
-                HTM Collection Mode Register (19:21).
-  </description>
-  <valueType>uint8</valueType>
-  <initToZero/>
-  <writeable/>
-  <persistRuntime/>
-</attribute>
-
-<attribute>
-  <id>ATTR_NHTM_HTMSC_MODE_WRITETOIO</id>
-  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
-  <description> Use space option. For NHTM only.
-                HTM Collection Mode Register (22).
-                0 = Use HTM_CL_Write op to target system memory.
-                    Do pre-allocation sequence. (default)
-                1 = Use ci_pr_st op to target anywhere else.
-                    Dont do pre-allocate sequence.
-  </description>
-  <valueType>uint8</valueType>
-  <enum> DISABLE = 0x0, ENABLE = 0x1 </enum>
-  <initToZero/>
-  <writeable/>
-  <persistRuntime/>
-</attribute>
-
-<!-- **** CHTM attributes only ***
--->
-<attribute>
-  <id>ATTR_CHTM_HTMSC_MODE_CONTENT_SEL</id>
-  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
-  <description> Core HTM: defines the CHTM trace mode.
-                HTM Collection Mode Register (1:2).
-                Only Direct Memory Write mode (IMA) is supported at this time.
-  </description>
-  <valueType>uint8</valueType>
-  <enum> CI = 0x0, LLAT = 0x1, PPE = 0x2, DMW = 0x3 </enum>
-  <initToZero/>
-  <writeable/>
-  <persistRuntime/>
-</attribute>
-
-<attribute>
-  <id>ATTR_CHTM_HTMSC_MODE_CAPTURE</id>
-  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
-  <description> Core HTM: defines capture mode according to trace mode.
-                HTM Collection Mode Register (4:9).
-                When htm_mode_q(1 TO 2) == 00, i.e. Core Instruction Trace
-                  00xxxx : tc_pc_trace_active asserted when HTM_STAT[Tracing]=1 to purge the ERAT when entering and exitting trace
-                  01xxxx : tc_pc_trace_active asserted when HTM_MODE[HTM_Trace_enable]=1 to purge the ERAT only at the beginning
-                When htm_mode_q(1 TO 2) == 01, i.e. LLAT Trace
-                  0xxxxx : capture on assertion of l2_htm_llat_disp_req, i.e. any dispatch request
-                  1xxxxx : capture on assertion of l2_htm_llat_disp_req AND l2_llat_htm_rcdisp_occurred, i.e. only on passed dispatch
-                  x0xxxx : capture on assertion of l2_htm_llat_disp_req, i.e. loads or stores
-                  x1xxxx : capture on assertion of l2_htm_llat_disp_req AND l2_llat_htm_rcdisp_ld_not_st, i.e. only loads
-                  xx0xxx : capture on assertion of l2_llat_htm_pbl3hit_dval
-                  xx1xxx : no capture on assertion of l2_llat_htm_pbl3hit_dval - enable embedded timestamp
-                When htm_mode_q(1 TO 2) == 11, i.e. Direct Memory Write
-                  1xxxxx : Enable HPMC-IMA Mode
-  </description>
-  <valueType>uint32</valueType>
-  <initToZero/>
-  <writeable/>
-  <persistRuntime/>
-</attribute>
-
-<attribute>
-  <id>ATTR_CHTM_HTMSC_MODE_CORE_INSTR_STALL</id>
-  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
-  <description> For CHTM only.
-                 0: Core execution is stalled whenever the data buffers are almost full to prevent losing records.
-                 1: Core execution is never stalled and entries may be discarded when buffer is full
-  </description>
-  <valueType>uint8</valueType>
-  <enum> ENABLE = 0x0, DISABLE = 0x1 </enum>
-  <initToZero/>
-  <writeable/>
-  <persistRuntime/>
-</attribute>
-
-<!-- **** Common attributes for both NHTM & CHTM ***
--->
-<attribute>
-  <id>ATTR_HTMSC_MODE_WRAP</id>
-  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
-  <description> Trace Wrap mode, used for both NHTM and CHTM
-                HTM Collection Mode Register (13).
-                0 = Wrap trace to beginning of Trace Memory
-                1 = Stop trace when top of Trace Memory is reached
-  </description>
-  <valueType>uint8</valueType>
-  <enum> ENABLE = 0x0, DISABLE = 0x1</enum>
-  <initToZero/>
-  <writeable/>
-  <persistRuntime/>
-</attribute>
-
-<attribute>
-  <id>ATTR_HTMSC_MODE_DIS_TSTAMP</id>
-  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
-  <description> TimeStamp Writes option, used for both NHTM and CHTM
-                HTM Collection Mode Register (14).
-                0 = Write of timestamps enabled to indicate elapsed time
-                    between records.
-                1 = Timestamps written only to indicate record loss
-  </description>
-  <valueType>uint8</valueType>
-  <enum> ENABLE = 0x0, DISABLE = 0x1 </enum>
-  <initToZero/>
-  <writeable/>
-  <persistRuntime/>
-</attribute>
-
-<attribute>
-  <id>ATTR_HTMSC_MODE_SINGLE_TSTAMP</id>
-  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
-  <description> Overflow Timestamps option, used for both NHTM and CHTM.
-                HTM Collection Mode Register (15).
-                0 = Timestamp written to indicate elapsed time overflow.
-                1 = Only one timestamp is written between entries, overflow
-                    indication is lost
-  </description>
-  <valueType>uint8</valueType>
-  <enum> DISABLE = 0x0, ENABLE = 0x1 </enum>
-  <initToZero/>
-  <writeable/>
-  <persistRuntime/>
-</attribute>
-
-<attribute>
-  <id>ATTR_HTMSC_MODE_MARKERS_ONLY</id>
-  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
-  <description> Nest HTM: Stamp/Marker only mode.
-                HTM Collection Mode Register (17).
-                0 = Normal trace
-                1 = Ignore incoming trace data and save only markers caused
-                    by HTM_TRIG writes,
-  </description>
-  <valueType>uint8</valueType>
-  <enum> DISABLE = 0x0, ENABLE = 0x1 </enum>
-  <initToZero/>
-  <writeable/>
-  <persistRuntime/>
-</attribute>
-
-<attribute>
-  <id>ATTR_HTMSC_MODE_DIS_FORCE_GROUP_SCOPE</id>
-  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
-  <description> Nest HTM: Group scope option.
-                HTM Collection Mode Register (18).
-                This is a powerbus debug bit
-                0 = htm write ops sent with group scope
-                1 = htm write ops sent with Vg scope using programmed
-                    target bits.
-  </description>
-  <valueType>uint8</valueType>
-  <enum> DISABLE = 0x0, ENABLE = 0x1 </enum>
-  <initToZero/>
-  <writeable/>
-  <persistRuntime/>
-</attribute>
-
-<attribute>
-  <id>ATTR_HTMSC_MODE_VGTARGET</id>
-  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
-  <description> Nest HTM: VG target mode.
-                Stores inverse of HTM Collection Mode Register (24:39).
-                Vg Target bits should be configured if HTM_MEM[scope] is Vg
-                or if Disable Group Scope=1
-  </description>
-  <valueType>uint32</valueType>
-  <initToZero/>
-  <writeable/>
-  <persistRuntime/>
-</attribute>
-
 <!-- ********************************************************
         Attributes for HTM Memory Configuration Register
      ******************************************************** -->
@@ -655,7 +545,7 @@
                 HTM Memory Configuration Register (1:3)
   </description>
   <valueType>uint8</valueType>
-  <enum> LOCAL = 0x0, NEARNODE = 0x1, GROUP = 0x3, REMOTE = 0x4, VECTORED = 0x5 </enum>
+  <enum> LOCAL = 0x0, NEARNODE = 0x2, GROUP = 0x3, REMOTE = 0x4, VECTORED = 0x5 </enum>
   <initToZero/>
   <writeable/>
   <persistRuntime/>
@@ -859,6 +749,12 @@
   <persistRuntime/>
 </attribute>
 
+
+
+<!-- **** CHTM attributes ***-->
+<!-- **************************************************
+     Attributes for PDBAR Address and Scope
+     ************************************************** -->
 <attribute>
   <id>ATTR_HTMSC_IMA_PDBAR_SCOPE</id>
   <targetType>TARGET_TYPE_PROC_CHIP</targetType>
@@ -880,6 +776,7 @@
                  bits must also be initialized.
   </description>
   <valueType>uint8</valueType>
+  <array>32</array>
   <enum> LOCAL = 0x0, NEARNODE = 0x2, GROUP = 0x3, REMOTE = 0x4, VECTORED = 0x5 </enum>
   <initToZero/>
   <writeable/>
@@ -891,10 +788,415 @@
   <targetType>TARGET_TYPE_PROC_CHIP</targetType>
   <description>  IMA Write Physical Base Address
   </description>
+  <array>32</array>
   <valueType>uint64</valueType>
   <initToZero/>
+  <writeable/>
+  <persistRuntime/>
+</attribute>
+
+<attribute>
+  <id>ATTR_HTMSC_MODE_WRAP</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description> Trace Wrap mode, used for both NHTM and CHTM
+                HTM Collection Mode Register (13).
+                0 = Wrap trace to beginning of Trace Memory
+                1 = Stop trace when top of Trace Memory is reached
+  </description>
+  <valueType>uint8</valueType>
+  <enum> ENABLE = 0x0, DISABLE = 0x1</enum>
   <initToZero/>
   <writeable/>
+  <persistRuntime/>
+</attribute>
+
+<attribute>
+  <id>ATTR_HTMSC_MODE_DIS_TSTAMP</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description> TimeStamp Writes option, used for both NHTM and CHTM
+                HTM Collection Mode Register (14).
+                0 = Write of timestamps enabled to indicate elapsed time
+                    between records.
+                1 = Timestamps written only to indicate record loss
+  </description>
+  <valueType>uint8</valueType>
+  <enum> ENABLE = 0x0, DISABLE = 0x1 </enum>
+  <initToZero/>
+  <writeable/>
+  <persistRuntime/>
+</attribute>
+
+<attribute>
+  <id>ATTR_HTMSC_MODE_SINGLE_TSTAMP</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description> Overflow Timestamps option, used for both NHTM and CHTM.
+                HTM Collection Mode Register (15).
+                0 = Timestamp written to indicate elapsed time overflow.
+                1 = Only one timestamp is written between entries, overflow
+                    indication is lost
+  </description>
+  <valueType>uint8</valueType>
+  <enum> DISABLE = 0x0, ENABLE = 0x1 </enum>
+  <initToZero/>
+  <writeable/>
+  <persistRuntime/>
+</attribute>
+
+<attribute>
+  <id>ATTR_HTMSC_MODE_MARKERS_ONLY</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description> Nest HTM: Stamp/Marker only mode.
+                HTM Collection Mode Register (17).
+                0 = Normal trace
+                1 = Ignore incoming trace data and save only markers caused
+                    by HTM_TRIG writes,
+  </description>
+  <valueType>uint8</valueType>
+  <enum> DISABLE = 0x0, ENABLE = 0x1 </enum>
+  <initToZero/>
+  <writeable/>
+  <persistRuntime/>
+</attribute>
+
+<attribute>
+  <id>ATTR_HTMSC_MODE_DIS_FORCE_GROUP_SCOPE</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description> Nest HTM: Group scope option.
+                HTM Collection Mode Register (18).
+                This is a powerbus debug bit
+                0 = htm write ops sent with group scope
+                1 = htm write ops sent with Vg scope using programmed
+                    target bits.
+  </description>
+  <valueType>uint8</valueType>
+  <enum> DISABLE = 0x0, ENABLE = 0x1 </enum>
+  <initToZero/>
+  <writeable/>
+  <persistRuntime/>
+</attribute>
+
+<attribute>
+  <id>ATTR_HTMSC_MODE_VGTARGET</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description> Nest HTM: VG target mode.
+                Stores inverse of HTM Collection Mode Register (24:39).
+                Vg Target bits should be configured if HTM_MEM[scope] is Vg
+                or if Disable Group Scope=1
+  </description>
+  <valueType>uint32</valueType>
+  <initToZero/>
+  <writeable/>
+  <persistRuntime/>
+</attribute>
+
+<!-- **************************************************
+     Attributes for cHTM MODE
+     ************************************************** -->
+<attribute>
+  <id>ATTR_CHTM_MODE_LLAT_CAPTURE_FAIL_DISP_DIS</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description> If disabled (0): Allow capture of all dispatches
+  </description>
+  <valueType>uint8</valueType>
+  <array>32</array>
+  <initToZero/>
+  <enum> DISABLE = 0x0, ENABLE = 0x1 </enum>
+  <writeable/>
+  <persistRuntime/>
+</attribute>
+
+<attribute>
+  <id>ATTR_CHTM_MODE_LLAT_CAPTURE_STORE_DIS</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description> If disabled (0): Allow capture of stores
+  </description>
+  <valueType>uint8</valueType>
+  <array>32</array>
+  <initToZero/>
+  <enum> DISABLE = 0x0, ENABLE = 0x1 </enum>
+  <writeable/>
+  <persistRuntime/>
+</attribute>
+
+<attribute>
+  <id>ATTR_CHTM_MODE_LLAT_CAPTURE_PBL3_HIT_DIS</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description> If disabled (0): Allow capture of l3 hits
+  </description>
+  <valueType>uint8</valueType>
+  <array>32</array>
+  <initToZero/>
+  <enum> ENABLE = 0x0, DISABLE = 0x1 </enum>
+  <writeable/>
+  <persistRuntime/>
+</attribute>
+
+<attribute>
+  <id>ATTR_CHTM_MODE_LLAT_IMBEDDED_TS</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description> Enables embedded timestamps for LLAT tracing
+  </description>
+  <valueType>uint8</valueType>
+  <array>32</array>
+  <initToZero/>
+  <enum> DISABLE = 0x0, ENABLE = 0x1 </enum>
+  <writeable/>
+  <persistRuntime/>
+</attribute>
+
+<attribute>
+  <id>ATTR_CHTM_MODE_CORE_CAPTURE_TRACE_FULL_ON_ERROR</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description> Prevent the core from writing to the HTM when in error state
+  </description>
+  <valueType>uint8</valueType>
+  <array>32</array>
+  <initToZero/>
+  <enum> DISABLE = 0x0, ENABLE = 0x1 </enum>
+  <writeable/>
+  <persistRuntime/>
+</attribute>
+
+<attribute>
+  <id>ATTR_CHTM_MODE_LLAT_PAUSE_ON_PURGE</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description> If asserted: LLAT tracing will insert a stop marker
+                  in the trace when a purge is requested from pervasive
+  </description>
+  <valueType>uint8</valueType>
+  <array>32</array>
+  <initToZero/>
+  <enum> DISABLE = 0x0, ENABLE = 0x1 </enum>
+  <writeable/>
+  <persistRuntime/>
+</attribute>
+
+<attribute>
+  <id>ATTR_CHTM_MODE_CORE_WRAP</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description> Allow cHTM to "wrap" in memory, otherwise stop when top of memory is reached
+  </description>
+  <valueType>uint8</valueType>
+  <array>32</array>
+  <initToZero/>
+  <enum> DISABLE = 0x0, ENABLE = 0x1 </enum>
+  <writeable/>
+  <persistRuntime/>
+</attribute>
+
+<attribute>
+  <id>ATTR_CHTM_MODE_DIS_TSTAMP</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description> Disable time stamps between records that exceed the embeded time stamp.
+                  Recommended to disable for LLAT tracing.
+  </description>
+  <valueType>uint8</valueType>
+  <array>32</array>
+  <initToZero/>
+  <enum> ENABLE = 0x0, DISABLE = 0x1 </enum>
+  <writeable/>
+  <persistRuntime/>
+</attribute>
+
+<attribute>
+  <id>ATTR_CHTM_MODE_SINGLE_TIME_STAMP</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description> Allow only a single time stamp to be written between records.
+  </description>
+  <valueType>uint8</valueType>
+  <array>32</array>
+  <initToZero/>
+  <enum> DISABLE = 0x0, ENABLE = 0x1 </enum>
+  <writeable/>
+  <persistRuntime/>
+</attribute>
+
+<attribute>
+  <id>ATTR_CHTM_MODE_DIS_STALL</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description> If disabled (0): the core will stop executing instructions when the
+                  trace buffer is full. Core trace only.
+  </description>
+  <valueType>uint8</valueType>
+  <array>32</array>
+  <initToZero/>
+  <enum> DISABLE = 0x0, ENABLE = 0x1 </enum>
+  <writeable/>
+  <persistRuntime/>
+</attribute>
+
+<attribute>
+  <id>ATTR_CHTM_MODE_MARKERS_ONLY</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description> Only print markers to trace.
+  </description>
+  <valueType>uint8</valueType>
+  <array>32</array>
+  <initToZero/>
+  <enum> DISABLE = 0x0, ENABLE = 0x1 </enum>
+  <writeable/>
+  <persistRuntime/>
+</attribute>
+
+<attribute>
+  <id>ATTR_CHTM_MODE_DIS_GROUP</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description> Force scope to VG if group or nodal scope requested
+  </description>
+  <valueType>uint8</valueType>
+  <array>32</array>
+  <initToZero/>
+  <enum> DISABLE = 0x0, ENABLE = 0x1 </enum>
+  <writeable/>
+  <persistRuntime/>
+</attribute>
+
+<attribute>
+  <id>ATTR_CHTM_MODE_VGTARGET</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description> Target bits used in VG mode, if requested.
+                 The bits will be inverted before being programmed
+  </description>
+  <valueType>uint8</valueType>
+  <array>32</array>
+  <initToZero/>
+  <writeable/>
+  <persistRuntime/>
+</attribute>
+
+<!-- **************************************************
+     Attributes for IMA trace
+     ************************************************** -->
+<attribute>
+  <id>ATTR_CHTM_HTMSC_MODE_CORE_INSTR_STALL</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description> For CHTM only.
+                 0: Core execution is stalled whenever the data buffers are almost full to prevent losing records.
+                 1: Core execution is never stalled and entries may be discarded when buffer is full
+  </description>
+  <valueType>uint8</valueType>
+  <array>32</array>
+  <enum> ENABLE = 0x0, DISABLE = 0x1 </enum>
+  <initToZero/>
+  <writeable/>
+  <persistRuntime/>
+</attribute>
+
+<attribute>
+  <id>ATTR_CHTM_HTMSC_IMA_EVENT_MASK_IC_TAP</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description> For CHTM only.
+                 000 = ~.5ms
+                 001 = ~1ms
+                 010 = ~4ms
+                 011 = ~16ms
+                 100 = ~64ms
+                 101 = ~256ms
+                 110 = ~1s
+                 111 = ~4s 
+  </description>
+  <valueType>uint8</valueType>
+  <array>32</array>
+  <default>0x03</default>
+  <writeable/>
+  <persistRuntime/>
+</attribute>
+
+<attribute>
+  <id>ATTR_CHTM_HTMSC_IMA_EVENT_MASK_DIS_WRAP</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description> For CHTM only.
+                 Prevent trace from wrapping. Only collect one round and then disable this trace.
+  </description>
+  <valueType>uint8</valueType>
+  <array>32</array>
+  <default>0x00</default>
+  <enum> ENABLE=0x0, DISABLE=0x1 </enum>
+  <writeable/>
+  <initToZero/>
+  <persistRuntime/>
+</attribute>
+
+<attribute>
+  <id>ATTR_CHTM_HTMSC_IMA_EVENT_MASK_FREEZE</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description> For CHTM only.
+                 Prevent IMA from posting by freezing counters
+  </description>
+  <valueType>uint8</valueType>
+  <array>32</array>
+  <default>0x00</default>
+  <enum> DISABLE=0x0, ENABLE=0x1 </enum>
+  <writeable/>
+  <initToZero/>
+  <persistRuntime/>
+</attribute>
+
+<attribute>
+  <id>ATTR_CHTM_HTMSC_IMA_EVENT_MASK_EN_D_PRE</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description> For CHTM only.
+                 Allow the IMA to count L1 data prefetches
+  </description>
+  <valueType>uint8</valueType>
+  <array>32</array>
+  <enum> DISABLE=0x0, ENABLE=0x1 </enum>
+  <writeable/>
+  <initToZero/>
+  <persistRuntime/>
+</attribute>
+
+<attribute>
+  <id>ATTR_CHTM_HTMSC_IMA_EVENT_MASK_EN_I_PRE</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description> For CHTM only.
+                 Allow the IMA to count L1 instruction prefetches
+  </description>
+  <valueType>uint8</valueType>
+  <array>32</array>
+  <enum> DISABLE=0x0, ENABLE=0x1 </enum>
+  <writeable/>
+  <initToZero/>
+  <persistRuntime/>
+</attribute>
+
+<attribute>
+  <id>ATTR_CHTM_HTMSC_IMA_EVENT_MASK_ONE_EVENT</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description> For CHTM only.
+                 Only sample one event and one thread
+  </description>
+  <valueType>uint8</valueType>
+  <array>32</array>
+  <enum> DISABLE=0x0, ENABLE=0x1 </enum>
+  <writeable/>
+  <initToZero/>
+  <persistRuntime/>
+</attribute>
+
+<attribute>
+  <id>ATTR_CHTM_HTMSC_IMA_EVENT_MASK_EVENT_VTID</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description> For CHTM only.
+                 The thread to be sampled by one event mode
+  </description>
+  <valueType>uint8</valueType>
+  <array>32</array>
+  <writeable/>
+  <initToZero/>
+  <persistRuntime/>
+</attribute>
+
+<attribute>
+  <id>ATTR_CHTM_HTMSC_IMA_EVENT_MASK_EVENT_SELECT</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description> For CHTM only.
+                 The event to be sampled by one event mode
+  </description>
+  <valueType>uint8</valueType>
+  <array>32</array>
+  <writeable/>
+  <initToZero/>
   <persistRuntime/>
 </attribute>
 

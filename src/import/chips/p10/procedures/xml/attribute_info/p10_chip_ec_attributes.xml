@@ -1086,4 +1086,20 @@
    </chipEcFeature>
   </attribute>
   <!-- ******************************************************************** -->
+  <attribute>
+   <id>ATTR_CHIP_EC_FEATURE_CHTM_ENABLE</id>
+   <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+   <description>
+     Enable setup of cHTMs for core tracing activity. DD2 feature only.
+   </description>
+   <chipEcFeature>
+     <chip>
+       <name>ATTR_EC</name>
+       <ec>
+         <value>0x10</value>
+         <test>GREATER_THAN</test>
+       </ec>
+     </chip>
+   </chipEcFeature>
+  </attribute>
 </attributes>

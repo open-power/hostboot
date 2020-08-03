@@ -141,6 +141,14 @@ static const uint32_t QME_CDBB_MESSAGE_NUMBER_LEN = 8;
 //<< [QME_CDBB]
 // c/reg00009.H
 
+//>> [NC_NCCHTM_NCCHTSC_HTM_LAST]
+static const uint64_t NC_NCCHTM_NCCHTSC_HTM_LAST = 0x20010683ull;
+
+static const uint32_t NC_NCCHTM_NCCHTSC_HTM_LAST_HTM_LAST_ADDRESS = 12;
+static const uint32_t NC_NCCHTM_NCCHTSC_HTM_LAST_HTM_LAST_ADDRESS_LEN = 45;
+//<< [NC_NCCHTM_NCCHTSC_HTM_LAST]
+// c/reg00009.H
+
 //>>THE END<<
 
 #ifndef __PPE_HCODE__
