@@ -195,6 +195,69 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
+///
+/// @brief Workaround for exp_omi-setup to set explorer cdr bw value
+/// @param[in] i_target OCMB chip
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success
+///
+fapi2::ReturnCode cdr_bw_override(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target)
+{
+    fapi2::buffer<uint64_t> l_exp_mdsp_pcib_tr_config_0;
+    fapi2::buffer<uint64_t> l_exp_mdsp_pcib_tr_config_1;
+    constexpr uint32_t EXPLR_MDSP_PCIB_TR_CONFIG_0_BASE = 0x200A00;
+    constexpr uint32_t EXPLR_MDSP_PCIB_TR_CONFIG_1_BASE = 0x200A04;
+    uint32_t l_addr_explr_mdsp_pcib_tr_config_0 = EXPLR_MDSP_PCIB_TR_CONFIG_0_BASE;
+    uint32_t l_addr_explr_mdsp_pcib_tr_config_1 = EXPLR_MDSP_PCIB_TR_CONFIG_1_BASE;
+    constexpr uint8_t EXP_NUM_LANES = 8;
+    constexpr uint8_t CDR_BW_OVERRIDE_START = 57;
+    constexpr uint8_t CDR_BW_OVERRIDE_LEN = 7;
+    constexpr uint8_t CONFIG_UPDATE_START = 54;
+    constexpr uint8_t CONFIG_UPDATE_LEN = 1;
+    uint8_t l_cdr_bw_val = 47;  //ideal default value found by Chris Steffen experiments
+    uint8_t lane = 0;
+
+    // *** Hardcoing for now to get merged in as quickly as possible.  Will update to use an attribute ***
+    // get cdr bw override from attribute
+    //API_TRY(FAPI_ATTR_GET(fapi2::ATTR_EXP_CDR_BW_OVERRIDE, i_target, l_cdr_bw_val),
+    //        "Error getting ATTR__EXP_CDR_BW_OVERRIDE");
+
+    // Set configurable exp CDR BW value
+    lane = 0;
+
+    while (lane < EXP_NUM_LANES)
+    {
+        // set local config addresses based on lane value
+        l_addr_explr_mdsp_pcib_tr_config_0 = EXPLR_MDSP_PCIB_TR_CONFIG_0_BASE + (lane << 12);
+        l_addr_explr_mdsp_pcib_tr_config_1 = EXPLR_MDSP_PCIB_TR_CONFIG_1_BASE + (lane << 12);
+
+        // Update the CDR Values:
+        FAPI_TRY(fapi2::getScom(i_target, l_addr_explr_mdsp_pcib_tr_config_1, l_exp_mdsp_pcib_tr_config_1),
+                 "Error reading EXPLR_DLX_DL0_CONFIG1 on %s", mss::c_str(i_target));
+        l_exp_mdsp_pcib_tr_config_1.insertFromRight<CDR_BW_OVERRIDE_START,
+                                                    CDR_BW_OVERRIDE_LEN>(l_cdr_bw_val);
+        FAPI_TRY(fapi2::putScom(i_target, l_addr_explr_mdsp_pcib_tr_config_1, l_exp_mdsp_pcib_tr_config_1),
+                 "Error writing EXPLR_DLX_DL0_CONFIG1 on %s", mss::c_str(i_target));
+
+
+        // Toggle the config update bit:
+        FAPI_TRY(fapi2::getScom(i_target, l_addr_explr_mdsp_pcib_tr_config_0, l_exp_mdsp_pcib_tr_config_0),
+                 "Error reading EXPLR_DLX_DL0_CONFIG0 on %s", mss::c_str(i_target));
+        l_exp_mdsp_pcib_tr_config_0.insertFromRight<CONFIG_UPDATE_START,
+                                                    CONFIG_UPDATE_LEN>(1);
+        FAPI_TRY(fapi2::putScom(i_target, l_addr_explr_mdsp_pcib_tr_config_0, l_exp_mdsp_pcib_tr_config_0),
+                 "Error writing EXPLR_DLX_DL0_CONFIG0 on %s", mss::c_str(i_target));
+        l_exp_mdsp_pcib_tr_config_0.insertFromRight<CONFIG_UPDATE_START,
+                                                    CONFIG_UPDATE_LEN>(0);
+        FAPI_TRY(fapi2::putScom(i_target, l_addr_explr_mdsp_pcib_tr_config_0, l_exp_mdsp_pcib_tr_config_0),
+                 "Error writing EXPLR_DLX_DL0_CONFIG0 on %s", mss::c_str(i_target));
+
+        lane++;
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
 } // omi
 } // workarounds
 } // exp

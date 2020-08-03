@@ -164,6 +164,9 @@ extern "C"
             FAPI_INF("%s EDPL enable: %s", mss::c_str(i_target), l_edpl_disable ? "false" : "true");
         }
 
+        // Update explorer CDR BW value to 0x2F based on Chris Steffen's testing
+        FAPI_TRY(mss::exp::workarounds::omi::cdr_bw_override(i_target));
+
         // Perform p10 workaround
         // Train mode 6 (state 3)
         FAPI_TRY(mss::exp::workarounds::omi::pre_training_prbs(i_target));

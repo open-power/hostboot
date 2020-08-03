@@ -98,6 +98,14 @@ fapi2::ReturnCode training_prbs(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP
 ///
 fapi2::ReturnCode pre_training_prbs(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target);
 
+///
+/// @brief Workaround for exp_omi-setup to set explorer cdr bw value
+/// @param[in] i_target OCMB chip
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success
+///
+fapi2::ReturnCode cdr_bw_override(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target);
+
+
 } // omi
 } // workarounds
 } // exp
