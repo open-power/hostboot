@@ -193,12 +193,10 @@ COPY_RENAME_FILES = \
     hbplugins/$(notdir $(file)):$(file):errltool) \
     $(foreach file, $(call ROOTPATH_WILDCARD,src/usr/scom/plugins/*.*), \
     hbplugins/$(notdir $(file)):$(file):errltool) \
-    hbplugins/prdf/$(notdir $(file)):$(file):errltool) \
     hwas/common/hwasCallout.H:src/include/usr/hwas/common/hwasCallout.H:errltool \
     devicefw/driverif.H:src/include/usr/devicefw/driverif.H:errltool \
     devicefw/userif.H:src/include/usr/devicefw/userif.H:errltool
 
-#
 # Symbolic links created in the target.
 #
 # Format is <dest link>:<source file>:<comma separated targets>
