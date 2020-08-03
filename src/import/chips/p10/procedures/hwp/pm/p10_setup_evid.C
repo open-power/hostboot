@@ -690,21 +690,33 @@ p10_update_dpll_value (const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_targ
 {
     fapi2::buffer<uint64_t> l_data64;
 
+    // Only change the DPLL if the values are non-zero
     do
     {
-        //FMax
-        l_data64.insertFromRight<NEST_DPLL_FREQ_FMAX,
-                                 NEST_DPLL_FREQ_FMAX_LEN>(i_safe_mode_dpll_value);
-        //FMin
-        l_data64.insertFromRight<NEST_DPLL_FREQ_FMIN,
-                                 NEST_DPLL_FREQ_FMIN_LEN>(i_safe_mode_dpll_fmin_value);
-        //FMult
-        l_data64.insertFromRight<NEST_DPLL_FREQ_FMULT,
-                                 NEST_DPLL_FREQ_FMULT_LEN>(i_safe_mode_dpll_value);
+
+        FAPI_TRY(fapi2::getScom(i_target, NEST_DPLL_FREQ, l_data64),
+                 "ERROR: Failed to read for EQ_QPPM_DPLL_FREQ");
+
+        if (i_safe_mode_dpll_value)
+        {
+            //FMax
+            l_data64.insertFromRight<NEST_DPLL_FREQ_FMAX,
+                                     NEST_DPLL_FREQ_FMAX_LEN>(i_safe_mode_dpll_value);
+
+            //FMult
+            l_data64.insertFromRight<NEST_DPLL_FREQ_FMULT,
+                                     NEST_DPLL_FREQ_FMULT_LEN>(i_safe_mode_dpll_value);
+        }
+
+        if (i_safe_mode_dpll_fmin_value)
+        {
+            //FMin
+            l_data64.insertFromRight<NEST_DPLL_FREQ_FMIN,
+                                     NEST_DPLL_FREQ_FMIN_LEN>(i_safe_mode_dpll_fmin_value);
+        }
 
         FAPI_TRY(fapi2::putScom(i_target, NEST_DPLL_FREQ, l_data64),
                  "ERROR: Failed to write for EQ_QPPM_DPLL_FREQ");
-
     }
     while (0);
 
