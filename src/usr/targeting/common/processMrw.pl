@@ -5670,6 +5670,209 @@ sub __printHostbootTargetHierarchy__
     } # end foreach my $child (@{ $children })
 } # end sub __printHostbootTargetHierarchy__
 
+#--------------------------------------------------
+# @brief A utility function to extract the DIMM data for populating the DIMM Data
+#        Layout spread sheet for a system
+#
+# @note Call this function as the last function in main to get the data.  It is
+#       self contained and only needs the global target object to run. Use the
+#       -s option to silence warnings.
+#
+# @param [in] $targetObj - The global target object.
+#--------------------------------------------------
+sub extractDimmData
+{
+    my $targetObj = shift;
+
+    my @dimmDataLayoutArray;
+    my $systemName = $targetObj->getSystemName();
+    my $header0 = "";
+
+    if ($systemName =~ m/DENALI/)
+    {
+        $header0 = "\n\nDenali Dimm Layout\n";
+
+        # Denali Layout - matches the output of the spreadsheet
+        my @p1Left = qw(ddimm-08 ddimm-09 ddimm-10 ddimm-11 ddimm-12 ddimm-13 ddimm-14 ddimm-15);
+        my @p3Left = qw(ddimm-24 ddimm-25 ddimm-26 ddimm-27 ddimm-28 ddimm-29 ddimm-30 ddimm-31);
+        my @p2Left = qw(ddimm-40 ddimm-41 ddimm-42 ddimm-43 ddimm-44 ddimm-45 ddimm-46 ddimm-47);
+        my @p0Left = qw(ddimm-56 ddimm-57 ddimm-58 ddimm-59 ddimm-60 ddimm-61 ddimm-62 ddimm-63);
+
+        my @p1Right = qw(ddimm-00 ddimm-01 ddimm-02 ddimm-03 ddimm-04 ddimm-05 ddimm-06 ddimm-07);
+        my @p3Right = qw(ddimm-16 ddimm-17 ddimm-18 ddimm-19 ddimm-20 ddimm-21 ddimm-22 ddimm-23);
+        my @p2Right = qw(ddimm-32 ddimm-33 ddimm-34 ddimm-35 ddimm-36 ddimm-37 ddimm-38 ddimm-39);
+        my @p0Right = qw(ddimm-48 ddimm-49 ddimm-50 ddimm-51 ddimm-52 ddimm-53 ddimm-54 ddimm-55);
+
+        # Populate the array in the format that the data will be displayed
+        @dimmDataLayoutArray = (\@p1Left, \@p3Left, \@p2Left, \@p0Left, \@p1Right, \@p3Right, \@p2Right, \@p0Right);
+    }
+    elsif ($systemName =~ m/RAINIER/)
+    {
+        $header0 = "\n\nRanier Dimm Layout\n";
+
+        # Rainier Layout - matches the output of the spreadsheet
+        my @p3Left = qw(ddimm-28 ddimm-29 ddimm-30 ddimm-31);
+        my @p2Left = qw(ddimm-20 ddimm-21 ddimm-22 ddimm-23);
+        my @p1Left = qw(ddimm-13 ddimm-14 ddimm-15 ddimm-12);
+        my @p0Left = qw(ddimm-04 ddimm-05 ddimm-06 ddimm-07);
+
+        my @p3Right = qw(ddimm-24 ddimm-25 ddimm-26 ddimm-27);
+        my @p2Right = qw(ddimm-16 ddimm-17 ddimm-18 ddimm-19);
+        my @p1Right = qw(ddimm-08 ddimm-09 ddimm-10 ddimm-11);
+        my @p0Right = qw(ddimm-00 ddimm-01 ddimm-02 ddimm-03);
+
+        # Populate the array in the format that the data will be displayed
+        @dimmDataLayoutArray = (\@p3Left, \@p2Left, \@p1Left, \@p0Left, \@p3Right, \@p2Right, \@p1Right, \@p0Right);
+    }
+    else
+    {
+        die "ERROR: Missing data format layout for system $systemName.\n";
+    }
+
+    # Hash to map the DIMMs of interest to their target
+    my %dimmDataHash;
+
+    # Search all Targets, extracting the DIMMs for node 0
+    foreach my $target (sort keys %{ $targetObj->getAllTargets() })
+    {
+        my $type = $targetObj->getType($target);
+
+        if ( ($type eq "DIMM")   &&
+             ($targetObj->getTargetType($target) eq "lcard-dimm-ddimm")  &&
+             ($targetObj->getAttribute($target, 'AFFINITY_PATH') =~ m/node-0/) )
+        {
+            # Use the position of the DIMM as the key in hash to map to the DIMM target.
+            # The key will need to match what is in the array dimmDataLayoutArray
+            my $dimmId = $targetObj->getAttribute($target, "POSITION");
+            $dimmId = sprintf("ddimm-%0.2d", $dimmId);
+            $dimmDataHash{$dimmId} = $target;
+        }
+    } # foreach my $target ..
+
+    print $header0;
+    my $header1 = "-----------------------------------------------------------------------------------------------------------------------------\n" .
+                  "                             DIMM   OCMB Cronus                                OMI    Engine   DDIMM        OCMB         DIMM\n" .
+                  "PROC Logical Path            FAPI   Target              I2C Path               Chan   Port     HUID         HUID         LOC\n" .
+                  "-----------------------------------------------------------------------------------------------------------------------------";
+    foreach my $proc (@dimmDataLayoutArray)
+    {
+        print $header1;
+        my $count = 0;
+        foreach my $procRow (@$proc)
+        {
+            if (($count % 4) == 0)
+            {
+                print "\n";
+            }
+            my $dimmTarget = $dimmDataHash{$procRow};
+            if (!($dimmTarget eq undef))
+            {
+                __extractDimmData__($targetObj, $dimmTarget);
+                $count++;
+            }
+        }
+        print "\n\n\n";
+    } # foreach my $proc (@dimmDataLayoutArray)
+}
+
+
+#--------------------------------------------------
+# @brief A private method that does the actual gathering of the DIMM Layout Data
+#
+# @param [in] $targetObj  - The global target object.
+# @param [in] $dimmTarget - The DIMM target object to extract the data from
+#--------------------------------------------------
+sub __extractDimmData__
+{
+    my $targetObj = shift;
+    my $dimmTarget = shift;
+
+    my $ddimmAffinity = $targetObj->getAttribute($dimmTarget, 'AFFINITY_PATH');
+
+    # Extract the PROC number from the DIMM's AFFINITY_PATH
+    my $procNum = $ddimmAffinity;
+    $procNum =~ s#.*proc#proc#; # Remove all the characters before the "proc" word
+    $procNum =~ s#/.*##; # Remove all characters after the forward slash that follows the 'proc-#" word
+    $procNum =~ s#proc-*#P#; # Replace "proc" with 'P'
+
+    # Extract the Logical Path (mc-#/mi-#/mcc-#/omi-#) from the DIMM's AFFINITY_PATH
+    $ddimmAffinity =~ s#affinity:sys-0/node-./proc-./##;
+    $ddimmAffinity =~ s#/ocmb_chip-0/mem_port-0/dimm-0##;
+
+    # Get the DIMM's FAPI_POS
+    my $dimmFapiPos = $targetObj->getAttribute($dimmTarget, "FAPI_POS");
+    my $dimmFapiPos = sprintf("%0.3d", $dimmFapiPos);
+
+    # Find the OCMB_CHIP and extract the OCM_CHIP's FAPI_NAME
+    my $ocmbTarget = 0;
+    my $children = $targetObj->getTargetChildren($dimmTarget);
+    foreach my $child (@{ $children })
+    {
+        if ($targetObj->getType($child) eq "OCMB_CHIP")
+        {
+            $ocmbTarget = $child;
+        }
+    }
+    my $ocmbFapiName = $targetObj->getAttribute($ocmbTarget, "FAPI_NAME");
+
+    # Extract the I2C PATH
+    my $dimmId = $targetObj->getAttribute($dimmTarget, "POSITION");
+    $dimmId = sprintf("%0.2d", $dimmId);
+    $dimmId = "ddimm-$dimmId";
+
+    my $dimmI2c = "";
+    my $dimmConn = $targetObj->findConnectionsByDirection($dimmTarget, "I2C", "", 1);
+    foreach my $conn (@{$dimmConn->{CONN}})
+    {
+        $dimmI2c = $conn->{SOURCE};
+        $dimmI2c =~ s#.*master-##;
+        $dimmI2c = uc $dimmI2c;
+        last;
+    }
+    $dimmI2c = "I2C-$dimmI2c";
+    $dimmI2c = sprintf("%11s", $dimmI2c);
+    $dimmI2c = $dimmId .  $dimmI2c;
+
+
+    # Get the OMI Chan
+    my $omiId = 0;
+    my $conn = $targetObj->findConnectionsByDirection($dimmTarget, "OMI", "", 1);
+    foreach my $conn (@{$conn->{CONN}})
+    {
+        # This is a very water down version of the same code as found in
+        # the processDdimmAndChildren function.
+        my $source = $conn->{SOURCE};
+        # Split the source into proc#, mc#, mi#, mcc#, omic#, omi#
+        my @targets = split(/\//, $source);
+        $omiId = sprintf("%6s", (uc $targets[11]) );
+    }
+
+    # Get the Engine Port
+    my $dimmEngine = $targetObj->getAttributeField($dimmTarget, "EEPROM_VPD_PRIMARY_INFO", "engine");
+    if ($dimmEngine == 3)
+    {
+        $dimmEngine = "E";
+    }
+    else
+    {
+        $dimmEngine = "???";
+    }
+
+    my $dimmPort = $targetObj->getAttributeField($dimmTarget, "EEPROM_VPD_PRIMARY_INFO", "port");
+    $dimmPort = sprintf("%0.2d", $dimmPort);
+    $dimmPort = $dimmEngine . $dimmPort;
+
+    # Get the DDIMM & OCMB HUID
+    my $dimmHuid = $targetObj->getAttribute($dimmTarget, "HUID");
+    my $ocmbHuid = $targetObj->getAttribute($ocmbTarget, "HUID");
+
+    # Get the DIMM Location
+    my $dimmLoc = $targetObj->getAttribute($dimmTarget, "STATIC_ABS_LOCATION_CODE");
+    $dimmLoc =~ s#P0-##;
+
+    # Print all the data gathered
+    print "$procNum   $ddimmAffinity    $dimmFapiPos   $ocmbFapiName   $dimmI2c  $omiId   $dimmPort      $dimmHuid   $ocmbHuid   $dimmLoc \n";
+}
 
 ################################################################################
 # Internal tests
