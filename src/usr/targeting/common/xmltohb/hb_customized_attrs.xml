@@ -876,6 +876,13 @@
         <writeable/>
   </attribute>
 
+    <attribute>
+        <!-- We never want to enable Checkstops for special attentions -->
+        <id>ATTR_XSTOP_ON_SPATTN</id>
+        <persistency>volatile</persistency>
+        <default>DISABLED</default>
+        <no_export/>
+    </attribute>
 
     <!-- =====================================================================
      End of customizations definitions
