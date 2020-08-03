@@ -207,6 +207,21 @@ void*    call_mss_freq( void *io_pArgs )
             break;
         }
 
+        //@FIXME-RTC:258326-Remove once we have newer SPD in Simics
+        // Force the OMI frequency to match what we booted with until we get SPD
+        //  and MRW in-sync
+        if( l_newOmiFreq  != l_originalOmiFreq )
+        {
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                      "Forcing computed OMI Frequency (%d) to match our expected value (%d)",
+                      l_newOmiFreq, l_originalOmiFreq);
+            l_newOmiFreq = l_originalOmiFreq;
+            for (const auto & l_proc_target : l_procTargetList)
+            {
+                l_proc_target->setAttr<TARGETING::ATTR_FREQ_OMI_MHZ>(l_originalOmiFreq);
+            }
+        }
+
         // FW examines the master SBE boot scratch registers versus
         // system MRW ATTR and will customize the master SBE
         // Set ATTR_FORCE_SBE_UPDATE to trigger SBE update in later IPL flow
