@@ -44,7 +44,6 @@
 #include <isteps/mem_utils.H>
 #include <string.h>
 #include <stdio.h>
-
 #include <sys/msg.h>                     //  message Q's
 #include <mbox/mbox_queues.H>            //
 #include <kernel/vmmmgr.H>
@@ -138,6 +137,7 @@ typedef std::map<uint32_t, const char*>::iterator SPRNUM_MAP_IT;
     _op_(HEIR     ,339 )\
     _op_(AMOR     ,349 )\
     _op_(TIR      ,446 )\
+    _op_(HDEXCR_RU,455 )\
     _op_(PTCR     ,464 )\
     _op_(HDEXCR   ,471 )\
     _op_(USPRG0   ,496 )\
@@ -187,6 +187,7 @@ typedef std::map<uint32_t, const char*>::iterator SPRNUM_MAP_IT;
     _op_(EBBHR    ,804 )\
     _op_(EBBRR    ,805 )\
     _op_(BESCR    ,806 )\
+    _op_(DEXCR_RU ,812 )\
     _op_(LMRR     ,813 )\
     _op_(LMSER    ,814 )\
     _op_(TAR      ,815 )\
@@ -520,6 +521,9 @@ errlHndl_t copyArchitectedRegs(void)
                  *               register data(PRE_INIT failure case)
                  * @devdesc      Insufficient space to copy architected
                  *               registers
+                 * @custdesc     Failure to collect some error data
+                 *               following system error
+                 *
                  */
                 l_err = new ERRORLOG::ErrlEntry(
                         ERRORLOG::ERRL_SEV_UNRECOVERABLE,
@@ -569,15 +573,6 @@ errlHndl_t copyArchitectedRegs(void)
                 procSrcAddr = reinterpret_cast<uint64_t>(procSrcAddr +
                                              sizeof(sbeArchRegDumpThreadHdr_t));
 
-                // TIMA (Thread Interrupt Management Area) is hardware structure
-                // of 0x40 consecutive bytes that holds per-physical thread 
-                // interrupt data. TIMA data is collection irrespective of the
-                // Core STOP State.
-                if (sbeTdHdr->coreState != 0)
-                {
-                    regCount = SIZE_TIMA_REG;
-                }
-
                 // Fill register data
                 for(uint8_t cnt = 0; cnt < regCount; cnt++)
                 {
@@ -604,37 +599,76 @@ errlHndl_t copyArchitectedRegs(void)
                     //next register data related to the same thread.
                     procSrcAddr = reinterpret_cast<uint64_t>(procSrcAddr +
                                                sizeof(sbeArchRegDumpEntries_t));
+
+                    //Handle the Failure FFDC for current register being read
+                    if(sbeRegData->isFfdcPresent)
+                    {
+                        TRACFCOMP(g_trac_dump, "SBE indicated failure to collect register."
+                        " TYPE:%d,REG:0%.8x,FAPIRC=0x%.16llx for PIR=0x%.8x",(uint8_t)sbeRegData->regType,
+                        (uint32_t)sbeRegData->regNum,sbeRegData->regVal,(uint32_t)hostHdr->pir);
+
+                        //Fetch the FFDC buffer and attach it to the errorlog
+                        /*@
+                         * @errortype
+                         * @moduleid          DUMP::DUMP_ARCH_REGS
+                         * @reasoncode        DUMP::DUMP_INVALID_ARCH_REG_DATA
+                         * @userdata1[00:31]  PIR value
+                         * @userdata1[32:63]  Register Address/Offset
+                         * @userdata2         Failure FAPI RC
+                         * @devdesc           SBE failed to collect architected
+                         *                    register (ref userdata 1)
+                         * @custdesc          Failure to collect some error data
+                         *                    following system error
+                         */
+                        l_err = new ERRORLOG::ErrlEntry(
+                                ERRORLOG::ERRL_SEV_INFORMATIONAL,
+                                DUMP_ARCH_REGS,
+                                DUMP_INVALID_ARCH_REG_DATA,
+                                TWO_UINT32_TO_UINT64(hostHdr->pir,sbeRegData->regNum),
+                                sbeRegData->regVal);
+                        //Fetch the length of the FFDC
+                        uint32_t* ffdcLen =  reinterpret_cast<uint32_t*>(procSrcAddr);
+                        //Move the source ptr to start of FFDC data.
+                        procSrcAddr = procSrcAddr+sizeof(uint32_t);
+                        //Fetch the FFDC buffer and attach it to the errorlog
+                        l_err->addFFDC(DUMP_COMP_ID,reinterpret_cast<uint8_t*>(procSrcAddr),*ffdcLen,
+                                       0,0,false);
+                        //Commit the errorlog an continue
+                        errlCommit(l_err, DUMP_COMP_ID);
+                        //Move the source address to skip the FFDC bytes
+                        procSrcAddr =(procSrcAddr + *ffdcLen);
+
+                        //If Reg Type is TIMA and Last register is not set,
+                        //then there is valid data after TIMA failure FFDC.
+                        //Adjust the destination address accordingly to copy 
+                        //the SPR data.
+                        if ( (sbeRegData->regType == DUMP_ARCH_REG_TYPE_TIMA)
+                                && (!sbeRegData->isLastReg) )
+                        {
+                            uint32_t remainingTIMACount = SIZE_TIMA_REG - (cnt+1);
+                            dstTempAddr = reinterpret_cast<uint64_t>(
+                                          dstTempAddr + (remainingTIMACount *
+                                                   sizeof(hostArchRegDataEntry)));
+                        }
+                    }
+                    //If Last register is set irrespective of type of register
                     if( sbeRegData->isLastReg )
                     {
-                        //Skip the FFDC for now
-                        if(sbeRegData->isFfdcPresent)
+                        //Bump up the destination address to leave holes
+                        //at the memory reserved for remaining registers
+                        uint16_t remaingRegCount = regCount - (cnt+1);
+                        //TRACFCOMP("remaingRegCount=0x%.8x",(uint32_t)remaingRegCount);
+                        if(remaingRegCount)
                         {
-                            //Move the source address to skip theFFDC
-                            procSrcAddr = procSrcAddr + (sizeof(uint32_t)*SBE_FFDC_SIZE);
-                            //Adjust the destination address accordingly to skip
-                            //the mememory required for remaining registers
-                            uint32_t remaingRegCount = regCount - (cnt+1);
-                            if(remaingRegCount)
-                            {
-                                dstTempAddr = reinterpret_cast<uint64_t>(
-                                               dstTempAddr + (remaingRegCount *
-                                               sizeof(hostArchRegDataEntry)));
-                            }
+                            dstTempAddr = reinterpret_cast<uint64_t>(
+                                     dstTempAddr + (remaingRegCount * 
+                                          sizeof(hostArchRegDataEntry)));
                         }
                         break;
                     }
-                }
 
-                // For cores with NON-ZERO stop states, only TIMA Register data
-                // will be collected. Need to update the destination address to
-                // skip the memory allocated for SPR/GPR data.
-                if (sbeTdHdr->coreState != 0)
-                {
-                    dstTempAddr = reinterpret_cast<uint64_t>(dstTempAddr +
-                                  (((sbeProcHdr->reg_cnt) - SIZE_TIMA_REG) *
-                                                 sizeof(hostArchRegDataEntry)));
-                }
-            }
+                } //End of Register Loop
+            }//Thread Loop
             if(collectMinimumDataMode)
             {
                 TRACFCOMP(g_trac_dump, "Hypervisor Pre-Init failure case. Copy data only related to "
