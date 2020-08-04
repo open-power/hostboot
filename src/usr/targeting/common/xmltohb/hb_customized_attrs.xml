@@ -322,7 +322,7 @@
     <attribute>
           <id>ATTR_SYSTEM_IPL_PHASE</id>
           <default>HB_IPL</default>
-          <persistency>volatile-zeroed</persistency>
+          <persistency>volatile</persistency>
      </attribute>
 
     <!-- TODO RTC:244307 Revisit ATTR_SYSTEM_POUNDV_VALIDITY_HALT_DISABLE

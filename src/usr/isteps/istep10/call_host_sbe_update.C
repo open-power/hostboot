@@ -253,6 +253,15 @@ void* call_host_sbe_update (void *io_pArgs)
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                "call_host_sbe_update entry" );
 
+    Target* l_sys = UTIL::assertGetToplevelTarget();
+
+    // Temporary hack to allow SBE update to customize the image correctly. That is, for IPL and not runtime.
+    // @TODO RTC 258692: Remove once issue is resolved.
+    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "host_build_stop_image: ATTR_SYSTEM_IPL_PHASE is: 0x%d",
+                                                    l_sys->getAttr<TARGETING::ATTR_SYSTEM_IPL_PHASE>());
+    l_sys->setAttr<TARGETING::ATTR_SYSTEM_IPL_PHASE>(1);
+    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "host_build_stop_image: ATTR_SYSTEM_IPL_PHASE overwrote to: 0x%d",
+                                                    l_sys->getAttr<TARGETING::ATTR_SYSTEM_IPL_PHASE>());
     do
     {
 
