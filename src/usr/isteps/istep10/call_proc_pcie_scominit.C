@@ -60,8 +60,6 @@
 #include    "host_proc_pcie_scominit.H"
 #include    <p10_pcie_scominit.H>
 
-#include    <util/misc.H> // Util::isSimicsRunning
-
 namespace   ISTEP_10
 {
 
@@ -89,13 +87,6 @@ void*    call_proc_pcie_scominit( void    *io_pArgs )
     //  convert to fap2 target, and execute hwp
     for (const auto & curproc : l_procTargetList)
     {
-        //@FIXME-RTC:258294
-        if( !Util::isSimicsRunning() )
-        {
-            TRACFCOMP( g_fapiTd, "BRINGUP> Skip p10_pcie_scominit" );
-            break;
-        }
-
         l_errl = computeProcPcieConfigAttrs(curproc);
         if(l_errl != nullptr)
         {
