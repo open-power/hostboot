@@ -225,10 +225,10 @@ ecid_initDecodeTable()
 void
 DD10level_decodetable()
 {
-    DD10LEVEL.insert( std::pair<std::string, std::string> ( "1000" , "1 (PCIe)" ) );
-    DD10LEVEL.insert( std::pair<std::string, std::string> ( "1100" , "2 (Memory part1)" ) );
-    DD10LEVEL.insert( std::pair<std::string, std::string> ( "1110" , "3 (Memory part2)" ) );
-    DD10LEVEL.insert( std::pair<std::string, std::string> ( "1111" , "4 (IBUF Fix)" ) );
+    DD10LEVEL.insert( std::pair<std::string, std::string> ( "1000" , "1 (Joachim approved)" ) );
+    DD10LEVEL.insert( std::pair<std::string, std::string> ( "1100" , "2 (Unused)" ) );
+    DD10LEVEL.insert( std::pair<std::string, std::string> ( "1110" , "3 (Unused)" ) );
+    DD10LEVEL.insert( std::pair<std::string, std::string> ( "1111" , "4 (Unused)" ) );
 }
 
 
