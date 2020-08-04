@@ -34,9 +34,75 @@
 #include <p10_io_init_start_ppe.H>
 #include <p10_io_ppe_lib.H>
 #include <p10_io_ppe_regs.H>
-#include <p10_scom_pauc_0.H>
-#include <p10_scom_iohs_8.H>
+#include <p10_scom_pauc.H>
+#include <p10_scom_iohs.H>
+#include <p10_scom_omi.H>
 #include <p10_io_lib.H>
+
+///
+/// @brief Write IOHS Per-Lane Hardware Data
+///
+/// @param[in] i_target IOHS target
+///
+/// @return fapi2::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
+fapi2::ReturnCode p10_io_iohs_put_pl_regs(const fapi2::Target<fapi2::TARGET_TYPE_IOHS>& i_target,
+        const uint64_t i_reg_base_addr,
+        const uint32_t i_reg_start,
+        const uint32_t i_reg_len,
+        const uint32_t i_num_lanes,
+        const uint64_t i_fld_data)
+{
+    const uint64_t SCOM_LANE_SHIFT = 32;
+    const uint64_t SCOM_LANE_MASK  = 0x0000001F00000000;
+    FAPI_DBG("Begin");
+    fapi2::buffer<uint64_t> l_data = 0;
+    uint64_t l_addr = 0x0;
+
+    for (uint64_t l_lane = 0; l_lane < i_num_lanes; ++l_lane)
+    {
+        l_addr = i_reg_base_addr | ((l_lane << SCOM_LANE_SHIFT) & SCOM_LANE_MASK);
+        FAPI_TRY(fapi2::getScom(i_target, l_addr, l_data));
+        l_data.insertFromRight(i_fld_data, i_reg_start, i_reg_len);
+        FAPI_TRY(fapi2::putScom(i_target, l_addr, l_data));
+    }
+
+fapi_try_exit:
+    FAPI_DBG("End");
+    return fapi2::current_err;
+}
+
+///
+/// @brief Write OMI Per-Lane Hardware Data
+///
+/// @param[in] i_target OMI target
+///
+/// @return fapi2::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
+fapi2::ReturnCode p10_io_omi_put_pl_regs(const fapi2::Target<fapi2::TARGET_TYPE_OMI>& i_target,
+        const uint64_t i_reg_base_addr,
+        const uint32_t i_reg_start,
+        const uint32_t i_reg_len,
+        const uint32_t i_num_lanes,
+        const uint64_t i_fld_data)
+{
+    const uint32_t SCOM_LANE_SHIFT = 32;
+    const uint64_t SCOM_LANE_MASK  = 0x0000001F00000000;
+    FAPI_DBG("Begin");
+    fapi2::buffer<uint64_t> l_data = 0;
+    uint64_t l_addr = 0x0;
+
+    for (uint64_t l_lane = 0; l_lane < i_num_lanes; ++l_lane)
+    {
+        l_addr = i_reg_base_addr | ((l_lane << SCOM_LANE_SHIFT) & SCOM_LANE_MASK);
+        FAPI_TRY(fapi2::getScom(i_target, l_addr, l_data));
+        l_data.insertFromRight(i_fld_data, i_reg_start, i_reg_len);
+        FAPI_TRY(fapi2::putScom(i_target, l_addr, l_data));
+    }
+
+fapi_try_exit:
+    FAPI_DBG("End");
+    return fapi2::current_err;
+}
+
 
 ///
 /// @brief Setup lane reversal as needed prior to init.
@@ -63,6 +129,24 @@ fapi2::ReturnCode p10_io_init_lane_reversal(const fapi2::Target<fapi2::TARGET_TY
         SET_DLP_OPTICAL_CONFIG_LINK1_RX_LANE_SWAP((l_lane_reversal & 0x10) >> 4, l_data);
         SET_DLP_OPTICAL_CONFIG_LINK1_TX_LANE_SWAP((l_lane_reversal & 0x08) >> 3, l_data);
         FAPI_TRY(PUT_DLP_OPTICAL_CONFIG(l_iohs_target, l_data));
+    }
+
+fapi_try_exit:
+    FAPI_DBG("End");
+    return fapi2::current_err;
+}
+
+///
+/// @brief Flushes the mem_regs cached values
+///
+/// @return fapi2::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
+fapi2::ReturnCode p10_io_init_flush_mem_regs()
+{
+    FAPI_DBG("Begin");
+
+    for (auto i = 0; i < P10_IO_LIB_NUMBER_OF_THREADS; i++)
+    {
+        FAPI_TRY(p10_io_ppe_mem_regs[i].flush());
     }
 
 fapi_try_exit:
@@ -180,6 +264,171 @@ fapi2::ReturnCode p10_io_init_img_regs(const fapi2::Target<fapi2::TARGET_TYPE_PR
 
         SET_PHY_PPE_WRAP_XIXCR_PPE_XIXCR_XCR(2, l_data); //Resume
         FAPI_TRY(PUT_PHY_PPE_WRAP_XIXCR(l_pauc_target, l_data));
+
+    }
+
+fapi_try_exit:
+    FAPI_DBG("End");
+    return fapi2::current_err;
+}
+
+///
+/// @brief Setup custom init settings for the mem regs
+///
+/// @param[in] i_target Chip target to start
+///
+/// @return fapi2::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
+fapi2::ReturnCode p10_io_init_regs(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
+{
+    FAPI_DBG("Begin");
+    using namespace scomt::pauc;
+    using namespace scomt::iohs;
+    using namespace scomt::omi;
+    auto l_pauc_targets = i_target.getChildren<fapi2::TARGET_TYPE_PAUC>();
+
+    for (auto l_pauc_target : l_pauc_targets)
+    {
+        auto l_iohs_targets = l_pauc_target.getChildren<fapi2::TARGET_TYPE_IOHS>();
+        auto l_omic_targets = l_pauc_target.getChildren<fapi2::TARGET_TYPE_OMIC>();
+
+
+        for (auto l_iohs_target : l_iohs_targets)
+        {
+            int l_num_lanes = P10_IO_LIB_NUMBER_OF_IOHS_LANES;
+            int l_thread = 0;
+
+            FAPI_TRY(p10_io_get_iohs_thread(l_iohs_target, l_thread));
+            FAPI_DBG("Setting number of lanes and turning off stop_thread for IOHS thread %d", l_thread);
+
+
+            FAPI_TRY(p10_io_iohs_put_pl_regs(l_iohs_target,
+                                             IOO_RX0_0_RD_RX_DAC_REGS_CNTL11_PL,
+                                             IOO_RX0_0_RD_RX_DAC_REGS_CNTL11_PL_FREQ_ADJUST,
+                                             IOO_RX0_0_RD_RX_DAC_REGS_CNTL11_PL_FREQ_ADJUST_LEN,
+                                             l_num_lanes,
+                                             0x0D));
+
+            // RX A CTLE_PEAK1
+            FAPI_TRY(p10_io_iohs_put_pl_regs(l_iohs_target,
+                                             IOO_RX0_0_RD_RX_DAC_REGS_CNTL6_PL,
+                                             IOO_RX0_0_RD_RX_DAC_REGS_CNTL6_PL_PEAK1,
+                                             IOO_RX0_0_RD_RX_DAC_REGS_CNTL6_PL_PEAK1_LEN,
+                                             l_num_lanes,
+                                             4));
+
+            // RX A CTLE_PEAK2
+            FAPI_TRY(p10_io_iohs_put_pl_regs(l_iohs_target,
+                                             IOO_RX0_0_RD_RX_DAC_REGS_CNTL6_PL,
+                                             IOO_RX0_0_RD_RX_DAC_REGS_CNTL6_PL_PEAK2,
+                                             IOO_RX0_0_RD_RX_DAC_REGS_CNTL6_PL_PEAK2_LEN,
+                                             l_num_lanes,
+                                             4));
+
+            // RX B CTLE_PEAK1
+            FAPI_TRY(p10_io_iohs_put_pl_regs(l_iohs_target,
+                                             IOO_RX0_0_RD_RX_DAC_REGS_CNTL13_PL,
+                                             IOO_RX0_0_RD_RX_DAC_REGS_CNTL13_PL_PEAK1,
+                                             IOO_RX0_0_RD_RX_DAC_REGS_CNTL13_PL_PEAK1_LEN,
+                                             l_num_lanes,
+                                             4));
+
+            // RX B CTLE_PEAK2
+            FAPI_TRY(p10_io_iohs_put_pl_regs(l_iohs_target,
+                                             IOO_RX0_0_RD_RX_DAC_REGS_CNTL13_PL,
+                                             IOO_RX0_0_RD_RX_DAC_REGS_CNTL13_PL_PEAK2,
+                                             IOO_RX0_0_RD_RX_DAC_REGS_CNTL13_PL_PEAK2_LEN,
+                                             l_num_lanes,
+                                             4));
+
+
+            //FAPI_TRY(p10_io_ppe_rx_disable_bank_pdwn[l_thread].putData(l_pauc_target, 0x01));
+
+            FAPI_TRY(p10_io_ppe_rx_eo_enable_edge_offset_cal[l_thread].putData(l_pauc_target, 0x0));
+            FAPI_TRY(p10_io_ppe_rx_eo_enable_lte_cal        [l_thread].putData(l_pauc_target, 0x0));
+            FAPI_TRY(p10_io_ppe_rx_eo_enable_dfe_cal        [l_thread].putData(l_pauc_target, 0x0));
+            FAPI_TRY(p10_io_ppe_rx_eo_enable_ddc            [l_thread].putData(l_pauc_target, 0x0));
+            FAPI_TRY(p10_io_ppe_rx_eo_enable_quad_phase_cal [l_thread].putData(l_pauc_target, 0x0));
+            FAPI_TRY(p10_io_ppe_rx_eo_enable_ctle_peak_cal  [l_thread].putData(l_pauc_target, 0x0));
+
+            FAPI_TRY(p10_io_ppe_rx_rc_enable_edge_offset_cal[l_thread].putData(l_pauc_target, 0x0));
+            FAPI_TRY(p10_io_ppe_rx_rc_enable_lte_cal        [l_thread].putData(l_pauc_target, 0x0));
+            FAPI_TRY(p10_io_ppe_rx_rc_enable_dfe_cal        [l_thread].putData(l_pauc_target, 0x0));
+            FAPI_TRY(p10_io_ppe_rx_rc_enable_ddc            [l_thread].putData(l_pauc_target, 0x0));
+            FAPI_TRY(p10_io_ppe_rx_rc_enable_quad_phase_cal [l_thread].putData(l_pauc_target, 0x0));
+            FAPI_TRY(p10_io_ppe_rx_rc_enable_ctle_peak_cal  [l_thread].putData(l_pauc_target, 0x0));
+
+        }
+
+        for (auto l_omic_target : l_omic_targets)
+        {
+            int l_thread;
+            auto l_omi_targets = l_omic_target.getChildren<fapi2::TARGET_TYPE_OMI>();
+            int l_num_lanes = P10_IO_LIB_NUMBER_OF_OMI_LANES;
+
+            FAPI_TRY(p10_io_get_omic_thread(l_omic_target, l_thread));
+            FAPI_DBG("Setting number of lanes and turning off stop_thread for OMIC thread %d", l_thread);
+
+            for (auto l_omi_target : l_omi_targets)
+            {
+                FAPI_TRY(p10_io_omi_put_pl_regs(l_omi_target,
+                                                RXPACKS_0_DEFAULT_RD_RX_DAC_REGS_CNTL11_PL,
+                                                RXPACKS_0_DEFAULT_RD_RX_DAC_REGS_CNTL11_PL_FREQ_ADJUST,
+                                                RXPACKS_0_DEFAULT_RD_RX_DAC_REGS_CNTL11_PL_FREQ_ADJUST_LEN,
+                                                l_num_lanes,
+                                                0x01));
+
+                // RX A CTLE_PEAK1
+                FAPI_TRY(p10_io_omi_put_pl_regs(l_omi_target,
+                                                RXPACKS_0_DEFAULT_RD_RX_DAC_REGS_CNTL6_PL,
+                                                RXPACKS_0_DEFAULT_RD_RX_DAC_REGS_CNTL6_PL_PEAK1,
+                                                RXPACKS_0_DEFAULT_RD_RX_DAC_REGS_CNTL6_PL_PEAK1_LEN,
+                                                l_num_lanes,
+                                                4));
+
+                // RX A CTLE_PEAK2
+                FAPI_TRY(p10_io_omi_put_pl_regs(l_omi_target,
+                                                RXPACKS_0_DEFAULT_RD_RX_DAC_REGS_CNTL6_PL,
+                                                RXPACKS_0_DEFAULT_RD_RX_DAC_REGS_CNTL6_PL_PEAK2,
+                                                RXPACKS_0_DEFAULT_RD_RX_DAC_REGS_CNTL6_PL_PEAK2_LEN,
+                                                l_num_lanes,
+                                                4));
+
+                // RX B CTLE_PEAK1
+                FAPI_TRY(p10_io_omi_put_pl_regs(l_omi_target,
+                                                RXPACKS_0_DEFAULT_RD_RX_DAC_REGS_CNTL13_PL,
+                                                RXPACKS_0_DEFAULT_RD_RX_DAC_REGS_CNTL13_PL_PEAK1,
+                                                RXPACKS_0_DEFAULT_RD_RX_DAC_REGS_CNTL13_PL_PEAK1_LEN,
+                                                l_num_lanes,
+                                                4));
+
+                // RX B CTLE_PEAK2
+                FAPI_TRY(p10_io_omi_put_pl_regs(l_omi_target,
+                                                RXPACKS_0_DEFAULT_RD_RX_DAC_REGS_CNTL13_PL,
+                                                RXPACKS_0_DEFAULT_RD_RX_DAC_REGS_CNTL13_PL_PEAK2,
+                                                RXPACKS_0_DEFAULT_RD_RX_DAC_REGS_CNTL13_PL_PEAK2_LEN,
+                                                l_num_lanes,
+                                                4));
+
+                //FAPI_TRY(p10_io_ppe_rx_disable_bank_pdwn[l_thread].putData(l_pauc_target, 0x01));
+
+                FAPI_TRY(p10_io_ppe_rx_eo_enable_edge_offset_cal[l_thread].putData(l_pauc_target, 0x0));
+                FAPI_TRY(p10_io_ppe_rx_eo_enable_lte_cal        [l_thread].putData(l_pauc_target, 0x0));
+                FAPI_TRY(p10_io_ppe_rx_eo_enable_dfe_cal        [l_thread].putData(l_pauc_target, 0x0));
+                FAPI_TRY(p10_io_ppe_rx_eo_enable_ddc            [l_thread].putData(l_pauc_target, 0x0));
+                FAPI_TRY(p10_io_ppe_rx_eo_enable_quad_phase_cal [l_thread].putData(l_pauc_target, 0x0));
+                FAPI_TRY(p10_io_ppe_rx_eo_enable_ctle_peak_cal  [l_thread].putData(l_pauc_target, 0x0));
+
+                FAPI_TRY(p10_io_ppe_rx_rc_enable_edge_offset_cal[l_thread].putData(l_pauc_target, 0x0));
+                FAPI_TRY(p10_io_ppe_rx_rc_enable_lte_cal        [l_thread].putData(l_pauc_target, 0x0));
+                FAPI_TRY(p10_io_ppe_rx_rc_enable_dfe_cal        [l_thread].putData(l_pauc_target, 0x0));
+                FAPI_TRY(p10_io_ppe_rx_rc_enable_ddc            [l_thread].putData(l_pauc_target, 0x0));
+                FAPI_TRY(p10_io_ppe_rx_rc_enable_quad_phase_cal [l_thread].putData(l_pauc_target, 0x0));
+                FAPI_TRY(p10_io_ppe_rx_rc_enable_ctle_peak_cal  [l_thread].putData(l_pauc_target, 0x0));
+            }
+        }
+
+        // Flush the data to the sram
+        FAPI_TRY(p10_io_init_flush_mem_regs());
 
     }
 
@@ -397,6 +646,8 @@ fapi2::ReturnCode p10_io_init_start_ppe(const fapi2::Target<fapi2::TARGET_TYPE_P
     FAPI_TRY(p10_io_init_lane_reversal(i_target));
 
     FAPI_TRY(p10_io_init_img_regs(i_target));
+
+    FAPI_TRY(p10_io_init_regs(i_target));
 
     //Wait for reset to finish
     //FIXME: is there a way to tell when it's done?
