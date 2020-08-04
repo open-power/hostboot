@@ -4145,9 +4145,9 @@ errlHndl_t verifyAndMovePayload(void)
 
     do{
 
-    if (!is_phyp_load())
+    if (TARGETING::is_sapphire_load() && !INITSERVICE::spBaseServicesEnabled())
     {
-        // Non-PHYP load, no need to verify and move
+        // OPAL load on BMC, no need to verify and move
         break;
     }
 
