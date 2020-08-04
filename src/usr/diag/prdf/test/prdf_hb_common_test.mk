@@ -84,5 +84,5 @@ OBJS += prdfsimUtil.o
 
 TESTS += ${PRD_USR_TEST_PATH}/prdfTest_Proc.H
 TESTS += ${PRD_USR_TEST_PATH}/prdfTest.H
-TESTS += ${PRD_USR_TEST_PATH}/prdfTest_BadDqBitmap.H
+#TESTS += ${PRD_USR_TEST_PATH}/prdfTest_BadDqBitmap.H
 
