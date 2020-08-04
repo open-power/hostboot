@@ -118,7 +118,8 @@ static PPE_Type_t G_PPE_Types[PPE_TYPE_MAX] =
         0,                  //No VDR available through XIR
         {   {0,     0x0}},
         0,                  //No specific registers
-        {   {0,     0x0}}
+        {   {0,     0x0}},
+        {{}}
     },//PPE_TYPE_SBE
     {
         "GPE",
@@ -229,7 +230,8 @@ static PPE_Type_t G_PPE_Types[PPE_TYPE_MAX] =
         0,
         {   {0,  0 }},
         0,
-        {   {0,  0 }}
+        {   {0,  0 }},
+        {{}}
     }//PPE_TYPE_IO
 };
 
