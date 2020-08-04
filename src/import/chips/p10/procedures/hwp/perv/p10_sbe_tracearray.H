@@ -72,9 +72,9 @@ constexpr uint32_t IOHS_CHIPLET_ID_END   = 0x1F;
 #define IS_IOHS(chipletId) \
     ((chipletId >= IOHS_CHIPLET_ID_START) && \
      (chipletId <= IOHS_CHIPLET_ID_END))
-#define IS_PEC(busId) \
-    ((busId > _PROC_TB_LAST_PROC_TARGET) && \
-     (busId <= _PROC_TB_LAST_PEC_TARGET))
+#define IS_PEC(chipletId) \
+    ((chipletId >= PEC_CHIPLET_ID_START) && \
+     (chipletId <= PEC_CHIPLET_ID_END))
 
 // structure to represent HWP arguments
 struct proc_gettracearray_args

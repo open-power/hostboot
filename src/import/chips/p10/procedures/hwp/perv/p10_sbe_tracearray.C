@@ -261,17 +261,13 @@ class TraceArrayFinder
                          * of code is to determine if the target passed is E or W and determines if:
                          * 1) The trace bus passes exists for this PAUC (checked in p10_sbe_tracearray); and
                          * 2) The mux position for the PTL is correct
-                         * As a side note, calling getChipletNumber on a PEC target that has been converted to PERV
-                         * causes a seg fault*/
+                         */
                         pri_mux_sel = sel;
 
-                        if(!IS_PEC(i_trace_bus))
+                        if ( (i_target.getChipletNumber() == 0x10 || i_target.getChipletNumber() == 0x11)
+                             && ( (i_trace_bus == PROC_TB_PTL0 || i_trace_bus == PROC_TB_PTL1) ) )
                         {
-                            if ( (i_target.getChipletNumber() == 0x10 || i_target.getChipletNumber() == 0x11)
-                                 && ( (i_trace_bus == PROC_TB_PTL0 || i_trace_bus == PROC_TB_PTL1) ) )
-                            {
-                                pri_mux_sel = 1;
-                            }
+                            pri_mux_sel = 1;
                         }
 
                         FAPI_DBG("Assigning secondary mux");

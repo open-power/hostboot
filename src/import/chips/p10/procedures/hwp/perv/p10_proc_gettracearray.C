@@ -64,27 +64,15 @@ extern "C" fapi2::ReturnCode p10_proc_gettracearray(
     FAPI_INF("Entering ...");
 
     fapi2::Target<P10_SBE_TRACEARRAY_TARGET_TYPES> l_target;
-    fapi2::TargetFilter target_filter;
-    fapi2::ATTR_CHIP_UNIT_POS_Type l_pec_chiplet_num = 0;
     const uint8_t l_chiplet_num = i_target.getChipletNumber();
     uint32_t NUM_TRACE_ROWS = 0;
     NUM_TRACE_ROWS = max_rows(i_args.trace_bus);
 
     FAPI_DBG("Chiplet Number: %llx", i_target.getChipletNumber());
 
-    if(IS_MC(l_chiplet_num) || IS_PAUC(l_chiplet_num) || IS_IOHS(l_chiplet_num))
+    if(IS_MC(l_chiplet_num) || IS_PAUC(l_chiplet_num) || IS_IOHS(l_chiplet_num) || IS_PEC(l_chiplet_num))
     {
         l_target = i_target.getParent<fapi2::TARGET_TYPE_PERV>();
-    }
-    else if (IS_PEC(i_args.trace_bus))
-    {
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS,
-                               i_target,
-                               l_pec_chiplet_num),
-                 "Error from FAPI_ATTR_GET (ATTR_CHIP_UNIT_POS)");
-        target_filter = (l_chiplet_num == 0) ? fapi2::TARGET_FILTER_PCI0 : fapi2::TARGET_FILTER_PCI1;
-        l_target = (i_target.getParent<fapi2::TARGET_TYPE_PROC_CHIP>().getChildren<fapi2::TARGET_TYPE_PERV>
-                    (target_filter, fapi2::TARGET_STATE_FUNCTIONAL)[0]);
     }
     else
     {
