@@ -64,8 +64,6 @@
 #include    <vpd/mvpdenums.H>
 #include    <vfs/vfs.H>
 
-#include <util/misc.H> // Util::isSimicsRunning
-
 namespace   THREAD_ACTIVATE
 {
 
@@ -79,13 +77,6 @@ void activate_threads( errlHndl_t& io_rtaskRetErrl )
 
     do
     {
-        //@FIXME-RTC:258286
-        if( !Util::isSimicsRunning() )
-        {
-            TRACFCOMP( g_fapiTd, "BRINGUP> Leaving in single-thread mode" );
-            break;
-        }
-
         // get the sys target
         TARGETING::Target* sys = NULL;
         TARGETING::targetService().getTopLevelTarget(sys);
