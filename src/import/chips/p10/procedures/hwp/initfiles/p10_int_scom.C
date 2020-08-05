@@ -29,7 +29,6 @@
 
 using namespace fapi2;
 
-constexpr uint64_t literal_0x2000120076F0007E = 0x2000120076F0007E;
 constexpr uint64_t literal_0b00 = 0b00;
 constexpr uint64_t literal_0b1 = 0b1;
 constexpr uint64_t literal_0x775643213F3F00 = 0x775643213F3F00;
@@ -55,12 +54,6 @@ fapi2::ReturnCode p10_int_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>
         FAPI_TRY(FAPI_ATTR_GET_PRIVILEGED(fapi2::ATTR_NAME, TGT0, l_chip_id));
         FAPI_TRY(FAPI_ATTR_GET_PRIVILEGED(fapi2::ATTR_EC, TGT0, l_chip_ec));
         fapi2::buffer<uint64_t> l_scom_buffer;
-        {
-            FAPI_TRY(fapi2::getScom( TGT0, 0x2010802ull, l_scom_buffer ));
-
-            l_scom_buffer.insert<0, 64, 0, uint64_t>(literal_0x2000120076F0007E );
-            FAPI_TRY(fapi2::putScom(TGT0, 0x2010802ull, l_scom_buffer));
-        }
         {
             FAPI_TRY(fapi2::getScom( TGT0, 0x2010803ull, l_scom_buffer ));
 
