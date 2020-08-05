@@ -570,11 +570,11 @@
       <priority>MEDIUM</priority>
     </callout>
     <callout>
-      <target>TARGET</target>
+      <target>DIMM_TARGET</target>
       <priority>MEDIUM</priority>
     </callout>
     <deconfigure>
-      <target>TARGET</target>
+      <target>DIMM_TARGET</target>
     </deconfigure>
   </hwpError>
 
