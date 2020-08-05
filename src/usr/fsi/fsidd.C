@@ -2298,16 +2298,6 @@ errlHndl_t FsiDD::initMasterControl(TARGETING::Target* i_master,
                    i_type==TARGETING::FSI_MASTER_TYPE_MFSI ? 'H' : 'C',
                    databuf );
 
-        // @FIXME-RTC:254475-Remove once this works everywhere
-        if( !Util::isMultiprocSupported() )
-        {
-            TRACFCOMP( g_trac_fsi, "Multiproc not yet supported. "
-                "Setting iv_slaves to 0 for corresponding "
-                "slave_index 0x%llX", slave_index);
-
-            iv_slaves[slave_index] = 0;
-        }
-
         //If we aren't doing the initialization then we're all done
         if( !hb_doing_init )
         {
