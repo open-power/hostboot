@@ -200,6 +200,9 @@
       <id>CALCULATED_PROC_MEMORY_POWER_DROP</id>
     </attribute>
     <attribute>
+      <id>CHASSIS_PLDM_ENTITY_ID_INFO</id>
+    </attribute>
+    <attribute>
       <id>CUMULATIVE_PMCOMPLEX_RESET_COUNT</id>
     </attribute>
     <attribute>
@@ -294,6 +297,9 @@
     </attribute>
     <attribute>
       <id>OP_TRACE_LITE</id>
+    </attribute>
+    <attribute>
+      <id>SYSTEM_PLDM_ENTITY_ID_INFO</id>
     </attribute>
   </targetTypeExtension>
 

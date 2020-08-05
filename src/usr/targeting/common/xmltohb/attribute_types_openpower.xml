@@ -209,6 +209,62 @@
   </attribute>
 
   <attribute>
+    <complexType>
+      <description>
+        Structure which describes the "Entity Identification Information" data
+        type defined by the "Platform Level Data Model (PLDM) for Platform
+        Monitoring and Control" specification (a.k.a. DSP0248) published by the
+        DMTF.  WARNING: All fields are little endian.  Gives the entity
+        identification information for the chassis.
+      </description>
+      <field>
+        <default>0x0000</default>
+        <description>
+          Combination of the P/L bit and the Entity ID value. The P/L bit is a
+          bit indicating whether the entity is a physical (0b0) or logical (0b1)
+          entity.  The Entity ID is a 15-bit value from DSP0249 that identifies
+          the general type of entity.
+        </description>
+        <name>entityType</name>
+        <type>uint16_t</type>
+      </field>
+      <field>
+        <default>0x0000</default>
+        <description>
+          16-bit number that differentiates among instances of entities that
+          have the same Entity Type and Container ID values.
+        </description>
+        <name>entityInstanceNumber</name>
+        <type>uint16_t</type>
+      </field>
+      <field>
+        <default>0x0000</default>
+        <description>
+          A 16-bit number that identifies the containing entity that the Entity
+          Instance Number is defined relative to.  If this value is 0x0000, the
+          containing entity is considered to be the overall system.
+        </description>
+        <name>containerId</name>
+        <type>uint16_t</type>
+      </field>
+    </complexType>
+    <description>
+      Stores "Entity Identification Information" for a given entity, as defined
+      in the "Platform Level Data Model (PLDM) for Platform Monitoring and
+      Control" specification (a.k.a. DSP0248) published by the DMTF.  A value of
+      0x000000000000 is assumed not to be valid.  Hostboot populates this
+      attribute on platforms that support PLDM after determining the final PLDM
+      Entity Identification Information for various FRUs.  HDAT consumes this
+      attribute when building the SLCA on said platforms.
+    </description>
+    <id>CHASSIS_PLDM_ENTITY_ID_INFO</id>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <no_export/>
+  </attribute>
+
+  <attribute>
     <id>CUMULATIVE_PMCOMPLEX_RESET_COUNT</id>
     <description>
         Number of PM Complex resets since the system was booted.
@@ -1491,6 +1547,62 @@ ID for the sensor number returned with the elog. -->
       <value>0xC7</value>
     </enumerator>
   </enumerationType>
+
+  <attribute>
+    <complexType>
+      <description>
+        Structure which describes the "Entity Identification Information" data
+        type defined by the "Platform Level Data Model (PLDM) for Platform
+        Monitoring and Control" specification (a.k.a. DSP0248) published by the
+        DMTF.  WARNING: All fields are little endian.  Gives the entity
+        identification information for the system.
+      </description>
+      <field>
+        <default>0x0000</default>
+        <description>
+          Combination of the P/L bit and the Entity ID value. The P/L bit is a
+          bit indicating whether the entity is a physical (0b0) or logical (0b1)
+          entity.  The Entity ID is a 15-bit value from DSP0249 that identifies
+          the general type of entity.
+        </description>
+        <name>entityType</name>
+        <type>uint16_t</type>
+      </field>
+      <field>
+        <default>0x0000</default>
+        <description>
+          16-bit number that differentiates among instances of entities that
+          have the same Entity Type and Container ID values.
+        </description>
+        <name>entityInstanceNumber</name>
+        <type>uint16_t</type>
+      </field>
+      <field>
+        <default>0x0000</default>
+        <description>
+          A 16-bit number that identifies the containing entity that the Entity
+          Instance Number is defined relative to.  If this value is 0x0000, the
+          containing entity is considered to be the overall system.
+        </description>
+        <name>containerId</name>
+        <type>uint16_t</type>
+      </field>
+    </complexType>
+    <description>
+      Stores "Entity Identification Information" for a given entity, as defined
+      in the "Platform Level Data Model (PLDM) for Platform Monitoring and
+      Control" specification (a.k.a. DSP0248) published by the DMTF.  A value of
+      0x000000000000 is assumed not to be valid.  Hostboot populates this
+      attribute on platforms that support PLDM after determining the final PLDM
+      Entity Identification Information for various FRUs.  HDAT consumes this
+      attribute when building the SLCA on said platforms.
+    </description>
+    <id>SYSTEM_PLDM_ENTITY_ID_INFO</id>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <no_export/>
+  </attribute>
 
   <attribute>
     <id>VDD_CURRENT_OVERFLOW_WORKAROUND_ENABLE</id>
