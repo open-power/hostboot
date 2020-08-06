@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -52,7 +52,20 @@ namespace TARGETING
     };
 
 
-
+/**
+ * @brief Populate the o_vector with target object pointers based on the
+ *        requested class, type, and functional state.
+ *
+ * @parm[out] o_vector, reference of vector of target pointers.
+ * @parm[in]  i_class,  the class of the targets to be obtained
+ * @parm[in]  i_type,   the type of the targets to be obtained
+ * @parm[in]  i_state,  Selection filter based on ResourceState enum,
+ *                      designates all, present, or functional
+ *
+ * @return N/A
+ */
+void getClassResources( TARGETING::TargetHandleList & o_vector,
+                        CLASS i_class, TYPE  i_type, ResourceState i_state );
 
 /**
  * @brief Predicate function to sort by HUID

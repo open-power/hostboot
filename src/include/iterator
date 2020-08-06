@@ -101,6 +101,32 @@ typename iterator_traits<InputIterator>::difference_type
         (first, last);
 }
 
+/** Determine the size of an array.
+ *
+ *  @param[in] array - The array
+ *
+ *  @return The number of elements in the array. Will not work with 0-size
+ *  arrays because those are a GNU extension and technically illegal in C++.
+ */
+template <typename T, size_t Size>
+constexpr size_t size(T(&array)[Size])
+{
+    return Size;
+}
+
+/** Determine the size of a container.
+ *
+ *  @param[in] c - The container
+ *
+ *  @return The number of elements in the container (by calling the container's
+ *  size() member function).
+ */
+template <typename Container>
+constexpr auto size(const Container& c) -> decltype(c.size())
+{
+    return c.size();
+}
+
 /** A OutputIterator which operates by push_back onto a container.
  *
  *  See public std::back_insert_iterator documentation.
@@ -190,41 +216,9 @@ back_insert_iterator<BackInsertionSequence>
  *    vector<int> l_cpp_array (begin(c_array), end(c_array));
  */
 template <typename T, size_t size>
-T* begin(T (&c_array)[size])
+constexpr T* begin(T (&c_array)[size])
 {
     return &c_array[0];
-}
-
-/**
- * begin(container)
- * @param[in] c - a container with a begin method
- * @return Returns an iterator to the beginning of the sequence represented by c
- *
- * Example:
- *      std::vector<int> v = { 3, 1, 4 };
- *      auto vi = std::begin(v);
- *      std::cout << *vi << '\n';
- */
-template< typename C >
-auto begin(const C& c) -> decltype(c.begin())
-{
-    return c.begin();
-}
-
-/**
- * begin(container)
- * @param[in] c - a container with a begin method
- * @return Returns an iterator to the beginning of the sequence represented by c
- *
- * Example:
- *      std::vector<int> v = { 3, 1, 4 };
- *      auto vi = std::begin(v);
- *      std::cout << *vi << '\n';
- */
-template< typename C >
-auto begin(C& c) -> decltype(c.begin())
-{
-    return c.begin();
 }
 
 /**
@@ -237,43 +231,93 @@ auto begin(C& c) -> decltype(c.begin())
  *    vector<int> l_cpp_array (begin(c_array), end(c_array));
  */
 template <typename T, size_t size>
-T* end(T (&c_array)[size])
+constexpr T* end(T (&c_array)[size])
 {
     return &c_array[0] + size;
 }
 
 /**
- * end(container)
- * @param[in] c - a container with an end method
- * @return Returns an iterator to the ending of the sequence represented by c
+ * cbegin(array)
+ * Returns const pointer to beginning of array
  *
  * Example:
- *      std::vector<int> v = { 3, 1, 4 };
- *      if (std::find(std::begin(v), std::end(v), 5) != std::end(v)) {
- *          std::cout << "found a 5 in vector v!\n";
- *      }
+ *    const int c_array[] = {0, 1, 2};
+ *    vector<int> l_cpp_array (cbegin(c_array), cend(c_array));
  */
-template< typename C >
-auto end(const C& c) -> decltype(c.end())
+template <typename T, size_t size>
+constexpr const T* cbegin(const T (&c_array)[size])
 {
-    return c.end();
+    return &c_array[0];
+}
+
+/**
+ * cend(array)
+ * Returns const pointer to end of array (i.e. the element after the last element)
+ *
+ * Example:
+ *    const int c_array[] = {0, 1, 2};
+ *    vector<int> l_cpp_array (cbegin(c_array), cend(c_array));
+ */
+template <typename T, size_t size>
+constexpr const T* cend(const T (&c_array)[size])
+{
+    return &c_array[0] + size;
+}
+
+/**
+ * begin(container)
+ * Returns iterator to beginning of container
+ *
+ * Example:
+ *    vector<int> old_array {0, 1, 2};
+ *    vector<int> new_array (begin(old_array), end(old_array));
+ */
+template <typename T>
+constexpr auto begin(T &container) -> decltype(container.begin())
+{
+    return container.begin();
 }
 
 /**
  * end(container)
- * @param[in] c - a container with an end method
- * @return Returns an iterator to the ending of the sequence represented by c
+ * Returns iterator to end of container
  *
  * Example:
- *      std::vector<int> v = { 3, 1, 4 };
- *      if (std::find(std::begin(v), std::end(v), 5) != std::end(v)) {
- *          std::cout << "found a 5 in vector v!\n";
- *      }
+ *    vector<int> old_array {0, 1, 2};
+ *    vector<int> new_array (begin(old_array), end(old_array));
  */
-template< typename C >
-auto end(C& c) -> decltype(c.end())
+template <typename T>
+constexpr auto end(T &container) -> decltype(container.end())
 {
-    return c.end();
+    return container.end();
+}
+
+/**
+ * cbegin(container)
+ * Returns const iterator to beginning of container
+ *
+ * Example:
+ *    const vector<int> old_array {0, 1, 2};
+ *    vector<int> new_array (cbegin(old_array), cend(old_array));
+ */
+template <typename T>
+constexpr auto cbegin(const T &container) -> decltype(container.cbegin())
+{
+    return container.cbegin();
+}
+
+/**
+ * cend(container)
+ * Returns const iterator to end of container
+ *
+ * Example:
+ *    const vector<int> old_array {0, 1, 2};
+ *    vector<int> new_array (cbegin(old_array), cend(old_array));
+ */
+template <typename T>
+constexpr auto cend(const T &container) -> decltype(container.cend())
+{
+    return container.cend();
 }
 
 }; // namespace std.

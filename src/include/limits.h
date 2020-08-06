@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2020                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -35,5 +35,6 @@
 #define PAGE_SIZE PAGESIZE
 
 #define INT_MAX   __INT_MAX__
+#define SHRT_MAX  __SHRT_MAX__
 
 #endif

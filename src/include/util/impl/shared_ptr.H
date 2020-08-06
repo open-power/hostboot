@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -48,6 +48,52 @@ namespace std
             private:
                 size_t count;
         };
+
+        // @brief This is the base class of all Deleter objects created by the
+        //        shared_ptr class.
+        class shared_ptr_deleter_base
+        {
+        public:
+            // @brief Delete the owned object;
+            virtual void operator()() = 0;
+
+            virtual ~shared_ptr_deleter_base() { }
+        };
+
+        // @brief This class is used to destroy objects allocated by "new". We
+        //        don't support arrays yet.
+        template<typename T>
+        class standard_deleter : public shared_ptr_deleter_base
+        {
+        public:
+            T* ptr;
+
+            standard_deleter(T* p) : ptr(p) { }
+
+            void operator()() override
+            {
+                delete ptr;
+            }
+        };
+
+        // @brief This class is used to destroy objects with a custom deleter.
+        template<typename T, typename Deleter>
+        class custom_deleter : public shared_ptr_deleter_base
+        {
+        public:
+            T* ptr;
+            Deleter deleter;
+
+            template<typename Del>
+            custom_deleter(T* p, Del&& del) :
+                ptr(p), deleter(std::forward<Del>(del))
+            { }
+
+            void operator()() override
+            {
+                deleter(ptr);
+            }
+        };
     }
 
     template <typename T>
@@ -57,13 +103,36 @@ namespace std
             typedef T element_type;
 
             constexpr shared_ptr() :
-                count(nullptr), pointer(nullptr), owner(nullptr) {};
-            constexpr shared_ptr(nullptr_t) :
-                count(nullptr), pointer(nullptr), owner(nullptr) {};
+                count(nullptr), pointer(nullptr), owner(nullptr),
+                deleter(nullptr)
+            {};
 
-            template<typename U> explicit shared_ptr(U* ptr)
+            constexpr shared_ptr(nullptr_t) :
+                count(nullptr), pointer(nullptr), owner(nullptr),
+                deleter(nullptr)
+            {};
+
+            template<typename U>
+            explicit shared_ptr(U* ptr)
             {
                 _setup(ptr);
+                if (ptr)
+                {
+                    deleter = new __impl::standard_deleter<U>(ptr);
+                }
+            }
+
+            template<typename U, typename Deleter>
+            explicit shared_ptr(U* ptr, Deleter&& del)
+            {
+                _setup(ptr);
+                if (ptr)
+                {
+                    deleter = new __impl::custom_deleter<U, Deleter>
+                    {
+                        ptr, std::forward<Deleter>(del)
+                    };
+                }
             }
 
             template<typename U> shared_ptr(const shared_ptr<U>& r, T* ptr)
@@ -97,24 +166,38 @@ namespace std
               (shared_ptr<U>&& r) NEVER_INLINE;
 
             void reset() { _cleanup(); }
-            template<typename U> void reset(U* ptr) { _cleanup(); _setup(ptr); }
+
+            template<typename U>
+            void reset(U* ptr) {
+                _cleanup();
+                _setup(ptr);
+
+                if (ptr)
+                {
+                    deleter = new __impl::standard_deleter<U>(ptr);
+                }
+            }
 
             void swap(shared_ptr& r)
             {
                 T* tmp0 = r.owner;
                 T* tmp1 = r.pointer;
                 __impl::shared_ptr_count* tmp2 = r.count;
+                __impl::shared_ptr_deleter_base* tmp3 = r.deleter;
                 r.owner = owner;
                 r.pointer = pointer;
                 r.count = count;
+                r.deleter = deleter;
                 owner = tmp0;
                 pointer = tmp1;
                 count = tmp2;
+                deleter = tmp3;
             }
 
             T* get() const { return pointer; }
 
-            T& operator*() const { return *pointer; }
+            template<typename X = T>
+            X& operator*() const { return *pointer; }
             T* operator->() const { return pointer; }
 
             long use_count() const
@@ -138,10 +221,12 @@ namespace std
             __impl::shared_ptr_count* count;
             T* pointer;
             T* owner;
+            __impl::shared_ptr_deleter_base* deleter;
 
             template<typename U> void _setup(U* ptr)
             {
                 owner = pointer = static_cast<T*>(ptr);
+                deleter = nullptr;
                 if (pointer)
                 {
                     count = new __impl::shared_ptr_count();
@@ -161,9 +246,11 @@ namespace std
                 count = r.count;
                 owner = r.owner;
                 pointer = r.pointer;
+                deleter = r.deleter;
                 r.count = nullptr;
                 r.owner = nullptr;
                 r.pointer = nullptr;
+                r.deleter = nullptr;
             }
     };
 
@@ -211,14 +298,16 @@ namespace std
         if (!count) return;
 
         if (count->decrement())
-            {
+        {
             delete count;
-            delete owner;
-            }
+            (*deleter)();
+            delete deleter;
+        }
 
         count = nullptr;
         owner = nullptr;
         pointer = nullptr;
+        deleter = nullptr;
     }
     template <typename T>
       template<typename U> void shared_ptr<T>::_copy(const shared_ptr<U>& r)
@@ -227,6 +316,7 @@ namespace std
         count = r.count;
         owner = static_cast<T*>(r.owner);
         pointer = static_cast<T*>(r.pointer);
+        deleter = r.deleter;
     }
 
 

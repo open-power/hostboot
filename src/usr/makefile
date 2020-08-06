@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2010,2019
+# Contributors Listed Below - COPYRIGHT 2010,2020
 # [+] Google Inc.
 # [+] International Business Machines Corp.
 #
@@ -56,8 +56,10 @@ SUBDIRS += intr.d
 SUBDIRS += isteps.d
 SUBDIRS += lpc.d
 SUBDIRS += mbox.d
+SUBDIRS += $(if $(CONFIG_MCTP)$(CONFIG_MCTP_TESTCASES),mctp.d)
 SUBDIRS += mmio.d
 SUBDIRS += $(if $(CONFIG_FSP_BUILD),,nvram.d)
+SUBDIRS += $(if $(CONFIG_PLDM)$(CONFIG_PLDM_TESTCASES),pldm.d)
 SUBDIRS += pnor.d
 SUBDIRS += runtime.d
 SUBDIRS += sbe.d

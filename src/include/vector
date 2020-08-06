@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -122,6 +122,17 @@ namespace std
                     iv_finish = ctor_copy(x.iv_start, x.iv_finish, iv_start);
                 }
 
+                vector(vector&& other)
+                    : iv_start(NULL),
+                      iv_finish(NULL),
+                      iv_end_of_storage(NULL)
+                {
+                    // Our members start off as NULL, so this swap puts the
+                    // NULLs in the other, and puts the other's variables into
+                    // ourself.
+                    swap(other);
+                }
+
                 /**
                  * CTOR create a vector from initializer_list
                  * @param[in] init_list Initializer list
@@ -190,11 +201,29 @@ namespace std
                     return(*this);
                 }
 
+                vector& operator=(vector&& other)
+                {
+                    // Swap ourselves out with a default-constructed
+                    // vector. This will destroy and deallocate our storage and
+                    // NULL-out our member variables.
+                    {
+                        vector empty_vector;
+                        swap(empty_vector);
+                    }
+
+                    // Now swap ourselves with the dying vector, which will give
+                    // us ownership of its variables and NULL its variables out
+                    // afterward.
+                    swap(other);
+
+                    return *this;
+                }
+
                 // Iterators --------------------
 
                 /**
                  * Get iterator to the first vector element
-                 * @return iterator of rist vector element
+                 * @return iterator of first vector element
                  * @pre None.
                  * @post None.
                  */
@@ -206,7 +235,7 @@ namespace std
 
                 /**
                  * Get const_iterator to the first vector element
-                 * @return const_iterator of rist vector element
+                 * @return const_iterator of first vector element
                  * @pre None.
                  * @post None.
                  */
@@ -218,7 +247,7 @@ namespace std
 
                 /**
                  * Get iterator to the last vector element + 1
-                 * @return iterator
+                 * @return iterator of last vector element + 1
                  * @pre None.
                  * @post None.
                  */
@@ -230,12 +259,36 @@ namespace std
 
                 /**
                  * Get const_iterator to the last vector element + 1
-                 * @return const_iterator
+                 * @return const_iterator of last vector element + 1
                  * @pre None.
                  * @post None.
                  */
                 __attribute__ ((always_inline))
                 const_iterator end() const
+                {
+                    return (iv_finish);
+                }
+
+                /**
+                 * Get const_iterator to the first vector element
+                 * @return const_iterator of first vector element
+                 * @pre None.
+                 * @post None.
+                 */
+                __attribute__ ((always_inline))
+                const_iterator cbegin() const
+                {
+                    return (iv_start);
+                }
+
+                /**
+                 * Get const_iterator to the last vector element + 1
+                 * @return const_iterator of last vector element + 1
+                 * @pre None.
+                 * @post None.
+                 */
+                __attribute__ ((always_inline))
+                const_iterator cend() const
                 {
                     return (iv_finish);
                 }
@@ -429,6 +482,15 @@ namespace std
                  * (C++11)
                  */
                 T * data()
+                {
+                    return iv_start;
+                }
+
+                /*
+                 * direct access to the underlying array
+                 * (C++11)
+                 */
+                const T * data() const
                 {
                     return iv_start;
                 }

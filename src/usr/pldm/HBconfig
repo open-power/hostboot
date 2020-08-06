@@ -1,0 +1,17 @@
+config PLDM
+  default n
+    help
+      If enabled Hostboot supports PLDM over MCTP.
+
+config PLDM_TESTCASES
+  default n
+  help
+    If enabled, Hostboot supports PLDM testcases that do not require sending MCTP traffic
+
+config LOAD_LIDS_VIA_PLDM
+  default n
+  depends on !LOAD_PHYP_FROM_BOOTKERNEL
+  help
+    If enabled, the lids from Master Container Lid (MCL) will be loaded via PLDM File IO
+    requests to BMC. Note: the lids can either be loaded via PLDM or via BOOTKERNEL, but
+    not both.

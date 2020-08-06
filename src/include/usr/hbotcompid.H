@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2020                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -513,6 +513,22 @@ const char BPM_COMP_NAME[] = "bpm";
 const compId_t FAPIWRAP_COMP_ID = 0x4400;
 const char FAPIWRAP_COMP_NAME[] = "fapiwrap";
 
+//@}
+
+/** @name MCTP
+ *  MCTP communication library module
+ */
+//@{
+const compId_t MCTP_COMP_ID = 0x4600;
+const char MCTP_COMP_NAME[] = "mctp";
+//@}
+
+/** @name PLDM
+ *  PLDM communication library module
+ */
+//@{
+const compId_t PLDM_COMP_ID = 0x4700;
+const char PLDM_COMP_NAME[] = "pldm";
 //@}
 
 //

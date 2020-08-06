@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -150,6 +150,7 @@ namespace RUNTIME
         RT_NO_OMI_TARGET_FOUND         = RUNTIME_COMP_ID | 0x49,
         RC_LOG_GARD_EVENT_UNKNOWN_ERROR_TYPE   = RUNTIME_COMP_ID | 0x4A,
         RC_LOG_GARD_EVENT              = RUNTIME_COMP_ID | 0x4B,
+        RC_MCTP_AVAILABLE_ERR          = RUNTIME_COMP_ID | 0x4E,
     };
 
     enum UserDetailsTypes

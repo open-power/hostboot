@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2020                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -70,6 +70,12 @@ void block_lpc_ops( bool i_block );
  * @return LPC BAR physical address
  */
 uint64_t get_lpc_bar( void );
+
+/**
+ * @brief Return the value of the LPC BAR that the driver is using
+ * @return LPC BAR virtual address
+ */
+uint64_t get_lpc_virtual_bar( void );
 
 
 };  // namespace LPC

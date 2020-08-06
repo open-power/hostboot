@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015                             */
+/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -23,4 +23,5 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 #include <util/impl/shared_ptr.H>
+#include <util/impl/unique_ptr.H>
 /* vim: set filetype=cpp : */

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -154,6 +154,9 @@ namespace std
                           "Incorrect substitution of lvalue reference.");
             return static_cast<T&&>(t);
         }
+
+    template<typename T>
+        typename std::add_rvalue_reference<T>::type declval();
 };
 
 

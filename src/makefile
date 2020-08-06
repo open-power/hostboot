@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2010,2019
+# Contributors Listed Below - COPYRIGHT 2010,2020
 # [+] Google Inc.
 # [+] International Business Machines Corp.
 #
@@ -148,6 +148,8 @@ BASE_MODULES += pnor
 BASE_MODULES += vfs
 BASE_MODULES += $(if $(CONFIG_AST2400) || $(CONFIG_AST2500), sio)
 BASE_MODULES += $(if $(CONFIG_CONSOLE),console)
+BASE_MODULES += $(if $(CONFIG_MCTP)$(CONFIG_MCTP_TESTCASES),mctp)
+BASE_MODULES += $(if $(CONFIG_PLDM)$(CONFIG_PLDM_TESTCASES),pldm_base)
 
 # This is exported so that gcov knows the list of base modules to
 # exclude from instrumentation. We can't simply export BASE_MODULES or
@@ -221,6 +223,7 @@ EXTENDED_MODULES += smf
 EXTENDED_MODULES += expaccess
 EXTENDED_MODULES += expupd
 EXTENDED_MODULES += fapiwrap
+EXTENDED_MODULES += $(if $(CONFIG_PLDM)$(CONFIG_PLDM_TESTCASES),pldm_extended)
 
 #***************************************
 # Working test modules

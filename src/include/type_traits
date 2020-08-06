@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -29,5 +29,6 @@
 #include <util/impl/is_integral.H>
 #include <util/impl/is_ptr.H>
 #include <util/impl/enable_if.H>
+#include <util/impl/is_array.H>
 
 /* vim: set filetype=cpp : */

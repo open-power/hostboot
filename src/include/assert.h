@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -48,12 +48,12 @@
 
 #include <builtins.h>
 
+#ifdef __cplusplus
 #ifdef __HOSTBOOT_MODULE // Only allow traced assert in module code.
 #include <trace/interface.H>
 namespace TRACE { extern trace_desc_t* g_assertTraceBuffer; };
 #endif
 
-#ifdef __cplusplus
 extern "C"
 {
 #endif
@@ -61,6 +61,9 @@ extern "C"
 /** @enum AssertBehavior
  *  @brief Types of assert behavior used by the internal __assert function.
  */
+#ifndef __cplusplus
+typedef
+#endif
 enum AssertBehavior
 {
         /** Standard assert, custom trace already done. */
@@ -71,7 +74,11 @@ enum AssertBehavior
     ASSERT_CRITICAL,
         /** Kernel-level assert. */
     ASSERT_KERNEL,
-};
+}
+#ifndef __cplusplus
+AssertBehavior
+#endif
+;
 
 /** @fn __assert
  *  @brief Internal function utilized by assert macros to commonize handling.
@@ -93,11 +100,15 @@ enum AssertBehavior
  *      Kernel - A printk is performed and a while(1) loop is entered to cease
  *               user-space dispatching.
  */
+#ifdef NO_RETURN
 NO_RETURN
+#endif
 void __assert(AssertBehavior i_assertb, const char* i_file, int i_line);
 
 #ifdef __HOSTBOOT_MODULE // Only allow traced assert in module code.
 
+// TODO RTC:249565 revist asserts for c code
+#ifdef __cplusplus
 // Macro tricks to determine if there is a custom string.
 #define __ASSERT_HAS_TRACE_(_1, _2, ...) _2
 #define __ASSERT_HAS_TRACE(...) __ASSERT_HAS_TRACE_(0 , ##__VA_ARGS__, 0)
@@ -136,6 +147,18 @@ void __assert(AssertBehavior i_assertb, const char* i_file, int i_line);
                  __FILE__, __LINE__);\
     }\
 }
+#else
+
+// Do the assert but ignore the trace
+#define assert(expr, ...) \
+{\
+    if (unlikely(!(expr)))\
+    {\
+        __assert(ASSERT_TRACE_NOTDONE, __FILE__, __LINE__);\
+    }\
+}
+
+#endif
 
 #else   // Only allow kernel assert in non-module code.
 

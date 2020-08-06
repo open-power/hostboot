@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -93,7 +93,32 @@ const TaskInfo    g_taskinfolist[]   =   {
                         BASE_IMAGE,                 // Base Module
                 }
         },
-
+#if defined(CONFIG_MCTP) || defined(CONFIG_MCTP_TESTCASES)
+        /**
+         * @brief   libmctp
+         */
+        {
+                "libmctp.so" ,                      // taskname
+                NULL,                               // no pointer to fn
+                {
+                        START_TASK,
+                        BASE_IMAGE,                  // Base Module
+                }
+        },
+#endif
+#if defined(CONFIG_PLDM) || defined(CONFIG_PLDM_TESTCASES)
+        /**
+         * @brief   libpldm_base
+         */
+        {
+                "libpldm_base.so" ,                 // taskname
+                NULL,                               // no pointer to fn
+                {
+                        START_TASK,
+                        BASE_IMAGE,                  // Base Module
+                }
+        },
+#endif
         //  -----   Extended Image  -----------------------------------------------------
 
         /**

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2020                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -393,6 +393,12 @@ uint64_t get_lpc_bar( void )
     return mm_virt_to_phys( reinterpret_cast<void*>(
                             l_LpcDD.getLPCBaseAddr() )) -
                             l_LpcDD.getLPCStartAddr();
+}
+
+uint64_t get_lpc_virtual_bar( void )
+{
+    LpcDD l_LpcDD = Singleton<LpcDD>::instance();
+    return (l_LpcDD.getLPCBaseAddr() - l_LpcDD.getLPCStartAddr());
 }
 
 
