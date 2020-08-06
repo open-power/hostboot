@@ -100,8 +100,8 @@ const TopoSetEntryScom SET_TOPO_ENTRY_SCOM[] =
 
 enum topo_scom_fld
 {
-    ENTRY,
-    VALID
+    TOPO_ENTRY,
+    TOPO_VALID
 };
 
 ///
@@ -112,7 +112,7 @@ enum topo_scom_fld
 ///              a common wrapper to avoid code duplication and still use the
 ///              scomt checking facilities.
 /// @param[in]  i_target        Reference to processor chip target
-/// @param[in]  fld             Field to modify: ENTRY or VALID
+/// @param[in]  fld             Field to modify: TOPO_ENTRY or TOPO_VALID
 /// @param[in]  n               Topology id table entry index, each SCOM register
 ///                             stores 8 entries and their valid bits.
 ///                             assert(n >= 0 && n < 8)
@@ -131,7 +131,7 @@ void set_topo_scom(fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP> chip,
     // PREP so we can make use of the nice scomt checking
     scomt::c::PREP_L3_MISC_L3CERRS_TOPOLOGY_TBL0_SCOM_RD(chip);
 
-    if (fld == ENTRY)
+    if (fld == TOPO_ENTRY)
     {
         SET_TOPO_ENTRY_SCOM[n](value, regval);
     }
@@ -277,8 +277,8 @@ fapi2::ReturnCode get_topology_table_scoms(
                 continue;
             }
 
-            set_topo_scom(i_target, VALID, j, 1, regval);
-            set_topo_scom(i_target, ENTRY, j, val, regval);
+            set_topo_scom(i_target, TOPO_VALID, j, 1, regval);
+            set_topo_scom(i_target, TOPO_ENTRY, j, val, regval);
             FAPI_DBG("Set     TOPOLOGY_ID_TABLE[%02zu]=%02x      regval=%016llx", idx, val, regval);
         }
 
