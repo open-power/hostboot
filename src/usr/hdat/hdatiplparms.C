@@ -255,9 +255,6 @@ static void hdatPopulateOtherIPLAttributes(hdatOtherIPLAttributes_t &o_hdatOTA)
  */
 void  HdatIplParms::hdatGetIplParmsData()
 {
-    PNOR::SideInfo_t l_sideInfo;
-    errlHndl_t l_errl = NULL;
-
     TARGETING::Target *l_pSysTarget = NULL;
     (void) TARGETING::targetService().getTopLevelTarget(l_pSysTarget);
     if(l_pSysTarget == NULL)
@@ -269,6 +266,11 @@ void  HdatIplParms::hdatGetIplParmsData()
     //IPL to hypervisor running
     this->iv_hdatIPLParams->iv_iplParms.hdatIPLDestination = 0x02;
 
+    //@TODO RTC 258465 HDAT: eBMC fetching the IPL side from
+    //BIOS (Boot) parameter of PLDM
+    /*
+    PNOR::SideInfo_t l_sideInfo;
+    errlHndl_t l_errl = NULL;
     l_errl = PNOR::getSideInfo(PNOR::WORKING, l_sideInfo);
     if(!l_errl)
     {
@@ -287,6 +289,9 @@ void  HdatIplParms::hdatGetIplParmsData()
     {
         ERRORLOG::errlCommit(l_errl,HDAT_COMP_ID);
     }
+     */
+    this->iv_hdatIPLParams->iv_iplParms.hdatIPLSide =
+                                     HDAT_FIRMWARE_SIDE_WORKING;
     // Fast IPL Speed
     this->iv_hdatIPLParams->iv_iplParms.hdatIPLSpeed = 0xFF;
 
