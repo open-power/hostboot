@@ -936,11 +936,11 @@
       <default>
         <field>
           <id>dataOffsetKB</id>
-          <value>0</value>
+          <value>416</value>
         </field>
         <field>
           <id>dataSizeKB</id>
-          <value>0</value>
+          <value>96</value>
         </field>
         <field>
           <!-- Corresponds to the RAW value of the EEPROM_CONTENT_TYPE enumeration -->
@@ -1027,7 +1027,7 @@
         </field>
         <field>
           <id>engine</id>
-          <value>3</value>
+          <value>2</value>
         </field>
         <field>
           <id>spiMasterPath</id>
@@ -1053,7 +1053,7 @@
         </field>
         <field>
           <id>engine</id>
-          <value>3</value>
+          <value>2</value>
         </field>
         <field>
           <id>spiMasterPath</id>
@@ -1079,7 +1079,7 @@
         </field>
         <field>
           <id>engine</id>
-          <value>3</value>
+          <value>2</value>
         </field>
         <field>
           <id>spiMasterPath</id>
@@ -1105,7 +1105,7 @@
         </field>
         <field>
           <id>engine</id>
-          <value>3</value>
+          <value>2</value>
         </field>
         <field>
           <id>spiMasterPath</id>
@@ -1131,7 +1131,7 @@
         </field>
         <field>
           <id>engine</id>
-          <value>3</value>
+          <value>2</value>
         </field>
         <field>
           <id>spiMasterPath</id>
@@ -1262,7 +1262,7 @@
         </field>
         <field>
           <id>engine</id>
-          <value>2</value>
+          <value>3</value>
         </field>
         <field>
           <id>spiMasterPath</id>
@@ -1288,7 +1288,7 @@
         </field>
         <field>
           <id>engine</id>
-          <value>3</value>
+          <value>2</value>
         </field>
         <field>
           <id>spiMasterPath</id>
@@ -1314,7 +1314,7 @@
         </field>
         <field>
           <id>engine</id>
-          <value>2</value>
+          <value>3</value>
         </field>
         <field>
           <id>spiMasterPath</id>
