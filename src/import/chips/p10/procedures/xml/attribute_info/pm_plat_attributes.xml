@@ -1020,6 +1020,40 @@
     <overrideOnly/>
     <group>enablement</group>
   </attribute>
+ <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_SYSTEM_WOF_VALIDATION_MODE</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+    Defines the mode of WOF checking in relationship to system reaction
+
+    FAIL - if not ATTR_SYSTEM_PSTATE_DISABLE, fails the IPL (product default).
+           else act as OFF
+    INFO - if not ATTR_SYSTEM_PSTATE_DISABLE, Info error log; Pstates are disabled;
+                IPL continues.
+           else act as OFF
+    WARN - if not ATTR_SYSTEM_PSTATE_DISABLE, error messages to traces; no error
+                logs, Pstates are disabled (as #V is bad), IPL continues.
+           else act as OFF
+    OFF  - no checking performed; IPL continues.  Pstates are follow
+                ATTR_SYSTEM_PSTATE_DISABLE (user beware if not Disabled).
+
+    Producer: Override
+
+    Consumers: p10_pstate_parameter_build
+    </description>
+    <valueType>uint8</valueType>
+    <platInit/>
+    <enum>
+        FAIL= 0,
+        INFO = 1,
+        WARN = 2,
+        OFF = 3
+    </enum>
+    <default>WARN</default>
+    <overrideOnly/>
+    <group>enablement</group>
+  </attribute>
 
  <!-- ********************************************************************* -->
   <attribute>

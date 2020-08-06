@@ -3262,48 +3262,60 @@ fapi2::ReturnCode PlatPmPPB::get_mvpd_iddq( void )
     uint8_t*        l_buffer_iq_c =  nullptr;
     uint32_t        l_record = 0;
     uint32_t        l_bufferSize_iq  = IQ_BUFFER_ALLOC;
+    fapi2::ATTR_SYSTEM_IQ_VALIDATION_MODE_Type l_iq_mode = 0;
 
 
     // --------------------------------------------
     // Process IQ Keyword (IDDQ) Data
     // --------------------------------------------
 
+
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SYSTEM_IQ_VALIDATION_MODE, iv_procChip,l_iq_mode));
     // set l_record to appropriate cprx record
     l_record = (uint32_t)fapi2::MVPD_RECORD_CRP0;
 
     //First read is to get size of vpd record, note the o_buffer is nullptr
     FAPI_TRY( getMvpdField((fapi2::MvpdRecord)l_record,
-                           fapi2::MVPD_KEYWORD_IQ,
-                           iv_procChip,
-                           nullptr,
-                           l_bufferSize_iq) );
+                fapi2::MVPD_KEYWORD_IQ,
+                iv_procChip,
+                nullptr,
+                l_bufferSize_iq) );
 
     //Allocate memory for vpd data
     l_buffer_iq_c = reinterpret_cast<uint8_t*>(malloc(l_bufferSize_iq));
 
     // Get Chip IQ MVPD data from the CRPx records
     FAPI_TRY(getMvpdField((fapi2::MvpdRecord)l_record,
-                          fapi2::MVPD_KEYWORD_IQ,
-                          iv_procChip,
-                          l_buffer_iq_c,
-                          l_bufferSize_iq));
+                fapi2::MVPD_KEYWORD_IQ,
+                iv_procChip,
+                l_buffer_iq_c,
+                l_bufferSize_iq));
 
     //copy VPD data to IQ structure table
     memcpy(&iv_iddqt, l_buffer_iq_c, l_bufferSize_iq);
 
     //Verify Payload header data.
     if ( !(iv_iddqt.iddq_version) ||
-         !(iv_iddqt.good_normal_cores_per_sort))
+            !(iv_iddqt.good_normal_cores_per_sort))
     {
-        //iv_wof_enabled = false;//TBD for now commented for wof testing purpose
-        //because IQ data was not valid
-        FAPI_ASSERT_NOEXIT(false,
-                           fapi2::PSTATE_PB_IQ_VPD_ERROR(fapi2::FAPI2_ERRL_SEV_RECOVERED)
-                           .set_CHIP_TARGET(iv_procChip)
-                           .set_VERSION(iv_iddqt.iddq_version)
-                           .set_GOOD_NORMAL_CORES_PER_SORT(iv_iddqt.good_normal_cores_per_sort),
-                           "Pstate Parameter Block IQ Payload data error being logged");
-        fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+        if (l_iq_mode == fapi2::ENUM_ATTR_SYSTEM_IQ_VALIDATION_MODE_INFO)
+        {
+            FAPI_INF("Pstate Parameter Block IQ Payload data error being logged");
+        }
+        else
+        {
+
+
+            //iv_wof_enabled = false;//TBD for now commented for wof testing purpose
+            //because IQ data was not valid
+            FAPI_ASSERT_NOEXIT(false,
+                    fapi2::PSTATE_PB_IQ_VPD_ERROR(fapi2::FAPI2_ERRL_SEV_RECOVERED)
+                    .set_CHIP_TARGET(iv_procChip)
+                    .set_VERSION(iv_iddqt.iddq_version)
+                    .set_GOOD_NORMAL_CORES_PER_SORT(iv_iddqt.good_normal_cores_per_sort),
+                    "Pstate Parameter Block IQ Payload data error being logged");
+            fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+        }
     }
 
     //Verify ivdd_all_cores_off_caches_off has MSB bit is set
@@ -4664,6 +4676,7 @@ fapi2::ReturnCode PlatPmPPB::wof_init(
     uint16_t l_vcs_size = 0;
     uint16_t l_io_size  = 0;
     uint16_t l_ac_size  = 0;
+    fapi2::ATTR_SYSTEM_WOF_VALIDATION_MODE_Type l_wof_mode;
 
     //this structure has VRT header + data
     VRT_t l_vrt;
@@ -4710,7 +4723,7 @@ fapi2::ReturnCode PlatPmPPB::wof_init(
             strcpy(p_wfth->package_name,  "DENALI_DCM");
 
             FAPI_INF("l_vcs_start before %d l_vdd_start %d  l_io_start %d  l_ac_start %d",
-                        p_wfth->vcs_start, p_wfth->vdd_start, p_wfth->io_start, p_wfth->amb_cond_start );
+                    p_wfth->vcs_start, p_wfth->vdd_start, p_wfth->io_start, p_wfth->amb_cond_start );
 
             uint16_t l_vcs_start = revle16(p_wfth->vcs_start);
             uint16_t l_vdd_start = revle16(p_wfth->vdd_start);
@@ -4738,15 +4751,15 @@ fapi2::ReturnCode PlatPmPPB::wof_init(
             }
 
             FAPI_INF("VRT default: l_vrt fields value 0x%08X marker %X type %d content %d io %01d ac %01d vc %02d vd %02d",
-                                    l_vrt.vrtHeader.value,
-                                    l_vrt.vrtHeader.fields.marker,
-                                    l_vrt.vrtHeader.fields.type,
-                                    l_vrt.vrtHeader.fields.content,
-                                    l_vrt.vrtHeader.fields.io_id,
-                                    l_vrt.vrtHeader.fields.ac_id,
-                                    l_vrt.vrtHeader.fields.vcs_ceff_ratio_pct,
-                                    l_vrt.vrtHeader.fields.vdd_ceff_ratio_pct
-                                    );
+                    l_vrt.vrtHeader.value,
+                    l_vrt.vrtHeader.fields.marker,
+                    l_vrt.vrtHeader.fields.type,
+                    l_vrt.vrtHeader.fields.content,
+                    l_vrt.vrtHeader.fields.io_id,
+                    l_vrt.vrtHeader.fields.ac_id,
+                    l_vrt.vrtHeader.fields.vcs_ceff_ratio_pct,
+                    l_vrt.vrtHeader.fields.vdd_ceff_ratio_pct
+                    );
 
             for (auto i = 0; i < WOF_VRT_SIZE; ++i)
             {
@@ -4771,7 +4784,7 @@ fapi2::ReturnCode PlatPmPPB::wof_init(
                             l_vrt.vrtHeader.value = revle32(l_vrt.vrtHeader.value); // Restore the fixed structure
 
                             l_index += sizeof (l_vrt);
-                       }
+                        }
                     }
                 }
             }
@@ -4781,6 +4794,7 @@ fapi2::ReturnCode PlatPmPPB::wof_init(
         else
         {
             FAPI_DBG("ATTR_SYS_VRT_STATIC_DATA_ENABLE is not SET");
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SYSTEM_WOF_VALIDATION_MODE, iv_procChip,l_wof_mode));
 
             // Read System VRT data
             l_rc = FAPI_ATTR_GET(fapi2::ATTR_WOF_TABLE_DATA,
@@ -4840,29 +4854,36 @@ fapi2::ReturnCode PlatPmPPB::wof_init(
         if (!l_wof_header_data_state)
         {
             iv_wof_enabled = false;
-            FAPI_ASSERT_NOEXIT(false,
-                    fapi2::PSTATE_PB_WOF_HEADER_DATA_INVALID(fapi2::FAPI2_ERRL_SEV_RECOVERED)
-                    .set_CHIP_TARGET(FAPI_SYSTEM)
-                    .set_MAGIC_NUMBER(p_wfth->magic_number.value)
-                    .set_VERSION(p_wfth->header_version)
-                    .set_VRT_BLOCK_SIZE(p_wfth->vrt_block_size)
-                    .set_VRT_HEADER_SIZE(p_wfth->vrt_block_header_size)
-                    .set_VRT_DATA_SIZE(p_wfth->vrt_data_size)
-                    .set_CORE_COUNT(p_wfth->core_count)
-                    .set_VCS_START(p_wfth->vcs_start)
-                    .set_VCS_STEP(p_wfth->vcs_step)
-                    .set_VCS_SIZE(p_wfth->vcs_size)
-                    .set_VDD_START(p_wfth->vdd_start)
-                    .set_VDD_STEP(p_wfth->vdd_step)
-                    .set_VDD_SIZE(p_wfth->vdd_size)
-                    .set_IO_START(p_wfth->io_start)
-                    .set_IO_STEP(p_wfth->io_step)
-                    .set_IO_SIZE(p_wfth->io_size)
-                    .set_AMB_COND_START(p_wfth->amb_cond_start)
-                    .set_AMB_COND_STEP(p_wfth->amb_cond_step)
-                    .set_AMB_COND_SIZE(p_wfth->amb_cond_size),
+            if (l_wof_mode == fapi2::ENUM_ATTR_SYSTEM_WOF_VALIDATION_MODE_INFO)
+            {
+                FAPI_INF("Pstate Parameter Block WOF Header validation failed");
+            }
+            else
+            {
+                FAPI_ASSERT_NOEXIT(false,
+                        fapi2::PSTATE_PB_WOF_HEADER_DATA_INVALID(fapi2::FAPI2_ERRL_SEV_RECOVERED)
+                        .set_CHIP_TARGET(FAPI_SYSTEM)
+                        .set_MAGIC_NUMBER(p_wfth->magic_number.value)
+                        .set_VERSION(p_wfth->header_version)
+                        .set_VRT_BLOCK_SIZE(p_wfth->vrt_block_size)
+                        .set_VRT_HEADER_SIZE(p_wfth->vrt_block_header_size)
+                        .set_VRT_DATA_SIZE(p_wfth->vrt_data_size)
+                        .set_CORE_COUNT(p_wfth->core_count)
+                        .set_VCS_START(p_wfth->vcs_start)
+                        .set_VCS_STEP(p_wfth->vcs_step)
+                        .set_VCS_SIZE(p_wfth->vcs_size)
+                        .set_VDD_START(p_wfth->vdd_start)
+                        .set_VDD_STEP(p_wfth->vdd_step)
+                        .set_VDD_SIZE(p_wfth->vdd_size)
+                        .set_IO_START(p_wfth->io_start)
+                        .set_IO_STEP(p_wfth->io_step)
+                        .set_IO_SIZE(p_wfth->io_size)
+                        .set_AMB_COND_START(p_wfth->amb_cond_start)
+                        .set_AMB_COND_STEP(p_wfth->amb_cond_step)
+                        .set_AMB_COND_SIZE(p_wfth->amb_cond_size),
                     "Pstate Parameter Block WOF Header validation failed");
-            break;
+                break;
+            }
 
         }
 
@@ -4884,7 +4905,7 @@ fapi2::ReturnCode PlatPmPPB::wof_init(
         {
             FAPI_INF ("l_wof_table_index %d vrt_index %d", l_wof_table_index, vrt_index);
             FAPI_DBG("Addresses: *l_wof_table_data %p  *l_wof_table_data+l_wof_table_index %p",
-                            *l_wof_table_data,  (*l_wof_table_data) + l_wof_table_index);
+                    *l_wof_table_data,  (*l_wof_table_data) + l_wof_table_index);
 
             l_rc = update_vrt (
                     ((*l_wof_table_data) + l_wof_table_index),
