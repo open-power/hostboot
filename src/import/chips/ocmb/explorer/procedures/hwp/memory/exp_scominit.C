@@ -44,6 +44,7 @@
 #include <lib/shared/exp_consts.H>
 #include <generic/memory/lib/utils/fir/gen_mss_unmask.H>
 #include <lib/inband/exp_fw_adapter_properties.H>
+#include <lib/phy/exp_phy_reset.H>
 
 extern "C"
 {
@@ -89,6 +90,9 @@ extern "C"
 
         // Print and record Explorer FW version info
         FAPI_TRY( mss::exp::ib::run_fw_adapter_properties_get(i_target) );
+
+        // Resets the explorer PHY if needed
+        FAPI_TRY(mss::exp::phy::reset(i_target));
 
         return fapi2::FAPI2_RC_SUCCESS;
 

@@ -64,6 +64,7 @@ enum phy_init_mode
     NORMAL = 0,
     EYE_CAPTURE_STEP_1 = 1,
     EYE_CAPTURE_STEP_2 = 2,
+    RESET = 3,
 };
 
 ///
