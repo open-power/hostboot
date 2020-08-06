@@ -45,6 +45,7 @@ OBJS += call_proc_fabric_link_layer.o
 OBJS += call_fabric_dl_post_trainadv.o
 OBJS += call_proc_fabric_iovalid.o
 OBJS += call_proc_fbc_eff_config_aggregate.o
+OBJS += p10_smp_wrap.o
 
 VPATH += ${PROCEDURES_PATH}/hwp/nest/ ${PROCEDURES_PATH}/hwp/io/
 
