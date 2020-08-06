@@ -69,6 +69,13 @@ class p10_io_ppe_cache_proc
         p10_io_ppe_sram_reg p10_io_ppe_ppe_error_thread;
         p10_io_ppe_sram_reg p10_io_ppe_ppe_error_valid;
         p10_io_ppe_sram_reg p10_io_ppe_ppe_num_threads;
+        p10_io_ppe_sram_reg p10_io_ppe_ppe_tx_zcal_bist_busy;
+        p10_io_ppe_sram_reg p10_io_ppe_ppe_tx_zcal_bist_busy_done_alias;
+        p10_io_ppe_sram_reg p10_io_ppe_ppe_tx_zcal_bist_busy_done_fail_alias;
+        p10_io_ppe_sram_reg p10_io_ppe_ppe_tx_zcal_bist_done;
+        p10_io_ppe_sram_reg p10_io_ppe_ppe_tx_zcal_bist_done_fail_alias;
+        p10_io_ppe_sram_reg p10_io_ppe_ppe_tx_zcal_bist_en;
+        p10_io_ppe_sram_reg p10_io_ppe_ppe_tx_zcal_bist_fail;
         p10_io_ppe_sram_reg p10_io_ppe_ppe_tx_zcal_busy;
         p10_io_ppe_sram_reg p10_io_ppe_ppe_tx_zcal_busy_done_alias;
         p10_io_ppe_sram_reg p10_io_ppe_ppe_tx_zcal_busy_done_error_alias;
@@ -77,6 +84,7 @@ class p10_io_ppe_cache_proc
         p10_io_ppe_sram_reg p10_io_ppe_ppe_tx_zcal_error;
         p10_io_ppe_sram_reg p10_io_ppe_ppe_tx_zcal_n;
         p10_io_ppe_sram_reg p10_io_ppe_ppe_tx_zcal_p;
+        p10_io_ppe_sram_reg p10_io_ppe_ppe_vio_volts;
         p10_io_ppe_sram_reg p10_io_ppe_ppe_watchdog_select_sim_mode;
         p10_io_ppe_sram_reg p10_io_ppe_ucontroller_test_en;
         p10_io_ppe_sram_reg p10_io_ppe_ucontroller_test_stat;
@@ -143,6 +151,8 @@ class p10_io_ppe_cache_proc
         p10_io_ppe_sram_reg p10_io_ppe_loff_setting_ovr_enb[5];
         p10_io_ppe_sram_reg p10_io_ppe_poff_avg_a[5];
         p10_io_ppe_sram_reg p10_io_ppe_poff_avg_b[5];
+        p10_io_ppe_sram_reg p10_io_ppe_ppe_channel_loss[5];
+        p10_io_ppe_sram_reg p10_io_ppe_ppe_data_rate[5];
         p10_io_ppe_sram_reg p10_io_ppe_ppe_debug_state[5];
         p10_io_ppe_sram_reg p10_io_ppe_ppe_debug_stopwatch_time_us[5];
         p10_io_ppe_sram_reg p10_io_ppe_ppe_eoff_edge_hysteresis[5];
@@ -171,11 +181,13 @@ class p10_io_ppe_cache_proc
         p10_io_ppe_sram_reg p10_io_ppe_rx_a_dfe_done[5];
         p10_io_ppe_sram_reg p10_io_ppe_rx_a_dfe_h1_done[5];
         p10_io_ppe_sram_reg p10_io_ppe_rx_a_eoff_done[5];
+        p10_io_ppe_sram_reg p10_io_ppe_rx_a_lane_hist_min_eye_width[5];
         p10_io_ppe_sram_reg p10_io_ppe_rx_a_last_eye_height[5];
         p10_io_ppe_sram_reg p10_io_ppe_rx_a_latch_offset_done[5];
         p10_io_ppe_sram_reg p10_io_ppe_rx_a_lte_gain_done[5];
         p10_io_ppe_sram_reg p10_io_ppe_rx_a_lte_zero_done[5];
         p10_io_ppe_sram_reg p10_io_ppe_rx_a_quad_phase_done[5];
+        p10_io_ppe_sram_reg p10_io_ppe_rx_a_step_done_alias[5];
         p10_io_ppe_sram_reg p10_io_ppe_rx_amp_gain_cnt_max[5];
         p10_io_ppe_sram_reg p10_io_ppe_rx_b_bank_sync_done[5];
         p10_io_ppe_sram_reg p10_io_ppe_rx_b_ber_done[5];
@@ -188,11 +200,13 @@ class p10_io_ppe_cache_proc
         p10_io_ppe_sram_reg p10_io_ppe_rx_b_dfe_done[5];
         p10_io_ppe_sram_reg p10_io_ppe_rx_b_dfe_h1_done[5];
         p10_io_ppe_sram_reg p10_io_ppe_rx_b_eoff_done[5];
+        p10_io_ppe_sram_reg p10_io_ppe_rx_b_lane_hist_min_eye_width[5];
         p10_io_ppe_sram_reg p10_io_ppe_rx_b_last_eye_height[5];
         p10_io_ppe_sram_reg p10_io_ppe_rx_b_latch_offset_done[5];
         p10_io_ppe_sram_reg p10_io_ppe_rx_b_lte_gain_done[5];
         p10_io_ppe_sram_reg p10_io_ppe_rx_b_lte_zero_done[5];
         p10_io_ppe_sram_reg p10_io_ppe_rx_b_quad_phase_done[5];
+        p10_io_ppe_sram_reg p10_io_ppe_rx_b_step_done_alias[5];
         p10_io_ppe_sram_reg p10_io_ppe_rx_bad_eye_opt_height[5];
         p10_io_ppe_sram_reg p10_io_ppe_rx_bad_eye_opt_width[5];
         p10_io_ppe_sram_reg p10_io_ppe_rx_bank_sync_fail[5];
@@ -217,13 +231,13 @@ class p10_io_ppe_cache_proc
         p10_io_ppe_sram_reg p10_io_ppe_rx_dccal_done[5];
         p10_io_ppe_sram_reg p10_io_ppe_rx_ddc_fail[5];
         p10_io_ppe_sram_reg p10_io_ppe_rx_ddc_hysteresis[5];
-        p10_io_ppe_sram_reg p10_io_ppe_rx_ddc_last_left_edge[5];
-        p10_io_ppe_sram_reg p10_io_ppe_rx_ddc_last_right_edge[5];
         p10_io_ppe_sram_reg p10_io_ppe_rx_ddc_measure_limited[5];
         p10_io_ppe_sram_reg p10_io_ppe_rx_ddc_min_err_lim[5];
         p10_io_ppe_sram_reg p10_io_ppe_rx_dfe_clkadj_coeff[5];
         p10_io_ppe_sram_reg p10_io_ppe_rx_dfe_debug[5];
         p10_io_ppe_sram_reg p10_io_ppe_rx_dfe_fail[5];
+        p10_io_ppe_sram_reg p10_io_ppe_rx_dfe_full_mode[5];
+        p10_io_ppe_sram_reg p10_io_ppe_rx_dfe_full_quad[5];
         p10_io_ppe_sram_reg p10_io_ppe_rx_dfe_h1_fail[5];
         p10_io_ppe_sram_reg p10_io_ppe_rx_dfe_max_check[5];
         p10_io_ppe_sram_reg p10_io_ppe_rx_dfe_min_check[5];
@@ -236,6 +250,7 @@ class p10_io_ppe_cache_proc
         p10_io_ppe_sram_reg p10_io_ppe_rx_eo_enable_ctle_peak_cal[5];
         p10_io_ppe_sram_reg p10_io_ppe_rx_eo_enable_ddc[5];
         p10_io_ppe_sram_reg p10_io_ppe_rx_eo_enable_dfe_cal[5];
+        p10_io_ppe_sram_reg p10_io_ppe_rx_eo_enable_dfe_full_cal[5];
         p10_io_ppe_sram_reg p10_io_ppe_rx_eo_enable_edge_offset_cal[5];
         p10_io_ppe_sram_reg p10_io_ppe_rx_eo_enable_lte_cal[5];
         p10_io_ppe_sram_reg p10_io_ppe_rx_eo_enable_quad_phase_cal[5];
@@ -269,6 +284,7 @@ class p10_io_ppe_cache_proc
         p10_io_ppe_sram_reg p10_io_ppe_rx_lane_hist_min_eye_height_latch[5];
         p10_io_ppe_sram_reg p10_io_ppe_rx_lane_hist_min_eye_height_quad[5];
         p10_io_ppe_sram_reg p10_io_ppe_rx_lane_hist_min_eye_height_valid[5];
+        p10_io_ppe_sram_reg p10_io_ppe_rx_lane_hist_min_eye_width_valid[5];
         p10_io_ppe_sram_reg p10_io_ppe_rx_lane_recal_cnt[5];
         p10_io_ppe_sram_reg p10_io_ppe_rx_last_init_lane[5];
         p10_io_ppe_sram_reg p10_io_ppe_rx_latch_offset_fail[5];
@@ -282,6 +298,7 @@ class p10_io_ppe_cache_proc
         p10_io_ppe_sram_reg p10_io_ppe_rx_lte_zero_fail[5];
         p10_io_ppe_sram_reg p10_io_ppe_rx_lte_zero_max_check[5];
         p10_io_ppe_sram_reg p10_io_ppe_rx_lte_zero_min_check[5];
+        p10_io_ppe_sram_reg p10_io_ppe_rx_manual_servo_filter_depth[5];
         p10_io_ppe_sram_reg p10_io_ppe_rx_min_recal_cnt[5];
         p10_io_ppe_sram_reg p10_io_ppe_rx_min_recal_cnt_reached[5];
         p10_io_ppe_sram_reg p10_io_ppe_rx_qpa_cdrlock_ignore[5];
@@ -334,7 +351,10 @@ class p10_io_ppe_cache_proc
         p10_io_ppe_sram_reg p10_io_ppe_tx_ffe_pre1_coef[5];
         p10_io_ppe_sram_reg p10_io_ppe_tx_ffe_pre2_coef[5];
         p10_io_ppe_sram_reg p10_io_ppe_tx_rc_enable_dcc[5];
+        p10_io_ppe_sram_reg p10_io_ppe_tx_seg_test_1r_segs[5];
+        p10_io_ppe_sram_reg p10_io_ppe_tx_seg_test_2r_seg[5];
         p10_io_ppe_sram_reg p10_io_ppe_tx_seg_test_en[5];
         p10_io_ppe_sram_reg p10_io_ppe_tx_seg_test_fail[5];
+        p10_io_ppe_sram_reg p10_io_ppe_tx_seg_test_frc_2r[5];
 };
 #endif

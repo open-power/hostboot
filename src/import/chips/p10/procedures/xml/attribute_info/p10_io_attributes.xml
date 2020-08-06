@@ -24,6 +24,129 @@
 <!-- IBM_PROLOG_END_TAG                                                     -->
 <attributes>
  <!-- ******************************************************************************** -->
+
+  <attribute>
+    <id>ATTR_OMI_SPREAD_SPECTRUM</id>
+    <targetType>
+      TARGET_TYPE_PROC_CHIP
+    </targetType>
+    <description>
+       Specifies if spread spectrum is enabled for the OMI links
+    </description>
+    <valueType>uint8</valueType>
+    <enum>
+      ENABLED = 0x01,
+      DISABLED = 0x00
+    </enum>
+    <default>DISABLED</default>
+    <platInit/>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_IOHS_SPREAD_SPECTRUM</id>
+    <targetType>
+      TARGET_TYPE_PROC_CHIP
+    </targetType>
+    <description>
+       Specifies if spread spectrum is enabled for the iohs links
+    </description>
+    <valueType>uint8</valueType>
+    <enum>
+      ENABLED = 0x01,
+      DISABLED = 0x00
+    </enum>
+    <default>DISABLED</default>
+    <platInit/>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_IO_IOHS_CHANNEL_LOSS</id>
+    <targetType>
+      TARGET_TYPE_IOHS
+    </targetType>
+    <description>
+       Specifies the channel loss
+    </description>
+    <valueType>uint8</valueType>
+    <enum>
+      HIGH_LOSS = 0x00,
+      MID_LOSS = 0x01,
+      LOW_LOSS = 0x02
+    </enum>
+    <default>HIGH_LOSS</default>
+    <platInit/>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_IO_OMI_CHANNEL_LOSS</id>
+    <targetType>
+      TARGET_TYPE_OMI
+    </targetType>
+    <description>
+       Specifies the channel loss
+    </description>
+    <valueType>uint8</valueType>
+    <enum>
+      HIGH_LOSS = 0x00,
+      MID_LOSS = 0x01,
+      LOW_LOSS = 0x02
+    </enum>
+    <default>HIGH_LOSS</default>
+    <platInit/>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_IO_OMI_PRE1</id>
+    <targetType>
+      TARGET_TYPE_OMI
+    </targetType>
+    <description>
+       OMI PRE1 settings
+    </description>
+    <valueType>uint8</valueType>
+    <default>0x00</default>
+    <platInit/>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_IO_OMI_PRE2</id>
+    <targetType>
+      TARGET_TYPE_OMI
+    </targetType>
+    <description>
+       OMI PRE2 settings
+    </description>
+    <valueType>uint8</valueType>
+    <default>0x00</default>
+    <platInit/>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_IO_IOHS_PRE1</id>
+    <targetType>
+      TARGET_TYPE_IOHS
+    </targetType>
+    <description>
+       IOHS PRE1 settings
+    </description>
+    <valueType>uint8</valueType>
+    <default>0x00</default>
+    <platInit/>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_IO_IOHS_PRE2</id>
+    <targetType>
+      TARGET_TYPE_IOHS
+    </targetType>
+    <description>
+       IOHS PRE2 settings
+    </description>
+    <valueType>uint8</valueType>
+    <default>0x00</default>
+    <platInit/>
+  </attribute>
+
   <attribute>
     <id>ATTR_OMI_DL_GROUP_POS</id>
     <targetType>
