@@ -107,73 +107,6 @@ p10_hcd_core_shadows_disable(
 
     if ( MMIO_GET ( QME_FLAGS_TOD_COMPLETE ) == 1 )
     {
-
-        FAPI_DBG("Disable CORE_SAMPLE via CUCR[1]");
-        FAPI_TRY( HCD_PUTMMIO_C( i_target, CPMS_CUCR_WO_CLEAR, MMIO_LOAD32H(BIT32(1)) ) );
-
-        if( l_dds_operable )
-        {
-            FAPI_DBG("Disable Droop Detection and Cancel Active Droop Response via FDCR[0,2-3]");
-            FAPI_TRY( HCD_PUTMMIO_C( i_target, CPMS_FDCR_WO_OR, MMIO_LOAD32H( (BIT32(0) | BITS32(2, 2)) ) ) );
-
-            FAPI_DBG("Wait for FDCR_UPDATE_IN_PROGRESS to be 0x0 via CUCR[31]");
-            l_timeout = HCD_SHADOW_DIS_FDCR_UPDATE_IN_PROG_POLL_TIMEOUT_HW_NS /
-                        HCD_SHADOW_DIS_FDCR_UPDATE_IN_PROG_POLL_DELAY_HW_NS;
-
-            do
-            {
-                FAPI_TRY( HCD_GETMMIO_C( i_target, CPMS_CUCR, l_mmioData ) );
-
-                // use multicastAND to check 0
-                if( MMIO_GET(31) == 0 )
-                {
-                    break;
-                }
-
-                fapi2::delay(HCD_SHADOW_DIS_FDCR_UPDATE_IN_PROG_POLL_DELAY_HW_NS,
-                             HCD_SHADOW_DIS_FDCR_UPDATE_IN_PROG_POLL_DELAY_SIM_CYCLE);
-            }
-            while( (--l_timeout) != 0 );
-
-            FAPI_ASSERT((l_timeout != 0),
-                        fapi2::SHADOW_DIS_FDCR_UPDATE_IN_PROG_TIMEOUT()
-                        .set_SHADOW_DIS_FDCR_UPDATE_IN_PROG_POLL_TIMEOUT_HW_NS(HCD_SHADOW_DIS_FDCR_UPDATE_IN_PROG_POLL_TIMEOUT_HW_NS)
-                        .set_CPMS_CUCR(l_mmioData)
-                        .set_CORE_TARGET(i_target),
-                        "ERROR: FDCR Update Timeout");
-        }
-
-        FAPI_DBG("Disable CORE_SHADOW via CUCR[0]");
-        FAPI_TRY( HCD_PUTMMIO_C( i_target, CPMS_CUCR_WO_CLEAR, MMIO_LOAD32H(BIT32(0)) ) );
-
-        FAPI_DBG("Wait for FTC/PP/DPT_SHADOW_STATE to be Idle via CUCR[33-35,40-41,45-46]");
-        l_timeout = HCD_SHADOW_DIS_CORE_SHADOW_STATE_POLL_TIMEOUT_HW_NS /
-                    HCD_SHADOW_DIS_CORE_SHADOW_STATE_POLL_DELAY_HW_NS;
-
-        do
-        {
-            FAPI_TRY( HCD_GETMMIO_C( i_target, MMIO_LOWADDR(CPMS_CUCR), l_mmioData ) );
-
-            // use multicastAND to check 0
-            MMIO_GET32L(l_shadow_states);
-
-            if( !( l_shadow_states & ( BITS64SH(33, 3) | BITS64SH(40, 2) | BITS64SH(45, 2) ) ) )
-            {
-                break;
-            }
-
-            fapi2::delay(HCD_SHADOW_DIS_CORE_SHADOW_STATE_POLL_DELAY_HW_NS,
-                         HCD_SHADOW_DIS_CORE_SHADOW_STATE_POLL_DELAY_SIM_CYCLE);
-        }
-        while( (--l_timeout) != 0 );
-
-        FAPI_ASSERT((l_timeout != 0),
-                    fapi2::SHADOW_DIS_CORE_SHADOW_STATE_TIMEOUT()
-                    .set_SHADOW_DIS_CORE_SHADOW_STATE_POLL_TIMEOUT_HW_NS(HCD_SHADOW_DIS_CORE_SHADOW_STATE_POLL_TIMEOUT_HW_NS)
-                    .set_CPMS_CUCR(l_mmioData)
-                    .set_CORE_TARGET(i_target),
-                    "ERROR: Shadow Disable FTC/PP/DPT Shadow State Timeout");
-
         FAPI_DBG("Wait on XFER_RECEIVE_DONE via PCR_TFCSR[32]");
         l_timeout = HCD_SHADOW_DIS_XFER_RECEIVE_DONE_POLL_TIMEOUT_HW_NS /
                     HCD_SHADOW_DIS_XFER_RECEIVE_DONE_POLL_DELAY_HW_NS;
@@ -225,9 +158,6 @@ p10_hcd_core_shadows_disable(
 
         FAPI_DBG("Drop XFER_RECEIVE_DONE via PCR_TFCSR[32]");
         FAPI_TRY( HCD_PUTMMIO_C( i_target, MMIO_LOWADDR(QME_TFCSR_WO_CLEAR), MMIO_1BIT( MMIO_LOWBIT(32) ) ) );
-
-        FAPI_DBG("Assert CTFS_WKUP_ENABLE via PCR_SCSR[27]");
-        FAPI_TRY( HCD_PUTMMIO_C( i_target, QME_SCSR_WO_OR, MMIO_1BIT(27) ) );
     }
     else
     {
@@ -240,10 +170,76 @@ p10_hcd_core_shadows_disable(
         FAPI_TRY( HCD_PUTSCOM_C( i_target, EC_PC_TFX_SM, BIT64(1) ) );
     }
 
+    FAPI_DBG("Disable CORE_SAMPLE via CUCR[1]");
+    FAPI_TRY( HCD_PUTMMIO_C( i_target, CPMS_CUCR_WO_CLEAR, MMIO_LOAD32H(BIT32(1)) ) );
+
+    if( l_dds_operable )
+    {
+        FAPI_DBG("Disable Droop Detection and Cancel Active Droop Response via FDCR[0,2-3]");
+        FAPI_TRY( HCD_PUTMMIO_C( i_target, CPMS_FDCR_WO_OR, MMIO_LOAD32H( (BIT32(0) | BITS32(2, 2)) ) ) );
+
+        FAPI_DBG("Wait for FDCR_UPDATE_IN_PROGRESS to be 0x0 via CUCR[31]");
+        l_timeout = HCD_SHADOW_DIS_FDCR_UPDATE_IN_PROG_POLL_TIMEOUT_HW_NS /
+                    HCD_SHADOW_DIS_FDCR_UPDATE_IN_PROG_POLL_DELAY_HW_NS;
+
+        do
+        {
+            FAPI_TRY( HCD_GETMMIO_C( i_target, CPMS_CUCR, l_mmioData ) );
+
+            // use multicastAND to check 0
+            if( MMIO_GET(31) == 0 )
+            {
+                break;
+            }
+
+            fapi2::delay(HCD_SHADOW_DIS_FDCR_UPDATE_IN_PROG_POLL_DELAY_HW_NS,
+                         HCD_SHADOW_DIS_FDCR_UPDATE_IN_PROG_POLL_DELAY_SIM_CYCLE);
+        }
+        while( (--l_timeout) != 0 );
+
+        FAPI_ASSERT((l_timeout != 0),
+                    fapi2::SHADOW_DIS_FDCR_UPDATE_IN_PROG_TIMEOUT()
+                    .set_SHADOW_DIS_FDCR_UPDATE_IN_PROG_POLL_TIMEOUT_HW_NS(HCD_SHADOW_DIS_FDCR_UPDATE_IN_PROG_POLL_TIMEOUT_HW_NS)
+                    .set_CPMS_CUCR(l_mmioData)
+                    .set_CORE_TARGET(i_target),
+                    "ERROR: FDCR Update Timeout");
+    }
+
+    FAPI_DBG("Disable CORE_SHADOW via CUCR[0]");
+    FAPI_TRY( HCD_PUTMMIO_C( i_target, CPMS_CUCR_WO_CLEAR, MMIO_LOAD32H(BIT32(0)) ) );
+
+    FAPI_DBG("Wait for FTC/PP/DPT_SHADOW_STATE to be Idle via CUCR[33-35,40-41,45-46]");
+    l_timeout = HCD_SHADOW_DIS_CORE_SHADOW_STATE_POLL_TIMEOUT_HW_NS /
+                HCD_SHADOW_DIS_CORE_SHADOW_STATE_POLL_DELAY_HW_NS;
+
+    do
+    {
+        FAPI_TRY( HCD_GETMMIO_C( i_target, MMIO_LOWADDR(CPMS_CUCR), l_mmioData ) );
+
+        // use multicastAND to check 0
+        MMIO_GET32L(l_shadow_states);
+
+        if( !( l_shadow_states & ( BITS64SH(33, 3) | BITS64SH(40, 2) | BITS64SH(45, 2) ) ) )
+        {
+            break;
+        }
+
+        fapi2::delay(HCD_SHADOW_DIS_CORE_SHADOW_STATE_POLL_DELAY_HW_NS,
+                     HCD_SHADOW_DIS_CORE_SHADOW_STATE_POLL_DELAY_SIM_CYCLE);
+    }
+    while( (--l_timeout) != 0 );
+
+    FAPI_ASSERT((l_timeout != 0),
+                fapi2::SHADOW_DIS_CORE_SHADOW_STATE_TIMEOUT()
+                .set_SHADOW_DIS_CORE_SHADOW_STATE_POLL_TIMEOUT_HW_NS(HCD_SHADOW_DIS_CORE_SHADOW_STATE_POLL_TIMEOUT_HW_NS)
+                .set_CPMS_CUCR(l_mmioData)
+                .set_CORE_TARGET(i_target),
+                "ERROR: Shadow Disable FTC/PP/DPT Shadow State Timeout");
+
+    FAPI_DBG("Assert CTFS_WKUP_ENABLE via PCR_SCSR[27]");
+    FAPI_TRY( HCD_PUTMMIO_C( i_target, QME_SCSR_WO_OR, MMIO_1BIT(27) ) );
+
 fapi_try_exit:
-
     FAPI_INF("<<p10_hcd_core_shadows_disable");
-
     return fapi2::current_err;
-
 }
