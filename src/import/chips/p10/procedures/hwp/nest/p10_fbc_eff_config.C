@@ -47,37 +47,41 @@ const uint32_t EPSILON_MAX_VALUE = 0xFFFFFFFF;
 const uint8_t NUM_EPSILON_READ_TIERS = 3;
 const uint8_t NUM_EPSILON_WRITE_TIERS = 2;
 
+// Note: If epsilon tables are updated, be sure to update
+// statics values in scan initfiles for hostboot/chip-cont
+// environments if applicable.
+
 // Low-end Epsilons (4 chips/group, 1 group), DLR disabled/half
 // Product offerings: Rainier (low-end with DCMs)
 const uint32_t EPSILON_R_T0_LE[] = {  10,  10,  10,  10,  11 };
 const uint32_t EPSILON_R_T1_LE[] = {  10,  10,  10,  10,  11 };
-const uint32_t EPSILON_R_T2_LE[] = { 285, 304, 328, 362, 413 };
+const uint32_t EPSILON_R_T2_LE[] = { 300, 318, 342, 376, 427 };
 const uint32_t EPSILON_W_T0_LE[] = {   0,   0,   0,   0,   0 };
-const uint32_t EPSILON_W_T1_LE[] = { 193, 198, 205, 215, 228 };
+const uint32_t EPSILON_W_T1_LE[] = { 207, 212, 219, 228, 243 };
 
 // Low-end Epsilons (4 chips/group, 1 group), DLR quarter-width
 // Product offerings: Rainier (low-end with DCMs)
 const uint32_t EPSILON_R_T0_LQ[] = {  10,  10,  10,  10,  11 };
 const uint32_t EPSILON_R_T1_LQ[] = {  10,  10,  10,  10,  11 };
-const uint32_t EPSILON_R_T2_LQ[] = { 360, 379, 403, 437, 488 };
+const uint32_t EPSILON_R_T2_LQ[] = { 375, 393, 417, 451, 502 };
 const uint32_t EPSILON_W_T0_LQ[] = {   0,   0,   0,   0,   0 };
-const uint32_t EPSILON_W_T1_LQ[] = { 268, 273, 280, 289, 303 };
+const uint32_t EPSILON_W_T1_LQ[] = { 282, 287, 294, 303, 318 };
 
 // Mid-range Epsilons (8 chips/group, 1 group)
 // Product offerings: Everest (mid-range with DCMs), Denali Flat-8
 const uint32_t EPSILON_R_T0_MR[] = {  10,  10,  10,  10,  11 };
 const uint32_t EPSILON_R_T1_MR[] = {  10,  10,  10,  10,  11 };
-const uint32_t EPSILON_R_T2_MR[] = { 276, 291, 310, 337, 377 };
+const uint32_t EPSILON_R_T2_MR[] = { 293, 307, 327, 354, 394 };
 const uint32_t EPSILON_W_T0_MR[] = {   0,   0,   0,   0,   0 };
-const uint32_t EPSILON_W_T1_MR[] = { 139, 137, 134, 130, 125 };
+const uint32_t EPSILON_W_T1_MR[] = { 156, 154, 151, 147, 142 };
 
 // High-end Epsilons (4 chips/group, 4 groups)
 // Product offerings: Denali (high-end with SCMs)
 const uint32_t EPSILON_R_T0_HE[] = {  10,  10,  10,  10,  11 };
-const uint32_t EPSILON_R_T1_HE[] = { 287, 305, 330, 363, 414 };
-const uint32_t EPSILON_R_T2_HE[] = { 293, 526, 570, 632, 724 };
-const uint32_t EPSILON_W_T0_HE[] = { 181, 186, 192, 202, 216 };
-const uint32_t EPSILON_W_T1_HE[] = { 367, 388, 417, 457, 516 };
+const uint32_t EPSILON_R_T1_HE[] = { 304, 322, 346, 380, 431 };
+const uint32_t EPSILON_R_T2_HE[] = { 526, 559, 604, 665, 758 };
+const uint32_t EPSILON_W_T0_HE[] = { 197, 202, 209, 219, 233 };
+const uint32_t EPSILON_W_T1_HE[] = { 401, 422, 450, 490, 550 };
 
 // LCO constants
 const uint8_t MAX_L3_TARGETS = 32;
