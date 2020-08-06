@@ -424,6 +424,8 @@ fapi2::ReturnCode p10_fabric_iovalid_lane_validate(
 
         if ((l_lane_failed_count <= 1) && (l_lane_not_locked_count <= 1))
         {
+            FAPI_TRY(PREP_DLP_FIR_REG_WO_OR(i_iohs_target));
+
             if (i_even_not_odd)
             {
                 SET_DLP_FIR_REG_0_SPARE_DONE(l_dl_fir);
