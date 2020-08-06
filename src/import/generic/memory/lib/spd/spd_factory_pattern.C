@@ -103,7 +103,8 @@ rev_fallback::rev_fallback(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_targe
     RDIMM_DDR4_V1_1{DDR4, RDIMM_MODULE, rev::V1_1},
     NVDIMM_DDR4_V1_0{DDR4, NVDIMM_MODULE, rev::V1_0},
     NVDIMM_DDR4_V1_1{DDR4, NVDIMM_MODULE, rev::V1_1},
-    DDIMM_DDR4_V0_3{DDR4, DDIMM_MODULE, rev::V0_3}
+    DDIMM_DDR4_V0_3{DDR4, DDIMM_MODULE, rev::V0_3},
+    DDIMM_DDR4_V0_4{DDR4, DDIMM_MODULE, rev::V0_4}
 {
     // Member variable initialization
     fapi2::buffer<uint8_t> l_buffer(i_key.iv_rev);
@@ -124,6 +125,7 @@ rev_fallback::rev_fallback(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_targe
     iv_nvdimm_rev_map[NVDIMM_DDR4_V1_1] = rev::V1_1;
 
     iv_ddimm_rev_map[DDIMM_DDR4_V0_3] = rev::V0_3;
+    iv_ddimm_rev_map[DDIMM_DDR4_V0_4] = rev::V0_4;
 
     // Another small map to select the right map based on module
     iv_spd_param_map[RDIMM_MODULE] = iv_rdimm_rev_map;
