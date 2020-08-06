@@ -75,7 +75,7 @@ void* call_proc_chiplet_enable_ridi( void *io_pArgs )
     errlHndl_t l_err = nullptr;
     TARGETING::TargetHandleList l_cpuTargetList;
 
-    if (TARGETING::isSMPWrapConfig())
+    if (!TARGETING::isSMPWrapConfig())
     {
         //Get a list of proc chips
         getAllChips(l_cpuTargetList, TYPE_PROC);

@@ -65,7 +65,7 @@ void* call_proc_pau_scominit( void *io_pArgs )
 
     TRACFCOMP(g_trac_isteps_trace, ENTER_MRK"call_proc_pau_scominit entry");
 
-    if (TARGETING::isSMPWrapConfig())
+    if (!TARGETING::isSMPWrapConfig())
     {
         //Get a list of all proc chips
         getAllChips(l_procTargetList, TYPE_PROC);
