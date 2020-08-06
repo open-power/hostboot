@@ -1456,9 +1456,11 @@ int32_t rank( ExtensibleChip * i_chip, MemRank i_rank )
                       i_chip->getHuid() );
             break;
         }
-
+        PRDF_TRAC( PRDF_FUNC "NOTE: Dynamic mem dealloc currently disabled" );
+        /* TODO RTC 258446
         // Send the address range to the hypervisor.
         sendDynMemDeallocRequest( ssAddr, seAddr );
+        */
         PRDF_TRAC( PRDF_FUNC "Rank dealloc for Start Addr: 0x%016llx "
                    "End Addr: 0x%016llx", ssAddr, seAddr );
 
@@ -1507,8 +1509,11 @@ int32_t port( ExtensibleChip * i_chip )
             break;
         }
 
+        PRDF_TRAC( PRDF_FUNC "NOTE: Dynamic mem dealloc currently disabled" );
+        /* TODO RTC 258446
         // Send the address range to the hypervisor.
         sendDynMemDeallocRequest( ssAddr, seAddr );
+        */
         PRDF_TRAC( PRDF_FUNC "Port dealloc for Start Addr: 0x%016llx "
                    "End Addr: 0x%016llx", ssAddr, seAddr );
 
@@ -1598,8 +1603,11 @@ int32_t dimmSlct( TargetHandle_t i_dimm )
             break;
         }
 
+        PRDF_TRAC( PRDF_FUNC "NOTE: Dynamic mem dealloc currently disabled" );
+        /* TODO RTC 258446
         // Send the address range to the hypervisor.
         sendDynMemDeallocRequest( ssAddr, seAddr );
+        */
         PRDF_TRAC( PRDF_FUNC "DIMM Slct dealloc for Start Addr: 0x%016llx "
                    "End Addr: 0x%016llx", ssAddr, seAddr );
 
