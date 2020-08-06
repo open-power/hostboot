@@ -277,7 +277,8 @@ void cleanupChnlAttns<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
     // for subchannel 0 or DSTLFIR[4:7] for subchannel 1
     ExtensibleChip * mcc = getConnectedParent( i_chip, TYPE_MCC );
 
-    SCAN_COMM_REGISTER_CLASS * dstlfir_and = mcc->getRegister( "DSTLFIR_AND" );
+    SCAN_COMM_REGISTER_CLASS * dstlfir_and =
+        mcc->getRegister( "MC_DSTL_FIR_AND" );
 
     dstlfir_and->setAllBits();
     dstlfir_and->SetBitFieldJustified( chnlPos*4, 4, 0 );
@@ -321,7 +322,7 @@ void cleanupChnlAttns<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
                            mskData );
                 // Attention on, set bits in DSTLFIR
                 SCAN_COMM_REGISTER_CLASS * dstlfir_or =
-                    mcc->getRegister( "DSTLFIR_OR" );
+                    mcc->getRegister( "MC_DSTL_FIR_OR" );
                 dstlfir_or->SetBit( fir.bitPos + (4*chnlPos) );
                 if ( SUCCESS != dstlfir_or->Write() )
                 {
@@ -423,10 +424,10 @@ bool __queryUcsMcc( ExtensibleChip * i_mcc, TargetHandle_t i_omi )
         { {13,29}, {17,31}, {23,25} };
 
     // Check the DSTLFIR for UCS
-    SCAN_COMM_REGISTER_CLASS * fir  = i_mcc->getRegister( "DSTLFIR" );
-    SCAN_COMM_REGISTER_CLASS * mask = i_mcc->getRegister( "DSTLFIR_MASK" );
-    SCAN_COMM_REGISTER_CLASS * act0 = i_mcc->getRegister( "DSTLFIR_ACT0" );
-    SCAN_COMM_REGISTER_CLASS * act1 = i_mcc->getRegister( "DSTLFIR_ACT1" );
+    SCAN_COMM_REGISTER_CLASS * fir  = i_mcc->getRegister( "MC_DSTL_FIR" );
+    SCAN_COMM_REGISTER_CLASS * mask = i_mcc->getRegister( "MC_DSTL_FIR_MASK" );
+    SCAN_COMM_REGISTER_CLASS * act0 = i_mcc->getRegister( "MC_DSTL_FIR_ACT0" );
+    SCAN_COMM_REGISTER_CLASS * act1 = i_mcc->getRegister( "MC_DSTL_FIR_ACT1" );
     SCAN_COMM_REGISTER_CLASS * cnfg = i_mcc->getRegister( "DSTLCFG2" );
 
     if ( SUCCESS == (fir->Read() | mask->Read() | act0->Read() | act1->Read() |
@@ -462,10 +463,10 @@ bool __queryUcsMcc( ExtensibleChip * i_mcc, TargetHandle_t i_omi )
       {50,55}, {52,50}, {54,50}, {56,48}, {60,56} };
 
     // Check the USTLFIR for UCS
-    fir  = i_mcc->getRegister( "USTLFIR" );
-    mask = i_mcc->getRegister( "USTLFIR_MASK" );
-    act0 = i_mcc->getRegister( "USTLFIR_ACT0" );
-    act1 = i_mcc->getRegister( "USTLFIR_ACT1" );
+    fir  = i_mcc->getRegister( "MC_USTL_FIR" );
+    mask = i_mcc->getRegister( "MC_USTL_FIR_MASK" );
+    act0 = i_mcc->getRegister( "MC_USTL_FIR_ACT0" );
+    act1 = i_mcc->getRegister( "MC_USTL_FIR_ACT1" );
     cnfg = i_mcc->getRegister( "USTLFAILMASK" );
 
     if ( SUCCESS == (fir->Read() | mask->Read() | act0->Read() | act1->Read() |
@@ -756,7 +757,7 @@ void __cleanupChnlFail<TYPE_OMI>( TargetHandle_t i_omi,
             // DSTLFIR Subchannel B Bits: 4,5,6,7,13,15,17,19,21,23
             mask |= 0x0f05550000000000ull;
         }
-        reg = mccChip->getRegister( "DSTLFIR_MASK_OR" );
+        reg = mccChip->getRegister( "MC_DSTL_FIR_MASK_OR" );
         reg->SetBitFieldJustified( 0, 64, mask );
         reg->Write();
 
@@ -775,7 +776,7 @@ void __cleanupChnlFail<TYPE_OMI>( TargetHandle_t i_omi,
             //                            48,50,52,54,56,60
             mask |= 0x5400000aaaaaaa88ull;
         }
-        reg = mccChip->getRegister( "USTLFIR_MASK_OR" );
+        reg = mccChip->getRegister( "MC_USTL_FIR_MASK_OR" );
         reg->SetBitFieldJustified( 0, 64, mask );
         reg->Write();
 
