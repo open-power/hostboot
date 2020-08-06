@@ -22,3 +22,48 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+
+///
+/// @file exp_phy_reset.H
+/// @brief Procedures to reset the Explorer PHY
+///
+// *HWP HWP Owner: Andre Marin <aamarin@us.ibm.com>
+// *HWP HWP Backup: Stephen Glancy <sglancy@us.ibm.com>
+// *HWP Team: Memory
+// *HWP Level: 2
+// *HWP Consumed by: FSP:HB
+
+#ifndef __EXP_PHY_RESET_H__
+#define __EXP_PHY_RESET_H__
+
+#include <fapi2.H>
+#include <generic/memory/lib/utils/shared/mss_generic_consts.H>
+
+namespace mss
+{
+namespace exp
+{
+namespace phy
+{
+
+///
+/// @brief Resets the explorer's PHY if needed
+/// @param[in] i_target the explorer chip target in question
+/// @return FAPI2_RC_SUCCESS if ok
+///
+fapi2::ReturnCode reset( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target );
+
+///
+/// @brief Checks if the Explorer FW supports the separate reset procedure
+/// @param[in] i_target the explorer chip target in question
+/// @param[out] o_is_ext_reset_supported YES if the external PHY reset is needed, otherwise no
+/// @return FAPI2_RC_SUCCESS if ok
+///
+fapi2::ReturnCode is_reset_supported( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+                                      mss::states& o_is_reset_supported );
+
+} // ns phy
+} // ns exp
+} // ns mss
+
+#endif
