@@ -52,6 +52,7 @@
 #include <targeting/targplatreasoncodes.H>
 #include <attributetraits.H>
 #include <targeting/common/utilFilter.H>
+#include <targeting/common/util.H>
 
 #ifdef __HOSTBOOT_MODULE
 // System
@@ -1247,20 +1248,16 @@ void TargetService::dump() const
             TARG_INF("XSCOM Base Address = 0x%016llX",l_xscomBaseAddr);
         }
 
-        uint8_t l_Group_Id = 0;
-        if ( l_allTargets->tryGetAttr<
-                ATTR_FABRIC_GROUP_ID>(l_Group_Id))
+        TARGETING::ATTR_PROC_FABRIC_TOPOLOGY_ID_type topoId = 0;
+        if(l_allTargets->tryGetAttr<TARGETING::ATTR_PROC_FABRIC_TOPOLOGY_ID>(topoId))
         {
-            TARG_INF("XSCOM Node ID = 0x%X",l_Group_Id);
+            TARGETING::groupId_t groupId = 0;
+            TARGETING::chipId_t chipId = 0;
+            TARGETING::extractGroupAndChip(topoId, groupId, chipId);
+            TARG_INF("XSCOM topology ID = 0x%02X",topoId);
+            TARG_INF("XSCOM node ID = 0x%02X",groupId);
+            TARG_INF("XSCOM chip ID = 0x%02X",chipId);
         }
-
-        uint8_t l_Chip_Id = 0;
-        if ( l_allTargets->tryGetAttr<
-                ATTR_FABRIC_CHIP_ID>(l_Chip_Id))
-        {
-            TARG_INF("XSCOM Chip ID = 0x%X",l_Chip_Id);
-        }
-
     }
 
     return;

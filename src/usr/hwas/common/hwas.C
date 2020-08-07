@@ -219,32 +219,14 @@ bool compareAffinity(const TargetInfo t1, const TargetInfo t2)
 }
 
 /*
- * @brief  This function takes in proc target and returns topology id
+ * @brief  This function returns the topology ID of the input proc target
  *
  * @param[in] i_proc: proc target
- * @return topology id
+ * @return Processor's topology ID
  */
 uint8_t getTopologyId (TargetHandle_t i_proc)
 {
     return i_proc->getAttr<ATTR_PROC_FABRIC_TOPOLOGY_ID>();
-}
-
-/*
- * @brief  This function takes in the value of ATTR_PROC_MEM_TO_USE
- *         and extract out group and chip id
- *         in the following bit format: GGGG CCC
- *         where G = Group Id and C = Chip Id
- *
- * @param[in] i_proc_mem_to_use: Value of ATTR_PROC_MEM_TO_USE
- * @param[out] o_grp_id: groupd id
- * @param[out] o_chip_id: chip id
- */
-void parseProcMemToUseIntoGrpChipId (uint8_t   i_proc_mem_to_use,
-                                     uint8_t & o_grp_id,
-                                     uint8_t & o_chip_id)
-{
-    o_grp_id  = (i_proc_mem_to_use >> 3) & 0x0F;
-    o_chip_id = i_proc_mem_to_use & 0x07;
 }
 
 errlHndl_t update_proc_mem_to_use (const Target* i_node)
@@ -312,7 +294,7 @@ errlHndl_t update_proc_mem_to_use (const Target* i_node)
 
         }
 
-        //set PROC_MEM_TO_USE to the group/chip id of the proc we want to
+        //set PROC_MEM_TO_USE to the topology ID of the proc we want to
         //use the mem of
         //get all procs behind the input node
         TargetHandleList l_procs;
@@ -342,7 +324,7 @@ errlHndl_t check_for_missing_memory (const Target* i_node,
     do
     {
         /////////////////////////////////////////////////////////////
-        //Step 1 -- Figure out the lowest group/chip id proc that has
+        //Step 1 -- Figure out proc with lowest topology ID that has
         //          memory
         /////////////////////////////////////////////////////////////
         //get all procs behind the input node
@@ -353,10 +335,10 @@ errlHndl_t check_for_missing_memory (const Target* i_node,
                                         TYPE_PROC,
                                         UTIL_FILTER_FUNCTIONAL);
 
-        //sort based on group/chip id. So, we can deterministically
+        //sort based on topology ID in order to deterministically
         //pick the processor with memory. This will also help guarantee
-        //that we will attempt to use master (or altmaster) proc's memory
-        //first before using slave proc's memory.
+        //that we will attempt to use primary (or secondary) proc's memory
+        //first before using another proc's memory.
         std::sort(l_procs.begin(), l_procs.end(),
                 [] (TargetHandle_t a, TargetHandle_t b)
                 {
@@ -391,19 +373,15 @@ errlHndl_t check_for_missing_memory (const Target* i_node,
         //get the proc pointed by PROC_MEM_TO_USE and check
         //if there is memory behind that proc. We rely on the current
         //value of PROC_MEM_TO_USE, so, we don't change our answer
-        //unnecessarily (in cases when both master proc and altmaster
-        //have memory)
-        uint8_t l_grp  = 0;
-        uint8_t l_chip = 0;
-        parseProcMemToUseIntoGrpChipId(io_proc_mem_to_use, l_grp, l_chip);
-        PredicateAttrVal<ATTR_FABRIC_GROUP_ID> l_predGrp (l_grp);
-        PredicateAttrVal<ATTR_FABRIC_CHIP_ID> l_predChip (l_chip);
+        //unnecessarily (in cases when both primary boot proc and secondary
+        //boot proc have memory)
+        PredicateAttrVal<ATTR_PROC_FABRIC_TOPOLOGY_ID> topoIdPred(io_proc_mem_to_use);
         PredicateCTM l_predProc (CLASS_CHIP, TYPE_PROC);
         PredicateIsFunctional l_isFunctional;
         PredicatePostfixExpr l_procCheckExpr;
 
         l_procCheckExpr.push(&l_predProc).push(&l_isFunctional).
-            push(&l_predGrp).push(&l_predChip).And().And().And();
+            push(&topoIdPred).And().And();
 
         TargetHandleList l_procMemUsedCurrently;
         targetService().getAssociated(l_procMemUsedCurrently,
@@ -413,8 +391,8 @@ errlHndl_t check_for_missing_memory (const Target* i_node,
                                       &l_procCheckExpr);
 
         HWAS_INF("check_for_missing_memory: looking for a proc with "
-                "grp=0x%x chip=0x%x, found %d procs",
-                l_grp, l_chip, l_procMemUsedCurrently.size());
+                 "topology ID 0x%02X, found %d procs",
+                 io_proc_mem_to_use, l_procMemUsedCurrently.size());
 
         if (l_procMemUsedCurrently.size() >= 1)
         {
@@ -435,7 +413,7 @@ errlHndl_t check_for_missing_memory (const Target* i_node,
 
 
         /////////////////////////////////////////////////////////////
-        //Step 3-- If proc picked in Step1 has lower group/chip id
+        //Step 3-- If proc picked in Step1 has lower topology id
         //          than current proc_mem_to_use value or
         //          there is no memory behind the currently used proc,
         //          then we update the proc_mem_to_use

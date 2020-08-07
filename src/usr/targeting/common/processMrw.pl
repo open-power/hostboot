@@ -1011,6 +1011,10 @@ sub processNode
 
 } # end sub processNode
 
+
+# Hash which maps a node's ordinal ID to the smallest topology ID in that node
+my %minTopoIdForNode;
+
 #--------------------------------------------------
 # @brief Process targets of type PROC and all it's children
 #
@@ -1081,11 +1085,6 @@ sub processProcessorAndChildren
     my $nodeParentAffinity =$targetObj->getAttribute($nodeParent, "AFFINITY_PATH");
     my $nodeParentPhysical = $targetObj->getAttribute($nodeParent, "PHYS_PATH");
 
-    # Copy the parent socket attributes FABRIC_GROUP_ID and FABRIC_CHIP_ID to
-    # the PROC.
-    $targetObj->copyAttribute($socket, $target, "FABRIC_GROUP_ID");
-    $targetObj->copyAttribute($socket, $target, "FABRIC_CHIP_ID");
-
     # Get the FAPI_NAME by using the data gathered above.
     my $fapiName = $targetObj->getFapiName($type, $nodeParentPos, $procPosPerNode);
 
@@ -1106,6 +1105,15 @@ sub processProcessorAndChildren
     # Save this target for retrieval later when printing the xml (sub printXML)
     $targetObj->{targeting}{SYS}[$sysParentPos]{NODES}[$nodeParentPos]
                 {PROCS}[$procPosPerNode]{KEY} = $target;
+
+    # Save the minimum topology ID in this node for calculating
+    # PROC_MEM_TO_USE later
+    my $topoId = getTopologyId($targetObj,$target);
+    if (   (!defined $minTopoIdForNode{$nodeParentPos})
+        || ($topoId < $minTopoIdForNode{$nodeParentPos}) )
+    {
+        $minTopoIdForNode{$nodeParentPos}=$topoId;
+    }
 
     # Set the PROC's master status
     setProcMasterStatus($targetObj, $target);
@@ -2826,69 +2834,22 @@ sub postProcessProcessor
     $targetObj->setAttributeField($target, "SCOM_SWITCHES", "useXscom", "0");
     $targetObj->setAttributeField($target, "SCOM_SWITCHES", "useI2cScom","0");
 
-    ## default effective fabric ids to match regular fabric ids
-    ##  the value will be adjusted based on presence detection later
+    ## Default effective fabric topology ID to match default fabric topology
+    ## ID.  The value will be adjusted based on presence detection later.
     $targetObj->setAttribute($target,
-                             "PROC_EFF_FABRIC_GROUP_ID",
+                             "PROC_FABRIC_EFF_TOPOLOGY_ID",
                              $targetObj->getAttribute($target,
-                                                      "FABRIC_GROUP_ID"));
-    $targetObj->setAttribute($target,
-                             "PROC_EFF_FABRIC_CHIP_ID",
-                             $targetObj->getAttribute($target,
-                                                      "FABRIC_CHIP_ID"));
-
-
-    #TODO RTC: 191762 -- Need a generic way to source FABRIC_GROUP_ID and
-    #FABRIC_CHIP_ID from the MRW and select the right value in processMRW
-    #based on the system configuration we are compiling for.
-    my $system_config = $targetObj->{system_config};
-    if ($system_config eq "w")
-    {
-        my $huid_str = $targetObj->getAttribute($target, "HUID");
-        my $huid     = hex $huid_str;
-        my $grp_id   = $targetObj->getAttribute($target,"FABRIC_GROUP_ID");
-        my $chip_id  = $targetObj->getAttribute($target,"FABRIC_CHIP_ID");
-
-        if    ($huid eq 0x50000)
-        {
-            $grp_id  = 0;
-            $chip_id = 0;
-        }
-        elsif ($huid eq 0x50001)
-        {
-            $grp_id  = 1;
-            $chip_id = 1;
-        }
-        elsif ($huid eq 0x50002)
-        {
-            $grp_id  = 0;
-            $chip_id = 1;
-        }
-        elsif ($huid eq 0x50003)
-        {
-            $grp_id  = 1;
-            $chip_id = 0;
-        }
-        else
-        {
-            #This is super ugly hack to make sure FABRIC_GROUP_ID and
-            #FABRIC_CHIP_ID are unique in the entire system. But, it
-            #doesn't matter what they are for other drawers as for
-            #wrap config we only care about one drawer
-            $grp_id += 1;
-        }
-
-        $targetObj->setAttribute($target,"FABRIC_GROUP_ID",$grp_id);
-        $targetObj->setAttribute($target,"FABRIC_CHIP_ID",$chip_id);
-        $targetObj->setAttribute($target,"PROC_EFF_FABRIC_GROUP_ID",$grp_id);
-        $targetObj->setAttribute($target,"PROC_EFF_FABRIC_CHIP_ID",$chip_id);
-    }
+                                                      "PROC_FABRIC_TOPOLOGY_ID"));
 
     setupMemoryMaps($targetObj,$target);
 
+    # Every processor in the same node gets the smallest topology ID present
+    # in the node, indicating which proc's memory to use.  This can change
+    # dynamically during system operation.
+    my $nodeParent = $targetObj->findParentByType($target, "NODE");
+    my $nodeParentPos = $targetObj->getAttribute($nodeParent, "ORDINAL_ID");
     $targetObj->setAttribute($target,
-                     "PROC_MEM_TO_USE", ( $targetObj->getAttribute($target,
-                     "FABRIC_GROUP_ID") << 3));
+                             "PROC_MEM_TO_USE",$minTopoIdForNode{$nodeParentPos});
 
     processPowerRails ($targetObj, $target);
 

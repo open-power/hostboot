@@ -297,37 +297,24 @@ errlHndl_t check_proc0_memory_config(IStepError & io_istepErr)
 void check_hrmor_within_range (ATTR_PROC_MEM_TO_USE_type i_proc_mem_to_use,
                                IStepError & io_StepError)
 {
-    // TODO RTC 212966 - Support for topology id
-    //extract group and chip id from PROC_MEM_TO_USE attribute
-    uint8_t l_grp  {0};
-    uint8_t l_chip {0};
-    HWAS::parseProcMemToUseIntoGrpChipId(i_proc_mem_to_use, l_grp, l_chip);
+    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+              "check_hrmor_within_range: PROC_MEM_TO_USE=0x%02X",
+              i_proc_mem_to_use);
 
-    TRACFCOMP(g_trac_isteps_trace,
-            "check_hrmor_within_range: PROC_MEM_TO_USE=0x%x,Grp=0x%x,Chip=0x%x",
-            i_proc_mem_to_use, l_grp, l_chip);
-
-    //Find a proc that matches current proc_mem_to_use's group/chip id
+    // Find a proc that matches current proc_mem_to_use's topology ID
     TargetHandleList l_procs;
     getAllChips(l_procs, TYPE_PROC);
 
     TargetHandle_t l_procTgtMemUsed {nullptr};
     for (auto & l_proc : l_procs)
     {
-        auto l_proc_topo = l_proc->getAttr<ATTR_PROC_FABRIC_TOPOLOGY_ID>();
-        groupId_t l_proc_grp = 0;
-        chipId_t l_proc_chip = 0;
-        extractGroupAndChip(l_proc_topo,
-                            l_proc_grp,
-                            l_proc_chip);
-
-        if ((l_proc_grp == l_grp) && (l_proc_chip == l_chip))
+        const auto procTopoId = l_proc->getAttr<ATTR_PROC_FABRIC_TOPOLOGY_ID>();
+        if (procTopoId == i_proc_mem_to_use)
         {
             l_procTgtMemUsed = l_proc;
             break;
         }
     }
-
 
     //if we find it, then we check that the hrmor is within
     //range of configured mem.
@@ -934,10 +921,8 @@ void*    call_mss_attr_update( void *io_pArgs )
             //of proc pointed by ATTR_PROC_MEM_TO_USE
             //////////////////////////////////////////////////////////////////
 
-            // TODO RTC 212966 - Support for topology ID
-            // NOTE: ATTR_PROC_MEM_TO_USE contains group/chip id instead of
-            // topology id.
-            auto l_proc_mem_to_use = l_mProc->getAttr<ATTR_PROC_MEM_TO_USE>();
+            // NOTE: ATTR_PROC_MEM_TO_USE contains a topology id.
+            const auto l_proc_mem_to_use = l_mProc->getAttr<ATTR_PROC_MEM_TO_USE>();
             check_hrmor_within_range(l_proc_mem_to_use, l_StepError);
 
             //////////////////////////////////////////////////////////////////

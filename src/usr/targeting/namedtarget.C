@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -66,7 +66,7 @@ const TARGETING::Target *   getMasterCore( )
 
     TARGETING::Target * l_processor =   NULL;
     (void)TARGETING::targetService().masterProcChipTargetHandle( l_processor );
-    FABRIC_CHIP_ID_ATTR l_topologyId =
+    const auto l_topologyId =
                 l_processor->getAttr<TARGETING::ATTR_PROC_FABRIC_TOPOLOGY_ID>();
 
     TargetHandleList l_cores;

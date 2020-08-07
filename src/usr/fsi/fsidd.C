@@ -47,6 +47,7 @@
 #include <targeting/common/commontargeting.H>
 #include "errlud_fsi.H"
 #include <util/misc.H>
+#include <targeting/common/util.H>
 
 //Serialize all accesses - @fixme - RTC:98898
 mutex_t g_fsiOpMux = MUTEX_INITIALIZER;
@@ -456,50 +457,18 @@ errlHndl_t FsiDD::initializeHardware()
     TRACFCOMP( g_trac_fsi, "FSI::initializeHardware>" );
 
     do{
-        //Hardware Bug HW222712 on Murano DD1.0 causes the
-        //  any_error bit to be un-clearable so we just
-        //  have to ignore it
-        if( (iv_master->getAttr<TARGETING::ATTR_MODEL>()
-             == TARGETING::MODEL_MURANO) )
-        {
-            // have to use the scom version on the master chip
-            uint32_t scom_data[2];
-            size_t scom_size = sizeof(scom_data);
-            l_err = deviceOp( DeviceFW::READ,
-                              TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL,
-                              scom_data,
-                              scom_size,
-                              DEVICE_XSCOM_ADDRESS(0x000F000F) );
-            if( l_err ) { break; }
-
-            uint32_t ec_level = 0x00;
-            ec_level = (scom_data[0] & 0xF0000000) >> 24;
-            ec_level |= ((scom_data[0] & 0x00F00000) >> 20);
-            if( ec_level < 0x20 )
-            {
-                // Ignore bits 16 and 24
-                // 16: cMFSI any-master-error
-                // 24: MFSI any-master-error
-                iv_opbErrorMask &= 0xFFFF7F7F;
-            }
-        }
-
-        //@fixme-RTC:87909 - temporary simics workaround
-        if( (iv_master->getAttr<TARGETING::ATTR_MODEL>()
-             == TARGETING::MODEL_VENICE) )
-        {
-            // Ignore bits 16 and 24
-            // 16: cMFSI any-master-error
-            // 24: MFSI any-master-error
-            iv_opbErrorMask &= 0xFFFF7F7F;
-        }
-
         // Determine if we are running on the primary or alternate
-        //  master, per the SBE architecture the primary is chip0
-        //  and the alternate is chip1
-        iv_useAlt =
-          iv_master->getAttr<TARGETING::ATTR_FABRIC_CHIP_ID>();
-        TRACFCOMP( g_trac_fsi, "Master = %.8X : alt=%d", TARGETING::get_huid(iv_master), iv_useAlt );
+        // boot processsor, per the SBE architecture the primary is chip0
+        // and the alternate is chip1
+        const auto topoId =
+            iv_master->getAttr<TARGETING::ATTR_PROC_FABRIC_TOPOLOGY_ID>();
+        TARGETING::groupId_t groupId = 0;
+        TARGETING::chipId_t chipId = 0;
+        TARGETING::extractGroupAndChip(topoId, groupId, chipId);
+
+        iv_useAlt = chipId;
+        TRACFCOMP(g_trac_fsi, "Primary boot proc HUID = 0x%08X, use alt boot proc = %d",
+                  TARGETING::get_huid(iv_master), iv_useAlt);
 
         typedef struct {
             TARGETING::Target* targ;

@@ -311,30 +311,6 @@ errlHndl_t check_for_missing_memory (const TARGETING::Target* i_node,
                                      bool & o_found_missing_mem);
 
 /*
- * @brief  This function takes in proc target and returns group/chip id
- *         in the following bit format: GGGG CCC
- *         where G = Group Id and C = Chip Id
- *
- * @param[in] i_proc: proc target
- * @retval: chip info including group and chip id
- */
-uint64_t getGroupChipIdInfo (TARGETING::TargetHandle_t i_proc);
-
-/*
- * @brief  This function takes in the value of ATTR_PROC_MEM_TO_USE
- *         and extract out group and chip id
- *         in the following bit format: GGGG CCC
- *         where G = Group Id and C = Chip Id
- *
- * @param[in] i_proc_mem_to_use: Value of ATTR_PROC_MEM_TO_USE
- * @param[out] o_grp_id: group id
- * @param[out] o_chip_id: chip id
- */
-void parseProcMemToUseIntoGrpChipId (uint8_t i_proc_mem_to_use,
-                                     uint8_t & o_grp_id,
-                                     uint8_t & o_chip_id);
-
-/*
  * @brief This function computes whether current value of
  *        PROC_MEM_TO_USE matches with the expected value.
  *        The expected value can change through the IPL because
