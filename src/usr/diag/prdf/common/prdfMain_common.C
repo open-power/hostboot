@@ -209,13 +209,6 @@ bool __analyzeOcmbs( STEP_CODE_DATA_STRUCT & io_sc )
 
     PRDF_TRAC( "PRDF::__analyzeOcmbs enter" );
 
-    ATTR_MODEL_type procModel = getChipModel( getMasterProc() );
-    if ( MODEL_AXONE != procModel )
-    {
-        PRDF_TRAC( "PRDF__analyzeOcmbs OCMBs only supported for Axone" );
-        return attnFound;
-    }
-
     TargetHandle_t sys = nullptr;
     targetService().getTopLevelTarget( sys );
     assert( sys != nullptr );

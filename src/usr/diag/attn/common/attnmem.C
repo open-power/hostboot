@@ -560,16 +560,6 @@ void MemOps::resolveOcmbs( const TargetHandle_t i_proc,
 
     ATTN_SLOW( "MemOps::resolveOcmbs start" );
 
-    // Do nothing if we are not on a system that supports OCMBs
-    TargetHandle_t primaryProc = nullptr;
-    getTargetService().masterProcChipTargetHandle( primaryProc );
-    ATTR_MODEL_type procModel = primaryProc->getAttr<ATTR_MODEL>();
-    if ( MODEL_AXONE != procModel )
-    {
-        ATTN_SLOW( "MemOps::resolveOcmbs OCMBs only supported on Axone" );
-        return;
-    }
-
     // Check the attribute whether we are at a point in the IPL where we can
     // get attentions from the OCMBs but will not get interrupts.
     TargetHandle_t sys = nullptr;
