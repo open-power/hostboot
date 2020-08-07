@@ -244,7 +244,7 @@ void* call_host_activate_boot_core(void* const io_pArgs)
         //In the future possibly move default "waitTime" value to SBEIO code
         uint64_t waitTimeMs = 10500; // wait time 10.5 sec, anything larger than 10737 ms can cause
                                      // overflow on SBE side of the timeout calculations
-        l_errl = SBEIO::startDeadmanLoop(waitTimeMs);
+        l_errl = SBEIO::startDeadmanLoop(waitTimeMs,l_regInits.data(),l_regInits.size());
 
         if (l_errl)
         {
