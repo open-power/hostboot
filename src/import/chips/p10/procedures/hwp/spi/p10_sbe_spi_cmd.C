@@ -37,12 +37,42 @@
     #include "sbeutil.H"
 #endif
 
+// memcpy functionality
+#if __PPE42__
+    #include "ppe42_string.h"
+#else
+    #include <string.h>
+#endif
+
 #define SPI_SLAVE_WR_CMD  0x0200000000000000
 #define SPI_SLAVE_RD_CMD  0x0300000000000000
 #define SPI_SLAVE_RD_STAT 0x0500000000000000
 #define SPI_SLAVE_WR_EN   0x0600000000000000
 
+// Timeout values so not stuck in wait loops forever
+constexpr uint64_t SPI_TIMEOUT_MAX_WAIT_COUNT      = 10000;   // 10 seconds
+constexpr uint64_t SPI_TIMEOUT_DELAY_NS            = 1000000; // 1 msec
+constexpr uint64_t SPI_TIMEOUT_DELAY_NS_SIM_CYCLES = 1000000; // 1 msec
+
 using namespace fapi2;
+
+
+// TPM SPI command
+// From Trusted Computing Group(TCG) 2.0 spec for SPI Bit Protocol
+// https://trustedcomputinggroup.org/wp-content/uploads/PC-Client-Specific-Platform-TPM-Profile-for-TPM-2p0-v1p04_r0p37_pub-1.pdf
+typedef union
+{
+    struct
+    {
+        uint32_t readNotWrite : 1;
+        uint32_t reserved : 1;
+        uint32_t len : 6;
+        uint32_t addr : 24;
+        uint32_t reserved2: 32;
+    } cmd_bits;
+    uint64_t val;
+} tpmSpiCmd_t;
+
 
 fapi2::ReturnCode
 spi_master_lock(SpiControlHandle& i_handle, uint64_t i_pib_master_id)
@@ -135,7 +165,9 @@ spi_wait_for_tdr_empty(SpiControlHandle& i_handle)
 {
     fapi2::buffer<uint64_t> data64 = 0;
 
-    while(1)
+    uint64_t timeout = SPI_TIMEOUT_MAX_WAIT_COUNT;
+
+    while(timeout--)
     {
         FAPI_TRY(getScom( i_handle.target_chip,
                           i_handle.base_addr + SPIM_STATUSREG, data64));
@@ -157,7 +189,20 @@ spi_wait_for_tdr_empty(SpiControlHandle& i_handle)
             break; //Wait until TX Buffer is empty
         }
 
+        fapi2::delay(SPI_TIMEOUT_DELAY_NS, SPI_TIMEOUT_DELAY_NS_SIM_CYCLES);
     }
+
+    FAPI_ASSERT( timeout != 0,
+#ifndef BOOTLOADER
+                 fapi2::SBE_SPI_HANG_TIMEOUT()
+                 .set_CHIP_TARGET(i_handle.target_chip)
+                 .set_BASE_ADDRESS(i_handle.base_addr + SPIM_STATUSREG)
+                 .set_STATUS_REGISTER(data64)
+                 .set_TIMEOUT_MSEC(SPI_TIMEOUT_MAX_WAIT_COUNT),
+                 "spi_wait_for_tdr_empty wait timeout" );
+#else
+                 RC_SBE_SPI_HANG_TIMEOUT );
+#endif
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -169,7 +214,9 @@ spi_wait_for_rdr_full(SpiControlHandle& i_handle)
 {
     fapi2::buffer<uint64_t> status_reg = 0;
 
-    while(1)
+    uint64_t timeout = SPI_TIMEOUT_MAX_WAIT_COUNT;
+
+    while(timeout--)
     {
         FAPI_TRY(getScom( i_handle.target_chip,
                           i_handle.base_addr + SPIM_STATUSREG, status_reg));
@@ -190,7 +237,21 @@ spi_wait_for_rdr_full(SpiControlHandle& i_handle)
         {
             break;
         }
+
+        fapi2::delay(SPI_TIMEOUT_DELAY_NS, SPI_TIMEOUT_DELAY_NS_SIM_CYCLES);
     }
+
+    FAPI_ASSERT( timeout != 0,
+#ifndef BOOTLOADER
+                 fapi2::SBE_SPI_HANG_TIMEOUT()
+                 .set_CHIP_TARGET(i_handle.target_chip)
+                 .set_BASE_ADDRESS(i_handle.base_addr + SPIM_STATUSREG)
+                 .set_STATUS_REGISTER(status_reg)
+                 .set_TIMEOUT_MSEC(SPI_TIMEOUT_MAX_WAIT_COUNT),
+                 "spi_wait_for_rdr_full wait timeout" );
+#else
+                 RC_SBE_SPI_HANG_TIMEOUT );
+#endif
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -202,7 +263,9 @@ spi_wait_for_idle(SpiControlHandle& i_handle)
 {
     fapi2::buffer<uint64_t> data64 = 0;
 
-    while(1)
+    uint64_t timeout = SPI_TIMEOUT_MAX_WAIT_COUNT;
+
+    while(timeout--)
     {
         FAPI_TRY(getScom( i_handle.target_chip,
                           i_handle.base_addr + SPIM_STATUSREG, data64));
@@ -223,7 +286,21 @@ spi_wait_for_idle(SpiControlHandle& i_handle)
         {
             break;
         }
+
+        fapi2::delay(SPI_TIMEOUT_DELAY_NS, SPI_TIMEOUT_DELAY_NS_SIM_CYCLES);
     }
+
+    FAPI_ASSERT( timeout != 0,
+#ifndef BOOTLOADER
+                 fapi2::SBE_SPI_HANG_TIMEOUT()
+                 .set_CHIP_TARGET(i_handle.target_chip)
+                 .set_BASE_ADDRESS(i_handle.base_addr + SPIM_STATUSREG)
+                 .set_STATUS_REGISTER(data64)
+                 .set_TIMEOUT_MSEC(SPI_TIMEOUT_MAX_WAIT_COUNT),
+                 "spi_wait_for_idle wait timeout" );
+#else
+                 RC_SBE_SPI_HANG_TIMEOUT );
+#endif
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -420,6 +497,446 @@ spi_precheck(SpiControlHandle& i_handle)
 #endif
 fapi_try_exit:
     return fapi2::current_err;
+}
+
+/**
+ * @brief Wait for sequence index to be executed
+ *        Read the STATUSREG and check that the status indicates
+ *        it has passed index
+ *
+ * @param[in]  i_handle - handle for SPI operations
+ * @param[in]  i_index - SEQ index to check has executed
+ * @return     Error RC if timeout or multiplexing error detected
+ */
+static fapi2::ReturnCode
+spi_wait_for_seq_index_pass(SpiControlHandle& i_handle, const uint32_t i_index)
+{
+    fapi2::buffer<uint64_t> status_reg = 0;
+
+    uint64_t timeout = SPI_TIMEOUT_MAX_WAIT_COUNT;
+
+    while(timeout--)
+    {
+        FAPI_TRY(getScom( i_handle.target_chip,
+                          i_handle.base_addr + SPIM_STATUSREG, status_reg));
+
+        //checking for multiplexing error
+        FAPI_ASSERT( (status_reg.getBit<50>() == 0),
+#ifndef BOOTLOADER
+                     fapi2::SBE_SPI_INVALID_PORT_MULTIPLEX_SET()
+                     .set_CHIP_TARGET(i_handle.target_chip)
+                     .set_BASE_ADDRESS(i_handle.base_addr + SPIM_STATUSREG)
+                     .set_STATUS_REGISTER(status_reg),
+                     "Port multiplexer setting error set in wait_for_seq_index_pass");
+#else
+                     RC_SBE_SPI_INVALID_PORT_MULTIPLEX_SET);
+#endif
+
+        // 28 to 31 Sequencer index - Sequence index currently being executed
+        status_reg = (status_reg >> 32) & 0x000000000000000FULL;
+
+        if(status_reg > i_index)
+        {
+            break;
+        }
+
+        fapi2::delay(SPI_TIMEOUT_DELAY_NS, SPI_TIMEOUT_DELAY_NS_SIM_CYCLES);
+    }
+
+    FAPI_DBG("wait_for_seq_index_pass(%d) timeout %lld msec", i_index, timeout);
+    FAPI_ASSERT( timeout != 0,
+#ifndef BOOTLOADER
+                 fapi2::SBE_SPI_HANG_TIMEOUT()
+                 .set_CHIP_TARGET(i_handle.target_chip)
+                 .set_BASE_ADDRESS(i_handle.base_addr + SPIM_STATUSREG)
+                 .set_STATUS_REGISTER(status_reg)
+                 .set_TIMEOUT_MSEC(SPI_TIMEOUT_MAX_WAIT_COUNT),
+                 "wait_for_seq_index_pass(%d) wait timeout", i_index);
+#else
+                 RC_SBE_SPI_HANG_TIMEOUT);
+#endif
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+fapi2::ReturnCode spi_tpm_write_with_wait( SpiControlHandle& i_handle,
+        const uint32_t i_locality,
+        const uint32_t i_address,
+        const uint8_t i_length,
+        const uint8_t* i_buffer )
+{
+    uint64_t SEQ = 0;
+    uint64_t CNT = 0;
+    fapi2::buffer<uint64_t> data64 = 0;
+
+    // Trusted Computing Group (TCG) standard requires
+    // 3-byte addressing for SPI TPM operations
+    // Change into TPM address on SPI ( D4_[locality]xxxh )
+    uint32_t l_address = 0x00D40000 + (i_locality << 12) + (i_address & 0x0FFF);
+    fapi2::ReturnCode rc = fapi2::FAPI2_RC_SUCCESS;
+    tpmSpiCmd_t startWriteCmd = {0};
+
+    // Looking for last byte being a 0x01 which indicates end of wait period
+    uint64_t memory_mapping_reg = 0x00000000FF01FF00;
+
+    if(i_length <= 8)
+    {
+        // Sequencer Basic Operations
+        //    0x1X = Select_Slave X -Select slave X (X = handle.slave)
+        //        34 = Shift_N1 - M = 4 bytes of data being sent in TDR
+        //          41 = Shift_N2 - M = 1 byte to receive
+        //            62 = Branch if Not Equal RDR   -- use memory_mapping_reg
+        //              3M = Shift_N1 - M = i_length bytes of data to send
+        //                10 = select_slave 0 - deselect any slave
+        //                  00 = STOP
+        SEQ = 0x1034416230100000ULL | (static_cast<uint64_t>(i_length) << 24) |
+              (static_cast<uint64_t>(i_handle.slave) << 56);
+        CNT = ((0x65) << 8);
+    }
+    else if((i_length % 8) == 0)
+    {
+        // Sequencer Basic Operations
+        //    0x1X = Select_Slave X -Select slave X (X = handle.slave)
+        //        34 = Shift_N1 - M = 4 bytes of data being sent in TDR
+        //          41 = Shift_N2 - M = 1 byte to receive
+        //            62 = Branch if Not Equal RDR   -- use memory_mapping_reg
+        //              38 = Shift_N1 - M = 8 bytes of data to sendg
+        //                E4 = Branch to index 4 if not Equal and increment loop counter
+        //                  10 = select_slave 0 - deselect any slave
+        //                    00 = STOP
+        SEQ = 0x1034416238E41000ULL | (static_cast<uint64_t>(i_handle.slave) << 56);
+        CNT = (static_cast<uint64_t>((i_length / 8) - 1) << 32) | ((0x65) << 8);
+    }
+    else
+    {
+        // Sequencer Basic Operations
+        //    0x1X = Select_Slave X -Select slave X (X = handle.slave)
+        //        34 = Shift_N1 - M = 4 bytes of data being sent in TDR
+        //          41 = Shift_N2 - M = 1 byte to receive
+        //            62 = Branch if Not Equal RDR   -- use memory_mapping_reg
+        //              38 = Shift_N1 - M = 8 bytes of data to send
+        //                E4 = Branch to index 4 if not Equal and increment loop counter
+        //                  3M = Shift_N1 - M = i_length%8 of remaining data sent in TDR
+        //                    10 = select_slave 0 - deselect any slave
+        SEQ = 0x1034416238E43010ULL | (static_cast<uint64_t>((i_length) % 8) << 8) |
+              (static_cast<uint64_t>(i_handle.slave) << 56);
+        CNT = (static_cast<uint64_t>((i_length / 8) - 1) << 32) | ((0x65) << 8);
+    }
+
+    // Initial TDR command
+    startWriteCmd.cmd_bits.readNotWrite = 0;
+    startWriteCmd.cmd_bits.len = ((i_length - 1) & 0x3F);
+    startWriteCmd.cmd_bits.addr = l_address;
+
+
+    FAPI_DBG("Address: 0x%08X, SEQ: 0x%016X", i_handle.base_addr + SPIM_SEQREG, SEQ);
+    FAPI_TRY(putScom(i_handle.target_chip, i_handle.base_addr + SPIM_SEQREG, SEQ));
+    FAPI_DBG("Address: 0x%08X, MEMORY_MAPPING_REG: 0x%016X", i_handle.base_addr + SPIM_MMSPISMREG, memory_mapping_reg);
+    FAPI_TRY(putScom(i_handle.target_chip, i_handle.base_addr + SPIM_MMSPISMREG, memory_mapping_reg));
+    FAPI_DBG("Address: 0x%08X, CNT: 0x%016X", i_handle.base_addr + SPIM_COUNTERREG, CNT);
+    FAPI_TRY(putScom(i_handle.target_chip, i_handle.base_addr + SPIM_COUNTERREG, CNT));
+    FAPI_DBG("Address: 0x%08X, TDR: 0x%016X", i_handle.base_addr + SPIM_TDR, startWriteCmd.val);
+    FAPI_TRY(putScom(i_handle.target_chip, i_handle.base_addr + SPIM_TDR, startWriteCmd.val));
+
+
+    // wait until sequence index 3 has executed
+    rc = spi_wait_for_seq_index_pass(i_handle, 3);
+
+    if (rc)
+    {
+        FAPI_ERR("Error in wait_for_seq_index_pass, rc: 0x%08X", static_cast<uint32_t>(rc));
+        fapi2::current_err = rc;
+        goto fapi_try_exit;
+    }
+
+    data64 = 0;
+
+    // break data up into 8-byte sections
+    for(int i = 0; i < i_length; i++)
+    {
+        data64 = (data64 << 8) | ((uint8_t)i_buffer[i]);
+
+        if( ((i % 8) == 7) || (i == (i_length - 1)) )
+        {
+            // left-justify data if not full 8-bytes added
+            if ( (i_length < 8) ||
+                 ((i == (i_length - 1)) && ((i_length % 8) != 0)) )
+            {
+                data64 = data64 << (8 * (8 - i_length % 8));
+            }
+
+            rc = spi_wait_for_tdr_empty(i_handle);
+
+            if (rc)
+            {
+                FAPI_ERR("Error in spi_wait_for_tdr_empty ");
+                fapi2::current_err = rc;
+                goto fapi_try_exit;
+            }
+
+            FAPI_DBG("tpm_write() TDR: 0x%016X", data64);
+            FAPI_TRY(putScom(i_handle.target_chip, i_handle.base_addr + SPIM_TDR, data64));
+        }
+    }
+
+    rc = spi_wait_for_idle(i_handle);
+
+    if (rc)
+    {
+        FAPI_ERR("Multiplexing error or timeout from spi_wait_for_idle ");
+        fapi2::current_err = rc;
+        goto fapi_try_exit;
+    }
+
+fapi_try_exit:
+    FAPI_DBG("spi_tpm_write_with_wait() exit. RC: 0x%08X", static_cast<uint32_t>(rc));
+    return rc;
+}
+
+
+/**
+  * @brief  Internal read TPM with wait
+  *         Secure TPM reads will call this with i_length <= 8
+  *         Non-secure TPM reads can call this with i_length > 8
+  *
+  * @param[in] i_handle   Reference to SPI control handle
+  * @param[in] i_address  TPM address on SPI in the form of: 0xD4_[locality]xxxh
+  * @param[in] i_length   Length in bytes to read
+  * @param[out]o_buffer   Buffer where the data read will be copied into
+  *
+  * @return FAPI2_RC_SUCCESS if the spi read completes successfully,
+  *         else error code.
+  */
+fapi2::ReturnCode spi_tpm_read_internal_with_wait( SpiControlHandle& i_handle,
+        const uint32_t i_address,
+        uint8_t i_length,
+        uint8_t* o_buffer )
+{
+    uint64_t SEQ;
+    uint64_t CNT;
+    fapi2::buffer<uint64_t> data64 = 0;
+    uint64_t temp = 0;
+    fapi2::ReturnCode rc = fapi2::FAPI2_RC_SUCCESS;
+    tpmSpiCmd_t startReadCmd = {0};
+
+    // Looking for last byte being a 0x01 which indicates end of wait period
+    uint64_t memory_mapping_reg = 0x00000000FF01FF00;
+
+    if(i_length <= 8)
+    {
+        // Sequencer Basic Operations
+        //    0x1X = Select_Slave X -Select slave X (X = handle.slave)
+        //        34 = Shift_N1 - M = 4 bytes of data being sent in TDR
+        //          41 = Shift_N2 - M = 1 byte to receive
+        //            62 = Branch if Not Equal RDR   -- use memory_mapping_reg
+        //              4X = Shift_N2 - X bytes to receive (X=length)
+        //                10 = select_slave 0 - deselect any slave
+        //                  00 = STOP
+        // Shift out 4 bytes of TDR (the read/write bit, the size, the address),
+        // then switch to reading and if the next bytes is not 1, then go to
+        // sequence opcode (2), and keep doing that until the data is 0x1.
+        // (that covers the flow control), then start reading the actual # of
+        // bytes the TPM is trying to send back
+        SEQ = 0x1034416240100000ULL | (static_cast<uint64_t>(i_length) << 24) |
+              (static_cast<uint64_t>(i_handle.slave) << 56);
+        CNT = ((0x6F) << 8);
+    }
+    else if((i_length % 8) == 0)
+    {
+        // NON-SECURE OPERATION - 0xEx cmd op not allowed
+        // Sequencer Basic Operations
+        //    0x1X = Select_Slave X -Select slave X (X = handle.slave)
+        //        34 = Shift_N1 - M = 4 bytes of data being sent in TDR
+        //          41 = Shift_N2 - M = 1 byte to receive
+        //            62 = Branch if Not Equal RDR   -- use memory_mapping_reg
+        //              48 = Shift_N2 - 8 bytes to receive
+        //                E4 = Branch if Not Equal and Increment - SEQ opcode (4)
+        //                  10 = select_slave 0 - deselect any slave
+        //                    00 = STOP
+        SEQ = 0x1034416248E41000ULL | (static_cast<uint64_t>(i_handle.slave) << 56);
+        CNT = (static_cast<uint64_t>((i_length / 8) - 1) << 32) | ((0x6F) << 8);
+    }
+    else
+    {
+        // NON-SECURE OPERATION - 0xEx cmd op not allowed
+        // Sequencer Basic Operations
+        //    0x1X = Select_Slave X -Select slave X (X = handle.slave)
+        //        34 = Shift_N1 - M = 4 bytes of data being sent in TDR
+        //          41 = Shift_N2 - M = 1 byte to receive
+        //            62 = Branch if Not Equal RDR   -- use memory_mapping_reg
+        //              48 = Shift_N2 - 8 bytes to receive
+        //                E4 = Branch if Not Equal and Increment - SEQ opcode (4)
+        //                  40 = Shift_N2 - 0 bytes to receive
+        //                    10 = select_slave 0 - deselect any slave
+        //                      00 = STOP
+        SEQ = 0x1034416248E44010ULL | (static_cast<uint64_t>((i_length) % 8) << 8)
+              | (static_cast<uint64_t>(i_handle.slave) << 56);
+        CNT = (static_cast<uint64_t>((i_length / 8) - 1) << 32) | ((0x6F) << 8);
+    }
+
+    // Initial TDR command
+    startReadCmd.cmd_bits.readNotWrite = 1;
+    startReadCmd.cmd_bits.len = ((i_length - 1) & 0x3F);
+    startReadCmd.cmd_bits.addr = i_address;
+
+    FAPI_DBG("Address: 0x%08X, SEQ: 0x%016X", i_handle.base_addr + SPIM_SEQREG, SEQ);
+    FAPI_TRY(putScom(i_handle.target_chip, i_handle.base_addr + SPIM_SEQREG, SEQ));
+    FAPI_DBG("Address: 0x%08X, MMSPIMREG: 0x%016X", i_handle.base_addr + SPIM_MMSPISMREG, memory_mapping_reg);
+    FAPI_TRY(putScom(i_handle.target_chip, i_handle.base_addr + SPIM_MMSPISMREG, memory_mapping_reg));
+    FAPI_DBG("Address: 0x%08X, COUNTERREG: 0x%016X", i_handle.base_addr + SPIM_COUNTERREG, CNT);
+    FAPI_TRY(putScom(i_handle.target_chip, i_handle.base_addr + SPIM_COUNTERREG, CNT));
+    FAPI_DBG("Address: 0x%08X, TDR: 0x%016X", i_handle.base_addr + SPIM_TDR, startReadCmd.val);
+    FAPI_TRY(putScom(i_handle.target_chip, i_handle.base_addr + SPIM_TDR, startReadCmd.val));
+    FAPI_DBG("spi_wait_for_tdr_empty()");
+    rc = spi_wait_for_tdr_empty(i_handle);
+
+    if (rc)
+    {
+        FAPI_ERR("Error in spi_wait_for_tdr_empty");
+        fapi2::current_err = rc;
+        goto fapi_try_exit;
+    }
+
+    FAPI_DBG("spi_wait_for_tdr_empty() done, TDR 0");
+    FAPI_TRY(putScom(i_handle.target_chip, i_handle.base_addr + SPIM_TDR, 0x0ULL));
+    FAPI_DBG("TDR 0 done");
+
+    //receive data
+    if(i_length <= 8)
+    {
+        rc = spi_wait_for_rdr_full(i_handle);  //Wait for response
+
+        if (rc)
+        {
+            FAPI_ERR("Error in spi_wait_for_rdr_full");
+            fapi2::current_err = rc;
+            goto fapi_try_exit;
+        }
+
+        FAPI_TRY(getScom(i_handle.target_chip, i_handle.base_addr + SPIM_RDR, data64));
+        data64.extract<0, 64>(temp);
+
+        FAPI_DBG("spi_wait_for_rdr_full finished, data read from rdr: 0x%016X", temp);
+
+        // The value read from this RDR register is right-aligned.
+        // Only copy the requested bytes of data
+        temp = temp << ((8 - i_length) * 8);
+        memcpy(o_buffer, &temp, i_length);
+    }
+    else
+    {
+
+        for (uint32_t i = 0; i < static_cast<uint32_t>(i_length - 7); i += 8)
+        {
+            rc = spi_wait_for_rdr_full(i_handle);  //Wait for response
+
+            if (rc)
+            {
+                FAPI_ERR("Error in spi_wait_for_rdr_full");
+                fapi2::current_err = rc;
+                goto fapi_try_exit;
+            }
+
+            FAPI_TRY(getScom(i_handle.target_chip, i_handle.base_addr + SPIM_RDR, data64));
+            data64.extract<0, 64>(temp);
+            FAPI_DBG("%d) spi_wait_for_rdr_full finished, data read from rdr: 0x%016X", i, temp);
+
+            // add the full 8 bytes to buffer
+            reinterpret_cast<uint64_t*>(o_buffer)[i / 8] = temp;
+        }
+
+        if ((i_length % 8 != 0) && (i_length > 8))
+        {
+            rc = spi_wait_for_rdr_full(i_handle);  //Wait for response
+
+            if (rc)
+            {
+                FAPI_ERR("Error in spi_wait_for_rdr_full");
+                fapi2::current_err = rc;
+                goto fapi_try_exit;
+            }
+
+            FAPI_TRY(getScom(i_handle.target_chip, i_handle.base_addr + SPIM_RDR, data64));
+            data64.extract<0, 64>(temp);
+            FAPI_DBG("Read RDR data: 0x%016X", temp);
+
+            // The value read from this RDR register is right-aligned.
+            // Only copy the remaining requested bytes of data
+            temp = temp << ((8 - (i_length % 8)) * 8);
+            FAPI_DBG("Copy %d bytes of right-aligned shifted RDR: 0x%016X",
+                     i_length % 8, temp);
+            memcpy(&o_buffer[i_length - (i_length % 8)], &temp, i_length % 8);
+        }
+    }
+
+    FAPI_DBG("spi_tpm_read_with_wait: spi_wait_for_idle");
+    rc = spi_wait_for_idle(i_handle);
+    FAPI_DBG("spi_tpm_read_with_wait: spi_wait_for_idle done");
+
+    if (rc)
+    {
+        FAPI_ERR("Multiplexing error in spi_wait_for_idle");
+        fapi2::current_err = rc;
+        goto fapi_try_exit;
+    }
+
+fapi_try_exit:
+    FAPI_DBG("spi_tpm_read_with_wait() exit. RC: 0x%02X", static_cast<int>(rc));
+    return rc;
+}
+
+
+fapi2::ReturnCode spi_tpm_read_secure( SpiControlHandle& i_handle,
+                                       const uint32_t i_locality,
+                                       const uint32_t i_address,
+                                       const uint8_t i_length,
+                                       uint8_t* o_buffer )
+{
+    fapi2::ReturnCode rc = fapi2::FAPI2_RC_SUCCESS;
+    uint8_t readlen = i_length;  // try to read full length if possible
+
+    // Trusted Computing Group (TCG) standard requires
+    // 3-byte addressing for SPI TPM operations
+    // Change into TPM address on SPI ( D4_[locality]xxxh )
+    uint32_t l_address = 0x00D40000 + (i_locality << 12) + (i_address & 0x0FFF);
+
+    // 0xEX Op code is not allowed in secure mode so need to split
+    // read into multiple transactions of TPM_SECURE_READ_TRNS max size
+    do
+    {
+        if (i_length <= TPM_SECURE_READ_TRNS)
+        {
+            rc = spi_tpm_read_internal_with_wait( i_handle, l_address, readlen, o_buffer );
+            break;
+        }
+
+        for(uint8_t i = 0; i < i_length; i += TPM_SECURE_READ_TRNS)
+        {
+            readlen = (i_length - i) < TPM_SECURE_READ_TRNS ?
+                      (i_length - i) : TPM_SECURE_READ_TRNS;
+
+            if (readlen == 0)
+            {
+                break;
+            }
+
+            rc = spi_tpm_read_internal_with_wait( i_handle, l_address, readlen, o_buffer );
+
+            if (rc != fapi2::FAPI2_RC_SUCCESS)
+            {
+                FAPI_ERR( "spi_tpm_read_secure: "
+                          "Failed address 0x%04X read at %d bytes out of %d total",
+                          l_address, i, i_length);
+                break;
+            }
+
+            o_buffer += readlen;
+        }
+    }
+    while(0);
+
+    return rc;
 }
 
 //Reads data. For this implementation of one time use to counter,

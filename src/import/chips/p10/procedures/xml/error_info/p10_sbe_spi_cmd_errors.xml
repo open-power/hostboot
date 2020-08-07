@@ -56,4 +56,21 @@
         </callout>
     </hwpError>
     <!-- *****************************************************************-->
+    <hwpError>
+        <rc>RC_SBE_SPI_HANG_TIMEOUT</rc>
+        <description>
+            Procedure: Error calling p10_sbe_spi_cmd HWP
+            Error due to detected hang while waiting for SPI cmd completion.
+        </description>
+        <ffdc>CHIP_TARGET</ffdc>
+        <ffdc>BASE_ADDRESS</ffdc>
+        <ffdc>STATUS_REGISTER</ffdc>
+        <ffdc>TIMEOUT_MSEC</ffdc>
+        <callout>
+            <procedure>CODE</procedure>
+            <priority>HIGH</priority>
+        </callout>
+    </hwpError>
+    <!-- *****************************************************************-->
+
 </hwpErrors>

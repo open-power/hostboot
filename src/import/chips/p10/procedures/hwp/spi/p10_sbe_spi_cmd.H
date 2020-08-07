@@ -55,6 +55,9 @@
 //we can transfer a max of 8*256 = 2048 bytes.
 #define MAX_LENGTH_TRNS 2048
 
+//Secure reads via TPM require not using 0xEX command
+#define TPM_SECURE_READ_TRNS 8
+
 //Each page in the seeprom is 256 bytes in size
 #define SEEPROM_PAGE_SIZE 256
 
@@ -163,6 +166,49 @@ extern "C"
         uint32_t i_length,
         SPI_ECC_CONTROL_STATUS i_eccStatus,
         uint8_t* o_buffer);
+
+///
+/// @brief  API to read from the TPM using SPI
+///         Secure reading requires no 0xEX command,
+///         so this read may be broken into multiple TPM reads
+///
+/// @param[in] i_handle   Reference to SPI control handle
+/// @param[in] i_locality TPM locality (0-4)
+/// @param[in] i_address  The relative address to read from the TPM
+///                       The last three nibbles of TPM address on SPI
+///                       0xD4_[locality]xxxh
+/// @param[in] i_length   Length in bytes to read
+/// @param[out]o_buffer   Buffer where the data read will be copied into
+///
+/// @return FAPI2_RC_SUCCESS if the spi read completes successfully,
+///         else error code.
+///
+    fapi2::ReturnCode spi_tpm_read_secure( SpiControlHandle& i_handle,
+                                           const uint32_t i_locality,
+                                           const uint32_t i_address,
+                                           const uint8_t i_length,
+                                           uint8_t* o_buffer );
+
+
+///
+/// @brief  API to write to the TPM using SPI
+///
+/// @param[in] i_handle   Reference to SPI control handle
+/// @param[in] i_locality TPM locality (0-4)
+/// @param[in] i_address  The relative address to write to the TPM
+///                       The last three nibbles of TPM address on SPI
+///                       0xD4_[locality]xxxh
+/// @param[in] i_length   Length in bytes to write
+/// @param[in] i_buffer   Data buffer to write
+///
+/// @return FAPI2_RC_SUCCESS if the spi write completes successfully,
+///         else error code.
+///
+    fapi2::ReturnCode spi_tpm_write_with_wait( SpiControlHandle& i_handle,
+            const uint32_t i_locality,
+            const uint32_t i_address,
+            const uint8_t i_length,
+            const uint8_t* i_buffer );
 
 ///
 /// @brief  API to write the seeprom using SPI
