@@ -451,6 +451,9 @@ enum OVERLAY_MODE
 
 /// Overlay bit conflict
 #define SCAN_COMPRESSION_OVERLAY_BIT_CONFLICT (uint8_t)12
+
+/// Overlay bit conflict
+#define SCAN_COMPRESSION_STOP_DECODE_ERROR (uint8_t)13
 /// @}
 
 #endif  //  __P10_SCAN_COMPRESSION_H__

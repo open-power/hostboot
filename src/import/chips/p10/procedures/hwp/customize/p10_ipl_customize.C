@@ -522,8 +522,8 @@ fapi2::ReturnCode get_overlays_ring(
                      set_RING_ID(i_ringId).
                      set_MAX_RING_BUF_SIZE(RS4_RING_BUF_SIZE).
                      set_LOCAL_RC(rc).
-                     set_OCCURRENCE(5),
-                     "rs4_get_raw_bit_length() failed w/rc=0x%08x for ringId=0x%x, occurrence=5",
+                     set_OCCURRENCE(4),
+                     "rs4_get_raw_bit_length() failed w/rc=0x%08x for ringId=0x%x, occurrence=4",
                      rc, i_ringId );
 
         FAPI_DBG("Ring found in origination section, Overlays: "
@@ -824,8 +824,8 @@ fapi2::ReturnCode process_target_and_dynamic_rings(
                          set_RING_ID(i_ringId).
                          set_MAX_RING_BUF_SIZE(RS4_RING_BUF_SIZE).
                          set_LOCAL_RC(l_rc).
-                         set_OCCURRENCE(2),
-                         "rs4_get_raw_bit_length() failed w/rc=0x%08x for ringId=0x%x, occurrence=2",
+                         set_OCCURRENCE(1),
+                         "rs4_get_raw_bit_length() failed w/rc=0x%08x for ringId=0x%x, occurrence=1",
                          l_rc, i_ringId );
 
             FAPI_DBG("Ring found in origination section, Dynamic (.dynamic): "
@@ -931,8 +931,8 @@ fapi2::ReturnCode process_target_and_dynamic_rings(
                          set_RING_ID(i_ringId).
                          set_MAX_RING_BUF_SIZE(RS4_RING_BUF_SIZE).
                          set_LOCAL_RC(l_rc).
-                         set_OCCURRENCE(3),
-                         "rs4_get_raw_bit_length() failed w/rc=0x%08x for ringId=0x%x, occurrence=3",
+                         set_OCCURRENCE(2),
+                         "rs4_get_raw_bit_length() failed w/rc=0x%08x for ringId=0x%x, occurrence=2",
                          l_rc, i_ringId );
 
             FAPI_DBG("Ring found in origination section, Base (.{sbe,qme}.rings}: "
@@ -1219,8 +1219,8 @@ fapi2::ReturnCode _fetch_and_insert_vpd_rings(
                      set_RING_ID(i_ringId).
                      set_MAX_RING_BUF_SIZE(RS4_RING_BUF_SIZE).
                      set_LOCAL_RC(l_rc).
-                     set_OCCURRENCE(4),
-                     "rs4_get_raw_bit_length() failed w/rc=0x%08x for ringId=0x%x, occurrence=4",
+                     set_OCCURRENCE(3),
+                     "rs4_get_raw_bit_length() failed w/rc=0x%08x for ringId=0x%x, occurrence=3",
                      l_rc, i_ringId );
 
         FAPI_DBG("Ring found in origination section, Mvpd: "

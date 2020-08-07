@@ -308,6 +308,14 @@ stop_decode(uint32_t* o_count, const uint8_t* i_string, const uint32_t i_i)
     do
     {
         nibble = rs4_get_nibble(i_string, i);
+
+        if (digits == 0 && nibble == 0)
+        {
+            //A stop sequence cannot start with a zero. If it does, this
+            //indicates either a damaged ring image or encoding bug.
+            return -1;
+        }
+
         count = (count * 8) + (nibble & 0x7);
         i++;
         digits++;
@@ -355,7 +363,7 @@ __rs4_compress(uint8_t* o_rs4_str,
     uint32_t i;                 /* Nibble index in i_data_str/i_care_str */
     uint32_t j;                 /* Nibble index in o_rs4_str */
     uint32_t k;                 /* Location to place <scan_count(N)> */
-    uint32_t count;             /* Counts rotate/scan nibbles */
+    uint32_t count;             /* Counts *raw* rotate/scan nibbles */
     int care_nibble;
     int data_nibble;
 
@@ -738,8 +746,8 @@ __rs4_decompress(uint8_t* o_data_str,
     uint32_t j;                 /* Nibble index in o_data_str/o_care_str */
     uint32_t k;                 /* Loop index */
     uint32_t bits;              /* Number of output bits decoded so far */
-    uint32_t count;             /* Count of rotate nibbles */
-    uint32_t nibbles;           /* Rotate encoding or scan nibbles to process */
+    uint32_t count;             /* Counts *raw* rotate nibbles */
+    int      nibbles;           /* Rotate or scan RS4 nibbles to process */
     int r;                      /* Remainder bits */
     int masked;                 /* if a care mask is available */
 
@@ -754,6 +762,13 @@ __rs4_decompress(uint8_t* o_data_str,
         if (state == 0)
         {
             nibbles = stop_decode(&count, i_rs4_str, i);
+
+            if (nibbles == -1)
+            {
+                MY_ERR("ERROR: __rs4_decompress: Error in the RS4 stop sequence\n");
+                return SCAN_COMPRESSION_STOP_DECODE_ERROR;
+            }
+
             i += nibbles;
 
             bits += 4 * count;
@@ -788,7 +803,7 @@ __rs4_decompress(uint8_t* o_data_str,
                 return BUG(SCAN_COMPRESSION_BUFFER_OVERFLOW);
             }
 
-            for (k = 0; k < nibbles; k++)
+            for (k = 0; k < (uint8_t)nibbles; k++) //nibbles always <15 here
             {
                 rs4_set_nibble(o_care_str, j, rs4_get_nibble(i_rs4_str, i));
                 i = (masked ? i + 1 : i);
@@ -905,8 +920,8 @@ rs4_get_raw_bit_length( uint32_t& o_length,
     uint32_t i;                 /* Nibble index in i_rs4Str */
     uint32_t k;                 /* Loop index */
     uint32_t bits;              /* Number of output bits decoded so far */
-    uint32_t count;             /* Count of rotate nibbles */
-    uint32_t nibbles;           /* Rotate encoding or scan nibbles to process */
+    uint32_t count;             /* Counts *raw* rotate nibbles */
+    int      nibbles;           /* Rotate or scan RS4 nibbles to process */
     int r;                      /* Remainder bits */
     int masked;                 /* if a care mask is available */
 
@@ -922,6 +937,13 @@ rs4_get_raw_bit_length( uint32_t& o_length,
         if (state == 0)
         {
             nibbles = stop_decode(&count, rs4Str, i);
+
+            if (nibbles == -1)
+            {
+                MY_ERR("ERROR: rs4_get_raw_bit_length: Error in the RS4 stop sequence\n");
+                return SCAN_COMPRESSION_STOP_DECODE_ERROR;
+            }
+
             i += nibbles;
 
             bits += 4 * count;
@@ -942,7 +964,7 @@ rs4_get_raw_bit_length( uint32_t& o_length,
             nibbles = (masked ? 1 : nibbles);
             bits += 4 * nibbles;
 
-            for (k = 0; k < nibbles; k++)
+            for (k = 0; k < (uint8_t)nibbles; k++) //nibbles always <15 here
             {
                 i = (masked ? i + 1 : i);
                 i++;
@@ -987,7 +1009,8 @@ int
 rs4_redundant(const CompressedScanData* i_data, MyBool_t& o_redundant)
 {
     uint8_t* data;
-    uint32_t length, pos;
+    uint32_t count;
+    int      nibbles;
 
     o_redundant = false;
 
@@ -1002,20 +1025,23 @@ rs4_redundant(const CompressedScanData* i_data, MyBool_t& o_redundant)
     // followed by the end-of-string marker, and any remaining mod-4 bits
     // are also 0.
 
-    pos = stop_decode(&length, data, 0);
-    length *= 4;
+    nibbles = stop_decode(&count, data, 0);
 
-    if (rs4_get_nibble(data, pos) == 0)
+    if (nibbles == -1)
     {
-        if (rs4_get_nibble(data, pos + 1) == 0)
+        MY_ERR("ERROR: rs4_redundant: Error in the RS4 stop sequence\n");
+        return SCAN_COMPRESSION_STOP_DECODE_ERROR;
+    }
+
+    if (rs4_get_nibble(data, nibbles) == 0)
+    {
+        if (rs4_get_nibble(data, nibbles + 1) == 0)
         {
             o_redundant = true;
         }
         else
         {
-            length += rs4_get_nibble(data, pos + 1);
-
-            if (rs4_get_nibble(data, pos + 2) == 0)
+            if (rs4_get_nibble(data, nibbles + 2) == 0)
             {
                 o_redundant = true;
             }
@@ -1088,7 +1114,7 @@ __rs4_compress_from_raw4( uint8_t* o_rs4Str,
     uint32_t i;                 /* Nibble index in raw bit stream */
     uint32_t j;                 /* Nibble index in o_rs4Str */
     uint32_t k;                 /* Location to place <scan_count(N)> */
-    uint32_t count;             /* Counts rotate/scan nibbles */
+    uint32_t count;             /* Counts rotate or scan *raw* nibbles */
     uint8_t careNibble;
     uint8_t dataNibble;
 
@@ -1123,7 +1149,7 @@ __rs4_compress_from_raw4( uint8_t* o_rs4Str,
     uint32_t rawBits    = i_raw4->bits;    // Number of true raw bits
     uint32_t rawNibbles = (i_raw4->bits + 3) / 4; // This includes the rem nibble, if any
     uint32_t iRec = 0;
-    bool bLastRecord = false;
+    bool     bLastRecord = false;
     int      wholeNibblesInRec = 0;
     int      remBits = rawBits & 0x3;
 
@@ -1500,8 +1526,8 @@ __rs4_decompress_to_raw4( uint8_t* o_raw4Str,
     int      state;             /* 0: Rotate, 1: Scan */
     bool     masked;            /* =true if a care mask is available */
     uint32_t i;                 /* Nibble index in i_rs4Str */
-    uint32_t count;             /* Count of true *raw* rotate [zero] nibbles */
-    uint32_t nibbles;           /* Rotate encoding or scan nibbles to process */
+    uint32_t count;             /* Counts *raw* rotate [zero] nibbles */
+    int      nibbles;           /* Rotate or scan RS4 nibbles to process */
 
     uint8_t  szRaw4Record   = sizeof(Raw4Record_t);
 
@@ -1525,6 +1551,13 @@ __rs4_decompress_to_raw4( uint8_t* o_raw4Str,
         {
             // Get RS4 stop nipples and *raw* rotate [zero] nipple count
             nibbles = stop_decode(&count, i_rs4Str, i);
+
+            if (nibbles == -1)
+            {
+                MY_ERR("ERROR: __rs4_decompress_to_raw4: Error in the RS4 stop sequence\n");
+                return SCAN_COMPRESSION_STOP_DECODE_ERROR;
+            }
+
             i += nibbles;
 
             // Only append record to raw4 string if there is at least one rotate nibble
@@ -1577,7 +1610,7 @@ __rs4_decompress_to_raw4( uint8_t* o_raw4Str,
                 return SCAN_COMPRESSION_BUFFER_OVERFLOW;
             }
 
-            for (uint8_t k = 0; k < nibbles; k++)
+            for (uint8_t k = 0; k < (uint8_t)nibbles; k++) //nibbles always <15 here
             {
                 raw4Record->nibbleIndex = rawNibbleCount;
 
@@ -1675,6 +1708,13 @@ _rs4_decompress_to_raw4( Raw4ScanData_t* o_raw4,
                                    rawBits,
                                    (uint8_t*)i_rs4 + sizeof(CompressedScanData),
                                    i_dbgl );
+
+    if (rc)
+    {
+        MY_ERR("ERROR: _rs4_decompress_to_raw4: __rs4_decompress_to_raw4 failed w/rc=0x%08x\n",
+               rc);
+        return rc;
+    }
 
     o_raw4->magic   = RAW4_MAGIC; // "RAW4"
     o_raw4->version = RAW4_VERSION;
@@ -2014,7 +2054,8 @@ rs4_overlay( CompressedScanData* o_rs4Final,    // Holds rs4Final + raw4Tgt + ra
 
     if (rc)
     {
-        MY_ERR("ERROR: rs4_overlay: _rs4_decompress_to_raw4 failed w/rc=0x%08x (1)\n", rc);
+        MY_ERR("ERROR: rs4_overlay: _rs4_decompress_to_raw4 failed for Tgt ring w/rc=0x%08x\n",
+               rc);
         return rc;
     }
 
@@ -2025,7 +2066,8 @@ rs4_overlay( CompressedScanData* o_rs4Final,    // Holds rs4Final + raw4Tgt + ra
 
     if (rc)
     {
-        MY_ERR("ERROR: rs4_overlay: _rs4_decompress_to_raw4 failed w/rc=0x%08x (2)\n", rc);
+        MY_ERR("ERROR: rs4_overlay: _rs4_decompress_to_raw4 failed for Ovly ring w/rc=0x%08x\n",
+               rc);
         return rc;
     }
 
