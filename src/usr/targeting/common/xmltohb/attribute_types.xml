@@ -5908,6 +5908,7 @@
         <default>NULL</default>
       </Target_t>
     </simpleType>
+    <no_export/>
   </attribute>
 
   <enumerationType>
