@@ -1,0 +1,230 @@
+# IBM_PROLOG_BEGIN_TAG
+# This is an automatically generated prolog.
+#
+# $Source: src/usr/diag/prdf/common/plat/p10/p10_omic_regs.rule $
+#
+# OpenPOWER HostBoot Project
+#
+# Contributors Listed Below - COPYRIGHT 2019,2020
+# [+] International Business Machines Corp.
+#
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+# implied. See the License for the specific language governing
+# permissions and limitations under the License.
+#
+# IBM_PROLOG_END_TAG
+
+###############################################################################
+# Additional registers for omic, not defined in XML
+###############################################################################
+
+
+    ###########################################################################
+    # P10 target OMIDLFIR
+    ###########################################################################
+
+    register MC_OMI_DL_FIR_MASK_OR
+    {
+        name        "P10 OMIC target OMIDLFIR MASK atomic OR";
+        scomaddr    0x0C011405;
+        capture     group never;
+        access      write_only;
+    };
+
+    register DL0_ERROR_HOLD
+    {
+        name        "P10 target DL0 Error Hold Register";
+        scomaddr    0x0C011413;
+        capture     group dl0_ffdc;
+    };
+
+    register DL1_ERROR_HOLD
+    {
+        name        "P10 target DL1 Error Hold Register";
+        scomaddr    0x0C011423;
+        capture     group dl1_ffdc;
+    };
+
+    ###########################################################################
+    # P10 target OMIC additional FFDC
+    ###########################################################################
+
+    register CMN_CONFIG
+    {
+        name        "P10 OMI-CMN Configuration Register";
+        scomaddr    0x0C01140E;
+        capture     group dl0_ffdc;
+        capture     group dl1_ffdc;
+    };
+
+    register PMU_CNTR
+    {
+        name        "P10 PMU Counter Register";
+        scomaddr    0x0C01140F;
+        capture     group dl0_ffdc;
+        capture     group dl1_ffdc;
+    };
+
+    register DL0_CONFIG0
+    {
+        name        "P10 OMI-DL0 Configuration0 Register";
+        scomaddr    0x0C011410;
+        capture     group dl0_ffdc;
+    };
+
+    register DL0_CONFIG1
+    {
+        name        "P10 OMI-DL0 Configuration1 Register";
+        scomaddr    0x0C011411;
+        capture     group dl0_ffdc;
+    };
+
+    register DL0_ERROR_MASK
+    {
+        name        "P10 DL0 Error Mask Register";
+        scomaddr    0x0C011412;
+        capture     group dl0_ffdc;
+    };
+
+    register DL0_ERROR_CAPTURE
+    {
+        name        "P10 DL0 Error Capture Register";
+        scomaddr    0x0C011414;
+        capture     group dl0_ffdc;
+    };
+
+    register DL0_EDPL_MAX_COUNT
+    {
+        name        "P10 DL0 EDPL MAX COUNT";
+        scomaddr    0x0C011415;
+        capture     group dl0_ffdc;
+    };
+
+    register DL0_STATUS_REGISTER
+    {
+        name        "P10 DL0 Status Register";
+        scomaddr    0x0C011416;
+        capture     group dl0_ffdc;
+    };
+
+    register DL0_TRAINING_STATUS
+    {
+        name        "P10 DL0 Training Status Register";
+        scomaddr    0x0C011417;
+        capture     group dl0_ffdc;
+    };
+
+    register DL0_DLX_CONFIG
+    {
+        name        "P10 PowerBus DL0 Endpoint Config Register";
+        scomaddr    0x0C011418;
+        capture     group dl0_ffdc;
+    };
+
+    register DL0_DLX_INFO
+    {
+        name        "P10 DL0 Remote Information Register";
+        scomaddr    0x0C011419;
+        capture     group dl0_ffdc;
+    };
+
+    register DL0_ERROR_ACTION
+    {
+        name        "P10 DL0 Error Action Register";
+        scomaddr    0x0C01141D;
+        capture     group dl0_ffdc;
+    };
+
+    register DL0_CYA_BITS
+    {
+        name        "P10 PowerBus DL0 CYA Bits Register";
+        scomaddr    0x0C01141F;
+        capture     group dl0_ffdc;
+    };
+
+    register DL1_CONFIG0
+    {
+        name        "P10 OMI-DL1 Configuration0 Register";
+        scomaddr    0x0C011420;
+        capture     group dl1_ffdc;
+    };
+
+    register DL1_CONFIG1
+    {
+        name        "P10 OMI-DL1 Configuration1 Register";
+        scomaddr    0x0C011421;
+        capture     group dl1_ffdc;
+    };
+
+    register DL1_ERROR_MASK
+    {
+        name        "P10 DL1 Error Mask Register";
+        scomaddr    0x0C011422;
+        capture     group dl1_ffdc;
+    };
+
+    register DL1_ERROR_CAPTURE
+    {
+        name        "P10 DL1 Error Capture Register";
+        scomaddr    0x0C011424;
+        capture     group dl1_ffdc;
+    };
+
+    register DL1_EDPL_MAX_COUNT
+    {
+        name        "P10 DL1 EDPL MAX COUNT";
+        scomaddr    0x0C011425;
+        capture     group dl1_ffdc;
+    };
+
+    register DL1_STATUS_REGISTER
+    {
+        name        "P10 DL1 Status Register";
+        scomaddr    0x0C011426;
+        capture     group dl1_ffdc;
+    };
+
+    register DL1_TRAINING_STATUS
+    {
+        name        "P10 DL1 Training Status Register";
+        scomaddr    0x0C011427;
+        capture     group dl1_ffdc;
+    };
+
+    register DL1_DLX_CONFIG
+    {
+        name        "P10 PowerBus DL1 Endpoint Config Register";
+        scomaddr    0x0C011428;
+        capture     group dl1_ffdc;
+    };
+
+    register DL1_DLX_INFO
+    {
+        name        "P10 DL1 Remote Information Register";
+        scomaddr    0x0C011429;
+        capture     group dl1_ffdc;
+    };
+
+    register DL1_ERROR_ACTION
+    {
+        name        "P10 DL1 Error Action Register";
+        scomaddr    0x0C01142D;
+        capture     group dl1_ffdc;
+    };
+
+    register DL1_CYA_BITS
+    {
+        name        "P10 PowerBus DL1 CYA Bits Register";
+        scomaddr    0x0C01142F;
+        capture     group dl1_ffdc;
+    };
+

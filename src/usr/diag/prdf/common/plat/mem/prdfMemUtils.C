@@ -739,7 +739,7 @@ void __cleanupChnlFail<TYPE_OMI>( TargetHandle_t i_omi,
 
         // Mask off attentions from the OMIDLFIR in the OMIC based on the
         // OMI position. 0-19, 20-39, 40-59
-        reg = omicChip->getRegister( "OMIDLFIR_MASK_OR" );
+        reg = omicChip->getRegister( "MC_OMI_DL_FIR_MASK_OR" );
         reg->SetBitFieldJustified( (omiPosRelOmic * 20), 20, 0xfffff );
         reg->Write();
 

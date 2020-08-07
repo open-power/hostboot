@@ -38,7 +38,6 @@ include ../prdf_hb_only.mk  # Will define PRD_SRC_PATH and PRD_INC_PATH
 include ../common/prdf_common_fsp_and_hb.mk
 include ../common/framework/prdf_framework.mk
 include ../common/plat/p10/prdf_plat_p10.mk
-include ../common/plat/axone/prdf_plat_axone.mk
 include ../common/plat/mem/prdf_plat_mem.mk
 include ../common/plat/explorer/prdf_plat_explorer.mk
 include ../plat/mem/prdf_plat_mem_hb_only.mk

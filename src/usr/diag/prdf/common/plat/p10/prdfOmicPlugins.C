@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/diag/prdf/common/plat/axone/prdfOmicPlugins.C $       */
+/* $Source: src/usr/diag/prdf/common/plat/p10/prdfOmicPlugins.C $         */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
@@ -44,7 +44,7 @@ namespace PRDF
 
 using namespace PlatServices;
 
-namespace axone_omic
+namespace p10_omic
 {
 
 //##############################################################################
@@ -68,7 +68,7 @@ int32_t PreAnalysis( ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc,
 
     return SUCCESS;
 }
-PRDF_PLUGIN_DEFINE( axone_omic, PreAnalysis );
+PRDF_PLUGIN_DEFINE( p10_omic, PreAnalysis );
 
 /**
  * @brief  Plugin function called after analysis is complete but before PRD
@@ -87,7 +87,7 @@ int32_t PostAnalysis( ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc )
 
     return SUCCESS;
 }
-PRDF_PLUGIN_DEFINE( axone_omic, PostAnalysis );
+PRDF_PLUGIN_DEFINE( p10_omic, PostAnalysis );
 
 //##############################################################################
 //
@@ -105,7 +105,7 @@ PRDF_PLUGIN_DEFINE( axone_omic, PostAnalysis );
 int32_t DlFatalError( ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc,
                       uint8_t i_dl )
 {
-    #define PRDF_FUNC "[axone_omic::DlFatalError] "
+    #define PRDF_FUNC "[p10_omic::DlFatalError] "
 
     int32_t rc = SUCCESS;
 
@@ -167,11 +167,10 @@ int32_t DlFatalError_##POS( ExtensibleChip * i_chip, \
 { \
     return DlFatalError( i_chip, io_sc, POS ); \
 } \
-PRDF_PLUGIN_DEFINE( axone_omic, DlFatalError_##POS );
+PRDF_PLUGIN_DEFINE( p10_omic, DlFatalError_##POS );
 
 DL_FATAL_ERROR_PLUGIN( 0 );
 DL_FATAL_ERROR_PLUGIN( 1 );
-DL_FATAL_ERROR_PLUGIN( 2 );
 
 /**
  * @brief  Plugin function to collect OMI fail related FFDC from the appropriate
@@ -184,7 +183,7 @@ DL_FATAL_ERROR_PLUGIN( 2 );
 int32_t CollectOmiOcmbFfdc( ExtensibleChip * i_chip,
                             STEP_CODE_DATA_STRUCT & io_sc, uint8_t i_dl )
 {
-    #define PRDF_FUNC "[axone_omic::CollectOmiOcmbFfdc] "
+    #define PRDF_FUNC "[p10_omic::CollectOmiOcmbFfdc] "
 
     do
     {
@@ -229,12 +228,11 @@ int32_t CollectOmiOcmbFfdc_##POS( ExtensibleChip * i_chip, \
 { \
     return CollectOmiOcmbFfdc( i_chip, io_sc, POS ); \
 } \
-PRDF_PLUGIN_DEFINE( axone_omic, CollectOmiOcmbFfdc_##POS );
+PRDF_PLUGIN_DEFINE( p10_omic, CollectOmiOcmbFfdc_##POS );
 
 OMI_OCMB_FFDC_PLUGIN( 0 );
 OMI_OCMB_FFDC_PLUGIN( 1 );
-OMI_OCMB_FFDC_PLUGIN( 2 );
 
-} // end namespace axone_omic
+} // end namespace p10_omic
 
 } // end namespace PRDF

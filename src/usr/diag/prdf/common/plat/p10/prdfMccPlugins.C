@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/diag/prdf/common/plat/axone/prdfMccPlugins.C $        */
+/* $Source: src/usr/diag/prdf/common/plat/p10/prdfMccPlugins.C $          */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
@@ -40,7 +40,7 @@ namespace PRDF
 
 using namespace PlatServices;
 
-namespace axone_mcc
+namespace p10_mcc
 {
 
 //##############################################################################
@@ -64,7 +64,7 @@ int32_t PreAnalysis( ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc,
 
     return SUCCESS;
 }
-PRDF_PLUGIN_DEFINE( axone_mcc, PreAnalysis );
+PRDF_PLUGIN_DEFINE( p10_mcc, PreAnalysis );
 
 /**
  * @brief  Plugin function called after analysis is complete but before PRD
@@ -83,9 +83,9 @@ int32_t PostAnalysis( ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc )
 
     return SUCCESS;
 }
-PRDF_PLUGIN_DEFINE( axone_mcc, PostAnalysis );
+PRDF_PLUGIN_DEFINE( p10_mcc, PostAnalysis );
 
-} // end namespace axone_mcc
+} // end namespace p10_mcc
 
 } // end namespace PRDF
 
