@@ -614,7 +614,7 @@ errlHndl_t eepromSpiRead ( TARGETING::Target * i_spiMaster,
                       i_spiMaster,
                       o_buffer,
                       i_buflen,
-                      DEVICE_SPI_ADDRESS
+                      DEVICE_SPI_EEPROM_ADDRESS
                        (i_spiInfo.accessAddr.spi_addr.engine,
                         i_spiInfo.accessAddr.spi_addr.roleOffset_KB*KILOBYTE +
                         i_spiInfo.offset)
@@ -747,7 +747,7 @@ errlHndl_t eepromSpiWrite ( TARGETING::Target * i_target,
                               i_spiMaster,
                               pageBuffer,
                               pageWriteSize,
-                              DEVICE_SPI_ADDRESS
+                              DEVICE_SPI_EEPROM_ADDRESS
                                 (io_spiInfo.accessAddr.spi_addr.engine,
                                  io_spiInfo.accessAddr.spi_addr.roleOffset_KB*KILOBYTE + startingPageOffset)
                             );
@@ -765,7 +765,7 @@ errlHndl_t eepromSpiWrite ( TARGETING::Target * i_target,
                               i_spiMaster,
                               i_buffer,
                               pageWriteSize,
-                              DEVICE_SPI_ADDRESS
+                              DEVICE_SPI_EEPROM_ADDRESS
                                 (io_spiInfo.accessAddr.spi_addr.engine,
                                  io_spiInfo.accessAddr.spi_addr.roleOffset_KB*KILOBYTE + io_spiInfo.offset)
                             );

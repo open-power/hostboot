@@ -37,19 +37,18 @@ namespace SPI
 //------------------------------------------------------------------------------
 //  SPI User Details
 //------------------------------------------------------------------------------
-UdSpiParameters::UdSpiParameters(uint8_t i_opType,
-                                 int64_t i_accessType,
-                                 SpiOp i_spiOp)
+UdSpiEepromParameters::UdSpiEepromParameters(uint8_t i_opType,
+                                             int64_t i_accessType,
+                                             SpiEepromOp i_spiOp)
 {
     // Set up Ud instance variables
     iv_CompId = SPI_COMP_ID;
     iv_Version = 1;
-    iv_SubSection = SPI_UDT_PARAMETERS;
+    iv_SubSection = SPI_EEPROM_UDT_PARAMETERS;
 
     //***** Memory Layout *****
-    // 1 byte   : Op Type Description
     // 1 byte   : Op Type (DeviceFW::OperationType)
-    // 4 bytes  : Target HUID
+    // 4 bytes  : SPI controller Target HUID
     // 8 bytes  : Access Type (DeviceFW::AccessType)
     // 1 byte   : Engine
     // 8 bytes  : Offset
@@ -71,26 +70,11 @@ UdSpiParameters::UdSpiParameters(uint8_t i_opType,
     uint32_t tmp32 = 0;
     uint8_t tmp8 = 0;
 
-    if( i_opType == DeviceFW::READ )
-    {
-        tmp8 = 0;
-    }
-    else if( i_opType == DeviceFW::WRITE )
-    {
-        tmp8 = 1;
-    }
-    else
-    {
-        tmp8 = 2;
-    }
-    memcpy(l_pBuf, &tmp8, sizeof(tmp8));
-    l_pBuf += sizeof(tmp8);
-
     tmp8 = i_opType;
     memcpy(l_pBuf, &tmp8, sizeof(tmp8));
     l_pBuf += sizeof(tmp8);
 
-    tmp32 = TARGETING::get_huid(i_spiOp.getTarget());
+    tmp32 = TARGETING::get_huid(i_spiOp.getControllerTarget());
     memcpy(l_pBuf, &tmp32, sizeof(tmp32));
     l_pBuf += sizeof(tmp32);
 
@@ -128,9 +112,70 @@ UdSpiParameters::UdSpiParameters(uint8_t i_opType,
 }
 
 //------------------------------------------------------------------------------
-UdSpiParameters::~UdSpiParameters()
+UdSpiEepromParameters::~UdSpiEepromParameters()
 {
+}
 
+UdSpiTpmParameters::UdSpiTpmParameters(uint8_t i_opType,
+                                       int64_t i_accessType,
+                                       SpiTpmOp i_spiOp)
+{
+    // Set up Ud instance variables
+    iv_CompId = SPI_COMP_ID;
+    iv_Version = 1;
+    iv_SubSection = SPI_TPM_UDT_PARAMETERS;
+
+    //***** Memory Layout *****
+    // 1 byte   : Op Type (DeviceFW::OperationType)
+    // 4 bytes  : Controller Target HUID
+    // 8 bytes  : Access Type (DeviceFW::AccessType)
+    // 1 byte   : Engine
+    // 8 bytes  : Offset
+    // 4 bytes  : Locality
+    // 4 bytes  : TPM HUID
+    char * l_pBuf = reinterpret_cast<char *>(
+                          reallocUsrBuf(sizeof(uint8_t)*2
+                                        +sizeof(uint32_t)
+                                        +sizeof(uint64_t)
+                                        +sizeof(uint8_t)
+                                        +sizeof(uint64_t)
+                                        +sizeof(uint32_t)
+                                        +sizeof(uint32_t)));
+    uint64_t tmp64 = 0;
+    uint32_t tmp32 = 0;
+    uint8_t tmp8 = 0;
+
+    tmp8 = i_opType;
+    memcpy(l_pBuf, &tmp8, sizeof(tmp8));
+    l_pBuf += sizeof(tmp8);
+
+    tmp32 = TARGETING::get_huid(i_spiOp.getControllerTarget());
+    memcpy(l_pBuf, &tmp32, sizeof(tmp32));
+    l_pBuf += sizeof(tmp32);
+
+    tmp64 = i_accessType;
+    memcpy(l_pBuf, &tmp64, sizeof(tmp64));
+    l_pBuf += sizeof(tmp64);
+
+    tmp8 = i_spiOp.getEngine();
+    memcpy(l_pBuf, &tmp8, sizeof(tmp8));
+    l_pBuf += sizeof(tmp8);
+
+    tmp64 = i_spiOp.getOffset();
+    memcpy(l_pBuf, &tmp64, sizeof(tmp64));
+    l_pBuf += sizeof(tmp64);
+
+    tmp32 = i_spiOp.getLocality();
+    memcpy(l_pBuf, &tmp32, sizeof(tmp32));
+    l_pBuf += sizeof(tmp32);
+
+    tmp32 = TARGETING::get_huid(i_spiOp.getTpmTarget());
+    memcpy(l_pBuf, &tmp32, sizeof(tmp32));
+    l_pBuf += sizeof(tmp32);
+}
+
+UdSpiTpmParameters::~UdSpiTpmParameters()
+{
 }
 
 } // end SPI namespace

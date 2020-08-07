@@ -50,7 +50,8 @@ namespace SPI
 
     enum SpiUserDetailsTypes
     {
-        SPI_UDT_PARAMETERS = 0x01,
+        SPI_EEPROM_UDT_PARAMETERS = 0x01,
+        SPI_TPM_UDT_PARAMETERS    = 0x02,
     };
 
     enum SpiUserDetailsVersions

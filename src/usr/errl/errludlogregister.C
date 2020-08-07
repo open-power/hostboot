@@ -247,7 +247,8 @@ void ErrlUserDetailsLogRegister::copyRegisterData(
         case DeviceFW::PRESENT:     // userif.H
         case DeviceFW::PNOR:        // userif.H
         case DeviceFW::MAILBOX:     // userif.H
-        case DeviceFW::SPI:         // driverif.H
+        case DeviceFW::SPI_EEPROM:  // driverif.H
+        case DeviceFW::SPI_TPM:     // driverif.H
         default:
         {   // no action - not logged
             TRACFCOMP(g_trac_errl, "LogRegister: AccessType %x not logged",

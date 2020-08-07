@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -66,7 +66,8 @@ namespace DeviceFW
         SBEFIFOSCOM,
         I2CSCOM,
         I2C_MUX,
-        SPI,
+        SPI_EEPROM,
+        SPI_TPM,
         LAST_DRIVER_ACCESS_TYPE
     };
 
@@ -341,13 +342,26 @@ namespace DeviceFW
         DeviceFW::SBEFIFOSCOM, static_cast<uint64_t>((i_address))
 
     /**
-     * Construct the device addressing parameters for the SPI device ops.
+     * Construct the device addressing parameters for the SPI device ops
+     * for eeprom access.
      * This macro defaults to skipping the ECC bytes.
      * @param[in] i_engine - Which SPI master engine to use.
      * @param[in] i_offset - Offset to start read/writing from.
      */
-    #define DEVICE_SPI_ADDRESS(i_engine, i_offset)\
-        DeviceFW::SPI, i_engine, i_offset
+     #define DEVICE_SPI_EEPROM_ADDRESS(i_engine, i_offset)\
+        DeviceFW::SPI_EEPROM, i_engine, i_offset
+
+    /**
+     * Construct the device addressing parameters for the SPI device ops
+     * for TPM access.
+     * This macro defaults to skipping the ECC bytes.
+     * @param[in] i_engine - Which SPI controller engine to use.
+     * @param[in] i_offset - Offset to start read/writing from
+     * @param[in] i_locality - TPM locality (0-3)
+     * @param[in] i_tpm - TPM target being accessed
+     */
+    #define DEVICE_SPI_TPM_ADDRESS(i_engine, i_offset, i_locality, i_tpm)\
+        DeviceFW::SPI_TPM, i_engine, i_offset, i_locality, i_tpm
 
     /** @class InvalidParameterType
      *  @brief Unused type to cause compiler fails for invalid template types.

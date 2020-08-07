@@ -125,41 +125,32 @@ void spiInit(errlHndl_t & io_rtaskRetErrl)
     return;
 }
 
-// Register the generic SPI perform Op with routing code for Procs.
+// Register the EEPROM SPI perform Op with routing code for Procs.
 DEVICE_REGISTER_ROUTE(DeviceFW::WILDCARD,
-                      DeviceFW::SPI,
+                      DeviceFW::SPI_EEPROM,
                       TARGETING::TYPE_PROC,
-                      spiPerformOp);
+                      spiEepromPerformOp);
+
+// Register the TPM SPI perform Op with routing code for Procs.
+DEVICE_REGISTER_ROUTE(DeviceFW::WILDCARD,
+                      DeviceFW::SPI_TPM,
+                      TARGETING::TYPE_PROC,
+                      spiTpmPerformOp);
+
 
 errlHndl_t spiPerformOp(DeviceFW::OperationType i_opType,
-                        TARGETING::Target*      i_target,
                         void*                   io_buffer,
                         size_t&                 io_buflen,
-                        int64_t                 i_accessType,
-                        va_list                 i_args)
+                        SpiOp *                 i_spiOp )
 {
-    TRACUCOMP(g_trac_spi, ENTER_MRK"spiPerformOp() opType(%s), "
-              "i_target(0x%X), io_buffer(%p), io_buflen(%d), "
-              "i_accessType(%ld)",
-              (i_opType == DeviceFW::READ) ? "READ" : "WRITE",
-              TARGETING::get_huid(i_target),
-              io_buffer,
-              io_buflen,
-              i_accessType);
-
     errlHndl_t errl = nullptr;
     bool mutex_should_unlock = false;
 
-    // SPI master engine to use for this operation
-    uint8_t engine = static_cast<uint8_t>(va_arg(i_args, uint64_t));
-    // The offset to start the read or write from
-    uint64_t offset = va_arg(i_args, uint64_t);
+    assert((i_spiOp != nullptr), "spiPerformOp called with nullptr SpiOp");
 
-    SpiOp spiOp = SpiOp(i_target,
-                        engine,
-                        offset,
-                        io_buflen,
-                        io_buffer);
+    TARGETING::Target* spiTarget = i_spiOp->getControllerTarget();
+    uint8_t spiEngine = i_spiOp->getEngine();
+
     do {
 
         if (io_buflen == 0)
@@ -180,14 +171,14 @@ errlHndl_t spiPerformOp(DeviceFW::OperationType i_opType,
             errl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                            SPI_PERFORM_OP,
                                            SPI_INVALID_BUFFER_SIZE,
-                                           TARGETING::get_huid(i_target),
+                                           TARGETING::get_huid(spiTarget),
                                            0,
                                            ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
             break;
         }
 
-        errl = spiEngineLockOp(i_target,
-                               engine,
+        errl = spiEngineLockOp(spiTarget,
+                               spiEngine,
                                mutex_should_unlock);
         if (errl != nullptr)
         {
@@ -196,7 +187,7 @@ errlHndl_t spiPerformOp(DeviceFW::OperationType i_opType,
 
         // Take possession of the Atomic Lock
         TRACDCOMP(g_trac_spi, "Grabbing atomic lock");
-        SpiControlHandle handle = spiOp.getSpiHandle();
+        SpiControlHandle handle = i_spiOp->getSpiHandle();
         FAPI_INVOKE_HWP( errl,
                          spi_master_unlock,
                          handle,
@@ -204,7 +195,7 @@ errlHndl_t spiPerformOp(DeviceFW::OperationType i_opType,
         if (errl != nullptr)
         {
             TRACFCOMP(g_trac_spi, "Failure trying to release atomic lock");
-            ERRORLOG::ErrlUserDetailsTarget(i_target, "Proc Target")
+            ERRORLOG::ErrlUserDetailsTarget(spiTarget, "Proc Target")
               .addToLog(errl);
             io_buflen = 0;
             break;
@@ -216,7 +207,7 @@ errlHndl_t spiPerformOp(DeviceFW::OperationType i_opType,
         if (errl != nullptr)
         {
             TRACFCOMP(g_trac_spi, "Failure trying to grab atomic lock");
-            ERRORLOG::ErrlUserDetailsTarget(i_target, "Proc Target")
+            ERRORLOG::ErrlUserDetailsTarget(spiTarget, "Proc Target")
               .addToLog(errl);
             io_buflen = 0;
             break;
@@ -227,8 +218,8 @@ errlHndl_t spiPerformOp(DeviceFW::OperationType i_opType,
         // =====================================================================
         if (i_opType == DeviceFW::READ)
         {
-            errl = spiOp.read(io_buffer,
-                              io_buflen);
+            // calls the derived class function
+            errl = i_spiOp->read(io_buffer, io_buflen);
 
             if (errl != nullptr)
             {
@@ -242,9 +233,8 @@ errlHndl_t spiPerformOp(DeviceFW::OperationType i_opType,
         // =====================================================================
         else if (i_opType == DeviceFW::WRITE)
         {
-            errl = spiOp.write(io_buffer,
-                               io_buflen);
-
+            // calls the derived class function
+            errl = i_spiOp->write(io_buffer, io_buflen);
             if (errl != nullptr)
             {
                 TRACUCOMP(g_trac_spi,
@@ -268,7 +258,7 @@ errlHndl_t spiPerformOp(DeviceFW::OperationType i_opType,
             errl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                            SPI_PERFORM_OP,
                                            SPI_UNKNOWN_OP_TYPE,
-                                           TARGETING::get_huid(i_target),
+                                           TARGETING::get_huid(spiTarget),
                                            i_opType,
                                            ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
             break;
@@ -278,8 +268,8 @@ errlHndl_t spiPerformOp(DeviceFW::OperationType i_opType,
 
     if (mutex_should_unlock)
     {
-        errlHndl_t unlockErrl = spiEngineLockOp(i_target,
-                                                engine,
+        errlHndl_t unlockErrl = spiEngineLockOp(spiTarget,
+                                                spiEngine,
                                                 mutex_should_unlock);
         if (unlockErrl != nullptr)
         {
@@ -299,11 +289,46 @@ errlHndl_t spiPerformOp(DeviceFW::OperationType i_opType,
         }
     }
 
+    return errl;
+}
+
+
+errlHndl_t spiEepromPerformOp(DeviceFW::OperationType i_opType,
+                              TARGETING::Target*      i_controller_target,
+                              void*                   io_buffer,
+                              size_t&                 io_buflen,
+                              int64_t                 i_accessType,
+                              va_list                 i_args)
+{
+    errlHndl_t errl = nullptr;
+
+    TRACUCOMP(g_trac_spi, ENTER_MRK"spiEepromPerformOp() opType(%s), "
+              "i_controller_target(0x%X), io_buffer(%p), io_buflen(%d), "
+              "i_accessType(%ld)",
+              (i_opType == DeviceFW::READ) ? "READ" : "WRITE",
+              TARGETING::get_huid(i_controller_target),
+              io_buffer,
+              io_buflen,
+              i_accessType);
+
+    // SPI master engine to use for this operation
+    uint8_t engine = static_cast<uint8_t>(va_arg(i_args, uint64_t));
+
+    // The offset to start the read or write from
+    uint64_t offset = va_arg(i_args, uint64_t);
+
+    SpiEepromOp spiOp = SpiEepromOp(i_controller_target,
+                                    engine,
+                                    offset,
+                                    io_buflen,
+                                    io_buffer);
+
+    errl = spiPerformOp(i_opType, io_buffer, io_buflen, &spiOp);
     if (errl != nullptr)
     {
-        UdSpiParameters(i_opType,
-                        i_accessType,
-                        spiOp).addToLog(errl);
+        UdSpiEepromParameters(i_opType,
+                              i_accessType,
+                              spiOp).addToLog(errl);
 
         errl->collectTrace(SPI_COMP_NAME, KILOBYTE);
     }
@@ -311,8 +336,282 @@ errlHndl_t spiPerformOp(DeviceFW::OperationType i_opType,
     return errl;
 }
 
-errlHndl_t SpiOp::read(void*   o_buffer,
-                       size_t& io_buflen)
+errlHndl_t spiTpmPerformOp(DeviceFW::OperationType i_opType,
+                           TARGETING::Target*      i_controller_target,
+                           void*                   io_buffer,
+                           size_t&                 io_buflen,
+                           int64_t                 i_accessType,
+                           va_list                 i_args)
+{
+    errlHndl_t errl = nullptr;
+
+    TRACUCOMP(g_trac_spi, ENTER_MRK"spiTpmPerformOp() opType(%s), "
+              "i_controller_target(0x%X), io_buffer(%p), io_buflen(%d), "
+              "i_accessType(%ld)",
+              (i_opType == DeviceFW::READ) ? "READ" : "WRITE",
+              TARGETING::get_huid(i_controller_target),
+              io_buffer,
+              io_buflen,
+              i_accessType);
+
+    // SPI master engine to use for this operation
+    uint8_t engine = static_cast<uint8_t>(va_arg(i_args, uint64_t));
+
+    // The offset to start the read or write from
+    uint64_t offset = va_arg(i_args, uint64_t);
+
+    uint32_t locality = va_arg(i_args, uint32_t);
+
+    TARGETING::Target * tpmTarget = va_arg(i_args, TARGETING::Target *);
+
+    SpiTpmOp spiOp = SpiTpmOp(i_controller_target,
+                              engine,
+                              offset,
+                              locality,
+                              tpmTarget);
+
+    errl = spiPerformOp(i_opType, io_buffer, io_buflen, &spiOp);
+    if (errl != nullptr)
+    {
+        UdSpiTpmParameters(i_opType,
+                           i_accessType,
+                           spiOp).addToLog(errl);
+
+        errl->collectTrace(SPI_COMP_NAME, KILOBYTE);
+    }
+
+    return errl;
+}
+
+bool spiGetEngineMutex(TARGETING::Target* i_target,
+                       uint8_t            i_engine,
+                       mutex_t*&          io_engine_lock)
+{
+    bool success = true;
+    namespace T = TARGETING;
+    do
+    {
+        switch(i_engine)
+        {
+            case 0:
+                io_engine_lock =
+                    i_target->getHbMutexAttr<T::ATTR_SPI_ENGINE_MUTEX_0>();
+                break;
+            case 1:
+                io_engine_lock =
+                    i_target->getHbMutexAttr<T::ATTR_SPI_ENGINE_MUTEX_1>();
+                break;
+            case 2:
+                io_engine_lock =
+                    i_target->getHbMutexAttr<T::ATTR_SPI_ENGINE_MUTEX_2>();
+                break;
+            case 3:
+                io_engine_lock =
+                    i_target->getHbMutexAttr<T::ATTR_SPI_ENGINE_MUTEX_3>();
+                break;
+            case 4:
+                io_engine_lock =
+                    i_target->getHbMutexAttr<T::ATTR_SPI_ENGINE_MUTEX_4>();
+                break;
+            case 5:
+                io_engine_lock =
+                    i_target->getHbMutexAttr<T::ATTR_SPI_ENGINE_MUTEX_5>();
+                break;
+            default:
+                TRACFCOMP(g_trac_spi, ERR_MRK"spiGetEngineMutex: "
+                          "Invalid engine for getting mutex. i_engine=%d",
+                          i_engine);
+                success = false;
+                break;
+        };
+    } while(0);
+
+    return success;
+}
+
+errlHndl_t spiEngineLockOp(TARGETING::Target* i_target,
+                           const uint8_t      i_engine,
+                                 bool&        io_unlock)
+{
+    errlHndl_t errl = nullptr;
+
+    do {
+        mutex_t * engine_lock = nullptr;
+        bool mutexSuccess = spiGetEngineMutex(i_target,
+                                              i_engine,
+                                              engine_lock);
+
+        if (!mutexSuccess)
+        {
+            TRACFCOMP(g_trac_spi, ERR_MRK"spiEngineLockOp(): "
+                      "Failed to retrieve requested engine mutex! Engine %d",
+                      i_engine);
+            /*@
+            * @errortype
+            * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
+            * @moduleid         SPI::SPI_ENGINE_LOCK_OP
+            * @reasoncode       SPI::SPI_FAILED_TO_RETRIEVE_ENGINE_MUTEX
+            * @userdata1        Target HUID of the SPI Master
+            * @userdata2        Requested SPI Engine
+            * @devdesc          The SPI engine mutex requested couldn't be
+            *                   retrieved.
+            * @custdesc         A problem occurred during IPL of the system.
+            */
+            errl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                           SPI_ENGINE_LOCK_OP,
+                                           SPI_FAILED_TO_RETRIEVE_ENGINE_MUTEX,
+                                           TARGETING::get_huid(i_target),
+                                           i_engine,
+                                           ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+            io_unlock = false;
+            break;
+        }
+
+        if (io_unlock)
+        {
+            mutex_unlock(engine_lock);
+            io_unlock = false;
+        }
+        else
+        {
+            mutex_lock(engine_lock);
+            io_unlock = true;
+        }
+
+    } while(0);
+
+    return errl;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+// SpiOp
+////////////////////////////////////////////////////////////////////////////////
+SpiOp::SpiOp(TARGETING::Target* i_controller_target,
+             const uint8_t      i_engine,
+             const uint64_t     i_offset)
+    : iv_target(i_controller_target),
+      iv_offset(i_offset),
+      iv_engine(i_engine)
+{
+}
+
+void SpiOp::addStatusRegs(errlHndl_t& io_errl)
+{
+    do {
+        if (io_errl == nullptr)
+        {
+            // io_errl cannot be nullptr.
+            TRACFCOMP(g_trac_spi, ERR_MRK"SpiOp::addStatusRegs(): "
+                      "io_errl was nullptr. Skip adding additional FFDC");
+            break;
+        }
+
+        ERRORLOG::ErrlUserDetailsLogRegister registerUDSection(iv_target);
+
+        // Calculates the base address for the SPI device we want to pull
+        // register contents from.
+        SpiControlHandle handle = getSpiHandle();
+
+        // List of registers to collect data from.
+        uint32_t registerList[] = {
+            (SPIM_COUNTERREG     | handle.base_addr),
+            (SPIM_CONFIGREG1     | handle.base_addr),
+            (SPIM_CLOCKCONFIGREG | handle.base_addr),
+            (SPIM_MMSPISMREG     | handle.base_addr),
+            (SPIM_TDR            | handle.base_addr),
+            (SPIM_RDR            | handle.base_addr),
+            (SPIM_SEQREG         | handle.base_addr),
+            (SPIM_STATUSREG      | handle.base_addr),
+        };
+
+        for (auto reg : registerList)
+        {
+            registerUDSection.addData(DEVICE_SCOM_ADDRESS(reg));
+        }
+
+        // Figure out if in FSI or PIB mode
+        auto spiSwitch = iv_target->getAttr<TARGETING::ATTR_SPI_SWITCHES>();
+
+        // Add Root Control Register as well in case the PIB bit was set
+        // improperly
+        if (spiSwitch.usePibSPI)
+        {
+            registerUDSection.addData(DEVICE_SCOM_ADDRESS(ROOT_CTRL_8_PIB));
+        }
+        else
+        {
+            registerUDSection.addData(DEVICE_FSI_ADDRESS(ROOT_CTRL_8_FSI));
+        }
+
+        registerUDSection.addToLog(io_errl);
+
+    } while(0);
+}
+
+void SpiOp::addCallouts(errlHndl_t& io_errl)
+{
+    do {
+        if (io_errl == nullptr)
+        {
+            // io_errl cannot be nullptr.
+            TRACFCOMP(g_trac_spi, ERR_MRK"SpiOp::addCallouts(): "
+                      "io_errl was nullptr. Skip adding additional FFDC");
+            break;
+        }
+
+        // Do a medium callout on the SPI master proc
+        io_errl->addHwCallout(iv_target,
+                              HWAS::SRCI_PRIORITY_MED,
+                              HWAS::NO_DECONFIG,
+                              HWAS::GARD_NULL);
+
+        // Do a low callout on HB code.
+        io_errl->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
+                                     HWAS::SRCI_PRIORITY_LOW);
+    } while(0);
+}
+
+SpiControlHandle SpiOp::getSpiHandle()
+{
+    fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP> chip_target(iv_target);
+
+    auto spiSwitch = iv_target->getAttr<TARGETING::ATTR_SPI_SWITCHES>();
+
+    // setup SPI handle based on spiSwitch attribute
+    return SpiControlHandle(chip_target, iv_engine, 1, spiSwitch.usePibSPI);
+}
+
+TARGETING::Target* SpiOp::getControllerTarget() const
+{
+    return iv_target;
+}
+
+uint64_t SpiOp::getOffset() const
+{
+    return iv_offset;
+}
+
+uint8_t  SpiOp::getEngine() const
+{
+    return iv_engine;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+// SpiEepromOp
+////////////////////////////////////////////////////////////////////////////////
+SpiEepromOp::SpiEepromOp(TARGETING::Target* i_target,
+                         const uint8_t      i_engine,
+                         const uint64_t     i_offset,
+                         const size_t       i_buflen,
+                         void *             i_buffer)
+    : SpiOp(i_target, i_engine, i_offset), iv_length(i_buflen)
+{
+    iv_start_index = (iv_offset % TRANSACTION_ALIGNMENT);
+    setAdjustedOpArgs(i_buffer);
+}
+
+errlHndl_t SpiEepromOp::read(void*   o_buffer,
+                             size_t& io_buflen)
 {
     errlHndl_t errl = nullptr;
     SpiControlHandle handle = getSpiHandle();
@@ -410,8 +709,8 @@ errlHndl_t SpiOp::read(void*   o_buffer,
     return errl;
 }
 
-errlHndl_t SpiOp::write(void*   i_buffer,
-                        size_t& io_buflen)
+errlHndl_t SpiEepromOp::write(void*   i_buffer,
+                              size_t& io_buflen)
 {
     errlHndl_t errl = nullptr;
 
@@ -533,11 +832,11 @@ errlHndl_t SpiOp::write(void*   i_buffer,
     return errl;
 }
 
-errlHndl_t SpiOp::copyToBuffer(void*           io_destination,
-                               size_t&         io_amountToCopy,
-                               uint8_t const * i_source,
-                               const size_t    i_sourceLength,
-                               const size_t    i_sourceOffset)
+errlHndl_t SpiEepromOp::copyToBuffer(void*           io_destination,
+                                     size_t&         io_amountToCopy,
+                                     uint8_t const * i_source,
+                                     const size_t    i_sourceLength,
+                                     const size_t    i_sourceOffset)
 {
     errlHndl_t errl = nullptr;
 
@@ -583,124 +882,8 @@ errlHndl_t SpiOp::copyToBuffer(void*           io_destination,
     return errl;
 }
 
-bool spiGetEngineMutex(TARGETING::Target* i_target,
-                       uint8_t            i_engine,
-                       mutex_t*&          io_engine_lock)
-{
-    bool success = true;
-    namespace T = TARGETING;
-    do
-    {
-        switch(i_engine)
-        {
-            case 0:
-                io_engine_lock =
-                    i_target->getHbMutexAttr<T::ATTR_SPI_ENGINE_MUTEX_0>();
-                break;
-            case 1:
-                io_engine_lock =
-                    i_target->getHbMutexAttr<T::ATTR_SPI_ENGINE_MUTEX_1>();
-                break;
-            case 2:
-                io_engine_lock =
-                    i_target->getHbMutexAttr<T::ATTR_SPI_ENGINE_MUTEX_2>();
-                break;
-            case 3:
-                io_engine_lock =
-                    i_target->getHbMutexAttr<T::ATTR_SPI_ENGINE_MUTEX_3>();
-                break;
-            case 4:
-                io_engine_lock =
-                    i_target->getHbMutexAttr<T::ATTR_SPI_ENGINE_MUTEX_4>();
-                break;
-            case 5:
-                io_engine_lock =
-                    i_target->getHbMutexAttr<T::ATTR_SPI_ENGINE_MUTEX_5>();
-                break;
-            default:
-                TRACFCOMP(g_trac_spi, ERR_MRK"spiGetEngineMutex: "
-                          "Invalid engine for getting mutex. i_engine=%d",
-                          i_engine);
-                success = false;
-                break;
-        };
-    } while(0);
 
-    return success;
-}
-
-errlHndl_t spiEngineLockOp(TARGETING::Target* i_target,
-                           const uint8_t      i_engine,
-                                 bool&        io_unlock)
-{
-    errlHndl_t errl = nullptr;
-
-    do {
-        mutex_t * engine_lock = nullptr;
-        bool mutexSuccess = spiGetEngineMutex(i_target,
-                                              i_engine,
-                                              engine_lock);
-
-        if (!mutexSuccess)
-        {
-            TRACFCOMP(g_trac_spi, ERR_MRK"spiEngineLockOp(): "
-                      "Failed to retrieve requested engine mutex! Engine %d",
-                      i_engine);
-            /*@
-            * @errortype
-            * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
-            * @moduleid         SPI::SPI_ENGINE_LOCK_OP
-            * @reasoncode       SPI::SPI_FAILED_TO_RETRIEVE_ENGINE_MUTEX
-            * @userdata1        Target HUID of the SPI Master
-            * @userdata2        Requested SPI Engine
-            * @devdesc          The SPI engine mutex requested couldn't be
-            *                   retrieved.
-            * @custdesc         A problem occurred during IPL of the system.
-            */
-            errl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                           SPI_ENGINE_LOCK_OP,
-                                           SPI_FAILED_TO_RETRIEVE_ENGINE_MUTEX,
-                                           TARGETING::get_huid(i_target),
-                                           i_engine,
-                                           ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
-            io_unlock = false;
-            break;
-        }
-
-        if (io_unlock)
-        {
-            mutex_unlock(engine_lock);
-            io_unlock = false;
-        }
-        else
-        {
-            mutex_lock(engine_lock);
-            io_unlock = true;
-        }
-
-    } while(0);
-
-    return errl;
-}
-
-SpiOp::SpiOp(TARGETING::Target* i_target,
-             const uint8_t      i_engine,
-             const uint64_t     i_offset,
-             const size_t       i_buflen,
-             void *             i_buffer)
-    : iv_target(i_target),
-      iv_offset(i_offset),
-      iv_length(i_buflen),
-      iv_engine(i_engine)
-{
-    iv_start_index = (iv_offset % TRANSACTION_ALIGNMENT);
-
-    // Calculate the adjusted parameters.
-    setAdjustedOpArgs(i_buffer);
-
-}
-
-void SpiOp::setAdjustedOpArgs(void * i_buffer)
+void SpiEepromOp::setAdjustedOpArgs(void * i_buffer)
 {
     // Determine the adjusted start offset by checking how far off
     // the requested offset is from the nearest lower bound
@@ -755,67 +938,14 @@ void SpiOp::setAdjustedOpArgs(void * i_buffer)
               iv_length, iv_adjusted_length, iv_offset, iv_adjusted_offset);
 }
 
-void SpiOp::addStatusRegs(errlHndl_t& io_errl)
+
+void SpiEepromOp::addCallouts(errlHndl_t& io_errl)
 {
     do {
         if (io_errl == nullptr)
         {
             // io_errl cannot be nullptr.
-            TRACFCOMP(g_trac_spi, ERR_MRK"SpiOp::addStatusRegs(): "
-                      "io_errl was nullptr. Skip adding additional FFDC");
-            break;
-        }
-
-        ERRORLOG::ErrlUserDetailsLogRegister registerUDSection(iv_target);
-
-        // Calculates the base address for the SPI device we want to pull
-        // register contents from.
-        SpiControlHandle handle = getSpiHandle();
-
-        // List of registers to collect data from.
-        uint32_t registerList[] = {
-            (SPIM_COUNTERREG     | handle.base_addr),
-            (SPIM_CONFIGREG1     | handle.base_addr),
-            (SPIM_CLOCKCONFIGREG | handle.base_addr),
-            (SPIM_MMSPISMREG     | handle.base_addr),
-            (SPIM_TDR            | handle.base_addr),
-            (SPIM_RDR            | handle.base_addr),
-            (SPIM_SEQREG         | handle.base_addr),
-            (SPIM_STATUSREG      | handle.base_addr),
-        };
-
-        for (auto reg : registerList)
-        {
-            registerUDSection.addData(DEVICE_SCOM_ADDRESS(reg));
-        }
-
-        // Figure out if in FSI or PIB mode
-        auto spiSwitch = iv_target->getAttr<TARGETING::ATTR_SPI_SWITCHES>();
-
-        // Add Root Control Register as well in case the PIB bit was set
-        // improperly
-        if (spiSwitch.usePibSPI)
-        {
-            registerUDSection.addData(DEVICE_SCOM_ADDRESS(ROOT_CTRL_8_PIB));
-        }
-        else
-        {
-            registerUDSection.addData(DEVICE_FSI_ADDRESS(ROOT_CTRL_8_FSI));
-        }
-
-        registerUDSection.addToLog(io_errl);
-
-    } while(0);
-}
-
-void SpiOp::addCallouts(errlHndl_t& io_errl)
-{
-
-    do {
-        if (io_errl == nullptr)
-        {
-            // io_errl cannot be nullptr.
-            TRACFCOMP(g_trac_spi, ERR_MRK"SpiOp::addCallouts(): "
+            TRACFCOMP(g_trac_spi, ERR_MRK"SpiEepromOp::addCallouts(): "
                       "io_errl was nullptr. Skip adding additional FFDC");
             break;
         }
@@ -842,10 +972,7 @@ void SpiOp::addCallouts(errlHndl_t& io_errl)
                                         HWAS::NO_DECONFIG,
                                         HWAS::GARD_NULL);
                 break;
-            case 4:
-                // TPM
-                // @TODO RTC 246066 Handle TPM callout via HW callout using
-                //                  updated TPM_INFO attr
+            case 4:  // TPM
                 break;
             case 5:
                 // DUMP
@@ -859,67 +986,125 @@ void SpiOp::addCallouts(errlHndl_t& io_errl)
                 break;
         };
 
-        // Do a medium callout on the SPI master proc
-        io_errl->addHwCallout(iv_target,
-                              HWAS::SRCI_PRIORITY_MED,
-                              HWAS::NO_DECONFIG,
-                              HWAS::GARD_NULL);
+        // Add the lower level SPI callouts
+        SpiOp::addCallouts(io_errl);
 
-        // Do a low callout on HB code.
-        io_errl->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
-                                     HWAS::SRCI_PRIORITY_LOW);
-    } while(0);
+    } while (0);
 }
 
-SpiControlHandle SpiOp::getSpiHandle()
-{
-    fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP> chip_target(iv_target);
-
-    auto spiSwitch = iv_target->getAttr<TARGETING::ATTR_SPI_SWITCHES>();
-
-    // setup SPI handle based on spiSwitch attribute
-    return SpiControlHandle(chip_target, iv_engine, 1, spiSwitch.usePibSPI);
-}
-
-TARGETING::Target* SpiOp::getTarget()
-{
-    return iv_target;
-}
-
-uint64_t SpiOp::getOffset()
-{
-    return iv_offset;
-}
-
-uint64_t SpiOp::getLength()
+uint64_t SpiEepromOp::getLength() const
 {
     return iv_length;
 }
 
-uint8_t  SpiOp::getEngine()
-{
-    return iv_engine;
-}
-
-uint64_t SpiOp::getAdjustedOffset()
+uint64_t SpiEepromOp::getAdjustedOffset() const
 {
     return iv_adjusted_offset;
 }
 
-uint64_t SpiOp::getAdjustedLength()
+uint64_t SpiEepromOp::getAdjustedLength() const
 {
     return iv_adjusted_length;
 }
 
-uint8_t SpiOp::getStartIndex()
+uint8_t SpiEepromOp::getStartIndex() const
 {
     return iv_start_index;
 }
 
-bool SpiOp::getUsingAdjustedBuffer()
+bool SpiEepromOp::getUsingAdjustedBuffer() const
 {
     return iv_usingAdjustedBuffer;
 }
 
+///////////////////////////////////////////////////////////////////////////////
+// SpiTpmOp
+///////////////////////////////////////////////////////////////////////////////
+SpiTpmOp::SpiTpmOp(TARGETING::Target* i_controller_target,
+                   const uint8_t            i_engine,
+                   const uint64_t           i_offset,
+                   const uint32_t           i_locality,
+                   TARGETING::Target* i_tpm_target)
+                   : SpiOp(i_controller_target, i_engine, i_offset),
+                    iv_locality(i_locality), iv_tpmTarget(i_tpm_target)
+{
+}
+
+errlHndl_t SpiTpmOp::read(void* o_buffer, size_t& io_buflen)
+{
+    errlHndl_t errl = nullptr;
+
+/* TODO RTC:246066 - reenable when hwp is available
+    TRACUCOMP(g_trac_spi, "SpiTpmOp::read() - calling "
+            "spi_tpm_read_secure HWP with params: "
+            "locality = %d, offset = 0x%llx, length = %d",
+            iv_locality, iv_offset, io_buflen);
+
+    SpiControlHandle handle = getSpiHandle();
+    FAPI_INVOKE_HWP(errl,
+                    spi_tpm_read_secure,
+                    handle,
+                    iv_locality,
+                    iv_offset,
+                    io_buflen,
+                    reinterpret_cast<uint8_t*>(o_buffer));
+*/
+    return errl;
+}
+
+errlHndl_t SpiTpmOp::write(void* i_buffer, size_t& io_buflen)
+{
+    errlHndl_t errl = nullptr;
+
+/* TODO RTC:246066 - reenable when hwp is available
+    TRACUCOMP(g_trac_spi, "SpiTpmOp::write() - calling "
+            "spi_tpm_write_with_wait HWP with params:"
+            "locality = %d, offset = 0x%llx, length = %d",
+            iv_locality, iv_offset, io_buflen);
+
+    SpiControlHandle handle = getSpiHandle();
+    FAPI_INVOKE_HWP(errl,
+                    spi_tpm_write_with_wait,
+                    handle,
+                    iv_locality,
+                    iv_offset,
+                    io_buflen,
+                    reinterpret_cast<uint8_t*>(i_buffer));
+*/
+    return errl;
+}
+
+uint32_t SpiTpmOp::getLocality() const
+{
+    return iv_locality;
+}
+
+const TARGETING::Target* SpiTpmOp::getTpmTarget() const
+{
+    return iv_tpmTarget;
+}
+
+void SpiTpmOp::addCallouts(errlHndl_t& io_errl)
+{
+    do {
+        if (io_errl == nullptr)
+        {
+            // io_errl cannot be nullptr.
+            TRACFCOMP(g_trac_spi, ERR_MRK"SpiTpmOp::addCallouts(): "
+                      "io_errl was nullptr. Skip adding additional FFDC");
+            break;
+        }
+
+        // Callout TPM HW
+        io_errl->addHwCallout(iv_tpmTarget,
+                              HWAS::SRCI_PRIORITY_HIGH,
+                              HWAS::NO_DECONFIG,
+                              HWAS::GARD_NULL);
+
+        // Add the lower level SPI callouts
+        SpiOp::addCallouts(io_errl);
+
+    } while (0);
+}
 
 }; // end namespace SPI

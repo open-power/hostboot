@@ -101,7 +101,7 @@ public:
                                  testDataGood[i].spiMaster,
                                  &buffer,
                                  testDataGood[i].dataLength,
-                                 DEVICE_SPI_ADDRESS(testDataGood[i].engine,
+                                 DEVICE_SPI_EEPROM_ADDRESS(testDataGood[i].engine,
                                                     testDataGood[i].read_offset));
 
             if (errl)
@@ -151,8 +151,8 @@ public:
                                  masterProc,
                                  &buffer,
                                  dataLength,
-                                 DEVICE_SPI_ADDRESS(engine,
-                                                    read_offset));
+                                 DEVICE_SPI_EEPROM_ADDRESS(engine,
+                                                           read_offset));
 
             if (errl)
             {
@@ -198,8 +198,8 @@ public:
                                  masterProc,
                                  buffer,
                                  dataLength,
-                                 DEVICE_SPI_ADDRESS(engine,
-                                                    read_offset));
+                                 DEVICE_SPI_EEPROM_ADDRESS(engine,
+                                                           read_offset));
 
             if (errl)
             {
@@ -245,8 +245,8 @@ public:
                                  masterProc,
                                  buffer,
                                  dataLength,
-                                 DEVICE_SPI_ADDRESS(engine,
-                                                    read_offset));
+                                 DEVICE_SPI_EEPROM_ADDRESS(engine,
+                                                           read_offset));
 
             if (errl)
             {
@@ -354,7 +354,7 @@ public:
                                 testDataGood[i].spiMaster,
                                 &original_data,
                                 testDataGood[i].dataLength,
-                                DEVICE_SPI_ADDRESS(testDataGood[i].engine,
+                                DEVICE_SPI_EEPROM_ADDRESS(testDataGood[i].engine,
                                                    testDataGood[i].write_offset));
 
             if (errl)
@@ -374,7 +374,7 @@ public:
                      testDataGood[i].spiMaster,
                      &testDataGood[i].data,
                      testDataGood[i].dataLength,
-                     DEVICE_SPI_ADDRESS(testDataGood[i].engine,
+                     DEVICE_SPI_EEPROM_ADDRESS(testDataGood[i].engine,
                                         testDataGood[i].write_offset));
 
             if (errl)
@@ -394,7 +394,7 @@ public:
                      testDataGood[i].spiMaster,
                      &buffer,
                      testDataGood[i].dataLength,
-                     DEVICE_SPI_ADDRESS(testDataGood[i].engine,
+                     DEVICE_SPI_EEPROM_ADDRESS(testDataGood[i].engine,
                                         testDataGood[i].write_offset));
 
             if (errl)
@@ -426,7 +426,7 @@ public:
                      testDataGood[i].spiMaster,
                      &original_data,
                      testDataGood[i].dataLength,
-                     DEVICE_SPI_ADDRESS(testDataGood[i].engine,
+                     DEVICE_SPI_EEPROM_ADDRESS(testDataGood[i].engine,
                                         testDataGood[i].write_offset));
 
             if (errl)
@@ -446,8 +446,8 @@ public:
                      testDataGood[i].spiMaster,
                      &buffer,
                      testDataGood[i].dataLength,
-                     DEVICE_SPI_ADDRESS(testDataGood[i].engine,
-                                        testDataGood[i].write_offset));
+                     DEVICE_SPI_EEPROM_ADDRESS(testDataGood[i].engine,
+                                               testDataGood[i].write_offset));
 
             if (errl)
             {
@@ -495,8 +495,8 @@ public:
                                 testDataBad[i].spiMaster,
                                 &testDataBad[i].data,
                                 testDataBad[i].dataLength,
-                                DEVICE_SPI_ADDRESS(testDataBad[i].engine,
-                                                   testDataBad[i].write_offset));
+                                DEVICE_SPI_EEPROM_ADDRESS(testDataBad[i].engine,
+                                                  testDataBad[i].write_offset));
 
             if (errl)
             {

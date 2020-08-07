@@ -47,21 +47,112 @@
 namespace SPI
 {
 
-// The number of bytes a SPI transaction must be aligned to.
-const size_t TRANSACTION_ALIGNMENT = 8;
-
 class SpiOp
 {
+protected:
+
+    // Master SPI target
     TARGETING::Target* iv_target;
 
     // The requested read or write offset.
     uint64_t iv_offset;
 
-    // The length of the request.
-    size_t iv_length;
-
     // The engine to use for this Op
     uint8_t iv_engine;
+
+
+    /**
+     *  @brief Adds the various registers of the target spi device to an error
+     *         log.
+     *
+     *  @param[in/out]  io_errl     The error log to add the register contents
+     *                              to.
+     */
+    void addStatusRegs(errlHndl_t& io_errl);
+
+    /**
+     *  @brief Adds callouts for the SPI device to the error log.
+     *         Does a medium callout on the SPI master proc
+     *         Does a low callout of HB code
+     *
+     *  @param[in/out]  io_errl     The error log to add the callouts to.
+     */
+    virtual void addCallouts(errlHndl_t& io_errl);
+
+public:
+
+    /**
+     *  @brief Constructor that creates a SpiOp object. This constructor will
+     *         initialize all member variables.
+     *
+     *  @param[in]  i_controller_target    Initializes iv_target.
+     *  @param[in]  i_engine               Initializes iv_engine.
+     *  @param[in]  i_offset               Initializes iv_offset.
+     *
+     */
+    SpiOp(TARGETING::Target* i_controller_target,
+          uint8_t   i_engine,
+          uint64_t  i_offset);
+
+    /**
+     * @brief      Constructs a SpiControlHandle object that calculates engine
+     *             offset and other necessary parameters to perform the SpiOp.
+     *
+     * @return     SpiControlHandle
+     */
+    SpiControlHandle getSpiHandle();
+
+    /**
+     * @brief          Pure virtual function that will perform the SPI read
+     *                 operation.
+     *
+     * @param[out]     o_buffer  The buffer to place the retrieved data.
+     *
+     * @param[in]      io_buflen  The size of the data to read and place in the
+     *                            buffer.
+     *
+     * @return         errlHndl_t nullptr if successful, otherwise a pointer to
+     *                            the error log.
+     */
+    virtual errlHndl_t read(void* o_buffer, size_t& io_buflen) = 0;
+
+    /**
+     * @brief          Pure virtual function that will perform the SPI write
+     *                 operation.
+     *
+     * @param[in]      i_buffer  The buffer containing the data to be written
+     *                           to the target device.
+     *
+     * @param[in/out]  io_buflen INPUT: The size of the data to write to the
+     *                                  target device.
+     *                           OUTPUT: The size of the data buffer written.
+     *
+     * @return         errlHndl_t nullptr if successful, otherwise a pointer to
+     *                            the error log.
+     */
+    virtual errlHndl_t write(void* i_buffer, size_t& io_buflen) = 0;
+
+    /**
+     * @brief Returns the value of iv_offset member.
+     */
+    uint64_t getOffset() const;
+
+    /**
+     * @brief Returns the value of iv_engine member.
+     */
+    uint8_t  getEngine() const;
+
+    /**
+     * @brief Returns the value of iv_target member.
+     */
+    TARGETING::Target* getControllerTarget() const;
+
+}; // End of SpiOp class definition.
+
+class SpiEepromOp : public SpiOp
+{
+    // The number of bytes a SPI transaction must be aligned to.
+    static constexpr size_t TRANSACTION_ALIGNMENT = 8;
 
     // The adjusted offset to read or write to.
     // This must always be a multiple of TRANSACTION_ALIGNMENT
@@ -83,6 +174,9 @@ class SpiOp
     // buffer.
     uint8_t * iv_buffer;
 
+    // The length of the request.
+    size_t iv_length;
+
     /**
      * @brief Sets the adjusted buffer parameters. This determine if the
      *        requested operation was aligned and will calculate the appropriate
@@ -95,87 +189,6 @@ class SpiOp
      *                         necessary.
      */
     void setAdjustedOpArgs(void * i_buffer);
-
-    /**
-     *  @brief Adds the various registers of the target spi device to an error
-     *         log.
-     *
-     *  @param[in/out]  io_errl     The error log to add the register contents
-     *                              to.
-     */
-    void addStatusRegs(errlHndl_t& io_errl);
-
-    /**
-     *  @brief Adds callouts for the SPI device to the error log.
-     *
-     *  @param[in/out]  io_errl     The error log to add the callouts to.
-     */
-    void addCallouts(errlHndl_t& io_errl);
-
-public:
-
-    /**
-     *  @brief Constructor that creates a SpiOp object. This constructor will
-     *         initialize all member variables based on whether the requested
-     *         operation is aligned by TRANSACTION_ALIGNMENT.
-     *
-     *  @param[in]  i_target    Initializes iv_target.
-     *
-     *  @param[in]  i_engine    Initializes iv_engine.
-     *
-     *  @param[in]  i_offset    Initializes i_offset and used to calculate
-     *                          iv_adjusted_offset and iv_start_index.
-     *
-     *  @param[in]  i_buflen    Initializes iv_length and used to calculate
-     *                          iv_adjusted_length.
-     *
-     *  @param[in]  i_buffer    Initializes iv_buffer IF the request is
-     *                          aligned. Otherwise, not used.
-     */
-    SpiOp(TARGETING::Target* i_target,
-          uint8_t            i_engine,
-          uint64_t           i_offset,
-          size_t             i_buflen,
-          void *             i_buffer);
-
-    /**
-     * @brief      Constructs a SpiControlHandle object that calculates engine
-     *             offset and other necessary parameters to perform the SpiOp.
-     *
-     * @return     SpiControlHandle
-     */
-    SpiControlHandle getSpiHandle();
-
-    /**
-     * @brief          Performs the SPI read operation and handles alignment
-     *                 adjusting if necessary.
-     *
-     * @param[out]     o_buffer  The buffer to place the retrieved data.
-     *
-     * @param[in]      io_buflen  The size of the data to read and place in the
-     *                            buffer.
-     *
-     * @return         errlHndl_t nullptr if successful, otherwise a pointer to
-     *                            the error log.
-     */
-    errlHndl_t read(void*   o_buffer,
-                    size_t& io_buflen);
-
-    /**
-     * @brief          Performs the SPI write operation.
-     *
-     * @param[in]      i_buffer  The buffer containing the data to be written to
-     *                           the target device.
-     *
-     * @param[in/out]  io_buflen INPUT: The size of the data to write to the
-     *                                  target device.
-     *                           OUTPUT: The size of the data buffer written.
-     *
-     * @return         errlHndl_t nullptr if successful, otherwise a pointer to
-     *                            the error log.
-     */
-    errlHndl_t write(void*   i_buffer,
-                     size_t& io_buflen);
 
     /**
      * @brief Copies the requested data from the adjusted buffer contents into
@@ -209,46 +222,165 @@ public:
                             const size_t    i_sourceOffset = 0);
 
     /**
-     * @brief Returns the value of iv_offset member.
+     *  @brief Adds callouts for the SPI Eeprom device to the error log.
+     *
+     *  @param[in/out]  io_errl     The error log to add the callouts to.
      */
-    uint64_t getOffset();
+    void addCallouts(errlHndl_t& io_errl);
+
+public:
+    /**
+     *  @brief Constructor that creates a SpiEepromOp object. This constructor
+     *         will initialize all member variables based on whether the requested
+     *         operation is aligned by TRANSACTION_ALIGNMENT.
+     *
+     *  @param[in]  i_controller_target    Initializes iv_target.
+     *
+     *  @param[in]  i_engine    Initializes iv_engine.
+     *
+     *  @param[in]  i_offset    Initializes i_offset and used to calculate
+     *                          iv_adjusted_offset and iv_start_index.
+     *
+     *  @param[in]  i_buflen    Initializes iv_length and used to calculate
+     *                          iv_adjusted_length.
+     *
+     *  @param[in]  i_buffer    Initializes iv_buffer IF the request is
+     *                          aligned. Otherwise, not used.
+     */
+    SpiEepromOp(TARGETING::Target* i_controller_target,
+                uint8_t            i_engine,
+                uint64_t           i_offset,
+                size_t             i_buflen,
+                void *             i_buffer);
 
     /**
-     * @brief Returns the value of iv_length member.
+     * @brief          Performs the SPI EEPROM read operation and handles
+     *                 alignment adjusting if necessary.
+     *
+     * @param[out]     o_buffer  The buffer to place the retrieved data.
+     *
+     * @param[in]      io_buflen  The size of the data to read and place in the
+     *                            buffer.
+     *
+     * @return         errlHndl_t nullptr if successful, otherwise a pointer to
+     *                            the error log.
      */
-    uint64_t getLength();
+    errlHndl_t read(void* o_buffer, size_t& io_buflen);
 
     /**
-     * @brief Returns the value of iv_engine member.
+     * @brief          Performs the SPI EEPROM write operation.
+     *
+     * @param[in]      i_buffer  The buffer containing the data to be written
+     *                           to the target device.
+     *
+     * @param[in/out]  io_buflen INPUT: The size of the data to write to the
+     *                                  target device.
+     *                           OUTPUT: The size of the data buffer written.
+     *
+     * @return         errlHndl_t nullptr if successful, otherwise a pointer to
+     *                            the error log.
      */
-    uint8_t  getEngine();
+    errlHndl_t write(void* i_buffer, size_t& io_buflen);
 
     /**
      * @brief Returns the value of iv_adjusted_offset member.
      */
-    uint64_t getAdjustedOffset();
+    uint64_t getAdjustedOffset() const;
 
     /**
      * @brief Returns the value of iv_adjusted_length member.
      */
-    uint64_t getAdjustedLength();
+    uint64_t getAdjustedLength() const;
 
     /**
      * @brief Returns the value of iv_start_index member.
      */
-    uint8_t getStartIndex();
+    uint8_t getStartIndex() const;
 
     /**
      * @brief Returns the value of iv_usingAdjustedBuffer member.
      */
-    bool getUsingAdjustedBuffer();
+    bool getUsingAdjustedBuffer() const;
 
     /**
-     * @brief Returns the value of iv_target member.
+     * @brief Returns the value of iv_length member.
      */
-    TARGETING::Target* getTarget();
+    uint64_t getLength() const;
+}; // End of SpiEepromOp class definition.
 
-}; // End of SpiOp class definition.
+
+class SpiTpmOp : public SpiOp
+{
+    // TPM locality - (0-4)
+    uint32_t iv_locality;
+
+    // TPM target being accessed
+    const TARGETING::Target * iv_tpmTarget;
+
+    /**
+     *  @brief Adds callouts for the SPI TPM device to the error log.
+     *
+     *  @param[in/out]  io_errl     The error log to add the callouts to.
+     */
+    void addCallouts(errlHndl_t& io_errl);
+
+public:
+    /**
+     *  @brief Constructor that creates a SpiTpmOp object.
+     *         This constructor will initialize all member variables
+     *
+     *  @param[in]  i_controller_target    Initializes iv_target.
+     *  @param[in]  i_engine               Initializes iv_engine.
+     *  @param[in]  i_offset               Initializes iv_offset
+     *  @param[in]  i_locality             Initializes iv_locality (0-4)
+     *  @param[in]  i_tpm_target           Initializes iv_tpmTarget
+     *
+     */
+    SpiTpmOp(TARGETING::Target* i_controller_target,
+             uint8_t            i_engine,
+             uint64_t           i_offset,
+             uint32_t           i_locality,
+             TARGETING::Target* i_tpm_target);
+
+    /**
+     * @brief          Performs the SPI TPM read operation
+     *
+     * @param[out]     o_buffer  The buffer to place the retrieved data.
+     *
+     * @param[in]      io_buflen  The size of the data to read and place in the
+     *                            buffer.
+     *
+     * @return         errlHndl_t nullptr if successful, otherwise a pointer to
+     *                            the error log.
+     */
+    errlHndl_t read(void* o_buffer, size_t& io_buflen);
+
+    /**
+     * @brief          Performs the SPI TPM write operation.
+     *
+     * @param[in]      i_buffer  The buffer containing the data to be written
+     *                           to the target device.
+     *
+     * @param[in/out]  io_buflen INPUT: The size of the data to write to the
+     *                                  target device.
+     *                           OUTPUT: The size of the data buffer written.
+     *
+     * @return         errlHndl_t nullptr if successful, otherwise a pointer to
+     *                            the error log.
+     */
+    errlHndl_t write(void* i_buffer, size_t& io_buflen);
+
+    /**
+     * @brief Returns the value of iv_locality member.
+     */
+    uint32_t getLocality() const;
+
+    /**
+     * @brief Returns pointer to iv_tpmTarget member
+     */
+    const TARGETING::Target* getTpmTarget() const;
+
+}; // End of SpiTpmOp class definition.
 
 /**
  * @brief Initialize SPI Device Driver by forcing SPI Master to use PIB.
@@ -259,13 +391,14 @@ void spiInit(errlHndl_t &io_rtaskRetErrl);
 
 /**
  *
- * @brief Perform a SPI access operation. It follows a pre-defined prototype
- *        function in order to be registered with the device driver framework.
+ * @brief Perform a SPI access operation to an eeprom.
+ *        It follows a pre-defined prototype function in order to be registered
+ *        with the device driver framework.
  *
  * @param[in] i_opType       Operation Type. See DeviceFW::OperationType in
  *                           driverif.H
  *
- * @param[in] i_target       SPI Master Target.
+ * @param[in] i_target       SPI Controller Target.
  *
  * @param [in/out] io_buffer INPUT: Pointer to the data that will be written to
  *                                  the target device.
@@ -282,18 +415,92 @@ void spiInit(errlHndl_t &io_rtaskRetErrl);
  *
  * @param [in] i_args        This is an argument list for the device driver
  *                           framework.  This list of arguments is documented
- *                           in driverif.H.
+ *                           in driverif.H. *
+
+ *
+ * @return     errlHndl_t    nullptr if successful, otherwise a pointer to the
+ *                           error log.
+ *
+ */
+errlHndl_t spiEepromPerformOp(DeviceFW::OperationType i_opType,
+                              TARGETING::Target*      i_controller_target,
+                              void*                   io_buffer,
+                              size_t&                 io_buflen,
+                              int64_t                 i_accessType,
+                              va_list                 i_args);
+
+/**
+ *
+ * @brief Perform a SPI access operation to a TPM.
+ *        It follows a pre-defined prototype function in order to be registered
+ *        with the device driver framework.
+ *
+ * @param[in] i_opType       Operation Type. See DeviceFW::OperationType in
+ *                           driverif.H
+ *
+ * @param[in] i_controller_target
+ *                           SPI Controller Target
+ *
+ * @param [in/out] io_buffer INPUT: Pointer to the data that will be written to
+ *                                  the target device.
+ *                           OUTPUT: Pointer to the data that was read from the
+ *                                   target device.
+ *
+ * @param [in/out] io_buflen INPUT: Length of the buffer to be written to
+ *                                  target device.
+ *                           OUTPUT: Length of buffer that was written, or
+ *                                   length of buffer to be read from target
+ *                                   device.
+ *
+ * @param [in] i_accessType  Access Type. See DeviceFW::AccessType in userif.H
+ *
+ * @param [in] i_args        This is an argument list for the device driver
+ *                           framework.  This list of arguments is documented
+ *                           in driverif.H. *
+
+ *
+ * @return     errlHndl_t    nullptr if successful, otherwise a pointer to the
+ *                           error log.
+ *
+ */
+errlHndl_t spiTpmPerformOp(DeviceFW::OperationType i_opType,
+                           TARGETING::Target*      i_controller_target,
+                           void*                   io_buffer,
+                           size_t&                 io_buflen,
+                           int64_t                 i_accessType,
+                           va_list                 i_args);
+
+/**
+ *
+ * @brief Perform a SPI access operation. It follows a pre-defined prototype
+ *        function in order to be registered with the device driver framework.
+ *
+ * @param[in] i_opType       Operation Type. See DeviceFW::OperationType in
+ *                           driverif.H
+ *
+ * @param [in/out] io_buffer INPUT: Pointer to the data that will be written to
+ *                                  the target device.
+ *                           OUTPUT: Pointer to the data that was read from the
+ *                                   target device.
+ *
+ * @param [in/out] io_buflen INPUT: Length of the buffer to be written to
+ *                                  target device.
+ *                           OUTPUT: Length of buffer that was written, or
+ *                                   length of buffer to be read from target
+ *                                   device.
+ *
+ * @param[in] i_spiOp        Pointer to derived object which contains
+ *                           information to perform the virtual SPI operations
  *
  * @return     errlHndl_t    nullptr if successful, otherwise a pointer to the
  *                           error log.
  *
  */
 errlHndl_t spiPerformOp(DeviceFW::OperationType i_opType,
-                        TARGETING::Target*      i_target,
                         void*                   io_buffer,
                         size_t&                 io_buflen,
                         int64_t                 i_accessType,
-                        va_list                 i_args);
+                        SpiOp *                 i_spiOp );
 
 
 /**

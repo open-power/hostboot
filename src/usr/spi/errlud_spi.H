@@ -39,11 +39,11 @@ namespace SPI
 {
 
 /**
- * @class UdSpiParameters
+ * @class UdSpiEepromParameters
  *
- * Adds SPI information to an error log as user detail data
+ * Adds SPI EEPROM information to an error log as user detail data
  */
-class UdSpiParameters : public ERRORLOG::ErrlUserDetails
+class UdSpiEepromParameters : public ERRORLOG::ErrlUserDetails
 {
   public:
     /**
@@ -53,20 +53,52 @@ class UdSpiParameters : public ERRORLOG::ErrlUserDetails
      *  @param i_accessType   Access Type
      *  @param i_spiOp        Class containing the SPI parameters
      */
-    UdSpiParameters(uint8_t i_opType,
-                    int64_t i_accessType,
-                    SpiOp   i_spiOp);
+    UdSpiEepromParameters(uint8_t i_opType,
+                          int64_t i_accessType,
+                          SpiEepromOp i_spiOp);
 
     /**
      *  @brief Destructor
      */
-    virtual ~UdSpiParameters();
+    virtual ~UdSpiEepromParameters();
 
   private:
     // Disabled
-    UdSpiParameters(UdSpiParameters &);
-    UdSpiParameters & operator=(UdSpiParameters &);
+    UdSpiEepromParameters(UdSpiEepromParameters &);
+    UdSpiEepromParameters & operator=(UdSpiEepromParameters &);
 };
+
+
+/**
+ * @class UdSpiTpmParameters
+ *
+ * Adds SPI TPM information to an error log as user detail data
+ */
+class UdSpiTpmParameters : public ERRORLOG::ErrlUserDetails
+{
+  public:
+    /**
+     *  @brief Constructor
+     *
+     *  @param i_opType       Operation Type
+     *  @param i_accessType   Access Type
+     *  @param i_spiOp        Class containing the SPI parameters
+     */
+    UdSpiTpmParameters(uint8_t i_opType,
+                       int64_t i_accessType,
+                       SpiTpmOp i_spiOp);
+
+    /**
+     *  @brief Destructor
+     */
+    virtual ~UdSpiTpmParameters();
+
+  private:
+    // Disabled
+    UdSpiTpmParameters(UdSpiTpmParameters &);
+    UdSpiTpmParameters & operator=(UdSpiTpmParameters &);
+};
+
 
 } // end SPI namespace
 

@@ -183,8 +183,12 @@ public:
                         i_parser.PrintString("AccessType", "DeviceFW::IBSCOM "
                                                     "- not logged");
                         break;
-                    case DeviceFW::SPI:         // driverif.H
-                        i_parser.PrintString("AccessType", "DeviceFW::SPI "
+                    case DeviceFW::SPI_EEPROM: // driverif.H
+                        i_parser.PrintString("AccessType", "DeviceFW::SPI_EEPROM "
+                                                    "- not logged");
+                        break;
+                    case DeviceFW::SPI_TPM:    // driverif.H
+                        i_parser.PrintString("AccessType", "DeviceFW::SPI_TPM "
                                                     "- not logged");
                         break;
                     default:

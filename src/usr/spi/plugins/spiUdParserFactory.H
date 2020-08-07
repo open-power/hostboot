@@ -36,8 +36,11 @@ namespace SPI
         public:
             UserDetailsParserFactory()
             {
-                registerParser<SPI::UdParserSPIParameters>
-                  (SPI_UDT_PARAMETERS);
+                registerParser<SPI::UdParserSpiEepromParameters>
+                  (SPI_EEPROM_UDT_PARAMETERS);
+
+                registerParser<SPI::UdParserSpiTpmParameters>
+                  (SPI_TPM_UDT_PARAMETERS);
             }
 
         private:
