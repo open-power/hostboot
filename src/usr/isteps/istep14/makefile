@@ -98,6 +98,12 @@ OBJS += p10_l2_flush.o
 OBJS += p10_sbe_stop_hb.o
 OBJS += p10_pcie_scom.o
 
+#TODO-RTC:257623--Consolidate this into 3rd-party module to avoid duplication with istep10
+# needed by p10_exit_cache_contained
+OBJS+=p10_mcc_omi_scom.o
+OBJS+=p10_mi_omi_scom.o
+
+
 # Add the path where HWPs object files are located
 VPATH += ${SRC_IMPORT_PATH}/chips/p10/common/scominfo/
 VPATH += ${P10_PROCEDURE_PATH}/memory/

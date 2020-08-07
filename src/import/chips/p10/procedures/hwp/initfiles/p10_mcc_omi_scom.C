@@ -29,6 +29,7 @@
 
 using namespace fapi2;
 
+constexpr uint64_t literal_0b100000 = 0b100000;
 constexpr uint64_t literal_0b10000 = 0b10000;
 constexpr uint64_t literal_0b00000 = 0b00000;
 constexpr uint64_t literal_0b0100 = 0b0100;
@@ -42,15 +43,15 @@ constexpr uint64_t literal_0xFF = 0xFF;
 constexpr uint64_t literal_0b0000100011 = 0b0000100011;
 constexpr uint64_t literal_0b0000110011 = 0b0000110011;
 constexpr uint64_t literal_0b0001000000 = 0b0001000000;
-constexpr uint64_t literal_0b100000 = 0b100000;
-constexpr uint64_t literal_0b0001 = 0b0001;
-constexpr uint64_t literal_0b1000000 = 0b1000000;
-constexpr uint64_t literal_0b011000 = 0b011000;
 constexpr uint64_t literal_7 = 7;
+constexpr uint64_t literal_0b0001 = 0b0001;
 constexpr uint64_t literal_0b0010 = 0b0010;
+constexpr uint64_t literal_0b1000 = 0b1000;
 constexpr uint64_t literal_1 = 1;
-constexpr uint64_t literal_0b11 = 0b11;
+constexpr uint64_t literal_0b01 = 0b01;
 constexpr uint64_t literal_0b1 = 0b1;
+constexpr uint64_t literal_0b0110000 = 0b0110000;
+constexpr uint64_t literal_0b0100000 = 0b0100000;
 
 fapi2::ReturnCode p10_mcc_omi_scom(const fapi2::Target<fapi2::TARGET_TYPE_MCC>& TGT0,
                                    const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>& TGT1)
@@ -72,6 +73,13 @@ fapi2::ReturnCode p10_mcc_omi_scom(const fapi2::Target<fapi2::TARGET_TYPE_MCC>& 
         fapi2::ATTR_SYS_DISABLE_HWFM_Type l_TGT1_ATTR_SYS_DISABLE_HWFM;
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SYS_DISABLE_HWFM, TGT1, l_TGT1_ATTR_SYS_DISABLE_HWFM));
         fapi2::buffer<uint64_t> l_scom_buffer;
+        {
+            FAPI_TRY(fapi2::getScom( TGT0, 0xc010c22ull, l_scom_buffer ));
+
+            l_scom_buffer.insert<2, 6, 58, uint64_t>(literal_0b100000 );
+            l_scom_buffer.insert<8, 6, 58, uint64_t>(literal_0b100000 );
+            FAPI_TRY(fapi2::putScom(TGT0, 0xc010c22ull, l_scom_buffer));
+        }
         {
             FAPI_TRY(fapi2::getScom( TGT0, 0xc010c23ull, l_scom_buffer ));
 
@@ -146,8 +154,8 @@ fapi2::ReturnCode p10_mcc_omi_scom(const fapi2::Target<fapi2::TARGET_TYPE_MCC>& 
 
             constexpr auto l_MCP_CHAN0_ATCL_CL_CLSCOM_MCBUSYQ_ENABLE_BUSY_COUNTERS_ON = 0x1;
             l_scom_buffer.insert<0, 1, 63, uint64_t>(l_MCP_CHAN0_ATCL_CL_CLSCOM_MCBUSYQ_ENABLE_BUSY_COUNTERS_ON );
-            constexpr auto l_MCP_CHAN0_ATCL_CL_CLSCOM_MCBUSYQ_BUSY_COUNTER_WINDOW_SELECT_256_CYCLES = 0x4;
-            l_scom_buffer.insert<1, 3, 61, uint64_t>(l_MCP_CHAN0_ATCL_CL_CLSCOM_MCBUSYQ_BUSY_COUNTER_WINDOW_SELECT_256_CYCLES );
+            constexpr auto l_MCP_CHAN0_ATCL_CL_CLSCOM_MCBUSYQ_BUSY_COUNTER_WINDOW_SELECT_1024_CYCLES = 0x1;
+            l_scom_buffer.insert<1, 3, 61, uint64_t>(l_MCP_CHAN0_ATCL_CL_CLSCOM_MCBUSYQ_BUSY_COUNTER_WINDOW_SELECT_1024_CYCLES );
             l_scom_buffer.insert<4, 10, 54, uint64_t>(literal_0b0000100011 );
             l_scom_buffer.insert<14, 10, 54, uint64_t>(literal_0b0000110011 );
             l_scom_buffer.insert<24, 10, 54, uint64_t>(literal_0b0001000000 );
@@ -161,16 +169,6 @@ fapi2::ReturnCode p10_mcc_omi_scom(const fapi2::Target<fapi2::TARGET_TYPE_MCC>& 
             FAPI_TRY(fapi2::putScom(TGT0, 0xc010c2bull, l_scom_buffer));
         }
         {
-            FAPI_TRY(fapi2::getScom( TGT0, 0xc010d0aull, l_scom_buffer ));
-
-            l_scom_buffer.insert<2, 6, 58, uint64_t>(literal_0b100000 );
-            l_scom_buffer.insert<12, 4, 60, uint64_t>(literal_0b0001 );
-            l_scom_buffer.insert<17, 7, 57, uint64_t>(literal_0b1000000 );
-            l_scom_buffer.insert<50, 6, 58, uint64_t>(literal_0b011000 );
-            l_scom_buffer.insert<58, 6, 58, uint64_t>(literal_0b011000 );
-            FAPI_TRY(fapi2::putScom(TGT0, 0xc010d0aull, l_scom_buffer));
-        }
-        {
             FAPI_TRY(fapi2::getScom( TGT0, 0xc010d0bull, l_scom_buffer ));
 
             if ((l_TGT1_ATTR_SYS_DISABLE_MCU_TIMEOUTS == literal_0))
@@ -180,6 +178,7 @@ fapi2::ReturnCode p10_mcc_omi_scom(const fapi2::Target<fapi2::TARGET_TYPE_MCC>& 
 
             l_scom_buffer.insert<16, 4, 60, uint64_t>(literal_0b0001 );
             l_scom_buffer.insert<24, 4, 60, uint64_t>(literal_0b0010 );
+            l_scom_buffer.insert<45, 4, 60, uint64_t>(literal_0b1000 );
             FAPI_TRY(fapi2::putScom(TGT0, 0xc010d0bull, l_scom_buffer));
         }
         {
@@ -187,7 +186,7 @@ fapi2::ReturnCode p10_mcc_omi_scom(const fapi2::Target<fapi2::TARGET_TYPE_MCC>& 
 
             if ((l_TGT1_ATTR_SYS_ENABLE_MC_HW520600_X4CTR == literal_1))
             {
-                l_scom_buffer.insert<21, 2, 62, uint64_t>(literal_0b11 );
+                l_scom_buffer.insert<21, 2, 62, uint64_t>(literal_0b01 );
             }
 
             l_scom_buffer.insert<62, 1, 63, uint64_t>(literal_0b1 );
@@ -224,6 +223,13 @@ fapi2::ReturnCode p10_mcc_omi_scom(const fapi2::Target<fapi2::TARGET_TYPE_MCC>& 
             constexpr auto l_MCP_CHAN0_WRITE_NEW_WRITE_64B_MODE_ON = 0x1;
             l_scom_buffer.insert<9, 1, 63, uint64_t>(l_MCP_CHAN0_WRITE_NEW_WRITE_64B_MODE_ON );
             FAPI_TRY(fapi2::putScom(TGT0, 0xc010f48ull, l_scom_buffer));
+        }
+        {
+            FAPI_TRY(fapi2::getScom( TGT0, 0xc010f4dull, l_scom_buffer ));
+
+            l_scom_buffer.insert<19, 7, 57, uint64_t>(literal_0b0110000 );
+            l_scom_buffer.insert<27, 7, 57, uint64_t>(literal_0b0100000 );
+            FAPI_TRY(fapi2::putScom(TGT0, 0xc010f4dull, l_scom_buffer));
         }
 
     };

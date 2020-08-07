@@ -81,19 +81,6 @@ static const uint32_t DLX_CONFIG_CFG_DLX1_LEN = 32;
 //<< [DLX_CONFIG]
 // iohs/reg00046.H
 
-//>> [IOO_RX0_0_RD_RX_DAC_REGS_CNTL11_PL]
-static const uint64_t IOO_RX0_0_RD_RX_DAC_REGS_CNTL11_PL = 0x8000580010012c3full;
-
-static const uint32_t IOO_RX0_0_RD_RX_DAC_REGS_CNTL11_PL_TERM_PD = 48;
-static const uint32_t IOO_RX0_0_RD_RX_DAC_REGS_CNTL11_PL_FREQ_ADJUST = 49;
-static const uint32_t IOO_RX0_0_RD_RX_DAC_REGS_CNTL11_PL_FREQ_ADJUST_LEN = 5;
-static const uint32_t IOO_RX0_0_RD_RX_DAC_REGS_CNTL11_PL_OFF_CM = 54;
-static const uint32_t IOO_RX0_0_RD_RX_DAC_REGS_CNTL11_PL_OFF_CM_LEN = 4;
-static const uint32_t IOO_RX0_0_RD_RX_DAC_REGS_CNTL11_PL_OFF_DM = 58;
-static const uint32_t IOO_RX0_0_RD_RX_DAC_REGS_CNTL11_PL_OFF_DM_LEN = 6;
-//<< [IOO_RX0_0_RD_RX_DAC_REGS_CNTL11_PL]
-// iohs/reg00046.H
-
 //>>THE END<<
 
 #ifndef __PPE_HCODE__

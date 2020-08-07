@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/import/chips/p10/common/include/iohs/reg00041.H $         */
+/* $Source: src/import/chips/p10/procedures/hwp/initfiles/p10_mcc_omi_pretrain_scom.H $ */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2020                             */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,24 +22,24 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-#include "fapi2.H"
+#ifndef _INIT_P10_MCC_OMI_PRETRAIN_SCOM_PROCEDURE_H_
+#define _INIT_P10_MCC_OMI_PRETRAIN_SCOM_PROCEDURE_H_
 
-#ifndef __IOHS_REG00041_H_
-#define __IOHS_REG00041_H_
 
-#ifndef __PPE_HCODE__
-namespace scomt
+#include <stddef.h>
+#include <stdint.h>
+#include <fapi2.H>
+
+
+typedef fapi2::ReturnCode (*p10_mcc_omi_pretrain_scom_FP_t)(const fapi2::Target<fapi2::TARGET_TYPE_MCC>&,
+        const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>&);
+
+extern "C"
 {
-namespace iohs
-{
-#endif
 
+    fapi2::ReturnCode p10_mcc_omi_pretrain_scom(const fapi2::Target<fapi2::TARGET_TYPE_MCC>& TGT0,
+            const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>& TGT1);
 
-//>>THE END<<
-
-#ifndef __PPE_HCODE__
-}
 }
 
-#endif
 #endif
