@@ -178,7 +178,7 @@ namespace impl
 {
 
 // Size of the array below
-constexpr size_t NUM_FAPI_TARGETING_TYPES = 22;
+constexpr size_t NUM_FAPI_TARGETING_TYPES = 23;
 
 // Declaration of the array holding the associations between fapi2 target
 // types and Targeting types.

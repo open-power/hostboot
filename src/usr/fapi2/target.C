@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -62,6 +62,11 @@ extern const std::array<fapi2_targeting_type, NUM_FAPI_TARGETING_TYPES>
     { fapi2::TARGET_TYPE_IOHS      , TARGETING::TYPE_IOHS      },
     { fapi2::TARGET_TYPE_PAUC      , TARGETING::TYPE_PAUC      },
     { fapi2::TARGET_TYPE_PMIC      , TARGETING::TYPE_PMIC      },
+
+    // @TODO RTC 214692: Update TYPE_MCS to the correct type
+    //  Choosing a valid type that there are none of, if we use TYPE_NA it will
+    //  act like a wildcard and return a bunch of children when it shouldn't
+    { fapi2::TARGET_TYPE_GENERICI2CSLAVE, TARGETING::TYPE_MCS   }
 };
 
 } // end fapi2::impl namespace
