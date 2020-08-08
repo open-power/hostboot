@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -60,8 +60,6 @@ int32_t McbistCmdComplete( ExtensibleChip * i_chip,
                            STEP_CODE_DATA_STRUCT & io_sc )
 {
     #define PRDF_FUNC "[explorer_ocmb::McbistCmdComplete] "
-
-    return SUCCESS;
 
     // Tell the TD controller there was a command complete attention.
     OcmbDataBundle * db = getOcmbDataBundle( i_chip );
