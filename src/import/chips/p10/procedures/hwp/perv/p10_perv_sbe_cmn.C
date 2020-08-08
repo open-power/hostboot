@@ -724,7 +724,9 @@ fapi2::ReturnCode p10_perv_sbe_cmn_setup_multicast_groups(
     {
         fapi2::MCGROUP_ALL, 7
     });
+#ifndef __HOSTBOOT_MODULE
     FAPI_TRY(fapi2::setMulticastGroupMap(i_target_chip, l_group_map));
+#endif
 
     FAPI_INF("p10_perv_sbe_cmn_setup_multicast_groups: Exiting ...");
 

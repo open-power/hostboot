@@ -34,6 +34,7 @@ EXTRAINCDIR += ${PROCEDURES_PATH}/utils/stopreg/
 EXTRAINCDIR += ${PROCEDURES_PATH}/hwp/customize/
 EXTRAINCDIR += ${PROCEDURES_PATH}/hwp/corecache/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/common/include/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/perv/
 EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/fapi2/include/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/utils/imageProcs/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/imageProcs/
@@ -63,3 +64,4 @@ include ${ROOTPATH}/config.mk
 
 VPATH += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/pm/
 VPATH += ${PROCEDURES_PATH}/hwp/corecache/
+VPATH += ${PROCEDURES_PATH}/hwp/perv

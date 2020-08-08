@@ -25,8 +25,10 @@
 PROCEDURE=p10_update_ec_state
 $(call ADD_MODULE_INCDIR,$(PROCEDURE),$(PROJECT_ROOT)/chips/p10/procedures/hwp/corecache/)
 $(call ADD_MODULE_INCDIR,$(PROCEDURE),$(PROJECT_ROOT)/chips/p10/procedures/hwp/lib/)
+$(call ADD_MODULE_INCDIR,$(PROCEDURE),$(PROJECT_ROOT)/chips/p10/procedures/hwp/perv/)
 $(call ADD_MODULE_INCDIR,$(PROCEDURE),$(PROJECT_ROOT)/chips/p10/common/include)
 lib$(PROCEDURE)_DEPLIBS+=p10_pm_util
+lib$(PROCEDURE)_DEPLIBS+=p10_perv_sbe_cmn
 OBJ+=p10_hcd_core_stopclocks.o
 OBJ+=p10_hcd_cache_poweroff.o
 OBJ+=p10_hcd_cache_stopclocks.o
@@ -39,5 +41,6 @@ OBJ+=p10_hcd_l2_tlbie_quiesce.o
 OBJ+=p10_hcd_core_stopgrid.o
 OBJ+=p10_hcd_chtm_purge.o
 OBJ+=p10_pm_util.o
+OBJ+=p10_perv_sbe_cmn.o
 OBJ+=p10_hcd_mma_stopclocks.o
 $(call BUILD_PROCEDURE)

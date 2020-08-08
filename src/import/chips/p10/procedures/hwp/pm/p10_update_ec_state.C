@@ -55,6 +55,9 @@
 #include <p10_scom_proc.H>
 #include <p10_scom_c.H>
 #include <p10_scom_eq.H>
+#include <multicast_group_defs.H>
+#include <p10_perv_sbe_cmn.H>
+#include <p10_hang_pulse_mc_setup_tables.H>
 
 
 using namespace scomt;
@@ -100,6 +103,12 @@ fapi2::ReturnCode p10_update_ec_state(
 
     FAPI_TRY(update_ec_config(i_target),
              "Error update_core_config detected");
+
+    // Set up multicast groups, MCGROUP_GOOD_CORES gets all EQs that
+    // are good according to ATTR_PG
+    FAPI_TRY(p10_perv_sbe_cmn_setup_multicast_groups(i_target,
+             SELECT_EX_MC_GROUPS),
+             "Error from p10_perv_sbe_cmn_setup_multicast_groups");
 
     FAPI_TRY(verify_ec_hw_state(i_target));
 
@@ -196,12 +205,19 @@ static fapi2::ReturnCode update_ec_config(
                 l_present_core_unit_pos = l_present_core_unit_pos % 4;
 
                 //Update the pg bits
-                l_pg_config.setBit(l_present_core_unit_pos + CL2_START_POSITION); //ecl2
+                l_pg_config.flush<0>().setBit(l_present_core_unit_pos + CL2_START_POSITION); //ecl2
                 l_pg_config.setBit(l_present_core_unit_pos + L3_START_POSITION); //l3
                 l_pg_config.setBit(l_present_core_unit_pos + MMA_START_POSITION); //mma
 
                 //setting Region Partial Good bits
                 FAPI_TRY(fapi2::putScom(l_eq, CPLT_CTRL2_WO_OR, l_pg_config));
+
+                // Set PSCOM enable
+                FAPI_TRY(fapi2::putScom(l_eq, CPLT_CTRL3_WO_OR, l_pg_config));
+
+                // Clear Power Gate/DFT fence
+                FAPI_TRY(fapi2::putScom(l_eq, CPLT_CTRL5_WO_CLEAR, l_pg_config));
+
                 break;
             }  // Current core
         } // Functional core loop
@@ -387,7 +403,6 @@ fapi_try_exit:
     FAPI_INF("< set_atomic_lock...");
     return fapi2::current_err;
 }
-
 fapi2::ReturnCode clear_atomic_lock(
     const fapi2::Target<fapi2::TARGET_TYPE_CORE>& i_core_target,
     const uint32_t i_lockId)

@@ -459,8 +459,10 @@ void testMulticastWriteOpBadParam()
     }while(0);
 }
 
+//TODO RTC 255196
 void testMulticastReadOr()
 {
+#if 0
 // @TODO: RTC 244854: This is broke for run time testing, enable when can.
 #ifndef __HOSTBOOT_RUNTIME
     TARGETING::TargetHandle_t l_proc = nullptr;
@@ -587,10 +589,12 @@ void testMulticastReadOr()
 
     }while(0);
 #endif // #ifndef __HOSTBOOT_RUNTIME
+#endif
 }
 
 void testMulticastReadAnd()
 {
+#if 0
 // @TODO: RTC 244854: This is broke for run time testing, enable when can.
 #ifndef __HOSTBOOT_RUNTIME
     TARGETING::TargetHandle_t l_proc = nullptr;
@@ -758,6 +762,7 @@ void testMulticastReadAnd()
 
     } while(0);
 #endif // #ifndef __HOSTBOOT_RUNTIME
+#endif
 }
 
 void testMulticastCoreSelect()
@@ -928,6 +933,7 @@ void testMulticastCoreSelect()
 
 void testMulticastCompare()
 {
+#if 0
 // @TODO: RTC 244854: This is broke for run time testing, enable when can.
 #ifndef __HOSTBOOT_RUNTIME
     TARGETING::TargetHandle_t l_proc = nullptr;
@@ -1130,6 +1136,7 @@ void testMulticastCompare()
         errlCommit(l_errl, CXXTEST_COMP_ID);
     }
 #endif // #ifndef __HOSTBOOT_RUNTIME
+#endif
 }
 
 }; //class FapiMulticastTest
