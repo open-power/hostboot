@@ -65,6 +65,7 @@
 #include <errl/errlmanager.H>
 
 #include <p10_io_init_done.H>
+#include <sys/time.h>
 
 namespace ISTEP_09
 {
@@ -82,6 +83,9 @@ void* call_proc_io_dccal_done(void* const io_pArgs)
 {
     ISTEP_ERROR::IStepError l_stepError;
     TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, "call_proc_io_dccal_done entry");
+
+    //@FIXME-RTC:258548-SW501880-Add extra delay here to handle slow PPE
+    nanosleep( 5, 0 ); //Wait 5 seconds
 
     // Get all functional proc chip targets
     TARGETING::TargetHandleList l_cpuTargetList;
