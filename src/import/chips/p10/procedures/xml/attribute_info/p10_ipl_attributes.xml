@@ -57,6 +57,22 @@
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
+  <id>ATTR_CONTAINED_LOAD_PATH</id>
+  <targetType>TARGET_TYPE_SYSTEM</targetType>
+  <description>
+    Define mechanism used to load contained testcase
+  </description>
+  <valueType>uint8</valueType>
+  <enum>
+    PBA = 0x0,
+    L2SQ = 0x1
+  </enum>
+  <initToZero/>
+  <platInit/>
+  <mrwHide/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
   <id>ATTR_IS_MPIPL</id>
   <targetType>TARGET_TYPE_SYSTEM</targetType>
   <description>Indicates if current IPL is memory-preserving</description>
