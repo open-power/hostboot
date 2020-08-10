@@ -2619,17 +2619,6 @@ sub postProcessSystem
 
     my $maxComputeNodes  = get_max_compute_nodes($targetObj , $target);
     $targetObj->setAttribute($target, "MAX_COMPUTE_NODES_PER_SYSTEM", $maxComputeNodes);
-
-    #handle enumeration changes
-    my $enum_val = $targetObj->getAttribute($target,"PROC_FABRIC_PUMP_MODE");
-    if ( $enum_val =~ /MODE1/i)
-    {
-        $targetObj->setAttribute($target,"PROC_FABRIC_PUMP_MODE","CHIP_IS_NODE");
-    }
-    elsif ( $enum_val =~ /MODE2/i)
-    {
-        $targetObj->setAttribute($target,"PROC_FABRIC_PUMP_MODE","CHIP_IS_GROUP");
-    }
 } # end sub postProcessSystem
 
 #--------------------------------------------------
