@@ -116,13 +116,20 @@ inline fapi2::ReturnCode after_p10_omi_init_dstlfir_helper(const fapi2::Target<f
     FAPI_TRY(l_rc, "for target %s unable to create fir::reg for 0x%016x", mss::c_str(i_target),
              scomt::mcc::DSTL_DSTLFIR_RW);
 
+    // Set up host attention for these FIRs using ACT0, ACT1, ACT2 = 0,0,1
+    // TODO: Story #565 Need to update FIR API to handle ACT2 register
+    FAPI_TRY(fapi2::getScom(i_target, scomt::mcc::DSTL_DSTLFIRACT2, l_reg_data));
+    l_reg_data.setBit<scomt::mcc::DSTL_DSTLFIR_SUBCHANNEL_A_TLX_SPECIAL_ATTENTION>()
+    .setBit<scomt::mcc::DSTL_DSTLFIR_SUBCHANNEL_B_TLX_SPECIAL_ATTENTION>();
+    FAPI_TRY(fapi2::putScom(i_target, scomt::mcc::DSTL_DSTLFIRACT2, l_reg_data));
+
     l_setup_dstlfir_rc = l_p10_mcc_dstlfir_reg
                          .template local_checkstop<scomt::mcc::DSTL_DSTLFIR_SUBCHANNEL_A_TLX_CHECKSTOP>()
                          .template recoverable_error<scomt::mcc::DSTL_DSTLFIR_SUBCHANNEL_A_TLX_RECOVERABLE_ATTENTION>()
-                         .template attention<scomt::mcc::DSTL_DSTLFIR_SUBCHANNEL_A_TLX_SPECIAL_ATTENTION>()
+                         .template checkstop<scomt::mcc::DSTL_DSTLFIR_SUBCHANNEL_A_TLX_SPECIAL_ATTENTION>()
                          .template local_checkstop<scomt::mcc::DSTL_DSTLFIR_SUBCHANNEL_B_TLX_CHECKSTOP>()
                          .template recoverable_error<scomt::mcc::DSTL_DSTLFIR_SUBCHANNEL_B_TLX_RECOVERABLE_ATTENTION>()
-                         .template attention<scomt::mcc::DSTL_DSTLFIR_SUBCHANNEL_B_TLX_SPECIAL_ATTENTION>()
+                         .template checkstop<scomt::mcc::DSTL_DSTLFIR_SUBCHANNEL_B_TLX_SPECIAL_ATTENTION>()
                          .template recoverable_error<scomt::mcc::DSTL_DSTLFIR_SUBCHANNEL_A_TIMEOUT_ERROR>()
                          .template recoverable_error<scomt::mcc::DSTL_DSTLFIR_SUBCHANNEL_B_TIMEOUT_ERROR>()
                          .write();

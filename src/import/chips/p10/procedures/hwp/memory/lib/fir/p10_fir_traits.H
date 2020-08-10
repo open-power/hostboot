@@ -37,6 +37,7 @@
 #define _P10_FIR_TRAITS_H_
 
 #include <fapi2.H>
+#include <p10_scom_mcc_0.H>
 #include <p10_scom_mcc_2.H>
 #include <p10_scom_mcc_4.H>
 #include <p10_scom_mcc_8.H>
@@ -64,6 +65,7 @@ struct firTraits<scomt::mcc::DSTL_DSTLFIR_RW>
     static constexpr uint64_t REG = scomt::mcc::DSTL_DSTLFIR_RW;
     static constexpr uint64_t ACT0 = scomt::mcc::DSTL_DSTLFIRACT0;
     static constexpr uint64_t ACT1 = scomt::mcc::DSTL_DSTLFIRACT1;
+    static constexpr uint64_t ACT2 = scomt::mcc::DSTL_DSTLFIRACT2;
     static constexpr uint64_t MASK = scomt::mcc::DSTL_DSTLFIRMASK_RW;
     static constexpr uint64_t MASK_AND = scomt::mcc::DSTL_DSTLFIRMASK_WO_AND;
     static constexpr uint64_t MASK_OR = scomt::mcc::DSTL_DSTLFIRMASK_WO_OR;
