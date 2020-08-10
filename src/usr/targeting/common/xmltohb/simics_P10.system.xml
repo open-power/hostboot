@@ -73,6 +73,7 @@
      - 2 SMP connections
        p0:op2 to p1:op1
        p0:op6 to p1:op4
+     - 1 TPM hanging off of Node 0
 
      ================================================================= -->
 
@@ -21654,5 +21655,64 @@
 </targetInstance>
 
 <!-- ==== DDIMMs off second processor ==================================== -->
+
+<!-- DDIMM off of proc1 port2  -->
+
+
+<!-- ===================================================================== -->
+<!-- TPM Chip                                                              -->
+<!-- ===================================================================== -->
+<!-- TPM off of Node 0  -->
+<targetInstance>
+    <id>sys0node0tpm0</id>
+    <type>chip-tpm-cectpm</type>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/tpm-0</default>
+    </attribute>
+    <attribute>
+        <id>HUID</id>
+        <default>0x00310000</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/tpm-0</default>
+    </attribute>
+    <attribute>
+        <id>POSITION</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <!-- TODO: RTC: 246066 Remove TPM_INFO from all XMLs and HB code -->
+        <id>TPM_INFO</id>
+        <default>
+            <field>
+                <id>i2cMasterPath</id>
+                <value>physical:sys-0/node-0/proc-0</value>
+            </field>
+        </default>
+    </attribute>
+    <attribute>
+        <id>SPI_TPM_INFO</id>
+        <default>
+            <field>
+                <id>spiMasterPath</id>
+                <value>physical:sys-0/node-0/proc-0</value>
+            </field>
+        </default>
+    </attribute>
+    <attribute>
+        <id>TPM_ROLE</id>
+        <default>TPM_PRIMARY</default>
+    </attribute>
+    <attribute>
+      <id>TPM_MODEL</id>
+      <default>2</default>
+    </attribute>
+</targetInstance>
 
 </attributes>
