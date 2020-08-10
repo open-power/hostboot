@@ -202,6 +202,13 @@ class ImageBuildRecord
      * @return      IMG_BUILD_SUCCESS in case of success, error code otherwise.
      */
     uint32_t getSection( const char * i_sectn, ImgSectnSumm & o_sectionOffset );
+    /**
+     * @brief  returns image section offset wrt to HOMER region base.
+     * @param[in] i_sectn       name of the image section
+     * @param[in] i_imgSectn    an instance of ImgSectnSumm
+     * @return      IMG_BUILD_SUCCESS in case of success, error code otherwise.
+     */
+    uint32_t editSection( const char * i_sectn, ImgSectnSumm & i_imgSectn );
 
     /**
      * @brief generates report summarizing all sections and respective offsets.
@@ -270,6 +277,7 @@ uint32_t ImageBuildRecord::setSection( const char * i_sectn, uint32_t i_offset, 
         iv_sectnList.push_back( l_sectn );
 
         iv_currentWriteOffset += i_sectnLen;
+        FAPI_DBG(" After Section Index 0x%08x", iv_currentWriteOffset );
     }
     else
     {
@@ -307,6 +315,36 @@ uint32_t ImageBuildRecord::getSection( const char * i_sectn, ImgSectnSumm & o_im
     return l_rc;
 }
 
+//--------------------------------------------------------------------------------------------------------
+uint32_t ImageBuildRecord::editSection( const char * i_sectn, ImgSectnSumm & i_imgSectn )
+{
+    uint32_t l_rc   =   IMG_BUILD_SUCCESS;
+
+    do
+    {
+        if( !i_sectn )
+        {
+            l_rc    =   BAD_SECTN_NAME;
+            break;
+        }
+
+        for( auto &sectn : iv_sectnList )
+        {
+            if( !memcmp( sectn.iv_sectnName, i_sectn, TEMP_ARRAY_SIZE ) )
+            {
+                sectn.iv_sectnOffset    = i_imgSectn.iv_sectnOffset;
+                sectn.iv_sectnLength    = i_imgSectn.iv_sectnLength;
+                iv_currentWriteOffset   = i_imgSectn.iv_sectnOffset + i_imgSectn.iv_sectnLength;
+                FAPI_INF( "Editing Section , Offset 0x%08x Length 0x%08x Current Index 0x%08x",
+                            sectn.iv_sectnOffset, sectn.iv_sectnLength, iv_currentWriteOffset );
+                break;
+            }
+        }
+
+    } while(0);
+
+    return l_rc;
+}
 //--------------------------------------------------------------------------------------------------------
 
 uint32_t ImageBuildRecord::checkSize( uint32_t i_sectionSize )
@@ -1083,7 +1121,6 @@ fapi2::ReturnCode buildQmeSpecificRing( CONST_FAPI2_PROC& i_procTgt, Homerlayout
                  "Chiplet Specific Ring Customization Failed For QME" );
 
         l_currentIndex  =  l_instSpecbase + (l_superChiplet*l_instSpecLength);
-
         memcpy( &i_pChipHomer->iv_cpmrRegion.iv_qmeSramRegion[l_currentIndex],
             i_ringData.iv_pWorkBuf1, l_workBufSize );
 
@@ -1162,9 +1199,6 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
-
-
-
 //----------------------------------------------------------------------------------------------
 
 fapi2::ReturnCode buildQmeOverride( Homerlayout_t *i_pChipHomer, RingBufData & i_ringData,
@@ -1182,21 +1216,30 @@ fapi2::ReturnCode buildQmeOverride( Homerlayout_t *i_pChipHomer, RingBufData & i
         uint32_t l_buildIndex       =   0;
 
         i_qmeBuildRecord.getSection( "QME Common Ring", l_qmeSectn );
-        l_qmeSectn.iv_sectnOffset   =   l_qmeSectn.iv_sectnOffset + l_qmeSectn.iv_sectnLength;
-        l_buildIndex                =   ( ( ( l_qmeSectn.iv_sectnOffset  + 15 )/16 ) * 16 );
+        //calculating start offset of Override ring
+        l_buildIndex      =   l_qmeSectn.iv_sectnOffset + l_qmeSectn.iv_sectnLength;
+        l_buildIndex      =   ( ( ( l_buildIndex  + 15 )/16 ) * 16 );
 
-        l_qmeSectn.iv_sectnLength   =   l_overrideSize;
+        //re computed new common ring size and rounded it to 32B boundary
+        l_qmeSectn.iv_sectnLength   =   ( l_buildIndex - l_qmeSectn.iv_sectnOffset ) + l_overrideSize;
+        l_qmeSectn.iv_sectnLength   =   ((( l_qmeSectn.iv_sectnLength + 31 ) >> 5) << 5);
 
+        i_qmeBuildRecord.editSection( "QME Common Ring", l_qmeSectn );
+
+        //copying Override Rings
         memcpy( (uint8_t *)&i_pChipHomer->iv_cpmrRegion.iv_qmeSramRegion[l_buildIndex - QME_IMAGE_CPMR_OFFSET ],
-                (uint8_t *)i_ringData.iv_pOverride,
-                l_qmeSectn.iv_sectnLength );
+                        (uint8_t *)i_ringData.iv_pOverride,
+                        l_overrideSize );
 
-
+        //Setting Offset and Length of Override sub-region
+        l_qmeSectn.iv_sectnOffset   =   l_buildIndex; //rounded override start offset to 16B boundary
+        l_qmeSectn.iv_sectnLength   =   l_overrideSize;
         FAPI_INF( "Override Offset   0x%08x  Override Length   0x%08x",
                    l_qmeSectn.iv_sectnOffset, l_qmeSectn.iv_sectnLength );
     }
 
-    i_qmeBuildRecord.setSection( "QME Override Ring", l_qmeSectn.iv_sectnOffset, l_qmeSectn.iv_sectnLength );
+    //Special Case for Overrides : Length is already accounted in common ring section
+    i_qmeBuildRecord.setSection( "QME Override Ring", l_qmeSectn.iv_sectnOffset, 0 );
 
 
     FAPI_INF("<< buildQmeOverride")
@@ -1292,7 +1335,6 @@ fapi2::ReturnCode buildQmeHeader( CONST_FAPI2_PROC& i_procTgt, Homerlayout_t   *
     ImgSectnSumm    l_imgSectn;
     uint64_t l_cpmrPhyAddr      =   0;
     uint32_t l_tempWord         =   0;
-    uint32_t l_temp             =   0;
 
     if( !i_qmeBuildRecord.getSection( "QME Hcode", l_imgSectn ) )
     {
@@ -1319,7 +1361,6 @@ fapi2::ReturnCode buildQmeHeader( CONST_FAPI2_PROC& i_procTgt, Homerlayout_t   *
     {
         pImgHdr->g_qme_common_ring_offset   =   l_imgSectn.iv_sectnOffset - l_tempWord;
         pImgHdr->g_qme_common_ring_length   =   l_imgSectn.iv_sectnLength;
-        l_temp  =   l_imgSectn.iv_sectnLength;
     }
 
     if( !i_qmeBuildRecord.getSection( "QME Override Ring", l_imgSectn ) )
@@ -1327,7 +1368,6 @@ fapi2::ReturnCode buildQmeHeader( CONST_FAPI2_PROC& i_procTgt, Homerlayout_t   *
         if( l_imgSectn.iv_sectnOffset )
         {
             pImgHdr->g_qme_cmn_ring_ovrd_offset =   l_imgSectn.iv_sectnOffset - l_tempWord;
-            pImgHdr->g_qme_common_ring_length   =   l_imgSectn.iv_sectnLength + l_temp;
         }
     }
 
