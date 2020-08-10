@@ -5120,7 +5120,6 @@ sub getAttributeDefault {
 #
 # return - The two fields successfully merged
 #
-
 sub mergeComplexAttributeFields {
     my($newAttrFields, $currentAttrFields) = @_;
 
@@ -5142,7 +5141,22 @@ sub mergeComplexAttributeFields {
         # Iterate over the fields of $newField and look for their corresponding
         # id in $currentAttrFields.  All the fields in $newField should exist in
         # $currentAttrFields, if not, then there is a problem
-        foreach my $newField (@{$newAttrFields->{default}->{field}})
+
+        # There's an issue that $newAttrFields->{default}->{field} may not be an array.
+        # To address that issue, we can check type of it:
+        my @newFieldArr = ();
+        if (ref $newAttrFields->{default}->{field} ne "ARRAY")
+        {
+            # If it's not an array, then append it to newFieldArr as if it is the only array entry
+            @newFieldArr = ($newAttrFields->{default}->{field});
+        }
+        else
+        {
+            # If it is an array, then @newFieldArr will be a reference to it
+            @newFieldArr = @{$newAttrFields->{default}->{field}};
+        }
+
+        foreach my $newField (@newFieldArr)
         {
             my $foundField = 0;
 
@@ -5154,7 +5168,7 @@ sub mergeComplexAttributeFields {
             }
 
             # Iterate over $mergedFields (really $currentAttrFields) looking
-            # for the $newField of $newAttrFields
+            # for the $newField of @newFieldArr
             foreach my $currentField (@{$mergedFields->{default}->{field}})
             {
                 # Found the field in question
