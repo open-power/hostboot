@@ -8160,6 +8160,31 @@
 
   <attribute>
     <complexType>
+      <description>Structure to define the addressing of an attached TPM chip via SPI.</description>
+      <field>
+        <default>physical:sys-0</default>
+        <description>Entity path to the chip that contains the SPI engine that drives the TPM. When
+          the SPI_TPM_INFO object is being used, only this field should be edited. All the other
+          fields do not change regardless of P10 system.</description>
+        <name>spiMasterPath</name>
+        <type>EntityPath</type>
+      </field>
+      <field>
+        <default>0x04</default>
+        <description>SPI engine for TPM</description>
+        <name>engine</name>
+        <type>uint8_t</type>
+      </field>
+    </complexType>
+    <description>Information needed to address the TPM chip via SPI</description>
+    <id>SPI_TPM_INFO</id>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <no_export/>
+  </attribute>
+
+  <attribute>
+    <complexType>
       <description>Structure to define the addressing for an attached SPI
           eeprom device that contains WOF data.
       </description>
@@ -8758,6 +8783,28 @@
     </enumerator>
     <id>TOD_ROLE</id>
   </enumerationType>
+
+  <attribute>
+    <id>TPM_ENABLED</id>
+    <description>
+        Kill-switch to withhold the use of TPM if any problem is found. HB code will not be updating
+        this attribute.
+        0: TPM should not be enabled
+        1: TPM is enabled
+    </description>
+    <range>
+      <min>0</min>
+      <max>1</max>
+    </range>
+    <simpleType>
+      <uint8_t>
+        <default>1</default>
+      </uint8_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <no_export/>
+  </attribute>
 
   <attribute>
     <complexType>

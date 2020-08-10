@@ -1551,6 +1551,12 @@
       <id>PARENT_DECONFIG_RULES</id>
     </attribute>
     <attribute>
+      <id>SPI_TPM_INFO</id>
+    </attribute>
+    <attribute>
+      <id>TPM_ENABLED</id>
+    </attribute>
+    <attribute>
       <id>TPM_INFO</id>
     </attribute>
     <attribute>
