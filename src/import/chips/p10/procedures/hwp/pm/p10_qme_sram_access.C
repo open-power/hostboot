@@ -170,6 +170,9 @@ fapi2::ReturnCode p10_qme_sram_access_internal(
     if (!l_timeout)
     {
         FAPI_ERR("QME SRAM is not accessible , need to be retried");
+        l_data64.flush<0>().setBit(0);
+        FAPI_TRY(fapi2::putScom(i_qme_target, QME_QSCR_WO_CLEAR, l_data64));
+
         FAPI_ASSERT(false,
                     fapi2::QME_SRAM_ACCESS_DENIED().
                     set_EQ_TARGET(i_qme_target).set_QME_FLAG(l_data64).
