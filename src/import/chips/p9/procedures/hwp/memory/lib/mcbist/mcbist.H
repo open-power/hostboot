@@ -103,7 +103,6 @@ const mss::states is_broadcast_capable(const std::vector<fapi2::Target<T>>& i_ta
 ///
 const mss::states is_broadcast_capable(const std::vector<mss::dimm::kind<>>& i_kinds);
 
-
 ///
 /// @brief Configures all of the ports for broadcast mode
 /// @tparam MC the mc type of the T
@@ -114,6 +113,16 @@ const mss::states is_broadcast_capable(const std::vector<mss::dimm::kind<>>& i_k
 ///
 template< mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T >
 fapi2::ReturnCode setup_broadcast_port_select(const fapi2::Target<T>& i_target, uint64_t& o_port_select);
+
+///
+/// @brief Checks if broadcast mode is capable based upon the timings
+/// @param[in] i_targets the targets to effect
+/// @param[out] o_broadcast_capable YES if BC capable, otherwise NO
+/// @return FAPI2_RC_SUCCSS iff ok
+/// @note all timing attributes must be equal for broadcast to be capable
+///
+fapi2::ReturnCode is_broadcast_capable_timings(const std::vector<fapi2::Target<fapi2::TARGET_TYPE_MCA>>& i_targets,
+        mss::states& o_broadcast_capable);
 
 ///
 /// @brief Enables broadcast mode

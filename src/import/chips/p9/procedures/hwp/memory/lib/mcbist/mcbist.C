@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -311,6 +311,63 @@ const mss::states is_broadcast_capable_helper(const fapi2::Target<fapi2::TARGET_
 }
 
 ///
+/// @brief Checks if broadcast mode is capable based upon the timings
+/// @param[in] i_targets the targets to effect
+/// @param[out] o_broadcast_capable YES if BC capable, otherwise NO
+/// @return FAPI2_RC_SUCCSS iff ok
+/// @note all timing attributes must be equal for broadcast to be capable
+///
+fapi2::ReturnCode is_broadcast_capable_timings(const std::vector<fapi2::Target<fapi2::TARGET_TYPE_MCA>>& i_targets,
+        mss::states& o_broadcast_capable)
+{
+    // We're broadcast capable until proven otherwise
+    o_broadcast_capable = mss::states::YES;
+
+    // Timing registers to check
+    static const std::vector<uint64_t> TIMING_REGS =
+    {
+        MCA_MBA_DSM0Q,
+        MCA_MBA_TMR0Q,
+        MCA_MBA_TMR1Q,
+        MCA_MBAREF0Q,
+        MCA_MBAREFAQ,
+        MCA_MBASTR0Q,
+    };
+
+    // Loop through all the registers
+    for(const auto& l_reg : TIMING_REGS)
+    {
+        bool l_first_mca = true;
+        fapi2::buffer<uint64_t> l_previous_value;
+
+        // Loop through all MCA's
+        for(const auto& l_mca : i_targets)
+        {
+            fapi2::buffer<uint64_t> l_current_value;
+            FAPI_TRY(mss::getScom(l_mca, l_reg, l_current_value));
+
+            // If this is the first MCA, then assign the previous value
+            if(l_first_mca)
+            {
+                l_first_mca = false;
+                l_previous_value = l_current_value;
+            }
+
+            // If the values differ, then update to not be broadcast capable and exit
+            if(l_previous_value != l_current_value)
+            {
+                o_broadcast_capable = mss::states::NO;
+                return fapi2::FAPI2_RC_SUCCESS;
+            }
+        }
+    }
+
+    return fapi2::FAPI2_RC_SUCCESS;
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
 /// @brief Checks if broadcast mode is capable of being enabled on this target
 /// @param[in] i_target the target to effect - specialization for MCBIST target type
 /// @return l_capable - yes iff these vector of targets are broadcast capable
@@ -343,26 +400,36 @@ const mss::states is_broadcast_capable(const fapi2::Target<fapi2::TARGET_TYPE_MC
         // Steps to determine if this MCBIST is broadcastable
         // 1) Check the number of DIMM's on each MCA - true only if they all match
         // 2) Check that all of the DIMM kinds are equal - if they are, then we can do broadcast mode
+        // 3) check the timing attributes (all of them must be equal)
         // 3) if both 1 and 2 are true, then broadcast capable, otherwise false
 
         // 1) Check the number of DIMM's on each MCA - if they don't match, then no
-        const auto l_mca_check = is_broadcast_capable(mss::find_targets<fapi2::TARGET_TYPE_MCA>(i_target));
+        const auto& l_mcas = mss::find_targets<fapi2::TARGET_TYPE_MCA>(i_target);
+        const auto l_mca_check = is_broadcast_capable(l_mcas);
 
         // 2) Check that all of the DIMM kinds are equal - if they are, then we can do broadcast mode
         const auto l_dimms = mss::find_targets<fapi2::TARGET_TYPE_DIMM>(i_target);
         const auto l_dimm_kinds = mss::dimm::kind<>::vector(l_dimms);
         const auto l_dimm_kind_check = is_broadcast_capable(l_dimm_kinds);
 
-        // 3) if both 1/2 are true, then broadcastable, otherwise false
-        const auto l_capable = ((l_mca_check == mss::states::YES) && (l_dimm_kind_check == mss::states::YES)) ?
-                               mss::states::YES : mss::states::NO;
+        // 3) check the timing attributes (all of them must be equal)
+        mss::states l_timing_check = mss::states::YES;
+        FAPI_TRY(is_broadcast_capable_timings(l_mcas, l_timing_check));
 
-        FAPI_INF("%s %s broadcast capable", mss::c_str(i_target), (l_capable == mss::states::YES) ? "is" : "is not");
-        return l_capable;
+        // 4) if both 1-3 are true, then broadcastable, otherwise false
+        {
+            const auto l_capable = ((l_mca_check == mss::states::YES) &&
+                                    (l_dimm_kind_check == mss::states::YES) &&
+                                    (l_timing_check == mss::states::YES)) ?
+                                   mss::states::YES : mss::states::NO;
+
+            FAPI_INF("%s %s broadcast capable", mss::c_str(i_target), (l_capable == mss::states::YES) ? "is" : "is not");
+            return l_capable;
+        }
     }
 
 fapi_try_exit:
-    FAPI_ERR("%s failed to get an MRW attribute, an egregious error. Returning NOT broadcast capable",
+    FAPI_ERR("%s failed to get an attribute, an egregious error. Returning NOT broadcast capable",
              mss::c_str(i_target));
     return mss::states::NO;
 }

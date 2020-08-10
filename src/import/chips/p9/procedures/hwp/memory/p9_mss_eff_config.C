@@ -51,6 +51,7 @@
 #include <lib/dimm/eff_dimm.H>
 #include <lib/eff_config/plug_rules.H>
 #include <generic/memory/lib/utils/count_dimm.H>
+#include <lib/workarounds/eff_config_workarounds.H>
 
 ///
 /// @brief Configure the attributes for each controller
@@ -397,6 +398,9 @@ fapi2::ReturnCode p9_mss_eff_config( const fapi2::Target<fapi2::TARGET_TYPE_MCS>
     // Check plug rules. We check the MCS, and this will iterate down to children as needed.
     FAPI_TRY( mss::plug_rule::enforce_plug_rules(i_target),
               "Failed enforce_plug_rules for %s", mss::c_str(i_target) );
+
+    // Sychronizes timings to allow broadcast mode mode to be run
+    FAPI_TRY(mss::workarounds::eff_config::synchronize_broadcast_timings(i_target));
 
 fapi_try_exit:
     return fapi2::current_err;

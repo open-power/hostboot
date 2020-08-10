@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -68,6 +68,14 @@ fapi2::ReturnCode is_nvdimm_rc_drive_strength_needed(const fapi2::Target<fapi2::
 fapi2::ReturnCode nvdimm_rc_drive_strength(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
         const uint8_t i_override_value,
         fapi2::buffer<uint8_t>& io_rc_value);
+
+///
+/// @brief Updates timing attributes to be synchronized allowing the parts to be broadcast capable
+/// @param[in] i_target MCS target on which to operate
+/// @return SUCCESS if the code executes successfully
+/// @note synchronizes attributes across the whole MCBIST
+///
+fapi2::ReturnCode synchronize_broadcast_timings(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target);
 
 } // ns eff_config
 } // ns workarounds
