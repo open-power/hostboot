@@ -1029,8 +1029,8 @@ fapi2::ReturnCode PlatPmPPB::gppb_init(
         io_globalppb->pgpe_flags[PGPE_FLAG_PHANTOM_HALT_ENABLE] = iv_attrs.attr_phantom_halt_enable;
         io_globalppb->pgpe_flags[PGPE_FLAG_RVRM_ENABLE] = iv_rvrm_enabled;
 
-        io_globalppb->vcs_vdd_offset_mv = iv_attrs.attr_vcs_vdd_offset_mv;
-        io_globalppb->vcs_floor_mv  = iv_attrs.attr_vcs_floor_mv;
+        io_globalppb->vcs_vdd_offset_mv= revle16(uint16_t(iv_attrs.attr_vcs_vdd_offset_mv & 0xFF));//Attribute is 1-byte only so truncate it
+        io_globalppb->vcs_floor_mv  = revle16(iv_attrs.attr_vcs_floor_mv);
 
         //WOV parameters
         io_globalppb->wov_sample_125us                = revle32(iv_attrs.attr_wov_sample_125us);
