@@ -49,16 +49,23 @@ public:
 void testMulticastSetup()
 {
     TARGETING::TargetHandle_t l_proc = nullptr;
-    TARGETING::targetService().masterProcChipTargetHandle(l_proc);
-    assert(l_proc, "testMulticastSetup: master proc handle is nullptr");
+    errlHndl_t l_errl = nullptr;
+
+    do {
+
+    l_errl = TARGETING::targetService().queryMasterProcChipTargetHandle(l_proc);
+    if(l_errl)
+    {
+        TS_FAIL("testMulticastSetup: could not get master proc target");
+        errlCommit(l_errl, CXXTEST_COMP_ID);
+        break;
+    }
 
     fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>l_fapiProc(l_proc);
 
     auto l_eq = l_fapiProc.getMulticast<fapi2::TARGET_TYPE_EQ,
                                         fapi2::MULTICAST_BITX>(
                                             fapi2::MCGROUP_GOOD_EQ);
-    do {
-
     if(!l_eq.get().isMulticast())
     {
         TS_FAIL("testMulticastSetup: The EQ target was expected to be"
@@ -166,24 +173,152 @@ void testMulticastSetup()
     } while(0);
 }
 
+void testMulticastReadOr()
+{
+    TARGETING::TargetHandle_t l_proc = nullptr;
+    errlHndl_t l_errl = nullptr;
+
+    const uint32_t TEST_REG = 0xC000001; // CPLT_CTRL1_RW
+    // Bits 1-3 are unused in this reg
+    const uint64_t l_testDataArr[] = { 0x4000000000000000,
+                                       0x2000000000000000,
+                                       0x1000000000000000 };
+
+    const uint64_t BIT_1_SET = 0x4000000000000000;
+    const uint64_t BIT_2_SET = 0x2000000000000000;
+    const uint64_t BIT_3_SET = 0x1000000000000000;
+
+    do {
+
+    l_errl = TARGETING::targetService().queryMasterProcChipTargetHandle(l_proc);
+    if(l_errl)
+    {
+        TS_FAIL("testMulticastReadOr: could not get master proc target");
+        break;
+    }
+
+    fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>l_fapiProc(l_proc);
+    auto l_mc = l_fapiProc.getMulticast<fapi2::TARGET_TYPE_MC,
+                                        fapi2::MULTICAST_OR>(
+                                            fapi2::MCGROUP_ALL);
+
+
+    if(l_mc.get() == nullptr)
+    {
+        TS_FAIL("testMulticastReadOr: Internal multicast target is nullptr");
+        break;
+    }
+
+    TARGETING::TargetHandleList l_mcs;
+    getAllChiplets(l_mcs, TARGETING::TYPE_MC, false);
+
+    // Need at least three targets for the test
+    if(l_mcs.size() < 3)
+    {
+        TS_FAIL("testMulticastReadOr requires at least 3 MCs to run correctly");
+        break;
+    }
+
+    uint64_t l_mcastScomAddr = fapi2::getMulticastAddr(TEST_REG,
+                                    l_mc.get().getMulticastGroup(),
+                                    l_mc.get().getMulticastOp());
+    TS_INFO("testMulticastReadOr: multicast address = 0x%016x", l_mcastScomAddr);
+
+    uint64_t l_testData = 0;
+    uint64_t l_origData = 0;
+    size_t l_size = sizeof(l_testData);
+    fapi2::buffer<uint64_t>l_fapiReadData(l_testData);
+    fapi2::ReturnCode l_fapiRc = fapi2::getScom(l_mc, TEST_REG,l_fapiReadData);
+    if(l_fapiRc)
+    {
+        TS_FAIL("testMulticastReadOr: Multicast getScom returned RC: %d",l_fapiRc);
+        l_errl = fapi2::rcToErrl(l_fapiRc);
+        break;
+    }
+
+    l_errl = deviceRead(l_mcs[0],
+                        &l_origData,
+                        l_size,
+                        DEVICE_SCOM_ADDRESS(TEST_REG,0));
+    if(l_errl)
+    {
+        TS_FAIL("testMulticastReadOr: could not read from reg 0x%08x on HUID 0x%08x",
+                TEST_REG, TARGETING::get_huid(l_mcs[0]));
+        break;
+    }
+
+    for(uint8_t i = 0; i < 3; ++i)
+    {
+        l_testData = l_origData | l_testDataArr[i];
+        l_errl = deviceWrite(l_mcs[i],
+                             &l_testData,
+                             l_size,
+                             DEVICE_SCOM_ADDRESS(TEST_REG, 0));
+        if(l_errl)
+        {
+            TS_FAIL("testMulticastReadOr: could not write to reg 0x%08x on HUID 0x%08x",
+                    TEST_REG, TARGETING::get_huid(l_mcs[i]));
+            break;
+        }
+    }
+    if(l_errl)
+    {
+        break;
+    }
+
+    l_fapiRc = getScom(l_mc, TEST_REG, l_fapiReadData);
+    if(l_fapiRc)
+    {
+        TS_FAIL("testMulticastReadOr: Multicast getScom returned RC: %d",l_fapiRc);
+        l_errl = fapi2::rcToErrl(l_fapiRc);
+        break;
+    }
+
+    if((l_fapiReadData & (BIT_1_SET | BIT_2_SET | BIT_3_SET)) !=
+       (BIT_1_SET | BIT_2_SET | BIT_3_SET))
+    {
+        TS_FAIL("testMulticastReadOr: unexpected multicast read result. Expected: 0x%016lx; actual: 0x%016lx (full reg data: 0x%016lx)",
+                BIT_1_SET | BIT_2_SET | BIT_3_SET,
+                l_fapiReadData & (BIT_1_SET | BIT_2_SET | BIT_3_SET),
+                l_fapiReadData);
+        break;
+    }
+
+    } while(0);
+
+    if(l_errl)
+    {
+        errlCommit(l_errl, CXXTEST_COMP_ID);
+    }
+}
+
 void testMulticastWriteOp()
 {
 // @TODO: RTC 244854: This is broke for run time testing, enable when can.
 #ifndef __HOSTBOOT_RUNTIME
     TARGETING::TargetHandle_t l_proc = nullptr;
-    TARGETING::targetService().masterProcChipTargetHandle(l_proc);
-    assert(l_proc, "testMulticastWriteOp: master proc handle is nullptr");
+    errlHndl_t l_errl = nullptr;
 
-    fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>l_fapiProc(l_proc);
-    auto l_eq = l_fapiProc.getMulticast<fapi2::TARGET_TYPE_EQ,
-                                        fapi2::MULTICAST_OR>(
-                                            fapi2::MCGROUP_ALL);
     const uint32_t TEST_SCOM_WRITE_ADDR = 0x20000010; // TPEQP.CPLT_CTRL0
     const uint64_t TEST_DATA = 0x0000000000000001; // Bit 63 set
     uint32_t l_scomAddr = TEST_SCOM_WRITE_ADDR;
     uint64_t l_dataToWrite = 0xF; // So that we know that the data changed
 
     do {
+
+    l_errl = TARGETING::targetService().queryMasterProcChipTargetHandle(l_proc);
+    if(l_errl)
+    {
+        TS_FAIL("testMulticastWriteOp: could not get master proc target");
+        errlCommit(l_errl, CXXTEST_COMP_ID);
+        break;
+    }
+
+    fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>l_fapiProc(l_proc);
+    auto l_eq = l_fapiProc.getMulticast<fapi2::TARGET_TYPE_EQ,
+                                        fapi2::MULTICAST_OR>(
+                                            fapi2::MCGROUP_ALL);
+
 
     TARGETING::TargetHandleList l_eqs;
     getChildAffinityTargets(l_eqs, l_proc,
@@ -204,10 +339,10 @@ void testMulticastWriteOp()
             l_multicastScom);
 
     size_t l_size = sizeof(l_dataToWrite);
-    errlHndl_t l_errl = deviceRead(l_eqTarget,
-                                   &l_dataToWrite,
-                                   l_size,
-                                   DEVICE_SCOM_ADDRESS(l_scomAddr, 0));
+    l_errl = deviceRead(l_eqTarget,
+                        &l_dataToWrite,
+                        l_size,
+                        DEVICE_SCOM_ADDRESS(l_scomAddr, 0));
     if(l_errl)
     {
         TS_FAIL("testMulticastWriteOp: Could not read SCOM 0x%.08x",
@@ -348,8 +483,22 @@ void testMulticastWriteOp()
 void testMulticastWriteOpBadParam()
 {
     TARGETING::TargetHandle_t l_proc = nullptr;
-    TARGETING::targetService().masterProcChipTargetHandle(l_proc);
-    assert(l_proc, "testMulticastWriteOpBadParam: master proc hndl is nullptr");
+    errlHndl_t l_errl = nullptr;
+
+    const uint32_t TEST_SCOM_WRITE_ADDR = 0x20000010; // TPEQP.CPLT_CTRL0
+    const uint64_t TEST_DATA = 0x0000000000000002; // Bit 62 set
+    uint32_t l_scomAddr = TEST_SCOM_WRITE_ADDR;
+    uint64_t l_dataToWrite = 0xF; // So that we know that the data changed
+
+    do {
+
+    l_errl = TARGETING::targetService().queryMasterProcChipTargetHandle(l_proc);
+    if(l_errl)
+    {
+        TS_FAIL("testMulticastWriteOpBadParam: could not get master proc target");
+        errlCommit(l_errl, CXXTEST_COMP_ID);
+        break;
+    }
 
     fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>l_fapiProc(l_proc);
     // Intentionally provide an incorrect param (MCGROUP_GOOD_IOHS). In this
@@ -357,12 +506,7 @@ void testMulticastWriteOpBadParam()
     auto l_eq = l_fapiProc.getMulticast<fapi2::TARGET_TYPE_EQ,
                                         fapi2::MULTICAST_OR>(
                                             fapi2::MCGROUP_GOOD_IOHS);
-    const uint32_t TEST_SCOM_WRITE_ADDR = 0x20000010; // TPEQP.CPLT_CTRL0
-    const uint64_t TEST_DATA = 0x0000000000000002; // Bit 62 set
-    uint32_t l_scomAddr = TEST_SCOM_WRITE_ADDR;
-    uint64_t l_dataToWrite = 0xF; // So that we know that the data changed
 
-    do {
 
     TARGETING::TargetHandleList l_eqs;
     getChildAffinityTargets(l_eqs, l_proc,
@@ -383,10 +527,10 @@ void testMulticastWriteOpBadParam()
             l_multicastScom);
 
     size_t l_size = sizeof(l_dataToWrite);
-    errlHndl_t l_errl = deviceRead(l_eqTarget,
-                                   &l_dataToWrite,
-                                   l_size,
-                                   DEVICE_SCOM_ADDRESS(l_scomAddr, 0));
+    l_errl = deviceRead(l_eqTarget,
+                        &l_dataToWrite,
+                        l_size,
+                        DEVICE_SCOM_ADDRESS(l_scomAddr, 0));
     if(l_errl)
     {
         TS_FAIL("testMulticastWriteOpBadParam: Could not read SCOM "
@@ -459,329 +603,117 @@ void testMulticastWriteOpBadParam()
     }while(0);
 }
 
-//TODO RTC 255196
-void testMulticastReadOr()
-{
-#if 0
-// @TODO: RTC 244854: This is broke for run time testing, enable when can.
-#ifndef __HOSTBOOT_RUNTIME
-    TARGETING::TargetHandle_t l_proc = nullptr;
-    TARGETING::targetService().masterProcChipTargetHandle(l_proc);
-    assert(l_proc, "testMulticastReadOr: master proc handle is nullptr");
-
-    fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>l_fapiProc(l_proc);
-    auto l_eq = l_fapiProc.getMulticast<fapi2::TARGET_TYPE_EQ,
-                                        fapi2::MULTICAST_OR>(
-                                           fapi2::MCGROUP_GOOD_EQ);
-    const uint32_t TEST_SCOM_ADDR = 0x20000008; // TPEQP.CPLT_CONF0
-    const uint64_t TEST_DATA = 0x0000000000000003; // Bit 62, 63 set
-    const uint64_t TEST_DATA_1 = 0x0000000000000004; // Bit 61
-    uint32_t l_scomAddr = TEST_SCOM_ADDR;
-
-    do {
-    TARGETING::TargetHandleList l_eqs;
-    getChildAffinityTargets(l_eqs, l_proc,
-                            TARGETING::CLASS_UNIT, TARGETING::TYPE_EQ, false);
-    TARGETING::Target* l_eqTarget = l_eqs[0];
-    TARGETING::Target* l_eqTarget1 = l_eqs[1];
-    TARGETING::Target* l_eqTarget2 = l_eqs[2];
-
-    if(l_eq.get() == nullptr)
-    {
-        TS_FAIL("testMulticastReadOr: Internal multicast target is nullptr");
-        break;
-    }
-
-    // Setup: clear bits 61, 62, 63 from TEST_SCOM_ADDR on all EQs for future
-    // testing
-    uint64_t l_dataToWrite = 0;
-    size_t l_size = sizeof(l_dataToWrite);
-    errlHndl_t l_errl = deviceRead(l_eqTarget,
-                                   &l_dataToWrite,
-                                   l_size,
-                                   DEVICE_SCOM_ADDRESS(TEST_SCOM_ADDR, 0));
-    if(l_errl)
-    {
-        TS_FAIL("testMulticastReadOr: Could not read SCOM 0x%.08x", l_scomAddr);
-        errlCommit(l_errl, CXXTEST_COMP_ID);
-        break;
-    }
-
-    l_dataToWrite &= (~(TEST_DATA | TEST_DATA_1));
-
-    // Clear bits 61, 62, and 63 in the test reg on all EQs
-    for(const auto& l_eqTgt : l_eqs)
-    {
-        l_errl = deviceWrite(l_eqTgt,
-                             &l_dataToWrite,
-                             l_size,
-                             DEVICE_SCOM_ADDRESS(TEST_SCOM_ADDR, 0));
-        if(l_errl)
-        {
-            TS_FAIL("testMulticastReadOr: Could not reset test reg on target "
-                    "0x%.08x", TARGETING::get_huid(l_eqTgt));
-            errlCommit(l_errl, CXXTEST_COMP_ID);
-            break;
-        }
-    }
-
-    uint64_t l_testData = l_dataToWrite | TEST_DATA;
-
-    // Write the first set of test data to EQ2
-    l_errl = deviceWrite(l_eqTarget2,
-                         &l_testData,
-                         l_size,
-                         DEVICE_SCOM_ADDRESS(TEST_SCOM_ADDR, 0));
-    if(l_errl)
-    {
-        TS_FAIL("testMulticastReadOr: Could not write test data to target "
-                "0x%.08x", TARGETING::get_huid(l_eqTarget2));
-        errlCommit(l_errl, CXXTEST_COMP_ID);
-        break;
-    }
-
-    l_testData = l_dataToWrite | TEST_DATA_1;
-    // Write the second set of test data to EQ1
-    l_errl = deviceWrite(l_eqTarget1,
-                         &l_testData,
-                         l_size,
-                         DEVICE_SCOM_ADDRESS(TEST_SCOM_ADDR, 0));
-    if(l_errl)
-    {
-        TS_FAIL("testMulticastReadOr: Could not write test data to target "
-                "0x%.08x", TARGETING::get_huid(l_eqTarget1));
-        errlCommit(l_errl, CXXTEST_COMP_ID);
-        break;
-    }
-
-    uint64_t l_multicastScom = fapi2::getMulticastAddr(l_scomAddr,
-                                l_eq.get().getMulticastGroup(),
-                                l_eq.get().getMulticastOp());
-    TS_INFO("testMulticastReadOr: Multicast address = 0x%.08x",l_multicastScom);
-
-    uint64_t l_multicastReadData = 0xFF;
-    fapi2::buffer<uint64_t>l_fapiBuff(l_multicastReadData);
-    fapi2::ReturnCode l_fapiRc = fapi2::getScom(l_eq,
-                                                TEST_SCOM_ADDR,
-                                                l_fapiBuff);
-    if(l_fapiRc)
-    {
-        TS_FAIL("testMulticastReadOr: could not read multicast SCOM via"
-                " fapi2 layer from addr 0x%.08x", l_multicastScom);
-        l_errl = fapi2::rcToErrl(l_fapiRc);
-    }
-    if(l_errl)
-    {
-        errlCommit(l_errl, CXXTEST_COMP_ID);
-        break;
-    }
-    else
-    {
-        // The result should be the OR of all test bits
-        if(l_fapiBuff != (l_dataToWrite | TEST_DATA | TEST_DATA_1))
-        {
-            TS_FAIL("testMulticastReadOr: The multicast read data does not "
-                    "match expectation. Expected: 0x%.16lx; actual 0x%.16lx",
-                    l_dataToWrite, l_fapiBuff);
-            break;
-        }
-    }
-
-    }while(0);
-#endif // #ifndef __HOSTBOOT_RUNTIME
-#endif
-}
-
 void testMulticastReadAnd()
 {
-#if 0
-// @TODO: RTC 244854: This is broke for run time testing, enable when can.
-#ifndef __HOSTBOOT_RUNTIME
     TARGETING::TargetHandle_t l_proc = nullptr;
-    TARGETING::targetService().masterProcChipTargetHandle(l_proc);
-    assert(l_proc, "testMulticastReadAnd: master proc handle is nullptr");
+    errlHndl_t l_errl = nullptr;
 
-    fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>l_fapiProc(l_proc);
-    auto l_eq = l_fapiProc.getMulticast<fapi2::TARGET_TYPE_EQ,
-                                        fapi2::MULTICAST_AND>(
-                                            fapi2::MCGROUP_GOOD_EQ);
-    const uint32_t TEST_SCOM_WRITE_ADDR = 0x20000008; // TPEQP.CPLT_CONF0
-    const uint64_t TEST_DATA = 0x0000000000000005; // Bit 61, 63 set
-    const uint64_t TEST_DATA_1 = 0x0000000000000002; // Bit 62 set
-    const uint64_t TEST_DATA_2 = 0x0000000000000001; // Bit 63 set
+    const uint32_t TEST_SCOM_WRITE_ADDR = 0xC000001; // CPLT_CTRL1_RW
+    const uint64_t TEST_DATA = 0x5000000000000000; // Bit 1, 3 set
+    const uint64_t TEST_DATA_1 = 0x2000000000000000; // Bit 2 set
 
     uint32_t l_scomAddr = TEST_SCOM_WRITE_ADDR;
-    uint64_t l_dataToWrite = 0xFF;
+    uint64_t l_dataToWrite = 0;
 
     do {
-    TARGETING::TargetHandleList l_eqs;
-    getChildAffinityTargets(l_eqs, l_proc,
-                            TARGETING::CLASS_UNIT, TARGETING::TYPE_EQ, false);
-    TARGETING::Target* l_eqTarget = l_eqs[0];
-    TARGETING::Target* l_eqTarget1 = l_eqs[1];
 
-    if(l_eq.get() == nullptr)
+    l_errl = TARGETING::targetService().queryMasterProcChipTargetHandle(l_proc);
+    if(l_errl)
+    {
+        TS_FAIL("testMulticastReadAnd: could not get master proc target");
+        break;
+    }
+
+    fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>l_fapiProc(l_proc);
+    auto l_mc = l_fapiProc.getMulticast<fapi2::TARGET_TYPE_MC,
+                                               fapi2::MULTICAST_AND>(
+                                                fapi2::MCGROUP_ALL);
+
+
+    TARGETING::TargetHandleList l_mcs;
+    getAllChiplets(l_mcs, TARGETING::TYPE_MC, false);
+
+    if(l_mc.get() == nullptr)
     {
         TS_FAIL("testMulticastReadAnd: Internal multicast target is nullptr");
         break;
     }
 
     size_t l_size = sizeof(l_dataToWrite);
-    // Set up - erase the test data from regs
-    errlHndl_t l_errl = deviceRead(l_eqTarget,
-                                   &l_dataToWrite,
-                                   l_size,
-                                   DEVICE_SCOM_ADDRESS(l_scomAddr, 0));
-    if(l_errl)
-    {
-        TS_FAIL("testMulticastReadAnd: Could not read SCOM 0x%.08x",l_scomAddr);
-        errlCommit(l_errl, CXXTEST_COMP_ID);
-        break;
-    }
-
-    // Reset the test bits
-    l_dataToWrite &= ~(TEST_DATA | TEST_DATA_1);
-    // Write first set of test data to all EQs
+    // Write first set of test data to all MCs
     uint64_t l_testData = l_dataToWrite | TEST_DATA;
 
-    for(const auto& l_eq : l_eqs)
-    {
-        l_errl = deviceWrite(l_eq,
-                             &l_dataToWrite,
-                             l_size,
-                             DEVICE_SCOM_ADDRESS(l_scomAddr, 0));
-        if(l_errl)
-        {
-            TS_FAIL("testMulticastReadAnd: Could not reset test data for target"
-                    " 0x%.08x", TARGETING::get_huid(l_eq));
-            break;
-        }
-
-        l_errl = deviceWrite(l_eq,
-                             &l_testData,
-                             l_size,
-                             DEVICE_SCOM_ADDRESS(l_scomAddr, 0));
-        if(l_errl)
-        {
-            TS_FAIL("testMulticastReadAnd: Could not write test data to HUID "
-                    "0x%.08x", TARGETING::get_huid(l_eq));
-            break;
-        }
-    }
-    if(l_errl)
-    {
-        errlCommit(l_errl, CXXTEST_COMP_ID);
-        break;
-    }
-
-    // Write the second set of test data to EQ1
-    l_testData = l_dataToWrite | TEST_DATA_1;
-    l_errl = deviceWrite(l_eqTarget1,
-                         &l_testData,
-                         l_size,
-                         DEVICE_SCOM_ADDRESS(l_scomAddr, 0));
-    if(l_errl)
-    {
-        TS_FAIL("testMulticastReadAnd: Could not write test data to EQ0 "
-                "(HUID: 0x%.08x)", TARGETING::get_huid(l_eqTarget));
-        break;
-    }
-
-    uint64_t l_multicastScom = fapi2::getMulticastAddr(l_scomAddr,
-                                l_eq.get().getMulticastGroup(),
-                                l_eq.get().getMulticastOp());
-    TS_INFO("testMulticastReadAnd: multicast address = 0x%.08x",
-            l_multicastScom);
-
-    // Read multicast
+    // Multicast write the first set of test data so that all of the possible
+    // MCs are updated correctly.
     fapi2::buffer<uint64_t>l_fapiBuff(l_testData);
-    fapi2::ReturnCode l_fapiRc = fapi2::getScom(l_eq,
+    fapi2::ReturnCode l_fapiRc = fapi2::putScom(l_mc,
                                                 TEST_SCOM_WRITE_ADDR,
                                                 l_fapiBuff);
     if(l_fapiRc)
     {
-        TS_FAIL("testMulticastReadAnd: could not read multicast SCOM via"
-                " fapi2 layer from addr 0x%.08x", l_multicastScom);
+        TS_FAIL("testMulticastReadAnd: could not multicast write; FAPI RC: %d",
+                l_fapiRc);
         l_errl = fapi2::rcToErrl(l_fapiRc);
-    }
-    if(l_errl)
-    {
-        errlCommit(l_errl, CXXTEST_COMP_ID);
         break;
     }
 
-    // Since the operation is AND read, the result of the read should be
-    // a logical AND of all reads, in which case no test data should show
-    // up in bits 61-63 since the bits alternate.
-    if(l_fapiBuff != l_dataToWrite)
-    {
-        TS_FAIL("testMulticastReadAnd: Unexpected multicast AND read data. "
-                "Expected 0x%.16lx; actual 0x%.16lx", l_dataToWrite,l_testData);
-        break;
-    }
-
-    // Now set bit 63 in EQ1
-    l_testData = l_dataToWrite | TEST_DATA_2;
-    l_errl = deviceWrite(l_eqTarget1,
+    // Write the second set of test data to MC0
+    l_testData = l_testData | TEST_DATA_1;
+    l_errl = deviceWrite(l_mcs[0],
                          &l_testData,
                          l_size,
                          DEVICE_SCOM_ADDRESS(l_scomAddr, 0));
     if(l_errl)
     {
-        TS_FAIL("testMulticastReadAnd: Cound not write second set of test data "
-                "to EQ1");
-        errlCommit(l_errl, CXXTEST_COMP_ID);
+        TS_FAIL("testMulticastReadAnd: Could not write test data to MC0 (HUID: 0x%.08x)",
+                TARGETING::get_huid(l_mcs[0]));
         break;
     }
 
+    uint64_t l_multicastScom = fapi2::getMulticastAddr(l_scomAddr,
+                                l_mc.get().getMulticastGroup(),
+                                l_mc.get().getMulticastOp());
+    TS_INFO("testMulticastReadAnd: multicast address = 0x%.08x",
+            l_multicastScom);
+
     // Read multicast
-    l_fapiRc = fapi2::getScom(l_eq,
+    l_fapiRc = fapi2::getScom(l_mc,
                               TEST_SCOM_WRITE_ADDR,
                               l_fapiBuff);
     if(l_fapiRc)
     {
-        TS_FAIL("testMulticastReadAnd: could not read multicast SCOM via"
-                " fapi2 layer from addr 0x%.08x", l_multicastScom);
+        TS_FAIL("testMulticastReadAnd: could not read multicast SCOM via fapi2 layer from addr 0x%.08x; FAPI RC: %d",
+                l_multicastScom, l_fapiRc);
         l_errl = fapi2::rcToErrl(l_fapiRc);
-    }
-    if(l_errl)
-    {
-        errlCommit(l_errl, CXXTEST_COMP_ID);
         break;
     }
 
-    // Bit 63 overlaps in all registers, so it should be set in the result of
-    // multicast AND read
-    if(l_fapiBuff != (l_dataToWrite | TEST_DATA_2))
+    TS_INFO("testMulticastReadAnd: multicast read result: 0x%016lx", l_fapiBuff);
+
+    // At this point, MC0 contains the value 7, and all other MCs have the
+    // value 5. The AND of those should produce the value of 5.
+    if((l_fapiBuff & TEST_DATA) != TEST_DATA)
     {
-        TS_FAIL("testMulticastReadAnd: Test 2: Unexpected multicast AND read "
-                "data. Expected: 0x%.16lx; actual 0x%.16lx",
-                (l_dataToWrite | TEST_DATA_2), l_testData);
+        TS_FAIL("testMulticastReadAnd: Unexpected multicast AND read data. Expected 0x%.16lx; actual 0x%.16lx (full reg data: 0x%016lx)",
+                TEST_DATA, (l_fapiBuff & TEST_DATA), l_fapiBuff);
         break;
     }
 
     } while(0);
-#endif // #ifndef __HOSTBOOT_RUNTIME
-#endif
+
+    if(l_errl)
+    {
+        errlCommit(l_errl, CXXTEST_COMP_ID);
+    }
 }
 
 void testMulticastCoreSelect()
 {
-// @TODO: RTC 244854: This is broke for run time testing, enable when can.
-#ifndef __HOSTBOOT_RUNTIME
     TARGETING::TargetHandle_t l_proc = nullptr;
-    TARGETING::targetService().masterProcChipTargetHandle(l_proc);
-    assert(l_proc, "testMulticastCoreSelect: master proc handle is nullptr");
+    errlHndl_t l_errl = nullptr;
 
     // MCCORE_0 only
     uint32_t l_coreSelect = 0x8;
-
-    fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>l_fapiProc(l_proc);
-    auto l_eq = l_fapiProc.getMulticast<fapi2::MULTICAST_AND>(
-                                     fapi2::MCGROUP_GOOD_EQ,
-                                     static_cast<fapi2::MulticastCoreSelect>
-                                            (l_coreSelect));
-
     const uint32_t TEST_SCOM_WRITE_ADDR = 0x200E88A0; // QME_QOSR
     const uint64_t TEST_DATA = 0x00000000002A0000;
     const uint64_t BIT_CLEAR_MASK = 0x00000000003F0000;
@@ -789,6 +721,21 @@ void testMulticastCoreSelect()
     uint64_t l_dataToWrite = 0x0;
 
     do {
+    l_errl = TARGETING::targetService().queryMasterProcChipTargetHandle(l_proc);
+    if(l_errl)
+    {
+        TS_FAIL("testMulticastCoreSelect: could not get master proc target");
+        errlCommit(l_errl, CXXTEST_COMP_ID);
+        break;
+    }
+
+    fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>l_fapiProc(l_proc);
+    auto l_eq = l_fapiProc.getMulticast<fapi2::MULTICAST_AND>(
+                                     fapi2::MCGROUP_ALL,
+                                     static_cast<fapi2::MulticastCoreSelect>
+                                            (l_coreSelect));
+
+
     uint32_t l_multicastScomAddr =fapi2::getMulticastAddr(TEST_SCOM_WRITE_ADDR,
                                                  l_eq.get().getMulticastGroup(),
                                                  l_eq.get().getMulticastOp(),
@@ -801,7 +748,6 @@ void testMulticastCoreSelect()
     TARGETING::getAllChiplets(l_cores, TARGETING::TYPE_CORE, true);
     assert(l_cores.size() != 0, "testMulticastCoreSelect: "
            "could not find any cores!");
-    errlHndl_t l_errl = nullptr;
     TARGETING::Target* l_coreTarget = l_cores[0];
 
     l_errl = deviceRead(l_coreTarget,
@@ -928,40 +874,38 @@ void testMulticastCoreSelect()
         break;
     }
     } while(0);
-#endif // #ifndef __HOSTBOOT_RUNTIME
 }
 
 void testMulticastCompare()
 {
-#if 0
 // @TODO: RTC 244854: This is broke for run time testing, enable when can.
 #ifndef __HOSTBOOT_RUNTIME
     TARGETING::TargetHandle_t l_proc = nullptr;
     errlHndl_t l_errl = nullptr;
-    const uint32_t TEST_SCOM_WRITE_ADDR = 0x20000000; // CPLT_CTRL0
-    const uint64_t TEST_DATA = 0x000000000000000F; // Bits 60-63 set
+    const uint32_t TEST_SCOM_WRITE_ADDR = 0xC000001; // CPLT_CTRL1_RW
+    const uint64_t TEST_DATA = 0x7000000000000000; // Bits 1-3 set
 
     do {
     l_errl = TARGETING::targetService().queryMasterProcChipTargetHandle(l_proc);
     if(l_errl)
     {
+        TS_FAIL("testMulticastCompare: could not get master proc target");
         break;
     }
 
     fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>l_fapiProc(l_proc);
-    auto l_eq = l_fapiProc.getMulticast<fapi2::TARGET_TYPE_EQ,
+    auto l_mc = l_fapiProc.getMulticast<fapi2::TARGET_TYPE_MC,
                                         fapi2::MULTICAST_COMPARE >(
-                                                fapi2::MCGROUP_GOOD_EQ);
+                                                fapi2::MCGROUP_ALL);
 
-    TARGETING::TargetHandleList l_eqs;
-    getChildAffinityTargets(l_eqs, l_proc,
-                            TARGETING::CLASS_UNIT, TARGETING::TYPE_EQ, false);
+    TARGETING::TargetHandleList l_mcs;
+    getAllChiplets(l_mcs, TARGETING::TYPE_MC, false);
 
     uint64_t l_dataToWrite = 0xFF;
     size_t l_size = sizeof(l_dataToWrite);
 
-    auto l_eq0 = l_eqs[0];
-    l_errl = deviceRead(l_eq0,
+    auto l_mc0 = l_mcs[0];
+    l_errl = deviceRead(l_mc0,
                         &l_dataToWrite,
                         l_size,
                         DEVICE_SCOM_ADDRESS(TEST_SCOM_WRITE_ADDR,0));
@@ -975,17 +919,17 @@ void testMulticastCompare()
     // Reset test bits
     l_dataToWrite &= ~(TEST_DATA);
 
-    for(const auto& l_eqTarget : l_eqs)
+    for(const auto& l_mc : l_mcs)
     {
-        l_errl = deviceWrite(l_eqTarget,
+        l_errl = deviceWrite(l_mc,
                              &l_dataToWrite,
                              l_size,
                              DEVICE_SCOM_ADDRESS(TEST_SCOM_WRITE_ADDR,0));
         if(l_errl)
         {
             TS_FAIL("testMulticastCompare: could not write to SCOM 0x%.08x "
-                    "for EQ HUID 0x%.08x", TEST_SCOM_WRITE_ADDR,
-                    TARGETING::get_huid(l_eqTarget));
+                    "for MC HUID 0x%.08x", TEST_SCOM_WRITE_ADDR,
+                    TARGETING::get_huid(l_mc));
             break;
         }
     }
@@ -996,8 +940,8 @@ void testMulticastCompare()
 
     l_dataToWrite |= TEST_DATA;
 
-    // Write the test data to only the first EQ to trigger the compare error
-    l_errl = deviceWrite(l_eq0,
+    // Write the test data to only the first MC to trigger the compare error
+    l_errl = deviceWrite(l_mc0,
                          &l_dataToWrite,
                          l_size,
                          DEVICE_SCOM_ADDRESS(TEST_SCOM_WRITE_ADDR, 0));
@@ -1008,8 +952,8 @@ void testMulticastCompare()
         break;
     }
     uint32_t l_multicastScomAddr = fapi2::getMulticastAddr(TEST_SCOM_WRITE_ADDR,
-                                                 l_eq.get().getMulticastGroup(),
-                                                 l_eq.get().getMulticastOp());
+                                                 l_mc.get().getMulticastGroup(),
+                                                 l_mc.get().getMulticastOp());
 
     uint64_t l_multicastReadData = 0xFF;
     fapi2::buffer<uint64_t>l_fapiBuff(l_multicastReadData);
@@ -1017,7 +961,7 @@ void testMulticastCompare()
     // Read compare - this should trigger an error.
     // Hostboot-style of SCOM here because we want to look at the HB error
     // log produced.
-    l_errl = deviceRead(l_eq.get(),
+    l_errl = deviceRead(l_mc.get(),
                         &l_multicastReadData,
                         l_size,
                         DEVICE_SCOM_ADDRESS(l_multicastScomAddr, 0));
@@ -1046,7 +990,7 @@ void testMulticastCompare()
     }
 
     // Now read FAPI-style to check HB to FAPI RC conversion
-    l_fapiRc = fapi2::getScom(l_eq,
+    l_fapiRc = fapi2::getScom(l_mc,
                               TEST_SCOM_WRITE_ADDR,
                               l_fapiBuff);
     if(!l_fapiRc)
@@ -1086,12 +1030,14 @@ void testMulticastCompare()
                             l_errl->getErrorType());
                     break;
                 }
+                delete l_errl;
+                l_errl = nullptr;
             }
         }
     }
 
-    // Now write multicast to all EQs
-    l_fapiRc = fapi2::putScom(l_eq,
+    // Now write multicast to all MCs
+    l_fapiRc = fapi2::putScom(l_mc,
                               TEST_SCOM_WRITE_ADDR,
                               l_dataToWrite);
     if(l_fapiRc)
@@ -1106,7 +1052,7 @@ void testMulticastCompare()
     }
 
     // Now read compare - it should work fine
-    l_fapiRc = fapi2::getScom(l_eq,
+    l_fapiRc = fapi2::getScom(l_mc,
                               TEST_SCOM_WRITE_ADDR,
                               l_fapiBuff);
     if(l_fapiRc)
@@ -1136,7 +1082,6 @@ void testMulticastCompare()
         errlCommit(l_errl, CXXTEST_COMP_ID);
     }
 #endif // #ifndef __HOSTBOOT_RUNTIME
-#endif
 }
 
 }; //class FapiMulticastTest
