@@ -192,6 +192,18 @@ static const uint32_t SCAN32_SCAN32_REG_LEN = 32;
 //<< [SCAN32]
 // perv/reg00002.H
 
+//>> [FSXCOMP_FSXLOG_M1A_DATA_AREA_15]
+//ERRCODE: // The addresses of this register do not all translate to the same targets.
+
+static const uint32_t FSXCOMP_FSXLOG_M1A_DATA_AREA_15_FSI = 0x0000284full;
+static const uint32_t FSXCOMP_FSXLOG_M1A_DATA_AREA_15_FSI_BYTE = 0x0000293cull;
+static const uint32_t FSXCOMP_FSXLOG_M1A_DATA_AREA_15_RW = 0x0005004full;
+
+static const uint32_t FSXCOMP_FSXLOG_M1A_DATA_AREA_15_MDA_M1A_DATA_AREA_15 = 0;
+static const uint32_t FSXCOMP_FSXLOG_M1A_DATA_AREA_15_MDA_M1A_DATA_AREA_15_LEN = 32;
+//<< [FSXCOMP_FSXLOG_M1A_DATA_AREA_15]
+// perv/reg00002.H
+
 //>>THE END<<
 
 #ifndef __PPE_HCODE__

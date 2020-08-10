@@ -55,9 +55,6 @@ const uint8_t NUM_STACK_CONFIG = 3;
 const uint8_t NUM_OF_INSTANCES = 4;
 const uint64_t PIPEDOUTCTL2_OFFSET = 22;
 const uint64_t PIPEDOUTCTL0_OFFSET = 20;
-const uint8_t PIPEDOUTCTL0_RESERVED_63_59_START = 59;
-const uint8_t PIPEDOUTCTL0_RESERVED_63_59_LEN = 5;
-const uint8_t PIPEDOUTCTL0_63_59_VAL = 0xF;
 const uint64_t NANO_SEC_DELAY = 20000;
 const uint64_t SIM_CYC_DELAY = 512;
 
@@ -164,12 +161,6 @@ p10_pcie_scominit(
             FAPI_TRY(fapi2::putScom(l_pec_target, l_xramBaseReg + PIPEDOUTCTL2_OFFSET, l_data), "Error from putScom 0x%.16llX",
                      l_xramBaseReg + PIPEDOUTCTL2_OFFSET);
 
-            l_data = 0;
-            FAPI_TRY(fapi2::getScom(l_pec_target, l_xramBaseReg + PIPEDOUTCTL0_OFFSET, l_data), "Error from getScom 0x%.16llX",
-                     l_xramBaseReg + PIPEDOUTCTL0_OFFSET);
-            l_data.insertFromRight<PIPEDOUTCTL0_RESERVED_63_59_START, PIPEDOUTCTL0_RESERVED_63_59_LEN>(PIPEDOUTCTL0_63_59_VAL);
-            FAPI_TRY(fapi2::putScom(l_pec_target, l_xramBaseReg + PIPEDOUTCTL0_OFFSET, l_data), "Error from putScom 0x%.16llX",
-                     l_xramBaseReg + PIPEDOUTCTL0_OFFSET);
         }
 
     }

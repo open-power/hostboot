@@ -131,6 +131,15 @@ static const uint32_t CPMS_DHCR_EVENT_COUNT_LEN = 8;
 //<< [CPMS_DHCR]
 // c/reg00012.H
 
+//>> [NC_NCMISC_NCSCOMS_NCU_DARN_BAR_REG]
+static const uint64_t NC_NCMISC_NCSCOMS_NCU_DARN_BAR_REG = 0x20010651ull;
+
+static const uint32_t NC_NCMISC_NCSCOMS_NCU_DARN_BAR_REG_EN = 0;
+static const uint32_t NC_NCMISC_NCSCOMS_NCU_DARN_BAR_REG_ADDR = 12;
+static const uint32_t NC_NCMISC_NCSCOMS_NCU_DARN_BAR_REG_ADDR_LEN = 40;
+//<< [NC_NCMISC_NCSCOMS_NCU_DARN_BAR_REG]
+// c/reg00012.H
+
 //>>THE END<<
 
 #ifndef __PPE_HCODE__

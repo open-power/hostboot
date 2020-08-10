@@ -288,6 +288,27 @@ static const uint32_t XSTOP4_WAIT_CYCLES_LEN = 12;
 //<< [XSTOP4]
 // pec/reg00011.H
 
+//>> [PIPEDOUTCTL0]
+static const uint64_t PIPEDOUTCTL0 = 0x08011514ull;
+
+static const uint32_t PIPEDOUTCTL0_RESERVED_63_59 = 0;
+static const uint32_t PIPEDOUTCTL0_RESERVED_63_59_LEN = 5;
+static const uint32_t PIPEDOUTCTL0_PHY1_REFB_LANE_CLK_EN = 5;
+static const uint32_t PIPEDOUTCTL0_PHY1_REFB_CLKDET_EN = 6;
+static const uint32_t PIPEDOUTCTL0_PHY1_REFA_LANE_CLK_EN = 7;
+static const uint32_t PIPEDOUTCTL0_PHY1_REFA_CLKDET_EN = 8;
+static const uint32_t PIPEDOUTCTL0_PHY0_REFB_LANE_CLK_EN = 9;
+static const uint32_t PIPEDOUTCTL0_PHY0_REFB_CLKDET_EN = 10;
+static const uint32_t PIPEDOUTCTL0_PHY0_REFA_LANE_CLK_EN = 11;
+static const uint32_t PIPEDOUTCTL0_PHY0_REFA_CLKDET_EN = 12;
+static const uint32_t PIPEDOUTCTL0_RESERVED_50_42 = 13;
+static const uint32_t PIPEDOUTCTL0_RESERVED_50_42_LEN = 9;
+static const uint32_t PIPEDOUTCTL0_PHY_RTUNE_REQ = 22;
+static const uint32_t PIPEDOUTCTL0_RESERVED_40_0 = 23;
+static const uint32_t PIPEDOUTCTL0_RESERVED_40_0_LEN = 41;
+//<< [PIPEDOUTCTL0]
+// pec/reg00011.H
+
 //>>THE END<<
 
 #ifndef __PPE_HCODE__
