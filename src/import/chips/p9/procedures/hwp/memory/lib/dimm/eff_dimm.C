@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -922,8 +922,9 @@ fapi2::ReturnCode eff_dimm::dram_trfc()
         FAPI_INF("tCK (ps): %d, tRFC (ps): %d, tRFC (nck): %d",
                  iv_tCK_in_ps, l_trfc_in_ps, l_trfc_in_nck);
 
-        // Update MCS attribute
-        l_mcs_attrs_trfc[iv_port_index] = l_trfc_in_nck;
+        // DIMM's can have separate timings in a dual-drop system.
+        // In those cases, we want to take the safest (most pessimistic) values
+        l_mcs_attrs_trfc[iv_port_index] = std::max(l_mcs_attrs_trfc[iv_port_index], l_trfc_in_nck);
 
         // casts vector into the type FAPI_ATTR_SET is expecting by deduction
         FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DRAM_TRFC,
@@ -1125,8 +1126,9 @@ fapi2::ReturnCode eff_dimm::dram_tccd_l()
         FAPI_INF("tCK (ps): %d, tCCD_L (ps): %d, tCCD_L (nck): %d",
                  iv_tCK_in_ps, l_tccd_in_ps, l_tccd_in_nck);
 
-        // Update MCS attribute
-        l_mcs_attrs_tccd[iv_port_index] = l_tccd_in_nck;
+        // DIMM's can have separate timings in a dual-drop system.
+        // In those cases, we want to take the safest (most pessimistic) values
+        l_mcs_attrs_tccd[iv_port_index] = std::max(l_tccd_in_nck, l_mcs_attrs_tccd[iv_port_index]);
 
         // casts vector into the type FAPI_ATTR_SET is expecting by deduction
         FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DRAM_TCCD_L,
@@ -2207,7 +2209,9 @@ fapi2::ReturnCode eff_dimm::dram_twr()
         // Get & update MCS attribute
         FAPI_TRY( eff_dram_twr(iv_mcs, l_attrs_dram_twr.data()) );
 
-        l_attrs_dram_twr[iv_port_index] = l_twr_in_nck;
+        // DIMM's can have separate timings in a dual-drop system.
+        // In those cases, we want to take the safest (most pessimistic) values
+        l_attrs_dram_twr[iv_port_index] = std::max(l_twr_in_nck, l_attrs_dram_twr[iv_port_index]);
         FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DRAM_TWR,
                                 iv_mcs,
                                 UINT8_VECTOR_TO_1D_ARRAY(l_attrs_dram_twr, PORTS_PER_MCS)),
@@ -3230,7 +3234,9 @@ fapi2::ReturnCode eff_dimm::dram_trp()
         // Get & update MCS attribute
         FAPI_TRY( eff_dram_trp(iv_mcs, l_attrs_dram_trp.data()) );
 
-        l_attrs_dram_trp[iv_port_index] = l_trp_in_nck ;
+        // DIMM's can have separate timings in a dual-drop system.
+        // In those cases, we want to take the safest (most pessimistic) values
+        l_attrs_dram_trp[iv_port_index] = std::max(l_trp_in_nck, l_attrs_dram_trp[iv_port_index]);
         FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DRAM_TRP,
                                 iv_mcs,
                                 UINT8_VECTOR_TO_1D_ARRAY(l_attrs_dram_trp, PORTS_PER_MCS)),
@@ -3285,7 +3291,9 @@ fapi2::ReturnCode eff_dimm::dram_trcd()
         // Get & update MCS attribute
         FAPI_TRY( eff_dram_trcd(iv_mcs, l_attrs_dram_trcd.data()) );
 
-        l_attrs_dram_trcd[iv_port_index] = l_trcd_in_nck;
+        // DIMM's can have separate timings in a dual-drop system.
+        // In those cases, we want to take the safest (most pessimistic) values
+        l_attrs_dram_trcd[iv_port_index] = std::max(l_trcd_in_nck, l_attrs_dram_trcd[iv_port_index]);
         FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DRAM_TRCD,
                                 iv_mcs,
                                 UINT8_VECTOR_TO_1D_ARRAY(l_attrs_dram_trcd, PORTS_PER_MCS)),
@@ -3336,7 +3344,9 @@ fapi2::ReturnCode eff_dimm::dram_trc()
         // Get & update MCS attribute
         FAPI_TRY( eff_dram_trc(iv_mcs, l_attrs_dram_trc.data()) );
 
-        l_attrs_dram_trc[iv_port_index] = l_trc_in_nck;
+        // DIMM's can have separate timings in a dual-drop system.
+        // In those cases, we want to take the safest (most pessimistic) values
+        l_attrs_dram_trc[iv_port_index] = std::max(l_trc_in_nck, l_attrs_dram_trc[iv_port_index]);
         FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DRAM_TRC,
                                 iv_mcs,
                                 UINT8_VECTOR_TO_1D_ARRAY(l_attrs_dram_trc, PORTS_PER_MCS)),
@@ -3383,7 +3393,10 @@ fapi2::ReturnCode eff_dimm::dram_twtr_l()
         // Get & update MCS attribute
         FAPI_TRY( eff_dram_twtr_l(iv_mcs, l_attrs_dram_twtr_l.data()) );
 
-        l_attrs_dram_twtr_l[iv_port_index] = l_twtr_l_in_nck;
+        // DIMM's can have separate timings in a dual-drop system.
+        // In those cases, we want to take the safest (most pessimistic) values
+        l_attrs_dram_twtr_l[iv_port_index] = std::max(static_cast<uint8_t>(l_twtr_l_in_nck),
+                                             l_attrs_dram_twtr_l[iv_port_index]);
         FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DRAM_TWTR_L,
                                 iv_mcs,
                                 UINT8_VECTOR_TO_1D_ARRAY(l_attrs_dram_twtr_l, PORTS_PER_MCS)),
@@ -3429,7 +3442,9 @@ fapi2::ReturnCode eff_dimm::dram_twtr_s()
         // Get & update MCS attribute
         FAPI_TRY( eff_dram_twtr_s(iv_mcs, l_attrs_dram_twtr_s.data()) );
 
-        l_attrs_dram_twtr_s[iv_port_index] = l_twtr_s_in_nck;
+        // DIMM's can have separate timings in a dual-drop system.
+        // In those cases, we want to take the safest (most pessimistic) values
+        l_attrs_dram_twtr_s[iv_port_index] = std::max(l_twtr_s_in_nck, l_attrs_dram_twtr_s[iv_port_index]);
         FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DRAM_TWTR_S,
                                 iv_mcs,
                                 UINT8_VECTOR_TO_1D_ARRAY(l_attrs_dram_twtr_s, PORTS_PER_MCS)),
@@ -3599,7 +3614,11 @@ fapi2::ReturnCode eff_dimm::dram_trrd_s()
     // Get & update MCS attribute
     FAPI_TRY( eff_dram_trrd_s(iv_mcs, l_attrs_dram_trrd_s.data()) );
 
-    l_attrs_dram_trrd_s[iv_port_index] = l_trrd_s_in_nck;
+
+    // DIMM's can have separate timings in a dual-drop system.
+    // In those cases, we want to take the safest (most pessimistic) values
+    l_attrs_dram_trrd_s[iv_port_index] = std::max(static_cast<uint8_t>(l_trrd_s_in_nck),
+                                         l_attrs_dram_trrd_s[iv_port_index]);
 
     FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DRAM_TRRD_S,
                             iv_mcs,
@@ -3679,7 +3698,10 @@ fapi2::ReturnCode eff_dimm::dram_trrd_l()
     // Get & update MCS attribute
     FAPI_TRY( eff_dram_trrd_l(iv_mcs, l_attrs_dram_trrd_l.data()) );
 
-    l_attrs_dram_trrd_l[iv_port_index] = l_trrd_l_in_nck;
+    // DIMM's can have separate timings in a dual-drop system.
+    // In those cases, we want to take the safest (most pessimistic) values
+    l_attrs_dram_trrd_l[iv_port_index] = std::max(static_cast<uint8_t>(l_trrd_l_in_nck),
+                                         l_attrs_dram_trrd_l[iv_port_index]);
 
     FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DRAM_TRRD_L,
                             iv_mcs,
@@ -3782,7 +3804,9 @@ fapi2::ReturnCode eff_dimm::dram_tfaw()
     // Get & update MCS attribute
     FAPI_TRY( eff_dram_tfaw(iv_mcs, l_attrs_dram_tfaw.data()) );
 
-    l_attrs_dram_tfaw[iv_port_index] = l_tfaw_in_nck;
+    // DIMM's can have separate timings in a dual-drop system.
+    // In those cases, we want to take the safest (most pessimistic) values
+    l_attrs_dram_tfaw[iv_port_index] = std::max(static_cast<uint8_t>(l_tfaw_in_nck), l_attrs_dram_tfaw[iv_port_index]);
 
     FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DRAM_TFAW,
                             iv_mcs,
@@ -3853,7 +3877,9 @@ fapi2::ReturnCode eff_dimm::dram_tras()
     // Get & update MCS attribute
     FAPI_TRY( eff_dram_tras(iv_mcs, l_attrs_dram_tras.data()) );
 
-    l_attrs_dram_tras[iv_port_index] = l_tras_in_nck;
+    // DIMM's can have separate timings in a dual-drop system.
+    // In those cases, we want to take the safest (most pessimistic) values
+    l_attrs_dram_tras[iv_port_index] = std::max(l_tras_in_nck, l_attrs_dram_tras[iv_port_index]);
     FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DRAM_TRAS,
                             iv_mcs,
                             UINT8_VECTOR_TO_1D_ARRAY(l_attrs_dram_tras, PORTS_PER_MCS)),
@@ -3888,7 +3914,9 @@ fapi2::ReturnCode eff_dimm::dram_trtp()
     // Get & update MCS attribute
     FAPI_TRY( eff_dram_trtp(iv_mcs, l_attrs_dram_trtp.data()) );
 
-    l_attrs_dram_trtp[iv_port_index] = l_calc_trtp_in_nck;
+    // DIMM's can have separate timings in a dual-drop system.
+    // In those cases, we want to take the safest (most pessimistic) values
+    l_attrs_dram_trtp[iv_port_index] = std::max(l_attrs_dram_trtp[iv_port_index], l_calc_trtp_in_nck);
 
     FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DRAM_TRTP,
                             iv_mcs,

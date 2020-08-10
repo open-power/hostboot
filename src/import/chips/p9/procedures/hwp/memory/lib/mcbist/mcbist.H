@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -3202,6 +3202,16 @@ const mss::states is_broadcast_capable(const std::vector<mss::dimm::kind>& i_kin
 ///
 template< fapi2::TargetType T >
 fapi2::ReturnCode setup_broadcast_port_select(const fapi2::Target<T>& i_target, uint64_t& o_port_select);
+
+///
+/// @brief Checks if broadcast mode is capable based upon the timings
+/// @param[in] i_targets the targets to effect
+/// @param[out] o_broadcast_capable YES if BC capable, otherwise NO
+/// @return FAPI2_RC_SUCCSS iff ok
+/// @note all timing attributes must be equal for broadcast to be capable
+///
+fapi2::ReturnCode is_broadcast_capable_timings(const std::vector<fapi2::Target<fapi2::TARGET_TYPE_MCA>>& i_targets,
+        mss::states& o_broadcast_capable);
 
 ///
 /// @brief Enables broadcast mode
