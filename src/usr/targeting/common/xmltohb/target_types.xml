@@ -157,11 +157,19 @@
     </attribute>
   </targetType>
 
-  <!-- This special TPM target exists only to adapt Hostboot's TPM target to
-     various workbooks' TPM target; all attributes should be declared against
-     the parent target -->
+  <!-- For P9, do not remove because it's not known how serverwiz/common-mrw-xml will work once
+  this is merged back to public github and op-build has to compile p9 code.-->
   <targetType>
     <id>chip-NPCT501</id>
+    <parent>chip-tpm-cectpm</parent>
+  </targetType>
+
+  <!-- These special TPM targets exists only to adapt Hostboot's TPM target to
+     various workbooks' TPM targets; all attributes should be declared against
+     the parent target chip-tpm-cectpm.-->
+  <!-- For P10 -->
+  <targetType>
+    <id>chip-NPCT750AAC</id>
     <parent>chip-tpm-cectpm</parent>
   </targetType>
 

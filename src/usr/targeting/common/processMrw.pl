@@ -541,8 +541,6 @@ sub processTargets
 
                 processUcd($targetObj, $target);
             }
-            # NOTE that this is a place holder for processing TPM.  Currently
-            # type will not match 'TPM', will need to update to get a match.
             elsif ($type eq "TPM")
             {
                 processTpm($targetObj, $target);
@@ -610,8 +608,6 @@ sub postProcessTargets
                 postProcessUcd($targetObj, $target);
             }
         }
-        # NOTE that this is a place holder for processing TPM.  Currently
-        # type will not match 'TPM', will need to update to get a match.
         elsif ($type eq "TPM")
         {
             postProcessTpm($targetObj, $target);
@@ -1737,7 +1733,6 @@ sub processTpm
     my $sysParentPos = $targetObj->getAttribute($sysParent, "ORDINAL_ID");
     my $nodeParent = $targetObj->findParentByType($target, "NODE");
     my $nodeParentPos = $targetObj->getAttribute($nodeParent, "ORDINAL_ID");
-    my $nodeParentAffinity = $targetObj->getAttribute($nodeParent, "AFFINITY_PATH");
     my $nodeParentPhysical = $targetObj->getAttribute($nodeParent, "PHYS_PATH");
 
     my $staticAbsLocationCode = getStaticAbsLocationCode($targetObj,$target);
@@ -3237,12 +3232,8 @@ sub postProcessUcd
     }
 } # end sub postProcessUcd
 
-#  @brief Processes a TPM target
-#
-#  @par Detailed Description:
-#      Processes a TPM target; notably determines the TPM's I2C master chip and
-#      updates the associated field in the TPM_INFO attribute, especially useful
-#      on multi-node or multi-TPM systems.
+#  @brief Post-processes a TPM target to use SPI_TPM_INFO. Only the SPI controller field needs to be
+#  updated
 #
 #  @param[in] $targetObj Object model reference
 #  @param[in] $target    Handle of the target to process
@@ -3251,41 +3242,31 @@ sub postProcessTpm
     my $targetObj = shift;
     my $target    = shift;
 
-    # Get any connection involving TPM target's child I2C slave targets
-    my $i2cBuses=$targetObj->findDestConnections($target,"I2C","");
-    if ($i2cBuses ne "")
+    # Get any connection involving TPM-target's child SPI-targets
+    my $spiBuses = $targetObj->findDestConnections($target,"SPI","");
+
+    if ($spiBuses ne "")
     {
-        foreach my $i2cBus (@{$i2cBuses->{CONN}})
+        foreach my $spiBus (@{$spiBuses->{CONN}})
         {
-            # On the I2C master side of the connection, ascend one level to the
-            # parent chip
-            my $i2cMasterParentTarget=$i2cBus->{SOURCE_PARENT};
-            my $i2cMasterParentTargetType =
-                $targetObj->getType($i2cMasterParentTarget);
+            # On the SPI side of the connection, ascend one level to the parent chip
+            my $spiParentTarget = $spiBus->{SOURCE_PARENT};
+            my $spiParentTargetType = $targetObj->getType($spiParentTarget);
 
             # Hostboot code assumes CEC TPMs are only connected to processors.
-            # Unless that assumption changes, this sanity check is required to
-            # catch modeling errors.
-            if($i2cMasterParentTargetType ne "PROC")
+            # Unless that assumption changes, this sanity check is required to catch modeling errors
+            if($spiParentTargetType ne "PROC")
             {
                 select()->flush(); # flush buffer before spewing out error message
-                die   "Model integrity error; CEC TPM I2C connections must "
-                    . "originate at a PROC target, not a "
-                    . "$i2cMasterParentTargetType target.\n";
+                die "Model integrity error; CEC TPM SPI connections must originate at a PROC ".
+                    "target, not a $spiParentTargetType target.\n";
             }
 
             # Get its physical path
-            my $i2cMasterParentTargetPath = $targetObj->getAttribute(
-                $i2cMasterParentTarget,"PHYS_PATH");
+            my $spiParentTargetPath = $targetObj->getAttribute($spiParentTarget,"PHYS_PATH");
 
-            # Set the TPM's I2C master path accordingly
-            $targetObj->setAttributeField(
-                $target, "TPM_INFO","i2cMasterPath",
-                $i2cMasterParentTargetPath);
-
-            # All TPM I2C buses must be driven from the same I2C master, so only
-            # process the first one
-            last;
+            # Set the TPM's SPI controller's path accordingly
+            $targetObj->setAttributeField($target, "SPI_TPM_INFO", "spiMasterPath", $spiParentTargetPath);
         }
     }
 } # end sub postProcessTpm
@@ -3990,21 +3971,22 @@ sub processI2C
             {
                 $type = "0xFF";
             }
-            # TPM types can vary by MODEL number
-            elsif ($type_str eq "NUVOTON_TPM")
-            {
-                # Model values can be found in tpmddif.H and are kept in
-                # sync with TPM_MODEL attribute in attribute_types_hb.xml
-                my $tpm_model = $targetObj->getAttribute($i2c->{DEST_PARENT},"TPM_MODEL");
-                if ($tpm_model eq 1)
-                {
-                    $type = $targetObj->getEnumValue("HDAT_I2C_DEVICE_TYPE",$type_str);
-                }
-                if ($tpm_model eq 2)
-                {
-                    $type = $targetObj->getEnumValue("HDAT_I2C_DEVICE_TYPE","TCG_I2C_TPM");
-                }
-            }
+            # FXIME RTC: 212110 Secureboot: P10 - HDAT SPI rework  - HDAT security related code
+            # # TPM types can vary by MODEL number
+            # elsif ($type_str eq "NUVOTON_TPM")
+            # {
+            #     # Model values can be found in tpmddif.H and are kept in
+            #     # sync with TPM_MODEL attribute in attribute_types_hb.xml
+            #     my $tpm_model = $targetObj->getAttribute($i2c->{DEST_PARENT},"TPM_MODEL");
+            #     if ($tpm_model eq 1)
+            #     {
+            #         $type = $targetObj->getEnumValue("HDAT_I2C_DEVICE_TYPE",$type_str);
+            #     }
+            #     if ($tpm_model eq 2)
+            #     {
+            #         $type = $targetObj->getEnumValue("HDAT_I2C_DEVICE_TYPE","TCG_I2C_TPM");
+            #     }
+            # }
             else
             {
                 $type = $targetObj->getEnumValue("HDAT_I2C_DEVICE_TYPE",$type_str);
@@ -4133,22 +4115,23 @@ sub processI2C
                     }
                 }
 
-                # For TPM:
-                # <vendor>,<device type>,<purpose>,<scope>
-                if ($type_str eq "NUVOTON_TPM")
-                {
-                    # Model values can be found in tpmddif.H and are kept in
-                    # sync with TPM_MODEL attribute in attribute_types_hb.xml
-                    my $tpm_model = $targetObj->getAttribute($i2c->{DEST_PARENT},"TPM_MODEL");
-                    if ($tpm_model eq 1)
-                    {
-                        $label = "nuvoton,npct601,tpm,host";
-                    }
-                    if ($tpm_model eq 2)
-                    {
-                        $label = "tcg,tpm_i2c_ptp,tpm,host";
-                    }
-                }
+                # FXIME RTC: 212110 Secureboot: P10 - HDAT SPI rework  - HDAT security related code
+                # # For TPM:
+                # # <vendor>,<device type>,<purpose>,<scope>
+                # if ($type_str eq "NUVOTON_TPM")
+                # {
+                #     # Model values can be found in tpmddif.H and are kept in
+                #     # sync with TPM_MODEL attribute in attribute_types_hb.xml
+                #     my $tpm_model = $targetObj->getAttribute($i2c->{DEST_PARENT},"TPM_MODEL");
+                #     if ($tpm_model eq 1)
+                #     {
+                #         $label = "nuvoton,npct601,tpm,host";
+                #     }
+                #     if ($tpm_model eq 2)
+                #     {
+                #         $label = "tcg,tpm_i2c_ptp,tpm,host";
+                #     }
+                # }
 
                 if ($label eq "")
                 {
@@ -4987,46 +4970,6 @@ sub validateTargetHasBeenPreProcessed($targetObj, $target)
 
     return 1;
 }
-
-#--------------------------------------------------
-#  @brief Returns whether system has multiple possible TPMs or not
-#
-#  @par Detailed Description:
-#      Returns whether system has multiple possible TPMs or not.
-#      The MRW parser activates more complicated I2C master detection logic when
-#      a system blueprint defines more than one TPM, in order to avoid having to
-#      fix other non-compliant workbooks.  If every workbook is determined to
-#      model the TPM and its I2C connection properly, this special case can be
-#      removed.
-#
-#  @param[in] $targetsRef Reference to array of targets in the system
-#  @retval 0 System does not have multiple possible TPMs
-#  @retval 1 System has multiple possible TPMs
-#
-#  @TODO RTC: 189374 Remove API when all platforms' MRW supports dynamically
-#      determining the processor driving it
-#--------------------------------------------------
-sub isMultiTpmSystem
-{
-    my $targetObj = shift;
-    my $targetsRef = shift;
-
-    my $tpms=0;
-    foreach my $target (@$targetsRef)
-    {
-        my $type = $targetObj->getType($target);
-        if($type eq "TPM")
-        {
-            ++$tpms;
-            if($tpms >1)
-            {
-                last;
-            }
-        }
-    }
-
-    return ($tpms > 1) ? 1 : 0;
-} # end sub isMultiTpmSystem
 
 #--------------------------------------------------
 # @brief Get the parent pervasive value for the given unit
