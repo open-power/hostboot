@@ -84,7 +84,7 @@ foreach $obj in (get-object-list ocmb -all){
 ### Enable the second processor - @TODO-RTC:254475
 
 # Connect up the missing cfams
-connect backplane0.cnt_hfsi_link[1] backplane0.cnt_fsi_slave[0][1][1]
+try {connect backplane0.cnt_hfsi_link[1] backplane0.cnt_fsi_slave[0][1][1]} except {}
 
 # Set valid bit for Scratch Reg3/Reg6 in Scratch Reg8 bit 2/5
 $scratch = ((get-master-procs)[0].cfam_cmp.lbus_map.read 0x2800 + 0x3F*4 4 -b)
