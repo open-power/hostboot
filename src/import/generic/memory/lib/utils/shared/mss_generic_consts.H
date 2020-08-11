@@ -657,6 +657,7 @@ enum link_widths
     LINK_WIDTHS_X16     = 0b0100,
     LINK_WIDTHS_X8      = 0b0010,
     LINK_WIDTHS_X4      = 0b0001,
+    LINK_WIDTHS_X8X4    = 0b0011,
 };
 
 ///

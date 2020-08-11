@@ -230,7 +230,8 @@ fapi2::ReturnCode setup_mc_config0(
     // CFG_DL0_HALF_WIDTH_BACKOFF_ENABLE: dl0 x4 backoff enabled
     scomt::omi::SET_CONFIG0_HALF_WIDTH_BACKOFF_ENABLE(i_dl_x4_backoff_en, l_val);
 
-    scomt::omi::SET_CONFIG0_SUPPORTED_MODES(mss::omi::link_widths::LINK_WIDTHS_X8, l_val);
+    // CFG_DL0_SUPPORTED_MODES x8 and X4
+    scomt::omi::SET_CONFIG0_SUPPORTED_MODES(mss::omi::link_widths::LINK_WIDTHS_X8X4, l_val);
 
     // CFG_DL0_TRAIN_MODE: dl0 train mode
     scomt::omi::SET_CONFIG0_TRAIN_MODE(i_train_mode, l_val);
