@@ -119,6 +119,16 @@ namespace DUMP
     } PACKED;
 
 
+    //Processor Specific Architected Register Data TOC
+    //structure
+    struct procArcRegDataToc_t
+    {
+        uint64_t dataOffset; //Processor specific architected data start offset
+        uint32_t dataSize;  //Total data size for particular processor data
+        uint32_t reserved;  //Future use reserve
+    } PACKED;
+
+
     // Processor Dump Area table format
     struct procDumpAreaEntry
     {
@@ -132,6 +142,7 @@ namespace DUMP
         uint64_t capArrayAddr;         // Actual destination address (filled by HB)
         uint8_t  reserved3[4];         // Reserved
         uint32_t capArraySize;         // Actual destination size (filled by HB)
+        procArcRegDataToc_t iv_procArcRegDataToc[16];//processor Specific Architected Register Data TOC
     } PACKED;
 
     // Host formatted architected register data content (as per HDAT spec)

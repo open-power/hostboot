@@ -669,6 +669,12 @@ errlHndl_t copyArchitectedRegs(void)
 
                 } //End of Register Loop
             }//Thread Loop
+
+            //Update Processor Specific data TOC contents. 
+            procTableEntry->iv_procArcRegDataToc[procNum].dataSize = (procTableEntry->threadRegSize * threadCount);
+            procTableEntry->iv_procArcRegDataToc[procNum].dataOffset = (uint64_t)pDstAddrBase + 
+                                                                       (procNum * procTableEntry->iv_procArcRegDataToc[procNum].dataSize);
+
             if(collectMinimumDataMode)
             {
                 TRACFCOMP(g_trac_dump, "Hypervisor Pre-Init failure case. Copy data only related to "
