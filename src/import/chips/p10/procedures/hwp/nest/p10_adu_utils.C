@@ -255,6 +255,7 @@ fapi2::ReturnCode p10_adu_utils_set_quiesce_init(
     // Setup post-command init; sends a pb init command after executing adu command
     SET_TP_TPBR_AD_ALTD_OPTION_REG_WITH_POST_INIT(altd_option_reg_data);
     SET_TP_TPBR_AD_ALTD_OPTION_REG_BEFORE_INIT_WAIT_COUNT(INIT_SWITCH_WAIT_COUNT, altd_option_reg_data);
+    SET_TP_TPBR_AD_ALTD_OPTION_REG_WITH_FAST_PATH(altd_option_reg_data);
 
     // Write to ADU special option reg
     FAPI_TRY(PUT_TP_TPBR_AD_ALTD_OPTION_REG(i_target, altd_option_reg_data),
