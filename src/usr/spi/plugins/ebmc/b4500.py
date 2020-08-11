@@ -23,11 +23,23 @@
 #
 # IBM_PROLOG_END_TAG
 
+'''
+Defines UD parsing classes for SPI FFDC to be used in BMC
+
+NOTE: If a parser is added/removed in SpiUserDetailsTypes or if any UD content is changed in their
+      respective functions, then those changes must also be reflected in
+      src/usr/spi/plugins/spiUdParserFactory.H and src/usr/spi/plugins/errludP_spi.H
+'''
+
 import json
 from udparsers.helpers.errludP_Helpers import hexDump, memConcat, hexConcat
 
 class errludP_spi:
-    #SPI Parameters
+
+    # Must match value in src/include/usr/spi/spireasoncodes.H
+    SPI_UDT_VERSION_1 = 1
+
+    # UD parser for SPI EEPROM FFDC
     def UdParserSpiEepromParameters(subType, ver, data):
         # ***** Memory Layout *****
         # 1 byte   : Op Type (DeviceFW::OperationType)
@@ -44,7 +56,7 @@ class errludP_spi:
         d = dict()
         subd = dict()
 
-        if ver == 1 and len(data) == 49:
+        if ver >= errludP_spi.SPI_UDT_VERSION_1:
             i  = 0
             op = data[i]
             # Keep this check in sync with DeviceFW::OperationType values
@@ -67,19 +79,60 @@ class errludP_spi:
             subd['Start Index'], i=memConcat(data, i, i+1)
             subd['Adjusted Buffer Used'], i=memConcat(data, i, i+1)
         else:
-            if ver != 1:
-                subd['Unknown Parser Version']=hex(ver)
+            subd['Unknown Parser Version']=hex(ver)
             subd['Hex Dump']=hexDump(data, 0, len(data))
 
-        d['SPI EEPROM Parameters'], i=subd
+        d['SPI EEPROM Parameters'] = subd
 
         jsonStr = json.dumps(d)
         return jsonStr
 
+    # UD parser for SPI TPM FFDC
+    def UdParserSpiTpmParameters(subType, ver, data):
+
+        d = dict()
+        subd = dict()
+
+        if ver >= errludP_spi.SPI_UDT_VERSION_1:
+
+            # ***** Memory Layout *****
+            # 1 byte   : Op Type (DeviceFW::OperationType)
+            # 4 bytes  : Controller Target HUID
+            # 8 bytes  : Access Type (DeviceFW::AccessType)
+            # 1 byte   : Engine
+            # 8 bytes  : Offset
+            # 4 bytes  : Locality
+            # 4 bytes  : TPM HUID
+
+            i  = 0
+            op = data[i]
+            if op == 0:
+                subd['SPI Operation']='Read'
+            elif op == 1:
+                subd['SPI Operation']='Write'
+            else:
+                subd['SPI Operation']='Unknown'
+
+            subd['OP Type Value'], i = memConcat(data, i, i+1)
+            subd['Controller Target HUID'], i = memConcat(data, i, i+4)
+            subd['Access Type'], i = memConcat(data, i, i+8)
+            subd['Engine'], i = memConcat(data, i, i+1)
+            subd['Offset'], i = memConcat(data, i, i+8)
+            subd['Locality'], i = memConcat(data, i, i+4)
+            subd['TPM HUID'], i = memConcat(data, i, i+4)
+        else:
+            subd['Unknown Parser Version']=hex(ver)
+            subd['Hex Dump']=hexDump(data, 0, len(data))
+
+        d['SPI TPM Parameters']=subd
+
+        jsonStr = json.dumps(d)
+        return jsonStr
 
 #Dictionary with parser functions for each subtype
 #Values from SpiUserDetailsTypes enum in src/include/usr/spi/spireasoncodes.H
-SpiUserDetailsTypes = { 1: "UdParserSPIEepromParameters"}
+SpiUserDetailsTypes = { 1: "UdParserSpiEepromParameters",
+                        2: "UdParserSpiTpmParameters"}
 
 def parseUDToJson(subType, ver, data):
     args = (subType, ver, data)

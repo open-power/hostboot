@@ -56,7 +56,8 @@ namespace SPI
 
     enum SpiUserDetailsVersions
     {
-        SPI_UDT_VERSION_1 = 0x01,
+        SPI_UDT_VERSION_1 = 0x01, // This value is hardcoded in src/usr/spi/plugins/ebmc/b4500.py
+                                  // If it's changed here, it must also be changed in b4500.py
     };
 
 };

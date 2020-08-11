@@ -29,6 +29,9 @@
  *  @file errludP_spi.H
  *
  *  Defines the ErrlUserDetailsParser classes that parse SPI FFDC
+ *
+ *  NOTE: If a parser is added/removed or if any UD content is changed here, then those changes must
+ *  also be reflected in src/usr/spi/plugins/ebmc/b4500.py
  */
 
 #include "errluserdetails.H"

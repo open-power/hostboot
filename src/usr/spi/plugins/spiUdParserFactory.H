@@ -36,6 +36,11 @@ namespace SPI
         public:
             UserDetailsParserFactory()
             {
+                /*
+                NOTE: If a parser is added/removed, this change must also be reflected in
+                src/usr/spi/plugins/ebmc/b4500.py
+                */
+
                 registerParser<SPI::UdParserSpiEepromParameters>
                   (SPI_EEPROM_UDT_PARAMETERS);
 
