@@ -44,7 +44,10 @@
 #include <p10_scom_phb.H>
 #include <p10_fbc_utils.H>
 #include <p10_iop_xram_utils.H>
-
+// Cronus only
+#if !defined(__PPE__) && !defined(__HOSTBOOT_MODULE)
+    #include <p10_pcie_utils.H>
+#endif
 
 //-----------------------------------------------------------------------------------
 // Constant definitions
@@ -71,7 +74,6 @@ const uint64_t  RAWLANEAONN_DIG_FAST_FLAGS_REG[NUM_OF_INSTANCES] =
 ///-----------------------------------------------------------------------------
 /// Function definitions
 ///-----------------------------------------------------------------------------
-
 fapi2::ReturnCode
 p10_pcie_scominit(
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
@@ -170,6 +172,22 @@ p10_pcie_scominit(
     // In P10, I move that register to a new grouping of latches and forgot to set the init value to '1'.
     for (auto l_phb_target : l_phb_targets)
     {
+
+// Cronus only
+#if !defined(__PPE__) && !defined(__HOSTBOOT_MODULE)
+        // Skip if PHB target is not enabled
+        bool l_phbEnabled = false;
+        FAPI_TRY(isPHBEnabled(l_phb_target, l_phbEnabled),
+                 "Error returned from isPHBEnabled()");
+
+        if (!l_phbEnabled)
+        {
+            FAPI_DBG("PHB is disabled, skip Reset.");
+            continue;
+        }
+
+#endif
+
         l_data = 0;
         FAPI_TRY(PREP_REGS_PHBRESET_REG(l_phb_target));
         SET_REGS_PHBRESET_REG_PE_ETU_RESET(l_data);

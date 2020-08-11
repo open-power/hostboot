@@ -36,7 +36,10 @@
 //------------------------------------------------------------------------------
 #include <p10_pcie_config.H>
 #include <p10_fbc_utils.H>
-
+// Cronus only
+#if !defined(__PPE__) && !defined(__HOSTBOOT_MODULE)
+    #include <p10_pcie_utils.H>
+#endif
 #include <p10_scom_pec.H>
 #include <p10_scom_phb.H>
 
@@ -238,6 +241,21 @@ fapi2::ReturnCode p10_pcie_config(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CH
         // Get the PHB id
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, l_phb_chiplet, l_phb_id),
                  "Error from FAPI_ATTR_GET (ATTR_CHIP_UNIT_POS)");
+
+// Cronus only
+#if !defined(__PPE__) && !defined(__HOSTBOOT_MODULE)
+        // Skip if PHB target is not enabled
+        bool l_phbEnabled = false;
+        FAPI_TRY(isPHBEnabled(l_phb_chiplet, l_phbEnabled),
+                 "Error returned from isPHBEnabled()");
+
+        if (!l_phbEnabled)
+        {
+            FAPI_DBG("PHB ID %i is disabled, skip configure.", l_phb_id);
+            continue;
+        }
+
+#endif
 
         // Phase2 init step 7_a
         // NestBase+StackBase+0xA
