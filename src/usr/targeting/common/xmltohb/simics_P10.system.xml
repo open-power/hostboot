@@ -384,7 +384,7 @@
     <attribute><id>VPD_REC_NUM</id><default>0</default></attribute>
     <attribute>
         <id>FREQ_OMI_MHZ</id>
-        <default>25600</default>
+        <default>21330</default>
     </attribute>
     <attribute>
         <id>PROC_FABRIC_TOPOLOGY_ID</id>
@@ -460,7 +460,7 @@
     </attribute>
     <attribute>
         <id>FREQ_OMI_MHZ</id>
-        <default>25600</default>
+        <default>21330</default>
     </attribute>
     <attribute>
         <id>PROC_FABRIC_TOPOLOGY_ID</id>
