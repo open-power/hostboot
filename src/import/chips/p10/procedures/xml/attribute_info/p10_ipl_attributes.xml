@@ -344,4 +344,28 @@
   <default>CORE_UNFUSED</default>
 </attribute>
 <!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_CORE_LPAR_MODE_POLICY</id>
+  <targetType>TARGET_TYPE_SYSTEM</targetType>
+  <description>
+    Sets policy for core LPAR configuration
+  </description>
+  <valueType>uint8</valueType>
+  <enum>FOLLOW_FUSED_STATE = 0x0, LPAR_PER_CORE = 0x1, LPAR_PER_THREAD = 0x2</enum>
+  <platInit/>
+  <default>FOLLOW_FUSED_STATE</default>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_CORE_LPAR_MODE</id>
+  <targetType>TARGET_TYPE_SYSTEM</targetType>
+  <description>
+    Sets policy for core LPAR configuration
+  </description>
+  <valueType>uint8</valueType>
+  <enum>LPAR_PER_THREAD = 0x0, LPAR_PER_CORE = 0x1</enum>
+  <writeable/>
+  <initToZero/>
+</attribute>
+<!-- ********************************************************************** -->
 </attributes>

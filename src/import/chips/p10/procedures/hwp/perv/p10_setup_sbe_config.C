@@ -79,7 +79,12 @@ fapi2::ReturnCode p10_setup_sbe_config(
     if (!fapi2::is_platform<fapi2::PLAT_HOSTBOOT>())
     {
         fapi2::ATTR_FUSED_CORE_MODE_Type l_attr_fused_core_mode;
+        fapi2::ATTR_CORE_LPAR_MODE_POLICY_Type l_attr_core_lpar_mode_policy;
+        fapi2::ATTR_CORE_LPAR_MODE_Type l_attr_core_lpar_mode;
         fapi2::buffer<uint32_t> l_perv_ctrl0;
+
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CORE_LPAR_MODE_POLICY, FAPI_SYSTEM, l_attr_core_lpar_mode_policy),
+                 "Error from FAPI_ATTR_GET (ATTR_CORE_LPAR_MODE_POLICY)");
 
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_FUSED_CORE_MODE, FAPI_SYSTEM, l_attr_fused_core_mode),
                  "Error from FAPI_ATTR_GET (ATTR_FUSED_CORE_MODE)");
@@ -95,8 +100,30 @@ fapi2::ReturnCode p10_setup_sbe_config(
         FAPI_TRY(fapi2::getCfamRegister(i_target_chip, FSXCOMP_FSXLOG_PERV_CTRL0_COPY_FSI, l_perv_ctrl0),
                  "Error reading PERV_CTRL0_COPY");
 
+        if (l_attr_core_lpar_mode_policy == fapi2::ENUM_ATTR_CORE_LPAR_MODE_POLICY_FOLLOW_FUSED_STATE)
+        {
+            if (l_attr_fused_core_mode == fapi2::ENUM_ATTR_FUSED_CORE_MODE_CORE_FUSED)
+            {
+                l_attr_core_lpar_mode = fapi2::ENUM_ATTR_CORE_LPAR_MODE_LPAR_PER_CORE;
+            }
+            else
+            {
+                l_attr_core_lpar_mode = fapi2::ENUM_ATTR_CORE_LPAR_MODE_LPAR_PER_THREAD;
+            }
+        }
+        else if (l_attr_core_lpar_mode_policy == fapi2::ENUM_ATTR_CORE_LPAR_MODE_POLICY_LPAR_PER_CORE)
+        {
+            l_attr_core_lpar_mode = fapi2::ENUM_ATTR_CORE_LPAR_MODE_LPAR_PER_CORE;
+        }
+        else
+        {
+            l_attr_core_lpar_mode = fapi2::ENUM_ATTR_CORE_LPAR_MODE_LPAR_PER_THREAD;
+        }
+
         l_perv_ctrl0.writeBit<FSXCOMP_FSXLOG_PERV_CTRL0_TP_OTP_SCOM_FUSED_CORE_MODE>(
             l_attr_fused_core_mode == fapi2::ENUM_ATTR_FUSED_CORE_MODE_CORE_FUSED);
+        l_perv_ctrl0.writeBit<FSXCOMP_FSXLOG_PERV_CTRL0_TP_EX_SINGLE_LPAR_EN_DC>(
+            l_attr_core_lpar_mode);
 
         FAPI_TRY(fapi2::putCfamRegister(i_target_chip, FSXCOMP_FSXLOG_PERV_CTRL0_COPY_FSI, l_perv_ctrl0),
                  "Error writing PERV_CTRL0_COPY");
