@@ -68,7 +68,7 @@ fapi2::ReturnCode p10_pre_poweroff(const
 
     // RC0 bit0: cfam protection 0, bit8: cfam protection 1, bit9: cfam protection 2
     FAPI_DBG("Raise Cfam protection");
-    l_read_reg_pc0.flush<0>()
+    l_read_reg_rc0.flush<0>()
     .setBit<FSXCOMP_FSXLOG_ROOT_CTRL0_CFAM_PROTECTION_0_DC>()
     .setBit<FSXCOMP_FSXLOG_ROOT_CTRL0_CFAM_PROTECTION_1_DC>()
     .setBit<FSXCOMP_FSXLOG_ROOT_CTRL0_CFAM_PROTECTION_2_DC>()
