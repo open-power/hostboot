@@ -46,6 +46,7 @@
 #include <lib/shared/exp_consts.H>
 #include <lib/dimm/exp_rank.H>
 #include <generic/memory/lib/utils/mc/gen_mss_port.H>
+#include <generic/memory/lib/utils/mc/gen_mss_restore_repairs.H>
 #include <generic/memory/lib/utils/shared/mss_generic_consts.H>
 #include <mss_generic_attribute_getters.H>
 
