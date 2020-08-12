@@ -5382,6 +5382,219 @@ fapi_try_exit:
 }
 //<< GET_[NC_NCMISC_NCSCOMS_NCU_DARN_BAR_REG_ADDR]
 
+//>> PREP_[NC_NCMISC_NCSCOMS_NCU_RCMD_QUIESCE_REG]
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PREP_NC_NCMISC_NCSCOMS_NCU_RCMD_QUIESCE_REG(const fapi2::Target<K, M, V>& i_target)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = NC_NCMISC_NCSCOMS_NCU_RCMD_QUIESCE_REG;
+#endif
+    return fapi2::current_err;
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+//<< PREP_[NC_NCMISC_NCSCOMS_NCU_RCMD_QUIESCE_REG]
+
+//>> GET_[NC_NCMISC_NCSCOMS_NCU_RCMD_QUIESCE_REG]
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode GET_NC_NCMISC_NCSCOMS_NCU_RCMD_QUIESCE_REG(const fapi2::Target<K, M, V>& i_target,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = NC_NCMISC_NCSCOMS_NCU_RCMD_QUIESCE_REG;
+#endif
+    return fapi2::getScom(i_target, NC_NCMISC_NCSCOMS_NCU_RCMD_QUIESCE_REG, o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+//<< GET_[NC_NCMISC_NCSCOMS_NCU_RCMD_QUIESCE_REG]
+
+//>> PUT_[NC_NCMISC_NCSCOMS_NCU_RCMD_QUIESCE_REG]
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PUT_NC_NCMISC_NCSCOMS_NCU_RCMD_QUIESCE_REG(const fapi2::Target<K, M, V>& i_target,
+        const uint64_t i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    FAPI_TRY(scomt::chkReg(NC_NCMISC_NCSCOMS_NCU_RCMD_QUIESCE_REG));
+#endif
+    return fapi2::putScom(i_target, NC_NCMISC_NCSCOMS_NCU_RCMD_QUIESCE_REG, i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+//<< PUT_[NC_NCMISC_NCSCOMS_NCU_RCMD_QUIESCE_REG]
+
+
+//>> SET_[NC_NCMISC_NCSCOMS_NCU_RCMD_QUIESCE_REG_NCU_RCMD_QUIESCE]
+static inline fapi2::buffer<uint64_t>& SET_NC_NCMISC_NCSCOMS_NCU_RCMD_QUIESCE_REG_NCU_RCMD_QUIESCE(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(NC_NCMISC_NCSCOMS_NCU_RCMD_QUIESCE_REG));
+#endif
+    return o_data.insertFromRight<NC_NCMISC_NCSCOMS_NCU_RCMD_QUIESCE_REG_NCU_RCMD_QUIESCE,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("0:scom_c Invalid dial access NC_NCMISC_NCSCOMS_NCU_RCMD_QUIESCE_REG_NCU_RCMD_QUIESCE chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[NC_NCMISC_NCSCOMS_NCU_RCMD_QUIESCE_REG_NCU_RCMD_QUIESCE]
+
+//>> SET_[NC_NCMISC_NCSCOMS_NCU_RCMD_QUIESCE_REG_NCU_RCMD_QUIESCE]
+static inline fapi2::buffer<uint64_t>& SET_NC_NCMISC_NCSCOMS_NCU_RCMD_QUIESCE_REG_NCU_RCMD_QUIESCE(
+    const uint64_t i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(NC_NCMISC_NCSCOMS_NCU_RCMD_QUIESCE_REG));
+#endif
+    return o_data.insertFromRight<NC_NCMISC_NCSCOMS_NCU_RCMD_QUIESCE_REG_NCU_RCMD_QUIESCE,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("1:scom_c Invalid dial access NC_NCMISC_NCSCOMS_NCU_RCMD_QUIESCE_REG_NCU_RCMD_QUIESCE chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[NC_NCMISC_NCSCOMS_NCU_RCMD_QUIESCE_REG_NCU_RCMD_QUIESCE]
+
+//>> SET_[NC_NCMISC_NCSCOMS_NCU_RCMD_QUIESCE_REG_NCU_RCMD_QUIESCE]
+static inline fapi2::buffer<uint64_t>& SET_NC_NCMISC_NCSCOMS_NCU_RCMD_QUIESCE_REG_NCU_RCMD_QUIESCE(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(NC_NCMISC_NCSCOMS_NCU_RCMD_QUIESCE_REG));
+#endif
+    return o_data.setBit<NC_NCMISC_NCSCOMS_NCU_RCMD_QUIESCE_REG_NCU_RCMD_QUIESCE>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("2:scom_c Invalid dial access NC_NCMISC_NCSCOMS_NCU_RCMD_QUIESCE_REG_NCU_RCMD_QUIESCE chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[NC_NCMISC_NCSCOMS_NCU_RCMD_QUIESCE_REG_NCU_RCMD_QUIESCE]
+
+//>> CLEAR_[NC_NCMISC_NCSCOMS_NCU_RCMD_QUIESCE_REG_NCU_RCMD_QUIESCE]
+static inline fapi2::buffer<uint64_t>& CLEAR_NC_NCMISC_NCSCOMS_NCU_RCMD_QUIESCE_REG_NCU_RCMD_QUIESCE(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(NC_NCMISC_NCSCOMS_NCU_RCMD_QUIESCE_REG));
+#endif
+    return o_data.clearBit<NC_NCMISC_NCSCOMS_NCU_RCMD_QUIESCE_REG_NCU_RCMD_QUIESCE>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("3:scom_c Invalid dial access NC_NCMISC_NCSCOMS_NCU_RCMD_QUIESCE_REG_NCU_RCMD_QUIESCE chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< CLEAR_[NC_NCMISC_NCSCOMS_NCU_RCMD_QUIESCE_REG_NCU_RCMD_QUIESCE]
+
+//>> GET_[NC_NCMISC_NCSCOMS_NCU_RCMD_QUIESCE_REG_NCU_RCMD_QUIESCE]
+static inline fapi2::buffer<uint64_t>& GET_NC_NCMISC_NCSCOMS_NCU_RCMD_QUIESCE_REG_NCU_RCMD_QUIESCE(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(NC_NCMISC_NCSCOMS_NCU_RCMD_QUIESCE_REG));
+#endif
+    return i_data.extractToRight<NC_NCMISC_NCSCOMS_NCU_RCMD_QUIESCE_REG_NCU_RCMD_QUIESCE,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("4:scom_c Invalid dial access NC_NCMISC_NCSCOMS_NCU_RCMD_QUIESCE_REG_NCU_RCMD_QUIESCE chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[NC_NCMISC_NCSCOMS_NCU_RCMD_QUIESCE_REG_NCU_RCMD_QUIESCE]
+
+//>> GET_[NC_NCMISC_NCSCOMS_NCU_RCMD_QUIESCE_REG_NCU_RCMD_QUIESCE]
+static inline bool GET_NC_NCMISC_NCSCOMS_NCU_RCMD_QUIESCE_REG_NCU_RCMD_QUIESCE(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(NC_NCMISC_NCSCOMS_NCU_RCMD_QUIESCE_REG));
+#endif
+    return i_data.getBit<NC_NCMISC_NCSCOMS_NCU_RCMD_QUIESCE_REG_NCU_RCMD_QUIESCE>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("5:scom_c Invalid dial access NC_NCMISC_NCSCOMS_NCU_RCMD_QUIESCE_REG_NCU_RCMD_QUIESCE chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[NC_NCMISC_NCSCOMS_NCU_RCMD_QUIESCE_REG_NCU_RCMD_QUIESCE]
+
+//>> SET_[NC_NCMISC_NCSCOMS_NCU_RCMD_QUIESCE_REG_SPARE]
+static inline fapi2::buffer<uint64_t>& SET_NC_NCMISC_NCSCOMS_NCU_RCMD_QUIESCE_REG_SPARE(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(NC_NCMISC_NCSCOMS_NCU_RCMD_QUIESCE_REG));
+#endif
+    return o_data.insertFromRight<NC_NCMISC_NCSCOMS_NCU_RCMD_QUIESCE_REG_SPARE,
+           NC_NCMISC_NCSCOMS_NCU_RCMD_QUIESCE_REG_SPARE_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("0:scom_c Invalid dial access NC_NCMISC_NCSCOMS_NCU_RCMD_QUIESCE_REG_SPARE chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[NC_NCMISC_NCSCOMS_NCU_RCMD_QUIESCE_REG_SPARE]
+
+//>> SET_[NC_NCMISC_NCSCOMS_NCU_RCMD_QUIESCE_REG_SPARE]
+static inline fapi2::buffer<uint64_t>& SET_NC_NCMISC_NCSCOMS_NCU_RCMD_QUIESCE_REG_SPARE(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(NC_NCMISC_NCSCOMS_NCU_RCMD_QUIESCE_REG));
+#endif
+    return o_data.insertFromRight<NC_NCMISC_NCSCOMS_NCU_RCMD_QUIESCE_REG_SPARE,
+           NC_NCMISC_NCSCOMS_NCU_RCMD_QUIESCE_REG_SPARE_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("1:scom_c Invalid dial access NC_NCMISC_NCSCOMS_NCU_RCMD_QUIESCE_REG_SPARE chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[NC_NCMISC_NCSCOMS_NCU_RCMD_QUIESCE_REG_SPARE]
+
+//>> GET_[NC_NCMISC_NCSCOMS_NCU_RCMD_QUIESCE_REG_SPARE]
+static inline fapi2::buffer<uint64_t>& GET_NC_NCMISC_NCSCOMS_NCU_RCMD_QUIESCE_REG_SPARE(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(NC_NCMISC_NCSCOMS_NCU_RCMD_QUIESCE_REG));
+#endif
+    return i_data.extractToRight<NC_NCMISC_NCSCOMS_NCU_RCMD_QUIESCE_REG_SPARE,
+           NC_NCMISC_NCSCOMS_NCU_RCMD_QUIESCE_REG_SPARE_LEN>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("4:scom_c Invalid dial access NC_NCMISC_NCSCOMS_NCU_RCMD_QUIESCE_REG_SPARE chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[NC_NCMISC_NCSCOMS_NCU_RCMD_QUIESCE_REG_SPARE]
+
+
 //>>THE END<<
 
 #ifndef __PPE_HCODE__
