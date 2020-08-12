@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -36,6 +36,8 @@
 #ifndef _MSS_ECC_GALOIS_H_
 #define _MSS_ECC_GALOIS_H_
 
+#include <fapi2.H>
+#include <generic/memory/lib/utils/shared/mss_generic_consts.H>
 #include <generic/memory/lib/ecc/ecc_traits.H>
 
 namespace mss
@@ -46,13 +48,14 @@ namespace ecc
 
 ///
 /// @brief Return symbol value from a given Galois code
+/// @tparam MC the memory controller type defaults to type in mc defaults
 /// @tparam T fapi2 Target Type defaults to the default set in mc const file
 /// @tparam TT traits type defaults to eccTraits<T>
 /// @param[in] i_galois the Galois code
 /// @param[out] o_symbol symbol value represented by given Galois code
 /// @return FAPI2_RC_SUCCESS iff all is ok
 ///
-template< fapi2::TargetType T = DEFAULT_MEM_PORT_TARGET, typename TT = eccTraits<DEFAULT_MC_TYPE, T> >
+template< mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T = DEFAULT_MEM_PORT_TARGET, typename TT = eccTraits<MC, T> >
 fapi2::ReturnCode galois_to_symbol( const uint8_t i_galois, uint8_t& o_symbol )
 {
     const auto& l_p = std::find(TT::symbol2galois, (TT::symbol2galois + TT::ECC_MAX_SYMBOLS), i_galois);
@@ -72,13 +75,14 @@ fapi_try_exit:
 
 ///
 /// @brief Return Galois code from a given symbol value
+/// @tparam MC the memory controller type defaults to type in mc defaults
 /// @tparam T fapi2 Target Type defaults to the default set in mc const file
 /// @tparam TT traits type defaults to eccTraits<T>
 /// @param[in] i_symbol the symbol value
 /// @param[out] o_galois Galois code represented by given symbol
 /// @return FAPI2_RC_SUCCESS iff all is ok
 ///
-template< fapi2::TargetType T = DEFAULT_MEM_PORT_TARGET, typename TT = eccTraits<DEFAULT_MC_TYPE, T> >
+template< mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T = DEFAULT_MEM_PORT_TARGET, typename TT = eccTraits<MC, T> >
 fapi2::ReturnCode symbol_to_galois( const uint8_t i_symbol, uint8_t& o_galois )
 {
     FAPI_ASSERT( i_symbol < TT::ECC_MAX_SYMBOLS,
@@ -96,13 +100,14 @@ fapi_try_exit:
 
 ///
 /// @brief Return symbol value from a given DQ index
+/// @tparam MC the memory controller type defaults to type in mc defaults
 /// @tparam T fapi2 Target Type defaults to the default set in mc const file
 /// @tparam TT traits type defaults to eccTraits<T>
 /// @param[in] i_dq the DQ index
 /// @param[out] o_symbol symbol value represented by given DQ index
 /// @return FAPI2_RC_SUCCESS iff all is ok
 ///
-template< fapi2::TargetType T = DEFAULT_MEM_PORT_TARGET, typename TT = eccTraits<DEFAULT_MC_TYPE, T> >
+template< mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T = DEFAULT_MEM_PORT_TARGET, typename TT = eccTraits<MC, T> >
 fapi2::ReturnCode dq_to_symbol( const uint8_t i_dq, uint8_t& o_symbol )
 {
     const auto& l_p = std::find(TT::symbol2dq, (TT::symbol2dq + TT::ECC_MAX_SYMBOLS), i_dq);
@@ -122,13 +127,14 @@ fapi_try_exit:
 
 ///
 /// @brief Return DQ index from a given symbol value
+/// @tparam MC the memory controller type defaults to type in mc defaults
 /// @tparam T fapi2 Target Type defaults to the default set in mc const file
 /// @tparam TT traits type defaults to eccTraits<T>
 /// @param[in] i_symbol the symbol value
 /// @param[out] o_dq DQ index represented by given symbol value
 /// @return FAPI2_RC_SUCCESS iff all is ok
 ///
-template< fapi2::TargetType T = DEFAULT_MEM_PORT_TARGET, typename TT = eccTraits<DEFAULT_MC_TYPE, T> >
+template< mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T = DEFAULT_MEM_PORT_TARGET, typename TT = eccTraits<MC, T> >
 fapi2::ReturnCode symbol_to_dq( const uint8_t i_symbol, uint8_t& o_dq )
 {
     FAPI_ASSERT( i_symbol < TT::ECC_MAX_SYMBOLS,
@@ -146,19 +152,20 @@ fapi_try_exit:
 
 ///
 /// @brief Return DQ index from a given Galois code
+/// @tparam MC the memory controller type defaults to type in mc defaults
 /// @tparam T fapi2 Target Type defaults to the default set in mc const file
 /// @tparam TT traits type defaults to eccTraits<T>
 /// @param[in] i_galois the Galois code
 /// @param[out] o_dq DQ index represented by given Galois code
 /// @return FAPI2_RC_SUCCESS iff all is ok
 ///
-template< fapi2::TargetType T = DEFAULT_MEM_PORT_TARGET, typename TT = eccTraits<DEFAULT_MC_TYPE, T> >
+template< mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T = DEFAULT_MEM_PORT_TARGET, typename TT = eccTraits<MC, T> >
 fapi2::ReturnCode galois_to_dq( const uint8_t i_galois, uint8_t& o_dq  )
 {
     uint8_t l_symbol = 0;
 
-    FAPI_TRY( galois_to_symbol<T>(i_galois, l_symbol), "Failed galois_to_symbol");
-    FAPI_TRY( symbol_to_dq<T>(l_symbol, o_dq), "Failed symbol_to_dq" );
+    FAPI_TRY( galois_to_symbol(i_galois, l_symbol), "Failed galois_to_symbol");
+    FAPI_TRY( symbol_to_dq(l_symbol, o_dq), "Failed symbol_to_dq" );
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -166,19 +173,20 @@ fapi_try_exit:
 
 ///
 /// @brief Return Galois code from a given DQ index
+/// @tparam MC the memory controller type defaults to type in mc defaults
 /// @tparam T fapi2 Target Type defaults to the default set in mc const file
 /// @tparam TT traits type defaults to eccTraits<T>
 /// @param[in] i_dq the DQ index
 /// @param[out] o_galois Galois code represented by given symbol
 /// @return FAPI2_RC_SUCCESS iff all is ok
 ///
-template< fapi2::TargetType T = DEFAULT_MEM_PORT_TARGET, typename TT = eccTraits<DEFAULT_MC_TYPE, T> >
+template< mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T = DEFAULT_MEM_PORT_TARGET, typename TT = eccTraits<MC, T> >
 fapi2::ReturnCode dq_to_galois( const uint8_t i_dq, uint8_t& o_galois )
 {
     uint8_t l_symbol = 0;
 
-    FAPI_TRY( mss::ecc::dq_to_symbol<T>(i_dq, l_symbol), "Failed dq_to_symbol");
-    FAPI_TRY( mss::ecc::symbol_to_galois<T>(l_symbol, o_galois) , "Failed symbol_to_galois" );
+    FAPI_TRY( dq_to_symbol(i_dq, l_symbol), "Failed dq_to_symbol");
+    FAPI_TRY( symbol_to_galois(l_symbol, o_galois) , "Failed symbol_to_galois" );
 
 fapi_try_exit:
     return fapi2::current_err;

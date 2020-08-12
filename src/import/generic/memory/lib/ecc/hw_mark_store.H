@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -52,13 +52,14 @@ namespace hwms
 ///
 /// @brief Read Hardware Mark Store (HWMS) register
 /// @tparam R master rank number
+/// @tparam MC the memory controller type defaults to type in mc defaults
 /// @tparam T fapi2 Target Type - derived from i_target's type
 /// @tparam TT traits type defaults to eccTraits<DEFAULT_MC_TYPE, T>
 /// @param[in] i_target the fapi2 target of the mc
 /// @param[out] o_data the value of the register
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
 ///
-template< uint64_t R, fapi2::TargetType T, typename TT = eccTraits<DEFAULT_MC_TYPE, T> >
+template< uint64_t R, mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T, typename TT = eccTraits<MC, T> >
 inline fapi2::ReturnCode read_rank( const fapi2::Target<T>& i_target, fapi2::buffer<uint64_t>& o_data )
 {
     static_assert((R < TT::ECC_MAX_MRANK_PER_PORT), "Master rank index failed range check");
@@ -70,117 +71,126 @@ fapi_try_exit:
 
 ///
 /// @brief Read Hardware Mark Store (HWMS) rank 0 register
+/// @tparam MC the memory controller type defaults to type in mc defaults
 /// @tparam T fapi2 Target Type - derived from i_target's type
 /// @param[in] i_target the fapi2 target of the mc
 /// @param[out] o_data the value of the register
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
 ///
-template< fapi2::TargetType T >
+template< mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T >
 inline fapi2::ReturnCode read_rank0( const fapi2::Target<T>& i_target, fapi2::buffer<uint64_t>& o_data )
 {
-    return ( read_rank<0>(i_target, o_data) );
+    return ( read_rank<0, MC>(i_target, o_data) );
 }
 
 ///
 /// @brief Read Hardware Mark Store (HWMS) rank 1 register
+/// @tparam MC the memory controller type defaults to type in mc defaults
 /// @tparam T fapi2 Target Type - derived from i_target's type
 /// @param[in] i_target the fapi2 target of the mc
 /// @param[out] o_data the value of the register
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
 ///
-template< fapi2::TargetType T >
+template< mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T >
 inline fapi2::ReturnCode read_rank1( const fapi2::Target<T>& i_target, fapi2::buffer<uint64_t>& o_data )
 {
-    return ( read_rank<1>(i_target, o_data) );
+    return ( read_rank<1, MC>(i_target, o_data) );
 }
 
 ///
 /// @brief Read Hardware Mark Store (HWMS) rank 2 register
+/// @tparam MC the memory controller type defaults to type in mc defaults
 /// @tparam T fapi2 Target Type - derived from i_target's type
 /// @param[in] i_target the fapi2 target of the mc
 /// @param[out] o_data the value of the register
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
 ///
-template< fapi2::TargetType T >
+template< mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T >
 inline fapi2::ReturnCode read_rank2( const fapi2::Target<T>& i_target, fapi2::buffer<uint64_t>& o_data )
 {
-    return ( read_rank<2>(i_target, o_data) );
+    return ( read_rank<2, MC>(i_target, o_data) );
 }
 
 ///
 /// @brief Read Hardware Mark Store (HWMS) rank 3 register
+/// @tparam MC the memory controller type defaults to type in mc defaults
 /// @tparam T fapi2 Target Type - derived from i_target's type
 /// @param[in] i_target the fapi2 target of the mc
 /// @param[out] o_data the value of the register
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
 ///
-template< fapi2::TargetType T >
+template< mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T >
 inline fapi2::ReturnCode read_rank3( const fapi2::Target<T>& i_target, fapi2::buffer<uint64_t>& o_data )
 {
-    return ( read_rank<3>(i_target, o_data) );
+    return ( read_rank<3, MC>(i_target, o_data) );
 }
 
 ///
 /// @brief Read Hardware Mark Store (HWMS) rank 4 register
+/// @tparam MC the memory controller type defaults to type in mc defaults
 /// @tparam T fapi2 Target Type - derived from i_target's type
 /// @param[in] i_target the fapi2 target of the mc
 /// @param[out] o_data the value of the register
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
 ///
-template< fapi2::TargetType T >
+template< mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T >
 inline fapi2::ReturnCode read_rank4( const fapi2::Target<T>& i_target, fapi2::buffer<uint64_t>& o_data )
 {
-    return ( read_rank<4>(i_target, o_data) );
+    return ( read_rank<4, MC>(i_target, o_data) );
 }
 
 ///
 /// @brief Read Hardware Mark Store (HWMS) rank 5 register
+/// @tparam MC the memory controller type defaults to type in mc defaults
 /// @tparam T fapi2 Target Type - derived from i_target's type
 /// @param[in] i_target the fapi2 target of the mc
 /// @param[out] o_data the value of the register
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
 ///
-template< fapi2::TargetType T >
+template< mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T >
 inline fapi2::ReturnCode read_rank5( const fapi2::Target<T>& i_target, fapi2::buffer<uint64_t>& o_data )
 {
-    return ( read_rank<5>(i_target, o_data) );
+    return ( read_rank<5, MC>(i_target, o_data) );
 }
 
 ///
 /// @brief Read Hardware Mark Store (HWMS) rank 6 register
+/// @tparam MC the memory controller type defaults to type in mc defaults
 /// @tparam T fapi2 Target Type - derived from i_target's type
 /// @param[in] i_target the fapi2 target of the mc
 /// @param[out] o_data the value of the register
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
 ///
-template< fapi2::TargetType T >
+template< mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T >
 inline fapi2::ReturnCode read_rank6( const fapi2::Target<T>& i_target, fapi2::buffer<uint64_t>& o_data )
 {
-    return ( read_rank<6>(i_target, o_data) );
+    return ( read_rank<6, MC>(i_target, o_data) );
 }
 
 ///
 /// @brief Read Hardware Mark Store (HWMS) rank 7 register
+/// @tparam MC the memory controller type defaults to type in mc defaults
 /// @tparam T fapi2 Target Type - derived from i_target's type
 /// @param[in] i_target the fapi2 target of the mc
 /// @param[out] o_data the value of the register
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
 ///
-template< fapi2::TargetType T >
+template< mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T >
 inline fapi2::ReturnCode read_rank7( const fapi2::Target<T>& i_target, fapi2::buffer<uint64_t>& o_data )
 {
-    return ( read_rank<7>(i_target, o_data) );
+    return ( read_rank<7, MC>(i_target, o_data) );
 }
 
 ///
 /// @brief Read Hardware Mark Store (HWMS) register
+/// @tparam MC the memory controller type defaults to type in mc defaults
 /// @tparam T fapi2 Target Type - derived from i_target's type
 /// @param[in] i_target the fapi2 target of the mc
 /// @param[in] i_rank the master rank index
 /// @param[out] o_data the value of the register
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
 ///
-template< fapi2::TargetType T >
+template< mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T >
 inline fapi2::ReturnCode read( const fapi2::Target<T>& i_target,
                                const uint64_t i_rank,
                                fapi2::buffer<uint64_t>& o_data )
@@ -188,28 +198,28 @@ inline fapi2::ReturnCode read( const fapi2::Target<T>& i_target,
     switch (i_rank)
     {
         case(0):
-            return ( read_rank0(i_target, o_data) );
+            return ( read_rank0<MC>(i_target, o_data) );
 
         case(1):
-            return ( read_rank1(i_target, o_data) );
+            return ( read_rank1<MC>(i_target, o_data) );
 
         case(2):
-            return ( read_rank2(i_target, o_data) );
+            return ( read_rank2<MC>(i_target, o_data) );
 
         case(3):
-            return ( read_rank3(i_target, o_data) );
+            return ( read_rank3<MC>(i_target, o_data) );
 
         case(4):
-            return ( read_rank4(i_target, o_data) );
+            return ( read_rank4<MC>(i_target, o_data) );
 
         case(5):
-            return ( read_rank5(i_target, o_data) );
+            return ( read_rank5<MC>(i_target, o_data) );
 
         case(6):
-            return ( read_rank6(i_target, o_data) );
+            return ( read_rank6<MC>(i_target, o_data) );
 
         case(7):
-            return ( read_rank7(i_target, o_data) );
+            return ( read_rank7<MC>(i_target, o_data) );
 
         default:
             FAPI_ASSERT( false,
@@ -230,13 +240,14 @@ fapi_try_exit:
 ///
 /// @brief Write Hardware Mark Store (HWMS) register
 /// @tparam R master rank number
+/// @tparam MC the memory controller type defaults to type in mc defaults
 /// @tparam T fapi2 Target Type - derived from i_target's type
 /// @tparam TT traits type defaults to eccTraits<DEFAULT_MC_TYPE, T>
 /// @param[in] i_target the fapi2 target of the mc
 /// @param[in] i_data the value to write to the register
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
 ///
-template< uint64_t R, fapi2::TargetType T, typename TT = eccTraits<DEFAULT_MC_TYPE, T> >
+template< uint64_t R, mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T, typename TT = eccTraits<MC, T> >
 inline fapi2::ReturnCode write_rank( const fapi2::Target<T>& i_target, const fapi2::buffer<uint64_t>& i_data )
 {
     static_assert((R < TT::ECC_MAX_MRANK_PER_PORT), "Master rank index failed range check");
@@ -248,117 +259,126 @@ fapi_try_exit:
 
 ///
 /// @brief Write Hardware Mark Store (HWMS) rank 0 register
+/// @tparam MC the memory controller type defaults to type in mc defaults
 /// @tparam T fapi2 Target Type - derived from i_target's type
 /// @param[in] i_target the fapi2 target of the mc
 /// @param[in] i_data the value to write to the register
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
 ///
-template< fapi2::TargetType T >
+template< mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T >
 inline fapi2::ReturnCode write_rank0( const fapi2::Target<T>& i_target, const fapi2::buffer<uint64_t>& i_data )
 {
-    return ( write_rank<0>(i_target, i_data) );
+    return ( write_rank<0, MC>(i_target, i_data) );
 }
 
 ///
 /// @brief Write Hardware Mark Store (HWMS) rank 1 register
+/// @tparam MC the memory controller type defaults to type in mc defaults
 /// @tparam T fapi2 Target Type - derived from i_target's type
 /// @param[in] i_target the fapi2 target of the mc
 /// @param[in] i_data the value to write to the register
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
 ///
-template< fapi2::TargetType T >
+template< mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T >
 inline fapi2::ReturnCode write_rank1( const fapi2::Target<T>& i_target, const fapi2::buffer<uint64_t>& i_data )
 {
-    return ( write_rank<1>(i_target, i_data) );
+    return ( write_rank<1, MC>(i_target, i_data) );
 }
 
 ///
 /// @brief Write Hardware Mark Store (HWMS) rank 2 register
+/// @tparam MC the memory controller type defaults to type in mc defaults
 /// @tparam T fapi2 Target Type - derived from i_target's type
 /// @param[in] i_target the fapi2 target of the mc
 /// @param[in] i_data the value to write to the register
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
 ///
-template< fapi2::TargetType T >
+template< mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T >
 inline fapi2::ReturnCode write_rank2( const fapi2::Target<T>& i_target, const fapi2::buffer<uint64_t>& i_data )
 {
-    return ( write_rank<2>(i_target, i_data) );
+    return ( write_rank<2, MC>(i_target, i_data) );
 }
 
 ///
 /// @brief Write Hardware Mark Store (HWMS) rank 3 register
+/// @tparam MC the memory controller type defaults to type in mc defaults
 /// @tparam T fapi2 Target Type - derived from i_target's type
 /// @param[in] i_target the fapi2 target of the mc
 /// @param[in] i_data the value to write to the register
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
 ///
-template< fapi2::TargetType T >
+template< mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T >
 inline fapi2::ReturnCode write_rank3( const fapi2::Target<T>& i_target, const fapi2::buffer<uint64_t>& i_data )
 {
-    return ( write_rank<3>(i_target, i_data) );
+    return ( write_rank<3, MC>(i_target, i_data) );
 }
 
 ///
 /// @brief Write Hardware Mark Store (HWMS) rank 4 register
+/// @tparam MC the memory controller type defaults to type in mc defaults
 /// @tparam T fapi2 Target Type - derived from i_target's type
 /// @param[in] i_target the fapi2 target of the mc
 /// @param[in] i_data the value to write to the register
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
 ///
-template< fapi2::TargetType T >
+template< mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T >
 inline fapi2::ReturnCode write_rank4( const fapi2::Target<T>& i_target, const fapi2::buffer<uint64_t>& i_data )
 {
-    return ( write_rank<4>(i_target, i_data) );
+    return ( write_rank<4, MC>(i_target, i_data) );
 }
 
 ///
 /// @brief Write Hardware Mark Store (HWMS) rank 5 register
+/// @tparam MC the memory controller type defaults to type in mc defaults
 /// @tparam T fapi2 Target Type - derived from i_target's type
 /// @param[in] i_target the fapi2 target of the mc
 /// @param[in] i_data the value to write to the register
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
 ///
-template< fapi2::TargetType T >
+template< mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T >
 inline fapi2::ReturnCode write_rank5( const fapi2::Target<T>& i_target, const fapi2::buffer<uint64_t>& i_data )
 {
-    return ( write_rank<5>(i_target, i_data) );
+    return ( write_rank<5, MC>(i_target, i_data) );
 }
 
 ///
 /// @brief Write Hardware Mark Store (HWMS) rank 6 register
+/// @tparam MC the memory controller type defaults to type in mc defaults
 /// @tparam T fapi2 Target Type - derived from i_target's type
 /// @param[in] i_target the fapi2 target of the mc
 /// @param[in] i_data the value to write to the register
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
 ///
-template< fapi2::TargetType T >
+template< mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T >
 inline fapi2::ReturnCode write_rank6( const fapi2::Target<T>& i_target, const fapi2::buffer<uint64_t>& i_data )
 {
-    return ( write_rank<6>(i_target, i_data) );
+    return ( write_rank<6, MC>(i_target, i_data) );
 }
 
 ///
 /// @brief Write Hardware Mark Store (HWMS) rank 7 register
+/// @tparam MC the memory controller type defaults to type in mc defaults
 /// @tparam T fapi2 Target Type - derived from i_target's type
 /// @param[in] i_target the fapi2 target of the mc
 /// @param[in] i_data the value to write to the register
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
 ///
-template< fapi2::TargetType T >
+template< mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T >
 inline fapi2::ReturnCode write_rank7( const fapi2::Target<T>& i_target, const fapi2::buffer<uint64_t>& i_data )
 {
-    return ( write_rank<7>(i_target, i_data) );
+    return ( write_rank<7, MC>(i_target, i_data) );
 }
 
 ///
 /// @brief Write Hardware Mark Store (HWMS) register
+/// @tparam MC the memory controller type defaults to type in mc defaults
 /// @tparam T fapi2 Target Type - derived from i_target's type
 /// @param[in] i_target the fapi2 target of the mc
 /// @param[in] i_rank the master rank index
 /// @param[in] i_data the value to write to the register
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
 ///
-template< fapi2::TargetType T >
+template< mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T >
 inline fapi2::ReturnCode write( const fapi2::Target<T>& i_target,
                                 const uint64_t i_rank,
                                 const fapi2::buffer<uint64_t>& i_data )
@@ -366,28 +386,28 @@ inline fapi2::ReturnCode write( const fapi2::Target<T>& i_target,
     switch (i_rank)
     {
         case(0):
-            return ( write_rank0(i_target, i_data) );
+            return ( write_rank0<MC>(i_target, i_data) );
 
         case(1):
-            return ( write_rank1(i_target, i_data) );
+            return ( write_rank1<MC>(i_target, i_data) );
 
         case(2):
-            return ( write_rank2(i_target, i_data) );
+            return ( write_rank2<MC>(i_target, i_data) );
 
         case(3):
-            return ( write_rank3(i_target, i_data) );
+            return ( write_rank3<MC>(i_target, i_data) );
 
         case(4):
-            return ( write_rank4(i_target, i_data) );
+            return ( write_rank4<MC>(i_target, i_data) );
 
         case(5):
-            return ( write_rank5(i_target, i_data) );
+            return ( write_rank5<MC>(i_target, i_data) );
 
         case(6):
-            return ( write_rank6(i_target, i_data) );
+            return ( write_rank6<MC>(i_target, i_data) );
 
         case(7):
-            return ( write_rank7(i_target, i_data) );
+            return ( write_rank7<MC>(i_target, i_data) );
 
         default:
             FAPI_ASSERT( false,
@@ -407,13 +427,14 @@ fapi_try_exit:
 
 ///
 /// @brief set_chipmark
+/// @tparam MC the memory controller type defaults to type in mc defaults
 /// @tparam T fapi2 Target Type defaults to the default set in mc const file
 /// @tparam TT traits type defaults to eccTraits<DEFAULT_MC_TYPE, T>
 /// @param[in, out] io_data the register value
 /// @param[in] i_value the value of the field
 /// @note HWMS0_CHIPMARK: Hardware chipmark (Galois field code)
 ///
-template< fapi2::TargetType T = DEFAULT_MEM_PORT_TARGET, typename TT = eccTraits<DEFAULT_MC_TYPE, T> >
+template< mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T = DEFAULT_MEM_PORT_TARGET, typename TT = eccTraits<MC, T> >
 inline void set_chipmark( fapi2::buffer<uint64_t>& io_data, const uint64_t i_value )
 {
     io_data.insertFromRight<TT::HARDWARE_MS_CHIPMARK, TT::HARDWARE_MS_CHIPMARK_LEN>(i_value);
@@ -422,13 +443,14 @@ inline void set_chipmark( fapi2::buffer<uint64_t>& io_data, const uint64_t i_val
 
 ///
 /// @brief get_chipmark
+/// @tparam MC the memory controller type defaults to type in mc defaults
 /// @tparam T fapi2 Target Type defaults to the default set in mc const file
 /// @tparam TT traits type defaults to eccTraits<DEFAULT_MC_TYPE, T>
 /// @param[in] i_data the register value
 /// @param[out] o_value the value of the field
 /// @note HWMS0_CHIPMARK: Hardware chipmark (Galois field code)
 ///
-template< fapi2::TargetType T = DEFAULT_MEM_PORT_TARGET, typename TT = eccTraits<DEFAULT_MC_TYPE, T> >
+template< mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T = DEFAULT_MEM_PORT_TARGET, typename TT = eccTraits<MC, T> >
 inline void get_chipmark( const fapi2::buffer<uint64_t>& i_data, uint64_t& o_value )
 {
     i_data.extractToRight<TT::HARDWARE_MS_CHIPMARK, TT::HARDWARE_MS_CHIPMARK_LEN>(o_value);
@@ -437,13 +459,14 @@ inline void get_chipmark( const fapi2::buffer<uint64_t>& i_data, uint64_t& o_val
 
 ///
 /// @brief set_confirmed
+/// @tparam MC the memory controller type defaults to type in mc defaults
 /// @tparam T fapi2 Target Type defaults to the default set in mc const file
 /// @tparam TT traits type defaults to eccTraits<DEFAULT_MC_TYPE, T>
 /// @param[in, out] io_data the register value
 /// @param[in] i_state mss::YES or mss::NO - desired state
 /// @note HWMS0_CONFIRMED: chipmark confirmed
 ///
-template< fapi2::TargetType T = DEFAULT_MEM_PORT_TARGET, typename TT = eccTraits<DEFAULT_MC_TYPE, T> >
+template< mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T = DEFAULT_MEM_PORT_TARGET, typename TT = eccTraits<MC, T> >
 inline void set_confirmed( fapi2::buffer<uint64_t>& io_data, const mss::states i_state )
 {
     io_data.writeBit<TT::HARDWARE_MS_CONFIRMED>(i_state);
@@ -452,13 +475,14 @@ inline void set_confirmed( fapi2::buffer<uint64_t>& io_data, const mss::states i
 
 ///
 /// @brief get_confirmed
+/// @tparam MC the memory controller type defaults to type in mc defaults
 /// @tparam T fapi2 Target Type
 /// @tparam TT traits type defaults to eccTraits<DEFAULT_MC_TYPE, T>
 /// @param[in] i_data the register value
 /// @param[out] o_state mss::YES or mss::NO - representing the state of the field
 /// @note HWMS0_CONFIRMED: chipmark confirmed
 ///
-template< fapi2::TargetType T = DEFAULT_MEM_PORT_TARGET, typename TT = eccTraits<DEFAULT_MC_TYPE, T> >
+template< mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T = DEFAULT_MEM_PORT_TARGET, typename TT = eccTraits<MC, T> >
 inline void get_confirmed( const fapi2::buffer<uint64_t>& i_data, mss::states& o_state )
 {
     o_state = (i_data.getBit<TT::HARDWARE_MS_CONFIRMED>() == false) ? mss::NO : mss::YES;
@@ -467,6 +491,7 @@ inline void get_confirmed( const fapi2::buffer<uint64_t>& i_data, mss::states& o
 
 ///
 /// @brief set_exit_1
+/// @tparam MC the memory controller type defaults to type in mc defaults
 /// @tparam T fapi2 Target Type defaults to the default set in mc const file
 /// @tparam TT traits type defaults to eccTraits<DEFAULT_MC_TYPE, T>
 /// @param[in, out] io_data the register value
@@ -474,7 +499,7 @@ inline void get_confirmed( const fapi2::buffer<uint64_t>& i_data, mss::states& o
 /// @note HWMS0_EXIT_1: When set, bypass-enabled reads using this mark will
 /// @note use exit 1; otherwise exit 0
 ///
-template< fapi2::TargetType T = DEFAULT_MEM_PORT_TARGET, typename TT = eccTraits<DEFAULT_MC_TYPE, T> >
+template< mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T = DEFAULT_MEM_PORT_TARGET, typename TT = eccTraits<MC, T> >
 inline void set_exit_1( fapi2::buffer<uint64_t>& io_data, const mss::states i_state )
 {
     io_data.writeBit<TT::HARDWARE_MS_EXIT1>(i_state);
@@ -483,6 +508,7 @@ inline void set_exit_1( fapi2::buffer<uint64_t>& io_data, const mss::states i_st
 
 ///
 /// @brief get_exit_1
+/// @tparam MC the memory controller type defaults to type in mc defaults
 /// @tparam T fapi2 Target Type defaults to the default set in mc const file
 /// @tparam TT traits type defaults to eccTraits<DEFAULT_MC_TYPE, T>
 /// @param[in] i_data the register value
@@ -490,7 +516,7 @@ inline void set_exit_1( fapi2::buffer<uint64_t>& io_data, const mss::states i_st
 /// @note HWMS0_EXIT_1: When set, bypass-enabled reads using this mark will
 /// @note use exit 1; otherwise exit 0
 ///
-template< fapi2::TargetType T = DEFAULT_MEM_PORT_TARGET, typename TT = eccTraits<DEFAULT_MC_TYPE, T> >
+template< mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T = DEFAULT_MEM_PORT_TARGET, typename TT = eccTraits<MC, T> >
 inline void get_exit_1( const fapi2::buffer<uint64_t>& i_data, mss::states& o_state )
 {
     o_state = (i_data.getBit<TT::HARDWARE_MS_EXIT1>() == false) ? mss::NO : mss::YES;
@@ -498,6 +524,66 @@ inline void get_exit_1( const fapi2::buffer<uint64_t>& i_data, mss::states& o_st
 }
 
 } // close namespace hwms
+
+///
+/// @brief Get Hardware Mark Store
+/// @tparam MC the memory controller type
+/// @tparam T the fapi2::TargetType - derived
+/// @param[in] i_target the fapi2 target
+/// @param[in] i_rank the desired port rank
+/// @param[out] o_galois the Galois code of the mark
+/// @param[out] o_confirmed true if the mark is a chipmark
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+///
+template< mss::mc_type MC, fapi2::TargetType T >
+fapi2::ReturnCode get_hwms( const fapi2::Target<T>& i_target,
+                            const uint64_t i_rank,
+                            uint64_t& o_galois,
+                            mss::states& o_confirmed )
+{
+    fapi2::buffer<uint64_t> l_buffer;
+
+    FAPI_TRY( mss::ecc::hwms::read<MC>(i_target, i_rank, l_buffer) );
+    mss::ecc::hwms::get_chipmark<MC>(l_buffer, o_galois);
+    mss::ecc::hwms::get_confirmed<MC>(l_buffer, o_confirmed);
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Set Hardware Mark Store
+/// @tparam MC the memory controller type
+/// @tparam T the fapi2::TargetType - derived
+/// @param[in] i_target the fapi2 target
+/// @param[in] i_rank the desired port rank
+/// @param[in] i_galois the Galois code of the mark, or set to 0 to clear mark
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+///
+template< mss::mc_type MC, fapi2::TargetType T >
+fapi2::ReturnCode set_hwms( const fapi2::Target<T>& i_target,
+                            const uint64_t i_rank,
+                            const uint64_t i_galois )
+{
+    fapi2::buffer<uint64_t> l_buffer;
+    uint8_t l_symbol = 0;
+
+    // galois value of 0 means to clear the mark so only fill in fields if non-zero
+    if (i_galois != 0)
+    {
+        // check for valid Galois code
+        FAPI_TRY( mss::ecc::galois_to_symbol<MC>( (uint8_t)i_galois, l_symbol) );
+
+        mss::ecc::hwms::set_chipmark<MC>(l_buffer, i_galois);
+        mss::ecc::hwms::set_confirmed<MC>(l_buffer, mss::YES);
+        mss::ecc::hwms::set_exit_1<MC>(l_buffer, mss::YES);
+    }
+
+    FAPI_TRY( mss::ecc::hwms::write<MC>(i_target, i_rank, l_buffer) );
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
 
 } // close namespace ecc
 
