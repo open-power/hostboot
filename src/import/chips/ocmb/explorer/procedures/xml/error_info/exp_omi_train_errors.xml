@@ -46,6 +46,11 @@
     </collectRegisterFfdc>
     <collectRegisterFfdc>
       <id>REG_FFDC_MC_OMI_TRAIN_ERR_INFO</id>
+      <target>OMI_TARGET</target>
+      <targetType>TARGET_TYPE_OMI</targetType>
+    </collectRegisterFfdc>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_MC_OMIC_TRAIN_ERR_INFO</id>
       <target>OMIC_TARGET</target>
       <targetType>TARGET_TYPE_OMIC</targetType>
     </collectRegisterFfdc>

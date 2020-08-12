@@ -45,8 +45,6 @@
 
   <registerFfdc>
     <id>REG_FFDC_MC_OMI_TRAIN_ERR_INFO</id>
-    <scomRegister>scomt::omic::CMN_CONFIG</scomRegister>
-    <scomRegister>scomt::omic::PMU_CNTR</scomRegister>
     <scomRegister>scomt::omi::CONFIG0</scomRegister>
     <scomRegister>scomt::omi::CONFIG1</scomRegister>
     <scomRegister>scomt::omi::ERROR_MASK</scomRegister>
@@ -59,6 +57,12 @@
     <scomRegister>scomt::omi::DLX_INFO</scomRegister>
     <scomRegister>scomt::omi::ERROR_ACTION</scomRegister>
     <scomRegister>scomt::omi::CYA_BITS</scomRegister>
+  </registerFfdc>
+
+  <registerFfdc>
+    <id>REG_FFDC_MC_OMIC_TRAIN_ERR_INFO</id>
+    <scomRegister>scomt::omic::CMN_CONFIG</scomRegister>
+    <scomRegister>scomt::omic::PMU_CNTR</scomRegister>
   </registerFfdc>
 
   <!-- ******************************************************************** -->
@@ -83,6 +87,11 @@
     </collectRegisterFfdc>
     <collectRegisterFfdc>
       <id>REG_FFDC_MC_OMI_TRAIN_ERR_INFO</id>
+      <target>OMI_TARGET</target>
+      <targetType>TARGET_TYPE_OMI</targetType>
+    </collectRegisterFfdc>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_MC_OMIC_TRAIN_ERR_INFO</id>
       <target>OMIC_TARGET</target>
       <targetType>TARGET_TYPE_OMIC</targetType>
     </collectRegisterFfdc>
