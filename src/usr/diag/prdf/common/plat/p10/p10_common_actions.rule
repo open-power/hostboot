@@ -106,6 +106,12 @@ actionclass threshold_and_mask
 actionclass threshold_and_mask_self   { calloutSelfMed;   threshold_and_mask; };
 actionclass threshold_and_mask_level2 { callout2ndLvlMed; threshold_and_mask; };
 
+actionclass threshold_and_mask_parent_proc
+{
+    calloutParentProcMed;
+    threshold_and_mask;
+};
+
 ################################################################################
 #                               Special Flags                                  #
 ################################################################################
@@ -140,6 +146,9 @@ actionclass calloutSelfMedNoGard
 /** Callout self with  low priority but don't gard it */
 actionclass calloutSelfLowNoGard
 { callout(MRU_LOW, NO_GARD); };
+
+# Parent processor
+actionclass calloutParentProcMed { callout(connected(TYPE_PROC), MRU_MED); };
 
 ################################################################################
 #                           Callouts with thresholds                           #
@@ -204,14 +213,21 @@ actionclass self_M_level2_L_th_32perDay
 
 actionclass parent_proc_th_1
 {
-    callout(connected(TYPE_PROC), MRU_MED);
+    calloutParentProcMed;
     threshold1;
 };
 
 actionclass parent_proc_th_32perDay
 {
-    callout(connected(TYPE_PROC), MRU_MED);
+    calloutParentProcMed;
     threshold32pday;
+};
+
+actionclass parent_proc_M_level2_L_th_1
+{
+    calloutParentProcMed;
+    callout2ndLvlLow;
+    threshold1;
 };
 
 actionclass level2_M_proc_L_th_1
@@ -225,10 +241,12 @@ actionclass level2_M_proc_L_th_1
 #                           Callouts with flags                                #
 ################################################################################
 
-actionclass level2_th_1_SUE  { level2_th_1; SueSeen;   };
-actionclass level2_th_1_UERE { level2_th_1; SueSource; };
-actionclass self_th_1_SUE    { self_th_1;   SueSeen;   };
-actionclass self_th_1_UERE   { self_th_1;   SueSource; };
+actionclass level2_th_1_SUE       { level2_th_1;      SueSeen;   };
+actionclass level2_th_1_UERE      { level2_th_1;      SueSource; };
+actionclass self_th_1_SUE         { self_th_1;        SueSeen;   };
+actionclass self_th_1_UERE        { self_th_1;        SueSource; };
+actionclass parent_proc_th_1_SUE  { parent_proc_th_1; SueSeen;   };
+actionclass parent_proc_th_1_UERE { parent_proc_th_1; SueSource; };
 
 ################################################################################
 #                               Dump Types                                     #

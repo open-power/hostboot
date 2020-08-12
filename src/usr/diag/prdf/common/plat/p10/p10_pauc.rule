@@ -271,62 +271,62 @@ group gPAU_LOCAL_FIR
     /** PAU_LOCAL_FIR[0]
      *  CFIR - Parity or PCB access error
      */
-    (rPAU_LOCAL_FIR, bit(0)) ? self_th_32perDay;
+    (rPAU_LOCAL_FIR, bit(0)) ? parent_proc_th_32perDay;
 
     /** PAU_LOCAL_FIR[1]
      *  CPLT_CTRL - PCB access error
      */
-    (rPAU_LOCAL_FIR, bit(1)) ? self_th_32perDay;
+    (rPAU_LOCAL_FIR, bit(1)) ? parent_proc_th_32perDay;
 
     /** PAU_LOCAL_FIR[2]
      *  CC - PCB access error
      */
-    (rPAU_LOCAL_FIR, bit(2)) ? self_th_32perDay;
+    (rPAU_LOCAL_FIR, bit(2)) ? parent_proc_th_32perDay;
 
     /** PAU_LOCAL_FIR[3]
      *  CC - Clock Control Error
      */
-    (rPAU_LOCAL_FIR, bit(3)) ? self_th_32perDay;
+    (rPAU_LOCAL_FIR, bit(3)) ? parent_proc_th_32perDay;
 
     /** PAU_LOCAL_FIR[4]
      *  PSC - PSCOM access error
      */
-    (rPAU_LOCAL_FIR, bit(4)) ? self_th_32perDay;
+    (rPAU_LOCAL_FIR, bit(4)) ? parent_proc_th_32perDay;
 
     /** PAU_LOCAL_FIR[5]
      *  PSC - internal or ring interface error
      */
-    (rPAU_LOCAL_FIR, bit(5)) ? self_th_32perDay;
+    (rPAU_LOCAL_FIR, bit(5)) ? parent_proc_th_32perDay;
 
     /** PAU_LOCAL_FIR[6]
      *  THERM - internal error
      */
-    (rPAU_LOCAL_FIR, bit(6)) ? threshold_and_mask_self;
+    (rPAU_LOCAL_FIR, bit(6)) ? threshold_and_mask_parent_proc;
 
     /** PAU_LOCAL_FIR[7]
      *  THERM - pcb error
      */
-    (rPAU_LOCAL_FIR, bit(7)) ? threshold_and_mask_self;
+    (rPAU_LOCAL_FIR, bit(7)) ? threshold_and_mask_parent_proc;
 
     /** PAU_LOCAL_FIR[8]
      *  THERMTRIP - Critical temperature indicator
      */
-    (rPAU_LOCAL_FIR, bit(8)) ? threshold_and_mask_self;
+    (rPAU_LOCAL_FIR, bit(8)) ? threshold_and_mask_parent_proc;
 
     /** PAU_LOCAL_FIR[9]
      *  THERMTRIP - Fatal temperature indicator
      */
-    (rPAU_LOCAL_FIR, bit(9)) ? threshold_and_mask_self;
+    (rPAU_LOCAL_FIR, bit(9)) ? threshold_and_mask_parent_proc;
 
     /** PAU_LOCAL_FIR[10]
      *  VOLTTRIP - Voltage sense error
      */
-    (rPAU_LOCAL_FIR, bit(10)) ? threshold_and_mask_self;
+    (rPAU_LOCAL_FIR, bit(10)) ? threshold_and_mask_parent_proc;
 
     /** PAU_LOCAL_FIR[11]
      *  DBG - scom parity fail
      */
-    (rPAU_LOCAL_FIR, bit(11)) ? threshold_and_mask_self;
+    (rPAU_LOCAL_FIR, bit(11)) ? threshold_and_mask_parent_proc;
 
     /** PAU_LOCAL_FIR[12]
      *  reserved
@@ -371,12 +371,12 @@ group gPAU_LOCAL_FIR
     /** PAU_LOCAL_FIR[20]
      *  Trace00 - scom parity err
      */
-    (rPAU_LOCAL_FIR, bit(20)) ? self_th_32perDay;
+    (rPAU_LOCAL_FIR, bit(20)) ? parent_proc_th_32perDay;
 
     /** PAU_LOCAL_FIR[21]
      *  Trace01 - scom parity err - Unused in Axon,PCI
      */
-    (rPAU_LOCAL_FIR, bit(21)) ? self_th_32perDay;
+    (rPAU_LOCAL_FIR, bit(21)) ? parent_proc_th_32perDay;
 
     /** PAU_LOCAL_FIR[22]
      *  unused
@@ -629,12 +629,12 @@ group gPAU_PTL_FIR
     /** PAU_PTL_FIR[4]
      *  dob01 ue
      */
-    (rPAU_PTL_FIR, bit(4)) ? self_th_1_UERE;
+    (rPAU_PTL_FIR, bit(4)) ? parent_proc_th_1_UERE;
 
     /** PAU_PTL_FIR[5]
      *  dob01 ce
      */
-    (rPAU_PTL_FIR, bit(5)) ? self_th_32perDay;
+    (rPAU_PTL_FIR, bit(5)) ? parent_proc_th_32perDay;
 
     /** PAU_PTL_FIR[6]
      *  dob01 sue
@@ -649,12 +649,12 @@ group gPAU_PTL_FIR
     /** PAU_PTL_FIR[8]
      *  dob23 ue
      */
-    (rPAU_PTL_FIR, bit(8)) ? self_th_1_UERE;
+    (rPAU_PTL_FIR, bit(8)) ? parent_proc_th_1_UERE;
 
     /** PAU_PTL_FIR[9]
      *  dob23 ce
      */
-    (rPAU_PTL_FIR, bit(9)) ? self_th_32perDay;
+    (rPAU_PTL_FIR, bit(9)) ? parent_proc_th_32perDay;
 
     /** PAU_PTL_FIR[10]
      *  dob23 sue
@@ -669,52 +669,52 @@ group gPAU_PTL_FIR
     /** PAU_PTL_FIR[12]
      *  Even PTL, even framer internal error
      */
-    (rPAU_PTL_FIR, bit(12)) ? self_th_1;
+    (rPAU_PTL_FIR, bit(12)) ? parent_proc_th_1;
 
     /** PAU_PTL_FIR[13]
      *  Even PTL, outbound switch cmd/presp/cresp internal
      */
-    (rPAU_PTL_FIR, bit(13)) ? self_th_1;
+    (rPAU_PTL_FIR, bit(13)) ? parent_proc_th_1;
 
     /** PAU_PTL_FIR[14]
      *  Even PTL, odd framer internal error
      */
-    (rPAU_PTL_FIR, bit(14)) ? self_th_1;
+    (rPAU_PTL_FIR, bit(14)) ? parent_proc_th_1;
 
     /** PAU_PTL_FIR[15]
      *  Odd PTL, even framer internal error
      */
-    (rPAU_PTL_FIR, bit(15)) ? self_th_1;
+    (rPAU_PTL_FIR, bit(15)) ? parent_proc_th_1;
 
     /** PAU_PTL_FIR[16]
      *  Odd PTL, outbound switch cmd/presp/cresp internal 
      */
-    (rPAU_PTL_FIR, bit(16)) ? self_th_1;
+    (rPAU_PTL_FIR, bit(16)) ? parent_proc_th_1;
 
     /** PAU_PTL_FIR[17]
      *  Odd PTL, odd framer internal error
      */
-    (rPAU_PTL_FIR, bit(17)) ? self_th_1;
+    (rPAU_PTL_FIR, bit(17)) ? parent_proc_th_1;
 
     /** PAU_PTL_FIR[18]
      *  Even PTL, even parser internal error
      */
-    (rPAU_PTL_FIR, bit(18)) ? self_th_1;
+    (rPAU_PTL_FIR, bit(18)) ? parent_proc_th_1;
 
     /** PAU_PTL_FIR[19]
      *  Even PTL, odd parser internal error
      */
-    (rPAU_PTL_FIR, bit(19)) ? self_th_1;
+    (rPAU_PTL_FIR, bit(19)) ? parent_proc_th_1;
 
     /** PAU_PTL_FIR[20]
      *  Odd PTL, even parser internal error
      */
-    (rPAU_PTL_FIR, bit(20)) ? self_th_1;
+    (rPAU_PTL_FIR, bit(20)) ? parent_proc_th_1;
 
     /** PAU_PTL_FIR[21]
      *  Odd PTL, odd parser internal error
      */
-    (rPAU_PTL_FIR, bit(21)) ? self_th_1;
+    (rPAU_PTL_FIR, bit(21)) ? parent_proc_th_1;
 
     /** PAU_PTL_FIR[22]
      *  Even PTL, even link down
@@ -834,12 +834,12 @@ group gPAU_PHY_FIR
     /** PAU_PHY_FIR[1]
      *  RX state machine parity or mode register parity er
      */
-    (rPAU_PHY_FIR, bit(1)) ? self_th_1;
+    (rPAU_PHY_FIR, bit(1)) ? parent_proc_th_1;
 
     /** PAU_PHY_FIR[2]
      *  RX state machine parity or mode register parity er
      */
-    (rPAU_PHY_FIR, bit(2)) ? self_th_32perDay;
+    (rPAU_PHY_FIR, bit(2)) ? parent_proc_th_32perDay;
 
     /** PAU_PHY_FIR[3]
      *  RX state machine parity or mode register parity er
@@ -874,12 +874,12 @@ group gPAU_PHY_FIR
     /** PAU_PHY_FIR[9]
      *  A PPE internal error has occurred.
      */
-    (rPAU_PHY_FIR, bit(9)) ? self_th_1;
+    (rPAU_PHY_FIR, bit(9)) ? parent_proc_th_1;
 
     /** PAU_PHY_FIR[10]
      *  A PPE external error has occurred.
      */
-    (rPAU_PHY_FIR, bit(10)) ? self_th_1;
+    (rPAU_PHY_FIR, bit(10)) ? parent_proc_th_1;
 
     /** PAU_PHY_FIR[11]
      *  A PPE Halt due to Watchdog or Interrupt has occurr
@@ -894,7 +894,7 @@ group gPAU_PHY_FIR
     /** PAU_PHY_FIR[13]
      *  PPE Halted.
      */
-    (rPAU_PHY_FIR, bit(13)) ? self_th_1;
+    (rPAU_PHY_FIR, bit(13)) ? parent_proc_th_1;
 
     /** PAU_PHY_FIR[14]
      *  A PPE Watchdog Timeout has occurred.
@@ -904,17 +904,17 @@ group gPAU_PHY_FIR
     /** PAU_PHY_FIR[15]
      *  A PPE Array Scrub was missed.
      */
-    (rPAU_PHY_FIR, bit(15)) ? threshold_and_mask_self;
+    (rPAU_PHY_FIR, bit(15)) ? threshold_and_mask_parent_proc;
 
     /** PAU_PHY_FIR[16]
      *  A PPE Array uncorrectable error has occurred.
      */
-    (rPAU_PHY_FIR, bit(16)) ? self_th_1;
+    (rPAU_PHY_FIR, bit(16)) ? parent_proc_th_1;
 
     /** PAU_PHY_FIR[17]
      *  A PPE Array correctable error has occurred.
      */
-    (rPAU_PHY_FIR, bit(17)) ? self_th_32perDay;
+    (rPAU_PHY_FIR, bit(17)) ? parent_proc_th_32perDay;
 
     /** PAU_PHY_FIR[18]
      *  A PPE Code Recal Abort has occurred.
@@ -924,12 +924,12 @@ group gPAU_PHY_FIR
     /** PAU_PHY_FIR[19]
      *  A PPE Code Fatal Error has occurred.
      */
-    (rPAU_PHY_FIR, bit(19)) ? self_th_1;
+    (rPAU_PHY_FIR, bit(19)) ? parent_proc_th_1;
 
     /** PAU_PHY_FIR[20]
      *  A PPE Code Warning has occurred.
      */
-    (rPAU_PHY_FIR, bit(20)) ? threshold_and_mask_self;
+    (rPAU_PHY_FIR, bit(20)) ? threshold_and_mask_parent_proc;
 
     /** PAU_PHY_FIR[21]
      *  A PPE Code DFT Error has occurred.
@@ -944,7 +944,7 @@ group gPAU_PHY_FIR
     /** PAU_PHY_FIR[23]
      *  A PPE Code Thread Locked has occurred.
      */
-    (rPAU_PHY_FIR, bit(23)) ? threshold_and_mask_self;
+    (rPAU_PHY_FIR, bit(23)) ? threshold_and_mask_parent_proc;
 
     /** PAU_PHY_FIR[24]
      *  Reserved

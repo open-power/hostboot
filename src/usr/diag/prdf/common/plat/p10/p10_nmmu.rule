@@ -179,7 +179,7 @@ group gNMMU_CQ_FIR
     /** NMMU_CQ_FIR[0]
      *  PBI internal parity error
      */
-    (rNMMU_CQ_FIR, bit(0)) ? self_th_1;
+    (rNMMU_CQ_FIR, bit(0)) ? parent_proc_th_1;
 
     /** NMMU_CQ_FIR[1]
      *  PowerBus command hang error
@@ -189,17 +189,17 @@ group gNMMU_CQ_FIR
     /** NMMU_CQ_FIR[2]
      *  PowerBus read address error
      */
-    (rNMMU_CQ_FIR, bit(2)) ? self_M_level2_L_th_1;
+    (rNMMU_CQ_FIR, bit(2)) ? parent_proc_M_level2_L_th_1;
 
     /** NMMU_CQ_FIR[3]
      *  PowerBus write address error
      */
-    (rNMMU_CQ_FIR, bit(3)) ? self_M_level2_L_th_1;
+    (rNMMU_CQ_FIR, bit(3)) ? parent_proc_M_level2_L_th_1;
 
     /** NMMU_CQ_FIR[4]
      *  PowerBus miscellaneous error
      */
-    (rNMMU_CQ_FIR, bit(4)) ? self_th_1;
+    (rNMMU_CQ_FIR, bit(4)) ? parent_proc_th_1;
 
     /** NMMU_CQ_FIR[5]
      *  Reserved
@@ -209,22 +209,22 @@ group gNMMU_CQ_FIR
     /** NMMU_CQ_FIR[6]
      *  PowerBus Xlate UE error
      */
-    (rNMMU_CQ_FIR, bit(6)) ? self_th_1;
+    (rNMMU_CQ_FIR, bit(6)) ? parent_proc_th_1;
 
     /** NMMU_CQ_FIR[7]
      *  PowerBus Xlate SUE error
      */
-    (rNMMU_CQ_FIR, bit(7)) ? self_th_1_SUE;
+    (rNMMU_CQ_FIR, bit(7)) ? parent_proc_th_1_SUE;
 
     /** NMMU_CQ_FIR[8]
      *  PowerBus CE error
      */
-    (rNMMU_CQ_FIR, bit(8)) ? self_th_32perDay;
+    (rNMMU_CQ_FIR, bit(8)) ? parent_proc_th_32perDay;
 
     /** NMMU_CQ_FIR[9]
      *  PowerBus UE error
      */
-    (rNMMU_CQ_FIR, bit(9)) ? self_th_1;
+    (rNMMU_CQ_FIR, bit(9)) ? parent_proc_th_1;
 
     /** NMMU_CQ_FIR[10]
      *  PowerBus SUE error
@@ -234,12 +234,12 @@ group gNMMU_CQ_FIR
     /** NMMU_CQ_FIR[11]
      *  Inbound LCO_ARRAY CE error
      */
-    (rNMMU_CQ_FIR, bit(11)) ? self_th_32perDay;
+    (rNMMU_CQ_FIR, bit(11)) ? parent_proc_th_32perDay;
 
     /** NMMU_CQ_FIR[12]
      *  Inbound LCO_ARRAY UE error
      */
-    (rNMMU_CQ_FIR, bit(12)) ? self_th_1;
+    (rNMMU_CQ_FIR, bit(12)) ? parent_proc_th_1;
 
     /** NMMU_CQ_FIR[13]
      *  Inbound LCO_ARRAY SUE error
@@ -249,17 +249,17 @@ group gNMMU_CQ_FIR
     /** NMMU_CQ_FIR[14]
      *  Inbound array CE error
      */
-    (rNMMU_CQ_FIR, bit(14)) ? self_th_32perDay;
+    (rNMMU_CQ_FIR, bit(14)) ? parent_proc_th_32perDay;
 
     /** NMMU_CQ_FIR[15]
      *  Inbound array UE error
      */
-    (rNMMU_CQ_FIR, bit(15)) ? self_th_1;
+    (rNMMU_CQ_FIR, bit(15)) ? parent_proc_th_1;
 
     /** NMMU_CQ_FIR[16]
      *  internal state error
      */
-    (rNMMU_CQ_FIR, bit(16)) ? self_th_1;
+    (rNMMU_CQ_FIR, bit(16)) ? parent_proc_th_1;
 
     /** NMMU_CQ_FIR[17]
      *  ACK_DEAD cresp received by read command
@@ -299,27 +299,27 @@ group gNMMU_FIR
     /** NMMU_FIR[0]
      *  Fabric DIn xlat array CE error detected.
      */
-    (rNMMU_FIR, bit(0)) ? self_th_32perDay;
+    (rNMMU_FIR, bit(0)) ? parent_proc_th_32perDay;
 
     /** NMMU_FIR[1]
      *  Fabric DIn xlat array UE error detected.
      */
-    (rNMMU_FIR, bit(1)) ? self_th_1;
+    (rNMMU_FIR, bit(1)) ? parent_proc_th_1;
 
     /** NMMU_FIR[2]
      *  Fabric DIn xlat array SUE error detected.
      */
-    (rNMMU_FIR, bit(2)) ? self_th_1_SUE;
+    (rNMMU_FIR, bit(2)) ? parent_proc_th_1_SUE;
 
     /** NMMU_FIR[3]
      *  Fabric mst rd array CE error detected.
      */
-    (rNMMU_FIR, bit(3)) ? self_th_32perDay;
+    (rNMMU_FIR, bit(3)) ? parent_proc_th_32perDay;
 
     /** NMMU_FIR[4]
      *  Fabric mst rd array UE error detected.
      */
-    (rNMMU_FIR, bit(4)) ? self_th_1;
+    (rNMMU_FIR, bit(4)) ? parent_proc_th_1;
 
     /** NMMU_FIR[5]
      *  Fabric mst rd array SUE error detected.
@@ -329,7 +329,7 @@ group gNMMU_FIR
     /** NMMU_FIR[6]
      *  Fabric xlat protocol error detected.
      */
-    (rNMMU_FIR, bit(6)) ? self_th_1;
+    (rNMMU_FIR, bit(6)) ? parent_proc_th_1;
 
     /** NMMU_FIR[7]
      *  Fabric xlat op timeout detected.
@@ -339,48 +339,48 @@ group gNMMU_FIR
     /** NMMU_FIR[8]
      *  SLB directory parity error detected.
      */
-    (rNMMU_FIR, bit(8)) ? self_th_32perDay;
-    # P10_10: CS self_th_1
+    (rNMMU_FIR, bit(8)) ? parent_proc_th_32perDay;
+    # P10_10: CS parent_proc_th_1
 
     /** NMMU_FIR[9]
      *  SLB cache parity error detected.
      */
-    (rNMMU_FIR, bit(9)) ? self_th_32perDay;
-    # P10_10: CS self_th_1
+    (rNMMU_FIR, bit(9)) ? parent_proc_th_32perDay;
+    # P10_10: CS parent_proc_th_1
 
     /** NMMU_FIR[10]
      *  SLB lru parity error detected.
      */
-    (rNMMU_FIR, bit(10)) ? self_th_32perDay;
-    # P10_10: CS self_th_1
+    (rNMMU_FIR, bit(10)) ? parent_proc_th_32perDay;
+    # P10_10: CS parent_proc_th_1
 
     /** NMMU_FIR[11]
      *  SLB multi-hit error detected.
      */
-    (rNMMU_FIR, bit(11)) ? threshold_and_mask_self;
+    (rNMMU_FIR, bit(11)) ? threshold_and_mask_parent_proc;
 
     /** NMMU_FIR[12]
      *  TLB directory parity error detected.
      */
-    (rNMMU_FIR, bit(12)) ? self_th_32perDay;
-    # P10_10: CS self_th_1
+    (rNMMU_FIR, bit(12)) ? parent_proc_th_32perDay;
+    # P10_10: CS parent_proc_th_1
 
     /** NMMU_FIR[13]
      *  TLB cache parity error detected.
      */
-    (rNMMU_FIR, bit(13)) ? self_th_32perDay;
-    # P10_10: CS self_th_1
+    (rNMMU_FIR, bit(13)) ? parent_proc_th_32perDay;
+    # P10_10: CS parent_proc_th_1
 
     /** NMMU_FIR[14]
      *  TLB lru parity error detected.
      */
-    (rNMMU_FIR, bit(14)) ? self_th_32perDay;
-    # P10_10: CS self_th_1
+    (rNMMU_FIR, bit(14)) ? parent_proc_th_32perDay;
+    # P10_10: CS parent_proc_th_1
 
     /** NMMU_FIR[15]
      *  TLB multi-hit error detected.
      */
-    (rNMMU_FIR, bit(15)) ? threshold_and_mask_self;
+    (rNMMU_FIR, bit(15)) ? threshold_and_mask_parent_proc;
 
     /** NMMU_FIR[16]
      *  Segment fault detected
@@ -410,7 +410,7 @@ group gNMMU_FIR
     /** NMMU_FIR[21]
      *  Address error cresp detected by twsm for read
      */
-    (rNMMU_FIR, bit(21)) ? self_M_level2_L_th_1;
+    (rNMMU_FIR, bit(21)) ? parent_proc_M_level2_L_th_1;
 
     /** NMMU_FIR[22]
      *  PTE update fail due to armwf mismatch.
@@ -420,7 +420,7 @@ group gNMMU_FIR
     /** NMMU_FIR[23]
      *  Address error cresp detected by twsm for write.
      */
-    (rNMMU_FIR, bit(23)) ? self_M_level2_L_th_1;
+    (rNMMU_FIR, bit(23)) ? parent_proc_M_level2_L_th_1;
 
     /** NMMU_FIR[24]
      *  Unsupported radix cfg for guest-side
@@ -455,34 +455,34 @@ group gNMMU_FIR
     /** NMMU_FIR[30]
      *  Context cache array parity error detected
      */
-    (rNMMU_FIR, bit(30)) ? self_th_32perDay;
-    # P10_10: CS self_th_1
+    (rNMMU_FIR, bit(30)) ? parent_proc_th_32perDay;
+    # P10_10: CS parent_proc_th_1
 
     /** NMMU_FIR[31]
      *  Radix pwc array parity error detected
      */
-    (rNMMU_FIR, bit(31)) ? self_th_32perDay;
-    # P10_10: CS self_th_1
+    (rNMMU_FIR, bit(31)) ? parent_proc_th_32perDay;
+    # P10_10: CS parent_proc_th_1
 
     /** NMMU_FIR[32]
      *  Tablewalk sm control error detected
      */
-    (rNMMU_FIR, bit(32)) ? self_th_1;
+    (rNMMU_FIR, bit(32)) ? parent_proc_th_1;
 
     /** NMMU_FIR[33]
      *  Castout sm control error detected
      */
-    (rNMMU_FIR, bit(33)) ? self_th_1;
+    (rNMMU_FIR, bit(33)) ? parent_proc_th_1;
 
     /** NMMU_FIR[34]
      *  Check-in sm control error detected
      */
-    (rNMMU_FIR, bit(34)) ? self_th_1;
+    (rNMMU_FIR, bit(34)) ? parent_proc_th_1;
 
     /** NMMU_FIR[35]
      *  Invalidate sm control error detected
      */
-    (rNMMU_FIR, bit(35)) ? self_th_1;
+    (rNMMU_FIR, bit(35)) ? parent_proc_th_1;
 
     /** NMMU_FIR[36]
      *  Tablewalk sm timeout error detected
@@ -512,13 +512,13 @@ group gNMMU_FIR
     /** NMMU_FIR[41]
      *  fbc snoop invalidate filter parity error
      */
-    (rNMMU_FIR, bit(41)) ? self_th_32perDay;
-    # P10_10: CS self_th_1
+    (rNMMU_FIR, bit(41)) ? parent_proc_th_32perDay;
+    # P10_10: CS parent_proc_th_1
 
     /** NMMU_FIR[42]
      *  fabric purge threshold exceeded
      */
-    (rNMMU_FIR, bit(42)) ? self_th_1;
+    (rNMMU_FIR, bit(42)) ? parent_proc_th_1;
 
     /** NMMU_FIR[43]
      *  NPU local checkstop error detected

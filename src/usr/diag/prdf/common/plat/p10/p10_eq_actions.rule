@@ -29,17 +29,6 @@ actionclass coreUnitCheckstop
     # TBD
 };
 
-# In P10, we are unable to gard the EQ target. Instead, we'll callout and gard
-# all connected CORE targets as a group.
-actionclass calloutEQ
-{
-    funccall("calloutConnectedCores");
-};
-
-actionclass eq_th_1               { calloutEQ; threshold1;         };
-actionclass eq_th_32perDay        { calloutEQ; threshold32pday;    };
-actionclass threshold_and_mask_eq { calloutEQ; threshold_and_mask; };
-
 ###############################################################################
 # Analyze connected
 ###############################################################################

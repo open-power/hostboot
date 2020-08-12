@@ -38,24 +38,6 @@ using namespace PlatServices;
 namespace p10_eq
 {
 
-/**
- * @brief  Add all functional cores connected to this EQ to the callout list.
- * @param  i_chip EQ chip.
- * @param  io_sc  The step code data struct.
- * @return SUCCESS.
- */
-int32_t calloutConnectedCores(ExtensibleChip * i_chip,
-                              STEP_CODE_DATA_STRUCT & io_sc)
-{
-    for (const auto& core : getConnectedChildren(i_chip->getTrgt(), TYPE_CORE))
-    {
-        io_sc.service_data->SetCallout(core, MRU_MEDA);
-    }
-
-    return SUCCESS;
-}
-PRDF_PLUGIN_DEFINE(p10_eq, calloutConnectedCores);
-
 } // namespace p10_eq
 
 } // namespace PRDF

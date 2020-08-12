@@ -509,87 +509,87 @@ group gEQ_LOCAL_FIR
     /** EQ_LOCAL_FIR[0]
      *  CFIR - Parity or PCB access error
      */
-    (rEQ_LOCAL_FIR, bit(0)) ? eq_th_32perDay;
+    (rEQ_LOCAL_FIR, bit(0)) ? parent_proc_th_32perDay;
 
     /** EQ_LOCAL_FIR[1]
      *  CPLT_CTRL - PCB access error
      */
-    (rEQ_LOCAL_FIR, bit(1)) ? eq_th_32perDay;
+    (rEQ_LOCAL_FIR, bit(1)) ? parent_proc_th_32perDay;
 
     /** EQ_LOCAL_FIR[2]
      *  CC - PCB access error - read and clear nn03000F
      */
-    (rEQ_LOCAL_FIR, bit(2)) ? eq_th_32perDay;
+    (rEQ_LOCAL_FIR, bit(2)) ? parent_proc_th_32perDay;
 
     /** EQ_LOCAL_FIR[3]
      *  CC - Clock Control Error - read and clear nn03000F
      */
-    (rEQ_LOCAL_FIR, bit(3)) ? eq_th_32perDay;
+    (rEQ_LOCAL_FIR, bit(3)) ? parent_proc_th_32perDay;
 
     /** EQ_LOCAL_FIR[4]
      *  PSC - PSCOM access error - read and clear nn01001
      */
-    (rEQ_LOCAL_FIR, bit(4)) ? eq_th_32perDay;
+    (rEQ_LOCAL_FIR, bit(4)) ? parent_proc_th_32perDay;
 
     /** EQ_LOCAL_FIR[5]
      *  PSC - internal or ring interface error - read and 
      */
-    (rEQ_LOCAL_FIR, bit(5)) ? eq_th_32perDay;
+    (rEQ_LOCAL_FIR, bit(5)) ? parent_proc_th_32perDay;
 
     /** EQ_LOCAL_FIR[6]
      *  THERM1 internal error
      */
-    (rEQ_LOCAL_FIR, bit(6)) ? threshold_and_mask_eq;
+    (rEQ_LOCAL_FIR, bit(6)) ? threshold_and_mask_parent_proc;
 
     /** EQ_LOCAL_FIR[7]
      *  THERM1 pcb error
      */
-    (rEQ_LOCAL_FIR, bit(7)) ? threshold_and_mask_eq;
+    (rEQ_LOCAL_FIR, bit(7)) ? threshold_and_mask_parent_proc;
 
     /** EQ_LOCAL_FIR[8]
      *  THERMTRIP1 - Critical temperature indicator
      */
-    (rEQ_LOCAL_FIR, bit(8)) ? threshold_and_mask_eq;
+    (rEQ_LOCAL_FIR, bit(8)) ? threshold_and_mask_parent_proc;
 
     /** EQ_LOCAL_FIR[9]
      *  THERMTRIP1 - Fatal temperature indicator
      */
-    (rEQ_LOCAL_FIR, bit(9)) ? threshold_and_mask_eq;
+    (rEQ_LOCAL_FIR, bit(9)) ? threshold_and_mask_parent_proc;
 
     /** EQ_LOCAL_FIR[10]
      *  VOLTTRIP1 - Voltage sense error
      */
-    (rEQ_LOCAL_FIR, bit(10)) ? threshold_and_mask_eq;
+    (rEQ_LOCAL_FIR, bit(10)) ? threshold_and_mask_parent_proc;
 
     /** EQ_LOCAL_FIR[11]
      *  THERM2 - internal err
      */
-    (rEQ_LOCAL_FIR, bit(11)) ? threshold_and_mask_eq;
+    (rEQ_LOCAL_FIR, bit(11)) ? threshold_and_mask_parent_proc;
 
     /** EQ_LOCAL_FIR[12]
      *  THERM2 - pcb error
      */
-    (rEQ_LOCAL_FIR, bit(12)) ? threshold_and_mask_eq;
+    (rEQ_LOCAL_FIR, bit(12)) ? threshold_and_mask_parent_proc;
 
     /** EQ_LOCAL_FIR[13]
      *  THERMTRIP2 - Critical temperature indicator
      */
-    (rEQ_LOCAL_FIR, bit(13)) ? threshold_and_mask_eq;
+    (rEQ_LOCAL_FIR, bit(13)) ? threshold_and_mask_parent_proc;
 
     /** EQ_LOCAL_FIR[14]
      *  THERMTRIP2 - Fatal temperature indicator
      */
-    (rEQ_LOCAL_FIR, bit(14)) ? threshold_and_mask_eq;
+    (rEQ_LOCAL_FIR, bit(14)) ? threshold_and_mask_parent_proc;
 
     /** EQ_LOCAL_FIR[15]
      *  VOLTTRIP2 - Voltage sense error
      */
-    (rEQ_LOCAL_FIR, bit(15)) ? threshold_and_mask_eq;
+    (rEQ_LOCAL_FIR, bit(15)) ? threshold_and_mask_parent_proc;
 
     /** EQ_LOCAL_FIR[16]
      *  DBG - scom parity fail
      */
-    (rEQ_LOCAL_FIR, bit(16)) ? threshold_and_mask_eq;
+    (rEQ_LOCAL_FIR, bit(16)) ? threshold_and_mask_parent_proc;
 
     /** EQ_LOCAL_FIR[17]
      *  reserved
@@ -609,102 +609,102 @@ group gEQ_LOCAL_FIR
     /** EQ_LOCAL_FIR[20]
      *  L30 Trace Err
      */
-    (rEQ_LOCAL_FIR, bit(20)) ? eq_th_32perDay;
+    (rEQ_LOCAL_FIR, bit(20)) ? parent_proc_th_32perDay;
 
     /** EQ_LOCAL_FIR[21]
      *  L31 Trace Err
      */
-    (rEQ_LOCAL_FIR, bit(21)) ? eq_th_32perDay;
+    (rEQ_LOCAL_FIR, bit(21)) ? parent_proc_th_32perDay;
 
     /** EQ_LOCAL_FIR[22]
      *  L32 Trace Err
      */
-    (rEQ_LOCAL_FIR, bit(22)) ? eq_th_32perDay;
+    (rEQ_LOCAL_FIR, bit(22)) ? parent_proc_th_32perDay;
 
     /** EQ_LOCAL_FIR[23]
      *  L33 Trace Err
      */
-    (rEQ_LOCAL_FIR, bit(23)) ? eq_th_32perDay;
+    (rEQ_LOCAL_FIR, bit(23)) ? parent_proc_th_32perDay;
 
     /** EQ_LOCAL_FIR[24]
      *  DCADJ FIR ERR Core 0
      */
-    (rEQ_LOCAL_FIR, bit(24)) ? eq_th_32perDay;
+    (rEQ_LOCAL_FIR, bit(24)) ? parent_proc_th_32perDay;
 
     /** EQ_LOCAL_FIR[25]
      *  DCADJ FIR ERR Core 1
      */
-    (rEQ_LOCAL_FIR, bit(25)) ? eq_th_32perDay;
+    (rEQ_LOCAL_FIR, bit(25)) ? parent_proc_th_32perDay;
 
     /** EQ_LOCAL_FIR[26]
      *  DCADJ FIR ERR Core 2
      */
-    (rEQ_LOCAL_FIR, bit(26)) ? eq_th_32perDay;
+    (rEQ_LOCAL_FIR, bit(26)) ? parent_proc_th_32perDay;
 
     /** EQ_LOCAL_FIR[27]
      *  DCADJ FIR ERR Core 3
      */
-    (rEQ_LOCAL_FIR, bit(27)) ? eq_th_32perDay;
+    (rEQ_LOCAL_FIR, bit(27)) ? parent_proc_th_32perDay;
 
     /** EQ_LOCAL_FIR[28]
      *  SKEWADJ FIR ERR Core0
      */
-    (rEQ_LOCAL_FIR, bit(28)) ? threshold_and_mask_eq;
+    (rEQ_LOCAL_FIR, bit(28)) ? threshold_and_mask_parent_proc;
 
     /** EQ_LOCAL_FIR[29]
      *  SKEWADJ FIR ERR Core1
      */
-    (rEQ_LOCAL_FIR, bit(29)) ? threshold_and_mask_eq;
+    (rEQ_LOCAL_FIR, bit(29)) ? threshold_and_mask_parent_proc;
 
     /** EQ_LOCAL_FIR[30]
      *  SKEWADJ FIR ERR Core2
      */
-    (rEQ_LOCAL_FIR, bit(30)) ? threshold_and_mask_eq;
+    (rEQ_LOCAL_FIR, bit(30)) ? threshold_and_mask_parent_proc;
 
     /** EQ_LOCAL_FIR[31]
      *  SKEWADJ FIR ERR Core3
      */
-    (rEQ_LOCAL_FIR, bit(31)) ? threshold_and_mask_eq;
+    (rEQ_LOCAL_FIR, bit(31)) ? threshold_and_mask_parent_proc;
 
     /** EQ_LOCAL_FIR[32]
      *  DC_SCOM_ERR_0
      */
-    (rEQ_LOCAL_FIR, bit(32)) ? eq_th_32perDay;
+    (rEQ_LOCAL_FIR, bit(32)) ? parent_proc_th_32perDay;
 
     /** EQ_LOCAL_FIR[33]
      *  DC_SCOM_ERR_1
      */
-    (rEQ_LOCAL_FIR, bit(33)) ? eq_th_32perDay;
+    (rEQ_LOCAL_FIR, bit(33)) ? parent_proc_th_32perDay;
 
     /** EQ_LOCAL_FIR[34]
      *  DC_SCOM_ERR_2
      */
-    (rEQ_LOCAL_FIR, bit(34)) ? eq_th_32perDay;
+    (rEQ_LOCAL_FIR, bit(34)) ? parent_proc_th_32perDay;
 
     /** EQ_LOCAL_FIR[35]
      *  DC_SCOM_ERR_3
      */
-    (rEQ_LOCAL_FIR, bit(35)) ? eq_th_32perDay;
+    (rEQ_LOCAL_FIR, bit(35)) ? parent_proc_th_32perDay;
 
     /** EQ_LOCAL_FIR[36]
      *  SKEW_SCOM_ERR_0
      */
-    (rEQ_LOCAL_FIR, bit(36)) ? eq_th_32perDay;
+    (rEQ_LOCAL_FIR, bit(36)) ? parent_proc_th_32perDay;
 
     /** EQ_LOCAL_FIR[37]
      *  SKEW_SCOM_ERR_1
      */
-    (rEQ_LOCAL_FIR, bit(37)) ? eq_th_32perDay;
+    (rEQ_LOCAL_FIR, bit(37)) ? parent_proc_th_32perDay;
 
     /** EQ_LOCAL_FIR[38]
      *  SKEW_SCOM_ERR_2
      */
-    (rEQ_LOCAL_FIR, bit(38)) ? eq_th_32perDay;
+    (rEQ_LOCAL_FIR, bit(38)) ? parent_proc_th_32perDay;
 
     /** EQ_LOCAL_FIR[39]
      *  SKEW_SCOM_ERR_3
      */
-    (rEQ_LOCAL_FIR, bit(39)) ? eq_th_32perDay;
+    (rEQ_LOCAL_FIR, bit(39)) ? parent_proc_th_32perDay;
 
     /** EQ_LOCAL_FIR[40]
      *  unused
@@ -877,37 +877,37 @@ group gEQ_QME_FIR
     /** EQ_QME_FIR[6]
      *  SRAM Uncorrectable Error.
      */
-    (rEQ_QME_FIR, bit(6)) ? eq_th_1;
+    (rEQ_QME_FIR, bit(6)) ? parent_proc_th_1;
 
     /** EQ_QME_FIR[7]
      *  SRAM Correctable Error.
      */
-    (rEQ_QME_FIR, bit(7)) ? eq_th_32perDay;
+    (rEQ_QME_FIR, bit(7)) ? parent_proc_th_32perDay;
 
     /** EQ_QME_FIR[8]
      *  Resonant Clock Table array Parity Error.
      */
-    (rEQ_QME_FIR, bit(8)) ? eq_th_1;
+    (rEQ_QME_FIR, bit(8)) ? parent_proc_th_1;
 
     /** EQ_QME_FIR[9]
      *  PIG request of PCB interrupt before its previous i
      */
-    (rEQ_QME_FIR, bit(9)) ? eq_th_1;
+    (rEQ_QME_FIR, bit(9)) ? parent_proc_th_1;
 
     /** EQ_QME_FIR[10]
      *  Scrub timer tick occurred when scrub is still pend
      */
-    (rEQ_QME_FIR, bit(10)) ? eq_th_1;
+    (rEQ_QME_FIR, bit(10)) ? parent_proc_th_1;
 
     /** EQ_QME_FIR[11]
      *  QME_LFIR_CTFS_ERR
      */
-    (rEQ_QME_FIR, bit(11)) ? eq_th_1;
+    (rEQ_QME_FIR, bit(11)) ? parent_proc_th_1;
 
     /** EQ_QME_FIR[12]
      *  QME_LFIR_CPMS_ERR
      */
-    (rEQ_QME_FIR, bit(12)) ? eq_th_1;
+    (rEQ_QME_FIR, bit(12)) ? parent_proc_th_1;
 
     /** EQ_QME_FIR[13]
      *  PGPE Heartbeat Lost from a hw deadman timer contro
@@ -917,17 +917,17 @@ group gEQ_QME_FIR
     /** EQ_QME_FIR[14]
      *  BCE forward progress error
      */
-    (rEQ_QME_FIR, bit(14)) ? eq_th_1;
+    (rEQ_QME_FIR, bit(14)) ? parent_proc_th_1;
 
     /** EQ_QME_FIR[15]
      *  Resclk TARGET_PSTATE Change Protocol Error
      */
-    (rEQ_QME_FIR, bit(15)) ? eq_th_1;
+    (rEQ_QME_FIR, bit(15)) ? parent_proc_th_1;
 
     /** EQ_QME_FIR[16]
      *  PCB Network or Endpoint Reset occurred when QME wa
      */
-    (rEQ_QME_FIR, bit(16)) ? eq_th_1;
+    (rEQ_QME_FIR, bit(16)) ? parent_proc_th_1;
 
     /** EQ_QME_FIR[17]
      *  Firmware cleared special wakeup request before SPE
@@ -972,12 +972,12 @@ group gEQ_QME_FIR
     /** EQ_QME_FIR[25]
      *  Correctable error detected on incoming data for a 
      */
-    (rEQ_QME_FIR, bit(25)) ? eq_th_32perDay;
+    (rEQ_QME_FIR, bit(25)) ? parent_proc_th_32perDay;
 
     /** EQ_QME_FIR[26]
      *  UE Detected on incoming data for a PowerBus read.
      */
-    (rEQ_QME_FIR, bit(26)) ? eq_th_1;
+    (rEQ_QME_FIR, bit(26)) ? parent_proc_th_1;
 
     /** EQ_QME_FIR[27]
      *  SUE Detected on incoming data for a PowerBus read.
@@ -987,12 +987,12 @@ group gEQ_QME_FIR
     /** EQ_QME_FIR[28]
      *  PB Request address hit an invalid entry in the TOP
      */
-    (rEQ_QME_FIR, bit(28)) ? eq_th_1;
+    (rEQ_QME_FIR, bit(28)) ? parent_proc_th_1;
 
     /** EQ_QME_FIR[29]
      *  Parity error detected on a powerbus tag
      */
-    (rEQ_QME_FIR, bit(29)) ? eq_th_1;
+    (rEQ_QME_FIR, bit(29)) ? parent_proc_th_1;
 
     /** EQ_QME_FIR[30]
      *  Code attempted to write the PIG register when the
@@ -1007,12 +1007,12 @@ group gEQ_QME_FIR
     /** EQ_QME_FIR[32]
      *  CE detected on read to the SSA located in QME powe
      */
-    (rEQ_QME_FIR, bit(32)) ? eq_th_1;
+    (rEQ_QME_FIR, bit(32)) ? parent_proc_th_1;
 
     /** EQ_QME_FIR[33]
      *  UE detected on read to the SSA located in QME powe
      */
-    (rEQ_QME_FIR, bit(33)) ? eq_th_1;
+    (rEQ_QME_FIR, bit(33)) ? parent_proc_th_1;
 
     /** EQ_QME_FIR[34]
      *  Implemented but not used. Input tied to 0.
