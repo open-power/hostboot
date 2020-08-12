@@ -625,7 +625,7 @@ void nvdimmAddFfdc( TARGETING::TargetHandle_t i_nvdimm, errlHndl_t & io_errl  )
 #endif
 
 //##############################################################################
-//##                Explorer/Axone Maintenance Command wrappers
+//##                Explorer Maintenance Command wrappers
 //##############################################################################
 
 template<>

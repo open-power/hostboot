@@ -34,7 +34,7 @@
 # Simply add the following line at the top the actionclass section of each rule
 # file:
 #
-# .include "p9_common_actions.rule"
+# .include "p10_common_actions.rule"
 #
 # Note that no indentation can be used for the .include keyword.
 ################################################################################

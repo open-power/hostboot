@@ -34,14 +34,14 @@
 
     register DSTLCFG2
     {
-        name        "P9 Axone DSTL Error Injection Register";
+        name        "P10 DSTL Error Injection Register";
         scomaddr    0x0C010D0E;
         capture     group default;
     };
 
     register USTLFAILMASK
     {
-        name        "P9 Axone USTL Fail Response Channel Fail Mask";
+        name        "P10 USTL Fail Response Channel Fail Mask";
         scomaddr    0x0C010E13;
         capture     group default;
     };
@@ -52,7 +52,7 @@
 
     register MC_DSTL_FIR_AND
     {
-        name        "P9 MCC target DSTLFIR atomic AND";
+        name        "P10 MCC target DSTLFIR atomic AND";
         scomaddr    0x0c010d01;
         capture     group never;
         access      write_only;
@@ -60,7 +60,7 @@
 
     register MC_DSTL_FIR_OR
     {
-        name        "P9 MCC target DSTLFIR atomic OR";
+        name        "P10 MCC target DSTLFIR atomic OR";
         scomaddr    0x0c010d02;
         capture     group never;
         access      write_only;
@@ -68,7 +68,7 @@
 
     register MC_DSTL_FIR_MASK_OR
     {
-        name        "P9 MCC target DSTLFIR MASK atomic OR";
+        name        "P10 MCC target DSTLFIR MASK atomic OR";
         scomaddr    0x0c010d05;
         capture     group never;
         access      write_only;
@@ -80,7 +80,7 @@
 
     register MC_USTL_FIR_MASK_OR
     {
-        name        "P9 MCC target USTLFIR MASK atomic OR";
+        name        "P10 MCC target USTLFIR MASK atomic OR";
         scomaddr    0x0c010e05;
         capture     group never;
         access      write_only;

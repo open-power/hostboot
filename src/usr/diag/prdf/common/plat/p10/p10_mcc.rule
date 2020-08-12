@@ -501,12 +501,12 @@ group gMC_USTL_FIR
     (rMC_USTL_FIR, bit(16)) ? defaultMaskedError;
 
     /** MC_USTL_FIR[17]
-     *  Not used in Axone
+     *  Unused
      */
     (rMC_USTL_FIR, bit(17)) ? defaultMaskedError;
 
     /** MC_USTL_FIR[18]
-     *  Not used in Axone
+     *  Unused
      */
     (rMC_USTL_FIR, bit(18)) ? defaultMaskedError;
 

@@ -64,20 +64,6 @@ int32_t ClearServiceCallFlag( ExtensibleChip * i_chip,
 
     return SUCCESS;
 }
-PRDF_PLUGIN_DEFINE_NS( axone_capp,     CommonPlugins, ClearServiceCallFlag );
-PRDF_PLUGIN_DEFINE_NS( axone_ec,       CommonPlugins, ClearServiceCallFlag );
-PRDF_PLUGIN_DEFINE_NS( axone_eq,       CommonPlugins, ClearServiceCallFlag );
-PRDF_PLUGIN_DEFINE_NS( axone_ex,       CommonPlugins, ClearServiceCallFlag );
-PRDF_PLUGIN_DEFINE_NS( axone_mc,       CommonPlugins, ClearServiceCallFlag );
-PRDF_PLUGIN_DEFINE_NS( axone_mcc,      CommonPlugins, ClearServiceCallFlag );
-PRDF_PLUGIN_DEFINE_NS( axone_mi,       CommonPlugins, ClearServiceCallFlag );
-PRDF_PLUGIN_DEFINE_NS( axone_npu,      CommonPlugins, ClearServiceCallFlag );
-PRDF_PLUGIN_DEFINE_NS( axone_obus,     CommonPlugins, ClearServiceCallFlag );
-PRDF_PLUGIN_DEFINE_NS( axone_omic,     CommonPlugins, ClearServiceCallFlag );
-PRDF_PLUGIN_DEFINE_NS( axone_pec,      CommonPlugins, ClearServiceCallFlag );
-PRDF_PLUGIN_DEFINE_NS( axone_phb,      CommonPlugins, ClearServiceCallFlag );
-PRDF_PLUGIN_DEFINE_NS( axone_proc,     CommonPlugins, ClearServiceCallFlag );
-PRDF_PLUGIN_DEFINE_NS( axone_xbus,     CommonPlugins, ClearServiceCallFlag );
 PRDF_PLUGIN_DEFINE_NS( explorer_ocmb,  CommonPlugins, ClearServiceCallFlag );
 PRDF_PLUGIN_DEFINE_NS( p10_proc,       CommonPlugins, ClearServiceCallFlag );
 PRDF_PLUGIN_DEFINE_NS( p10_mcc,        CommonPlugins, ClearServiceCallFlag );
@@ -109,7 +95,6 @@ int32_t ClearServiceCallFlag_mnfgInfo( ExtensibleChip * i_chip,
 
     return SUCCESS;
 }
-PRDF_PLUGIN_DEFINE_NS(axone_proc,   CommonPlugins, ClearServiceCallFlag_mnfgInfo);
 PRDF_PLUGIN_DEFINE_NS(p10_proc,   CommonPlugins, ClearServiceCallFlag_mnfgInfo);
 
 /**
@@ -122,7 +107,6 @@ int32_t analyzeUcs( ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc )
 {
     return i_chip->Analyze( io_sc, UNIT_CS );
 }
-PRDF_PLUGIN_DEFINE_NS(axone_mc, CommonPlugins, analyzeUcs);
 PRDF_PLUGIN_DEFINE_NS(p10_mc, CommonPlugins, analyzeUcs);
 
 } // namespace CommonPlugins ends

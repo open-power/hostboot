@@ -56,8 +56,8 @@
     <bit pos="14">Parity Error detected in WDF for CL pop</bit>
     <bit pos="15">WDF detected a non-zero syndrome (CE ore UE) from USTL</bit>
     <bit pos="16">WDF UE detected a parity error on the CMT interface from USTL, cmd parity err, or buffer manager parity error</bit>
-    <bit pos="17">Not used in Axone</bit>
-    <bit pos="18">Not used in Axone</bit>
+    <bit pos="17">Unused</bit>
+    <bit pos="18">Unused</bit>
     <bit pos="19">Read Buffers overflowed/underflowed (more than 64 in use)</bit>
     <bit pos="20">WRT CE detected on buffer output</bit>
     <bit pos="21">WRT UE detected on buffer output</bit>

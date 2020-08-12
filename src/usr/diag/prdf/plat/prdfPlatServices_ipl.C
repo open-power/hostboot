@@ -141,7 +141,7 @@ uint32_t mssRestoreDramRepairs<TYPE_OCMB_CHIP>( TargetHandle_t i_target,
 }
 
 //##############################################################################
-//##                Explorer/Axone Maintenance Command wrappers
+//##                Explorer Maintenance Command wrappers
 //##############################################################################
 
 template<>

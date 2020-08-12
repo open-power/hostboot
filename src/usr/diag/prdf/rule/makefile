@@ -205,15 +205,11 @@ ${PRDR_CMP_PATH}: ${PRDR_CMP_YACC_o_PATH} ${PRDR_CMP_FLEX_o_PATH} \
 #------------------------------------------------------------------------------
 
 vpath %.rule \
-	  ../common/plat/p9 \
 	  ../common/plat/p10 \
-	  ../common/plat/axone \
 	  ../common/plat/explorer \
 	  ../common/plat/mem
 
-PRDRPP_SEARCHDIRS = -I../common/plat/p9 \
-				    -I../common/plat/p10 \
-				    -I../common/plat/axone \
+PRDRPP_SEARCHDIRS = -I../common/plat/p10 \
 				    -I../common/plat/explorer \
 					-I../common/plat/mem
 

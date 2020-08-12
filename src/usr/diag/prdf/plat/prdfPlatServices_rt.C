@@ -113,7 +113,7 @@ void sendPredDeallocRequest( uint64_t i_saddr, uint64_t i_eaddr )
 }
 
 //##############################################################################
-//##                Explorer/Axone Maintenance Command wrappers
+//##                Explorer Maintenance Command wrappers
 //##############################################################################
 
 template<>

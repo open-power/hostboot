@@ -92,7 +92,6 @@ int32_t CheckForRecovered( ExtensibleChip * i_chip,
 
     return SUCCESS;
 }
-PRDF_PLUGIN_DEFINE_NS( axone_proc,   Proc, CheckForRecovered );
 PRDF_PLUGIN_DEFINE_NS( p10_proc,     Proc, CheckForRecovered );
 
 //------------------------------------------------------------------------------
@@ -173,7 +172,6 @@ int32_t CheckForRecoveredSev(ExtensibleChip * i_chip, uint32_t & o_sev)
     return SUCCESS;
 
 }
-PRDF_PLUGIN_DEFINE_NS( axone_proc,   Proc, CheckForRecoveredSev );
 PRDF_PLUGIN_DEFINE_NS( p10_proc,     Proc, CheckForRecoveredSev );
 
 /** @func GetCheckstopInfo
@@ -288,7 +286,6 @@ int32_t handleDeadmanTimer( ExtensibleChip * i_chip,
 
     return SUCCESS;
 }
-PRDF_PLUGIN_DEFINE_NS( axone_proc,   Proc, handleDeadmanTimer );
 PRDF_PLUGIN_DEFINE_NS( p10_proc,     Proc, handleDeadmanTimer );
 
 //------------------------------------------------------------------------------
@@ -328,7 +325,6 @@ int32_t handleSbeVital( ExtensibleChip * i_chip,
 #endif
     return SUCCESS;
 }
-PRDF_PLUGIN_DEFINE_NS( axone_proc,   Proc, handleSbeVital );
 PRDF_PLUGIN_DEFINE_NS( p10_proc,     Proc, handleSbeVital );
 
 //------------------------------------------------------------------------------
@@ -362,7 +358,6 @@ int32_t CheckForUnitCs( ExtensibleChip * i_chip,
 
     return SUCCESS;
 }
-PRDF_PLUGIN_DEFINE_NS( axone_proc,   Proc, CheckForUnitCs );
 PRDF_PLUGIN_DEFINE_NS( p10_proc,     Proc, CheckForUnitCs );
 
 //------------------------------------------------------------------------------
@@ -396,7 +391,6 @@ int32_t PmRecovery( ExtensibleChip * i_chip,
 
     return SUCCESS;
 }
-PRDF_PLUGIN_DEFINE_NS( axone_proc,   Proc, PmRecovery );
 PRDF_PLUGIN_DEFINE_NS( p10_proc,     Proc, PmRecovery );
 
 //------------------------------------------------------------------------------
@@ -471,7 +465,6 @@ int32_t handleIntCqFirPcRecovError( ExtensibleChip * i_chip,
 
     return l_rc;
 }
-PRDF_PLUGIN_DEFINE_NS( axone_proc,   Proc, handleIntCqFirPcRecovError );
 PRDF_PLUGIN_DEFINE_NS( p10_proc,     Proc, handleIntCqFirPcRecovError );
 
 //------------------------------------------------------------------------------

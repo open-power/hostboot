@@ -44,14 +44,12 @@ EXTRAINCDIR += ${PRD_USR_PATH}/common/framework/config
 EXTRAINCDIR += ${PRD_USR_PATH}/common/rule
 EXTRAINCDIR += ${PRD_USR_PATH}/common/plat
 EXTRAINCDIR += ${PRD_USR_PATH}/common/plat/mem
-EXTRAINCDIR += ${PRD_USR_PATH}/common/plat/p9
 EXTRAINCDIR += ${PRD_USR_PATH}/common/plat/p10
 EXTRAINCDIR += ${PRD_USR_PATH}/common/mnfgtools
 EXTRAINCDIR += ${PRD_USR_PATH}/mnfgtools
 EXTRAINCDIR += ${PRD_USR_PATH}/framework
 EXTRAINCDIR += ${PRD_USR_PATH}/plat
 EXTRAINCDIR += ${PRD_USR_PATH}/plat/mem
-EXTRAINCDIR += ${PRD_USR_PATH}/plat/p9
 EXTRAINCDIR += ${PRD_USR_PATH}/test
 
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/ecmddatabuffer
