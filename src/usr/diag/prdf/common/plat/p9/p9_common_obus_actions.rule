@@ -238,6 +238,24 @@ actionclass internal_error_L1
     try ( non_smp_callout_self_th_32perDay, obusSmpFailure_L1 );
 };
 
+actionclass non_smp_crc_nak_L0
+{
+    threshold32pday; # Regardless of SMP/OpenCAPI mode.
+
+    # SMP:     threshold_and_mask_self
+    # Non-SMP: callout OpenCAPI adapter threshold 32/day
+    try ( funccall("non_smp_callout_link_0"), threshold_and_mask_self );
+};
+
+actionclass non_smp_crc_nak_L1
+{
+    threshold32pday; # Regardless of SMP/OpenCAPI mode.
+
+    # SMP:     threshold_and_mask_self
+    # Non-SMP: callout OpenCAPI adapter threshold 32/day
+    try ( funccall("non_smp_callout_link_1"), threshold_and_mask_self );
+};
+
 ###############################################################################
 # Analyze groups
 ###############################################################################

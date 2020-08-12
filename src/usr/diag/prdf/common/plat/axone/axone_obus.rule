@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2018,2019
+# Contributors Listed Below - COPYRIGHT 2018,2020
 # [+] International Business Machines Corp.
 #
 #
@@ -459,22 +459,22 @@ group gIOOLFIR
     /** IOOLFIR[6]
      *  link0 crc error
      */
-    (rIOOLFIR, bit(6)) ? threshold_and_mask_self;
+    (rIOOLFIR, bit(6)) ? non_smp_crc_nak_L0;
 
     /** IOOLFIR[7]
      *  link1 crc error
      */
-    (rIOOLFIR, bit(7)) ? threshold_and_mask_self;
+    (rIOOLFIR, bit(7)) ? non_smp_crc_nak_L1;
 
     /** IOOLFIR[8]
      *  link0 nak received
      */
-    (rIOOLFIR, bit(8)) ? threshold_and_mask_self_non_smp_only;
+    (rIOOLFIR, bit(8)) ? non_smp_crc_nak_L0;
 
     /** IOOLFIR[9]
      *  link1 nak received
      */
-    (rIOOLFIR, bit(9)) ? threshold_and_mask_self_non_smp_only;
+    (rIOOLFIR, bit(9)) ? non_smp_crc_nak_L1;
 
     /** IOOLFIR[10]
      *  link0 replay buffer full

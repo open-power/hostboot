@@ -246,75 +246,100 @@ int32_t callout_CapiBrick( ExtensibleChip * i_chip,
     {
         // Something is wrong, so get level2 involved
         io_sc.service_data->SetCallout( LEVEL2_SUPPORT, MRU_MED, NO_GARD );
+        io_sc.service_data->setFlag(ServiceDataCollector::AT_THRESHOLD);
+        io_sc.service_data->setFlag(ServiceDataCollector::SERVICE_CALL);
+
     } // end if no callout done
-
-
-    // Ensure elog is seen
-    io_sc.service_data->setFlag( ServiceDataCollector::AT_THRESHOLD );
-    io_sc.service_data->setFlag( ServiceDataCollector::SERVICE_CALL );
-
 
     return l_rc;
 
 }  // end callout_CapiBrick
 
+/**
+ * @brief If OBUS is NOT in SMP mode, calls out OpenCAPI adapter on link 0 and
+ *        returns SUCCESS. Otherwise, returns PRD_SCAN_COMM_REGISTER_ZERO.
+ */
+int32_t non_smp_callout_link_0(ExtensibleChip * i_chip,
+                               STEP_CODE_DATA_STRUCT & io_sc)
+{
+    int32_t rc = PRD_SCAN_COMM_REGISTER_ZERO;
+
+    if (!obusInSmpMode(i_chip->getTrgt()))
+    {
+        // OBUS link 0 is OBUS BRICK 0.
+        rc = callout_CapiBrick(i_chip, io_sc, 0);
+    }
+
+    return rc;
+}
+PRDF_PLUGIN_DEFINE_NS( nimbus_obus,  obus, non_smp_callout_link_0 );
+PRDF_PLUGIN_DEFINE_NS( cumulus_obus, obus, non_smp_callout_link_0 );
+PRDF_PLUGIN_DEFINE_NS( axone_obus,   obus, non_smp_callout_link_0 );
 
 /**
- * @brief If OBUS is NOT in SMP mode, calls out OBUS BRICK 0 on first
- *        occurrence and returns SUCCESS. Note that OBUS link0 is
- *        related to OBUS BRICK 0.
- *        Otherwise, returns PRD_SCAN_COMM_REGISTER_ZERO.
+ * @brief If OBUS is NOT in SMP mode, calls out OpenCAPI adapter on link 1 and
+ *        returns SUCCESS. Otherwise, returns PRD_SCAN_COMM_REGISTER_ZERO.
  */
-int32_t non_smp_callout_link_0_th_1( ExtensibleChip * i_chip,
-                                     STEP_CODE_DATA_STRUCT & io_sc )
+int32_t non_smp_callout_link_1(ExtensibleChip * i_chip,
+                               STEP_CODE_DATA_STRUCT & io_sc)
 {
-    int32_t  l_rc = SUCCESS;
+    int32_t rc = PRD_SCAN_COMM_REGISTER_ZERO;
 
-    if ( obusInSmpMode(i_chip->getTrgt()) )
+    if (!obusInSmpMode(i_chip->getTrgt()))
     {
-        // SMP mode: Try some other action.
-        l_rc = PRD_SCAN_COMM_REGISTER_ZERO;
-    }
-    else
-    {
-        l_rc = callout_CapiBrick(i_chip, io_sc, 0);
+        // IMPORTANT: OBUS link 1 is OBUS BRICK 2.
+        rc = callout_CapiBrick(i_chip, io_sc, 2);
     }
 
-    return l_rc;
+    return rc;
+}
+PRDF_PLUGIN_DEFINE_NS( nimbus_obus,  obus, non_smp_callout_link_1 );
+PRDF_PLUGIN_DEFINE_NS( cumulus_obus, obus, non_smp_callout_link_1 );
+PRDF_PLUGIN_DEFINE_NS( axone_obus,   obus, non_smp_callout_link_1 );
 
-} // end callout_CAPI_0
+/**
+ * @brief If OBUS is NOT in SMP mode, calls out OpenCAPI adapter on link 0,
+ *        makes the error log predictive, and returns SUCCESS. Otherwise,
+ *        returns PRD_SCAN_COMM_REGISTER_ZERO.
+ */
+int32_t non_smp_callout_link_0_th_1(ExtensibleChip * i_chip,
+                                    STEP_CODE_DATA_STRUCT & io_sc)
+{
+    int32_t rc = non_smp_callout_link_0(i_chip, io_sc);
+    if (SUCCESS == rc)
+    {
+        // Make the log predictive.
+        io_sc.service_data->setFlag(ServiceDataCollector::AT_THRESHOLD);
+        io_sc.service_data->setFlag(ServiceDataCollector::SERVICE_CALL);
+    }
+
+    return rc;
+}
 PRDF_PLUGIN_DEFINE_NS( nimbus_obus,  obus, non_smp_callout_link_0_th_1 );
 PRDF_PLUGIN_DEFINE_NS( cumulus_obus, obus, non_smp_callout_link_0_th_1 );
 PRDF_PLUGIN_DEFINE_NS( axone_obus,   obus, non_smp_callout_link_0_th_1 );
 
-
 /**
- * @brief If OBUS is NOT in SMP mode, calls out OBUS BRICK 2 on first
- *        occurrence and returns SUCCESS. Note that OBUS link1 is
- *        related to OBUS BRICK 2.
- *        Otherwise, returns PRD_SCAN_COMM_REGISTER_ZERO.
- */int32_t non_smp_callout_link_1_th_1( ExtensibleChip * i_chip,
-                                     STEP_CODE_DATA_STRUCT & io_sc )
+ * @brief If OBUS is NOT in SMP mode, calls out OpenCAPI adapter on link 1,
+ *        makes the error log predictive, and returns SUCCESS. Otherwise,
+ *        returns PRD_SCAN_COMM_REGISTER_ZERO.
+ */
+int32_t non_smp_callout_link_1_th_1(ExtensibleChip * i_chip,
+                                    STEP_CODE_DATA_STRUCT & io_sc)
 {
-    int32_t  l_rc = SUCCESS;
-
-    if ( obusInSmpMode(i_chip->getTrgt()) )
+    int32_t rc = non_smp_callout_link_1(i_chip, io_sc);
+    if (SUCCESS == rc)
     {
-        // SMP mode: Try some other action.
-        l_rc = PRD_SCAN_COMM_REGISTER_ZERO;
-    }
-    else
-    {
-        l_rc = callout_CapiBrick(i_chip, io_sc, 2);
+        // Make the log predictive.
+        io_sc.service_data->setFlag(ServiceDataCollector::AT_THRESHOLD);
+        io_sc.service_data->setFlag(ServiceDataCollector::SERVICE_CALL);
     }
 
-    return l_rc;
-
-} // end callout_CAPI_2
+    return rc;
+}
 PRDF_PLUGIN_DEFINE_NS( nimbus_obus,  obus, non_smp_callout_link_1_th_1 );
 PRDF_PLUGIN_DEFINE_NS( cumulus_obus, obus, non_smp_callout_link_1_th_1 );
 PRDF_PLUGIN_DEFINE_NS( axone_obus,   obus, non_smp_callout_link_1_th_1 );
-
 
 } // end namespace obus
 
