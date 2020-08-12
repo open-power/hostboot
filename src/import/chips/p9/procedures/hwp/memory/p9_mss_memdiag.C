@@ -144,7 +144,7 @@ extern "C"
                     uint64_t l_galois = 0;
                     mss::states l_confirmed = mss::NO;
                     // check for chip mark in hardware mark store
-                    FAPI_TRY( mss::ecc::get_hwms(l_mca, l_rank, l_galois, l_confirmed) );
+                    FAPI_TRY( mss::ecc::get_hwms<mss::mc_type::NIMBUS>(l_mca, l_rank, l_galois, l_confirmed) );
 
                     if (l_confirmed)
                     {
@@ -152,7 +152,7 @@ extern "C"
                         auto l_region = mss::ecc::fwms::mark_region::DISABLED;
                         auto l_addr = mss::mcbist::address(0);
                         // check for symbol mark in firmware mark store
-                        FAPI_TRY( mss::ecc::get_fwms(l_mca, l_rank, l_galois, l_type, l_region, l_addr) );
+                        FAPI_TRY( mss::ecc::get_fwms<mss::mc_type::NIMBUS>(l_mca, l_rank, l_galois, l_type, l_region, l_addr) );
 
                         FAPI_ASSERT( l_region == mss::ecc::fwms::mark_region::DISABLED,
                                      fapi2::MSS_MEMDIAGS_CHIPMARK_AND_SYMBOLMARK().set_MCA_TARGET(l_mca).set_RANK(l_rank),

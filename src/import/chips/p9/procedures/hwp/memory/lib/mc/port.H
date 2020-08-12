@@ -44,6 +44,7 @@
 #include <generic/memory/lib/utils/scom.H>
 #include <generic/memory/lib/utils/c_str.H>
 #include <generic/memory/lib/utils/mc/gen_mss_port.H>
+#include <generic/memory/lib/utils/mc/gen_mss_restore_repairs.H>
 #include <p9_mc_scom_addresses.H>
 #include <p9_mc_scom_addresses_fld.H>
 #include <lib/dimm/rank.H>

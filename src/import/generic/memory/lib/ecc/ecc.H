@@ -62,137 +62,8 @@ namespace ecc
 {
 
 ///
-/// @brief Get Hardware Mark Store
-/// @tparam T the fapi2::TargetType - derived
-/// @param[in] i_target the fapi2 target
-/// @param[in] i_rank the desired rank
-/// @param[out] o_galois the Galois code of the mark
-/// @param[out] o_confirmed true if the mark is a chipmark
-/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
-///
-template< fapi2::TargetType T >
-inline fapi2::ReturnCode get_hwms( const fapi2::Target<T>& i_target,
-                                   const uint64_t i_rank,
-                                   uint64_t& o_galois,
-                                   mss::states& o_confirmed )
-{
-    fapi2::buffer<uint64_t> l_buffer;
-
-    FAPI_TRY( mss::ecc::hwms::read(i_target, i_rank, l_buffer) );
-    mss::ecc::hwms::get_chipmark(l_buffer, o_galois);
-    mss::ecc::hwms::get_confirmed(l_buffer, o_confirmed);
-
-fapi_try_exit:
-    return fapi2::current_err;
-}
-
-///
-/// @brief Set Hardware Mark Store
-/// @tparam T the fapi2::TargetType - derived
-/// @param[in] i_target the fapi2 target
-/// @param[in] i_rank the desired rank
-/// @param[in] i_galois the Galois code of the mark, or set to 0 to clear mark
-/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
-///
-template< fapi2::TargetType T >
-inline fapi2::ReturnCode set_hwms( const fapi2::Target<T>& i_target,
-                                   const uint64_t i_rank,
-                                   const uint64_t i_galois )
-{
-    fapi2::buffer<uint64_t> l_buffer;
-    uint8_t l_symbol = 0;
-
-    // galois value of 0 means to clear the mark so only fill in fields if non-zero
-    if (i_galois != 0)
-    {
-        // check for valid Galois code
-        FAPI_TRY( mss::ecc::galois_to_symbol( (uint8_t)i_galois, l_symbol) );
-
-        mss::ecc::hwms::set_chipmark(l_buffer, i_galois);
-        mss::ecc::hwms::set_confirmed(l_buffer, mss::YES);
-        mss::ecc::hwms::set_exit_1(l_buffer, mss::YES);
-    }
-
-    FAPI_TRY( mss::ecc::hwms::write(i_target, i_rank, l_buffer) );
-
-fapi_try_exit:
-    return fapi2::current_err;
-}
-
-///
-/// @brief Get Firmware Mark Store
-/// @tparam T the fapi2::TargetType - derived
-/// @param[in] i_target the fapi2 target
-/// @param[in] i_rank the desired rank
-/// @param[out] o_galois the Galois code of the mark
-/// @param[out] o_type the type code of the mark
-/// @param[out] o_region the region code of the mark
-/// @param[out] o_address the starting address of the mark
-/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
-///
-template< fapi2::TargetType T >
-inline fapi2::ReturnCode get_fwms( const fapi2::Target<T>& i_target,
-                                   const uint64_t i_rank,
-                                   uint64_t& o_galois,
-                                   mss::ecc::fwms::mark_type& o_type,
-                                   mss::ecc::fwms::mark_region& o_region,
-                                   mss::mcbist::address& o_address )
-{
-    fapi2::buffer<uint64_t> l_buffer;
-
-    FAPI_TRY( mss::ecc::fwms::read(i_target, i_rank, l_buffer) );
-    mss::ecc::fwms::get_mark(l_buffer, o_galois);
-    mss::ecc::fwms::get_type(l_buffer, o_type);
-    mss::ecc::fwms::get_region(l_buffer, o_region);
-    mss::ecc::fwms::get_address(l_buffer, o_address);
-
-fapi_try_exit:
-    return fapi2::current_err;
-}
-
-///
-/// @brief Set Firmware Mark Store
-/// @tparam T the fapi2::TargetType - derived
-/// @param[in] i_target the fapi2 target
-/// @param[in] i_rank the desired rank
-/// @param[in] i_galois the Galois code of the mark, or set to 0 to clear mark
-/// @param[in] i_type the type code of the mark
-/// @param[in] i_region the region code of the mark
-/// @param[in] i_address the starting address of the mark
-/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
-///
-template< fapi2::TargetType T >
-inline fapi2::ReturnCode set_fwms( const fapi2::Target<T>& i_target,
-                                   const uint64_t i_rank,
-                                   const uint64_t i_galois,
-                                   const mss::ecc::fwms::mark_type i_type,
-                                   const mss::ecc::fwms::mark_region i_region,
-                                   const mss::mcbist::address i_address )
-{
-    fapi2::buffer<uint64_t> l_buffer = 0;
-    uint8_t l_symbol = 0;
-
-    // galois value of 0 means to clear the mark so only fill in fields if non-zero
-    if (i_galois != 0)
-    {
-        // check for valid Galois code
-        FAPI_TRY( mss::ecc::galois_to_symbol( (uint8_t)i_galois, l_symbol) );
-
-        mss::ecc::fwms::set_mark(l_buffer, i_galois);
-        mss::ecc::fwms::set_type(l_buffer, i_type);
-        mss::ecc::fwms::set_region(l_buffer, i_region);
-        mss::ecc::fwms::set_address(l_buffer, i_address);
-        mss::ecc::fwms::set_exit_1(l_buffer, mss::YES);
-    }
-
-    FAPI_TRY( mss::ecc::fwms::write(i_target, i_rank, l_buffer) );
-
-fapi_try_exit:
-    return fapi2::current_err;
-}
-
-///
 /// @brief Query Hardware Marks
+/// @tparam MC the memory controller type
 /// @tparam T the fapi2::TargetType - derived
 /// @tparam TT traits type defaults to eccTraits<DEFAULT_MC_TYPE, T>
 /// @param[in] i_target the fapi2 target
@@ -200,7 +71,7 @@ fapi_try_exit:
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
 /// @note no rank information is returned
 ///
-template< fapi2::TargetType T, typename TT = eccTraits<DEFAULT_MC_TYPE, T> >
+template< mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T, typename TT = eccTraits<MC, T> >
 inline fapi2::ReturnCode get_hw_marks( const fapi2::Target<T>& i_target,
                                        std::vector<uint64_t>& o_marks )
 {
@@ -212,7 +83,7 @@ inline fapi2::ReturnCode get_hw_marks( const fapi2::Target<T>& i_target,
 
     for (uint64_t l_rank = 0; l_rank < TT::ECC_MAX_MRANK_PER_PORT; ++l_rank)
     {
-        FAPI_TRY( get_hwms(i_target, l_rank, l_galois, l_confirmed) );
+        FAPI_TRY( get_hwms<MC>(i_target, l_rank, l_galois, l_confirmed) );
 
         if (l_confirmed == mss::states::YES)
         {
@@ -228,6 +99,7 @@ fapi_try_exit:
 
 ///
 /// @brief Query Firmware Marks
+/// @tparam MC the memory controller type
 /// @tparam T the fapi2::TargetType - derived
 /// @tparam TT traits type defaults to eccTraits<DEFAULT_MC_TYPE, T>
 /// @param[in] i_target the fapi2 target
@@ -235,7 +107,7 @@ fapi_try_exit:
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
 /// @note no rank information is returned
 ///
-template< fapi2::TargetType T, typename TT = eccTraits<DEFAULT_MC_TYPE, T> >
+template< mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T, typename TT = eccTraits<MC, T> >
 inline fapi2::ReturnCode get_fw_marks( const fapi2::Target<T>& i_target,
                                        std::vector<uint64_t>& o_marks )
 {
@@ -249,7 +121,7 @@ inline fapi2::ReturnCode get_fw_marks( const fapi2::Target<T>& i_target,
 
     for (uint64_t l_rank = 0; l_rank < TT::ECC_MAX_MRANK_PER_PORT; ++l_rank)
     {
-        FAPI_TRY( get_fwms(i_target, l_rank, l_galois, l_type, l_region, l_address) );
+        FAPI_TRY( get_fwms<MC>(i_target, l_rank, l_galois, l_type, l_region, l_address) );
 
         if (l_region != mss::ecc::fwms::mark_region::DISABLED)
         {
