@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -86,7 +86,7 @@ public:
             // Make arbitrary initial data
             MemRank rank( 0, 0 );
             const uint8_t initialBitmap[DQ_BITMAP::BITMAP_SIZE] =
-                { 0xdb, 0xdb, 0xdb, 0xdb, 0xdb, 0xdb, 0xdb, 0xdb, 0xdb, 0x00 };
+                { 0xdb, 0xdb, 0xdb, 0xdb, 0xdb, 0xdb, 0xdb, 0xdb, 0xdb, 0xdb };
             BitmapData initialData;
             memcpy( initialData[0].bitmap, initialBitmap,
                     sizeof(initialData[0].bitmap) );
@@ -109,11 +109,22 @@ public:
 
             BitmapData newData = getBitmap.getData();
 
+            const uint8_t SPARE_BYTE = 9;
+
             // Compare the read data to the initial data. The last byte (byte 9)
             // is for spares so we won't worry about comparing that.
-            for ( uint8_t n = 0; n < (DQ_BITMAP::BITMAP_SIZE-1); n++ )
+            for ( uint8_t n = 0; n < (DQ_BITMAP::BITMAP_SIZE); n++ )
             {
-                if ( newData.at(0).bitmap[n] != initialBitmap[n] )
+                if ( SPARE_BYTE == n )
+                {
+                    if ( newData.at(0).bitmap[n] != 0xff )
+                    {
+                        TS_FAIL( "TestNimbusReadWriteBadDqBitmap: Spare Byte "
+                                 "incorrectly set. newData[%d]=0x%x expected "
+                                 "0xff", n, newData.at(0).bitmap[n] );
+                    }
+                }
+                else if ( newData.at(0).bitmap[n] != initialBitmap[n] )
                 {
                     TS_FAIL( "TestNimbusReadWriteBadDqBitmap: Incorrect data "
                              "found. newData[%d]=0x%x initialBitmap[%d]=0x%x",
@@ -173,7 +184,7 @@ public:
             // Make arbitrary initial data
             MemRank rank( 0 );
             const uint8_t initialBitmap[DQ_BITMAP::BITMAP_SIZE] =
-                { 0xab, 0xab, 0xab, 0xab, 0xab, 0xab, 0xab, 0xab, 0xab, 0x00 };
+                { 0xab, 0xab, 0xab, 0xab, 0xab, 0xab, 0xab, 0xab, 0xab, 0xab };
             BitmapData initialData;
             memcpy( initialData[0].bitmap, initialBitmap,
                     sizeof(initialData[0].bitmap) );
@@ -196,11 +207,22 @@ public:
 
             BitmapData newData = getBitmap.getData();
 
+            const uint8_t SPARE_BYTE = 5;
+
             // Compare the read data to the initial data. The last byte (byte 9)
             // is for spares so we won't worry about comparing that.
-            for ( uint8_t n = 0; n < (DQ_BITMAP::BITMAP_SIZE-1); n++ )
+            for ( uint8_t n = 0; n < (DQ_BITMAP::BITMAP_SIZE); n++ )
             {
-                if ( newData.at(0).bitmap[n] != initialBitmap[n] )
+                if ( SPARE_BYTE == n )
+                {
+                    if ( newData.at(0).bitmap[n] != 0xff )
+                    {
+                        TS_FAIL( "TestAxoneReadWriteBadDqBitmap: Spare Byte "
+                                 "incorrectly set. newData[%d]=0x%x expected "
+                                 "0xff", n, newData.at(0).bitmap[n] );
+                    }
+                }
+                else if ( newData.at(0).bitmap[n] != initialBitmap[n] )
                 {
                     TS_FAIL( "TestAxoneReadWriteBadDqBitmap: Incorrect data "
                              "found. newData[%d]=0x%x initialBitmap[%d]=0x%x",

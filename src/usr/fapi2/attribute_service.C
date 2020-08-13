@@ -640,6 +640,18 @@ ReturnCode platGetWOFTableData(const Target<TARGET_TYPE_ALL>& i_fapiTarget,
 }
 
 //******************************************************************************
+// fapi2::platAttrSvc::__getChipModel function
+//******************************************************************************
+TARGETING::ATTR_MODEL_type __getChipModel()
+{
+    // determine the chip's model
+    TARGETING::Target * masterProc = nullptr;
+    TARGETING::targetService().masterProcChipTargetHandle(masterProc);
+
+    return masterProc->getAttr<TARGETING::ATTR_MODEL>();
+}
+
+//******************************************************************************
 // ATTR_BAD_DQ_BITMAP getter/setter constant definitions
 //******************************************************************************
 
@@ -658,7 +670,8 @@ struct dimmBadDqDataFormat
 };
 
 // constant definitions
-const uint8_t  SPARE_DRAM_DQ_BYTE_NUMBER_INDEX = 9;
+const uint8_t  SPARE_DRAM_DQ_BYTE_NUMBER_INDEX =
+    (TARGETING::MODEL_AXONE == __getChipModel()) ? 5 : 9;
 const uint32_t DIMM_BAD_DQ_MAGIC_NUMBER = 0xbadd4471;
 const uint8_t  DIMM_BAD_DQ_VERSION = 1;
 const uint8_t  DIMM_BAD_DQ_NUM_BYTES = 80;
@@ -670,18 +683,6 @@ union wiringData
     uint8_t cumulus[MAX_PORTS_PER_CEN][DIMM_BAD_DQ_NUM_BYTES];
     uint8_t memport[mss::MAX_DQ_BITS];
 };
-
-//******************************************************************************
-// fapi2::platAttrSvc::__getChipModel function
-//******************************************************************************
-TARGETING::ATTR_MODEL_type __getChipModel()
-{
-    // determine the chip's model
-    TARGETING::Target * masterProc = nullptr;
-    TARGETING::targetService().masterProcChipTargetHandle(masterProc);
-
-    return masterProc->getAttr<TARGETING::ATTR_MODEL>();
-}
 
 //******************************************************************************
 // fapi2::platAttrSvc::__getTranslationPortSlct function
@@ -1190,18 +1191,9 @@ ReturnCode __mcLogicalToDimmDqHelper(
     }
     else
     {
-        // use wiring data to translate mc pin to dimm dq format
-        // Note: the wiring data maps from dimm dq format to mc format
-        for ( uint8_t bit = 0; bit < mss::MAX_DQ_BITS; bit++ )
-        {
-            // Check to see which bit in the wiring data corresponds to our
-            // DIMM DQ format pin.
-            if ( i_wiringData.memport[bit] == i_mcPin )
-            {
-                o_dimm_dq = bit;
-                break;
-            }
-        }
+        // Note: the wiring data for MEM_PORTs/OCMBs is 1-to-1, so there
+        // is no actual need to check the wiring data right now.
+        o_dimm_dq = i_mcPin;
     }
 
 fapi_try_exit:
@@ -1248,9 +1240,9 @@ ReturnCode __dimmDqToMcLogicalHelper(
     }
     else
     {
-        // Translate from DIMM DQ format to MC using wiring data
-        // Note: the wiring data maps from dimm dq format to mc logical format
-        o_mcPin = i_wiringData.memport[i_dimm_dq];
+        // Note: the wiring data for MEM_PORTs/OCMBs is 1-to-1, so there
+        // is no actual need to check the wiring data right now.
+        o_mcPin = i_dimm_dq;
     }
 
 fapi_try_exit:

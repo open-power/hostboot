@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -59,8 +59,6 @@ class MemDqBitmap
 
     enum
     {
-        DRAM_SPARE_BYTE = 9, // Same byte for both ports.
-
         ECC_SPARE_BYTE  = 8, // ECC spare is on second nibble of this byte.
         ECC_SPARE_PORT  = 1, // Only on port 1.
     };
@@ -79,6 +77,7 @@ class MemDqBitmap
              TARGETING::TYPE_OCMB_CHIP ==
                   PlatServices::getTargetType(iv_trgt) )
         {
+            iv_spareByte = 5;
             // TODO RTC 210072 - Support multiple ports
             TARGETING::TargetHandle_t dimm =
                 PlatServices::getConnectedDimm( iv_trgt, iv_rank );
@@ -86,6 +85,7 @@ class MemDqBitmap
         }
         else
         {
+            iv_spareByte = 9;
             iv_x4Dram = PlatServices::isDramWidthX4( iv_trgt );
         }
     }
@@ -242,6 +242,7 @@ class MemDqBitmap
     TARGETING::TargetHandle_t iv_trgt; ///< Target MBA/MCA/MEM_PORT/OCMB_CHIP
     MemRank iv_rank;                   ///< Target rank
     bool iv_x4Dram;                    ///< TRUE if iv_trgt uses x4 DRAMs
+    uint8_t iv_spareByte;              ///< Specifies the spare byte location
 
     /** A bitmap of all bad DQs for each port. */
     BitmapData iv_data;

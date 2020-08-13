@@ -323,7 +323,7 @@ uint32_t MemDqBitmap::getPortByteBitIdx( const MemSymbol & i_symbol,
 
         if ( i_symbol.isDramSpared() )
         {
-            o_byteIdx = DRAM_SPARE_BYTE;
+            o_byteIdx = iv_spareByte;
         }
         else if ( i_symbol.isEccSpared() )
         {
@@ -569,7 +569,7 @@ uint32_t MemDqBitmap::isSpareAvailable( uint8_t i_portSlct, bool & o_dramSpare,
             break;
         }
 
-        uint8_t spareDqBits = iv_data.at(i_portSlct).bitmap[DRAM_SPARE_BYTE];
+        uint8_t spareDqBits = iv_data.at(i_portSlct).bitmap[iv_spareByte];
 
         if ( iv_x4Dram )
         {
@@ -650,12 +650,12 @@ uint32_t MemDqBitmap::setDramSpare( uint8_t i_portSlct, uint8_t i_pins )
             {
                 i_pins = i_pins << DQS_PER_NIBBLE;
             }
-            iv_data[i_portSlct].bitmap[DRAM_SPARE_BYTE] |= i_pins;
+            iv_data[i_portSlct].bitmap[iv_spareByte] |= i_pins;
         }
         else
         {
             i_pins &= 0xff; // limit to 8 bits
-            iv_data[i_portSlct].bitmap[DRAM_SPARE_BYTE] |= i_pins;
+            iv_data[i_portSlct].bitmap[iv_spareByte] |= i_pins;
         }
 
     } while (0);
