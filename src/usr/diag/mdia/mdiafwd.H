@@ -90,10 +90,10 @@ enum
     OCMB_MCBIST_FIR_ACT1    = 0x08011807,
 
     // ocmb omidlfir unit regs
-    OMIDLFIR                = 0x07013340,
-    OMIDLFIR_MASK           = 0x07013343,
-    OMIDLFIR_ACT0           = 0x07013346,
-    OMIDLFIR_ACT1           = 0x07013347,
+    OMIDLFIR                = 0x08012800,
+    OMIDLFIR_MASK           = 0x08012803,
+    OMIDLFIR_ACT0           = 0x08012806,
+    OMIDLFIR_ACT1           = 0x08012807,
 
     // proc regs
     IPOLL_MASK              = 0x000F0033,
