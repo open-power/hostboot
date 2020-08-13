@@ -1984,6 +1984,7 @@ errlHndl_t populate_hbSecurebootData ( void )
     return (l_elog);
 } // end populate_hbRuntime
 
+// FIXME: RTC: 212110 Secureboot: P10 - HDAT SPI rework
 errlHndl_t populate_TpmInfoByNode(const uint64_t i_instance)
 {
     errlHndl_t l_elog = nullptr;
@@ -2242,15 +2243,15 @@ errlHndl_t populate_TpmInfoByNode(const uint64_t i_instance)
         // save for second pass SRTM/DRTM log offset fixups
         fixList.push_back(std::make_pair(pTpm, l_tpmInstInfo));
 
-        auto l_tpmInfo = pTpm->getAttr<TARGETING::ATTR_TPM_INFO>();
+        auto l_tpmInfo = pTpm->getAttr<TARGETING::ATTR_SPI_TPM_INFO>();
 
         TARGETING::PredicateAttrVal<TARGETING::ATTR_PHYS_PATH>
-                                      hasSameI2cMaster(l_tpmInfo.i2cMasterPath);
+                                      hasSameSpiController(l_tpmInfo.spiMasterPath);
 
         auto itr = std::find_if(l_procList.begin(),l_procList.end(),
-        [&hasSameI2cMaster](const TARGETING::TargetHandle_t & t)
+        [&hasSameSpiController](const TARGETING::TargetHandle_t & t)
         {
-            return hasSameI2cMaster(t);
+            return hasSameSpiController(t);
         });
 
         if(itr == l_procList.end())
@@ -2280,16 +2281,15 @@ errlHndl_t populate_TpmInfoByNode(const uint64_t i_instance)
 
         auto l_proc = *itr;
 
-        l_tpmInstInfo->hdatChipId = l_proc->getAttr<
-                                                 TARGETING::ATTR_ORDINAL_ID>();
+        l_tpmInstInfo->hdatChipId = l_proc->getAttr<TARGETING::ATTR_ORDINAL_ID>();
 
-        l_tpmInstInfo->hdatDbobId = l_node->getAttr<
-                                                 TARGETING::ATTR_ORDINAL_ID>();
-
-        l_tpmInstInfo->hdatLocality1Addr = l_tpmInfo.devAddrLocality1;
-        l_tpmInstInfo->hdatLocality2Addr = l_tpmInfo.devAddrLocality2;
-        l_tpmInstInfo->hdatLocality3Addr = l_tpmInfo.devAddrLocality3;
-        l_tpmInstInfo->hdatLocality4Addr = l_tpmInfo.devAddrLocality4;
+        // Reserved space was previously used for "Drawer/Book/Octant/Blade"-id
+        // and TPM locality values
+        l_tpmInstInfo->reserved_0x0004 = 0x0;
+        l_tpmInstInfo->reserved_0x0008 = 0x0;
+        l_tpmInstInfo->reserved_0x0009 = 0x0;
+        l_tpmInstInfo->reserved_0x000A = 0x0;
+        l_tpmInstInfo->reserved_0x000B = 0x0;
 
 #ifndef CONFIG_DISABLE_TPM_IN_HDAT
         auto hwasState = pTpm->getAttr<TARGETING::ATTR_HWAS_STATE>();

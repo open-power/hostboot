@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -90,7 +90,7 @@ namespace TRUSTEDBOOT
 #ifdef __HOSTBOOT_MODULE
         uint64_t inMemlogBaseAddr; ///< Base address of log for dev tree
         uint64_t devtreeXscomAddr; ///< Devtree Xscom Address
-        uint32_t devtreeI2cMasterOffset; ///< Devtree I2c Master Offset
+        uint32_t devtreeSpiControllerOffset; ///< Devtree SPI Controller Offset
         uint8_t eventLog[TPMLOG_BUFFER_SIZE]; ///< EventLog Buffer
 #endif
         mutex_t  logMutex;       ///< Log mutex
@@ -143,7 +143,7 @@ namespace TRUSTEDBOOT
      * @param[in/out] io_logAddr TPM Log address
      * @param[out] o_allocationSize Total memory allocated for log
      * @param[out] o_xscomAddr Chip Xscom Address
-     * @param[out] o_i2cMasterOffset I2c Master Offset
+     * @param[out] o_spiControllerOffset SPI Controller Offset
      * @return errlHndl_t NULL if successful, otherwise a pointer to the
      *       error log.
      * Function will allocate a new region in memory to store log
@@ -153,17 +153,17 @@ namespace TRUSTEDBOOT
                                          uint64_t & io_logAddr,
                                          size_t & o_allocationSize,
                                          uint64_t & o_xscomAddr,
-                                         uint32_t & o_i2cMasterOffset);
+                                         uint32_t & o_spiControllerOffset);
 
     /**
      * @brief Store TPM devtree node information
      * @param[in] i_val TpmLogMgr structure
      * @param[in] i_xscomAddr Chip Xscom Address
-     * @param[in] i_i2cMasterOffset i2c Master Offset
+     * @param[in] i_spiControllerOffset SPI Controller Offset
      */
     void TpmLogMgr_setTpmDevtreeInfo(TpmLogMgr* i_val,
                                      uint64_t i_xscomAddr,
-                                     uint32_t i_i2cMasterOffset);
+                                     uint32_t i_spiControllerOffset);
     /**
      * @brief Relocate the TPM log to the provided location
      * @param[in] i_val TpmLogMgr structure

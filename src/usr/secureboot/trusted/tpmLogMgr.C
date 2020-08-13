@@ -534,7 +534,7 @@ namespace TRUSTEDBOOT
                                         uint64_t & io_logAddr,
                                         size_t & o_allocationSize,
                                         uint64_t & o_xscomAddr,
-                                        uint32_t & o_i2cMasterOffset)
+                                        uint32_t & o_spiControllerOffset)
     {
         errlHndl_t err = NULL;
 
@@ -551,7 +551,7 @@ namespace TRUSTEDBOOT
         i_val->inMemlogBaseAddr = io_logAddr;
         o_allocationSize = TPMLOG_DEVTREE_SIZE;
         o_xscomAddr = i_val->devtreeXscomAddr;
-        o_i2cMasterOffset = i_val->devtreeI2cMasterOffset;
+        o_spiControllerOffset = i_val->devtreeSpiControllerOffset;
 
         // Copy image.
         i_val->eventLogInMem = (uint8_t*)(mm_block_map(
@@ -574,10 +574,10 @@ namespace TRUSTEDBOOT
 
     void TpmLogMgr_setTpmDevtreeInfo(TpmLogMgr* i_val,
                                      uint64_t i_xscomAddr,
-                                     uint32_t i_i2cMasterOffset)
+                                     uint32_t i_spiControllerOffset)
     {
         i_val->devtreeXscomAddr = i_xscomAddr;
-        i_val->devtreeI2cMasterOffset = i_i2cMasterOffset;
+        i_val->devtreeSpiControllerOffset = i_spiControllerOffset;
     }
 
     void TpmLogMgr_relocateTpmLog(TpmLogMgr* i_val,

@@ -7,4 +7,4 @@ config TPMDD
 config TPM_NUVOTON
     default y
     help
-        Enable Nuvoton TPM I2C driver
+        Enable Nuvoton TPM SPI driver

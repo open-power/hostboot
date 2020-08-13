@@ -83,7 +83,7 @@ errlHndl_t getTpmLogDevtreeInfo(
           uint64_t &       io_logAddr,
           size_t &         o_allocationSize,
           uint64_t &       o_xscomAddr,
-          uint32_t &       o_i2cMasterOffset)
+          uint32_t &       o_spiControllerOffset)
 {
     assert(i_pTpm != nullptr,"getTpmLogDevtreeInfo: BUG! i_pTpm was nullptr");
     assert(i_pTpm->getAttr<TARGETING::ATTR_TYPE>() == TARGETING::TYPE_TPM,
@@ -109,7 +109,7 @@ errlHndl_t getTpmLogDevtreeInfo(
                                        io_logAddr,
                                        o_allocationSize,
                                        o_xscomAddr,
-                                       o_i2cMasterOffset);
+                                       o_spiControllerOffset);
     }
     TRACUCOMP( g_trac_trustedboot,
                EXIT_MRK"getTpmLogDevtreeInfo() Addr:0x%016lX",io_logAddr);
@@ -119,7 +119,7 @@ errlHndl_t getTpmLogDevtreeInfo(
 void setTpmDevtreeInfo(
     const TpmTarget* const i_pTpm,
     const uint64_t         i_xscomAddr,
-    const uint32_t         i_i2cMasterOffset)
+    const uint32_t         i_spiControllerOffset)
 {
     assert(i_pTpm != nullptr,"setTpmLogDevtreeInfo: BUG! i_pTpm was nullptr");
     assert(i_pTpm->getAttr<TARGETING::ATTR_TYPE>() == TARGETING::TYPE_TPM,
@@ -128,15 +128,15 @@ void setTpmDevtreeInfo(
 
     TRACUCOMP( g_trac_trustedboot,
                ENTER_MRK"setTpmLogDevtreeOffset() tgt=0x%08X "
-               "Xscom:0x%016lX Master:0x%08X",
+               "Xscom:0x%016lX Controller:0x%08X",
                TARGETING::get_huid(i_pTpm),
-               i_xscomAddr, i_i2cMasterOffset);
+               i_xscomAddr, i_spiControllerOffset);
 
     auto * const pTpmLogMgr = getTpmLogMgr(i_pTpm);
     if (nullptr != pTpmLogMgr)
     {
         TpmLogMgr_setTpmDevtreeInfo(pTpmLogMgr,
-                                    i_xscomAddr, i_i2cMasterOffset);
+                                    i_xscomAddr, i_spiControllerOffset);
     }
 }
 
@@ -1084,12 +1084,12 @@ void tpmMarkFailed(TpmTarget* const i_pTpm,
     TARGETING::TargetHandleList l_procList;
     getAllChips(l_procList,TARGETING::TYPE_PROC,false);
 
-    auto l_tpmInfo = l_tpm->getAttr<TARGETING::ATTR_TPM_INFO>();
+    auto l_tpmInfo = l_tpm->getAttr<TARGETING::ATTR_SPI_TPM_INFO>();
 
     for(auto it : l_procList)
     {
         auto l_physPath = it->getAttr<TARGETING::ATTR_PHYS_PATH>();
-        if (l_tpmInfo.i2cMasterPath == l_physPath)
+        if (l_tpmInfo.spiMasterPath == l_physPath)
         {
             // found processor to deconfigure
             l_proc = it;
@@ -1323,7 +1323,7 @@ void tpmVerifyFunctionalPrimaryTpmExists(
                                          HWAS::SRCI_PRIORITY_LOW);
                 err->collectTrace(TRBOOT_COMP_NAME);
                 err->collectTrace(TPMDD_COMP_NAME );
-                err->collectTrace(I2C_COMP_NAME );
+                err->collectTrace(SPI_COMP_NAME );
                 err->collectTrace(SECURE_COMP_NAME );
                 const auto reasonCode = err->reasonCode();
 
@@ -2371,7 +2371,7 @@ void markTpmUnusable(TARGETING::Target* i_tpm,
 
     l_errl->collectTrace(SECURE_COMP_NAME);
     l_errl->collectTrace(TRBOOT_COMP_NAME);
-    l_errl->collectTrace(I2C_COMP_NAME);
+    l_errl->collectTrace(SPI_COMP_NAME);
     l_errl->collectTrace(HWAS_COMP_NAME);
 
     if(i_associatedErrl)

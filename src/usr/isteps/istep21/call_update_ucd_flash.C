@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -93,9 +93,8 @@ void call_update_ucd_flash(void)
             break;
         }
 
-        // Make sure TPM queue is flushed before doing any I2C operations, since
-        // loading via MCL drives PCR extends into the TPM, and TPM can share
-        // the same I2C bus as UCD devices
+        // Make sure TPM queue is flushed before doing any SPI operations, since
+        // loading via MCL drives PCR extends into the TPM
         pError = TRUSTEDBOOT::flushTpmQueue();
         if(pError)
         {

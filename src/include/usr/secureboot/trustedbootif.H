@@ -260,7 +260,7 @@ namespace TRUSTEDBOOT
      *
      *  @param[out] o_xscomAddr Chip Xscom Address
      *
-     *  @param[out] o_i2cMasterOffset I2c Master Offset
+     *  @param[out] o_spiControllerOffset SPI Controller Offset
      *
      *  @return errlHndl_t NULL if successful, otherwise a pointer to the
      *      error log.
@@ -270,7 +270,7 @@ namespace TRUSTEDBOOT
               uint64_t&  io_logAddr,
               size_t&    o_allocationSize,
               uint64_t&  o_xscomAddr,
-              uint32_t&  o_i2cMasterOffset);
+              uint32_t&  o_spiControllerOffset);
 
     /**
      *  @brief Store devtree node information for the TPM
@@ -280,12 +280,12 @@ namespace TRUSTEDBOOT
      *
      *  @param[in] i_xscomAddr Chip Xscom Address
      *
-     *  @param[in] i_i2cMasterOffset i2c Master Offset
+     *  @param[in] i_spiControllerOffset SPI Controller Offset
      */
     void setTpmDevtreeInfo(
         const TpmTarget* i_pTpm,
               uint64_t   i_xscomAddr,
-              uint32_t   i_i2cMasterOffset);
+              uint32_t   i_spiControllerOffset);
 
     #ifdef CONFIG_TPMDD
     /**

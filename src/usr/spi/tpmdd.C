@@ -27,7 +27,7 @@
  *
  * @brief Implementation of the TPM device driver,
  *      which will access the TPM within the
- *      system via the I2C device driver
+ *      system via the SPI device driver
  *
  */
 
@@ -305,7 +305,7 @@ bool tpmPresence (TARGETING::Target* i_pTpm)
     assert(i_pTpm != nullptr,
            "BUG! Caller passed in nullptr for TPM target");
 
-    // Input target must have a TPM_INFO attribute (only applicable to TPM
+    // Input target must have a SPI_TPM_INFO attribute (only applicable to TPM
     // targets), enforced by call to tpmReadAttributes
     errlHndl_t pError = nullptr;
     bool present = false;
@@ -1072,7 +1072,7 @@ errlHndl_t tpmReadAttributes ( TARGETING::Target * i_target,
             const auto type = i_target->getAttr<TARGETING::ATTR_TYPE>();
 
             TRACFCOMP(g_trac_tpmdd,ERR_MRK
-                "tpmReadAttributes: Failed to read TPM_INFO "
+                "tpmReadAttributes: Failed to read SPI_TPM_INFO "
                 "attribute from target HUID=0x%08X of type=0x%08X.",
                 TARGETING::get_huid(i_target), type);
 

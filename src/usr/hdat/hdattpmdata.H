@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2017,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -25,6 +25,7 @@
 #ifndef HDATTPMDATA_H
 #define HDATTPMDATA_H
 
+// FIXME: RTC: 212110 Secureboot: P10 - HDAT SPI rework
 /**
  * @file hdattpmdata.H
  *
@@ -102,11 +103,13 @@ struct hdatTpmConfigFlags_t
 struct hdatSbTpmInstInfo_t
 {
     uint32_t hdatChipId;
-    uint32_t hdatDbobId; // Drawer/Book/Octant/Blade ID
-    uint8_t hdatLocality1Addr;
-    uint8_t hdatLocality2Addr;
-    uint8_t hdatLocality3Addr;
-    uint8_t hdatLocality4Addr;
+    // Reserved space was previously used for "Drawer/Book/Octant/Blade"-id and TPM locality values
+    // which are no longer needed. Empty space kept to comform with specs.
+    uint32_t reserved_0x0004;
+    uint8_t reserved_0x0008;
+    uint8_t reserved_0x0009;
+    uint8_t reserved_0x000A;
+    uint8_t reserved_0x000B;
     uint8_t hdatFunctionalStatus;
     struct hdatTpmConfigFlags_t hdatTpmConfigFlags;
     uint8_t reserved[2];
