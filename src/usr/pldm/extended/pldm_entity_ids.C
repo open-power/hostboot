@@ -75,9 +75,8 @@ const unique_entity_info foreign_entity_types[] =
 {
     { CLASS_ENC, TYPE_NODE, ENTITY_TYPE_BACKPLANE },
     { CLASS_SYS, TYPE_SYS,  ENTITY_TYPE_CHASSIS },
-    { CLASS_SYS, TYPE_SYS,  ENTITY_TYPE_LOGICAL_SYSTEM }
-    //TODO RTC: 246066 Enable when TPMs are detected by hostboot
-//     { CLASS_CHIP, TYPE_TPM, ENTITY_TYPE_TPM }
+    { CLASS_SYS, TYPE_SYS,  ENTITY_TYPE_LOGICAL_SYSTEM },
+    { CLASS_CHIP, TYPE_TPM, ENTITY_TYPE_TPM }
 };
 
 /* @brief Update the given target's PLDM_ENTITY_ID_INFO attribute
@@ -179,7 +178,7 @@ errlHndl_t updateTargetEntityIdAttribute(Target* const i_target,
         .generic = {
             .entityType = static_cast<uint16_t>(htole16(ent.entity_type)),
             .entityInstanceNumber = static_cast<uint16_t>(htole16(ent.entity_instance_num)),
-            .containerId = static_cast<uint16_t>(htole16(ent.entity_container_id)) 
+            .containerId = static_cast<uint16_t>(htole16(ent.entity_container_id))
          }
     };
 

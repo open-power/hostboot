@@ -34,7 +34,7 @@
 // Includes
 // -----------------------------------------------
 #include <targeting/common/targetservice.H>
-#include <i2c/tpmddif.H>
+#include <spi/tpmddif.H>
 #include <errl/errlentry.H>
 #include <list>
 #include <pnor/pnorif.H>

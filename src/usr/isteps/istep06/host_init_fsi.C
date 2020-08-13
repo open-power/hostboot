@@ -30,7 +30,7 @@
 #include <errl/errlmanager.H>
 #include <fsi/fsiif.H>
 #include <i2c/i2cif.H>
-#include <i2c/tpmddif.H>
+#include <spi/tpmddif.H>
 #include <initservice/taskargs.H>
 #include <initservice/isteps_trace.H>
 #include <initservice/initserviceif.H>

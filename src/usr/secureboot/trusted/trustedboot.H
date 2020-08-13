@@ -34,7 +34,7 @@
 // Includes
 // -----------------------------------------------
 #include <secureboot/trustedbootif.H>
-#include <i2c/tpmddif.H>
+#include <spi/tpmddif.H>
 #include <trace/interface.H>
 #include <sys/msg.h>
 #include "trustedTypes.H"

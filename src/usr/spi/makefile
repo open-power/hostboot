@@ -44,6 +44,7 @@ OBJS += spidd.o
 OBJS += errlud_spi.o
 OBJS += p10_spi_init_pib.o
 OBJS += p10_spi_init_fsi.o
+OBJS += $(if $(CONFIG_TPMDD),tpmdd.o,)
 
 SUBDIRS += test.d
 

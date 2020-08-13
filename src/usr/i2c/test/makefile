@@ -27,6 +27,5 @@ ROOTPATH = ../../../..
 MODULE = testi2c
 
 TESTS += i2ctest.H
-#TESTS += $(if $(CONFIG_TPMDD),tpmddtest.H,)
 
 include ${ROOTPATH}/config.mk

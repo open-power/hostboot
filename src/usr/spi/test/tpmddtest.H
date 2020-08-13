@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/i2c/test/tpmddtest.H $                                */
+/* $Source: src/usr/spi/test/tpmddtest.H $                                */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -36,16 +36,17 @@
 #include <errl/errlmanager.H>
 #include <errl/errlentry.H>
 #include <devicefw/driverif.H>
-#include <i2c/tpmddreasoncodes.H>
+#include <spi/tpmddreasoncodes.H>
 #include <targeting/common/commontargeting.H>
 #include <secureboot/trustedbootif.H>
-#include "i2ctest.H"
 #include "../tpmdd.H"
 #include "../../secureboot/trusted/trustedTypes.H"
 
 extern trace_desc_t* g_trac_tpmdd;
 
-// NOTE: TRACUCOMP defined/controlled in i2ctest.H
+// Easy macro replace for unit testing
+//#define TRACUCOMP(args...)  TRACFCOMP(args)
+#define TRACUCOMP(args...)
 
 using namespace TARGETING;
 using namespace TPMDD;
@@ -60,7 +61,7 @@ class TPMDDTest: public CxxTest::TestSuite
          */
         TARGETING::Target* getTestTarget()
         {
-            TARGETING::Target* testTarget = NULL;
+            TARGETING::Target* testTarget = nullptr;
             TARGETING::TargetHandleList tpmList;
             TARGETING::getAllChips(tpmList,
                                    TARGETING::TYPE_TPM,
@@ -79,17 +80,17 @@ class TPMDDTest: public CxxTest::TestSuite
                 errlHndl_t err = tpmReadAttributes (testTarget, tpmInfo,
                                                     TPM_LOCALITY_0);
 
-                if (NULL != err)
+                if (nullptr != err)
                 {
-                    testTarget = NULL;
+                    testTarget = nullptr;
                     delete err;
-                    err = NULL;
+                    err = nullptr;
                 }
                 else if (!tpmInfo.tpmEnabled)
                 {
                     TRACFCOMP(g_trac_tpmdd, "getTestTarget - "
                               "Chip not enabled");
-                    testTarget = NULL;
+                    testTarget = nullptr;
                 }
                 else
                 {
@@ -106,7 +107,7 @@ class TPMDDTest: public CxxTest::TestSuite
          */
         void testTPMReadVendorID ( void )
         {
-            errlHndl_t err = NULL;
+            errlHndl_t err = nullptr;
             int64_t fails = 0, num_ops = 0;
             uint32_t data = 0x0;
             size_t dataSize = sizeof(data);
@@ -116,14 +117,9 @@ class TPMDDTest: public CxxTest::TestSuite
 
             do
             {
-#ifdef CONFIG_AXONE_BRING_UP
-                TRACFCOMP( g_trac_tpmdd,"Skipping test on Axone" );
-                break;
-#endif
-
                 // Get a TPM Target
                 TARGETING::Target* testTarget = getTestTarget();
-                if (NULL == testTarget)
+                if (nullptr == testTarget)
                 {
                     continue;
                 }
@@ -136,19 +132,19 @@ class TPMDDTest: public CxxTest::TestSuite
                                                      0,
                                                      TPM_LOCALITY_0) );
 
-                if( NULL != err )
+                if( nullptr != err )
                 {
                     fails++;
                     TS_FAIL( "testTPMReadVendorID - Error detected" );
                     errlCommit( err,
                                 TPMDD_COMP_ID );
                     delete err;
-                    err = NULL;
+                    err = nullptr;
                     continue;
                 }
                 else if ((data & TPMDD::TPM_VENDORID_MASK)
-                         // Only 65x supported in simics for now:
-                           != TPMDD::TPM_VENDORID_65x)
+                         // Only 75x supported in simics for now:
+                           != TPMDD::TPM_VENDORID_75x)
                 {
                     fails++;
                     TS_FAIL( "testTPMReadVendorID - Failed to read "
@@ -176,7 +172,7 @@ class TPMDDTest: public CxxTest::TestSuite
          */
         void testTPMInvalidOperation ( void )
         {
-            errlHndl_t err = NULL;
+            errlHndl_t err = nullptr;
             int64_t fails = 0, num_ops = 0;
             uint64_t data = 0x0ull;
             size_t dataSize = 0;
@@ -189,7 +185,7 @@ class TPMDDTest: public CxxTest::TestSuite
 
                 // Get a TPM Target
                 TARGETING::Target* testTarget = getTestTarget();
-                if (NULL == testTarget)
+                if (nullptr == testTarget)
                 {
                     continue;
                 }
@@ -202,7 +198,7 @@ class TPMDDTest: public CxxTest::TestSuite
                                                      0,
                                                      TPM_LOCALITY_0) );
 
-                if( NULL == err )
+                if( nullptr == err )
                 {
                     fails++;
                     TS_FAIL( "testTPMInvalidOperation - Error should've "
@@ -215,7 +211,7 @@ class TPMDDTest: public CxxTest::TestSuite
                               "RC=0x%X",
                               err->reasonCode() );
                     delete err;
-                    err = NULL;
+                    err = nullptr;
                 }
 
 
@@ -228,7 +224,7 @@ class TPMDDTest: public CxxTest::TestSuite
                                                     0,
                                                     TPM_LOCALITY_0) );
 
-                if( NULL == err )
+                if( nullptr == err )
                 {
                     fails++;
                     TS_FAIL( "testTPMInvalidOperation - Error should've "
@@ -241,7 +237,7 @@ class TPMDDTest: public CxxTest::TestSuite
                               "RC=0x%X",
                               err->reasonCode() );
                     delete err;
-                    err = NULL;
+                    err = nullptr;
                 }
 
 
@@ -259,7 +255,7 @@ class TPMDDTest: public CxxTest::TestSuite
          */
         void testTPMOverflow ( void )
         {
-            errlHndl_t err = NULL;
+            errlHndl_t err = nullptr;
             int64_t fails = 0, num_ops = 0;
             uint64_t data = 0x0ull;
             size_t dataSize = 0;
@@ -271,7 +267,7 @@ class TPMDDTest: public CxxTest::TestSuite
             {
                 // Get a TPM Target
                 TARGETING::Target* testTarget = getTestTarget();
-                if (NULL == testTarget)
+                if (nullptr == testTarget)
                 {
                     continue;
                 }
@@ -286,7 +282,7 @@ class TPMDDTest: public CxxTest::TestSuite
                                                      0,
                                                      TPM_LOCALITY_0) );
 
-                if( NULL == err ||
+                if( nullptr == err ||
                     err->reasonCode() != TPM_OVERFLOW_ERROR)
                 {
                     fails++;
@@ -302,7 +298,7 @@ class TPMDDTest: public CxxTest::TestSuite
                               "RC=0x%X",
                               err->reasonCode() );
                     delete err;
-                    err = NULL;
+                    err = nullptr;
                 }
 
 
@@ -331,9 +327,9 @@ class TPMDDTest: public CxxTest::TestSuite
 
                 // Get a processor Target instead of a tpm target
                 TARGETING::TargetService& tS = TARGETING::targetService();
-                TARGETING::Target* testTarget = NULL;
+                TARGETING::Target* testTarget = nullptr;
                 tS.masterProcChipTargetHandle( testTarget );
-                assert(testTarget != NULL);
+                assert(testTarget != nullptr);
 
                 // Skip this target if target is non-functional
                 if(!testTarget->getAttr<TARGETING::ATTR_HWAS_STATE>()
@@ -361,7 +357,7 @@ class TPMDDTest: public CxxTest::TestSuite
 
                 testTarget = getTestTarget();
 
-                if (NULL != testTarget)
+                if (nullptr != testTarget)
                 {
                     // Now test with valid primary target
                     num_ops++;
@@ -393,7 +389,7 @@ class TPMDDTest: public CxxTest::TestSuite
         void testTPMTransmit ( void )
         {
 
-            errlHndl_t err = NULL;
+            errlHndl_t err = nullptr;
             int64_t fails = 0, num_ops = 0;
             uint8_t data[256];
             size_t dataSize = sizeof(data);
@@ -406,7 +402,7 @@ class TPMDDTest: public CxxTest::TestSuite
 
                 // Get a TPM Target
                 TARGETING::Target* testTarget = getTestTarget();
-                if (NULL == testTarget)
+                if (nullptr == testTarget)
                 {
                     continue;
                 }
@@ -441,14 +437,13 @@ class TPMDDTest: public CxxTest::TestSuite
                     reinterpret_cast<TRUSTEDBOOT::TPM2_BaseOut*>(data);
 
 
-                if( NULL != err )
+                if( nullptr != err )
                 {
                     fails++;
                     TS_FAIL( "testTPMTransmit - GetCap : Error detected" );
-                    errlCommit( err,
-                                TPMDD_COMP_ID );
+                    errlCommit( err, TPMDD_COMP_ID );
                     delete err;
-                    err = NULL;
+                    err = nullptr;
                     continue;
                 }
                 else if (TRUSTEDBOOT::TPM_SUCCESS !=
@@ -480,7 +475,7 @@ class TPMDDTest: public CxxTest::TestSuite
         void testTPMTransmitOverUnder ( void )
         {
 
-            errlHndl_t err = NULL;
+            errlHndl_t err = nullptr;
             int64_t fails = 0, num_ops = 0;
             uint8_t data[256];
             size_t dataSize = sizeof(data);
@@ -494,7 +489,7 @@ class TPMDDTest: public CxxTest::TestSuite
 
                 // Get a TPM Target
                 TARGETING::Target* testTarget = getTestTarget();
-                if (NULL == testTarget)
+                if (nullptr == testTarget)
                 {
                     continue;
                 }
@@ -519,23 +514,31 @@ class TPMDDTest: public CxxTest::TestSuite
                 num_ops++;
                 // Force datasize to be too small
                 dataSize = sizeof(TRUSTEDBOOT::TPM2_BaseOut);
+
                 err = deviceRead(testTarget,
-                                 &data,
+                                 data,
                                  dataSize,
                                  DEVICE_TPM_ADDRESS(TPM_OP_TRANSMIT,
                                                     cmdSize,
                                                     TPM_LOCALITY_0) );
 
-                if( NULL == err ||
-                    err->reasonCode() != TPM_OVERFLOW_ERROR)
+                if( (nullptr == err) ||
+                    (err->reasonCode() != TPM_OVERFLOW_ERROR) )
                 {
                     fails++;
                     TS_FAIL( "testTPMTransmitOverUnder - Error "
-                             "data overflow not detected" );
-                    errlCommit( err,
-                                TPMDD_COMP_ID );
-                    delete err;
-                    err = NULL;
+                             "data overflow NOT detected - "
+                             "(dataSize %d vs cmdSize %d), "
+                             " rc=0x%X, plid=0x%X",
+                             sizeof(TRUSTEDBOOT::TPM2_BaseOut), cmdSize,
+                             ERRL_GETRC_SAFE(err), ERRL_GETPLID_SAFE(err) );
+                    if (err)
+                    {
+                        errlCommit( err,
+                                    TPMDD_COMP_ID );
+                        delete err;
+                        err = nullptr;
+                    }
                 }
                 else
                 {

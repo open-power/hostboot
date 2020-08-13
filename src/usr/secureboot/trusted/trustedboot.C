@@ -55,7 +55,7 @@
 #include <ipmi/ipmisensor.H>
 #endif
 #include <devicefw/driverif.H>
-#include <i2c/tpmddif.H>
+#include <spi/tpmddif.H>
 #include "trustedboot.H"
 #include "trustedTypes.H"
 #include "trustedbootCmds.H"

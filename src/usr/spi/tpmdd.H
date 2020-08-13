@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/i2c/tpmdd.H $                                         */
+/* $Source: src/usr/spi/tpmdd.H $                                         */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
@@ -35,7 +35,7 @@
 // ----------------------------------------------
 // Includes
 // ----------------------------------------------
-#include <i2c/tpmddif.H>
+#include <spi/tpmddif.H>
 #include <errl/errlentry.H>
 
 namespace TPMDD

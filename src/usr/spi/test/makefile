@@ -27,6 +27,7 @@ ROOTPATH = ../../../..
 MODULE = testspi
 
 TESTS = testspi.H
+TESTS += $(if $(CONFIG_TPMDD),tpmddtest.H,)
 
 #HWP_PATH += ${ROOTPATH}/src/import/chips/p10/procedures
 

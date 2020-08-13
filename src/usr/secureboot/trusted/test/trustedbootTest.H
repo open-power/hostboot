@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -36,7 +36,7 @@
 #include <targeting/common/commontargeting.H>
 #include <errl/errlmanager.H>
 #include <errl/errlentry.H>
-#include <i2c/tpmddif.H>
+#include <spi/tpmddif.H>
 #include <secureboot/trustedbootif.H>
 #include <targeting/common/predicates/predicates.H>
 #include <targeting/common/attributes.H>

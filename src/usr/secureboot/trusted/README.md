@@ -12,9 +12,9 @@ It primarily does this by measuring and storing firmware images and system
 * This code also determines which TPMs exist on the system, if they are
  functional, and initializes them
 * To directly talk to the TPMs this code uses the TPM Device Driver, which
- is built on top of the I2C Device Driver:
-  * [src/usr/i2c/tmpdd.C](../../i2c/tpmdd.C)
-  * [src/usr/i2c/tpmdd.H](../../i2c/tpmdd.H)
+ is built on top of the SPI Device Driver:
+  * [src/usr/spi/tmpdd.C](../../spi/tpmdd.C)
+  * [src/usr/spi/tpmdd.H](../../spi/tpmdd.H)
 
 * The **libsecureboot_trusted.so** module created here is available in
  Hostboot's extended image

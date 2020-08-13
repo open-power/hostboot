@@ -40,9 +40,9 @@
 #include <errl/errludstring.H>
 #include <targeting/common/targetservice.H>
 #include <devicefw/driverif.H>
-#include <i2c/tpmddif.H>
+#include <spi/tpmddif.H>
 #include <secureboot/trustedbootif.H>
-#include <i2c/tpmddreasoncodes.H>
+#include <spi/tpmddreasoncodes.H>
 #include <secureboot/trustedboot_reasoncodes.H>
 #include "trustedbootUtils.H"
 #include "trustedbootCmds.H"

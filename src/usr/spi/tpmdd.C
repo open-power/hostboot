@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/i2c/tpmdd.C $                                         */
+/* $Source: src/usr/spi/tpmdd.C $                                         */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
@@ -45,15 +45,13 @@
 #include <targeting/common/targetservice.H>
 #include <targeting/common/util.H>
 #include <devicefw/driverif.H>
-#include <i2c/tpmddif.H>
-#include <i2c/i2creasoncodes.H>
-#include <i2c/tpmddreasoncodes.H>
-#include <i2c/i2cif.H>
 #include <util/misc.H> // simics check
+#include <spi/tpmddif.H>
+#include <spi/tpmddreasoncodes.H>
 #include <secureboot/service.H>
 #include <secureboot/trustedbootif.H>
 #include "tpmdd.H"
-#include "errlud_i2c.H"
+
 
 // ----------------------------------------------
 // Globals
@@ -1431,7 +1429,6 @@ errlHndl_t tpmReadReg ( tpm_info_t i_tpmInfo,
     errlHndl_t err = nullptr;
 
     i_tpmInfo.offset = i_offset;
-
     err =  tpmRead( o_buffer,
                     i_buflen,
                     i_tpmInfo );

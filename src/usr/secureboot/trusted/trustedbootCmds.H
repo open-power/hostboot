@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -39,7 +39,7 @@
 // -----------------------------------------------
 #ifdef __HOSTBOOT_MODULE
 #include <secureboot/trustedbootif.H>
-#include <i2c/tpmddif.H>
+#include <spi/tpmddif.H>
 using namespace TPMDD;
 #endif
 #include "trustedboot.H"
