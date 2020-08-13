@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -271,6 +271,8 @@ void fapi2PlatGetVpdOcmbChipTest::testPlatGetVPD_EFD()
     } while(0);
 
 
+    //TODO RTC: 258808 - Re-enable when we have VPD that supports it
+/*
     /// Test case 8
     // Test with data that is guaranteed to find a match 1
     ++l_numTests;
@@ -298,7 +300,6 @@ void fapi2PlatGetVpdOcmbChipTest::testPlatGetVPD_EFD()
             break;
         }
     } while(0);
-
 
     /// Test case 9
     // Test with data that is guaranteed to find a match 2
@@ -328,7 +329,7 @@ void fapi2PlatGetVpdOcmbChipTest::testPlatGetVPD_EFD()
             break;
         }
     } while(0);
-
+**/
 
     /// Test case 10
     // Test with data that is guaranteed to find a match 3
