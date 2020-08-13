@@ -681,78 +681,45 @@ ExtensibleChip * getNeighborCore( ExtensibleChip * i_core )
     }
     return neighborCore;
 }
+
 //------------------------------------------------------------------------------
 
-TargetHandle_t getConnectedPeerTarget( TargetHandle_t i_target )
+TargetHandle_t getConnectedPeerTarget(TargetHandle_t i_target)
 {
-    #define PRDF_FUNC "[PlatServices::getConnectedPeerTarget] "
+    PRDF_ASSERT(nullptr != i_target);
+    PRDF_ASSERT(TYPE_IOHS == getTargetType(i_target));
 
-    PRDF_ASSERT( NULL != i_target );
-
-    TargetHandle_t o_target = NULL;
-
-    do
-    {
-        TYPE type = getTargetType( i_target );
-
-        switch( type )
-        {
-            case TYPE_XBUS:
-            case TYPE_OBUS:
-            case TYPE_PSI:
-
-                o_target = i_target->getAttr<ATTR_PEER_TARGET>();
-                break;
-
-            default:
-                PRDF_ERR( PRDF_FUNC "Target type not supported: i_target=0x%08x "
-                          "type=0x%x", getHuid(i_target), type );
-        }
-
-
-    } while(0);
-
-    return o_target;
-
-    #undef PRDF_FUNC
+    return i_target->getAttr<ATTR_PEER_TARGET>();
 }
 
 //------------------------------------------------------------------------------
 
-TargetHandle_t getConnectedPeerProc( TargetHandle_t i_procTarget,
-                                     TYPE i_busType, uint32_t i_busPos )
+TargetHandle_t getConnectedPeerProc(TargetHandle_t i_procTarget,
+                                    TYPE i_busType, uint32_t i_busPos)
 {
-    #define PRDF_FUNC "[PlatServices::getConnectedPeerProc] "
+    PRDF_ASSERT(nullptr != i_procTarget);
+    PRDF_ASSERT(TYPE_PROC == getTargetType(i_procTarget));
+    PRDF_ASSERT((TYPE_IOHS == i_busType) && (MAX_IOHS_PER_PROC > i_busPos));
 
-    PRDF_ERR( PRDF_FUNC "Not supported for P10 yet" );
-    /* TODO RTC 252759
-    PRDF_ASSERT( NULL != i_procTarget );
-    PRDF_ASSERT( TYPE_PROC == getTargetType(i_procTarget) );
-    PRDF_ASSERT( ((TYPE_XBUS == i_busType) && (MAX_XBUS_PER_PROC > i_busPos)) ||
-                 ((TYPE_OBUS == i_busType) && (MAX_OBUS_PER_PROC > i_busPos)) );
-
-    TargetHandle_t o_target = NULL;
+    TargetHandle_t o_target = nullptr;
 
     do
     {
-        // Starting PROC -> starting XBUS/ABUS.
-        TargetHandle_t busTarget = getConnectedChild( i_procTarget, i_busType,
-                                                      i_busPos );
-        if ( NULL == busTarget ) break;
+        // Starting PROC -> starting IOHS.
+        TargetHandle_t busTarget = getConnectedChild(i_procTarget, i_busType,
+                                                     i_busPos);
+        if (nullptr == busTarget) break;
 
-        // Starting XBUS/ABUS -> ATTR_PEER_TARGET -> destination XBUS/ABUS.
-        TargetHandle_t destTarget = getConnectedPeerTarget( busTarget );
-        if ( NULL == destTarget ) break;
+        // Starting IOHS -> ATTR_PEER_TARGET -> destination IOHS.
+        TargetHandle_t destTarget = getConnectedPeerTarget(busTarget);
+        if (nullptr == destTarget) break;
 
-        // Destination XBUS/ABUS -> destination PROC.
-        o_target = getConnectedParent( destTarget, TYPE_PROC );
+        // Destination IOHS -> destination PROC.
+        o_target = getConnectedParent(destTarget, TYPE_PROC);
 
     } while(0);
-    */
 
-    return nullptr;
-
-    #undef PRDF_FUNC
+    return o_target;
 }
 
 //------------------------------------------------------------------------------

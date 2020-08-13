@@ -274,27 +274,27 @@ ExtensibleChip * getConnectedChild( ExtensibleChip * i_parent,
 ExtensibleChip * getNeighborCore( ExtensibleChip * i_core );
 
 /**
- * @brief   Returns the target of a PROC that is connected via the given
- *          target's XBUS or ABUS.
- * @param   i_procTarget Target of TYPE_PROC.
- * @param   i_busType    Bus type of TYPE_XBUS or TYPE_ABUS.
- * @param   i_busPos     Position of bus (XBUS: 0-3, ABUS: 0-2).
- * @return  The connected PROC target. On error, the target will be NULL.
+ * @brief  Returns the PROC target connected via the given bus type and
+ *         position.
+ * @param  i_procTarget A PROC target.
+ * @param  i_busType    The connected bus type.
+ * @param  i_busPos     The position of the bus relative to the PROC.
+ * @return The connected PROC target or nullptr on error.
  */
 TARGETING::TargetHandle_t getConnectedPeerProc(
                                          TARGETING::TargetHandle_t i_procTarget,
                                          TARGETING::TYPE i_busType,
-                                         uint32_t i_busPos );
+                                         uint32_t i_busPos);
 
 /**
- * @brief   Returns the connected peer target using ATTR_PEER_TARGET
- * @param   i_tgt Source target
- * @return  Connected peer target, or NULL
- * @note    Only works if ATTR_PEER_TARGET is defined.
- *          Currently only X and A bus targets.
+ * @brief  Returns the peer target connected to the given target.
+ * @param  i_target The source target
+ * @return The connected peer target or nullptr on error.
+ * @note   This utilizes ATTR_PEER_TARGET, which must be defined for the given
+ *         target.
  */
 TARGETING::TargetHandle_t getConnectedPeerTarget(
-                                  TARGETING::TargetHandle_t i_tgt);
+                                  TARGETING::TargetHandle_t i_target);
 
 /**
  * @param  i_trgt The target OCMB_CHIP or MEM_PORT.
