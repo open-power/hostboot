@@ -759,4 +759,23 @@
     </chipEcFeature>
   </attribute>
 
+  <!-- ******************************************************************** -->
+  <attribute>
+    <id>ATTR_CHIP_EC_FEATURE_HW531432</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      P10 DD1 only
+      HW531432 - channel timeout on mirrored writes
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_P10</name>
+        <ec>
+          <value>0x10</value>
+          <test>LESS_THAN_OR_EQUAL</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
+
 </attributes>

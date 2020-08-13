@@ -198,6 +198,16 @@ static const uint32_t XSTOP5_WAIT_CYCLES_LEN = 12;
 //<< [XSTOP5]
 // mc/reg00013.H
 
+//>> [MBA_SCOMFIR_MISCFIRMASK]
+static const uint64_t MBA_SCOMFIR_MISCFIRMASK_RW = 0x0c010f03ull;
+static const uint64_t MBA_SCOMFIR_MISCFIRMASK_WO_AND = 0x0c010f04ull;
+static const uint64_t MBA_SCOMFIR_MISCFIRMASK_WO_OR = 0x0c010f05ull;
+
+static const uint32_t MBA_SCOMFIR_MISCFIRMASK_MISCFIRMASK_FIR_MASK = 0;
+static const uint32_t MBA_SCOMFIR_MISCFIRMASK_MISCFIRMASK_FIR_MASK_LEN = 12;
+//<< [MBA_SCOMFIR_MISCFIRMASK]
+// mc/reg00013.H
+
 //>>THE END<<
 
 #ifndef __PPE_HCODE__

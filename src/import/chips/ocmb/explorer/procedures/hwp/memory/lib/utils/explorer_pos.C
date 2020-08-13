@@ -131,4 +131,18 @@ relative_pos<fapi2::TARGET_TYPE_MC>(const fapi2::Target<fapi2::TARGET_TYPE_OMIC>
     return pos(i_target) % TT::OMIC_PER_MC;
 }
 
+///
+/// @brief Return an OMI's relative position from an OMIC
+/// @param[in] i_target a target representing the target in question
+/// @return The position relative to chiplet R
+/// @note this needs to live here so it doesn't cause multiple definition link errors in mss_p10 library
+///
+template<>
+posTraits<fapi2::TARGET_TYPE_OMI>::pos_type
+relative_pos<fapi2::TARGET_TYPE_OMIC>(const fapi2::Target<fapi2::TARGET_TYPE_OMI>& i_target)
+{
+    typedef mcTypeTraits<mc_type::EXPLORER> TT;
+    return pos(i_target) % TT::OMI_PER_OMIC;
+}
+
 }// mss

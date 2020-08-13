@@ -87,6 +87,11 @@ class reg
             FAPI_TRY( mss::getScom(iv_target, RT::ACT0, iv_action0) );
             FAPI_TRY( mss::getScom(iv_target, RT::ACT1, iv_action1) );
 
+            if (RT::HAS_ACT2)
+            {
+                FAPI_TRY( mss::getScom(iv_target, RT::ACT2, iv_action2) );
+            }
+
         fapi_try_exit:
             o_rc = fapi2::current_err;
         }
@@ -117,10 +122,10 @@ class reg
             return mss::putScom(iv_target, RT::REG, 0);
         }
 
-        // Magic patterns in these functions are (Action0, Action1, Mask)
+        // Magic patterns in these functions are (Action0, Action1, Action2, Mask)
 
         ///
-        /// @brief Setup Checkstop (0,0,0)
+        /// @brief Setup Checkstop (0,0,0,0)
         /// @tparam B the ordinial number of the bit in question
         /// @tparam C the bit count, defaults to 1
         /// @return fir::reg reference suitable for chaining
@@ -128,11 +133,11 @@ class reg
         template< uint64_t B, uint64_t C = 1 >
         inline fir::reg<R>& checkstop()
         {
-            return action_helper<B, C>(0, 0, 0);
+            return action_helper<B, C>(0, 0, 0, 0);
         }
 
         ///
-        /// @brief Setup Recoverable Error (0,1,0)
+        /// @brief Setup Recoverable Error (0,1,0,0)
         /// @tparam B the ordinial number of the bit in question
         /// @tparam C the bit count, defaults to 1
         /// @return fir::reg reference sutable for chaining
@@ -140,11 +145,11 @@ class reg
         template< uint64_t B, uint64_t C = 1 >
         inline fir::reg<R>& recoverable_error()
         {
-            return action_helper<B, C>(0, 1, 0);
+            return action_helper<B, C>(0, 1, 0, 0);
         }
 
         ///
-        /// @brief Setup Attention (1,0,0)
+        /// @brief Setup Attention (1,0,0,0)
         /// @tparam B the ordinial number of the bit in question
         /// @tparam C the bit count, defaults to 1
         /// @return fir::reg reference sutable for chaining
@@ -152,12 +157,11 @@ class reg
         template< uint64_t B, uint64_t C = 1 >
         inline fir::reg<R>& attention()
         {
-            return action_helper<B, C>(1, 0, 0);
-            // TK do we need to setup special attention or host attention here?
+            return action_helper<B, C>(1, 0, 0, 0);
         }
 
         ///
-        /// @brief Setup Local checkstop (1,1,0)
+        /// @brief Setup Local checkstop (1,1,0,0)
         /// @tparam B the ordinial number of the bit in question
         /// @tparam C the bit count, defaults to 1
         /// @return fir::reg reference sutable for chaining
@@ -165,11 +169,23 @@ class reg
         template< uint64_t B, uint64_t C = 1 >
         inline fir::reg<R>& local_checkstop()
         {
-            return action_helper<B, C>(1, 1, 0);
+            return action_helper<B, C>(1, 1, 0, 0);
         }
 
         ///
-        /// @brief Setup Masked (x,x,1)
+        /// @brief Setup Host Attention (0,0,1,0)
+        /// @tparam B the ordinial number of the bit in question
+        /// @tparam C the bit count, defaults to 1
+        /// @return fir::reg reference sutable for chaining
+        ///
+        template< uint64_t B, uint64_t C = 1 >
+        inline fir::reg<R>& host_attention()
+        {
+            return action_helper<B, C>(0, 0, 1, 0);
+        }
+
+        ///
+        /// @brief Setup Masked (x,x,x,1)
         /// @tparam B the ordinial number of the bit in question
         /// @tparam C the bit count, defaults to 1
         /// @return fir::reg reference sutable for chaining
@@ -177,7 +193,7 @@ class reg
         template< uint64_t B, uint64_t C = 1 >
         inline fir::reg<R>& masked()
         {
-            return action_helper<B, C>(1, 1, 1);
+            return action_helper<B, C>(1, 1, 1, 1);
         }
 
         ///
@@ -189,6 +205,12 @@ class reg
             // Set action registers before unmasking to prevent unintended actions when you unmask.
             FAPI_TRY( mss::putScom(iv_target, RT::ACT0,     iv_action0) );
             FAPI_TRY( mss::putScom(iv_target, RT::ACT1,     iv_action1) );
+
+            if (RT::HAS_ACT2)
+            {
+                FAPI_TRY( mss::putScom(iv_target, RT::ACT2, iv_action2) );
+            }
+
             FAPI_TRY( mss::putScom(iv_target, RT::MASK_AND, iv_mask) );
 
         fapi_try_exit:
@@ -204,27 +226,69 @@ class reg
             return RT::REG;
         }
 
+        ///
+        /// @brief Return mask value
+        /// @return FIR mask register value
+        ///
+        fapi2::buffer<uint64_t> get_mask() const
+        {
+            return iv_mask;
+        }
+
+        ///
+        /// @brief Return act0 value
+        /// @return FIR action0 register value
+        ///
+        fapi2::buffer<uint64_t> get_act0() const
+        {
+            return iv_action0;
+        }
+
+        ///
+        /// @brief Return act1 value
+        /// @return FIR action1 register value
+        ///
+        fapi2::buffer<uint64_t> get_act1() const
+        {
+            return iv_action1;
+        }
+
+        ///
+        /// @brief Return act2 value
+        /// @return FIR action2 register value
+        ///
+        fapi2::buffer<uint64_t> get_act2() const
+        {
+            return iv_action2;
+        }
+
     private:
 
         fapi2::buffer<uint64_t> iv_mask;
         fapi2::buffer<uint64_t> iv_action0;
         fapi2::buffer<uint64_t> iv_action1;
+        fapi2::buffer<uint64_t> iv_action2;
 
         ///
-        /// @brief Register helper takes a setting of bits for action0, action1 and mask and sets our internal state
+        /// @brief Register helper takes a setting of bits for action0, action1, action2, and mask and sets our internal state
         /// @tparam B the fir bit ordinal number
         /// @tparam C the bit count, defaults to 1
         /// @param[in] i_act0 the setting for action0
         /// @param[in] i_act1 the setting for action1
+        /// @param[in] i_act2 the setting for action2
         /// @param[in] i_mask the setting for mask
         /// @return reference to fir::reg, to be used for chaining
         ///
         template< uint64_t B, uint64_t C = 1 >
-        inline fir::reg<R>& action_helper(const uint64_t i_act0, const uint64_t i_act1, const uint64_t i_mask)
+        inline fir::reg<R>& action_helper(const uint64_t i_act0,
+                                          const uint64_t i_act1,
+                                          const uint64_t i_act2,
+                                          const uint64_t i_mask)
         {
             iv_mask.writeBit<B, C>(i_mask);
             iv_action0.writeBit<B, C>(i_act0);
             iv_action1.writeBit<B, C>(i_act1);
+            iv_action2.writeBit<B, C>(i_act2);
 
             return *this;
         }

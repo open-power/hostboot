@@ -39,6 +39,24 @@ namespace mcc
 #endif
 
 
+//>> [USTL_USTLMCHWFM]
+static const uint64_t USTL_USTLMCHWFM = 0x0c010e0full;
+
+static const uint32_t USTL_USTLMCHWFM_ENABLE = 0;
+static const uint32_t USTL_USTLMCHWFM_FAIL_THRESH = 1;
+static const uint32_t USTL_USTLMCHWFM_FAIL_THRESH_LEN = 6;
+static const uint32_t USTL_USTLMCHWFM_WINDOW_SIZE = 7;
+static const uint32_t USTL_USTLMCHWFM_WINDOW_SIZE_LEN = 7;
+static const uint32_t USTL_USTLMCHWFM_TSCALE = 14;
+static const uint32_t USTL_USTLMCHWFM_TSCALE_LEN = 2;
+static const uint32_t USTL_USTLMCHWFM_SCOM_COMMAND_VALID = 16;
+static const uint32_t USTL_USTLMCHWFM_SCOM_COMMAND = 17;
+static const uint32_t USTL_USTLMCHWFM_SUB_CHANNEL_SELECT = 18;
+static const uint32_t USTL_USTLMCHWFM_HWFM_STATUS = 19;
+static const uint32_t USTL_USTLMCHWFM_HWFM_STATUS_LEN = 4;
+//<< [USTL_USTLMCHWFM]
+// mcc/reg00003.H
+
 //>>THE END<<
 
 #ifndef __PPE_HCODE__

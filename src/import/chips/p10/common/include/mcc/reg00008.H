@@ -139,6 +139,428 @@ fapi_try_exit:
 }
 //<< GET_[USTL_USTLFIRACT0_USTLFIRACT0_ACTION_0]
 
+//>> PREP_[ATCL_CL_CLSCOM_MCEPSQ]
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PREP_ATCL_CL_CLSCOM_MCEPSQ(const fapi2::Target<K, M, V>& i_target)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = ATCL_CL_CLSCOM_MCEPSQ;
+#endif
+    return fapi2::current_err;
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+//<< PREP_[ATCL_CL_CLSCOM_MCEPSQ]
+
+//>> GET_[ATCL_CL_CLSCOM_MCEPSQ]
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode GET_ATCL_CL_CLSCOM_MCEPSQ(const fapi2::Target<K, M, V>& i_target,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = ATCL_CL_CLSCOM_MCEPSQ;
+#endif
+    return fapi2::getScom(i_target, ATCL_CL_CLSCOM_MCEPSQ, o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+//<< GET_[ATCL_CL_CLSCOM_MCEPSQ]
+
+//>> PUT_[ATCL_CL_CLSCOM_MCEPSQ]
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PUT_ATCL_CL_CLSCOM_MCEPSQ(const fapi2::Target<K, M, V>& i_target, const uint64_t i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    FAPI_TRY(scomt::chkReg(ATCL_CL_CLSCOM_MCEPSQ));
+#endif
+    return fapi2::putScom(i_target, ATCL_CL_CLSCOM_MCEPSQ, i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+//<< PUT_[ATCL_CL_CLSCOM_MCEPSQ]
+
+
+//>> SET_[ATCL_CL_CLSCOM_MCEPSQ_JITTER_EPSILON]
+static inline fapi2::buffer<uint64_t>& SET_ATCL_CL_CLSCOM_MCEPSQ_JITTER_EPSILON(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(ATCL_CL_CLSCOM_MCEPSQ));
+#endif
+    return o_data.insertFromRight<ATCL_CL_CLSCOM_MCEPSQ_JITTER_EPSILON,
+           ATCL_CL_CLSCOM_MCEPSQ_JITTER_EPSILON_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("0:scom_mcc Invalid dial access ATCL_CL_CLSCOM_MCEPSQ_JITTER_EPSILON chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[ATCL_CL_CLSCOM_MCEPSQ_JITTER_EPSILON]
+
+//>> SET_[ATCL_CL_CLSCOM_MCEPSQ_JITTER_EPSILON]
+static inline fapi2::buffer<uint64_t>& SET_ATCL_CL_CLSCOM_MCEPSQ_JITTER_EPSILON(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(ATCL_CL_CLSCOM_MCEPSQ));
+#endif
+    return o_data.insertFromRight<ATCL_CL_CLSCOM_MCEPSQ_JITTER_EPSILON,
+           ATCL_CL_CLSCOM_MCEPSQ_JITTER_EPSILON_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("1:scom_mcc Invalid dial access ATCL_CL_CLSCOM_MCEPSQ_JITTER_EPSILON chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[ATCL_CL_CLSCOM_MCEPSQ_JITTER_EPSILON]
+
+//>> GET_[ATCL_CL_CLSCOM_MCEPSQ_JITTER_EPSILON]
+static inline fapi2::buffer<uint64_t>& GET_ATCL_CL_CLSCOM_MCEPSQ_JITTER_EPSILON(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(ATCL_CL_CLSCOM_MCEPSQ));
+#endif
+    return i_data.extractToRight<ATCL_CL_CLSCOM_MCEPSQ_JITTER_EPSILON,
+           ATCL_CL_CLSCOM_MCEPSQ_JITTER_EPSILON_LEN>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("4:scom_mcc Invalid dial access ATCL_CL_CLSCOM_MCEPSQ_JITTER_EPSILON chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[ATCL_CL_CLSCOM_MCEPSQ_JITTER_EPSILON]
+
+//>> SET_[ATCL_CL_CLSCOM_MCEPSQ_LOCAL_NODE_EPSILON]
+static inline fapi2::buffer<uint64_t>& SET_ATCL_CL_CLSCOM_MCEPSQ_LOCAL_NODE_EPSILON(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(ATCL_CL_CLSCOM_MCEPSQ));
+#endif
+    return o_data.insertFromRight<ATCL_CL_CLSCOM_MCEPSQ_LOCAL_NODE_EPSILON,
+           ATCL_CL_CLSCOM_MCEPSQ_LOCAL_NODE_EPSILON_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("0:scom_mcc Invalid dial access ATCL_CL_CLSCOM_MCEPSQ_LOCAL_NODE_EPSILON chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[ATCL_CL_CLSCOM_MCEPSQ_LOCAL_NODE_EPSILON]
+
+//>> SET_[ATCL_CL_CLSCOM_MCEPSQ_LOCAL_NODE_EPSILON]
+static inline fapi2::buffer<uint64_t>& SET_ATCL_CL_CLSCOM_MCEPSQ_LOCAL_NODE_EPSILON(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(ATCL_CL_CLSCOM_MCEPSQ));
+#endif
+    return o_data.insertFromRight<ATCL_CL_CLSCOM_MCEPSQ_LOCAL_NODE_EPSILON,
+           ATCL_CL_CLSCOM_MCEPSQ_LOCAL_NODE_EPSILON_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("1:scom_mcc Invalid dial access ATCL_CL_CLSCOM_MCEPSQ_LOCAL_NODE_EPSILON chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[ATCL_CL_CLSCOM_MCEPSQ_LOCAL_NODE_EPSILON]
+
+//>> GET_[ATCL_CL_CLSCOM_MCEPSQ_LOCAL_NODE_EPSILON]
+static inline fapi2::buffer<uint64_t>& GET_ATCL_CL_CLSCOM_MCEPSQ_LOCAL_NODE_EPSILON(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(ATCL_CL_CLSCOM_MCEPSQ));
+#endif
+    return i_data.extractToRight<ATCL_CL_CLSCOM_MCEPSQ_LOCAL_NODE_EPSILON,
+           ATCL_CL_CLSCOM_MCEPSQ_LOCAL_NODE_EPSILON_LEN>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("4:scom_mcc Invalid dial access ATCL_CL_CLSCOM_MCEPSQ_LOCAL_NODE_EPSILON chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[ATCL_CL_CLSCOM_MCEPSQ_LOCAL_NODE_EPSILON]
+
+//>> SET_[ATCL_CL_CLSCOM_MCEPSQ_NEAR_NODAL_EPSILON]
+static inline fapi2::buffer<uint64_t>& SET_ATCL_CL_CLSCOM_MCEPSQ_NEAR_NODAL_EPSILON(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(ATCL_CL_CLSCOM_MCEPSQ));
+#endif
+    return o_data.insertFromRight<ATCL_CL_CLSCOM_MCEPSQ_NEAR_NODAL_EPSILON,
+           ATCL_CL_CLSCOM_MCEPSQ_NEAR_NODAL_EPSILON_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("0:scom_mcc Invalid dial access ATCL_CL_CLSCOM_MCEPSQ_NEAR_NODAL_EPSILON chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[ATCL_CL_CLSCOM_MCEPSQ_NEAR_NODAL_EPSILON]
+
+//>> SET_[ATCL_CL_CLSCOM_MCEPSQ_NEAR_NODAL_EPSILON]
+static inline fapi2::buffer<uint64_t>& SET_ATCL_CL_CLSCOM_MCEPSQ_NEAR_NODAL_EPSILON(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(ATCL_CL_CLSCOM_MCEPSQ));
+#endif
+    return o_data.insertFromRight<ATCL_CL_CLSCOM_MCEPSQ_NEAR_NODAL_EPSILON,
+           ATCL_CL_CLSCOM_MCEPSQ_NEAR_NODAL_EPSILON_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("1:scom_mcc Invalid dial access ATCL_CL_CLSCOM_MCEPSQ_NEAR_NODAL_EPSILON chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[ATCL_CL_CLSCOM_MCEPSQ_NEAR_NODAL_EPSILON]
+
+//>> GET_[ATCL_CL_CLSCOM_MCEPSQ_NEAR_NODAL_EPSILON]
+static inline fapi2::buffer<uint64_t>& GET_ATCL_CL_CLSCOM_MCEPSQ_NEAR_NODAL_EPSILON(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(ATCL_CL_CLSCOM_MCEPSQ));
+#endif
+    return i_data.extractToRight<ATCL_CL_CLSCOM_MCEPSQ_NEAR_NODAL_EPSILON,
+           ATCL_CL_CLSCOM_MCEPSQ_NEAR_NODAL_EPSILON_LEN>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("4:scom_mcc Invalid dial access ATCL_CL_CLSCOM_MCEPSQ_NEAR_NODAL_EPSILON chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[ATCL_CL_CLSCOM_MCEPSQ_NEAR_NODAL_EPSILON]
+
+//>> SET_[ATCL_CL_CLSCOM_MCEPSQ_GROUP_EPSILON]
+static inline fapi2::buffer<uint64_t>& SET_ATCL_CL_CLSCOM_MCEPSQ_GROUP_EPSILON(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(ATCL_CL_CLSCOM_MCEPSQ));
+#endif
+    return o_data.insertFromRight<ATCL_CL_CLSCOM_MCEPSQ_GROUP_EPSILON,
+           ATCL_CL_CLSCOM_MCEPSQ_GROUP_EPSILON_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("0:scom_mcc Invalid dial access ATCL_CL_CLSCOM_MCEPSQ_GROUP_EPSILON chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[ATCL_CL_CLSCOM_MCEPSQ_GROUP_EPSILON]
+
+//>> SET_[ATCL_CL_CLSCOM_MCEPSQ_GROUP_EPSILON]
+static inline fapi2::buffer<uint64_t>& SET_ATCL_CL_CLSCOM_MCEPSQ_GROUP_EPSILON(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(ATCL_CL_CLSCOM_MCEPSQ));
+#endif
+    return o_data.insertFromRight<ATCL_CL_CLSCOM_MCEPSQ_GROUP_EPSILON,
+           ATCL_CL_CLSCOM_MCEPSQ_GROUP_EPSILON_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("1:scom_mcc Invalid dial access ATCL_CL_CLSCOM_MCEPSQ_GROUP_EPSILON chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[ATCL_CL_CLSCOM_MCEPSQ_GROUP_EPSILON]
+
+//>> GET_[ATCL_CL_CLSCOM_MCEPSQ_GROUP_EPSILON]
+static inline fapi2::buffer<uint64_t>& GET_ATCL_CL_CLSCOM_MCEPSQ_GROUP_EPSILON(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(ATCL_CL_CLSCOM_MCEPSQ));
+#endif
+    return i_data.extractToRight<ATCL_CL_CLSCOM_MCEPSQ_GROUP_EPSILON,
+           ATCL_CL_CLSCOM_MCEPSQ_GROUP_EPSILON_LEN>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("4:scom_mcc Invalid dial access ATCL_CL_CLSCOM_MCEPSQ_GROUP_EPSILON chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[ATCL_CL_CLSCOM_MCEPSQ_GROUP_EPSILON]
+
+//>> SET_[ATCL_CL_CLSCOM_MCEPSQ_REMOTE_NODAL_EPSILON]
+static inline fapi2::buffer<uint64_t>& SET_ATCL_CL_CLSCOM_MCEPSQ_REMOTE_NODAL_EPSILON(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(ATCL_CL_CLSCOM_MCEPSQ));
+#endif
+    return o_data.insertFromRight<ATCL_CL_CLSCOM_MCEPSQ_REMOTE_NODAL_EPSILON,
+           ATCL_CL_CLSCOM_MCEPSQ_REMOTE_NODAL_EPSILON_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("0:scom_mcc Invalid dial access ATCL_CL_CLSCOM_MCEPSQ_REMOTE_NODAL_EPSILON chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[ATCL_CL_CLSCOM_MCEPSQ_REMOTE_NODAL_EPSILON]
+
+//>> SET_[ATCL_CL_CLSCOM_MCEPSQ_REMOTE_NODAL_EPSILON]
+static inline fapi2::buffer<uint64_t>& SET_ATCL_CL_CLSCOM_MCEPSQ_REMOTE_NODAL_EPSILON(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(ATCL_CL_CLSCOM_MCEPSQ));
+#endif
+    return o_data.insertFromRight<ATCL_CL_CLSCOM_MCEPSQ_REMOTE_NODAL_EPSILON,
+           ATCL_CL_CLSCOM_MCEPSQ_REMOTE_NODAL_EPSILON_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("1:scom_mcc Invalid dial access ATCL_CL_CLSCOM_MCEPSQ_REMOTE_NODAL_EPSILON chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[ATCL_CL_CLSCOM_MCEPSQ_REMOTE_NODAL_EPSILON]
+
+//>> GET_[ATCL_CL_CLSCOM_MCEPSQ_REMOTE_NODAL_EPSILON]
+static inline fapi2::buffer<uint64_t>& GET_ATCL_CL_CLSCOM_MCEPSQ_REMOTE_NODAL_EPSILON(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(ATCL_CL_CLSCOM_MCEPSQ));
+#endif
+    return i_data.extractToRight<ATCL_CL_CLSCOM_MCEPSQ_REMOTE_NODAL_EPSILON,
+           ATCL_CL_CLSCOM_MCEPSQ_REMOTE_NODAL_EPSILON_LEN>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("4:scom_mcc Invalid dial access ATCL_CL_CLSCOM_MCEPSQ_REMOTE_NODAL_EPSILON chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[ATCL_CL_CLSCOM_MCEPSQ_REMOTE_NODAL_EPSILON]
+
+//>> SET_[ATCL_CL_CLSCOM_MCEPSQ_VECTOR_GROUP_EPSILON]
+static inline fapi2::buffer<uint64_t>& SET_ATCL_CL_CLSCOM_MCEPSQ_VECTOR_GROUP_EPSILON(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(ATCL_CL_CLSCOM_MCEPSQ));
+#endif
+    return o_data.insertFromRight<ATCL_CL_CLSCOM_MCEPSQ_VECTOR_GROUP_EPSILON,
+           ATCL_CL_CLSCOM_MCEPSQ_VECTOR_GROUP_EPSILON_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("0:scom_mcc Invalid dial access ATCL_CL_CLSCOM_MCEPSQ_VECTOR_GROUP_EPSILON chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[ATCL_CL_CLSCOM_MCEPSQ_VECTOR_GROUP_EPSILON]
+
+//>> SET_[ATCL_CL_CLSCOM_MCEPSQ_VECTOR_GROUP_EPSILON]
+static inline fapi2::buffer<uint64_t>& SET_ATCL_CL_CLSCOM_MCEPSQ_VECTOR_GROUP_EPSILON(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(ATCL_CL_CLSCOM_MCEPSQ));
+#endif
+    return o_data.insertFromRight<ATCL_CL_CLSCOM_MCEPSQ_VECTOR_GROUP_EPSILON,
+           ATCL_CL_CLSCOM_MCEPSQ_VECTOR_GROUP_EPSILON_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("1:scom_mcc Invalid dial access ATCL_CL_CLSCOM_MCEPSQ_VECTOR_GROUP_EPSILON chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[ATCL_CL_CLSCOM_MCEPSQ_VECTOR_GROUP_EPSILON]
+
+//>> GET_[ATCL_CL_CLSCOM_MCEPSQ_VECTOR_GROUP_EPSILON]
+static inline fapi2::buffer<uint64_t>& GET_ATCL_CL_CLSCOM_MCEPSQ_VECTOR_GROUP_EPSILON(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(ATCL_CL_CLSCOM_MCEPSQ));
+#endif
+    return i_data.extractToRight<ATCL_CL_CLSCOM_MCEPSQ_VECTOR_GROUP_EPSILON,
+           ATCL_CL_CLSCOM_MCEPSQ_VECTOR_GROUP_EPSILON_LEN>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("4:scom_mcc Invalid dial access ATCL_CL_CLSCOM_MCEPSQ_VECTOR_GROUP_EPSILON chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[ATCL_CL_CLSCOM_MCEPSQ_VECTOR_GROUP_EPSILON]
+
+//>> SET_[ATCL_CL_CLSCOM_MCEPSQ_EPF_EPSILON]
+static inline fapi2::buffer<uint64_t>& SET_ATCL_CL_CLSCOM_MCEPSQ_EPF_EPSILON(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(ATCL_CL_CLSCOM_MCEPSQ));
+#endif
+    return o_data.insertFromRight<ATCL_CL_CLSCOM_MCEPSQ_EPF_EPSILON,
+           ATCL_CL_CLSCOM_MCEPSQ_EPF_EPSILON_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("0:scom_mcc Invalid dial access ATCL_CL_CLSCOM_MCEPSQ_EPF_EPSILON chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[ATCL_CL_CLSCOM_MCEPSQ_EPF_EPSILON]
+
+//>> SET_[ATCL_CL_CLSCOM_MCEPSQ_EPF_EPSILON]
+static inline fapi2::buffer<uint64_t>& SET_ATCL_CL_CLSCOM_MCEPSQ_EPF_EPSILON(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(ATCL_CL_CLSCOM_MCEPSQ));
+#endif
+    return o_data.insertFromRight<ATCL_CL_CLSCOM_MCEPSQ_EPF_EPSILON,
+           ATCL_CL_CLSCOM_MCEPSQ_EPF_EPSILON_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("1:scom_mcc Invalid dial access ATCL_CL_CLSCOM_MCEPSQ_EPF_EPSILON chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[ATCL_CL_CLSCOM_MCEPSQ_EPF_EPSILON]
+
+//>> GET_[ATCL_CL_CLSCOM_MCEPSQ_EPF_EPSILON]
+static inline fapi2::buffer<uint64_t>& GET_ATCL_CL_CLSCOM_MCEPSQ_EPF_EPSILON(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(ATCL_CL_CLSCOM_MCEPSQ));
+#endif
+    return i_data.extractToRight<ATCL_CL_CLSCOM_MCEPSQ_EPF_EPSILON,
+           ATCL_CL_CLSCOM_MCEPSQ_EPF_EPSILON_LEN>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("4:scom_mcc Invalid dial access ATCL_CL_CLSCOM_MCEPSQ_EPF_EPSILON chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[ATCL_CL_CLSCOM_MCEPSQ_EPF_EPSILON]
+
 //>>THE END<<
 
 #ifndef __PPE_HCODE__

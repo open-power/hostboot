@@ -1077,6 +1077,7 @@ struct mcTypeTraits<mc_type::EXPLORER>
     {
         MC_PER_PROC = 2,
         MI_PER_MC = 2,
+        OMI_PER_OMIC = 2, // Note this is not the case for p9a!
         OMIC_PER_MC = 3,
         MCC_PER_MI = 2,
         OMI_PER_MCC = 2,

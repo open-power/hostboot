@@ -37,19 +37,9 @@
 #define _P10_FIR_TRAITS_H_
 
 #include <fapi2.H>
-#include <p10_scom_mcc_0.H>
-#include <p10_scom_mcc_2.H>
-#include <p10_scom_mcc_4.H>
-#include <p10_scom_mcc_8.H>
-#include <p10_scom_mcc_9.H>
-#include <p10_scom_mcc_a.H>
-#include <p10_scom_mcc_b.H>
-#include <p10_scom_mcc_c.H>
-#include <p10_scom_mcc_d.H>
-#include <p10_scom_mcc_e.H>
-#include <p10_scom_omic_3.H>
-#include <p10_scom_omic_7.H>
-#include <p10_scom_omic_f.H>
+#include <p10_scom_mc.H>
+#include <p10_scom_mcc.H>
+#include <p10_scom_omic.H>
 #include <generic/memory/lib/utils/fir/gen_mss_fir.H>
 #include <generic/memory/lib/utils/shared/mss_generic_consts.H>
 
@@ -69,6 +59,7 @@ struct firTraits<scomt::mcc::DSTL_DSTLFIR_RW>
     static constexpr uint64_t MASK = scomt::mcc::DSTL_DSTLFIRMASK_RW;
     static constexpr uint64_t MASK_AND = scomt::mcc::DSTL_DSTLFIRMASK_WO_AND;
     static constexpr uint64_t MASK_OR = scomt::mcc::DSTL_DSTLFIRMASK_WO_OR;
+    static constexpr bool HAS_ACT2 = true;
 
     // Target type of this register
     static constexpr fapi2::TargetType T = fapi2::TARGET_TYPE_MCC;
@@ -83,9 +74,11 @@ struct firTraits<scomt::mcc::USTL_USTLFIR_RW>
     static constexpr uint64_t REG = scomt::mcc::USTL_USTLFIR_RW;
     static constexpr uint64_t ACT0 = scomt::mcc::USTL_USTLFIRACT0;
     static constexpr uint64_t ACT1 = scomt::mcc::USTL_USTLFIRACT1;
+    static constexpr uint64_t ACT2 = scomt::mcc::USTL_USTLFIRACT2;
     static constexpr uint64_t MASK = scomt::mcc::USTL_USTLFIRMASK_RW;
     static constexpr uint64_t MASK_AND = scomt::mcc::USTL_USTLFIRMASK_WO_AND;
     static constexpr uint64_t MASK_OR = scomt::mcc::USTL_USTLFIRMASK_WO_OR;
+    static constexpr bool HAS_ACT2 = true;
 
     // Target type of this register
     static constexpr fapi2::TargetType T = fapi2::TARGET_TYPE_MCC;
@@ -100,12 +93,52 @@ struct firTraits<scomt::omic::MC_OMI_FIR_REG_RW>
     static constexpr uint64_t REG = scomt::omic::MC_OMI_FIR_REG_RW;
     static constexpr uint64_t ACT0 = scomt::omic::MC_OMI_FIR_ACTION0_REG;
     static constexpr uint64_t ACT1 = scomt::omic::MC_OMI_FIR_ACTION1_REG;
+    static constexpr uint64_t ACT2 = scomt::omic::MC_OMI_FIR_ACTION1_REG;
     static constexpr uint64_t MASK = scomt::omic::MC_OMI_FIR_MASK_REG_RW;
     static constexpr uint64_t MASK_AND = scomt::omic::MC_OMI_FIR_MASK_REG_WO_AND;
     static constexpr uint64_t MASK_OR = scomt::omic::MC_OMI_FIR_MASK_REG_WO_OR;
+    static constexpr bool HAS_ACT2 = false;
 
     // Target type of this register
     static constexpr fapi2::TargetType T = fapi2::TARGET_TYPE_OMIC;
+};
+
+///
+/// @brief FIR Register Traits for base MBA_SCOMFIR_MISCFIRQ_RW
+///
+template <>
+struct firTraits<scomt::mc::MBA_SCOMFIR_MISCFIRQ_RW>
+{
+    static constexpr uint64_t REG = scomt::mc::MBA_SCOMFIR_MISCFIRQ_RW;
+    static constexpr uint64_t ACT0 = scomt::mc::MBA_SCOMFIR_MISCFIRACT0;
+    static constexpr uint64_t ACT1 = scomt::mc::MBA_SCOMFIR_MISCFIRACT1;
+    static constexpr uint64_t ACT2 = scomt::mc::MBA_SCOMFIR_MISCFIRACT2;
+    static constexpr uint64_t MASK = scomt::mc::MBA_SCOMFIR_MISCFIRMASK_RW;
+    static constexpr uint64_t MASK_AND = scomt::mc::MBA_SCOMFIR_MISCFIRMASK_WO_AND;
+    static constexpr uint64_t MASK_OR = scomt::mc::MBA_SCOMFIR_MISCFIRMASK_WO_OR;
+    static constexpr bool HAS_ACT2 = true;
+
+    // Target type of this register
+    static constexpr fapi2::TargetType T = fapi2::TARGET_TYPE_MC;
+};
+
+///
+/// @brief FIR Register Traits for base LOCAL_FIR_RW
+///
+template <>
+struct firTraits<scomt::mc::LOCAL_FIR_RW>
+{
+    static constexpr uint64_t REG = scomt::mc::LOCAL_FIR_RW;
+    static constexpr uint64_t ACT0 = scomt::mc::EPS_FIR_LOCAL_ACTION0;
+    static constexpr uint64_t ACT1 = scomt::mc::EPS_FIR_LOCAL_ACTION1;
+    static constexpr uint64_t ACT2 = scomt::mc::EPS_FIR_LOCAL_ACTION2;
+    static constexpr uint64_t MASK = scomt::mc::EPS_FIR_LOCAL_MASK_RW;
+    static constexpr uint64_t MASK_AND = scomt::mc::EPS_FIR_LOCAL_MASK_WO_AND;
+    static constexpr uint64_t MASK_OR = scomt::mc::EPS_FIR_LOCAL_MASK_WO_OR;
+    static constexpr bool HAS_ACT2 = true;
+
+    // Target type of this register
+    static constexpr fapi2::TargetType T = fapi2::TARGET_TYPE_MC;
 };
 
 } // end mss ns

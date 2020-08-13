@@ -53,9 +53,11 @@ struct firTraits<EXPLR_MCBIST_MCBISTFIRQ>
     static constexpr uint64_t REG = EXPLR_MCBIST_MCBISTFIRQ;
     static constexpr uint64_t ACT0 = EXPLR_MCBIST_MCBISTFIRACT0;
     static constexpr uint64_t ACT1 = EXPLR_MCBIST_MCBISTFIRACT1;
+    static constexpr uint64_t ACT2 = EXPLR_MCBIST_MCBISTFIRACT1;
     static constexpr uint64_t MASK = EXPLR_MCBIST_MCBISTFIRMASK;
     static constexpr uint64_t MASK_AND = EXPLR_MCBIST_MCBISTFIRMASK_AND;
     static constexpr uint64_t MASK_OR = EXPLR_MCBIST_MCBISTFIRMASK_OR;
+    static constexpr bool HAS_ACT2 = false;
 
     // Target type of this register
     static constexpr fapi2::TargetType T = fapi2::TARGET_TYPE_OCMB_CHIP;
@@ -70,9 +72,11 @@ struct firTraits<EXPLR_SRQ_SRQFIRQ>
     static constexpr uint64_t REG = EXPLR_SRQ_SRQFIRQ;
     static constexpr uint64_t ACT0 = EXPLR_SRQ_SRQFIR_ACTION0;
     static constexpr uint64_t ACT1 = EXPLR_SRQ_SRQFIR_ACTION1;
+    static constexpr uint64_t ACT2 = EXPLR_SRQ_SRQFIR_ACTION1;
     static constexpr uint64_t MASK = EXPLR_SRQ_SRQFIR_MASK;
     static constexpr uint64_t MASK_AND = EXPLR_SRQ_SRQFIR_MASK_AND;
     static constexpr uint64_t MASK_OR = EXPLR_SRQ_SRQFIR_MASK_OR;
+    static constexpr bool HAS_ACT2 = false;
 
     // Target type of this register
     static constexpr fapi2::TargetType T = fapi2::TARGET_TYPE_OCMB_CHIP;
@@ -87,9 +91,11 @@ struct firTraits<EXPLR_RDF_FIR>
     static constexpr uint64_t REG = EXPLR_RDF_FIR;
     static constexpr uint64_t ACT0 = EXPLR_RDF_ACTION0;
     static constexpr uint64_t ACT1 = EXPLR_RDF_ACTION1;
+    static constexpr uint64_t ACT2 = EXPLR_RDF_ACTION1;
     static constexpr uint64_t MASK = EXPLR_RDF_MASK;
     static constexpr uint64_t MASK_AND = EXPLR_RDF_MASK_AND;
     static constexpr uint64_t MASK_OR = EXPLR_RDF_MASK_OR;
+    static constexpr bool HAS_ACT2 = false;
 
     // Target type of this register
     static constexpr fapi2::TargetType T = fapi2::TARGET_TYPE_OCMB_CHIP;
@@ -104,9 +110,11 @@ struct firTraits<EXPLR_TP_MB_UNIT_TOP_LOCAL_FIR>
     static constexpr uint64_t REG = EXPLR_TP_MB_UNIT_TOP_LOCAL_FIR;
     static constexpr uint64_t ACT0 = EXPLR_TP_MB_UNIT_TOP_LOCAL_FIR_ACTION0;
     static constexpr uint64_t ACT1 = EXPLR_TP_MB_UNIT_TOP_LOCAL_FIR_ACTION1;
+    static constexpr uint64_t ACT2 = EXPLR_TP_MB_UNIT_TOP_LOCAL_FIR_ACTION1;
     static constexpr uint64_t MASK = EXPLR_TP_MB_UNIT_TOP_LOCAL_FIR_MASK;
     static constexpr uint64_t MASK_AND = EXPLR_TP_MB_UNIT_TOP_LOCAL_FIR_MASK_AND;
     static constexpr uint64_t MASK_OR = EXPLR_TP_MB_UNIT_TOP_LOCAL_FIR_MASK_OR;
+    static constexpr bool HAS_ACT2 = false;
 
     // Target type of this register
     static constexpr fapi2::TargetType T = fapi2::TARGET_TYPE_OCMB_CHIP;
@@ -121,9 +129,11 @@ struct firTraits<EXPLR_TLXT_TLXFIRQ>
     static constexpr uint64_t REG = EXPLR_TLXT_TLXFIRQ;
     static constexpr uint64_t ACT0 = EXPLR_TLXT_TLXFIRACT0;
     static constexpr uint64_t ACT1 = EXPLR_TLXT_TLXFIRACT1;
+    static constexpr uint64_t ACT2 = EXPLR_TLXT_TLXFIRACT1;
     static constexpr uint64_t MASK = EXPLR_TLXT_TLXFIRMASK;
     static constexpr uint64_t MASK_AND = EXPLR_TLXT_TLXFIRMASK_AND;
     static constexpr uint64_t MASK_OR = EXPLR_TLXT_TLXFIRMASK_OR;
+    static constexpr bool HAS_ACT2 = false;
 
     // Target type of this register
     static constexpr fapi2::TargetType T = fapi2::TARGET_TYPE_OCMB_CHIP;
@@ -138,9 +148,11 @@ struct firTraits<EXPLR_DLX_MC_OMI_FIR_REG>
     static constexpr uint64_t REG = EXPLR_DLX_MC_OMI_FIR_REG;
     static constexpr uint64_t ACT0 = EXPLR_DLX_MC_OMI_FIR_ACTION0_REG;
     static constexpr uint64_t ACT1 = EXPLR_DLX_MC_OMI_FIR_ACTION1_REG;
+    static constexpr uint64_t ACT2 = EXPLR_DLX_MC_OMI_FIR_ACTION1_REG;
     static constexpr uint64_t MASK = EXPLR_DLX_MC_OMI_FIR_MASK_REG;
     static constexpr uint64_t MASK_AND = EXPLR_DLX_MC_OMI_FIR_MASK_REG_AND;
     static constexpr uint64_t MASK_OR = EXPLR_DLX_MC_OMI_FIR_MASK_REG_OR;
+    static constexpr bool HAS_ACT2 = false;
 
     // Target type of this register
     static constexpr fapi2::TargetType T = fapi2::TARGET_TYPE_OCMB_CHIP;
@@ -155,9 +167,11 @@ struct firTraits<EXPLR_MMIO_MFIR>
     static constexpr uint64_t REG = EXPLR_MMIO_MFIR;
     static constexpr uint64_t ACT0 = EXPLR_MMIO_MFIRACT0;
     static constexpr uint64_t ACT1 = EXPLR_MMIO_MFIRACT1;
+    static constexpr uint64_t ACT2 = EXPLR_MMIO_MFIRACT1;
     static constexpr uint64_t MASK = EXPLR_MMIO_MFIRMASK;
     static constexpr uint64_t MASK_AND = EXPLR_MMIO_MFIRMASK_AND;
     static constexpr uint64_t MASK_OR = EXPLR_MMIO_MFIRMASK_OR;
+    static constexpr bool HAS_ACT2 = false;
 
     // Target type of this register
     static constexpr fapi2::TargetType T = fapi2::TARGET_TYPE_OCMB_CHIP;

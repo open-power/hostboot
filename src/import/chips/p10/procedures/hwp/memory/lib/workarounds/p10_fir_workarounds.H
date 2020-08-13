@@ -36,6 +36,8 @@
 #define _P10_FIR_WORKAROUNDS_H_
 
 #include <fapi2.H>
+#include <generic/memory/lib/utils/fir/gen_mss_fir.H>
+#include <p10_scom_mcc.H>
 
 namespace mss
 {
@@ -47,9 +49,20 @@ namespace fir
 ///
 /// @brief Function handling the DD1 workaround for HW511630 and HW520480
 /// @param[in] i_target the MCC target of the DSTL fir
-/// @return FAPI2_RC_SUCCESS iff ok
+/// @param[in,out] io_mcc_dstlfir_reg the DSTLFIR FIR register instance
 ///
-fapi2::ReturnCode dstl_dd1_workaround( const fapi2::Target<fapi2::TARGET_TYPE_MCC>& i_target);
+void dstl_dd1_workaround( const fapi2::Target<fapi2::TARGET_TYPE_MCC>& i_target,
+                          mss::fir::reg<scomt::mcc::DSTL_DSTLFIR_RW>& io_mcc_dstlfir_reg );
+
+///
+/// @brief Function handling the DD1 workaround for HW531432
+/// @param[in] i_target the MCC target of the DSTL fir
+/// @param[in] i_hw_mirroring_en the value of ATTR_MRW_HW_MIRRORING_ENABLE
+/// @param[in,out] io_mcc_dstlfir_reg the DSTLFIR FIR register instance
+///
+void dstl_channel_timeout_workaround( const fapi2::Target<fapi2::TARGET_TYPE_MCC>& i_target,
+                                      const uint8_t i_hw_mirroring_en,
+                                      mss::fir::reg<scomt::mcc::DSTL_DSTLFIR_RW>& io_mcc_dstlfir_reg );
 
 } // namespace fir
 } // namespace workarounds

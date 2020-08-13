@@ -27,11 +27,8 @@
 #define _P10_FIR_H_
 
 #include <fapi2.H>
-#include <p10_scom_mcc_2.H>
-#include <p10_scom_mcc_4.H>
-#include <p10_scom_mcc_b.H>
-#include <p10_scom_mcc_d.H>
-#include <p10_scom_omi_7.H>
+#include <p10_scom_mcc.H>
+#include <p10_scom_omi.H>
 #include <lib/fir/p10_fir_traits.H>
 #include <lib/mc/host_mc_traits.H>
 #include <lib/workarounds/p10_fir_workarounds.H>
@@ -93,6 +90,17 @@ static constexpr uint8_t USTL_USTLFAILMASK_CHANNEL_FAIL_TYPE_DISABLE_55      = 5
 static constexpr uint8_t USTL_USTLFAILMASK_CHANNEL_FAIL_TYPE_DISABLE_56      = 56;
 static constexpr uint8_t USTL_USTLFAILMASK_CHANNEL_FAIL_TYPE_DISABLE_57      = 57;
 
+// fld_fixes for DSTLFIR
+static constexpr uint8_t DSTL_DSTLFIR_DECRYPT_ERR_INFO_SCOM_PER              = 24;
+static constexpr uint8_t DSTL_DSTLFIR_DECRYPT_ERR_INFO_KEY_LOCKED            = 25;
+static constexpr uint8_t DSTL_DSTLFIR_DECRYPT_ERR_INFO_ADDR_PIPE_PER         = 26;
+static constexpr uint8_t DSTL_DSTLFIR_DECRYPT_ERR_INFO_CL_PERR_ON_VALID_TAG  = 27;
+static constexpr uint8_t DSTL_DSTLFIR_DECRYPT_ERR_INFO_USTL_DMX_PERR         = 28;
+static constexpr uint8_t DSTL_DSTLFIR_ENCRYPT_ERR_INFO_SCOM_PER              = 29;
+static constexpr uint8_t DSTL_DSTLFIR_ENCRYPT_ERR_INFO_KEY_LOCKED            = 30;
+static constexpr uint8_t DSTL_DSTLFIR_ENCRYPT_ERR_INFO_ADDR_ENCRYPT_PERR     = 31;
+static constexpr uint8_t DSTL_DSTLFIR_ENCRYPT_ERR_INFO_DATA_ENCRYPT_PERR     = 32;
+
 } // mcc
 } // scomt
 
@@ -112,27 +120,70 @@ inline fapi2::ReturnCode after_p10_omi_init_dstlfir_helper(const fapi2::Target<f
     fapi2::ReturnCode l_setup_dstlfir_rc = fapi2::FAPI2_RC_SUCCESS;
     fapi2::buffer<uint64_t> l_reg_data;
 
+    fapi2::Target <fapi2::TARGET_TYPE_SYSTEM> l_parentSystem;
+    fapi2::ATTR_MRW_HW_MIRRORING_ENABLE_Type l_mirroring_enabled = 0;
+
     mss::fir::reg<scomt::mcc::DSTL_DSTLFIR_RW> l_p10_mcc_dstlfir_reg(i_target, l_rc);
     FAPI_TRY(l_rc, "for target %s unable to create fir::reg for 0x%016x", mss::c_str(i_target),
              scomt::mcc::DSTL_DSTLFIR_RW);
 
     // Set up host attention for these FIRs using ACT0, ACT1, ACT2 = 0,0,1
     // TODO: Story #565 Need to update FIR API to handle ACT2 register
-    FAPI_TRY(fapi2::getScom(i_target, scomt::mcc::DSTL_DSTLFIRACT2, l_reg_data));
-    l_reg_data.setBit<scomt::mcc::DSTL_DSTLFIR_SUBCHANNEL_A_TLX_SPECIAL_ATTENTION>()
-    .setBit<scomt::mcc::DSTL_DSTLFIR_SUBCHANNEL_B_TLX_SPECIAL_ATTENTION>();
-    FAPI_TRY(fapi2::putScom(i_target, scomt::mcc::DSTL_DSTLFIRACT2, l_reg_data));
 
-    l_setup_dstlfir_rc = l_p10_mcc_dstlfir_reg
-                         .template local_checkstop<scomt::mcc::DSTL_DSTLFIR_SUBCHANNEL_A_TLX_CHECKSTOP>()
-                         .template recoverable_error<scomt::mcc::DSTL_DSTLFIR_SUBCHANNEL_A_TLX_RECOVERABLE_ATTENTION>()
-                         .template checkstop<scomt::mcc::DSTL_DSTLFIR_SUBCHANNEL_A_TLX_SPECIAL_ATTENTION>()
-                         .template local_checkstop<scomt::mcc::DSTL_DSTLFIR_SUBCHANNEL_B_TLX_CHECKSTOP>()
-                         .template recoverable_error<scomt::mcc::DSTL_DSTLFIR_SUBCHANNEL_B_TLX_RECOVERABLE_ATTENTION>()
-                         .template checkstop<scomt::mcc::DSTL_DSTLFIR_SUBCHANNEL_B_TLX_SPECIAL_ATTENTION>()
-                         .template recoverable_error<scomt::mcc::DSTL_DSTLFIR_SUBCHANNEL_A_TIMEOUT_ERROR>()
-                         .template recoverable_error<scomt::mcc::DSTL_DSTLFIR_SUBCHANNEL_B_TIMEOUT_ERROR>()
-                         .write();
+    l_p10_mcc_dstlfir_reg
+    .template checkstop<scomt::mcc::DSTL_DSTLFIR_SUBCHANNEL_A_TLX_CHECKSTOP>()
+    .template recoverable_error<scomt::mcc::DSTL_DSTLFIR_SUBCHANNEL_A_TLX_RECOVERABLE_ATTENTION>()
+    .template checkstop<scomt::mcc::DSTL_DSTLFIR_SUBCHANNEL_B_TLX_CHECKSTOP>()
+    .template recoverable_error<scomt::mcc::DSTL_DSTLFIR_SUBCHANNEL_B_TLX_RECOVERABLE_ATTENTION>()
+    .template recoverable_error<scomt::mcc::DSTL_DSTLFIR_SUBCHANNEL_A_TIMEOUT_ERROR>()
+    .template recoverable_error<scomt::mcc::DSTL_DSTLFIR_SUBCHANNEL_B_TIMEOUT_ERROR>()
+    .template recoverable_error<scomt::mcc::DSTL_DSTLFIR_SUBCHANNEL_A_CHANNEL_TIMEOUT>()
+    .template recoverable_error<scomt::mcc::DSTL_DSTLFIR_SUBCHANNEL_B_CHANNEL_TIMEOUT>()
+    .template checkstop<scomt::mcc::DSTL_DSTLFIR_DECRYPT_ERR_INFO_SCOM_PER>()
+    .template recoverable_error<scomt::mcc::DSTL_DSTLFIR_DECRYPT_ERR_INFO_KEY_LOCKED>()
+    .template recoverable_error<scomt::mcc::DSTL_DSTLFIR_DECRYPT_ERR_INFO_ADDR_PIPE_PER>()
+    .template checkstop<scomt::mcc::DSTL_DSTLFIR_DECRYPT_ERR_INFO_CL_PERR_ON_VALID_TAG>()
+    .template checkstop<scomt::mcc::DSTL_DSTLFIR_DECRYPT_ERR_INFO_USTL_DMX_PERR>()
+    .template checkstop<scomt::mcc::DSTL_DSTLFIR_ENCRYPT_ERR_INFO_SCOM_PER>()
+    .template recoverable_error<scomt::mcc::DSTL_DSTLFIR_ENCRYPT_ERR_INFO_KEY_LOCKED>()
+    .template recoverable_error<scomt::mcc::DSTL_DSTLFIR_ENCRYPT_ERR_INFO_ADDR_ENCRYPT_PERR>()
+    .template recoverable_error<scomt::mcc::DSTL_DSTLFIR_ENCRYPT_ERR_INFO_DATA_ENCRYPT_PERR>();
+
+    if(fapi2::is_platform<fapi2::PLAT_HOSTBOOT>())
+    {
+        l_p10_mcc_dstlfir_reg
+        .template local_checkstop<scomt::mcc::DSTL_DSTLFIR_SUBCHANNEL_A_TLX_CHECKSTOP>()
+        .template local_checkstop<scomt::mcc::DSTL_DSTLFIR_SUBCHANNEL_B_TLX_CHECKSTOP>()
+        .template host_attention<scomt::mcc::DSTL_DSTLFIR_SUBCHANNEL_A_TLX_SPECIAL_ATTENTION>()
+        .template host_attention<scomt::mcc::DSTL_DSTLFIR_SUBCHANNEL_B_TLX_SPECIAL_ATTENTION>();
+    }
+
+    //If mirroring is enabled, allow channel fails to not be fatal
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MRW_HW_MIRRORING_ENABLE, l_parentSystem, l_mirroring_enabled));
+
+    if(l_mirroring_enabled)
+    {
+        l_p10_mcc_dstlfir_reg
+        .template recoverable_error<scomt::mcc::DSTL_DSTLFIR_SUBCHANNEL_A_FAIL_ACTION>()
+        .template recoverable_error<scomt::mcc::DSTL_DSTLFIR_SUBCHANNEL_B_FAIL_ACTION>();
+    }
+    else
+    {
+        if(fapi2::is_platform<fapi2::PLAT_HOSTBOOT>())
+        {
+            l_p10_mcc_dstlfir_reg
+            .template local_checkstop<scomt::mcc::DSTL_DSTLFIR_SUBCHANNEL_A_FAIL_ACTION>()
+            .template local_checkstop<scomt::mcc::DSTL_DSTLFIR_SUBCHANNEL_B_FAIL_ACTION>();
+        }
+        else
+        {
+            l_p10_mcc_dstlfir_reg
+            .template checkstop<scomt::mcc::DSTL_DSTLFIR_SUBCHANNEL_A_FAIL_ACTION>()
+            .template checkstop<scomt::mcc::DSTL_DSTLFIR_SUBCHANNEL_B_FAIL_ACTION>();
+        }
+    }
+
+    l_setup_dstlfir_rc = l_p10_mcc_dstlfir_reg.write();
 
     FAPI_TRY(l_setup_dstlfir_rc, "Error setting up fir reg 0x%016x for target %s",
              scomt::mcc::DSTL_DSTLFIR_RW,
@@ -155,12 +206,13 @@ inline fapi2::ReturnCode after_p10_omi_init_dstlfir_helper(const fapi2::Target<f
     .clearBit<scomt::mcc::DSTL_DSTLCFG2_CFG_SUBCH_A_FAIL_DIS_TLXVC3_OVERUSE>()
     .clearBit<scomt::mcc::DSTL_DSTLCFG2_CFG_SUBCH_B_FAIL_DIS_TLXVC3_OVERUSE>()
     .setBit<scomt::mcc::DSTL_DSTLCFG2_CFG_SUBCH_A_FAIL_DIS_DSTL_TIMEOUT>()
-    .setBit<scomt::mcc::DSTL_DSTLCFG2_CFG_SUBCH_B_FAIL_DIS_DSTL_TIMEOUT>();
+    .setBit<scomt::mcc::DSTL_DSTLCFG2_CFG_SUBCH_B_FAIL_DIS_DSTL_TIMEOUT>()
+    .clearBit<scomt::mcc::DSTL_DSTLCFG2_CFG_SUBCH_A_FAIL_DIS_LOCAL_PARITY>()
+    .clearBit<scomt::mcc::DSTL_DSTLCFG2_CFG_SUBCH_B_FAIL_DIS_LOCAL_PARITY>();
 
     FAPI_TRY(fapi2::putScom(i_target, MCCT::DSTL_CFG2, l_reg_data));
 
 fapi_try_exit:
-
     return fapi2::current_err;
 }
 
@@ -193,12 +245,15 @@ inline fapi2::ReturnCode after_p10_omi_init_ustlfir_helper(const fapi2::Target<f
                          .template checkstop<scomt::mcc::USTL_USTLFIR_WDF_SCOM_SEQ_ERROR>()
                          .template checkstop<scomt::mcc::USTL_USTLFIR_WDF_PWCTL_SEQ_ERROR>()
                          .template checkstop<scomt::mcc::USTL_USTLFIR_WDF_MISC_REG_PARITY_ERROR>()
-                         .template checkstop<scomt::mcc::USTL_USTLFIR_WDF_CMT_PARITY_ERROR>() /* P9A uses WDF_CMD_PARITY */
+                         .template checkstop<scomt::mcc::USTL_USTLFIR_WDF_CL_POP_PARITY_ERROR>()
+                         .template checkstop<scomt::mcc::USTL_USTLFIR_WDF_CMT_PARITY_ERROR>()
                          .template checkstop<scomt::mcc::USTL_USTLFIR_READ_MBS_RDBUF_OVF_ERROR>()
                          .template recoverable_error<scomt::mcc::USTL_USTLFIR_WRT_BUFFER_CE>()
                          .template recoverable_error<scomt::mcc::USTL_USTLFIR_WRT_BUFFER_UE>()
                          .template checkstop<scomt::mcc::USTL_USTLFIR_WRT_SCOM_SEQ_ERROR>()
                          .template checkstop<scomt::mcc::USTL_USTLFIR_WRT_MISC_REG_PARITY_ERROR>()
+                         .template recoverable_error<scomt::mcc::USTL_USTLFIR_WRT_DATA_SYNDROME_NE0>()
+                         .template checkstop<scomt::mcc::USTL_USTLFIR_WRT_BUFF_ERR>()
                          .template local_checkstop<scomt::mcc::USTL_USTLFIR_CHANA_FAIL_RESP_CHECKSTOP>()
                          .template local_checkstop<scomt::mcc::USTL_USTLFIR_CHANB_FAIL_RESP_CHECKSTOP>()
                          .template recoverable_error<scomt::mcc::USTL_USTLFIR_CHANA_FAIL_RESP_RECOVER>()
@@ -229,6 +284,7 @@ inline fapi2::ReturnCode after_p10_omi_init_ustlfir_helper(const fapi2::Target<f
                          .template recoverable_error<scomt::mcc::USTL_USTLFIR_RECOV_REG_PARITY_ERROR>()
                          .template local_checkstop<scomt::mcc::USTL_USTLFIR_CHANA_INVALID_DL_DP_COMBO>()
                          .template local_checkstop<scomt::mcc::USTL_USTLFIR_CHANB_INVALID_DL_DP_COMBO>()
+                         .template checkstop<scomt::mcc::USTL_USTLFIR_SPARE_61>() // USTLFIR_MIRROR_CHANFAIL_RELATED_PARITY_ERROR
                          .write();
 
     FAPI_TRY(l_setup_ustlfir_rc, "Error setting up fir reg 0x%016x for target %s",
@@ -343,6 +399,7 @@ inline fapi2::ReturnCode setup_reg_dl_after_chiplet_scominit_helper(
     scomt::omi::CLEAR_ERROR_MASK_16(l_reg_data);
     scomt::omi::CLEAR_ERROR_MASK_15(l_reg_data);
     scomt::omi::CLEAR_ERROR_MASK_14(l_reg_data);
+    scomt::omi::SET_ERROR_MASK_05(l_reg_data);
 
     FAPI_TRY(scomt::omi::PUT_ERROR_MASK(i_target, l_reg_data));
 
@@ -357,7 +414,45 @@ fapi_try_exit:
 ///
 inline fapi2::ReturnCode after_p10_chiplet_scominit(const fapi2::Target<fapi2::TARGET_TYPE_MC>& i_target)
 {
+    const auto l_chip_target = mss::find_target<fapi2::TARGET_TYPE_PROC_CHIP>(i_target);
     fapi2::ReturnCode l_rc = fapi2::FAPI2_RC_SUCCESS;
+    fapi2::ReturnCode l_rc2 = fapi2::FAPI2_RC_SUCCESS;
+    fapi2::ATTR_CHIP_EC_FEATURE_HW511630_HW520480_Type l_hw511630_hw520480 = false;
+    fapi2::ATTR_CHIP_EC_FEATURE_HW531432_Type l_hw531432 = false;
+    fapi2::ATTR_MRW_HW_MIRRORING_ENABLE_Type l_hw_mirroring_en = 0;
+
+    mss::fir::reg<scomt::mc::MBA_SCOMFIR_MISCFIRQ_RW> l_mc_miscfir_reg(i_target, l_rc);
+    mss::fir::reg<scomt::mc::LOCAL_FIR_RW> l_mc_local_fir_reg(i_target, l_rc2);
+
+    FAPI_TRY(l_rc, "unable to create fir::reg for MBA_SCOMFIR_MISCFIRQ_RW 0x%08X", scomt::mc::MBA_SCOMFIR_MISCFIRQ_RW);
+    FAPI_TRY(l_rc2, "unable to create fir::reg for LOCAL_FIR_RW 0x%08X", scomt::mc::LOCAL_FIR_RW);
+
+    // Get DD1 Workaround attrs
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_HW511630_HW520480, l_chip_target, l_hw511630_hw520480),
+             "Error from FAPI_ATTR_GET (ATTR_CHIP_EC_FEATURE_HW511630_HW520480)");
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_HW531432, l_chip_target, l_hw531432),
+             "Error from FAPI_ATTR_GET (ATTR_CHIP_EC_FEATURE_HW531432)");
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MRW_HW_MIRRORING_ENABLE, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(),
+                           l_hw_mirroring_en),
+             "Error from FAPI_ATTR_GET (ATTR_MRW_HW_MIRRORING_ENABLE)");
+
+    // Set up MISCFIRQ
+    l_rc = l_mc_miscfir_reg.recoverable_error<scomt::mc::MBA_SCOMFIR_MISCFIRQ_SCOM_RECOVERABLE_REG_PE>()
+           .recoverable_error<scomt::mc::MBA_SCOMFIR_MISCFIRQ_MCEBUSEN_REGS_PE>()
+           .write();
+    FAPI_TRY(l_rc, "Error setting up fir reg 0x%016x for target %s",
+             scomt::mc::MBA_SCOMFIR_MISCFIRQ_RW,
+             mss::c_str(i_target));
+
+    // Set up LOCAL_FIR
+    l_rc = l_mc_local_fir_reg.recoverable_error<scomt::mc::LOCAL_FIR_CFIR>()
+           .recoverable_error<scomt::mc::LOCAL_FIR_CPLT_CTRL>()
+           .recoverable_error<scomt::mc::LOCAL_FIR_CC_PCB>()
+           .recoverable_error<scomt::mc::LOCAL_FIR_CC_OTHERS>()
+           .write();
+    FAPI_TRY(l_rc, "Error setting up fir reg 0x%016x for target %s",
+             scomt::mc::LOCAL_FIR_RW,
+             mss::c_str(i_target));
 
     for (const auto& l_omic : mss::find_targets<fapi2::TARGET_TYPE_OMIC>(i_target))
     {
@@ -370,8 +465,7 @@ inline fapi2::ReturnCode after_p10_chiplet_scominit(const fapi2::Target<fapi2::T
             // Note that there are child-target-specific FIR bits in these regs, so we need to check
             // what's configured and unmask the corresponding group of FIRs in the right reg
             // OMI relative pos ==> DL0/1
-            uint8_t l_omi_pos = 0;
-            FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_OMI_DL_GROUP_POS, l_omi, l_omi_pos) );
+            const auto l_omi_pos = mss::relative_pos<fapi2::TARGET_TYPE_OMIC>(l_omi);
 
             switch(l_omi_pos)
             {
@@ -412,39 +506,41 @@ inline fapi2::ReturnCode after_p10_chiplet_scominit(const fapi2::Target<fapi2::T
     for (const auto& l_mcc : mss::find_targets<fapi2::TARGET_TYPE_MCC>(i_target))
     {
         fapi2::ReturnCode l_rc = fapi2::FAPI2_RC_SUCCESS;
-        fapi2::ReturnCode l_setup_dstlfir_rc = fapi2::FAPI2_RC_SUCCESS;
 
         // Create FIR reg
         mss::fir::reg<scomt::mcc::DSTL_DSTLFIR_RW> l_mcc_dstlfir_reg(l_mcc, l_rc);
-
-        // Get DD1 Workaround attr
-        const auto l_chip_target = mss::find_target<fapi2::TARGET_TYPE_PROC_CHIP>(i_target);
-        fapi2::ATTR_CHIP_EC_FEATURE_HW511630_HW520480_Type l_hw511630_hw520480;
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_HW511630_HW520480, l_chip_target, l_hw511630_hw520480),
-                 "Error from FAPI_ATTR_GET (ATTR_CHIP_EC_FEATURE_HW511630_HW520480)");
         FAPI_TRY(l_rc, "unable to create fir::reg for DSTL_DSTLFIR_RW 0x%08X", scomt::mcc::DSTL_DSTLFIR_RW);
 
-        // Write DSTLFIR register per axone spec, TK, potential changes in P10
-        l_setup_dstlfir_rc = l_mcc_dstlfir_reg
-                             .recoverable_error<scomt::mcc::DSTL_DSTLFIR_CONFIG_REG_RECOVERABLE_PARITY_ERROR>()
-                             .checkstop<scomt::mcc::DSTL_DSTLFIR_CONFIG_REG_FATAL_PARITY_ERROR>()
-                             .local_checkstop<scomt::mcc::DSTL_DSTLFIR_SUBCHANNEL_A_COUNTER_ERROR>()
-                             .local_checkstop<scomt::mcc::DSTL_DSTLFIR_SUBCHANNEL_B_COUNTER_ERROR>()
-                             .local_checkstop<scomt::mcc::DSTL_DSTLFIR_SUBCHANNEL_A_BUFFER_OVERUSE_ERROR>()
-                             .local_checkstop<scomt::mcc::DSTL_DSTLFIR_SUBCHANNEL_B_BUFFER_OVERUSE_ERROR>()
-                             .local_checkstop<scomt::mcc::DSTL_DSTLFIR_SUBCHANNEL_A_CHANNEL_TIMEOUT>()
-                             .local_checkstop<scomt::mcc::DSTL_DSTLFIR_SUBCHANNEL_B_CHANNEL_TIMEOUT>()
-                             .write();
+        // Write DSTLFIR register per axone spec
+        l_mcc_dstlfir_reg.checkstop<scomt::mcc::DSTL_DSTLFIR_MCS_DSTL_CMD_PARITY_ERROR>()
+        .checkstop<scomt::mcc::DSTL_DSTLFIR_RESET_CREDITS_RD_WDF_BUFFER_NONZERO>()
+        .recoverable_error<scomt::mcc::DSTL_DSTLFIR_CONFIG_REG_RECOVERABLE_PARITY_ERROR>()
+        .checkstop<scomt::mcc::DSTL_DSTLFIR_CONFIG_REG_FATAL_PARITY_ERROR>()
+        .local_checkstop<scomt::mcc::DSTL_DSTLFIR_SUBCHANNEL_A_COUNTER_ERROR>()
+        .local_checkstop<scomt::mcc::DSTL_DSTLFIR_SUBCHANNEL_B_COUNTER_ERROR>()
+        .local_checkstop<scomt::mcc::DSTL_DSTLFIR_SUBCHANNEL_A_TIMEOUT_ERROR>()
+        .local_checkstop<scomt::mcc::DSTL_DSTLFIR_SUBCHANNEL_B_TIMEOUT_ERROR>()
+        .local_checkstop<scomt::mcc::DSTL_DSTLFIR_SUBCHANNEL_A_BUFFER_OVERUSE_ERROR>()
+        .local_checkstop<scomt::mcc::DSTL_DSTLFIR_SUBCHANNEL_B_BUFFER_OVERUSE_ERROR>()
+        .local_checkstop<scomt::mcc::DSTL_DSTLFIR_SUBCHANNEL_A_CHANNEL_TIMEOUT>()
+        .local_checkstop<scomt::mcc::DSTL_DSTLFIR_SUBCHANNEL_B_CHANNEL_TIMEOUT>()
+        .local_checkstop<scomt::mcc::DSTL_DSTLFIR_SUBCHANNEL_A_PARITY_ERROR>()
+        .local_checkstop<scomt::mcc::DSTL_DSTLFIR_SUBCHANNEL_B_PARITY_ERROR>();
 
-        FAPI_TRY(l_setup_dstlfir_rc, "Error setting up fir reg 0x%016x for target %s",
-                 scomt::mcc::DSTL_DSTLFIR_RW,
-                 mss::c_str(i_target));
-
-        // Parse workaround for DD1
+        // Parse workarounds for DD1
         if (l_hw511630_hw520480)
         {
-            FAPI_TRY( mss::workarounds::fir::dstl_dd1_workaround(l_mcc) );
+            mss::workarounds::fir::dstl_dd1_workaround(l_mcc, l_mcc_dstlfir_reg);
         }
+
+        if (l_hw531432)
+        {
+            mss::workarounds::fir::dstl_channel_timeout_workaround(l_mcc, l_hw_mirroring_en, l_mcc_dstlfir_reg);
+        }
+
+        FAPI_TRY(l_mcc_dstlfir_reg.write(), "Error setting up fir reg 0x%016x for target %s",
+                 scomt::mcc::DSTL_DSTLFIR_RW,
+                 mss::c_str(i_target));
     }
 
     return fapi2::FAPI2_RC_SUCCESS;
@@ -474,8 +570,7 @@ inline fapi2::ReturnCode after_p10_omi_init_omi_fir_helper(const fapi2::Target<f
             // Note that there are child-target-specific FIR bits in these regs, so we need to check
             // what's configured and unmask the corresponding group of FIRs in the right reg
             // OMI relative pos ==> DL0/1
-            uint8_t l_omi_pos = 0;
-            FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_OMI_DL_GROUP_POS, l_omi, l_omi_pos) );
+            const auto l_omi_pos = mss::relative_pos<fapi2::TARGET_TYPE_OMIC>(l_omi);
 
             switch(l_omi_pos)
             {

@@ -446,7 +446,7 @@
     <valueType>uint8</valueType>
     <enum> DISABLED = 0, ENABLED = 1 </enum>
     <writeable/>
-    <initToZero/>
+    <default>ENABLED</default>
     <mssAccessorName>enable_fir_unmasking</mssAccessorName>
   </attribute>
 
