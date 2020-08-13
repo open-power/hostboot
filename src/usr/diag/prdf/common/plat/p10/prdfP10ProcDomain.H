@@ -53,49 +53,6 @@ class ProcDomain : public RuleChipDomain
      virtual int32_t Analyze( STEP_CODE_DATA_STRUCT & serviceData,
                               ATTENTION_TYPE attentionType );
 
-    /**
-     * @brief  Determine which chip to Analyze in a list of chips in this domain
-     * @note   This main only analyze one chip in the domain.
-     *          Not the whole domain.
-     * @param  serviceData   Service data collector
-     * @param  attentionType Attention of the chip
-     * @param  i_chips       List of chips in the domain to analyze
-     * @return SUCCESS
-     */
-     virtual int32_t AnalyzeTheseChips( STEP_CODE_DATA_STRUCT & serviceData,
-                                        ATTENTION_TYPE attentionType,
-                                        TARGETING::TargetHandleList & i_chips );
-    /**
-     * @brief  Order chips in a list of chips in this domain.
-     * @note
-     * @param  attentionType Attention of the chip
-     * @param  i_chips       List of chips in the domain to analyze
-     * @return SUCCESS
-     */
-     virtual int32_t OrderTheseChips( ATTENTION_TYPE attentionType,
-                                      TARGETING::TargetHandleList & i_chips );
-
-    /**
-     * @brief  Finds the pointer to the appropriate chip to do analysis or other
-     * @note   Just a function to help keep order in a subset of the domain
-     * @param  i_chipId      Handle of the chip to find
-     * @param  i_chips       List of chips in the domain to analyze
-     * @return SUCCESS
-     */
-     virtual RuleChip * FindChipInTheseChips( TARGETING::TargetHandle_t
-                                                                  i_chipId,
-                                              TARGETING::TargetHandleList &
-                                                                  i_chips );
-
-    /**
-     * @brief  Moves the chip in question to the front of the list of chips.
-     * @param  i_chipToFront The chip that should be in the front of the list.
-     * @param  i_chips       List of chips in the domain to analyze.
-     * @return SUCCESS
-     */
-     virtual void MoveToFrontInTheseChips( uint32_t i_chipToFront,
-                                      TARGETING::TargetHandleList & i_chips );
-
 protected:
 
     /**
