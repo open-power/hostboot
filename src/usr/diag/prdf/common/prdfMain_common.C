@@ -201,77 +201,6 @@ errlHndl_t initialize()
 
 //------------------------------------------------------------------------------
 
-bool __analyzeOcmbs( STEP_CODE_DATA_STRUCT & io_sc )
-{
-    bool attnFound = false;
-
-    #ifdef __HOSTBOOT_MODULE
-
-    PRDF_TRAC( "PRDF::__analyzeOcmbs enter" );
-
-    TargetHandle_t sys = nullptr;
-    targetService().getTopLevelTarget( sys );
-    assert( sys != nullptr );
-    if ( 0 == sys->getAttr<ATTR_ATTN_CHK_OCMBS>() )
-    {
-        PRDF_TRAC( "PRDF::__analyzeOcmbs ATTR_ATTN_CHK_OCMBS not set" );
-        return attnFound;
-    }
-
-    TargetHandleList ocmbList;
-    getAllChips( ocmbList, TYPE_OCMB_CHIP );
-
-    struct firInfo
-    {
-        const char * firAddr;
-        const char * firMask;
-        ATTENTION_TYPE attnType;
-    };
-    static const std::vector<firInfo> firList
-    {
-        { "OCMB_CHIPLET_CS_FIR",  "OCMB_CHIPLET_FIR_MASK",     UNIT_CS     },
-        { "OCMB_CHIPLET_RE_FIR",  "OCMB_CHIPLET_FIR_MASK",     RECOVERABLE },
-        { "OCMB_CHIPLET_SPA_FIR", "OCMB_CHIPLET_SPA_FIR_MASK", HOST_ATTN   },
-    };
-
-    for ( const auto & ocmb : ocmbList )
-    {
-        ExtensibleChip * ocmbChip = (ExtensibleChip *)systemPtr->GetChip(ocmb);
-        PRDF_TRAC( "PRDF::__analyzeOcmbs Checking huid=0x%08x",
-                   ocmbChip->getHuid() );
-        for ( const auto & fir : firList )
-        {
-            SCAN_COMM_REGISTER_CLASS * reg = ocmbChip->getRegister(fir.firAddr);
-            SCAN_COMM_REGISTER_CLASS * msk = ocmbChip->getRegister(fir.firMask);
-
-            if ( SUCCESS == (reg->Read() | msk->Read()) )
-            {
-                uint64_t regData = reg->GetBitFieldJustified(0,64);
-                uint64_t mskData = msk->GetBitFieldJustified(0,64);
-                if ( RECOVERABLE == fir.attnType )
-                {
-                    regData = regData >> 2;
-                }
-                if ( 0 != ( regData & ~mskData & 0x1ffffffffffffffbull ) )
-                {
-                    attnFound = true;
-                    PRDF_TRAC( "PRDF::__analyzeOcmbs Attn found huid=0x%08x",
-                               ocmbChip->getHuid() );
-                    ocmbChip->Analyze( io_sc, fir.attnType );
-                }
-            }
-        }
-    }
-
-    #endif
-
-    PRDF_TRAC( "PRDF::__analyzeOcmbs exit" );
-
-    return attnFound;
-}
-
-//------------------------------------------------------------------------------
-
 errlHndl_t main( ATTENTION_VALUE_TYPE i_priAttnType,
                  const AttnList & i_attnList )
 {
@@ -357,12 +286,7 @@ errlHndl_t main( ATTENTION_VALUE_TYPE i_priAttnType,
         l_tempSdc.setPrimaryPass();
         sdc.service_data = &l_tempSdc;
 
-        int32_t analyzeRc = SUCCESS;
-        // Analyze all the OCMBs if needed
-        if ( !__analyzeOcmbs( sdc ) )
-        {
-            analyzeRc = systemPtr->Analyze( sdc );
-        }
+        int32_t analyzeRc = systemPtr->Analyze( sdc );
 
         if( PRD_SCAN_COMM_REGISTER_ZERO == analyzeRc )
         {

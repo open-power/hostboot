@@ -44,16 +44,6 @@ class OcmbChipDomain : public RuleChipDomain
                     RuleChipDomain( i_did, i_size )
     {}
 
-    /**
-     * @brief  Query for an attention of a specific type in this domain
-     * @param  i_attnType [MACHINE_CHECK | RECOVERABLE | SPECIAL]
-     * @return false
-     * @note   This function will always return false. That way PRD will look
-     *         for the attention via the processor chip.
-     */
-    virtual bool Query( ATTENTION_TYPE i_attnType )
-    {  return false;  }
-
     #ifdef __HOSTBOOT_RUNTIME
 
     /**
