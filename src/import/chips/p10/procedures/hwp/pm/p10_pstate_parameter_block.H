@@ -232,6 +232,12 @@ class PlatPmPPB
             const VoltageConfigActions_t i_action);
 
         /// -----------------------------------------------------------------------
+        /// @brief Initialize resclk
+        /// @return fapi2::ReturnCode: FAPI2_RC_SUCCESS if success, else error code.
+        /// -----------------------------------------------------------------------
+        void resclk_init();
+
+        /// -----------------------------------------------------------------------
         /// @brief Initialize WOF data
         /// @param[out]     o_buf points to WOF data
         /// @param[inout]   io_size size of the wof  table

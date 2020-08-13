@@ -388,6 +388,11 @@ p10_pstate_parameter_block( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i
         FAPI_TRY(l_pmPPB->rvrm_enablement());
 
         // ----------------
+        // RESCLK Initialization
+        // ----------------
+        l_pmPPB->resclk_init();
+
+        // ----------------
         // Initialize GPPB structure
         // ----------------
         FAPI_TRY(l_pmPPB->gppb_init(l_globalppb));
@@ -400,7 +405,6 @@ p10_pstate_parameter_block( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i
                  o_buf,
                  io_size),
                  "WOF initialization failure");
-
 
         // ----------------
         //Initialize OPPB structure
@@ -4047,6 +4051,24 @@ fapi_try_exit:
     FAPI_INF("< PlatPmPPB:rvrm_enablement");
     return fapi2::current_err;
 }
+
+///////////////////////////////////////////////////////////
+////////   resclk_init
+///////////////////////////////////////////////////////////
+void PlatPmPPB::resclk_init()
+{
+    if (iv_attrs.attr_resclk_disable == fapi2::ENUM_ATTR_SYSTEM_RESCLK_DISABLE_OFF)
+    {
+        iv_resclk_enabled = true;
+        FAPI_INF("Resonant Clocks are enabled");
+    }
+    else
+    {
+        iv_resclk_enabled = false;
+        FAPI_INF("Resonant Clocks are disabled.");
+    }
+} // end of resclk_init
+
 
 ///////////////////////////////////////////////////////////
 ////////  ps2v_mv
