@@ -74,6 +74,8 @@ struct unique_entity_info
 const unique_entity_info foreign_entity_types[] =
 {
     { CLASS_ENC, TYPE_NODE, ENTITY_TYPE_BACKPLANE },
+    { CLASS_SYS, TYPE_SYS,  ENTITY_TYPE_CHASSIS },
+    { CLASS_SYS, TYPE_SYS,  ENTITY_TYPE_LOGICAL_SYSTEM }
     //TODO RTC: 246066 Enable when TPMs are detected by hostboot
 //     { CLASS_CHIP, TYPE_TPM, ENTITY_TYPE_TPM }
 };
@@ -162,15 +164,42 @@ errlHndl_t updateTargetEntityIdAttribute(Target* const i_target,
              ent.entity_instance_num,
              ent.entity_container_id);
 
-    const TARGETING::ATTR_PLDM_ENTITY_ID_INFO_type entity_info =
-    {
+    // This union groups all PLDM entity ID information attributes into the
+    // same storage location to be exploited below.  All PLDM entity ID
+    // information attribute flavors need to move in lock step if they are ever
+    // changed
+    const union {
+        TARGETING::ATTR_PLDM_ENTITY_ID_INFO_type         generic;
+        TARGETING::ATTR_CHASSIS_PLDM_ENTITY_ID_INFO_type chassis;
+        TARGETING::ATTR_SYSTEM_PLDM_ENTITY_ID_INFO_type  system;
+
+    } entity_info = {
+
         // The attribute stores its values in little-endian
-        .entityType = static_cast<uint16_t>(htole16(ent.entity_type)),
-        .entityInstanceNumber = static_cast<uint16_t>(htole16(ent.entity_instance_num)),
-        .containerId = static_cast<uint16_t>(htole16(ent.entity_container_id))
+        .generic = {
+            .entityType = static_cast<uint16_t>(htole16(ent.entity_type)),
+            .entityInstanceNumber = static_cast<uint16_t>(htole16(ent.entity_instance_num)),
+            .containerId = static_cast<uint16_t>(htole16(ent.entity_container_id)) 
+         }
     };
 
-    i_target->setAttr<ATTR_PLDM_ENTITY_ID_INFO>(entity_info);
+    switch(ent.entity_type)
+    {
+        // System and chassis PLDM entity ID information map to specially named
+        // attributes (with the same format as PLDM_ENTITY_ID_INFO) that reside
+        // on the system target
+        case ENTITY_TYPE_LOGICAL_SYSTEM:
+            PLDM_INF("Writing logical system PLDM entity ID info");
+            i_target->setAttr<ATTR_SYSTEM_PLDM_ENTITY_ID_INFO>(entity_info.system);
+            break;
+        case ENTITY_TYPE_CHASSIS:
+            PLDM_INF("Writing chassis PLDM entity ID info");
+            i_target->setAttr<ATTR_CHASSIS_PLDM_ENTITY_ID_INFO>(entity_info.chassis);
+            break;
+        default:
+            i_target->setAttr<ATTR_PLDM_ENTITY_ID_INFO>(entity_info.generic);
+            break;
+    }
 
     } while (false);
 
