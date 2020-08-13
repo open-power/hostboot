@@ -66,6 +66,61 @@ int32_t Initialize( ExtensibleChip * i_chip )
 PRDF_PLUGIN_DEFINE( explorer_ocmb, Initialize );
 
 /**
+ * @brief  During system or unit checkstop analysis, this is used to determine
+ *         if a chip has any active recoverable attentions.
+ * @param  i_chip     An OCMB chip.
+ * @param  o_hasAttns True if a recoverable attention exists on the OCMB.
+ * @return SUCCESS.
+ */
+int32_t CheckForRecovered(ExtensibleChip * i_chip, bool & o_hasAttns)
+{
+    o_hasAttns = false;
+
+    SCAN_COMM_REGISTER_CLASS * reg = i_chip->getRegister("OCMB_CHIPLET_RE_FIR");
+    if (SUCCESS != reg->Read())
+    {
+        PRDF_ERR("[CheckForRecovered] OCMB_CHIPLET_RE_FIR read failed on "
+                 "0x%08x", i_chip->getHuid());
+    }
+    else if (0 != reg->GetBitFieldJustified(1,10)) // bits 1-10
+    {
+        o_hasAttns = true;
+    }
+
+    return SUCCESS;
+}
+PRDF_PLUGIN_DEFINE(explorer_ocmb, CheckForRecovered);
+
+/**
+ * @brief  During system checkstop analysis, this is used to determine if a chip
+ *         has any active unit checkstop attentions.
+ * @param  i_chip     An OCMB chip.
+ * @param  o_hasAttns True if a unit checkstop attention exists on the OCMB.
+ * @return SUCCESS.
+ */
+int32_t CheckForUnitCs(ExtensibleChip * i_chip, bool & o_hasAttns)
+{
+    o_hasAttns = false;
+
+    // Note that OCMB checkstop attentions are all reported as unit checkstops
+    // and they do not directly trigger system checkstops.
+
+    SCAN_COMM_REGISTER_CLASS * reg = i_chip->getRegister("OCMB_CHIPLET_CS_FIR");
+    if (SUCCESS != reg->Read())
+    {
+        PRDF_ERR("[CheckForUnitCs] OCMB_CHIPLET_CS_FIR read failed on 0x%08x",
+                 i_chip->getHuid());
+    }
+    else if (0 != reg->GetBitFieldJustified(3,10)) // bits 3-12
+    {
+        o_hasAttns = true;
+    }
+
+    return SUCCESS;
+}
+PRDF_PLUGIN_DEFINE(explorer_ocmb, CheckForUnitCs);
+
+/**
  * @brief  Plugin function called after analysis is complete but before PRD
  *         exits.
  * @param  i_chip An OCMB chip.

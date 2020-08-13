@@ -668,7 +668,7 @@ void MemOps::resolveOcmbs( const TargetHandle_t i_proc,
             {
                 ATTN_SLOW( "MemOps::resolveOcmbs found attn" );
                 // If FIR bits are on, add the OCMB attn to the attn list
-                AttnData newData( i_proc, fir.attnType );
+                AttnData newData( ocmb, fir.attnType );
                 io_attentions.add( Attention(newData, this) );
                 attnFound = true;
                 break;

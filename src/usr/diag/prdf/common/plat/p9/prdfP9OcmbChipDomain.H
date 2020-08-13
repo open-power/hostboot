@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -43,16 +43,6 @@ class OcmbChipDomain : public RuleChipDomain
     OcmbChipDomain( DOMAIN_ID i_did, uint32_t i_size = OCMB_DOMAIN_SIZE ) :
                     RuleChipDomain( i_did, i_size )
     {}
-
-    /**
-     * @brief  Query for an attention of a specific type in this domain
-     * @param  i_attnType [MACHINE_CHECK | RECOVERABLE | SPECIAL]
-     * @return false
-     * @note   This function will always return false. That way PRD will look
-     *         for the attention via the processor chip.
-     */
-    virtual bool Query( ATTENTION_TYPE i_attnType )
-    {  return false;  }
 
     #ifdef __HOSTBOOT_RUNTIME
 
