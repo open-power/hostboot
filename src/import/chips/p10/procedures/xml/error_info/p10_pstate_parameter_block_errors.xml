@@ -577,16 +577,20 @@
   <hwpError>
     <rc>RC_PSTATE_PB_UT_PSTATE0_FREQ_MISMATCH</rc>
     <description>The computed system pstate0 frequency attribute does not match
-     with the UltraTurbo frequency for this par
+     with the UltraTurbo frequency for this part. This indicates the parts from
+     different sorts may be plugged into the machine.
     </description>
     <ffdc>CHIP_TARGET</ffdc>
     <ffdc>UT_FREQ</ffdc>
     <ffdc>PSTATE0_FREQ</ffdc>
     <callout>
-      <procedure>CODE</procedure>
+      <target>CHIP_TARGET</target>
       <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>MEDIUM</priority>
     </callout>
   </hwpError>
   <!-- ******************************************************************** -->
-
 </hwpErrors>

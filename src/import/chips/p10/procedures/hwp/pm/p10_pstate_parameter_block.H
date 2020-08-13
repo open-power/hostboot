@@ -101,7 +101,6 @@ typedef struct
 {
     uint32_t attr_freq_core_ceiling_mhz;
 
-
     uint32_t attr_freq_proc_refclock_khz;
     uint32_t attr_proc_dpll_divider;
     uint32_t attr_pau_frequency_mhz;
@@ -167,6 +166,7 @@ typedef struct
     uint32_t attr_save_mode_nodds_uplift_mv[2]; //VDD,VCS
 
     uint32_t attr_pstate0_freq;
+    uint32_t attr_nominal_freq;
 
     uint32_t freq_proc_refclock_khz;
     uint32_t proc_dpll_divider;
