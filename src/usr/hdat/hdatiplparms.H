@@ -582,8 +582,8 @@ const hdatIplpFeatureFlagSetting_t hdatIplpFeatureFlagSettingsArray[NUM_RISK_LEV
 #define HDAT_SYSTEM_TYPE_PLUS_FIRENZE              0x30000001
 #define HDAT_SYSTEM_TYPE_MISC_OPENPOWER            0x00150000
 
-#define HDAT_FIRMWARE_SIDE_GOLDEN                  0x00
-#define HDAT_FIRMWARE_SIDE_WORKING                 0x22
+#define HDAT_FIRMWARE_SIDE_PERMANENT               0x00
+#define HDAT_FIRMWARE_SIDE_TEMPORARY               0x11
 
 #define HDAT_KEYLOCK_MANUAL                        0x02
 #define HDAT_KEYLOCK_NORMAL                        0x04

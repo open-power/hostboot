@@ -268,30 +268,8 @@ void  HdatIplParms::hdatGetIplParmsData()
 
     //@TODO RTC 258465 HDAT: eBMC fetching the IPL side from
     //BIOS (Boot) parameter of PLDM
-    /*
-    PNOR::SideInfo_t l_sideInfo;
-    errlHndl_t l_errl = NULL;
-    l_errl = PNOR::getSideInfo(PNOR::WORKING, l_sideInfo);
-    if(!l_errl)
-    {
-        if(l_sideInfo.isGolden)
-        {
-            this->iv_hdatIPLParams->iv_iplParms.hdatIPLSide =
-                                             HDAT_FIRMWARE_SIDE_GOLDEN;
-        }
-        else
-        {
-            this->iv_hdatIPLParams->iv_iplParms.hdatIPLSide =
-                                             HDAT_FIRMWARE_SIDE_WORKING;
-        }
-    }
-    else
-    {
-        ERRORLOG::errlCommit(l_errl,HDAT_COMP_ID);
-    }
-     */
     this->iv_hdatIPLParams->iv_iplParms.hdatIPLSide =
-                                     HDAT_FIRMWARE_SIDE_WORKING;
+                                     HDAT_FIRMWARE_SIDE_TEMPORARY;
     // Fast IPL Speed
     this->iv_hdatIPLParams->iv_iplParms.hdatIPLSpeed = 0xFF;
 
