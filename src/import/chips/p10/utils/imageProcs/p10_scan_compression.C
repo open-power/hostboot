@@ -750,6 +750,8 @@ __rs4_decompress(uint8_t* o_data_str,
     int      nibbles;           /* Rotate or scan RS4 nibbles to process */
     int r;                      /* Remainder bits */
     int masked;                 /* if a care mask is available */
+    uint8_t  careNibble;
+    uint8_t  dataNibble;
 
     i = 0;
     j = 0;
@@ -803,13 +805,35 @@ __rs4_decompress(uint8_t* o_data_str,
                 return BUG(SCAN_COMPRESSION_BUFFER_OVERFLOW);
             }
 
-            for (k = 0; k < (uint8_t)nibbles; k++) //nibbles always <15 here
+
+            if (masked)
             {
-                rs4_set_nibble(o_care_str, j, rs4_get_nibble(i_rs4_str, i));
-                i = (masked ? i + 1 : i);
-                rs4_set_nibble(o_data_str, j, rs4_get_nibble(i_rs4_str, i));
-                i++;
+                careNibble = rs4_get_nibble(i_rs4_str, i);
+                dataNibble = rs4_get_nibble(i_rs4_str, i + 1);
+
+                if (~careNibble & dataNibble)
+                {
+                    MY_ERR("ERROR: __rs4_decompress: Conflicting care and data bits in RS4"
+                           " ring at nibbles(%u,%u)=(0x%x,0x%x)\n",
+                           i, i + 1, careNibble, dataNibble);
+                    return SCAN_COMPRESSION_CAREDATA_CONFLICT;
+                }
+
+                rs4_set_nibble(o_care_str, j, careNibble);
+                rs4_set_nibble(o_data_str, j, dataNibble);
+                i += 2;
                 j++;
+            }
+            else
+            {
+                for (k = 0; k < (uint8_t)nibbles; k++) //nibbles always <15 here
+                {
+                    dataNibble = rs4_get_nibble(i_rs4_str, i);
+                    rs4_set_nibble(o_care_str, j, dataNibble); //care=data here
+                    rs4_set_nibble(o_data_str, j, dataNibble);
+                    i++;
+                    j++;
+                }
             }
 
             state = 0;
@@ -833,9 +857,28 @@ __rs4_decompress(uint8_t* o_data_str,
 
     if (r != 0)
     {
-        rs4_set_nibble(o_care_str, j, rs4_get_nibble(i_rs4_str, i));
-        i = (masked ? i + 1 : i);
-        rs4_set_nibble(o_data_str, j, rs4_get_nibble(i_rs4_str, i));
+        if (masked)
+        {
+            careNibble = rs4_get_nibble(i_rs4_str, i);
+            dataNibble = rs4_get_nibble(i_rs4_str, i + 1);
+
+            if (~careNibble & dataNibble)
+            {
+                MY_ERR("ERROR: __rs4_decompress: Conflicting [term] care and data bits in RS4"
+                       " ring at nibbles(%u,%u)=(0x%x,0x%x)\n",
+                       i, i + 1, careNibble, dataNibble);
+                return SCAN_COMPRESSION_CAREDATA_CONFLICT;
+            }
+
+            rs4_set_nibble(o_care_str, j, careNibble);
+            rs4_set_nibble(o_data_str, j, dataNibble);
+        }
+        else
+        {
+            dataNibble = rs4_get_nibble(i_rs4_str, i);
+            rs4_set_nibble(o_care_str, j, dataNibble); //care=data here
+            rs4_set_nibble(o_data_str, j, dataNibble);
+        }
     }
 
     *o_length = bits;
@@ -1412,7 +1455,7 @@ __rs4_compress_from_raw4( uint8_t* o_rs4Str,
     else
     {
         return BUGX(SCAN_COMPRESSION_STATE_ERROR,
-                    "Termination can not immediately follow state=2 (masked datastate)\n");
+                    "Termination can not immediately follow state=2 (masked data state)\n");
     }
 
     // Indicate termination start
@@ -1525,6 +1568,8 @@ __rs4_decompress_to_raw4( uint8_t* o_raw4Str,
 {
     int      state;             /* 0: Rotate, 1: Scan */
     bool     masked;            /* =true if a care mask is available */
+    uint8_t  careNibble;
+    uint8_t  dataNibble;
     uint32_t i;                 /* Nibble index in i_rs4Str */
     uint32_t count;             /* Counts *raw* rotate [zero] nibbles */
     int      nibbles;           /* Rotate or scan RS4 nibbles to process */
@@ -1610,19 +1655,42 @@ __rs4_decompress_to_raw4( uint8_t* o_raw4Str,
                 return SCAN_COMPRESSION_BUFFER_OVERFLOW;
             }
 
-            for (uint8_t k = 0; k < (uint8_t)nibbles; k++) //nibbles always <15 here
+            if (masked)
             {
                 raw4Record->nibbleIndex = rawNibbleCount;
 
-                // Copy data nibble, or if masked, care+data nibbles, from RS4
-                raw4Record->careData = rs4_get_nibble(i_rs4Str, i) << 4;//Care in left nibbl
-                i = masked ? i + 1 : i; //If masked, data comes after care. Otherwise, copy data again
-                raw4Record->careData |= rs4_get_nibble(i_rs4Str, i);    //Data in right nibbl
+                careNibble = rs4_get_nibble(i_rs4Str, i);
+                dataNibble = rs4_get_nibble(i_rs4Str, i + 1);
 
-                i++;
+                if (~careNibble & dataNibble)
+                {
+                    MY_ERR("ERROR: __rs4_decompress_to_raw4: Conflicting care and data bits in RS4"
+                           " ring at nibbles(%u,%u)=(0x%x,0x%x)\n",
+                           i, i + 1, careNibble, dataNibble);
+                    return SCAN_COMPRESSION_CAREDATA_CONFLICT;
+                }
 
+                raw4Record->careData = careNibble << 4; //Put Care into left nibbl
+                raw4Record->careData |= dataNibble;     //Put Data into right nibbl
+
+                i += 2;
                 raw4Record++; // Pt to next record
                 rawNibbleCount++;
+            }
+            else
+            {
+                for (uint8_t k = 0; k < (uint8_t)nibbles; k++) //nibbles always <15 here
+                {
+                    raw4Record->nibbleIndex = rawNibbleCount;
+
+                    dataNibble = rs4_get_nibble(i_rs4Str, i);
+                    raw4Record->careData = dataNibble << 4;//Put Care in left nibbl (care=data here)
+                    raw4Record->careData |= dataNibble;    //Put Data in right nibbl
+
+                    i++;
+                    raw4Record++; // Pt to next record
+                    rawNibbleCount++;
+                }
             }
 
             state = 0;
@@ -1642,23 +1710,26 @@ __rs4_decompress_to_raw4( uint8_t* o_raw4Str,
 
     if (remBits)
     {
-        uint8_t remCareData = 0;
-
-        // Copy data nibble, or if masked care+data nibbles, from RS4
-        remCareData = rs4_get_nibble(i_rs4Str, i) << 4;//Care in left nibbl
-        i = masked ? i + 1 : i; //If masked, data comes after care. Otherwise, copy data again
-        remCareData |= rs4_get_nibble(i_rs4Str, i);    //Data in right nibbl
+        if (masked)
+        {
+            careNibble = rs4_get_nibble(i_rs4Str, i);
+            dataNibble = rs4_get_nibble(i_rs4Str, i + 1);
+        }
+        else
+        {
+            dataNibble = rs4_get_nibble(i_rs4Str, i);
+            careNibble = dataNibble; //care=data here
+        }
 
         // Do nothing if...
-        // ...remCareData==0 and it follows a previous rotate sequence
-        // Otherwise, create an Raw4 record for the rem nibble if
-        // ...it has data in it or it immediately follows a previous data record
-        if ( remCareData == 0 && (raw4Record - 1)->careData == 0 )
+        //    care&data==0 and it follows a previous rotate sequence
+        // otherwise, create an Raw4 record for the rem nibble if
+        //    it has data in it or it immediately follows a previous data record
+        if ( careNibble == 0 && dataNibble == 0 && (raw4Record - 1)->careData == 0 )
         {
             // Not much to do. Lump in rem [zero] rotate with ongoing rotate.
-            // ...just update Raw4 raw stats
+            // ...just add the remBits
             rawBits += remBits;
-            rawNibbleCount++;
         }
         else
         {
@@ -1675,9 +1746,24 @@ __rs4_decompress_to_raw4( uint8_t* o_raw4Str,
 
             raw4Record->nibbleIndex = rawNibbleCount;
 
-            raw4Record->careData = remCareData;
+            if (masked)
+            {
+                if (~careNibble & dataNibble)
+                {
+                    MY_ERR("ERROR: __rs4_decompress_to_raw4: Conflicting [rem] care and data bits"
+                           " in RS4 ring at nibbles(%u,%u)=(0x%x,0x%x)\n",
+                           i, i + 1, careNibble, dataNibble);
+                    return SCAN_COMPRESSION_CAREDATA_CONFLICT;
+                }
 
-            rawNibbleCount++;
+                raw4Record->careData = careNibble << 4; //Put Care into left nibbl
+                raw4Record->careData |= dataNibble;     //Put Data into right nibbl
+            }
+            else
+            {
+                raw4Record->careData = dataNibble << 4;//Put Care in left nibbl (care=data here)
+                raw4Record->careData |= dataNibble;    //Put Data in right nibbl
+            }
         }
     }
 
