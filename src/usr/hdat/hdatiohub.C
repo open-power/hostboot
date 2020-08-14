@@ -1172,22 +1172,67 @@ errlHndl_t hdatLoadIoData(const hdatMsAddr_t &i_msAddr,
             //memory map version
             l_hub->hdatMemMapVersion = 3;
 
-            //@TODO RTC 246357 missing attribute
-            /*l_hub->hdatFab0PresDetect = l_pProcTarget->
-                   getAttr<TARGETING::ATTR_PROC_PCIE_PHB_ACTIVE>();*/
-            //Need to remove the below check once the attribute is ready
-            //Hub0: PHB 0,1,2 & 3
-            //Hub1: PHB 0,1,3,4 & 5
-            if (l_numProcs == 0)
-            {
-                l_hub->hdatFab0PresDetect = 0xF0;
-            }
-            else if (l_numProcs == 1)
-            {
-                l_hub->hdatFab0PresDetect = 0xDC;
-            }
-
             TARGETING::PredicateHwas l_predHwasFunc;
+            TARGETING::PredicateCTM l_pecPredicate (TARGETING::CLASS_UNIT,
+                                                    TARGETING::TYPE_PEC);
+            TARGETING::PredicatePostfixExpr l_funcPec;
+            l_funcPec.push(&l_pecPredicate).push(&l_predHwasFunc).And();
+
+            TARGETING::TargetHandleList l_pecList;
+
+            TARGETING::targetService().getAssociated(l_pecList, l_pProcTarget,
+                       TARGETING::TargetService::CHILD,
+                       TARGETING::TargetService::ALL,
+                       &l_funcPec);
+
+            // Sample values for DCM-0 (Proc-0 and Proc-1)
+            // Hub0 : PHB 0,1,2 & 3 : 0xF0
+            // Hub1 : PHB 0,1,3,4 & 5 : 0xDC
+            uint8_t  l_fab0PresDetect = 0;
+            for(uint8_t l_idx = 0; l_idx<l_pecList.size(); ++l_idx)
+            {
+                TARGETING::Target *l_pecTarget = l_pecList[l_idx];
+
+                TARGETING::ATTR_PROC_PCIE_PHB_ACTIVE_type l_phbActive =
+                    {0};
+
+                //Get PHB Active flag from PEC
+                assert( l_pecTarget->
+                   tryGetAttr<TARGETING::ATTR_PROC_PCIE_PHB_ACTIVE>(
+                      l_phbActive));
+
+                uint8_t l_pecChipUnit = 0;
+                assert( l_pecTarget->
+                   tryGetAttr<TARGETING::ATTR_CHIP_UNIT>(l_pecChipUnit));
+
+                //Array count of ATTR_PROC_PCIE_PHB_ACTIVE_BASE is 3
+                for(uint8_t l_phbActIdx = 0; l_phbActIdx <
+                    sizeof(TARGETING::ATTR_PROC_PCIE_PHB_ACTIVE_type);
+                    ++l_phbActIdx)
+                {
+                    uint8_t l_bitPos = 0;
+                    if ((l_phbActive[l_phbActIdx] == 1) && (l_pecChipUnit == 0))
+                    {
+                        //Filling bit positions 7,6,5
+                        l_bitPos = 7 - l_phbActIdx;
+                    }
+                    else if ((l_phbActive[l_phbActIdx] == 1) &&
+                             (l_pecChipUnit == 1))
+                    {
+                        //Filling bit positions 4,3,2
+                        l_bitPos = 4 - l_phbActIdx;
+                    }
+
+                    //Only update the value if the active bit has been set
+                    if (l_phbActive[l_phbActIdx] == 1)
+                    {
+                        l_fab0PresDetect = (1 << l_bitPos) | l_fab0PresDetect;
+                    }
+                }
+            }
+            l_hub->hdatFab0PresDetect = l_fab0PresDetect;
+            HDAT_DBG("hdatFab0PresDetect : 0x%X", l_hub->hdatFab0PresDetect);
+
             TARGETING::PredicateCTM l_phbPredicate (TARGETING::CLASS_UNIT,
                                                     TARGETING::TYPE_PHB);
             TARGETING::PredicatePostfixExpr l_funcPhb;
