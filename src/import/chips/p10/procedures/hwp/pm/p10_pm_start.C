@@ -56,6 +56,8 @@
 // Includes
 // -----------------------------------------------------------------------------
 #include <p10_pm_start.H>
+#include <p10_core_special_wakeup.H>
+#include <multicast_group_defs.H>
 
 // Function prototypes
 // -----------------------------------------------------------------------------
@@ -73,6 +75,9 @@ fapi2::ReturnCode p10_pm_start(
     FAPI_INF(">>>>>>>>> p10_pm_start...");
 
     fapi2::ReturnCode l_rc;
+
+    fapi2::Target < fapi2::TARGET_TYPE_CORE | fapi2::TARGET_TYPE_MULTICAST > core_mc_target =
+        i_target.getMulticast< fapi2::MULTICAST_OR >(fapi2::MCGROUP_GOOD_EQ, fapi2::MCCORE_ALL);
     //  ************************************************************************
     //  Issue init to OCB
     //  ************************************************************************
@@ -129,13 +134,31 @@ fapi2::ReturnCode p10_pm_start(
 
     //  ************************************************************************
     //  Initialize the QME Engine
+    //  pm::PM_START_RUNTIME => This is  for internal purpose to know we are in
+    //  runtime mode, as this procedure is called only after istep 18
     //  ************************************************************************
     FAPI_DBG("Executing p10_pm_qme_init to start QME");
-    FAPI_EXEC_HWP(l_rc, p10_pm_qme_init, i_target, pm::PM_START);
+    FAPI_EXEC_HWP(l_rc, p10_pm_qme_init, i_target, pm::PM_START_RUNTIME);
     FAPI_TRY(l_rc, "ERROR: Failed to start QME");
     FAPI_TRY(p10_pm_glob_fir_trace(i_target, "After QME initialization"));
 
     //  ************************************************************************
+    //  ************************************************************************
+    //  Clear the special wakeup for all cores.
+    //  Note:  The auto special wakeup is cleared by QME Hcode.  The
+    //  STOP_OVERRIDE_MODE and STOP_ACTIVE_MASK bits are cleared by the
+    //  p10_pm_qme_init(halt) procedure."
+    //  ************************************************************************
+    FAPI_DBG("Disable special wakeup for all functional  core targets");
+    FAPI_EXEC_HWP(l_rc,
+                  p10_core_special_wakeup,
+                  core_mc_target,
+                  p10specialWakeup::SPCWKUP_DISABLE,
+                  p10specialWakeup::HYP
+                 );
+    FAPI_TRY(l_rc, "ERROR: Failed to disable special wakeup.");
+
+
     //  Initialize the XGPE Engine
     //  ************************************************************************
     FAPI_DBG("Executing p10_pm_xgpe_init to start XGPE");
@@ -169,6 +192,7 @@ fapi2::ReturnCode p10_pm_start(
                  );
     FAPI_TRY(l_rc, "ERROR: Failed to start OCC PPC405");
     FAPI_TRY(p10_pm_glob_fir_trace(i_target, "After OCC PPC405 init"));
+
 
 fapi_try_exit:
 

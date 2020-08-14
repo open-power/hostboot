@@ -32,6 +32,7 @@ lib$(PROCEDURE)_EXTRALIBS+=p10_pm_firinit
 lib$(PROCEDURE)_EXTRALIBS+=p10_pm_ocb_init
 lib$(PROCEDURE)_EXTRALIBS+=p10_pm_occ_control
 lib$(PROCEDURE)_EXTRALIBS+=p10_check_proc_config
+lib$(PROCEDURE)_EXTRALIBS+=p10_core_special_wakeup
 $(call ADD_MODULE_SRCDIR,$(PROCEDURE),$(ROOTPATH)/chips/p10/procedures/hwp/lib)
 $(call ADD_MODULE_SRCDIR,$(PROCEDURE),$(ROOTPATH)/chips/p10/common/pmlib/include/registers)
 $(call BUILD_PROCEDURE)

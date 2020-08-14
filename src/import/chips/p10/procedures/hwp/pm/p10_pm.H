@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -56,6 +56,7 @@ extern const char* PM_FLOW_MODE_NAME[];
         "PM_RESET_SOFT",        \
         "PM_INIT_SOFT",         \
         "PM_INIT_SPECIAL"       \
+        "PM_START_RUNTIME"      \
     }
 
 #define PM_MODE_NAME_VAR PM_FLOW_MODE_NAME[] = PM_FLOW_MODE_NAME_STRINGS
@@ -87,14 +88,15 @@ namespace pm
 
 enum PM_FLOW_MODE
 {
-    PM_HALT         = 0x1,
-    PM_START        = 0x2,
-    PM_SETUP        = 0x3,
-    PM_SETUP_PIB    = 0x4,
-    PM_SETUP_ALL    = 0x5,
-    PM_RESET_SOFT   = 0x6,
-    PM_INIT_SOFT    = 0x7,
-    PM_INIT_SPECIAL = 0x8,
+    PM_HALT           = 0x1,
+    PM_START          = 0x2,
+    PM_SETUP          = 0x3,
+    PM_SETUP_PIB      = 0x4,
+    PM_SETUP_ALL      = 0x5,
+    PM_RESET_SOFT     = 0x6,
+    PM_INIT_SOFT      = 0x7,
+    PM_INIT_SPECIAL   = 0x8,
+    PM_START_RUNTIME  = 0x9, //This enum is for internal purpose and is used to know we are in runtime ipl mode.
 };
 
 enum PM_DUMP_MODE

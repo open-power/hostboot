@@ -117,7 +117,8 @@ enum
 // -----------------------------------------------------------------------------
 
 fapi2::ReturnCode qme_init(
-    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target);
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
+    const pm::PM_FLOW_MODE i_mode);
 
 fapi2::ReturnCode qme_halt(
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target);
@@ -156,7 +157,8 @@ fapi2::ReturnCode p10_pm_qme_init(
     // -------------------------------
     // Initialization:  perform order or dynamic operations to initialize
     // the STOP funciton using necessary Platform or Feature attributes.
-    if ( pm::PM_START == i_mode )
+    if ( pm::PM_START == i_mode ||
+         pm::PM_START_RUNTIME == i_mode)
     {
         const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_FUSED_CORE_MODE,
@@ -165,7 +167,7 @@ fapi2::ReturnCode p10_pm_qme_init(
                  "Error from FAPI_ATTR_GET for attribute ATTR_FUSED_CORE_MODE");
 
         // Boot the QME
-        FAPI_TRY( qme_init( i_target ), "ERROR: Failed To Initialize  QME" );
+        FAPI_TRY( qme_init( i_target, i_mode ), "ERROR: Failed To Initialize  QME" );
         // Adjust for EQ placement
         FAPI_TRY( pcb_skew_adj( i_target ), "ERROR: Failed To adjust the PCB Skew" );
     }
@@ -204,7 +206,8 @@ fapi_try_exit:
 /// @retval FAPI_RC_SUCCESS else ERROR defined in xml
 
 fapi2::ReturnCode qme_init(
-    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target )
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
+    const pm::PM_FLOW_MODE i_mode )
 {
     // Function not supported on SBE platform
 #ifndef __PPE__
@@ -217,6 +220,7 @@ fapi2::ReturnCode qme_init(
     const uint32_t QME_QMCR_STOP_SHIFTREG_OVERRIDE_EN = 29;
 
     fapi2::buffer<uint64_t>     l_qme_flag;
+    fapi2::buffer<uint64_t>     l_data64;
     fapi2::buffer<uint64_t>     l_xcr;
     fapi2::buffer<uint64_t>     l_xsr;
     fapi2::buffer<uint64_t>     l_iar;
@@ -336,12 +340,22 @@ fapi2::ReturnCode qme_init(
         fapi2::buffer<uint64_t> l_tod_fsm_reg;
         fapi2::buffer<uint64_t> l_qme_flag_mask;
 
+        //If this function called after istep 16.2, then we are in runtime mode
+        //and need to set that qme flag register
+        if ( pm::PM_START_RUNTIME == i_mode)
+        {
+            FAPI_TRY( putScom( l_eq_mc_or, QME_FLAGS_WO_OR, BIT64(p10hcd::QME_FLAGS_RUNTIME_MODE)));
+        }
+
         l_qme_flag_mask.flush<0>().setBit<p10hcd::QME_FLAGS_TOD_SETUP_COMPLETE>();
 
         fapi2::ATTR_IS_MPIPL_Type l_mpipl;
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IS_MPIPL, FAPI_SYSTEM, l_mpipl))
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IS_MPIPL, FAPI_SYSTEM, l_mpipl));
 
-        if (l_mpipl)
+        //If we are in HB ipl and if mpipl, then need to clear the TOD complete
+        //flag.
+        if (pm::PM_START == i_mode &&
+            l_mpipl)
         {
             FAPI_INF("MPIPL: Clearing QME TOD Setup Complete Flag to avoid shadowing");
             FAPI_TRY( putScom( l_eq_mc_or, QME_FLAGS_WO_CLEAR, l_qme_flag_mask ) );
@@ -436,6 +450,11 @@ fapi2::ReturnCode qme_init(
                     "QME start halted");
     }
 
+    //Clear STOP_OVERRIDE_MODE and ACTIVE_MASK , so that QME is ready for
+    //stop sequencing.
+    l_data64.flush<0>().setBit<QME_QMCR_STOP_OVERRIDE_MODE>().setBit< QME_QMCR_STOP_ACTIVE_MASK>();
+    FAPI_TRY( putScom( l_eq_mc_or, QME_QMCR_WO_CLEAR, l_data64) );
+
     FAPI_INF( "QME was activated successfully!!!!" );
 
 fapi_try_exit:
@@ -479,27 +498,8 @@ fapi2::ReturnCode qme_halt(
     l_data64.flush<0>().insertFromRight( XCR_HALT, 1, 3 );
     FAPI_TRY( putScom( l_eq_mc_or, QME_SCOM_XIXCR, l_data64 ) );
 
-    FAPI_INF("Poll for HALT State via XSR...");
-
-    do
-    {
-        FAPI_TRY( getScom( l_eq_mc_and, QME_SCOM_XIDBGPRO, l_data64 ) );
-        fapi2::delay( QME_POLLTIME_MS * 1000 * 1000, QME_POLLTIME_MCYCLES * 1000 * 1000 );
-    }
-    while( ( l_data64.getBit<XSR_HALTED_STATE>() == 0 ) && ( --l_timeout_in_MS != 0 ) );
-
-    if( 0 == l_timeout_in_MS )
-    {
-        FAPI_ASSERT( false,
-                     fapi2::QME_HALT_TIMEOUT()
-                     .set_CHIP(i_target)
-                     .set_PPE_STATE_MODE(XCR_HALT),
-                     "STOP Reset Timeout");
-    }
-
-    FAPI_INF("Clear ASSERT_SPECIAL_WKUP_DONE and AUTO_SPECIAL_WAKEUP_DISABLE, Assert PM_EXIT if not STOP_GATED");
-    l_data64.flush<0>().setBit < QME_SCSR_ASSERT_SPECIAL_WKUP_DONE > ();
-    l_data64.setBit < QME_SCSR_AUTO_SPECIAL_WAKEUP_DISABLE > ();
+    FAPI_INF("Clear AUTO_SPECIAL_WAKEUP_DISABLE, Assert PM_EXIT if not STOP_GATED");
+    l_data64.flush<0>().setBit < QME_SCSR_AUTO_SPECIAL_WAKEUP_DISABLE > ();
     FAPI_TRY( putScom( core_mc_target_and, QME_SCSR_WO_CLEAR, l_data64 ) );
 
     for ( auto l_core_target : i_target.getChildren<fapi2::TARGET_TYPE_CORE>( fapi2::TARGET_STATE_FUNCTIONAL ) )
@@ -529,8 +529,32 @@ fapi2::ReturnCode qme_halt(
         }
     }
 
-    FAPI_INF("Clear QME_ACTIVE in OCC Flag Register...");
-    l_data64.flush<0>().setBit<QME_ACTIVE>();
+    //Set STOP_OVERRIDE_MODE and ACTIVE_MASK , so that QME won't be involved in
+    //stop sequencing when it is halted
+    l_data64.flush<0>().setBit<QME_QMCR_STOP_OVERRIDE_MODE>().setBit<QME_QMCR_STOP_ACTIVE_MASK>();
+    FAPI_TRY( putScom( l_eq_mc_or, QME_QMCR_SCOM2, l_data64) );
+
+
+    FAPI_INF("Poll for HALT State via XSR...");
+
+    do
+    {
+        FAPI_TRY( getScom( l_eq_mc_and, QME_SCOM_XIDBGPRO, l_data64 ) );
+        fapi2::delay( QME_POLLTIME_MS * 1000 * 1000, QME_POLLTIME_MCYCLES * 1000 * 1000 );
+    }
+    while( ( l_data64.getBit<XSR_HALTED_STATE>() == 0 ) && ( --l_timeout_in_MS != 0 ) );
+
+    if( 0 == l_timeout_in_MS )
+    {
+        FAPI_ASSERT( false,
+                     fapi2::QME_HALT_TIMEOUT()
+                     .set_CHIP(i_target)
+                     .set_PPE_STATE_MODE(XCR_HALT),
+                     "STOP Reset Timeout");
+    }
+
+    FAPI_INF("Clear QME_FLAG Flag Register...");
+    l_data64.flush<0>();
     FAPI_TRY( putScom( l_eq_mc_or, QME_FLAGS_RW, l_data64 ) );
 
 fapi_try_exit:

@@ -64,7 +64,6 @@ fapi2::ReturnCode checkForSplWkupPreReq(
     fapi2::buffer <uint64_t> l_data;
     fapi2::buffer <uint64_t> l_coreSshsrc;
     fapi2::buffer <uint64_t> l_scsr;
-    uint32_t l_address  =   0;
     fapi2::Target < fapi2::TARGET_TYPE_PROC_CHIP > l_proc     =
         i_target.getParent < fapi2::TARGET_TYPE_PROC_CHIP > ();
     auto l_eq_mc_and = l_proc.getMulticast<fapi2::TARGET_TYPE_EQ, fapi2::MULTICAST_AND >(fapi2::MCGROUP_GOOD_EQ);
@@ -77,10 +76,6 @@ fapi2::ReturnCode checkForSplWkupPreReq(
                      set_QME_EISR_REG( l_data ),
                      "System In CheckStop State. Spl Wakeup Not Attempted" );
     }
-
-    l_address   =  p10specialWakeup::SpecialWakeupAddr[i_entity];
-    l_data.flush<0>();
-    FAPI_TRY( fapi2::getScom( i_target, l_address, l_data ) );
 
     //Need to assure ourselves that we have infrastructure in place to support
     //Special wakeup. Special wakeup at an early stage of IPL ( in failure path )

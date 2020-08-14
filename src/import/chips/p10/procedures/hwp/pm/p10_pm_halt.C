@@ -55,10 +55,12 @@
 // -----------------------------------------------------------------------------
 #include <p10_pm_halt.H>
 #include <p10_pm_occ_gpe_init.H>
-// -----------------------------------------------------------------------------
-// Constant definitions
-// -----------------------------------------------------------------------------
-// Map the auto generated names to clearer ones
+#include <p10_pm_hcd_flags.h>
+#include <p10_core_special_wakeup.H>
+#include <multicast_group_defs.H>
+
+#include <p10_scom_eq.H>
+using namespace scomt::eq;
 // -----------------------------------------------------------------------------
 // Global variables
 // -----------------------------------------------------------------------------
@@ -67,6 +69,7 @@
 // Constant Defintions
 // -----------------------------------------------------------------------------
 
+fapi2::ReturnCode  initiateSPWU(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target);
 
 // -----------------------------------------------------------------------------
 // Function definitions
@@ -103,6 +106,12 @@ fapi2::ReturnCode p10_pm_halt(
     FAPI_DBG("Executing p10_pm_firinit for masking errors in halt operation.");
     FAPI_EXEC_HWP(l_rc, p10_pm_firinit, i_target, pm::PM_RESET_SOFT);
     FAPI_TRY(l_rc, "ERROR: Failed to mask PBA & QME FIRs.");
+
+
+    //  ************************************************************************
+    //  Enable the special wakeup for all cores only if QME is active
+    //  ************************************************************************
+    FAPI_TRY(initiateSPWU(i_target));
 
     //  ************************************************************************
     //  Issue halt to OCC GPEs ( GPE0 and GPE1) (Bring them to HALT)
@@ -164,6 +173,41 @@ fapi2::ReturnCode p10_pm_halt(
     FAPI_DBG("Executing p10_pm_pss_init to halt P2S and HWC logic");
     FAPI_EXEC_HWP(l_rc, p10_pm_pss_init, i_target, pm::PM_HALT);
     FAPI_TRY(l_rc, "ERROR: Failed to halt PSS & HWC");
+
+fapi_try_exit:
+
+    FAPI_IMP("<< p10_pm_halt");
+    return fapi2::current_err;
+}
+
+fapi2::ReturnCode initiateSPWU(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
+{
+    fapi2::ReturnCode l_rc;
+    fapi2::buffer<uint64_t> l_qme_flag;
+    fapi2::buffer<uint64_t> l_xsr;
+
+    auto l_eq_mc_and =
+        i_target.getMulticast<fapi2::TARGET_TYPE_EQ, fapi2::MULTICAST_AND >(fapi2::MCGROUP_GOOD_EQ);
+    fapi2::Target < fapi2::TARGET_TYPE_CORE | fapi2::TARGET_TYPE_MULTICAST > core_mc_target =
+        i_target.getMulticast< fapi2::MULTICAST_OR >(fapi2::MCGROUP_GOOD_EQ, fapi2::MCCORE_ALL);
+
+    // First check if QME_ACTIVE is set before assert spwu
+    FAPI_TRY( getScom( l_eq_mc_and, QME_FLAGS_RW, l_qme_flag ) );
+    FAPI_TRY( getScom( l_eq_mc_and, QME_SCOM_XIDBGPRO, l_xsr ) );
+
+    if( l_qme_flag.getBit<p10hcd::QME_FLAGS_STOP_READY>() == 1  &&
+        !(l_xsr.getBit<0>()))
+    {
+        FAPI_DBG("Enable special wakeup for all functional  Core targets");
+        FAPI_EXEC_HWP(l_rc,
+                      p10_core_special_wakeup,
+                      core_mc_target,
+                      p10specialWakeup::SPCWKUP_ENABLE,
+                      p10specialWakeup::HYP
+                     );
+        FAPI_TRY(l_rc, "ERROR: Failed to enable special wakeup.");
+
+    }
 
 fapi_try_exit:
 
