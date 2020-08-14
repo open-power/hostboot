@@ -139,10 +139,11 @@ void ErrlManager::sendMboxMsg ( errlHndl_t& io_err )
 
     do
     {
+#ifdef CONFIG_PLDM
         //@TODO-RTC:249470-Send PLDM message with PEL
         TRACFCOMP( g_trac_errl, INFO_MRK"Skipping ErrlManager::sendMboxMsg until PLDM is in place" );
         break;
-
+#endif
 
 #ifdef CONFIG_BMC_IPMI
 
