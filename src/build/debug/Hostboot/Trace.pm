@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2011,2018
+# Contributors Listed Below - COPYRIGHT 2011,2020
 # [+] International Business Machines Corp.
 #
 #
@@ -47,6 +47,7 @@ use constant BIN_ENTRY_SIZE_OFFSET => 12;
 use constant BIN_ENTRY_SIZE => 24;
 
 use File::Temp qw(tempfile tempdir);
+use File::Which;
 
 sub main
 {
@@ -55,6 +56,20 @@ sub main
     if (not defined $args->{"fsp-trace"})
     {
         $args->{"fsp-trace"} = "fsp-trace";
+        my $fspTracePath = which($args->{"fsp-trace"});
+        if (not defined $fspTracePath)
+        {
+            ::userDisplay("Error: fsp-trace not in PATH.\n");
+            die;
+        }
+    }
+    else
+    {
+        if (!(-x $args->{"fsp-trace"}))
+        {
+            ::userDisplay("$args->{'fsp-trace'} is not executable.");
+            die;
+        }
     }
 
     my $fsptrace_options = "";
@@ -74,6 +89,13 @@ sub main
     binmode($fh);
     my $foundBuffer = 0;
     print $fh "\2";
+
+    # Make sure there is an hbotStringFile to use later
+    if (!(-r ::getImgPath()."hbotStringFile"))
+    {
+        ::userDisplay("Couldn't read ". ::getImgPath()."hbotStringFile");
+        die;
+    }
 
     my ($daemonAddr, $daemonSize) =::findPointer("TRACEDMN",
            "Singleton<TRACEDAEMON::Daemon>::instance()::instance");
@@ -167,7 +189,7 @@ sub main
         #   column (i.e. the timestamp) to avoid reordering traces that have
         #   identical timestamps
         open TRACE, ($args->{"fsp-trace"}." $tmpdir -s ".
-                    ::getImgPath()."hbotStringFile $fsptrace_options | sort -s -k 1,1 |");        
+                    ::getImgPath()."hbotStringFile $fsptrace_options | sort -s -k 1,1 |") or die;
         while (my $line = <TRACE>)
         {
             ::userDisplay $line;
