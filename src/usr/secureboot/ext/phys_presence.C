@@ -54,6 +54,37 @@ using namespace ERRORLOG;
 namespace SECUREBOOT
 {
 
+/**
+ *  @brief Local function returning if IPL is in Mnfg Mode
+ *
+ *  @return Returns true if in manufactoring mode (based on MNFG_FLAG_SRC_TERM
+ *          being enabled in ATTR_MNFG_FLAGS); otherwise, returns false
+ */
+bool isMnfgIpl(void)
+{
+    bool retVal = false;
+
+    // Find out if in manufacturing mode
+    TARGETING::Target* pTopLevel = nullptr;
+    TARGETING::targetService().getTopLevelTarget(pTopLevel);
+    assert(pTopLevel != nullptr,"Top level target was nullptr");
+
+    auto mnfgFlags = pTopLevel->getAttr<TARGETING::ATTR_MNFG_FLAGS>();
+
+    if (mnfgFlags & TARGETING::MNFG_FLAG_SRC_TERM)
+    {
+        retVal = true;
+    }
+
+    return retVal;
+}
+
+/**
+ * @brief Checks if the Physical Presence Window was opened and if
+ *        Physical Presence was asserted.
+ *
+ *        See src/include/usr/secureboot/phys_presence_if.H for details
+ */
 errlHndl_t detectPhysPresence(void)
 {
     errlHndl_t err = nullptr;
@@ -344,11 +375,14 @@ errlHndl_t detectPhysPresence(void)
         sys->setAttr<ATTR_PHYS_PRES_ASSERTED>(is_phys_pres_asserted);
     }
 
-    // If there is an error, but there was not a key clear request requiring
-    // the assertion of physical presence, make the error informational and
-    // commit it here so as not to halt the IPL
+    // If there is an error...
+    // 1) but there was not a key clear request requiring the assertion of
+    // physical presence --AND--
+    // 2) it wasn't a mnfg mode IPL, then
+    // make the error informational and commit it here so as not to halt the IPL
     if ((err != nullptr) &&
-        (doesKeyClearRequestPhysPres == false))
+        (doesKeyClearRequestPhysPres == false) &&
+        (isMnfgIpl() == false))
     {
         err->setSev(ERRORLOG::ERRL_SEV_INFORMATIONAL);
         SB_ERR("detectPhysPresence: Setting ERR to informational and "
@@ -371,6 +405,14 @@ errlHndl_t detectPhysPresence(void)
     return err;
 }
 
+/**
+ * @brief Handle Physical Presence Window first checks to see if a physical
+ *        presence window should be opened.  Then, if necessary, it sets up
+ *        the physical presence detect circuit and then shuts down the
+ *        system.
+ *
+ *        See src/include/usr/secureboot/phys_presence_if.H for details
+ */
 errlHndl_t handlePhysPresenceWindow(void)
 {
     errlHndl_t err = nullptr;
@@ -709,11 +751,14 @@ errlHndl_t handlePhysPresenceWindow(void)
 
     } while (0);
 
-    // If there is an error, but there was not a key clear request requiring
-    // the assertion of physical presence, make the error informational and
-    // commit it here so as not to halt the IPL
+    // If there is an error...
+    // 1) but there was not a key clear request requiring the assertion of
+    // physical presence --AND--
+    // 2) it wasn't a mnfg mode IPL, then
+    // make the error informational and commit it here so as not to halt the IPL
     if ((err != nullptr) &&
-        (doesKeyClearRequestPhysPres == false))
+        (doesKeyClearRequestPhysPres == false) &&
+        (isMnfgIpl() == false))
     {
         err->setSev(ERRORLOG::ERRL_SEV_INFORMATIONAL);
         SB_ERR("handlePhysPresenceWindow: Setting ERR to informational and "
