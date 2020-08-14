@@ -148,11 +148,6 @@ void* call_fabric_dl_post_trainadv(void* const io_pArgs)
         invoke_hwp({ l_pair.first }, { l_pair.second }, l_stepError);
     }
 
-    if (TARGETING::isSMPWrapConfig())
-    {
-        // TODO RTC 246933: Integrate SMP wrap functionality
-    }
-
     TRACFCOMP( g_trac_isteps_trace, "call_fabric_dl_post_trainadv exit" );
 
     return l_stepError.getErrorHandle();

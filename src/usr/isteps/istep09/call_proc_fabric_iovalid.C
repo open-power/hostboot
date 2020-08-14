@@ -84,49 +84,87 @@ using namespace ERRORLOG;
 using namespace TARGETING;
 using namespace HWAS;
 
-#if 0 // TODO RTC 246933: Reincorporate SMP wrap functionality
+typedef std::map<ATTR_HUID_type, ATTR_IOHS_LINK_TRAIN_type > IohsHuidAttrMap_t;
 
-typedef std::map<ATTR_HUID_type, ATTR_LINK_TRAIN_type > OBUSHuidAttrMap_t;
-
-void fillAttrMap (OBUSHuidAttrMap_t& o_map)
+void fillAttrMap (IohsHuidAttrMap_t& o_map)
 {
-    TargetHandleList l_obuses;
-    getAllChiplets(l_obuses, TYPE_OBUS);
-    for (const auto& l_obus : l_obuses)
+    // IOHS buses
+    TargetHandleList l_buses;
+    getAllChiplets(l_buses, TYPE_IOHS);
+    ATTR_IOHS_CONFIG_MODE_type l_configMode;
+
+    for (const auto& l_bus : l_buses)
     {
-        o_map[get_huid(l_obus)] = l_obus->getAttr<ATTR_LINK_TRAIN>();
+        // Only care about X and A config mode
+        l_configMode = l_bus->getAttr<ATTR_IOHS_CONFIG_MODE>();
+
+        if ((l_configMode == fapi2::ENUM_ATTR_IOHS_CONFIG_MODE_SMPX) ||
+            (l_configMode == fapi2::ENUM_ATTR_IOHS_CONFIG_MODE_SMPA))
+        {
+            o_map[get_huid(l_bus)] = l_bus->getAttr<ATTR_IOHS_LINK_TRAIN>();
+        }
     }
 }
 
-void calloutOBUS(TargetHandle_t i_proc,
-                 OBUSHuidAttrMap_t& i_attrMapBeforeHWP,
-                 errlHndl_t& io_errl)
+
+void calloutBUS(const TargetHandle_t i_proc,
+                const IohsHuidAttrMap_t& i_attrMapBeforeHWP,
+                errlHndl_t& io_errl)
 {
-    TargetHandleList l_obuses;
-    getChildChiplets(l_obuses, i_proc, TYPE_OBUS);
-    for (const auto& l_obus : l_obuses)
+    TargetHandleList l_buses;
+    getChildChiplets(l_buses, i_proc, TYPE_IOHS);
+
+    for (const auto& l_bus : l_buses)
     {
-        auto l_trainVal = l_obus->getAttr<ATTR_LINK_TRAIN>();
+        auto l_trainVal = l_bus->getAttr<ATTR_IOHS_LINK_TRAIN>();
         int l_trainValBefore = -1;
 
-        auto l_itr = i_attrMapBeforeHWP.find(get_huid(l_obus));
+        auto l_itr = i_attrMapBeforeHWP.find(get_huid(l_bus));
         if (l_itr != i_attrMapBeforeHWP.end())
         {
             l_trainValBefore = l_itr->second;
         }
 
         TRACDCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                  "calloutOBUS: HUID=0x%x BeforeTrainVal=0x%x CurrTrainVal=0x%x",
-                  get_huid(l_obus),
+                  "calloutBUS: HUID=0x%x BeforeTrainVal=0x%x CurrTrainVal=0x%x",
+                  get_huid(l_bus),
                   l_trainValBefore,
                   l_trainVal);
 
         if (l_trainVal == l_trainValBefore)
         {
-            //This OBUS link is fine. Value is as exepected after running HWP
+            // This IOHS BUS link is fine. Value is as exepected after running HWP
             continue;
         }
 
+        // Get the iohs paths
+        const auto l_iohsPath = l_bus->getAttr<ATTR_PHYS_PATH>();
+        const auto l_peerPath = l_bus->getAttr<ATTR_PEER_PATH>();
+
+        // Set the bus type
+        // @todo RTC:245730 Support A/X/O/N bus callout equivalent of P9 using IOHS targets
+        const auto l_configMode = l_bus->getAttr<ATTR_IOHS_CONFIG_MODE>();
+        HWAS::busTypeEnum l_busType = HWAS::FSI_BUS_TYPE;
+        if (l_configMode == fapi2::ENUM_ATTR_IOHS_CONFIG_MODE_SMPX)
+        {
+            l_busType = X_BUS_TYPE;
+            TRACDCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                      "calloutBUS: bustype=%d",l_busType);
+        }
+        else if (l_configMode == fapi2::ENUM_ATTR_IOHS_CONFIG_MODE_SMPA)
+        {
+            l_busType = A_BUS_TYPE;
+            TRACDCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                      "calloutBUS: bustype=%d",l_busType);
+        }
+        else
+        {
+            // Only callout X/A bus type
+            continue;
+        }
+
+// @todo RTC:256842 Everest support for half links
+#if 0
         TargetHandleList l_smpGroupTargets;
         getChildAffinityTargets(l_smpGroupTargets,
                                 l_obus,
@@ -152,11 +190,12 @@ void calloutOBUS(TargetHandle_t i_proc,
                         SRCI_PRIORITY_MED);
             }
         }
+#endif
+
     }
 
 }
 
-#endif
 
 void* call_proc_fabric_iovalid(void* const io_pArgs)
 {
@@ -171,11 +210,9 @@ void* call_proc_fabric_iovalid(void* const io_pArgs)
     TargetHandleList l_cpuTargetList;
     getAllChips(l_cpuTargetList, TYPE_PROC);
 
-#if 0 // TODO RTC 246933: Reincorporate SMP wrap functionality
-    //Save off the state of ATTR_LINK_TRAIN
-    OBUSHuidAttrMap_t l_attrMapBeforeHWP;
+    //Save off the state of ATTR_IOHS_LINK_TRAIN
+    IohsHuidAttrMap_t l_attrMapBeforeHWP;
     fillAttrMap(l_attrMapBeforeHWP);
-#endif
 
     // Loop through all processors including master
     for (const auto & l_cpu_target: l_cpuTargetList)
@@ -187,7 +224,6 @@ void* call_proc_fabric_iovalid(void* const io_pArgs)
                   "Running p10_fabric_iovalid HWP on processor target 0x%.8X",
                   get_huid(l_cpu_target));
 
-#if 0 // TODO RTC 246933: Reincorporate SMP wrap functionality
         if (TARGETING::isSMPWrapConfig())
         {
             const bool l_set_not_clear = true,
@@ -224,7 +260,7 @@ void* call_proc_fabric_iovalid(void* const io_pArgs)
             }
 
             //Something bad happened during the hwp run
-            for (const auto l_rc : l_fapiRcs)
+            for (auto l_rc : l_fapiRcs)
             {
                 errlHndl_t l_tempErr = rcToErrl(l_rc);
                 if (l_tempErr)
@@ -234,15 +270,20 @@ void* call_proc_fabric_iovalid(void* const io_pArgs)
                     // capture the target data in the elog
                     ErrlUserDetailsTarget(l_cpu_target).addToLog(l_tempErr);
 
-                    //callout any buses we need to.
-                    calloutOBUS(l_cpu_target, l_attrMapBeforeHWP, l_tempErr);
+                    // callout any IOHS buses we need to
+                    calloutBUS(l_cpu_target,
+                               l_attrMapBeforeHWP,
+                               l_tempErr);
 
-                    captureError(l_tempErr, l_StepError, HWPF_COMP_ID, l_cpu_target);
+                    // save the error
+                    captureError(l_tempErr,
+                                 l_StepError,
+                                 HWPF_COMP_ID,
+                                 l_cpu_target);
                 }
             }
         }
         else
-#endif
         {
             const bool l_set_not_clear = true,
                        l_update_internode = false,
