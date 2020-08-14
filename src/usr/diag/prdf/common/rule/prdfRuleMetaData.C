@@ -401,7 +401,7 @@ int32_t RuleMetaData::Analyze( STEP_CODE_DATA_STRUCT & io_sc )
     ServiceDataCollector & i_sdc = *(io_sc.service_data);
     // Set default dump flags.
     i_sdc.SetDump( (hwTableContent)cv_dumpType,
-                    l_chipAnalyzed->GetChipHandle() );
+                    l_chipAnalyzed->getTrgt() );
     // Add statement below for Drop call.
     CaptureData & capture = io_sc.service_data->GetCaptureData();
     // Get capture data for this chip.  Allow override.
@@ -515,7 +515,7 @@ int32_t RuleMetaData::CaptureErrorData( CaptureData & io_cap,
 {
     using namespace TARGETING;
     ExtensibleChip * l_pChipAnalyzed = ServiceDataCollector::getChipAnalyzed( );
-    TargetHandle_t l_pTargetAnalyzed = l_pChipAnalyzed->GetChipHandle( );
+    TargetHandle_t l_pTargetAnalyzed = l_pChipAnalyzed->getTrgt( );
 
     std::vector<SCAN_COMM_REGISTER_CLASS *>::const_iterator l_hwCaptureEnd =
                                             cv_hwCaptureGroups[i_group].end();

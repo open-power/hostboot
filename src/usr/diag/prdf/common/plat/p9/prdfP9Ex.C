@@ -87,7 +87,7 @@ void addL2LdCrFfdc( ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc,
 
     // Add data to capture data.
     BitString  bs( sz_maxData*8, (CPU_WORD *) &data );
-    cd.Add( i_chip->GetChipHandle(),
+    cd.Add( i_chip->getTrgt(),
             Util::hashString(LD_CR_FFDC::L2TITLE), bs );
 }
 
@@ -122,7 +122,7 @@ void addL3LdCrFfdc( ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc,
 
     // Add data to capture data.
     BitString bs( sz_maxData*8, (CPU_WORD *) &data );
-    cd.Add( i_chip->GetChipHandle(),
+    cd.Add( i_chip->getTrgt(),
             Util::hashString(LD_CR_FFDC::L3TITLE), bs );
 }
 

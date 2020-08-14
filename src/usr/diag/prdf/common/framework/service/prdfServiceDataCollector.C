@@ -363,7 +363,7 @@ TARGETING::TargetHandle_t ServiceDataCollector::getTargetAnalyzed( )
     TARGETING::TargetHandle_t l_pTargetAnalyzed = NULL;
     if( NULL != l_pChipAnalyzed )
     {
-         l_pTargetAnalyzed = l_pChipAnalyzed->GetChipHandle( );
+         l_pTargetAnalyzed = l_pChipAnalyzed->getTrgt( );
     }
     return  l_pTargetAnalyzed ;
 }

@@ -99,7 +99,7 @@ void ProcDomain::Order(ATTENTION_TYPE attentionType)
         for (int32_t i = (GetSize() - 1); i >= 0; --i)
         {
             RuleChip * l_procChip = LookUp(i);
-            TargetHandle_t l_pchipHandle = l_procChip->GetChipHandle();
+            TargetHandle_t l_pchipHandle = l_procChip->getTrgt();
             bool l_analysisPending =
                 sysdbug.isActiveAttentionPending(l_pchipHandle, attentionType );
             if ( l_analysisPending )
@@ -187,7 +187,7 @@ void ProcDomain::SortForRecov()
     for ( uint32_t i = 0; i < GetSize(); ++i )
     {
         RuleChip * l_procChip = LookUp(i);
-        TargetHandle_t l_pchipHandle = l_procChip->GetChipHandle();
+        TargetHandle_t l_pchipHandle = l_procChip->getTrgt();
 
         //check if chip has an attention which has not been analyzed as yet
         if( sysdbug.isActiveAttentionPending( l_pchipHandle, RECOVERABLE ) )

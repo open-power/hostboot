@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -216,7 +216,7 @@ uint32_t ScomRegister::Access( BitString & bs,
                                RegisterAccess::Operation op ) const
 {
     int32_t l_rc = SCR_ACCESS_FAILED;
-    TARGETING::TargetHandle_t i_pchipTarget = getChip()->GetChipHandle();
+    TARGETING::TargetHandle_t i_pchipTarget = getChip()->getTrgt();
     l_rc = getScomService().Access( i_pchipTarget,bs,iv_scomAddress,op );
 
     return(l_rc);
@@ -227,7 +227,7 @@ ExtensibleChip* ScomRegister::getChip( )const
     ExtensibleChip* l_pchip = NULL;
     l_pchip = ServiceDataCollector::getChipAnalyzed();
     TARGETING::TYPE l_type = PlatServices::getTargetType(
-                                                l_pchip->GetChipHandle() );
+                                                l_pchip->getTrgt() );
     PRDF_ASSERT( iv_chipType == l_type )
     return l_pchip;
 }

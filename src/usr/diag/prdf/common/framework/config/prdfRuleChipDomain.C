@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -46,7 +46,7 @@ bool RuleChipDomain::Query( ATTENTION_TYPE i_attnType )
     for ( uint32_t i = 0; i < GetSize(); i++ )
     {
         RuleChip * chip = LookUp(i);
-        TARGETING::TargetHandle_t l_pchipHandle = LookUp(i)->GetChipHandle();
+        TARGETING::TargetHandle_t l_pchipHandle = LookUp(i)->getTrgt();
 
         if ( sysdbug.isActiveAttentionPending( l_pchipHandle, i_attnType ) )
         {
@@ -105,7 +105,7 @@ void RuleChipDomain::Order( ATTENTION_TYPE i_attnType )
     for ( int32_t i = (GetSize() - 1); i >= 0; i-- )
     {
         RuleChip * chip = LookUp(i);
-        TARGETING::TargetHandle_t l_pchipHandle = LookUp(i)->GetChipHandle();
+        TARGETING::TargetHandle_t l_pchipHandle = LookUp(i)->getTrgt();
 
         if ( sysdbug.isActiveAttentionPending( l_pchipHandle, i_attnType ) )
         {

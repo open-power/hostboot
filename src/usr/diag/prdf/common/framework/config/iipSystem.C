@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -126,7 +126,7 @@ CHIP_CLASS * System::GetChip(TARGETING::TargetHandle_t i_pchipHandle )
     //  chips.LookUp(chipPtr, chipId);
     for(uint32_t i = 0; i < chips.size(); ++i)
     {
-        if(chips[i]->GetChipHandle() == i_pchipHandle)
+        if(chips[i]->getTrgt() == i_pchipHandle)
         {
             chipPtr = chips[i];
             break;
@@ -203,7 +203,7 @@ void System::RemoveNonFunctionalChips()
         chipIterator != chips.end();
         chipIterator++)
     {
-        if(!PlatServices::isFunctional((*chipIterator)->GetChipHandle()))
+        if(!PlatServices::isFunctional((*chipIterator)->getTrgt()))
         {
             l_chips.push_back(*chipIterator);
         }
@@ -220,7 +220,7 @@ void System::RemoveNonFunctionalChips()
         chipIterator != l_chips.end();
         chipIterator++)
     {
-        RemoveStoppedChips((*chipIterator)->GetChipHandle());
+        RemoveStoppedChips((*chipIterator)->getTrgt());
     }
 }
 

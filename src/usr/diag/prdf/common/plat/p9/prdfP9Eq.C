@@ -51,7 +51,7 @@ int32_t PostAnalysis( ExtensibleChip * i_chip,
                       STEP_CODE_DATA_STRUCT & io_sc )
 {
 #ifdef __HOSTBOOT_RUNTIME
-    int32_t l_rc = restartTraceArray(i_chip->GetChipHandle());
+    int32_t l_rc = restartTraceArray(i_chip->getTrgt());
     if (SUCCESS != l_rc)
     {
         PRDF_ERR( "[EQ PostAnalysis HUID: 0x%08x RestartTraceArray failed",

@@ -125,7 +125,7 @@ int32_t PostAnalysis( ExtensibleChip * i_chip,
     }
     else
     {
-        int32_t l_rc = restartTraceArray(i_chip->GetChipHandle());
+        int32_t l_rc = restartTraceArray(i_chip->getTrgt());
         if (SUCCESS != l_rc)
         {
             PRDF_ERR( "[EC PostAnalysis HUID: 0x%08x RestartTraceArray failed",
@@ -359,7 +359,7 @@ int32_t CheckCoreCheckstop( ExtensibleChip * i_chip,
             io_sc.service_data->setFlag( ServiceDataCollector::TERMINATE );
 
             // PHYP was unresponsive, be sure to get SW content.
-            io_sc.service_data->SetDump(CONTENT_SW, i_chip->GetChipHandle());
+            io_sc.service_data->SetDump(CONTENT_SW, i_chip->getTrgt());
             break;
         }
 
@@ -395,7 +395,7 @@ int32_t CheckCoreCheckstop( ExtensibleChip * i_chip,
             io_sc.service_data->setFlag( ServiceDataCollector::TERMINATE );
 
             // PHYP was unresponsive, so get SW content.
-            io_sc.service_data->SetDump(CONTENT_SW, i_chip->GetChipHandle());
+            io_sc.service_data->SetDump(CONTENT_SW, i_chip->getTrgt());
         }
     } while(0);
     return SUCCESS;

@@ -295,7 +295,7 @@ int32_t getCfam( ExtensibleChip * i_chip,
     do
     {
         // HB doesn't allow cfam access on master proc
-        TargetHandle_t l_procTgt = i_chip->GetChipHandle();
+        TargetHandle_t l_procTgt = i_chip->getTrgt();
 
         if( TYPE_PROC == getTargetType(l_procTgt) )
         {

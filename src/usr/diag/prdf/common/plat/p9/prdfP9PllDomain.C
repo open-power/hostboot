@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -129,7 +129,7 @@ void mfClockResolution( STEP_CODE_DATA_STRUCT &io_sc,
     for ( auto chip : i_chipList )
     {
         bool bothClocksFailed = false;
-        TargetHandle_t chipTgt = chip->GetChipHandle();
+        TargetHandle_t chipTgt = chip->getTrgt();
 
         SCAN_COMM_REGISTER_CLASS *oscSw = chip->getRegister("OSC_SW_SENSE");
         uint32_t l_rc = oscSw->Read();

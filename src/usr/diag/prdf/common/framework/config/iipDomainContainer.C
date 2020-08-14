@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -81,7 +81,7 @@ class prdfCompareChipIds: public std::unary_function<void*&, bool>
     // I cannot call it directly.  C++ won't allow it because of "strong typing" rules.
     inline bool operator() (CHIP_CLASS& i)
     {
-       return (__cid == i.GetChipHandle());
+       return (__cid == i.getTrgt());
     };
     //Really fancy caste for the benefit of the compiler.
     inline bool operator() (void*& i)
@@ -117,7 +117,7 @@ bool DomainContainer<T>::Query( ATTENTION_TYPE attentionType )
 
     for( unsigned int i = 0; i < size; i++ )
     {
-        TARGETING::TargetHandle_t l_pchipHandle = LookUp(i)->GetChipHandle();
+        TARGETING::TargetHandle_t l_pchipHandle = LookUp(i)->getTrgt();
         o_rc =
             sysdebug.isActiveAttentionPending( l_pchipHandle, attentionType );
         if( true == o_rc ) break;
@@ -136,7 +136,7 @@ int32_t DomainContainer<T>::Analyze(STEP_CODE_DATA_STRUCT & serviceData,
     Order(attentionType);
     ExtensibleChip * l_chip = LookUp(0);
     int32_t o_rc = ( l_chip->Analyze( serviceData, attentionType ) );
-    sysdebug.clearAttnPendingStatus( l_chip->GetChipHandle(), attentionType );
+    sysdebug.clearAttnPendingStatus( l_chip->getTrgt(), attentionType );
 
     return o_rc;
 }

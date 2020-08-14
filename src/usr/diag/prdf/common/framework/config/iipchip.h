@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -109,22 +109,6 @@ class CHIP_CLASS
      </ul><br>
      */
     virtual ~CHIP_CLASS();
-
-    /**
-     Access the target handle  for this chip
-     <ul>
-     <br><b>Parameters:  </b> none
-     <br><b>Returns:     </b> Handle for this chip
-     <br><b>Requirements:</b> None
-     <br><b>Promises:    </b> None
-     <br><b>Notes:       </b> Not to be used previous to Regatta
-     </ul><br>
-     */
-    // NOTE: Deprecating this interface. Use getTrgt() instead.
-    TARGETING::TargetHandle_t GetChipHandle() const
-    {
-        return iv_pchipHandle;
-    }
 
     /**
      Initialize hardware associated with this chip object

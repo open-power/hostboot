@@ -298,7 +298,7 @@ int32_t todCollectFaultDataChip(  ExtensibleChip * i_chip,
 {
     #define PRDF_FUNC "[Proc::todCollectFaultDataChip] "
 
-    TargetHandle_t l_chipTarget = i_chip->GetChipHandle();
+    TargetHandle_t l_chipTarget = i_chip->getTrgt();
     TodFaultData l_faultData ( l_chipTarget );
 
     uint32_t l_rc = FAIL;
@@ -665,7 +665,7 @@ void addFfdcToCaptureData(  ExtensibleChip * i_chip,
     BitString  bs( sz_t * 8, (CPU_WORD *) & errorDataBuff );
 
     CaptureData & cd = i_stepcode.service_data->GetCaptureData();
-    cd.Add( i_chip->GetChipHandle(), Util::hashString("TOD_ERROR_DATA"), bs );
+    cd.Add( i_chip->getTrgt(), Util::hashString("TOD_ERROR_DATA"), bs );
 }
 
 /**
@@ -934,7 +934,7 @@ int32_t todStepCheckFault( ExtensibleChip * i_chip,
     // If we never made a callout, call out this chip.
     if ( 0 == i_stepcode.service_data->getMruListSize() )
     {
-        i_stepcode.service_data->SetCallout( i_chip->GetChipHandle() );
+        i_stepcode.service_data->SetCallout( i_chip->getTrgt() );
         analysisSummary[0] = UNKNOWN_TOD_ERROR;
         analysisSummary[1] = UNKNOWN_TOD_ERROR;
     }
@@ -1021,7 +1021,7 @@ int32_t todNewTopologyIfBackupMDMT( ExtensibleChip * i_chip,
         if( ( l_masterTodSelect ) && ( l_masterDrawerSelect ) )
         {
             TargetHandleList badChipList;
-            badChipList.push_back( i_chip->GetChipHandle() );
+            badChipList.push_back( i_chip->getTrgt() );
             requestNewTODTopology( 0xFFFFFFFF, nullptr, badChipList, false );
         }
 
@@ -1046,7 +1046,7 @@ int32_t requestTopologySwitch( ExtensibleChip * i_chip,
     {
         // Reconfigure the TOD topology and let PHYP know when backup is good.
         TargetHandleList badChipList;
-        badChipList.push_back( i_chip->GetChipHandle( ) );
+        badChipList.push_back( i_chip->getTrgt( ) );
         requestNewTODTopology( 0xFFFFFFFF, nullptr, badChipList, true );
     }
 #endif

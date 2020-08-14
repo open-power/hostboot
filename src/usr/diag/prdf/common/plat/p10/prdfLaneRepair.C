@@ -161,11 +161,11 @@ int32_t __handleLaneRepairEvent( ExtensibleChip * i_chip,
         if ( SUCCESS != l_rc) break;
 
         // Add failed lane capture data to errorlog
-        i_sc.service_data->GetCaptureData().Add(i_chip->GetChipHandle(),
+        i_sc.service_data->GetCaptureData().Add(i_chip->getTrgt(),
                                 ( Util::hashString("ALL_FAILED_LANES_0TO63") ^
                                   i_chip->getSignatureOffset() ),
                                 l_newLaneMap0to63);
-        i_sc.service_data->GetCaptureData().Add(i_chip->GetChipHandle(),
+        i_sc.service_data->GetCaptureData().Add(i_chip->getTrgt(),
                                 ( Util::hashString("ALL_FAILED_LANES_64TO127") ^
                                   i_chip->getSignatureOffset() ),
                                 l_newLaneMap64to127);
@@ -206,11 +206,11 @@ int32_t __handleLaneRepairEvent( ExtensibleChip * i_chip,
             if ( SUCCESS != l_rc) break;
 
             // Add failed lane capture data to errorlog
-            i_sc.service_data->GetCaptureData().Add(i_chip->GetChipHandle(),
+            i_sc.service_data->GetCaptureData().Add(i_chip->getTrgt(),
                                 ( Util::hashString("VPD_FAILED_LANES_0TO63") ^
                                   i_chip->getSignatureOffset() ),
                                 l_vpdLaneMap0to63);
-            i_sc.service_data->GetCaptureData().Add(i_chip->GetChipHandle(),
+            i_sc.service_data->GetCaptureData().Add(i_chip->getTrgt(),
                                ( Util::hashString("VPD_FAILED_LANES_64TO127") ^
                                  i_chip->getSignatureOffset() ),
                                l_vpdLaneMap64to127);
