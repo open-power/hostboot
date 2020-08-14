@@ -69,19 +69,13 @@ fapi2::ReturnCode p10_chiplet_fabric_scominit(
         FAPI_EXEC_HWP(l_rc, p10_fbc_no_hp_scom, i_target, FAPI_SYSTEM);
         FAPI_TRY(l_rc, "Error from p10_fbc_no_hp_scom");
 
-        // mask FIRs on proc/pauc scope if there are no valid links
-        if(!l_iohs_targets.size())
+        // init all FIRs as inactive before applying configuration
+        for(auto l_iohs : i_target.getChildren<fapi2::TARGET_TYPE_IOHS>(fapi2::TARGET_STATE_PRESENT))
         {
-            auto l_iohs_present = i_target.getChildren<fapi2::TARGET_TYPE_IOHS>(fapi2::TARGET_STATE_PRESENT);
-
-            for(auto l_iohs : l_iohs_present)
-            {
-                FAPI_TRY(p10_smp_link_firs(l_iohs, sublink_t::BOTH, action_t::INACTIVE),
-                         "Error from p10_smp_link_firs when masking firs for all links");
-            }
+            FAPI_TRY(p10_smp_link_firs(l_iohs, sublink_t::BOTH, action_t::INACTIVE),
+                     "Error from p10_smp_link_firs when masking firs for all links");
         }
     }
-
 
     for (auto l_iohs : l_iohs_targets)
     {
