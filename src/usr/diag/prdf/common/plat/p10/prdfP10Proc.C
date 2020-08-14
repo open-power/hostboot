@@ -64,115 +64,110 @@ namespace Proc
 //##############################################################################
 
 /**
- * @brief  Used when the chip has a CHECK_STOP or UNIT_CS attention to check for
- *         the presence of recoverable attentions.
- * @param  i_chip         A P9 chip.
- * @param  o_hasRecovered True if the chip has a recoverable attention.
- * @return SUCCESS
+ * @brief Determines if there are any active unit checkstop attentions on this
+ *        processor.
+ * @param i_chip      A processor chip.
+ * @param o_hasUnitCs True, if this chip has a unit checkstop attention. False,
+ *                    otherwise.
+ * @return SUCCESS always.
  */
-int32_t CheckForRecovered( ExtensibleChip * i_chip,
-                           bool & o_hasRecovered )
+int32_t CheckForUnitCs(ExtensibleChip * i_chip, bool & o_hasUnitCs)
+{
+    o_hasUnitCs = false;
+
+    SCAN_COMM_REGISTER_CLASS * fir = i_chip->getRegister("GLOBAL_UCS_FIR");
+    if (SUCCESS == fir->Read())
+    {
+        if (0 != fir->GetBitFieldJustified( 1, 3) || // TP, N0, N1
+            0 != fir->GetBitFieldJustified( 8, 2) || // PCI 0-1
+            0 != fir->GetBitFieldJustified(12, 8) || // MC 0-3, PAU 0-3
+            0 != fir->GetBitFieldJustified(24,16))   // IOHS 0-7, EQ 0-7
+        {
+            o_hasUnitCs = true;
+        }
+    }
+
+    return SUCCESS;
+}
+PRDF_PLUGIN_DEFINE_NS(p10_proc, Proc, CheckForUnitCs);
+
+//------------------------------------------------------------------------------
+
+/**
+ * @brief Determines if there are any active recoverable attentions on this
+ *        processor.
+ * @param i_chip         A processor chip.
+ * @param o_hasRecovered True, if this chip has a recoverable attention. False,
+ *                       otherwise.
+ * @return SUCCESS always.
+ */
+int32_t CheckForRecovered(ExtensibleChip * i_chip, bool & o_hasRecovered)
 {
     o_hasRecovered = false;
 
-    int32_t l_rc = SUCCESS;
-
-    SCAN_COMM_REGISTER_CLASS * l_grer = i_chip->getRegister("GLOBAL_RE_FIR");
-    l_rc = l_grer->Read();
-
-    if ( SUCCESS != l_rc )
+    SCAN_COMM_REGISTER_CLASS * fir = i_chip->getRegister("GLOBAL_RE_FIR");
+    if (SUCCESS == fir->Read())
     {
-        PRDF_ERR("[CheckForRecovered] GLOBAL_RE_FIR read failed"
-                 "for 0x%08x", i_chip->GetId());
-    }
-    else if ( 0 != l_grer->GetBitFieldJustified(1,55) )
-    {
-        o_hasRecovered = true;
+        if (0 != fir->GetBitFieldJustified( 1, 3) || // TP, N0, N1
+            0 != fir->GetBitFieldJustified( 8, 2) || // PCI 0-1
+            0 != fir->GetBitFieldJustified(12, 8) || // MC 0-3, PAU 0-3
+            0 != fir->GetBitFieldJustified(24,16))   // IOHS 0-7, EQ 0-7
+        {
+            o_hasRecovered = true;
+        }
     }
 
     return SUCCESS;
 }
-PRDF_PLUGIN_DEFINE_NS( p10_proc,     Proc, CheckForRecovered );
+PRDF_PLUGIN_DEFINE_NS(p10_proc, Proc, CheckForRecovered);
 
 //------------------------------------------------------------------------------
+
 /**
- * @brief Used when the chip is queried, by the fabric domain, for RECOVERED
- * attentions to assign a severity to the attention for sorting.
- * @param[in]   i_chip - P8 chip
- * @param[out]  o_sev - Priority order (lowest to highest):
- *  1 - Core chiplet checkstop
- *  2 - Core chiplet error
- *  3 - PCB chiplet error (TOD logic)
- *  4 - Other error
- *  5 - Memory controller chiplet
- *
- * @return SUCCESS
- *
+ * @brief Determines if there are any active recoverable attentions on this
+ *        processor and assigns a severity for the order in which the
+ *        recoverable attentions should be handled.
+ * @param i_chip A processor chip.
+ * @param o_sev  The priority order (lowest to highest):
+ *               1 - EQ chiplets (core errors are the lowest)
+ *               2 - TP chiplet error (PCB chiplet error, TOD logic)
+ *               3 - Nest and IO chiplets
+ *               4 - Memory chiplets
+ * @return SUCCESS always.
  */
 int32_t CheckForRecoveredSev(ExtensibleChip * i_chip, uint32_t & o_sev)
 {
-    int32_t o_rc = SUCCESS;
-    bool l_runtime = atRuntime();
+    o_sev = 1; // lowest priority
 
-    SCAN_COMM_REGISTER_CLASS * l_rer = NULL;
-
-    SCAN_COMM_REGISTER_CLASS * l_unitxstp = NULL;
-    if ( l_runtime )
+    SCAN_COMM_REGISTER_CLASS * refir  = i_chip->getRegister("GLOBAL_RE_FIR");
+    if (SUCCESS == refir->Read())
     {
-        l_unitxstp = i_chip->getRegister("GLOBAL_UCS_FIR");
-        o_rc |= l_unitxstp->Read();
-    }
-
-    l_rer = i_chip->getRegister("GLOBAL_RE_FIR");
-    o_rc |= l_rer->Read();
-
-    if (o_rc)
-    {
-        PRDF_ERR( "[CheckForRecoveredSev] SCOM fail on 0x%08x rc=%x",
-                  i_chip->GetId(), o_rc);
-        return o_rc;
-    }
-
-    if (l_rer->GetBitFieldJustified(7,2))
-    {
-        // errors from MC chiplets
-        o_sev = 5;
-    }
-    else if(l_rer->GetBitFieldJustified(2, 4) ||
-            l_rer->GetBitFieldJustified(9, 4) ||
-            l_rer->GetBitFieldJustified(13,3) ||
-            l_rer->IsBitSet(6))
-    {
-        // errors from PB, Xbus, OB, or PCI chiplets
-        o_sev = 4;
-    }
-    else if(l_rer->IsBitSet(1))
-    {
-        // error from TP
-        o_sev = 3;
-    }
-    else if (l_rer->GetBitFieldJustified(16,6))
-    {
-        // error from EQ
-        o_sev = 2;
-    }
-    else if(l_runtime &&
-            (l_rer->GetBitFieldJustified(32,24) &
-             l_unitxstp->GetBitFieldJustified(32,24)) == 0 )
-    {
-        // core recoverable
-        o_sev = 2;
-    }
-    else
-    {
-        // core checkstop
-        o_sev = 1;
+        if (0 != refir->GetBitFieldJustified(12,4)) // MC 0-3
+        {
+            o_sev = 4;
+        }
+        else if (0 != refir->GetBitFieldJustified( 2,2) || // N0, N1
+                 0 != refir->GetBitFieldJustified( 8,2) || // PCI 0-1
+                 0 != refir->GetBitFieldJustified(16,4) || // PAU 0-3
+                 0 != refir->GetBitFieldJustified(24,8))   // IOHS 0-7
+        {
+            o_sev = 3;
+        }
+        else if (0 != refir->GetBitFieldJustified(1,1)) // TP
+        {
+            o_sev = 2;
+        }
+        else if (0 != refir->GetBitFieldJustified(32,8)) // EQ 0-7
+        {
+            o_sev = 1;
+        }
     }
 
     return SUCCESS;
-
 }
-PRDF_PLUGIN_DEFINE_NS( p10_proc,     Proc, CheckForRecoveredSev );
+PRDF_PLUGIN_DEFINE_NS(p10_proc, Proc, CheckForRecoveredSev);
+
+//------------------------------------------------------------------------------
 
 /**
  * @brief Determines if there are any active checkstop attentions on this
@@ -302,39 +297,6 @@ int32_t handleSbeVital( ExtensibleChip * i_chip,
     return SUCCESS;
 }
 PRDF_PLUGIN_DEFINE_NS( p10_proc,     Proc, handleSbeVital );
-
-//------------------------------------------------------------------------------
-
-/**
- * @brief  Used when the chip has a CHECK_STOP to see if there
- *         is also a UNIT_CS present
- * @param  i_chip         A P9 chip.
- * @param  o_hasUcs True if the chip has a UNIT CS attention.
- * @return SUCCESS
- */
-int32_t CheckForUnitCs( ExtensibleChip * i_chip,
-                        bool & o_hasUcs )
-{
-    o_hasUcs = false;
-
-    int32_t l_rc = SUCCESS;
-
-    SCAN_COMM_REGISTER_CLASS * l_gUcsR = i_chip->getRegister("GLOBAL_UCS_FIR");
-    l_rc = l_gUcsR->Read();
-
-    if ( SUCCESS != l_rc )
-    {
-        PRDF_ERR("[CheckForUnitCs] GLOBAL_UCS_FIR read failed"
-                 "for 0x%08x", i_chip->GetId());
-    }
-    else if ( 0 != l_gUcsR->GetBitFieldJustified(1,55) )
-    {
-        o_hasUcs = true;
-    }
-
-    return SUCCESS;
-}
-PRDF_PLUGIN_DEFINE_NS( p10_proc,     Proc, CheckForUnitCs );
 
 //------------------------------------------------------------------------------
 
