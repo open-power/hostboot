@@ -1483,9 +1483,9 @@ FAPI_INF("%-60s[3] = 0x%08x %d", #attr_name, iv_attrs.attr_assign[3], iv_attrs.a
     DATABLOCK_GET_ATTR(ATTR_SYSTEM_DDS_DISABLE,    FAPI_SYSTEM, attr_system_dds_disable);
     DATABLOCK_GET_ATTR(ATTR_SYSTEM_RESCLK_DISABLE, FAPI_SYSTEM, attr_resclk_disable);
     DATABLOCK_GET_ATTR(ATTR_SYSTEM_PSTATES_MODE,   FAPI_SYSTEM, attr_pstate_mode);
+    DATABLOCK_GET_ATTR(ATTR_SYSTEM_OCS_DISABLE,         FAPI_SYSTEM, attr_system_ocs_disable);
+    DATABLOCK_GET_ATTR(ATTR_SYSTEM_PGPE_CURRENT_READ_DISABLE, FAPI_SYSTEM, attr_system_current_read_disable);
 
-    DATABLOCK_GET_ATTR(ATTR_SYSTEM_PGPE_CURRENT_READ_DISABLE, iv_procChip, attr_system_current_read_disable);
-    DATABLOCK_GET_ATTR(ATTR_SYSTEM_OCS_DISABLE,         iv_procChip , attr_system_ocs_disable);
     DATABLOCK_GET_ATTR(ATTR_DDS_BIAS_ENABLE, iv_procChip , attr_dds_bias_enable);
     DATABLOCK_GET_ATTR(ATTR_DDS_COARSE_THROTTLE_ENABLE, iv_procChip , attr_dds_coarse_thr_enable);
     DATABLOCK_GET_ATTR(ATTR_PMCR_MOST_RECENT_MODE,      iv_procChip , attr_pmcr_most_recent_enable);

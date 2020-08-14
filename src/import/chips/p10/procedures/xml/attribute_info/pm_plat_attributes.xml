@@ -945,7 +945,7 @@
   <!-- ********************************************************************* -->
   <attribute>
     <id>ATTR_SYSTEM_OCS_DISABLE</id>
-    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
     <description>
     Disables Over Current Sensor functions
 
@@ -972,7 +972,7 @@
   <!-- ********************************************************************* -->
   <attribute>
     <id>ATTR_SYSTEM_PGPE_CURRENT_READ_DISABLE</id>
-    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
     <description>
     Disables PGPE from reading the rail currents and populating content to the OCC.
 
