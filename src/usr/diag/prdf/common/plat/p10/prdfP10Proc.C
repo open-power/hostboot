@@ -174,102 +174,78 @@ int32_t CheckForRecoveredSev(ExtensibleChip * i_chip, uint32_t & o_sev)
 }
 PRDF_PLUGIN_DEFINE_NS( p10_proc,     Proc, CheckForRecoveredSev );
 
-/** @func GetCheckstopInfo
- *  To be called from the fabric domain to gather Checkstop information.  This
- *  information is used in a sorting algorithm.
- *
- *  This is a plugin function: GetCheckstopInfo
- *
- *  @param i_chip - The chip.
- *  @param o_wasInternal - True if this chip has an internal checkstop.
- *  @param o_externalChips - List of external fabrics driving checkstop.
- *  @param o_wofValue - Current WOF value (unused for now).
+/**
+ * @brief Determines if there are any active checkstop attentions on this
+ *        processor that did not originate from a connected processor.
+ * @param i_chip         A processor chip.
+ * @param o_internalAttn True, if there is an internal checkstop attentions.
+ *                       False, otherwise.
+ * @return SUCCESS always.
  */
-int32_t GetCheckstopInfo( ExtensibleChip * i_chip,
-                          bool & o_wasInternal,
-                          TargetHandleList & o_externalChips,
-                          uint64_t & o_wofValue )
+int32_t GetCheckstopInfo(ExtensibleChip * i_chip, bool & o_internalAttn)
 {
-    // Clear parameters.
-    o_wasInternal = false;
-    o_externalChips.clear();
-    o_wofValue = 0;
+    #define PRDF_FUNC "[Proc::GetCheckstopInfo] "
 
-    SCAN_COMM_REGISTER_CLASS * l_globalFir =
-      i_chip->getRegister("GLOBAL_CS_FIR");
+    o_internalAttn = false;
 
-    SCAN_COMM_REGISTER_CLASS * l_pbXstpFir =
-      i_chip->getRegister("N3_CHIPLET_CS_FIR");
+    SCAN_COMM_REGISTER_CLASS * fir = nullptr;
+    SCAN_COMM_REGISTER_CLASS * msk = nullptr;
 
-    SCAN_COMM_REGISTER_CLASS * l_extXstpFir =
-      i_chip->getRegister("PBEXTFIR");
-
-    int32_t o_rc = SUCCESS;
-    o_rc |= l_globalFir->Read();
-    o_rc |= l_pbXstpFir->Read();
-    o_rc |= l_extXstpFir->Read();
-
-    if(o_rc)
+    do
     {
-        PRDF_ERR( "[GetCheckstopInfo] SCOM fail on 0x%08x rc=%x",
-                  i_chip->GetId(), o_rc);
-        return o_rc;
-    }
+        // First, check if there is an active checkstop attention at the global
+        // level.
+        fir = i_chip->getRegister("GLOBAL_CS_FIR");
+        if (SUCCESS != fir->Read()) break;
 
-    uint8_t l_connectedXstps = l_extXstpFir->GetBitFieldJustified(0,7);
-
-    bool pbXstpFromOtherChip = l_pbXstpFir->IsBitSet(2);
-
-    if ((0 != l_globalFir->GetBitFieldJustified(0,56)) &&
-        (!l_globalFir->IsBitSet(5) || !pbXstpFromOtherChip))
-        o_wasInternal = true;
-
-    // Get connected chips.
-    uint32_t l_positions[] =
-    {
-        0, // bit 0 - XBUS 0
-        1, // bit 1 - XBUS 1
-        2, // bit 2 - XBUS 2
-        0, // bit 3 - OBUS 0
-        1, // bit 4 - OBUS 1
-        2, // bit 5 - OBUS 2
-        3  // bit 6 - OBUS 3
-    };
-
-    for (uint8_t i = 0, j = 0x40; i < 7; i++, j >>= 1)
-    {
-        if (0 != (j & l_connectedXstps))
+        // If there is an active attention from any chiplet other than the N1
+        // chiplet (i.e. any of GLOBAL_CS_FIR[0:2,4:39] are set), the attention
+        // is internal.
+        if ((0 != fir->GetBitFieldJustified(0, 3)) ||
+            (0 != fir->GetBitFieldJustified(4,36)))
         {
-            TargetHandle_t l_connectedFab =
-              getConnectedPeerProc(i_chip->GetChipHandle(),
-                                   i<3 ? TYPE_XBUS : TYPE_OBUS,
-                                   l_positions[i]);
-
-            if (NULL != l_connectedFab)
-            {
-                o_externalChips.push_back(l_connectedFab);
-            }
+            o_internalAttn = true;
+            break;
         }
-    }
 
-    // Read WOF value.
-    SCAN_COMM_REGISTER_CLASS * l_wof = i_chip->getRegister("TODWOF");
-    o_rc |= l_wof->Read();
+        // If there is NOT an attention from the N1 chiplet (i.e. the only bit
+        // not checked above, GLOBAL_CS_FIR[3]), then there is NOT an active
+        // checkstop attention on this chip.
+        if (!fir->IsBitSet(3)) break;
 
-    if(o_rc)
-    {
-        PRDF_ERR( "[GetCheckstopInfo] SCOM fail on 0x%08x rc=%x",
-                  i_chip->GetId(), o_rc);
-        return o_rc;
-    }
+        // Now, check if there is an active checkstop attention at the chiplet
+        // level.
+        fir = i_chip->getRegister("N1_CHIPLET_CS_FIR");
+        msk = i_chip->getRegister("N1_CHIPLET_CS_FIR_MASK");
+        if (SUCCESS != fir->Read() || SUCCESS != msk->Read()) break;
 
-    o_wofValue = l_wof->GetBitFieldJustified(0,64);
+        // If bits there is an active attention from any FIR other than the
+        // PB_EXT_FIR (i.e. any of N1_CHIPLET_CS_FIR[4:32,34:39] are set), the
+        // attention is internal.
+        if ((0 != ( fir->GetBitFieldJustified( 4,29) &
+                   ~msk->GetBitFieldJustified( 4,29))) ||
+            (0 != ( fir->GetBitFieldJustified(34, 6) &
+                   ~msk->GetBitFieldJustified(34, 6))))
+        {
+            o_internalAttn = true;
+            break;
+        }
+
+        // At this point, the attention only originated from the PB_EXT_FIR
+        // (i.e. N1_CHIPLET_CS_FIR[33]) and, therefore, only originated from a
+        // connected processor.
+
+        // This is just a sanity check just in case there is a bug with the bit
+        // ranges used above.
+        PRDF_ASSERT(fir->IsBitSet(33) && !msk->IsBitSet(33));
+
+    } while (0);
 
     return SUCCESS;
 
+    #undef PRDF_FUNC
 }
-PRDF_PLUGIN_DEFINE_NS( axone_proc,   Proc, GetCheckstopInfo );
-PRDF_PLUGIN_DEFINE_NS( p10_proc,     Proc, GetCheckstopInfo );
+PRDF_PLUGIN_DEFINE_NS(p10_proc, Proc, GetCheckstopInfo);
 
 //------------------------------------------------------------------------------
 

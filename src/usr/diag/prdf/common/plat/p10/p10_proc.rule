@@ -4924,10 +4924,12 @@ group gVAS_FIR
 # N1 Chiplet Checkstop FIR
 ################################################################################
 
+# Note that bit 33 (PB_EXT_FIR) is explicitly ignored because it simply
+# indicates a checkstop originated from another processor.
 rule rN1_CHIPLET_CS_FIR
 {
   CHECK_STOP:
-    N1_CHIPLET_CS_FIR & ~N1_CHIPLET_CS_FIR_MASK & `0fffffffffffffff`;
+    N1_CHIPLET_CS_FIR & ~N1_CHIPLET_CS_FIR_MASK & `0fffffffbfffffff`;
 };
 
 group gN1_CHIPLET_CS_FIR
@@ -5058,11 +5060,6 @@ group gN1_CHIPLET_CS_FIR
      */
     (rN1_CHIPLET_CS_FIR, bit(32)) ? analyze(gPB_STATION_FIR_15);
 
-    /** N1_CHIPLET_CS_FIR[33]
-     *  Attention from PB_EXT_FIR
-     */
-    (rN1_CHIPLET_CS_FIR, bit(33)) ? analyze(gPB_EXT_FIR);
-
     /** N1_CHIPLET_CS_FIR[38]
      *  Attention from PSIHB_FIR
      */
@@ -5079,10 +5076,12 @@ group gN1_CHIPLET_CS_FIR
 # N1 Chiplet Recoverable FIR
 ################################################################################
 
+# Note that bit 33 (PB_EXT_FIR) is explicitly ignored because it simply
+# indicates a checkstop originated from another processor.
 rule rN1_CHIPLET_RE_FIR
 {
   RECOVERABLE:
-    N1_CHIPLET_RE_FIR & ~N1_CHIPLET_RE_FIR_MASK & `0fffffffffffffff`;
+    N1_CHIPLET_RE_FIR & ~N1_CHIPLET_RE_FIR_MASK & `0fffffffbfffffff`;
 };
 
 group gN1_CHIPLET_RE_FIR
@@ -5212,11 +5211,6 @@ group gN1_CHIPLET_RE_FIR
      *  Attention from PB_STATION_FIR
      */
     (rN1_CHIPLET_RE_FIR, bit(32)) ? analyze(gPB_STATION_FIR_15);
-
-    /** N1_CHIPLET_RE_FIR[33]
-     *  Attention from PB_EXT_FIR
-     */
-    (rN1_CHIPLET_RE_FIR, bit(33)) ? analyze(gPB_EXT_FIR);
 
     /** N1_CHIPLET_RE_FIR[38]
      *  Attention from PSIHB_FIR
@@ -7612,62 +7606,6 @@ group gPB_STATION_FIR_14
      *  link1 hw parity error
      */
     (rPB_STATION_FIR_14, bit(21)) ? self_th_1;
-
-};
-
-################################################################################
-# P10 chip PB_EXT_FIR
-################################################################################
-
-rule rPB_EXT_FIR
-{
-  CHECK_STOP:
-    PB_EXT_FIR & ~PB_EXT_FIR_MASK & ~PB_EXT_FIR_ACT0 & ~PB_EXT_FIR_ACT1;
-};
-
-group gPB_EXT_FIR
-    filter singlebit,
-           cs_root_cause
-{
-    /** PB_EXT_FIR[0]
-     *  pb_x0_fir_err
-     */
-    (rPB_EXT_FIR, bit(0)) ? defaultMaskedError;
-
-    /** PB_EXT_FIR[1]
-     *  pb_x1_fir_err
-     */
-    (rPB_EXT_FIR, bit(1)) ? defaultMaskedError;
-
-    /** PB_EXT_FIR[2]
-     *  pb_x2_fir_err
-     */
-    (rPB_EXT_FIR, bit(2)) ? defaultMaskedError;
-
-    /** PB_EXT_FIR[3]
-     *  pb_x3_fir_err
-     */
-    (rPB_EXT_FIR, bit(3)) ? defaultMaskedError;
-
-    /** PB_EXT_FIR[4]
-     *  pb_x4_fir_err
-     */
-    (rPB_EXT_FIR, bit(4)) ? defaultMaskedError;
-
-    /** PB_EXT_FIR[5]
-     *  pb_x5_fir_err
-     */
-    (rPB_EXT_FIR, bit(5)) ? defaultMaskedError;
-
-    /** PB_EXT_FIR[6]
-     *  pb_x6_fir_err
-     */
-    (rPB_EXT_FIR, bit(6)) ? defaultMaskedError;
-
-    /** PB_EXT_FIR[7]
-     *  pb_x7_fir_err
-     */
-    (rPB_EXT_FIR, bit(7)) ? defaultMaskedError;
 
 };
 

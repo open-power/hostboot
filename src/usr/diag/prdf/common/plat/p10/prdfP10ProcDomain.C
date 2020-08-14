@@ -99,8 +99,7 @@ void ProcDomain::Order(ATTENTION_TYPE attentionType)
         for (int32_t i = (GetSize() - 1); i >= 0; --i)
         {
             RuleChip * l_procChip = LookUp(i);
-            TARGETING::TargetHandle_t l_pchipHandle =
-                                                l_procChip->GetChipHandle();
+            TargetHandle_t l_pchipHandle = l_procChip->GetChipHandle();
             bool l_analysisPending =
                 sysdbug.isActiveAttentionPending(l_pchipHandle, attentionType );
             if ( l_analysisPending )
@@ -112,158 +111,53 @@ void ProcDomain::Order(ATTENTION_TYPE attentionType)
     }
 }
 
-
-// Determine the proper sorting for a checkstop based on:
-//         1. Find only a single chip with an internal checkstop
-//         2. Graph reduction algorithm
-//         3. WOF/TOD counters
+// Finds the first chip with an active checkstop attention that did not
+// originate from a connected processor and moves it to the front of the domain.
 void ProcDomain::SortForXstop()
 {
-    using namespace PluginDef;
-    using namespace TARGETING;
-
-    uint32_t l_internalOnlyCount = 0;
-    int l_chip = 0;
-
-    uint64_t l_externalDrivers[GetSize()];
-    uint64_t l_wofValues[GetSize()];
-    bool l_internalCS[GetSize()];
-
-    memset( &l_externalDrivers[0], 0x00, sizeof(l_externalDrivers) );
-    memset( &l_wofValues[0],       0x00, sizeof(l_wofValues)       );
-    memset( &l_internalCS[0],      0x00, sizeof(l_internalCS)      );
-
-    union { uint64_t * u; CPU_WORD * c; } ptr;
-    SYSTEM_DEBUG_CLASS sysDebug;
-    TargetHandle_t node = NULL;
-
-    if( false == isSmpCoherent() )
+    // Before stitching the nodes together, any system checkstop will be limited
+    // to a single node and ATTN will only pass us chips belonging to the node
+    // that raised the attention. In this scenario, we should only consider
+    // chips belonging this node.
+    TargetHandle_t nodeTrgt = nullptr;
+    if ( false == isSmpCoherent() )
     {
-        // Before node stitching, any system CS is only limited
-        // to a node. ATTN will only pass us proc chips belonging
-        // to a single node. In this scenario, we should only consider
-        // chips belonging to one node.
-        TargetHandle_t proc = sysDebug.getTargetWithAttn( TYPE_PROC,
-                                                          MACHINE_CHECK);
-        node = getConnectedParent( proc, TYPE_NODE);
+        SYSTEM_DEBUG_CLASS sysDebug;
+        TargetHandle_t proc = sysDebug.getTargetWithAttn(TYPE_PROC,
+                                                         MACHINE_CHECK);
+        nodeTrgt = getConnectedParent(proc, TYPE_NODE);
     }
 
-    // Get internal setting and external driver list for each chip.
-    for(uint32_t i = 0; i < GetSize(); ++i)
+    // Look for the first chip with active checkstop attentions that did not
+    // originate from a connected processor. In case of soft reIPL (i.e. the
+    // service processor is not reset), start looking at the end of the domain
+    // to avoid possible starvation.
+    for (int i = (GetSize() - 1); i >= 0; --i)
     {
-        l_externalDrivers[i] = 0;
-        l_wofValues[i] = 0;
+        RuleChip * procChip = LookUp(i);
 
-        RuleChip * l_procChip = LookUp(i);
-
-        // if it is a node check stop, limit the scope of sorting only to the
-        // node which is causing ATTN to invoke PRD.
-        if ( ( NULL != node ) && ( node != getConnectedParent(
-                                    l_procChip->GetChipHandle(), TYPE_NODE) ))
+        // Limit the scope to a node if needed.
+        if ((nullptr != nodeTrgt) &&
+            (nodeTrgt != getConnectedParent(procChip->getTrgt(), TYPE_NODE)))
+        {
             continue;
+        }
 
-        ptr.u = &l_externalDrivers[i];
-        BitString l_externalChips(GetSize(), ptr.c);
-        TargetHandleList l_tmpList;
+        // Determine if a checkstop attention originated from this chip.
+        bool internalAttn = false;
 
-        // Call "GetCheckstopInfo" plugin.
-        ExtensibleChipFunction * l_extFunc
-            = l_procChip->getExtensibleFunction("GetCheckstopInfo");
+        ExtensibleChipFunction * extFunc
+            = procChip->getExtensibleFunction("GetCheckstopInfo");
 
-        (*l_extFunc)(l_procChip,
-                     bindParm<bool &, TargetHandleList &, uint64_t &>
-                        (l_internalCS[i],
-                         l_tmpList,
-                         l_wofValues[i]
-                     )
-        );
+        (*extFunc)(procChip, PluginDef::bindParm<bool &>(internalAttn));
 
-
-        // Update bit buffer.
-        for (auto j = l_tmpList.begin();
-             j != l_tmpList.end(); ++j)
+        if (internalAttn)
         {
-            for (uint32_t k = 0; k < GetSize(); k++)
-                if ((*j) == LookUp(k)->GetChipHandle())
-                    l_externalChips.setBit(k);
-        };
-
-        // Check if is internal.
-        if (l_internalCS[i])
-        {
-            l_internalOnlyCount++;
-            l_chip = i;
+            // Move this chip to the front of the domain.
+            MoveToFront(i);
+            break;
         }
     }
-
-    // Check if we are done... only one with an internal error.
-    if (1 == l_internalOnlyCount)
-    {
-        MoveToFront(l_chip);
-        return;
-    }
-    else if (0 == l_internalOnlyCount)
-    {
-        PRDF_TRAC("[ProcDomain::SortForXstop] continue "
-                  "with analysis to determine which chip "
-                  "sourced the error.");
-    }
-
-    // --- Do graph reduction ---
-    // Currently does not do cycle elimination.
-
-    // Get initial list (all chips).
-    BitStringBuffer l_current(GetSize());
-    l_current.setAll(); // turn on all bits.
-
-    // Do reduction.
-    // When done, l_prev will have the minimal list.
-    BitStringBuffer l_prev(GetSize());
-    l_prev.clearAll();
-
-    while ((!(l_current == l_prev)) && (!l_current.isZero()))
-    {
-        l_prev = l_current;
-        l_current.clearAll();
-
-        for (uint32_t i = 0; i < GetSize(); i++)
-        {
-            if (l_prev.isBitSet(i)) // skip if this chip isn't in the pool.
-                for (uint32_t j = 0; j < GetSize(); j++)
-                {
-                    ptr.u = &l_externalDrivers[i]; // zs01
-                    if ( BitString(GetSize(), ptr.c).isBitSet(j) )
-                        l_current.setBit(j);
-                }
-        }
-    }
-
-    // Hopefully, we got just one chip left...
-    if (1 == l_prev.getSetCount())
-    {
-        // Now find it.
-        for (uint32_t i = 0; i < GetSize(); i++)
-            if ((l_prev.isBitSet(i)) &&
-                (l_internalCS[i] || (0 == l_internalOnlyCount)))
-            {
-                MoveToFront(i);
-                return;
-            }
-    }
-
-    // --- Do WOF compare ---
-    uint32_t l_minWof = 0;
-    for (uint32_t i = 0; i < GetSize(); i++)
-    {
-        // Search for minimum WOF value.
-        if (l_wofValues[i] < l_wofValues[l_minWof])
-                // Only choose chips with internal checkstop,
-                // unless no internals.
-            if ((l_internalCS[i] || (0 == l_internalOnlyCount)))
-                l_minWof = i;
-    }
-    MoveToFront(l_minWof);
-    return;
 }
 
 namespace __prdfProcDomain
@@ -293,7 +187,7 @@ void ProcDomain::SortForRecov()
     for ( uint32_t i = 0; i < GetSize(); ++i )
     {
         RuleChip * l_procChip = LookUp(i);
-        TARGETING::TargetHandle_t l_pchipHandle = l_procChip->GetChipHandle();
+        TargetHandle_t l_pchipHandle = l_procChip->GetChipHandle();
 
         //check if chip has an attention which has not been analyzed as yet
         if( sysdbug.isActiveAttentionPending( l_pchipHandle, RECOVERABLE ) )
