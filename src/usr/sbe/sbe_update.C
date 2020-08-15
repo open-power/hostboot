@@ -345,21 +345,26 @@ namespace SBE
                 memset(&sbeState, 0, sizeof(sbeState));
                 sbeState.target = procList[i];
 
-                TRACUCOMP( g_trac_sbe, "updateProcessorSbeSeeproms(): "
+                TRACFCOMP( g_trac_sbe, "updateProcessorSbeSeeproms(): "
                            "Main Loop: tgt=0x%X, i=%d",
                            TARGETING::get_huid(sbeState.target), i);
 
                 // Check to see if current target is master processor
                 if ( sbeState.target == masterProcChipTargetHandle)
                 {
-                    TRACUCOMP(g_trac_sbe,"sbeState.target=0x%X is MASTER. "
+                    TRACFCOMP(g_trac_sbe,"updateProcessorSbeSeeproms(): sbeState.target=0x%X is BOOT proc. "
                               " (i=%d)",
                               TARGETING::get_huid(sbeState.target), i);
                     sbeState.target_is_master = true;
                 }
                 else
                 {
+                    // TODO RTC 209485 - Remove the skipping of the non-BOOT proc when HPT enabled
+                    TRACFCOMP(g_trac_sbe,"updateProcessorSbeSeeproms(): sbeState.target=0x%X is -NOT- BOOT proc skipped "
+                              " (i=%d)",
+                              TARGETING::get_huid(sbeState.target), i);
                     sbeState.target_is_master = false;
+                    continue;
                 }
 
                 //Can only update the SBE once the powerbus is up (secureboot)
