@@ -33,6 +33,10 @@
   <ffdc>TARGET_CHIP</ffdc>
   <ffdc>TARGET_MC</ffdc>
   <ffdc>FREQ_MC_MHZ</ffdc>
+  <callout>
+    <procedure>CODE</procedure>
+    <priority>HIGH</priority>
+  </callout>
 </hwpError>
 <!-- ******************************************************************** -->
 <hwpError>
@@ -44,6 +48,10 @@
   <ffdc>TARGET_CHIP</ffdc>
   <ffdc>TARGET_IOHS</ffdc>
   <ffdc>FREQ_IOHS_MHZ</ffdc>
+  <callout>
+    <procedure>CODE</procedure>
+    <priority>HIGH</priority>
+  </callout>
 </hwpError>
 <!-- ******************************************************************** -->
 <hwpError>
@@ -54,6 +62,10 @@
   </description>
   <ffdc>TARGET_CHIP</ffdc>
   <ffdc>FREQ_PCIE_MHZ</ffdc>
+  <callout>
+    <procedure>CODE</procedure>
+    <priority>HIGH</priority>
+  </callout>
 </hwpError>
 <!-- ******************************************************************** -->
 <hwpError>
@@ -65,6 +77,10 @@
   <ffdc>CONTAINED_IPL_TYPE</ffdc>
   <ffdc>PAUC_FUNCTIONAL</ffdc>
   <ffdc>PAUC_PRESENT</ffdc>
+  <callout>
+    <procedure>CODE</procedure>
+    <priority>HIGH</priority>
+  </callout>
 </hwpError>
 <!-- ******************************************************************** -->
 <hwpError>
@@ -75,6 +91,14 @@
   </description>
   <ffdc>TARGET_CHIP</ffdc>
   <ffdc>N1_PG_MVPD</ffdc>
+  <callout>
+    <procedure>CODE</procedure>
+    <priority>HIGH</priority>
+  </callout>
+  <callout>
+    <target>TARGET</target>
+    <priority>MEDIUM</priority>
+  </callout>
 </hwpError>
 <!-- ******************************************************************** -->
 <hwpError>
@@ -84,6 +108,10 @@
   </description>
   <ffdc>TARGET_CHIP</ffdc>
   <ffdc>USE_SCOM</ffdc>
+  <callout>
+    <procedure>CODE</procedure>
+    <priority>HIGH</priority>
+  </callout>
 </hwpError>
 <!-- ******************************************************************** -->
 </hwpErrors>
