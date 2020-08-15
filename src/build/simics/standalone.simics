@@ -33,11 +33,12 @@ try {
     $found_custom_eecache = 0
 }
 
+
 if( $vpo_compile == "1" ) {
     echo "    - Skipping EECACHE preload (VPO Mode)"
 } else {
     if( $found_custom_eecache == 1 ) {
-        #yep...
+        echo "    - Using custom eecache found in custom_eecache.bin"
     } else if( $hb_multiproc == 1 )  {
         $eccPreload = (lookup-file "%simics%/eecache_2proc_prebuilt.bin.ecc")
     } else {
@@ -48,7 +49,6 @@ if( $vpo_compile == "1" ) {
     ($hb_pnor).load-file $eccPreload 0x2C000
 }
 ###################################
-
 
 # Turn on all processor cec-chips
 foreach $proc in (get-component-list -all proc_p10_pib) {
@@ -105,7 +105,7 @@ try {connect backplane0.cnt_hfsi_link[1] backplane0.cnt_fsi_slave[0][1][1]} exce
 (get-master-procs)[0].cfam_cmp.lbus_map.write 0x2800 + 0x3D*4 0x00000080 4 -b
 
 # Scratch9:  Set pauPllFreqMhz (0:15) mc(0-3)PllBucket (16:27) ndlMeshCtlSetup (28:31)
-(get-master-procs)[0].cfam_cmp.lbus_map.write 0x2800 + 0x180*4 0x09600000 4 -b
+(get-master-procs)[0].cfam_cmp.lbus_map.write 0x2800 + 0x180*4 0x09604800 4 -b
 
 # Scratch10: Set iohs<bucket>PllBucket (0:31) 4 bits/bucket
 (get-master-procs)[0].cfam_cmp.lbus_map.write 0x2800 + 0x181*4 0x33333333 4 -b
