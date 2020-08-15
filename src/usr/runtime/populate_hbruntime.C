@@ -1869,7 +1869,6 @@ errlHndl_t populate_hbSecurebootData ( void )
                   "Setting hdatFwSecureVersion to 0x%.2X",
                   l_sysParmsPtr->hdatFwSecureVersion);
 
-#ifdef CONFIG_KEY_CLEAR
         // Populate "Host FW key clear requests" section
         // NOTE: KEY_CLEAR_REQUEST enum should sync with expected bits
         // in HDAT spec; this enum is used for both ATTR_KEY_CLEAR_REQUEST
@@ -1877,6 +1876,7 @@ errlHndl_t populate_hbSecurebootData ( void )
         auto key_clear_request =
             sys->getAttr<TARGETING::ATTR_KEY_CLEAR_REQUEST_HB>();
 
+#ifdef CONFIG_KEY_CLEAR
         // If Physical Presence was not asserted, then mask off all bits
         // except for Mfg bit in case of imprint drivers
         // NOTE: Using the presence of a backdoor to assert we have an
@@ -1939,7 +1939,7 @@ errlHndl_t populate_hbSecurebootData ( void )
         {
             l_elog->setSev(ERRORLOG::ERRL_SEV_INFORMATIONAL);
             TRACFCOMP(g_trac_runtime, ERR_MRK "populate_hbSecurebootData: "
-                      "SECUREBOOT::clearKeyClearSensor() falied. "
+                      "SECUREBOOT::clearKeyClearSensor() failed. "
                       "Setting ERR to informational and committing here. "
                       "Don't want this fail to halt the IPL: "
                       TRACE_ERR_FMT,
@@ -1951,6 +1951,14 @@ errlHndl_t populate_hbSecurebootData ( void )
             // no "break;" - just continue
         }
 #endif // CONFIG_BMC_IPMI
+
+#else // CONFIG_KEY_CLEAR is NOT defined
+        key_clear_request = KEY_CLEAR_REQUEST_NONE;
+        TRACFCOMP(g_trac_runtime, INFO_MRK"populate_hbSecurebootData: "
+                  "KEY CLEAR Support is not enabled in hostboot so setting key_clear_request "
+                  "in HDAT to 0x%.4X (KEY_CLEAR_REQUEST_NONE)",
+                  key_clear_request);
+        l_sysParmsPtr->hdatKeyClearRequest = key_clear_request;
 #endif // CONFIG_KEY_CLEAR
 
     } while(0);
