@@ -3427,63 +3427,6 @@
     <readable/>
   </attribute>
 
-  <enumerationType>
-    <id>MFG_WRAP_TEST_ABUS_LINKS_SET</id>
-    <description>Enum for MFG_WRAP_TEST_ABUS_LINKS_SET</description>
-    <enumerator>
-      <name>SET_NONE</name>
-      <value>0x0</value>
-    </enumerator>
-    <enumerator>
-      <name>SET_1</name>
-      <value>0x1</value>
-    </enumerator>
-    <enumerator>
-      <name>SET_2</name>
-      <value>0x2</value>
-    </enumerator>
-  </enumerationType>
-
-  <attribute>
-    <id>MFG_WRAP_TEST_ABUS_LINKS_SET</id>
-    <description>
-      Due to fabric limitations, we can only enable 2 links
-      at a time during wrap testing. This attribute defines
-      which set this ABUS link belong to. This attribute
-      will live on the OBUS target. The value will come
-      from MRW. When the value for this attribute matches
-      MFG_WRAP_TEST_ABUS_LINKS_SET_ENABLE, then we leave the
-      OBUSes configured. Otherwise, we deconfigure them.
-    </description>
-    <simpleType>
-      <enumeration>
-        <default>SET_NONE</default>
-        <id>MFG_WRAP_TEST_ABUS_LINKS_SET</id>
-      </enumeration>
-    </simpleType>
-    <persistency>non-volatile</persistency>
-    <readable/>
-  </attribute>
-
-  <attribute>
-    <id>MFG_WRAP_TEST_ABUS_LINKS_SET_ENABLE</id>
-    <description>
-      This attribute defines which set of ABUS links to enable
-      during MST wrap testing. This attribute will live on
-      the system target. The value will be overriden during
-      MST testing. When the value of MFG_WRAP_TEST_ABUS_LINKS_SET
-      on each of the OBUS matches with this value, then we leave the
-      OBUSes configured. Otherwise, we deconfigure them.
-    </description>
-    <simpleType>
-      <uint8_t>
-        <default>0</default>
-      </uint8_t>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-  </attribute>
-
   <attribute>
     <id>MGC_LOAD_SOURCE</id>
     <description>defines MGC load source</description>

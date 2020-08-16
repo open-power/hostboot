@@ -3558,17 +3558,6 @@ sub processSmpA
                 my $destTxMsbSawp = $targetObj->getBusConnBusAttr($busConnection, "DEST_TX_MSBSWAP");
                 $targetObj->setAttribute($busDestTarget, "EI_BUS_TX_MSBSWAP",  $destTxMsbSawp);
             }
-
-            # Set the wrap config for both source and destination targets
-            my $linkSet = "SET_NONE";
-
-            if ($targetObj->isBusConnBusAttrDefined($busConnection, "MFG_WRAP_TEST_ABUS_LINKS_SET"))
-            {
-                $linkSet  = $targetObj->getBusConnBusAttr($busConnection, "MFG_WRAP_TEST_ABUS_LINKS_SET");
-            }
-
-            $targetObj->setAttribute($busSrcTarget,  "MFG_WRAP_TEST_ABUS_LINKS_SET", $linkSet);
-            $targetObj->setAttribute($busDestTarget, "MFG_WRAP_TEST_ABUS_LINKS_SET", $linkSet);
         } # end if($applyConfiguration eq 1)
     } # end if ($busConnection ne "")
 } # end sub processSmpA
@@ -6463,15 +6452,6 @@ sub processAbus
            $targetObj->getAttribute($abusdest, "HUID"));
         $targetObj->setAttribute($abusdest, "PEER_HUID",
            $targetObj->getAttribute($abussource, "HUID"));
-
-        # copy attributes for wrap config
-        my $link_set = "SET_NONE";
-        if ($targetObj->isBusAttributeDefined($aBus->{SOURCE},$aBus->{BUS_NUM},"MFG_WRAP_TEST_ABUS_LINKS_SET"))
-        {
-            $link_set = $targetObj->getBusAttribute($aBus->{SOURCE},$aBus->{BUS_NUM},"MFG_WRAP_TEST_ABUS_LINKS_SET");
-        }
-        $targetObj->setAttribute($target, "MFG_WRAP_TEST_ABUS_LINKS_SET", $link_set);
-        $targetObj->setAttribute($abus_dest_parent, "MFG_WRAP_TEST_ABUS_LINKS_SET", $link_set);
     }
 } # end sub processAbus
 

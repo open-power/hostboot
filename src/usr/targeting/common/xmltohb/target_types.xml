@@ -4237,9 +4237,6 @@
       <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
     </attribute>
     <attribute>
-      <id>MFG_WRAP_TEST_ABUS_LINKS_SET</id>
-    </attribute>
-    <attribute>
       <default>
         <field>
           <id>childRollupAllowed</id>

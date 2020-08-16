@@ -1222,16 +1222,37 @@ sub handleTgtPtrAttributesHb{
                 {
                     $attr->{default} = $TargetList{$attr->{default}};
                 }
-                else
+                # Only inspect the default value if it is not already NULL
+                elsif ($attr->{default} ne "NULL")
                 {
-                    print STDOUT ("$attr->{id} attribute has an unknown value "
-                        . "$attr->{default}\n"
-                        . "It must be NULL or a valid PHYS_PATH\n");
-                    $attr->{default} = "NULL";
-                }
-            }
-        }
-    }
+                    # Get the node number from the input file and PHYS_PATH for comparison
+                    my $fileNodeNumber = $cfgHbXmlFile;
+                    # Extract the node number from the file name
+                    $fileNodeNumber =~ s/^.*node.([0-9]).*/$1/;
+
+                    my $attributeNodeNumber = $attr->{default};
+                    # Extract the node number from the PHYS_PATH
+                    $attributeNodeNumber =~ s/^.*node.([0-9]).*/$1/;
+
+                    if ($fileNodeNumber != $attributeNodeNumber)
+                    {
+                        # If working with a file that is dealing with only NODE
+                        # X data, then it will not find a PHYS_PATH that is in
+                        # NODE Y, therefore no need to inform caller of a
+                        # non-issue.  Just set the default value to NULL.
+                        $attr->{default} = "NULL";
+                    }
+                    else
+                    {
+                        print STDOUT ("$attr->{id} attribute has an unknown value "
+                            . "$attr->{default}\n"
+                            . "It must be NULL or a valid PHYS_PATH\n");
+                        $attr->{default} = "NULL";
+                    } # if ($fileNodeNumber != $attributeNodeNumber)
+                } # if (exists $TargetList{$attr->{default}})
+            } # if(exists ${$Target_t}{$attr->{id}})
+        } # foreach my $attr (@{$targetInstance->{attribute}})
+    } # foreach my $targetInstance (@{${$attributes}->{targetInstance}})
 }
 
 sub getPeerHuid
