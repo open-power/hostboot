@@ -366,11 +366,16 @@ bool __queryUcsOmic( ExtensibleChip * i_omic, ExtensibleChip * i_mcc,
         // If channel fail isn't configured, no need to continue.
         if ( cnfg->IsBitSet(22 + omiPosRelMcc) ) break;
 
-        // Check the OMIDLFIR for UCS (relevant bits: 0,20,40)
-        SCAN_COMM_REGISTER_CLASS * fir  = i_omic->getRegister("OMIDLFIR");
-        SCAN_COMM_REGISTER_CLASS * mask = i_omic->getRegister("OMIDLFIR_MASK");
-        SCAN_COMM_REGISTER_CLASS * act0 = i_omic->getRegister("OMIDLFIR_ACT0");
-        SCAN_COMM_REGISTER_CLASS * act1 = i_omic->getRegister("OMIDLFIR_ACT1");
+        // Check the MC_OMI_DL_FIR for UCS (relevant bits: 0,20,40)
+        SCAN_COMM_REGISTER_CLASS * fir  = nullptr;
+        SCAN_COMM_REGISTER_CLASS * mask = nullptr;
+        SCAN_COMM_REGISTER_CLASS * act0 = nullptr;
+        SCAN_COMM_REGISTER_CLASS * act1 = nullptr;
+
+        fir  = i_omic->getRegister("MC_OMI_DL_FIR");
+        mask = i_omic->getRegister("MC_OMI_DL_FIR_MASK");
+        act0 = i_omic->getRegister("MC_OMI_DL_FIR_ACT0");
+        act1 = i_omic->getRegister("MC_OMI_DL_FIR_ACT1");
 
         if ( SUCCESS == ( fir->Read() | mask->Read() |
                          act0->Read() | act1->Read() ) )
@@ -385,11 +390,13 @@ bool __queryUcsOmic( ExtensibleChip * i_omic, ExtensibleChip * i_mcc,
             // 40: OMI-DL 2
             uint8_t bitOff = omiPosRelOmic * 20;
 
-            // Check if there is a UNIT_CS for the relevant bits in the OMIDLFIR
-            // Note: The OMIDLFIR can't actually be set up to report UNIT_CS
-            // attentions, instead, as a workaround, the relevant channel fail
-            // bits will be set as recoverable bits and we will manually set
-            // the attention types to UNIT_CS in our handling of those errors.
+            // Check if there is a UNIT_CS for the relevant bits in the
+            // MC_OMI_DL_FIR.
+            // Note: The MC_OMI_DL_FIR can't actually be set up to report
+            // UNIT_CS attentions, instead, as a workaround, the relevant
+            // channel fail bits will be set as recoverable bits and we will
+            // manually set the attention types to UNIT_CS in our handling of
+            // those errors.
             if ( fir->IsBitSet(bitOff)  && !mask->IsBitSet(bitOff) &&
                  !act0->IsBitSet(bitOff) &&  act1->IsBitSet(bitOff) )
             {
@@ -589,10 +596,11 @@ bool __analyzeChnlFail<TYPE_OMI>( TargetHandle_t i_omi,
         if ( __queryUcsOmic( omicChip, mccChip, i_omi ) )
         {
             // Analyze UNIT_CS on the OMIC chip
-            // Note: The OMIDLFIR can't actually be set up to report UNIT_CS
-            // attentions, instead, as a workaround, the relevant channel fail
-            // bits will be set as recoverable bits and we will manually set
-            // the attention types to UNIT_CS in our handling of those errors.
+            // Note: The MC_OMI_DL_FIR can't actually be set up to report
+            // UNIT_CS attentions, instead, as a workaround, the relevant
+            // channel fail bits will be set as recoverable bits and we will
+            // manually set the attention types to UNIT_CS in our handling of
+            // those errors.
             if ( SUCCESS == omicChip->Analyze(io_sc, RECOVERABLE) )
             {
                 o_analyzed = true;
@@ -737,7 +745,7 @@ void __cleanupChnlFail<TYPE_OMI>( TargetHandle_t i_omi,
         // we will just move on and try the rest.
         SCAN_COMM_REGISTER_CLASS * reg = nullptr;
 
-        // Mask off attentions from the OMIDLFIR in the OMIC based on the
+        // Mask off attentions from the MC_OMI_DL_FIR in the OMIC based on the
         // OMI position. 0-19, 20-39, 40-59
         reg = omicChip->getRegister( "MC_OMI_DL_FIR_MASK_OR" );
         reg->SetBitFieldJustified( (omiPosRelOmic * 20), 20, 0xfffff );
