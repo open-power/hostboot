@@ -42,7 +42,6 @@
 
 //  TARGETING support
 #include <attributeenums.H>            // TYPE_PROC
-#include <targeting/common/mfgFlagAccessors.H>  // isSMPWrapConfig
 
 //  Error handling support
 #include <isteps/hwpisteperror.H>      // ISTEP_ERROR::IStepError
@@ -75,36 +74,33 @@ void* call_proc_chiplet_enable_ridi( void *io_pArgs )
     errlHndl_t l_err = nullptr;
     TARGETING::TargetHandleList l_cpuTargetList;
 
-    if (!TARGETING::isSMPWrapConfig())
+    //Get a list of proc chips
+    getAllChips(l_cpuTargetList, TYPE_PROC);
+
+    // Loop through all proc chips and convert them to FAPI targets
+    for (const auto & curproc: l_cpuTargetList)
     {
-        //Get a list of proc chips
-        getAllChips(l_cpuTargetList, TYPE_PROC);
+        const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>
+                l_fapi2_proc_target (curproc);
 
-        // Loop through all proc chips and convert them to FAPI targets
-        for (const auto & curproc: l_cpuTargetList)
+        // Call p10_chiplet_enable_ridi hwp
+        FAPI_INVOKE_HWP( l_err, p10_chiplet_enable_ridi, l_fapi2_proc_target);
+
+        if(l_err)
         {
-            const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>
-                    l_fapi2_proc_target (curproc);
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                      "ERROR : call p10_chiplet_enable_ridi HWP(): failed on target 0x%08X. "
+                       TRACE_ERR_FMT,
+                       get_huid(curproc),
+                       TRACE_ERR_ARGS(l_err));
 
-            FAPI_INVOKE_HWP( l_err, p10_chiplet_enable_ridi,
-                             l_fapi2_proc_target);
+            // Capture Error
+            captureError(l_err, l_stepError, HWPF_COMP_ID, curproc);
 
-            if(l_err)
-            {
-                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                          "ERROR : call p10_chiplet_enable_ridi HWP(): failed on target 0x%08X. "
-                           TRACE_ERR_FMT,
-                           get_huid(curproc),
-                           TRACE_ERR_ARGS(l_err));
-
-                // Capture Error
-                captureError(l_err, l_stepError, HWPF_COMP_ID, curproc);
-
-                // Run HWP on all procs even if one reports an error
-                continue;
-            }
+            // Run HWP on all procs even if one reports an error
+            continue;
         }
-    }
+    } // for (const auto & curproc: l_cpuTargetList)
 
     TRACFCOMP(g_trac_isteps_trace,
               EXIT_MRK"call_proc_chiplet_enable_ridi exit");

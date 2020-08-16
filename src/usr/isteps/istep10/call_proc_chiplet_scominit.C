@@ -42,7 +42,6 @@
 
 //  TARGETING support
 #include <attributeenums.H>            // TYPE_PROC
-#include <targeting/common/mfgFlagAccessors.H>  // isSMPWrapConfig
 
 //  Error handling support
 #include <isteps/hwpisteperror.H>      // ISTEP_ERROR::IStepError
@@ -78,56 +77,52 @@ void* call_proc_chiplet_scominit( void *io_pArgs )
 
     TRACFCOMP(g_trac_isteps_trace, ENTER_MRK"call_proc_chiplet_scominit entry" );
 
-    if (!TARGETING::isSMPWrapConfig())
+    //Get a list of all proc chips
+    getAllChips(l_procTargetList, TYPE_PROC);
+
+    // Loop through all proc chips, convert to fap2 target, and execute hwp
+    for (const auto & curproc: l_procTargetList)
     {
-        //Get a list of all proc chips
-        getAllChips(l_procTargetList, TYPE_PROC);
+        const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>
+                l_fapi2_proc_target (curproc);
 
-        // Loop through all proc chips, convert to fap2 target, and execute hwp
-        for (const auto & curproc: l_procTargetList)
+        // Call p10_chiplet_scominit hwp
+        FAPI_INVOKE_HWP( l_err, p10_chiplet_scominit,
+                         l_fapi2_proc_target);
+
+        if(l_err)
         {
-            const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>
-                    l_fapi2_proc_target (curproc);
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                       "ERROR in p10_chiplet_scominit HWP(): failed on target 0x%.08X. "
+                       TRACE_ERR_FMT,
+                       get_huid(curproc),
+                       TRACE_ERR_ARGS(l_err));
 
-            // Call p10_chiplet_scominit hwp
-            FAPI_INVOKE_HWP( l_err, p10_chiplet_scominit,
-                             l_fapi2_proc_target);
+            // Capture error
+            captureError(l_err, l_stepError, HWPF_COMP_ID, curproc);
 
-            if(l_err)
-            {
-                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                           "ERROR in p10_chiplet_scominit HWP(): failed on target 0x%.08X. "
-                           TRACE_ERR_FMT,
-                           get_huid(curproc),
-                           TRACE_ERR_ARGS(l_err));
-
-                // Capture error
-                captureError(l_err, l_stepError, HWPF_COMP_ID, curproc);
-
-                // Skip rest of functionality for this proc, but let others run.
-                continue;
-            }
-
-            // Call p10_psi_scominit hwp
-            FAPI_INVOKE_HWP( l_err, p10_psi_scominit,
-                                 l_fapi2_proc_target);
-
-            if(l_err)
-            {
-                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                           "ERROR in p10_psi_scominit HWP(): failed on target 0x%.08X. "
-                           TRACE_ERR_FMT,
-                           get_huid(curproc),
-                           TRACE_ERR_ARGS(l_err));
-
-                // Capture error
-                captureError(l_err, l_stepError, HWPF_COMP_ID, curproc);
-
-                // Skip rest of functionality for this proc, but let others run.
-                continue;
-            }
+            // Skip rest of functionality for this proc, but let others run.
+            continue;
         }
-    }
+
+        // Call p10_psi_scominit hwp
+        FAPI_INVOKE_HWP( l_err, p10_psi_scominit, l_fapi2_proc_target);
+
+        if(l_err)
+        {
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                       "ERROR in p10_psi_scominit HWP(): failed on target 0x%.08X. "
+                       TRACE_ERR_FMT,
+                       get_huid(curproc),
+                       TRACE_ERR_ARGS(l_err));
+
+            // Capture error
+            captureError(l_err, l_stepError, HWPF_COMP_ID, curproc);
+
+            // Skip rest of functionality for this proc, but let others run.
+            continue;
+        }
+    } // for (const auto & curproc: l_procTargetList)
 
     // Enable TCEs with an empty TCE Table, if necessary
     // This will prevent the FSP from DMAing to system memory without
