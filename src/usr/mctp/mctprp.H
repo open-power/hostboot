@@ -27,6 +27,7 @@
 
 // System Headers
 #include <sys/msg.h>
+#include <sys/sync.h>
 // Userspace Headers
 #include <errl/errlentry.H>
 #include <mctp/mctp_const.H>
@@ -104,6 +105,7 @@ class MctpRP
       msg_q_t     iv_outboundMsgQ;             // MCTP outbound messages
       volatile bool iv_channelActive;          // MCTP channel ready for traffic
       uint16_t    iv_mctpVersion;              // MCTP version negotiated during initialization
+      mutex_t     iv_mctp_mutex;               // Mutex to protect tx_queue accesses
 
       // Disallow copying this class.
       MctpRP& operator=(const MctpRP&);
