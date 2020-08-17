@@ -57,47 +57,6 @@ namespace ddr4
 {
 
 ///
-/// @brief Add latching commands for WR VREF to the instruction array - allows for custom MR06 data
-/// @param[in] i_target, a fapi2::Target<TARGET_TYPE_DIMM>
-/// @param[in] i_mrs06, base MRS 06 allows the user to setup custom values and pass it in
-/// @param[in] i_rank, rank on which to latch MRS 06
-/// @param[in,out] a vector of CCS instructions we should add to
-/// @return FAPI2_RC_SUCCESS if and only if ok
-///
-fapi2::ReturnCode add_latch_wr_vref_commands( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-        const mrs06_data<mss::mc_type::NIMBUS>& i_mrs06,
-        const uint64_t i_rank,
-        std::vector< ccs::instruction_t >& io_inst)
-{
-    // JEDEC has a 3 step latching process for WR VREF
-    // 1) enter into VREFDQ training mode, with the desired range value is XXXXXX
-    // 2) set the VREFDQ value while in training mode - this actually latches the value
-    // 3) exit VREFDQ training mode and go into normal operation mode
-
-    // Adds both VREFDQ train enables
-    // Note: this isn't general - assumes Nimbus via MCBIST instruction here BRS
-    auto l_mr_override = i_mrs06;
-
-    // Add both to the CCS program - JEDEC step 1
-    enable_vref_train_enable(l_mr_override);
-    FAPI_TRY( mrs_engine(i_target, l_mr_override, i_rank, mss::tvrefdqe(i_target), io_inst),
-              "Error in add_latch_wr_vref_commands" );
-
-    // Add both to the CCS program - JEDEC step 2
-    FAPI_TRY( mrs_engine(i_target, l_mr_override, i_rank, mss::tvrefdqe(i_target), io_inst),
-              "Error in add_latch_wr_vref_commands" );
-
-    // Hits VREFDQ train disable - putting the DRAM's back in mainline mode
-    // Add both to the CCS program - JEDEC step 3
-    disable_vref_train_enable(l_mr_override);
-    FAPI_TRY( mrs_engine(i_target, l_mr_override, i_rank, mss::tvrefdqe(i_target), io_inst),
-              "Error in add_latch_wr_vref_commands" );
-
-fapi_try_exit:
-    return fapi2::current_err;
-}
-
-///
 /// @brief Add latching commands for WR VREF to the instruction array
 /// @param[in] i_target, a fapi2::Target<TARGET_TYPE_MCA>
 /// @param[in] i_rank_pair, rank pair on which to latch MRS 06 - hits all ranks in the rank pair
@@ -106,14 +65,16 @@ fapi_try_exit:
 /// @param[in] i_nvdimm_workaround switch to indicate nvdimm workaround. Default to false
 /// @return FAPI2_RC_SUCCESS if and only if ok
 ///
-fapi2::ReturnCode latch_wr_vref_commands_by_rank_pair( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
-        const uint64_t i_rank_pair,
-        const uint8_t i_train_range,
-        const uint8_t i_train_value,
-        const bool i_nvdimm_workaround)
+fapi2::ReturnCode latch_wr_vref_commands_by_rank_pair
+( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+  const uint64_t i_rank_pair,
+  const uint8_t i_train_range,
+  const uint8_t i_train_value,
+  const bool i_nvdimm_workaround)
 {
     // Declares variables
     const auto l_mcbist = find_target<fapi2::TARGET_TYPE_MCBIST>(i_target);
+
     // Warning: l_dimm is not a valid Target and will crash Cronus if used before it gets filled in by mss::rank::get_dimm_target_from_rank
     fapi2::Target<fapi2::TARGET_TYPE_DIMM> l_dimm;
     ccs::program l_program;
@@ -139,7 +100,7 @@ fapi2::ReturnCode latch_wr_vref_commands_by_rank_pair( const fapi2::Target<fapi2
                   mss::c_str(i_target));
 
         // Adds the latching commands to the CCS program for this current rank
-        FAPI_TRY(setup_latch_wr_vref_commands_by_rank(l_dimm,
+        FAPI_TRY(setup_latch_wr_vref_commands_by_rank<mss::mc_type::NIMBUS>(l_dimm,
                  l_rank,
                  i_train_range,
                  i_train_value,
@@ -160,63 +121,6 @@ fapi2::ReturnCode latch_wr_vref_commands_by_rank_pair( const fapi2::Target<fapi2
     {
         FAPI_TRY( mss::ccs::execute(l_mcbist, l_program, i_target), "Failed ccs execute %s", mss::c_str(i_target) );
     }
-
-fapi_try_exit:
-    return fapi2::current_err;
-}
-
-///
-/// @brief Add latching commands for WR VREF to the instruction array by a given rank
-/// @param[in] i_target, a fapi2::Target<TARGET_TYPE_MCA>
-/// @param[in] i_rank, rank on which to latch MRS 06 - hits all ranks in the rank pair
-/// @param[in] i_train_range, VREF range to setup
-/// @param[in] i_train_value, VREF value to setup
-/// @param[in,out] a vector of CCS instructions we should add to
-/// @return FAPI2_RC_SUCCESS if and only if ok
-///
-fapi2::ReturnCode setup_latch_wr_vref_commands_by_rank( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-        const uint64_t i_rank,
-        const uint8_t i_train_range,
-        const uint8_t i_train_value,
-        std::vector< ccs::instruction_t >& io_inst)
-{
-    // Check to make sure our ctor worked ok
-    mrs06_data<mss::mc_type::NIMBUS> l_mrs06( i_target, fapi2::current_err );
-    FAPI_TRY( fapi2::current_err, "%s Unable to construct MRS06 data from attributes", mss::c_str(i_target));
-
-    // Setup training range if the value is not the default
-    if(i_train_range != wr_vref_override::USE_DEFAULT_WR_VREF_SETTINGS)
-    {
-        FAPI_INF("%s Overriding vrefdq train %s data to be 0x%02x for rank %lu", mss::c_str(i_target), "range", i_train_value,
-                 i_rank);
-
-        // Sets up the MR information
-        for(uint64_t i = 0; i < MAX_RANK_PER_DIMM; ++i)
-        {
-            l_mrs06.iv_vrefdq_train_range[i] = i_train_range;
-        }
-    }
-
-    // Setup training value if the value is not the default
-    if(i_train_value != wr_vref_override::USE_DEFAULT_WR_VREF_SETTINGS)
-    {
-        FAPI_INF("%s Overriding vrefdq train %s data to be 0x%02x for rank %lu", mss::c_str(i_target), "value", i_train_value,
-                 i_rank);
-
-        // Sets up the MR information
-        for(uint64_t i = 0; i < MAX_RANK_PER_DIMM; ++i)
-        {
-            l_mrs06.iv_vrefdq_train_value[i] = i_train_value;
-        }
-    }
-
-    // Adds the latching commands
-    FAPI_TRY(add_latch_wr_vref_commands(i_target,
-                                        l_mrs06,
-                                        i_rank,
-                                        io_inst),
-             "%s Failed add_latch_wr_vref_commands in setup_latch_wr_vref_commands_by_rank",
-             mss::c_str(i_target) );
 
 fapi_try_exit:
     return fapi2::current_err;
