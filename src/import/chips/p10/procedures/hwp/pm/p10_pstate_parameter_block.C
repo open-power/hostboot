@@ -5199,7 +5199,7 @@ fapi2::ReturnCode PlatPmPPB::pm_set_frequency()
             }
 
             //Compute WOFBase (minumim across chips)
-            else if (l_wofbase_freq > iv_attrs.attr_nominal_freq &&
+            if (l_wofbase_freq > iv_attrs.attr_nominal_freq &&
                         iv_attrs.attr_nominal_freq == 0)
             {
                 iv_attrs.attr_nominal_freq = l_wofbase_freq;
