@@ -285,9 +285,14 @@ void* call_mss_eff_config (void *io_pArgs)
             break;
         }
 
-        // Distribute the SMF Memory (if system appropriate)
-        distributeSmfMemory();
+        if(SECUREBOOT::SMF::isSmfEnabled())
+        {
+            // Distribute the SMF Memory (if system appropriate)
+            distributeSmfMemory();
+        }
 
+        // We need to check for SMF again, since distributeSmfMemory may have
+        // disabled it.
         if(SECUREBOOT::SMF::isSmfEnabled())
         {
             // SMF is still enabled, which means that the requested amount of
