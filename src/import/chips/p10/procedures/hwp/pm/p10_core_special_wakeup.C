@@ -33,7 +33,6 @@
 #include <p10_scom_eq_2.H>
 #include <p10_scom_c_0.H>
 #include <p10_scom_c_7.H>
-#include <p10_ppe_c_7.H>
 #include <p10_scom_eq_c.H>
 #include <p10_scom_eq_1.H>
 #include <p10_core_special_wakeup.H>
@@ -99,7 +98,7 @@ fapi2::ReturnCode checkForSplWkupPreReq(
     FAPI_TRY( fapi2::getScom( l_ecMcAndTgt, scomt::c::QME_SCSR, l_scsr ) );
 
     if( l_data.getBit< p10specialWakeup::QME_FLAG_STOP_READY >() ||
-        !l_scsr.getBit< scomt::ppe_c::QME_SCSR_AUTO_SPECIAL_WAKEUP_DISABLE >() )
+        !l_scsr.getBit< scomt::c::QME_SCSR_AUTO_SPECIAL_WAKEUP_DISABLE >() )
     {
         //Special Wakeup is Feasible
         FAPI_DBG( "PM Complex Ready For Special Wakeup" );
