@@ -89,6 +89,15 @@ static void * poll_kcs_status_task(void*)
     return nullptr;
 }
 
+// Call hostlpc binding function mctp_hostlpc_tx_complete but wrap it in a mutex lock
+static void lock_and_mctp_hostlpc_tx_complete(struct mctp_binding_hostlpc *hostlpc,
+                                              mutex_t &mutex)
+{
+    mutex_lock(&mutex);
+    mctp_hostlpc_tx_complete(hostlpc);
+    mutex_unlock(&mutex);
+}
+
 void MctpRP::poll_kcs_status(void)
 {
     task_detach();
@@ -146,9 +155,54 @@ void MctpRP::poll_kcs_status(void)
             break;
         }
 
-        msg = msg_allocate();
-        msg->type = l_status;
-        msg_send(iv_inboundMsgQ, msg);
+        switch(l_status)
+        {
+          case MSG_INIT:
+              TRACFCOMP(g_trac_mctp,
+                        "Found kcs msg type: MCTP::MSG_INIT which we do not support, ignoring it",
+                        msg->type);
+              break;
+          case MSG_TX_BEGIN:
+              TRACDCOMP(g_trac_mctp, "BMC has sent us a message we need to read");
+              mctp_hostlpc_rx_start(iv_hostlpc);
+              break;
+          case MSG_RX_COMPLETE:
+              // BMC has completed receiving the message we sent
+              TRACDCOMP(g_trac_mctp, "BMC says they are complete reading what we sent");
+              lock_and_mctp_hostlpc_tx_complete(iv_hostlpc, iv_mctp_mutex);
+              break;
+          case MSG_DUMMY:
+
+              // The BMC will send us this message after writing the status
+              // register during the initization sequence to notify us they
+              // have filled out info in the config section of the lpc space
+              // and has activated the KCS interface
+              l_errl = this->_mctp_channel_init();
+
+              if(l_errl)
+              {
+                  uint32_t l_fatalEid = l_errl->eid();
+                  errlCommit(l_errl, MCTP_COMP_ID);
+#ifdef CONFIG_CONSOLE
+                  CONSOLE::displayf(NULL,
+                                    "MCTP initialization failed! The commited error log 0x%X will be in hostboot dump but will not make it to BMC",
+                                    l_fatalEid);
+#endif
+
+                  // 2nd param "true" indicates we want to the call the
+                  // function to trigger a shutdown in a separate thread.
+                  // This allows us to register for and handle shutdown events
+                  // in this thread.
+                  INITSERVICE::doShutdown(l_fatalEid, true);
+              }
+              break;
+          default:
+              // Just leave a trace and move on with our life
+              TRACFCOMP(g_trac_mctp,
+                        "Found invalid kcs msg type: 0x%.02x, ignoring it",
+                        msg->type);
+              break;
+        }
     }
 }
 
@@ -195,74 +249,6 @@ static void rx_message(uint8_t i_eid, void * i_data, void *i_msg, size_t i_len)
    }
 }
 
-// Static function used to launch task calling handle_inbound_messages on
-// the MctpRP singleton
-static void * handle_inbound_messages_task(void*)
-{
-    TRACFCOMP(g_trac_mctp, "Starting to handle inbound commands");
-    Singleton<MctpRP>::instance().handle_inbound_messages();
-    return nullptr;
-}
-
-void MctpRP::handle_inbound_messages(void)
-{
-    task_detach();
-    errlHndl_t l_errl = nullptr;
-
-    while(1)
-    {
-        msg_t* msg = msg_wait(iv_inboundMsgQ);
-
-        switch(msg->type)
-        {
-          case MSG_INIT:
-              TRACFCOMP(g_trac_mctp,
-                        "Found kcs msg type: MCTP::MSG_INIT which we do not support, ignoring it",
-                        msg->type);
-              break;
-          case MSG_TX_BEGIN:
-              TRACDCOMP(g_trac_mctp, "BMC has sent us a message we need to read");
-              mctp_hostlpc_rx_start(iv_hostlpc);
-              break;
-          case MSG_RX_COMPLETE:
-              // BMC has completed receiving the message we sent
-              TRACDCOMP(g_trac_mctp, "BMC says they are complete reading what we sent");
-              mctp_hostlpc_tx_complete(iv_hostlpc);
-              break;
-          case MSG_DUMMY:
-
-              // The BMC will send us this message after writing the status
-              // register during the initization sequence to notify us they
-              // have filled out info in the config section of the lpc space
-              // and has activated the KCS interface
-              l_errl = this->_mctp_channel_init();
-
-              if(l_errl)
-              {
-                  uint32_t l_fatalEid = l_errl->eid();
-                  errlCommit(l_errl, MCTP_COMP_ID);
-#ifdef CONFIG_CONSOLE
-                  CONSOLE::displayf(NULL,
-                                    "MCTP initialization failed! The commited error log 0x%X will be in hostboot dump but will not make it to BMC",
-                                    l_fatalEid);
-#endif
-
-                  // 2nd param "true" indicates we want to the call the
-                  // function to trigger a shutdown in a separate thread.
-                  // This allows us to register for and handle shutdown events
-                  // in this thread.
-                  INITSERVICE::doShutdown(l_fatalEid, true);
-              }
-              break;
-          default:
-              // Just leave a trace and move on with our life
-              TRACFCOMP(g_trac_mctp,
-                        "Found invalid kcs msg type: 0x%.02x, ignoring it",
-                        msg->type);
-              break;
-        }
-    }
-}
 
 // Static function used to launch task calling handle_outbound_messages on
 // the MctpRP singleton
@@ -271,6 +257,16 @@ static void * handle_outbound_messages_task(void*)
     TRACFCOMP(g_trac_mctp, "Starting to handle outbound commands");
     Singleton<MctpRP>::instance().handle_outbound_messages();
     return nullptr;
+}
+
+// Call libmctp core function mctp_message_tx but wrap it in a mutex lock
+static int lock_and_mctp_message_tx(struct mctp *mctp, mctp_eid_t eid,
+                                    void *msg, size_t msg_len, mutex_t &mutex)
+{
+    mutex_lock(&mutex);
+    int rc = mctp_message_tx(mctp, eid, msg, msg_len);
+    mutex_unlock(&mutex);
+    return rc;
 }
 
 void MctpRP::handle_outbound_messages(void)
@@ -305,10 +301,11 @@ void MctpRP::handle_outbound_messages(void)
                        "pldm message : ",
                        msg->extra_data ,
                        msg->data[0]);
-              int rc = mctp_message_tx(iv_mctp,
-                                       BMC_EID,
-                                       msg->extra_data,
-                                       msg->data[0]);
+              int rc = lock_and_mctp_message_tx(iv_mctp,
+                                                BMC_EID,
+                                                msg->extra_data,
+                                                msg->data[0],
+                                                iv_mctp_mutex);
 
               if(rc != RC_MCTP_SUCCESS)
               {
@@ -492,7 +489,6 @@ void MctpRP::_init(void)
 
     // Start cmd daemon first because we want it ready if poll daemon finds
     // something right away
-    task_create(handle_inbound_messages_task, NULL);
     task_create(handle_outbound_messages_task, NULL);
 
     // Set the receive function to be rx_message which
@@ -509,7 +505,8 @@ MctpRP::MctpRP(void):
     iv_mctp(mctp_init()),
     iv_inboundMsgQ(msg_q_create()),
     iv_outboundMsgQ(msg_q_create()),
-    iv_channelActive(false)
+    iv_channelActive(false),
+    iv_mctp_mutex(MUTEX_INITIALIZER)
 {
 }
 
