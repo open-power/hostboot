@@ -415,7 +415,7 @@
         Attributes for HTM Collection Mode Register
      ************************************************** -->
 
-<!-- **** NHTM attributes only *** 
+<!-- **** NHTM attributes only ***
 -->
 <attribute>
   <id>ATTR_NHTM_HTMSC_MODE_CONTENT_SEL</id>
@@ -457,10 +457,10 @@
       When htm_mode_q(1 TO 2) == 10, i.e. OCC
       00000htm0 : Pre-Allocate maximum memory buffers (8)
       00001htm0 : Pre-Allocate fewer memory buffers (4)
-      0000xmmm0 : mmm for optional external mux control 
+      0000xmmm0 : mmm for optional external mux control
   </description>
   <valueType>uint16</valueType>
-  <initToZero/>
+  <default>0x0040</default>
   <writeable/>
   <persistRuntime/>
 </attribute>

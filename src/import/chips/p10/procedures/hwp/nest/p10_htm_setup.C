@@ -958,7 +958,7 @@ fapi2::ReturnCode setup_HTM_MODE(
                            i_target, l_uint16_attr),
              "setup_HTM_MODE: Error getting ATTR_NHTM_HTMSC_MODE_CAPTURE, "
              "l_rc 0x%.8X", (uint64_t)fapi2::current_err);
-    FAPI_DBG("  ATTR_NHTM_HTMSC_MODE_CAPTURE_GENERATED_WRITES 0x%.8X", l_uint16_attr);
+    FAPI_DBG("  ATTR_NHTM_HTMSC_MODE_CAPTURE          0x%.8X", l_uint16_attr);
 
     SET_PB_BRIDGE_NHTM_SC_HTM_MODE_TMSC_MODE_CAPTURE(l_uint16_attr, l_HTM_mode_data);
 
