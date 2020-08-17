@@ -47,22 +47,44 @@ namespace fir
 {
 
 ///
-/// @brief Function handling the DD1 workaround for HW511630 and HW520480
+/// @brief Function handling the subchannel FIR settings after chiplet_scominit
 /// @param[in] i_target the MCC target of the DSTL fir
+/// @param[in] i_omi_fail_action value from ATTR_OMI_CHANNEL_FAIL_ACTION
 /// @param[in,out] io_mcc_dstlfir_reg the DSTLFIR FIR register instance
 ///
-void dstl_dd1_workaround( const fapi2::Target<fapi2::TARGET_TYPE_MCC>& i_target,
-                          mss::fir::reg<scomt::mcc::DSTL_DSTLFIR_RW>& io_mcc_dstlfir_reg );
+void override_subchannel_firs_after_chiplet_scominit( const fapi2::Target<fapi2::TARGET_TYPE_MCC>& i_target,
+        const uint8_t i_omi_fail_action,
+        mss::fir::reg<scomt::mcc::DSTL_DSTLFIR_RW>& io_mcc_dstlfir_reg );
 
 ///
-/// @brief Function handling the DD1 workaround for HW531432
+/// @brief Function handling the DSTLFIR subchannel FIR settings after omi_init
 /// @param[in] i_target the MCC target of the DSTL fir
-/// @param[in] i_hw_mirroring_en the value of ATTR_MRW_HW_MIRRORING_ENABLE
+/// @param[in] i_omi_fail_action value from ATTR_OMI_CHANNEL_FAIL_ACTION
 /// @param[in,out] io_mcc_dstlfir_reg the DSTLFIR FIR register instance
 ///
-void dstl_channel_timeout_workaround( const fapi2::Target<fapi2::TARGET_TYPE_MCC>& i_target,
-                                      const uint8_t i_hw_mirroring_en,
-                                      mss::fir::reg<scomt::mcc::DSTL_DSTLFIR_RW>& io_mcc_dstlfir_reg );
+void override_dstl_subchannel_firs_after_omi_init( const fapi2::Target<fapi2::TARGET_TYPE_MCC>& i_target,
+        const uint8_t i_omi_fail_action,
+        mss::fir::reg<scomt::mcc::DSTL_DSTLFIR_RW>& io_mcc_dstlfir_reg );
+
+///
+/// @brief Function handling the USTLFIR subchannel FIR settings after omi_init
+/// @param[in] i_target the MCC target of the USTL fir
+/// @param[in] i_omi_fail_action value from ATTR_OMI_CHANNEL_FAIL_ACTION
+/// @param[in,out] io_mcc_ustlfir_reg the USTLFIR FIR register instance
+///
+void override_ustl_subchannel_firs_after_omi_init( const fapi2::Target<fapi2::TARGET_TYPE_MCC>& i_target,
+        const uint8_t i_omi_fail_action,
+        mss::fir::reg<scomt::mcc::USTL_USTLFIR_RW>& io_mcc_ustlfir_reg );
+
+///
+/// @brief Function handling the Cronus mode settings for DSTLFIR
+/// @param[in] i_target the MCC target of the DSTL fir
+/// @param[in] i_hostboot_mode true if our platform is hostboot, false if cronus
+/// @param[in,out] io_mcc_dstlfir_reg the DSTLFIR FIR register instance
+///
+void dstl_cronus_settings( const fapi2::Target<fapi2::TARGET_TYPE_MCC>& i_target,
+                           const bool i_hostboot_mode,
+                           mss::fir::reg<scomt::mcc::DSTL_DSTLFIR_RW>& io_mcc_dstlfir_reg );
 
 } // namespace fir
 } // namespace workarounds

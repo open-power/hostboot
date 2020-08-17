@@ -50,35 +50,269 @@ namespace fir
 {
 
 ///
-/// @brief Function handling the DD1 workaround for HW511630 and HW520480
+/// @brief Function handling the subchannel FIR settings after chiplet_scominit
 /// @param[in] i_target the MCC target of the DSTL fir
+/// @param[in] i_omi_fail_action value from ATTR_OMI_CHANNEL_FAIL_ACTION
 /// @param[in,out] io_mcc_dstlfir_reg the DSTLFIR FIR register instance
 ///
-void dstl_dd1_workaround( const fapi2::Target<fapi2::TARGET_TYPE_MCC>& i_target,
-                          mss::fir::reg<scomt::mcc::DSTL_DSTLFIR_RW>& io_mcc_dstlfir_reg )
+void override_subchannel_firs_after_chiplet_scominit( const fapi2::Target<fapi2::TARGET_TYPE_MCC>& i_target,
+        const uint8_t i_omi_fail_action,
+        mss::fir::reg<scomt::mcc::DSTL_DSTLFIR_RW>& io_mcc_dstlfir_reg )
 {
-    // Write DSTLFIR register per defect workaround
-    FAPI_DBG("%s Setting DSTLFIR to HW511630 and HW520480 workaround settings", mss::c_str(i_target));
-    io_mcc_dstlfir_reg.local_checkstop<scomt::mcc::DSTL_DSTLFIR_SUBCHANNEL_A_FAIL_ACTION>()
-    .local_checkstop<scomt::mcc::DSTL_DSTLFIR_SUBCHANNEL_B_FAIL_ACTION>();
+    // Write DSTLFIR register per attr setting
+    switch(i_omi_fail_action)
+    {
+        case fapi2::ENUM_ATTR_OMI_CHANNEL_FAIL_ACTION_XSTOP:
+            FAPI_DBG("%s Setting DSTLFIR subchannel FIRs to checkstop per attribute setting", mss::c_str(i_target));
+            io_mcc_dstlfir_reg.checkstop<scomt::mcc::DSTL_DSTLFIR_SUBCHANNEL_A_COUNTER_ERROR>()
+            .checkstop<scomt::mcc::DSTL_DSTLFIR_SUBCHANNEL_B_COUNTER_ERROR>()
+            .checkstop<scomt::mcc::DSTL_DSTLFIR_SUBCHANNEL_A_TIMEOUT_ERROR>()
+            .checkstop<scomt::mcc::DSTL_DSTLFIR_SUBCHANNEL_B_TIMEOUT_ERROR>()
+            .checkstop<scomt::mcc::DSTL_DSTLFIR_SUBCHANNEL_A_BUFFER_OVERUSE_ERROR>()
+            .checkstop<scomt::mcc::DSTL_DSTLFIR_SUBCHANNEL_B_BUFFER_OVERUSE_ERROR>()
+            .checkstop<scomt::mcc::DSTL_DSTLFIR_SUBCHANNEL_A_CHANNEL_TIMEOUT>()
+            .checkstop<scomt::mcc::DSTL_DSTLFIR_SUBCHANNEL_B_CHANNEL_TIMEOUT>()
+            .checkstop<scomt::mcc::DSTL_DSTLFIR_SUBCHANNEL_A_PARITY_ERROR>()
+            .checkstop<scomt::mcc::DSTL_DSTLFIR_SUBCHANNEL_B_PARITY_ERROR>();
+            break;
+
+        case fapi2::ENUM_ATTR_OMI_CHANNEL_FAIL_ACTION_MASKED:
+            FAPI_DBG("%s Setting DSTLFIR subchannel FIRs to masked per attribute setting", mss::c_str(i_target));
+            io_mcc_dstlfir_reg.masked<scomt::mcc::DSTL_DSTLFIR_SUBCHANNEL_A_COUNTER_ERROR>()
+            .masked<scomt::mcc::DSTL_DSTLFIR_SUBCHANNEL_B_COUNTER_ERROR>()
+            .masked<scomt::mcc::DSTL_DSTLFIR_SUBCHANNEL_A_TIMEOUT_ERROR>()
+            .masked<scomt::mcc::DSTL_DSTLFIR_SUBCHANNEL_B_TIMEOUT_ERROR>()
+            .masked<scomt::mcc::DSTL_DSTLFIR_SUBCHANNEL_A_BUFFER_OVERUSE_ERROR>()
+            .masked<scomt::mcc::DSTL_DSTLFIR_SUBCHANNEL_B_BUFFER_OVERUSE_ERROR>()
+            .masked<scomt::mcc::DSTL_DSTLFIR_SUBCHANNEL_A_CHANNEL_TIMEOUT>()
+            .masked<scomt::mcc::DSTL_DSTLFIR_SUBCHANNEL_B_CHANNEL_TIMEOUT>()
+            .masked<scomt::mcc::DSTL_DSTLFIR_SUBCHANNEL_A_PARITY_ERROR>()
+            .masked<scomt::mcc::DSTL_DSTLFIR_SUBCHANNEL_B_PARITY_ERROR>();
+            break;
+
+        case fapi2::ENUM_ATTR_OMI_CHANNEL_FAIL_ACTION_RECOVERABLE:
+            FAPI_DBG("%s Setting DSTLFIR subchannel FIRs to recoverable per attribute setting", mss::c_str(i_target));
+            io_mcc_dstlfir_reg.recoverable_error<scomt::mcc::DSTL_DSTLFIR_SUBCHANNEL_A_COUNTER_ERROR>()
+            .recoverable_error<scomt::mcc::DSTL_DSTLFIR_SUBCHANNEL_B_COUNTER_ERROR>()
+            .recoverable_error<scomt::mcc::DSTL_DSTLFIR_SUBCHANNEL_A_TIMEOUT_ERROR>()
+            .recoverable_error<scomt::mcc::DSTL_DSTLFIR_SUBCHANNEL_B_TIMEOUT_ERROR>()
+            .recoverable_error<scomt::mcc::DSTL_DSTLFIR_SUBCHANNEL_A_BUFFER_OVERUSE_ERROR>()
+            .recoverable_error<scomt::mcc::DSTL_DSTLFIR_SUBCHANNEL_B_BUFFER_OVERUSE_ERROR>()
+            .recoverable_error<scomt::mcc::DSTL_DSTLFIR_SUBCHANNEL_A_CHANNEL_TIMEOUT>()
+            .recoverable_error<scomt::mcc::DSTL_DSTLFIR_SUBCHANNEL_B_CHANNEL_TIMEOUT>()
+            .recoverable_error<scomt::mcc::DSTL_DSTLFIR_SUBCHANNEL_A_PARITY_ERROR>()
+            .recoverable_error<scomt::mcc::DSTL_DSTLFIR_SUBCHANNEL_B_PARITY_ERROR>();
+            break;
+
+        default:
+            // By default just leave it local_checkstop
+            FAPI_DBG("%s Leaving DSTLFIR subchannel FIRs as local_checkstop per attribute setting", mss::c_str(i_target));
+            io_mcc_dstlfir_reg.local_checkstop<scomt::mcc::DSTL_DSTLFIR_SUBCHANNEL_A_COUNTER_ERROR>()
+            .local_checkstop<scomt::mcc::DSTL_DSTLFIR_SUBCHANNEL_B_COUNTER_ERROR>()
+            .local_checkstop<scomt::mcc::DSTL_DSTLFIR_SUBCHANNEL_A_TIMEOUT_ERROR>()
+            .local_checkstop<scomt::mcc::DSTL_DSTLFIR_SUBCHANNEL_B_TIMEOUT_ERROR>()
+            .local_checkstop<scomt::mcc::DSTL_DSTLFIR_SUBCHANNEL_A_BUFFER_OVERUSE_ERROR>()
+            .local_checkstop<scomt::mcc::DSTL_DSTLFIR_SUBCHANNEL_B_BUFFER_OVERUSE_ERROR>()
+            .local_checkstop<scomt::mcc::DSTL_DSTLFIR_SUBCHANNEL_A_CHANNEL_TIMEOUT>()
+            .local_checkstop<scomt::mcc::DSTL_DSTLFIR_SUBCHANNEL_B_CHANNEL_TIMEOUT>()
+            .local_checkstop<scomt::mcc::DSTL_DSTLFIR_SUBCHANNEL_A_PARITY_ERROR>()
+            .local_checkstop<scomt::mcc::DSTL_DSTLFIR_SUBCHANNEL_B_PARITY_ERROR>();
+            break;
+    }
 }
 
 ///
-/// @brief Function handling the DD1 workaround for HW531432
+/// @brief Function handling the DSTLFIR subchannel FIR settings after omi_init
 /// @param[in] i_target the MCC target of the DSTL fir
-/// @param[in] i_hw_mirroring_en the value of ATTR_MRW_HW_MIRRORING_ENABLE
+/// @param[in] i_omi_fail_action value from ATTR_OMI_CHANNEL_FAIL_ACTION
 /// @param[in,out] io_mcc_dstlfir_reg the DSTLFIR FIR register instance
 ///
-void dstl_channel_timeout_workaround( const fapi2::Target<fapi2::TARGET_TYPE_MCC>& i_target,
-                                      const uint8_t i_hw_mirroring_en,
-                                      mss::fir::reg<scomt::mcc::DSTL_DSTLFIR_RW>& io_mcc_dstlfir_reg )
+void override_dstl_subchannel_firs_after_omi_init( const fapi2::Target<fapi2::TARGET_TYPE_MCC>& i_target,
+        const uint8_t i_omi_fail_action,
+        mss::fir::reg<scomt::mcc::DSTL_DSTLFIR_RW>& io_mcc_dstlfir_reg )
 {
-    // Write DSTLFIR register per defect workaround
-    if (i_hw_mirroring_en == fapi2::ENUM_ATTR_MRW_HW_MIRRORING_ENABLE_REQUIRED)
+    // Write DSTLFIR register per attr setting
+    switch(i_omi_fail_action)
     {
-        FAPI_DBG("%s Setting DSTLFIR to HW531432 workaround settings", mss::c_str(i_target));
-        io_mcc_dstlfir_reg.checkstop<scomt::mcc::DSTL_DSTLFIR_SUBCHANNEL_A_CHANNEL_TIMEOUT>()
-        .checkstop<scomt::mcc::DSTL_DSTLFIR_SUBCHANNEL_B_CHANNEL_TIMEOUT>();
+        case fapi2::ENUM_ATTR_OMI_CHANNEL_FAIL_ACTION_XSTOP:
+            FAPI_DBG("%s Setting DSTLFIR subchannel FIRs to checkstop per attribute setting", mss::c_str(i_target));
+            io_mcc_dstlfir_reg.checkstop<scomt::mcc::DSTL_DSTLFIR_SUBCHANNEL_A_TLX_CHECKSTOP>()
+            .checkstop<scomt::mcc::DSTL_DSTLFIR_SUBCHANNEL_B_TLX_CHECKSTOP>();
+            break;
+
+        case fapi2::ENUM_ATTR_OMI_CHANNEL_FAIL_ACTION_MASKED:
+            FAPI_DBG("%s Setting DSTLFIR subchannel FIRs to masked per attribute setting", mss::c_str(i_target));
+            io_mcc_dstlfir_reg.masked<scomt::mcc::DSTL_DSTLFIR_SUBCHANNEL_A_TLX_CHECKSTOP>()
+            .masked<scomt::mcc::DSTL_DSTLFIR_SUBCHANNEL_B_TLX_CHECKSTOP>();
+            break;
+
+        case fapi2::ENUM_ATTR_OMI_CHANNEL_FAIL_ACTION_RECOVERABLE:
+            FAPI_DBG("%s Setting DSTLFIR subchannel FIRs to recoverable per attribute setting", mss::c_str(i_target));
+            io_mcc_dstlfir_reg.recoverable_error<scomt::mcc::DSTL_DSTLFIR_SUBCHANNEL_A_TLX_CHECKSTOP>()
+            .recoverable_error<scomt::mcc::DSTL_DSTLFIR_SUBCHANNEL_B_TLX_CHECKSTOP>();
+            break;
+
+        default:
+            // By default just leave it local_checkstop
+            FAPI_DBG("%s Leaving DSTLFIR subchannel FIRs as local_checkstop per attribute setting", mss::c_str(i_target));
+            io_mcc_dstlfir_reg.local_checkstop<scomt::mcc::DSTL_DSTLFIR_SUBCHANNEL_A_TLX_CHECKSTOP>()
+            .local_checkstop<scomt::mcc::DSTL_DSTLFIR_SUBCHANNEL_B_TLX_CHECKSTOP>();
+            break;
+    }
+}
+
+///
+/// @brief Function handling the USTLFIR subchannel FIR settings after omi_init
+/// @param[in] i_target the MCC target of the USTL fir
+/// @param[in] i_omi_fail_action value from ATTR_OMI_CHANNEL_FAIL_ACTION
+/// @param[in,out] io_mcc_ustlfir_reg the USTLFIR FIR register instance
+///
+void override_ustl_subchannel_firs_after_omi_init( const fapi2::Target<fapi2::TARGET_TYPE_MCC>& i_target,
+        const uint8_t i_omi_fail_action,
+        mss::fir::reg<scomt::mcc::USTL_USTLFIR_RW>& io_mcc_ustlfir_reg )
+{
+    // Write USTLFIR register per attr setting
+    switch(i_omi_fail_action)
+    {
+        case fapi2::ENUM_ATTR_OMI_CHANNEL_FAIL_ACTION_XSTOP:
+            FAPI_DBG("%s Setting USTLFIR subchannel FIRs to checkstop per attribute setting", mss::c_str(i_target));
+            io_mcc_ustlfir_reg.checkstop<scomt::mcc::USTL_USTLFIR_CHANA_UNEXP_DATA_ERR>()
+            .checkstop<scomt::mcc::USTL_USTLFIR_CHANB_UNEXP_DATA_ERR>()
+            .checkstop<scomt::mcc::USTL_USTLFIR_CHANA_INVALID_TEMPLATE_ERROR>()
+            .checkstop<scomt::mcc::USTL_USTLFIR_CHANB_INVALID_TEMPLATE_ERROR>()
+            .checkstop<scomt::mcc::USTL_USTLFIR_CHANA_FAIL_RESP_CHECKSTOP>()
+            .checkstop<scomt::mcc::USTL_USTLFIR_CHANB_FAIL_RESP_CHECKSTOP>()
+            .checkstop<scomt::mcc::USTL_USTLFIR_CHANA_FLIT_PARITY_ERROR>()
+            .checkstop<scomt::mcc::USTL_USTLFIR_CHANB_FLIT_PARITY_ERROR>()
+            .checkstop<scomt::mcc::USTL_USTLFIR_CHANA_FATAL_PARITY_ERROR>()
+            .checkstop<scomt::mcc::USTL_USTLFIR_CHANB_FATAL_PARITY_ERROR>()
+            .checkstop<scomt::mcc::USTL_USTLFIR_CHANA_BAD_RESP_LOG_VAL>()
+            .checkstop<scomt::mcc::USTL_USTLFIR_CHANB_BAD_RESP_LOG_VAL>()
+            .checkstop<scomt::mcc::USTL_USTLFIR_CHANA_EXCESS_BAD_DATA_BITS>()
+            .checkstop<scomt::mcc::USTL_USTLFIR_CHANB_EXCESS_BAD_DATA_BITS>()
+            .checkstop<scomt::mcc::USTL_USTLFIR_CHANA_COMP_TMPL0_DATA_NOT_MMIO>()
+            .checkstop<scomt::mcc::USTL_USTLFIR_CHANB_COMP_TMPL0_DATA_NOT_MMIO>()
+            .checkstop<scomt::mcc::USTL_USTLFIR_CHANA_EXCESS_DATA_ERROR>()
+            .checkstop<scomt::mcc::USTL_USTLFIR_CHANB_EXCESS_DATA_ERROR>()
+            .checkstop<scomt::mcc::USTL_USTLFIR_CHANA_BADCRC_DATA_NOT_VALID_ERROR>()
+            .checkstop<scomt::mcc::USTL_USTLFIR_CHANB_BADCRC_DATA_NOT_VALID_ERROR>()
+            .checkstop<scomt::mcc::USTL_USTLFIR_CHANA_FIFO_OVERFLOW_ERROR>()
+            .checkstop<scomt::mcc::USTL_USTLFIR_CHANB_FIFO_OVERFLOW_ERROR>()
+            .checkstop<scomt::mcc::USTL_USTLFIR_CHANA_INVALID_CMD_ERROR>()
+            .checkstop<scomt::mcc::USTL_USTLFIR_CHANB_INVALID_CMD_ERROR>()
+            .checkstop<scomt::mcc::USTL_USTLFIR_CHANA_INVALID_DL_DP_COMBO>()
+            .checkstop<scomt::mcc::USTL_USTLFIR_CHANB_INVALID_DL_DP_COMBO>();
+            break;
+
+        case fapi2::ENUM_ATTR_OMI_CHANNEL_FAIL_ACTION_MASKED:
+            FAPI_DBG("%s Setting USTLFIR subchannel FIRs to masked per attribute setting", mss::c_str(i_target));
+            io_mcc_ustlfir_reg.masked<scomt::mcc::USTL_USTLFIR_CHANA_UNEXP_DATA_ERR>()
+            .masked<scomt::mcc::USTL_USTLFIR_CHANB_UNEXP_DATA_ERR>()
+            .masked<scomt::mcc::USTL_USTLFIR_CHANA_INVALID_TEMPLATE_ERROR>()
+            .masked<scomt::mcc::USTL_USTLFIR_CHANB_INVALID_TEMPLATE_ERROR>()
+            .masked<scomt::mcc::USTL_USTLFIR_CHANA_FAIL_RESP_CHECKSTOP>()
+            .masked<scomt::mcc::USTL_USTLFIR_CHANB_FAIL_RESP_CHECKSTOP>()
+            .masked<scomt::mcc::USTL_USTLFIR_CHANA_FLIT_PARITY_ERROR>()
+            .masked<scomt::mcc::USTL_USTLFIR_CHANB_FLIT_PARITY_ERROR>()
+            .masked<scomt::mcc::USTL_USTLFIR_CHANA_FATAL_PARITY_ERROR>()
+            .masked<scomt::mcc::USTL_USTLFIR_CHANB_FATAL_PARITY_ERROR>()
+            .masked<scomt::mcc::USTL_USTLFIR_CHANA_BAD_RESP_LOG_VAL>()
+            .masked<scomt::mcc::USTL_USTLFIR_CHANB_BAD_RESP_LOG_VAL>()
+            .masked<scomt::mcc::USTL_USTLFIR_CHANA_EXCESS_BAD_DATA_BITS>()
+            .masked<scomt::mcc::USTL_USTLFIR_CHANB_EXCESS_BAD_DATA_BITS>()
+            .masked<scomt::mcc::USTL_USTLFIR_CHANA_COMP_TMPL0_DATA_NOT_MMIO>()
+            .masked<scomt::mcc::USTL_USTLFIR_CHANB_COMP_TMPL0_DATA_NOT_MMIO>()
+            .masked<scomt::mcc::USTL_USTLFIR_CHANA_EXCESS_DATA_ERROR>()
+            .masked<scomt::mcc::USTL_USTLFIR_CHANB_EXCESS_DATA_ERROR>()
+            .masked<scomt::mcc::USTL_USTLFIR_CHANA_BADCRC_DATA_NOT_VALID_ERROR>()
+            .masked<scomt::mcc::USTL_USTLFIR_CHANB_BADCRC_DATA_NOT_VALID_ERROR>()
+            .masked<scomt::mcc::USTL_USTLFIR_CHANA_FIFO_OVERFLOW_ERROR>()
+            .masked<scomt::mcc::USTL_USTLFIR_CHANB_FIFO_OVERFLOW_ERROR>()
+            .masked<scomt::mcc::USTL_USTLFIR_CHANA_INVALID_CMD_ERROR>()
+            .masked<scomt::mcc::USTL_USTLFIR_CHANB_INVALID_CMD_ERROR>()
+            .masked<scomt::mcc::USTL_USTLFIR_CHANA_INVALID_DL_DP_COMBO>()
+            .masked<scomt::mcc::USTL_USTLFIR_CHANB_INVALID_DL_DP_COMBO>();
+            break;
+
+        case fapi2::ENUM_ATTR_OMI_CHANNEL_FAIL_ACTION_RECOVERABLE:
+            FAPI_DBG("%s Setting USTLFIR subchannel FIRs to recoverable per attribute setting", mss::c_str(i_target));
+            io_mcc_ustlfir_reg.recoverable_error<scomt::mcc::USTL_USTLFIR_CHANA_UNEXP_DATA_ERR>()
+            .recoverable_error<scomt::mcc::USTL_USTLFIR_CHANB_UNEXP_DATA_ERR>()
+            .recoverable_error<scomt::mcc::USTL_USTLFIR_CHANA_INVALID_TEMPLATE_ERROR>()
+            .recoverable_error<scomt::mcc::USTL_USTLFIR_CHANB_INVALID_TEMPLATE_ERROR>()
+            .recoverable_error<scomt::mcc::USTL_USTLFIR_CHANA_FAIL_RESP_CHECKSTOP>()
+            .recoverable_error<scomt::mcc::USTL_USTLFIR_CHANB_FAIL_RESP_CHECKSTOP>()
+            .recoverable_error<scomt::mcc::USTL_USTLFIR_CHANA_FLIT_PARITY_ERROR>()
+            .recoverable_error<scomt::mcc::USTL_USTLFIR_CHANB_FLIT_PARITY_ERROR>()
+            .recoverable_error<scomt::mcc::USTL_USTLFIR_CHANA_FATAL_PARITY_ERROR>()
+            .recoverable_error<scomt::mcc::USTL_USTLFIR_CHANB_FATAL_PARITY_ERROR>()
+            .recoverable_error<scomt::mcc::USTL_USTLFIR_CHANA_BAD_RESP_LOG_VAL>()
+            .recoverable_error<scomt::mcc::USTL_USTLFIR_CHANB_BAD_RESP_LOG_VAL>()
+            .recoverable_error<scomt::mcc::USTL_USTLFIR_CHANA_EXCESS_BAD_DATA_BITS>()
+            .recoverable_error<scomt::mcc::USTL_USTLFIR_CHANB_EXCESS_BAD_DATA_BITS>()
+            .recoverable_error<scomt::mcc::USTL_USTLFIR_CHANA_COMP_TMPL0_DATA_NOT_MMIO>()
+            .recoverable_error<scomt::mcc::USTL_USTLFIR_CHANB_COMP_TMPL0_DATA_NOT_MMIO>()
+            .recoverable_error<scomt::mcc::USTL_USTLFIR_CHANA_EXCESS_DATA_ERROR>()
+            .recoverable_error<scomt::mcc::USTL_USTLFIR_CHANB_EXCESS_DATA_ERROR>()
+            .recoverable_error<scomt::mcc::USTL_USTLFIR_CHANA_BADCRC_DATA_NOT_VALID_ERROR>()
+            .recoverable_error<scomt::mcc::USTL_USTLFIR_CHANB_BADCRC_DATA_NOT_VALID_ERROR>()
+            .recoverable_error<scomt::mcc::USTL_USTLFIR_CHANA_FIFO_OVERFLOW_ERROR>()
+            .recoverable_error<scomt::mcc::USTL_USTLFIR_CHANB_FIFO_OVERFLOW_ERROR>()
+            .recoverable_error<scomt::mcc::USTL_USTLFIR_CHANA_INVALID_CMD_ERROR>()
+            .recoverable_error<scomt::mcc::USTL_USTLFIR_CHANB_INVALID_CMD_ERROR>()
+            .recoverable_error<scomt::mcc::USTL_USTLFIR_CHANA_INVALID_DL_DP_COMBO>()
+            .recoverable_error<scomt::mcc::USTL_USTLFIR_CHANB_INVALID_DL_DP_COMBO>();
+            break;
+
+        default:
+            // By default just leave it local_checkstop
+            FAPI_DBG("%s Leaving USTLFIR subchannel FIRs as local_checkstop per attribute setting", mss::c_str(i_target));
+            io_mcc_ustlfir_reg.local_checkstop<scomt::mcc::USTL_USTLFIR_CHANA_UNEXP_DATA_ERR>()
+            .local_checkstop<scomt::mcc::USTL_USTLFIR_CHANB_UNEXP_DATA_ERR>()
+            .local_checkstop<scomt::mcc::USTL_USTLFIR_CHANA_INVALID_TEMPLATE_ERROR>()
+            .local_checkstop<scomt::mcc::USTL_USTLFIR_CHANB_INVALID_TEMPLATE_ERROR>()
+            .local_checkstop<scomt::mcc::USTL_USTLFIR_CHANA_FAIL_RESP_CHECKSTOP>()
+            .local_checkstop<scomt::mcc::USTL_USTLFIR_CHANB_FAIL_RESP_CHECKSTOP>()
+            .local_checkstop<scomt::mcc::USTL_USTLFIR_CHANA_FLIT_PARITY_ERROR>()
+            .local_checkstop<scomt::mcc::USTL_USTLFIR_CHANB_FLIT_PARITY_ERROR>()
+            .local_checkstop<scomt::mcc::USTL_USTLFIR_CHANA_FATAL_PARITY_ERROR>()
+            .local_checkstop<scomt::mcc::USTL_USTLFIR_CHANB_FATAL_PARITY_ERROR>()
+            .local_checkstop<scomt::mcc::USTL_USTLFIR_CHANA_BAD_RESP_LOG_VAL>()
+            .local_checkstop<scomt::mcc::USTL_USTLFIR_CHANB_BAD_RESP_LOG_VAL>()
+            .local_checkstop<scomt::mcc::USTL_USTLFIR_CHANA_EXCESS_BAD_DATA_BITS>()
+            .local_checkstop<scomt::mcc::USTL_USTLFIR_CHANB_EXCESS_BAD_DATA_BITS>()
+            .local_checkstop<scomt::mcc::USTL_USTLFIR_CHANA_COMP_TMPL0_DATA_NOT_MMIO>()
+            .local_checkstop<scomt::mcc::USTL_USTLFIR_CHANB_COMP_TMPL0_DATA_NOT_MMIO>()
+            .local_checkstop<scomt::mcc::USTL_USTLFIR_CHANA_EXCESS_DATA_ERROR>()
+            .local_checkstop<scomt::mcc::USTL_USTLFIR_CHANB_EXCESS_DATA_ERROR>()
+            .local_checkstop<scomt::mcc::USTL_USTLFIR_CHANA_BADCRC_DATA_NOT_VALID_ERROR>()
+            .local_checkstop<scomt::mcc::USTL_USTLFIR_CHANB_BADCRC_DATA_NOT_VALID_ERROR>()
+            .local_checkstop<scomt::mcc::USTL_USTLFIR_CHANA_FIFO_OVERFLOW_ERROR>()
+            .local_checkstop<scomt::mcc::USTL_USTLFIR_CHANB_FIFO_OVERFLOW_ERROR>()
+            .local_checkstop<scomt::mcc::USTL_USTLFIR_CHANA_INVALID_CMD_ERROR>()
+            .local_checkstop<scomt::mcc::USTL_USTLFIR_CHANB_INVALID_CMD_ERROR>()
+            .local_checkstop<scomt::mcc::USTL_USTLFIR_CHANA_INVALID_DL_DP_COMBO>()
+            .local_checkstop<scomt::mcc::USTL_USTLFIR_CHANB_INVALID_DL_DP_COMBO>();
+            break;
+    }
+}
+
+///
+/// @brief Function handling the Cronus mode settings for DSTLFIR
+/// @param[in] i_target the MCC target of the DSTL fir
+/// @param[in] i_hostboot_mode true if our platform is hostboot, false if cronus
+/// @param[in,out] io_mcc_dstlfir_reg the DSTLFIR FIR register instance
+///
+void dstl_cronus_settings( const fapi2::Target<fapi2::TARGET_TYPE_MCC>& i_target,
+                           const bool i_hostboot_mode,
+                           mss::fir::reg<scomt::mcc::DSTL_DSTLFIR_RW>& io_mcc_dstlfir_reg )
+{
+    // Need to mask the SPECIAL_ATTENTION FIRs in Cronus mode because they get lit during memdiags and are causing lab issues
+    if (!i_hostboot_mode)
+    {
+        FAPI_DBG("%s Setting DSTLFIR to Cronus mode settings", mss::c_str(i_target));
+        io_mcc_dstlfir_reg.masked<scomt::mcc::DSTL_DSTLFIR_SUBCHANNEL_A_TLX_SPECIAL_ATTENTION>()
+        .masked<scomt::mcc::DSTL_DSTLFIR_SUBCHANNEL_B_TLX_SPECIAL_ATTENTION>();
     }
 }
 

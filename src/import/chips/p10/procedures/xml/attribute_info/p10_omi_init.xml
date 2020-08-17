@@ -225,4 +225,25 @@
   <mssAccessorName>omi_oc_minor_ver</mssAccessorName>
 </attribute>
 <!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_OMI_CHANNEL_FAIL_ACTION</id>
+  <targetType>TARGET_TYPE_SYSTEM</targetType>
+  <description>
+      Selects the settings for DSTLFIR and USTLFIR channel fail FIRs
+      Default: LOCAL_XSTOP (channel based FIRs will cause unit checkstop)
+      Lab/Cronus users may want XSTOP to help debug channel fails
+  </description>
+  <valueType>uint8</valueType>
+  <enum>
+    MASKED = 0x00,
+    XSTOP = 0x01,
+    LOCAL_XSTOP = 0x02,
+    RECOVERABLE = 0x03
+  </enum>
+  <default>0x02</default>
+  <platInit/>
+  <overrideOnly/>
+  <mssAccessorName>omi_channel_fail_action</mssAccessorName>
+</attribute>
+<!-- ********************************************************************** -->
 </attributes>

@@ -162,14 +162,14 @@ namespace unmask
 ///
 fapi2::ReturnCode after_p10_omi_init(const fapi2::Target<fapi2::TARGET_TYPE_MCC>& i_target)
 {
-    // Get parent MC from MCC to do necessary OMI FIR unmasks
-    // const auto& l_mc = mss::find_target<fapi2::TARGET_TYPE_MC>(i_target);
-    // FAPI_TRY(after_p10_omi_init_omi_fir_helper(l_mc));
+    // Unmask MC_OMI_FIR per FIR XML spec
+    const auto& l_mc = mss::find_target<fapi2::TARGET_TYPE_MC>(i_target);
+    FAPI_TRY(after_p10_omi_init_omi_fir_helper(l_mc));
 
-    // Set all bits on MCC DSTLFIR per FIR XML spec
+    // Unmask MCC DSTLFIR per FIR XML spec
     FAPI_TRY(after_p10_omi_init_dstlfir_helper(i_target));
 
-    // Set all bits on MCC USTLFIR per FIR XML spec
+    // Unmask MCC USTLFIR per FIR XML spec
     FAPI_TRY(after_p10_omi_init_ustlfir_helper(i_target));
 
 fapi_try_exit:

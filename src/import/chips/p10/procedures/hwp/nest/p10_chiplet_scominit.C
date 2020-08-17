@@ -48,6 +48,7 @@
 #include <fapi2_mem_access.H>
 
 #include <p10_scom_proc_7.H>
+#include <lib/fir/p10_fir.H>
 
 //------------------------------------------------------------------------------
 // Function definitions
@@ -121,7 +122,7 @@ fapi2::ReturnCode p10_chiplet_scominit(const fapi2::Target<fapi2::TARGET_TYPE_PR
 {
     FAPI_DBG("Start");
 
-    fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
+    const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
     char l_tgt_str[fapi2::MAX_ECMD_STRING_LEN];
     fapi2::ReturnCode l_rc;
 
@@ -175,6 +176,15 @@ fapi2::ReturnCode p10_chiplet_scominit(const fapi2::Target<fapi2::TARGET_TYPE_PR
                 FAPI_TRY(l_rc, "Error from p10.mi.omi.pretrain.scom.initfile");
             }
         }
+    }
+
+    // unmask MCC/OMIC/OMI FIRs
+    for (const auto& l_mc_target : i_target.getChildren<fapi2::TARGET_TYPE_MC>())
+    {
+        fapi2::toString(l_mc_target, l_tgt_str, sizeof(l_tgt_str));
+
+        FAPI_DBG("Unmasking FIRs on target %s...", l_tgt_str);
+        FAPI_TRY(mss::unmask::after_p10_chiplet_scominit(l_mc_target));
     }
 
 fapi_try_exit:

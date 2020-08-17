@@ -122,24 +122,5 @@ struct firTraits<scomt::mc::MBA_SCOMFIR_MISCFIRQ_RW>
     static constexpr fapi2::TargetType T = fapi2::TARGET_TYPE_MC;
 };
 
-///
-/// @brief FIR Register Traits for base LOCAL_FIR_RW
-///
-template <>
-struct firTraits<scomt::mc::LOCAL_FIR_RW>
-{
-    static constexpr uint64_t REG = scomt::mc::LOCAL_FIR_RW;
-    static constexpr uint64_t ACT0 = scomt::mc::EPS_FIR_LOCAL_ACTION0;
-    static constexpr uint64_t ACT1 = scomt::mc::EPS_FIR_LOCAL_ACTION1;
-    static constexpr uint64_t ACT2 = scomt::mc::EPS_FIR_LOCAL_ACTION2;
-    static constexpr uint64_t MASK = scomt::mc::EPS_FIR_LOCAL_MASK_RW;
-    static constexpr uint64_t MASK_AND = scomt::mc::EPS_FIR_LOCAL_MASK_WO_AND;
-    static constexpr uint64_t MASK_OR = scomt::mc::EPS_FIR_LOCAL_MASK_WO_OR;
-    static constexpr bool HAS_ACT2 = true;
-
-    // Target type of this register
-    static constexpr fapi2::TargetType T = fapi2::TARGET_TYPE_MC;
-};
-
 } // end mss ns
 #endif
