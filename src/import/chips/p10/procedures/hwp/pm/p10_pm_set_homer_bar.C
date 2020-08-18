@@ -174,8 +174,8 @@ fapi2::ReturnCode pm_qme_bar_config (
     FAPI_DBG("p10_pm_qme_bar_config: address 0x%016llX, size 0x%016llX",
              i_qme_bar_addr, i_qme_bar_size);
 
-    auto l_eq_mc  =
-        i_target.getMulticast<fapi2::TARGET_TYPE_EQ >(fapi2::MCGROUP_GOOD_EQ);
+    auto eqList =
+        i_target.getChildren<fapi2::TARGET_TYPE_EQ>(fapi2::TARGET_STATE_FUNCTIONAL);
 
     // Check if QME BAR address is within range,
     // High order bits checked to ensure a valid real address
@@ -207,6 +207,7 @@ fapi2::ReturnCode pm_qme_bar_config (
                 "ERROR: Bar size of 0 but non-zero i_qme_bar_size=0x%016llx",
                 i_qme_bar_size);
 
+    l_bar64.flush<0>();
     // Create the BCE BAR value
     l_bar64.set(i_qme_bar_addr);
     FAPI_DBG("i_qme_bar_addr: 0x%016llX vs l_bar64: 0x%016llX", i_qme_bar_addr, l_bar64);
@@ -233,7 +234,10 @@ fapi2::ReturnCode pm_qme_bar_config (
 
     FAPI_DBG("after: 0x%016llX", l_bar64);
 
-    FAPI_TRY(fapi2::putScom(l_eq_mc, QME_BCEBAR0, l_bar64));
+    for( auto eq : eqList )
+    {
+        FAPI_TRY(fapi2::putScom(eq, QME_BCEBAR0, l_bar64));
+    }
 
 fapi_try_exit:
     FAPI_DBG("<< p10_pm_qme_bar_config...");
