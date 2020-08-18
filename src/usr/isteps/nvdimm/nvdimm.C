@@ -5500,10 +5500,12 @@ bool nvdimmArm(TargetHandleList &i_nvdimmTargetList)
         // Status update should be valid by 1ms (usual range: 300 - 400 us)
         // but we want no chance of a false failure so we'll wait 100ms before
         // we die.
-        // A non-zero means the status has been updated
+        // Wait until a valid 0x0D status or timeout
+        // Hit issue where a non-zero might be returned before timeout
+        // but it was not the valid 0x0D status
         l_data = 0x00;
         int status_wait_time = 100*NS_PER_MSEC; // wait 100 msec
-        while( (l_data == 0x00) && (status_wait_time > 0) )
+        while( (l_data != 0x0D) && (status_wait_time > 0) )
         {
             // Check notification status and errors
             l_err = nvdimmReadReg(l_nvdimm, SET_EVENT_NOTIFICATION_STATUS, l_data);
@@ -5513,8 +5515,11 @@ bool nvdimmArm(TargetHandleList &i_nvdimmTargetList)
                         get_huid(l_nvdimm), status_wait_time);
                 break;
             }
-            nanosleep(0, NS_PER_MSEC/10); // sleep 100us (.1 ms) between reads
-            status_wait_time -= (NS_PER_MSEC/10);
+            if (l_data != 0x0D) // skip sleep if data is valid
+            {
+                nanosleep(0, NS_PER_MSEC/10); // sleep 100us (.1 ms) between reads
+                status_wait_time -= (NS_PER_MSEC/10);
+            }
         }
         // if error found from nvdimmReadReg
         if (l_err)
