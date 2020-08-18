@@ -1355,22 +1355,14 @@ errlHndl_t checkForHbOnNvdimm(void)
 //******************************************************************************
 //  verificationMatchHandler()
 //******************************************************************************
-void HWASPlatVerification::verificationMatchHandler(Target * i_target,
-      const bool i_hbFunctional, const bool i_sbeFunctional)
+errlHndl_t HWASPlatVerification::verificationMatchHandler(Target * i_target,
+                                                          const bool i_hbFunctional,
+                                                          const bool i_sbeFunctional)
 {
+    errlHndl_t l_errLog = nullptr;
 
-    // Check if i_hbFunctional and i_sbeFunctional value match
-    if (i_hbFunctional == i_sbeFunctional)
-    {
-        HWAS_INF("verifyDeconfiguration: ATTR_PG matches mbox "
-            "scratch registers for chip unit type %s with HUID %.8X "
-            "(SBE marked functional: %s  HB marked functional: %s)",
-            i_target->getAttrAsString<ATTR_TYPE>(),
-            i_target->getAttr<ATTR_HUID>(),
-            ((i_sbeFunctional) ? "True" : "False"),
-            ((i_hbFunctional) ? "True" : "False") );
-    }
-    else
+    // Hostboot must deconfigure at least what the SBE deconfigures.
+    if (i_hbFunctional && !i_sbeFunctional)
     {
         HWAS_ERR("verifyDeconfiguration: ATTR_PG does not match mbox "
             "scratch registers for chip unit type %s with HUID %.8X "
@@ -1382,19 +1374,18 @@ void HWASPlatVerification::verificationMatchHandler(Target * i_target,
 
         // Commit error due to mismatching HB and SBE deconfigs
         /*@
-        * @errortype
-        * @severity         ERRL_SEV_PREDICTIVE
+        * @errortype        ERRL_SEV_UNRECOVERABLE
         * @moduleid         MOD_DECONFIG_TARGETS_FROM_GARD_AND_VPD
         * @reasoncode       RC_HB_SBE_DECONFIG_MISMATCH
         * @userdata1        Target HUID
-        * @userdata2[0:31]  SBE did configure target (0: no, 1: yes)
-        * @userdata2[32:63] HB did configure target (0: no, 1: yes)
+        * @userdata2[0:31]  SBE target functional? (0: no, 1: yes)
+        * @userdata2[32:63] HB target functional? (0: no, 1: yes)
         * @devdesc          SBE and HB targets configuration do not
         *                   match.
         * @custdesc         Firmware error during IPL
         */
-        errlHndl_t l_errLog = new ERRORLOG::ErrlEntry (
-            ERRORLOG::ERRL_SEV_PREDICTIVE,
+        l_errLog = new ERRORLOG::ErrlEntry (
+            ERRORLOG::ERRL_SEV_UNRECOVERABLE,
             MOD_DECONFIG_TARGETS_FROM_GARD_AND_VPD,
             RC_HB_SBE_DECONFIG_MISMATCH,
             i_target->getAttr<ATTR_HUID>(),
@@ -1404,19 +1395,27 @@ void HWASPlatVerification::verificationMatchHandler(Target * i_target,
         );
 
         l_errLog->collectTrace(HWAS_COMP_NAME);
-
-        /* TODO RTC 248496   Uncomment the following when fixed
-        ERRORLOG::errlCommit(l_errLog, HWAS_COMP_ID);
-        */
-
     }
+    else
+    {
+        HWAS_INF("verifyDeconfiguration: ATTR_PG matches mbox "
+            "scratch registers for chip unit type %s with HUID %.8X "
+            "(SBE marked functional: %s  HB marked functional: %s)",
+            i_target->getAttrAsString<ATTR_TYPE>(),
+            i_target->getAttr<ATTR_HUID>(),
+            ((i_sbeFunctional) ? "True" : "False"),
+            ((i_hbFunctional) ? "True" : "False") );
+    }
+
+    return l_errLog;
 } // verificationMatchHandler
 
 //******************************************************************************
 //  verifyDeconfiguration()
 //******************************************************************************
-void HWASPlatVerification::verifyDeconfiguration()
+errlHndl_t HWASPlatVerification::verifyDeconfiguration()
 {
+    HWAS_INF(ENTER_MRK"verifyDeconfiguration");
 
     using namespace INITSERVICE::SPLESS;
 
@@ -1445,6 +1444,8 @@ void HWASPlatVerification::verifyDeconfiguration()
         {TYPE_PAU, MboxScratch2_t::REG_IDX, 12, 19},
         {TYPE_IOHS, MboxScratch2_t::REG_IDX, 20, 27}
     };
+
+    errlHndl_t l_errLog = nullptr;
 
     do
     {
@@ -1551,14 +1552,44 @@ void HWASPlatVerification::verifyDeconfiguration()
                         continue;
                     }
 
-                    verificationMatchHandler(l_chiplet, l_hostbootFunctional,
-                                             l_sbeFunctional);
+                    errlHndl_t matchError =
+                        verificationMatchHandler(l_chiplet, l_hostbootFunctional,
+                                                 l_sbeFunctional);
 
+                    if (matchError)
+                    {
+                        if (!l_errLog)
+                        {
+                            HWAS_ERR("verifyDeconfiguration: One or more SBE/HB deconfiguration mismatches exist");
+
+                            /*
+                             * @errortype  ERRL_SEV_UNRECOVERABLE
+                             * @moduleid   MOD_DECONFIG_TARGETS_FROM_GARD_AND_VPD
+                             * @reasoncode RC_HB_SBE_DECONFIG_MISMATCHES_EXIST
+                             * @devdesc    One or more SBE/HB deconfiguration mismatches exist; see other logs
+                             * @custdesc   Firmware error during IPL
+                             */
+                            l_errLog = new ERRORLOG::ErrlEntry (
+                                ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                MOD_DECONFIG_TARGETS_FROM_GARD_AND_VPD,
+                                RC_HB_SBE_DECONFIG_MISMATCHES_EXIST,
+                                0,
+                                0);
+
+                            l_errLog->collectTrace(HWAS_COMP_NAME);
+                        }
+
+                        matchError->plid(l_errLog->plid());
+                        errlCommit(matchError, HWAS_COMP_ID);
+                    }
                 }
             }
         }
     } while (0);
 
+    HWAS_INF(EXIT_MRK"verifyDeconfiguration");
+
+    return l_errLog;
 } // verifyDeconfiguration
 
 } // namespace HWAS

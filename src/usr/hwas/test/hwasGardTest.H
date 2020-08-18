@@ -323,7 +323,7 @@ private:
     of errors to instead check that what has been deconfig with test data was
     caught by verifyDeconfiguration()
     */
-    void verificationMatchHandler(Target * i_target,
+    errlHndl_t verificationMatchHandler(Target * i_target,
         const bool i_hbFunctional, const bool i_sbeFunctional) override
     {
 
@@ -358,6 +358,7 @@ private:
             }
         }
 
+        return nullptr; // return value ignored
     }
 
 public:

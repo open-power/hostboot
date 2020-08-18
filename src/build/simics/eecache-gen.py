@@ -39,6 +39,7 @@ import os
 import cli
 import struct
 import sys
+import struct
 
 ###########################################################################
 # version 1 header record
@@ -275,3 +276,28 @@ def eecache_gen(eecache_file, version):
         hb_eecache_setup(eecache_file, version, 0)
     return None
 
+
+###########################################################################
+# Get PG records for EQ chiplets from MVPD file
+# @param vpd_path - Path to file containing the meas/mvpd/ks SEEPROM data
+# @return list    - 8 EQ PG records
+###########################################################################
+def get_eq_pg_records(vpd_path):
+    with open(vpd_path, 'rb') as vpd_file:
+        os.unlink(vpd_path)
+
+        vpd_bytes = vpd_file.read()
+        pg_idx = vpd_bytes.find('CP00VD\x0201PG')
+
+        if pg_idx == -1:
+            raise Exception('Cannot find PG keyword in file ' + vpd_path)
+
+        # Skip to the PG section contents
+        pg_idx += 13
+
+        # The 8 EQ records start at byte 96 and are 3 bytes wide (see
+        # PG VPD spreadsheet)
+        pg_idx += 96
+
+        return [ struct.unpack(">I", '\x00' + vpd_bytes[pg_idx+offset:pg_idx+offset+3])[0]
+                 for offset in range(0, 8*3, 3) ]

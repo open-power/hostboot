@@ -91,6 +91,7 @@ namespace HWAS
         RC_OCMB_INTERFACE_TYPE_MISMATCH         = HWAS_COMP_ID | 0x22,
         RC_OCMB_CHIP_ID_MISMATCH                = HWAS_COMP_ID | 0x23,
         RC_HB_SBE_DECONFIG_MISMATCH             = HWAS_COMP_ID | 0x24,
+        RC_HB_SBE_DECONFIG_MISMATCHES_EXIST     = HWAS_COMP_ID | 0x25,
     };
 
     enum HwasPlatUserDetailsTypes

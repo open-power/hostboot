@@ -50,7 +50,64 @@ if( $vpo_compile == "1" ) {
 }
 ###################################
 
+###################################
+# Update scratch register 0 to let the SBE know which cores are good
+###################################
+
+# We are going to, for each processor:
+# 1. Save the MVPD SEEPROM contents to a file
+# 2. Use a python function (get_eq_pg_records) to parse out the EQ PG rows
+# 3. Figure out which cores are functional in each EQ
+# 4. Update scratch reg 1
+# We only do this if code coverage is not enabled, because we rely on
+# being able to use more backing caches for code coverage data.
+
+@simenv.hostboot_profile = 'HOSTBOOT_PROFILE' in os.environ
+
+if ($hostboot_profile == FALSE) {
+  # Standalone has 1 DCM
+  foreach $dcm in [0] {
+    # Always 2 procs per DCM
+    foreach $procnum in [0, 1] {
+      # Read out the processor's measurement/mvpd/keystore SEEPROM (512Kb)
+      (get-seeprom $dcm $procnum 2).save-file "meas_mvpd_ks_img.bin" 0 512*1024
+
+      # Get a list of the PG records for EQ chiplets
+      @simenv.eq_pg = get_eq_pg_records("meas_mvpd_ks_img.bin")
+
+      $pgmask = 0x00044100      # This is EC_R1_PG_MASK from pgLogic.C
+      $scratch1 = 0             # Accumulator for scratch reg 1
+      $scratch1bit = 0x80000000 # Loop iterator variable, shifted right 1 bit each loop
+
+      # Loop through each EQ PG row
+      foreach $pg in $eq_pg {
+        # Loop through the 4 cores in each EQ row
+        foreach $idx in [0, 1, 2, 3] {
+          # All zeroes means the part is functional
+          if (($pg & ($pgmask >> $idx)) == 0) {
+            $scratch1 = $scratch1 | $scratch1bit
+          }
+          $scratch1bit = $scratch1bit >> 1
+        }
+      }
+
+      # Invert the polarity of the scratch register (0 = functional)
+      $scratch1 = (~$scratch1) & 0xFFFFFFFF
+
+      echo "SBE Scratch Register 1 is set to "
+      print -x $scratch1
+
+      # Write value to SBE scratch register 1
+      backplane0.dcm[$dcm].chip[$procnum].cfam_cmp.lbus_map.write 0x2800+0x38*4 $scratch1 4 -b
+    }
+  }
+}
+
+###################################
+
+#################################
 # Turn on all processor cec-chips
+#################################
 foreach $proc in (get-component-list -all proc_p10_pib) {
     foreach $cc in (get-object-list component=$proc type=cec-chip -recursive) {
         @SIM_get_interface(SIM_get_object(simenv.cc), "signal").signal_raise()
@@ -92,8 +149,17 @@ try {connect backplane0.cnt_hfsi_link[1] backplane0.cnt_fsi_slave[0][1][1]} exce
 
 # See src/include/usr/initservice/mboxRegs.H for scratch reg struct definitions
 
-# Scratch8:  Set valid bits for Regs 3/4/6/9/10 (Bits 2/3/5/8/9)
-(get-master-procs)[0].cfam_cmp.lbus_map.write 0x2800 + 0x3F*4 0x34C00000 4 -b
+# Scratch register 8:  Set valid bits for Regs 3/4/6/9/10 (Bits 2/3/5/8/9)
+$scratch8 = 0x34C00000
+
+# If we're not doing code coverage, then we have set scratch register
+# 1 with PG-good cores
+if ($hostboot_profile == FALSE) {
+  # Set valid bit for register 1 (bit 0)
+  $scratch8 = $scratch8 | 0x80000000
+}
+
+(get-master-procs)[0].cfam_cmp.lbus_map.write 0x2800 + 0x3F*4 $scratch8 4 -b
 
 # Scratch3:  Set fwModeCtlFlags (0:31) - Clear all flags
 (get-master-procs)[0].cfam_cmp.lbus_map.write 0x2800 + 0x3A*4 0x00000000 4 -b

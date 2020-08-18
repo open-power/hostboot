@@ -45,22 +45,26 @@ public: // User interface
     /**
      * @brief Helper function to verify that HB and SBE
      *        deconfiguration data matches
+     * @return errlHndl_t Error if any, otherwise nullptr.
      */
-    void verifyDeconfiguration();
+    errlHndl_t verifyDeconfiguration();
 
 private:
 
     /**
-     * @brief Check whether if for a given target its caculated deconfig from HB
-     * and SBE match. If it doesn't match this function will log an error.
-     * This function is made virtual so that tests can override it.
+     * @brief Check whether if for a given target its calculated deconfig from HB
+     * and SBE match. If it doesn't match this function will log an error and
+     * return false.  This function is made virtual so that tests can override
+     * it.
      *
-     * @param[in]  i_target Target being verified
-     * @param[in]  i_hbFunctional De-configuration according to HB
-     * @param[in]  i_sbeFunctional De-configuration according to SBE
+     * @param[in]         i_target Target being verified
+     * @param[in]         i_hbFunctional De-configuration according to HB
+     * @param[in]         i_sbeFunctional De-configuration according to SBE
+     * @return errlHndl_t Error if any, otherwise nullptr.
      */
-    virtual void verificationMatchHandler(TARGETING::Target * i_target,
-        bool i_hbFunctional, bool i_sbeFunctional);
+    virtual errlHndl_t verificationMatchHandler(TARGETING::Target * i_target,
+                                                bool i_hbFunctional,
+                                                bool i_sbeFunctional);
 
 };
 
