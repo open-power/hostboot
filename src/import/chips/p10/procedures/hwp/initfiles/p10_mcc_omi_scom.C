@@ -218,6 +218,13 @@ fapi2::ReturnCode p10_mcc_omi_scom(const fapi2::Target<fapi2::TARGET_TYPE_MCC>& 
 
             FAPI_TRY(fapi2::putScom(TGT0, 0xc010e0full, l_scom_buffer));
         }
+        {
+            FAPI_TRY(fapi2::getScom( TGT0, 0xc010f48ull, l_scom_buffer ));
+
+            constexpr auto l_MCP_CHAN0_WRITE_NEW_WRITE_64B_MODE_ON = 0x1;
+            l_scom_buffer.insert<9, 1, 63, uint64_t>(l_MCP_CHAN0_WRITE_NEW_WRITE_64B_MODE_ON );
+            FAPI_TRY(fapi2::putScom(TGT0, 0xc010f48ull, l_scom_buffer));
+        }
 
     };
 fapi_try_exit:
