@@ -1340,7 +1340,11 @@ errlHndl_t copySrcToDest(dumpEntry *srcTableEntry,
 
             // If this is not a dump start message, need to collect the
             // Results table and size as well as the results table itself.
-            if (i_type != DUMP_MSG_START_MSG_TYPE)
+
+            // Fips950 firmware release should not be supporting MPIPL data
+            // collection for OPAL based systems.Hence the below code is
+            // disabled for OPAL
+            if (i_type != DUMP_MSG_START_MSG_TYPE && TARGETING::is_phyp_load())
             {
                 uint64_t resultsTableAddr = 0;
                 uint64_t resultsTableSize = 0;
