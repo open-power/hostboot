@@ -229,7 +229,18 @@ namespace fapi2
         {
             assert(l_size == sizeof(l_buffer), "size of buffer changed after deviceWrite");
             mcastGrp1ScomAddr = getMulticastAddr(mcastGrp1ScomAddr, i_target.getMulticastGroup(),
-                fapi2::MULTICAST_BITX, i_target.getCoreSelect());
+                fapi2::MULTICAST_BITX, MCCORE_NONE);
+
+            /*
+             * This "magic" SCOM operation will perform a "grab bit 0" multicast
+             * read from an address in the PCB slave that is guaranteed to be
+             * readable (since it does not depend on a chiplet being powered/
+             * enabled/clocked) and always have bit 0 set to '1'
+             * (per definition).
+             * The result of the operation will be a 64bit value that will
+             * contain said bit 0, i.e. a '1' for all members of the multicast
+             * group, and a '0' for all others.
+             */
 
             // This function contains two scoms so not necessarily thread safe
             // Each individual scom is protected, but not the greater operation

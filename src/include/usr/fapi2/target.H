@@ -200,22 +200,31 @@ inline TARGETING::TYPE convertFapi2TypeToTargeting(const fapi2::TargetType i_T)
 
     TARGETING::TYPE o_targetingType = TARGETING::TYPE_NA;
 
-    const auto conversion = std::find_if(std::cbegin(fapi2ToTargetingTypes),
-                                         std::cend(fapi2ToTargetingTypes),
-                                         [i_T](const auto a)
-                                         {
-                                             return a.fapi2Type == i_T;
-                                         });
-
-    if (conversion != std::cend(fapi2ToTargetingTypes))
+    // Muticast targets are always of type PROC
+    if(i_T & TARGET_TYPE_MULTICAST)
     {
-        o_targetingType = conversion->targetingType;
+        o_targetingType = TARGETING::TYPE_PROC;
     }
     else
     {
-        FAPI_ERR("convertFapi2TypeToTargeting:: Chiplet type not supported 0x%.8X!",
-                 i_T);
-        assert(false);
+
+        const auto conversion = std::find_if(std::cbegin(fapi2ToTargetingTypes),
+                                             std::cend(fapi2ToTargetingTypes),
+                                             [i_T](const auto a)
+                                             {
+                                                 return a.fapi2Type == i_T;
+                                             });
+
+        if (conversion != std::cend(fapi2ToTargetingTypes))
+        {
+            o_targetingType = conversion->targetingType;
+        }
+        else
+        {
+            FAPI_ERR("convertFapi2TypeToTargeting:: Chiplet type not supported 0x%.8X!",
+                     i_T);
+            assert(false);
+        }
     }
 
     return o_targetingType;
