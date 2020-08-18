@@ -46,7 +46,6 @@
     #define CPMS_CUCR_WO_CLEAR           CPMS_CUCR_SCOM1
     #define CPMS_CUCR_WO_OR              CPMS_CUCR_SCOM2
 
-    #define QME_SCSR_WO_CLEAR            QME_SCSR_SCOM1
     #define QME_SCSR_WO_OR               QME_SCSR_SCOM2
 
     #define QME_TFCSR_WO_CLEAR           QME_TFCSR_SCOM1
@@ -61,7 +60,6 @@
         #define CPMS_CUCR_WO_CLEAR           CPMS_CUCR_PPE1
         #define CPMS_CUCR_WO_OR              CPMS_CUCR_PPE2
 
-        #define QME_SCSR_WO_CLEAR            QME_SCSR_PPE1
         #define QME_SCSR_WO_OR               QME_SCSR_PPE2
 
         #define QME_TFCSR_WO_CLEAR           QME_TFCSR_PPE1
