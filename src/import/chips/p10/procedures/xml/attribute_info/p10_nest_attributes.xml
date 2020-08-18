@@ -866,4 +866,20 @@
   <initToZero/>
 </attribute>
 <!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_HW543384_WAR_MODE</id>
+  <targetType>TARGET_TYPE_SYSTEM</targetType>
+  <description>
+    Select workaround type to be applied if HW543384 is present
+  </description>
+  <valueType>uint8</valueType>
+  <enum>
+    NONE = 0,
+    TIE_NEST_TO_PAU = 1,
+    FBC_FLOW_CONTROL = 2
+  </enum>
+  <platInit/>
+  <initToZero/>
+</attribute>
+<!-- ******************************************************************** -->
 </attributes>

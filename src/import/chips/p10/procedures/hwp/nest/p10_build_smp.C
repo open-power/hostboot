@@ -759,6 +759,25 @@ fapi2::ReturnCode p10_build_smp_link_topo_tables(
 {
     FAPI_DBG("Start");
 
+    // build set of all valid group/chip IDs in system
+    fapi2::buffer<uint32_t> l_topo_ids_in_system;
+
+    for (auto g_iter = i_smp.groups.begin(); g_iter != i_smp.groups.end(); g_iter++)
+    {
+        for (auto p_iter = g_iter->second.chips.begin(); p_iter != g_iter->second.chips.end(); p_iter++)
+        {
+            fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP> l_target = *(p_iter->second.target);
+            uint8_t l_topo_index = 0;
+
+            // index into topology table is by the 5-bit topology id of processor
+            FAPI_TRY(topo::get_topology_idx(l_target, EFF_TOPOLOGY_ID, l_topo_index),
+                     "Error from topo::get_topology_idx (remote target)");
+
+            FAPI_INF("Adding topology index %d", l_topo_index);
+            l_topo_ids_in_system.setBit(l_topo_index);
+        }
+    }
+
     for (auto g_iter = i_smp.groups.begin(); g_iter != i_smp.groups.end(); g_iter++)
     {
         for (auto p_iter = g_iter->second.chips.begin(); p_iter != g_iter->second.chips.end(); p_iter++)
@@ -791,6 +810,8 @@ fapi2::ReturnCode p10_build_smp_link_topo_tables(
                 FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, l_loc_iohs_target, l_loc_link_id),
                          "Error from FAPI_ATTR_GET (ATTR_CHIP_UNIT_POS)");
 
+                FAPI_DBG("Working on link %d\n", l_loc_link_id);
+
                 bool l_link_en = (l_x_cnfg[l_loc_link_id] != fapi2::ENUM_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG_FALSE) ?
                                  (l_x_cnfg[l_loc_link_id] != fapi2::ENUM_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG_FALSE) :
                                  (l_a_cnfg[l_loc_link_id] != fapi2::ENUM_ATTR_PROC_FABRIC_A_ATTACHED_CHIP_CNFG_FALSE);
@@ -807,8 +828,24 @@ fapi2::ReturnCode p10_build_smp_link_topo_tables(
                     FAPI_TRY(topo::get_topology_idx(l_rem_target, EFF_TOPOLOGY_ID, l_topo_index),
                              "Error from topo::get_topology_idx (remote target)");
 
-                    // program the link id used to get from this chip to remote chip
-                    l_topo_id_table[l_topo_index] = l_loc_link_id;
+                    if(l_x_cnfg[l_loc_link_id] != fapi2::ENUM_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG_FALSE)
+                    {
+                        // program the link id used to get from this chip to remote chip for xlinks
+                        FAPI_DBG("Set LINK_TOPOLOGY_ID_TABLE[%d]=%d\n", l_topo_index, l_loc_link_id);
+                        l_topo_id_table[l_topo_index] = l_loc_link_id;
+                    }
+                    else
+                    {
+                        // program all indexes for valid remote groups for alinks
+                        for(uint8_t l_index = 0; l_index < P10_FBC_UTILS_MAX_TOPO_ENTRIES; l_index++)
+                        {
+                            if(l_topo_ids_in_system.getBit(l_index) && ((l_index & 0x1C) == (l_topo_index & 0x1C)))
+                            {
+                                FAPI_DBG("Set LINK_TOPOLOGY_ID_TABLE[%d]=%d\n", l_index, l_loc_link_id);
+                                l_topo_id_table[l_index] = l_loc_link_id;
+                            }
+                        }
+                    }
                 }
                 else
                 {

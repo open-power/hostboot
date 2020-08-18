@@ -113,14 +113,14 @@ const struct fir_registers_btm firs_btm =
     },
     .PHY_FIR =
     {
-        0x88FFFFC000000000, // iohs0
-        0x44FFFFC000000000, // iohs1
-        0x88FFFFC000000000, // iohs2
-        0x44FFFFC000000000, // iohs3
-        0x88FFFFC000000000, // iohs4
-        0x44FFFFC000000000, // iohs5
-        0x88FFFFC000000000, // iohs6
-        0x44FFFFC000000000, // iohs7
+        0x88FBFDC000000000, // iohs0
+        0x44FBFDC000000000, // iohs1
+        0x88FBFDC000000000, // iohs2
+        0x44FBFDC000000000, // iohs3
+        0x88FBFDC000000000, // iohs4
+        0x44FBFDC000000000, // iohs5
+        0x88FBFDC000000000, // iohs6
+        0x44FBFDC000000000, // iohs7
     },
 };
 
