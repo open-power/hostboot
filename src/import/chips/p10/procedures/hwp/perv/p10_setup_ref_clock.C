@@ -62,6 +62,7 @@ fapi2::ReturnCode p10_setup_ref_clock(const
     fapi2::buffer<uint8_t> l_attr_mux0a_rcs_pll, l_attr_mux0b_rcs_pll, l_attr_mux0c_rcs_pll, l_attr_mux0d_rcs_pll,
           l_attr_mux_dpll, l_attr_mux_omi_lcpll, l_attr_mux_input,
           l_attr_clock_pll_mux_tod;
+    fapi2::ATTR_CHIP_EC_FEATURE_HW543384_Type l_hw543384;
 
     FAPI_INF("p10_setup_ref_clock: Entering ...");
 
@@ -221,6 +222,21 @@ fapi2::ReturnCode p10_setup_ref_clock(const
 
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CLOCK_MUX3_INPUT, i_target_chip, l_attr_mux_input),
              "Error from FAPI_ATTR_GET (ATTR_CLOCK_MUX3_INPUT)");
+
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_HW543384, i_target_chip, l_hw543384),
+             "Error from FAPI_ATTR_GET (ATTR_CHIP_EC_FEATURE_HW543384)");
+
+    if (l_hw543384)
+    {
+        fapi2::ATTR_HW543384_WAR_MODE_Type l_hw543384_war_mode;
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_HW543384_WAR_MODE, FAPI_SYSTEM, l_hw543384_war_mode),
+                 "Error from FAPI_ATTR_GET (:ATTR_HW543384_WAR_MODE)");
+
+        if (l_hw543384_war_mode == fapi2::ENUM_ATTR_HW543384_WAR_MODE_TIE_NEST_TO_PAU)
+        {
+            l_attr_mux_input = fapi2::ENUM_ATTR_CLOCK_MUX3_INPUT_MUX2B;
+        }
+    }
 
     l_read_reg.writeBit<FSXCOMP_FSXLOG_ROOT_CTRL4_CLEAR_TP_MUX3_CLKIN_SEL_DC>
     (l_attr_mux_input.getBit<7>());
