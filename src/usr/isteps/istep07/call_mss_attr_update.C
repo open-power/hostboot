@@ -77,6 +77,7 @@
 
 #include <isteps/mem_utils.H>
 #include <arch/memorymap.H>
+#include <util/misc.H> // Util::isSimicsRunning
 
 namespace   ISTEP_07
 {
@@ -814,7 +815,8 @@ void check_scratch_regs_vs_attrs( IStepError & io_StepError )
 
     // If we had a scratch/attribute mismatch do reconfig loop
     // which will also sync attributes to the SP
-    if (l_reconfigLoop)
+    // TODO RTC:259097 remove simics check
+    if (l_reconfigLoop && !(Util::isSimicsRunning()))
     {
         TRACFCOMP(g_trac_isteps_trace,
                   "check_scratch_regs_vs_attrs scratch/attribute mismatch, "
