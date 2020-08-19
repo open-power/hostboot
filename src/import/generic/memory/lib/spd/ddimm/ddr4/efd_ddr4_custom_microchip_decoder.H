@@ -84,6 +84,7 @@ class decoder<mss::spd::device_type::DDR4, DDR4_CUSTOM_MICROCHIP, R > : public b
         /// @brief default dtor
         ///
         virtual ~decoder() = default;
+
         ///
         /// @brief Decodes Host Speed Supported -> HOST_SPEED_SUPPORTED
         /// @param[out] o_output encoding from SPD
@@ -91,10 +92,7 @@ class decoder<mss::spd::device_type::DDR4, DDR4_CUSTOM_MICROCHIP, R > : public b
         ///
         virtual fapi2::ReturnCode host_speed_supported(uint8_t& o_output) const override
         {
-            FAPI_TRY(( reader<fields_t::HOST_SPEED_SUPPORTED, R>(iv_target, iv_data, o_output)) );
-
-        fapi_try_exit:
-            return fapi2::current_err;
+            return reader<fields_t::HOST_SPEED_SUPPORTED, R>(iv_target, iv_data, o_output);
         }
 
         ///
@@ -104,10 +102,7 @@ class decoder<mss::spd::device_type::DDR4, DDR4_CUSTOM_MICROCHIP, R > : public b
         ///
         virtual fapi2::ReturnCode phy_odt_impedance(uint8_t& o_output) const override
         {
-            FAPI_TRY(( reader<fields_t::PHY_ODT_IMPEDANCE, R>(iv_target, iv_data, o_output)) );
-
-        fapi_try_exit:
-            return fapi2::current_err;
+            return reader<fields_t::PHY_ODT_IMPEDANCE, R>(iv_target, iv_data, o_output);
         }
 
         ///
@@ -117,10 +112,7 @@ class decoder<mss::spd::device_type::DDR4, DDR4_CUSTOM_MICROCHIP, R > : public b
         ///
         virtual fapi2::ReturnCode phy_drive_impedance_pull_up(uint8_t& o_output) const override
         {
-            FAPI_TRY(( reader<fields_t::PHY_DRIVE_IMPEDANCE_PULL_UP, R>(iv_target, iv_data, o_output)) );
-
-        fapi_try_exit:
-            return fapi2::current_err;
+            return reader<fields_t::PHY_DRIVE_IMPEDANCE_PULL_UP, R>(iv_target, iv_data, o_output);
         }
 
         ///
@@ -130,10 +122,7 @@ class decoder<mss::spd::device_type::DDR4, DDR4_CUSTOM_MICROCHIP, R > : public b
         ///
         virtual fapi2::ReturnCode phy_drive_impedance_pull_down(uint8_t& o_output) const override
         {
-            FAPI_TRY(( reader<fields_t::PHY_DRIVE_IMPEDANCE_PULL_DOWN, R>(iv_target, iv_data, o_output)) );
-
-        fapi_try_exit:
-            return fapi2::current_err;
+            return reader<fields_t::PHY_DRIVE_IMPEDANCE_PULL_DOWN, R>(iv_target, iv_data, o_output);
         }
 
         ///
@@ -143,10 +132,7 @@ class decoder<mss::spd::device_type::DDR4, DDR4_CUSTOM_MICROCHIP, R > : public b
         ///
         virtual fapi2::ReturnCode phy_drive_impedance(uint8_t& o_output) const override
         {
-            FAPI_TRY(( reader<fields_t::PHY_DRIVE_IMPEDANCE, R>(iv_target, iv_data, o_output)) );
-
-        fapi_try_exit:
-            return fapi2::current_err;
+            return reader<fields_t::PHY_DRIVE_IMPEDANCE, R>(iv_target, iv_data, o_output);
         }
 
         ///
@@ -156,10 +142,7 @@ class decoder<mss::spd::device_type::DDR4, DDR4_CUSTOM_MICROCHIP, R > : public b
         ///
         virtual fapi2::ReturnCode master_ranks_supported(uint8_t& o_output) const override
         {
-            FAPI_TRY(( reader<fields_t::MASTER_RANKS_SUPPORTED, R>(iv_target, iv_data, o_output)) );
-
-        fapi_try_exit:
-            return fapi2::current_err;
+            return reader<fields_t::MASTER_RANKS_SUPPORTED, R>(iv_target, iv_data, o_output);
         }
 
         ///
@@ -169,10 +152,7 @@ class decoder<mss::spd::device_type::DDR4, DDR4_CUSTOM_MICROCHIP, R > : public b
         ///
         virtual fapi2::ReturnCode phy_slew_rate_dq_dqs(uint8_t& o_output) const override
         {
-            FAPI_TRY(( reader<fields_t::PHY_SLEW_RATE_DQ_DQS, R>(iv_target, iv_data, o_output)) );
-
-        fapi_try_exit:
-            return fapi2::current_err;
+            return reader<fields_t::PHY_SLEW_RATE_DQ_DQS, R>(iv_target, iv_data, o_output);
         }
 
         ///
@@ -182,10 +162,7 @@ class decoder<mss::spd::device_type::DDR4, DDR4_CUSTOM_MICROCHIP, R > : public b
         ///
         virtual fapi2::ReturnCode atx_impedance(uint8_t& o_output) const override
         {
-            FAPI_TRY(( reader<fields_t::ATX_IMPEDANCE, R>(iv_target, iv_data, o_output)) );
-
-        fapi_try_exit:
-            return fapi2::current_err;
+            return reader<fields_t::ATX_IMPEDANCE, R>(iv_target, iv_data, o_output);
         }
 
         ///
@@ -195,10 +172,7 @@ class decoder<mss::spd::device_type::DDR4, DDR4_CUSTOM_MICROCHIP, R > : public b
         ///
         virtual fapi2::ReturnCode atx_slew_rate(uint8_t& o_output) const override
         {
-            FAPI_TRY(( reader<fields_t::ATX_SLEW_RATE, R>(iv_target, iv_data, o_output)) );
-
-        fapi_try_exit:
-            return fapi2::current_err;
+            return reader<fields_t::ATX_SLEW_RATE, R>(iv_target, iv_data, o_output);
         }
 
         ///
@@ -208,10 +182,7 @@ class decoder<mss::spd::device_type::DDR4, DDR4_CUSTOM_MICROCHIP, R > : public b
         ///
         virtual fapi2::ReturnCode ck_impedance(uint8_t& o_output) const override
         {
-            FAPI_TRY(( reader<fields_t::CK_IMPEDANCE, R>(iv_target, iv_data, o_output)) );
-
-        fapi_try_exit:
-            return fapi2::current_err;
+            return reader<fields_t::CK_IMPEDANCE, R>(iv_target, iv_data, o_output);
         }
 
         ///
@@ -221,10 +192,7 @@ class decoder<mss::spd::device_type::DDR4, DDR4_CUSTOM_MICROCHIP, R > : public b
         ///
         virtual fapi2::ReturnCode ck_slew_rate(uint8_t& o_output) const override
         {
-            FAPI_TRY(( reader<fields_t::CK_SLEW_RATE, R>(iv_target, iv_data, o_output)) );
-
-        fapi_try_exit:
-            return fapi2::current_err;
+            return reader<fields_t::CK_SLEW_RATE, R>(iv_target, iv_data, o_output);
         }
 
         ///
@@ -234,10 +202,7 @@ class decoder<mss::spd::device_type::DDR4, DDR4_CUSTOM_MICROCHIP, R > : public b
         ///
         virtual fapi2::ReturnCode alert_odt_impedance(uint8_t& o_output) const override
         {
-            FAPI_TRY(( reader<fields_t::ALERT_ODT_IMPEDANCE, R>(iv_target, iv_data, o_output)) );
-
-        fapi_try_exit:
-            return fapi2::current_err;
+            return reader<fields_t::ALERT_ODT_IMPEDANCE, R>(iv_target, iv_data, o_output);
         }
 
         ///
@@ -247,10 +212,7 @@ class decoder<mss::spd::device_type::DDR4, DDR4_CUSTOM_MICROCHIP, R > : public b
         ///
         virtual fapi2::ReturnCode dram_rtt_nom(uint8_t& o_output) const override
         {
-            FAPI_TRY(( reader<fields_t::DRAM_RTT_NOM, R>(iv_target, iv_data, o_output)) );
-
-        fapi_try_exit:
-            return fapi2::current_err;
+            return reader<fields_t::DRAM_RTT_NOM, R>(iv_target, iv_data, o_output);
         }
 
         ///
@@ -260,10 +222,7 @@ class decoder<mss::spd::device_type::DDR4, DDR4_CUSTOM_MICROCHIP, R > : public b
         ///
         virtual fapi2::ReturnCode dram_rtt_nom_rank0(uint8_t& o_output) const override
         {
-            FAPI_TRY(( reader<fields_t::DRAM_RTT_NOM_RANK0, R>(iv_target, iv_data, o_output)) );
-
-        fapi_try_exit:
-            return fapi2::current_err;
+            return reader<fields_t::DRAM_RTT_NOM_RANK0, R>(iv_target, iv_data, o_output);
         }
 
         ///
@@ -273,10 +232,7 @@ class decoder<mss::spd::device_type::DDR4, DDR4_CUSTOM_MICROCHIP, R > : public b
         ///
         virtual fapi2::ReturnCode dram_rtt_nom_rank1(uint8_t& o_output) const override
         {
-            FAPI_TRY(( reader<fields_t::DRAM_RTT_NOM_RANK1, R>(iv_target, iv_data, o_output)) );
-
-        fapi_try_exit:
-            return fapi2::current_err;
+            return reader<fields_t::DRAM_RTT_NOM_RANK1, R>(iv_target, iv_data, o_output);
         }
 
         ///
@@ -286,10 +242,7 @@ class decoder<mss::spd::device_type::DDR4, DDR4_CUSTOM_MICROCHIP, R > : public b
         ///
         virtual fapi2::ReturnCode dram_rtt_nom_rank2(uint8_t& o_output) const override
         {
-            FAPI_TRY(( reader<fields_t::DRAM_RTT_NOM_RANK2, R>(iv_target, iv_data, o_output)) );
-
-        fapi_try_exit:
-            return fapi2::current_err;
+            return reader<fields_t::DRAM_RTT_NOM_RANK2, R>(iv_target, iv_data, o_output);
         }
 
         ///
@@ -299,10 +252,7 @@ class decoder<mss::spd::device_type::DDR4, DDR4_CUSTOM_MICROCHIP, R > : public b
         ///
         virtual fapi2::ReturnCode dram_rtt_nom_rank3(uint8_t& o_output) const override
         {
-            FAPI_TRY(( reader<fields_t::DRAM_RTT_NOM_RANK3, R>(iv_target, iv_data, o_output)) );
-
-        fapi_try_exit:
-            return fapi2::current_err;
+            return reader<fields_t::DRAM_RTT_NOM_RANK3, R>(iv_target, iv_data, o_output);
         }
 
         ///
@@ -312,10 +262,7 @@ class decoder<mss::spd::device_type::DDR4, DDR4_CUSTOM_MICROCHIP, R > : public b
         ///
         virtual fapi2::ReturnCode dram_rtt_wr(uint8_t& o_output) const override
         {
-            FAPI_TRY(( reader<fields_t::DRAM_RTT_WR, R>(iv_target, iv_data, o_output)) );
-
-        fapi_try_exit:
-            return fapi2::current_err;
+            return reader<fields_t::DRAM_RTT_WR, R>(iv_target, iv_data, o_output);
         }
 
         ///
@@ -325,10 +272,7 @@ class decoder<mss::spd::device_type::DDR4, DDR4_CUSTOM_MICROCHIP, R > : public b
         ///
         virtual fapi2::ReturnCode dram_rtt_wr_rank0(uint8_t& o_output) const override
         {
-            FAPI_TRY(( reader<fields_t::DRAM_RTT_WR_RANK0, R>(iv_target, iv_data, o_output)) );
-
-        fapi_try_exit:
-            return fapi2::current_err;
+            return reader<fields_t::DRAM_RTT_WR_RANK0, R>(iv_target, iv_data, o_output);
         }
 
         ///
@@ -338,10 +282,7 @@ class decoder<mss::spd::device_type::DDR4, DDR4_CUSTOM_MICROCHIP, R > : public b
         ///
         virtual fapi2::ReturnCode dram_rtt_wr_rank1(uint8_t& o_output) const override
         {
-            FAPI_TRY(( reader<fields_t::DRAM_RTT_WR_RANK1, R>(iv_target, iv_data, o_output)) );
-
-        fapi_try_exit:
-            return fapi2::current_err;
+            return reader<fields_t::DRAM_RTT_WR_RANK1, R>(iv_target, iv_data, o_output);
         }
 
         ///
@@ -351,10 +292,7 @@ class decoder<mss::spd::device_type::DDR4, DDR4_CUSTOM_MICROCHIP, R > : public b
         ///
         virtual fapi2::ReturnCode dram_rtt_wr_rank2(uint8_t& o_output) const override
         {
-            FAPI_TRY(( reader<fields_t::DRAM_RTT_WR_RANK2, R>(iv_target, iv_data, o_output)) );
-
-        fapi_try_exit:
-            return fapi2::current_err;
+            return reader<fields_t::DRAM_RTT_WR_RANK2, R>(iv_target, iv_data, o_output);
         }
 
         ///
@@ -364,10 +302,7 @@ class decoder<mss::spd::device_type::DDR4, DDR4_CUSTOM_MICROCHIP, R > : public b
         ///
         virtual fapi2::ReturnCode dram_rtt_wr_rank3(uint8_t& o_output) const override
         {
-            FAPI_TRY(( reader<fields_t::DRAM_RTT_WR_RANK3, R>(iv_target, iv_data, o_output)) );
-
-        fapi_try_exit:
-            return fapi2::current_err;
+            return reader<fields_t::DRAM_RTT_WR_RANK3, R>(iv_target, iv_data, o_output);
         }
 
         ///
@@ -377,10 +312,7 @@ class decoder<mss::spd::device_type::DDR4, DDR4_CUSTOM_MICROCHIP, R > : public b
         ///
         virtual fapi2::ReturnCode dram_rtt_park(uint8_t& o_output) const override
         {
-            FAPI_TRY(( reader<fields_t::DRAM_RTT_PARK, R>(iv_target, iv_data, o_output)) );
-
-        fapi_try_exit:
-            return fapi2::current_err;
+            return reader<fields_t::DRAM_RTT_PARK, R>(iv_target, iv_data, o_output);
         }
 
         ///
@@ -390,10 +322,7 @@ class decoder<mss::spd::device_type::DDR4, DDR4_CUSTOM_MICROCHIP, R > : public b
         ///
         virtual fapi2::ReturnCode dram_rtt_park_rank0(uint8_t& o_output) const override
         {
-            FAPI_TRY(( reader<fields_t::DRAM_RTT_PARK_RANK0, R>(iv_target, iv_data, o_output)) );
-
-        fapi_try_exit:
-            return fapi2::current_err;
+            return reader<fields_t::DRAM_RTT_PARK_RANK0, R>(iv_target, iv_data, o_output);
         }
 
         ///
@@ -403,10 +332,7 @@ class decoder<mss::spd::device_type::DDR4, DDR4_CUSTOM_MICROCHIP, R > : public b
         ///
         virtual fapi2::ReturnCode dram_rtt_park_rank1(uint8_t& o_output) const override
         {
-            FAPI_TRY(( reader<fields_t::DRAM_RTT_PARK_RANK1, R>(iv_target, iv_data, o_output)) );
-
-        fapi_try_exit:
-            return fapi2::current_err;
+            return reader<fields_t::DRAM_RTT_PARK_RANK1, R>(iv_target, iv_data, o_output);
         }
 
         ///
@@ -416,10 +342,7 @@ class decoder<mss::spd::device_type::DDR4, DDR4_CUSTOM_MICROCHIP, R > : public b
         ///
         virtual fapi2::ReturnCode dram_rtt_park_rank2(uint8_t& o_output) const override
         {
-            FAPI_TRY(( reader<fields_t::DRAM_RTT_PARK_RANK2, R>(iv_target, iv_data, o_output)) );
-
-        fapi_try_exit:
-            return fapi2::current_err;
+            return reader<fields_t::DRAM_RTT_PARK_RANK2, R>(iv_target, iv_data, o_output);
         }
 
         ///
@@ -429,10 +352,7 @@ class decoder<mss::spd::device_type::DDR4, DDR4_CUSTOM_MICROCHIP, R > : public b
         ///
         virtual fapi2::ReturnCode dram_rtt_park_rank3(uint8_t& o_output) const override
         {
-            FAPI_TRY(( reader<fields_t::DRAM_RTT_PARK_RANK3, R>(iv_target, iv_data, o_output)) );
-
-        fapi_try_exit:
-            return fapi2::current_err;
+            return reader<fields_t::DRAM_RTT_PARK_RANK3, R>(iv_target, iv_data, o_output);
         }
 
         ///
@@ -442,11 +362,7 @@ class decoder<mss::spd::device_type::DDR4, DDR4_CUSTOM_MICROCHIP, R > : public b
         ///
         virtual fapi2::ReturnCode dram_dic(uint8_t& o_output) const override
         {
-            FAPI_TRY( (reader<fields_t::DRAM_DIC, R>
-                       (iv_target, iv_data, o_output)) );
-
-        fapi_try_exit:
-            return fapi2::current_err;
+            return reader<fields_t::DRAM_DIC, R>(iv_target, iv_data, o_output);
         }
 
         ///
@@ -456,10 +372,7 @@ class decoder<mss::spd::device_type::DDR4, DDR4_CUSTOM_MICROCHIP, R > : public b
         ///
         virtual fapi2::ReturnCode write_preamble(uint8_t& o_output) const override
         {
-            FAPI_TRY(( reader<fields_t::WRITE_PREAMBLE, R>(iv_target, iv_data, o_output)) );
-
-        fapi_try_exit:
-            return fapi2::current_err;
+            return reader<fields_t::WRITE_PREAMBLE, R>(iv_target, iv_data, o_output);
         }
 
         ///
@@ -469,10 +382,7 @@ class decoder<mss::spd::device_type::DDR4, DDR4_CUSTOM_MICROCHIP, R > : public b
         ///
         virtual fapi2::ReturnCode read_preamble(uint8_t& o_output) const override
         {
-            FAPI_TRY(( reader<fields_t::READ_PREAMBLE, R>(iv_target, iv_data, o_output)) );
-
-        fapi_try_exit:
-            return fapi2::current_err;
+            return reader<fields_t::READ_PREAMBLE, R>(iv_target, iv_data, o_output);
         }
 
         ///
@@ -482,10 +392,7 @@ class decoder<mss::spd::device_type::DDR4, DDR4_CUSTOM_MICROCHIP, R > : public b
         ///
         virtual fapi2::ReturnCode phy_equalization(uint8_t& o_output) const override
         {
-            FAPI_TRY(( reader<fields_t::PHY_EQUALIZATION, R>(iv_target, iv_data, o_output)) );
-
-        fapi_try_exit:
-            return fapi2::current_err;
+            return reader<fields_t::PHY_EQUALIZATION, R>(iv_target, iv_data, o_output);
         }
 
         ///
@@ -495,10 +402,7 @@ class decoder<mss::spd::device_type::DDR4, DDR4_CUSTOM_MICROCHIP, R > : public b
         ///
         virtual fapi2::ReturnCode init_phy_vref(uint8_t& o_output) const override
         {
-            FAPI_TRY( (reader<fields_t::INIT_PHY_VREF, R>(iv_target, iv_data, o_output)) );
-
-        fapi_try_exit:
-            return fapi2::current_err;
+            return reader<fields_t::INIT_PHY_VREF, R>(iv_target, iv_data, o_output);
         }
 
         ///
@@ -508,10 +412,7 @@ class decoder<mss::spd::device_type::DDR4, DDR4_CUSTOM_MICROCHIP, R > : public b
         ///
         virtual fapi2::ReturnCode wr_vref_dq_range(uint8_t& o_output) const override
         {
-            FAPI_TRY(( reader<fields_t::WR_VREF_DQ_RANGE, R>(iv_target, iv_data, o_output)) );
-
-        fapi_try_exit:
-            return fapi2::current_err;
+            return reader<fields_t::WR_VREF_DQ_RANGE, R>(iv_target, iv_data, o_output);
         }
 
         ///
@@ -521,10 +422,7 @@ class decoder<mss::spd::device_type::DDR4, DDR4_CUSTOM_MICROCHIP, R > : public b
         ///
         virtual fapi2::ReturnCode wr_vref_dq_value(uint8_t& o_output) const override
         {
-            FAPI_TRY(( reader<fields_t::WR_VREF_DQ_VALUE, R>(iv_target, iv_data, o_output)) );
-
-        fapi_try_exit:
-            return fapi2::current_err;
+            return reader<fields_t::WR_VREF_DQ_VALUE, R>(iv_target, iv_data, o_output);
         }
 
         ///
@@ -534,10 +432,7 @@ class decoder<mss::spd::device_type::DDR4, DDR4_CUSTOM_MICROCHIP, R > : public b
         ///
         virtual fapi2::ReturnCode odt_wr_map_rank3(uint8_t& o_output) const override
         {
-            FAPI_TRY(( reader<fields_t::ODT_WR_MAP_RANK3, R>(iv_target, iv_data, o_output)) );
-
-        fapi_try_exit:
-            return fapi2::current_err;
+            return reader<fields_t::ODT_WR_MAP_RANK3, R>(iv_target, iv_data, o_output);
         }
 
         ///
@@ -547,10 +442,7 @@ class decoder<mss::spd::device_type::DDR4, DDR4_CUSTOM_MICROCHIP, R > : public b
         ///
         virtual fapi2::ReturnCode odt_wr_map_rank2(uint8_t& o_output) const override
         {
-            FAPI_TRY(( reader<fields_t::ODT_WR_MAP_RANK2, R>(iv_target, iv_data, o_output)) );
-
-        fapi_try_exit:
-            return fapi2::current_err;
+            return reader<fields_t::ODT_WR_MAP_RANK2, R>(iv_target, iv_data, o_output);
         }
 
         ///
@@ -560,10 +452,7 @@ class decoder<mss::spd::device_type::DDR4, DDR4_CUSTOM_MICROCHIP, R > : public b
         ///
         virtual fapi2::ReturnCode odt_wr_map_rank1(uint8_t& o_output) const override
         {
-            FAPI_TRY(( reader<fields_t::ODT_WR_MAP_RANK1, R>(iv_target, iv_data, o_output)) );
-
-        fapi_try_exit:
-            return fapi2::current_err;
+            return reader<fields_t::ODT_WR_MAP_RANK1, R>(iv_target, iv_data, o_output);
         }
 
         ///
@@ -573,10 +462,7 @@ class decoder<mss::spd::device_type::DDR4, DDR4_CUSTOM_MICROCHIP, R > : public b
         ///
         virtual fapi2::ReturnCode odt_wr_map_rank0(uint8_t& o_output) const override
         {
-            FAPI_TRY(( reader<fields_t::ODT_WR_MAP_RANK0, R>(iv_target, iv_data, o_output)) );
-
-        fapi_try_exit:
-            return fapi2::current_err;
+            return reader<fields_t::ODT_WR_MAP_RANK0, R>(iv_target, iv_data, o_output);
         }
 
         ///
@@ -586,10 +472,7 @@ class decoder<mss::spd::device_type::DDR4, DDR4_CUSTOM_MICROCHIP, R > : public b
         ///
         virtual fapi2::ReturnCode odt_rd_map_rank3(uint8_t& o_output) const override
         {
-            FAPI_TRY(( reader<fields_t::ODT_RD_MAP_RANK3, R>(iv_target, iv_data, o_output)) );
-
-        fapi_try_exit:
-            return fapi2::current_err;
+            return reader<fields_t::ODT_RD_MAP_RANK3, R>(iv_target, iv_data, o_output);
         }
 
         ///
@@ -599,10 +482,7 @@ class decoder<mss::spd::device_type::DDR4, DDR4_CUSTOM_MICROCHIP, R > : public b
         ///
         virtual fapi2::ReturnCode odt_rd_map_rank2(uint8_t& o_output) const override
         {
-            FAPI_TRY(( reader<fields_t::ODT_RD_MAP_RANK2, R>(iv_target, iv_data, o_output)) );
-
-        fapi_try_exit:
-            return fapi2::current_err;
+            return reader<fields_t::ODT_RD_MAP_RANK2, R>(iv_target, iv_data, o_output);
         }
 
         ///
@@ -612,10 +492,7 @@ class decoder<mss::spd::device_type::DDR4, DDR4_CUSTOM_MICROCHIP, R > : public b
         ///
         virtual fapi2::ReturnCode odt_rd_map_rank1(uint8_t& o_output) const override
         {
-            FAPI_TRY(( reader<fields_t::ODT_RD_MAP_RANK1, R>(iv_target, iv_data, o_output)) );
-
-        fapi_try_exit:
-            return fapi2::current_err;
+            return reader<fields_t::ODT_RD_MAP_RANK1, R>(iv_target, iv_data, o_output);
         }
 
         ///
@@ -625,10 +502,7 @@ class decoder<mss::spd::device_type::DDR4, DDR4_CUSTOM_MICROCHIP, R > : public b
         ///
         virtual fapi2::ReturnCode odt_rd_map_rank0(uint8_t& o_output) const override
         {
-            FAPI_TRY(( reader<fields_t::ODT_RD_MAP_RANK0, R>(iv_target, iv_data, o_output)) );
-
-        fapi_try_exit:
-            return fapi2::current_err;
+            return reader<fields_t::ODT_RD_MAP_RANK0, R>(iv_target, iv_data, o_output);
         }
 
         ///
@@ -638,10 +512,7 @@ class decoder<mss::spd::device_type::DDR4, DDR4_CUSTOM_MICROCHIP, R > : public b
         ///
         virtual fapi2::ReturnCode geardown_during_training(uint8_t& o_output) const override
         {
-            FAPI_TRY(( reader<fields_t::GEARDOWN_DURING_TRAINING, R>(iv_target, iv_data, o_output)) );
-
-        fapi_try_exit:
-            return fapi2::current_err;
+            return reader<fields_t::GEARDOWN_DURING_TRAINING, R>(iv_target, iv_data, o_output);
         }
 
         ///
@@ -720,10 +591,7 @@ class decoder<mss::spd::device_type::DDR4, DDR4_CUSTOM_MICROCHIP, R > : public b
         ///
         virtual fapi2::ReturnCode dfimrl_ddrclk(uint8_t& o_output) const
         {
-            FAPI_TRY( (reader<fields_t::DFIMRL_DDRCLK, R>(iv_target, iv_data, o_output)) );
-
-        fapi_try_exit:
-            return fapi2::current_err;
+            return reader<fields_t::DFIMRL_DDRCLK, R>(iv_target, iv_data, o_output);
         }
 
         ///
@@ -733,10 +601,7 @@ class decoder<mss::spd::device_type::DDR4, DDR4_CUSTOM_MICROCHIP, R > : public b
         ///
         virtual fapi2::ReturnCode cac_delay_a_side_group_0(uint8_t& o_output) const
         {
-            FAPI_TRY( (reader<fields_t::CAC_DLY_A_0, R>(iv_target, iv_data, o_output)) );
-
-        fapi_try_exit:
-            return fapi2::current_err;
+            return reader<fields_t::CAC_DLY_A_0, R>(iv_target, iv_data, o_output);
         }
 
         ///
@@ -746,10 +611,7 @@ class decoder<mss::spd::device_type::DDR4, DDR4_CUSTOM_MICROCHIP, R > : public b
         ///
         virtual fapi2::ReturnCode cac_delay_a_side_group_1(uint8_t& o_output) const
         {
-            FAPI_TRY( (reader<fields_t::CAC_DLY_A_1, R>(iv_target, iv_data, o_output)) );
-
-        fapi_try_exit:
-            return fapi2::current_err;
+            return reader<fields_t::CAC_DLY_A_1, R>(iv_target, iv_data, o_output);
         }
 
         ///
@@ -759,10 +621,7 @@ class decoder<mss::spd::device_type::DDR4, DDR4_CUSTOM_MICROCHIP, R > : public b
         ///
         virtual fapi2::ReturnCode cac_delay_a_side_group_2(uint8_t& o_output) const
         {
-            FAPI_TRY( (reader<fields_t::CAC_DLY_A_2, R>(iv_target, iv_data, o_output)) );
-
-        fapi_try_exit:
-            return fapi2::current_err;
+            return reader<fields_t::CAC_DLY_A_2, R>(iv_target, iv_data, o_output);
         }
 
         ///
@@ -772,10 +631,7 @@ class decoder<mss::spd::device_type::DDR4, DDR4_CUSTOM_MICROCHIP, R > : public b
         ///
         virtual fapi2::ReturnCode cac_delay_a_side_group_3(uint8_t& o_output) const
         {
-            FAPI_TRY( (reader<fields_t::CAC_DLY_A_3, R>(iv_target, iv_data, o_output)) );
-
-        fapi_try_exit:
-            return fapi2::current_err;
+            return reader<fields_t::CAC_DLY_A_3, R>(iv_target, iv_data, o_output);
         }
 
         ///
@@ -785,10 +641,7 @@ class decoder<mss::spd::device_type::DDR4, DDR4_CUSTOM_MICROCHIP, R > : public b
         ///
         virtual fapi2::ReturnCode cac_delay_a_side_group_4(uint8_t& o_output) const
         {
-            FAPI_TRY( (reader<fields_t::CAC_DLY_A_4, R>(iv_target, iv_data, o_output)) );
-
-        fapi_try_exit:
-            return fapi2::current_err;
+            return reader<fields_t::CAC_DLY_A_4, R>(iv_target, iv_data, o_output);
         }
 
         ///
@@ -798,10 +651,7 @@ class decoder<mss::spd::device_type::DDR4, DDR4_CUSTOM_MICROCHIP, R > : public b
         ///
         virtual fapi2::ReturnCode cac_delay_a_side_group_5(uint8_t& o_output) const
         {
-            FAPI_TRY( (reader<fields_t::CAC_DLY_A_5, R>(iv_target, iv_data, o_output)) );
-
-        fapi_try_exit:
-            return fapi2::current_err;
+            return reader<fields_t::CAC_DLY_A_5, R>(iv_target, iv_data, o_output);
         }
 
         ///
@@ -811,10 +661,7 @@ class decoder<mss::spd::device_type::DDR4, DDR4_CUSTOM_MICROCHIP, R > : public b
         ///
         virtual fapi2::ReturnCode cac_delay_a_side_group_6(uint8_t& o_output) const
         {
-            FAPI_TRY( (reader<fields_t::CAC_DLY_A_6, R>(iv_target, iv_data, o_output)) );
-
-        fapi_try_exit:
-            return fapi2::current_err;
+            return reader<fields_t::CAC_DLY_A_6, R>(iv_target, iv_data, o_output);
         }
 
         ///
@@ -824,10 +671,7 @@ class decoder<mss::spd::device_type::DDR4, DDR4_CUSTOM_MICROCHIP, R > : public b
         ///
         virtual fapi2::ReturnCode cac_delay_a_side_group_7(uint8_t& o_output) const
         {
-            FAPI_TRY( (reader<fields_t::CAC_DLY_A_7, R>(iv_target, iv_data, o_output)) );
-
-        fapi_try_exit:
-            return fapi2::current_err;
+            return reader<fields_t::CAC_DLY_A_7, R>(iv_target, iv_data, o_output);
         }
 
         ///
@@ -837,10 +681,7 @@ class decoder<mss::spd::device_type::DDR4, DDR4_CUSTOM_MICROCHIP, R > : public b
         ///
         virtual fapi2::ReturnCode cac_delay_b_side_group_0(uint8_t& o_output) const
         {
-            FAPI_TRY( (reader<fields_t::CAC_DLY_B_0, R>(iv_target, iv_data, o_output)) );
-
-        fapi_try_exit:
-            return fapi2::current_err;
+            return reader<fields_t::CAC_DLY_B_0, R>(iv_target, iv_data, o_output);
         }
 
         ///
@@ -850,10 +691,7 @@ class decoder<mss::spd::device_type::DDR4, DDR4_CUSTOM_MICROCHIP, R > : public b
         ///
         virtual fapi2::ReturnCode cac_delay_b_side_group_1(uint8_t& o_output) const
         {
-            FAPI_TRY( (reader<fields_t::CAC_DLY_B_1, R>(iv_target, iv_data, o_output)) );
-
-        fapi_try_exit:
-            return fapi2::current_err;
+            return reader<fields_t::CAC_DLY_B_1, R>(iv_target, iv_data, o_output);
         }
 
         ///
@@ -863,10 +701,7 @@ class decoder<mss::spd::device_type::DDR4, DDR4_CUSTOM_MICROCHIP, R > : public b
         ///
         virtual fapi2::ReturnCode cac_delay_b_side_group_2(uint8_t& o_output) const
         {
-            FAPI_TRY( (reader<fields_t::CAC_DLY_B_2, R>(iv_target, iv_data, o_output)) );
-
-        fapi_try_exit:
-            return fapi2::current_err;
+            return reader<fields_t::CAC_DLY_B_2, R>(iv_target, iv_data, o_output);
         }
 
         ///
@@ -876,10 +711,7 @@ class decoder<mss::spd::device_type::DDR4, DDR4_CUSTOM_MICROCHIP, R > : public b
         ///
         virtual fapi2::ReturnCode cac_delay_b_side_group_3(uint8_t& o_output) const
         {
-            FAPI_TRY( (reader<fields_t::CAC_DLY_B_3, R>(iv_target, iv_data, o_output)) );
-
-        fapi_try_exit:
-            return fapi2::current_err;
+            return reader<fields_t::CAC_DLY_B_3, R>(iv_target, iv_data, o_output);
         }
 
         ///
@@ -889,10 +721,7 @@ class decoder<mss::spd::device_type::DDR4, DDR4_CUSTOM_MICROCHIP, R > : public b
         ///
         virtual fapi2::ReturnCode cac_delay_b_side_group_4(uint8_t& o_output) const
         {
-            FAPI_TRY( (reader<fields_t::CAC_DLY_B_4, R>(iv_target, iv_data, o_output)) );
-
-        fapi_try_exit:
-            return fapi2::current_err;
+            return reader<fields_t::CAC_DLY_B_4, R>(iv_target, iv_data, o_output);
         }
 
         ///
@@ -902,10 +731,7 @@ class decoder<mss::spd::device_type::DDR4, DDR4_CUSTOM_MICROCHIP, R > : public b
         ///
         virtual fapi2::ReturnCode cac_delay_b_side_group_5(uint8_t& o_output) const
         {
-            FAPI_TRY( (reader<fields_t::CAC_DLY_B_5, R>(iv_target, iv_data, o_output)) );
-
-        fapi_try_exit:
-            return fapi2::current_err;
+            return reader<fields_t::CAC_DLY_B_5, R>(iv_target, iv_data, o_output);
         }
 
         ///
@@ -915,10 +741,7 @@ class decoder<mss::spd::device_type::DDR4, DDR4_CUSTOM_MICROCHIP, R > : public b
         ///
         virtual fapi2::ReturnCode cac_delay_b_side_group_6(uint8_t& o_output) const
         {
-            FAPI_TRY( (reader<fields_t::CAC_DLY_B_6, R>(iv_target, iv_data, o_output)) );
-
-        fapi_try_exit:
-            return fapi2::current_err;
+            return reader<fields_t::CAC_DLY_B_6, R>(iv_target, iv_data, o_output);
         }
 
         ///
@@ -928,10 +751,7 @@ class decoder<mss::spd::device_type::DDR4, DDR4_CUSTOM_MICROCHIP, R > : public b
         ///
         virtual fapi2::ReturnCode cac_delay_b_side_group_7(uint8_t& o_output) const
         {
-            FAPI_TRY( (reader<fields_t::CAC_DLY_B_7, R>(iv_target, iv_data, o_output)) );
-
-        fapi_try_exit:
-            return fapi2::current_err;
+            return reader<fields_t::CAC_DLY_B_7, R>(iv_target, iv_data, o_output);
         }
 
         ///
@@ -941,10 +761,7 @@ class decoder<mss::spd::device_type::DDR4, DDR4_CUSTOM_MICROCHIP, R > : public b
         ///
         virtual fapi2::ReturnCode pmic0_swa_offset(uint8_t& o_output) const override
         {
-            FAPI_TRY(( reader<fields_t::PMIC0_SWA_OFFSET, R>(iv_target, iv_data, o_output)) );
-
-        fapi_try_exit:
-            return fapi2::current_err;
+            return reader<fields_t::PMIC0_SWA_OFFSET, R>(iv_target, iv_data, o_output);
         }
 
         ///
@@ -954,10 +771,7 @@ class decoder<mss::spd::device_type::DDR4, DDR4_CUSTOM_MICROCHIP, R > : public b
         ///
         virtual fapi2::ReturnCode pmic0_swa_offset_direction(uint8_t& o_output) const override
         {
-            FAPI_TRY(( reader<fields_t::PMIC0_SWA_OFFSET_DIRECTION, R>(iv_target, iv_data, o_output)) );
-
-        fapi_try_exit:
-            return fapi2::current_err;
+            return reader<fields_t::PMIC0_SWA_OFFSET_DIRECTION, R>(iv_target, iv_data, o_output);
         }
 
         ///
@@ -967,10 +781,7 @@ class decoder<mss::spd::device_type::DDR4, DDR4_CUSTOM_MICROCHIP, R > : public b
         ///
         virtual fapi2::ReturnCode pmic0_swb_offset(uint8_t& o_output) const override
         {
-            FAPI_TRY(( reader<fields_t::PMIC0_SWB_OFFSET, R>(iv_target, iv_data, o_output)) );
-
-        fapi_try_exit:
-            return fapi2::current_err;
+            return reader<fields_t::PMIC0_SWB_OFFSET, R>(iv_target, iv_data, o_output);
         }
 
         ///
@@ -980,10 +791,7 @@ class decoder<mss::spd::device_type::DDR4, DDR4_CUSTOM_MICROCHIP, R > : public b
         ///
         virtual fapi2::ReturnCode pmic0_swb_offset_direction(uint8_t& o_output) const override
         {
-            FAPI_TRY(( reader<fields_t::PMIC0_SWB_OFFSET_DIRECTION, R>(iv_target, iv_data, o_output)) );
-
-        fapi_try_exit:
-            return fapi2::current_err;
+            return reader<fields_t::PMIC0_SWB_OFFSET_DIRECTION, R>(iv_target, iv_data, o_output);
         }
 
         ///
@@ -993,10 +801,7 @@ class decoder<mss::spd::device_type::DDR4, DDR4_CUSTOM_MICROCHIP, R > : public b
         ///
         virtual fapi2::ReturnCode pmic0_swc_offset(uint8_t& o_output) const override
         {
-            FAPI_TRY(( reader<fields_t::PMIC0_SWC_OFFSET, R>(iv_target, iv_data, o_output)) );
-
-        fapi_try_exit:
-            return fapi2::current_err;
+            return reader<fields_t::PMIC0_SWC_OFFSET, R>(iv_target, iv_data, o_output);
         }
 
         ///
@@ -1006,10 +811,7 @@ class decoder<mss::spd::device_type::DDR4, DDR4_CUSTOM_MICROCHIP, R > : public b
         ///
         virtual fapi2::ReturnCode pmic0_swc_offset_direction(uint8_t& o_output) const override
         {
-            FAPI_TRY(( reader<fields_t::PMIC0_SWC_OFFSET_DIRECTION, R>(iv_target, iv_data, o_output)) );
-
-        fapi_try_exit:
-            return fapi2::current_err;
+            return reader<fields_t::PMIC0_SWC_OFFSET_DIRECTION, R>(iv_target, iv_data, o_output);
         }
 
         ///
@@ -1019,10 +821,7 @@ class decoder<mss::spd::device_type::DDR4, DDR4_CUSTOM_MICROCHIP, R > : public b
         ///
         virtual fapi2::ReturnCode pmic0_swd_offset(uint8_t& o_output) const override
         {
-            FAPI_TRY(( reader<fields_t::PMIC0_SWD_OFFSET, R>(iv_target, iv_data, o_output)) );
-
-        fapi_try_exit:
-            return fapi2::current_err;
+            return reader<fields_t::PMIC0_SWD_OFFSET, R>(iv_target, iv_data, o_output);
         }
 
         ///
@@ -1032,10 +831,7 @@ class decoder<mss::spd::device_type::DDR4, DDR4_CUSTOM_MICROCHIP, R > : public b
         ///
         virtual fapi2::ReturnCode pmic0_swd_offset_direction(uint8_t& o_output) const override
         {
-            FAPI_TRY(( reader<fields_t::PMIC0_SWD_OFFSET_DIRECTION, R>(iv_target, iv_data, o_output)) );
-
-        fapi_try_exit:
-            return fapi2::current_err;
+            return reader<fields_t::PMIC0_SWD_OFFSET_DIRECTION, R>(iv_target, iv_data, o_output);
         }
 
         ///
@@ -1045,10 +841,7 @@ class decoder<mss::spd::device_type::DDR4, DDR4_CUSTOM_MICROCHIP, R > : public b
         ///
         virtual fapi2::ReturnCode pmic1_swa_offset(uint8_t& o_output) const override
         {
-            FAPI_TRY(( reader<fields_t::PMIC1_SWA_OFFSET, R>(iv_target, iv_data, o_output)) );
-
-        fapi_try_exit:
-            return fapi2::current_err;
+            return reader<fields_t::PMIC1_SWA_OFFSET, R>(iv_target, iv_data, o_output);
         }
 
         ///
@@ -1058,10 +851,7 @@ class decoder<mss::spd::device_type::DDR4, DDR4_CUSTOM_MICROCHIP, R > : public b
         ///
         virtual fapi2::ReturnCode pmic1_swa_offset_direction(uint8_t& o_output) const override
         {
-            FAPI_TRY(( reader<fields_t::PMIC1_SWA_OFFSET_DIRECTION, R>(iv_target, iv_data, o_output)) );
-
-        fapi_try_exit:
-            return fapi2::current_err;
+            return reader<fields_t::PMIC1_SWA_OFFSET_DIRECTION, R>(iv_target, iv_data, o_output);
         }
 
         ///
@@ -1071,10 +861,7 @@ class decoder<mss::spd::device_type::DDR4, DDR4_CUSTOM_MICROCHIP, R > : public b
         ///
         virtual fapi2::ReturnCode pmic1_swb_offset(uint8_t& o_output) const override
         {
-            FAPI_TRY(( reader<fields_t::PMIC1_SWB_OFFSET, R>(iv_target, iv_data, o_output)) );
-
-        fapi_try_exit:
-            return fapi2::current_err;
+            return reader<fields_t::PMIC1_SWB_OFFSET, R>(iv_target, iv_data, o_output);
         }
 
         ///
@@ -1084,10 +871,7 @@ class decoder<mss::spd::device_type::DDR4, DDR4_CUSTOM_MICROCHIP, R > : public b
         ///
         virtual fapi2::ReturnCode pmic1_swb_offset_direction(uint8_t& o_output) const override
         {
-            FAPI_TRY(( reader<fields_t::PMIC1_SWB_OFFSET_DIRECTION, R>(iv_target, iv_data, o_output)) );
-
-        fapi_try_exit:
-            return fapi2::current_err;
+            return reader<fields_t::PMIC1_SWB_OFFSET_DIRECTION, R>(iv_target, iv_data, o_output);
         }
 
         ///
@@ -1097,10 +881,7 @@ class decoder<mss::spd::device_type::DDR4, DDR4_CUSTOM_MICROCHIP, R > : public b
         ///
         virtual fapi2::ReturnCode pmic1_swc_offset(uint8_t& o_output) const override
         {
-            FAPI_TRY(( reader<fields_t::PMIC1_SWC_OFFSET, R>(iv_target, iv_data, o_output)) );
-
-        fapi_try_exit:
-            return fapi2::current_err;
+            return reader<fields_t::PMIC1_SWC_OFFSET, R>(iv_target, iv_data, o_output);
         }
 
         ///
@@ -1110,10 +891,7 @@ class decoder<mss::spd::device_type::DDR4, DDR4_CUSTOM_MICROCHIP, R > : public b
         ///
         virtual fapi2::ReturnCode pmic1_swc_offset_direction(uint8_t& o_output) const override
         {
-            FAPI_TRY(( reader<fields_t::PMIC1_SWC_OFFSET_DIRECTION, R>(iv_target, iv_data, o_output)) );
-
-        fapi_try_exit:
-            return fapi2::current_err;
+            return reader<fields_t::PMIC1_SWC_OFFSET_DIRECTION, R>(iv_target, iv_data, o_output);
         }
 
         ///
@@ -1123,10 +901,7 @@ class decoder<mss::spd::device_type::DDR4, DDR4_CUSTOM_MICROCHIP, R > : public b
         ///
         virtual fapi2::ReturnCode pmic1_swd_offset(uint8_t& o_output) const override
         {
-            FAPI_TRY(( reader<fields_t::PMIC1_SWD_OFFSET, R>(iv_target, iv_data, o_output)) );
-
-        fapi_try_exit:
-            return fapi2::current_err;
+            return reader<fields_t::PMIC1_SWD_OFFSET, R>(iv_target, iv_data, o_output);
         }
 
         ///
@@ -1136,10 +911,7 @@ class decoder<mss::spd::device_type::DDR4, DDR4_CUSTOM_MICROCHIP, R > : public b
         ///
         virtual fapi2::ReturnCode pmic1_swd_offset_direction(uint8_t& o_output) const override
         {
-            FAPI_TRY(( reader<fields_t::PMIC1_SWD_OFFSET_DIRECTION, R>(iv_target, iv_data, o_output)) );
-
-        fapi_try_exit:
-            return fapi2::current_err;
+            return reader<fields_t::PMIC1_SWD_OFFSET_DIRECTION, R>(iv_target, iv_data, o_output);
         }
 
         ///
@@ -1149,10 +921,7 @@ class decoder<mss::spd::device_type::DDR4, DDR4_CUSTOM_MICROCHIP, R > : public b
         ///
         virtual fapi2::ReturnCode pmic0_swa_current_warning(uint8_t& o_output) const override
         {
-            FAPI_TRY(( reader<fields_t::PMIC0_SWA_CURRENT_WARNING, R>(iv_target, iv_data, o_output)) );
-
-        fapi_try_exit:
-            return fapi2::current_err;
+            return reader<fields_t::PMIC0_SWA_CURRENT_WARNING, R>(iv_target, iv_data, o_output);
         }
 
         ///
@@ -1162,10 +931,7 @@ class decoder<mss::spd::device_type::DDR4, DDR4_CUSTOM_MICROCHIP, R > : public b
         ///
         virtual fapi2::ReturnCode pmic0_swb_current_warning(uint8_t& o_output) const override
         {
-            FAPI_TRY(( reader<fields_t::PMIC0_SWB_CURRENT_WARNING, R>(iv_target, iv_data, o_output)) );
-
-        fapi_try_exit:
-            return fapi2::current_err;
+            return reader<fields_t::PMIC0_SWB_CURRENT_WARNING, R>(iv_target, iv_data, o_output);
         }
 
         ///
@@ -1175,10 +941,7 @@ class decoder<mss::spd::device_type::DDR4, DDR4_CUSTOM_MICROCHIP, R > : public b
         ///
         virtual fapi2::ReturnCode pmic0_swc_current_warning(uint8_t& o_output) const override
         {
-            FAPI_TRY(( reader<fields_t::PMIC0_SWC_CURRENT_WARNING, R>(iv_target, iv_data, o_output)) );
-
-        fapi_try_exit:
-            return fapi2::current_err;
+            return reader<fields_t::PMIC0_SWC_CURRENT_WARNING, R>(iv_target, iv_data, o_output);
         }
 
         ///
@@ -1188,10 +951,7 @@ class decoder<mss::spd::device_type::DDR4, DDR4_CUSTOM_MICROCHIP, R > : public b
         ///
         virtual fapi2::ReturnCode pmic0_swd_current_warning(uint8_t& o_output) const override
         {
-            FAPI_TRY(( reader<fields_t::PMIC0_SWD_CURRENT_WARNING, R>(iv_target, iv_data, o_output)) );
-
-        fapi_try_exit:
-            return fapi2::current_err;
+            return reader<fields_t::PMIC0_SWD_CURRENT_WARNING, R>(iv_target, iv_data, o_output);
         }
 
         ///
@@ -1201,10 +961,7 @@ class decoder<mss::spd::device_type::DDR4, DDR4_CUSTOM_MICROCHIP, R > : public b
         ///
         virtual fapi2::ReturnCode pmic1_swa_current_warning(uint8_t& o_output) const override
         {
-            FAPI_TRY(( reader<fields_t::PMIC1_SWA_CURRENT_WARNING, R>(iv_target, iv_data, o_output)) );
-
-        fapi_try_exit:
-            return fapi2::current_err;
+            return reader<fields_t::PMIC1_SWA_CURRENT_WARNING, R>(iv_target, iv_data, o_output);
         }
 
         ///
@@ -1214,10 +971,7 @@ class decoder<mss::spd::device_type::DDR4, DDR4_CUSTOM_MICROCHIP, R > : public b
         ///
         virtual fapi2::ReturnCode pmic1_swb_current_warning(uint8_t& o_output) const override
         {
-            FAPI_TRY(( reader<fields_t::PMIC1_SWB_CURRENT_WARNING, R>(iv_target, iv_data, o_output)) );
-
-        fapi_try_exit:
-            return fapi2::current_err;
+            return reader<fields_t::PMIC1_SWB_CURRENT_WARNING, R>(iv_target, iv_data, o_output);
         }
 
         ///
@@ -1227,10 +981,7 @@ class decoder<mss::spd::device_type::DDR4, DDR4_CUSTOM_MICROCHIP, R > : public b
         ///
         virtual fapi2::ReturnCode pmic1_swc_current_warning(uint8_t& o_output) const override
         {
-            FAPI_TRY(( reader<fields_t::PMIC1_SWC_CURRENT_WARNING, R>(iv_target, iv_data, o_output)) );
-
-        fapi_try_exit:
-            return fapi2::current_err;
+            return reader<fields_t::PMIC1_SWC_CURRENT_WARNING, R>(iv_target, iv_data, o_output);
         }
 
         ///
@@ -1240,10 +991,7 @@ class decoder<mss::spd::device_type::DDR4, DDR4_CUSTOM_MICROCHIP, R > : public b
         ///
         virtual fapi2::ReturnCode pmic1_swd_current_warning(uint8_t& o_output) const override
         {
-            FAPI_TRY(( reader<fields_t::PMIC1_SWD_CURRENT_WARNING, R>(iv_target, iv_data, o_output)) );
-
-        fapi_try_exit:
-            return fapi2::current_err;
+            return reader<fields_t::PMIC1_SWD_CURRENT_WARNING, R>(iv_target, iv_data, o_output);
         }
 
         ///
@@ -1295,10 +1043,7 @@ class decoder<mss::spd::device_type::DDR4, DDR4_CUSTOM_MICROCHIP, R > : public b
         ///
         virtual fapi2::ReturnCode dimm_ddr4_f0rc7x(uint8_t& o_output) const override
         {
-            FAPI_TRY(( reader<fields_t::RCD_IBT, R>(iv_target, iv_data, o_output)) );
-
-        fapi_try_exit:
-            return fapi2::current_err;
+            return reader<fields_t::RCD_IBT, R>(iv_target, iv_data, o_output);
         }
 
         ///
@@ -1308,10 +1053,67 @@ class decoder<mss::spd::device_type::DDR4, DDR4_CUSTOM_MICROCHIP, R > : public b
         ///
         virtual fapi2::ReturnCode dimm_ddr4_f1rc00(uint8_t& o_output) const override
         {
-            FAPI_TRY(( reader<fields_t::RCD_DB_DIC, R>(iv_target, iv_data, o_output)) );
+            return reader<fields_t::RCD_DB_DIC, R>(iv_target, iv_data, o_output);
+        }
 
-        fapi_try_exit:
-            return fapi2::current_err;
+        ///
+        /// @brief F1RC1X - QxCSn_n Output Delay Control Word
+        /// @param[out] o_output encoding from SPD
+        /// @return FAPI2_RC_SUCCESS if okay
+        ///
+        virtual fapi2::ReturnCode dimm_ddr4_f1rc1x(uint8_t& o_output) const override
+        {
+            return reader<fields_t::F1RC1X, R>(iv_target, iv_data, o_output);
+        }
+
+        ///
+        /// @brief F1RC3X - QxCKEn Output Delay Control Word
+        /// @param[out] o_output encoding from SPD
+        /// @return FAPI2_RC_SUCCESS if okay
+        ///
+        virtual fapi2::ReturnCode dimm_ddr4_f1rc3x(uint8_t& o_output) const override
+        {
+            return reader<fields_t::F1RC3X, R>(iv_target, iv_data, o_output);
+        }
+
+        ///
+        /// @brief F1RC4X - QxODTn Output Delay Control Word
+        /// @param[out] o_output encoding from SPD
+        /// @return FAPI2_RC_SUCCESS if okay
+        ///
+        virtual fapi2::ReturnCode dimm_ddr4_f1rc4x(uint8_t& o_output) const override
+        {
+            return reader<fields_t::F1RC4X, R>(iv_target, iv_data, o_output);
+        }
+
+        ///
+        /// @brief  F1RC5X - QxCA Output Delay Control Word
+        /// @param[out] o_output encoding from SPD
+        /// @return FAPI2_RC_SUCCESS if okay
+        ///
+        virtual fapi2::ReturnCode dimm_ddr4_f1rc5x(uint8_t& o_output) const override
+        {
+            return reader<fields_t::F1RC5X, R>(iv_target, iv_data, o_output);
+        }
+
+        ///
+        /// @brief F1RC6X – Y1/Y3 Output Delay Control Word
+        /// @param[out] o_output encoding from SPD
+        /// @return FAPI2_RC_SUCCESS if okay
+        ///
+        virtual fapi2::ReturnCode dimm_ddr4_f1rc6x(uint8_t& o_output) const override
+        {
+            return reader<fields_t::F1RC6X, R>(iv_target, iv_data, o_output);
+        }
+
+        ///
+        /// @brief F1RC7X – Y0/Y2 Output Delay Control Word
+        /// @param[out] o_output encoding from SPD
+        /// @return FAPI2_RC_SUCCESS if okay
+        ///
+        virtual fapi2::ReturnCode dimm_ddr4_f1rc7x(uint8_t& o_output) const override
+        {
+            return reader<fields_t::F1RC7X, R>(iv_target, iv_data, o_output);
         }
 
         ///
@@ -1365,6 +1167,7 @@ class decoder<mss::spd::device_type::DDR4, DDR4_CUSTOM_MICROCHIP, R > : public b
                          spd::c_str(iv_target),
                          o_output);
             }
+
         fapi_try_exit:
             return fapi2::current_err;
         }
@@ -1376,10 +1179,7 @@ class decoder<mss::spd::device_type::DDR4, DDR4_CUSTOM_MICROCHIP, R > : public b
         ///
         virtual fapi2::ReturnCode dimms_supported(uint8_t& o_output) const override
         {
-            FAPI_TRY(( reader<fields_t::DIMMS_SUPPORTED, R>(iv_target, iv_data, o_output)) );
-
-        fapi_try_exit:
-            return fapi2::current_err;
+            return reader<fields_t::DIMMS_SUPPORTED, R>(iv_target, iv_data, o_output);
         }
 };
 

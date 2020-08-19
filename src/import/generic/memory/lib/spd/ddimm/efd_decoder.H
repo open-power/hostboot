@@ -569,6 +569,72 @@ class base_decoder
         }
 
         ///
+        /// @brief F1RC1X - QxCSn_n Output Delay Control Word
+        /// @param[out] o_output encoding from SPD
+        /// @return FAPI2_RC_SUCCESS if okay
+        ///
+        virtual fapi2::ReturnCode dimm_ddr4_f1rc1x(uint8_t& o_output) const
+        {
+            o_output = 0;
+            return fapi2::FAPI2_RC_SUCCESS;
+        }
+
+        ///
+        /// @brief F1RC3X - QxCKEn Output Delay Control Word
+        /// @param[out] o_output encoding from SPD
+        /// @return FAPI2_RC_SUCCESS if okay
+        ///
+        virtual fapi2::ReturnCode dimm_ddr4_f1rc3x(uint8_t& o_output) const
+        {
+            o_output = 0;
+            return fapi2::FAPI2_RC_SUCCESS;
+        }
+
+        ///
+        /// @brief F1RC4X - QxODTn Output Delay Control Word
+        /// @param[out] o_output encoding from SPD
+        /// @return FAPI2_RC_SUCCESS if okay
+        ///
+        virtual fapi2::ReturnCode dimm_ddr4_f1rc4x(uint8_t& o_output) const
+        {
+            o_output = 0;
+            return fapi2::FAPI2_RC_SUCCESS;
+        }
+
+        ///
+        /// @brief  F1RC5X - QxCA Output Delay Control Word
+        /// @param[out] o_output encoding from SPD
+        /// @return FAPI2_RC_SUCCESS if okay
+        ///
+        virtual fapi2::ReturnCode dimm_ddr4_f1rc5x(uint8_t& o_output) const
+        {
+            o_output = 0;
+            return fapi2::FAPI2_RC_SUCCESS;
+        }
+
+        ///
+        /// @brief F1RC6X – Y1/Y3 Output Delay Control Word
+        /// @param[out] o_output encoding from SPD
+        /// @return FAPI2_RC_SUCCESS if okay
+        ///
+        virtual fapi2::ReturnCode dimm_ddr4_f1rc6x(uint8_t& o_output) const
+        {
+            o_output = 0;
+            return fapi2::FAPI2_RC_SUCCESS;
+        }
+
+        ///
+        /// @brief F1RC7X – Y0/Y2 Output Delay Control Word
+        /// @param[out] o_output encoding from SPD
+        /// @return FAPI2_RC_SUCCESS if okay
+        ///
+        virtual fapi2::ReturnCode dimm_ddr4_f1rc7x(uint8_t& o_output) const
+        {
+            o_output = 0;
+            return fapi2::FAPI2_RC_SUCCESS;
+        }
+
+        ///
         /// @brief Decodes RCD slew rate control -> RCD_SLEW_RATE
         /// @param[out] o_output encoding from SPD
         /// @return FAPI2_RC_SUCCESS if okay
