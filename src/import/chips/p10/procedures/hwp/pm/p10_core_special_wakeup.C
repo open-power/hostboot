@@ -337,7 +337,6 @@ fapi2::ReturnCode   isSplWkupInProgress( const std::vector < fapi2::Target <fapi
         }
     }
 
-fapi_try_exit:
     return fapi2::current_err;
 }
 

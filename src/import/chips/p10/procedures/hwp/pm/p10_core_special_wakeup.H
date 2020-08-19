@@ -31,6 +31,9 @@
 // *HWP Level:          2
 // *HWP Consumed by:    HB,FSP
 
+#ifndef _P10_CORE_SPECIAL_WAKEUP_H_
+#define _P10_CORE_SPECIAL_WAKEUP_H_
+
 #include <fapi2.H>
 #include <p10_scom_c_0.H>
 #include <p10_scom_c_4.H>
@@ -75,7 +78,7 @@ enum PROC_SPCWKUP_OPS
 /**
  * @brief Special wakeup operation message.
  */
-char SplWkupMsg[MAX_OPERATION][10] =
+static char SplWkupMsg[MAX_OPERATION][10] __attribute__((unused)) =
 {
     "ASSERT",
     "DE-ASSERT"
@@ -116,3 +119,5 @@ extern "C"
         const p10specialWakeup::PROC_SPCWKUP_ENTITY i_entity );
 
 } //extern "C"
+
+#endif // _P10_CORE_SPECIAL_WAKEUP_H_
