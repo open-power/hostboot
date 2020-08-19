@@ -272,7 +272,7 @@ errlHndl_t nodePresenceDetect(DeviceFW::OperationType i_opType,
         pvpd_present = true;  //node PVDP always returns present
     }
 #endif
-    VPD::updateSerialNumberFromBMC( i_target );
+    l_errl = VPD::updateSerialNumberFromBMC( i_target );
 
     //Fsp sets PN/SN so if there is none, do it here
     if(!INITSERVICE::spBaseServicesEnabled())
@@ -286,7 +286,7 @@ errlHndl_t nodePresenceDetect(DeviceFW::OperationType i_opType,
     memcpy(io_buffer, &pvpd_present, sizeof(pvpd_present));
     io_buflen = sizeof(pvpd_present);
 
-    return NULL;
+    return l_errl;
 }
 
 // Register as the presence detect for nodes.

@@ -41,6 +41,7 @@
 #include <console/consoleif.H>
 #include <initservice/istepdispatcherif.H>
 #include <ipmi/ipmifruinv.H>
+#include <pldm/requests/pldm_pdr_requests.H>
 
 
 // ----------------------------------------------
@@ -65,7 +66,7 @@ errlHndl_t getPnorAddr ( pnorInformation & i_pnorInfo,
                          uint64_t &io_cachedAddr,
                          mutex_t * i_mutex )
 {
-    errlHndl_t err = NULL;
+    errlHndl_t err = nullptr;
     PNOR::SectionInfo_t info;
 
     TRACSSCOMP( g_trac_vpd,
@@ -107,10 +108,10 @@ errlHndl_t readPNOR ( uint64_t i_byteAddr,
                       uint64_t &io_cachedAddr,
                       mutex_t * i_mutex )
 {
-    errlHndl_t err = NULL;
+    errlHndl_t err = nullptr;
     int64_t vpdLocation = 0;
     uint64_t addr = 0x0;
-    const char * readAddr = NULL;
+    const char * readAddr = nullptr;
 
     TRACSSCOMP( g_trac_vpd,
                 ENTER_MRK"readPNOR()" );
@@ -178,10 +179,10 @@ errlHndl_t writePNOR ( uint64_t i_byteAddr,
                        uint64_t &io_cachedAddr,
                        mutex_t * i_mutex )
 {
-    errlHndl_t err = NULL;
+    errlHndl_t err = nullptr;
     int64_t vpdLocation = 0;
     uint64_t addr = 0x0;
-    const char * writeAddr = NULL;
+    const char * writeAddr = nullptr;
 
     TRACSSCOMP( g_trac_vpd,
                 ENTER_MRK"writePNOR()" );
@@ -268,8 +269,8 @@ errlHndl_t sendMboxWriteMsg ( size_t i_numBytes,
                               VPD_MSG_TYPE i_type,
                               VpdWriteMsg_t& i_record )
 {
-    errlHndl_t l_err = NULL;
-    msg_t* msg = NULL;
+    errlHndl_t l_err = nullptr;
+    msg_t* msg = nullptr;
 
     TRACSSCOMP( g_trac_vpd,
                 ENTER_MRK"sendMboxWriteMsg()" );
@@ -320,10 +321,10 @@ errlHndl_t sendMboxWriteMsg ( size_t i_numBytes,
 
             // just commit the log and move on, nothing else to do
             errlCommit( l_err, VPD_COMP_ID );
-            l_err = NULL;
+            l_err = nullptr;
 
             free( msg->extra_data );
-            msg->extra_data = NULL;
+            msg->extra_data = nullptr;
             msg_free( msg );
         }
     } while( 0 );
@@ -340,7 +341,7 @@ errlHndl_t sendMboxWriteMsg ( size_t i_numBytes,
 // ------------------------------------------------------------------
 void setPartAndSerialNumberAttributes( TARGETING::Target * i_target )
 {
-    errlHndl_t l_err = NULL;
+    errlHndl_t l_err = nullptr;
     vpdKeyword l_serialNumberKeyword = 0;
     size_t l_dataSize = 0;
 
@@ -367,13 +368,13 @@ void setPartAndSerialNumberAttributes( TARGETING::Target * i_target )
             {
                 TRACFCOMP(g_trac_vpd, "setPartAndSerialNumberAttributes::Error getting record/keywords for PN/SN");
                 errlCommit(l_err, VPD_COMP_ID);
-                l_err = NULL;
+                l_err = nullptr;
                 break;
             }
 
             // Get the size of the part number
             l_err = l_ipvpd->read( i_target,
-                                   NULL,
+                                   nullptr,
                                    l_dataSize,
                                    l_args );
 
@@ -381,7 +382,7 @@ void setPartAndSerialNumberAttributes( TARGETING::Target * i_target )
             {
                 TRACFCOMP(g_trac_vpd, " vpd.C::setPartAndSerialNumbers::read part number size");
                 errlCommit(l_err, VPD_COMP_ID);
-                l_err = NULL;
+                l_err = nullptr;
                 break;
             }
 
@@ -395,7 +396,7 @@ void setPartAndSerialNumberAttributes( TARGETING::Target * i_target )
             {
                 TRACFCOMP(g_trac_vpd, "vpd.C::setPartAndSerialNumbers::read part number");
                 errlCommit(l_err, VPD_COMP_ID);
-                l_err = NULL;
+                l_err = nullptr;
                 break;
             }
 
@@ -416,7 +417,7 @@ void setPartAndSerialNumberAttributes( TARGETING::Target * i_target )
             l_args.keyword = l_serialNumberKeyword;
             l_dataSize = 0;
             l_err = l_ipvpd->read( i_target,
-                          NULL,
+                          nullptr,
                           l_dataSize,
                           l_args );
 
@@ -424,7 +425,7 @@ void setPartAndSerialNumberAttributes( TARGETING::Target * i_target )
             {
                 TRACFCOMP(g_trac_vpd, "vpd.C::setPartAndSerialNumbers::read serial number size");
                 errlCommit( l_err, VPD_COMP_ID );
-                l_err = NULL;
+                l_err = nullptr;
                 break;
             }
 
@@ -439,7 +440,7 @@ void setPartAndSerialNumberAttributes( TARGETING::Target * i_target )
             {
                 TRACFCOMP(g_trac_vpd, "vpd.C::setPartAndSerialNumbers::serial number");
                 errlCommit( l_err, VPD_COMP_ID );
-                l_err = NULL;
+                l_err = nullptr;
                 break;
             }
 
@@ -466,31 +467,31 @@ void setPartAndSerialNumberAttributes( TARGETING::Target * i_target )
 // ------------------------------------------------------------------
 // setPartAndSerialNumberAttributes
 // ------------------------------------------------------------------
-void updateSerialNumberFromBMC( TARGETING::Target * i_nodetarget )
+errlHndl_t updateSerialNumberFromBMC( TARGETING::Target * i_nodetarget )
 {
+    errlHndl_t l_errl = nullptr;
 #ifdef CONFIG_UPDATE_SN_FROM_BMC
-    errlHndl_t l_errl = NULL;
     size_t     l_vpdSize = 0;
 
     //Get Product Serial Number from Backplane
-    char* l_sn_prod = NULL;
+    char* l_sn_prod = nullptr;
     l_sn_prod = IPMIFRUINV::getProductSN(0);
-    if (l_sn_prod != NULL)
+    if (l_sn_prod != nullptr)
     {
         TRACFCOMP(g_trac_vpd, "Got system serial number from BMC.");
         TRACFCOMP(g_trac_vpd, "SN from BMC is: %s", l_sn_prod);
 
-        l_errl = deviceRead(i_nodetarget, NULL, l_vpdSize,
+        l_errl = deviceRead(i_nodetarget, nullptr, l_vpdSize,
                 DEVICE_PVPD_ADDRESS( PVPD::OSYS, PVPD::SS ));
 
-        if(l_errl == NULL)
+        if(l_errl == nullptr)
         {
             uint8_t l_vpddata[l_vpdSize];
 
             l_errl = deviceRead(i_nodetarget, l_vpddata, l_vpdSize,
                 DEVICE_PVPD_ADDRESS( PVPD::OSYS, PVPD::SS ));
 
-            if(l_errl == NULL)
+            if(l_errl == nullptr)
             {
                 TRACFCOMP(g_trac_vpd, "SN in PVPD::OSYS:SS: %s, size: %d", l_vpddata, l_vpdSize);
 
@@ -498,27 +499,31 @@ void updateSerialNumberFromBMC( TARGETING::Target * i_nodetarget )
                 {
                     l_errl = deviceWrite(i_nodetarget, l_sn_prod, l_vpdSize,
                                 DEVICE_PVPD_ADDRESS( PVPD::OSYS, PVPD::SS ));
-                    CONSOLE::displayf(NULL, "updated SN from BMC into PVPD.");
+                    CONSOLE::displayf(nullptr, "updated SN from BMC into PVPD.");
                     CONSOLE::flush();
-                    CONSOLE::displayf(NULL, "Need a reboot.");
+                    CONSOLE::displayf(nullptr, "Need a reboot.");
                     CONSOLE::flush();
+#ifdef CONFIG_PLDM
+                    l_errl = PLDM::sendGracefulRebootRequest();
+                    if(l_errl)
+                    {
+                        TRACFCOMP(g_trac_vpd, "updateSerialNumberFromBMC: Could not send reboot PLDM request");
+                    }
+#elif defined (CONFIG_BMC_IPMI)
                     INITSERVICE::requestReboot();
+#endif
                 }
             }
         }
 
-        if(l_errl)
-        {
-            ERRORLOG::errlCommit(l_errl,VPD_COMP_ID);
-        }
-
          //getProductSN requires the caller to delete the char array
          delete[] l_sn_prod;
-         l_sn_prod = NULL;
+         l_sn_prod = nullptr;
 
         TRACFCOMP(g_trac_vpd, "End updateSerialNumberFromBMC.");
     }
 #endif
+    return l_errl;
 }
 
 // ------------------------------------------------------------------
@@ -531,7 +536,7 @@ errlHndl_t getPnAndSnRecordAndKeywords( TARGETING::Target * i_target,
                                   vpdKeyword & io_keywordSN )
 {
     TRACFCOMP(g_trac_vpd, ENTER_MRK"getPnAndSnRecordAndKeywords()");
-    errlHndl_t l_err = NULL;
+    errlHndl_t l_err = nullptr;
     do{
 
         if( i_type == TARGETING::TYPE_PROC )
@@ -595,7 +600,7 @@ errlHndl_t getPnAndSnRecordAndKeywords( TARGETING::Target * i_target,
  *
  * @param[out] o_match      Result of compare
  *
- * @return errlHndl_t       NULL if successful, otherwise a pointer to the
+ * @return errlHndl_t       nullptr if successful, otherwise a pointer to the
  *                          error log.
  */
 errlHndl_t cmpEecacheToEeprom(TARGETING::Target *            i_target,
@@ -751,7 +756,7 @@ errlHndl_t ensureEepromCacheIsInSync(TARGETING::Target           * i_target,
 // ------------------------------------------------------------------
 errlHndl_t ensureCacheIsInSync ( TARGETING::Target * i_target )
 {
-    errlHndl_t l_err = NULL;
+    errlHndl_t l_err = nullptr;
 
     TRACSSCOMP( g_trac_vpd, ENTER_MRK"ensureCacheIsInSync() " );
 
@@ -917,7 +922,7 @@ errlHndl_t ensureCacheIsInSync ( TARGETING::Target * i_target )
             TRACFCOMP(g_trac_vpd,"VPD::ensureCacheIsInSync: PNOR_PN/SN != SEEPROM_PN/SN, Loading PNOR from SEEPROM for target %.8X",TARGETING::get_huid(i_target));
             const char* l_pathstring =
               i_target->getAttr<TARGETING::ATTR_PHYS_PATH>().toString();
-            CONSOLE::displayf(NULL,"Detected new part : %.8X (%s)",
+            CONSOLE::displayf(nullptr,"Detected new part : %.8X (%s)",
                               TARGETING::get_huid(i_target),
                               l_pathstring);
             free((void*)(l_pathstring));
@@ -965,7 +970,7 @@ errlHndl_t ensureCacheIsInSync ( TARGETING::Target * i_target )
 // ------------------------------------------------------------------
 errlHndl_t invalidatePnorCache ( TARGETING::Target * i_target )
 {
-    errlHndl_t l_err = NULL;
+    errlHndl_t l_err = nullptr;
 
     TRACSSCOMP( g_trac_vpd, ENTER_MRK"invalidatePnorCache() " );
 
@@ -1013,7 +1018,7 @@ void setVpdConfigFlagsHW ( )
 errlHndl_t invalidateAllPnorCaches ( bool i_setHwOnly )
 {
     TRACFCOMP(g_trac_vpd,"invalidateAllPnorCaches");
-    errlHndl_t l_err = NULL;
+    errlHndl_t l_err = nullptr;
 
     do {
         // Find all the targets with VPD switches
@@ -1106,7 +1111,7 @@ void addListToMap(numRecValidMap_t                  & i_recNumMap,
 //---------------------------------------------------------
 errlHndl_t validateSharedPnorCache()
 {
-    errlHndl_t errl = NULL;
+    errlHndl_t errl = nullptr;
     std::map<TARGETING::ATTR_VPD_REC_NUM_type,targetValidPair_t> l_recNumMap;
 
     TRACDCOMP( g_trac_vpd, ENTER_MRK"validateSharedPnorCache()");

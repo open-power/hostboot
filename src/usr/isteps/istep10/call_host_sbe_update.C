@@ -31,6 +31,7 @@
 #include    <initservice/isteps_trace.H>
 #include    <initservice/istepdispatcherif.H>
 #include    <initservice/initserviceif.H>
+#include    <pldm/requests/pldm_pdr_requests.H>
 
 //  targeting support
 #include    <targeting/common/commontargeting.H>
@@ -218,22 +219,33 @@ errlHndl_t rediscoverI2CTargets(void)
 
                 // No Break - Still send chassis power cycle
             }
+#endif
 
+#ifdef CONFIG_PLDM
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, INFO_MRK
+                      "rediscoverI2CTargets: requesting PLDM reboot");
+            err = PLDM::sendGracefulRebootRequest();
+            if(err)
+            {
+                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, ERR_MRK
+                          "rediscoverI2CTargets: PLDM reboot request failed");
+                break;
+            }
+#elif defined (CONFIG_BMC_IPMI)
             // Initiate a graceful power cycle
             TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,INFO_MRK
                    "rediscoverI2CTargets: requesting power cycle");
             INITSERVICE::requestReboot();
-
+#endif
             // sleep here to give BMC a chance to get us rebooting so
             // SBE Update will not take place
-            while (true)
+            while(true)
             {
                 nanosleep(60,0); // 60 seconds
             }
-#endif
 
 
-       }
+        }
 
     } while(0);
 
@@ -282,8 +294,10 @@ void* call_host_sbe_update (void *io_pArgs)
         l_errl = rediscoverI2CTargets();
         if (l_errl)
         {
+            l_StepError.addErrorDetails( l_errl);
             // Commit error and keep going
             errlCommit( l_errl, HWPF_COMP_ID );
+            break;
         }
 
         // Call to check state of Processor SBE SEEPROMs and

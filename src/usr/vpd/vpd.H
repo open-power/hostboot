@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -122,7 +122,7 @@ typedef std::map<RecordTargetPair_t,uint8_t*> OverrideMap_t;
  *
  * @param[in] i_target - The target to query.
  *
- * @return errlHndl_t - NULL if successful, otherwise a pointer to the
+ * @return errlHndl_t - nullptr if successful, otherwise a pointer to the
  *      Error log.
  */
 errlHndl_t getVpdLocation ( int64_t & o_vpdLocation,
@@ -146,7 +146,7 @@ errlHndl_t getVpdLocation ( int64_t & o_vpdLocation,
  * @param[in] i_mutex - The Mutex from the calling code.  It is locked when
  *      the globals are modified.
  *
- * @return errlHndl_t - NULL if successful, otherwise a pointer to the
+ * @return errlHndl_t - nullptr if successful, otherwise a pointer to the
  *      Error log.
 */
 errlHndl_t getPnorAddr ( pnorInformation & i_pnorInfo,
@@ -179,7 +179,7 @@ errlHndl_t getPnorAddr ( pnorInformation & i_pnorInfo,
  *      and io_cachedAddr.  It is assumed that those parameters are global
  *      variables in the code where they reside.
  *
- * @return errlHndl_t - NULL if successful, otherwise a pointer to the error
+ * @return errlHndl_t - nullptr if successful, otherwise a pointer to the error
  *      log.
  */
 errlHndl_t readPNOR ( uint64_t i_byteAddr,
@@ -212,7 +212,7 @@ errlHndl_t readPNOR ( uint64_t i_byteAddr,
  *      and io_cachedAddr.  It is assumed that those parameters are global
  *      variables in the code where they reside.
  *
- * @return errlHndl_t - NULL if successful, otherwise a pointer to the error
+ * @return errlHndl_t - nullptr if successful, otherwise a pointer to the error
  *      log.
  */
 errlHndl_t writePNOR ( uint64_t i_byteAddr,
@@ -237,7 +237,7 @@ errlHndl_t writePNOR ( uint64_t i_byteAddr,
  *
  * @param[in] i_record - The rec_num + record/keyword.
  *
- * @return errlHndl_t - NULL if successful, otherwise a pointer to the error
+ * @return errlHndl_t - nullptr if successful, otherwise a pointer to the error
  *      log.
  */
 errlHndl_t sendMboxWriteMsg ( size_t i_numBytes,
@@ -279,7 +279,7 @@ bool resolveVpdSource( TARGETING::Target * i_target,
  * @param[in/out] io_partKeyword - the part number keyword
  * @param[in/out] io_serialKeyword - the serial number keyword
  *
- * @return errlHndl_t - NULL if successful, otherwise a pointer to the
+ * @return errlHndl_t - nullptr if successful, otherwise a pointer to the
  *                error log.
  */
 errlHndl_t getPnAndSnRecordAndKeywords( TARGETING::Target * i_target,
@@ -291,8 +291,11 @@ errlHndl_t getPnAndSnRecordAndKeywords( TARGETING::Target * i_target,
 /**
  * @brief Read data from the BMC to update the system serial number
  * @param[in] i_target - node target to update vpd of
+ *
+ * @return errlHndl_t - nullptr if successful, otherwise a pointer to the
+ *                      error log.
  */
-void updateSerialNumberFromBMC( TARGETING::Target * i_nodetarget );
+errlHndl_t updateSerialNumberFromBMC( TARGETING::Target * i_nodetarget );
 
 /**
  * Define useful constants for VPD code

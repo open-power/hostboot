@@ -65,6 +65,7 @@
 #include <sbe/sbe_update.H>
 #include <initservice/initsvcreasoncodes.H>
 #include <sys/time.h>
+#include <pldm/requests/pldm_pdr_requests.H>
 
 #ifdef CONFIG_BMC_IPMI
 #include <ipmi/ipmisensor.H>
@@ -5921,7 +5922,23 @@ errlHndl_t sbeDoReboot( void )
         }
 #endif
 
-#ifdef CONFIG_BMC_IPMI
+#ifdef CONFIG_PLDM
+        if(g_do_hw_keys_hash_transition)
+        {
+            // TODO RTC: 259366 the PLDM equivalent of
+            // INITSERVICE::requestPowerOff() goes here.
+        }
+        else
+        {
+            TRACFCOMP(g_trac_sbe, "sbeDoReboot: requesting PLDM reboot");
+            err = PLDM::sendGracefulRebootRequest();
+            if(err)
+            {
+                TRACFCOMP(g_trac_sbe, "sbeDoReboot(): could not request PLDM reboot");
+                break;
+            }
+        }
+#elif defined (CONFIG_BMC_IPMI)
         if(g_do_hw_keys_hash_transition)
         {
             // Initiate a graceful power off
@@ -5937,7 +5954,7 @@ errlHndl_t sbeDoReboot( void )
                        "requesting power cycle");
             INITSERVICE::requestReboot();
         }
-#else //non-IPMI
+#else //non-IPMI and non-PLDM
         if(g_do_hw_keys_hash_transition)
         {
             TRACFCOMP(g_trac_sbe,

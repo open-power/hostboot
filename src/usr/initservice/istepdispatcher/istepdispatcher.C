@@ -71,6 +71,7 @@
 #include <lpc/lpcif.H>
 #include <istep18/establish_system_smp.H>
 #include <arch/magic.H>
+#include <pldm/requests/pldm_pdr_requests.H>
 
 #ifdef CONFIG_BMC_IPMI
 #include <ipmi/ipmiwatchdog.H>      //IPMI watchdog timer
@@ -677,6 +678,22 @@ errlHndl_t IStepDispatcher::executeAllISteps()
                         }
                         else if (!l_manufacturingMode)
                         {
+                            #ifdef CONFIG_CONSOLE
+                            auto l_reconfigAttr =
+                              l_pTopLevel->getAttr<TARGETING::ATTR_RECONFIGURE_LOOP>();
+                            bool l_deconfig = false;
+                            if( l_reconfigAttr ==
+                                TARGETING::RECONFIGURE_LOOP_DECONFIGURE )
+                            {
+                                l_deconfig = true;
+                            }
+
+                            CONSOLE::displayf(NULL,
+                              "System Shutting Down"
+                              "To Perform Reconfiguration After %s",
+                              l_deconfig ? "Deconfig" : "Recoverable Error" );
+                            CONSOLE::flush();
+                            #endif
                             #ifdef CONFIG_BMC_IPMI
                             // Check the newGardRecord instance variable
                             if(iv_newGardRecord)
@@ -710,30 +727,20 @@ errlHndl_t IStepDispatcher::executeAllISteps()
                                     "but no new gard records were committed. Do "
                                     "not increment reboot count.");
                             }
-
+                            #endif // CONFIG_BMC_IPMI
+                            #ifdef CONFIG_PLDM
+                            TRACFCOMP(g_trac_initsvc, INFO_MRK"executeAllISteps: sending PLDM reboot request");
+                            err = PLDM::sendGracefulRebootRequest();
+                            if(err)
+                            {
+                                TRACFCOMP(g_trac_initsvc, ERR_MRK"executeAllISteps: could not send PLDM reboot request");
+                                break;
+                            }
+                            #elif defined (CONFIG_BMC_IPMI)
                             // Request BMC to do power cycle that sends shutdown
                             // and reset the host
                             requestReboot();
-
-                            #endif
-
-                            #ifdef CONFIG_CONSOLE
-                            auto l_reconfigAttr =
-                              l_pTopLevel->getAttr<TARGETING::ATTR_RECONFIGURE_LOOP>();
-                            bool l_deconfig = false;
-                            if( l_reconfigAttr ==
-                                TARGETING::RECONFIGURE_LOOP_DECONFIGURE )
-                            {
-                                l_deconfig = true;
-                            }
-
-                            CONSOLE::displayf(NULL,
-                              "System Shutting Down"
-                              "To Perform Reconfiguration After %s",
-                              l_deconfig ? "Deconfig" : "Recoverable Error" );
-                            CONSOLE::flush();
-                            #endif
-                            #ifndef CONFIG_BMC_IPMI
+                            #else // non-IPMI and non-PLDM
                             shutdownDuringIpl();
                             #endif
 

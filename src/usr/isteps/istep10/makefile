@@ -47,6 +47,7 @@ EXTRAINCDIR += ${INITFILES_HWP_PATH}
 EXTRAINCDIR += ${PERV_HWP_PATH}
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/memory/
 EXTRAINCDIR += ${ROOTPATH}/src/import/
+EXTRAINCDIR += ${ROOTPATH}/src/usr/pldm/extern
 
 OBJS += call_proc_build_smp.o
 OBJS += call_host_sbe_update.o
