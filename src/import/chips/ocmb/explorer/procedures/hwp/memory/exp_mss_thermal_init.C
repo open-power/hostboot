@@ -57,10 +57,15 @@ extern "C"
         FAPI_TRY(mss::attr::get_is_simulation(l_sim));
         FAPI_TRY(mss::attr::get_disable_therm_init_read(i_target, l_interval_read_dis));
 
+        if (l_sim)
+        {
+            FAPI_INF("Skip exp_mss_thermal_init for sim");
+            return fapi2::FAPI2_RC_SUCCESS;
+        }
+
         // Logic needs to be implemented in simics rainer - AAM
         // Attribute is 0 == enabled, 1 == disabled (enabled by default (0), make sure the disable is not set)
-        if ((l_interval_read_dis == fapi2::ENUM_ATTR_MSS_OCMB_DISABLE_THERM_INIT_READ_ENABLED) &&
-            (!l_sim))
+        if ((l_interval_read_dis == fapi2::ENUM_ATTR_MSS_OCMB_DISABLE_THERM_INIT_READ_ENABLED))
         {
             FAPI_TRY(mss::exp::sensor_interval_read(i_target),
                      "Error performing EXP_FW_TEMP_SENSOR_CONFIG_INTERVAL_READ operation on %s", mss::c_str(i_target));

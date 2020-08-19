@@ -57,6 +57,7 @@ extern "C"
     fapi2::ReturnCode exp_scominit( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target)
     {
         mss::display_git_commit_info("exp_scominit");
+        uint8_t l_sim = 0;
 
         if (mss::count_dimm(i_target) == 0)
         {
@@ -73,6 +74,8 @@ extern "C"
                            .getParent<fapi2::TARGET_TYPE_MI>()
                            .getParent<fapi2::TARGET_TYPE_MC>();
 
+        FAPI_TRY( mss::attr::get_is_simulation( l_sim) );
+
         for(const auto& l_port : l_port_targets)
         {
             fapi2::ReturnCode l_rc;
@@ -88,8 +91,12 @@ extern "C"
         // Run required unmasks for LOCAL_FIR, FABR0, SRQFIR after scominit
         FAPI_TRY(mss::unmask::after_scominit<mss::mc_type::EXPLORER>(i_target));
 
-        // Print and record Explorer FW version info
-        FAPI_TRY( mss::exp::ib::run_fw_adapter_properties_get(i_target) );
+        if (!l_sim)
+        {
+            FAPI_INF("mss::exp::ib::run_fw_adapter_properties_get %s", mss::c_str(i_target));
+            // Print and record Explorer FW version info
+            FAPI_TRY( mss::exp::ib::run_fw_adapter_properties_get(i_target) );
+        }
 
         // Resets the explorer PHY if needed
         FAPI_TRY(mss::exp::phy::reset(i_target));
