@@ -237,6 +237,11 @@ fapi2::ReturnCode p10_io_init::img_regs(const fapi2::Target<fapi2::TARGET_TYPE_P
         SET_PHY_PPE_WRAP_XIXCR_PPE_XIXCR_XCR(2, l_data); //Resume
         FAPI_TRY(PUT_PHY_PPE_WRAP_XIXCR(l_pauc_target, l_data));
 
+        // Clear PPE Halted FIR
+        FAPI_TRY(GET_PHY_SCOM_MAC_FIR_REG_RW(l_pauc_target, l_data));
+        SET_PHY_SCOM_MAC_FIR_REG_PPE_HALTED(0, l_data);
+        FAPI_TRY(PUT_PHY_SCOM_MAC_FIR_REG_RW(l_pauc_target, l_data));
+
     }
 
 fapi_try_exit:
@@ -329,10 +334,10 @@ fapi2::ReturnCode p10_io_init::init_regs(const fapi2::Target<fapi2::TARGET_TYPE_
 
             uint32_t l_omi_data_rate = 0;
 
-            if (l_omi_freq >= fapi2::ENUM_ATTR_FREQ_OMI_MHZ_25600)
-            {
-                l_omi_data_rate = 1;
-            }
+            //if (l_omi_freq >= fapi2::ENUM_ATTR_FREQ_OMI_MHZ_25600)
+            //{
+            //    l_omi_data_rate = 1;
+            //}
 
             int l_num_lanes = P10_IO_LIB_NUMBER_OF_OMI_LANES;
             FAPI_TRY(p10_io_get_omic_thread(l_omic_target, l_thread));
@@ -405,6 +410,7 @@ fapi2::ReturnCode p10_io_init::init_regs(const fapi2::Target<fapi2::TARGET_TYPE_
                 FAPI_TRY(p10_io_ppe_ppe_data_rate[l_thread].putData(l_pauc_target, l_omi_data_rate));
                 FAPI_TRY(p10_io_ppe_ppe_channel_loss[l_thread].putData(l_pauc_target, l_ppe_channel_loss));
 
+                FAPI_TRY(p10_io_ppe_tx_dc_enable_dcc[l_thread].putData(l_pauc_target, 0x0));
                 FAPI_TRY(p10_io_ppe_rx_eo_enable_dfe_full_cal [l_thread].putData(l_pauc_target, 0x0));
                 FAPI_TRY(p10_io_ppe_rx_eo_enable_ctle_peak_cal[l_thread].putData(l_pauc_target, 0x0));
                 FAPI_TRY(p10_io_ppe_rx_rc_enable_ctle_peak_cal[l_thread].putData(l_pauc_target, 0x0));

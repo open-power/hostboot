@@ -107,18 +107,6 @@ fapi2::ReturnCode p10_fbc_dlp_scom(const fapi2::Target<fapi2::TARGET_TYPE_IOHS>&
                 l_scom_buffer.insert<62, 2, 62, uint64_t>(l_DLP0_DLP_CONFIG_DL_SELECT_DLP );
             }
 
-            if (l_def_FBC_EVN_ENABLED)
-            {
-                constexpr auto l_DLP0_DLP_CONFIG_LINK0_SELECT_ON = 0x1;
-                l_scom_buffer.insert<56, 1, 63, uint64_t>(l_DLP0_DLP_CONFIG_LINK0_SELECT_ON );
-            }
-
-            if (l_def_FBC_ODD_ENABLED)
-            {
-                constexpr auto l_DLP0_DLP_CONFIG_LINK1_SELECT_ON = 0x1;
-                l_scom_buffer.insert<57, 1, 63, uint64_t>(l_DLP0_DLP_CONFIG_LINK1_SELECT_ON );
-            }
-
             constexpr auto l_DLP0_DLP_CONFIG_PHY_TRAIN_A_ADJ_USE4 = 0x2;
             l_scom_buffer.insert<0, 2, 62, uint64_t>(l_DLP0_DLP_CONFIG_PHY_TRAIN_A_ADJ_USE4 );
             l_scom_buffer.insert<8, 4, 60, uint64_t>(literal_0x0 );

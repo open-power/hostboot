@@ -61,7 +61,8 @@ p10_fabric_dl_setup_linktrain_start(
 
     //## PHY_CONFIG Register: Enable link 0, Config_dl_select = DLP
     //putscom pu.iohs 1801100c 0000000000000081 -all
-    FAPI_TRY(PREP_DLP_PHY_CONFIG(i_target));
+    //FAPI_TRY(PREP_DLP_PHY_CONFIG(i_target));
+    FAPI_TRY(GET_DLP_PHY_CONFIG(i_target, l_data));
 
     if (l_do_even)
     {

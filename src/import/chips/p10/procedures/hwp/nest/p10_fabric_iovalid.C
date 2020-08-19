@@ -65,9 +65,9 @@ enum dl_training_states
 
 const uint32_t DL_NUM_LANES_PER_HALF_LINK = 9;
 
-const uint32_t DL_MAX_POLL_LOOPS   = 100;
+const uint32_t DL_MAX_POLL_LOOPS   = 1000;
 const uint32_t DL_POLL_SIM_CYCLES  = 10000000;
-const uint32_t DL_POLL_HW_DELAY_NS = 100000000;
+const uint32_t DL_POLL_HW_DELAY_NS = 10000000;
 
 //------------------------------------------------------------------------------
 // Function definitions
