@@ -644,10 +644,35 @@ group gIOHS_LOCAL_FIR
 };
 
 ################################################################################
-# P10 chip IOHS_DLP_FIR
+# P10 chip IOHS_DLP_PHY_CONFIG
 ################################################################################
 
-rule rIOHS_DLP_FIR
+rule rIOHS_DLP_PHY_CONFIG
+{
+  CHECK_STOP:
+    IOHS_DLP_PHY_CONFIG & `0000000000000003`;
+  RECOVERABLE:
+    IOHS_DLP_PHY_CONFIG & `0000000000000003`;
+};
+
+group gIOHS_DLP_FIR
+{
+    /** IOHS_DLP_PHY_CONFIG[62]
+     *  Attention from IOHS_DLP_FIR in OpenCAPI mode
+     */
+    (rIOHS_DLP_PHY_CONFIG, bit(62)) ? analyze(gIOHS_DLP_FIR_OpenCAPI);
+
+    /** IOHS_DLP_PHY_CONFIG[63]
+     *  Attention from IOHS_DLP_FIR in SMP mode
+     */
+    (rIOHS_DLP_PHY_CONFIG, bit(63)) ? analyze(gIOHS_DLP_FIR_SMP);
+};
+
+################################################################################
+# P10 chip IOHS_DLP_FIR (SMP mode)
+################################################################################
+
+rule rIOHS_DLP_FIR_SMP
 {
   CHECK_STOP:
     IOHS_DLP_FIR & ~IOHS_DLP_FIR_MASK & ~IOHS_DLP_FIR_ACT0 & ~IOHS_DLP_FIR_ACT1;
@@ -655,319 +680,521 @@ rule rIOHS_DLP_FIR
     IOHS_DLP_FIR & ~IOHS_DLP_FIR_MASK & ~IOHS_DLP_FIR_ACT0 &  IOHS_DLP_FIR_ACT1;
 };
 
-group gIOHS_DLP_FIR
-    filter singlebit,
+group gIOHS_DLP_FIR_SMP
+    filter priority(56,57,58,59,60,61),
            cs_root_cause(54,55,56,57,58,59,60,61)
 {
-    /** IOHS_DLP_FIR[0]
-     *  OLL link0 trained
+    /** IOHS_DLP_FIR[0] (SMP mode)
+     *  link0 trained
      */
-    (rIOHS_DLP_FIR, bit(0)) ? defaultMaskedError;
+    (rIOHS_DLP_FIR_SMP, bit(0)) ? defaultMaskedError;
 
-    /** IOHS_DLP_FIR[1]
-     *  OLL link1 trained
+    /** IOHS_DLP_FIR[1] (SMP mode)
+     *  link1 trained
      */
-    (rIOHS_DLP_FIR, bit(1)) ? defaultMaskedError;
+    (rIOHS_DLP_FIR_SMP, bit(1)) ? defaultMaskedError;
 
-    /** IOHS_DLP_FIR[2]
+    /** IOHS_DLP_FIR[2] (SMP mode)
      *  link0 op irq
      */
-    (rIOHS_DLP_FIR, bit(2)) ? defaultMaskedError;
+    (rIOHS_DLP_FIR_SMP, bit(2)) ? defaultMaskedError;
 
-    /** IOHS_DLP_FIR[3]
+    /** IOHS_DLP_FIR[3] (SMP mode)
      *  link1 op irq
      */
-    (rIOHS_DLP_FIR, bit(3)) ? defaultMaskedError;
+    (rIOHS_DLP_FIR_SMP, bit(3)) ? defaultMaskedError;
 
-    /** IOHS_DLP_FIR[4]
+    /** IOHS_DLP_FIR[4] (SMP mode)
      *  link0 replay threshold
      */
-    (rIOHS_DLP_FIR, bit(4)) ? defaultMaskedError;
+    (rIOHS_DLP_FIR_SMP, bit(4)) ? defaultMaskedError;
 
-    /** IOHS_DLP_FIR[5]
+    /** IOHS_DLP_FIR[5] (SMP mode)
      *  link1 replay threshold
      */
-    (rIOHS_DLP_FIR, bit(5)) ? defaultMaskedError;
+    (rIOHS_DLP_FIR_SMP, bit(5)) ? defaultMaskedError;
 
-    /** IOHS_DLP_FIR[6]
+    /** IOHS_DLP_FIR[6] (SMP mode)
      *  link0 crc error
      */
-    (rIOHS_DLP_FIR, bit(6)) ? threshold_and_mask_self;
+    (rIOHS_DLP_FIR_SMP, bit(6)) ? threshold_and_mask_self;
 
-    /** IOHS_DLP_FIR[7]
+    /** IOHS_DLP_FIR[7] (SMP mode)
      *  link1 crc error
      */
-    (rIOHS_DLP_FIR, bit(7)) ? threshold_and_mask_self;
+    (rIOHS_DLP_FIR_SMP, bit(7)) ? threshold_and_mask_self;
 
-    /** IOHS_DLP_FIR[8]
+    /** IOHS_DLP_FIR[8] (SMP mode)
      *  link0 nak received
      */
-    (rIOHS_DLP_FIR, bit(8)) ? defaultMaskedError;
+    (rIOHS_DLP_FIR_SMP, bit(8)) ? threshold_and_mask_self;
 
-    /** IOHS_DLP_FIR[9]
+    /** IOHS_DLP_FIR[9] (SMP mode)
      *  link1 nak received
      */
-    (rIOHS_DLP_FIR, bit(9)) ? defaultMaskedError;
+    (rIOHS_DLP_FIR_SMP, bit(9)) ? threshold_and_mask_self;
 
-    /** IOHS_DLP_FIR[10]
+    /** IOHS_DLP_FIR[10] (SMP mode)
      *  link0 replay buffer full
      */
-    (rIOHS_DLP_FIR, bit(10)) ? defaultMaskedError;
+    (rIOHS_DLP_FIR_SMP, bit(10)) ? defaultMaskedError;
 
-    /** IOHS_DLP_FIR[11]
+    /** IOHS_DLP_FIR[11] (SMP mode)
      *  link1 replay buffer full
      */
-    (rIOHS_DLP_FIR, bit(11)) ? defaultMaskedError;
+    (rIOHS_DLP_FIR_SMP, bit(11)) ? defaultMaskedError;
 
-    /** IOHS_DLP_FIR[12]
+    /** IOHS_DLP_FIR[12] (SMP mode)
      *  link0 sl ecc threshold
      */
-    (rIOHS_DLP_FIR, bit(12)) ? defaultMaskedError;
+    (rIOHS_DLP_FIR_SMP, bit(12)) ? defaultMaskedError;
 
-    /** IOHS_DLP_FIR[13]
+    /** IOHS_DLP_FIR[13] (SMP mode)
      *  link1 sl ecc threshold
      */
-    (rIOHS_DLP_FIR, bit(13)) ? defaultMaskedError;
+    (rIOHS_DLP_FIR_SMP, bit(13)) ? defaultMaskedError;
 
-    /** IOHS_DLP_FIR[14]
+    /** IOHS_DLP_FIR[14] (SMP mode)
      *  link0 sl ecc correctable
      */
-    (rIOHS_DLP_FIR, bit(14)) ? threshold_and_mask_self;
+    (rIOHS_DLP_FIR_SMP, bit(14)) ? threshold_and_mask_self;
 
-    /** IOHS_DLP_FIR[15]
+    /** IOHS_DLP_FIR[15] (SMP mode)
      *  link1 sl ecc correctable
      */
-    (rIOHS_DLP_FIR, bit(15)) ? threshold_and_mask_self;
+    (rIOHS_DLP_FIR_SMP, bit(15)) ? threshold_and_mask_self;
 
-    /** IOHS_DLP_FIR[16]
+    /** IOHS_DLP_FIR[16] (SMP mode)
      *  link0 sl ecc ue
      */
-    (rIOHS_DLP_FIR, bit(16)) ? threshold_and_mask_self;
+    (rIOHS_DLP_FIR_SMP, bit(16)) ? threshold_and_mask_self;
 
-    /** IOHS_DLP_FIR[17]
+    /** IOHS_DLP_FIR[17] (SMP mode)
      *  link1 sl ecc ue
      */
-    (rIOHS_DLP_FIR, bit(17)) ? threshold_and_mask_self;
+    (rIOHS_DLP_FIR_SMP, bit(17)) ? threshold_and_mask_self;
 
-    /** IOHS_DLP_FIR[18]
+    /** IOHS_DLP_FIR[18] (SMP mode)
      *  link0 retrain threshold
      */
-    (rIOHS_DLP_FIR, bit(18)) ? defaultMaskedError;
+    (rIOHS_DLP_FIR_SMP, bit(18)) ? defaultMaskedError;
 
-    /** IOHS_DLP_FIR[19]
+    /** IOHS_DLP_FIR[19] (SMP mode)
      *  link1 retrain threshold
      */
-    (rIOHS_DLP_FIR, bit(19)) ? defaultMaskedError;
+    (rIOHS_DLP_FIR_SMP, bit(19)) ? defaultMaskedError;
 
-    /** IOHS_DLP_FIR[20]
+    /** IOHS_DLP_FIR[20] (SMP mode)
      *  link0 loss block align
      */
-    (rIOHS_DLP_FIR, bit(20)) ? defaultMaskedError;
+    (rIOHS_DLP_FIR_SMP, bit(20)) ? defaultMaskedError;
 
-    /** IOHS_DLP_FIR[21]
+    /** IOHS_DLP_FIR[21] (SMP mode)
      *  link1 loss block align
      */
-    (rIOHS_DLP_FIR, bit(21)) ? defaultMaskedError;
+    (rIOHS_DLP_FIR_SMP, bit(21)) ? defaultMaskedError;
 
-    /** IOHS_DLP_FIR[22]
+    /** IOHS_DLP_FIR[22] (SMP mode)
      *  link0 invalid block
      */
-    (rIOHS_DLP_FIR, bit(22)) ? defaultMaskedError;
+    (rIOHS_DLP_FIR_SMP, bit(22)) ? defaultMaskedError;
 
-    /** IOHS_DLP_FIR[23]
+    /** IOHS_DLP_FIR[23] (SMP mode)
      *  link1 invalid block
      */
-    (rIOHS_DLP_FIR, bit(23)) ? defaultMaskedError;
+    (rIOHS_DLP_FIR_SMP, bit(23)) ? defaultMaskedError;
 
-    /** IOHS_DLP_FIR[24]
+    /** IOHS_DLP_FIR[24] (SMP mode)
      *  link0 deskew error
      */
-    (rIOHS_DLP_FIR, bit(24)) ? defaultMaskedError;
+    (rIOHS_DLP_FIR_SMP, bit(24)) ? defaultMaskedError;
 
-    /** IOHS_DLP_FIR[25]
+    /** IOHS_DLP_FIR[25] (SMP mode)
      *  link1 deskew error
      */
-    (rIOHS_DLP_FIR, bit(25)) ? defaultMaskedError;
+    (rIOHS_DLP_FIR_SMP, bit(25)) ? defaultMaskedError;
 
-    /** IOHS_DLP_FIR[26]
+    /** IOHS_DLP_FIR[26] (SMP mode)
      *  link0 deskew overflow
      */
-    (rIOHS_DLP_FIR, bit(26)) ? defaultMaskedError;
+    (rIOHS_DLP_FIR_SMP, bit(26)) ? defaultMaskedError;
 
-    /** IOHS_DLP_FIR[27]
+    /** IOHS_DLP_FIR[27] (SMP mode)
      *  link1 deskew overflow
      */
-    (rIOHS_DLP_FIR, bit(27)) ? defaultMaskedError;
+    (rIOHS_DLP_FIR_SMP, bit(27)) ? defaultMaskedError;
 
-    /** IOHS_DLP_FIR[28]
+    /** IOHS_DLP_FIR[28] (SMP mode)
      *  link0 sw retrain
      */
-    (rIOHS_DLP_FIR, bit(28)) ? defaultMaskedError;
+    (rIOHS_DLP_FIR_SMP, bit(28)) ? defaultMaskedError;
 
-    /** IOHS_DLP_FIR[29]
+    /** IOHS_DLP_FIR[29] (SMP mode)
      *  link1 sw retrain
      */
-    (rIOHS_DLP_FIR, bit(29)) ? defaultMaskedError;
+    (rIOHS_DLP_FIR_SMP, bit(29)) ? defaultMaskedError;
 
-    /** IOHS_DLP_FIR[30]
+    /** IOHS_DLP_FIR[30] (SMP mode)
      *  link0 ack queue overflow
      */
-    (rIOHS_DLP_FIR, bit(30)) ? defaultMaskedError;
+    (rIOHS_DLP_FIR_SMP, bit(30)) ? defaultMaskedError;
 
-    /** IOHS_DLP_FIR[31]
+    /** IOHS_DLP_FIR[31] (SMP mode)
      *  link1 ack queue overflow
      */
-    (rIOHS_DLP_FIR, bit(31)) ? defaultMaskedError;
+    (rIOHS_DLP_FIR_SMP, bit(31)) ? defaultMaskedError;
 
-    /** IOHS_DLP_FIR[32]
+    /** IOHS_DLP_FIR[32] (SMP mode)
      *  link0 ack queue underflow
      */
-    (rIOHS_DLP_FIR, bit(32)) ? defaultMaskedError;
+    (rIOHS_DLP_FIR_SMP, bit(32)) ? defaultMaskedError;
 
-    /** IOHS_DLP_FIR[33]
+    /** IOHS_DLP_FIR[33] (SMP mode)
      *  link1 ack queue underflow
      */
-    (rIOHS_DLP_FIR, bit(33)) ? defaultMaskedError;
+    (rIOHS_DLP_FIR_SMP, bit(33)) ? defaultMaskedError;
 
-    /** IOHS_DLP_FIR[34]
+    /** IOHS_DLP_FIR[34] (SMP mode)
      *  link0 num replay
      */
-    (rIOHS_DLP_FIR, bit(34)) ? defaultMaskedError;
+    (rIOHS_DLP_FIR_SMP, bit(34)) ? defaultMaskedError;
 
-    /** IOHS_DLP_FIR[35]
+    /** IOHS_DLP_FIR[35] (SMP mode)
      *  link1 num replay
      */
-    (rIOHS_DLP_FIR, bit(35)) ? defaultMaskedError;
+    (rIOHS_DLP_FIR_SMP, bit(35)) ? defaultMaskedError;
 
-    /** IOHS_DLP_FIR[36]
+    /** IOHS_DLP_FIR[36] (SMP mode)
      *  link0 training set received
      */
-    (rIOHS_DLP_FIR, bit(36)) ? defaultMaskedError;
+    (rIOHS_DLP_FIR_SMP, bit(36)) ? defaultMaskedError;
 
-    /** IOHS_DLP_FIR[37]
+    /** IOHS_DLP_FIR[37] (SMP mode)
      *  link1 training set received
      */
-    (rIOHS_DLP_FIR, bit(37)) ? defaultMaskedError;
+    (rIOHS_DLP_FIR_SMP, bit(37)) ? defaultMaskedError;
 
-    /** IOHS_DLP_FIR[38]
+    /** IOHS_DLP_FIR[38] (SMP mode)
      *  link0 prbs select error
      */
-    (rIOHS_DLP_FIR, bit(38)) ? threshold_and_mask_self;
+    (rIOHS_DLP_FIR_SMP, bit(38)) ? threshold_and_mask_self;
 
-    /** IOHS_DLP_FIR[39]
+    /** IOHS_DLP_FIR[39] (SMP mode)
      *  link1 prbs select error
      */
-    (rIOHS_DLP_FIR, bit(39)) ? threshold_and_mask_self;
+    (rIOHS_DLP_FIR_SMP, bit(39)) ? threshold_and_mask_self;
 
-    /** IOHS_DLP_FIR[40]
+    /** IOHS_DLP_FIR[40] (SMP mode)
      *  link0 tcomplete bad
      */
-    (rIOHS_DLP_FIR, bit(40)) ? defaultMaskedError;
+    (rIOHS_DLP_FIR_SMP, bit(40)) ? defaultMaskedError;
 
-    /** IOHS_DLP_FIR[41]
+    /** IOHS_DLP_FIR[41] (SMP mode)
      *  link1 tcomplete bad
      */
-    (rIOHS_DLP_FIR, bit(41)) ? defaultMaskedError;
+    (rIOHS_DLP_FIR_SMP, bit(41)) ? defaultMaskedError;
 
-    /** IOHS_DLP_FIR[42]
+    /** IOHS_DLP_FIR[42] (SMP mode)
      *  link0 no spare lane available
      */
-    (rIOHS_DLP_FIR, bit(42)) ? TBDDefaultCallout;
+    (rIOHS_DLP_FIR_SMP, bit(42)) ? smp_callout_l0_th_1;
 
-    /** IOHS_DLP_FIR[43]
+    /** IOHS_DLP_FIR[43] (SMP mode)
      *  link1 no spare lane available
      */
-    (rIOHS_DLP_FIR, bit(43)) ? TBDDefaultCallout;
+    (rIOHS_DLP_FIR_SMP, bit(43)) ? smp_callout_l1_th_1;
 
-    /** IOHS_DLP_FIR[44]
+    /** IOHS_DLP_FIR[44] (SMP mode)
      *  link0 spare done
      */
-    (rIOHS_DLP_FIR, bit(44)) ? TBDDefaultCallout;
+    (rIOHS_DLP_FIR_SMP, bit(44)) ? smp_callout_l0_th_32perDay;
 
-    /** IOHS_DLP_FIR[45]
+    /** IOHS_DLP_FIR[45] (SMP mode)
      *  link1 spare done
      */
-    (rIOHS_DLP_FIR, bit(45)) ? TBDDefaultCallout;
+    (rIOHS_DLP_FIR_SMP, bit(45)) ? smp_callout_l1_th_32perDay;
 
-    /** IOHS_DLP_FIR[46]
+    /** IOHS_DLP_FIR[46] (SMP mode)
      *  link0 too many crc errors
      */
-    (rIOHS_DLP_FIR, bit(46)) ? TBDDefaultCallout;
+    (rIOHS_DLP_FIR_SMP, bit(46)) ? smp_callout_l0_th_1;
 
-    /** IOHS_DLP_FIR[47]
+    /** IOHS_DLP_FIR[47] (SMP mode)
      *  link1 too many crc errors
      */
-    (rIOHS_DLP_FIR, bit(47)) ? TBDDefaultCallout;
+    (rIOHS_DLP_FIR_SMP, bit(47)) ? smp_callout_l1_th_1;
 
-    /** IOHS_DLP_FIR[48]
-     *  link0 npu/dlx error
+    /** IOHS_DLP_FIR[48:49] (SMP mode)
+     *  unused
      */
-    (rIOHS_DLP_FIR, bit(48)) ? threshold_and_mask_self;
+    (rIOHS_DLP_FIR_SMP, bit(48|49)) ? defaultMaskedError;
 
-    /** IOHS_DLP_FIR[49]
-     *  link1 npu/dlx error
-     */
-    (rIOHS_DLP_FIR, bit(49)) ? threshold_and_mask_self;
-
-    /** IOHS_DLP_FIR[50]
+    /** IOHS_DLP_FIR[50] (SMP mode)
      *  link0 osc switch
      */
-    (rIOHS_DLP_FIR, bit(50)) ? threshold_and_mask_self;
+    (rIOHS_DLP_FIR_SMP, bit(50)) ? threshold_and_mask_self;
 
-    /** IOHS_DLP_FIR[51]
+    /** IOHS_DLP_FIR[51] (SMP mode)
      *  link1 osc switch
      */
-    (rIOHS_DLP_FIR, bit(51)) ? threshold_and_mask_self;
+    (rIOHS_DLP_FIR_SMP, bit(51)) ? threshold_and_mask_self;
 
-    /** IOHS_DLP_FIR[52]
+    /** IOHS_DLP_FIR[52] (SMP mode)
      *  link0 correctable array error
      */
-    (rIOHS_DLP_FIR, bit(52)) ? TBDDefaultCallout;
+    (rIOHS_DLP_FIR_SMP, bit(52)) ? self_th_32perDay;
 
-    /** IOHS_DLP_FIR[53]
+    /** IOHS_DLP_FIR[53] (SMP mode)
      *  link1 correctable array error
      */
-    (rIOHS_DLP_FIR, bit(53)) ? TBDDefaultCallout;
+    (rIOHS_DLP_FIR_SMP, bit(53)) ? self_th_32perDay;
 
-    /** IOHS_DLP_FIR[54]
+    /** IOHS_DLP_FIR[54] (SMP mode)
      *  link0 uncorrectable array error
      */
-    (rIOHS_DLP_FIR, bit(54)) ? TBDDefaultCallout;
+    (rIOHS_DLP_FIR_SMP, bit(54)) ? self_th_1;
 
-    /** IOHS_DLP_FIR[55]
+    /** IOHS_DLP_FIR[55] (SMP mode)
      *  link1 uncorrectable array error
      */
-    (rIOHS_DLP_FIR, bit(55)) ? TBDDefaultCallout;
+    (rIOHS_DLP_FIR_SMP, bit(55)) ? self_th_1;
 
-    /** IOHS_DLP_FIR[56]
+    /** IOHS_DLP_FIR[56] (SMP mode)
      *  link0 training failed
      */
-    (rIOHS_DLP_FIR, bit(56)) ? TBDDefaultCallout;
+    (rIOHS_DLP_FIR_SMP, bit(56)) ? smp_failure_l0_th_1;
 
-    /** IOHS_DLP_FIR[57]
+    /** IOHS_DLP_FIR[57] (SMP mode)
      *  link1 training failed
      */
-    (rIOHS_DLP_FIR, bit(57)) ? TBDDefaultCallout;
+    (rIOHS_DLP_FIR_SMP, bit(57)) ? smp_failure_l1_th_1;
 
-    /** IOHS_DLP_FIR[58]
+    /** IOHS_DLP_FIR[58] (SMP mode)
      *  link0 unrecoverable error
      */
-    (rIOHS_DLP_FIR, bit(58)) ? TBDDefaultCallout;
+    (rIOHS_DLP_FIR_SMP, bit(58)) ? smp_failure_l0_th_1;
 
-    /** IOHS_DLP_FIR[59]
+    /** IOHS_DLP_FIR[59] (SMP mode)
      *  link1 unrecoverable error
      */
-    (rIOHS_DLP_FIR, bit(59)) ? TBDDefaultCallout;
+    (rIOHS_DLP_FIR_SMP, bit(59)) ? smp_failure_l1_th_1;
 
-    /** IOHS_DLP_FIR[60]
+    /** IOHS_DLP_FIR[60] (SMP mode)
      *  link0 internal error
      */
-    (rIOHS_DLP_FIR, bit(60)) ? TBDDefaultCallout;
+    (rIOHS_DLP_FIR_SMP, bit(60)) ? self_th_1;
 
-    /** IOHS_DLP_FIR[61]
+    /** IOHS_DLP_FIR[61] (SMP mode)
      *  link1 internal error
      */
-    (rIOHS_DLP_FIR, bit(61)) ? TBDDefaultCallout;
+    (rIOHS_DLP_FIR_SMP, bit(61)) ? self_th_1;
+
+};
+
+################################################################################
+# P10 chip IOHS_DLP_FIR (OpenCAPI mode)
+################################################################################
+
+rule rIOHS_DLP_FIR_OpenCAPI
+{
+  CHECK_STOP:
+    IOHS_DLP_FIR & ~IOHS_DLP_FIR_MASK & ~IOHS_DLP_FIR_ACT0 & ~IOHS_DLP_FIR_ACT1;
+  RECOVERABLE:
+    IOHS_DLP_FIR & ~IOHS_DLP_FIR_MASK & ~IOHS_DLP_FIR_ACT0 &  IOHS_DLP_FIR_ACT1;
+  # This type is not supported, but it is necessary to put here so the that
+  # signature for this group is different than the SMP group.
+  HOST_ATTN:
+    IOHS_DLP_FIR;
+};
+
+group gIOHS_DLP_FIR_OpenCAPI
+    filter priority(56,57,58,59,60,61),
+           cs_root_cause(54,55,56,57,58,59,60,61)
+{
+    /** IOHS_DLP_FIR[0:5] (OpenCAPI mode)
+     *  unused
+     */
+    (rIOHS_DLP_FIR_OpenCAPI, bit(0|1|2|3|4|5)) ? defaultMaskedError;
+
+    /** IOHS_DLP_FIR[6] (OpenCAPI mode)
+     *  link0 crc error
+     */
+    (rIOHS_DLP_FIR_OpenCAPI, bit(6)) ? opencapi_l0_th_32perDay;
+
+    /** IOHS_DLP_FIR[7] (OpenCAPI mode)
+     *  link1 crc error
+     */
+    (rIOHS_DLP_FIR_OpenCAPI, bit(7)) ? opencapi_l1_th_32perDay;
+
+    /** IOHS_DLP_FIR[8] (OpenCAPI mode)
+     *  link0 nak received
+     */
+    (rIOHS_DLP_FIR_OpenCAPI, bit(8)) ? opencapi_l0_th_32perDay;
+
+    /** IOHS_DLP_FIR[9] (OpenCAPI mode)
+     *  link1 nak received
+     */
+    (rIOHS_DLP_FIR_OpenCAPI, bit(9)) ? opencapi_l1_th_32perDay;
+
+    /** IOHS_DLP_FIR[10:19] (OpenCAPI mode)
+     *  unused
+     */
+    (rIOHS_DLP_FIR_OpenCAPI, bit(10|11|12|13|14|15|16|17|18|19)) ? defaultMaskedError;
+
+    /** IOHS_DLP_FIR[20] (OpenCAPI mode)
+     *  link0 loss block align
+     */
+    (rIOHS_DLP_FIR_OpenCAPI, bit(20)) ? defaultMaskedError;
+
+    /** IOHS_DLP_FIR[21] (OpenCAPI mode)
+     *  link1 loss block align
+     */
+    (rIOHS_DLP_FIR_OpenCAPI, bit(21)) ? defaultMaskedError;
+
+    /** IOHS_DLP_FIR[22] (OpenCAPI mode)
+     *  link0 invalid block
+     */
+    (rIOHS_DLP_FIR_OpenCAPI, bit(22)) ? defaultMaskedError;
+
+    /** IOHS_DLP_FIR[23] (OpenCAPI mode)
+     *  link1 invalid block
+     */
+    (rIOHS_DLP_FIR_OpenCAPI, bit(23)) ? defaultMaskedError;
+
+    /** IOHS_DLP_FIR[24:25] (OpenCAPI mode)
+     *  unused
+     */
+    (rIOHS_DLP_FIR_OpenCAPI, bit(24|25)) ? defaultMaskedError;
+
+    /** IOHS_DLP_FIR[26] (OpenCAPI mode)
+     *  link0 deskew overflow
+     */
+    (rIOHS_DLP_FIR_OpenCAPI, bit(26)) ? defaultMaskedError;
+
+    /** IOHS_DLP_FIR[27] (OpenCAPI mode)
+     *  link1 deskew overflow
+     */
+    (rIOHS_DLP_FIR_OpenCAPI, bit(27)) ? defaultMaskedError;
+
+    /** IOHS_DLP_FIR[28] (OpenCAPI mode)
+     *  link0 sw retrain
+     */
+    (rIOHS_DLP_FIR_OpenCAPI, bit(28)) ? defaultMaskedError;
+
+    /** IOHS_DLP_FIR[29] (OpenCAPI mode)
+     *  link1 sw retrain
+     */
+    (rIOHS_DLP_FIR_OpenCAPI, bit(29)) ? defaultMaskedError;
+
+    /** IOHS_DLP_FIR[30:33] (OpenCAPI mode)
+     *  unused
+     */
+    (rIOHS_DLP_FIR_OpenCAPI, bit(30|31|32|33)) ? defaultMaskedError;
+
+    /** IOHS_DLP_FIR[34] (OpenCAPI mode)
+     *  link0 no forward progress
+     */
+    (rIOHS_DLP_FIR_OpenCAPI, bit(34)) ? defaultMaskedError;
+
+    /** IOHS_DLP_FIR[35] (OpenCAPI mode)
+     *  link1 no forward progress
+     */
+    (rIOHS_DLP_FIR_OpenCAPI, bit(35)) ? defaultMaskedError;
+
+    /** IOHS_DLP_FIR[36] (OpenCAPI mode)
+     *  link0 training set received
+     */
+    (rIOHS_DLP_FIR_OpenCAPI, bit(36)) ? defaultMaskedError;
+
+    /** IOHS_DLP_FIR[37] (OpenCAPI mode)
+     *  link1 training set received
+     */
+    (rIOHS_DLP_FIR_OpenCAPI, bit(37)) ? defaultMaskedError;
+
+    /** IOHS_DLP_FIR[38:43] (OpenCAPI mode)
+     *  unused
+     */
+    (rIOHS_DLP_FIR_OpenCAPI, bit(38|39|40|41|42|43)) ? defaultMaskedError;
+
+    /** IOHS_DLP_FIR[44] (OpenCAPI mode)
+     *  link0 degraded mode
+     */
+    (rIOHS_DLP_FIR_OpenCAPI, bit(44)) ? opencapi_l0_th_1;
+
+    /** IOHS_DLP_FIR[45] (OpenCAPI mode)
+     *  link1 degraded mode
+     */
+    (rIOHS_DLP_FIR_OpenCAPI, bit(45)) ? opencapi_l1_th_1;
+
+    /** IOHS_DLP_FIR[46:47] (OpenCAPI mode)
+     *  unused
+     */
+    (rIOHS_DLP_FIR_OpenCAPI, bit(46|47)) ? defaultMaskedError;
+
+    /** IOHS_DLP_FIR[48] (OpenCAPI mode)
+     *  link0 dlx error
+     */
+    (rIOHS_DLP_FIR_OpenCAPI, bit(48)) ? threshold_and_mask_self;
+
+    /** IOHS_DLP_FIR[49] (OpenCAPI mode)
+     *  link1 dlx error
+     */
+    (rIOHS_DLP_FIR_OpenCAPI, bit(49)) ? threshold_and_mask_self;
+
+    /** IOHS_DLP_FIR[50:51] (OpenCAPI mode)
+     *  unused
+     */
+    (rIOHS_DLP_FIR_OpenCAPI, bit(50|51)) ? defaultMaskedError;
+
+    /** IOHS_DLP_FIR[52] (OpenCAPI mode)
+     *  link0 correctable array error
+     */
+    (rIOHS_DLP_FIR_OpenCAPI, bit(52)) ? self_th_32perDay;
+
+    /** IOHS_DLP_FIR[53] (OpenCAPI mode)
+     *  link1 correctable array error
+     */
+    (rIOHS_DLP_FIR_OpenCAPI, bit(53)) ? self_th_32perDay;
+
+    /** IOHS_DLP_FIR[54] (OpenCAPI mode)
+     *  link0 uncorrectable array error
+     */
+    (rIOHS_DLP_FIR_OpenCAPI, bit(54)) ? self_th_1;
+
+    /** IOHS_DLP_FIR[55] (OpenCAPI mode)
+     *  link1 uncorrectable array error
+     */
+    (rIOHS_DLP_FIR_OpenCAPI, bit(55)) ? self_th_1;
+
+    /** IOHS_DLP_FIR[56] (OpenCAPI mode)
+     *  link0 dlx clock frequency error
+     */
+    (rIOHS_DLP_FIR_OpenCAPI, bit(56)) ? level2_th_1;
+
+    /** IOHS_DLP_FIR[57] (OpenCAPI mode)
+     *  link1 dlx clock frequency error
+     */
+    (rIOHS_DLP_FIR_OpenCAPI, bit(57)) ? level2_th_1;
+
+    /** IOHS_DLP_FIR[58] (OpenCAPI mode)
+     *  link0 unrecoverable error
+     */
+    (rIOHS_DLP_FIR_OpenCAPI, bit(58)) ? opencapi_l0_th_1;
+
+    /** IOHS_DLP_FIR[59] (OpenCAPI mode)
+     *  link1 unrecoverable error
+     */
+    (rIOHS_DLP_FIR_OpenCAPI, bit(59)) ? opencapi_l1_th_1;
+
+    /** IOHS_DLP_FIR[60] (OpenCAPI mode)
+     *  link0 internal error
+     */
+    (rIOHS_DLP_FIR_OpenCAPI, bit(60)) ? self_th_1;
+
+    /** IOHS_DLP_FIR[61] (OpenCAPI mode)
+     *  link1 internal error
+     */
+    (rIOHS_DLP_FIR_OpenCAPI, bit(61)) ? self_th_1;
 
 };
 

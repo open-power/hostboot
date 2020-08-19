@@ -1,0 +1,99 @@
+# IBM_PROLOG_BEGIN_TAG
+# This is an automatically generated prolog.
+#
+# $Source: src/usr/diag/prdf/common/plat/p10/p10_iohs_actions.rule $
+#
+# OpenPOWER HostBoot Project
+#
+# Contributors Listed Below - COPYRIGHT 2020
+# [+] International Business Machines Corp.
+#
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+# implied. See the License for the specific language governing
+# permissions and limitations under the License.
+#
+# IBM_PROLOG_END_TAG
+
+actionclass smp_callout_l0
+{
+    capture(smp_ffdc_l0);
+    capture(smp_ffdc);
+    TBDDefaultCallout;
+};
+
+actionclass smp_callout_l1
+{
+    capture(smp_ffdc_l1);
+    capture(smp_ffdc);
+    TBDDefaultCallout;
+};
+
+actionclass smp_callout_l0_th_1
+{
+    smp_callout_l0;
+    threshold1;
+};
+
+actionclass smp_callout_l1_th_1
+{
+    smp_callout_l1;
+    threshold1;
+};
+
+actionclass smp_callout_l0_th_32perDay
+{
+    smp_callout_l0;
+    threshold32pday;
+};
+
+actionclass smp_callout_l1_th_32perDay
+{
+    smp_callout_l1;
+    threshold32pday;
+};
+
+actionclass smp_failure_l0_th_1
+{
+    smp_callout_l0;
+    threshold1;
+};
+
+actionclass smp_failure_l1_th_1
+{
+    smp_callout_l1;
+    threshold1;
+};
+
+actionclass opencapi_l0_th_32perDay
+{
+    TBDDefaultCallout;
+    threshold32pday;
+};
+
+actionclass opencapi_l1_th_32perDay
+{
+    TBDDefaultCallout;
+    threshold32pday;
+};
+
+actionclass opencapi_l0_th_1
+{
+    TBDDefaultCallout;
+    threshold1;
+};
+
+actionclass opencapi_l1_th_1
+{
+    TBDDefaultCallout;
+    threshold1;
+};
+

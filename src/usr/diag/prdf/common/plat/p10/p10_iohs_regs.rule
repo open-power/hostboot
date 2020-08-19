@@ -1,0 +1,141 @@
+# IBM_PROLOG_BEGIN_TAG
+# This is an automatically generated prolog.
+#
+# $Source: src/usr/diag/prdf/common/plat/p10/p10_iohs_regs.rule $
+#
+# OpenPOWER HostBoot Project
+#
+# Contributors Listed Below - COPYRIGHT 2020
+# [+] International Business Machines Corp.
+#
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+# implied. See the License for the specific language governing
+# permissions and limitations under the License.
+#
+# IBM_PROLOG_END_TAG
+
+###############################################################################
+# Additional registers for IOHS, not defined in XML
+###############################################################################
+
+    register IOHS_DLP_PHY_CONFIG
+    {
+        name        "P10 IOHS DLP PHY Config Register";
+        scomaddr    0x1801100C;
+        capture     group default;
+    };
+
+    register IOHS_DLP_LINK0_TX_LANE_CONTROL
+    {
+        name        "P10 IOHS DLP LINK0 TRANSMIT LANE CONTROL";
+        scomaddr    0x18011010;
+        capture     group smp_ffdc_l0;
+    };
+
+    register IOHS_DLP_LINK0_RX_LANE_CONTROL
+    {
+        name        "P10 IOHS DLP LINK0 RECEIVE LANE CONTROL";
+        scomaddr    0x18011012;
+        capture     group smp_ffdc_l0;
+    };
+
+    register IOHS_DLP_LINK0_INFO
+    {
+        name        "P10 IOHS DLP LINK0 INFORMATION REG";
+        scomaddr    0x18011014;
+        capture     group smp_ffdc_l0;
+    };
+
+    register IOHS_DLP_LINK0_ERROR_STATUS
+    {
+        name        "P10 IOHS DLP LINK0 ERROR STATUS";
+        scomaddr    0x18011016;
+        capture     group smp_ffdc_l0;
+    };
+
+    register IOHS_DLP_LINK0_SYN_CAPTURE
+    {
+        name        "P10 IOHS DLP LINK0 SYNDROME CAPTURE";
+        scomaddr    0x18011022;
+        capture     group smp_ffdc_l0;
+    };
+
+    register IOHS_DLP_LINK0_QUALITY
+    {
+        name        "P10 IOHS DLP LINK0 Quality Status Register";
+        scomaddr    0x18011026;
+        capture     group smp_ffdc_l0;
+    };
+
+    register IOHS_DLP_LINK1_TX_LANE_CONTROL
+    {
+        name        "P10 IOHS DLP LINK1 TRANSMIT LANE CONTROL";
+        scomaddr    0x18011011;
+        capture     group smp_ffdc_l1;
+    };
+
+    register IOHS_DLP_LINK1_RX_LANE_CONTROL
+    {
+        name        "P10 IOHS DLP LINK1 RECEIVE LANE CONTROL";
+        scomaddr    0x18011013;
+        capture     group smp_ffdc_l1;
+    };
+
+    register IOHS_DLP_LINK1_INFO
+    {
+        name        "P10 IOHS DLP LINK1 INFORMATION REG";
+        scomaddr    0x18011015;
+        capture     group smp_ffdc_l1;
+    };
+
+    register IOHS_DLP_LINK1_ERROR_STATUS
+    {
+        name        "P10 IOHS DLP LINK1 ERROR STATUS";
+        scomaddr    0x18011017;
+        capture     group smp_ffdc_l1;
+    };
+
+    register IOHS_DLP_LINK1_SYN_CAPTURE
+    {
+        name        "P10 IOHS DLP LINK1 SYNDROME CAPTURE";
+        scomaddr    0x18011023;
+        capture     group smp_ffdc_l1;
+    };
+
+    register IOHS_DLP_LINK1_QUALITY
+    {
+        name        "P10 IOHS DLP LINK1 Quality Status Register";
+        scomaddr    0x18011026;
+        capture     group smp_ffdc_l1;
+    };
+
+    register IOHS_DLP_REPLAY_THRESHOLD
+    {
+        name        "P10 IOHS DLP REPLAY THRESHOLD";
+        scomaddr    0x18011018;
+        capture     group smp_ffdc;
+    };
+
+    register IOHS_DLP_SL_ECC_THRESHOLD
+    {
+        name        "P10 IOHS DLP SL ECC THRESHOLD";
+        scomaddr    0x18011019;
+        capture     group smp_ffdc;
+    };
+
+    register IOHS_DLP_MISC_ERROR_STATUS
+    {
+        name        "P10 IOHS DLP Misc Error Status Register";
+        scomaddr    0x18011029;
+        capture     group smp_ffdc;
+    };
+
