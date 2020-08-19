@@ -1810,6 +1810,22 @@ class dimm_module_decoder
             o_output = 0;
             return fapi2::FAPI2_RC_SUCCESS;
         }
+
+        ///
+        /// @brief Decodes the module partnumber
+        /// @param[out] o_output partnumber value as read from the SPD
+        /// @return FAPI2_RC_SUCCESS if okay
+        /// @note Needed for LRDIMM decodes to workaround a specific PN's SI issues
+        ///
+        virtual fapi2::ReturnCode module_partnumber(uint8_t o_output[mss::MODULE_PARTNUMBER_ATTR]) const
+        {
+            for(uint8_t l_index = 0; l_index < mss::MODULE_PARTNUMBER_ATTR; ++ l_index)
+            {
+                o_output[l_index] = 0;
+            }
+
+            return fapi2::FAPI2_RC_SUCCESS;
+        }
 };
 
 }// spd

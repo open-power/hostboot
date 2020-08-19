@@ -1037,6 +1037,37 @@ class decoder<DDR4, LRDIMM_MODULE, R > : public dimm_module_decoder
             return fapi2::current_err;
         }
 
+        ///
+        /// @brief Decodes the module partnumber
+        /// @param[out] o_output partnumber value as read from the SPD
+        /// @return FAPI2_RC_SUCCESS if okay
+        /// @note Needed for LRDIMM decodes to workaround a specific PN's SI issues
+        ///
+        fapi2::ReturnCode module_partnumber(uint8_t o_output[mss::MODULE_PARTNUMBER_ATTR]) const override
+        {
+            constexpr uint64_t MODULE_PARTNUMBER_START = 329;
+            const auto EXPECTED_SIZE = MODULE_PARTNUMBER_START + mss::MODULE_PARTNUMBER_ATTR;
+            FAPI_ASSERT(iv_data.size() >= EXPECTED_SIZE,
+                        fapi2::MSS_OUT_OF_BOUNDS_INDEXING()
+                        .set_TARGET(iv_target)
+                        .set_INDEX(EXPECTED_SIZE)
+                        .set_LIST_SIZE(iv_data.size())
+                        .set_FUNCTION(mss::GET_FIELD),
+                        "%s invalid SPD size of %lu. Expected a size of at least %lu",
+                        mss::spd::c_str(iv_target), iv_data.size(), EXPECTED_SIZE);
+
+            // Loops through and grabs the fields
+            // Not doing the fields traits method as we would need 20 traits
+            for(uint64_t l_index = 0; l_index < mss::MODULE_PARTNUMBER_ATTR; ++l_index)
+            {
+                o_output[l_index] = iv_data[MODULE_PARTNUMBER_START + l_index];
+            }
+
+            return fapi2::FAPI2_RC_SUCCESS;
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
+
 };//decoder
 
 }// spd

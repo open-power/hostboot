@@ -4529,8 +4529,7 @@ fapi2::ReturnCode eff_lrdimm::dram_rtt_nom()
     uint8_t l_decoder_val = 0;
     uint8_t l_mcs_attrs[PORTS_PER_MCS][MAX_DIMM_PER_PORT][MAX_RANK_PER_DIMM] = {};
 
-    uint8_t l_ism386 = 0;
-    const uint8_t ZERO = 0;
+    mss::states l_ism386 = mss::states::NO;
 
     FAPI_TRY( eff_dram_rtt_nom(iv_mcs, &l_mcs_attrs[0][0][0]) );
 
@@ -4547,7 +4546,7 @@ fapi2::ReturnCode eff_lrdimm::dram_rtt_nom()
         // Use specific ODT values for specific dimm according to dimm part number.
         FAPI_TRY( is_m386a8k40cm2_ctd7y_helper(l_ism386));
 
-        if(l_ism386 != ZERO)
+        if(l_ism386 != mss::states::NO)
         {
             l_mcs_attrs[iv_port_index][iv_dimm_index][mss::index(l_rank)] = DRAM_RTT_VALUES[iv_master_ranks_index];
         }
@@ -4645,11 +4644,10 @@ fapi2::ReturnCode eff_lrdimm::dram_rtt_wr()
     {
         // Workaround in m386a8k40cm2_ctd7y
         // Use specific ODT values for specific dimm according to dimm part number.
-        uint8_t l_ism386 = 0;
-        const uint8_t ZERO = 0;
+        mss::states l_ism386 = mss::states::NO;
         FAPI_TRY( is_m386a8k40cm2_ctd7y_helper(l_ism386));
 
-        if(l_ism386 != ZERO)
+        if(l_ism386 != mss::states::NO)
         {
             l_mcs_attrs[iv_port_index][iv_dimm_index][mss::index(l_rank)] = DRAM_RTT_VALUES[iv_master_ranks_index];
         }
@@ -4725,8 +4723,7 @@ fapi2::ReturnCode eff_lrdimm::dram_rtt_park()
     uint8_t l_mcs_attrs[PORTS_PER_MCS][MAX_DIMM_PER_PORT][MAX_RANK_PER_DIMM] = {};
     uint8_t l_decoder_val_01 = 0;
     uint8_t l_decoder_val_23 = 0;
-    uint8_t l_ism386 = 0;
-    const uint8_t ZERO = 0;
+    mss::states l_ism386 = mss::states::NO;
 
     FAPI_TRY( eff_dram_rtt_park(iv_mcs, &l_mcs_attrs[0][0][0]) );
 
@@ -4734,7 +4731,7 @@ fapi2::ReturnCode eff_lrdimm::dram_rtt_park()
     // Use specific ODT values for specific dimm according to dimm part number.
     FAPI_TRY( is_m386a8k40cm2_ctd7y_helper(l_ism386));
 
-    if(l_ism386 != ZERO)
+    if(l_ism386 != mss::states::NO)
     {
         for(uint64_t l_rank = 0; l_rank < MAX_RANK_PER_DIMM; ++l_rank)
         {
@@ -6030,16 +6027,20 @@ fapi2::ReturnCode eff_dimm::cal_step_enable()
 fapi2::ReturnCode eff_dimm::is_m386a8k40cm2_ctd7y()
 {
     // Sets up the vector
-    uint8_t l_data;
+    mss::states l_ism386 = mss::states::NO;
 
-    // Sets up the vector
-    std::vector<uint8_t> l_data_vector(PORTS_PER_MCS, l_data);
+    // Workaround in m386a8k40cm2_ctd7y
+    // Use specific ODT values for specific dimm according to dimm part number.
+    FAPI_TRY( is_m386a8k40cm2_ctd7y_helper(l_ism386));
 
-    FAPI_TRY( is_m386a8k40cm2_ctd7y_helper(l_data));
+    {
+        // Sets up the vector
+        std::vector<uint8_t> l_data_vector(PORTS_PER_MCS, l_ism386 == mss::states::NO ? 0 : 1);
 
-    // Sets the value
-    FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_MSS_IS_M386A8K40CM2_CTD7Y, iv_mcs, UINT8_VECTOR_TO_1D_ARRAY(l_data_vector,
-                            PORTS_PER_MCS)));
+        // Sets the value
+        FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_MSS_IS_M386A8K40CM2_CTD7Y, iv_mcs, UINT8_VECTOR_TO_1D_ARRAY(l_data_vector,
+                                PORTS_PER_MCS)));
+    }
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -6151,11 +6152,10 @@ fapi2::ReturnCode eff_lrdimm::odt_wr()
 
         // Workaround in m386a8k40cm2_ctd7y
         // Use specific ODT values for specific dimm according to dimm part number.
-        uint8_t l_ism386 = 0;
-        const uint8_t ZERO = 0;
+        mss::states l_ism386 = mss::states::NO;
         FAPI_TRY( is_m386a8k40cm2_ctd7y_helper(l_ism386));
 
-        if(l_ism386 != ZERO)
+        if(l_ism386 != mss::states::NO)
         {
             l_dram_odt = DRAM_ODT_VALUES_M386A8K40CM2[iv_master_ranks_index][l_rank] & DIMM_ODT_MASK[iv_dimm_index];
         }

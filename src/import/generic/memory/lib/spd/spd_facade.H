@@ -3091,6 +3091,20 @@ class facade final
             return fapi2::current_err;
         }
 
+        ///
+        /// @brief Decodes the module partnumber
+        /// @param[out] o_output partnumber value as read from the SPD
+        /// @return FAPI2_RC_SUCCESS if okay
+        /// @note Needed for LRDIMM decodes to workaround a specific PN's SI issues
+        ///
+        fapi2::ReturnCode module_partnumber(uint8_t o_output[mss::MODULE_PARTNUMBER_ATTR]) const
+        {
+            FAPI_TRY( iv_dimm_module_decoder->module_partnumber(o_output) );
+
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
+
 };
 
 ///

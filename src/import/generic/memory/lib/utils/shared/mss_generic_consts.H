@@ -134,6 +134,7 @@ enum generic_sizes
     NUM_MAX_FREQS = 5,             ///< Used for ATTR_MAX_ALLOWED_DIMM_FREQ
     MARK_STORE_COUNT = 8,          ///< Elements in a VPD mark/store array
     MAX_RANK_PER_DIMM_ATTR = 4,    ///< Elements in a per-rank attribute array
+    MODULE_PARTNUMBER_ATTR = 20,   ///< Elements in a module partnumber attribute array
 };
 
 ///
