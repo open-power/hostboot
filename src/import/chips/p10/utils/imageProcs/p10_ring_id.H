@@ -360,9 +360,10 @@ enum RingID
     ec_cl2_func              = 408, //0x198
     ec_mma_func              = 409, //0x199
     ec_l3_func               = 410, //0x19A
-    NUM_RING_IDS_EKB         = 155,
+    eq_inex                  = 411, //0x19B
+    NUM_RING_IDS_EKB         = 156,
 
-    NUM_RING_IDS             = 323, // = NUM_RING_IDS_MVPD + NUM_RING_IDS_EKB
+    NUM_RING_IDS             = 324, // = NUM_RING_IDS_MVPD + NUM_RING_IDS_EKB
 }; // enum RingID
 
 #endif  // _P10_RING_ID_H_

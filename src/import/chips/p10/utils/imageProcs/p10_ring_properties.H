@@ -32,7 +32,7 @@ static const uint8_t RING_TABLE_VERSION_EKB = 23;
 #define RINGID_START_MVPD    (RingId_t)0
 #define RINGID_END_MVPD      (RingId_t)167
 #define RINGID_START_EKB     (RingId_t)256
-#define RINGID_END_EKB       (RingId_t)410
+#define RINGID_END_EKB       (RingId_t)411
 
 #define RING_INDEX_START_MVPD   (RingId_t)0
 #define RING_INDEX_START_EKB    (RingId_t)168
@@ -554,6 +554,7 @@ enum RingOffset
     ec_cl2_func              = 22,
     ec_mma_func              = 23,
     ec_l3_func               = 24,
+    eq_inex                  = 25,
     // Instance Rings
     eq_repr                  = (0 | INSTANCE_RING_MARK),
     ec_cl2_repr              = (1 | INSTANCE_RING_MARK),
@@ -574,7 +575,7 @@ static const ChipletData_t g_chipletData =
 {
     0x20, // Base chiplet/instance ID.
     8,  // Number of chiplet instances
-    25, // 25 common rings for EQ Chiplet
+    26, // 26 common rings for EQ Chiplet
     13, // 13 instance specific rings for EQ Chiplet
 };
 }; // end of namespace EQ
@@ -909,6 +910,7 @@ static const RingProperties_t RING_PROPERTIES[NUM_RING_IDS] =
     {ec_cl2_func             , "ec_cl2_func"             , 0x20032000, EQ::ec_cl2_func               , EQ_TYPE   , RMRK_ROOT | RCLS_EKB_RINGS | RMRK_SCAN_BY_QME        }, // 408
     {ec_mma_func             , "ec_mma_func"             , 0x20830000, EQ::ec_mma_func               , EQ_TYPE   , RMRK_ROOT | RCLS_EKB_RINGS | RMRK_SCAN_BY_QME        }, // 409
     {ec_l3_func              , "ec_l3_func"              , 0x20030200, EQ::ec_l3_func                , EQ_TYPE   , RMRK_ROOT | RCLS_EKB_RINGS | RMRK_SCAN_BY_QME        }, // 410
+    {eq_inex                 , "eq_inex"                 , 0x2003402B, EQ::eq_inex                   , EQ_TYPE   , RMRK_ROOT | RCLS_EKB_RINGS | RMRK_SCAN_BY_QME        }, // 411
 };
 #endif
 
@@ -1241,6 +1243,7 @@ static const RingProperties_t RING_PROPERTIES[NUM_RING_IDS] =
     {EQ::ec_cl2_func               , EQ_TYPE   }, // 408
     {EQ::ec_mma_func               , EQ_TYPE   }, // 409
     {EQ::ec_l3_func                , EQ_TYPE   }, // 410
+    {EQ::eq_inex                   , EQ_TYPE   }, // 411
 };
 #endif  // __PPE__
 
