@@ -136,16 +136,6 @@ void*    host_mss_attr_cleanup( void *io_pArgs )
     Target* l_pTopLevel = UTIL::assertGetToplevelTarget();
     auto l_mirror = l_pTopLevel->getAttr<TARGETING::ATTR_PAYLOAD_IN_MIRROR_MEM>();
 
-    // In Simics mode disable memory mirroring for now
-    // TODO RTC: 215700 to enable it back for P10 Sim
-    if(Util::isSimicsRunning())
-    {
-        l_mirror = false;
-        l_pTopLevel->setAttr<ATTR_PAYLOAD_IN_MIRROR_MEM>(0);
-        TRACFCOMP(g_trac_isteps_trace,
-                  INFO_MRK "Disabling memory mirroring temporarily");
-    }
-
     if(l_mirror)
     {
         l_pTopLevel->setAttr<TARGETING::ATTR_MRW_HW_MIRRORING_ENABLE>

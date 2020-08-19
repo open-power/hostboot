@@ -98,13 +98,7 @@ const uint8_t BITS_PER_BYTE = 8;
 
 const uint8_t HDAT_INVALID_NODE = 0xFF;
 
-// The upper limit of the hostboot reserved memory.
-const uint64_t HB_RES_MEM_UPPER_LIMIT = VMM_HRMOR_OFFSET +
-                                        RESERVED_MEM_END_OFFSET;
 
-// The lower limit of the hostboot reserved memory.
-const uint64_t HB_RES_MEM_LOWER_LIMIT = VMM_HRMOR_OFFSET +
-                                        RESERVED_MEM_START_OFFSET;
 
 trace_desc_t *g_trac_runtime = nullptr;
 TRAC_INIT(&g_trac_runtime, RUNTIME_COMP_NAME, KILOBYTE);
@@ -345,43 +339,17 @@ errlHndl_t checkHbResMemLimit(const uint64_t i_addr, const uint64_t i_size)
 {
     errlHndl_t l_errl = nullptr;
 
-    // Start 256M HB addr space
-    uint64_t l_hbAddr = cpu_hrmor_nodal_base();
+    // Find the start of HB addr space , which will be
+    // the node base + the hostboot base addr
+    uint64_t l_node_base = cpu_hrmor_nodal_base();
+    uint64_t l_hostboot_base_addr = RUNTIME::getHbBaseAddr();
 
     // Address limits
-    uint64_t l_lowerLimit = HB_RES_MEM_LOWER_LIMIT + l_hbAddr;
-    uint64_t l_upperLimit = HB_RES_MEM_UPPER_LIMIT + l_hbAddr;
+    uint64_t l_lowerLimit = l_hostboot_base_addr + l_node_base + RESERVED_MEM_START_OFFSET;
+    uint64_t l_upperLimit = l_hostboot_base_addr + l_node_base + RESERVED_MEM_END_OFFSET;
 
-    // Update address limits for mirroring
-    if(TARGETING::is_phyp_load())
-    {
-        // Change address start to mirror address, if mirror enabled
-        TARGETING::Target* l_sys = nullptr;
-        TARGETING::targetService().getTopLevelTarget(l_sys);
-        assert( l_sys != nullptr,"checkHbResMemLimit:top level target nullptr");
-
-        auto l_mirrored =
-            l_sys->getAttr<TARGETING::ATTR_PAYLOAD_IN_MIRROR_MEM>();
-        if (l_mirrored)
-        {
-            TARGETING::ATTR_MIRROR_BASE_ADDRESS_type l_mirrorBase = 0;
-            l_mirrorBase =
-              l_sys->getAttr<TARGETING::ATTR_MIRROR_BASE_ADDRESS>();
-
-            TRACFCOMP( g_trac_runtime,
-                "checkHbResMemLimit> Adding mirror base %p so "
-                "new start address at %p",
-                reinterpret_cast<void*>(l_mirrorBase),
-                reinterpret_cast<void*>(l_lowerLimit + l_mirrorBase) );
-
-            // update address to new mirror address
-            l_lowerLimit += l_mirrorBase;
-            l_upperLimit += l_mirrorBase;
-        }
-    }
-
-    TRACDCOMP(g_trac_runtime, "l_hbAddr 0x%.16llX, i_addr 0x%.16llX, l_lowerLimit 0x%.16llX",
-              l_hbAddr, i_addr, l_lowerLimit);
+    TRACDCOMP(g_trac_runtime, "l_node_base 0x%.16llX, i_addr 0x%.16llX, l_lowerLimit 0x%.16llX",
+              l_node_base, i_addr, l_lowerLimit);
     TRACDCOMP(g_trac_runtime, "i_size = 0x%.16llX, l_upperLimit = 0x%.16llX",
               i_size, l_upperLimit);
 
@@ -1095,32 +1063,7 @@ errlHndl_t populate_HbRsvMem(uint64_t i_nodeId, bool i_master_node)
         // Setting r to 26 sets the offset granularity to 64MB.
         // 64MB * 60 = 3840MB, which is equal to 4GB-256MB.
         ////////////////////////////////////////////////////////////////////
-        uint64_t l_hbAddr = cpu_spr_value(CPU_SPR_HRMOR);
-
-        TARGETING::ATTR_MIRROR_BASE_ADDRESS_type l_mirrorBase = 0;
-        if(TARGETING::is_phyp_load())
-        {
-            // If mirroring enabled,
-            // change address start to be at its mirrored address equivalent
-            auto l_mirrored =
-                      l_sys->getAttr<TARGETING::ATTR_PAYLOAD_IN_MIRROR_MEM>();
-            if (l_mirrored)
-            {
-                l_mirrorBase =
-                  l_sys->getAttr<TARGETING::ATTR_MIRROR_BASE_ADDRESS>();
-
-                TRACFCOMP( g_trac_runtime,
-                    "populate_HbRsvMem> Adding mirror base %p so "
-                    "new start address at %p",
-                    reinterpret_cast<void*>(l_mirrorBase),
-                    reinterpret_cast<void*>(l_hbAddr + l_mirrorBase) );
-
-                // l_mirrorBase is basically a new floor/zero that we want to
-                // orient everything against. Therefore we just add it onto
-                // the address we would normally use.
-                l_hbAddr += l_mirrorBase;
-            }
-        }
+        uint64_t l_hbAddr = RUNTIME::getHbBaseAddr();
 
         /* The primary reserved section should encompass the entirety of the
          * Hostboot local memory space.  This data will be preserved across
@@ -1234,9 +1177,7 @@ errlHndl_t populate_HbRsvMem(uint64_t i_nodeId, bool i_master_node)
         uint64_t l_archAddr = 0;
         if(TARGETING::is_phyp_load())
         {
-            l_archAddr = cpu_spr_value(CPU_SPR_HRMOR)
-                          + l_mirrorBase
-                          + VMM_ARCH_REG_DATA_START_OFFSET;
+            l_archAddr = RUNTIME::getHbBaseAddr() + VMM_ARCH_REG_DATA_START_OFFSET;
         }
         else if(TARGETING::is_sapphire_load())
         {
@@ -1301,9 +1242,7 @@ errlHndl_t populate_HbRsvMem(uint64_t i_nodeId, bool i_master_node)
 
         if(TARGETING::is_phyp_load())
         {
-            l_startAddr = cpu_spr_value(CPU_SPR_HRMOR)
-                          + l_mirrorBase
-                          + VMM_HB_DATA_TOC_START_OFFSET;
+            l_startAddr = RUNTIME::getHbBaseAddr() + VMM_HB_DATA_TOC_START_OFFSET;
         }
         else if(TARGETING::is_sapphire_load())
         {
@@ -4191,8 +4130,8 @@ errlHndl_t verifyAndMovePayload(void)
 
     // Get Temporary Virtual Address To Payload
     // - Need to make Memory spaces HRMOR-relative
-    uint64_t hrmorVal = cpu_spr_value(CPU_SPR_HRMOR);
-    uint64_t payload_tmp_phys_addr = hrmorVal + MCL_TMP_ADDR;
+    uint64_t hostboot_base_addr = RUNTIME::getHbBaseAddr();
+    uint64_t payload_tmp_phys_addr = hostboot_base_addr + MCL_TMP_ADDR;
     uint64_t payload_size          = MCL_TMP_SIZE;
 
     payload_tmp_virt_addr = mm_block_map(
@@ -4281,12 +4220,10 @@ errlHndl_t verifyAndMovePayload(void)
         break;
     }
 
+    const auto sys = TARGETING::UTIL::assertGetToplevelTarget();
+
     // Move PAYLOAD to Final Location
     // Get Target Service, and the system target.
-    TargetService& tS = targetService();
-    TARGETING::Target* sys = nullptr;
-    (void) tS.getTopLevelTarget( sys );
-    assert(sys != nullptr, "verifyAndMovePayload() sys target is NULL");
     uint64_t payloadBase = sys->getAttr<TARGETING::ATTR_PAYLOAD_BASE>();
 
     payloadBase = payloadBase * MEGABYTE;
@@ -4335,7 +4272,7 @@ errlHndl_t verifyAndMovePayload(void)
 
     // Move HDAT into its proper place after it was temporarily put into
     // HDAT_TMP_ADDR-relative-to-HRMOR (HDAT_TMP_SIZE) by the FSP via TCEs
-    uint64_t hdat_tmp_phys_addr = hrmorVal + HDAT_TMP_ADDR;
+    uint64_t hdat_tmp_phys_addr = hostboot_base_addr + HDAT_TMP_ADDR;
 
     hdat_tmp_virt_addr = mm_block_map(
                             reinterpret_cast<void*>(hdat_tmp_phys_addr),

@@ -171,8 +171,7 @@ void* call_proc_exit_cache_contained (void *io_pArgs)
 
     if(l_mirrored)
     {
-//TODO RTC: 215700 Enable Memory Mirroring
-#if 0
+
         ATTR_MIRROR_BASE_ADDRESS_type l_mirrorBaseAddr = 0;
         if(!is_sapphire_load())
         {
@@ -312,7 +311,6 @@ void* call_proc_exit_cache_contained (void *io_pArgs)
                   0,
                   true); // callout firmware
         }
-#endif
     }
     // If we're not mirrored, payloadBase is the lowest mem_base.
     // Note that if we are mirrored, finding the correct mirror

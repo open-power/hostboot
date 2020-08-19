@@ -35,6 +35,7 @@
 #include <runtime/preverifiedlidmgr.H>
 #include <limits.h>
 #include <util/utiltce.H>
+#include <runtime/runtime.H>
 
 namespace MCL
 {
@@ -106,9 +107,10 @@ MasterContainerLidMgr::MasterContainerLidMgr(const bool i_loadOnly)
   iv_compInfoCache{}, iv_hasHeader(true), iv_loadOnly(i_loadOnly)
 {
     // Need to make Memory spaces HRMOR-relative
-    uint64_t hrmorVal = cpu_spr_value(CPU_SPR_HRMOR);
-    iv_mclAddr = hrmorVal + MCL_ADDR;
-    iv_tmpAddr = hrmorVal + MCL_TMP_ADDR;
+    const uint64_t hostboot_base_address = RUNTIME::getHbBaseAddr();
+
+    iv_tmpAddr = hostboot_base_address + MCL_TMP_ADDR;
+    iv_mclAddr = hostboot_base_address + MCL_ADDR;
 
     initMcl();
 }
@@ -120,9 +122,10 @@ MasterContainerLidMgr::MasterContainerLidMgr(const void* i_pMcl,
   iv_compInfoCache{}, iv_hasHeader(false)
 {
     // Need to make Memory spaces HRMOR-relative
-    uint64_t hrmorVal = cpu_spr_value(CPU_SPR_HRMOR);
-    iv_mclAddr = hrmorVal + MCL_ADDR;
-    iv_tmpAddr = hrmorVal + MCL_TMP_ADDR;
+    const uint64_t hostboot_base_address = RUNTIME::getHbBaseAddr();
+
+    iv_mclAddr = hostboot_base_address + MCL_ADDR;
+    iv_tmpAddr = hostboot_base_address + MCL_TMP_ADDR;
 
 
     initMcl(i_pMcl, i_size);
@@ -826,7 +829,6 @@ errlHndl_t MasterContainerLidMgr::tpmExtend(const ComponentID& i_compId,
                 i_conHdr.componentId());
         break;
     }
-
     } while(0);
 
     UTIL_DT(EXIT_MRK"MasterContainerLidMgr::tpmExtend");

@@ -29,6 +29,7 @@
 #include <stdint.h>
 #include <builtins.h>
 #include <errl/errlentry.H>
+#include <targeting/common/targetservice.H>
 #include <hdat/hdat.H>
 #include "../../../src/usr/runtime/hdatstructs.H"
 #include <vmmconst.h>
@@ -398,7 +399,21 @@ errlHndl_t getRsvdMemTraceBuf(uint64_t& o_RsvdMemAddress, uint64_t& o_size);
  */
 errlHndl_t getPayloadAttnAreaAddr(uint64_t& o_payloadTiAddr);
 
-/*
+inline uint64_t getHbBaseAddr()
+{
+    const auto sys = TARGETING::UTIL::assertGetToplevelTarget();
+    const auto mirror_base = sys->getAttr<TARGETING::ATTR_PAYLOAD_IN_MIRROR_MEM>() ?
+                              sys->getAttr<TARGETING::ATTR_MIRROR_BASE_ADDRESS>() : 0;
+    const auto hrmor = cpu_spr_value(CPU_SPR_HRMOR);
+
+    // If a non-zero mirror_base found then we need to return a
+    // mirrored address. To calculate hostboot's mirrored base
+    // address you take the hrmor divided in half and offset
+    // by the mirrored base.
+    return mirror_base ? (hrmor / 2) + mirror_base : hrmor;
+}
+
+/**
  *  @brief Calculates the node's proposed start address for the system's
  *         SP ATTN areas, which becomes the effective configuration if it's
  *         elected as the master.
@@ -407,8 +422,7 @@ errlHndl_t getPayloadAttnAreaAddr(uint64_t& o_payloadTiAddr);
  */
 inline uint64_t calcSpAttnAreaStart()
 {
-    auto hrmorVal = cpu_spr_value(CPU_SPR_HRMOR);
-    return  (hrmorVal + PHYP_ATTN_AREA_OFFSET) | VmmManager::FORCE_PHYS_ADDR;
+    return  (getHbBaseAddr() + PHYP_ATTN_AREA_OFFSET) | VmmManager::FORCE_PHYS_ADDR;
 }
 
 /*

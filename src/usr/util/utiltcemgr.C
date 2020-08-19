@@ -51,6 +51,7 @@
 #include <devicefw/userif.H>
 #include <initservice/initserviceif.H>
 #include <sbeio/sbeioif.H>
+#include <runtime/runtime.H>
 
 trace_desc_t* g_trac_tce = nullptr;
 TRAC_INIT(&g_trac_tce, UTILTCE_TRACE_NAME, 4*KILOBYTE);
@@ -135,13 +136,14 @@ errlHndl_t utilSetupPayloadTces(void)
     do{
 
     TRACFCOMP(g_trac_tce,ENTER_MRK"utilSetupPayloadTces(): nodeId=0x%X", nodeId);
+    // Get the hostboot base address adjusted for mirrored
+    // memory if neccessary
+    const uint64_t hostboot_base_address = RUNTIME::getHbBaseAddr();
 
     // Allocate TCEs for PAYLOAD to Temporary Space
-    // -- Address must be HRMOR-specific
-    uint64_t hrmorVal = cpu_spr_value(CPU_SPR_HRMOR);
-    addr = hrmorVal + MCL_TMP_ADDR;
+    addr = hostboot_base_address + MCL_TMP_ADDR;
     size = MCL_TMP_SIZE;
-    TRACUCOMP(g_trac_tce,"utilSetupPayloadTces(): addr=0x%.16llX, hrmor=0x%.16llX, size=0x%X", addr, hrmorVal, size);
+    TRACFCOMP(g_trac_tce,"utilSetupPayloadTces(): addr=0x%.16llX, hrmor=0x%.16llX, size=0x%X", addr, hostboot_base_address, size);
 
     errl = utilAllocateTces(addr, size, token);
     if (errl)
@@ -182,7 +184,7 @@ errlHndl_t utilSetupPayloadTces(void)
 
     // Allocate TCEs for HDAT
     // -- Address must be HRMOR-specific
-    addr = hrmorVal + HDAT_TMP_ADDR;
+    addr = hostboot_base_address + HDAT_TMP_ADDR;
     size = HDAT_TMP_SIZE;
 
     errl = utilAllocateTces(addr, size, token);
@@ -230,13 +232,14 @@ errlHndl_t utilClosePayloadTces(void)
         break;
     }
 
+    // Get the hostboot base address adjusted for mirrored
+    // memory if neccessary
+    const uint64_t hostboot_base_address = RUNTIME::getHbBaseAddr();
     // Close the Unsecure Memory Region that was opened for the FSP to run
     // PSI Diagnostics Test using the PAYLOAD section
     // -- addr is a constant for PAYLOAD
-    // -- Address must be HRMOR-specific
-    uint64_t hrmorVal = cpu_spr_value(CPU_SPR_HRMOR);
-    uint64_t addr = hrmorVal + MCL_TMP_ADDR;
-    TRACUCOMP(g_trac_tce,"utilClosePayloadTces(): addr=0x%.16llX, hrmor=0x%.16llX", addr, hrmorVal);
+    uint64_t addr = hostboot_base_address + MCL_TMP_ADDR;
+    TRACUCOMP(g_trac_tce,"utilClosePayloadTces(): addr=0x%.16llX, hrmor=0x%.16llX", addr, hostboot_base_address);
 
     errl = SBEIO::closeUnsecureMemRegion(addr,
                                          nullptr); //Master Processor
@@ -280,10 +283,11 @@ UtilTceMgr::UtilTceMgr(const uint64_t i_tableAddr, const size_t i_tableSize)
   ,iv_payloadToken(INVALID_TOKEN_VALUE)
   ,iv_hdatToken(INVALID_TOKEN_VALUE)
 {
+    // Get the hostboot base address adjusted for mirrored
+    // memory if neccessary
+    const uint64_t hostboot_base_address = RUNTIME::getHbBaseAddr();
 
-    // Need to set up TCE Table with HRMOR-specific Address
-    uint64_t hrmorVal = cpu_spr_value(CPU_SPR_HRMOR);
-    iv_tceTablePhysAddr = hrmorVal + TCE_TABLE_ADDR;
+    iv_tceTablePhysAddr = hostboot_base_address + TCE_TABLE_ADDR;
 
     // Table Address must be 4MB Aligned and default input is TCE_TABLE_ADDR
     static_assert( TCE_TABLE_ADDR % TCE_TABLE_ADDRESS_ALIGNMENT == 0,"TCE Table must align on 4 MB boundary");
@@ -298,7 +302,7 @@ UtilTceMgr::UtilTceMgr(const uint64_t i_tableAddr, const size_t i_tableSize)
     iv_tceEntryCount = iv_tceTableSize/(sizeof (uint64_t));
 
 
-    TRACUCOMP(g_trac_tce,"UtilTceMgr::UtilTceMgr: iv_tceTableVaAddr=0x%.16llX, iv_tceTablePhysAddr=0x%.16llX, iv_tceTableSize=0x%llX, iv_tceEntryCount=0x%X, iv_allocatedAddrs,size=%d, hrmorVal=0x%.16llX", iv_tceTableVaAddr, iv_tceTablePhysAddr, iv_tceTableSize, iv_tceEntryCount, iv_allocatedAddrs.size(), hrmorVal);
+    TRACFCOMP(g_trac_tce,"UtilTceMgr::UtilTceMgr: iv_tceTableVaAddr=0x%.16llX, iv_tceTablePhysAddr=0x%.16llX, iv_tceTableSize=0x%llX, iv_tceEntryCount=0x%X, iv_allocatedAddrs,size=%d, hostboot_base_address=0x%.16llX", iv_tceTableVaAddr, iv_tceTablePhysAddr, iv_tceTableSize, iv_tceEntryCount, iv_allocatedAddrs.size(), hostboot_base_address);
 
     // Initialize HW without Initializing Table so that FSP cannot DMA
     // to memory without Hostboot control
