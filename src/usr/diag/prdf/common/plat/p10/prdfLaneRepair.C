@@ -321,10 +321,10 @@ int32_t handleLaneRepairEvent( ExtensibleChip * i_chip,
 void   obus_smpCallout( TargetHandle_t i_smpTgt, TargetHandle_t i_obusTgt,
                         STEP_CODE_DATA_STRUCT & i_sc )
 {
-    errlHndl_t l_mainElog = NULL;
+    errlHndl_t l_mainElog = nullptr;
     l_mainElog = ServiceGeneratorClass::ThisServiceGenerator().getErrl();
 
-    if ( NULL == l_mainElog )
+    if ( nullptr == l_mainElog )
     {
         PRDF_ERR("smpCallout_link Failed to get the global error log" );
     }
@@ -371,20 +371,20 @@ void   obus_smpCallout( TargetHandle_t i_smpTgt, TargetHandle_t i_obusTgt,
     #else
         // FSP code
         #ifndef ESW_SIM_COMPILE
-        errlHndl_t  l_err = NULL;
+        errlHndl_t  l_err = nullptr;
 
         // Call SVPD routine to add callouts
         l_err = HWSV::SvrError::AddBusCallouts( l_mainElog, i_smpTgt,
                                                 l_smpPeerTgt, HWAS::O_BUS_TYPE,
                                                 SRCI_PRIORITY_MED );
 
-        if (NULL != l_err)
+        if (nullptr != l_err)
         {
             PRDF_ERR("AddBusCallouts failed");
             l_err->CollectTrace(PRDF_COMP_NAME, 1024);
             l_err->commit( PRDF_COMP_ID, ERRL_ACTION_REPORT );
             delete l_err;
-           l_err = NULL;
+           l_err = nullptr;
         }
         #endif // not simulation
 
@@ -503,7 +503,7 @@ void  obus_smpCallout_link( uint32_t  i_obusNum, ExtensibleChip * i_chip,
     TargetHandle_t   l_obus = getConnectedChild(rxTrgt,
                                                 TYPE_OBUS, i_obusNum);
 
-    PRDF_ASSERT( NULL != l_obus );
+    PRDF_ASSERT( nullptr != l_obus );
 
     // We found the right OBUS target
     obus_smpCallout_link( l_obus, i_link, i_sc );
@@ -649,9 +649,9 @@ void  obus_clearMaskFail( errlHndl_t &io_errl, TargetHandle_t &i_rxTrgt,
                           TargetHandle_t &i_txTrgt, uint32_t i_link )
 {
     // ensure we have valid inputs
-    PRDF_ASSERT( NULL != i_rxTrgt );
-    PRDF_ASSERT( NULL != i_txTrgt );
-    PRDF_ASSERT( NULL != io_errl );
+    PRDF_ASSERT( nullptr != i_rxTrgt );
+    PRDF_ASSERT( nullptr != i_txTrgt );
+    PRDF_ASSERT( nullptr != io_errl );
 
 #ifdef __HOSTBOOT_MODULE // register writes not allowed on FSP
 
@@ -725,9 +725,9 @@ int32_t obus_fail_L0( ExtensibleChip * i_chip,
 
     do
     {
-        errlHndl_t l_mainElog = NULL;
+        errlHndl_t l_mainElog = nullptr;
         l_mainElog = ServiceGeneratorClass::ThisServiceGenerator().getErrl();
-        if ( NULL == l_mainElog )
+        if ( nullptr == l_mainElog )
         {
             PRDF_ERR( "obus_fail Failed to get the global error log" );
             rc = FAIL;
@@ -756,9 +756,9 @@ int32_t obus_fail_L1( ExtensibleChip * i_chip,
 
     do
     {
-        errlHndl_t l_mainElog = NULL;
+        errlHndl_t l_mainElog = nullptr;
         l_mainElog = ServiceGeneratorClass::ThisServiceGenerator().getErrl();
-        if ( NULL == l_mainElog )
+        if ( nullptr == l_mainElog )
         {
             PRDF_ERR( "obus_fail_Failed to get the global error log" );
             rc = FAIL;
@@ -788,7 +788,7 @@ void    baseCaptureSmpFFDC( ExtensibleChip * i_chip,
     ExtensibleChip * l_obusChip;
     l_obusChip = (ExtensibleChip *)systemPtr->GetChip(l_obus);
     // Add OBUS registers for this instance
-    if( NULL != l_obusChip )
+    if( nullptr != l_obusChip )
     {
         l_obusChip->CaptureErrorData(
                           io_sc.service_data->GetCaptureData(),
@@ -889,9 +889,9 @@ int32_t calloutBusInterface( TargetHandle_t i_rxTrgt,
         }
 
         // Get the global error log.
-        errlHndl_t errl = NULL;
+        errlHndl_t errl = nullptr;
         errl = ServiceGeneratorClass::ThisServiceGenerator().getErrl();
-        if ( NULL == errl )
+        if ( nullptr == errl )
         {
             PRDF_ERR( PRDF_FUNC "Failed to get the global error log" );
             rc = FAIL; break;

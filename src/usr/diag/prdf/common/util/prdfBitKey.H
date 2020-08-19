@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -78,8 +78,8 @@ class BitString;
 \endverbatim
 
  The assingment operator is overloaded to provide setting
- the bit positions form a NULL terminated character
- string.  Since the string is NULL terminated with 0 and
+ the bit positions form a nullptr terminated character
+ string.  Since the string is nullptr terminated with 0 and
  this a valid bit position, each character value is
  converted to an unsigned character and decremented to
  obtain the actual bit position.  The character string
@@ -106,7 +106,7 @@ class BitKey
 
     //! Default Constructor
     /*!
-        This function initializes the string to NULL (empty bit list)
+        This function initializes the string to nullptr (empty bit list)
      */
     BitKey(void);
 
@@ -159,7 +159,7 @@ class BitKey
     /*!
      This function assigns the specified pointer to
      character string representation of a Bit List to this
-     Bit List.  Since the string is NULL terminated with 0
+     Bit List.  Since the string is nullptr terminated with 0
      and thus a valid bit position, each character value is
      decremented to obtain the actual bit position.
     */
@@ -277,7 +277,7 @@ class BitKey
      This function allocates storage for keys bigger keys (IsDirect() == false)
      \return number of uint32_t words allocated
      \post
-     If the string is NULL, then it is allocated.
+     If the string is nullptr, then it is allocated.
      If the string length is not equal to the specified
      length, then the string is re-allocated.
      */
@@ -285,7 +285,7 @@ class BitKey
 
     uint32_t * DataPtr(void)
     {
-      uint32_t * ptr = NULL;
+      uint32_t * ptr = nullptr;
       if(IsDirect()) ptr = &iv_storage1;
       else ptr = iv_rep.buffer;
       return ptr;
@@ -293,7 +293,7 @@ class BitKey
 
     const uint32_t * cDataPtr(void) const
     {
-      const uint32_t * ptr = NULL;
+      const uint32_t * ptr = nullptr;
       if(IsDirect()) ptr = &iv_storage1;
       else ptr = iv_rep.buffer;
       return ptr;

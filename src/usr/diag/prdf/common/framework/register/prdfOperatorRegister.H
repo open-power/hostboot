@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -38,7 +38,7 @@ class NotRegister : public SCAN_COMM_REGISTER_CLASS
 {
   public:
     NotRegister() :
-        SCAN_COMM_REGISTER_CLASS( ), iv_child(NULL), iv_iBS(0)
+        SCAN_COMM_REGISTER_CLASS( ), iv_child(nullptr), iv_iBS(0)
     {
         iv_bs = &iv_iBS;
     }
@@ -95,7 +95,7 @@ class SummaryRegister : public SCAN_COMM_REGISTER_CLASS
 {
   public:
     SummaryRegister() :
-        SCAN_COMM_REGISTER_CLASS( ), iv_child(NULL), iv_amount(0), iv_iBS(0)
+        SCAN_COMM_REGISTER_CLASS( ), iv_child(nullptr), iv_amount(0), iv_iBS(0)
     {
         iv_bs = &iv_iBS;
     }
@@ -188,7 +188,7 @@ class LeftShiftRegister : public SCAN_COMM_REGISTER_CLASS
 {
   public:
     LeftShiftRegister() :
-        SCAN_COMM_REGISTER_CLASS( ), iv_child(NULL), iv_amount(0), iv_iBS(0)
+        SCAN_COMM_REGISTER_CLASS( ), iv_child(nullptr), iv_amount(0), iv_iBS(0)
     {
         iv_bs = &iv_iBS;
     }
@@ -255,7 +255,7 @@ class RightShiftRegister : public SCAN_COMM_REGISTER_CLASS
 {
   public:
     RightShiftRegister() :
-        SCAN_COMM_REGISTER_CLASS( ), iv_child(NULL), iv_amount(0), iv_iBS(0)
+        SCAN_COMM_REGISTER_CLASS( ), iv_child(nullptr), iv_amount(0), iv_iBS(0)
     {
         iv_bs = &iv_iBS;
     }
@@ -323,7 +323,7 @@ class AndRegister : public SCAN_COMM_REGISTER_CLASS
 {
   public:
     AndRegister() :
-        SCAN_COMM_REGISTER_CLASS( ), iv_left(NULL), iv_right(NULL), iv_iBS(0)
+        SCAN_COMM_REGISTER_CLASS( ), iv_left(nullptr), iv_right(nullptr), iv_iBS(0)
     {
         iv_bs = &iv_iBS;
     }
@@ -405,7 +405,7 @@ class OrRegister : public SCAN_COMM_REGISTER_CLASS
   public:
 
     OrRegister() :
-        SCAN_COMM_REGISTER_CLASS( ), iv_left(NULL), iv_right(NULL), iv_iBS(0)
+        SCAN_COMM_REGISTER_CLASS( ), iv_left(nullptr), iv_right(nullptr), iv_iBS(0)
     {
         iv_bs = &iv_iBS;
     }
@@ -536,11 +536,11 @@ class AttnTypeRegister : public SCAN_COMM_REGISTER_CLASS
                       SCAN_COMM_REGISTER_CLASS *i_proccs,
                       SCAN_COMM_REGISTER_CLASS *i_hostattn ) :
         SCAN_COMM_REGISTER_CLASS( ),
-        iv_check(    NULL == i_check    ? &cv_null : i_check),
-        iv_recov(    NULL == i_recov    ? &cv_null : i_recov),
-        iv_special(  NULL == i_special  ? &cv_null : i_special),
-        iv_proccs(   NULL == i_proccs   ? &cv_null : i_proccs),
-        iv_hostattn( NULL == i_hostattn ? &cv_null : i_hostattn),
+        iv_check(    nullptr == i_check    ? &cv_null : i_check),
+        iv_recov(    nullptr == i_recov    ? &cv_null : i_recov),
+        iv_special(  nullptr == i_special  ? &cv_null : i_special),
+        iv_proccs(   nullptr == i_proccs   ? &cv_null : i_proccs),
+        iv_hostattn( nullptr == i_hostattn ? &cv_null : i_hostattn),
         iv_iBS(0)         // will fully initialize this inside ctor.
     {
         uint32_t l_length = 1024;

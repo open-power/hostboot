@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 1996,2014              */
+/* Contributors Listed Below - COPYRIGHT 1996,2020                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -113,7 +115,7 @@ public:
   //
   // Purpose:  Builds chipList and domainList and system
   // Parameters: None
-  // Returns:    Ptr to system | NULL
+  // Returns:    Ptr to system | nullptr
   // Requirements: Global ptr to syspit object has been initialized
   // Promises:  All chip objects and domain objects for system intantiated
   // Exceptions: None
@@ -124,7 +126,7 @@ public:
   //        Instantiates the domains in the system and assign chips.
   //        This function should only be called once.
   //    If any fail conditions are encoutered then an SRC is written to
-  //    the SOT using SRCFILL. If NULL is returned then chiplist and
+  //    the SOT using SRCFILL. If nullptr is returned then chiplist and
   //    domainlist may not be complete.
   //
   // End Function Specification ******************************************

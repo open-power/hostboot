@@ -125,7 +125,7 @@ TryResolution::TryResolution(Resolution &tryRes, Resolution & defaultRes)
 
 inline
 TryResolution::TryResolution()
-  : xTryResolution(NULL), xDefaultResolution(NULL) {}
+  : xTryResolution(nullptr), xDefaultResolution(nullptr) {}
 
 } // end namespace PRDF
 

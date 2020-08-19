@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2009,2014              */
+/* Contributors Listed Below - COPYRIGHT 2009,2020                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -34,14 +36,14 @@ class ExtensibleDomain
 {
     public:
         ExtensibleDomain(const char * i_domainName) :
-                iv_domainName(i_domainName), iv_dataBundle(NULL) {};
+                iv_domainName(i_domainName), iv_dataBundle(nullptr) {};
 
         virtual ~ExtensibleDomain()
             {
-                if (NULL != iv_dataBundle)
+                if (nullptr != iv_dataBundle)
                 {
                     delete iv_dataBundle;
-                    iv_dataBundle = NULL;
+                    iv_dataBundle = nullptr;
                 }
             };
 

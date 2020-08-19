@@ -121,7 +121,7 @@ System::~System(void)
 
 CHIP_CLASS * System::GetChip(TARGETING::TargetHandle_t i_pchipHandle )
 {
-    CHIP_CLASS * chipPtr = NULL;
+    CHIP_CLASS * chipPtr = nullptr;
 
     //  chips.LookUp(chipPtr, chipId);
     for(uint32_t i = 0; i < chips.size(); ++i)
@@ -138,7 +138,7 @@ CHIP_CLASS * System::GetChip(TARGETING::TargetHandle_t i_pchipHandle )
 
 Domain * System::GetDomain(DOMAIN_ID domainId)
 {
-    Domain * domainPtr = NULL;
+    Domain * domainPtr = nullptr;
 
     //  domains.LookUp(domainPtr, domainId);
     for(uint32_t i = 0; i < prioritizedDomains.size(); ++i)
@@ -262,9 +262,9 @@ int32_t System::Analyze( STEP_CODE_DATA_STRUCT & io_sc )
 {
     #define PRDF_FUNC "[System::Analyze] "
     SYSTEM_DEBUG_CLASS sysdebug;
-    Domain * domainAtAttentionPtr = NULL;
-    ServiceDataCollector * l_saved_sdc = NULL;
-    ServiceDataCollector * l_temp_sdc = NULL;
+    Domain * domainAtAttentionPtr = nullptr;
+    ServiceDataCollector * l_saved_sdc = nullptr;
+    ServiceDataCollector * l_temp_sdc = nullptr;
 
     int32_t rc = (prioritizedDomains.empty() ? NO_DOMAINS_IN_SYSTEM : SUCCESS);
     int32_t l_saved_rc = 0;
@@ -281,18 +281,18 @@ int32_t System::Analyze( STEP_CODE_DATA_STRUCT & io_sc )
             startAttnType = RECOVERABLE;
 
         for ( ATTENTION_TYPE secAttnType = startAttnType;
-              domainAtAttentionPtr == NULL && secAttnType >= priAttnType;
+              domainAtAttentionPtr == nullptr && secAttnType >= priAttnType;
               --secAttnType )
         {
             DomainContainerType::iterator domainIterator;
 
             for( domainIterator = prioritizedDomains.begin();
                  domainIterator != prioritizedDomains.end() &&
-                 domainAtAttentionPtr == NULL; )
+                 domainAtAttentionPtr == nullptr; )
             {
                 bool l_continueInDomain = false;
-                domainAtAttentionPtr = ((*domainIterator)->Query(secAttnType)) ? (*domainIterator) : NULL;
-                if(domainAtAttentionPtr != NULL)
+                domainAtAttentionPtr = ((*domainIterator)->Query(secAttnType)) ? (*domainIterator) : nullptr;
+                if(domainAtAttentionPtr != nullptr)
                 {
                     io_sc.service_data->setSecondaryAttnType(secAttnType);
                     rc = domainAtAttentionPtr->Analyze(io_sc, secAttnType);
@@ -300,7 +300,7 @@ int32_t System::Analyze( STEP_CODE_DATA_STRUCT & io_sc )
                         (rc == PRD_POWER_FAULT) )
                     {
                         // save sdc, and continue
-                        if(l_saved_sdc == NULL)
+                        if(l_saved_sdc == nullptr)
                         {
                             l_saved_sdc = new ServiceDataCollector(
                                                 *io_sc.service_data);
@@ -320,7 +320,7 @@ int32_t System::Analyze( STEP_CODE_DATA_STRUCT & io_sc )
                             io_sc.service_data->clearSecondaryErrFlag();
                         }
 
-                        domainAtAttentionPtr = NULL;
+                        domainAtAttentionPtr = nullptr;
 
                         if(rc == PRD_POWER_FAULT)
                         {
@@ -337,18 +337,18 @@ int32_t System::Analyze( STEP_CODE_DATA_STRUCT & io_sc )
                         // we want to add additional signature of MACHINE XSTOP
                         // attention to error log.
 
-                        // l_temp_sdc is not NULL. It is a code bug. Do not do
+                        // l_temp_sdc is not nullptr. It is a code bug. Do not do
                         // anything for error isolation pass.
-                        if ( NULL != l_temp_sdc )
+                        if ( nullptr != l_temp_sdc )
                         {
-                            PRDF_ERR( PRDF_FUNC "l_temp_sdc is not NULL" );
+                            PRDF_ERR( PRDF_FUNC "l_temp_sdc is not nullptr" );
                             continue;
                         }
 
                         // Do a setup for error isolation pass for MACHINE
                         // XTOP. In this pass, we are only interested in
                         // error signature.
-                        domainAtAttentionPtr = NULL;
+                        domainAtAttentionPtr = nullptr;
                         l_temp_sdc = new ServiceDataCollector (
                                                     *io_sc.service_data );
                         // Set up Error Isolation Pass Flag.
@@ -373,7 +373,7 @@ int32_t System::Analyze( STEP_CODE_DATA_STRUCT & io_sc )
                         break;
                     }
 
-                } // end domainAtAttentionPtr != NULL
+                } // end domainAtAttentionPtr != nullptr
 
                 //so if a chip of a domain is at attention and gave us dd02, we
                 //would like to see other chips of the domain before moving on
@@ -387,12 +387,12 @@ int32_t System::Analyze( STEP_CODE_DATA_STRUCT & io_sc )
             } // end inner for loop
         } // end outer for loop
 
-        // if ptr is NULL && we don't have a saved SDC than we have noAttns
-        // if ptr is NULL && we have a saved SDC then we have an attn with no-bits-on
+        // if ptr is nullptr && we don't have a saved SDC than we have noAttns
+        // if ptr is nullptr && we have a saved SDC then we have an attn with no-bits-on
         // otherwise we are done - already did the analysis
-        if ( domainAtAttentionPtr == NULL)
+        if ( domainAtAttentionPtr == nullptr)
         {
-            if(l_saved_sdc == NULL)
+            if(l_saved_sdc == nullptr)
             {
                 rc = noAttnResolution.Resolve(io_sc);
             }
@@ -404,9 +404,9 @@ int32_t System::Analyze( STEP_CODE_DATA_STRUCT & io_sc )
             }
         }
 
-        // l_temp_sdc will not be NULL if we go to ERROR ISOLATION ONLY PASS.
+        // l_temp_sdc will not be nullptr if we go to ERROR ISOLATION ONLY PASS.
         // In that case get the secondary signature and update this.
-        if ( NULL != l_temp_sdc )
+        if ( nullptr != l_temp_sdc )
         {
             // Merge SUE flag, but only when the UERE flag is not set. We want
             // to merge the flag in cases where we happen to get another attn
@@ -448,7 +448,7 @@ int32_t System::Analyze( STEP_CODE_DATA_STRUCT & io_sc )
             rc = l_primaryRc;
         }
 
-        if(l_saved_sdc != NULL) delete l_saved_sdc; //dg05a
+        if(l_saved_sdc != nullptr) delete l_saved_sdc; //dg05a
 
     }
     #undef PRDF_FUNC
@@ -461,7 +461,7 @@ RuleMetaData* System::getChipMetaData( TARGETING::TYPE i_type,
                                         ResolutionFactory & i_reslFactory,
                                         errlHndl_t & o_errl )
 {
-    if( NULL == iv_listRuleData[i_type] )
+    if( nullptr == iv_listRuleData[i_type] )
     {
         iv_listRuleData[i_type] = new RuleMetaData( i_fileName,i_scanFactory,
                                                     i_reslFactory,i_type,

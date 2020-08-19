@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -147,7 +147,7 @@ BitKey & BitKey::operator=(const BitKey & bit_list)
   }
   else
   {
-    const uint32_t * dataPtr = NULL;
+    const uint32_t * dataPtr = nullptr;
     if(bit_list.IsDirect())
     {
       dataPtr = &bit_list.iv_storage1;

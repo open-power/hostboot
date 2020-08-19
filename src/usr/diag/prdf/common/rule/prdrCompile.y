@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -206,7 +206,7 @@ line:   chip
 chip:   PRDR_CHIP PRDR_ID '{' chiplines '}' ';'
     {
         // Create a default chip object is chiplines are empty.
-        if (NULL == $4)
+        if (nullptr == $4)
             $4 = new Chip();
 
         // Assign chip's shortname from ID.
@@ -218,17 +218,17 @@ chip:   PRDR_CHIP PRDR_ID '{' chiplines '}' ';'
 ;
 
     /* Any number of lines can make up a chiplines token.  */
-chiplines:  { $$ = NULL; }  // empty line.
+chiplines:  { $$ = nullptr; }  // empty line.
         | chiplines chipline ';'
     {
         // Merge the chip lines together into a single object as needed.
-        if (NULL != $1)
+        if (nullptr != $1)
         {
-            if (NULL == $2)
-                $$ = NULL;
+            if (nullptr == $2)
+                $$ = nullptr;
             else
             {
-                // Both are non-NULL, merge.
+                // Both are non-nullptr, merge.
                 Chip::merge($1, $2);
                 $$ = $1;
                 delete $2;
@@ -236,8 +236,8 @@ chiplines:  { $$ = NULL; }  // empty line.
         }
         else
         {
-            if (NULL == $2)
-                $$ = NULL;
+            if (nullptr == $2)
+                $$ = nullptr;
             else
                 $$ = $2;
         }
@@ -246,7 +246,7 @@ chiplines:  { $$ = NULL; }  // empty line.
 ;
 
     /* Create a chip object based on the contents of the line. */
-chipline:   { $$ = NULL; } // allow a free ;.
+chipline:   { $$ = nullptr; } // allow a free ;.
         | PRDR_CHIPID PRDR_INTEGER
     {
         $$ = new Chip();
@@ -294,7 +294,7 @@ chipline:   { $$ = NULL; } // allow a free ;.
 register: PRDR_REGISTER PRDR_ID '{' reglines '}'
     {
         // Create register object as needed.
-        if (NULL == $4)
+        if (nullptr == $4)
             $$ = new Register();
         else
             $$ = $4;
@@ -304,17 +304,17 @@ register: PRDR_REGISTER PRDR_ID '{' reglines '}'
     }
 ;
     /* Any number of lines can make up a reglines token.  */
-reglines:   { $$ = NULL; }
+reglines:   { $$ = nullptr; }
         | reglines regline ';'
     {
         // Merge register lines as needed.
-        if (NULL != $1)
+        if (nullptr != $1)
         {
-            if (NULL == $2)
-                $$ = NULL;
+            if (nullptr == $2)
+                $$ = nullptr;
             else
             {
-                // Both are non-NULL, merge.
+                // Both are non-nullptr, merge.
                 Register::merge($1, $2);
                 $$ = $1;
                 delete $2;
@@ -322,8 +322,8 @@ reglines:   { $$ = NULL; }
         }
         else
         {
-            if (NULL == $2)
-                $$ = NULL;
+            if (nullptr == $2)
+                $$ = nullptr;
             else
                 $$ = $2;
         }
@@ -331,7 +331,7 @@ reglines:   { $$ = NULL; }
 ;
 
     /* Define all of the lines (expressions) that can be found in a register */
-regline:    { $$ = NULL; }
+regline:    { $$ = nullptr; }
         | PRDR_NAME_KW PRDR_STRING
     {
         $$ = new Register();
@@ -523,7 +523,7 @@ group:  PRDR_GROUP PRDR_ID grpattns grpfilters '{' grouplines '}' ';'
         g_groups[*$2] = $6;
 
         // Add attentions to attention start list.
-        if (NULL != $3)
+        if (nullptr != $3)
         {
             for (std::list<std::string *>::iterator i = $3->begin();
                  i != $3->end();
@@ -535,7 +535,7 @@ group:  PRDR_GROUP PRDR_ID grpattns grpfilters '{' grouplines '}' ';'
         }
 
         // Add filters to group.
-        if (NULL != $4)
+        if (nullptr != $4)
         {
             for (std::list<Group_Filter *>::iterator i = $4->begin();
                  i != $4->end();
@@ -552,7 +552,7 @@ group:  PRDR_GROUP PRDR_ID grpattns grpfilters '{' grouplines '}' ';'
 ;
 
     /* Definitions for attention directives. */
-grpattns:   { $$ = NULL; }
+grpattns:   { $$ = nullptr; }
         | PRDR_ATTNTYPE grpattns_item        { $$ = $2; }
 ;
 
@@ -570,7 +570,7 @@ grpattns_item: grpattns_item ',' PRDR_ID
 ;
 
     /* Definitions for filter directives. */
-grpfilters:     { $$ = NULL; }
+grpfilters:     { $$ = nullptr; }
         | PRDR_FILTER grpfilt_items        { $$ = $2; }
 ;
 
@@ -690,7 +690,7 @@ rule: PRDR_RULE PRDR_ID '{' ruleexpr ';' '}' ';'
     | PRDR_RULE PRDR_ID '{' PRDR_ID ':' ruleexpr ';' '}' ';'
     {
         g_rules[*$2] = new ExprOp1(Prdr::RULE,
-                       new ExprAttnLink($4, $6, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL));
+                       new ExprAttnLink($4, $6, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr));
         delete $2;
         delete $4;
     }
@@ -699,7 +699,7 @@ rule: PRDR_RULE PRDR_ID '{' ruleexpr ';' '}' ';'
                         '}' ';'
     {
         g_rules[*$2] = new ExprOp1(Prdr::RULE,
-                       new ExprAttnLink($4, $6, $8, $10, NULL, NULL, NULL, NULL, NULL, NULL));
+                       new ExprAttnLink($4, $6, $8, $10, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr));
         delete $2;
         delete $4;
         delete $8;
@@ -710,7 +710,7 @@ rule: PRDR_RULE PRDR_ID '{' ruleexpr ';' '}' ';'
                         '}' ';'
     {
         g_rules[*$2] = new ExprOp1(Prdr::RULE,
-                       new ExprAttnLink($4, $6, $8, $10, $12, $14, NULL, NULL, NULL, NULL));
+                       new ExprAttnLink($4, $6, $8, $10, $12, $14, nullptr, nullptr, nullptr, nullptr));
         delete $2;
         delete $4;
         delete $8;
@@ -723,7 +723,7 @@ rule: PRDR_RULE PRDR_ID '{' ruleexpr ';' '}' ';'
                         '}' ';'
     {
         g_rules[*$2] = new ExprOp1(Prdr::RULE,
-                       new ExprAttnLink($4, $6, $8, $10, $12, $14, $16, $18, NULL, NULL));
+                       new ExprAttnLink($4, $6, $8, $10, $12, $14, $16, $18, nullptr, nullptr));
         delete $2;
         delete $4;
         delete $8;
@@ -842,7 +842,7 @@ actionlines:
     }
         | actionlines actionline ';'
     {
-        if (NULL != $2)
+        if (nullptr != $2)
             $1->cv_rules.push_back($2);
         $$ = $1;
     }
@@ -850,7 +850,7 @@ actionlines:
 
 actionline:
     {
-        $$ = NULL;
+        $$ = nullptr;
     }
         | PRDR_ID
     {
@@ -883,7 +883,7 @@ action_threshold: PRDR_ACT_THRESHOLD '(' ')'
     }
     | PRDR_ACT_THRESHOLD '(' PRDR_FLD_KW '(' PRDR_INTEGER  time_units ')' ','  PRDR_MFG_FILE_KW  '(' PRDR_ID ')' ')'
     {
-        $$ = new ExprAct_Thresh($5, $6, 0, NULL, $11);
+        $$ = new ExprAct_Thresh($5, $6, 0, nullptr, $11);
     }
 ;
 
@@ -990,7 +990,7 @@ action_callout: PRDR_ACT_CALLOUT '(' PRDR_ID ')'
     }
         | PRDR_ACT_CALLOUT '(' PRDR_ID ',' PRDR_ID ')'
     {
-        $$ = new ExprAct_Callout($3, NULL, Prdr::CALLOUT_GARD_SELF, 0xffffffff, NULL, $5);
+        $$ = new ExprAct_Callout($3, nullptr, Prdr::CALLOUT_GARD_SELF, 0xffffffff, nullptr, $5);
     }
 
         | PRDR_ACT_CALLOUT '(' PRDR_CONNECTED '(' PRDR_ID  action_callout_alt')' ',' PRDR_ID ',' PRDR_ID ')'
@@ -1011,7 +1011,7 @@ action_callout: PRDR_ACT_CALLOUT '(' PRDR_ID ')'
 
 action_callout_alt:
     {
-        $$ = NULL;
+        $$ = nullptr;
     }
         | ',' PRDR_ALTERNATE '(' actionline ')'
     {

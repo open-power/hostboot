@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2005,2014              */
+/* Contributors Listed Below - COPYRIGHT 2005,2020                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -60,7 +62,7 @@ namespace PRDF
         { \
             __PRDR_PLUGIN_HOMTYPE l_homtype = homtype; \
             __table_struct * l_tablePtr = cv_table; \
-            while (NULL != l_tablePtr->name) \
+            while (nullptr != l_tablePtr->name) \
             { \
                 GetRegisterIdTable()[l_homtype][l_tablePtr->id].name = \
                     l_tablePtr->name;  \
@@ -79,7 +81,7 @@ namespace PRDF
                 { id , #name , brief, address } ,
 
     #define PRDR_REGISTER_ID_TABLE_END \
-                { 0, NULL, NULL, 0 } \
+                { 0, nullptr, nullptr, 0 } \
             };
 #endif
 

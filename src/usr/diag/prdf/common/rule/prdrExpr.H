@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -123,11 +123,11 @@ class ExprRef : public Expr
             else
             {
                 Expr * tmp = g_rules[*cv_name];
-                if (NULL == tmp)
+                if (nullptr == tmp)
                 {
                     std::cerr << "NPE: " << *cv_name << std::endl;
                 }
-                return (NULL == tmp ?
+                return (nullptr == tmp ?
                         SignatureOp::DEFAULT_SIGNATURE
                         : tmp->getSignature()
                     );
@@ -299,7 +299,7 @@ class ExprOp1 : public Expr
         int output(FILE * i_file)
             {
                 PRDR_FWRITE(&cv_op, 1, 1, i_file);
-                if (NULL != cv_arg)
+                if (nullptr != cv_arg)
                     cv_arg->output(i_file);
 
                 return 0;
@@ -310,13 +310,13 @@ class ExprOp1 : public Expr
                              std::ostream & o_errFile = std::cerr)
         {
             o_stream << cv_op << " ";
-            if (NULL != cv_arg)
+            if (nullptr != cv_arg)
                 cv_arg->generateDoxygen(o_stream, o_trailing, o_errFile);
         };
 
         uint16_t getSignature()
         {
-            return (NULL == cv_arg ?
+            return (nullptr == cv_arg ?
                         SignatureOp::DEFAULT_SIGNATURE
                         : cv_arg->getSignature()
                    );
@@ -339,9 +339,9 @@ class ExprOp2 : public Expr
         int output(FILE * i_file)
             {
                 PRDR_FWRITE(&cv_op, 1, 1, i_file);
-                if (NULL != cv_arg[0])
+                if (nullptr != cv_arg[0])
                     cv_arg[0]->output(i_file);
-                if (NULL != cv_arg[1])
+                if (nullptr != cv_arg[1])
                     cv_arg[1]->output(i_file);
 
                 return 0;
@@ -351,11 +351,11 @@ class ExprOp2 : public Expr
                              std::string & o_trailing,
                              std::ostream & o_errFile = std::cerr)
         {
-            if (NULL != cv_arg[0])
+            if (nullptr != cv_arg[0])
                 cv_arg[0]->generateDoxygen(o_stream, o_trailing, o_errFile);
             o_stream << " " << cv_op << " ";
 
-            if (NULL != cv_arg[1])
+            if (nullptr != cv_arg[1])
                 cv_arg[1]->generateDoxygen(o_stream, o_trailing, o_errFile);
         };
 
@@ -374,11 +374,11 @@ class ExprOp2 : public Expr
             else
             {
                 return SignatureOp::combineSig(
-                                    (NULL == cv_arg[0] ?
+                                    (nullptr == cv_arg[0] ?
                                       SignatureOp::DEFAULT_SIGNATURE
                                       : cv_arg[0]->getSignature()
                                     ),
-                                    (NULL == cv_arg[1] ?
+                                    (nullptr == cv_arg[1] ?
                                       SignatureOp::DEFAULT_SIGNATURE
                                       : cv_arg[1]->getSignature()
                                     ));
@@ -399,16 +399,16 @@ class ExprAttnLink : public Expr
                      std::string * attn5, Expr * exp5)
         {
             for (int i = 0; i < Prdr::MAX_NUM_ATTN_TYPES; i++)
-                cv_arg[i] = NULL;
+                cv_arg[i] = nullptr;
 
             cv_arg[decodeAttnType(attn1)] = exp1;
-            if (NULL != exp2)
+            if (nullptr != exp2)
                 cv_arg[decodeAttnType(attn2)] = exp2;
-            if (NULL != exp3)
+            if (nullptr != exp3)
                 cv_arg[decodeAttnType(attn3)] = exp3;
-            if (NULL != exp4)
+            if (nullptr != exp4)
                 cv_arg[decodeAttnType(attn4)] = exp4;
-            if (NULL != exp5)
+            if (nullptr != exp5)
                 cv_arg[decodeAttnType(attn5)] = exp5;
         };
 
@@ -419,12 +419,12 @@ class ExprAttnLink : public Expr
 
             cv_op = 0;
             for (int i = 0; i < Prdr::MAX_NUM_ATTN_TYPES; i++)
-                if (NULL != cv_arg[i])
+                if (nullptr != cv_arg[i])
                     cv_op++;
             PRDR_FWRITE(&cv_op, 1, 1, i_file);
 
             for (int i = 0; i < Prdr::MAX_NUM_ATTN_TYPES; i++)
-                if (NULL != cv_arg[i])
+                if (nullptr != cv_arg[i])
                 {
                     cv_op = i;
                     PRDR_FWRITE(&cv_op, 1, 1, i_file);
@@ -438,7 +438,7 @@ class ExprAttnLink : public Expr
         {
             uint16_t l_val = SignatureOp::DEFAULT_SIGNATURE;
             for (int i = 0; i < Prdr::MAX_NUM_ATTN_TYPES; i++)
-                if (NULL != cv_arg[i])
+                if (nullptr != cv_arg[i])
                     l_val = SignatureOp::combineSig(l_val,
                                                     cv_arg[i]->getSignature());
                 else
@@ -450,7 +450,7 @@ class ExprAttnLink : public Expr
     protected:
         int decodeAttnType(std::string * attn)
         {
-            if (NULL == attn)
+            if (nullptr == attn)
             {
                 yyerror("ICE - NPE.");
             }
@@ -641,10 +641,10 @@ class ExprAct_Try : public Expr
                              std::ostream & o_errFile = std::cerr)
         {
             o_stream << "try { ";
-            if (NULL != cv_left)
+            if (nullptr != cv_left)
                 cv_left->generateDoxygen(o_stream, o_trailing, o_errFile);
             o_stream << ", ";
-            if (NULL != cv_right)
+            if (nullptr != cv_right)
                 cv_right->generateDoxygen(o_stream, o_trailing, o_errFile);
             o_stream << " } ";
         };
@@ -661,9 +661,9 @@ class ExprAct_Thresh : public Expr
         uint32_t cv_3;
         std::string * cv_mfg_file_thr;
 
-        ExprAct_Thresh( uint8_t i_field = 0, Expr * i_fieldTime = NULL,
-                            uint8_t i_mfg   = 0, Expr * i_mfgTime   = NULL,
-                            std::string * i_mfg_file = NULL ) :
+        ExprAct_Thresh( uint8_t i_field = 0, Expr * i_fieldTime = nullptr,
+                            uint8_t i_mfg   = 0, Expr * i_mfgTime   = nullptr,
+                            std::string * i_mfg_file = nullptr ) :
             cv_field(i_field), cv_mfg(i_mfg), cv_mfg_file_thr(i_mfg_file)
         {
             cv_thresholdTime[0] = i_fieldTime;
@@ -677,10 +677,10 @@ class ExprAct_Thresh : public Expr
                 l_op = Prdr::ACT_THRES;
                 PRDR_FWRITE(&l_op, 1, 1, i_file);
 
-                if (NULL == cv_thresholdTime[0])
+                if (nullptr == cv_thresholdTime[0])
                     l_op = 0;
-                else if ( (NULL == cv_thresholdTime[1]) &&
-                          (NULL == cv_mfg_file_thr))
+                else if ( (nullptr == cv_thresholdTime[1]) &&
+                          (nullptr == cv_mfg_file_thr))
                 {
                     l_op = 1;
                 }
@@ -690,21 +690,21 @@ class ExprAct_Thresh : public Expr
                 if (0 != cv_3)
                     l_op |= 0x40;
 
-                if (NULL != cv_mfg_file_thr)
+                if (nullptr != cv_mfg_file_thr)
                     l_op |= 0x20;
 
                 PRDR_FWRITE(&l_op, 1, 1, i_file);
 
-                if (NULL != cv_thresholdTime[0])
+                if (nullptr != cv_thresholdTime[0])
                 {
                     PRDR_FWRITE(&cv_field, sizeof(cv_field), 1, i_file);
                     cv_thresholdTime[0]->output(i_file);
-                    if (NULL != cv_thresholdTime[1])
+                    if (nullptr != cv_thresholdTime[1])
                     {
                         PRDR_FWRITE(&cv_mfg, sizeof(cv_mfg), 1, i_file);
                         cv_thresholdTime[1]->output(i_file);
                     }
-                    else if (NULL != cv_mfg_file_thr)
+                    else if (nullptr != cv_mfg_file_thr)
                     {
                         uint32_t l_tmp32 = prdrActionArgMap(*cv_mfg_file_thr);
                         l_tmp32 = htonl(l_tmp32);
@@ -726,7 +726,7 @@ class ExprAct_Thresh : public Expr
                              std::ostream & o_errFile = std::cerr)
             {
                 o_stream << "threshold(";
-                if (NULL != cv_thresholdTime[0])
+                if (nullptr != cv_thresholdTime[0])
                 {
                     uint32_t units = cv_field;
                     o_stream <<" field";
@@ -735,7 +735,7 @@ class ExprAct_Thresh : public Expr
                     o_stream << ",";
                     cv_thresholdTime[0]->generateDoxygen(o_stream, o_trailing, o_errFile);
                     o_stream << ")";
-                    if (NULL != cv_thresholdTime[1])
+                    if (nullptr != cv_thresholdTime[1])
                     {
                         units = cv_mfg;
                         o_stream << ", mfg";
@@ -745,7 +745,7 @@ class ExprAct_Thresh : public Expr
                         cv_thresholdTime[1]->generateDoxygen(o_stream, o_trailing, o_errFile);
                         o_stream << ")";
                     }
-                    else if (NULL != cv_mfg_file_thr)
+                    else if (nullptr != cv_mfg_file_thr)
                     {
                         o_stream << ", mfg_file";
                         o_stream << "(";
@@ -779,7 +779,7 @@ class ExprAct_Dump : public Expr  //@ecdf
 
                 uint32_t l_dType;
 
-                if (NULL == cv_1)
+                if (nullptr == cv_1)
                     l_dType = prdrActionArgMap("DUMP_CONTENT_HW");
                 else
                     l_dType = prdrActionArgMap(*cv_1);
@@ -847,11 +847,11 @@ class ExprAct_Callout : public Expr
         std::string * cv_4;
 
         ExprAct_Callout(std::string * i_1,
-                        std::string * i_2 = NULL,
+                        std::string * i_2 = nullptr,
                         Prdr::Callout_type  i_t = Prdr::CALLOUT_GARD_SELF,
                         uint32_t      i_3 = 0xffffffff,
-                        Expr        * i_alt = NULL,
-                        std::string * i_4 = NULL ):
+                        Expr        * i_alt = nullptr,
+                        std::string * i_4 = nullptr ):
                                             cv_1(i_1), cv_2(i_2),
                                             cv_3(i_3), cv_alt(i_alt),
                                             cv_type(i_t),
@@ -879,11 +879,11 @@ class ExprAct_Callout : public Expr
                 l_arg = htonl(cv_3);
                 PRDR_FWRITE(&l_arg, sizeof(l_arg), 1, i_file);
                 // Write bool for ALT resolution.
-                l_op = (NULL == cv_alt ? 0 : 1);
+                l_op = (nullptr == cv_alt ? 0 : 1);
                 PRDR_FWRITE(&l_op, 1, 1, i_file);
 
                 // Write ALT resolution.
-                if (NULL != cv_alt)
+                if (nullptr != cv_alt)
                     cv_alt->output(i_file);
 
                 // Write peer connection type
@@ -895,7 +895,7 @@ class ExprAct_Callout : public Expr
                 PRDR_FWRITE(&l_arg, sizeof(l_arg), 1, i_file);
             }
             // Write gard state
-            if( NULL == cv_4 )
+            if( nullptr == cv_4 )
             {
                 // if no policy for gard has been specified explicitly, assume
                 // it to be NO GARD for procedure callout. But for self or
@@ -926,7 +926,7 @@ class ExprAct_Callout : public Expr
         {
             o_stream << "callout ( ";
             std::string tmpGard("GARD");
-            if( NULL != cv_4 )
+            if( nullptr != cv_4 )
             {
                 tmpGard.assign( *cv_4 );
             }
@@ -962,7 +962,7 @@ class ExprAct_Funccall : public Expr
     public:
         std::string * cv_1, * cv_2;
 
-        ExprAct_Funccall(std::string * i_1, std::string * i_2 = NULL) :
+        ExprAct_Funccall(std::string * i_1, std::string * i_2 = nullptr) :
                 cv_1(i_1), cv_2(i_2) {};
 
         int output(FILE * i_file)
@@ -977,7 +977,7 @@ class ExprAct_Funccall : public Expr
                 PRDR_FWRITE(cv_1->c_str(), cv_1->size() + 1, 1, i_file);
 
                 uint32_t l_chip;
-                if (NULL != cv_2)
+                if (nullptr != cv_2)
                     l_chip = htonl(prdrActionArgMap(*cv_2));
                 else
                     l_chip = 0;
@@ -991,7 +991,7 @@ class ExprAct_Funccall : public Expr
                              std::ostream & o_errFile = std::cerr)
         {
             o_stream << "funccall( " << *cv_1;
-            if (NULL != cv_2)
+            if (nullptr != cv_2)
                 o_stream << ", " << *cv_2;
             o_stream << " ) ";
         };

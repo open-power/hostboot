@@ -107,7 +107,7 @@ struct ResetAndMaskTransformer
                 break;
 
             default:
-                o.op = NULL;
+                o.op = nullptr;
                 break;
         }
 
@@ -169,7 +169,7 @@ errlHndl_t RuleMetaData::loadRuleFile( ScanFacility & i_scanFactory ,
     ActionMap_t l_actionMap;
     GroupMap_t l_groupMap;
     uint32_t l_id = 1;
-    errlHndl_t l_errl = NULL ;
+    errlHndl_t l_errl = nullptr ;
     SharedThreshold_t l_sharedThresholds;
 
     Prdr::Chip * l_chip;
@@ -183,7 +183,7 @@ errlHndl_t RuleMetaData::loadRuleFile( ScanFacility & i_scanFactory ,
                                };
     // Parse chip file.
     l_errl = Prdr::LoadChipCache::loadChip(cv_fileName, &l_chip);
-    if( NULL == l_errl )
+    if( nullptr == l_errl )
     {
 
         // Get default dump type.
@@ -305,7 +305,7 @@ errlHndl_t RuleMetaData::loadRuleFile( ScanFacility & i_scanFactory ,
                     CaptureRequirement req;
                     req.cv_TargetType = (*j).data[0];
                     req.cv_TargetIndex = (*j).data[1];
-                    req.cv_func = NULL;
+                    req.cv_func = nullptr;
 
                     cv_hwCaptureReq[cv_hwRegs[hashId]] = req;
                 }
@@ -351,7 +351,7 @@ errlHndl_t RuleMetaData::loadRuleFile( ScanFacility & i_scanFactory ,
         // initialize all the pointers for the groups, but don't construct their
         // data yet.
         Resolution & l_defaultResolution =
-                        i_reslFactory.getCalloutGardResol( NULL,
+                        i_reslFactory.getCalloutGardResol( nullptr,
                                                             MRU_LOW, NO_GARD );
         for (int i = 0; i < l_chip->cv_groupCount; i++)
         {
@@ -529,7 +529,7 @@ int32_t RuleMetaData::CaptureErrorData( CaptureData & io_cap,
         if ( CaptureRequirement() != cv_hwCaptureReq[*i])
         {
             CaptureRequirement req = cv_hwCaptureReq[*i];
-            if (NULL != req.cv_func)
+            if (nullptr != req.cv_func)
             {
                 bool l_cap = true;
                 (*req.cv_func)
@@ -611,9 +611,9 @@ SCAN_COMM_REGISTER_CLASS * RuleMetaData::createVirtualRegister(
                                                     Prdr::Expr * i_vReg,
                                                     RuleFileData & i_data )
 {
-    SCAN_COMM_REGISTER_CLASS * l_arg[5] = { NULL };
+    SCAN_COMM_REGISTER_CLASS * l_arg[5] = { nullptr };
     uint32_t l_tmp32 = 0;
-    SCAN_COMM_REGISTER_CLASS * l_rc = NULL;
+    SCAN_COMM_REGISTER_CLASS * l_rc = nullptr;
 
     switch(i_vReg->cv_op)
     {
@@ -708,32 +708,32 @@ SCAN_COMM_REGISTER_CLASS * RuleMetaData::createVirtualRegister(
 
         case Prdr::ATTNLINK:
 
-            if ( NULL != i_vReg->cv_value[0].p )
+            if ( nullptr != i_vReg->cv_value[0].p )
             {
                 l_arg[0] = createVirtualRegister(i_vReg->cv_value[0].p, i_data);
             }
 
-            if ( NULL != i_vReg->cv_value[1].p )
+            if ( nullptr != i_vReg->cv_value[1].p )
             {
                 l_arg[1] = createVirtualRegister(i_vReg->cv_value[1].p, i_data);
 
             }
-            if ( NULL != i_vReg->cv_value[2].p )
+            if ( nullptr != i_vReg->cv_value[2].p )
             {
                 l_arg[2] = createVirtualRegister(i_vReg->cv_value[2].p, i_data);
             }
 
-            if ( NULL != i_vReg->cv_value[3].p )
+            if ( nullptr != i_vReg->cv_value[3].p )
             {
                 l_arg[3] = createVirtualRegister(i_vReg->cv_value[3].p, i_data);
             }
 
-            if ( NULL != i_vReg->cv_value[4].p )
+            if ( nullptr != i_vReg->cv_value[4].p )
             {
                 l_arg[4] = createVirtualRegister(i_vReg->cv_value[4].p, i_data);
             }
 
-            // passing NULL objects in *l_arg[x]
+            // passing nullptr objects in *l_arg[x]
             l_rc = &i_data.cv_scanFactory.GetAttnTypeRegister(l_arg[0],
                                                               l_arg[1],
                                                               l_arg[2],
@@ -779,10 +779,10 @@ SCAN_COMM_REGISTER_CLASS * RuleMetaData::createVirtualRegister(
 Resolution * RuleMetaData::createActionClass( uint32_t i_action,
                                           RuleMetaData::RuleFileData & i_data )
 {
-    if ( NULL != i_data.cv_actionMap[i_action] )
+    if ( nullptr != i_data.cv_actionMap[i_action] )
         return i_data.cv_actionMap[i_action];
 
-    Resolution * l_tmpRes = NULL, * l_retRes = NULL;
+    Resolution * l_tmpRes = nullptr, * l_retRes = nullptr;
 
     for (int i = 0; i < i_data.cv_loadChip->cv_actionSize[i_action]; i++)
     {
@@ -800,7 +800,7 @@ Resolution * RuleMetaData::createActionClass( uint32_t i_action,
         }
     }
 
-    if (NULL == l_retRes) // @pw05
+    if (nullptr == l_retRes) // @pw05
     {
         class NullResolution : public Resolution
         {
@@ -823,7 +823,7 @@ Resolution * RuleMetaData::createActionClass( uint32_t i_action,
 Resolution * RuleMetaData::createResolution( Prdr::Expr * i_action,
                                          RuleMetaData::RuleFileData & i_data )
 {
-    Resolution * l_rc = NULL;
+    Resolution * l_rc = nullptr;
 
     switch (i_action->cv_op)
     {
@@ -897,7 +897,7 @@ Resolution * RuleMetaData::createResolution( Prdr::Expr * i_action,
             }
             else
             {
-                if (NULL == i_data.cv_sharedThresholds[i_action->cv_value[5].i])
+                if (nullptr == i_data.cv_sharedThresholds[i_action->cv_value[5].i])
                 {
                     if ( !PlatServices::mfgMode() )
                     {
@@ -952,7 +952,7 @@ Resolution * RuleMetaData::createResolution( Prdr::Expr * i_action,
                                 (TARGETING::TYPE) i_action->cv_value[2].i,
                                                   i_action->cv_value[3].i,
                                 (PRDpriority)     i_action->cv_value[1].i,
-                                ( NULL == i_action->cv_value[4].p ? NULL :
+                                ( nullptr == i_action->cv_value[4].p ? nullptr :
                                     ( this->createResolution(
                                         i_action->cv_value[4].p, i_data ) ) ),
                                 TARGETING::TYPE_NA,
@@ -965,7 +965,7 @@ Resolution * RuleMetaData::createResolution( Prdr::Expr * i_action,
                                 (TARGETING::TYPE) i_action->cv_value[2].i,
                                                   i_action->cv_value[3].i,
                                 (PRDpriority)     i_action->cv_value[1].i,
-                                ( NULL == i_action->cv_value[4].p ? NULL :
+                                ( nullptr == i_action->cv_value[4].p ? nullptr :
                                     ( this->createResolution(
                                         i_action->cv_value[4].p, i_data ) ) ),
                                 (TARGETING::TYPE) i_action->cv_value[5].i,
@@ -983,7 +983,7 @@ Resolution * RuleMetaData::createResolution( Prdr::Expr * i_action,
                 case Prdr::CALLOUT_GARD_SELF: // self callout with gard option
                 default:
                     l_rc = &i_data.cv_reslFactory.getCalloutGardResol(
-                                NULL,
+                                nullptr,
                                 (PRDpriority) i_action->cv_value[1].i,
                                 (GARD_POLICY) i_action->cv_value[6].i );
                     break;
@@ -1014,7 +1014,7 @@ void RuleMetaData::createGroup(Group * i_group,
             static void execute(std::vector<uint8_t> & i_bits,
                     Prdr::Expr * i_expr)
             {
-                if (NULL == i_expr)
+                if (nullptr == i_expr)
                     return;
                 if (i_expr->cv_op == Prdr::INT_SHORT)
                 {
@@ -1105,11 +1105,11 @@ ExtensibleChipFunction *RuleMetaData::getExtensibleFunction(
     ExtensibleFunctionType * plugin =
         getPluginGlobalMap().getPlugins(cv_fileName)[i_func];
 
-    if (NULL == plugin)
+    if (nullptr == plugin)
     {
         if (!i_expectNull)
         {
-            errlHndl_t l_errl = NULL;
+            errlHndl_t l_errl = nullptr;
 
             PRDF_CREATE_ERRL(l_errl,
                              ERRL_SEV_UNRECOVERABLE,
@@ -1144,13 +1144,13 @@ ExtensibleChipFunction *RuleMetaData::getExtensibleFunction(
             // stage during system Initialize and this scenario should fail
             // basic validation.
             // So aborting system at this point.
-            PRDF_ERR( PRDF_FUNC "NULL Function for plugin:%s chip %s",
+            PRDF_ERR( PRDF_FUNC "nullptr Function for plugin:%s chip %s",
                       i_func, cv_fileName );
 
-            PRDF_ASSERT( NULL != plugin );
+            PRDF_ASSERT( nullptr != plugin );
         }
 
-        static Plugin<ExtensibleChip> l_nullPlugin(NULL);
+        static Plugin<ExtensibleChip> l_nullPlugin(nullptr);
         plugin = &l_nullPlugin;
 
     }
@@ -1166,7 +1166,7 @@ SCAN_COMM_REGISTER_CLASS * RuleMetaData::getRegister( const char * i_reg,
 {
     uint16_t hashId = Util::hashString( i_reg );
     SCAN_COMM_REGISTER_CLASS * l_pRegister = cv_hwRegs[hashId];
-    if ( NULL == l_pRegister )
+    if ( nullptr == l_pRegister )
     {
        l_pRegister = getNullRegister( i_reg,i_expectNull );
     }
@@ -1203,7 +1203,7 @@ SCAN_COMM_REGISTER_CLASS * RuleMetaData::getNullRegister( const char * i_reg,
 
         if (!i_expectNull)
         {
-            errlHndl_t l_errl = NULL;
+            errlHndl_t l_errl = nullptr;
             PRDF_CREATE_ERRL(l_errl,
                              ERRL_SEV_UNRECOVERABLE,
                              ERRL_ETYPE_NOT_APPLICABLE,

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -62,7 +62,7 @@ class PrdfTest_MfgSync: public CxxTest::TestSuite
         PRDF_ENTER(PRDF_FUNC);
         ErrorSignature l_errSig;
         PfaData        l_pfaData;
-        errlHndl_t     l_err = NULL;
+        errlHndl_t     l_err = nullptr;
 
         l_errSig.setChipId(0xffffffff);
         l_errSig.setRegId(0xffff);

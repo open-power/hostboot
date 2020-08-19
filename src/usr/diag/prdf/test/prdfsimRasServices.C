@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -40,7 +40,7 @@ errlHndl_t SimErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
     using namespace PlatServices;
 
     PRDF_ENTER("SimErrDataService::GenerateSrcPfa()");
-    errlHndl_t errLog = NULL;
+    errlHndl_t errLog = nullptr;
 
     // call the actual ras services function
     errLog = ErrDataService::GenerateSrcPfa( i_attnType, io_sdc );

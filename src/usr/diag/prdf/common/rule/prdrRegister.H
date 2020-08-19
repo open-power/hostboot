@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -177,7 +177,7 @@ class Register
     std::list<CaptureReqStruct> cv_captures;
 
     Register() :
-        cv_sname(NULL),
+        cv_sname(nullptr),
         cv_name(&cv_name_default),
         cv_flags(0),
         cv_scomaddr(0),
@@ -187,7 +187,7 @@ class Register
 
     static void merge(Register * i_l, Register * i_r)
     {
-        if ( NULL != i_r->cv_sname )
+        if ( nullptr != i_r->cv_sname )
         {
             i_l->cv_sname = i_r->cv_sname;
         }

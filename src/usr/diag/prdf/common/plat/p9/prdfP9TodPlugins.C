@@ -78,8 +78,8 @@ struct TodFaultData
         isMdmtAndFaulty[0]      =   false;
         isMdmtAndFaulty[1]      =   false;
         activeTopologyIsPrimary =   false;
-        chipSourcingClk[0]      =   NULL;
-        chipSourcingClk[1]      =   NULL;
+        chipSourcingClk[0]      =   nullptr;
+        chipSourcingClk[1]      =   nullptr;
         activeMasterPathPosition[0] = 0;
         activeMasterPathPosition[1] = 0;
     }
@@ -428,7 +428,7 @@ int32_t todCollectFaultDataChip(  ExtensibleChip * i_chip,
                 if ( l_slvErr )
                 {
                     uint32_t l_connection = 0;
-                    TargetHandle_t l_procClockSrc = NULL;
+                    TargetHandle_t l_procClockSrc = nullptr;
 
                     uint32_t l_ret = FAIL;
 #ifdef __HOSTBOOT_RUNTIME
@@ -472,7 +472,7 @@ int32_t todCollectFaultDataChip(  ExtensibleChip * i_chip,
                                                               l_connection );
                     }
 
-                    if( NULL == l_procClockSrc )
+                    if( nullptr == l_procClockSrc )
                     {
                         l_procClockSrc = l_chipTarget;
                     }
@@ -710,7 +710,7 @@ int32_t todStepCheckFault( ExtensibleChip * i_chip,
     collectTodErrorFfdc( l_faultData, failOverstatus, todErrorFfdc );
 
     bool l_phypError = false;
-    TargetHandle_t mdmtList[2] = {NULL, NULL };
+    TargetHandle_t mdmtList[2] = {nullptr, nullptr };
     uint8_t mdmtFailedOscPos[2] = {0xFF, 0xFF};
     uint8_t analysisSummary[2] = { NO_TOD_ERROR, NO_TOD_ERROR };
     bool l_allInternal = true;
@@ -750,7 +750,7 @@ int32_t todStepCheckFault( ExtensibleChip * i_chip,
 
         // MDMT analysis
 
-        if( NULL != mdmtList[i] )
+        if( nullptr != mdmtList[i] )
         {
             // HW initiated failover. Callout the failed OSC.
             if ( failOverstatus.masterPathHwFailOver )
@@ -823,7 +823,7 @@ int32_t todStepCheckFault( ExtensibleChip * i_chip,
                 if ( j->chipSourcingClk[i] == j->chipReportingError )
                 {
 
-                    if ( NULL != j->chipReportingError )
+                    if ( nullptr != j->chipReportingError )
                     {
                         // update consolidated callout list and
                         //black list for internal path errors

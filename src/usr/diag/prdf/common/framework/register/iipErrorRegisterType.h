@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 1996,2017                        */
+/* Contributors Listed Below - COPYRIGHT 1996,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -113,7 +113,7 @@ protected:
   // Returns:      Reference to a bit string containing the data read
   // Requirements: None.
   // Promises:     Returns a reference to the bit string containing the
-  //               value read . May return NULL if hardware access failed.
+  //               value read . May return nullptr if hardware access failed.
   // Exceptions:   None. (Future: May throw Ereg_Read_Failure)
   // Concurrency:
   // Notes:

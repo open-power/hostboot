@@ -95,7 +95,7 @@ int32_t mdiaSendEventMsg( TargetHandle_t i_trgt,
     mdiaEvent.type   = i_eventType;
 
     errlHndl_t errl = MDIA::processEvent( mdiaEvent );
-    if ( NULL != errl )
+    if ( nullptr != errl )
     {
         PRDF_ERR( PRDF_FUNC "MDIA::processEvent() failed: i_target=0x%08x "
                   "i_eventType=%d", getHuid(i_trgt), i_eventType );
@@ -119,14 +119,14 @@ uint32_t mssRestoreDramRepairs<TYPE_OCMB_CHIP>( TargetHandle_t i_target,
 {
     uint32_t o_rc = SUCCESS;
 
-    errlHndl_t errl = NULL;
+    errlHndl_t errl = nullptr;
 
     fapi2::buffer<uint8_t> tmpRepairedRankMask, tmpBadDimmMask;
     FAPI_INVOKE_HWP( errl, exp_restore_repairs,
                      fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>( i_target ),
                      tmpRepairedRankMask, tmpBadDimmMask );
 
-    if ( NULL != errl )
+    if ( nullptr != errl )
     {
         PRDF_ERR( "[PlatServices::mssRestoreDramRepairs] "
                   "exp_restore_repairs() failed. HUID: 0x%08x",

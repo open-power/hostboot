@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -106,7 +106,7 @@ struct AttnData
      * @brief   default constructor
      */
     AttnData() :
-      targetHndl( NULL ),
+      targetHndl( 0 ),
       attnType( INVALID_ATTENTION_TYPE ),
       isAnalysisNotDone( false )
     {}
@@ -190,7 +190,7 @@ extern errlHndl_t initialize();
  *
  * @note If the i_attnType is CHECK_STOP than an error log is returned
  * containing the analysis; otherwise, for other attention types, PRD
- * commits the error log itself and NULL is returned.
+ * commits the error log itself and nullptr is returned.
  */
 extern errlHndl_t main( ATTENTION_VALUE_TYPE i_attnType,
                         const AttnList & i_attnList );

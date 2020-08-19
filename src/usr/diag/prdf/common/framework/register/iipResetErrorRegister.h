@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -92,7 +92,7 @@ public:
    <br><b>Notes:       </b> If no scrId is provided than the address of the scan comm register is used
    </ul><br>
    */
-  ResetErrorRegister(SCAN_COMM_REGISTER_CLASS & r, ResolutionMap & rm, FILTER_CLASS * f = NULL, uint16_t scrID = 0x0fff, SCAN_COMM_REGISTER_CLASS & maskScr = *((SCAN_COMM_REGISTER_CLASS *) NULL));
+  ResetErrorRegister(SCAN_COMM_REGISTER_CLASS & r, ResolutionMap & rm, FILTER_CLASS * f = nullptr, uint16_t scrID = 0x0fff, SCAN_COMM_REGISTER_CLASS & maskScr = *((SCAN_COMM_REGISTER_CLASS *) nullptr));
 
   /**
    Constructor
@@ -103,7 +103,7 @@ public:
    <br><b>Notes:       </b> If no scrId is provided than the address of the scan comm register is used
    </ul><br>
    */
-  ResetErrorRegister(SCAN_COMM_REGISTER_CLASS & r, ResolutionMap & rm, uint16_t scrID, SCAN_COMM_REGISTER_CLASS & maskScr = *((SCAN_COMM_REGISTER_CLASS *) NULL));
+  ResetErrorRegister(SCAN_COMM_REGISTER_CLASS & r, ResolutionMap & rm, uint16_t scrID, SCAN_COMM_REGISTER_CLASS & maskScr = *((SCAN_COMM_REGISTER_CLASS *) nullptr));
 
   /**
    Constructor - Where scan comm register to read is different from the scan comm register to write to reset
@@ -116,7 +116,7 @@ public:
    <br><b>Notes:       </b> If no scrId is provided than the address of the scan comm register is used
    </ul><br>
    */
-  ResetErrorRegister(SCAN_COMM_REGISTER_CLASS & r, ResolutionMap & rm, SCAN_COMM_REGISTER_CLASS & reset, FILTER_CLASS * f = NULL, uint16_t scrID = 0x0fff);
+  ResetErrorRegister(SCAN_COMM_REGISTER_CLASS & r, ResolutionMap & rm, SCAN_COMM_REGISTER_CLASS & reset, FILTER_CLASS * f = nullptr, uint16_t scrID = 0x0fff);
 
   /**
    Constructor - Where scan comm register to read is different from the scan comm register to write to reset
@@ -261,7 +261,7 @@ class ResetAndMaskErrorRegister : public ErrorRegisterMask
          */
         ResetAndMaskErrorRegister(SCAN_COMM_REGISTER_CLASS & r,
                                   ResolutionMap & rm,
-                                  FILTER_CLASS * f = NULL,
+                                  FILTER_CLASS * f = nullptr,
                                   uint16_t scrId = 0x0fff)
             : ErrorRegisterMask(r, rm, f, scrId), cv_resets(), cv_masks() {};
 

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -303,10 +303,10 @@ CaptureData & CaptureData::operator=(const uint8_t *i_flatdata)
         // Read chip Handle.
         memcpy(&l_chipHuid , i_flatdata,l_huidSize );
         i_flatdata += l_huidSize ;
-        TargetHandle_t l_pchipHandle  =NULL;
+        TargetHandle_t l_pchipHandle  =nullptr;
         l_chipHuid =  ntohl(l_chipHuid);
         l_pchipHandle = PlatServices::getTarget(l_chipHuid );
-        if(NULL ==l_pchipHandle)
+        if(nullptr ==l_pchipHandle)
         {
             continue;
         }
@@ -371,9 +371,9 @@ void CaptureData::mergeData(CaptureData & i_cd)
 // copy ctor for Data class
 CaptureData::Data::Data(const Data & d):
 chipHandle(d.chipHandle), address(d.address),
-dataByteLength(d.dataByteLength), dataPtr(NULL)
+dataByteLength(d.dataByteLength), dataPtr(nullptr)
 {
-    if(d.dataPtr != NULL)
+    if(d.dataPtr != nullptr)
     {
         dataPtr = new uint8_t[dataByteLength];
 
@@ -386,12 +386,12 @@ CaptureData::Data & CaptureData::Data::operator=(const Data & d)
     chipHandle = d.chipHandle;
     address = d.address;
     dataByteLength = d.dataByteLength;
-    if(dataPtr != NULL)
+    if(dataPtr != nullptr)
     {
         delete[]dataPtr;
-        dataPtr = NULL;
+        dataPtr = nullptr;
     }
-    if(d.dataPtr != NULL)
+    if(d.dataPtr != nullptr)
     {
         dataPtr = new uint8_t[dataByteLength];
         memcpy(dataPtr, d.dataPtr, dataByteLength);

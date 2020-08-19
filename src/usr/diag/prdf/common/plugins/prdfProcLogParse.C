@@ -153,7 +153,7 @@ bool parseTodFfdcData(  uint8_t * i_buffer, uint32_t i_buflen,
 
     do
     {
-        if( NULL == i_buffer )
+        if( nullptr == i_buffer )
         {
             o_rc = false;
             break;
@@ -232,7 +232,7 @@ bool parseL2LdCrFfdc( uint8_t * i_buffer, uint32_t i_buflen,
 
     do
     {
-        if ( NULL == i_buffer ) { o_rc = false; break; }
+        if ( nullptr == i_buffer ) { o_rc = false; break; }
 
         if ( i_buflen < sizeof(LD_CR_FFDC::L2LdCrFfdc) )
             { o_rc = false; break; }
@@ -288,7 +288,7 @@ bool parseL3LdCrFfdc( uint8_t * i_buffer, uint32_t i_buflen,
 
     do
     {
-        if ( NULL == i_buffer ) { o_rc = false; break; }
+        if ( nullptr == i_buffer ) { o_rc = false; break; }
 
         if ( i_buflen < sizeof(LD_CR_FFDC::L3LdCrFfdc) )
             { o_rc = false; break; }

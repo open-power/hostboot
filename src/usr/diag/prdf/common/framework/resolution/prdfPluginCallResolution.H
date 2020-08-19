@@ -40,7 +40,7 @@ class PluginCallResolution : public Resolution
 
     public:
         PluginCallResolution(void)
-          : iv_function( NULL ) {}
+          : iv_function( nullptr ) {}
 
         PluginCallResolution( ExtensibleChipFunction * i_function )
             :iv_function(i_function) {};
@@ -65,7 +65,7 @@ class PluginCallResolution : public Resolution
             // only pass.
             if ( i_error.service_data->IsIsolationOnlyPass()) return SUCCESS;
 
-            if (NULL == iv_function)
+            if (nullptr == iv_function)
             {
                 return FAIL;
 
@@ -74,7 +74,7 @@ class PluginCallResolution : public Resolution
             ExtensibleChip * l_pResolutionChip =
                                     ServiceDataCollector::getChipAnalyzed( );
 
-            PRDF_ASSERT( NULL != l_pResolutionChip );
+            PRDF_ASSERT( nullptr != l_pResolutionChip );
 
             return ( *iv_function ) ( l_pResolutionChip, PluginDef::bindParm
                                         <STEP_CODE_DATA_STRUCT&>( i_error ) );

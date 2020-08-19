@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -48,7 +48,7 @@ namespace Prdr
              i != cv_cache.end();
              ++i)
         {
-            if (NULL != i->second)
+            if (nullptr != i->second)
                 delete (Chip*)i->second;
         }
 
@@ -61,15 +61,15 @@ namespace Prdr
     errlHndl_t LoadChipCache::loadChip(const char * i_file,
                                        Chip ** o_chip)
     {
-        errlHndl_t l_errl = NULL;
-        *o_chip = NULL;
+        errlHndl_t l_errl = nullptr;
+        *o_chip = nullptr;
 
         Cache_t::iterator i = cv_cache.find(i_file);
 
         if (cv_cache.end() != i) // Found object in cache.
         {
             (*o_chip) = (Chip*)(*i).second;
-            l_errl = NULL;
+            l_errl = nullptr;
         }
         else
         {
@@ -118,7 +118,7 @@ namespace Prdr
 
                 l_errl = UtilReg::read( "fstp/RO_Root", (void *)rootPath,
                                         sz_rootPath );
-                if ( NULL != l_errl ) break;
+                if ( nullptr != l_errl ) break;
 
                 strncat( rootPath, prdPath,  sz_prdPath  );
                 strncat( rootPath, filePath, sz_filePath );
@@ -151,7 +151,7 @@ namespace Prdr
 
             } while (0);
 
-            if (NULL == l_errl)
+            if (nullptr == l_errl)
             {
                 // Add chip object to the cache.
                 cv_cache[i_file] = *o_chip;
@@ -160,7 +160,7 @@ namespace Prdr
             {
                 PRDF_ERR("LoadChipCache::loadChip() l_errl is not null!");
                 delete *o_chip;
-                (*o_chip) = NULL;
+                (*o_chip) = nullptr;
             }
 
         }

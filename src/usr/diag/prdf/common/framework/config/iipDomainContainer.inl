@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 1996,2014              */
+/* Contributors Listed Below - COPYRIGHT 1996,2020                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -38,14 +40,14 @@ template<class T>
 inline
 const T * DomainContainer<T>::LookUp(unsigned int i_chipIndex) const
 {
-  return((T *) ((i_chipIndex < chips.size()) ? chips[i_chipIndex] : NULL));
+  return((T *) ((i_chipIndex < chips.size()) ? chips[i_chipIndex] : nullptr));
 }
 
 template<class T>
 inline
 T * DomainContainer<T>::LookUp(unsigned int i_chipIndex)
 {
-  return((T *) ((i_chipIndex < chips.size()) ? chips[i_chipIndex] : NULL));
+  return((T *) ((i_chipIndex < chips.size()) ? chips[i_chipIndex] : nullptr));
 }
 
 template<class T>

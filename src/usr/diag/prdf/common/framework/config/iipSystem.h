@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 1996,2019                        */
+/* Contributors Listed Below - COPYRIGHT 1996,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -183,7 +183,7 @@ class System
   // Promises:     Return a pointer to the requested chip if it exists
   // Exceptions:   None.
   // Concurrency:  Reentrant.
-  // Notes:  If the specified chip is not in the System, then NULL is
+  // Notes:  If the specified chip is not in the System, then nullptr is
   //         returned.
   //
   // End Function Specification ****************************************
@@ -198,7 +198,7 @@ class System
   // Promises:     Return a pointer to the requested domain if it exists
   // Exceptions:   None.
   // Concurrency:  Reentrant.
-  // Notes:  If the specified domain is not in the System, then NULL is
+  // Notes:  If the specified domain is not in the System, then nullptr is
   //         returned.
   //
   // End Function Specification ****************************************

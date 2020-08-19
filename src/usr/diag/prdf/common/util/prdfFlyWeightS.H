@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2007,2014              */
+/* Contributors Listed Below - COPYRIGHT 2007,2020                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -35,7 +37,7 @@ class FlyWeightS
 {
     public:
 
-        FlyWeightS() : iv_rowSize(2), iv_colSize(S), iv_nextPos(NULL),
+        FlyWeightS() : iv_rowSize(2), iv_colSize(S), iv_nextPos(nullptr),
                        iv_size(0)
                 { iv_rows.reserve(iv_rowSize); iv_heaps.reserve(iv_rowSize); };
 

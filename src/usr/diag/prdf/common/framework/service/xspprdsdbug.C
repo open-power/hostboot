@@ -92,7 +92,7 @@ using namespace PlatServices;
 
 AttnList g_AttnDataList;
 bool g_init_done = false;
-uint32_t * g_src = NULL;
+uint32_t * g_src = nullptr;
 
 //---------------------------------------------------------------------
 
@@ -275,7 +275,7 @@ void SYSTEM_DEBUG_CLASS::Clear(void)
 TargetHandle_t SYSTEM_DEBUG_CLASS::getTargetWithAttn
                         ( TYPE i_tgtType, ATTENTION_VALUE_TYPE i_attnType) const
 {
-    TargetHandle_t o_tgt = NULL;
+    TargetHandle_t o_tgt = nullptr;
 
     for(AttnList::const_iterator i = g_AttnDataList.begin();
                                   i != g_AttnDataList.end(); ++i)
@@ -321,7 +321,7 @@ uint8_t SYSTEM_DEBUG_CLASS::getPrimaryAttnType( TargetHandle_t i_chipTgt ) const
 
 void SYSTEM_DEBUG_CLASS::SetPrdSrcPointer()
 {
-    g_src = NULL;
+    g_src = nullptr;
 }
 
 void SYSTEM_DEBUG_CLASS::SetPrdSrcPointer(uint32_t* src_ptr)

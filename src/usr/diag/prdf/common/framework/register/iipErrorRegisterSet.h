@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 1997,2014              */
+/* Contributors Listed Below - COPYRIGHT 1997,2020                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -62,7 +64,7 @@ class ErrorRegisterSet: public ErrorRegisterMask
 public:
   ErrorRegisterSet(SCAN_COMM_REGISTER_CLASS & r,
                    ResolutionMap & rm,
-                   FILTER_CLASS * f = NULL);
+                   FILTER_CLASS * f = nullptr);
   // Function Specification ********************************************
   //
   // Purpose:      Constructor

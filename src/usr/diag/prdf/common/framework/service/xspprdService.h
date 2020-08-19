@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -93,7 +93,7 @@ class ServiceGeneratorClass
      * @brief  Creates an SRC, PFA data, and error log from the SDC provided.
      * @param  i_attnType Analysis attention type.
      * @param  io_sdc     Target SDC.
-     * @return A non-NULL error log indicates a system termination is required.
+     * @return A non-nullptr error log indicates a system termination is required.
      *         Otherwise, PRD will commit the error log generated.
      * @pre    The Time of Error must be set in the given SDC.
      */
@@ -108,7 +108,7 @@ class ServiceGeneratorClass
 
     /**
      * @brief  Return error log associated with current analysis flow.
-     * @note   For normal analysis paths only. Will return NULL if
+     * @note   For normal analysis paths only. Will return nullptr if
                createInitialErrl() has not been called in PRDF::main().
      * @return An error log.
      */

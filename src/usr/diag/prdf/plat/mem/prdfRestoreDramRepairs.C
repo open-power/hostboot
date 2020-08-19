@@ -85,7 +85,7 @@ errlHndl_t createErrl( uint32_t i_reasonCode, TargetHandle_t i_trgt,
 template<TARGETING::TYPE T>
 void commitErrl( errlHndl_t i_errl, TargetHandle_t i_trgt )
 {
-    if ( NULL != i_errl )
+    if ( nullptr != i_errl )
     {
         // Add traces
         i_errl->collectTrace( PRDF_COMP_NAME, 512 );
@@ -192,7 +192,7 @@ bool processRepairedRanks( TargetHandle_t i_trgt, uint8_t i_repairedRankMask )
     bool o_calloutMade  = false;
     bool analysisErrors = false;
 
-    errlHndl_t errl = NULL; // Initially NULL, will create if needed.
+    errlHndl_t errl = nullptr; // Initially nullptr, will create if needed.
 
     do
     {
@@ -232,7 +232,7 @@ bool processRepairedRanks( TargetHandle_t i_trgt, uint8_t i_repairedRankMask )
             {
                 // All repairs on the rank have been used. Callout all repairs.
 
-                if ( NULL == errl )
+                if ( nullptr == errl )
                 {
                     errl = createErrl<T>( PRDF_DETECTED_FAIL_HARDWARE,
                                           i_trgt, PRDFSIG_RdrRepairsUsed );
@@ -304,7 +304,7 @@ bool processBadDimms( TargetHandle_t i_trgt, uint8_t i_badDimmMask )
     bool o_calloutMade  = false;
     bool analysisErrors = false;
 
-    errlHndl_t errl = NULL; // Initially NULL, will create if needed.
+    errlHndl_t errl = nullptr; // Initially nullptr, will create if needed.
 
     // Iterate the list of all DIMMs
     TargetHandleList dimms = getConnectedChildren( i_trgt, TYPE_DIMM );
@@ -318,7 +318,7 @@ bool processBadDimms( TargetHandle_t i_trgt, uint8_t i_badDimmMask )
 
         if ( 0 != (i_badDimmMask & mask) )
         {
-            if ( NULL == errl )
+            if ( nullptr == errl )
             {
                 errl = createErrl<T>( PRDF_DETECTED_FAIL_HARDWARE,
                                       i_trgt, PRDFSIG_RdrRepairUnavail );

@@ -39,7 +39,7 @@ using namespace PlatServices;
 //------------------------------------------------------------------------------
 
 MemoryMru::MemoryMru( uint32_t i_memMru ) :
-    iv_target(NULL), iv_rank(0), iv_special(NO_SPECIAL_CALLOUT)
+    iv_target(nullptr), iv_rank(0), iv_special(NO_SPECIAL_CALLOUT)
 {
     #define PRDF_FUNC "[MemoryMru::MemoryMru] "
 
@@ -52,7 +52,7 @@ MemoryMru::MemoryMru( uint32_t i_memMru ) :
 
     TargetHandle_t node = getConnectedChild( system, TYPE_NODE,
             iv_memMruMeld.s.nodePos );
-    if ( NULL == node )
+    if ( nullptr == node )
     {
         PRDF_ERR( PRDF_FUNC "Could not find functional node attached to "
                 "system at pos: %u", iv_memMruMeld.s.nodePos );
@@ -61,7 +61,7 @@ MemoryMru::MemoryMru( uint32_t i_memMru ) :
 
     TargetHandle_t proc = getConnectedChild( node, TYPE_PROC,
             iv_memMruMeld.s.procPos );
-    if ( NULL == proc )
+    if ( nullptr == proc )
     {
         PRDF_ERR( PRDF_FUNC "Could not find functional  proc attached to "
                 "node 0x%08X at pos: %u", getHuid( node ),

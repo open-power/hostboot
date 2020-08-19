@@ -136,7 +136,7 @@ protected:  // Data
 
 inline
 ThresholdResolution::ThresholdResolution(uint16_t thresholdValue, uint32_t mask_id)
-: Resolution(), threshold(thresholdValue), count(0), maskId(mask_id) //, xRes(NULL)
+: Resolution(), threshold(thresholdValue), count(0), maskId(mask_id) //, xRes(nullptr)
 {}
 
 /*

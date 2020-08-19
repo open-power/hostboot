@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -42,14 +42,14 @@ ExtensibleDomainFunction *
 {
     ExtensibleFunctionType * plugin =
             getPluginGlobalMap().getPlugins(iv_domainName)[i_func];
-    if (NULL == plugin)
+    if (nullptr == plugin)
     {
-        static Plugin<ExtensibleDomain> l_nullPlugin(NULL);
+        static Plugin<ExtensibleDomain> l_nullPlugin(nullptr);
         plugin = &l_nullPlugin;
 
         if (!i_expectNull)
         {
-            errlHndl_t l_errl = NULL;
+            errlHndl_t l_errl = nullptr;
             PRDF_CREATE_ERRL(l_errl,
                              ERRL_SEV_UNRECOVERABLE,
                              ERRL_ETYPE_NOT_APPLICABLE,

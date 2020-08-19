@@ -74,7 +74,7 @@ public:
    @pre None
    @post Object created & space reserved
    */
-  ResolutionMap(int32_t entryCount, Resolution &defaultResolution, FilterClass * i_fltr = NULL);
+  ResolutionMap(int32_t entryCount, Resolution &defaultResolution, FilterClass * i_fltr = nullptr);
 
   /*
    Destructor - compiler default is ok
@@ -227,7 +227,7 @@ private: // Data
     BitKey iv_blist;
     Resolution * iv_res;
     RmPair(uint8_t i_bitPos, Resolution *res) : iv_blist(i_bitPos), iv_res(res) {}
-    RmPair(void) : iv_blist(), iv_res(NULL) {}
+    RmPair(void) : iv_blist(), iv_res(nullptr) {}
   };
 
   typedef std::vector<RmPair> MapList;

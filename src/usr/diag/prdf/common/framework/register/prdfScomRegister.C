@@ -224,7 +224,7 @@ uint32_t ScomRegister::Access( BitString & bs,
 //-----------------------------------------------------------------------------
 ExtensibleChip* ScomRegister::getChip( )const
 {
-    ExtensibleChip* l_pchip = NULL;
+    ExtensibleChip* l_pchip = nullptr;
     l_pchip = ServiceDataCollector::getChipAnalyzed();
     TARGETING::TYPE l_type = PlatServices::getTargetType(
                                                 l_pchip->getTrgt() );
@@ -238,7 +238,7 @@ bool ScomRegister::queryCache() const
 {
     RegDataCache & cache = RegDataCache::getCachedRegisters();
     BitString * bs = cache.queryCache( getChip(), this );
-    return ( NULL != bs );
+    return ( nullptr != bs );
 }
 
 //------------------------------------------------------------------------------
@@ -254,7 +254,7 @@ BitString & ScomRegister::readCache() const
 void ScomRegister::flushCache( ExtensibleChip *i_pChip ) const
 {
      RegDataCache & regDump = RegDataCache::getCachedRegisters();
-    if( NULL == i_pChip )
+    if( nullptr == i_pChip )
     {
         regDump.flush();
     }

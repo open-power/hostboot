@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -126,7 +126,7 @@ namespace Prdr
                     for (int i = 0; i < loopMax; i++)
                         i_left >> i_right.data[i];
 
-                    i_right.func = NULL;
+                    i_right.func = nullptr;
 
                     if ('f' == i_right.op)
                     {
@@ -207,41 +207,41 @@ namespace Prdr
             uint16_t *      cv_actionSize;
             Expr **         cv_actions;
 
-            Chip() : cv_regCount(0), cv_registers(NULL),
-                         cv_ruleCount(0), cv_rules(NULL),
-                         cv_groupCount(0), cv_groupSize(NULL),
-                         cv_groupFlags(NULL), cv_groupPriorityBits(NULL),
-                         cv_groupCsRootCauseBits(NULL), cv_groups(NULL),
-                         cv_actionCount(0), cv_actionSize(NULL),
-                         cv_actions(NULL)
+            Chip() : cv_regCount(0), cv_registers(nullptr),
+                         cv_ruleCount(0), cv_rules(nullptr),
+                         cv_groupCount(0), cv_groupSize(nullptr),
+                         cv_groupFlags(nullptr), cv_groupPriorityBits(nullptr),
+                         cv_groupCsRootCauseBits(nullptr), cv_groups(nullptr),
+                         cv_actionCount(0), cv_actionSize(nullptr),
+                         cv_actions(nullptr)
             {
             };
 
             ~Chip()
             {
-                if (NULL != cv_registers) delete[] cv_registers;
-                if (NULL != cv_rules) delete[] cv_rules;
+                if (nullptr != cv_registers) delete[] cv_registers;
+                if (nullptr != cv_rules) delete[] cv_rules;
                 for (int i = 0; i < cv_groupCount; i++)
                 {
-                    if (NULL != cv_groupPriorityBits[i])
+                    if (nullptr != cv_groupPriorityBits[i])
                         delete cv_groupPriorityBits[i];
 
-                    if ( NULL != cv_groupCsRootCauseBits[i] )
+                    if ( nullptr != cv_groupCsRootCauseBits[i] )
                         delete cv_groupCsRootCauseBits[i];
 
-                    if (NULL != cv_groups[i])
+                    if (nullptr != cv_groups[i])
                         delete[] cv_groups[i];
                 }
-                if (NULL != cv_groups) delete[] cv_groups;
-                if (NULL != cv_groupSize) delete[] cv_groupSize;
-                if (NULL != cv_groupFlags) delete[] cv_groupFlags;
-                if (NULL != cv_groupPriorityBits) delete[] cv_groupPriorityBits;
-                if ( NULL != cv_groupCsRootCauseBits )
+                if (nullptr != cv_groups) delete[] cv_groups;
+                if (nullptr != cv_groupSize) delete[] cv_groupSize;
+                if (nullptr != cv_groupFlags) delete[] cv_groupFlags;
+                if (nullptr != cv_groupPriorityBits) delete[] cv_groupPriorityBits;
+                if ( nullptr != cv_groupCsRootCauseBits )
                     delete[] cv_groupCsRootCauseBits;
                 for (int i = 0; i < cv_actionCount; i++)
-                    if (NULL != cv_actions[i]) delete[] cv_actions[i];
-                if (NULL != cv_actions) delete[] cv_actions;
-                if (NULL != cv_actionSize) delete[] cv_actionSize;
+                    if (nullptr != cv_actions[i]) delete[] cv_actions[i];
+                if (nullptr != cv_actions) delete[] cv_actions;
+                if (nullptr != cv_actionSize) delete[] cv_actionSize;
             };
     };
 

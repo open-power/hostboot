@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -81,7 +81,7 @@ class CaptureRequirement
     public:
 
         CaptureRequirement() :cv_TargetType(TARGETING::TYPE_NA),
-            cv_TargetIndex(0), cv_func(NULL)
+            cv_TargetIndex(0), cv_func(nullptr)
         { };
 
         uint32_t cv_TargetType;

@@ -172,7 +172,7 @@ void mfClockResolution( STEP_CODE_DATA_STRUCT &io_sc,
                 PlatServices::getActiveRefClk(chipTgt, TYPE_OSCPCICLK);
 
             // Callout this chip if nothing else.
-            if(NULL == l_ptargetClock)
+            if(nullptr == l_ptargetClock)
             {
                 l_ptargetClock = chipTgt;
             }
@@ -251,7 +251,7 @@ int32_t PllDomain::Analyze(STEP_CODE_DATA_STRUCT & serviceData,
         // Call this chip's capturePllFfdc plugin if it exists.
         ExtensibleChipFunction * l_captureFfdc =
             l_chip->getExtensibleFunction("capturePllFfdc", true);
-        if ( NULL != l_captureFfdc )
+        if ( nullptr != l_captureFfdc )
         {
             (*l_captureFfdc)( l_chip,
             PluginDef::bindParm<STEP_CODE_DATA_STRUCT &>(serviceData) );
@@ -333,7 +333,7 @@ int32_t PllDomain::Analyze(STEP_CODE_DATA_STRUCT & serviceData,
             // Call this chip's CalloutPll plugin if it exists.
             ExtensibleChipFunction * l_callout =
                 pllUnlockList[0]->getExtensibleFunction( "CalloutPll", true );
-            if ( NULL != l_callout )
+            if ( nullptr != l_callout )
             {
                 (*l_callout)( pllUnlockList[0],
                     PluginDef::bindParm<STEP_CODE_DATA_STRUCT &>(serviceData) );

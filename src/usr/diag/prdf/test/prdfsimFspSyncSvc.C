@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -47,15 +47,15 @@ void SimFspSyncSvc::processRequestMsg(msg_t * i_msg)
     #define FUNC "[SimFspSyncSvc::processRequestMsg]"
     PRDF_ENTER(FUNC);
 
-    PRDF_ASSERT(NULL != i_msg);
+    PRDF_ASSERT(nullptr != i_msg);
 
-    errlHndl_t pError = NULL;
+    errlHndl_t pError = nullptr;
 
     switch(i_msg->type)
     {
         case MFG_TRACE_SYNC_TO_FSP:
             pError = processMfgTrace(i_msg);
-            if(NULL != pError)
+            if(nullptr != pError)
             {
                 PRDF_ERR(FUNC " processMfgTrace returned error");
                 PRDF_COMMIT_ERRL(pError, ERRL_ACTION_REPORT);
@@ -76,9 +76,9 @@ errlHndl_t SimFspSyncSvc::processMfgTrace(msg_t *i_msg) const
     #define PRDF_FUNC "[SimFspSyncSvc::processMfgTrace]"
     PRDF_ENTER(PRDF_FUNC);
 
-    errlHndl_t l_errLog = NULL;
+    errlHndl_t l_errLog = nullptr;
     uint8_t l_mruListCount = 0;
-    uint8_t  *l_extraData = NULL;
+    uint8_t  *l_extraData = nullptr;
 
     do
     {
@@ -119,7 +119,7 @@ errlHndl_t SimFspSyncSvc::processMfgTrace(msg_t *i_msg) const
             break;
         }
 
-        if(NULL != l_extraData)
+        if(nullptr != l_extraData)
         {
             free(l_extraData);
         }

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -199,9 +199,9 @@ class PrioritySingleBitFilter : public FilterClass
      * the bit list, thus to prioritize bit positions 0,1, & 2 in the bit list,
      * pbls would = "\x01\x02\x03";
      */
-    PrioritySingleBitFilter(const char * pbls = NULL)
+    PrioritySingleBitFilter(const char * pbls = nullptr)
     {
-        if (NULL != pbls)
+        if (nullptr != pbls)
         {
             while('\0' != pbls[0])
             {

@@ -79,8 +79,8 @@ class AnalyzeConnected : public Resolution
      * @param[io] io_service_data References to STEP_CODE_DATA_STRUCT
      * @param[i]  i_default Default resolution
      * @return    SUCCESS | non-zero if chip not found.
-     * @note      if the call to getConnected yields NULL  than the
-     *            altResolution is called. If the altResolution is NULL than the
+     * @note      if the call to getConnected yields nullptr  than the
+     *            altResolution is called. If the altResolution is nullptr than the
      *            source is added to the callout list.
      */
     virtual int32_t Resolve( STEP_CODE_DATA_STRUCT & io_service_data,

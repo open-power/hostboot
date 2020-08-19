@@ -221,8 +221,8 @@ bool CheckChipletPll(ExtensibleChip * i_chip, TARGETING::TYPE i_chpltType)
 
     int32_t rc = SUCCESS;
     bool pllErrFound = false;
-    const char * errRegStr = NULL;
-    const char * cfgRegStr = NULL;
+    const char * errRegStr = nullptr;
+    const char * cfgRegStr = nullptr;
     ExtensibleChipList chpltList;
 
     getChpltList( i_chip, i_chpltType, errRegStr, cfgRegStr, chpltList );
@@ -585,7 +585,7 @@ int32_t capturePllFfdc( ExtensibleChip * i_chip,
     for( ; itr != exList.end(); ++itr)
     {
         exChip = (ExtensibleChip *)systemPtr->GetChip(*itr);
-        if( NULL == exChip ) continue;
+        if( nullptr == exChip ) continue;
 
         exChip->CaptureErrorData(
                 io_sc.service_data->GetCaptureData(),

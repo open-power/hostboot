@@ -211,13 +211,13 @@ int32_t callout_CapiBrick( ExtensibleChip * i_chip,
                                     l_brick,  SRCI_PRIORITY_HIGH,
                                     HWAS::OPEN_CAPI_ADAPTER_PART_TYPE, l_elog );
 
-                if (NULL != l_hwsvElog)
+                if (nullptr != l_hwsvElog)
                 {
                     PRDF_ERR("callout_CapiBrick failed - brick %d", i_brickNum);
                     l_hwsvElog->CollectTrace(PRDF_COMP_NAME, 1024);
                     l_hwsvElog->commit( PRDF_COMP_ID, ERRL_ACTION_REPORT );
                     delete l_hwsvElog;
-                    l_hwsvElog = NULL;
+                    l_hwsvElog = nullptr;
                 } // end if failed callout
 
        #endif // not simulation

@@ -59,7 +59,7 @@ int32_t ClockResolution::Resolve(STEP_CODE_DATA_STRUCT & serviceData,
 
         // Callout this chip if nothing else.
         // Or in the case of hostboot, use this chip for addClockCallout
-        if(NULL == l_ptargetClock)
+        if(nullptr == l_ptargetClock)
         {
             l_ptargetClock = iv_ptargetClock;
         }
@@ -127,7 +127,7 @@ int32_t ClockResolution::Resolve(STEP_CODE_DATA_STRUCT & serviceData,
                 PlatServices::getActiveRefClk(iv_ptargetClock, TYPE_OSCPCICLK);
 
             // Callout this chip if nothing else.
-            if(NULL == l_ptargetClock)
+            if(nullptr == l_ptargetClock)
             {
                 l_ptargetClock = iv_ptargetClock;
             }
@@ -156,7 +156,7 @@ int32_t ClockResolution::Resolve(STEP_CODE_DATA_STRUCT & serviceData,
         for( TargetHandleList::iterator i = l_targetsConnectedToClock.begin();
              i != l_targetsConnectedToClock.end(); ++i )
         {
-            if ( NULL != (*i) )
+            if ( nullptr != (*i) )
             {
                 serviceData.service_data->SetCallout( *i );
             }

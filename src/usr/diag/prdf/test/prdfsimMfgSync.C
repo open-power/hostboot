@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -57,13 +57,13 @@ errlHndl_t SimMfgSync::syncMfgTraceToFsp(ErrorSignature *i_esig,
     #define PRDF_FUNC "[SimMfgSync::syncMfgTraceToFsp]"
     PRDF_ENTER( PRDF_FUNC );
 
-    errlHndl_t l_err = NULL;
+    errlHndl_t l_err = nullptr;
 
     do
     {
         l_err = MfgSync::syncMfgTraceToFsp(i_esig, i_pfaData);
 
-        if(NULL != l_err)
+        if(nullptr != l_err)
         {
             PRDF_TRAC( PRDF_FUNC " syncMfgTraceToFsp failed" );
         }
@@ -81,7 +81,7 @@ errlHndl_t SimMfgSync::sendMboxMsg( msg_t * i_msg, bool i_expectResponse )
 {
     #define FUNC "[SimMfgSync::sendMboxMsg]"
     PRDF_ENTER( FUNC );
-    errlHndl_t l_errl = NULL;
+    errlHndl_t l_errl = nullptr;
 
     // send a sync message
     PRDF_TRAC(FUNC " sending sync mbox msg" );

@@ -164,7 +164,7 @@ ${PRDR_CMP_FLEX_C_PATH}: ${PRDR_CMP_FLEX} | ${OBJ_RULE_DIR}
 # Build the PRD rule compiler
 #------------------------------------------------------------------------------
 
-USERDEFINES = -D__HOSTBOOT_MODULE -O3 -pipe
+USERDEFINES = -std=gnu++11 -D__HOSTBOOT_MODULE -O3 -pipe
 
 ${PRDR_CMP_YACC_o_PATH}: ${PRDR_CMP_YACC_C_PATH} ${PRDR_CMP_YACC_H_PATH}
 	${PRD_OUT_MAKE}

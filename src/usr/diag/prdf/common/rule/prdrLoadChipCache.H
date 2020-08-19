@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -69,7 +69,7 @@ namespace Prdr
              * @param o_chip - Pointer to the object loaded from the file or
              *                        retrieved from the cache.
              *
-             * @note Caller must check o_chip for NULL pointers, indicating that
+             * @note Caller must check o_chip for nullptr pointers, indicating that
              * the chip file could not be found / loaded.
              *
              * @retuns errlHndl_t - In the event of a registry or file failure.

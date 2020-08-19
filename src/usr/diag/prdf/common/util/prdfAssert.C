@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -57,7 +57,7 @@ void prdfAssert( const char * i_exp, const char * i_file, int i_line )
 {
     PRDF_ERR( "prdfAssert(%s) in %s line %d", i_exp, i_file, i_line );
 
-    errlHndl_t errl = NULL;
+    errlHndl_t errl = nullptr;
 
     /*@
      * @errortype

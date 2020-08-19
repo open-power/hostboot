@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2007,2014              */
+/* Contributors Listed Below - COPYRIGHT 2007,2020                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -91,7 +93,7 @@ class UtilSMap
             size_type cv_blockSize = cv_firstSize + cv_secondSize;
 
     public:
-        UtilSMap() : iv_memblock(NULL), iv_size(0), iv_blockCount(2) {};
+        UtilSMap() : iv_memblock(nullptr), iv_size(0), iv_blockCount(2) {};
         ~UtilSMap() { this->clear(); };
 
         inline size_type size() const { return iv_size;};
@@ -105,7 +107,7 @@ class UtilSMap
 
         void clear()
             {
-                if (NULL != iv_memblock)
+                if (nullptr != iv_memblock)
                 {
                     for( size_type i = 0; i < iv_size; i++ )
                     {
@@ -116,14 +118,14 @@ class UtilSMap
                     free(iv_memblock);
                 }
 
-                iv_memblock = NULL;
+                iv_memblock = nullptr;
                 iv_size = 0;
                 iv_blockCount = 2;
             };
 
         data_type * insert(const key_type & k, const data_type & v)
             {
-                if (NULL == iv_memblock)
+                if (nullptr == iv_memblock)
                 {
                     iv_memblock = (char *) malloc(cv_blockSize * iv_blockCount);
                 }
@@ -149,7 +151,7 @@ class UtilSMap
             {
                 data_type * l_rc = find(i);
 
-                if (NULL == l_rc)
+                if (nullptr == l_rc)
                     l_rc = insert(i, data_type());
 
                 return *l_rc;
@@ -163,7 +165,7 @@ class UtilSMap
             iv_size = i_rhs.iv_size;
             iv_blockCount = i_rhs.iv_blockCount;
 
-            if( NULL != i_rhs.iv_memblock )
+            if( nullptr != i_rhs.iv_memblock )
             {
                 iv_memblock = (char *) malloc( cv_blockSize * iv_blockCount);
                 for( size_type i = 0; i < iv_size; i++ )
@@ -181,8 +183,8 @@ class UtilSMap
          {
             iv_size = i_rhs.iv_size;
             iv_blockCount = i_rhs.iv_blockCount;
-            iv_memblock = NULL;
-            if( NULL != i_rhs.iv_memblock )
+            iv_memblock = nullptr;
+            if( nullptr != i_rhs.iv_memblock )
             {
                 iv_memblock = (char *) malloc( cv_blockSize * iv_blockCount);
                 for( size_type i = 0; i < iv_size; i++ )
@@ -198,15 +200,15 @@ class UtilSMap
 
         data_type * find(const key_type & k)
         {
-            if (NULL == iv_memblock)
-                return NULL;
+            if (nullptr == iv_memblock)
+                return nullptr;
 
             for (size_type i = 0; i < iv_size; i++)
                 if ((*(key_type *)&iv_memblock[i * cv_blockSize]) == k)
                     return ((data_type *)
                             &iv_memblock[i * cv_blockSize + cv_firstSize]);
 
-            return NULL;
+            return nullptr;
         };
 };
 

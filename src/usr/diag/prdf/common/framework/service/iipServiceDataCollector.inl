@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -41,8 +41,8 @@ ServiceDataCollector::ServiceDataCollector() :
     hitCount(0),
     threshold(0),
     analysisFlags(0),
-    startingPoint(NULL),
-    ivpDumpRequestChipHandle(NULL),
+    startingPoint(nullptr),
+    ivpDumpRequestChipHandle(nullptr),
     causeAttentionType(INVALID_ATTENTION_TYPE)
 {
     PlatServices::getCurrentTime(ivCurrentEventTime);

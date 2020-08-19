@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -30,7 +30,7 @@ namespace PRDF
 {
 
 MfgThresholdMgr::MfgThresholdMgr() :
-  iv_mfgThres(NULL)
+  iv_mfgThres(nullptr)
 {
 
 }
@@ -80,10 +80,10 @@ void MfgThresholdMgr::reset()
 {
     iv_thrs.clear();
 
-    if(NULL != iv_mfgThres)
+    if(nullptr != iv_mfgThres)
     {
         delete iv_mfgThres;
-        iv_mfgThres = NULL;
+        iv_mfgThres = nullptr;
     }
 }
 
@@ -95,7 +95,7 @@ MfgThreshold * MfgThresholdMgr::getMfgThreshold()
 
 void MfgThresholdMgr::setupThresholds()
 {
-    if(NULL == iv_mfgThres)
+    if(nullptr == iv_mfgThres)
     {
         iv_mfgThres = new MfgThreshold();
         iv_mfgThres->setup();

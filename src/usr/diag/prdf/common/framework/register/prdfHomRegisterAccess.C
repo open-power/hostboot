@@ -80,7 +80,7 @@ ScomService& getScomService()
 }
 
 ScomService::ScomService() :
-    iv_ScomAccessor(NULL)
+    iv_ScomAccessor(nullptr)
 {
     PRDF_DTRAC("ScomService() initializing default iv_ScomAccessor");
     iv_ScomAccessor = new ScomAccessor();
@@ -88,11 +88,11 @@ ScomService::ScomService() :
 
 ScomService::~ScomService()
 {
-    if(NULL != iv_ScomAccessor)
+    if(nullptr != iv_ScomAccessor)
     {
         PRDF_DTRAC("~ScomService() deleting iv_ScomAccessor");
         delete iv_ScomAccessor;
-        iv_ScomAccessor = NULL;
+        iv_ScomAccessor = nullptr;
     }
 }
 
@@ -100,11 +100,11 @@ void ScomService::setScomAccessor(ScomAccessor & i_ScomAccessor)
 {
     PRDF_DTRAC("ScomService::setScomAccessor() setting new scom accessor");
 
-    if(NULL != iv_ScomAccessor)
+    if(nullptr != iv_ScomAccessor)
     {
         PRDF_TRAC("ScomService::setScomAccessor() deleting old iv_ScomAccessor");
         delete iv_ScomAccessor;
-        iv_ScomAccessor = NULL;
+        iv_ScomAccessor = nullptr;
     }
 
     iv_ScomAccessor = &i_ScomAccessor;
@@ -138,7 +138,7 @@ uint32_t ScomAccessor::Access(TargetHandle_t i_target,
 
     uint32_t rc = SUCCESS;
 
-    if(i_target != NULL)
+    if(i_target != nullptr)
     {
         switch (operation)
         {

@@ -113,8 +113,8 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
     {
         // User did not want this error log committed. No need to continue. So
         // delete it and exit.
-        delete iv_errl; iv_errl = NULL;
-        return NULL;
+        delete iv_errl; iv_errl = nullptr;
+        return nullptr;
     }
 
 #ifdef __HOSTBOOT_MODULE
@@ -705,11 +705,11 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
     PRDF_INF( PRDF_FUNC "PRD called to analyze an error: 0x%08x 0x%08x",
               esig->getChipId(), esig->getSigId() );
 
-    // Reset iv_errl to NULL. This is done to catch logical bug in our code.
+    // Reset iv_errl to nullptr. This is done to catch logical bug in our code.
     // It enables us to assert in createInitialErrl function if iv_errl is
-    // not NULL which should catch any logical bug in initial stages of testing.
+    // not nullptr which should catch any logical bug in initial stages of testing.
     errlHndl_t o_errl = iv_errl;
-    iv_errl = NULL;
+    iv_errl = nullptr;
 
     return o_errl;
 
@@ -953,7 +953,7 @@ void ErrDataService::deallocateDimms( const SDC_MRU_LIST & i_mruList )
 //------------------------------------------------------------------------------
 
 RasServices::RasServices() :
-    iv_eds(NULL)
+    iv_eds(nullptr)
 {
     iv_eds = new ErrDataService();
 }
@@ -962,10 +962,10 @@ RasServices::RasServices() :
 
 RasServices::~RasServices()
 {
-    if ( NULL != iv_eds )
+    if ( nullptr != iv_eds )
     {
         delete iv_eds;
-        iv_eds = NULL;
+        iv_eds = nullptr;
     }
 }
 
@@ -980,10 +980,10 @@ void RasServices::Initialize()
 
 void RasServices::setErrDataService( ErrDataService & i_eds )
 {
-    if ( NULL != iv_eds )
+    if ( nullptr != iv_eds )
     {
         delete iv_eds;
-        iv_eds = NULL;
+        iv_eds = nullptr;
     }
 
     iv_eds = &i_eds;

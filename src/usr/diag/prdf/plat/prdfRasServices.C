@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -54,7 +54,7 @@ void ErrDataService::MnfgTrace( ErrorSignature * i_esig,
         #ifndef __HOSTBOOT_RUNTIME
         if ( !INITSERVICE::spBaseServicesEnabled() ) break;
 
-        errlHndl_t errl = NULL;
+        errlHndl_t errl = nullptr;
         errl = getMfgSync().syncMfgTraceToFsp(i_esig, i_pfaData);
         if (errl)
         {
@@ -75,9 +75,9 @@ void ErrDataService::updateSrc( uint32_t i_user1, uint32_t i_user2,
                                 uint32_t i_user3, uint32_t i_user4,
                                 uint16_t i_rc )
 {
-    // We should always have a valid pointer here. If it is NULL, there
+    // We should always have a valid pointer here. If it is nullptr, there
     // is some major issue.
-    PRDF_ASSERT ( NULL != iv_errl);
+    PRDF_ASSERT ( nullptr != iv_errl);
 
     iv_errl->setReasonCode(i_rc);
     iv_errl->addUserData1( PRDF_GET_UINT64_FROM_UINT32( i_user1, i_user2 ));
@@ -88,9 +88,9 @@ void ErrDataService::updateSrc( uint32_t i_user1, uint32_t i_user2,
 
 void ErrDataService::createInitialErrl( ATTENTION_TYPE i_attnType )
 {
-    // We should always have a NULL pointer here. If it is not NULL, there
+    // We should always have a nullptr pointer here. If it is not nullptr, there
     // is some major issue.
-    PRDF_ASSERT ( NULL == iv_errl );
+    PRDF_ASSERT ( nullptr == iv_errl );
     using namespace ERRORLOG;
 
     iv_errl = new ErrlEntry(
@@ -121,7 +121,7 @@ void ErrDataService::commitErrLog( errlHndl_t & io_errl,
 
 {
     errlCommit( io_errl, PRDF_COMP_ID );
-    io_errl = NULL;
+    io_errl = nullptr;
 }
 
 } // end namespace PRDF

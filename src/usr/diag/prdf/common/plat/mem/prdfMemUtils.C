@@ -106,8 +106,8 @@ int32_t collectCeStats<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
         // Use this map to keep track of the total counts per DRAM.
         DramCountMap dramCounts;
 
-        const char * reg_str = NULL;
-        SCAN_COMM_REGISTER_CLASS * reg = NULL;
+        const char * reg_str = nullptr;
+        SCAN_COMM_REGISTER_CLASS * reg = nullptr;
 
         for ( uint8_t regIdx = 0; regIdx < CE_REGS_PER_PORT; regIdx++ )
         {

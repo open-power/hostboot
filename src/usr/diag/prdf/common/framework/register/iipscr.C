@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 1997,2019                        */
+/* Contributors Listed Below - COPYRIGHT 1997,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -132,7 +132,7 @@ uint32_t SCAN_COMM_REGISTER_CLASS::Read
 //  Title:  Set Bit
 //
 //  Purpose:  This function sets(1) the specified bit position in
-//            the Bit String.  If the Bit String is NULL, then a
+//            the Bit String.  If the Bit String is nullptr, then a
 //            new Bit String is allocated and cleared to all zero
 //            before setting the bit.
 //
@@ -160,7 +160,7 @@ void SCAN_COMM_REGISTER_CLASS::SetBit
 //  Title:  Clear Bit
 //
 //  Purpose:  This function clears(0) the specified bit position in
-//            the Bit String.  If the Bit String is NULL, then a
+//            the Bit String.  If the Bit String is nullptr, then a
 //            new Bit String is allocated and cleared to all zeros.
 //
 //  Side-effects:  Bit String is modified.
@@ -188,7 +188,7 @@ void SCAN_COMM_REGISTER_CLASS::ClearBit
 // Title:  Clear Bit String
 //
 // Purpose:  This function clears the Bit String.  If the data
-//           member is NULL, then a new Bit String is allocated.
+//           member is nullptr, then a new Bit String is allocated.
 //           Upon return, the state of the Bit String is all zero.
 //
 // Side-effects:  Bit String data member is modified.

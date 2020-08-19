@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -88,7 +88,7 @@ class PlatConfigurator : public Configurator
      * @parm   i_type       The specified target type.
      * @parm   io_domain    The associated domain.
      * @parm   io_pllDmnLst The PLL domain map list.
-     * @return An error log on error, otherwise NULL.
+     * @return An error log on error, otherwise nullptr.
      */
     errlHndl_t addDomainChips( TARGETING::TYPE  i_type,
                                RuleChipDomain * io_domain,

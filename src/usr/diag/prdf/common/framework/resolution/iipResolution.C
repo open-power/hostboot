@@ -97,7 +97,7 @@ int32_t EregResolution::Resolve( STEP_CODE_DATA_STRUCT & io_data,
                                  bool i_default )
 {
     int32_t rc = PRD_INTERNAL_CODE_ERROR;
-    if( errorRegister != NULL )
+    if( errorRegister != nullptr )
     {
         rc = errorRegister->Analyze( io_data );
     }
@@ -112,11 +112,11 @@ int32_t CalloutGardResolution::Resolve( STEP_CODE_DATA_STRUCT & io_serviceData,
 {
     /*
     This resolution is only needed when we callout self. So, during RuleChip
-    creation, we create CalloutGardResolution passing NULL as target value. In
+    creation, we create CalloutGardResolution passing nullptr as target value. In
     Resolve function when we need to update SDC with target to be called out, we
     get it from Service Data Collector. It is because target currently under
     analysis is the target that needs to be called out here. By instantiating
-    Callout resolution with just priority info and NULL target, we are able to
+    Callout resolution with just priority info and nullptr target, we are able to
     reduce CalloutGardResolution objects to one per priority instead of one per
     target per priority. So, this reduction in number of resolution objects
     shall eventually reduce memory utilization.

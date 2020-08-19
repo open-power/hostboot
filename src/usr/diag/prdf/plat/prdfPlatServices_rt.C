@@ -263,7 +263,7 @@ int32_t l3LineDelete(TargetHandle_t i_exTgt,
                      const p9_l3err_extract_err_data& i_l3_err_data)
 {
     using namespace stopImageSection;
-    errlHndl_t err = NULL;
+    errlHndl_t err = nullptr;
     const uint64_t retryCount = 100;
 
     // Apply Line Delete
@@ -273,7 +273,7 @@ int32_t l3LineDelete(TargetHandle_t i_exTgt,
                      fapiTrgt,
                      i_l3_err_data,
                      retryCount);
-    if(NULL != err)
+    if(nullptr != err)
     {
         PRDF_ERR( "[PlatServices::l3LineDelete] HUID: 0x%08x failed",
                   getHuid(i_exTgt));
@@ -457,7 +457,7 @@ void requestNewTODTopology( uint32_t i_oscPos,
 {
     /* TODO RTC 256733
     #define PRDF_FUNC "[PlatServices::requestNewTODTopology] "
-    if ( i_badChipList.size() > 0 || i_procOscTgt != NULL )
+    if ( i_badChipList.size() > 0 || i_procOscTgt != nullptr )
     {
         errlHndl_t err = TOD::resetBackupTopology( i_oscPos, i_procOscTgt,
                                                i_badChipList, i_informPhyp );

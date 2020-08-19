@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 1996,2019                        */
+/* Contributors Listed Below - COPYRIGHT 1996,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -230,7 +230,7 @@ private: // functions
      * @param     RuleChip pointer associated with register
      * @return    Nil
      */
-    void flushCache( ExtensibleChip *i_pChip = NULL ) const;
+    void flushCache( ExtensibleChip *i_pChip = nullptr ) const;
 
   private: // Data
 

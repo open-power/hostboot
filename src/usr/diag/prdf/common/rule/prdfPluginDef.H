@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -159,7 +159,7 @@ class Plugin : public ExtensibleFunction<_ExtensibleObject>
                            PluginDef::ParameterList * B)
         {
             int32_t i = 0;
-            if (NULL != _func)
+            if (nullptr != _func)
             {
                 i = _func(A,B);
             }

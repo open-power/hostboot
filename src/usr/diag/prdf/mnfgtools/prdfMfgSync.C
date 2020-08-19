@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -42,8 +42,8 @@ errlHndl_t MfgSync::syncMfgTraceToFsp( ErrorSignature *i_esig,
     #define PRDF_FUNC "[MfgSync::syncMfgTraceToFsp]"
     PRDF_ENTER( PRDF_FUNC );
 
-    errlHndl_t l_err = NULL;
-    msg_t *msg = NULL;
+    errlHndl_t l_err = nullptr;
+    msg_t *msg = nullptr;
 
     do
     {
@@ -75,7 +75,7 @@ errlHndl_t MfgSync::syncMfgTraceToFsp( ErrorSignature *i_esig,
 
         l_err = sendMboxMsg( msg, false );
 
-        if( NULL != l_err )
+        if( nullptr != l_err )
         {
             PRDF_ERR( PRDF_FUNC " failed to send mbox msg" );
             break;
@@ -85,11 +85,11 @@ errlHndl_t MfgSync::syncMfgTraceToFsp( ErrorSignature *i_esig,
     // After sending an asynchronous message, the memory allocated
     // to msg and extra_data is automatically deleted.
     // We need to free it explicity if the message send failed.
-    if(NULL != l_err)
+    if(nullptr != l_err)
     {
         free( msg->extra_data );
         msg_free( msg );
-        msg = NULL;
+        msg = nullptr;
     }
 
     PRDF_EXIT( PRDF_FUNC );
@@ -102,7 +102,7 @@ errlHndl_t MfgSync::sendMboxMsg( msg_t * i_msg, bool i_expectResponse )
 {
     #define FUNC "[MfgSync::sendMboxMsg]"
     PRDF_ENTER( FUNC );
-    errlHndl_t l_errl = NULL;
+    errlHndl_t l_errl = nullptr;
 
     PRDF_TRAC( "type:  0x%04x", i_msg->type );
     PRDF_TRAC( "data0: 0x%016llx", i_msg->data[0] );
@@ -120,7 +120,7 @@ errlHndl_t MfgSync::sendMboxMsg( msg_t * i_msg, bool i_expectResponse )
         l_errl = MBOX::send( MBOX::FSP_PRD_SYNC_MSGQ_ID, i_msg );
     }
 
-    if( NULL != l_errl )
+    if( nullptr != l_errl )
     {
         PRDF_TRAC(FUNC " failed to send mbox msg");
     }

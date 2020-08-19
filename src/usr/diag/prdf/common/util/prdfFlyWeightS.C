@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -55,7 +55,7 @@ void FlyWeightS<T,S>::clear()
     iv_rows.clear();
 
     iv_size = 0;
-    iv_nextPos = NULL;
+    iv_nextPos = nullptr;
     iv_rowSize = 2;
     iv_colSize = S;
 }
@@ -65,18 +65,18 @@ T & FlyWeightS<T,S>::get(const T & key)
 {
     HintType l_hint;
     T * l_val = find(key,l_hint);
-    return (NULL == l_val ? *insert(key,l_hint) : *l_val);
+    return (nullptr == l_val ? *insert(key,l_hint) : *l_val);
 }
 
 template <typename T, uint32_t S>
 T * FlyWeightS<T,S>::find(const T & key, HintType & o_hint)
 {
-    T * l_rc = NULL;
+    T * l_rc = nullptr;
 
     // Check for empty case.
-    if (NULL == iv_nextPos)
+    if (nullptr == iv_nextPos)
     {
-        return NULL;
+        return nullptr;
     }
 
     // Search rows for possible entry.
@@ -139,7 +139,7 @@ template <typename T, uint32_t S>
 T * FlyWeightS<T,S>::insert(const T & key, HintType & i_hint)
 {
     // Check for new array.
-    if (NULL == iv_nextPos)
+    if (nullptr == iv_nextPos)
     {
         HeapType p = this->getHeap();
         (*p) = key;
@@ -166,7 +166,7 @@ T * FlyWeightS<T,S>::insert(const T & key, HintType & i_hint)
     }
     else // not enough room.
     {
-        T * l_nextElement = NULL;
+        T * l_nextElement = nullptr;
         // Should it go on next list?
         if (*static_cast<T *>(static_cast<NeutralV *>(*i_hint.row)->back())
                 < key)
@@ -203,13 +203,13 @@ T * FlyWeightS<T,S>::getHeap()
 {
     iv_size++;
 
-    if (NULL == iv_nextPos)
+    if (nullptr == iv_nextPos)
     {
         iv_nextPos = new T[RoundBucketSize<T,S>::value];
-        if( NULL == iv_nextPos )
+        if( nullptr == iv_nextPos )
         {
             PRDF_ERR("Can not allocate memory on heap");
-            PRDF_ASSERT( NULL != iv_nextPos );
+            PRDF_ASSERT( nullptr != iv_nextPos );
         }
         iv_heaps.push_back(iv_nextPos);
     }
@@ -220,10 +220,10 @@ T * FlyWeightS<T,S>::getHeap()
     if ((static_cast<T*>(*(iv_heaps.end()-1)) + RoundBucketSize<T,S>::value) == iv_nextPos)
     {
         iv_nextPos = new T[RoundBucketSize<T,S>::value];
-        if( NULL == iv_nextPos )
+        if( nullptr == iv_nextPos )
         {
             PRDF_ERR("Can not allocate memory on heap");
-            PRDF_ASSERT( NULL != iv_nextPos );
+            PRDF_ASSERT( nullptr != iv_nextPos );
         }
         iv_heaps.push_back(iv_nextPos);
     }
@@ -263,7 +263,7 @@ void FlyWeightS<T,S>::increaseSize()
          i != iv_rows.end();
          i++)
     {
-        if (*i == NULL)
+        if (*i == nullptr)
             continue;
 
         bool l_merged = false;
@@ -274,7 +274,7 @@ void FlyWeightS<T,S>::increaseSize()
             l_merged = false;
             i_next++;
 
-            while ( (iv_rows.end() != i_next) && (NULL == *i_next) )
+            while ( (iv_rows.end() != i_next) && (nullptr == *i_next) )
                     i_next++;
 
             if (i_next == iv_rows.end())
@@ -290,14 +290,14 @@ void FlyWeightS<T,S>::increaseSize()
                     static_cast<NeutralV *>(*i_next)->end());
 
                 delete static_cast<NeutralV *>(*i_next);
-                *i_next = NULL;
+                *i_next = nullptr;
 
                 l_merged = true;
             }
         } while(l_merged);
     }
 
-    iv_rows.erase(std::remove(iv_rows.begin(), iv_rows.end(), (void *) NULL),
+    iv_rows.erase(std::remove(iv_rows.begin(), iv_rows.end(), (void *) nullptr),
                   iv_rows.end());
 
 };

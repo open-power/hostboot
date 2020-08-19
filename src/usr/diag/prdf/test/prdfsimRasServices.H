@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -48,7 +48,7 @@ class SimErrDataService : public ErrDataService
      * @brief  Creates an SRC, PFA data, and error log from the SDC provided.
      * @param  i_attnType Analysis attention type.
      * @param  io_sdc      Target SDC.
-     * @return A non-NULL error log indicates a system termination is required.
+     * @return A non-nullptr error log indicates a system termination is required.
      *         Otherwise, PRD will commit the error log generated.
      * @pre    The Time of Error must be set in the given SDC.
      */

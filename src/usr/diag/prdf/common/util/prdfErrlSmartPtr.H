@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -44,8 +44,8 @@ class ErrlSmartPtr
 
         class INVALID_TYPE_CONVERSION___SEE_COMMENTS_FOR_RELEASE_FUNCTION {};
 
-        /* ctor - Initialize ptr to NULL */
-        ErrlSmartPtr() : iv_errl(NULL) {};
+        /* ctor - Initialize ptr to nullptr */
+        ErrlSmartPtr() : iv_errl(nullptr) {};
         /* dtor - Commit remaining error log */
         ~ErrlSmartPtr() { commit_errl(); };
 
@@ -84,8 +84,8 @@ class ErrlSmartPtr
             };
 
         /* operator ==
-         *        Compare with NULL or other ptr values:
-         *                if (errl == NULL)...
+         *        Compare with nullptr or other ptr values:
+         *                if (errl == nullptr)...
          */
         bool operator==(const errlHndl_t i_errl) const
             {
@@ -93,8 +93,8 @@ class ErrlSmartPtr
             };
 
         /* operator !=
-         *        Compare with NULL or other ptr values:
-         *                if (errl != NULL)...
+         *        Compare with nullptr or other ptr values:
+         *                if (errl != nullptr)...
          */
         bool operator!=(const errlHndl_t i_errl) const
             {
@@ -102,8 +102,8 @@ class ErrlSmartPtr
             };
 
         /* friend operator ==
-         *        Compare with NULL or other ptr values:
-         *                if (NULL == errl)
+         *        Compare with nullptr or other ptr values:
+         *                if (nullptr == errl)
          */
         friend bool operator==(const errlHndl_t i_errl,
                         const ErrlSmartPtr & i_smrtptr)
@@ -112,8 +112,8 @@ class ErrlSmartPtr
             };
 
         /* friend operator =!
-         *        Compare with NULL or other ptr values:
-         *                if (NULL =! errl)
+         *        Compare with nullptr or other ptr values:
+         *                if (nullptr =! errl)
          */
         friend bool operator!=(const errlHndl_t i_errl,
                         const ErrlSmartPtr & i_smrtptr)
@@ -131,7 +131,7 @@ class ErrlSmartPtr
 
         operator INVALID_TYPE_CONVERSION___SEE_COMMENTS_FOR_RELEASE_FUNCTION *()
             {
-                return NULL;
+                return nullptr;
             };
 
         /* errlHndl_t release
@@ -150,7 +150,7 @@ class ErrlSmartPtr
         errlHndl_t release()
             {
                 errlHndl_t l_tmp = iv_errl;
-                iv_errl = NULL;
+                iv_errl = nullptr;
                 return l_tmp;
             };
 

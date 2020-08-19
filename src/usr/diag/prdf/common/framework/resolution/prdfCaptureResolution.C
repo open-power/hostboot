@@ -34,7 +34,7 @@ int32_t CaptureResolution::Resolve( STEP_CODE_DATA_STRUCT & io_error,
 {
     ExtensibleChip * l_pResolutionChip =
                                 ServiceDataCollector::getChipAnalyzed( );
-    PRDF_ASSERT( NULL != l_pResolutionChip );
+    PRDF_ASSERT( nullptr != l_pResolutionChip );
 
     return l_pResolutionChip->CaptureErrorData(
                                     io_error.service_data->GetCaptureData(),

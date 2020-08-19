@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 1996,2014              */
+/* Contributors Listed Below - COPYRIGHT 1996,2020                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -190,11 +192,11 @@ public:
    Returns a pointer to the chip at the specified index
    <ul>
    <br><b>Parameters:  </b> chipIndex
-   <br><b>Returns:     </b> pointer to a Chip of type T | NULL
+   <br><b>Returns:     </b> pointer to a Chip of type T | nullptr
    <br><b>Requirements:</b> AddChip(), 0 <= chipIndex < GetSize()
    <br><b>Promises:    </b> None.
    <br><b>Exceptions:  </b> None.
-   <br><b>Notes:       </b> NULL is return if chipIndex is out of range
+   <br><b>Notes:       </b> nullptr is return if chipIndex is out of range
    </ul><br>
    */
   const T * LookUp(unsigned int chipIndex) const;

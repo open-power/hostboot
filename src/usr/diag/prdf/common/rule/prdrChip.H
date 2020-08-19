@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -75,7 +75,7 @@ class Chip
 
         std::string cv_name_default;
 
-        Chip() : cv_sname(NULL),
+        Chip() : cv_sname(nullptr),
                      cv_name(&cv_name_default),
                      cv_chipid(0),
                      cv_targetType(0),
@@ -87,7 +87,7 @@ class Chip
 
         static void merge(Chip * i_l, Chip * i_r)
         {
-            if (NULL != i_r->cv_sname)
+            if (nullptr != i_r->cv_sname)
                 i_l->cv_sname = i_r->cv_sname;
             if (&i_r->cv_name_default != i_r->cv_name)
                 i_l->cv_name = i_r->cv_name;

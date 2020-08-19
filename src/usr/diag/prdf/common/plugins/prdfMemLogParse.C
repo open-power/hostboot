@@ -295,7 +295,7 @@ bool parseMemUeTable( uint8_t  * i_buffer, uint32_t i_buflen,
 
     bool rc = true;
 
-    if ( NULL == i_buffer ) return false; // Something failed in parser.
+    if ( nullptr == i_buffer ) return false; // Something failed in parser.
 
     const uint32_t entries = i_buflen / ENTRY_SIZE;
 
@@ -359,7 +359,7 @@ bool parseMemCeTable( uint8_t  * i_buffer, uint32_t i_buflen,
 
     bool o_rc = true;
 
-    if ( NULL == i_buffer ) return false; // Something failed in parser.
+    if ( nullptr == i_buffer ) return false; // Something failed in parser.
     if ( i_buflen < METADATA_SIZE )
         return false; // Something failed in parser.
 
@@ -476,7 +476,7 @@ bool parseDramRepairsData( uint8_t  * i_buffer, uint32_t i_buflen,
 {
     bool rc = true;
 
-    if ( NULL != i_buffer )
+    if ( nullptr != i_buffer )
     {
         UtilMem l_membuf( i_buffer, i_buflen );
 
@@ -544,7 +544,7 @@ bool parseDramRepairsVpd( uint8_t * i_buffer, uint32_t i_buflen,
 {
     bool rc = true;
 
-    if ( NULL == i_buffer ) return false; // Something failed in parser.
+    if ( nullptr == i_buffer ) return false; // Something failed in parser.
 
     uint32_t entrySize = DQ_BITMAP::ENTRY_SIZE;
 
@@ -570,7 +570,7 @@ bool parseBadDqBitmap( uint8_t  * i_buffer, uint32_t i_buflen,
 {
     bool rc = true;
 
-    if ( NULL == i_buffer ) return false; // Something failed in parser.
+    if ( nullptr == i_buffer ) return false; // Something failed in parser.
 
     uint32_t entrySize = DQ_BITMAP::ENTRY_SIZE;
 
@@ -597,7 +597,7 @@ bool parseRowRepairVpd( uint8_t * i_buffer, uint32_t i_buflen,
 {
     bool rc = true;
 
-    if ( NULL == i_buffer ) return false; // Something failed in parser.
+    if ( nullptr == i_buffer ) return false; // Something failed in parser.
 
     uint32_t entrySize = ROW_REPAIR::ENTRY_SIZE;
 
@@ -624,7 +624,7 @@ bool parseTdCtlrStateData( uint8_t  * i_buffer, uint32_t i_buflen,
     bool o_rc = true;
 
     // Make sure we have a valid buffer.
-    if ( (NULL == i_buffer) || (0 == i_buflen) ) return false;
+    if ( (nullptr == i_buffer) || (0 == i_buflen) ) return false;
 
     // This is a copy of the enum in prdfMemTdQueue.H.
     enum TdType

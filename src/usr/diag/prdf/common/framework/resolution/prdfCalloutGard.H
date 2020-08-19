@@ -106,7 +106,7 @@ inline CalloutGardResolution::CalloutGardResolution(
 
 inline
 CalloutGardResolution::CalloutGardResolution() :
-    iv_callout( NULL ),
+    iv_callout( nullptr ),
     iv_calloutPriority( MRU_MED ),
     iv_gardState( GARD )
 {}

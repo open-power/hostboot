@@ -132,11 +132,11 @@ void ServiceDataCollector::SetCallout( PRDcallout mru,
 
     if ( PRDcalloutData::TYPE_TARGET == mru.getType() )
     {
-        // Ensuring target is not NULL
-        if ( NULL == mru.getTarget() )
+        // Ensuring target is not nullptr
+        if ( nullptr == mru.getTarget() )
         {
             PRDF_ERR( "[ServiceDataCollector::SetCallout] "
-                      "skipping NULL callout" );
+                      "skipping nullptr callout" );
             return;
         }
     }
@@ -308,9 +308,9 @@ void ServiceDataCollector::AddSignatureList( TargetHandle_t i_target,
 
     do
     {
-        if ( NULL == i_target )
+        if ( nullptr == i_target )
         {
-            PRDF_ERR( PRDF_FUNC "Given target is NULL" );
+            PRDF_ERR( PRDF_FUNC "Given target is nullptr" );
             break;
         }
 
@@ -344,7 +344,7 @@ void ServiceDataCollector::AddSignatureList( ErrorSignature & i_sig )
      TARGETING::TargetHandle_t tgt = PlatServices::getTarget(
                                                   i_sig.getChipId());
 
-     if ( NULL != tgt )
+     if ( nullptr != tgt )
      {
         AddSignatureList( tgt, i_sig.getSigId() );
      }
@@ -360,8 +360,8 @@ void ServiceDataCollector::AddSignatureList( ErrorSignature & i_sig )
 TARGETING::TargetHandle_t ServiceDataCollector::getTargetAnalyzed( )
 {
     ExtensibleChip * l_pChipAnalyzed = getChipAnalyzed();
-    TARGETING::TargetHandle_t l_pTargetAnalyzed = NULL;
-    if( NULL != l_pChipAnalyzed )
+    TARGETING::TargetHandle_t l_pTargetAnalyzed = nullptr;
+    if( nullptr != l_pChipAnalyzed )
     {
          l_pTargetAnalyzed = l_pChipAnalyzed->getTrgt( );
     }
@@ -488,7 +488,7 @@ ServiceDataCollector & ServiceDataCollector::operator=(
     {
         TARGETING::TargetHandle_t l_pChipHandle = buffer_getTarget(i_flatdata);
         uint32_t             l_signature   = (uint32_t)  buffer_get32(i_flatdata);
-        if(NULL !=l_pChipHandle)
+        if(nullptr !=l_pChipHandle)
         {
             SignatureList    l_item(l_pChipHandle, l_signature);
             iv_SignatureList.push_back(l_item);

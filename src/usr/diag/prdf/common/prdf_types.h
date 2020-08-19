@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2002,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2002,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -27,18 +27,6 @@
 #define PRDF_TYPES_H
 
 #include <stdint.h>
-
-#undef NULL
-#define NULL 0
-
-#if defined(PRDF_HOSTBOOT_ERRL_PLUGIN) || defined(PRDF_FSP_ERRL_PLUGIN)
-  // The error log parser is always compiled with the x86_64-mcp8-jail, which
-  // does not support C++11, yet. Therefore, define nullptr so we don't have
-  // to revert a bunch of new code.
-  #ifndef nullptr
-    #define nullptr NULL
-  #endif
-#endif
 
 namespace PRDF
 {

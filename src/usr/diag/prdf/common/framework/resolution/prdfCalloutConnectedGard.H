@@ -63,7 +63,7 @@ class CalloutConnectedGard : public Resolution
      *                            values
      * @param   i_altResolution   to use if the connection does not exist or
      *                            is invalid.
-     *                            If NULL than source is called out
+     *                            If nullptr than source is called out
      * @param   i_peerConnType    type of unit that is peer connected to
      *                            i_targetType
      * @param   i_trgtGardState   gard policy associated with target callout
@@ -88,7 +88,7 @@ class CalloutConnectedGard : public Resolution
      * @post      service_data is complete
      * @return    SUCCESS | non-zero
      * @note      if the call to getConnected yields an invalid  target then
-     *            altResolution is called. If the altResolution is NULL than the
+     *            altResolution is called. If the altResolution is nullptr than the
      *            source is added to the callout list.
      */
     virtual int32_t Resolve( STEP_CODE_DATA_STRUCT & io_service_data,

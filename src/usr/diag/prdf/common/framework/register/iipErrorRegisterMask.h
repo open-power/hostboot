@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -99,7 +99,7 @@ public:
                             Comm register address is used
    </ul><br>
    */
-  ErrorRegisterMask(SCAN_COMM_REGISTER_CLASS & r, ResolutionMap & rm, FILTER_CLASS * f = NULL, uint16_t scrId = 0x0fff, SCAN_COMM_REGISTER_CLASS & maskScr = *((SCAN_COMM_REGISTER_CLASS *) NULL)); // dg00
+  ErrorRegisterMask(SCAN_COMM_REGISTER_CLASS & r, ResolutionMap & rm, FILTER_CLASS * f = nullptr, uint16_t scrId = 0x0fff, SCAN_COMM_REGISTER_CLASS & maskScr = *((SCAN_COMM_REGISTER_CLASS *) nullptr)); // dg00
 
   /**
    Constructor
@@ -110,7 +110,7 @@ public:
    <br><b>Parameter:   </b> Optional maskScan comm register
    </ul><br>
    */
-  ErrorRegisterMask(SCAN_COMM_REGISTER_CLASS & r, ResolutionMap & rm, uint16_t scrId, SCAN_COMM_REGISTER_CLASS & maskScr = *((SCAN_COMM_REGISTER_CLASS *) NULL)); // dg00
+  ErrorRegisterMask(SCAN_COMM_REGISTER_CLASS & r, ResolutionMap & rm, uint16_t scrId, SCAN_COMM_REGISTER_CLASS & maskScr = *((SCAN_COMM_REGISTER_CLASS *) nullptr)); // dg00
 
   // Function Specification ********************************************
   //
@@ -183,7 +183,7 @@ protected:
    <br><b>Parameters:  </b> BitList
    <br><b>Returns:     </b> return code
    <br><b>Requirements:</b> Filter()
-   <br><b>Promises:    </b> if xMaskScr == NULL then
+   <br><b>Promises:    </b> if xMaskScr == nullptr then
                                bitStringMask bit(s) set if error.service_data->IsAtThreshold()
                             ELSE bitStringMask remains unchanged
                             Hardware may be modified

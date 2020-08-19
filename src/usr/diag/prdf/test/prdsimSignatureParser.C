@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -123,17 +125,17 @@ const char * SimSignatureParser::Description(const Signature & signature)
     {0x0000DD91, "Scan comm access from Error Register failed due to Power Fault"},
     {0x0000DDFF, "Special return code indicating Not to reset or mask FIR bits"},
     {0x00ED0000, "PLL error"},
-    {0,NULL} // this must exist and must be last
+    {0,nullptr} // this must exist and must be last
   };
 
-  const char * result = NULL;
+  const char * result = nullptr;
 //  PrdrErrSigTable & est = prdfGetErrorSigTable();
 //  result = est[l_homt][signature.code];
 
 
-  if(NULL == result)
+  if(nullptr == result)
   {
-      for(uint32_t i = 1; l_defaultErrorCodes[i].description != NULL; ++i)
+      for(uint32_t i = 1; l_defaultErrorCodes[i].description != nullptr; ++i)
       {
             if(0x0000DD00 == (signature.code & 0x0000FF00))
             {
@@ -154,7 +156,7 @@ const char * SimSignatureParser::Description(const Signature & signature)
             }
       }
   }
-  if(NULL == result)
+  if(nullptr == result)
   {
     result = "(W) No description found";
   }

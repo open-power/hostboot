@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -173,7 +173,7 @@ class DIGIT_STRING_BYTE_CLASS : public DIGIT_STRING_CLASS
       ) :
          /*!o No value returned                                       */
       DIGIT_STRING_CLASS(mdv, l),
-      xbuffer(NULL)
+      xbuffer(nullptr)
       {
       SetString();
       }

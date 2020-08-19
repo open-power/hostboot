@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -165,7 +165,7 @@ inline
 ErrorRegisterFilter::ErrorRegisterFilter(SCAN_COMM_REGISTER_CLASS & r,
                                          ResolutionMap & rm,
                                          uint16_t scrId)
-: ErrorRegister(r,rm,scrId), filter(NULL)
+: ErrorRegister(r,rm,scrId), filter(nullptr)
 {}
 
 inline

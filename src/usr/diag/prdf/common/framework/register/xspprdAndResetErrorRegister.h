@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -84,7 +84,7 @@ class AndResetErrorRegister: public ErrorRegisterMask
                            in hardware or strange things will happen
   </ul><br>
 */
-  AndResetErrorRegister(SCAN_COMM_REGISTER_CLASS & r,ResolutionMap & rm, SCAN_COMM_REGISTER_CLASS & resetScr, FILTER_CLASS * f = NULL, uint16_t scrId = 0x0fff, SCAN_COMM_REGISTER_CLASS & maskScr = *((SCAN_COMM_REGISTER_CLASS *) NULL));
+  AndResetErrorRegister(SCAN_COMM_REGISTER_CLASS & r,ResolutionMap & rm, SCAN_COMM_REGISTER_CLASS & resetScr, FILTER_CLASS * f = nullptr, uint16_t scrId = 0x0fff, SCAN_COMM_REGISTER_CLASS & maskScr = *((SCAN_COMM_REGISTER_CLASS *) nullptr));
 
 /**
   Constructor
@@ -102,7 +102,7 @@ class AndResetErrorRegister: public ErrorRegisterMask
                            or results will not be as expected
   </ul><br>
 */
- AndResetErrorRegister(SCAN_COMM_REGISTER_CLASS & r,ResolutionMap & rm, SCAN_COMM_REGISTER_CLASS & resetScr, uint16_t scrId, SCAN_COMM_REGISTER_CLASS & r1 = *((SCAN_COMM_REGISTER_CLASS *) NULL));
+ AndResetErrorRegister(SCAN_COMM_REGISTER_CLASS & r,ResolutionMap & rm, SCAN_COMM_REGISTER_CLASS & resetScr, uint16_t scrId, SCAN_COMM_REGISTER_CLASS & r1 = *((SCAN_COMM_REGISTER_CLASS *) nullptr));
 
 
 /**

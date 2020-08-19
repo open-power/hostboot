@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -91,7 +91,7 @@ void prdrReadBitString(UtilStream & i_stream, std::vector<uint64_t> & o_vector)
 
 errlHndl_t LoadChip(UtilStream & i_stream, Chip & o_chip)
 {
-    errlHndl_t l_errl = NULL;
+    errlHndl_t l_errl = nullptr;
 
     do
     {
@@ -309,14 +309,14 @@ errlHndl_t LoadChip(UtilStream & i_stream, Chip & o_chip)
                 }
                 else //@pw01
                 {
-                    o_chip.cv_actions[i] = NULL;
+                    o_chip.cv_actions[i] = nullptr;
                 }
             }
         }
 
     } while (false);
 
-    if (NULL == l_errl)
+    if (nullptr == l_errl)
         l_errl = i_stream.getLastError();
 
     return l_errl;
@@ -428,7 +428,7 @@ void ReadExpr(UtilStream & i_stream, Expr & o_expr)
             break;
 
         case ACT_FUNC:
-            o_expr.cv_actFunc = NULL;
+            o_expr.cv_actFunc = nullptr;
             ReadString(i_stream, o_expr.cv_actFunc);
 
             i_stream >> o_expr.cv_value[1].i;
@@ -453,7 +453,7 @@ void ReadExpr(UtilStream & i_stream, Expr & o_expr)
                     ReadExpr(i_stream, *o_expr.cv_value[4].p);
                 }
                 else
-                    o_expr.cv_value[4].p = NULL;
+                    o_expr.cv_value[4].p = nullptr;
 
                 // Read peer connection type
                 i_stream >> o_expr.cv_value[5].i;
@@ -499,10 +499,10 @@ Register::~Register()
         j != cv_captures.end();
         ++j)
     {
-        if (NULL != (*j).func)
+        if (nullptr != (*j).func)
         {
             delete[] (*j).func;
-            (*j).func = NULL;
+            (*j).func = nullptr;
         }
     }
 }
@@ -510,12 +510,12 @@ Register::~Register()
 Expr::Expr()
 {
     cv_op = 0;
-    cv_actFunc = NULL;
+    cv_actFunc = nullptr;
     // Clear out the pointers and 'delete' settings.
     for (uint32_t i = 0; i < MAX_VALUES; i++)
     {
         cv_deletePtr[i] = false;
-        cv_value[i].p = NULL;
+        cv_value[i].p = nullptr;
     }
 }
 
@@ -527,10 +527,10 @@ Expr::~Expr()
         // On function call operator and bit string,
         // cv_value[0].p points to a string.
         case ACT_FUNC:
-            if(NULL != cv_actFunc)
+            if(nullptr != cv_actFunc)
             {
                 delete[] cv_actFunc;
-                cv_actFunc = NULL;
+                cv_actFunc = nullptr;
             }
             break;
         case BIT_STR:

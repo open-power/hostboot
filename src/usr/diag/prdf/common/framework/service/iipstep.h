@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -108,7 +108,7 @@ struct STEP_CODE_DATA_STRUCT
 {
     // Used to identify a unique error condition and collect related
     // information
-    STEP_CODE_DATA_STRUCT () : service_data( NULL ) {};
+    STEP_CODE_DATA_STRUCT () : service_data( nullptr ) {};
     ServiceDataCollector *     service_data;
 };
 

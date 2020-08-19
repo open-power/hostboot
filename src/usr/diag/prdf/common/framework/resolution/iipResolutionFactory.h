@@ -157,7 +157,7 @@ public:
                                     TARGETING::TYPE i_targetType,
                                     uint32_t i_idx = 0,
                                     PRDpriority i_priority = MRU_MED,
-                                    Resolution * i_altResolution = NULL,
+                                    Resolution * i_altResolution = nullptr,
                                     TARGETING::TYPE i_peerConnType =
                                                     TARGETING::TYPE_NA,
                                     GARD_POLICY i_gardState = GARD );
@@ -249,7 +249,7 @@ public:
    * @post      only one instance of this obect with these paramaters will exist
    */
   Resolution & GetClockResolution(
-                    TARGETING::TargetHandle_t i_pClockHandle = NULL ,
+                    TARGETING::TargetHandle_t i_pClockHandle = nullptr ,
                     TARGETING::TYPE i_targetType = TARGETING::TYPE_PROC );
 /**
    Link resolutions to form a single resolution performing the actions of them all
@@ -331,7 +331,7 @@ public:
   class ResolutionLink: public Resolution
   {
   public:
-    ResolutionLink(): Resolution(), xlnk1(NULL), xlnk2(NULL) {}
+    ResolutionLink(): Resolution(), xlnk1(nullptr), xlnk2(nullptr) {}
     ResolutionLink(Resolution & r1, Resolution & r2)
       : Resolution(), xlnk1(&r1), xlnk2(&r2) {}
     ResolutionLink(const ResolutionLink & rl)

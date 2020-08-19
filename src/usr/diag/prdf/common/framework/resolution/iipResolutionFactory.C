@@ -141,7 +141,7 @@ MaskResolution & ResolutionFactory::GetThresholdResolution( uint32_t maskId,
                         const ThresholdResolution::ThresholdPolicy & policy,
                         const ThresholdResolution::ThresholdPolicy & mfgPolicy )
 {
-  MaskResolution * r = NULL;
+  MaskResolution * r = nullptr;
   if ( !PlatServices::mfgMode() )
   {
     r = &iv_thresholdResolutions.get(ThresholdResolution(maskId,policy));
@@ -156,7 +156,7 @@ MaskResolution & ResolutionFactory::GetThresholdResolution( uint32_t maskId,
 MaskResolution & ResolutionFactory::GetThresholdResolution( uint32_t maskId,
                         const ThresholdResolution::ThresholdPolicy & policy )
 {
-  MaskResolution * r = NULL;
+  MaskResolution * r = nullptr;
   if ( !PlatServices::mfgMode() &&
        !(policy == ThresholdResolution::cv_mnfgDefault) )
   {
@@ -172,7 +172,7 @@ MaskResolution & ResolutionFactory::GetThresholdResolution( uint32_t maskId,
 
 MaskResolution & ResolutionFactory::GetThresholdResolution(uint32_t maskId)
 {
-  MaskResolution * r = NULL;
+  MaskResolution * r = nullptr;
   if ( !PlatServices::mfgMode() )
   {
     r = &iv_thresholdResolutions.get(

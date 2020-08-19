@@ -528,7 +528,7 @@ int32_t mssGetSteerMux<TYPE_OCMB_CHIP>( TargetHandle_t i_ocmb,
 
     // called by FSP code so can't just move to hostboot side
 #ifdef __HOSTBOOT_MODULE
-    errlHndl_t errl = NULL;
+    errlHndl_t errl = nullptr;
 
     uint8_t port0Spare, port1Spare, eccSpare;
 
@@ -537,7 +537,7 @@ int32_t mssGetSteerMux<TYPE_OCMB_CHIP>( TargetHandle_t i_ocmb,
 //    FAPI_INVOKE_HWP( errl, mss_check_steering, fapiPort,
 //            i_rank.getMaster(), port0Spare, port1Spare, eccSpare );
 
-    if ( NULL != errl )
+    if ( nullptr != errl )
     {
         PRDF_ERR( "[PlatServices::mssGetSteerMux] mss_check_steering() "
                   "failed. HUID: 0x%08x rank: %d",
@@ -568,7 +568,7 @@ int32_t mssSetSteerMux<TYPE_OCMB_CHIP>( TargetHandle_t i_memPort,
     /* TODO RTC 199032 - sparing support
 
 #ifdef __HOSTBOOT_MODULE
-    errlHndl_t errl = NULL;
+    errlHndl_t errl = nullptr;
     fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT> fapiPort(i_memPort);
 
     TargetHandle_t dimm = getConnectedDimm( i_memPort, i_rank,
@@ -582,7 +582,7 @@ int32_t mssSetSteerMux<TYPE_OCMB_CHIP>( TargetHandle_t i_memPort,
 //                     i_rank.getMaster(), l_dramSymbol,
 //                     i_x4EccSpare );
 
-    if ( NULL != errl )
+    if ( nullptr != errl )
     {
         PRDF_ERR( "[PlatServices::mssSetSteerMux] mss_do_steering "
                   "failed. HUID: 0x%08x rank: %d symbol: %d eccSpare: %c",
@@ -622,7 +622,7 @@ int32_t getDimmSpareConfig<TYPE_MEM_PORT>( TargetHandle_t i_memPort,
         ReturnCode l_rc = FAPI_ATTR_GET( fapi2::ATTR_MEM_EFF_DIMM_SPARE,
                                          fapiPort, attr );
         errlHndl_t errl = fapi2::rcToErrl(l_rc);
-        if ( NULL != errl )
+        if ( nullptr != errl )
         {
             PRDF_ERR( PRDF_FUNC "Failed to get ATTR_MEM_EFF_DIMM_SPARE for "
                       "Target: 0x%08X", getHuid( i_memPort ) );

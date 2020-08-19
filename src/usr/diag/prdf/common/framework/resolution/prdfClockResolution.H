@@ -65,7 +65,7 @@ public:
    * @param[in] i_targetType  type of target connected to clock source
    * @return    Non-SUCCESS if an internal function fails, SUCCESS otherwise.
   */
-    ClockResolution( TARGETING::TargetHandle_t i_pTargetHandle = NULL,
+    ClockResolution( TARGETING::TargetHandle_t i_pTargetHandle = nullptr,
                          TARGETING::TYPE i_targetType = TARGETING::TYPE_PROC ) :
                          iv_ptargetClock( i_pTargetHandle ),
                          iv_targetType( i_targetType )

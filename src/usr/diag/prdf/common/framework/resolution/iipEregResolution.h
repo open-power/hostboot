@@ -123,7 +123,7 @@ EregResolution::EregResolution(ErrorRegisterType &er)
 
 inline
 EregResolution::EregResolution()
-  : errorRegister(NULL) {}
+  : errorRegister(nullptr) {}
 
 } // end namespace PRDF
 

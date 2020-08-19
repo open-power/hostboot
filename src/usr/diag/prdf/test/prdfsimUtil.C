@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -151,17 +151,17 @@ const uint64_t NUM_EPATH_ARRAY = sizeof(EPATH_ARRAY_MAP)/sizeof(EPATH_ARRAY_MAP[
      if (*needle == '\0')
          return (char *) haystack;
      needlelen = strlen(needle);
-     for (; (haystack = strchr(haystack, *needle)) != NULL; haystack++)
+     for (; (haystack = strchr(haystack, *needle)) != nullptr; haystack++)
          if (strncmp(haystack, needle, needlelen) == 0)
              return (char *) haystack;
-     return NULL;
+     return nullptr;
  }
 
 #endif // end ifdef __HOSTBOOT_MODULE
 
 TARGETING::Target* string2Target(const char * i_str)
 {
-    TARGETING::Target* l_retTarget = NULL;
+    TARGETING::Target* l_retTarget = nullptr;
     TARGETING::EntityPath epath(TARGETING::EntityPath::PATH_PHYSICAL);
     epath.addLast(TARGETING::TYPE_SYS,0);
 
@@ -169,9 +169,9 @@ TARGETING::Target* string2Target(const char * i_str)
 
     for( uint64_t x = 0; x < NUM_EPATH_ARRAY; ++x )
     {
-        const char * pch = NULL;
+        const char * pch = nullptr;
         pch = strstr(i_str, EPATH_ARRAY_MAP[x].str);
-        if(NULL != pch)
+        if(nullptr != pch)
         {
             PRDF_DTRAC("string2Target() pathE.type=0x%08x, pathE.instance=%d",
                   EPATH_ARRAY_MAP[x].pathE.type, EPATH_ARRAY_MAP[x].pathE.instance);
@@ -182,7 +182,7 @@ TARGETING::Target* string2Target(const char * i_str)
 
     l_retTarget = getTarget(epath);
 
-    if ( NULL != l_retTarget )
+    if ( nullptr != l_retTarget )
     {
         PRDF_TRAC("string2Target() l_retTarget=0x%08x, epath=see target traces",
                   getHuid(l_retTarget));

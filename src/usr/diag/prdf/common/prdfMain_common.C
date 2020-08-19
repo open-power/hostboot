@@ -72,8 +72,8 @@ extern void initPlatSpecific();
 // Global Variables
 //------------------------------------------------------------------------------
 
-System * systemPtr = NULL;
-ErrlSmartPtr g_prd_errlHndl; // inited to NULL in ctor.
+System * systemPtr = nullptr;
+ErrlSmartPtr g_prd_errlHndl; // inited to nullptr in ctor.
 bool g_initialized = false;
 
 //------------------------------------------------------------------------------
@@ -85,7 +85,7 @@ void unInitialize()
     PRDF_ENTER( "PRDF::unInitialize()" );
 
     delete systemPtr;
-    systemPtr = NULL;
+    systemPtr = nullptr;
     g_initialized = false;
 
     ScanFacility::Access().reset();
@@ -108,13 +108,13 @@ errlHndl_t noLock_initialize()
 
     PRDF_ENTER( PRDF_FUNC );
 
-    g_prd_errlHndl = NULL; // This forces any previous errls to be committed
+    g_prd_errlHndl = nullptr; // This forces any previous errls to be committed
 
     // Synchronize SCOM access to hardware
     // Start un-synchronized so hardware is accessed
     RegDataCache::getCachedRegisters().flush();
 
-    if(g_initialized == true && systemPtr != NULL)
+    if(g_initialized == true && systemPtr != nullptr)
     {
         // This means we are being re-initialized (and we were in a good state)
         // so Clean up in preparation for re-build
@@ -135,7 +135,7 @@ errlHndl_t noLock_initialize()
                                           ( new PRDF::PlatConfigurator() );
 
         errlHndl_t l_errBuild = configuratorPtr->build();//build object model
-        if( NULL != l_errBuild )
+        if( nullptr != l_errBuild )
         {
             //there is some problem in building RuleMetaData object
             g_prd_errlHndl = l_errBuild;
@@ -144,12 +144,12 @@ errlHndl_t noLock_initialize()
             // clean this up .The easiest way is to delete the system which in
             //in turn shall clean up the constituents.
             delete systemPtr;
-            systemPtr = NULL;
+            systemPtr = nullptr;
             g_initialized = false;
             PRDF_ERR(PRDF_FUNC "failed to buid object model");
         }
         //systemPtr is populated in configurator
-        else if( systemPtr != NULL )
+        else if( systemPtr != nullptr )
         {
             systemPtr->Initialize(); // Hardware initialization
             g_initialized = true;
@@ -186,7 +186,7 @@ errlHndl_t initialize()
 {
     PRDF_ENTER( "PRDF::initialize()" );
 
-    errlHndl_t err = NULL;
+    errlHndl_t err = nullptr;
 
     // will unlock when going out of scope
     PRDF_SYSTEM_SCOPELOCK;
@@ -207,23 +207,23 @@ errlHndl_t main( ATTENTION_VALUE_TYPE i_priAttnType,
     PRDF_ENTER( "PRDF::main() Global attnType=%04X", i_priAttnType );
 
     // These have to be outside of system scope lock
-    errlHndl_t retErrl = NULL;
+    errlHndl_t retErrl = nullptr;
 
     { // system scope lock starts ------------------------------------------
 
     // will unlock when going out of scope
     PRDF_SYSTEM_SCOPELOCK;
 
-    g_prd_errlHndl = NULL;
+    g_prd_errlHndl = nullptr;
 
     uint32_t rc =  SUCCESS;
     // clears all the chips saved to stack during last analysis
     ServiceDataCollector::clearChipStack();
 
-    if(( g_initialized == false)&&(NULL ==systemPtr))
+    if(( g_initialized == false)&&(nullptr ==systemPtr))
     {
         g_prd_errlHndl = noLock_initialize();
-        if(g_prd_errlHndl != NULL) rc = PRD_NOT_INITIALIZED;
+        if(g_prd_errlHndl != nullptr) rc = PRD_NOT_INITIALIZED;
     }
 
     ServiceDataCollector serviceData;
@@ -255,7 +255,7 @@ errlHndl_t main( ATTENTION_VALUE_TYPE i_priAttnType,
     serviceGenerator.createInitialErrl( i_priAttnType );
 
     // check for something wrong
-    if ( g_initialized == false || rc != SUCCESS || systemPtr == NULL )
+    if ( g_initialized == false || rc != SUCCESS || systemPtr == nullptr )
     {
         if(rc == SUCCESS)
         {
@@ -333,7 +333,7 @@ errlHndl_t main( ATTENTION_VALUE_TYPE i_priAttnType,
         //delete all the wrapper register objects since these were created
         //just for plugin code
         l_scanFac.ResetPluginRegister();
-        if(analyzeRc != SUCCESS && g_prd_errlHndl == NULL)
+        if(analyzeRc != SUCCESS && g_prd_errlHndl == nullptr)
         {
             (serviceData.GetErrorSignature())->setErrCode(
                                                     (uint16_t)analyzeRc );
@@ -349,9 +349,9 @@ errlHndl_t main( ATTENTION_VALUE_TYPE i_priAttnType,
         }
     }
 
-    if(g_prd_errlHndl != NULL)
+    if(g_prd_errlHndl != nullptr)
     {
-        PRDF_INF("PRDTRACE: PrdMain: g_prd_errlHndl != NULL");
+        PRDF_INF("PRDTRACE: PrdMain: g_prd_errlHndl != nullptr");
         PRDF_ADD_PROCEDURE_CALLOUT( g_prd_errlHndl, MRU_MED, SP_CODE );
         // This is a precautionary step. There is a possibilty that if
         // severity for g_prd_errlHndl is Predictve and there is only
@@ -360,7 +360,7 @@ errlHndl_t main( ATTENTION_VALUE_TYPE i_priAttnType,
         PRDF_ADD_PROCEDURE_CALLOUT( g_prd_errlHndl, MRU_LOW, LEVEL2_SUPPORT );
 
         // This forces any previous errls to be committed
-        g_prd_errlHndl = NULL;
+        g_prd_errlHndl = nullptr;
 
         // pw 597903 -- Don't GARD if we got a global error.
         serviceData.clearMruListGard();
@@ -370,7 +370,7 @@ errlHndl_t main( ATTENTION_VALUE_TYPE i_priAttnType,
                                                       serviceData );
 
     // Sleep for 20msec to let attention lines settle if we are at threshold.
-    if ( (g_prd_errlHndl == NULL) && serviceData.IsAtThreshold() )
+    if ( (g_prd_errlHndl == nullptr) && serviceData.IsAtThreshold() )
     {
         PlatServices::milliSleep( 0, 20 );
     }
@@ -390,9 +390,9 @@ errlHndl_t noLock_refresh()
 {
     PRDF_ENTER("PRDF::noLock_refresh()");
 
-    errlHndl_t l_errl = NULL;
+    errlHndl_t l_errl = nullptr;
 
-    if((false == g_initialized) || (NULL == systemPtr))
+    if((false == g_initialized) || (nullptr == systemPtr))
     {
         l_errl = noLock_initialize();
     }
@@ -412,7 +412,7 @@ errlHndl_t refresh()
 {
     PRDF_ENTER("PRDF::refresh()");
 
-    errlHndl_t l_errl = NULL;
+    errlHndl_t l_errl = nullptr;
 
     // will unlock when going out of scope
     PRDF_SYSTEM_SCOPELOCK;

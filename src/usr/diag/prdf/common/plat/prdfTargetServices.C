@@ -167,7 +167,7 @@ void hwpErrorIsolation( ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc )
 //        changes.
 TARGETING::TargetHandle_t getTarget( HUID i_huid )
 {
-    TargetHandle_t o_target = NULL;
+    TargetHandle_t o_target = nullptr;
 
     // FIXME: RTC 62867
     //        This is an incredibly inefficient linear search. It is recommended
@@ -186,7 +186,7 @@ TARGETING::TargetHandle_t getTarget( HUID i_huid )
         }
     }
 
-    if ( NULL == o_target )
+    if ( nullptr == o_target )
     {
         PRDF_ERR( "[getTarget] i_huid: 0x%08x failed", i_huid );
     }
@@ -199,7 +199,7 @@ TARGETING::TargetHandle_t getTarget( HUID i_huid )
 TARGETING::TargetHandle_t getTarget( const TARGETING::EntityPath & i_path )
 {
     TargetHandle_t o_target = targetService().toTarget( i_path );
-    if ( NULL == o_target )
+    if ( nullptr == o_target )
     {
         PRDF_ERR( "[getTarget] Failed: i_path = " ); i_path.dump();
     }
@@ -217,7 +217,7 @@ int32_t getEntityPath( TARGETING::TargetHandle_t i_target,
 
     do
     {
-        if ( NULL == i_target ) break;
+        if ( nullptr == i_target ) break;
 
         if ( EntityPath::PATH_NA != i_pathType )
             o_path.setType( i_pathType );
@@ -264,7 +264,7 @@ HUID getHuid( TARGETING::TargetHandle_t i_target )
 
     do
     {
-        if ( NULL == i_target ) break; // return INVALID_HUID
+        if ( nullptr == i_target ) break; // return INVALID_HUID
 
         if ( !i_target->tryGetAttr<ATTR_HUID>(o_huid) )
         {
@@ -285,9 +285,9 @@ bool isFunctional( TARGETING::TargetHandle_t i_target )
 
     do
     {
-        if ( NULL == i_target )
+        if ( nullptr == i_target )
         {
-            PRDF_ERR( "[isFunctional] i_target is NULL" );
+            PRDF_ERR( "[isFunctional] i_target is nullptr" );
             break;
         }
 
@@ -310,7 +310,7 @@ TARGETING::TYPE getTargetType( TARGETING::TargetHandle_t i_target )
 {
     TYPE o_type = TYPE_LAST_IN_RANGE;
 
-    if ( NULL != i_target )
+    if ( nullptr != i_target )
     {
         if ( !i_target->tryGetAttr<ATTR_TYPE>(o_type) )
         {
@@ -334,7 +334,7 @@ TARGETING::CLASS getTargetClass( TARGETING::TargetHandle_t i_target )
 {
     CLASS o_class = CLASS_NA;
 
-    if ( NULL != i_target )
+    if ( nullptr != i_target )
     {
         if ( !i_target->tryGetAttr<ATTR_CLASS>(o_class) )
         {
@@ -356,10 +356,10 @@ TARGETING::CLASS getTargetClass( TARGETING::TargetHandle_t i_target )
 
 TARGETING::MODEL getChipModel( TARGETING::TargetHandle_t i_trgt )
 {
-    PRDF_ASSERT( NULL != i_trgt );
+    PRDF_ASSERT( nullptr != i_trgt );
 
     TargetHandle_t parent = getParentChip( i_trgt );
-    PRDF_ASSERT( NULL != parent );
+    PRDF_ASSERT( nullptr != parent );
 
     return parent->getAttr<ATTR_MODEL>();
 }
@@ -369,10 +369,10 @@ TARGETING::MODEL getChipModel( TARGETING::TargetHandle_t i_trgt )
 #ifdef __HOSTBOOT_MODULE
 uint32_t getChipId( TARGETING::TargetHandle_t i_trgt )
 {
-    PRDF_ASSERT( NULL != i_trgt );
+    PRDF_ASSERT( nullptr != i_trgt );
 
     TargetHandle_t parent = getParentChip( i_trgt );
-    PRDF_ASSERT( NULL != parent );
+    PRDF_ASSERT( nullptr != parent );
 
     return parent->getAttr<ATTR_CHIP_ID>();
 }
@@ -382,10 +382,10 @@ uint32_t getChipId( TARGETING::TargetHandle_t i_trgt )
 
 uint8_t getChipLevel( TARGETING::TargetHandle_t i_trgt )
 {
-    PRDF_ASSERT( NULL != i_trgt );
+    PRDF_ASSERT( nullptr != i_trgt );
 
     TargetHandle_t parent = getParentChip( i_trgt );
-    PRDF_ASSERT( NULL != parent );
+    PRDF_ASSERT( nullptr != parent );
 
     return parent->getAttr<ATTR_EC>();
 }
@@ -806,7 +806,7 @@ TARGETING::TargetHandle_t getSystemTarget()
 
 TARGETING::TargetHandle_t getParentChip( TARGETING::TargetHandle_t i_target )
 {
-    TargetHandle_t o_chipTarget = NULL;
+    TargetHandle_t o_chipTarget = nullptr;
 
     CLASS l_class = getTargetClass( i_target );
     switch ( l_class )
@@ -838,7 +838,7 @@ TARGETING::TargetHandle_t getParentChip( TARGETING::TargetHandle_t i_target )
             PRDF_ERR( "[getParentChip] Unsupported class: %d", l_class );
     }
 
-    if ( NULL == o_chipTarget )
+    if ( nullptr == o_chipTarget )
     {
         PRDF_ERR( "[getParentChip] Failed: i_target=0x%08x",
                   getHuid(i_target) );
@@ -901,7 +901,7 @@ bool checkLastFuncCore( TARGETING::TargetHandle_t i_trgt )
 
 TargetHandle_t getMasterProc()
 {
-    TargetHandle_t masterProc = NULL;
+    TargetHandle_t masterProc = nullptr;
     targetService().masterProcChipTargetHandle( masterProc );
     return masterProc;
 }

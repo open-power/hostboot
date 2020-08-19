@@ -88,7 +88,7 @@ bool hasRedundantClocks();
  * @brief   Returns the target for a given HUID.
  * @param   i_huid The HUID of a target.
  * @return  The target for the given HUID.
- * @post    Must check that the returned target is not NULL.
+ * @post    Must check that the returned target is not nullptr.
  */
 TARGETING::TargetHandle_t getTarget( HUID i_huid );
 
@@ -96,7 +96,7 @@ TARGETING::TargetHandle_t getTarget( HUID i_huid );
  * @brief   Returns the target for a given entity path.
  * @param   i_path The entity path of a target.
  * @return  The target for the given entity path.
- * @post    Must check that the returned target is not NULL.
+ * @post    Must check that the returned target is not nullptr.
  */
 TARGETING::TargetHandle_t getTarget( const TARGETING::EntityPath & i_path );
 
@@ -226,7 +226,7 @@ TARGETING::TargetHandle_t getConnectedParent(TARGETING::TargetHandle_t i_target,
  * @param   i_target    The given parent target.
  * @param   i_connType  Type of target(s) return in list
  * @param   i_position  Target position index
- * @return  The requested child target, NULL if target not found.
+ * @return  The requested child target, nullptr if target not found.
  */
 TARGETING::TargetHandle_t getConnectedChild( TARGETING::TargetHandle_t i_parent,
                                              TARGETING::TYPE i_childType,
@@ -324,7 +324,7 @@ TARGETING::TargetHandle_t getSystemTarget();
  * @brief   Get container chip target for the given target.
  * @param   i_target Any chip or unit target.
  * @return  The container chip target.
- * @post    Must check that the returned target is not NULL.
+ * @post    Must check that the returned target is not nullptr.
  */
 TARGETING::TargetHandle_t getParentChip( TARGETING::TargetHandle_t i_target );
 
@@ -342,7 +342,7 @@ TARGETING::TargetHandleList getFunctionalTargetList( TARGETING::TYPE i_type );
  */
 bool checkLastFuncCore( TARGETING::TargetHandle_t i_trgt );
 
-/** @return The master PROC target. NULL on failure. */
+/** @return The master PROC target. nullptr on failure. */
 TARGETING::TargetHandle_t getMasterProc();
 
 //##############################################################################

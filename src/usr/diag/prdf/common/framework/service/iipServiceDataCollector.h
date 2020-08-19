@@ -105,7 +105,7 @@ struct SdcCallout {
 
   //bool gard;
   SdcCallout() :
-    callout(NULL), priority(MRU_LOW), gardState( NO_GARD )
+    callout(nullptr), priority(MRU_LOW), gardState( NO_GARD )
   {}
 
   SdcCallout(PRDcallout & mru, PRDpriority p, GARD_POLICY i_gardState )
@@ -130,7 +130,7 @@ struct SignatureList
     TARGETING::TargetHandle_t target;
     uint32_t                  signature;
 
-    SignatureList() : target(NULL), signature(0) {}
+    SignatureList() : target(nullptr), signature(0) {}
 
     SignatureList( TARGETING::TargetHandle_t i_target, uint32_t i_signature ) :
         target(i_target), signature(i_signature)
@@ -352,7 +352,7 @@ public:
   /**
    Add a change to the prd signature List
    */
-  void AddSignatureList(TARGETING::TargetHandle_t i_ptargetHandle =NULL,
+  void AddSignatureList(TARGETING::TargetHandle_t i_ptargetHandle =nullptr,
                           uint32_t  i_signature = 0x00000000);
 
     /**
@@ -869,7 +869,7 @@ public:
    </ul><br>
    */
   void SetDump( hwTableContent iDumpRequestContent,
-                TARGETING::TargetHandle_t iDumpRequestChipHandle = NULL )
+                TARGETING::TargetHandle_t iDumpRequestChipHandle = nullptr )
   {
     setFlag(DUMP);
     ivDumpRequestContent = iDumpRequestContent;

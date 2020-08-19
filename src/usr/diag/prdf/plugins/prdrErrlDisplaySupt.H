@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2005,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2005,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -59,7 +59,7 @@
         { \
             __PRDR_PLUGIN_HUID l_homtype = homtype; \
             __table_struct * l_tablePtr = cv_table; \
-            while (NULL != l_tablePtr->name) \
+            while (nullptr != l_tablePtr->name) \
             { \
                 GetErrorSigTable()[l_homtype][l_tablePtr->signature] = \
                   std::pair<const char*, const char*> \
@@ -77,7 +77,7 @@
                 { signature , name , brief } ,
 
     #define PRDR_ERROR_SIGNATURE_TABLE_END \
-                { 0, NULL, NULL } \
+                { 0, nullptr, nullptr } \
             }; \
             } \
             } // end namespace PRDF

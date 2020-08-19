@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -51,7 +51,7 @@ BitString & RegDataCache::read( ExtensibleChip * i_chip,
     ScomRegisterAccess l_scomAccessKey ( *i_reg, i_chip );
     BitString * l_pBitString = queryCache( l_scomAccessKey );
 
-    if ( NULL == l_pBitString )
+    if ( nullptr == l_pBitString )
     {
         // Creating new entry
         l_pBitString = new BitStringBuffer( i_reg->GetBitLength() );
@@ -109,7 +109,7 @@ BitString * RegDataCache::queryCache(
 BitString * RegDataCache::queryCache(
                         const ScomRegisterAccess & i_scomAccessKey ) const
 {
-    BitString * l_pBitString = NULL;
+    BitString * l_pBitString = nullptr;
     CacheDump::const_iterator itDump = iv_cachedRead.find( i_scomAccessKey );
     if( iv_cachedRead.end() != itDump )
     {

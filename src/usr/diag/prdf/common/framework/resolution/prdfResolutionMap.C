@@ -259,7 +259,7 @@ int32_t ResolutionMap::LookUp( ResolutionList & o_list,
     uint32_t lsize = o_list.size();
     int32_t l_rc = SUCCESS;
 
-    if(iv_filter != NULL)
+    if(iv_filter != nullptr)
     {
         iv_filter->Apply( io_bitList,scd );
     }
@@ -315,11 +315,11 @@ int32_t ResolutionMap::LookUp( ResolutionList & o_list,
     {
         o_default = true;
         ResolutionFactory & resFac = ResolutionFactory::Access();
-        Resolution & defRes = resFac.getCalloutGardResol( NULL, MRU_MED, GARD );
+        Resolution & defRes = resFac.getCalloutGardResol( nullptr, MRU_MED, GARD );
         o_list.push_back( &defRes );
     }
 
-    if( iv_filter != NULL )
+    if( iv_filter != nullptr )
     {
         iv_filter->Undo(io_bitList); // so returned bit list will have proper
                                      // value for reset

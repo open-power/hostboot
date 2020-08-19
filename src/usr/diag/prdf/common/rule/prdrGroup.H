@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -53,14 +53,14 @@ class Group
         std::string cv_doxcomment;
 
         Group() :
-            cv_priorityList(NULL),
-            cv_csRootCauseList(NULL),
+            cv_priorityList(nullptr),
+            cv_csRootCauseList(nullptr),
             cv_op(Prdr::GROUP),
             cv_flags(0),
             cv_doxcomment() {};
         Group(char o) :
-            cv_priorityList(NULL),
-            cv_csRootCauseList(NULL),
+            cv_priorityList(nullptr),
+            cv_csRootCauseList(nullptr),
             cv_op(o),
             cv_flags(0),
             cv_doxcomment() {};
@@ -76,11 +76,11 @@ class Group
             i_l->cv_flags |= i_r->cv_flags;
 
             // Set Priority list.
-            if (NULL != i_l->cv_priorityList)
+            if (nullptr != i_l->cv_priorityList)
                 i_r->cv_priorityList = i_l->cv_priorityList;
 
             // Set CS root cause bit list
-            if ( NULL != i_l->cv_csRootCauseList )
+            if ( nullptr != i_l->cv_csRootCauseList )
             {
                 i_r->cv_csRootCauseList = i_l->cv_csRootCauseList;
             }
@@ -92,7 +92,7 @@ class Group
                 if (Prdr::GROUP == cv_op)
                 {
                     Expr * l_front = *(cv_rules.begin());
-                    if (NULL == l_front)
+                    if (nullptr == l_front)
                     {
                         // ICE.
                     }
@@ -197,7 +197,7 @@ class Group
                     }
                     if ( Prdr::PRDR_GROUP_FILTER_CS_ROOT_CAUSE & cv_flags)
                     {
-                        if ( NULL != cv_csRootCauseList )
+                        if ( nullptr != cv_csRootCauseList )
                         {
                             cv_csRootCauseList->output( i_file );
                         }
@@ -255,7 +255,7 @@ class Group_Filter_Priority : public Group_Filter
 class Group_Filter_CS_Root_Cause : public Group_Filter
 {
     public:
-    Group_Filter_CS_Root_Cause() : iv_csCauseList(NULL) {};
+    Group_Filter_CS_Root_Cause() : iv_csCauseList(nullptr) {};
 
     Group_Filter_CS_Root_Cause( Expr * i_list ) : iv_csCauseList( i_list ) {};
 

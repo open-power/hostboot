@@ -180,14 +180,14 @@ uint32_t getScom(TARGETING::TargetHandle_t i_target, BitString& io_bs,
 uint32_t putScom(TARGETING::TargetHandle_t i_target, BitString& io_bs,
                    uint64_t i_address)
 {
-    errlHndl_t errl = NULL;
+    errlHndl_t errl = nullptr;
     uint32_t rc = SUCCESS;
     size_t bsize = (io_bs.getBitLen()+7)/8;
     CPU_WORD* buffer = io_bs.getBufAddr();
 
     errl = deviceWrite(i_target, buffer, bsize, DEVICE_SCOM_ADDRESS(i_address));
 
-    if( NULL != errl )
+    if( nullptr != errl )
     {
         PRDF_ERR( "putScom() failed on i_target=0x%08x i_address=0x%016llx",
                   getHuid(i_target), i_address );
@@ -205,7 +205,7 @@ uint32_t putScom(TARGETING::TargetHandle_t i_target, BitString& io_bs,
         else
         {
             delete errl;
-            errl = NULL;
+            errl = nullptr;
         }
     }
 
@@ -227,8 +227,8 @@ uint32_t getSpdData(TARGETING::TargetHandle_t i_target,
     const fapi2::Target<fapi2::TARGET_TYPE_DIMM> l_fapi2_dimm(i_target);
 
     do {
-      // SPD interface call with NULL blob to get size data
-      FAPI_INVOKE_HWP(l_errl, fapi2::getSPD, l_fapi2_dimm, NULL, o_len);
+      // SPD interface call with nullptr blob to get size data
+      FAPI_INVOKE_HWP(l_errl, fapi2::getSPD, l_fapi2_dimm, nullptr, o_len);
 
       // Check for a valid size returned without an error
       if(nullptr != l_errl)
@@ -299,7 +299,7 @@ int32_t getCfam( ExtensibleChip * i_chip,
 
         if( TYPE_PROC == getTargetType(l_procTgt) )
         {
-            TargetHandle_t l_pMasterProcChip = NULL;
+            TargetHandle_t l_pMasterProcChip = nullptr;
             targetService().
                 masterProcChipTargetHandle( l_pMasterProcChip );
 
@@ -311,7 +311,7 @@ int32_t getCfam( ExtensibleChip * i_chip,
             }
         }
 
-        errlHndl_t errH = NULL;
+        errlHndl_t errH = nullptr;
         size_t l_size = sizeof(uint32_t);
         errH = deviceRead(l_procTgt, &o_data, l_size,
                           DEVICE_FSI_ADDRESS((uint64_t) byteAddr));
@@ -845,7 +845,7 @@ int32_t restartTraceArray(TargetHandle_t i_tgt)
                      taArgs,
                      taData);
 
-    if(NULL != err)
+    if(nullptr != err)
     {
         PRDF_ERR( "[PlatServices::RestartTraceArray] HUID: 0x%08x"
                   "RestartTraceArray failed", getHuid(i_tgt));

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -109,11 +109,11 @@ void Group::Add(SCAN_COMM_REGISTER_CLASS * i_reg,
                     uint16_t i_scrID,
                     bool i_reqTranspose)
 {
-    FilterClass * l_transposeFilter = NULL;
+    FilterClass * l_transposeFilter = nullptr;
     uint8_t l_bits[1] = { '\0' };
     ResolutionMap * l_res = cv_resMaps[i_reg];
 
-    if (NULL == l_res)
+    if (nullptr == l_res)
     {
         l_res = cv_resMaps[i_reg] = new ResolutionMap(1, cv_defaultRes);
         ResetAndMaskErrorRegister * l_errReg =
@@ -162,7 +162,7 @@ void Group::Add(SCAN_COMM_REGISTER_CLASS * i_reg,
         i_bitSize = 1;
 
         // Check for existing transposition filter, create link as needed.
-        if (NULL != l_res->getFilter())
+        if (nullptr != l_res->getFilter())
         {
             l_transposeFilter = new FilterLink(*l_res->getFilter(),
                                                *l_transposeFilter);  // pw01
@@ -184,7 +184,7 @@ void Group::Add(SCAN_COMM_REGISTER_CLASS * i_reg,
 {
     ResolutionMap * l_res = cv_resMaps[i_reg];
 
-    if (NULL == l_res)
+    if (nullptr == l_res)
     {
         l_res = cv_resMaps[i_reg] = new ResolutionMap(1, cv_defaultRes);
         ResetAndMaskErrorRegister * l_errReg =
@@ -237,7 +237,7 @@ void Group::AddFilter(FilterClass * i_filter, bool i_addFirst )
                 ((ResolutionMap *)(*i).second)->getFilter();
 
         // Need new filter link?
-        if (NULL != l_bitFilter)
+        if (nullptr != l_bitFilter)
         {
             if( i_addFirst )
             {

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -112,7 +112,7 @@ const BitString & ErrorRegisterMask::Read()
   // apply software mask
   bitString.maskString(bitStringMask);
   // apply hardware mask - if scan comm register for it was specified
-  if(&xMaskScr != NULL)  /*constant condition*/        // dg00
+  if(&xMaskScr != nullptr)  /*constant condition*/        // dg00
   {                                                    // dg00
     int32_t rc = xMaskScr.Read();                       // dg00
     if(rc == SUCCESS)                                  // dg00
@@ -134,7 +134,7 @@ int32_t ErrorRegisterMask::Reset(const BIT_LIST_CLASS & bit_list,
   {
     int32_t blLength = bit_list.size();
     int i = 0;
-    if(&xMaskScr == NULL) /* constant condition*/ // dg00
+    if(&xMaskScr == nullptr) /* constant condition*/ // dg00
     {                     // dg00
       for(i = 0; i < blLength; ++i)
       {

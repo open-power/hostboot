@@ -183,7 +183,7 @@ int32_t MemIplCeStats<T>::calloutHardCes( const MemRank & i_stopRank )
             // from rest of attention flow. We could have set the callout
             // values in sdc but it would have created confusion in ffdc if
             // we also get vcm/ue at same time.
-            errlHndl_t l_errl = NULL;
+            errlHndl_t l_errl = nullptr;
 
             PRDF_CREATE_ERRL( l_errl,
                               ERRL_SEV_PREDICTIVE,
@@ -244,7 +244,7 @@ bool MemIplCeStats<T>::calloutCePerDram()
                 MemoryMru memMru ( trgt, symIter->symbol.getRank(),
                                    symIter->symbol );
 
-                errlHndl_t l_errl = NULL;
+                errlHndl_t l_errl = nullptr;
 
                 PRDF_CREATE_ERRL( l_errl,
                               ERRL_SEV_PREDICTIVE,
@@ -310,7 +310,7 @@ bool MemIplCeStats<T>::calloutCePerRank()
                 MemoryMru memMru ( trgt, symIter->symbol.getRank(),
                                    symIter->symbol );
 
-                errlHndl_t l_errl = NULL;
+                errlHndl_t l_errl = nullptr;
 
                 PRDF_CREATE_ERRL( l_errl,
                               ERRL_SEV_PREDICTIVE,
@@ -377,7 +377,7 @@ bool MemIplCeStats<T>::calloutCePerDs()
                 MemoryMru memMru ( trgt, symIter->symbol.getRank() ,
                                    symIter->symbol );
 
-                errlHndl_t l_errl = NULL;
+                errlHndl_t l_errl = nullptr;
                 PRDF_CREATE_ERRL( l_errl,
                               ERRL_SEV_PREDICTIVE,
                               ERRL_ETYPE_NOT_APPLICABLE,

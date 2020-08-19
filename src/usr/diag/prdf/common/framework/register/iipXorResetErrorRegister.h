@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -65,7 +65,7 @@ class XorResetErrorRegister : public ErrorRegisterMask
 public:
   XorResetErrorRegister(SCAN_COMM_REGISTER_CLASS & r,
                         ResolutionMap & rm,
-                        FILTER_CLASS * f = NULL);
+                        FILTER_CLASS * f = nullptr);
 
   // Function Specification ********************************************
   //

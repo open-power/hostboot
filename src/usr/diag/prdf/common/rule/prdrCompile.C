@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -79,7 +79,7 @@ int main(int argc, char ** argv)
     }
 
     FILE * l_prfFile = fopen(argv[1], "w+");
-    if (NULL == l_prfFile)
+    if (nullptr == l_prfFile)
     {
         std::cerr << "Error opening file for output." << std::endl;
         exit(-1);
@@ -123,7 +123,7 @@ int main(int argc, char ** argv)
     l_regFile << "PRDR_REGISTER_ID_TABLE_START ";
 
     yyline = 1;  // current line is 1.
-    g_currentChip = NULL; // initialize current chip.
+    g_currentChip = nullptr; // initialize current chip.
 
     uint16_t l_size;
 
@@ -134,7 +134,7 @@ int main(int argc, char ** argv)
     prdrCheckReferences();
 
     // output chip.
-    if (NULL != g_currentChip)
+    if (nullptr != g_currentChip)
     {
         g_currentChip->output(l_prfFile);
         g_currentChip->outputRegisterFile(l_regFile);
@@ -266,7 +266,7 @@ std::map<std::string, char> g_refType;
 
 uint16_t prdrGetRefId(std::string * i_name)
 {
-    if (NULL == i_name)
+    if (nullptr == i_name)
     {
         yyerror("ICE - NPE.");
         return 0;
@@ -280,7 +280,7 @@ uint16_t prdrGetRefId(std::string * i_name)
 
 char prdrGetRefType(std::string * i_name)
 {
-    if (NULL == i_name)
+    if (nullptr == i_name)
     {
         yyerror("ICE - NPE.");
         return 0;
@@ -297,7 +297,7 @@ void prdrCheckReferences()
     {
         uint32_t l_refId = 1;
 
-        if (NULL == g_currentChip)
+        if (nullptr == g_currentChip)
             break;
 
         for (RegisterList::iterator i = g_currentChip->cv_reglist.begin();

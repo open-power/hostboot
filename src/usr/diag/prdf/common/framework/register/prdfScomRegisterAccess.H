@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -64,7 +66,7 @@ class ScomRegisterAccess : public ScomRegister
     /**
      * @brief     constructor
      */
-    ScomRegisterAccess():ScomRegister( ),iv_containerChip ( NULL ){ };
+    ScomRegisterAccess():ScomRegister( ),iv_containerChip ( nullptr ){ };
 
     /**
      * @brief Destructor

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -82,7 +82,7 @@ namespace PRDF
         {
             iv_reinitTarget = false;
             setHwasState(iv_attnList[0].targetHndl, false);
-            errlHndl_t l_pErr = NULL;
+            errlHndl_t l_pErr = nullptr;
             //l_pErr = PRDF::initialize();
             if (l_pErr)
             {
@@ -93,14 +93,14 @@ namespace PRDF
 
         iv_attnList.clear();
 
-        if(NULL != iv_ScrDB)
+        if(nullptr != iv_ScrDB)
         {
-            delete iv_ScrDB; iv_ScrDB = NULL;
+            delete iv_ScrDB; iv_ScrDB = nullptr;
         }
 
-        if(NULL != iv_SimSignatureParser)
+        if(nullptr != iv_SimSignatureParser)
         {
-            delete iv_SimSignatureParser; iv_SimSignatureParser = NULL;
+            delete iv_SimSignatureParser; iv_SimSignatureParser = nullptr;
         }
 
         PRDF_TRAC( "SimServices::~SimServices()" );
@@ -110,10 +110,10 @@ namespace PRDF
     {
         iv_attnList.clear();
 
-        if(NULL != iv_ScrDB) delete iv_ScrDB;
+        if(nullptr != iv_ScrDB) delete iv_ScrDB;
         iv_ScrDB = new ScrDB();
 
-        if(NULL != iv_SimSignatureParser) delete iv_SimSignatureParser;
+        if(nullptr != iv_SimSignatureParser) delete iv_SimSignatureParser;
         iv_SimSignatureParser = new SimSignatureParser();
 
         //initTargeting();
@@ -126,7 +126,7 @@ namespace PRDF
         PRDF_TRAC( "SimServices::startSim() Test: %s",
             (iv_testName ? iv_testName : "No Test Name specified"));
 
-        errlHndl_t l_pErr = NULL;
+        errlHndl_t l_pErr = nullptr;
         l_pErr = PRDF::main(iv_attnList[0].attnType, iv_attnList);
 
         if (l_pErr)
@@ -164,7 +164,7 @@ namespace PRDF
         {
             iv_reinitTarget = true;
             setHwasState(l_attnEntry.targetHndl, true);
-            errlHndl_t l_pErr = NULL;
+            errlHndl_t l_pErr = nullptr;
             //l_pErr = PRDF::initialize();
             if (l_pErr)
             {

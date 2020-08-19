@@ -71,7 +71,7 @@ errlHndl_t PlatConfigurator::build()
 {
     PRDF_ENTER( "PlatConfigurator::build()" );
 
-    errlHndl_t errl = NULL;
+    errlHndl_t errl = nullptr;
 
     // Create System object to populate with domains.
     systemPtr = new System(cv_noAttnResolution);
@@ -173,7 +173,7 @@ errlHndl_t PlatConfigurator::build()
     chips.clear();
     domains.clear();
 
-    if ( NULL != errl )
+    if ( nullptr != errl )
     {
         PRDF_ERR( "PlatConfigurator::build() failed to build object model" );
     }

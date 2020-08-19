@@ -108,7 +108,7 @@ ErrorCodeDescription g_defaultErrorCodes[] =
                  " Power Fault"},
     {0x0000DDFF, "Special return code indicating Not to reset or"
                  " mask FIR bits"},
-    {0,NULL} // this must exist and must be last
+    {0,nullptr} // this must exist and must be last
 };
 
 //------------------------------------------------------------------------------
@@ -296,12 +296,12 @@ void getSigDesc( HUID i_chipId, const uint32_t i_sig, const uint32_t i_len,
     getTargetInfo( i_chipId, l_targetType, &chipName[0], 42 );
 
     std::string l_descString = GetErrorSigTable()[l_targetType][i_sig];
-    const char * l_description = NULL;
+    const char * l_description = nullptr;
 
     if (std::string() == l_descString)
     {
         for( uint32_t l_idx = 1;
-             g_defaultErrorCodes[l_idx].description != NULL; ++l_idx)
+             g_defaultErrorCodes[l_idx].description != nullptr; ++l_idx)
         {
             if ( (i_sig & 0x0000ffff ) ==
                         g_defaultErrorCodes[l_idx].signature)
@@ -310,7 +310,7 @@ void getSigDesc( HUID i_chipId, const uint32_t i_sig, const uint32_t i_len,
                 break;
             }
         }
-        if (l_description == NULL)
+        if (l_description == nullptr)
         {
             l_description = g_defaultErrorCodes[0].description;
         }
@@ -602,7 +602,7 @@ bool parsePfaData( void * i_buffer, uint32_t i_buflen,
 
     i_parser.PrintBlank();
 
-    if ( NULL != i_buffer )
+    if ( nullptr != i_buffer )
     {
         // Get the PFA data struct.
         PfaData pfa;
@@ -871,7 +871,7 @@ bool srcDataParse( ErrlUsrParser & i_parser, const SrciSrc & i_src )
     char l_tmpstr[72];
     const uint32_t l_chipId = l_hexData[l_wc-4];
     const uint32_t l_signature = l_hexData[l_wc-2];
-    //ErrorCodeDescription* l_chipTable = NULL;
+    //ErrorCodeDescription* l_chipTable = nullptr;
 
     bool codeFailure = false;
     const char * srcErrType = "PRD Error of some sort.";

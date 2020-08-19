@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -54,10 +54,10 @@ RuleChip::RuleChip( const char * i_fileName ,
                     ScanFacility & i_scanFactory,
                     ResolutionFactory & i_reslFactory,
                     errlHndl_t & o_errl )
-    : ExtensibleChip( i_pTargetHandle ),cv_dataBundle( NULL )
+    : ExtensibleChip( i_pTargetHandle ),cv_dataBundle( nullptr )
 {
-    iv_pRuleData = NULL;
-    if( NULL != systemPtr )
+    iv_pRuleData = nullptr;
+    if( nullptr != systemPtr )
     {
         TARGETING::TYPE  l_type  =
                         PlatServices::getTargetType( i_pTargetHandle );
@@ -77,9 +77,9 @@ void RuleChip::init( )
     PRDF_DEFINE_CHIP_SCOPE( this );
     // Call initialize plugin.
     ExtensibleChipFunction * l_init = getExtensibleFunction("Initialize", true);
-    if (NULL != l_init)
+    if (nullptr != l_init)
     {
-        (*l_init)( this,PluginDef::bindParm<void*>(NULL) );
+        (*l_init)( this,PluginDef::bindParm<void*>(nullptr) );
     }
 
 };
@@ -88,7 +88,7 @@ void RuleChip::init( )
 
 RuleChip::~RuleChip()
 {
-    if (NULL != cv_dataBundle)
+    if (nullptr != cv_dataBundle)
     {
         delete cv_dataBundle;
     }
@@ -124,7 +124,7 @@ ExtensibleChipFunction *
 {
     //this pointer is retained in stack just for the scope of this function
     PRDF_DEFINE_CHIP_SCOPE( this );
-    ExtensibleChipFunction * l_ptr = NULL ;
+    ExtensibleChipFunction * l_ptr = nullptr ;
     l_ptr = iv_pRuleData->getExtensibleFunction( i_func , i_expectNull );
     return l_ptr ;
 }

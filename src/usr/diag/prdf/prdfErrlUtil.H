@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -81,7 +81,7 @@
 #define PRDF_COMMIT_ERRL(io_errl, i_actions) { \
     errlHndl_t globalErrl = \
                 ServiceGeneratorClass::ThisServiceGenerator().getErrl(); \
-    if( NULL != globalErrl ) io_errl->plid( globalErrl->plid() ); \
+    if( nullptr != globalErrl ) io_errl->plid( globalErrl->plid() ); \
     uint64_t l_d1 = io_errl->getUserData1();                      \
     uint64_t l_d2 = io_errl->getUserData2();                      \
     TRACFCOMP( PRDF::traceDesc,"SRC 16:19  %16llx %16llx",        \
