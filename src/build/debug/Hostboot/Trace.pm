@@ -47,7 +47,6 @@ use constant BIN_ENTRY_SIZE_OFFSET => 12;
 use constant BIN_ENTRY_SIZE => 24;
 
 use File::Temp qw(tempfile tempdir);
-use File::Which;
 
 sub main
 {
@@ -56,8 +55,11 @@ sub main
     if (not defined $args->{"fsp-trace"})
     {
         $args->{"fsp-trace"} = "fsp-trace";
-        my $fspTracePath = which($args->{"fsp-trace"});
-        if (not defined $fspTracePath)
+
+        use Env'@PATH';
+        # Search PATH for fsp-trace
+        my $fspTracePath = grep -x "$_/fsp-trace",@PATH;
+        if (!$fspTracePath)
         {
             ::userDisplay("Error: fsp-trace not in PATH.\n");
             die;
