@@ -2229,7 +2229,7 @@ class readerTraits
     public:
 
         static constexpr size_t COMPARISON_VAL = 0x00;
-        static constexpr const char* FIELD_STR = "RCD slew rate control Byte0";
+        static constexpr const char* FIELD_STR = "RCD slew rate control Byte 0";
 
         template <typename T>
         using COMPARISON_OP = std::equal_to<T>;
@@ -2249,7 +2249,7 @@ class readerTraits
     public:
 
         static constexpr size_t COMPARISON_VAL = 0xFF;
-        static constexpr const char* FIELD_STR = "RCD slew rate control Byte0";
+        static constexpr const char* FIELD_STR = "RCD slew rate control Byte 0";
 
         template <typename T>
         using COMPARISON_OP = std::less_equal<T>;
@@ -2268,7 +2268,7 @@ class readerTraits
     public:
 
         static constexpr size_t COMPARISON_VAL = 0x00;
-        static constexpr const char* FIELD_STR = "RCD slew rate control Byte1";
+        static constexpr const char* FIELD_STR = "RCD slew rate control Byte 1";
 
         template <typename T>
         using COMPARISON_OP = std::equal_to<T>;
@@ -2282,13 +2282,234 @@ class readerTraits
 /// @note valid for rev >= 0.4
 ///
 template< mss::spd::rev R >
-class readerTraits
-    < fields< mss::spd::device_type::DDR4, mss::efd::id::DDR4_CUSTOM_MICROCHIP>::RCD_SLEW_RATE_CTRL_1, R >
+class readerTraits< fields< mss::spd::device_type::DDR4, mss::efd::id::DDR4_CUSTOM_MICROCHIP>::RCD_SLEW_RATE_CTRL_1, R >
 {
     public:
 
         static constexpr size_t COMPARISON_VAL = 0xFF;
-        static constexpr const char* FIELD_STR = "RCD slew rate control Byte1";
+        static constexpr const char* FIELD_STR = "RCD slew rate control Byte 1";
+
+        template <typename T>
+        using COMPARISON_OP = std::less_equal<T>;
+};
+
+///
+/// @class readerTraits
+/// @brief trait structure to hold static SPD information
+/// @note F1RC1X field specialization
+/// @note valid for rev = 0.3
+///
+template< >
+class readerTraits< fields< mss::spd::device_type::DDR4, mss::efd::id::DDR4_CUSTOM_MICROCHIP>::F1RC1X, mss::spd::rev::V0_3 >
+{
+    public:
+
+        static constexpr size_t COMPARISON_VAL = 0;
+        static constexpr const char* FIELD_STR = "QxCSn_n Output Delay Control Word (F1RC1X)";
+
+        template <typename T>
+        using COMPARISON_OP = std::equal_to<T>;
+};
+
+///
+/// @class readerTraits
+/// @brief trait structure to hold static SPD information
+/// @tparam R the revision of the SPD field
+/// @note F1RC1X field specialization
+/// @note valid for rev >= 0.4
+///
+template< mss::spd::rev R >
+class readerTraits< fields< mss::spd::device_type::DDR4, mss::efd::id::DDR4_CUSTOM_MICROCHIP>::F1RC1X, R >
+{
+    public:
+
+        static constexpr size_t COMPARISON_VAL = 0x9F;
+        static constexpr const char* FIELD_STR = "QxCSn_n Output Delay Control Word (F1RC1X)";
+
+        template <typename T>
+        using COMPARISON_OP = std::less_equal<T>;
+};
+
+///
+/// @class readerTraits
+/// @brief trait structure to hold static SPD information
+/// @note F1RC3X field specialization
+/// @note valid for rev = 0.3
+///
+template< >
+class readerTraits< fields< mss::spd::device_type::DDR4, mss::efd::id::DDR4_CUSTOM_MICROCHIP>::F1RC3X, mss::spd::rev::V0_3 >
+{
+    public:
+
+        static constexpr size_t COMPARISON_VAL = 0;
+        static constexpr const char* FIELD_STR = "QxCKEn Output Delay Control Word (F1RC3X)";
+
+        template <typename T>
+        using COMPARISON_OP = std::equal_to<T>;
+};
+
+///
+/// @class readerTraits
+/// @brief trait structure to hold static SPD information
+/// @tparam R the revision of the SPD field
+/// @note F1RC3X field specialization
+/// @note valid for rev >= 0.4
+///
+template< mss::spd::rev R >
+class readerTraits< fields< mss::spd::device_type::DDR4, mss::efd::id::DDR4_CUSTOM_MICROCHIP>::F1RC3X, R >
+{
+    public:
+
+        static constexpr size_t COMPARISON_VAL = 0x9F;
+        static constexpr const char* FIELD_STR = "QxCKEn Output Delay Control Word (F1RC3X)";
+
+        template <typename T>
+        using COMPARISON_OP = std::less_equal<T>;
+};
+
+///
+/// @class readerTraits
+/// @brief trait structure to hold static SPD information
+/// @note F1RC4X field specialization
+/// @note valid for rev = 0.3
+///
+template< >
+class readerTraits< fields< mss::spd::device_type::DDR4, mss::efd::id::DDR4_CUSTOM_MICROCHIP>::F1RC4X, mss::spd::rev::V0_3 >
+{
+    public:
+
+        static constexpr size_t COMPARISON_VAL = 0;
+        static constexpr const char* FIELD_STR = "QxODTn Output Delay Control Word (F1RC4X)";
+
+        template <typename T>
+        using COMPARISON_OP = std::equal_to<T>;
+};
+
+///
+/// @class readerTraits
+/// @brief trait structure to hold static SPD information
+/// @tparam R the revision of the SPD field
+/// @note F1RC4X field specialization
+/// @note valid for rev >= 0.4
+///
+template< mss::spd::rev R >
+class readerTraits< fields< mss::spd::device_type::DDR4, mss::efd::id::DDR4_CUSTOM_MICROCHIP>::F1RC4X, R >
+{
+    public:
+
+        static constexpr size_t COMPARISON_VAL = 0x9F;
+        static constexpr const char* FIELD_STR = "QxODTn Output Delay Control Word (F1RC4X)";
+
+        template <typename T>
+        using COMPARISON_OP = std::less_equal<T>;
+};
+
+///
+/// @class readerTraits
+/// @brief trait structure to hold static SPD information
+/// @note F1RC5X field specialization
+/// @note valid for rev = 0.3
+///
+template< >
+class readerTraits< fields< mss::spd::device_type::DDR4, mss::efd::id::DDR4_CUSTOM_MICROCHIP>::F1RC5X, mss::spd::rev::V0_3 >
+{
+    public:
+
+        static constexpr size_t COMPARISON_VAL = 0;
+        static constexpr const char* FIELD_STR = "QxCA Output Delay Control Word (F1RC5X)";
+
+        template <typename T>
+        using COMPARISON_OP = std::equal_to<T>;
+};
+
+///
+/// @class readerTraits
+/// @brief trait structure to hold static SPD information
+/// @tparam R the revision of the SPD field
+/// @note F1RC5X field specialization
+/// @note valid for rev >= 0.4
+///
+template< mss::spd::rev R >
+class readerTraits< fields< mss::spd::device_type::DDR4, mss::efd::id::DDR4_CUSTOM_MICROCHIP>::F1RC5X, R >
+{
+    public:
+
+        static constexpr size_t COMPARISON_VAL = 0x9F;
+        static constexpr const char* FIELD_STR = "QxCA Output Delay Control Word (F1RC5X)";
+
+        template <typename T>
+        using COMPARISON_OP = std::less_equal<T>;
+};
+
+///
+/// @class readerTraits
+/// @brief trait structure to hold static SPD information
+/// @note F1RC6X field specialization
+/// @note valid for rev = 0.3
+///
+template< >
+class readerTraits< fields< mss::spd::device_type::DDR4, mss::efd::id::DDR4_CUSTOM_MICROCHIP>::F1RC6X, mss::spd::rev::V0_3 >
+{
+    public:
+
+        static constexpr size_t COMPARISON_VAL = 0;
+        static constexpr const char* FIELD_STR = "Y1/Y3 Output Delay Control Word (F1RC6X)";
+
+        template <typename T>
+        using COMPARISON_OP = std::equal_to<T>;
+};
+
+///
+/// @class readerTraits
+/// @brief trait structure to hold static SPD information
+/// @tparam R the revision of the SPD field
+/// @note F1RC6X field specialization
+/// @note valid for rev >= 0.4
+///
+template< mss::spd::rev R >
+class readerTraits< fields< mss::spd::device_type::DDR4, mss::efd::id::DDR4_CUSTOM_MICROCHIP>::F1RC6X, R >
+{
+    public:
+
+        static constexpr size_t COMPARISON_VAL = 0xBF;
+        static constexpr const char* FIELD_STR = "Y1/Y3 Output Delay Control Word (F1RC6X)";
+
+        template <typename T>
+        using COMPARISON_OP = std::less_equal<T>;
+};
+
+///
+/// @class readerTraits
+/// @brief trait structure to hold static SPD information
+/// @note F1RC7X field specialization
+/// @note valid for rev = 0.3
+///
+template< >
+class readerTraits< fields< mss::spd::device_type::DDR4, mss::efd::id::DDR4_CUSTOM_MICROCHIP>::F1RC7X, mss::spd::rev::V0_3 >
+{
+    public:
+
+        static constexpr size_t COMPARISON_VAL = 0;
+        static constexpr const char* FIELD_STR = "Y0/Y2 Output Delay Control Word (F1RC7X)";
+
+        template <typename T>
+        using COMPARISON_OP = std::equal_to<T>;
+};
+
+///
+/// @class readerTraits
+/// @brief trait structure to hold static SPD information
+/// @tparam R the revision of the SPD field
+/// @note F1RC7X field specialization
+/// @note valid for rev >= 0.4
+///
+template< mss::spd::rev R >
+class readerTraits< fields< mss::spd::device_type::DDR4, mss::efd::id::DDR4_CUSTOM_MICROCHIP>::F1RC7X, R >
+{
+    public:
+
+        static constexpr size_t COMPARISON_VAL = 0xBF;
+        static constexpr const char* FIELD_STR = "Y0/Y2 Output Delay Control Word (F1RC7X)";
 
         template <typename T>
         using COMPARISON_OP = std::less_equal<T>;

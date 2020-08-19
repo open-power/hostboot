@@ -534,6 +534,36 @@ class fields<mss::spd::device_type::DDR4, mss::efd::id::DDR4_CUSTOM_MICROCHIP>
             RCD_SLEW_RATE_CTRL_1_BYTE = 103,
             RCD_SLEW_RATE_CTRL_1_START = 0,
             RCD_SLEW_RATE_CTRL_1_LEN = 8,
+
+            // Byte 104:  F1RC1X - QxCSn_n Output Delay Control Word
+            F1RC1X_BYTE = 104,
+            F1RC1X_START = 0,
+            F1RC1X_LEN = 8,
+
+            // Byte 106:  F1RC3X - QxCKEn Output Delay Control Word
+            F1RC3X_BYTE = 106,
+            F1RC3X_START = 0,
+            F1RC3X_LEN = 8,
+
+            // Byte 107:  F1RC4X - QxODTn Output Delay Control Word
+            F1RC4X_BYTE = 107,
+            F1RC4X_START = 0,
+            F1RC4X_LEN = 8,
+
+            // Byte 108:  F1RC5X - QxCA Output Delay Control Word
+            F1RC5X_BYTE = 108,
+            F1RC5X_START = 0,
+            F1RC5X_LEN = 8,
+
+            // Byte 109:  F1RC6X – Y1/Y3 Output Delay Control Word
+            F1RC6X_BYTE = 109,
+            F1RC6X_START = 0,
+            F1RC6X_LEN = 8,
+
+            // Byte 110: F1RC7X – Y0/Y2 Output Delay Control Word
+            F1RC7X_BYTE = 110,
+            F1RC7X_START = 0,
+            F1RC7X_LEN = 8,
         };
 
     public:
@@ -812,6 +842,24 @@ class fields<mss::spd::device_type::DDR4, mss::efd::id::DDR4_CUSTOM_MICROCHIP>
 
         // Byte 103: RCD slew rate control Byte1
         static constexpr field_t RCD_SLEW_RATE_CTRL_1{RCD_SLEW_RATE_CTRL_1_BYTE, RCD_SLEW_RATE_CTRL_1_START, RCD_SLEW_RATE_CTRL_1_LEN};
+
+        // Byte 104:  F1RC1X - QxCSn_n Output Delay Control Word
+        static constexpr field_t F1RC1X{F1RC1X_BYTE, F1RC1X_START, F1RC1X_LEN};
+
+        // Byte 106:  F1RC3X - QxCKEn Output Delay Control Word
+        static constexpr field_t F1RC3X{F1RC3X_BYTE, F1RC3X_START, F1RC3X_LEN};
+
+        // Byte 107:  F1RC4X - QxODTn Output Delay Control Word
+        static constexpr field_t F1RC4X{F1RC4X_BYTE, F1RC4X_START, F1RC4X_LEN};
+
+        // Byte 108:  F1RC5X - QxCA Output Delay Control Word
+        static constexpr field_t F1RC5X{F1RC5X_BYTE, F1RC5X_START, F1RC5X_LEN};
+
+        // Byte 109:  F1RC6X – Y1/Y3 Output Delay Control Word
+        static constexpr field_t F1RC6X{F1RC6X_BYTE, F1RC6X_START, F1RC6X_LEN};
+
+        // Byte 110: F1RC7X – Y0/Y2 Output Delay Control Word
+        static constexpr field_t F1RC7X{F1RC7X_BYTE, F1RC7X_START, F1RC7X_LEN};
 };
 
 } // ns efd

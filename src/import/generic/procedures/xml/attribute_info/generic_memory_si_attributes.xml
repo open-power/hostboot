@@ -524,4 +524,88 @@
         <mssAccessorName>si_windage_rd_ctr</mssAccessorName>
     </attribute>
 
+<attribute>
+    <id>ATTR_MEM_DIMM_DDR4_F1RC1X</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      Array[DIMM].
+      F1RC1X - QxCSn_n Output Delay Control Word from the DDR4 RCD Spec.
+    </description>
+    <initToZero></initToZero>
+    <valueType>uint8</valueType>
+    <array>2</array>
+    <writeable/>
+    <mssAccessorName>ddr4_f1rc1x</mssAccessorName>
+  </attribute>
+
+    <attribute>
+    <id>ATTR_MEM_DIMM_DDR4_F1RC3X</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      Array[DIMM].
+      F1RC3X - QxCKEn Output Delay Control Word from the DDR4 RCD Spec.
+    </description>
+    <initToZero></initToZero>
+    <valueType>uint8</valueType>
+    <array>2</array>
+    <writeable/>
+    <mssAccessorName>ddr4_f1rc3x</mssAccessorName>
+  </attribute>
+
+    <attribute>
+    <id>ATTR_MEM_DIMM_DDR4_F1RC4X</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      Array[DIMM].
+      F1RC4X - QxODTn Output Delay Control Word from the DDR4 RCD Spec.
+    </description>
+    <initToZero></initToZero>
+    <valueType>uint8</valueType>
+    <array>2</array>
+    <writeable/>
+    <mssAccessorName>ddr4_f1rc4x</mssAccessorName>
+  </attribute>
+
+    <attribute>
+    <id>ATTR_MEM_DIMM_DDR4_F1RC5X</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      Array[DIMM].
+      F1RC5X - QxCA Output Delay Control Word from the DDR4 RCD Spec.
+    </description>
+    <initToZero></initToZero>
+    <valueType>uint8</valueType>
+    <array>2</array>
+    <writeable/>
+    <mssAccessorName>ddr4_f1rc5x</mssAccessorName>
+  </attribute>
+
+    <attribute>
+    <id>ATTR_MEM_DIMM_DDR4_F1RC6X</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      Array[DIMM].
+      F1RC6X - Y1/Y3 Output Delay Control Word from the DDR4 RCD Spec.
+    </description>
+    <initToZero></initToZero>
+    <valueType>uint8</valueType>
+    <array>2</array>~
+    <writeable/>
+    <mssAccessorName>ddr4_f1rc6x</mssAccessorName>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_MEM_DIMM_DDR4_F1RC7X</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      Array[DIMM].
+      F1RC7X - Y0/Y2 Output Delay Control Word from the DDR4 RCD Spec.
+    </description>
+    <initToZero></initToZero>
+    <valueType>uint8</valueType>
+    <array>2</array>
+    <writeable/>
+    <mssAccessorName>ddr4_f1rc7x</mssAccessorName>
+  </attribute>
+
 </attributes>
