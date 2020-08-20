@@ -2111,68 +2111,132 @@ bool NvdimmsUpdate::runUpdateUsingLid(NvdimmLidImage * i_lidImage,
             ERRORLOG::errlCommit(l_err, NVDIMM_COMP_ID);
             l_err = nullptr;
 
-            l_err = pInstalledImage->updateImage(i_lidImage);
-            if (l_err)
+            // hold original error in case retry works
+            errlHndl_t l_original_error = nullptr;
+            do
             {
-                // If update fails, the NV controller will run on its factory
-                // installed version in slot 0.
-                // We will call out the failed NVDIMM for replacement, but try
-                // to keep running with as much function as possible.
-                TRACFCOMP(g_trac_nvdimm_upd,
-                    ERR_MRK"NvdimmsUpdate::runUpdateUsingLid() - "
-                    "NVDIMM 0x%.8X NV controller update failed. "
-                    "RC=0x%X, PLID=0x%.8X", l_nvdimm_huid,
-                    ERRL_GETRC_SAFE(l_err), ERRL_GETPLID_SAFE(l_err));
-                commitPredictiveNvdimmError(l_err);
-                l_err = nullptr;
-                o_no_error_found = false;
-                continue;
-            }
-            else
-            {
-                // successfully updated this NVDIMM
-
-                // Note: call for version should just return a saved value
-                uint16_t curVersion = INVALID_VERSION;
-                l_err = pInstalledImage->getVersion(curVersion);
+                // put controller into a known state
+                // (helps recover from previous update failures)
+                l_err = nvdimmResetController(l_nvdimm);
                 if (l_err)
                 {
-                    TRACFCOMP(g_trac_nvdimm_upd,
-                        ERR_MRK"NvdimmsUpdate::runUpdateUsingLid() - "
-                        "Failed to find current NVDIMM level of %.8X after "
-                        "successful update. RC=0x%X, PLID=0x%.8X",
-                        l_nvdimm_huid,
+                    TRACFCOMP(g_trac_nvdimm_upd, ERR_MRK
+                        "NvdimmsUpdate::runUpdateUsingLid() - :  "
+                        "Unable to reset controller for 0x%.8X nvdimm "
+                        "RC=0x%X, PLID=0x%.8X", l_nvdimm_huid,
                         ERRL_GETRC_SAFE(l_err), ERRL_GETPLID_SAFE(l_err));
                     commitPredictiveNvdimmError(l_err);
                     l_err = nullptr;
+                    break;
                 }
 
-                /*@
-                 *@errortype        INFORMATIONAL
-                 *@reasoncode       NVDIMM_UPDATE_COMPLETE
-                 *@moduleid         NVDIMM_RUN_UPDATE_USING_LID
-                 *@userdata1[0:31]  NVDIMM Target Huid
-                 *@userdata1[32:63] Total region write retries
-                 *@userdata2[0:15]  Previous level
-                 *@userdata2[16:31] Current updated level
-                 *@userdata2[32:63] Installed type (manufacturer and product)
-                 *@devdesc          Successful update of NVDIMM code
-                 *@custdesc         NVDIMM was successfully updated
-                 */
-                l_err = new ERRORLOG::ErrlEntry(
-                             ERRORLOG::ERRL_SEV_INFORMATIONAL,
-                             NVDIMM_RUN_UPDATE_USING_LID,
-                             NVDIMM_UPDATE_COMPLETE,
-                             TWO_UINT32_TO_UINT64(
-                               l_nvdimm_huid,
-                               pInstalledImage->getRegionWriteRetries()),
-                             TWO_UINT16_ONE_UINT32_TO_UINT64(
-                               l_oldVersion, curVersion,
-                               l_installed_type),
-                             ERRORLOG::ErrlEntry::ADD_SW_CALLOUT );
-                l_err->collectTrace(NVDIMM_UPD, 512);
-                ERRORLOG::errlCommit(l_err, NVDIMM_COMP_ID);
+                l_err = pInstalledImage->updateImage(i_lidImage);
+                if (l_err)
+                {
+                    // If update fails, the NV controller will run on its factory
+                    // installed version in slot 0.
+                    // We will call out the failed NVDIMM for replacement, but try
+                    // to keep running with as much function as possible.
+                    TRACFCOMP(g_trac_nvdimm_upd,
+                        ERR_MRK"NvdimmsUpdate::runUpdateUsingLid() - "
+                        "NVDIMM 0x%.8X NV controller update failed. "
+                        "RC=0x%X, PLID=0x%.8X", l_nvdimm_huid,
+                        ERRL_GETRC_SAFE(l_err), ERRL_GETPLID_SAFE(l_err));
+
+                    if (l_original_error == nullptr)
+                    {
+                        l_original_error = l_err;
+                        l_original_error->collectTrace(NVDIMM_UPD, 512);
+                        l_err = nullptr;
+                        continue;
+                    }
+                    else
+                    {
+                        // already retried, just break now
+                        break;
+                    }
+                }
+                else
+                {
+                    // successfully updated this NVDIMM
+
+                    // Note: call for version should just return a saved value
+                    uint16_t curVersion = INVALID_VERSION;
+                    l_err = pInstalledImage->getVersion(curVersion);
+                    if (l_err)
+                    {
+                        TRACFCOMP(g_trac_nvdimm_upd,
+                            ERR_MRK"NvdimmsUpdate::runUpdateUsingLid() - "
+                            "Failed to find current NVDIMM level of %.8X after "
+                            "successful update. RC=0x%X, PLID=0x%.8X",
+                            l_nvdimm_huid,
+                            ERRL_GETRC_SAFE(l_err), ERRL_GETPLID_SAFE(l_err));
+                        commitPredictiveNvdimmError(l_err);
+                        l_err = nullptr;
+                    }
+
+                    /*@
+                     *@errortype        INFORMATIONAL
+                     *@reasoncode       NVDIMM_UPDATE_COMPLETE
+                     *@moduleid         NVDIMM_RUN_UPDATE_USING_LID
+                     *@userdata1[0:31]  NVDIMM Target Huid
+                     *@userdata1[32:63] Total region write retries
+                     *@userdata2[0:15]  Previous level
+                     *@userdata2[16:31] Current updated level
+                     *@userdata2[32:63] Installed type (manufacturer and product)
+                     *@devdesc          Successful update of NVDIMM code
+                     *@custdesc         NVDIMM was successfully updated
+                     */
+                    l_err = new ERRORLOG::ErrlEntry(
+                                 ERRORLOG::ERRL_SEV_INFORMATIONAL,
+                                 NVDIMM_RUN_UPDATE_USING_LID,
+                                 NVDIMM_UPDATE_COMPLETE,
+                                 TWO_UINT32_TO_UINT64(
+                                   l_nvdimm_huid,
+                                   pInstalledImage->getRegionWriteRetries()),
+                                 TWO_UINT16_ONE_UINT32_TO_UINT64(
+                                   l_oldVersion, curVersion,
+                                   l_installed_type),
+                                 ERRORLOG::ErrlEntry::ADD_SW_CALLOUT );
+                    l_err->collectTrace(NVDIMM_UPD, 512);
+                    ERRORLOG::errlCommit(l_err, NVDIMM_COMP_ID);
+                    l_err = nullptr;
+                    break;
+                }
+            } while (l_err == nullptr);
+
+            if (l_err && l_original_error)
+            {
+                // link the new error to the original failure error
+                l_err->plid(l_original_error->plid());
+                // don't recollect trace data for original error
+                ERRORLOG::errlCommit(l_original_error, NVDIMM_COMP_ID);
+
+                // log this latest failure as predictive,
+                // since dimm wasn't updated
+                commitPredictiveNvdimmError(l_err);
+                l_err = nullptr;
+                l_original_error = nullptr;
+                o_no_error_found = false;
+
+                // go to next dimm in list as this one failed update
+                continue;
             }
+            else if (l_original_error)
+            {
+                // recovered from the first failure
+                l_original_error->setSev( ERRORLOG::ERRL_SEV_RECOVERED );
+                ERRORLOG::errlCommit(l_original_error, NVDIMM_COMP_ID);
+                l_original_error = nullptr;
+            }
+            else if (l_err)
+            {
+                // should not hit this case, but cleanup error if necessary
+                commitPredictiveNvdimmError(l_err);
+                l_err = nullptr;
+            }
+            //else - no errors
+
         } // end of updateNeeded
 
         /////////////////////////////////////////////////////////////////
