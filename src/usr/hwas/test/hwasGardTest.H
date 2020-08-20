@@ -487,7 +487,6 @@ public:
     */
     void testHostbootSbeDeconfig()
     {
-
         // Target attributes will be edited, save state to restore at the end
         // of testcase
         TS_INFO("testHostbootSbeDeconfig Started");
@@ -503,16 +502,26 @@ public:
         // Create fake gard records
         testHbSbeDeconfig.createFakeGardRecords();
 
+        do
+        {
+
         errlHndl_t l_pErrHandler = testHbSbeDeconfig.discoverTargets();
 
         if (nullptr != l_pErrHandler) //discoverTargets worked
         {
             TS_FAIL("testHostbootSbeDeconfig: Error while calling"
                 " discoverTargets()");
+            errlCommit(l_pErrHandler, CXXTEST_COMP_ID);
+            break;
         }
+
+        // Create fake gard records
+        testHbSbeDeconfig.createFakeGardRecords();
 
         // Verify
         testHbSbeDeconfig.verifyDeconfiguration();
+
+        } while (0);
 
         // Restore SBE reg data
         testHbSbeDeconfig.restoreSbeRegs();

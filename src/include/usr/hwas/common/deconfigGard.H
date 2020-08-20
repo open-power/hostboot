@@ -730,15 +730,12 @@ private:
      *                  to true if target was deconfigured; NOT SET OTHERWISE
      * @param[in] i_deconfigRule Deconfigure Runtime options -
      *                  default not at runtime
-     * @param[in] i_shouldUpdateAttrPG Flag stating whether to update ATTR_PG
-     *                  for i_target
      */
     void _deconfigureTarget(TARGETING::Target & i_target,
                             const uint32_t i_errlEid,
                             bool *o_targetDeconfigured = NULL,
                             const DeconfigureFlags i_deconfigRule =
-                                    NOT_AT_RUNTIME,
-                            bool i_shouldUpdateAttrPG = false);
+                                    NOT_AT_RUNTIME);
 
     /**
      * @brief Works deconfig up the parent branch

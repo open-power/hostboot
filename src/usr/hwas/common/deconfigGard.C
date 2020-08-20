@@ -195,8 +195,7 @@ void DeconfigGard::_deconfigureTarget(
         Target & i_target,
         const uint32_t i_errlEid,
         bool *o_targetDeconfigured /* default is NULL */,
-        const DeconfigureFlags i_deconfigRule /* default is NOT_AT_RUNTIME */,
-        bool i_shouldUpdateAttrPG /* default is false */)
+        const DeconfigureFlags i_deconfigRule /* default is NOT_AT_RUNTIME */)
 {
     HWAS_INF("Deconfiguring Target %.8X, errlEid 0x%X",
             get_huid(&i_target), i_errlEid);
@@ -216,11 +215,7 @@ void DeconfigGard::_deconfigureTarget(
         l_state.dumpfunctional = 0;
     }
 
-    // Update ATTR_PG via gard only if i_shouldUpdateAttrPG is true
-    if (i_shouldUpdateAttrPG == true)
-    {
-        updateAttrPG(i_target, false);
-    }
+    updateAttrPG(i_target, false);
 
     if (!l_state.functional)
     {
@@ -1896,7 +1891,7 @@ errlHndl_t DeconfigGard::applyGardRecord(Target *i_pTarget,
         // Deconfigure the Target
         // don't need to check ATTR_DECONFIG_GARDABLE -- if we get
         //  here, it's because of a gard record on this target
-        _deconfigureTarget(*i_pTarget, l_errlogEid, NULL, i_deconfigRule, true);
+        _deconfigureTarget(*i_pTarget, l_errlogEid, NULL, i_deconfigRule);
 
         // Deconfigure other Targets by association
         _deconfigureByAssoc(*i_pTarget, l_errlogEid,i_deconfigRule);

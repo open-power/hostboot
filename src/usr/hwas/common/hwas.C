@@ -163,6 +163,8 @@ void enableHwasState(Target *i_target,
     hwasState.functional    = i_functional;
 
     i_target->setAttr<ATTR_HWAS_STATE>( hwasState );
+
+    updateAttrPG(*i_target, hwasState.functional);
 }
 
 TargetHandleList disableExtraOcapiIohsTargets(const Target* const i_pauc)
