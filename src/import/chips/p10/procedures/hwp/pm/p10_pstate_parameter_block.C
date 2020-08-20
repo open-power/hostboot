@@ -3295,8 +3295,9 @@ fapi2::ReturnCode PlatPmPPB::get_mvpd_iddq( void )
                 l_buffer_iq_c,
                 l_bufferSize_iq));
 
+    //skip keyword version and
     //copy VPD data to IQ structure table
-    memcpy(&iv_iddqt, l_buffer_iq_c, l_bufferSize_iq);
+    memcpy(&iv_iddqt, (l_buffer_iq_c+1), l_bufferSize_iq);
 
     //Verify Payload header data.
     if ( !(iv_iddqt.iddq_version) ||
