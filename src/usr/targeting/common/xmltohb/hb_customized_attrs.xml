@@ -62,6 +62,15 @@
           <writeable/>
      </attribute>
 
+     <!-- Override this to be writeable and volatile, so that we can
+          break the timeout into smaller chunks and do them one at a
+          time to avoid memory leaks. -->
+     <attribute>
+          <id>ATTR_MSS_CHECK_FOR_READY_TIMEOUT</id>
+          <writeable/>
+          <persistency>volatile</persistency>
+     </attribute>
+
     <!-- Dynamic Init settings will come from BIOS/ASM or lab override -->
     <attribute>
         <id>ATTR_DYNAMIC_INIT_MODE_VEC</id>

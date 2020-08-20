@@ -112,18 +112,58 @@ void* call_ocmb_check_for_ready (void *io_pArgs)
             {
                 NUM_LOOPS = 1;
             }
+
+            // Save the original timeout (to be restored after
+            // exp_check_for_ready
+            const auto original_timeout
+                = l_ocmb->getAttr<ATTR_MSS_CHECK_FOR_READY_TIMEOUT>();
+
+            // Break the timeout into small chunks. This is a hack to avoid
+            // running out of memory in the polling code.
+            const ATTR_MSS_CHECK_FOR_READY_TIMEOUT_type timeout_chunk_size = 10;
+
+            // exp_check_for_ready will read this attribute to know how long to
+            // poll. If this number is too large and we get too many I2C error
+            // logs between calls to FAPI_INVOKE_HWP, we will run out of memory.
+            l_ocmb->setAttr<ATTR_MSS_CHECK_FOR_READY_TIMEOUT>(timeout_chunk_size);
+
             for(uint8_t i = 0; i < NUM_LOOPS; i++)
             {
-                // Delete the log from the previous iteration
-                if( l_errl )
+                // Retry exp_check_for_ready as many times as it takes to either
+                // succeed or time out (in timeout_chunk_size-duration attempts)
+                for (size_t timeout_counter = 0;
+                     timeout_counter < original_timeout;
+                     timeout_counter += timeout_chunk_size)
                 {
-                    delete l_errl;
-                    l_errl = nullptr;
+                    // Delete the log from the previous iteration
+                    if( l_errl )
+                    {
+                        delete l_errl;
+                        l_errl = nullptr;
+                    }
+
+                    // Catch the last iteration in the case where
+                    // original_timeout is not evenly divisible by
+                    // timeout_chunk_size.
+                    const size_t chunk_size = original_timeout - timeout_counter;
+                    if (chunk_size < timeout_chunk_size)
+                    {
+                        l_ocmb->setAttr<ATTR_MSS_CHECK_FOR_READY_TIMEOUT>(chunk_size);
+                    }
+
+                    FAPI_INVOKE_HWP(l_errl,
+                                    exp_check_for_ready,
+                                    l_fapi_ocmb_target);
+
+                    // On success, quit retrying.
+                    if (!l_errl)
+                    {
+                        break;
+                    }
                 }
-                FAPI_INVOKE_HWP(l_errl,
-                                exp_check_for_ready,
-                                l_fapi_ocmb_target);
             }
+
+            l_ocmb->setAttr<ATTR_MSS_CHECK_FOR_READY_TIMEOUT>(original_timeout);
 
             if (l_errl)
             {
