@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020                             */
+/* Contributors Listed Below - COPYRIGHT 2020,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -217,10 +217,13 @@ fapi2::ReturnCode p10_int_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>
             FAPI_TRY(fapi2::putScom(TGT0, 0x2010a1full, l_scom_buffer));
         }
         {
-            FAPI_TRY(fapi2::getScom( TGT0, 0x2010a88ull, l_scom_buffer ));
+            if (((l_chip_id == 0xa) && (l_chip_ec == 0x10)) )
+            {
+                FAPI_TRY(fapi2::getScom( TGT0, 0x2010a88ull, l_scom_buffer ));
 
-            l_scom_buffer.insert<34, 6, 58, uint64_t>(literal_0b100000 );
-            FAPI_TRY(fapi2::putScom(TGT0, 0x2010a88ull, l_scom_buffer));
+                l_scom_buffer.insert<34, 6, 58, uint64_t>(literal_0b100000 );
+                FAPI_TRY(fapi2::putScom(TGT0, 0x2010a88ull, l_scom_buffer));
+            }
         }
         {
             FAPI_TRY(fapi2::getScom( TGT0, 0x2010a8aull, l_scom_buffer ));

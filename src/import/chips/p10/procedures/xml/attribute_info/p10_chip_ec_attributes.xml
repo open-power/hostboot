@@ -42,6 +42,41 @@
 <attributes>
   <!-- ******************************************************************** -->
   <attribute>
+    <id>ATTR_CHIP_EC_FEATURE_DD1_NAMES</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      Chip ec feature attribute to differentiate simple spy/register name
+      changes.
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_P10</name>
+        <ec>
+          <value>0x10</value>
+          <test>EQUAL</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
+  <!-- ******************************************************************** -->
+  <attribute>
+    <id>ATTR_CHIP_EC_FEATURE_PAU_TWO_TA</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      The PAU has 2 trace array instances
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_P10</name>
+        <ec>
+          <value>0x10</value>
+          <test>EQUAL</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
+  <!-- ******************************************************************** -->
+  <attribute>
     <id>ATTR_CHIP_EC_FEATURE_OMI_DL_X4_BACKOFF_ENABLE</id>
     <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
     <description>
