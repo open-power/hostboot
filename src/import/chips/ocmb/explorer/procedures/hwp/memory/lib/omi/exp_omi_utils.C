@@ -43,6 +43,7 @@
 #include <lib/shared/exp_consts.H>
 #include <p10_scom_omi_a.H>
 #include <lib/i2c/exp_i2c.H>
+#include <i2c_access.H>
 
 namespace mss
 {

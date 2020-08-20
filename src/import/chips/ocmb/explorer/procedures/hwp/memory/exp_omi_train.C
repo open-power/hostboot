@@ -45,6 +45,7 @@
 #include <generic/memory/lib/utils/shared/mss_generic_consts.H>
 #include <generic/memory/lib/utils/mss_generic_check.H>
 #include <mss_generic_system_attribute_getters.H>
+#include <i2c/exp_i2c_fields.H>
 
 extern "C"
 {

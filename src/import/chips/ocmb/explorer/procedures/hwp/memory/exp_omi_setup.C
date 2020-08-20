@@ -48,6 +48,7 @@
 #include <generic/memory/lib/utils/fir/gen_mss_unmask.H>
 #include <generic/memory/lib/utils/mss_generic_check.H>
 #include <mss_generic_system_attribute_getters.H>
+#include <lib/i2c/exp_i2c_fields.H>
 
 extern "C"
 {
