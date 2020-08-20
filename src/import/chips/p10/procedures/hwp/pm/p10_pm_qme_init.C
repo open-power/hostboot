@@ -452,6 +452,7 @@ fapi2::ReturnCode qme_halt(
     using namespace c;
     fapi2::buffer<uint64_t> l_data64;
     uint32_t                l_timeout_in_MS = 100;
+    uint8_t CL2_START_POS = 5;
 
     FAPI_IMP(">> qme_halt...");
 
@@ -492,6 +493,22 @@ fapi2::ReturnCode qme_halt(
 
     for ( auto l_core_target : i_target.getChildren<fapi2::TARGET_TYPE_CORE>( fapi2::TARGET_STATE_FUNCTIONAL ) )
     {
+        fapi2::ATTR_CHIP_UNIT_POS_Type l_core_unit_pos;
+        FAPI_TRY(FAPI_ATTR_GET( fapi2::ATTR_CHIP_UNIT_POS,
+                                l_core_target,
+                                l_core_unit_pos));
+
+        l_core_unit_pos = l_core_unit_pos % 4;
+
+        fapi2::Target<fapi2::TARGET_TYPE_EQ> l_eq_target = l_core_target.getParent<fapi2::TARGET_TYPE_EQ>();
+
+        FAPI_TRY( fapi2::getScom( l_eq_target, CPLT_CTRL3_RW, l_data64 ) );
+
+        if (!l_data64.getBit(l_core_unit_pos + CL2_START_POS))
+        {
+            continue;
+        }
+
         FAPI_TRY( fapi2::getScom( l_core_target, scomt::c::QME_SSH_SRC, l_data64 ) );
 
         if( l_data64.getBit<0>() != 1)
