@@ -573,6 +573,7 @@
     </description>
     <valueType>uint32</valueType>
     <initToZero/>
+    <enum>A = 65, B = 66</enum>
     <writeable/>
     <mssAccessorName>exp_fw_partition_id</mssAccessorName>
   </attribute>

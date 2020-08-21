@@ -219,6 +219,33 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
+///
+/// @brief Get the firwmare revision based upon the partition that was booted
+/// @param[in] i_target OCMB_CHIP target
+/// @param[in] o_fw_version the FW version that was booted
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
+///
+inline fapi2::ReturnCode get_booted_fw_version(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+        uint32_t& o_fw_version)
+{
+    o_fw_version = 0;
+    uint32_t l_partition = 0;
+
+    FAPI_TRY(mss::attr::get_exp_fw_partition_id(i_target, l_partition));
+
+    // If we're the A-side partion, grab the A-side value
+    if(l_partition == fapi2::ENUM_ATTR_MSS_EXP_FW_PARTITION_ID_A)
+    {
+        return mss::attr::get_exp_fw_version_a(i_target, o_fw_version);
+    }
+
+    // Otherwise, return the B-side value
+    return mss::attr::get_exp_fw_version_b(i_target, o_fw_version);
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
 } // ns mss
 
 #endif
