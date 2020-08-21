@@ -95,6 +95,22 @@
   <!-- ******************************************************************** -->
   <hwpError>
     <sbeError/>
+    <rc>RC_P10_RAM_INACTIVE_THREAD_HW542214</rc>
+    <description>
+      RAM to inactive thread (put_reg) and HW542214 is present
+    </description>
+    <ffdc>CORE_TARGET</ffdc>
+    <ffdc>REG_TYPE</ffdc>
+    <ffdc>REG_NUM</ffdc>
+    <ffdc>ALLOW_MULT</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <sbeError/>
     <rc>RC_P10_RAM_THREAD_NOT_STOP_ERR</rc>
     <description>
       The thread to perform ramming is not stopped
