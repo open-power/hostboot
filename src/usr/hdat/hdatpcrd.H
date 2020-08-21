@@ -53,7 +53,7 @@ namespace HDAT
 
 #define HDAT_NUM_P7_PCRD_ENTRIES    32
 #define HDAT_FULL_MVPD_SIZE 0x10000
-const uint16_t HDAT_PCRD_VERSION    = 0x21;
+const uint16_t HDAT_PCRD_VERSION    = 0x26;
 const char HDAT_PCRD_STRUCT_NAME[7] = "SPPCRD";
 #define HDAT_SW_CHKSTP_FIR_SCOM         0x05012000
 #define HDAT_SW_CHKSTP_FIR_SCOM_BIT_POS 0x1F  
@@ -125,6 +125,9 @@ struct hdatPcrdChipInfo_t
     uint8_t   hdatPcrdTopologyIdIndex;  // 0x0069 index in the topology id array
                                         //        to indicate the primary
                                         //        topology id
+    uint32_t  hdatPcrdABCBusSpeed;      // 0x006A A-bus speed
+    uint32_t  hdatPcrdXYZBusSpeed;      // 0x007E X-bus speed
+    uint8_t   hdatPcrdFabTopologyId;    // 0x0072 Fabric topology id
 } __attribute__ ((packed));
 
 /* @brief Defines 'chip time-of-day structure in the PCRD */

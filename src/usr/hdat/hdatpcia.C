@@ -275,26 +275,29 @@ errlHndl_t HdatPcia::hdatLoadPcia(uint32_t &o_size, uint32_t &o_count)
                         l_threadIndex, this->iv_spPcia[index].hdatThreadData.
                         pciaThreadData[l_threadIndex].pciaPhysThreadId);
 
-
-                        /* Proc ID Reg for split core is TTTT0PPPPPYY
-                           Where           TTTT  is topology id
-                                                 left shift by 8 bits
+                        /* Proc ID Reg for split core is SSSTTTTRPPPPPYY
+                           Where           SSS   is spare id
+                                                 and its zero, space left for
+                                                 hardware changes
+                                           TTTT  is topology id
+                                           R     is reserved
                                            PPPPP is the core number
-                                                 left shift by 2 bits
                                            YY    is thread id
-                        */
+                         */
                         // PIR generation for split core mode
-                        // A bit unsure about this as well
                         const PIR_t pir(l_procTopologyId, l_coreNum,
                                 l_threadIndex);
-                        const uint8_t l_ThreadProcIdReg = pir.word;
+                        const uint32_t l_threadProcIdReg = pir.word;
+
+                        HDAT_DBG("l_threadProcIdReg split core: 0x%.8X",
+                            l_threadProcIdReg);
 
                         hdatSetPciaHdrs(&this->iv_spPcia[index]);
                         this->iv_spPcia[index].hdatCoreData.pciaProcStatus
                             = l_procStatus;
                         this->iv_spPcia[index].hdatThreadData.
                         pciaThreadData[l_threadIndex].pciaProcIdReg =
-                        l_ThreadProcIdReg;
+                        l_threadProcIdReg;
 
                         //This field is deprecated starting with P9
                         this->iv_spPcia[index].hdatThreadData.
@@ -411,12 +414,10 @@ errlHndl_t HdatPcia::hdatLoadPcia(uint32_t &o_size, uint32_t &o_count)
                     TARGETING::TargetService::ALL,
                     &l_presentEq);
 
-                TARGETING::ATTR_CHIP_UNIT_type l_eqId = 0;
                 for(uint32_t l_eqIdx = 0; l_eqIdx < l_eqList.size();
                     ++l_eqIdx)
                 {
                     TARGETING::Target* l_pTarget = l_eqList[l_eqIdx];
-                    l_eqId = l_pTarget->getAttr<TARGETING::ATTR_CHIP_UNIT>();
 
                     //Get the the FC targets
                     TARGETING::TargetHandleList l_fcList;
@@ -473,22 +474,27 @@ errlHndl_t HdatPcia::hdatLoadPcia(uint32_t &o_size, uint32_t &o_count)
                                 this->iv_spPcia[index].hdatThreadData.
                                 pciaThreadData[l_threadIndex].pciaPhysThreadId);
 
-                            /* Proc ID Reg for fused core is TTTT0QQQPYYY
-                               Where           TTTT   is topology id
-                                                      left shift by 8 bits
-                                               QQQ    is Quad id
-                                                      left shift by 4 bits
-                                               P      is the core
-                                                      left shift by 3 bits
+                            /* Proc ID Reg for fused core is SSSTTTTRPPPPYYY
+                               Where           SSS    is Spare Id
+                                                      and its zero, space left
+                                                      for hardware changes
+                                               TTTT   is Topology id
+                                               R      is reserved
+                                               PPPP   is the core
                                                       chiplet pair number
                                                YYY    is thread id
                              */
                             uint32_t l_threadProcIdReg = 0;
+
                             // PIR generation for fused core mode
-                            l_threadProcIdReg =  l_procTopologyId << 8 |
-                                                 l_eqId << 4           |
-                                                 l_fcId << 3           |
-                                                 l_threadIndex;
+                            PIR_t pir(0);
+                            pir.topologyIdFused = l_procTopologyId;
+                            pir.coreIdFused = l_fcId;
+                            pir.threadIdFused = l_threadIndex;
+                            l_threadProcIdReg = pir.word;
+
+                            HDAT_DBG("l_threadProcIdReg fused core: 0x%.8X",
+                                l_threadProcIdReg);
 
                             this->iv_spPcia[index].hdatThreadData.
                                 pciaThreadData[l_threadIndex].pciaProcIdReg =

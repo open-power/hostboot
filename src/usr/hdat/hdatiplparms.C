@@ -599,34 +599,10 @@ void HdatIplParms::hdatGetSystemParamters()
              (l_pSysTarget->getAttr<TARGETING::ATTR_PHYP_SYSTEM_TYPE>());
     HDAT_DBG("System Type:0X%08X", iv_hdatIPLParams->iv_sysParms.hdatSysType);
 
-    //Get ABC Bus Speed
-    this->iv_hdatIPLParams->iv_sysParms.hdatABCBusSpeed = 24;
-/* TODO RTC:216061 Re-enable when attr exists
-    TARGETING::ATTR_FREQ_A_MHZ_type l_ABCBusSpeed;
-    if(l_pSysTarget->tryGetAttr<TARGETING::ATTR_FREQ_A_MHZ>(l_ABCBusSpeed))
-    {
-        this->iv_hdatIPLParams->iv_sysParms.hdatABCBusSpeed = l_ABCBusSpeed;
-    }
-    else
-    {
-        HDAT_ERR(" Error in getting attribute FREQ_A_MHZ");
-    }
-**/
-
-    //Get XYZ Bus Speed
-    //@TODO: RTC 142465 attribute not available
-    /*TARGETING::ATTR_FREQ_X_MHZ_type l_WXYZBusSpeed;
-    if(l_pSysTarget->tryGetAttr<TARGETING::ATTR_FREQ_X_MHZ>(l_WXYZBusSpeed))
-    {
-        this->iv_hdatIPLParams->iv_sysParms.hdatWXYZBusSpeed = l_WXYZBusSpeed;
-    }
-    else
-    {
-        HDAT_ERR(" Error in getting attribute FREQ_X_MHZ");
-    }*/
-
-    // Hard coding as witherspoon
-    this->iv_hdatIPLParams->iv_sysParms.hdatWXYZBusSpeed = 0x000007d0;
+    //Setting both ABC Bus Speed and XYZ Bus Speed as 0.
+    //Both values are deprecated and moved to PCRD.
+    this->iv_hdatIPLParams->iv_sysParms.hdatABCBusSpeed = 0x0;
+    this->iv_hdatIPLParams->iv_sysParms.hdatWXYZBusSpeed = 0x0;
 
     // NO ECO Support
     this->iv_hdatIPLParams->iv_sysParms.hdatSystemECOMode = 0;

@@ -1031,8 +1031,27 @@ errlHndl_t HdatPcrd::hdatSetProcessorInfo(
         //PHYP from BOOTKERNEL partition.
         iv_spPcrd->hdatChipData.hdatPcrdStopLevelSupport = 0x00000000;
 #else
-        iv_spPcrd->hdatChipData.hdatPcrdStopLevelSupport =
+        // Get the 4 byte system level supported stop state value defined by the
+        // system owner for this specific box
+        TARGETING::ATTR_SUPPORTED_STOP_STATES_type l_stopStates =
             l_pSysTarget->getAttr<TARGETING::ATTR_SUPPORTED_STOP_STATES>();
+
+        // Making it ready to combine with a 2 byte value (No data loss here as
+        // the last 2 bytes of the above attribute is not used)
+        uint16_t l_systemStopStates = (l_stopStates & 0xFFFF0000) >> 16;
+
+        // Get the 2 byte stop level value which is currently supported by the
+        // the QME hardware/software stack
+        TARGETING::ATTR_STOP_LEVELS_SUPPORTED_type l_qmeHwSwStopStates =
+            l_pSysTarget->getAttr<TARGETING::ATTR_STOP_LEVELS_SUPPORTED >();
+
+        // Final value is still a 4 byte value which reflects the intersection
+        // of these two fields
+        iv_spPcrd->hdatChipData.hdatPcrdStopLevelSupport =
+            (l_systemStopStates & l_qmeHwSwStopStates) << 16;
+
+        HDAT_DBG("Final Stop Level=0x%X",
+            iv_spPcrd->hdatChipData.hdatPcrdStopLevelSupport);
 #endif
         iv_spPcrd->hdatChipData.hdatPcrdCheckstopAddr = HDAT_SW_CHKSTP_FIR_SCOM;
         iv_spPcrd->hdatChipData.hdatPcrdSpareBitNum   = HDAT_SW_CHKSTP_FIR_SCOM_BIT_POS;
@@ -1084,6 +1103,53 @@ errlHndl_t HdatPcrd::hdatSetProcessorInfo(
 
         HDAT_DBG("PrimTopIdx=%d",
             iv_spPcrd->hdatChipData.hdatPcrdTopologyIdIndex);
+
+        bool l_smpxSet = false;
+        bool l_smpaSet = false;
+        TARGETING::PredicateHwas l_predHwasFunc;
+        TARGETING::PredicateCTM l_iohsPredicate (TARGETING::CLASS_UNIT,
+                                                 TARGETING::TYPE_IOHS);
+        l_predHwasFunc.functional(true);
+        TARGETING::PredicatePostfixExpr l_funcIohs;
+        l_funcIohs.push(&l_iohsPredicate).push(&l_predHwasFunc).And();
+
+        TARGETING::TargetHandleList l_iohsList;
+
+        TARGETING::targetService().getAssociated(l_iohsList, i_pProcTarget,
+                   TARGETING::TargetService::CHILD,
+                   TARGETING::TargetService::ALL,
+                   &l_funcIohs);
+
+        for(uint8_t l_iohsIdx = 0; l_iohsIdx<l_iohsList.size(); ++l_iohsIdx)
+        {
+            TARGETING::Target *l_pIohsTarget = l_iohsList[l_iohsIdx];
+
+            if( (l_pIohsTarget->getAttr<ATTR_IOHS_CONFIG_MODE>() ==
+                 TARGETING::IOHS_CONFIG_MODE_SMPX) && (l_smpxSet == false) )
+            {
+                iv_spPcrd->hdatChipData.hdatPcrdXYZBusSpeed =
+                    l_pIohsTarget->getAttr<ATTR_FREQ_IOHS_MHZ>();
+                l_smpxSet = true;
+            }
+            else if( (l_pIohsTarget->getAttr<ATTR_IOHS_CONFIG_MODE>() ==
+                TARGETING::IOHS_CONFIG_MODE_SMPA) && (l_smpaSet == false) )
+            {
+                iv_spPcrd->hdatChipData.hdatPcrdABCBusSpeed =
+                    l_pIohsTarget->getAttr<ATTR_FREQ_IOHS_MHZ>();
+                l_smpaSet = true;
+            }
+
+            if (l_smpxSet == true && l_smpaSet == true)
+            {
+                break;
+            }
+        }
+
+        HDAT_DBG("l_abcFreq=%d, l_wxyzFreq=%d",
+            iv_spPcrd->hdatChipData.hdatPcrdABCBusSpeed,
+            iv_spPcrd->hdatChipData.hdatPcrdXYZBusSpeed);
+
+        iv_spPcrd->hdatChipData.hdatPcrdFabTopologyId = l_procRealFabricTopoId;
     }
     while(0);
     HDAT_EXIT();
