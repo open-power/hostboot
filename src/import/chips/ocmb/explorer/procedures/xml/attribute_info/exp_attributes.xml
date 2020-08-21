@@ -587,6 +587,7 @@
     <initToZero></initToZero>
     <valueType>uint32</valueType>
     <default>0</default>
+    <enum>A = 65, B = 66</enum>
     <writeable/>
     <mssAccessorName>exp_fw_partition_id</mssAccessorName>
   </attribute>

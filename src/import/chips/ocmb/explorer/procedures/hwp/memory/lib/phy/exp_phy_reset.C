@@ -45,6 +45,7 @@
 #include <lib/eff_config/explorer_attr_engine_traits.H>
 #include <generic/memory/lib/data_engine/data_engine.H>
 #include <lib/phy/exp_phy_reset.H>
+#include <lib/exp_attribute_accessors_manual.H>
 
 namespace mss
 {
@@ -117,9 +118,20 @@ fapi_try_exit:
 fapi2::ReturnCode is_reset_supported( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
                                       mss::states& o_is_reset_supported )
 {
-    // TODO:592 Update explorer PHY reset code when Microchip FW supports it
+    // Microchip FW does not support the PHY reset at a version of CL397559 or lower
+    constexpr uint32_t PHY_RESET_UNSUPPORTED = 397559;
+
+    // Grab the firmware revision that was booted
     o_is_reset_supported = mss::states::NO;
-    return fapi2::FAPI2_RC_SUCCESS;
+    uint32_t l_fw_revision = 0;
+    FAPI_TRY(mss::get_booted_fw_version(i_target, l_fw_revision));
+
+    // If we're at or below the unsupported value? the reset is unsupported
+    // Otherwise it's supported
+    o_is_reset_supported = l_fw_revision <= PHY_RESET_UNSUPPORTED ? mss::states::NO : mss::states::YES;
+
+fapi_try_exit:
+    return fapi2::current_err;
 }
 
 } // ns phy
