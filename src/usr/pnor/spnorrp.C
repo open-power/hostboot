@@ -754,6 +754,7 @@ uint64_t SPnorRP::verifySections(SectionId i_id,
         uint32_t l_errEid = l_errhdl->eid();
         iv_startupRC = l_errhdl->reasonCode();
         TRACFCOMP(g_trac_pnor,ERR_MRK"SPnorRP::verifySections there was an error");
+        o_plid=l_errhdl->plid();
         if (failedVerify)
         {
             SECUREBOOT::handleSecurebootFailure(l_errhdl, false, true);
@@ -763,7 +764,6 @@ uint64_t SPnorRP::verifySections(SectionId i_id,
             errlCommit(l_errhdl,PNOR_COMP_ID);
             INITSERVICE::doShutdown(l_errEid, true);
         }
-        o_plid=l_errhdl->plid();
     }
 
     return l_rc;
