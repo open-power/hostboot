@@ -263,6 +263,7 @@
     <ffdc>CHIP_TARGET</ffdc>
     <ffdc>XIP_RC</ffdc>
     <ffdc>SECTION_ID</ffdc>
+    <ffdc>SECTION_SIZE</ffdc>
     <ffdc>DDLEVEL</ffdc>
     <ffdc>OCCURRENCE</ffdc>
     <callout>

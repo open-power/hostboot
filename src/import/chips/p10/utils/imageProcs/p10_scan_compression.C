@@ -387,8 +387,10 @@ __rs4_compress(uint8_t* o_rs4_str,
 
         if (~care_nibble & data_nibble)
         {
-            return BUGX(SCAN_COMPRESSION_CAREDATA_CONFLICT,
-                        "Conflicting data and mask bits in nibble %d\n", i);
+            MY_ERR("ERROR: __rs4_compress: Conflicting Care and Data bits in raw"
+                   " ring at nibble[%u]=(0x%x,0x%x)\n",
+                   i, care_nibble, data_nibble);
+            return SCAN_COMPRESSION_CAREDATA_CONFLICT;
         }
 
         if (state == 0)
@@ -527,8 +529,10 @@ __rs4_compress(uint8_t* o_rs4_str,
 
         if (~care_nibble & data_nibble)
         {
-            return BUGX(SCAN_COMPRESSION_CAREDATA_CONFLICT,
-                        "ERROR: __rs4_compress: Conflicting data and mask bits in nibble %d\n", i);
+            MY_ERR("ERROR: __rs4_compress: Conflicting [term] Care and Data bits in raw"
+                   " ring at nibble[%u]=(0x%x,0x%x)\n",
+                   i, care_nibble, data_nibble);
+            return SCAN_COMPRESSION_CAREDATA_CONFLICT;
         }
 
         if ((care_nibble ^ data_nibble) == 0)

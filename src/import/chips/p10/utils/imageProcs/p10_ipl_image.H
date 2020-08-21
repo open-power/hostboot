@@ -1575,7 +1575,7 @@ p9_xip_decode_toc_dump(void* i_image, void* i_dump,
 #define P9_XIP_CANT_RESTORE_IMAGE 18
 
 /// .rings seciton for specific dd level is larger than the allowable size
-#define P9_XIP_SBE_DD_SIZE_ERR 19
+#define P9_XIP_SECTION_SIZE_IS_ZERO 19
 
 /// Specified section has no ddLevel support
 #define P9_XIP_NO_DDLEVEL_SUPPORT 20
@@ -1609,7 +1609,7 @@ p9_xip_decode_toc_dump(void* i_image, void* i_dump,
         "P9_XIP_HASH_COLLISION",     \
         "P9_XIP_NULL_BUFFER",        \
         "P9_XIP_CANT_RESTORE_IMAGE", \
-        "P9_XIP_SBE_DD_SIZE_ERR",    \
+        "P9_XIP_SECTION_SIZE_IS_ZERO",\
         "P9_XIP_NO_DDLEVEL_SUPPORT", \
         "P9_XIP_DDLEVEL_NOT_FOUND",  \
         "P9_XIP_DDLEVEL_CODE_BUG",   \

@@ -1962,18 +1962,45 @@ p9_xip_get_section(const void* i_image,
 {
     int rc = 0;
     P9XipSection* imageSection;
+
     rc = xipGetSectionPointer(i_image, i_sectionId, &imageSection);
 
     if (!rc)
     {
         xipTranslateSection(o_hostSection, imageSection);
     }
-
-    if (i_ddLevel == UNDEFINED_DD_LEVEL)
+    else
     {
-        //Here we always return the entire XIP section. Nothing more to do.
+        return TRACE_ERRORX(rc,
+                            "ERROR: xip_get_section: xipGetSectionPointer failed w/rc=0x%08x"
+                            " for sectionId=%u",
+                            rc, i_sectionId);
     }
-    else if (o_hostSection->iv_ddSupport == 1)
+
+    if ( i_ddLevel == UNDEFINED_DD_LEVEL )
+    {
+        //Here we always return the entire XIP section, whether it exists or not. This is to
+        //support the so many legacy calls into this function (from within the ipl_image
+        //API) and which assume rc=0 even if the ipl/xip section is zero size, ie is empty.
+        //It is the responsibility of the caller to make sure not to use the pointer offset
+        //to a non-existing xip section.
+        //
+        //Note that if the ddLevel is specified, we do check specifically for zero sized
+        //xip section.
+        //
+        //Nothing more to do here though.
+        return INFRASTRUCT_RC_SUCCESS;
+    }
+
+    // Check for zero section size before proceeding with a DD specified sub-section retrieval.
+    if ( o_hostSection->iv_size == 0 )
+    {
+        return TRACE_ERRORX(P9_XIP_SECTION_SIZE_IS_ZERO,
+                            "WARNING: xip_get_section: Size of sectionId=%u is zero",
+                            i_sectionId);
+    }
+
+    if (o_hostSection->iv_ddSupport == 1)
     {
         uint8_t* buf;
         uint32_t size;

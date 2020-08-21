@@ -1524,16 +1524,21 @@ fapi2::ReturnCode fetch_and_insert_vpd_rings(
     // Let's get the .overlays ring section up front
     P9XipSection iplImgSection;
     void* l_overlaysSection = NULL;
-    l_rc = p9_xip_get_section(i_hwImage, P9_XIP_SECTION_HW_OVERLAYS, &iplImgSection, i_ddLevel);
+    l_rc = p9_xip_get_sub_section( i_hwImage,
+                                   P9_XIP_SECTION_HW_OVERLAYS,
+                                   UNDEFINED_IPL_IMAGE_SID,
+                                   &iplImgSection,
+                                   i_ddLevel );
 
     FAPI_ASSERT( l_rc == INFRASTRUCT_RC_SUCCESS,
                  fapi2::XIPC_XIP_GET_SECTION_ERROR().
                  set_CHIP_TARGET(i_procTarget).
                  set_XIP_RC(l_rc).
                  set_SECTION_ID(P9_XIP_SECTION_HW_OVERLAYS).
+                 set_SECTION_SIZE(iplImgSection.iv_size).
                  set_DDLEVEL(i_ddLevel).
                  set_OCCURRENCE(6),
-                 "p9_xip_get_section() failed (6) w/rc=0x%08x getting .overlays"
+                 "p9_xip_get_sub_section() failed (6) w/rc=0x%08x getting .overlays"
                  " section for ddLevel=0x%x",
                  (uint32_t)l_rc, i_ddLevel );
 
@@ -2598,16 +2603,20 @@ ReturnCode p10_ipl_customize (
         i_sysPhase == SYSPHASE_HB_MEAS)
     {
         // Test the size of the DD specific SBE image's .rings section (it better be ==0).
-        l_rc = p9_xip_get_section(io_image, P9_XIP_SECTION_SBE_RINGS, &iplImgSection);
+        l_rc = p9_xip_get_sub_section( io_image,
+                                       P9_XIP_SECTION_SBE_RINGS,
+                                       UNDEFINED_IPL_IMAGE_SID,
+                                       &iplImgSection );
 
         FAPI_ASSERT( l_rc == INFRASTRUCT_RC_SUCCESS,
                      fapi2::XIPC_XIP_GET_SECTION_ERROR().
                      set_CHIP_TARGET(i_procTarget).
                      set_XIP_RC(l_rc).
                      set_SECTION_ID(P9_XIP_SECTION_SBE_RINGS).
+                     set_SECTION_SIZE(iplImgSection.iv_size).
                      set_DDLEVEL(UNDEFINED_DD_LEVEL).
                      set_OCCURRENCE(1),
-                     "p9_xip_get_section() failed (1) w/rc=0x%08x getting SBE .rings"
+                     "p9_xip_get_sub_section() failed (1) w/rc=0x%08x getting SBE .rings"
                      " section for ddLevel=0x%x",
                      (uint32_t)l_rc, UNDEFINED_DD_LEVEL );
 
@@ -2804,34 +2813,45 @@ ReturnCode p10_ipl_customize (
                                            &iplImgSection,
                                            attrDdLevel );
 
-            FAPI_ASSERT( l_rc == INFRASTRUCT_RC_SUCCESS,
+            FAPI_ASSERT( l_rc == INFRASTRUCT_RC_SUCCESS ||
+                         (l_rc == P9_XIP_SECTION_SIZE_IS_ZERO && attrDdLevel == 0x20), //temp dd2 hack
                          fapi2::XIPC_XIP_GET_SECTION_ERROR().
                          set_CHIP_TARGET(i_procTarget).
                          set_XIP_RC(l_rc).
                          set_SECTION_ID(subSectionID).
+                         set_SECTION_SIZE(iplImgSection.iv_size).
                          set_DDLEVEL(attrDdLevel).
                          set_OCCURRENCE(2),
                          "p9_xip_get_sub_section() failed (2) w/rc=0x%08X retrieving SBE IPL"
                          " section ID=%u and ddLevel=0x%x",
                          (uint32_t)l_rc, subSectionID, attrDdLevel );
 
-            l_rc = p9_xip_append( io_image,       // *must* be an SBE image
-                                  subSectionID,
-                                  (void*)((uint8_t*)i_hwImage + iplImgSection.iv_offset),
-                                  iplImgSection.iv_size,
-                                  l_maxImageSize,
-                                  &l_sectionOffset,
-                                  0 );
+            if (l_rc == P9_XIP_SECTION_SIZE_IS_ZERO && attrDdLevel == 0x20) //temp dd2 hack
+            {
+                FAPI_ERR("WARNING: Zero sized fastarray SBE XIP sectionId=%u only allowed"
+                         " temporarily for ddLevel=0x%x",
+                         subSectionID, attrDdLevel);
+            }
+            else
+            {
+                l_rc = p9_xip_append( io_image,
+                                      subSectionID,
+                                      (void*)((uint8_t*)i_hwImage + iplImgSection.iv_offset),
+                                      iplImgSection.iv_size,
+                                      l_maxImageSize,
+                                      &l_sectionOffset,
+                                      0 );
 
-            FAPI_ASSERT( l_rc == 0,
-                         fapi2::XIPC_XIP_APPEND_ERROR().
-                         set_CHIP_TARGET(i_procTarget).
-                         set_XIP_RC(l_rc).
-                         set_SECTION_ID(subSectionID).
-                         set_MAX_IMAGE_SIZE(l_maxImageSize).
-                         set_OCCURRENCE(1),
-                         "ERROR(1,%u): p9_xip_append() failed w/rc=0x%08x",
-                         iSection, (uint32_t)l_rc );
+                FAPI_ASSERT( l_rc == INFRASTRUCT_RC_SUCCESS,
+                             fapi2::XIPC_XIP_APPEND_ERROR().
+                             set_CHIP_TARGET(i_procTarget).
+                             set_XIP_RC(l_rc).
+                             set_SECTION_ID(subSectionID).
+                             set_MAX_IMAGE_SIZE(l_maxImageSize).
+                             set_OCCURRENCE(1),
+                             "ERROR(1,%u): p9_xip_append() failed w/rc=0x%08x",
+                             iSection, (uint32_t)l_rc );
+            }
         }
     }
 
@@ -2852,35 +2872,46 @@ ReturnCode p10_ipl_customize (
                                        &iplImgSection,
                                        attrDdLevel );
 
-        FAPI_ASSERT( l_rc == INFRASTRUCT_RC_SUCCESS,
+        FAPI_ASSERT( l_rc == INFRASTRUCT_RC_SUCCESS ||
+                     (l_rc == P9_XIP_SECTION_SIZE_IS_ZERO && attrDdLevel == 0x20), //temp dd2 hack
                      fapi2::XIPC_XIP_GET_SECTION_ERROR().
                      set_CHIP_TARGET(i_procTarget).
                      set_XIP_RC(l_rc).
                      set_SECTION_ID(subSectionID).
+                     set_SECTION_SIZE(iplImgSection.iv_size).
                      set_DDLEVEL(attrDdLevel).
-                     set_OCCURRENCE(2),
-                     "p9_xip_get_sub_section() failed (2) w/rc=0x%08X retrieving SBE IPL"
+                     set_OCCURRENCE(7),
+                     "p9_xip_get_sub_section() failed (7) w/rc=0x%08X retrieving SBE IPL"
                      " section ID=%u and ddLevel=0x%x",
                      (uint32_t)l_rc, subSectionID, attrDdLevel );
 
-        l_rc = p9_xip_append( io_image,       // *must* be an SBE image
-                              subSectionID,
-                              (void*)((uint8_t*)i_hwImage + iplImgSection.iv_offset),
-                              iplImgSection.iv_size,
-                              l_maxImageSize,
-                              &l_sectionOffset,
-                              0 );
+        if (l_rc == P9_XIP_SECTION_SIZE_IS_ZERO && attrDdLevel == 0x20) //temp dd2 hack
+        {
+            FAPI_ERR("WARNING: Zero sized hdct SBE XIP sectionId=%u only allowed"
+                     " temporarily for ddLevel=0x%x",
+                     subSectionID, attrDdLevel);
+        }
+        else
+        {
+            l_rc = p9_xip_append( io_image,
+                                  subSectionID,
+                                  (void*)((uint8_t*)i_hwImage + iplImgSection.iv_offset),
+                                  iplImgSection.iv_size,
+                                  l_maxImageSize,
+                                  &l_sectionOffset,
+                                  0 );
 
-        FAPI_ASSERT( l_rc == 0,
-                     fapi2::XIPC_XIP_APPEND_ERROR().
-                     set_CHIP_TARGET(i_procTarget).
-                     set_XIP_RC(l_rc).
-                     set_SECTION_ID(subSectionID).
-                     set_MAX_IMAGE_SIZE(l_maxImageSize).
-                     set_OCCURRENCE(1),
-                     "ERROR: p9_xip_append() failed w/rc=0x%08x for section = %u"
-                     " ddLevel=0x%x",
-                     (uint32_t)l_rc, subSectionID, attrDdLevel);
+            FAPI_ASSERT( l_rc == 0,
+                         fapi2::XIPC_XIP_APPEND_ERROR().
+                         set_CHIP_TARGET(i_procTarget).
+                         set_XIP_RC(l_rc).
+                         set_SECTION_ID(subSectionID).
+                         set_MAX_IMAGE_SIZE(l_maxImageSize).
+                         set_OCCURRENCE(1),
+                         "ERROR: p9_xip_append() failed w/rc=0x%08x for section = %u"
+                         " ddLevel=0x%x",
+                         (uint32_t)l_rc, subSectionID, attrDdLevel);
+        }
     }
 
 
@@ -2912,6 +2943,7 @@ ReturnCode p10_ipl_customize (
                          set_CHIP_TARGET(i_procTarget).
                          set_XIP_RC(l_rc).
                          set_SECTION_ID(subSectionID).
+                         set_SECTION_SIZE(iplImgSection.iv_size).
                          set_DDLEVEL(attrDdLevel).
                          set_OCCURRENCE(3),
                          "p9_xip_get_sub_section() failed (3) w/rc=0x%08X retrieving .sbe.rings"
@@ -2937,6 +2969,7 @@ ReturnCode p10_ipl_customize (
                          set_CHIP_TARGET(i_procTarget).
                          set_XIP_RC(l_rc).
                          set_SECTION_ID(subSectionID).
+                         set_SECTION_SIZE(iplImgSection.iv_size).
                          set_DDLEVEL(attrDdLevel).
                          set_OCCURRENCE(4),
                          "p9_xip_get_sub_section() failed (4) w/rc=0x%08x retrieving .qme.rings"
@@ -3134,16 +3167,21 @@ ReturnCode p10_ipl_customize (
     // Extract the .dynamic ring section from the HW image and process all Base
     // and Dynamic rings. (Note that the Base ring section was extracted earlier.)
     //
-    l_rc = p9_xip_get_section(i_hwImage, P9_XIP_SECTION_HW_DYNAMIC, &iplImgSection, attrDdLevel);
+    l_rc = p9_xip_get_sub_section( i_hwImage,
+                                   P9_XIP_SECTION_HW_DYNAMIC,
+                                   UNDEFINED_IPL_IMAGE_SID,
+                                   &iplImgSection,
+                                   attrDdLevel);
 
     FAPI_ASSERT( l_rc == INFRASTRUCT_RC_SUCCESS,
                  fapi2::XIPC_XIP_GET_SECTION_ERROR().
                  set_CHIP_TARGET(i_procTarget).
                  set_XIP_RC(l_rc).
                  set_SECTION_ID(P9_XIP_SECTION_HW_DYNAMIC).
+                 set_SECTION_SIZE(iplImgSection.iv_size).
                  set_DDLEVEL(attrDdLevel).
                  set_OCCURRENCE(5),
-                 "p9_xip_get_section() failed (5) w/rc=0x%08X getting .dynamic"
+                 "p9_xip_get_sub_section() failed (5) w/rc=0x%08X getting .dynamic"
                  " section for ddLevel=0x%x",
                  (uint32_t)l_rc, attrDdLevel );
 
