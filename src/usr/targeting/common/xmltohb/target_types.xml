@@ -2723,10 +2723,6 @@
       <id>MODEL</id>
     </attribute>
     <attribute>
-      <default>1</default>
-      <id>RCD_PARITY_RECONFIG_LOOPS_ALLOWED</id>
-    </attribute>
-    <attribute>
       <default>0x000603FC00000000</default>
       <id>XSCOM_BASE_ADDRESS</id>
     </attribute>
@@ -3486,9 +3482,6 @@
     </attribute>
     <attribute>
       <id>PARENT_PERVASIVE</id>
-    </attribute>
-    <attribute>
-      <id>RCD_PARITY_RECONFIG_LOOP_COUNT</id>
     </attribute>
     <attribute>
       <default>MCA</default>
