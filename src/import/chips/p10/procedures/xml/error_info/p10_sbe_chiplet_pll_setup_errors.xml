@@ -34,13 +34,48 @@
    <!-- ******************************************************************** -->
    <hwpError>
       <sbeError/>
-      <rc>RC_P10_SBE_CHIPLET_PLL_SETUP_CCALCOMP_TIMEOUT</rc>
+      <rc>RC_P10_HW540133_CCALCOMP_TIMEOUT</rc>
       <description>
         Polling timeout reached waiting for CCALCOMP to resolve on PLL
       </description>
       <ffdc>TARGET</ffdc>
       <ffdc>CHIPLET</ffdc>
       <ffdc>UNCALIBRATED</ffdc>
+   </hwpError>
+   <!-- ******************************************************************** -->
+   <hwpError>
+      <sbeError/>
+      <rc>RC_P10_HW540133_CBM1_WA_ERR</rc>
+      <description>
+        Error applying calibrated_bandsel_m1 workaround -- bad return code in
+        scan/scom sequence application or failure to observe subseqent PLL lock
+      </description>
+      <ffdc>TARGET</ffdc>
+      <ffdc>LOCK_ERR</ffdc>
+   </hwpError>
+   <!-- ******************************************************************** -->
+   <hwpError>
+      <sbeError/>
+      <rc>RC_P10_HW540133_LLBM1_WA_ERR</rc>
+      <description>
+        Error applying last_locking_bandsel_m1 workaround -- bad return code in
+        scan/scom sequence application or failure to observe subseqent PLL lock
+      </description>
+      <ffdc>TARGET</ffdc>
+      <ffdc>LOCK_ERR</ffdc>
+      <ffdc>FIRST_ATTEMPT</ffdc>
+      <ffdc>INTERMEDIATE_STEP</ffdc>
+      <ffdc>LAST_ATTEMPT</ffdc>
+   </hwpError>
+   <!-- ******************************************************************** -->
+   <hwpError>
+      <sbeError/>
+      <rc>RC_P10_HW540133_WORKAROUND_ERR</rc>
+      <description>
+        Unsupported workaround selection
+      </description>
+      <ffdc>TARGET</ffdc>
+      <ffdc>WORKAROUND_TYPE</ffdc>
    </hwpError>
    <!-- ******************************************************************** -->
 </hwpErrors>
