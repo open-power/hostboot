@@ -264,7 +264,6 @@
     <enum>
         DECONFIGURE      = 0x1,
         BAD_DQ_BIT_SET   = 0x2,
-        RCD_PARITY_ERROR = 0x4,
         OCMB_FW_UPDATE   = 0x8
     </enum>
     <writeable/>
