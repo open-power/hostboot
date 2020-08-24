@@ -74,6 +74,15 @@ extern "C"
 
             // Enable sync operations for all MIs and then trigger it on a master MI
             FAPI_TRY(mss::enable_sync_operations(mi));
+        }
+
+        for (const auto& mi : l_mi_list)
+        {
+            if (mss::count_dimm(mi) == 0)
+            {
+                FAPI_INF("No DIMMs on %s -- skipping", mss::c_str(mi));
+                continue;
+            }
 
             // If an MI has already been marked as master, skip this setup
             if(l_is_master_mi_set)
