@@ -57,6 +57,7 @@
 #include <p10_pm_get_poundw_bucket_attr.H>
 #include <p10_frequency_buckets.H>
 #include <errl/errlmanager.H>
+#include <lib/shared/exp_consts.H>
 
 #include <targeting/common/targetservice.H>
 #include <targeting/common/predicates/predicatectm.H>
@@ -68,20 +69,6 @@
 
 #include <secureboot/service.H>
 #include <util/misc.H>
-
-//FIXME RTC:257292  This needs to be removed when the constants are either moved to P10 XML
-// or retired; it the latter case, the references to these constants need to be
-// removed too.
-namespace mss
-{
-enum sizes
-{
-    PORTS_PER_MCS = 2,
-    MAX_DIMM_PER_PORT = 2,
-    ROW_REPAIR_BYTE_COUNT = 4,
-    MAX_DQ_BITS = 72,
-};
-}
 
 //******************************************************************************
 // Implementation
@@ -645,6 +632,14 @@ TARGETING::ATTR_MODEL_type __getChipModel()
 // ATTR_BAD_DQ_BITMAP getter/setter constant definitions
 //******************************************************************************
 
+// constant definitions
+const uint8_t  SPARE_DRAM_DQ_BYTE_NUMBER_INDEX = 5;
+const uint32_t DIMM_BAD_DQ_MAGIC_NUMBER = 0xbadd4471;
+const uint8_t  DIMM_BAD_DQ_VERSION = 1;
+const uint8_t  DIMM_BAD_DQ_NUM_BYTES = 80;
+const uint8_t  ROW_REPAIR_BYTE_SIZE = 4;
+size_t DIMM_BAD_DQ_SIZE_BYTES = 0x50;
+
 // define structure for the format of DIMM_BAD_DQ_DATA
 struct dimmBadDqDataFormat
 {
@@ -654,21 +649,13 @@ struct dimmBadDqDataFormat
     uint8_t  iv_reserved2;
     uint8_t  iv_reserved3;
     uint8_t  iv_bitmaps[mss::MAX_RANK_PER_DIMM][mss::BAD_DQ_BYTE_COUNT];
-    uint8_t  iv_rowRepairData[mss::MAX_RANK_PER_DIMM]
-                             [mss::ROW_REPAIR_BYTE_COUNT];
+    uint8_t  iv_rowRepairData[mss::MAX_RANK_PER_DIMM][ROW_REPAIR_BYTE_SIZE];
     uint8_t  iv_unused[16];
 };
 
-// constant definitions
-const uint8_t  SPARE_DRAM_DQ_BYTE_NUMBER_INDEX = 5;
-const uint32_t DIMM_BAD_DQ_MAGIC_NUMBER = 0xbadd4471;
-const uint8_t  DIMM_BAD_DQ_VERSION = 1;
-const uint8_t  DIMM_BAD_DQ_NUM_BYTES = 80;
-size_t DIMM_BAD_DQ_SIZE_BYTES = 0x50;
-
 union wiringData
 {
-    uint8_t memport[mss::MAX_DQ_BITS];
+    uint8_t memport[mss::exp::MAX_SYMBOLS_PER_PORT];
 };
 
 //******************************************************************************
@@ -776,54 +763,46 @@ ReturnCode __dimmGetDqBitmapSpareByte(
     ReturnCode l_rc;
 
     // Spare DRAM Attribute: Returns spare DRAM availability for
-    // all DIMMs associated with the target MCS.
-    uint8_t l_dramSpare[mss::PORTS_PER_MCS][mss::MAX_DIMM_PER_PORT]
-                       [mss::MAX_RANK_PER_DIMM] = {};
+    // all DIMMs associated with the target.
+    uint8_t l_dramSpare[mss::exp::MAX_DIMM_PER_PORT][mss::MAX_RANK_PER_DIMM] = {};
 
-    uint32_t l_ds = 0;
-    FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_FAPI_POS, i_fapiDimm, l_ds) );
-    l_ds = l_ds % mss::MAX_DIMM_PER_PORT;
-
-    {
     // Get the MEM_PORT target
     Target<TARGET_TYPE_MEM_PORT> l_fapiMemPort =
         i_fapiDimm.getParent<TARGET_TYPE_MEM_PORT>();
 
-    // The attribute exists on the MEM_PORT so we don't need to worry about
-    // the port slct, just set the attribute in the space for port slct 0.
-    FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_MEM_EFF_DIMM_SPARE, l_fapiMemPort,
-                            l_dramSpare[0]) );
+    uint32_t l_ds = 0;
+    FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_FAPI_POS, i_fapiDimm, l_ds) );
+    l_ds = l_ds % mss::exp::MAX_DIMM_PER_PORT;
 
-#if 0 //RTC:257292
-    uint8_t l_ps = 0;
+    FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_MEM_EFF_DIMM_SPARE, l_fapiMemPort,
+                            l_dramSpare) );
+
     // Iterate through each rank of this DIMM
     for ( uint8_t i = 0; i < mss::MAX_RANK_PER_DIMM; i++ )
     {
         // Handle spare DRAM configuration cases
-        switch ( l_dramSpare[l_ps][l_ds][i] )
+        switch ( l_dramSpare[l_ds][i] )
         {
-            case fapi2::ENUM_ATTR_EFF_DIMM_SPARE_NO_SPARE:
+            case fapi2::ENUM_ATTR_MEM_EFF_DIMM_SPARE_NO_SPARE:
                 // Set DQ bits reflecting unconnected
                 // spare DRAM in caller's data
                 o_spareByte[i] = 0xFF;
                 break;
 
-            case fapi2::ENUM_ATTR_EFF_DIMM_SPARE_LOW_NIBBLE:
+            case fapi2::ENUM_ATTR_MEM_EFF_DIMM_SPARE_LOW_NIBBLE:
                 o_spareByte[i] = 0x0F;
                 break;
 
-            case fapi2::ENUM_ATTR_EFF_DIMM_SPARE_HIGH_NIBBLE:
+            case fapi2::ENUM_ATTR_MEM_EFF_DIMM_SPARE_HIGH_NIBBLE:
                 o_spareByte[i] = 0xF0;
                 break;
 
                 // As erroneous value will not be encountered.
-            case fapi2::ENUM_ATTR_EFF_DIMM_SPARE_FULL_BYTE:
+            case fapi2::ENUM_ATTR_MEM_EFF_DIMM_SPARE_FULL_BYTE:
             default:
                 o_spareByte[i] = 0x0;
                 break;
         }
-    }
-#endif
     }
 
 fapi_try_exit:
@@ -1520,8 +1499,7 @@ ReturnCode __rowRepairTranslateDramPos(
         uint8_t l_srank = l_dramPosAndSrank & 0x07;
 
         // The last bit of the row repair stores the validity bit
-        bool l_valid = io_translatedData[rank][mss::ROW_REPAIR_BYTE_COUNT-1]
-            & 0x01;
+        bool l_valid = io_translatedData[rank][ROW_REPAIR_BYTE_SIZE-1] & 0x01;
 
         // If the row repair isn't valid, no need to translate anything
         if ( !l_valid ) continue;
