@@ -298,17 +298,12 @@ errlHndl_t hdatGetHwCardId(const Target *i_pTarget, uint32_t &o_cardId)
 void hdatPopulateMTMAndSerialNumber()
 {
     HDAT_ENTER();
-    //errlHndl_t l_errl = NULL;
-    //@TODO RTC 246438  MTM and SN yet to be defined in workbook
-    //VSYS TM and SE will be read from the bp vpd once defined
+    errlHndl_t l_errl = NULL;
     TARGETING::ATTR_RAW_MTM_type l_rawMTM = {};
     TARGETING::ATTR_SERIAL_NUMBER_type l_serialNumber = {};
     TARGETING::Target *l_pSysTarget = NULL;
 
-    strcpy(l_rawMTM,"8335.GTG");
-    strcpy(reinterpret_cast<char *>(l_serialNumber),"RAINIER");
-    HDAT_ERR("initializing mtm with %s",l_rawMTM);
- //   size_t     l_vpdSize = 0;
+    size_t     l_vpdSize = 0;
 
     (void) TARGETING::targetService().getTopLevelTarget(l_pSysTarget);
     if(l_pSysTarget == NULL)
@@ -316,17 +311,8 @@ void hdatPopulateMTMAndSerialNumber()
         HDAT_ERR("Error in getting Top Level Target");
         assert(l_pSysTarget != NULL);
     }
-    l_pSysTarget->setAttr<TARGETING::ATTR_RAW_MTM>
-                             (l_rawMTM);
-    l_pSysTarget->setAttr
-              <TARGETING::ATTR_SERIAL_NUMBER>(l_serialNumber);
 
-    //@TODO: RTC 246357 missing attrubute
-    //uncomment the following after DeviceRead support is enabled 
-    //to read the BP vpd
-    //use STD Array format when reenabled
-
-    /*TARGETING::PredicateCTM l_nodePredicate(TARGETING::CLASS_ENC,
+    TARGETING::PredicateCTM l_nodePredicate(TARGETING::CLASS_ENC,
                                              TARGETING::TYPE_NODE);
     TARGETING::PredicateHwas l_predHwas;
     l_predHwas.present(true);
@@ -341,16 +327,17 @@ void hdatPopulateMTMAndSerialNumber()
                                         &l_presentNode);
 
     TARGETING::Target *l_nodeTarget = (*l_nodeFilter);
+    HDAT_DBG("before deviceRead  PVPD::VSYS, PVPD::TM");
 
    l_errl = deviceRead(l_nodeTarget, NULL, l_vpdSize,
-            DEVICE_PVPD_ADDRESS( PVPD::OSYS, PVPD::MM ));
+            DEVICE_PVPD_ADDRESS( PVPD::VSYS, PVPD::TM ));
 
     if(l_errl == NULL)
     {
         uint8_t l_vpddata[l_vpdSize];
 
         l_errl = deviceRead(l_nodeTarget, l_vpddata, l_vpdSize,
-                DEVICE_PVPD_ADDRESS( PVPD::OSYS, PVPD::MM ));
+                DEVICE_PVPD_ADDRESS( PVPD::VSYS, PVPD::TM ));
 
         if(l_errl == NULL)
         {
@@ -358,6 +345,7 @@ void hdatPopulateMTMAndSerialNumber()
             //phyp would requre just 8 character of MTM
             strncpy(l_rawMTM,reinterpret_cast<const char*>(l_vpddata),
                     l_mtmSize);
+            HDAT_DBG("from deviceRead l_rawMTM=%s, l_vpddata=%s",l_rawMTM,l_vpddata);
             for(uint8_t i=0; i<sizeof(l_rawMTM); i++)
             {
                 if(l_rawMTM[i] == '-')
@@ -368,33 +356,41 @@ void hdatPopulateMTMAndSerialNumber()
             }
 
             if(!l_pSysTarget->trySetAttr<TARGETING::ATTR_RAW_MTM>
-                                                                   (l_rawMTM))
+                                                  (l_rawMTM))
             {
                 HDAT_ERR("Error in setting MTM");
             }
         }
+        else
+        {
+            HDAT_DBG("deviceRead on PVPD::VSYS, PVPD::TM returned error");
+        }
+    }
+    else
+    {
+        HDAT_DBG("deviceRead on PVPD::VSYS, PVPD::TM returned error to fetch the vpd size");
     }
     if(l_errl)
     {
         ERRORLOG::errlCommit(l_errl,HDAT_COMP_ID);
-    }*/
+    }
 
-    //TODO RTC attribute ATTR_RAW_MTM not defined
-    /*if(!l_pSysTarget->trySetAttr<TARGETING::ATTR_RAW_MTM>
+    if(!l_pSysTarget->trySetAttr<TARGETING::ATTR_RAW_MTM>
                          (l_rawMTM))
     {
         HDAT_ERR("Error in setting MTM");
-    }*/
+    }
 
-    /*l_errl = deviceRead(l_nodeTarget, NULL, l_vpdSize,
-            DEVICE_PVPD_ADDRESS( PVPD::OSYS, PVPD::SS ));
+    HDAT_DBG("before deviceRead PVPD::VSYS, PVPD::SE");
+    l_errl = deviceRead(l_nodeTarget, NULL, l_vpdSize,
+            DEVICE_PVPD_ADDRESS( PVPD::VSYS, PVPD::SE ));
 
     if(l_errl == NULL)
     {
         uint8_t l_vpddata[l_vpdSize];
 
         l_errl = deviceRead(l_nodeTarget, l_vpddata, l_vpdSize,
-                DEVICE_PVPD_ADDRESS( PVPD::OSYS, PVPD::SS ));
+                DEVICE_PVPD_ADDRESS( PVPD::VSYS, PVPD::SE ));
 
         if(l_errl == NULL)
         {
@@ -402,6 +398,8 @@ void hdatPopulateMTMAndSerialNumber()
             //phyp would requre just 7 character of serial number
             strncpy(reinterpret_cast<char *>(l_serialNumber),
                     reinterpret_cast<const char*>(l_vpddata),l_serialSize);
+            HDAT_DBG("from deviceRead l_serialNumber=%s and l_vpddata=%s",
+                                                 l_serialNumber,l_vpddata);
 
             if(!l_pSysTarget->trySetAttr
                 <TARGETING::ATTR_SERIAL_NUMBER>(l_serialNumber))
@@ -409,9 +407,8 @@ void hdatPopulateMTMAndSerialNumber()
                 HDAT_ERR("Error in setting Serial Number");
             }
         }
-    }*/
-    //TODO RTC attribute ATTR_SERIAL_NUMBER not defined
-    /*if(!l_pSysTarget->trySetAttr
+    }
+    if(!l_pSysTarget->trySetAttr
            <TARGETING::ATTR_SERIAL_NUMBER>(l_serialNumber))
     {
         HDAT_ERR("Error in setting Serial Number");
@@ -420,63 +417,11 @@ void hdatPopulateMTMAndSerialNumber()
     if(l_errl)
     {
         ERRORLOG::errlCommit(l_errl,HDAT_COMP_ID);
-    }*/
+    }
 
-HDAT_EXIT();
+    HDAT_EXIT();
 }
 
-/**
- * @brief This routine gets prefix of location code
- *
- * @pre None
- *
- * @post None
- *
- * @param   o_locCode      - output parameter - Location Code Prefix
- *
- * @return None
- */
-void hdatGetLocationCodePrefix(char *o_locCode)
-{
-    TARGETING::ATTR_RAW_MTM_type l_rawMTM = {0};
-    TARGETING::ATTR_SERIAL_NUMBER_type l_serialNumber = {0};
-    TARGETING::Target *l_pSysTarget = NULL;
-
-    (void) TARGETING::targetService().getTopLevelTarget(l_pSysTarget);
-    if(l_pSysTarget == NULL)
-    {
-        HDAT_ERR("Error in getting Top Level Target");
-        assert(l_pSysTarget != NULL);
-    }
-
-    strcpy(reinterpret_cast<char *>(l_serialNumber),"RAINIER");
-
-    strcpy(o_locCode, "U");
-
-    //if(l_pSysTarget == TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL)
-   // {
-   //     assert(false);
-   // }
-
-    //@TODO RTC 246357 attribute MTM and SERIAL_NUMBER not defined
-    if(l_pSysTarget->tryGetAttr<TARGETING::ATTR_RAW_MTM>(l_rawMTM))
-    {
-        if(1)
-        {
-            strcat(o_locCode,"OPWR");
-            strcat(o_locCode,".");
-            strcat(o_locCode,(const char*)l_serialNumber);
-        }
-        else
-        {
-            HDAT_ERR("Error accessing ATTR_SERIAL_NUMBER attribute");
-        }
-    }
-    else
-    {
-        HDAT_ERR("Error accessing ATTR_RAW_MTM attribute");
-    }
-}
 
 /**
  * @brief This routine constructs the location Code for the incoming target
@@ -485,62 +430,122 @@ void hdatGetLocationCodePrefix(char *o_locCode)
  *
  * @post None
  *
- * @param i_pFruTarget    - input parameter - System target
- *        i_locCodePrefix - input parameter - Location Code prefix
+ * @param i_pFruTarget    - input parameter - fru target
+ *        i_frutype - input parameter - fru type
  *        o_locCode - output parameter - Constructed location code
  *
  * @return None
  */
+
 void hdatGetLocationCode(TARGETING::Target *i_pFruTarget,
-                                             char *i_locCodePrefix,
-                                             char *o_locCode)
+                         HDAT_FRUType_t i_frutype,
+                         char *o_locCode)
 {
+    HDAT_ENTER();
     TARGETING::ATTR_PHYS_PATH_type l_physPath;
-    TARGETING::ATTR_LOCATION_CODE_type l_locationCode;
+    TARGETING::ATTR_STATIC_ABS_LOCATION_CODE_type l_absLocationCode;
+    TARGETING::ATTR_CHASSIS_LOCATION_CODE_type l_chassisLocationCode;
+    TARGETING::ATTR_SYS_LOCATION_CODE_type l_sysLocationCode;
     char *l_pPhysPath;
     char l_locCode[64] = {0};
 
 
-    if(i_pFruTarget->tryGetAttr<TARGETING::ATTR_LOCATION_CODE>(l_locationCode)
-                    && (strlen(l_locationCode) > 0))
+    HDAT_DBG("entered hdatGetLocationCode with fru type 0x%x",i_frutype);
+    TARGETING::Target *l_pSystemTarget = NULL;
+    (void) TARGETING::targetService().getTopLevelTarget(l_pSystemTarget);
+    if(l_pSystemTarget == NULL)
     {
-        sprintf(l_locCode, "%s-%s",i_locCodePrefix,l_locationCode);
+        HDAT_ERR("Error in getting Top Level Target");
+        assert(l_pSystemTarget != NULL);
     }
-    else if(i_pFruTarget->tryGetAttr<TARGETING::ATTR_PHYS_PATH>(l_physPath))
+
+    if(i_frutype == HDAT_SLCA_FRU_TYPE_SV ||
+       i_frutype == HDAT_SLCA_FRU_TYPE_VV)
     {
-        char *l_cutString;
-        char *l_suffix;
-
-        l_pPhysPath = i_pFruTarget->getAttr
-                                 <TARGETING::ATTR_PHYS_PATH>().toString();
-
-        l_cutString = strchr(l_pPhysPath, '/');
-        l_suffix = l_cutString;
-
-        while (l_cutString != NULL)
+        HDAT_DBG("fru type VV or SV 0x%x only SYS_LOCATION_CODE",i_frutype);
+        if(l_pSystemTarget->tryGetAttr<TARGETING::ATTR_SYS_LOCATION_CODE>
+                           (l_sysLocationCode)
+                       &&(strlen(l_sysLocationCode) > 0))
         {
-            l_suffix = l_cutString;
-            l_cutString = strchr(l_cutString+1, '/');
+            HDAT_DBG("fetched SYS_LOCATION_CODE %s for fru type %d",
+                      l_sysLocationCode, i_frutype);
+            sprintf(l_locCode, "%s",l_sysLocationCode);
         }
-
-        sprintf(l_locCode, "%s-%s",i_locCodePrefix,(l_suffix+1));
     }
     else
     {
-        HDAT_ERR("Error accessing ATTR_PHYS_PATH or ATTR_LOCATION_CODE attribute");
-        return;
-    }
-
-    uint8_t l_index = 0;
-    while(l_index < strlen(l_locCode))
-    {
-        if(l_locCode[l_index] != ' ')
+        if(l_pSystemTarget->tryGetAttr<TARGETING::ATTR_CHASSIS_LOCATION_CODE>
+                        (l_chassisLocationCode)
+                    &&  (strlen(l_chassisLocationCode) > 0))
         {
-            *o_locCode++ = l_locCode[l_index];
+            HDAT_DBG("fetched CHASSIS_LOCATION_CODE %s for fru type %d",
+                          l_chassisLocationCode, i_frutype);
         }
-        l_index++;
-    }
+        if(i_frutype == HDAT_SLCA_FRU_TYPE_EV)
+        {
+            HDAT_DBG("fru type EV 0x%x only CHASSIS_LOCATION_CODE",i_frutype);
+            sprintf(l_locCode, "%s",l_chassisLocationCode);
+        }
+
+        else
+        {
+            if(i_pFruTarget->tryGetAttr
+                   <TARGETING::ATTR_STATIC_ABS_LOCATION_CODE>(l_absLocationCode)
+                          && (strlen(l_absLocationCode) > 0))
+            {
+                HDAT_DBG("fetched ATTR_STATIC_ABS_LOCATION_CODE %s",
+                                                             l_absLocationCode);
+                HDAT_DBG("l_chassisLocationCode=%s, l_absLocationCode=%s",
+                            l_chassisLocationCode,l_absLocationCode);
+                sprintf(l_locCode, "%s-%s",
+                       l_chassisLocationCode,l_absLocationCode);
+            }
+         }
+     }
+     HDAT_DBG("l_locCode = %s",l_locCode);
+
+     if ( strlen(l_locCode) <= 0)
+     {
+         if(i_pFruTarget->tryGetAttr<TARGETING::ATTR_PHYS_PATH>
+                            (l_physPath))
+         {
+             HDAT_DBG("fetching the ATTR_PHYS_PATH for location code");
+             char *l_cutString;
+             char *l_suffix;
+
+             l_pPhysPath = i_pFruTarget->getAttr
+                            <TARGETING::ATTR_PHYS_PATH>().toString();
+
+             l_cutString = strchr(l_pPhysPath, '/');
+             l_suffix = l_cutString;
+
+             while (l_cutString != NULL)
+             {
+                 l_suffix = l_cutString;
+                 l_cutString = strchr(l_cutString+1, '/');
+             }
+
+             sprintf(l_locCode, "ufcs-%s",(l_suffix+1));
+         }
+         else
+         {
+             HDAT_ERR("Error accessing ATTR_PHYS_PATH attribute");
+             return;
+         }
+     }
+
+     uint8_t l_index = 0;
+     while(l_index < strlen(l_locCode))
+     {
+         if(l_locCode[l_index] != ' ')
+         {
+             *o_locCode++ = l_locCode[l_index];
+         }
+         l_index++;
+     }
+     HDAT_EXIT();
 }
+
 
 /******************************************************************************/
 //hdatGetAsciiKwd
@@ -548,7 +553,7 @@ void hdatGetLocationCode(TARGETING::Target *i_pFruTarget,
 
 errlHndl_t hdatGetAsciiKwd( TARGETING::Target * i_target,uint32_t &o_kwdSize,
            char* &o_kwd,vpdType i_vpdtype,struct vpdData i_fetchVpd[],
-           uint32_t i_num, size_t theSize[])
+           uint32_t i_num, size_t theSize[],const HdatKeywordInfo i_Keywords[])
 {
     HDAT_ENTER();
     errlHndl_t l_err = NULL;
@@ -562,7 +567,8 @@ errlHndl_t hdatGetAsciiKwd( TARGETING::Target * i_target,uint32_t &o_kwdSize,
              break;
         case BP:
              l_err = hdatGetAsciiKwdForPvpd(i_target,o_kwdSize,o_kwd,
-                                            i_fetchVpd,i_num,theSize);
+                                            i_fetchVpd,i_num,theSize,
+                                            i_Keywords);
              HDAT_DBG("got back kwd size=%x",o_kwdSize);
              break;
         default:
@@ -609,15 +615,24 @@ errlHndl_t hdatGetFullRecords( TARGETING::Target * i_target,uint32_t &o_kwdSize,
 /******************************************************************************/
 errlHndl_t hdatGetAsciiKwdForPvpd(TARGETING::Target * i_target,
            uint32_t &o_kwdSize,char* &o_kwd,
-           struct vpdData i_fetchVpd[], size_t i_num, size_t theSize[])
+           struct vpdData i_fetchVpd[], size_t i_num, size_t theSize[],
+           const HdatKeywordInfo i_Keywords[])
 {
+    HDAT_ENTER();
+    HDAT_DBG("entered hdatGetAsciiKwdForPvpd with total number of kwds=%d ",
+                               i_num);
 
     errlHndl_t l_err = NULL;
-    uint64_t cmds = 0x0;
     uint64_t fails = 0x0;
     VPD::vpdRecord theRecord = 0x0;
     VPD::vpdKeyword theKeyword = 0x0;
 
+    size_t viniSize{};
+    uint32_t lxSize{};
+    uint8_t numRecords = 2; //VINI and LXR0 for BP
+    size_t numViniKwds{};
+    size_t numLXKwds {};
+    size_t cmds{};
 
     o_kwd = NULL;
     o_kwdSize = 0;
@@ -633,15 +648,19 @@ errlHndl_t hdatGetAsciiKwdForPvpd(TARGETING::Target * i_target,
 
         for( uint32_t curCmd = 0; curCmd < numCmds; curCmd++ )
         {
-            cmds++;
             theRecord = i_fetchVpd[curCmd].record;
             theKeyword = i_fetchVpd[curCmd].keyword;
 
-            if( theKeyword == PVPD::LX)
+            if(theRecord == PVPD::LXR0 &&
+                theKeyword == PVPD::RT)
             {
-                theSize[curCmd] = 0;
-                continue;
+                numViniKwds = cmds;
+                HDAT_DBG("starting LXR0 here ");
+                viniSize = o_kwdSize;
+                HDAT_DBG("so vini records size=0x%x, numViniKwds=0x%x",
+                                               viniSize,numViniKwds);
             }
+
             l_err = deviceRead( i_target,
                               NULL,
                               theSize[curCmd],
@@ -672,16 +691,37 @@ errlHndl_t hdatGetAsciiKwdForPvpd(TARGETING::Target * i_target,
 
                 continue;
             }
+            cmds++;
             HDAT_DBG("fetching BP kwd size PVPD, size initialised=%x "
              " keyword =%04x",theSize[curCmd],theKeyword);
             o_kwdSize += theSize[curCmd];
         }
+        numLXKwds = cmds - numViniKwds;
+        lxSize = o_kwdSize - viniSize;
+        HDAT_DBG("lxSize=0x%x and numLXKwds=0x%x",lxSize,numLXKwds);
 
-        HDAT_DBG("hdatGetAsciiKwdForPvpd:: allocating total key word size %d",
+        HDAT_DBG("hdatGetAsciiKwdForPvpd:: only all key word data size 0x%x",
                   o_kwdSize);
-        o_kwd = new char[o_kwdSize];
+        uint8_t l_startTag = HDAT_VPD_RECORD_START_TAG;
+        uint8_t l_endTag = HDAT_VPD_RECORD_END_TAG;
+        uint32_t l_RecTagSize = 2 * sizeof(l_startTag);  // Size of start and end Tags for each record
+        uint32_t l_wholeTagSize = l_RecTagSize * numRecords;  // Size of start and end tags for all records
 
-        uint32_t loc = 0;
+        size_t totSize = o_kwdSize + l_wholeTagSize +   //kwd data size + start + end tag
+                           (sizeof(uint16_t)*numRecords) *  //size val of all recs
+                           i_num *2 +//total kwd name size
+                           i_num * sizeof(uint8_t); //separator between kwds
+        o_kwdSize = totSize;
+
+        o_kwd = new char[totSize]; 
+        HDAT_DBG("vini kwd Size=0x%x, numViniKwds=0x%x",viniSize,numViniKwds);
+        uint16_t tmpVINISize = viniSize + numViniKwds * 1 + numViniKwds * 2;
+        HDAT_DBG("VINI SIZE=0x%x",tmpVINISize);
+        uint16_t tmpSize = UINT16_IN_LITTLE_ENDIAN(tmpVINISize);
+        memcpy(reinterpret_cast<void *>(o_kwd),&l_startTag,sizeof(l_startTag));
+        memcpy(reinterpret_cast<void *>(o_kwd+1),&tmpSize,sizeof(tmpSize));
+
+        uint32_t loc = sizeof(uint16_t) + sizeof(uint8_t);
         for( uint32_t curCmd = 0; curCmd < numCmds; curCmd++ )
         {
             theRecord = i_fetchVpd[curCmd].record;
@@ -691,6 +731,7 @@ errlHndl_t hdatGetAsciiKwdForPvpd(TARGETING::Target * i_target,
             //theSize[curCmd] will be 0.
             if( theSize[curCmd] == 0)
             {
+                HDAT_DBG("theSize[curCmd] is 0");
                 continue;
             }
             theData = new uint8_t [theSize[curCmd]];
@@ -703,7 +744,8 @@ errlHndl_t hdatGetAsciiKwdForPvpd(TARGETING::Target * i_target,
                               theSize[curCmd],
                               DEVICE_PVPD_ADDRESS( theRecord,
                                                    theKeyword ) );
-            HDAT_DBG("hdatGetAsciiKwdForPvpd: read BP data %s",theData);
+            HDAT_DBG("hdatGetAsciiKwdForPvpd: read BP KWD=%s, data %s",
+                                       i_Keywords[curCmd].keywordName,theData);
 
             if ( l_err )
             {
@@ -737,6 +779,30 @@ errlHndl_t hdatGetAsciiKwdForPvpd(TARGETING::Target * i_target,
             }
             if ( NULL != theData )
             {
+                if(theRecord == PVPD::LXR0 &&
+                    theKeyword == PVPD::RT)
+                {
+                    HDAT_DBG("end writing VINI");
+                     memcpy(reinterpret_cast<void *>(o_kwd + loc),&l_endTag,
+                                                              sizeof(l_endTag));
+                     memcpy(reinterpret_cast<void *>(o_kwd + loc+1),&l_startTag,
+                                                            sizeof(l_startTag));
+                     HDAT_DBG("lxSize=0x%x, numLXKwds=0x%x",lxSize,numLXKwds);
+                     uint16_t tmpLxSize = lxSize + numLXKwds * 1 + 
+                                                                 numLXKwds * 2;
+                     HDAT_DBG("LX SIZE=0x%x",tmpLxSize);
+                     tmpSize = UINT16_IN_LITTLE_ENDIAN(tmpLxSize);
+                     memcpy(reinterpret_cast<void *>(o_kwd + loc+2),
+                                                     &tmpSize,sizeof(tmpSize));
+                     loc += sizeof(l_startTag) *2 + sizeof(tmpSize); 
+                }
+                memcpy(reinterpret_cast<void *>(o_kwd + loc),
+                                            &i_Keywords[curCmd].keywordName, 2);
+                loc += 2;
+                uint8_t l_var = theSize[curCmd];
+                memcpy(reinterpret_cast<void *>(o_kwd + loc),&l_var,
+                            sizeof(uint8_t));
+                loc += sizeof(uint8_t);
                 memcpy(reinterpret_cast<void *>(o_kwd + loc),theData,
                        theSize[curCmd]);
 
@@ -747,12 +813,14 @@ errlHndl_t hdatGetAsciiKwdForPvpd(TARGETING::Target * i_target,
                           curCmd);
             }
         }
+        memcpy(reinterpret_cast<void *>(o_kwd + loc),&l_endTag,
+                                                            sizeof(l_endTag));
     }while(0);
 
     HDAT_DBG("hdatGetAsciiKwdForPvpd: returning keyword size %d and data %s",
               o_kwdSize,o_kwd);
+    HDAT_EXIT();
     return l_err;
-
 }
 
 
@@ -764,6 +832,7 @@ errlHndl_t hdatGetPvpdFullRecord(TARGETING::Target * i_target,
            uint32_t &o_kwdSize,char* &o_kwd,
            const IpVpdFacade::recordInfo i_fetchVpd[], size_t i_num, size_t theSize[])
 {
+    HDAT_ENTER();
 
     errlHndl_t l_err = NULL;
     uint64_t fails = 0x0;
@@ -901,8 +970,8 @@ errlHndl_t hdatGetPvpdFullRecord(TARGETING::Target * i_target,
 
     HDAT_DBG("hdatGetPvpdFullRecord: returning keyword size %d and data %s",
               o_kwdSize,o_kwd);
+    HDAT_EXIT();
     return l_err;
-
 }
 
 /******************************************************************************/
@@ -1418,6 +1487,7 @@ errlHndl_t hdatGetAsciiKwdForSpd(TARGETING::Target * i_target,
 void hdatGetTarget (const hdatSpiraDataAreas i_dataArea,
                         TARGETING::TargetHandleList &o_targList)
 {
+    HDAT_ENTER();
     TARGETING::TYPE l_type;
     TARGETING::CLASS l_class;
 
@@ -1469,6 +1539,7 @@ void hdatGetTarget (const hdatSpiraDataAreas i_dataArea,
             (l_class == TARGETING::CLASS_SYS))
         {
             o_targList.push_back(l_sys);
+            HDAT_DBG("fetched SYS target");
         }
         else
         {
@@ -1485,6 +1556,7 @@ void hdatGetTarget (const hdatSpiraDataAreas i_dataArea,
 
     }
 
+    HDAT_EXIT();
 }
 
 errlHndl_t hdatformatAsciiKwd(const struct vpdData i_fetchVpd[],
@@ -1493,6 +1565,7 @@ errlHndl_t hdatformatAsciiKwd(const struct vpdData i_fetchVpd[],
         const HdatKeywordInfo i_Keywords[])
 {
     HDAT_ENTER();
+    HDAT_DBG("entered hdatformatAsciiKwd with theSize=0x%x",theSize);
 
     // i_kwdSize - data size
     // (i_num* sizeof(uint8_t)) - individual datat size

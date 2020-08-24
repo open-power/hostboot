@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -102,6 +102,7 @@ errlHndl_t hdatProcessFru(const hdatMsAddr_t &i_msAddr,
     if (HDAT_SYS_VPD == i_dataArea)
     {
         l_strName = HDAT_SYS_VPD_STRUCT_NAME;
+        HDAT_DBG("constructing SYS VPD");
     }
     else
     {
@@ -117,11 +118,6 @@ errlHndl_t hdatProcessFru(const hdatMsAddr_t &i_msAddr,
         {
             uint32_t l_num = i_size/sizeof (i_fetchVpd[0]);
            l_num -= 1 ;  // The last record is TEST record.which shouldn't be used.
-
-            //@TODO: RTC 142465 missing attribute
-            //FRU_BP and FRU_SV does not have slca index and rid
-            /*assert((l_targList[l_cnt]->tryGetAttr<TARGETING::ATTR_SLCA_RID>
-            (l_hdatRID)));*/
 
             // Construct the VPD object and write the flat data to a file
             l_vpdObj = new HdatVpd(l_errlHndl,

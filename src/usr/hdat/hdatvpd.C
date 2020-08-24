@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -58,13 +58,6 @@ extern trace_desc_t * g_hdatTraceDesc;
 /*----------------------------------------------------------------------------*/
 const uint16_t HDAT_VPD_VERSION = 0x0020;
 
-const uint8_t LX_RECORD_TEMPLATE[] =
-{0x84, 0x1C, 0x00, 0x52, 0x54, 0x04, 0x4C, 0x58,
- 0x52, 0x30, 0x56, 0x5A, 0x02, 0x30, 0x31, 0x4C,
- 0x58, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
- 0x00, 0x00, 0x50, 0x46, 0x02, 0x00, 0x00, 0x78};
-const uint16_t LX_RECORD_SIZE = 32;
-const uint16_t LX_KEYWORD_OFFSET= 18;
 
 /** @brief See the prologue in hdatvpd.H
  */
@@ -88,8 +81,9 @@ iv_kwdSize(0), iv_kwd(NULL)
     i_target->tryGetAttr<TARGETING::ATTR_SLCA_INDEX>(l_slcaIdx);
 
     //overriding target for BP  vpd
-    if ( FRU_SV == (i_resourceId >> 8 ) )
+    if ( strcmp(i_eyeCatcher,HDAT_SYS_VPD_STRUCT_NAME) == 0 )
     {
+        HDAT_DBG("fetching node target for SYSVPD");
         TARGETING::TargetHandleList l_targList;
         PredicateCTM predNode(TARGETING::CLASS_ENC, TARGETING::TYPE_NODE);
         PredicateHwas predFunctional;
@@ -121,18 +115,14 @@ iv_kwdSize(0), iv_kwd(NULL)
     size_t theSize[i_num];
     char *o_fmtKwd = nullptr;
     uint32_t o_fmtkwdSize = 0;
-    //get the SLCA index and the keyword for the RID
-    if ( i_vpdType != BP) //fetch bp vpd from file
-    {
     o_errlHndl = hdatGetAsciiKwd(l_target,iv_kwdSize,iv_kwd,i_vpdType,
-                                 i_fetchVpd,i_num,theSize);
+                                 i_fetchVpd,i_num,theSize,i_pvpdKeywords);
+    //no need to call hdatformatAsciiKwd as the kwd is formatted 
+    //in the abovefunction itself  
 
     HDAT_DBG("hdatGetAsciiKwd returned kwd size =%d",iv_kwdSize);
 
-    o_errlHndl = hdatformatAsciiKwd(i_fetchVpd, i_num, theSize, iv_kwd,
-                iv_kwdSize, o_fmtKwd, o_fmtkwdSize, i_pvpdKeywords);
-    }
-    else //bp vpd
+    /*else //bp vpd
     {
         UtilFile l_bpFile ("pvpd_bp.dat");
         if ( !l_bpFile.exists())
@@ -168,7 +158,7 @@ iv_kwdSize(0), iv_kwd(NULL)
             }
             }while(0);
         }
-    }
+    }*/
     if( o_fmtKwd != NULL )
     {
         delete[] iv_kwd;
@@ -178,38 +168,6 @@ iv_kwdSize(0), iv_kwd(NULL)
         delete[] o_fmtKwd;
         o_fmtKwd = nullptr;
     }
-
-    //@TODO: RTC 246357 : HDAT: Support of missing attributes in P10 Rainer
-    //this block is probably not required because LXR0 is
-    ////available in the bp vpd file as needed by Phyp
-    /*if(strcmp(i_eyeCatcher,"IO KID")==0)
-    {
-        using namespace TARGETING;
-        // Get Target Service, and the system target.
-        TARGETING::TargetService& l_targetService = targetService();
-        TARGETING::Target* l_sysTarget = NULL;
-        (void) l_targetService.getTopLevelTarget(l_sysTarget);
-
-        assert(l_sysTarget != NULL);
-
-        //fetching lx data
-        uint64_t l_LXvalue = l_sysTarget->getAttr<ATTR_ASCII_VPD_LX_KEYWORD>();
-        char *temp_lx = new char[LX_RECORD_SIZE];
-        memcpy(temp_lx, LX_RECORD_TEMPLATE, LX_RECORD_SIZE);
-        memcpy((void*)(temp_lx + LX_KEYWORD_OFFSET), &l_LXvalue, sizeof(uint64_t));
-
-        //append LXR0 record to VINI record
-        size_t combined_size = iv_kwdSize + LX_RECORD_SIZE;
-        char * temp_buf = new char[combined_size];
-        memcpy(temp_buf,iv_kwd,iv_kwdSize);
-        memcpy((void *)(temp_buf+iv_kwdSize),temp_lx, LX_RECORD_SIZE);
-
-        delete[] temp_lx;
-        delete[] iv_kwd;
-        iv_kwd = temp_buf;
-        iv_kwdSize = combined_size;
-    }*/
-
 
     if (NULL == o_errlHndl)
     {
@@ -246,8 +204,9 @@ iv_kwdSize(0), iv_kwd(NULL)
     i_target->tryGetAttr<TARGETING::ATTR_SLCA_INDEX>(l_slcaIdx);
 
     //overriding target for BP  vpd
-    if ( FRU_SV == (i_resourceId >> 8 ) )
+    if ( strcmp(i_eyeCatcher,HDAT_SYS_VPD_STRUCT_NAME) == 0 )
     {
+        HDAT_DBG("fetching node target for SYSVPD");
         TARGETING::TargetHandleList l_targList;
         PredicateCTM predNode(TARGETING::CLASS_ENC, TARGETING::TYPE_NODE);
         PredicateHwas predFunctional;
@@ -280,17 +239,12 @@ iv_kwdSize(0), iv_kwd(NULL)
 
     iv_fru.hdatResourceId = i_resourceId;
     size_t theSize[i_num];
-    //get the SLCA index and the keyword for the RID
-    //TODO does Phyp need the full bp vpd?
-    //or only LX R0 kwd as fsp??
-    if (i_vpdType != BP)
-    {
+    HDAT_DBG("before hdatGetFullRecords");
     o_errlHndl = hdatGetFullRecords(l_target,iv_kwdSize,iv_kwd,i_vpdType,
                                  i_fetchVpd,i_num,theSize);
 
     HDAT_DBG("hdatGetFullRecords returned kwd size =%d",iv_kwdSize);
-    }
-    else
+    /*else
     {
         UtilFile l_bpFile ("pvpd_bp.dat");
         if ( !l_bpFile.exists())
@@ -326,39 +280,8 @@ iv_kwdSize(0), iv_kwd(NULL)
             HDAT_DBG("constructed full bp vpd data");
             }while(0);
         }
-    }
-
-    //TODO RTC 246357 missing attrubute
-    //this block may not be needed as LXR0 is
-    //already available in the bp vpd for Rainier
-    /*if(strcmp(i_eyeCatcher,"IO KID")==0)
-    {
-        using namespace TARGETING;
-        // Get Target Service, and the system target.
-        TARGETING::TargetService& l_targetService = targetService();
-        TARGETING::Target* l_sysTarget = NULL;
-        (void) l_targetService.getTopLevelTarget(l_sysTarget);
-
-        assert(l_sysTarget != NULL);
-
-        //fetching lx data
-        uint64_t l_LXvalue = l_sysTarget->getAttr<ATTR_ASCII_VPD_LX_KEYWORD>();
-        char *temp_lx = new char[LX_RECORD_SIZE];
-        memcpy(temp_lx, LX_RECORD_TEMPLATE, LX_RECORD_SIZE);
-        memcpy((void*)(temp_lx + LX_KEYWORD_OFFSET), &l_LXvalue, sizeof(uint64_t));
-
-        //append LXR0 record to VINI record
-        size_t combined_size = iv_kwdSize + LX_RECORD_SIZE;
-        char * temp_buf = new char[combined_size];
-        memcpy(temp_buf,iv_kwd,iv_kwdSize);
-        memcpy((void *)(temp_buf+iv_kwdSize),temp_lx, LX_RECORD_SIZE);
-
-        delete[] temp_lx;
-        temp_lx = nullptr;
-        delete[] iv_kwd;
-        iv_kwd = temp_buf;
-        iv_kwdSize = combined_size;
     }*/
+
     if (NULL == o_errlHndl)
     {
         iv_fru.hdatSlcaIdx = l_slcaIdx;

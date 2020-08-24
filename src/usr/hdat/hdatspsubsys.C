@@ -541,7 +541,8 @@ errlHndl_t HdatSpSubsys::hdatFillDataPtrs()
                                           iv_kwd,
                                           HDAT::PROC,
                                           mvpdDataTable,
-                                          l_num,theSize);
+                                          l_num,theSize,
+                                          l_mvpdKeywords);
             HDAT_DBG(" initial size vpd  : %X", iv_kwdSize);
             if(l_errlHndl)
             {

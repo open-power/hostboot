@@ -31,6 +31,13 @@ namespace HDAT
 const uint16_t HDAT_SLCA_STRUCT_VERSION    = 0x21;
 const char HDAT_SLCA_STRUCT_NAME[7] = "SLCA  ";
 
+struct pldm_entity_info
+{
+    uint16_t entityType;
+    uint16_t entityInstanceNumber;
+    uint16_t containerId;
+}__attribute__ ((packed));
+
 struct HDAT_slcaEntry_t
 {
     uint16_t fru_index;                 //slca_index_of_this_fru
@@ -52,6 +59,8 @@ struct HDAT_slcaEntry_t
     uint16_t number_of_children_2B;     //number of children - 2 byte version
     uint8_t installed;                  //Is FRU installed
     uint8_t collected;                  //Is FRU VPD collected
+    pldm_entity_info pldm_entity_id;             //pldm entity id of this fru
+    pldm_entity_info first_child_pldm_entity_id; //pldm entity id of this frus 1st child
 
     HDAT_slcaEntry_t():fru_index(0xFFFF),
                        fru_rid(0xFFFF),
@@ -74,32 +83,6 @@ struct HDAT_slcaEntry_t
                             memset(&fru_id,0x0,sizeof(fru_id));
                             memset(&location_code,0x0,sizeof(location_code));
                        };
-
-};
-
-enum HDAT_FRUType_t
-{
- HDAT_SLCA_FRU_TYPE_BP      = 0x00,
- HDAT_SLCA_FRU_TYPE_EV      = 0x01,
- HDAT_SLCA_FRU_TYPE_SV      = 0x02,
- HDAT_SLCA_FRU_TYPE_PROC    = 0x03,
- HDAT_SLCA_FRU_TYPE_MEM     = 0x04,
- HDAT_SLCA_FRU_TYPE_IOP     = 0x05,
- HDAT_SLCA_FRU_TYPE_SP      = 0x06,
- HDAT_SLCA_FRU_TYPE_PS      = 0x07,
- HDAT_SLCA_FRU_TYPE_AM      = 0x08,
- HDAT_SLCA_FRU_TYPE_CU      = 0x09,
- HDAT_SLCA_FRU_TYPE_CE      = 0x0A,
- HDAT_SLCA_FRU_TYPE_OP      = 0x0B,
- HDAT_SLCA_FRU_TYPE_RG      = 0x0C,
- HDAT_SLCA_FRU_TYPE_SA      = 0x0D,
- HDAT_SLCA_FRU_TYPE_EI      = 0x0E,
- HDAT_SLCA_FRU_TYPE_EF      = 0x0F,
- HDAT_SLCA_FRU_TYPE_CS      = 0x10,
- HDAT_SLCA_FRU_TYPE_DIMM    = 0x11,
- HDAT_SLCA_FRU_TYPE_VV      = 0x12,
- HDAT_SLCA_FRU_TYPE_RI      = 0x13,
- HDAT_SLCA_FRU_TYPE_UNKNOWN = 0xFF,
 };
 
 struct fru_id_rid_t

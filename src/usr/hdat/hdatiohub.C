@@ -37,7 +37,7 @@ using namespace TARGETING;
 namespace HDAT
 {
 
-vpdData mvpdData[] =
+vpdData pvpdData[] =
 {
     { PVPD::VINI, PVPD::RT },
     { PVPD::VINI, PVPD::DR },
@@ -53,7 +53,9 @@ vpdData mvpdData[] =
     { PVPD::VINI, PVPD::B3 },
     { PVPD::VINI, PVPD::B4 },
     { PVPD::VINI, PVPD::B7 },
-    { PVPD::VINI, PVPD::PF },
+    { PVPD::LXR0, PVPD::RT },
+    { PVPD::LXR0, PVPD::VZ},
+    { PVPD::LXR0, PVPD::LX },
 };
 
 const HdatKeywordInfo l_pvpdKeywords[] =
@@ -72,22 +74,11 @@ const HdatKeywordInfo l_pvpdKeywords[] =
     { PVPD::B3,  "B3" },
     { PVPD::B4,  "B4" },
     { PVPD::B7,  "B7" },
-    { PVPD::PF,  "PF" },
+    { PVPD::RT,  "RT" },
+    { PVPD::VZ,  "VZ" },
+    { PVPD::LX,  "LX" },
 };
 
-vpdData pvpdDataP10[] =
-{
-/* TODO RTC: 248085 validate p10 record/keywords */
-    { PVPD::VINI, PVPD::PN },
-    { PVPD::VINI, PVPD::SN },
-
-};
-
-const HdatKeywordInfo l_pvpdKeywordsP10[] =
-{
-    { PVPD::PN,  "PN" },
-    { PVPD::SN,  "SN" },
-};
 
 extern trace_desc_t *g_trac_hdat;
 
@@ -493,6 +484,7 @@ errlHndl_t HdatIoHubFru::hdatGetDaughterInfoFromTarget(
                           0,0,0,0);
             assert ( i_target != NULL);
         }
+        HDAT_DBG("entered with i_target=%x",i_target);
         if ((i_target->getAttr<ATTR_CLASS>() != CLASS_CARD)&&
             (i_target->getAttr<ATTR_CLASS>() != CLASS_LOGICAL_CARD)&&
             (i_target->getAttr<ATTR_CLASS>() != CLASS_CHIP))
@@ -593,7 +585,8 @@ errlHndl_t HdatIoHubFru::bldDaughterStruct(uint32_t i_hubArrayNum)
             uint32_t l_procOrdId = i_target->getAttr<TARGETING::ATTR_ORDINAL_ID>();
             if(l_procOrdId == procOrdId)
             {
-                HDAT_DBG("found proc target for procOrdId=0x%x",l_procOrdId);
+                HDAT_DBG("found proc target=%x for procOrdId=0x%x",
+                                              TARGETING::get_huid(i_target),l_procOrdId);
                 break;
             }
             else
@@ -716,7 +709,6 @@ errlHndl_t HdatIoHubFru::addDaughterCard(uint32_t i_resourceId,
     HdatVpd *l_vpdObj, **l_arrayEntry;
     uint32_t l_size;
     uint32_t l_vpdType = 0x0;
-    uint32_t FRU_BP = 0x8;
 
     l_vpdObj = NULL;
     l_vpdType = i_resourceId >> 8;
@@ -729,45 +721,15 @@ errlHndl_t HdatIoHubFru::addDaughterCard(uint32_t i_resourceId,
         //Get the processor model
         auto l_model = TARGETING::targetService().getProcessorModel();
 
-        if ( l_vpdType == FRU_BP )
+        if (l_model == TARGETING::MODEL_POWER10)
         {
-            //@TODO:RTC 213229(Remove HDAT hack or Axone)
-            //Check whether the code can be more fault tolerant by avoiding
-            //model check
-            //@TODO:RTC Story 246361 HDAT Nimbus/Cumulus model code removal
-            /*
-            if(l_model == TARGETING::MODEL_NIMBUS)
-            {
-                uint32_t i_num = sizeof(mvpdData)/sizeof(mvpdData[0]);
-                l_vpdObj = new HdatVpd(l_errlHndl, i_resourceId,i_target,
-                                       HDAT_KID_STRUCT_NAME,i_index,BP,
-                                       mvpdData,i_num,l_pvpdKeywords);
-            }
-             */
-            if(l_model == TARGETING::MODEL_POWER10)
-            {
-                //@TODO RTC 216059 hostboot to read BP vpd via PLDM
-                HDAT_DBG("constructing BP vpd for daughter card");
-                //BP not available in hostboot
-               // uint32_t i_num = sizeof(pvpdDataP10)/sizeof(pvpdDataP10[0]);
-                l_vpdObj = new HdatVpd(l_errlHndl, i_resourceId,i_target,
-                                       HDAT_KID_STRUCT_NAME,i_index,BP,
-                                       pvpdDataP10,0,l_pvpdKeywordsP10);
-            }
-            else
-            {
-                HDAT_ERR("Chip is not POWER10");
-            }
-        }
-        else if (l_model == TARGETING::MODEL_POWER10)//BP vpd not present in Hostboot
-        {
-            //@TODO RTC 216059 hostboot to read BP vpd via PLDM
             //l_vpdType can not be compared since there is no valid rid
-            //for BP
-            HDAT_DBG("else constructing BP vpd for daughter card");
+            //for BP in p10
+            HDAT_DBG("constructing BP vpd for daughter card for p10");
+            uint32_t i_num = sizeof(pvpdData)/sizeof(pvpdData[0]);
             l_vpdObj = new HdatVpd(l_errlHndl, i_resourceId,i_target,
                                       HDAT_KID_STRUCT_NAME,i_index,BP,
-                                      pvpdDataP10,0,l_pvpdKeywordsP10);//values are not used
+                                     pvpdData,i_num,l_pvpdKeywords);
         }
         //@TODO: RTC 148660 pci slots and cards
 
@@ -1058,6 +1020,7 @@ errlHndl_t hdatLoadIoData(const hdatMsAddr_t &i_msAddr,
 
             uint32_t l_procOrdId =
                      l_pProcTarget->getAttr<TARGETING::ATTR_ORDINAL_ID>();
+            HDAT_DBG("l_procOrdId=0x%x for target=0x%x",l_procOrdId,l_pProcTarget);
 
             //Add support for finding the card type
             //All values except HDAT_PROC_CARD is reverved

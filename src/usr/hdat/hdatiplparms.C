@@ -75,6 +75,7 @@ extern trace_desc_t *g_trac_hdat;
  */
 static void hdatGetNumberOfCores(uint32_t &o_numCores)
 {
+    HDAT_ENTER();
     uint8_t          l_prData[9];
     size_t           l_prDataSz = 8;
     errlHndl_t       l_err = NULL;
@@ -110,6 +111,7 @@ static void hdatGetNumberOfCores(uint32_t &o_numCores)
         o_numCores = l_prData[2] >> 4;
         HDAT_DBG("Number of Cores: %d",o_numCores);
     }
+    HDAT_EXIT();
 }
 
 /**
@@ -452,11 +454,10 @@ static errlHndl_t hdatGetPortInfo(HDAT::hdatHDIFDataArray_t &o_portArrayHdr,
     for (uint32_t l_idx = 0; l_idx < l_serialPortList.size(); ++l_idx)
     {
         TARGETING::Target *l_serialportTarget = l_serialPortList[l_idx];
-        char l_locCodePrefix[64]={0};
         char l_locCode[64]={0};
 
-        hdatGetLocationCodePrefix(l_locCodePrefix);
-        hdatGetLocationCode(l_serialportTarget,l_locCodePrefix,l_locCode);
+        hdatGetLocationCode(l_serialportTarget,
+                                         HDAT_SLCA_FRU_TYPE_CS,l_locCode);
         HDAT_DBG(" Serial Port Loc Code :%s", l_locCode);
 
         strncpy((char *)(o_ports[l_loopCnt].hdatLocCode),

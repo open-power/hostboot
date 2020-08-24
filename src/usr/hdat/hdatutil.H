@@ -260,6 +260,31 @@ struct hdatEepromPartData_t
 
 }__attribute__ ((packed));
 
+enum HDAT_FRUType_t
+{
+     HDAT_SLCA_FRU_TYPE_BP      = 0x00,
+     HDAT_SLCA_FRU_TYPE_EV      = 0x01,
+     HDAT_SLCA_FRU_TYPE_SV      = 0x02,
+     HDAT_SLCA_FRU_TYPE_PROC    = 0x03,
+     HDAT_SLCA_FRU_TYPE_MEM     = 0x04,
+     HDAT_SLCA_FRU_TYPE_IOP     = 0x05,
+     HDAT_SLCA_FRU_TYPE_SP      = 0x06,
+     HDAT_SLCA_FRU_TYPE_PS      = 0x07,
+     HDAT_SLCA_FRU_TYPE_AM      = 0x08,
+     HDAT_SLCA_FRU_TYPE_CU      = 0x09,
+     HDAT_SLCA_FRU_TYPE_CE      = 0x0A,
+     HDAT_SLCA_FRU_TYPE_OP      = 0x0B,
+     HDAT_SLCA_FRU_TYPE_RG      = 0x0C,
+     HDAT_SLCA_FRU_TYPE_SA      = 0x0D,
+     HDAT_SLCA_FRU_TYPE_EI      = 0x0E,
+     HDAT_SLCA_FRU_TYPE_EF      = 0x0F,
+     HDAT_SLCA_FRU_TYPE_CS      = 0x10,
+     HDAT_SLCA_FRU_TYPE_DIMM    = 0x11,
+     HDAT_SLCA_FRU_TYPE_VV      = 0x12,
+     HDAT_SLCA_FRU_TYPE_RI      = 0x13,
+     HDAT_SLCA_FRU_TYPE_UNKNOWN = 0xFF,
+};
+
 /**
  * @brief Create/Build an Error log and add HADT component trace
  * if the log exists then FFDC will be added to the existing log and
@@ -358,28 +383,15 @@ void hdatPopulateMTMAndSerialNumber();
  *
  * @post None
  *
- * @param i_pFruTarget    - input parameter - System target
- *        o_LocCodeSuffix - output parameter - Location Code suffix
+ * @param i_pFruTarget    - input parameter - fru target
+ *        i_frutype - fru type
+ *        o_locCode - output location code
  *
  * @return None
  */
 void hdatGetLocationCode(TARGETING::Target *i_pFruTarget,
-                                             char *i_locCodePrefix,
+                                             HDAT_FRUType_t i_frutype,
                                              char *o_locCode);
-
-/**
- * @brief This routine gets prefix of location code
- *
- * @pre None
- *
- * @post None
- *
- * @param i_pnodeTarget  - input parameter - Node target
- *        o_locCode      - output parameter - Location Code Prefix
- *
- * @return None
- */
-void hdatGetLocationCodePrefix(char *o_locCode);
 
 /**
  * @brief  Get the ascii keyword for a TARGET
@@ -392,6 +404,8 @@ void hdatGetLocationCodePrefix(char *o_locCode);
  * @param[in] i_vpdtype: enum vpdType to select the appropriate device address
  * @param[in] i_fetchVpd: relevant structure to be read to fetch the VPD
  * @param[in] i_num: number of elements in the structure
+ * @param[in/out] theSize : array containing the size for each keyword
+ * @param[in]: i_Keywords : keyword enum to name mapping
  *
  * @return errlHndl_t NULL on success
  */
@@ -401,7 +415,8 @@ errlHndl_t hdatGetAsciiKwd(
                            char* &o_kwd,
                            vpdType i_vpdtype,
                            struct vpdData i_fetchVpd[],
-                           uint32_t i_num,size_t theSize[]);
+                           uint32_t i_num,size_t theSize[],
+                           const HdatKeywordInfo i_Keywords[]);
 
 /**
  * @brief  Get the ascii keyword for proc
@@ -445,6 +460,8 @@ errlHndl_t hdatGetFullRecords( TARGETING::Target * i_target,uint32_t &o_kwdSize,
  * @param[out]o_kwd: key word array
  * @param[in] i_fetchVpd: relevant structure to be read to fetch the VPD
  * @param[in] i_num: number of elements in the structure
+ * @param[in/out] theSize : array containing the size for each keyword
+ * @param[in]: i_Keywords : keyword enum to name mapping
  *
  * @return errlHndl_t NULL on success
  *
@@ -454,7 +471,8 @@ errlHndl_t hdatGetAsciiKwdForPvpd(
                        uint32_t &o_kwdSize,
                        char* &o_kwd,
                        struct vpdData i_fetchVpd[],
-                       size_t i_num,size_t theSize[]);
+                       size_t i_num,size_t theSize[],
+                       const HdatKeywordInfo i_Keywords[]);
 
 
 /**

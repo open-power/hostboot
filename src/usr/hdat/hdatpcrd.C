@@ -380,7 +380,7 @@ errlHndl_t HdatPcrd::hdatLoadPcrd(uint32_t &o_size, uint32_t &o_count)
                 uint32_t l_num = sizeof(procVpdData) / sizeof(procVpdData[0]);
                 size_t theSize[l_num];
                 l_errl = hdatGetAsciiKwd(l_pProcTarget,l_asciiKeywordSize,l_keyword,
-                        PROC,procVpdData,l_num,theSize);
+                        PROC,procVpdData,l_num,theSize,l_mvpdKeywords);
                 if(l_errl )
                 {
                     HDAT_ERR("Error [0x%08X] in the collect the VPD data",
