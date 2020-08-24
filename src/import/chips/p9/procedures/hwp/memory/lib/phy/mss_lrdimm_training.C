@@ -1163,7 +1163,7 @@ fapi2::ReturnCode vref<vref_types::DRAM_WR_VREF>::add_command( const fapi2::Targ
             FAPI_DBG("DRAM_WR_VREF:write vref l_rank = 0x%02x l_index = 0x%02x i_vref = 0x%02x",
                      l_rank, l_index, i_vref);
 
-            FAPI_TRY(mss::ddr4::setup_latch_wr_vref_commands_by_rank(l_dimm,
+            FAPI_TRY(mss::ddr4::setup_latch_wr_vref_commands_by_rank<mss::mc_type::NIMBUS>(l_dimm,
                      l_rank,
                      VREF_DEFALT_RANGE,
                      i_vref,
