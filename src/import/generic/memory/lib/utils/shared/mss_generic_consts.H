@@ -1061,6 +1061,16 @@ enum class throttle_type
 };
 
 ///
+/// @brief VREF_DQ_TRAIN enums
+///
+enum vref_dq_train
+{
+    // Intentionally verbose as to avoid cronus bug (collision with DISABLE)
+    TRAIN_DISABLE = 0,
+    TRAIN_ENABLE = 1
+};
+
+///
 /// @brief Trait classes for mc_type
 /// @tparam MC the mc_type
 ///

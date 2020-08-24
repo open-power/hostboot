@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -135,6 +135,18 @@ inline OT ns_to_nck( const uint64_t i_freq, const OT& i_timing_in_ns)
 }
 
 }// spd
+
+///
+/// @brief VREF DQ Enter time *in clocks*
+/// @tparam MC mc_type
+/// @return VREF DQ Enter time *in clocks*
+///
+template< mss::mc_type MC, fapi2::TargetType T>
+class tvrefdqe
+{
+    public:
+        static uint64_t get(const fapi2::Target<T>& i_target);
+};
 
 ///
 /// @brief Calculates refresh interval time

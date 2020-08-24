@@ -22,3 +22,40 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+
+///
+/// @file latch_wr_vref_explorer.C
+/// @brief Explorer specialized latch WR VREF functions
+///
+// *HWP HWP Owner: Stephen Glancy <sglancy@us.ibm.com>
+// *HWP HWP Backup: Mark Pizzutillo <Mark.Pizzutillo@ibm.com>
+// *HWP Team: Memory
+// *HWP Level: 3
+// *HWP Consumed by: HB:FSP
+
+#include <generic/memory/lib/utils/dimm/mss_timing.H>
+#include <generic/memory/lib/utils/shared/mss_generic_consts.H>
+#include <generic/memory/lib/dimm/ddr4/latch_wr_vref.H>
+
+namespace mss
+{
+
+///
+/// @brief VREF DQ Enter time *in clocks*
+/// @tparam T TargetType
+/// @return VREF DQ Enter time *in clocks*
+/// @note Explorer specialization
+///
+template<fapi2::TargetType T>
+class tvrefdqe<mss::mc_type::EXPLORER, T>
+{
+    public:
+        static uint64_t get(const fapi2::Target<T>& i_target)
+        {
+            // WR VREF train delay is 150 ns / SMALLEST_CLOCK
+            // Our smallest clock is 0.625 at 3200
+            return 240;
+        }
+};
+
+} // mss
