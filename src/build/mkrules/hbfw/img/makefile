@@ -362,11 +362,9 @@ hcode_lid: ${ENGD_SRCPATH:Fp10.hw_ref_image.bin}
 P10_OCC_IMG = ${bb}/images/ppc/lab/fs/p9le/rootfs/opt/extucode/81e00430.lid
 
 ## System Specific
-ZEPPELIN_WOFDATA_IMG = ${ENGD_WOFPATH:Fzeppelin_wof_data.bin}
 
-#@TODO 250793 - Enable WOFDATA generation for Denali
-#DENALI_WOFDATA_IMG = ${ENGD_WOFPATH:Fdenali_wof_data.bin}
-DENALI_WOFDATA_IMG = ${ENGD_WOFPATH:Ffleetwood_wof_data.bin}
+DENALI_WOFDATA_IMG = ${ENGD_WOFPATH:Fdenali_wof_data.bin}
+
 # Create list of images for each node (in node order)
 # genPnorImages will handle multiple HBD=binfile pairs
 DENALI_HBD_IMGS = HBD=${${HBFW_TARGPATH:FDENALI_node_0_hb_targeting.bin}:P},HBD=${${HBFW_TARGPATH:FDENALI_node_1_hb_targeting.bin}:P},HBD=${${HBFW_TARGPATH:FDENALI_node_2_hb_targeting.bin}:P},HBD=${${HBFW_TARGPATH:FDENALI_node_3_hb_targeting.bin}:P},HBD=${${HBFW_TARGPATH:FDENALI_SMP_WRAP_node_0_hb_targeting.bin}:P}
