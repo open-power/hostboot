@@ -44,6 +44,7 @@
 
 #include <fapi2/plat_hwp_invoker.H>
 #include <p10_query_core_stop_state.H>
+#include <p10_core_special_wakeup.H>
 
 #include <scom/scomif.H>
 #include <errl/errludprintk.H>
@@ -75,21 +76,20 @@ void* call_host_activate_secondary_cores(void* const io_pArgs)
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                "call_host_activate_secondary_cores entry" );
 
-    // @@@@@    CUSTOM BLOCK:   @@@@@
-
-    //track master group/chip/core (no threads)
-    const uint64_t l_masterPIR_wo_thread
+    //track boot group/chip/core (no threads)
+    const uint64_t l_bootPIR_wo_thread
         = PIR_t(task_getcpuid()).word & ~PIR_t::THREAD_MASK;
 
     TargetHandleList l_cores;
     getAllChiplets(l_cores, TYPE_CORE);
+
     TARGETING::Target* sys = nullptr;
     TARGETING::targetService().getTopLevelTarget(sys);
     assert(sys != nullptr, "Toplevel target must not be null");
     uint32_t l_numCores = 0;
 
     // Force some updates in Simics if the QME model isn't enabled
-    if(Util::requiresSlaveCoreWorkaround())
+    if(Util::requiresSecondaryCoreWorkaround())
     {
         TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
                   "Triggering Simics QME workaround");
@@ -97,144 +97,232 @@ void* call_host_activate_secondary_cores(void* const io_pArgs)
         MAGIC_INST_SETUP_THREADS(smfEnabled);
     }
 
-    // keep track of which cores started
-    TargetHandleList l_startedCores;
-
-    for (const auto& l_core : l_cores)
+    do
     {
-        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                  "Iterating all cores in system - This is core: %d",
-                  l_numCores);
-
-        l_numCores += 1;
-
-        ConstTargetHandle_t l_processor = getParentChip(l_core);
-
-        const auto coreId = l_core->getAttr<TARGETING::ATTR_CHIP_UNIT>();
-        const auto topologyId =
-            l_processor->getAttr<TARGETING::ATTR_PROC_FABRIC_TOPOLOGY_ID>();
-
-        const fapi2::Target<fapi2::TARGET_TYPE_CORE> l_fapi2_coreTarget(l_core);
-
-        // Determine PIR and threads to enable for this core
-        const uint64_t pir = PIR_t(topologyId, coreId).word;
-        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                  "pir for this core is: 0x%016llX", pir);
-
-        //Skip the master core that is already running
-        if ((pir & ~PIR_t::THREAD_MASK) == l_masterPIR_wo_thread)
+        //TODO RTC:259370 - Remove this HW workaround later
+        if (sys->getAttr<TARGETING::ATTR_IS_MPIPL_HB>())
         {
-            continue;
+            //In an MPIPL we need to issue a special wakeup to all functional cores
+            // prior to sending the doorbell messages
+            TargetHandleList l_procTargetList;
+            getAllChips(l_procTargetList, TYPE_PROC);
+
+            for (const auto & l_proc: l_procTargetList)
+            {
+                fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>l_fapiProc(l_proc);
+
+                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                            "Calling p10_core_special_wakeup (ENABLE) for all cores on proc: 0x%x",
+                             l_proc->getAttr<TARGETING::ATTR_HUID>());
+
+                fapi2::Target < fapi2::TARGET_TYPE_CORE | fapi2::TARGET_TYPE_MULTICAST >  l_core_mc =
+                             l_fapiProc.getMulticast< fapi2::MULTICAST_OR >
+                                        (fapi2::MCGROUP_GOOD_EQ, fapi2::MCCORE_ALL);
+
+                FAPI_INVOKE_HWP(l_errl,
+                                p10_core_special_wakeup,
+                                l_core_mc,
+                                p10specialWakeup::SPCWKUP_ENABLE,
+                                p10specialWakeup::HOST);
+
+                if (l_errl != nullptr)
+                {
+                    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                               ERR_MRK "call_host_activate_secondary_cores> Failed in call to "
+                               "p10_core_special_wakeup (ENABLE) for all cores on proc: 0x%x",
+                               l_proc->getAttr<TARGETING::ATTR_HUID>());
+                    //break out of processor loop
+                    break;
+                }
+            }
+
+            //if there was an error enabling special wakeup, do not continue with
+            // secondary core wakeup
+            if (l_errl != nullptr)
+            {
+                l_stepError.addErrorDetails(l_errl);
+                errlCommit(l_errl, HWPF_COMP_ID);
+                break;
+            }
         }
 
-        int rc = 0;
-        const uint64_t en_threads = sys->getAttr<ATTR_ENABLED_THREADS>();
-        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                  "call_host_activate_secondary_cores: Waking 0x%016llX.",
-                  pir);
+        // keep track of which cores started
+        TargetHandleList l_startedCores;
 
-        rc = cpu_start_core(pir, en_threads);
-
-        // Handle time out error
-        uint32_t l_checkidle_eid = 0;
-        if (-ETIME == rc)
+        for (const auto& l_core : l_cores)
         {
             TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                      "call_host_activate_secondary_cores: "
-                      "Time out rc from kernel %d on core 0x%016llX",
-                      rc,
+                      "Iterating all cores in system - This is core: %d",
+                      l_numCores);
+
+            l_numCores += 1;
+
+            ConstTargetHandle_t l_processor = getParentChip(l_core);
+
+            const auto coreId = l_core->getAttr<TARGETING::ATTR_CHIP_UNIT>();
+            const auto topologyId =
+                l_processor->getAttr<TARGETING::ATTR_PROC_FABRIC_TOPOLOGY_ID>();
+
+            const fapi2::Target<fapi2::TARGET_TYPE_CORE> l_fapi2_coreTarget(l_core);
+
+            // Determine PIR and threads to enable for this core
+            const uint64_t pir = PIR_t(topologyId, coreId).word;
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                      "pir for this core is: 0x%016llX", pir);
+
+            //Skip the boot core that is already running
+            if ((pir & ~PIR_t::THREAD_MASK) == l_bootPIR_wo_thread)
+            {
+                continue;
+            }
+
+            int rc = 0;
+            const uint64_t en_threads = sys->getAttr<ATTR_ENABLED_THREADS>();
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                      "call_host_activate_secondary_cores: Waking 0x%016llX.",
                       pir);
 
-            // only called if the core doesn't report in
-            const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>
-              l_fapi2ProcTarget(l_processor);
+            rc = cpu_start_core(pir, en_threads);
 
-            TARGETING::ATTR_FAPI_NAME_type l_targName { };
-            fapi2::toString(l_fapi2ProcTarget,
-                            l_targName,
-                            sizeof(l_targName));
-
-            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                      "Call p10_check_idle_stop_done on processor %s",
-                      l_targName);
-
-            FAPI_INVOKE_HWP(l_timeout_errl,
-                            p10_query_core_stop_state,
-                            l_fapi2_coreTarget,
-                            EXPECTED_STOP_STATE);
-
-            if (l_timeout_errl)
+            // Handle time out error
+            uint32_t l_checkidle_eid = 0;
+            if (-ETIME == rc)
             {
                 TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                          "ERROR : p10_check_idle_stop_done: "
-                          TRACE_ERR_FMT,
-                          TRACE_ERR_ARGS(l_timeout_errl));
+                          "call_host_activate_secondary_cores: "
+                          "Time out rc from kernel %d on core 0x%016llX",
+                          rc,
+                          pir);
 
-                // Add chip target info
-                ErrlUserDetailsTarget(l_processor).addToLog(l_timeout_errl);
+                // only called if the core doesn't report in
+                const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>
+                  l_fapi2ProcTarget(l_processor);
 
-                // Create IStep error log
-                l_stepError.addErrorDetails(l_timeout_errl);
+                TARGETING::ATTR_FAPI_NAME_type l_targName { };
+                fapi2::toString(l_fapi2ProcTarget,
+                                l_targName,
+                                sizeof(l_targName));
 
-                l_checkidle_eid = l_timeout_errl->eid();
+                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                          "Call p10_check_idle_stop_done on processor %s",
+                          l_targName);
 
-                // Commit error
-                errlCommit(l_timeout_errl, HWPF_COMP_ID);
+                FAPI_INVOKE_HWP(l_timeout_errl,
+                                p10_query_core_stop_state,
+                                l_fapi2_coreTarget,
+                                EXPECTED_STOP_STATE);
+
+                if (l_timeout_errl)
+                {
+                    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                              "ERROR : p10_check_idle_stop_done: "
+                              TRACE_ERR_FMT,
+                              TRACE_ERR_ARGS(l_timeout_errl));
+
+                    // Add chip target info
+                    ErrlUserDetailsTarget(l_processor).addToLog(l_timeout_errl);
+
+                    // Create IStep error log
+                    l_stepError.addErrorDetails(l_timeout_errl);
+
+                    l_checkidle_eid = l_timeout_errl->eid();
+
+                    // Commit error
+                    errlCommit(l_timeout_errl, HWPF_COMP_ID);
+                }
+            } // End of handle time out error
+
+            // Create unrecoverable error log ourselves to knock out the
+            //  core in case the HWP didn't do a HW callout or if there
+            //  was no HWP error at all
+            if( 0 != rc )
+            {
+                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                           "call_host_activate_secondary_cores: "
+                           "Core errors during wakeup on core 0x%016llX",
+                           pir);
+                /*@
+                 * @errortype
+                 * @reasoncode  RC_SECONDARY_CORE_WAKEUP_ERROR
+                 * @severity    ERRORLOG::ERRL_SEV_UNRECOVERABLE
+                 * @moduleid    MOD_HOST_ACTIVATE_SECONDARY_CORES
+                 * @userdata1[00:31]   PIR of failing core.
+                 * @userdata2[32:63]   HUID of failing core.
+                 * @userdata2[00:31]   EID from p10_check_idle_stop_done().
+                 * @userdata2[32:63]   rc of cpu_start_core().
+                 *
+                 * @devdesc Kernel returned error when trying to activate
+                 *          core.
+                 * @custdesc Unable to activate all hardware during boot..
+                 */
+                l_errl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                                 MOD_HOST_ACTIVATE_SECONDARY_CORES,
+                                                 RC_SECONDARY_CORE_WAKEUP_ERROR,
+                                                 TWO_UINT32_TO_UINT64(pir,
+                                                         TARGETING::get_huid(l_core)),
+                                                 TWO_UINT32_TO_UINT64(l_checkidle_eid,
+                                                                      rc));
+
+                // Callout and gard core that failed to wake up.
+                l_errl->addHwCallout(l_core,
+                                     HWAS::SRCI_PRIORITY_HIGH,
+                                     HWAS::DECONFIG,
+                                     HWAS::GARD_Predictive);
+
+                // Could be an interrupt issue
+                l_errl->collectTrace(INTR_TRACE_NAME,256);
+
+                // Throw printk in there too in case it is a kernel issue
+                ERRORLOG::ErrlUserDetailsPrintk().addToLog(l_errl);
+
+                // Add interesting ISTEP traces
+                l_errl->collectTrace(ISTEP_COMP_NAME,256);
+
+                l_stepError.addErrorDetails(l_errl);
+                errlCommit(l_errl, HWPF_COMP_ID);
+
+                break;
             }
-        } // End of handle time out error
-
-        // Create unrecoverable error log ourselves to knock out the
-        //  core in case the HWP didn't do a HW callout or if there
-        //  was no HWP error at all
-        if( 0 != rc )
-        {
-            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                       "call_host_activate_secondary_cores: "
-                       "Core errors during wakeup on core 0x%016llX",
-                       pir);
-            /*@
-             * @errortype
-             * @reasoncode  RC_SLAVE_CORE_WAKEUP_ERROR
-             * @severity    ERRORLOG::ERRL_SEV_UNRECOVERABLE
-             * @moduleid    MOD_HOST_ACTIVATE_SECONDARY_CORES
-             * @userdata1[00:31]   PIR of failing core.
-             * @userdata2[32:63]   HUID of failing core.
-             * @userdata2[00:31]   EID from p10_check_idle_stop_done().
-             * @userdata2[32:63]   rc of cpu_start_core().
-             *
-             * @devdesc Kernel returned error when trying to activate
-             *          core.
-             * @custdesc Unable to activate all hardware during boot..
-             */
-            l_errl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                             MOD_HOST_ACTIVATE_SECONDARY_CORES,
-                                             RC_SLAVE_CORE_WAKEUP_ERROR,
-                                             TWO_UINT32_TO_UINT64(pir,
-                                                     TARGETING::get_huid(l_core)),
-                                             TWO_UINT32_TO_UINT64(l_checkidle_eid,
-                                                                  rc));
-
-            // Callout and gard core that failed to wake up.
-            l_errl->addHwCallout(l_core,
-                                 HWAS::SRCI_PRIORITY_HIGH,
-                                 HWAS::DECONFIG,
-                                 HWAS::GARD_Predictive);
-
-            // Could be an interrupt issue
-            l_errl->collectTrace(INTR_TRACE_NAME,256);
-
-            // Throw printk in there too in case it is a kernel issue
-            ERRORLOG::ErrlUserDetailsPrintk().addToLog(l_errl);
-
-            // Add interesting ISTEP traces
-            l_errl->collectTrace(ISTEP_COMP_NAME,256);
-
-            l_stepError.addErrorDetails(l_errl);
-            errlCommit(l_errl, HWPF_COMP_ID);
-
-            break;
         }
-    }
+
+        //TODO RTC:259370 - Remove HW workaround later
+        //Disable Special Wakeup in MPIPL (allows stop states to work)
+        if (sys->getAttr<TARGETING::ATTR_IS_MPIPL_HB>())
+        {
+            TargetHandleList l_procTargetList;
+            getAllChips(l_procTargetList, TYPE_PROC);
+
+            for (const auto & l_proc: l_procTargetList)
+            {
+                fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>l_fapiProc(l_proc);
+
+                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                                "Calling p10_core_special_wakeup (DISABLE) for all cores on proc: 0x%x",
+                                 l_proc->getAttr<TARGETING::ATTR_HUID>());
+
+                fapi2::Target < fapi2::TARGET_TYPE_CORE | fapi2::TARGET_TYPE_MULTICAST >  l_core_mc =
+                      l_fapiProc.getMulticast< fapi2::MULTICAST_OR >
+                                      (fapi2::MCGROUP_GOOD_EQ, fapi2::MCCORE_ALL);
+
+
+                FAPI_INVOKE_HWP(l_errl,
+                                p10_core_special_wakeup,
+                                l_core_mc,
+                                p10specialWakeup::SPCWKUP_DISABLE,
+                                p10specialWakeup::HOST);
+
+                if (l_errl != nullptr)
+                {
+                    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                               ERR_MRK "call_host_activate_secondary_cores> Failed in call to "
+                               "p10_core_special_wakeup DISABLE for all cores on proc: 0x%x",
+                               l_proc->getAttr<TARGETING::ATTR_HUID>());
+                    l_stepError.addErrorDetails(l_errl);
+                    errlCommit(l_errl, HWPF_COMP_ID);
+                }
+            }
+        }
+    } while (0);
 
     //Set SKIP_WAKEUP to false after all cores are powered on (16.2)
     //If this is not set false, PM_RESET will fail to enable special wakeup.

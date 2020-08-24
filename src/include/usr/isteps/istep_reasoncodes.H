@@ -153,7 +153,7 @@ namespace ISTEP
         RC_RISK_LEVEL_TOO_LOW                    = ISTEP_COMP_ID | 0x4B,
         RC_INVALID_HX_KEYWORD_DATA               = ISTEP_COMP_ID | 0x4C,
         RC_PNOR_IPMI_NOT_ENABLED                 = ISTEP_COMP_ID | 0x4D,
-        RC_SLAVE_CORE_WAKEUP_ERROR               = ISTEP_COMP_ID | 0x4E,
+        RC_SECONDARY_CORE_WAKEUP_ERROR           = ISTEP_COMP_ID | 0x4E,
         RC_UCD_IMG_NOT_IN_CONTAINER              = ISTEP_COMP_ID | 0x4F,
         RC_MM_UNMAP_FAILED                       = ISTEP_COMP_ID | 0x50,
         RC_OMI_FREQ_MISMATCH                     = ISTEP_COMP_ID | 0x51,

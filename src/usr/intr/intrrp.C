@@ -1356,7 +1356,7 @@ void IntrRp::msgHandler()
                     TRACDCOMP(g_trac_intr, "IntrRp::msgHandler() CPU Timeout Message received for: %x",
                               pir.word);
 
-                    if(   !Util::requiresSlaveCoreWorkaround()
+                    if(   !Util::requiresSecondaryCoreWorkaround()
                        && iv_ipisPending.count(pir))
                     {
                         size_t count = msg->data[1];

@@ -55,7 +55,7 @@ bool __isQmeEnabled()
     return r3;
 }
 
-bool requiresSlaveCoreWorkaround()
+bool requiresSecondaryCoreWorkaround()
 {
     static const auto required =
         isSimicsRunning() && !isQmeModelEnabled();

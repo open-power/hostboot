@@ -73,7 +73,7 @@ void send_doorbell_wakeup(uint64_t i_pir)
 {
     printk("send_doorbell_wakeup to pir: %lx\n", i_pir);
 
-    if(Util::requiresSlaveCoreWorkaround())
+    if(Util::requiresSecondaryCoreWorkaround())
     {
         // We never get a real wakeup interrupt so just lie
         InterruptMsgHdlr::sendThreadWakeupMsg(i_pir);
