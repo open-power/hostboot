@@ -438,7 +438,23 @@
     </chipEcFeature>
   </attribute>
   <!-- ******************************************************************** -->
-
+  <attribute>
+    <id>ATTR_CHIP_EC_FEATURE_HW542410</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      Mask powerbus hangs from causing checkstops through NX UMAC fir
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_P10</name>
+        <ec>
+          <value>0x10</value>
+          <test>EQUAL</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
+  <!-- ******************************************************************** -->
   <attribute>
     <id>ATTR_CHIP_EC_FEATURE_HW533775</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
@@ -738,7 +754,6 @@
      </chip>
    </chipEcFeature>
   </attribute>
-
   <!-- ******************************************************************** -->
   <attribute>
     <id>ATTR_CHIP_EC_FEATURE_HW511630_HW520480</id>
@@ -758,7 +773,6 @@
       </chip>
     </chipEcFeature>
   </attribute>
-
   <!-- ******************************************************************** -->
   <attribute>
     <id>ATTR_CHIP_EC_FEATURE_HW531432</id>
@@ -777,7 +791,6 @@
       </chip>
     </chipEcFeature>
   </attribute>
-
   <!-- ******************************************************************** -->
   <attribute>
    <id>ATTR_CHIP_EC_FEATURE_HW541300</id>
@@ -795,5 +808,5 @@
      </chip>
    </chipEcFeature>
   </attribute>
-
+  <!-- ******************************************************************** -->
 </attributes>
