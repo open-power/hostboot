@@ -25,12 +25,13 @@
 use strict;
 
 package Hostboot::TiParser;
-use Exporter;
-our @EXPORT_OK = ('main');
+use Exporter qw(import);
+our @EXPORT_OK = qw(main parseTiData formatDataForPrinting formatData shiftMultiple mapSafe);
 
 # The TI pointer is located at 0x2008 offset from HRMOR
 use constant TI_AREA_PTR => 0x2008;
 # The size of the TI area
+# refer to bootloader_data.H @sync_ti_area_size for the Ti area size
 use constant TI_AREA_SIZE_BYTES => 128;
 # The offset of the HBBL from HRMOR
 use constant BL_HRMOR_OFFSET => 0x200000;
@@ -233,6 +234,7 @@ sub parseTiData
     #==========================================================================
     #                                Word 0
     #==========================================================================
+
     # TI Area Valid
     my $tiAreaValid = shift @bytes;
     ::userDisplay("TI Area Valid?: 0x" . $tiAreaValid . "\n");
@@ -243,12 +245,15 @@ sub parseTiData
 
     # Number Of Data Bytes - unused by Hostboot
     my $numberOfDataBytes = shiftMultiple(\@bytes, 2);
+    ::userDisplay("Number of Data Bytes: 0x$numberOfDataBytes (unused by HB)\n");
 
     #==========================================================================
     #                                Word 1
     #==========================================================================
+
     # Reserved 0 - unused
     my $reserved0 = shift @bytes;
+    ::userDisplay("(Reserved: 0x" . $reserved0 . " (unused by HB))\n");
 
     # HB Terminate Type
     my $terminateType = shift @bytes;
@@ -269,6 +274,7 @@ sub parseTiData
     #==========================================================================
     #                                Word 2
     #==========================================================================
+
     # At this time, this is a PHYP-only word
     # SRC Format - unused by Hostboot
     my $srcFormat = shift @bytes;
@@ -279,6 +285,8 @@ sub parseTiData
     # Num Hex Words - unused by Hostboot
     my $numHexWords = shift @bytes;
 
+    my $word2 = $srcFormat.$srcFlags.$numAsciiWords.$numHexWords;
+    ::userDisplay("PHYP-specific data: 0x" . $word2 . " (unused by HB)\n");
 
     #==========================================================================
     #                                Hostboot Flags
@@ -287,7 +295,7 @@ sub parseTiData
     my $hbDumpFlag = 0;
     $hbDumpFlag = substr(@bytes[0], 0, 1);
 
-    ::userDisplay("Hostboot Dump Flag: 0x" . $hbDumpFlag . "\n");
+    ::userDisplay(sprintf "Hostboot Dump Flag: 0x%02X\n", $hbDumpFlag);
 
     # 7 reserved bits
     my $reserved1 = shift @bytes;
@@ -310,10 +318,10 @@ sub parseTiData
     ############################################################################
     # Parse out the HB_T_SRC_DataArea Struct and print
     ############################################################################
-    ::userDisplay "\t\nHB_T_SRC_DataArea\n";
+    ::userDisplay("\nHB_T_SRC_DataArea\n");
     # Zeroth SRC Word often referred to as the SRC
     # Format: Bsxxyyyy
-    ::userDisplay "SRC Word 0\n";
+    ::userDisplay("SRC Word 0\n");
 
     # ID = Bs
     # s = Code Subsystem (1=FSP, C=HB, 7=PHYP)
@@ -326,25 +334,30 @@ sub parseTiData
 
     # Subsystem ID of Callout = xx
     my $subsystemId = shift @bytes;
+    ::userDisplay("\tSubsystem ID: (0x" . $subsystemId . ")\n");
 
     # Reason Code = yyyy
     my $reasonCode = shiftMultiple(\@bytes, 2);
 
-    ::userDisplay("\tReason Code: 0x". $reasonCode ."\n");
+    ::userDisplay("\tReason Code: 0x" . $reasonCode . "\n");
 
-    # Attempt to decode the reason code and the module id if supported
-    ::decodeRc($reasonCode, $bytes[2]);
+    # Attempt to decode the reason code
+    ::userDisplay("Decoded Reason Code: \n");
+
+    my $decodeMsg = ::decodeRc($reasonCode);
+    $decodeMsg =~ s/\n/\n\t/g;
+    ::userDisplay("\t$decodeMsg");
 
     # First SRC Word is reserved by FSP SRCI comp, so nothing to parse.
 
     # Second SRC word
     # Format: ssssmmrr
     # System Backplane CCIN = ssss
-    ::userDisplay("\t\nSRC Word 2\n");
+    ::userDisplay("\nSRC Word 2\n");
 
     my $sysBackPlaneCCIN = shiftMultiple(\@bytes, 2);
 
-    ::userDisplay("\tSystem Backplane CCIN: 0x". $sysBackPlaneCCIN ."\n");
+    ::userDisplay("\tSystem Backplane CCIN: 0x" . $sysBackPlaneCCIN . "\n");
 
     # Module ID = mm
     # Hostboot usually has this value define a file or a function
@@ -352,7 +365,7 @@ sub parseTiData
     # across the entire subsystem's codebase
     my $modId = shift @bytes;
 
-    ::userDisplay("\tModule Id: " . " (0x". $modId .")\n");
+    ::userDisplay("\tModule ID: (0x" . $modId . ")\n");
 
     # FSP Subsystem = rr
     # 10 if FSP A, 20 if FSP B originated SRC (FSP subsystem only)
@@ -361,23 +374,23 @@ sub parseTiData
     my %FSP_SUBSYSTEM = ( "10" => "FSP A",
                           "20" => "FSP B", );
 
-    ::userDisplay("\tFSP Subsystem: ". mapSafe(\%FSP_SUBSYSTEM, $fspSubSys) ." (0x". $fspSubSys .")\n");
+    ::userDisplay("\tFSP Subsystem: ". mapSafe(\%FSP_SUBSYSTEM, $fspSubSys) ." (0x" . $fspSubSys . ")\n");
 
     # Third SRC Word
     # Hex value of last Progess Code (FSP subsystem only)
-    ::userDisplay("\t\nSRC Word 3\n");
+    ::userDisplay("\nSRC Word 3\n");
     my $fullWord3 = shiftMultiple(\@bytes, 4);
 
-    ::userDisplay("\tLast Progress Code (FSP Only): 0x". $fullWord3."\n");
+    ::userDisplay("\tLast Progress Code (FSP Only): 0x" . $fullWord3 . "\n");
 
     # Fourth SRC Word
     # Error Status Flags
-    ::userDisplay("\t\nSRC Word 4\n");
+    ::userDisplay("\nSRC Word 4\n");
     my $fullWord4 = shiftMultiple(\@bytes, 4);
 
-    ::userDisplay("\tError Status Flags: 0x". $fullWord4."\n");
+    ::userDisplay("\tError Status Flags: 0x" . $fullWord4 . "\n");
 
-    ::userDisplay("\t\nSRC Word 5\n");
+    ::userDisplay("SRC Word 5\n");
 
     # Remaining SRC Words are user data
     # SRC Word 5
@@ -403,17 +416,17 @@ sub parseTiData
     # SRC Word 6
     my $fullWord6 = shiftMultiple(\@bytes, 4);
 
-    ::userDisplay("\t\nSRC Word 6: 0x". $fullWord6."\n");
+    ::userDisplay("\nSRC Word 6: 0x" . $fullWord6 . "\n");
 
     # SRC Word 7
     my $fullWord7 = shiftMultiple(\@bytes, 4);
 
-    ::userDisplay("\t\nSRC Word 7: 0x". $fullWord7."\n");
+    ::userDisplay("\nSRC Word 7: 0x" . $fullWord7 . "\n");
 
     # SRC Word 8
     my $fullWord8 = shiftMultiple(\@bytes, 4);
 
-    ::userDisplay("\t\nSRC Word 8: 0x". $fullWord8."\n");
+    ::userDisplay("\nSRC Word 8: 0x" . $fullWord8 . "\n");
 
     ############################################################################
     # End HB_T_SRC_DataArea

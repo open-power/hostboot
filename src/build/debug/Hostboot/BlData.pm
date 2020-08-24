@@ -25,6 +25,9 @@
 
 use strict;
 
+# this file references bootloader_data.H for the sizes of the
+# data being displayed
+
 package Hostboot::BlData;
 use Exporter;
 our @EXPORT_OK = ('main');
@@ -83,7 +86,7 @@ sub main
     my $dataAddress = ::read64($dataSym|$btLdrHrmorOffset);
     my $dataAddrStr = sprintf("0x%016llX", $dataAddress);
 
-    ::userDisplay "------------Bootloader Data------------";
+    ::userDisplay "--------------Bootloader Data---------------";
     ::userDisplay "\nData Symbol Address: ";
     ::userDisplay $dataSymStr;
     ::userDisplay "\nData Address: ";
@@ -102,8 +105,25 @@ sub main
     ::userDisplay $scratchAddrStr;
     ::userDisplay "\n--------------------------------------------\n";
 
+
+    my $tiDataAreaAddr = $dataAddr + $dataOffset;
+    my $tiDataAreaAddrStr = sprintf("0x%08X", $tiDataAreaAddr);
+    # refer to bootloader_data.H @sync_ti_area_size for the Ti area size
+    my $tiDataAreaSize = 128;
+    my $tiDataArea = ::readData($tiDataAreaAddr,$tiDataAreaSize);
+    my $tiDataAreaData = formatData($tiDataArea);
+    $dataOffset += ::alignUp($tiDataAreaSize, 16);
+
+    ::userDisplay "\nTI Data Area Address: ";
+    ::userDisplay $tiDataAreaAddrStr;
+    ::userDisplay "\n\nTI Data Area:\n";
+    ::userDisplay $tiDataAreaData;
+    ::userDisplay "\n--------------------------------------------\n";
+
+
     my $traceAddr = $dataAddr + $dataOffset;
     my $traceAddrStr = sprintf("0x%08X", $traceAddr);
+    # refer to bootloader_trace.H @sync_trace_size for the Trace size
     my $traceSize = 64;
     my $trace = ::readData($traceAddr,$traceSize);
     my $traceData = formatData($trace);
@@ -166,20 +186,6 @@ sub main
     ::userDisplay "\n\nFirst PNOR MMIO: ";
     ::userDisplay $pnorMmioStr;
     ::userDisplay "\n\n--------------------------------------------\n";
-
-
-    my $tiDataAreaAddr = $dataAddr + $dataOffset;
-    my $tiDataAreaAddrStr = sprintf("0x%08X", $tiDataAreaAddr);
-    my $tiDataAreaSize = 48;
-    my $tiDataArea = ::readData($tiDataAreaAddr,$tiDataAreaSize);
-    my $tiDataAreaData = formatData($tiDataArea);
-    $dataOffset += ::alignUp($tiDataAreaSize, 16);
-
-    ::userDisplay "\nTI Data Area Address: ";
-    ::userDisplay $tiDataAreaAddrStr;
-    ::userDisplay "\n\nTI Data Area:\n";
-    ::userDisplay $tiDataAreaData;
-    ::userDisplay "\n--------------------------------------------\n";
 
 
     my $hbbPnorSecAddr = $dataAddr + $dataOffset;

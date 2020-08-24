@@ -26,8 +26,8 @@
 use strict;
 
 package Hostboot::BlTrace;
-use Exporter;
-our @EXPORT_OK = ('main');
+use Exporter qw(import);
+our @EXPORT_OK = ('main', 'formatTrace');
 
 my %traceText = (
     "10" => "Main started",
@@ -91,11 +91,18 @@ sub formatTrace
     my $trace = shift;
     my $traceDataRaw = "";
     my $traceDataText = "";
+    my $byteWordCount = 0;
 
     for (my $i = 0; $i < length($trace); $i++)
     {
         my $traceHexStr = sprintf("%02X", ord(substr($trace, $i, 1)));
         $traceDataRaw .= $traceHexStr;
+
+        if ($i % 4 == 0)
+        {
+            $traceDataText .= "Word #$byteWordCount\n";
+            $byteWordCount += 1;
+        }
 
         if ($i % 16 == 15)
         {
@@ -138,6 +145,7 @@ sub main
 
     # Offset from Hostboot's HRMOR (2MB + HBBL_MAX_SIZE + 12K exception vectors + size of TI area (128B))
     my $traceAddr = 0x20B080;
+    # refer to bootloader_trace.H @sync_trace_size for the Trace size
     my $traceSize = 64;
 
     # Parse trace address from options.

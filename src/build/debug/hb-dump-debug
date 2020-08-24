@@ -100,7 +100,7 @@ sub usage
 #
 # @param integer - Address to read at.
 # @param size - Size (in bytes) to read.
-# 
+#
 # @return The blob of data requested.
 #
 sub readData
@@ -229,8 +229,30 @@ sub decodeRc
     my $rawRc = shift;
     my $modId = shift;
 
-    ::userDisplay("\nDecoded Reason Code and Module Id: \n");
-    system("hb", "decoderc", $rawRc, $modId);
+    # check if present in a hb workon environment,
+    # and capture the output so it doesn't get displayed
+    chomp( my $projectRoot = `echo \${PROJECT_ROOT}`);
+
+    if ($projectRoot eq "") {
+        return ("RC can't be decoded.\nMust be in a hb workon environment to decode the Reason Code\n");
+    }
+
+    my $cmd = "$projectRoot/src/build/debug/decodeRc $rawRc $modId";
+
+    # run the decode cmd and capture the output
+    my $decodedReasonCode = `$cmd`;
+
+    if ($? == -1) {
+        return ("cmd '$cmd'\nfailed to execute: $!\n");
+    }
+    elsif ($? != 0){
+        my $errorMsg = sprintf ("decodeRc died with signal %d:\n", $?);
+        # get just the first line which contains the error msg
+        $errorMsg .= (split(/^/, $decodedReasonCode))[0];
+        return $errorMsg;
+    }
+
+    return $decodedReasonCode;
 }
 
 __END__

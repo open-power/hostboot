@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -37,6 +37,8 @@
  *  TaskInfo structs for each task that will run.
  */
 
+// @sync_trace_size this number needs to be in sync
+// with others with this tag
 #ifndef BOOTLOADER_TRACE_SIZE
 #define BOOTLOADER_TRACE_SIZE 64
 #endif

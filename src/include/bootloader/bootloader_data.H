@@ -42,10 +42,13 @@ namespace Bootloader{
     typedef struct blData
     {
         // Instance of the TI Data Area
+        // @sync_ti_area_size this number needs to be in sync
+        // with others with this tag
         HB_TI_DataArea bl_TIDataArea;
         static_assert( sizeof(HB_TI_DataArea) == 128, "HB_TI_DataArea "
                        "size changed.  Check bootloader_data.H alignment.  "
-                       "Fix BlData.pm processing.");
+                       "Fix BlData.pm, TiParser.pm, and BlParseDump.pm "
+                       "processing.");
 
         // @name bl_trace
         // @brief Buffer for Bootloader Trace data
