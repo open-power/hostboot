@@ -48,6 +48,7 @@ use Data::Dumper;
 use POSIX;
 use Env;
 use XML::LibXML;
+use Scalar::Util qw(looks_like_number);
 
 
 # Provides object deep copy capability to support virtual
@@ -1235,7 +1236,10 @@ sub handleTgtPtrAttributesHb{
                     # Extract the node number from the PHYS_PATH
                     $attributeNodeNumber =~ s/^.*node.([0-9]).*/$1/;
 
-                    if ($fileNodeNumber != $attributeNodeNumber)
+                    # Make sure the data are valid numbers before doing the comparison
+                    if ( looks_like_number($fileNodeNumber)         &&
+                         looks_like_number($attributeNodeNumber)    &&
+                        ($fileNodeNumber != $attributeNodeNumber) )
                     {
                         # If working with a file that is dealing with only NODE
                         # X data, then it will not find a PHYS_PATH that is in
