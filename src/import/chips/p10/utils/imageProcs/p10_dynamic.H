@@ -170,4 +170,9 @@ enum DYN_FEATURES
     CORE_RECOVERY                 = 29,
 };
 
+enum DYN_SERVICES
+{
+    RAS_MPV            = 0,
+};
+
 #endif

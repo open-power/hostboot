@@ -68,9 +68,6 @@
     <initToZero/>
     <platInit/>
     <persistRuntime/>
-    <enum>
-        RAS_MPV            = 0x0000000400000000
-    </enum>
   </attribute>
   <attribute>
     <id>ATTR_DYNAMIC_INIT_MODE_COUNT</id>
