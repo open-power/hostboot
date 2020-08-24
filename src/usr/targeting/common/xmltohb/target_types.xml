@@ -1986,6 +1986,51 @@
   </targetType>
 
   <targetType>
+    <id>generic_i2c_device</id>
+    <parent>asic</parent>
+    <attribute>
+      <default>MEM</default>
+      <id>CDM_DOMAIN</id>
+    </attribute>
+    <attribute>
+      <default>1</default>
+      <id>DECONFIG_GARDABLE</id>
+    </attribute>
+    <attribute>
+      <id>FAPI_I2C_CONTROL_INFO</id>
+    </attribute>
+    <attribute>
+      <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
+      <!-- GARD_APPLIED, RESRC_RECOV, GARD -->
+      <default>0x00000031</default>
+    </attribute>
+    <attribute>
+      <default>
+        <field>
+          <id>childRollupAllowed</id>
+          <value>0</value>
+        </field>
+        <field>
+          <id>deconfigureParent</id>
+          <value>1</value>
+        </field>
+        <field>
+          <id>valid</id>
+          <value>1</value>
+        </field>
+      </default>
+      <id>PARENT_DECONFIG_RULES</id>
+    </attribute>
+    <attribute>
+      <id>REL_POS</id>
+    </attribute>
+    <attribute>
+      <id>TYPE</id>
+      <default>GENERIC_I2C_DEVICE</default>
+    </attribute>
+  </targetType>
+
+  <targetType>
     <id>i2c-power-sequencer</id>
     <parent>asic</parent>
     <attribute>

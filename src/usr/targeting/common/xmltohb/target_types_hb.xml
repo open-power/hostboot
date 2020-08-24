@@ -202,6 +202,14 @@
   </targetTypeExtension>
 
   <targetTypeExtension>
+    <id>generic_i2c_device</id>
+    <attribute>
+      <id>DYNAMIC_I2C_DEVICE_ADDRESS</id>
+      <default>0</default>
+    </attribute>
+  </targetTypeExtension>
+
+  <targetTypeExtension>
     <id>lcard-dimm</id>
     <attribute>
       <id>DIMM_SPD_BYTE_SIZE</id>

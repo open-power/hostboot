@@ -630,6 +630,7 @@ void Target::getAttrTankTargetPosData(uint16_t & o_pos,
                 case(TYPE_DIMM):
                 case(TYPE_OCMB_CHIP):
                 case(TYPE_PMIC):
+                case(TYPE_GENERIC_I2C_DEVICE):
                 case(TYPE_FSP):
                 case(TYPE_PNOR):
                 case(TYPE_APSS):

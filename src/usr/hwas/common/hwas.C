@@ -625,6 +625,60 @@ errlHndl_t discoverPmicTargetsAndEnable(const Target &i_sysTarget)
     return l_err;
 }
 
+/**
+ * @brief Do presence detect on Generic I2C Device targets and enable HWAS state
+ *
+ * @param[in] i_sysTarget the top level target (CLASS_SYS)
+ * @return    errlHndl_t  return nullptr if no error,
+ *                        else return a handle to an error entry
+ *
+ */
+errlHndl_t discoverGenericI2cDeviceTargetsAndEnable(const Target &i_sysTarget)
+{
+    HWAS_INF(ENTER_MRK"discoverGenericI2cDeviceTargetsAndEnable");
+
+    errlHndl_t l_err{nullptr};
+
+    do
+    {
+        // Only get Generic I2C Device targets
+        const PredicateCTM l_gi2cPred(CLASS_NA, TYPE_GENERIC_I2C_DEVICE);
+        TARGETING::PredicatePostfixExpr l_asicPredExpr;
+        l_asicPredExpr.push(&l_gi2cPred);
+        TargetHandleList l_pGi2cCheckPres;
+        targetService().getAssociated( l_pGi2cCheckPres, (&i_sysTarget),
+            TargetService::CHILD, TargetService::ALL, &l_asicPredExpr);
+
+        // Do the presence detect on only Generic I2C Device targets
+        // NOTE: this function will remove any non-functional targets
+        //       from l_pGi2cCheckPres
+        l_err = platPresenceDetect(l_pGi2cCheckPres);
+
+        // If an issue with platPresenceDetect, then exit, returning
+        // error back to caller
+        if (nullptr != l_err)
+        {
+            break;
+        }
+
+        // Enable the HWAS State for the Generic I2C Device targets
+        const bool l_present(true);
+        const bool l_functional(true);
+        const uint32_t l_errlEid(0);
+        for (TargetHandle_t pTarget : l_pGi2cCheckPres)
+        {
+            // set HWAS state to show each Generic I2C Device target
+            // is present and functional
+            enableHwasState(pTarget, l_present, l_functional, l_errlEid);
+        }
+    } while (0);
+
+    HWAS_INF(EXIT_MRK"discoverGenericI2cDeviceTargetsAndEnable exit with %s",
+             (nullptr == l_err ? "no error" : "error"));
+
+    return l_err;
+}
+
 errlHndl_t discoverTargets()
 {
     HWAS::HWASDiscovery l_HWASDiscovery;
@@ -701,7 +755,12 @@ errlHndl_t HWASDiscovery::discoverTargets()
         PredicateCTM predEnc(CLASS_ENC);
         PredicateCTM predChip(CLASS_CHIP);
         PredicateCTM predDimm(CLASS_LOGICAL_CARD, TYPE_DIMM);
+
+        // We can ignore PMIC and GENERIC_I2C_DEVICE at first as
+        // they will be handled with separate sections below since they
+        // have dynamic I2C device addresses
         PredicateCTM predPmic(CLASS_ASIC, TYPE_PMIC);
+        PredicateCTM predGi2c(CLASS_ASIC, TYPE_GENERIC_I2C_DEVICE);
         // We can ignore chips of TYPE_I2C_MUX because they
         // were already detected above in discoverMuxTargetsAndEnable
         // Also we can ignore chips of type PMIC because they will be processed
@@ -710,7 +769,8 @@ errlHndl_t HWASDiscovery::discoverTargets()
         PredicatePostfixExpr checkExpr;
         checkExpr.push(&predChip).push(&predDimm).Or().push(&predEnc).Or().
                   push(&predMux).Not().And().
-                  push(&predPmic).Not().And();
+                  push(&predPmic).Not().And().
+                  push(&predGi2c).Not().And();
 
         TargetHandleList pCheckPres;
         targetService().getAssociated( pCheckPres, pSys,
@@ -949,6 +1009,15 @@ errlHndl_t HWASDiscovery::discoverTargets()
         // we must wait because we need the SPD cached from the OCMBs
         // which occurs when OCMBs go through presence detection above
         errl = discoverPmicTargetsAndEnable(*pSys);
+
+        if (errl != NULL)
+        {
+            break; // break out of the do/while so that we can return
+        }
+
+
+        // After processing PMICs look at the Generic I2C Slaves
+        errl = discoverGenericI2cDeviceTargetsAndEnable(*pSys);
 
         if (errl != NULL)
         {

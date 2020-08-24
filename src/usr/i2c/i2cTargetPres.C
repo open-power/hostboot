@@ -48,7 +48,8 @@ namespace I2C
  * @brief Performs a presence detect operation on a Target that has the
  *        ATTR_FAPI_I2C_CONTROL_INFO and can be detected via that device
  *
- *        Currently used to detect I2C_MUTEX and OCMB_CHIP targets
+ *        Currently used to detect I2C_MUTEX, OCMB_CHIP, PMIC, and
+ *        Generic I2C Device targets (like DDIMM ADC and GPIO Expander targets)
  *
  * @param[in]   i_target     Presence detect target
  * @param[in]   i_buflen     lengh of operation requested
@@ -313,9 +314,16 @@ errlHndl_t pmicI2CPresencePerformOp(DeviceFW::OperationType i_opType,
             break;
         }
 
-        assert(l_devAddr != 0,
-              "Found devAddr for PMIC 0x%.08x to be 0, this cannot be. Check SPD and REL_POS on target",
-              TARGETING::get_huid(i_target));
+        if (l_devAddr == 0)
+        {
+            TRACFCOMP(g_trac_i2c, ERR_MRK"pmicI2CPresencePerformOp() "
+                      "Found devAddr for PMIC 0x%.08x to be 0. Likely that SPD returned "
+                      "a value of 0 because this PMIC at REL_POS=%d does not exist for "
+                      "parent OCMB 0x%.8X",
+                      TARGETING::get_huid(i_target), l_relPos,
+                      TARGETING::get_huid(l_parentOcmb));
+            break;
+        }
 
         if(l_devAddr == FAPIWRAP::NO_PMIC_DEV_ADDR)
         {
@@ -384,7 +392,7 @@ errlHndl_t muxI2CPresencePerformOp(DeviceFW::OperationType i_opType,
                                             l_muxPresent);
     if (l_errl)
     {
-        TRACFCOMP( g_trac_i2c, ERR_MRK"basicI2CTargetPresenceDetect() "
+        TRACFCOMP( g_trac_i2c, ERR_MRK"genericI2CTargetPresenceDetect() "
                     "Error detecting target 0x%.08X, io_buffer will not be set",
                     TARGETING::get_huid(i_target));
     }
@@ -394,6 +402,73 @@ errlHndl_t muxI2CPresencePerformOp(DeviceFW::OperationType i_opType,
         memcpy(io_buffer, &l_muxPresent, sizeof(l_muxPresent));
         io_buflen = sizeof(l_muxPresent);
     }
+
+    return l_errl;
+}
+
+/**
+ * @brief Performs a presence detect operation on a Generic I2C Device Target
+ *        that has the ATTR_FAPI_I2C_CONTROL_INFO and can be detected
+ *
+ *
+ * @param[in]   i_opType        Operation type, see DeviceFW::OperationType
+ *                              in driverif.H
+ * @param[in]   i_target        Presence detect target
+ * @param[in/out] io_buffer     Read: Pointer to output data storage
+ *                              Write: Pointer to input data storage
+ * @param[in/out] io_buflen     Input: size of io_buffer (in bytes, always 1)
+ *                              Output: Success = 1, Failure = 0
+ * @param[in]   i_accessType    DeviceFW::AccessType enum (userif.H)
+ * @param[in]   i_args          This is an argument list for DD framework.
+ *                              In this function, there are no arguments.
+ * @return  errlHndl_t
+ */
+errlHndl_t genericI2CDevicePresencePerformOp(DeviceFW::OperationType i_opType,
+                                            TARGETING::Target* i_target,
+                                            void* io_buffer,
+                                            size_t& io_buflen,
+                                            int64_t i_accessType,
+                                            va_list i_args)
+{
+    errlHndl_t l_errl = nullptr;
+    bool l_gi2cPresent = false;
+    TARGETING::Target* l_parentOcmb = TARGETING::getImmediateParentByAffinity(i_target);
+    auto l_parentHwasState = l_parentOcmb->getAttr<TARGETING::ATTR_HWAS_STATE>();
+
+    do {
+        if(! l_parentHwasState.present)
+        {
+            // If the parent chip is not present, then neither is the generic i2c device
+            // so just break out and return not present
+            break;
+        }
+
+        // TODO RTC 214692
+        // Dynamically look up i2c device address (like we do for PMICs) via FAPIWRAP
+        // But, until we have the lookup option we need to set the DYNAMIC_I2C_DEV_ADDRESS
+        // attribute since that is what genericI2CTargetPresenceDetect() will use
+        TARGETING::ATTR_FAPI_I2C_CONTROL_INFO_type l_i2cInfo =
+            i_target->getAttr<TARGETING::ATTR_FAPI_I2C_CONTROL_INFO>();
+
+        i_target->setAttr<TARGETING::ATTR_DYNAMIC_I2C_DEVICE_ADDRESS>(l_i2cInfo.devAddr);
+
+        l_errl = genericI2CTargetPresenceDetect(i_target,
+                                                io_buflen,
+                                                l_gi2cPresent);
+        if (l_errl)
+        {
+            TRACFCOMP( g_trac_i2c, ERR_MRK"genericI2CTargetPresenceDetect() "
+                        "Error detecting target 0x%.08X, io_buffer will not be set",
+                        TARGETING::get_huid(i_target));
+        }
+        else
+        {
+            // Copy variable describing if target is present or not to i/o buffer param
+            memcpy(io_buffer, &l_gi2cPresent, sizeof(l_gi2cPresent));
+            io_buflen = sizeof(l_gi2cPresent);
+        }
+
+    } while(0);
 
     return l_errl;
 }
@@ -416,4 +491,9 @@ DEVICE_REGISTER_ROUTE( DeviceFW::READ,
                        TARGETING::TYPE_PMIC,
                        pmicI2CPresencePerformOp );
 
+// Register the pmic vrm presence detect function with the device framework
+DEVICE_REGISTER_ROUTE( DeviceFW::READ,
+                       DeviceFW::PRESENT,
+                       TARGETING::TYPE_GENERIC_I2C_DEVICE,
+                       genericI2CDevicePresencePerformOp );
 }

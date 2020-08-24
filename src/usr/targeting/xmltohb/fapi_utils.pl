@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2017,2019
+# Contributors Listed Below - COPYRIGHT 2017,2020
 # [+] International Business Machines Corp.
 #
 #
@@ -274,6 +274,7 @@ sub createTargetExtensionFromFapi(\%,\%)
     TARGET_TYPE_PAUC          => "unit-pauc-power10",
     TARGET_TYPE_IOHS          => "unit-iohs-power10",
     TARGET_TYPE_PAU           => "unit-pau-power10",
+    TARGET_TYPE_GENERICI2CSLAVE => "generic_i2c_device",
     };
 
     # Loop through all of the targets that this attribute

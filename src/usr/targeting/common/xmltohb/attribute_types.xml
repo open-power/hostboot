@@ -9257,8 +9257,12 @@
       <value>84</value>
     </enumerator>
     <enumerator>
-      <name>LAST_IN_RANGE</name>
+      <name>GENERIC_I2C_DEVICE</name>
       <value>85</value>
+    </enumerator>
+    <enumerator>
+      <name>LAST_IN_RANGE</name>
+      <value>86</value>
     </enumerator>
     <id>TYPE</id>
   </enumerationType>

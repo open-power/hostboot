@@ -503,6 +503,8 @@ const char* EntityPath::pathElementTypeAsString(
             return "PAUC";
         case TYPE_LPCREFCLKENDPT:
             return "LPCREFCLKENDPT";
+        case TYPE_GENERIC_I2C_DEVICE:
+            return "GENERIC_I2C_DEVICE";
         default:
             return "Unknown path type";
     }
