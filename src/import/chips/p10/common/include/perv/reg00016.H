@@ -22207,6 +22207,2839 @@ fapi_try_exit:
 }
 //<< GET_[OTPC_M_STATUS_REGISTER_RD_DATA_COUNT]
 
+//>> PREP_[DPLL_CNTL_MISC_REGS_PFET]
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PREP_DPLL_CNTL_MISC_REGS_PFET(const fapi2::Target<K, M, V>& i_target)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = DPLL_CNTL_MISC_REGS_PFET;
+#endif
+    return fapi2::current_err;
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+//<< PREP_[DPLL_CNTL_MISC_REGS_PFET]
+
+//>> GET_[DPLL_CNTL_MISC_REGS_PFET]
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode GET_DPLL_CNTL_MISC_REGS_PFET(const fapi2::Target<K, M, V>& i_target,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = DPLL_CNTL_MISC_REGS_PFET;
+#endif
+    return fapi2::getScom(i_target, DPLL_CNTL_MISC_REGS_PFET, o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+//<< GET_[DPLL_CNTL_MISC_REGS_PFET]
+
+//>> PUT_[DPLL_CNTL_MISC_REGS_PFET]
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PUT_DPLL_CNTL_MISC_REGS_PFET(const fapi2::Target<K, M, V>& i_target,
+        const uint64_t i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    FAPI_TRY(scomt::chkReg(DPLL_CNTL_MISC_REGS_PFET));
+#endif
+    return fapi2::putScom(i_target, DPLL_CNTL_MISC_REGS_PFET, i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+//<< PUT_[DPLL_CNTL_MISC_REGS_PFET]
+
+
+//>> SET_[DPLL_CNTL_MISC_REGS_PFET_EMO0_VDD_PFETS_DISABLED_SENSE_OUT_DC]
+static inline fapi2::buffer<uint64_t>& SET_DPLL_CNTL_MISC_REGS_PFET_EMO0_VDD_PFETS_DISABLED_SENSE_OUT_DC(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DPLL_CNTL_MISC_REGS_PFET));
+#endif
+    return o_data.insertFromRight<DPLL_CNTL_MISC_REGS_PFET_EMO0_VDD_PFETS_DISABLED_SENSE_OUT_DC,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("0:scom_perv Invalid dial access DPLL_CNTL_MISC_REGS_PFET_EMO0_VDD_PFETS_DISABLED_SENSE_OUT_DC chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[DPLL_CNTL_MISC_REGS_PFET_EMO0_VDD_PFETS_DISABLED_SENSE_OUT_DC]
+
+//>> SET_[DPLL_CNTL_MISC_REGS_PFET_EMO0_VDD_PFETS_DISABLED_SENSE_OUT_DC]
+static inline fapi2::buffer<uint64_t>& SET_DPLL_CNTL_MISC_REGS_PFET_EMO0_VDD_PFETS_DISABLED_SENSE_OUT_DC(
+    const uint64_t i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DPLL_CNTL_MISC_REGS_PFET));
+#endif
+    return o_data.insertFromRight<DPLL_CNTL_MISC_REGS_PFET_EMO0_VDD_PFETS_DISABLED_SENSE_OUT_DC,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("1:scom_perv Invalid dial access DPLL_CNTL_MISC_REGS_PFET_EMO0_VDD_PFETS_DISABLED_SENSE_OUT_DC chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[DPLL_CNTL_MISC_REGS_PFET_EMO0_VDD_PFETS_DISABLED_SENSE_OUT_DC]
+
+//>> SET_[DPLL_CNTL_MISC_REGS_PFET_EMO0_VDD_PFETS_DISABLED_SENSE_OUT_DC]
+static inline fapi2::buffer<uint64_t>& SET_DPLL_CNTL_MISC_REGS_PFET_EMO0_VDD_PFETS_DISABLED_SENSE_OUT_DC(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DPLL_CNTL_MISC_REGS_PFET));
+#endif
+    return o_data.setBit<DPLL_CNTL_MISC_REGS_PFET_EMO0_VDD_PFETS_DISABLED_SENSE_OUT_DC>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("2:scom_perv Invalid dial access DPLL_CNTL_MISC_REGS_PFET_EMO0_VDD_PFETS_DISABLED_SENSE_OUT_DC chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[DPLL_CNTL_MISC_REGS_PFET_EMO0_VDD_PFETS_DISABLED_SENSE_OUT_DC]
+
+//>> CLEAR_[DPLL_CNTL_MISC_REGS_PFET_EMO0_VDD_PFETS_DISABLED_SENSE_OUT_DC]
+static inline fapi2::buffer<uint64_t>& CLEAR_DPLL_CNTL_MISC_REGS_PFET_EMO0_VDD_PFETS_DISABLED_SENSE_OUT_DC(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DPLL_CNTL_MISC_REGS_PFET));
+#endif
+    return o_data.clearBit<DPLL_CNTL_MISC_REGS_PFET_EMO0_VDD_PFETS_DISABLED_SENSE_OUT_DC>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("3:scom_perv Invalid dial access DPLL_CNTL_MISC_REGS_PFET_EMO0_VDD_PFETS_DISABLED_SENSE_OUT_DC chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< CLEAR_[DPLL_CNTL_MISC_REGS_PFET_EMO0_VDD_PFETS_DISABLED_SENSE_OUT_DC]
+
+//>> GET_[DPLL_CNTL_MISC_REGS_PFET_EMO0_VDD_PFETS_DISABLED_SENSE_OUT_DC]
+static inline fapi2::buffer<uint64_t>& GET_DPLL_CNTL_MISC_REGS_PFET_EMO0_VDD_PFETS_DISABLED_SENSE_OUT_DC(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DPLL_CNTL_MISC_REGS_PFET));
+#endif
+    return i_data.extractToRight<DPLL_CNTL_MISC_REGS_PFET_EMO0_VDD_PFETS_DISABLED_SENSE_OUT_DC,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("4:scom_perv Invalid dial access DPLL_CNTL_MISC_REGS_PFET_EMO0_VDD_PFETS_DISABLED_SENSE_OUT_DC chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[DPLL_CNTL_MISC_REGS_PFET_EMO0_VDD_PFETS_DISABLED_SENSE_OUT_DC]
+
+//>> GET_[DPLL_CNTL_MISC_REGS_PFET_EMO0_VDD_PFETS_DISABLED_SENSE_OUT_DC]
+static inline bool GET_DPLL_CNTL_MISC_REGS_PFET_EMO0_VDD_PFETS_DISABLED_SENSE_OUT_DC(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DPLL_CNTL_MISC_REGS_PFET));
+#endif
+    return i_data.getBit<DPLL_CNTL_MISC_REGS_PFET_EMO0_VDD_PFETS_DISABLED_SENSE_OUT_DC>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("5:scom_perv Invalid dial access DPLL_CNTL_MISC_REGS_PFET_EMO0_VDD_PFETS_DISABLED_SENSE_OUT_DC chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[DPLL_CNTL_MISC_REGS_PFET_EMO0_VDD_PFETS_DISABLED_SENSE_OUT_DC]
+
+//>> SET_[DPLL_CNTL_MISC_REGS_PFET_EMO0_VDD_PFETS_ENABLED_SENSE_OUT_DC]
+static inline fapi2::buffer<uint64_t>& SET_DPLL_CNTL_MISC_REGS_PFET_EMO0_VDD_PFETS_ENABLED_SENSE_OUT_DC(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DPLL_CNTL_MISC_REGS_PFET));
+#endif
+    return o_data.insertFromRight<DPLL_CNTL_MISC_REGS_PFET_EMO0_VDD_PFETS_ENABLED_SENSE_OUT_DC,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("0:scom_perv Invalid dial access DPLL_CNTL_MISC_REGS_PFET_EMO0_VDD_PFETS_ENABLED_SENSE_OUT_DC chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[DPLL_CNTL_MISC_REGS_PFET_EMO0_VDD_PFETS_ENABLED_SENSE_OUT_DC]
+
+//>> SET_[DPLL_CNTL_MISC_REGS_PFET_EMO0_VDD_PFETS_ENABLED_SENSE_OUT_DC]
+static inline fapi2::buffer<uint64_t>& SET_DPLL_CNTL_MISC_REGS_PFET_EMO0_VDD_PFETS_ENABLED_SENSE_OUT_DC(
+    const uint64_t i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DPLL_CNTL_MISC_REGS_PFET));
+#endif
+    return o_data.insertFromRight<DPLL_CNTL_MISC_REGS_PFET_EMO0_VDD_PFETS_ENABLED_SENSE_OUT_DC,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("1:scom_perv Invalid dial access DPLL_CNTL_MISC_REGS_PFET_EMO0_VDD_PFETS_ENABLED_SENSE_OUT_DC chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[DPLL_CNTL_MISC_REGS_PFET_EMO0_VDD_PFETS_ENABLED_SENSE_OUT_DC]
+
+//>> SET_[DPLL_CNTL_MISC_REGS_PFET_EMO0_VDD_PFETS_ENABLED_SENSE_OUT_DC]
+static inline fapi2::buffer<uint64_t>& SET_DPLL_CNTL_MISC_REGS_PFET_EMO0_VDD_PFETS_ENABLED_SENSE_OUT_DC(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DPLL_CNTL_MISC_REGS_PFET));
+#endif
+    return o_data.setBit<DPLL_CNTL_MISC_REGS_PFET_EMO0_VDD_PFETS_ENABLED_SENSE_OUT_DC>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("2:scom_perv Invalid dial access DPLL_CNTL_MISC_REGS_PFET_EMO0_VDD_PFETS_ENABLED_SENSE_OUT_DC chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[DPLL_CNTL_MISC_REGS_PFET_EMO0_VDD_PFETS_ENABLED_SENSE_OUT_DC]
+
+//>> CLEAR_[DPLL_CNTL_MISC_REGS_PFET_EMO0_VDD_PFETS_ENABLED_SENSE_OUT_DC]
+static inline fapi2::buffer<uint64_t>& CLEAR_DPLL_CNTL_MISC_REGS_PFET_EMO0_VDD_PFETS_ENABLED_SENSE_OUT_DC(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DPLL_CNTL_MISC_REGS_PFET));
+#endif
+    return o_data.clearBit<DPLL_CNTL_MISC_REGS_PFET_EMO0_VDD_PFETS_ENABLED_SENSE_OUT_DC>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("3:scom_perv Invalid dial access DPLL_CNTL_MISC_REGS_PFET_EMO0_VDD_PFETS_ENABLED_SENSE_OUT_DC chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< CLEAR_[DPLL_CNTL_MISC_REGS_PFET_EMO0_VDD_PFETS_ENABLED_SENSE_OUT_DC]
+
+//>> GET_[DPLL_CNTL_MISC_REGS_PFET_EMO0_VDD_PFETS_ENABLED_SENSE_OUT_DC]
+static inline fapi2::buffer<uint64_t>& GET_DPLL_CNTL_MISC_REGS_PFET_EMO0_VDD_PFETS_ENABLED_SENSE_OUT_DC(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DPLL_CNTL_MISC_REGS_PFET));
+#endif
+    return i_data.extractToRight<DPLL_CNTL_MISC_REGS_PFET_EMO0_VDD_PFETS_ENABLED_SENSE_OUT_DC,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("4:scom_perv Invalid dial access DPLL_CNTL_MISC_REGS_PFET_EMO0_VDD_PFETS_ENABLED_SENSE_OUT_DC chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[DPLL_CNTL_MISC_REGS_PFET_EMO0_VDD_PFETS_ENABLED_SENSE_OUT_DC]
+
+//>> GET_[DPLL_CNTL_MISC_REGS_PFET_EMO0_VDD_PFETS_ENABLED_SENSE_OUT_DC]
+static inline bool GET_DPLL_CNTL_MISC_REGS_PFET_EMO0_VDD_PFETS_ENABLED_SENSE_OUT_DC(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DPLL_CNTL_MISC_REGS_PFET));
+#endif
+    return i_data.getBit<DPLL_CNTL_MISC_REGS_PFET_EMO0_VDD_PFETS_ENABLED_SENSE_OUT_DC>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("5:scom_perv Invalid dial access DPLL_CNTL_MISC_REGS_PFET_EMO0_VDD_PFETS_ENABLED_SENSE_OUT_DC chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[DPLL_CNTL_MISC_REGS_PFET_EMO0_VDD_PFETS_ENABLED_SENSE_OUT_DC]
+
+//>> SET_[DPLL_CNTL_MISC_REGS_PFET_EMO1_VDD_PFETS_DISABLED_SENSE_OUT_DC]
+static inline fapi2::buffer<uint64_t>& SET_DPLL_CNTL_MISC_REGS_PFET_EMO1_VDD_PFETS_DISABLED_SENSE_OUT_DC(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DPLL_CNTL_MISC_REGS_PFET));
+#endif
+    return o_data.insertFromRight<DPLL_CNTL_MISC_REGS_PFET_EMO1_VDD_PFETS_DISABLED_SENSE_OUT_DC,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("0:scom_perv Invalid dial access DPLL_CNTL_MISC_REGS_PFET_EMO1_VDD_PFETS_DISABLED_SENSE_OUT_DC chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[DPLL_CNTL_MISC_REGS_PFET_EMO1_VDD_PFETS_DISABLED_SENSE_OUT_DC]
+
+//>> SET_[DPLL_CNTL_MISC_REGS_PFET_EMO1_VDD_PFETS_DISABLED_SENSE_OUT_DC]
+static inline fapi2::buffer<uint64_t>& SET_DPLL_CNTL_MISC_REGS_PFET_EMO1_VDD_PFETS_DISABLED_SENSE_OUT_DC(
+    const uint64_t i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DPLL_CNTL_MISC_REGS_PFET));
+#endif
+    return o_data.insertFromRight<DPLL_CNTL_MISC_REGS_PFET_EMO1_VDD_PFETS_DISABLED_SENSE_OUT_DC,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("1:scom_perv Invalid dial access DPLL_CNTL_MISC_REGS_PFET_EMO1_VDD_PFETS_DISABLED_SENSE_OUT_DC chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[DPLL_CNTL_MISC_REGS_PFET_EMO1_VDD_PFETS_DISABLED_SENSE_OUT_DC]
+
+//>> SET_[DPLL_CNTL_MISC_REGS_PFET_EMO1_VDD_PFETS_DISABLED_SENSE_OUT_DC]
+static inline fapi2::buffer<uint64_t>& SET_DPLL_CNTL_MISC_REGS_PFET_EMO1_VDD_PFETS_DISABLED_SENSE_OUT_DC(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DPLL_CNTL_MISC_REGS_PFET));
+#endif
+    return o_data.setBit<DPLL_CNTL_MISC_REGS_PFET_EMO1_VDD_PFETS_DISABLED_SENSE_OUT_DC>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("2:scom_perv Invalid dial access DPLL_CNTL_MISC_REGS_PFET_EMO1_VDD_PFETS_DISABLED_SENSE_OUT_DC chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[DPLL_CNTL_MISC_REGS_PFET_EMO1_VDD_PFETS_DISABLED_SENSE_OUT_DC]
+
+//>> CLEAR_[DPLL_CNTL_MISC_REGS_PFET_EMO1_VDD_PFETS_DISABLED_SENSE_OUT_DC]
+static inline fapi2::buffer<uint64_t>& CLEAR_DPLL_CNTL_MISC_REGS_PFET_EMO1_VDD_PFETS_DISABLED_SENSE_OUT_DC(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DPLL_CNTL_MISC_REGS_PFET));
+#endif
+    return o_data.clearBit<DPLL_CNTL_MISC_REGS_PFET_EMO1_VDD_PFETS_DISABLED_SENSE_OUT_DC>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("3:scom_perv Invalid dial access DPLL_CNTL_MISC_REGS_PFET_EMO1_VDD_PFETS_DISABLED_SENSE_OUT_DC chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< CLEAR_[DPLL_CNTL_MISC_REGS_PFET_EMO1_VDD_PFETS_DISABLED_SENSE_OUT_DC]
+
+//>> GET_[DPLL_CNTL_MISC_REGS_PFET_EMO1_VDD_PFETS_DISABLED_SENSE_OUT_DC]
+static inline fapi2::buffer<uint64_t>& GET_DPLL_CNTL_MISC_REGS_PFET_EMO1_VDD_PFETS_DISABLED_SENSE_OUT_DC(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DPLL_CNTL_MISC_REGS_PFET));
+#endif
+    return i_data.extractToRight<DPLL_CNTL_MISC_REGS_PFET_EMO1_VDD_PFETS_DISABLED_SENSE_OUT_DC,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("4:scom_perv Invalid dial access DPLL_CNTL_MISC_REGS_PFET_EMO1_VDD_PFETS_DISABLED_SENSE_OUT_DC chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[DPLL_CNTL_MISC_REGS_PFET_EMO1_VDD_PFETS_DISABLED_SENSE_OUT_DC]
+
+//>> GET_[DPLL_CNTL_MISC_REGS_PFET_EMO1_VDD_PFETS_DISABLED_SENSE_OUT_DC]
+static inline bool GET_DPLL_CNTL_MISC_REGS_PFET_EMO1_VDD_PFETS_DISABLED_SENSE_OUT_DC(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DPLL_CNTL_MISC_REGS_PFET));
+#endif
+    return i_data.getBit<DPLL_CNTL_MISC_REGS_PFET_EMO1_VDD_PFETS_DISABLED_SENSE_OUT_DC>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("5:scom_perv Invalid dial access DPLL_CNTL_MISC_REGS_PFET_EMO1_VDD_PFETS_DISABLED_SENSE_OUT_DC chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[DPLL_CNTL_MISC_REGS_PFET_EMO1_VDD_PFETS_DISABLED_SENSE_OUT_DC]
+
+//>> SET_[DPLL_CNTL_MISC_REGS_PFET_EMO1_VDD_PFETS_ENABLED_SENSE_OUT_DC]
+static inline fapi2::buffer<uint64_t>& SET_DPLL_CNTL_MISC_REGS_PFET_EMO1_VDD_PFETS_ENABLED_SENSE_OUT_DC(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DPLL_CNTL_MISC_REGS_PFET));
+#endif
+    return o_data.insertFromRight<DPLL_CNTL_MISC_REGS_PFET_EMO1_VDD_PFETS_ENABLED_SENSE_OUT_DC,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("0:scom_perv Invalid dial access DPLL_CNTL_MISC_REGS_PFET_EMO1_VDD_PFETS_ENABLED_SENSE_OUT_DC chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[DPLL_CNTL_MISC_REGS_PFET_EMO1_VDD_PFETS_ENABLED_SENSE_OUT_DC]
+
+//>> SET_[DPLL_CNTL_MISC_REGS_PFET_EMO1_VDD_PFETS_ENABLED_SENSE_OUT_DC]
+static inline fapi2::buffer<uint64_t>& SET_DPLL_CNTL_MISC_REGS_PFET_EMO1_VDD_PFETS_ENABLED_SENSE_OUT_DC(
+    const uint64_t i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DPLL_CNTL_MISC_REGS_PFET));
+#endif
+    return o_data.insertFromRight<DPLL_CNTL_MISC_REGS_PFET_EMO1_VDD_PFETS_ENABLED_SENSE_OUT_DC,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("1:scom_perv Invalid dial access DPLL_CNTL_MISC_REGS_PFET_EMO1_VDD_PFETS_ENABLED_SENSE_OUT_DC chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[DPLL_CNTL_MISC_REGS_PFET_EMO1_VDD_PFETS_ENABLED_SENSE_OUT_DC]
+
+//>> SET_[DPLL_CNTL_MISC_REGS_PFET_EMO1_VDD_PFETS_ENABLED_SENSE_OUT_DC]
+static inline fapi2::buffer<uint64_t>& SET_DPLL_CNTL_MISC_REGS_PFET_EMO1_VDD_PFETS_ENABLED_SENSE_OUT_DC(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DPLL_CNTL_MISC_REGS_PFET));
+#endif
+    return o_data.setBit<DPLL_CNTL_MISC_REGS_PFET_EMO1_VDD_PFETS_ENABLED_SENSE_OUT_DC>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("2:scom_perv Invalid dial access DPLL_CNTL_MISC_REGS_PFET_EMO1_VDD_PFETS_ENABLED_SENSE_OUT_DC chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[DPLL_CNTL_MISC_REGS_PFET_EMO1_VDD_PFETS_ENABLED_SENSE_OUT_DC]
+
+//>> CLEAR_[DPLL_CNTL_MISC_REGS_PFET_EMO1_VDD_PFETS_ENABLED_SENSE_OUT_DC]
+static inline fapi2::buffer<uint64_t>& CLEAR_DPLL_CNTL_MISC_REGS_PFET_EMO1_VDD_PFETS_ENABLED_SENSE_OUT_DC(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DPLL_CNTL_MISC_REGS_PFET));
+#endif
+    return o_data.clearBit<DPLL_CNTL_MISC_REGS_PFET_EMO1_VDD_PFETS_ENABLED_SENSE_OUT_DC>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("3:scom_perv Invalid dial access DPLL_CNTL_MISC_REGS_PFET_EMO1_VDD_PFETS_ENABLED_SENSE_OUT_DC chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< CLEAR_[DPLL_CNTL_MISC_REGS_PFET_EMO1_VDD_PFETS_ENABLED_SENSE_OUT_DC]
+
+//>> GET_[DPLL_CNTL_MISC_REGS_PFET_EMO1_VDD_PFETS_ENABLED_SENSE_OUT_DC]
+static inline fapi2::buffer<uint64_t>& GET_DPLL_CNTL_MISC_REGS_PFET_EMO1_VDD_PFETS_ENABLED_SENSE_OUT_DC(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DPLL_CNTL_MISC_REGS_PFET));
+#endif
+    return i_data.extractToRight<DPLL_CNTL_MISC_REGS_PFET_EMO1_VDD_PFETS_ENABLED_SENSE_OUT_DC,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("4:scom_perv Invalid dial access DPLL_CNTL_MISC_REGS_PFET_EMO1_VDD_PFETS_ENABLED_SENSE_OUT_DC chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[DPLL_CNTL_MISC_REGS_PFET_EMO1_VDD_PFETS_ENABLED_SENSE_OUT_DC]
+
+//>> GET_[DPLL_CNTL_MISC_REGS_PFET_EMO1_VDD_PFETS_ENABLED_SENSE_OUT_DC]
+static inline bool GET_DPLL_CNTL_MISC_REGS_PFET_EMO1_VDD_PFETS_ENABLED_SENSE_OUT_DC(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DPLL_CNTL_MISC_REGS_PFET));
+#endif
+    return i_data.getBit<DPLL_CNTL_MISC_REGS_PFET_EMO1_VDD_PFETS_ENABLED_SENSE_OUT_DC>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("5:scom_perv Invalid dial access DPLL_CNTL_MISC_REGS_PFET_EMO1_VDD_PFETS_ENABLED_SENSE_OUT_DC chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[DPLL_CNTL_MISC_REGS_PFET_EMO1_VDD_PFETS_ENABLED_SENSE_OUT_DC]
+
+//>> SET_[DPLL_CNTL_MISC_REGS_PFET_EMO2_VDD_PFETS_DISABLED_SENSE_OUT_DC]
+static inline fapi2::buffer<uint64_t>& SET_DPLL_CNTL_MISC_REGS_PFET_EMO2_VDD_PFETS_DISABLED_SENSE_OUT_DC(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DPLL_CNTL_MISC_REGS_PFET));
+#endif
+    return o_data.insertFromRight<DPLL_CNTL_MISC_REGS_PFET_EMO2_VDD_PFETS_DISABLED_SENSE_OUT_DC,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("0:scom_perv Invalid dial access DPLL_CNTL_MISC_REGS_PFET_EMO2_VDD_PFETS_DISABLED_SENSE_OUT_DC chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[DPLL_CNTL_MISC_REGS_PFET_EMO2_VDD_PFETS_DISABLED_SENSE_OUT_DC]
+
+//>> SET_[DPLL_CNTL_MISC_REGS_PFET_EMO2_VDD_PFETS_DISABLED_SENSE_OUT_DC]
+static inline fapi2::buffer<uint64_t>& SET_DPLL_CNTL_MISC_REGS_PFET_EMO2_VDD_PFETS_DISABLED_SENSE_OUT_DC(
+    const uint64_t i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DPLL_CNTL_MISC_REGS_PFET));
+#endif
+    return o_data.insertFromRight<DPLL_CNTL_MISC_REGS_PFET_EMO2_VDD_PFETS_DISABLED_SENSE_OUT_DC,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("1:scom_perv Invalid dial access DPLL_CNTL_MISC_REGS_PFET_EMO2_VDD_PFETS_DISABLED_SENSE_OUT_DC chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[DPLL_CNTL_MISC_REGS_PFET_EMO2_VDD_PFETS_DISABLED_SENSE_OUT_DC]
+
+//>> SET_[DPLL_CNTL_MISC_REGS_PFET_EMO2_VDD_PFETS_DISABLED_SENSE_OUT_DC]
+static inline fapi2::buffer<uint64_t>& SET_DPLL_CNTL_MISC_REGS_PFET_EMO2_VDD_PFETS_DISABLED_SENSE_OUT_DC(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DPLL_CNTL_MISC_REGS_PFET));
+#endif
+    return o_data.setBit<DPLL_CNTL_MISC_REGS_PFET_EMO2_VDD_PFETS_DISABLED_SENSE_OUT_DC>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("2:scom_perv Invalid dial access DPLL_CNTL_MISC_REGS_PFET_EMO2_VDD_PFETS_DISABLED_SENSE_OUT_DC chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[DPLL_CNTL_MISC_REGS_PFET_EMO2_VDD_PFETS_DISABLED_SENSE_OUT_DC]
+
+//>> CLEAR_[DPLL_CNTL_MISC_REGS_PFET_EMO2_VDD_PFETS_DISABLED_SENSE_OUT_DC]
+static inline fapi2::buffer<uint64_t>& CLEAR_DPLL_CNTL_MISC_REGS_PFET_EMO2_VDD_PFETS_DISABLED_SENSE_OUT_DC(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DPLL_CNTL_MISC_REGS_PFET));
+#endif
+    return o_data.clearBit<DPLL_CNTL_MISC_REGS_PFET_EMO2_VDD_PFETS_DISABLED_SENSE_OUT_DC>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("3:scom_perv Invalid dial access DPLL_CNTL_MISC_REGS_PFET_EMO2_VDD_PFETS_DISABLED_SENSE_OUT_DC chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< CLEAR_[DPLL_CNTL_MISC_REGS_PFET_EMO2_VDD_PFETS_DISABLED_SENSE_OUT_DC]
+
+//>> GET_[DPLL_CNTL_MISC_REGS_PFET_EMO2_VDD_PFETS_DISABLED_SENSE_OUT_DC]
+static inline fapi2::buffer<uint64_t>& GET_DPLL_CNTL_MISC_REGS_PFET_EMO2_VDD_PFETS_DISABLED_SENSE_OUT_DC(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DPLL_CNTL_MISC_REGS_PFET));
+#endif
+    return i_data.extractToRight<DPLL_CNTL_MISC_REGS_PFET_EMO2_VDD_PFETS_DISABLED_SENSE_OUT_DC,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("4:scom_perv Invalid dial access DPLL_CNTL_MISC_REGS_PFET_EMO2_VDD_PFETS_DISABLED_SENSE_OUT_DC chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[DPLL_CNTL_MISC_REGS_PFET_EMO2_VDD_PFETS_DISABLED_SENSE_OUT_DC]
+
+//>> GET_[DPLL_CNTL_MISC_REGS_PFET_EMO2_VDD_PFETS_DISABLED_SENSE_OUT_DC]
+static inline bool GET_DPLL_CNTL_MISC_REGS_PFET_EMO2_VDD_PFETS_DISABLED_SENSE_OUT_DC(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DPLL_CNTL_MISC_REGS_PFET));
+#endif
+    return i_data.getBit<DPLL_CNTL_MISC_REGS_PFET_EMO2_VDD_PFETS_DISABLED_SENSE_OUT_DC>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("5:scom_perv Invalid dial access DPLL_CNTL_MISC_REGS_PFET_EMO2_VDD_PFETS_DISABLED_SENSE_OUT_DC chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[DPLL_CNTL_MISC_REGS_PFET_EMO2_VDD_PFETS_DISABLED_SENSE_OUT_DC]
+
+//>> SET_[DPLL_CNTL_MISC_REGS_PFET_EMO2_VDD_PFETS_ENABLED_SENSE_OUT_DC]
+static inline fapi2::buffer<uint64_t>& SET_DPLL_CNTL_MISC_REGS_PFET_EMO2_VDD_PFETS_ENABLED_SENSE_OUT_DC(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DPLL_CNTL_MISC_REGS_PFET));
+#endif
+    return o_data.insertFromRight<DPLL_CNTL_MISC_REGS_PFET_EMO2_VDD_PFETS_ENABLED_SENSE_OUT_DC,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("0:scom_perv Invalid dial access DPLL_CNTL_MISC_REGS_PFET_EMO2_VDD_PFETS_ENABLED_SENSE_OUT_DC chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[DPLL_CNTL_MISC_REGS_PFET_EMO2_VDD_PFETS_ENABLED_SENSE_OUT_DC]
+
+//>> SET_[DPLL_CNTL_MISC_REGS_PFET_EMO2_VDD_PFETS_ENABLED_SENSE_OUT_DC]
+static inline fapi2::buffer<uint64_t>& SET_DPLL_CNTL_MISC_REGS_PFET_EMO2_VDD_PFETS_ENABLED_SENSE_OUT_DC(
+    const uint64_t i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DPLL_CNTL_MISC_REGS_PFET));
+#endif
+    return o_data.insertFromRight<DPLL_CNTL_MISC_REGS_PFET_EMO2_VDD_PFETS_ENABLED_SENSE_OUT_DC,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("1:scom_perv Invalid dial access DPLL_CNTL_MISC_REGS_PFET_EMO2_VDD_PFETS_ENABLED_SENSE_OUT_DC chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[DPLL_CNTL_MISC_REGS_PFET_EMO2_VDD_PFETS_ENABLED_SENSE_OUT_DC]
+
+//>> SET_[DPLL_CNTL_MISC_REGS_PFET_EMO2_VDD_PFETS_ENABLED_SENSE_OUT_DC]
+static inline fapi2::buffer<uint64_t>& SET_DPLL_CNTL_MISC_REGS_PFET_EMO2_VDD_PFETS_ENABLED_SENSE_OUT_DC(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DPLL_CNTL_MISC_REGS_PFET));
+#endif
+    return o_data.setBit<DPLL_CNTL_MISC_REGS_PFET_EMO2_VDD_PFETS_ENABLED_SENSE_OUT_DC>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("2:scom_perv Invalid dial access DPLL_CNTL_MISC_REGS_PFET_EMO2_VDD_PFETS_ENABLED_SENSE_OUT_DC chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[DPLL_CNTL_MISC_REGS_PFET_EMO2_VDD_PFETS_ENABLED_SENSE_OUT_DC]
+
+//>> CLEAR_[DPLL_CNTL_MISC_REGS_PFET_EMO2_VDD_PFETS_ENABLED_SENSE_OUT_DC]
+static inline fapi2::buffer<uint64_t>& CLEAR_DPLL_CNTL_MISC_REGS_PFET_EMO2_VDD_PFETS_ENABLED_SENSE_OUT_DC(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DPLL_CNTL_MISC_REGS_PFET));
+#endif
+    return o_data.clearBit<DPLL_CNTL_MISC_REGS_PFET_EMO2_VDD_PFETS_ENABLED_SENSE_OUT_DC>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("3:scom_perv Invalid dial access DPLL_CNTL_MISC_REGS_PFET_EMO2_VDD_PFETS_ENABLED_SENSE_OUT_DC chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< CLEAR_[DPLL_CNTL_MISC_REGS_PFET_EMO2_VDD_PFETS_ENABLED_SENSE_OUT_DC]
+
+//>> GET_[DPLL_CNTL_MISC_REGS_PFET_EMO2_VDD_PFETS_ENABLED_SENSE_OUT_DC]
+static inline fapi2::buffer<uint64_t>& GET_DPLL_CNTL_MISC_REGS_PFET_EMO2_VDD_PFETS_ENABLED_SENSE_OUT_DC(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DPLL_CNTL_MISC_REGS_PFET));
+#endif
+    return i_data.extractToRight<DPLL_CNTL_MISC_REGS_PFET_EMO2_VDD_PFETS_ENABLED_SENSE_OUT_DC,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("4:scom_perv Invalid dial access DPLL_CNTL_MISC_REGS_PFET_EMO2_VDD_PFETS_ENABLED_SENSE_OUT_DC chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[DPLL_CNTL_MISC_REGS_PFET_EMO2_VDD_PFETS_ENABLED_SENSE_OUT_DC]
+
+//>> GET_[DPLL_CNTL_MISC_REGS_PFET_EMO2_VDD_PFETS_ENABLED_SENSE_OUT_DC]
+static inline bool GET_DPLL_CNTL_MISC_REGS_PFET_EMO2_VDD_PFETS_ENABLED_SENSE_OUT_DC(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DPLL_CNTL_MISC_REGS_PFET));
+#endif
+    return i_data.getBit<DPLL_CNTL_MISC_REGS_PFET_EMO2_VDD_PFETS_ENABLED_SENSE_OUT_DC>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("5:scom_perv Invalid dial access DPLL_CNTL_MISC_REGS_PFET_EMO2_VDD_PFETS_ENABLED_SENSE_OUT_DC chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[DPLL_CNTL_MISC_REGS_PFET_EMO2_VDD_PFETS_ENABLED_SENSE_OUT_DC]
+
+//>> SET_[DPLL_CNTL_MISC_REGS_PFET_EMO3_VDD_PFETS_DISABLED_SENSE_OUT_DC]
+static inline fapi2::buffer<uint64_t>& SET_DPLL_CNTL_MISC_REGS_PFET_EMO3_VDD_PFETS_DISABLED_SENSE_OUT_DC(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DPLL_CNTL_MISC_REGS_PFET));
+#endif
+    return o_data.insertFromRight<DPLL_CNTL_MISC_REGS_PFET_EMO3_VDD_PFETS_DISABLED_SENSE_OUT_DC,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("0:scom_perv Invalid dial access DPLL_CNTL_MISC_REGS_PFET_EMO3_VDD_PFETS_DISABLED_SENSE_OUT_DC chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[DPLL_CNTL_MISC_REGS_PFET_EMO3_VDD_PFETS_DISABLED_SENSE_OUT_DC]
+
+//>> SET_[DPLL_CNTL_MISC_REGS_PFET_EMO3_VDD_PFETS_DISABLED_SENSE_OUT_DC]
+static inline fapi2::buffer<uint64_t>& SET_DPLL_CNTL_MISC_REGS_PFET_EMO3_VDD_PFETS_DISABLED_SENSE_OUT_DC(
+    const uint64_t i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DPLL_CNTL_MISC_REGS_PFET));
+#endif
+    return o_data.insertFromRight<DPLL_CNTL_MISC_REGS_PFET_EMO3_VDD_PFETS_DISABLED_SENSE_OUT_DC,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("1:scom_perv Invalid dial access DPLL_CNTL_MISC_REGS_PFET_EMO3_VDD_PFETS_DISABLED_SENSE_OUT_DC chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[DPLL_CNTL_MISC_REGS_PFET_EMO3_VDD_PFETS_DISABLED_SENSE_OUT_DC]
+
+//>> SET_[DPLL_CNTL_MISC_REGS_PFET_EMO3_VDD_PFETS_DISABLED_SENSE_OUT_DC]
+static inline fapi2::buffer<uint64_t>& SET_DPLL_CNTL_MISC_REGS_PFET_EMO3_VDD_PFETS_DISABLED_SENSE_OUT_DC(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DPLL_CNTL_MISC_REGS_PFET));
+#endif
+    return o_data.setBit<DPLL_CNTL_MISC_REGS_PFET_EMO3_VDD_PFETS_DISABLED_SENSE_OUT_DC>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("2:scom_perv Invalid dial access DPLL_CNTL_MISC_REGS_PFET_EMO3_VDD_PFETS_DISABLED_SENSE_OUT_DC chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[DPLL_CNTL_MISC_REGS_PFET_EMO3_VDD_PFETS_DISABLED_SENSE_OUT_DC]
+
+//>> CLEAR_[DPLL_CNTL_MISC_REGS_PFET_EMO3_VDD_PFETS_DISABLED_SENSE_OUT_DC]
+static inline fapi2::buffer<uint64_t>& CLEAR_DPLL_CNTL_MISC_REGS_PFET_EMO3_VDD_PFETS_DISABLED_SENSE_OUT_DC(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DPLL_CNTL_MISC_REGS_PFET));
+#endif
+    return o_data.clearBit<DPLL_CNTL_MISC_REGS_PFET_EMO3_VDD_PFETS_DISABLED_SENSE_OUT_DC>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("3:scom_perv Invalid dial access DPLL_CNTL_MISC_REGS_PFET_EMO3_VDD_PFETS_DISABLED_SENSE_OUT_DC chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< CLEAR_[DPLL_CNTL_MISC_REGS_PFET_EMO3_VDD_PFETS_DISABLED_SENSE_OUT_DC]
+
+//>> GET_[DPLL_CNTL_MISC_REGS_PFET_EMO3_VDD_PFETS_DISABLED_SENSE_OUT_DC]
+static inline fapi2::buffer<uint64_t>& GET_DPLL_CNTL_MISC_REGS_PFET_EMO3_VDD_PFETS_DISABLED_SENSE_OUT_DC(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DPLL_CNTL_MISC_REGS_PFET));
+#endif
+    return i_data.extractToRight<DPLL_CNTL_MISC_REGS_PFET_EMO3_VDD_PFETS_DISABLED_SENSE_OUT_DC,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("4:scom_perv Invalid dial access DPLL_CNTL_MISC_REGS_PFET_EMO3_VDD_PFETS_DISABLED_SENSE_OUT_DC chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[DPLL_CNTL_MISC_REGS_PFET_EMO3_VDD_PFETS_DISABLED_SENSE_OUT_DC]
+
+//>> GET_[DPLL_CNTL_MISC_REGS_PFET_EMO3_VDD_PFETS_DISABLED_SENSE_OUT_DC]
+static inline bool GET_DPLL_CNTL_MISC_REGS_PFET_EMO3_VDD_PFETS_DISABLED_SENSE_OUT_DC(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DPLL_CNTL_MISC_REGS_PFET));
+#endif
+    return i_data.getBit<DPLL_CNTL_MISC_REGS_PFET_EMO3_VDD_PFETS_DISABLED_SENSE_OUT_DC>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("5:scom_perv Invalid dial access DPLL_CNTL_MISC_REGS_PFET_EMO3_VDD_PFETS_DISABLED_SENSE_OUT_DC chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[DPLL_CNTL_MISC_REGS_PFET_EMO3_VDD_PFETS_DISABLED_SENSE_OUT_DC]
+
+//>> SET_[DPLL_CNTL_MISC_REGS_PFET_EMO3_VDD_PFETS_ENABLED_SENSE_OUT_DC]
+static inline fapi2::buffer<uint64_t>& SET_DPLL_CNTL_MISC_REGS_PFET_EMO3_VDD_PFETS_ENABLED_SENSE_OUT_DC(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DPLL_CNTL_MISC_REGS_PFET));
+#endif
+    return o_data.insertFromRight<DPLL_CNTL_MISC_REGS_PFET_EMO3_VDD_PFETS_ENABLED_SENSE_OUT_DC,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("0:scom_perv Invalid dial access DPLL_CNTL_MISC_REGS_PFET_EMO3_VDD_PFETS_ENABLED_SENSE_OUT_DC chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[DPLL_CNTL_MISC_REGS_PFET_EMO3_VDD_PFETS_ENABLED_SENSE_OUT_DC]
+
+//>> SET_[DPLL_CNTL_MISC_REGS_PFET_EMO3_VDD_PFETS_ENABLED_SENSE_OUT_DC]
+static inline fapi2::buffer<uint64_t>& SET_DPLL_CNTL_MISC_REGS_PFET_EMO3_VDD_PFETS_ENABLED_SENSE_OUT_DC(
+    const uint64_t i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DPLL_CNTL_MISC_REGS_PFET));
+#endif
+    return o_data.insertFromRight<DPLL_CNTL_MISC_REGS_PFET_EMO3_VDD_PFETS_ENABLED_SENSE_OUT_DC,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("1:scom_perv Invalid dial access DPLL_CNTL_MISC_REGS_PFET_EMO3_VDD_PFETS_ENABLED_SENSE_OUT_DC chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[DPLL_CNTL_MISC_REGS_PFET_EMO3_VDD_PFETS_ENABLED_SENSE_OUT_DC]
+
+//>> SET_[DPLL_CNTL_MISC_REGS_PFET_EMO3_VDD_PFETS_ENABLED_SENSE_OUT_DC]
+static inline fapi2::buffer<uint64_t>& SET_DPLL_CNTL_MISC_REGS_PFET_EMO3_VDD_PFETS_ENABLED_SENSE_OUT_DC(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DPLL_CNTL_MISC_REGS_PFET));
+#endif
+    return o_data.setBit<DPLL_CNTL_MISC_REGS_PFET_EMO3_VDD_PFETS_ENABLED_SENSE_OUT_DC>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("2:scom_perv Invalid dial access DPLL_CNTL_MISC_REGS_PFET_EMO3_VDD_PFETS_ENABLED_SENSE_OUT_DC chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[DPLL_CNTL_MISC_REGS_PFET_EMO3_VDD_PFETS_ENABLED_SENSE_OUT_DC]
+
+//>> CLEAR_[DPLL_CNTL_MISC_REGS_PFET_EMO3_VDD_PFETS_ENABLED_SENSE_OUT_DC]
+static inline fapi2::buffer<uint64_t>& CLEAR_DPLL_CNTL_MISC_REGS_PFET_EMO3_VDD_PFETS_ENABLED_SENSE_OUT_DC(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DPLL_CNTL_MISC_REGS_PFET));
+#endif
+    return o_data.clearBit<DPLL_CNTL_MISC_REGS_PFET_EMO3_VDD_PFETS_ENABLED_SENSE_OUT_DC>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("3:scom_perv Invalid dial access DPLL_CNTL_MISC_REGS_PFET_EMO3_VDD_PFETS_ENABLED_SENSE_OUT_DC chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< CLEAR_[DPLL_CNTL_MISC_REGS_PFET_EMO3_VDD_PFETS_ENABLED_SENSE_OUT_DC]
+
+//>> GET_[DPLL_CNTL_MISC_REGS_PFET_EMO3_VDD_PFETS_ENABLED_SENSE_OUT_DC]
+static inline fapi2::buffer<uint64_t>& GET_DPLL_CNTL_MISC_REGS_PFET_EMO3_VDD_PFETS_ENABLED_SENSE_OUT_DC(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DPLL_CNTL_MISC_REGS_PFET));
+#endif
+    return i_data.extractToRight<DPLL_CNTL_MISC_REGS_PFET_EMO3_VDD_PFETS_ENABLED_SENSE_OUT_DC,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("4:scom_perv Invalid dial access DPLL_CNTL_MISC_REGS_PFET_EMO3_VDD_PFETS_ENABLED_SENSE_OUT_DC chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[DPLL_CNTL_MISC_REGS_PFET_EMO3_VDD_PFETS_ENABLED_SENSE_OUT_DC]
+
+//>> GET_[DPLL_CNTL_MISC_REGS_PFET_EMO3_VDD_PFETS_ENABLED_SENSE_OUT_DC]
+static inline bool GET_DPLL_CNTL_MISC_REGS_PFET_EMO3_VDD_PFETS_ENABLED_SENSE_OUT_DC(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DPLL_CNTL_MISC_REGS_PFET));
+#endif
+    return i_data.getBit<DPLL_CNTL_MISC_REGS_PFET_EMO3_VDD_PFETS_ENABLED_SENSE_OUT_DC>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("5:scom_perv Invalid dial access DPLL_CNTL_MISC_REGS_PFET_EMO3_VDD_PFETS_ENABLED_SENSE_OUT_DC chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[DPLL_CNTL_MISC_REGS_PFET_EMO3_VDD_PFETS_ENABLED_SENSE_OUT_DC]
+
+//>> SET_[DPLL_CNTL_MISC_REGS_PFET_PAU0_VDD_PFETS_DISABLED_SENSE_OUT_DC]
+static inline fapi2::buffer<uint64_t>& SET_DPLL_CNTL_MISC_REGS_PFET_PAU0_VDD_PFETS_DISABLED_SENSE_OUT_DC(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DPLL_CNTL_MISC_REGS_PFET));
+#endif
+    return o_data.insertFromRight<DPLL_CNTL_MISC_REGS_PFET_PAU0_VDD_PFETS_DISABLED_SENSE_OUT_DC,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("0:scom_perv Invalid dial access DPLL_CNTL_MISC_REGS_PFET_PAU0_VDD_PFETS_DISABLED_SENSE_OUT_DC chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[DPLL_CNTL_MISC_REGS_PFET_PAU0_VDD_PFETS_DISABLED_SENSE_OUT_DC]
+
+//>> SET_[DPLL_CNTL_MISC_REGS_PFET_PAU0_VDD_PFETS_DISABLED_SENSE_OUT_DC]
+static inline fapi2::buffer<uint64_t>& SET_DPLL_CNTL_MISC_REGS_PFET_PAU0_VDD_PFETS_DISABLED_SENSE_OUT_DC(
+    const uint64_t i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DPLL_CNTL_MISC_REGS_PFET));
+#endif
+    return o_data.insertFromRight<DPLL_CNTL_MISC_REGS_PFET_PAU0_VDD_PFETS_DISABLED_SENSE_OUT_DC,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("1:scom_perv Invalid dial access DPLL_CNTL_MISC_REGS_PFET_PAU0_VDD_PFETS_DISABLED_SENSE_OUT_DC chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[DPLL_CNTL_MISC_REGS_PFET_PAU0_VDD_PFETS_DISABLED_SENSE_OUT_DC]
+
+//>> SET_[DPLL_CNTL_MISC_REGS_PFET_PAU0_VDD_PFETS_DISABLED_SENSE_OUT_DC]
+static inline fapi2::buffer<uint64_t>& SET_DPLL_CNTL_MISC_REGS_PFET_PAU0_VDD_PFETS_DISABLED_SENSE_OUT_DC(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DPLL_CNTL_MISC_REGS_PFET));
+#endif
+    return o_data.setBit<DPLL_CNTL_MISC_REGS_PFET_PAU0_VDD_PFETS_DISABLED_SENSE_OUT_DC>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("2:scom_perv Invalid dial access DPLL_CNTL_MISC_REGS_PFET_PAU0_VDD_PFETS_DISABLED_SENSE_OUT_DC chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[DPLL_CNTL_MISC_REGS_PFET_PAU0_VDD_PFETS_DISABLED_SENSE_OUT_DC]
+
+//>> CLEAR_[DPLL_CNTL_MISC_REGS_PFET_PAU0_VDD_PFETS_DISABLED_SENSE_OUT_DC]
+static inline fapi2::buffer<uint64_t>& CLEAR_DPLL_CNTL_MISC_REGS_PFET_PAU0_VDD_PFETS_DISABLED_SENSE_OUT_DC(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DPLL_CNTL_MISC_REGS_PFET));
+#endif
+    return o_data.clearBit<DPLL_CNTL_MISC_REGS_PFET_PAU0_VDD_PFETS_DISABLED_SENSE_OUT_DC>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("3:scom_perv Invalid dial access DPLL_CNTL_MISC_REGS_PFET_PAU0_VDD_PFETS_DISABLED_SENSE_OUT_DC chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< CLEAR_[DPLL_CNTL_MISC_REGS_PFET_PAU0_VDD_PFETS_DISABLED_SENSE_OUT_DC]
+
+//>> GET_[DPLL_CNTL_MISC_REGS_PFET_PAU0_VDD_PFETS_DISABLED_SENSE_OUT_DC]
+static inline fapi2::buffer<uint64_t>& GET_DPLL_CNTL_MISC_REGS_PFET_PAU0_VDD_PFETS_DISABLED_SENSE_OUT_DC(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DPLL_CNTL_MISC_REGS_PFET));
+#endif
+    return i_data.extractToRight<DPLL_CNTL_MISC_REGS_PFET_PAU0_VDD_PFETS_DISABLED_SENSE_OUT_DC,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("4:scom_perv Invalid dial access DPLL_CNTL_MISC_REGS_PFET_PAU0_VDD_PFETS_DISABLED_SENSE_OUT_DC chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[DPLL_CNTL_MISC_REGS_PFET_PAU0_VDD_PFETS_DISABLED_SENSE_OUT_DC]
+
+//>> GET_[DPLL_CNTL_MISC_REGS_PFET_PAU0_VDD_PFETS_DISABLED_SENSE_OUT_DC]
+static inline bool GET_DPLL_CNTL_MISC_REGS_PFET_PAU0_VDD_PFETS_DISABLED_SENSE_OUT_DC(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DPLL_CNTL_MISC_REGS_PFET));
+#endif
+    return i_data.getBit<DPLL_CNTL_MISC_REGS_PFET_PAU0_VDD_PFETS_DISABLED_SENSE_OUT_DC>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("5:scom_perv Invalid dial access DPLL_CNTL_MISC_REGS_PFET_PAU0_VDD_PFETS_DISABLED_SENSE_OUT_DC chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[DPLL_CNTL_MISC_REGS_PFET_PAU0_VDD_PFETS_DISABLED_SENSE_OUT_DC]
+
+//>> SET_[DPLL_CNTL_MISC_REGS_PFET_PAU0_VDD_PFETS_ENABLED_SENSE_OUT_DC]
+static inline fapi2::buffer<uint64_t>& SET_DPLL_CNTL_MISC_REGS_PFET_PAU0_VDD_PFETS_ENABLED_SENSE_OUT_DC(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DPLL_CNTL_MISC_REGS_PFET));
+#endif
+    return o_data.insertFromRight<DPLL_CNTL_MISC_REGS_PFET_PAU0_VDD_PFETS_ENABLED_SENSE_OUT_DC,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("0:scom_perv Invalid dial access DPLL_CNTL_MISC_REGS_PFET_PAU0_VDD_PFETS_ENABLED_SENSE_OUT_DC chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[DPLL_CNTL_MISC_REGS_PFET_PAU0_VDD_PFETS_ENABLED_SENSE_OUT_DC]
+
+//>> SET_[DPLL_CNTL_MISC_REGS_PFET_PAU0_VDD_PFETS_ENABLED_SENSE_OUT_DC]
+static inline fapi2::buffer<uint64_t>& SET_DPLL_CNTL_MISC_REGS_PFET_PAU0_VDD_PFETS_ENABLED_SENSE_OUT_DC(
+    const uint64_t i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DPLL_CNTL_MISC_REGS_PFET));
+#endif
+    return o_data.insertFromRight<DPLL_CNTL_MISC_REGS_PFET_PAU0_VDD_PFETS_ENABLED_SENSE_OUT_DC,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("1:scom_perv Invalid dial access DPLL_CNTL_MISC_REGS_PFET_PAU0_VDD_PFETS_ENABLED_SENSE_OUT_DC chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[DPLL_CNTL_MISC_REGS_PFET_PAU0_VDD_PFETS_ENABLED_SENSE_OUT_DC]
+
+//>> SET_[DPLL_CNTL_MISC_REGS_PFET_PAU0_VDD_PFETS_ENABLED_SENSE_OUT_DC]
+static inline fapi2::buffer<uint64_t>& SET_DPLL_CNTL_MISC_REGS_PFET_PAU0_VDD_PFETS_ENABLED_SENSE_OUT_DC(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DPLL_CNTL_MISC_REGS_PFET));
+#endif
+    return o_data.setBit<DPLL_CNTL_MISC_REGS_PFET_PAU0_VDD_PFETS_ENABLED_SENSE_OUT_DC>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("2:scom_perv Invalid dial access DPLL_CNTL_MISC_REGS_PFET_PAU0_VDD_PFETS_ENABLED_SENSE_OUT_DC chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[DPLL_CNTL_MISC_REGS_PFET_PAU0_VDD_PFETS_ENABLED_SENSE_OUT_DC]
+
+//>> CLEAR_[DPLL_CNTL_MISC_REGS_PFET_PAU0_VDD_PFETS_ENABLED_SENSE_OUT_DC]
+static inline fapi2::buffer<uint64_t>& CLEAR_DPLL_CNTL_MISC_REGS_PFET_PAU0_VDD_PFETS_ENABLED_SENSE_OUT_DC(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DPLL_CNTL_MISC_REGS_PFET));
+#endif
+    return o_data.clearBit<DPLL_CNTL_MISC_REGS_PFET_PAU0_VDD_PFETS_ENABLED_SENSE_OUT_DC>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("3:scom_perv Invalid dial access DPLL_CNTL_MISC_REGS_PFET_PAU0_VDD_PFETS_ENABLED_SENSE_OUT_DC chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< CLEAR_[DPLL_CNTL_MISC_REGS_PFET_PAU0_VDD_PFETS_ENABLED_SENSE_OUT_DC]
+
+//>> GET_[DPLL_CNTL_MISC_REGS_PFET_PAU0_VDD_PFETS_ENABLED_SENSE_OUT_DC]
+static inline fapi2::buffer<uint64_t>& GET_DPLL_CNTL_MISC_REGS_PFET_PAU0_VDD_PFETS_ENABLED_SENSE_OUT_DC(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DPLL_CNTL_MISC_REGS_PFET));
+#endif
+    return i_data.extractToRight<DPLL_CNTL_MISC_REGS_PFET_PAU0_VDD_PFETS_ENABLED_SENSE_OUT_DC,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("4:scom_perv Invalid dial access DPLL_CNTL_MISC_REGS_PFET_PAU0_VDD_PFETS_ENABLED_SENSE_OUT_DC chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[DPLL_CNTL_MISC_REGS_PFET_PAU0_VDD_PFETS_ENABLED_SENSE_OUT_DC]
+
+//>> GET_[DPLL_CNTL_MISC_REGS_PFET_PAU0_VDD_PFETS_ENABLED_SENSE_OUT_DC]
+static inline bool GET_DPLL_CNTL_MISC_REGS_PFET_PAU0_VDD_PFETS_ENABLED_SENSE_OUT_DC(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DPLL_CNTL_MISC_REGS_PFET));
+#endif
+    return i_data.getBit<DPLL_CNTL_MISC_REGS_PFET_PAU0_VDD_PFETS_ENABLED_SENSE_OUT_DC>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("5:scom_perv Invalid dial access DPLL_CNTL_MISC_REGS_PFET_PAU0_VDD_PFETS_ENABLED_SENSE_OUT_DC chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[DPLL_CNTL_MISC_REGS_PFET_PAU0_VDD_PFETS_ENABLED_SENSE_OUT_DC]
+
+//>> SET_[DPLL_CNTL_MISC_REGS_PFET_PAU3_VDD_PFETS_DISABLED_SENSE_OUT_DC]
+static inline fapi2::buffer<uint64_t>& SET_DPLL_CNTL_MISC_REGS_PFET_PAU3_VDD_PFETS_DISABLED_SENSE_OUT_DC(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DPLL_CNTL_MISC_REGS_PFET));
+#endif
+    return o_data.insertFromRight<DPLL_CNTL_MISC_REGS_PFET_PAU3_VDD_PFETS_DISABLED_SENSE_OUT_DC,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("0:scom_perv Invalid dial access DPLL_CNTL_MISC_REGS_PFET_PAU3_VDD_PFETS_DISABLED_SENSE_OUT_DC chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[DPLL_CNTL_MISC_REGS_PFET_PAU3_VDD_PFETS_DISABLED_SENSE_OUT_DC]
+
+//>> SET_[DPLL_CNTL_MISC_REGS_PFET_PAU3_VDD_PFETS_DISABLED_SENSE_OUT_DC]
+static inline fapi2::buffer<uint64_t>& SET_DPLL_CNTL_MISC_REGS_PFET_PAU3_VDD_PFETS_DISABLED_SENSE_OUT_DC(
+    const uint64_t i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DPLL_CNTL_MISC_REGS_PFET));
+#endif
+    return o_data.insertFromRight<DPLL_CNTL_MISC_REGS_PFET_PAU3_VDD_PFETS_DISABLED_SENSE_OUT_DC,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("1:scom_perv Invalid dial access DPLL_CNTL_MISC_REGS_PFET_PAU3_VDD_PFETS_DISABLED_SENSE_OUT_DC chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[DPLL_CNTL_MISC_REGS_PFET_PAU3_VDD_PFETS_DISABLED_SENSE_OUT_DC]
+
+//>> SET_[DPLL_CNTL_MISC_REGS_PFET_PAU3_VDD_PFETS_DISABLED_SENSE_OUT_DC]
+static inline fapi2::buffer<uint64_t>& SET_DPLL_CNTL_MISC_REGS_PFET_PAU3_VDD_PFETS_DISABLED_SENSE_OUT_DC(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DPLL_CNTL_MISC_REGS_PFET));
+#endif
+    return o_data.setBit<DPLL_CNTL_MISC_REGS_PFET_PAU3_VDD_PFETS_DISABLED_SENSE_OUT_DC>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("2:scom_perv Invalid dial access DPLL_CNTL_MISC_REGS_PFET_PAU3_VDD_PFETS_DISABLED_SENSE_OUT_DC chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[DPLL_CNTL_MISC_REGS_PFET_PAU3_VDD_PFETS_DISABLED_SENSE_OUT_DC]
+
+//>> CLEAR_[DPLL_CNTL_MISC_REGS_PFET_PAU3_VDD_PFETS_DISABLED_SENSE_OUT_DC]
+static inline fapi2::buffer<uint64_t>& CLEAR_DPLL_CNTL_MISC_REGS_PFET_PAU3_VDD_PFETS_DISABLED_SENSE_OUT_DC(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DPLL_CNTL_MISC_REGS_PFET));
+#endif
+    return o_data.clearBit<DPLL_CNTL_MISC_REGS_PFET_PAU3_VDD_PFETS_DISABLED_SENSE_OUT_DC>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("3:scom_perv Invalid dial access DPLL_CNTL_MISC_REGS_PFET_PAU3_VDD_PFETS_DISABLED_SENSE_OUT_DC chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< CLEAR_[DPLL_CNTL_MISC_REGS_PFET_PAU3_VDD_PFETS_DISABLED_SENSE_OUT_DC]
+
+//>> GET_[DPLL_CNTL_MISC_REGS_PFET_PAU3_VDD_PFETS_DISABLED_SENSE_OUT_DC]
+static inline fapi2::buffer<uint64_t>& GET_DPLL_CNTL_MISC_REGS_PFET_PAU3_VDD_PFETS_DISABLED_SENSE_OUT_DC(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DPLL_CNTL_MISC_REGS_PFET));
+#endif
+    return i_data.extractToRight<DPLL_CNTL_MISC_REGS_PFET_PAU3_VDD_PFETS_DISABLED_SENSE_OUT_DC,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("4:scom_perv Invalid dial access DPLL_CNTL_MISC_REGS_PFET_PAU3_VDD_PFETS_DISABLED_SENSE_OUT_DC chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[DPLL_CNTL_MISC_REGS_PFET_PAU3_VDD_PFETS_DISABLED_SENSE_OUT_DC]
+
+//>> GET_[DPLL_CNTL_MISC_REGS_PFET_PAU3_VDD_PFETS_DISABLED_SENSE_OUT_DC]
+static inline bool GET_DPLL_CNTL_MISC_REGS_PFET_PAU3_VDD_PFETS_DISABLED_SENSE_OUT_DC(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DPLL_CNTL_MISC_REGS_PFET));
+#endif
+    return i_data.getBit<DPLL_CNTL_MISC_REGS_PFET_PAU3_VDD_PFETS_DISABLED_SENSE_OUT_DC>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("5:scom_perv Invalid dial access DPLL_CNTL_MISC_REGS_PFET_PAU3_VDD_PFETS_DISABLED_SENSE_OUT_DC chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[DPLL_CNTL_MISC_REGS_PFET_PAU3_VDD_PFETS_DISABLED_SENSE_OUT_DC]
+
+//>> SET_[DPLL_CNTL_MISC_REGS_PFET_PAU3_VDD_PFETS_ENABLED_SENSE_OUT_DC]
+static inline fapi2::buffer<uint64_t>& SET_DPLL_CNTL_MISC_REGS_PFET_PAU3_VDD_PFETS_ENABLED_SENSE_OUT_DC(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DPLL_CNTL_MISC_REGS_PFET));
+#endif
+    return o_data.insertFromRight<DPLL_CNTL_MISC_REGS_PFET_PAU3_VDD_PFETS_ENABLED_SENSE_OUT_DC,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("0:scom_perv Invalid dial access DPLL_CNTL_MISC_REGS_PFET_PAU3_VDD_PFETS_ENABLED_SENSE_OUT_DC chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[DPLL_CNTL_MISC_REGS_PFET_PAU3_VDD_PFETS_ENABLED_SENSE_OUT_DC]
+
+//>> SET_[DPLL_CNTL_MISC_REGS_PFET_PAU3_VDD_PFETS_ENABLED_SENSE_OUT_DC]
+static inline fapi2::buffer<uint64_t>& SET_DPLL_CNTL_MISC_REGS_PFET_PAU3_VDD_PFETS_ENABLED_SENSE_OUT_DC(
+    const uint64_t i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DPLL_CNTL_MISC_REGS_PFET));
+#endif
+    return o_data.insertFromRight<DPLL_CNTL_MISC_REGS_PFET_PAU3_VDD_PFETS_ENABLED_SENSE_OUT_DC,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("1:scom_perv Invalid dial access DPLL_CNTL_MISC_REGS_PFET_PAU3_VDD_PFETS_ENABLED_SENSE_OUT_DC chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[DPLL_CNTL_MISC_REGS_PFET_PAU3_VDD_PFETS_ENABLED_SENSE_OUT_DC]
+
+//>> SET_[DPLL_CNTL_MISC_REGS_PFET_PAU3_VDD_PFETS_ENABLED_SENSE_OUT_DC]
+static inline fapi2::buffer<uint64_t>& SET_DPLL_CNTL_MISC_REGS_PFET_PAU3_VDD_PFETS_ENABLED_SENSE_OUT_DC(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DPLL_CNTL_MISC_REGS_PFET));
+#endif
+    return o_data.setBit<DPLL_CNTL_MISC_REGS_PFET_PAU3_VDD_PFETS_ENABLED_SENSE_OUT_DC>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("2:scom_perv Invalid dial access DPLL_CNTL_MISC_REGS_PFET_PAU3_VDD_PFETS_ENABLED_SENSE_OUT_DC chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[DPLL_CNTL_MISC_REGS_PFET_PAU3_VDD_PFETS_ENABLED_SENSE_OUT_DC]
+
+//>> CLEAR_[DPLL_CNTL_MISC_REGS_PFET_PAU3_VDD_PFETS_ENABLED_SENSE_OUT_DC]
+static inline fapi2::buffer<uint64_t>& CLEAR_DPLL_CNTL_MISC_REGS_PFET_PAU3_VDD_PFETS_ENABLED_SENSE_OUT_DC(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DPLL_CNTL_MISC_REGS_PFET));
+#endif
+    return o_data.clearBit<DPLL_CNTL_MISC_REGS_PFET_PAU3_VDD_PFETS_ENABLED_SENSE_OUT_DC>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("3:scom_perv Invalid dial access DPLL_CNTL_MISC_REGS_PFET_PAU3_VDD_PFETS_ENABLED_SENSE_OUT_DC chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< CLEAR_[DPLL_CNTL_MISC_REGS_PFET_PAU3_VDD_PFETS_ENABLED_SENSE_OUT_DC]
+
+//>> GET_[DPLL_CNTL_MISC_REGS_PFET_PAU3_VDD_PFETS_ENABLED_SENSE_OUT_DC]
+static inline fapi2::buffer<uint64_t>& GET_DPLL_CNTL_MISC_REGS_PFET_PAU3_VDD_PFETS_ENABLED_SENSE_OUT_DC(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DPLL_CNTL_MISC_REGS_PFET));
+#endif
+    return i_data.extractToRight<DPLL_CNTL_MISC_REGS_PFET_PAU3_VDD_PFETS_ENABLED_SENSE_OUT_DC,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("4:scom_perv Invalid dial access DPLL_CNTL_MISC_REGS_PFET_PAU3_VDD_PFETS_ENABLED_SENSE_OUT_DC chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[DPLL_CNTL_MISC_REGS_PFET_PAU3_VDD_PFETS_ENABLED_SENSE_OUT_DC]
+
+//>> GET_[DPLL_CNTL_MISC_REGS_PFET_PAU3_VDD_PFETS_ENABLED_SENSE_OUT_DC]
+static inline bool GET_DPLL_CNTL_MISC_REGS_PFET_PAU3_VDD_PFETS_ENABLED_SENSE_OUT_DC(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DPLL_CNTL_MISC_REGS_PFET));
+#endif
+    return i_data.getBit<DPLL_CNTL_MISC_REGS_PFET_PAU3_VDD_PFETS_ENABLED_SENSE_OUT_DC>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("5:scom_perv Invalid dial access DPLL_CNTL_MISC_REGS_PFET_PAU3_VDD_PFETS_ENABLED_SENSE_OUT_DC chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[DPLL_CNTL_MISC_REGS_PFET_PAU3_VDD_PFETS_ENABLED_SENSE_OUT_DC]
+
+//>> SET_[DPLL_CNTL_MISC_REGS_PFET_PAU4_VDD_PFETS_DISABLED_SENSE_OUT_DC]
+static inline fapi2::buffer<uint64_t>& SET_DPLL_CNTL_MISC_REGS_PFET_PAU4_VDD_PFETS_DISABLED_SENSE_OUT_DC(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DPLL_CNTL_MISC_REGS_PFET));
+#endif
+    return o_data.insertFromRight<DPLL_CNTL_MISC_REGS_PFET_PAU4_VDD_PFETS_DISABLED_SENSE_OUT_DC,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("0:scom_perv Invalid dial access DPLL_CNTL_MISC_REGS_PFET_PAU4_VDD_PFETS_DISABLED_SENSE_OUT_DC chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[DPLL_CNTL_MISC_REGS_PFET_PAU4_VDD_PFETS_DISABLED_SENSE_OUT_DC]
+
+//>> SET_[DPLL_CNTL_MISC_REGS_PFET_PAU4_VDD_PFETS_DISABLED_SENSE_OUT_DC]
+static inline fapi2::buffer<uint64_t>& SET_DPLL_CNTL_MISC_REGS_PFET_PAU4_VDD_PFETS_DISABLED_SENSE_OUT_DC(
+    const uint64_t i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DPLL_CNTL_MISC_REGS_PFET));
+#endif
+    return o_data.insertFromRight<DPLL_CNTL_MISC_REGS_PFET_PAU4_VDD_PFETS_DISABLED_SENSE_OUT_DC,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("1:scom_perv Invalid dial access DPLL_CNTL_MISC_REGS_PFET_PAU4_VDD_PFETS_DISABLED_SENSE_OUT_DC chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[DPLL_CNTL_MISC_REGS_PFET_PAU4_VDD_PFETS_DISABLED_SENSE_OUT_DC]
+
+//>> SET_[DPLL_CNTL_MISC_REGS_PFET_PAU4_VDD_PFETS_DISABLED_SENSE_OUT_DC]
+static inline fapi2::buffer<uint64_t>& SET_DPLL_CNTL_MISC_REGS_PFET_PAU4_VDD_PFETS_DISABLED_SENSE_OUT_DC(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DPLL_CNTL_MISC_REGS_PFET));
+#endif
+    return o_data.setBit<DPLL_CNTL_MISC_REGS_PFET_PAU4_VDD_PFETS_DISABLED_SENSE_OUT_DC>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("2:scom_perv Invalid dial access DPLL_CNTL_MISC_REGS_PFET_PAU4_VDD_PFETS_DISABLED_SENSE_OUT_DC chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[DPLL_CNTL_MISC_REGS_PFET_PAU4_VDD_PFETS_DISABLED_SENSE_OUT_DC]
+
+//>> CLEAR_[DPLL_CNTL_MISC_REGS_PFET_PAU4_VDD_PFETS_DISABLED_SENSE_OUT_DC]
+static inline fapi2::buffer<uint64_t>& CLEAR_DPLL_CNTL_MISC_REGS_PFET_PAU4_VDD_PFETS_DISABLED_SENSE_OUT_DC(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DPLL_CNTL_MISC_REGS_PFET));
+#endif
+    return o_data.clearBit<DPLL_CNTL_MISC_REGS_PFET_PAU4_VDD_PFETS_DISABLED_SENSE_OUT_DC>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("3:scom_perv Invalid dial access DPLL_CNTL_MISC_REGS_PFET_PAU4_VDD_PFETS_DISABLED_SENSE_OUT_DC chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< CLEAR_[DPLL_CNTL_MISC_REGS_PFET_PAU4_VDD_PFETS_DISABLED_SENSE_OUT_DC]
+
+//>> GET_[DPLL_CNTL_MISC_REGS_PFET_PAU4_VDD_PFETS_DISABLED_SENSE_OUT_DC]
+static inline fapi2::buffer<uint64_t>& GET_DPLL_CNTL_MISC_REGS_PFET_PAU4_VDD_PFETS_DISABLED_SENSE_OUT_DC(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DPLL_CNTL_MISC_REGS_PFET));
+#endif
+    return i_data.extractToRight<DPLL_CNTL_MISC_REGS_PFET_PAU4_VDD_PFETS_DISABLED_SENSE_OUT_DC,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("4:scom_perv Invalid dial access DPLL_CNTL_MISC_REGS_PFET_PAU4_VDD_PFETS_DISABLED_SENSE_OUT_DC chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[DPLL_CNTL_MISC_REGS_PFET_PAU4_VDD_PFETS_DISABLED_SENSE_OUT_DC]
+
+//>> GET_[DPLL_CNTL_MISC_REGS_PFET_PAU4_VDD_PFETS_DISABLED_SENSE_OUT_DC]
+static inline bool GET_DPLL_CNTL_MISC_REGS_PFET_PAU4_VDD_PFETS_DISABLED_SENSE_OUT_DC(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DPLL_CNTL_MISC_REGS_PFET));
+#endif
+    return i_data.getBit<DPLL_CNTL_MISC_REGS_PFET_PAU4_VDD_PFETS_DISABLED_SENSE_OUT_DC>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("5:scom_perv Invalid dial access DPLL_CNTL_MISC_REGS_PFET_PAU4_VDD_PFETS_DISABLED_SENSE_OUT_DC chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[DPLL_CNTL_MISC_REGS_PFET_PAU4_VDD_PFETS_DISABLED_SENSE_OUT_DC]
+
+//>> SET_[DPLL_CNTL_MISC_REGS_PFET_PAU4_VDD_PFETS_ENABLED_SENSE_OUT_DC]
+static inline fapi2::buffer<uint64_t>& SET_DPLL_CNTL_MISC_REGS_PFET_PAU4_VDD_PFETS_ENABLED_SENSE_OUT_DC(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DPLL_CNTL_MISC_REGS_PFET));
+#endif
+    return o_data.insertFromRight<DPLL_CNTL_MISC_REGS_PFET_PAU4_VDD_PFETS_ENABLED_SENSE_OUT_DC,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("0:scom_perv Invalid dial access DPLL_CNTL_MISC_REGS_PFET_PAU4_VDD_PFETS_ENABLED_SENSE_OUT_DC chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[DPLL_CNTL_MISC_REGS_PFET_PAU4_VDD_PFETS_ENABLED_SENSE_OUT_DC]
+
+//>> SET_[DPLL_CNTL_MISC_REGS_PFET_PAU4_VDD_PFETS_ENABLED_SENSE_OUT_DC]
+static inline fapi2::buffer<uint64_t>& SET_DPLL_CNTL_MISC_REGS_PFET_PAU4_VDD_PFETS_ENABLED_SENSE_OUT_DC(
+    const uint64_t i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DPLL_CNTL_MISC_REGS_PFET));
+#endif
+    return o_data.insertFromRight<DPLL_CNTL_MISC_REGS_PFET_PAU4_VDD_PFETS_ENABLED_SENSE_OUT_DC,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("1:scom_perv Invalid dial access DPLL_CNTL_MISC_REGS_PFET_PAU4_VDD_PFETS_ENABLED_SENSE_OUT_DC chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[DPLL_CNTL_MISC_REGS_PFET_PAU4_VDD_PFETS_ENABLED_SENSE_OUT_DC]
+
+//>> SET_[DPLL_CNTL_MISC_REGS_PFET_PAU4_VDD_PFETS_ENABLED_SENSE_OUT_DC]
+static inline fapi2::buffer<uint64_t>& SET_DPLL_CNTL_MISC_REGS_PFET_PAU4_VDD_PFETS_ENABLED_SENSE_OUT_DC(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DPLL_CNTL_MISC_REGS_PFET));
+#endif
+    return o_data.setBit<DPLL_CNTL_MISC_REGS_PFET_PAU4_VDD_PFETS_ENABLED_SENSE_OUT_DC>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("2:scom_perv Invalid dial access DPLL_CNTL_MISC_REGS_PFET_PAU4_VDD_PFETS_ENABLED_SENSE_OUT_DC chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[DPLL_CNTL_MISC_REGS_PFET_PAU4_VDD_PFETS_ENABLED_SENSE_OUT_DC]
+
+//>> CLEAR_[DPLL_CNTL_MISC_REGS_PFET_PAU4_VDD_PFETS_ENABLED_SENSE_OUT_DC]
+static inline fapi2::buffer<uint64_t>& CLEAR_DPLL_CNTL_MISC_REGS_PFET_PAU4_VDD_PFETS_ENABLED_SENSE_OUT_DC(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DPLL_CNTL_MISC_REGS_PFET));
+#endif
+    return o_data.clearBit<DPLL_CNTL_MISC_REGS_PFET_PAU4_VDD_PFETS_ENABLED_SENSE_OUT_DC>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("3:scom_perv Invalid dial access DPLL_CNTL_MISC_REGS_PFET_PAU4_VDD_PFETS_ENABLED_SENSE_OUT_DC chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< CLEAR_[DPLL_CNTL_MISC_REGS_PFET_PAU4_VDD_PFETS_ENABLED_SENSE_OUT_DC]
+
+//>> GET_[DPLL_CNTL_MISC_REGS_PFET_PAU4_VDD_PFETS_ENABLED_SENSE_OUT_DC]
+static inline fapi2::buffer<uint64_t>& GET_DPLL_CNTL_MISC_REGS_PFET_PAU4_VDD_PFETS_ENABLED_SENSE_OUT_DC(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DPLL_CNTL_MISC_REGS_PFET));
+#endif
+    return i_data.extractToRight<DPLL_CNTL_MISC_REGS_PFET_PAU4_VDD_PFETS_ENABLED_SENSE_OUT_DC,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("4:scom_perv Invalid dial access DPLL_CNTL_MISC_REGS_PFET_PAU4_VDD_PFETS_ENABLED_SENSE_OUT_DC chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[DPLL_CNTL_MISC_REGS_PFET_PAU4_VDD_PFETS_ENABLED_SENSE_OUT_DC]
+
+//>> GET_[DPLL_CNTL_MISC_REGS_PFET_PAU4_VDD_PFETS_ENABLED_SENSE_OUT_DC]
+static inline bool GET_DPLL_CNTL_MISC_REGS_PFET_PAU4_VDD_PFETS_ENABLED_SENSE_OUT_DC(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DPLL_CNTL_MISC_REGS_PFET));
+#endif
+    return i_data.getBit<DPLL_CNTL_MISC_REGS_PFET_PAU4_VDD_PFETS_ENABLED_SENSE_OUT_DC>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("5:scom_perv Invalid dial access DPLL_CNTL_MISC_REGS_PFET_PAU4_VDD_PFETS_ENABLED_SENSE_OUT_DC chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[DPLL_CNTL_MISC_REGS_PFET_PAU4_VDD_PFETS_ENABLED_SENSE_OUT_DC]
+
+//>> SET_[DPLL_CNTL_MISC_REGS_PFET_PAU5_VDD_PFETS_DISABLED_SENSE_OUT_DC]
+static inline fapi2::buffer<uint64_t>& SET_DPLL_CNTL_MISC_REGS_PFET_PAU5_VDD_PFETS_DISABLED_SENSE_OUT_DC(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DPLL_CNTL_MISC_REGS_PFET));
+#endif
+    return o_data.insertFromRight<DPLL_CNTL_MISC_REGS_PFET_PAU5_VDD_PFETS_DISABLED_SENSE_OUT_DC,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("0:scom_perv Invalid dial access DPLL_CNTL_MISC_REGS_PFET_PAU5_VDD_PFETS_DISABLED_SENSE_OUT_DC chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[DPLL_CNTL_MISC_REGS_PFET_PAU5_VDD_PFETS_DISABLED_SENSE_OUT_DC]
+
+//>> SET_[DPLL_CNTL_MISC_REGS_PFET_PAU5_VDD_PFETS_DISABLED_SENSE_OUT_DC]
+static inline fapi2::buffer<uint64_t>& SET_DPLL_CNTL_MISC_REGS_PFET_PAU5_VDD_PFETS_DISABLED_SENSE_OUT_DC(
+    const uint64_t i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DPLL_CNTL_MISC_REGS_PFET));
+#endif
+    return o_data.insertFromRight<DPLL_CNTL_MISC_REGS_PFET_PAU5_VDD_PFETS_DISABLED_SENSE_OUT_DC,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("1:scom_perv Invalid dial access DPLL_CNTL_MISC_REGS_PFET_PAU5_VDD_PFETS_DISABLED_SENSE_OUT_DC chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[DPLL_CNTL_MISC_REGS_PFET_PAU5_VDD_PFETS_DISABLED_SENSE_OUT_DC]
+
+//>> SET_[DPLL_CNTL_MISC_REGS_PFET_PAU5_VDD_PFETS_DISABLED_SENSE_OUT_DC]
+static inline fapi2::buffer<uint64_t>& SET_DPLL_CNTL_MISC_REGS_PFET_PAU5_VDD_PFETS_DISABLED_SENSE_OUT_DC(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DPLL_CNTL_MISC_REGS_PFET));
+#endif
+    return o_data.setBit<DPLL_CNTL_MISC_REGS_PFET_PAU5_VDD_PFETS_DISABLED_SENSE_OUT_DC>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("2:scom_perv Invalid dial access DPLL_CNTL_MISC_REGS_PFET_PAU5_VDD_PFETS_DISABLED_SENSE_OUT_DC chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[DPLL_CNTL_MISC_REGS_PFET_PAU5_VDD_PFETS_DISABLED_SENSE_OUT_DC]
+
+//>> CLEAR_[DPLL_CNTL_MISC_REGS_PFET_PAU5_VDD_PFETS_DISABLED_SENSE_OUT_DC]
+static inline fapi2::buffer<uint64_t>& CLEAR_DPLL_CNTL_MISC_REGS_PFET_PAU5_VDD_PFETS_DISABLED_SENSE_OUT_DC(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DPLL_CNTL_MISC_REGS_PFET));
+#endif
+    return o_data.clearBit<DPLL_CNTL_MISC_REGS_PFET_PAU5_VDD_PFETS_DISABLED_SENSE_OUT_DC>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("3:scom_perv Invalid dial access DPLL_CNTL_MISC_REGS_PFET_PAU5_VDD_PFETS_DISABLED_SENSE_OUT_DC chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< CLEAR_[DPLL_CNTL_MISC_REGS_PFET_PAU5_VDD_PFETS_DISABLED_SENSE_OUT_DC]
+
+//>> GET_[DPLL_CNTL_MISC_REGS_PFET_PAU5_VDD_PFETS_DISABLED_SENSE_OUT_DC]
+static inline fapi2::buffer<uint64_t>& GET_DPLL_CNTL_MISC_REGS_PFET_PAU5_VDD_PFETS_DISABLED_SENSE_OUT_DC(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DPLL_CNTL_MISC_REGS_PFET));
+#endif
+    return i_data.extractToRight<DPLL_CNTL_MISC_REGS_PFET_PAU5_VDD_PFETS_DISABLED_SENSE_OUT_DC,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("4:scom_perv Invalid dial access DPLL_CNTL_MISC_REGS_PFET_PAU5_VDD_PFETS_DISABLED_SENSE_OUT_DC chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[DPLL_CNTL_MISC_REGS_PFET_PAU5_VDD_PFETS_DISABLED_SENSE_OUT_DC]
+
+//>> GET_[DPLL_CNTL_MISC_REGS_PFET_PAU5_VDD_PFETS_DISABLED_SENSE_OUT_DC]
+static inline bool GET_DPLL_CNTL_MISC_REGS_PFET_PAU5_VDD_PFETS_DISABLED_SENSE_OUT_DC(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DPLL_CNTL_MISC_REGS_PFET));
+#endif
+    return i_data.getBit<DPLL_CNTL_MISC_REGS_PFET_PAU5_VDD_PFETS_DISABLED_SENSE_OUT_DC>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("5:scom_perv Invalid dial access DPLL_CNTL_MISC_REGS_PFET_PAU5_VDD_PFETS_DISABLED_SENSE_OUT_DC chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[DPLL_CNTL_MISC_REGS_PFET_PAU5_VDD_PFETS_DISABLED_SENSE_OUT_DC]
+
+//>> SET_[DPLL_CNTL_MISC_REGS_PFET_PAU5_VDD_PFETS_ENABLED_SENSE_OUT_DC]
+static inline fapi2::buffer<uint64_t>& SET_DPLL_CNTL_MISC_REGS_PFET_PAU5_VDD_PFETS_ENABLED_SENSE_OUT_DC(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DPLL_CNTL_MISC_REGS_PFET));
+#endif
+    return o_data.insertFromRight<DPLL_CNTL_MISC_REGS_PFET_PAU5_VDD_PFETS_ENABLED_SENSE_OUT_DC,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("0:scom_perv Invalid dial access DPLL_CNTL_MISC_REGS_PFET_PAU5_VDD_PFETS_ENABLED_SENSE_OUT_DC chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[DPLL_CNTL_MISC_REGS_PFET_PAU5_VDD_PFETS_ENABLED_SENSE_OUT_DC]
+
+//>> SET_[DPLL_CNTL_MISC_REGS_PFET_PAU5_VDD_PFETS_ENABLED_SENSE_OUT_DC]
+static inline fapi2::buffer<uint64_t>& SET_DPLL_CNTL_MISC_REGS_PFET_PAU5_VDD_PFETS_ENABLED_SENSE_OUT_DC(
+    const uint64_t i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DPLL_CNTL_MISC_REGS_PFET));
+#endif
+    return o_data.insertFromRight<DPLL_CNTL_MISC_REGS_PFET_PAU5_VDD_PFETS_ENABLED_SENSE_OUT_DC,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("1:scom_perv Invalid dial access DPLL_CNTL_MISC_REGS_PFET_PAU5_VDD_PFETS_ENABLED_SENSE_OUT_DC chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[DPLL_CNTL_MISC_REGS_PFET_PAU5_VDD_PFETS_ENABLED_SENSE_OUT_DC]
+
+//>> SET_[DPLL_CNTL_MISC_REGS_PFET_PAU5_VDD_PFETS_ENABLED_SENSE_OUT_DC]
+static inline fapi2::buffer<uint64_t>& SET_DPLL_CNTL_MISC_REGS_PFET_PAU5_VDD_PFETS_ENABLED_SENSE_OUT_DC(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DPLL_CNTL_MISC_REGS_PFET));
+#endif
+    return o_data.setBit<DPLL_CNTL_MISC_REGS_PFET_PAU5_VDD_PFETS_ENABLED_SENSE_OUT_DC>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("2:scom_perv Invalid dial access DPLL_CNTL_MISC_REGS_PFET_PAU5_VDD_PFETS_ENABLED_SENSE_OUT_DC chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[DPLL_CNTL_MISC_REGS_PFET_PAU5_VDD_PFETS_ENABLED_SENSE_OUT_DC]
+
+//>> CLEAR_[DPLL_CNTL_MISC_REGS_PFET_PAU5_VDD_PFETS_ENABLED_SENSE_OUT_DC]
+static inline fapi2::buffer<uint64_t>& CLEAR_DPLL_CNTL_MISC_REGS_PFET_PAU5_VDD_PFETS_ENABLED_SENSE_OUT_DC(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DPLL_CNTL_MISC_REGS_PFET));
+#endif
+    return o_data.clearBit<DPLL_CNTL_MISC_REGS_PFET_PAU5_VDD_PFETS_ENABLED_SENSE_OUT_DC>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("3:scom_perv Invalid dial access DPLL_CNTL_MISC_REGS_PFET_PAU5_VDD_PFETS_ENABLED_SENSE_OUT_DC chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< CLEAR_[DPLL_CNTL_MISC_REGS_PFET_PAU5_VDD_PFETS_ENABLED_SENSE_OUT_DC]
+
+//>> GET_[DPLL_CNTL_MISC_REGS_PFET_PAU5_VDD_PFETS_ENABLED_SENSE_OUT_DC]
+static inline fapi2::buffer<uint64_t>& GET_DPLL_CNTL_MISC_REGS_PFET_PAU5_VDD_PFETS_ENABLED_SENSE_OUT_DC(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DPLL_CNTL_MISC_REGS_PFET));
+#endif
+    return i_data.extractToRight<DPLL_CNTL_MISC_REGS_PFET_PAU5_VDD_PFETS_ENABLED_SENSE_OUT_DC,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("4:scom_perv Invalid dial access DPLL_CNTL_MISC_REGS_PFET_PAU5_VDD_PFETS_ENABLED_SENSE_OUT_DC chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[DPLL_CNTL_MISC_REGS_PFET_PAU5_VDD_PFETS_ENABLED_SENSE_OUT_DC]
+
+//>> GET_[DPLL_CNTL_MISC_REGS_PFET_PAU5_VDD_PFETS_ENABLED_SENSE_OUT_DC]
+static inline bool GET_DPLL_CNTL_MISC_REGS_PFET_PAU5_VDD_PFETS_ENABLED_SENSE_OUT_DC(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DPLL_CNTL_MISC_REGS_PFET));
+#endif
+    return i_data.getBit<DPLL_CNTL_MISC_REGS_PFET_PAU5_VDD_PFETS_ENABLED_SENSE_OUT_DC>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("5:scom_perv Invalid dial access DPLL_CNTL_MISC_REGS_PFET_PAU5_VDD_PFETS_ENABLED_SENSE_OUT_DC chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[DPLL_CNTL_MISC_REGS_PFET_PAU5_VDD_PFETS_ENABLED_SENSE_OUT_DC]
+
+//>> SET_[DPLL_CNTL_MISC_REGS_PFET_PAU6_VDD_PFETS_DISABLED_SENSE_OUT_DC]
+static inline fapi2::buffer<uint64_t>& SET_DPLL_CNTL_MISC_REGS_PFET_PAU6_VDD_PFETS_DISABLED_SENSE_OUT_DC(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DPLL_CNTL_MISC_REGS_PFET));
+#endif
+    return o_data.insertFromRight<DPLL_CNTL_MISC_REGS_PFET_PAU6_VDD_PFETS_DISABLED_SENSE_OUT_DC,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("0:scom_perv Invalid dial access DPLL_CNTL_MISC_REGS_PFET_PAU6_VDD_PFETS_DISABLED_SENSE_OUT_DC chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[DPLL_CNTL_MISC_REGS_PFET_PAU6_VDD_PFETS_DISABLED_SENSE_OUT_DC]
+
+//>> SET_[DPLL_CNTL_MISC_REGS_PFET_PAU6_VDD_PFETS_DISABLED_SENSE_OUT_DC]
+static inline fapi2::buffer<uint64_t>& SET_DPLL_CNTL_MISC_REGS_PFET_PAU6_VDD_PFETS_DISABLED_SENSE_OUT_DC(
+    const uint64_t i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DPLL_CNTL_MISC_REGS_PFET));
+#endif
+    return o_data.insertFromRight<DPLL_CNTL_MISC_REGS_PFET_PAU6_VDD_PFETS_DISABLED_SENSE_OUT_DC,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("1:scom_perv Invalid dial access DPLL_CNTL_MISC_REGS_PFET_PAU6_VDD_PFETS_DISABLED_SENSE_OUT_DC chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[DPLL_CNTL_MISC_REGS_PFET_PAU6_VDD_PFETS_DISABLED_SENSE_OUT_DC]
+
+//>> SET_[DPLL_CNTL_MISC_REGS_PFET_PAU6_VDD_PFETS_DISABLED_SENSE_OUT_DC]
+static inline fapi2::buffer<uint64_t>& SET_DPLL_CNTL_MISC_REGS_PFET_PAU6_VDD_PFETS_DISABLED_SENSE_OUT_DC(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DPLL_CNTL_MISC_REGS_PFET));
+#endif
+    return o_data.setBit<DPLL_CNTL_MISC_REGS_PFET_PAU6_VDD_PFETS_DISABLED_SENSE_OUT_DC>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("2:scom_perv Invalid dial access DPLL_CNTL_MISC_REGS_PFET_PAU6_VDD_PFETS_DISABLED_SENSE_OUT_DC chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[DPLL_CNTL_MISC_REGS_PFET_PAU6_VDD_PFETS_DISABLED_SENSE_OUT_DC]
+
+//>> CLEAR_[DPLL_CNTL_MISC_REGS_PFET_PAU6_VDD_PFETS_DISABLED_SENSE_OUT_DC]
+static inline fapi2::buffer<uint64_t>& CLEAR_DPLL_CNTL_MISC_REGS_PFET_PAU6_VDD_PFETS_DISABLED_SENSE_OUT_DC(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DPLL_CNTL_MISC_REGS_PFET));
+#endif
+    return o_data.clearBit<DPLL_CNTL_MISC_REGS_PFET_PAU6_VDD_PFETS_DISABLED_SENSE_OUT_DC>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("3:scom_perv Invalid dial access DPLL_CNTL_MISC_REGS_PFET_PAU6_VDD_PFETS_DISABLED_SENSE_OUT_DC chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< CLEAR_[DPLL_CNTL_MISC_REGS_PFET_PAU6_VDD_PFETS_DISABLED_SENSE_OUT_DC]
+
+//>> GET_[DPLL_CNTL_MISC_REGS_PFET_PAU6_VDD_PFETS_DISABLED_SENSE_OUT_DC]
+static inline fapi2::buffer<uint64_t>& GET_DPLL_CNTL_MISC_REGS_PFET_PAU6_VDD_PFETS_DISABLED_SENSE_OUT_DC(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DPLL_CNTL_MISC_REGS_PFET));
+#endif
+    return i_data.extractToRight<DPLL_CNTL_MISC_REGS_PFET_PAU6_VDD_PFETS_DISABLED_SENSE_OUT_DC,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("4:scom_perv Invalid dial access DPLL_CNTL_MISC_REGS_PFET_PAU6_VDD_PFETS_DISABLED_SENSE_OUT_DC chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[DPLL_CNTL_MISC_REGS_PFET_PAU6_VDD_PFETS_DISABLED_SENSE_OUT_DC]
+
+//>> GET_[DPLL_CNTL_MISC_REGS_PFET_PAU6_VDD_PFETS_DISABLED_SENSE_OUT_DC]
+static inline bool GET_DPLL_CNTL_MISC_REGS_PFET_PAU6_VDD_PFETS_DISABLED_SENSE_OUT_DC(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DPLL_CNTL_MISC_REGS_PFET));
+#endif
+    return i_data.getBit<DPLL_CNTL_MISC_REGS_PFET_PAU6_VDD_PFETS_DISABLED_SENSE_OUT_DC>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("5:scom_perv Invalid dial access DPLL_CNTL_MISC_REGS_PFET_PAU6_VDD_PFETS_DISABLED_SENSE_OUT_DC chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[DPLL_CNTL_MISC_REGS_PFET_PAU6_VDD_PFETS_DISABLED_SENSE_OUT_DC]
+
+//>> SET_[DPLL_CNTL_MISC_REGS_PFET_PAU6_VDD_PFETS_ENABLED_SENSE_OUT_DC]
+static inline fapi2::buffer<uint64_t>& SET_DPLL_CNTL_MISC_REGS_PFET_PAU6_VDD_PFETS_ENABLED_SENSE_OUT_DC(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DPLL_CNTL_MISC_REGS_PFET));
+#endif
+    return o_data.insertFromRight<DPLL_CNTL_MISC_REGS_PFET_PAU6_VDD_PFETS_ENABLED_SENSE_OUT_DC,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("0:scom_perv Invalid dial access DPLL_CNTL_MISC_REGS_PFET_PAU6_VDD_PFETS_ENABLED_SENSE_OUT_DC chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[DPLL_CNTL_MISC_REGS_PFET_PAU6_VDD_PFETS_ENABLED_SENSE_OUT_DC]
+
+//>> SET_[DPLL_CNTL_MISC_REGS_PFET_PAU6_VDD_PFETS_ENABLED_SENSE_OUT_DC]
+static inline fapi2::buffer<uint64_t>& SET_DPLL_CNTL_MISC_REGS_PFET_PAU6_VDD_PFETS_ENABLED_SENSE_OUT_DC(
+    const uint64_t i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DPLL_CNTL_MISC_REGS_PFET));
+#endif
+    return o_data.insertFromRight<DPLL_CNTL_MISC_REGS_PFET_PAU6_VDD_PFETS_ENABLED_SENSE_OUT_DC,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("1:scom_perv Invalid dial access DPLL_CNTL_MISC_REGS_PFET_PAU6_VDD_PFETS_ENABLED_SENSE_OUT_DC chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[DPLL_CNTL_MISC_REGS_PFET_PAU6_VDD_PFETS_ENABLED_SENSE_OUT_DC]
+
+//>> SET_[DPLL_CNTL_MISC_REGS_PFET_PAU6_VDD_PFETS_ENABLED_SENSE_OUT_DC]
+static inline fapi2::buffer<uint64_t>& SET_DPLL_CNTL_MISC_REGS_PFET_PAU6_VDD_PFETS_ENABLED_SENSE_OUT_DC(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DPLL_CNTL_MISC_REGS_PFET));
+#endif
+    return o_data.setBit<DPLL_CNTL_MISC_REGS_PFET_PAU6_VDD_PFETS_ENABLED_SENSE_OUT_DC>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("2:scom_perv Invalid dial access DPLL_CNTL_MISC_REGS_PFET_PAU6_VDD_PFETS_ENABLED_SENSE_OUT_DC chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[DPLL_CNTL_MISC_REGS_PFET_PAU6_VDD_PFETS_ENABLED_SENSE_OUT_DC]
+
+//>> CLEAR_[DPLL_CNTL_MISC_REGS_PFET_PAU6_VDD_PFETS_ENABLED_SENSE_OUT_DC]
+static inline fapi2::buffer<uint64_t>& CLEAR_DPLL_CNTL_MISC_REGS_PFET_PAU6_VDD_PFETS_ENABLED_SENSE_OUT_DC(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DPLL_CNTL_MISC_REGS_PFET));
+#endif
+    return o_data.clearBit<DPLL_CNTL_MISC_REGS_PFET_PAU6_VDD_PFETS_ENABLED_SENSE_OUT_DC>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("3:scom_perv Invalid dial access DPLL_CNTL_MISC_REGS_PFET_PAU6_VDD_PFETS_ENABLED_SENSE_OUT_DC chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< CLEAR_[DPLL_CNTL_MISC_REGS_PFET_PAU6_VDD_PFETS_ENABLED_SENSE_OUT_DC]
+
+//>> GET_[DPLL_CNTL_MISC_REGS_PFET_PAU6_VDD_PFETS_ENABLED_SENSE_OUT_DC]
+static inline fapi2::buffer<uint64_t>& GET_DPLL_CNTL_MISC_REGS_PFET_PAU6_VDD_PFETS_ENABLED_SENSE_OUT_DC(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DPLL_CNTL_MISC_REGS_PFET));
+#endif
+    return i_data.extractToRight<DPLL_CNTL_MISC_REGS_PFET_PAU6_VDD_PFETS_ENABLED_SENSE_OUT_DC,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("4:scom_perv Invalid dial access DPLL_CNTL_MISC_REGS_PFET_PAU6_VDD_PFETS_ENABLED_SENSE_OUT_DC chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[DPLL_CNTL_MISC_REGS_PFET_PAU6_VDD_PFETS_ENABLED_SENSE_OUT_DC]
+
+//>> GET_[DPLL_CNTL_MISC_REGS_PFET_PAU6_VDD_PFETS_ENABLED_SENSE_OUT_DC]
+static inline bool GET_DPLL_CNTL_MISC_REGS_PFET_PAU6_VDD_PFETS_ENABLED_SENSE_OUT_DC(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DPLL_CNTL_MISC_REGS_PFET));
+#endif
+    return i_data.getBit<DPLL_CNTL_MISC_REGS_PFET_PAU6_VDD_PFETS_ENABLED_SENSE_OUT_DC>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("5:scom_perv Invalid dial access DPLL_CNTL_MISC_REGS_PFET_PAU6_VDD_PFETS_ENABLED_SENSE_OUT_DC chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[DPLL_CNTL_MISC_REGS_PFET_PAU6_VDD_PFETS_ENABLED_SENSE_OUT_DC]
+
+//>> SET_[DPLL_CNTL_MISC_REGS_PFET_PAU7_VDD_PFETS_DISABLED_SENSE_OUT_DC]
+static inline fapi2::buffer<uint64_t>& SET_DPLL_CNTL_MISC_REGS_PFET_PAU7_VDD_PFETS_DISABLED_SENSE_OUT_DC(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DPLL_CNTL_MISC_REGS_PFET));
+#endif
+    return o_data.insertFromRight<DPLL_CNTL_MISC_REGS_PFET_PAU7_VDD_PFETS_DISABLED_SENSE_OUT_DC,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("0:scom_perv Invalid dial access DPLL_CNTL_MISC_REGS_PFET_PAU7_VDD_PFETS_DISABLED_SENSE_OUT_DC chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[DPLL_CNTL_MISC_REGS_PFET_PAU7_VDD_PFETS_DISABLED_SENSE_OUT_DC]
+
+//>> SET_[DPLL_CNTL_MISC_REGS_PFET_PAU7_VDD_PFETS_DISABLED_SENSE_OUT_DC]
+static inline fapi2::buffer<uint64_t>& SET_DPLL_CNTL_MISC_REGS_PFET_PAU7_VDD_PFETS_DISABLED_SENSE_OUT_DC(
+    const uint64_t i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DPLL_CNTL_MISC_REGS_PFET));
+#endif
+    return o_data.insertFromRight<DPLL_CNTL_MISC_REGS_PFET_PAU7_VDD_PFETS_DISABLED_SENSE_OUT_DC,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("1:scom_perv Invalid dial access DPLL_CNTL_MISC_REGS_PFET_PAU7_VDD_PFETS_DISABLED_SENSE_OUT_DC chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[DPLL_CNTL_MISC_REGS_PFET_PAU7_VDD_PFETS_DISABLED_SENSE_OUT_DC]
+
+//>> SET_[DPLL_CNTL_MISC_REGS_PFET_PAU7_VDD_PFETS_DISABLED_SENSE_OUT_DC]
+static inline fapi2::buffer<uint64_t>& SET_DPLL_CNTL_MISC_REGS_PFET_PAU7_VDD_PFETS_DISABLED_SENSE_OUT_DC(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DPLL_CNTL_MISC_REGS_PFET));
+#endif
+    return o_data.setBit<DPLL_CNTL_MISC_REGS_PFET_PAU7_VDD_PFETS_DISABLED_SENSE_OUT_DC>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("2:scom_perv Invalid dial access DPLL_CNTL_MISC_REGS_PFET_PAU7_VDD_PFETS_DISABLED_SENSE_OUT_DC chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[DPLL_CNTL_MISC_REGS_PFET_PAU7_VDD_PFETS_DISABLED_SENSE_OUT_DC]
+
+//>> CLEAR_[DPLL_CNTL_MISC_REGS_PFET_PAU7_VDD_PFETS_DISABLED_SENSE_OUT_DC]
+static inline fapi2::buffer<uint64_t>& CLEAR_DPLL_CNTL_MISC_REGS_PFET_PAU7_VDD_PFETS_DISABLED_SENSE_OUT_DC(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DPLL_CNTL_MISC_REGS_PFET));
+#endif
+    return o_data.clearBit<DPLL_CNTL_MISC_REGS_PFET_PAU7_VDD_PFETS_DISABLED_SENSE_OUT_DC>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("3:scom_perv Invalid dial access DPLL_CNTL_MISC_REGS_PFET_PAU7_VDD_PFETS_DISABLED_SENSE_OUT_DC chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< CLEAR_[DPLL_CNTL_MISC_REGS_PFET_PAU7_VDD_PFETS_DISABLED_SENSE_OUT_DC]
+
+//>> GET_[DPLL_CNTL_MISC_REGS_PFET_PAU7_VDD_PFETS_DISABLED_SENSE_OUT_DC]
+static inline fapi2::buffer<uint64_t>& GET_DPLL_CNTL_MISC_REGS_PFET_PAU7_VDD_PFETS_DISABLED_SENSE_OUT_DC(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DPLL_CNTL_MISC_REGS_PFET));
+#endif
+    return i_data.extractToRight<DPLL_CNTL_MISC_REGS_PFET_PAU7_VDD_PFETS_DISABLED_SENSE_OUT_DC,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("4:scom_perv Invalid dial access DPLL_CNTL_MISC_REGS_PFET_PAU7_VDD_PFETS_DISABLED_SENSE_OUT_DC chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[DPLL_CNTL_MISC_REGS_PFET_PAU7_VDD_PFETS_DISABLED_SENSE_OUT_DC]
+
+//>> GET_[DPLL_CNTL_MISC_REGS_PFET_PAU7_VDD_PFETS_DISABLED_SENSE_OUT_DC]
+static inline bool GET_DPLL_CNTL_MISC_REGS_PFET_PAU7_VDD_PFETS_DISABLED_SENSE_OUT_DC(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DPLL_CNTL_MISC_REGS_PFET));
+#endif
+    return i_data.getBit<DPLL_CNTL_MISC_REGS_PFET_PAU7_VDD_PFETS_DISABLED_SENSE_OUT_DC>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("5:scom_perv Invalid dial access DPLL_CNTL_MISC_REGS_PFET_PAU7_VDD_PFETS_DISABLED_SENSE_OUT_DC chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[DPLL_CNTL_MISC_REGS_PFET_PAU7_VDD_PFETS_DISABLED_SENSE_OUT_DC]
+
+//>> SET_[DPLL_CNTL_MISC_REGS_PFET_PAU7_VDD_PFETS_ENABLED_SENSE_OUT_DC]
+static inline fapi2::buffer<uint64_t>& SET_DPLL_CNTL_MISC_REGS_PFET_PAU7_VDD_PFETS_ENABLED_SENSE_OUT_DC(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DPLL_CNTL_MISC_REGS_PFET));
+#endif
+    return o_data.insertFromRight<DPLL_CNTL_MISC_REGS_PFET_PAU7_VDD_PFETS_ENABLED_SENSE_OUT_DC,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("0:scom_perv Invalid dial access DPLL_CNTL_MISC_REGS_PFET_PAU7_VDD_PFETS_ENABLED_SENSE_OUT_DC chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[DPLL_CNTL_MISC_REGS_PFET_PAU7_VDD_PFETS_ENABLED_SENSE_OUT_DC]
+
+//>> SET_[DPLL_CNTL_MISC_REGS_PFET_PAU7_VDD_PFETS_ENABLED_SENSE_OUT_DC]
+static inline fapi2::buffer<uint64_t>& SET_DPLL_CNTL_MISC_REGS_PFET_PAU7_VDD_PFETS_ENABLED_SENSE_OUT_DC(
+    const uint64_t i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DPLL_CNTL_MISC_REGS_PFET));
+#endif
+    return o_data.insertFromRight<DPLL_CNTL_MISC_REGS_PFET_PAU7_VDD_PFETS_ENABLED_SENSE_OUT_DC,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("1:scom_perv Invalid dial access DPLL_CNTL_MISC_REGS_PFET_PAU7_VDD_PFETS_ENABLED_SENSE_OUT_DC chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[DPLL_CNTL_MISC_REGS_PFET_PAU7_VDD_PFETS_ENABLED_SENSE_OUT_DC]
+
+//>> SET_[DPLL_CNTL_MISC_REGS_PFET_PAU7_VDD_PFETS_ENABLED_SENSE_OUT_DC]
+static inline fapi2::buffer<uint64_t>& SET_DPLL_CNTL_MISC_REGS_PFET_PAU7_VDD_PFETS_ENABLED_SENSE_OUT_DC(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DPLL_CNTL_MISC_REGS_PFET));
+#endif
+    return o_data.setBit<DPLL_CNTL_MISC_REGS_PFET_PAU7_VDD_PFETS_ENABLED_SENSE_OUT_DC>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("2:scom_perv Invalid dial access DPLL_CNTL_MISC_REGS_PFET_PAU7_VDD_PFETS_ENABLED_SENSE_OUT_DC chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[DPLL_CNTL_MISC_REGS_PFET_PAU7_VDD_PFETS_ENABLED_SENSE_OUT_DC]
+
+//>> CLEAR_[DPLL_CNTL_MISC_REGS_PFET_PAU7_VDD_PFETS_ENABLED_SENSE_OUT_DC]
+static inline fapi2::buffer<uint64_t>& CLEAR_DPLL_CNTL_MISC_REGS_PFET_PAU7_VDD_PFETS_ENABLED_SENSE_OUT_DC(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DPLL_CNTL_MISC_REGS_PFET));
+#endif
+    return o_data.clearBit<DPLL_CNTL_MISC_REGS_PFET_PAU7_VDD_PFETS_ENABLED_SENSE_OUT_DC>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("3:scom_perv Invalid dial access DPLL_CNTL_MISC_REGS_PFET_PAU7_VDD_PFETS_ENABLED_SENSE_OUT_DC chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< CLEAR_[DPLL_CNTL_MISC_REGS_PFET_PAU7_VDD_PFETS_ENABLED_SENSE_OUT_DC]
+
+//>> GET_[DPLL_CNTL_MISC_REGS_PFET_PAU7_VDD_PFETS_ENABLED_SENSE_OUT_DC]
+static inline fapi2::buffer<uint64_t>& GET_DPLL_CNTL_MISC_REGS_PFET_PAU7_VDD_PFETS_ENABLED_SENSE_OUT_DC(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DPLL_CNTL_MISC_REGS_PFET));
+#endif
+    return i_data.extractToRight<DPLL_CNTL_MISC_REGS_PFET_PAU7_VDD_PFETS_ENABLED_SENSE_OUT_DC,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("4:scom_perv Invalid dial access DPLL_CNTL_MISC_REGS_PFET_PAU7_VDD_PFETS_ENABLED_SENSE_OUT_DC chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[DPLL_CNTL_MISC_REGS_PFET_PAU7_VDD_PFETS_ENABLED_SENSE_OUT_DC]
+
+//>> GET_[DPLL_CNTL_MISC_REGS_PFET_PAU7_VDD_PFETS_ENABLED_SENSE_OUT_DC]
+static inline bool GET_DPLL_CNTL_MISC_REGS_PFET_PAU7_VDD_PFETS_ENABLED_SENSE_OUT_DC(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DPLL_CNTL_MISC_REGS_PFET));
+#endif
+    return i_data.getBit<DPLL_CNTL_MISC_REGS_PFET_PAU7_VDD_PFETS_ENABLED_SENSE_OUT_DC>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("5:scom_perv Invalid dial access DPLL_CNTL_MISC_REGS_PFET_PAU7_VDD_PFETS_ENABLED_SENSE_OUT_DC chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[DPLL_CNTL_MISC_REGS_PFET_PAU7_VDD_PFETS_ENABLED_SENSE_OUT_DC]
+
+//>> SET_[DPLL_CNTL_MISC_REGS_PFET_PCIE0_VDD_PFETS_DISABLED_SENSE_OUT_DC]
+static inline fapi2::buffer<uint64_t>& SET_DPLL_CNTL_MISC_REGS_PFET_PCIE0_VDD_PFETS_DISABLED_SENSE_OUT_DC(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DPLL_CNTL_MISC_REGS_PFET));
+#endif
+    return o_data.insertFromRight<DPLL_CNTL_MISC_REGS_PFET_PCIE0_VDD_PFETS_DISABLED_SENSE_OUT_DC,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("0:scom_perv Invalid dial access DPLL_CNTL_MISC_REGS_PFET_PCIE0_VDD_PFETS_DISABLED_SENSE_OUT_DC chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[DPLL_CNTL_MISC_REGS_PFET_PCIE0_VDD_PFETS_DISABLED_SENSE_OUT_DC]
+
+//>> SET_[DPLL_CNTL_MISC_REGS_PFET_PCIE0_VDD_PFETS_DISABLED_SENSE_OUT_DC]
+static inline fapi2::buffer<uint64_t>& SET_DPLL_CNTL_MISC_REGS_PFET_PCIE0_VDD_PFETS_DISABLED_SENSE_OUT_DC(
+    const uint64_t i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DPLL_CNTL_MISC_REGS_PFET));
+#endif
+    return o_data.insertFromRight<DPLL_CNTL_MISC_REGS_PFET_PCIE0_VDD_PFETS_DISABLED_SENSE_OUT_DC,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("1:scom_perv Invalid dial access DPLL_CNTL_MISC_REGS_PFET_PCIE0_VDD_PFETS_DISABLED_SENSE_OUT_DC chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[DPLL_CNTL_MISC_REGS_PFET_PCIE0_VDD_PFETS_DISABLED_SENSE_OUT_DC]
+
+//>> SET_[DPLL_CNTL_MISC_REGS_PFET_PCIE0_VDD_PFETS_DISABLED_SENSE_OUT_DC]
+static inline fapi2::buffer<uint64_t>& SET_DPLL_CNTL_MISC_REGS_PFET_PCIE0_VDD_PFETS_DISABLED_SENSE_OUT_DC(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DPLL_CNTL_MISC_REGS_PFET));
+#endif
+    return o_data.setBit<DPLL_CNTL_MISC_REGS_PFET_PCIE0_VDD_PFETS_DISABLED_SENSE_OUT_DC>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("2:scom_perv Invalid dial access DPLL_CNTL_MISC_REGS_PFET_PCIE0_VDD_PFETS_DISABLED_SENSE_OUT_DC chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[DPLL_CNTL_MISC_REGS_PFET_PCIE0_VDD_PFETS_DISABLED_SENSE_OUT_DC]
+
+//>> CLEAR_[DPLL_CNTL_MISC_REGS_PFET_PCIE0_VDD_PFETS_DISABLED_SENSE_OUT_DC]
+static inline fapi2::buffer<uint64_t>& CLEAR_DPLL_CNTL_MISC_REGS_PFET_PCIE0_VDD_PFETS_DISABLED_SENSE_OUT_DC(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DPLL_CNTL_MISC_REGS_PFET));
+#endif
+    return o_data.clearBit<DPLL_CNTL_MISC_REGS_PFET_PCIE0_VDD_PFETS_DISABLED_SENSE_OUT_DC>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("3:scom_perv Invalid dial access DPLL_CNTL_MISC_REGS_PFET_PCIE0_VDD_PFETS_DISABLED_SENSE_OUT_DC chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< CLEAR_[DPLL_CNTL_MISC_REGS_PFET_PCIE0_VDD_PFETS_DISABLED_SENSE_OUT_DC]
+
+//>> GET_[DPLL_CNTL_MISC_REGS_PFET_PCIE0_VDD_PFETS_DISABLED_SENSE_OUT_DC]
+static inline fapi2::buffer<uint64_t>& GET_DPLL_CNTL_MISC_REGS_PFET_PCIE0_VDD_PFETS_DISABLED_SENSE_OUT_DC(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DPLL_CNTL_MISC_REGS_PFET));
+#endif
+    return i_data.extractToRight<DPLL_CNTL_MISC_REGS_PFET_PCIE0_VDD_PFETS_DISABLED_SENSE_OUT_DC,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("4:scom_perv Invalid dial access DPLL_CNTL_MISC_REGS_PFET_PCIE0_VDD_PFETS_DISABLED_SENSE_OUT_DC chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[DPLL_CNTL_MISC_REGS_PFET_PCIE0_VDD_PFETS_DISABLED_SENSE_OUT_DC]
+
+//>> GET_[DPLL_CNTL_MISC_REGS_PFET_PCIE0_VDD_PFETS_DISABLED_SENSE_OUT_DC]
+static inline bool GET_DPLL_CNTL_MISC_REGS_PFET_PCIE0_VDD_PFETS_DISABLED_SENSE_OUT_DC(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DPLL_CNTL_MISC_REGS_PFET));
+#endif
+    return i_data.getBit<DPLL_CNTL_MISC_REGS_PFET_PCIE0_VDD_PFETS_DISABLED_SENSE_OUT_DC>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("5:scom_perv Invalid dial access DPLL_CNTL_MISC_REGS_PFET_PCIE0_VDD_PFETS_DISABLED_SENSE_OUT_DC chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[DPLL_CNTL_MISC_REGS_PFET_PCIE0_VDD_PFETS_DISABLED_SENSE_OUT_DC]
+
+//>> SET_[DPLL_CNTL_MISC_REGS_PFET_PCIE0_VDD_PFETS_ENABLED_SENSE_OUT_DC]
+static inline fapi2::buffer<uint64_t>& SET_DPLL_CNTL_MISC_REGS_PFET_PCIE0_VDD_PFETS_ENABLED_SENSE_OUT_DC(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DPLL_CNTL_MISC_REGS_PFET));
+#endif
+    return o_data.insertFromRight<DPLL_CNTL_MISC_REGS_PFET_PCIE0_VDD_PFETS_ENABLED_SENSE_OUT_DC,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("0:scom_perv Invalid dial access DPLL_CNTL_MISC_REGS_PFET_PCIE0_VDD_PFETS_ENABLED_SENSE_OUT_DC chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[DPLL_CNTL_MISC_REGS_PFET_PCIE0_VDD_PFETS_ENABLED_SENSE_OUT_DC]
+
+//>> SET_[DPLL_CNTL_MISC_REGS_PFET_PCIE0_VDD_PFETS_ENABLED_SENSE_OUT_DC]
+static inline fapi2::buffer<uint64_t>& SET_DPLL_CNTL_MISC_REGS_PFET_PCIE0_VDD_PFETS_ENABLED_SENSE_OUT_DC(
+    const uint64_t i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DPLL_CNTL_MISC_REGS_PFET));
+#endif
+    return o_data.insertFromRight<DPLL_CNTL_MISC_REGS_PFET_PCIE0_VDD_PFETS_ENABLED_SENSE_OUT_DC,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("1:scom_perv Invalid dial access DPLL_CNTL_MISC_REGS_PFET_PCIE0_VDD_PFETS_ENABLED_SENSE_OUT_DC chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[DPLL_CNTL_MISC_REGS_PFET_PCIE0_VDD_PFETS_ENABLED_SENSE_OUT_DC]
+
+//>> SET_[DPLL_CNTL_MISC_REGS_PFET_PCIE0_VDD_PFETS_ENABLED_SENSE_OUT_DC]
+static inline fapi2::buffer<uint64_t>& SET_DPLL_CNTL_MISC_REGS_PFET_PCIE0_VDD_PFETS_ENABLED_SENSE_OUT_DC(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DPLL_CNTL_MISC_REGS_PFET));
+#endif
+    return o_data.setBit<DPLL_CNTL_MISC_REGS_PFET_PCIE0_VDD_PFETS_ENABLED_SENSE_OUT_DC>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("2:scom_perv Invalid dial access DPLL_CNTL_MISC_REGS_PFET_PCIE0_VDD_PFETS_ENABLED_SENSE_OUT_DC chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[DPLL_CNTL_MISC_REGS_PFET_PCIE0_VDD_PFETS_ENABLED_SENSE_OUT_DC]
+
+//>> CLEAR_[DPLL_CNTL_MISC_REGS_PFET_PCIE0_VDD_PFETS_ENABLED_SENSE_OUT_DC]
+static inline fapi2::buffer<uint64_t>& CLEAR_DPLL_CNTL_MISC_REGS_PFET_PCIE0_VDD_PFETS_ENABLED_SENSE_OUT_DC(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DPLL_CNTL_MISC_REGS_PFET));
+#endif
+    return o_data.clearBit<DPLL_CNTL_MISC_REGS_PFET_PCIE0_VDD_PFETS_ENABLED_SENSE_OUT_DC>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("3:scom_perv Invalid dial access DPLL_CNTL_MISC_REGS_PFET_PCIE0_VDD_PFETS_ENABLED_SENSE_OUT_DC chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< CLEAR_[DPLL_CNTL_MISC_REGS_PFET_PCIE0_VDD_PFETS_ENABLED_SENSE_OUT_DC]
+
+//>> GET_[DPLL_CNTL_MISC_REGS_PFET_PCIE0_VDD_PFETS_ENABLED_SENSE_OUT_DC]
+static inline fapi2::buffer<uint64_t>& GET_DPLL_CNTL_MISC_REGS_PFET_PCIE0_VDD_PFETS_ENABLED_SENSE_OUT_DC(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DPLL_CNTL_MISC_REGS_PFET));
+#endif
+    return i_data.extractToRight<DPLL_CNTL_MISC_REGS_PFET_PCIE0_VDD_PFETS_ENABLED_SENSE_OUT_DC,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("4:scom_perv Invalid dial access DPLL_CNTL_MISC_REGS_PFET_PCIE0_VDD_PFETS_ENABLED_SENSE_OUT_DC chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[DPLL_CNTL_MISC_REGS_PFET_PCIE0_VDD_PFETS_ENABLED_SENSE_OUT_DC]
+
+//>> GET_[DPLL_CNTL_MISC_REGS_PFET_PCIE0_VDD_PFETS_ENABLED_SENSE_OUT_DC]
+static inline bool GET_DPLL_CNTL_MISC_REGS_PFET_PCIE0_VDD_PFETS_ENABLED_SENSE_OUT_DC(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DPLL_CNTL_MISC_REGS_PFET));
+#endif
+    return i_data.getBit<DPLL_CNTL_MISC_REGS_PFET_PCIE0_VDD_PFETS_ENABLED_SENSE_OUT_DC>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("5:scom_perv Invalid dial access DPLL_CNTL_MISC_REGS_PFET_PCIE0_VDD_PFETS_ENABLED_SENSE_OUT_DC chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[DPLL_CNTL_MISC_REGS_PFET_PCIE0_VDD_PFETS_ENABLED_SENSE_OUT_DC]
+
+//>> SET_[DPLL_CNTL_MISC_REGS_PFET_PCIE1_VDD_PFETS_DISABLED_SENSE_OUT_DC]
+static inline fapi2::buffer<uint64_t>& SET_DPLL_CNTL_MISC_REGS_PFET_PCIE1_VDD_PFETS_DISABLED_SENSE_OUT_DC(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DPLL_CNTL_MISC_REGS_PFET));
+#endif
+    return o_data.insertFromRight<DPLL_CNTL_MISC_REGS_PFET_PCIE1_VDD_PFETS_DISABLED_SENSE_OUT_DC,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("0:scom_perv Invalid dial access DPLL_CNTL_MISC_REGS_PFET_PCIE1_VDD_PFETS_DISABLED_SENSE_OUT_DC chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[DPLL_CNTL_MISC_REGS_PFET_PCIE1_VDD_PFETS_DISABLED_SENSE_OUT_DC]
+
+//>> SET_[DPLL_CNTL_MISC_REGS_PFET_PCIE1_VDD_PFETS_DISABLED_SENSE_OUT_DC]
+static inline fapi2::buffer<uint64_t>& SET_DPLL_CNTL_MISC_REGS_PFET_PCIE1_VDD_PFETS_DISABLED_SENSE_OUT_DC(
+    const uint64_t i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DPLL_CNTL_MISC_REGS_PFET));
+#endif
+    return o_data.insertFromRight<DPLL_CNTL_MISC_REGS_PFET_PCIE1_VDD_PFETS_DISABLED_SENSE_OUT_DC,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("1:scom_perv Invalid dial access DPLL_CNTL_MISC_REGS_PFET_PCIE1_VDD_PFETS_DISABLED_SENSE_OUT_DC chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[DPLL_CNTL_MISC_REGS_PFET_PCIE1_VDD_PFETS_DISABLED_SENSE_OUT_DC]
+
+//>> SET_[DPLL_CNTL_MISC_REGS_PFET_PCIE1_VDD_PFETS_DISABLED_SENSE_OUT_DC]
+static inline fapi2::buffer<uint64_t>& SET_DPLL_CNTL_MISC_REGS_PFET_PCIE1_VDD_PFETS_DISABLED_SENSE_OUT_DC(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DPLL_CNTL_MISC_REGS_PFET));
+#endif
+    return o_data.setBit<DPLL_CNTL_MISC_REGS_PFET_PCIE1_VDD_PFETS_DISABLED_SENSE_OUT_DC>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("2:scom_perv Invalid dial access DPLL_CNTL_MISC_REGS_PFET_PCIE1_VDD_PFETS_DISABLED_SENSE_OUT_DC chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[DPLL_CNTL_MISC_REGS_PFET_PCIE1_VDD_PFETS_DISABLED_SENSE_OUT_DC]
+
+//>> CLEAR_[DPLL_CNTL_MISC_REGS_PFET_PCIE1_VDD_PFETS_DISABLED_SENSE_OUT_DC]
+static inline fapi2::buffer<uint64_t>& CLEAR_DPLL_CNTL_MISC_REGS_PFET_PCIE1_VDD_PFETS_DISABLED_SENSE_OUT_DC(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DPLL_CNTL_MISC_REGS_PFET));
+#endif
+    return o_data.clearBit<DPLL_CNTL_MISC_REGS_PFET_PCIE1_VDD_PFETS_DISABLED_SENSE_OUT_DC>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("3:scom_perv Invalid dial access DPLL_CNTL_MISC_REGS_PFET_PCIE1_VDD_PFETS_DISABLED_SENSE_OUT_DC chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< CLEAR_[DPLL_CNTL_MISC_REGS_PFET_PCIE1_VDD_PFETS_DISABLED_SENSE_OUT_DC]
+
+//>> GET_[DPLL_CNTL_MISC_REGS_PFET_PCIE1_VDD_PFETS_DISABLED_SENSE_OUT_DC]
+static inline fapi2::buffer<uint64_t>& GET_DPLL_CNTL_MISC_REGS_PFET_PCIE1_VDD_PFETS_DISABLED_SENSE_OUT_DC(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DPLL_CNTL_MISC_REGS_PFET));
+#endif
+    return i_data.extractToRight<DPLL_CNTL_MISC_REGS_PFET_PCIE1_VDD_PFETS_DISABLED_SENSE_OUT_DC,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("4:scom_perv Invalid dial access DPLL_CNTL_MISC_REGS_PFET_PCIE1_VDD_PFETS_DISABLED_SENSE_OUT_DC chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[DPLL_CNTL_MISC_REGS_PFET_PCIE1_VDD_PFETS_DISABLED_SENSE_OUT_DC]
+
+//>> GET_[DPLL_CNTL_MISC_REGS_PFET_PCIE1_VDD_PFETS_DISABLED_SENSE_OUT_DC]
+static inline bool GET_DPLL_CNTL_MISC_REGS_PFET_PCIE1_VDD_PFETS_DISABLED_SENSE_OUT_DC(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DPLL_CNTL_MISC_REGS_PFET));
+#endif
+    return i_data.getBit<DPLL_CNTL_MISC_REGS_PFET_PCIE1_VDD_PFETS_DISABLED_SENSE_OUT_DC>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("5:scom_perv Invalid dial access DPLL_CNTL_MISC_REGS_PFET_PCIE1_VDD_PFETS_DISABLED_SENSE_OUT_DC chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[DPLL_CNTL_MISC_REGS_PFET_PCIE1_VDD_PFETS_DISABLED_SENSE_OUT_DC]
+
+//>> SET_[DPLL_CNTL_MISC_REGS_PFET_PCIE1_VDD_PFETS_ENABLED_SENSE_OUT_DC]
+static inline fapi2::buffer<uint64_t>& SET_DPLL_CNTL_MISC_REGS_PFET_PCIE1_VDD_PFETS_ENABLED_SENSE_OUT_DC(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DPLL_CNTL_MISC_REGS_PFET));
+#endif
+    return o_data.insertFromRight<DPLL_CNTL_MISC_REGS_PFET_PCIE1_VDD_PFETS_ENABLED_SENSE_OUT_DC,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("0:scom_perv Invalid dial access DPLL_CNTL_MISC_REGS_PFET_PCIE1_VDD_PFETS_ENABLED_SENSE_OUT_DC chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[DPLL_CNTL_MISC_REGS_PFET_PCIE1_VDD_PFETS_ENABLED_SENSE_OUT_DC]
+
+//>> SET_[DPLL_CNTL_MISC_REGS_PFET_PCIE1_VDD_PFETS_ENABLED_SENSE_OUT_DC]
+static inline fapi2::buffer<uint64_t>& SET_DPLL_CNTL_MISC_REGS_PFET_PCIE1_VDD_PFETS_ENABLED_SENSE_OUT_DC(
+    const uint64_t i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DPLL_CNTL_MISC_REGS_PFET));
+#endif
+    return o_data.insertFromRight<DPLL_CNTL_MISC_REGS_PFET_PCIE1_VDD_PFETS_ENABLED_SENSE_OUT_DC,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("1:scom_perv Invalid dial access DPLL_CNTL_MISC_REGS_PFET_PCIE1_VDD_PFETS_ENABLED_SENSE_OUT_DC chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[DPLL_CNTL_MISC_REGS_PFET_PCIE1_VDD_PFETS_ENABLED_SENSE_OUT_DC]
+
+//>> SET_[DPLL_CNTL_MISC_REGS_PFET_PCIE1_VDD_PFETS_ENABLED_SENSE_OUT_DC]
+static inline fapi2::buffer<uint64_t>& SET_DPLL_CNTL_MISC_REGS_PFET_PCIE1_VDD_PFETS_ENABLED_SENSE_OUT_DC(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DPLL_CNTL_MISC_REGS_PFET));
+#endif
+    return o_data.setBit<DPLL_CNTL_MISC_REGS_PFET_PCIE1_VDD_PFETS_ENABLED_SENSE_OUT_DC>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("2:scom_perv Invalid dial access DPLL_CNTL_MISC_REGS_PFET_PCIE1_VDD_PFETS_ENABLED_SENSE_OUT_DC chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[DPLL_CNTL_MISC_REGS_PFET_PCIE1_VDD_PFETS_ENABLED_SENSE_OUT_DC]
+
+//>> CLEAR_[DPLL_CNTL_MISC_REGS_PFET_PCIE1_VDD_PFETS_ENABLED_SENSE_OUT_DC]
+static inline fapi2::buffer<uint64_t>& CLEAR_DPLL_CNTL_MISC_REGS_PFET_PCIE1_VDD_PFETS_ENABLED_SENSE_OUT_DC(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DPLL_CNTL_MISC_REGS_PFET));
+#endif
+    return o_data.clearBit<DPLL_CNTL_MISC_REGS_PFET_PCIE1_VDD_PFETS_ENABLED_SENSE_OUT_DC>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("3:scom_perv Invalid dial access DPLL_CNTL_MISC_REGS_PFET_PCIE1_VDD_PFETS_ENABLED_SENSE_OUT_DC chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< CLEAR_[DPLL_CNTL_MISC_REGS_PFET_PCIE1_VDD_PFETS_ENABLED_SENSE_OUT_DC]
+
+//>> GET_[DPLL_CNTL_MISC_REGS_PFET_PCIE1_VDD_PFETS_ENABLED_SENSE_OUT_DC]
+static inline fapi2::buffer<uint64_t>& GET_DPLL_CNTL_MISC_REGS_PFET_PCIE1_VDD_PFETS_ENABLED_SENSE_OUT_DC(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DPLL_CNTL_MISC_REGS_PFET));
+#endif
+    return i_data.extractToRight<DPLL_CNTL_MISC_REGS_PFET_PCIE1_VDD_PFETS_ENABLED_SENSE_OUT_DC,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("4:scom_perv Invalid dial access DPLL_CNTL_MISC_REGS_PFET_PCIE1_VDD_PFETS_ENABLED_SENSE_OUT_DC chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[DPLL_CNTL_MISC_REGS_PFET_PCIE1_VDD_PFETS_ENABLED_SENSE_OUT_DC]
+
+//>> GET_[DPLL_CNTL_MISC_REGS_PFET_PCIE1_VDD_PFETS_ENABLED_SENSE_OUT_DC]
+static inline bool GET_DPLL_CNTL_MISC_REGS_PFET_PCIE1_VDD_PFETS_ENABLED_SENSE_OUT_DC(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DPLL_CNTL_MISC_REGS_PFET));
+#endif
+    return i_data.getBit<DPLL_CNTL_MISC_REGS_PFET_PCIE1_VDD_PFETS_ENABLED_SENSE_OUT_DC>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("5:scom_perv Invalid dial access DPLL_CNTL_MISC_REGS_PFET_PCIE1_VDD_PFETS_ENABLED_SENSE_OUT_DC chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[DPLL_CNTL_MISC_REGS_PFET_PCIE1_VDD_PFETS_ENABLED_SENSE_OUT_DC]
+
+//>> SET_[DPLL_CNTL_MISC_REGS_PFET_NMMU_VDD_PFETS_DISABLED_SENSE_OUT_DC]
+static inline fapi2::buffer<uint64_t>& SET_DPLL_CNTL_MISC_REGS_PFET_NMMU_VDD_PFETS_DISABLED_SENSE_OUT_DC(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DPLL_CNTL_MISC_REGS_PFET));
+#endif
+    return o_data.insertFromRight<DPLL_CNTL_MISC_REGS_PFET_NMMU_VDD_PFETS_DISABLED_SENSE_OUT_DC,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("0:scom_perv Invalid dial access DPLL_CNTL_MISC_REGS_PFET_NMMU_VDD_PFETS_DISABLED_SENSE_OUT_DC chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[DPLL_CNTL_MISC_REGS_PFET_NMMU_VDD_PFETS_DISABLED_SENSE_OUT_DC]
+
+//>> SET_[DPLL_CNTL_MISC_REGS_PFET_NMMU_VDD_PFETS_DISABLED_SENSE_OUT_DC]
+static inline fapi2::buffer<uint64_t>& SET_DPLL_CNTL_MISC_REGS_PFET_NMMU_VDD_PFETS_DISABLED_SENSE_OUT_DC(
+    const uint64_t i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DPLL_CNTL_MISC_REGS_PFET));
+#endif
+    return o_data.insertFromRight<DPLL_CNTL_MISC_REGS_PFET_NMMU_VDD_PFETS_DISABLED_SENSE_OUT_DC,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("1:scom_perv Invalid dial access DPLL_CNTL_MISC_REGS_PFET_NMMU_VDD_PFETS_DISABLED_SENSE_OUT_DC chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[DPLL_CNTL_MISC_REGS_PFET_NMMU_VDD_PFETS_DISABLED_SENSE_OUT_DC]
+
+//>> SET_[DPLL_CNTL_MISC_REGS_PFET_NMMU_VDD_PFETS_DISABLED_SENSE_OUT_DC]
+static inline fapi2::buffer<uint64_t>& SET_DPLL_CNTL_MISC_REGS_PFET_NMMU_VDD_PFETS_DISABLED_SENSE_OUT_DC(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DPLL_CNTL_MISC_REGS_PFET));
+#endif
+    return o_data.setBit<DPLL_CNTL_MISC_REGS_PFET_NMMU_VDD_PFETS_DISABLED_SENSE_OUT_DC>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("2:scom_perv Invalid dial access DPLL_CNTL_MISC_REGS_PFET_NMMU_VDD_PFETS_DISABLED_SENSE_OUT_DC chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[DPLL_CNTL_MISC_REGS_PFET_NMMU_VDD_PFETS_DISABLED_SENSE_OUT_DC]
+
+//>> CLEAR_[DPLL_CNTL_MISC_REGS_PFET_NMMU_VDD_PFETS_DISABLED_SENSE_OUT_DC]
+static inline fapi2::buffer<uint64_t>& CLEAR_DPLL_CNTL_MISC_REGS_PFET_NMMU_VDD_PFETS_DISABLED_SENSE_OUT_DC(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DPLL_CNTL_MISC_REGS_PFET));
+#endif
+    return o_data.clearBit<DPLL_CNTL_MISC_REGS_PFET_NMMU_VDD_PFETS_DISABLED_SENSE_OUT_DC>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("3:scom_perv Invalid dial access DPLL_CNTL_MISC_REGS_PFET_NMMU_VDD_PFETS_DISABLED_SENSE_OUT_DC chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< CLEAR_[DPLL_CNTL_MISC_REGS_PFET_NMMU_VDD_PFETS_DISABLED_SENSE_OUT_DC]
+
+//>> GET_[DPLL_CNTL_MISC_REGS_PFET_NMMU_VDD_PFETS_DISABLED_SENSE_OUT_DC]
+static inline fapi2::buffer<uint64_t>& GET_DPLL_CNTL_MISC_REGS_PFET_NMMU_VDD_PFETS_DISABLED_SENSE_OUT_DC(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DPLL_CNTL_MISC_REGS_PFET));
+#endif
+    return i_data.extractToRight<DPLL_CNTL_MISC_REGS_PFET_NMMU_VDD_PFETS_DISABLED_SENSE_OUT_DC,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("4:scom_perv Invalid dial access DPLL_CNTL_MISC_REGS_PFET_NMMU_VDD_PFETS_DISABLED_SENSE_OUT_DC chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[DPLL_CNTL_MISC_REGS_PFET_NMMU_VDD_PFETS_DISABLED_SENSE_OUT_DC]
+
+//>> GET_[DPLL_CNTL_MISC_REGS_PFET_NMMU_VDD_PFETS_DISABLED_SENSE_OUT_DC]
+static inline bool GET_DPLL_CNTL_MISC_REGS_PFET_NMMU_VDD_PFETS_DISABLED_SENSE_OUT_DC(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DPLL_CNTL_MISC_REGS_PFET));
+#endif
+    return i_data.getBit<DPLL_CNTL_MISC_REGS_PFET_NMMU_VDD_PFETS_DISABLED_SENSE_OUT_DC>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("5:scom_perv Invalid dial access DPLL_CNTL_MISC_REGS_PFET_NMMU_VDD_PFETS_DISABLED_SENSE_OUT_DC chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[DPLL_CNTL_MISC_REGS_PFET_NMMU_VDD_PFETS_DISABLED_SENSE_OUT_DC]
+
+//>> SET_[DPLL_CNTL_MISC_REGS_PFET_NMMU_VDD_PFETS_ENABLED_SENSE_OUT_DC]
+static inline fapi2::buffer<uint64_t>& SET_DPLL_CNTL_MISC_REGS_PFET_NMMU_VDD_PFETS_ENABLED_SENSE_OUT_DC(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DPLL_CNTL_MISC_REGS_PFET));
+#endif
+    return o_data.insertFromRight<DPLL_CNTL_MISC_REGS_PFET_NMMU_VDD_PFETS_ENABLED_SENSE_OUT_DC,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("0:scom_perv Invalid dial access DPLL_CNTL_MISC_REGS_PFET_NMMU_VDD_PFETS_ENABLED_SENSE_OUT_DC chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[DPLL_CNTL_MISC_REGS_PFET_NMMU_VDD_PFETS_ENABLED_SENSE_OUT_DC]
+
+//>> SET_[DPLL_CNTL_MISC_REGS_PFET_NMMU_VDD_PFETS_ENABLED_SENSE_OUT_DC]
+static inline fapi2::buffer<uint64_t>& SET_DPLL_CNTL_MISC_REGS_PFET_NMMU_VDD_PFETS_ENABLED_SENSE_OUT_DC(
+    const uint64_t i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DPLL_CNTL_MISC_REGS_PFET));
+#endif
+    return o_data.insertFromRight<DPLL_CNTL_MISC_REGS_PFET_NMMU_VDD_PFETS_ENABLED_SENSE_OUT_DC,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("1:scom_perv Invalid dial access DPLL_CNTL_MISC_REGS_PFET_NMMU_VDD_PFETS_ENABLED_SENSE_OUT_DC chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[DPLL_CNTL_MISC_REGS_PFET_NMMU_VDD_PFETS_ENABLED_SENSE_OUT_DC]
+
+//>> SET_[DPLL_CNTL_MISC_REGS_PFET_NMMU_VDD_PFETS_ENABLED_SENSE_OUT_DC]
+static inline fapi2::buffer<uint64_t>& SET_DPLL_CNTL_MISC_REGS_PFET_NMMU_VDD_PFETS_ENABLED_SENSE_OUT_DC(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DPLL_CNTL_MISC_REGS_PFET));
+#endif
+    return o_data.setBit<DPLL_CNTL_MISC_REGS_PFET_NMMU_VDD_PFETS_ENABLED_SENSE_OUT_DC>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("2:scom_perv Invalid dial access DPLL_CNTL_MISC_REGS_PFET_NMMU_VDD_PFETS_ENABLED_SENSE_OUT_DC chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[DPLL_CNTL_MISC_REGS_PFET_NMMU_VDD_PFETS_ENABLED_SENSE_OUT_DC]
+
+//>> CLEAR_[DPLL_CNTL_MISC_REGS_PFET_NMMU_VDD_PFETS_ENABLED_SENSE_OUT_DC]
+static inline fapi2::buffer<uint64_t>& CLEAR_DPLL_CNTL_MISC_REGS_PFET_NMMU_VDD_PFETS_ENABLED_SENSE_OUT_DC(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DPLL_CNTL_MISC_REGS_PFET));
+#endif
+    return o_data.clearBit<DPLL_CNTL_MISC_REGS_PFET_NMMU_VDD_PFETS_ENABLED_SENSE_OUT_DC>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("3:scom_perv Invalid dial access DPLL_CNTL_MISC_REGS_PFET_NMMU_VDD_PFETS_ENABLED_SENSE_OUT_DC chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< CLEAR_[DPLL_CNTL_MISC_REGS_PFET_NMMU_VDD_PFETS_ENABLED_SENSE_OUT_DC]
+
+//>> GET_[DPLL_CNTL_MISC_REGS_PFET_NMMU_VDD_PFETS_ENABLED_SENSE_OUT_DC]
+static inline fapi2::buffer<uint64_t>& GET_DPLL_CNTL_MISC_REGS_PFET_NMMU_VDD_PFETS_ENABLED_SENSE_OUT_DC(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DPLL_CNTL_MISC_REGS_PFET));
+#endif
+    return i_data.extractToRight<DPLL_CNTL_MISC_REGS_PFET_NMMU_VDD_PFETS_ENABLED_SENSE_OUT_DC,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("4:scom_perv Invalid dial access DPLL_CNTL_MISC_REGS_PFET_NMMU_VDD_PFETS_ENABLED_SENSE_OUT_DC chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[DPLL_CNTL_MISC_REGS_PFET_NMMU_VDD_PFETS_ENABLED_SENSE_OUT_DC]
+
+//>> GET_[DPLL_CNTL_MISC_REGS_PFET_NMMU_VDD_PFETS_ENABLED_SENSE_OUT_DC]
+static inline bool GET_DPLL_CNTL_MISC_REGS_PFET_NMMU_VDD_PFETS_ENABLED_SENSE_OUT_DC(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(DPLL_CNTL_MISC_REGS_PFET));
+#endif
+    return i_data.getBit<DPLL_CNTL_MISC_REGS_PFET_NMMU_VDD_PFETS_ENABLED_SENSE_OUT_DC>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("5:scom_perv Invalid dial access DPLL_CNTL_MISC_REGS_PFET_NMMU_VDD_PFETS_ENABLED_SENSE_OUT_DC chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[DPLL_CNTL_MISC_REGS_PFET_NMMU_VDD_PFETS_ENABLED_SENSE_OUT_DC]
+
 //>>THE END<<
 
 #ifndef __PPE_HCODE__
