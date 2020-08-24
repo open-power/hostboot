@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -561,7 +561,8 @@ inline fapi2::ReturnCode reset_rtt_wr_swap_enable( const fapi2::Target<T>& i_tar
 
     // gets and sets the VREF counter reset value, max of vrefdq enter or exit time
     {
-        const uint64_t l_vref_counter_reset = std::max(mss::tvrefdqe(i_target), mss::tvrefdqx(i_target));
+        const uint64_t l_vref_counter_reset = std::max(mss::tvrefdqe<mss::mc_type::NIMBUS, T>::get(i_target),
+                                              mss::tvrefdqx(i_target));
         l_data.insertFromRight<TT::VREF_COUNTER_RESET_VAL, TT::VREF_COUNTER_RESET_VAL_LEN>(l_vref_counter_reset);
     }
 

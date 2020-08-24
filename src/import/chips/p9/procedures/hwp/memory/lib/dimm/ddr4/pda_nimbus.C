@@ -48,7 +48,7 @@
 #include <lib/dimm/mrs_traits_nimbus.H>
 
 #include <lib/dimm/ddr4/mrs_load_ddr4_nimbus.H>
-#include <lib/dimm/ddr4/latch_wr_vref.H>
+#include <lib/dimm/ddr4/latch_wr_vref_nimbus.H>
 #include <lib/phy/write_cntrl.H>
 #include <lib/phy/dp16.H>
 #include <lib/dimm/ddr4/pda_nimbus.H>

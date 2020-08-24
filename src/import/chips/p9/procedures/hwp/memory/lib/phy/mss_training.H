@@ -40,7 +40,7 @@
 
 #include <fapi2.H>
 #include <lib/eff_config/timing.H>
-#include <lib/dimm/ddr4/latch_wr_vref.H>
+#include <lib/dimm/ddr4/latch_wr_vref_nimbus.H>
 
 namespace mss
 {

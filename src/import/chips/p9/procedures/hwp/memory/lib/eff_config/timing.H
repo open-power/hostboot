@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -468,17 +468,21 @@ fapi_try_exit:
 
 ///
 /// @brief VREF DQ Enter time *in clocks*
-/// @tparam T the fapi2::TargetType of i_target
-/// @param[in] i_target a target for attributes
+/// @tparam T TargetType
 /// @return VREF DQ Enter time *in clocks*
+/// @note Nimbus specialization
 ///
-template< fapi2::TargetType T >
-inline uint64_t tvrefdqe( const fapi2::Target<T>& i_target )
+template<fapi2::TargetType T>
+class tvrefdqe<mss::mc_type::NIMBUS, T>
 {
-    // JEDEC tVREFDQE in ns
-    constexpr uint64_t tVREFDQE = 150;
-    return ns_to_cycles<T>(i_target, tVREFDQE);
-}
+    public:
+        static uint64_t get(const fapi2::Target<T>& i_target)
+        {
+            // JEDEC tVREFDQE in ns
+            constexpr uint64_t tVREFDQE = 150;
+            return ns_to_cycles<T>(i_target, tVREFDQE);
+        }
+};
 
 ///
 /// @brief VREF DQ Exit time *in clocks*

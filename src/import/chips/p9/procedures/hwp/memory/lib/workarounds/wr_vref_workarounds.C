@@ -43,7 +43,7 @@
 #include <generic/memory/lib/utils/scom.H>
 #include <lib/ccs/ccs_traits_nimbus.H>
 #include <lib/dimm/ddr4/nvdimm_utils.H>
-#include <lib/dimm/ddr4/latch_wr_vref.H>
+#include <lib/dimm/ddr4/latch_wr_vref_nimbus.H>
 #include <lib/workarounds/dp16_workarounds.H>
 
 namespace mss

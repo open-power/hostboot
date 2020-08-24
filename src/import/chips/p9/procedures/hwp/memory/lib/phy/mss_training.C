@@ -46,7 +46,7 @@
 #include <lib/phy/mss_lrdimm_training.H>
 #include <lib/workarounds/dp16_workarounds.H>
 #include <lib/workarounds/wr_vref_workarounds.H>
-#include <lib/dimm/ddr4/latch_wr_vref.H>
+#include <lib/dimm/ddr4/latch_wr_vref_nimbus.H>
 #include <lib/workarounds/seq_workarounds.H>
 #include <lib/workarounds/dqs_align_workarounds.H>
 #include <lib/workarounds/ccs_workarounds.H>

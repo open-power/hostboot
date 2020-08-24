@@ -60,7 +60,7 @@
 #include <generic/memory/lib/ccs/ccs.H>
 #include <lib/workarounds/ccs_workarounds.H>
 #include <lib/eff_config/timing.H>
-#include <lib/dimm/ddr4/latch_wr_vref.H>
+#include <lib/dimm/ddr4/latch_wr_vref_nimbus.H>
 #include <lib/dimm/ddr4/nvdimm_utils.H>
 
 using fapi2::TARGET_TYPE_MCBIST;

@@ -254,7 +254,6 @@ prd_obj_no_sim += dp16_workarounds.o
 prd_obj_no_sim += phy_cntrl.o
 prd_obj_no_sim += adr.o
 prd_obj_no_sim += pda_nimbus.o
-prd_obj_no_sim += latch_wr_vref.o
 prd_obj_no_sim += ccs_workarounds.o
 prd_obj_no_sim += eff_dimm.o
 prd_obj_no_sim += eff_config_workarounds.o

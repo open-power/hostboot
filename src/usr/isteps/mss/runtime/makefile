@@ -91,7 +91,7 @@ OBJS += memory_size.o
 OBJS += gen_mss_mcbist_patterns.o
 OBJS += nimbus_pos.o
 OBJS += unmask.o
-
+OBJS += latch_wr_vref_nimbus.o
 
 #HWP build tool
 include ${ROOTPATH}/procedure.rules.mk
