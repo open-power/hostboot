@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -64,8 +64,8 @@ typedef struct
 ///
 enum
 {
-    STATUS_OP_FAILED     = 0x00,
-    STATUS_OP_SUCCESSFUL = 0x01,
+    STATUS_OP_FAILED     = 0x01,
+    STATUS_OP_SUCCESSFUL = 0x00,
 };
 
 /// See header
