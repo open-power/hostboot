@@ -165,11 +165,13 @@ actionclass analyzeUSTLFIR { analyze(gUSTLFIR); };
 actionclass analyze_ocmb_chnl0
 {
     analyze(connected(TYPE_OCMB_CHIP, 0));
+    funccall("ReturnPrdNoClearFirBits");
 };
 
 actionclass analyze_ocmb_chnl1
 {
     analyze(connected(TYPE_OCMB_CHIP, 1));
+    funccall("ReturnPrdNoClearFirBits");
 };
 
 actionclass analyze_ocmb_chnl0_UERE

@@ -85,6 +85,19 @@ int32_t PostAnalysis( ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc )
 }
 PRDF_PLUGIN_DEFINE( p10_mcc, PostAnalysis );
 
+/**
+ * @brief  Plugin called to return PRD_NO_CLEAR_FIR_BITS to the rule code.
+ * @param  i_chip A MCC chip.
+ * @param  io_sc  The step code data struct.
+ * @return SUCCESS.
+ */
+int32_t ReturnPrdNoClearFirBits( ExtensibleChip * i_chip,
+                                 STEP_CODE_DATA_STRUCT & io_sc )
+{
+    return PRD_NO_CLEAR_FIR_BITS;
+}
+PRDF_PLUGIN_DEFINE( p10_mcc, ReturnPrdNoClearFirBits );
+
 //##############################################################################
 //
 //                             Callout plugins
