@@ -338,18 +338,29 @@ fapi2::ReturnCode qme_init(
 
         l_qme_flag_mask.flush<0>().setBit<p10hcd::QME_FLAGS_TOD_SETUP_COMPLETE>();
 
-        FAPI_INF("Syncing TOD Running State");
-        FAPI_TRY(GET_TOD_FSM_REG(i_target, l_tod_fsm_reg));
+        fapi2::ATTR_IS_MPIPL_Type l_mpipl;
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IS_MPIPL, FAPI_SYSTEM, l_mpipl))
 
-        if (GET_TOD_FSM_REG_TOD_IS_RUNNING(l_tod_fsm_reg))
+        if (l_mpipl)
         {
-            FAPI_INF("TOD is running! Setting QME TOD Setup Complete Flag");
-            FAPI_TRY( putScom( l_eq_mc_or, QME_FLAGS_WO_OR, l_qme_flag_mask ) );
+            FAPI_INF("MPIPL: Clearing QME TOD Setup Complete Flag to avoid shadowing");
+            FAPI_TRY( putScom( l_eq_mc_or, QME_FLAGS_WO_CLEAR, l_qme_flag_mask ) );
         }
         else
         {
-            FAPI_INF("TOD is NOT running!  Clearing QME TOD Setup Complete Flag");
-            FAPI_TRY( putScom( l_eq_mc_or, QME_FLAGS_WO_CLEAR, l_qme_flag_mask ) );
+            FAPI_INF("Syncing TOD Running State");
+            FAPI_TRY(GET_TOD_FSM_REG(i_target, l_tod_fsm_reg));
+
+            if (GET_TOD_FSM_REG_TOD_IS_RUNNING(l_tod_fsm_reg))
+            {
+                FAPI_INF("TOD is running! Setting QME TOD Setup Complete Flag");
+                FAPI_TRY( putScom( l_eq_mc_or, QME_FLAGS_WO_OR, l_qme_flag_mask ) );
+            }
+            else
+            {
+                FAPI_INF("TOD is NOT running!  Clearing QME TOD Setup Complete Flag");
+                FAPI_TRY( putScom( l_eq_mc_or, QME_FLAGS_WO_CLEAR, l_qme_flag_mask ) );
+            }
         }
     }
 
