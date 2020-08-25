@@ -404,8 +404,13 @@ void Block::castOutPages(uint64_t i_type)
     {
         // NOTE: All LRU constraints must be < 7, since getLRU() only reports
         // 3 bits worth of size (despite the uint8_t return type).
+#ifdef CONFIG_AGGRESSIVE_LRU
+        size_t rw_constraint = 2;
+        size_t ro_constraint = 1;
+#else
         size_t rw_constraint = 5;
         size_t ro_constraint = 6;
+#endif
 
         if(i_type == VmmManager::CRITICAL)
         {

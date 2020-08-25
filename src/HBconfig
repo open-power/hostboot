@@ -4,6 +4,11 @@ config VPO_COMPILE
     help
         Compile and build image for VPO environment
 
+config AGGRESSIVE_LRU
+    default n
+    help
+        Compile and build kernel with AGGRESSIVE LRU
+
 config SBE_PRESENT
     default y
     help

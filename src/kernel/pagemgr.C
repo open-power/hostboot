@@ -293,6 +293,11 @@ void PageManager::_initialize()
 
     printk("PageManager end of preserved area at 0X%lX\n", l_endPreservedArea);
     printk("PageManager page table offset at 0X%lX\n", l_pageTableOffset);
+#ifdef CONFIG_AGGRESSIVE_LRU
+    printk("CastOutPages AGGRESSIVE LRU\n");
+#else
+    printk("CastOutPages NORMAL LRU\n");
+#endif
 
     // Populate half the cache after the preserved area
     KernelMisc::populate_cache_lines(
