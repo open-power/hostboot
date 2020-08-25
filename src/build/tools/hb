@@ -471,7 +471,7 @@ hb_simsetup()
 
     # Nothing should land here
     echo "**** Don't know how to do a non-standalone simsetup!  ***"
-    echo "Try fipssetup instead"
+    echo "Try 'hb fipssetup' instead"
     exit 1
 }
 
