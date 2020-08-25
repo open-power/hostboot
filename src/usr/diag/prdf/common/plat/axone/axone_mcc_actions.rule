@@ -191,11 +191,13 @@ actionclass defaultCallout_chnl1_th_1
 actionclass analyze_ocmb_chnl0
 {
     try( analyze(connected(TYPE_OCMB_CHIP, 0)), defaultCallout_chnl0_th_1 );
+    funccall("ReturnPrdNoClearFirBits");
 };
 
 actionclass analyze_ocmb_chnl1
 {
     try( analyze(connected(TYPE_OCMB_CHIP, 1)), defaultCallout_chnl1_th_1 );
+    funccall("ReturnPrdNoClearFirBits");
 };
 
 actionclass analyze_ocmb_chnl0_UERE
