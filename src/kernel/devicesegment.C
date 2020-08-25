@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -44,16 +44,11 @@ void DeviceSegment::init(size_t segId)
     SegmentManager::addSegment(this, segId);
 }
 
-/**
- * @brief Handle a page fault for a device address access
- * @param i_task[in] - Task pointer to the task requiring the page
- * @param i_addr[in] - 64-bit address needed to be paged
- * @return bool - TRUE: Page added to page table
- *               FALSE: Not a valid address to be paged
- */
 bool DeviceSegment::handlePageFault(task_t* i_task, uint64_t i_addr,
-                                    bool i_store)
+                                    bool i_store, bool* o_oom)
 {
+    (void)o_oom; // unused
+
     //Verify input address falls within this segment's address range
     if (i_addr < this->getBaseAddress() ||
         i_addr >= (this->getBaseAddress() + (1ull << SLBE_s)))
@@ -177,4 +172,3 @@ uint64_t DeviceSegment::findPhysicalAddress(uint64_t i_vaddr) const
 
     return rc;
 }
-

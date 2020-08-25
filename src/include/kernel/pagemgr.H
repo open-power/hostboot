@@ -163,9 +163,16 @@ class PageManager
          * Allocate pages
          * @param[in] n, Requested allocation in pages
          * @param[in] userspace - Request to allocate came from userspace
+         * @param[in] kAllowOom - Allow out-of-memory in kernel mode
          * @return pointer to requested memory
+         *
+         * If kAllowOom is true and it is executing in kernel mode, then an OOM
+         * condition will cause this function to return a null pointer. If not
+         * in kernel mode or allowOom is false, then a kernel assert is
+         * triggered.
          */
-        static void* allocatePage(size_t n = 1, bool userspace = false);
+        static void* allocatePage(size_t n = 1, bool userspace = false,
+                                  bool kAllowOom = false);
 
         /**
          * Return pages to the pagemanager
@@ -234,7 +241,7 @@ class PageManager
     private:
         void _initialize();
 
-        void* _allocatePage(size_t,bool);   //!< see allocatePage()
+        void* _allocatePage(size_t,bool,bool);//!< see allocatePage()
         void _freePage(void*, size_t);       //!< see freePage()
         void _coalesce( void );              //!< see coalesce()
         void _addMemory(size_t, size_t);     //!< see addMemory()

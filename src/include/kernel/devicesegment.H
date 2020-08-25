@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -69,10 +69,15 @@ class DeviceSegment : public Segment
          * @param[in] i_task - Task pointer to the task requiring the page
          * @param[in] i_addr - 64-bit address needed to be paged
          * @param[in] i_store - Fault was due to a store.
+         * @param[in] o_oom - Whether the handler failed due to OOM condition
          * @return bool - true: Page added to page table
          *               false: Not a valid address to be paged
+         *
+         * If o_oom is non-null, it will be set to true of an OOM occurs. If an
+         * OOM does not occur, it will not be altered. If it is null, then an
+         * OOM may trigger a kernel assert.
          */
-        bool handlePageFault(task_t* i_task, uint64_t i_addr, bool i_store);
+        bool handlePageFault(task_t* i_task, uint64_t i_addr, bool i_store, bool* o_oom);
 
 
         /**

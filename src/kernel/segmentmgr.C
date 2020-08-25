@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -34,10 +34,10 @@
 #include <usr/debugpointers.H>
 
 bool SegmentManager::handlePageFault(task_t* i_task, uint64_t i_addr,
-                                     bool i_store)
+                                     bool i_store, bool* o_oom)
 {
     return Singleton<SegmentManager>::instance().
-                _handlePageFault(i_task, i_addr, i_store);
+        _handlePageFault(i_task, i_addr, i_store, o_oom);
 }
 
 void SegmentManager::addSegment(Segment* i_segment, size_t i_segId)
@@ -84,14 +84,14 @@ void SegmentManager::addDebugPointers()
 }
 
 bool SegmentManager::_handlePageFault(task_t* i_task, uint64_t i_addr,
-                                      bool i_store)
+                                      bool i_store, bool* o_oom)
 {
     size_t segId = getSegmentIdFromAddress(i_addr);
 
     // Call contained segment object to handle page fault.
     if ((segId < MAX_SEGMENTS) && (NULL != iv_segments[segId]))
     {
-        return iv_segments[segId]->handlePageFault(i_task, i_addr, i_store);
+        return iv_segments[segId]->handlePageFault(i_task, i_addr, i_store, o_oom);
     }
 
     return false;

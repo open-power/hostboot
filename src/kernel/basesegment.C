@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -105,10 +105,10 @@ void BaseSegment::_init()
     }
 }
 
-bool BaseSegment::handlePageFault(task_t* i_task, uint64_t i_addr, bool i_store)
+bool BaseSegment::handlePageFault(task_t* i_task, uint64_t i_addr, bool i_store, bool* o_oom)
 {
     // Tail recursion to block chain.
-    return iv_block->handlePageFault(i_task, i_addr, i_store);
+    return iv_block->handlePageFault(i_task, i_addr, i_store, o_oom);
 }
 
 /**

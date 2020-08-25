@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -87,15 +87,20 @@ class SegmentManager
          * @param[in] i_task - Task causing the page fault.
          * @param[in] i_addr - Effective address accessed to cause fault.
          * @param[in] i_store - The page fault was due to a store.
+         * @param[out] o_oom - Whether the handler failed due to OOM condition
          *
          * @return true - Page fault was successfully handled.
          *
          * If the page fault is not successfully handled the expectation is
          * that the VMM will perform appropriate action, such as killing the
          * task.
+         *
+         * If o_oom is non-null, it will be set to true of an OOM occurs. If an
+         * OOM does not occur, it will not be altered. If it is null, then an
+         * OOM may trigger a kernel assert.
          */
         static bool handlePageFault(task_t* i_task, uint64_t i_addr,
-                                    bool i_store);
+                                    bool i_store, bool* o_oom);
 
         /**
          * @brief Adds a segment to the container.
@@ -162,7 +167,7 @@ class SegmentManager
 
     private:
         /** See handlePageFault. */
-        bool _handlePageFault(task_t* i_task, uint64_t i_addr, bool i_store);
+        bool _handlePageFault(task_t* i_task, uint64_t i_addr, bool i_store, bool* o_oom);
         /** See addSegment. */
         void _addSegment(Segment* i_segment, size_t i_segId);
         /** See getSegment. */

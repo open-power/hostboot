@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2014              */
+/* Contributors Listed Below - COPYRIGHT 2011,2020                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -85,7 +87,7 @@ class StackSegment : public Segment
          *
          * Calls block chain to deal with page fault.
          */
-        bool handlePageFault(task_t* i_task, uint64_t i_addr, bool i_store);
+        bool handlePageFault(task_t* i_task, uint64_t i_addr, bool i_store, bool* o_oom);
 
         /**
          * @brief Locate the physical address of the given virtual address

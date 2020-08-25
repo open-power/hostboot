@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -70,7 +70,7 @@ class Block
          * @param[in] i_mappedToPhy - boolean value indicating whether this
          *              block is a mapped to physical block.
          *                         Default: false
-         * @param[in] i_spteAddr - address that the SPTE will be created  
+         * @param[in] i_spteAddr - address that the SPTE will be created
          *              at if a specific location is required.
          *                         Default: NULL
          *
@@ -83,7 +83,7 @@ class Block
               iv_ptes(NULL), iv_readMsgHdlr(NULL),iv_writeMsgHdlr(NULL),
               iv_mappedToPhysical(i_mappedToPhy)
             {init(i_msgQueue, i_spteAddr);};
- 
+
 
         /**
          * @brief Destructor.
@@ -115,6 +115,7 @@ class Block
          * @param[in] i_task - Task causing the page fault.
          * @param[in] i_addr - Effective address accessed to cause fault.
          * @param[in] i_store - The fault was due to a store.
+         * @param[in] o_oom - Whether the handler encountered an OOM error
          *
          * @return true - Page fault was successfully handled.
          *
@@ -124,8 +125,13 @@ class Block
          *
          * If the address is not within this block, the block will attempt to
          * make calls down the block-chain if it exists.
+         *
+         * If o_oom is non-null, then if an OOM condition occurs, *o_oom will be
+         * set to true, and the function will return. The variable is not set if
+         * an OOM does not occur.
          */
-        bool handlePageFault(task_t* i_task, uint64_t i_addr, bool i_store);
+        bool handlePageFault(task_t* i_task, uint64_t i_addr, bool i_store,
+                             bool* o_oom);
 
         /**
          * @brief Locate the physical address of the given virtual address
@@ -318,8 +324,8 @@ class Block
          * @brief Finish initialization of block.
          *
          * @param[in] i_msgQ - The message queue associated with this block
-         * @param[in] i_spteAddr - address that the SPTE will be created  
-         *              at if a specific address is required. 
+         * @param[in] i_spteAddr - address that the SPTE will be created
+         *              at if a specific address is required.
          *              Default: NULL
          *
          * Construct ShadowPTE entries.

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2010,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2010,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -148,9 +148,21 @@ bool VmmManager::_pteMiss(task_t* t, uint64_t effAddr, bool store)
 {
     lock.lock();
 
-    bool rc = SegmentManager::handlePageFault(t, effAddr, store);
+    /* Allow out-of-memory conditions to pass without pageAllocate() calling
+     * kassert. That way we can detect the error, unlock our spinlock, and
+     * kassert ourselves without crossing paths with
+     * printkBacktrace/findPhysicalAddress and deadlocking. */
+    bool oom = false;
+
+    bool rc = SegmentManager::handlePageFault(t, effAddr, store, &oom);
 
     lock.unlock();
+
+    if (oom)
+    {
+        printk("_pteMiss failed due to OOM\n");
+        kassert(false);
+    }
 
     return rc;
 }

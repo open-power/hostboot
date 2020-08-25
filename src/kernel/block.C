@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -98,14 +98,14 @@ ShadowPTE* Block::getPTE(uint64_t i_addr) const
 };
 
 
-bool Block::handlePageFault(task_t* i_task, uint64_t i_addr, bool i_store)
+bool Block::handlePageFault(task_t* i_task, uint64_t i_addr, bool i_store, bool* o_oom)
 {
     // Check containment, call down chain if address isn't in this block.
     if (!isContained(i_addr))
     {
         return (iv_nextBlock ?
-                    iv_nextBlock->handlePageFault(i_task, i_addr, i_store) :
-                    false);
+                iv_nextBlock->handlePageFault(i_task, i_addr, i_store, o_oom) :
+                false);
     }
 
     // Calculate page aligned virtual address.
@@ -136,6 +136,8 @@ bool Block::handlePageFault(task_t* i_task, uint64_t i_addr, bool i_store)
         }
     }
 
+    const bool allowOom = o_oom != nullptr;
+
     if (!pte->isPresent())
     {
         if (this->iv_readMsgHdlr != NULL)
@@ -144,7 +146,14 @@ bool Block::handlePageFault(task_t* i_task, uint64_t i_addr, bool i_store)
             //If the page data is zero, create the page
             if (pte->getPage() == 0)
             {
-                l_page = PageManager::allocatePage();
+                l_page = PageManager::allocatePage(1, false, allowOom);
+
+                if (l_page == nullptr)
+                {
+                    *o_oom = true;
+                    return false;
+                }
+
                 //Add to ShadowPTE
                 pte->setPageAddr(reinterpret_cast<uint64_t>(l_page));
             }
@@ -157,7 +166,13 @@ bool Block::handlePageFault(task_t* i_task, uint64_t i_addr, bool i_store)
         }
         else if (pte->isAllocateFromZero())
         {
-            void* l_page = PageManager::allocatePage();
+            void* l_page = PageManager::allocatePage(1, false, allowOom);
+
+            if (l_page == nullptr)
+            {
+                *o_oom = true;
+                return false;
+            }
 
             // set the permission of the physical address pte entry to
             // READ_ONLY now that we have handled the page fault and

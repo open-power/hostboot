@@ -188,7 +188,7 @@ void PageManager::init()
     Singleton<PageManager>::instance();
 }
 
-void* PageManager::allocatePage(size_t n, bool userspace)
+void* PageManager::allocatePage(size_t n, bool userspace, bool kAllowOom)
 {
     void* page = NULL;
 
@@ -241,7 +241,7 @@ void* PageManager::allocatePage(size_t n, bool userspace)
     {
         // In kernel mode.  Do a normal call to the PageManager.
         PageManager& pmgr = Singleton<PageManager>::instance();
-        page = pmgr._allocatePage(n, userspace);
+        page = pmgr._allocatePage(n, userspace, kAllowOom);
     }
 
     return page;
@@ -345,7 +345,7 @@ void PageManager::_initialize()
                                      g_BlToHbDataManager.getHbCacheSizeMb());
 }
 
-void* PageManager::_allocatePage(size_t n, bool userspace)
+void* PageManager::_allocatePage(size_t n, bool userspace, bool allowOom)
 {
     // The allocator was designed to be lockless.  We have ran into a problem
     // in Brazos where all threads (over 256) were trying to allocate a page
@@ -377,7 +377,8 @@ void* PageManager::_allocatePage(size_t n, bool userspace)
         CpuManager::forceMemoryPeriodic();
     }
 
-    // If still not successful, we're out of memory.  Assert.
+    // If still not successful, we're out of memory.  Assert as long as the
+    // caller doesn't want to allow OOM (_pteMiss uses this to avoid deadlocks).
     if ((NULL == page) && (!userspace))
     {
         register task_t* t;
@@ -385,7 +386,11 @@ void* PageManager::_allocatePage(size_t n, bool userspace)
         printk("Insufficient memory for alloc %zd pages on tid=%d!\n",
                n, t->tid);
         printk("Pages available=%ld\n",iv_pagesAvail);
-        kassert(false);
+
+        if (!allowOom)
+        {
+            kassert(false);
+        }
     }
 
     // Update statistics (only if we actually found a page).

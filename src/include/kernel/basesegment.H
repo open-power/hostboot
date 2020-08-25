@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -67,7 +67,7 @@ class BaseSegment : public Segment
          * Calls block chain to deal with page fault.
          */
         virtual bool handlePageFault(task_t* i_task, uint64_t i_addr,
-                                     bool i_store);
+                                     bool i_store, bool* o_oom);
 
         /**
          * @brief Implementation of the pure-virtual function from Segment.

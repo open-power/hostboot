@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2014              */
+/* Contributors Listed Below - COPYRIGHT 2011,2020                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -62,7 +64,7 @@ StackSegment::~StackSegment()
 }
 
 bool StackSegment::handlePageFault(task_t* i_task, uint64_t i_addr,
-                                   bool i_store)
+                                   bool i_store, bool* o_oom)
 {
     uint64_t l_addr_8mb = i_addr & ~((8*MEGABYTE) - 1);
 
@@ -70,7 +72,7 @@ bool StackSegment::handlePageFault(task_t* i_task, uint64_t i_addr,
 
     return (NULL == l_node ?
                 false :
-                l_node->block->handlePageFault(i_task, i_addr, i_store));
+                l_node->block->handlePageFault(i_task, i_addr, i_store, o_oom));
 }
 
 uint64_t StackSegment::findPhysicalAddress(uint64_t i_vaddr) const

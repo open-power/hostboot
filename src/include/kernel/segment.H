@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2014              */
+/* Contributors Listed Below - COPYRIGHT 2011,2020                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -54,15 +56,20 @@ class Segment
          * @param[in] i_task - Task causing the page fault.
          * @param[in] i_addr - Effective address accessed to cause fault.
          * @param[in] i_store - The fault was due to a store.
+         * @param[out] o_oom - Handler failed due to OOM condition
          *
          * @return true - Page fault was successfully handled.
          *
          * If the page fault is not successfully handled the expectation is
          * that the VMM will perform appropriate action, such as killing the
          * task.
+         *
+         * If o_oom is non-null, it will be set to true of an OOM occurs. If an
+         * OOM does not occur, it will not be altered. If it is null, then an
+         * OOM may trigger a kernel assert.
          */
         virtual bool handlePageFault(task_t* i_task, uint64_t i_addr,
-                                     bool i_store) = 0;
+                                     bool i_store, bool* o_oom) = 0;
 
         /**
          * @brief Get the base address of this segment.
