@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018                             */
+/* Contributors Listed Below - COPYRIGHT 2018,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -99,6 +99,7 @@ constexpr uint64_t PAGEMANAGERALLOCCOUNT     = 0x504147454d414343; //'PAGEMACC'
 constexpr uint64_t SEGMENTMANAGER            = 0x53474d4e544d4752; //'SGMNTMGR'
 constexpr uint64_t BLOCKREADONLYEVICT        = 0x424c4f434b524f45; //'BLOCKROE'
 constexpr uint64_t BLOCKREADWRITEEVICT       = 0x424c4f434b525745; //'BLOCKRWE'
+constexpr uint64_t HUGEBLOCKALLOCATED        = 0x48554745564D4D20; //'HUGEVMM '
 // Number of values cannot exceed MAX_ENTRIES
 
 

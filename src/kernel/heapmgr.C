@@ -32,6 +32,7 @@
 #include <arch/ppc.H>
 #include <usr/debugpointers.H>
 #include <arch/magic.H>
+#include <usr/vmmconst.h>
 
 #ifdef HOSTBOOT_DEBUG
 #define SMALL_HEAP_PAGES_TRACKED 64
@@ -70,7 +71,7 @@ uint32_t HeapManager::cv_free_chunks;
 uint32_t HeapManager::cv_smallheap_page_count = 0;
 uint32_t HeapManager::cv_largeheap_page_count = 0;
 uint32_t HeapManager::cv_largeheap_page_max = 0;
-
+uint32_t HeapManager::cv_hugeblock_allocated = 0;
 
 void HeapManager::init()
 {
@@ -270,7 +271,22 @@ void * HeapManager::allocate(size_t i_sz)
     overhead = offsetof(fence_t,data) + sizeof(CHECK::END);
 #endif
 
-    if(i_sz + overhead > MAX_SMALL_ALLOC_SIZE)
+    if( (i_sz + overhead > MAX_BIG_ALLOC_SIZE)
+        && (i_sz + overhead <= HC_SLOT_SIZE) )
+    {
+        printkd("allocateHuge=%ld [%d]\n", i_sz, task_gettid());
+        void* ptr = hmgr._allocateHuge(i_sz);
+        if( ptr )
+        {
+            return ptr;
+        }
+        else
+        {
+            // default to using regular allocations if huge doesn't work
+            return hmgr._allocateBig(i_sz);
+        }
+    }
+    else if(i_sz + overhead > MAX_SMALL_ALLOC_SIZE)
     {
         return hmgr._allocateBig(i_sz);
     }
@@ -305,9 +321,9 @@ void* HeapManager::_allocate(size_t i_sz)
     // 8 bytes book keeping, 1 byte validation
     size_t which_bucket = bucketIndex(i_sz + CHUNK_HEADER_PLUS_RESERVED);
 
-    chunk_t* chunk = reinterpret_cast<chunk_t*>(NULL);
+    chunk_t* chunk = static_cast<chunk_t*>(nullptr);
     chunk = pop_bucket(which_bucket);
-    if (NULL == chunk)
+    if (nullptr == chunk)
     {
         newPage();
         return _allocate(i_sz);
@@ -341,7 +357,10 @@ void* HeapManager::_allocate(size_t i_sz)
 
 void* HeapManager::_realloc(void* i_ptr, size_t i_sz)
 {
-    void* new_ptr = _reallocBig(i_ptr,i_sz);
+    void* new_ptr = _reallocHuge(i_ptr,i_sz);
+    if(new_ptr) return new_ptr;
+
+    new_ptr = _reallocBig(i_ptr,i_sz);
     if(new_ptr) return new_ptr;
 
     size_t overhead = 0;
@@ -396,17 +415,17 @@ void* HeapManager::_reallocBig(void* i_ptr, size_t i_sz)
     if(ALIGN_PAGE(reinterpret_cast<uint64_t>(i_ptr)) !=
        reinterpret_cast<uint64_t>(i_ptr))
     {
-        return NULL;
+        return nullptr;
     }
 
 #ifdef CONFIG_MALLOC_FENCING
     i_ptr=_enforceBigFence(i_ptr);
 #endif
 
-    void* new_ptr = NULL;
+    void* new_ptr = nullptr;
     big_chunk_t * bc = big_chunk_stack.first();
     while(bc)
-   {
+    {
        if(bc->addr == i_ptr)
        {
            size_t new_size = ALIGN_PAGE(i_sz)/PAGESIZE;
@@ -448,9 +467,9 @@ void* HeapManager::_reallocBig(void* i_ptr, size_t i_sz)
 
 void HeapManager::_free(void * i_ptr)
 {
-    if (NULL == i_ptr) return;
+    if (nullptr == i_ptr) return;
 
-    if(!_freeBig(i_ptr))
+    if(!_freeHuge(i_ptr) && !_freeBig(i_ptr))
     {
 
 #ifdef CONFIG_MALLOC_FENCING
@@ -484,16 +503,16 @@ void HeapManager::_free(void * i_ptr)
 
 HeapManager::chunk_t* HeapManager::pop_bucket(size_t i_bucket)
 {
-    if (i_bucket >= BUCKETS) return NULL;
+    if (i_bucket >= BUCKETS) return nullptr;
 
     chunk_t* c = first_chunk[i_bucket].pop();
 
-    if (NULL == c)
+    if (nullptr == c)
     {
         // Couldn't allocate from the correct size bucket, so split up an
         // item from the next sized bucket.
         c = pop_bucket(i_bucket+1);
-        if (NULL != c)
+        if (nullptr != c)
         {
             size_t c_size = bucketByteSize(i_bucket);
             size_t c1_size = bucketByteSize(c->bucket) - c_size;
@@ -602,14 +621,14 @@ size_t HeapManager::bucketIndex(size_t i_sz)
 // all other processes must be quiesced
 void HeapManager::_coalesce()
 {
-    chunk_t* head = NULL;
-    chunk_t* chunk = NULL;
+    chunk_t* head = nullptr;
+    chunk_t* chunk = nullptr;
 
     // make a chain out of all the free chunks
     for(size_t bucket = 0; bucket < BUCKETS; ++bucket)
     {
-        chunk = NULL;
-        while(NULL != (chunk = first_chunk[bucket].pop()))
+        chunk = nullptr;
+        while(nullptr != (chunk = first_chunk[bucket].pop()))
         {
             kassert(chunk->free == 'F');
 
@@ -627,7 +646,7 @@ void HeapManager::_coalesce()
         chunk = head;
 
         // Iterate through the chain.
-        while(NULL != chunk)
+        while(nullptr != chunk)
         {
             bool incrementChunk = true;
 
@@ -687,9 +706,9 @@ void HeapManager::_coalesce()
         }
 
         // Remove all the non-free (merged) chunks from the list.
-        chunk_t* newHead = NULL;
+        chunk_t* newHead = nullptr;
         chunk = head;
-        while (NULL != chunk)
+        while (nullptr != chunk)
         {
             if ((chunk->free == 'F') && (chunk->coalesce == 'C'))
             {
@@ -714,7 +733,7 @@ void HeapManager::_coalesce()
     cv_free_chunks = 0;
     cv_free_bytes = 0;
     chunk = head;
-    while(chunk != NULL)
+    while(chunk != nullptr)
     {
         chunk_t * temp = chunk->next;
 
@@ -817,7 +836,7 @@ void* HeapManager::_allocateBig(size_t i_sz)
     {
         if(bc->page_count == 0)
         {
-            if(__sync_bool_compare_and_swap(&bc->addr,NULL,v))
+            if(__sync_bool_compare_and_swap(&bc->addr,nullptr,v))
             {
                 bc->page_count = pages;
                 break;
@@ -860,7 +879,7 @@ bool HeapManager::_freeBig(void* i_ptr)
 
             size_t page_count = bc->page_count;
             bc->page_count = 0;
-            bc->addr = NULL;
+            bc->addr = nullptr;
             lwsync();
 
             PageManager::freePage(i_ptr,page_count);
@@ -906,5 +925,202 @@ void HeapManager::_addDebugPointers()
     DEBUG::add_debug_pointer(DEBUG::HEAPMANAGERFREECHUNKS,
                              &cv_free_chunks,
                              sizeof(HeapManager::cv_free_chunks));
+    DEBUG::add_debug_pointer(DEBUG::HUGEBLOCKALLOCATED,
+                             &cv_hugeblock_allocated,
+                             sizeof(HeapManager::cv_hugeblock_allocated));
+}
+
+void* HeapManager::_allocateHuge(size_t i_sz)
+{
+    size_t pages = ALIGN_PAGE(i_sz)/PAGESIZE;
+    if( (pages*PAGESIZE) > HC_SLOT_SIZE )
+    {
+        printkd( "_allocateHuge> Request too large, bytes=%ld > HC_SLOT_SIZE=%d\n",
+            i_sz, HC_SLOT_SIZE );
+        return nullptr;
+    }
+
+    // Values for cv_hugeblock_allocated
+    //  0=nothing done
+    //  1=init in progress
+    //  2=init complete
+    // If nothing has been initialized yet, do it
+    if( __sync_bool_compare_and_swap(&cv_hugeblock_allocated,0,1) )
+    {
+        int rc = mm_alloc_block( nullptr,
+                                 reinterpret_cast<void*>(VMM_VADDR_MALLOC),
+                                 HC_TOTAL_SIZE );
+        if(rc != 0)
+        {
+            printk( "_allocateHuge> mm_alloc_block failed for %lX\n",
+                    VMM_VADDR_MALLOC );
+            return nullptr;
+        }
+
+        // Prepopulate list with the available addresses
+        for( uint64_t addr = (VMM_VADDR_MALLOC+HC_TOTAL_SIZE);
+             addr >= VMM_VADDR_MALLOC;
+             addr -= HC_SLOT_SIZE )
+        {
+            huge_chunk_t* hc =
+              new huge_chunk_t(reinterpret_cast<void*>(addr),0);
+            huge_chunk_stack.push(hc);
+        }
+
+        cv_hugeblock_allocated = 2;
+        sync();
+    }
+    else
+    {
+        // hold off any other threads until the init is done
+        while( cv_hugeblock_allocated != 2 )
+        {
+            task_yield();
+        }
+    }
+
+
+    // Find an unused chunk
+    huge_chunk_t * hc = huge_chunk_stack.first();
+    while(hc)
+    {
+        if( hc->page_count == 0 )
+        {
+            printkd( "_allocateHuge> Found hole at %p pages=%ld i_sz=%ld\n", hc->addr, pages, i_sz);
+        }
+
+        // atomically set the page_count
+        if(__sync_bool_compare_and_swap(&hc->page_count,0,pages))
+        {
+            break;
+        }
+        hc = reinterpret_cast<huge_chunk_t *> (reinterpret_cast<uint64_t>(hc->next) & 0x00000000FFFFFFFF);
+    }
+    if(!hc)
+    {
+        printk( "_allocateHuge> No chunks left for requested size=%ld!!\n", i_sz );
+        MAGIC_INSTRUCTION(MAGIC_BREAK_ON_ERROR);
+        return nullptr;
+    }
+
+    int rc = mm_set_permission(hc->addr,
+                               pages*PAGESIZE,
+                               WRITABLE | ALLOCATE_FROM_ZERO );
+    if(rc != 0)
+    {
+        printk( "_allocateHuge> mm_set_permission failed for requested size=%ld!!\n", i_sz );
+    }
+
+    return hc->addr;
+}
+
+
+bool HeapManager::_freeHuge(void* i_ptr)
+{
+    // Huge allocations are within the allocated VMM space
+    if( (reinterpret_cast<uint64_t>(i_ptr) < VMM_VADDR_MALLOC)
+        || (reinterpret_cast<uint64_t>(i_ptr)
+            >= (VMM_VADDR_MALLOC+VMM_MALLOC_SIZE)) )
+    {
+        return false;
+    }
+    printkd( "_freeHuge> free i_ptr=%p\n", i_ptr );
+
+    // Find the relevant chunk
+    huge_chunk_t * hc = huge_chunk_stack.first();
+    while(hc)
+    {
+        if( hc->addr == i_ptr )
+        {
+            break;
+        }
+        hc = reinterpret_cast<huge_chunk_t *> (reinterpret_cast<uint64_t>(hc->next) & 0x00000000FFFFFFFF);
+    }
+    if(!hc)
+    {
+        printk( "_freeHuge> Cannot find chunk for i_ptr=%p!!\n", i_ptr );
+        return false;
+    }
+
+    int rc = 0;
+    rc = mm_remove_pages(RELEASE,
+                         i_ptr,
+                         hc->page_count*PAGESIZE);
+    if(rc != 0)
+    {
+        printk( "_freeHuge> mm_remove_pages failed for i_ptr=%p (hc->page_count=%ld)\n", i_ptr, hc->page_count);
+        return false;
+    }
+
+    // Set permissions back to "no_access"
+    rc = mm_set_permission(i_ptr,
+                           hc->page_count*PAGESIZE,
+                           NO_ACCESS | ALLOCATE_FROM_ZERO );
+    if(rc != 0)
+    {
+        printk( "_freeHuge> mm_set_permission failed for i_ptr=%p (hc->page_count=%ld)\n", i_ptr, hc->page_count);
+        return false;
+    }
+
+    // Zero it out so we can use it again
+    hc->page_count = 0;
+
+    return true;
+}
+
+void* HeapManager::_reallocHuge(void* i_ptr, size_t i_sz)
+{
+    // Huge allocations are within the allocated VMM space
+    if( (reinterpret_cast<uint64_t>(i_ptr) < VMM_VADDR_MALLOC)
+        || (reinterpret_cast<uint64_t>(i_ptr) >=
+            (VMM_VADDR_MALLOC+VMM_MALLOC_SIZE)) )
+    {
+        return nullptr;
+    }
+
+    if( i_sz > HC_SLOT_SIZE )
+    {
+        printk( "_reallocHuge> Cannot do a realloc of %ld bytes, max is HC_SLOT_SIZE=%d", i_sz, HC_SLOT_SIZE );
+        return nullptr;
+    }
+
+    // Find the chunk in question
+    huge_chunk_t * hc = huge_chunk_stack.first();
+    while(hc)
+    {
+        if( hc->addr == i_ptr )
+        {
+            hc->page_count = ALIGN_PAGE(i_sz)/PAGESIZE;
+            int rc = mm_set_permission(hc->addr,
+                              hc->page_count*PAGESIZE,
+                              WRITABLE | ALLOCATE_FROM_ZERO );
+
+            if(rc != 0)
+            {
+                printk( "_reallocHuge> mm_set_permission failed for i_ptr=%p (hc->page_count=%ld)\n", i_ptr, hc->page_count);
+                return nullptr;
+            }
+
+            rc = mm_set_permission( (reinterpret_cast<char*>(hc->addr)+(hc->page_count*PAGESIZE)),
+                              (HC_SLOT_SIZE - (hc->page_count*PAGESIZE)),
+                              NO_ACCESS | ALLOCATE_FROM_ZERO );
+
+            if(rc != 0)
+            {
+                printk( "_reallocHuge> mm_set_permission failed for i_ptr=%p (hc->page_count=%ld)\n", i_ptr, hc->page_count);
+                return nullptr;
+            }
+            break;
+        }
+        hc = reinterpret_cast<huge_chunk_t *> (reinterpret_cast<uint64_t>(hc->next) & 0x00000000FFFFFFFF);
+    }
+    if(!hc)
+    {
+        printk( "_reallocHuge> No chunk for %p!!\n", i_ptr );
+        MAGIC_INSTRUCTION(MAGIC_BREAK_ON_ERROR);
+        return nullptr;
+    }
+
+    return i_ptr;
 }
 

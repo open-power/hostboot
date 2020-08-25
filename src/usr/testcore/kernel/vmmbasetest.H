@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -36,6 +36,7 @@
 #include <sys/mm.h>
 #include <usr/vmmconst.h>
 #include <targeting/common/util.H>
+#include <kernel/heapmgr.H>
 
 class VmmBaseTest : public CxxTest::TestSuite
 {
@@ -138,16 +139,69 @@ class VmmBaseTest : public CxxTest::TestSuite
 
         void testHugeMalloc()
         {
-            int status;
+            // Allocate minimum huge, touch a couple pages, free it
+            uint32_t* test1 = (uint32_t*)malloc(HeapManager::MAX_BIG_ALLOC_SIZE+4);
+            test1[0] = 0x11223344;
+            test1[(HeapManager::MAX_BIG_ALLOC_SIZE+4)/4-1] = 0x55667788;
+            free( test1 );
 
-            printk("testHugeMalloc: Expect to see uncaught exception! ");isync();
+            // Allocate maximum huge, touch a couple pages, free it
+            uint32_t* test2 = (uint32_t*)malloc(HeapManager::HC_SLOT_SIZE);
+            test2[0] = 0x11111111;
+            test2[HeapManager::HC_SLOT_SIZE/4-1] = 0x22222222;
+            free( test2 );
 
-            tid_t child = task_create(bigMalloc, NULL);
+            // Allocate a couple things in a row
+            test1 = (uint32_t*)malloc(HeapManager::MAX_BIG_ALLOC_SIZE+100);
+            test2 = (uint32_t*)malloc(HeapManager::MAX_BIG_ALLOC_SIZE+200);
+            test1[0] = 0x33333333;
+            test1[100] = 0x44444444;
+            test2[0] = 0x55555555;
+            test2[200] = 0x66666666;
 
-            if ((child != task_wait_tid(child, &status, NULL)) ||
-                (status != TASK_STATUS_CRASHED))
+            // And 10 more
+            uint32_t* test[10];
+            for( int i=0; i < 10; i++ )
             {
-                TS_FAIL("testHugeMalloc> Giant malloc didn't crash.");
+                test[i] = (uint32_t*)malloc(HeapManager::MAX_BIG_ALLOC_SIZE
+                                            +4*PAGESIZE*(i+1));
+                test[i][i] = i;
+            }
+
+            // Make sure our data is still good
+            if( (test1[0] != 0x33333333) || (test1[100] != 0x44444444) )
+            {
+                TS_FAIL( "testHugeMalloc> test1 is bad : Expected 0x33333333, got %.8X, Expected 0x44444444, got %.8X",
+                         test1[0], test1[100] );
+            }
+            if( (test2[0] != 0x55555555) || (test2[200] != 0x66666666) )
+            {
+                TS_FAIL( "testHugeMalloc> test2 is bad : Expected 0x55555555, got %.8X, Expected 0x66666666, got %.8X",
+                         test2[0], test2[200] );
+            }
+            for( uint32_t i=0; i < 10; i++ )
+            {
+                if( test[i][i] != i )
+                {
+                    TS_FAIL( "testHugeMalloc> test[%d][%d] = %d, not %d",
+                             i, i, test[i][i], i );
+                }
+            }
+
+            // Try a realloc
+            realloc( test2, HeapManager::MAX_BIG_ALLOC_SIZE+300 );
+            if( (test2[0] != 0x55555555) || (test2[200] != 0x66666666) )
+            {
+                TS_FAIL( "testHugeMalloc> test2 realloc is bad : Expected 0x55555555, got %.8X, Expected 0x66666666, got %.8X",
+                         test2[0], test2[200] );
+            }
+
+            // Free everything
+            free( test1 );
+            free( test2 );
+            for( int i=0; i < 10; i++ )
+            {
+                free( test[i] );
             }
         }
 

@@ -117,6 +117,10 @@ enum BlockPriority
     ATTR_PRIORITY  = (SPNOR_PRIORITY + 1), //Dependent on PNOR and SPNOR
 };
 
+/** Huge user-space mallocs will use 16GB */
+#define VMM_VADDR_MALLOC (16 * GIGABYTE)
+#define VMM_MALLOC_SIZE  (1 * GIGABYTE)
+
 /**
  * Other Constants
  */

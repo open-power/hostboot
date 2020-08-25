@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2011,2019
+# Contributors Listed Below - COPYRIGHT 2011,2020
 # [+] International Business Machines Corp.
 #
 #
@@ -115,6 +115,10 @@ sub main
       ::findPointer("BLOCKRWE",
                     "Block::cv_rw_evict_req");
 
+    my $huge_vmm_allocated = ::read32
+      ::findPointer("HUGEVMM ",
+                    "HeapManager::cv_hugeblock_allocated");
+
 
     ::userDisplay "===================================================\n";
     ::userDisplay "MemStats:\n";
@@ -129,6 +133,7 @@ sub main
     ::userDisplay "    Max. Pages used by heap: $heap_max\n";
     ::userDisplay "    heap free bytes/chunks   $heap_free/$heap_free_chunks (valid only after a coalescing)\n";
     ::userDisplay "    Heap chunks coalesced:   $heap_coal\n";
+    ::userDisplay "    Huge VMM allocated:      $huge_vmm_allocated\n";
     ::userDisplay "\nVirtual Memory Manager page eviction requests:\n";
     ::userDisplay "    RO page requests:        $castout_ro\n";
     ::userDisplay "    RW page requests:        $castout_rw\n";

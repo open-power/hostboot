@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2010,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2010,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -81,7 +81,12 @@ class HeapManager
             // last bucket size, 8 byte chunk header + 1 byte for consistency
             // checking
             MAX_SMALL_ALLOC_SIZE      = BUCKET_SIZE11 - CHUNK_HEADER_PLUS_RESERVED,
+            MAX_BIG_ALLOC_SIZE        = 20*PAGESIZE,
 
+            // Constants for Huge Chunk support
+            HC_SLOT_SIZE   = 1*MEGABYTE,  //!< Max size of a single allocation
+            HC_NUM_SLOTS   = 20,  //!< Number of available allocations
+            HC_TOTAL_SIZE  = (HC_SLOT_SIZE*HC_NUM_SLOTS),  //! Total size
         };
 
 // we only want the constants in HBRT
@@ -177,12 +182,28 @@ class HeapManager
                 : addr(i_ptr), page_count(i_pages), next(NULL) {}
         };
 
+        /**
+         * huge chunk directory entry
+         */
+        struct huge_chunk_t
+        {
+            void * addr;        //!< Allocated address
+            size_t page_count;  //!< Number of pages used
+            huge_chunk_t * next; //!< Next allocation
+
+            huge_chunk_t(void * i_ptr, size_t i_pages)
+                : addr(i_ptr), page_count(i_pages), next(nullptr) {}
+        };
+
         void* _allocate(size_t);        //!< see allocate
         void* _allocateBig(size_t);     //!< see allocate
+        void* _allocateHuge(size_t);    //!< see allocate
         void* _realloc(void*,size_t);   //!< see realloc
         void* _reallocBig(void*,size_t);//!< see realloc
+        void* _reallocHuge(void*,size_t);//!< see realloc
         void _free(void*);              //!< see free
         bool _freeBig(void*);           //!< see free
+        bool _freeHuge(void*);          //!< see free
         void _coalesce(void);           //!< see coalesce
 
         /**
@@ -237,6 +258,7 @@ class HeapManager
 
         Util::Lockfree::Stack<chunk_t> first_chunk[BUCKETS]; //!< free pool
         Util::Lockfree::Stack<big_chunk_t> big_chunk_stack;  //!< big chunk dir
+        Util::Lockfree::Stack<huge_chunk_t> huge_chunk_stack; //!< huge chunks
 
         static const size_t cv_chunk_size[BUCKETS];//!< The bucket sizes
         static uint32_t cv_coalesce_count;       //!< coalesced chunk count
@@ -245,6 +267,7 @@ class HeapManager
         static uint32_t cv_smallheap_page_count; //!< # of pages being used
         static uint32_t cv_largeheap_page_count; //!< # of pages being used
         static uint32_t cv_largeheap_page_max;   //!< Max # of pages used
+        static uint32_t cv_hugeblock_allocated;  //!< Huge Block allocated
 
 #endif //__HOSTBOOT_RUNTIME
 
