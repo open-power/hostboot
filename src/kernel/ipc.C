@@ -29,8 +29,24 @@
 #include <kernel/console.H>
 #include <errno.h>
 #include <kernel/doorbell.H>
+#include <assert.h>
 
 using namespace KernelIpc;
+
+
+// The base divisor (common to both modes) is everything until the 4 bits of topology ID. Converting bits into total
+// values, this is 2 (reserved) * 32 (cores) * 4 (threads)
+//
+// To get the rest of the divisor we consider the mode.
+// Mode 0 = GGGC, also known as chip=node mode
+// Since C is the node number and it's not used (always zero) simply divide the PIR by a value larger than it
+// to always get 0 for the node number.
+#define TOPOLOGY_MODE_0_NODE_DIVISOR (16 * 2 * 32 * 4)
+// Mode 1 = GGCC, also known as chip=group mode
+// GG are the bits the represent the node number so divide by the value that leaves only GG as the remainder.
+#define TOPOLOGY_MODE_1_NODE_DIVISOR (4 * 2 * 32 * 4)
+
+TARGETING::topoMode_t g_topology_mode = TARGETING::PROC_FABRIC_TOPOLOGY_MODE_INVALID;
 
 /**
  * IPC communication area. Interrupt service provider initializes.
@@ -121,8 +137,21 @@ int KernelIpc::updateRemoteIpcAddr(uint64_t i_Node, uint64_t i_RemoteAddr)
 int KernelIpc::qryLocalIpcInfo(uint64_t * i_pONode, uint64_t * i_pOAddr)
 {
     // determine node and remote address
-    // TODO RTC:258023 -- Fix l_localNode setting
-    uint64_t l_localNode = getPIR()/KERNEL_MAX_SUPPORTED_CPUS_PER_INST;
+    uint64_t l_localNode = 0;
+
+    if (g_topology_mode == PROC_FABRIC_TOPOLOGY_MODE_MODE0)
+    {
+        l_localNode = getPIR()/TOPOLOGY_MODE_0_NODE_DIVISOR;
+    }
+    else if (g_topology_mode == PROC_FABRIC_TOPOLOGY_MODE_MODE1)
+    {
+        l_localNode = getPIR()/TOPOLOGY_MODE_1_NODE_DIVISOR;
+    }
+    else
+    {
+        // Topology Mode was not setup yet.
+        crit_assert(false);
+    }
 
     uint64_t l_localAddr = reinterpret_cast<uint64_t>(&ipc_data_area);
     uint64_t l_hrmor = getHRMOR();
@@ -135,5 +164,11 @@ int KernelIpc::qryLocalIpcInfo(uint64_t * i_pONode, uint64_t * i_pOAddr)
     *i_pOAddr = l_oAddr;
 
     return(0);
+}
+
+void KernelIpc::setTopologyMode(TARGETING::topoMode_t const i_topologyMode)
+{
+    g_topology_mode = i_topologyMode;
+    printk("Topology Mode = %d\n",g_topology_mode);
 }
 

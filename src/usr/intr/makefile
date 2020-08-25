@@ -25,6 +25,8 @@
 ROOTPATH = ../../..
 MODULE = intr
 
+EXTRAINCDIR += ${ROOTPATH}/src/include/usr/lib/
+
 OBJS += intrrp.o
 
 SUBDIRS += test.d

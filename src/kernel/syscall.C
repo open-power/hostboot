@@ -159,6 +159,7 @@ namespace Systemcalls
     void SetMchkData(task_t *t);
     void UpdateRemoteIpcAddr(task_t *t);
     void QryLocalIpcInfo(task_t *t);
+    void SetTopologyMode(task_t *t);
 
 
     syscall syscalls[] =
@@ -205,7 +206,8 @@ namespace Systemcalls
         &CritAssert,  // MISC_CRITASSERT
         &SetMchkData,  // MISC_SETMCHKDATA
         &UpdateRemoteIpcAddr, // UPDATE_REMOTE_IPC_ADDR
-        &QryLocalIpcInfo  // QRY_LOCAL_IPC_INFO
+        &QryLocalIpcInfo,  // QRY_LOCAL_IPC_INFO
+        &SetTopologyMode   // MISC_SET_TOPOLOGY_MODE
 
     };
 };
@@ -1049,6 +1051,13 @@ namespace Systemcalls
         uint64_t * i_pOAddr = (uint64_t *)TASK_GETARG1(t);
         int rc = KernelIpc::qryLocalIpcInfo(i_pONode, i_pOAddr);
         TASK_SETRTN(t, rc);
+    }
+
+    void SetTopologyMode(task_t* t)
+    {
+        uint8_t i_topologyMode = (uint8_t)TASK_GETARG0(t);
+
+        KernelIpc::setTopologyMode(i_topologyMode);
     }
 
 };

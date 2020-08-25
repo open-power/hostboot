@@ -418,6 +418,7 @@ errlHndl_t IntrRp::_init()
         uint64_t l_thisNode = 0xa5a5;   // seed with invalid value(s) to
         uint64_t l_remoteAddr = 0x5a5a; // catch missing return values
 
+        set_topology_mode(sys->getAttr<TARGETING::ATTR_PROC_FABRIC_TOPOLOGY_MODE>());
         qryLocalIpcInfo( l_thisNode, l_remoteAddr );
 
         // validate no change to local if this is an MPIPL

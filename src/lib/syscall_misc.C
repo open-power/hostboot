@@ -153,3 +153,10 @@ void set_mchk_data(uint64_t i_xstopAddr, uint64_t i_xstopData)
               reinterpret_cast<void*>(i_xstopAddr),
               reinterpret_cast<void*>(i_xstopData));
 }
+
+
+void set_topology_mode(uint8_t i_topologyMode)
+{
+    _syscall1(MISC_SET_TOPOLOGY_MODE,
+              reinterpret_cast<void*>(i_topologyMode));
+}

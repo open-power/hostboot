@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -66,6 +66,19 @@ namespace KernelIpc
      *  @note
      */
     int qryLocalIpcInfo(uint64_t * i_pONode, uint64_t * i_pOAddr);
+
+    /** @fn set_topology_mode
+     *  @brief Tells the kernel what topology mode the system is in.
+     *         0 == Mode 0; GGGC where G = Group (3 bits) and C = Chip (1 bit). In this mode the chip bit isn't used and
+     *                      group=chip. That is to say that group bits correspond to the proc chip number. This mode is
+     *                      for single node systems such as Rainier and Everest.
+     *         1 == Mode 1; GGCC 2 bits group and 2 bits chip. Confusingly, this mode is referred to as chip=node but
+     *                      the group bits actually determine the node and the chip bits are used for the proc chip
+     *                      number.
+     *
+     *  @param[in]  i_topologyMode   The topology mode setting for this system.
+     */
+    void setTopologyMode(uint8_t i_topologyMode);
 
 
 struct ipc_data_area_t
