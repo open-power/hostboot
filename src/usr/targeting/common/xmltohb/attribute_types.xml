@@ -5913,6 +5913,7 @@
   </range>
   <readable/>
   <writeable/>
+  <no_export/>
 </attribute>
 
 <attribute>
@@ -5930,6 +5931,7 @@
   <persistency>non-volatile</persistency>
   <readable/>
   <writeable/>
+  <no_export/>
 </attribute>
 
 <attribute>
