@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -172,9 +172,15 @@ void getMnfgMemCeTh( ExtensibleChip * i_chip, const MemRank & i_rank,
     }
     else
     {
-        // Get DRAM size
-        uint8_t size = MemUtils::getDramSize<T>( i_chip->getTrgt(),
-                                                 i_rank.getDimmSlct() );
+        // Note: Support for larger DRAM sizes has caused a re-evaluation of
+        // the MNFG memory CE thresholds. It has been determined that there
+        // isn't actually a need to adjust the threshold based on DRAM size.
+        // As such we will just use the same threshold for all DRAM densities,
+        // using the baseline thresholds of a 4Gb DRAM. The calculations below
+        // have been left intact in case we need to reinstate the adjustments
+        // based on DRAM size and because the per DIMM threshold still needs
+        // to be calculated based on the number of ranks per dimm.
+        uint8_t size = 4;
 
         // Get number of ranks per DIMM select.
         uint8_t rankCount = getNumRanksPerDimm<T>( i_chip->getTrgt(),
