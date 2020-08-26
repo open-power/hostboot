@@ -2711,6 +2711,9 @@
       <id>USE_TCES_FOR_DMAS</id>
     </attribute>
     <attribute>
+      <id>WOF_TABLE_LID_NUMBER</id>
+    </attribute>
+    <attribute>
       <id>XSCOM_BASE_ADDRESS</id>
     </attribute>
   </targetType>
