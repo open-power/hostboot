@@ -349,6 +349,23 @@
   </attribute>
   <!-- ******************************************************************** -->
   <attribute>
+    <id>ATTR_CHIP_EC_FEATURE_DD1_FAC_HIER</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      Facilities have dd1 hierachy
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_P10</name>
+        <ec>
+          <value>0x10</value>
+          <test>EQUAL</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
+  <!-- ******************************************************************** -->
+  <attribute>
     <id>ATTR_CHIP_EC_FEATURE_HW520842</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>
