@@ -254,6 +254,14 @@ public:
      */
     bool queryServiceCall() const { return queryFlag(SERVICE_CALL); }
 
+    /** @brief Sets the SERVICE_CALL, AT_THRESHOLD, and DEGRADED flags. */
+    void setPredictive()
+    {
+        setFlag(SERVICE_CALL); // Service required.
+        setFlag(AT_THRESHOLD); // Masks if needed.
+        setFlag(DEGRADED);     // Possible degraded performance.
+    }
+
     /**
      * @brief Sets the DONT_COMMIT_ERRL flag indicating not to commit the error
      *        log.

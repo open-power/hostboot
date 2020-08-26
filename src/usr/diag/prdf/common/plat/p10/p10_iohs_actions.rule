@@ -27,14 +27,14 @@ actionclass smp_callout_l0
 {
     capture(smp_ffdc_l0);
     capture(smp_ffdc);
-    TBDDefaultCallout;
+    funccall("smp_callout_l0");
 };
 
 actionclass smp_callout_l1
 {
     capture(smp_ffdc_l1);
     capture(smp_ffdc);
-    TBDDefaultCallout;
+    funccall("smp_callout_l1");
 };
 
 actionclass smp_callout_l0_th_1

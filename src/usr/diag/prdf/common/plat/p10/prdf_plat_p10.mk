@@ -48,6 +48,7 @@ prd_rule_plugin += prdfCommonPlugins.o
 prd_rule_plugin += prdfP10Pll.o
 prd_rule_plugin += prdfP10Proc.o
 prd_rule_plugin += prdfP10Eq.o
+prd_rule_plugin += prdfP10Iohs.o
 prd_rule_plugin += prdfLaneRepair.o
 prd_rule_plugin += prdfMccPlugins.o
 prd_rule_plugin += prdfOmicPlugins.o

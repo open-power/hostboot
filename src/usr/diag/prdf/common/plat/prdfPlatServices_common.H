@@ -188,6 +188,21 @@ int32_t setVpdFailedLanes(TARGETING::TargetHandle_t i_rxBusTgt,
 bool obusInSmpMode(TARGETING::TargetHandle_t obusTgt);
 
 //##############################################################################
+//##                        Fabric/Memory bus functions
+//##############################################################################
+
+/**
+ * @brief Adds callouts for both SMPGROUP endpoints associated with the given
+ *        IOHS link (priority MED_A) and also adds callouts for everything else
+ *        in between the two endpoints (priority LOW).
+ * @param i_chip IOHS processor unit.
+ * @param io_sc  The step code data struct.
+ * @param i_link IOHS link.
+ */
+void calloutSmpBus(ExtensibleChip* i_chip, unsigned int i_link,
+                   STEP_CODE_DATA_STRUCT& io_sc);
+
+//##############################################################################
 //##                        Memory specific functions
 //##############################################################################
 
