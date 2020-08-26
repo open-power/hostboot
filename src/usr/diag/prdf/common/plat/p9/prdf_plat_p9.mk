@@ -52,5 +52,4 @@ prd_rule_plugin += prdfP9Ex.o
 prd_rule_plugin += prdfP9Ec.o
 prd_rule_plugin += prdfP9Eq.o
 prd_rule_plugin += prdfP9TodPlugins.o
-prd_rule_plugin += prdfP9Obus.o
 

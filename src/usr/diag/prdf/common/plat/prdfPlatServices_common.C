@@ -76,15 +76,6 @@ src/hwsv/server/hwpf2/fapi2/target_types.H for a list of all the TargetTypes
 */
 
 //##############################################################################
-//##                       Lane Repair functions
-//##############################################################################
-
-bool obusInSmpMode( TargetHandle_t obus )
-{
-    return obus->getAttr<ATTR_OPTICS_CONFIG_MODE>() == OPTICS_CONFIG_MODE_SMP;
-}
-
-//##############################################################################
 //##                        Memory specific functions
 //##############################################################################
 

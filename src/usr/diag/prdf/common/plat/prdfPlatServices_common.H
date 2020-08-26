@@ -113,17 +113,6 @@ void collectSBE_FFDC(TARGETING::TargetHandle_t i_procTarget);
 */
 
 //##############################################################################
-//##                       Lane Repair functions
-//##############################################################################
-
-/**
- * @brief Checks if OBUS target is configured in SMP (ABUS) mode
- * @param obusTgt OBUS target to check
- * @return true if SMP mode
- */
-bool obusInSmpMode(TARGETING::TargetHandle_t obusTgt);
-
-//##############################################################################
 //##                        Fabric/Memory bus functions
 //##############################################################################
 
