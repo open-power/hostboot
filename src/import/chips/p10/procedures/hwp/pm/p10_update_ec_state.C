@@ -59,6 +59,9 @@
 #include <p10_perv_sbe_cmn.H>
 #include <p10_hang_pulse_mc_setup_tables.H>
 
+#ifdef __HOSTBOOT_MODULE
+    #include <util/misc.H>                   // Util::isSimicsRunning
+#endif
 
 using namespace scomt;
 using namespace proc;
@@ -253,8 +256,17 @@ fapi2::ReturnCode powerdown_deconfigured_cl2_l3(
     do
     {
         auto l_eq_target = i_core_target.getParent<fapi2::TARGET_TYPE_EQ>();
+#ifdef __HOSTBOOT_MODULE
 
-        FAPI_TRY(set_atomic_lock(i_core_target, l_lockId));
+        if (! Util::isSimicsRunning())
+        {
+#endif
+            FAPI_TRY(set_atomic_lock(i_core_target, l_lockId));
+
+#ifdef __HOSTBOOT_MODULE
+        }
+
+#endif
 
         //Update the pscom enable and pg bits to temporarily allow controlling
         //of now deconfigured elements.
@@ -333,7 +345,16 @@ fapi2::ReturnCode powerdown_deconfigured_cl2_l3(
         FAPI_TRY(fapi2::putScom(l_eq_target, CPLT_CTRL3_WO_CLEAR, l_pscom_pg_config));
         FAPI_TRY(fapi2::putScom(l_eq_target, CPLT_CTRL2_WO_CLEAR, l_pscom_pg_config));
 
-        FAPI_TRY(clear_atomic_lock(i_core_target, l_lockId));
+#ifdef __HOSTBOOT_MODULE
+
+        if (! Util::isSimicsRunning())
+        {
+#endif
+            FAPI_TRY(clear_atomic_lock(i_core_target, l_lockId));
+#ifdef __HOSTBOOT_MODULE
+        }
+
+#endif
     }
     while(0);
 
