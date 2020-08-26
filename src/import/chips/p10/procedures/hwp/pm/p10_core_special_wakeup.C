@@ -36,6 +36,17 @@
 #include <p10_scom_eq_c.H>
 #include <p10_scom_eq_1.H>
 #include <p10_core_special_wakeup.H>
+#include <multicast_group_defs.H>
+
+/**
+ * @brief Special wakeup operation message.
+ */
+char SplWkupMsg[p10specialWakeup::MAX_OPERATION][10] =
+{
+    "ASSERT",
+    "DE-ASSERT"
+};
+
 
 
 /**
@@ -54,14 +65,10 @@ fapi2::ReturnCode checkForSplWkupPreReq(
     fapi2::buffer <uint64_t> l_coreSshsrc;
     fapi2::buffer <uint64_t> l_scsr;
     uint32_t l_address  =   0;
-    fapi2::Target < fapi2::TARGET_TYPE_CORE | fapi2::TARGET_TYPE_MULTICAST,
-          fapi2::MULTICAST_AND > l_ecMcAndTgt     =   i_target;
-    fapi2::Target < fapi2::TARGET_TYPE_EQ | fapi2::TARGET_TYPE_MULTICAST  > l_parentEq     =
-        i_target.getParent < fapi2::TARGET_TYPE_EQ | fapi2::TARGET_TYPE_MULTICAST > ();
-    fapi2::Target < fapi2::TARGET_TYPE_EQ | fapi2::TARGET_TYPE_MULTICAST,
-          fapi2::MULTICAST_AND >   l_eqMcAndTgt    =   l_parentEq;
-
-    FAPI_TRY( scomt::eq::GET_QME_EISR_RW( l_parentEq, l_data ));
+    fapi2::Target < fapi2::TARGET_TYPE_PROC_CHIP > l_proc     =
+        i_target.getParent < fapi2::TARGET_TYPE_PROC_CHIP > ();
+    auto l_eq_mc_and = l_proc.getMulticast<fapi2::TARGET_TYPE_EQ, fapi2::MULTICAST_AND >(fapi2::MCGROUP_GOOD_EQ);
+    FAPI_TRY( scomt::eq::GET_QME_EISR_RW( l_eq_mc_and, l_data ));
 
     if( scomt::eq::GET_QME_EISR_SYSTEM_CHECKSTOP( l_data ) )
     {
@@ -73,9 +80,9 @@ fapi2::ReturnCode checkForSplWkupPreReq(
 
     l_address   =  p10specialWakeup::SpecialWakeupAddr[i_entity];
     l_data.flush<0>();
-    FAPI_TRY( fapi2::getScom( l_ecMcAndTgt, l_address, l_data ) );
+    FAPI_TRY( fapi2::getScom( i_target, l_address, l_data ) );
 
-    FAPI_DBG( "Before Attempting Spl Wkup 0x%016lx", l_data );
+    FAPI_INF( "Before Attempting Spl Wkup 0x%016lx %08X", l_data, l_address );
 
     if( ( l_data.getBit< p10specialWakeup::SPWKUP_REQ_DONE_BIT >() &&
           ( p10specialWakeup::SPCWKUP_ENABLE == i_operation ) ) ||
@@ -94,8 +101,8 @@ fapi2::ReturnCode checkForSplWkupPreReq(
     //can't be supported. Check below enables calling platform to handle it
     //gracefully.
 
-    FAPI_TRY( fapi2::getScom( l_eqMcAndTgt, scomt::eq::QME_FLAGS_RW, l_data ) );
-    FAPI_TRY( fapi2::getScom( l_ecMcAndTgt, scomt::c::QME_SCSR, l_scsr ) );
+    FAPI_TRY( fapi2::getScom( l_eq_mc_and, scomt::eq::QME_FLAGS_RW, l_data ) );
+    FAPI_TRY( fapi2::getScom( i_target, scomt::c::QME_SCSR, l_scsr ) );
 
     if( l_data.getBit< p10specialWakeup::QME_FLAG_STOP_READY >() ||
         !l_scsr.getBit< scomt::c::QME_SCSR_AUTO_SPECIAL_WAKEUP_DISABLE >() )
@@ -281,7 +288,7 @@ fapi2::ReturnCode initiateSplWkup(
                  "Core Special Wakeup Request Timed Out" );
 
     FAPI_INF( "Special Wakeup %s Done On Targeted Core",
-              p10specialWakeup::SplWkupMsg[(uint8_t)i_operation] );
+              SplWkupMsg[(uint8_t)i_operation] );
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -418,7 +425,8 @@ fapi2::ReturnCode p10_core_special_wakeup(
     }
 
     blockWakeupRecursion( l_modCoreList, p10specialWakeup::BLOCK );
-
+    //TODO , need revisit this logic
+#if 0
     l_tempRc    =   checkForSplWkupPreReq( i_target, i_operation, i_entity );
 
     if( l_tempRc )
@@ -434,6 +442,8 @@ fapi2::ReturnCode p10_core_special_wakeup(
 
         goto fapi_try_exit;
     }
+
+#endif
 
     FAPI_TRY( initiateSplWkup( i_target, i_operation, i_entity ) ,
               "Attempt For Special Wakeup Failed" );

@@ -76,15 +76,6 @@ enum PROC_SPCWKUP_OPS
 };
 
 /**
- * @brief Special wakeup operation message.
- */
-static char SplWkupMsg[MAX_OPERATION][10] __attribute__((unused)) =
-{
-    "ASSERT",
-    "DE-ASSERT"
-};
-
-/**
  * @brief SCOM address for special wakeup for various entities.
  */
 static const uint64_t SpecialWakeupAddr[MAX_SPWKUP_ENTITY]  =
