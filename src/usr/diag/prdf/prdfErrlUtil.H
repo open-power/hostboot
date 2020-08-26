@@ -186,13 +186,6 @@
                 i_gardErrType);
 
 /**
- * @brief Add bus callout user data section to an existing error log
- */
-#define PRDF_ADD_BUS_CALLOUT( io_errl, i_ep1, i_ep2, i_busType, i_priority )  \
-  io_errl->addBusCallout( i_ep1, i_ep2, i_busType, \
-                          (const HWAS::callOutPriority)i_priority );
-
-/**
  * @brief Process's pending deconfig and GARD service actions
  *        and thencommits and deletes the error log.
  */

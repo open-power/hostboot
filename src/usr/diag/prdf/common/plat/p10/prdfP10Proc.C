@@ -37,7 +37,6 @@
 #ifdef __HOSTBOOT_MODULE
 #include <prdfPlatServices_ipl.H>
 #include <prdfErrlUtil.H>
-#include <prdfLaneRepair.H>
 #include <sbeio/sbeioif.H>
 #endif
 

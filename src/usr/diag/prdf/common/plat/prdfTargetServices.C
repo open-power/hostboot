@@ -1308,12 +1308,6 @@ TargetHandle_t getClockId(TargetHandle_t i_trgt, TARGETING::TYPE i_connType,
 bool mfgMode()
 { return TARGETING::areMfgThresholdsActive(); }
 
-bool isFabeRepairDisabled()
-{ return TARGETING::isFabricRepairDisabled(); }
-
-bool isMemeRepairDisabled()
-{ return TARGETING::isMemoryRepairDisabled(); }
-
 bool mnfgTerminate()
 { return TARGETING::areAllSrcsTerminating(); }
 

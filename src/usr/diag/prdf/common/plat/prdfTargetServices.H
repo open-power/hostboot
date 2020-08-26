@@ -489,18 +489,6 @@ TARGETING::TargetHandle_t getClockId(TARGETING::TargetHandle_t
 bool mfgMode();
 
 /**
- *  @brief  Returns status of MNFG_DISABLE_FABRIC_eREPAIR flag
- *  @return TRUE if MNFG_DISABLE_FABRIC_eREPAIR set, FALSE otherwise
- */
-bool isFabeRepairDisabled();
-
-/**
- * @brief  Returns status of MNFG_DISABLE_MEMORY_eREPAIR flag
- * @return TRUE if MNFG_DISABLE_MEMORY_eREPAIR set, FALSE otherwise
- */
-bool isMemeRepairDisabled();
-
-/**
  * @brief   Returns status of MNFG_SRC_TERM manufacturing policy flag.
  * @param   None.
  * @return  TRUE if MNFG_SRC_TERM policy flag is set, FALSE
