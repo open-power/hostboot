@@ -120,6 +120,7 @@ class SbePsu
             SBE_CMD_CONTROL_SYSTEM_CONFIG    = 0x06,
             SBE_PSU_MSG_STASH_KEY_ADDR       = 0x07,
             SBE_PSU_SECURITY_LIST_BIN_DUMP   = 0x08,
+            SBE_PSU_OCMB_CONFIG              = 0x09,
         };
 
         /**
@@ -267,6 +268,31 @@ class SbePsu
             SBE_GET_CAPABILITIES_REQ_USED_REGS  = 0x07,  // Use Reg 0 ... Reg 2 (0x1 + 0x2 + 0x4)
             SBE_GET_CAPABILITIES_RSP_USED_REGS  = 0x07,  // Use Reg 0 ... Reg 2 (0x1 + 0x2 + 0x4)
         };
+
+        /**
+        * @brief Define which registers are available for transferring data
+        *
+        * Shows which of the request and response msg registers that are
+        * enabled for transferring data and receiving a response. The reserved
+        * registers are excluded and therefore do not need to be written to
+        * or read from.
+        *
+        * This is a 4 bit field:
+        * 0x1 - MBOX Reg 0 is non-reserved (read or write this reg)
+        * 0x2 - MBOX Reg 1 is non-reserved (read or write this reg)
+        * 0x4 - MBOX Reg 2 is non-reserved (read or write this reg)
+        * 0x8 - MBOX Reg 3 is non-reserved (read or write this reg)
+        */
+        enum psuSendOcmbConfig
+        {
+            // Enable/Use MBOX Regs 0 .. 3 (0x1 + 0x2 + 0x4 + 0x8) to send
+            // SBE OCMB updates
+            SBE_REQ_SEND_OCMB_CONFIG_REGS  = 0x0F,
+            // Enable/Use MBOX Reg 0 (0x1) to receive a response from SBE
+            // after sending the OCMB updates
+            SBE_RSP_SEND_OCMB_CONFIG_REGS  = 0x01,
+        };
+
 
         /**
         * @brief non reserved word enums
@@ -557,6 +583,49 @@ class SbePsu
                 uint64_t cd7_readSeeprom_DestinationAddr; // mbxReg2
                 uint64_t cd7_readSeeprom_MbxReg3Reserved; // mbxReg3
             } PACKED;
+
+            struct // sendOcmbConfig
+            {
+                // Mailbox Registry 0, Bytes 0..3
+                uint16_t cd7_sendOcmbConfig_Reserved0;     // Mbx Reg 0, Bytes 0..1
+                uint16_t cd7_sendOcmbConfig_Reserved1;     // Mbx Reg 0, Bytes 2..3
+                // Mailbox Registry 0, Bytes 4..7
+                uint16_t cd7_sendOcmbConfig_SeqID;         // Mbx Reg 0, Bytes 4..5
+                uint8_t  cd7_sendOcmbConfig_CommandClass;  // Mbx Reg 0, Byte 6: 0xD7 (SBE_PSU_GENERIC_MESSAGE)
+                uint8_t  cd7_sendOcmbConfig_Command;       // Mbx Reg 0, Byte 7: 0x09 (SBE_PSU_OCMB_CONFIG)
+
+                /// IX - The OCMB instance which is associated with FAPI_POS % 16
+                ///      Example: I0 (instance 0) equivalent to FAPI_POS 0, etc
+                /// PX - The OCMB port number thats is associated with the OCMB instance
+                // Mailbox Registry 1, Bytes 0..3
+                uint8_t  cd7_sendOcmbConfig_I0_P0;         // Mbx Reg 1, Byte 0
+                uint8_t  cd7_sendOcmbConfig_I1_P1;         // Mbx Reg 1, Byte 1
+                uint8_t  cd7_sendOcmbConfig_I2_P2;         // Mbx Reg 1, Byte 2
+                uint8_t  cd7_sendOcmbConfig_I3_P3;         // Mbx Reg 1, Byte 3
+                // Mailbox Registry 1, Bytes 4..7
+                uint8_t  cd7_sendOcmbConfig_I4_P4;         // Mbx Reg 1, Byte 4
+                uint8_t  cd7_sendOcmbConfig_I5_P5;         // Mbx Reg 1, Byte 5
+                uint8_t  cd7_sendOcmbConfig_I6_P6;         // Mbx Reg 1, Byte 6
+                uint8_t  cd7_sendOcmbConfig_I7_P7;         // Mbx Reg 1, Byte 7
+                // Mailbox Registry 2, Bytes 0..3
+                uint8_t  cd7_sendOcmbConfig_I8_P8;         // Mbx Reg 2, Byte 0
+                uint8_t  cd7_sendOcmbConfig_I9_P9;         // Mbx Reg 2, Byte 1
+                uint8_t  cd7_sendOcmbConfig_IA_PA;         // Mbx Reg 2, Byte 2
+                uint8_t  cd7_sendOcmbConfig_IB_PB;         // Mbx Reg 2, Byte 3
+                // Mailbox Registry 2, Bytes 4..7
+                uint8_t  cd7_sendOcmbConfig_IC_PC;         // Mbx Reg 2, Byte 4
+                uint8_t  cd7_sendOcmbConfig_ID_PD;         // Mbx Reg 2, Byte 5
+                uint8_t  cd7_sendOcmbConfig_IE_PE;         // Mbx Reg 2, Byte 6
+                uint8_t  cd7_sendOcmbConfig_IF_PF;         // Mbx Reg 2, Byte 7
+
+                // Mailbox Registry 3, Bytes 0..3
+                uint8_t  cd7_sendOcmbConfig_engine;        // Mbx Reg 3, Byte 0
+                uint8_t  cd7_sendOcmbConfig_devAddr;       // Mbx Reg 3, Byte 1
+                uint16_t cd7_sendOcmbConfig_function_state;  // Mbx Reg 3, Byte 2..3
+                // Mailbox Registry 3, Bytes 4..7
+                uint32_t cd7_sendOcmbConfig_Reserved2;     // Mbx Reg 3, Byte 4..7
+            } PACKED;
+
 
 
             psuCommand(uint16_t i_controlFlags, //Mbx Reg 0 input
