@@ -41,6 +41,8 @@
 #include "ocmbFwImage.H"
 #include <exp_fw_update.H>
 #include <initservice/istepdispatcherif.H>
+#include <console/consoleif.H>
+#include <util/threadpool.H>
 
 
 using namespace ISTEP_ERROR;
@@ -118,6 +120,110 @@ errlHndl_t getFlashedHash(TargetHandle_t i_target, sha512regs_t& o_regs)
     return l_err;
 }
 
+//
+// @brief Mutex to prevent threads from adding details to the step
+//        error log at the same time.
+mutex_t g_stepErrorMutex = MUTEX_INITIALIZER;
+
+/*******************************************************************************
+ * @brief base work item class for isteps (used by thread pool)
+ */
+class IStepWorkItem
+{
+    public:
+        virtual ~IStepWorkItem(){}
+        virtual void operator()() = 0;
+};
+
+/*******************************************************************************
+ * @brief OCMB specific work item class
+ */
+class OcmbWorkItem: public IStepWorkItem
+{
+    private:
+        IStepError* iv_pStepError;
+        const Target* iv_ocmb;
+        rawImageInfo_t* iv_imageInfo;
+        bool iv_rebootRequired;
+
+    public:
+        /**
+         * @brief task function, called by threadpool to run the HWP on the
+         *        target
+         */
+         void operator()();
+
+        /**
+         * @brief ctor
+         *
+         * @param[in] i_Ocmb target Ocmb to operate on
+         * @param[in] i_istepError error accumulator for this istep
+         */
+        OcmbWorkItem(const Target& i_Ocmb,
+                     IStepError& i_stepError,
+                     rawImageInfo_t& i_imageInfo):
+            iv_pStepError(&i_stepError),
+            iv_ocmb(&i_Ocmb),
+            iv_imageInfo(&i_imageInfo),
+            iv_rebootRequired(false)
+        {}
+
+        // delete default copy/move constructors and operators
+        OcmbWorkItem() = delete;
+        OcmbWorkItem(const OcmbWorkItem& ) = delete;
+        OcmbWorkItem& operator=(const OcmbWorkItem& ) = delete;
+        OcmbWorkItem(OcmbWorkItem&&) = delete;
+        OcmbWorkItem& operator=(OcmbWorkItem&&) = delete;
+
+        /**
+         * @brief destructor
+         */
+        ~OcmbWorkItem(){};
+};
+
+//******************************************************************************
+void OcmbWorkItem::operator()()
+{
+    errlHndl_t l_err = nullptr;
+
+    // reset watchdog for each Ocmb as this function can be very slow
+    INITSERVICE::sendProgressCode();
+
+    fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP> l_fapi2Target(const_cast<TARGETING::TargetHandle_t>(iv_ocmb));
+
+    // Invoke procedure
+    FAPI_INVOKE_HWP(l_err, exp_fw_update, l_fapi2Target,
+                    iv_imageInfo->imagePtr, iv_imageInfo->imageSize);
+    if (l_err)
+    {
+        TRACFCOMP(g_trac_expupd,
+                  "Error from exp_fw_update for OCMB 0x%08x",
+                  TARGETING::get_huid(iv_ocmb));
+
+        l_err->collectTrace(EXPUPD_COMP_NAME);
+
+        // addErrorDetails may not be thread-safe.  Protect with mutex.
+        mutex_lock(&g_stepErrorMutex);
+
+        // Create IStep error log and cross reference to error
+        // that occurred
+        iv_pStepError->addErrorDetails( l_err );
+
+        mutex_unlock(&g_stepErrorMutex);
+
+        errlCommit(l_err, EXPUPD_COMP_ID);
+    }
+    else
+    {
+        TRACFCOMP(g_trac_expupd,
+                  "updateAll: successfully updated OCMB 0x%08x",
+                  TARGETING::get_huid(iv_ocmb));
+
+        // Request reboot for new firmware to be used
+        iv_rebootRequired = true;
+    }
+}
+
 /**
  * @brief Check flash image SHA512 hash value of each explorer chip
  *        and update the flash if it does not match the SHA512 hash
@@ -139,6 +245,9 @@ void updateAll(IStepError& o_stepError)
     Target* l_pTopLevel = nullptr;
     targetService().getTopLevelTarget( l_pTopLevel );
     assert(l_pTopLevel, "expupd::updateAll: no TopLevelTarget");
+
+    Util::ThreadPool<IStepWorkItem> threadpool;
+    constexpr size_t MAX_OCMB_THREADS = 4;
 
     TRACFCOMP(g_trac_expupd, ENTER_MRK
               "updateAll: %d ocmb chips found",
@@ -318,46 +427,50 @@ void updateAll(IStepError& o_stepError)
             break;
         }
 
-        // update each explorer in the list of chips needing updates
+        // Nothing to update, just exit
+        if( l_flashUpdateList.empty() )
+        {
+            TRACFCOMP(g_trac_expupd, INFO_MRK "Nothing to update");
+            break;
+        }
+
+        //Don't create more threads than we have targets
+        size_t l_numTargets = l_flashUpdateList.size();
+        uint32_t l_numThreads = std::min(MAX_OCMB_THREADS, l_numTargets);
+
+        TRACFCOMP(g_trac_expupd,
+                  INFO_MRK"Starting %llu thread(s) to handle %llu OCMB target(s) ",
+                  l_numThreads, l_numTargets);
+
+        //Set the number of threads to use in the threadpool
+        Util::ThreadPoolManager::setThreadCount(l_numThreads);
+
         for(const auto & l_ocmb : l_flashUpdateList)
         {
-            TRACFCOMP(g_trac_expupd, "updateAll: updating OCMB 0x%08x",
-                      TARGETING::get_huid(l_ocmb));
-            fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>l_fapi2Target(l_ocmb);
-
-            // reset watchdog for each ocmb as this function can be very slow
-            INITSERVICE::sendProgressCode();
-
-            // Invoke procedure
-            FAPI_INVOKE_HWP(l_err, exp_fw_update, l_fapi2Target,
-                            l_imageInfo.imagePtr, l_imageInfo.imageSize);
-            if (l_err)
-            {
-                TRACFCOMP(g_trac_expupd,
-                          "Error from exp_fw_update for OCMB 0x%08x",
-                          TARGETING::get_huid(l_ocmb));
-
-                l_err->collectTrace(EXPUPD_COMP_NAME);
-
-                // Create IStep error log and cross reference to error
-                // that occurred
-                o_stepError.addErrorDetails( l_err );
-
-                errlCommit(l_err, EXPUPD_COMP_ID);
-
-                // Don't stop on error, go to next target.
-                continue;
-            }
-            else
-            {
-                TRACFCOMP(g_trac_expupd,
-                        "updateAll: successfully updated OCMB 0x%08x",
-                        TARGETING::get_huid(l_ocmb));
-
-                // Request reboot for new firmware to be used
-                l_rebootRequired = true;
-            }
+            //  Create a new workitem from this membuf and feed it to the
+            //  thread pool for processing.  Thread pool handles workitem
+            //  cleanup.
+            threadpool.insert(new OcmbWorkItem(*l_ocmb,
+                                               o_stepError,
+                                               l_imageInfo));
         }
+
+        //create and start worker threads
+        threadpool.start();
+
+        //wait for all workitems to complete, then clean up all threads.
+        l_err = threadpool.shutdown();
+        if(l_err)
+        {
+            TRACFCOMP(g_trac_expupd,
+                      ERR_MRK"updateAll: thread pool returned an error "
+                      TRACE_ERR_FMT,
+                      TRACE_ERR_ARGS(l_err));
+
+            // Capture error
+            o_stepError.addErrorDetails( l_err );
+        }
+
     }while(0);
 
     // unload explorer fw image
