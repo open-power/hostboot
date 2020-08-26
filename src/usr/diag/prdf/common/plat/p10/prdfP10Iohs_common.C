@@ -70,6 +70,34 @@ int32_t smp_callout_l1(ExtensibleChip* i_chip, STEP_CODE_DATA_STRUCT& io_sc)
 }
 PRDF_PLUGIN_DEFINE(p10_iohs, smp_callout_l1);
 
+/**
+ * @brief  Adds a callout for the OpenCAPI adapter on IOHS link 0.
+ * @param  i_chip IOHS processor unit.
+ * @param  io_sc  The step code data struct.
+ * @return SUCCESS always.
+ */
+int32_t opencapi_callout_l0(ExtensibleChip* i_chip,
+                            STEP_CODE_DATA_STRUCT& io_sc)
+{
+    calloutOpenCapiAdapter(i_chip, 0, io_sc);
+    return SUCCESS;
+}
+PRDF_PLUGIN_DEFINE(p10_iohs, opencapi_callout_l0);
+
+/**
+ * @brief  Adds a callout for the OpenCAPI adapter on IOHS link 1.
+ * @param  i_chip IOHS processor unit.
+ * @param  io_sc  The step code data struct.
+ * @return SUCCESS always.
+ */
+int32_t opencapi_callout_l1(ExtensibleChip* i_chip,
+                            STEP_CODE_DATA_STRUCT& io_sc)
+{
+    calloutOpenCapiAdapter(i_chip, 1, io_sc);
+    return SUCCESS;
+}
+PRDF_PLUGIN_DEFINE(p10_iohs, opencapi_callout_l1);
+
 } // namespace p10_iohs
 
 } // namespace PRDF

@@ -77,25 +77,25 @@ actionclass smp_failure_l1_th_1
 
 actionclass opencapi_l0_th_32perDay
 {
-    TBDDefaultCallout;
+    funccall("opencapi_callout_l0");
     threshold32pday;
 };
 
 actionclass opencapi_l1_th_32perDay
 {
-    TBDDefaultCallout;
+    funccall("opencapi_callout_l1");
     threshold32pday;
 };
 
 actionclass opencapi_l0_th_1
 {
-    TBDDefaultCallout;
+    funccall("opencapi_callout_l0");
     threshold1;
 };
 
 actionclass opencapi_l1_th_1
 {
-    TBDDefaultCallout;
+    funccall("opencapi_callout_l1");
     threshold1;
 };
 
