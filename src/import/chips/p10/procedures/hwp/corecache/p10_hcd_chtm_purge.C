@@ -37,6 +37,8 @@
 // *HWP Team               : PM
 // *HWP Consumed by        : SBE:QME
 // *HWP Level              : 2
+///
+// EKB-Mirror-To: hw/ppe
 
 
 //------------------------------------------------------------------------------

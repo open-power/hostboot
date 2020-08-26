@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -24,6 +24,8 @@
 /* IBM_PROLOG_END_TAG                                                     */
 
 
+///
+// EKB-Mirror-To: hw/ppe
 
 #ifndef _P10_HCD_CHTM_PURGE_H_
 #define _P10_HCD_CHTM_PURGE_H_
