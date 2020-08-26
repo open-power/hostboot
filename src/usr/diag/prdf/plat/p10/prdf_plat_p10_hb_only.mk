@@ -40,6 +40,7 @@ prd_incpath += ${PRD_SRC_PATH}/plat/p10
 # plat/p10/ (non-rule plugin related)
 
 # plat/p10/ (rule plugin related)
+prd_rule_plugin += prdfP10Iohs.o
 
 ################################################################################
 # Hostboot only object files (IPL only)

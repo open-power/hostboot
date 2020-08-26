@@ -27,6 +27,13 @@
 # Additional registers for IOHS, not defined in XML
 ###############################################################################
 
+    register IOHS_DLP_FIR_AND
+    {
+        name        "P10 chip IOHS_DLP_FIR atomic AND register";
+        scomaddr    0x18011001;
+        capture     group never;
+    };
+
     register IOHS_DLP_PHY_CONFIG
     {
         name        "P10 IOHS DLP PHY Config Register";

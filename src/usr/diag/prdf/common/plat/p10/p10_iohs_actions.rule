@@ -64,12 +64,14 @@ actionclass smp_callout_l1_th_32perDay
 actionclass smp_failure_l0_th_1
 {
     smp_callout_l0;
+    funccall("smp_failure_l0");
     threshold1;
 };
 
 actionclass smp_failure_l1_th_1
 {
     smp_callout_l1;
+    funccall("smp_failure_l1");
     threshold1;
 };
 
