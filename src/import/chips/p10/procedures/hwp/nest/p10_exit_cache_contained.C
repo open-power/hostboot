@@ -139,7 +139,6 @@ static const uint64_t MC_BAR_REG_SCOM_ADDRS[] =
     scomt::mc::SCOMFIR_MCFGP1A,
     scomt::mc::SCOMFIR_MCFGPM0A,
     scomt::mc::SCOMFIR_MCFGPM1A,
-    scomt::mc::SCOMFIR_MCMODE0,
     scomt::mc::SCOMFIR_MCMODE2,
 };
 
@@ -885,6 +884,7 @@ p10_exit_cache_contained_run_mi_initfile_xscom(
     fapi2::ATTR_MEM_MIRROR_PLACEMENT_POLICY_Type l_TGT1_ATTR_MEM_MIRROR_PLACEMENT_POLICY;
     fapi2::ATTR_SYS_DISABLE_MCU_TIMEOUTS_Type l_TGT1_ATTR_SYS_DISABLE_MCU_TIMEOUTS;
     fapi2::ATTR_CHIP_UNIT_POS_Type l_unit_num;
+    fapi2::ATTR_MSS_INTERLEAVE_GRANULARITY_Type l_interleave_granule_size;
 
     uint64_t l_scom_data = 0;
     uint64_t l_scom_mask = 0;
@@ -893,6 +893,8 @@ p10_exit_cache_contained_run_mi_initfile_xscom(
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SYS_DISABLE_MCU_TIMEOUTS, FAPI_SYSTEM, l_TGT1_ATTR_SYS_DISABLE_MCU_TIMEOUTS));
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, i_mi_target, l_unit_num),
              "Error from FAPI_ATTR_GET (ATTR_CHIP_UNIT_POS)");
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_INTERLEAVE_GRANULARITY, FAPI_SYSTEM, l_interleave_granule_size),
+             "Error from FAPI_ATTR_GET (ATTR_MSS_INTERLEAVE_GRANULARITY)");
 
     //MCPERF1
     l_scom_data = 0;
@@ -921,6 +923,7 @@ p10_exit_cache_contained_run_mi_initfile_xscom(
     l_scom_mask = 0;
     //data
     l_scom_data |= (uint64_t) 0x1 << (64 - ( 2 + 1));
+    l_scom_data |= (uint64_t) l_interleave_granule_size << (64 - (32 + 4));
 
     if ((l_TGT1_ATTR_MEM_MIRROR_PLACEMENT_POLICY == fapi2::ENUM_ATTR_MEM_MIRROR_PLACEMENT_POLICY_FLIPPED))
     {
@@ -929,6 +932,7 @@ p10_exit_cache_contained_run_mi_initfile_xscom(
 
     //mask
     l_scom_mask |= (uint64_t) 0x1 << (64 - ( 2 + 1));
+    l_scom_mask |= (uint64_t) 0xF << (64 - (32 + 4));
     l_scom_mask |= (uint64_t) 0x1 << (64 - (36 + 1));
     FAPI_TRY(p10_gen_xscom_init(
                  i_target,

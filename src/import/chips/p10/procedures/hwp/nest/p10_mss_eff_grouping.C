@@ -4007,76 +4007,6 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
-///
-/// @brief Set Interleave Granularity in MCMODE0 register
-///
-/// @param[in]  i_mcBarDataPair  Target pair <MCC, mcBarData>
-/// @param[out] o_memBarRegs     BAR register attribute data array
-///
-/// @return FAPI2_RC_SUCCESS if success, else error code.
-///
-fapi2::ReturnCode setMCMODE0regData(
-    const std::vector<std::pair<fapi2::Target<fapi2::TARGET_TYPE_MCC>, mcBarData_t>>& i_mcBarDataPair,
-    fapi2::ATTR_MEMORY_BAR_REGS_Type o_memBarRegs)
-{
-    FAPI_DBG("Entering");
-    std::vector<fapi2::Target<fapi2::TARGET_TYPE_MI>> l_granule_supported;
-    fapi2::ATTR_MSS_INTERLEAVE_GRANULARITY_Type l_interleave_granule_size;
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_INTERLEAVE_GRANULARITY,
-                           fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(),
-                           l_interleave_granule_size),
-             "Error getting ATTR_MSS_INTERLEAVE_GRANULARITY, l_rc 0x%.8X",
-             (uint64_t)fapi2::current_err);
-
-    // Build a list of MIs that need to have granularity programmed
-    for (auto l_pair : i_mcBarDataPair)
-    {
-        fapi2::Target<fapi2::TARGET_TYPE_MCC> l_target = l_pair.first;
-        mcBarData_t l_data = l_pair.second;
-
-        // MCFGP valid (bit 0)
-        if (l_data.MCFGP_valid == true)
-        {
-            // If MI is not in the list yet, add it to the list to set granularity
-            fapi2::Target<fapi2::TARGET_TYPE_MI> l_mi_target = l_target.getParent<fapi2::TARGET_TYPE_MI>();
-            auto it = std::find(l_granule_supported.begin(), l_granule_supported.end(), l_mi_target);
-
-            if (it == l_granule_supported.end())
-            {
-                l_granule_supported.push_back(l_mi_target);
-            }
-        }
-    }
-
-    // Set granularity
-    for ( auto l_it = l_granule_supported.begin(); l_it != l_granule_supported.end(); l_it++ )
-    {
-        fapi2::buffer<uint64_t> l_mcmode0_scom_data(0);
-        fapi2::buffer<uint64_t> l_mcmode0_scom_mask_data(0);
-
-        // Get MI target pos
-        auto l_mi_target = *l_it;
-        uint8_t l_miPos = 0;
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, l_mi_target, l_miPos),
-                 "Error getting MI ATTR_CHIP_UNIT_POS, l_rc 0x%.8X",
-                 (uint64_t)fapi2::current_err);
-
-        FAPI_TRY(PREP_SCOMFIR_MCMODE0(l_mi_target));
-        // Set interleave granularity (bits 32:35)
-        SET_SCOMFIR_MCMODE0_GROUP_ADDRESS_INTERLEAVE_GRANULARITY(l_interleave_granule_size,
-                l_mcmode0_scom_data);
-        // Set mask value for bits 32:35
-        SET_SCOMFIR_MCMODE0_GROUP_ADDRESS_INTERLEAVE_GRANULARITY((uint64_t)0xF,
-                l_mcmode0_scom_mask_data);
-        // Save to buffer
-        o_memBarRegs[l_miPos][fapi2::ENUM_ATTR_MEMORY_BAR_REGS_MCMODE0][BAR_REGS_DATA_IDX] = l_mcmode0_scom_data;
-        o_memBarRegs[l_miPos][fapi2::ENUM_ATTR_MEMORY_BAR_REGS_MCMODE0][BAR_REGS_MASK_IDX] = l_mcmode0_scom_mask_data;
-    }
-
-fapi_try_exit:
-    FAPI_DBG("Exit");
-    return fapi2::current_err;
-}
 
 ///
 /// @brief Set subchannel enables in MCMODE2 register
@@ -4487,11 +4417,6 @@ fapi2::ReturnCode setBarRegsData(
              "setMCMODE2regData() returns an error, l_rc 0x%.8X",
              (uint64_t)fapi2::current_err);
 
-    // 1. ---- Get MCMODE0 reg data -----
-    FAPI_TRY(setMCMODE0regData(i_mccBarDataPair, o_memBarRegs),
-             "setMCMODE0regData() returns an error. l_rc 0x%.8X",
-             (uint64_t)fapi2::current_err);
-
     // Remaining registers are per MCC chiplet
     for (auto l_pair : i_mccBarDataPair)
     {
@@ -4557,9 +4482,6 @@ void displayMemoryBarRegs(const fapi2::ATTR_MEMORY_BAR_REGS_Type i_memBarRegs)
         FAPI_INF("       MCFGPM1A 0x%.16llX 0x%.16llX",
                  i_memBarRegs[ii][fapi2::ENUM_ATTR_MEMORY_BAR_REGS_MCFGPM1A][BAR_REGS_DATA_IDX],
                  i_memBarRegs[ii][fapi2::ENUM_ATTR_MEMORY_BAR_REGS_MCFGPM1A][BAR_REGS_MASK_IDX]);
-        FAPI_INF("       MCMODE0  0x%.16llX 0x%.16llX",
-                 i_memBarRegs[ii][fapi2::ENUM_ATTR_MEMORY_BAR_REGS_MCMODE0][BAR_REGS_DATA_IDX],
-                 i_memBarRegs[ii][fapi2::ENUM_ATTR_MEMORY_BAR_REGS_MCMODE0][BAR_REGS_MASK_IDX]);
     }
 
     return;

@@ -57,9 +57,8 @@
     MCFGP1A        = 5,
     MCFGPM0A       = 6,
     MCFGPM1A       = 7,
-    MCMODE0        = 8,
-    MCMODE2        = 9,
-    NUM_BAR_REGS   = 10
+    MCMODE2        = 8,
+    NUM_BAR_REGS   = 9
   </enum>
   <writeable/>
   <initToZero/>
