@@ -82,19 +82,6 @@
   </hwpError>
   <!-- *********************************************************************** -->
   <hwpError>
-    <rc>RC_INTERNAL_CORE_STATE_MATCHES_REQUESTED_STATE</rc>
-    <description>Current special wakeup state of the core matches the requested state.
-    HWP will not attempt to special wakeup the core again. It will simply return 
-    success to the caller.
-    </description>
-    <ffdc>SP_WKUP_REG_VALUE</ffdc>
-    <ffdc>ENTITY</ffdc>
-    <ffdc>CORE_TARGET</ffdc>
-    <ffdc>CORE_SSHSRC</ffdc>
-
-  </hwpError>
-  <!-- *********************************************************************** -->
-  <hwpError>
     <rc>RC_INTERNAL_SPLWKUP_IS_POSSIBLE</rc>
     <description>An internal RC suggesting that special wakeup request can be serviced.
     It is based on the fact that the QME servicing the core is active.

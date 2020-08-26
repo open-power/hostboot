@@ -82,20 +82,6 @@ fapi2::ReturnCode checkForSplWkupPreReq(
     l_data.flush<0>();
     FAPI_TRY( fapi2::getScom( i_target, l_address, l_data ) );
 
-    FAPI_INF( "Before Attempting Spl Wkup 0x%016lx %08X", l_data, l_address );
-
-    if( ( l_data.getBit< p10specialWakeup::SPWKUP_REQ_DONE_BIT >() &&
-          ( p10specialWakeup::SPCWKUP_ENABLE == i_operation ) ) ||
-        ( !l_data.getBit< p10specialWakeup::SPWKUP_REQ_DONE_BIT >() &&
-          ( p10specialWakeup::SPCWKUP_DISABLE == i_operation ) ) )
-
-    {
-        FAPI_INF("Spl Wkup Requested State Matches Current State" );
-        fapi2::current_err  =   fapi2::RC_INTERNAL_CORE_STATE_MATCHES_REQUESTED_STATE;
-        goto fapi_try_exit;
-
-    }
-
     //Need to assure ourselves that we have infrastructure in place to support
     //Special wakeup. Special wakeup at an early stage of IPL ( in failure path )
     //can't be supported. Check below enables calling platform to handle it
@@ -425,25 +411,9 @@ fapi2::ReturnCode p10_core_special_wakeup(
     }
 
     blockWakeupRecursion( l_modCoreList, p10specialWakeup::BLOCK );
-    //TODO , need revisit this logic
-#if 0
-    l_tempRc    =   checkForSplWkupPreReq( i_target, i_operation, i_entity );
 
-    if( l_tempRc )
-    {
-        // If requested state matches current state then there is not need to
-        // request again. Simply return SUCCESS.
-        if( l_tempRc == (uint32_t)fapi2::RC_INTERNAL_CORE_STATE_MATCHES_REQUESTED_STATE )
-        {
-            l_tempRc    =   fapi2::FAPI2_RC_SUCCESS;
-        }
-
-        fapi2::current_err  =   l_tempRc;
-
-        goto fapi_try_exit;
-    }
-
-#endif
+    FAPI_TRY( checkForSplWkupPreReq( i_target, i_operation, i_entity ),
+              "Failed To Check Spl Wakeup Pre-Req" );
 
     FAPI_TRY( initiateSplWkup( i_target, i_operation, i_entity ) ,
               "Attempt For Special Wakeup Failed" );
