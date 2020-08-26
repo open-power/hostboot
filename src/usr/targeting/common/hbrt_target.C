@@ -33,10 +33,10 @@
 #include <errl/errludtarget.H>
 #include <limits.h>
 #else
-#define KILOBYTE  (1024ul)            /**< 1 KB */
-#define MEGABYTE  (1024 * 1024ul)     /**< 1 MB */
-#define GIGABYTE  (MEGABYTE * 1024ul) /**< 1 GB */
-#define TERABYTE  (GIGABYTE * 1024ul) /**< 1 TB */
+#define KILOBYTE  (1024ull)            /**< 1 KB */
+#define MEGABYTE  (1024 * 1024ull)     /**< 1 MB */
+#define GIGABYTE  (MEGABYTE * 1024ull) /**< 1 GB */
+#define TERABYTE  (GIGABYTE * 1024ull) /**< 1 TB */
 #endif
 
 
