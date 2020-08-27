@@ -6021,6 +6021,40 @@ fapi2::ReturnCode eff_dimm::cal_step_enable()
 }
 
 ///
+/// @brief if this dimm is M386A8K40CM2-CTD7Y
+/// @param o_value record if this dimm is M386A8K40CM2-CTD7Y
+/// @return fapi2::FAPI2_RC_SUCCESS if okay
+///
+fapi2::ReturnCode eff_dimm::is_m386a8k40cm2_ctd7y_helper(mss::states& o_value)
+{
+    constexpr uint8_t COMPARISON_VAL[mss::MODULE_PARTNUMBER_ATTR] = {'M', '3', '8', '6', 'A', '8', 'K', '4', '0', 'C', 'M', '2', '-', 'C', 'T', 'D', ' ', ' ', ' ', ' '};
+    uint16_t l_decoder_val = 0;
+
+    uint8_t l_module_pn[mss::MODULE_PARTNUMBER_ATTR] = {};
+    FAPI_TRY( iv_spd_decoder.module_partnumber(l_module_pn));
+
+    iv_spd_decoder.reg_manufacturer_id_code(l_decoder_val);
+
+    // If the comparison value is not equal to our PN, then no workaround is needed
+    if(memcmp(l_module_pn, COMPARISON_VAL, mss::MODULE_PARTNUMBER_ATTR) != MEMCMP_EQUAL)
+    {
+        o_value = mss::states::NO;
+    }
+    // Otherwise, check the RCD vendor
+    else if(l_decoder_val == fapi2::ENUM_ATTR_EFF_RCD_MFG_ID_IDT)
+    {
+        o_value = mss::states::YES;
+    }
+    else
+    {
+        o_value = mss::states::NO;
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
 /// @brief Determines and sets the is_m386a8k40cm2_ctd7y values
 /// @return fapi2::FAPI2_RC_SUCCESS if okay
 ///
