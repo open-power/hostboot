@@ -914,9 +914,6 @@ errlHndl_t hbResvLoadSecureSection (const PNOR::SectionId i_sec,
               PNOR::SectionIdToString(i_sec));
 
     errlHndl_t l_elog = nullptr;
-    //RTC: 209485
-    //      PHASE 1 - First get HCODE_LID infrastructure in builds
-    //      PHASE 2 - Uncomment HCODE_LID override
     PNOR::SectionId shadow_i_sec = i_sec;
 
 #ifdef CONFIG_SECUREBOOT
@@ -927,8 +924,8 @@ errlHndl_t hbResvLoadSecureSection (const PNOR::SectionId i_sec,
 
         if (i_sec == PNOR::HCODE)
         {
-            //shadow_i_sec = PNOR::HCODE_LID;
-            TRACFCOMP( g_trac_runtime, "hbResvLoadSecureSection -PHASE2- will OVERRIDE to HCODE_LID shadow_i_sec %s",
+            shadow_i_sec = PNOR::HCODE_LID;
+            TRACFCOMP( g_trac_runtime, "hbResvLoadSecureSection HCODE_LID shadow_i_sec %s",
                 PNOR::SectionIdToString(shadow_i_sec));
         }
         // Check for inhibited sections

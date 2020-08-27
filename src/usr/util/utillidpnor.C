@@ -46,14 +46,18 @@ const size_t lidIdStrLength = 9;
 //  Value - LidAndContainerLid
 //          The first Lid in the pair is the image content
 //          The second Lid in the pair is the Container LID (Secure Header)
+//
+//  SPECIAL NOTE: HCODE_LID is listed first in table lookups
+//  to allow prioritization of picking the non-HPT HCODE_LID partition
+//  to insulate the HPT handling from affecting the LID validation steps.
 static const PnorLidsMap PnorToLidsMap =
 {
     { PNOR::TESTRO,      LidAndContainerLid(TEST_LIDID, INVALID_LIDID)},
     { PNOR::VERSION,     LidAndContainerLid(VERSION_LIDID, INVALID_LIDID)},
     { PNOR::OCC,         LidAndContainerLid(OCC_LIDID, OCC_CONTAINER_LIDID)},
     { PNOR::WOFDATA,     LidAndContainerLid(WOF_LIDID, WOF_CONTAINER_LIDID)},
-    { PNOR::HCODE,       LidAndContainerLid(P10_HCODE_LIDID, HCODE_CONTAINER_LIDID)},
     { PNOR::HCODE_LID,   LidAndContainerLid(P10_HCODE_LIDID, HCODE_CONTAINER_LIDID)},
+    { PNOR::HCODE,       LidAndContainerLid(P10_HCODE_LIDID, HCODE_CONTAINER_LIDID)},
     { PNOR::RINGOVD,     LidAndContainerLid(HWREFIMG_RINGOVD_LIDID,INVALID_LIDID)},
 };
 
