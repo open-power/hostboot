@@ -91,6 +91,48 @@ PRDF_PLUGIN_DEFINE( p10_omic, PostAnalysis );
 
 //##############################################################################
 //
+//                             Callout plugins
+//
+//##############################################################################
+
+/**
+ * @brief  Calls out the entire bus interface for OMI 0.
+ * @param  i_chip An OMIC chip.
+ * @param  io_sc  The step code data struct.
+ * @return SUCCESS
+ */
+int32_t calloutBusInterface_0(ExtensibleChip* i_chip,
+                              STEP_CODE_DATA_STRUCT& io_sc)
+{
+    TargetHandle_t rxTrgt = getConnectedChild(i_chip->getTrgt(), TYPE_OMI, 0);
+    TargetHandle_t txTrgt = getConnectedChild(rxTrgt, TYPE_OCMB_CHIP, 0);
+
+    calloutBus(io_sc, rxTrgt, txTrgt, HWAS::OMI_BUS_TYPE);
+
+    return SUCCESS;
+}
+PRDF_PLUGIN_DEFINE(p10_omic, calloutBusInterface_0);
+
+/**
+ * @brief  Calls out the entire bus interface for OMI 1.
+ * @param  i_chip An OMIC chip.
+ * @param  io_sc  The step code data struct.
+ * @return SUCCESS
+ */
+int32_t calloutBusInterface_1(ExtensibleChip* i_chip,
+                              STEP_CODE_DATA_STRUCT& io_sc)
+{
+    TargetHandle_t rxTrgt = getConnectedChild(i_chip->getTrgt(), TYPE_OMI, 1);
+    TargetHandle_t txTrgt = getConnectedChild(rxTrgt, TYPE_OCMB_CHIP, 0);
+
+    calloutBus(io_sc, rxTrgt, txTrgt, HWAS::OMI_BUS_TYPE);
+
+    return SUCCESS;
+}
+PRDF_PLUGIN_DEFINE(p10_omic, calloutBusInterface_1);
+
+//##############################################################################
+//
 //                               OMIDLFIR
 //
 //##############################################################################

@@ -200,6 +200,29 @@ int32_t CollectOmiFfdc( ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc )
 }
 PRDF_PLUGIN_DEFINE( explorer_ocmb, CollectOmiFfdc );
 
+//##############################################################################
+//
+//                             Callout plugins
+//
+//##############################################################################
+
+/**
+ * @brief  Calls out the entire OMI bus interface.
+ * @param  i_chip An OCMB chip.
+ * @param  io_sc  The step code data struct.
+ * @return SUCCESS
+ */
+int32_t calloutBusInterface(ExtensibleChip* i_chip,
+                            STEP_CODE_DATA_STRUCT& io_sc)
+{
+    TargetHandle_t rxTrgt = i_chip->getTrgt();
+    TargetHandle_t txTrgt = getConnectedParent(rxTrgt, TYPE_OMI);
+
+    calloutBus(io_sc, rxTrgt, txTrgt, HWAS::OMI_BUS_TYPE);
+
+    return SUCCESS;
+}
+PRDF_PLUGIN_DEFINE(explorer_ocmb, calloutBusInterface);
 
 //##############################################################################
 //

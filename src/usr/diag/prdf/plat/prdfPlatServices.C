@@ -347,6 +347,26 @@ TARGETING::TargetHandle_t getActiveRefClk(TARGETING::TargetHandle_t
 //##                        Fabric/Memory bus functions
 //##############################################################################
 
+void calloutBus(STEP_CODE_DATA_STRUCT& io_sc,
+                TargetHandle_t i_rxTrgt, TargetHandle_t i_txTrgt,
+                HWAS::busTypeEnum i_busType, HWAS::CalloutFlag_t i_flags)
+{
+    PRDF_ASSERT(nullptr != i_rxTrgt);
+    PRDF_ASSERT(nullptr != i_txTrgt);
+
+    // Add both endpoints to the callout list, priority medium group A.
+    io_sc.service_data->SetCallout(i_rxTrgt, MRU_MEDA);
+    io_sc.service_data->SetCallout(i_txTrgt, MRU_MEDA);
+
+    // Callout the rest of the bus, priority low.
+    errlHndl_t errl = ServiceGeneratorClass::ThisServiceGenerator().getErrl();
+    PRDF_ASSERT(nullptr != errl);
+    errl->addBusCallout(i_rxTrgt, i_txTrgt, i_busType,
+                        HWAS::SRCI_PRIORITY_LOW, i_flags);
+}
+
+//------------------------------------------------------------------------------
+
 void calloutSmpBus(ExtensibleChip* i_chip, unsigned int i_link,
                    STEP_CODE_DATA_STRUCT& io_sc)
 {
@@ -393,17 +413,10 @@ void calloutSmpBus(ExtensibleChip* i_chip, unsigned int i_link,
     TargetHandle_t txTrgt = getConnectedPeerTarget(rxTrgt);
     PRDF_ASSERT(nullptr != txTrgt);
 
-    // Callout the endpoints, priority medium group A.
-    io_sc.service_data->SetCallout(rxTrgt, MRU_MEDA);
-    io_sc.service_data->SetCallout(txTrgt, MRU_MEDA);
-
-    // Callout the rest of the bus, priority low.
-    errlHndl_t errl = ServiceGeneratorClass::ThisServiceGenerator().getErrl();
-    PRDF_ASSERT(nullptr != errl);
+    // Callout the entire bus interface.
     // TODO: What type should we use for IOHS? Do we need differentiate between
     //       X or A link types or can we use a generic new IOHS type?
-    errl->addBusCallout(rxTrgt, txTrgt, HWAS::????,
-                        HWAS::SRCI_PRIORITY_LOW, calloutFlag);
+    calloutBus(io_sc, rxTrgt, txTrgt, HWAS::???, calloutFlag);
 */
 }
 

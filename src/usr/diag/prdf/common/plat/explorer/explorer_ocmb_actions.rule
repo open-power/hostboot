@@ -102,9 +102,7 @@ actionclass omi
 
 actionclass omi_bus
 {
-    calloutSelfMedA;
-    callout(connected(TYPE_OMI), MRU_MEDA);
-    funccall("calloutBusInterfacePlugin");
+    funccall("calloutBusInterface");
 };
 
 actionclass mem_port

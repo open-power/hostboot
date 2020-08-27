@@ -59,14 +59,12 @@ actionclass chnl1_ocmb
 
 actionclass chnl0_omi_bus
 {
-    TBDDefaultCallout;
-#    funccall("omiParentCalloutBusInterfacePlugin_0");
+    funccall("calloutBusInterface_0");
 };
 
 actionclass chnl1_omi_bus
 {
-    TBDDefaultCallout;
-#    funccall("omiParentCalloutBusInterfacePlugin_1");
+    funccall("calloutBusInterface_1");
 };
 
 actionclass chnl0_omi_bus_th_1

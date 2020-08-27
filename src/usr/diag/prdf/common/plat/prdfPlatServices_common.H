@@ -192,6 +192,21 @@ bool obusInSmpMode(TARGETING::TargetHandle_t obusTgt);
 //##############################################################################
 
 /**
+ * @brief Adds both endpoints to the callout list (priority medium group A) and
+ *        calls out everything else in between (priority low).
+ * @param io_sc     The step code data struct.
+ * @param i_rxTrgt  The RX endpoint target.
+ * @param i_txTrgt  The TX endpoint target.
+ * @param i_busType The hardware bus type
+ * @param i_flags   Extra flag for callout structure.
+ */
+void calloutBus(STEP_CODE_DATA_STRUCT& io_sc,
+                TARGETING::TargetHandle_t i_rxTrgt,
+                TARGETING::TargetHandle_t i_txTrgt,
+                HWAS::busTypeEnum i_busType,
+                HWAS::CalloutFlag_t i_flags = HWAS::FLAG_NONE);
+
+/**
  * @brief Adds callouts for both SMPGROUP endpoints associated with the given
  *        IOHS link (priority MED_A) and also adds callouts for everything else
  *        in between the two endpoints (priority LOW).
