@@ -132,17 +132,6 @@ void calloutBus(STEP_CODE_DATA_STRUCT& io_sc,
                 HWAS::CalloutFlag_t i_flags = HWAS::FLAG_NONE);
 
 /**
- * @brief Adds callouts for both SMPGROUP endpoints associated with the given
- *        IOHS link (priority MED_A) and also adds callouts for everything else
- *        in between the two endpoints (priority LOW).
- * @param i_chip IOHS processor unit.
- * @param i_link IOHS link.
- * @param io_sc  The step code data struct.
- */
-void calloutSmpBus(ExtensibleChip* i_chip, unsigned int i_link,
-                   STEP_CODE_DATA_STRUCT& io_sc);
-
-/**
  * @brief Adds the OpenCAPI adapter attached to the given IOHS link to the
  *        callout list.
  * @param i_chip IOHS processor unit.

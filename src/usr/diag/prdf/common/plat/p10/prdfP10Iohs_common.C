@@ -41,36 +41,6 @@ namespace p10_iohs
 {
 
 /**
- * @brief  Adds callouts for both SMPGROUP endpoints associated with IOHS link 0
- *         (priority MED_A) and also adds callouts for everything else in
- *         between the two endpoints (priority LOW).
- * @param  i_chip IOHS processor unit.
- * @param  io_sc  The step code data struct.
- * @return SUCCESS always.
- */
-int32_t smp_callout_l0(ExtensibleChip* i_chip, STEP_CODE_DATA_STRUCT& io_sc)
-{
-    calloutSmpBus(i_chip, 0, io_sc);
-    return SUCCESS;
-}
-PRDF_PLUGIN_DEFINE(p10_iohs, smp_callout_l0);
-
-/**
- * @brief  Adds callouts for both SMPGROUP endpoints associated with IOHS link 1
- *         (priority MED_A) and also adds callouts for everything else in
- *         between the two endpoints (priority LOW).
- * @param  i_chip IOHS processor unit.
- * @param  io_sc  The step code data struct.
- * @return SUCCESS always.
- */
-int32_t smp_callout_l1(ExtensibleChip* i_chip, STEP_CODE_DATA_STRUCT& io_sc)
-{
-    calloutSmpBus(i_chip, 1, io_sc);
-    return SUCCESS;
-}
-PRDF_PLUGIN_DEFINE(p10_iohs, smp_callout_l1);
-
-/**
  * @brief  Adds a callout for the OpenCAPI adapter on IOHS link 0.
  * @param  i_chip IOHS processor unit.
  * @param  io_sc  The step code data struct.

@@ -29,6 +29,7 @@
 #include <prdfPluginMap.H>
 
 #include <prdfPlatServices.H>
+#include <prdfP10IohsExtraSig.H>
 
 using namespace TARGETING;
 
@@ -39,6 +40,79 @@ using namespace PlatServices;
 
 namespace p10_iohs
 {
+
+/**
+ * @brief  Calls out an entire SMPGROUP bus with the given IOHS link.
+ * @param  i_chip IOHS processor unit.
+ * @param  io_sc  The step code data struct.
+ * @return SUCCESS always.
+ */
+int32_t __smp_callout(ExtensibleChip* i_chip, unsigned int i_link,
+                      STEP_CODE_DATA_STRUCT& io_sc)
+{
+    PRDF_ASSERT(nullptr != i_chip);
+    PRDF_ASSERT(TYPE_IOHS == i_chip->getType());
+    PRDF_ASSERT(i_link < MAX_LINK_PER_IOHS);
+
+    // SMP callouts need to determine if the link is down. This can be done by
+    // querying the link quality status register. A zero value indicates the
+    // link has failed.
+
+    // TODO: Uncomment once below is supported.
+    //HWAS::CalloutFlag_t calloutFlag = HWAS::FLAG_NONE;
+
+    const char* reg_str = (0 == i_link) ? "IOHS_DLP_LINK0_QUALITY"
+                                        : "IOHS_DLP_LINK1_QUALITY";
+    SCAN_COMM_REGISTER_CLASS* reg = i_chip->getRegister(reg_str);
+    if (SUCCESS == reg->Read() && reg->BitStringIsZero())
+    {
+        // TODO: Uncomment once below is supported.
+        //calloutFlag = HWAS::FLAG_LINK_DOWN;
+
+        // Indicate in the multi-signature section that the link has failed.
+        io_sc.service_data->AddSignatureList(i_chip->getTrgt(),
+                                             PRDFSIG_LinkFailed);
+
+        // Make the error log predictive.
+        io_sc.service_data->setPredictive();
+    }
+
+    // TODO: Remove once below is supported.
+    io_sc.service_data->SetCallout(LEVEL2_SUPPORT, MRU_MED, NO_GARD);
+/* TODO: RTC 259316 - See action items below.
+    // Get the connected SMPGROUP target.
+    // TODO: Need to add the following to the connMap map in getConnectedChild()
+    //       so we can get an SMPGROUP from an IOHS.
+    //          { {TYPE_IOHS, TYPE_SMPGROUP}, MAX_LINK_PER_IOHS },
+    TargetHandle_t rxTrgt = getConnectedChild(i_chip->getTrgt(), TYPE_SMPGROUP,
+                                              i_link);
+    PRDF_ASSERT(nullptr != rxTrgt);
+
+    // Get the peer SMPGROUP target.
+    // TODO: Need to update getConnectedPeerTarget() to allow SMPGROUP targets.
+    TargetHandle_t txTrgt = getConnectedPeerTarget(rxTrgt);
+    PRDF_ASSERT(nullptr != txTrgt);
+
+    // Callout the entire bus interface.
+    // TODO: What type should we use for IOHS? Do we need differentiate between
+    //       X or A link types or can we use a generic new IOHS type?
+    calloutBus(io_sc, rxTrgt, txTrgt, HWAS::???, calloutFlag);
+*/
+
+    return SUCCESS;
+}
+
+int32_t smp_callout_l0(ExtensibleChip* i_chip, STEP_CODE_DATA_STRUCT& io_sc)
+{
+    return __smp_callout(i_chip, 0, io_sc);
+}
+PRDF_PLUGIN_DEFINE(p10_iohs, smp_callout_l0);
+
+int32_t smp_callout_l1(ExtensibleChip* i_chip, STEP_CODE_DATA_STRUCT& io_sc)
+{
+    return __smp_callout(i_chip, 1, io_sc);
+}
+PRDF_PLUGIN_DEFINE(p10_iohs, smp_callout_l1);
 
 /**
  * @brief  Additional handling for SMP link failures.
