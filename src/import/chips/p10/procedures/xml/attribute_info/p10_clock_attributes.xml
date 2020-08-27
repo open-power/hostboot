@@ -274,4 +274,21 @@
   <initToZero/>
 </attribute>
 <!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_HW543822_WAR_MODE</id>
+  <targetType>TARGET_TYPE_SYSTEM</targetType>
+  <description>
+    Select workaround type to be applied if HW543822 is present
+  </description>
+  <valueType>uint8</valueType>
+  <enum>
+    FORCE_HUNDRED_OHM_DIFF = 0,
+    FORCE_NO_TERM = 1,
+    FORCE_FIFTY_OHM_SE = 2,
+    NONE = 3
+  </enum>
+  <platInit>mrw</platInit>
+  <default>NONE</default>
+</attribute>
+<!-- ********************************************************************** -->
 </attributes>
