@@ -103,85 +103,6 @@ fapi_try_exit:
 namespace pmic
 {
 
-
-///
-/// @brief Set PWR_GOOD pins on IDT PMICs, no-op otherwise
-///
-/// @param[in] i_pmics vector of PMICs to set PWR_GOOD pins on
-/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
-///
-fapi2::ReturnCode set_pwr_good_pin_io_idt(
-    const std::vector<fapi2::Target<fapi2::TARGET_TYPE_PMIC>>& i_pmics)
-{
-    // IDT PMICs I/O mode must be enabled before VR Enable
-    for (const auto& l_pmic : i_pmics)
-    {
-        bool l_pmic_is_idt = false;
-        FAPI_TRY(pmic_is_idt(l_pmic, l_pmic_is_idt));
-
-        if (l_pmic_is_idt)
-        {
-            FAPI_TRY(set_pwr_good_pin_io(l_pmic));
-        }
-    }
-
-fapi_try_exit:
-    return fapi2::current_err;
-}
-
-///
-/// @brief Set PWR_GOOD pins on TI PMICs, no-op otherwise
-///
-/// @param[in] i_pmics vector of PMICs to set PWR_GOOD pins on
-/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
-///
-fapi2::ReturnCode set_pwr_good_pin_io_ti(
-    const std::vector<fapi2::Target<fapi2::TARGET_TYPE_PMIC>>& i_pmics)
-{
-    // IDT PMICs I/O mode must be enabled before VR Enable
-    for (const auto& l_pmic : i_pmics)
-    {
-        bool l_pmic_is_ti = false;
-        FAPI_TRY(pmic_is_ti(l_pmic, l_pmic_is_ti));
-
-        if (l_pmic_is_ti)
-        {
-            FAPI_TRY(set_pwr_good_pin_io(l_pmic));
-        }
-    }
-
-fapi_try_exit:
-    return fapi2::current_err;
-}
-
-///
-/// @breif Set PWR_GOOD pin to I/O (for use with 1U/2U)
-///
-/// @param[in] i_pmic_target PMIC target
-/// @return fapi2::FAPI2_RC_SUCCESS iff success
-///
-fapi2::ReturnCode set_pwr_good_pin_io(
-    const fapi2::Target<fapi2::TargetType::TARGET_TYPE_PMIC>& i_pmic_target)
-{
-    static constexpr auto J = mss::pmic::product::JEDEC_COMPLIANT;
-    using REGS = pmicRegs<J>;
-    using FIELDS = pmicFields<J>;
-    using CONSTS = mss::pmic::consts<J>;
-
-    fapi2::buffer<uint8_t> l_vr_enable_buffer;
-
-    FAPI_TRY(mss::pmic::i2c::reg_read_reverse_buffer(i_pmic_target, REGS::R32, l_vr_enable_buffer));
-
-    // Enable I/O PWR_GOOD pin (1 --> Bit 5)
-    l_vr_enable_buffer.writeBit<FIELDS::R32_PWR_GOOD_IO_TYPE>(CONSTS::PWR_GOOD_IO_TYPE_IO);
-    FAPI_TRY(mss::pmic::i2c::reg_write_reverse_buffer(i_pmic_target, REGS::R32, l_vr_enable_buffer));
-
-    return fapi2::FAPI2_RC_SUCCESS;
-
-fapi_try_exit:
-    return fapi2::current_err;
-}
-
 ///
 /// @breif set VR enable bit for system startup via R32 (not broadcast)
 ///
@@ -201,7 +122,9 @@ fapi2::ReturnCode start_vr_enable(
 
     // Enable programmable mode
     FAPI_TRY(mss::pmic::i2c::reg_read_reverse_buffer(i_pmic_target, REGS::R2F, l_programmable_mode_buffer));
+
     l_programmable_mode_buffer.writeBit<FIELDS::R2F_SECURE_MODE>(CONSTS::PROGRAMMABLE_MODE);
+
     FAPI_TRY(mss::pmic::i2c::reg_write_reverse_buffer(i_pmic_target, REGS::R2F, l_programmable_mode_buffer));
 
     // Next, start VR_ENABLE
@@ -592,6 +515,42 @@ fapi_try_exit:
 }
 
 ///
+/// @brief Enable pmics using manual mode (direct VR enable, no SPD fields)
+/// @param[in] i_pmics vector of PMICs to enable
+/// @return FAPI2_RC_SUCCESS iff success, else error
+///
+fapi2::ReturnCode enable_manual(const std::vector<fapi2::Target<fapi2::TARGET_TYPE_PMIC>>& i_pmics)
+{
+    using CONSTS = mss::pmic::consts<mss::pmic::product::JEDEC_COMPLIANT>;
+    using REGS = pmicRegs<mss::pmic::product::JEDEC_COMPLIANT>;
+    using FIELDS = pmicFields<mss::pmic::product::JEDEC_COMPLIANT>;
+
+    for (const auto& l_pmic : i_pmics)
+    {
+        fapi2::buffer<uint8_t> l_programmable_mode;
+        l_programmable_mode.writeBit<FIELDS::R2F_SECURE_MODE>(CONSTS::PROGRAMMABLE_MODE);
+
+        FAPI_INF("Enabling PMIC %s with default settings", mss::c_str(l_pmic));
+
+        // Check to make sure VIN_BULK measures above minimum voltage tolerance, ensuring the PMIC
+        // will function as expected
+        FAPI_TRY(mss::pmic::check_vin_bulk_good(l_pmic),
+                 "%s pmic_enable: check for VIN_BULK good either failed, or was below minimum voltage tolerance",
+                 mss::c_str(l_pmic));
+
+        // Enable programmable mode
+        FAPI_TRY(mss::pmic::i2c::reg_write_reverse_buffer(l_pmic, REGS::R2F, l_programmable_mode));
+
+        // Start VR Enable
+        FAPI_TRY(mss::pmic::start_vr_enable(l_pmic),
+                 "Error starting VR_ENABLE on PMIC %s", mss::c_str(l_pmic));
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
 /// @brief Function to enable PMIC using SPD settings
 ///
 /// @param[in] i_pmic_target - the pmic target
@@ -656,51 +615,30 @@ fapi2::ReturnCode disable_and_reset_pmics(const fapi2::Target<fapi2::TARGET_TYPE
     using FIELDS = pmicFields<mss::pmic::product::JEDEC_COMPLIANT>;
 
     // First, grab the PMIC targets in REL_POS order
-    bool l_pmic_is_ti = false;
     auto l_pmics = mss::find_targets_sorted_by_index<fapi2::TARGET_TYPE_PMIC>(i_ocmb_target);
 
     // Next, sort them by the sequence attributes
     FAPI_TRY(mss::pmic::order_pmics_by_sequence(i_ocmb_target, l_pmics));
 
-    // First, we have to clear the PWR_GOOD IO Mode for all TI PMICs, then we will VR Disable for
-    // all PMICs. These have to be done in separate loops, as once a PMIC is disabled, it may drive
-    // PWR_GOOD low which would cause the other PMIC to immediately turn off (if it was still
-    // configured in I/O mode)
-
-    // Iterate in the reverse order of the sequence attributes, so we disable in the reverse sequence
+    // Reverse loop
     for (int16_t l_i = (l_pmics.size() - 1); l_i >= 0; --l_i)
     {
         const auto& PMIC = l_pmics[l_i];
 
-        // TI PMICS, we need to reset the PWR_GOOD_IO_TYPE to OUTPUT (instead of I/O) before we VR_DISABLE
-        // For 4U this is essentially a no-op since we'll always be in Output mode, but is required for 2U
-        FAPI_TRY(pmic_is_ti(PMIC, l_pmic_is_ti));
-
-        if (l_pmic_is_ti)
+        // First, disable
         {
             fapi2::buffer<uint8_t> l_reg_contents;
 
-            FAPI_TRY(mss::pmic::i2c::reg_read_reverse_buffer(PMIC, REGS::R32, l_reg_contents));
-            l_reg_contents.writeBit<FIELDS::R32_PWR_GOOD_IO_TYPE>(CONSTS::PWR_GOOD_IO_TYPE_OUTPUT);
+            // Redundant clearBit, but just so it's clear what we're doing
+            l_reg_contents.clearBit<FIELDS::R32_VR_ENABLE>();
+
             FAPI_TRY(mss::pmic::i2c::reg_write_reverse_buffer(PMIC, REGS::R32, l_reg_contents));
-
         }
-    }
-
-    // Iterate in the reverse order of the sequence attributes, so we disable in the reverse sequence
-    for (int16_t l_i = (l_pmics.size() - 1); l_i >= 0; --l_i)
-    {
-        const auto& PMIC = l_pmics[l_i];
-
-        // Now, VR Disable
-        fapi2::buffer<uint8_t> l_reg_contents;
-
-        FAPI_TRY(mss::pmic::i2c::reg_read_reverse_buffer(PMIC, REGS::R32, l_reg_contents));
-        l_reg_contents.clearBit<FIELDS::R32_VR_ENABLE>();
-        FAPI_TRY(mss::pmic::i2c::reg_write_reverse_buffer(PMIC, REGS::R32, l_reg_contents));
 
         // Now that it's disabled, let's clear the status bits so errors don't hang over into the next enable
-        FAPI_TRY(mss::pmic::status::clear(PMIC));
+        {
+            FAPI_TRY(mss::pmic::status::clear(PMIC));
+        }
     }
 
 fapi_try_exit:
@@ -718,24 +656,11 @@ fapi2::ReturnCode enable_1u_2u(
     const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_ocmb_target,
     const mss::pmic::enable_mode i_mode)
 {
-
     auto l_pmics = mss::find_targets_sorted_by_index<fapi2::TARGET_TYPE_PMIC>(i_ocmb_target);
 
     // Now the PMICs are in the right order of DIMM and the right order by their defined SPD sequence within each dimm
     // Let's kick off the enables
 
-    // We must consider the PWR_GOOD mode. The enable sequence must be in this order:
-    // PMIC0,1:  pgood=input+output  (IDT ONLY)
-    // PMIC0,1:  VR enable
-    // PMIC0,1:  pgood=input+output  (TI ONLY)
-
-    // We should never have PMICs from both vendors on a dimm, so we shouldn't have to worry about any
-    // interleaving. However, we do check the vendor on each PMIC anyway.
-
-    // IDT PMICs I/O mode must be enabled before VR Enable
-    FAPI_TRY(set_pwr_good_pin_io_idt(l_pmics));
-
-    // So we will need a few loops.
     if (i_mode == mss::pmic::enable_mode::MANUAL)
     {
         for (const auto& l_pmic : l_pmics)
@@ -765,9 +690,6 @@ fapi2::ReturnCode enable_1u_2u(
                      "pmic_enable: Error enabling PMIC %s", mss::c_str(l_pmic));
         }
     }
-
-    // TI PMICs I/O mode must be enabled after VR Enable
-    FAPI_TRY(set_pwr_good_pin_io_ti(l_pmics));
 
     return fapi2::FAPI2_RC_SUCCESS;
 

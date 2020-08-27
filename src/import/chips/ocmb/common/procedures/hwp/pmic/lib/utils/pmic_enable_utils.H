@@ -317,33 +317,6 @@ struct target_info_redundancy
 //-----------------------------------
 
 ///
-/// @brief Set PWR_GOOD pins on IDT PMICs, no-op otherwise
-///
-/// @param[in] i_pmics vector of PMICs to set PWR_GOOD pins on
-/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
-///
-fapi2::ReturnCode set_pwr_good_pin_io_idt(
-    const std::vector<fapi2::Target<fapi2::TARGET_TYPE_PMIC>>& i_pmics);
-
-///
-/// @brief Set PWR_GOOD pins on TI PMICs, no-op otherwise
-///
-/// @param[in] i_pmics vector of PMICs to set PWR_GOOD pins on
-/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
-///
-fapi2::ReturnCode set_pwr_good_pin_io_ti(
-    const std::vector<fapi2::Target<fapi2::TARGET_TYPE_PMIC>>& i_pmics);
-
-///
-/// @breif Set PWR_GOOD pin to I/O (for use with 1U/2U)
-///
-/// @param[in] i_pmic_target PMIC target
-/// @return fapi2::FAPI2_RC_SUCCESS iff success
-///
-fapi2::ReturnCode set_pwr_good_pin_io(
-    const fapi2::Target<fapi2::TargetType::TARGET_TYPE_PMIC>& i_pmic_target);
-
-///
 /// @breif set VR enable bit for system startup via R32 (not broadcast)
 ///
 /// @param[in] i_pmic_target PMIC target
