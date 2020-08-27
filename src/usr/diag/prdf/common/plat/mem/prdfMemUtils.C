@@ -318,8 +318,8 @@ void cleanupChnlAttns<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
             if ( 0 != (regData & ~mskData) )
             {
                 PRDF_TRAC( PRDF_FUNC "Re-setting DSTLFIR, attn found: %s "
-                           "regData=0x%x, mskData=0x%x", fir.firAddr, regData,
-                           mskData );
+                           "regData=0x%016llx, mskData=0x%016llx", fir.firAddr,
+                           regData, mskData );
                 // Attention on, set bits in DSTLFIR
                 SCAN_COMM_REGISTER_CLASS * dstlfir_or =
                     mcc->getRegister( "MC_DSTL_FIR_OR" );
