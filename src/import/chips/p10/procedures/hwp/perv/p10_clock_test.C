@@ -37,6 +37,7 @@
 #include "p10_scom_perv_2.H"
 #include "p10_scom_perv_d.H"
 #include "p10_scom_perv_f.H"
+#include "p10_scom_perv_7.H"
 
 enum P10_CLOCK_TEST_Private_Constants
 {
@@ -55,20 +56,44 @@ fapi2::ReturnCode p10_clock_test(const
     using namespace scomt;
     using namespace scomt::perv;
 
-    fapi2::buffer<uint32_t> l_data32;
+    fapi2::buffer<uint32_t> l_root_ctrl0;
+    fapi2::buffer<uint32_t> l_root_ctrl0_copy;
+    fapi2::buffer<uint32_t> l_root_ctrl6;
+
+    fapi2::ATTR_CHIP_EC_FEATURE_HW543822_Type l_hw543822;
+    fapi2::ATTR_HW543822_WAR_MODE_Type l_hw543822_war_mode;
+    fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
 
     FAPI_INF("p10_clock_test: Entering ...");
 
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_HW543822, i_target_chip, l_hw543822));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_HW543822_WAR_MODE, FAPI_SYSTEM, l_hw543822_war_mode));
+
+    if ((l_hw543822 != 0) &&
+        (l_hw543822_war_mode != fapi2::ENUM_ATTR_HW543822_WAR_MODE_NONE))
+    {
+        fapi2::buffer<uint32_t> l_root_ctrl6_temp;
+        // set sys0/sys1 refclock termination to 50ohm to ground when running clock test
+        FAPI_TRY(fapi2::getCfamRegister(i_target_chip, FSXCOMP_FSXLOG_ROOT_CTRL6_FSI, l_root_ctrl6));
+        l_root_ctrl6_temp = l_root_ctrl6;
+
+        l_root_ctrl6_temp.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL6_TP_AN_SYS0_RX_REFCLK_TERM,
+                                          FSXCOMP_FSXLOG_ROOT_CTRL6_TP_AN_SYS0_RX_REFCLK_TERM_LEN>(l_hw543822_war_mode);
+        l_root_ctrl6_temp.insertFromRight<FSXCOMP_FSXLOG_ROOT_CTRL6_TP_AN_SYS1_RX_REFCLK_TERM,
+                                          FSXCOMP_FSXLOG_ROOT_CTRL6_TP_AN_SYS1_RX_REFCLK_TERM_LEN>(l_hw543822_war_mode);
+
+        FAPI_TRY(fapi2::putCfamRegister(i_target_chip, FSXCOMP_FSXLOG_ROOT_CTRL6_FSI, l_root_ctrl6_temp));
+    }
+
     FAPI_DBG("unfence input wires to register 2810");
-    FAPI_TRY(fapi2::getCfamRegister(i_target_chip, FSXCOMP_FSXLOG_ROOT_CTRL0_FSI, l_data32));
-    l_data32.clearBit<FSXCOMP_FSXLOG_ROOT_CTRL0_CFAM_PROTECTION_0_DC>();
-    FAPI_TRY(fapi2::putCfamRegister(i_target_chip, FSXCOMP_FSXLOG_ROOT_CTRL0_FSI, l_data32));
+    FAPI_TRY(fapi2::getCfamRegister(i_target_chip, FSXCOMP_FSXLOG_ROOT_CTRL0_FSI, l_root_ctrl0));
+    l_root_ctrl0.clearBit<FSXCOMP_FSXLOG_ROOT_CTRL0_CFAM_PROTECTION_0_DC>();
+    FAPI_TRY(fapi2::putCfamRegister(i_target_chip, FSXCOMP_FSXLOG_ROOT_CTRL0_FSI, l_root_ctrl0));
 
     FAPI_DBG("unfence input wires to register 2910");
-    FAPI_TRY(fapi2::getCfamRegister(i_target_chip, FSXCOMP_FSXLOG_ROOT_CTRL0_COPY_FSI, l_data32));
-    l_data32.clearBit<FSXCOMP_FSXLOG_ROOT_CTRL0_CFAM_PROTECTION_0_DC>();
-    FAPI_TRY(fapi2::putCfamRegister(i_target_chip, FSXCOMP_FSXLOG_ROOT_CTRL0_COPY_FSI, l_data32));
-
+    FAPI_TRY(fapi2::getCfamRegister(i_target_chip, FSXCOMP_FSXLOG_ROOT_CTRL0_COPY_FSI, l_root_ctrl0_copy));
+    l_root_ctrl0_copy.clearBit<FSXCOMP_FSXLOG_ROOT_CTRL0_CFAM_PROTECTION_0_DC>();
+    FAPI_TRY(fapi2::putCfamRegister(i_target_chip, FSXCOMP_FSXLOG_ROOT_CTRL0_COPY_FSI, l_root_ctrl0_copy));
 
     for(int i = 0; i < POLL_COUNT; i++)
     {
@@ -77,6 +102,12 @@ fapi2::ReturnCode p10_clock_test(const
 
         FAPI_DBG("Set input valuse to clock test latches - RCS_CLOCK_TEST_IN = 0");
         FAPI_TRY(p10_clock_test_latches(i_target_chip, false));
+    }
+
+    if ((l_hw543822 != 0) &&
+        (l_hw543822_war_mode != fapi2::ENUM_ATTR_HW543822_WAR_MODE_NONE))
+    {
+        FAPI_TRY(fapi2::putCfamRegister(i_target_chip, FSXCOMP_FSXLOG_ROOT_CTRL6_FSI, l_root_ctrl6));
     }
 
     FAPI_INF("p10_clock_test: Exiting ...");
