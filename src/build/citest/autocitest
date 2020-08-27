@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2011,2019
+# Contributors Listed Below - COPYRIGHT 2011,2020
 # [+] International Business Machines Corp.
 #
 #
@@ -378,6 +378,8 @@ while [ $(($modsstarted)) -lt 1 -o $(($modsstarted)) -ne $(($modscompleted)) ]; 
     if [[ -z "${HOSTBOOT_PROFILE}" ]]; then
         if [[ "$CHIP" == "AXONE" ]]; then
             # 75 minutes for axone
+            loop_timeout=225
+        elif [[ "$CHIP" == "CUMULUS_CDIMM" ]]; then
             loop_timeout=225
         else
             # 50 minutes by default
