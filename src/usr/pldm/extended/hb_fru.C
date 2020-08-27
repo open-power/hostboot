@@ -702,35 +702,15 @@ errlHndl_t generate_ipz_formatted_vpd(const uint8_t* const i_pldm_fru_table_buf,
                 PLDM_INF("generate_ipz_formatted_vpd: found record 0x%.08x", record_name);
             }
 
+
+            bool is_known_ipz_record = (record_keyword_field_map.find(record_name) !=
+                     record_keyword_field_map.end());
+
             // If we do not find RT_KEYWORD_FIELD_ID to be the first entry in
             // a given fru record, then it is safe to assume that this record
             // does not represent IPZ VPD data
-            if( is_ipz_record )
+            if( is_known_ipz_record )
             {
-                if ( record_keyword_field_map.find(record_name) ==
-                     record_keyword_field_map.end() )
-                {
-                    PLDM_ERR("generate_ipz_formatted_vpd: Unsupported PLDM Fru Record for record 0x%04x found while looking up field %u",
-                             record_name, fru_tlv->type)
-                    /*
-                    * @errortype  ERRL_SEV_UNRECOVERABLE
-                    * @moduleid   MOD_PLDM_FRU_TO_IPZ
-                    * @reasoncode RC_UNSUPPORTED_RECORD
-                    * @userdata1  record name (ascii)
-                    * @userdata2  PLDM Fru field type
-                    * @devdesc    BMC sent fru info host does not understand
-                    * @custdesc   A software error occurred during system boot
-                    */
-                    errl = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
-                                          MOD_PLDM_FRU_TO_IPZ,
-                                          RC_UNSUPPORTED_RECORD,
-                                          record_name,
-                                          fru_tlv->type,
-                                          ErrlEntry::NO_SW_CALLOUT);
-                    addBmcErrorCallouts(errl);
-                    break;
-                }
-
                 std::vector<uint16_t> record_keywords = record_keyword_field_map.at(record_name);
 
                 if(fru_tlv->type < RT_FIELD_TYPE ||
@@ -774,6 +754,11 @@ errlHndl_t generate_ipz_formatted_vpd(const uint8_t* const i_pldm_fru_table_buf,
                 std::copy(fru_tlv->value,
                           fru_tlv->value + fru_tlv->length,
                           back_inserter(record_bytes));
+            }
+
+            if(is_ipz_record && !is_known_ipz_record)
+            {
+                PLDM_INF("BMC sent us the IPZ record 0x%.08x which Hostboot does not know how to process, skipping it");
             }
 
             // increment the offset_of_cur_pldm_record_entry variable by the total size of
