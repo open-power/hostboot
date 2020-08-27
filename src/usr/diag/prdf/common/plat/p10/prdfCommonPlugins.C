@@ -88,14 +88,27 @@ PRDF_PLUGIN_DEFINE_NS( p10_mc,         CommonPlugins, ClearServiceCallFlag );
 int32_t ClearServiceCallFlag_mnfgInfo( ExtensibleChip * i_chip,
                                        STEP_CODE_DATA_STRUCT & i_sc )
 {
-    if ( i_sc.service_data->IsAtThreshold() )
+    if (i_sc.service_data->IsAtThreshold() &&
+        (CHECK_STOP != i_sc.service_data->getPrimaryAttnType()))
     {
         i_sc.service_data->clearServiceCall();
     }
 
     return SUCCESS;
 }
-PRDF_PLUGIN_DEFINE_NS(p10_proc,   CommonPlugins, ClearServiceCallFlag_mnfgInfo);
+PRDF_PLUGIN_DEFINE_NS(p10_proc, CommonPlugins, ClearServiceCallFlag_mnfgInfo);
+PRDF_PLUGIN_DEFINE_NS(p10_eq,   CommonPlugins, ClearServiceCallFlag_mnfgInfo);
+PRDF_PLUGIN_DEFINE_NS(p10_core, CommonPlugins, ClearServiceCallFlag_mnfgInfo);
+PRDF_PLUGIN_DEFINE_NS(p10_pec,  CommonPlugins, ClearServiceCallFlag_mnfgInfo);
+PRDF_PLUGIN_DEFINE_NS(p10_phb,  CommonPlugins, ClearServiceCallFlag_mnfgInfo);
+PRDF_PLUGIN_DEFINE_NS(p10_pauc, CommonPlugins, ClearServiceCallFlag_mnfgInfo);
+PRDF_PLUGIN_DEFINE_NS(p10_pau,  CommonPlugins, ClearServiceCallFlag_mnfgInfo);
+PRDF_PLUGIN_DEFINE_NS(p10_iohs, CommonPlugins, ClearServiceCallFlag_mnfgInfo);
+PRDF_PLUGIN_DEFINE_NS(p10_nmmu, CommonPlugins, ClearServiceCallFlag_mnfgInfo);
+PRDF_PLUGIN_DEFINE_NS(p10_mc,   CommonPlugins, ClearServiceCallFlag_mnfgInfo);
+PRDF_PLUGIN_DEFINE_NS(p10_mcc,  CommonPlugins, ClearServiceCallFlag_mnfgInfo);
+PRDF_PLUGIN_DEFINE_NS(p10_omic, CommonPlugins, ClearServiceCallFlag_mnfgInfo);
+PRDF_PLUGIN_DEFINE_NS(explorer_ocmb, CommonPlugins, ClearServiceCallFlag_mnfgInfo);
 
 /**
  * @brief   Analyze for unit checkstops on this target.

@@ -279,7 +279,8 @@ group gEQ_L3_FIR
     /** EQ_L3_FIR[4]
      *  CE detected on L3 cache read
      */
-    (rEQ_L3_FIR, bit(4)) ? l3_cache_ce;
+    (rEQ_L3_FIR, bit(4)) ? temporaryBringUpHammer;
+#    (rEQ_L3_FIR, bit(4)) ? l3_cache_ce;
 
     /** EQ_L3_FIR[5]
      *  UE detected on L3 cache read
@@ -294,7 +295,8 @@ group gEQ_L3_FIR
     /** EQ_L3_FIR[7]
      *  L3 cache write data CE from Power Bus
      */
-    (rEQ_L3_FIR, bit(7)) ? self_th_32perDay;
+    (rEQ_L3_FIR, bit(7)) ? temporaryBringUpHammer;
+#    (rEQ_L3_FIR, bit(7)) ? self_th_32perDay;
 
     /** EQ_L3_FIR[8]
      *  L3 cache write data UE from Power Bus
@@ -309,7 +311,8 @@ group gEQ_L3_FIR
     /** EQ_L3_FIR[10]
      *  L3 cache write data CE from L2
      */
-    (rEQ_L3_FIR, bit(10)) ? self_th_32perDay;
+    (rEQ_L3_FIR, bit(10)) ? temporaryBringUpHammer;
+#    (rEQ_L3_FIR, bit(10)) ? self_th_32perDay;
 
     /** EQ_L3_FIR[11]
      *  L3 cache write data UE from L2
@@ -324,7 +327,8 @@ group gEQ_L3_FIR
     /** EQ_L3_FIR[13]
      *  L3 DIR read CE
      */
-    (rEQ_L3_FIR, bit(13)) ? l3_dir_ce;
+    (rEQ_L3_FIR, bit(13)) ? temporaryBringUpHammer;
+#    (rEQ_L3_FIR, bit(13)) ? l3_dir_ce;
 
     /** EQ_L3_FIR[14]
      *  L3 Dir read UE
@@ -575,7 +579,8 @@ group gEQ_L2_FIR
     /** EQ_L2_FIR[0]
      *  L2 cache read CE
      */
-    (rEQ_L2_FIR, bit(0)) ? l2_cache_ce;
+    (rEQ_L2_FIR, bit(0)) ? temporaryBringUpHammer;
+#    (rEQ_L2_FIR, bit(0)) ? l2_cache_ce;
 
     /** EQ_L2_FIR[1]
      *  L2 cache read UE
@@ -605,7 +610,8 @@ group gEQ_L2_FIR
     /** EQ_L2_FIR[6]
      *  L2 directory read CE
      */
-    (rEQ_L2_FIR, bit(6)) ? l2_dir_ce;
+    (rEQ_L2_FIR, bit(6)) ? temporaryBringUpHammer;
+#    (rEQ_L2_FIR, bit(6)) ? l2_dir_ce;
 
     /** EQ_L2_FIR[7]
      *  L2 directory read UE
