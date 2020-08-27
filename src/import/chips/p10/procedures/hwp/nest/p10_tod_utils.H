@@ -53,7 +53,7 @@ const uint32_t P10_TOD_SETUP_LATENCY_FIXED_OPTIC_CYCLES = 5;
 
 // Minimum/Maximum allowable delay for any node
 const uint32_t MIN_TOD_DELAY = 0;
-const uint32_t MAX_TOD_DELAY = 0xFF;
+const uint32_t MAX_TOD_DELAY = 0x3FF;
 
 // TOD operation delay times for HW/sim
 const uint32_t P10_TOD_UTILS_HW_NS_DELAY     = 50000;
@@ -183,10 +183,10 @@ const uint64_t TOD_LOAD_TOD_REG_GOTO_STOPPED_STATE = 0x0000000000000001ULL;
 // TOD_[PRI, SEC]_PORT_[0,1]_CTRL_REG register field definitions
 const uint32_t TOD_PORT_CTRL_REG_TX_X0_SEL    = 4;
 const uint32_t TOD_PORT_CTRL_REG_TX_X0_EN     = 20;
-const uint32_t TOD_PORT_CTRL_REG_I_PATH_DELAY = 32;
+const uint32_t TOD_PORT_CTRL_REG_I_PATH_DELAY = 30;
 
 const uint32_t TOD_PORT_CTRL_REG_TX_LEN = 2;
-const uint32_t TOD_PORT_CTRL_REG_I_PATH_DELAY_LEN = 8;
+const uint32_t TOD_PORT_CTRL_REG_I_PATH_DELAY_LEN = 10;
 
 const uint32_t TOD_PORT_CTRL_REG_S_PATH_0 = 0x0;
 const uint32_t TOD_PORT_CTRL_REG_S_PATH_1 = 0x1;
