@@ -359,7 +359,7 @@ echo "Calling hbDistribute --hb-standalone "
         # The list of commands to build the hostboot code patches to be dropped in /nfs/test/pnor/ on the FSP
         # The command does the minimum necessary work to do that for time saving reasons. This will not build targeting
         # patches since that takes much more time and is done less often than just code patches.
-        buildPatch="mkdir -p ${SANDBOXBASE}/src/hbfw && cd ${SANDBOXBASE}/src/hbfw \
+        buildPatch="mkdir -p ${SANDBOXBASE}/src/hbfw/img && cd ${SANDBOXBASE}/src/hbfw \
 && mk expand_tars_fsp.tar expand_tars_simics.tar && \
 cd ${SANDBOXBASE}/src/hbfw/img/ \
 && mk -j16"
