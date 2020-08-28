@@ -1313,7 +1313,7 @@ bool skip_dne_spare_nibble(const uint8_t i_spare_support,
 /// @param[in,out] io_repairs_exceeded 2-bit mask, where a bit set means that DIMM had more bad bits than could be repaired
 /// @return FAPI2_RC_SUCCESS if and only if ok
 ///
-template< mss::mc_type MC, fapi2::TargetType T, uint64_t R, uint64_t B >
+template< mss::mc_type MC, fapi2::TargetType T, uint64_t R, uint64_t B, typename TT = portTraits<MC> >
 inline fapi2::ReturnCode restore_repairs_helper( const fapi2::Target<T>& i_target,
         const uint8_t i_bad_bits[R][B],
         fapi2::buffer<uint8_t>& io_repairs_applied,
@@ -1337,6 +1337,7 @@ inline fapi2::ReturnCode restore_repairs_helper( const fapi2::Target<T>& i_targe
         const auto l_rank_idx = index(l_rank);
 
         // don't process last byte if it's a non-existent spare. Non-existent spare bits are marked 'bad' in the attribute
+        // Different memory controllers will process this differently and some might not need the spare
         const auto l_total_bytes = get_total_bytes<MC>(l_dimm_spare[l_rank]);
 
         repair_state_machine<MC, fapi2::TARGET_TYPE_DIMM> l_machine;
