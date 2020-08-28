@@ -1201,8 +1201,8 @@ void addScomFailFFDC( errlHndl_t i_err,
             TARGETING::targetService().masterProcChipTargetHandle(mproc);
             if (i_chipTarg != mproc)
             {
-                l_scom_data.addData(DEVICE_FSI_ADDRESS(0x2874));//==281D
-                l_scom_data.addData(DEVICE_FSI_ADDRESS(0x2878));//==281E
+                l_scom_data.addData(DEVICE_CFAM_ADDRESS(0x281D));
+                l_scom_data.addData(DEVICE_CFAM_ADDRESS(0x281E));
             }
         }
     }

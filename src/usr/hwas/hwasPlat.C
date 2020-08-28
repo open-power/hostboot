@@ -173,7 +173,7 @@ errlHndl_t cfamIDEC(DeviceFW::OperationType i_opType,
         op_size = sizeof(uint32_t);
 
         errl = DeviceFW::deviceRead(i_target, &id_ec, op_size,
-                                    DEVICE_FSI_ADDRESS(0x01028));
+                                    DEVICE_CFAM_ADDRESS(0x100A));
     }
 
     //Look for a totally dead chip

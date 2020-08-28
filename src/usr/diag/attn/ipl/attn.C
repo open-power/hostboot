@@ -193,8 +193,6 @@ void  setTrueMask_otherProcs( const TARGETING::TargetHandleList &i_allProcs )
     const uint16_t  ATTN_TRUEMASK_REG = 0x100D;   // cfam address
     uint32_t        l_truemaskData = 0x60000000;  // Chkstop and SpecialAttn
     size_t          l_size = sizeof(l_truemaskData);
-    uint16_t        l_fsiAddr = (ATTN_TRUEMASK_REG & 0xfe00) |
-                                ((ATTN_TRUEMASK_REG & 0x01ff) * 4);
 
 
     ATTN_SLOW("setTrueMask_otherProcs - FSP %d",  l_fspSystem);
@@ -220,7 +218,7 @@ void  setTrueMask_otherProcs( const TARGETING::TargetHandleList &i_allProcs )
 
                 // Write the CFAM register on this processor
                 l_err = deviceWrite( l_procTarget, &l_truemaskData, l_size,
-                                     DEVICE_FSI_ADDRESS((uint64_t) l_fsiAddr) );
+                                     DEVICE_CFAM_ADDRESS(ATTN_TRUEMASK_REG) );
                 if (l_err)
                 {
                     ATTN_SLOW("Failed to init TRUEMASK on 0x%08X", l_huid);

@@ -151,6 +151,14 @@ namespace DeviceFW
     #define DEVICE_FSI_ADDRESS(i_address) \
         DeviceFW::FSI, static_cast<uint64_t>((i_address))
 
+    /** Construct the device addressing parameters for FSI device ops
+     *   using the more common CFAM address format : EEEE.EEEA.AAAA.AAAA.
+     *   E=Engine, A=Address in 4-byte words
+     *  @param[in] i_address - CFAM address to operate on.
+     */
+    #define DEVICE_CFAM_ADDRESS(i_address) \
+        DeviceFW::FSI, static_cast<uint64_t>((i_address & 0xFE00) | ((i_address & 0x01FF)*4) )
+
     /**
      * Construct the device addressing parameters for the SPD device ops.
      * @param[in] i_keyword - The keyword enumeration value to be accessed
