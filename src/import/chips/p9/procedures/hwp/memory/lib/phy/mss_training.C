@@ -192,6 +192,8 @@ fapi2::ReturnCode phy_step::run( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_
                                  const uint64_t i_rp,
                                  const uint8_t i_abort_on_error ) const
 {
+    fapi2::buffer<uint64_t> l_err_data;
+
     // Execute this cal step
     FAPI_INF("%s RP%d running cal step '%s'", mss::c_str(i_target), i_rp, get_name());
     FAPI_TRY(mss::execute_cal_steps_helper( i_target,
@@ -199,6 +201,14 @@ fapi2::ReturnCode phy_step::run( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_
                                             iv_init_cal_config,
                                             i_abort_on_error,
                                             calculate_cycles(i_target)));
+
+    FAPI_TRY(pc::read_init_cal_error(i_target, l_err_data));
+
+    if(l_err_data)
+    {
+        FAPI_ERR("%s RP%d failed on cal step '%s'", mss::c_str(i_target), i_rp, get_name());
+    }
+
 fapi_try_exit:
     return fapi2::current_err;
 }
