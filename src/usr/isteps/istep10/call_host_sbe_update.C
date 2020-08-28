@@ -248,7 +248,8 @@ void* call_host_sbe_update (void *io_pArgs)
 {
     errlHndl_t  l_errl  =   NULL;
     IStepError l_StepError;
-    bool l_testAltMaster = true;
+    //TODO RTC:258541 - Test + Re-enable
+    //bool l_testAltMaster = true;
 
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                "call_host_sbe_update entry" );
@@ -299,6 +300,11 @@ void* call_host_sbe_update (void *io_pArgs)
             break;
         }
 
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                   "Temporarily skip testing alternate boot proc LPC/PNOR validation");
+
+//TODO RTC:258541 - Test + Re-enable
+/*
         // Run LPC Init on Alt Master Procs
         // Get list of all processors
         TARGETING::TargetHandleList l_procList;
@@ -359,6 +365,7 @@ void* call_host_sbe_update (void *io_pArgs)
                 errlCommit( l_errl, HWPF_COMP_ID );
             }
         }
+**/
 
         // Set SEEPROM_VERSIONS_MATCH attributes for each processor
         // this will be used later on by the sbe_retry code to determine
