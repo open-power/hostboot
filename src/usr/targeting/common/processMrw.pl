@@ -1750,10 +1750,11 @@ sub processTpm
     my $tpmFapiName  = $targetObj->getFapiName($type);
 
     # Take advantage of previous work done on the NODEs.  Use the parent NODE's
-    # physical path for our self and append tpm to the end.  Use method
-    # getParentProcAffinityPath to get the TPM's affinity path.
-    my $tpmAffinity = getParentProcAffinityPath($targetObj, $target, $tpmPosPerSystem, $type);
+    # physical path for our self and append tpm to the end.
     my $tpmPhysical = $nodeParentPhysical . "/tpm-" . $tpmPosPerSystem;
+    ### @fixme-RTC:246066: Secureboot - HBI SPI TPM support
+    ### properly set AFFINITY_PATH
+    my $tpmAffinity = $tpmPhysical;
 
     # Now that we collected all the data we need, set some target attributes
     $targetObj->setHuid($target, $sysParentPos, $nodeParentPos, $tpmPosPerSystem);
