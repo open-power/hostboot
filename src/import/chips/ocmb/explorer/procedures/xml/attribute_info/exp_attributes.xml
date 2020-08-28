@@ -447,6 +447,7 @@
         <default>0x0</default>
         <platInit/>
         <mrwHide/>
+        <mssAccessorName>ocmb_checkstop_obj_handle</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -459,6 +460,7 @@
         <default>0x1</default>
         <platInit/>
         <mrwHide/>
+        <mssAccessorName>ocmb_recov_obj_handle</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -471,6 +473,7 @@
         <default>0x2</default>
         <platInit/>
         <mrwHide/>
+        <mssAccessorName>ocmb_specattn_obj_handle</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -483,6 +486,7 @@
         <default>0x3</default>
         <platInit/>
         <mrwHide/>
+        <mssAccessorName>ocmb_appintr_obj_handle</mssAccessorName>
     </attribute>
 
     <attribute>

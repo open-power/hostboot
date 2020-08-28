@@ -223,6 +223,20 @@ fapi2::ReturnCode setup_omi_dl0_config0(
     const uint8_t i_dl_x4_backoff_en);
 
 ///
+/// @brief Set up the OMI object handles for intrp_req commands
+/// @param[in] i_target OCMB target
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success
+///
+fapi2::ReturnCode setup_obj_handles(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target);
+
+///
+/// @brief Set up the OMI interrupt command flags
+/// @param[in] i_target OCMB target
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success
+///
+fapi2::ReturnCode setup_int_cmd_flags(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target);
+
+///
 /// @brief Sets up the FFE_SETTINGS command
 /// @param[in] i_target target on which the code is operating
 /// @param[out] o_data data for the FFE_SETTINGS command
