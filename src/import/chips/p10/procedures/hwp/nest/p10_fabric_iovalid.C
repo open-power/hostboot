@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -470,8 +470,6 @@ fapi2::ReturnCode p10_fabric_iovalid_link_validate(
     fapi2::buffer<uint64_t> l_dl_status_reg;
     fapi2::buffer<uint64_t> l_dl_rx_control;
     fapi2::buffer<uint64_t> l_tl_fir_reg;
-    uint64_t l_dl_timeout_state_evn = 0;
-    uint64_t l_dl_timeout_state_odd = 0;
     bool l_dl_trained = false;
     bool l_dl_fail_evn = false;
     bool l_dl_fail_odd = false;
@@ -501,11 +499,23 @@ fapi2::ReturnCode p10_fabric_iovalid_link_validate(
     // validate DL training state; poll for training completion
     for(uint32_t l_poll_loops = DL_MAX_POLL_LOOPS; l_poll_loops > 0 && !l_dl_trained; l_poll_loops--)
     {
+        uint64_t l_dl_timeout_state_evn = 0;
+        uint64_t l_dl_current_state_evn = 0;
+        uint64_t l_dl_prior_state_evn = 0;
+        uint64_t l_dl_timeout_state_odd = 0;
+        uint64_t l_dl_current_state_odd = 0;
+        uint64_t l_dl_prior_state_odd = 0;
+
         FAPI_TRY(GET_DLP_DLL_STATUS(i_loc_endp_target, l_dl_status_reg),
                  "Error from getScom (DLP_DLL_STATUS)");
 
         GET_DLP_DLL_STATUS_0_TIMEOUT_STATE(l_dl_status_reg, l_dl_timeout_state_evn);
+        GET_DLP_DLL_STATUS_0_CURRENT_STATE(l_dl_status_reg, l_dl_current_state_evn);
+        GET_DLP_DLL_STATUS_0_PRIOR_STATE(l_dl_status_reg, l_dl_prior_state_evn);
+
         GET_DLP_DLL_STATUS_1_TIMEOUT_STATE(l_dl_status_reg, l_dl_timeout_state_odd);
+        GET_DLP_DLL_STATUS_1_CURRENT_STATE(l_dl_status_reg, l_dl_current_state_odd);
+        GET_DLP_DLL_STATUS_1_PRIOR_STATE(l_dl_status_reg, l_dl_prior_state_odd);
 
         FAPI_TRY(GET_DLP_FIR_REG_RW(i_loc_endp_target, l_dl_fir_reg),
                  "Error from getScom (DLP_FIR_REG_RW)");
@@ -515,10 +525,68 @@ fapi2::ReturnCode p10_fabric_iovalid_link_validate(
             l_dl_trained = GET_DLP_FIR_REG_0_TRAINED(l_dl_fir_reg) &&
                            GET_DLP_FIR_REG_1_TRAINED(l_dl_fir_reg);
 
+            // *INDENT-OFF*
             if (!l_dl_trained)
             {
-                l_dl_fail_evn = !(l_dl_timeout_state_evn == DL_STATE_LAT_MEASURE);
-                l_dl_fail_odd = !(l_dl_timeout_state_odd == DL_STATE_LAT_MEASURE);
+                // wihthout HW trained indication, mark half link failed unless
+                // it matches one of two pass criteria:
+                l_dl_fail_evn =
+                    !(
+                      // pass criteria #1: timeout state in Latency Measure on this link only
+                      (
+                       (l_dl_timeout_state_evn == DL_STATE_LAT_MEASURE) &&
+                       (l_dl_timeout_state_odd != DL_STATE_LAT_MEASURE)
+                      )
+
+                      ||
+
+                      // pass criteria #2: timeout state Inactive on this link:
+                      (
+                       (l_dl_timeout_state_evn == DL_STATE_INACTIVE) &&
+
+                       (
+                        // 2a) this link: TS1/TS2 and other: LINKDOWN/PATA/PATB/SYNC
+                        (((l_dl_current_state_evn == DL_STATE_SEND_TS1) || (l_dl_prior_state_evn == DL_STATE_SEND_TS1) ||
+                          (l_dl_current_state_evn == DL_STATE_SEND_TS2) || (l_dl_prior_state_evn == DL_STATE_SEND_TS2)) &&
+                         ((l_dl_current_state_odd >= DL_STATE_LINKDOWN) && (l_dl_current_state_odd <= DL_STATE_SEND_SYNC)))
+
+                        ||
+
+                        // 2b) this link: T2 and other: TS1/TS2/TS3/LINKDOWN/PATA
+                        ((l_dl_current_state_evn == DL_STATE_SEND_T2) &&
+                         ((l_dl_current_state_odd >= DL_STATE_SEND_TS1) && (l_dl_current_state_odd <= DL_STATE_SEND_PATTA)))
+                       )
+                      )
+                     );
+
+                l_dl_fail_odd =
+                    !(
+                      // pass criteria #1: timeout state in Latency Measure on this link only
+                      (
+                       (l_dl_timeout_state_odd == DL_STATE_LAT_MEASURE) &&
+                       (l_dl_timeout_state_evn != DL_STATE_LAT_MEASURE)
+                      )
+
+                      ||
+
+                      // pass criteria #2: timeout state Inactive on this link:
+                      (
+                       (l_dl_timeout_state_odd == DL_STATE_INACTIVE) &&
+
+                       (
+                        // 2a) this link: TS1/TS2 and other: LINKDOWN/PATA/PATB/SYNC
+                        (((l_dl_current_state_odd == DL_STATE_SEND_TS1) || (l_dl_prior_state_odd == DL_STATE_SEND_TS1) ||
+                          (l_dl_current_state_odd == DL_STATE_SEND_TS2) || (l_dl_prior_state_odd == DL_STATE_SEND_TS2)) &&
+                         ((l_dl_current_state_evn >= DL_STATE_LINKDOWN) && (l_dl_current_state_evn <= DL_STATE_SEND_SYNC)))
+
+                        ||
+
+                        // 2b) this link: T2 and other: TS1/TS2/TS3/LINKDOWN/PATA
+                        ((l_dl_current_state_odd == DL_STATE_SEND_T2) &&
+                         ((l_dl_current_state_evn >= DL_STATE_SEND_TS1) && (l_dl_current_state_evn <= DL_STATE_SEND_PATTA)))
+                       )
+                      )
+                     );
 
                 FAPI_DBG("evn fail: %d, timeout_state: 0x%X / odd fail: %d, timeout_state: 0x%X",
                          l_dl_fail_evn ? (1) : (0), l_dl_timeout_state_evn,
@@ -531,6 +599,7 @@ fapi2::ReturnCode p10_fabric_iovalid_link_validate(
                 l_dl_fail_evn = false;
                 l_dl_fail_odd = false;
             }
+            // *INDENT-ON*
         }
         else if (l_loc_link_train == fapi2::ENUM_ATTR_IOHS_LINK_TRAIN_EVEN_ONLY)
         {
