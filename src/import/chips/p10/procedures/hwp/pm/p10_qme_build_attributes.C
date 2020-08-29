@@ -53,11 +53,12 @@ p10_qme_build_attributes(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_ch
     uint16_t       leftover            = 0;
 
     fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> l_sys_tgt;
-    auto l_cores = i_chip_tgt.getChildren<fapi2::TARGET_TYPE_CORE>(fapi2::TARGET_STATE_FUNCTIONAL);
+    auto l_perv_tgts = i_chip_tgt.getChildren<fapi2::TARGET_TYPE_PERV>(fapi2::TARGET_STATE_FUNCTIONAL);
+    auto l_ec_tgts = i_chip_tgt.getChildren<fapi2::TARGET_TYPE_CORE>(fapi2::TARGET_STATE_FUNCTIONAL);
+    auto l_eq_tgts = i_chip_tgt.getChildren<fapi2::TARGET_TYPE_EQ>(fapi2::TARGET_STATE_FUNCTIONAL);
     //Assume all attributes share the same value between cores
     //If that assumption is wrong, then should consider using
     //system/proc_chip level attribute array like the topology_vector
-    fapi2::Target<fapi2::TARGET_TYPE_CORE>   l_core_tgt = l_cores.front();
 
 
     if( l_hw_image_meta_ver != HCODE_IMAGE_BUILD_ATTR_VERSION )
@@ -546,8 +547,12 @@ p10_qme_build_attributes(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_ch
 
     {
         uint8_t l_uint8_data = 0;
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, l_core_tgt, l_uint8_data),
-                 "Error From FAPI_ATTR_GET For ATTR_CHIP_UNIT_POS");
+
+        if (l_ec_tgts.size())
+        {
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, l_ec_tgts.front(), l_uint8_data),
+                     "Error From FAPI_ATTR_GET For ATTR_CHIP_UNIT_POS");
+        }
 
         FAPI_DBG("ATTR_CHIP_UNIT_POS uint8_ Attribute Value: %x, Copy to Address: %x",
                  l_uint8_data, i_pQmeAttrTank);

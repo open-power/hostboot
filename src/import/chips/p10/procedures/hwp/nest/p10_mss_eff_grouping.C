@@ -4520,6 +4520,14 @@ fapi2::ReturnCode p10_mss_eff_grouping(
     if (l_mccChiplets.size() == 0)
     {
         FAPI_INF("p10_mss_eff_grouping: No functional MCC, no grouping performed.");
+
+        // Set defaults for Memory Base and Size FAPI Attributes
+        FAPI_TRY(l_baseSizeData.setBaseSizeAttr(i_target, l_sysAttrs, l_groupData),
+                 "setBaseSizeAttr returns error l_rc 0x%.8X",
+                 (uint64_t)fapi2::current_err);
+        FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_MSS_MEM_IPL_COMPLETE, i_target, l_memIplComplete),
+                 "Error setting ATTR_MSS_MEM_IPL_COMPLETE, l_rc 0x%.8X",
+                 (uint64_t)fapi2::current_err);
         goto fapi_try_exit;
     }
 
