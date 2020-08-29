@@ -2159,14 +2159,25 @@ fapi2::ReturnCode PlatPmPPB::get_mvpd_poundV()
 
         update_vpd_pts_value();
 
-        //Update pstate for all points
-        for (int i = 0; i < NUM_PV_POINTS; i++)
+        uint32_t l_vpd_max_freq = 0;
+        uint32_t l_pd_pts = 0;
+        if (iv_attr_mvpd_poundV_raw[CF7].frequency_mhz > 
+            iv_attr_mvpd_poundV_raw[CF6].frequency_mhz)
         {
-            //TBD
-            if (i == VPD_PV_CF7)
-                continue;
+            l_vpd_max_freq = iv_attr_mvpd_poundV_raw[CF7].frequency_mhz;
+            l_pd_pts = NUM_PV_POINTS;
+        }
+        else
+        {
+            l_vpd_max_freq = iv_attr_mvpd_poundV_raw[CF6].frequency_mhz;
+            l_pd_pts = NUM_PV_POINTS - 1;
+        }
 
-            iv_attr_mvpd_poundV_raw[i].pstate = (iv_attr_mvpd_poundV_raw[CF6].frequency_mhz -
+
+        //Update pstate for all points
+        for (uint32_t i = 0; i < l_pd_pts; i++)
+        {
+            iv_attr_mvpd_poundV_raw[i].pstate = (l_vpd_max_freq -
             iv_attr_mvpd_poundV_raw[i].frequency_mhz) * 1000 / (iv_frequency_step_khz);
 
             iv_vddPsavFreq = (uint32_t)(revle16(iv_poundV_raw_data.other_info.VddPsavCoreFreq));
@@ -2175,7 +2186,7 @@ fapi2::ReturnCode PlatPmPPB::get_mvpd_poundV()
             iv_vddUTFreq = (uint32_t)(revle16(iv_poundV_raw_data.other_info.VddUTCoreFreq));
             iv_vddFmaxFreq = (uint32_t)(revle16(iv_poundV_raw_data.other_info.VddFmxCoreFreq));
 
-            FAPI_INF("PSTATE %x %x %d PSAV %x WOF %x UT %x Fmax %x",iv_attr_mvpd_poundV_raw[CF6].frequency_mhz,
+            FAPI_INF("PSTATE %x %x %d PSAV %x WOF %x UT %x Fmax %x",l_vpd_max_freq,
                      iv_attr_mvpd_poundV_raw[i].frequency_mhz,iv_attr_mvpd_poundV_raw[i].pstate,
                      iv_vddPsavFreq, iv_vddWofBaseFreq,
                       iv_vddUTFreq, iv_vddFmaxFreq);
@@ -5173,6 +5184,8 @@ fapi2::ReturnCode PlatPmPPB::pm_set_frequency()
 
             FAPI_INF("l_fmax_freq %04x, l_ut_freq %04x l_psav_freq=%04x",(l_fmax_freq),(l_ut_freq), l_psav_freq);
 
+            //TBD Need to revisit
+            l_fmax_freq = 0;
             //Compute FMAX and Ceil freq
             if ( l_fmax_freq > iv_attrs.attr_pstate0_freq)
             {
@@ -5180,7 +5193,7 @@ fapi2::ReturnCode PlatPmPPB::pm_set_frequency()
             }
             else if ( l_fmax_freq == 0)
             {
-                if (l_ut_freq > iv_attrs.attr_pstate0_freq &&
+                if (l_ut_freq > iv_attrs.attr_pstate0_freq ||
                         iv_attrs.attr_pstate0_freq == 0)
                 {
                     iv_attrs.attr_pstate0_freq = l_ut_freq;
