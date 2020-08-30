@@ -46,7 +46,7 @@
      Number of dynamic init features.
     </description>
     <valueType>uint64</valueType>
-    <default>30</default>
+    <default>31</default>
     <writeable/>
     <persistRuntime/>
   </attribute>
@@ -76,7 +76,7 @@
      Number of dynamic init modes.
     </description>
     <valueType>uint64</valueType>
-    <default>1</default>
+    <default>2</default>
     <writeable/>
     <persistRuntime/>
   </attribute>
