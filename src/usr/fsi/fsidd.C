@@ -745,9 +745,18 @@ void FsiDD::getFsiFFDC(FSI::fsiFFDCType_t i_ffdc_type,
         // Grab the security reg (per Cedric)
         if( i_target != iv_master )
         {
-            ERRORLOG::ErrlUserDetailsLogRegister l_scom_data(i_target);
-            l_scom_data.addData(DEVICE_XSCOM_ADDRESS(0x00010005ull));
-            l_scom_data.addToLog(io_log);
+            // We can only read this register if XSCOMs have been enabled.
+            //  Making the XSCOM before it is ready will cause a machine check.
+            //  Doing the scom via the SBE or FSI2PIB will lead to recursive
+            //  calls into the FSI driver.
+            TARGETING::ScomSwitches l_switches =
+              i_target->getAttr<TARGETING::ATTR_SCOM_SWITCHES>();
+            if( l_switches.useXscom )
+            {
+                ERRORLOG::ErrlUserDetailsLogRegister l_scom_data(i_target);
+                l_scom_data.addData(DEVICE_XSCOM_ADDRESS(0x00010005ull));
+                l_scom_data.addToLog(io_log);
+            }
         }
     }
     else if( (FSI::FFDC_OPB0_FAIL == i_ffdc_type)
