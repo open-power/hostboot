@@ -241,6 +241,19 @@ fapi2::ReturnCode p10_fbc_no_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             FAPI_TRY(fapi2::putScom(TGT0, 0x3011015ull, l_scom_buffer));
         }
         {
+            FAPI_TRY(fapi2::getScom( TGT0, 0x301101eull, l_scom_buffer ));
+
+            constexpr auto l_PB_PB_COM_PB_CFG_EX00_HBUS_DISABLE_OFF = 0x0;
+            l_scom_buffer.insert<8, 1, 63, uint64_t>(l_PB_PB_COM_PB_CFG_EX00_HBUS_DISABLE_OFF );
+            constexpr auto l_PB_PB_COM_PB_CFG_EX01_HBUS_DISABLE_OFF = 0x0;
+            l_scom_buffer.insert<9, 1, 63, uint64_t>(l_PB_PB_COM_PB_CFG_EX01_HBUS_DISABLE_OFF );
+            constexpr auto l_PB_PB_COM_PB_CFG_EX02_HBUS_DISABLE_OFF = 0x0;
+            l_scom_buffer.insert<10, 1, 63, uint64_t>(l_PB_PB_COM_PB_CFG_EX02_HBUS_DISABLE_OFF );
+            constexpr auto l_PB_PB_COM_PB_CFG_EX03_HBUS_DISABLE_OFF = 0x0;
+            l_scom_buffer.insert<11, 1, 63, uint64_t>(l_PB_PB_COM_PB_CFG_EX03_HBUS_DISABLE_OFF );
+            FAPI_TRY(fapi2::putScom(TGT0, 0x301101eull, l_scom_buffer));
+        }
+        {
             FAPI_TRY(fapi2::getScom( TGT0, 0x301102aull, l_scom_buffer ));
 
             if (((l_def_CHIP_IS_GROUP == literal_1) && (l_def_NUM_X_LINKS_CFG < literal_3)))
@@ -767,6 +780,19 @@ fapi2::ReturnCode p10_fbc_no_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
 
             l_scom_buffer.insert<0, 4, 60, uint64_t>(literal_0xC );
             FAPI_TRY(fapi2::putScom(TGT0, 0x3011055ull, l_scom_buffer));
+        }
+        {
+            FAPI_TRY(fapi2::getScom( TGT0, 0x301105eull, l_scom_buffer ));
+
+            constexpr auto l_PB_PB_COM_PB_CFG_EX04_HBUS_DISABLE_OFF = 0x0;
+            l_scom_buffer.insert<8, 1, 63, uint64_t>(l_PB_PB_COM_PB_CFG_EX04_HBUS_DISABLE_OFF );
+            constexpr auto l_PB_PB_COM_PB_CFG_EX05_HBUS_DISABLE_OFF = 0x0;
+            l_scom_buffer.insert<9, 1, 63, uint64_t>(l_PB_PB_COM_PB_CFG_EX05_HBUS_DISABLE_OFF );
+            constexpr auto l_PB_PB_COM_PB_CFG_EX06_HBUS_DISABLE_OFF = 0x0;
+            l_scom_buffer.insert<10, 1, 63, uint64_t>(l_PB_PB_COM_PB_CFG_EX06_HBUS_DISABLE_OFF );
+            constexpr auto l_PB_PB_COM_PB_CFG_EX07_HBUS_DISABLE_OFF = 0x0;
+            l_scom_buffer.insert<11, 1, 63, uint64_t>(l_PB_PB_COM_PB_CFG_EX07_HBUS_DISABLE_OFF );
+            FAPI_TRY(fapi2::putScom(TGT0, 0x301105eull, l_scom_buffer));
         }
         {
             FAPI_TRY(fapi2::getScom( TGT0, 0x301106aull, l_scom_buffer ));
@@ -1297,6 +1323,19 @@ fapi2::ReturnCode p10_fbc_no_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             FAPI_TRY(fapi2::putScom(TGT0, 0x3011095ull, l_scom_buffer));
         }
         {
+            FAPI_TRY(fapi2::getScom( TGT0, 0x301109eull, l_scom_buffer ));
+
+            constexpr auto l_PB_PB_COM_PB_CFG_EX08_HBUS_DISABLE_OFF = 0x0;
+            l_scom_buffer.insert<8, 1, 63, uint64_t>(l_PB_PB_COM_PB_CFG_EX08_HBUS_DISABLE_OFF );
+            constexpr auto l_PB_PB_COM_PB_CFG_EX09_HBUS_DISABLE_OFF = 0x0;
+            l_scom_buffer.insert<9, 1, 63, uint64_t>(l_PB_PB_COM_PB_CFG_EX09_HBUS_DISABLE_OFF );
+            constexpr auto l_PB_PB_COM_PB_CFG_EX10_HBUS_DISABLE_OFF = 0x0;
+            l_scom_buffer.insert<10, 1, 63, uint64_t>(l_PB_PB_COM_PB_CFG_EX10_HBUS_DISABLE_OFF );
+            constexpr auto l_PB_PB_COM_PB_CFG_EX11_HBUS_DISABLE_OFF = 0x0;
+            l_scom_buffer.insert<11, 1, 63, uint64_t>(l_PB_PB_COM_PB_CFG_EX11_HBUS_DISABLE_OFF );
+            FAPI_TRY(fapi2::putScom(TGT0, 0x301109eull, l_scom_buffer));
+        }
+        {
             FAPI_TRY(fapi2::getScom( TGT0, 0x30110aaull, l_scom_buffer ));
 
             if (((l_def_CHIP_IS_GROUP == literal_1) && (l_def_NUM_X_LINKS_CFG < literal_3)))
@@ -1823,6 +1862,19 @@ fapi2::ReturnCode p10_fbc_no_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
 
             l_scom_buffer.insert<0, 4, 60, uint64_t>(literal_0xC );
             FAPI_TRY(fapi2::putScom(TGT0, 0x30110d5ull, l_scom_buffer));
+        }
+        {
+            FAPI_TRY(fapi2::getScom( TGT0, 0x30110deull, l_scom_buffer ));
+
+            constexpr auto l_PB_PB_COM_PB_CFG_EX12_HBUS_DISABLE_OFF = 0x0;
+            l_scom_buffer.insert<8, 1, 63, uint64_t>(l_PB_PB_COM_PB_CFG_EX12_HBUS_DISABLE_OFF );
+            constexpr auto l_PB_PB_COM_PB_CFG_EX13_HBUS_DISABLE_OFF = 0x0;
+            l_scom_buffer.insert<9, 1, 63, uint64_t>(l_PB_PB_COM_PB_CFG_EX13_HBUS_DISABLE_OFF );
+            constexpr auto l_PB_PB_COM_PB_CFG_EX14_HBUS_DISABLE_OFF = 0x0;
+            l_scom_buffer.insert<10, 1, 63, uint64_t>(l_PB_PB_COM_PB_CFG_EX14_HBUS_DISABLE_OFF );
+            constexpr auto l_PB_PB_COM_PB_CFG_EX15_HBUS_DISABLE_OFF = 0x0;
+            l_scom_buffer.insert<11, 1, 63, uint64_t>(l_PB_PB_COM_PB_CFG_EX15_HBUS_DISABLE_OFF );
+            FAPI_TRY(fapi2::putScom(TGT0, 0x30110deull, l_scom_buffer));
         }
         {
             FAPI_TRY(fapi2::getScom( TGT0, 0x30110eaull, l_scom_buffer ));
@@ -2353,6 +2405,19 @@ fapi2::ReturnCode p10_fbc_no_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             FAPI_TRY(fapi2::putScom(TGT0, 0x3011115ull, l_scom_buffer));
         }
         {
+            FAPI_TRY(fapi2::getScom( TGT0, 0x301111eull, l_scom_buffer ));
+
+            constexpr auto l_PB_PB_COM_PB_CFG_EX16_HBUS_DISABLE_OFF = 0x0;
+            l_scom_buffer.insert<8, 1, 63, uint64_t>(l_PB_PB_COM_PB_CFG_EX16_HBUS_DISABLE_OFF );
+            constexpr auto l_PB_PB_COM_PB_CFG_EX17_HBUS_DISABLE_OFF = 0x0;
+            l_scom_buffer.insert<9, 1, 63, uint64_t>(l_PB_PB_COM_PB_CFG_EX17_HBUS_DISABLE_OFF );
+            constexpr auto l_PB_PB_COM_PB_CFG_EX18_HBUS_DISABLE_OFF = 0x0;
+            l_scom_buffer.insert<10, 1, 63, uint64_t>(l_PB_PB_COM_PB_CFG_EX18_HBUS_DISABLE_OFF );
+            constexpr auto l_PB_PB_COM_PB_CFG_EX19_HBUS_DISABLE_OFF = 0x0;
+            l_scom_buffer.insert<11, 1, 63, uint64_t>(l_PB_PB_COM_PB_CFG_EX19_HBUS_DISABLE_OFF );
+            FAPI_TRY(fapi2::putScom(TGT0, 0x301111eull, l_scom_buffer));
+        }
+        {
             FAPI_TRY(fapi2::getScom( TGT0, 0x301112aull, l_scom_buffer ));
 
             if (((l_def_CHIP_IS_GROUP == literal_1) && (l_def_NUM_X_LINKS_CFG < literal_3)))
@@ -2879,6 +2944,19 @@ fapi2::ReturnCode p10_fbc_no_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
 
             l_scom_buffer.insert<0, 4, 60, uint64_t>(literal_0xC );
             FAPI_TRY(fapi2::putScom(TGT0, 0x3011155ull, l_scom_buffer));
+        }
+        {
+            FAPI_TRY(fapi2::getScom( TGT0, 0x301115eull, l_scom_buffer ));
+
+            constexpr auto l_PB_PB_COM_PB_CFG_EX20_HBUS_DISABLE_OFF = 0x0;
+            l_scom_buffer.insert<8, 1, 63, uint64_t>(l_PB_PB_COM_PB_CFG_EX20_HBUS_DISABLE_OFF );
+            constexpr auto l_PB_PB_COM_PB_CFG_EX21_HBUS_DISABLE_OFF = 0x0;
+            l_scom_buffer.insert<9, 1, 63, uint64_t>(l_PB_PB_COM_PB_CFG_EX21_HBUS_DISABLE_OFF );
+            constexpr auto l_PB_PB_COM_PB_CFG_EX22_HBUS_DISABLE_OFF = 0x0;
+            l_scom_buffer.insert<10, 1, 63, uint64_t>(l_PB_PB_COM_PB_CFG_EX22_HBUS_DISABLE_OFF );
+            constexpr auto l_PB_PB_COM_PB_CFG_EX23_HBUS_DISABLE_OFF = 0x0;
+            l_scom_buffer.insert<11, 1, 63, uint64_t>(l_PB_PB_COM_PB_CFG_EX23_HBUS_DISABLE_OFF );
+            FAPI_TRY(fapi2::putScom(TGT0, 0x301115eull, l_scom_buffer));
         }
         {
             FAPI_TRY(fapi2::getScom( TGT0, 0x301116aull, l_scom_buffer ));
@@ -3409,6 +3487,19 @@ fapi2::ReturnCode p10_fbc_no_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             FAPI_TRY(fapi2::putScom(TGT0, 0x3011195ull, l_scom_buffer));
         }
         {
+            FAPI_TRY(fapi2::getScom( TGT0, 0x301119eull, l_scom_buffer ));
+
+            constexpr auto l_PB_PB_COM_PB_CFG_EX24_HBUS_DISABLE_OFF = 0x0;
+            l_scom_buffer.insert<8, 1, 63, uint64_t>(l_PB_PB_COM_PB_CFG_EX24_HBUS_DISABLE_OFF );
+            constexpr auto l_PB_PB_COM_PB_CFG_EX25_HBUS_DISABLE_OFF = 0x0;
+            l_scom_buffer.insert<9, 1, 63, uint64_t>(l_PB_PB_COM_PB_CFG_EX25_HBUS_DISABLE_OFF );
+            constexpr auto l_PB_PB_COM_PB_CFG_EX26_HBUS_DISABLE_OFF = 0x0;
+            l_scom_buffer.insert<10, 1, 63, uint64_t>(l_PB_PB_COM_PB_CFG_EX26_HBUS_DISABLE_OFF );
+            constexpr auto l_PB_PB_COM_PB_CFG_EX27_HBUS_DISABLE_OFF = 0x0;
+            l_scom_buffer.insert<11, 1, 63, uint64_t>(l_PB_PB_COM_PB_CFG_EX27_HBUS_DISABLE_OFF );
+            FAPI_TRY(fapi2::putScom(TGT0, 0x301119eull, l_scom_buffer));
+        }
+        {
             FAPI_TRY(fapi2::getScom( TGT0, 0x30111aaull, l_scom_buffer ));
 
             if (((l_def_CHIP_IS_GROUP == literal_1) && (l_def_NUM_X_LINKS_CFG < literal_3)))
@@ -3935,6 +4026,19 @@ fapi2::ReturnCode p10_fbc_no_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
 
             l_scom_buffer.insert<0, 4, 60, uint64_t>(literal_0xC );
             FAPI_TRY(fapi2::putScom(TGT0, 0x30111d5ull, l_scom_buffer));
+        }
+        {
+            FAPI_TRY(fapi2::getScom( TGT0, 0x30111deull, l_scom_buffer ));
+
+            constexpr auto l_PB_PB_COM_PB_CFG_EX28_HBUS_DISABLE_OFF = 0x0;
+            l_scom_buffer.insert<8, 1, 63, uint64_t>(l_PB_PB_COM_PB_CFG_EX28_HBUS_DISABLE_OFF );
+            constexpr auto l_PB_PB_COM_PB_CFG_EX29_HBUS_DISABLE_OFF = 0x0;
+            l_scom_buffer.insert<9, 1, 63, uint64_t>(l_PB_PB_COM_PB_CFG_EX29_HBUS_DISABLE_OFF );
+            constexpr auto l_PB_PB_COM_PB_CFG_EX30_HBUS_DISABLE_OFF = 0x0;
+            l_scom_buffer.insert<10, 1, 63, uint64_t>(l_PB_PB_COM_PB_CFG_EX30_HBUS_DISABLE_OFF );
+            constexpr auto l_PB_PB_COM_PB_CFG_EX31_HBUS_DISABLE_OFF = 0x0;
+            l_scom_buffer.insert<11, 1, 63, uint64_t>(l_PB_PB_COM_PB_CFG_EX31_HBUS_DISABLE_OFF );
+            FAPI_TRY(fapi2::putScom(TGT0, 0x30111deull, l_scom_buffer));
         }
         {
             FAPI_TRY(fapi2::getScom( TGT0, 0x30111eaull, l_scom_buffer ));
