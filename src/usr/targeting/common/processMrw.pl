@@ -1747,16 +1747,12 @@ sub processTpm
     # Take advantage of previous work done on the NODEs.  Use the parent NODE's
     # physical path for our self and append tpm to the end.
     my $tpmPhysical = $nodeParentPhysical . "/tpm-" . $tpmPosPerSystem;
-    ### @fixme-RTC:246066: Secureboot - HBI SPI TPM support
-    ### properly set AFFINITY_PATH
-    my $tpmAffinity = $tpmPhysical;
 
     # Now that we collected all the data we need, set some target attributes
     $targetObj->setHuid($target, $sysParentPos, $nodeParentPos, $tpmPosPerSystem);
     $targetObj->setAttribute($target, "ORDINAL_ID",    $tpmPosPerSystem);
     $targetObj->setAttribute($target, "FAPI_POS",      $tpmPosPerSystem);
     $targetObj->setAttribute($target, "FAPI_NAME",     $tpmFapiName);
-    $targetObj->setAttribute($target, "AFFINITY_PATH", $tpmAffinity);
     $targetObj->setAttribute($target, "PHYS_PATH",     $tpmPhysical);
 
     # Save this target for retrieval later when printing the xml (sub printXML)
@@ -2161,8 +2157,7 @@ sub getParentProcAffinityPath
     my $affinity_path = "";
 
     # Only get affinity path for supported types.
-    if(($type_name ne "TPM")
-      && ($type_name ne "POWER_SEQUENCER"))
+    if($type_name ne "POWER_SEQUENCER")
     {
         select()->flush(); # flush buffer before spewing out error message
         die "Attempted to get parent processor affinity path" .
@@ -3233,7 +3228,7 @@ sub postProcessUcd
 } # end sub postProcessUcd
 
 #  @brief Post-processes a TPM target to use SPI_TPM_INFO. Only the SPI controller field needs to be
-#  updated
+#  updated. Also set affinity path for TPM target.
 #
 #  @param[in] $targetObj Object model reference
 #  @param[in] $target    Handle of the target to process
@@ -3265,8 +3260,15 @@ sub postProcessTpm
             # Get its physical path
             my $spiParentTargetPath = $targetObj->getAttribute($spiParentTarget,"PHYS_PATH");
 
-            # Set the TPM's SPI controller's path accordingly
+            # Set the TPM's SPI controller's path in the SPI_TPM_INFO attribute
+            # Note that by using SPI_TPM_INFO, the engine number is inheritted
             $targetObj->setAttributeField($target, "SPI_TPM_INFO", "spiMasterPath", $spiParentTargetPath);
+
+            # Set AFFINITY_PATH
+            my $spiParentAffinityPath = $targetObj->getAttribute($spiParentTarget,"AFFINITY_PATH");
+            my $tpmPosPerSystem = $targetObj->getTargetPosition($target);
+            my $tpmAffinity = $spiParentAffinityPath . "/tpm-" . $tpmPosPerSystem;
+            $targetObj->setAttribute($target, "AFFINITY_PATH", $tpmAffinity);
         }
     }
 } # end sub postProcessTpm
