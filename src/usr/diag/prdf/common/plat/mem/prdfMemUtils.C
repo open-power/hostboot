@@ -305,7 +305,9 @@ void cleanupChnlAttns<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
         SCAN_COMM_REGISTER_CLASS * reg = i_chip->getRegister( fir.firAddr );
         SCAN_COMM_REGISTER_CLASS * msk = i_chip->getRegister( fir.firMask );
 
-        if ( SUCCESS == ( reg->Read() | msk->Read() ) )
+        // The attention on the OCMB had been cleared by the rule code. We must
+        // do force reads to update the values stored in the register cache.
+        if ( SUCCESS == ( reg->ForceRead() | msk->ForceRead() ) )
         {
             uint64_t regData = reg->GetBitFieldJustified(0,64);
             uint64_t mskData = msk->GetBitFieldJustified(0,64);
