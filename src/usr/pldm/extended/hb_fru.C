@@ -672,6 +672,7 @@ errlHndl_t generate_ipz_formatted_vpd(const uint8_t* const i_pldm_fru_table_buf,
         // we are not sure yet if the PLDM Fru record contains IPZ data or not
         // so for now be safe and assume its not IPZ data
         bool is_ipz_record = false;
+        bool is_known_ipz_record = false;
 
         uint32_t record_name = 0;
 
@@ -703,8 +704,8 @@ errlHndl_t generate_ipz_formatted_vpd(const uint8_t* const i_pldm_fru_table_buf,
             }
 
 
-            bool is_known_ipz_record = (record_keyword_field_map.find(record_name) !=
-                     record_keyword_field_map.end());
+            is_known_ipz_record = (record_keyword_field_map.find(record_name) !=
+                                   record_keyword_field_map.end());
 
             // If we do not find RT_KEYWORD_FIELD_ID to be the first entry in
             // a given fru record, then it is safe to assume that this record
@@ -778,7 +779,7 @@ errlHndl_t generate_ipz_formatted_vpd(const uint8_t* const i_pldm_fru_table_buf,
         // next pldm fru record if there is one.
         cur_pldm_rec_ptr += offset_of_cur_pldm_record_entry;
 
-        if(is_ipz_record)
+        if(is_known_ipz_record)
         {
             // The last byte in the IPZ record is the END MAGIC NUM 0x78
             record_bytes.push_back(VPD_RECORD_END_MAGIC_NUM);
