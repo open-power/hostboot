@@ -62,7 +62,6 @@ fapi2::ReturnCode p10_setup_sbe_config(
     // clear secure access bit if instructed to disable security
     {
         fapi2::ATTR_SECURITY_MODE_Type l_attr_security_mode;
-
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SECURITY_MODE, FAPI_SYSTEM, l_attr_security_mode),
                  "Error from FAPI_ATTR_GET (ATTR_SECURITY_MODE)");
 
@@ -70,11 +69,16 @@ fapi2::ReturnCode p10_setup_sbe_config(
         {
             // The Secure Access Bit is only writeable on DD1 chips,
             // so we won't need to put an EC level switch in here.
+
+            // Set scratch reg3 bit 6 to disable security by default now for DD1
+            // Set scratch reg8 bit 2 to mark scratch reg3 as valid
             FAPI_DBG("Attempting to disable security");
 
             if (l_use_scom)
             {
                 fapi2::buffer<uint64_t> l_cbs_cs;
+                fapi2::buffer<uint64_t> l_read_scratch3_reg;
+                fapi2::buffer<uint64_t> l_read_scratch8_reg;
 
                 FAPI_TRY(fapi2::getScom(i_target_chip,
                                         FSXCOMP_FSXLOG_CBS_CS,
@@ -87,10 +91,31 @@ fapi2::ReturnCode p10_setup_sbe_config(
                                         FSXCOMP_FSXLOG_CBS_CS,
                                         l_cbs_cs),
                          "Error writing CBS Control/Status register (scom)");
+
+                FAPI_TRY(fapi2::getScom(i_target_chip,
+                                        FSXCOMP_FSXLOG_SCRATCH_REGISTER_3_RW,
+                                        l_read_scratch3_reg),
+                         "Error reading Scratch Reg3 register");
+                l_read_scratch3_reg.setBit<6>();
+                FAPI_TRY(fapi2::putScom(i_target_chip,
+                                        FSXCOMP_FSXLOG_SCRATCH_REGISTER_3_RW,
+                                        l_read_scratch3_reg),
+                         "Error writing Scratch Reg3 register");
+                FAPI_TRY(fapi2::getScom(i_target_chip,
+                                        FSXCOMP_FSXLOG_SCRATCH_REGISTER_8_RW,
+                                        l_read_scratch8_reg),
+                         "Error reading Scratch Reg8 register");
+                l_read_scratch8_reg.setBit<2>();
+                FAPI_TRY(fapi2::putScom(i_target_chip,
+                                        FSXCOMP_FSXLOG_SCRATCH_REGISTER_8_RW,
+                                        l_read_scratch8_reg),
+                         "Error writing Scratch Reg8 register");
             }
             else
             {
                 fapi2::buffer<uint32_t> l_cbs_cs;
+                fapi2::buffer<uint32_t> l_read_scratch3_reg;
+                fapi2::buffer<uint32_t> l_read_scratch8_reg;
 
                 FAPI_TRY(fapi2::getCfamRegister(i_target_chip,
                                                 FSXCOMP_FSXLOG_CBS_CS_FSI,
@@ -103,6 +128,25 @@ fapi2::ReturnCode p10_setup_sbe_config(
                                                 FSXCOMP_FSXLOG_CBS_CS_FSI,
                                                 l_cbs_cs),
                          "Error writing CBS Control/Status register (cfam)");
+
+                FAPI_TRY(fapi2::getCfamRegister(i_target_chip,
+                                                FSXCOMP_FSXLOG_SCRATCH_REGISTER_3_RW,
+                                                l_read_scratch3_reg),
+                         "Error reading Scratch Reg3 register");
+                l_read_scratch3_reg.setBit<6>();
+                FAPI_TRY(fapi2::putCfamRegister(i_target_chip,
+                                                FSXCOMP_FSXLOG_SCRATCH_REGISTER_3_RW,
+                                                l_read_scratch3_reg),
+                         "Error writing Scratch Reg3 register");
+                FAPI_TRY(fapi2::getCfamRegister(i_target_chip,
+                                                FSXCOMP_FSXLOG_SCRATCH_REGISTER_8_RW,
+                                                l_read_scratch8_reg),
+                         "Error reading Scratch Reg8 register");
+                l_read_scratch8_reg.setBit<2>();
+                FAPI_TRY(fapi2::putCfamRegister(i_target_chip,
+                                                FSXCOMP_FSXLOG_SCRATCH_REGISTER_8_RW,
+                                                l_read_scratch8_reg),
+                         "Error writing Scratch Reg8 register");
             }
         }
     }
