@@ -207,6 +207,22 @@ void* call_proc_check_secondary_sbe_seeprom_complete( void *io_pArgs )
             captureError(l_errl, l_stepError, HWPF_COMP_ID, l_cpu_target);
             break;
         }
+        // Need to switch SPI control register back to FSI_ACCESS mode
+        // since SBE will flip the access mode into PIB_ACCESS
+        l_errl = SPI::spiSetAccessMode(l_cpu_target, SPI::FSI_ACCESS);
+        if (l_errl)
+        {
+            // This would be another hard to find firmware bug so terminate
+            // with this failure
+            TRACFCOMP(g_trac_isteps_trace,
+                      "ERROR: SPI access mode switch to FSI_ACCESS failed for target %.8X"
+                      TRACE_ERR_FMT,
+                      get_huid(l_cpu_target),
+                      TRACE_ERR_ARGS(l_errl));
+            captureError(l_errl, l_stepError, HWPF_COMP_ID, l_cpu_target);
+            break;
+        }
+
     }   // end of going through all slave processors
 
     //  Once the sbes are up correctly, fetch all the proc ECIDs and
