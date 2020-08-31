@@ -156,6 +156,7 @@ class ImageBuildRecord
         iv_currentWriteOffset( 0 ),
         iv_regionBaseAddress( 0 )
     {
+        memset( iv_currentSectn, 0, TEMP_ARRAY_SIZE );
         memset( iv_platName, 0, PLAT_NAME_SIZE );
         memcpy( iv_platName, i_name, PLAT_NAME_SIZE );
         iv_maxSizeList["XPMR Header"]       =   XPMR_HEADER_SIZE;
@@ -377,7 +378,7 @@ void ImageBuildRecord::dumpBuildRecord( )
 
     for( auto sectn : iv_sectnList )
     {
-        FAPI_DBG( "%-35s   :   0x%08x   :   Length   :   0x%08x",
+        FAPI_INF( "%-35s   :   0x%08x   :   Length   :   0x%08x",
                   sectn.iv_sectnName, sectn.iv_sectnOffset, sectn.iv_sectnLength );
     }
 
@@ -618,6 +619,7 @@ fapi2::ReturnCode buildXpmrHeader( Homerlayout_t* i_pChipHomer, ImageBuildRecord
 
     //XGPE SRAM
     l_pXpmrHdr->iv_xgpeSramSize     =   l_sectn.iv_sectnLength;
+    i_xpmrBuildRecord.dumpBuildRecord();
 
 #ifndef __HOSTBOOT_MODULE
     l_pXpmrHdr->iv_bootCopierOffset     =   htobe32(l_pXpmrHdr->iv_bootCopierOffset);
@@ -1298,11 +1300,11 @@ fapi2::ReturnCode buildQmeRing( CONST_FAPI2_PROC& i_procTgt, void * const i_pIma
     memcpy( &i_pChipHomer->iv_cpmrRegion.iv_qmeSramRegion[l_qmeSectn.iv_sectnLength],
             i_ringData.iv_pWorkBuf1, l_workBufSize );
 
-    FAPI_INF( "Common Ring 0x%08x", l_workBufSize );
-
     i_qmeBuildRecord.setSection( "QME Common Ring",
                               ( &i_pChipHomer->iv_cpmrRegion.iv_qmeSramRegion[l_qmeSectn.iv_sectnLength] - (uint8_t *)&i_pChipHomer->iv_cpmrRegion ),
-                                i_ringData.iv_ringBufSize );
+                                l_workBufSize );
+
+    FAPI_INF( "Common Ring Size 0x%08x Customized Size 0x%08x", i_ringData.iv_ringBufSize, l_workBufSize );
 
     FAPI_TRY( parseRingOverride( i_ringData.iv_pOverride ),
               "Failed To Parse Override Ring" );
@@ -1646,6 +1648,7 @@ fapi2::ReturnCode buildCpmrHeader( CONST_FAPI2_PROC& i_procTgt, Homerlayout_t   
 
     FAPI_TRY( buildScomHeader( i_procTgt, i_pChipHomer ) );
 
+#ifndef __HOSTBOOT_MODULE
     FAPI_INF( "Max Core L2 SCOM Entry       0x%08x", htobe32( pCpmrHdr->iv_maxCoreL2ScomEntry) );
     FAPI_INF( "Max Cache L3 SCOM Entry      0x%08x",  htobe32( pCpmrHdr->iv_maxEqL3ScomEntry) );
     FAPI_INF( "QME Hcode Offset             0x%08x",  htobe32( pCpmrHdr->iv_qmeImgOffset ));
@@ -1654,6 +1657,7 @@ fapi2::ReturnCode buildCpmrHeader( CONST_FAPI2_PROC& i_procTgt, Homerlayout_t   
     FAPI_INF( "Core Common Ring Length      0x%08x",  htobe32( pCpmrHdr->iv_commonRingLength ));
     FAPI_INF( "Core Spec Ring Offset        0x%08x",  htobe32( pCpmrHdr->iv_specRingOffset ));
     FAPI_INF( "Core Spec Ring Length        0x%08x",  htobe32( pCpmrHdr->iv_specRingLength ));
+#endif
 
  fapi_try_exit:
     FAPI_INF( "<< buildCpmrHeader" )
@@ -1912,6 +1916,7 @@ fapi2::ReturnCode buildPpmrHeader( Homerlayout_t* i_pChipHomer, ImageBuildRecord
     i_ppmrBuildRecord.getSection( "WOF Tables", l_sectn );
     l_pPpmrHdr->iv_wofTableOffset   =   l_sectn.iv_sectnOffset;
     l_pPpmrHdr->iv_wofTableLength   =   l_sectn.iv_sectnLength;
+    i_ppmrBuildRecord.dumpBuildRecord();
 
 #ifndef __HOSTBOOT_MODULE
     l_pPpmrHdr->iv_bootCopierOffset =   htobe32(l_pPpmrHdr->iv_bootCopierOffset);
