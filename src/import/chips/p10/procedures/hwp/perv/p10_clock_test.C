@@ -123,25 +123,33 @@ static fapi2::ReturnCode p10_clock_test_latches(
 
     if (! (l_cp_refclck_select == fapi2::ENUM_ATTR_CP_REFCLOCK_SELECT_OSC1))
     {
+        // when clock_pos set directly, its not working.
+        // So assigning this to variable as a work around.
+        // Need to clean this, after finding the root cause of issue.
+        uint8_t l_clock_pos_0 = fapi2::ENUM_ATTR_CP_REFCLOCK_SELECT_OSC0;
         FAPI_ASSERT(check_clockA,
                     fapi2::CLOCK_TEST_OUT_RCS_ERR()
                     .set_MASTER_CHIP(i_target_chip)
                     .set_READ_SNS1LTH(l_data32)
                     .set_ATTR_CP_REFCLOCK_SELECT_VALUE(l_cp_refclck_select)
                     .set_RCS_CLOCK_TEST_IN(set_rcs_clock_test_in)
-                    .set_CLOCK_POS(fapi2::ENUM_ATTR_CP_REFCLOCK_SELECT_OSC0),
+                    .set_CLOCK_POS(l_clock_pos_0),
                     "Clock A is bad");
     }
 
     if (! (l_cp_refclck_select == fapi2::ENUM_ATTR_CP_REFCLOCK_SELECT_OSC0))
     {
+        // when clock_pos set directly, its not working.
+        // So assigning this to variable as a work around.
+        // Need to clean this, after finding the root cause of issue.
+        uint8_t l_clock_pos_1 = fapi2::ENUM_ATTR_CP_REFCLOCK_SELECT_OSC1;
         FAPI_ASSERT(check_clockB,
                     fapi2::CLOCK_TEST_OUT_RCS_ERR()
                     .set_MASTER_CHIP(i_target_chip)
                     .set_READ_SNS1LTH(l_data32)
                     .set_ATTR_CP_REFCLOCK_SELECT_VALUE(l_cp_refclck_select)
                     .set_RCS_CLOCK_TEST_IN(set_rcs_clock_test_in)
-                    .set_CLOCK_POS(fapi2::ENUM_ATTR_CP_REFCLOCK_SELECT_OSC0),
+                    .set_CLOCK_POS(l_clock_pos_1),
                     "Clock B is bad");
     }
 
