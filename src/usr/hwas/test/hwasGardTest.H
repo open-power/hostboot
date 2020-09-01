@@ -520,7 +520,9 @@ public:
         testHbSbeDeconfig.createFakeGardRecords();
 
         // Verify
-        testHbSbeDeconfig.verifyDeconfiguration();
+        Target* l_pMasterProcChip = nullptr;
+        targetService().masterProcChipTargetHandle(l_pMasterProcChip);
+        testHbSbeDeconfig.verifyDeconfiguration(l_pMasterProcChip);
 
         } while (0);
 

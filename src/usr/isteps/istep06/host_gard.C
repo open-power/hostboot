@@ -239,9 +239,12 @@ void* host_gard( void *io_pArgs )
     }
 
     // Verify that de-configuration logic done by SBE matches what HB has
-    // de-configured
+    // de-configured for boot proc
+    TARGETING::Target* l_pMasterProcChip = nullptr;
+    TARGETING::targetService().masterProcChipTargetHandle(l_pMasterProcChip);
+
     HWAS::HWASPlatVerification verification;
-    l_err = verification.verifyDeconfiguration();
+    l_err = verification.verifyDeconfiguration(l_pMasterProcChip);
 
     if (l_err)
     {

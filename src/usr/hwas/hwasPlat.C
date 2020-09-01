@@ -1413,7 +1413,7 @@ errlHndl_t HWASPlatVerification::verificationMatchHandler(Target * i_target,
 //******************************************************************************
 //  verifyDeconfiguration()
 //******************************************************************************
-errlHndl_t HWASPlatVerification::verifyDeconfiguration()
+errlHndl_t HWASPlatVerification::verifyDeconfiguration(Target* i_target)
 {
     HWAS_INF(ENTER_MRK"verifyDeconfiguration");
 
@@ -1469,119 +1469,109 @@ errlHndl_t HWASPlatVerification::verifyDeconfiguration()
 
         for (const auto l_unitTypeOffset: l_unitMboxOffsetData)
         {
-            // Only valid to evaluate chips that we actually detected
-            TargetHandleList l_validChips;
-            getChildAffinityTargetsByState (l_validChips, l_topSysTarget,
-                CLASS_CHIP, TYPE_NA, UTIL_FILTER_PRESENT);
+            //Find all child chiplets related to the target passed in
+            TargetHandleList l_childChiplets;
+            getChildAffinityTargetsByState (l_childChiplets,
+                                            i_target,
+                                            CLASS_NA,
+                                            l_unitTypeOffset.type,
+                                            UTIL_FILTER_ALL);
 
-            for (const auto l_chip: l_validChips)
+            for (const auto l_chiplet: l_childChiplets)
             {
-                TargetHandleList l_childChiplets;
-                getChildAffinityTargetsByState (l_childChiplets,
-                                                l_chip,
-                                                CLASS_NA,
-                                                l_unitTypeOffset.type,
-                                                UTIL_FILTER_ALL);
-
-                for (const auto l_chiplet: l_childChiplets)
+                // Getting functional state as saved from SBE
+                AttributeTraits<ATTR_CHIP_UNIT>::Type l_chipUnit;
+                if(!l_chiplet->tryGetAttr<ATTR_CHIP_UNIT>(l_chipUnit))
                 {
-                    // Getting functional state as saved from SBE
+                    HWAS_ERR("verifyDeconfiguration: Failed to get chip unit "
+                             "for %s with HUID %.8X",
+                             l_chiplet->getAttrAsString<ATTR_TYPE>(),
+                             l_chiplet->getAttr<ATTR_HUID>()
+                             );
+                    continue;
+                }
 
-                    AttributeTraits<ATTR_CHIP_UNIT>::Type l_chipUnit;
-                    if(!l_chiplet->tryGetAttr<ATTR_CHIP_UNIT>(l_chipUnit))
-                    {
-                        HWAS_ERR("verifyDeconfiguration: Failed to get chip unit "
-                                 "for %s with HUID %.8X",
-                                 l_chiplet->getAttrAsString<ATTR_TYPE>(),
-                                 l_chiplet->getAttr<ATTR_HUID>()
-                                 );
-                        continue;
-                    }
+                // see src/include/usr/initservice/mboxRegs.H, MboxScratch2_t
+                // There's a gard bit only for NMMU with CHIP_UNIT value
+                // of 1, therefore CHIP_UNIT value of 0 is ignored
+                if (l_unitTypeOffset.type == TYPE_NMMU && l_chipUnit == 0)
+                {
+                    continue;
+                }
 
-                    // see src/include/usr/initservice/mboxRegs.H, MboxScratch2_t
-                    // There's a gard bit only for NMMU with CHIP_UNIT value
-                    // of 1, therefore CHIP_UNIT value of 0 is ignored
-                    if (l_unitTypeOffset.type == TYPE_NMMU && l_chipUnit == 0)
-                    {
-                        continue;
-                    }
+                // Calculating the offset at which this l_chiplet's gard data is
+                // written in the scratch register
+                uint32_t l_chipUnitOffset = l_chipUnit + l_unitTypeOffset.startBitPosition;
 
-                    // Calculating the offset at which this l_chiplet's gard data is
-                    // written in the scratch register
-                    uint32_t l_chipUnitOffset = l_chipUnit +
-                      l_unitTypeOffset.startBitPosition;
+                if (l_unitTypeOffset.type == TYPE_NMMU && l_chipUnit == 1)
+                {
+                    // Value for TYPE_NMMU with l_chipUnit equal to 1 does not
+                    // use l_chipUnit to calculate offset
+                    l_chipUnitOffset = l_unitTypeOffset.startBitPosition;
+                }
 
-                    if (l_unitTypeOffset.type == TYPE_NMMU && l_chipUnit == 1)
-                    {
-                        // Value for TYPE_NMMU with l_chipUnit equal to 1 does not
-                        // use l_chipUnit to calculate offset
-                        l_chipUnitOffset = l_unitTypeOffset.startBitPosition;
-                    }
+                if (l_chipUnitOffset > l_unitTypeOffset.endBitPosition)
+                {
+                    HWAS_ERR("verifyDeconfiguration: l_chipUnitOffset %u is "
+                             "going beyond l_unitTypeOffset.endBitPosition %u",
+                             l_chipUnitOffset, l_unitTypeOffset.endBitPosition);
+                    continue;
+                }
 
-                    if (l_chipUnitOffset > l_unitTypeOffset.endBitPosition)
-                    {
-                        HWAS_ERR("verifyDeconfiguration: l_chipUnitOffset %u is "
-                                 "going beyond l_unitTypeOffset.endBitPosition %u",
-                                 l_chipUnitOffset, l_unitTypeOffset.endBitPosition);
-                        continue;
-                    }
+                const uint32_t l_scratchReg = l_scratchRegs[l_unitTypeOffset.mboxReg];
 
-                    const uint32_t l_scratchReg =
-                      l_scratchRegs[l_unitTypeOffset.mboxReg];
-
-                    bool l_sbeFunctional =
+                bool l_sbeFunctional =
                       ((0x80000000ull >> l_chipUnitOffset) & l_scratchReg) == 0;
 
-                    // Getting functional state as known to HB from ATTR_PG
+                // Getting functional state as known to HB from ATTR_PG
 
-                    Target* const l_perv = getTargetWithPGAttr(*l_chiplet);
-                    bool l_hostbootFunctional = false;
+                Target* const l_perv = getTargetWithPGAttr(*l_chiplet);
+                bool l_hostbootFunctional = false;
 
-                    if (l_perv)
-                    {
-                        pg_entry_t l_attrPGMask = getDeconfigMaskedPGValue(*l_chiplet);
-                        l_hostbootFunctional =
+                if (l_perv)
+                {
+                    pg_entry_t l_attrPGMask = getDeconfigMaskedPGValue(*l_chiplet);
+                    l_hostbootFunctional =
                           (l_attrPGMask & l_perv->getAttr<ATTR_PG>()) == 0;
-                    }
-                    else
-                    {
-                        HWAS_ERR("verifyDeconfiguration: Failed to get pervasive "
-                                 "target for chip unit type %s with HUID  %.8X",
-                                 l_chiplet->getAttrAsString<ATTR_TYPE>(),
-                                 l_chiplet->getAttr<ATTR_HUID>());
-                        continue;
-                    }
+                }
+                else
+                {
+                    HWAS_ERR("verifyDeconfiguration: Failed to get pervasive "
+                             "target for chip unit type %s with HUID  %.8X",
+                             l_chiplet->getAttrAsString<ATTR_TYPE>(),
+                             l_chiplet->getAttr<ATTR_HUID>());
+                    continue;
+                }
 
-                    errlHndl_t matchError =
+                errlHndl_t matchError =
                         verificationMatchHandler(l_chiplet, l_hostbootFunctional,
                                                  l_sbeFunctional);
 
-                    if (matchError)
+                if (matchError)
+                {
+                    if (!l_errLog)
                     {
-                        if (!l_errLog)
-                        {
-                            HWAS_ERR("verifyDeconfiguration: One or more SBE/HB deconfiguration mismatches exist");
+                        HWAS_ERR("verifyDeconfiguration: One or more SBE/HB deconfiguration mismatches exist");
 
-                            /*
-                             * @errortype  ERRL_SEV_UNRECOVERABLE
-                             * @moduleid   MOD_DECONFIG_TARGETS_FROM_GARD_AND_VPD
-                             * @reasoncode RC_HB_SBE_DECONFIG_MISMATCHES_EXIST
-                             * @devdesc    One or more SBE/HB deconfiguration mismatches exist; see other logs
-                             * @custdesc   Firmware error during IPL
-                             */
-                            l_errLog = new ERRORLOG::ErrlEntry (
+                        /*
+                         * @errortype  ERRL_SEV_UNRECOVERABLE
+                         * @moduleid   MOD_DECONFIG_TARGETS_FROM_GARD_AND_VPD
+                         * @reasoncode RC_HB_SBE_DECONFIG_MISMATCHES_EXIST
+                         * @devdesc    One or more SBE/HB deconfiguration mismatches exist; see other logs
+                         * @custdesc   Firmware error during IPL
+                         */
+                        l_errLog = new ERRORLOG::ErrlEntry (
                                 ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                 MOD_DECONFIG_TARGETS_FROM_GARD_AND_VPD,
                                 RC_HB_SBE_DECONFIG_MISMATCHES_EXIST,
                                 0,
                                 0);
 
-                            l_errLog->collectTrace(HWAS_COMP_NAME);
-                        }
-
-                        matchError->plid(l_errLog->plid());
-                        errlCommit(matchError, HWAS_COMP_ID);
+                        l_errLog->collectTrace(HWAS_COMP_NAME);
                     }
+
+                    matchError->plid(l_errLog->plid());
+                    errlCommit(matchError, HWAS_COMP_ID);
                 }
             }
         }

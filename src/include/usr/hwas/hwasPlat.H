@@ -45,9 +45,10 @@ public: // User interface
     /**
      * @brief Helper function to verify that HB and SBE
      *        deconfiguration data matches
+     * @param[in]         i_target Target being verified
      * @return errlHndl_t Error if any, otherwise nullptr.
      */
-    errlHndl_t verifyDeconfiguration();
+    errlHndl_t verifyDeconfiguration(TARGETING::Target* i_target);
 
 private:
 
