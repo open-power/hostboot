@@ -409,10 +409,16 @@ class PlatPmPPB
         bool is_rvrm_enabled();
 
         /// -----------------------------------------------------------------------
-        /// @brief State of DDSC feature
+        /// @brief State of DDS feature
         /// @return enabled(true)/disabled (false)
         /// -----------------------------------------------------------------------
-        bool is_ddsc_enabled();
+        bool is_dds_enabled();
+
+        /// -----------------------------------------------------------------------
+        /// @brief State of OCS feature
+        /// @return enabled(true)/disabled (false)
+        /// -----------------------------------------------------------------------
+        bool is_ocs_enabled();
 
         /// -----------------------------------------------------------------------
         /// @brief State of WOF Undervolt
@@ -658,6 +664,7 @@ class PlatPmPPB
         uint32_t                  iv_occ_freq_mhz;        // OCC frequency
         uint8_t                   iv_wov_underv_enabled;
         uint8_t                   iv_wov_overv_enabled;
+        uint8_t                   iv_ocs_enabled;
         bool                      iv_optional_pdv_pts_value_zero;
         bool                      iv_poundV_fmax_enable;
         uint16_t                  iv_array_vdn_mv;

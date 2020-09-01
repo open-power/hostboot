@@ -326,6 +326,21 @@
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
+    <rc>RC_PSTATE_PB_ZERO_DCCR</rc>
+    <description>The #W VPD field for the DDS Count Control Register (DCCR)
+    is zero.  This will lead to the following function disablement:
+    - Over Current Sensor (OCS)
+    - Undervolting
+    - Overvolting
+    </description>
+    <ffdc>CHIP_TARGET</ffdc>
+    <callout>
+      <target>CHIP_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
     <rc>RC_PSTATE_PB_IQ_VPD_ERROR</rc>
     <description>#IQ data payload header is invalid</description>
     <ffdc>CHIP_TARGET</ffdc>

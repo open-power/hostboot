@@ -1024,7 +1024,7 @@
  <!-- ********************************************************************* -->
   <attribute>
     <id>ATTR_SYSTEM_WOF_VALIDATION_MODE</id>
-    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
     <description>
     Defines the mode of WOF checking in relationship to system reaction
 
@@ -1059,7 +1059,7 @@
  <!-- ********************************************************************* -->
   <attribute>
     <id>ATTR_SYSTEM_PDV_VALIDATION_MODE</id>
-    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
     <description>
     Defines the mode of #V checking in relationship to system reaction
 
@@ -1094,7 +1094,7 @@
  <!-- ********************************************************************* -->
   <attribute>
     <id>ATTR_SYSTEM_PDW_VALIDATION_MODE</id>
-    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
     <description>
     Defines the mode of #W checking in relationship to system reaction
 
@@ -1129,7 +1129,7 @@
 <!-- ********************************************************************* -->
   <attribute>
     <id>ATTR_SYSTEM_IQ_VALIDATION_MODE</id>
-    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
     <description>
     Defines the mode of IQ checking in relationship to system reaction
 

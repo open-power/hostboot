@@ -1014,7 +1014,7 @@ fapi2::ReturnCode PlatPmPPB::gppb_init(
         //Set PGPE Flags
         io_globalppb->pgpe_flags[PGPE_FLAG_RESCLK_ENABLE] = iv_resclk_enabled;
         io_globalppb->pgpe_flags[PGPE_FLAG_CURRENT_READ_DISABLE] = iv_attrs.attr_system_current_read_disable;
-        io_globalppb->pgpe_flags[PGPE_FLAG_OCS_DISABLE] = iv_attrs.attr_system_ocs_disable;
+        io_globalppb->pgpe_flags[PGPE_FLAG_OCS_DISABLE] = !iv_ocs_enabled;
         io_globalppb->pgpe_flags[PGPE_FLAG_WOF_ENABLE] = iv_wof_enabled;
         io_globalppb->pgpe_flags[PGPE_FLAG_WOV_UNDERVOLT_ENABLE] = iv_wov_underv_enabled;
         io_globalppb->pgpe_flags[PGPE_FLAG_WOV_OVERVOLT_ENABLE] = iv_wov_overv_enabled;
@@ -2973,9 +2973,9 @@ void PlatPmPPB::update_vpd_pts_value()
     }//end of for
 }
 ///////////////////////////////////////////////////////////
-////////   is_ddsc_enabled
+////////   is_dds_enabled
 ///////////////////////////////////////////////////////////
-bool PlatPmPPB::is_ddsc_enabled()
+bool PlatPmPPB::is_dds_enabled()
 {
     const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
 //    uint8_t attr_dd_ddsc_not_supported;
@@ -2989,7 +2989,7 @@ bool PlatPmPPB::is_ddsc_enabled()
  //        !(attr_dd_vdm_not_supported) &&
          iv_dds_enabled)
          ? true : false;
-} // end of is_ddsc_enabled
+} // end of is_dds_enabled
 
 ///////////////////////////////////////////////////////////
 ////////  is_wof_enabled
@@ -3024,6 +3024,20 @@ bool PlatPmPPB::is_rvrm_enabled()
         ? true : false;
 } //end of is_rvrm_enabled
 
+///////////////////////////////////////////////////////////
+////////  is_ocs_enabled
+///////////////////////////////////////////////////////////
+bool PlatPmPPB::is_ocs_enabled()
+{
+    fapi2::ATTR_SYSTEM_OCS_DISABLE_Type attr_system_ocs_disable = false;
+    const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
+    FAPI_ATTR_GET(fapi2::ATTR_SYSTEM_OCS_DISABLE, FAPI_SYSTEM, attr_system_ocs_disable);
+
+    return
+        (!(attr_system_ocs_disable) &&
+         iv_ocs_enabled)
+        ? true : false;
+} //end of is_ocs_enabled
 
 ///////////////////////////////////////////////////////////
 ////////   apply_biased_values
@@ -3174,10 +3188,10 @@ fapi2::ReturnCode PlatPmPPB::get_mvpd_poundW (void)
     do
     {
         FAPI_DBG("get_mvpd_poundW: VDM enable = %d, WOF enable %d",
-                is_ddsc_enabled(), is_wof_enabled());
+                is_dds_enabled(), is_wof_enabled());
 
         // Exit if both VDM and WOF is disabled
-        if ((!is_ddsc_enabled() && !is_wof_enabled()))
+        if ((!is_dds_enabled() && !is_wof_enabled()))
         {
             FAPI_INF("   get_mvpd_poundW: BOTH VDM and WOF are disabled.  Skipping remaining checks");
             iv_dds_enabled = false;
@@ -3233,7 +3247,7 @@ fapi2::ReturnCode PlatPmPPB::get_mvpd_poundW (void)
             break;
         }
 
-        //If we have reached this point, that means VDM is ok to be enabled. Only then we try to
+        //If we have reached this point, that means DDS is ok to be enabled. Only then we try to
         //enable wov undervolting
         if  (((iv_attrs.attr_wov_underv_force == 1))  &&
                 is_wov_underv_enabled() == 1) {
@@ -3288,8 +3302,8 @@ fapi2::ReturnCode PlatPmPPB::get_mvpd_iddq( void )
     // Process IQ Keyword (IDDQ) Data
     // --------------------------------------------
 
-
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SYSTEM_IQ_VALIDATION_MODE, iv_procChip,l_iq_mode));
+    const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SYSTEM_IQ_VALIDATION_MODE, FAPI_SYSTEM, l_iq_mode));
     // set l_record to appropriate cprx record
     l_record = (uint32_t)fapi2::MVPD_RECORD_CRP0;
 
@@ -4829,7 +4843,7 @@ fapi2::ReturnCode PlatPmPPB::wof_init(
         else
         {
             FAPI_DBG("ATTR_SYS_VRT_STATIC_DATA_ENABLE is not SET");
-            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SYSTEM_WOF_VALIDATION_MODE, iv_procChip,l_wof_mode));
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SYSTEM_WOF_VALIDATION_MODE, FAPI_SYSTEM, l_wof_mode));
 
             // Read System VRT data
             l_rc = FAPI_ATTR_GET(fapi2::ATTR_WOF_TABLE_DATA,
@@ -4991,6 +5005,44 @@ fapi2::ReturnCode PlatPmPPB::wof_init(
     // want to fail;  rather, we just disable WOF.
     fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
 
+    // Check the validity of some PoundW fields
+    FAPI_INF("Checking validity of #W.  DCC = 0x%016X", revle64(iv_poundW_data.other.droop_count_control));
+    if (iv_poundW_data.other.droop_count_control == 0)
+    {
+
+        FAPI_ERR("#W DCCR is 0. Disabling Over-Current Sensor, Undervolting and Overvolting");
+        iv_ocs_enabled = false;
+        iv_wov_underv_enabled = false;
+        iv_wov_overv_enabled = false;
+
+        if (is_wof_enabled())
+        {
+            FAPI_ERR("WARNING: WOF is enabled with Over-Current Sensor disabled!");
+        }
+
+        const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
+        fapi2::ATTR_SYSTEM_PDV_VALIDATION_MODE_Type l_sys_pdw_mode;
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SYSTEM_PDW_VALIDATION_MODE, FAPI_SYSTEM,l_sys_pdw_mode));
+        if (l_sys_pdw_mode == fapi2::ENUM_ATTR_SYSTEM_PDW_VALIDATION_MODE_INFO)
+        {
+            FAPI_ASSERT_NOEXIT(false,
+                    fapi2::PSTATE_PB_ZERO_DCCR(fapi2::FAPI2_ERRL_SEV_RECOVERED)
+                    .set_CHIP_TARGET(iv_procChip),
+                    "Pstate Parameter Block: #W DCCR has value of 0");
+        }
+        else if (l_sys_pdw_mode == fapi2::ENUM_ATTR_SYSTEM_PDW_VALIDATION_MODE_WARN)
+        {
+            FAPI_ERR("WARNING: #W DCCR has value of 0");
+        }
+        else if (l_sys_pdw_mode == fapi2::ENUM_ATTR_SYSTEM_PDW_VALIDATION_MODE_FAIL)
+        {
+            FAPI_ASSERT(false,
+                    fapi2::PSTATE_PB_ZERO_DCCR()
+                    .set_CHIP_TARGET(iv_procChip),
+                    "Pstate Parameter Block: #W DCCR has value of 0");
+        }
+    }
+
 fapi_try_exit:
     if (l_wof_table_data)
     {
@@ -5031,7 +5083,7 @@ fapi2::ReturnCode PlatPmPPB::set_global_feature_attributes()
 
 
       //Check whether to enable WOV Undervolting. WOV can
-      //only be enabled if VDMs are enabled
+      //only be enabled if DDSs are enabled
       if (!is_wov_underv_enabled() ||
           !is_dds_enabled())
       {
@@ -5137,6 +5189,9 @@ fapi2::ReturnCode PlatPmPPB::pm_set_frequency()
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_NOMINAL_FREQ_MHZ,
                 sys_target, l_nominal_freq_mhz));
 
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SYSTEM_PDV_VALIDATION_MODE,
+                sys_target, l_sys_pdv_mode));
+
         //If pstate0 freq is set means, we have already computed other
         //frequencies (floor and ceil) as well
         if (l_pstate0_freq_mhz)
@@ -5160,7 +5215,6 @@ fapi2::ReturnCode PlatPmPPB::pm_set_frequency()
                 l_proc_target,l_floor_freq_mhz));
             FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_FREQ_CORE_CEILING_MHZ,
                 l_proc_target,l_ceil_freq_mhz));
-            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SYSTEM_PDV_VALIDATION_MODE, l_proc_target,l_sys_pdv_mode));
             //Read #V data from each proc
             FAPI_TRY(p10_pm_get_poundv_bucket(l_proc_target, l_poundV_data));
 
