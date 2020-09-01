@@ -68,6 +68,7 @@
     L2SQ = 0x1
   </enum>
   <initToZero/>
+  <writeable/>
   <platInit/>
   <mrwHide/>
 </attribute>

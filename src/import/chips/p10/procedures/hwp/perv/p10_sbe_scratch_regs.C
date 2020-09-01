@@ -677,6 +677,7 @@ fapi2::ReturnCode p10_sbe_scratch_regs_update(
         fapi2::ATTR_CLOCKSTOP_ON_XSTOP_Type l_attr_clockstop_on_xstop;
         fapi2::ATTR_CLOCK_MUX_IOHS_LCPLL_INPUT_Type l_attr_clock_mux_iohs_lcpll_input;
         fapi2::ATTR_CLOCK_MUX_PCI_LCPLL_INPUT_Type l_attr_clock_mux_pci_lcpll_input;
+        fapi2::ATTR_CONTAINED_LOAD_PATH_Type l_attr_contained_load_path;
         uint8_t l_clockstop_on_xstop = ATTR_CLOCKSTOP_ON_XSTOP_DISABLED;
 
         FAPI_DBG("Reading ATTR_SYSTEM_IPL_PHASE");
@@ -781,6 +782,19 @@ fapi2::ReturnCode p10_sbe_scratch_regs_update(
                                                     ATTR_CLOCK_MUX_PCI_LCPLL_INPUT_STARTBIT +
                                                     (ATTR_CLOCK_MUX_PCI_LCPLL_INPUT_LENGTH * l_attr_chip_unit_pos),
                                                     ATTR_CLOCK_MUX_PCI_LCPLL_INPUT_LENGTH));
+        }
+
+        FAPI_DBG("Reading ATTR_CONTAINED_LOAD_PATH");
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CONTAINED_LOAD_PATH, FAPI_SYSTEM, l_attr_contained_load_path),
+                 "Error from FAPI_ATTR_GET (ATTR_CONTAINED_LOAD_PATH)");
+
+        if (l_attr_contained_load_path == fapi2::ENUM_ATTR_CONTAINED_LOAD_PATH_L2SQ)
+        {
+            l_scratch5_reg.setBit<ATTR_CONTAINED_LOAD_PATH_BIT>();
+        }
+        else
+        {
+            l_scratch5_reg.clearBit<ATTR_CONTAINED_LOAD_PATH_BIT>();
         }
 
         FAPI_DBG("Setting up value of Scratch_reg5");
