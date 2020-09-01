@@ -63,8 +63,8 @@ errlHndl_t PbusLinkSvc::getPbusConnections( TargetPairs_t & o_PbusConnections,
     if (l_errl == nullptr)
     {
         TargetPairs_t * const l_PbusConnections = (i_noDuplicate
-                                                   ? &iv_busConnections[i_busType]
-                                                   : &iv_uniqueBusConnections[i_busType]);
+                                                   ? &iv_uniqueBusConnections[i_busType]
+                                                   : &iv_busConnections[i_busType] );
 
         o_PbusConnections.insert( l_PbusConnections->begin(),
                                   l_PbusConnections->end() );
@@ -180,6 +180,11 @@ errlHndl_t PbusLinkSvc::collectPbusConnections( const IOHS_CONFIG_MODE i_busType
                 // l_dstTgt is functional
                 if (l_dstTgt == l_dstTarget)
                 {
+                    TRACFCOMP( TARGETING::g_trac_targeting,
+                               "ADDING pair HUID %.8X,%.8X TYPE %d",
+                               TARGETING::get_huid(l_pTarget),
+                               TARGETING::get_huid(l_dstTgt),
+                               i_busType);
                     // save the pair if not yet done so
                     (*l_pPbusConnections)[l_pTarget] = l_dstTgt;
                     (*l_pPbusUniqueConnections)[l_pTarget] = l_dstTgt;
