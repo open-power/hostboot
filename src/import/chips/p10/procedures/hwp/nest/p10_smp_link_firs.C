@@ -190,7 +190,8 @@ const struct fir_registers firs_runtime =
 
     .PHY_FIR_ACTION0 = 0x8000000000000000,
     .PHY_FIR_ACTION1 = 0xF47FDB0000000000,
-    .PHY_FIR_MASK    = 0x0B8024C000000000,
+    //.PHY_FIR_MASK    = 0x0B8024C000000000,
+    .PHY_FIR_MASK    = 0x0B843FC000000000,
 };
 
 // DL Config Register Enums

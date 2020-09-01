@@ -274,9 +274,9 @@ fapi2::ReturnCode p10_pau_scominit_dl(const fapi2::Target<fapi2::TARGET_TYPE_PRO
         {
             fapi2::buffer<uint64_t> l_dlp_config(0x0);
 
-            fapi2::ATTR_IOHS_LINK_TRAIN_Type l_link_train;
-            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IOHS_LINK_TRAIN, l_iohs_target, l_link_train),
-                     "Error from FAPI_ATTR_GET (ATTR_IOHS_LINK_TRAIN)");
+            //fapi2::ATTR_IOHS_LINK_TRAIN_Type l_link_train;
+            //FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IOHS_LINK_TRAIN, l_iohs_target, l_link_train),
+            //         "Error from FAPI_ATTR_GET (ATTR_IOHS_LINK_TRAIN)");
 
             // DLP0.DLP.CONFIG_DL_SELECT = DLO
             // DLP0.DLP.CONFIG_LINK0_SELECT = ON (if even link enabled)
@@ -284,36 +284,36 @@ fapi2::ReturnCode p10_pau_scominit_dl(const fapi2::Target<fapi2::TARGET_TYPE_PRO
             FAPI_TRY(GET_DLP_PHY_CONFIG(l_iohs_target, l_dlp_config));
             SET_DLP_PHY_CONFIG_DL_SELECT(ENUM_DLP_CONFIG_DL_SELECT_DLO, l_dlp_config);
 
-            switch(l_link_train)
-            {
-                case fapi2::ENUM_ATTR_IOHS_LINK_TRAIN_BOTH:
-                    SET_DLP_PHY_CONFIG_LINK0_SELECT(l_dlp_config);
-                    SET_DLP_PHY_CONFIG_LINK1_SELECT(l_dlp_config);
-                    break;
+            //switch(l_link_train)
+            //{
+            //    case fapi2::ENUM_ATTR_IOHS_LINK_TRAIN_BOTH:
+            //        SET_DLP_PHY_CONFIG_LINK0_SELECT(l_dlp_config);
+            //        SET_DLP_PHY_CONFIG_LINK1_SELECT(l_dlp_config);
+            //        break;
 
-                case fapi2::ENUM_ATTR_IOHS_LINK_TRAIN_EVEN_ONLY:
-                    SET_DLP_PHY_CONFIG_LINK0_SELECT(l_dlp_config);
-                    break;
+            //    case fapi2::ENUM_ATTR_IOHS_LINK_TRAIN_EVEN_ONLY:
+            //        SET_DLP_PHY_CONFIG_LINK0_SELECT(l_dlp_config);
+            //        break;
 
-                case fapi2::ENUM_ATTR_IOHS_LINK_TRAIN_ODD_ONLY:
-                    SET_DLP_PHY_CONFIG_LINK1_SELECT(l_dlp_config);
-                    break;
+            //    case fapi2::ENUM_ATTR_IOHS_LINK_TRAIN_ODD_ONLY:
+            //        SET_DLP_PHY_CONFIG_LINK1_SELECT(l_dlp_config);
+            //        break;
 
-                default:
-                    CLEAR_DLP_PHY_CONFIG_LINK0_SELECT(l_dlp_config);
-                    CLEAR_DLP_PHY_CONFIG_LINK1_SELECT(l_dlp_config);
-                    break;
-            }
+            //    default:
+            //        CLEAR_DLP_PHY_CONFIG_LINK0_SELECT(l_dlp_config);
+            //        CLEAR_DLP_PHY_CONFIG_LINK1_SELECT(l_dlp_config);
+            //        break;
+            //}
 
             FAPI_TRY(PUT_DLP_PHY_CONFIG(l_iohs_target, l_dlp_config));
 
-            // DLP0.DLP.CONFIG_LINK_PAIR = ON (if both even/odd link enabled)
-            if(l_link_train == fapi2::ENUM_ATTR_IOHS_LINK_TRAIN_BOTH)
-            {
-                FAPI_TRY(GET_DLP_CONFIG(l_iohs_target, l_dlp_config));
-                SET_DLP_CONFIG_LINK_PAIR(l_dlp_config);
-                FAPI_TRY(PUT_DLP_CONFIG(l_iohs_target, l_dlp_config));
-            }
+            //// DLP0.DLP.CONFIG_LINK_PAIR = ON (if both even/odd link enabled)
+            //if(l_link_train == fapi2::ENUM_ATTR_IOHS_LINK_TRAIN_BOTH)
+            //{
+            //    FAPI_TRY(GET_DLP_CONFIG(l_iohs_target, l_dlp_config));
+            //    SET_DLP_CONFIG_LINK_PAIR(l_dlp_config);
+            //    FAPI_TRY(PUT_DLP_CONFIG(l_iohs_target, l_dlp_config));
+            //}
         }
     }
 

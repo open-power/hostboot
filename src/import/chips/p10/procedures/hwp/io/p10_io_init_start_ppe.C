@@ -242,6 +242,11 @@ fapi2::ReturnCode p10_io_init::img_regs(const fapi2::Target<fapi2::TARGET_TYPE_P
         SET_PHY_SCOM_MAC_FIR_REG_PPE_HALTED(0, l_data);
         FAPI_TRY(PUT_PHY_SCOM_MAC_FIR_REG_RW(l_pauc_target, l_data));
 
+        // Clear PPE Halted FIR Mask
+        FAPI_TRY(GET_PHY_SCOM_MAC_FIR_MASK_REG_RW(l_pauc_target, l_data));
+        SET_PHY_SCOM_MAC_FIR_MASK_REG_PPE_HALTED_MASK(0, l_data);
+        FAPI_TRY(PUT_PHY_SCOM_MAC_FIR_MASK_REG_RW(l_pauc_target, l_data));
+
     }
 
 fapi_try_exit:

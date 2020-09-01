@@ -105,35 +105,51 @@ p10_fabric_dl_setup_linktrain(
 {
     FAPI_DBG("Start");
 
-    bool l_do_even = false;
-    bool l_do_odd = false;
-    fapi2::ATTR_IOHS_LINK_TRAIN_Type l_link_train;
-    fapi2::ATTR_LINK_SPEED_Type l_link_speed;
+    fapi2::ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG_Type l_x_en;
+    fapi2::ATTR_PROC_FABRIC_A_ATTACHED_CHIP_CNFG_Type l_a_en;
 
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IOHS_LINK_TRAIN,
-                           i_target,
-                           l_link_train),
-             "Error from FAPI_ATTR_GET (ATTR_IOHS_LINK_TRAIN)");
+    auto l_proc = i_target.getParent<fapi2::TARGET_TYPE_PROC_CHIP>();
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG, l_proc, l_x_en),
+             "Error from FAPI_ATTR_GET (ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG)");
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_A_ATTACHED_CHIP_CNFG, l_proc, l_a_en),
+             "Error from FAPI_ATTR_GET (ATTR_PROC_FABRIC_A_ATTACHED_CHIP_CNFG)");
 
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_LINK_SPEED,
-                           i_target,
-                           l_link_speed),
-             "Error from FAPI_ATTR_GET (ATTR_LINK_SPEED)");
+    fapi2::ATTR_CHIP_UNIT_POS_Type l_link;
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, i_target, l_link),
+             "Error from FAPI_ATTR_GET (ATTR_CHIP_UNIT_POS)");
 
-    l_do_even = l_link_train == fapi2::ENUM_ATTR_IOHS_LINK_TRAIN_BOTH ||
-                l_link_train == fapi2::ENUM_ATTR_IOHS_LINK_TRAIN_EVEN_ONLY;
+    if (l_x_en[l_link] || l_a_en[l_link])
+    {
+        bool l_do_even = false;
+        bool l_do_odd = false;
+        fapi2::ATTR_IOHS_LINK_TRAIN_Type l_link_train;
+        fapi2::ATTR_LINK_SPEED_Type l_link_speed;
 
-    l_do_odd  = l_link_train == fapi2::ENUM_ATTR_IOHS_LINK_TRAIN_BOTH ||
-                l_link_train == fapi2::ENUM_ATTR_IOHS_LINK_TRAIN_ODD_ONLY;
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IOHS_LINK_TRAIN,
+                               i_target,
+                               l_link_train),
+                 "Error from FAPI_ATTR_GET (ATTR_IOHS_LINK_TRAIN)");
 
-    FAPI_ASSERT(!(l_link_speed == fapi2::ENUM_ATTR_LINK_SPEED_50G && l_do_odd),
-                fapi2::P10_INVALID_LINK_CONFIG_ERR()
-                .set_IOHS_TARGET(i_target)
-                .set_LINK_TRAIN(l_link_train)
-                .set_LINK_SPEED(l_link_speed),
-                "The odd half of the link cannot be selected at 50G");
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_LINK_SPEED,
+                               i_target,
+                               l_link_speed),
+                 "Error from FAPI_ATTR_GET (ATTR_LINK_SPEED)");
 
-    FAPI_TRY(p10_fabric_dl_setup_linktrain_start(i_target, l_do_even, l_do_odd));
+        l_do_even = l_link_train == fapi2::ENUM_ATTR_IOHS_LINK_TRAIN_BOTH ||
+                    l_link_train == fapi2::ENUM_ATTR_IOHS_LINK_TRAIN_EVEN_ONLY;
+
+        l_do_odd  = l_link_train == fapi2::ENUM_ATTR_IOHS_LINK_TRAIN_BOTH ||
+                    l_link_train == fapi2::ENUM_ATTR_IOHS_LINK_TRAIN_ODD_ONLY;
+
+        FAPI_ASSERT(!(l_link_speed == fapi2::ENUM_ATTR_LINK_SPEED_50G && l_do_odd),
+                    fapi2::P10_INVALID_LINK_CONFIG_ERR()
+                    .set_IOHS_TARGET(i_target)
+                    .set_LINK_TRAIN(l_link_train)
+                    .set_LINK_SPEED(l_link_speed),
+                    "The odd half of the link cannot be selected at 50G");
+
+        FAPI_TRY(p10_fabric_dl_setup_linktrain_start(i_target, l_do_even, l_do_odd));
+    }
 
 fapi_try_exit:
     FAPI_DBG("End");
