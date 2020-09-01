@@ -77,6 +77,9 @@ errlHndl_t ocmbMmioPerformOp(DeviceFW::OperationType i_opType,
         uint64_t l_fullAddr = i_ocmbTarget->getAttr<TARGETING::ATTR_MMIO_PHYS_ADDR>();
         l_fullAddr += l_offset;
 
+        // Set the ignore HRMOR bit so that PHYP gets the right address
+        l_fullAddr |= IGNORE_HRMOR;
+
         // send message to hypervisor level to do the mmio operation
         l_err = SCOM::sendScomToHyp(i_opType, i_ocmbTarget,
                                     l_fullAddr, io_buffer);

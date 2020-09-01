@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -32,6 +32,8 @@
 /** @file  mmio.H
  *  @brief Provides interface to perform MMIO operations to Explorer chips
  *  */
+
+#define IGNORE_HRMOR 0x8000000000000000
 
 namespace MMIO
 {
