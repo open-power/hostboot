@@ -47,6 +47,7 @@
 #include    <arch/pirformat.H>
 #include    <arch/pvrformat.H>
 #include    <arch/magic.H>
+#include    <console/consoleif.H>
 
 //  targeting support
 #include    <targeting/common/target.H>
@@ -101,7 +102,6 @@ void activate_threads( errlHndl_t& io_rtaskRetErrl )
                                      false);
 
         // set the fused core mode attribute
-        bool l_smt8 = false;
         PVR_t l_pvr( mmio_pvr_read() & 0xFFFFFFFF );
 
         //We need to read the EXPORT_REGL_STATUS register to tell if the fuse
@@ -124,22 +124,30 @@ void activate_threads( errlHndl_t& io_rtaskRetErrl )
 
         uint8_t l_isFuseBlown = (l_chipIdReadout & IS_FUSED_BLOWN_BIT_MASK);
 
+        TARGETING::ATTR_FUSED_CORE_MODE_HB_type l_coreMode;
+        TARGETING::ATTR_FUSED_CORE_OPTION_type l_option;
+
         if( l_pvr.smt == PVR_t::SMT4_MODE )
         {
-            sys->setAttr<TARGETING::ATTR_FUSED_CORE_MODE_HB>
-                (TARGETING::FUSED_CORE_MODE_HB_SMT4_ONLY);
-            if(l_isFuseBlown)
-            {
-                sys->setAttr<TARGETING::ATTR_PAYLOAD_KIND>
-                    (TARGETING::PAYLOAD_KIND_SAPPHIRE);
-            }
+            l_coreMode = TARGETING::FUSED_CORE_MODE_HB_SMT4_ONLY;
+            l_option = TARGETING::FUSED_CORE_OPTION_USING_NORMAL_CORES;
         }
         else // SMT8_MODE
         {
+            l_coreMode = TARGETING::FUSED_CORE_MODE_HB_SMT8_ONLY;
+            l_option = TARGETING::FUSED_CORE_OPTION_USING_FUSED_CORES;
             sys->setAttr<TARGETING::ATTR_FUSED_CORE_MODE_HB>
                 (TARGETING::FUSED_CORE_MODE_HB_SMT8_ONLY);
-            l_smt8 = true;
         }
+        sys->setAttr<TARGETING::ATTR_FUSED_CORE_MODE_HB>(l_coreMode);
+        if( l_isFuseBlown )
+        {
+            sys->setAttr<TARGETING::ATTR_FUSED_CORE_OPTION>(l_option);
+        }
+
+        TRACFCOMP( g_fapiImpTd, "Core Mode = %d, Fuseblow = %d, Option = %d",
+                   l_coreMode, l_isFuseBlown, l_option );
+        CONSOLE::displayf( nullptr, "SMT=%d, Fuse=%d\n", l_coreMode, l_isFuseBlown );
 
         // -----------------------------------
         // Activate threads on the master core
@@ -217,7 +225,7 @@ void activate_threads( errlHndl_t& io_rtaskRetErrl )
         const uint64_t SMT8_ENABLE_THREADS_MASK = 0xC000000000000000;
         const uint64_t SMT8_FUSE0_THREADS_MASK  = 0xA000000000000000;
         const uint64_t SMT8_FUSE1_THREADS_MASK  = 0x5000000000000000;
-        if( l_smt8 )
+        if( l_coreMode == TARGETING::FUSED_CORE_MODE_HB_SMT8_ONLY )
         {
             // First capture if threads 0,2 are enabled.  Then eliminate
             // odd threads and compress to bits 0,1
@@ -294,7 +302,7 @@ void activate_threads( errlHndl_t& io_rtaskRetErrl )
         // Activate threads on the master-fused core
         // -----------------------------------------
 
-        if( l_smt8 )
+        if( l_coreMode == TARGETING::FUSED_CORE_MODE_HB_SMT8_ONLY )
         {
             uint64_t l_fusedCoreID = l_masterCoreID + 1;
 
@@ -399,7 +407,7 @@ void activate_threads( errlHndl_t& io_rtaskRetErrl )
             {
                 break;
             }
-        }  // end if( l_smt8 )
+        }  // end if( l_coreMode == TARGETING::FUSED_CORE_MODE_HB_SMT8_ONLY )
 
 
         //Check if we are in MPIPL

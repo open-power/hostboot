@@ -172,40 +172,26 @@ uint8_t  is_fused_mode( )
     /*
         Fused Mode
 
-        ATTR_FUSED_CORE_MODE / ATTR_FUSED_CORE_OPTION / ATTR_PAYLOAD_KIND
+        ATTR_FUSED_CORE_MODE / ATTR_FUSED_CORE_OPTION
 
-        smt4_default / default_cores / phyp --> fused
-        smt4_default / default_cores / opal --> notfused
-        smt4_default / normal_cores  / *    --> notfused
-        smt4_default / fused_cores   / *    --> fused
+        smt4_only / default_cores    --> notfused
+        smt4_only / normal_cores     --> notfused
+        smt4_only / fused_cores      --> fused
 
-        smt4_only / default_cores / *   --> notfused
-        smt4_only / normal_cores  / *   --> notfused
-        smt4_only / fused_cores   / *   --> fused
-
-        smt8_only / default_cores / *   --> fused
-        smt8_only / normal_cores  / *   --> notfused
-        smt8_only / fused_cores   / *   --> fused
+        smt8_only / default_cores    --> fused
+        smt8_only / normal_cores     --> notfused
+        smt8_only / fused_cores      --> fused
     */
 
-    uint8_t l_mode = sys->getAttr<ATTR_FUSED_CORE_MODE_HB>();;
-    uint8_t l_option = sys->getAttr<ATTR_FUSED_CORE_OPTION>();;
-    PAYLOAD_KIND l_payload = sys->getAttr<ATTR_PAYLOAD_KIND>();
+    // FUSED_CORE_MODE_HB represents what we read from the PVR
+    uint8_t l_mode = sys->getAttr<ATTR_FUSED_CORE_MODE_HB>();
+
+    // FUSED_CORE_OPTION is used as an override to force a mode on universal parts
+    uint8_t l_option = sys->getAttr<ATTR_FUSED_CORE_OPTION>();
 
     if (FUSED_CORE_OPTION_USING_DEFAULT_CORES == l_option)
     {
-        if (FUSED_CORE_MODE_HB_SMT4_DEFAULT == l_mode)
-        {
-            if (PAYLOAD_KIND_PHYP == l_payload)
-            {
-                l_fused = true;
-            }
-            else
-            {
-                l_fused = false;
-            }
-        }
-        else if (FUSED_CORE_MODE_HB_SMT4_ONLY == l_mode)
+        if (FUSED_CORE_MODE_HB_SMT4_ONLY == l_mode)
         {
             l_fused = false;
         }
@@ -217,10 +203,18 @@ uint8_t  is_fused_mode( )
     else if (FUSED_CORE_OPTION_USING_NORMAL_CORES == l_option)
     {
         l_fused = false;
+        if (FUSED_CORE_MODE_HB_SMT8_ONLY == l_mode)
+        {
+            TARG_ERR("FUSED_CORE_OPTION wants SMT4 but hardware is set to SMT8");
+        }
     }
     else // USING_FUSED_CORES
     {
         l_fused = true;
+        if (FUSED_CORE_MODE_HB_SMT4_ONLY == l_mode)
+        {
+            TARG_ERR("FUSED_CORE_OPTION wants SMT8 but hardware is set to SMT4");
+        }
     }
 
     return(l_fused);

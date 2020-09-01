@@ -1978,21 +1978,18 @@
     </enumerator>
     <enumerator>
       <name>SMT4_ONLY</name>
-      <value>1</value>
+      <value>4</value>
     </enumerator>
     <enumerator>
       <name>SMT8_ONLY</name>
-      <value>2</value>
+      <value>8</value>
     </enumerator>
   </enumerationType>
 
   <attribute>
     <id>FUSED_CORE_MODE_HB</id>
     <description>
-        Stores the SMT setting used to determine fused mode.
-        SMT4_DEFAULT: Nimbus_DD1, boot in SMT4 but can change to SMT8
-        SMT4_ONLY: Nimbus_DD2/Cumulus, set based on PVR info
-        SMT8_ONLY: Nimbus_DD2/Cumulus, set based on PVR info
+        Stores the SMT setting read from the PVR that defines the fused mode.
     </description>
     <simpleType>
       <uint8_t/>
@@ -2005,8 +2002,8 @@
 
   <attribute>
     <description>
-        If not loading PHYP or OPAL, then use this to
-        decide whether to use FUSED cores or NOT.
+        Force a fused-core mode.  Note this will not match the true hardware
+        state if using a part with fuses blown..
     </description>
     <id>FUSED_CORE_OPTION</id>
     <persistency>volatile-zeroed</persistency>
