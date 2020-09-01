@@ -34,7 +34,7 @@ EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/utils/imageProcs/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/imageProcs/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/ffdc/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/scomt/
-#EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/xip
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/common/include/
 
 HWP_LIB_PATH += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/lib/
 EXTRAINCDIR += ${HWP_LIB_PATH}
@@ -71,6 +71,33 @@ OBJS += p10_pm_get_poundw_bucket.o
 OBJS += p10_pm_sram_access_utils.o
 OBJS += p10_pm_qme_firinit.o
 OBJS += p10_pm_pba_firinit.o
+OBJS += p10_pm_pba_init.o
+OBJS += p10_fbc_utils.o
+OBJS += p10_pm_ocb_init.o
+OBJS += p10_pm_ocb_indir_setup_linear.o
+OBJS += p10_pm_ocb_indir_access.o
+OBJS += p10_pm_occ_control.o
+OBJS += p10_pm_occ_firinit.o
+OBJS += p10_pm_firinit.o
+OBJS += p10_pm_pss_init.o
+OBJS += p10_hcode_image_build.o
+OBJS += p10_qme_build_attributes.o
+OBJS += p10_pm_qme_init.o
+OBJS += p10_core_special_wakeup.o
+OBJS += p10_pm_xgpe_init.o
+OBJS += p10_pm_occ_gpe_init.o
+OBJS += p10_pm_ocb_indir_setup_circular.o
+OBJS += p10_scan_ring_util.o
+OBJS += p10_stop_util.o
+OBJS += p10_stop_api.o
+OBJS += p10_pm_set_homer_bar.o
+OBJS += p10_pm_pba_bar_config.o
+OBJS += p10_pm_start.o
+OBJS += p10_pm_pgpe_init.o
+OBJS += p10_pm_halt.o
+OBJS += p10_setup_runtime_wakeup_mode.o
+OBJS += p10_qme_customize.o
+OBJS += p10_check_proc_config.o
 
 ##  NOTE: add a new directory onto the vpaths when you add a new HWP
 VPATH += ${HWP_PM_PATH}
@@ -80,27 +107,3 @@ VPATH += ${CUSTOMIZE_HWP_PATH}
 VPATH += ${NEST_UTIL_PATH}
 
 include ${ROOTPATH}/procedure.rules.mk
-include ${HWP_PM_PATH}/p10_pm_pba_init.mk
-include ${HWP_PM_PATH}/p10_pm_ocb_init.mk
-include ${HWP_PM_PATH}/p10_pm_ocb_indir_setup_linear.mk
-include ${HWP_PM_PATH}/p10_pm_ocb_indir_access.mk
-include ${HWP_PM_PATH}/p10_pm_occ_control.mk
-include ${HWP_PM_PATH}/p10_pm_occ_firinit.mk
-include ${HWP_PM_PATH}/p10_pm_firinit.mk
-include ${HWP_PM_PATH}/p10_pm_pss_init.mk
-include ${HWP_PM_PATH}/p10_hcode_image_build.mk
-include ${HWP_PM_PATH}/p10_qme_build_attributes.mk
-include ${HWP_PM_PATH}/p10_pm_qme_init.mk
-include ${HWP_PM_PATH}/p10_pm_xgpe_init.mk
-include ${HWP_PM_PATH}/p10_pm_occ_gpe_init.mk
-include ${HWP_PM_PATH}/p10_pm_ocb_indir_setup_circular.mk
-include ${HWP_PM_PATH}/p10_scan_ring_util.mk
-include ${HWP_PM_PATH}/p10_check_proc_config.mk
-include ${HWP_STOPUTIL_PATH}/p10_stop_util.mk
-include ${HWP_STOPUTIL_PATH}/p10_stop_api.mk
-include ${HWP_PM_PATH}/p10_pm_set_homer_bar.mk
-include ${HWP_PM_PATH}/p10_pm_start.mk
-include ${HWP_PM_PATH}/p10_pm_pgpe_init.mk
-include ${HWP_PM_PATH}/p10_pm_halt.mk
-include ${HWP_PM_PATH}/p10_setup_runtime_wakeup_mode.mk
-include ${CUSTOMIZE_HWP_PATH}/p10_qme_customize.mk
