@@ -56,6 +56,11 @@ fapi2::ReturnCode p10_pre_poweroff(const
     FAPI_TRY(fapi2::putCfamRegister(i_target_chip, FSXCOMP_FSXLOG_ROOT_CTRL1_CLEAR_FSI,
                                     l_read_reg_rc1));
 
+    FAPI_DBG("Assert OCMB reset");
+    l_read_reg_rc0.flush<0>().setBit<FSXCOMP_FSXLOG_ROOT_CTRL0_TPFSI_IO_OCMB_RESET_EN>();
+    FAPI_TRY(fapi2::putCfamRegister(i_target_chip, FSXCOMP_FSXLOG_ROOT_CTRL0_SET_FSI,
+                                    l_read_reg_rc0));
+
     // wait 1ms
     fapi2::delay(HW_NS_DELAY, SIM_CYCLE_DELAY);
 
