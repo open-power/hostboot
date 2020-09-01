@@ -943,7 +943,7 @@ errlHndl_t LpcDD::_writeLPC(LPC::TransType i_type,
                                  && (i_addr + io_buflen) < LPC::FW_WINDOW_SIZE)
         {
 #ifdef CONFIG_MCTP
-            lpc_fw_memcpy( o_buffer, reinterpret_cast<void*>(l_addr), io_buflen );
+            lpc_fw_memcpy( reinterpret_cast<void*>(l_addr), i_buffer, io_buflen );
 #else
             memcpy( reinterpret_cast<void*>(l_addr), i_buffer, io_buflen );
 #endif
