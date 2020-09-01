@@ -479,7 +479,7 @@
           ARRAY[DIMM]
           Byte 264: Registered Clock Drivers (RCD).
           DDIMM SPD spec.
-          Module’s supported RCD options
+          Module's supported RCD options
         </description>
         <initToZero></initToZero>
         <valueType>uint8</valueType>

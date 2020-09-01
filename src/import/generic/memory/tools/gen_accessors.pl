@@ -90,7 +90,7 @@ sub print_help
 }
 
 # Print out where we got the plotter module from (useful for debugging)
-print "Using module gen_accessors from: " . $INC{"gen_accessors.pm"} . "\n";
+#print "Using module gen_accessors from: " . $INC{"gen_accessors.pm"} . "\n";
 
 #------------------------------------------------------------------------------
 # Print Command Line Help
