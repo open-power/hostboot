@@ -322,6 +322,7 @@
     </description>
     <valueType>uint8</valueType>
     <platInit/>
+    <default>ON</default>
     <enum>
         OFF = 0x00,
         ON = 0x01
