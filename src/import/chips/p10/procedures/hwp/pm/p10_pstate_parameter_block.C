@@ -1190,7 +1190,10 @@ fapi2::ReturnCode PlatPmPPB::oppb_init(
         i_occppb->vdd_vret_mv = revle32(i_occppb->vdd_vret_mv);
 
         // Altitude temperature adjustment (in (degrees Celcius/km)*1000)
-        i_occppb->altitude_temp_adj_degCpMm =  revle32(uint32_t(iv_attrs.attr_system_wof_altitude_temp_adjustment));
+        i_occppb->altitude_temp_adj_degCpm =  revle32(uint32_t(iv_attrs.attr_system_wof_altitude_temp_adjustment));
+
+        // Altitude base (in meters))
+        i_occppb->altitude_reference_m =  revle32(uint32_t(iv_attrs.attr_system_wof_tdp_altitude_reference));
 
     }while(0);
 
@@ -1501,6 +1504,7 @@ FAPI_INF("%-60s[3] = 0x%08x %d", #attr_name, iv_attrs.attr_assign[3], iv_attrs.a
     DATABLOCK_GET_ATTR(ATTR_DDS_TRIP_MODE,    FAPI_SYSTEM, attr_dds_trip_mode);
     DATABLOCK_GET_ATTR(ATTR_DDS_TRIP_INTERPOLATION_CONTROL,    FAPI_SYSTEM, attr_dds_trip_interpolation_control);
     DATABLOCK_GET_ATTR(ATTR_WOF_ALTITUDE_TEMP_ADJUSTMENT, FAPI_SYSTEM, attr_system_wof_altitude_temp_adjustment);
+    DATABLOCK_GET_ATTR(ATTR_WOF_TDP_ALTITUDE_REFERENCE_M, FAPI_SYSTEM, attr_system_wof_tdp_altitude_reference);
 
     //TBD
     //DATABLOCK_GET_ATTR(ATTR_CHIP_EC_FEATURE_WOF_NOT_SUPPORTED, iv_procChip, attr_dd_wof_not_supported);

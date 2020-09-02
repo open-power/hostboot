@@ -2919,13 +2919,30 @@
 
     Default: 8C/2100m = 8C/2.1Km = 3.809 C/kM;  Encode: 3.809 C/kM*1000 = 3809
     Producer:  Override
-    Consumers: p10_pm_pgpe_init
+    Consumers: p10_pstate_parameter_block
     </description>
     <valueType>uint16</valueType>
     <platInit/>
     <overrideOnly/>
     <default>3809</default>
-    <group>debug</group>
+    <group>wof</group>
+  </attribute>
+
+  <!-- *********************************************************************-->
+  <attribute>
+    <id>ATTR_WOF_TDP_ALTITUDE_REFERENCE_M</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+    Altitude (in meters) on which WOF Ambient Condition is based.
+
+    Producer:  Override
+    Consumers: p10_pstate_parameter_block
+    </description>
+    <valueType>uint16</valueType>
+    <platInit/>
+    <default>1000</default>
+    <overrideOnly/>
+    <group>wof</group>
   </attribute>
 
   <!-- *********************************************************************-->

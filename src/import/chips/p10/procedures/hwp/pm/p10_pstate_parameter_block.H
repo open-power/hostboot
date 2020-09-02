@@ -147,6 +147,7 @@ typedef struct
     int8_t   attr_voltage_ext_vdn_bias;
 
     uint16_t attr_system_wof_altitude_temp_adjustment;
+    uint16_t attr_system_wof_tdp_altitude_reference;
 
     // AVSBus attributes
     uint32_t attr_avs_bus_freq;

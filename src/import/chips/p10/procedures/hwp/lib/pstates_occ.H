@@ -190,7 +190,10 @@ typedef struct
 
     // Altitude temperature adjustment (in (degrees Celcius/km)*1000)
     // eg 8C/2100m = 8C/2.1Km = 3.809 -> 1000 = 3809
-    uint32_t            altitude_temp_adj_degCpMm;
+    uint32_t            altitude_temp_adj_degCpm;
+
+    // Altitude base (in meters))
+    uint32_t            altitude_reference_m;
 
 } OCCPstateParmBlock_t ;
 
