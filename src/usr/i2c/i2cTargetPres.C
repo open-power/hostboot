@@ -197,6 +197,11 @@ errlHndl_t genericI2CTargetPresenceDetect(TARGETING::Target* i_target,
                       TARGETING::get_huid(i_target));
         }
 
+        TRACSSCOMP(g_trac_i2c, "I2C::genericI2CTargetPresenceDetect> target 0x%.08X: "
+                   "checking i2cm 0x%.08X, e%d/p%d/devAddr=0x%.2X",
+                   TARGETING::get_huid(i_target),  TARGETING::get_huid(l_i2cMasterTarget),
+                   l_i2cInfo.engine, l_i2cInfo.port, l_i2cInfo.devAddr);
+
         //Check for the target at the I2C level
         l_target_present = I2C::i2cPresence(l_i2cMasterTarget,
                                             l_i2cInfo.port,
@@ -284,7 +289,7 @@ errlHndl_t pmicI2CPresencePerformOp(DeviceFW::OperationType i_opType,
 
     errlHndl_t l_errl = nullptr;
     bool l_pmicPresent = false;
-    uint8_t l_devAddr;
+    uint8_t l_devAddr = 0;
     TARGETING::Target* l_parentOcmb = TARGETING::getImmediateParentByAffinity(i_target);
     auto l_parentHwasState = l_parentOcmb->getAttr<TARGETING::ATTR_HWAS_STATE>();
 
@@ -432,6 +437,7 @@ errlHndl_t genericI2CDevicePresencePerformOp(DeviceFW::OperationType i_opType,
 {
     errlHndl_t l_errl = nullptr;
     bool l_gi2cPresent = false;
+    uint8_t l_devAddr = 0;
     TARGETING::Target* l_parentOcmb = TARGETING::getImmediateParentByAffinity(i_target);
     auto l_parentHwasState = l_parentOcmb->getAttr<TARGETING::ATTR_HWAS_STATE>();
 
@@ -443,14 +449,32 @@ errlHndl_t genericI2CDevicePresencePerformOp(DeviceFW::OperationType i_opType,
             break;
         }
 
-        // TODO RTC 214692
         // Dynamically look up i2c device address (like we do for PMICs) via FAPIWRAP
-        // But, until we have the lookup option we need to set the DYNAMIC_I2C_DEV_ADDRESS
-        // attribute since that is what genericI2CTargetPresenceDetect() will use
-        TARGETING::ATTR_FAPI_I2C_CONTROL_INFO_type l_i2cInfo =
-            i_target->getAttr<TARGETING::ATTR_FAPI_I2C_CONTROL_INFO>();
 
-        i_target->setAttr<TARGETING::ATTR_DYNAMIC_I2C_DEVICE_ADDRESS>(l_i2cInfo.devAddr);
+        TARGETING::ATTR_REL_POS_type l_relPos
+          = i_target->getAttr<TARGETING::ATTR_REL_POS>();
+
+        l_errl = FAPIWRAP::get_gpio_adc_dev_addr(l_relPos,
+                                                 l_devAddr);
+        if (l_errl)
+        {
+            TRACFCOMP( g_trac_i2c, ERR_MRK"genericI2CDevicePresencePerformOp() "
+                       "Error attempting to read device address for HUID 0x%.08X, "
+                       "rel_pos=%d",
+                        TARGETING::get_huid(i_target), l_relPos);
+            break;
+        }
+
+        if (l_devAddr == 0)
+        {
+            TRACFCOMP(g_trac_i2c, ERR_MRK"genericI2CDevicePresencePerformOp() "
+                      "Found devAddr for HUID 0x%.08x to be 0. Likely an error meaning "
+                      "that REL_POS=%d does not exist",
+                      TARGETING::get_huid(i_target), l_relPos);
+            break;
+        }
+
+        i_target->setAttr<TARGETING::ATTR_DYNAMIC_I2C_DEVICE_ADDRESS>(l_devAddr);
 
         l_errl = genericI2CTargetPresenceDetect(i_target,
                                                 io_buflen,

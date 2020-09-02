@@ -74,6 +74,18 @@ namespace FAPIWRAP
 
     constexpr uint8_t NO_PMIC_DEV_ADDR = 0xFF;
 
+    /**
+     * @brief This function wraps around the FAPI2 HWP "get_gpio_adc_i2c_addr" which
+     *        takes in the relative position of a ADC or GPIO Expansion target (relative
+     *        to its parent OCMB's chip) on a 4U DDIMM and returns the i2c device address
+     *        of that target.
+     * @param[in]  i_rel_pos  - The ADC or GPIO Expansion's position relative to parent OCMB
+     * @param[out] o_devAddr - Returns the i2c device address
+     * @return errlHndl_t - nullptr if no error, otherwise contains error
+     */
+    errlHndl_t get_gpio_adc_dev_addr( const uint8_t i_rel_pos,
+                                      uint8_t& o_devAddr);
+
 }
 
 #endif

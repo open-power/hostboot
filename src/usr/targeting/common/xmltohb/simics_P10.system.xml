@@ -13231,7 +13231,7 @@
 <!-- 1                             3                   0x9E               -->
 <!-- 2 (only 4U DDIMM)             2                   0xB4               -->
 <!-- 3 (only 4U DDIMM)             4                   0xBE               -->
-<!-- NOTE: I2C Device Address found dynmaically in SPD; therefore defaulting all to oxFF below -->
+<!-- NOTE: I2C Device Address found dynamically in SPD; therefore defaulting all to oxFF below -->
 
 <!-- Only 8 of 16 OCMBs will be present in the config. -->
 <!--  - For 4U DDIMM config only first 32 PMICs will be present; next 4 will not be present; -->
@@ -14719,8 +14719,7 @@
 <!-- rel pos 1: ADC1  - I2C Device Address 0x2E -->
 <!-- rel pos 2: GPIO0 - I2C Device Address 0x70 -->
 <!-- rel pos 3: GPIO1 - I2C Device Address 0x7E -->
-<!-- TODO RTC 214692 - The above I2C device addresses will be found dynmacially; -->
-<!--                   they will default to 0xFF below -->
+<!-- The above I2C device addresses will be found dynamically; they will default to 0xFF below -->
 <!--                  -->
 <!-- Only 8 of 16 OCMBs will be present in the config. -->
 <!--  - For 4U DDIMM config only first 32 ADCs and 16 GPIOs will be present; next 4 will not be present; -->

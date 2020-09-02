@@ -2019,9 +2019,6 @@
       <id>PARENT_DECONFIG_RULES</id>
     </attribute>
     <attribute>
-      <id>REL_POS</id>
-    </attribute>
-    <attribute>
       <id>TYPE</id>
       <default>GENERIC_I2C_DEVICE</default>
     </attribute>
@@ -2397,9 +2394,6 @@
         </field>
       </default>
       <id>PARENT_DECONFIG_RULES</id>
-    </attribute>
-    <attribute>
-      <id>REL_POS</id>
     </attribute>
     <attribute>
       <id>TYPE</id>

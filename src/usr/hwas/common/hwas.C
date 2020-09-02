@@ -597,7 +597,7 @@ errlHndl_t discoverPmicTargetsAndEnable(const Target &i_sysTarget)
             TargetService::CHILD, TargetService::ALL, &l_asicPredExpr);
 
         // Do the presence detect on only PMIC targets
-        // NOTE: this function will remove any non-functional targets
+        // NOTE: this function will remove any non-present targets
         //       from pPmicCheckPres
         l_err = platPresenceDetect(l_pPmicCheckPres);
 
@@ -650,7 +650,7 @@ errlHndl_t discoverGenericI2cDeviceTargetsAndEnable(const Target &i_sysTarget)
             TargetService::CHILD, TargetService::ALL, &l_asicPredExpr);
 
         // Do the presence detect on only Generic I2C Device targets
-        // NOTE: this function will remove any non-functional targets
+        // NOTE: this function will remove any non-present targets
         //       from l_pGi2cCheckPres
         l_err = platPresenceDetect(l_pGi2cCheckPres);
 

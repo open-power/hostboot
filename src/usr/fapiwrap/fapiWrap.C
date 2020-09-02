@@ -31,10 +31,10 @@
 #include <devicefw/driverif.H>      // deviceRead
 
 // Imported Includes
-#include <exp_getidec.H>       // exp_getidec
-#include <pmic_i2c_addr_get.H> // get_pmic_i2c_addr
-#include <chipids.H>           // for GEMINI ID
-
+#include <exp_getidec.H>           // exp_getidec
+#include <pmic_i2c_addr_get.H>     // get_pmic_i2c_addr
+#include <chipids.H>               // for GEMINI ID
+#include <gpio_adc_i2c_addr_get.H> // for get_gpio_adc_i2c_addr
 
 trace_desc_t* g_trac_fapiwrap;
 TRAC_INIT(&g_trac_fapiwrap, FAPIWRAP_COMP_NAME, 6*KILOBYTE, TRACE::BUFFER_SLOW);
@@ -104,4 +104,19 @@ namespace FAPIWRAP
         }while(0);
         return l_errl;
     }
+
+    errlHndl_t get_gpio_adc_dev_addr( const uint8_t i_rel_pos,
+                                      uint8_t& o_devAddr)
+    {
+        errlHndl_t l_errl = nullptr;
+
+        do{
+
+            o_devAddr = get_gpio_adc_i2c_addr(i_rel_pos);
+
+        }while(0);
+        return l_errl;
+    }
+
+
 }
