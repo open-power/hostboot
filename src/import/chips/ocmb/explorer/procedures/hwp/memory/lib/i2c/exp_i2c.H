@@ -94,6 +94,11 @@ inline fapi2::ReturnCode capture_status( const fapi2::Target<fapi2::TARGET_TYPE_
         const std::vector<uint8_t>& i_data,
         uint64_t& o_fw_status_data )
 {
+    // Commenting out the below code due to the "Lab debug" section in the fw_status function.
+    // Because we continue polling if FW_STATUS doesn't return, it's possible that we can get
+    // here from fw_status without ever filling up i_data
+    // TODO #622 : update once EDBC-671 is resolved
+#if 0
     FAPI_ASSERT ((i_data.size() == FW_STATUS_BYTE_LEN),
                  fapi2::MSS_EXP_I2C_FW_STATUS_INVALID_SIZE().
                  set_TARGET(i_target).
@@ -101,6 +106,8 @@ inline fapi2::ReturnCode capture_status( const fapi2::Target<fapi2::TARGET_TYPE_
                  "Data length returned from FW_STATUS was incorrect when attempting to print to error log. (%d when expecting %d)"
                  TARGTIDFORMAT,
                  i_data.size(), FW_STATUS_BYTE_LEN , MSSTARGID);
+#endif
+    o_fw_status_data = 0;
 
     for( const auto l_byte : i_data )
     {
@@ -110,8 +117,10 @@ inline fapi2::ReturnCode capture_status( const fapi2::Target<fapi2::TARGET_TYPE_
     }
 
     return fapi2::FAPI2_RC_SUCCESS;
+#if 0
 fapi_try_exit:
     return fapi2::current_err;
+#endif
 }
 namespace check
 {
@@ -265,6 +274,7 @@ inline fapi2::ReturnCode fw_status(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_C
     // This is a base function that will be utilized by the platform code
     // As such, we don't want to pull in more libraries than we need to: it would cause extra dependencies
     // So, we're decomposing the polling library below
+    fapi2::ReturnCode l_fw_status_rc = fapi2::FAPI2_RC_SUCCESS;
     bool l_busy = true;
     uint8_t l_boot_stage = 0;
     uint64_t l_loop = 0;
@@ -273,13 +283,27 @@ inline fapi2::ReturnCode fw_status(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_C
     // Loop until we max our our loop count or get a non-busy response
     for(; l_loop < i_loops; ++l_loop)
     {
-        FAPI_TRY( get_fw_status(i_target, l_data) );
-        FAPI_TRY( check::status_code(i_target, FW_STATUS, l_data, l_busy, i_assert_if_bad_status) );
-        FAPI_TRY( status::get_boot_stage(i_target, l_data, l_boot_stage) );
+        // Lab debug: We're seeing i2c timeout on some fw_status commands during OMI training
+        // so remove FAPI_TRY around get_fw_status to avoid bailing out of polling loop
+        // TODO #622 : update once EDBC-671 is resolved
+        l_fw_status_rc = get_fw_status(i_target, l_data);
 
-        if (fw_status_loop_done(i_target, l_busy, l_boot_stage))
+        if (l_fw_status_rc == fapi2::FAPI2_RC_SUCCESS)
         {
-            break;
+            FAPI_TRY( check::status_code(i_target, FW_STATUS, l_data, l_busy, i_assert_if_bad_status) );
+            FAPI_TRY( status::get_boot_stage(i_target, l_data, l_boot_stage) );
+
+            if (fw_status_loop_done(i_target, l_busy, l_boot_stage))
+            {
+                break;
+            }
+        }
+        else
+        {
+            FAPI_ERR(TARGTIDFORMAT " got an i2c timeout during FW_STATUS loop %u. Ignoring and continuing...",
+                     MSSTARGID , l_loop);
+            // Need to reset fapi2::current_err so we don't return the ignored error
+            fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
         }
 
         FAPI_TRY( fapi2::delay( i_delay, 200) );
