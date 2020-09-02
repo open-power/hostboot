@@ -315,6 +315,9 @@ class mcbistTraits<mss::mc_type::NIMBUS, fapi2::TARGET_TYPE_MCBIST>
             GOTO_SUBTEST = MCBIST_MCBMR0Q_MCBIST_CFG_TEST00_COMPL_1ST_CMD,
             GOTO_SUBTEST_LEN = 5,
 
+            // Refresh Only bitcode - No global enums
+            REFRESH_ONLY = 0b001,
+
             ECC_MODE = MCBIST_MCBMR0Q_MCBIST_CFG_TEST00_ECC_MODE,
             DATA_MODE = MCBIST_MCBMR0Q_MCBIST_CFG_TEST00_DATA_MODE,
             DATA_MODE_LEN = MCBIST_MCBMR0Q_MCBIST_CFG_TEST00_DATA_MODE_LEN,

@@ -556,6 +556,8 @@ enum test_type
     W_INFINITE = 51,
     R_INFINITE = 52,
     MARCH_RF = 53,
+    MARCH_C_MINUS = 54,
+    MARCH_IFA_13 = 55,
 };
 
 
