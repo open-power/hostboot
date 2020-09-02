@@ -38,6 +38,10 @@ SECTIONS
         *(.glink)
     }
 
+    .plt ALIGN(0x8): {
+        *(.plt)
+    }
+
     .rodata ALIGN(0x8): {
         __minimum_data_start_addr = ALIGN(0x1000);
         tls_start_address = .;
@@ -57,7 +61,6 @@ SECTIONS
         *(.toc)
         *(.opd)
         *(.got)
-        *(.plt)
         *(.data.rel.ro.*)
         *(.data.*traceData_codeInfo*)
         . = __minimum_data_start_addr > . ? __minimum_data_start_addr : .;
