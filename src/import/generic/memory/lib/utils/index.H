@@ -86,7 +86,7 @@ inline void sort_targets_by_index(std::vector<fapi2::Target<T>>& io_targets)
                   const fapi2::Target<T>& l_first_target,
                   const fapi2::Target<T>& l_second_target) -> bool
     {
-        return mss::index(l_first_target) < mss::index(l_first_target);
+        return mss::index(l_first_target) < mss::index(l_second_target);
     });
 }
 
