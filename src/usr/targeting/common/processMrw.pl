@@ -2007,18 +2007,8 @@ sub setCommonAttrForChiplet
         my $value = sprintf("0x%0.2X", $chiplet_id);
         $targetObj->setAttribute($target, "CHIPLET_ID", $value);
     }
-    # @TODO RTC 256291: Remove this branch when the MRWs locate PAUs directly
-    # under PAUCs
-    elsif ($targetType eq "PAU")
-    {
-        # Rebase this PAU onto the ancestor PAUC, if it's under an IOHS
-        # currently.
-        if ($targetAffinity =~ 'iohs')
-        {
-            rebasePau($targetObj, $target);
-        }
-    }
-    elsif ($pervasive_parent ne "")
+
+    if ($pervasive_parent ne "")
     {
         # Special case: FC does not have a PARENT_PERVASIVE
         if ($targetType ne "FC")
@@ -3326,56 +3316,6 @@ sub postProcessIohs
     } # end if ($iohsConfigMode eq "SMPA") ... elseif ...
 
 } # end sub postProcessIohs
-
-# @TODO RTC 256291: Remove this code
-#--------------------------------------------------
-# @brief Rebase PAU targets on their PAUC ancestors
-#
-# @details This method removes the PAU target underneath an IOHS and places it
-#          directly below the ancestor PAUC, by updating its PHYS_PATH,
-#          AFFINITY_PATH, REL_POS, and INSTANCE_PATH attributes.
-#
-# @param[in] $targetObj - The global target object blob
-# @param[in] $target    - The PAU target
-#--------------------------------------------------
-sub rebasePau
-{
-    my $targetObj    = shift;
-    my $target       = shift;
-    my $attr;
-
-    my $relPos;
-
-    foreach $attr ('PHYS_PATH', 'AFFINITY_PATH')
-    {
-        # Replace the PAU number with the IOHS number (except for PAUCs 0 and
-        # 1, where the PAU number is always 0).
-        my $newPath = $targetObj->getAttribute($target, $attr);
-        $newPath =~ s/pauc-(\d+)\/iohs-(\d+)\/pau-\d+/pauc-\1\/pau-\2/;
-
-        # $1 and $2 are from the capture groups in the regex
-        my $paucInstance = $1;
-        $relPos = $2;
-
-        # If we're looking at PAUC 0 or 1, then force the PAU instance to be 0
-        # (as PAUC 0 and 1 each only have one child PAU). Otherwise, the PAU
-        # will just inherit the instance from whatever the IOHS formerly had.
-        if ($paucInstance == '0' || $paucInstance == '1')
-        {
-            $newPath =~ s/pau-\d+/pau-0/;
-            $relPos = '0';
-        }
-
-        $targetObj->setAttribute($target, $attr, $newPath);
-    }
-
-    # Update the REL_POS attribute
-    $targetObj->setAttribute($target, 'REL_POS', $relPos);
-
-    my $instpath = $targetObj->getAttribute($target, 'INSTANCE_PATH');
-    $instpath =~ s/\/iohs\d+//;
-    $targetObj->setAttribute($target, 'INSTANCE_PATH', $instpath);
-}
 
 #--------------------------------------------------
 # @brief Set up the SMPX bus for the IOHS target
