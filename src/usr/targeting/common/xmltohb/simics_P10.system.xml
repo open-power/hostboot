@@ -13231,7 +13231,7 @@
 <!-- 1                             3                   0x9E               -->
 <!-- 2 (only 4U DDIMM)             2                   0xB4               -->
 <!-- 3 (only 4U DDIMM)             4                   0xBE               -->
-<!-- NOTE: I2C Device Address found dynamically in SPD; therefore defaulting all to oxFF below -->
+<!-- NOTE: I2C Device Address found dynamically in SPD; therefore defaulting all to 0xFF below -->
 
 <!-- Only 8 of 16 OCMBs will be present in the config. -->
 <!--  - For 4U DDIMM config only first 32 PMICs will be present; next 4 will not be present; -->
@@ -13927,6 +13927,10 @@
         <default>pmic:k0:n0:s0:p16</default>
     </attribute>
     <attribute>
+        <id>FAPI_POS</id>
+        <default>16</default>
+    </attribute>
+    <attribute>
         <id>FAPI_I2C_CONTROL_INFO</id>
         <default>
             <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
@@ -14091,6 +14095,10 @@
         <default>pmic:k0:n0:s0:p20</default>
     </attribute>
     <attribute>
+        <id>FAPI_POS</id>
+        <default>20</default>
+    </attribute>
+    <attribute>
         <id>FAPI_I2C_CONTROL_INFO</id>
         <default>
             <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
@@ -14127,6 +14135,10 @@
     <attribute>
         <id>FAPI_NAME</id>
         <default>pmic:k0:n0:s0:p21</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>21</default>
     </attribute>
     <attribute>
         <id>FAPI_I2C_CONTROL_INFO</id>
@@ -14167,6 +14179,10 @@
         <default>pmic:k0:n0:s0:p22</default>
     </attribute>
     <attribute>
+        <id>FAPI_POS</id>
+        <default>22</default>
+    </attribute>
+    <attribute>
         <id>FAPI_I2C_CONTROL_INFO</id>
         <default>
             <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
@@ -14203,6 +14219,10 @@
     <attribute>
         <id>FAPI_NAME</id>
         <default>pmic:k0:n0:s0:p23</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>23</default>
     </attribute>
     <attribute>
         <id>FAPI_I2C_CONTROL_INFO</id>
@@ -14285,6 +14305,10 @@
         <default>pmic:k0:n0:s0:p25</default>
     </attribute>
     <attribute>
+        <id>FAPI_POS</id>
+        <default>25</default>
+    </attribute>
+    <attribute>
         <id>FAPI_I2C_CONTROL_INFO</id>
         <default>
             <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
@@ -14323,6 +14347,10 @@
         <default>pmic:k0:n0:s0:p26</default>
     </attribute>
     <attribute>
+        <id>FAPI_POS</id>
+        <default>26</default>
+    </attribute>
+    <attribute>
         <id>FAPI_I2C_CONTROL_INFO</id>
         <default>
             <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
@@ -14359,6 +14387,10 @@
     <attribute>
         <id>FAPI_NAME</id>
         <default>pmic:k0:n0:s0:p27</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>27</default>
     </attribute>
     <attribute>
         <id>FAPI_I2C_CONTROL_INFO</id>
@@ -14442,6 +14474,10 @@
         <default>pmic:k0:n0:s0:p29</default>
     </attribute>
     <attribute>
+        <id>FAPI_POS</id>
+        <default>29</default>
+    </attribute>
+    <attribute>
         <id>FAPI_I2C_CONTROL_INFO</id>
         <default>
             <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
@@ -14480,6 +14516,10 @@
         <default>pmic:k0:n0:s0:p30</default>
     </attribute>
     <attribute>
+        <id>FAPI_POS</id>
+        <default>30</default>
+    </attribute>
+    <attribute>
         <id>FAPI_I2C_CONTROL_INFO</id>
         <default>
             <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
@@ -14516,6 +14556,10 @@
     <attribute>
         <id>FAPI_NAME</id>
         <default>pmic:k0:n0:s0:p31</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>31</default>
     </attribute>
     <attribute>
         <id>FAPI_I2C_CONTROL_INFO</id>
@@ -14713,7 +14757,7 @@
 <!-- Up to 2 each per OCMB: (a max of 32 per P10)-->
 <!--  - 2U DDIMMs: 0 ADCs and 0 GPIO Expanders per OCMB -->
 <!--  - 4U DDIMMs: 2 ADCs and 2 GPIO Expanders per OCMB -->
-<!--                               -->
+<!--                  -->
 <!-- Grouped together under "Generic I2C Device" targets, but separated by their relative position: -->
 <!-- rel pos 0: ADC0  - I2C Device Address 0x20 -->
 <!-- rel pos 1: ADC1  - I2C Device Address 0x2E -->
@@ -14722,15 +14766,16 @@
 <!-- The above I2C device addresses will be found dynamically; they will default to 0xFF below -->
 <!--                  -->
 <!-- Only 8 of 16 OCMBs will be present in the config. -->
-<!--  - For 4U DDIMM config only first 32 ADCs and 16 GPIOs will be present; next 4 will not be present; -->
+<!--  - For 4U DDIMM config only first 16 ADCs and 16 GPIOs will be present; next 4 will not be present; -->
 <!--  - For 2U DDIMs no ADCs nor GPIOs will be present -->
 <!-- ===================================================================== -->
+
 <targetInstance>
     <id>sys0node0generici2cdevice0</id>
     <type>generic_i2c_device</type>
     <attribute>
-      <id>HUID</id>
-      <default>0x00550000</default>
+        <id>HUID</id>
+        <default>0x00550000</default>
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
@@ -14740,7 +14785,7 @@
         <id>FAPI_NAME</id>
         <default>generici2cslave:k0:n0:s0:p0</default>
     </attribute>
-     <attribute>
+    <attribute>
         <id>FAPI_POS</id>
         <default>0</default>
     </attribute>
@@ -14750,12 +14795,12 @@
             <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
             <field><id>engine</id><value>3</value></field>
             <field><id>port</id><value>9</value></field>
-            <field><id>devAddr</id><value>0x20</value></field>
+            <field><id>devAddr</id><value>0xFF</value></field>
         </default>
     </attribute>
     <attribute>
-      <id>ORDINAL_ID</id>
-      <default>0</default>
+        <id>ORDINAL_ID</id>
+        <default>0</default>
     </attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -14765,9 +14810,9 @@
         <id>REL_POS</id>
         <default>0</default>
     </attribute>
-     <attribute>
-      <id>I2C_DEV_TYPE</id>
-      <default>ADS7138_ADC</default>
+    <attribute>
+        <id>I2C_DEV_TYPE</id>
+        <default>ADS7138_ADC</default>
     </attribute>
 </targetInstance>
 
@@ -14775,8 +14820,8 @@
     <id>sys0node0generici2cdevice1</id>
     <type>generic_i2c_device</type>
     <attribute>
-      <id>HUID</id>
-      <default>0x00550001</default>
+        <id>HUID</id>
+        <default>0x00550001</default>
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
@@ -14786,7 +14831,7 @@
         <id>FAPI_NAME</id>
         <default>generici2cslave:k0:n0:s0:p1</default>
     </attribute>
-     <attribute>
+    <attribute>
         <id>FAPI_POS</id>
         <default>1</default>
     </attribute>
@@ -14796,12 +14841,12 @@
             <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
             <field><id>engine</id><value>3</value></field>
             <field><id>port</id><value>9</value></field>
-            <field><id>devAddr</id><value>0x2E</value></field>
+            <field><id>devAddr</id><value>0xFF</value></field>
         </default>
     </attribute>
     <attribute>
-      <id>ORDINAL_ID</id>
-      <default>1</default>
+        <id>ORDINAL_ID</id>
+        <default>1</default>
     </attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -14811,9 +14856,9 @@
         <id>REL_POS</id>
         <default>1</default>
     </attribute>
-     <attribute>
-      <id>I2C_DEV_TYPE</id>
-      <default>ADS7138_ADC</default>
+    <attribute>
+        <id>I2C_DEV_TYPE</id>
+        <default>ADS7138_ADC</default>
     </attribute>
 </targetInstance>
 
@@ -14821,8 +14866,8 @@
     <id>sys0node0generici2cdevice2</id>
     <type>generic_i2c_device</type>
     <attribute>
-      <id>HUID</id>
-      <default>0x00550002</default>
+        <id>HUID</id>
+        <default>0x00550002</default>
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
@@ -14832,7 +14877,7 @@
         <id>FAPI_NAME</id>
         <default>generici2cslave:k0:n0:s0:p2</default>
     </attribute>
-     <attribute>
+    <attribute>
         <id>FAPI_POS</id>
         <default>2</default>
     </attribute>
@@ -14842,12 +14887,12 @@
             <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
             <field><id>engine</id><value>3</value></field>
             <field><id>port</id><value>9</value></field>
-            <field><id>devAddr</id><value>0x70</value></field>
+            <field><id>devAddr</id><value>0xFF</value></field>
         </default>
     </attribute>
     <attribute>
-      <id>ORDINAL_ID</id>
-      <default>2</default>
+        <id>ORDINAL_ID</id>
+        <default>2</default>
     </attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -14857,9 +14902,9 @@
         <id>REL_POS</id>
         <default>2</default>
     </attribute>
-     <attribute>
-      <id>I2C_DEV_TYPE</id>
-      <default>PCA9554A_GPIO_EXPANDER</default>
+    <attribute>
+        <id>I2C_DEV_TYPE</id>
+        <default>PCA9554A_GPIO_EXPANDER</default>
     </attribute>
 </targetInstance>
 
@@ -14867,8 +14912,8 @@
     <id>sys0node0generici2cdevice3</id>
     <type>generic_i2c_device</type>
     <attribute>
-      <id>HUID</id>
-      <default>0x00550003</default>
+        <id>HUID</id>
+        <default>0x00550003</default>
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
@@ -14878,7 +14923,7 @@
         <id>FAPI_NAME</id>
         <default>generici2cslave:k0:n0:s0:p3</default>
     </attribute>
-     <attribute>
+    <attribute>
         <id>FAPI_POS</id>
         <default>3</default>
     </attribute>
@@ -14888,12 +14933,12 @@
             <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
             <field><id>engine</id><value>3</value></field>
             <field><id>port</id><value>9</value></field>
-            <field><id>devAddr</id><value>0x7E</value></field>
+            <field><id>devAddr</id><value>0xFF</value></field>
         </default>
     </attribute>
     <attribute>
-      <id>ORDINAL_ID</id>
-      <default>3</default>
+        <id>ORDINAL_ID</id>
+        <default>3</default>
     </attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -14903,9 +14948,1481 @@
         <id>REL_POS</id>
         <default>3</default>
     </attribute>
-     <attribute>
-      <id>I2C_DEV_TYPE</id>
-      <default>PCA9554A_GPIO_EXPANDER</default>
+    <attribute>
+        <id>I2C_DEV_TYPE</id>
+        <default>PCA9554A_GPIO_EXPANDER</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0generici2cdevice4</id>
+    <type>generic_i2c_device</type>
+    <attribute>
+        <id>HUID</id>
+        <default>0x00550004</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-0/mi-0/mcc-0/omi-1/ocmb_chip-0/generic_i2c_device-0</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>generici2cslave:k0:n0:s0:p4</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>4</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_I2C_CONTROL_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>port</id><value>8</value></field>
+            <field><id>devAddr</id><value>0xFF</value></field>
+        </default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>4</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/generic_i2c_device-4</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>I2C_DEV_TYPE</id>
+        <default>ADS7138_ADC</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0generici2cdevice5</id>
+    <type>generic_i2c_device</type>
+    <attribute>
+        <id>HUID</id>
+        <default>0x00550005</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-0/mi-0/mcc-0/omi-1/ocmb_chip-0/generic_i2c_device-1</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>generici2cslave:k0:n0:s0:p5</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>5</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_I2C_CONTROL_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>port</id><value>8</value></field>
+            <field><id>devAddr</id><value>0xFF</value></field>
+        </default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>5</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/generic_i2c_device-5</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>1</default>
+    </attribute>
+    <attribute>
+        <id>I2C_DEV_TYPE</id>
+        <default>ADS7138_ADC</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0generici2cdevice6</id>
+    <type>generic_i2c_device</type>
+    <attribute>
+        <id>HUID</id>
+        <default>0x00550006</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-0/mi-0/mcc-0/omi-1/ocmb_chip-0/generic_i2c_device-2</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>generici2cslave:k0:n0:s0:p6</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>6</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_I2C_CONTROL_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>port</id><value>8</value></field>
+            <field><id>devAddr</id><value>0xFF</value></field>
+        </default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>6</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/generic_i2c_device-6</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>2</default>
+    </attribute>
+    <attribute>
+        <id>I2C_DEV_TYPE</id>
+        <default>PCA9554A_GPIO_EXPANDER</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0generici2cdevice7</id>
+    <type>generic_i2c_device</type>
+    <attribute>
+        <id>HUID</id>
+        <default>0x00550007</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-0/mi-0/mcc-0/omi-1/ocmb_chip-0/generic_i2c_device-3</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>generici2cslave:k0:n0:s0:p7</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>7</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_I2C_CONTROL_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>port</id><value>8</value></field>
+            <field><id>devAddr</id><value>0xFF</value></field>
+        </default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>7</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/generic_i2c_device-7</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>3</default>
+    </attribute>
+    <attribute>
+        <id>I2C_DEV_TYPE</id>
+        <default>PCA9554A_GPIO_EXPANDER</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0generici2cdevice8</id>
+    <type>generic_i2c_device</type>
+    <attribute>
+        <id>HUID</id>
+        <default>0x00550008</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-0/mi-0/mcc-1/omi-0/ocmb_chip-0/generic_i2c_device-0</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>generici2cslave:k0:n0:s0:p8</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>8</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_I2C_CONTROL_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>port</id><value>10</value></field>
+            <field><id>devAddr</id><value>0xFF</value></field>
+        </default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>8</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/generic_i2c_device-8</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>I2C_DEV_TYPE</id>
+        <default>ADS7138_ADC</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0generici2cdevice9</id>
+    <type>generic_i2c_device</type>
+    <attribute>
+        <id>HUID</id>
+        <default>0x00550009</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-0/mi-0/mcc-1/omi-0/ocmb_chip-0/generic_i2c_device-1</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>generici2cslave:k0:n0:s0:p9</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>9</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_I2C_CONTROL_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>port</id><value>10</value></field>
+            <field><id>devAddr</id><value>0xFF</value></field>
+        </default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>9</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/generic_i2c_device-9</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>1</default>
+    </attribute>
+    <attribute>
+        <id>I2C_DEV_TYPE</id>
+        <default>ADS7138_ADC</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0generici2cdevice10</id>
+    <type>generic_i2c_device</type>
+    <attribute>
+        <id>HUID</id>
+        <default>0x0055000A</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-0/mi-0/mcc-1/omi-0/ocmb_chip-0/generic_i2c_device-2</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>generici2cslave:k0:n0:s0:p10</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>10</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_I2C_CONTROL_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>port</id><value>10</value></field>
+            <field><id>devAddr</id><value>0xFF</value></field>
+        </default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>10</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/generic_i2c_device-10</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>2</default>
+    </attribute>
+    <attribute>
+        <id>I2C_DEV_TYPE</id>
+        <default>PCA9554A_GPIO_EXPANDER</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0generici2cdevice11</id>
+    <type>generic_i2c_device</type>
+    <attribute>
+        <id>HUID</id>
+        <default>0x0055000B</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-0/mi-0/mcc-1/omi-0/ocmb_chip-0/generic_i2c_device-3</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>generici2cslave:k0:n0:s0:p11</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>11</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_I2C_CONTROL_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>port</id><value>10</value></field>
+            <field><id>devAddr</id><value>0xFF</value></field>
+        </default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>11</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/generic_i2c_device-11</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>3</default>
+    </attribute>
+    <attribute>
+        <id>I2C_DEV_TYPE</id>
+        <default>PCA9554A_GPIO_EXPANDER</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0generici2cdevice12</id>
+    <type>generic_i2c_device</type>
+    <attribute>
+        <id>HUID</id>
+        <default>0x0055000C</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-0/mi-0/mcc-1/omi-1/ocmb_chip-0/generic_i2c_device-0</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>generici2cslave:k0:n0:s0:p12</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>12</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_I2C_CONTROL_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>port</id><value>11</value></field>
+            <field><id>devAddr</id><value>0xFF</value></field>
+        </default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>12</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/generic_i2c_device-12</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>I2C_DEV_TYPE</id>
+        <default>ADS7138_ADC</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0generici2cdevice13</id>
+    <type>generic_i2c_device</type>
+    <attribute>
+        <id>HUID</id>
+        <default>0x0055000D</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-0/mi-0/mcc-1/omi-1/ocmb_chip-0/generic_i2c_device-1</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>generici2cslave:k0:n0:s0:p13</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>13</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_I2C_CONTROL_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>port</id><value>11</value></field>
+            <field><id>devAddr</id><value>0xFF</value></field>
+        </default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>13</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/generic_i2c_device-13</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>1</default>
+    </attribute>
+    <attribute>
+        <id>I2C_DEV_TYPE</id>
+        <default>ADS7138_ADC</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0generici2cdevice14</id>
+    <type>generic_i2c_device</type>
+    <attribute>
+        <id>HUID</id>
+        <default>0x0055000E</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-0/mi-0/mcc-1/omi-1/ocmb_chip-0/generic_i2c_device-2</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>generici2cslave:k0:n0:s0:p14</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>14</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_I2C_CONTROL_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>port</id><value>11</value></field>
+            <field><id>devAddr</id><value>0xFF</value></field>
+        </default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>14</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/generic_i2c_device-14</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>2</default>
+    </attribute>
+    <attribute>
+        <id>I2C_DEV_TYPE</id>
+        <default>PCA9554A_GPIO_EXPANDER</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0generici2cdevice15</id>
+    <type>generic_i2c_device</type>
+    <attribute>
+        <id>HUID</id>
+        <default>0x0055000F</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-0/mi-0/mcc-1/omi-1/ocmb_chip-0/generic_i2c_device-3</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>generici2cslave:k0:n0:s0:p15</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>15</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_I2C_CONTROL_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>port</id><value>11</value></field>
+            <field><id>devAddr</id><value>0xFF</value></field>
+        </default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>15</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/generic_i2c_device-15</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>3</default>
+    </attribute>
+    <attribute>
+        <id>I2C_DEV_TYPE</id>
+        <default>PCA9554A_GPIO_EXPANDER</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0generici2cdevice16</id>
+    <type>generic_i2c_device</type>
+    <attribute>
+        <id>HUID</id>
+        <default>0x00550010</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-1/mi-0/mcc-0/omi-0/ocmb_chip-0/generic_i2c_device-0</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>generici2cslave:k0:n0:s0:p16</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>16</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_I2C_CONTROL_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>port</id><value>13</value></field>
+            <field><id>devAddr</id><value>0xFF</value></field>
+        </default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>16</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/generic_i2c_device-16</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>I2C_DEV_TYPE</id>
+        <default>ADS7138_ADC</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0generici2cdevice17</id>
+    <type>generic_i2c_device</type>
+    <attribute>
+        <id>HUID</id>
+        <default>0x00550011</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-1/mi-0/mcc-0/omi-0/ocmb_chip-0/generic_i2c_device-1</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>generici2cslave:k0:n0:s0:p17</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>17</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_I2C_CONTROL_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>port</id><value>13</value></field>
+            <field><id>devAddr</id><value>0xFF</value></field>
+        </default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>17</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/generic_i2c_device-17</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>1</default>
+    </attribute>
+    <attribute>
+        <id>I2C_DEV_TYPE</id>
+        <default>ADS7138_ADC</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0generici2cdevice18</id>
+    <type>generic_i2c_device</type>
+    <attribute>
+        <id>HUID</id>
+        <default>0x00550012</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-1/mi-0/mcc-0/omi-0/ocmb_chip-0/generic_i2c_device-2</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>generici2cslave:k0:n0:s0:p18</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>18</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_I2C_CONTROL_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>port</id><value>13</value></field>
+            <field><id>devAddr</id><value>0xFF</value></field>
+        </default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>18</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/generic_i2c_device-18</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>2</default>
+    </attribute>
+    <attribute>
+        <id>I2C_DEV_TYPE</id>
+        <default>PCA9554A_GPIO_EXPANDER</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0generici2cdevice19</id>
+    <type>generic_i2c_device</type>
+    <attribute>
+        <id>HUID</id>
+        <default>0x00550013</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-1/mi-0/mcc-0/omi-0/ocmb_chip-0/generic_i2c_device-3</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>generici2cslave:k0:n0:s0:p19</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>19</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_I2C_CONTROL_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>port</id><value>13</value></field>
+            <field><id>devAddr</id><value>0xFF</value></field>
+        </default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>19</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/generic_i2c_device-19</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>3</default>
+    </attribute>
+    <attribute>
+        <id>I2C_DEV_TYPE</id>
+        <default>PCA9554A_GPIO_EXPANDER</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0generici2cdevice20</id>
+    <type>generic_i2c_device</type>
+    <attribute>
+        <id>HUID</id>
+        <default>0x00550014</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-1/mi-0/mcc-0/omi-1/ocmb_chip-0/generic_i2c_device-0</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>generici2cslave:k0:n0:s0:p20</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>20</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_I2C_CONTROL_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>port</id><value>0</value></field>
+            <field><id>devAddr</id><value>0xFF</value></field>
+        </default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>20</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/generic_i2c_device-20</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>I2C_DEV_TYPE</id>
+        <default>ADS7138_ADC</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0generici2cdevice21</id>
+    <type>generic_i2c_device</type>
+    <attribute>
+        <id>HUID</id>
+        <default>0x00550015</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-1/mi-0/mcc-0/omi-1/ocmb_chip-0/generic_i2c_device-1</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>generici2cslave:k0:n0:s0:p21</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>21</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_I2C_CONTROL_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>port</id><value>0</value></field>
+            <field><id>devAddr</id><value>0xFF</value></field>
+        </default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>21</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/generic_i2c_device-21</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>1</default>
+    </attribute>
+    <attribute>
+        <id>I2C_DEV_TYPE</id>
+        <default>ADS7138_ADC</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0generici2cdevice22</id>
+    <type>generic_i2c_device</type>
+    <attribute>
+        <id>HUID</id>
+        <default>0x00550016</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-1/mi-0/mcc-0/omi-1/ocmb_chip-0/generic_i2c_device-2</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>generici2cslave:k0:n0:s0:p22</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>22</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_I2C_CONTROL_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>port</id><value>0</value></field>
+            <field><id>devAddr</id><value>0xFF</value></field>
+        </default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>22</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/generic_i2c_device-22</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>2</default>
+    </attribute>
+    <attribute>
+        <id>I2C_DEV_TYPE</id>
+        <default>PCA9554A_GPIO_EXPANDER</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0generici2cdevice23</id>
+    <type>generic_i2c_device</type>
+    <attribute>
+        <id>HUID</id>
+        <default>0x00550017</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-1/mi-0/mcc-0/omi-1/ocmb_chip-0/generic_i2c_device-3</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>generici2cslave:k0:n0:s0:p23</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>23</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_I2C_CONTROL_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>port</id><value>0</value></field>
+            <field><id>devAddr</id><value>0xFF</value></field>
+        </default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>23</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/generic_i2c_device-23</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>3</default>
+    </attribute>
+    <attribute>
+        <id>I2C_DEV_TYPE</id>
+        <default>PCA9554A_GPIO_EXPANDER</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0generici2cdevice24</id>
+    <type>generic_i2c_device</type>
+    <attribute>
+        <id>HUID</id>
+        <default>0x00550018</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-1/mi-0/mcc-1/omi-0/ocmb_chip-0/generic_i2c_device-0</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>generici2cslave:k0:n0:s0:p24</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>24</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_I2C_CONTROL_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>port</id><value>12</value></field>
+            <field><id>devAddr</id><value>0xFF</value></field>
+        </default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>24</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/generic_i2c_device-24</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>I2C_DEV_TYPE</id>
+        <default>ADS7138_ADC</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0generici2cdevice25</id>
+    <type>generic_i2c_device</type>
+    <attribute>
+        <id>HUID</id>
+        <default>0x00550019</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-1/mi-0/mcc-1/omi-0/ocmb_chip-0/generic_i2c_device-1</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>generici2cslave:k0:n0:s0:p25</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>25</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_I2C_CONTROL_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>port</id><value>12</value></field>
+            <field><id>devAddr</id><value>0xFF</value></field>
+        </default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>25</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/generic_i2c_device-25</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>1</default>
+    </attribute>
+    <attribute>
+        <id>I2C_DEV_TYPE</id>
+        <default>ADS7138_ADC</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0generici2cdevice26</id>
+    <type>generic_i2c_device</type>
+    <attribute>
+        <id>HUID</id>
+        <default>0x0055001A</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-1/mi-0/mcc-1/omi-0/ocmb_chip-0/generic_i2c_device-2</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>generici2cslave:k0:n0:s0:p26</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>26</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_I2C_CONTROL_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>port</id><value>12</value></field>
+            <field><id>devAddr</id><value>0xFF</value></field>
+        </default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>26</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/generic_i2c_device-26</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>2</default>
+    </attribute>
+    <attribute>
+        <id>I2C_DEV_TYPE</id>
+        <default>PCA9554A_GPIO_EXPANDER</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0generici2cdevice27</id>
+    <type>generic_i2c_device</type>
+    <attribute>
+        <id>HUID</id>
+        <default>0x0055001B</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-1/mi-0/mcc-1/omi-0/ocmb_chip-0/generic_i2c_device-3</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>generici2cslave:k0:n0:s0:p27</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>27</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_I2C_CONTROL_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>port</id><value>12</value></field>
+            <field><id>devAddr</id><value>0xFF</value></field>
+        </default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>27</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/generic_i2c_device-27</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>3</default>
+    </attribute>
+    <attribute>
+        <id>I2C_DEV_TYPE</id>
+        <default>PCA9554A_GPIO_EXPANDER</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0generici2cdevice28</id>
+    <type>generic_i2c_device</type>
+    <attribute>
+        <id>HUID</id>
+        <default>0x0055001C</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-1/mi-0/mcc-1/omi-1/ocmb_chip-0/generic_i2c_device-0</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>generici2cslave:k0:n0:s0:p28</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>28</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_I2C_CONTROL_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>port</id><value>1</value></field>
+            <field><id>devAddr</id><value>0xFF</value></field>
+        </default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>28</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/generic_i2c_device-28</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>I2C_DEV_TYPE</id>
+        <default>ADS7138_ADC</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0generici2cdevice29</id>
+    <type>generic_i2c_device</type>
+    <attribute>
+        <id>HUID</id>
+        <default>0x0055001D</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-1/mi-0/mcc-1/omi-1/ocmb_chip-0/generic_i2c_device-1</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>generici2cslave:k0:n0:s0:p29</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>29</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_I2C_CONTROL_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>port</id><value>1</value></field>
+            <field><id>devAddr</id><value>0xFF</value></field>
+        </default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>29</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/generic_i2c_device-29</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>1</default>
+    </attribute>
+    <attribute>
+        <id>I2C_DEV_TYPE</id>
+        <default>ADS7138_ADC</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0generici2cdevice30</id>
+    <type>generic_i2c_device</type>
+    <attribute>
+        <id>HUID</id>
+        <default>0x0055001E</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-1/mi-0/mcc-1/omi-1/ocmb_chip-0/generic_i2c_device-2</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>generici2cslave:k0:n0:s0:p30</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>30</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_I2C_CONTROL_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>port</id><value>1</value></field>
+            <field><id>devAddr</id><value>0xFF</value></field>
+        </default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>30</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/generic_i2c_device-30</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>2</default>
+    </attribute>
+    <attribute>
+        <id>I2C_DEV_TYPE</id>
+        <default>PCA9554A_GPIO_EXPANDER</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0generici2cdevice31</id>
+    <type>generic_i2c_device</type>
+    <attribute>
+        <id>HUID</id>
+        <default>0x0055001F</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-1/mi-0/mcc-1/omi-1/ocmb_chip-0/generic_i2c_device-3</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>generici2cslave:k0:n0:s0:p31</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>31</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_I2C_CONTROL_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>port</id><value>1</value></field>
+            <field><id>devAddr</id><value>0xFF</value></field>
+        </default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>31</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/generic_i2c_device-31</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>3</default>
+    </attribute>
+    <attribute>
+        <id>I2C_DEV_TYPE</id>
+        <default>PCA9554A_GPIO_EXPANDER</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0generici2cdevice32</id>
+    <type>generic_i2c_device</type>
+    <attribute>
+        <id>HUID</id>
+        <default>0x00550020</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-2/mi-0/mcc-0/omi-0/ocmb_chip-0/generic_i2c_device-0</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>generici2cslave:k0:n0:s0:p32</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>32</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_I2C_CONTROL_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>port</id><value>2</value></field>
+            <field><id>devAddr</id><value>0xFF</value></field>
+        </default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>32</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/generic_i2c_device-32</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>I2C_DEV_TYPE</id>
+        <default>ADS7138_ADC</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0generici2cdevice33</id>
+    <type>generic_i2c_device</type>
+    <attribute>
+        <id>HUID</id>
+        <default>0x00550021</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-2/mi-0/mcc-0/omi-0/ocmb_chip-0/generic_i2c_device-1</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>generici2cslave:k0:n0:s0:p33</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>33</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_I2C_CONTROL_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>port</id><value>2</value></field>
+            <field><id>devAddr</id><value>0xFF</value></field>
+        </default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>33</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/generic_i2c_device-33</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>1</default>
+    </attribute>
+    <attribute>
+        <id>I2C_DEV_TYPE</id>
+        <default>ADS7138_ADC</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0generici2cdevice34</id>
+    <type>generic_i2c_device</type>
+    <attribute>
+        <id>HUID</id>
+        <default>0x00550022</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-2/mi-0/mcc-0/omi-0/ocmb_chip-0/generic_i2c_device-2</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>generici2cslave:k0:n0:s0:p34</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>34</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_I2C_CONTROL_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>port</id><value>2</value></field>
+            <field><id>devAddr</id><value>0xFF</value></field>
+        </default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>34</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/generic_i2c_device-34</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>2</default>
+    </attribute>
+    <attribute>
+        <id>I2C_DEV_TYPE</id>
+        <default>PCA9554A_GPIO_EXPANDER</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0generici2cdevice35</id>
+    <type>generic_i2c_device</type>
+    <attribute>
+        <id>HUID</id>
+        <default>0x00550023</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-2/mi-0/mcc-0/omi-0/ocmb_chip-0/generic_i2c_device-3</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>generici2cslave:k0:n0:s0:p35</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>35</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_I2C_CONTROL_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>port</id><value>2</value></field>
+            <field><id>devAddr</id><value>0xFF</value></field>
+        </default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>35</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/generic_i2c_device-35</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>3</default>
+    </attribute>
+    <attribute>
+        <id>I2C_DEV_TYPE</id>
+        <default>PCA9554A_GPIO_EXPANDER</default>
     </attribute>
 </targetInstance>
 
@@ -19141,19 +20658,187 @@
 </targetInstance>
 
 <targetInstance>
-    <id>sys0node0pmic64</id><!-- port2 -->
-    <type>pmic</type>
+        <id>sys0node0pmic64</id>
+        <type>pmic</type>
+        <attribute>
+          <id>HUID</id>
+          <default>0x004E0040</default>
+        </attribute>
+        <attribute>
+            <id>AFFINITY_PATH</id>
+            <default>affinity:sys-0/node-0/proc-1/mc-0/mi-0/mcc-0/omi-0/ocmb_chip-0/pmic-0</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_NAME</id>
+            <default>pmic:k0:n0:s0:p64</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_POS</id>
+            <default>64</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_I2C_CONTROL_INFO</id>
+            <default>
+                <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-1</value></field>
+                <field><id>engine</id><value>3</value></field>
+                <field><id>port</id><value>2</value></field>
+                <field><id>devAddr</id><value>0xFF</value></field>
+            </default>
+        </attribute>
+        <attribute>
+          <id>ORDINAL_ID</id>
+          <default>64</default>
+        </attribute>
+        <attribute>
+            <id>PHYS_PATH</id>
+            <default>physical:sys-0/node-0/pmic-64</default>
+        </attribute>
+        <attribute>
+            <id>REL_POS</id>
+            <default>0</default>
+        </attribute>
+</targetInstance>
+
+<targetInstance>
+        <id>sys0node0pmic65</id>
+        <type>pmic</type>
+        <attribute>
+          <id>HUID</id>
+          <default>0x004E0041</default>
+        </attribute>
+        <attribute>
+            <id>AFFINITY_PATH</id>
+            <default>affinity:sys-0/node-0/proc-1/mc-0/mi-0/mcc-0/omi-0/ocmb_chip-0/pmic-1</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_NAME</id>
+            <default>pmic:k0:n0:s0:p65</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_POS</id>
+            <default>65</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_I2C_CONTROL_INFO</id>
+            <default>
+                <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-1</value></field>
+                <field><id>engine</id><value>3</value></field>
+                <field><id>port</id><value>2</value></field>
+                <field><id>devAddr</id><value>0xFF</value></field>
+            </default>
+        </attribute>
+        <attribute>
+          <id>ORDINAL_ID</id>
+          <default>65</default>
+        </attribute>
+        <attribute>
+            <id>PHYS_PATH</id>
+            <default>physical:sys-0/node-0/pmic-65</default>
+        </attribute>
+        <attribute>
+            <id>REL_POS</id>
+            <default>1</default>
+        </attribute>
+</targetInstance>
+
+<targetInstance>
+        <id>sys0node0pmic66</id>
+        <type>pmic</type>
+        <attribute>
+          <id>HUID</id>
+          <default>0x004E0042</default>
+        </attribute>
+        <attribute>
+            <id>AFFINITY_PATH</id>
+            <default>affinity:sys-0/node-0/proc-1/mc-0/mi-0/mcc-0/omi-0/ocmb_chip-0/pmic-2</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_NAME</id>
+            <default>pmic:k0:n0:s0:p66</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_POS</id>
+            <default>66</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_I2C_CONTROL_INFO</id>
+            <default>
+                <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-1</value></field>
+                <field><id>engine</id><value>3</value></field>
+                <field><id>port</id><value>2</value></field>
+                <field><id>devAddr</id><value>0xFF</value></field>
+            </default>
+        </attribute>
+        <attribute>
+          <id>ORDINAL_ID</id>
+          <default>66</default>
+        </attribute>
+        <attribute>
+            <id>PHYS_PATH</id>
+            <default>physical:sys-0/node-0/pmic-66</default>
+        </attribute>
+        <attribute>
+            <id>REL_POS</id>
+            <default>2</default>
+        </attribute>
+</targetInstance>
+
+<targetInstance>
+        <id>sys0node0pmic67</id>
+        <type>pmic</type>
+        <attribute>
+          <id>HUID</id>
+          <default>0x004E0043</default>
+        </attribute>
+        <attribute>
+            <id>AFFINITY_PATH</id>
+            <default>affinity:sys-0/node-0/proc-1/mc-0/mi-0/mcc-0/omi-0/ocmb_chip-0/pmic-3</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_NAME</id>
+            <default>pmic:k0:n0:s0:p67</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_POS</id>
+            <default>67</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_I2C_CONTROL_INFO</id>
+            <default>
+                <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-1</value></field>
+                <field><id>engine</id><value>3</value></field>
+                <field><id>port</id><value>2</value></field>
+                <field><id>devAddr</id><value>0xFF</value></field>
+            </default>
+        </attribute>
+        <attribute>
+          <id>ORDINAL_ID</id>
+          <default>67</default>
+        </attribute>
+        <attribute>
+            <id>PHYS_PATH</id>
+            <default>physical:sys-0/node-0/pmic-67</default>
+        </attribute>
+        <attribute>
+            <id>REL_POS</id>
+            <default>3</default>
+        </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0generici2cdevice64</id>
+    <type>generic_i2c_device</type>
     <attribute>
-      <id>HUID</id>
-      <default>0x004E0040</default>
+        <id>HUID</id>
+        <default>0x00550040</default>
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-1/mc-0/mi-0/mcc-0/omi-0/ocmb_chip-0/pmic-0</default>
+        <default>affinity:sys-0/node-0/proc-1/mc-0/mi-0/mcc-0/omi-0/ocmb_chip-0/generic_i2c_device-0</default>
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
-        <default>pmic:k0:n0:s0:p64</default>
+        <default>generici2cslave:k0:n0:s0:p64</default>
     </attribute>
     <attribute>
         <id>FAPI_POS</id>
@@ -19165,37 +20850,41 @@
             <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-1</value></field>
             <field><id>engine</id><value>3</value></field>
             <field><id>port</id><value>2</value></field>
-            <field><id>devAddr</id><value>0x90</value></field>
+            <field><id>devAddr</id><value>0xFF</value></field>
         </default>
     </attribute>
     <attribute>
-      <id>ORDINAL_ID</id>
-      <default>64</default>
+        <id>ORDINAL_ID</id>
+        <default>64</default>
     </attribute>
     <attribute>
         <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/pmic-64</default>
+        <default>physical:sys-0/node-0/generic_i2c_device-64</default>
     </attribute>
     <attribute>
         <id>REL_POS</id>
         <default>0</default>
     </attribute>
+    <attribute>
+        <id>I2C_DEV_TYPE</id>
+        <default>ADS7138_ADC</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
-    <id>sys0node0pmic65</id><!-- port2 -->
-    <type>pmic</type>
+    <id>sys0node0generici2cdevice65</id>
+    <type>generic_i2c_device</type>
     <attribute>
-      <id>HUID</id>
-      <default>0x004E0041</default>
+        <id>HUID</id>
+        <default>0x00550041</default>
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-1/mc-0/mi-0/mcc-0/omi-0/ocmb_chip-0/pmic-1</default>
+        <default>affinity:sys-0/node-0/proc-1/mc-0/mi-0/mcc-0/omi-0/ocmb_chip-0/generic_i2c_device-1</default>
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
-        <default>pmic:k0:n0:s0:p65</default>
+        <default>generici2cslave:k0:n0:s0:p65</default>
     </attribute>
     <attribute>
         <id>FAPI_POS</id>
@@ -19207,20 +20896,116 @@
             <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-1</value></field>
             <field><id>engine</id><value>3</value></field>
             <field><id>port</id><value>2</value></field>
-            <field><id>devAddr</id><value>0x90</value></field>
+            <field><id>devAddr</id><value>0xFF</value></field>
         </default>
     </attribute>
     <attribute>
-      <id>ORDINAL_ID</id>
-      <default>65</default>
+        <id>ORDINAL_ID</id>
+        <default>65</default>
     </attribute>
     <attribute>
         <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/pmic-65</default>
+        <default>physical:sys-0/node-0/generic_i2c_device-65</default>
     </attribute>
     <attribute>
         <id>REL_POS</id>
         <default>1</default>
+    </attribute>
+    <attribute>
+        <id>I2C_DEV_TYPE</id>
+        <default>ADS7138_ADC</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0generici2cdevice66</id>
+    <type>generic_i2c_device</type>
+    <attribute>
+        <id>HUID</id>
+        <default>0x00550042</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-1/mc-0/mi-0/mcc-0/omi-0/ocmb_chip-0/generic_i2c_device-2</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>generici2cslave:k0:n0:s0:p66</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>66</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_I2C_CONTROL_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-1</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>port</id><value>2</value></field>
+            <field><id>devAddr</id><value>0xFF</value></field>
+        </default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>66</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/generic_i2c_device-66</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>2</default>
+    </attribute>
+    <attribute>
+        <id>I2C_DEV_TYPE</id>
+        <default>PCA9554A_GPIO_EXPANDER</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0generici2cdevice67</id>
+    <type>generic_i2c_device</type>
+    <attribute>
+        <id>HUID</id>
+        <default>0x00550043</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-1/mc-0/mi-0/mcc-0/omi-0/ocmb_chip-0/generic_i2c_device-3</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>generici2cslave:k0:n0:s0:p67</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>67</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_I2C_CONTROL_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-1</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>port</id><value>2</value></field>
+            <field><id>devAddr</id><value>0xFF</value></field>
+        </default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>67</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/generic_i2c_device-67</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>3</default>
+    </attribute>
+    <attribute>
+        <id>I2C_DEV_TYPE</id>
+        <default>PCA9554A_GPIO_EXPANDER</default>
     </attribute>
 </targetInstance>
 
@@ -19274,8 +21059,6 @@
         </default>
     </attribute>
 </targetInstance>
-
-<!-- DDIMM off of proc1 port8  -->
 
 <targetInstance>
     <id>sys0node0ocmb17</id><!-- port8 -->
@@ -19363,19 +21146,187 @@
 </targetInstance>
 
 <targetInstance>
-    <id>sys0node0pmic68</id><!-- port8 -->
-    <type>pmic</type>
+        <id>sys0node0pmic68</id>
+        <type>pmic</type>
+        <attribute>
+          <id>HUID</id>
+          <default>0x004E0044</default>
+        </attribute>
+        <attribute>
+            <id>AFFINITY_PATH</id>
+            <default>affinity:sys-0/node-0/proc-1/mc-0/mi-0/mcc-0/omi-1/ocmb_chip-0/pmic-0</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_NAME</id>
+            <default>pmic:k0:n0:s0:p68</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_POS</id>
+            <default>68</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_I2C_CONTROL_INFO</id>
+            <default>
+                <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-1</value></field>
+                <field><id>engine</id><value>3</value></field>
+                <field><id>port</id><value>8</value></field>
+                <field><id>devAddr</id><value>0xFF</value></field>
+            </default>
+        </attribute>
+        <attribute>
+          <id>ORDINAL_ID</id>
+          <default>68</default>
+        </attribute>
+        <attribute>
+            <id>PHYS_PATH</id>
+            <default>physical:sys-0/node-0/pmic-68</default>
+        </attribute>
+        <attribute>
+            <id>REL_POS</id>
+            <default>0</default>
+        </attribute>
+</targetInstance>
+
+<targetInstance>
+        <id>sys0node0pmic69</id>
+        <type>pmic</type>
+        <attribute>
+          <id>HUID</id>
+          <default>0x004E0045</default>
+        </attribute>
+        <attribute>
+            <id>AFFINITY_PATH</id>
+            <default>affinity:sys-0/node-0/proc-1/mc-0/mi-0/mcc-0/omi-1/ocmb_chip-0/pmic-1</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_NAME</id>
+            <default>pmic:k0:n0:s0:p69</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_POS</id>
+            <default>69</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_I2C_CONTROL_INFO</id>
+            <default>
+                <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-1</value></field>
+                <field><id>engine</id><value>3</value></field>
+                <field><id>port</id><value>8</value></field>
+                <field><id>devAddr</id><value>0xFF</value></field>
+            </default>
+        </attribute>
+        <attribute>
+          <id>ORDINAL_ID</id>
+          <default>69</default>
+        </attribute>
+        <attribute>
+            <id>PHYS_PATH</id>
+            <default>physical:sys-0/node-0/pmic-69</default>
+        </attribute>
+        <attribute>
+            <id>REL_POS</id>
+            <default>1</default>
+        </attribute>
+</targetInstance>
+
+<targetInstance>
+        <id>sys0node0pmic70</id>
+        <type>pmic</type>
+        <attribute>
+          <id>HUID</id>
+          <default>0x004E0046</default>
+        </attribute>
+        <attribute>
+            <id>AFFINITY_PATH</id>
+            <default>affinity:sys-0/node-0/proc-1/mc-0/mi-0/mcc-0/omi-1/ocmb_chip-0/pmic-2</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_NAME</id>
+            <default>pmic:k0:n0:s0:p70</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_POS</id>
+            <default>70</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_I2C_CONTROL_INFO</id>
+            <default>
+                <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-1</value></field>
+                <field><id>engine</id><value>3</value></field>
+                <field><id>port</id><value>8</value></field>
+                <field><id>devAddr</id><value>0xFF</value></field>
+            </default>
+        </attribute>
+        <attribute>
+          <id>ORDINAL_ID</id>
+          <default>70</default>
+        </attribute>
+        <attribute>
+            <id>PHYS_PATH</id>
+            <default>physical:sys-0/node-0/pmic-70</default>
+        </attribute>
+        <attribute>
+            <id>REL_POS</id>
+            <default>2</default>
+        </attribute>
+</targetInstance>
+
+<targetInstance>
+        <id>sys0node0pmic71</id>
+        <type>pmic</type>
+        <attribute>
+          <id>HUID</id>
+          <default>0x004E0047</default>
+        </attribute>
+        <attribute>
+            <id>AFFINITY_PATH</id>
+            <default>affinity:sys-0/node-0/proc-1/mc-0/mi-0/mcc-0/omi-1/ocmb_chip-0/pmic-3</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_NAME</id>
+            <default>pmic:k0:n0:s0:p71</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_POS</id>
+            <default>71</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_I2C_CONTROL_INFO</id>
+            <default>
+                <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-1</value></field>
+                <field><id>engine</id><value>3</value></field>
+                <field><id>port</id><value>8</value></field>
+                <field><id>devAddr</id><value>0xFF</value></field>
+            </default>
+        </attribute>
+        <attribute>
+          <id>ORDINAL_ID</id>
+          <default>71</default>
+        </attribute>
+        <attribute>
+            <id>PHYS_PATH</id>
+            <default>physical:sys-0/node-0/pmic-71</default>
+        </attribute>
+        <attribute>
+            <id>REL_POS</id>
+            <default>3</default>
+        </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0generici2cdevice68</id>
+    <type>generic_i2c_device</type>
     <attribute>
-      <id>HUID</id>
-      <default>0x004E0044</default>
+        <id>HUID</id>
+        <default>0x00550044</default>
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-1/mc-0/mi-0/mcc-0/omi-1/ocmb_chip-0/pmic-0</default>
+        <default>affinity:sys-0/node-0/proc-1/mc-0/mi-0/mcc-0/omi-1/ocmb_chip-0/generic_i2c_device-0</default>
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
-        <default>pmic:k0:n0:s0:p68</default>
+        <default>generici2cslave:k0:n0:s0:p68</default>
     </attribute>
     <attribute>
         <id>FAPI_POS</id>
@@ -19387,37 +21338,41 @@
             <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-1</value></field>
             <field><id>engine</id><value>3</value></field>
             <field><id>port</id><value>8</value></field>
-            <field><id>devAddr</id><value>0x90</value></field>
+            <field><id>devAddr</id><value>0xFF</value></field>
         </default>
     </attribute>
     <attribute>
-      <id>ORDINAL_ID</id>
-      <default>68</default>
+        <id>ORDINAL_ID</id>
+        <default>68</default>
     </attribute>
     <attribute>
         <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/pmic-68</default>
+        <default>physical:sys-0/node-0/generic_i2c_device-68</default>
     </attribute>
     <attribute>
         <id>REL_POS</id>
         <default>0</default>
     </attribute>
+    <attribute>
+        <id>I2C_DEV_TYPE</id>
+        <default>ADS7138_ADC</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
-    <id>sys0node0pmic69</id><!-- port8 -->
-    <type>pmic</type>
+    <id>sys0node0generici2cdevice69</id>
+    <type>generic_i2c_device</type>
     <attribute>
-      <id>HUID</id>
-      <default>0x004E0045</default>
+        <id>HUID</id>
+        <default>0x00550045</default>
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-1/mc-0/mi-0/mcc-0/omi-1/ocmb_chip-0/pmic-1</default>
+        <default>affinity:sys-0/node-0/proc-1/mc-0/mi-0/mcc-0/omi-1/ocmb_chip-0/generic_i2c_device-1</default>
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
-        <default>pmic:k0:n0:s0:p69</default>
+        <default>generici2cslave:k0:n0:s0:p69</default>
     </attribute>
     <attribute>
         <id>FAPI_POS</id>
@@ -19429,20 +21384,116 @@
             <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-1</value></field>
             <field><id>engine</id><value>3</value></field>
             <field><id>port</id><value>8</value></field>
-            <field><id>devAddr</id><value>0x90</value></field>
+            <field><id>devAddr</id><value>0xFF</value></field>
         </default>
     </attribute>
     <attribute>
-      <id>ORDINAL_ID</id>
-      <default>69</default>
+        <id>ORDINAL_ID</id>
+        <default>69</default>
     </attribute>
     <attribute>
         <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/pmic-69</default>
+        <default>physical:sys-0/node-0/generic_i2c_device-69</default>
     </attribute>
     <attribute>
         <id>REL_POS</id>
         <default>1</default>
+    </attribute>
+    <attribute>
+        <id>I2C_DEV_TYPE</id>
+        <default>ADS7138_ADC</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0generici2cdevice70</id>
+    <type>generic_i2c_device</type>
+    <attribute>
+        <id>HUID</id>
+        <default>0x00550046</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-1/mc-0/mi-0/mcc-0/omi-1/ocmb_chip-0/generic_i2c_device-2</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>generici2cslave:k0:n0:s0:p70</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>70</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_I2C_CONTROL_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-1</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>port</id><value>8</value></field>
+            <field><id>devAddr</id><value>0xFF</value></field>
+        </default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>70</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/generic_i2c_device-70</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>2</default>
+    </attribute>
+    <attribute>
+        <id>I2C_DEV_TYPE</id>
+        <default>PCA9554A_GPIO_EXPANDER</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0generici2cdevice71</id>
+    <type>generic_i2c_device</type>
+    <attribute>
+        <id>HUID</id>
+        <default>0x00550047</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-1/mc-0/mi-0/mcc-0/omi-1/ocmb_chip-0/generic_i2c_device-3</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>generici2cslave:k0:n0:s0:p71</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>71</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_I2C_CONTROL_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-1</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>port</id><value>8</value></field>
+            <field><id>devAddr</id><value>0xFF</value></field>
+        </default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>71</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/generic_i2c_device-71</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>3</default>
+    </attribute>
+    <attribute>
+        <id>I2C_DEV_TYPE</id>
+        <default>PCA9554A_GPIO_EXPANDER</default>
     </attribute>
 </targetInstance>
 
@@ -19496,8 +21547,6 @@
         </default>
     </attribute>
 </targetInstance>
-
-<!-- DDIMM off of proc1 port12  -->
 
 <targetInstance>
     <id>sys0node0ocmb18</id><!-- port12 -->
@@ -19585,19 +21634,187 @@
 </targetInstance>
 
 <targetInstance>
-    <id>sys0node0pmic72</id><!-- port12 -->
-    <type>pmic</type>
+        <id>sys0node0pmic72</id>
+        <type>pmic</type>
+        <attribute>
+          <id>HUID</id>
+          <default>0x004E0048</default>
+        </attribute>
+        <attribute>
+            <id>AFFINITY_PATH</id>
+            <default>affinity:sys-0/node-0/proc-1/mc-0/mi-0/mcc-1/omi-0/ocmb_chip-0/pmic-0</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_NAME</id>
+            <default>pmic:k0:n0:s0:p72</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_POS</id>
+            <default>72</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_I2C_CONTROL_INFO</id>
+            <default>
+                <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-1</value></field>
+                <field><id>engine</id><value>3</value></field>
+                <field><id>port</id><value>12</value></field>
+                <field><id>devAddr</id><value>0xFF</value></field>
+            </default>
+        </attribute>
+        <attribute>
+          <id>ORDINAL_ID</id>
+          <default>72</default>
+        </attribute>
+        <attribute>
+            <id>PHYS_PATH</id>
+            <default>physical:sys-0/node-0/pmic-72</default>
+        </attribute>
+        <attribute>
+            <id>REL_POS</id>
+            <default>0</default>
+        </attribute>
+</targetInstance>
+
+<targetInstance>
+        <id>sys0node0pmic73</id>
+        <type>pmic</type>
+        <attribute>
+          <id>HUID</id>
+          <default>0x004E0049</default>
+        </attribute>
+        <attribute>
+            <id>AFFINITY_PATH</id>
+            <default>affinity:sys-0/node-0/proc-1/mc-0/mi-0/mcc-1/omi-0/ocmb_chip-0/pmic-1</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_NAME</id>
+            <default>pmic:k0:n0:s0:p73</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_POS</id>
+            <default>73</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_I2C_CONTROL_INFO</id>
+            <default>
+                <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-1</value></field>
+                <field><id>engine</id><value>3</value></field>
+                <field><id>port</id><value>12</value></field>
+                <field><id>devAddr</id><value>0xFF</value></field>
+            </default>
+        </attribute>
+        <attribute>
+          <id>ORDINAL_ID</id>
+          <default>73</default>
+        </attribute>
+        <attribute>
+            <id>PHYS_PATH</id>
+            <default>physical:sys-0/node-0/pmic-73</default>
+        </attribute>
+        <attribute>
+            <id>REL_POS</id>
+            <default>1</default>
+        </attribute>
+</targetInstance>
+
+<targetInstance>
+        <id>sys0node0pmic74</id>
+        <type>pmic</type>
+        <attribute>
+          <id>HUID</id>
+          <default>0x004E004A</default>
+        </attribute>
+        <attribute>
+            <id>AFFINITY_PATH</id>
+            <default>affinity:sys-0/node-0/proc-1/mc-0/mi-0/mcc-1/omi-0/ocmb_chip-0/pmic-2</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_NAME</id>
+            <default>pmic:k0:n0:s0:p74</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_POS</id>
+            <default>74</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_I2C_CONTROL_INFO</id>
+            <default>
+                <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-1</value></field>
+                <field><id>engine</id><value>3</value></field>
+                <field><id>port</id><value>12</value></field>
+                <field><id>devAddr</id><value>0xFF</value></field>
+            </default>
+        </attribute>
+        <attribute>
+          <id>ORDINAL_ID</id>
+          <default>74</default>
+        </attribute>
+        <attribute>
+            <id>PHYS_PATH</id>
+            <default>physical:sys-0/node-0/pmic-74</default>
+        </attribute>
+        <attribute>
+            <id>REL_POS</id>
+            <default>2</default>
+        </attribute>
+</targetInstance>
+
+<targetInstance>
+        <id>sys0node0pmic75</id>
+        <type>pmic</type>
+        <attribute>
+          <id>HUID</id>
+          <default>0x004E004B</default>
+        </attribute>
+        <attribute>
+            <id>AFFINITY_PATH</id>
+            <default>affinity:sys-0/node-0/proc-1/mc-0/mi-0/mcc-1/omi-0/ocmb_chip-0/pmic-3</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_NAME</id>
+            <default>pmic:k0:n0:s0:p75</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_POS</id>
+            <default>75</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_I2C_CONTROL_INFO</id>
+            <default>
+                <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-1</value></field>
+                <field><id>engine</id><value>3</value></field>
+                <field><id>port</id><value>12</value></field>
+                <field><id>devAddr</id><value>0xFF</value></field>
+            </default>
+        </attribute>
+        <attribute>
+          <id>ORDINAL_ID</id>
+          <default>75</default>
+        </attribute>
+        <attribute>
+            <id>PHYS_PATH</id>
+            <default>physical:sys-0/node-0/pmic-75</default>
+        </attribute>
+        <attribute>
+            <id>REL_POS</id>
+            <default>3</default>
+        </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0generici2cdevice72</id>
+    <type>generic_i2c_device</type>
     <attribute>
-      <id>HUID</id>
-      <default>0x004E0048</default>
+        <id>HUID</id>
+        <default>0x00550048</default>
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-1/mc-0/mi-0/mcc-1/omi-0/ocmb_chip-0/pmic-0</default>
+        <default>affinity:sys-0/node-0/proc-1/mc-0/mi-0/mcc-1/omi-0/ocmb_chip-0/generic_i2c_device-0</default>
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
-        <default>pmic:k0:n0:s0:p72</default>
+        <default>generici2cslave:k0:n0:s0:p72</default>
     </attribute>
     <attribute>
         <id>FAPI_POS</id>
@@ -19609,37 +21826,41 @@
             <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-1</value></field>
             <field><id>engine</id><value>3</value></field>
             <field><id>port</id><value>12</value></field>
-            <field><id>devAddr</id><value>0x90</value></field>
+            <field><id>devAddr</id><value>0xFF</value></field>
         </default>
     </attribute>
     <attribute>
-      <id>ORDINAL_ID</id>
-      <default>72</default>
+        <id>ORDINAL_ID</id>
+        <default>72</default>
     </attribute>
     <attribute>
         <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/pmic-72</default>
+        <default>physical:sys-0/node-0/generic_i2c_device-72</default>
     </attribute>
     <attribute>
         <id>REL_POS</id>
         <default>0</default>
     </attribute>
+    <attribute>
+        <id>I2C_DEV_TYPE</id>
+        <default>ADS7138_ADC</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
-    <id>sys0node0pmic73</id><!-- port12 -->
-    <type>pmic</type>
+    <id>sys0node0generici2cdevice73</id>
+    <type>generic_i2c_device</type>
     <attribute>
-      <id>HUID</id>
-      <default>0x004E0049</default>
+        <id>HUID</id>
+        <default>0x00550049</default>
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-1/mc-0/mi-0/mcc-1/omi-0/ocmb_chip-0/pmic-1</default>
+        <default>affinity:sys-0/node-0/proc-1/mc-0/mi-0/mcc-1/omi-0/ocmb_chip-0/generic_i2c_device-1</default>
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
-        <default>pmic:k0:n0:s0:p73</default>
+        <default>generici2cslave:k0:n0:s0:p73</default>
     </attribute>
     <attribute>
         <id>FAPI_POS</id>
@@ -19651,20 +21872,116 @@
             <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-1</value></field>
             <field><id>engine</id><value>3</value></field>
             <field><id>port</id><value>12</value></field>
-            <field><id>devAddr</id><value>0x90</value></field>
+            <field><id>devAddr</id><value>0xFF</value></field>
         </default>
     </attribute>
     <attribute>
-      <id>ORDINAL_ID</id>
-      <default>73</default>
+        <id>ORDINAL_ID</id>
+        <default>73</default>
     </attribute>
     <attribute>
         <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/pmic-73</default>
+        <default>physical:sys-0/node-0/generic_i2c_device-73</default>
     </attribute>
     <attribute>
         <id>REL_POS</id>
         <default>1</default>
+    </attribute>
+    <attribute>
+        <id>I2C_DEV_TYPE</id>
+        <default>ADS7138_ADC</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0generici2cdevice74</id>
+    <type>generic_i2c_device</type>
+    <attribute>
+        <id>HUID</id>
+        <default>0x0055004A</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-1/mc-0/mi-0/mcc-1/omi-0/ocmb_chip-0/generic_i2c_device-2</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>generici2cslave:k0:n0:s0:p74</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>74</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_I2C_CONTROL_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-1</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>port</id><value>12</value></field>
+            <field><id>devAddr</id><value>0xFF</value></field>
+        </default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>74</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/generic_i2c_device-74</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>2</default>
+    </attribute>
+    <attribute>
+        <id>I2C_DEV_TYPE</id>
+        <default>PCA9554A_GPIO_EXPANDER</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0generici2cdevice75</id>
+    <type>generic_i2c_device</type>
+    <attribute>
+        <id>HUID</id>
+        <default>0x0055004B</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-1/mc-0/mi-0/mcc-1/omi-0/ocmb_chip-0/generic_i2c_device-3</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>generici2cslave:k0:n0:s0:p75</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>75</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_I2C_CONTROL_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-1</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>port</id><value>12</value></field>
+            <field><id>devAddr</id><value>0xFF</value></field>
+        </default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>75</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/generic_i2c_device-75</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>3</default>
+    </attribute>
+    <attribute>
+        <id>I2C_DEV_TYPE</id>
+        <default>PCA9554A_GPIO_EXPANDER</default>
     </attribute>
 </targetInstance>
 
@@ -19718,8 +22035,6 @@
         </default>
     </attribute>
 </targetInstance>
-
-<!-- DDIMM off of proc1 port15  -->
 
 <targetInstance>
     <id>sys0node0ocmb19</id><!-- port15 -->
@@ -19807,19 +22122,187 @@
 </targetInstance>
 
 <targetInstance>
-    <id>sys0node0pmic76</id><!-- port15 -->
-    <type>pmic</type>
+        <id>sys0node0pmic76</id>
+        <type>pmic</type>
+        <attribute>
+          <id>HUID</id>
+          <default>0x004E004C</default>
+        </attribute>
+        <attribute>
+            <id>AFFINITY_PATH</id>
+            <default>affinity:sys-0/node-0/proc-1/mc-0/mi-0/mcc-1/omi-1/ocmb_chip-0/pmic-0</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_NAME</id>
+            <default>pmic:k0:n0:s0:p76</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_POS</id>
+            <default>76</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_I2C_CONTROL_INFO</id>
+            <default>
+                <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-1</value></field>
+                <field><id>engine</id><value>3</value></field>
+                <field><id>port</id><value>15</value></field>
+                <field><id>devAddr</id><value>0xFF</value></field>
+            </default>
+        </attribute>
+        <attribute>
+          <id>ORDINAL_ID</id>
+          <default>76</default>
+        </attribute>
+        <attribute>
+            <id>PHYS_PATH</id>
+            <default>physical:sys-0/node-0/pmic-76</default>
+        </attribute>
+        <attribute>
+            <id>REL_POS</id>
+            <default>0</default>
+        </attribute>
+</targetInstance>
+
+<targetInstance>
+        <id>sys0node0pmic77</id>
+        <type>pmic</type>
+        <attribute>
+          <id>HUID</id>
+          <default>0x004E004D</default>
+        </attribute>
+        <attribute>
+            <id>AFFINITY_PATH</id>
+            <default>affinity:sys-0/node-0/proc-1/mc-0/mi-0/mcc-1/omi-1/ocmb_chip-0/pmic-1</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_NAME</id>
+            <default>pmic:k0:n0:s0:p77</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_POS</id>
+            <default>77</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_I2C_CONTROL_INFO</id>
+            <default>
+                <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-1</value></field>
+                <field><id>engine</id><value>3</value></field>
+                <field><id>port</id><value>15</value></field>
+                <field><id>devAddr</id><value>0xFF</value></field>
+            </default>
+        </attribute>
+        <attribute>
+          <id>ORDINAL_ID</id>
+          <default>77</default>
+        </attribute>
+        <attribute>
+            <id>PHYS_PATH</id>
+            <default>physical:sys-0/node-0/pmic-77</default>
+        </attribute>
+        <attribute>
+            <id>REL_POS</id>
+            <default>1</default>
+        </attribute>
+</targetInstance>
+
+<targetInstance>
+        <id>sys0node0pmic78</id>
+        <type>pmic</type>
+        <attribute>
+          <id>HUID</id>
+          <default>0x004E004E</default>
+        </attribute>
+        <attribute>
+            <id>AFFINITY_PATH</id>
+            <default>affinity:sys-0/node-0/proc-1/mc-0/mi-0/mcc-1/omi-1/ocmb_chip-0/pmic-2</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_NAME</id>
+            <default>pmic:k0:n0:s0:p78</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_POS</id>
+            <default>78</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_I2C_CONTROL_INFO</id>
+            <default>
+                <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-1</value></field>
+                <field><id>engine</id><value>3</value></field>
+                <field><id>port</id><value>15</value></field>
+                <field><id>devAddr</id><value>0xFF</value></field>
+            </default>
+        </attribute>
+        <attribute>
+          <id>ORDINAL_ID</id>
+          <default>78</default>
+        </attribute>
+        <attribute>
+            <id>PHYS_PATH</id>
+            <default>physical:sys-0/node-0/pmic-78</default>
+        </attribute>
+        <attribute>
+            <id>REL_POS</id>
+            <default>2</default>
+        </attribute>
+</targetInstance>
+
+<targetInstance>
+        <id>sys0node0pmic79</id>
+        <type>pmic</type>
+        <attribute>
+          <id>HUID</id>
+          <default>0x004E004F</default>
+        </attribute>
+        <attribute>
+            <id>AFFINITY_PATH</id>
+            <default>affinity:sys-0/node-0/proc-1/mc-0/mi-0/mcc-1/omi-1/ocmb_chip-0/pmic-3</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_NAME</id>
+            <default>pmic:k0:n0:s0:p79</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_POS</id>
+            <default>79</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_I2C_CONTROL_INFO</id>
+            <default>
+                <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-1</value></field>
+                <field><id>engine</id><value>3</value></field>
+                <field><id>port</id><value>15</value></field>
+                <field><id>devAddr</id><value>0xFF</value></field>
+            </default>
+        </attribute>
+        <attribute>
+          <id>ORDINAL_ID</id>
+          <default>79</default>
+        </attribute>
+        <attribute>
+            <id>PHYS_PATH</id>
+            <default>physical:sys-0/node-0/pmic-79</default>
+        </attribute>
+        <attribute>
+            <id>REL_POS</id>
+            <default>3</default>
+        </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0generici2cdevice76</id>
+    <type>generic_i2c_device</type>
     <attribute>
-      <id>HUID</id>
-      <default>0x004E004C</default>
+        <id>HUID</id>
+        <default>0x0055004C</default>
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-1/mc-0/mi-0/mcc-1/omi-1/ocmb_chip-0/pmic-0</default>
+        <default>affinity:sys-0/node-0/proc-1/mc-0/mi-0/mcc-1/omi-1/ocmb_chip-0/generic_i2c_device-0</default>
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
-        <default>pmic:k0:n0:s0:p76</default>
+        <default>generici2cslave:k0:n0:s0:p76</default>
     </attribute>
     <attribute>
         <id>FAPI_POS</id>
@@ -19831,37 +22314,41 @@
             <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-1</value></field>
             <field><id>engine</id><value>3</value></field>
             <field><id>port</id><value>15</value></field>
-            <field><id>devAddr</id><value>0x90</value></field>
+            <field><id>devAddr</id><value>0xFF</value></field>
         </default>
     </attribute>
     <attribute>
-      <id>ORDINAL_ID</id>
-      <default>76</default>
+        <id>ORDINAL_ID</id>
+        <default>76</default>
     </attribute>
     <attribute>
         <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/pmic-76</default>
+        <default>physical:sys-0/node-0/generic_i2c_device-76</default>
     </attribute>
     <attribute>
         <id>REL_POS</id>
         <default>0</default>
     </attribute>
+    <attribute>
+        <id>I2C_DEV_TYPE</id>
+        <default>ADS7138_ADC</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
-    <id>sys0node0pmic77</id><!-- port15 -->
-    <type>pmic</type>
+    <id>sys0node0generici2cdevice77</id>
+    <type>generic_i2c_device</type>
     <attribute>
-      <id>HUID</id>
-      <default>0x004E004D</default>
+        <id>HUID</id>
+        <default>0x0055004D</default>
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-1/mc-0/mi-0/mcc-1/omi-1/ocmb_chip-0/pmic-1</default>
+        <default>affinity:sys-0/node-0/proc-1/mc-0/mi-0/mcc-1/omi-1/ocmb_chip-0/generic_i2c_device-1</default>
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
-        <default>pmic:k0:n0:s0:p77</default>
+        <default>generici2cslave:k0:n0:s0:p77</default>
     </attribute>
     <attribute>
         <id>FAPI_POS</id>
@@ -19873,20 +22360,116 @@
             <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-1</value></field>
             <field><id>engine</id><value>3</value></field>
             <field><id>port</id><value>15</value></field>
-            <field><id>devAddr</id><value>0x90</value></field>
+            <field><id>devAddr</id><value>0xFF</value></field>
         </default>
     </attribute>
     <attribute>
-      <id>ORDINAL_ID</id>
-      <default>77</default>
+        <id>ORDINAL_ID</id>
+        <default>77</default>
     </attribute>
     <attribute>
         <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/pmic-77</default>
+        <default>physical:sys-0/node-0/generic_i2c_device-77</default>
     </attribute>
     <attribute>
         <id>REL_POS</id>
         <default>1</default>
+    </attribute>
+    <attribute>
+        <id>I2C_DEV_TYPE</id>
+        <default>ADS7138_ADC</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0generici2cdevice78</id>
+    <type>generic_i2c_device</type>
+    <attribute>
+        <id>HUID</id>
+        <default>0x0055004E</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-1/mc-0/mi-0/mcc-1/omi-1/ocmb_chip-0/generic_i2c_device-2</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>generici2cslave:k0:n0:s0:p78</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>78</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_I2C_CONTROL_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-1</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>port</id><value>15</value></field>
+            <field><id>devAddr</id><value>0xFF</value></field>
+        </default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>78</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/generic_i2c_device-78</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>2</default>
+    </attribute>
+    <attribute>
+        <id>I2C_DEV_TYPE</id>
+        <default>PCA9554A_GPIO_EXPANDER</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0generici2cdevice79</id>
+    <type>generic_i2c_device</type>
+    <attribute>
+        <id>HUID</id>
+        <default>0x0055004F</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-1/mc-0/mi-0/mcc-1/omi-1/ocmb_chip-0/generic_i2c_device-3</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>generici2cslave:k0:n0:s0:p79</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>79</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_I2C_CONTROL_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-1</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>port</id><value>15</value></field>
+            <field><id>devAddr</id><value>0xFF</value></field>
+        </default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>79</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/generic_i2c_device-79</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>3</default>
+    </attribute>
+    <attribute>
+        <id>I2C_DEV_TYPE</id>
+        <default>PCA9554A_GPIO_EXPANDER</default>
     </attribute>
 </targetInstance>
 
@@ -19940,8 +22523,6 @@
         </default>
     </attribute>
 </targetInstance>
-
-<!-- DDIMM off of proc1 port13  -->
 
 <targetInstance>
     <id>sys0node0ocmb20</id><!-- port13 -->
@@ -20029,19 +22610,187 @@
 </targetInstance>
 
 <targetInstance>
-    <id>sys0node0pmic80</id><!-- port13 -->
-    <type>pmic</type>
+        <id>sys0node0pmic80</id>
+        <type>pmic</type>
+        <attribute>
+          <id>HUID</id>
+          <default>0x004E0050</default>
+        </attribute>
+        <attribute>
+            <id>AFFINITY_PATH</id>
+            <default>affinity:sys-0/node-0/proc-1/mc-1/mi-0/mcc-0/omi-0/ocmb_chip-0/pmic-0</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_NAME</id>
+            <default>pmic:k0:n0:s0:p80</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_POS</id>
+            <default>80</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_I2C_CONTROL_INFO</id>
+            <default>
+                <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-1</value></field>
+                <field><id>engine</id><value>3</value></field>
+                <field><id>port</id><value>13</value></field>
+                <field><id>devAddr</id><value>0xFF</value></field>
+            </default>
+        </attribute>
+        <attribute>
+          <id>ORDINAL_ID</id>
+          <default>80</default>
+        </attribute>
+        <attribute>
+            <id>PHYS_PATH</id>
+            <default>physical:sys-0/node-0/pmic-80</default>
+        </attribute>
+        <attribute>
+            <id>REL_POS</id>
+            <default>0</default>
+        </attribute>
+</targetInstance>
+
+<targetInstance>
+        <id>sys0node0pmic81</id>
+        <type>pmic</type>
+        <attribute>
+          <id>HUID</id>
+          <default>0x004E0051</default>
+        </attribute>
+        <attribute>
+            <id>AFFINITY_PATH</id>
+            <default>affinity:sys-0/node-0/proc-1/mc-1/mi-0/mcc-0/omi-0/ocmb_chip-0/pmic-1</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_NAME</id>
+            <default>pmic:k0:n0:s0:p81</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_POS</id>
+            <default>81</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_I2C_CONTROL_INFO</id>
+            <default>
+                <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-1</value></field>
+                <field><id>engine</id><value>3</value></field>
+                <field><id>port</id><value>13</value></field>
+                <field><id>devAddr</id><value>0xFF</value></field>
+            </default>
+        </attribute>
+        <attribute>
+          <id>ORDINAL_ID</id>
+          <default>81</default>
+        </attribute>
+        <attribute>
+            <id>PHYS_PATH</id>
+            <default>physical:sys-0/node-0/pmic-81</default>
+        </attribute>
+        <attribute>
+            <id>REL_POS</id>
+            <default>1</default>
+        </attribute>
+</targetInstance>
+
+<targetInstance>
+        <id>sys0node0pmic82</id>
+        <type>pmic</type>
+        <attribute>
+          <id>HUID</id>
+          <default>0x004E0052</default>
+        </attribute>
+        <attribute>
+            <id>AFFINITY_PATH</id>
+            <default>affinity:sys-0/node-0/proc-1/mc-1/mi-0/mcc-0/omi-0/ocmb_chip-0/pmic-2</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_NAME</id>
+            <default>pmic:k0:n0:s0:p82</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_POS</id>
+            <default>82</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_I2C_CONTROL_INFO</id>
+            <default>
+                <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-1</value></field>
+                <field><id>engine</id><value>3</value></field>
+                <field><id>port</id><value>13</value></field>
+                <field><id>devAddr</id><value>0xFF</value></field>
+            </default>
+        </attribute>
+        <attribute>
+          <id>ORDINAL_ID</id>
+          <default>82</default>
+        </attribute>
+        <attribute>
+            <id>PHYS_PATH</id>
+            <default>physical:sys-0/node-0/pmic-82</default>
+        </attribute>
+        <attribute>
+            <id>REL_POS</id>
+            <default>2</default>
+        </attribute>
+</targetInstance>
+
+<targetInstance>
+        <id>sys0node0pmic83</id>
+        <type>pmic</type>
+        <attribute>
+          <id>HUID</id>
+          <default>0x004E0053</default>
+        </attribute>
+        <attribute>
+            <id>AFFINITY_PATH</id>
+            <default>affinity:sys-0/node-0/proc-1/mc-1/mi-0/mcc-0/omi-0/ocmb_chip-0/pmic-3</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_NAME</id>
+            <default>pmic:k0:n0:s0:p83</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_POS</id>
+            <default>83</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_I2C_CONTROL_INFO</id>
+            <default>
+                <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-1</value></field>
+                <field><id>engine</id><value>3</value></field>
+                <field><id>port</id><value>13</value></field>
+                <field><id>devAddr</id><value>0xFF</value></field>
+            </default>
+        </attribute>
+        <attribute>
+          <id>ORDINAL_ID</id>
+          <default>83</default>
+        </attribute>
+        <attribute>
+            <id>PHYS_PATH</id>
+            <default>physical:sys-0/node-0/pmic-83</default>
+        </attribute>
+        <attribute>
+            <id>REL_POS</id>
+            <default>3</default>
+        </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0generici2cdevice80</id>
+    <type>generic_i2c_device</type>
     <attribute>
-      <id>HUID</id>
-      <default>0x004E0050</default>
+        <id>HUID</id>
+        <default>0x00550050</default>
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-1/mc-1/mi-0/mcc-0/omi-0/ocmb_chip-0/pmic-0</default>
+        <default>affinity:sys-0/node-0/proc-1/mc-1/mi-0/mcc-0/omi-0/ocmb_chip-0/generic_i2c_device-0</default>
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
-        <default>pmic:k0:n0:s0:p80</default>
+        <default>generici2cslave:k0:n0:s0:p80</default>
     </attribute>
     <attribute>
         <id>FAPI_POS</id>
@@ -20053,37 +22802,41 @@
             <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-1</value></field>
             <field><id>engine</id><value>3</value></field>
             <field><id>port</id><value>13</value></field>
-            <field><id>devAddr</id><value>0x90</value></field>
+            <field><id>devAddr</id><value>0xFF</value></field>
         </default>
     </attribute>
     <attribute>
-      <id>ORDINAL_ID</id>
-      <default>80</default>
+        <id>ORDINAL_ID</id>
+        <default>80</default>
     </attribute>
     <attribute>
         <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/pmic-80</default>
+        <default>physical:sys-0/node-0/generic_i2c_device-80</default>
     </attribute>
     <attribute>
         <id>REL_POS</id>
         <default>0</default>
     </attribute>
+    <attribute>
+        <id>I2C_DEV_TYPE</id>
+        <default>ADS7138_ADC</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
-    <id>sys0node0pmic81</id><!-- port13 -->
-    <type>pmic</type>
+    <id>sys0node0generici2cdevice81</id>
+    <type>generic_i2c_device</type>
     <attribute>
-      <id>HUID</id>
-      <default>0x004E0051</default>
+        <id>HUID</id>
+        <default>0x00550051</default>
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-1/mc-1/mi-0/mcc-0/omi-0/ocmb_chip-0/pmic-1</default>
+        <default>affinity:sys-0/node-0/proc-1/mc-1/mi-0/mcc-0/omi-0/ocmb_chip-0/generic_i2c_device-1</default>
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
-        <default>pmic:k0:n0:s0:p81</default>
+        <default>generici2cslave:k0:n0:s0:p81</default>
     </attribute>
     <attribute>
         <id>FAPI_POS</id>
@@ -20095,20 +22848,116 @@
             <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-1</value></field>
             <field><id>engine</id><value>3</value></field>
             <field><id>port</id><value>13</value></field>
-            <field><id>devAddr</id><value>0x90</value></field>
+            <field><id>devAddr</id><value>0xFF</value></field>
         </default>
     </attribute>
     <attribute>
-      <id>ORDINAL_ID</id>
-      <default>81</default>
+        <id>ORDINAL_ID</id>
+        <default>81</default>
     </attribute>
     <attribute>
         <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/pmic-81</default>
+        <default>physical:sys-0/node-0/generic_i2c_device-81</default>
     </attribute>
     <attribute>
         <id>REL_POS</id>
         <default>1</default>
+    </attribute>
+    <attribute>
+        <id>I2C_DEV_TYPE</id>
+        <default>ADS7138_ADC</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0generici2cdevice82</id>
+    <type>generic_i2c_device</type>
+    <attribute>
+        <id>HUID</id>
+        <default>0x00550052</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-1/mc-1/mi-0/mcc-0/omi-0/ocmb_chip-0/generic_i2c_device-2</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>generici2cslave:k0:n0:s0:p82</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>82</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_I2C_CONTROL_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-1</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>port</id><value>13</value></field>
+            <field><id>devAddr</id><value>0xFF</value></field>
+        </default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>82</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/generic_i2c_device-82</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>2</default>
+    </attribute>
+    <attribute>
+        <id>I2C_DEV_TYPE</id>
+        <default>PCA9554A_GPIO_EXPANDER</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0generici2cdevice83</id>
+    <type>generic_i2c_device</type>
+    <attribute>
+        <id>HUID</id>
+        <default>0x00550053</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-1/mc-1/mi-0/mcc-0/omi-0/ocmb_chip-0/generic_i2c_device-3</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>generici2cslave:k0:n0:s0:p83</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>83</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_I2C_CONTROL_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-1</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>port</id><value>13</value></field>
+            <field><id>devAddr</id><value>0xFF</value></field>
+        </default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>83</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/generic_i2c_device-83</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>3</default>
+    </attribute>
+    <attribute>
+        <id>I2C_DEV_TYPE</id>
+        <default>PCA9554A_GPIO_EXPANDER</default>
     </attribute>
 </targetInstance>
 
@@ -20162,8 +23011,6 @@
         </default>
     </attribute>
 </targetInstance>
-
-<!-- DDIMM off of proc1 port9  -->
 
 <targetInstance>
     <id>sys0node0ocmb21</id><!-- port9 -->
@@ -20251,19 +23098,187 @@
 </targetInstance>
 
 <targetInstance>
-    <id>sys0node0pmic84</id><!-- port9 -->
-    <type>pmic</type>
+        <id>sys0node0pmic84</id>
+        <type>pmic</type>
+        <attribute>
+          <id>HUID</id>
+          <default>0x004E0054</default>
+        </attribute>
+        <attribute>
+            <id>AFFINITY_PATH</id>
+            <default>affinity:sys-0/node-0/proc-1/mc-1/mi-0/mcc-0/omi-1/ocmb_chip-0/pmic-0</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_NAME</id>
+            <default>pmic:k0:n0:s0:p84</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_POS</id>
+            <default>84</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_I2C_CONTROL_INFO</id>
+            <default>
+                <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-1</value></field>
+                <field><id>engine</id><value>3</value></field>
+                <field><id>port</id><value>9</value></field>
+                <field><id>devAddr</id><value>0xFF</value></field>
+            </default>
+        </attribute>
+        <attribute>
+          <id>ORDINAL_ID</id>
+          <default>84</default>
+        </attribute>
+        <attribute>
+            <id>PHYS_PATH</id>
+            <default>physical:sys-0/node-0/pmic-84</default>
+        </attribute>
+        <attribute>
+            <id>REL_POS</id>
+            <default>0</default>
+        </attribute>
+</targetInstance>
+
+<targetInstance>
+        <id>sys0node0pmic85</id>
+        <type>pmic</type>
+        <attribute>
+          <id>HUID</id>
+          <default>0x004E0055</default>
+        </attribute>
+        <attribute>
+            <id>AFFINITY_PATH</id>
+            <default>affinity:sys-0/node-0/proc-1/mc-1/mi-0/mcc-0/omi-1/ocmb_chip-0/pmic-1</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_NAME</id>
+            <default>pmic:k0:n0:s0:p85</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_POS</id>
+            <default>85</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_I2C_CONTROL_INFO</id>
+            <default>
+                <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-1</value></field>
+                <field><id>engine</id><value>3</value></field>
+                <field><id>port</id><value>9</value></field>
+                <field><id>devAddr</id><value>0xFF</value></field>
+            </default>
+        </attribute>
+        <attribute>
+          <id>ORDINAL_ID</id>
+          <default>85</default>
+        </attribute>
+        <attribute>
+            <id>PHYS_PATH</id>
+            <default>physical:sys-0/node-0/pmic-85</default>
+        </attribute>
+        <attribute>
+            <id>REL_POS</id>
+            <default>1</default>
+        </attribute>
+</targetInstance>
+
+<targetInstance>
+        <id>sys0node0pmic86</id>
+        <type>pmic</type>
+        <attribute>
+          <id>HUID</id>
+          <default>0x004E0056</default>
+        </attribute>
+        <attribute>
+            <id>AFFINITY_PATH</id>
+            <default>affinity:sys-0/node-0/proc-1/mc-1/mi-0/mcc-0/omi-1/ocmb_chip-0/pmic-2</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_NAME</id>
+            <default>pmic:k0:n0:s0:p86</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_POS</id>
+            <default>86</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_I2C_CONTROL_INFO</id>
+            <default>
+                <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-1</value></field>
+                <field><id>engine</id><value>3</value></field>
+                <field><id>port</id><value>9</value></field>
+                <field><id>devAddr</id><value>0xFF</value></field>
+            </default>
+        </attribute>
+        <attribute>
+          <id>ORDINAL_ID</id>
+          <default>86</default>
+        </attribute>
+        <attribute>
+            <id>PHYS_PATH</id>
+            <default>physical:sys-0/node-0/pmic-86</default>
+        </attribute>
+        <attribute>
+            <id>REL_POS</id>
+            <default>2</default>
+        </attribute>
+</targetInstance>
+
+<targetInstance>
+        <id>sys0node0pmic87</id>
+        <type>pmic</type>
+        <attribute>
+          <id>HUID</id>
+          <default>0x004E0057</default>
+        </attribute>
+        <attribute>
+            <id>AFFINITY_PATH</id>
+            <default>affinity:sys-0/node-0/proc-1/mc-1/mi-0/mcc-0/omi-1/ocmb_chip-0/pmic-3</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_NAME</id>
+            <default>pmic:k0:n0:s0:p87</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_POS</id>
+            <default>87</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_I2C_CONTROL_INFO</id>
+            <default>
+                <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-1</value></field>
+                <field><id>engine</id><value>3</value></field>
+                <field><id>port</id><value>9</value></field>
+                <field><id>devAddr</id><value>0xFF</value></field>
+            </default>
+        </attribute>
+        <attribute>
+          <id>ORDINAL_ID</id>
+          <default>87</default>
+        </attribute>
+        <attribute>
+            <id>PHYS_PATH</id>
+            <default>physical:sys-0/node-0/pmic-87</default>
+        </attribute>
+        <attribute>
+            <id>REL_POS</id>
+            <default>3</default>
+        </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0generici2cdevice84</id>
+    <type>generic_i2c_device</type>
     <attribute>
-      <id>HUID</id>
-      <default>0x004E0054</default>
+        <id>HUID</id>
+        <default>0x00550054</default>
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-1/mc-1/mi-0/mcc-0/omi-1/ocmb_chip-0/pmic-0</default>
+        <default>affinity:sys-0/node-0/proc-1/mc-1/mi-0/mcc-0/omi-1/ocmb_chip-0/generic_i2c_device-0</default>
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
-        <default>pmic:k0:n0:s0:p84</default>
+        <default>generici2cslave:k0:n0:s0:p84</default>
     </attribute>
     <attribute>
         <id>FAPI_POS</id>
@@ -20275,37 +23290,41 @@
             <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-1</value></field>
             <field><id>engine</id><value>3</value></field>
             <field><id>port</id><value>9</value></field>
-            <field><id>devAddr</id><value>0x90</value></field>
+            <field><id>devAddr</id><value>0xFF</value></field>
         </default>
     </attribute>
     <attribute>
-      <id>ORDINAL_ID</id>
-      <default>84</default>
+        <id>ORDINAL_ID</id>
+        <default>84</default>
     </attribute>
     <attribute>
         <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/pmic-84</default>
+        <default>physical:sys-0/node-0/generic_i2c_device-84</default>
     </attribute>
     <attribute>
         <id>REL_POS</id>
         <default>0</default>
     </attribute>
+    <attribute>
+        <id>I2C_DEV_TYPE</id>
+        <default>ADS7138_ADC</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
-    <id>sys0node0pmic85</id><!-- port9 -->
-    <type>pmic</type>
+    <id>sys0node0generici2cdevice85</id>
+    <type>generic_i2c_device</type>
     <attribute>
-      <id>HUID</id>
-      <default>0x004E0055</default>
+        <id>HUID</id>
+        <default>0x00550055</default>
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-1/mc-1/mi-0/mcc-0/omi-1/ocmb_chip-0/pmic-1</default>
+        <default>affinity:sys-0/node-0/proc-1/mc-1/mi-0/mcc-0/omi-1/ocmb_chip-0/generic_i2c_device-1</default>
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
-        <default>pmic:k0:n0:s0:p85</default>
+        <default>generici2cslave:k0:n0:s0:p85</default>
     </attribute>
     <attribute>
         <id>FAPI_POS</id>
@@ -20317,20 +23336,116 @@
             <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-1</value></field>
             <field><id>engine</id><value>3</value></field>
             <field><id>port</id><value>9</value></field>
-            <field><id>devAddr</id><value>0x90</value></field>
+            <field><id>devAddr</id><value>0xFF</value></field>
         </default>
     </attribute>
     <attribute>
-      <id>ORDINAL_ID</id>
-      <default>85</default>
+        <id>ORDINAL_ID</id>
+        <default>85</default>
     </attribute>
     <attribute>
         <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/pmic-85</default>
+        <default>physical:sys-0/node-0/generic_i2c_device-85</default>
     </attribute>
     <attribute>
         <id>REL_POS</id>
         <default>1</default>
+    </attribute>
+    <attribute>
+        <id>I2C_DEV_TYPE</id>
+        <default>ADS7138_ADC</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0generici2cdevice86</id>
+    <type>generic_i2c_device</type>
+    <attribute>
+        <id>HUID</id>
+        <default>0x00550056</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-1/mc-1/mi-0/mcc-0/omi-1/ocmb_chip-0/generic_i2c_device-2</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>generici2cslave:k0:n0:s0:p86</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>86</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_I2C_CONTROL_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-1</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>port</id><value>9</value></field>
+            <field><id>devAddr</id><value>0xFF</value></field>
+        </default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>86</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/generic_i2c_device-86</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>2</default>
+    </attribute>
+    <attribute>
+        <id>I2C_DEV_TYPE</id>
+        <default>PCA9554A_GPIO_EXPANDER</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0generici2cdevice87</id>
+    <type>generic_i2c_device</type>
+    <attribute>
+        <id>HUID</id>
+        <default>0x00550057</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-1/mc-1/mi-0/mcc-0/omi-1/ocmb_chip-0/generic_i2c_device-3</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>generici2cslave:k0:n0:s0:p87</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>87</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_I2C_CONTROL_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-1</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>port</id><value>9</value></field>
+            <field><id>devAddr</id><value>0xFF</value></field>
+        </default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>87</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/generic_i2c_device-87</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>3</default>
+    </attribute>
+    <attribute>
+        <id>I2C_DEV_TYPE</id>
+        <default>PCA9554A_GPIO_EXPANDER</default>
     </attribute>
 </targetInstance>
 
@@ -20384,8 +23499,6 @@
         </default>
     </attribute>
 </targetInstance>
-
-<!-- DDIMM off of proc1 port3  -->
 
 <targetInstance>
     <id>sys0node0ocmb22</id><!-- port3 -->
@@ -20473,19 +23586,187 @@
 </targetInstance>
 
 <targetInstance>
-    <id>sys0node0pmic88</id><!-- port3 -->
-    <type>pmic</type>
+        <id>sys0node0pmic88</id>
+        <type>pmic</type>
+        <attribute>
+          <id>HUID</id>
+          <default>0x004E0058</default>
+        </attribute>
+        <attribute>
+            <id>AFFINITY_PATH</id>
+            <default>affinity:sys-0/node-0/proc-1/mc-1/mi-0/mcc-1/omi-0/ocmb_chip-0/pmic-0</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_NAME</id>
+            <default>pmic:k0:n0:s0:p88</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_POS</id>
+            <default>88</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_I2C_CONTROL_INFO</id>
+            <default>
+                <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-1</value></field>
+                <field><id>engine</id><value>3</value></field>
+                <field><id>port</id><value>3</value></field>
+                <field><id>devAddr</id><value>0xFF</value></field>
+            </default>
+        </attribute>
+        <attribute>
+          <id>ORDINAL_ID</id>
+          <default>88</default>
+        </attribute>
+        <attribute>
+            <id>PHYS_PATH</id>
+            <default>physical:sys-0/node-0/pmic-88</default>
+        </attribute>
+        <attribute>
+            <id>REL_POS</id>
+            <default>0</default>
+        </attribute>
+</targetInstance>
+
+<targetInstance>
+        <id>sys0node0pmic89</id>
+        <type>pmic</type>
+        <attribute>
+          <id>HUID</id>
+          <default>0x004E0059</default>
+        </attribute>
+        <attribute>
+            <id>AFFINITY_PATH</id>
+            <default>affinity:sys-0/node-0/proc-1/mc-1/mi-0/mcc-1/omi-0/ocmb_chip-0/pmic-1</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_NAME</id>
+            <default>pmic:k0:n0:s0:p89</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_POS</id>
+            <default>89</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_I2C_CONTROL_INFO</id>
+            <default>
+                <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-1</value></field>
+                <field><id>engine</id><value>3</value></field>
+                <field><id>port</id><value>3</value></field>
+                <field><id>devAddr</id><value>0xFF</value></field>
+            </default>
+        </attribute>
+        <attribute>
+          <id>ORDINAL_ID</id>
+          <default>89</default>
+        </attribute>
+        <attribute>
+            <id>PHYS_PATH</id>
+            <default>physical:sys-0/node-0/pmic-89</default>
+        </attribute>
+        <attribute>
+            <id>REL_POS</id>
+            <default>1</default>
+        </attribute>
+</targetInstance>
+
+<targetInstance>
+        <id>sys0node0pmic90</id>
+        <type>pmic</type>
+        <attribute>
+          <id>HUID</id>
+          <default>0x004E005A</default>
+        </attribute>
+        <attribute>
+            <id>AFFINITY_PATH</id>
+            <default>affinity:sys-0/node-0/proc-1/mc-1/mi-0/mcc-1/omi-0/ocmb_chip-0/pmic-2</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_NAME</id>
+            <default>pmic:k0:n0:s0:p90</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_POS</id>
+            <default>90</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_I2C_CONTROL_INFO</id>
+            <default>
+                <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-1</value></field>
+                <field><id>engine</id><value>3</value></field>
+                <field><id>port</id><value>3</value></field>
+                <field><id>devAddr</id><value>0xFF</value></field>
+            </default>
+        </attribute>
+        <attribute>
+          <id>ORDINAL_ID</id>
+          <default>90</default>
+        </attribute>
+        <attribute>
+            <id>PHYS_PATH</id>
+            <default>physical:sys-0/node-0/pmic-90</default>
+        </attribute>
+        <attribute>
+            <id>REL_POS</id>
+            <default>2</default>
+        </attribute>
+</targetInstance>
+
+<targetInstance>
+        <id>sys0node0pmic91</id>
+        <type>pmic</type>
+        <attribute>
+          <id>HUID</id>
+          <default>0x004E005B</default>
+        </attribute>
+        <attribute>
+            <id>AFFINITY_PATH</id>
+            <default>affinity:sys-0/node-0/proc-1/mc-1/mi-0/mcc-1/omi-0/ocmb_chip-0/pmic-3</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_NAME</id>
+            <default>pmic:k0:n0:s0:p91</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_POS</id>
+            <default>91</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_I2C_CONTROL_INFO</id>
+            <default>
+                <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-1</value></field>
+                <field><id>engine</id><value>3</value></field>
+                <field><id>port</id><value>3</value></field>
+                <field><id>devAddr</id><value>0xFF</value></field>
+            </default>
+        </attribute>
+        <attribute>
+          <id>ORDINAL_ID</id>
+          <default>91</default>
+        </attribute>
+        <attribute>
+            <id>PHYS_PATH</id>
+            <default>physical:sys-0/node-0/pmic-91</default>
+        </attribute>
+        <attribute>
+            <id>REL_POS</id>
+            <default>3</default>
+        </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0generici2cdevice88</id>
+    <type>generic_i2c_device</type>
     <attribute>
-      <id>HUID</id>
-      <default>0x004E0058</default>
+        <id>HUID</id>
+        <default>0x00550058</default>
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-1/mc-1/mi-0/mcc-1/omi-0/ocmb_chip-0/pmic-0</default>
+        <default>affinity:sys-0/node-0/proc-1/mc-1/mi-0/mcc-1/omi-0/ocmb_chip-0/generic_i2c_device-0</default>
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
-        <default>pmic:k0:n0:s0:p88</default>
+        <default>generici2cslave:k0:n0:s0:p88</default>
     </attribute>
     <attribute>
         <id>FAPI_POS</id>
@@ -20497,37 +23778,41 @@
             <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-1</value></field>
             <field><id>engine</id><value>3</value></field>
             <field><id>port</id><value>3</value></field>
-            <field><id>devAddr</id><value>0x90</value></field>
+            <field><id>devAddr</id><value>0xFF</value></field>
         </default>
     </attribute>
     <attribute>
-      <id>ORDINAL_ID</id>
-      <default>88</default>
+        <id>ORDINAL_ID</id>
+        <default>88</default>
     </attribute>
     <attribute>
         <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/pmic-88</default>
+        <default>physical:sys-0/node-0/generic_i2c_device-88</default>
     </attribute>
     <attribute>
         <id>REL_POS</id>
         <default>0</default>
     </attribute>
+    <attribute>
+        <id>I2C_DEV_TYPE</id>
+        <default>ADS7138_ADC</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
-    <id>sys0node0pmic89</id><!-- port3 -->
-    <type>pmic</type>
+    <id>sys0node0generici2cdevice89</id>
+    <type>generic_i2c_device</type>
     <attribute>
-      <id>HUID</id>
-      <default>0x004E0059</default>
+        <id>HUID</id>
+        <default>0x00550059</default>
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-1/mc-1/mi-0/mcc-1/omi-0/ocmb_chip-0/pmic-1</default>
+        <default>affinity:sys-0/node-0/proc-1/mc-1/mi-0/mcc-1/omi-0/ocmb_chip-0/generic_i2c_device-1</default>
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
-        <default>pmic:k0:n0:s0:p89</default>
+        <default>generici2cslave:k0:n0:s0:p89</default>
     </attribute>
     <attribute>
         <id>FAPI_POS</id>
@@ -20539,20 +23824,116 @@
             <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-1</value></field>
             <field><id>engine</id><value>3</value></field>
             <field><id>port</id><value>3</value></field>
-            <field><id>devAddr</id><value>0x90</value></field>
+            <field><id>devAddr</id><value>0xFF</value></field>
         </default>
     </attribute>
     <attribute>
-      <id>ORDINAL_ID</id>
-      <default>89</default>
+        <id>ORDINAL_ID</id>
+        <default>89</default>
     </attribute>
     <attribute>
         <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/pmic-89</default>
+        <default>physical:sys-0/node-0/generic_i2c_device-89</default>
     </attribute>
     <attribute>
         <id>REL_POS</id>
         <default>1</default>
+    </attribute>
+    <attribute>
+        <id>I2C_DEV_TYPE</id>
+        <default>ADS7138_ADC</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0generici2cdevice90</id>
+    <type>generic_i2c_device</type>
+    <attribute>
+        <id>HUID</id>
+        <default>0x0055005A</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-1/mc-1/mi-0/mcc-1/omi-0/ocmb_chip-0/generic_i2c_device-2</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>generici2cslave:k0:n0:s0:p90</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>90</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_I2C_CONTROL_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-1</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>port</id><value>3</value></field>
+            <field><id>devAddr</id><value>0xFF</value></field>
+        </default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>90</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/generic_i2c_device-90</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>2</default>
+    </attribute>
+    <attribute>
+        <id>I2C_DEV_TYPE</id>
+        <default>PCA9554A_GPIO_EXPANDER</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0generici2cdevice91</id>
+    <type>generic_i2c_device</type>
+    <attribute>
+        <id>HUID</id>
+        <default>0x0055005B</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-1/mc-1/mi-0/mcc-1/omi-0/ocmb_chip-0/generic_i2c_device-3</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>generici2cslave:k0:n0:s0:p91</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>91</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_I2C_CONTROL_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-1</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>port</id><value>3</value></field>
+            <field><id>devAddr</id><value>0xFF</value></field>
+        </default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>91</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/generic_i2c_device-91</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>3</default>
+    </attribute>
+    <attribute>
+        <id>I2C_DEV_TYPE</id>
+        <default>PCA9554A_GPIO_EXPANDER</default>
     </attribute>
 </targetInstance>
 
@@ -20606,8 +23987,6 @@
         </default>
     </attribute>
 </targetInstance>
-
-<!-- DDIMM off of proc1 port14  -->
 
 <targetInstance>
     <id>sys0node0ocmb23</id><!-- port14 -->
@@ -20695,19 +24074,187 @@
 </targetInstance>
 
 <targetInstance>
-    <id>sys0node0pmic92</id><!-- port14 -->
-    <type>pmic</type>
+        <id>sys0node0pmic92</id>
+        <type>pmic</type>
+        <attribute>
+          <id>HUID</id>
+          <default>0x004E005C</default>
+        </attribute>
+        <attribute>
+            <id>AFFINITY_PATH</id>
+            <default>affinity:sys-0/node-0/proc-1/mc-1/mi-0/mcc-1/omi-1/ocmb_chip-0/pmic-0</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_NAME</id>
+            <default>pmic:k0:n0:s0:p92</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_POS</id>
+            <default>92</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_I2C_CONTROL_INFO</id>
+            <default>
+                <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-1</value></field>
+                <field><id>engine</id><value>3</value></field>
+                <field><id>port</id><value>14</value></field>
+                <field><id>devAddr</id><value>0xFF</value></field>
+            </default>
+        </attribute>
+        <attribute>
+          <id>ORDINAL_ID</id>
+          <default>92</default>
+        </attribute>
+        <attribute>
+            <id>PHYS_PATH</id>
+            <default>physical:sys-0/node-0/pmic-92</default>
+        </attribute>
+        <attribute>
+            <id>REL_POS</id>
+            <default>0</default>
+        </attribute>
+</targetInstance>
+
+<targetInstance>
+        <id>sys0node0pmic93</id>
+        <type>pmic</type>
+        <attribute>
+          <id>HUID</id>
+          <default>0x004E005D</default>
+        </attribute>
+        <attribute>
+            <id>AFFINITY_PATH</id>
+            <default>affinity:sys-0/node-0/proc-1/mc-1/mi-0/mcc-1/omi-1/ocmb_chip-0/pmic-1</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_NAME</id>
+            <default>pmic:k0:n0:s0:p93</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_POS</id>
+            <default>93</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_I2C_CONTROL_INFO</id>
+            <default>
+                <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-1</value></field>
+                <field><id>engine</id><value>3</value></field>
+                <field><id>port</id><value>14</value></field>
+                <field><id>devAddr</id><value>0xFF</value></field>
+            </default>
+        </attribute>
+        <attribute>
+          <id>ORDINAL_ID</id>
+          <default>93</default>
+        </attribute>
+        <attribute>
+            <id>PHYS_PATH</id>
+            <default>physical:sys-0/node-0/pmic-93</default>
+        </attribute>
+        <attribute>
+            <id>REL_POS</id>
+            <default>1</default>
+        </attribute>
+</targetInstance>
+
+<targetInstance>
+        <id>sys0node0pmic94</id>
+        <type>pmic</type>
+        <attribute>
+          <id>HUID</id>
+          <default>0x004E005E</default>
+        </attribute>
+        <attribute>
+            <id>AFFINITY_PATH</id>
+            <default>affinity:sys-0/node-0/proc-1/mc-1/mi-0/mcc-1/omi-1/ocmb_chip-0/pmic-2</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_NAME</id>
+            <default>pmic:k0:n0:s0:p94</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_POS</id>
+            <default>94</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_I2C_CONTROL_INFO</id>
+            <default>
+                <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-1</value></field>
+                <field><id>engine</id><value>3</value></field>
+                <field><id>port</id><value>14</value></field>
+                <field><id>devAddr</id><value>0xFF</value></field>
+            </default>
+        </attribute>
+        <attribute>
+          <id>ORDINAL_ID</id>
+          <default>94</default>
+        </attribute>
+        <attribute>
+            <id>PHYS_PATH</id>
+            <default>physical:sys-0/node-0/pmic-94</default>
+        </attribute>
+        <attribute>
+            <id>REL_POS</id>
+            <default>2</default>
+        </attribute>
+</targetInstance>
+
+<targetInstance>
+        <id>sys0node0pmic95</id>
+        <type>pmic</type>
+        <attribute>
+          <id>HUID</id>
+          <default>0x004E005F</default>
+        </attribute>
+        <attribute>
+            <id>AFFINITY_PATH</id>
+            <default>affinity:sys-0/node-0/proc-1/mc-1/mi-0/mcc-1/omi-1/ocmb_chip-0/pmic-3</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_NAME</id>
+            <default>pmic:k0:n0:s0:p95</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_POS</id>
+            <default>95</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_I2C_CONTROL_INFO</id>
+            <default>
+                <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-1</value></field>
+                <field><id>engine</id><value>3</value></field>
+                <field><id>port</id><value>14</value></field>
+                <field><id>devAddr</id><value>0xFF</value></field>
+            </default>
+        </attribute>
+        <attribute>
+          <id>ORDINAL_ID</id>
+          <default>95</default>
+        </attribute>
+        <attribute>
+            <id>PHYS_PATH</id>
+            <default>physical:sys-0/node-0/pmic-95</default>
+        </attribute>
+        <attribute>
+            <id>REL_POS</id>
+            <default>3</default>
+        </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0generici2cdevice92</id>
+    <type>generic_i2c_device</type>
     <attribute>
-      <id>HUID</id>
-      <default>0x004E005C</default>
+        <id>HUID</id>
+        <default>0x0055005C</default>
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-1/mc-1/mi-0/mcc-1/omi-1/ocmb_chip-0/pmic-0</default>
+        <default>affinity:sys-0/node-0/proc-1/mc-1/mi-0/mcc-1/omi-1/ocmb_chip-0/generic_i2c_device-0</default>
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
-        <default>pmic:k0:n0:s0:p92</default>
+        <default>generici2cslave:k0:n0:s0:p92</default>
     </attribute>
     <attribute>
         <id>FAPI_POS</id>
@@ -20719,37 +24266,41 @@
             <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-1</value></field>
             <field><id>engine</id><value>3</value></field>
             <field><id>port</id><value>14</value></field>
-            <field><id>devAddr</id><value>0x90</value></field>
+            <field><id>devAddr</id><value>0xFF</value></field>
         </default>
     </attribute>
     <attribute>
-      <id>ORDINAL_ID</id>
-      <default>92</default>
+        <id>ORDINAL_ID</id>
+        <default>92</default>
     </attribute>
     <attribute>
         <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/pmic-92</default>
+        <default>physical:sys-0/node-0/generic_i2c_device-92</default>
     </attribute>
     <attribute>
         <id>REL_POS</id>
         <default>0</default>
     </attribute>
+    <attribute>
+        <id>I2C_DEV_TYPE</id>
+        <default>ADS7138_ADC</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
-    <id>sys0node0pmic93</id><!-- port14 -->
-    <type>pmic</type>
+    <id>sys0node0generici2cdevice93</id>
+    <type>generic_i2c_device</type>
     <attribute>
-      <id>HUID</id>
-      <default>0x004E005D</default>
+        <id>HUID</id>
+        <default>0x0055005D</default>
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-1/mc-1/mi-0/mcc-1/omi-1/ocmb_chip-0/pmic-1</default>
+        <default>affinity:sys-0/node-0/proc-1/mc-1/mi-0/mcc-1/omi-1/ocmb_chip-0/generic_i2c_device-1</default>
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
-        <default>pmic:k0:n0:s0:p93</default>
+        <default>generici2cslave:k0:n0:s0:p93</default>
     </attribute>
     <attribute>
         <id>FAPI_POS</id>
@@ -20761,20 +24312,116 @@
             <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-1</value></field>
             <field><id>engine</id><value>3</value></field>
             <field><id>port</id><value>14</value></field>
-            <field><id>devAddr</id><value>0x90</value></field>
+            <field><id>devAddr</id><value>0xFF</value></field>
         </default>
     </attribute>
     <attribute>
-      <id>ORDINAL_ID</id>
-      <default>93</default>
+        <id>ORDINAL_ID</id>
+        <default>93</default>
     </attribute>
     <attribute>
         <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/pmic-93</default>
+        <default>physical:sys-0/node-0/generic_i2c_device-93</default>
     </attribute>
     <attribute>
         <id>REL_POS</id>
         <default>1</default>
+    </attribute>
+    <attribute>
+        <id>I2C_DEV_TYPE</id>
+        <default>ADS7138_ADC</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0generici2cdevice94</id>
+    <type>generic_i2c_device</type>
+    <attribute>
+        <id>HUID</id>
+        <default>0x0055005E</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-1/mc-1/mi-0/mcc-1/omi-1/ocmb_chip-0/generic_i2c_device-2</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>generici2cslave:k0:n0:s0:p94</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>94</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_I2C_CONTROL_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-1</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>port</id><value>14</value></field>
+            <field><id>devAddr</id><value>0xFF</value></field>
+        </default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>94</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/generic_i2c_device-94</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>2</default>
+    </attribute>
+    <attribute>
+        <id>I2C_DEV_TYPE</id>
+        <default>PCA9554A_GPIO_EXPANDER</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0generici2cdevice95</id>
+    <type>generic_i2c_device</type>
+    <attribute>
+        <id>HUID</id>
+        <default>0x0055005F</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-1/mc-1/mi-0/mcc-1/omi-1/ocmb_chip-0/generic_i2c_device-3</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>generici2cslave:k0:n0:s0:p95</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>95</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_I2C_CONTROL_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-1</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>port</id><value>14</value></field>
+            <field><id>devAddr</id><value>0xFF</value></field>
+        </default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>95</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/generic_i2c_device-95</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>3</default>
+    </attribute>
+    <attribute>
+        <id>I2C_DEV_TYPE</id>
+        <default>PCA9554A_GPIO_EXPANDER</default>
     </attribute>
 </targetInstance>
 
@@ -20828,8 +24475,6 @@
         </default>
     </attribute>
 </targetInstance>
-
-<!-- DDIMM off of proc1 port0  (not connected) -->
 
 <targetInstance>
     <id>sys0node0ocmb24</id><!-- port0 -->
@@ -20917,19 +24562,187 @@
 </targetInstance>
 
 <targetInstance>
-    <id>sys0node0pmic96</id><!-- port0 -->
-    <type>pmic</type>
+        <id>sys0node0pmic96</id>
+        <type>pmic</type>
+        <attribute>
+          <id>HUID</id>
+          <default>0x004E0060</default>
+        </attribute>
+        <attribute>
+            <id>AFFINITY_PATH</id>
+            <default>affinity:sys-0/node-0/proc-1/mc-2/mi-0/mcc-0/omi-0/ocmb_chip-0/pmic-0</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_NAME</id>
+            <default>pmic:k0:n0:s0:p96</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_POS</id>
+            <default>96</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_I2C_CONTROL_INFO</id>
+            <default>
+                <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-1</value></field>
+                <field><id>engine</id><value>3</value></field>
+                <field><id>port</id><value>0</value></field>
+                <field><id>devAddr</id><value>0xFF</value></field>
+            </default>
+        </attribute>
+        <attribute>
+          <id>ORDINAL_ID</id>
+          <default>96</default>
+        </attribute>
+        <attribute>
+            <id>PHYS_PATH</id>
+            <default>physical:sys-0/node-0/pmic-96</default>
+        </attribute>
+        <attribute>
+            <id>REL_POS</id>
+            <default>0</default>
+        </attribute>
+</targetInstance>
+
+<targetInstance>
+        <id>sys0node0pmic97</id>
+        <type>pmic</type>
+        <attribute>
+          <id>HUID</id>
+          <default>0x004E0061</default>
+        </attribute>
+        <attribute>
+            <id>AFFINITY_PATH</id>
+            <default>affinity:sys-0/node-0/proc-1/mc-2/mi-0/mcc-0/omi-0/ocmb_chip-0/pmic-1</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_NAME</id>
+            <default>pmic:k0:n0:s0:p97</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_POS</id>
+            <default>97</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_I2C_CONTROL_INFO</id>
+            <default>
+                <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-1</value></field>
+                <field><id>engine</id><value>3</value></field>
+                <field><id>port</id><value>0</value></field>
+                <field><id>devAddr</id><value>0xFF</value></field>
+            </default>
+        </attribute>
+        <attribute>
+          <id>ORDINAL_ID</id>
+          <default>97</default>
+        </attribute>
+        <attribute>
+            <id>PHYS_PATH</id>
+            <default>physical:sys-0/node-0/pmic-97</default>
+        </attribute>
+        <attribute>
+            <id>REL_POS</id>
+            <default>1</default>
+        </attribute>
+</targetInstance>
+
+<targetInstance>
+        <id>sys0node0pmic98</id>
+        <type>pmic</type>
+        <attribute>
+          <id>HUID</id>
+          <default>0x004E0062</default>
+        </attribute>
+        <attribute>
+            <id>AFFINITY_PATH</id>
+            <default>affinity:sys-0/node-0/proc-1/mc-2/mi-0/mcc-0/omi-0/ocmb_chip-0/pmic-2</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_NAME</id>
+            <default>pmic:k0:n0:s0:p98</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_POS</id>
+            <default>98</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_I2C_CONTROL_INFO</id>
+            <default>
+                <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-1</value></field>
+                <field><id>engine</id><value>3</value></field>
+                <field><id>port</id><value>0</value></field>
+                <field><id>devAddr</id><value>0xFF</value></field>
+            </default>
+        </attribute>
+        <attribute>
+          <id>ORDINAL_ID</id>
+          <default>98</default>
+        </attribute>
+        <attribute>
+            <id>PHYS_PATH</id>
+            <default>physical:sys-0/node-0/pmic-98</default>
+        </attribute>
+        <attribute>
+            <id>REL_POS</id>
+            <default>2</default>
+        </attribute>
+</targetInstance>
+
+<targetInstance>
+        <id>sys0node0pmic99</id>
+        <type>pmic</type>
+        <attribute>
+          <id>HUID</id>
+          <default>0x004E0063</default>
+        </attribute>
+        <attribute>
+            <id>AFFINITY_PATH</id>
+            <default>affinity:sys-0/node-0/proc-1/mc-2/mi-0/mcc-0/omi-0/ocmb_chip-0/pmic-3</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_NAME</id>
+            <default>pmic:k0:n0:s0:p99</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_POS</id>
+            <default>99</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_I2C_CONTROL_INFO</id>
+            <default>
+                <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-1</value></field>
+                <field><id>engine</id><value>3</value></field>
+                <field><id>port</id><value>0</value></field>
+                <field><id>devAddr</id><value>0xFF</value></field>
+            </default>
+        </attribute>
+        <attribute>
+          <id>ORDINAL_ID</id>
+          <default>99</default>
+        </attribute>
+        <attribute>
+            <id>PHYS_PATH</id>
+            <default>physical:sys-0/node-0/pmic-99</default>
+        </attribute>
+        <attribute>
+            <id>REL_POS</id>
+            <default>3</default>
+        </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0generici2cdevice96</id>
+    <type>generic_i2c_device</type>
     <attribute>
-      <id>HUID</id>
-      <default>0x004E0060</default>
+        <id>HUID</id>
+        <default>0x00550060</default>
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-1/mc-2/mi-0/mcc-0/omi-0/ocmb_chip-0/pmic-0</default>
+        <default>affinity:sys-0/node-0/proc-1/mc-2/mi-0/mcc-0/omi-0/ocmb_chip-0/generic_i2c_device-0</default>
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
-        <default>pmic:k0:n0:s0:p96</default>
+        <default>generici2cslave:k0:n0:s0:p96</default>
     </attribute>
     <attribute>
         <id>FAPI_POS</id>
@@ -20941,37 +24754,41 @@
             <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-1</value></field>
             <field><id>engine</id><value>3</value></field>
             <field><id>port</id><value>0</value></field>
-            <field><id>devAddr</id><value>0x90</value></field>
+            <field><id>devAddr</id><value>0xFF</value></field>
         </default>
     </attribute>
     <attribute>
-      <id>ORDINAL_ID</id>
-      <default>96</default>
+        <id>ORDINAL_ID</id>
+        <default>96</default>
     </attribute>
     <attribute>
         <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/pmic-96</default>
+        <default>physical:sys-0/node-0/generic_i2c_device-96</default>
     </attribute>
     <attribute>
         <id>REL_POS</id>
         <default>0</default>
     </attribute>
+    <attribute>
+        <id>I2C_DEV_TYPE</id>
+        <default>ADS7138_ADC</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
-    <id>sys0node0pmic97</id><!-- port0 -->
-    <type>pmic</type>
+    <id>sys0node0generici2cdevice97</id>
+    <type>generic_i2c_device</type>
     <attribute>
-      <id>HUID</id>
-      <default>0x004E0061</default>
+        <id>HUID</id>
+        <default>0x00550061</default>
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-1/mc-2/mi-0/mcc-0/omi-0/ocmb_chip-0/pmic-1</default>
+        <default>affinity:sys-0/node-0/proc-1/mc-2/mi-0/mcc-0/omi-0/ocmb_chip-0/generic_i2c_device-1</default>
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
-        <default>pmic:k0:n0:s0:p97</default>
+        <default>generici2cslave:k0:n0:s0:p97</default>
     </attribute>
     <attribute>
         <id>FAPI_POS</id>
@@ -20983,20 +24800,116 @@
             <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-1</value></field>
             <field><id>engine</id><value>3</value></field>
             <field><id>port</id><value>0</value></field>
-            <field><id>devAddr</id><value>0x90</value></field>
+            <field><id>devAddr</id><value>0xFF</value></field>
         </default>
     </attribute>
     <attribute>
-      <id>ORDINAL_ID</id>
-      <default>97</default>
+        <id>ORDINAL_ID</id>
+        <default>97</default>
     </attribute>
     <attribute>
         <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/pmic-97</default>
+        <default>physical:sys-0/node-0/generic_i2c_device-97</default>
     </attribute>
     <attribute>
         <id>REL_POS</id>
         <default>1</default>
+    </attribute>
+    <attribute>
+        <id>I2C_DEV_TYPE</id>
+        <default>ADS7138_ADC</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0generici2cdevice98</id>
+    <type>generic_i2c_device</type>
+    <attribute>
+        <id>HUID</id>
+        <default>0x00550062</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-1/mc-2/mi-0/mcc-0/omi-0/ocmb_chip-0/generic_i2c_device-2</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>generici2cslave:k0:n0:s0:p98</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>98</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_I2C_CONTROL_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-1</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>port</id><value>0</value></field>
+            <field><id>devAddr</id><value>0xFF</value></field>
+        </default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>98</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/generic_i2c_device-98</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>2</default>
+    </attribute>
+    <attribute>
+        <id>I2C_DEV_TYPE</id>
+        <default>PCA9554A_GPIO_EXPANDER</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0generici2cdevice99</id>
+    <type>generic_i2c_device</type>
+    <attribute>
+        <id>HUID</id>
+        <default>0x00550063</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-1/mc-2/mi-0/mcc-0/omi-0/ocmb_chip-0/generic_i2c_device-3</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>generici2cslave:k0:n0:s0:p99</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>99</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_I2C_CONTROL_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-1</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>port</id><value>0</value></field>
+            <field><id>devAddr</id><value>0xFF</value></field>
+        </default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>99</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/generic_i2c_device-99</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>3</default>
+    </attribute>
+    <attribute>
+        <id>I2C_DEV_TYPE</id>
+        <default>PCA9554A_GPIO_EXPANDER</default>
     </attribute>
 </targetInstance>
 
@@ -21050,7 +24963,6 @@
         </default>
     </attribute>
 </targetInstance>
-
 <!-- DDIMM off of proc1 port1  (not connected) -->
 
 <targetInstance>
@@ -22604,7 +26516,6 @@
         </default>
     </attribute>
 </targetInstance>
-
 <!-- ==== DDIMMs off second processor ==================================== -->
 
 <!-- DDIMM off of proc1 port2  -->
