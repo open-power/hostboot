@@ -309,7 +309,9 @@ inline fapi2::ReturnCode fw_status(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_C
         FAPI_TRY( fapi2::delay( i_delay, 200) );
     }
 
-    FAPI_DBG(TARGTIDFORMAT " stopped on loop %u/%u", MSSTARGID , l_loop, i_loops);
+    FAPI_INF(TARGTIDFORMAT " FW_STATUS polling completed after %d/%d poll attempts",
+             MSSTARGID , l_loop + 1, i_loops);
+    FAPI_DBG(TARGTIDFORMAT " stopped on loop %u/%u", MSSTARGID , l_loop + 1, i_loops);
     FAPI_TRY(capture_status(i_target, l_data, l_fw_status_data));
     // Check that Explorer is not still in FW_BUSY state
     FAPI_ASSERT( !(l_busy && (i_assert_if_busy == ASSERT_IF_BUSY_FW_STATUS)),
@@ -463,6 +465,7 @@ inline fapi2::ReturnCode exp_check_for_ready_helper(const fapi2::Target<fapi2::T
 {
     std::vector<uint8_t> l_data;
     uint8_t l_boot_stage = 0;
+    size_t l_poll_attempts = 0;
 
     // Using using default parameters from class, with overrides for delay and poll_count
     mss::poll_parameters l_poll_params(DELAY_10NS,
@@ -474,14 +477,18 @@ inline fapi2::ReturnCode exp_check_for_ready_helper(const fapi2::Target<fapi2::T
     // From MSCC explorer firmware arch spec
     // 4.1.5: After power-up, the Explorer Chip will respond with NACK to all incoming I2C requests
     // from the HOST until the I2C slave interface is ready to receive commands.
-    FAPI_ASSERT( mss::poll(i_target, l_poll_params, [i_target]()->bool
+    FAPI_ASSERT( mss::poll(i_target, l_poll_params, [&i_target, &l_poll_attempts]()->bool
     {
+        l_poll_attempts++;
         return mss::exp::i2c::is_ready(i_target) == fapi2::FAPI2_RC_SUCCESS;
     }),
     fapi2::MSS_EXP_I2C_POLLING_TIMEOUT().
     set_TARGET(i_target),
     "Failed to see an ACK from I2C -- polling timeout on %s",
     mss::c_str(i_target) );
+
+    FAPI_INF(TARGTIDFORMAT " Initial I2C ACK polling completed after %d/%d poll attempts",
+             MSSTARGID , l_poll_attempts, i_poll_count);
 
     // If we're already in RUNTIME_FW stage, due to fuse settings or running procedures manually,
     // we can (and should) skip the bypass and polling here
@@ -501,15 +508,22 @@ inline fapi2::ReturnCode exp_check_for_ready_helper(const fapi2::Target<fapi2::T
     // and immediately load the runtime firmware.
     FAPI_TRY(fw_bypass_download_window(i_target));
 
+    // Reset poll attempts for next loop
+    l_poll_attempts = 0;
+
     // Loop again until we get an ACK from i2c
-    FAPI_ASSERT( mss::poll(i_target, l_poll_params, [i_target]()->bool
+    FAPI_ASSERT( mss::poll(i_target, l_poll_params, [&i_target, &l_poll_attempts]()->bool
     {
+        l_poll_attempts++;
         return mss::exp::i2c::is_ready(i_target) == fapi2::FAPI2_RC_SUCCESS;
     }),
     fapi2::MSS_EXP_I2C_POLLING_TIMEOUT().
     set_TARGET(i_target),
     "Failed to see an ACK from I2C -- polling timeout on %s",
     mss::c_str(i_target) );
+
+    FAPI_INF(TARGTIDFORMAT " FW boot I2C polling completed after %d/%d poll attempts",
+             MSSTARGID , l_poll_attempts, i_poll_count);
 
     // Now poll the EXP_FW_STATUS command until it returns SUCCESS and RUNTIME_FW
     FAPI_TRY(fw_status(i_target, i_delay, i_poll_count));
