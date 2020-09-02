@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -308,6 +308,9 @@ class mcbistTraits< mss::mc_type::EXPLORER, fapi2::TARGET_TYPE_OCMB_CHIP>
             // Goto subtests use the compl_1st - rand_mode to define the subtest to jump to
             GOTO_SUBTEST = EXPLR_MCBIST_MCBMR0Q_MCBIST_CFG_TEST00_COMPL_1ST_CMD,
             GOTO_SUBTEST_LEN = 5,
+
+            // Refresh Only bitcode - No global enums
+            REFRESH_ONLY = 0b001,
 
             ECC_MODE = EXPLR_MCBIST_MCBMR0Q_MCBIST_CFG_TEST00_ECC_MODE,
             DATA_MODE = EXPLR_MCBIST_MCBMR0Q_MCBIST_CFG_TEST00_DATA_MODE,

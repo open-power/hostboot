@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -916,6 +916,31 @@ inline subtest_t<MC, T, TT> goto_subtest( const uint64_t i_jump_to )
 
     // Plug in the subtest the user passed in
     l_subtest.change_goto_subtest(i_jump_to);
+    return l_subtest;
+}
+
+///
+/// @brief Return a refresh-only subtest - configured simply
+/// @tparam MC the mc type of the T
+/// @tparam T the fapi2::TargetType - derived
+/// @tparam TT the mcbistTraits associated with T - derived
+/// @param[in] the subtest we should go to
+/// @return mss::mcbist::subtest_t
+/// @note Turns on ECC mode for the returned subtest - caller can turn it off
+/// @note Configures for start/end address select bit as address config register 0
+///
+template< mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T = mss::mcbistMCTraits<MC>::MC_TARGET_TYPE, typename TT = mcbistTraits<MC, T> >
+inline subtest_t<MC, T, TT> refresh_subtest( )
+{
+    // Starts life full of 0's
+    subtest_t<MC, T, TT> l_subtest;
+
+    // 0:3   = 0111 - we want subtest type to be a Goto
+    l_subtest.iv_mcbmr.template insertFromRight<TT::OP_TYPE, TT::OP_TYPE_LEN>(op_type::GOTO_SUBTEST_N);
+
+    // Change data mode to be non-zero for refresh only
+    l_subtest.iv_mcbmr.template insertFromRight<TT::DATA_MODE, TT::DATA_MODE_LEN>(TT::REFRESH_ONLY);
+
     return l_subtest;
 }
 
