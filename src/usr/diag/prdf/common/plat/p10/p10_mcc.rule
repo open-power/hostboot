@@ -261,22 +261,26 @@ group gMC_DSTL_FIR
     /** MC_DSTL_FIR[12]
      *  Subchannel A counter error
      */
-    (rMC_DSTL_FIR, bit(12)) ? chnl0_omi_bus_th_1;
+    (rMC_DSTL_FIR, bit(12)) ? temporaryBringUpHammer;
+#    (rMC_DSTL_FIR, bit(12)) ? chnl0_omi_bus_th_1;
 
     /** MC_DSTL_FIR[13]
      *  Subchannel B counter error
      */
-    (rMC_DSTL_FIR, bit(13)) ? chnl1_omi_bus_th_1;
+    (rMC_DSTL_FIR, bit(13)) ? temporaryBringUpHammer;
+#    (rMC_DSTL_FIR, bit(13)) ? chnl1_omi_bus_th_1;
 
     /** MC_DSTL_FIR[14]
      *  Subchannel A valid cmd timeout error
      */
-    (rMC_DSTL_FIR, bit(14)) ? chnl0_omi_bus_th_32_perDay;
+    (rMC_DSTL_FIR, bit(14)) ? temporaryBringUpHammer;
+#    (rMC_DSTL_FIR, bit(14)) ? chnl0_omi_bus_th_32_perDay;
 
     /** MC_DSTL_FIR[15]
      *  Subchannel B valid cmd timeout error
      */
-    (rMC_DSTL_FIR, bit(15)) ? chnl1_omi_bus_th_32_perDay;
+    (rMC_DSTL_FIR, bit(15)) ? temporaryBringUpHammer;
+#    (rMC_DSTL_FIR, bit(15)) ? chnl1_omi_bus_th_32_perDay;
 
     /** MC_DSTL_FIR[16]
      *  Subchannel A buffer overuse error
@@ -311,12 +315,14 @@ group gMC_DSTL_FIR
     /** MC_DSTL_FIR[22]
      *  DSTLFIR channel timeout on subch A
      */
-    (rMC_DSTL_FIR, bit(22)) ? chnl0_omi_bus_th_1;
+    (rMC_DSTL_FIR, bit(22)) ? temporaryBringUpHammer;
+#    (rMC_DSTL_FIR, bit(22)) ? chnl0_omi_bus_th_1;
 
     /** MC_DSTL_FIR[23]
      *  DSTLFIR channel timeout on subch B
      */
-    (rMC_DSTL_FIR, bit(23)) ? chnl1_omi_bus_th_1;
+    (rMC_DSTL_FIR, bit(23)) ? temporaryBringUpHammer;
+#    (rMC_DSTL_FIR, bit(23)) ? chnl1_omi_bus_th_1;
 
     /** MC_DSTL_FIR[24]
      *  Error info from decrypt
