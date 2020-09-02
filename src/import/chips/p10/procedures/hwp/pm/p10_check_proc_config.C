@@ -270,7 +270,12 @@ fapi2::ReturnCode p10_check_proc_config ( CONST_FAPI2_PROC& i_procTgt, void* i_p
     FAPI_INF( ">> p10_check_proc_config" );
 
     uint64_t l_configVectVal = INIT_CONFIG_VALUE;
-    uint8_t* pHomer = (uint8_t*)i_pHomerImage + XPMR_HOMER_OFFSET + XPMR_PROC_CONFIG_UAV_POS;
+    uint8_t* pHomer;
+
+    FAPI_TRY( validateInputArgs( i_procTgt, i_pHomerImage ),
+              "Input Arguments Found Invalid" );
+
+    pHomer = (uint8_t*)i_pHomerImage + XPMR_HOMER_OFFSET + XPMR_PROC_CONFIG_UAV_POS;
 
 #ifndef __HOSTBOOT_MODULE
     g_targetTypeMap[fapi2::TARGET_TYPE_MC]          =   "MC";
@@ -278,8 +283,6 @@ fapi2::ReturnCode p10_check_proc_config ( CONST_FAPI2_PROC& i_procTgt, void* i_p
     g_targetTypeMap[fapi2::TARGET_TYPE_PHB]         =   "PHB";
 #endif
 
-    FAPI_TRY( validateInputArgs( i_procTgt, i_pHomerImage ),
-              "Input Arguments Found Invalid" );
 
     FAPI_TRY( checkChiplet< fapi2::TARGET_TYPE_MC >
               ( i_procTgt, fapi2::TARGET_TYPE_MC, l_configVectVal, MC_POS ),
