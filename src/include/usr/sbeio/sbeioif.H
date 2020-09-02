@@ -160,6 +160,18 @@ namespace SBEIO
      */
     errlHndl_t sendPsuQuiesceSbe(TARGETING::Target* i_pProc);
 
+
+    /**
+     * @brief Send OCMB configuration info to the SBE
+     *
+     * @param[in] i_pProc - Pointer to the PROC target that contains
+     *                      the OCMB Targets
+     *
+     * @return errlHndl_t Error log handle on failure.
+     *
+     */
+    errlHndl_t psuSendSbeOcmbConfig(TARGETING::Target* i_pProc);
+
      /**
      * @brief Get the capabilities of the SBE via PSU
      *

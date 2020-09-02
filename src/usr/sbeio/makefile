@@ -54,6 +54,7 @@ OBJS += sbe_exitCatcheContained.o
 OBJS += p10_extract_sbe_rc.o
 OBJS += p10_ppe_utils.o
 OBJS += p10_ppe_common.o
+OBJS += sbe_psuSendOcmbConfig.o
 
 # sbeio's sub directories
 SUBDIRS += test.d
