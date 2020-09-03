@@ -46,8 +46,20 @@ fapi2::ReturnCode p10_setup_sbe_config(
 
     fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
 
+    // when running in Hostboot context, use SCOM to reach master only
+    bool l_use_scom = false;
+
+    if (fapi2::is_platform<fapi2::PLAT_HOSTBOOT>())
+    {
+        fapi2::ATTR_PROC_SBE_MASTER_CHIP_Type l_sbe_master_chip;
+
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_SBE_MASTER_CHIP, i_target_chip, l_sbe_master_chip),
+                 "Error from FAPI_ATTR_GET (ATTR_PROC_SBE_MASTER_CHIP");
+
+        l_use_scom = (l_sbe_master_chip == fapi2::ENUM_ATTR_PROC_SBE_MASTER_CHIP_TRUE);
+    }
     // clear secure access bit if instructed to disable security
-    if (!fapi2::is_platform<fapi2::PLAT_HOSTBOOT>())
+    else
     {
         fapi2::ATTR_SECURITY_MODE_Type l_attr_security_mode;
         fapi2::buffer<uint32_t> l_cbs_cs_reg;
@@ -76,29 +88,17 @@ fapi2::ReturnCode p10_setup_sbe_config(
     }
 
     // set fused mode behavior
-    if (!fapi2::is_platform<fapi2::PLAT_HOSTBOOT>())
     {
         fapi2::ATTR_FUSED_CORE_MODE_Type l_attr_fused_core_mode;
         fapi2::ATTR_CORE_LPAR_MODE_POLICY_Type l_attr_core_lpar_mode_policy;
         fapi2::ATTR_CORE_LPAR_MODE_Type l_attr_core_lpar_mode;
-        fapi2::buffer<uint32_t> l_perv_ctrl0;
+        fapi2::buffer<uint64_t> l_perv_ctrl0;
 
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CORE_LPAR_MODE_POLICY, FAPI_SYSTEM, l_attr_core_lpar_mode_policy),
                  "Error from FAPI_ATTR_GET (ATTR_CORE_LPAR_MODE_POLICY)");
 
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_FUSED_CORE_MODE, FAPI_SYSTEM, l_attr_fused_core_mode),
                  "Error from FAPI_ATTR_GET (ATTR_FUSED_CORE_MODE)");
-
-        l_perv_ctrl0.flush<0>().setBit<FSXCOMP_FSXLOG_PERV_CTRL0_TP_OTP_SCOM_FUSED_CORE_MODE>();
-        FAPI_TRY(fapi2::putCfamRegister(i_target_chip,
-                                        (l_attr_fused_core_mode == fapi2::ENUM_ATTR_FUSED_CORE_MODE_CORE_FUSED) ?
-                                        FSXCOMP_FSXLOG_PERV_CTRL0_SET_FSI :
-                                        FSXCOMP_FSXLOG_PERV_CTRL0_CLEAR_FSI,
-                                        l_perv_ctrl0),
-                 "Error updating Fused mode control in PERV_CTRL0");
-
-        FAPI_TRY(fapi2::getCfamRegister(i_target_chip, FSXCOMP_FSXLOG_PERV_CTRL0_COPY_FSI, l_perv_ctrl0),
-                 "Error reading PERV_CTRL0_COPY");
 
         if (l_attr_core_lpar_mode_policy == fapi2::ENUM_ATTR_CORE_LPAR_MODE_POLICY_FOLLOW_FUSED_STATE)
         {
@@ -120,30 +120,89 @@ fapi2::ReturnCode p10_setup_sbe_config(
             l_attr_core_lpar_mode = fapi2::ENUM_ATTR_CORE_LPAR_MODE_LPAR_PER_THREAD;
         }
 
+
+        if (l_use_scom)
+        {
+            FAPI_TRY(fapi2::getScom(i_target_chip,
+                                    FSXCOMP_FSXLOG_PERV_CTRL0_RW,
+                                    l_perv_ctrl0),
+                     "Error reading PERV_CTRL0 (scom)");
+        }
+        else
+        {
+            fapi2::buffer<uint32_t> l_perv_ctrl0_cfam;
+            FAPI_TRY(fapi2::getCfamRegister(i_target_chip,
+                                            FSXCOMP_FSXLOG_PERV_CTRL0_FSI,
+                                            l_perv_ctrl0_cfam),
+                     "Error reading PERV_CTRL0 (cfam)");
+            l_perv_ctrl0.insert<0, 32, 0>(l_perv_ctrl0_cfam);
+        }
+
         l_perv_ctrl0.writeBit<FSXCOMP_FSXLOG_PERV_CTRL0_TP_OTP_SCOM_FUSED_CORE_MODE>(
             l_attr_fused_core_mode == fapi2::ENUM_ATTR_FUSED_CORE_MODE_CORE_FUSED);
         l_perv_ctrl0.writeBit<FSXCOMP_FSXLOG_PERV_CTRL0_TP_EX_SINGLE_LPAR_EN_DC>(
             l_attr_core_lpar_mode);
 
-        FAPI_TRY(fapi2::putCfamRegister(i_target_chip, FSXCOMP_FSXLOG_PERV_CTRL0_COPY_FSI, l_perv_ctrl0),
-                 "Error writing PERV_CTRL0_COPY");
+        if (l_use_scom)
+        {
+            FAPI_TRY(fapi2::putScom(i_target_chip,
+                                    FSXCOMP_FSXLOG_PERV_CTRL0_RW,
+                                    l_perv_ctrl0),
+                     "Error writing PERV_CTRL0 (scom)");
+        }
+        else
+        {
+            fapi2::buffer<uint32_t> l_perv_ctrl0_cfam;
+            l_perv_ctrl0_cfam.insert<0, 32, 0>(l_perv_ctrl0);
+            FAPI_TRY(fapi2::putCfamRegister(i_target_chip,
+                                            FSXCOMP_FSXLOG_PERV_CTRL0_FSI,
+                                            l_perv_ctrl0_cfam),
+                     "Error writing PERV_CTRL0 (cfam)");
+        }
+
+        // copy
+        if (l_use_scom)
+        {
+            FAPI_TRY(fapi2::getScom(i_target_chip,
+                                    FSXCOMP_FSXLOG_PERV_CTRL0_COPY_RW,
+                                    l_perv_ctrl0),
+                     "Error reading PERV_CTRL0_COPY (scom)");
+        }
+        else
+        {
+            fapi2::buffer<uint32_t> l_perv_ctrl0_cfam;
+            FAPI_TRY(fapi2::getCfamRegister(i_target_chip,
+                                            FSXCOMP_FSXLOG_PERV_CTRL0_COPY_FSI,
+                                            l_perv_ctrl0_cfam),
+                     "Error reading PERV_CTRL0_COPY (cfam)");
+            l_perv_ctrl0.insert<0, 32, 0>(l_perv_ctrl0_cfam);
+        }
+
+        l_perv_ctrl0.writeBit<FSXCOMP_FSXLOG_PERV_CTRL0_TP_OTP_SCOM_FUSED_CORE_MODE>(
+            l_attr_fused_core_mode == fapi2::ENUM_ATTR_FUSED_CORE_MODE_CORE_FUSED);
+        l_perv_ctrl0.writeBit<FSXCOMP_FSXLOG_PERV_CTRL0_TP_EX_SINGLE_LPAR_EN_DC>(
+            l_attr_core_lpar_mode);
+
+        if (l_use_scom)
+        {
+            FAPI_TRY(fapi2::putScom(i_target_chip,
+                                    FSXCOMP_FSXLOG_PERV_CTRL0_COPY_RW,
+                                    l_perv_ctrl0),
+                     "Error writing PERV_CTRL0_COPY (scom)");
+        }
+        else
+        {
+            fapi2::buffer<uint32_t> l_perv_ctrl0_cfam;
+            l_perv_ctrl0_cfam.insert<0, 32, 0>(l_perv_ctrl0);
+            FAPI_TRY(fapi2::putCfamRegister(i_target_chip,
+                                            FSXCOMP_FSXLOG_PERV_CTRL0_COPY_FSI,
+                                            l_perv_ctrl0_cfam),
+                     "Error writing PERV_CTRL0_COPY (cfam)");
+        }
     }
 
     // configure mailbox scratch registers
     {
-        // when running in Hostboot context, use SCOM to reach master only
-        bool l_use_scom = false;
-
-        if (fapi2::is_platform<fapi2::PLAT_HOSTBOOT>())
-        {
-            fapi2::ATTR_PROC_SBE_MASTER_CHIP_Type l_sbe_master_chip;
-
-            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_SBE_MASTER_CHIP, i_target_chip, l_sbe_master_chip),
-                     "Error from FAPI_ATTR_GET (ATTR_PROC_SBE_MASTER_CHIP");
-
-            l_use_scom = (l_sbe_master_chip == fapi2::ENUM_ATTR_PROC_SBE_MASTER_CHIP_TRUE);
-        }
-
         FAPI_TRY(p10_sbe_scratch_regs_update(i_target_chip, true, l_use_scom),
                  "Error from p10_sbe_scratch_regs_update");
     }
