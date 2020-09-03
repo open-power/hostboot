@@ -79,9 +79,6 @@ enum P10_HCD_CORE_SHADOWS_DISABLE_CONSTANTS
     HCD_SHADOW_DIS_CORE_SHADOW_STATE_POLL_TIMEOUT_HW_NS   = 100000, // 10^5ns = 100us timeout
     HCD_SHADOW_DIS_CORE_SHADOW_STATE_POLL_DELAY_HW_NS     = 1000,   // 1us poll loop delay
     HCD_SHADOW_DIS_CORE_SHADOW_STATE_POLL_DELAY_SIM_CYCLE = 32000,  // 32k sim cycle delay
-    HCD_SHADOW_DIS_XFER_RECEIVE_DONE_POLL_TIMEOUT_HW_NS   = 100000, // 10^5ns = 100us timeout
-    HCD_SHADOW_DIS_XFER_RECEIVE_DONE_POLL_DELAY_HW_NS     = 1000,   // 1us poll loop delay
-    HCD_SHADOW_DIS_XFER_RECEIVE_DONE_POLL_DELAY_SIM_CYCLE = 32000,  // 32k sim cycle delay
 };
 
 //------------------------------------------------------------------------------
@@ -95,87 +92,17 @@ p10_hcd_core_shadows_disable(
     fapi2::buffer<buffer_t> l_mmioData = 0;
     uint32_t                l_timeout  = 0;
     uint32_t                l_shadow_states = 0;
-    uint32_t                l_tfcsr_errors = 0;
-    uint32_t                l_dds_operable = 0;
-
-    FAPI_INF(">>p10_hcd_core_shadows_disable");
-
-    fapi2::Target < fapi2::TARGET_TYPE_CORE | fapi2::TARGET_TYPE_MULTICAST > l_mc_or = i_target;//default OR
     fapi2::Target < fapi2::TARGET_TYPE_EQ | fapi2::TARGET_TYPE_MULTICAST, fapi2::MULTICAST_AND > l_eq_target =
         i_target.getParent < fapi2::TARGET_TYPE_EQ | fapi2::TARGET_TYPE_MULTICAST > ();
 
-    FAPI_TRY(HCD_GETMMIO_Q( l_eq_target, QME_FLAGS_RW, l_mmioData ) );
-    l_dds_operable = MMIO_GET(QME_FLAGS_DDS_ENABLED);
-
-    if ( MMIO_GET ( QME_FLAGS_TOD_COMPLETE ) == 1 )
-    {
-        FAPI_DBG("Wait on XFER_RECEIVE_DONE via PCR_TFCSR[32]");
-        l_timeout = HCD_SHADOW_DIS_XFER_RECEIVE_DONE_POLL_TIMEOUT_HW_NS /
-                    HCD_SHADOW_DIS_XFER_RECEIVE_DONE_POLL_DELAY_HW_NS;
-
-        do
-        {
-            FAPI_TRY( HCD_GETMMIO_C( i_target, MMIO_LOWADDR(QME_TFCSR), l_mmioData ) );
-
-            // use multicastAND to check 1
-            if( MMIO_GET(MMIO_LOWBIT(32)) == 1 )
-            {
-                break;
-            }
-
-            fapi2::delay(HCD_SHADOW_DIS_XFER_RECEIVE_DONE_POLL_DELAY_HW_NS,
-                         HCD_SHADOW_DIS_XFER_RECEIVE_DONE_POLL_DELAY_SIM_CYCLE);
-        }
-        while( (--l_timeout) != 0 );
-
-        FAPI_ASSERT((l_timeout != 0),
-                    fapi2::SHADOW_DIS_XFER_RECEIVE_DONE_TIMEOUT()
-                    .set_SHADOW_DIS_XFER_RECEIVE_DONE_POLL_TIMEOUT_HW_NS(HCD_SHADOW_DIS_XFER_RECEIVE_DONE_POLL_TIMEOUT_HW_NS)
-                    .set_QME_TFCSR(l_mmioData)
-                    .set_CORE_TARGET(i_target),
-                    "ERROR: Shadow Disable Xfer Receive Done Timeout");
-
-        FAPI_DBG("Check INCOMING/RUNTIME/STATE_ERR == 0 via PCR_TFCSR[34-36]");
-        FAPI_TRY( HCD_GETMMIO_C( l_mc_or, MMIO_LOWADDR(QME_TFCSR), l_mmioData ) );
-
-        MMIO_EXTRACT(MMIO_LOWBIT(34), 3, l_tfcsr_errors);
-
-        if( l_tfcsr_errors != 0 )
-        {
-            FAPI_DBG("Clear INCOMING/RUNTIME/STATE_ERR[%x] via PCR_TFCSR[34-36]", l_tfcsr_errors);
-            FAPI_TRY( HCD_PUTMMIO_C( i_target, MMIO_LOWADDR(QME_TFCSR_WO_CLEAR), MMIO_LOAD32L( BITS64SH(34, 3) ) ) );
-
-            FAPI_DBG("Assert TFAC_RESET via PCR_TFCSR[1]");
-            FAPI_TRY( HCD_PUTMMIO_C( i_target, QME_TFCSR_WO_OR, MMIO_1BIT(1) ) );
-
-            FAPI_DBG("Reset the core timefac to INACTIVE via PC.COMMON.TFX[1]");
-            FAPI_TRY( HCD_PUTSCOM_C( i_target, EC_PC_TFX_SM, BIT64(1) ) );
-        }
-
-        FAPI_ASSERT((l_tfcsr_errors == 0),
-                    fapi2::SHADOW_DIS_TFCSR_ERROR_CHECK_FAILED()
-                    .set_QME_TFCSR(l_tfcsr_errors)
-                    .set_CORE_TARGET(i_target),
-                    "ERROR: Shadow Disable TFCSR Error Check Failed");
-
-        FAPI_DBG("Drop XFER_RECEIVE_DONE via PCR_TFCSR[32]");
-        FAPI_TRY( HCD_PUTMMIO_C( i_target, MMIO_LOWADDR(QME_TFCSR_WO_CLEAR), MMIO_1BIT( MMIO_LOWBIT(32) ) ) );
-    }
-    else
-    {
-        FAPI_INF("TOD not enabled.  Resetting TimeFac Shadow");
-
-        FAPI_DBG("Assert TFAC_RESET via PCR_TFCSR[1]");
-        FAPI_TRY( HCD_PUTMMIO_C( i_target, QME_TFCSR_WO_OR, BIT32(1) ) );
-
-        FAPI_DBG("Reset the core timefac to INACTIVE via PC.COMMON.TFX[1]");
-        FAPI_TRY( HCD_PUTSCOM_C( i_target, EC_PC_TFX_SM, BIT64(1) ) );
-    }
+    FAPI_INF(">>p10_hcd_core_shadows_disable");
 
     FAPI_DBG("Disable CORE_SAMPLE via CUCR[1]");
     FAPI_TRY( HCD_PUTMMIO_C( i_target, CPMS_CUCR_WO_CLEAR, MMIO_LOAD32H(BIT32(1)) ) );
 
-    if( l_dds_operable )
+    FAPI_TRY(HCD_GETMMIO_Q( l_eq_target, QME_FLAGS_RW, l_mmioData ) );
+
+    if( MMIO_GET(QME_FLAGS_DDS_ENABLED) == 1 )
     {
         FAPI_DBG("Disable Droop Detection and Cancel Active Droop Response via FDCR[0,2-3]");
         FAPI_TRY( HCD_PUTMMIO_C( i_target, CPMS_FDCR_WO_OR, MMIO_LOAD32H( (BIT32(0) | BITS32(2, 2)) ) ) );
