@@ -118,7 +118,7 @@ actionclass threshold_and_mask_parent_proc
  */
 actionclass temporaryBringUpHammer
 {
-    threshold1;
+    level2_th_1;
     funccall("ClearServiceCallFlag_mnfgInfo");
 };
 

@@ -229,6 +229,16 @@ actionclass threshold_and_mask_mem_port
     threshold_and_mask;
 };
 
+/**
+ * Log the error, mask, but do not log as predictive. Applies to both field and
+ * manufacturing mode.
+ */
+actionclass temporaryBringUpHammer
+{
+    level2_th_1;
+    funccall("ClearServiceCallFlag_mnfgInfo");
+};
+
 ################################################################################
 #                           Callouts with flags                                #
 ################################################################################

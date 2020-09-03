@@ -159,7 +159,8 @@ group gMC_OMI_DL_FIR
     /** MC_OMI_DL_FIR[5]
      *  OMI-DL0 running in degraded mode
      */
-    (rMC_OMI_DL_FIR, bit(5)) ? TBDDefaultCallout;
+    (rMC_OMI_DL_FIR, bit(5)) ? temporaryBringUpHammer;
+#    (rMC_OMI_DL_FIR, bit(5)) ? TBDDefaultCallout;
 
     /** MC_OMI_DL_FIR[6]
      *  OMI-DL0 parity error detection on a lane
@@ -259,7 +260,8 @@ group gMC_OMI_DL_FIR
     /** MC_OMI_DL_FIR[25]
      *  OMI-DL1 running in degraded mode
      */
-    (rMC_OMI_DL_FIR, bit(25)) ? TBDDefaultCallout;
+    (rMC_OMI_DL_FIR, bit(25)) ? temporaryBringUpHammer;
+#    (rMC_OMI_DL_FIR, bit(25)) ? TBDDefaultCallout;
 
     /** MC_OMI_DL_FIR[26]
      *  OMI-DL1 parity error detection on a lane
