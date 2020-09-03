@@ -1561,7 +1561,7 @@
     </description>
     <simpleType>
       <uint8_t>
-        <default>1</default>
+        <default>2</default>
       </uint8_t>
     </simpleType>
     <persistency>non-volatile</persistency>
