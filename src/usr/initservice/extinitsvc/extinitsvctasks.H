@@ -93,7 +93,7 @@ const TaskInfo g_exttaskinfolist[]   =   {
             NULL,                                       // no ptr to fnct
             {
 
-                START_TASK,                              // task type
+                INIT_TASK,                              // task type
                 EXT_IMAGE,                              // Extended Module
             }
         },
