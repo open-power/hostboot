@@ -447,6 +447,78 @@ static const uint32_t TP_TPVSB_FSI_W_SHIFT_DMA_STAT_COMP_MASK_REGISTER_DMA_STAT_
 //<< [TP_TPVSB_FSI_W_SHIFT_DMA_STAT_COMP_MASK_REGISTER]
 // proc/reg00044.H
 
+//>> [TP_TPCHIP_TPC_LOCAL_FIR]
+static const uint64_t TP_TPCHIP_TPC_LOCAL_FIR_RW = 0x01040100ull;
+static const uint64_t TP_TPCHIP_TPC_LOCAL_FIR_WO_AND = 0x01040101ull;
+static const uint64_t TP_TPCHIP_TPC_LOCAL_FIR_WO_OR = 0x01040102ull;
+
+static const uint32_t TP_TPCHIP_TPC_LOCAL_FIR_CFIR = 0;
+static const uint32_t TP_TPCHIP_TPC_LOCAL_FIR_CPLT_CTRL = 1;
+static const uint32_t TP_TPCHIP_TPC_LOCAL_FIR_CC_PCB = 2;
+static const uint32_t TP_TPCHIP_TPC_LOCAL_FIR_CC_OTHERS = 3;
+static const uint32_t TP_TPCHIP_TPC_LOCAL_FIR_IN04 = 4;
+static const uint32_t TP_TPCHIP_TPC_LOCAL_FIR_IN05 = 5;
+static const uint32_t TP_TPCHIP_TPC_LOCAL_FIR_IN06 = 6;
+static const uint32_t TP_TPCHIP_TPC_LOCAL_FIR_IN07 = 7;
+static const uint32_t TP_TPCHIP_TPC_LOCAL_FIR_IN08 = 8;
+static const uint32_t TP_TPCHIP_TPC_LOCAL_FIR_IN09 = 9;
+static const uint32_t TP_TPCHIP_TPC_LOCAL_FIR_IN10 = 10;
+static const uint32_t TP_TPCHIP_TPC_LOCAL_FIR_IN11 = 11;
+static const uint32_t TP_TPCHIP_TPC_LOCAL_FIR_IN12 = 12;
+static const uint32_t TP_TPCHIP_TPC_LOCAL_FIR_IN13 = 13;
+static const uint32_t TP_TPCHIP_TPC_LOCAL_FIR_IN14 = 14;
+static const uint32_t TP_TPCHIP_TPC_LOCAL_FIR_IN15 = 15;
+static const uint32_t TP_TPCHIP_TPC_LOCAL_FIR_IN16 = 16;
+static const uint32_t TP_TPCHIP_TPC_LOCAL_FIR_IN17 = 17;
+static const uint32_t TP_TPCHIP_TPC_LOCAL_FIR_IN18 = 18;
+static const uint32_t TP_TPCHIP_TPC_LOCAL_FIR_IN19 = 19;
+static const uint32_t TP_TPCHIP_TPC_LOCAL_FIR_IN20 = 20;
+static const uint32_t TP_TPCHIP_TPC_LOCAL_FIR_IN21 = 21;
+static const uint32_t TP_TPCHIP_TPC_LOCAL_FIR_IN22 = 22;
+static const uint32_t TP_TPCHIP_TPC_LOCAL_FIR_IN23 = 23;
+static const uint32_t TP_TPCHIP_TPC_LOCAL_FIR_IN24 = 24;
+static const uint32_t TP_TPCHIP_TPC_LOCAL_FIR_IN25 = 25;
+static const uint32_t TP_TPCHIP_TPC_LOCAL_FIR_IN26 = 26;
+static const uint32_t TP_TPCHIP_TPC_LOCAL_FIR_IN27 = 27;
+static const uint32_t TP_TPCHIP_TPC_LOCAL_FIR_IN28 = 28;
+static const uint32_t TP_TPCHIP_TPC_LOCAL_FIR_IN29 = 29;
+static const uint32_t TP_TPCHIP_TPC_LOCAL_FIR_IN30 = 30;
+static const uint32_t TP_TPCHIP_TPC_LOCAL_FIR_IN31 = 31;
+static const uint32_t TP_TPCHIP_TPC_LOCAL_FIR_IN32 = 32;
+static const uint32_t TP_TPCHIP_TPC_LOCAL_FIR_IN33 = 33;
+static const uint32_t TP_TPCHIP_TPC_LOCAL_FIR_IN34 = 34;
+static const uint32_t TP_TPCHIP_TPC_LOCAL_FIR_IN35 = 35;
+static const uint32_t TP_TPCHIP_TPC_LOCAL_FIR_IN36 = 36;
+static const uint32_t TP_TPCHIP_TPC_LOCAL_FIR_IN37 = 37;
+static const uint32_t TP_TPCHIP_TPC_LOCAL_FIR_IN38 = 38;
+static const uint32_t TP_TPCHIP_TPC_LOCAL_FIR_IN39 = 39;
+static const uint32_t TP_TPCHIP_TPC_LOCAL_FIR_IN40 = 40;
+static const uint32_t TP_TPCHIP_TPC_LOCAL_FIR_IN41 = 41;
+static const uint32_t TP_TPCHIP_TPC_LOCAL_FIR_IN42 = 42;
+static const uint32_t TP_TPCHIP_TPC_LOCAL_FIR_IN43 = 43;
+static const uint32_t TP_TPCHIP_TPC_LOCAL_FIR_IN44 = 44;
+static const uint32_t TP_TPCHIP_TPC_LOCAL_FIR_IN45 = 45;
+static const uint32_t TP_TPCHIP_TPC_LOCAL_FIR_IN46 = 46;
+static const uint32_t TP_TPCHIP_TPC_LOCAL_FIR_IN47 = 47;
+static const uint32_t TP_TPCHIP_TPC_LOCAL_FIR_IN48 = 48;
+static const uint32_t TP_TPCHIP_TPC_LOCAL_FIR_IN49 = 49;
+static const uint32_t TP_TPCHIP_TPC_LOCAL_FIR_IN50 = 50;
+static const uint32_t TP_TPCHIP_TPC_LOCAL_FIR_IN51 = 51;
+static const uint32_t TP_TPCHIP_TPC_LOCAL_FIR_IN52 = 52;
+static const uint32_t TP_TPCHIP_TPC_LOCAL_FIR_IN53 = 53;
+static const uint32_t TP_TPCHIP_TPC_LOCAL_FIR_IN54 = 54;
+static const uint32_t TP_TPCHIP_TPC_LOCAL_FIR_IN55 = 55;
+static const uint32_t TP_TPCHIP_TPC_LOCAL_FIR_IN56 = 56;
+static const uint32_t TP_TPCHIP_TPC_LOCAL_FIR_IN57 = 57;
+static const uint32_t TP_TPCHIP_TPC_LOCAL_FIR_IN58 = 58;
+static const uint32_t TP_TPCHIP_TPC_LOCAL_FIR_IN59 = 59;
+static const uint32_t TP_TPCHIP_TPC_LOCAL_FIR_IN60 = 60;
+static const uint32_t TP_TPCHIP_TPC_LOCAL_FIR_IN61 = 61;
+static const uint32_t TP_TPCHIP_TPC_LOCAL_FIR_IN62 = 62;
+static const uint32_t TP_TPCHIP_TPC_LOCAL_FIR_EXT_LOCAL_XSTOP = 63;
+//<< [TP_TPCHIP_TPC_LOCAL_FIR]
+// proc/reg00044.H
+
 //>>THE END<<
 
 #ifndef __PPE_HCODE__
