@@ -56,9 +56,9 @@
    <!-- ******************************************************************** -->
    <hwpError>
       <sbeError/>
-      <rc>RC_P10_HW540133_LLBM1_WA_ERR</rc>
+      <rc>RC_P10_HW540133_LLB_WA_ERR</rc>
       <description>
-        Error applying last_locking_bandsel_m1 workaround -- bad return code in
+        Error applying last_locking_bandsel workaround -- bad return code in
         scan/scom sequence application or failure to observe subseqent PLL lock
       </description>
       <ffdc>TARGET</ffdc>
@@ -66,6 +66,7 @@
       <ffdc>FIRST_ATTEMPT</ffdc>
       <ffdc>INTERMEDIATE_STEP</ffdc>
       <ffdc>LAST_ATTEMPT</ffdc>
+      <ffdc>WA_TYPE</ffdc>
    </hwpError>
    <!-- ******************************************************************** -->
    <hwpError>
