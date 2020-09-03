@@ -93,6 +93,11 @@ typedef struct
 namespace pm_pstate_parameter_block
 {
 
+enum ROUNDING
+{
+    ROUND_UP,
+    ROUND_DOWN
+};
 
 #define BIAS_PCT_UNIT              0.5
 using namespace fapi2;
@@ -137,14 +142,15 @@ typedef struct
     uint8_t attr_dds_trip_mode;
     uint8_t attr_dds_trip_interpolation_control;
     uint8_t attr_dds_bias_enable;
+    uint8_t attr_fmax_enable;
 
     uint8_t attr_dd_wof_not_supported;
     uint8_t attr_dd_dds_not_supported;
     uint8_t attr_pstate_mode;
 
-    int8_t   attr_freq_bias; //for all #V points
-    int8_t   attr_voltage_ext_bias[2][8];
-    int8_t   attr_voltage_ext_vdn_bias;
+    int8_t  attr_freq_bias; //for all #V points
+    int8_t  attr_voltage_ext_bias[2][8];
+    int8_t  attr_voltage_ext_vdn_bias;
 
     uint16_t attr_system_wof_altitude_temp_adjustment;
     uint16_t attr_system_wof_tdp_altitude_reference;
@@ -303,6 +309,7 @@ class PlatPmPPB
         /// @return fapi::ReturnCode: FAPI2_RC_SUCCESS if success, else error code.
         /// -----------------------------------------------------------------------
         fapi2::ReturnCode pm_set_frequency();
+
         /// -----------------------------------------------------------------------
 
         /// @brief Read #V data from module vpd
@@ -382,6 +389,36 @@ class PlatPmPPB
         /// @return fapi::ReturnCode: FAPI2_RC_SUCCESS if success, else error code.
         /// -----------------------------------------------------------------------
         fapi2::ReturnCode safe_mode_init( void );
+
+        ///////////////////////////////////////////////////////////
+        ////////   find_freq_region
+        ///////////////////////////////////////////////////////////
+        uint32_t find_freq_region(const uint32_t freq_mhz);
+
+        ///////////////////////////////////////////////////////////
+        ////////   region_steps
+        ///////////////////////////////////////////////////////////
+        uint32_t region_steps(const uint32_t region);
+
+        ///////////////////////////////////////////////////////////
+        ////////   compute_stretch_points
+        ///////////////////////////////////////////////////////////
+        // This method computes the new frequency points within a stretched region of the
+        // RAW #V.  These points are returned in the o_points vector.
+        void compute_stretched_freq_pt(const uint32_t region,
+                                       uint32_t* o_point_mhz);
+
+        ///////////////////////////////////////////////////////////
+        ////////   interpolate_freq_point
+        ///////////////////////////////////////////////////////////
+        void interpolate_freq_pt(const uint32_t  freq,
+                                 const uint32_t  region,
+                                 PoundVOpPoint_t* ip);
+
+        ///////////////////////////////////////////////////////////
+        ////////   create_stretched_points
+        ///////////////////////////////////////////////////////////
+        fapi2::ReturnCode create_stretched_pts();
 
         /// -----------------------------------------------------------------------
         /// @brief Compute VPD points of different regions
@@ -502,6 +539,7 @@ class PlatPmPPB
         {
             memcpy(o_data, iv_attr_mvpd_poundV_biased, sizeof(iv_attr_mvpd_poundV_biased));
         }
+
         /// -----------------------------------------------------------------------
         /// @brief Compute slope values for fixed point of shift 4.12
         /// @param[in]     y1    pstate value of powersave
@@ -686,6 +724,7 @@ class PlatPmPPB
 
         PoundVOpPoint_t           iv_attr_mvpd_poundV_raw[NUM_PV_POINTS];
         PoundVOpPoint_t           iv_attr_mvpd_poundV_biased[NUM_PV_POINTS];
+        PoundVOpPoint_t           iv_attr_mvpd_poundV_raw_orig[NUM_PV_POINTS];
         PoundVOpPoint_t           iv_attr_mvpd_data[NUM_PV_POINTS];
         uint8_t                   iv_poundV_bucket_id;
 

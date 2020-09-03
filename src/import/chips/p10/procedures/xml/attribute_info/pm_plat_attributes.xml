@@ -2946,4 +2946,30 @@
   </attribute>
 
   <!-- *********************************************************************-->
+  <attribute>
+    <id>ATTR_SYSTEM_FMAX_ENABLE</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+    Enable the use of the #V Fmax value within each chip in the system.  In this
+    mode, Pstate 0 is determined by finding the maximimum of all #V FMax values.
+
+    If this attribute is OFF, Pstate 0 is set by the UltraTurbo value that is
+    to be common across all parts in the system as they must be from the same
+    sort.
+
+    Default: OFF
+    Producer:  MRW
+    Consumers: p10_pstate_parameter_block
+    </description>
+    <valueType>uint8</valueType>
+    <enum>
+        OFF=0,
+        ON=1
+    </enum>
+    <platInit/>
+    <default>OFF</default>
+    <group>pstate</group>
+  </attribute>
+
+  <!-- *********************************************************************-->
 </attributes>

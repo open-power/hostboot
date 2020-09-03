@@ -73,10 +73,9 @@ using namespace pm_pstate_parameter_block;
                  iv_attr_mvpd_data[i].ics_tdp_dc_10ma == 0 || \
                  iv_attr_mvpd_data[i].ics_rdp_ac_10ma == 0 || \
                  iv_attr_mvpd_data[i].ics_rdp_dc_10ma == 0 || \
-                 iv_attr_mvpd_data[i].frequency_guardband_sort_mhz == 0 || \
-                 iv_attr_mvpd_data[i].vdd_vmin == 0 || \
-                 iv_attr_mvpd_data[i].idd_power_pattern_10ma == 0 || \
-                 iv_attr_mvpd_data[i].core_power_pattern_temp_0p5C == 0)
+                 iv_attr_mvpd_data[i].irt_rdp_ac_10ma == 0 || \
+                 iv_attr_mvpd_data[i].irt_rdp_dc_10ma == 0 || \
+                 iv_attr_mvpd_data[i].vdd_vmin == 0)
 
 #define POUNDV_POINTS_PRINT(i,suffix)   \
                   .set_FREQUENCY_##suffix(iv_attr_mvpd_data[i].frequency_mhz)  \
@@ -90,10 +89,9 @@ using namespace pm_pstate_parameter_block;
                  .set_ICS_TDP_DC_##suffix(iv_attr_mvpd_data[i].ics_tdp_dc_10ma) \
                  .set_ICS_RDP_AC_##suffix(iv_attr_mvpd_data[i].ics_rdp_ac_10ma) \
                  .set_ICS_RDP_DC_##suffix(iv_attr_mvpd_data[i].ics_rdp_dc_10ma) \
-                 .set_FREQ_GB_SORT_##suffix(iv_attr_mvpd_data[i].frequency_guardband_sort_mhz) \
-                 .set_VDD_VMIN_##suffix(iv_attr_mvpd_data[i].vdd_vmin) \
-                 .set_IDD_POWR_##suffix(iv_attr_mvpd_data[i].idd_power_pattern_10ma) \
-                 .set_CORE_POWR_TEMP_##suffix(iv_attr_mvpd_data[i].core_power_pattern_temp_0p5C)
+                 .set_ICS_RDP_AC_##suffix(iv_attr_mvpd_data[i].irt_rdp_ac_10ma) \
+                 .set_ICS_RDP_DC_##suffix(iv_attr_mvpd_data[i].irt_rdp_dc_10ma) \
+                 .set_VDD_VMIN_##suffix(iv_attr_mvpd_data[i].vdd_vmin) 
 
 //w => N_L (w > 7 is invalid)
 //x => N_S (x > N_L is invalid)
@@ -177,14 +175,14 @@ const uint8_t g_vpd_PVData[] =
 {
     1,
 //      C-Freq     VDDVLT     IDDTAC       IDDTDC     IDDRAC     IDDRDC     VCSVLT     ICSTAC     ICSTDC    ICSRAC    ICSRDC    CFGSRT    VDDVMN    IVDDPP   TCPPT
-        0x07,0xd0, 0x02,0xBB, 0x23,0x2a, 0x10,0x50, 0x23,0x2a, 0x10,0x50, 0x02,0xbc, 0x01,0x1f, 0x02,0x86, 0x01,0x1f,0x02,0x86,0x08,0x20,0x02,0x70,0x33,0x7b,0xaa,0x00,0x00,0x00,0x00,0x00,0x00,   //CF0
-        0x08,0x98, 0x02,0xdb, 0x28,0xff, 0x10,0xaf, 0x28,0xff, 0x10,0xaf, 0x02,0xdb, 0x01,0x4e, 0x02,0x8f, 0x01,0x4e,0x02,0x8f,0x08,0xf0,0x02,0x8c,0x39,0xae,0xaa,0x00,0x00,0x00,0x00,0x00,0x00,   //CF1
-        0x09,0x60, 0x02,0xfa, 0x2f,0x35, 0x11,0x0c, 0x2f,0x35, 0x11,0x0c, 0x02,0xfa, 0x01,0x81, 0x02,0x98, 0x01,0x81,0x02,0x98,0x09,0xc0,0x02,0xa8,0x40,0x41,0xaa,0x00,0x00,0x00,0x00,0x00,0x00,   //CF2
-        0x0a,0x28, 0x03,0x20, 0x36,0x7b, 0x11,0x81, 0x36,0x7b, 0x11,0x81, 0x03,0x20, 0x01,0xbd, 0x02,0xa4, 0x01,0xbd,0x02,0xa4,0x0a,0x90,0x02,0xca,0x47,0xfc,0xaa,0x00,0x00,0x00,0x00,0x00,0x00,   //CF3
-        0x0a,0xf0, 0x03,0x4e, 0x3f,0x18, 0x12,0x12, 0x3f,0x18, 0x12,0x12, 0x03,0x4e, 0x02,0x03, 0x02,0xb2, 0x02,0x03,0x02,0xb2,0x0b,0x60,0x02,0xf3,0x51,0x2b,0xaa,0x00,0x00,0x00,0x00,0x00,0x00,   //CF4
-        0x0b,0x54, 0x03,0x6b, 0x44,0x46, 0x12,0x70, 0x44,0x46, 0x12,0x70, 0x03,0x6b, 0x02,0x2d, 0x02,0xbb, 0x02,0x2D,0x02,0xbb,0x0b,0xc8,0x03,0x0d,0x56,0xb7,0xaa,0x00,0x00,0x00,0x00,0x00,0x00,   //CF5
-        0x0b,0xb8, 0x03,0x82, 0x49,0x0d, 0x12,0xbd, 0x49,0x0d, 0x12,0xbd, 0x03,0x82, 0x02,0x54, 0x02,0xc2, 0x02,0x54,0x02,0xc2,0x0c,0x30,0x03,0x21,0x5b,0xca,0xaa,0x00,0x00,0x00,0x00,0x00,0x00,   //CF6
-        0x0c,0x1c, 0x03,0xab, 0x4f,0xff, 0x13,0x47, 0x4f,0xff, 0x13,0x47, 0x03,0xab, 0x02,0x8d, 0x02,0xD0, 0x02,0x8d,0x02,0xd0,0x0c,0x98,0x03,0x46,0x63,0x47,0xaa,0x00,0x00,0x00,0x00,0x00,0x00,   //CF7
+        0x07,0xd0, 0x02,0xBB, 0x23,0x2a, 0x10,0x50, 0x23,0x2a, 0x10,0x50, 0x02,0xbc, 0x01,0x1f, 0x02,0x86, 0x01,0x1f,0x02,0x86,0x08,0x20,0x02,0x70,0x33,0x7b,0xaa,0x23,0x2a,0x10,0x50,0x00,0x00,   //CF0
+        0x08,0x98, 0x02,0xdb, 0x28,0xff, 0x10,0xaf, 0x28,0xff, 0x10,0xaf, 0x02,0xdb, 0x01,0x4e, 0x02,0x8f, 0x01,0x4e,0x02,0x8f,0x08,0xf0,0x02,0x8c,0x39,0xae,0xaa,0x28,0xff,0x10,0xaf,0x00,0x00,   //CF1
+        0x09,0x60, 0x02,0xfa, 0x2f,0x35, 0x11,0x0c, 0x2f,0x35, 0x11,0x0c, 0x02,0xfa, 0x01,0x81, 0x02,0x98, 0x01,0x81,0x02,0x98,0x09,0xc0,0x02,0xa8,0x40,0x41,0xaa,0x2f,0x35,0x11,0x0c,0x00,0x00,   //CF2
+        0x0a,0x28, 0x03,0x20, 0x36,0x7b, 0x11,0x81, 0x36,0x7b, 0x11,0x81, 0x03,0x20, 0x01,0xbd, 0x02,0xa4, 0x01,0xbd,0x02,0xa4,0x0a,0x90,0x02,0xca,0x47,0xfc,0xaa,0x36,0x7b,0x11,0x81,0x00,0x00,   //CF3
+        0x0a,0xf0, 0x03,0x4e, 0x3f,0x18, 0x12,0x12, 0x3f,0x18, 0x12,0x12, 0x03,0x4e, 0x02,0x03, 0x02,0xb2, 0x02,0x03,0x02,0xb2,0x0b,0x60,0x02,0xf3,0x51,0x2b,0xaa,0x3f,0x18,0x12,0x12,0x00,0x00,   //CF4
+        0x0b,0x54, 0x03,0x6b, 0x44,0x46, 0x12,0x70, 0x44,0x46, 0x12,0x70, 0x03,0x6b, 0x02,0x2d, 0x02,0xbb, 0x02,0x2D,0x02,0xbb,0x0b,0xc8,0x03,0x0d,0x56,0xb7,0xaa,0x44,0x46,0x12,0x70,0x00,0x00,   //CF5
+        0x0b,0xb8, 0x03,0x82, 0x49,0x0d, 0x12,0xbd, 0x49,0x0d, 0x12,0xbd, 0x03,0x82, 0x02,0x54, 0x02,0xc2, 0x02,0x54,0x02,0xc2,0x0c,0x30,0x03,0x21,0x5b,0xca,0xaa,0x49,0x0d,0x12,0xbd,0x00,0x00,   //CF6
+        0x0c,0x1c, 0x03,0xab, 0x4f,0xff, 0x13,0x47, 0x4f,0xff, 0x13,0x47, 0x03,0xab, 0x02,0x8d, 0x02,0xD0, 0x02,0x8d,0x02,0xd0,0x0c,0x98,0x03,0x46,0x63,0x47,0xaa,0x4f,0xff,0x13,0x47,0x00,0x00,   //CF7
 //SR      VDNVLT     IDNTAC     IDNTDC     VIOVLT    IIOTAC     IIOTDC     VCIVLT     ICITAC     ICITDC
         0x03,0x84, 0x03,0xd2, 0x00,0xF4, 0x03,0x84, 0x06,0xba, 0x06,0xba, 0x03,0x52, 0x02,0xfd, 0x02,0xfd, 0x00,0x00, 0x00,0x00, 0x00,0x00, 0x00,0x00, 0x00,0x00, 0x00,0x00, 0x00,0x00,0x00,
 //        PAUFRQ    SSPTAR     VDNPOW     VIOPOW     PCIPOW     AVDD       SSPACT  IDDRLT       VDDTWI   VCSTWI VIOTWI  AMBTWI  MDINPLT
@@ -195,6 +193,27 @@ const uint8_t g_vpd_PVData[] =
 
 
 /*
+const uint8_t g_vpd_PVData[] =
+{
+    1,
+//      C-Freq     VDDVLT     IDDTAC       IDDTDC     IDDRAC     IDDRDC     VCSVLT     ICSTAC     ICSTDC    ICSRAC    ICSRDC    CFGSRT    VDDVMN    IVDDPP   TCPPT
+        0x07,0xd0, 0x02,0xBB, 0x23,0x2a, 0x10,0x50, 0x23,0x2a, 0x10,0x50, 0x02,0xbc, 0x01,0x1f, 0x02,0x86, 0x01,0x1f,0x02,0x86,0x08,0x20,0x02,0x70,0x33,0x7b,0xaa,0x00,0x00,0x00,0x00,0x00,0x00,   //CF0
+        0x08,0x98, 0x02,0xdb, 0x28,0xff, 0x10,0xaf, 0x28,0xff, 0x10,0xaf, 0x02,0xdb, 0x01,0x4e, 0x02,0x8f, 0x01,0x4e,0x02,0x8f,0x08,0xf0,0x02,0x8c,0x39,0xae,0xaa,0x00,0x00,0x00,0x00,0x00,0x00,   //CF1
+        0x09,0x60, 0x02,0xfa, 0x2f,0x35, 0x11,0x0c, 0x2f,0x35, 0x11,0x0c, 0x02,0xfa, 0x01,0x81, 0x02,0x98, 0x01,0x81,0x02,0x98,0x09,0xc0,0x02,0xa8,0x40,0x41,0xaa,0x00,0x00,0x00,0x00,0x00,0x00,   //CF2
+        0x0a,0x28, 0x03,0x20, 0x36,0x7b, 0x11,0x81, 0x36,0x7b, 0x11,0x81, 0x03,0x20, 0x01,0xbd, 0x02,0xa4, 0x01,0xbd,0x02,0xa4,0x0a,0x90,0x02,0xca,0x47,0xfc,0xaa,0x00,0x00,0x00,0x00,0x00,0x00,   //CF3
+        0x0a,0xf0, 0x03,0x4e, 0x3f,0x18, 0x12,0x12, 0x3f,0x18, 0x12,0x12, 0x03,0x4e, 0x02,0x03, 0x02,0xb2, 0x02,0x03,0x02,0xb2,0x0b,0x60,0x02,0xf3,0x51,0x2b,0xaa,0x00,0x00,0x00,0x00,0x00,0x00,   //CF4
+        0x0b,0x54, 0x03,0x6b, 0x44,0x46, 0x12,0x70, 0x44,0x46, 0x12,0x70, 0x03,0x6b, 0x02,0x2d, 0x02,0xbb, 0x02,0x2D,0x02,0xbb,0x0b,0xc8,0x03,0x0d,0x56,0xb7,0xaa,0x00,0x00,0x00,0x00,0x00,0x00,   //CF5
+        0x0b,0xb8, 0x03,0x82, 0x49,0x0d, 0x12,0xbd, 0x49,0x0d, 0x12,0xbd, 0x03,0x82, 0x02,0x54, 0x02,0xc2, 0x02,0x54,0x02,0xc2,0x0c,0x30,0x03,0x21,0x5b,0xca,0xaa,0x00,0x00,0x00,0x00,0x00,0x00,   //CF6
+        0x0c,0x1c, 0x03,0xab, 0x4f,0xff, 0x13,0x47, 0x4f,0xff, 0x13,0x47, 0x03,0xab, 0x02,0x8d, 0x02,0xD0, 0x02,0x8d,0x02,0xd0,0x0c,0x98,0x03,0x46,0x63,0x47,0xaa,0x00,0x00,0x00,0x00,0x00,0x00,   //CF7
+//SR      VDNVLT     IDNTAC     IDNTDC     VIOVLT    IIOTAC     IIOTDC     VCIVLT     ICITAC     ICITDC
+        0x00,0x00, 0x00,0x00, 0x00,0x00, 0x00,0x00, 0x00,0x00, 0x00,0x00, 0x00,0x00, 0x00,0x00, 0x00,0x00, 0x00,0x00, 0x00,0x00, 0x00,0x00, 0x00,0x00, 0x00,0x00, 0x00,0x00, 0x00,0x00, 0x00,0x00, 0x00,
+//        PAUFRQ    SSPTAR     VDNPOW     VIOPOW     PCIPOW     SSPACT  IDDRLT  VDDTWI     VCSTWI VIOTWI  AMBTWI  MDINPLT
+        0x00,0x00, 0x00,0x00, 0x00,0x00, 0x00,0x00, 0x00,0x00, 0x00,0x00, 0x00,0x00,0x00,   0x00,  0x00,   0x00,   0x00,
+//      RDPSPT  TDPSPT  WOFBSCFRQ    FFCFREQ   VDDPsavCoreF VDDCF6CoreF VDDFmaxCF  MMATemp  IOTemp    FFMPT
+        0x00,   0x00,   0x0D,0xAC, 0x0B,0xB8, 0x07,0xD0,    0x0E,0xD8, 0x0F,0xA0, 0x00,    0x00,   0x00,0x00,
+};
+
+
 const uint8_t g_vpd_PVData[] =
 {
     1,
@@ -382,6 +401,11 @@ p10_pstate_parameter_block( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i
         }
 
         // ----------------
+        // Compute Fmax and update pstate0
+        // ----------------
+//        l_pmPPB->pm_set_frequency();
+
+        // ----------------
         // get VPD data (#V,#W,IQ)
         // ----------------
         FAPI_TRY(l_pmPPB->vpd_init(),"vpd_init function failed");
@@ -391,12 +415,6 @@ p10_pstate_parameter_block( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i
         // ----------------
         l_pmPPB->compute_vpd_pts();
 
-        // ----------------
-        // Compute Fmax and update pstate0
-        // ----------------
-//        l_pmPPB->pm_set_frequency();
-
-        // ----------------
         // Safe mode freq and volt init
         // ----------------
         FAPI_TRY(l_pmPPB->safe_mode_init());
@@ -561,7 +579,7 @@ void gppb_print(GlobalPstateParmBlock_t* i_gppb)
 
         FAPI_INF("%s", l_buffer);
     }
-    FAPI_INF("Operating Points:  Freq_GB(mHz)   VDD_vmin(mV)  IDD_POW(10mA)   CORE_POWR_TEMP(0.5C)");
+    FAPI_INF("Operating Points:  RT_AC(mHz)   VDD_vmin(mV)  RT_DC(10mA) ");
 
     for (uint32_t i = 0; i < NUM_OP_POINTS; i++)
     {
@@ -570,20 +588,17 @@ void gppb_print(GlobalPstateParmBlock_t* i_gppb)
         strcat(l_buffer, l_temp_buffer);
 
         HEX_DEC_STR(l_buffer,
-                revle32(i_gppb->operating_points_set[0][i].frequency_guardband_sort_mhz),
-                revle32(i_gppb->operating_points_set[0][i].frequency_guardband_sort_mhz));
+                revle32(i_gppb->operating_points_set[0][i].irt_rdp_ac_10ma),
+                revle32(i_gppb->operating_points_set[0][i].irt_rdp_ac_10ma));
 
         HEX_DEC_STR(l_buffer,
                 revle32(i_gppb->operating_points_set[0][i].vdd_vmin),
                 revle32(i_gppb->operating_points_set[0][i].vdd_vmin));
 
         HEX_DEC_STR(l_buffer,
-                revle32(i_gppb->operating_points_set[0][i].idd_power_pattern_10ma),
-                revle32(i_gppb->operating_points_set[0][i].idd_power_pattern_10ma));
+                revle32(i_gppb->operating_points_set[0][i].irt_rdp_dc_10ma),
+                revle32(i_gppb->operating_points_set[0][i].irt_rdp_dc_10ma));
 
-        HEX_DEC_STR(l_buffer,
-                revle32(i_gppb->operating_points_set[0][i].core_power_pattern_temp_0p5C),
-                revle32(i_gppb->operating_points_set[0][i].core_power_pattern_temp_0p5C));
 
         FAPI_INF("%s", l_buffer);
     }
@@ -1006,13 +1021,11 @@ fapi2::ReturnCode PlatPmPPB::gppb_init(
                 io_globalppb->operating_points_set[i][j].vcs_mv          = revle32(iv_operating_points[i][j].vcs_mv);
                 io_globalppb->operating_points_set[i][j].ics_tdp_ac_10ma = revle32(iv_operating_points[i][j].ics_tdp_ac_10ma);
                 io_globalppb->operating_points_set[i][j].ics_tdp_dc_10ma = revle32(iv_operating_points[i][j].ics_tdp_ac_10ma);
-                io_globalppb->operating_points_set[i][j].frequency_guardband_sort_mhz =
-                    revle32(iv_operating_points[i][j].frequency_guardband_sort_mhz);
                 io_globalppb->operating_points_set[i][j].vdd_vmin        = revle32(iv_operating_points[i][j].vdd_vmin);
-                io_globalppb->operating_points_set[i][j].idd_power_pattern_10ma =
-                    revle32(iv_operating_points[i][j].idd_power_pattern_10ma);
-                io_globalppb->operating_points_set[i][j].core_power_pattern_temp_0p5C =
-                    revle32(iv_operating_points[i][j].core_power_pattern_temp_0p5C);
+                io_globalppb->operating_points_set[i][j].irt_rdp_ac_10ma =
+                    revle32(iv_operating_points[i][j].irt_rdp_ac_10ma);
+                io_globalppb->operating_points_set[i][j].irt_rdp_dc_10ma =
+                    revle32(iv_operating_points[i][j].irt_rdp_dc_10ma);
                 io_globalppb->operating_points_set[i][j].pstate          = iv_operating_points[i][j].pstate;
             }
         }
@@ -1145,13 +1158,11 @@ fapi2::ReturnCode PlatPmPPB::oppb_init(
             i_occppb->operating_points[i].vcs_mv          = revle32(iv_attr_mvpd_poundV_biased[i].vcs_mv);
             i_occppb->operating_points[i].ics_tdp_ac_10ma = revle32(iv_attr_mvpd_poundV_biased[i].ics_tdp_ac_10ma);
             i_occppb->operating_points[i].ics_tdp_dc_10ma = revle32(iv_attr_mvpd_poundV_biased[i].ics_tdp_ac_10ma);
-            i_occppb->operating_points[i].frequency_guardband_sort_mhz =
-            revle32(iv_attr_mvpd_poundV_biased[i].frequency_guardband_sort_mhz);
             i_occppb->operating_points[i].vdd_vmin        = revle32(iv_attr_mvpd_poundV_biased[i].vdd_vmin);
-            i_occppb->operating_points[i].idd_power_pattern_10ma =
-            revle32(iv_attr_mvpd_poundV_biased[i].idd_power_pattern_10ma);
-            i_occppb->operating_points[i].core_power_pattern_temp_0p5C =
-            revle32(iv_attr_mvpd_poundV_biased[i].core_power_pattern_temp_0p5C);
+            i_occppb->operating_points[i].irt_rdp_ac_10ma =
+            revle32(iv_attr_mvpd_poundV_biased[i].irt_rdp_ac_10ma);
+            i_occppb->operating_points[i].irt_rdp_dc_10ma =
+            revle32(iv_attr_mvpd_poundV_biased[i].irt_rdp_dc_10ma);
             i_occppb->operating_points[i].pstate          = iv_attr_mvpd_poundV_biased[i].pstate;
         }
 
@@ -1330,7 +1341,7 @@ void oppb_print(OCCPstateParmBlock_t* i_oppb)
 
         FAPI_INF("%s", l_buffer);
     }
-    FAPI_INF("Operating Points:  Freq_GB(mHz)   VDD_vmin(mV)  IDD_POW(10mA)   CORE_POWR_TEMP(0.5C)");
+    FAPI_INF("Operating Points:  RT_AC(10ma)   VDD_vmin(mV)  RT_DC(10mA)");
 
     for (uint32_t i = 0; i < NUM_OP_POINTS; i++)
     {
@@ -1339,20 +1350,16 @@ void oppb_print(OCCPstateParmBlock_t* i_oppb)
         strcat(l_buffer, l_temp_buffer);
 
         HEX_DEC_STR(l_buffer,
-                revle32(i_oppb->operating_points[i].frequency_guardband_sort_mhz),
-                revle32(i_oppb->operating_points[i].frequency_guardband_sort_mhz));
+                revle32(i_oppb->operating_points[i].irt_rdp_ac_10ma),
+                revle32(i_oppb->operating_points[i].irt_rdp_ac_10ma));
 
         HEX_DEC_STR(l_buffer,
                 revle32(i_oppb->operating_points[i].vdd_vmin),
                 revle32(i_oppb->operating_points[i].vdd_vmin));
 
         HEX_DEC_STR(l_buffer,
-                revle32(i_oppb->operating_points[i].idd_power_pattern_10ma),
-                revle32(i_oppb->operating_points[i].idd_power_pattern_10ma));
-
-        HEX_DEC_STR(l_buffer,
-                revle32(i_oppb->operating_points[i].core_power_pattern_temp_0p5C),
-                revle32(i_oppb->operating_points[i].core_power_pattern_temp_0p5C));
+                revle32(i_oppb->operating_points[i].irt_rdp_dc_10ma),
+                revle32(i_oppb->operating_points[i].irt_rdp_dc_10ma));
 
         FAPI_INF("%s", l_buffer);
     }
@@ -1534,6 +1541,7 @@ FAPI_INF("%-60s[3] = 0x%08x %d", #attr_name, iv_attrs.attr_assign[3], iv_attrs.a
     DATABLOCK_GET_ATTR(ATTR_FREQ_PAU_MHZ,           FAPI_SYSTEM, attr_pau_frequency_mhz);
     DATABLOCK_GET_ATTR(ATTR_FREQ_CORE_CEILING_MHZ,  iv_procChip, attr_freq_core_ceiling_mhz);
     DATABLOCK_GET_ATTR(ATTR_FREQ_CORE_FLOOR_MHZ,    iv_procChip, attr_freq_core_floor_mhz);
+    DATABLOCK_GET_ATTR(ATTR_SYSTEM_FMAX_ENABLE,     FAPI_SYSTEM, attr_fmax_enable);
 
     // Loadline, Distribution loss and Distribution offset attributes
 
@@ -1802,9 +1810,13 @@ fapi2::ReturnCode PlatPmPPB::compute_boot_safe(
                 !iv_attrs.attr_boot_voltage_mv[VDN])
             {
                 // ----------------
+                // Compute Fmax and update pstate0
+                // ----------------
+//                l_pmPPB->pm_set_frequency();
+
+                // ----------------
                 // get VPD data (#V,#W)
                 // ----------------
-
                 FAPI_TRY(vpd_init(),"vpd_init function failed");
 
                 // Compute the VPD operating points
@@ -1957,10 +1969,14 @@ fapi2::ReturnCode PlatPmPPB::vpd_init( void )
         FAPI_TRY(get_mvpd_poundV(),
                  "get_mvpd_poundV function failed to retrieve pound V data");
 
+        FAPI_IMP("Creating the stretched VPD structure for Hcode consumption");
+        FAPI_TRY(create_stretched_pts(),
+                "create_stretched_pts function failed");
+
         // Apply biased values if any
-        //
         FAPI_IMP("Apply Biasing to #V");
-        FAPI_TRY(apply_biased_values(),"apply_biased_values function failed");
+        FAPI_TRY(apply_biased_values(),
+                "apply_biased_values function failed");
 
         //Read #AW data
         FAPI_TRY(get_mvpd_poundAW(),
@@ -2192,44 +2208,66 @@ fapi2::ReturnCode PlatPmPPB::get_mvpd_poundV()
                     iv_attr_mvpd_poundV_raw[i].ics_rdp_dc_10ma);
             l_buffer_inc += 2;
             //frequency_guardband_sort_mhz
+#if 0
             iv_attr_mvpd_poundV_raw[i].frequency_guardband_sort_mhz = (uint32_t) UINT16_GET(l_buffer_inc);
             FAPI_INF("#V data = 0x%04X  %-6d", iv_attr_mvpd_poundV_raw[i].frequency_guardband_sort_mhz,
                     iv_attr_mvpd_poundV_raw[i].frequency_guardband_sort_mhz);
+#endif
             l_buffer_inc += 2;
             //vdd_vmin
             iv_attr_mvpd_poundV_raw[i].vdd_vmin = (uint32_t) UINT16_GET(l_buffer_inc);
             FAPI_INF("#V data = 0x%04X  %-6d", iv_attr_mvpd_poundV_raw[i].vdd_vmin,
                     iv_attr_mvpd_poundV_raw[i].vdd_vmin);
             l_buffer_inc += 2;
+
             //idd_power_pattern_10ma
+#if 0
             iv_attr_mvpd_poundV_raw[i].idd_power_pattern_10ma = (uint32_t) UINT16_GET(l_buffer_inc);
             FAPI_INF("#V data = 0x%04X  %-6d", iv_attr_mvpd_poundV_raw[i].idd_power_pattern_10ma,
                     iv_attr_mvpd_poundV_raw[i].idd_power_pattern_10ma);
+#endif
             l_buffer_inc += 2;
             //core_power_pattern_temp_0p5C
+#if 0
             iv_attr_mvpd_poundV_raw[i].core_power_pattern_temp_0p5C = (uint32_t) *l_buffer_inc;
             FAPI_INF("#V data = 0x%04X  %-6d", iv_attr_mvpd_poundV_raw[i].core_power_pattern_temp_0p5C,
                     iv_attr_mvpd_poundV_raw[i].core_power_pattern_temp_0p5C);
+#endif
+            l_buffer_inc += 1;
 
-            // //core_power_pattern_temp_0p5C(1byte) + spare (3bytes)
-            l_buffer_inc += 7;
+            //irt_rdp_ac_10ma
+            iv_attr_mvpd_poundV_raw[i].irt_rdp_ac_10ma = (uint32_t) *l_buffer_inc;
+            FAPI_INF("#V data = 0x%04X  %-6d", iv_attr_mvpd_poundV_raw[i].irt_rdp_ac_10ma,
+                    iv_attr_mvpd_poundV_raw[i].irt_rdp_ac_10ma);
+
+            l_buffer_inc += 2;
+
+            //irt_rdp_dc_10ma
+            iv_attr_mvpd_poundV_raw[i].irt_rdp_dc_10ma = (uint32_t) *l_buffer_inc;
+            FAPI_INF("#V data = 0x%04X  %-6d", iv_attr_mvpd_poundV_raw[i].irt_rdp_dc_10ma,
+                    iv_attr_mvpd_poundV_raw[i].irt_rdp_dc_10ma);
+
+            // irt_rdp_dc_10ma(wbyte) + spare (2byte)
+            l_buffer_inc += 4;
         }
 
         iv_poundV_bucket_id = bucket_id;
         FAPI_TRY(chk_valid_poundv(false));
 
-        update_vpd_pts_value();
+        //update_vpd_pts_value();
 
         uint32_t l_vpd_max_freq = 0;
         uint32_t l_pd_pts = 0;
-        if (iv_attr_mvpd_poundV_raw[CF7].frequency_mhz >
-            iv_attr_mvpd_poundV_raw[CF6].frequency_mhz)
+        if ((iv_attr_mvpd_poundV_raw[CF7].frequency_mhz >
+            iv_attr_mvpd_poundV_raw[CF6].frequency_mhz) &&
+            iv_attrs.attr_fmax_enable)
         {
             l_vpd_max_freq = iv_attr_mvpd_poundV_raw[CF7].frequency_mhz;
             l_pd_pts = NUM_PV_POINTS;
         }
         else
         {
+            iv_attr_mvpd_poundV_raw[CF7].frequency_mhz = 0;
             l_vpd_max_freq = iv_attr_mvpd_poundV_raw[CF6].frequency_mhz;
             l_pd_pts = NUM_PV_POINTS - 1;
         }
@@ -2448,7 +2486,7 @@ fapi2::ReturnCode PlatPmPPB::get_mvpd_poundV()
         l_buffer_inc += 2;
 
         strcpy(outstr, "fmax_freq_mhz");
-        iv_attr_mvpd_poundV_other_info.ultraturbo_freq_mhz = (uint32_t) UINT16_GET(l_buffer_inc);
+        iv_attr_mvpd_poundV_other_info.fmax_freq_mhz = (uint32_t) UINT16_GET(l_buffer_inc);
         FAPI_INF("#V data = 0x%04X  %-6d (%s)", iv_attr_mvpd_poundV_other_info.fmax_freq_mhz,
                                                 iv_attr_mvpd_poundV_other_info.fmax_freq_mhz,
                                                 outstr);
@@ -2553,10 +2591,9 @@ fapi2::ReturnCode PlatPmPPB::chk_valid_poundv(
                     iv_attr_mvpd_data[i].ics_tdp_dc_10ma,
                     iv_attr_mvpd_data[i].ics_rdp_ac_10ma,
                     iv_attr_mvpd_data[i].ics_rdp_dc_10ma,
-                    iv_attr_mvpd_data[i].frequency_guardband_sort_mhz,
                     iv_attr_mvpd_data[i].vdd_vmin,
-                    iv_attr_mvpd_data[i].idd_power_pattern_10ma,
-                    iv_attr_mvpd_data[i].core_power_pattern_temp_0p5C
+                    iv_attr_mvpd_data[i].irt_rdp_ac_10ma,
+                    iv_attr_mvpd_data[i].irt_rdp_dc_10ma
                     );
 
             if (is_wof_enabled() &&
@@ -2574,7 +2611,10 @@ fapi2::ReturnCode PlatPmPPB::chk_valid_poundv(
                         {
                             iv_poundV_fmax_enable = false;
                         }
-                        iv_optional_pdv_pts_value_zero = true;
+                        else
+                        {
+                            iv_optional_pdv_pts_value_zero = true;
+                        }
                         FAPI_INF("Skip logging error for this operating point %s",pv_op_str[i]);
                         continue;
                     }
@@ -2633,7 +2673,10 @@ fapi2::ReturnCode PlatPmPPB::chk_valid_poundv(
                         {
                             iv_poundV_fmax_enable = false;
                         }
-                        iv_optional_pdv_pts_value_zero = true;
+                        else
+                        {
+                            iv_optional_pdv_pts_value_zero = true;
+                        }
                         FAPI_INF("Skip logging error for this operating point %s",pv_op_str[i]);
                         continue;
                     }
@@ -2769,14 +2812,12 @@ fapi2::ReturnCode PlatPmPPB::chk_valid_poundv(
                     iv_attr_mvpd_data[i].ics_rdp_ac_10ma) ||
                     (iv_attr_mvpd_data[i - 1].ics_rdp_dc_10ma >
                     iv_attr_mvpd_data[i].ics_rdp_dc_10ma) ||
-                    (iv_attr_mvpd_data[i - 1].frequency_guardband_sort_mhz >
-                    iv_attr_mvpd_data[i].frequency_guardband_sort_mhz) ||
                     (iv_attr_mvpd_data[i - 1].vdd_vmin >
                     iv_attr_mvpd_data[i].vdd_vmin) ||
-                    (iv_attr_mvpd_data[i - 1].idd_power_pattern_10ma >
-                    iv_attr_mvpd_data[i].idd_power_pattern_10ma) ||
-                    (iv_attr_mvpd_data[i - 1].core_power_pattern_temp_0p5C >
-                    iv_attr_mvpd_data[i].core_power_pattern_temp_0p5C))
+                    (iv_attr_mvpd_data[i - 1].irt_rdp_ac_10ma >
+                    iv_attr_mvpd_data[i].irt_rdp_ac_10ma) ||
+                    (iv_attr_mvpd_data[i - 1].irt_rdp_ac_10ma >
+                    iv_attr_mvpd_data[i].irt_rdp_ac_10ma))
 
                 {
                     iv_pstates_enabled = false;
@@ -2843,22 +2884,18 @@ fapi2::ReturnCode PlatPmPPB::chk_valid_poundv(
                             POUNDV_SLOPE_CHECK(iv_attr_mvpd_data[i - 1].ics_rdp_dc_10ma,
                                 iv_attr_mvpd_data[i].ics_rdp_dc_10ma),pv_op_str[i], iv_attr_mvpd_data[i].ics_rdp_dc_10ma);
 
-                    FAPI_INF("%s Frequency GB sort value %u is %s %s Frequency GB sort value %u",
-                            pv_op_str[i - 1], iv_attr_mvpd_data[i - 1].frequency_guardband_sort_mhz,
-                            POUNDV_SLOPE_CHECK(iv_attr_mvpd_data[i - 1].frequency_guardband_sort_mhz,
-                                iv_attr_mvpd_data[i].frequency_guardband_sort_mhz),pv_op_str[i], iv_attr_mvpd_data[i].frequency_guardband_sort_mhz);
                     FAPI_INF("%s VDD vmin voltage value %u is %s %s VDD vmin voltage value %u",
                             pv_op_str[i - 1], iv_attr_mvpd_data[i - 1].vdd_vmin,
                             POUNDV_SLOPE_CHECK(iv_attr_mvpd_data[i - 1].vdd_vmin,
                                 iv_attr_mvpd_data[i].vdd_vmin),pv_op_str[i], iv_attr_mvpd_data[i].vdd_vmin);
-                    FAPI_INF("%s IDD powr pattern value %u is %s %s IDD powr pattern value %u",
-                            pv_op_str[i - 1], iv_attr_mvpd_data[i - 1].idd_power_pattern_10ma,
-                            POUNDV_SLOPE_CHECK(iv_attr_mvpd_data[i - 1].idd_power_pattern_10ma,
-                                iv_attr_mvpd_data[i].idd_power_pattern_10ma),pv_op_str[i], iv_attr_mvpd_data[i].idd_power_pattern_10ma);
-                    FAPI_INF("%s Core powr pattern temp value %u is %s %s Core powr pattern temp value %u",
-                            pv_op_str[i - 1], iv_attr_mvpd_data[i - 1].core_power_pattern_temp_0p5C,
-                            POUNDV_SLOPE_CHECK(iv_attr_mvpd_data[i - 1].core_power_pattern_temp_0p5C,
-                                iv_attr_mvpd_data[i].core_power_pattern_temp_0p5C),pv_op_str[i], iv_attr_mvpd_data[i].core_power_pattern_temp_0p5C);
+                    FAPI_INF("%s TDP RT AC value %u is %s %s TDP RT AC value %u",
+                            pv_op_str[i - 1], iv_attr_mvpd_data[i - 1].irt_rdp_ac_10ma,
+                            POUNDV_SLOPE_CHECK(iv_attr_mvpd_data[i - 1].irt_rdp_ac_10ma,
+                                iv_attr_mvpd_data[i].irt_rdp_ac_10ma),pv_op_str[i], iv_attr_mvpd_data[i].irt_rdp_ac_10ma);
+                    FAPI_INF("%s TDP RT DC value %u is %s %s TDP RT DC value %u",
+                            pv_op_str[i - 1], iv_attr_mvpd_data[i - 1].irt_rdp_dc_10ma,
+                            POUNDV_SLOPE_CHECK(iv_attr_mvpd_data[i - 1].irt_rdp_dc_10ma,
+                                iv_attr_mvpd_data[i].irt_rdp_dc_10ma),pv_op_str[i], iv_attr_mvpd_data[i].irt_rdp_dc_10ma);
                     if (i_biased_state)
                     {
                         if (attr_poundv_validity_halt_disable)
@@ -3006,24 +3043,19 @@ void PlatPmPPB::update_vpd_pts_value()
                         iv_attr_mvpd_poundV_raw[l_cf3_ut_idx].ics_rdp_dc_10ma,
                         CF1_3_PERCENTAGE);
 
-                POUNDV_POINT_CALC (iv_attr_mvpd_poundV_raw[i].frequency_guardband_sort_mhz,
-                        iv_attr_mvpd_poundV_raw[l_ps_cf3_idx].frequency_guardband_sort_mhz,
-                        iv_attr_mvpd_poundV_raw[l_cf3_ut_idx].frequency_guardband_sort_mhz,
-                        CF1_3_PERCENTAGE);
-
                 POUNDV_POINT_CALC (iv_attr_mvpd_poundV_raw[i].vdd_vmin,
                         iv_attr_mvpd_poundV_raw[l_ps_cf3_idx].vdd_vmin,
                         iv_attr_mvpd_poundV_raw[l_cf3_ut_idx].vdd_vmin,
                         CF1_3_PERCENTAGE);
 
-                POUNDV_POINT_CALC (iv_attr_mvpd_poundV_raw[i].idd_power_pattern_10ma,
-                        iv_attr_mvpd_poundV_raw[l_ps_cf3_idx].idd_power_pattern_10ma,
-                        iv_attr_mvpd_poundV_raw[l_cf3_ut_idx].idd_power_pattern_10ma,
+                POUNDV_POINT_CALC (iv_attr_mvpd_poundV_raw[i].irt_rdp_ac_10ma,
+                        iv_attr_mvpd_poundV_raw[l_ps_cf3_idx].irt_rdp_ac_10ma,
+                        iv_attr_mvpd_poundV_raw[l_cf3_ut_idx].irt_rdp_ac_10ma,
                         CF1_3_PERCENTAGE);
 
-                POUNDV_POINT_CALC (iv_attr_mvpd_poundV_raw[i].core_power_pattern_temp_0p5C,
-                        iv_attr_mvpd_poundV_raw[l_ps_cf3_idx].core_power_pattern_temp_0p5C,
-                        iv_attr_mvpd_poundV_raw[l_cf3_ut_idx].core_power_pattern_temp_0p5C,
+                POUNDV_POINT_CALC (iv_attr_mvpd_poundV_raw[i].irt_rdp_dc_10ma,
+                        iv_attr_mvpd_poundV_raw[l_ps_cf3_idx].irt_rdp_dc_10ma,
+                        iv_attr_mvpd_poundV_raw[l_cf3_ut_idx].irt_rdp_dc_10ma,
                         CF1_3_PERCENTAGE);
 
         } //end of if
@@ -3647,6 +3679,234 @@ void iddq_print(IddqTable_t* i_iddqt)
     FAPI_INF("%s", l_line_str);
 }
 
+/*
+
+int = interpolate
+str = stretch
+    Case
+     UT     d   A               B
+CF7         7   int CF7,CF6     CF6
+    <- A
+CF6 <- B    6   CF6             str CF6,CF5
+                                       2
+CF5         5   CF5             CF5 (s)
+
+CF4         4   CF4             CF4
+
+CF3         3   CF3             CF3
+
+CF2         2   CF2             CF2
+
+CF1         1   CF1             CF1
+
+CF0         0   CF0             CF0
+
+*/
+
+
+///////////////////////////////////////////////////////////
+////////   find_freq_region
+///////////////////////////////////////////////////////////
+uint32_t PlatPmPPB::find_freq_region(const uint32_t freq_mhz)
+{
+    for (auto r = 0; r < NUM_PV_POINTS; ++r)
+    {
+        FAPI_INF("%08X %08X %d",iv_attr_mvpd_poundV_raw[r].frequency_mhz,
+        iv_attr_mvpd_poundV_raw[r+1].frequency_mhz,r);
+        if ((freq_mhz >= iv_attr_mvpd_poundV_raw[r].frequency_mhz &&
+             freq_mhz <  iv_attr_mvpd_poundV_raw[r+1].frequency_mhz  )  ||
+            (freq_mhz >= iv_attr_mvpd_poundV_raw[r].frequency_mhz &&
+             iv_attr_mvpd_poundV_raw[r+1].frequency_mhz) == 0)
+        {
+            return r;
+        }
+    }
+    return 111;
+}
+
+///////////////////////////////////////////////////////////
+////////   region_steps
+///////////////////////////////////////////////////////////
+uint32_t PlatPmPPB::region_steps(const uint32_t region)
+{
+
+   if (iv_attr_mvpd_poundV_raw[region+1].frequency_mhz == 0)
+   {
+      return 0;
+   }
+
+   return ((iv_attr_mvpd_poundV_raw[region+1].frequency_mhz -
+            iv_attr_mvpd_poundV_raw[region].frequency_mhz  ) * 1000 /
+            iv_frequency_step_khz );
+}
+
+
+///////////////////////////////////////////////////////////
+////////   compute_stretch_point
+///////////////////////////////////////////////////////////
+// This method computes the new frequency points within a stretched region of the
+// RAW #V.  These points are returned in the o_points vector.  (note: this can do
+// more that 2 points
+void PlatPmPPB::compute_stretched_freq_pt(const uint32_t region,
+                                          uint32_t *o_point_mhz)
+{
+    uint32_t region_start_mhz = iv_attr_mvpd_poundV_raw[region].frequency_mhz;
+    uint32_t region_end_mhz = iv_attr_mvpd_poundV_raw[region+1].frequency_mhz;
+
+    uint32_t step_size_mhz =
+        (uint32_t) internal_ceil(((float)region_end_mhz - (float)region_start_mhz) / 2);
+
+    *o_point_mhz = region_start_mhz + step_size_mhz;
+}
+
+#define INTERPOLATE_FREQ(m_FREQ, round, m_REGION, m_MEMBER, m_VALUE)  \
+    {\
+        uint16_t m = compute_slope_4_12(iv_attr_mvpd_poundV_raw[m_REGION+1].m_MEMBER,         \
+                                        iv_attr_mvpd_poundV_raw[m_REGION].m_MEMBER,           \
+                                        iv_attr_mvpd_poundV_raw[m_REGION+1].frequency_mhz,    \
+                                        iv_attr_mvpd_poundV_raw[m_REGION].frequency_mhz     );\
+        uint32_t x = m_FREQ - iv_attr_mvpd_poundV_raw[m_REGION].frequency_mhz; \
+        uint32_t b = iv_attr_mvpd_poundV_raw[m_REGION].m_MEMBER; \
+        if (round == ROUND_UP) \
+        {\
+            m_VALUE = (( m * x ) >> (VID_SLOPE_FP_SHIFT_12 - 1)) + (b << 1) + 1; \
+            m_VALUE = m_VALUE >> 1; \
+        } \
+        else if (round == ROUND_DOWN)\
+        { \
+            m_VALUE = (( m * x ) >> (VID_SLOPE_FP_SHIFT_12)) + b; \
+        }\
+    }
+
+///////////////////////////////////////////////////////////
+////////   interpolate_freq_point
+///////////////////////////////////////////////////////////
+void PlatPmPPB::interpolate_freq_pt(const uint32_t freq,
+                                    const uint32_t region,
+                                    PoundVOpPoint_t *ip)
+{
+    INTERPOLATE_FREQ( freq, ROUND_UP,   region, vdd_mv,             ip->vdd_mv);
+    INTERPOLATE_FREQ( freq, ROUND_UP,   region, idd_tdp_ac_10ma,    ip->idd_tdp_ac_10ma);
+    INTERPOLATE_FREQ( freq, ROUND_UP,   region, idd_tdp_dc_10ma,    ip->idd_tdp_dc_10ma);
+    INTERPOLATE_FREQ( freq, ROUND_UP,   region, idd_rdp_ac_10ma,    ip->idd_rdp_ac_10ma);
+    INTERPOLATE_FREQ( freq, ROUND_UP,   region, idd_rdp_dc_10ma,    ip->idd_rdp_dc_10ma);
+    INTERPOLATE_FREQ( freq, ROUND_UP,   region, vcs_mv,             ip->vcs_mv);
+    INTERPOLATE_FREQ( freq, ROUND_UP,   region, ics_tdp_ac_10ma,    ip->ics_tdp_ac_10ma);
+    INTERPOLATE_FREQ( freq, ROUND_UP,   region, ics_tdp_dc_10ma,    ip->ics_tdp_dc_10ma);
+    INTERPOLATE_FREQ( freq, ROUND_UP,   region, ics_rdp_ac_10ma,    ip->ics_rdp_ac_10ma);
+    INTERPOLATE_FREQ( freq, ROUND_UP,   region, ics_rdp_dc_10ma,    ip->ics_rdp_dc_10ma);
+
+    ip->vdd_vmin = iv_attr_mvpd_poundV_raw[region].vdd_vmin;
+    ip->irt_rdp_ac_10ma = iv_attr_mvpd_poundV_raw[region].irt_rdp_ac_10ma;
+    ip->irt_rdp_dc_10ma = iv_attr_mvpd_poundV_raw[region].irt_rdp_dc_10ma;
+}
+
+
+// point set use.
+//    VPD_PT_SET_RAW - MVPD as is
+//    VPD_PT_SET_STRETCHED - Stretched
+//    VPD_PT_SET_BIASED - Biased and stretched
+fapi2::ReturnCode PlatPmPPB::create_stretched_pts()
+{
+    FAPI_INF(">>>>>>>>>> create_stretched_points");
+
+    // COpy the raw data from the vpd 
+    memcpy (iv_attr_mvpd_poundV_raw_orig,
+            iv_attr_mvpd_poundV_raw,
+            sizeof(iv_attr_mvpd_poundV_raw));
+
+    if (iv_attrs.attr_fmax_enable == 1)
+    {
+         FAPI_ASSERT(iv_attr_mvpd_poundV_raw[NUM_PV_POINTS-1].frequency_mhz != 0,
+            fapi2::PSTATE_PB_FMAX_ZERO_WHEN_ENABLED()
+            .set_CHIP_TARGET(iv_procChip),
+            "Fmax #V VPD frequency is 0 which FMax mode is enabled.");
+
+    }
+    else
+    {
+        uint32_t        ur = find_freq_region(iv_attrs.attr_pstate0_freq_mhz);  // UT region
+        uint32_t        dr = NUM_PV_POINTS-1;                               // Destination point
+        uint32_t        sr = ur;                                            // Source region
+        uint32_t        stretch_freq;
+        PoundVOpPoint_t ip;
+
+        FAPI_INF("ur %d %08x",ur,iv_attrs.attr_pstate0_freq_mhz);
+        FAPI_ASSERT(ur == NUM_PV_POINTS-2,   // (eg for 8 points having 7 regions (0:6) -> region 6)
+                fapi2::PSTATE_PB_UT_NOT_REGION6()
+                .set_CHIP_TARGET(iv_procChip)
+                .set_PSTATE0_FREQ(iv_attrs.attr_pstate0_freq_mhz*1000)
+                .set_UT_FREQ(iv_reference_frequency_khz),
+                "UltraTurbo must in Region 6");
+
+        // 2 cases: (possible with pointers into a common set of curve fit points)
+        // 1. f(UT) > f(CF6)
+        // 2. f(UT) = f(CF6) (eg region 6)
+
+
+        if ( iv_attrs.attr_pstate0_freq_mhz > iv_attr_mvpd_poundV_raw[ur].frequency_mhz)
+        {
+            FAPI_ASSERT(iv_attr_mvpd_poundV_raw[ur+1].frequency_mhz == 0,
+                    fapi2::PSTATE_PB_FMAX_ZERO_UT_INTERPOLATION()
+                    .set_CHIP_TARGET(iv_procChip)
+                    .set_UT_FREQ(iv_attrs.attr_pstate0_freq_mhz)
+                    .set_CF6_FREQ(iv_attr_mvpd_poundV_raw[ur].frequency_mhz),
+                    "Fmax #V VPD frequency is 0 and is needed for UltraTurbo interpolation.");
+
+            ip.pstate = (iv_attrs.attr_pstate0_freq_mhz -
+                    iv_attr_mvpd_poundV_raw[ur].frequency_mhz) * 1000 / (iv_frequency_step_khz);
+
+            ip.frequency_mhz = iv_attrs.attr_pstate0_freq_mhz;
+
+
+            //UT freq put in gCF7
+            interpolate_freq_pt(iv_attrs.attr_pstate0_freq_mhz, ur, &ip);  // TODO:  use Pstate interpolation?????
+
+            memcpy(&iv_attr_mvpd_poundV_raw[dr],
+                    &ip,
+                    sizeof(PoundVOpPoint_t));
+            --dr;
+
+        }
+        else // f(UT) = f(CF6) (eg region 6)
+        {
+            // Copy CF6 to gCF7
+            memcpy(&iv_attr_mvpd_poundV_raw[dr],
+                    &iv_attr_mvpd_poundV_raw[ur],
+                    sizeof(PoundVOpPoint_t));
+            --dr; --sr;
+
+            uint32_t needed_steps = 2;
+
+            FAPI_ASSERT(region_steps(sr) >= needed_steps,
+                    fapi2::PSTATE_PB_STRETCH_REGION_LACKS_STEPS()
+                    .set_CHIP_TARGET(iv_procChip)
+                    .set_UT_FREQ(iv_attrs.attr_pstate0_freq_mhz)
+                    .set_STRETCH_REGION(sr)
+                    .set_STRETCH_REGION_P1_FREQ(iv_attr_mvpd_poundV_raw[sr+1].frequency_mhz)
+                    .set_STRETCH_REGION_FREQ(iv_attr_mvpd_poundV_raw[sr].frequency_mhz),
+                    "Fmax #V VPD frequency is 0 and is needed for UltraTurbo interpolation.");
+
+            compute_stretched_freq_pt(sr, &stretch_freq);
+
+            ip.pstate = ((stretch_freq -
+                    iv_attr_mvpd_poundV_raw[sr].frequency_mhz) * 1000) / (iv_frequency_step_khz);
+            ip.frequency_mhz = stretch_freq;
+
+            interpolate_freq_pt(stretch_freq, sr, &ip);
+
+            memcpy(&iv_attr_mvpd_poundV_raw[dr],
+                    &ip,
+                    sizeof(PoundVOpPoint_t));
+        }
+    }
+
+fapi_try_exit:
+    FAPI_INF("<<<<<<<<<< create_stretched_points");
+    return fapi2::current_err;
+}
+
+
 ///////////////////////////////////////////////////////////
 ////////   compute_vpd_pts
 ///////////////////////////////////////////////////////////
@@ -3702,14 +3962,12 @@ void PlatPmPPB::compute_vpd_pts()
             iv_attr_mvpd_poundV_biased[p].ics_rdp_ac_10ma;
         iv_operating_points[VPD_PT_SET_BIASED][p].ics_rdp_dc_10ma=
             iv_attr_mvpd_poundV_biased[p].ics_rdp_dc_10ma;
-        iv_operating_points[VPD_PT_SET_BIASED][p].frequency_guardband_sort_mhz =
-            iv_attr_mvpd_poundV_biased[p].frequency_guardband_sort_mhz;
         iv_operating_points[VPD_PT_SET_BIASED][p].vdd_vmin =
             iv_attr_mvpd_poundV_biased[p].vdd_vmin;
-        iv_operating_points[VPD_PT_SET_BIASED][p].idd_power_pattern_10ma =
-            iv_attr_mvpd_poundV_biased[p].idd_power_pattern_10ma;
-        iv_operating_points[VPD_PT_SET_BIASED][p].core_power_pattern_temp_0p5C =
-            iv_attr_mvpd_poundV_biased[p].core_power_pattern_temp_0p5C;
+        iv_operating_points[VPD_PT_SET_BIASED][p].irt_rdp_ac_10ma =
+            iv_attr_mvpd_poundV_biased[p].irt_rdp_ac_10ma;
+        iv_operating_points[VPD_PT_SET_BIASED][p].irt_rdp_dc_10ma =
+            iv_attr_mvpd_poundV_biased[p].irt_rdp_dc_10ma;
         iv_operating_points[VPD_PT_SET_BIASED][p].pstate =
             iv_attr_mvpd_poundV_biased[p].pstate;
     }
@@ -3785,14 +4043,12 @@ void PlatPmPPB::compute_vpd_pts()
             iv_attr_mvpd_poundV_biased[p].ics_rdp_ac_10ma;
         iv_operating_points[VPD_PT_SET_BIASED_SYSP][p].ics_rdp_dc_10ma=
             iv_attr_mvpd_poundV_biased[p].ics_rdp_dc_10ma;
-        iv_operating_points[VPD_PT_SET_BIASED_SYSP][p].frequency_guardband_sort_mhz =
-                   iv_attr_mvpd_poundV_biased[p].frequency_guardband_sort_mhz;
         iv_operating_points[VPD_PT_SET_BIASED_SYSP][p].vdd_vmin =
                    iv_attr_mvpd_poundV_biased[p].vdd_vmin;
-        iv_operating_points[VPD_PT_SET_BIASED_SYSP][p].idd_power_pattern_10ma =
-                   iv_attr_mvpd_poundV_biased[p].idd_power_pattern_10ma;
-        iv_operating_points[VPD_PT_SET_BIASED_SYSP][p].core_power_pattern_temp_0p5C =
-                   iv_attr_mvpd_poundV_biased[p].core_power_pattern_temp_0p5C;
+        iv_operating_points[VPD_PT_SET_BIASED_SYSP][p].irt_rdp_ac_10ma =
+                   iv_attr_mvpd_poundV_biased[p].irt_rdp_ac_10ma;
+        iv_operating_points[VPD_PT_SET_BIASED_SYSP][p].irt_rdp_dc_10ma =
+                   iv_attr_mvpd_poundV_biased[p].irt_rdp_dc_10ma;
         iv_operating_points[VPD_PT_SET_BIASED_SYSP][p].pstate =
                    iv_attr_mvpd_poundV_biased[p].pstate;
         iv_operating_points[VPD_PT_SET_BIASED_SYSP][p].frequency_mhz =
@@ -5332,15 +5588,12 @@ fapi2::ReturnCode PlatPmPPB::pm_set_frequency()
                 l_sys_freq_core_floor_mhz = l_tmp_psav_freq;
             }
 
-            // TODO:  must have https://rchgit01.rchland.ibm.com/gerrit1/#/c/104098/
-            // for the proper use of fmax_freq
-            l_fmax_freq = 0;
             //Compute FMAX and Ceil freq
-            if ( l_fmax_freq > iv_attrs.attr_pstate0_freq_mhz)
+            if ( l_fmax_freq > iv_attrs.attr_pstate0_freq_mhz && iv_attrs.attr_fmax_enable == 1)
             {
                 iv_attrs.attr_pstate0_freq_mhz = l_fmax_freq;
             }
-            else if ( l_fmax_freq == 0)
+            else if ( l_fmax_freq == 0  || iv_attrs.attr_fmax_enable == 0)
             {
                 if (l_ut_freq > iv_attrs.attr_pstate0_freq_mhz ||
                         iv_attrs.attr_pstate0_freq_mhz == 0)

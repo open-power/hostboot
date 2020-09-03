@@ -217,10 +217,10 @@ typedef struct
     uint32_t ics_tdp_dc_10ma;
     uint32_t ics_rdp_ac_10ma;
     uint32_t ics_rdp_dc_10ma;
-    uint32_t frequency_guardband_sort_mhz;
     uint32_t vdd_vmin;
-    uint32_t idd_power_pattern_10ma;
-    uint32_t core_power_pattern_temp_0p5C;
+    uint32_t irt_rdp_ac_10ma;
+    uint32_t irt_rdp_dc_10ma;
+    uint32_t pad32;
     uint8_t  pstate;        // Pstate of this VpdOperating
     uint8_t  pad[3];        // Alignment padding
 } PoundVOpPoint_t;

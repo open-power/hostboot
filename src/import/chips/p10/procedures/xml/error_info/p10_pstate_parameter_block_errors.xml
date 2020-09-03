@@ -88,10 +88,9 @@
     <ffdc>ICS_TDP_DC_A</ffdc>
     <ffdc>ICS_RDP_AC_A</ffdc>
     <ffdc>ICS_RDP_DC_A</ffdc>
-    <ffdc>FREQ_GB_SORT_A</ffdc>
+    <ffdc>IRT_RDP_AC_10MA_A</ffdc>
+    <ffdc>IRT_RDP_DC_10MA_A</ffdc>
     <ffdc>VDD_VMIN_A</ffdc>
-    <ffdc>IDD_POWR_A</ffdc>
-    <ffdc>CORE_POWR_TEMP_A</ffdc>
     <ffdc>FREQUENCY_B</ffdc>
     <ffdc>VDD_B</ffdc>
     <ffdc>IDD_TDP_AC_B</ffdc>
@@ -103,10 +102,9 @@
     <ffdc>ICS_TDP_DC_B</ffdc>
     <ffdc>ICS_RDP_AC_B</ffdc>
     <ffdc>ICS_RDP_DC_B</ffdc>
-    <ffdc>FREQ_GB_SORT_B</ffdc>
+    <ffdc>IRT_RDP_AC_10MA_B</ffdc>
+    <ffdc>IRT_RDP_DC_10MA_B</ffdc>
     <ffdc>VDD_VMIN_B</ffdc>
-    <ffdc>IDD_POWR_B</ffdc>
-    <ffdc>CORE_POWR_TEMP_B</ffdc>
     <callout>
       <target>CHIP_TARGET</target>
       <priority>HIGH</priority>
@@ -135,10 +133,9 @@
     <ffdc>ICS_TDP_DC_A</ffdc>
     <ffdc>ICS_RDP_AC_A</ffdc>
     <ffdc>ICS_RDP_DC_A</ffdc>
-    <ffdc>FREQ_GB_SORT_A</ffdc>
+    <ffdc>IRT_RDP_AC_10MA_A</ffdc>
+    <ffdc>IRT_RDP_DC_10MA_A</ffdc>
     <ffdc>VDD_VMIN_A</ffdc>
-    <ffdc>IDD_POWR_A</ffdc>
-    <ffdc>CORE_POWR_TEMP_A</ffdc>
     <ffdc>FREQUENCY_B</ffdc>
     <ffdc>VDD_B</ffdc>
     <ffdc>IDD_TDP_AC_B</ffdc>
@@ -150,10 +147,9 @@
     <ffdc>ICS_TDP_DC_B</ffdc>
     <ffdc>ICS_RDP_AC_B</ffdc>
     <ffdc>ICS_RDP_DC_B</ffdc>
-    <ffdc>FREQ_GB_SORT_B</ffdc>
+    <ffdc>IRT_RDP_AC_10MA_B</ffdc>
+    <ffdc>IRT_RDP_DC_10MA_B</ffdc>
     <ffdc>VDD_VMIN_B</ffdc>
-    <ffdc>IDD_POWR_B</ffdc>
-    <ffdc>CORE_POWR_TEMP_B</ffdc>
     <callout>
       <target>CHIP_TARGET</target>
       <priority>HIGH</priority>
@@ -180,10 +176,9 @@
     <ffdc>ICS_TDP_DC_A</ffdc>
     <ffdc>ICS_RDP_AC_A</ffdc>
     <ffdc>ICS_RDP_DC_A</ffdc>
-    <ffdc>FREQ_GB_SORT_A</ffdc>
+    <ffdc>IRT_RDP_AC_10MA_A</ffdc>
+    <ffdc>IRT_RDP_DC_10MA_A</ffdc>
     <ffdc>VDD_VMIN_A</ffdc>
-    <ffdc>IDD_POWR_A</ffdc>
-    <ffdc>CORE_POWR_TEMP_A</ffdc>
     <callout>
       <target>CHIP_TARGET</target>
       <priority>HIGH</priority>
@@ -210,10 +205,9 @@
     <ffdc>ICS_TDP_DC_A</ffdc>
     <ffdc>ICS_RDP_AC_A</ffdc>
     <ffdc>ICS_RDP_DC_A</ffdc>
-    <ffdc>FREQ_GB_SORT_A</ffdc>
+    <ffdc>IRT_RDP_AC_10MA_A</ffdc>
+    <ffdc>IRT_RDP_DC_10MA_A</ffdc>
     <ffdc>VDD_VMIN_A</ffdc>
-    <ffdc>IDD_POWR_A</ffdc>
-    <ffdc>CORE_POWR_TEMP_A</ffdc>
     <callout>
       <target>CHIP_TARGET</target>
       <priority>HIGH</priority>
@@ -241,10 +235,9 @@
     <ffdc>ICS_TDP_DC_A</ffdc>
     <ffdc>ICS_RDP_AC_A</ffdc>
     <ffdc>ICS_RDP_DC_A</ffdc>
-    <ffdc>FREQ_GB_SORT_A</ffdc>
+    <ffdc>IRT_RDP_AC_10MA_A</ffdc>
+    <ffdc>IRT_RDP_DC_10MA_A</ffdc>
     <ffdc>VDD_VMIN_A</ffdc>
-    <ffdc>IDD_POWR_A</ffdc>
-    <ffdc>CORE_POWR_TEMP_A</ffdc>
     <callout>
       <target>CHIP_TARGET</target>
       <priority>HIGH</priority>
@@ -271,10 +264,9 @@
     <ffdc>ICS_TDP_DC_A</ffdc>
     <ffdc>ICS_RDP_AC_A</ffdc>
     <ffdc>ICS_RDP_DC_A</ffdc>
-    <ffdc>FREQ_GB_SORT_A</ffdc>
+    <ffdc>IRT_RDP_AC_10MA_A</ffdc>
+    <ffdc>IRT_RDP_DC_10MA_A</ffdc>
     <ffdc>VDD_VMIN_A</ffdc>
-    <ffdc>IDD_POWR_A</ffdc>
-    <ffdc>CORE_POWR_TEMP_A</ffdc>
     <callout>
       <target>CHIP_TARGET</target>
       <priority>HIGH</priority>
@@ -598,6 +590,78 @@
     <ffdc>CHIP_TARGET</ffdc>
     <ffdc>UT_FREQ</ffdc>
     <ffdc>PSTATE0_FREQ</ffdc>
+    <callout>
+      <target>CHIP_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>MEDIUM</priority>
+    </callout>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_PSTATE_PB_FMAX_ZERO_WHEN_ENABLED</rc>
+    <description>With ATTR_SYSTEM_FMAX_ENABLE being set, the necessary VPD #V
+    Fmax frequency is 0.
+    </description>
+    <ffdc>CHIP_TARGET</ffdc>
+    <callout>
+      <target>CHIP_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>MEDIUM</priority>
+    </callout>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_PSTATE_PB_UT_NOT_REGION6</rc>
+    <description>The UltraTurbo frequency must be at or above the VPD #V CF6
+    frequency.
+    </description>
+    <ffdc>CHIP_TARGET</ffdc>
+    <ffdc>PSTATE0_FREQ</ffdc>
+    <ffdc>UT_FREQ</ffdc>
+    <callout>
+      <target>CHIP_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>MEDIUM</priority>
+    </callout>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_PSTATE_PB_FMAX_ZERO_UT_INTERPOLATION</rc>
+    <description>Placing a UltraTurbo frequency above CF6 requires CF7 to be
+    non-zero.
+    </description>
+    <ffdc>CHIP_TARGET</ffdc>
+    <ffdc>UT_FREQ</ffdc>
+    <ffdc>CF6_FREQ</ffdc>
+    <callout>
+      <target>CHIP_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>MEDIUM</priority>
+    </callout>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_PSTATE_PB_STRETCH_REGION_LACKS_STEPS</rc>
+    <description>The stretch region necessary to place Pstate 0 in CF7 does
+    not have 2 or more 16.667 frequency steps.
+    </description>
+    <ffdc>CHIP_TARGET</ffdc>
+    <ffdc>UT_FREQ</ffdc>
+    <ffdc>STRETCH_REGION</ffdc>
+    <ffdc>STRETCH_REGION_P1_FREQ</ffdc>
+    <ffdc>STRETCH_REGION_FREQ</ffdc>
     <callout>
       <target>CHIP_TARGET</target>
       <priority>HIGH</priority>
