@@ -197,6 +197,19 @@ class reg
         }
 
         ///
+        /// @brief Setup Masked without touching action bits (x,x,x,1)
+        /// @tparam B the ordinial number of the bit in question
+        /// @tparam C the bit count, defaults to 1
+        /// @return fir::reg reference sutable for chaining
+        ///
+        template< uint64_t B, uint64_t C = 1 >
+        inline fir::reg<R>& remask()
+        {
+            iv_mask.setBit<B, C>();
+            return *this;
+        }
+
+        ///
         /// @brief Write action0, action1 and mask for this register
         /// @return fapi2::FAPI2_RC_SUCCESS iff ok
         ///

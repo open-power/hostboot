@@ -44,6 +44,7 @@
 #include <mss_generic_attribute_getters.H>
 #include <mss_generic_system_attribute_getters.H>
 #include <mss_explorer_attribute_getters.H>
+#include <lib/workarounds/exp_fir_workarounds.H>
 
 namespace mss
 {
@@ -334,6 +335,7 @@ fapi2::ReturnCode after_mc_omi_setup<mss::mc_type::EXPLORER>( const fapi2::Targe
 {
     constexpr uint64_t MASK_ALL = ~0ull;
 
+    fapi2::ATTR_OMI_X4_DEGRADE_ACTION_Type l_degrade_fail_action = 0;
     fapi2::buffer<uint64_t> l_dl0_error_mask;
     fapi2::buffer<uint64_t> l_global_fir_mask_reg;
     fapi2::buffer<uint64_t> l_global_spa_attn_reg;
@@ -350,6 +352,8 @@ fapi2::ReturnCode after_mc_omi_setup<mss::mc_type::EXPLORER>( const fapi2::Targe
     FAPI_TRY(l_rc1, "unable to create fir::reg for EXPLR_TP_MB_UNIT_TOP_LOCAL_FIR 0x%08X", EXPLR_TP_MB_UNIT_TOP_LOCAL_FIR);
     FAPI_TRY(l_rc2, "unable to create fir::reg for EXPLR_TLXT_TLXFIRQ 0x%08X", EXPLR_TLXT_TLXFIRQ);
     FAPI_TRY(l_rc3, "unable to create fir::reg for EXPLR_DLX_MC_OMI_FIR_REG 0x%08X", EXPLR_DLX_MC_OMI_FIR_REG);
+
+    FAPI_TRY(mss::attr::get_omi_x4_degrade_action(l_degrade_fail_action));
 
     // Write LOCAL_FIR register per Explorer unmask spec
     FAPI_TRY(l_exp_local_fir_reg.recoverable_error<EXPLR_TP_MB_UNIT_TOP_LOCAL_FIR_PCS_GPBC_IRQ_106>()
@@ -382,13 +386,17 @@ fapi2::ReturnCode after_mc_omi_setup<mss::mc_type::EXPLORER>( const fapi2::Targe
     // Note: Explorer doesn't initialize its DLX_MC_OMI_FIR masks to the masked state, so mask them all first
     FAPI_DBG("Masking entire EXPLR_DLX_MC_OMI_FIR_MASK_REG on %s", mss::c_str(i_target));
     FAPI_TRY(fapi2::putScom(i_target, EXPLR_DLX_MC_OMI_FIR_MASK_REG, MASK_ALL));
-    FAPI_TRY(l_exp_mc_omi_fir_reg.checkstop<EXPLR_DLX_MC_OMI_FIR_REG_DL0_FATAL_ERROR>()
-             .checkstop<EXPLR_DLX_MC_OMI_FIR_REG_DL0_DATA_UE>()
-             .recoverable_error<EXPLR_DLX_MC_OMI_FIR_REG_DL0_X4_MODE>()
-             .recoverable_error<EXPLR_DLX_MC_OMI_FIR_REG_DL0_TIMEOUT>()
-             .recoverable_error<EXPLR_DLX_MC_OMI_FIR_REG_DL0_ERROR_RETRAIN>()
-             .recoverable_error<EXPLR_DLX_MC_OMI_FIR_REG_DL0_EDPL_RETRAIN>()
-             .write(), "Failed to write MC_OMI FIR register for %s", mss::c_str(i_target));
+    l_exp_mc_omi_fir_reg.checkstop<EXPLR_DLX_MC_OMI_FIR_REG_DL0_FATAL_ERROR>()
+    .checkstop<EXPLR_DLX_MC_OMI_FIR_REG_DL0_DATA_UE>()
+    .recoverable_error<EXPLR_DLX_MC_OMI_FIR_REG_DL0_X4_MODE>()
+    .recoverable_error<EXPLR_DLX_MC_OMI_FIR_REG_DL0_TIMEOUT>()
+    .recoverable_error<EXPLR_DLX_MC_OMI_FIR_REG_DL0_ERROR_RETRAIN>()
+    .recoverable_error<EXPLR_DLX_MC_OMI_FIR_REG_DL0_EDPL_RETRAIN>();
+
+    // Set up x4 degrade FIR attribute overrides
+    mss::exp::workarounds::fir::override_x4_degrade_fir(i_target, l_degrade_fail_action, l_exp_mc_omi_fir_reg);
+
+    FAPI_TRY(l_exp_mc_omi_fir_reg.write(), "Failed to write MC_OMI FIR register for %s", mss::c_str(i_target));
 
     FAPI_TRY(fapi2::getScom(i_target, EXPLR_DLX_DL0_ERROR_MASK, l_dl0_error_mask));
     l_dl0_error_mask.setBit<EXPLR_DLX_DL0_ERROR_MASK_47>()

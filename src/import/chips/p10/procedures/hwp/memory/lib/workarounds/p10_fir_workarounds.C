@@ -316,6 +316,46 @@ void dstl_cronus_settings( const fapi2::Target<fapi2::TARGET_TYPE_MCC>& i_target
     }
 }
 
+///
+/// @brief Function handling the MC_OMI_FIR x4 degrade FIR settings
+/// @param[in] i_target the OMIC target of the MC_OMI fir
+/// @param[in] i_omi_fail_action value from ATTR_OMI_X4_DEGRADE_ACTION
+/// @param[in,out] io_mc_omi_fir_reg the MC_OMI_FIR register instance
+///
+void override_x4_degrade_firs( const fapi2::Target<fapi2::TARGET_TYPE_OMIC>& i_target,
+                               const uint8_t i_omi_fail_action,
+                               mss::fir::reg<scomt::omic::MC_OMI_FIR_REG_RW>& io_mc_omi_fir_reg )
+{
+    // Write MC_OMI_FIR register per attr setting
+    switch(i_omi_fail_action)
+    {
+        case fapi2::ENUM_ATTR_OMI_X4_DEGRADE_ACTION_XSTOP:
+            FAPI_DBG("%s Setting MC_OMI_FIR degrade FIRs to checkstop per attribute setting", mss::c_str(i_target));
+            io_mc_omi_fir_reg.checkstop<scomt::omic::MC_OMI_FIR_REG_DL0_X4_MODE>()
+            .checkstop<scomt::omic::MC_OMI_FIR_REG_DL1_X4_MODE>();
+            break;
+
+        case fapi2::ENUM_ATTR_OMI_X4_DEGRADE_ACTION_MASKED:
+            FAPI_DBG("%s Setting MC_OMI_FIR degrade FIRs to masked per attribute setting", mss::c_str(i_target));
+            io_mc_omi_fir_reg.masked<scomt::omic::MC_OMI_FIR_REG_DL0_X4_MODE>()
+            .masked<scomt::omic::MC_OMI_FIR_REG_DL1_X4_MODE>();
+            break;
+
+        case fapi2::ENUM_ATTR_OMI_X4_DEGRADE_ACTION_LOCAL_XSTOP:
+            FAPI_DBG("%s Setting MC_OMI_FIR degrade FIRs to local_checkstop per attribute setting", mss::c_str(i_target));
+            io_mc_omi_fir_reg.local_checkstop<scomt::omic::MC_OMI_FIR_REG_DL0_X4_MODE>()
+            .local_checkstop<scomt::omic::MC_OMI_FIR_REG_DL1_X4_MODE>();
+            break;
+
+        default:
+            // By default just leave them recoverable
+            FAPI_DBG("%s Leaving MC_OMI_FIR degrade FIRs as recoverable per attribute setting", mss::c_str(i_target));
+            io_mc_omi_fir_reg.recoverable_error<scomt::omic::MC_OMI_FIR_REG_DL0_X4_MODE>()
+            .recoverable_error<scomt::omic::MC_OMI_FIR_REG_DL1_X4_MODE>();
+            break;
+    }
+}
+
 } // namespace fir
 } // namespace workarounds
 } // namespace mss

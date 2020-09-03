@@ -438,6 +438,28 @@
   </attribute>
 
   <attribute>
+    <id>ATTR_OMI_X4_DEGRADE_ACTION</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+        Selects the settings for Host and Explorer FIRs
+        for when x4 channel degrade occurs.
+        Default: RECOVERABLE (channel degrade will cause recoverable error)
+        Performance team request is to XSTOP when degrade occurs
+    </description>
+    <valueType>uint8</valueType>
+    <enum>
+      MASKED = 0x00,
+      XSTOP = 0x01,
+      LOCAL_XSTOP = 0x02,
+      RECOVERABLE = 0x03
+    </enum>
+    <default>0x03</default>
+    <platInit/>
+    <overrideOnly/>
+    <mssAccessorName>omi_x4_degrade_action</mssAccessorName>
+  </attribute>
+
+  <attribute>
     <id>ATTR_ENABLE_FIR_UNMASKING</id>
     <targetType>TARGET_TYPE_SYSTEM</targetType>
     <description>

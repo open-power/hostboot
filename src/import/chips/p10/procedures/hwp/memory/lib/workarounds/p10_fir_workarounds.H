@@ -38,6 +38,7 @@
 #include <fapi2.H>
 #include <generic/memory/lib/utils/fir/gen_mss_fir.H>
 #include <p10_scom_mcc.H>
+#include <p10_scom_omic.H>
 
 namespace mss
 {
@@ -85,6 +86,16 @@ void override_ustl_subchannel_firs_after_omi_init( const fapi2::Target<fapi2::TA
 void dstl_cronus_settings( const fapi2::Target<fapi2::TARGET_TYPE_MCC>& i_target,
                            const bool i_hostboot_mode,
                            mss::fir::reg<scomt::mcc::DSTL_DSTLFIR_RW>& io_mcc_dstlfir_reg );
+
+///
+/// @brief Function handling the MC_OMI_FIR x4 degrade FIR settings
+/// @param[in] i_target the OMIC target of the MC_OMI fir
+/// @param[in] i_omi_fail_action value from ATTR_OMI_X4_DEGRADE_ACTION
+/// @param[in,out] io_mc_omi_fir_reg the MC_OMI_FIR register instance
+///
+void override_x4_degrade_firs( const fapi2::Target<fapi2::TARGET_TYPE_OMIC>& i_target,
+                               const uint8_t i_omi_fail_action,
+                               mss::fir::reg<scomt::omic::MC_OMI_FIR_REG_RW>& io_mc_omi_fir_reg );
 
 } // namespace fir
 } // namespace workarounds
