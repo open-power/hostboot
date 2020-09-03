@@ -92,7 +92,7 @@ actionclass calloutSelfLowNoGard
 actionclass level2_M_self_L
 {
     callout2ndLvlMed;
-    calloutSelfLow;
+    calloutSelfLowNoGard;
 };
 
 actionclass omi
