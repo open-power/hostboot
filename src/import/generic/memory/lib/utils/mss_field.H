@@ -194,6 +194,7 @@ inline fapi2::ReturnCode get_field(const fapi2::Target<T>& i_target,
         // API enforces uint8_t vector data, so no conversion check needed to uint8_t buffer
         fapi2::buffer<uint8_t>(i_data[BYTE]).extractToRight<F.get_start(), F.get_length()>(o_value);
 
+#ifndef __PPE__
         FAPI_DBG(TARGTIDFORMAT " data[%d] = 0x%02x. Field with start bit %d, bit len %d, has data 0x%02x.",
                  TARGTID,
                  BYTE,
@@ -201,6 +202,7 @@ inline fapi2::ReturnCode get_field(const fapi2::Target<T>& i_target,
                  F.get_start(),
                  F.get_length(),
                  o_value);
+#endif
     }
 
 fapi_try_exit:
@@ -256,7 +258,7 @@ inline fapi2::ReturnCode set_field(const fapi2::Target<T>& i_target,
 fapi_try_exit:
     return fapi2::current_err;
 }
-#endif
+#endif // PPE
 ///
 /// @brief byte field reader
 /// @tparam E endian type
@@ -299,10 +301,12 @@ inline fapi2::ReturnCode get_field( const fapi2::Target<T>& i_target,
     // Implicit (possible) promotion during conversion is safe
     o_value = static_cast<OT>(l_temp);
 
+#ifndef __PPE__
     FAPI_DBG("%s: 0x%02x for %s",
              TT::FIELD_STR,
              o_value,
              spd::c_str(i_target));
+#endif
 
 
 fapi_try_exit:
