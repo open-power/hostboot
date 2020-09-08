@@ -184,10 +184,10 @@ fapi2::ReturnCode p10_io_init::img_regs(const fapi2::Target<fapi2::TARGET_TYPE_P
             FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_LINK_SPEED, l_iohs_target, l_link_speed),
                      "Error from FAPI_ATTR_GET (ATTR_LINK_SPEED)");
 
-            if (l_link_speed == fapi2::ENUM_ATTR_LINK_SPEED_50G || l_link_train != fapi2::ENUM_ATTR_IOHS_LINK_TRAIN_BOTH)
-            {
-                l_num_lanes /= 2;
-            }
+            //if (l_link_speed == fapi2::ENUM_ATTR_LINK_SPEED_50G || l_link_train != fapi2::ENUM_ATTR_IOHS_LINK_TRAIN_BOTH)
+            //{
+            //    l_num_lanes /= 2;
+            //}
 
             //Enable spread spectrum
             FAPI_TRY(p10_io_ppe_fw_spread_en[l_thread].putData(l_pauc_target, l_iohs_ss));
@@ -207,7 +207,7 @@ fapi2::ReturnCode p10_io_init::img_regs(const fapi2::Target<fapi2::TARGET_TYPE_P
         {
             int l_thread;
             auto l_omi_targets = l_omic_target.getChildren<fapi2::TARGET_TYPE_OMI>();
-            int l_num_lanes = l_omi_targets.size() * P10_IO_LIB_NUMBER_OF_OMI_LANES;
+            int l_num_lanes = P10_IO_LIB_NUMBER_OF_OMIC_LANES;
 
             FAPI_TRY(p10_io_get_omic_thread(l_omic_target, l_thread));
             FAPI_DBG("Setting number of lanes and turning off stop_thread for OMIC thread %d", l_thread);
