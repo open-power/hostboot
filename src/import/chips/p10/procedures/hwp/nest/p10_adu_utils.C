@@ -281,8 +281,10 @@ fapi2::ReturnCode p10_adu_utils_set_switch_action(
     fapi2::buffer<uint64_t> pmisc_data;
 
     // Build ADU pMisc Mode register content
+#ifndef __PPE__
     FAPI_DBG("Writing ADU pMisc Mode register: switch_ab=%s, switch_cd=%s",
              i_switch_ab ? "true" : "false", i_switch_cd ? "true" : "false");
+#endif
 
     FAPI_TRY(GET_TP_TPBR_AD_SND_MODE_REG(i_target, pmisc_data));
 
