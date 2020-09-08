@@ -36,6 +36,7 @@
 #include <exp_omi_init.H>
 #include <exp_oc_regs.H>
 #include <lib/inband/exp_inband.H>
+#include <lib/omi/exp_omi_utils.H>
 #include <chips/common/utils/chipids.H>
 #include <mss_explorer_attribute_getters.H>
 #include <mss_p9a_attribute_getters.H>
@@ -654,6 +655,8 @@ fapi2::ReturnCode exp_omi_init(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>
     FAPI_TRY(omiValidateDownstream(i_target));
     FAPI_TRY(omiTLVersionShortBackOff(i_target));
     FAPI_TRY(omiSetMMIOEnableBAR(i_target));
+    FAPI_TRY(mss::exp::omi::setup_obj_handles(i_target));
+    FAPI_TRY(mss::exp::omi::setup_int_cmd_flags(i_target));
     FAPI_TRY(omiSetACTagPASIDMetaData(i_target));
     FAPI_TRY(omiEnableAFU(i_target));
     FAPI_TRY(mss::unmask::after_mc_omi_init<mss::mc_type::EXPLORER>(i_target));
