@@ -3330,6 +3330,9 @@ sub processSmpX
     my $target        = shift;
     my $parentTarget  = shift;
 
+    # Retrieve option '-c' caller supplied
+    my $systemConfig = $targetObj->{system_config};
+
     my $busConnection = $targetObj->getFirstConnectionBus($target);
 
     # Only proceed if a bus connection exists ...
@@ -3366,7 +3369,6 @@ sub processSmpX
         # For example, in wrap config, CONFIG_APPLY is expected to have "w"
         # If "w" is not there, then we skip the connection and mark peers
         # as NULL
-        my $systemConfig = $targetObj->{system_config};
         if (($systemConfig eq $wrapConfig && $config =~ /$wrapConfig/) ||
            ($systemConfig ne $wrapConfig && $config =~ /$defaultConfig/))
         {
@@ -3385,7 +3387,6 @@ sub processSmpX
     } # end if ($busConnection ne "")
 } # end sub processSmpX
 
-
 #--------------------------------------------------
 # @brief Set up the SMPA bus for the IOHS target
 #
@@ -3395,68 +3396,93 @@ sub processSmpX
 #--------------------------------------------------
 sub processSmpA
 {
-    my $targetObj       = shift;
-    my $target          = shift;
-    my $parentTarget    = shift;
+    my $targetObj     = shift;
+    my $target        = shift;
+    my $parentTarget  = shift;
 
-    my $busConnection = $targetObj->getFirstConnectionBus($target);
+    my $busConnection = "";
+    # Retrieve option '-c' caller supplied
+    my $systemConfig = $targetObj->{system_config};
 
+    my $numBusConnections = $targetObj->getNumConnections($target);
     # Only proceed if a bus connection exists ...
-    if ($busConnection ne "")
+    if ($numBusConnections != 0)
     {
         ## Ascertain the configuration
         # Create some useful variables to help w/sorting out the configuration
         my $applyConfiguration = 0;
-        my $twoNode = "2";
+        my $twoNode   = "2";
         my $threeNode = "3";
-        my $fourNode = "4";
-        my $config = "";
+        my $fourNode  = "4";
+        my $config    = "";
 
-        if ($targetObj->isBusAttributeDefined($target, 0, "CONFIG_APPLY"))
+        # Iterate thru the bus connections, searching for the bus connection
+        # that is associated with the system configuration, option '-c'
+        for ( my $busIndex = 0; $busIndex < $numBusConnections; $busIndex++ )
         {
-            $config = $targetObj->getBusAttribute($target, 0, "CONFIG_APPLY");
-        }
-
-        # The CONFIG_APPLY bus attribute carries a comma separated values
-        # for each A-bus connection. For eg.,
-        # "2,3,4" - This connection is applicable in 2,3 and 4 node config
-        # "w" - This connection is applicable only in wrap config
-        # "2" - This connection is applicable only in 2 node config
-        # "4" - This connection is applicable only in 4 node config
-        # The below logic looks for these values (w, 2, 3, and 4) and decides
-        # whether a certain A-bus connection has to be considered or not.
-        # If user has passed 2N as argument, then we consider only those
-        # A-bus connections where value "2" is present in the configuration.
-        my $systemConfig = $targetObj->{system_config};
-        if ($systemConfig eq "2N" && $config =~ /$twoNode/)
-        {
-            # MRW configuration matches system configuration for a 2 node,
-            # therefore apply configuration.
-            $applyConfiguration = 1;
-        }
-        elsif ($systemConfig eq "")
-        {
-            # No system configuration, is MRW configuration for a 3 or 4 node system?
-            # This will skip any connections specific to ONLY 2 node systems
-            if($config =~ /$threeNode/ || $config =~ /$fourNode/)
+            if ($targetObj->isBusAttributeDefined($target, $busIndex, "CONFIG_APPLY"))
             {
-                # MRW configuration is for a 3 or 4 node system,
+                $config = $targetObj->getBusAttribute($target, $busIndex, "CONFIG_APPLY");
+
+                # Cache the bus connection for use later
+                $busConnection = $targetObj->getConnectionBus($target, $busIndex);
+            }
+            else
+            {
+                # If no attribute CONFIG_APPLY exists for this bus connection,
+                # then check next bus connection
+                next;
+            }
+
+            # The CONFIG_APPLY bus attribute carries a comma separated values
+            # for each A-bus connection. For eg.,
+            # "2,3,4" - This connection is applicable in 2,3 and 4 node config
+            # "w" - This connection is applicable only in wrap config
+            # "2" - This connection is applicable only in 2 node config
+            # "4" - This connection is applicable only in 4 node config
+            # The below logic looks for these values (w, 2, 3, and 4) and decides
+            # whether a certain A-bus connection has to be considered or not, based
+            # on the system configuration, the configuration caller passed in via
+            # option '-c'
+            # If user has passed 2N as argument, then we consider only those
+            # A-bus connections where value "2" is present in the configuration.
+            if ($systemConfig eq "2N" && $config =~ /$twoNode/)
+            {
+                # MRW configuration matches system configuration for a 2 node,
                 # therefore apply configuration.
                 $applyConfiguration = 1;
             }
-        }
-        elsif ($config =~ /$systemConfig/)
-        {
-            # If system configuration matches the MRW configuration, then
-            # apply configuration. Ex: wrap config
-            $applyConfiguration = 1;
-        }
-        else
-        {
-            # No valid configuration given via MRW nor system,
-            # therefore DO NOT apply configuration.
-            $applyConfiguration = 0;
-        }
+            elsif ($systemConfig eq "")
+            {
+                # No system configuration, is MRW configuration for a 3 or 4 node system?
+                # This will skip any connections specific to ONLY 2 node systems
+                if($config =~ /$threeNode/ || $config =~ /$fourNode/)
+                {
+                    # MRW configuration is for a 3 or 4 node system,
+                    # therefore apply configuration.
+                    $applyConfiguration = 1;
+                }
+            }
+            elsif ($config =~ /$systemConfig/)
+            {
+                # If system configuration matches the MRW configuration, then
+                # apply configuration. Ex: wrap config
+                $applyConfiguration = 1;
+            }
+            else
+            {
+                # No valid configuration given via MRW nor system,
+                # therefore DO NOT apply configuration.
+                $applyConfiguration = 0;
+            }
+
+            # If this bus connection's CONFIG_APPLY matches the system
+            # configuration, then exit 'for' loop
+            if ($applyConfiguration == 1)
+            {
+                last;
+            }
+        } # for ( my $busIndex = 0; $busIndex < $numBusConnections; $busIndex++ )
 
         # Only proceed if a valid configuration has been ascertained  ...
         if ($applyConfiguration eq 1)
@@ -3466,9 +3492,21 @@ sub processSmpA
 
             # Don't nullify the configuration attributes
             my $nullifyFlag = false;
+
             ($busSrcTarget, $busDestTarget) =
                    setCommonBusConfigAttributes($targetObj, $target, $parentTarget,
                                                 $busConnection, $nullifyFlag);
+
+            # If SMP WRAP configuration then set these variables for both source
+            # and destination targets
+            if ($systemConfig eq "w")
+            {
+                $targetObj->setAttribute($busSrcTarget, "IOHS_CONFIG_MODE", "SMPX");
+                $targetObj->setAttribute($busSrcTarget, "IOHS_DRAWER_INTERCONNECT", "FALSE");
+
+                $targetObj->setAttribute($busDestTarget, "IOHS_CONFIG_MODE", "SMPX");
+                $targetObj->setAttribute($busDestTarget, "IOHS_DRAWER_INTERCONNECT", "FALSE");
+            }
 
             # Set bus transmit MSBSWAP for both source and destination targets
             if ($targetObj->isBusConnBusAttrDefined($busConnection, "SOURCE_TX_MSBSWAP"))
@@ -3482,9 +3520,9 @@ sub processSmpA
                 my $destTxMsbSawp = $targetObj->getBusConnBusAttr($busConnection, "DEST_TX_MSBSWAP");
                 $targetObj->setAttribute($busDestTarget, "EI_BUS_TX_MSBSWAP",  $destTxMsbSawp);
             }
-        } # end if($applyConfiguration eq 1)
-    } # end if ($busConnection ne "")
-} # end sub processSmpA
+        } # if ($applyConfiguration eq 1)
+    } # if ($numBusConnections != 0)
+} # sub processSmpA
 
 #--------------------------------------------------
 # @brief Set the common configuration attributes, 'PEER_TARGET', 'PEER_PATH'
