@@ -139,16 +139,6 @@ void*    call_proc_pcie_scominit( void    *io_pArgs );
 void*    call_proc_scomoverride_chiplets( void    *io_pArgs );
 
 /**
- *  @brief   proc_chiplet_enable_ridi
- *
- *  param[in,out]   -   pointer to any arguments, usually NULL
- *
- *  return  any error logs to istep
- *
- */
-void*    call_proc_chiplet_enable_ridi( void    *io_pArgs );
-
-/**
  *  @brief   call_host_rng_bist
  *
  *  param[in,out]   -   pointer to any arguments, usually NULL
@@ -207,8 +197,8 @@ const   TaskInfo    g_istep10[]  =   {
         },
         {
                 ISTEPNAME(10,08,"proc_chiplet_enable_ridi"),
-                ISTEP_10::call_proc_chiplet_enable_ridi,
-                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, false }
+                nullptr,
+                { START_FN, EXT_IMAGE, IPL_NOOP, false }
         },
         {
                 ISTEPNAME(10,09,"host_rng_bist"),

@@ -136,4 +136,6 @@ OBJS += p10_io_ppe_regs.o
 OBJS += p10_iohs_enable_ridi.o
 OBJS += p10_enable_ridi.o
 
+OBJS+=p10_chiplet_enable_ridi.o
+
 include ${ROOTPATH}/config.mk

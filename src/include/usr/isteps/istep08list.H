@@ -288,13 +288,13 @@ namespace   INITSERVICE
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP, false }
         },
         {
-                ISTEPNAME(08,13,"proc_init_ioppe"),
-                ISTEP_08::call_proc_init_ioppe,
+                ISTEPNAME(08,13,"proc_iohs_enable_ridi"),
+                ISTEP_08::call_proc_iohs_enable_ridi,
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP, false }
         },
         {
-                ISTEPNAME(08,14,"proc_iohs_enable_ridi"),
-                ISTEP_08::call_proc_iohs_enable_ridi,
+                ISTEPNAME(08,14,"proc_init_ioppe"),
+                ISTEP_08::call_proc_init_ioppe,
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP, false }
         },
 };

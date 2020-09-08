@@ -41,6 +41,7 @@
 #include <fapi2/plat_hwp_invoker.H>
 #include <nest/nestHwpHelperFuncs.H>
 #include <p10_iohs_enable_ridi.H>
+#include <p10_chiplet_enable_ridi.H>
 
 using namespace ISTEP;
 using namespace ISTEP_ERROR;
@@ -55,10 +56,10 @@ namespace ISTEP_08
 //******************************************************************************
 void* call_proc_iohs_enable_ridi(void *io_pArgs)
 {
+    TRACFCOMP(g_trac_isteps_trace, ENTER_MRK"call_proc_iohs_enable_ridi");
+
     IStepError  l_stepError;
     errlHndl_t l_errl = nullptr;
-
-    TRACFCOMP(g_trac_isteps_trace, ENTER_MRK"call_proc_iohs_enable_ridi");
 
     //  get a list of all the procs in the system
     //
@@ -69,6 +70,27 @@ void* call_proc_iohs_enable_ridi(void *io_pArgs)
     {
         const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>
             l_fapi2_proc_target (l_procChip);
+
+        TRACFCOMP(g_trac_isteps_trace,
+                  "Running call_proc_iohs_enable_ridi p10_chiplet_enable_ridi HWP on processor target %.8X",
+                  get_huid(l_procChip));
+
+        // Call p10_chiplet_enable_ridi hwp
+        FAPI_INVOKE_HWP( l_errl, p10_chiplet_enable_ridi, l_fapi2_proc_target);
+
+        if(l_errl)
+        {
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                      "ERROR : call p10_chiplet_enable_ridi HWP(): failed on target 0x%08X. "
+                       TRACE_ERR_FMT,
+                       get_huid(l_procChip),
+                       TRACE_ERR_ARGS(l_errl));
+
+            // Capture Error
+            captureError(l_errl, l_stepError, HWPF_COMP_ID, l_procChip);
+            // Run HWP on all procs even if one reports an error
+            continue;
+        }
 
         TRACFCOMP(g_trac_isteps_trace,
                   "Running call_proc_iohs_enable_ridi p10_iohs_enable_ridi HWP on processor target %.8X",
@@ -85,6 +107,8 @@ void* call_proc_iohs_enable_ridi(void *io_pArgs)
                       get_huid(l_procChip),
                       TRACE_ERR_ARGS(l_errl));
             captureError(l_errl, l_stepError, HWPF_COMP_ID, l_procChip);
+            // Run HWP on all procs even if one reports an error
+            continue;
         }
 
     } // end of cycling through all processor chips
