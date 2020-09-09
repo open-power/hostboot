@@ -47,7 +47,7 @@ class VmmBaseTest : public CxxTest::TestSuite
         {
             int status;
 
-            printk("testNullAccess1: Expect to see uncaught exception! ");
+            printk("testNullAccess1> Expect to see uncaught exception!\n");
             tid_t child = task_create(readFromNULL, NULL);
 
             if ((child != task_wait_tid(child, &status, NULL)) ||
@@ -56,7 +56,7 @@ class VmmBaseTest : public CxxTest::TestSuite
                 TS_FAIL("Write to NULL not caught.");
             }
 
-            printk("testNullAccess2: Expect to see uncaught exception! ");
+            printk("testNullAccess2> Expect to see uncaught exception!\n");
             child = task_create(writeToNULL, NULL);
             if ((child != task_wait_tid(child, &status, NULL)) ||
                 (status != TASK_STATUS_CRASHED))
@@ -65,11 +65,58 @@ class VmmBaseTest : public CxxTest::TestSuite
             }
         }
 
+
+        void testWriteToHugeValid()
+        {
+            int status;
+            int invalid = 0;
+            tid_t child = task_create(writeToHuge, static_cast<void*>(&invalid));
+            if ((child != task_wait_tid(child, &status, NULL)) ||
+                (status != TASK_STATUS_CRASHED))
+            {
+                TS_INFO("testWriteToHugeValid> Write to HUGE properly able to write to valid.");
+            }
+            else
+            {
+                TS_FAIL("testWriteToHugeValid> Write to HUGE -NOT- able to write to valid.");
+            }
+        }
+
+        void testWriteToHugeInvalid()
+        {
+            int status;
+            int invalid = 1;
+            printk("testWriteToHugeInvalid> Expect to see uncaught Data Storage exception!\n");
+            tid_t child = task_create(writeToHuge, static_cast<void*>(&invalid));
+            if ((child != task_wait_tid(child, &status, NULL)) ||
+                (status != TASK_STATUS_CRASHED))
+            {
+                TS_FAIL("testWriteToHugeInvalid> Write to HUGE did -NOT- properly catch invalid write.");
+            }
+        }
+
+        void testWriteOOB()
+        {
+            int status;
+            printk("testWriteOOB> Expect to see uncaught Data Storage exception!\n");
+            tid_t child = task_create(writeOOB, NULL);
+
+            if ((child != task_wait_tid(child, &status, NULL)) ||
+                (status != TASK_STATUS_CRASHED))
+            {
+                TS_FAIL("testWriteOOB> WriteOOB -NOT- properly handled.");
+            }
+            else
+            {
+                TS_INFO("testWriteOOB> WriteOOB properly handled.");
+            }
+        }
+
         void testWriteToKernelCode()
         {
             int status;
 
-            printk("testWriteToKernelCode: Expect to see uncaught exception! ");
+            printk("testWriteToKernelCode> Expect to see uncaught Data Storage exception!\n");
             tid_t child = task_create(writeToKernelCode, NULL);
             if ((child != task_wait_tid(child, &status, NULL)) ||
                 (status != TASK_STATUS_CRASHED))
@@ -171,12 +218,14 @@ class VmmBaseTest : public CxxTest::TestSuite
             // Make sure our data is still good
             if( (test1[0] != 0x33333333) || (test1[100] != 0x44444444) )
             {
-                TS_FAIL( "testHugeMalloc> test1 is bad : Expected 0x33333333, got %.8X, Expected 0x44444444, got %.8X",
+                TS_FAIL( "testHugeMalloc> test1 is bad : Expected 0x33333333, "
+                         "got 0x%.8X, Expected 0x44444444, got 0x%.8X",
                          test1[0], test1[100] );
             }
             if( (test2[0] != 0x55555555) || (test2[200] != 0x66666666) )
             {
-                TS_FAIL( "testHugeMalloc> test2 is bad : Expected 0x55555555, got %.8X, Expected 0x66666666, got %.8X",
+                TS_FAIL( "testHugeMalloc> test2 is bad : Expected 0x55555555, "
+                         "got 0x%.8X, Expected 0x66666666, got 0x%.8X",
                          test2[0], test2[200] );
             }
             for( uint32_t i=0; i < 10; i++ )
@@ -189,10 +238,64 @@ class VmmBaseTest : public CxxTest::TestSuite
             }
 
             // Try a realloc
-            realloc( test2, HeapManager::MAX_BIG_ALLOC_SIZE+300 );
+            uint32_t* test2_new_ptr =
+                (uint32_t*)realloc(test2, HeapManager::MAX_BIG_ALLOC_SIZE+300);
+            if (test2_new_ptr == nullptr)
+            {
+                TS_FAIL( "testHugeMalloc> test2_new_ptr realloc is bad, "
+                         "should have received good ptr\n");
+            }
+
+            if( (test2_new_ptr[0] != 0x55555555) || (test2_new_ptr[200] != 0x66666666) )
+            {
+                TS_FAIL( "testHugeMalloc> test2_new_ptr realloc is bad : "
+                         "Expected 0x55555555, got 0x%.8X, Expected 0x66666666, got 0x%.8X",
+                         test2[0], test2[200] );
+            }
+
+            test2 = test2_new_ptr; // refresh with new addr
+
             if( (test2[0] != 0x55555555) || (test2[200] != 0x66666666) )
             {
-                TS_FAIL( "testHugeMalloc> test2 realloc is bad : Expected 0x55555555, got %.8X, Expected 0x66666666, got %.8X",
+                TS_FAIL( "testHugeMalloc> test2 realloc is bad : Expected 0x55555555, "
+                         "got 0x%.8X, Expected 0x66666666, got 0x%.8X",
+                         test2[0], test2[200] );
+            }
+
+            // COMMENTED OUT: ASSERT happens - Try a realloc TOO BIG
+            //uint32_t* test_original = test2;
+            //uint32_t* test2_new_ptr_too_huge =
+            //    (uint32_t*)realloc( test2, HeapManager::HC_SLOT_SIZE+1);
+            //if (test2_new_ptr_too_huge != nullptr)
+            //{
+            //    TS_FAIL("testHugeMalloc> we should -NOT- have received a valid pointer back ! "
+            //            "test2_new_ptr_too_huge=%p test2 ptr=%p\n", test2_new_ptr_too_huge, test2);
+            //}
+            //test2 = test_original; // refresh with addr
+
+            //if( (test2[0] != 0x55555555) || (test2[200] != 0x66666666) )
+            //{
+            //    TS_FAIL( "testHugeMalloc> test2 realloc is bad : Expected 0x55555555, "
+            //             "got 0x%.8X, Expected 0x66666666, got 0x%.8X",
+            //             test2[0], test2[200] );
+            //}
+
+            // Try a realloc FROM HUGE to BIG
+            uint32_t* test_original = test2;
+            uint32_t* test3_new_ptr_shrink_to_big =
+                (uint32_t*)realloc( test2, HeapManager::MAX_BIG_ALLOC_SIZE);
+            if (test3_new_ptr_shrink_to_big == nullptr)
+            {
+                TS_FAIL("testHugeMalloc> We should have received a valid pointer back ! "
+                        "test3_new_ptr_shrink_to_big=%p test2 ptr=%p\n",
+                         test3_new_ptr_shrink_to_big, test2);
+            }
+            test2 = test_original; // refresh with addr
+
+            if( (test2[0] != 0x55555555) || (test2[200] != 0x66666666) )
+            {
+                TS_FAIL( "testHugeMalloc> test3 realloc is bad : "
+                         "Expected 0x55555555, got 0x%.8X, Expected 0x66666666, got 0x%.8X",
                          test2[0], test2[200] );
             }
 
@@ -216,6 +319,75 @@ class VmmBaseTest : public CxxTest::TestSuite
         static void* writeToNULL(void* unused)
         {
             (*(uint64_t*)NULL) = 0x12345678;
+            return NULL;
+        }
+
+        static void* writeToHuge(void *invalid)
+        {
+            uint32_t* test1 = (uint32_t*)malloc(HeapManager::MAX_BIG_ALLOC_SIZE+4);
+            test1[0] = 0x11223344;
+            test1[(HeapManager::MAX_BIG_ALLOC_SIZE+4)/4-1] = 0x55667788;
+            if ((*reinterpret_cast<int*>(invalid)) != 0)
+            {
+                // free the malloc so we expect
+                // data storage exception when writing
+                free (test1);
+                test1[0] = 0x77777777;
+            }
+            else
+            {
+                free (test1);
+            }
+            return NULL;
+        }
+
+        static void* writeOOB(void *unused)
+        {
+            size_t l_sz = HeapManager::MAX_BIG_ALLOC_SIZE+4;
+            size_t pages = ALIGN_PAGE(l_sz)/PAGESIZE;
+            printk("writeOOB> pages=%ld l_sz=%ld\n", pages, l_sz);
+            uint32_t* test1 = (uint32_t*)malloc(HeapManager::MAX_BIG_ALLOC_SIZE+4);
+            printk("writeOOB> HUGE malloc test1 ptr=%p\n", test1);
+            test1[0] = 0x11223344;
+            printk("writeOOB> Expecting 0x11223344, 0x%X\n", test1[0]);
+            // write to valid first
+            test1[(HeapManager::MAX_BIG_ALLOC_SIZE+4)/4-1] = 0x55667788;
+            printk("writeOOB> ((HeapManager::MAX_BIG_ALLOC_SIZE+4)/4)-1=%d\n",
+                ((HeapManager::MAX_BIG_ALLOC_SIZE+4)/4)-1);
+            printk("writeOOB> Expecting 0x55667788, 0x%X\n",
+                test1[((HeapManager::MAX_BIG_ALLOC_SIZE+4)/4)-1]);
+
+            // next writeOOB, testing in what should be
+            // the added page alignment space
+            // and then finally outside the bounds
+            // the progression is kept to aide in triage if failures
+
+            test1[(HeapManager::MAX_BIG_ALLOC_SIZE+4)/4+4] = 0x11111111;
+            printk("writeOOB> ((HeapManager::MAX_BIG_ALLOC_SIZE+4)/4)+4=%d\n",
+                ((HeapManager::MAX_BIG_ALLOC_SIZE+4)/4)+4);
+            printk("writeOOB> Expecting 0x11111111, 0x%X\n",
+                test1[((HeapManager::MAX_BIG_ALLOC_SIZE+4)/4)+4]);
+            test1[(HeapManager::MAX_BIG_ALLOC_SIZE+4)/4+8] = 0x22222222;
+            printk("writeOOB> ((HeapManager::MAX_BIG_ALLOC_SIZE+4)/4)+8=%d\n",
+                ((HeapManager::MAX_BIG_ALLOC_SIZE+4)/4)+8);
+            printk("writeOOB> Expecting 0x22222222, 0x%X\n",
+                test1[((HeapManager::MAX_BIG_ALLOC_SIZE+4)/4)+8]);
+
+            // the following should -NOT- appear in printk
+            // we should hit data storage exception
+
+            test1[((pages*PAGESIZE)/4)+1] = 0x33333333;
+            printk("writeOOB> Unexpectedly here ((pages*PAGESIZE)/4)+1=%ld\n",
+                ((pages*PAGESIZE)/4)+1 );
+            printk("writeOOB> Unexpectedly here, maybe 0x33333333, 0x%X\n",
+                test1[((pages*PAGESIZE)/4)+1]);
+
+            test1[((pages*PAGESIZE)/4)+2] = 0x44444444;
+            printk("writeOOB> Unexpectedly here ((pages*PAGESIZE)/4)+2=%ld\n",
+                ((pages*PAGESIZE)/4)+2 );
+            printk("writeOOB> Unexpectedly here, maybe 0x44444444, 0x%X\n",
+                test1[((pages*PAGESIZE)/4)+2]);
+
             return NULL;
         }
 

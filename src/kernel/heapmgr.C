@@ -357,11 +357,18 @@ void* HeapManager::_allocate(size_t i_sz)
 
 void* HeapManager::_realloc(void* i_ptr, size_t i_sz)
 {
-    void* new_ptr = _reallocHuge(i_ptr,i_sz);
-    if(new_ptr) return new_ptr;
+    // do some range checks
+    //
+    // Logic for all these are conditional on falling thru
+    // from largest to smallest
+    if (reinterpret_cast<uint64_t>(i_ptr) >= VMM_VADDR_MALLOC)
+    {
+        void* new_ptr = _reallocHuge(i_ptr,i_sz);
+        return new_ptr;
+    }
 
-    new_ptr = _reallocBig(i_ptr,i_sz);
-    if(new_ptr) return new_ptr;
+    void* new_ptr = _reallocBig(i_ptr,i_sz);
+    if (new_ptr) return new_ptr;
 
     size_t overhead = 0;
     new_ptr = i_ptr;
@@ -405,6 +412,11 @@ void* HeapManager::_realloc(void* i_ptr, size_t i_sz)
     }
 #endif
 
+    if (new_ptr == nullptr)
+    {
+        printk("_realloc RETURN nullptr\n");
+        crit_assert(0);
+    }
     return new_ptr;
 }
 
@@ -415,6 +427,7 @@ void* HeapManager::_reallocBig(void* i_ptr, size_t i_sz)
     if(ALIGN_PAGE(reinterpret_cast<uint64_t>(i_ptr)) !=
        reinterpret_cast<uint64_t>(i_ptr))
     {
+        printkd("_reallocBig RETURN nullptr\n");
         return nullptr;
     }
 
@@ -935,7 +948,7 @@ void* HeapManager::_allocateHuge(size_t i_sz)
     size_t pages = ALIGN_PAGE(i_sz)/PAGESIZE;
     if( (pages*PAGESIZE) > HC_SLOT_SIZE )
     {
-        printkd( "_allocateHuge> Request too large, bytes=%ld > HC_SLOT_SIZE=%d\n",
+        printk( "_allocateHuge> Request too large, bytes=%ld > HC_SLOT_SIZE=%d\n",
             i_sz, HC_SLOT_SIZE );
         return nullptr;
     }
@@ -1024,7 +1037,6 @@ bool HeapManager::_freeHuge(void* i_ptr)
     {
         return false;
     }
-    printkd( "_freeHuge> free i_ptr=%p\n", i_ptr );
 
     // Find the relevant chunk
     huge_chunk_t * hc = huge_chunk_stack.first();
@@ -1071,17 +1083,19 @@ bool HeapManager::_freeHuge(void* i_ptr)
 void* HeapManager::_reallocHuge(void* i_ptr, size_t i_sz)
 {
     // Huge allocations are within the allocated VMM space
+
     if( (reinterpret_cast<uint64_t>(i_ptr) < VMM_VADDR_MALLOC)
         || (reinterpret_cast<uint64_t>(i_ptr) >=
             (VMM_VADDR_MALLOC+VMM_MALLOC_SIZE)) )
     {
-        return nullptr;
+        printk("_reallocHuge RANGE CHECK i_ptr=%p i_sz=%ld\n", i_ptr, i_sz);
+        crit_assert(0);
     }
 
     if( i_sz > HC_SLOT_SIZE )
     {
-        printk( "_reallocHuge> Cannot do a realloc of %ld bytes, max is HC_SLOT_SIZE=%d", i_sz, HC_SLOT_SIZE );
-        return nullptr;
+        printk("_reallocHuge i_sz > HC_SLOT_SIZE i_ptr=%p i_sz=%ld\n", i_ptr, i_sz);
+        crit_assert(0);
     }
 
     // Find the chunk in question
