@@ -57,7 +57,7 @@ TRAC_INIT(&g_trac_dump, "DUMP", 4*KILOBYTE);
 #define SPR_ID_TYPE_NAME 0
 //Minimum space required for Master Fused Core
 //and its 8 threads
-#define HYP_REQUIRED_MIN_REG_SIZE 0x5CC0
+#define HYP_REQUIRED_MIN_REG_SIZE 0x5BC0
 
 namespace DUMP
 {
@@ -150,8 +150,11 @@ typedef std::map<uint32_t, const char*>::iterator SPRNUM_MAP_IT;
     _op_(UEIR     ,509 )\
     _op_(ACMCR    ,510 )\
     _op_(SMFCTRL  ,511 )\
-    _op_(SIER2    ,752 )\
-    _op_(SIER3    ,753 )\
+    _op_(SIERA_RU ,736 )\
+    _op_(SIERB_RU ,737 )\
+    _op_(MMCR3_RU ,738 )\
+    _op_(SIERA    ,752 )\
+    _op_(SIERB    ,753 )\
     _op_(MMCR3    ,754 )\
     _op_(SIER_RU  ,768 )\
     _op_(MMCR2_RU ,769 )\
@@ -217,12 +220,14 @@ typedef std::map<uint32_t, const char*>::iterator SPRNUM_MAP_IT;
     _op_(HID      ,1008)\
     _op_(PIR      ,1023)\
     _op_(NIA      ,2000)\
-    _op_(MSR      ,2001)\
+    _op_(MSRD     ,2001)\
     _op_(CR       ,2002)\
     _op_(FPSCR    ,2003)\
     _op_(VSCR     ,2004)\
-    _op_(SLBE     ,2005)\
-    _op_(SLBV     ,2006)
+    _op_(MSR      ,2005)\
+    _op_(MSR_L1   ,2006)\
+    _op_(MSRD_L1  ,2007)
+
 
 
 #define DO_SPRNUM_MAP(in_name, in_number)\
@@ -510,27 +515,29 @@ errlHndl_t copyArchitectedRegs(void)
             }
             else if(procTableEntry->dstArraySize < procTableEntry->capArraySize)
             {
+                TRACFCOMP(g_trac_dump, "Insufficient space detected, HYP Reserved Size=0x%.8x, actual "
+                " size=0x%.8x and Hypervisor Pre-Init failure(%d)", procTableEntry->dstArraySize,
+                procTableEntry->capArraySize,collectMinimumDataMode); 
                 /*@
                  * @errortype
-                 * @moduleid     DUMP::DUMP_ARCH_REGS
-                 * @reasoncode   DUMP::DUMP_PDAT_INSUFFICIENT_SPACE
-                 * @userdata1    Hypervisor reserved memory size
-                 * @userdata2    Memory needed to copy architected
-                 *               register data
-                 * @userdata3    Minimum memory required for copy architected
-                 *               register data(PRE_INIT failure case)
-                 * @devdesc      Insufficient space to copy architected
-                 *               registers
-                 * @custdesc     Failure to collect some error data
-                 *               following system error
+                 * @moduleid         DUMP::DUMP_ARCH_REGS
+                 * @reasoncode       DUMP::DUMP_PDAT_INSUFFICIENT_SPACE
+                 * @userdata1[00:31] Hypervisor reserved memory size
+                 * @userdata1[32:63] Memory needed to copy architected
+                 *                   register data
+                 * @userdata2        Minimum memory required for copy architected
+                 *                   register data(PRE_INIT failure case)
+                 * @devdesc          Insufficient space to copy architected
+                 *                   registers
+                 * @custdesc         Failure to collect some error data
+                 *                   following system error
                  *
                  */
                 l_err = new ERRORLOG::ErrlEntry(
                         ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                         DUMP_ARCH_REGS,
                         DUMP_PDAT_INSUFFICIENT_SPACE,
-                        procTableEntry->dstArraySize,
-                        procTableEntry->capArraySize,
+                        TWO_UINT32_TO_UINT64(procTableEntry->dstArraySize,procTableEntry->capArraySize),
                         HYP_REQUIRED_MIN_REG_SIZE,
                         ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
                 errlCommit(l_err, DUMP_COMP_ID);
