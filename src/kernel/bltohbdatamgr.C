@@ -67,7 +67,7 @@ void BlToHbDataManager::print() const
         printkd("-- HBB header Addr = 0x%lX Size = 0x%lX\n", getHbbHeaderAddr(),
                iv_data.hbbHeaderSize);
         printkd("-- Reserved Size = 0x%lX\n", iv_preservedSize);
-        printkd("-- HB Cache Size = %d MB\n", iv_cacheSizeMb);
+        printkd("-- HB Cache Size = %lu MB\n", getHbCacheSizeMb());
         printkd("-- Size of structure = 0x%lX\n", iv_data.sizeOfStructure);
         printkd("\n");
     }

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -48,7 +48,7 @@ void CpuTbRestoreDoorbellWorkItem::operator() (void)
     cpu_t *l_cpu = CpuManager::getCpu(pir);
 
     uint64_t l_restore_tb = l_cpu->cpu_restore_tb;
-    printkd("pir:%ld tb:0x%0x\n", pir, l_restore_tb);
+    printkd("pir:%lu tb:0x%0lX\n", pir, l_restore_tb);
     if (l_restore_tb > getTB())
     {
         setTB(l_restore_tb);

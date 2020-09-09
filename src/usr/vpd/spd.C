@@ -2482,6 +2482,9 @@ errlHndl_t cmpEecacheToEeprom(TARGETING::Target * i_target,
             break;
         }
 
+        TRACDBIN(g_trac_spd, "Hardware data : ", dataHardware, sizeHardware);
+        TRACDBIN(g_trac_spd, "Cache data : ", dataCache, sizeCache);
+
         // Compare the HARDWARE/CACHE keyword size/data
         if (sizeHardware != sizeCache)
         {
@@ -2499,9 +2502,6 @@ errlHndl_t cmpEecacheToEeprom(TARGETING::Target * i_target,
         o_match = true;
 
     } while(0);
-
-    TRACDBIN(g_trac_spd, "Hardware data : ", dataHardware, sizeHardware);
-    TRACDBIN(g_trac_spd, "Cache data : ", dataCache, sizeCache);
 
     TRACSSCOMP( g_trac_spd, EXIT_MRK"cmpEecacheToEeprom(): returning %s errors. o_match = 0x%X ",
                 (err ? "with" : "with no"), o_match );
