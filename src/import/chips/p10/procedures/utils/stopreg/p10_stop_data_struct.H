@@ -113,7 +113,7 @@ typedef struct
     uint8_t     iv_entryMatchOffset;
     uint8_t     iv_matchFound;
     uint8_t     iv_entryLimit;
-    uint8_t     iv_reserved;
+    uint8_t     iv_firstScomEntry;
 } ScomEntryDat_t;
 
 /**
@@ -141,11 +141,11 @@ enum
     SCOM_ENTRY_VALID        =   0x80000000,
     LAST_SCOM_ENTRY         =   0x40000000,
     SWIZZLE_LAST_SCOM_ENTRY =   0x00000040,
-    SCOM_ADDR_MASK          =   0x0000FFFF,
+    SCOM_ADDR_MASK          =   0x000FFFFF,
     SCOM_ADDR_CHIPLET_MASK  =   0x000FFFFF,
     SCOM_ENTRY_VER          =   0x10000000, //Ver 1.0
     CORE_SECTION_ID_CODE    =   0x00000000, //Core Section Id 0
-    L3_SECTION_ID_CODE      =   0x03000000, //L3 Section Id 3 b4:b7
+    L3_SECTION_ID_CODE      =   0x01000000, //L3 Section Id 3 b4
     MAX_SCOM_ENTRY_POS      =   0x10,
     MIN_SUPERCHIPLET_ID     =   0x20,
 

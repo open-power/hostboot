@@ -418,22 +418,14 @@
   </hwpError>
   <!-- *********************************************************************** -->
   <hwpError>
-    <rc>RC_QME_RING_SECTN_EXTRACTION_FAIL</rc>
-    <description>hcode image build procedure failed to extract scan rings within QME image</description>
-    <ffdc>EXTRACTION_FAILURE_CODE</ffdc>
-    <ffdc>EC_LEVEL</ffdc>
-    <callout>
-      <procedure>CODE</procedure>
-      <priority>HIGH</priority>
-    </callout>
-  </hwpError>
-  <!-- *********************************************************************** -->
-  <hwpError>
     <rc>RC_QME_IMG_EXCEED_SRAM_SIZE</rc>
     <description>Size of QME image exceeded the SRAM size.
     Note: 0xFFFFFFFF in field MAX_QME_IMG_SIZE_ALLOWED indicates an invalid size.
     </description>
     <ffdc>BAD_IMG_SIZE</ffdc>
+    <ffdc>QME_HCODE_SIZE</ffdc>
+    <ffdc>CMN_RING_SIZE</ffdc>
+    <ffdc>INST_RING_SIZE</ffdc>
     <ffdc>MAX_QME_IMG_SIZE_ALLOWED</ffdc>
     <ffdc>EC_LEVEL</ffdc>
     <callout>
@@ -469,226 +461,12 @@
   </hwpError>
   <!-- *********************************************************************** -->
   <hwpError>
-    <rc>RC_REFRESH_SCOM_UPDATE_FAIL</rc>
-    <description>hcode image build procedure failed to create restore entry for L3 refresh timer divider register</description>
-    <ffdc>STOP_API_SCOM_ERR</ffdc>
-    <ffdc>REFRESH_REG_ADDR</ffdc>
-    <ffdc>REFRESH_REG_DATA</ffdc>
-    <callout>
-      <procedure>CODE</procedure>
-      <priority>HIGH</priority>
-    </callout>
-  </hwpError>
-  <!-- *********************************************************************** -->
-  <hwpError>
     <rc>RC_PSTATE_SUP_STRUCT_SIZE_ERR</rc>
     <description>hcode image build procedure failed due to P-State parameter block super 
     struct size error</description>
     <ffdc>SUPER_STRUCT_SIZE</ffdc>
     <ffdc>MAX_SIZE_ALLOCATED</ffdc>
     <ffdc>ACTUAL_SIZE</ffdc>
-    <callout>
-      <procedure>CODE</procedure>
-      <priority>HIGH</priority>
-    </callout>
-  </hwpError>
-  <!-- *********************************************************************** -->
-  <hwpError>
-    <rc>RC_OCC_PARAM_BLOCK_SIZE_ERR</rc>
-    <description>hcode image build procedure failed due to OCC P-State parameter block struct 
-    size error</description>
-    <ffdc>OCC_PSTATE_STRUCT_SIZE</ffdc>
-    <ffdc>MAX_SIZE_ALLOCATED</ffdc>
-    <ffdc>ACTUAL_SIZE</ffdc>
-    <callout>
-      <procedure>CODE</procedure>
-      <priority>HIGH</priority>
-    </callout>
-  </hwpError>
-  <!-- *********************************************************************** -->
-  <hwpError>
-    <rc>RC_PARAM_WOF_TABLE_SIZE_ERR</rc>
-    <description>hcode image build procedure failed due to WOF Table exceeding permissible 
-    size limit</description>
-    <ffdc>ACTUAL_WOF_TABLE_SIZE</ffdc>
-    <ffdc>MAX_SIZE_ALLOCATED</ffdc>
-    <callout>
-      <procedure>CODE</procedure>
-      <priority>HIGH</priority>
-    </callout>
-  </hwpError>
-  <!-- *********************************************************************** -->
-  <hwpError>
-    <rc>RC_CORE_CMN_RING_LAYOUT_ERR</rc>
-    <description>hcode image build procedure failed to layout core common rings</description>
-    <ffdc>CORE_CMN_RING_SIZE</ffdc>
-    <ffdc>FAILURE_CODE</ffdc>
-    <ffdc>MAX_SIZE_ALLOCATED</ffdc>
-    <ffdc>EC_LEVEL</ffdc>
-    <ffdc>RING_ID</ffdc>
-    <callout>
-      <procedure>CODE</procedure>
-      <priority>HIGH</priority>
-    </callout>
-  </hwpError>
-  <!-- *********************************************************************** -->
-  <hwpError>
-    <rc>RC_CORE_CMN_RING_OVRD_LAYOUT_ERR</rc>
-    <description>hcode image build procedure failed to layout core common override rings</description>
-    <ffdc>OVRD_SIZE</ffdc>
-    <ffdc>FAILURE_CODE</ffdc>
-    <ffdc>MAX_SIZE_ALLOCATED</ffdc>
-    <ffdc>EC_LEVEL</ffdc>
-    <ffdc>RING_ID</ffdc>
-    <callout>
-      <procedure>CODE</procedure>
-      <priority>HIGH</priority>
-    </callout>
-  </hwpError>
-  <!-- *********************************************************************** -->
-  <hwpError>
-    <rc>RC_CORE_SPEC_RING_LAYOUT_ERR</rc>
-    <description>hcode image build procedure failed to layout core common 
-    override rings</description>
-    <ffdc>CORE_SPEC_RING_SIZE</ffdc>
-    <ffdc>FAILURE_CODE</ffdc>
-    <ffdc>MAX_SIZE_ALLOCATED</ffdc>
-    <ffdc>RING_ID</ffdc>
-    <ffdc>EC_LEVEL</ffdc>
-    <ffdc>CORE_ID</ffdc>
-    <callout>
-      <procedure>CODE</procedure>
-      <priority>HIGH</priority>
-    </callout>
-  </hwpError>
-  <!-- *********************************************************************** -->
-  <hwpError>
-    <rc>RC_FAILED_TO_CALCULATE_CORE_REPAIR_RING</rc>
-    <description>hcode image build procedure failed to determine max size of repair 
-    ring pair</description>
-    <ffdc>FAILURE_CODE</ffdc>
-    <ffdc>CORE_ID</ffdc>
-    <callout>
-      <procedure>CODE</procedure>
-      <priority>HIGH</priority>
-    </callout>
-  </hwpError>
-  <!-- *********************************************************************** -->
-  <hwpError>
-    <rc>RC_QUAD_CMN_RING_LAYOUT_ERR</rc>
-    <description>hcode image build procedure failed to layout quad common rings</description>
-    <ffdc>QUAD_CMN_RING_SIZE</ffdc>
-    <ffdc>FAILURE_CODE</ffdc>
-    <ffdc>MAX_SIZE_ALLOCATED</ffdc>
-    <ffdc>RING_ID</ffdc>
-    <ffdc>EC_LEVEL</ffdc>
-    <ffdc>QUAD_ID</ffdc>
-    <callout>
-      <procedure>CODE</procedure>
-      <priority>HIGH</priority>
-    </callout>
-  </hwpError>
-  <!-- *********************************************************************** -->
-  <hwpError>
-    <rc>RC_QUAD_CMN_RING_OVRD_LAYOUT_ERR</rc>
-    <description>hcode image build procedure failed to layout quad common 
-    override rings</description>
-    <ffdc>OVRD_SIZE</ffdc>
-    <ffdc>FAILURE_CODE</ffdc>
-    <ffdc>MAX_SIZE_ALLOCATED</ffdc>
-    <ffdc>RING_ID</ffdc>
-    <ffdc>EC_LEVEL</ffdc>
-    <callout>
-      <procedure>CODE</procedure>
-      <priority>HIGH</priority>
-    </callout>
-  </hwpError>
-  <!-- *********************************************************************** -->
-  <hwpError>
-    <rc>RC_QUAD_SPEC_RING_LAYOUT_ERR</rc>
-    <description>hcode image build procedure failed to layout quad spec 
-     rings</description>
-    <ffdc>QUAD_SPEC_RING_SIZE</ffdc>
-    <ffdc>FAILURE_CODE</ffdc>
-    <ffdc>MAX_SIZE_ALLOCATED</ffdc>
-    <ffdc>RING_ID</ffdc>
-    <ffdc>EC_LEVEL</ffdc>
-    <ffdc>QUAD_ID</ffdc>
-    <callout>
-      <procedure>CODE</procedure>
-      <priority>HIGH</priority>
-    </callout>
-  </hwpError>
-  <!-- *********************************************************************** -->
-  <hwpError>
-    <rc>RC_NCU_RNG_SCOM_SAVE_FAIL</rc>
-    <description>hcode image build procedure failed to save SCOM restore entry for 
-    NCU RNG BAR register</description>
-    <ffdc>SCOM_ADDRESS</ffdc>
-    <ffdc>SCOM_DATA</ffdc>
-    <ffdc>SCOM_REGION</ffdc>
-    <ffdc>SCOM_OP</ffdc>
-    <ffdc>FAILURE_CODE</ffdc>
-    <callout>
-      <procedure>CODE</procedure>
-      <priority>HIGH</priority>
-    </callout>
-  </hwpError>
-  <!-- *********************************************************************** -->
-  <hwpError>
-    <rc>RC_L2_RD_EPS_SCOM_SAVE_FAIL</rc>
-    <description>hcode image build procedure failed to save SCOM restore entry for 
-     EX_L2_RD_EPS_REG register</description>
-    <ffdc>SCOM_ADDRESS</ffdc>
-    <ffdc>SCOM_DATA</ffdc>
-    <ffdc>SCOM_REGION</ffdc>
-    <ffdc>SCOM_OP</ffdc>
-    <ffdc>FAILURE_CODE</ffdc>
-    <callout>
-      <procedure>CODE</procedure>
-      <priority>HIGH</priority>
-    </callout>
-  </hwpError>
-  <!-- *********************************************************************** -->
-  <hwpError>
-    <rc>RC_L2_WR_EPS_SCOM_SAVE_FAIL</rc>
-    <description>hcode image build procedure failed to save SCOM restore entry for 
-    EX_L2_WR_EPS_REG register</description>
-    <ffdc>SCOM_ADDRESS</ffdc>
-    <ffdc>SCOM_DATA</ffdc>
-    <ffdc>SCOM_REGION</ffdc>
-    <ffdc>SCOM_OP</ffdc>
-    <ffdc>FAILURE_CODE</ffdc>
-    <callout>
-      <procedure>CODE</procedure>
-      <priority>HIGH</priority>
-    </callout>
-  </hwpError>
-  <!-- *********************************************************************** -->
-  <hwpError>
-    <rc>RC_L3_RD_EPS_SCOM_SAVE_FAIL</rc>
-    <description>hcode image build procedure failed to save SCOM restore entry for 
-    EX_L3_RD_EPS_REG register</description>
-    <ffdc>SCOM_ADDRESS</ffdc>
-    <ffdc>SCOM_DATA</ffdc>
-    <ffdc>SCOM_REGION</ffdc>
-    <ffdc>SCOM_OP</ffdc>
-    <ffdc>FAILURE_CODE</ffdc>
-    <callout>
-      <procedure>CODE</procedure>
-      <priority>HIGH</priority>
-    </callout>
-  </hwpError>
-  <!-- *********************************************************************** -->
-  <hwpError>
-    <rc>RC_L3_WR_EPS_SCOM_SAVE_FAIL</rc>
-    <description>hcode image build procedure failed to save SCOM restore entry for 
-    L3_RD_EPS_REG </description>
-    <ffdc>SCOM_ADDRESS</ffdc>
-    <ffdc>SCOM_DATA</ffdc>
-    <ffdc>SCOM_REGION</ffdc>
-    <ffdc>SCOM_OP</ffdc>
-    <ffdc>FAILURE_CODE</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
@@ -747,20 +525,6 @@
   </hwpError>
   <!-- *********************************************************************** -->
   <hwpError>
-    <rc>RC_SELF_SAVE_API_FAILED</rc>
-    <description>API call for creating SPR self save entry failed.
-      It is meant for test and debug environment.</description>
-    <ffdc>PIR</ffdc>
-    <ffdc>STOP_API_RC</ffdc>
-    <ffdc>CORE_POS</ffdc>
-    <ffdc>THREAD_POS</ffdc>
-    <callout>
-      <procedure>CODE</procedure>
-      <priority>HIGH</priority>
-    </callout>
-  </hwpError>
-  <!-- *********************************************************************** -->
-  <hwpError>
     <rc>RC_BAD_UNSECURE_HOMER_VALUE</rc>
     <description>Attribute ATTR_UNSECURE_HOMER_ADDRESS is initialized with bad value. Address
     is either not aligned with 2MB boundary or b15 of of address value is not 0</description>
@@ -776,6 +540,20 @@
     <description>Override binary is bigger then temp buffer. It may mean override binary is not built
     correct. It is not expected to be more than 2KB.</description>
     <ffdc>BAD_OVERRIDE_BIN_SIZE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_BCE_BUF_SMALLER_FOR_NON_HCODE_SECTION</rc>
+    <description>Buffer allocated for block copy at runtime cannot accomodate core
+    common rings, repair ring or SCOM restore entries. </description>
+    <ffdc>BCE_BUF_SIZE</ffdc>
+    <ffdc>QME_HCODE_SIZE</ffdc>
+    <ffdc>CMN_RING_SIZE</ffdc>
+    <ffdc>INST_RING_SIZE</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>

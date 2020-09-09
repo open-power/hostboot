@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -832,17 +832,19 @@ STATIC StopReturnCode_t lookUpScomRestoreRegion( void * i_pImage, const ScomSect
 
     if( ( PROC_STOP_SECTION_CORE == i_sectn ) || ( PROC_STOP_SECTION_L2 == i_sectn ) )
     {
-        MY_INF( "Core Offset 0x%04x", SWIZZLE_2_BYTE(l_scomHdr->iv_coreOffset) );
+        MY_INF( "Core Offset 0x%04x Magic Word 0x%04x",
+                SWIZZLE_2_BYTE(l_scomHdr->iv_coreOffset),
+                SWIZZLE_2_BYTE(l_scomHdr->iv_magicMark) );
         l_offset       +=   SWIZZLE_2_BYTE(l_scomHdr->iv_coreOffset);
         o_entryDat->iv_subRegionLength  =   SWIZZLE_2_BYTE(l_scomHdr->iv_coreLength);
-        l_offset       +=   ( SWIZZLE_4_BYTE(l_pCpmrHdr->iv_maxCoreL2ScomEntry) * l_relativeCorePos );
+        l_offset       +=   ( SWIZZLE_4_BYTE(l_pCpmrHdr->iv_maxCoreL2ScomEntry) * l_relativeCorePos * sizeof(ScomEntry_t) );
     }
     else if( ( PROC_STOP_SECTION_L3 == i_sectn ) || ( PROC_STOP_SECTION_CACHE == i_sectn ) )
     {
         MY_INF( "Cache Offset 0x%04x", SWIZZLE_2_BYTE(l_scomHdr->iv_l3Offset) );
         l_offset       +=   SWIZZLE_2_BYTE(l_scomHdr->iv_l3Offset);
         o_entryDat->iv_subRegionLength  =   SWIZZLE_2_BYTE(l_scomHdr->iv_l3Length);
-        l_offset       +=   ( SWIZZLE_4_BYTE(l_pCpmrHdr->iv_maxEqL3ScomEntry) * l_relativeCorePos );
+        l_offset       +=   ( SWIZZLE_4_BYTE(l_pCpmrHdr->iv_maxEqL3ScomEntry) * l_relativeCorePos  * sizeof(ScomEntry_t) );
     }
     else
     {
@@ -892,6 +894,7 @@ STATIC StopReturnCode_t lookUpScomRestoreEntry( void * i_pImage, const ScomSecti
     l_pScomByte         =   ( uint8_t * )( (uint8_t *) i_pImage + o_pScomDat->iv_subRegionBaseOffset );
     l_pScom   =   (ScomEntry_t *)( l_pScomByte );
 
+
     switch( i_sectn )
     {
         case PROC_STOP_SECTION_CORE:
@@ -914,8 +917,11 @@ STATIC StopReturnCode_t lookUpScomRestoreEntry( void * i_pImage, const ScomSecti
 
     for( l_entry  = 0; l_entry < l_entryLimit; l_entry++ )
     {
-        if( !( l_pScom->iv_scomAddress & SWIZZLE_4_BYTE(SCOM_ENTRY_VALID) ) )
+
+        if( !( l_pScom->iv_scomAddress & SWIZZLE_4_BYTE(SCOM_ENTRY_VALID) ) ||
+            !( l_pScom->iv_scomAddress ) )
         {
+	        MY_INF( "Slot Found %d", l_entry );
             o_pScomDat->iv_slotFound       =   0x01;
             o_pScomDat->iv_entryOffset     =   l_entry;
             break;
@@ -928,6 +934,16 @@ STATIC StopReturnCode_t lookUpScomRestoreEntry( void * i_pImage, const ScomSecti
 
     for( l_entry  = 0; l_entry < l_entryLimit; l_entry++ )
     {
+        if( !( l_pScom->iv_scomAddress ) )
+        {
+            MY_INF( "Zero Address, last entry Found %d", l_entry );
+            o_pScomDat->iv_lastEntryOffset   =   l_entry;
+            o_pScomDat->iv_firstScomEntry    =   0x01;
+            break;
+        }
+
+        o_pScomDat->iv_firstScomEntry    =  0x00;
+
         if( l_pScom->iv_scomAddress & SWIZZLE_4_BYTE(LAST_SCOM_ENTRY) )
         {
             o_pScomDat->iv_lastEntryOffset   =   l_entry;
@@ -935,6 +951,7 @@ STATIC StopReturnCode_t lookUpScomRestoreEntry( void * i_pImage, const ScomSecti
                     o_pScomDat->iv_lastEntryOffset );
             break;
         }
+
         l_pScom++;
     }
 
@@ -951,6 +968,7 @@ STATIC StopReturnCode_t lookUpScomRestoreEntry( void * i_pImage, const ScomSecti
             MY_INF( "Existing Entry Slot No 0x%08x", l_entry );
             break;
         }
+
         l_pScom++;
     }
 
@@ -1023,11 +1041,10 @@ STATIC StopReturnCode_t updateScomEntry( void * i_pImage, uint32_t i_scomAddr,
                                 ScomOperation_t i_operation, ScomEntryDat_t * i_pScomDat )
 {
     StopReturnCode_t l_rc   =   STOP_SAVE_SUCCESS;
-    CpmrHeader_t * l_pCpmrHdr   =   NULL;
-    ScomEntry_t * l_pScom       =   NULL;
-    uint32_t l_maxScomEntry     =   0;
-    l_pCpmrHdr          =   ( CpmrHeader_t * ) ( (uint8_t *) i_pImage + CPMR_HOMER_OFFSET );
-    l_pScom             =   ( ScomEntry_t * )( (uint8_t *) i_pImage + i_pScomDat->iv_subRegionBaseOffset );
+    ScomEntry_t * l_pScom   =   NULL;
+    uint32_t l_tempVal      =   0;
+    l_pScom = ( ScomEntry_t * )( (uint8_t *) i_pImage + i_pScomDat->iv_subRegionBaseOffset );
+
     switch( i_operation )
     {
         case PROC_STOP_SCOM_OR_APPEND:
@@ -1039,27 +1056,30 @@ STATIC StopReturnCode_t updateScomEntry( void * i_pImage, uint32_t i_scomAddr,
 
             if( i_pScomDat->iv_entryLimit > i_pScomDat->iv_lastEntryOffset )
             {
-                l_pScom->iv_scomAddress    &= ~(SWIZZLE_LAST_SCOM_ENTRY);
-                l_pScom++;  // takes us to offset stored in iv_entryOffset
+                if( !i_pScomDat->iv_firstScomEntry )
+                {
+                    l_tempVal	=	SWIZZLE_4_BYTE( l_pScom->iv_scomAddress);
+                    l_tempVal  &=   ~(0x40000000);
+                    l_pScom->iv_scomAddress = SWIZZLE_4_BYTE(l_tempVal);
+                    l_pScom++;  // takes us to offset stored in iv_entryOffset
+                }
+
                 l_pScom->iv_scomAddress     =   i_scomAddr & SCOM_ADDR_MASK;
                 l_pScom->iv_scomAddress    |=  (SCOM_ENTRY_VALID | LAST_SCOM_ENTRY | SCOM_ENTRY_VER);
 
                 if( PROC_STOP_SECTION_CORE == i_sectn )
                 {
-                    l_maxScomEntry              =   SWIZZLE_4_BYTE(l_pCpmrHdr->iv_maxCoreL2ScomEntry);
                     l_pScom->iv_scomAddress    |=   CORE_SECTION_ID_CODE;
                 }
                 else
                 {
-                    l_maxScomEntry              =   SWIZZLE_4_BYTE(l_pCpmrHdr->iv_maxEqL3ScomEntry);
                     l_pScom->iv_scomAddress    |=   L3_SECTION_ID_CODE;
                 }
 
-                l_pScom->iv_scomAddress    |=   ( l_maxScomEntry << MAX_SCOM_ENTRY_POS );
                 l_pScom->iv_scomAddress     =   SWIZZLE_4_BYTE(l_pScom->iv_scomAddress);
                 l_pScom->iv_scomData        =   SWIZZLE_8_BYTE(i_scomData);
 
-                MY_INF( "SCOM Data 0x%08x", SWIZZLE_4_BYTE(l_pScom->iv_scomAddress) );
+                MY_INF( "SCOM Address 0x%08x", SWIZZLE_4_BYTE(l_pScom->iv_scomAddress) );
             }
             else
             {
@@ -1069,6 +1089,7 @@ STATIC StopReturnCode_t updateScomEntry( void * i_pImage, uint32_t i_scomAddr,
             }
 
             break;
+
             default:
             break;
     }

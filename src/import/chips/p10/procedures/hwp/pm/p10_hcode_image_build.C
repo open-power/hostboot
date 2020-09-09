@@ -74,6 +74,11 @@ enum
     INST_RING_OFFSET    =   2,
     OVRD_RING_OFFSET    =   0x44,
     EXT_MEM_ADDR        =   0x80000000,
+    QME_VER_BASE        =   0x00,
+    BLK_SIZE_32B        =   32,
+    QME_SRAM_OPT_VER    =   0x514d455f5f312e31ull,
+    QME_SRAM_MAGIC_WORD =   0x514d455f5f312e30ull,
+    QME_VER_BASE_ASCII  =   0x514d455f5f312e30ull,
 };
 
 /**
@@ -192,6 +197,7 @@ class ImageBuildRecord
         iv_maxSizeList["QME Inst Sectn"]    =   QME_INST_RING_SIZE;
         iv_maxSizeList["QME Meta Data"]     =   QME_HCODE_SIZE;
         iv_maxSizeList["QME SRAM Size"]     =   QME_SRAM_SIZE;
+        iv_maxSizeList["QME SCOM Restore"]  =   SCOM_RESTORE_SIZE_PER_CORE;
         iv_maxSizeList["SELF BIN"]          =   SMF_THREAD_LAUNCHER_SIZE;
         iv_maxSizeList["SELF"]              =   SELF_SAVE_RESTORE_REGION_SIZE;
         iv_maxSizeList["PPMR Header"]       =   PPMR_HEADER_SIZE;
@@ -277,6 +283,16 @@ class ImageBuildRecord
      */
     void setCurrentSectn( const char * i_sectn ) { memcpy( iv_currentSectn, i_sectn, ( strlen(i_sectn) + 1 ) ); }
 
+    /**
+     * @brief returns QME Image version.
+     */
+    uint32_t getPpeImageVer() { return iv_ppeImageVer; }
+
+    /**
+     * @brief inits QME Image version.
+     */
+    void setPpeImageVer( uint32_t i_ppeImgVer ) { iv_ppeImageVer = i_ppeImgVer; }
+
     private:
     std::vector< ImgSectnSumm > iv_sectnList;
     uint8_t * iv_homerBufPtr;
@@ -285,6 +301,7 @@ class ImageBuildRecord
     uint8_t   iv_platName[PLAT_NAME_SIZE];
     uint8_t   iv_currentSectn[TEMP_ARRAY_SIZE];
     std::map< const char *, uint32_t>  iv_maxSizeList;
+    uint32_t  iv_ppeImageVer;
 };
 
 //--------------------------------------------------------------------------------------------------------
@@ -1179,7 +1196,6 @@ fapi2::ReturnCode buildQmeSpecificRing( CONST_FAPI2_PROC& i_procTgt, Homerlayout
         l_currentIndex  =  l_instSpecbase + (l_superChiplet*l_instSpecLength);
         memcpy( &i_pChipHomer->iv_cpmrRegion.iv_qmeSramRegion[l_currentIndex],
             i_ringData.iv_pWorkBuf1, l_workBufSize );
-
     }
 
     i_qmeBuildRecord.setSection( "QME Inst Sectn", l_instRingOffset, l_instSpecLength );
@@ -1211,6 +1227,7 @@ fapi2::ReturnCode buildQmeImage( void* const i_pImageIn, Homerlayout_t* i_pChipH
     //Let us find XIP Header for QME Image
     P9XipSection ppeSection;
     uint8_t* pQmeImg = NULL;
+    uint64_t l_imgVer   =   0;
 
     if( i_imgType.qmeHcodeBuild )
     {
@@ -1226,7 +1243,6 @@ fapi2::ReturnCode buildQmeImage( void* const i_pImageIn, Homerlayout_t* i_pChipH
         pQmeImg = ppeSection.iv_offset + (uint8_t*) (i_pImageIn );
         FAPI_DBG("ppeSection.iv_offset = 0x%08X, ppeSection.iv_size = 0x%08X",
                  ppeSection.iv_offset, ppeSection.iv_size);
-
 
         memset(i_pChipHomer->iv_cpmrRegion.iv_qmeSramRegion, 0x00, QME_REGION_SIZE);
 
@@ -1245,9 +1261,30 @@ fapi2::ReturnCode buildQmeImage( void* const i_pImageIn, Homerlayout_t* i_pChipH
                      .set_ACTUAL_SIZE( ppeSection.iv_size ),
                      "Failed to find QME Hcode in QME XIP Image" );
 
+        //Rounding QME hcode size to a multiple of 32B
+        ppeSection.iv_size  =   ( ((ppeSection.iv_size  + BLK_SIZE_32B  - 1 ) >> SHIFT_RD_BLOCK_SIZE ) << SHIFT_RD_BLOCK_SIZE );
+
         i_imageRecord.setSection( "QME Hcode",
                                   ( &i_pChipHomer->iv_cpmrRegion.iv_qmeSramRegion[0] - (uint8_t *)&i_pChipHomer->iv_cpmrRegion ),
                                    ppeSection.iv_size );
+
+        QmeHeader_t* pImgHdr        =
+            (QmeHeader_t*) & i_pChipHomer->iv_cpmrRegion.iv_qmeSramRegion[QME_INT_VECTOR_SIZE];
+        l_imgVer    =   htobe64( pImgHdr->g_qme_magic_number );
+
+        FAPI_DBG( "Magic Word End 0x%016lx", l_imgVer );
+
+        if( ( 0 == l_imgVer ) || ( QME_VER_BASE_ASCII == l_imgVer ))
+        {
+           l_imgVer = 0;
+        }
+        else
+        {
+               l_imgVer    =   l_imgVer - QME_VER_BASE_ASCII;
+        }
+        FAPI_DBG( "QME SRAM Image Ver 0x%016lx", l_imgVer );
+        i_imageRecord.setPpeImageVer( l_imgVer );
+
     }   //i_imgType.qmeHcodeBuild
 
 fapi_try_exit:
@@ -1354,6 +1391,11 @@ fapi2::ReturnCode buildQmeRing( CONST_FAPI2_PROC& i_procTgt, void * const i_pIma
     memcpy( &i_pChipHomer->iv_cpmrRegion.iv_qmeSramRegion[l_qmeSectn.iv_sectnLength],
             i_ringData.iv_pWorkBuf1, l_workBufSize );
 
+    if( ! i_ringData.iv_pOverride )
+    {
+        l_workBufSize = ( (( l_workBufSize + 31 ) >> 5 ) << 5 );
+    }
+
     i_qmeBuildRecord.setSection( "QME Common Ring",
                               ( &i_pChipHomer->iv_cpmrRegion.iv_qmeSramRegion[l_qmeSectn.iv_sectnLength] - (uint8_t *)&i_pChipHomer->iv_cpmrRegion ),
                                 l_workBufSize );
@@ -1427,13 +1469,47 @@ fapi2::ReturnCode buildQmeHeader( CONST_FAPI2_PROC& i_procTgt, Homerlayout_t   *
         }
     }
 
-    if( !i_qmeBuildRecord.getSection( "QME Inst Sectn", l_imgSectn ) )
+    if( i_qmeBuildRecord.getPpeImageVer() > QME_VER_BASE )
     {
-        pImgHdr->g_qme_inst_spec_ring_offset    =
-                    ( pImgHdr->g_qme_common_ring_offset + pImgHdr->g_qme_common_ring_length );
-        pImgHdr->g_qme_inst_spec_ring_offset    =    ((( pImgHdr->g_qme_inst_spec_ring_offset  + 31 )/32) * 32);
-        pImgHdr->g_qme_max_spec_ring_length     =   l_imgSectn.iv_sectnLength;
+        if( !i_qmeBuildRecord.getSection( "QME Inst Sectn", l_imgSectn ) )
+        {
+            //Instance ring too points to begining of temp buffer which is at 32B boundary.
+            pImgHdr->g_qme_inst_spec_ring_offset    =    pImgHdr->g_qme_common_ring_offset;
+            pImgHdr->g_qme_max_spec_ring_length     =   l_imgSectn.iv_sectnLength;
+        }
     }
+    else
+    {
+        if( !i_qmeBuildRecord.getSection( "QME Inst Sectn", l_imgSectn ) )
+        {
+            pImgHdr->g_qme_inst_spec_ring_offset    =
+                        ( pImgHdr->g_qme_common_ring_offset + pImgHdr->g_qme_common_ring_length );
+            pImgHdr->g_qme_inst_spec_ring_offset    =    ((( pImgHdr->g_qme_inst_spec_ring_offset  + 31 )/32) * 32);
+            pImgHdr->g_qme_max_spec_ring_length     =   l_imgSectn.iv_sectnLength;
+        }
+    }
+
+    pImgHdr->g_qme_coreL2ScomLength = ( (MAX_CORE_SCOM_ENTRIES + MAX_L2_SCOM_ENTRIES) * SCOM_RESTORE_ENTRY_SIZE );
+    pImgHdr->g_qme_coreL2ScomLength = pImgHdr->g_qme_coreL2ScomLength * MAX_CORES_PER_QUAD;
+    pImgHdr->g_qme_L3ScomLength     = ( (MAX_EQ_SCOM_ENTRIES + MAX_L3_SCOM_ENTRIES) * SCOM_RESTORE_ENTRY_SIZE );
+    pImgHdr->g_qme_L3ScomLength     = pImgHdr->g_qme_L3ScomLength * MAX_CORES_PER_QUAD;
+
+    if( i_qmeBuildRecord.getPpeImageVer() > QME_VER_BASE )
+    {
+        //If BCE based paging is supported, pick bigger between core-l2 Scom and
+        //l3 scom
+        pImgHdr->g_qme_scom_offset  =   pImgHdr->g_qme_common_ring_offset;
+        pImgHdr->g_qme_scom_length  =   SCOM_RESTORE_SIZE_PER_QME;
+
+    }
+    else
+    {
+        //Offset and length a multiple of 32B
+        pImgHdr->g_qme_scom_offset  =   pImgHdr->g_qme_inst_spec_ring_offset + pImgHdr->g_qme_max_spec_ring_length;
+        pImgHdr->g_qme_scom_length  =   0; //Scom Restore not supported
+    }
+
+    i_qmeBuildRecord.setSection( "QME SCOM Restore", pImgHdr->g_qme_scom_offset, pImgHdr->g_qme_scom_length );
 
 #ifndef __HOSTBOOT_MODULE
    pImgHdr->g_qme_common_ring_offset    =   htobe32(pImgHdr->g_qme_common_ring_offset);
@@ -1441,6 +1517,10 @@ fapi2::ReturnCode buildQmeHeader( CONST_FAPI2_PROC& i_procTgt, Homerlayout_t   *
    pImgHdr->g_qme_inst_spec_ring_offset =   htobe32(pImgHdr->g_qme_inst_spec_ring_offset);
    pImgHdr->g_qme_max_spec_ring_length  =   htobe32(pImgHdr->g_qme_max_spec_ring_length);
    pImgHdr->g_qme_cmn_ring_ovrd_offset  =   htobe32(pImgHdr->g_qme_cmn_ring_ovrd_offset);
+   pImgHdr->g_qme_scom_offset           =   htobe32(pImgHdr->g_qme_scom_offset);
+   pImgHdr->g_qme_scom_length           =   htobe32(pImgHdr->g_qme_scom_length);
+   pImgHdr->g_qme_coreL2ScomLength      =   htobe32(pImgHdr->g_qme_coreL2ScomLength);
+   pImgHdr->g_qme_L3ScomLength          =   htobe32(pImgHdr->g_qme_L3ScomLength);
 
    FAPI_DBG( "===================== QME Ring Header ============================== " );
    FAPI_DBG( "Common Ring Offset        0x%08x" , htobe32(pImgHdr->g_qme_common_ring_offset));
@@ -1448,6 +1528,8 @@ fapi2::ReturnCode buildQmeHeader( CONST_FAPI2_PROC& i_procTgt, Homerlayout_t   *
    FAPI_DBG( "Override Ring Offset      0x%08x" , htobe32(pImgHdr->g_qme_cmn_ring_ovrd_offset));
    FAPI_DBG( "Instance Ring Offset      0x%08x" , htobe32(pImgHdr->g_qme_inst_spec_ring_offset));
    FAPI_DBG( "Instance Ring Length      0x%08x" , htobe32(pImgHdr->g_qme_max_spec_ring_length));
+   FAPI_DBG( "SCOM Offset               0x%08x" , htobe32(pImgHdr->g_qme_scom_offset));
+   FAPI_DBG( "SCOM Length               0x%08x" , htobe32(pImgHdr->g_qme_scom_length));
 
    FAPI_DBG( "===================== QME Ring Header Ends ========================= " );
 #endif
@@ -1597,7 +1679,7 @@ fapi2::ReturnCode   buildScomHeader( CONST_FAPI2_PROC& i_procTgt, Homerlayout_t 
     for( auto eq : eqList )
     {
         FAPI_TRY(FAPI_ATTR_GET( fapi2::ATTR_CHIP_UNIT_POS, eq, l_eqPos ));
-        l_offset    =   (l_eqPos * l_eqScomRegionSize * SCOM_RESTORE_ENTRY_SIZE) ;   //Header at the start of an EQ SCOM region
+        l_offset    =   ( MAX_CORES_PER_QUAD * l_eqPos * l_eqScomRegionSize * SCOM_RESTORE_ENTRY_SIZE) ;   //Header at the start of an EQ SCOM region
         l_pScomHdr  =   (ScomRestoreHeader_t *)&i_pChipHomer->iv_cpmrRegion.
                                                 iv_selfRestoreRegion.iv_coreScom[l_offset];
 
@@ -1698,6 +1780,13 @@ fapi2::ReturnCode buildCpmrHeader( CONST_FAPI2_PROC& i_procTgt, Homerlayout_t   
         pCpmrHdr->iv_specRingLength     =   htobe32( l_imgSectn.iv_sectnLength );
     }
 
+    if( !i_qmeBuildRecord.getSection( "QME SCOM Restore" , l_imgSectn ) )
+    {
+         pCpmrHdr->iv_scomRestoreOffset  =   htobe32( l_imgSectn.iv_sectnOffset );
+         pCpmrHdr->iv_scomRestoreLength  =   MAX_QUADS_PER_CHIP * l_imgSectn.iv_sectnLength;
+         pCpmrHdr->iv_scomRestoreLength  =   htobe32( pCpmrHdr->iv_scomRestoreLength );
+    }
+
     i_qmeBuildRecord.dumpBuildRecord();
 
     FAPI_TRY( buildScomHeader( i_procTgt, i_pChipHomer ) );
@@ -1711,6 +1800,9 @@ fapi2::ReturnCode buildCpmrHeader( CONST_FAPI2_PROC& i_procTgt, Homerlayout_t   
     FAPI_INF( "Core Common Ring Length      0x%08x",  htobe32( pCpmrHdr->iv_commonRingLength ));
     FAPI_INF( "Core Spec Ring Offset        0x%08x",  htobe32( pCpmrHdr->iv_specRingOffset ));
     FAPI_INF( "Core Spec Ring Length        0x%08x",  htobe32( pCpmrHdr->iv_specRingLength ));
+    FAPI_INF( "SCOM Restore Offset          0x%08x",  htobe32( pCpmrHdr->iv_scomRestoreOffset ));
+    FAPI_INF( "SCOM Restore Length          0x%08x",  htobe32( pCpmrHdr->iv_scomRestoreLength ));
+
 #endif
 
  fapi_try_exit:
@@ -1747,8 +1839,13 @@ fapi2::ReturnCode initCpmrAttribute( Homerlayout_t   *i_pChipHomer,
 
     i_qmeBuildRecord.getSection( "QME Hcode", l_imgSectn );
     l_tempCount     =   l_imgSectn.iv_sectnLength;
-    i_qmeBuildRecord.getSection( "QME Common Ring", l_imgSectn );
-    l_tempCount    +=   l_imgSectn.iv_sectnLength;
+
+    if( QME_VER_BASE == i_qmeBuildRecord.getPpeImageVer() )
+    {
+        i_qmeBuildRecord.getSection( "QME Common Ring", l_imgSectn );
+        l_tempCount    +=   l_imgSectn.iv_sectnLength;
+    }
+
     l_blockCount    =   (( l_tempCount + BCE_RD_BLOCK_SIZE - 1 ) >>  SHIFT_RD_BLOCK_SIZE );
 
     FAPI_TRY(FAPI_ATTR_SET( fapi2::ATTR_QME_HCODE_BLOCK_COUNT,
@@ -1778,7 +1875,7 @@ fapi2::ReturnCode populateMagicWord( Homerlayout_t   *i_pChipHomer )
     CpmrHeader_t* pCpmrHdr      =
         (CpmrHeader_t*) & ( i_pChipHomer->iv_cpmrRegion.iv_selfRestoreRegion.iv_CPMR_SR.elements.iv_CPMRHeader);
     QmeHeader_t* pQmeImgHdr     =
-            (QmeHeader_t*) & i_pChipHomer->iv_cpmrRegion.iv_qmeSramRegion[QME_INT_VECTOR_SIZE];
+        (QmeHeader_t*) & i_pChipHomer->iv_cpmrRegion.iv_qmeSramRegion[QME_INT_VECTOR_SIZE];
     PgpeHeader_t * pPgpeHeader   =
             ( PgpeHeader_t *) &i_pChipHomer->iv_ppmrRegion.iv_pgpeSramRegion[PGPE_INT_VECTOR_SIZE];
     PpmrHeader_t * l_pPpmrHdr   =
@@ -1789,7 +1886,13 @@ fapi2::ReturnCode populateMagicWord( Homerlayout_t   *i_pChipHomer )
             ( XgpeHeader_t *) &i_pChipHomer->iv_xpmrRegion.iv_xgpeSramRegion[XGPE_INT_VECTOR_SIZE];
 
     pCpmrHdr->iv_cpmrMagicWord      =   htobe64(CPMR_MAGIC_NUMBER);
-    pQmeImgHdr->g_qme_magic_number  =   htobe64(QME_MAGIC_NUMBER);
+
+    if( pQmeImgHdr->g_qme_magic_number != htobe64(QME_SRAM_OPT_VER ))
+    {
+        pQmeImgHdr->g_qme_magic_number  =   htobe64(QME_SRAM_MAGIC_WORD);
+    }
+    //QME image header magic word will come from hw image. This is for
+    //managing compatibility between hw image and hcode image build.
     l_pPpmrHdr->iv_ppmrMagicWord    =   htobe64(PPMR_MAGIC_NUMBER);
     pPgpeHeader->g_pgpe_magicWord   =   htobe64(PGPE_MAGIC_NUMBER);
     l_pXpmrHdr->iv_xpmrMagicWord    =   htobe64(XPMR_MAGIC_NUMBER);
@@ -2269,12 +2372,16 @@ fapi_try_exit:
 fapi2::ReturnCode verifySramImageSize( Homerlayout_t * i_pChipHomer, P10FuncModel & i_chipFuncModel )
 {
     uint32_t l_imageSize    =   0;
+    uint32_t l_tempSize     =   0;
+    uint32_t l_bceBufSize   =   0;
     XpmrHeader_t * l_pXpmrHdr   =
             (XpmrHeader_t *) i_pChipHomer->iv_xpmrRegion.iv_xpmrHeader;
     CpmrHeader_t* pCpmrHdr      =
         (CpmrHeader_t*) & ( i_pChipHomer->iv_cpmrRegion.iv_selfRestoreRegion.iv_CPMR_SR.elements.iv_CPMRHeader);
     PpmrHeader_t * l_pPpmrHdr   =
             (PpmrHeader_t *) i_pChipHomer->iv_ppmrRegion.iv_ppmrHeader;
+    QmeHeader_t* pImgHdr        =
+            (QmeHeader_t*) & i_pChipHomer->iv_cpmrRegion.iv_qmeSramRegion[QME_INT_VECTOR_SIZE];
 
     l_imageSize     =   htobe32 (l_pXpmrHdr->iv_xgpeSramSize );
 
@@ -2288,16 +2395,56 @@ fapi2::ReturnCode verifySramImageSize( Homerlayout_t * i_pChipHomer, P10FuncMode
 
     FAPI_INF( "----- XGPE Image Check Success -----" );
 
-    l_imageSize =   htobe32( pCpmrHdr->iv_qmeImgLength ) + htobe32( pCpmrHdr->iv_commonRingLength ) +
-                    htobe32( pCpmrHdr->iv_localPstateLength ) + htobe32 (pCpmrHdr->iv_specRingLength );
+    if ( htobe64( pImgHdr->g_qme_magic_number ) == QME_SRAM_MAGIC_WORD )
+    {
+        l_imageSize =   htobe32( pCpmrHdr->iv_qmeImgLength ) +
+                        htobe32( pCpmrHdr->iv_commonRingLength ) +
+                        htobe32( pCpmrHdr->iv_localPstateLength ) +
+                        htobe32( pCpmrHdr->iv_specRingLength ) +
+                        htobe32( pImgHdr->g_qme_scom_length );
 
-    FAPI_ASSERT( ( l_imageSize <= QME_SRAM_SIZE ),
-                 fapi2::QME_IMG_EXCEED_SRAM_SIZE()
-                 .set_BAD_IMG_SIZE( l_imageSize )
-                 .set_MAX_QME_IMG_SIZE_ALLOWED( QME_SRAM_SIZE )
-                 .set_EC_LEVEL( i_chipFuncModel.getChipLevel() ),
-                 "QME Image Size Check Failed Actual 0x%08x Max Allowed 0x%08x",
-                 l_imageSize, QME_SRAM_SIZE );
+        FAPI_ASSERT( ( l_imageSize <= QME_SRAM_SIZE ),
+                     fapi2::QME_IMG_EXCEED_SRAM_SIZE()
+                     .set_BAD_IMG_SIZE( l_imageSize )
+                     .set_QME_HCODE_SIZE( htobe32( pCpmrHdr->iv_qmeImgLength ) )
+                     .set_CMN_RING_SIZE( htobe32( pCpmrHdr->iv_commonRingLength ) )
+                     .set_INST_RING_SIZE( htobe32( pCpmrHdr->iv_specRingLength) )
+                     .set_MAX_QME_IMG_SIZE_ALLOWED( QME_SRAM_SIZE )
+                     .set_EC_LEVEL( i_chipFuncModel.getChipLevel() ),
+                     "QME Image Size Check Failed Actual 0x%08x Max Allowed 0x%08x",
+                     l_imageSize, QME_SRAM_SIZE );
+
+    }
+    else
+    {
+        l_bceBufSize   =  QME_SRAM_SIZE - htobe32( pCpmrHdr->iv_qmeImgLength );
+
+        l_tempSize     =  htobe32( pCpmrHdr->iv_commonRingLength );
+
+        if( l_tempSize < htobe32( pCpmrHdr->iv_specRingLength) )
+        {
+            l_tempSize = htobe32( pCpmrHdr->iv_specRingLength);
+        }
+
+        if( l_tempSize <  htobe32( pImgHdr->g_qme_coreL2ScomLength ) )
+        {
+            l_tempSize = htobe32( pImgHdr->g_qme_coreL2ScomLength );
+        }
+
+        if( l_tempSize <  htobe32( pImgHdr->g_qme_L3ScomLength ) )
+        {
+            l_tempSize = htobe32( pImgHdr->g_qme_L3ScomLength );
+        }
+
+        FAPI_ASSERT( ( l_bceBufSize >= l_tempSize ),
+                     fapi2::BCE_BUF_SMALLER_FOR_NON_HCODE_SECTION()
+                     .set_BCE_BUF_SIZE( l_bceBufSize )
+                     .set_QME_HCODE_SIZE( htobe32( pCpmrHdr->iv_qmeImgLength ) )
+                     .set_CMN_RING_SIZE( htobe32( pCpmrHdr->iv_commonRingLength ) )
+                     .set_INST_RING_SIZE( htobe32( pCpmrHdr->iv_specRingLength ) ),
+                     "BCE Buffer cannot contain all non-hcode sections of QME image BCE Buf 0x%08x Max Non Hcode Sectn 0x%08x",
+                     l_bceBufSize, l_tempSize );
+    }
 
     FAPI_INF( "----- QME Image Check Success  -----" );
 
@@ -2585,6 +2732,83 @@ fapi_try_exit:
      return fapi2::current_err;
 }
 
+fapi2::ReturnCode verifyScomRestore( CONST_FAPI2_PROC& i_procTgt, void* i_pHomerImage )
+{
+    #ifdef __VERIFY_SCOM_RESTORE
+    stopImageSection::StopReturnCode_t  l_retCode;
+    uint8_t l_corePos = 0;
+
+    uint32_t l2_fir_mask[MAX_CORES_PER_CHIP] = { 0x20028003, 0x20024003, 0x20022003, 0x20021003,
+                                            0x21028003, 0x21024003, 0x21022003, 0x21021003,
+                                            0x22028003, 0x22024003, 0x22022003, 0x22021003,
+                                            0x23028003, 0x23024003, 0x23022003, 0x23021003,
+                                            0x24028003, 0x24024003, 0x24022003, 0x24021003,
+                                            0x25028003, 0x25024003, 0x25022003, 0x25021003,
+                                            0x26028003, 0x26024003, 0x26022003, 0x26021003,
+                                            0x27028003, 0x27024003, 0x27022003, 0x27021003 };
+
+    uint32_t l3_fir_mask[MAX_CORES_PER_CHIP] = { 0x20018603, 0x20014603, 0x20012603, 0x20011603,
+                                            0x21018603, 0x21014603, 0x21012603, 0x21011603,
+                                            0x22018603, 0x22014603, 0x22012603, 0x22011603,
+                                            0x23018603, 0x23014603, 0x23012603, 0x23011603,
+                                            0x24018603, 0x24014603, 0x24012603, 0x24011603,
+                                            0x25018603, 0x25014603, 0x25012603, 0x25011603,
+                                            0x26018603, 0x26014603, 0x26012603, 0x26011603,
+                                            0x27018603, 0x27014603, 0x27012603, 0x27011603  };
+
+    uint32_t core_fir_mask[MAX_CORES_PER_CHIP] = { 0x20028443, 0x20024443, 0x20022443, 0x20021443,
+                                            0x21028443, 0x21024443, 0x21022443, 0x21021443,
+                                            0x22028443, 0x22024443, 0x22022443, 0x22021443,
+                                            0x23028443, 0x23024443, 0x23022443, 0x23021443,
+                                            0x24028443, 0x24024443, 0x24022443, 0x24021443,
+                                            0x25028443, 0x25024443, 0x25022443, 0x25021443,
+                                            0x26028443, 0x26024443, 0x26022443, 0x26021443,
+                                            0x27028443, 0x27024443, 0x27022443, 0x27021443
+                                            };
+    auto coreList = i_procTgt.getChildren< fapi2::TARGET_TYPE_CORE >();
+
+    for( auto core : coreList )
+    {
+        FAPI_TRY(FAPI_ATTR_GET( fapi2::ATTR_CHIP_UNIT_POS, core, l_corePos ));
+        l_retCode  = stopImageSection::proc_stop_save_scom( i_pHomerImage,
+                                    (l2_fir_mask[l_corePos]),
+                                                                0xaabbccddeeffaabbull,
+                                    stopImageSection::PROC_STOP_SCOM_APPEND,
+                                    stopImageSection::PROC_STOP_SECTION_CORE );
+
+        if( l_retCode )
+        {
+            FAPI_ERR( "proc_stop_save_scom Sectn Core-L2 Err 0x%08x", (uint32_t) l_retCode );
+        }
+
+        l_retCode  = stopImageSection::proc_stop_save_scom( i_pHomerImage,
+                                    (core_fir_mask[l_corePos]),
+                                                                0xaabbccddeeffaabbull,
+                                    stopImageSection::PROC_STOP_SCOM_APPEND,
+                                    stopImageSection::PROC_STOP_SECTION_CORE );
+
+        if( l_retCode )
+        {
+            FAPI_ERR( "proc_stop_save_scom Sectn Core Err 0x%08x", (uint32_t) l_retCode );
+        }
+
+        l_retCode  = stopImageSection::proc_stop_save_scom( i_pHomerImage,
+                                    (l3_fir_mask[l_corePos]),
+                                    0xaabbccddeeffaabbull,
+                                                                stopImageSection::PROC_STOP_SCOM_APPEND,
+                                    stopImageSection::PROC_STOP_SECTION_L3 );
+
+        if( l_retCode )
+        {
+            FAPI_ERR( "proc_stop_save_scom Sectn L3 Err 0x%08x", (uint32_t) l_retCode );
+        }
+    }
+
+    fapi_try_exit:
+    #endif
+        return fapi2::current_err;
+}
+
 //-------------------------------------------------------------------------------------------------------
 
 fapi2::ReturnCode p10_hcode_image_build(    CONST_FAPI2_PROC& i_procTgt,
@@ -2666,6 +2890,9 @@ fapi2::ReturnCode p10_hcode_image_build(    CONST_FAPI2_PROC& i_procTgt,
               "Image Size Check Failed " );
     FAPI_TRY( traceRs4ContainerSize( pChipHomer ),
         "Failed To Trace RS4 Size" );
+
+    FAPI_TRY( verifyScomRestore( i_procTgt, i_pHomerImage ),
+              "Failed To Create SCOM Restore Entry" );
 
 fapi_try_exit:
     FAPI_IMP("<< p10_hcode_image_build" );
