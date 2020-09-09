@@ -12785,7 +12785,7 @@
     <attribute><!-- Force a FSP-only code path -->
         <id>FOUND_PRESENT_BY_SP</id>
         <default>MISSING</default>
-    </attribute> 
+    </attribute>
     <attribute>
         <id>HUID</id>
         <default>0x004B0008</default>
@@ -13176,7 +13176,7 @@
     </attribute>
     <attribute>
         <id>FAPI_POS</id>
-        <default>16</default>
+        <default>15</default>
     </attribute>
     <attribute>
         <id>HUID</id>

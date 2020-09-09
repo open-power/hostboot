@@ -47,5 +47,6 @@ TESTS += sbe_fifo_buffer_test.H
 #TESTS += sbe_retry_handler_test.H
 TESTS += sbe_memregiontest.H
 TESTS += sbe_psucommandstest.H
+TESTS += sbe_psuSendOcmbConfigTest.H
 
 include ${ROOTPATH}/config.mk
