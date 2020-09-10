@@ -151,8 +151,8 @@
 #define IDDQ_MEASUREMENTS     6
 #define MEASUREMENT_ELEMENTS  4    // Number of groups measured
 #define IDDQ_READINGS_PER_IQ  2
-#define IDDQ_ARRAY_VOLTAGES     { 0.50, 0.60 ,  0.70 ,  0.80 ,  0.90 ,  1.00}
-#define IDDQ_ARRAY_VOLTAGES_STR {"0,50" "0.60", "0.70", "0.80", "0.90", "1.00"}
+#define IDDQ_ARRAY_VOLTAGES     { 0.50    0.60 ,  0.70 ,  0.80 ,  0.90 ,  1.00}
+#define IDDQ_ARRAY_VOLTAGES_STR {"0.50", "0.60", "0.70", "0.80", "0.90", "1.00"}
 
 /// VPD #W Data from keyword (eg VPD order)
 #define NUM_JUMP_VALUES 4

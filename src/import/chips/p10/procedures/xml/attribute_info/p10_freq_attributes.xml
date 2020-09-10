@@ -115,6 +115,7 @@
   </description>
   <valueType>uint32</valueType>
   <platInit/>
+  <writeable/>
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>

@@ -195,6 +195,17 @@ typedef struct
     // Altitude base (in meters))
     uint32_t            altitude_reference_m;
 
+    // Ceiling Frequency - Maximum operable frequency for a system that
+    // has limitations that are independent from Pstates.
+    // If 0, frequency_max_khz is the maximum frequency;
+    // If non-zero, this frequency should be translated to the Pstate space
+    //    so as to be the lowest Pstate (which is the highest frequency)
+    //    to which the system is clipped.
+    uint32_t            frequency_ceiling_khz;
+
+    // Pad to make the structure an even 1KB
+    uint8_t             pad[36];
+
 } OCCPstateParmBlock_t ;
 
 #ifdef __cplusplus

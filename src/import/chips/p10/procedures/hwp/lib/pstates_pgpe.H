@@ -386,7 +386,7 @@ typedef struct
     uint32_t            dpll_pstate0_value;  // @todo why this and reference_frequency_khz?
 
     /// VPD operating points are biased but without load-line correction.
-    // Frequencies are in MHz, voltages are specified in units of 1mV, currents
+    /// Frequencies are in MHz, voltages are specified in units of 1mV, currents
     /// are specified in units of 10mA, and temperatures are specified in 0.5
     /// degrees C.
     PoundVOpPoint_t     operating_points_set[NUM_VPD_PTS_SET][NUM_PV_POINTS];
@@ -470,6 +470,7 @@ typedef struct
     //WOV overvolting max percentage(in 0.1%, tenths of percent)
     uint8_t wov_overv_max_pct;
 
+    //Voltage at which the Retention VRM enters bypass due it's regulation deadzone
     uint8_t rvrm_deadzone_mv;
 
     //Determine how often to call the wov algorithm with respect
@@ -488,7 +489,13 @@ typedef struct
     //The minimum value of VCS
     uint16_t vcs_floor_mv;
 
-    uint32_t pad1; //Padding
+    // Ceiling Frequency - Maximum operable frequency for a system that
+    // has limitations that are independent from Pstates.
+    // If 0, reference_frequency_khz is the maximum frequency;
+    // If non-zero, this frequency should be translated to the Pstate space
+    //    so as to be the lowest Pstate (which is the highest frequency)
+    //    to which the system is clipped.
+    uint32_t frequency_ceiling_khz;
 
     /// #W Alternate Calibration Data
     PoundWEntry_AltCal_t    dds_alt_cal[MAXIMUM_CORES][NUM_PV_POINTS];
@@ -497,7 +504,7 @@ typedef struct
     PoundWEntry_TgtActBin_t dds_tgt_act_bin[MAXIMUM_CORES][NUM_PV_POINTS];
 
     /// #W Other (DDS Data)
-    PoundWOther_t   dds_other;
+    PoundWOther_t           dds_other;
 
     /// #W VDD Calibration(DDS Data)
     vdd_calibration         vdd_cal[NUM_PV_POINTS];
