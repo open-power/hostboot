@@ -242,6 +242,13 @@ sub printTarget
         $target_id =~ s/_chip//g;
         $target_id =~ s/mem_port/memport/g;
     }
+    elsif ($target_TYPE eq "GENERIC_I2C_DEVICE")
+    {
+        # If target is of type GENERIC_I2C_DEVICE, then remove "_chip" and
+        # "generic_i2c_device" from target ID
+        $target_id =~ s/_chip//g;
+        $target_id =~ s/generic_i2c_device/generici2cdevice/g;
+    }
 
     print $fh "\t<id>" . $target_id . "</id>\n";
     if($self->getTargetType($target) eq 'unit-clk-slave')
@@ -887,7 +894,7 @@ sub getFapiName
     }
     elsif ($targetType eq "PROC"   || $targetType eq "DIMM" ||
            $targetType eq "MEMBUF" || $targetType eq "PMIC" ||
-           $targetType eq "OCMB_CHIP")
+           $targetType eq "OCMB_CHIP" || $targetType eq "GENERIC_I2C_DEVICE")
     {
         if ($node eq "" || $chipPos eq "")
         {
@@ -902,6 +909,10 @@ sub getFapiName
         elsif ($targetType eq "OCMB_CHIP")
         {
             $chipName = "ocmb";
+        }
+        elsif ($targetType eq "GENERIC_I2C_DEVICE")
+        {
+            $chipName = "generici2cslave";
         }
 
         $chipName = lc $chipName;

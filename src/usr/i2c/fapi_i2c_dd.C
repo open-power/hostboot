@@ -377,10 +377,9 @@ errlHndl_t i2cRead( TARGETING::Target * i_target,
     {
 
         TRACFCOMP(g_trac_i2c,
-            ERR_MRK"fapi i2cRead(): read failed on %d/%d/0x%X, offsetSize=%d "
-            "with eid 0x%x", i_i2cInfo->port,
-            i_i2cInfo->engine, i_i2cInfo->devAddr, i_offset_data_size,
-            l_err->eid());
+            ERR_MRK"fapi i2cRead(): read failed on e%d/p%d/devAddr=0x%X, offsetSize=%d "
+            "with eid 0x%x", i_i2cInfo->engine, i_i2cInfo->port,
+            i_i2cInfo->devAddr, i_offset_data_size, l_err->eid());
 
         // Printing mux info separately, if combined, nothing is displayed
         char* l_muxPath = i_i2cInfo->i2cMuxPath.toString();
@@ -427,9 +426,9 @@ errlHndl_t i2cWrite( TARGETING::Target * i_target,
     if( l_err )
     {
         TRACFCOMP(g_trac_i2c,
-            ERR_MRK"fapi i2cWrite(): write failed on %d/%d/0x%X, length %d "
-            "with eid 0x%x", i_i2cInfo->port,
-            i_i2cInfo->engine, i_i2cInfo->devAddr, io_buffer_size,
+            ERR_MRK"fapi i2cWrite(): write failed on e%d/p%d/devAddr=0x%X, length %d "
+            "with eid 0x%x", i_i2cInfo->engine, i_i2cInfo->port,
+            i_i2cInfo->devAddr, io_buffer_size,
             l_err->eid());
 
         // Printing mux info separately, if combined, nothing is displayed

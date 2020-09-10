@@ -446,6 +446,11 @@ errlHndl_t genericI2CDevicePresencePerformOp(DeviceFW::OperationType i_opType,
         {
             // If the parent chip is not present, then neither is the generic i2c device
             // so just break out and return not present
+            TRACSSCOMP( g_trac_i2c, ERR_MRK"genericI2CDevicePresencePerformOp() "
+                       "Tgt HUID 0x%.08X has non-present Parent HUID 0x%.08X",
+                        TARGETING::get_huid(i_target),
+                        TARGETING::get_huid(l_parentOcmb));
+
             break;
         }
 

@@ -1018,7 +1018,6 @@ errlHndl_t HWASDiscovery::discoverTargets()
 
         // After processing PMICs look at the Generic I2C Slaves
         errl = discoverGenericI2cDeviceTargetsAndEnable(*pSys);
-
         if (errl != NULL)
         {
             break; // break out of the do/while so that we can return
@@ -2539,9 +2538,10 @@ void deconfigPresentByAssoc(TargetInfo i_targInfo)
     {
         TargetHandle_t l_childTarget = *pChild_it;
         enableHwasState(l_childTarget, true, false, i_targInfo.reason);
-        HWAS_INF("deconfigPresentByAssoc: Target %.8X"
-                " marked present, not functional: reason %.x",
-                l_childTarget->getAttr<ATTR_HUID>(), i_targInfo.reason);
+        HWAS_INF("deconfigPresentByAssoc: Parent Target: %.8X: Child Target %.8X"
+                 " marked present, not functional: reason %.x",
+                 get_huid(i_targInfo.pThisTarget),
+                 get_huid(l_childTarget), i_targInfo.reason);
     }
 
     // find all CHILD_BY_AFFINITY matches for this target and deconfigure them
@@ -2555,14 +2555,15 @@ void deconfigPresentByAssoc(TargetInfo i_targInfo)
     {
         TargetHandle_t l_affinityTarget = *pChild_it;
         enableHwasState(l_affinityTarget,true,false, i_targInfo.reason);
-        HWAS_INF("deconfigPresentByAssoc: Target %.8X"
-                " marked present, not functional: reason %.x",
-                l_affinityTarget->getAttr<ATTR_HUID>(), i_targInfo.reason);
+        HWAS_INF("deconfigPresentByAssoc: Parent Target %.8X: Child Target by Affinity %.8X"
+                 " marked present, not functional: reason %.x",
+                 get_huid(i_targInfo.pThisTarget),
+                 get_huid(l_affinityTarget), i_targInfo.reason);
     }
 
     // deconfigure the target itself
     enableHwasState(i_targInfo.pThisTarget,true,false,i_targInfo.reason);
-    HWAS_INF("deconfigPresentByAssoc: Target %.8X"
+    HWAS_INF("deconfigPresentByAssoc: Target itself %.8X"
             " marked present, not functional, reason %.x",
             i_targInfo.pThisTarget->getAttr<ATTR_HUID>(), i_targInfo.reason);
 

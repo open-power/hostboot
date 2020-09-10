@@ -101,6 +101,8 @@ my %MAX_INST_PER_PARENT =
     OCMB_CHIP => 1, # Number of OCMB_CHIPs per OMI
     PMIC      => 4, # Number of PMICs per DIMM/logical OCMB.  Adjusted for future
                     # systems.  Meaning, the current system may not have this many.
+    GENERIC_I2C_DEVICE  => 4, # Number of GENERIC_I2C_DEVICEs per DIMM/logical OCMB.
+                              # Max of 4, but not all DIMMs will have these.
     MEM_PORT  => 1, # Number of MEM_PORTs per OCMB
     DIMM      => 1, # Number of DIMMs per MEM_PORT
 
@@ -158,6 +160,11 @@ my %MAX_INST_PER_PROC =
     PMIC       => getMaxInstPerParent("MC") * getMaxInstPerParent("MI") *
                   getMaxInstPerParent("MCC") * getMaxInstPerParent("OMI") *
                   getMaxInstPerParent("OCMB_CHIP") * getMaxInstPerParent("PMIC"),
+
+    GENERIC_I2C_DEVICE =>
+                  getMaxInstPerParent("MC") * getMaxInstPerParent("MI") *
+                  getMaxInstPerParent("MCC") * getMaxInstPerParent("OMI") *
+                  getMaxInstPerParent("OCMB_CHIP") * getMaxInstPerParent("GENERIC_I2C_DEVICE"),
 
     OMIC       => getMaxInstPerParent("MC") * getMaxInstPerParent("OMIC"),
 
@@ -254,6 +261,7 @@ sub main
         printHostbootTargetHierarchy($targetObj, $xmlFile);
         return 0;
     }
+
     # Print the full target hierarchy, ignore all other options
     elsif ($targetObj->{print_full_hierarchy} == 1)
     {
@@ -518,9 +526,10 @@ sub processTargets
                 processProcessorAndChildren($targetObj, $target);
             }
             elsif ( ($type eq "DIMM")   &&
-                    ($targetObj->getTargetType($target) eq "lcard-dimm-ddimm") )
+                    (($targetObj->getTargetType($target) eq "lcard-dimm-ddimm") ||
+                     ($targetObj->getTargetType($target) eq "lcard-dimm-ddimm4u")) )
             {
-                # The P10 children that get processed are PMIC, OCMB, MEM_PORT
+                # The P10 children that get processed are PMIC, OCMB, MEM_PORT, GENERIC_I2C_DEVICE
                 processDdimmAndChildren($targetObj, $target);
             }
             elsif ($type eq "BMC")
@@ -1127,7 +1136,8 @@ sub processProcessorAndChildren
 } # end sub processProcessorAndChildren
 
 #--------------------------------------------------
-# @brief Process targets of type DDIMM and it's children PMIC and OCMB
+# @brief Process targets of type DDIMM and it's children,
+#        like PMIC, GENERIC_I2C_DEVICE, and OCMB
 #
 # @pre SYS, NODE and PROC targets need to be processed beforehand
 #
@@ -1290,7 +1300,8 @@ sub processDdimmAndChildren
     # Mark this target as processed
     markTargetAsProcessed($targetObj, $target);
 
-    ## Process children PMIC and OCMB. Children may differ for different systems.
+    ## Process children PMIC, OCMB, and Generic I2C Devices (aka ADCs and GPIO Expanders).
+    # Children may differ for different systems.
     # Sanity check flag, to make sure that this code is still valid.
     my $foundPmic = false;
     my $foundOcmb = false;
@@ -1301,6 +1312,7 @@ sub processDdimmAndChildren
     {
         my $childTargetType = $targetObj->getTargetType($child);
         my $childType = $targetObj->getType($child);
+
         if ($childTargetType eq "chip-vreg-generic")
         {
             # Update TYPE to PMIC, because it is set to N/A and that won't fly
@@ -1312,6 +1324,13 @@ sub processDdimmAndChildren
         {
             processOcmbChipAndChildren($targetObj, $child, $dimmId, $dimmPosPerNode);
             $foundOcmb = true;
+        }
+        elsif (($childTargetType eq "chip-PCA9554") ||
+               ($childTargetType eq "chip-adc"))
+        {
+            # Update TYPE to GENERIC_I2C_DEVICE for all targets
+            $childType = $targetObj->setAttribute($child, "TYPE", "GENERIC_I2C_DEVICE");
+            processGenericI2cDevice($targetObj, $child, $dimmId);
         }
     }
 
@@ -1330,6 +1349,9 @@ sub processDdimmAndChildren
             "child for this DDIMM ($target). Did the MRW structure " .
             "change?  If so update this script to reflect changes.  Error"
     }
+
+    # NOTE: no check for GENERIC_I2C_DEVICES because some dimms/systems won't have them
+
 } # end sub processDdimmAndChildren
 
 #--------------------------------------------------
@@ -1438,6 +1460,138 @@ sub processPmic
     # Mark this target as processed
     markTargetAsProcessed($targetObj, $target);
 } # end sub processPmic
+
+#--------------------------------------------------
+# @brief Process targets of type GENERIC_I2C_DEVICE
+#
+# @pre DIMM targets need to be processed beforehand
+#
+# @param[in] $targetObj - The global target object blob
+# @param[in] $target    - The GENERIC_I2C_DEVICVE target
+# @param[in] $dimmId    - The DIMM's ID, used to calculate the GENERIC_I2C_DEVICE's ID
+#--------------------------------------------------
+sub processGenericI2cDevice
+{
+    my $targetObj = shift;
+    my $target    = shift;
+    my $dimmId    = shift;
+
+    # Some sanity checks.  Make sure we are processing the correct target type
+    # and make sure the target's parent has been processed.
+    my $targetType = targetTypeSanityCheck($targetObj, $target, "GENERIC_I2C_DEVICE");
+    validateParentHasBeenProcessed($targetObj, $target);
+
+    # Get some useful data from the device's parent's SYS, NODE and DDIMM targets
+    my $sysParent = $targetObj->findParentByType($target, "SYS");
+    my $sysParentPos = $targetObj->getAttribute($sysParent, "ORDINAL_ID");
+    my $nodeParent = $targetObj->findParentByType($target, "NODE");
+    my $nodeParentPos = $targetObj->getAttribute($nodeParent, "ORDINAL_ID");
+    my $nodeParentPhysical = $targetObj->getAttribute($nodeParent, "PHYS_PATH");
+    my $ddimmParent = $targetObj->findParentByType($target, "DIMM");
+    my $ddimmParentPos = $targetObj->getAttribute($ddimmParent, "ORDINAL_ID");
+    my $ddimmParentAffinity = $targetObj->getAttribute($ddimmParent, "AFFINITY_PATH");
+
+    ## Get the instance name and set the Instance Position (aka relative position)
+    # Currently supported instance names: adc0, adc1, PCA9554A, PCA9554B
+    # Although different, the ADCs and the GPIO Expanders (PCA9554A/B) are grouped
+    # together under GENERIC_I2C_DEVICES.
+    # Their Instance Position is in the order as they're listed above
+    # Also set I2C_DEV_TYPE attribute based on instance position/name
+    my $instancePos = -1;
+    my $instanceName = $targetObj->getInstanceName($target);
+    my $i2cDevType = "ADS7138_ADC";
+
+    if ($instanceName eq "adc0")
+    {
+        $instancePos = 0;
+    }
+    elsif ($instanceName eq "adc1")
+    {
+        $instancePos = 1;
+    }
+    elsif ($instanceName eq "PCA9554A")
+    {
+        $instancePos = 2;
+        $i2cDevType = "PCA9554A_GPIO_EXPANDER";
+    }
+    elsif ($instanceName eq "PCA9554B")
+    {
+        $instancePos = 3;
+        $i2cDevType = "PCA9554A_GPIO_EXPANDER";
+    }
+    $targetObj->setAttribute($target, "I2C_DEV_TYPE", $i2cDevType);
+
+    # Cache the device's maximum instance per parent (DDIMM) for quick reference
+    my $maxDevicePerDdimm = getMaxInstPerParent("GENERIC_I2C_DEVICE");
+
+    # Do a quick sanity check.  Make sure the GENERIC_I2C_DEVICE instance position is less
+    # than what is expected it to be.
+    if ($instancePos >= $maxDevicePerDdimm )
+    {
+        select()->flush(); # flush buffer before spewing out error message
+        die "\nprocessPmic: ERROR: The GENERIC_I2C_DEVICE's instance position " .
+            "($instancePos), extracted from instance name " .
+            "\"$instanceName\", exceeds or is equal to the maximum GENERIC_I2C_DEVICE " .
+            "per DIMM (" . $maxDevicePerDdimm . "). Error" ;
+    }
+
+    ## Generic I2C Device ordering
+    # Ex. for adc0, dimm19 = generici2cdevice76   ((19 * 4) + 0)
+    # Ex. for adc1, dimm19 = generici2cdevice77   ((19 * 4) + 1)
+    # Ex. for PCA9554A, dimm19 = generici2cdevice78   ((19 * 4) + 2)
+    # Ex. for PCA9554B, dimm19 = generici2cdevice79   ((19 * 4) + 3)
+
+    ## Calculate the 'Generic I2C Device's Position Per System (SYS)'
+    # To calculate the Generic I2C Device's ordering, take its parent DDIMM position,
+    # multiply it by the maximum GENERIC_I2C_DEVICEs per DDIMM, then add the device's instance:
+    my $posPerSystem = ($ddimmParentPos * $maxDevicePerDdimm) + $instancePos;
+
+    ## Calculate the 'Generic I2C Device's Position per NODE'
+    # The generic i2c device's 'Position per NODE' is based on the maximum of generic
+    # i2c devices per node which is the product of the maximum number of DIMM's per PROC
+    # times the maximum number of PROC's per NODE times the maxium generic i2c devices per DDIMM.
+    # Modify that number with the system wide number to get generic i2c device position per NODE.
+    my $totalMaxDevicesPerNode = getMaxInstPerProc("DIMM") * getMaxInstPerParent("PROC") *
+                                 $maxDevicePerDdimm;
+    my $posPerNode = $posPerSystem % $totalMaxDevicesPerNode;
+
+    # The Device's ID is just a multiple of the DIMM's ID plus the Device's position
+    # relative to the DIMM.
+    my $deviceId = ($dimmId * $maxDevicePerDdimm) + $instancePos;
+
+    # Get the FAPI_NAME by using the data gathered above
+    my $fapiName = $targetObj->getFapiName($targetType, $nodeParentPos, $posPerSystem);
+
+    # Take advantage of previous work done on the DDIMMs and NODEs.  Use these
+    # parent affinity/physical path for our self and append "generic_i2c_device" to the end.
+    # NOTE: need the underscores for these lines as they get processed into GENERIC_I2C_DEVICE
+    my $deviceAffinity = $ddimmParentAffinity;
+    $deviceAffinity    =~ s/\/dimm-\d+//;     # Drop the dimm info, not needed
+    $deviceAffinity    =~ s/\/mem_port-\d+//; # Drop the mem_port info, not needed
+    $deviceAffinity    = $deviceAffinity . "/generic_i2c_device-" . $instancePos;
+    my $devicePhysical = $nodeParentPhysical . "/generic_i2c_device-" . $deviceId;
+
+    # Now that we collected all the data we need, set some target attributes
+    $targetObj->setHuid($target, $sysParentPos, $nodeParentPos, $posPerNode);
+    $targetObj->setAttribute($target, "POSITION",      $deviceId);
+    $targetObj->setAttribute($target, "ORDINAL_ID",    $posPerSystem);
+    $targetObj->setAttribute($target, "FAPI_POS",      $posPerSystem);
+    $targetObj->setAttribute($target, "FAPI_NAME",     $fapiName);
+    $targetObj->setAttribute($target, "REL_POS",       $instancePos);
+    $targetObj->setAttribute($target, "AFFINITY_PATH", $deviceAffinity);
+    $targetObj->setAttribute($target, "PHYS_PATH",     $devicePhysical);
+
+    # Set the FAPI_I2C_CONTROL_INFO attribute
+    setFapi2AttributeForDimmI2cDevices($targetObj, $target, "GENERIC_I2C_DEVICE");
+
+    # Save this target for retrieval later when printing the xml (sub printXML)
+    $targetObj->{targeting}{SYS}[$sysParentPos]{NODES}[$nodeParentPos]
+                {GENERIC_I2C_DEVICE}[$posPerSystem]{KEY} = $target;
+
+    # Mark this target as processed
+    markTargetAsProcessed($targetObj, $target);
+} # end sub processGenericI2cDevice
+
 
 #--------------------------------------------------
 # @brief Process targets of type OCMB_CHIP and it's child MEM_PORT
@@ -2444,6 +2598,67 @@ sub setFapi2AttributeForPmic
 
     $targetObj->setAttributeField($target, $fapiName, "devAddr", $devAddr);
 } # end setFapi2AttributeForPmic
+
+#--------------------------------------------------
+# @brief Set the FAPI_I2C_CONTROL_INFO attribute for the given Generic I2C Device
+#
+# @detail The majority of the FAPI_I2C_CONTROL_INFO data is equivalent to the
+#         the DDIMM parent EEPROM_VPD_PRIMARY_INFO attribute, so copy the
+#         appropriate fields.
+#
+# @param[in] $targetObj - The global target object blob
+# @param[in] $target    - The Pmic or Generic I2C Device target
+# @param[in] $type      - The type of the PMIC or Generic I2C Device
+#--------------------------------------------------
+sub setFapi2AttributeForDimmI2cDevices
+{
+    my $targetObj = shift;
+    my $target    = shift;
+    my $type      = shift;
+
+    # Sanity check.  Make sure we are processing the correct target type.
+    targetTypeSanityCheck($targetObj, $target, $type);
+
+    # Get the DDIMM parent
+    my $ddimmParent = $targetObj->getTargetParent($target);
+
+    # Copy some of the parent DDIMM's EEPROM data over to the FAPI2 attribute
+    my $eepromName = "EEPROM_VPD_PRIMARY_INFO";
+    my $fapiName = "FAPI_I2C_CONTROL_INFO";
+    $targetObj->copySrcAttributeFieldToDestAttributeField($ddimmParent, $target,
+                $eepromName, $fapiName, "i2cMasterPath");
+    $targetObj->copySrcAttributeFieldToDestAttributeField($ddimmParent, $target,
+                $eepromName, $fapiName, "engine");
+    $targetObj->copySrcAttributeFieldToDestAttributeField($ddimmParent, $target,
+                $eepromName, $fapiName, "port");
+
+    # Retrieve the I2C Address from the 'unit-i2c-slave' child target of $target.
+    # Set the field 'devAddr' for attribute FAPI2_I2C_CONTROL_INFO with value.
+    my $devAddr = "";
+    foreach my $i2cSlave (@{ $targetObj->getTargetChildren($target) })
+    {
+        my $type = $targetObj->getTargetType($i2cSlave);
+        if ($type eq "unit-i2c-slave")
+        {
+            $devAddr = $targetObj->getAttribute($i2cSlave, "I2C_ADDRESS");
+            last;
+        }
+    }
+
+    # If no value for the field devAddr, then there should be a warning.
+    # The default value of 0xFF can be used, so that's why this is not a full error.
+    if ($devAddr eq "")
+    {
+        select()->flush(); # flush buffer before spewing out error message
+        $devAddr = 0xFF;
+        warn "\nsetFapi2AttributeForDimmI2cDevices: ERROR: No child target " .
+            "\"unit-i2c-slave\" found for target ($target), therefore value " .
+            "for field \"devAddr\" for attribute FAPI2_I2C_CONTROL_INFO " .
+            "will use default value of $devAddr\n";
+    }
+
+    $targetObj->setAttributeField($target, $fapiName, "devAddr", $devAddr);
+} # end setFapi2AttributeForDimmI2cDevices
 
 #--------------------------------------------------
 # @brief Validate that PROCs are being processed in Topology ID order.
@@ -5665,7 +5880,8 @@ sub extractDimmData
         my $type = $targetObj->getType($target);
 
         if ( ($type eq "DIMM")   &&
-             ($targetObj->getTargetType($target) eq "lcard-dimm-ddimm")  &&
+             (($targetObj->getTargetType($target) eq "lcard-dimm-ddimm") ||
+               ($targetObj->getTargetType($target) eq "lcard-dimm-ddimm4u"))  &&
              ($targetObj->getAttribute($target, 'AFFINITY_PATH') =~ m/node-0/) )
         {
             # Use the position of the DIMM as the key in hash to map to the DIMM target.
@@ -6026,6 +6242,7 @@ sub testMaxInstPerProc
         MEM_PORT  => 16,
         DIMM      => 16,
         PMIC      => 32,
+        GENERIC_I2C_DEVICE   => 32,
         OMIC      => 8,
 
         PAUC      => 4,
