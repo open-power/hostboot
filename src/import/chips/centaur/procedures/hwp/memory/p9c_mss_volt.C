@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -162,7 +162,7 @@ fapi2::ReturnCode p9c_mss_volt(const std::vector<fapi2::Target<fapi2::TARGET_TYP
                 {
                     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_SPD_DRAM_DEVICE_TYPE, l_dimm, l_spd_dramtype));
 
-                    FAPI_ASSERT(l_spd_dramtype = ! fapi2::ENUM_ATTR_CEN_SPD_DRAM_DEVICE_TYPE_DDR4,
+                    FAPI_ASSERT(l_spd_dramtype == fapi2::ENUM_ATTR_CEN_SPD_DRAM_DEVICE_TYPE_DDR4,
                                 fapi2::CEN_MSS_VOLT_DDR_TYPE_MIXING_UNSUPPORTED().
                                 set_DIMM_DDR4_TARGET(l_dimm).
                                 set_DEVICE_TYPE(l_spd_dramtype),

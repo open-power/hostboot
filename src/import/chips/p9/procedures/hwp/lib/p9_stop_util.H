@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -69,21 +69,21 @@ namespace stopImageSection
 
 #else
 #define SWIZZLE_2_BYTE(WORD) \
-    ( (((WORD) >> 8) & 0x00FF) | (((WORD) << 8) & 0xFF00) )
+    ( ((((uint16_t)(WORD)) >> 8) & 0x00FF) | ((((uint16_t)(WORD)) << 8) & 0xFF00) )
 
 #define SWIZZLE_4_BYTE(WORD) \
-    ( (((WORD) >> 24) & 0x000000FF) | (((WORD) >>  8) & 0x0000FF00) | \
-      (((WORD) <<  8) & 0x00FF0000) | (((WORD) << 24) & 0xFF000000) )
+    ( ((((uint32_t)(WORD)) >> 24) & 0x000000FF) | ((((uint32_t)(WORD)) >>  8) & 0x0000FF00) | \
+      ((((uint32_t)(WORD)) <<  8) & 0x00FF0000) | ((((uint32_t)(WORD)) << 24) & 0xFF000000) )
 
 #define SWIZZLE_8_BYTE(WORD) \
-    ( (((WORD) >> 56) & 0x00000000000000FF) |  \
-      (((WORD) >> 40) & 0x000000000000FF00)| \
-      (((WORD) >> 24) & 0x0000000000FF0000) |  \
-      (((WORD) >>  8) & 0x00000000FF000000) |  \
-      (((WORD) <<  8) & 0x000000FF00000000) |  \
-      (((WORD) << 24) & 0x0000FF0000000000) | \
-      (((WORD) << 40) & 0x00FF000000000000) |  \
-      (((WORD) << 56) & 0xFF00000000000000) )
+    ( ((((uint64_t)(WORD)) >> 56) & 0x00000000000000FF) |  \
+      ((((uint64_t)(WORD)) >> 40) & 0x000000000000FF00)| \
+      ((((uint64_t)(WORD)) >> 24) & 0x0000000000FF0000) |  \
+      ((((uint64_t)(WORD)) >>  8) & 0x00000000FF000000) |  \
+      ((((uint64_t)(WORD)) <<  8) & 0x000000FF00000000) |  \
+      ((((uint64_t)(WORD)) << 24) & 0x0000FF0000000000) | \
+      ((((uint64_t)(WORD)) << 40) & 0x00FF000000000000) |  \
+      ((((uint64_t)(WORD)) << 56) & 0xFF00000000000000) )
 #endif
 
 /**

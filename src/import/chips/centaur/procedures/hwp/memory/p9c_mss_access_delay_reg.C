@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -3581,7 +3581,8 @@ extern "C" {
                     fapi2::CEN_MSS_ACCESS_DELAY_REG_SCHMOO_BAD_MBA_POS(),
                     "Bad position from ATTR_CHIP_UNIT_POS (%d)", l_mbapos);
 
-        FAPI_ASSERT(l_dram_width == fapi2::ENUM_ATTR_CEN_EFF_DRAM_WIDTH_X4 || fapi2::ENUM_ATTR_CEN_EFF_DRAM_WIDTH_X8,
+        FAPI_ASSERT(l_dram_width == fapi2::ENUM_ATTR_CEN_EFF_DRAM_WIDTH_X4 ||
+                    l_dram_width == fapi2::ENUM_ATTR_CEN_EFF_DRAM_WIDTH_X8,
                     fapi2::CEN_MSS_ACCESS_DELAY_REG_SCHMOO_BAD_DRAM_WIDTH().
                     set_DRAM_WIDTH(l_dram_width),
                     "Bad dram width from ATTR_EFF_DRAM_WIDTH (%d)", l_dram_width);

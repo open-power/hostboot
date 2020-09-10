@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -490,7 +490,7 @@ typedef struct __attribute__((packed, aligned(256))) HomerVFRTLayout
 } HomerVFRTLayout_t;
 
 // HOMER WOF layout
-typedef struct __attribute__((packed)) HomerWOFLayout
+typedef struct __attribute__((packed, aligned(128))) HomerWOFLayout
 {
     WofTablesHeader_t wof_header_data;
     HomerVFRTLayout_t homer_vfrt_data[CEF_VDN_INDEX][CEF_VDD_INDEX][ACTIVE_QUADS];

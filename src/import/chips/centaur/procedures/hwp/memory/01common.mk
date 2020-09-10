@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2015,2018
+# Contributors Listed Below - COPYRIGHT 2015,2021
 # [+] International Business Machines Corp.
 #
 #
@@ -29,6 +29,7 @@ CEN_INCLUDES += $(ROOTPATH)/chips/centaur/procedures/hwp/memory
 CEN_INCLUDES += $(ROOTPATH)/chips/centaur/procedures/hwp/memory/lib
 CEN_INCLUDES += $(ROOTPATH)/chips/centaur/procedures/hwp/memory/lib/shared
 CEN_INCLUDES += $(ROOTPATH)/chips/centaur/procedures/hwp/initfiles/
+export CEN_INCLUDES := $(CEN_INCLUDES)
 
 CEN_MSS_LAB_PATH := $(ROOTPATH)/chips/centaur/procedures/hwp/memory/lab
 

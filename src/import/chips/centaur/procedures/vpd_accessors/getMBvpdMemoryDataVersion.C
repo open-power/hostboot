@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017                             */
+/* Contributors Listed Below - COPYRIGHT 2017,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -59,11 +59,17 @@ extern "C"
         const fapi2::Target<fapi2::TARGET_TYPE_MEMBUF_CHIP>&   i_mbTarget,
         uint32_t&   o_val)
     {
+        union l_KeywordUnion
+        {
+            uint32_t vpdMemoryDataVersion;
+            MBvpdVMKeyword mBvpdVMKeyword;
+        };
+
         fapi2::ReturnCode l_fapi2rc;
         DimmType l_dimmType = DimmType::ISDIMM;
         fapi2::MBvpdRecord  l_record  = fapi2::MBVPD_RECORD_SPDX;
-        uint32_t l_vpdMemoryDataVersion = VM_KEYWORD_DEFAULT_VALUE;
-        size_t l_bufSize = sizeof(l_vpdMemoryDataVersion);
+        l_KeywordUnion l_vpdMDataUnion = {VM_KEYWORD_DEFAULT_VALUE};
+        size_t l_bufSize = sizeof(l_vpdMDataUnion.vpdMemoryDataVersion);
 
         FAPI_DBG("getMBvpdMemoryDataVersion: entry ");
 
@@ -116,7 +122,7 @@ extern "C"
         l_fapi2rc = getMBvpdField(l_record,
                                   fapi2::MBVPD_KEYWORD_VM,
                                   i_mbTarget,
-                                  reinterpret_cast<uint8_t*>(&l_vpdMemoryDataVersion),
+                                  reinterpret_cast<uint8_t*>(&l_vpdMDataUnion.vpdMemoryDataVersion),
                                   l_bufSize);
 
         if (l_fapi2rc)
@@ -127,30 +133,33 @@ extern "C"
         }
 
         // Check that sufficient size was returned.
-        FAPI_ASSERT(l_bufSize >= sizeof(l_vpdMemoryDataVersion),
+        FAPI_ASSERT(l_bufSize >= sizeof(l_vpdMDataUnion.vpdMemoryDataVersion),
                     fapi2::CEN_MBVPD_INSUFFICIENT_VPD_RETURNED().
                     set_KEYWORD(fapi2::MBVPD_KEYWORD_VM).
                     set_RETURNED_SIZE(l_bufSize).
                     set_CHIP_TARGET(i_mbTarget),
                     "getMBvpdMemoryDataVersion:"
                     " less keyword data returned than expected %d < %d",
-                    l_bufSize, sizeof(l_vpdMemoryDataVersion));
+                    l_bufSize, sizeof(l_vpdMDataUnion.vpdMemoryDataVersion));
 
-        // Check if the format byte in the value returned is in between valid range
-        FAPI_ASSERT(( ((MBvpdVMKeyword*)(&l_vpdMemoryDataVersion))->iv_version <=  VM_SUPPORTED_HIGH_VER ) &&
-                    ( ((MBvpdVMKeyword*)(&l_vpdMemoryDataVersion))->iv_version != VM_NOT_SUPPORTED ),
+        // Check if the format byte in the value returned is in between valid
+        // range
+        FAPI_ASSERT(( l_vpdMDataUnion.mBvpdVMKeyword.iv_version <=
+                      VM_SUPPORTED_HIGH_VER ) &&
+                    ( l_vpdMDataUnion.mBvpdVMKeyword.iv_version !=
+                      VM_NOT_SUPPORTED ),
                     fapi2::CEN_MBVPD_INVALID_VM_DATA_RETURNED().
                     set_KEYWORD(fapi2::MBVPD_KEYWORD_VM).
-                    set_RETURNED_VALUE(l_vpdMemoryDataVersion).
+                    set_RETURNED_VALUE(l_vpdMDataUnion.vpdMemoryDataVersion).
                     set_RECORD_NAME(l_record).
                     set_DIMM_TYPE(l_dimmType).
                     set_CHIP_TARGET(i_mbTarget),
                     "getMBvpdMemoryDataVersion:"
                     " keyword data returned is invalid : %d ",
-                    l_vpdMemoryDataVersion);
+                    l_vpdMDataUnion.vpdMemoryDataVersion);
 
         // return value
-        o_val = static_cast<uint32_t>(be16toh(l_vpdMemoryDataVersion));
+        o_val = static_cast<uint32_t>(be16toh(l_vpdMDataUnion.vpdMemoryDataVersion));
 
         FAPI_DBG("getMBvpdMemoryDataVersion: Memory Data version=0x%08x",
                  o_val);

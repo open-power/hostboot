@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -2315,7 +2315,8 @@ fapi2::ReturnCode buildParameterBlock( void* const i_pHomer, CONST_FAPI2_PROC& i
         uint32_t wofTableSize = i_sizeBuf1;
 
         // Allocate struct onto heap and initialize its memory to zeroes
-        pStateSupStruct = new PstateSuperStructure();
+        uint8_t * pMem = new uint8_t[ (( sizeof( PstateSuperStructure ) + ONE_KB  ) >> 10 ) << 10 ];
+        pStateSupStruct = ( PstateSuperStructure * )pMem;
         memset(i_pBuf1,0x00,i_sizeBuf1);
 
         //Building P-State Parameter block info by calling a HWP
@@ -2460,12 +2461,17 @@ fapi2::ReturnCode buildParameterBlock( void* const i_pHomer, CONST_FAPI2_PROC& i
         io_ppmrHdr.g_ppmr_wof_table_offset   =   SWIZZLE_4_BYTE(io_ppmrHdr.g_ppmr_wof_table_offset);
         io_ppmrHdr.g_ppmr_wof_table_length   =   SWIZZLE_4_BYTE(io_ppmrHdr.g_ppmr_wof_table_length);
 
+	if( pMem )
+	{
+	    delete pMem;
+	}	
+
     }//i_imgType.pgpePstateParmBlockBuild
 
 fapi_try_exit:
     FAPI_INF("<< buildParameterBlock");
 
-    delete pStateSupStruct;
+    //delete pStateSupStruct;
 
     return fapi2::current_err;
 }

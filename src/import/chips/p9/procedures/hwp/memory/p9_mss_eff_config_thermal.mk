@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2015,2017
+# Contributors Listed Below - COPYRIGHT 2015,2021
 # [+] International Business Machines Corp.
 #
 #
@@ -28,5 +28,5 @@
 
 PROCEDURE=p9_mss_eff_config_thermal
 lib$(PROCEDURE)_DEPLIBS += p9_mss_bulk_pwr_throttles
-$(eval $(call ADD_MEMORY_INCDIRS,$(PROCEDURE)))
+$(call ADD_MODULE_INCDIR,$(PROCEDURE),$(MSS_INCLUDES))
 $(call BUILD_PROCEDURE)

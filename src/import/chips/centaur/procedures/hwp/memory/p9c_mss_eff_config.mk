@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2016,2017
+# Contributors Listed Below - COPYRIGHT 2016,2021
 # [+] International Business Machines Corp.
 #
 #
@@ -29,5 +29,5 @@ PROCEDURE=p9c_mss_eff_config
 OBJS+=p9c_mss_eff_pre_config.o
 OBJS+=p9c_mss_eff_config_rank_group.o
 OBJS+=p9c_mss_eff_config_shmoo.o
-$(eval $(call ADD_MEMORY_INCDIRS,$(PROCEDURE)))
+$(call ADD_MODULE_INCDIR,$(PROCEDURE),$(CEN_INCLUDES))
 $(call BUILD_PROCEDURE)

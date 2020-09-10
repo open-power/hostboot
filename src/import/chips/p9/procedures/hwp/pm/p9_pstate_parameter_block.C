@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -2752,7 +2752,8 @@ void p9_pstate_compute_PStateV_slope(VpdOperatingPoint i_operating_points[][4],
 #define CENTER_STR(_buffer, _variable, _width)                  \
    {                                                            \
        int _w_ = _width-strlen(_variable)/2;                    \
-       sprintf(_buffer, " %*s%*s  ", _w_, _variable, _w_, "");  \
+       int _l_str_len = ((_w_ + strlen(_variable) + _w_) + 4);  \
+       snprintf(_buffer, _l_str_len, " %*s%*s  ", _w_, _variable, _w_, "");            \
    }
 
 #define HEX_DEC_STR(_buffer, _hex, _dec)                        \
@@ -3314,6 +3315,7 @@ iddq_print(IddqTable* i_iddqt)
 //    char            l_line_str[256];     // Formatted output line string
     char            l_buffer_str[1024];   // Temporary formatting string buffer
     char            l_line_str[1024];     // Formatted output line string
+    size_t          l_line_str_len;
 
     static const uint32_t IDDQ_DESC_SIZE = 56;
     static const uint32_t IDDQ_QUAD_SIZE = IDDQ_DESC_SIZE -
@@ -3374,7 +3376,15 @@ iddq_print(IddqTable* i_iddqt)
 
     // Put out the measurement voltages to the trace.
     strcpy(l_line_str, "  Measurement voltages:");
-    sprintf(l_buffer_str, "%-*s ", IDDQ_DESC_SIZE, l_line_str);
+    // the length for l_line_str_len is added by extra 2: 1 for a space in format "%-*s ";
+    // another 1 for terminating null.
+
+    l_line_str_len = strlen(l_line_str) - 1;
+    snprintf(l_buffer_str, l_line_str_len, "%-*s ", IDDQ_DESC_SIZE, l_line_str);
+
+//    l_line_str_len = strlen(l_line_str)+ 2;
+//    snprintf(l_buffer_str, l_line_str_len, "%-*s ", IDDQ_DESC_SIZE, l_line_str);
+
     strcpy(l_line_str, l_buffer_str);
     strcpy(l_buffer_str, "");
 

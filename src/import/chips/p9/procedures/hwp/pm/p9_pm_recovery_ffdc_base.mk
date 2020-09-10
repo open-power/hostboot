@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2017
+# Contributors Listed Below - COPYRIGHT 2017,2021
 # [+] International Business Machines Corp.
 #
 #
@@ -34,5 +34,5 @@ lib$(PROCEDURE)_DEPLIBS+=p9_pm_recovery_ffdc_qppm
 lib$(PROCEDURE)_DEPLIBS+=p9_cme_sram_access
 lib$(PROCEDURE)_DEPLIBS+=p9_ppe_state
 lib$(PROCEDURE)_DEPLIBS+=p9_ppe_utils
-$(call ADD_MODULE_INCDIR,$(FFDC_INC))
+$(call ADD_MODULE_INCDIR,$(PROCEDURE),$(FFDC_INC))
 $(call BUILD_PROCEDURE)

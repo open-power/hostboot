@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2016,2017
+# Contributors Listed Below - COPYRIGHT 2016,2021
 # [+] International Business Machines Corp.
 #
 #
@@ -29,5 +29,5 @@ PROCEDURE=getDQAttrISDIMM
 lib$(PROCEDURE)_DEPLIBS+=getISDIMMTOC4DAttrs
 lib$(PROCEDURE)_DEPLIBS+=getDecompressedISDIMMAttrs
 $(PROCEDURE)_DEPLIBS+=mss_generic
-$(eval $(call ADD_MEMORY_INCDIRS,$(PROCEDURE)))
+$(call ADD_MODULE_INCDIR,$(PROCEDURE),$(CEN_INCLUDES))
 $(call BUILD_PROCEDURE)

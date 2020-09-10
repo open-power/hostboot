@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2016,2017
+# Contributors Listed Below - COPYRIGHT 2016,2021
 # [+] International Business Machines Corp.
 #
 #
@@ -26,7 +26,7 @@
 # Include the macros and things for MSS procedures
 -include 01common.mk
 PROCEDURE=p9c_mss_draminit_training_advanced
-$(eval $(call ADD_MEMORY_INCDIRS,$(PROCEDURE)))
+$(call ADD_MODULE_INCDIR,$(PROCEDURE),$(CEN_INCLUDES))
 OBJS+=p9c_mss_mcbist.o
 OBJS+=p9c_mss_mcbist_common.o
 OBJS+=p9c_mss_mcbist_address.o
