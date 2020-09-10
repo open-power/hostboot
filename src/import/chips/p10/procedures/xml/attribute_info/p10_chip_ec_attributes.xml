@@ -456,6 +456,25 @@
   </attribute>
   <!-- ******************************************************************** -->
   <attribute>
+    <id>ATTR_CHIP_EC_FEATURE_HW544290</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      Tepid Moonbeam: Avoid NMMU deadlock with back invalidates and NX
+      check in/out requests by allowing only a single outstanding NX
+      miss queue entry at a time
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_P10</name>
+        <ec>
+          <value>0x10</value>
+          <test>EQUAL</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
+  <!-- ******************************************************************** -->
+  <attribute>
     <id>ATTR_CHIP_EC_FEATURE_HW533775</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>
