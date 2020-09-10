@@ -684,10 +684,8 @@ bool StateMachine::executeWorkItem(WorkFlowProperties * i_wfp)
 
             case RESTORE_DRAM_REPAIRS:
             {
-                /* TODO RTC 258619
                 TargetHandle_t target = getTarget( *i_wfp );
                 rc = PRDF::restoreDramRepairs<TYPE_OCMB_CHIP>( target );
-                */
                 break;
             }
             case START_PATTERN_0:
