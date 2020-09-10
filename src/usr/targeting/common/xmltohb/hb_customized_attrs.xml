@@ -902,11 +902,6 @@
         <no_export/>
     </attribute>
 
-    <attribute>
-        <id>ATTR_ENABLE_FIR_UNMASKING</id>
-        <default>0x1</default>
-    </attribute>
-
     <!-- =====================================================================
      End of customizations definitions
      ================================================================= -->
