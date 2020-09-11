@@ -232,7 +232,8 @@ fapi2::ReturnCode p10_setup_ref_clock(const
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_HW543384_WAR_MODE, FAPI_SYSTEM, l_hw543384_war_mode),
                  "Error from FAPI_ATTR_GET (:ATTR_HW543384_WAR_MODE)");
 
-        if (l_hw543384_war_mode == fapi2::ENUM_ATTR_HW543384_WAR_MODE_TIE_NEST_TO_PAU)
+        if ((l_hw543384_war_mode == fapi2::ENUM_ATTR_HW543384_WAR_MODE_TIE_NEST_TO_PAU) ||
+            (l_hw543384_war_mode == fapi2::ENUM_ATTR_HW543384_WAR_MODE_BOTH))
         {
             l_attr_mux_input = fapi2::ENUM_ATTR_CLOCK_MUX3_INPUT_MUX2B;
         }
