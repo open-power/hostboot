@@ -36,4 +36,17 @@
   </callout>
 </hwpError>
 <!-- ******************************************************************** -->
+<hwpError>
+  <rc>RC_P10_CHIPLET_FABRIC_SCOMINIT_INVALID_HW543384_WAR_MODE</rc>
+  <description>
+    Invalid workaround selected for HW543384
+  </description>
+  <ffdc>WAR_MODE</ffdc>
+  <ffdc>TARGET</ffdc>
+  <callout>
+    <procedure>CODE</procedure>
+    <priority>HIGH</priority>
+  </callout>
+</hwpError>
+<!-- ******************************************************************** -->
 </hwpErrors>

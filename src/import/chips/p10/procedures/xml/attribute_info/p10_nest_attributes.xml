@@ -878,7 +878,8 @@
   <enum>
     NONE = 0,
     TIE_NEST_TO_PAU = 1,
-    FBC_FLOW_CONTROL = 2
+    FBC_FLOW_CONTROL = 2,
+    BOTH = 3
   </enum>
   <platInit/>
   <initToZero/>

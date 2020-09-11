@@ -154,6 +154,13 @@ fapi2::ReturnCode p10_fbc_ptl_scom(const fapi2::Target<fapi2::TARGET_TYPE_PAUC>&
                                             (l_TGT1_ATTR_FREQ_PROC_IOHS_MHZ[l_def_OPTY] * literal_2063));
         uint64_t l_def_AX1_CMD_RATE_1B_RA = (((literal_11 * l_TGT2_ATTR_FREQ_PAU_MHZ) * literal_1611) %
                                              (l_TGT1_ATTR_FREQ_PROC_IOHS_MHZ[l_def_OPTY] * literal_2063));
+        fapi2::ATTR_HW543384_WAR_MODE_Type l_TGT2_ATTR_HW543384_WAR_MODE;
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_HW543384_WAR_MODE, TGT2, l_TGT2_ATTR_HW543384_WAR_MODE));
+        fapi2::ATTR_CHIP_EC_FEATURE_HW543384_Type l_TGT1_ATTR_CHIP_EC_FEATURE_HW543384;
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_HW543384, TGT1, l_TGT1_ATTR_CHIP_EC_FEATURE_HW543384));
+        uint64_t l_def_LETHAL_COFFEE_WAR = ((l_TGT1_ATTR_CHIP_EC_FEATURE_HW543384 != literal_0)
+                                            && ((l_TGT2_ATTR_HW543384_WAR_MODE == fapi2::ENUM_ATTR_HW543384_WAR_MODE_FBC_FLOW_CONTROL)
+                                                || (l_TGT2_ATTR_HW543384_WAR_MODE == fapi2::ENUM_ATTR_HW543384_WAR_MODE_BOTH)));
         fapi2::ATTR_PROC_FABRIC_A_INDIRECT_Type l_TGT2_ATTR_PROC_FABRIC_A_INDIRECT;
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_A_INDIRECT, TGT2, l_TGT2_ATTR_PROC_FABRIC_A_INDIRECT));
         uint64_t l_def_DUAL_VC_MODE = ((l_TGT2_ATTR_PROC_FABRIC_BROADCAST_MODE ==
@@ -410,7 +417,11 @@ fapi2::ReturnCode p10_fbc_ptl_scom(const fapi2::Target<fapi2::TARGET_TYPE_PAUC>&
         {
             FAPI_TRY(fapi2::getScom( TGT0, 0x10011810ull, l_scom_buffer ));
 
-            if (((l_def_AX0_ENABLED == literal_1) && l_def_DUAL_VC_MODE))
+            if ((((l_def_AX0_ENABLED == literal_1) && l_def_DUAL_VC_MODE) && l_def_LETHAL_COFFEE_WAR))
+            {
+                l_scom_buffer.insert<32, 5, 59, uint64_t>(literal_0x04 );
+            }
+            else if (((l_def_AX0_ENABLED == literal_1) && l_def_DUAL_VC_MODE))
             {
                 l_scom_buffer.insert<32, 5, 59, uint64_t>(literal_0x10 );
             }
@@ -434,7 +445,11 @@ fapi2::ReturnCode p10_fbc_ptl_scom(const fapi2::Target<fapi2::TARGET_TYPE_PAUC>&
         {
             FAPI_TRY(fapi2::getScom( TGT0, 0x10011811ull, l_scom_buffer ));
 
-            if (((l_def_AX1_ENABLED == literal_1) && l_def_DUAL_VC_MODE))
+            if ((((l_def_AX1_ENABLED == literal_1) && l_def_DUAL_VC_MODE) && l_def_LETHAL_COFFEE_WAR))
+            {
+                l_scom_buffer.insert<32, 5, 59, uint64_t>(literal_0x04 );
+            }
+            else if (((l_def_AX1_ENABLED == literal_1) && l_def_DUAL_VC_MODE))
             {
                 l_scom_buffer.insert<32, 5, 59, uint64_t>(literal_0x10 );
             }
