@@ -90,15 +90,15 @@ namespace check
 /// @brief Check that we recognize DDIMM module manufacturing ID
 /// @param[in] i_target dimm target
 /// @param[in] i_module_mfg_id DIMM module manufacturing ID
-/// @param[out] o_latest_content_rev latest SPD content revision
+/// @param[out] o_latest_combined_rev latest SPD combined revision
 /// @return fapi2::FAPI2_RC_SUCCESS if okay. A non-SUCCESS return will also produce an informational log
 ///
 fapi2::ReturnCode module_mfg_id(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
                                 const uint16_t i_module_mfg_id,
-                                uint8_t& o_latest_content_rev)
+                                uint16_t& o_latest_combined_rev)
 {
     // Check that we can find the ID in our latest revision list
-    FAPI_ASSERT( mss::find_value_from_key(LATEST_SPD_CONTENT_REV, i_module_mfg_id, o_latest_content_rev),
+    FAPI_ASSERT( mss::find_value_from_key(LATEST_SPD_COMBINED_REV, i_module_mfg_id, o_latest_combined_rev),
                  fapi2::MSS_UNKNOWN_DIMM_MODULE_MFG_ID()
                  .set_DIMM_TARGET(i_target)
                  .set_MODULE_MFG_ID(i_module_mfg_id),
@@ -115,57 +115,53 @@ fapi_try_exit:
 }
 
 ///
-/// @brief Check DDIMM base SPD revision versus latest supported
+/// @brief Check DDIMM SPD revision and content revision versus latest supported
 /// @param[in] i_target dimm target
-/// @param[in] i_spd_rev base SPD revision
-/// @return fapi2::FAPI2_RC_SUCCESS if okay. A non-SUCCESS return will also produce an informational log
-/// @note The return code from this function is only used in unit tests.
-///
-fapi2::ReturnCode base_spd_revision(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-                                    const uint8_t i_spd_rev)
-{
-    FAPI_ASSERT( (i_spd_rev >= LATEST_SPD_REV),
-                 fapi2::MSS_NON_CURRENT_SPD_REVISION()
-                 .set_DIMM_TARGET(i_target)
-                 .set_SPD_REVISION(i_spd_rev)
-                 .set_LATEST_SPD_REVISION(LATEST_SPD_REV),
-                 "%s DDIMM has non-current SPD revision and could be updated (0x%02X < 0x%02X)",
-                 mss::c_str(i_target), i_spd_rev, LATEST_SPD_REV );
-    return fapi2::FAPI2_RC_SUCCESS;
-
-fapi_try_exit:
-    // Log the error as recovered - we want this error to be informational
-    fapi2::logError(fapi2::current_err, fapi2::FAPI2_ERRL_SEV_RECOVERED);
-    fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
-    return fapi2::RC_MSS_NON_CURRENT_SPD_REVISION;
-}
-
-///
-/// @brief Check DDIMM SPD content revision versus latest supported
-/// @param[in] i_target dimm target
+/// @param[in] i_spd_rev SPD revision
 /// @param[in] i_spd_content_rev SPD content revision
-/// @param[in] i_latest_content_rev latest SPD content revision
+/// @param[in] i_latest_combined_rev latest SPD combined revision
 /// @return fapi2::FAPI2_RC_SUCCESS if okay. A non-SUCCESS return will also produce an informational log
 /// @note The return code from this function is only used in unit tests.
 ///
-fapi2::ReturnCode spd_content_revision(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-                                       const uint8_t i_spd_content_rev,
-                                       const uint8_t i_latest_content_rev)
+fapi2::ReturnCode spd_combined_revision(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+                                        const uint8_t i_spd_rev,
+                                        const uint8_t i_spd_content_rev,
+                                        const uint16_t i_latest_combined_rev)
 {
-    FAPI_ASSERT( (i_spd_content_rev >= i_latest_content_rev),
-                 fapi2::MSS_NON_CURRENT_SPD_CONTENT_REVISION()
-                 .set_DIMM_TARGET(i_target)
-                 .set_SPD_CONTENT_REVISION(i_spd_content_rev)
-                 .set_LATEST_SPD_CONTENT_REVISION(i_latest_content_rev),
-                 "%s DDIMM has non-current SPD content revision and could be updated (0x%02X < 0x%02X)",
-                 mss::c_str(i_target), i_spd_content_rev, i_latest_content_rev );
+    // Assemble the SPD combined revision
+    // We simply put the SPD revision before the content revision
+    fapi2::buffer<uint16_t> l_spd_combined_revision;
+    l_spd_combined_revision.insertFromRight<0, BITS_PER_BYTE>(i_spd_rev)
+    .insertFromRight<BITS_PER_BYTE, BITS_PER_BYTE>(i_spd_content_rev);
+
+    // Check the combined revision
+    if(l_spd_combined_revision < i_latest_combined_rev)
+    {
+        // For the lab, we just want to log these as informational errors
+#ifndef __HOSTBOOT_MODULE
+        FAPI_INF("%s DDIMM has non-current SPD combined revision and could be updated (0x%04X < 0x%04X)",
+                 mss::c_str(i_target), l_spd_combined_revision, i_latest_combined_rev );
+        // Return a bad RC here for unit test confirmation
+        return fapi2::RC_MSS_NON_CURRENT_SPD_COMBINED_REVISION;
+#else
+        // For hostboot, we want to generate an informational error log
+        FAPI_ASSERT( false,
+                     fapi2::MSS_NON_CURRENT_SPD_COMBINED_REVISION()
+                     .set_DIMM_TARGET(i_target)
+                     .set_SPD_COMBINED_REVISION(l_spd_combined_revision)
+                     .set_LATEST_SPD_COMBINED_REVISION(i_latest_combined_rev),
+                     "%s DDIMM has non-current SPD combined revision and could be updated (0x%04X < 0x%04X)",
+                     mss::c_str(i_target), l_spd_combined_revision, i_latest_combined_rev );
+#endif
+    }
+
     return fapi2::FAPI2_RC_SUCCESS;
 
 fapi_try_exit:
     // Log the error as recovered - we want this error to be informational
     fapi2::logError(fapi2::current_err, fapi2::FAPI2_ERRL_SEV_RECOVERED);
     fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
-    return fapi2::RC_MSS_NON_CURRENT_SPD_CONTENT_REVISION;
+    return fapi2::RC_MSS_NON_CURRENT_SPD_COMBINED_REVISION;
 }
 
 } // namespace check
@@ -186,7 +182,7 @@ fapi2::ReturnCode ddimm_spd_revision(const fapi2::Target<fapi2::TARGET_TYPE_MEM_
 
     for(const auto& l_dimm : mss::find_targets<fapi2::TARGET_TYPE_DIMM>(i_target))
     {
-        uint8_t l_latest_content_rev = 0;
+        uint16_t l_latest_combined_rev = 0;
         uint8_t l_dimm_type = 0;
         uint16_t l_module_mfg_id = 0;
 
@@ -203,7 +199,7 @@ fapi2::ReturnCode ddimm_spd_revision(const fapi2::Target<fapi2::TARGET_TYPE_MEM_
 
         // First make sure we can get the SPD content revision using the module manufacturing ID
         // This is not necessarily a hard fail, so don't bomb out, but we have to skip the SPD revision checks.
-        l_rc = check::module_mfg_id(l_dimm, l_module_mfg_id, l_latest_content_rev);
+        l_rc = check::module_mfg_id(l_dimm, l_module_mfg_id, l_latest_combined_rev);
 
         if (l_rc != fapi2::FAPI2_RC_SUCCESS)
         {
@@ -221,14 +217,10 @@ fapi2::ReturnCode ddimm_spd_revision(const fapi2::Target<fapi2::TARGET_TYPE_MEM_
                      "%s DDIMM has unsupported SPD revision and needs to be updated (0x%02X < 0x%02X)",
                      mss::c_str(l_dimm), l_spd_rev, MIN_FUNCTIONAL_SPD_REV );
 
-        // Don't bother checking the return code here because this check only produces informational logs
-        // (and the RC is only used for unit tests)
-        check::base_spd_revision(l_dimm, l_spd_rev);
-
         // Finally check the SPD content revision
         // Don't bother checking the return code here because this check only produces informational logs
         // (and the RC is only used for unit tests)
-        check::spd_content_revision(l_dimm, l_spd_content_rev, l_latest_content_rev);
+        check::spd_combined_revision(l_dimm, l_spd_rev, l_spd_content_rev, l_latest_combined_rev);
     }
 
 fapi_try_exit:

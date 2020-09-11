@@ -1492,12 +1492,12 @@
   </hwpError>
 
   <hwpError>
-    <rc>RC_MSS_NON_CURRENT_SPD_CONTENT_REVISION</rc>
+    <rc>RC_MSS_NON_CURRENT_SPD_COMBINED_REVISION</rc>
     <description>
-        DIMM SPD content revision is not current, and could be updated.
+        DIMM SPD combined revision is not current, and could be updated.
     </description>
-    <ffdc>SPD_CONTENT_REVISION</ffdc>
-    <ffdc>LATEST_SPD_CONTENT_REVISION</ffdc>
+    <ffdc>SPD_COMBINED_REVISION</ffdc>
+    <ffdc>LATEST_SPD_COMBINED_REVISION</ffdc>
     <callout>
       <target>DIMM_TARGET</target>
       <priority>HIGH</priority>
