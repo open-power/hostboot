@@ -2835,6 +2835,54 @@ ReturnCode p10_ipl_customize (
         }
     }
 
+    //////////////////////////////////////////////////////////////////////////
+    // CUSTOMIZE item:     Append DD-specific hdct binary to
+    //                     Seeprom image.
+    // System phase:       HB_SBE
+    //////////////////////////////////////////////////////////////////////////
+
+    if (i_sysPhase == SYSPHASE_HB_SBE)
+    {
+        // Setup up nested section ID combination for SBE PPE image
+        mainSectionID = P9_XIP_SECTION_HW_SBE;
+        subSectionID  = P9_XIP_SECTION_SBE_HDCT;
+        l_rc = p9_xip_get_sub_section( i_hwImage,
+                                       mainSectionID,
+                                       subSectionID,
+                                       &iplImgSection,
+                                       attrDdLevel );
+
+        FAPI_ASSERT( l_rc == INFRASTRUCT_RC_SUCCESS,
+                     fapi2::XIPC_XIP_GET_SECTION_ERROR().
+                     set_CHIP_TARGET(i_procTarget).
+                     set_XIP_RC(l_rc).
+                     set_SECTION_ID(subSectionID).
+                     set_DDLEVEL(attrDdLevel).
+                     set_OCCURRENCE(2),
+                     "p9_xip_get_sub_section() failed (2) w/rc=0x%08X retrieving SBE IPL"
+                     " section ID=%u and ddLevel=0x%x",
+                     (uint32_t)l_rc, subSectionID, attrDdLevel );
+
+        l_rc = p9_xip_append( io_image,       // *must* be an SBE image
+                              subSectionID,
+                              (void*)((uint8_t*)i_hwImage + iplImgSection.iv_offset),
+                              iplImgSection.iv_size,
+                              l_maxImageSize,
+                              &l_sectionOffset,
+                              0 );
+
+        FAPI_ASSERT( l_rc == 0,
+                     fapi2::XIPC_XIP_APPEND_ERROR().
+                     set_CHIP_TARGET(i_procTarget).
+                     set_XIP_RC(l_rc).
+                     set_SECTION_ID(subSectionID).
+                     set_MAX_IMAGE_SIZE(l_maxImageSize).
+                     set_OCCURRENCE(1),
+                     "ERROR: p9_xip_append() failed w/rc=0x%08x for section = %u"
+                     " ddLevel=0x%x",
+                     (uint32_t)l_rc, subSectionID, attrDdLevel);
+    }
+
 
 
 
