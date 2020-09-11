@@ -827,4 +827,21 @@
    </chipEcFeature>
   </attribute>
   <!-- ******************************************************************** -->
+  <attribute>
+  <id>ATTR_CHIP_EC_FEATURE_HW545787</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>
+    DD1 - Disable L2 blocking of sister threads in critical section.
+  </description>
+  <chipEcFeature>
+    <chip>
+     <name>ENUM_ATTR_NAME_P10</name>
+     <ec>
+       <value>0x10</value>
+       <test>EQUAL</test>
+     </ec>
+    </chip>
+  </chipEcFeature>
+  </attribute>
+  <!-- ******************************************************************** -->
 </attributes>
