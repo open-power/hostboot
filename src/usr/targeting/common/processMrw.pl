@@ -3757,13 +3757,15 @@ sub processFsi
         #   |         |        |         |
         #   |---------|        |---------|
 
+        use constant TOPOLOGY_MODE1 => 1;
         my $source_type = $targetObj->getType($parentTarget);
         if ( $source_type eq "PROC" )
         {
             my $proc_type = $targetObj->getAttribute($parentTarget, "PROC_MASTER_TYPE");
             if ($proc_type eq "ACTING_MASTER" || $proc_type eq "MASTER_CANDIDATE" )
             {
-                if (getTopologyId($targetObj, $parentTarget) == 1)
+                my $topoId = getTopologyId($targetObj, $parentTarget);
+                if (getTopologyIdChipBits($topoId, TOPOLOGY_MODE1) == 1)
                 {
                   $altfsiswitch = 1;
                 }
@@ -3776,12 +3778,14 @@ sub processFsi
             my $proc_type = $targetObj->getAttribute($fsi_child_target, "PROC_MASTER_TYPE");
             if ($proc_type eq "ACTING_MASTER" || $proc_type eq "MASTER_CANDIDATE" )
             {
-                if (getTopologyId($targetObj, $fsi_child_target) == 1)
+                my $topoId = getTopologyId($targetObj, $fsi_child_target);
+                if (getTopologyIdChipBits($topoId, TOPOLOGY_MODE1) == 1)
                 {
                   $flip_port = 1;
                 }
             }
         }
+
         $targetObj->setFsiAttributes($fsi_child_target,
                     $type,$cmfsi,$proc_path,$fsi_link,$flip_port,$altfsiswitch);
     }
@@ -4684,6 +4688,69 @@ sub getTopologyMode
                       ->{enumerator}->{$topologoyMode}->{value});
 }
 
+
+#--------------------------------------------------
+# @brief Extracts the Group bits from topology ID.
+#
+# @details  The topology ID is a 4 bit value that depends on the topology mode.
+#                Mode      ID
+#               MODE 0 => GGGC
+#               MODE 1 => GGCC
+#
+# @param[in] $topologyId   - The topology ID
+# @param[in] $topologyMode - The topology mode that determines the bit arrangement. Needs to be a base 10 numeral value.
+#
+# @return The value of the group bits.
+sub getTopologyIdGroupBits
+{
+    my $topologyId = shift;
+    my $topologyMode = shift;
+
+    use constant TOPOLOGY_MODE_1 => 1;
+
+    # Assume topology mode 0 (GGGC)
+    my $groupMask = 0xE; # Use 0xE, 1110b, to extract 'GGG' from 'GGGC'
+
+    # If topology mode 1 (GGCC)
+    if (TOPOLOGY_MODE_1 == $topologyMode)
+    {
+        $groupMask = 0xC; # Use 0xC, 1100b, to extract 'GG' from 'GGCC'
+    }
+
+    return ($topologyId & $groupMask);
+}
+
+#--------------------------------------------------
+# @brief Extracts the Chip bits from topology ID.
+#
+# @details  The topology ID is a 4 bit value that depends on the topology mode.
+#                Mode      ID
+#               MODE 0 => GGGC
+#               MODE 1 => GGCC
+#
+# @param[in] $topologyId   - The topology ID
+# @param[in] $topologyMode - The topology mode that determines the bit arrangement. Needs to be a base 10 numeral value.
+#
+# @return The value of the chip bits.
+sub getTopologyIdChipBits
+{
+    my $topologyId = shift;
+    my $topologyMode = shift;
+
+    use constant TOPOLOGY_MODE_1 => 1;
+
+    # Assume topology mode 0 (GGGC)
+    my $chipMask = 0x1;  # Use 0x1, 0001b, to extract 'C' from 'GGGC'
+
+    # If topology mode 1 (GGCC)
+    if (TOPOLOGY_MODE_1 == $topologyMode)
+    {
+        $chipMask = 0x3;  # Use 0x3, 0011b, to extract 'CC' from 'GGCC'
+    }
+
+    return ($topologyId & $chipMask);
+}
+
 #--------------------------------------------------
 # @brief Convert the topology ID to a topology index.
 #
@@ -4706,19 +4773,6 @@ sub convertTopologyIdToIndex
     my $topologyId = shift;
     my $topologyMode = shift;
 
-    use constant TOPOLOGY_MODE_1 => 1;
-
-    # Assume topology mode 0 (GGGC -> GGG0C)
-    my $groupMask = 0xE; # Use 0xE, 1110b, to extract 'GGG' from 'GGGC'
-    my $chipMask = 0x1;  # Use 0x1, 0001b, to extract 'C' from 'GGGC'
-
-    # If topology mode 1 (GGCC -> GG0CC)
-    if (TOPOLOGY_MODE_1 == $topologyMode)
-    {
-        $groupMask = 0xC; # Use 0xC, 1100b, to extract 'GG' from 'GGCC'
-        $chipMask = 0x3;  # Use 0x3, 0011b, to extract 'CC' from 'GGCC'
-    }
-
     # Set topology index to topology ID before doing conversion
     my $topologyIndex = $topologyId;
 
@@ -4733,7 +4787,8 @@ sub convertTopologyIdToIndex
     #  2) extract CC from GGCC: GGCC & 0x3 (0011b) returns CC
     # Bitwise 'OR' 1 and 2 together to produce a 5 bit index value: GGG0C OR GG0CC
     #    Index     =                  1                  'OR'               2
-    $topologyIndex = (($topologyIndex & $groupMask) << 1) | ($topologyIndex & $chipMask);
+    $topologyIndex = (getTopologyIdGroupBits($topologyId, $topologyMode) << 1)
+                   | (getTopologyIdChipBits($topologyId, $topologyMode));
 
     return ($topologyIndex);
 }
