@@ -270,7 +270,7 @@
      bit 4: link 1 tx lane reversal (9 tx lanes)
   </description>
   <valueType>uint8</valueType>
-  <writeable/>
+  <platInit/>
   <initToZero/>
 </attribute>
 <!-- ********************************************************************** -->
