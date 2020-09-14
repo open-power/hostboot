@@ -513,18 +513,21 @@ enum mbacal_addresses : uint32_t
 // MBACALFIR bit masks for event n
 enum mbacal_bitmask_values : uint64_t
 {
-    MBACALFIR_EVENTN_AND_BIT = 0xff7fffffffffffff,
-    MBACALFIR_EVENTN_OR_BIT  = 0x0080000000000000,
-    MBACALFIR_UNMASK_BIT     = 0xff7fffffffffffff,
+    MBACALFIR_EVENTN_AND_BIT         = 0xff7fffffffffffff,
+    MBACALFIR_EVENTN_OR_BIT          = 0x0080000000000000,
+    MBACALFIR_REFRESH_OVERRUN_OR_BIT = 0x2000000000000000,
+    MBACALFIR_UNMASK_BIT             = 0xff7fffffffffffff,
 };
 
 
 /**
- * @brief Mask MCBACALFIR Event N to prevent PRD from handling event
+ * @brief Mask MCBACALFIR to prevent PRD from handling event
+ *        Note: if mask fails, this will commit the error internally
  *
  * @param[in] - i_nvdimm - nvdimm target for operation on its parent MCA
+ * @param[in] - i_orMaskData - bits to mask via OR (see MBACALFIR_*OR_BIT)
  */
-void maskMbacalfir_eventn(TARGETING::Target* i_nvdimm);
+void maskMbacalfir(TARGETING::Target* i_nvdimm, uint64_t i_orMaskData);
 
 /**
  * @brief Wrapper to call deviceOp to read the NV controller via I2C

@@ -1143,7 +1143,7 @@ errlHndl_t nvdimmValidImage(Target *i_nvdimm, bool &o_imgValid)
     return l_err;
 }
 
-void maskMbacalfir_eventn(TARGETING::Target* i_nvdimm)
+void maskMbacalfir(TARGETING::Target* i_nvdimm, uint64_t i_orMaskData)
 {
     errlHndl_t l_err = nullptr;
     TargetHandleList l_mcaList;
@@ -1152,18 +1152,19 @@ void maskMbacalfir_eventn(TARGETING::Target* i_nvdimm)
     size_t l_writeSize = sizeof(l_writeData);
 
     getParentAffinityTargets(l_mcaList, i_nvdimm, CLASS_UNIT, TYPE_MCA);
-    assert(l_mcaList.size(), "maskMbacalfir_eventn() failed to find parent MCA.");
+    assert(l_mcaList.size(), "maskMbacalfir() failed to find parent MCA.");
 
     l_writeAddress = MBACALFIR_OR_MASK_REG;
-    l_writeData = MBACALFIR_EVENTN_OR_BIT;
+    l_writeData = i_orMaskData;
     l_err = deviceWrite(l_mcaList[0], &l_writeData, l_writeSize,
                         DEVICE_SCOM_ADDRESS(l_writeAddress));
     if(l_err)
     {
         TRACFCOMP(g_trac_nvdimm,
-            ERR_MRK "Failed to mask MBACALFIR EventN using address "
+            ERR_MRK "Failed to mask MBACALFIR 0x%016llX using address "
             "0x%08x on NVDIMM 0x%08X MCA 0x%08X",
-            l_writeAddress, get_huid(i_nvdimm), get_huid(l_mcaList[0]));
+            i_orMaskData, l_writeAddress, get_huid(i_nvdimm),
+            get_huid(l_mcaList[0]));
         l_err->collectTrace(NVDIMM_COMP_NAME);
         errlCommit( l_err, NVDIMM_COMP_ID );
     }
@@ -1211,10 +1212,6 @@ errlHndl_t nvdimmRestore(TargetHandleList& io_nvdimmList, uint8_t &i_mpipl)
             if (i_mpipl)
             {
                 TRACFCOMP(g_trac_nvdimm, "nvdimmRestore(): in MPIPL");
-
-                // To avoid PRD error during mpipl need to Mask MBACALFIR EventN
-                // Note: a regular IPL will already have this masked
-                maskMbacalfir_eventn(*it);
 
                 // Call init for error checking skipped in the SAVE step
                 nvdimm_init(*it);
@@ -1864,6 +1861,7 @@ void nvdimm_restore(TargetHandleList &i_nvdimmList)
             if (!l_valid)
             {
                 TRACFCOMP(g_trac_nvdimm, ERR_MRK"nvdimm_restore() nvdimm[%X] No valid image discovered", get_huid(*it));
+
                 // Set ATTR NV STATUS FLAG to Erased
                 nvdimmSetStatusFlag(*it, NSTD_VAL_ERASED);
                 it = l_nvdimm_restore_list.erase(it);

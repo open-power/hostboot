@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -362,11 +362,29 @@ bool nvdimmCalloutDimm(Target *i_nvdimm, uint8_t i_step, errlHndl_t& o_err)
             }
             else
             {
+                Target* l_sys = nullptr;
+                targetService().getTopLevelTarget( l_sys );
+                assert(l_sys, "nvdimmCalloutDimm: no TopLevelTarget");
+                uint8_t l_mpipl = l_sys->getAttr<ATTR_IS_MPIPL_HB>();
+                if (l_mpipl)
+                {
+                    TRACFCOMP( g_trac_nvdimm, "nvdimmCalloutDimm() - "
+                        "mask MBCALFIR eventN & refresh overrun for "
+                        "deconfigured nvdimm[%X]", get_huid(i_nvdimm) );
+
+                    // To avoid PRD error during mpipl need to Mask
+                    // MBACALFIR EventN & Refresh Overrun but only for
+                    // deconfigured nvdimm
+                    maskMbacalfir(i_nvdimm,  MBACALFIR_REFRESH_OVERRUN_OR_BIT |
+                                             MBACALFIR_EVENTN_OR_BIT);
+                    o_err->collectTrace(NVDIMM_COMP_NAME, 512);
+                }
+
                 // Callout, deconfig and gard the dimm
                 o_err->addHwCallout( i_nvdimm,
-                                       HWAS::SRCI_PRIORITY_HIGH,
-                                       HWAS::DECONFIG,
-                                       HWAS::GARD_Fatal);
+                                     HWAS::SRCI_PRIORITY_HIGH,
+                                     HWAS::DECONFIG,
+                                     HWAS::GARD_Fatal);
             }
 
             break;
