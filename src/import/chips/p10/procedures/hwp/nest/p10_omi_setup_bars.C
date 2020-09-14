@@ -238,7 +238,6 @@ fapi2::ReturnCode p10_omi_setup_bars(
         l_mcfiraction.setBit<SCOMFIR_MCFIR_COMMAND_LIST_TIMEOUT>();
         l_mcfiraction.setBit<SCOMFIR_MCFIR_POP_RCMD_NOHIT>();
         l_mcfiraction.setBit<SCOMFIR_MCFIR_POP_RCMD_BADHIT>();
-        l_mcfiraction.setBit<SCOMFIR_MCFIR_INVALID_SMF_ACCESS>();
         l_mcfiraction.setBit<SCOMFIR_MCFIR_SYNC_ERROR>();
 
         // Setup FIR bits in MC Fault Isolation Mask Register buffer
@@ -252,7 +251,6 @@ fapi2::ReturnCode p10_omi_setup_bars(
         l_mcfirmask_and.clearBit<SCOMFIR_MCFIR_POP_RCMD_NOHIT>();
         l_mcfirmask_and.clearBit<SCOMFIR_MCFIR_POP_RCMD_BADHIT>();
         l_mcfirmask_and.clearBit<SCOMFIR_MCFIR_MULTIPLE_TID_ERROR>();
-        l_mcfirmask_and.clearBit<SCOMFIR_MCFIR_INVALID_SMF_ACCESS>();
         l_mcfirmask_and.clearBit<SCOMFIR_MCFIR_SYNC_ERROR>();
 
         char l_targetStr[fapi2::MAX_ECMD_STRING_LEN];

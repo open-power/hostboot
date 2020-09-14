@@ -1080,7 +1080,6 @@ p10_exit_cache_contained_run_mi_initfile_xscom(
     l_scom_mask |= (uint64_t) 0x1 << (64 - (15 + 1)); //MCFIR_POP_RCMD_NOHIT
     l_scom_mask |= (uint64_t) 0x1 << (64 - (16 + 1)); //MCFIR_POP_RCMD_BADHIT
     l_scom_mask |= (uint64_t) 0x1 << (64 - (20 + 1)); //MCFIR_MULTIPLE_TID_ERROR
-    l_scom_mask |= (uint64_t) 0x1 << (64 - (22 + 1)); //MCFIR_INVALID_SMF_ACCESS
     l_scom_mask |= (uint64_t) 0x1 << (64 - (23 + 1)); //MCFIR_SYNC_ERROR
 
     FAPI_TRY(p10_gen_xscom_init(
@@ -1101,7 +1100,6 @@ p10_exit_cache_contained_run_mi_initfile_xscom(
     l_scom_data |= (uint64_t) 0x1 << (64 - ( 8 + 1)); //MCFIR_COMMAND_LIST_TIMEOUT
     l_scom_data |= (uint64_t) 0x1 << (64 - (15 + 1)); //MCFIR_POP_RCMD_NOHIT
     l_scom_data |= (uint64_t) 0x1 << (64 - (16 + 1)); //MCFIR_POP_RCMD_BADHIT
-    l_scom_data |= (uint64_t) 0x1 << (64 - (22 + 1)); //MCFIR_INVALID_SMF_ACCESS
     l_scom_data |= (uint64_t) 0x1 << (64 - (23 + 1)); //MCFIR_SYNC_ERROR
     //mask
     l_scom_mask |= (uint64_t) 0x1 << (64 - ( 0 + 1)); //MCFIR_MC_INTERNAL_RECOVERABLE_ERROR
@@ -1109,7 +1107,6 @@ p10_exit_cache_contained_run_mi_initfile_xscom(
     l_scom_mask |= (uint64_t) 0x1 << (64 - ( 8 + 1)); //MCFIR_COMMAND_LIST_TIMEOUT
     l_scom_mask |= (uint64_t) 0x1 << (64 - (15 + 1)); //MCFIR_POP_RCMD_NOHIT
     l_scom_mask |= (uint64_t) 0x1 << (64 - (16 + 1)); //MCFIR_POP_RCMD_BADHIT
-    l_scom_mask |= (uint64_t) 0x1 << (64 - (22 + 1)); //MCFIR_INVALID_SMF_ACCESS
     l_scom_mask |= (uint64_t) 0x1 << (64 - (23 + 1)); //MCFIR_SYNC_ERROR
 
     FAPI_TRY(p10_gen_xscom_init(
