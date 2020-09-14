@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017                             */
+/* Contributors Listed Below - COPYRIGHT 2017,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -35,7 +35,9 @@ namespace RUNTIME
 ///  -- RINGOVD
 const PreVerifyVector preVerifiedPnorSections {
     {PNOR::OCC, true},
+#ifndef CONFIG_LOAD_LIDS_VIA_PLDM
     {PNOR::WOFDATA, true},
+#endif
     {PNOR::HCODE, true},
     {PNOR::VERSION, true},
     {PNOR::RINGOVD, false},

@@ -256,6 +256,13 @@ fapi2::ReturnCode platParseWOFTables(uint8_t* o_wofData)
             addErrlPtrToReturnCode(l_rc, l_errl);
             break;
         }
+        
+#ifdef CONFIG_LOAD_LIDS_VIA_PLDM
+        // For P9 just when loading the WOF lid from the BMC, just hardcode
+        // the WOF image size so we succesfully load it. PHYP should
+        // not actually use the WOF image anyways
+        l_lidImageSize = VMM_SIZE_WOFDATA_LID;
+#endif
 
         FAPI_INF("WOFDATA lid is %d bytes", l_lidImageSize);
 

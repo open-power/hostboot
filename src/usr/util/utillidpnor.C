@@ -50,8 +50,10 @@ static const PnorLidsMap PnorToLidsMap =
     { PNOR::TESTRO,  LidAndContainerLid(TEST_LIDID, INVALID_LIDID)},
     { PNOR::VERSION, LidAndContainerLid(VERSION_LIDID, INVALID_LIDID)},
     { PNOR::OCC,     LidAndContainerLid(OCC_LIDID, OCC_CONTAINER_LIDID)},
+#ifndef CONFIG_LOAD_LIDS_VIA_PLDM
     { PNOR::WOFDATA, LidAndContainerLid(WOF_LIDID, WOF_CONTAINER_LIDID)},
     { PNOR::WOFDATA, LidAndContainerLid(WOF_GEN4_LIDID, WOF_GEN4_CONTAINER_LIDID)},
+#endif
     { PNOR::HCODE,   LidAndContainerLid(NIMBUS_HCODE_LIDID, HCODE_CONTAINER_LIDID)},
     { PNOR::RINGOVD, LidAndContainerLid(HWREFIMG_RINGOVD_LIDID,INVALID_LIDID)},
     // Note - This list does not include data that is used on non-OPAL
