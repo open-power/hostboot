@@ -676,9 +676,13 @@ fapi2::ReturnCode p10_tod_init(
 {
     FAPI_DBG("Start");
     fapi2::ATTR_IS_SIMULATION_Type l_attr_is_simulation;
+    fapi2::ATTR_DISABLE_TOD_SYNC_SPREAD_Type l_disable_tod_sync_spread;
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IS_SIMULATION,
                            fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(),
                            l_attr_is_simulation));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_DISABLE_TOD_SYNC_SPREAD,
+                           fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(),
+                           l_disable_tod_sync_spread));
 
     FAPI_ASSERT((i_tod_node != NULL) &&
                 (i_tod_node->i_target != NULL),
@@ -702,8 +706,11 @@ fapi2::ReturnCode p10_tod_init(
              "Error from init_tod_node!");
 
     // sync spread across chips in topology
-    FAPI_TRY(sync_spread(i_tod_node, l_attr_is_simulation),
-             "Error from sync_spread!");
+    if (l_disable_tod_sync_spread == 0)
+    {
+        FAPI_TRY(sync_spread(i_tod_node, l_attr_is_simulation),
+                 "Error from sync_spread!");
+    }
 
     // Notify the QMEs in each node that TOD setup is complete;
     //     (qme_tod_notify will recurse on each child)
