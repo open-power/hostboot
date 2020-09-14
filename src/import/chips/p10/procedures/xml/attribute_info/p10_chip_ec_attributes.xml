@@ -894,4 +894,40 @@
    </chipEcFeature>
   </attribute>
   <!-- ******************************************************************** -->
+  <attribute>
+   <id>ATTR_CHIP_EC_FEATURE_HW545803</id>
+   <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+   <description>
+     Disable timefac shadow clock gating for tod step, sync latches to prevent
+     core to shadow xfer errors
+   </description>
+   <chipEcFeature>
+     <chip>
+       <name>ENUM_ATTR_NAME_P10</name>
+       <ec>
+         <value>0x10</value>
+         <test>EQUAL</test>
+       </ec>
+     </chip>
+   </chipEcFeature>
+  </attribute>
+  <!-- ******************************************************************** -->
+  <attribute>
+   <id>ATTR_CHIP_EC_FEATURE_HW543632</id>
+   <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+   <description>
+     Wealthy Quirk -- disable SPURR, PURR parity error in timefac shadow
+     due to missing logic relative to the core implementation
+   </description>
+   <chipEcFeature>
+     <chip>
+       <name>ENUM_ATTR_NAME_P10</name>
+       <ec>
+         <value>0x10</value>
+         <test>EQUAL</test>
+       </ec>
+     </chip>
+   </chipEcFeature>
+  </attribute>
+  <!-- ******************************************************************** -->
 </attributes>
