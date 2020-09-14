@@ -55,6 +55,9 @@
 #include    <fapi2.H>
 #include    <p10_sbe_lpc_init.H>
 
+// PRDF
+#include    <diag/prdf/prdfMain.H>
+
 // Easy macro replace for unit testing
 //#define TRACUCOMP(args...)  TRACFCOMP(args)
 #define TRACUCOMP(args...)
@@ -265,6 +268,12 @@ void* call_host_sbe_update (void *io_pArgs)
 
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                "call_host_sbe_update entry" );
+
+    // This step uses significant memory resources. PRD, if it has been
+    // initialized, will also use significant memory resources. To ensure this
+    // step has enough resources to complete in a timely fashion, we will
+    // uninitialize PRD to free up the needed resources.
+    PRDF::uninitialize();
 
     Target* l_sys = UTIL::assertGetToplevelTarget();
 

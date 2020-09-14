@@ -80,9 +80,9 @@ bool g_initialized = false;
 // Function definitions
 //------------------------------------------------------------------------------
 
-void unInitialize()
+void uninitialize()
 {
-    PRDF_ENTER( "PRDF::unInitialize()" );
+    PRDF_ENTER( "PRDF::uninitialize()" );
 
     delete systemPtr;
     systemPtr = nullptr;
@@ -97,7 +97,7 @@ void unInitialize()
     // clear the MfgThresholdMgr
     MfgThresholdMgr::getInstance()->reset();
 
-    PRDF_EXIT( "PRDF::unInitialize()" );
+    PRDF_EXIT( "PRDF::uninitialize()" );
 }
 
 //------------------------------------------------------------------------------
@@ -118,7 +118,7 @@ errlHndl_t noLock_initialize()
     {
         // This means we are being re-initialized (and we were in a good state)
         // so Clean up in preparation for re-build
-        unInitialize();
+        PRDF::uninitialize();
     }
 
     if(g_initialized == false)

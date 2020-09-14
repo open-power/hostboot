@@ -183,6 +183,19 @@ extern bool g_initialized;
 extern errlHndl_t initialize();
 
 /**
+ * @brief Uninitializes the PRD system model and data.
+ *
+ * IMPORTANT: PRD initialization is expensive. The PRD system model and data is
+ * intented to stay in memory indefinitely to avoid re-initialization. Also,
+ * some data, like threshold counts or the memory maintenance command state
+ * machine, are stored and the PRD system model and will be lost when
+ * uninitialized.
+ *
+ * @return Error log if error occurs.
+ */
+extern void uninitialize();
+
+/**
  * @brief analyze attention errors
  * @param[in] i_attnType - global attention type
  * @param[in] i_attnList - list of chips at attention
