@@ -61,6 +61,7 @@
 
 #include <vpd/vpd_if.H>
 #include <initservice/initserviceif.H>
+#include <util/misc.H>
 
 namespace HWAS
 {
@@ -993,6 +994,24 @@ errlHndl_t platPresenceDetect(TargetHandleList &io_targets)
             ) // increment will be done in the loop below
     {
         TargetHandle_t pTarget = *pTarget_it;
+        // TODO RTC: 260058
+        // Disable Procs1-3 in non-simulation eBMC enviroment for
+        // bringup purposes.
+        if(!Util::isSimicsRunning() &&
+           !INITSERVICE::spBaseServicesEnabled())
+        {
+            if(pTarget->getAttr<ATTR_HUID>() == 0x50001 ||
+               pTarget->getAttr<ATTR_HUID>() == 0x50002 ||
+               pTarget->getAttr<ATTR_HUID>() == 0x50003)
+            {
+                HwasState l_hwasState;
+                l_hwasState.functional = false;
+                l_hwasState.present = false;
+                pTarget->setAttr<ATTR_HWAS_STATE>(l_hwasState);
+                pTarget_it = io_targets.erase(pTarget_it);
+                continue;
+            }
+        }
 
         // if CLASS_ENC
         // by definition, hostboot only has 1 node/enclosure, and we're
