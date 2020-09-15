@@ -27,11 +27,11 @@
         <id>ATTR_MEM_PMIC_4U_N_MODE</id>
         <targetType>TARGET_TYPE_PMIC</targetType>
         <description>
-          PMIC pair running in N-Mode (no redundancy) instead of N+1 mode.
-          This attribute applies to 4U only, would be set if GPIO or PMIC
-          setup reported a failure. Attribute should be compared with the
-          value of its redundant pmic's attribute. If both have declared
-          N-Mode, then both in the redundant pair will not be enabled.
+            PMIC pair running in N-Mode (no redundancy) instead of N+1 mode.
+            This attribute applies to 4U only, would be set if GPIO or PMIC
+            setup reported a failure. Attribute should be compared with the
+            value of its redundant pmic's attribute. If both have declared
+            N-Mode, then both in the redundant pair will not be enabled.
         </description>
         <enum>N_PLUS_1_MODE = 0, N_MODE = 1</enum>
         <initToZero></initToZero>
@@ -39,4 +39,29 @@
         <writeable/>
         <mssAccessorName>pmic_n_mode</mssAccessorName>
     </attribute>
+
+    <attribute>
+        <id>ATTR_MEM_PMIC_FORCE_N_MODE</id>
+        <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+        <description>
+            Force one of 4 N-Mode configurations instead of N_PLUS_1 mode.
+            The bits are as follows: [PMIC0, PMIC1, PMIC2, PMIC3, 0, 0, 0, 0]
+            Set the bits high for the desired PMICs to run with. A valid configuration
+            to boot with is at least a pair with one each of [0,2] and [1,3].
+            This only applies to 4U DDIMMs.
+        </description>
+        <enum>
+            N_PLUS_1 = 0xF0,
+            PMIC01   = 0xC0,
+            PMIC03   = 0x90,
+            PMIC12   = 0x60,
+            PMIC23   = 0x30
+        </enum>
+        <default>N_PLUS_1</default>
+        <valueType>uint8</valueType>
+        <platInit/>
+        <writeable/>
+        <mssAccessorName>pmic_force_n_mode</mssAccessorName>
+    </attribute>
+
 </attributes>

@@ -312,6 +312,16 @@ struct target_info_redundancy
     }
 };
 
+///
+/// @brief Structure type to loop on when performing SPD or manual enable for 4U pmics
+///
+struct enable_fields_4u
+{
+    fapi2::Target<fapi2::TARGET_TYPE_PMIC> iv_pmic;
+    fapi2::Target<fapi2::TARGET_TYPE_GENERICI2CSLAVE> iv_gpio;
+    uint8_t iv_input_port_bit;
+};
+
 //-----------------------------------
 // SPD Biasing functions
 //-----------------------------------
