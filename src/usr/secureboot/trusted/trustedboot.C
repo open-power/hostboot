@@ -2021,9 +2021,9 @@ errlHndl_t validateTpmHandle(const TpmTarget* i_pTpm)
 bool isTpmRequired()
 {
     bool retVal = false;
-
     do
     {
+/* TODO RTC: 259970 Fetch TPM Required sensor value via PLDM
         // First check if sensor is available
         if ( getTpmRequiredSensorValue(retVal) )
         {
@@ -2038,14 +2038,20 @@ bool isTpmRequired()
             // Sensor not available; reset retVal to be safe
             retVal = false;
         }
+*/
 
-
-        // Since sensor isn't available, use ATTR_TPM_REQUIRED
-        TARGETING::Target* pTopLevel = nullptr;
-        (void)TARGETING::targetService().getTopLevelTarget(pTopLevel);
-        assert(pTopLevel != nullptr, "Unable to get top level target");
-
-        retVal = pTopLevel->getAttr<TARGETING::ATTR_TPM_REQUIRED>();
+        // TPM always required in simics
+        if(Util::isSimicsRunning())
+        {
+            retVal = true;
+        }
+        else
+        {
+            // On HW, use ATTR_TPM_REQUIRED
+            TARGETING::Target* pTopLevel =
+                TARGETING::UTIL::assertGetToplevelTarget();
+            retVal = pTopLevel->getAttr<TARGETING::ATTR_TPM_REQUIRED>();
+        }
 
         TRACUCOMP( g_trac_trustedboot, "isTpmRequired: Using ATTR_TPM_REQUIRED:"
                    " retVal=%d",
