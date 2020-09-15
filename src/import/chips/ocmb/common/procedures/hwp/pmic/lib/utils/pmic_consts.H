@@ -388,7 +388,7 @@ enum regs
 ///
 /// @brief GPIO register fields
 ///
-enum fields
+enum fields : uint8_t
 {
     INPUT_PORT_REG_PMIC_PAIR0   = 2,
     INPUT_PORT_REG_PMIC_PAIR1   = 3,

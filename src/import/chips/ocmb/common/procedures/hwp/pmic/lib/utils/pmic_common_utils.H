@@ -34,6 +34,15 @@
 // *HWP Level: 1
 // *HWP Consumed by: FSP:HB
 
+///
+/// @brief FAPI_TRY for lambda functions, which goes to a different label
+///
+#define FAPI_TRY_LAMBDA( __operation__ )                               \
+    if ((fapi2::current_err = (__operation__)) != fapi2::FAPI2_RC_SUCCESS) \
+    {                                                                      \
+        goto fapi_try_exit_lambda;                                         \
+    }
+
 #ifndef __PMIC_COMMON_UTILS_H__
 #define __PMIC_COMMON_UTILS_H__
 
@@ -123,6 +132,41 @@ inline std::vector<fapi2::Target<fapi2::TARGET_TYPE_PMIC>> get_valid_pmics_for_i
     }
 
     return l_output_pmics;
+}
+
+///
+/// @brief Determine if PMIC is disabled based on ATTR_MEM_PMIC_FORCE_N_MODE attribute setting
+///
+/// @param[in] i_pmic_target PMIC target
+/// @param[out] o_disabled true/false
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else, error code
+///
+fapi2::ReturnCode disabled(const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& i_pmic_target, bool& o_disabled);
+
+///
+/// @brief Run the provided function
+///
+/// @tparam F function type (expected to be lambda)
+/// @param[in] i_pmic_target PMIC target
+/// @param[in] i_func lambda function to run if given PMIC is not disabled
+/// @return fapi2::ReturnCode
+///
+template<typename F>
+fapi2::ReturnCode run_if_not_disabled(
+    const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& i_pmic_target,
+    const F&& i_func)
+{
+    bool l_disabled = false;
+    FAPI_TRY(mss::pmic::disabled(i_pmic_target, l_disabled));
+
+    // Called with arguments pre-provided via capture
+    if (!l_disabled)
+    {
+        FAPI_TRY(i_func());
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
 }
 
 ///

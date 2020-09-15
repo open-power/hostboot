@@ -49,6 +49,30 @@ namespace mss
 namespace pmic
 {
 
+
+///
+/// @brief Determine if PMIC is disabled based on ATTR_MEM_PMIC_FORCE_N_MODE attribute setting
+///
+/// @param[in] i_pmic_target PMIC target
+/// @param[out] o_disabled true/false
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else, error code
+///
+fapi2::ReturnCode disabled(const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& i_pmic_target, bool& o_disabled)
+{
+    uint8_t l_pmic_force_n_mode_attr = 0;
+    fapi2::buffer<uint8_t> l_force_n_mode;
+
+    const auto& l_ocmb = mss::find_target<fapi2::TARGET_TYPE_OCMB_CHIP>(i_pmic_target);
+
+    FAPI_TRY(mss::attr::get_pmic_force_n_mode(l_ocmb, l_pmic_force_n_mode_attr));
+    l_force_n_mode = l_pmic_force_n_mode_attr;
+
+    o_disabled = !(l_force_n_mode.getBit(mss::index(i_pmic_target)));
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
 ///
 /// @brief Checks PMIC for VIN_BULK above minimum tolerance
 ///
@@ -429,10 +453,17 @@ fapi2::ReturnCode check_all_pmics(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CH
     // Check that the PMICs are enabled and without errors
     for (const auto& l_pmic : mss::find_targets<fapi2::TARGET_TYPE_PMIC>(i_ocmb_target))
     {
-        FAPI_TRY(check_for_vr_enable(i_ocmb_target, l_pmic),
-                 "PMIC %s did not return enabled status", mss::c_str(l_pmic));
+        // Don't run if our N Mode configuration has been overridden to skip this pmic
+        // (in which case it was never enabled)
+        FAPI_TRY(run_if_not_disabled(l_pmic, [&i_ocmb_target, &l_pmic, &l_pmic_error]()
+        {
+            FAPI_TRY_LAMBDA(check_for_vr_enable(i_ocmb_target, l_pmic));
+            FAPI_TRY_LAMBDA(mss::pmic::status::check_pmic(l_pmic, l_pmic_error));
 
-        FAPI_TRY(mss::pmic::status::check_pmic(l_pmic, l_pmic_error));
+        fapi_try_exit_lambda:
+            return fapi2::current_err;
+        }));
+
 
         FAPI_ASSERT_NOEXIT(!l_pmic_error,
                            fapi2::PMIC_STATUS_ERRORS()
