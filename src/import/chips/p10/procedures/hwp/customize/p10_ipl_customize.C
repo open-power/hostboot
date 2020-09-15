@@ -354,7 +354,7 @@ fapi2::ReturnCode writePG(
     void* i_image)
 {
     const uint8_t  IMG_PG_ENTRIES = 64;
-    const uint32_t DEFAULT_PG_VAL = 0xffffff;
+    const uint32_t DEFAULT_PG_VAL = 0xffffffff;
     const uint32_t STANDBY_PG_VAL = 0xffe03fff;
     uint8_t l_pg_idx = 0;
 
@@ -412,7 +412,7 @@ fapi2::ReturnCode writePG(
         const uint8_t  MVPD_PG_KWD_VER1 = 0x01;
         const uint8_t  MVPD_PG_KWD_VER1_SIZE = 193;
 
-        // Get Mvpd MK level
+        // Get Mvpd PG level
         FAPI_TRY(getMvpdField(fapi2::MVPD_RECORD_CP00,
                               fapi2::MVPD_KEYWORD_PG,
                               i_procTarget,
@@ -452,9 +452,9 @@ fapi2::ReturnCode writePG(
             uint32_t l_pg_mvpd_data = DEFAULT_PG_VAL & 0xFF000000;
             uint8_t l_pg_byte = 1 + (3 * l_pg_idx);
 
-            l_pg_mvpd_data = (fullPGData[l_pg_byte] << 16) |
-                             (fullPGData[l_pg_byte + 1] << 8) |
-                             (fullPGData[l_pg_byte + 2]);
+            l_pg_mvpd_data |= ((fullPGData[l_pg_byte] << 16) |
+                               (fullPGData[l_pg_byte + 1] << 8) |
+                               (fullPGData[l_pg_byte + 2]));
 
             // Update the image
             FAPI_TRY( p9_xip_set_element(i_image, "ATTR_PG_MVPD", l_pg_idx, l_pg_mvpd_data),
