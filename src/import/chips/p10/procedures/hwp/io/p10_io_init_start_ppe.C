@@ -415,7 +415,7 @@ fapi2::ReturnCode p10_io_init::init_regs(const fapi2::Target<fapi2::TARGET_TYPE_
                 FAPI_TRY(p10_io_ppe_ppe_data_rate[l_thread].putData(l_pauc_target, l_omi_data_rate));
                 FAPI_TRY(p10_io_ppe_ppe_channel_loss[l_thread].putData(l_pauc_target, l_ppe_channel_loss));
 
-                FAPI_TRY(p10_io_ppe_tx_dc_enable_dcc[l_thread].putData(l_pauc_target, 0x0));
+                //FAPI_TRY(p10_io_ppe_tx_dc_enable_dcc[l_thread].putData(l_pauc_target, 0x0));
                 FAPI_TRY(p10_io_ppe_rx_eo_enable_edge_offset_cal[l_thread].putData(l_pauc_target, 0x0));
                 FAPI_TRY(p10_io_ppe_rx_eo_enable_dfe_full_cal [l_thread].putData(l_pauc_target, 0x0));
                 FAPI_TRY(p10_io_ppe_rx_eo_enable_ctle_peak_cal[l_thread].putData(l_pauc_target, 0x0));
