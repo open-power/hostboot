@@ -146,3 +146,14 @@
         capture     group smp_ffdc;
     };
 
+    ############################################################################
+    # PLL FFDC Regs
+    ############################################################################
+
+    register IOHS_ERROR_REG
+    {
+        name        "IOHS PCBSLV error register";
+        scomaddr    0x180F001F;
+        capture     group default;
+    };
+

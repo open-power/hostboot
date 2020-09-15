@@ -1,0 +1,262 @@
+# IBM_PROLOG_BEGIN_TAG
+# This is an automatically generated prolog.
+#
+# $Source: src/usr/diag/prdf/common/plat/p10/p10_core_regs.rule $
+#
+# OpenPOWER HostBoot Project
+#
+# Contributors Listed Below - COPYRIGHT 2020
+# [+] International Business Machines Corp.
+#
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+# implied. See the License for the specific language governing
+# permissions and limitations under the License.
+#
+# IBM_PROLOG_END_TAG
+
+################################################################################
+# Additional registers for the CORE target
+################################################################################
+
+    ############################################################################
+    # EQ_CORE_FIR FFDC Regs
+    ############################################################################
+
+    register PC_FIR_HOLD_OUT
+    {
+        name        "Core PC FIR Holdout";
+        scomaddr    0x20028451;
+        capture     group default;
+    };
+
+    register THRCTL_HOLD_OUT
+    {
+        name        "Core Thread Control Holdout";
+        scomaddr    0x20028455;
+        capture     group default;
+    };
+
+    register VSU_HOLD_OUT
+    {
+        name        "VSU Error Report Hold Out";
+        scomaddr    0x200284B6;
+        capture     group default;
+    };
+
+    register TFAC_HOLD_OUT
+    {
+        name        "TFAC Error Report Hold Out";
+        scomaddr    0x200284B7;
+        capture     group default;
+    };
+
+    register IFU_HOLD_OUT0
+    {
+        name        "Core IFU Holdout 0";
+        scomaddr    0x20028600;
+        capture     group default;
+    };
+
+    register IFU_HOLD_OUT1
+    {
+        name        "Core IFU Holdout 1";
+        scomaddr    0x20028601;
+        capture     group default;
+    };
+
+    register IFU_HOLD_OUT2
+    {
+        name        "Core IFU Holdout 2";
+        scomaddr    0x20028602;
+        capture     group default;
+    };
+
+    register IFU_HOLD_OUT3
+    {
+        name        "Core IFU Holdout 3";
+        scomaddr    0x20028603;
+        capture     group default;
+    };
+
+    register ISU_HOLD_OUT0
+    {
+        name        "Core ISU Holdout 0";
+        scomaddr    0x20028640;
+        capture     group default;
+    };
+
+    register ISU_HOLD_OUT1
+    {
+        name        "Core ISU Holdout 1";
+        scomaddr    0x20028641;
+        capture     group default;
+    };
+
+    register ISU_HOLD_OUT2
+    {
+        name        "Core ISU Holdout 2";
+        scomaddr    0x20028642;
+        capture     group default;
+    };
+
+    register ISU_HOLD_OUT3
+    {
+        name        "Core ISU Holdout 3";
+        scomaddr    0x20028643;
+        capture     group default;
+    };
+
+    register LSU_HOLD_OUT_REG0
+    {
+        name        "Core LSU Holdout 0";
+        scomaddr    0x200286C0;
+        capture     group default;
+    };
+
+    register LSU_HOLD_OUT_REG1
+    {
+        name        "Core LSU Holdout 1";
+        scomaddr    0x200286C1;
+        capture     group default;
+    };
+
+    register LSU_HOLD_OUT_REG2
+    {
+        name        "Core LSU Holdout 2";
+        scomaddr    0x200286C2;
+        capture     group default;
+    };
+
+    register LSU_HOLD_OUT_REG3
+    {
+        name        "Core LSU Holdout 3";
+        scomaddr    0x200286C3;
+        capture     group default;
+    };
+
+    register LSU_HOLD_OUT_REG4
+    {
+        name        "Core LSU Holdout 4";
+        scomaddr    0x200286C4;
+        capture     group default;
+    };
+
+    register LSU_HOLD_OUT_REG5
+    {
+        name        "Core LSU Holdout 5";
+        scomaddr    0x200286C5;
+        capture     group default;
+    };
+
+    register LSU_HOLD_OUT_REG6
+    {
+        name        "Core LSU Holdout 6";
+        scomaddr    0x200286C6;
+        capture     group default;
+    };
+
+    register LSU_HOLD_OUT_REG7
+    {
+        name        "Core LSU Holdout 7";
+        scomaddr    0x200286C7;
+        capture     group default;
+    };
+
+    register LSU_HOLD_OUT_REG8
+    {
+        name        "Core LSU Holdout 8";
+        scomaddr    0x200286C8;
+        capture     group default;
+    };
+
+    register LSU_HOLD_OUT_REG9
+    {
+        name        "Core LSU Holdout 9";
+        scomaddr    0x200286C9;
+        capture     group default;
+    };
+
+    register LSU_HOLD_OUT_REG10
+    {
+        name        "Core LSU Holdout 10";
+        scomaddr    0x200286CA;
+        capture     group default;
+    };
+
+    register LSU_HOLD_OUT_REG11
+    {
+        name        "Core LSU Holdout 11";
+        scomaddr    0x200286CB;
+        capture     group default;
+    };
+
+    register LSU_HOLD_OUT_REG12
+    {
+        name        "Core LSU Holdout 12";
+        scomaddr    0x200286CC;
+        capture     group default;
+    };
+
+    register LSU_HOLD_OUT_REG13
+    {
+        name        "Core LSU Holdout 13";
+        scomaddr    0x200286CD;
+        capture     group default;
+    };
+
+    ############################################################################
+    # EQ_L2_FIR FFDC Regs
+    ############################################################################
+
+    register L2_ERR_RPT0
+    {
+        name        "L2 Error Report 0";
+        scomaddr    0x20028012;
+        capture     group default;
+    };
+
+    register L2_ERR_RPT1
+    {
+        name        "L2 Error Report 1";
+        scomaddr    0x20028013;
+        capture     group default;
+    };
+
+    ############################################################################
+    # EQ_NCU_FIR FFDC Regs
+    ############################################################################
+
+    register NCU_ERR_RPT_REG
+    {
+        name        "NCU Error Report";
+        scomaddr    0x2001864E;
+        capture     group default;
+    };
+
+    ############################################################################
+    # EQ_L3_FIR FFDC Regs
+    ############################################################################
+
+    register L3_ERR_RPT_0
+    {
+        name        "L3 error report Hold Out 0";
+        scomaddr    0x20018610;
+        capture     group default;
+    };
+
+    register L3_ERR_RPT_1
+    {
+        name        "L3 error report Hold Out 1";
+        scomaddr    0x20018617;
+        capture     group default;
+    };
+

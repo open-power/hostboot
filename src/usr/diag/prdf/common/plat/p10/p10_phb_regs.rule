@@ -1,0 +1,57 @@
+# IBM_PROLOG_BEGIN_TAG
+# This is an automatically generated prolog.
+#
+# $Source: src/usr/diag/prdf/common/plat/p10/p10_phb_regs.rule $
+#
+# OpenPOWER HostBoot Project
+#
+# Contributors Listed Below - COPYRIGHT 2020
+# [+] International Business Machines Corp.
+#
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+# implied. See the License for the specific language governing
+# permissions and limitations under the License.
+#
+# IBM_PROLOG_END_TAG
+
+################################################################################
+# Additional registers for the PHB target
+################################################################################
+
+    ############################################################################
+    # PCI_FIR FFDC Regs
+    ############################################################################
+
+    register PBAIB_CERR_RPT_REG
+    {
+        name        "PCI PFIR Error Report";
+        scomaddr    0x0801084B;
+        capture     group default;
+    };
+
+    ############################################################################
+    # PCI_NEST_FIR FFDC Regs
+    ############################################################################
+
+    register PCI_NFIR_ERR_RPT0
+    {
+        name        "PCI NFIR Error Report 0";
+        scomaddr    0x0201184A;
+        capture     group default;
+    };
+
+    register PCI_NFIR_ERR_RPT1
+    {
+        name        "PCI NFIR Error Report 1";
+        scomaddr    0x0201184B;
+        capture     group default;
+    };

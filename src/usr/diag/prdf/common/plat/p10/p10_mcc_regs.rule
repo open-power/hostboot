@@ -47,13 +47,13 @@
     };
 
     ###########################################################################
-    # P10 target DSTLFIR
+    # P10 target DSTL_FIR
     ###########################################################################
 
     register MC_DSTL_FIR_AND
     {
         name        "P10 MCC target DSTLFIR atomic AND";
-        scomaddr    0x0c010d01;
+        scomaddr    0x0C010D01;
         capture     group never;
         access      write_only;
     };
@@ -61,7 +61,7 @@
     register MC_DSTL_FIR_OR
     {
         name        "P10 MCC target DSTLFIR atomic OR";
-        scomaddr    0x0c010d02;
+        scomaddr    0x0C010D02;
         capture     group never;
         access      write_only;
     };
@@ -69,19 +69,34 @@
     register MC_DSTL_FIR_MASK_OR
     {
         name        "P10 MCC target DSTLFIR MASK atomic OR";
-        scomaddr    0x0c010d05;
+        scomaddr    0x0C010D05;
         capture     group never;
         access      write_only;
     };
 
+    register MC_DSTL_ERR_RPT
+    {
+        name        "MC DSTL Error Report";
+        scomaddr    0x0C010D0C;
+        capture     group default;
+    };
+
     ###########################################################################
-    # P10 target USTLFIR
+    # P10 target USTL_FIR
     ###########################################################################
 
     register MC_USTL_FIR_MASK_OR
     {
         name        "P10 MCC target USTLFIR MASK atomic OR";
-        scomaddr    0x0c010e05;
+        scomaddr    0x0C010E05;
         capture     group never;
         access      write_only;
     };
+
+    register MC_USTL_ERR_RPT
+    {
+        name        "MC USTL Error Report";
+        scomaddr    0x0C010E0E;
+        capture     group default;
+    };
+
