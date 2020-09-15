@@ -153,6 +153,15 @@ fapi2::ReturnCode p10_pm_qme_init(
     const char* PM_MODE_NAME_VAR;  //Defines storage for PM_MODE_NAME
     FAPI_IMP(" Execution mode %s", PM_MODE_NAME(i_mode));
     uint8_t                 fusedModeState = 0;
+    fapi2::buffer<uint64_t> l_ccsr = 0xF;
+
+    FAPI_TRY( getScom( i_target, scomt::proc::TP_TPCHIP_OCC_OCI_OCB_CCSR_RW, l_ccsr ) );
+
+    if( l_ccsr == 0 )
+    {
+        FAPI_IMP("No Configured Cores in this Proc, Not Continue on Booting QMEs");
+        goto fapi_try_exit;
+    }
 
     // -------------------------------
     // Initialization:  perform order or dynamic operations to initialize
@@ -621,8 +630,6 @@ fapi2::ReturnCode initQmeBoot(
     FAPI_INF(">> initQmeBoot");
 
     // mc_or target will be used for putscom too
-    auto l_eq_mc_and  =
-        i_target.getMulticast<fapi2::TARGET_TYPE_EQ, fapi2::MULTICAST_AND >(fapi2::MCGROUP_GOOD_EQ);
     auto l_eq_mc_or  =
         i_target.getMulticast<fapi2::TARGET_TYPE_EQ, fapi2::MULTICAST_OR >(fapi2::MCGROUP_GOOD_EQ);
     auto l_eq_mc_cmp =
@@ -708,7 +715,7 @@ fapi2::ReturnCode initQmeBoot(
         do
         {
             fapi2::delay(QME_POLLTIME_MS * 1000, QME_POLLTIME_MCYCLES * 1000 * 1000);
-            FAPI_TRY( getScom( l_eq_mc_and, QME_BCECSR, l_bceCsrReg ) );
+            FAPI_TRY( getScom( l_eq_mc_or, QME_BCECSR, l_bceCsrReg ) );
             l_bceCsrReg.extractToRight(l_qmeRunningCount, QME_BCECSR_NUM_BLOCKS, QME_BCECSR_NUM_BLOCKS_LEN );
             FAPI_DBG("l_qmeRunningCount LOOP: %u (0x%X)", l_qmeRunningCount, l_qmeRunningCount);
             ++loop_count;
