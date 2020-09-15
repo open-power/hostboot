@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -51,25 +51,36 @@ extern "C"
         host_fw_command_struct l_active_errl_cmd;
         host_fw_response_struct l_response;
 
+        // common interface (SUB_CMD_READ_ACTIVE_LOG ignores image and offset)
+        mss::exp::ib::exp_fw_log_cmd_parms_struct_t l_cmd_parms =
+        {
+            mss::exp::ib::SUB_CMD_READ_ACTIVE_LOG,
+            mss::exp::ib::EXP_IMAGE_A,
+            0,
+            static_cast<uint32_t>(o_data.size())
+        };
+
         // Set up the command packet
-        mss::exp::ib::build_log_cmd(i_ocmbTarget,
-                                    mss::exp::ib::SUB_CMD_READ_ACTIVE_LOG,
-                                    l_active_errl_cmd);
+        FAPI_TRY(mss::exp::ib::build_log_cmd(i_ocmbTarget,
+                                             l_cmd_parms,
+                                             l_active_errl_cmd),
+                 "exp_active_log: Failed build_log_cmd() for %s!",
+                 mss::c_str(i_ocmbTarget));
 
         // Send the command packet
         FAPI_TRY(mss::exp::ib::putCMD(i_ocmbTarget, l_active_errl_cmd),
-                 "exp_active_error_log: Failed putCMD() for %s!",
+                 "exp_active_log: Failed putCMD() for %s!",
                  mss::c_str(i_ocmbTarget));
 
         // Get the response
         FAPI_TRY(mss::exp::ib::getRSP(i_ocmbTarget, l_response, o_data),
-                 "exp_active_error_log: Failed getRSP() cmd "
-                 "for %s!", mss::c_str(i_ocmbTarget));
+                 "exp_active_log: Failed getRSP() cmd for %s!",
+                 mss::c_str(i_ocmbTarget));
 
         // Check if cmd was successful
         FAPI_TRY(mss::exp::ib::check_log_cmd_response(i_ocmbTarget, l_response),
-                 "exp_active_error_log: Failed check_log_cmd_response()"
-                 " for %s!", mss::c_str(i_ocmbTarget));
+                 "exp_active_log: Failed check_log_cmd_response() for %s!",
+                 mss::c_str(i_ocmbTarget));
 
     fapi_try_exit:
         return fapi2::current_err;
@@ -78,16 +89,28 @@ extern "C"
 
     /// See header
     fapi2::ReturnCode exp_saved_log(
+        const mss::exp::ib::exp_image i_image,
+        const uint32_t i_offset,
         const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_ocmbTarget,
-        std::vector<uint8_t>& o_data)
+        std::vector<uint8_t>& io_data)
     {
         host_fw_command_struct l_saved_log_cmd;
         host_fw_response_struct l_response;
 
+        mss::exp::ib::exp_fw_log_cmd_parms_struct_t l_cmd_parms =
+        {
+            mss::exp::ib::SUB_CMD_READ_SAVED_LOG,
+            i_image,
+            i_offset,
+            static_cast<uint32_t>(io_data.size())
+        };
+
         // Set up the command packet
-        mss::exp::ib::build_log_cmd(i_ocmbTarget,
-                                    mss::exp::ib::SUB_CMD_READ_SAVED_LOG,
-                                    l_saved_log_cmd);
+        FAPI_TRY(mss::exp::ib::build_log_cmd(i_ocmbTarget,
+                                             l_cmd_parms,
+                                             l_saved_log_cmd),
+                 "exp_saved_log: Failed build_log_cmd() for %s!",
+                 mss::c_str(i_ocmbTarget));
 
         // Send the command packet
         FAPI_TRY(mss::exp::ib::putCMD(i_ocmbTarget, l_saved_log_cmd),
@@ -95,7 +118,7 @@ extern "C"
                  mss::c_str(i_ocmbTarget));
 
         // Get the response
-        FAPI_TRY(mss::exp::ib::getRSP(i_ocmbTarget, l_response, o_data),
+        FAPI_TRY(mss::exp::ib::getRSP(i_ocmbTarget, l_response, io_data),
                  "exp_saved_log: Failed getRSP() for %s!",
                  mss::c_str(i_ocmbTarget));
 

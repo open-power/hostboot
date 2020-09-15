@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -38,6 +38,7 @@
 
 #include <fapi2.H>
 #include <vector>
+#include <lib/inband/exp_fw_log.H>
 
 // Required for Cronus
 typedef fapi2::ReturnCode (*exp_active_log_FP_t) (
@@ -45,6 +46,8 @@ typedef fapi2::ReturnCode (*exp_active_log_FP_t) (
     std::vector<uint8_t>& );
 
 typedef fapi2::ReturnCode (*exp_saved_log_FP_t) (
+    const mss::exp::ib::exp_image,
+    const uint32_t,
     const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>&,
     std::vector<uint8_t>& );
 
@@ -64,14 +67,20 @@ extern "C"
 
     ///
     /// @brief Grab saved log entries from Explorer SPI flash
+    /// @param[in] i_image - 0 = image A, 1 = image B
+    /// @param[in] i_offset - offset in image to start grabbing data (0-0x0FFFFF)
     /// @param[in] i_target the controller
-    /// @param[out] o_data - where to put error log data
+    /// @param[in/out] io_data -
+    ///               [in] size = amount of log data to gather (0-0x10000)
+    ///               [out]where to put error log data
     ///
     /// @return FAPI2_RC_SUCCESS iff ok
     ///
     fapi2::ReturnCode exp_saved_log(
+        const mss::exp::ib::exp_image i_image,
+        const uint32_t i_offset,
         const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_ocmbTarget,
-        std::vector<uint8_t>& o_data );
+        std::vector<uint8_t>& io_data );
 
 }// extern C
 #endif
