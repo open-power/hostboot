@@ -259,7 +259,7 @@ errlHndl_t PLDM::assignTargetEntityIds()
         getClassResources(target,
                           entity_info.target_class,
                           entity_info.target_type,
-                          UTIL_FILTER_PRESENT);
+                          UTIL_FILTER_ALL);
 
         if (target.size() != target_rsid.size())
         {
