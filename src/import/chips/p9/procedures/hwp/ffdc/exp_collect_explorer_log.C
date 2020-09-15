@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -70,8 +70,9 @@ const size_t FOLLOWING_PACKET_SIZE = 0x200;
  */
 enum exp_log_type : uint8_t
 {
-    ACTIVE_LOG = 1, // RAM error section
-    SAVED_LOG  = 2  // SPI flash error section
+    ACTIVE_LOG  = 1, // RAM error section
+    SAVED_LOG_A = 2, // SPI flash error section from image A
+    SAVED_LOG_B = 3  // SPI flash error section from image B
 };
 
 /**
@@ -105,20 +106,43 @@ fapi2::ReturnCode exp_collect_explorer_logs(const fapi2::ffdc_t& i_ocmb_chip,
     // How much explorer log data are we allowed to add to the HWP error?
     uint32_t l_allowable_size = *(reinterpret_cast<const uint32_t*>(i_size.ptr()));
 
+    // verify not trying to grab more than allowed per explorer log
+    if (l_allowable_size > mss::exp::ib::MAX_BYTES_PER_LOG)
+    {
+        // avoid assert within assert here, so just log this information
+        FAPI_INF("exp_collect_explorer_logs: passed size 0x%.8X, max size allowed: 0x%.8X",
+                 l_allowable_size, mss::exp::ib::MAX_BYTES_PER_LOG);
+
+        // set to maximum allowed
+        l_allowable_size =  mss::exp::ib::MAX_BYTES_PER_LOG;
+    }
+
     std::vector<uint8_t>l_explorer_log_data; // full Explorer log data
+    l_explorer_log_data.resize(l_allowable_size);
     fapi2::ffdc_t UNIT_FFDC_EXP_ERROR; // filled in for RC_EXPLORER_ERROR_LOG
 
-    FAPI_INF( "exp_collect_explorer_logs: Entering ... "
-              "(log type: %s, max data size: 0x%04X)",
-              i_log_type == ACTIVE_LOG ? "Active" : "Saved", l_allowable_size );
+    switch (i_log_type)
+    {
+        case ACTIVE_LOG:
+            FAPI_INF( "exp_collect_explorer_logs: Entering ... "
+                      "Grab ACTIVE_LOG with max data size: 0x%04X", l_allowable_size );
+            FAPI_EXEC_HWP(l_rc, exp_active_log, l_target_ocmb,
+                          l_explorer_log_data);
+            break;
 
-    if ( ACTIVE_LOG == i_log_type )
-    {
-        FAPI_EXEC_HWP(l_rc, exp_active_log, l_target_ocmb, l_explorer_log_data);
-    }
-    else
-    {
-        FAPI_EXEC_HWP(l_rc, exp_saved_log, l_target_ocmb, l_explorer_log_data);
+        case SAVED_LOG_A:
+            FAPI_INF( "exp_collect_explorer_logs: Entering ... "
+                      "Grab SAVED_LOG_A with max data size: 0x%04X", l_allowable_size );
+            FAPI_EXEC_HWP(l_rc, exp_saved_log, mss::exp::ib::EXP_IMAGE_A, 0, l_target_ocmb,
+                          l_explorer_log_data);
+            break;
+
+        case SAVED_LOG_B:
+            FAPI_INF( "exp_collect_explorer_logs: Entering ... "
+                      "Grab SAVED_LOG_B with max data size: 0x%04X", l_allowable_size );
+            FAPI_EXEC_HWP(l_rc, exp_saved_log, mss::exp::ib::EXP_IMAGE_B, 0, l_target_ocmb,
+                          l_explorer_log_data);
+            break;
     }
 
     if (l_rc != fapi2::FAPI2_RC_SUCCESS)
@@ -134,12 +158,31 @@ fapi2::ReturnCode exp_collect_explorer_logs(const fapi2::ffdc_t& i_ocmb_chip,
         // Add this much explorer log data (as maximum amount, could be less)
         l_header_meta.error_data_size = FIRST_PACKET_SIZE;
 
-        // We read from the end since the most recent logs are the last
-        // entries returned in the full Explorer log data
-        auto l_end_ptr = l_explorer_log_data.end();
+        // pointer to start of explorer data
+        const uint8_t* l_start_data_ptr = l_explorer_log_data.data();
+
+        uint32_t l_current_idx = 0;
+
+        if (i_log_type == ACTIVE_LOG)
+        {
+            // Skip to the last entry in ACTIVE log
+            // skip 0x00's at the end of the ACTIVE log
+            // leave at least 1 byte of data so we know log was all 0x00's
+            while ( (l_explorer_bytes_left > 1) &&
+                    (l_start_data_ptr[l_explorer_bytes_left - 1] == 0x00) )
+            {
+                l_explorer_bytes_left--;
+            }
+
+            // most recent traces at end of data in ACTIVE log
+            l_current_idx = l_explorer_bytes_left;
+        }
+
 
         // This is where we start iterating through the Explorer log data
         // and break it into sections that are added to the HWP error
+        // ACTIVE log data has most recent traces at the end
+        // SAVED log data has the most recent traces at the beginning
         while ( l_explorer_bytes_left )
         {
             // ----------------------------------------------------------------
@@ -147,53 +190,67 @@ fapi2::ReturnCode exp_collect_explorer_logs(const fapi2::ffdc_t& i_ocmb_chip,
             // ----------------------------------------------------------------
             // Verify there is enough space left in the allowable HWP error
             // so we can add another full data section
-            if ( l_allowable_size > l_header_meta.error_data_size)
+            if ( l_explorer_bytes_left < l_header_meta.error_data_size)
             {
-                // We can add at least a packet of data, if we have that
-                // much to add
-                if (l_explorer_bytes_left < l_header_meta.error_data_size)
-                {
-                    FAPI_INF("exp_collect_explorer_logs: %d) reduce packet size to include the last explorer log bytes"
-                             "(l_explorer_bytes_left %d, Initial packet size %d)", l_header_meta.packet_num,
-                             l_explorer_bytes_left, l_header_meta.error_data_size);
+                FAPI_DBG("exp_collect_explorer_logs: %d) reduce packet size to include the last explorer log bytes"
+                         "(l_explorer_bytes_left %d, Initial packet size %d)", l_header_meta.packet_num,
+                         l_explorer_bytes_left, l_header_meta.error_data_size);
 
-                    // reduce the packet size to include the last explorer log bytes
-                    l_header_meta.error_data_size = l_explorer_bytes_left;
-                }
-
-                // else, have enough data and space, so add full data size
+                // reduce the packet size to include the last explorer log bytes
+                l_header_meta.error_data_size = l_explorer_bytes_left;
             }
-            else if ( l_allowable_size ) // Any space left?
-            {
-                // Note: if here, we cannot add a full section size of data
 
-                // Is allowable size remaining less than the explorer bytes available?
-                if ( l_allowable_size < l_explorer_bytes_left )
+            // Setup offset where the data is starting from out of the whole Explorer log data
+            if (i_log_type == ACTIVE_LOG)
+            {
+                // check that offset won't wrap to huge number
+                if (l_header_meta.error_data_size > l_current_idx)
                 {
-                    // use up the rest of the allowable space available
-                    FAPI_INF("exp_collect_explorer_logs: %d) use up rest of space available"
-                             "(l_explorer_bytes_left %d, l_allowable_size %d)", l_header_meta.packet_num,
-                             l_explorer_bytes_left, l_allowable_size);
-                    l_header_meta.error_data_size = l_allowable_size;
+                    // avoid assert within assert here, so just log this information
+                    FAPI_INF("exp_collect_explorer_logs: %d) ACTIVE log index %d is less than %d data size",
+                             l_header_meta.packet_num, l_current_idx, l_header_meta.error_data_size);
+
+                    // start at offset 0 and grab until l_current_idx
+                    l_header_meta.error_data_size = l_current_idx;
                 }
-                else
-                {
-                    // reduce the packet size to include the last explorer log bytes
-                    l_header_meta.error_data_size = l_explorer_bytes_left;
-                }
+
+                l_header_meta.offset_exp_log = l_current_idx - l_header_meta.error_data_size;
             }
             else
             {
-                // reached allowable size
-                break;
+                l_header_meta.offset_exp_log = l_current_idx;
+
+                // Save Errorlog space by starting SAVED logs where there is real data
+                // Skip NULLs at beginning of SAVED logs
+                // but leave at least one data packet
+                if ( (l_header_meta.packet_num == 0) &&
+                     (l_explorer_bytes_left != l_header_meta.error_data_size))
+                {
+                    // index into saved log packet
+                    uint32_t l_pkt_idx = 0;
+
+                    // check if first packet is all NULLs
+                    while ((l_pkt_idx < l_header_meta.error_data_size)
+                           && (l_start_data_ptr[l_current_idx + l_pkt_idx] == 0x00))
+                    {
+                        l_pkt_idx++;
+                    }
+
+                    if (l_pkt_idx == l_header_meta.error_data_size)
+                    {
+                        FAPI_DBG("exp_collect_explorer_logs: "
+                                 "NULL packet at offset 0x%08X (data size: %d)",
+                                 l_header_meta.offset_exp_log,
+                                 l_header_meta.error_data_size);
+
+                        l_explorer_bytes_left -= l_header_meta.error_data_size;
+                        l_current_idx += l_header_meta.error_data_size;
+                        continue;
+                    }
+                }
             }
 
-            // ----------------------------------------------------------------
-
-            // offset where the data is starting from out of the whole Explorer log data
-            l_header_meta.offset_exp_log = l_explorer_bytes_left - l_header_meta.error_data_size;
-
-            FAPI_INF("exp_collect_explorer_logs: %d) starting offset 0x%08X "
+            FAPI_DBG("exp_collect_explorer_logs: %d) starting offset 0x%08X "
                      "(data size: %d)", l_header_meta.packet_num,
                      l_header_meta.offset_exp_log, l_header_meta.error_data_size);
 
@@ -202,29 +259,44 @@ fapi2::ReturnCode exp_collect_explorer_logs(const fapi2::ffdc_t& i_ocmb_chip,
             std::vector<uint8_t>l_error_log_entry ( ptr, ptr + sizeof(l_header_meta));
 
             // Now append the explorer error section to the section entry
-            // Note: working backwards from the end of the Explorer log data
             l_error_log_entry.insert( l_error_log_entry.end(),
-                                      l_end_ptr - l_header_meta.error_data_size,
-                                      l_end_ptr );
+                                      l_start_data_ptr + l_header_meta.offset_exp_log,
+                                      l_start_data_ptr + l_header_meta.offset_exp_log + l_header_meta.error_data_size);
 
             // Add the section entry to the HWP error log
             UNIT_FFDC_EXP_ERROR.ptr() = l_error_log_entry.data();
             UNIT_FFDC_EXP_ERROR.size() = l_error_log_entry.size();
 
-            if (ACTIVE_LOG == i_log_type)
+            switch (i_log_type)
             {
-                FAPI_ADD_INFO_TO_HWP_ERROR(o_rc, RC_EXPLORER_ACTIVE_ERROR_LOG);
-            }
-            else
-            {
-                FAPI_ADD_INFO_TO_HWP_ERROR(o_rc, RC_EXPLORER_SAVED_ERROR_LOG);
+                case ACTIVE_LOG:
+                    FAPI_ADD_INFO_TO_HWP_ERROR(o_rc, RC_EXPLORER_ACTIVE_ERROR_LOG);
+                    break;
+
+                case SAVED_LOG_A:
+                    FAPI_ADD_INFO_TO_HWP_ERROR(o_rc, RC_EXPLORER_SAVED_IMAGEA_ERROR_LOG);
+                    break;
+
+                case SAVED_LOG_B:
+                    FAPI_ADD_INFO_TO_HWP_ERROR(o_rc, RC_EXPLORER_SAVED_IMAGEB_ERROR_LOG);
+                    break;
             }
 
             // Update to next packet of Explorer error log data
             l_header_meta.packet_num++;
             l_explorer_bytes_left -= l_header_meta.error_data_size;
-            l_end_ptr -= l_header_meta.error_data_size; // point to beginning of last data inserted
-            l_allowable_size -= l_header_meta.error_data_size;
+
+            if (i_log_type == ACTIVE_LOG)
+            {
+                // point to end of data
+                l_current_idx -= l_header_meta.error_data_size;
+            }
+            else
+            {
+                // point to start of data
+                l_current_idx += l_header_meta.error_data_size;
+            }
+
             l_header_meta.error_data_size = FOLLOWING_PACKET_SIZE;
         }
     }
@@ -244,10 +316,18 @@ fapi2::ReturnCode exp_collect_explorer_active_log(
 }
 
 /// See header
-fapi2::ReturnCode exp_collect_explorer_saved_log(
+fapi2::ReturnCode exp_collect_explorer_saved_A_log(
     const fapi2::ffdc_t& i_ocmb_chip,
     const fapi2::ffdc_t& i_size,
     fapi2::ReturnCode& o_rc )
 {
-    return exp_collect_explorer_logs(i_ocmb_chip, i_size, SAVED_LOG, o_rc);
+    return exp_collect_explorer_logs(i_ocmb_chip, i_size, SAVED_LOG_A, o_rc);
+}
+
+fapi2::ReturnCode exp_collect_explorer_saved_B_log(
+    const fapi2::ffdc_t& i_ocmb_chip,
+    const fapi2::ffdc_t& i_size,
+    fapi2::ReturnCode& o_rc )
+{
+    return exp_collect_explorer_logs(i_ocmb_chip, i_size, SAVED_LOG_B, o_rc);
 }

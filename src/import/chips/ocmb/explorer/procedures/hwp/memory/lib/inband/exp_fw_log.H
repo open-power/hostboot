@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -57,7 +57,7 @@ namespace ib
 /// @brief Defines the sub-commands available for the
 ///        EXP_FW_LOG command
 ///
-enum exp_log_sub_cmd_op
+enum exp_log_sub_cmd_op : uint8_t
 {
     // This is used to read log entries from the active
     // firmware logfile stored in Explorer RAM
@@ -74,16 +74,46 @@ enum exp_log_sub_cmd_op
     SUB_CMD_ERASE_SAVED_LOG             = 0x04,
 };
 
+
+///
+/// @brief Enum for saved log image specification
+///
+enum exp_image : uint8_t
+{
+    EXP_IMAGE_A = 0,
+    EXP_IMAGE_B = 1,
+};
+
+///
+/// @brief Command parameters of Explorer Log commands
+///        This is found in the command_argument field
+typedef struct __attribute__((packed))
+{
+    exp_log_sub_cmd_op  op;   /**< Firmware error log sub-cmd operation */
+    exp_image  image;         /**< Image A or B specification,
+                                   used only for read saved logfile */
+    uint32_t offset;          /**< Logfile byte offset,
+                                   used only for read saved logfile */
+    uint32_t num_bytes;       /**< Number of bytes to read,
+                                   used only for read saved logfile */
+} exp_fw_log_cmd_parms_struct_t;
+
+/// @brief Maximum number of bytes that can be returned in one log
+/// Note: relevant to saved logfile num_bytes parameter
+const uint32_t MAX_BYTES_PER_LOG = 0x00010000;
+
 ///
 /// @brief Sets the command_argument fields for EXP_FW_LOG command
 ///
 /// @param[in] i_target - OCMB target
-/// @param[in] i_sub_op - what sub-command of EXP_FW_LOG to use
+/// @param[in] i_cmd_parms - what command parameters of EXP_FW_LOG to use
 /// @param[out] o_cmd   - command packet to update
+/// @return FAPI2_RC_SUCCESS iff ok
 ///
-void build_log_cmd(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
-                   const exp_log_sub_cmd_op i_sub_op,
-                   host_fw_command_struct& o_cmd );
+fapi2::ReturnCode build_log_cmd(
+    const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+    const exp_fw_log_cmd_parms_struct_t& i_cmd_parms,
+    host_fw_command_struct& o_cmd );
 
 
 ///

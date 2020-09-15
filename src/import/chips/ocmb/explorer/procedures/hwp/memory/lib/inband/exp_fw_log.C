@@ -39,7 +39,7 @@
 #include <lib/shared/exp_consts.H>
 #include <exp_data_structs.H>
 #include <generic/memory/lib/utils/c_str.H>
-
+#include <generic/memory/lib/utils/endian_utils.H>
 
 namespace mss
 {
@@ -64,40 +64,111 @@ typedef struct
 ///
 enum
 {
-    STATUS_OP_FAILED     = 0x01,
     STATUS_OP_SUCCESSFUL = 0x00,
+    STATUS_OP_FAILED     = 0x01,
 };
 
-/// See header
-void build_log_cmd( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
-                    const exp_log_sub_cmd_op i_sub_op,
-                    host_fw_command_struct& o_cmd )
+/// @brief Debug function to trace explorer fw log command
+/// @param i_cmd - command to be sent to Explorer
+void trace_cmd(const host_fw_command_struct& i_cmd)
 {
-    // Issue EXP_FW_LOG cmd though EXP-FW REQ buffer
-    o_cmd.cmd_id = mss::exp::omi::EXP_FW_LOG;
-    o_cmd.cmd_flags = 0;
+    FAPI_DBG("cmd_id:    0x%02X", i_cmd.cmd_id);
+    FAPI_DBG("cmd_flags: 0x%02X", i_cmd.cmd_flags);
+    FAPI_DBG("request_identifier: 0x%04X", i_cmd.request_identifier);
+    FAPI_DBG("cmd_length      : 0x%08X", i_cmd.cmd_length);
+    FAPI_DBG("cmd_crc         : 0x%08X", i_cmd.cmd_crc);
+    FAPI_DBG("host_work_area  : 0x%08X", i_cmd.host_work_area);
+    FAPI_DBG("cmd_work_area   : 0x%08X", i_cmd.cmd_work_area);
 
-    // Host generated id number (returned in response packet)
-    // @todo RTC 210371
-    //uint32_t l_counter = 0;
-    //FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_OCMB_COUNTER, i_target, l_counter));
-    o_cmd.request_identifier = 0xabcd;
-
-    if (i_sub_op == SUB_CMD_READ_SAVED_LOG)
+    for (int i = 0; i < CMD_PADDING_SIZE; i++)
     {
-        o_cmd.request_identifier = 0xabce;
+        FAPI_DBG("padding[%d] : 0x%08X", i,  i_cmd.padding[i] ); //uint32_t padding[3];
     }
 
-    o_cmd.cmd_length = 0;
+    // 28 bytes of command_argument data
+    for (int i = 0; i < ARGUMENT_SIZE; i++)
+    {
+        FAPI_DBG("command_argument[%d]: 0x%02X", i, i_cmd.command_argument[i] );
+    }
 
-    o_cmd.cmd_crc = 0xffffffff;
-    o_cmd.host_work_area = 0;
-    o_cmd.cmd_work_area = 0;
-    memset(o_cmd.padding, 0, sizeof(o_cmd.padding));
-
-    // Set the sub-command ID in the command argument field
-    o_cmd.command_argument[0] = i_sub_op;
+    FAPI_DBG("cmd_header_crc  : 0x%08X", i_cmd.cmd_header_crc    );   //uint32_t
 }
+
+/// @brief Debug function to trace explorer fw log response
+/// @parm i_rsp - response from Explorer to Explorer FW log command
+void trace_rsp(const host_fw_response_struct& i_rsp )
+{
+    FAPI_DBG("response_id          : 0x%02X",
+             i_rsp.response_id            );           //uint8_t  response_id;             // Response ID - same as Command ID
+    FAPI_DBG("response_flags       : 0x%02X",
+             i_rsp.response_flags         );       //uint8_t  response_flags;          // Various flags associated with the response
+    FAPI_DBG("request_identifier   : 0x%04X",
+             i_rsp.request_identifier     );       //uint16_t request_identifier;      // The request identifier of this transport request
+    FAPI_DBG("response_length      : 0x%08X",
+             i_rsp.response_length        );       //uint32_t response_length;         // Number of bytes following the response header
+    FAPI_DBG("response_crc         : 0x%08X",
+             i_rsp.response_crc           );       //uint32_t response_crc;            // CRC of response data buffer, if used
+    FAPI_DBG("host_work_area       : 0x%08X",
+             i_rsp.host_work_area         );       //uint32_t host_work_area;          // Scratchpad area for Host, FW returns this value as a reponse
+
+    for (int l_i = 0; l_i < RSP_PADDING_SIZE; l_i++)
+    {
+        FAPI_DBG("padding[%d]           : 0x%08X", l_i,
+                 i_rsp.padding[l_i] );            //uint32_t padding[4];              // Fill up to the size of one cache line
+    }
+
+    for (int l_i = 0; l_i < ARGUMENT_SIZE; l_i++)
+    {
+        FAPI_DBG("response_argument[%d]: 0x%02X", l_i,
+                 i_rsp.response_argument[l_i] ); //uint8_t  response_argument[28];   // Additional parameters associated with the response
+    }
+
+    FAPI_DBG("response_header_crc  : 0x%08X",
+             i_rsp.response_header_crc    );   //uint32_t response_header_crc;     // CRC of 63 bytes of response header
+}
+
+/// See header
+fapi2::ReturnCode build_log_cmd(
+    const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+    const exp_fw_log_cmd_parms_struct_t& i_cmd_parms,
+    host_fw_command_struct& o_cmd )
+{
+    std::vector<uint8_t> l_data;
+
+    memset(&o_cmd, 0, sizeof(host_fw_command_struct));
+
+    // Issue EXP_FW_LOG cmd though EXP-FW REQ buffer
+    o_cmd.cmd_id = mss::exp::omi::EXP_FW_LOG;
+
+    // Host generated id number (returned in response packet)
+    uint32_t l_counter = 0;
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_OCMB_COUNTER, i_target, l_counter));
+    o_cmd.request_identifier = l_counter;
+    o_cmd.cmd_crc = 0xffffffff; // no additional data in data buffer
+
+    // Provide the command arguments
+    // Copy i_cmd_params to command_argument data
+    // NOTE: memcpy of i_cmd_params fails since params is in BE format
+    o_cmd.command_argument[0] = i_cmd_parms.op;
+    o_cmd.command_argument[1] = i_cmd_parms.image;
+
+    // add offset argument in Explorer LE format
+    FAPI_TRY(forceCrctEndian(i_cmd_parms.offset, l_data));
+    memcpy(o_cmd.command_argument + 2, l_data.data(), sizeof(i_cmd_parms.offset));
+
+    // add num_bytes argument in Explorer LE format
+    l_data.clear(); // clear out previous data
+    FAPI_TRY(forceCrctEndian(i_cmd_parms.num_bytes, l_data));
+    memcpy(o_cmd.command_argument + (2 + sizeof(i_cmd_parms.offset)), l_data.data(), sizeof(i_cmd_parms.num_bytes));
+
+    // trace command if debugging
+    trace_cmd(o_cmd);
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+
 
 /// See header
 fapi2::ReturnCode check_log_cmd_response(
@@ -118,6 +189,9 @@ fapi2::ReturnCode check_log_cmd_response(
     FAPI_TRY(mss::exp::ib::readCrctEndian(resp_arg, index, l_rsp_args.status));
     FAPI_TRY(mss::exp::ib::readCrctEndian(resp_arg, index, l_rsp_args.err_code));
     FAPI_TRY(mss::exp::ib::readCrctEndian(resp_arg, index, l_rsp_args.num_bytes_returned));
+
+    // trace response if debugging
+    trace_rsp(i_rsp);
 
     // check if command was successful
     FAPI_ASSERT(l_rsp_args.status == STATUS_OP_SUCCESSFUL,

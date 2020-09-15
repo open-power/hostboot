@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2019                             -->
+<!-- Contributors Listed Below - COPYRIGHT 2019,2020                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -28,10 +28,12 @@
       <rc>RC_COLLECT_EXPLORER_ERROR</rc>
       <description>Collects error log data from Explorer chip</description>
       <collectFfdc>exp_collect_explorer_active_log, OCMB_CHIP_TARGET, EXP_ACTIVE_LOG_SIZE</collectFfdc>
-      <collectFfdc>exp_collect_explorer_saved_log, OCMB_CHIP_TARGET, EXP_SAVED_LOG_SIZE</collectFfdc>
+      <collectFfdc>exp_collect_explorer_saved_A_log, OCMB_CHIP_TARGET, EXP_SAVED_IMAGEA_LOG_SIZE</collectFfdc>
+      <collectFfdc>exp_collect_explorer_saved_B_log, OCMB_CHIP_TARGET, EXP_SAVED_IMAGEB_LOG_SIZE</collectFfdc>
       <ffdc>OCMB_CHIP_TARGET</ffdc>
       <ffdc>EXP_ACTIVE_LOG_SIZE</ffdc>
-      <ffdc>EXP_SAVED_LOG_SIZE</ffdc>
+      <ffdc>EXP_SAVED_IMAGEA_LOG_SIZE</ffdc>
+      <ffdc>EXP_SAVED_IMAGEB_LOG_SIZE</ffdc>
     </hwpError>
   <!-- ******************************************************************** -->
     <hwpError>
@@ -41,7 +43,13 @@
     </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
-      <rc>RC_EXPLORER_SAVED_ERROR_LOG</rc>
+      <rc>RC_EXPLORER_SAVED_IMAGEA_ERROR_LOG</rc>
+      <description>Collect saved explorer errors during exp_collect_explorer_saved_log</description>
+      <ffdc>UNIT_FFDC_EXP_ERROR</ffdc>
+    </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+      <rc>RC_EXPLORER_SAVED_IMAGEB_ERROR_LOG</rc>
       <description>Collect saved explorer errors during exp_collect_explorer_saved_log</description>
       <ffdc>UNIT_FFDC_EXP_ERROR</ffdc>
     </hwpError>
