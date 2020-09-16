@@ -2285,6 +2285,11 @@
   </targetType>
 
   <targetType>
+    <id>lcard-dimm-ddimm4u</id>
+    <parent>lcard-dimm-ddimm</parent>
+  </targetType>
+
+  <targetType>
     <id>lcard-dimm-ddr4</id>
     <parent>lcard-dimm</parent>
   </targetType>
