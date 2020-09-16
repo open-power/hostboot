@@ -49,6 +49,7 @@
 #define MAX_PSTATE_TABLE_ENTRIES        128
 #define MAX_VRATIO_VINDEX_TABLE_ENTRIES 299
 #define GEN_PSTATES_TBL_MAGIC           0x50535441424c3030ULL //PSTABL00 (last two ASCII characters indicate version number)
+#define GEN_PSTATES_TBL_MAGIC_V1        0x50535441424c3031ULL //PSTABL00 (last two ASCII characters indicate version number)
 
 #ifndef __ASSEMBLER__
 #ifdef __cplusplus
@@ -121,6 +122,41 @@ typedef struct
     PgpeHeader_t pgpe_header;
 #endif
 } GeneratedPstateInfo_t;
+
+typedef struct
+{
+
+    /// Magic Number
+    uint64_t magic;   // ASCII: "PSTABL00 "
+
+    /// The fastest frequency - after biases have been applied
+    uint32_t pstate0_frequency_khz;
+
+    /// Highest Pstate Number => slowest Pstate generated
+    uint32_t highest_pstate;
+
+    /// Generated table with system paramters included but without biases
+    PstateTable_t raw_pstates[MAX_PSTATE_TABLE_ENTRIES];
+
+    /// Generated table with system paramters and biases
+    /// Note: if all bias attributes are 0, this content will be the same
+    /// as the raw_pstates content.
+    PstateTable_t biased_pstates[MAX_PSTATE_TABLE_ENTRIES];
+
+    ///Generate table with vratio and vindex for all
+    ///combinations of activeCores and sortCores
+    VRatioVIndexTable_t vratio_vindex[MAX_VRATIO_VINDEX_TABLE_ENTRIES];
+
+#ifndef __PPE_PLAT
+    hcodeImageBuild::PgpeHeader_t pgpe_header;
+#else
+    ///PGPE Header
+    PgpeHeader_t pgpe_header;
+#endif
+
+    // PGPE content
+    GlobalPstateParmBlock_v1_t globalppb;
+} GeneratedPstateInfo_v1_t;
 
 
 #ifdef __cplusplus

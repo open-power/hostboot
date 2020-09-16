@@ -45,6 +45,7 @@
 /// structure.
 
 #define PSTATE_PARMSBLOCK_MAGIC 0x5053544154453030ull /* PSTATE00 */
+#define PSTATE_PARMSBLOCK_MAGIC_V1 0x5053544154453031ull /* PSTATE01 */
 
 #ifndef __ASSEMBLER__
 #ifdef __cplusplus
@@ -511,6 +512,222 @@ typedef struct
 
 // __attribute__((packed, aligned(1024))) GlobalPstateParmBlock_t;
 } GlobalPstateParmBlock_t;
+
+//Operating Points, Slopes, and Biases
+typedef struct
+{
+    /// Precalculated VPD Slopes
+    /// All are in 4.12 decimal form into uint16_t integer value
+    uint16_t    ps_voltage_slopes[RUNTIME_RAILS][NUM_VPD_PTS_SET][VPD_NUM_SLOPES_REGION];
+    uint16_t    voltage_ps_slopes[RUNTIME_RAILS][NUM_VPD_PTS_SET][VPD_NUM_SLOPES_REGION];
+    uint16_t    ps_ac_current_tdp[RUNTIME_RAILS][NUM_VPD_PTS_SET][VPD_NUM_SLOPES_REGION];
+    uint16_t    ps_dc_current_tdp[RUNTIME_RAILS][NUM_VPD_PTS_SET][VPD_NUM_SLOPES_REGION];
+    uint16_t    ac_current_ps_tdp[RUNTIME_RAILS][NUM_VPD_PTS_SET][VPD_NUM_SLOPES_REGION];
+    uint16_t    dc_current_ps_tdp[RUNTIME_RAILS][NUM_VPD_PTS_SET][VPD_NUM_SLOPES_REGION];
+    uint16_t    ps_ac_current_rdp[RUNTIME_RAILS][NUM_VPD_PTS_SET][VPD_NUM_SLOPES_REGION];
+    uint16_t    ps_dc_current_rdp[RUNTIME_RAILS][NUM_VPD_PTS_SET][VPD_NUM_SLOPES_REGION];
+    uint16_t    ac_current_ps_rdp[RUNTIME_RAILS][NUM_VPD_PTS_SET][VPD_NUM_SLOPES_REGION];
+    uint16_t    dc_current_ps_rdp[RUNTIME_RAILS][NUM_VPD_PTS_SET][VPD_NUM_SLOPES_REGION];
+} PoundVSlopes_t;
+
+typedef struct
+{
+    uint16_t    ps_dds_delay_slopes[NUM_VPD_PTS_SET][MAXIMUM_CORES][VPD_NUM_SLOPES_REGION];
+    uint8_t     ps_dds_slopes[NUM_POUNDW_DDS_FIELDS][NUM_VPD_PTS_SET][MAXIMUM_CORES][VPD_NUM_SLOPES_REGION];
+} PoundWSlopes_t;
+
+typedef struct
+{
+    uint32_t            reference_frequency_khz;    // Pstate[0] frequency
+    uint32_t            frequency_step_khz;
+    uint32_t            occ_complex_frequency_mhz;  // Needed for FITs
+    uint32_t            dpll_pstate0_value;  // @todo why this and reference_frequency_khz?
+
+    //Safe voltage and frequency
+    uint32_t            safe_voltage_mv[SAFE_VOLTAGE_SIZE];
+    uint32_t            safe_frequency_khz;
+    uint32_t            safe_throttle_idx;
+
+    // Ceiling Frequency - Maximum operable frequency for a system that
+    // has limitations that are independent from Pstates.
+    // If 0, reference_frequency_khz is the maximum frequency;
+    // If non-zero, this frequency should be translated to the Pstate space
+    //    so as to be the lowest Pstate (which is the highest frequency)
+    //    to which the system is clipped.
+    uint32_t frequency_ceiling_khz;
+
+
+    //Offset added to VDD to come up the corresponding VCS voltage. Note, VCS value
+    //is bounded by the vcs_floor value below
+    uint16_t vcs_vdd_offset_mv;
+
+    //The minimum value of VCS
+    uint16_t vcs_floor_mv;
+
+    uint16_t array_write_vdn_mv;
+    uint16_t array_write_vdd_mv;
+
+    uint8_t rvrm_deadzone_mv;
+
+    uint8_t reserved[87];
+} GlobalPstateParmBlockBase_t;
+
+//WOF
+typedef struct
+{
+    uint32_t core_on_ratio_vdd;
+    uint32_t l3_on_ratio_vdd;
+    uint32_t mma_on_ratio_vdd;
+    uint32_t core_on_ratio_vcs;
+    uint32_t l3_on_ratio_vcs;
+    uint32_t vdd_vratio_weight;
+    uint32_t vcs_vratio_weight;
+} GlobalPstateParmBlockWOF_t;
+
+typedef struct
+{
+    //Maximum performance loss threshold when undervolting(in 0.1%, tenths of percent)
+    uint8_t wov_underv_perf_loss_thresh_pct;
+
+    //WOV undervolting increment percentage(in 0.1%, tenths of percent)
+    uint8_t wov_underv_step_incr_pct;
+
+    //WOV undervolting decrement percentage(in 0.1%, tenths of percent)
+    uint8_t wov_underv_step_decr_pct;
+
+    //WOV undervolting max percentage(in 0.1%, tenths of percent)
+    uint8_t wov_underv_max_pct;
+
+    //When undervolting, if this value is non-zero, then voltage will never be set
+    //below this value. If it is zero, then the minimum voltage is only bounded by
+    //wov_underv_max_pct.
+    uint16_t wov_underv_vmin_mv;
+
+    //When overvolting, then voltage will never be set above this value
+    uint16_t wov_overv_vmax_mv;
+
+    //Determine how often to call the wov algorithm with respect
+    //to PGPE FIT ticks
+    uint32_t wov_sample_125us;
+
+    //Maximum performance loss(in 0.1%, tenths of percent). We should never be at
+    //this level, but we check using this value inside PGPE to make sure that this
+    //is reported if it ever happens
+    uint32_t wov_max_droop_pct;
+
+    //WOV overvolting increment percentage(in 0.1%, tenths of percent)
+    uint8_t wov_overv_step_incr_pct;
+
+    //WOV overvolting decrement percentage(in 0.1%, tenths of percent)
+    uint8_t wov_overv_step_decr_pct;
+
+    //WOV overvolting max percentage(in 0.1%, tenths of percent)
+    uint8_t wov_overv_max_pct;
+
+    uint8_t pad;
+} GlobalPstateParmBlockWOV_t;
+
+enum GPPB_OFFSET_IDX
+{
+    PGPE_FLAGS_OFFSET_IDX       = 0,
+    BASE_OFFSET_IDX             = 1,
+    AVSBUS_OFFSET_IDX           = 2,
+    SYSPARMS_VDD_OFFSET_IDX     = 3,
+    SYSPARMS_VCS_OFFSET_IDX     = 4,
+    SYSPARMS_VDN_OFFSET_IDX     = 5,
+    VRM_PARMS_OFFSET_IDX        = 6,
+    VPD_OP_OFFSET_IDX           = 7,
+    POUNDV_BIAS_OFFSET_IDX      = 8,
+    POUNDV_SLOPES_OFFSET_IDX    = 9,
+    POUNDW_SLOPES_OFFSET_IDX    = 10,
+    RESCLK_OFFSET_IDX           = 11,
+    DDS_OFFSET_IDX              = 12,
+    DDS_ALT_CAL_OFFSET_IDX      = 13,
+    DDS_TGT_ACT_BIN_OFFSET_IDX  = 14,
+    DDS_OTHER_OFFSET_IDX        = 15,
+    DDS_VDD_CAL_OFFSET_IDX      = 16,
+    WOF_OFFSET_IDX              = 17,
+    WOV_OFFSET_IDX              = 18,
+    MAX_GPPB_OFFSET_IDX         = 32,
+};
+
+/// Pstate Parameter consumed by PGPE
+///
+/// The GlobalPstateParameterBlock is an abstraction of a set of voltage/frequency
+/// operating points along with hardware limits.
+///
+typedef struct
+{
+
+    union
+    {
+        uint64_t        value;
+        struct
+        {
+            uint64_t    eye_catcher : 56;
+            uint64_t    version     : 8 ;
+
+        } fields;
+    } magic;
+
+    uint16_t offsets[MAX_GPPB_OFFSET_IDX];
+
+    //PGPE Flags
+    //Note: not all are used, but reserved for future use
+    uint8_t pgpe_flags[MAX_PGPE_FLAGS];
+
+    //Base GPPB variables
+    GlobalPstateParmBlockBase_t base;
+
+    //System Params- VDN, VCS, VDD and VRM
+    AvsBusTopology_t avs_bus_topology;
+    SysPowerDistParms_t vdd_sysparm;
+    SysPowerDistParms_t vcs_sysparm;
+    SysPowerDistParms_t vdn_sysparm;
+    VRMParms_t          ext_vrm_parms;
+
+    //Operating points, Slopes and Biases
+    /// VPD operating points are biased but without load-line correction.
+    // Frequencies are in MHz, voltages are specified in units of 1mV, currents
+    /// are specified in units of 10mA, and temperatures are specified in 0.5
+    /// degrees C.
+    PoundVOpPoint_t     operating_points_set[NUM_VPD_PTS_SET][NUM_PV_POINTS];
+
+    PoundVBias_t        poundv_biases_0p05pct;  // Values in 0.5%
+
+    PoundVSlopes_t      poundv_slopes;
+
+    //Resclk
+    /// The following are needed to generated the Pstate Table to HOMER.
+    ResClkSetup_t   resclk;
+
+    //DDS
+    /// #W Entry(DDS)
+    PoundWEntry_t       dds[MAXIMUM_CORES][NUM_PV_POINTS];
+
+    /// #W Alternate Calibration Data
+    PoundWEntry_AltCal_t    dds_alt_cal[MAXIMUM_CORES][NUM_PV_POINTS];
+
+    /// #W Target Active Bin Data
+    PoundWEntry_TgtActBin_t dds_tgt_act_bin[MAXIMUM_CORES][NUM_PV_POINTS];
+
+    /// #W Other (DDS Data)
+    PoundWOther_t   dds_other;
+
+    /// #W VDD Calibration(DDS Data)
+    vdd_calibration         vdd_cal[NUM_PV_POINTS];
+
+    // #W Pre-calculated slopes
+    PoundWSlopes_t poundw_slopes;
+
+    //WOF
+    GlobalPstateParmBlockWOF_t wof;
+
+    //WOV
+    GlobalPstateParmBlockWOV_t wov;
+
+// __attribute__((packed, aligned(1024))) GlobalPstateParmBlock_t;
+} GlobalPstateParmBlock_v1_t;
 
 
 #ifdef __cplusplus
