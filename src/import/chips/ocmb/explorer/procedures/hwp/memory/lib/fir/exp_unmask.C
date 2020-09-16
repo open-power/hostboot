@@ -171,10 +171,13 @@ fapi_try_exit:
 template<>
 fapi2::ReturnCode after_mc_omi_init<mss::mc_type::EXPLORER>(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target)
 {
+    constexpr uint8_t EXPLR_TLXT_TLX_ERR1_REPORTQ_TLXT_INTRP_REQ_FAILED = 38;
+
     fapi2::ReturnCode l_rc1 = fapi2::FAPI2_RC_SUCCESS;
     fapi2::ReturnCode l_rc2 = fapi2::FAPI2_RC_SUCCESS;
     fapi2::ReturnCode l_rc3 = fapi2::FAPI2_RC_SUCCESS;
     fapi2::ReturnCode l_rc4 = fapi2::FAPI2_RC_SUCCESS;
+    fapi2::buffer<uint64_t> l_reg_data;
 
     mss::fir::reg<EXPLR_MMIO_MFIR> l_exp_mmio_mfir_reg(i_target, l_rc1);
     mss::fir::reg<EXPLR_TLXT_TLXFIRQ> l_exp_tlxt_fir_reg(i_target, l_rc2);
@@ -228,6 +231,26 @@ fapi2::ReturnCode after_mc_omi_init<mss::mc_type::EXPLORER>(const fapi2::Target<
              .write());
 
     return fapi2::FAPI2_RC_SUCCESS;
+
+    // Setup checker masks for certain FIRs
+    FAPI_TRY(fapi2::getScom(i_target, EXPLR_TLXT_TLX_ERR0_REPORTQ_MASK, l_reg_data));
+    l_reg_data.setBit<EXPLR_TLXT_TLX_ERR0_REPORTQ_BAR0_PERR_NF>()
+    .setBit<EXPLR_TLXT_TLX_ERR0_REPORTQ_ADDR_XLATE_HOLE>()
+    .setBit<EXPLR_TLXT_TLX_ERR0_REPORTQ_BAD_DATA_RXD>()
+    .setBit<EXPLR_TLXT_TLX_ERR0_REPORTQ_EPOW_SIGNALLED>();
+    FAPI_TRY(fapi2::putScom(i_target, EXPLR_TLXT_TLX_ERR0_REPORTQ_MASK, l_reg_data));
+
+    // Per FIR spec: TLXFIRQ_TLXR_BAR0_OR_MMIO_NF: Bar0 parity error
+    // Want to route this to TLXTFIR[25] instead, and configure as fatal,
+    // since we don't plan to rewrite the bar0 reg to recover
+    // Set TLX_ERR0_REPORTQ_MASK[8] = 1, to keep this from setting TLXTFIR[17]
+    FAPI_TRY(fapi2::getScom(i_target, EXPLR_TLXT_TLX_ERR1_REPORTQ_MASK, l_reg_data));
+    l_reg_data.setBit<EXPLR_TLXT_TLX_ERR1_REPORTQ_TLXT_INTRP_REQ_FAILED>();
+    FAPI_TRY(fapi2::putScom(i_target, EXPLR_TLXT_TLX_ERR1_REPORTQ_MASK, l_reg_data));
+    // Set TLXCFG1[6]: TLXCFG1_SHUTDOWN_ON_BAR0_BAD = 1, to trigger TLXTFIR[25]
+    FAPI_TRY(fapi2::getScom(i_target, EXPLR_TLXT_TLXCFG1, l_reg_data));
+    l_reg_data.setBit<EXPLR_TLXT_TLXCFG1_SHUTDOWN_ON_BAR0_BAD>();
+    FAPI_TRY(fapi2::putScom(i_target, EXPLR_TLXT_TLXCFG1, l_reg_data));
 
 fapi_try_exit:
 
