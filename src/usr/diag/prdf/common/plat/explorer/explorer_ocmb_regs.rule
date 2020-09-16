@@ -375,12 +375,26 @@
         access      write_only;
     };
 
+    register TLX_ERR0_REPORT
+    {
+        name        "TLX Error report register 0 (TLXR)";
+        scomaddr    0x0801241C;
+        capture     group default;
+    };
+
     register TLX_ERR1_REPORT
     {
         name        "P9 OCMB target TLX Error Report Register";
         scomaddr    0x0801241D;
         reset       (&, 0x0801241D);
         mask        (|, 0x08012415);
+        capture     group default;
+    };
+
+    register TLX_ERR0_REPORT_MASK
+    {
+        name        "TLX Error Report Mask Register 0";
+        scomaddr    0x08012414;
         capture     group default;
     };
 
