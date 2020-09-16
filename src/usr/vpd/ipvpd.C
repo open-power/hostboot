@@ -1657,7 +1657,7 @@ errlHndl_t IpVpdFacade::retrieveKeyword ( const char * i_keywordName,
                          keywordSize,
                          io_buffer,
                          i_target,
-                         i_args.location,
+                         i_args,
                          i_recordName );
         if( err )
         {
@@ -1731,7 +1731,7 @@ errlHndl_t IpVpdFacade::retrieveRecord( const char * i_recordName,
                          l_size,
                          io_buffer,
                          i_target,
-                         i_args.location,
+                         i_args,
                          i_recordName );
         if( err )
         {
