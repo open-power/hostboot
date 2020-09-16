@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -41,7 +41,7 @@ fapi2::ReturnCode exp_error_rc(
 {
     FAPI_INF("Enter exp_error_rc (active %d, saved %d)...",
       i_active_log_size, i_saved_log_size);
-
+/* TODO RTC:205128 - reenable after EKB update to interface
     FAPI_ASSERT(0, fapi2::COLLECT_EXPLORER_ERROR()
                    .set_OCMB_CHIP_TARGET(i_ocmb_target)
                    .set_EXP_ACTIVE_LOG_SIZE(i_active_log_size)
@@ -49,7 +49,7 @@ fapi2::ReturnCode exp_error_rc(
                    "Testcase exp_error_rc assert");
 
 fapi_try_exit:
-
+*/
     FAPI_INF("Exiting exp_error_rc...");
     return fapi2::current_err;
 }
