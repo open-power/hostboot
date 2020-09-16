@@ -35,21 +35,21 @@
     {
         name        "MC Error Report 0";
         scomaddr    0x0C010C1E;
-        capture     group default;
+        capture     group mc_fir_ffdc;
     };
 
     register MC_ERR_RPT1
     {
         name        "MC Error Report 1";
         scomaddr    0x0C010C1F;
-        capture     group default;
+        capture     group mc_fir_ffdc;
     };
 
     register MC_ERR_RPT2
     {
         name        "MC Error Report 2";
         scomaddr    0x0C010C1A;
-        capture     group default;
+        capture     group mc_fir_ffdc;
     };
 
     ############################################################################
@@ -60,6 +60,6 @@
     {
         name        "MC PCBSLV error register";
         scomaddr    0x0C0F001F;
-        capture     group default;
+        capture     group pll_ffdc;
     };
 

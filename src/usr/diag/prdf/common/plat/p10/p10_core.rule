@@ -234,10 +234,10 @@ rule rCORE
 group gCORE attntype CHECK_STOP, RECOVERABLE, UNIT_CS
     filter singlebit
 {
-    (rCORE, bit(0)) ? analyze(gEQ_L3_FIR);
-    (rCORE, bit(1)) ? analyze(gEQ_NCU_FIR);
-    (rCORE, bit(2)) ? analyze(gEQ_L2_FIR);
-    (rCORE, bit(3)) ? analyze(gEQ_CORE_FIR);
+    (rCORE, bit(0)) ? analyzeEQ_L3_FIR;
+    (rCORE, bit(1)) ? analyzeEQ_NCU_FIR;
+    (rCORE, bit(2)) ? analyzeEQ_L2_FIR;
+    (rCORE, bit(3)) ? analyzeEQ_CORE_FIR;
 };
 
 ################################################################################

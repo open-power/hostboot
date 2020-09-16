@@ -154,7 +154,7 @@ rule rNMMU
 group gNMMU attntype CHECK_STOP, RECOVERABLE, UNIT_CS
     filter singlebit
 {
-    (rNMMU, bit(0)) ? analyze(gNMMU_CQ_FIR);
+    (rNMMU, bit(0)) ? analyzeNMMU_CQ_FIR;
     (rNMMU, bit(1)) ? analyze(gNMMU_FIR);
 };
 

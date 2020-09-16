@@ -80,3 +80,26 @@ actionclass l2_power_bus_ce
     TBDDefaultCallout;
 };
 
+actionclass analyzeEQ_CORE_FIR
+{
+    capture(eq_core_fir_ffdc);
+    analyze(gEQ_CORE_FIR);
+};
+
+actionclass analyzeEQ_L2_FIR
+{
+    capture(eq_l2_fir_ffdc);
+    analyze(gEQ_L2_FIR);
+};
+
+actionclass analyzeEQ_NCU_FIR
+{
+    capture(eq_ncu_fir_ffdc);
+    analyze(gEQ_NCU_FIR);
+};
+
+actionclass analyzeEQ_L3_FIR
+{
+    capture(eq_l3_fir_ffdc);
+    analyze(gEQ_L3_FIR);
+};

@@ -43,3 +43,9 @@ actionclass analyzeConnectedMCC3  { analyze(connected(TYPE_MCC,  3)); };
 actionclass analyzeConnectedOMIC0 { analyze(connected(TYPE_OMIC, 0)); };
 actionclass analyzeConnectedOMIC1 { analyze(connected(TYPE_OMIC, 1)); };
 
+actionclass analyzeMC_FIR
+{
+    capture(mc_fir_ffdc);
+    analyze(gMC_FIR);
+};
+

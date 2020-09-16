@@ -78,7 +78,7 @@
     {
         name        "MC DSTL Error Report";
         scomaddr    0x0C010D0C;
-        capture     group default;
+        capture     group mc_dstl_fir_ffdc;
     };
 
     ###########################################################################
@@ -97,6 +97,6 @@
     {
         name        "MC USTL Error Report";
         scomaddr    0x0C010E0E;
-        capture     group default;
+        capture     group mc_ustl_fir_ffdc;
     };
 

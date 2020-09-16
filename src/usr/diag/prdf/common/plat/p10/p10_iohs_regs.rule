@@ -154,6 +154,6 @@
     {
         name        "IOHS PCBSLV error register";
         scomaddr    0x180F001F;
-        capture     group default;
+        capture     group pll_ffdc;
     };
 

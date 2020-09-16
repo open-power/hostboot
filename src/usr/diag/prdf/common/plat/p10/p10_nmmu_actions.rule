@@ -1,7 +1,7 @@
 # IBM_PROLOG_BEGIN_TAG
 # This is an automatically generated prolog.
 #
-# $Source: src/usr/diag/prdf/common/plat/p10/p10_nmmu_regs.rule $
+# $Source: src/usr/diag/prdf/common/plat/p10/p10_nmmu_actions.rule $
 #
 # OpenPOWER HostBoot Project
 #
@@ -24,16 +24,11 @@
 # IBM_PROLOG_END_TAG
 
 ################################################################################
-# Additional registers for the NMMU target
+# Analyze
 ################################################################################
 
-    ############################################################################
-    # NMMU_CQ_FIR FFDC Regs
-    ############################################################################
-
-    register NMMU_NXCQ_ERR_RPT_0
-    {
-        name        "NMMU NXCQ Error Report 0";
-        scomaddr    0x02010C22;
-        capture     group nmmu_cq_fir_ffdc;
-    };
+actionclass analyzeNMMU_CQ_FIR
+{
+    capture(nmmu_cq_fir_ffdc);
+    analyze(gNMMU_CQ_FIR);
+};

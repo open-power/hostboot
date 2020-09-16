@@ -94,3 +94,45 @@ actionclass analyzeConnectedPHB3  { analyze(connected(TYPE_PHB,  3)); };
 actionclass analyzeConnectedPHB4  { analyze(connected(TYPE_PHB,  4)); };
 actionclass analyzeConnectedPHB5  { analyze(connected(TYPE_PHB,  5)); };
 
+
+actionclass analyzeHCA_FIR
+{
+    capture(hca_fir_ffdc);
+    analyze(gHCA_FIR);
+};
+
+actionclass analyzeINT_CQ_FIR
+{
+    capture(int_cq_fir_ffdc);
+    analyze(gINT_CQ_FIR);
+};
+
+actionclass analyzeNX_CQ_FIR
+{
+    capture(nx_cq_fir_ffdc);
+    analyze(gNX_CQ_FIR);
+};
+
+actionclass analyzeNX_DMA_ENG_FIR
+{
+    capture(nx_dma_eng_fir_ffdc);
+    analyze(gNX_DMA_ENG_FIR);
+};
+
+actionclass analyzeOCC_FIR
+{
+    capture(occ_fir_ffdc);
+    analyze(gOCC_FIR);
+};
+
+actionclass analyzePBAF_FIR
+{
+    capture(pbaf_fir_ffdc);
+    analyze(gPBAF_FIR);
+};
+
+actionclass analyzePBAO_FIR
+{
+    capture(pbao_fir_ffdc);
+    analyze(gPBAO_FIR);
+};

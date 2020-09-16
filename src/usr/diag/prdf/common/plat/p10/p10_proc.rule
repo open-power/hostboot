@@ -2408,12 +2408,12 @@ group gTP_CHIPLET_CS_FIR
     /** TP_CHIPLET_CS_FIR[5]
      *  Attention from OCC_FIR
      */
-    (rTP_CHIPLET_CS_FIR, bit(5)) ? analyze(gOCC_FIR);
+    (rTP_CHIPLET_CS_FIR, bit(5)) ? analyzeOCC_FIR;
 
     /** TP_CHIPLET_CS_FIR[6]
      *  Attention from PBAO_FIR
      */
-    (rTP_CHIPLET_CS_FIR, bit(6)) ? analyze(gPBAO_FIR);
+    (rTP_CHIPLET_CS_FIR, bit(6)) ? analyzePBAO_FIR;
 
 };
 
@@ -2438,12 +2438,12 @@ group gTP_CHIPLET_RE_FIR
     /** TP_CHIPLET_RE_FIR[5]
      *  Attention from OCC_FIR
      */
-    (rTP_CHIPLET_RE_FIR, bit(5)) ? analyze(gOCC_FIR);
+    (rTP_CHIPLET_RE_FIR, bit(5)) ? analyzeOCC_FIR;
 
     /** TP_CHIPLET_RE_FIR[6]
      *  Attention from PBAO_FIR
      */
-    (rTP_CHIPLET_RE_FIR, bit(6)) ? analyze(gPBAO_FIR);
+    (rTP_CHIPLET_RE_FIR, bit(6)) ? analyzePBAO_FIR;
 
 };
 
@@ -3306,7 +3306,7 @@ group gN0_CHIPLET_CS_FIR
     /** N0_CHIPLET_CS_FIR[7]
      *  Attention from INT_CQ_FIR
      */
-    (rN0_CHIPLET_CS_FIR, bit(7)) ? analyze(gINT_CQ_FIR);
+    (rN0_CHIPLET_CS_FIR, bit(7)) ? analyzeINT_CQ_FIR;
 
     /** N0_CHIPLET_CS_FIR[8]
      *  Attention from VAS_FIR
@@ -3316,12 +3316,12 @@ group gN0_CHIPLET_CS_FIR
     /** N0_CHIPLET_CS_FIR[9]
      *  Attention from NX_DMA_ENG_FIR
      */
-    (rN0_CHIPLET_CS_FIR, bit(9)) ? analyze(gNX_DMA_ENG_FIR);
+    (rN0_CHIPLET_CS_FIR, bit(9)) ? analyzeNX_DMA_ENG_FIR;
 
     /** N0_CHIPLET_CS_FIR[10]
      *  Attention from NX_CQ_FIR
      */
-    (rN0_CHIPLET_CS_FIR, bit(10)) ? analyze(gNX_CQ_FIR);
+    (rN0_CHIPLET_CS_FIR, bit(10)) ? analyzeNX_CQ_FIR;
 
     /** N0_CHIPLET_CS_FIR[13]
      *  Attention from PCI_NEST_FIR 3
@@ -3371,7 +3371,7 @@ group gN0_CHIPLET_RE_FIR
     /** N0_CHIPLET_RE_FIR[7]
      *  Attention from INT_CQ_FIR
      */
-    (rN0_CHIPLET_RE_FIR, bit(7)) ? analyze(gINT_CQ_FIR);
+    (rN0_CHIPLET_RE_FIR, bit(7)) ? analyzeINT_CQ_FIR;
 
     /** N0_CHIPLET_RE_FIR[8]
      *  Attention from VAS_FIR
@@ -3381,12 +3381,12 @@ group gN0_CHIPLET_RE_FIR
     /** N0_CHIPLET_RE_FIR[9]
      *  Attention from NX_DMA_ENG_FIR
      */
-    (rN0_CHIPLET_RE_FIR, bit(9)) ? analyze(gNX_DMA_ENG_FIR);
+    (rN0_CHIPLET_RE_FIR, bit(9)) ? analyzeNX_DMA_ENG_FIR;
 
     /** N0_CHIPLET_RE_FIR[10]
      *  Attention from NX_CQ_FIR
      */
-    (rN0_CHIPLET_RE_FIR, bit(10)) ? analyze(gNX_CQ_FIR);
+    (rN0_CHIPLET_RE_FIR, bit(10)) ? analyzeNX_CQ_FIR;
 
     /** N0_CHIPLET_RE_FIR[13]
      *  Attention from PCI_NEST_FIR 3
@@ -3441,12 +3441,12 @@ group gN0_CHIPLET_UCS_FIR
     /** N0_CHIPLET_UCS_FIR[9]
      *  Attention from NX_DMA_ENG_FIR
      */
-    (rN0_CHIPLET_UCS_FIR, bit(9)) ? analyze(gNX_DMA_ENG_FIR);
+    (rN0_CHIPLET_UCS_FIR, bit(9)) ? analyzeNX_DMA_ENG_FIR;
 
     /** N0_CHIPLET_UCS_FIR[10]
      *  Attention from NX_CQ_FIR
      */
-    (rN0_CHIPLET_UCS_FIR, bit(10)) ? analyze(gNX_CQ_FIR);
+    (rN0_CHIPLET_UCS_FIR, bit(10)) ? analyzeNX_CQ_FIR;
 
 };
 
@@ -4958,7 +4958,7 @@ group gN1_CHIPLET_CS_FIR
     /** N1_CHIPLET_CS_FIR[9]
      *  Attention from HCA_FIR
      */
-    (rN1_CHIPLET_CS_FIR, bit(9)) ? analyze(gHCA_FIR);
+    (rN1_CHIPLET_CS_FIR, bit(9)) ? analyzeHCA_FIR;
 
     /** N1_CHIPLET_CS_FIR[11]
      *  Attention from LPC_FIR
@@ -5068,7 +5068,7 @@ group gN1_CHIPLET_CS_FIR
     /** N1_CHIPLET_CS_FIR[39]
      *  Attention from PBAF_FIR
      */
-    (rN1_CHIPLET_CS_FIR, bit(39)) ? analyze(gPBAF_FIR);
+    (rN1_CHIPLET_CS_FIR, bit(39)) ? analyzePBAF_FIR;
 
 };
 
@@ -5110,7 +5110,7 @@ group gN1_CHIPLET_RE_FIR
     /** N1_CHIPLET_RE_FIR[9]
      *  Attention from HCA_FIR
      */
-    (rN1_CHIPLET_RE_FIR, bit(9)) ? analyze(gHCA_FIR);
+    (rN1_CHIPLET_RE_FIR, bit(9)) ? analyzeHCA_FIR;
 
     /** N1_CHIPLET_RE_FIR[11]
      *  Attention from LPC_FIR
@@ -5220,7 +5220,7 @@ group gN1_CHIPLET_RE_FIR
     /** N1_CHIPLET_RE_FIR[39]
      *  Attention from PBAF_FIR
      */
-    (rN1_CHIPLET_RE_FIR, bit(39)) ? analyze(gPBAF_FIR);
+    (rN1_CHIPLET_RE_FIR, bit(39)) ? analyzePBAF_FIR;
 
 };
 

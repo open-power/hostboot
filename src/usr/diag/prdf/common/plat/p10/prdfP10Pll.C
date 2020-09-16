@@ -563,8 +563,18 @@ int32_t MaskPll( ExtensibleChip * i_chip,
 }
 PRDF_PLUGIN_DEFINE_NS( p10_proc,   Proc, MaskPll );
 
+void __capturePll(ExtensibleChip * i_procChip, STEP_CODE_DATA_STRUCT & io_sc,
+                  TARGETING::TYPE i_unitType)
+{
+    for (const auto& chip : getConnectedChildren(i_procChip, i_unitType))
+    {
+        chip->CaptureErrorData(io_sc.service_data->GetCaptureData(),
+                               Util::hashString("pll_ffdc"));
+    }
+}
+
 /**
- * @brief   capture additional PLL FFDC
+ * @brief   Captures additional PLL registers for FFDC
  * @param   i_chip   P9 chip
  * @param   i_sc     service data collector
  * @returns Success
@@ -572,29 +582,17 @@ PRDF_PLUGIN_DEFINE_NS( p10_proc,   Proc, MaskPll );
 int32_t capturePllFfdc( ExtensibleChip * i_chip,
                         STEP_CODE_DATA_STRUCT & io_sc )
 {
-    #define PRDF_FUNC "[Proc::capturePllFfdc] "
-
     // Add FSI status reg
     PLL::captureFsiStatusReg<TYPE_PROC>( i_chip, io_sc );
 
-    // Add EX scom data
-    TargetHandleList exList = getConnectedChildren( i_chip->getTrgt(),
-                                                    TYPE_CORE );
-    ExtensibleChip * exChip;
-    TargetHandleList::iterator itr = exList.begin();
-    for( ; itr != exList.end(); ++itr)
-    {
-        exChip = (ExtensibleChip *)systemPtr->GetChip(*itr);
-        if( nullptr == exChip ) continue;
-
-        exChip->CaptureErrorData(
-                io_sc.service_data->GetCaptureData(),
-                Util::hashString("PllFIRs"));
-    }
+    // Get the PLL registers for each unit on this chip. Note that the PROC
+    // registers are already captured at this point.
+    __capturePll(i_chip, io_sc, TYPE_MC);
+    __capturePll(i_chip, io_sc, TYPE_EQ);
+    __capturePll(i_chip, io_sc, TYPE_PAUC);
+    __capturePll(i_chip, io_sc, TYPE_IOHS);
 
     return SUCCESS;
-
-    #undef PRDF_FUNC
 }
 PRDF_PLUGIN_DEFINE_NS( p10_proc,   Proc, capturePllFfdc );
 

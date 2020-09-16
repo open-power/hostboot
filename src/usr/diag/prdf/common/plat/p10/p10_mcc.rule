@@ -174,8 +174,8 @@ rule rMCC
 group gMCC attntype CHECK_STOP, RECOVERABLE, UNIT_CS, HOST_ATTN
     filter singlebit
 {
-    (rMCC, bit(0)) ? analyze(gMC_DSTL_FIR);
-    (rMCC, bit(1)) ? analyze(gMC_USTL_FIR);
+    (rMCC, bit(0)) ? analyzeMC_DSTL_FIR;
+    (rMCC, bit(1)) ? analyzeMC_USTL_FIR;
 };
 
 ################################################################################

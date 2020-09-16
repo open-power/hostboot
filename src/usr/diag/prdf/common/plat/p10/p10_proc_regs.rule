@@ -35,7 +35,7 @@
     {
         name        "HCA Error Report Hold Register";
         scomaddr    0x03011D56;
-        capture     group default;
+        capture     group hca_fir_ffdc;
     };
 
     ############################################################################
@@ -46,203 +46,203 @@
     {
         name        "INT CQ error report hold";
         scomaddr    0x02010839;
-        capture     group default;
+        capture     group int_cq_fir_ffdc;
     };
 
     register INT_CQ_ERR_INFO1
     {
         name        "INT CQ error info 1";
         scomaddr    0x0201083B;
-        capture     group default;
+        capture     group int_cq_fir_ffdc;
     };
 
     register INT_CQ_ERR_INFO2
     {
         name        "INT CQ error info 2";
         scomaddr    0x0201083C;
-        capture     group default;
+        capture     group int_cq_fir_ffdc;
     };
 
     register INT_CQ_ERR_INFO3
     {
         name        "INT CQ error info 3";
         scomaddr    0x0201083D;
-        capture     group default;
+        capture     group int_cq_fir_ffdc;
     };
 
     register INT_PC_ERR0_WOF
     {
         name        "INT PC Error0 WOF Register";
         scomaddr    0x02010AC2;
-        capture     group default;
+        capture     group int_cq_fir_ffdc;
     };
 
     register INT_PC_ERR0_WOF_DETAIL
     {
         name        "INT PC Error0 WOF Detail Register";
         scomaddr    0x02010AC3;
-        capture     group default;
+        capture     group int_cq_fir_ffdc;
     };
 
     register INT_PC_ERR0_FATAL
     {
         name        "INT PC Error0 Fatal Errors Register";
         scomaddr    0x02010AC4;
-        capture     group default;
+        capture     group int_cq_fir_ffdc;
     };
 
     register INT_PC_ERR0_RECOV
     {
         name        "INT PC Error0 Recoverable Errors Register";
         scomaddr    0x02010AC5;
-        capture     group default;
+        capture     group int_cq_fir_ffdc;
     };
 
     register INT_PC_ERR0_INFO
     {
         name        "INT PC Error0 Informational Errors Register";
         scomaddr    0x02010AC6;
-        capture     group default;
+        capture     group int_cq_fir_ffdc;
     };
 
     register INT_PC_ERR1_WOF
     {
         name        "INT PC Error1 WOF Register";
         scomaddr    0x02010ACA;
-        capture     group default;
+        capture     group int_cq_fir_ffdc;
     };
 
     register INT_PC_ERR1_WOF_DETAIL
     {
         name        "INT PC Error1 WOF Detail Register";
         scomaddr    0x02010ACB;
-        capture     group default;
+        capture     group int_cq_fir_ffdc;
     };
 
     register INT_PC_ERR1_FATAL
     {
         name        "INT PC Error1 Fatal Errors Register";
         scomaddr    0x02010ACC;
-        capture     group default;
+        capture     group int_cq_fir_ffdc;
     };
 
     register INT_PC_ERR1_RECOV
     {
         name        "INT PC Error1 Recoverable Errors Register";
         scomaddr    0x02010ACD;
-        capture     group default;
+        capture     group int_cq_fir_ffdc;
     };
 
     register INT_PC_ERR1_INFO
     {
         name        "INT PC Error1 Informational Errors Register";
         scomaddr    0x02010ACE;
-        capture     group default;
+        capture     group int_cq_fir_ffdc;
     };
 
     register INT_PC_NXC_WOF_ERR
     {
         name        "INT NXC WOF Register";
         scomaddr    0x02010AD2;
-        capture     group default;
+        capture     group int_cq_fir_ffdc;
     };
 
     register INT_PC_NXC_WOF_ERR_DETAIL
     {
         name        "INT NXC WOF Detail Register";
         scomaddr    0x02010AD3;
-        capture     group default;
+        capture     group int_cq_fir_ffdc;
     };
 
     register INT_PC_NXC_FATAL_ERR
     {
         name        "INT NXC Fatal Errors Register";
         scomaddr    0x02010AD4;
-        capture     group default;
+        capture     group int_cq_fir_ffdc;
     };
 
     register INT_PC_NXC_RECOV_ERR
     {
         name        "INT NXC Recoverable Errors Register";
         scomaddr    0x02010AD5;
-        capture     group default;
+        capture     group int_cq_fir_ffdc;
     };
 
     register INT_PC_NXC_INFO_ERR
     {
         name        "INT NXC Informational Errors Register";
         scomaddr    0x02010AD6;
-        capture     group default;
+        capture     group int_cq_fir_ffdc;
     };
 
     register INT_VC_WOF_ERR_G0
     {
         name        "INT VC Group0 WOF Register";
         scomaddr    0x020109C2;
-        capture     group default;
+        capture     group int_cq_fir_ffdc;
     };
 
     register INT_VC_WOF_ERR_G0_DETAIL
     {
         name        "INT VC Group0 WOF Detail Register";
         scomaddr    0x020109C3;
-        capture     group default;
+        capture     group int_cq_fir_ffdc;
     };
 
     register INT_VC_FATAL_ERR_G0
     {
         name        "INT VC Group0 Fatal Errors Register";
         scomaddr    0x020109C4;
-        capture     group default;
+        capture     group int_cq_fir_ffdc;
     };
 
     register INT_VC_RECOV_ERR_G0
     {
         name        "INT VC Group0 Recoverable Errors Register";
         scomaddr    0x020109C5;
-        capture     group default;
+        capture     group int_cq_fir_ffdc;
     };
 
     register INT_VC_INFO_ERR_G0
     {
         name        "INT VC Group0 Informational Errors Register";
         scomaddr    0x020109C6;
-        capture     group default;
+        capture     group int_cq_fir_ffdc;
     };
 
     register INT_VC_WOF_ERR_G1
     {
         name        "INT VC Group1 WOF Register";
         scomaddr    0x020109CA;
-        capture     group default;
+        capture     group int_cq_fir_ffdc;
     };
 
     register INT_VC_WOF_ERR_G1_DETAIL
     {
         name        "INT VC Group1 WOF Detail Register";
         scomaddr    0x020109CB;
-        capture     group default;
+        capture     group int_cq_fir_ffdc;
     };
 
     register INT_VC_FATAL_ERR_G1
     {
         name        "INT VC Group1 Fatal Errors Register";
         scomaddr    0x020109CC;
-        capture     group default;
+        capture     group int_cq_fir_ffdc;
     };
 
     register INT_VC_RECOV_ERR_G1
     {
         name        "INT VC Group1 Recoverable Errors Register";
         scomaddr    0x020109CD;
-        capture     group default;
+        capture     group int_cq_fir_ffdc;
     };
 
     register INT_VC_INFO_ERR_G1
     {
         name        "INT VC Group1 Informational Errors Register";
         scomaddr    0x020109CE;
-        capture     group default;
+        capture     group int_cq_fir_ffdc;
     };
 
     ############################################################################
@@ -253,14 +253,14 @@
     {
         name        "NX CQ error report 0";
         scomaddr    0x020110A2;
-        capture     group default;
+        capture     group nx_cq_fir_ffdc;
     };
 
     register NX_CQ_ERR_RPT_1
     {
         name        "NX CQ error report 1";
         scomaddr    0x020110A1;
-        capture     group default;
+        capture     group nx_cq_fir_ffdc;
     };
 
     ############################################################################
@@ -271,14 +271,14 @@
     {
         name        "DMA CERR Report Register 0";
         scomaddr    0x02011057;
-        capture     group default;
+        capture     group nx_dma_eng_fir_ffdc;
     };
 
     register SU_DMA_ERROR_REPORT_1
     {
         name        "DMA CERR Report Register 1";
         scomaddr    0x02011058;
-        capture     group default;
+        capture     group nx_dma_eng_fir_ffdc;
     };
 
     ############################################################################
@@ -289,14 +289,14 @@
     {
         name        "OCC Error Report";
         scomaddr    0x0101080A;
-        capture     group default;
+        capture     group occ_fir_ffdc;
     };
 
     register OCC_SCOM_ERR_RPT2
     {
         name        "OCC Error Report 2";
         scomaddr    0x0101080B;
-        capture     group default;
+        capture     group occ_fir_ffdc;
     };
 
     ############################################################################
@@ -307,21 +307,21 @@
     {
         name        "PBA Error Report Register 0";
         scomaddr    0x03011DCC;
-        capture     group default;
+        capture     group pbaf_fir_ffdc;
     };
 
     register PBA_ERR_RPT1
     {
         name        "PBA Error Report Register 1";
         scomaddr    0x03011DCD;
-        capture     group default;
+        capture     group pbaf_fir_ffdc;
     };
 
     register PBA_ERR_RPT2
     {
         name        "PBA Error Report Register 2";
         scomaddr    0x03011DCE;
-        capture     group default;
+        capture     group pbaf_fir_ffdc;
     };
 
     ############################################################################
@@ -332,14 +332,14 @@
     {
         name        "PBAO Error Report 1";
         scomaddr    0x01010CCD;
-        capture     group default;
+        capture     group pbao_fir_ffdc;
     };
 
     register PBAO_ERR_RPT_2
     {
         name        "PBAO Error Report 2";
         scomaddr    0x01010CCE;
-        capture     group default;
+        capture     group pbao_fir_ffdc;
     };
 
     ############################################################################
@@ -350,34 +350,34 @@
     {
         name        "TP PCBSLV error register";
         scomaddr    0x010F001F;
-        capture     group default;
+        capture     group pll_ffdc;
     };
 
     register N0_ERROR_REG
     {
         name        "N0 PCBSLV error register";
         scomaddr    0x020F001F;
-        capture     group default;
+        capture     group pll_ffdc;
     };
 
     register N1_ERROR_REG
     {
         name        "N1 PCBSLV error register";
         scomaddr    0x030F001F;
-        capture     group default;
+        capture     group pll_ffdc;
     };
 
     register PCI0_ERROR_REG
     {
         name        "PCI0 PCBSLV error register";
         scomaddr    0x080F001F;
-        capture     group default;
+        capture     group pll_ffdc;
     };
 
     register PCI1_ERROR_REG
     {
         name        "PCI1 PCBSLV error register";
         scomaddr    0x090F001F;
-        capture     group default;
+        capture     group pll_ffdc;
     };
 

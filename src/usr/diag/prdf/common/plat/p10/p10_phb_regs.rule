@@ -35,7 +35,7 @@
     {
         name        "PCI PFIR Error Report";
         scomaddr    0x0801084B;
-        capture     group default;
+        capture     group pci_fir_ffdc;
     };
 
     ############################################################################
@@ -46,12 +46,12 @@
     {
         name        "PCI NFIR Error Report 0";
         scomaddr    0x0201184A;
-        capture     group default;
+        capture     group pci_nest_fir_ffdc;
     };
 
     register PCI_NFIR_ERR_RPT1
     {
         name        "PCI NFIR Error Report 1";
         scomaddr    0x0201184B;
-        capture     group default;
+        capture     group pci_nest_fir_ffdc;
     };

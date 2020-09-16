@@ -179,3 +179,14 @@ actionclass analyze_ocmb_chnl1_UERE
     analyze_ocmb_chnl1;
 };
 
+actionclass analyzeMC_DSTL_FIR
+{
+    capture(mc_dstl_fir_ffdc);
+    analyze(gMC_DSTL_FIR);
+};
+
+actionclass analyzeMC_USTL_FIR
+{
+    capture(mc_ustl_fir_ffdc);
+    analyze(gMC_USTL_FIR);
+};

@@ -304,7 +304,7 @@ group gMC_CHIPLET_CS_FIR attntype CHECK_STOP
     /** MC_CHIPLET_CS_FIR[9]
      *  Attention from MC_FIR
      */
-    (rMC_CHIPLET_CS_FIR, bit(9)) ? analyze(gMC_FIR);
+    (rMC_CHIPLET_CS_FIR, bit(9)) ? analyzeMC_FIR;
 
     /** MC_CHIPLET_CS_FIR[10]
      *  Attention from MC_MISC_FIR
@@ -369,7 +369,7 @@ group gMC_CHIPLET_RE_FIR attntype RECOVERABLE
     /** MC_CHIPLET_RE_FIR[9]
      *  Attention from MC_FIR
      */
-    (rMC_CHIPLET_RE_FIR, bit(9)) ? analyze(gMC_FIR);
+    (rMC_CHIPLET_RE_FIR, bit(9)) ? analyzeMC_FIR;
 
     /** MC_CHIPLET_RE_FIR[10]
      *  Attention from MC_MISC_FIR
@@ -429,7 +429,7 @@ group gMC_CHIPLET_UCS_FIR attntype UNIT_CS
     /** MC_CHIPLET_UCS_FIR[9]
      *  Attention from MC_FIR
      */
-    (rMC_CHIPLET_UCS_FIR, bit(9)) ? analyze(gMC_FIR);
+    (rMC_CHIPLET_UCS_FIR, bit(9)) ? analyzeMC_FIR;
 
     /** MC_CHIPLET_UCS_FIR[10]
      *  Attention from MC_MISC_FIR
@@ -479,7 +479,7 @@ group gMC_CHIPLET_HA_FIR attntype HOST_ATTN
     /** MC_CHIPLET_HA_FIR[9]
      *  Attention from MC_FIR
      */
-    (rMC_CHIPLET_HA_FIR, bit(9)) ? analyze(gMC_FIR);
+    (rMC_CHIPLET_HA_FIR, bit(9)) ? analyzeMC_FIR;
 
     /** MC_CHIPLET_HA_FIR[10]
      *  Attention from MC_MISC_FIR
