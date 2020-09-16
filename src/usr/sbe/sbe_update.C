@@ -2162,6 +2162,12 @@ namespace SBE
             assert(sys, "getSbeInfoState() system target is NULL");
             uint8_t lockin_policy = sys->getAttr<ATTR_SECURE_VERSION_LOCKIN_POLICY>();
 
+#ifndef CONFIG_FSP_BUILD
+            lockin_policy = 1;
+            TRACFCOMP(g_trac_sbe, "getSbeInfoState() - "
+                      "Defaulting LOCKIN_POLICY to %d for all OpenPower Systems",
+                      lockin_policy);
+#endif
             bool update_hbbl_secure_version = false;
 
             if (hbbl_secure_version == min_secure_version)
@@ -2169,7 +2175,7 @@ namespace SBE
                 TRACFCOMP(g_trac_sbe, "getSbeInfoState() - "
                           "HBBL from pnor has secure version=0x%.2X, which is equal to "
                           "min_secure_version=0x%.2X. No changes. Ignoring "
-                          "ATTR_SECURE_VERSION_LOCKIN_POLICY=%d",
+                          "LOCKIN_POLICY=%d",
                           hbbl_secure_version, min_secure_version, lockin_policy);
             }
             else if (hbbl_secure_version > min_secure_version)
@@ -2178,7 +2184,7 @@ namespace SBE
                 {
                     TRACFCOMP(g_trac_sbe, "getSbeInfoState() - "
                               "HBBL from pnor has secure version=0x%.2X, which is greater than "
-                              "min_secure_version=0x%.2X. ATTR_SECURE_VERSION_LOCKIN_POLICY=%d "
+                              "min_secure_version=0x%.2X. LOCKIN_POLICY=%d "
                               "so will use new secure version value of 0x%.2X",
                               hbbl_secure_version, min_secure_version,
                               lockin_policy, hbbl_secure_version);
@@ -2187,7 +2193,7 @@ namespace SBE
                 {
                     TRACFCOMP(g_trac_sbe, "getSbeInfoState() - "
                               "HBBL from pnor has secure version=0x%.2X, which is greater than "
-                              "min_secure_version=0x%.2X. But ATTR_SECURE_VERSION_LOCKIN_POLICY=%d "
+                              "min_secure_version=0x%.2X. But LOCKIN_POLICY=%d "
                               "so will keep current min secure version value of 0x%.2X",
                               hbbl_secure_version, min_secure_version,
                               lockin_policy, min_secure_version);
@@ -2203,7 +2209,7 @@ namespace SBE
                               "HBBL from pnor has secure version=0x%.2X, which is less than "
                               "min_secure_version=0x%.2X. Since isSecurityEnabled=%d will "
                               "ROLLBACK secure version to 0x%.2X. Ignoring "
-                              "ATTR_SECURE_VERSION_LOCKIN_POLICY=%d",
+                              "LOCKIN_POLICY=%d",
                               hbbl_secure_version, min_secure_version,
                               isSecurityEnabled, hbbl_secure_version, lockin_policy);
                 }
@@ -2213,7 +2219,7 @@ namespace SBE
                               "HBBL from pnor has secure version=0x%.2X, which is less than "
                               "min_secure_version=0x%.2X.  With isSecurityEnabled=%d we should "
                               "have NEVER gotten here  Shutting down. Ignoring "
-                              "ATTR_SECURE_VERSION_LOCKIN_POLICY=%d",
+                              "LOCKIN_POLICY=%d",
                               hbbl_secure_version, min_secure_version,
                               isSecurityEnabled, lockin_policy);
 
@@ -2475,7 +2481,7 @@ namespace SBE
                  * @userdata2[0:15]  Secure Version found in Customized SBE Image
                  * @userdata2[16:31] Expected Secure Version
                  * @userdata2[32:47] Minimum Secure Version
-                 * @userdata2[48:63] ATTR_SECURE_VERSION_LOCKIN_POLICY
+                 * @userdata2[48:63] LOCKIN_POLICY
                  * @devdesc          Unexpected Secure Version found in SBE Image
                  * @custdesc         A problem occurred while updating processor
                  *                   boot code.
