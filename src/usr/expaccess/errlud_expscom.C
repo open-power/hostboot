@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -67,9 +67,15 @@ bool EXPSCOM::expAddLog( const exp_log_type i_type,
         }
         else
         {
-            TRACFCOMP( g_trac_expscom, INFO_MRK "FAPI_INVOKE_HWP exp_saved_error_log");
-            FAPI_INVOKE_HWP( l_errl, exp_saved_log,
-                             l_fapi_ocmb_target, l_error_log_data );
+// TODO RTC:205128 - enable after exp_fw_log_data.H updated in EKB
+            TRACFCOMP( g_trac_expscom,
+                INFO_MRK "HWP exp_saved_log not supported yet" );
+            return false;
+//          TRACFCOMP( g_trac_expscom, INFO_MRK "FAPI_INVOKE_HWP "
+//                    "exp_saved_log");
+
+//          FAPI_INVOKE_HWP( l_errl, exp_saved_log,
+//                           l_fapi_ocmb_target, l_error_log_data );
         }
 
         if (l_errl)
