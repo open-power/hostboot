@@ -1426,12 +1426,15 @@
   </hwpError>
 
   <hwpError>
-    <rc>RC_MSS_UNKNOWN_DIMM_MODULE_MFG_ID</rc>
+    <rc>RC_MSS_UNKNOWN_DIMM_SPD_KEY</rc>
     <description>
-        Module manufacturing ID from DIMM SPD was not recognized in
-        plug rule enforcement function.
+        DIMM SPD key from DIMM SPD was not recognized in
+        plug rule enforcement function. The key is the manufacturing ID,
+        the DIMM height, and the DIMM size.
     </description>
     <ffdc>MODULE_MFG_ID</ffdc>
+    <ffdc>DIMM_HEIGHT</ffdc>
+    <ffdc>DIMM_SIZE</ffdc>
     <callout>
       <target>DIMM_TARGET</target>
       <priority>HIGH</priority>
@@ -1472,12 +1475,12 @@
   </hwpError>
 
   <hwpError>
-    <rc>RC_MSS_UNSUPPORTED_SPD_CONTENT_REVISION</rc>
+    <rc>RC_MSS_UNSUPPORTED_SPD_COMBINED_REVISION</rc>
     <description>
-        DIMM SPD content revision is older than least supported revision.
+        DIMM SPD combined revision is older than least supported revision.
     </description>
-    <ffdc>SPD_CONTENT_REVISION</ffdc>
-    <ffdc>MINIMUM_FUNCTIONAL_SPD_CONTENT_REVISION</ffdc>
+    <ffdc>SPD_COMBINED_REVISION</ffdc>
+    <ffdc>MINIMUM_FUNCTIONAL_SPD_COMBINED_REVISION</ffdc>
     <callout>
       <procedure>MEMORY_PLUGGING_ERROR</procedure>
       <priority>HIGH</priority>

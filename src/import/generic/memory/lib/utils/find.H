@@ -344,8 +344,6 @@ bool find_value_from_key(const std::vector<std::pair<T, OT> >& i_vector_of_pairs
     // Did you find it? Let me know.
     if( (l_value_iterator == i_vector_of_pairs.end()) || (i_key != l_value_iterator->first) )
     {
-        // Static cast ensures that the below print will not fail at compile time
-        FAPI_INF("Did not find a mapping value to key: %d", static_cast<uint64_t>(i_key));
         return false;
     }
 
