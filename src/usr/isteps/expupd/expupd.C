@@ -327,11 +327,15 @@ void updateAll(IStepError& o_stepError)
             break;
         }
 
+        const auto l_pnorSectionSize = (l_pnorSectionInfo.hasHashTable
+                                        ? l_pnorSectionInfo.size
+                                        : l_pnorSectionInfo.secureProtectedPayloadSize);
+
         // Verify the header and retrieve address, size and
         // SHA512 hash of unpackaged image
         l_err = ocmbFwValidateImage(
                                   l_pnorSectionInfo.vaddr,
-                                  l_pnorSectionInfo.secureProtectedPayloadSize,
+                                  l_pnorSectionSize,
                                   l_imageInfo);
         if(l_err)
         {
