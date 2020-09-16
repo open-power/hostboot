@@ -35,7 +35,8 @@
 #include <lib/inband/exp_inband.H>
 #include <lib/omi/crc32.H>
 #include <lib/shared/exp_consts.H>
-
+#include <lib/exp_draminit_utils.H>
+#include <lib/exp_attribute_accessors_manual.H>
 #include <mmio_access.H>
 #include <generic/memory/lib/utils/c_str.H>
 #include <generic/memory/lib/utils/endian_utils.H>
@@ -106,6 +107,36 @@ fapi2::ReturnCode putScom(
     return putMMIO64(i_target, l_scomAddr, i_data);
 }
 
+/// @brief Writes user_input_msdg_t to the data buffer
+///
+/// @tparam T user_input_msdg_t type
+/// @param[in] i_target     The Explorer chip to issue the command to
+/// @param[in] i_data       The user_input_msdg_t data to write
+/// @param[out] o_crc       The calculated crc of the data.
+///
+/// @return fapi2::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
+fapi2::ReturnCode putUserInputMsdg(
+    const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+    const user_input_msdg& i_data,
+    uint32_t& o_crc)
+{
+    uint32_t l_fw_version = 0;
+    FAPI_TRY(mss::get_booted_fw_version(i_target, l_fw_version));
+
+    {
+        const bool is_new_fw_ver = is_new_fw_msdg_supported(l_fw_version);
+        std::vector<uint8_t> l_data;
+
+        FAPI_TRY(user_input_msdg_to_little_endian(i_data, is_new_fw_ver, l_data, o_crc));
+
+        FAPI_TRY(fapi2::putMMIO(i_target, EXPLR_IB_DATA_ADDR, BUFFER_TRANSACTION_SIZE, l_data));
+    }
+
+fapi_try_exit:
+    FAPI_DBG("Exiting with return code : 0x%08X...", (uint64_t)fapi2::current_err);
+    return fapi2::current_err;
+}
+
 /// @brief Writes 32 bits of data to OpenCAPI config space
 ///
 /// @param[in] i_target     The Explorer chip to write
@@ -136,114 +167,6 @@ fapi2::ReturnCode putOCCfg(
     }
 
     FAPI_TRY(fapi2::putMMIO(i_target, i_cfgAddr, 4, l_wd));
-
-fapi_try_exit:
-    FAPI_DBG("Exiting with return code : 0x%08X...", (uint64_t)fapi2::current_err);
-    return fapi2::current_err;
-}
-
-fapi2::ReturnCode user_input_msdg_to_little_endian(const user_input_msdg& i_input, std::vector<uint8_t>& o_data,
-        uint32_t& o_crc)
-{
-    o_data.clear();
-    FAPI_TRY(forceCrctEndian(i_input.version_number, o_data));
-    FAPI_TRY(forceCrctEndian(i_input.DimmType, o_data));
-    FAPI_TRY(forceCrctEndian(i_input.CsPresent, o_data));
-    FAPI_TRY(forceCrctEndian(i_input.DramDataWidth, o_data));
-    FAPI_TRY(forceCrctEndian(i_input.Height3DS, o_data));
-    FAPI_TRY(forceCrctEndian(i_input.ActiveDBYTE, o_data));
-    FAPI_TRY(forceCrctEndian(i_input.ActiveNibble, o_data));
-    FAPI_TRY(forceCrctEndian(i_input.AddrMirror, o_data));
-    FAPI_TRY(forceCrctEndian(i_input.ColumnAddrWidth, o_data));
-    FAPI_TRY(forceCrctEndian(i_input.RowAddrWidth, o_data));
-    FAPI_TRY(forceCrctEndian(i_input.SpdCLSupported, o_data));
-    FAPI_TRY(forceCrctEndian(i_input.SpdtAAmin, o_data));
-    FAPI_TRY(forceCrctEndian(i_input.Rank4Mode, o_data));
-    FAPI_TRY(forceCrctEndian(i_input.EncodedQuadCs, o_data));
-    FAPI_TRY(forceCrctEndian(i_input.DDPCompatible, o_data));
-    FAPI_TRY(forceCrctEndian(i_input.TSV8HSupport, o_data));
-    FAPI_TRY(forceCrctEndian(i_input.MRAMSupport, o_data));
-    FAPI_TRY(forceCrctEndian(i_input.MDSSupport, o_data));
-    FAPI_TRY(forceCrctEndian(i_input.NumPStates, o_data));
-    FAPI_TRY(forceCrctEndianArray(i_input.Frequency, MSDG_MAX_PSTATE, o_data));
-    FAPI_TRY(forceCrctEndianArray(i_input.PhyOdtImpedance, MSDG_MAX_PSTATE, o_data));
-    FAPI_TRY(forceCrctEndianArray(i_input.PhyDrvImpedancePU, MSDG_MAX_PSTATE, o_data));
-    FAPI_TRY(forceCrctEndianArray(i_input.PhyDrvImpedancePD, MSDG_MAX_PSTATE, o_data));
-    FAPI_TRY(forceCrctEndianArray(i_input.PhySlewRate, MSDG_MAX_PSTATE, o_data));
-    FAPI_TRY(forceCrctEndian(i_input.ATxImpedance, o_data));
-    FAPI_TRY(forceCrctEndian(i_input.ATxSlewRate, o_data));
-    FAPI_TRY(forceCrctEndian(i_input.CKTxImpedance, o_data));
-    FAPI_TRY(forceCrctEndian(i_input.CKTxSlewRate, o_data));
-    FAPI_TRY(forceCrctEndian(i_input.AlertOdtImpedance, o_data));
-    FAPI_TRY(forceCrctEndianArray(i_input.DramRttNomR0, MSDG_MAX_PSTATE, o_data));
-    FAPI_TRY(forceCrctEndianArray(i_input.DramRttNomR1, MSDG_MAX_PSTATE, o_data));
-    FAPI_TRY(forceCrctEndianArray(i_input.DramRttNomR2, MSDG_MAX_PSTATE, o_data));
-    FAPI_TRY(forceCrctEndianArray(i_input.DramRttNomR3, MSDG_MAX_PSTATE, o_data));
-    FAPI_TRY(forceCrctEndianArray(i_input.DramRttWrR0, MSDG_MAX_PSTATE, o_data));
-    FAPI_TRY(forceCrctEndianArray(i_input.DramRttWrR1, MSDG_MAX_PSTATE, o_data));
-    FAPI_TRY(forceCrctEndianArray(i_input.DramRttWrR2, MSDG_MAX_PSTATE, o_data));
-    FAPI_TRY(forceCrctEndianArray(i_input.DramRttWrR3, MSDG_MAX_PSTATE, o_data));
-    FAPI_TRY(forceCrctEndianArray(i_input.DramRttParkR0, MSDG_MAX_PSTATE, o_data));
-    FAPI_TRY(forceCrctEndianArray(i_input.DramRttParkR1, MSDG_MAX_PSTATE, o_data));
-    FAPI_TRY(forceCrctEndianArray(i_input.DramRttParkR2, MSDG_MAX_PSTATE, o_data));
-    FAPI_TRY(forceCrctEndianArray(i_input.DramRttParkR3, MSDG_MAX_PSTATE, o_data));
-    FAPI_TRY(forceCrctEndianArray(i_input.DramDic, MSDG_MAX_PSTATE, o_data));
-    FAPI_TRY(forceCrctEndianArray(i_input.DramWritePreamble, MSDG_MAX_PSTATE, o_data));
-    FAPI_TRY(forceCrctEndianArray(i_input.DramReadPreamble, MSDG_MAX_PSTATE, o_data));
-    FAPI_TRY(forceCrctEndianArray(i_input.PhyEqualization, MSDG_MAX_PSTATE, o_data));
-    FAPI_TRY(forceCrctEndianArray(i_input.InitVrefDQ, MSDG_MAX_PSTATE, o_data));
-    FAPI_TRY(forceCrctEndianArray(i_input.InitPhyVref, MSDG_MAX_PSTATE, o_data));
-    FAPI_TRY(forceCrctEndianArray(i_input.OdtWrMapCs, MSDG_MAX_PSTATE, o_data));
-    FAPI_TRY(forceCrctEndianArray(i_input.OdtRdMapCs, MSDG_MAX_PSTATE, o_data));
-    FAPI_TRY(forceCrctEndianArray(i_input.Geardown, MSDG_MAX_PSTATE, o_data));
-    FAPI_TRY(forceCrctEndianArray(i_input.CALatencyAdder, MSDG_MAX_PSTATE, o_data));
-    FAPI_TRY(forceCrctEndianArray(i_input.BistCALMode, MSDG_MAX_PSTATE, o_data));
-    FAPI_TRY(forceCrctEndianArray(i_input.BistCAParityLatency, MSDG_MAX_PSTATE, o_data));
-    FAPI_TRY(forceCrctEndianArray(i_input.RcdDic, MSDG_MAX_PSTATE, o_data));
-    FAPI_TRY(forceCrctEndianArray(i_input.RcdVoltageCtrl, MSDG_MAX_PSTATE, o_data));
-    FAPI_TRY(forceCrctEndianArray(i_input.RcdIBTCtrl, MSDG_MAX_PSTATE, o_data));
-    FAPI_TRY(forceCrctEndianArray(i_input.RcdDBDic, MSDG_MAX_PSTATE, o_data));
-    FAPI_TRY(forceCrctEndianArray(i_input.RcdSlewRate, MSDG_MAX_PSTATE, o_data));
-    FAPI_TRY(forceCrctEndian(i_input.DFIMRL_DDRCLK, o_data));
-
-    for (uint8_t l_pstate = 0; l_pstate < MSDG_MAX_PSTATE; ++l_pstate)
-    {
-        FAPI_TRY(forceCrctEndianArray(i_input.ATxDly_A[l_pstate], DRAMINIT_NUM_ADDR_DELAYS, o_data));
-    }
-
-    for (uint8_t l_pstate = 0; l_pstate < MSDG_MAX_PSTATE; ++l_pstate)
-    {
-        FAPI_TRY(forceCrctEndianArray(i_input.ATxDly_B[l_pstate], DRAMINIT_NUM_ADDR_DELAYS, o_data));
-    }
-
-    o_crc = crc32_gen(o_data);
-
-    padCommData(o_data);
-    FAPI_TRY(correctMMIOEndianForStruct(o_data));
-    FAPI_TRY(correctMMIOword_order(o_data));
-
-fapi_try_exit:
-    FAPI_DBG("Exiting with return code : 0x%08X...", (uint64_t)fapi2::current_err);
-    return fapi2::current_err;
-}
-
-/// @brief Writes user_input_msdg to the data buffer
-///
-/// @param[in] i_target     The Explorer chip to issue the command to
-/// @param[in] i_data       The user_input_msdg data to write
-/// @param[out] o_crc       The calculated crc of the data.
-///
-/// @return fapi2::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
-fapi2::ReturnCode putUserInputMsdg(
-    const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
-    const user_input_msdg& i_data,
-    uint32_t& o_crc)
-{
-    std::vector<uint8_t> l_data;
-
-    FAPI_TRY(user_input_msdg_to_little_endian(i_data, l_data, o_crc));
-
-    FAPI_TRY(fapi2::putMMIO(i_target, EXPLR_IB_DATA_ADDR, BUFFER_TRANSACTION_SIZE, l_data));
 
 fapi_try_exit:
     FAPI_DBG("Exiting with return code : 0x%08X...", (uint64_t)fapi2::current_err);
@@ -978,6 +901,115 @@ fapi2::ReturnCode readCrctEndianArray(const std::vector<uint8_t>& i_input, const
 
 fapi_try_exit:
     FAPI_DBG("Exiting with return code : 0x%08X...", (uint64_t)fapi2::current_err);
+    return fapi2::current_err;
+}
+
+///
+/// @brief Converts user_input_msdg_t to little endian and calculates the crc
+/// @param[in] i_input user_input_msdg_t structure to convert
+/// @param[in] i_is_new_fw_version denotes if newer than FW ver397559
+/// @param[out] o_data vector of bytes for mmio
+/// @param[out] o_crc the calculated crc of the data
+/// @return fapi2::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
+///
+fapi2::ReturnCode user_input_msdg_to_little_endian(const user_input_msdg_t& i_input,
+        const bool i_is_new_fw_version,
+        std::vector<uint8_t>& o_data,
+        uint32_t& o_crc)
+{
+    o_data.clear();
+
+    FAPI_TRY(forceCrctEndian(i_input.iv_user_msdg_upto_ver397559.version_number, o_data));
+    FAPI_TRY(forceCrctEndian(i_input.iv_user_msdg_upto_ver397559.DimmType, o_data));
+    FAPI_TRY(forceCrctEndian(i_input.iv_user_msdg_upto_ver397559.CsPresent, o_data));
+    FAPI_TRY(forceCrctEndian(i_input.iv_user_msdg_upto_ver397559.DramDataWidth, o_data));
+    FAPI_TRY(forceCrctEndian(i_input.iv_user_msdg_upto_ver397559.Height3DS, o_data));
+    FAPI_TRY(forceCrctEndian(i_input.iv_user_msdg_upto_ver397559.ActiveDBYTE, o_data));
+    FAPI_TRY(forceCrctEndian(i_input.iv_user_msdg_upto_ver397559.ActiveNibble, o_data));
+    FAPI_TRY(forceCrctEndian(i_input.iv_user_msdg_upto_ver397559.AddrMirror, o_data));
+    FAPI_TRY(forceCrctEndian(i_input.iv_user_msdg_upto_ver397559.ColumnAddrWidth, o_data));
+    FAPI_TRY(forceCrctEndian(i_input.iv_user_msdg_upto_ver397559.RowAddrWidth, o_data));
+    FAPI_TRY(forceCrctEndian(i_input.iv_user_msdg_upto_ver397559.SpdCLSupported, o_data));
+    FAPI_TRY(forceCrctEndian(i_input.iv_user_msdg_upto_ver397559.SpdtAAmin, o_data));
+    FAPI_TRY(forceCrctEndian(i_input.iv_user_msdg_upto_ver397559.Rank4Mode, o_data));
+    FAPI_TRY(forceCrctEndian(i_input.iv_user_msdg_upto_ver397559.EncodedQuadCs, o_data));
+    FAPI_TRY(forceCrctEndian(i_input.iv_user_msdg_upto_ver397559.DDPCompatible, o_data));
+    FAPI_TRY(forceCrctEndian(i_input.iv_user_msdg_upto_ver397559.TSV8HSupport, o_data));
+    FAPI_TRY(forceCrctEndian(i_input.iv_user_msdg_upto_ver397559.MRAMSupport, o_data));
+    FAPI_TRY(forceCrctEndian(i_input.iv_user_msdg_upto_ver397559.MDSSupport, o_data));
+    FAPI_TRY(forceCrctEndian(i_input.iv_user_msdg_upto_ver397559.NumPStates, o_data));
+    FAPI_TRY(forceCrctEndianArray(i_input.iv_user_msdg_upto_ver397559.Frequency, MSDG_MAX_PSTATE, o_data));
+    FAPI_TRY(forceCrctEndianArray(i_input.iv_user_msdg_upto_ver397559.PhyOdtImpedance, MSDG_MAX_PSTATE, o_data));
+    FAPI_TRY(forceCrctEndianArray(i_input.iv_user_msdg_upto_ver397559.PhyDrvImpedancePU, MSDG_MAX_PSTATE, o_data));
+    FAPI_TRY(forceCrctEndianArray(i_input.iv_user_msdg_upto_ver397559.PhyDrvImpedancePD, MSDG_MAX_PSTATE, o_data));
+    FAPI_TRY(forceCrctEndianArray(i_input.iv_user_msdg_upto_ver397559.PhySlewRate, MSDG_MAX_PSTATE, o_data));
+    FAPI_TRY(forceCrctEndian(i_input.iv_user_msdg_upto_ver397559.ATxImpedance, o_data));
+    FAPI_TRY(forceCrctEndian(i_input.iv_user_msdg_upto_ver397559.ATxSlewRate, o_data));
+    FAPI_TRY(forceCrctEndian(i_input.iv_user_msdg_upto_ver397559.CKTxImpedance, o_data));
+    FAPI_TRY(forceCrctEndian(i_input.iv_user_msdg_upto_ver397559.CKTxSlewRate, o_data));
+    FAPI_TRY(forceCrctEndian(i_input.iv_user_msdg_upto_ver397559.AlertOdtImpedance, o_data));
+    FAPI_TRY(forceCrctEndianArray(i_input.iv_user_msdg_upto_ver397559.DramRttNomR0, MSDG_MAX_PSTATE, o_data));
+    FAPI_TRY(forceCrctEndianArray(i_input.iv_user_msdg_upto_ver397559.DramRttNomR1, MSDG_MAX_PSTATE, o_data));
+    FAPI_TRY(forceCrctEndianArray(i_input.iv_user_msdg_upto_ver397559.DramRttNomR2, MSDG_MAX_PSTATE, o_data));
+    FAPI_TRY(forceCrctEndianArray(i_input.iv_user_msdg_upto_ver397559.DramRttNomR3, MSDG_MAX_PSTATE, o_data));
+    FAPI_TRY(forceCrctEndianArray(i_input.iv_user_msdg_upto_ver397559.DramRttWrR0, MSDG_MAX_PSTATE, o_data));
+    FAPI_TRY(forceCrctEndianArray(i_input.iv_user_msdg_upto_ver397559.DramRttWrR1, MSDG_MAX_PSTATE, o_data));
+    FAPI_TRY(forceCrctEndianArray(i_input.iv_user_msdg_upto_ver397559.DramRttWrR2, MSDG_MAX_PSTATE, o_data));
+    FAPI_TRY(forceCrctEndianArray(i_input.iv_user_msdg_upto_ver397559.DramRttWrR3, MSDG_MAX_PSTATE, o_data));
+    FAPI_TRY(forceCrctEndianArray(i_input.iv_user_msdg_upto_ver397559.DramRttParkR0, MSDG_MAX_PSTATE, o_data));
+    FAPI_TRY(forceCrctEndianArray(i_input.iv_user_msdg_upto_ver397559.DramRttParkR1, MSDG_MAX_PSTATE, o_data));
+    FAPI_TRY(forceCrctEndianArray(i_input.iv_user_msdg_upto_ver397559.DramRttParkR2, MSDG_MAX_PSTATE, o_data));
+    FAPI_TRY(forceCrctEndianArray(i_input.iv_user_msdg_upto_ver397559.DramRttParkR3, MSDG_MAX_PSTATE, o_data));
+    FAPI_TRY(forceCrctEndianArray(i_input.iv_user_msdg_upto_ver397559.DramDic, MSDG_MAX_PSTATE, o_data));
+    FAPI_TRY(forceCrctEndianArray(i_input.iv_user_msdg_upto_ver397559.DramWritePreamble, MSDG_MAX_PSTATE, o_data));
+    FAPI_TRY(forceCrctEndianArray(i_input.iv_user_msdg_upto_ver397559.DramReadPreamble, MSDG_MAX_PSTATE, o_data));
+    FAPI_TRY(forceCrctEndianArray(i_input.iv_user_msdg_upto_ver397559.PhyEqualization, MSDG_MAX_PSTATE, o_data));
+    FAPI_TRY(forceCrctEndianArray(i_input.iv_user_msdg_upto_ver397559.InitVrefDQ, MSDG_MAX_PSTATE, o_data));
+    FAPI_TRY(forceCrctEndianArray(i_input.iv_user_msdg_upto_ver397559.InitPhyVref, MSDG_MAX_PSTATE, o_data));
+    FAPI_TRY(forceCrctEndianArray(i_input.iv_user_msdg_upto_ver397559.OdtWrMapCs, MSDG_MAX_PSTATE, o_data));
+    FAPI_TRY(forceCrctEndianArray(i_input.iv_user_msdg_upto_ver397559.OdtRdMapCs, MSDG_MAX_PSTATE, o_data));
+    FAPI_TRY(forceCrctEndianArray(i_input.iv_user_msdg_upto_ver397559.Geardown, MSDG_MAX_PSTATE, o_data));
+    FAPI_TRY(forceCrctEndianArray(i_input.iv_user_msdg_upto_ver397559.CALatencyAdder, MSDG_MAX_PSTATE, o_data));
+    FAPI_TRY(forceCrctEndianArray(i_input.iv_user_msdg_upto_ver397559.BistCALMode, MSDG_MAX_PSTATE, o_data));
+    FAPI_TRY(forceCrctEndianArray(i_input.iv_user_msdg_upto_ver397559.BistCAParityLatency, MSDG_MAX_PSTATE, o_data));
+    FAPI_TRY(forceCrctEndianArray(i_input.iv_user_msdg_upto_ver397559.RcdDic, MSDG_MAX_PSTATE, o_data));
+    FAPI_TRY(forceCrctEndianArray(i_input.iv_user_msdg_upto_ver397559.RcdVoltageCtrl, MSDG_MAX_PSTATE, o_data));
+    FAPI_TRY(forceCrctEndianArray(i_input.iv_user_msdg_upto_ver397559.RcdIBTCtrl, MSDG_MAX_PSTATE, o_data));
+    FAPI_TRY(forceCrctEndianArray(i_input.iv_user_msdg_upto_ver397559.RcdDBDic, MSDG_MAX_PSTATE, o_data));
+    FAPI_TRY(forceCrctEndianArray(i_input.iv_user_msdg_upto_ver397559.RcdSlewRate, MSDG_MAX_PSTATE, o_data));
+    FAPI_TRY(forceCrctEndian(i_input.iv_user_msdg_upto_ver397559.DFIMRL_DDRCLK, o_data));
+
+    for (uint8_t l_pstate = 0; l_pstate < MSDG_MAX_PSTATE; ++l_pstate)
+    {
+        FAPI_TRY(forceCrctEndianArray(i_input.iv_user_msdg_upto_ver397559.ATxDly_A[l_pstate], DRAMINIT_NUM_ADDR_DELAYS,
+                                      o_data));
+    }
+
+    for (uint8_t l_pstate = 0; l_pstate < MSDG_MAX_PSTATE; ++l_pstate)
+    {
+        FAPI_TRY(forceCrctEndianArray(i_input.iv_user_msdg_upto_ver397559.ATxDly_B[l_pstate], DRAMINIT_NUM_ADDR_DELAYS,
+                                      o_data));
+    }
+
+    if(i_is_new_fw_version)
+    {
+        FAPI_TRY(forceCrctEndian(i_input.F1RC1x, o_data));
+        FAPI_TRY(forceCrctEndian(i_input.F1RC2x, o_data));
+        FAPI_TRY(forceCrctEndian(i_input.F1RC3x, o_data));
+        FAPI_TRY(forceCrctEndian(i_input.F1RC4x, o_data));
+        FAPI_TRY(forceCrctEndian(i_input.F1RC5x, o_data));
+        FAPI_TRY(forceCrctEndian(i_input.F1RC6x, o_data));
+        FAPI_TRY(forceCrctEndian(i_input.F1RC7x, o_data));
+    }
+
+    o_crc = crc32_gen(o_data);
+    padCommData(o_data);
+    FAPI_TRY(correctMMIOEndianForStruct(o_data));
+    FAPI_TRY(correctMMIOword_order(o_data));
+
+fapi_try_exit:
+    FAPI_DBG("Exiting with return code : 0x%08X...",
+             static_cast<uint64_t>(fapi2::current_err));
     return fapi2::current_err;
 }
 

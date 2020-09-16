@@ -31,15 +31,12 @@
 // *HWP Team: Memory
 // *HWP Level: 2
 // *HWP Consumed by: FSP:HB
-
-#include <generic/memory/lib/utils/c_str.H>
-#include <lib/shared/exp_defaults.H>
 #include <lib/exp_draminit_utils.H>
-#include <lib/phy/exp_train_display.H>
-#include <lib/phy/exp_train_handler.H>
+#include <generic/memory/lib/utils/c_str.H>
 #include <exp_inband.H>
 #include <lib/eff_config/explorer_attr_engine_traits.H>
 #include <generic/memory/lib/data_engine/data_engine.H>
+#include <lib/exp_attribute_accessors_manual.H>
 
 namespace mss
 {
@@ -105,22 +102,121 @@ fapi_try_exit:
 /// @brief Perform normal host FW phy init
 ///
 /// @param[in] i_target OCMB target
-/// @param[in] i_crc CRC value
+/// @param[in] i_phy_info phy information of interest
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success
 ///
-fapi2::ReturnCode host_fw_phy_normal_init(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
-        const uint32_t i_crc)
+fapi2::ReturnCode host_fw_phy_init(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+                                   const uint8_t i_phy_init_mode)
+{
+    user_input_msdg l_phy_params;
+    mss::exp::phy_param_info l_phy_info;
+    FAPI_TRY(mss::exp::init_phy_params(i_target, l_phy_params, l_phy_info));
+
+    // Call appropriate init function
+    if (i_phy_init_mode == fapi2::ENUM_ATTR_MSS_OCMB_PHY_INIT_MODE_NORMAL)
+    {
+        FAPI_TRY(mss::exp::host_fw_phy_normal_init(i_target, l_phy_info));
+    }
+    else
+    {
+        FAPI_TRY(mss::exp::host_fw_phy_init_with_eye_capture(i_target, l_phy_params, l_phy_info));
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Perform normal host FW phy init
+///
+/// @param[in] i_target OCMB target
+/// @param[in] i_phy_info phy information of interest
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success
+///
+fapi2::ReturnCode host_fw_phy_normal_init(
+    const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+    const phy_param_info& i_phy_info)
 {
     fapi2::ReturnCode l_rc = fapi2::FAPI2_RC_SUCCESS;
     host_fw_command_struct l_cmd;
     std::vector<uint8_t> l_rsp_data;
 
     // Issue full boot mode cmd though EXP-FW REQ buffer
-    FAPI_TRY(send_host_phy_init_cmd(i_target, i_crc, phy_init_mode::NORMAL, l_cmd));
+    FAPI_TRY(send_host_phy_init_cmd(i_target, i_phy_info, phy_init_mode::NORMAL, l_cmd));
     FAPI_TRY(mss::exp::check_host_fw_response(i_target, l_cmd, l_rsp_data, l_rc));
 
     FAPI_TRY(check_rsp_data_size(i_target, l_rsp_data.size(), phy_init_mode::NORMAL));
     FAPI_TRY(mss::exp::read_and_display_normal_training_repsonse(i_target, l_rsp_data, l_rc));
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Perform host FW phy init with eye capture
+/// @param[in] i_target OCMB target
+/// @param[in] i_phy_params phy initialization resp. struct
+/// @param[in] i_phy_info phy information of interest
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success
+/// @note the goal here is to attempt to send both phy_inits even
+/// in the event of a bad return code from the read & display
+///
+fapi2::ReturnCode host_fw_phy_init_with_eye_capture(
+    const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+    const user_input_msdg& i_phy_params,
+    const phy_param_info& i_phy_info)
+{
+    fapi2::ReturnCode l_check_response_1_rc;
+    fapi2::ReturnCode l_read_display_response_1_rc;
+    fapi2::ReturnCode l_check_response_2_rc;
+    fapi2::ReturnCode l_read_display_response_2_rc;
+
+    user_2d_eye_response_1_msdg l_response_1;
+    user_2d_eye_response_2_msdg l_response_2;
+
+    // If the data is the right size, we can read and display it.
+    // Otherwise, skip the reading and try step 2
+    FAPI_TRY(impl_details::common_init_eye_capture(i_target,
+             phy_init_mode::EYE_CAPTURE_STEP_1,
+             i_phy_info,
+             l_check_response_1_rc,
+             l_read_display_response_1_rc,
+             l_response_1));
+
+    // Put user_input_msdg again for step 2 (overwritten by data buffer from step 1)
+    {
+        phy_param_info l_phy_info = i_phy_info;
+
+        FAPI_TRY( mss::exp::ib::putUserInputMsdg(i_target, i_phy_params, l_phy_info.iv_crc),
+                  "Failed putUserInputMsdg() for %s", mss::c_str(i_target) );
+
+        FAPI_TRY(impl_details::common_init_eye_capture(i_target,
+                 phy_init_mode::EYE_CAPTURE_STEP_2,
+                 l_phy_info,
+                 l_check_response_2_rc,
+                 l_read_display_response_2_rc,
+                 l_response_2));
+    }
+
+    // Set Explorer RC response attributes
+    FAPI_TRY(set_rc_resp_attrs(i_target,
+                               l_read_display_response_1_rc,
+                               l_read_display_response_2_rc,
+                               l_response_1,
+                               l_response_2));
+
+    // Check the return codes and skip attr_engine
+    FAPI_TRY(process_eye_capture_return_codes(i_target,
+             l_response_1,
+             l_response_2,
+             l_check_response_1_rc,
+             l_check_response_2_rc));
+
+    // Finally, check the display response return codes
+    FAPI_TRY(l_read_display_response_1_rc, "Error ocurred reading/displaying eye capture response 1 of %s",
+             mss::c_str(i_target));
+    FAPI_TRY(l_read_display_response_2_rc, "Error ocurred reading/displaying eye capture response 2 of %s",
+             mss::c_str(i_target));
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -132,8 +228,8 @@ fapi_try_exit:
 /// @param[in] i_rc_resp the Explorer rc response
 /// @return FAPI2_RC_SUCCESS iff okay
 ///
-static fapi2::ReturnCode set_rc_resp_attr(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
-        const user_response_rc_msdg_t& i_rc_resp)
+fapi2::ReturnCode set_rc_resp_attrs(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+                                    const user_response_rc_msdg_t& i_rc_resp)
 {
     for (const auto& d : mss::find_targets<fapi2::TARGET_TYPE_DIMM>(i_target))
     {
@@ -152,92 +248,30 @@ fapi_try_exit:
 }
 
 ///
-/// @brief Perform host FW phy init with eye capture
+/// @brief Helper function to set rc response attrs
+/// @param[in] i_target the fapi2 OCMB target
+/// @param[in] i_read_display_response_1_rc ReturnCode for display_response_1
+/// @param[in] i_read_display_response_2_rc ReturnCode for display_response_2
+/// @param[in] i_response_1 the user_2d_eye_response_1_msdg
+/// @param[in] i_response_2 user_2d_eye_response_2_msdg
+/// @return FAPI2_RC_SUCCESS iff okay
 ///
-/// @param[in] i_target OCMB target
-/// @param[in] i_crc CRC value
-/// @param[in] i_phy_params PHY params struct
-/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success
-/// @note the goal here is to attempt to send both phy_inits even in the event of a bad return code from the read & display
-///
-fapi2::ReturnCode host_fw_phy_init_with_eye_capture(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
-        const uint32_t i_crc,
-        const user_input_msdg& i_phy_params)
+fapi2::ReturnCode set_rc_resp_attrs(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+                                    const fapi2::ReturnCode& i_read_display_response_1_rc,
+                                    const fapi2::ReturnCode& i_read_display_response_2_rc,
+                                    const user_2d_eye_response_1_msdg& i_response_1,
+                                    const user_2d_eye_response_2_msdg& i_response_2)
 {
-    fapi2::ReturnCode l_check_response_1_rc = fapi2::FAPI2_RC_SUCCESS;
-    fapi2::ReturnCode l_read_display_response_1_rc = fapi2::FAPI2_RC_SUCCESS;
-    fapi2::ReturnCode l_check_response_2_rc = fapi2::FAPI2_RC_SUCCESS;
-    fapi2::ReturnCode l_read_display_response_2_rc = fapi2::FAPI2_RC_SUCCESS;
-
-    user_2d_eye_response_1_msdg l_response_1;
-    user_2d_eye_response_2_msdg l_response_2;
-
-    std::vector<uint8_t> l_rsp_data;
-
-    // First, step 1
-    {
-        host_fw_command_struct l_cmd;
-        FAPI_TRY(send_host_phy_init_cmd(i_target, i_crc, phy_init_mode::EYE_CAPTURE_STEP_1, l_cmd));
-
-        // Return code output param is that of check::response
-        // A fail of getRSP will go to fapi_try_exit
-        FAPI_TRY(mss::exp::check_host_fw_response(i_target, l_cmd, l_rsp_data, l_check_response_1_rc));
-
-        l_read_display_response_1_rc = check_rsp_data_size(i_target,
-                                       l_rsp_data.size(),
-                                       phy_init_mode::EYE_CAPTURE_STEP_1);
-
-        // If the data is the right size, we can read and display it. Otherwise, skip the reading and try step 2
-        // Check the return codes at the end
-        if (l_read_display_response_1_rc == fapi2::FAPI2_RC_SUCCESS)
-        {
-            l_read_display_response_1_rc = mss::exp::read_and_display_user_2d_eye_response(i_target, l_rsp_data, l_response_1);
-        }
-    }
-    l_rsp_data.clear();
-
-    // Next, step 2
-    {
-        host_fw_command_struct l_cmd;
-        uint32_t l_crc = 0;
-
-        // Put user_input_msdg again for step 2 (overwritten by data buffer from step 1)
-        FAPI_TRY( mss::exp::ib::putUserInputMsdg(i_target, i_phy_params, l_crc),
-                  "Failed putUserInputMsdg() for %s", mss::c_str(i_target) );
-
-        // Send cmd
-        FAPI_TRY(send_host_phy_init_cmd(i_target, l_crc, phy_init_mode::EYE_CAPTURE_STEP_2, l_cmd));
-
-        // Return code output param is that of check::response
-        // A fail of getRSP will go to fapi_try_exit
-        FAPI_TRY(mss::exp::check_host_fw_response(i_target, l_cmd, l_rsp_data, l_check_response_2_rc));
-
-        l_read_display_response_2_rc = check_rsp_data_size(i_target,
-                                       l_rsp_data.size(),
-                                       phy_init_mode::EYE_CAPTURE_STEP_2);
-
-        // If the data is the right size, we can read and display it. Otherwise, skip the reading.
-        // Next, we will check these return codes
-        if (l_read_display_response_2_rc == fapi2::FAPI2_RC_SUCCESS)
-        {
-            l_read_display_response_2_rc = mss::exp::read_and_display_user_2d_eye_response(i_target, l_rsp_data, l_response_2);
-        }
-    }
-
-    // Set Explorer RC response attributes
-
-    if ((l_read_display_response_1_rc == fapi2::FAPI2_RC_SUCCESS && l_read_display_response_2_rc == fapi2::FAPI2_RC_SUCCESS)
-        || (l_read_display_response_1_rc == fapi2::FAPI2_RC_SUCCESS && l_read_display_response_2_rc != fapi2::FAPI2_RC_SUCCESS))
+    if (i_read_display_response_1_rc == fapi2::FAPI2_RC_SUCCESS)
     {
         // If both init cmds pass, we use the 1st response arbitrarily
-        FAPI_TRY(set_rc_resp_attr(i_target, l_response_1.rc_resp));
+        FAPI_TRY(set_rc_resp_attrs(i_target, i_response_1.rc_resp));
     }
 
-    else if (l_read_display_response_1_rc != fapi2::FAPI2_RC_SUCCESS
-             && l_read_display_response_2_rc == fapi2::FAPI2_RC_SUCCESS)
+    else if (i_read_display_response_2_rc == fapi2::FAPI2_RC_SUCCESS)
     {
         // If 1 of 2 init cmds fail, we run the attr_engine on the passing one.
-        FAPI_TRY(set_rc_resp_attr(i_target, l_response_2.rc_resp));
+        FAPI_TRY(set_rc_resp_attrs(i_target, i_response_2.rc_resp));
     }
 
     else
@@ -247,19 +281,6 @@ fapi2::ReturnCode host_fw_phy_init_with_eye_capture(const fapi2::Target<fapi2::T
                  "will NOT set Explorer rc response attrs for %s.",
                  mss::c_str(i_target));
     }
-
-    // Check the return codes and skip attr_engine
-    FAPI_TRY(process_eye_capture_return_codes(i_target,
-             l_response_1,
-             l_response_2,
-             l_check_response_1_rc,
-             l_check_response_2_rc));
-
-    // Finally, check the display response return codes
-    FAPI_TRY(l_read_display_response_1_rc, "Error ocurred reading/displaying eye capture response 1 of %s",
-             mss::c_str(i_target));
-    FAPI_TRY(l_read_display_response_2_rc, "Error ocurred reading/displaying eye capture response 2 of %s",
-             mss::c_str(i_target));
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -327,22 +348,21 @@ fapi_try_exit:
 /// @brief Send PHY init command given the provided phy mode and CRC
 ///
 /// @param[in] i_target OCMB target
-/// @param[in] i_crc CRC field
+/// @param[in] i_phy_info phy information of interest
 /// @param[in] i_phy_init_mode normal / eye capture step 1 or 2
 /// @param[out] host_fw_command_struct used for initialization
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success
 ///
 fapi2::ReturnCode send_host_phy_init_cmd(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
-        const uint32_t i_crc,
+        const phy_param_info& i_phy_info,
         const uint8_t i_phy_init_mode,
         host_fw_command_struct& o_cmd)
 {
     host_fw_command_struct l_cmd;
 
     // Issue full boot mode cmd though EXP-FW REQ buffer
-    FAPI_TRY(setup_cmd_params(i_target, i_crc, sizeof(user_input_msdg), i_phy_init_mode, l_cmd));
-    FAPI_TRY(mss::exp::ib::putCMD(i_target, l_cmd),
-             "Failed putCMD() for  %s", mss::c_str(i_target));
+    FAPI_TRY(setup_cmd_params(i_target, i_phy_info.iv_crc, i_phy_info.iv_size, i_phy_init_mode, l_cmd));
+    FAPI_TRY(mss::exp::ib::putCMD(i_target, l_cmd), "Failed putCMD() for  %s", mss::c_str(i_target));
 
     // Wait a bit for the command (and training) to complete
     // Value based on initial Explorer hardware in Cronus in i2c mode.
@@ -369,8 +389,9 @@ fapi2::ReturnCode check_host_fw_response(const fapi2::Target<fapi2::TARGET_TYPE_
         std::vector<uint8_t>& o_rsp_data,
         fapi2::ReturnCode& o_rc)
 {
-    host_fw_response_struct l_response;
+    o_rc = fapi2::FAPI2_RC_SUCCESS;
 
+    host_fw_response_struct l_response;
     FAPI_TRY(mss::exp::ib::getRSP(i_target, l_response, o_rsp_data),
              "Failed getRSP() for  %s", mss::c_str(i_target));
 
@@ -406,7 +427,7 @@ fapi2::ReturnCode read_and_display_normal_training_repsonse(
     FAPI_TRY( mss::exp::train::display_normal_info(i_target, l_train_response));
 
     // Set RC response attributes
-    FAPI_TRY(set_rc_resp_attr(i_target, l_train_response.rc_resp));
+    FAPI_TRY(set_rc_resp_attrs(i_target, l_train_response.rc_resp));
 
     if(i_rc != fapi2::FAPI2_RC_SUCCESS)
     {
@@ -462,7 +483,6 @@ fapi_try_exit:
 
 ///
 /// @brief user_input_msdg structure setup
-/// @tparam T the fapi2 TargetType
 /// @param[in] i_target the fapi2 target
 /// @param[out] o_phy_params the phy params data struct
 /// @return FAPI2_RC_SUCCESS iff okay
@@ -540,9 +560,24 @@ fapi2::ReturnCode setup_phy_params(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_C
         FAPI_TRY(l_set_phy_params.set_DFIMRL_DDRCLK(o_phy_params));
         FAPI_TRY(l_set_phy_params.set_ATxDly_A(o_phy_params));
         FAPI_TRY(l_set_phy_params.set_ATxDly_B(o_phy_params));
-    }
 
-    return fapi2::FAPI2_RC_SUCCESS;
+        {
+            uint32_t l_fw_version = 0;
+            FAPI_TRY(mss::get_booted_fw_version(i_target, l_fw_version));
+
+            if(is_new_fw_msdg_supported(l_fw_version))
+            {
+                FAPI_TRY(l_set_phy_params.set_F1RC1x(o_phy_params));
+                FAPI_TRY(l_set_phy_params.set_F1RC1x(o_phy_params));
+                FAPI_TRY(l_set_phy_params.set_F1RC2x(o_phy_params));
+                FAPI_TRY(l_set_phy_params.set_F1RC3x(o_phy_params));
+                FAPI_TRY(l_set_phy_params.set_F1RC4x(o_phy_params));
+                FAPI_TRY(l_set_phy_params.set_F1RC5x(o_phy_params));
+                FAPI_TRY(l_set_phy_params.set_F1RC6x(o_phy_params));
+                FAPI_TRY(l_set_phy_params.set_F1RC7x(o_phy_params));
+            }
+        }
+    }
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -554,8 +589,9 @@ fapi_try_exit:
 /// @param[in] i_phy_params the phy params data struct
 /// @return FAPI2_RC_SUCCESS iff okay
 ///
-fapi2::ReturnCode print_phy_params(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
-                                   const user_input_msdg& i_phy_params)
+fapi2::ReturnCode print_phy_params(
+    const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+    const user_input_msdg& i_phy_params)
 {
     // Hostboot doesn't implement FAPI_LAB
 #ifndef __HOSTBOOT_MODULE
@@ -564,212 +600,228 @@ fapi2::ReturnCode print_phy_params(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_C
     {
         FAPI_LAB("// Struct passed to data buffer during EXP_FW_DDR_PHY_INIT for %s", mss::c_str(l_port));
         FAPI_LAB("struct user_input_msdg m = {");
-        FAPI_LAB("  .version_number         = %u,", i_phy_params.version_number);
-        FAPI_LAB("  .DimmType               = %u,", i_phy_params.DimmType);
-        FAPI_LAB("  .CsPresent              = 0x%04X,", i_phy_params.CsPresent);
-        FAPI_LAB("  .DramDataWidth          = %u,", i_phy_params.DramDataWidth);
-        FAPI_LAB("  .Height3DS              = %u,", i_phy_params.Height3DS);
-        FAPI_LAB("  .ActiveDBYTE            = 0x%04X,", i_phy_params.ActiveDBYTE);
-        FAPI_LAB("  .ActiveNibble           = 0x%08X,", i_phy_params.ActiveNibble);
-        FAPI_LAB("  .AddrMirror             = 0x%04X,", i_phy_params.AddrMirror);
-        FAPI_LAB("  .ColumnAddrWidth        = 0x%04X,", i_phy_params.ColumnAddrWidth);
-        FAPI_LAB("  .RowAddrWidth           = 0x%04X,", i_phy_params.RowAddrWidth);
-        FAPI_LAB("  .SpdCLSupported         = 0x%08X,", i_phy_params.SpdCLSupported);
-        FAPI_LAB("  .SpdtAAmin              = %u,", i_phy_params.SpdtAAmin);
-        FAPI_LAB("  .Rank4Mode              = %u,", i_phy_params.Rank4Mode);
-        FAPI_LAB("  .EncodedQuadCs          = %u,", i_phy_params.EncodedQuadCs);
-        FAPI_LAB("  .DDPCompatible          = %u,", i_phy_params.DDPCompatible);
-        FAPI_LAB("  .TSV8HSupport           = %u,", i_phy_params.TSV8HSupport);
-        FAPI_LAB("  .MRAMSupport            = %u,", i_phy_params.MRAMSupport);
-        FAPI_LAB("  .MDSSupport             = %u,", i_phy_params.MDSSupport);
-        FAPI_LAB("  .NumPStates             = %u,", i_phy_params.NumPStates);
+        FAPI_LAB("  .version_number         = %u,", i_phy_params.iv_user_msdg_upto_ver397559.version_number);
+        FAPI_LAB("  .DimmType               = %u,", i_phy_params.iv_user_msdg_upto_ver397559.DimmType);
+        FAPI_LAB("  .CsPresent              = 0x%04X,", i_phy_params.iv_user_msdg_upto_ver397559.CsPresent);
+        FAPI_LAB("  .DramDataWidth          = %u,", i_phy_params.iv_user_msdg_upto_ver397559.DramDataWidth);
+        FAPI_LAB("  .Height3DS              = %u,", i_phy_params.iv_user_msdg_upto_ver397559.Height3DS);
+        FAPI_LAB("  .ActiveDBYTE            = 0x%04X,", i_phy_params.iv_user_msdg_upto_ver397559.ActiveDBYTE);
+        FAPI_LAB("  .ActiveNibble           = 0x%08X,", i_phy_params.iv_user_msdg_upto_ver397559.ActiveNibble);
+        FAPI_LAB("  .AddrMirror             = 0x%04X,", i_phy_params.iv_user_msdg_upto_ver397559.AddrMirror);
+        FAPI_LAB("  .ColumnAddrWidth        = 0x%04X,", i_phy_params.iv_user_msdg_upto_ver397559.ColumnAddrWidth);
+        FAPI_LAB("  .RowAddrWidth           = 0x%04X,", i_phy_params.iv_user_msdg_upto_ver397559.RowAddrWidth);
+        FAPI_LAB("  .SpdCLSupported         = 0x%08X,", i_phy_params.iv_user_msdg_upto_ver397559.SpdCLSupported);
+        FAPI_LAB("  .SpdtAAmin              = %u,", i_phy_params.iv_user_msdg_upto_ver397559.SpdtAAmin);
+        FAPI_LAB("  .Rank4Mode              = %u,", i_phy_params.iv_user_msdg_upto_ver397559.Rank4Mode);
+        FAPI_LAB("  .EncodedQuadCs          = %u,", i_phy_params.iv_user_msdg_upto_ver397559.EncodedQuadCs);
+        FAPI_LAB("  .DDPCompatible          = %u,", i_phy_params.iv_user_msdg_upto_ver397559.DDPCompatible);
+        FAPI_LAB("  .TSV8HSupport           = %u,", i_phy_params.iv_user_msdg_upto_ver397559.TSV8HSupport);
+        FAPI_LAB("  .MRAMSupport            = %u,", i_phy_params.iv_user_msdg_upto_ver397559.MRAMSupport);
+        FAPI_LAB("  .MDSSupport             = %u,", i_phy_params.iv_user_msdg_upto_ver397559.MDSSupport);
+        FAPI_LAB("  .NumPStates             = %u,", i_phy_params.iv_user_msdg_upto_ver397559.NumPStates);
 
         for (uint8_t l_pstate = 0; l_pstate < MSDG_MAX_PSTATE; ++l_pstate)
         {
-            FAPI_LAB("  .Frequency[%u]           = %u,", l_pstate, i_phy_params.Frequency[l_pstate]);
+            FAPI_LAB("  .Frequency[%u]           = %u,", l_pstate, i_phy_params.iv_user_msdg_upto_ver397559.Frequency[l_pstate]);
         }
 
         for (uint8_t l_pstate = 0; l_pstate < MSDG_MAX_PSTATE; ++l_pstate)
         {
-            FAPI_LAB("  .PhyOdtImpedance[%u]     = %u,", l_pstate, i_phy_params.PhyOdtImpedance[l_pstate]);
+            FAPI_LAB("  .PhyOdtImpedance[%u]     = %u,", l_pstate,
+                     i_phy_params.iv_user_msdg_upto_ver397559.PhyOdtImpedance[l_pstate]);
         }
 
         for (uint8_t l_pstate = 0; l_pstate < MSDG_MAX_PSTATE; ++l_pstate)
         {
-            FAPI_LAB("  .PhyDrvImpedancePU[%u]   = %u,", l_pstate, i_phy_params.PhyDrvImpedancePU[l_pstate]);
+            FAPI_LAB("  .PhyDrvImpedancePU[%u]   = %u,", l_pstate,
+                     i_phy_params.iv_user_msdg_upto_ver397559.PhyDrvImpedancePU[l_pstate]);
         }
 
         for (uint8_t l_pstate = 0; l_pstate < MSDG_MAX_PSTATE; ++l_pstate)
         {
-            FAPI_LAB("  .PhyDrvImpedancePD[%u]   = %u,", l_pstate, i_phy_params.PhyDrvImpedancePD[l_pstate]);
+            FAPI_LAB("  .PhyDrvImpedancePD[%u]   = %u,", l_pstate,
+                     i_phy_params.iv_user_msdg_upto_ver397559.PhyDrvImpedancePD[l_pstate]);
         }
 
         for (uint8_t l_pstate = 0; l_pstate < MSDG_MAX_PSTATE; ++l_pstate)
         {
-            FAPI_LAB("  .PhySlewRate[%u]         = %u,", l_pstate, i_phy_params.PhySlewRate[l_pstate]);
+            FAPI_LAB("  .PhySlewRate[%u]         = %u,", l_pstate, i_phy_params.iv_user_msdg_upto_ver397559.PhySlewRate[l_pstate]);
         }
 
-        FAPI_LAB("  .ATxImpedance           = %u,", i_phy_params.ATxImpedance);
-        FAPI_LAB("  .ATxSlewRate            = %u,", i_phy_params.ATxSlewRate);
-        FAPI_LAB("  .CKTxImpedance          = %u,", i_phy_params.CKTxImpedance);
-        FAPI_LAB("  .CKTxSlewRate           = %u,", i_phy_params.CKTxSlewRate);
-        FAPI_LAB("  .AlertOdtImpedance      = %u,", i_phy_params.AlertOdtImpedance);
+        FAPI_LAB("  .ATxImpedance           = %u,", i_phy_params.iv_user_msdg_upto_ver397559.ATxImpedance);
+        FAPI_LAB("  .ATxSlewRate            = %u,", i_phy_params.iv_user_msdg_upto_ver397559.ATxSlewRate);
+        FAPI_LAB("  .CKTxImpedance          = %u,", i_phy_params.iv_user_msdg_upto_ver397559.CKTxImpedance);
+        FAPI_LAB("  .CKTxSlewRate           = %u,", i_phy_params.iv_user_msdg_upto_ver397559.CKTxSlewRate);
+        FAPI_LAB("  .AlertOdtImpedance      = %u,", i_phy_params.iv_user_msdg_upto_ver397559.AlertOdtImpedance);
 
         for (uint8_t l_pstate = 0; l_pstate < MSDG_MAX_PSTATE; ++l_pstate)
         {
-            FAPI_LAB("  .DramRttNomR0[%u]        = %u,", l_pstate, i_phy_params.DramRttNomR0[l_pstate]);
-        }
-
-        for (uint8_t l_pstate = 0; l_pstate < MSDG_MAX_PSTATE; ++l_pstate)
-        {
-            FAPI_LAB("  .DramRttNomR1[%u]        = %u,", l_pstate, i_phy_params.DramRttNomR1[l_pstate]);
+            FAPI_LAB("  .DramRttNomR0[%u]        = %u,", l_pstate, i_phy_params.iv_user_msdg_upto_ver397559.DramRttNomR0[l_pstate]);
         }
 
         for (uint8_t l_pstate = 0; l_pstate < MSDG_MAX_PSTATE; ++l_pstate)
         {
-            FAPI_LAB("  .DramRttNomR2[%u]        = %u,", l_pstate, i_phy_params.DramRttNomR2[l_pstate]);
+            FAPI_LAB("  .DramRttNomR1[%u]        = %u,", l_pstate, i_phy_params.iv_user_msdg_upto_ver397559.DramRttNomR1[l_pstate]);
         }
 
         for (uint8_t l_pstate = 0; l_pstate < MSDG_MAX_PSTATE; ++l_pstate)
         {
-            FAPI_LAB("  .DramRttNomR3[%u]        = %u,", l_pstate, i_phy_params.DramRttNomR3[l_pstate]);
+            FAPI_LAB("  .DramRttNomR2[%u]        = %u,", l_pstate, i_phy_params.iv_user_msdg_upto_ver397559.DramRttNomR2[l_pstate]);
         }
 
         for (uint8_t l_pstate = 0; l_pstate < MSDG_MAX_PSTATE; ++l_pstate)
         {
-            FAPI_LAB("  .DramRttWrR0[%u]         = %u,", l_pstate, i_phy_params.DramRttWrR0[l_pstate]);
+            FAPI_LAB("  .DramRttNomR3[%u]        = %u,", l_pstate, i_phy_params.iv_user_msdg_upto_ver397559.DramRttNomR3[l_pstate]);
         }
 
         for (uint8_t l_pstate = 0; l_pstate < MSDG_MAX_PSTATE; ++l_pstate)
         {
-            FAPI_LAB("  .DramRttWrR1[%u]         = %u,", l_pstate, i_phy_params.DramRttWrR1[l_pstate]);
+            FAPI_LAB("  .DramRttWrR0[%u]         = %u,", l_pstate, i_phy_params.iv_user_msdg_upto_ver397559.DramRttWrR0[l_pstate]);
         }
 
         for (uint8_t l_pstate = 0; l_pstate < MSDG_MAX_PSTATE; ++l_pstate)
         {
-            FAPI_LAB("  .DramRttWrR2[%u]         = %u,", l_pstate, i_phy_params.DramRttWrR2[l_pstate]);
+            FAPI_LAB("  .DramRttWrR1[%u]         = %u,", l_pstate, i_phy_params.iv_user_msdg_upto_ver397559.DramRttWrR1[l_pstate]);
         }
 
         for (uint8_t l_pstate = 0; l_pstate < MSDG_MAX_PSTATE; ++l_pstate)
         {
-            FAPI_LAB("  .DramRttWrR3[%u]         = %u,", l_pstate, i_phy_params.DramRttWrR3[l_pstate]);
+            FAPI_LAB("  .DramRttWrR2[%u]         = %u,", l_pstate, i_phy_params.iv_user_msdg_upto_ver397559.DramRttWrR2[l_pstate]);
         }
 
         for (uint8_t l_pstate = 0; l_pstate < MSDG_MAX_PSTATE; ++l_pstate)
         {
-            FAPI_LAB("  .DramRttParkR0[%u]       = %u,", l_pstate, i_phy_params.DramRttParkR0[l_pstate]);
+            FAPI_LAB("  .DramRttWrR3[%u]         = %u,", l_pstate, i_phy_params.iv_user_msdg_upto_ver397559.DramRttWrR3[l_pstate]);
         }
 
         for (uint8_t l_pstate = 0; l_pstate < MSDG_MAX_PSTATE; ++l_pstate)
         {
-            FAPI_LAB("  .DramRttParkR1[%u]       = %u,", l_pstate, i_phy_params.DramRttParkR1[l_pstate]);
+            FAPI_LAB("  .DramRttParkR0[%u]       = %u,", l_pstate,
+                     i_phy_params.iv_user_msdg_upto_ver397559.DramRttParkR0[l_pstate]);
         }
 
         for (uint8_t l_pstate = 0; l_pstate < MSDG_MAX_PSTATE; ++l_pstate)
         {
-            FAPI_LAB("  .DramRttParkR2[%u]       = %u,", l_pstate, i_phy_params.DramRttParkR2[l_pstate]);
+            FAPI_LAB("  .DramRttParkR1[%u]       = %u,", l_pstate,
+                     i_phy_params.iv_user_msdg_upto_ver397559.DramRttParkR1[l_pstate]);
         }
 
         for (uint8_t l_pstate = 0; l_pstate < MSDG_MAX_PSTATE; ++l_pstate)
         {
-            FAPI_LAB("  .DramRttParkR3[%u]       = %u,", l_pstate, i_phy_params.DramRttParkR3[l_pstate]);
+            FAPI_LAB("  .DramRttParkR2[%u]       = %u,", l_pstate,
+                     i_phy_params.iv_user_msdg_upto_ver397559.DramRttParkR2[l_pstate]);
         }
 
         for (uint8_t l_pstate = 0; l_pstate < MSDG_MAX_PSTATE; ++l_pstate)
         {
-            FAPI_LAB("  .DramDic[%u]             = %u,", l_pstate, i_phy_params.DramDic[l_pstate]);
+            FAPI_LAB("  .DramRttParkR3[%u]       = %u,", l_pstate,
+                     i_phy_params.iv_user_msdg_upto_ver397559.DramRttParkR3[l_pstate]);
         }
 
         for (uint8_t l_pstate = 0; l_pstate < MSDG_MAX_PSTATE; ++l_pstate)
         {
-            FAPI_LAB("  .DramWritePreamble[%u]   = %u,", l_pstate, i_phy_params.DramWritePreamble[l_pstate]);
+            FAPI_LAB("  .DramDic[%u]             = %u,", l_pstate, i_phy_params.iv_user_msdg_upto_ver397559.DramDic[l_pstate]);
         }
 
         for (uint8_t l_pstate = 0; l_pstate < MSDG_MAX_PSTATE; ++l_pstate)
         {
-            FAPI_LAB("  .DramReadPreamble[%u]    = %u,", l_pstate, i_phy_params.DramReadPreamble[l_pstate]);
+            FAPI_LAB("  .DramWritePreamble[%u]   = %u,", l_pstate,
+                     i_phy_params.iv_user_msdg_upto_ver397559.DramWritePreamble[l_pstate]);
         }
 
         for (uint8_t l_pstate = 0; l_pstate < MSDG_MAX_PSTATE; ++l_pstate)
         {
-            FAPI_LAB("  .PhyEqualization[%u]     = %u,", l_pstate, i_phy_params.PhyEqualization[l_pstate]);
+            FAPI_LAB("  .DramReadPreamble[%u]    = %u,", l_pstate,
+                     i_phy_params.iv_user_msdg_upto_ver397559.DramReadPreamble[l_pstate]);
         }
 
         for (uint8_t l_pstate = 0; l_pstate < MSDG_MAX_PSTATE; ++l_pstate)
         {
-            FAPI_LAB("  .InitVrefDQ[%u]          = %u,", l_pstate, i_phy_params.InitVrefDQ[l_pstate]);
+            FAPI_LAB("  .PhyEqualization[%u]     = %u,", l_pstate,
+                     i_phy_params.iv_user_msdg_upto_ver397559.PhyEqualization[l_pstate]);
         }
 
         for (uint8_t l_pstate = 0; l_pstate < MSDG_MAX_PSTATE; ++l_pstate)
         {
-            FAPI_LAB("  .InitPhyVref[%u]         = %u,", l_pstate, i_phy_params.InitPhyVref[l_pstate]);
+            FAPI_LAB("  .InitVrefDQ[%u]          = %u,", l_pstate, i_phy_params.iv_user_msdg_upto_ver397559.InitVrefDQ[l_pstate]);
         }
 
         for (uint8_t l_pstate = 0; l_pstate < MSDG_MAX_PSTATE; ++l_pstate)
         {
-            FAPI_LAB("  .OdtWrMapCs[%u]          = 0x%04X,", l_pstate, i_phy_params.OdtWrMapCs[l_pstate]);
+            FAPI_LAB("  .InitPhyVref[%u]         = %u,", l_pstate, i_phy_params.iv_user_msdg_upto_ver397559.InitPhyVref[l_pstate]);
         }
 
         for (uint8_t l_pstate = 0; l_pstate < MSDG_MAX_PSTATE; ++l_pstate)
         {
-            FAPI_LAB("  .OdtRdMapCs[%u]          = 0x%04X,", l_pstate, i_phy_params.OdtRdMapCs[l_pstate]);
+            FAPI_LAB("  .OdtWrMapCs[%u]          = 0x%04X,", l_pstate,
+                     i_phy_params.iv_user_msdg_upto_ver397559.OdtWrMapCs[l_pstate]);
         }
 
         for (uint8_t l_pstate = 0; l_pstate < MSDG_MAX_PSTATE; ++l_pstate)
         {
-            FAPI_LAB("  .Geardown[%u]            = %u,", l_pstate, i_phy_params.Geardown[l_pstate]);
+            FAPI_LAB("  .OdtRdMapCs[%u]          = 0x%04X,", l_pstate,
+                     i_phy_params.iv_user_msdg_upto_ver397559.OdtRdMapCs[l_pstate]);
         }
 
         for (uint8_t l_pstate = 0; l_pstate < MSDG_MAX_PSTATE; ++l_pstate)
         {
-            FAPI_LAB("  .CALatencyAdder[%u]      = %u,", l_pstate, i_phy_params.CALatencyAdder[l_pstate]);
+            FAPI_LAB("  .Geardown[%u]            = %u,", l_pstate, i_phy_params.iv_user_msdg_upto_ver397559.Geardown[l_pstate]);
         }
 
         for (uint8_t l_pstate = 0; l_pstate < MSDG_MAX_PSTATE; ++l_pstate)
         {
-            FAPI_LAB("  .BistCALMode[%u]         = %u,", l_pstate, i_phy_params.BistCALMode[l_pstate]);
+            FAPI_LAB("  .CALatencyAdder[%u]      = %u,", l_pstate,
+                     i_phy_params.iv_user_msdg_upto_ver397559.CALatencyAdder[l_pstate]);
         }
 
         for (uint8_t l_pstate = 0; l_pstate < MSDG_MAX_PSTATE; ++l_pstate)
         {
-            FAPI_LAB("  .BistCAParityLatency[%u] = %u,", l_pstate, i_phy_params.BistCAParityLatency[l_pstate]);
+            FAPI_LAB("  .BistCALMode[%u]         = %u,", l_pstate, i_phy_params.iv_user_msdg_upto_ver397559.BistCALMode[l_pstate]);
         }
 
         for (uint8_t l_pstate = 0; l_pstate < MSDG_MAX_PSTATE; ++l_pstate)
         {
-            FAPI_LAB("  .RcdDic[%u]              = %u,", l_pstate, i_phy_params.RcdDic[l_pstate]);
+            FAPI_LAB("  .BistCAParityLatency[%u] = %u,", l_pstate,
+                     i_phy_params.iv_user_msdg_upto_ver397559.BistCAParityLatency[l_pstate]);
         }
 
         for (uint8_t l_pstate = 0; l_pstate < MSDG_MAX_PSTATE; ++l_pstate)
         {
-            FAPI_LAB("  .RcdVoltageCtrl[%u]      = %u,", l_pstate, i_phy_params.RcdVoltageCtrl[l_pstate]);
+            FAPI_LAB("  .RcdDic[%u]              = %u,", l_pstate, i_phy_params.iv_user_msdg_upto_ver397559.RcdDic[l_pstate]);
         }
 
         for (uint8_t l_pstate = 0; l_pstate < MSDG_MAX_PSTATE; ++l_pstate)
         {
-            FAPI_LAB("  .RcdIBTCtrl[%u]          = %u,", l_pstate, i_phy_params.RcdIBTCtrl[l_pstate]);
+            FAPI_LAB("  .RcdVoltageCtrl[%u]      = %u,", l_pstate,
+                     i_phy_params.iv_user_msdg_upto_ver397559.RcdVoltageCtrl[l_pstate]);
         }
 
         for (uint8_t l_pstate = 0; l_pstate < MSDG_MAX_PSTATE; ++l_pstate)
         {
-            FAPI_LAB("  .RcdDBDic[%u]            = %u,", l_pstate, i_phy_params.RcdDBDic[l_pstate]);
+            FAPI_LAB("  .RcdIBTCtrl[%u]          = %u,", l_pstate, i_phy_params.iv_user_msdg_upto_ver397559.RcdIBTCtrl[l_pstate]);
         }
 
         for (uint8_t l_pstate = 0; l_pstate < MSDG_MAX_PSTATE; ++l_pstate)
         {
-            FAPI_LAB("  .RcdSlewRate[%u]         = %u,", l_pstate, i_phy_params.RcdSlewRate[l_pstate]);
+            FAPI_LAB("  .RcdDBDic[%u]            = %u,", l_pstate, i_phy_params.iv_user_msdg_upto_ver397559.RcdDBDic[l_pstate]);
         }
 
         for (uint8_t l_pstate = 0; l_pstate < MSDG_MAX_PSTATE; ++l_pstate)
         {
-            FAPI_LAB("  .DFIMRL_DDRCLK          = %u,", i_phy_params.DFIMRL_DDRCLK);
+            FAPI_LAB("  .RcdSlewRate[%u]         = %u,", l_pstate, i_phy_params.iv_user_msdg_upto_ver397559.RcdSlewRate[l_pstate]);
+        }
+
+        for (uint8_t l_pstate = 0; l_pstate < MSDG_MAX_PSTATE; ++l_pstate)
+        {
+            FAPI_LAB("  .DFIMRL_DDRCLK          = %u,", i_phy_params.iv_user_msdg_upto_ver397559.DFIMRL_DDRCLK);
         }
 
         for (uint8_t l_pstate = 0; l_pstate < MSDG_MAX_PSTATE; ++l_pstate)
         {
             for(uint8_t l_addr = 0; l_addr < DRAMINIT_NUM_ADDR_DELAYS; ++l_addr)
             {
-                FAPI_LAB("  .ATxDly_A[%u][%u]         = 0x%02X,", l_pstate, l_addr, i_phy_params.ATxDly_A[l_pstate][l_addr]);
+                FAPI_LAB("  .ATxDly_A[%u][%u]         = 0x%02X,", l_pstate, l_addr,
+                         i_phy_params.iv_user_msdg_upto_ver397559.ATxDly_A[l_pstate][l_addr]);
             }
         }
 
@@ -777,16 +829,88 @@ fapi2::ReturnCode print_phy_params(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_C
         {
             for(uint8_t l_addr = 0; l_addr < DRAMINIT_NUM_ADDR_DELAYS; ++l_addr)
             {
-                FAPI_LAB("  .ATxDly_B[%u][%u]         = 0x%02X,", l_pstate, l_addr, i_phy_params.ATxDly_B[l_pstate][l_addr]);
+                FAPI_LAB("  .ATxDly_B[%u][%u]         = 0x%02X,", l_pstate, l_addr,
+                         i_phy_params.iv_user_msdg_upto_ver397559.ATxDly_B[l_pstate][l_addr]);
             }
+        }
+
+        uint32_t l_fw_version = 0;
+        FAPI_TRY(mss::get_booted_fw_version(i_target, l_fw_version));
+
+        if(is_new_fw_msdg_supported(l_fw_version))
+        {
+            FAPI_LAB("  .F1RC1x      = %u,", i_phy_params.F1RC1x);
+            FAPI_LAB("  .F1RC2x      = %u,", i_phy_params.F1RC2x);
+            FAPI_LAB("  .F1RC3x      = %u,", i_phy_params.F1RC3x);
+            FAPI_LAB("  .F1RC4x      = %u,", i_phy_params.F1RC4x);
+            FAPI_LAB("  .F1RC5x      = %u,", i_phy_params.F1RC5x);
+            FAPI_LAB("  .F1RC6x      = %u,", i_phy_params.F1RC6x);
+            FAPI_LAB("  .F1RC7x      = %u,", i_phy_params.F1RC7x);
         }
 
         FAPI_LAB("};");
     }
 
-#endif // __HOSTBOOT_MODULE
+fapi_try_exit:
+    return fapi2::current_err;
+
+#else
 
     return fapi2::FAPI2_RC_SUCCESS;
+
+#endif // __HOSTBOOT_MODULE
+
+}
+
+///
+/// @brief Initialize user_input_msdg_t and copy to Explorer internal buffer
+/// @param[in] i_target an explorer chip
+/// @param[out] o_phy_data phy information we want to pass around
+/// @return FAPI2_RC_SUCCESS iff okay
+/// @note attr for fw_version will select proper initialization at run-time
+///
+fapi2::ReturnCode init_phy_params(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+                                  mss::exp::phy_param_info& o_phy_info)
+{
+    user_input_msdg l_phy_params; // not used, just reusing interface below
+    return init_phy_params(i_target, l_phy_params, o_phy_info);
+}
+
+///
+/// @brief Initialize user_input_msdg_t and copy to Explorer internal buffer
+/// @param[in] i_target an explorer chip
+/// @param[out] o_phy_params phy initialization struct
+/// @param[out] o_phy_data phy information we want to pass around
+/// @return FAPI2_RC_SUCCESS iff okay
+/// @note attr for fw_version will select proper initialization at run-time
+///
+fapi2::ReturnCode init_phy_params(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+                                  user_input_msdg& o_phy_params,
+                                  mss::exp::phy_param_info& o_phy_info)
+{
+    uint32_t l_fw_version = 0;
+    FAPI_TRY(mss::get_booted_fw_version(i_target, l_fw_version));
+
+    FAPI_TRY(mss::exp::setup_phy_params(i_target, o_phy_params),
+             "Failed setup_phy_params() for %s", mss::c_str(i_target));
+
+    FAPI_TRY(mss::exp::print_phy_params(i_target, o_phy_params),
+             "Failed print_phy_params() for %s", mss::c_str(i_target));
+
+    // Copy the PHY initialization parameters into the internal buffer of Explorer
+    FAPI_TRY( mss::exp::ib::putUserInputMsdg(i_target, o_phy_params, o_phy_info.iv_crc),
+              "Failed putUserInputMsdg() for %s", mss::c_str(i_target) );
+
+    {
+        const bool l_is_new_fw_ver = is_new_fw_msdg_supported(l_fw_version);
+        constexpr auto l_new_struct_size = sizeof(o_phy_params);
+        constexpr auto l_old_struct_size = sizeof(o_phy_params.iv_user_msdg_upto_ver397559);
+
+        o_phy_info.iv_size = l_is_new_fw_ver ? l_new_struct_size : l_old_struct_size;
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
 }
 
 } // namespace exp

@@ -58,7 +58,8 @@ enum exp_struct_sizes
 
     // Constants for draminit
     DRAMINIT_NUM_ADDR_DELAYS = 8,
-    DRAMINIT_STRUCTURE_VERSION = 2,
+    OLD_DRAMINIT_STRUCTURE_VERSION = 2,
+    NEW_DRAMINIT_STRUCTURE_VERSION = 3,
 
     // Training response constants
     TIMING_RESPONSE_2D_ARRAY_SIZE = 16,
@@ -121,11 +122,12 @@ host_fw_response_struct;
 
 
 ///
-/// @class user_input_msdg
+/// @class user_input_msdg_upto_ver397559
 /// @brief PHY initialization parameters
 /// @note PHY FW module requires certain parameters from HOST software
+/// @note This response is valid for FW version up to 397559
 ///
-typedef struct __attribute__((packed)) user_input_msdg
+typedef struct __attribute__((packed)) user_input_msdg_upto_ver397559
 {
     uint32_t version_number;
 
@@ -618,6 +620,26 @@ typedef struct __attribute__((packed)) user_input_msdg
     //7bit B-side AC Delay
     //ATxDly_B[pstate][NumAnib]
     uint8_t  ATxDly_B[MSDG_MAX_PSTATE][DRAMINIT_NUM_ADDR_DELAYS];
+} user_input_msdg_upto_ver397559_t;
+
+///
+/// @class user_input_msdg
+/// @brief PHY initialization parameters
+/// @note PHY FW module requires certain parameters from HOST software
+/// @note This response is valid for FW version after 397559
+///
+typedef struct __attribute__((packed)) user_input_msdg
+{
+    user_input_msdg_upto_ver397559_t iv_user_msdg_upto_ver397559;
+
+    uint8_t F1RC1x;     // RCD control word F1RC1x. only available for RDIMM.
+    uint8_t F1RC2x;     // RCD control word F1RC2x. only available for RDIMM.
+    uint8_t F1RC3x;     // RCD control word F1RC3x. only available for RDIMM.
+    uint8_t F1RC4x;     // RCD control word F1RC4x. only available for RDIMM.
+    uint8_t F1RC5x;     // RCD control word F1RC5x. only available for RDIMM.
+    uint8_t F1RC6x;     // RCD control word F1RC6x. only available for RDIMM.
+    uint8_t F1RC7x;     // RCD control word F1RC7x. only available for RDIMM.
+
 } user_input_msdg_t;
 
 ///

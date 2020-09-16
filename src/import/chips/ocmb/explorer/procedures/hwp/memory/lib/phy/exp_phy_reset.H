@@ -36,8 +36,10 @@
 #ifndef __EXP_PHY_RESET_H__
 #define __EXP_PHY_RESET_H__
 
-#include <fapi2.H>
+#include <target.H>
+#include <return_code.H>
 #include <generic/memory/lib/utils/shared/mss_generic_consts.H>
+#include <lib/exp_draminit_utils.H>
 
 namespace mss
 {
@@ -45,6 +47,15 @@ namespace exp
 {
 namespace phy
 {
+
+///
+/// @brief Send Host phy_init_cmd and check resp
+/// @param[in] i_target an explorer chip
+/// @param[in] i_crc crc calculated from data
+/// @return FAPI2_RC_SUCCESS iff okay
+///
+fapi2::ReturnCode send_phy_reset(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+                                 const mss::exp::phy_param_info& i_crc);
 
 ///
 /// @brief Resets the explorer's PHY if needed

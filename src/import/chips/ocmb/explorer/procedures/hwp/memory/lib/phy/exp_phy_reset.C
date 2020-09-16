@@ -32,19 +32,10 @@
 // *HWP Team: Memory
 // *HWP Level: 2
 // *HWP Consumed by: FSP:HB
-
 #include <fapi2.H>
-#include <generic/memory/lib/utils/shared/mss_generic_consts.H>
-
-#include <generic/memory/lib/utils/c_str.H>
-#include <lib/shared/exp_defaults.H>
-#include <lib/exp_draminit_utils.H>
-#include <lib/phy/exp_train_display.H>
-#include <lib/phy/exp_train_handler.H>
-#include <exp_inband.H>
-#include <lib/eff_config/explorer_attr_engine_traits.H>
-#include <generic/memory/lib/data_engine/data_engine.H>
 #include <lib/phy/exp_phy_reset.H>
+#include <lib/exp_draminit_utils.H>
+#include <generic/memory/lib/utils/c_str.H>
 #include <lib/exp_attribute_accessors_manual.H>
 
 namespace mss
@@ -53,6 +44,53 @@ namespace exp
 {
 namespace phy
 {
+
+///
+/// @brief Send Host phy_init_cmd and check resp
+/// @param[in] i_target an explorer chip
+/// @param[in] i_phy_info phy information of interest
+/// @return FAPI2_RC_SUCCESS iff okay
+///
+fapi2::ReturnCode send_phy_reset(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+                                 const mss::exp::phy_param_info& i_phy_info)
+{
+    fapi2::ReturnCode l_rc = fapi2::FAPI2_RC_SUCCESS;
+    host_fw_command_struct l_cmd;
+    std::vector<uint8_t> l_rsp_data;
+
+    FAPI_TRY(send_host_phy_init_cmd(i_target, i_phy_info, mss::exp::phy_init_mode::RESET, l_cmd));
+    FAPI_TRY(mss::exp::check_host_fw_response(i_target, l_cmd, l_rsp_data, l_rc));
+    FAPI_TRY(l_rc, "%s Explorer received a bad response from PHY reset", mss::c_str(i_target));
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Checks if the Explorer FW supports the separate reset procedure
+/// @param[in] i_target the explorer chip target in question
+/// @param[out] o_is_ext_reset_supported YES if the external PHY reset is needed, otherwise no
+/// @return FAPI2_RC_SUCCESS if ok
+///
+fapi2::ReturnCode is_reset_supported( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+                                      mss::states& o_is_reset_supported )
+{
+    // Grab the firmware revision that was booted
+    o_is_reset_supported = mss::states::NO;
+
+    uint32_t l_fw_revision = 0;
+    FAPI_TRY(mss::get_booted_fw_version(i_target, l_fw_revision));
+
+    // If we're at or below the unsupported value? the reset is unsupported
+    // Otherwise it's supported
+    if (is_new_fw_msdg_supported(l_fw_revision))
+    {
+        o_is_reset_supported = mss::states::YES;
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
 
 ///
 /// @brief Resets the explorer's PHY if needed
@@ -71,28 +109,13 @@ fapi2::ReturnCode reset( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_ta
         return fapi2::FAPI2_RC_SUCCESS;
     }
 
-    // Runs the PHY initialization workaround
     {
-        uint32_t l_crc = 0;
-        fapi2::ReturnCode l_rc = fapi2::FAPI2_RC_SUCCESS;
-        host_fw_command_struct l_cmd;
-        std::vector<uint8_t> l_rsp_data;
-
-        user_input_msdg l_phy_params;
-        FAPI_TRY(mss::exp::setup_phy_params(i_target, l_phy_params),
-                 "Failed setup_phy_params() for %s", mss::c_str(i_target));
-
-        FAPI_TRY(mss::exp::print_phy_params(i_target, l_phy_params),
-                 "Failed print_phy_params() for %s", mss::c_str(i_target));
-
-        // Copy the PHY initialization parameters into the internal buffer of Explorer
-        FAPI_TRY( mss::exp::ib::putUserInputMsdg(i_target, l_phy_params, l_crc),
-                  "Failed putUserInputMsdg() for %s", mss::c_str(i_target) );
+        // Runs the PHY initialization workaround
+        mss::exp::phy_param_info l_phy_params;
+        FAPI_TRY(init_phy_params(i_target, l_phy_params));
 
         // Issue the PHY reset cmd though EXP-FW REQ buffer
-        FAPI_TRY(send_host_phy_init_cmd(i_target, l_crc, mss::exp::phy_init_mode::RESET, l_cmd));
-        FAPI_TRY(mss::exp::check_host_fw_response(i_target, l_cmd, l_rsp_data, l_rc));
-        FAPI_TRY(l_rc, "%s Explorer received a bad response from PHY reset", mss::c_str(i_target));
+        FAPI_TRY(send_phy_reset(i_target, l_phy_params));
     }
 
     return fapi2::FAPI2_RC_SUCCESS;
@@ -105,33 +128,8 @@ fapi_try_exit:
     // If any FIR's have lit up, this fail could have been caused by the FIR, rather than bad hardware
     // So, let PRD retrigger this step to see if we can resolve the issue
     // Note: the DRAMINIT FIR's are used as this function is coupled with the DRAMINIT logic
-    return mss::check::fir_or_pll_fail<mss::mc_type::EXPLORER, mss::check::firChecklist::DRAMINIT>(
-               i_target, fapi2::current_err);
-}
-
-///
-/// @brief Checks if the Explorer FW supports the separate reset procedure
-/// @param[in] i_target the explorer chip target in question
-/// @param[out] o_is_ext_reset_supported YES if the external PHY reset is needed, otherwise no
-/// @return FAPI2_RC_SUCCESS if ok
-///
-fapi2::ReturnCode is_reset_supported( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
-                                      mss::states& o_is_reset_supported )
-{
-    // Microchip FW does not support the PHY reset at a version of CL397559 or lower
-    constexpr uint32_t PHY_RESET_UNSUPPORTED = 397559;
-
-    // Grab the firmware revision that was booted
-    o_is_reset_supported = mss::states::NO;
-    uint32_t l_fw_revision = 0;
-    FAPI_TRY(mss::get_booted_fw_version(i_target, l_fw_revision));
-
-    // If we're at or below the unsupported value? the reset is unsupported
-    // Otherwise it's supported
-    o_is_reset_supported = l_fw_revision <= PHY_RESET_UNSUPPORTED ? mss::states::NO : mss::states::YES;
-
-fapi_try_exit:
-    return fapi2::current_err;
+    return mss::check::fir_or_pll_fail<mss::mc_type::EXPLORER,
+           mss::check::firChecklist::DRAMINIT>(i_target, fapi2::current_err);
 }
 
 } // ns phy
