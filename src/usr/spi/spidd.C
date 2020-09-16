@@ -1047,6 +1047,18 @@ errlHndl_t SpiTpmOp::read(void* o_buffer, size_t& io_buflen)
                     iv_offset,
                     io_buflen,
                     reinterpret_cast<uint8_t*>(o_buffer));
+    if (errl != nullptr)
+    {
+        TRACFCOMP(g_trac_spi, ERR_MRK "SpiTpmOp::read(): "
+                  "spi_tpm_read_secure HWP error with params: "
+                  "locality = %d, offset = 0x%llx, length = %d",
+                  iv_locality, iv_offset, io_buflen);
+        addStatusRegs(errl);
+        addCallouts(errl);
+        ERRORLOG::ErrlUserDetailsTarget(iv_target, "Proc Target")
+            .addToLog(errl);
+        io_buflen = 0;
+    }
 
     return errl;
 }
@@ -1068,7 +1080,17 @@ errlHndl_t SpiTpmOp::write(void* i_buffer, size_t& io_buflen)
                     iv_offset,
                     io_buflen,
                     reinterpret_cast<uint8_t*>(i_buffer));
-
+    if (errl != nullptr)
+    {
+        TRACFCOMP(g_trac_spi, ERR_MRK "SpiTpmOp::write(): "
+                  "spi_tpm_write_with_wait HWP error with params: "
+                  "locality = %d, offset = 0x%llx, length = %d",
+                  iv_locality, iv_offset, io_buflen);
+        addStatusRegs(errl);
+        addCallouts(errl);
+        ERRORLOG::ErrlUserDetailsTarget(iv_target, "Proc Target")
+            .addToLog(errl);
+    }
     return errl;
 }
 
