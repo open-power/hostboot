@@ -156,6 +156,11 @@
     </attribute>
 
     <attribute>
+          <id>ATTR_IOHS_DRAWER_INTERCONNECT</id>
+          <global/>
+    </attribute>
+
+    <attribute>
           <id>ATTR_MNFG_FLAGS</id>
           <default>0x0000000000000000</default>
           <writeable/>
