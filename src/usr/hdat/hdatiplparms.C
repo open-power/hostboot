@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -503,21 +503,22 @@ static void hdatGetFeatureFlagInfo(
         assert(l_pSysTarget != NULL);
     }
 
-    // Default the dd level to 2.3
-    uint8_t l_ddLevel = HDAT_PROC_NIMBUS_DD_23;
+    // Default the dd level to 1.0
+    uint8_t l_ddLevel = HDAT_PROC_P10_DD_10;
     const hdatIplpFeatureFlagSetting_t * l_featFlagArr;
     uint32_t l_featFlagArrSize = 0;
+    // Default single value for P10 is set as RISK 0
+    // In older releases this was fetched from attribute ATTR_RISK_LEVEL
     uint8_t l_riskLvl = 0;
 
-    // Risk level is set
-    l_riskLvl = l_pSysTarget->getAttr<ATTR_RISK_LEVEL>();
-
-    PVR_t l_pvr( mmio_pvr_read() & 0xFFFFFFFF );
+    // As of now only one DD level value is supported and if needed later, below
+    // code needs to be uncommented
+    // PVR_t l_pvr( mmio_pvr_read() & 0xFFFFFFFF );
     // DD level is set
-    l_ddLevel = l_pvr.getDDLevel();
+    // l_ddLevel = l_pvr.getDDLevel();
 
-    // Default to Nimbus DD2.3
-    uint8_t l_ddLvlIdx = HDAT_NIMBUS_DD_23_IDX;
+    // Default to P10 DD1.0
+    uint8_t l_ddLvlIdx = HDAT_P10_DD_10_IDX;
 
     l_featFlagArr = hdatIplpFeatureFlagSettingsArray[l_riskLvl][l_ddLvlIdx];
     l_featFlagArrSize =
@@ -534,7 +535,7 @@ static void hdatGetFeatureFlagInfo(
     o_featureFlagArrayHdr.hdatActSize   = sizeof(hdatIplpFeatureFlagSetting_t);
     o_featureFlagArrayHdr.hdatArrayCnt  =
         l_featFlagArrSize/sizeof(hdatIplpFeatureFlagSetting_t);
-    o_featureFlagArrayHdr.hdatVersion   = HDAT_FEATURE_FLAG_VERSION::V1;
+    o_featureFlagArrayHdr.hdatVersion   = HDAT_FEATURE_FLAG_VERSION::VERSION;
 
     memcpy(o_featureFlagSettings , l_featFlagArr, l_featFlagArrSize);
 }

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -55,7 +55,7 @@ namespace HDAT
 /* Typedefs                                                                   */
 /*----------------------------------------------------------------------------*/
 
-const uint16_t HDAT_IPL_PARAMS_VERSION    = 0x71; // Second P9 version
+const uint16_t HDAT_IPL_PARAMS_VERSION    = 0x80; // P10 version
 const char HDAT_IPLP_STRUCT_NAME[7] = "IPLPMS";
 
 
@@ -269,23 +269,19 @@ struct hdatPortCodes_t
              hdatReserved1 : 15;// Reserved for future use
 } __attribute__ ((packed));
 
+// Changed as per P10 values
 #define MAX_FEATURE_FLAGS 64     // Maximum number of feature flags
-#define NUM_RISK_LEVELS 6  // 0, 1, 2, 3, 4, 5
-#define NUM_OF_DD_LVLS  3  // DD2.0/2.1, 2.2, 2.3
-#define NUM_FF_FLAGS    18
+#define NUM_RISK_LEVELS 1  // 0
+#define NUM_OF_DD_LVLS  1  // P10-DD1.0
+#define NUM_FF_FLAGS    21
 
 enum HDAT_FEATURE_FLAG_VERSION : uint32_t
 {
-    V1 = 0x00000001
+    VERSION = 0x00000002
 };
 
-const uint8_t HDAT_PROC_NIMBUS_DD_20 = 0x20;
-const uint8_t HDAT_PROC_NIMBUS_DD_21 = 0x21;
-const uint8_t HDAT_PROC_NIMBUS_DD_22 = 0x22;
-const uint8_t HDAT_PROC_NIMBUS_DD_23 = 0x23;
-const uint8_t HDAT_NIMBUS_DD_20_21_IDX = 0;
-const uint8_t HDAT_NIMBUS_DD_22_IDX = 1;
-const uint8_t HDAT_NIMBUS_DD_23_IDX = 2;
+const uint8_t HDAT_PROC_P10_DD_10 = 0x10;
+const uint8_t HDAT_P10_DD_10_IDX = 0;
 
 struct hdatIplpFeatureFlagSetting_t
 {
@@ -298,145 +294,12 @@ struct hdatIplpFeatureFlagSetting_t
 
 const hdatIplpFeatureFlagSetting_t hdatIplpFeatureFlagSettingsArray[NUM_RISK_LEVELS][NUM_OF_DD_LVLS][NUM_FF_FLAGS]=
 {
-//RISK 0 (AIX/Linux/IBMi)
-{
-// Risk Level 0 , compat mode, nimbus DD2.0 / nimbus DD2.1
-{
-{"tm-suspend-mode",                                 0x0000000000000000},
-{"inst-spec-barrier-ori31,31,0",                    0x8000000000000000},
-{"fw-bcctrl-serialized",                            0x0000000000000000},
-{"inst-l1d-flush-ori30,30,0",                       0x0000000000000000},
-{"inst-l1d-flush-trig2",                            0x0000000000000000},
-{"fw-l1d-thread-split",                             0x8000000000000000},
-{"fw-branch-hints-honored",                         0x8000000000000000},
-{"inst-thread-reconfig-control-trig0-1",            0x0000000000000000},
-{"fw-count-cache-disabled",                         0x8000000000000000},
-{"fw-ltptr-serialized",                             0x0000000000000000},
-{"fw-count-cache-flush-bcctr2,0,0",                 0x0000000000000000},
-{"speculation-policy-favor-security",               0x8000000000000000},
-{"user-mode-branch-speculation",                    0x8000000000000000},
-{"needs-l1d-flush-msr-hv-1-to-0",                   0x8000000000000000},
-{"needs-l1d-flush-msr-pr-0-to-1",                   0x8000000000000000},
-{"needs-spec-barrier-for-bound-checks",             0x8000000000000000},
-{"needs-pmu-restricted",                            0x0000000000000000},
-{"needs-count-cache-flush-on-context-switch",       0x0000000000000000}},
 
-// Risk Level 0 , compat mode , nimbus DD 2.2
+//RISK 0 (Default single value for P10)
 {
-{"tm-suspend-mode",                                 0x8000000000000000},
+// Risk Level 0 , P10 DD 1.0
+{
 {"inst-spec-barrier-ori31,31,0",                    0x8000000000000000},
-{"fw-bcctrl-serialized",                            0x0000000000000000},
-{"inst-l1d-flush-ori30,30,0",                       0x0000000000000000},
-{"inst-l1d-flush-trig2",                            0x8000000000000000},
-{"fw-l1d-thread-split",                             0x8000000000000000},
-{"fw-branch-hints-honored",                         0x8000000000000000},
-{"inst-thread-reconfig-control-trig0-1",            0x0000000000000000},
-{"fw-count-cache-disabled",                         0x8000000000000000},
-{"fw-ltptr-serialized",                             0x0000000000000000},
-{"fw-count-cache-flush-bcctr2,0,0",                 0x0000000000000000},
-{"speculation-policy-favor-security",               0x8000000000000000},
-{"user-mode-branch-speculation",                    0x0000000000000000},
-{"needs-l1d-flush-msr-hv-1-to-0",                   0x8000000000000000},
-{"needs-l1d-flush-msr-pr-0-to-1",                   0x8000000000000000},
-{"needs-spec-barrier-for-bound-checks",             0x8000000000000000},
-{"needs-pmu-restricted",                            0x0000000000000000},
-{"needs-count-cache-flush-on-context-switch",       0x0000000000000000}},
-
-// Risk Level 0 , compat mode , nimbus DD 2.3
-{
-{"tm-suspend-mode",                                 0x8000000000000000},
-{"inst-spec-barrier-ori31,31,0",                    0x8000000000000000},
-{"fw-bcctrl-serialized",                            0x0000000000000000},
-{"inst-l1d-flush-ori30,30,0",                       0x0000000000000000},
-{"inst-l1d-flush-trig2",                            0x8000000000000000},
-{"fw-l1d-thread-split",                             0x8000000000000000},
-{"fw-branch-hints-honored",                         0x8000000000000000},
-{"inst-thread-reconfig-control-trig0-1",            0x0000000000000000},
-{"fw-count-cache-disabled",                         0x8000000000000000},
-{"fw-ltptr-serialized",                             0x0000000000000000},
-{"fw-count-cache-flush-bcctr2,0,0",                 0x0000000000000000},
-{"speculation-policy-favor-security",               0x8000000000000000},
-{"user-mode-branch-speculation",                    0x0000000000000000},
-{"needs-l1d-flush-msr-hv-1-to-0",                   0x8000000000000000},
-{"needs-l1d-flush-msr-pr-0-to-1",                   0x8000000000000000},
-{"needs-spec-barrier-for-bound-checks",             0x8000000000000000},
-{"needs-pmu-restricted",                            0x0000000000000000},
-{"needs-count-cache-flush-on-context-switch",       0x0000000000000000}},
-// End of Risk Level 0
-},
-
-//RISK 1 (AIX/Linux)
-{
-// Risk Level 1 , compat mode , nimbus DD 2.0 / nimbus DD 2.1
-{
-{"tm-suspend-mode",                                 0x0000000000000000},
-{"inst-spec-barrier-ori31,31,0",                    0x8000000000000000},
-{"fw-bcctrl-serialized",                            0x8000000000000000},
-{"inst-l1d-flush-ori30,30,0",                       0x0000000000000000},
-{"inst-l1d-flush-trig2",                            0x0000000000000000},
-{"fw-l1d-thread-split",                             0x8000000000000000},
-{"fw-branch-hints-honored",                         0x8000000000000000},
-{"inst-thread-reconfig-control-trig0-1",            0x0000000000000000},
-{"fw-count-cache-disabled",                         0x0000000000000000},
-{"fw-ltptr-serialized",                             0x0000000000000000},
-{"fw-count-cache-flush-bcctr2,0,0",                 0x0000000000000000},
-{"speculation-policy-favor-security",               0x8000000000000000},
-{"user-mode-branch-speculation",                    0x0000000000000000},
-{"needs-l1d-flush-msr-hv-1-to-0",                   0x8000000000000000},
-{"needs-l1d-flush-msr-pr-0-to-1",                   0x8000000000000000},
-{"needs-spec-barrier-for-bound-checks",             0x8000000000000000},
-{"needs-pmu-restricted",                            0x0000000000000000},
-{"needs-count-cache-flush-on-context-switch",       0x0000000000000000}},
-
-// Risk Level 1 , compat mode , nimbus DD 2.2
-{
-{"tm-suspend-mode",                                 0x8000000000000000},
-{"inst-spec-barrier-ori31,31,0",                    0x8000000000000000},
-{"fw-bcctrl-serialized",                            0x8000000000000000},
-{"inst-l1d-flush-ori30,30,0",                       0x0000000000000000},
-{"inst-l1d-flush-trig2",                            0x8000000000000000},
-{"fw-l1d-thread-split",                             0x8000000000000000},
-{"fw-branch-hints-honored",                         0x8000000000000000},
-{"inst-thread-reconfig-control-trig0-1",            0x0000000000000000},
-{"fw-count-cache-disabled",                         0x0000000000000000},
-{"fw-ltptr-serialized",                             0x0000000000000000},
-{"fw-count-cache-flush-bcctr2,0,0",                 0x0000000000000000},
-{"speculation-policy-favor-security",               0x8000000000000000},
-{"user-mode-branch-speculation",                    0x8000000000000000},
-{"needs-l1d-flush-msr-hv-1-to-0",                   0x8000000000000000},
-{"needs-l1d-flush-msr-pr-0-to-1",                   0x8000000000000000},
-{"needs-spec-barrier-for-bound-checks",             0x8000000000000000},
-{"needs-pmu-restricted",                            0x0000000000000000},
-{"needs-count-cache-flush-on-context-switch",       0x0000000000000000}},
-// Risk Level 1 , compat mode , nimbus DD 2.3
-{
-{"tm-suspend-mode",                                 0x8000000000000000},
-{"inst-spec-barrier-ori31,31,0",                    0x8000000000000000},
-{"fw-bcctrl-serialized",                            0x8000000000000000},
-{"inst-l1d-flush-ori30,30,0",                       0x0000000000000000},
-{"inst-l1d-flush-trig2",                            0x8000000000000000},
-{"fw-l1d-thread-split",                             0x8000000000000000},
-{"fw-branch-hints-honored",                         0x8000000000000000},
-{"inst-thread-reconfig-control-trig0-1",            0x0000000000000000},
-{"fw-count-cache-disabled",                         0x0000000000000000},
-{"fw-ltptr-serialized",                             0x0000000000000000},
-{"fw-count-cache-flush-bcctr2,0,0",                 0x0000000000000000},
-{"speculation-policy-favor-security",               0x8000000000000000},
-{"user-mode-branch-speculation",                    0x8000000000000000},
-{"needs-l1d-flush-msr-hv-1-to-0",                   0x8000000000000000},
-{"needs-l1d-flush-msr-pr-0-to-1",                   0x8000000000000000},
-{"needs-spec-barrier-for-bound-checks",             0x8000000000000000},
-{"needs-pmu-restricted",                            0x0000000000000000},
-{"needs-count-cache-flush-on-context-switch",       0x0000000000000000}},
-// End of Risk Level 1
-},
-
-//RISK 2 (No Security)
-{
-// Risk Level 2 , compat mode , nimbus DD 2.0 / nimbus DD 2.1
-{
-{"tm-suspend-mode",                                 0x0000000000000000},
-{"inst-spec-barrier-ori31,31,0",                    0x0000000000000000},
 {"fw-bcctrl-serialized",                            0x0000000000000000},
 {"inst-l1d-flush-ori30,30,0",                       0x0000000000000000},
 {"inst-l1d-flush-trig2",                            0x0000000000000000},
@@ -444,137 +307,21 @@ const hdatIplpFeatureFlagSetting_t hdatIplpFeatureFlagSettingsArray[NUM_RISK_LEV
 {"fw-branch-hints-honored",                         0x0000000000000000},
 {"inst-thread-reconfig-control-trig0-1",            0x0000000000000000},
 {"fw-count-cache-disabled",                         0x0000000000000000},
-{"fw-ltptr-serialized",                             0x0000000000000000},
-{"fw-count-cache-flush-bcctr2,0,0",                 0x0000000000000000},
-{"speculation-policy-favor-security",               0x0000000000000000},
-{"user-mode-branch-speculation",                    0x0000000000000000},
-{"needs-l1d-flush-msr-hv-1-to-0",                   0x0000000000000000},
-{"needs-l1d-flush-msr-pr-0-to-1",                   0x0000000000000000},
-{"needs-spec-barrier-for-bound-checks",             0x0000000000000000},
-{"needs-pmu-restricted",                            0x0000000000000000},
-{"needs-count-cache-flush-on-context-switch",       0x0000000000000000}},
-
-// Risk Level 2 , compat mode , nimbus DD 2.2
-{
-{"tm-suspend-mode",                                 0x8000000000000000},
-{"inst-spec-barrier-ori31,31,0",                    0x0000000000000000},
-{"fw-bcctrl-serialized",                            0x0000000000000000},
-{"inst-l1d-flush-ori30,30,0",                       0x0000000000000000},
-{"inst-l1d-flush-trig2",                            0x0000000000000000},
-{"fw-l1d-thread-split",                             0x0000000000000000},
-{"fw-branch-hints-honored",                         0x0000000000000000},
-{"inst-thread-reconfig-control-trig0-1",            0x0000000000000000},
-{"fw-count-cache-disabled",                         0x0000000000000000},
-{"fw-ltptr-serialized",                             0x0000000000000000},
-{"fw-count-cache-flush-bcctr2,0,0",                 0x0000000000000000},
-{"speculation-policy-favor-security",               0x0000000000000000},
-{"user-mode-branch-speculation",                    0x0000000000000000},
-{"needs-l1d-flush-msr-hv-1-to-0",                   0x0000000000000000},
-{"needs-l1d-flush-msr-pr-0-to-1",                   0x0000000000000000},
-{"needs-spec-barrier-for-bound-checks",             0x0000000000000000},
-{"needs-pmu-restricted",                            0x0000000000000000},
-{"needs-count-cache-flush-on-context-switch",       0x0000000000000000}},
-
-// Risk Level 2 , compat mode , nimbus DD 2.3
-{
-{"tm-suspend-mode",                                 0x8000000000000000},
-{"inst-spec-barrier-ori31,31,0",                    0x0000000000000000},
-{"fw-bcctrl-serialized",                            0x0000000000000000},
-{"inst-l1d-flush-ori30,30,0",                       0x0000000000000000},
-{"inst-l1d-flush-trig2",                            0x0000000000000000},
-{"fw-l1d-thread-split",                             0x0000000000000000},
-{"fw-branch-hints-honored",                         0x0000000000000000},
-{"inst-thread-reconfig-control-trig0-1",            0x0000000000000000},
-{"fw-count-cache-disabled",                         0x0000000000000000},
-{"fw-ltptr-serialized",                             0x0000000000000000},
-{"fw-count-cache-flush-bcctr2,0,0",                 0x0000000000000000},
-{"speculation-policy-favor-security",               0x0000000000000000},
-{"user-mode-branch-speculation",                    0x0000000000000000},
-{"needs-l1d-flush-msr-hv-1-to-0",                   0x0000000000000000},
-{"needs-l1d-flush-msr-pr-0-to-1",                   0x0000000000000000},
-{"needs-spec-barrier-for-bound-checks",             0x0000000000000000},
-{"needs-pmu-restricted",                            0x0000000000000000},
-{"needs-count-cache-flush-on-context-switch",       0x0000000000000000}},
-// End of Risk Level 2
-},
-
-
-//Risk levels 3 is being skipped as of now. Add values if needed infuture.
-//RISK3
-{
-// Risk Level3 2.0 / nimbus DD 2.1
-{},
-
-// Risk Level 3 nimbus DD2.2
-{},
-
-// Risk Level 3 nimbus DD2.3
-{},
-// End of Risk Level 3
-},
-
-
-//RISK 4
-{
-// Risk Level 4 , native mode , nimbus DD 2.0 / nimbus DD 2.1
-{},
-
-// Risk Level 4 , native mode , nimbus DD 2.2
-{},
-
-// Risk Level 4 , native mode , nimbus DD 2.3
-{
-{"tm-suspend-mode",                                 0x8000000000000000},
-{"inst-spec-barrier-ori31,31,0",                    0x8000000000000000},
-{"fw-bcctrl-serialized",                            0x0000000000000000},
-{"inst-l1d-flush-ori30,30,0",                       0x0000000000000000},
-{"inst-l1d-flush-trig2",                            0x8000000000000000},
-{"fw-l1d-thread-split",                             0x8000000000000000},
-{"fw-branch-hints-honored",                         0x0000000000000000},
-{"inst-thread-reconfig-control-trig0-1",            0x0000000000000000},
-{"fw-count-cache-disabled",                         0x0000000000000000},
-{"fw-ltptr-serialized",                             0x0000000000000000},
 {"fw-count-cache-flush-bcctr2,0,0",                 0x8000000000000000},
+{"fw-link-stack-disabled",                          0x0000000000000000},
+{"fw-link-stack-flush-bcctr2,0,0",                  0x8000000000000000},
 {"speculation-policy-favor-security",               0x8000000000000000},
-{"user-mode-branch-speculation",                    0x0000000000000000},
-{"needs-l1d-flush-msr-hv-1-to-0",                   0x8000000000000000},
-{"needs-l1d-flush-msr-pr-0-to-1",                   0x8000000000000000},
-{"needs-spec-barrier-for-bound-checks",             0x8000000000000000},
-{"needs-pmu-restricted",                            0x0000000000000000},
-{"needs-count-cache-flush-on-context-switch",       0x8000000000000000}},
-// End of Risk Level 4
-},
-
-
-//RISK 5
-{
-// Risk Level 5 , native mode , nimbus DD 2.0 / nimbus DD 2.1
-{},
-
-// Risk Level 5 , native mode , nimbus DD 2.2
-{},
-
-// Risk Level 5 , native mode , nimbus DD 2.3
-{
-{"tm-suspend-mode",                                 0x8000000000000000},
-{"inst-spec-barrier-ori31,31,0",                    0x0000000000000000},
-{"fw-bcctrl-serialized",                            0x0000000000000000},
-{"inst-l1d-flush-ori30,30,0",                       0x0000000000000000},
-{"inst-l1d-flush-trig2",                            0x0000000000000000},
-{"fw-l1d-thread-split",                             0x0000000000000000},
-{"fw-branch-hints-honored",                         0x0000000000000000},
-{"inst-thread-reconfig-control-trig0-1",            0x0000000000000000},
-{"fw-count-cache-disabled",                         0x0000000000000000},
-{"fw-ltptr-serialized",                             0x0000000000000000},
-{"fw-count-cache-flush-bcctr2,0,0",                 0x0000000000000000},
-{"speculation-policy-favor-security",               0x0000000000000000},
 {"user-mode-branch-speculation",                    0x0000000000000000},
 {"needs-l1d-flush-msr-hv-1-to-0",                   0x0000000000000000},
 {"needs-l1d-flush-msr-pr-0-to-1",                   0x0000000000000000},
-{"needs-spec-barrier-for-bound-checks",             0x0000000000000000},
-{"needs-pmu-restricted",                            0x0000000000000000},
-{"needs-count-cache-flush-on-context-switch",       0x0000000000000000}},
-// End of Risk Level 5
+{"needs-spec-barrier-for-bound-checks",             0x8000000000000000},
+{"needs-count-cache-flush-on-context-switch",       0x8000000000000000},
+{"needs-link-stack-flush-on-context-switch",        0x8000000000000000},
+{"no-need-l1d-flush-msr-pr-1-to-0",                 0x8000000000000000},
+{"no-need-l1d-flush-kernel-on-user-access",         0x8000000000000000},
+{"no-need-store-drain-on-priv-state-switch",        0x8000000000000000},
+},
+// End of Risk Level 0
 },
 
 };

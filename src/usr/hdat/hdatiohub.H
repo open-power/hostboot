@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -265,18 +265,6 @@ enum hdatHubStatus
                                       //presence detect bit
 #define HDAT_HUB_FAB_BRIDGE_PHB3 0x10 // HUB Fabric Bridge PHB3
                                       //presence detect bit
-
-
-#define HDAT_MODULE_TYPE_ID_MURANO 0x0001
-#define HDAT_MODULE_TYPE_ID_VENICE 0x0010
-
-//@TODO:RTC 166789: Need to access the module type from HB targeting model
-#define HDAT_MODULE_TYPE_ID_NIMBUS_LAGRANGE 0x0022
-#define HDAT_MODULE_TYPE_ID_CUMULUS_DUOMO 0x0030
-//TODO: RTC Story 246515 Miscellaneous Rainier Changes
-#define HDAT_MODULE_TYPE_ID_P10_GODEL  0x0050
-
-
 
 /*---------------------------------------------------------------------------*/
 /* C++ class definition                                                      */

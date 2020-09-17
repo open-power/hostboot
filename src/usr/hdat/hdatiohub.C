@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -1105,15 +1105,6 @@ errlHndl_t hdatLoadIoData(const hdatMsAddr_t &i_msAddr,
             }
             HDAT_DBG("hdatFlags 1: %X",l_hub->hdatFlags);
 
-            TARGETING::ATTR_MODEL_type  l_model =
-                            (l_pProcTarget->getAttr<TARGETING::ATTR_MODEL>());
-
-            //@TODO:RTC Story 246361 HDAT Nimbus/Cumulus model code removal
-            if(l_model == TARGETING::MODEL_POWER10)
-            {
-                l_hub->hdatModuleId = HDAT_MODULE_TYPE_ID_P10_GODEL;
-            }
-
             TARGETING::Target *l_pSysTarget = NULL;
             (void) TARGETING::targetService().getTopLevelTarget(l_pSysTarget);
 
@@ -1122,6 +1113,16 @@ errlHndl_t hdatLoadIoData(const hdatMsAddr_t &i_msAddr,
                 HDAT_ERR("Error in getting Top Level Target");
                 assert(l_pSysTarget != NULL);
             }
+
+            TARGETING::ATTR_PROC_MODULE_TYPE_type  l_modType =
+                TARGETING::PROC_MODULE_TYPE_GODEL;
+            if(!(l_pSysTarget->tryGetAttr<TARGETING::ATTR_PROC_MODULE_TYPE>
+                (l_modType)))
+            {
+                HDAT_ERR("Failed to read ATTR_PROC_MODULE_TYPE for SYS");
+            }
+            l_hub->hdatModuleId = l_modType;
+            HDAT_DBG("Module type: %X",l_modType);
 
             // Setting the Maximum PCIe Link Training Speed
             l_hub->hdatMaxPCIeLinkSpeed = HDAT_PCIE_MAX_SPEED_GEN5;
