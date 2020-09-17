@@ -353,13 +353,16 @@ namespace SBE
                 // Check to see if current target is master processor
                 if ( sbeState.target == masterProcChipTargetHandle)
                 {
-                    TRACUCOMP(g_trac_sbe,"sbeState.target=0x%X is MASTER. "
+                    TRACFCOMP(g_trac_sbe,"sbeState.target=0x%X is BOOT proc. "
                               " (i=%d)",
                               TARGETING::get_huid(sbeState.target), i);
                     sbeState.target_is_master = true;
                 }
                 else
                 {
+                    TRACFCOMP(g_trac_sbe,"sbeState.target=0x%X is non-BOOT proc. "
+                              " (i=%d)",
+                              TARGETING::get_huid(sbeState.target), i);
                     sbeState.target_is_master = false;
                 }
 
@@ -918,7 +921,7 @@ namespace SBE
                                uint32_t& io_image_size)
     {
         errlHndl_t err = nullptr;
-        P9XipItem l_xipItem;
+        P9XipSection l_xipSection = {0};
 
         TRACFCOMP( g_trac_sbe,
                    ENTER_MRK"appendHbblToSbe(): i_section=%p, "
@@ -928,20 +931,21 @@ namespace SBE
                             i_image, io_image_size);
 
         do{
-            // Call p9_xip_find to find HBBL image in SBE image
+            // Call p9_xip_get_section to find HBBL section in SBE image
             // Some xip calls keep same p9 prefix for p10
-            const char* l_sectionId = ".hbbl";
-            int xip_rc = p9_xip_find( i_image, l_sectionId, &l_xipItem );
+            int xip_rc = p9_xip_get_section(i_image, P9_XIP_SECTION_SBE_HBBL, &l_xipSection);
+            TRACFCOMP(g_trac_sbe, "appendHbblToSbe(): p9_xip_get_section .hbbl xip_rc=%d"
+                " iv_offset=0x%X iv_size=0x%X iv_alignment=0x%X",
+                xip_rc, l_xipSection.iv_offset, l_xipSection.iv_size,
+                l_xipSection.iv_alignment);
 
-            // TODO: Revisit with RTC 258273 to see if we should keep or remove
-            // defensive logic
             // Check the return code
-            if( xip_rc == P9_XIP_ITEM_NOT_FOUND || xip_rc == P9_XIP_DATA_NOT_PRESENT)
+            if ((xip_rc == 0) && (l_xipSection.iv_size != 0))
             {
                 TRACFCOMP( g_trac_sbe, "appendHbblToSbe(): "
-                           "p9_xip_find .hbbl NON CONCLUSIVE clean first rc=0x%X", xip_rc);
+                           "p9_xip_get_section .hbbl NON CONCLUSIVE clean first rc=0x%X", xip_rc);
 
-                // Call p9_xip_delete_section to clean or delete existing HBBL image
+                // Call p9_xip_delete_section to clean or delete existing HBBL section
                 // from SBE image
                 // Some xip calls keep same p9 prefix for p10
                 void *l_imageBuf =malloc(io_image_size);
@@ -981,18 +985,27 @@ namespace SBE
                     break;
                 }
             }
+            else if (xip_rc == 0)
+            {
+                TRACFCOMP(g_trac_sbe, "appendHbblToSbe(): p9_xip_get_section .hbbl FOUND but EMPTY");
+            }
+            else if ((xip_rc == P9_XIP_ITEM_NOT_FOUND) || (xip_rc == P9_XIP_DATA_NOT_PRESENT))
+            {
+                TRACFCOMP(g_trac_sbe, "appendHbblToSbe(): p9_xip_get_section .hbbl ITEM_NOT_FOUND "
+                    "or DATA_NOT_PRESENT");
+            }
             else
             {
-                TRACFCOMP( g_trac_sbe, "appendHbblToSbe(): p9_xip_find "
+                TRACFCOMP( g_trac_sbe, "appendHbblToSbe(): p9_xip_get_section "
                            ".hbbl received unexpected return code, rc=0x%X",
                            xip_rc );
                 /*@
                  * @errortype
                  * @moduleid     SBE_APPEND_HBBL
                  * @reasoncode   ERROR_FROM_XIP_FIND
-                 * @userdata1    rc from p9_xip_find
+                 * @userdata1    rc from p9_xip_get_section
                  * @userdata2    <unused>
-                 * @devdesc      Bad RC from p9_xip_find
+                 * @devdesc      Bad RC from p9_xip_get_section
                  * @custdesc     A problem occurred while updating processor
                  *               boot code.
                  */
@@ -1010,7 +1023,7 @@ namespace SBE
                 break;
             }
 
-            // Invoke p10_ipl_section_append to append HBBL image to SBE image
+            // Invoke p10_ipl_section_append to append HBBL section to SBE image
             FAPI_INVOKE_HWP( err,
                              p10_ipl_section_append,
                              i_section,
@@ -1033,7 +1046,7 @@ namespace SBE
 
         }while(0);
 
-        TRACUCOMP( g_trac_sbe,
+        TRACFCOMP( g_trac_sbe,
                    EXIT_MRK"appendHbblToSbe(): i_image=%p, "
                    "io_image_size=0x%X, RC=0x%X",
                    i_image, io_image_size, ERRL_GETRC_SAFE(err) );
@@ -2519,19 +2532,20 @@ namespace SBE
                      sbePnorPtr,
                      sbePnorImageSize);
 
-            // TODO: Revisit with RTC 258273 to see if we should keep or remove
-            // defensive logic
-            const char* l_sectionId = ".rings";
-            P9XipItem l_xipItem;
-            int xip_rc = p9_xip_find(sbeHbblImgPtr, l_sectionId, &l_xipItem);
+            P9XipSection l_xipSection = {0};
+            int xip_rc = p9_xip_get_section(sbeHbblImgPtr, P9_XIP_SECTION_SBE_RINGS, &l_xipSection);
+            TRACFCOMP(g_trac_sbe, "getSbeInfoState(): p9_xip_get_section .rings xip_rc=%d"
+                " iv_offset=0x%X iv_size=0x%X iv_alignment=0x%X",
+                xip_rc, l_xipSection.iv_offset, l_xipSection.iv_size,
+                l_xipSection.iv_alignment);
 
             // Check the return code
-            if( xip_rc == P9_XIP_ITEM_NOT_FOUND || xip_rc == P9_XIP_DATA_NOT_PRESENT)
+            if ((xip_rc == 0) && (l_xipSection.iv_size != 0))
             {
                 TRACFCOMP( g_trac_sbe, "getSbeInfoState(): "
-                           "p9_xip_find .rings NON CONCLUSIVE clean first rc=0x%X", xip_rc);
+                           "p9_xip_get_section .rings NON CONCLUSIVE clean first rc=0x%X", xip_rc);
 
-                // Call p9_xip_delete_section to clean or delete existing RINGS image
+                // Call p9_xip_delete_section to clean or delete existing RINGS section
                 // from SBE image
                 // Some xip calls keep same p9 prefix for p10
                 void *l_imageBuf =malloc(sbePnorImageSize);
@@ -2571,18 +2585,27 @@ namespace SBE
                     break;
                 }
             }
+            else if (xip_rc == 0)
+            {
+                TRACFCOMP(g_trac_sbe, "getSbeInfoState(): p9_xip_get_section .rings FOUND but EMPTY");
+            }
+            else if ((xip_rc == P9_XIP_ITEM_NOT_FOUND) || (xip_rc == P9_XIP_DATA_NOT_PRESENT))
+            {
+                TRACFCOMP(g_trac_sbe, "getSbeInfoState(): p9_xip_get_section .rings ITEM_NOT_FOUND "
+                    "or DATA_NOT_PRESENT");
+            }
             else
             {
-                TRACFCOMP( g_trac_sbe, "getSbeInfoState(): p9_xip_find "
+                TRACFCOMP( g_trac_sbe, "getSbeInfoState(): p9_xip_get_section "
                            ".rings received unexpected return code, rc=0x%X",
                            xip_rc );
                 /*@
                  * @errortype
                  * @moduleid     SBE_APPEND_HBBL
                  * @reasoncode   ERROR_FROM_XIP_FIND_RINGS
-                 * @userdata1    rc from p9_xip_find
+                 * @userdata1    rc from p9_xip_get_section
                  * @userdata2    <unused>
-                 * @devdesc      Bad RC from p9_xip_find
+                 * @devdesc      Bad RC from p9_xip_get_section
                  * @custdesc     A problem occurred while updating processor
                  *               boot code.
                  */
@@ -6171,11 +6194,11 @@ errlHndl_t getSecuritySettingsFromSbeImage(
                   sizeof(P9XipHeader().iv_magic) ) ;
 
 
-        // After getting P9XipHeader, call p9_xip_find to find HBBL image
+        // After getting P9XipHeader, call p9_xip_get_section to find HBBL section
         // in SBE Image
         P9XipSection l_xipSection = {0};
 
-        // Call p9_xip_find to find HBBL image in SBE image
+        // Call p9_xip_get_section to find HBBL section in SBE image
         // Some xip calls keep same p9 prefix for p10
         auto l_sectionId = P9_XIP_SECTION_SBE_HBBL;
 
