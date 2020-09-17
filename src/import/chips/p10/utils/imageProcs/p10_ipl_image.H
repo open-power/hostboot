@@ -1934,7 +1934,9 @@ typedef enum
     P9_XIP_SECTION_SBE_FA_RING_OVRD    = P9_XIP_SECTIONS_PLUS(11),
     P9_XIP_SECTION_SBE_RINGIDFEATLIST  = P9_XIP_SECTIONS_PLUS(12),
     P9_XIP_SECTION_SBE_HDCT            = P9_XIP_SECTIONS_PLUS(13),
-    P9_XIP_SECTIONS_SBE                = P9_XIP_SECTIONS_PLUS(14) // # sections
+    P9_XIP_SECTION_SBE_SBH_FIRMWARE    = P9_XIP_SECTIONS_PLUS(14),
+    P9_XIP_SECTION_SBE_SBH_HBBL        = P9_XIP_SECTIONS_PLUS(15),
+    P9_XIP_SECTIONS_SBE                = P9_XIP_SECTIONS_PLUS(16) // # sections
 } p9_xip_section_sbe_t;
 
 #define P9_XIP_SECTION_NAMES_SBE(var)     \
@@ -1952,7 +1954,9 @@ typedef enum
                          ".fa_ec_mma_far", \
                          ".fa_ring_ovrd",  \
                          ".ringidfeatlist",\
-                         ".hdct")
+                         ".hdct",\
+                         ".sbh_firmware",\
+                         ".sbh_hbbl")
 
 /**************************************************************************/
 /* QME Image                                                             */
