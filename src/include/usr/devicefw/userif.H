@@ -45,6 +45,9 @@ namespace DeviceFW
 {
     /** @enum AccessType
      *  @brief Access types for accessing a hardware device.
+     *
+     *  NOTE: Any changes to the values must be reflected in the function
+     *  ErrlUserDetailsParserLogRegister located in src/usr/errl/plugins/ebmc/b0100.py
      */
 
     enum AccessType

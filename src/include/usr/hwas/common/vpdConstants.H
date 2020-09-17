@@ -52,8 +52,9 @@ typedef uint32_t pg_mask_t;
 
 // NOTE: Many of the VPD_CP00_PG_X constants are used to construct an "All Good"
 //       vector to compare against the PG vector of a system. Changes to
-//       constants in this file should be reflected in
-//       src/usr/hwas/plugins/errludParser_pgData.H
+//       constants in this file should be reflected both in
+//       src/usr/hwas/plugins/errludParser_pgData.H and
+//       src/build/tools/ebmc/vpdConstants.py
 
 // constants the platReadPartialGood will use for looking at the VPD data
 const pg_idx_t VPD_CP00_PG_DATA_LENGTH      = 192;
@@ -217,6 +218,8 @@ const pg_mask_t VPD_CP00_PG_ALWAYS_GOOD_MASKS[ALWAYS_GOOD_INDEX_SIZE] =
 // unset, and every reserved bit set, used for tests.
 // This is defined in this header because it is used by both hwas1test.H and by
 // errludParser_pgData.H
+// NOTE: Any changes to the Partial-Good Vector should be reflected in the createPGV()
+// function found in src/build/tools/ebmc/vpdConstants.py
 // @TODO RTC 249996 static_assert requires this to be constexpr
 #ifdef __HOSTBOOT_MODULE
 #define CONSTEXPR constexpr

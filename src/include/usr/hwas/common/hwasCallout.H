@@ -38,6 +38,9 @@
 #include <targeting/common/target.H>
 #endif // not LOGPARSER
 
+// The following enums are used in src/build/tools/ebmc/hwasCallout.py
+// Any changes to these enums should also be reflected there.
+
 namespace HWAS
 {
 // from hwsv/server/hwsvTypes.H:
@@ -269,6 +272,9 @@ const uint8_t TARGET_IS_SENTINEL = 0xF0;
  *         is used in messages between Hostboot and FSP, and it is saved
  *         to persistent storage inside error logs.  This means that the
  *         size cannot change and the fields cannot be reordered.
+ *
+ * NOTE:   Keep check in ErrlUserDetailsParserCallout function in
+ *         src/usr/errl/plugins/ebmc/b0100.py in sync with this struct
  */
 typedef struct callout_ud
 {

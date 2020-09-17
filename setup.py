@@ -32,21 +32,27 @@ from setuptools import setup
 
 
 """
- New parsing modules should be added to this dictionary.
- Changes to a C++ UD Parser should also be made to the corresponding Python Parser.
- Helper files for the modules should be added to the directory corresponding to
- "helpers" in dirmap.
- Use "udparsers.helpers.helper_file_name" to include the file in a module.
+New parsing modules should be added to this dictionary.
+Changes to a C++ Parser should also be made to the corresponding Python Parser.
+
+Helper files for the modules should be added to the directory corresponding to
+"helpers" in dirmap.
+Use "udparsers.helpers.helper_file_name" to include the file in a module.
 
 """
 dirmap = {
+    "b0100": "src/usr/errl/plugins/ebmc/",
     "b0300": "src/usr/scom/plugins/ebmc",
+    "b0500": "src/usr/initservice/plugins/ebmc",
     "b0700": "src/usr/i2c/plugins/ebmc",
+    "b0900": "src/usr/isteps/plugins/ebmc",
     "b0a00": "src/usr/fsi/plugins/ebmc",
+    "b0c00": "src/usr/hwas/plugins/ebmc",
     "b0e00": "src/usr/eeprom/plugins/ebmc",
     "b1a00": "src/usr/runtime/plugins/ebmc",
     "b1d00": "src/usr/vpd/plugins/ebmc",
     "b1e00": "src/usr/secureboot/common/plugins/ebmc",
+    "b2600": "src/usr/htmgt/plugins/ebmc",
     "b3600": "src/usr/expaccess/plugins/ebmc",
     "b4500": "src/usr/spi/plugins/ebmc",
     "be500": "src/usr/diag/prdf/plugins/ebmc",

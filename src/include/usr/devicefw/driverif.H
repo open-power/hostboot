@@ -55,6 +55,9 @@ namespace DeviceFW
     /** @enum AccessType_DriverOnly
      *  @brief Access types to be used internally by drivers for routing
      *         requests to other drivers.
+     *
+     *  NOTE: Any changes to the values must be reflected in the function
+     *  ErrlUserDetailsParserLogRegister located in src/usr/errl/plugins/ebmc/b0100.py
      */
     enum AccessType_DriverOnly
     {

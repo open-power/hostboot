@@ -99,7 +99,7 @@ def findNull(data, start, end):
         index += 1
     return index
 
-""" Concatenates a section of data and converting each byte into a char
+""" Concatenates a section of data and converts each byte into a char
 
 @param[in] data: memoryview object to get data from
 @param[in] start: starting index of data to concatenate
@@ -111,3 +111,14 @@ def findNull(data, start, end):
 def strConcat(data, start, end):
     return "".join(chr(x) for x in data[start:end].tolist()), end+1
 
+""" Creates a string for an unknown value to use as the default value
+when searching a dictionary
+
+@param[in] data: memoryview object to get data from
+@param[in] start: starting index of data to concatenate
+@param[in] end: end index of data to concatenate
+@returns: a string of the unknown value
+
+"""
+def unknownStr(data, start, end):
+    return "UNKNOWN: " + hex(intConcat(data, start, end)[0])
