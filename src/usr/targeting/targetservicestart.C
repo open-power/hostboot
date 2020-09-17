@@ -109,7 +109,7 @@ namespace TARGETING
 static void initializeAttributes(TargetService& i_targetService,
                                  bool i_isMpipl,
                                  bool i_istepMode,
-                                 ATTR_MASTER_MBOX_SCRATCH_typeStdArr& i_masterScratch);
+                                 const ATTR_MASTER_MBOX_SCRATCH_typeStdArr& i_masterScratch);
 
 /**
  *  @brief Check that at least one processor of our cpu type is being targeted
@@ -142,33 +142,7 @@ static void initTargeting(errlHndl_t& io_pError)
     //be overwritten
     bool l_isMpipl = false;
     bool l_isIstepMode = false;
-    ATTR_MASTER_MBOX_SCRATCH_typeStdArr l_scratch { };
-
-    {
-        using namespace INITSERVICE::SPLESS;
-
-        const std::array<uint32_t, l_scratch.size()> l_regs {
-            MboxScratch1_t::REG_ADDR,
-            MboxScratch2_t::REG_ADDR,
-            MboxScratch3_t::REG_ADDR,
-            MboxScratch4_t::REG_ADDR,
-            MboxScratch5_t::REG_ADDR,
-            MboxScratch6_t::REG_ADDR,
-            MboxScratch7_t::REG_ADDR,
-            MboxScratch8_t::REG_ADDR,
-            MboxScratch9_t::REG_ADDR,
-            MboxScratch10_t::REG_ADDR,
-            MboxScratch11_t::REG_ADDR,
-            MboxScratch12_t::REG_ADDR,
-            MboxScratch13_t::REG_ADDR,
-            MboxScratch14_t::REG_ADDR,
-            MboxScratch15_t::REG_ADDR,
-            MboxScratch16_t::REG_ADDR,
-        };
-
-        std::transform(l_regs.cbegin(), l_regs.cend(),
-                       l_scratch.begin(), Util::readScratchReg);
-    }
+    const auto l_scratch = Util::readScratchRegs();
 
     // Check mbox scratch reg 3 for IPL boot options
     // Specifically istep mode (bit 0) and MPIPL (bit 2)
@@ -391,7 +365,7 @@ static void checkProcessorTargeting(TargetService& i_targetService)
 static void initializeAttributes(TargetService& i_targetService,
                                  bool i_isMpipl,
                                  bool i_istepMode,
-                                 ATTR_MASTER_MBOX_SCRATCH_typeStdArr& i_masterScratch)
+                                 const ATTR_MASTER_MBOX_SCRATCH_typeStdArr& i_masterScratch)
 {
     #define TARG_FN "initializeAttributes()...)"
     TARG_ENTER();

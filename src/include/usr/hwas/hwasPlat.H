@@ -46,9 +46,12 @@ public: // User interface
      * @brief Helper function to verify that HB and SBE
      *        deconfiguration data matches
      * @param[in]         i_target Target being verified
+     * @param[in]         i_scratchRegs Scratch registers to verify
      * @return errlHndl_t Error if any, otherwise nullptr.
      */
-    errlHndl_t verifyDeconfiguration(TARGETING::Target* i_target);
+    errlHndl_t verifyDeconfiguration(
+        TARGETING::Target* i_target,
+        const TARGETING::ATTR_MASTER_MBOX_SCRATCH_typeStdArr& i_scratchRegs);
 
 private:
 

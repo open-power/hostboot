@@ -238,20 +238,6 @@ void* host_gard( void *io_pArgs )
         errlCommit (l_err, ISTEP_COMP_ID);
     }
 
-    // Verify that de-configuration logic done by SBE matches what HB has
-    // de-configured for boot proc
-    TARGETING::Target* l_pMasterProcChip = nullptr;
-    TARGETING::targetService().masterProcChipTargetHandle(l_pMasterProcChip);
-
-    HWAS::HWASPlatVerification verification;
-    l_err = verification.verifyDeconfiguration(l_pMasterProcChip);
-
-    if (l_err)
-    {
-        l_stepError.addErrorDetails(l_err);
-        errlCommit(l_err, ISTEP_COMP_ID);
-    }
-
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "host_gard exit" );
 
     return l_stepError.getErrorHandle();

@@ -45,6 +45,8 @@
 #include <errl/errludtarget.H>
 #include <spi/spi.H> // for SPI lock support
 #include <p10_getecid.H>
+#include <util/utilmbox_scratch.H>
+#include <hwas/hwasPlat.H>
 
 using namespace ISTEP;
 using namespace ISTEP_ERROR;
@@ -154,6 +156,28 @@ void* call_proc_check_secondary_sbe_seeprom_complete( void *io_pArgs )
                       "SUCCESS : proc_check_secondary_sbe_seeprom_complete"
                       " completed ok for proc 0x%.8X",
                       get_huid(l_cpu_target));
+
+            // Ensure that the mailbox scratch registers 1 and 2 match what we
+            // calculated for functional state
+
+            const auto l_scratch = Util::readScratchRegs(l_cpu_target);
+
+            TRACFCOMP(g_trac_isteps_trace,
+                      "proc_check_secondary_sbe_seeprom_complete: "
+                      "Checking SBE functional state scratch registers on processor 0x%08x",
+                      get_huid(l_cpu_target));
+
+            l_errl = HWAS::HWASPlatVerification().verifyDeconfiguration(l_cpu_target, l_scratch);
+
+            // This shouldn't ever fail because Hostboot pushes the values to
+            // the secondary SBEs, so if it does then make the error
+            // UNRECOVERABLE.
+            if (l_errl)
+            {
+                l_errl->setSev(ERRORLOG::ERRL_SEV_UNRECOVERABLE);
+                l_errl->collectTrace("ISTEPS_TRACE", 256);
+                captureError(l_errl, l_stepError, HWPF_COMP_ID, l_cpu_target);
+            }
         }
         else
         {

@@ -1393,9 +1393,9 @@ errlHndl_t HWASPlatVerification::verificationMatchHandler(Target * i_target,
             ((i_sbeFunctional) ? "True" : "False"),
             ((i_hbFunctional) ? "True" : "False") );
 
-        // Commit error due to mismatching HB and SBE deconfigs
+        // Create error due to mismatching HB and SBE deconfigs
         /*@
-        * @errortype        ERRL_SEV_UNRECOVERABLE
+        * @errortype        ERRL_SEV_INFORMATIONAL
         * @moduleid         MOD_DECONFIG_TARGETS_FROM_GARD_AND_VPD
         * @reasoncode       RC_HB_SBE_DECONFIG_MISMATCH
         * @userdata1        Target HUID
@@ -1406,7 +1406,7 @@ errlHndl_t HWASPlatVerification::verificationMatchHandler(Target * i_target,
         * @custdesc         Firmware error during IPL
         */
         l_errLog = new ERRORLOG::ErrlEntry (
-            ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+            ERRORLOG::ERRL_SEV_INFORMATIONAL,
             MOD_DECONFIG_TARGETS_FROM_GARD_AND_VPD,
             RC_HB_SBE_DECONFIG_MISMATCH,
             i_target->getAttr<ATTR_HUID>(),
@@ -1434,7 +1434,8 @@ errlHndl_t HWASPlatVerification::verificationMatchHandler(Target * i_target,
 //******************************************************************************
 //  verifyDeconfiguration()
 //******************************************************************************
-errlHndl_t HWASPlatVerification::verifyDeconfiguration(Target* i_target)
+errlHndl_t HWASPlatVerification::verifyDeconfiguration(Target* i_target,
+                                                       const ATTR_MASTER_MBOX_SCRATCH_typeStdArr& i_scratchRegs)
 {
     HWAS_INF(ENTER_MRK"verifyDeconfiguration");
 
@@ -1470,14 +1471,6 @@ errlHndl_t HWASPlatVerification::verifyDeconfiguration(Target* i_target)
 
     do
     {
-        // getting top system target "SYS"
-        Target* l_topSysTarget = nullptr;
-        targetService().getTopLevelTarget(l_topSysTarget);
-        HWAS_ASSERT(l_topSysTarget,
-            "verifyDeconfiguration: Could not get top system target");
-        const auto l_scratchRegs = l_topSysTarget->getAttrAsStdArr
-            <TARGETING::ATTR_MASTER_MBOX_SCRATCH>();
-
         // In the following loops, for every l_unitTypeOffset the
         // l_hostbootFunctional and l_sbeFunctional values are calculated for
         // every individual part.
@@ -1539,7 +1532,7 @@ errlHndl_t HWASPlatVerification::verifyDeconfiguration(Target* i_target)
                     continue;
                 }
 
-                const uint32_t l_scratchReg = l_scratchRegs[l_unitTypeOffset.mboxReg];
+                const uint32_t l_scratchReg = i_scratchRegs[l_unitTypeOffset.mboxReg];
 
                 bool l_sbeFunctional =
                       ((0x80000000ull >> l_chipUnitOffset) & l_scratchReg) == 0;
@@ -1575,14 +1568,14 @@ errlHndl_t HWASPlatVerification::verifyDeconfiguration(Target* i_target)
                         HWAS_ERR("verifyDeconfiguration: One or more SBE/HB deconfiguration mismatches exist");
 
                         /*
-                         * @errortype  ERRL_SEV_UNRECOVERABLE
+                         * @errortype  ERRL_SEV_INFORMATIONAL
                          * @moduleid   MOD_DECONFIG_TARGETS_FROM_GARD_AND_VPD
                          * @reasoncode RC_HB_SBE_DECONFIG_MISMATCHES_EXIST
                          * @devdesc    One or more SBE/HB deconfiguration mismatches exist; see other logs
                          * @custdesc   Firmware error during IPL
                          */
                         l_errLog = new ERRORLOG::ErrlEntry (
-                                ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                ERRORLOG::ERRL_SEV_INFORMATIONAL,
                                 MOD_DECONFIG_TARGETS_FROM_GARD_AND_VPD,
                                 RC_HB_SBE_DECONFIG_MISMATCHES_EXIST,
                                 0,

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -38,6 +38,7 @@
 // I n c l u d e s
 /*****************************************************************************/
 #include <initservice/mboxRegs.H>
+#include <targeting/common/targetservice.H>
 
 // Utility Includes
 
@@ -88,20 +89,38 @@ namespace Util
      *  internally
      * @param[in] i_addr        Scom address of mailbox reg to write
      * @param[in] i_data        Data to write to mailbox
+     * @param[in] i_target      Processor target to write to
      *
      * @return none
      */
-    void writeScratchReg(uint64_t i_addr, uint32_t i_data);
+    void writeScratchReg(uint64_t i_addr, uint32_t i_data,
+                         TARGETING::Target* i_target
+                             = TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL);
 
     /**
      * @brief This function reads data to mailbox scratch reg
      *  These scom addresses are always accessible and any errors are commited
      *  internally
      * @param[in] i_addr        Scom address of mailbox reg to read
+     * @param[in] i_target      Processor target to read from
      *
      * @return Data in mailbox scratch reg
      */
-    uint32_t readScratchReg(uint64_t i_addr);
+    uint32_t readScratchReg(uint64_t i_addr,
+                            TARGETING::Target* i_target
+                                = TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL);
+
+    /**
+     * @brief This function reads all the mailbox scratch registers from a given
+     *        processor target using readScratchReg
+
+     * @param[in] i_target      Processor target to read from
+     *
+     * @return Mailbox scratch registers
+     */
+    TARGETING::ATTR_MASTER_MBOX_SCRATCH_typeStdArr
+        readScratchRegs(TARGETING::Target* i_target
+                            = TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL);
 
     /**
      * @brief This uses the stashed away mbox scratch regs to

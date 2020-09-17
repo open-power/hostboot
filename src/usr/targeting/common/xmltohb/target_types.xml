@@ -2710,6 +2710,9 @@
       <id>SECURE_VERSION_LOCKIN_POLICY</id>
     </attribute>
     <attribute>
+      <id>SKIP_PG_ENFORCEMENT</id>
+    </attribute>
+    <attribute>
       <id>SMF_MEM_AMT_REQUESTED</id>
     </attribute>
     <attribute>

@@ -1445,6 +1445,22 @@
   </attribute>
 
   <attribute>
+    <id>SKIP_PG_ENFORCEMENT</id>
+    <description>
+      Skip requiring that the mailbox scratch registers 1 and 2 on the
+      boot processor's SBE match the Hostboot deconfiguration state in
+      istep 7.5. If this value is nonzero, the check will be performed
+      but a reconfig loop will not be requested if mismatches occur.
+    </description>
+    <simpleType>
+      <uint8_t/>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <no_export/>
+  </attribute>
+
+  <attribute>
     <id>SPCWKUP_COUNT</id>
     <description>
         Keep track of the calls to Special Wakeup. Increment for each

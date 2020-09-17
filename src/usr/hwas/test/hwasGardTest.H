@@ -522,7 +522,8 @@ public:
         // Verify
         Target* l_pMasterProcChip = nullptr;
         targetService().masterProcChipTargetHandle(l_pMasterProcChip);
-        testHbSbeDeconfig.verifyDeconfiguration(l_pMasterProcChip);
+        const auto scratchRegs = UTIL::assertGetToplevelTarget()->getAttrAsStdArr<ATTR_MASTER_MBOX_SCRATCH>();
+        testHbSbeDeconfig.verifyDeconfiguration(l_pMasterProcChip, scratchRegs);
 
         } while (0);
 

@@ -61,6 +61,7 @@
 
 // HWAS
 #include    <hwas/common/hwas.H>
+#include    <hwas/hwasPlat.H>
 
 // fapi2 support
 #include <fapi2.H>
@@ -379,6 +380,8 @@ void check_scratch_regs_vs_attrs( IStepError & io_StepError )
     uint32_t l_ipl_phase = 0;
     const auto l_scratchRegs =
             l_sys->getAttrAsStdArr<ATTR_MASTER_MBOX_SCRATCH>();
+    const uint32_t SCRATCH1_MASK  = 0x40000000;
+    const uint32_t SCRATCH2_MASK  = 0x20000000;
     const uint32_t SCRATCH4_MASK  = 0x08000000;
     const uint32_t SCRATCH5_MASK  = 0x04000000;
     const uint32_t SCRATCH6_MASK  = 0x02000000;
@@ -400,13 +403,30 @@ void check_scratch_regs_vs_attrs( IStepError & io_StepError )
         break;
     }
 
-    // @todo RTC 258427 Follow-up on scratch1 and scratch2 reg checks in istep 7.5
     // --------------------------------------------------------
     // Scratch1 (CFAM 2838, SCOM 0x50038) - FW functional Cores
-    // --------------------------------------------------------
     // ---------------------------------------------------------------------
     // Scratch2 (CFAM 2839, SCOM 0x50039) – FW functional Targets (non core)
     // ---------------------------------------------------------------------
+
+    // Verify that de-configuration logic done by SBE matches what HB has
+    // de-configured for boot proc
+    l_err = HWAS::HWASPlatVerification().verifyDeconfiguration(l_mProc,
+                                                               l_sys->getAttrAsStdArr<ATTR_MASTER_MBOX_SCRATCH>());
+
+    if (l_err)
+    {
+        if (l_sys->getAttr<ATTR_SKIP_PG_ENFORCEMENT>() == 0)
+        {
+            TRACFCOMP( g_trac_isteps_trace,
+                       INFO_MRK"check_scratch_regs_vs_attrs: Mismatch in SBE/Hostboot functional state");
+
+            l_reconfigLoop = true;
+            l_reconfigReg |= SCRATCH1_MASK | SCRATCH2_MASK;
+        }
+
+        errlCommit( l_err, HWPF_COMP_ID );
+    }
 
     // ----------------------------------------------------------
     // Scratch3 (CFAM 283A, SCOM 0x5003A) – FW Mode/Control flags

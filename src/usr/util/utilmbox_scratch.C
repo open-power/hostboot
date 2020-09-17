@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -55,14 +55,13 @@ namespace Util
     // ----------------------------------------------
     mutex_t g_mutex = MUTEX_INITIALIZER;
 
-
-    uint32_t readScratchReg(uint64_t i_addr)
+    uint32_t readScratchReg(uint64_t i_addr, TARGETING::Target* const i_target)
     {
         size_t l_size = sizeof(uint64_t);
         uint64_t l_value = 0;
 
         errlHndl_t l_errl =
-          deviceRead(TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL,
+          deviceRead(i_target,
                      &l_value, l_size,
                      DEVICE_SCOM_ADDRESS(i_addr));
 
@@ -74,14 +73,15 @@ namespace Util
         return static_cast<uint32_t>(l_value >> 32);
     }
 
-    void writeScratchReg(uint64_t i_addr, uint32_t i_data)
+    void writeScratchReg(uint64_t i_addr, uint32_t i_data,
+                         TARGETING::Target* const i_target)
     {
         size_t l_size = sizeof(uint64_t);
         uint64_t l_value = static_cast<uint64_t>(i_data);
         l_value <<= 32; //data is in top half of scom reg
 
         errlHndl_t l_errl =
-          deviceWrite(TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL,
+          deviceWrite(i_target,
                      &i_data, l_size,
                      DEVICE_SCOM_ADDRESS(i_addr));
 
@@ -89,6 +89,40 @@ namespace Util
         {
             errlCommit(l_errl, UTIL_COMP_ID);
         }
+    }
+
+    TARGETING::ATTR_MASTER_MBOX_SCRATCH_typeStdArr readScratchRegs(TARGETING::Target* const i_target)
+    {
+        using namespace INITSERVICE::SPLESS;
+
+        TARGETING::ATTR_MASTER_MBOX_SCRATCH_typeStdArr l_scratch = { };
+
+        const std::array<uint32_t, l_scratch.size()> l_regs
+        {
+            MboxScratch1_t::REG_ADDR,
+            MboxScratch2_t::REG_ADDR,
+            MboxScratch3_t::REG_ADDR,
+            MboxScratch4_t::REG_ADDR,
+            MboxScratch5_t::REG_ADDR,
+            MboxScratch6_t::REG_ADDR,
+            MboxScratch7_t::REG_ADDR,
+            MboxScratch8_t::REG_ADDR,
+            MboxScratch9_t::REG_ADDR,
+            MboxScratch10_t::REG_ADDR,
+            MboxScratch11_t::REG_ADDR,
+            MboxScratch12_t::REG_ADDR,
+            MboxScratch13_t::REG_ADDR,
+            MboxScratch14_t::REG_ADDR,
+            MboxScratch15_t::REG_ADDR,
+            MboxScratch16_t::REG_ADDR,
+        };
+
+        for (size_t i = 0; i < l_scratch.size(); ++i)
+        {
+            l_scratch[i] = Util::readScratchReg(l_regs[i], i_target);
+        }
+
+        return l_scratch;
     }
 
     void writeDebugCommRegs(uint8_t i_usage, uint32_t i_addr, uint32_t i_size)
