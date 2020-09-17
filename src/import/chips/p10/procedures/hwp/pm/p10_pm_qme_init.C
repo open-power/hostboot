@@ -591,16 +591,35 @@ fapi2::ReturnCode init_topo_id_tables(
     using namespace scomt::eq;
 
     FAPI_DBG(">> init_topo_id_tables");
+
+    uint64_t data = 0;
+    fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP> l_chip_target =
+        eq.getParent<fapi2::TARGET_TYPE_PROC_CHIP>();
+
+    fapi2::ATTR_CHIP_EC_FEATURE_HW546482_QME_TOPO_FIR_Type l_qme_fir_bug;
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_HW546482_QME_TOPO_FIR,
+                           l_chip_target,
+                           l_qme_fir_bug),
+             "Error from FAPI_ATTR_GET for attribute ATTR_CHIP_EC_FEATURE_QME_TOPO_FIR");
+
     PREP_QME_SCOM_PBTXTR0(eq);
-    FAPI_TRY(PUT_QME_SCOM_PBTXTR0(eq, topo_scoms[0]));
+    data = topo_scoms[0];
+
+    if ( l_qme_fir_bug )
+    {
+        data |= BIT64(0);
+    }
+
+    FAPI_TRY(PUT_QME_SCOM_PBTXTR0(eq, data));
     PREP_QME_SCOM_PBTXTR1(eq);
     FAPI_TRY(PUT_QME_SCOM_PBTXTR1(eq, topo_scoms[1]));
     PREP_QME_SCOM_PBTXTR2(eq);
     FAPI_TRY(PUT_QME_SCOM_PBTXTR2(eq, topo_scoms[2]));
     PREP_QME_SCOM_PBTXTR3(eq);
     FAPI_TRY(PUT_QME_SCOM_PBTXTR3(eq, topo_scoms[3]));
-    FAPI_DBG("<< init_topo_id_tables");
+
 fapi_try_exit:
+    FAPI_DBG("<< init_topo_id_tables");
     return fapi2::current_err;
 }
 

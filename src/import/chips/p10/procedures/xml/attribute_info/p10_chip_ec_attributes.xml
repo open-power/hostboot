@@ -23,6 +23,22 @@
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
 
+<!-- This is an automatically generated prolog.                             -->
+<!--                                                                        -->
+<!-- $Source: chips/p10/procedures/xml/attribute_info/p10_chip_ec_attributes.xml $ -->
+<!--                                                                        -->
+<!-- IBM CONFIDENTIAL                                                       -->
+<!--                                                                        -->
+<!-- EKB Project                                                            -->
+<!--                                                                        -->
+<!-- [+] International Business Machines Corp.                              -->
+<!--                                                                        -->
+<!--                                                                        -->
+<!-- The source code for this program is not published or otherwise         -->
+<!-- divested of its trade secrets, irrespective of what has been           -->
+<!-- deposited with the U.S. Copyright Office.                              -->
+<!--                                                                        -->
+
 <attributes>
   <!-- ******************************************************************** -->
   <attribute>
@@ -774,6 +790,23 @@
     </chip>
   </chipEcFeature>
   </attribute>
+  <!-- ******************************************************************** -->
+  <attribute>
+   <id>ATTR_CHIP_EC_FEATURE_HW546482_QME_TOPO_FIR</id>
+   <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+   <description>
+     Work-around inadvertant QNE check on Topology entry 0
+   </description>
+   <chipEcFeature>
+     <chip>
+       <name>ENUM_ATTR_NAME_P10</name>
+       <ec>
+         <value>0x10</value>
+         <test>EQUAL</test>
+       </ec>
+     </chip>
+   </chipEcFeature>
+  </attribute>  
   <!-- ******************************************************************** -->
   <attribute>
    <id>ATTR_CHIP_EC_FEATURE_HW530359_XSL_PARITY</id>
