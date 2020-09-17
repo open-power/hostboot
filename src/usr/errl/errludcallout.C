@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -61,6 +61,7 @@ ErrlUserDetailsCallout::ErrlUserDetailsCallout(
     pData = reinterpret_cast<HWAS::callout_ud_t *>
                 (reallocUsrBuf(pDataLength));
     pData->type = HWAS::CLOCK_CALLOUT;
+    pData->flag = HWAS::FLAG_NONE;
     pData->clockType = i_clockType;
     pData->priority = i_priority;
     pData->clkDeconfigState = i_deconfigState;
@@ -93,6 +94,7 @@ ErrlUserDetailsCallout::ErrlUserDetailsCallout(
     pData = reinterpret_cast<HWAS::callout_ud_t *>
                 (reallocUsrBuf(pDataLength));
     pData->type = HWAS::PART_CALLOUT;
+    pData->flag = HWAS::FLAG_NONE;
     pData->partType = i_partType;
     pData->priority = i_priority;
     pData->partDeconfigState = i_deconfigState;
@@ -162,6 +164,7 @@ ErrlUserDetailsCallout::ErrlUserDetailsCallout(
     pData = reinterpret_cast<HWAS::callout_ud_t *>
                 (reallocUsrBuf(pDataLength));
     pData->type = HWAS::HW_CALLOUT;
+    pData->flag = HWAS::FLAG_NONE;
     pData->priority = i_priority;
 #ifndef __HOSTBOOT_RUNTIME
     pData->cpuid = task_getcpuid();
@@ -197,6 +200,7 @@ ErrlUserDetailsCallout::ErrlUserDetailsCallout(
                 (reallocUsrBuf(sizeof(HWAS::callout_ud_t)));
 
     pData->type = HWAS::PROCEDURE_CALLOUT;
+    pData->flag = HWAS::FLAG_NONE;
     pData->procedure = i_procedure;
     pData->priority = i_priority;
 
@@ -222,6 +226,7 @@ ErrlUserDetailsCallout::ErrlUserDetailsCallout(const uint32_t i_sensorID,
                 (reallocUsrBuf(sizeof(HWAS::callout_ud_t)));
 
     pData->type = HWAS::SENSOR_CALLOUT;
+    pData->flag = HWAS::FLAG_NONE;
     pData->priority = i_priority;
     pData->sensorId = i_sensorID;
     pData->sensorType = i_sensorType;
@@ -253,6 +258,7 @@ ErrlUserDetailsCallout::ErrlUserDetailsCallout(
                                                    (reallocUsrBuf(pDataLength));
 
     pData->type = HWAS::I2C_DEVICE_CALLOUT;
+    pData->flag = HWAS::FLAG_NONE;
     pData->engine = i_engine;
     pData->port = i_port;
     pData->address = i_address;

@@ -346,8 +346,9 @@ case HWAS::_type: i_parser.PrintString( "Sensor Type", #_type); break;
                 break;
             }
             default:
-                i_parser.PrintNumber( "Callout type", "UNKNOWN: 0x%X",
-                                            ntohl(pData->type) );
+                // The 'type' is a byte so use ".2X" to just print out a single byte.
+                // Also 'type' is a byte, no need to do ntohl or ntohs ... it is a byte
+                i_parser.PrintNumber( "Callout type", "UNKNOWN: 0x%.2X", pData->type);
                 break;
         } // switch type
 
@@ -372,12 +373,14 @@ case HWAS::_type: i_parser.PrintString( "Priority", #_type); break;
         switch (pData->flag)
         {
 #define case_FLAG(_type) \
-            case HWAS::_type: i_parser.PrintString( "Flag", #_type); break;
-                case_FLAG(FLAG_LINK_DOWN)
-                case(HWAS::FLAG_NONE): break; //do not print anything
-                default:
-                      i_parser.PrintNumber( "Flag", "UNKNOWN: 0x%X",
-                                            ntohl(pData->flag) );
+case HWAS::_type: i_parser.PrintString( "Flag", #_type); break;
+            case_FLAG(FLAG_LINK_DOWN)
+            case HWAS::FLAG_NONE: break;
+        default:
+            // The flag is a byte so use ".2X" to just print out a single byte.
+            // Also flag is a byte, no need to do ntohl or ntohs ... it is a byte
+            i_parser.PrintNumber( "Flag", "UNKNOWN: 0x%.2X", pData->flag);
+            break;
         } // switch partType
     } // parse
 
