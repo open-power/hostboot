@@ -81,25 +81,22 @@ namespace Prdr
                 // entire Hostboot image and put in a special
                 // location on FSP /nfs/test/pnor/ mount.
 
+                // Add the extention to the file name.
                 const char * ext = ".prf";
 
-                const size_t sz_file     = strlen( i_file );
-                const size_t sz_ext      = strlen( ext );
-                const size_t sz_filePath = sz_file + sz_ext;
+                char fileName[ strlen(i_file) + strlen(ext) + 1 ];
 
-                char filePath[sz_filePath + 1];
-                memset( filePath, '\0', sizeof(filePath) );
-
-                strncpy( filePath, i_file, sz_file );
-                strncat( filePath, ext,    sz_ext  );
+                strcpy( fileName, i_file );
+                strcat( fileName, ext    );
 
                 #ifdef __HOSTBOOT_MODULE
 
-                UtilFile l_ruleFile( filePath );
+                // Open file to read chip.
+                UtilFile l_ruleFile( fileName );
                 if ( !l_ruleFile.exists() )
                 {
                     PRDF_ERR( "LoadChipCache::loadChip() failed to find %s",
-                              filePath );
+                              fileName );
                 }
                 else
                 {
@@ -108,36 +105,44 @@ namespace Prdr
 
                 #else // not __HOSTBOOT_MODULE
 
-                // Read the correct directory path for flash.
-                const char * prdPath = "prdf/";
-                const size_t sz_prdPath = strlen( prdPath );
-
-                size_t sz_rootPath = 256;
-                char rootPath[ sz_rootPath + sz_prdPath + sz_filePath + 1 ];
-                memset( rootPath, '\0', sizeof(rootPath) );
-
-                l_errl = UtilReg::read( "fstp/RO_Root", (void *)rootPath,
-                                        sz_rootPath );
+                // Get the length of the root path from the registry. Note that
+                // passing nullptr will simply return the size of the entry.
+                size_t sz_rootPath = 0;
+                l_errl = UtilReg::read( "fstp/RO_Root", nullptr, sz_rootPath );
                 if ( nullptr != l_errl ) break;
 
-                strncat( rootPath, prdPath,  sz_prdPath  );
-                strncat( rootPath, filePath, sz_filePath );
+                // Allocate space for the root path.
+                char rootPath[ sz_rootPath + 1 ]; // add null char just in case
+                memset( rootPath, '\0', sizeof(rootPath) );
 
-                // Read /maint/data/... directory path for any prf file patch.
+                // Get the root path from the registry (no truncation).
+                l_errl = UtilReg::read( "fstp/RO_Root", (void *)rootPath,
+                                        sz_rootPath, false );
+                if ( nullptr != l_errl ) break;
+
+                // Now, build the full file path.
+                const char * prdPath = "prdf/";
+
+                char filePath[ strlen(rootPath) + strlen(prdPath) +
+                               strlen(fileName) + 1 ];
+
+                strcpy( filePath, rootPath );
+                strcat( filePath, prdPath  );
+                strcat( filePath, fileName );
+
+                // A patched version of the file may exist, so check that first.
                 const char * maintPath = "/maint/data/prdf/";
-                const size_t sz_maintPath = strlen( maintPath );
 
-                char patchPath[ sz_maintPath + sz_filePath + 1 ];
-                memset( patchPath, '\0', sizeof(patchPath) );
+                char patchPath[ strlen(maintPath) + strlen(fileName) + 1 ];
 
-                strncpy( patchPath, maintPath, sz_maintPath );
-                strncat( patchPath, filePath,  sz_filePath );
+                strcpy( patchPath, maintPath );
+                strcat( patchPath, fileName  );
 
-                // Open File to read chip.
+                // Open file to read chip.
                 UtilFile l_ruleFile( patchPath );
                 if ( !l_ruleFile.exists() ) // check for patch file.
                 {
-                    l_ruleFile.Open(rootPath, "r");
+                    l_ruleFile.Open(filePath, "r");
                 }
                 else
                 {
