@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -38,12 +38,14 @@
  * @brief Creates a test RC with added Explorer log trace data
  * @param i_ocmb_target - Explorer target
  * @param i_active_log_size - maximum size of active (RAM) data to add
- * @param i_saved_log_size - maximum size of saved (SPI flash) data to add
+ * @param i_saved_log_A_size - maximum size of saved image A (SPI flash) data to add
+ * @param i_saved_log_B_size - maximum size of saved image B (SPI flash) data to add
  * @return ReturnCode with added error log data
  */
 fapi2::ReturnCode exp_error_rc(
                fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_ocmb_target,
                const uint32_t i_active_log_size,
-               const uint32_t i_saved_log_size );
+               const uint32_t i_saved_log_A_size,
+               const uint32_t i_saved_log_B_size);
 
 #endif

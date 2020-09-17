@@ -63,7 +63,7 @@ class errludP_expscom:
         return jsonStr
 
     #Explorer Saved (SPI flash) Log Data
-    def UdParserExpSavedLog(subType, ver, data):
+    def UdParserExpSavedLog(subType, ver, data, image):
         # ***** Memory Layout *****
         # Header
         # 2 bytes  : Ordering byte (0=first packet)
@@ -83,7 +83,10 @@ class errludP_expscom:
         errorDataSize, i= intConcat(data, i, i+2)
         subd['Size Of Data Section']=f'0x{errorDataSize:04x}'
 
-        d['Explorer Saved (SPI flash) Log Data']=subd
+        if (image == "A")
+            d['Explorer Saved (SPI flash) Log Data Image A']=subd
+        else:
+            d['Explorer Saved (SPI flash) Log Data Image B']=subd
 
         if errorDataSize <= (len(data) - headerSize):
             d['Error Data']=hexDump(data, i, i+errorDataSize)
@@ -97,10 +100,19 @@ class errludP_expscom:
         jsonStr = json.dumps(d, indent=2)
         return jsonStr
 
+    #Explorer Saved (SPI flash) Log Data Image A
+    def UdParserExpSavedLogA(subType, ver, data):
+        return UdParserExpSavedLog(subType, ver, data, "A")
+
+    #Explorer Saved (SPI flash) Log Data Image B
+    def UdParserExpSavedLogB(subType, ver, data):
+        return UdParserExpSavedLog(subType, ver, data, "B")
+
 #Dictionary with parser functions for each subtype
 #Values are from UserDetailsTypes enum in src/include/usr/expscom/expscom_reasoncodes.H
 UserDetailsTypes = { 1: "UdParserExpActiveLog",
-                     2: "UdParserExpSavedLog" }
+                     2: "UdParserExpSavedLogA",
+                     3: "UdParserExpSavedLogB"}
 
 def parseUDToJson(subType, ver, data):
     args = (subType, ver, data)

@@ -24,6 +24,7 @@
 # IBM_PROLOG_END_TAG
 EXTRAINCDIR += ${ROOTPATH}/src/import
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/ocmb/explorer/procedures/hwp/memory/lib/inband/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/ocmb/explorer/procedures/hwp/memory/lib/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/ocmb/explorer/procedures/hwp/memory/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/ocmb/explorer/common/include/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/imageProcs
@@ -47,3 +48,4 @@ OBJS += exp_fw_log_data.o
 OBJS += errlud_expscom.o
 OBJS += c_str.o
 OBJS += exp_i2c.o
+OBJS += exp_fw_adapter_properties.o

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -107,22 +107,22 @@ public:
 };
 
 /**
- * @class UdParserExpSavedErrorLog
+ * @class UdParserExpSavedErrorLogA
  *
- * Parses user-data sections for Explorer's Saved logs
+ * Parses user-data sections for Explorer's Saved logs for image A side
  */
-class UdParserExpSavedLog : public ERRORLOG::ErrlUserDetailsParser
+class UdParserExpSavedLogA : public ERRORLOG::ErrlUserDetailsParser
 {
 public:
     /**
      *  @brief Constructor
      */
-    UdParserExpSavedLog() {}
+    UdParserExpSavedLogA() {}
 
     /**
      *  @brief Destructor
      */
-    virtual ~UdParserExpSavedLog() {}
+    virtual ~UdParserExpSavedLogA() {}
 
     /**
      *  @brief Parses string user detail data from an error log
@@ -138,7 +138,7 @@ public:
                        const uint32_t i_buflen) const
     {
         explog_section_header_t * pHeader = reinterpret_cast<explog_section_header_t *>(i_pBuffer);
-        i_parser.PrintHeading("Explorer Saved (SPI flash) Log Data");
+        i_parser.PrintHeading("Explorer Saved (SPI flash) Log Data - Image A");
         i_parser.PrintNumber("Order packet", "%d", TO_UINT16(&(pHeader->packet_num)));
         i_parser.PrintNumber("Data starting offset", "0x%.8lX", TO_UINT32(&(pHeader->offset_exp_log)));
         i_parser.PrintNumber("Size of data section", "0x%.4lX", TO_UINT16(&(pHeader->error_data_size)));
@@ -155,12 +155,67 @@ public:
             i_parser.PrintNumber("Expected data size", "0x%.4lX", i_buflen - sizeof(explog_section_header_t));
             i_parser.PrintHexDump(i_pBuffer, i_buflen);
         }
-
     }
 
     // Disabled
-    UdParserExpSavedLog(const UdParserExpSavedLog&) = delete;
-    UdParserExpSavedLog & operator=(const UdParserExpSavedLog&) = delete;
+    UdParserExpSavedLogA(const UdParserExpSavedLogA&) = delete;
+    UdParserExpSavedLogA & operator=(const UdParserExpSavedLogA&) = delete;
+};
+
+/**
+ * @class UdParserExpSavedErrorLogB
+ *
+ * Parses user-data sections for Explorer's Saved logs for image B side
+ */
+class UdParserExpSavedLogB : public ERRORLOG::ErrlUserDetailsParser
+{
+public:
+    /**
+     *  @brief Constructor
+     */
+    UdParserExpSavedLogB() {}
+
+    /**
+     *  @brief Destructor
+     */
+    virtual ~UdParserExpSavedLogB() {}
+
+    /**
+     *  @brief Parses string user detail data from an error log
+     *
+     *  @param  i_version Version of the data
+     *  @param  i_parse   ErrlUsrParser object for outputting information
+     *  @param  i_pBuffer Pointer to buffer containing detail data
+     *  @param  i_buflen  Length of the buffer
+     */
+    virtual void parse(errlver_t i_version,
+                       ErrlUsrParser & i_parser,
+                       void * i_pBuffer,
+                       const uint32_t i_buflen) const
+    {
+        explog_section_header_t * pHeader = reinterpret_cast<explog_section_header_t *>(i_pBuffer);
+        i_parser.PrintHeading("Explorer Saved (SPI flash) Log Data - Image B");
+        i_parser.PrintNumber("Order packet", "%d", TO_UINT16(&(pHeader->packet_num)));
+        i_parser.PrintNumber("Data starting offset", "0x%.8lX", TO_UINT32(&(pHeader->offset_exp_log)));
+        i_parser.PrintNumber("Size of data section", "0x%.4lX", TO_UINT16(&(pHeader->error_data_size)));
+        i_parser.PrintBlank();
+        uint16_t errorDataSize = TO_UINT16(&pHeader->error_data_size);
+        if (errorDataSize <= (i_buflen - sizeof(explog_section_header_t)))
+        {
+            char * l_trace_error_data = static_cast<char*>(i_pBuffer) + sizeof(explog_section_header_t);
+            i_parser.PrintHexDump(l_trace_error_data, errorDataSize);
+        }
+        else
+        {
+            i_parser.PrintHeading("ERROR DATA MISSING -- printing entire section in hex");
+            i_parser.PrintNumber("Expected data size", "0x%.4lX", i_buflen - sizeof(explog_section_header_t));
+            i_parser.PrintHexDump(i_pBuffer, i_buflen);
+        }
+    }
+
+    // Disabled
+    UdParserExpSavedLogB(const UdParserExpSavedLogB&) = delete;
+    UdParserExpSavedLogB & operator=(const UdParserExpSavedLogB&) = delete;
 };
 
 } // end EXPSCOM namespace

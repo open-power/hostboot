@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -30,7 +30,8 @@
 #include <fapi2.H>
 #include <fapi2/plat_hwp_invoker.H>    // FAPI_INVOKE_HWP
 #include <errl/errlmanager.H>
-#include "../errlud_expscom.H" // HB error log side
+#include <expscom/expscom_errlog.H>
+
 
 
 fapi2::ReturnCode get_scom(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
@@ -84,10 +85,17 @@ uint32_t expErrorLogHb()
             }
 
             numTests++;
-            logAdded = EXPSCOM::expAddLog(EXPSCOM::SAVED_LOG, l_ocmb, l_err);
+            logAdded = EXPSCOM::expAddLog(EXPSCOM::SAVED_LOG_A, l_ocmb, l_err);
             if (!logAdded)
             {
-                TS_FAIL("expErrorLogHb: No SAVED explorer logs added to 0x%04X", l_err->plid());
+                TS_FAIL("expErrorLogHb: No SAVED image A explorer logs added to 0x%04X", l_err->plid());
+                numFails++;
+            }
+            numTests++;
+            logAdded = EXPSCOM::expAddLog(EXPSCOM::SAVED_LOG_B, l_ocmb, l_err);
+            if (!logAdded)
+            {
+                TS_FAIL("expErrorLogHb: No SAVED image B explorer logs added to 0x%04X", l_err->plid());
                 numFails++;
             }
             errlCommit(l_err, CXXTEST_COMP_ID);
@@ -135,8 +143,8 @@ uint32_t expErrorLogRc()
         fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP> fapi2_ocmbTarget(l_ocmb);
         // This procedure creates an RC error and then adds Explorer log data
         // to that error
-        // (0x500 bytes of ACTIVE log data, 0x450 bytes of SAVED log data)
-        FAPI_INVOKE_HWP(l_errl, exp_error_rc, fapi2_ocmbTarget, 0x500, 0x450);
+        // (0x500 bytes of ACTIVE log data, 0x450 bytes of SAVED log data (images A & B))
+        FAPI_INVOKE_HWP(l_errl, exp_error_rc, fapi2_ocmbTarget, 0x500, 0x450, 0x450);
         if(l_errl != nullptr)
         {
             // Commit this error log so it can be examined for Explorer log data

@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/expaccess/test/rcExpLog.C $                           */
+/* $Source: src/include/usr/expscom/expscom_errlog.H $                    */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2020                             */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,36 +22,47 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-/**
- *  @file rcExpLog.C
- *  @brief Call fapi2::ReturnCode functions for explorer logs
+/*
+ * @file expscom_errlog.H
+ * @brief Explorer log gathering for hostboot side
  */
-#include <cxxtest/TestSuite.H>
-#include <fapi2.H>
-#include <plat_hwp_invoker.H>
-#include <hwp_error_info.H>
-#include <hwp_ffdc_classes.H>
+#ifndef __EXPSCOM_ERRLOG_H
+#define __EXPSCOM_ERRLOG_H
 
-#include <rcExpLog.H>
+//  targeting support
+#include    <targeting/common/commontargeting.H>
 
-fapi2::ReturnCode exp_error_rc(
-    fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_ocmb_target,
-    const uint32_t i_active_log_size,
-    const uint32_t i_saved_log_A_size,
-    const uint32_t i_saved_log_B_size)
+// errl handle
+#include <errl/errlentry.H>
+
+namespace EXPSCOM
 {
-    FAPI_INF("Enter exp_error_rc (active %d, savedA %d, savedB %d)...",
-      i_active_log_size, i_saved_log_A_size, i_saved_log_B_size);
+/**
+ * @brief Enum for what kind of Explorer log
+ */
+enum exp_log_type : uint8_t
+{
+    ACTIVE_LOG  = 1, // RAM error section
+    SAVED_LOG_A = 2, // SPI flash error section (image A)
+    SAVED_LOG_B = 3, // SPI flash error section (image B)
+    CURRENT_SAVED_LOG = 4, // SPI flash error section (current image running)
+    NONCURRENT_SAVED_LOG = 5, // SPI flash error section (non-current image running)
+};
 
-    FAPI_ASSERT(0, fapi2::COLLECT_EXPLORER_ERROR()
-                   .set_OCMB_CHIP_TARGET(i_ocmb_target)
-                   .set_EXP_ACTIVE_LOG_SIZE(i_active_log_size)
-                   .set_EXP_SAVED_IMAGEA_LOG_SIZE(i_saved_log_A_size)
-                   .set_EXP_SAVED_IMAGEB_LOG_SIZE(i_saved_log_B_size),
-                   "Testcase exp_error_rc assert");
-
-fapi_try_exit:
-
-    FAPI_INF("Exiting exp_error_rc...");
-    return fapi2::current_err;
+/**
+ * @brief Adds Explorer log data to platform log
+ *        Grabs explorer error log based on type and then breaks that data
+ *        into smaller user-data sections adding them to the platform log.
+ *        Note: First section will be the smallest and contain the most recent
+ *        trace data.
+ * @param i_type - what kind of explorer error log to add
+ * @param i_ocmb - Explorer target
+ * @param io_errl - Platform error log to add logs into
+ * @return true if explorer error data added, else false
+ */
+bool expAddLog( const exp_log_type i_type,
+                TARGETING::Target * i_ocmb,
+                errlHndl_t & io_errl );
 }
+
+#endif

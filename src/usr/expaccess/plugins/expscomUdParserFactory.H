@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -43,8 +43,10 @@ namespace EXPSCOM
                 registerParser<UdParserExpActiveLog>
                   (EXPSCOM_UDT_ACTIVE_LOG);
 
-                registerParser<UdParserExpSavedLog>
-                  (EXPSCOM_UDT_SAVED_LOG);
+                registerParser<UdParserExpSavedLogA>
+                  (EXPSCOM_UDT_SAVED_LOG_A);
+                registerParser<UdParserExpSavedLogB>
+                  (EXPSCOM_UDT_SAVED_LOG_B);
             }
 
         private:

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -47,7 +47,8 @@ namespace EXPSCOM
     enum UserDetailsTypes
     {
         EXPSCOM_UDT_ACTIVE_LOG     = 0x01,
-        EXPSCOM_UDT_SAVED_LOG      = 0x02,
+        EXPSCOM_UDT_SAVED_LOG_A    = 0x02,
+        EXPSCOM_UDT_SAVED_LOG_B    = 0x03,
     };
 };
 

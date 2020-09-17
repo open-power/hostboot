@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -31,7 +31,6 @@
  *  @brief Utility functions to add Explorer logs to your hostboot error
  */
 #include <stdint.h>
-
 #include <errl/errluserdetails.H>
 
 //  targeting support
@@ -40,31 +39,15 @@
 
 namespace EXPSCOM
 {
+
 /**
- * @brief Enum for what kind of Explorer log
+ *  @brief Distinguish image location of the saved log
  */
-enum exp_log_type : uint8_t
+enum saved_exp_image : uint8_t
 {
-    ACTIVE_LOG = 1, // RAM error section
-    SAVED_LOG  = 2  // SPI flash error section
+    SAVED_IMAGE_A = 0,
+    SAVED_IMAGE_B = 1,
 };
-
-/**
- * @brief Adds Explorer log data to platform log
- *        Grabs explorer error log based on type and then breaks that data
- *        into smaller user-data sections adding them to the platform log.
- *        Note: First section will be the smallest and contain the most recent
- *        trace data.  Probably contains most relevent traces, so try to make
- *        always fit in the error log.
- * @param i_type - what kind of explorer error log to add
- * @param i_ocmb - Explorer target
- * @param io_errl - Platform error log to add logs into
- * @return true if explorer error data added, else false
- */
-bool expAddLog( const exp_log_type i_type,
-                TARGETING::Target * i_ocmb,
-                errlHndl_t & io_errl );
-
 
 
 /**
@@ -86,7 +69,7 @@ struct explog_section_header_t
 // Break large explorer log data into smaller error sections
 // to avoid dropping important debug data.
 // Make most important first section smaller so this won't get dropped
-const uint16_t FIRST_EXPLORER_DATA_SECTION_SIZE     = 0x0100;
+const uint16_t FIRST_EXPLORER_DATA_SECTION_SIZE     = 0x0150;
 const uint16_t FOLLOWING_EXPLORER_DATA_SECTION_SIZE = 0x0200;
 
 
@@ -141,7 +124,8 @@ class ExpscomSavedLogUD : public ERRORLOG::ErrlUserDetails
      *  @param i_data_portion Pointer to portion of Saved error data
      *
      */
-    ExpscomSavedLogUD( const explog_section_header_t & i_header_info,
+    ExpscomSavedLogUD( const saved_exp_image i_image,
+                       const explog_section_header_t & i_header_info,
                        const uint8_t * i_data_portion );
 
     /**
