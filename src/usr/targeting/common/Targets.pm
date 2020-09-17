@@ -701,7 +701,7 @@ sub buildHierarchy
     {
         my $val=$settingptr->{$key}->{property}->
                        {$prop}->{value};
-        if ($val ne "")
+        if ((ref ($val) ne "HASH") and ($val ne ""))
         {
             $self->setAttribute($key, $prop, $val);
         }
