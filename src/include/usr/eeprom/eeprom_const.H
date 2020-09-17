@@ -155,8 +155,9 @@ union eepromRecordHeader
             } PACKED spiAccess;
         } PACKED eepromAccess;
         uint32_t cache_copy_size;   // Size of data saved in cache (in KB)
-        uint32_t internal_offset;   // offset from start of EECACHE section where cached
-                                    // data exists
+        uint32_t internal_offset;   // Offset from start of EECACHE section where cached data exists
+                                    // This variable is used in src/build/simics/eecache-gen.py to
+                                    // create empty header entries for a prebuilt EECACHE
         uint8_t  cached_copy_valid : 1,   // This bit is set when we think the contents of the
                                           // cache is valid.
         master_eeprom              : 1,   // This bit marks this record as the master one (i.e. look at this one for change)

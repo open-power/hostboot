@@ -39,7 +39,6 @@ import os
 import cli
 import struct
 import sys
-import struct
 
 ###########################################################################
 # version 1 header record
@@ -80,6 +79,36 @@ def write_i2c_eecache_record(f, huid, port, engine, devAddr, mux, size, offset, 
     f.write(struct.pack('>I', offset));
     f.write(struct.pack('>B', valid));
     return
+
+# Write an empty eecache header record to opened filehandle f
+# This has been verified to work with EECACHE files that use version 2 header records
+def write_empty_eecache_record(f):
+    '''
+    In the HB code, internal_offset of an eepromRecordHeader struct is set to
+    UNSET_INTERNAL_OFFSET_VALUE = 0xFFFFFFFF to mark that an entry does not have corresponding
+    cache data yet.
+    See src/include/usr/eeprom/eeprom_const.H for eepromRecordHeader struct and internal_offset
+    location in struct.
+    To create an empty entry, we'll set all of the bytes of the struct to zero, except for the
+    internal_offset value.
+    '''
+    writeEmptyBytes(f, 13)
+    f.write(struct.pack('>I', 0xFFFFFFFF))
+    writeEmptyBytes(f, 1)
+
+# Write n padding bytes to opened filehandle f
+def writeEmptyBytes(f, n):
+    # Write to opened filehandle
+    for i in range(n):
+        # Single byte write
+        # f.write(struct.pack('>B', 0x00))
+        f.write(struct.pack('x'))
+
+# Append n empty kilobytes to file with name file_name
+def writeEmptyKilobytes(file_name, n):
+    n *= 1024 # KB to bytes
+    with open(file_name, 'ab') as f:
+        writeEmptyBytes(f, n)
 
 ###########################################################################
 ##
@@ -129,7 +158,9 @@ def hb_eecache_setup(file_name, version, verbose):
             f.write(struct.pack('>i', 0x3A70D));
             # eepromRecordHeader for MVPD
             # valid arg.: 0xC0 means valid and master record
-            write_spi_eecache_record(f, 0x50000, 0x02, 0x00C0, 64, 0x70D, 0xC0);
+            ### @TODO RTC 258425: Reroute SPI MVPD accesses back through engine 2
+            ### Change 0x03 to 0x02 for first record only:
+            write_spi_eecache_record(f, 0x50000, 0x03, 0x00C0, 64, 0x70D, 0xC0);
             # for DIMM port 0
             write_i2c_eecache_record(f, 0x50000, 0, 3, 0xA0, 0xFF, 4, 0x1070D, 0xC0);
             # for DIMM port 1
@@ -138,12 +169,12 @@ def hb_eecache_setup(file_name, version, verbose):
             # valid arg.: 0x80 means is valid but not master record
             write_spi_eecache_record(f, 0x50000, 0x03, 0x0100, 160, 0x1270D, 0x80);
 
-            # Note: The max eeprom counts come from src/include/usr/eeprom/eeprom_const.H
+            # Note: The max eeprom count comes from src/include/usr/eeprom/eeprom_const.H
             # For version 2, it is currently a max count of 100
             # Given 4 records already filled out above, 96 more record headers
             # should be filled out as empty
             for _ in range(96):
-                write_i2c_eecache_record(f, 0, 0, 0, 0, 0, 0, 0xFFFFFFFF, 0);
+                write_empty_eecache_record(f)
         else:
             # Non-supported version argument
             sys.exit("Error: Non-supported Version Value passed into hb_eecache_setup(...)")
@@ -161,6 +192,10 @@ def hb_eecache_setup(file_name, version, verbose):
         # Probably this file will be deleted once we write to BMC
         with open(file_name, 'ab') as f:
             f.write(read_buf)
+    else:
+        # 64 kb to write coming from header entry
+        # write_spi_eecache_record(f, 0x50000, 0x03, 0x00C0, 64, ...)
+        writeEmptyKilobytes(file_name, 64)
 
     # now add 4K DDIMM VPD port 0
     ret = cli.run_command("get-dimm-seeprom 0 0 3 0") # reading DDIMM VPD port 0
@@ -173,6 +208,10 @@ def hb_eecache_setup(file_name, version, verbose):
         # Probably this file will be deleted once we write to BMC
         with open(file_name, 'ab') as f:
             f.write(read_buf)
+    else:
+        # 4 kb to write coming from header entry
+        # write_i2c_eecache_record(f, 0x50000, 0, 3, 0xA0, 0xFF, 4, ...)
+        writeEmptyKilobytes(file_name, 4)
 
     # now add 4K DDIMM VPD port 1
     ret = cli.run_command("get-dimm-seeprom 0 0 3 1") # reading DDIMM VPD port 1
@@ -185,6 +224,10 @@ def hb_eecache_setup(file_name, version, verbose):
         # Probably this file will be deleted once we write to BMC
         with open(file_name, 'ab') as f:
             f.write(read_buf)
+    else:
+        # 4 kb to write coming from header entry
+        # write_i2c_eecache_record(f, 0x50000, 1, 3, 0xA0, 0xFF, 4, ...)
+        writeEmptyKilobytes(file_name, 4)
 
     # add 160K WOF record for processor 0
     ret = cli.run_command("get-seeprom 0 0 3") # get ref to seeprom that has WOF for proc 0
@@ -194,6 +237,10 @@ def hb_eecache_setup(file_name, version, verbose):
         read_buf = image.iface.image.get(0x40000, 0x28000)
         with open(file_name, 'ab') as f:
             f.write(read_buf)
+    else:
+        # 160 kb to write coming from header entry
+        # write_spi_eecache_record(f, 0x50000, 0x03, 0x0100, 160, ...);
+        writeEmptyKilobytes(file_name, 160)
 
     ##################################### Populate Proc 1 Records ####################################
     # now add 64K mvpd record for processor 1 (0x50001)
