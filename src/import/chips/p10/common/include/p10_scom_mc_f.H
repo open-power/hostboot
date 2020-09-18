@@ -129,6 +129,18 @@ static const uint32_t TIMEOUT_REG_INT_TIMEOUT_LEN = 2;
 //<< [TIMEOUT_REG]
 // mc/reg00015.H
 
+//>> [SCOMFIR_MCFGP1E]
+static const uint64_t SCOMFIR_MCFGP1E = 0x0c010c17ull;
+
+static const uint32_t SCOMFIR_MCFGP1E_VALID = 0;
+static const uint32_t SCOMFIR_MCFGP1E_EXTEND_TO_END_OF_RANGE = 1;
+static const uint32_t SCOMFIR_MCFGP1E_LOWER_ADDRESS = 2;
+static const uint32_t SCOMFIR_MCFGP1E_LOWER_ADDRESS_LEN = 19;
+static const uint32_t SCOMFIR_MCFGP1E_UPPER_ADDRESS = 21;
+static const uint32_t SCOMFIR_MCFGP1E_UPPER_ADDRESS_LEN = 19;
+//<< [SCOMFIR_MCFGP1E]
+// mc/reg00015.H
+
 //>>THE END<<
 
 #ifndef __PPE_HCODE__

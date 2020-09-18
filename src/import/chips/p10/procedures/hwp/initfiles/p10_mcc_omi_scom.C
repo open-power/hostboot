@@ -81,6 +81,8 @@ fapi2::ReturnCode p10_mcc_omi_scom(const fapi2::Target<fapi2::TARGET_TYPE_MCC>& 
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_HW548786, TGT2, l_TGT2_ATTR_CHIP_EC_FEATURE_HW548786));
         fapi2::ATTR_SYS_DISABLE_HWFM_Type l_TGT1_ATTR_SYS_DISABLE_HWFM;
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SYS_DISABLE_HWFM, TGT1, l_TGT1_ATTR_SYS_DISABLE_HWFM));
+        fapi2::ATTR_PROC_MEMORY_ENCRYPTION_ENABLED_Type l_TGT2_ATTR_PROC_MEMORY_ENCRYPTION_ENABLED;
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_MEMORY_ENCRYPTION_ENABLED, TGT2, l_TGT2_ATTR_PROC_MEMORY_ENCRYPTION_ENABLED));
         fapi2::buffer<uint64_t> l_scom_buffer;
         {
             FAPI_TRY(fapi2::getScom( TGT0, 0xc010c22ull, l_scom_buffer ));
@@ -251,6 +253,40 @@ fapi2::ReturnCode p10_mcc_omi_scom(const fapi2::Target<fapi2::TARGET_TYPE_MCC>& 
             l_scom_buffer.insert<19, 7, 57, uint64_t>(literal_0b0110000 );
             l_scom_buffer.insert<27, 7, 57, uint64_t>(literal_0b0100000 );
             FAPI_TRY(fapi2::putScom(TGT0, 0xc010f4dull, l_scom_buffer));
+        }
+        {
+            FAPI_TRY(fapi2::getScom( TGT0, 0xc010f50ull, l_scom_buffer ));
+
+            if ((l_TGT2_ATTR_PROC_MEMORY_ENCRYPTION_ENABLED != fapi2::ENUM_ATTR_PROC_MEMORY_ENCRYPTION_ENABLED_DISABLED))
+            {
+                constexpr auto l_MCP_CHAN0_CRYPTO_ENCRYPT_CRYPTO_ENABLE_ON = 0x1;
+                l_scom_buffer.insert<4, 1, 63, uint64_t>(l_MCP_CHAN0_CRYPTO_ENCRYPT_CRYPTO_ENABLE_ON );
+            }
+
+            if ((l_TGT2_ATTR_PROC_MEMORY_ENCRYPTION_ENABLED == fapi2::ENUM_ATTR_PROC_MEMORY_ENCRYPTION_ENABLED_CTR))
+            {
+                constexpr auto l_MCP_CHAN0_CRYPTO_ENCRYPT_CRYPTO_SELECT_ON = 0x1;
+                l_scom_buffer.insert<5, 1, 63, uint64_t>(l_MCP_CHAN0_CRYPTO_ENCRYPT_CRYPTO_SELECT_ON );
+            }
+
+            FAPI_TRY(fapi2::putScom(TGT0, 0xc010f50ull, l_scom_buffer));
+        }
+        {
+            FAPI_TRY(fapi2::getScom( TGT0, 0xc010f58ull, l_scom_buffer ));
+
+            if ((l_TGT2_ATTR_PROC_MEMORY_ENCRYPTION_ENABLED != fapi2::ENUM_ATTR_PROC_MEMORY_ENCRYPTION_ENABLED_DISABLED))
+            {
+                constexpr auto l_MCP_CHAN0_CRYPTO_DECRYPT_CRYPTO_ENABLE_ON = 0x1;
+                l_scom_buffer.insert<4, 1, 63, uint64_t>(l_MCP_CHAN0_CRYPTO_DECRYPT_CRYPTO_ENABLE_ON );
+            }
+
+            if ((l_TGT2_ATTR_PROC_MEMORY_ENCRYPTION_ENABLED == fapi2::ENUM_ATTR_PROC_MEMORY_ENCRYPTION_ENABLED_CTR))
+            {
+                constexpr auto l_MCP_CHAN0_CRYPTO_DECRYPT_CRYPTO_SELECT_ON = 0x1;
+                l_scom_buffer.insert<5, 1, 63, uint64_t>(l_MCP_CHAN0_CRYPTO_DECRYPT_CRYPTO_SELECT_ON );
+            }
+
+            FAPI_TRY(fapi2::putScom(TGT0, 0xc010f58ull, l_scom_buffer));
         }
 
     };

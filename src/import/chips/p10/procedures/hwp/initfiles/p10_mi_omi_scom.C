@@ -31,6 +31,8 @@ using namespace fapi2;
 
 constexpr uint64_t literal_0b1 = 0b1;
 constexpr uint64_t literal_0b01111 = 0b01111;
+constexpr uint64_t literal_0b0000000000000000000 = 0b0000000000000000000;
+constexpr uint64_t literal_0b1111111111111111111 = 0b1111111111111111111;
 constexpr uint64_t literal_0 = 0;
 constexpr uint64_t literal_0xFFFF = 0xFFFF;
 constexpr uint64_t literal_112 = 112;
@@ -38,11 +40,17 @@ constexpr uint64_t literal_0x7 = 0x7;
 constexpr uint64_t literal_2 = 2;
 
 fapi2::ReturnCode p10_mi_omi_scom(const fapi2::Target<fapi2::TARGET_TYPE_MI>& TGT0,
-                                  const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>& TGT1)
+                                  const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>& TGT1, const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& TGT2)
 {
     {
+        fapi2::ATTR_EC_Type   l_chip_ec;
+        fapi2::ATTR_NAME_Type l_chip_id;
+        FAPI_TRY(FAPI_ATTR_GET_PRIVILEGED(fapi2::ATTR_NAME, TGT2, l_chip_id));
+        FAPI_TRY(FAPI_ATTR_GET_PRIVILEGED(fapi2::ATTR_EC, TGT2, l_chip_ec));
         fapi2::ATTR_MEM_MIRROR_PLACEMENT_POLICY_Type l_TGT1_ATTR_MEM_MIRROR_PLACEMENT_POLICY;
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MEM_MIRROR_PLACEMENT_POLICY, TGT1, l_TGT1_ATTR_MEM_MIRROR_PLACEMENT_POLICY));
+        fapi2::ATTR_PROC_MEMORY_ENCRYPTION_ENABLED_Type l_TGT2_ATTR_PROC_MEMORY_ENCRYPTION_ENABLED;
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_MEMORY_ENCRYPTION_ENABLED, TGT2, l_TGT2_ATTR_PROC_MEMORY_ENCRYPTION_ENABLED));
         fapi2::ATTR_SYS_DISABLE_MCU_TIMEOUTS_Type l_TGT1_ATTR_SYS_DISABLE_MCU_TIMEOUTS;
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SYS_DISABLE_MCU_TIMEOUTS, TGT1, l_TGT1_ATTR_SYS_DISABLE_MCU_TIMEOUTS));
         fapi2::buffer<uint64_t> l_scom_buffer;
@@ -80,6 +88,60 @@ fapi2::ReturnCode p10_mi_omi_scom(const fapi2::Target<fapi2::TARGET_TYPE_MI>& TG
             constexpr auto l_MCP_PBI01_SCOMFIR_MCMODE1_EN_EPF_CL_LIMIT_ON = 0x1;
             l_scom_buffer.insert<9, 1, 63, uint64_t>(l_MCP_PBI01_SCOMFIR_MCMODE1_EN_EPF_CL_LIMIT_ON );
             FAPI_TRY(fapi2::putScom(TGT0, 0xc010c12ull, l_scom_buffer));
+        }
+        {
+            FAPI_TRY(fapi2::getScom( TGT0, 0xc010c16ull, l_scom_buffer ));
+
+            if ((l_TGT2_ATTR_PROC_MEMORY_ENCRYPTION_ENABLED != fapi2::ENUM_ATTR_PROC_MEMORY_ENCRYPTION_ENABLED_DISABLED))
+            {
+                constexpr auto l_MCP_PBI01_SCOMFIR_MCFGP0E_ENC_VALID_ON = 0x1;
+                l_scom_buffer.insert<0, 1, 63, uint64_t>(l_MCP_PBI01_SCOMFIR_MCFGP0E_ENC_VALID_ON );
+            }
+
+            if ((l_TGT2_ATTR_PROC_MEMORY_ENCRYPTION_ENABLED != fapi2::ENUM_ATTR_PROC_MEMORY_ENCRYPTION_ENABLED_DISABLED))
+            {
+                constexpr auto l_MCP_PBI01_SCOMFIR_MCFGP0E_ENC_EXTEND_TO_END_OF_RANGE_ON = 0x1;
+                l_scom_buffer.insert<1, 1, 63, uint64_t>(l_MCP_PBI01_SCOMFIR_MCFGP0E_ENC_EXTEND_TO_END_OF_RANGE_ON );
+            }
+
+            if ((l_TGT2_ATTR_PROC_MEMORY_ENCRYPTION_ENABLED != fapi2::ENUM_ATTR_PROC_MEMORY_ENCRYPTION_ENABLED_DISABLED))
+            {
+                l_scom_buffer.insert<2, 19, 45, uint64_t>(literal_0b0000000000000000000 );
+            }
+
+            if ((l_TGT2_ATTR_PROC_MEMORY_ENCRYPTION_ENABLED != fapi2::ENUM_ATTR_PROC_MEMORY_ENCRYPTION_ENABLED_DISABLED))
+            {
+                l_scom_buffer.insert<21, 19, 45, uint64_t>(literal_0b1111111111111111111 );
+            }
+
+            FAPI_TRY(fapi2::putScom(TGT0, 0xc010c16ull, l_scom_buffer));
+        }
+        {
+            FAPI_TRY(fapi2::getScom( TGT0, 0xc010c17ull, l_scom_buffer ));
+
+            if ((l_TGT2_ATTR_PROC_MEMORY_ENCRYPTION_ENABLED != fapi2::ENUM_ATTR_PROC_MEMORY_ENCRYPTION_ENABLED_DISABLED))
+            {
+                constexpr auto l_MCP_PBI01_SCOMFIR_MCFGP1E_ENC_VALID_ON = 0x1;
+                l_scom_buffer.insert<0, 1, 63, uint64_t>(l_MCP_PBI01_SCOMFIR_MCFGP1E_ENC_VALID_ON );
+            }
+
+            if ((l_TGT2_ATTR_PROC_MEMORY_ENCRYPTION_ENABLED != fapi2::ENUM_ATTR_PROC_MEMORY_ENCRYPTION_ENABLED_DISABLED))
+            {
+                constexpr auto l_MCP_PBI01_SCOMFIR_MCFGP1E_ENC_EXTEND_TO_END_OF_RANGE_ON = 0x1;
+                l_scom_buffer.insert<1, 1, 63, uint64_t>(l_MCP_PBI01_SCOMFIR_MCFGP1E_ENC_EXTEND_TO_END_OF_RANGE_ON );
+            }
+
+            if ((l_TGT2_ATTR_PROC_MEMORY_ENCRYPTION_ENABLED != fapi2::ENUM_ATTR_PROC_MEMORY_ENCRYPTION_ENABLED_DISABLED))
+            {
+                l_scom_buffer.insert<2, 19, 45, uint64_t>(literal_0b0000000000000000000 );
+            }
+
+            if ((l_TGT2_ATTR_PROC_MEMORY_ENCRYPTION_ENABLED != fapi2::ENUM_ATTR_PROC_MEMORY_ENCRYPTION_ENABLED_DISABLED))
+            {
+                l_scom_buffer.insert<21, 19, 45, uint64_t>(literal_0b1111111111111111111 );
+            }
+
+            FAPI_TRY(fapi2::putScom(TGT0, 0xc010c17ull, l_scom_buffer));
         }
         {
             FAPI_TRY(fapi2::getScom( TGT0, 0xc010c1bull, l_scom_buffer ));

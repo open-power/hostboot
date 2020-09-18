@@ -220,6 +220,18 @@ static const uint32_t MBA_SCOMFIR_MISCFIRACT1_MISCFIRACT1_FIR_ACTION1_LEN = 12;
 //<< [MBA_SCOMFIR_MISCFIRACT1]
 // mc/reg00014.H
 
+//>> [SCOMFIR_MCFGP0E]
+static const uint64_t SCOMFIR_MCFGP0E = 0x0c010c16ull;
+
+static const uint32_t SCOMFIR_MCFGP0E_VALID = 0;
+static const uint32_t SCOMFIR_MCFGP0E_EXTEND_TO_END_OF_RANGE = 1;
+static const uint32_t SCOMFIR_MCFGP0E_LOWER_ADDRESS = 2;
+static const uint32_t SCOMFIR_MCFGP0E_LOWER_ADDRESS_LEN = 19;
+static const uint32_t SCOMFIR_MCFGP0E_UPPER_ADDRESS = 21;
+static const uint32_t SCOMFIR_MCFGP0E_UPPER_ADDRESS_LEN = 19;
+//<< [SCOMFIR_MCFGP0E]
+// mc/reg00014.H
+
 //>>THE END<<
 
 #ifndef __PPE_HCODE__

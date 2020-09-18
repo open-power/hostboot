@@ -857,6 +857,21 @@
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
+  <id>ATTR_PROC_MEMORY_ENCRYPTION_ENABLED</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>
+    Attribute Indicating if Memory Encryption is enabled and what type
+  </description>
+  <valueType>uint8</valueType>
+  <enum>
+    DISABLED = 0,
+    XTS = 1,
+    CTR = 2
+  </enum>
+  <platInit/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
   <id>ATTR_PROC_SBE_MCS_SETUP_SELECTED_MC</id>
   <targetType>TARGET_TYPE_PROC_CHIP</targetType>
   <description>
