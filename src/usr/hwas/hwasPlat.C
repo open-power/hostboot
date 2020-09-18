@@ -997,6 +997,7 @@ errlHndl_t platPresenceDetect(TargetHandleList &io_targets)
         // TODO RTC: 260058
         // Disable Procs1-3 in non-simulation eBMC enviroment for
         // bringup purposes.
+#ifdef CONFIG_FORCE_SINGLE_CHIP
         if(!Util::isSimicsRunning() &&
            !INITSERVICE::spBaseServicesEnabled())
         {
@@ -1012,6 +1013,7 @@ errlHndl_t platPresenceDetect(TargetHandleList &io_targets)
                 continue;
             }
         }
+#endif
 
         // if CLASS_ENC
         // by definition, hostboot only has 1 node/enclosure, and we're
