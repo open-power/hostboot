@@ -1558,7 +1558,6 @@ errlHndl_t populate_HbRsvMem(uint64_t i_nodeId, bool i_master_node)
                 // PHyp will just dynamically load it at runtime when requested.
                 if (   (   (secIdPair.first == PNOR::RINGOVD)
                         || (secIdPair.first == PNOR::WOFDATA))
-                    && INITSERVICE::spBaseServicesEnabled()
                     && TARGETING::is_phyp_load())
                 {
                     continue;
