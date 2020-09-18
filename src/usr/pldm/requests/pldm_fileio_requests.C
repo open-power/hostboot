@@ -234,8 +234,8 @@ errlHndl_t getLidFileFromOffset(const uint32_t i_fileHandle,
 
     struct pldm_read_write_file_by_type_req l_req
     {
-        // PERM or TEMP will return the same file
-        .file_type = PLDM_FILE_TYPE_LID_PERM,
+        // Currently BMC is hardcoded to use the TEMP side
+        .file_type = PLDM_FILE_TYPE_LID_TEMP,
         .file_handle = i_fileHandle,
         .offset = i_offset,
         .length = 0, // calculated later
