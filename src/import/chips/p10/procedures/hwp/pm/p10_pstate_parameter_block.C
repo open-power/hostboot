@@ -1823,23 +1823,23 @@ fapi2::ReturnCode PlatPmPPB::compute_boot_safe(
                 else
                 {
                     FAPI_INF("VDN boot voltage override not set, using VPD value and correcting for applicable load line setting");
-                    uint32_t l_int_vdn_mv = iv_poundV_raw_data.static_rails.SRVdnVltg;
-                    uint32_t l_idn_ma = (iv_poundV_raw_data.static_rails.SRIdnTdpAcCurr +
-                                         iv_poundV_raw_data.static_rails.SRIdnTdpDcCurr) * 100;
+                    uint32_t l_int_vdn_mv = (uint32_t)(revle16(iv_poundV_raw_data.static_rails.SRVdnVltg));
+                    uint32_t l_idn_ma =(uint32_t)((revle16(iv_poundV_raw_data.static_rails.SRIdnTdpAcCurr) +
+                                         revle16(iv_poundV_raw_data.static_rails.SRIdnTdpDcCurr)) * 10);
                     // Returns revle32
                     uint32_t l_ext_vdn_mv = sysparm_uplift(l_int_vdn_mv,
                             l_idn_ma,
-                            iv_vdn_sysparam.loadline_uohm,
-                            iv_vdn_sysparam.distloss_uohm,
-                            iv_vdn_sysparam.distoffset_uv);
+                            revle32(iv_vdn_sysparam.loadline_uohm),
+                            revle32(iv_vdn_sysparam.distloss_uohm),
+                            revle32(iv_vdn_sysparam.distoffset_uv));
 
                     FAPI_INF("VDN VPD voltage %d mV; Corrected voltage: %d mV; IDN: %d mA; LoadLine: %d uOhm; DistLoss: %d uOhm;  Offst: %d uOhm",
                             l_int_vdn_mv,
                             (l_ext_vdn_mv),
                             l_idn_ma,
-                            iv_vdn_sysparam.loadline_uohm,
-                            iv_vdn_sysparam.distloss_uohm,
-                            iv_vdn_sysparam.distoffset_uv);
+                            revle32(iv_vdn_sysparam.loadline_uohm),
+                            revle32(iv_vdn_sysparam.distloss_uohm),
+                            revle32(iv_vdn_sysparam.distoffset_uv));
 
                     iv_attrs.attr_boot_voltage_mv[VDN]= (l_ext_vdn_mv);
 
@@ -1860,23 +1860,23 @@ fapi2::ReturnCode PlatPmPPB::compute_boot_safe(
                 else
                 {
                     FAPI_INF("VIO boot voltage override not set, using VPD value and correcting for applicable load line setting");
-                    uint32_t l_int_vio_mv = iv_poundV_raw_data.static_rails.SRVioVltg;
-                    uint32_t l_iio_ma = (iv_poundV_raw_data.static_rails.SRIioTdpAcCurr +
-                                         iv_poundV_raw_data.static_rails.SRIioTdpDcCurr) * 100;
+                    uint32_t l_int_vio_mv = (uint32_t)(revle16(iv_poundV_raw_data.static_rails.SRVioVltg));
+                    uint32_t l_iio_ma = (uint32_t)((revle16(iv_poundV_raw_data.static_rails.SRIioTdpAcCurr) +
+                                         revle16(iv_poundV_raw_data.static_rails.SRIioTdpDcCurr)) * 10);
                     // Returns revle32
                     uint32_t l_ext_vio_mv = sysparm_uplift(l_int_vio_mv,
                             l_iio_ma,
-                            iv_vio_sysparam.loadline_uohm,
-                            iv_vio_sysparam.distloss_uohm,
-                            iv_vio_sysparam.distoffset_uv);
+                            revle32(iv_vio_sysparam.loadline_uohm),
+                            revle32(iv_vio_sysparam.distloss_uohm),
+                            revle32(iv_vio_sysparam.distoffset_uv));
 
                     FAPI_INF("VIO VPD voltage %d mV; Corrected voltage: %d mV; IDN: %d mA; LoadLine: %d uOhm; DistLoss: %d uOhm;  Offst: %d uOhm",
                             l_int_vio_mv,
                             (l_ext_vio_mv),
                             l_iio_ma,
-                            iv_vio_sysparam.loadline_uohm,
-                            iv_vio_sysparam.distloss_uohm,
-                            iv_vio_sysparam.distoffset_uv);
+                            revle32(iv_vio_sysparam.loadline_uohm),
+                            revle32(iv_vio_sysparam.distloss_uohm),
+                            revle32(iv_vio_sysparam.distoffset_uv));
 
                     iv_attrs.attr_boot_voltage_mv[VIO]= (l_ext_vio_mv);
                 }
@@ -3747,11 +3747,11 @@ void PlatPmPPB::compute_vpd_pts()
     for (auto p = 0; p < NUM_PV_POINTS; p++)
     {
         uint32_t l_vdd_mv = (iv_operating_points[VPD_PT_SET_BIASED][p].vdd_mv);
-        uint32_t l_idd_ma = (iv_operating_points[VPD_PT_SET_BIASED][p].idd_tdp_dc_10ma) * 100 +
-                             (iv_operating_points[VPD_PT_SET_BIASED][p].idd_tdp_ac_10ma) * 100;
+        uint32_t l_idd_ma = (iv_operating_points[VPD_PT_SET_BIASED][p].idd_tdp_dc_10ma) * 10 +
+                             (iv_operating_points[VPD_PT_SET_BIASED][p].idd_tdp_ac_10ma) * 10;
         uint32_t l_vcs_mv = (iv_operating_points[VPD_PT_SET_BIASED][p].vcs_mv);
-        uint32_t l_ics_ma = (iv_operating_points[VPD_PT_SET_BIASED][p].ics_tdp_dc_10ma) * 100 +
-                             (iv_operating_points[VPD_PT_SET_BIASED][p].ics_tdp_ac_10ma) * 100;
+        uint32_t l_ics_ma = (iv_operating_points[VPD_PT_SET_BIASED][p].ics_tdp_dc_10ma) * 10 +
+                             (iv_operating_points[VPD_PT_SET_BIASED][p].ics_tdp_ac_10ma) * 10;
 
         iv_operating_points[VPD_PT_SET_BIASED_SYSP][p].vdd_mv =
                     sysparm_uplift(l_vdd_mv,
