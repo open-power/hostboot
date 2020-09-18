@@ -58,11 +58,10 @@ fapi2::ReturnCode p10_setup_sbe_config(
 
         l_use_scom = (l_sbe_master_chip == fapi2::ENUM_ATTR_PROC_SBE_MASTER_CHIP_TRUE);
     }
+
     // clear secure access bit if instructed to disable security
-    else
     {
         fapi2::ATTR_SECURITY_MODE_Type l_attr_security_mode;
-        fapi2::buffer<uint32_t> l_cbs_cs_reg;
 
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SECURITY_MODE, FAPI_SYSTEM, l_attr_security_mode),
                  "Error from FAPI_ATTR_GET (ATTR_SECURITY_MODE)");
@@ -72,19 +71,40 @@ fapi2::ReturnCode p10_setup_sbe_config(
             // The Secure Access Bit is only writeable on DD1 chips,
             // so we won't need to put an EC level switch in here.
             FAPI_DBG("Attempting to disable security");
-            FAPI_TRY(fapi2::getCfamRegister(i_target_chip,
-                                            FSXCOMP_FSXLOG_CBS_CS_FSI,
-                                            l_cbs_cs_reg),
-                     "Error reading CBS Control/Status register");
 
-            l_cbs_cs_reg.clearBit<FSXCOMP_FSXLOG_CBS_CS_SECURE_ACCESS_BIT>();
+            if (l_use_scom)
+            {
+                fapi2::buffer<uint64_t> l_cbs_cs;
 
-            FAPI_TRY(fapi2::putCfamRegister(i_target_chip,
-                                            FSXCOMP_FSXLOG_CBS_CS_FSI,
-                                            l_cbs_cs_reg),
-                     "Error writing CBS Control/Status register");
+                FAPI_TRY(fapi2::getScom(i_target_chip,
+                                        FSXCOMP_FSXLOG_CBS_CS,
+                                        l_cbs_cs),
+                         "Error reading CBS Control/Status register (scom)");
+
+                l_cbs_cs.clearBit<FSXCOMP_FSXLOG_CBS_CS_SECURE_ACCESS_BIT>();
+
+                FAPI_TRY(fapi2::putScom(i_target_chip,
+                                        FSXCOMP_FSXLOG_CBS_CS,
+                                        l_cbs_cs),
+                         "Error writing CBS Control/Status register (scom)");
+            }
+            else
+            {
+                fapi2::buffer<uint32_t> l_cbs_cs;
+
+                FAPI_TRY(fapi2::getCfamRegister(i_target_chip,
+                                                FSXCOMP_FSXLOG_CBS_CS_FSI,
+                                                l_cbs_cs),
+                         "Error reading CBS Control/Status register (cfam)");
+
+                l_cbs_cs.clearBit<FSXCOMP_FSXLOG_CBS_CS_SECURE_ACCESS_BIT>();
+
+                FAPI_TRY(fapi2::putCfamRegister(i_target_chip,
+                                                FSXCOMP_FSXLOG_CBS_CS_FSI,
+                                                l_cbs_cs),
+                         "Error writing CBS Control/Status register (cfam)");
+            }
         }
-
     }
 
     // set fused mode behavior
