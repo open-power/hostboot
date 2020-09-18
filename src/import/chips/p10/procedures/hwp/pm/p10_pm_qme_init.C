@@ -642,6 +642,7 @@ fapi2::ReturnCode initQmeBoot(
     fapi2::buffer<uint64_t> l_bceCsrReg;
     fapi2::buffer<uint64_t> l_qmcrReg;
     fapi2::buffer<uint64_t> l_qmcData;
+    fapi2::buffer<uint64_t> l_pbcr;
     uint32_t l_bceTimeOut = TIMEOUT_COUNT;
     fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
     std::vector<uint64_t> l_topo_scoms;
@@ -654,26 +655,32 @@ fapi2::ReturnCode initQmeBoot(
     auto l_eq_mc_cmp =
         i_target.getMulticast<fapi2::TARGET_TYPE_EQ, fapi2::MULTICAST_COMPARE >(fapi2::MCGROUP_GOOD_EQ);
 
-    fapi2::ATTR_QME_BOOT_CONTROL_Type bootMode;
+    fapi2::ATTR_QME_BOOT_CONTROL_Type l_bootMode;
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_QME_BOOT_CONTROL,
                            i_target,
-                           bootMode),
+                           l_bootMode),
              "Error from FAPI_ATTR_GET for attribute ATTR_QME_BOOT_CONTROL");
 
     do
     {
         // No Block Copy means the SRAM was inserted externally
-        if ( bootMode == fapi2::ENUM_ATTR_QME_BOOT_CONTROL_HCODE_ALLSCAN_NOBC ||
-             bootMode == fapi2::ENUM_ATTR_QME_BOOT_CONTROL_HCODE_CMNSCAN_NOBC ||
-             bootMode == fapi2::ENUM_ATTR_QME_BOOT_CONTROL_HCODE_ONLY_NOBC )
+        if ( l_bootMode == fapi2::ENUM_ATTR_QME_BOOT_CONTROL_HCODE_ALLSCAN_NOBC ||
+             l_bootMode == fapi2::ENUM_ATTR_QME_BOOT_CONTROL_HCODE_CMNSCAN_NOBC ||
+             l_bootMode == fapi2::ENUM_ATTR_QME_BOOT_CONTROL_HCODE_ONLY_NOBC )
         {
             FAPI_INF("Skipping QME block copy");
             break;
         }
 
-        // Get the register values for the SCOMs to setup the topology id table
+        FAPI_INF("Setting the fabric topology tables");
         FAPI_TRY(topo::get_topology_table_scoms(i_target, l_topo_scoms));
         FAPI_TRY(init_topo_id_tables(l_eq_mc_or, l_topo_scoms));
+
+        FAPI_INF("Limiting the QME to use Group and System fabric scopes");
+        l_pbcr.flush<0>()
+        .setBit<QME_PBCR_DISABLE_LN_RD>()
+        .setBit<QME_PBCR_DISABLE_NN_RN_RD>();
+        FAPI_TRY( putScom( l_eq_mc_or, QME_PBCR_SCOM2, l_pbcr ) );
 
         // The Base HOMER address it placed in BCEBAR0 by p10_pm_set_homer_bar
         // and includes the region size. The hardware is read as some systems
