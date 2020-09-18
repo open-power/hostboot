@@ -63,7 +63,7 @@ const uint16_t valid_vini_keywords[]
                   0x4354,  // CT
                   0x4452,  // DR
                   0x4647,  // FG
-                  0x4657,  // FN
+                  0x464E,  // FN
                   0x4845,  // HE
                   0x4857,  // HW
                   0x4858,  // HX
