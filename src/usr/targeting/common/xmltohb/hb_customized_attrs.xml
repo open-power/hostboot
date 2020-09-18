@@ -122,6 +122,13 @@
         <default>2200</default>
     </attribute>
 
+     <!-- TODO RTC:260091 Revisit ATTR_FREQ_CORE_CEILING_MHZ
+         after HWP fix is available -->
+    <attribute>
+        <id>ATTR_FREQ_CORE_CEILING_MHZ</id>
+        <default>0x000007d0</default>
+    </attribute>
+
     <attribute>
           <id>ATTR_FREQ_A_MHZ</id>
           <default>0x1900</default>
