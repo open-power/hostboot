@@ -59,6 +59,62 @@ enum
     OSC_SW_SYS_REF = 36,
 };
 
+//------------------------------------------------------------------------------
+
+ExtensibleChipList __getChipList(ExtensibleChip * i_chip,
+                                 TARGETING::TYPE i_type)
+{
+    ExtensibleChipList list;
+
+    if (TYPE_PROC == i_type)
+    {
+        list.push_back(i_chip);
+    }
+    else
+    {
+        list = getConnectedChildren(i_chip, i_type);
+    }
+
+    return list;
+}
+
+//------------------------------------------------------------------------------
+
+static const
+std::map< TARGETING::TYPE,
+          std::vector< std::pair<const char*, const char*> > > g_pcbslvRegs =
+{
+    { TYPE_PROC, { { "TP_PCBSLV_CONFIG",   "TP_PCBSLV_ERROR"   },
+                   { "N0_PCBSLV_CONFIG",   "N0_PCBSLV_ERROR"   },
+                   { "N1_PCBSLV_CONFIG",   "N1_PCBSLV_ERROR"   }, } },
+    { TYPE_PEC,  { { "PEC_PCBSLV_CONFIG",  "PEC_PCBSLV_ERROR"  }, } },
+    { TYPE_MC,   { { "MC_PCBSLV_CONFIG",   "MC_PCBSLV_ERROR"   }, } },
+    { TYPE_PAUC, { { "PAUC_PCBSLV_CONFIG", "PAUC_PCBSLV_ERROR" }, } },
+    { TYPE_IOHS, { { "IOHS_PCBSLV_CONFIG", "IOHS_PCBSLV_ERROR" }, } },
+    { TYPE_EQ,   { { "EQ_PCBSLV_CONFIG",   "EQ_PCBSLV_ERROR"   }, } },
+};
+
+#define FOR_EACH_CHIPLET(CHIP) \
+    for ( const auto& map : g_pcbslvRegs ) \
+    { \
+        for ( const auto& chip : __getChipList(CHIP, map.first) ) \
+        {
+
+#define END_FOR_EACH_CHIPLET \
+        } \
+    }
+
+#define FOR_EACH_REG_PAIR(CHIP) \
+    FOR_EACH_CHIPLET(CHIP) \
+        for ( const auto& pair : map.second ) \
+        {
+
+#define END_FOR_EACH_REG_PAIR \
+        } \
+    END_FOR_EACH_CHIPLET
+
+//------------------------------------------------------------------------------
+
 void getChpltList ( ExtensibleChip * i_chip,
                     TARGETING::TYPE i_chpltType,
                     const char * &o_errRegStr,
@@ -102,14 +158,7 @@ void getChpltList ( ExtensibleChip * i_chip,
             PRDF_ASSERT(false);
     }
 
-    if ( i_chpltType == TYPE_PROC || i_chpltType == TYPE_XBUS )
-    {
-        o_chpltList.push_back(i_chip);
-    }
-    else
-    {
-        o_chpltList = PlatServices::getConnectedChildren(i_chip, i_chpltType);
-    }
+    o_chpltList = __getChipList(i_chip, i_chpltType);
 
     #undef PRDF_FUNC
 }
@@ -498,15 +547,7 @@ int32_t MaskPll( ExtensibleChip * i_chip,
 }
 PRDF_PLUGIN_DEFINE_NS( p10_proc,   Proc, MaskPll );
 
-void __capturePll(ExtensibleChip * i_procChip, STEP_CODE_DATA_STRUCT & io_sc,
-                  TARGETING::TYPE i_unitType)
-{
-    for (const auto& chip : getConnectedChildren(i_procChip, i_unitType))
-    {
-        chip->CaptureErrorData(io_sc.service_data->GetCaptureData(),
-                               Util::hashString("pll_ffdc"));
-    }
-}
+//------------------------------------------------------------------------------
 
 /**
  * @brief   Captures additional PLL registers for FFDC
@@ -517,15 +558,20 @@ void __capturePll(ExtensibleChip * i_procChip, STEP_CODE_DATA_STRUCT & io_sc,
 int32_t capturePllFfdc( ExtensibleChip * i_chip,
                         STEP_CODE_DATA_STRUCT & io_sc )
 {
-    // Add FSI status reg
+    // Note that the 'default_pll_ffdc' capture group (PLL error analysis) or
+    // the 'default' capture group (normal analysis) should have been captured
+    // before calling this function.
+
+    // Capture the FSI status registers.
     PLL::captureFsiStatusReg<TYPE_PROC>( i_chip, io_sc );
 
-    // Get the PLL registers for each unit on this chip. Note that the PROC
-    // registers are already captured at this point.
-    __capturePll(i_chip, io_sc, TYPE_MC);
-    __capturePll(i_chip, io_sc, TYPE_EQ);
-    __capturePll(i_chip, io_sc, TYPE_PAUC);
-    __capturePll(i_chip, io_sc, TYPE_IOHS);
+    // Capture the PLL FFDC for all sub-units of this chip.
+    FOR_EACH_CHIPLET(i_chip)
+
+        chip->CaptureErrorData(io_sc.service_data->GetCaptureData(),
+                               Util::hashString("pll_ffdc"));
+
+    END_FOR_EACH_CHIPLET
 
     return SUCCESS;
 }

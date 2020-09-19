@@ -31,9 +31,17 @@
     # PLL FFDC Regs
     ############################################################################
 
-    register PAUC_ERROR_REG
+    register PAUC_PCBSLV_CONFIG
+    {
+        name        "PAUC PCBSLV config register";
+        scomaddr    0x100F001E;
+        capture     group pll_ffdc;
+    };
+
+    register PAUC_PCBSLV_ERROR
     {
         name        "PAUC PCBSLV error register";
         scomaddr    0x100F001F;
         capture     group pll_ffdc;
     };
+

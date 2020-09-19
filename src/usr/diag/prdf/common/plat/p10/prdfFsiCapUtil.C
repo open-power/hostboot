@@ -72,14 +72,12 @@ void captureFsiStatusReg<TYPE_PROC>( ExtensibleChip * i_chip,
     if ( getMasterProc() != i_chip->getTrgt() )
     {
         __captureFsiReg( i_chip, io_sc, 0x1007, "CFAM_FSI_STATUS" );
-        __captureFsiReg( i_chip, io_sc, 0x2816, "CFAM_FSI_GP7"    );
     }
 
     #else
 
     // FSP has full FSI access.
     __captureFsiReg( i_chip, io_sc, 0x1007, "CFAM_FSI_STATUS" );
-    __captureFsiReg( i_chip, io_sc, 0x2816, "CFAM_FSI_GP7"    );
 
     #endif
 }

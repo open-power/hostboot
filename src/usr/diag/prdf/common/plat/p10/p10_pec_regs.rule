@@ -1,7 +1,7 @@
 # IBM_PROLOG_BEGIN_TAG
 # This is an automatically generated prolog.
 #
-# $Source: src/usr/diag/prdf/common/plat/p10/p10_eq_regs.rule $
+# $Source: src/usr/diag/prdf/common/plat/p10/p10_pec_regs.rule $
 #
 # OpenPOWER HostBoot Project
 #
@@ -23,24 +23,21 @@
 #
 # IBM_PROLOG_END_TAG
 
-################################################################################
-# Additional registers for the EQ target
-################################################################################
-
     ############################################################################
-    # PLL FFDC Regs
+    # PLL FFDC registers
     ############################################################################
 
-    register EQ_PCBSLV_CONFIG
+    register PEC_PCBSLV_CONFIG
     {
-        name        "EQ PCBSLV config register";
-        scomaddr    0x200F001E;
+        name        "PCI PCBSLV config register";
+        scomaddr    0x080F001E;
         capture     group pll_ffdc;
     };
 
-    register EQ_PCBSLV_ERROR
+    register PEC_PCBSLV_ERROR
     {
-        name        "EQ PCBSLV error register";
-        scomaddr    0x200F001F;
+        name        "PCI PCBSLV error register";
+        scomaddr    0x080F001F;
         capture     group pll_ffdc;
     };
+

@@ -27,6 +27,16 @@
 # Additional registers for the PROC target
 ################################################################################
 
+    # This register helps us determine where in the IPL the attention occurred.
+    # Possible values for this register (in ASCII): hostboot, bootload, shutdown
+
+    register CORE_SCRATCH_REG_3
+    {
+        name        "Core scratch register 3";
+        scomaddr    0x41010A89;
+        capture     group default;
+    };
+
     ############################################################################
     # HCA_FIR FFDC Regs
     ############################################################################
@@ -343,41 +353,62 @@
     };
 
     ############################################################################
-    # TP_LOCAL_FIR FFDC Regs
+    # PLL FFDC Regs
     ############################################################################
 
-    register TP_ERROR_REG
+    register CFAM_FSI_STATUS
+    {
+        name        "TP.TPVSB.FSI.W.FSI2PIB.STATUS";
+        scomaddr    0x00001007;
+        capture     group never; # captured via CFAM operation in PLL analysis
+    };
+
+    register RCS_SENSE_1
+    {
+        name        "RCS Sense 1 register";
+        scomaddr    0x0005001D;
+        capture     group pll_ffdc;
+    };
+
+    register TP_PCBSLV_CONFIG
+    {
+        name        "TP PCBSLV config register";
+        scomaddr    0x010F001E;
+        capture     group pll_ffdc;
+    };
+
+    register TP_PCBSLV_ERROR
     {
         name        "TP PCBSLV error register";
         scomaddr    0x010F001F;
         capture     group pll_ffdc;
     };
 
-    register N0_ERROR_REG
+    register N0_PCBSLV_CONFIG
+    {
+        name        "N0 PCBSLV config register";
+        scomaddr    0x020F001E;
+        capture     group pll_ffdc;
+    };
+
+    register N0_PCBSLV_ERROR
     {
         name        "N0 PCBSLV error register";
         scomaddr    0x020F001F;
         capture     group pll_ffdc;
     };
 
-    register N1_ERROR_REG
+    register N1_PCBSLV_CONFIG
+    {
+        name        "N1 PCBSLV config register";
+        scomaddr    0x030F001E;
+        capture     group pll_ffdc;
+    };
+
+    register N1_PCBSLV_ERROR
     {
         name        "N1 PCBSLV error register";
         scomaddr    0x030F001F;
-        capture     group pll_ffdc;
-    };
-
-    register PCI0_ERROR_REG
-    {
-        name        "PCI0 PCBSLV error register";
-        scomaddr    0x080F001F;
-        capture     group pll_ffdc;
-    };
-
-    register PCI1_ERROR_REG
-    {
-        name        "PCI1 PCBSLV error register";
-        scomaddr    0x090F001F;
         capture     group pll_ffdc;
     };
 

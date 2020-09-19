@@ -52,6 +52,7 @@ chip p10_proc
         name        "Global Checkstop Attention FIR";
         scomaddr    0x570F001C;
         capture     group default;
+        capture     group default_pll_ffdc;
     };
 
     ############################################################################
@@ -63,6 +64,7 @@ chip p10_proc
         name        "Global Recoverable Attention FIR";
         scomaddr    0x570F001B;
         capture     group default;
+        capture     group default_pll_ffdc;
     };
 
     ############################################################################
@@ -74,6 +76,7 @@ chip p10_proc
         name        "Global Unit Checkstop Attention FIR";
         scomaddr    0x570F002A;
         capture     group default;
+        capture     group default_pll_ffdc;
     };
 
     ############################################################################
@@ -85,6 +88,7 @@ chip p10_proc
         name        "Global Host Attention FIR";
         scomaddr    0x570F002B;
         capture     group default;
+        capture     group default_pll_ffdc;
     };
 
     ############################################################################
@@ -96,6 +100,7 @@ chip p10_proc
         name        "TP Chiplet Checkstop FIR";
         scomaddr    0x01040000;
         capture     group default;
+        capture     group default_pll_ffdc;
     };
 
     register TP_CHIPLET_CS_FIR_MASK
@@ -103,6 +108,7 @@ chip p10_proc
         name        "TP Chiplet Checkstop FIR MASK";
         scomaddr    0x01040040;
         capture     group default;
+        capture     group default_pll_ffdc;
     };
 
     ############################################################################
@@ -114,6 +120,7 @@ chip p10_proc
         name        "TP Chiplet Recoverable FIR";
         scomaddr    0x01040001;
         capture     group default;
+        capture     group default_pll_ffdc;
     };
 
     register TP_CHIPLET_RE_FIR_MASK
@@ -121,6 +128,7 @@ chip p10_proc
         name        "TP Chiplet Recoverable FIR MASK";
         scomaddr    0x01040041;
         capture     group default;
+        capture     group default_pll_ffdc;
     };
 
     ############################################################################
@@ -132,6 +140,7 @@ chip p10_proc
         name        "TP Chiplet Unit Checkstop FIR";
         scomaddr    0x01040003;
         capture     group default;
+        capture     group default_pll_ffdc;
     };
 
     register TP_CHIPLET_UCS_FIR_MASK
@@ -139,6 +148,7 @@ chip p10_proc
         name        "TP Chiplet Unit Checkstop FIR MASK";
         scomaddr    0x01040043;
         capture     group default;
+        capture     group default_pll_ffdc;
     };
 
     ############################################################################
@@ -150,6 +160,7 @@ chip p10_proc
         name        "TP Chiplet Host Attention FIR";
         scomaddr    0x01040004;
         capture     group default;
+        capture     group default_pll_ffdc;
     };
 
     register TP_CHIPLET_HA_FIR_MASK
@@ -157,6 +168,7 @@ chip p10_proc
         name        "TP Chiplet Host Attention FIR MASK";
         scomaddr    0x01040044;
         capture     group default;
+        capture     group default_pll_ffdc;
     };
 
     ############################################################################
@@ -170,6 +182,7 @@ chip p10_proc
         reset       (&, 0x01040101);
         mask        (|, 0x01040105);
         capture     group default;
+        capture     group default_pll_ffdc;
     };
 
     register TP_LOCAL_FIR_MASK
@@ -177,6 +190,7 @@ chip p10_proc
         name        "P10 chip TP_LOCAL_FIR MASK";
         scomaddr    0x01040103;
         capture     group default;
+        capture     group default_pll_ffdc;
     };
 
     register TP_LOCAL_FIR_ACT0
@@ -184,6 +198,7 @@ chip p10_proc
         name        "P10 chip TP_LOCAL_FIR ACT0";
         scomaddr    0x01040106;
         capture     group default;
+        capture     group default_pll_ffdc;
         capture     req nonzero("TP_LOCAL_FIR");
     };
 
@@ -192,6 +207,7 @@ chip p10_proc
         name        "P10 chip TP_LOCAL_FIR ACT1";
         scomaddr    0x01040107;
         capture     group default;
+        capture     group default_pll_ffdc;
         capture     req nonzero("TP_LOCAL_FIR");
     };
 
@@ -200,6 +216,7 @@ chip p10_proc
         name        "P10 chip TP_LOCAL_FIR ACT2";
         scomaddr    0x01040109;
         capture     group default;
+        capture     group default_pll_ffdc;
         capture     req nonzero("TP_LOCAL_FIR");
     };
 

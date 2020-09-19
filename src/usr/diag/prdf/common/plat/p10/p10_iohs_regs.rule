@@ -150,7 +150,14 @@
     # PLL FFDC Regs
     ############################################################################
 
-    register IOHS_ERROR_REG
+    register IOHS_PCBSLV_CONFIG
+    {
+        name        "IOHS PCBSLV config register";
+        scomaddr    0x180F001E;
+        capture     group pll_ffdc;
+    };
+
+    register IOHS_PCBSLV_ERROR
     {
         name        "IOHS PCBSLV error register";
         scomaddr    0x180F001F;

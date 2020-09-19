@@ -56,7 +56,14 @@
     # PLL FFDC Regs
     ############################################################################
 
-    register MC_ERROR_REG
+    register MC_PCBSLV_CONFIG
+    {
+        name        "MC PCBSLV config register";
+        scomaddr    0x0C0F001E;
+        capture     group pll_ffdc;
+    };
+
+    register MC_PCBSLV_ERROR
     {
         name        "MC PCBSLV error register";
         scomaddr    0x0C0F001F;

@@ -122,6 +122,8 @@ int32_t PllDomain::Analyze(STEP_CODE_DATA_STRUCT & serviceData,
     int32_t rc = SUCCESS;
     uint32_t mskErrType =  0;
 
+    ExtensibleChipFunction * func = nullptr;
+
     // Due to clock issues some chips may be moved to non-functional during
     // analysis. In this case, these chips will need to be removed from their
     // domains.
@@ -154,22 +156,15 @@ int32_t PllDomain::Analyze(STEP_CODE_DATA_STRUCT & serviceData,
         if (l_errType & SYS_PLL_UNLOCK  ) pllUnlockList.push_back(l_chip);
         if (l_errType & SYS_OSC_FAILOVER)  failoverList.push_back(l_chip);
 
-        // Get this chip's capture data for any error
-        l_chip->CaptureErrorData(
-                    serviceData.service_data->GetCaptureData());
-        // Capture PllFIRs group
-        l_chip->CaptureErrorData(
-                    serviceData.service_data->GetCaptureData(),
-                    Util::hashString("PllFIRs"));
+        // Capture any registers needed for PLL analysis, which would be
+        // captured by default during normal analysis.
+        l_chip->CaptureErrorData(serviceData.service_data->GetCaptureData(),
+                                 Util::hashString("default_pll_ffdc"));
 
-        // Call this chip's capturePllFfdc plugin if it exists.
-        ExtensibleChipFunction * l_captureFfdc =
-            l_chip->getExtensibleFunction("capturePllFfdc", true);
-        if ( nullptr != l_captureFfdc )
-        {
-            (*l_captureFfdc)( l_chip,
-            PluginDef::bindParm<STEP_CODE_DATA_STRUCT &>(serviceData) );
-        }
+        // Capture the rest of this chip's PLL FFDC.
+        func = l_chip->getExtensibleFunction("capturePllFfdc");
+        (*func)(l_chip,
+                PluginDef::bindParm<STEP_CODE_DATA_STRUCT &>(serviceData));
 
         // In the case of a PLL_UNLOCK error, we want to do additional isolation
         // in case of a HWP failure.
