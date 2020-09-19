@@ -496,6 +496,68 @@ void getSpiDeviceInfo(std::vector<spiSlaveDevice>& o_deviceInfo,
     assignUniqueIds(o_deviceInfo);
 }
 
+errlHndl_t spiInitEngine(
+          TARGETING::Target* i_pProc,
+    const uint8_t            i_engine)
+{
+    errlHndl_t pError = nullptr;
+    bool procLocked = false;
+
+    do {
+
+    pError = spiLockProcessor(i_pProc,true);
+    if (pError)
+    {
+        break;
+    }
+
+    procLocked = true;
+    const auto scomSwitches =
+        i_pProc->getAttr<TARGETING::ATTR_SCOM_SWITCHES>();
+    const bool pibAccess = !scomSwitches.useSpiFsiScom;
+
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP> fapiProc(i_pProc);
+    SpiControlHandle spiHandle(fapiProc,i_engine,1,pibAccess);
+
+    FAPI_INVOKE_HWP(pError,p10_spi_clock_init,spiHandle);
+    if(pError != nullptr)
+    {
+        TRACFCOMP(g_trac_spi, ERR_MRK"spiInitEngine(): "
+                  "p10_spi_clock_init HWP call returned an error for "
+                  "proc HUID 0x%08X, engine %d, pibAccess %d. "
+                  TRACE_ERR_FMT,
+                  TARGETING::get_huid(i_pProc),i_engine,pibAccess,
+                  TRACE_ERR_ARGS(pError));
+        pError->collectTrace(SPI_COMP_NAME, KILOBYTE);
+        break;
+    }
+
+    } while (0);
+
+    // Try to unlock the SPI locks, but only if lock was successful.
+    // If we fail to lock them in the first place and then (for some reason)
+    // we don't encounter the same failure when unlocking them then, we'll run
+    // into undefined behavior by unlocking unlocked mutexes.
+    if (procLocked)
+    {
+        // Unlock processor
+        errlHndl_t pError2 = spiLockProcessor(i_pProc, false);
+        if (pError && pError2)
+        {
+            pError2->plid(pError->plid());
+            ERRORLOG::errlCommit(pError2, SPI_COMP_ID);
+            pError2 = nullptr;
+        }
+        else if (pError2)
+        {
+            pError = pError2;
+            pError2 = nullptr;
+        }
+    }
+
+    return pError;
+}
+
 errlHndl_t spiSetAccessMode(TARGETING::Target * i_spiMasterProc,
                             spiAccess_t i_type)
 {

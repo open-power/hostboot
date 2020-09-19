@@ -133,6 +133,32 @@ errlHndl_t procPresenceDetect(DeviceFW::OperationType i_opType,
                         l_errl->collectTrace("FSI");
                         break;
                     }
+
+                    // Since we'll be using the FSI SPI master to read MVPD
+                    // initially, ensure that each applicable FSI SPI engine is
+                    // initialized.
+                    const std::vector<uint8_t> engines = {
+                            i_target->getAttr<TARGETING::ATTR_SPI_EEPROM_VPD_PRIMARY_INFO>().engine,
+                            i_target->getAttr<TARGETING::ATTR_SPI_EEPROM_VPD_BACKUP_INFO>().engine };
+
+                    for(const auto engine : engines)
+                    {
+                        l_errl = SPI::spiInitEngine(i_target,engine);
+                        if(l_errl != nullptr)
+                        {
+                            TRACFCOMP(g_trac_fsi,ERR_MRK "FSI::procPresenceDetect> "
+                                "Unable to configure FSI SPI engine %d associated "
+                                "with target 0x%.8X",
+                                engine, TARGETING::get_huid(i_target) );
+                            l_errl->collectTrace("FSI");
+                            break;
+                        }
+                    }
+
+                    if(l_errl)
+                    {
+                        break;
+                    }
                 }
             }
         }

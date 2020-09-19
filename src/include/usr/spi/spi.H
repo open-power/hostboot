@@ -221,6 +221,22 @@ enum spiAccess_t : uint8_t
 };
 
 /**
+ *  @brief Configures a SPI engine for use.  Currently updates the given SPI
+ *      engine's clock config register for FSI SPI engines only.  It will lock
+ *      SPI access to the given processor, init the engine, and release the
+ *      locks.  ATTR_SCOM_SWITCHES will control whether the FSI or PIB engine
+ *      will be initialized.
+ *
+ *  @param[in] i_pProc Processor target to initialize the SPI engine on
+ *  @param[in] i_engine SPI engine to init
+ *
+ *  @return errlHndl_t nullptr on success, otherwise valid error log handle
+ */
+errlHndl_t spiInitEngine(
+          TARGETING::Target* i_pProc,
+    const uint8_t            i_engine);
+
+/**
  * @brief spiSetAccessMode
  *
  *        Change the access method used by SPI for the given processor.
