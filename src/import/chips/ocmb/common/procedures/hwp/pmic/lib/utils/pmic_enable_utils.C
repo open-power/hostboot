@@ -144,6 +144,36 @@ fapi_try_exit:
 }
 
 ///
+/// @brief Set the soft stop time to maximum for the provided PMIC
+///
+/// @param[in] i_pmic_target PMIC target
+/// @return fapi2::FAPI2_RC_SUCCESS iff success
+/// @note This is used for 4U in order to avoid the issue of too-high current sink during a VR_DISABLE
+///
+fapi2::ReturnCode set_soft_stop_time(const fapi2::Target<fapi2::TargetType::TARGET_TYPE_PMIC>& i_pmic_target)
+{
+    using REGS = pmicRegs<mss::pmic::product::JEDEC_COMPLIANT>;
+    using FIELDS = pmicFields<mss::pmic::product::JEDEC_COMPLIANT>;
+
+    // Static as this is the same for all PMICs, and each run of this function
+    static const std::vector<uint8_t> SOFT_STOP_TIME_REGS = {REGS::R22, REGS::R24, REGS::R26, REGS::R28};
+
+    for (const uint8_t l_reg : SOFT_STOP_TIME_REGS)
+    {
+        fapi2::buffer<uint8_t> l_reg_contents;
+        FAPI_TRY(mss::pmic::i2c::reg_read_reverse_buffer(i_pmic_target, l_reg, l_reg_contents));
+
+        // Setting these two bits ensures the larges soft stop time
+        l_reg_contents.setBit<FIELDS::SOFT_STOP_TIME, FIELDS::SOFT_STOP_TIME_LEN>();
+
+        FAPI_TRY(mss::pmic::i2c::reg_write_reverse_buffer(i_pmic_target, l_reg, l_reg_contents));
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
 /// @brief bias PMIC with spd settings for phase combination (SWA, SWB or SWA+SWB)
 ///
 /// @param[in] i_pmic_target PMIC target
@@ -633,6 +663,9 @@ fapi2::ReturnCode disable_and_reset_pmics(const fapi2::Target<fapi2::TARGET_TYPE
 
             // Redundant clearBit, but just so it's clear what we're doing
             l_reg_contents.clearBit<FIELDS::R32_VR_ENABLE>();
+
+            // Due to long soft stop time in 4U (~8ms), let's delay for 10ms to be safe
+            fapi2::delay(4 * mss::common_timings::DELAY_1MS, mss::common_timings::DELAY_1MS);
 
             // We are opting here to log RC's here as recovered. If this register write fails,
             // the ones later in the procedure will fail as well. The action to perform in
@@ -1243,6 +1276,7 @@ fapi2::ReturnCode enable_with_redundancy(
         {
             FAPI_TRY(run_if_not_disabled(l_enable_fields.iv_pmic, [&l_target_info, &l_enable_fields]()
             {
+                FAPI_TRY_LAMBDA(mss::pmic::set_soft_stop_time(l_enable_fields.iv_pmic));
                 FAPI_TRY_LAMBDA(mss::pmic::start_vr_enable(l_enable_fields.iv_pmic));
                 FAPI_TRY_LAMBDA(mss::gpio::poll_input_port_ready(l_enable_fields.iv_gpio, l_enable_fields.iv_input_port_bit));
 
@@ -1261,6 +1295,7 @@ fapi2::ReturnCode enable_with_redundancy(
         {
             FAPI_TRY(run_if_not_disabled(l_enable_fields.iv_pmic, [&l_target_info, &l_enable_fields, l_vendor_id]()
             {
+                FAPI_TRY_LAMBDA(mss::pmic::set_soft_stop_time(l_enable_fields.iv_pmic));
                 FAPI_TRY_LAMBDA(mss::pmic::enable_spd(l_enable_fields.iv_pmic, l_target_info.iv_ocmb, l_vendor_id));
                 FAPI_TRY_LAMBDA(mss::gpio::poll_input_port_ready(l_enable_fields.iv_gpio, l_enable_fields.iv_input_port_bit));
 
