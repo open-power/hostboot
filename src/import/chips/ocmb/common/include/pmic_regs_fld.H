@@ -152,6 +152,10 @@ struct pmicFields<mss::pmic::product::JEDEC_COMPLIANT>
     static constexpr uint8_t R20_SWD_OUTPUT_CURRENT_LIMITER_WARNING_THRESHOLD_SETTING_START     = 0x06;
     static constexpr uint8_t R20_OUTPUT_CURRENT_LIMITER_WARNING_THRESHOLD_SETTING_LENGTH        = 0x02;
 
+    // R22, R24, R26, R28 soft stop time field
+    static constexpr uint8_t SOFT_STOP_TIME = 0;
+    static constexpr uint8_t SOFT_STOP_TIME_LEN = 2;
+
     // R2B - bit positions flipped (0 is for bit7, 1 is for bit6, etc)
     static constexpr uint8_t R2B_LDO_1P8_VOLT_SETTING_START     = 0x00;
     static constexpr uint8_t R2B_LDO_1P8_VOLT_SETTING_LENGTH    = 0x02;
