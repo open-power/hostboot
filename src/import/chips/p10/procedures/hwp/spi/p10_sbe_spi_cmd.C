@@ -73,6 +73,34 @@ typedef union
     uint64_t val;
 } tpmSpiCmd_t;
 
+fapi2::ReturnCode p10_spi_clock_init (
+    const SpiControlHandle& i_spiHandle)
+{
+    fapi2::buffer<uint64_t> data64 = 0;
+    const uint32_t clockRegAddr = i_spiHandle.base_addr + SPIM_CLOCKCONFIGREG;
+    FAPI_TRY(getScom(i_spiHandle.target_chip,
+                     clockRegAddr, data64));
+
+    // For now, just update FSI SPI clock divider and SCK receive delay if
+    // applicable.  The SPI clock divider is a ratio of unit logic to SCK, with
+    // a minimum value of 0x004.  Receive delay is given in units of unit clock
+    // and is used to compensate for internal and external delays.
+    if(!i_spiHandle.pibAccess) // i.e. FSI SPI engine
+    {
+        data64.insertFromRight(FSI_SPI_CLOCK_DIVIDER, SPI_CLOCK_DIVIDER_START_BIT,
+                               SPI_CLOCK_DIVIDER_LEN_BITS);
+
+        data64.insertFromRight(spiReceiveDelay(FSI_SPI_RECEIVE_DELAY_CYCLES),
+                               SPI_CLOCK_RECEIVE_DELAY_START_BIT,
+                               SPI_CLOCK_RECEIVE_DELAY_LEN_BITS);
+
+        FAPI_TRY(putScom(i_spiHandle.target_chip,
+                         clockRegAddr, data64));
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
 
 fapi2::ReturnCode
 spi_master_lock(SpiControlHandle& i_handle, uint64_t i_pib_master_id)

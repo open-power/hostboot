@@ -74,6 +74,39 @@ const uint32_t SPIM_RDR                  = 6;
 const uint32_t SPIM_SEQREG               = 7;
 const uint32_t SPIM_STATUSREG            = 8;
 
+// SPI clock control register information and defaults
+enum  SPI_CLOCK_CONTROL_REG_INFO : size_t
+{
+    // Known good FSI SPI clock control values
+    FSI_SPI_CLOCK_DIVIDER = 0x013,
+    FSI_SPI_RECEIVE_DELAY_CYCLES = 0,
+
+    // SPI clock control field start locations and lengths in bits
+    SPI_CLOCK_DIVIDER_START_BIT = 0,
+    SPI_CLOCK_DIVIDER_LEN_BITS = 12,
+    SPI_CLOCK_RECEIVE_DELAY_START_BIT = 12,
+    SPI_CLOCK_RECEIVE_DELAY_LEN_BITS = 8,
+};
+
+/**
+ *  @brief Calculates SPI receive delay value, given an input number of delay
+ *      cycles, to program into the SPI clock control register.  A value of
+ *      >= 8 will disable receive clocking entirely.
+ *
+ *  @param[in] i_delayCycles Number of SPI controller unit clocks to delay
+ *
+ *  @retval uint8_t Receive delay value to program into SPI clock control
+ *      register, translated from the input delay cycle value.
+ */
+inline uint8_t spiReceiveDelay(const size_t i_delayCycles)
+{
+    // 0x80 per the pervasive spec represents 0 delay cycles.  This 0x80 value
+    // must be shifted one more bit to the right for each additional delay
+    // cycle desired. 0x00 implies receive clocking disabled.
+    return 0x80 >> i_delayCycles;
+}
+
+
 extern "C"
 {
 
@@ -100,7 +133,8 @@ extern "C"
                 slave(i_slave),
                 base_addr(i_pib_access ?
                           SPIM_BASEADDRESS_PIB + this->engine * SPIM_ENGINEOFFSET :
-                          SPIM_BASEADDRESS_FSI + this->engine * SPIM_ENGINEOFFSET )
+                          SPIM_BASEADDRESS_FSI + this->engine * SPIM_ENGINEOFFSET ),
+                pibAccess(i_pib_access)
 
             {
             }
@@ -108,11 +142,23 @@ extern "C"
             const uint8_t engine;
             const uint16_t slave;
             const uint32_t base_addr;
+            const bool pibAccess;     // 1 if using PIB engine, else 0 (FSI)
     };
 
 //------------------------------------------------------------------------------
 // Function prototypes
 //------------------------------------------------------------------------------
+
+///
+/// @brief  API to configure the SPI clock control register indicated by the
+///     input SPI control handle
+///
+/// @param[in] i_spiHandle Reference to the SPI control handle
+///
+/// @return FAPI_RC_SUCCESS if the SPI clock control register was configured
+///     successfully, otherwise error code.
+///
+    fapi2::ReturnCode p10_spi_clock_init (const SpiControlHandle& i_spiHandle);
 
 ///
 /// @brief  API to lock the SPI h/w. SPI Lock should be acquired by the caller
