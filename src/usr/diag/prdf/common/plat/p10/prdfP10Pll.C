@@ -49,7 +49,7 @@ namespace PRDF
 using namespace PlatServices;
 using namespace PLL;
 
-namespace Proc
+namespace p10_proc
 {
 
 // PLL detect bits in TPLFIR
@@ -121,7 +121,7 @@ void getChpltList ( ExtensibleChip * i_chip,
                     const char * &o_cfgRegStr,
                     ExtensibleChipList & o_chpltList )
 {
-    #define PRDF_FUNC "[Proc::getChpltList ]"
+    #define PRDF_FUNC "[p10_proc::getChpltList ]"
     switch (i_chpltType)
     {
         case TYPE_PROC:
@@ -166,7 +166,7 @@ void getChpltList ( ExtensibleChip * i_chip,
 void ClearChipletParityError(ExtensibleChip * i_chip,
                              TARGETING::TYPE i_chpltType)
 {
-    #define PRDF_FUNC "[Proc::ClearChipletParityError ]"
+    #define PRDF_FUNC "[p10_proc::ClearChipletParityError ]"
 
     int32_t rc = SUCCESS;
     const char * errRegStr = nullptr;
@@ -193,7 +193,7 @@ void ClearChipletParityError(ExtensibleChip * i_chip,
 
 void ClearChipletPll(ExtensibleChip * i_chip, TARGETING::TYPE i_chpltType)
 {
-    #define PRDF_FUNC "[Proc::ClearChipletPll] "
+    #define PRDF_FUNC "[p10_proc::ClearChipletPll] "
 
     int32_t rc = SUCCESS;
     const char * errRegStr = nullptr;
@@ -231,7 +231,7 @@ void ClearChipletPll(ExtensibleChip * i_chip, TARGETING::TYPE i_chpltType)
 
 void MaskChipletPll(ExtensibleChip * i_chip, TARGETING::TYPE i_chpltType)
 {
-    #define PRDF_FUNC "[Proc::MaskChipletPll] "
+    #define PRDF_FUNC "[p10_proc::MaskChipletPll] "
 
     int32_t rc = SUCCESS;
     const char * errRegStr = nullptr;
@@ -265,7 +265,7 @@ void MaskChipletPll(ExtensibleChip * i_chip, TARGETING::TYPE i_chpltType)
 
 bool CheckChipletPll(ExtensibleChip * i_chip, TARGETING::TYPE i_chpltType)
 {
-    #define PRDF_FUNC "[Proc::CheckChipletPll] "
+    #define PRDF_FUNC "[p10_proc::CheckChipletPll] "
 
     int32_t rc = SUCCESS;
     bool pllErrFound = false;
@@ -341,14 +341,14 @@ bool CheckChipletPll(ExtensibleChip * i_chip, TARGETING::TYPE i_chpltType)
 }
 
 /**
- *  @brief Examine chiplets to determine which type of PLL error has ocurred
- *  @param i_chip P9 chip
- *  @param o_errType enum indicating which type of PLL error is detected
- *  @returns Failure or Success
+ * @brief  Queries for all PLL error types that occurred on this chip.
+ * @param  i_chip    A PROC chip.
+ * @param  o_errType The types of errors found. See enum PllErrorType.
+ * @return Non-SUCCESS on failure. SUCCESS, otherwise.
  */
-int32_t CheckErrorType( ExtensibleChip * i_chip, uint32_t & o_errType )
+int32_t CheckErrorType(ExtensibleChip * i_chip, uint32_t & o_errType)
 {
-    #define PRDF_FUNC "[Proc::CheckErrorType] "
+    #define PRDF_FUNC "[p10_proc::CheckErrorType] "
     int32_t rc = SUCCESS;
 
     // TODO: Currently disabling PLL error analysis until we are able to update
@@ -402,19 +402,19 @@ int32_t CheckErrorType( ExtensibleChip * i_chip, uint32_t & o_errType )
 
     #undef PRDF_FUNC
 }
-PRDF_PLUGIN_DEFINE_NS( p10_proc,   Proc, CheckErrorType );
+PRDF_PLUGIN_DEFINE(p10_proc, CheckErrorType);
 
 /**
- * @brief Clear Chiplet PCB slave reg parity errors
- * @param i_chip P9 chip
- * @returns Failure or Success
+ * @brief  Clears PCB slave parity errors on this chip.
+ * @param  i_chip A PROC chip.
+ * @param  io_sc  The step code data struct.
+ * @return Non-SUCCESS on failure. SUCCESS, otherwise.
  */
-int32_t clearParityError( ExtensibleChip * i_chip,
-                          STEP_CODE_DATA_STRUCT & i_sc )
+int32_t clearParityError(ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc)
 {
-    #define PRDF_FUNC "[Proc::clearParityError] "
+    #define PRDF_FUNC "[p10_proc::clearParityError] "
 
-    if ( CHECK_STOP != i_sc.service_data->getPrimaryAttnType() )
+    if ( CHECK_STOP != io_sc.service_data->getPrimaryAttnType() )
     {
         // Clear Chiplet parity error bits
         ClearChipletParityError(i_chip, TYPE_PROC);
@@ -429,19 +429,17 @@ int32_t clearParityError( ExtensibleChip * i_chip,
     return SUCCESS;
     #undef PRDF_FUNC
 }
-PRDF_PLUGIN_DEFINE_NS( p10_proc,   Proc, clearParityError );
+PRDF_PLUGIN_DEFINE(p10_proc, clearParityError);
 
 /**
-  * @brief Query the PLL chip for a PLL error on P9
-  * @param  i_chip P9 chip
-  * @param o_result set to true in the presence of PLL error
-  * @returns Failure or Success of query.
-  * @note
-  */
-int32_t QueryPll( ExtensibleChip * i_chip,
-                        bool & o_result)
+ * @brief  Queries for PLL errors on this chip.
+ * @param  i_chip   A PROC chip.
+ * @param  o_result True, if errors found. False, otherwise.
+ * @return Non-SUCCESS on failure. SUCCESS, otherwise.
+ */
+int32_t QueryPll(ExtensibleChip * i_chip, bool & o_result)
 {
-    #define PRDF_FUNC "[Proc::QueryPll] "
+    #define PRDF_FUNC "[p10_proc::QueryPll] "
 
     int32_t rc = SUCCESS;
     o_result = false;
@@ -464,22 +462,21 @@ int32_t QueryPll( ExtensibleChip * i_chip,
 
     #undef PRDF_FUNC
 }
-PRDF_PLUGIN_DEFINE_NS( p10_proc,   Proc, QueryPll );
+PRDF_PLUGIN_DEFINE(p10_proc, QueryPll);
 
 /**
-  * @brief  Clear the PLL error for P9 Plugin
-  * @param  i_chip P9 chip
-  * @param  i_sc   The step code data struct
-  * @returns Failure or Success of query.
-  */
-int32_t ClearPll( ExtensibleChip * i_chip,
-                        STEP_CODE_DATA_STRUCT & i_sc)
+ * @brief  Clears PLL errors on this chip.
+ * @param  i_chip A PROC chip.
+ * @param  io_sc  The step code data struct.
+ * @return Non-SUCCESS on failure. SUCCESS, otherwise.
+ */
+int32_t ClearPll(ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc)
 {
-    #define PRDF_FUNC "[Proc::ClearPll] "
+    #define PRDF_FUNC "[p10_proc::ClearPll] "
 
     int32_t rc = SUCCESS;
 
-    if (CHECK_STOP != i_sc.service_data->getPrimaryAttnType())
+    if (CHECK_STOP != io_sc.service_data->getPrimaryAttnType())
     {
         // Clear Pll bits in chiplet PCB Slave error regs
         ClearChipletPll(i_chip, TYPE_PROC);
@@ -506,18 +503,17 @@ int32_t ClearPll( ExtensibleChip * i_chip,
 
     #undef PRDF_FUNC
 }
-PRDF_PLUGIN_DEFINE_NS( p10_proc,   Proc, ClearPll );
+PRDF_PLUGIN_DEFINE(p10_proc, ClearPll);
 
 /**
-  * @brief Mask the PLL error for P9 Plugin
-  * @param  i_chip P9 chip
-  * @param  i_sc   The step code data struct
-  * @returns Failure or Success of query.
-  * @note
-  */
-int32_t MaskPll( ExtensibleChip * i_chip,
-                 STEP_CODE_DATA_STRUCT & i_sc,
-                 uint32_t i_errType )
+ * @brief  Masks PLL errors on this chip.
+ * @param  i_chip    A PROC chip.
+ * @param  io_sc     The step code data struct.
+ * @param  i_errType The types of errors to mask. See enum PllErrorType.
+ * @return Non-SUCCESS on failure. SUCCESS, otherwise.
+ */
+int32_t MaskPll(ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc,
+                uint32_t i_errType)
 {
     int32_t rc = SUCCESS;
 
@@ -538,25 +534,25 @@ int32_t MaskPll( ExtensibleChip * i_chip,
         rc = tpmask_or->Write();
         if (rc != SUCCESS)
         {
-            PRDF_ERR("[Proc::MaskPll] TP_LFIR_MSK write failed"
+            PRDF_ERR("[p10_proc::MaskPll] TP_LFIR_MSK write failed"
                      "for chip: 0x%08x", i_chip->getHuid());
         }
     }
 
     return SUCCESS;
 }
-PRDF_PLUGIN_DEFINE_NS( p10_proc,   Proc, MaskPll );
+PRDF_PLUGIN_DEFINE(p10_proc, MaskPll);
 
 //------------------------------------------------------------------------------
 
 /**
- * @brief   Captures additional PLL registers for FFDC
- * @param   i_chip   P9 chip
- * @param   i_sc     service data collector
- * @returns Success
+ * @brief  Captures PLL registers for FFDC.
+ * @param  i_chip A PROC chip.
+ * @param  io_sc  The step code data struct.
+ * @return Non-SUCCESS on failure. SUCCESS, otherwise.
  */
-int32_t capturePllFfdc( ExtensibleChip * i_chip,
-                        STEP_CODE_DATA_STRUCT & io_sc )
+int32_t capturePllFfdc(ExtensibleChip * i_chip,
+                       STEP_CODE_DATA_STRUCT & io_sc)
 {
     // Note that the 'default_pll_ffdc' capture group (PLL error analysis) or
     // the 'default' capture group (normal analysis) should have been captured
@@ -575,8 +571,8 @@ int32_t capturePllFfdc( ExtensibleChip * i_chip,
 
     return SUCCESS;
 }
-PRDF_PLUGIN_DEFINE_NS( p10_proc,   Proc, capturePllFfdc );
+PRDF_PLUGIN_DEFINE(p10_proc, capturePllFfdc);
 
-} // end namespace Proc
+} // end namespace p10_proc
 
 } // end namespace PRDF

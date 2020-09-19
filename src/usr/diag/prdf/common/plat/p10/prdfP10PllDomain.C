@@ -113,7 +113,7 @@ bool PllDomain::Query(ATTENTION_TYPE attentionType)
 
 //------------------------------------------------------------------------------
 
-int32_t PllDomain::Analyze(STEP_CODE_DATA_STRUCT & serviceData,
+int32_t PllDomain::Analyze(STEP_CODE_DATA_STRUCT& io_sc,
                            ATTENTION_TYPE attentionType)
 {
     #define PRDF_FUNC "[PllDomain::Analyze] "
@@ -144,10 +144,8 @@ int32_t PllDomain::Analyze(STEP_CODE_DATA_STRUCT & serviceData,
         }
 
         // Check if this chip has a clock error
-        ExtensibleChipFunction * l_query =
-            l_chip->getExtensibleFunction("CheckErrorType");
-        rc |= (*l_query)(l_chip,
-            PluginDef::bindParm<uint32_t &> (l_errType));
+        func = l_chip->getExtensibleFunction("CheckErrorType");
+        rc |= (*func)(l_chip, PluginDef::bindParm<uint32_t &>(l_errType));
 
         // Continue if no clock errors reported on this chip
         if ( 0 == l_errType )
@@ -158,24 +156,23 @@ int32_t PllDomain::Analyze(STEP_CODE_DATA_STRUCT & serviceData,
 
         // Capture any registers needed for PLL analysis, which would be
         // captured by default during normal analysis.
-        l_chip->CaptureErrorData(serviceData.service_data->GetCaptureData(),
+        l_chip->CaptureErrorData(io_sc.service_data->GetCaptureData(),
                                  Util::hashString("default_pll_ffdc"));
 
         // Capture the rest of this chip's PLL FFDC.
         func = l_chip->getExtensibleFunction("capturePllFfdc");
-        (*func)(l_chip,
-                PluginDef::bindParm<STEP_CODE_DATA_STRUCT &>(serviceData));
+        (*func)(l_chip, PluginDef::bindParm<STEP_CODE_DATA_STRUCT &>(io_sc));
 
         // In the case of a PLL_UNLOCK error, we want to do additional isolation
         // in case of a HWP failure.
         if ( l_errType & SYS_PLL_UNLOCK )
         {
-            PlatServices::hwpErrorIsolation( l_chip, serviceData );
+            PlatServices::hwpErrorIsolation( l_chip, io_sc );
         }
     } // end for each chip in domain
 
     // Remove all non-functional chips.
-    if ( CHECK_STOP != serviceData.service_data->getPrimaryAttnType() )
+    if ( CHECK_STOP != io_sc.service_data->getPrimaryAttnType() )
     {
         for (  auto i : nfchips )
         {
@@ -198,52 +195,51 @@ int32_t PllDomain::Analyze(STEP_CODE_DATA_STRUCT & serviceData,
     //       there is a UE RE present, nothing gets garded. To circumvent this,
     //       we will set the UERE flag here even though the PLL error is not the
     //       true SUE source.
-    if ( CHECK_STOP == serviceData.service_data->getPrimaryAttnType() )
+    if ( CHECK_STOP == io_sc.service_data->getPrimaryAttnType() )
     {
-        serviceData.service_data->SetUERE();
+        io_sc.service_data->SetUERE();
     }
 
-    closeClockSource.Resolve(serviceData);
+    closeClockSource.Resolve(io_sc);
     if(&closeClockSource != &farClockSource)
     {
-        farClockSource.Resolve(serviceData);
+        farClockSource.Resolve(io_sc);
     }
 
     if (pllUnlockList.size() > 0)
     {
         // Test for threshold
-        iv_threshold.Resolve(serviceData);
-        if(serviceData.service_data->IsAtThreshold())
+        iv_threshold.Resolve(io_sc);
+        if(io_sc.service_data->IsAtThreshold())
         {
             mskErrType |= SYS_PLL_UNLOCK;
         }
 
         // Set Signature
-        serviceData.service_data->GetErrorSignature()->
+        io_sc.service_data->GetErrorSignature()->
             setChipId(pllUnlockList[0]->getHuid());
-        serviceData.service_data->SetErrorSig( PRDFSIG_PLL_ERROR );
+        io_sc.service_data->SetErrorSig( PRDFSIG_PLL_ERROR );
 
         // If only one detected sys ref error, add it to the callout list.
         if (pllUnlockList.size() == 1)
         {
             const uint32_t tmpCount =
-                serviceData.service_data->getMruListSize();
+                io_sc.service_data->getMruListSize();
 
             // Call this chip's CalloutPll plugin if it exists.
-            ExtensibleChipFunction * l_callout =
-                pllUnlockList[0]->getExtensibleFunction( "CalloutPll", true );
-            if ( nullptr != l_callout )
+            func = pllUnlockList[0]->getExtensibleFunction("CalloutPll", true);
+            if ( nullptr != func )
             {
-                (*l_callout)( pllUnlockList[0],
-                    PluginDef::bindParm<STEP_CODE_DATA_STRUCT &>(serviceData) );
+                (*func)(pllUnlockList[0],
+                        PluginDef::bindParm<STEP_CODE_DATA_STRUCT &>(io_sc));
             }
 
             // If CalloutPll plugin does not add anything new to the callout
             // list, callout this chip
-            if ( tmpCount == serviceData.service_data->getMruListSize() )
+            if ( tmpCount == io_sc.service_data->getMruListSize() )
             {
                 // No additional callouts were made so add this chip to the list
-                serviceData.service_data->SetCallout(
+                io_sc.service_data->SetCallout(
                     pllUnlockList[0]->getTrgt());
             }
         }
@@ -251,51 +247,44 @@ int32_t PllDomain::Analyze(STEP_CODE_DATA_STRUCT & serviceData,
 
     if (failoverList.size() > 0)
     {
-        serviceData.service_data->GetErrorSignature()->
+        io_sc.service_data->GetErrorSignature()->
             setChipId(failoverList[0]->getHuid());
 
         // Mask failovers for this domain
         mskErrType |= SYS_OSC_FAILOVER;
 
         // Set signature
-        serviceData.service_data->SetErrorSig( PRDFSIG_SYS_REF_FAILOVER );
+        io_sc.service_data->SetErrorSig( PRDFSIG_SYS_REF_FAILOVER );
 
         // Make the error log predictive on first occurrence.
-        serviceData.service_data->SetThresholdMaskId(0);
+        io_sc.service_data->SetThresholdMaskId(0);
     }
 
-    if (serviceData.service_data->IsAtThreshold())
+    if (io_sc.service_data->IsAtThreshold())
     {
         // Mask appropriate errors on all chips in domain
-        ExtensibleDomainFunction * l_mask =
-                            getExtensibleFunction("MaskPll");
-        (*l_mask)(this,
-              PluginDef::bindParm<STEP_CODE_DATA_STRUCT&, uint32_t>
-                  (serviceData, mskErrType));
+        ExtensibleDomainFunction * mask = getExtensibleFunction("MaskPll");
+        (*mask)(this, PluginDef::bindParm<STEP_CODE_DATA_STRUCT&, uint32_t>
+                          (io_sc, mskErrType));
     }
 
     // Clear PLLs from this domain.
-    ExtensibleDomainFunction * l_clear = getExtensibleFunction("ClearPll");
-    (*l_clear)(this,
-               PluginDef::bindParm<STEP_CODE_DATA_STRUCT&>(serviceData));
+    ExtensibleDomainFunction * clear = getExtensibleFunction("ClearPll");
+    (*clear)(this, PluginDef::bindParm<STEP_CODE_DATA_STRUCT&>(io_sc));
 
     // Run PLL Post Analysis on any analyzed chips in this domain.
     for(auto l_chip : pllUnlockList)
     {
         // Send any special messages indicating there was a PLL error.
-        ExtensibleChipFunction * l_pllPostAnalysis =
-                l_chip->getExtensibleFunction("PllPostAnalysis", true);
-        (*l_pllPostAnalysis)(l_chip,
-                PluginDef::bindParm<STEP_CODE_DATA_STRUCT&>(serviceData));
+        func = l_chip->getExtensibleFunction("PllPostAnalysis", true);
+        (*func)(l_chip, PluginDef::bindParm<STEP_CODE_DATA_STRUCT&>(io_sc));
     }
 
     for(auto l_chip : failoverList)
     {
         // Send any special messages indicating there was a PLL error.
-        ExtensibleChipFunction * l_pllPostAnalysis =
-                l_chip->getExtensibleFunction("PllPostAnalysis", true);
-        (*l_pllPostAnalysis)(l_chip,
-                PluginDef::bindParm<STEP_CODE_DATA_STRUCT&>(serviceData));
+        func = l_chip->getExtensibleFunction("PllPostAnalysis", true);
+        (*func)(l_chip, PluginDef::bindParm<STEP_CODE_DATA_STRUCT&>(io_sc));
     }
 
     return SUCCESS;
