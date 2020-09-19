@@ -728,8 +728,29 @@ void check_scratch_regs_vs_attrs( IStepError & io_StepError )
     const auto l_attr_mc_pll_bkt =
                         l_mProc->getAttrAsStdArr<ATTR_MC_PLL_BUCKET>();
 
+    TARGETING::PredicateIsFunctional functional;
+    TARGETING::PredicateCTM isMc(CLASS_UNIT,TYPE_MC);
+
     for (uint32_t l_bkt = 0; l_bkt < l_attr_mc_pll_bkt.size(); l_bkt++)
     {
+        TARGETING::TargetHandleList mcList;
+        TARGETING::PredicateAttrVal<TARGETING::ATTR_CHIP_UNIT> sameUnit(l_bkt);
+        TARGETING::PredicatePostfixExpr isMatchingMcFunctional;
+        isMatchingMcFunctional.push(&isMc).push(&sameUnit).push(&functional).And().And();
+        TARGETING::targetService().getAssociated(
+            mcList,
+            l_mProc,
+            TARGETING::TargetService::CHILD,
+            TARGETING::TargetService::ALL,
+            &isMatchingMcFunctional);
+        if(mcList.empty())
+        {
+            TRACFCOMP(g_trac_isteps_trace,"MC with CHIP_UNIT 0x%02X under PROC "
+                      "0x%08X is not functional, ignoring MC PLL bucket check",
+                      l_bkt,TARGETING::get_huid(l_mProc));
+            continue;
+        }
+
         // Compare scratch9 mc pll bucket[] to ATTR_MC_PLL_BUCKET[]
         if (l_s9_mc_pll_bkt[l_bkt] != l_attr_mc_pll_bkt[l_bkt])
         {
@@ -798,8 +819,28 @@ void check_scratch_regs_vs_attrs( IStepError & io_StepError )
         const auto l_attr_iohs_pll_bkt =
                     l_mProc->getAttrAsStdArr<ATTR_IOHS_PLL_BUCKET>();
 
+        TARGETING::PredicateCTM isIohs(CLASS_UNIT,TYPE_IOHS);
+
         for (uint32_t l_bkt = 0; l_bkt < l_attr_iohs_pll_bkt.size(); l_bkt++)
         {
+            TARGETING::TargetHandleList iohsList;
+            TARGETING::PredicateAttrVal<TARGETING::ATTR_CHIP_UNIT> sameUnit(l_bkt);
+            TARGETING::PredicatePostfixExpr isMatchingIohsFunctional;
+            isMatchingIohsFunctional.push(&isIohs).push(&sameUnit).push(&functional).And().And();
+            TARGETING::targetService().getAssociated(
+                iohsList,
+                l_mProc,
+                TARGETING::TargetService::CHILD,
+                TARGETING::TargetService::ALL,
+                &isMatchingIohsFunctional);
+            if(iohsList.empty())
+            {
+                TRACFCOMP(g_trac_isteps_trace,"IOHS with CHIP_UNIT 0x%02X under PROC "
+                          "0x%08X is not functional, ignoring IOHS PLL bucket check",
+                          l_bkt,TARGETING::get_huid(l_mProc));
+                continue;
+            }
+
             // Compare scratch10 iohs pll bucket[] to ATTR_IOHS_PLL_BUCKET[]
             if (l_s10_iohs_pll_bkt[l_bkt] != l_attr_iohs_pll_bkt[l_bkt])
             {
