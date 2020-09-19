@@ -931,9 +931,7 @@ uint32_t getTargetPosition( TargetHandle_t i_trgt )
             {
                 case TYPE_PROC:
                 case TYPE_OSC:
-                case TYPE_OSCPCICLK:
                 case TYPE_OSCREFCLK:
-                case TYPE_MFREFCLK:
                 case TYPE_OCMB_CHIP:
                     o_pos = i_trgt->getAttr<ATTR_POSITION>();
                     break;
@@ -1258,14 +1256,6 @@ TargetHandle_t getClockId(TargetHandle_t i_trgt, TARGETING::TYPE i_connType,
         case TYPE_OSCREFCLK:
             peerType = TYPE_SYSREFCLKENDPT;
             oscType  = TYPE_OSCREFCLK;
-            break;
-
-        // TODO: The use of TYPE_OSCPCICLK appears to be carry-over from P8 and
-        //       probably should be replaced when there is time to investigate.
-        case TYPE_OSCPCICLK:
-            peerType = TYPE_MFREFCLKENDPT;
-            oscType  = (MODEL_NIMBUS == getChipModel(getMasterProc()))
-                            ? TYPE_OSCREFCLK : TYPE_MFREFCLK;
             break;
 
         default:

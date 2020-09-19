@@ -89,19 +89,9 @@ bool PllDomain::Query(ATTENTION_TYPE attentionType)
                 int32_t rc = (*l_query)(l_chip,
                     PluginDef::bindParm<uint32_t &> (l_errType));
 
-                // Check if clock errors apply to this domain
-                if ( GetId() == CLOCK_DOMAIN_IO )
-                {
-                    if ( ( l_errType & PCI_PLL_UNLOCK ) ||
-                         ( l_errType & PCI_OSC_FAILOVER ) )
-                        atAttn = true;
-                }
-                else
-                {
-                    if ( ( l_errType & SYS_PLL_UNLOCK ) ||
-                         ( l_errType & SYS_OSC_FAILOVER ) )
-                        atAttn = true;
-                }
+                if ( ( l_errType & SYS_PLL_UNLOCK ) ||
+                     ( l_errType & SYS_OSC_FAILOVER ) )
+                    atAttn = true;
 
                 // if rc then scom read failed
                 // Error log has already been generated
@@ -122,74 +112,6 @@ bool PllDomain::Query(ATTENTION_TYPE attentionType)
 }
 
 //------------------------------------------------------------------------------
-
-void mfClockResolution( STEP_CODE_DATA_STRUCT &io_sc,
-                        std::vector<ExtensibleChip *> i_chipList )
-{
-    for ( auto chip : i_chipList )
-    {
-        bool bothClocksFailed = false;
-        TargetHandle_t chipTgt = chip->getTrgt();
-
-        SCAN_COMM_REGISTER_CLASS *oscSw = chip->getRegister("OSC_SW_SENSE");
-        uint32_t l_rc = oscSw->Read();
-        if ( SUCCESS == l_rc )
-        {
-            const uint32_t OSC_0_OK = 28;
-            const uint32_t OSC_1_OK = 29;
-            if ( !(oscSw->IsBitSet(OSC_0_OK) || oscSw->IsBitSet(OSC_1_OK) ) )
-            {
-                bothClocksFailed = true;
-
-                // Callout both PCI Clocks
-                #ifndef __HOSTBOOT_MODULE
-                TargetHandle_t pciOsc =
-                    getClockId( chipTgt, TYPE_OSCPCICLK, 0 );
-                if (pciOsc)
-                    io_sc.service_data->SetCallout( pciOsc );
-
-                pciOsc = getClockId( chipTgt, TYPE_OSCPCICLK, 1 );
-                if (pciOsc)
-                    io_sc.service_data->SetCallout( pciOsc );
-
-                #else
-                io_sc.service_data->SetCallout( PRDcallout(chipTgt,
-                                                PRDcalloutData::TYPE_PCICLK0));
-                io_sc.service_data->SetCallout( PRDcallout(chipTgt,
-                                                PRDcalloutData::TYPE_PCICLK1));
-                #endif
-            }
-        }
-        else
-        {
-            PRDF_ERR( "ClockResolution::Resolve "
-                      "Read() failed on OSC_SW_SENSE huid 0x%08X", chipTgt );
-        }
-
-        if ( !bothClocksFailed )
-        {
-            TargetHandle_t l_ptargetClock =
-                PlatServices::getActiveRefClk(chipTgt, TYPE_OSCPCICLK);
-
-            // Callout this chip if nothing else.
-            if(nullptr == l_ptargetClock)
-            {
-                l_ptargetClock = chipTgt;
-            }
-
-            // callout the clock source
-            // HB does not have the osc target modeled
-            // so we need to use the proc target with
-            // osc clock type to call out
-            #ifndef __HOSTBOOT_MODULE
-            io_sc.service_data->SetCallout(l_ptargetClock);
-            #else
-            io_sc.service_data->SetCallout( PRDcallout(l_ptargetClock,
-                                            PRDcalloutData::TYPE_PCICLK));
-            #endif
-        }
-    }
-}
 
 int32_t PllDomain::Analyze(STEP_CODE_DATA_STRUCT & serviceData,
                            ATTENTION_TYPE attentionType)
@@ -229,16 +151,8 @@ int32_t PllDomain::Analyze(STEP_CODE_DATA_STRUCT & serviceData,
         if ( 0 == l_errType )
             continue;
 
-        if (GetId() == CLOCK_DOMAIN_IO)
-        {
-            if (l_errType & PCI_PLL_UNLOCK  ) pllUnlockList.push_back(l_chip);
-            if (l_errType & PCI_OSC_FAILOVER)  failoverList.push_back(l_chip);
-        }
-        else
-        {
-            if (l_errType & SYS_PLL_UNLOCK  ) pllUnlockList.push_back(l_chip);
-            if (l_errType & SYS_OSC_FAILOVER)  failoverList.push_back(l_chip);
-        }
+        if (l_errType & SYS_PLL_UNLOCK  ) pllUnlockList.push_back(l_chip);
+        if (l_errType & SYS_OSC_FAILOVER)  failoverList.push_back(l_chip);
 
         // Get this chip's capture data for any error
         l_chip->CaptureErrorData(
@@ -259,7 +173,7 @@ int32_t PllDomain::Analyze(STEP_CODE_DATA_STRUCT & serviceData,
 
         // In the case of a PLL_UNLOCK error, we want to do additional isolation
         // in case of a HWP failure.
-        if ( (l_errType & SYS_PLL_UNLOCK) || (l_errType & PCI_PLL_UNLOCK) )
+        if ( l_errType & SYS_PLL_UNLOCK )
         {
             PlatServices::hwpErrorIsolation( l_chip, serviceData );
         }
@@ -294,19 +208,10 @@ int32_t PllDomain::Analyze(STEP_CODE_DATA_STRUCT & serviceData,
         serviceData.service_data->SetUERE();
     }
 
-    // always suspect the clock source
-    if (GetId() == CLOCK_DOMAIN_IO)
+    closeClockSource.Resolve(serviceData);
+    if(&closeClockSource != &farClockSource)
     {
-        mfClockResolution(serviceData, failoverList);
-        mfClockResolution(serviceData, pllUnlockList);
-    }
-    else
-    {
-        closeClockSource.Resolve(serviceData);
-        if(&closeClockSource != &farClockSource)
-        {
-            farClockSource.Resolve(serviceData);
-        }
+        farClockSource.Resolve(serviceData);
     }
 
     if (pllUnlockList.size() > 0)
@@ -315,8 +220,7 @@ int32_t PllDomain::Analyze(STEP_CODE_DATA_STRUCT & serviceData,
         iv_threshold.Resolve(serviceData);
         if(serviceData.service_data->IsAtThreshold())
         {
-            mskErrType |= (GetId() == CLOCK_DOMAIN_IO) ?
-                         PCI_PLL_UNLOCK : SYS_PLL_UNLOCK;
+            mskErrType |= SYS_PLL_UNLOCK;
         }
 
         // Set Signature
@@ -355,22 +259,11 @@ int32_t PllDomain::Analyze(STEP_CODE_DATA_STRUCT & serviceData,
         serviceData.service_data->GetErrorSignature()->
             setChipId(failoverList[0]->getHuid());
 
-        if (GetId() == CLOCK_DOMAIN_IO)
-        {
-            // Mask failovers for this domain
-            mskErrType |= PCI_OSC_FAILOVER;
+        // Mask failovers for this domain
+        mskErrType |= SYS_OSC_FAILOVER;
 
-            // Set signature
-            serviceData.service_data->SetErrorSig( PRDFSIG_MF_REF_FAILOVER );
-        }
-        else
-        {
-            // Mask failovers for this domain
-            mskErrType |= SYS_OSC_FAILOVER;
-
-            // Set signature
-            serviceData.service_data->SetErrorSig( PRDFSIG_SYS_REF_FAILOVER );
-        }
+        // Set signature
+        serviceData.service_data->SetErrorSig( PRDFSIG_SYS_REF_FAILOVER );
 
         // Make the error log predictive on first occurrence.
         serviceData.service_data->SetThresholdMaskId(0);
@@ -429,15 +322,12 @@ int32_t PllDomain::ClearPll( ExtensibleDomain * i_domain,
 {
     PllDomain * l_domain = (PllDomain *) i_domain;
 
-    const char * clearPllFuncName = (l_domain->GetId() == CLOCK_DOMAIN_IO) ?
-        "ClearMfPll" : "ClearPll";
-
     // Clear children chips.
     for ( uint32_t i = 0; i < l_domain->GetSize(); i++ )
     {
         ExtensibleChip * l_chip = l_domain->LookUp(i);
         ExtensibleChipFunction * l_clear =
-                        l_chip->getExtensibleFunction(clearPllFuncName);
+                        l_chip->getExtensibleFunction("ClearPll");
         (*l_clear)( l_chip,
                     PluginDef::bindParm<STEP_CODE_DATA_STRUCT&>(i_sc) );
     }

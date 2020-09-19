@@ -484,33 +484,6 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
                                    thisDeconfig,
                                    thisGard);
         }
-        else if(PRDcalloutData::TYPE_PCICLK  == thiscallout.getType())
-        {
-            PRDF_ADD_CLOCK_CALLOUT(iv_errl,
-                                   thiscallout.getTarget(),
-                                   HWAS::OSCPCICLK_TYPE,
-                                   thispriority,
-                                   thisDeconfig,
-                                   thisGard);
-        }
-        else if(PRDcalloutData::TYPE_PCICLK0  == thiscallout.getType())
-        {
-            PRDF_ADD_CLOCK_CALLOUT(iv_errl,
-                                   thiscallout.getTarget(),
-                                   HWAS::OSCPCICLK0_TYPE,
-                                   thispriority,
-                                   thisDeconfig,
-                                   thisGard);
-        }
-        else if(PRDcalloutData::TYPE_PCICLK1 == thiscallout.getType())
-        {
-            PRDF_ADD_CLOCK_CALLOUT(iv_errl,
-                                   thiscallout.getTarget(),
-                                   HWAS::OSCPCICLK1_TYPE,
-                                   thispriority,
-                                   thisDeconfig,
-                                   thisGard);
-        }
         else if(PRDcalloutData::TYPE_TODCLK == thiscallout.getType())
         {
             PRDF_ADD_CLOCK_CALLOUT(iv_errl,

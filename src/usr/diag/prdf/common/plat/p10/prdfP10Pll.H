@@ -33,9 +33,7 @@ namespace PLL
 typedef enum
 {
     SYS_PLL_UNLOCK = 0x01,
-    PCI_PLL_UNLOCK = 0x02,
     SYS_OSC_FAILOVER = 0x04,
-    PCI_OSC_FAILOVER = 0x08,
 } PllErrorType;
 
 } // end namespace PLL

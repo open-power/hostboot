@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -52,9 +52,6 @@ enum MruType
     TYPE_MEMMRU,
     TYPE_SYMFRU,
     TYPE_PROCCLK,
-    TYPE_PCICLK,
-    TYPE_PCICLK0,
-    TYPE_PCICLK1,
     TYPE_TODCLK,
 };
 

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -87,7 +87,6 @@ class PRDcallout
         {
             case PRDcalloutData::TYPE_TARGET:
             case PRDcalloutData::TYPE_PROCCLK:
-            case PRDcalloutData::TYPE_PCICLK:
                 iv_meldValue.target = PlatServices::getTarget(i_val); break;
             case PRDcalloutData::TYPE_MEMMRU:
             case PRDcalloutData::TYPE_SYMFRU:
@@ -168,7 +167,6 @@ class PRDcallout
         {
             case PRDcalloutData::TYPE_TARGET:
             case PRDcalloutData::TYPE_PROCCLK:
-            case PRDcalloutData::TYPE_PCICLK:
                 return PlatServices::getHuid(iv_meldValue.target); break;
             case PRDcalloutData::TYPE_MEMMRU:
             case PRDcalloutData::TYPE_SYMFRU:

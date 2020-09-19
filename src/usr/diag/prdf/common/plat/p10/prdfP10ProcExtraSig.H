@@ -30,7 +30,6 @@
 
 /* PLL Extra signatures */
 PRDR_ERROR_SIGNATURE( PLL_ERROR, 0x00ed0000, "","PLL error" );
-PRDR_ERROR_SIGNATURE( MF_REF_FAILOVER, 0x00ed0001, "", "MF Ref Clk failover" );
 PRDR_ERROR_SIGNATURE( SYS_REF_FAILOVER, 0x00ed0002, "",
                       "Sys Ref Clk failover" );
 #endif // __prdfP10ProcExtraSig_H

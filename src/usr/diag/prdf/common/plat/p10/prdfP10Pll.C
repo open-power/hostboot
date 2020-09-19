@@ -57,7 +57,6 @@ enum
 {
     PLL_UNLOCK = 21,
     OSC_SW_SYS_REF = 36,
-    OSC_SW_MF_REF  = 37,
 };
 
 void getChpltList ( ExtensibleChip * i_chip,
@@ -336,12 +335,6 @@ int32_t CheckErrorType( ExtensibleChip * i_chip, uint32_t & o_errType )
             o_errType |= SYS_OSC_FAILOVER;
         }
 
-        if ((! TP_LFIRmask->IsBitSet(OSC_SW_MF_REF)) &&
-             TP_LFIR->IsBitSet(OSC_SW_MF_REF))
-        {
-            o_errType |= PCI_OSC_FAILOVER;
-        }
-
         if ((! TP_LFIRmask->IsBitSet(PLL_UNLOCK)) &&
              TP_LFIR->IsBitSet(PLL_UNLOCK))
         {
@@ -352,12 +345,6 @@ int32_t CheckErrorType( ExtensibleChip * i_chip, uint32_t & o_errType )
                 CheckChipletPll(i_chip, TYPE_MC))
             {
                 o_errType |= SYS_PLL_UNLOCK;
-            }
-
-            // Check PCIE chiplet for MF ref unlock
-            if (CheckChipletPll(i_chip, TYPE_PEC))
-            {
-                o_errType |= PCI_PLL_UNLOCK;
             }
         }
     } while (0);
@@ -472,38 +459,6 @@ int32_t ClearPll( ExtensibleChip * i_chip,
 }
 PRDF_PLUGIN_DEFINE_NS( p10_proc,   Proc, ClearPll );
 
-int32_t ClearMfPll( ExtensibleChip * i_chip,
-                        STEP_CODE_DATA_STRUCT & i_sc)
-{
-    #define PRDF_FUNC "[Proc::ClearMfPll] "
-
-    int32_t rc = SUCCESS;
-
-    if (CHECK_STOP != i_sc.service_data->getPrimaryAttnType())
-    {
-        // Clear Pll bits in chiplet PCB Slave error regs
-        ClearChipletPll(i_chip, TYPE_PEC);
-
-        // Clear TP_LFIR
-        SCAN_COMM_REGISTER_CLASS * TP_LFIRand =
-                   i_chip->getRegister("TP_LFIR_AND");
-        TP_LFIRand->setAllBits();
-        TP_LFIRand->ClearBit(PLL_UNLOCK);
-        TP_LFIRand->ClearBit(OSC_SW_MF_REF);
-        rc = TP_LFIRand->Write();
-        if (rc != SUCCESS)
-        {
-            PRDF_ERR(PRDF_FUNC "TP_LFIR_AND write failed"
-                     "for chip: 0x%08x", i_chip->getHuid());
-        }
-    }
-
-    return SUCCESS;
-
-    #undef PRDF_FUNC
-}
-PRDF_PLUGIN_DEFINE_NS( p10_proc,   Proc, ClearMfPll );
-
 /**
   * @brief Mask the PLL error for P9 Plugin
   * @param  i_chip P9 chip
@@ -525,32 +480,12 @@ int32_t MaskPll( ExtensibleChip * i_chip,
         MaskChipletPll(i_chip, TYPE_MC);
     }
 
-    if (PCI_PLL_UNLOCK & i_errType)
-    {
-        MaskChipletPll(i_chip, TYPE_PROC);
-        MaskChipletPll(i_chip, TYPE_PEC);
-    }
-
     if (SYS_OSC_FAILOVER & i_errType)
     {
         SCAN_COMM_REGISTER_CLASS * tpmask_or =
             i_chip->getRegister("TP_LFIR_MASK_OR");
         tpmask_or->clearAllBits();
         tpmask_or->SetBit(OSC_SW_SYS_REF);
-        rc = tpmask_or->Write();
-        if (rc != SUCCESS)
-        {
-            PRDF_ERR("[Proc::MaskPll] TP_LFIR_MSK write failed"
-                     "for chip: 0x%08x", i_chip->getHuid());
-        }
-    }
-
-    if (PCI_OSC_FAILOVER & i_errType)
-    {
-        SCAN_COMM_REGISTER_CLASS * tpmask_or =
-            i_chip->getRegister("TP_LFIR_MASK_OR");
-        tpmask_or->clearAllBits();
-        tpmask_or->SetBit(OSC_SW_MF_REF);
         rc = tpmask_or->Write();
         if (rc != SUCCESS)
         {
