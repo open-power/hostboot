@@ -2498,6 +2498,9 @@
       <id>ENABLED_THREADS</id>
     </attribute>
     <attribute>
+      <id>FABRIC_TO_PHYSICAL_NODE_MAP</id>
+    </attribute>
+    <attribute>
       <id>FIELD_TH_L2_LINE_DELETES</id>
     </attribute>
     <attribute>
