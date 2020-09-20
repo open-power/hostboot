@@ -508,6 +508,12 @@ errlHndl_t spiInitEngine(
     pError = spiLockProcessor(i_pProc,true);
     if (pError)
     {
+        TRACFCOMP(g_trac_spi, ERR_MRK"spiInitEngine(): "
+                  "spiLockProcessor() failed to acquire lock(s) for proc "
+                  "HUID 0x%08X. "
+                  TRACE_ERR_FMT,
+                  TARGETING::get_huid(i_pProc),
+                  TRACE_ERR_ARGS(pError));
         break;
     }
 
@@ -542,6 +548,16 @@ errlHndl_t spiInitEngine(
     {
         // Unlock processor
         errlHndl_t pError2 = spiLockProcessor(i_pProc, false);
+        if (pError2)
+        {
+            TRACFCOMP(g_trac_spi, ERR_MRK"spiInitEngine(): "
+                      "spiLockProcessor() failed to release lock(s) for proc "
+                      "HUID 0x%08X. "
+                      TRACE_ERR_FMT,
+                      TARGETING::get_huid(i_pProc),
+                      TRACE_ERR_ARGS(pError2));
+        }
+
         if (pError && pError2)
         {
             pError2->plid(pError->plid());
@@ -568,6 +584,12 @@ errlHndl_t spiSetAccessMode(TARGETING::Target * i_spiMasterProc,
         l_err = spiLockProcessor(i_spiMasterProc, true);
         if (l_err)
         {
+            TRACFCOMP(g_trac_spi, ERR_MRK"spiSetAccessMode(): "
+                      "spiLockProcessor() failed to acquire lock(s) for proc "
+                      "HUID 0x%08X. "
+                      TRACE_ERR_FMT,
+                      TARGETING::get_huid(i_spiMasterProc),
+                      TRACE_ERR_ARGS(l_err));
             break;
         }
         l_procLocked = true;
@@ -622,8 +644,18 @@ errlHndl_t spiSetAccessMode(TARGETING::Target * i_spiMasterProc,
     // into undefined behavior by unlocking unlocked mutexes.
     if (l_procLocked)
     {
-        // unlock processor
+        // Unlock processor
         errlHndl_t l_err2 = spiLockProcessor(i_spiMasterProc, false);
+        if (l_err2)
+        {
+            TRACFCOMP(g_trac_spi, ERR_MRK"spiSetAccessMode(): "
+                      "spiLockProcessor() failed to release lock(s) for proc "
+                      "HUID 0x%08X. "
+                      TRACE_ERR_FMT,
+                      TARGETING::get_huid(i_spiMasterProc),
+                      TRACE_ERR_ARGS(l_err2));
+        }
+
         if (l_err && l_err2)
         {
             l_err2->plid(l_err->plid());
