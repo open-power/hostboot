@@ -117,6 +117,7 @@ const DepModInfo g_istep18Dependancies = {
 #ifndef CONFIG_VPO_COMPILE
             DEP_LIB(libtod.so),
             DEP_LIB(libistep18.so),
+            DEP_LIB(libfab_iovalid.so),
 #endif
             nullptr
         }
