@@ -195,9 +195,14 @@ if($vpo_compile == "1") {
 }
 
 # Changing the base of HRMOR to 4GB - 256MB for all procs
-echo "Setting l3_base"
 foreach $proc in (get-all-procs) {
-    $proc->l3_base=0xF0000000
+    # only set l3_base if SBE has not already done so, 0x08000000 is the invalid default
+    # simics currently sets.
+    if($proc->l3_base == 0x08000000)
+    {
+        echo "Setting l3_base 0xF0000000 on "+ $proc->name
+        $proc->l3_base=0xF0000000
+    }
 }
 
 #Enable extra processor support if asked to
