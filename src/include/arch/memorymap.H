@@ -227,7 +227,7 @@ inline uint8_t getTopoIndexFromAddr( const uint64_t i_addr )
  *          by low-level code
  */
 constexpr uint64_t  MMIO_BASE =                              0x0006000000000000;
-constexpr uint64_t  MMIO_GROUP0_CHIP0_XSCOM_BASE_ADDR =      0x000603FC00000000;
+constexpr uint64_t  MMIO_GROUP0_CHIP0_XSCOM_BASE_ADDR =      0x000E03FC00000000;
 constexpr uint64_t  MMIO_GROUP0_CHIP0_LPC_BASE_ADDR   =      0x0006030000000000;
 constexpr uint64_t  MMIO_GROUP0_CHIP0_PSI_BRIDGE_BASE_ADDR = 0x0006030203000000;
 constexpr uint64_t  MMIO_GROUP0_CHIP0_XIVE_CONTROLLER_BASE_ADDR =
