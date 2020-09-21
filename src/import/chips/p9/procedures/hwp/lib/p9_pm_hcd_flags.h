@@ -102,6 +102,8 @@ enum PM_GPE_OCC_SCRATCH2_DEFS
     PGPE_SAFE_MODE_ERROR                    = 14,
     PM_DEBUG_HALT_ENABLE                    = 15,
     CORE_THROTTLE_CONTINUOUS_CHANGE_ENABLE  = 16,
+    CME_PFET_DELAY_TO_TIMEOUT               = 20,
+    CME_PFET_TIMEOUT_INJECTION              = 21,
     PGPE_OP_TRACE_DISABLE                   = 24,
     PGPE_OP_TRACE_MEM_MODE                  = 25
 
@@ -130,6 +132,8 @@ enum PM_CME_FLAGS_DEFS
     CME_FLAGS_SAFE_MODE                                 = 16,
     CME_FLAGS_PSTATES_SUSPENDED                         = 17,
     CME_FLAGS_DB0_COMM_RECV_STARVATION_CNT_ENABLED      = 18,
+    CME_FLAGS_PFET_FIT_INJECTION                        = 20,
+    CME_FLAGS_PFET_TIMEOUT_INJECTION                    = 21,
     CME_FLAGS_SPWU_CHECK_ENABLE                         = 22,
     CME_FLAGS_BLOCK_ENTRY_STOP11                        = 23,
     CME_FLAGS_PSTATES_ENABLED                           = 24,
