@@ -80,98 +80,111 @@ fapi2::ReturnCode p10_fbc_eff_config_aggregate_link_setup(
         o_addr_dis[l_loc_link_id] = 0;
     }
 
+    for (uint8_t l_loc_link_id = 0; l_loc_link_id < P10_FBC_UTILS_MAX_LINKS; l_loc_link_id++)
+    {
+        FAPI_DBG("loc_fbc_id %d: l_fbc_id_active_count[%d]=%d\n",
+                 i_loc_fbc_id, l_loc_link_id, l_fbc_id_active_count[l_loc_link_id]);
+    }
+
     o_aggregate_mode = 0;
 
     // set aggregate mode if more than one link is pointed at the same remote fabric ID
     for (uint8_t l_rem_fbc_id = 0; l_rem_fbc_id < P10_FBC_UTILS_MAX_CHIPS; l_rem_fbc_id++)
     {
-        if (l_fbc_id_active_count[l_rem_fbc_id] > 1)
+        // continue to process next remote fabric ID if one link or less connected
+        if(l_fbc_id_active_count[l_rem_fbc_id] <= 1)
         {
-            // only one set of aggregate links are supported
-            FAPI_ASSERT(!o_aggregate_mode,
-                        fapi2::P10_FBC_EFF_CONFIG_AGGREGATE_INVALID_CONFIG_ERR().
-                        set_TARGET(i_target).
-                        set_LOCAL_FBC_ID(i_loc_fbc_id).
-                        set_REMOTE_FBC_ID1(l_aggregate_rem_fbc_id).
-                        set_REMOTE_FBC_ID2(l_rem_fbc_id),
-                        "Invalid aggregate link configuration!");
+            continue;
+        }
 
-            o_aggregate_mode = 1;
-            l_aggregate_rem_fbc_id = l_rem_fbc_id;
+        // only one set of aggregate links are supported, throw error if more than one set
+        FAPI_ASSERT(!o_aggregate_mode,
+                    fapi2::P10_FBC_EFF_CONFIG_AGGREGATE_INVALID_CONFIG_ERR().
+                    set_TARGET(i_target).
+                    set_LOCAL_FBC_ID(i_loc_fbc_id).
+                    set_REMOTE_FBC_ID1(l_aggregate_rem_fbc_id).
+                    set_REMOTE_FBC_ID2(l_rem_fbc_id),
+                    "Invalid aggregate link configuration!");
 
-            // flip default value for link address disable
-            for (uint8_t l_loc_link_id = 0; l_loc_link_id < P10_FBC_UTILS_MAX_LINKS; l_loc_link_id++)
+        o_aggregate_mode = 1;
+        l_aggregate_rem_fbc_id = l_rem_fbc_id;
+
+        // scan link delays for smallest value
+        uint8_t l_loc_coherent_link_id = 0xFF;
+        uint32_t l_loc_coherent_link_delay = 0xFFFFFFFF;
+
+        for (uint8_t l_loc_link_id = 0; l_loc_link_id < P10_FBC_UTILS_MAX_LINKS; l_loc_link_id++)
+        {
+            if (i_en[l_loc_link_id] && (i_agg_link_delay[l_loc_link_id] < l_loc_coherent_link_delay))
             {
-                o_addr_dis[l_loc_link_id] = (i_en[l_loc_link_id]) ? (1) : (0);
+                l_loc_coherent_link_delay = i_agg_link_delay[l_loc_link_id];
+                FAPI_DBG("Setting coherent_link_delay = %d", l_loc_coherent_link_delay);
             }
+        }
 
-            // scan link delays for smallest value
-            uint8_t l_loc_coherent_link_id = 0xFF;
-            uint32_t l_loc_coherent_link_delay = 0xFFFFFFFF;
+        // determine if more than one link matches the minimum delay
+        uint8_t l_matches = 0;
 
-            for (uint8_t l_loc_link_id = 0; l_loc_link_id < P10_FBC_UTILS_MAX_LINKS; l_loc_link_id++)
+        for (uint8_t l_loc_link_id = 0; l_loc_link_id < P10_FBC_UTILS_MAX_LINKS; l_loc_link_id++)
+        {
+            if (i_en[l_loc_link_id] && (i_agg_link_delay[l_loc_link_id] == l_loc_coherent_link_delay))
             {
-                if (i_en[l_loc_link_id] && (i_agg_link_delay[l_loc_link_id] < l_loc_coherent_link_delay))
-                {
-                    l_loc_coherent_link_delay = i_agg_link_delay[l_loc_link_id];
-                    FAPI_DBG("Setting coherent_link_delay = %d", l_loc_coherent_link_delay);
-                }
+                l_matches++;
+                l_loc_coherent_link_id = l_loc_link_id;
             }
+        }
 
-            // determine if more than one link matches the minimum delay
-            uint8_t l_matches = 0;
+        // ties must be broken consistently on both connected chips; we
+        // need to pick both ends of the same link to carry coherency
+        // select link with lowest link ID number on chip with smaller fabric ID
+        if (l_matches != 1)
+        {
+            FAPI_DBG("Breaking tie");
 
-            for (uint8_t l_loc_link_id = 0; l_loc_link_id < P10_FBC_UTILS_MAX_LINKS; l_loc_link_id++)
+            if (i_loc_fbc_id < l_rem_fbc_id)
             {
-                if (i_en[l_loc_link_id] && (i_agg_link_delay[l_loc_link_id] == l_loc_coherent_link_delay))
+                // local fabric ID is smaller than remote
+                for (uint8_t l_loc_link_id = 0; l_loc_link_id < P10_FBC_UTILS_MAX_LINKS; l_loc_link_id++)
                 {
-                    l_matches++;
-                    l_loc_coherent_link_id = l_loc_link_id;
-                }
-            }
-
-            // ties must be broken consistently on both connected chips; we
-            // need to pick both ends of the same link to carry coherency
-            // select link with lowest link ID number on chip with smaller fabric ID
-            if (l_matches != 1)
-            {
-                FAPI_DBG("Breaking tie");
-
-                if (i_loc_fbc_id < l_rem_fbc_id)
-                {
-                    // local fabric ID is smaller than remote
-                    for (uint8_t l_loc_link_id = 0; l_loc_link_id < P10_FBC_UTILS_MAX_LINKS; l_loc_link_id++)
+                    if (i_en[l_loc_link_id] && (i_agg_link_delay[l_loc_link_id] == l_loc_coherent_link_delay))
                     {
-                        if (i_en[l_loc_link_id] && (i_agg_link_delay[l_loc_link_id] == l_loc_coherent_link_delay))
-                        {
-                            l_loc_coherent_link_id = l_loc_link_id;
-                            break;
-                        }
+                        l_loc_coherent_link_id = l_loc_link_id;
+                        break;
                     }
-
-                    FAPI_DBG("Selecting coherent link = link %d based on local chip", l_loc_coherent_link_id);
                 }
-                else
-                {
-                    // remote fabric ID is smaller than local
-                    uint8_t l_rem_coherent_link_id = 0xFF;
 
-                    for (uint8_t l_loc_link_id = 0; l_loc_link_id < P10_FBC_UTILS_MAX_LINKS; l_loc_link_id++)
-                    {
-                        if (i_en[l_loc_link_id] &&
-                            (i_agg_link_delay[l_loc_link_id] == l_loc_coherent_link_delay) &&
-                            (i_rem_link_id[l_loc_link_id] < l_rem_coherent_link_id))
-                        {
-                            l_rem_coherent_link_id = i_rem_link_id[l_loc_link_id];
-                            l_loc_coherent_link_id = l_loc_link_id;
-                        }
-                    }
-
-                    FAPI_DBG("Selecting coherent link = link %d based on remote chip", l_loc_coherent_link_id);
-                }
+                FAPI_DBG("Selecting coherent link = link %d based on local chip", l_loc_coherent_link_id);
             }
+            else
+            {
+                // remote fabric ID is smaller than local
+                uint8_t l_rem_coherent_link_id = 0xFF;
 
-            o_addr_dis[l_loc_coherent_link_id] = 0;
+                for (uint8_t l_loc_link_id = 0; l_loc_link_id < P10_FBC_UTILS_MAX_LINKS; l_loc_link_id++)
+                {
+                    if (i_en[l_loc_link_id]
+                        && (i_agg_link_delay[l_loc_link_id] == l_loc_coherent_link_delay)
+                        && (i_rem_link_id[l_loc_link_id] < l_rem_coherent_link_id))
+                    {
+                        l_rem_coherent_link_id = i_rem_link_id[l_loc_link_id];
+                        l_loc_coherent_link_id = l_loc_link_id;
+                    }
+                }
+
+                FAPI_DBG("Selecting coherent link = link %d based on remote chip", l_loc_coherent_link_id);
+            }
+        }
+
+        // disable coherent traffic on all other links connected to same remote chip as selected coherent link
+        for (uint8_t l_loc_link_id = 0; l_loc_link_id < P10_FBC_UTILS_MAX_LINKS; l_loc_link_id++)
+        {
+            if (i_en[l_loc_link_id]
+                && (i_rem_fbc_id[l_loc_link_id] == i_rem_fbc_id[l_loc_coherent_link_id])
+                && (l_loc_link_id != l_loc_coherent_link_id))
+            {
+                FAPI_DBG("Setting addr_dis[%d] = 1\n", l_loc_link_id);
+                o_addr_dis[l_loc_link_id] = 1;
+            }
         }
     }
 
@@ -261,6 +274,8 @@ fapi2::ReturnCode p10_fbc_eff_config_aggregate(
     ////////////////////////////////////////////////////////
     l_loc_fbc_id = (l_broadcast_mode == fapi2::ENUM_ATTR_PROC_FABRIC_BROADCAST_MODE_1HOP_CHIP_IS_GROUP) ?
                    (l_loc_fbc_group_id) : (l_loc_fbc_chip_id);
+
+    FAPI_DBG("Processing l_loc_fbc_id = %d\n", l_loc_fbc_id);
 
     ////////////////////////////////////////////////////////
     // Calculate aggregate configuration
