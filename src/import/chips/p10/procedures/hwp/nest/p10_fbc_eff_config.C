@@ -486,6 +486,7 @@ fapi2::ReturnCode p10_fbc_eff_config_link_attrs(void)
     FAPI_DBG("Start");
 
     fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
+    fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP> l_target = FAPI_SYSTEM.getChildren<fapi2::TARGET_TYPE_PROC_CHIP>().front();
 
     fapi2::ATTR_CHIP_UNIT_POS_Type l_iohs_pos;
     fapi2::ATTR_FREQ_PROC_IOHS_MHZ_Type l_freq_proc_iohs_mhz;
@@ -493,6 +494,8 @@ fapi2::ReturnCode p10_fbc_eff_config_link_attrs(void)
     fapi2::ATTR_PROC_FABRIC_BROADCAST_MODE_Type l_broadcast_mode;
     fapi2::ATTR_PROC_FABRIC_PRESENT_GROUPS_Type l_present_groups;
     fapi2::ATTR_PROC_FABRIC_A_INDIRECT_Type l_a_indirect;
+    fapi2::ATTR_CHIP_EC_FEATURE_HW543384_Type l_hw543384;
+    fapi2::ATTR_HW543384_WAR_MODE_Type l_hw543384_war_mode;
     uint8_t l_num_groups = 0;
 
     for (auto l_proc_target : FAPI_SYSTEM.getChildren<fapi2::TARGET_TYPE_PROC_CHIP>())
@@ -518,6 +521,10 @@ fapi2::ReturnCode p10_fbc_eff_config_link_attrs(void)
              "Error from FAPI_ATTR_GET (ATTR_PROC_FABRIC_BROADCAST_MODE)");
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_PRESENT_GROUPS, FAPI_SYSTEM, l_present_groups),
              "Error from FAPI_ATTR_GET (ATTR_PROC_FABRIC_PRESENT_GROUPS)");
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_HW543384, l_target, l_hw543384),
+             "Error from FAPI_ATTR_GET (ATTR_CHIP_EC_FEATURE_HW543384)");
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_HW543384_WAR_MODE, FAPI_SYSTEM, l_hw543384_war_mode),
+             "Error from FAPI_ATTR_GET (ATTR_HW543384_WAR_MODE)");
 
     for (uint8_t ii = 0; ii < P10_FBC_UTILS_MAX_CHIPS; ii++)
     {
@@ -532,6 +539,11 @@ fapi2::ReturnCode p10_fbc_eff_config_link_attrs(void)
     l_a_indirect = ((l_num_groups >= 4)
                     && (l_broadcast_mode == fapi2::ENUM_ATTR_PROC_FABRIC_BROADCAST_MODE_1HOP_CHIP_IS_GROUP)) ?
                    (fapi2::ENUM_ATTR_PROC_FABRIC_A_INDIRECT_ON) : (fapi2::ENUM_ATTR_PROC_FABRIC_A_INDIRECT_OFF);
+
+    if(l_hw543384 && (l_hw543384_war_mode == fapi2::ENUM_ATTR_HW543384_WAR_MODE_NONE))
+    {
+        l_a_indirect = fapi2::ENUM_ATTR_PROC_FABRIC_A_INDIRECT_OFF;
+    }
 
     FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_PROC_FABRIC_A_INDIRECT, FAPI_SYSTEM, l_a_indirect),
              "Error form FAPI_ATTR_GET (ATTR_PROC_FABRIC_A_INDIRECT)");

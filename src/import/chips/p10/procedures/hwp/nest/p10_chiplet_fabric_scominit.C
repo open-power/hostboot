@@ -61,14 +61,14 @@ fapi2::ReturnCode p10_chiplet_fabric_scominit(
     char l_tgt_str[fapi2::MAX_ECMD_STRING_LEN];
     fapi2::ReturnCode l_rc;
 
+    // apply FBC non-hotplug scom initfile
+    fapi2::toString(i_target, l_tgt_str, sizeof(l_tgt_str));
+    FAPI_DBG("Invoking p10.fbc.no_hp.scom.initfile on target %s...", l_tgt_str);
+    FAPI_EXEC_HWP(l_rc, p10_fbc_no_hp_scom, i_target, FAPI_SYSTEM);
+    FAPI_TRY(l_rc, "Error from p10_fbc_no_hp_scom");
+
     if (i_config_intranode)
     {
-        // apply FBC non-hotplug scom initfile
-        fapi2::toString(i_target, l_tgt_str, sizeof(l_tgt_str));
-        FAPI_DBG("Invoking p10.fbc.no_hp.scom.initfile on target %s...", l_tgt_str);
-        FAPI_EXEC_HWP(l_rc, p10_fbc_no_hp_scom, i_target, FAPI_SYSTEM);
-        FAPI_TRY(l_rc, "Error from p10_fbc_no_hp_scom");
-
         // init all FIRs as inactive before applying configuration
         for(auto l_iohs : i_target.getChildren<fapi2::TARGET_TYPE_IOHS>(fapi2::TARGET_STATE_PRESENT))
         {
