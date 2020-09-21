@@ -35,7 +35,7 @@ use Hostboot::_DebugFramework;
 
 # HRMOR value: 4 GB - 256 MB = 3840 MB
 use constant DEFAULT_HRMOR => 3840*1024*1024;
-use constant PER_NODE_OFFSET => 32*1024*1024*1024*1024; # 32 TB.
+use constant PER_NODE_OFFSET => 64*1024*1024*1024*1024; # 64 TB.
 use constant UNSET_HRMOR => 0xFFFFFFFFFFFFFFFF;
 
 my $filename = basename (__FILE__);
