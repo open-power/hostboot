@@ -234,14 +234,17 @@ echo "Wait for SBE and Hostboot bootloader to complete."
 echo
 echo "==================================="
 echo
-BL_HRMOR=0xF0200000
 loopcount=1
 while true; do
     sleep 5
     HRMOR=`autosim $NOWIN --simcmd   "python \"getHRMOR()\""| tr -d '\n\r'`
     echo "HRMOR = $HRMOR"
 
-    if [[ "$HRMOR" -ne "$BL_HRMOR" ]] && [[ "$HRMOR" -ne 0 ]]; then
+    ## if HRMOR is at a 0x200000 (2MB) offset then we can assume we
+    ## are still in the bootloader
+    HRMOR_AT_BL_OFFSET=`echo $((($HRMOR & 0x200000) != 0))`
+
+    if [[ "$HRMOR_AT_BL_OFFSET" -eq 0 ]] && [[ "$HRMOR" -ne 0 ]]; then
         echo "SBE and Hostboot bootloader completed successfully"
         break
     fi
