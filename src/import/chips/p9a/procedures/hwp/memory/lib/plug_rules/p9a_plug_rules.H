@@ -88,27 +88,6 @@ struct spd_lookup_key
     bool operator!=(const spd_lookup_key& i_rhs) const;
 };
 
-/// @note This is the oldest functional DDIMM SPD revision
-///       any DIMMs with older SPD will be called out
-static const uint8_t MIN_FUNCTIONAL_SPD_REV = 0x03;
-
-/// @note These are the latest DDIMM SPD combined revisions
-///       combined revision is the SPD revision and the SPD content revision
-///       any DIMMs with older SPD will generate an error
-///       The first byte is the major revision
-///               any updates to this are usually new bytes and will require code updates
-///       The second byte is the content revision
-///               updates to this byte are most likely values and it's less likely that code will need to be updated
-/// @note When adding new vendors, THIS NEEDS TO BE IN SORTED ORDER BY VENDOR ID ENCODING
-static const std::vector<std::pair<uint16_t, uint16_t>> LATEST_SPD_COMBINED_REV =
-{
-    {fapi2::ENUM_ATTR_MEM_EFF_MODULE_MFG_ID_SMART,      0x0400}, // 0x0194
-    {fapi2::ENUM_ATTR_MEM_EFF_MODULE_MFG_ID_US_MODULAR, 0x0400}, // 0x04AB
-    {fapi2::ENUM_ATTR_MEM_EFF_MODULE_MFG_ID_FUJITSU,    0x0400}, // 0x8004
-    {fapi2::ENUM_ATTR_MEM_EFF_MODULE_MFG_ID_MICRON,     0x0400}, // 0x802C
-    {fapi2::ENUM_ATTR_MEM_EFF_MODULE_MFG_ID_SAMSUNG,    0x0400}, // 0x80CE
-};
-
 ///
 /// @brief Enforce the plug-rules we can do before mss_freq
 /// @param[in] i_target FAPI2 target (proc chip)
@@ -149,29 +128,54 @@ namespace check
 {
 
 ///
-/// @brief Check that we recognize DDIMM module manufacturing ID
+/// @brief Check that we recognize SPD lookup key and return the SPD versions associated with the key
 /// @param[in] i_target dimm target
-/// @param[in] i_module_mfg_id DIMM module manufacturing ID
-/// @param[out] o_latest_content_rev latest SPD content revision
+/// @param[in] i_key the SPD lookup key to be used to grab the combined revisions
+/// @param[out] o_minimum_combined_rev minimum SPD combined revisions
+/// @param[out] o_latest_combined_rev latest SPD combined revisions
 /// @return fapi2::FAPI2_RC_SUCCESS if okay. A non-SUCCESS return will also produce an informational log
 ///
-fapi2::ReturnCode module_mfg_id(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-                                const uint16_t i_module_mfg_id,
-                                uint16_t& o_latest_content_rev);
+fapi2::ReturnCode spd_revision_key(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+                                   const spd_lookup_key& i_key,
+                                   uint16_t& o_minimum_combined_rev,
+                                   uint16_t& o_latest_combined_rev);
+
+///
+/// @brief Check DDIMM SPD revision and content revision versus minimum supported
+/// @param[in] i_target dimm target
+/// @param[in] i_spd_combined_revision the combined SPD revision and content
+/// @param[in] i_min_combined_rev SPD minimum combined revision information
+/// @return fapi2::FAPI2_RC_SUCCESS if okay. A non-SUCCESS return will also produce an informational log
+/// @note The return code from this function is only used in unit tests.
+///
+fapi2::ReturnCode spd_minimum_combined_revision(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+        const uint16_t i_spd_combined_rev,
+        const uint16_t i_min_combined_rev);
 
 ///
 /// @brief Check DDIMM SPD revision and content revision versus latest supported
 /// @param[in] i_target dimm target
-/// @param[in] i_spd_rev SPD revision
-/// @param[in] i_spd_content_rev SPD content revision
-/// @param[in] i_latest_combined_rev latest SPD combined revision
+/// @param[in] i_spd_combined_revision the combined SPD revision and content
+/// @param[in] i_latest_combined_rev latest SPD combined revision information
 /// @return fapi2::FAPI2_RC_SUCCESS if okay. A non-SUCCESS return will also produce an informational log
 /// @note The return code from this function is only used in unit tests.
 ///
-fapi2::ReturnCode spd_combined_revision(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-                                        const uint8_t i_spd_rev,
-                                        const uint8_t i_spd_content_rev,
-                                        const uint16_t i_latest_combined_rev);
+fapi2::ReturnCode spd_latest_combined_revision(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+        const uint16_t i_spd_combined_rev,
+        const uint16_t i_latest_combined_rev);
+
+///
+/// @brief Check DDIMM SPD revision and content revision versus minimum supported
+/// @param[in] i_target dimm target
+/// @param[in] i_spd_combined_revision the combined SPD revision and content
+/// @param[in] i_min_combined_rev SPD minimum combined revision information
+/// @return fapi2::FAPI2_RC_SUCCESS if okay. A non-SUCCESS return will also produce an informational log
+/// @note The return code from this function is only used in unit tests.
+///
+fapi2::ReturnCode spd_minimum_combined_revision(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+        const uint16_t i_spd_combined_rev,
+        const uint16_t i_min_combined_rev);
+
 } // namespace check
 
 ///
