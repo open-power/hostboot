@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2017,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -47,6 +47,8 @@
 #include <p9_hcd_memmap_base.H>
 #include <p9_pm_hcd_flags.h>
 #include <p9_pm_recovery_ffdc_defines.H>
+#include <p9n2_perv_scom_addresses.H>
+#include <p9a_quad_scom_addresses.H>
 
 /**
  * @brief   local constants used within HWP
@@ -62,6 +64,7 @@ enum
     CFG_PM_MUX_DISABLE          =   7,
     TP_FENCE_PCB                =   25,
     OCC_FLAG2_SCOM1_ADDR        =   0x0006C18B,
+    PFET_TRIGGERED_CME_MALF     =   61,
 };
 
 /**
@@ -271,13 +274,18 @@ void CoreAction :: getDeadCoreVector( fapi2::buffer <uint32_t>& o_deadCoreVectBu
 fapi2::ReturnCode CoreAction :: clearPmMalFuncRegs( )
 {
     fapi2::buffer <uint64_t> l_scomData;
+    fapi2::ReturnCode l_tempRc;
 
+    l_tempRc = fapi2::current_err;
     l_scomData.flush < 0 >();
     l_scomData.setBit( 0, MAX_CORES_PER_CHIP );   // clear dead core vector
     l_scomData.setBit( p9hcd::PM_CALLOUT_ACTIVE );      // clear PM Malfunction error
 
     FAPI_TRY( putScom( iv_procChipTgt, P9N2_PU_OCB_OCI_OCCFLG2_SCOM1, l_scomData ),
               "Failed To Write OCC Flag2 Register" );
+
+    fapi2::current_err = l_tempRc;
+
 fapi_try_exit:
     return fapi2::current_err;
 }
@@ -295,6 +303,13 @@ extern "C"
         using namespace p9_stop_recov_ffdc;
         FAPI_IMP(">> p9_pm_callout" );
 
+        fapi2::buffer <uint64_t> l_occLfir;
+        fapi2::buffer <uint64_t> l_cpmmmrVal;
+        fapi2::buffer <uint64_t> l_cmeScratchReg[MAX_CMES_PER_CHIP];
+        uint8_t  l_exPos  = 0;
+        uint8_t  l_corePos = 0;
+        auto exList = i_procTgt.getChildren<fapi2::TARGET_TYPE_EX>(fapi2::TARGET_STATE_FUNCTIONAL);
+        fapi2::buffer <uint32_t> l_faultVector;
         errlver_t  l_summSectn;
         HomerFfdcRegion* l_pHomerFfdc =
             ( HomerFfdcRegion*)( (uint8_t*)i_pHomerBase + FFDC_REGION_HOMER_BASE_OFFSET );
@@ -321,6 +336,103 @@ extern "C"
 
         l_coreActn.getDeadCoreVector( o_deadCores ); //retrieve Phyp generated dead core vector
         FAPI_INF("Dead cores from PHYP: 0x%08x", o_deadCores);
+
+        FAPI_TRY( getScom( i_procTgt, P9N2_PERV_TP_OCC_SCOM_OCCLFIR, l_occLfir ),
+                  "Failed To Read OCC LFIR" );
+
+        // Check if mal-function is trigerred by PFET Headers
+        if( l_occLfir.getBit( PFET_TRIGGERED_CME_MALF ) )
+        {
+
+            for( auto ex : exList )
+            {
+                FAPI_TRY( FAPI_ATTR_GET( fapi2::ATTR_CHIP_UNIT_POS, ex, l_exPos ),
+                          "fapiGetAttribute of ATTR_CHIP_UNIT_POS" );
+                auto coreList = ex.getChildren< fapi2::TARGET_TYPE_CORE >();
+
+                for( auto core : coreList )
+                {
+                    l_cpmmmrVal.flush<0>();
+                    FAPI_TRY( fapi2::getScom(core, C_CPPM_CPMMR, l_cpmmmrVal ),
+                              "Failed To Read CPMMR");
+
+                    FAPI_TRY( FAPI_ATTR_GET( fapi2::ATTR_CHIP_UNIT_POS, core, l_corePos ) );
+
+                    if(    l_cpmmmrVal.getBit<5>())
+                    {
+                        l_cmeScratchReg[l_exPos].setBit<5>();
+                    }
+
+                    if(    l_cpmmmrVal.getBit<6>())
+                    {
+                        l_cmeScratchReg[l_exPos].setBit<6>();
+                    }
+
+                }
+
+                //Creating summary of PFET header error from scratch registers of all CMEs
+
+                if( l_cmeScratchReg[l_exPos].getBit<5>())
+                {
+
+                    l_faultVector.setBit( 2 * l_exPos );
+                }
+
+                if( l_cmeScratchReg[l_exPos].getBit<6>() )
+                {
+                    l_faultVector.setBit( (2 * l_exPos) + 1 );
+                }
+            }
+
+            for( auto ex : exList )
+            {
+                FAPI_TRY( FAPI_ATTR_GET( fapi2::ATTR_CHIP_UNIT_POS, ex, l_exPos ) );
+                auto coreList = ex.getChildren< fapi2::TARGET_TYPE_CORE >( fapi2::TARGET_STATE_FUNCTIONAL );
+
+                for( auto core : coreList )
+                {
+                    FAPI_TRY( FAPI_ATTR_GET( fapi2::ATTR_CHIP_UNIT_POS, core, l_corePos ) );
+
+                    FAPI_ASSERT( !( l_cmeScratchReg[l_exPos].getBit<5>() && l_cmeScratchReg[l_exPos].getBit<6>() ),
+                                 fapi2::BAD_EX_PFET_HEADER_TRIGERRED_PM_MALF()
+                                 .set_SCRATCH_REG( l_cmeScratchReg[l_exPos] )
+                                 .set_OCC_LFIR( l_occLfir )
+                                 .set_FAULT_VECTOR( l_faultVector )
+                                 .set_EX_TARGET( ex )
+                                 .set_PROC_CHIP_IN_ERROR( i_procTgt )
+                                 .set_EX_NUMBER_IN_ERROR( l_exPos ),
+                                 "Both Core's PFET Header Fault Trigerred PM Malfunction" );
+
+                    if( l_corePos & 0x01 )
+                    {
+                        FAPI_ASSERT( !( l_cmeScratchReg[l_exPos].getBit<6>() ),
+                                     fapi2::BAD_C1_PFET_HEADER_TRIGERRED_PM_MALF()
+                                     .set_SCRATCH_REG( l_cmeScratchReg[l_exPos] )
+                                     .set_OCC_LFIR( l_occLfir )
+                                     .set_FAULT_VECTOR( l_faultVector )
+                                     .set_CORE_TARGET( core )
+                                     .set_PROC_CHIP_IN_ERROR( i_procTgt )
+                                     .set_CORE_NUMBER_IN_ERROR(l_corePos ),
+                                     "C1 PFET Header Fault Trigerred PM Malfunction" );
+                    }
+                    else
+                    {
+                        FAPI_ASSERT( !( l_cmeScratchReg[l_exPos].getBit<5>() ),
+                                     fapi2::BAD_C0_PFET_HEADER_TRIGERRED_PM_MALF()
+                                     .set_SCRATCH_REG( l_cmeScratchReg[l_exPos] )
+                                     .set_OCC_LFIR( l_occLfir )
+                                     .set_FAULT_VECTOR( l_faultVector )
+                                     .set_CORE_TARGET( core )
+                                     .set_PROC_CHIP_IN_ERROR( i_procTgt )
+                                     .set_CORE_NUMBER_IN_ERROR(l_corePos ),
+                                     "C0 PFET Header Fault Trigerred PM Malfunction" );
+                    }
+
+                }//for auto core
+
+            } //for auto ex
+
+        }   // if( l_occLfir.getBit
 
         for( uint8_t l_secId = 0; l_secId < MAX_FFDC_SUMMARY_SECTN_CNT;
              l_secId++ )

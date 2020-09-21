@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -68,6 +68,8 @@
 #include <p9_pm_recovery_ffdc_occ.H>
 #include <p9_pm_recovery_ffdc_cppm.H>
 #include <p9_pm_recovery_ffdc_qppm.H>
+#include <p9n2_perv_scom_addresses.H>
+#include <p9a_quad_scom_addresses.H>
 
 // -----------------------------------------------------------------------------
 // Constant definitions
@@ -113,6 +115,9 @@ fapi2::ReturnCode p9_pm_reset(
 
     const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
     bool l_malfAlert = false;
+    fapi2::buffer<uint64_t> l_cpmmmrVal;
+    fapi2::buffer<uint64_t> l_qmeScrVal;
+    auto ex_list = i_target.getChildren<fapi2::TARGET_TYPE_EX>();
 
     fapi2::ATTR_PM_MALF_CYCLE_Type l_pmMalfCycle =
         fapi2::ENUM_ATTR_PM_MALF_CYCLE_INACTIVE;
@@ -434,6 +439,7 @@ fapi2::ReturnCode p9_pm_reset(
     if (l_malfAlert == true)
     {
         const uint32_t l_OCC_LFIR_BIT_STOP_RCV_NOTIFY_PRD = 3;
+
         l_phase = PM_RESET_NOTIFY_PRD;
         FAPI_TRY (FAPI_ATTR_SET (fapi2::ATTR_PM_RESET_PHASE, i_target, l_phase));
 

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -201,7 +201,8 @@ fapi2::ReturnCode p9_update_ec_eq_state(
     FAPI_TRY(update_eq_config(i_target),
              "Error update_cache_config detected");
 
-    FAPI_TRY(verify_eq_ec_hw_state(i_target));
+// Remove to keep from accessing a deconfigured core or quad
+//    FAPI_TRY(verify_eq_ec_hw_state(i_target));
 
     //Check PROC_SBE_MASTER attr to see if this is master proc
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_SBE_MASTER_CHIP, i_target, l_is_master_chip))

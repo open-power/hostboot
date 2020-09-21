@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -45,6 +45,7 @@
 #include <p9_eq_clear_atomic_lock.H>
 #include <p9_pm_recovery_ffdc_sgpe.H>
 #include <p9_pm_recovery_ffdc_cme.H>
+#include <p9a_quad_scom_addresses.H>
 
 using namespace p9_stop_recov_ffdc;
 namespace p9_check_idle_stop
@@ -66,6 +67,8 @@ enum PmState
     SGPE_HCODE_HALT =   0x0100,
     SGPE_OFFLINE    =   0x0200,
     PM_ACTIVE       =   0x0400,
+    C0_PFET_HDR     =   0x0800,
+    C1_PFET_HDR     =   0x1000,
 };
 
 /**
@@ -89,6 +92,8 @@ enum
     TIMEOUT_COUNT               =
         (FORCE_CORE_TIMEOUT_MS * 1000) / FORCE_CORE_POLLTIME_US,
     HALT_CONDITION_BIT          =   4,
+    C0_PFET_HDR_ERR_BIT         =  0,
+    C1_PFET_HDR_ERR_BIT         =  1,
 
 };
 
@@ -192,6 +197,16 @@ class CmeState
         fapi2::ReturnCode collectSramFfdc( fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP >& i_procChipTgt,
                                            fapi2::variable_buffer& i_ffdcVarBuf );
 
+        /**
+         * @return returns even core's PFET header error's status.
+         */
+        bool getEvenCorePfetHdrErrStatus( );
+
+        /**
+         * @return returns odd core's PFET header error's status.
+         */
+        bool getOddCorePfetHdrErrStatus( );
+
     private:
         uint8_t     iv_cmePos;          // CME Position
         uint16_t    iv_cmeHcodeState;   // State of CME
@@ -286,12 +301,33 @@ bool CmeState::isStopGated()
 
 //----------------------------------------------------------------------------------------------
 
+bool CmeState::getOddCorePfetHdrErrStatus( )
+{
+    bool l_c1PfetErr = false;
+    l_c1PfetErr = ( iv_cmeHcodeState & C1_PFET_HDR ) ? true : false;
+
+    return l_c1PfetErr;
+}
+
+//----------------------------------------------------------------------------------------------
+
+bool CmeState::getEvenCorePfetHdrErrStatus( )
+{
+    bool l_coPfetErr = false;
+    l_coPfetErr = ( iv_cmeHcodeState & C0_PFET_HDR ) ? true : false;
+
+    return l_coPfetErr;
+}
+
+//----------------------------------------------------------------------------------------------
+
 fapi2::ReturnCode CmeState:: init( fapi2::Target< fapi2::TARGET_TYPE_CORE >& i_coreTgt )
 {
-    FAPI_DBG(">> CmeState:: init" );
+    FAPI_IMP(">> CmeState:: init" );
     fapi2::buffer<uint64_t> l_cmeSisrRegValue;
     fapi2::buffer<uint64_t> l_cmeXsrRegValue;
     fapi2::buffer<uint64_t> l_cmeRegValue;
+    fapi2::buffer<uint64_t> l_cpmmmrVal;
     uint32_t l_tempXirData = 0;
     uint8_t l_corePos = 0;
     uint8_t l_coreSplAttn = SPECIAL_ATTN_BIT;
@@ -329,7 +365,7 @@ fapi2::ReturnCode CmeState:: init( fapi2::Target< fapi2::TARGET_TYPE_CORE >& i_c
             break;
         }
 
-        FAPI_DBG("CME XSR Val       :   0x%016lx", l_cmeXsrRegValue );
+        FAPI_IMP("CME XSR Val       :   0x%016lx", l_cmeXsrRegValue );
 
         l_retCode = getScom( l_exTgt, EX_CME_LCL_SISR_SCOM, l_cmeSisrRegValue );
 
@@ -344,12 +380,44 @@ fapi2::ReturnCode CmeState:: init( fapi2::Target< fapi2::TARGET_TYPE_CORE >& i_c
             iv_cmeHcodeState |= PM_ACTIVE;
         }
 
-        FAPI_DBG("SISR Val          :   0x%016lx", l_cmeSisrRegValue );
+        FAPI_IMP("SISR Val          :   0x%016lx", l_cmeSisrRegValue );
 
         //CME is in halt state
 
         if( l_cmeXsrRegValue.getBit< HALT_BIT >() )
         {
+            uint8_t l_cPos = 0;
+
+            auto coreList = l_exTgt.getChildren< fapi2::TARGET_TYPE_CORE >();
+
+            for( auto core : coreList )
+            {
+                FAPI_ATTR_GET( fapi2::ATTR_CHIP_UNIT_POS, core, l_cPos ) ;
+
+                l_retCode = getScom( core, C_CPPM_CPMMR, l_cpmmmrVal);
+
+                FAPI_IMP("CPMMR Val          :   0x%016lx", l_cpmmmrVal);
+
+                if( l_retCode  != fapi2::FAPI2_RC_SUCCESS )
+                {
+                    iv_cmeHcodeState |= SCOM_FAILURE;
+                    break;
+                }
+
+                if( l_cpmmmrVal.getBit ( 5 + (l_cPos & 0x01) ))
+                {
+                    iv_cmeHcodeState |= ( l_cPos & 0x01 ) ? C1_PFET_HDR : C0_PFET_HDR;
+                }
+            } //end of core list
+
+            if ( (iv_cmeHcodeState & C1_PFET_HDR) ||
+                 (iv_cmeHcodeState & C0_PFET_HDR ))
+            {
+                iv_cmeHcodeState |= CME_HCODE_HALT;
+                FAPI_IMP("Hit the PFET header state");
+                break;
+            }
+
             if( l_cmeSisrRegValue.getBit( l_coreSplAttn ) )
             {
                 iv_cmeHcodeState |= BAD_CORE_ATTN;
@@ -367,7 +435,7 @@ fapi2::ReturnCode CmeState:: init( fapi2::Target< fapi2::TARGET_TYPE_CORE >& i_c
             l_cmeRegValue.extract<0, 8>( l_tempXirData );
             l_cmeRegValue.extract<0, 32>( iv_irRegValue );
 
-            FAPI_DBG("CME IR-EDR    :   0x%016lx", l_cmeRegValue );
+            FAPI_IMP("CME IR-EDR    :   0x%016lx", l_cmeRegValue );
 
             if( ( TRAP_OPCODE == l_tempXirData ) ||
                 l_cmeXsrRegValue.getBit< TRAP_EVENT_BIT >() )
@@ -403,7 +471,7 @@ fapi2::ReturnCode CmeState:: init( fapi2::Target< fapi2::TARGET_TYPE_CORE >& i_c
 
 fapi_try_exit:
 
-    FAPI_DBG("<< CmeState:: init" );
+    FAPI_IMP("<< CmeState:: init %08X", iv_cmeHcodeState);
 
     return fapi2::current_err;
 
@@ -579,7 +647,7 @@ fapi2::ReturnCode SgpeState::init( fapi2::Target< fapi2::TARGET_TYPE_EX >& i_exT
         if( l_retCode )
         {
             //Still let us make an attempt to check SGPE State
-            FAPI_INF("fapi2::delay failed" );
+            FAPI_IMP("fapi2::delay failed" );
         }
 
         l_retCode = getScom( l_parentProc, PU_GPE3_GPEXIXSR_SCOM, l_sgpeXsrRegVal );
@@ -751,6 +819,14 @@ class StopFfdcRules
          */
         fapi2::ReturnCode forceSgpeHalt();
 
+        /**
+         * @brief returns fapi2 RC suggesting that there is PFET header error.
+         * @return  fapi2 RC
+         */
+        fapi2::ReturnCode assertPfetHeaderFault();
+
+
+
     private:
 
         SgpeState       iv_sgpeState;   // Summarizes state of SGPE
@@ -765,7 +841,7 @@ class StopFfdcRules
 
 fapi2::ReturnCode StopFfdcRules::init()
 {
-    FAPI_DBG(">> StopFfdcRules::init");
+    FAPI_IMP(">> StopFfdcRules::init");
     fapi2::ReturnCode l_retCode = fapi2::FAPI2_RC_SUCCESS;
 
     iv_exTgt    =   iv_coreTgt.getParent<fapi2::TARGET_TYPE_EX>();
@@ -795,7 +871,7 @@ fapi2::ReturnCode StopFfdcRules::init()
     iv_cmeState.dumpCmeState();
 
 fapi_try_exit:
-    FAPI_DBG("<< StopFfdcRules::init");
+    FAPI_IMP("<< StopFfdcRules::init");
     return fapi2::current_err;
 }
 
@@ -888,7 +964,15 @@ fapi2::ReturnCode StopFfdcRules::analyze( )
     }
     else if( iv_cmeState.isCmeHcodeHalted() )
     {
-        l_retCode = assertCmeHcodeHalt();
+        if( iv_cmeState.getEvenCorePfetHdrErrStatus() ||
+            iv_cmeState.getOddCorePfetHdrErrStatus() )
+        {
+            l_retCode = assertPfetHeaderFault();
+        }
+        else
+        {
+            l_retCode = assertCmeHcodeHalt();
+        }
     }
     else if ( iv_cmeState.isCmeHalted() )
     {
@@ -1257,8 +1341,121 @@ fapi2::ReturnCode StopFfdcRules::assertCoreRunning()
     //and accessible. Hence, simply return SUCCESS
     FAPI_DBG( "<< StopFfdcRules::assertCoreRunning" );
     return fapi2::FAPI2_RC_SUCCESS;
-
 }
+
+//----------------------------------------------------------------------------------------------
+
+fapi2::ReturnCode StopFfdcRules::assertPfetHeaderFault()
+{
+    FAPI_DBG( ">> StopFfdcRules::assertPfetHeaderFault" );
+    //______________________________________________________________________________________________
+    //BAD_xx_PFET_HEADER| SGPE State |  CME State   |   CME FFDC Reg  |   SGPE FFDC Reg | Misc
+    //                  |            |              |                 |                 |
+    //                  |------------|--------------|-----------------|----------------------------
+    //                  |  No        |   Yes        |    No           |   No            |
+    //______________________________________________________________________________________________
+    //
+    uint8_t l_corePos = 0;
+    uint8_t l_exPos   = 0;
+    fapi2::buffer<uint64_t> l_occLfirBuf;
+    fapi2::buffer<uint64_t> l_cpmmmrVal;
+    fapi2::buffer<uint64_t> l_faultVector;
+    auto l_exList = iv_procTgt.getChildren< fapi2::TARGET_TYPE_EX > ();
+    fapi2::ReturnCode l_retCode = getScom( iv_procTgt, OCB_OCCLFIR, l_occLfirBuf );
+    auto coreList = iv_exTgt.getChildren< fapi2::TARGET_TYPE_CORE >();
+
+    if( l_retCode )
+    {
+        FAPI_ERR("SCOM Error in FFDC Path - Ignoring" );
+    }
+
+    l_faultVector.flush<0> ();
+
+    FAPI_ATTR_GET( fapi2::ATTR_CHIP_UNIT_POS, iv_exTgt, l_exPos );
+
+    for( auto core : coreList )
+    {
+        l_retCode = getScom( core, C_CPPM_CPMMR, l_cpmmmrVal);
+
+        FAPI_ATTR_GET( fapi2::ATTR_CHIP_UNIT_POS, core, l_corePos ) ;
+
+        //Creating summary of PFET header error from scratch registers of
+        //all CMEs
+
+        if(    l_cpmmmrVal.getBit<5>())
+        {
+            l_faultVector.setBit( 2 * l_exPos );
+        }
+
+        if(    l_cpmmmrVal.getBit<6>())
+        {
+            l_faultVector.setBit( (2 * l_exPos) + 1 );
+        }
+
+    }
+
+
+    l_retCode = getScom( iv_coreTgt, C_CPPM_CPMMR, l_cpmmmrVal);
+
+    if( l_retCode )
+    {
+        FAPI_ERR("SCOM Error in FFDC Path - Ignoring" );
+    }
+
+
+    if( iv_cmeState.getEvenCorePfetHdrErrStatus() &&
+        iv_cmeState.getOddCorePfetHdrErrStatus() )
+    {
+        FAPI_ATTR_GET( fapi2::ATTR_CHIP_UNIT_POS, iv_exTgt, l_exPos );
+        FAPI_ASSERT( false,
+                     fapi2::BAD_EX_PFET_HEADER_TRIGERRED_PM_MALF()
+                     .set_SCRATCH_REG( l_cpmmmrVal )
+                     .set_OCC_LFIR( l_occLfirBuf)
+                     .set_FAULT_VECTOR( l_faultVector )
+                     .set_EX_TARGET( iv_exTgt )
+                     .set_PROC_CHIP_IN_ERROR(iv_procTgt )
+                     .set_EX_NUMBER_IN_ERROR(l_exPos ),
+                     "Both Core's PFET Header Fault Trigerred PM Malfunction" );
+    }
+
+    for( auto core : coreList )
+    {
+        l_retCode = getScom( core, C_CPPM_CPMMR, l_cpmmmrVal);
+
+        FAPI_ATTR_GET( fapi2::ATTR_CHIP_UNIT_POS, core, l_corePos ) ;
+
+        if( l_cpmmmrVal.getBit<6>())
+        {
+            FAPI_ASSERT( false,
+                         fapi2::BAD_C1_PFET_HEADER_TRIGERRED_PM_MALF()
+                         .set_SCRATCH_REG( l_cpmmmrVal)
+                         .set_OCC_LFIR( l_occLfirBuf )
+                         .set_FAULT_VECTOR( l_faultVector )
+                         .set_CORE_TARGET( iv_coreTgt )
+                         .set_PROC_CHIP_IN_ERROR( iv_procTgt )
+                         .set_CORE_NUMBER_IN_ERROR( l_corePos ),
+                         "CME Halted Due To C1 PFET Header Fault" );
+        }
+
+        if (l_cpmmmrVal.getBit<5>())
+        {
+            FAPI_ASSERT( false,
+                         fapi2::BAD_C0_PFET_HEADER_TRIGERRED_PM_MALF()
+                         .set_SCRATCH_REG( l_cpmmmrVal)
+                         .set_OCC_LFIR( l_occLfirBuf )
+                         .set_FAULT_VECTOR( l_faultVector )
+                         .set_CORE_TARGET( iv_coreTgt )
+                         .set_PROC_CHIP_IN_ERROR( iv_procTgt )
+                         .set_CORE_NUMBER_IN_ERROR( l_corePos ),
+                         "CME Halted Due To C0 PFET Header Fault" );
+        }
+    }
+
+fapi_try_exit:
+    FAPI_DBG( "<< StopFfdcRules::assertPfetHeaderFault" );
+    return fapi2::current_err;
+}
+
 
 //----------------------------------------------------------------------------------------------
 
