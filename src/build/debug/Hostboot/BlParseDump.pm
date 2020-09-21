@@ -45,10 +45,12 @@ use constant BL_DATA_DUMP_SIZE_BYTES => 16;
 sub main
 {
     ::userDisplay "\n-----------Bootloader Parse Dump------------\n";
-    ::userDisplay("Minor warning: as of 9/10/2020, should changes\n"
-                  "be made to the formating found in bl_terminate.C,\n"
-                  "or the sizes of the data in bootloader_data.H,\n"
-                  "then this parser may no longer be correct\n");
+
+    my $warning = "Minor warning: as of 9/10/2020, should changes\n";
+    $warning .= "be made to the formating found in bl_terminate.C,\n";
+    $warning .= "or the sizes of the data in bootloader_data.H,\n";
+    $warning .= "then this parser may no longer be correct\n";
+    ::userDisplay($warning);
 
     # skip the data/bytes after 'Fatal Error SRC:' since that info is given
     # later and parsed in the data following 'Dump:'
