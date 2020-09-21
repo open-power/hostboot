@@ -37,7 +37,12 @@ use Getopt::Long qw(:config pass_through);
 # Hostboot base image constants for the hardware header portion of the
 # secureboot header
 use constant BASE_IMAGE_TOTAL_CONTAINER_SIZE => 0x000000000007EF80;
-use constant BASE_IMAGE_TARGET_HRMOR => 0x00000000F0000000;
+# Note: base_image_target_hrmor is not being filled out because
+# the value is not used. We want the hostboot codebase to be able
+# to dynamically handle being loaded at any HRMOR. We will use a
+# value of zero to comply with legacy code that validates the
+# field as an aligned value.
+use constant BASE_IMAGE_TARGET_HRMOR => 0x0000000000000000;
 use constant BASE_IMAGE_INSTRUCTION_START_STACK_POINTER => 0x0000000008280000;
 
 use constant MAX_COMP_ID_LEN => 8;
