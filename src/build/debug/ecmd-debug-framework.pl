@@ -33,8 +33,8 @@ use lib dirname (__FILE__);
 
 use Hostboot::_DebugFramework;
 
-# HRMOR value: 4 GB - 256 MB = 3840 MB
-use constant DEFAULT_HRMOR => 3840*1024*1024;
+# HRMOR value: 4 GB - 512 MB = 3584 MB
+use constant DEFAULT_HRMOR => 3584*1024*1024;
 use constant PER_NODE_OFFSET => 64*1024*1024*1024*1024; # 64 TB.
 use constant UNSET_HRMOR => 0xFFFFFFFFFFFFFFFF;
 
@@ -162,7 +162,7 @@ sub getEnv
 
 # @sub getHRMOR
 #
-# Returns the HRMOR (4GB-256MB for a real system).
+# Returns the HRMOR (4GB-512MB for a real system).
 #
 sub getHRMOR
 {
@@ -456,7 +456,7 @@ List of arguments to pass to the tool as options.
 
 =item B<--force-hrmor>=value
 
-Set the HRMOR to be a non-default value.  The default is 4GB-256MB.
+Set the HRMOR to be a non-default value.  The default is 4GB-512MB.
 
 =item B<--toolhelp>
 
