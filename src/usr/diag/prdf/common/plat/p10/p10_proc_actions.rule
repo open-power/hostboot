@@ -47,6 +47,22 @@ actionclass nx_th_1
 /** Callout connected NX, threshold 1, SUE originated from somewhere else */
 actionclass nx_th_1_SUE { nx_th_1; SueSeen; };
 
+/** PLL Threshold of 2 per 5 mins */
+actionclass thresholdPll
+{
+    threshold( field(2 / 5 min) );
+};
+
+/** This action is needed when TP_LOCAL_FIR[28] is set and the attention was not
+ *  attributed to a PLL unlock error. */
+actionclass pcb_slave_internal_parity
+{
+    calloutSelfHigh;
+    thresholdPll;
+    funccall("capturePllFfdc");
+    funccall("clearPcbSlaveParityError");
+};
+
 ###############################################################################
 # Analyze connected
 ###############################################################################

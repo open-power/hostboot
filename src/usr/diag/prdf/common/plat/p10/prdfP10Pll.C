@@ -452,33 +452,6 @@ int32_t queryPllErrTypes(ExtensibleChip* i_chip, PllErrTypes& o_errTypes)
 PRDF_PLUGIN_DEFINE(p10_proc, queryPllErrTypes);
 
 /**
- * @brief  Clears PCB slave parity errors on this chip.
- * @param  i_chip A PROC chip.
- * @param  io_sc  The step code data struct.
- * @return Non-SUCCESS on failure. SUCCESS, otherwise.
- */
-int32_t clearParityError(ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc)
-{
-    #define PRDF_FUNC "[p10_proc::clearParityError] "
-
-    if ( CHECK_STOP != io_sc.service_data->getPrimaryAttnType() )
-    {
-        // Clear Chiplet parity error bits
-        ClearChipletParityError(i_chip, TYPE_PROC);
-        ClearChipletParityError(i_chip, TYPE_XBUS);
-        ClearChipletParityError(i_chip, TYPE_OBUS);
-        ClearChipletParityError(i_chip, TYPE_MC);
-        ClearChipletParityError(i_chip, TYPE_PEC);
-        ClearChipletParityError(i_chip, TYPE_EQ);
-        ClearChipletParityError(i_chip, TYPE_CORE);
-    }
-
-    return SUCCESS;
-    #undef PRDF_FUNC
-}
-PRDF_PLUGIN_DEFINE(p10_proc, clearParityError);
-
-/**
  * @brief  Queries for PLL errors on this chip.
  * @param  i_chip   A PROC chip.
  * @param  o_result True, if errors found. False, otherwise.
@@ -868,6 +841,52 @@ PRDF_PLUGIN_DEFINE(p10_proc, maskPllErrTypes);
 //------------------------------------------------------------------------------
 
 #endif // __HOSTBOOT_MODULE
+
+//##############################################################################
+//## This plugin is required for both FSP and Hostboot because there is no
+//## mechanism to declare an optional function call from the rule code.
+//##############################################################################
+
+/**
+ * @brief  Clears PCB slave parity errors on this chip.
+ * @param  i_chip A PROC chip.
+ * @param  io_sc  The step code data struct.
+ * @return Non-SUCCESS on failure. SUCCESS, otherwise.
+ */
+int32_t clearPcbSlaveParityError(ExtensibleChip * i_chip,
+                                 STEP_CODE_DATA_STRUCT & io_sc)
+{
+    #ifdef __HOSTBOOT_MODULE // only allowed to modify hardware from the host
+
+    // Use the broadcast OR register to write the same value to the
+    // xx_PCBSLV_ERROR register on each chiplet. These registers are
+    // "write-to-clear". So setting a bit to 1 will tell hardware to clear
+    // the bit.
+
+    SCAN_COMM_REGISTER_CLASS* err = i_chip->getRegister("BC_OR_PCBSLV_ERROR");
+
+    // Clear all bits in the register except the PLL unlock errors.
+    err->setAllBits();
+    err->SetBitFieldJustified(24, 8, 0);
+
+    err->Write();
+
+    // Since hardware will change the value of the xx_PCBSLV_ERROR registers,
+    // clear them out of the cache so that subsequent reads will refresh the
+    // cache.
+
+    RegDataCache& cache = RegDataCache::getCachedRegisters();
+    cache.flush(i_chip, err);
+
+    FOR_EACH_REG_PAIR(i_chip)
+        cache.flush(chip, chip->getRegister(pair.second));
+    END_FOR_EACH_REG_PAIR
+
+    #endif // __HOSTBOOT_MODULE
+
+    return SUCCESS;
+}
+PRDF_PLUGIN_DEFINE(p10_proc, clearPcbSlaveParityError);
 
 //------------------------------------------------------------------------------
 

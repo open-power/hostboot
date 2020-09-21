@@ -2667,7 +2667,7 @@ group gTP_LOCAL_FIR
     /** TP_LOCAL_FIR[28]
      *  PCB Slave error
      */
-    (rTP_LOCAL_FIR, bit(28)) ? TBDDefaultCallout;
+    (rTP_LOCAL_FIR, bit(28)) ? pcb_slave_internal_parity;
 
     /** TP_LOCAL_FIR[29]
      *  SBE - PPE int hardware error
