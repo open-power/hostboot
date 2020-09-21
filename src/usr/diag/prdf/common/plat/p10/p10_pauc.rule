@@ -829,62 +829,62 @@ group gPAU_PHY_FIR
     /** PAU_PHY_FIR[0]
      *  RX state machine parity or mode register parity er
      */
-    (rPAU_PHY_FIR, bit(0)) ? TBDDefaultCallout;
+    (rPAU_PHY_FIR, bit(0)) ? self_th_1;
 
     /** PAU_PHY_FIR[1]
      *  RX state machine parity or mode register parity er
      */
-    (rPAU_PHY_FIR, bit(1)) ? parent_proc_th_1;
+    (rPAU_PHY_FIR, bit(1)) ? self_th_1;
 
     /** PAU_PHY_FIR[2]
      *  RX state machine parity or mode register parity er
      */
-    (rPAU_PHY_FIR, bit(2)) ? parent_proc_th_32perDay;
+    (rPAU_PHY_FIR, bit(2)) ? threshold_and_mask_self_th1;
 
     /** PAU_PHY_FIR[3]
      *  RX state machine parity or mode register parity er
      */
-    (rPAU_PHY_FIR, bit(3)) ? TBDDefaultCallout;
+    (rPAU_PHY_FIR, bit(3)) ? threshold_and_mask_self_th1;
 
     /** PAU_PHY_FIR[4]
      *  TX state machine parity or mode register parity er
      */
-    (rPAU_PHY_FIR, bit(4)) ? defaultMaskedError;
+    (rPAU_PHY_FIR, bit(4)) ? self_th_1;
 
     /** PAU_PHY_FIR[5]
      *  TX state machine parity or mode register parity er
      */
-    (rPAU_PHY_FIR, bit(5)) ? TBDDefaultCallout;
+    (rPAU_PHY_FIR, bit(5)) ? self_th_1;
 
     /** PAU_PHY_FIR[6]
      *  TX state machine parity or mode register parity er
      */
-    (rPAU_PHY_FIR, bit(6)) ? defaultMaskedError;
+    (rPAU_PHY_FIR, bit(6)) ? threshold_and_mask_self_th1;
 
     /** PAU_PHY_FIR[7]
      *  TX state machine parity or mode register parity er
      */
-    (rPAU_PHY_FIR, bit(7)) ? defaultMaskedError;
+    (rPAU_PHY_FIR, bit(7)) ? threshold_and_mask_self_th1;
 
     /** PAU_PHY_FIR[8]
      *  TX ZCAL state machine parity or mode register pari
      */
-    (rPAU_PHY_FIR, bit(8)) ? defaultMaskedError;
+    (rPAU_PHY_FIR, bit(8)) ? self_th_1;
 
     /** PAU_PHY_FIR[9]
      *  A PPE internal error has occurred.
      */
-    (rPAU_PHY_FIR, bit(9)) ? parent_proc_th_1;
+    (rPAU_PHY_FIR, bit(9)) ? self_th_1;
 
     /** PAU_PHY_FIR[10]
      *  A PPE external error has occurred.
      */
-    (rPAU_PHY_FIR, bit(10)) ? parent_proc_th_1;
+    (rPAU_PHY_FIR, bit(10)) ? self_th_1;
 
     /** PAU_PHY_FIR[11]
      *  A PPE Halt due to Watchdog or Interrupt has occurr
      */
-    (rPAU_PHY_FIR, bit(11)) ? level2_th_1;
+    (rPAU_PHY_FIR, bit(11)) ? self_M_level2_L_th_1;
 
     /** PAU_PHY_FIR[12]
      *  A PPE Halt due to Debug has occurred.
@@ -894,27 +894,27 @@ group gPAU_PHY_FIR
     /** PAU_PHY_FIR[13]
      *  PPE Halted.
      */
-    (rPAU_PHY_FIR, bit(13)) ? parent_proc_th_1;
+    (rPAU_PHY_FIR, bit(13)) ? self_M_level2_L_th_1;
 
     /** PAU_PHY_FIR[14]
      *  A PPE Watchdog Timeout has occurred.
      */
-    (rPAU_PHY_FIR, bit(14)) ? level2_th_1;
+    (rPAU_PHY_FIR, bit(14)) ? self_M_level2_L_th_1;
 
     /** PAU_PHY_FIR[15]
      *  A PPE Array Scrub was missed.
      */
-    (rPAU_PHY_FIR, bit(15)) ? threshold_and_mask_parent_proc;
+    (rPAU_PHY_FIR, bit(15)) ? threshold_and_mask_self;
 
     /** PAU_PHY_FIR[16]
      *  A PPE Array uncorrectable error has occurred.
      */
-    (rPAU_PHY_FIR, bit(16)) ? parent_proc_th_1;
+    (rPAU_PHY_FIR, bit(16)) ? self_th_1;
 
     /** PAU_PHY_FIR[17]
      *  A PPE Array correctable error has occurred.
      */
-    (rPAU_PHY_FIR, bit(17)) ? parent_proc_th_32perDay;
+    (rPAU_PHY_FIR, bit(17)) ? self_th_32perDay;
 
     /** PAU_PHY_FIR[18]
      *  A PPE Code Recal Abort has occurred.
@@ -924,12 +924,12 @@ group gPAU_PHY_FIR
     /** PAU_PHY_FIR[19]
      *  A PPE Code Fatal Error has occurred.
      */
-    (rPAU_PHY_FIR, bit(19)) ? parent_proc_th_1;
+    (rPAU_PHY_FIR, bit(19)) ? self_th_1;
 
     /** PAU_PHY_FIR[20]
      *  A PPE Code Warning has occurred.
      */
-    (rPAU_PHY_FIR, bit(20)) ? threshold_and_mask_parent_proc;
+    (rPAU_PHY_FIR, bit(20)) ? threshold_and_mask_self;
 
     /** PAU_PHY_FIR[21]
      *  A PPE Code DFT Error has occurred.
@@ -939,12 +939,12 @@ group gPAU_PHY_FIR
     /** PAU_PHY_FIR[22]
      *  A PPE Code Recal Not Run has occurred.
      */
-    (rPAU_PHY_FIR, bit(22)) ? threshold_and_mask;
+    (rPAU_PHY_FIR, bit(22)) ? level2_th_32perDay;
 
     /** PAU_PHY_FIR[23]
      *  A PPE Code Thread Locked has occurred.
      */
-    (rPAU_PHY_FIR, bit(23)) ? threshold_and_mask_parent_proc;
+    (rPAU_PHY_FIR, bit(23)) ? level2_th_1;
 
     /** PAU_PHY_FIR[24]
      *  Reserved

@@ -175,7 +175,6 @@ int32_t DlFatalError( ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc,
         if ( dl_error_hold->IsBitSet(53) ||
              dl_error_hold->IsBitSet(55) ||
              dl_error_hold->IsBitSet(57) ||
-             dl_error_hold->IsBitSet(58) ||
              dl_error_hold->IsBitSet(59) ||
              dl_error_hold->IsBitSet(60) ||
              dl_error_hold->IsBitSet(62) ||

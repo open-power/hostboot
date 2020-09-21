@@ -194,9 +194,11 @@ rule rMC_DSTL_FIR
     MC_DSTL_FIR & ~MC_DSTL_FIR_MASK &  MC_DSTL_FIR_ACT0 &  MC_DSTL_FIR_ACT1 & ~MC_DSTL_FIR_ACT2;
 };
 
+# Bits 12 and 13 can be side-effects of bits 16 and 17 respectively which is
+# why we will make sure to prioritize bits 16 and 17 here.
 group gMC_DSTL_FIR
-    filter singlebit,
-           cs_root_cause(0,4)
+    filter priority(16,17),
+           cs_root_cause(0,4,12,13,16,17,22,23,35,36)
 {
     /** MC_DSTL_FIR[0]
      *  AFU initiated Checkstop on Subchannel A
@@ -327,22 +329,22 @@ group gMC_DSTL_FIR
     /** MC_DSTL_FIR[24]
      *  Error info from decrypt
      */
-    (rMC_DSTL_FIR, bit(24)) ? defaultMaskedError;
+    (rMC_DSTL_FIR, bit(24)) ? self_th_1;
 
     /** MC_DSTL_FIR[25]
      *  Error info from decrypt
      */
-    (rMC_DSTL_FIR, bit(25)) ? defaultMaskedError;
+    (rMC_DSTL_FIR, bit(25)) ? level2_th_1;
 
     /** MC_DSTL_FIR[26]
      *  Error info from decrypt
      */
-    (rMC_DSTL_FIR, bit(26)) ? defaultMaskedError;
+    (rMC_DSTL_FIR, bit(26)) ? self_th_1;
 
     /** MC_DSTL_FIR[27]
      *  Error info from decrypt
      */
-    (rMC_DSTL_FIR, bit(27)) ? defaultMaskedError;
+    (rMC_DSTL_FIR, bit(27)) ? self_th_1;
 
     /** MC_DSTL_FIR[28]
      *  Error info from decrypt
@@ -357,7 +359,7 @@ group gMC_DSTL_FIR
     /** MC_DSTL_FIR[30]
      *  Error info from encrypt
      */
-    (rMC_DSTL_FIR, bit(30)) ? self_th_1;
+    (rMC_DSTL_FIR, bit(30)) ? level2_th_1;
 
     /** MC_DSTL_FIR[31]
      *  Error info from encrypt
@@ -372,22 +374,22 @@ group gMC_DSTL_FIR
     /** MC_DSTL_FIR[33]
      *  Subchan A AFU Application Interrupt Attention whil
      */
-    (rMC_DSTL_FIR, bit(33)) ? self_th_1;
+    (rMC_DSTL_FIR, bit(33)) ? defaultMaskedError;
 
     /** MC_DSTL_FIR[34]
      *  Subchan B AFU Application Interrupt Attention whil
      */
-    (rMC_DSTL_FIR, bit(34)) ? self_th_1;
+    (rMC_DSTL_FIR, bit(34)) ? defaultMaskedError;
 
     /** MC_DSTL_FIR[35]
      *  A parity error local to Subchhanel A occurred.
      */
-    (rMC_DSTL_FIR, bit(35)) ? self_th_1;
+    (rMC_DSTL_FIR, bit(35)) ? chnl0_omi_th_1;
 
     /** MC_DSTL_FIR[36]
      *  A parity error local to Subchhanel B occurred.
      */
-    (rMC_DSTL_FIR, bit(36)) ? self_th_1;
+    (rMC_DSTL_FIR, bit(36)) ? chnl1_omi_th_1;
 
     /** MC_DSTL_FIR[37]
      *  Reserved
@@ -419,27 +421,27 @@ rule rMC_USTL_FIR
 
 group gMC_USTL_FIR
     filter singlebit,
-           cs_root_cause
+           cs_root_cause(0,1,2,3,27,28,35,36,37,38,39,40,41,42,43,44,49,50,51,52,53,54,55,56,59,60)
 {
     /** MC_USTL_FIR[0]
      *  Unexpected Flit Data showed up for Chana
      */
-    (rMC_USTL_FIR, bit(0)) ? defaultMaskedError;
+    (rMC_USTL_FIR, bit(0)) ? chnl0_ocmb_th_1;
 
     /** MC_USTL_FIR[1]
      *  Unexpected Flit Data showed up for Chanb
      */
-    (rMC_USTL_FIR, bit(1)) ? defaultMaskedError;
+    (rMC_USTL_FIR, bit(1)) ? chnl1_ocmb_th_1;
 
     /** MC_USTL_FIR[2]
      *  A unsupported template for a command flit for chan
      */
-    (rMC_USTL_FIR, bit(2)) ? defaultMaskedError;
+    (rMC_USTL_FIR, bit(2)) ? chnl0_ocmb_th_1;
 
     /** MC_USTL_FIR[3]
      *  A unsupported template for a command flit for chan
      */
-    (rMC_USTL_FIR, bit(3)) ? defaultMaskedError;
+    (rMC_USTL_FIR, bit(3)) ? chnl1_ocmb_th_1;
 
     /** MC_USTL_FIR[4]
      *  Reserved.
@@ -454,12 +456,12 @@ group gMC_USTL_FIR
     /** MC_USTL_FIR[6]
      *  WDF CE detected on buffer output
      */
-    (rMC_USTL_FIR, bit(6)) ? defaultMaskedError;
+    (rMC_USTL_FIR, bit(6)) ? self_th_32perDay;
 
     /** MC_USTL_FIR[7]
      *  WDF UE detected on buffer output
      */
-    (rMC_USTL_FIR, bit(7)) ? defaultMaskedError;
+    (rMC_USTL_FIR, bit(7)) ? self_th_1;
 
     /** MC_USTL_FIR[8]
      *  WDF SUE detected on buffer output
@@ -469,42 +471,42 @@ group gMC_USTL_FIR
     /** MC_USTL_FIR[9]
      *  WDF buffer overrun detected
      */
-    (rMC_USTL_FIR, bit(9)) ? defaultMaskedError;
+    (rMC_USTL_FIR, bit(9)) ? self_th_1;
 
     /** MC_USTL_FIR[10]
      *  WDF detected parity on USTL tag interface
      */
-    (rMC_USTL_FIR, bit(10)) ? defaultMaskedError;
+    (rMC_USTL_FIR, bit(10)) ? self_th_1;
 
     /** MC_USTL_FIR[11]
      *  WDF detected a scom sequencer error
      */
-    (rMC_USTL_FIR, bit(11)) ? defaultMaskedError;
+    (rMC_USTL_FIR, bit(11)) ? self_th_1;
 
     /** MC_USTL_FIR[12]
      *  WDF detected a pwctl sequencer error
      */
-    (rMC_USTL_FIR, bit(12)) ? defaultMaskedError;
+    (rMC_USTL_FIR, bit(12)) ? self_th_1;
 
     /** MC_USTL_FIR[13]
      *  WDF detected a parity error on the misc_reg scom r
      */
-    (rMC_USTL_FIR, bit(13)) ? defaultMaskedError;
+    (rMC_USTL_FIR, bit(13)) ? self_th_1;
 
     /** MC_USTL_FIR[14]
      *  Parity Error detected in WDF for CL pop
      */
-    (rMC_USTL_FIR, bit(14)) ? defaultMaskedError;
+    (rMC_USTL_FIR, bit(14)) ? self_th_1;
 
     /** MC_USTL_FIR[15]
-     *  WDF detected a non-zero syndrome (CE ore UE) from 
+     *  WDF detected a non-zero syndrome (CE ore UE) from
      */
     (rMC_USTL_FIR, bit(15)) ? defaultMaskedError;
 
     /** MC_USTL_FIR[16]
      *  WDF CMD parity errror
      */
-    (rMC_USTL_FIR, bit(16)) ? defaultMaskedError;
+    (rMC_USTL_FIR, bit(16)) ? self_th_1;
 
     /** MC_USTL_FIR[17]
      *  Unused
@@ -517,19 +519,19 @@ group gMC_USTL_FIR
     (rMC_USTL_FIR, bit(18)) ? defaultMaskedError;
 
     /** MC_USTL_FIR[19]
-     *  Read Buffers overflowed/underflowed (more than 64 
+     *  Read Buffers overflowed/underflowed (more than 64
      */
-    (rMC_USTL_FIR, bit(19)) ? defaultMaskedError;
+    (rMC_USTL_FIR, bit(19)) ? all_ocmb_and_mcc_th_1;
 
     /** MC_USTL_FIR[20]
      *  WRT CE detected on buffer output
      */
-    (rMC_USTL_FIR, bit(20)) ? defaultMaskedError;
+    (rMC_USTL_FIR, bit(20)) ? parent_proc_th_32perDay;
 
     /** MC_USTL_FIR[21]
      *  WRT UE detected on buffer output
      */
-    (rMC_USTL_FIR, bit(21)) ? defaultMaskedError;
+    (rMC_USTL_FIR, bit(21)) ? parent_proc_th_1;
 
     /** MC_USTL_FIR[22]
      *  WRT SUE detected on buffer output
@@ -539,42 +541,42 @@ group gMC_USTL_FIR
     /** MC_USTL_FIR[23]
      *  WRT detected a scom sequencer error
      */
-    (rMC_USTL_FIR, bit(23)) ? defaultMaskedError;
+    (rMC_USTL_FIR, bit(23)) ? self_th_1;
 
     /** MC_USTL_FIR[24]
      *  WRT detected a parity error on the misc_reg scom r
      */
-    (rMC_USTL_FIR, bit(24)) ? defaultMaskedError;
+    (rMC_USTL_FIR, bit(24)) ? self_th_1;
 
     /** MC_USTL_FIR[25]
      *  WRT Data Syndrome not equal to 0 for input for wri
      */
-    (rMC_USTL_FIR, bit(25)) ? defaultMaskedError;
+    (rMC_USTL_FIR, bit(25)) ? parent_proc_th_1;
 
     /** MC_USTL_FIR[26]
      *  No buffer error; Buffer manager parity error.
      */
-    (rMC_USTL_FIR, bit(26)) ? defaultMaskedError;
+    (rMC_USTL_FIR, bit(26)) ? self_th_1;
 
     /** MC_USTL_FIR[27]
      *  A fail response set as checkstop occurred for chan
      */
-    (rMC_USTL_FIR, bit(27)) ? defaultMaskedError;
+    (rMC_USTL_FIR, bit(27)) ? chnl0_ocmb_th_1;
 
     /** MC_USTL_FIR[28]
      *  A fail response set as checkstop occurred for chan
      */
-    (rMC_USTL_FIR, bit(28)) ? defaultMaskedError;
+    (rMC_USTL_FIR, bit(28)) ? chnl1_ocmb_th_1;
 
     /** MC_USTL_FIR[29]
      *  A fail response set as recoverable occurred for ch
      */
-    (rMC_USTL_FIR, bit(29)) ? defaultMaskedError;
+    (rMC_USTL_FIR, bit(29)) ? threshold_and_mask_chnl0_ocmb_th_1;
 
     /** MC_USTL_FIR[30]
      *  A fail response set as recoverable occurred for ch
      */
-    (rMC_USTL_FIR, bit(30)) ? defaultMaskedError;
+    (rMC_USTL_FIR, bit(30)) ? threshold_and_mask_chnl1_ocmb_th_1;
 
     /** MC_USTL_FIR[31]
      *  A lol drop set as checkstop occurred for chana
@@ -589,72 +591,72 @@ group gMC_USTL_FIR
     /** MC_USTL_FIR[33]
      *  A lol drop set as recoverable occurred for chana
      */
-    (rMC_USTL_FIR, bit(33)) ? defaultMaskedError;
+    (rMC_USTL_FIR, bit(33)) ? chnl0_ocmb_H_omi_L_th_32_perDay;
 
     /** MC_USTL_FIR[34]
      *  A lol drop set as recoverable occurred for chanb
      */
-    (rMC_USTL_FIR, bit(34)) ? defaultMaskedError;
+    (rMC_USTL_FIR, bit(34)) ? chnl1_ocmb_H_omi_L_th_32_perDay;
 
     /** MC_USTL_FIR[35]
      *  flit data pariry error from dl for chana
      */
-    (rMC_USTL_FIR, bit(35)) ? defaultMaskedError;
+    (rMC_USTL_FIR, bit(35)) ? chnl0_omi_th_1;
 
     /** MC_USTL_FIR[36]
      *  flit data pariry error from dl for chanb
      */
-    (rMC_USTL_FIR, bit(36)) ? defaultMaskedError;
+    (rMC_USTL_FIR, bit(36)) ? chnl1_omi_th_1;
 
     /** MC_USTL_FIR[37]
      *  internal fifo parity error for chana
      */
-    (rMC_USTL_FIR, bit(37)) ? defaultMaskedError;
+    (rMC_USTL_FIR, bit(37)) ? chnl0_omi_th_1;
 
     /** MC_USTL_FIR[38]
      *  internal fifo parity error for chanb
      */
-    (rMC_USTL_FIR, bit(38)) ? defaultMaskedError;
+    (rMC_USTL_FIR, bit(38)) ? chnl1_omi_th_1;
 
     /** MC_USTL_FIR[39]
      *  Bad response detected from chan a
      */
-    (rMC_USTL_FIR, bit(39)) ? defaultMaskedError;
+    (rMC_USTL_FIR, bit(39)) ? chnl0_ocmb_th_1;
 
     /** MC_USTL_FIR[40]
      *  Bad response detected from chan b
      */
-    (rMC_USTL_FIR, bit(40)) ? defaultMaskedError;
+    (rMC_USTL_FIR, bit(40)) ? chnl1_ocmb_th_1;
 
     /** MC_USTL_FIR[41]
      *  Bad data set for data that is not valid chana
      */
-    (rMC_USTL_FIR, bit(41)) ? defaultMaskedError;
+    (rMC_USTL_FIR, bit(41)) ? chnl0_ocmb_th_1;
 
     /** MC_USTL_FIR[42]
      *  Bad data set for data that is not valid chanb
      */
-    (rMC_USTL_FIR, bit(42)) ? defaultMaskedError;
+    (rMC_USTL_FIR, bit(42)) ? chnl1_ocmb_th_1;
 
     /** MC_USTL_FIR[43]
      *  Memory read data returned in template 0, chana
      */
-    (rMC_USTL_FIR, bit(43)) ? defaultMaskedError;
+    (rMC_USTL_FIR, bit(43)) ? chnl0_ocmb_th_1;
 
     /** MC_USTL_FIR[44]
      *  Memory read data returned in template 0, chanb
      */
-    (rMC_USTL_FIR, bit(44)) ? defaultMaskedError;
+    (rMC_USTL_FIR, bit(44)) ? chnl1_ocmb_th_1;
 
     /** MC_USTL_FIR[45]
      *  Recieved mmio response while in LOL mode chana
      */
-    (rMC_USTL_FIR, bit(45)) ? defaultMaskedError;
+    (rMC_USTL_FIR, bit(45)) ? chnl0_omi_th_1;
 
     /** MC_USTL_FIR[46]
      *  Recieved mmio response while in LOL mode chanb
      */
-    (rMC_USTL_FIR, bit(46)) ? defaultMaskedError;
+    (rMC_USTL_FIR, bit(46)) ? chnl1_omi_th_1;
 
     /** MC_USTL_FIR[47]
      *  valid bad data or SUE received channel a
@@ -669,67 +671,67 @@ group gMC_USTL_FIR
     /** MC_USTL_FIR[49]
      *  ChanA excessive data error
      */
-    (rMC_USTL_FIR, bit(49)) ? defaultMaskedError;
+    (rMC_USTL_FIR, bit(49)) ? chnl0_ocmb_th_1;
 
     /** MC_USTL_FIR[50]
      *  ChanB excessive data error
      */
-    (rMC_USTL_FIR, bit(50)) ? defaultMaskedError;
+    (rMC_USTL_FIR, bit(50)) ? chnl1_ocmb_th_1;
 
     /** MC_USTL_FIR[51]
      *  Commit state where commit data is not marked as va
      */
-    (rMC_USTL_FIR, bit(51)) ? defaultMaskedError;
+    (rMC_USTL_FIR, bit(51)) ? chnl0_omi_th_1;
 
     /** MC_USTL_FIR[52]
      *  Commit state where commit data is not marked as va
      */
-    (rMC_USTL_FIR, bit(52)) ? defaultMaskedError;
+    (rMC_USTL_FIR, bit(52)) ? chnl1_omi_th_1;
 
     /** MC_USTL_FIR[53]
      *  A fifo in the ustl chana overflowed
      */
-    (rMC_USTL_FIR, bit(53)) ? defaultMaskedError;
+    (rMC_USTL_FIR, bit(53)) ? chnl0_omi_th_1;
 
     /** MC_USTL_FIR[54]
      *  A fifo in the ustl chanb overflowed
      */
-    (rMC_USTL_FIR, bit(54)) ? defaultMaskedError;
+    (rMC_USTL_FIR, bit(54)) ? chnl1_omi_th_1;
 
     /** MC_USTL_FIR[55]
      *  Invalid command decoded in USTL FF subchannel A
      */
-    (rMC_USTL_FIR, bit(55)) ? defaultMaskedError;
+    (rMC_USTL_FIR, bit(55)) ? chnl0_ocmb_th_1;
 
     /** MC_USTL_FIR[56]
      *  Invalid command decoded in USTL FF subchannel B
      */
-    (rMC_USTL_FIR, bit(56)) ? defaultMaskedError;
+    (rMC_USTL_FIR, bit(56)) ? chnl1_ocmb_th_1;
 
     /** MC_USTL_FIR[57]
      *  Fatal register parity error
      */
-    (rMC_USTL_FIR, bit(57)) ? defaultMaskedError;
+    (rMC_USTL_FIR, bit(57)) ? self_th_1;
 
     /** MC_USTL_FIR[58]
      *  recov register parity error
      */
-    (rMC_USTL_FIR, bit(58)) ? defaultMaskedError;
+    (rMC_USTL_FIR, bit(58)) ? self_th_1;
 
     /** MC_USTL_FIR[59]
      *  ChanA response invalid(dlength and/or dpart receiv
      */
-    (rMC_USTL_FIR, bit(59)) ? defaultMaskedError;
+    (rMC_USTL_FIR, bit(59)) ? chnl0_ocmb_th_1;
 
     /** MC_USTL_FIR[60]
      *  ChanB response invalid(dlength and/or dpart receiv
      */
-    (rMC_USTL_FIR, bit(60)) ? defaultMaskedError;
+    (rMC_USTL_FIR, bit(60)) ? chnl1_ocmb_th_1;
 
     /** MC_USTL_FIR[61]
-     *  USTL spare FIR bits
+     *  USTLFIR mirror chanfail related parity error
      */
-    (rMC_USTL_FIR, bit(61)) ? defaultMaskedError;
+    (rMC_USTL_FIR, bit(61)) ? self_th_1;
 
 };
 

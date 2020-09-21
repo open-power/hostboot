@@ -128,23 +128,23 @@ rule rMC_OMI_DL_FIR
 };
 
 group gMC_OMI_DL_FIR
-    filter singlebit,
-           cs_root_cause
+    filter priority(0,20),
+           cs_root_cause(0,20)
 {
     /** MC_OMI_DL_FIR[0]
      *  OMI-DL0 fatal error
      */
-    (rMC_OMI_DL_FIR, bit(0)) ? TBDDefaultCallout;
+    (rMC_OMI_DL_FIR, bit(0)) ? dl0_fatal_error;
 
     /** MC_OMI_DL_FIR[1]
      *  OMI-DL0 UE on data flit
      */
-    (rMC_OMI_DL_FIR, bit(1)) ? self_th_1;
+    (rMC_OMI_DL_FIR, bit(1)) ? dl0_omi_th_1;
 
     /** MC_OMI_DL_FIR[2]
      *  OMI-DL0 CE on TL flit
      */
-    (rMC_OMI_DL_FIR, bit(2)) ? self_th_32perDay;
+    (rMC_OMI_DL_FIR, bit(2)) ? dl0_omi_th_32perDay;
 
     /** MC_OMI_DL_FIR[3]
      *  OMI-DL0 detected a CRC error
@@ -160,7 +160,7 @@ group gMC_OMI_DL_FIR
      *  OMI-DL0 running in degraded mode
      */
     (rMC_OMI_DL_FIR, bit(5)) ? temporaryBringUpHammer;
-#    (rMC_OMI_DL_FIR, bit(5)) ? TBDDefaultCallout;
+#    (rMC_OMI_DL_FIR, bit(5)) ? dl0_omi_bus_th_1; # TBD for DD2
 
     /** MC_OMI_DL_FIR[6]
      *  OMI-DL0 parity error detection on a lane
@@ -170,7 +170,7 @@ group gMC_OMI_DL_FIR
     /** MC_OMI_DL_FIR[7]
      *  OMI-DL0 retrained due to no forward progress
      */
-    (rMC_OMI_DL_FIR, bit(7)) ? TBDDefaultCallout;
+    (rMC_OMI_DL_FIR, bit(7)) ? dl0_omi_bus_th_32perDay;
 
     /** MC_OMI_DL_FIR[8]
      *  OMI-DL0 remote side initiated a retrain
@@ -178,14 +178,14 @@ group gMC_OMI_DL_FIR
     (rMC_OMI_DL_FIR, bit(8)) ? defaultMaskedError;
 
     /** MC_OMI_DL_FIR[9]
-     *  OMI-DL0 retrain due to internal error or software 
+     *  OMI-DL0 retrain due to internal error or software
      */
-    (rMC_OMI_DL_FIR, bit(9)) ? TBDDefaultCallout;
+    (rMC_OMI_DL_FIR, bit(9)) ? dl0_omi_bus_th_32perDay;
 
     /** MC_OMI_DL_FIR[10]
      *  OMI-DL0 threshold reached
      */
-    (rMC_OMI_DL_FIR, bit(10)) ? TBDDefaultCallout;
+    (rMC_OMI_DL_FIR, bit(10)) ? dl0_omi_bus_th_32perDay;
 
     /** MC_OMI_DL_FIR[11]
      *  OMI-DL0 trained
@@ -235,17 +235,17 @@ group gMC_OMI_DL_FIR
     /** MC_OMI_DL_FIR[20]
      *  OMI-DL1 fatal error
      */
-    (rMC_OMI_DL_FIR, bit(20)) ? TBDDefaultCallout;
+    (rMC_OMI_DL_FIR, bit(20)) ? dl1_fatal_error;
 
     /** MC_OMI_DL_FIR[21]
      *  OMI-DL1 UE on data flit
      */
-    (rMC_OMI_DL_FIR, bit(21)) ? self_th_1;
+    (rMC_OMI_DL_FIR, bit(21)) ? dl1_omi_th_1;
 
     /** MC_OMI_DL_FIR[22]
      *  OMI-DL1 CE on TL flit
      */
-    (rMC_OMI_DL_FIR, bit(22)) ? self_th_32perDay;
+    (rMC_OMI_DL_FIR, bit(22)) ? dl1_omi_th_32perDay;
 
     /** MC_OMI_DL_FIR[23]
      *  OMI-DL1 detected a CRC error
@@ -261,7 +261,7 @@ group gMC_OMI_DL_FIR
      *  OMI-DL1 running in degraded mode
      */
     (rMC_OMI_DL_FIR, bit(25)) ? temporaryBringUpHammer;
-#    (rMC_OMI_DL_FIR, bit(25)) ? TBDDefaultCallout;
+#    (rMC_OMI_DL_FIR, bit(25)) ? dl1_omi_bus_th_1; # TBD for DD2
 
     /** MC_OMI_DL_FIR[26]
      *  OMI-DL1 parity error detection on a lane
@@ -271,7 +271,7 @@ group gMC_OMI_DL_FIR
     /** MC_OMI_DL_FIR[27]
      *  OMI-DL1 retrained due to no forward progress
      */
-    (rMC_OMI_DL_FIR, bit(27)) ? TBDDefaultCallout;
+    (rMC_OMI_DL_FIR, bit(27)) ? dl1_omi_bus_th_32perDay;
 
     /** MC_OMI_DL_FIR[28]
      *  OMI-DL1 remote side initiated a retrain
@@ -279,14 +279,14 @@ group gMC_OMI_DL_FIR
     (rMC_OMI_DL_FIR, bit(28)) ? defaultMaskedError;
 
     /** MC_OMI_DL_FIR[29]
-     *  OMI-DL1 retrain due to internal error or software 
+     *  OMI-DL1 retrain due to internal error or software
      */
-    (rMC_OMI_DL_FIR, bit(29)) ? TBDDefaultCallout;
+    (rMC_OMI_DL_FIR, bit(29)) ? dl1_omi_bus_th_32perDay;
 
     /** MC_OMI_DL_FIR[30]
      *  OMI-DL1 threshold reached
      */
-    (rMC_OMI_DL_FIR, bit(30)) ? TBDDefaultCallout;
+    (rMC_OMI_DL_FIR, bit(30)) ? dl1_omi_bus_th_32perDay;
 
     /** MC_OMI_DL_FIR[31]
      *  OMI-DL1 trained

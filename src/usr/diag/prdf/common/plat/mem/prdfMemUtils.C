@@ -368,7 +368,7 @@ bool __queryUcsOmic( ExtensibleChip * i_omic, ExtensibleChip * i_mcc,
         // If channel fail isn't configured, no need to continue.
         if ( cnfg->IsBitSet(22 + omiPosRelMcc) ) break;
 
-        // Check the MC_OMI_DL_FIR for UCS (relevant bits: 0,20,40)
+        // Check the MC_OMI_DL_FIR for UCS (relevant bits: 0,20)
         SCAN_COMM_REGISTER_CLASS * fir  = nullptr;
         SCAN_COMM_REGISTER_CLASS * mask = nullptr;
         SCAN_COMM_REGISTER_CLASS * act0 = nullptr;
@@ -389,7 +389,6 @@ bool __queryUcsOmic( ExtensibleChip * i_omic, ExtensibleChip * i_mcc,
             // Get the bit offset for the bit relevant to the inputted OMI.
             // 0 : OMI-DL 0
             // 20: OMI-DL 1
-            // 40: OMI-DL 2
             uint8_t bitOff = omiPosRelOmic * 20;
 
             // Check if there is a UNIT_CS for the relevant bits in the
@@ -427,10 +426,10 @@ bool __queryUcsMcc( ExtensibleChip * i_mcc, TargetHandle_t i_omi )
     // configuration bit in DSTLCFG2. Ex: {12,28} = DSTLFIR[12], DSTLCFG2[28]
     // NOTE: there is a separate map for each subchannel.
     const std::map<uint8_t,uint8_t> dstlfirMapChanA =
-        { {12,28}, {16,30}, {22,24} };
+        { {12,28}, {16,30}, {22,24}, {35,49} };
 
     const std::map<uint8_t,uint8_t> dstlfirMapChanB =
-        { {13,29}, {17,31}, {23,25} };
+        { {13,29}, {17,31}, {23,25}, {36,50} };
 
     // Check the DSTLFIR for UCS
     SCAN_COMM_REGISTER_CLASS * fir  = i_mcc->getRegister( "MC_DSTL_FIR" );

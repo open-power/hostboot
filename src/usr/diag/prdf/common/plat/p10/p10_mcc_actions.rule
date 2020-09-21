@@ -137,6 +137,20 @@ actionclass chnl1_ocmb_H_omi_L_th_1
     threshold1;
 };
 
+actionclass chnl0_ocmb_H_omi_L_th_32_perDay
+{
+    chnl0_ocmb;
+    chnl0_omi_L;
+    threshold32pday;
+};
+
+actionclass chnl1_ocmb_H_omi_L_th_32_perDay
+{
+    chnl1_ocmb;
+    chnl1_omi_L;
+    threshold32pday;
+};
+
 actionclass threshold_and_mask_chnl0_ocmb_th_1
 {
     threshold_and_mask;

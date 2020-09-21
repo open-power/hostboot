@@ -104,6 +104,12 @@ actionclass threshold_and_mask
 };
 
 actionclass threshold_and_mask_self   { calloutSelfMed;   threshold_and_mask; };
+actionclass threshold_and_mask_self_th1
+{
+    calloutSelfMed;
+    threshold_and_mask;
+    threshold1;
+};
 actionclass threshold_and_mask_level2 { callout2ndLvlMed; threshold_and_mask; };
 
 actionclass threshold_and_mask_parent_proc
@@ -192,6 +198,12 @@ actionclass level2_th_1
 {
     callout2ndLvlMed;
     threshold1;
+};
+
+actionclass level2_th_32perDay
+{
+    callout2ndLvlMed;
+    threshold32pday;
 };
 
 actionclass level2_dump_SW

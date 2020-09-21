@@ -551,17 +551,17 @@ group gMC_LOCAL_FIR
     /** MC_LOCAL_FIR[8]
      *  THERMTRIP - Critical temperature indicator
      */
-    (rMC_LOCAL_FIR, bit(8)) ? threshold_and_mask_self;
+    (rMC_LOCAL_FIR, bit(8)) ? defaultMaskedError;
 
     /** MC_LOCAL_FIR[9]
      *  THERMTRIP - Fatal temperature indicator
      */
-    (rMC_LOCAL_FIR, bit(9)) ? threshold_and_mask_self;
+    (rMC_LOCAL_FIR, bit(9)) ? defaultMaskedError;
 
     /** MC_LOCAL_FIR[10]
      *  VOLTTRIP - Voltage sense error
      */
-    (rMC_LOCAL_FIR, bit(10)) ? threshold_and_mask_self;
+    (rMC_LOCAL_FIR, bit(10)) ? defaultMaskedError;
 
     /** MC_LOCAL_FIR[11]
      *  DBG - scom parity fail
@@ -611,12 +611,12 @@ group gMC_LOCAL_FIR
     /** MC_LOCAL_FIR[20]
      *  Trace00 - scom parity err
      */
-    (rMC_LOCAL_FIR, bit(20)) ? self_th_32perDay;
+    (rMC_LOCAL_FIR, bit(20)) ? threshold_and_mask_self;
 
     /** MC_LOCAL_FIR[21]
      *  Trace01 - scom parity err - Unused in Axon,PCI
      */
-    (rMC_LOCAL_FIR, bit(21)) ? self_th_32perDay;
+    (rMC_LOCAL_FIR, bit(21)) ? threshold_and_mask_self;
 
     /** MC_LOCAL_FIR[22]
      *  unused
@@ -868,17 +868,17 @@ group gMC_FIR
     /** MC_FIR[3]
      *  MC inband bar with incorrect ttype
      */
-    (rMC_FIR, bit(3)) ? TBDDefaultCallout;
+    (rMC_FIR, bit(3)) ? level2_M_self_L_th_1;
 
     /** MC_FIR[4]
      *  MC multiple BAR hit
      */
-    (rMC_FIR, bit(4)) ? TBDDefaultCallout;
+    (rMC_FIR, bit(4)) ? self_th_1;
 
     /** MC_FIR[5]
      *  Commandlist early hang trigger activated
      */
-    (rMC_FIR, bit(5)) ? defaultMaskedError;
+    (rMC_FIR, bit(5)) ? threshold_and_mask_level2;
 
     /** MC_FIR[6]
      *  reserved
@@ -893,7 +893,7 @@ group gMC_FIR
     /** MC_FIR[8]
      *  Command list state machine timeout
      */
-    (rMC_FIR, bit(8)) ? threshold_and_mask_self;
+    (rMC_FIR, bit(8)) ? threshold_and_mask_level2;
 
     /** MC_FIR[9]
      *  reserved
@@ -928,12 +928,12 @@ group gMC_FIR
     /** MC_FIR[15]
      *  Plus One Prefetch generated command did not hit an
      */
-    (rMC_FIR, bit(15)) ? self_th_1;
+    (rMC_FIR, bit(15)) ? threshold_and_mask_self;
 
     /** MC_FIR[16]
-     *  Plus One Prefetch generated command hit config or 
+     *  Plus One Prefetch generated command hit config or
      */
-    (rMC_FIR, bit(16)) ? self_th_1;
+    (rMC_FIR, bit(16)) ? threshold_and_mask_self;
 
     /** MC_FIR[17]
      *  Parity Error in WAT/Debug config register.
@@ -1035,7 +1035,7 @@ group gMC_MISC_FIR
     /** MC_MISC_FIR[8]
      *  Parity Error taken on MCEBUSEN[0,1,2,3] regs.
      */
-    (rMC_MISC_FIR, bit(8)) ? defaultMaskedError;
+    (rMC_MISC_FIR, bit(8)) ? self_th_1;
 
     /** MC_MISC_FIR[9]
      *  Parity Error taken on WAT* Regs.
