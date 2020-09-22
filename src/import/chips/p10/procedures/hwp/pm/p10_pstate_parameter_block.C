@@ -5254,6 +5254,36 @@ fapi2::ReturnCode PlatPmPPB::pm_set_frequency()
 
         for (auto l_proc_target : sys_target.getChildren<fapi2::TARGET_TYPE_PROC_CHIP>())
         {
+
+            // Enforce the attribute derived ceiling
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_DD1_LIMITED_FREQUENCY,
+                                    l_proc_target,l_limited_freq_mhz));
+            //This part of the code will enable later, because we are seeing CEIL and
+            //FLOOR frequency are set from the MRW to 2000MHZ, But for now we
+            //should force the ceil freq to 2400MHZ to make OCC happy
+            // Will comeback to this once we sort out, why and how MRW are
+            // gettting the ceil and floor values 
+#if 0
+            if (l_limited_freq_mhz)
+            {
+                if ((l_sys_freq_core_ceil_mhz) && 
+                    (l_sys_freq_core_ceil_mhz > l_forced_ceil_freq_mhz))
+                {
+                    l_sys_freq_core_ceil_mhz = l_forced_ceil_freq_mhz;
+                }
+                else if (!l_sys_freq_core_ceil_mhz)
+                {
+                    l_sys_freq_core_ceil_mhz = l_forced_ceil_freq_mhz;
+                }
+                FAPI_INF("Limited frequency DD level.  Capping to %04d MHz", l_sys_freq_core_ceil_mhz);
+            }
+#endif
+            if (l_limited_freq_mhz)
+            {
+                l_sys_freq_core_ceil_mhz = l_forced_ceil_freq_mhz;
+            }
+
+
             FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_FREQ_CORE_FLOOR_MHZ,
                 l_proc_target,l_floor_freq_mhz));
 
@@ -5291,9 +5321,14 @@ fapi2::ReturnCode PlatPmPPB::pm_set_frequency()
             //procs) then need to update system core floor freq
             FAPI_DBG("floor frequency check:   sys %04d ceil %04d",
                         l_sys_freq_core_floor_mhz, l_floor_freq_mhz);
+
             if ( l_sys_freq_core_floor_mhz > l_tmp_psav_freq)
             {
                 l_tmp_psav_freq = l_sys_freq_core_floor_mhz;
+            }
+            else if (!l_sys_freq_core_floor_mhz)
+            {
+                l_sys_freq_core_floor_mhz = l_tmp_psav_freq;
             }
 
             // TODO:  must have https://rchgit01.rchland.ibm.com/gerrit1/#/c/104098/
@@ -5351,25 +5386,9 @@ fapi2::ReturnCode PlatPmPPB::pm_set_frequency()
             //If the system core ceiling freq is less then of Pstate0 (of all the
             //procs) then need to update system core ceiling freq
             FAPI_DBG("ceiling frequency check:  sys %04d ceil %04d", l_sys_freq_core_ceil_mhz, l_tmp_ceil_freq);
-            if ( l_sys_freq_core_ceil_mhz < l_tmp_ceil_freq)
+            if ( (l_sys_freq_core_ceil_mhz != 0) && l_sys_freq_core_ceil_mhz < l_tmp_ceil_freq)
             {
                 l_tmp_ceil_freq = l_sys_freq_core_ceil_mhz;
-            }
-
-            // Enforce the attribute derived ceiling
-            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_DD1_LIMITED_FREQUENCY,
-                l_proc_target,l_limited_freq_mhz));
-
-            if (l_limited_freq_mhz)
-            {
-                FAPI_INF("Limited frequency test values:  Present ceiling:  %04d MHz;  Forced Ceiling: %04d MHz",
-                                l_tmp_ceil_freq, l_forced_ceil_freq_mhz);
-            }
-
-            if (l_limited_freq_mhz && (l_tmp_ceil_freq > l_forced_ceil_freq_mhz) )
-            {
-                l_tmp_ceil_freq = l_forced_ceil_freq_mhz;
-                FAPI_INF("Limited frequency DD level.  Capping to %04d MHz", l_tmp_ceil_freq);
             }
 
             //Compute WOFBase (minumim across chips)
@@ -5421,8 +5440,12 @@ fapi2::ReturnCode PlatPmPPB::pm_set_frequency()
 
         iv_attrs.attr_freq_core_ceiling_mhz = l_ceil_freq_mhz;
         FAPI_INF("Computed ceiling frequency: %04d (0x%04x)", l_ceil_freq_mhz, l_ceil_freq_mhz);
+        FAPI_INF("Computed floor frequency: %04d (0x%04x)", l_sys_freq_core_floor_mhz, l_sys_freq_core_floor_mhz);
 
+        //Update system ceil and floor freq
         FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_FREQ_SYSTEM_CORE_CEILING_MHZ, sys_target,l_ceil_freq_mhz));
+        FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_FREQ_SYSTEM_CORE_FLOOR_MHZ, sys_target,l_sys_freq_core_floor_mhz));
+
         for (auto l_proc_target : sys_target.getChildren<fapi2::TARGET_TYPE_PROC_CHIP>())
         {
             FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_FREQ_CORE_CEILING_MHZ, l_proc_target,l_ceil_freq_mhz));
