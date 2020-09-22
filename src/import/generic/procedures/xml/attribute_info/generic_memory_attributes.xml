@@ -455,7 +455,7 @@
     </enum>
     <default>0x03</default>
     <platInit/>
-    <overrideOnly/>
+    <writeable/>
     <mssAccessorName>omi_x4_degrade_action</mssAccessorName>
   </attribute>
 

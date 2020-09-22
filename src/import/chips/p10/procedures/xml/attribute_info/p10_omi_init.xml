@@ -242,7 +242,7 @@
   </enum>
   <default>0x02</default>
   <platInit/>
-  <overrideOnly/>
+  <writeable/>
   <mssAccessorName>omi_channel_fail_action</mssAccessorName>
 </attribute>
 <!-- ********************************************************************** -->
