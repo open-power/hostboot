@@ -26,14 +26,8 @@
 #define _MEMORYMAP_H
 
 #include <limits.h>
-#include <usr/initservice/mboxRegs.H>
-#include <targeting/common/attributes.H>
-#include <targeting/common/targetservice.H>
 #include <assert.h>
 
-using namespace INITSERVICE;
-using namespace SPLESS;
-using namespace TARGETING;
 
 namespace MEMMAP
 {
@@ -55,7 +49,7 @@ typedef union
         uint8_t group:2; // 4:5
         uint8_t chip :2; // 6:7
     } mode1;
-    topoId_t topoId;
+    uint8_t topoId;
 }topologyIdBits_t;
 
 /**
@@ -132,8 +126,8 @@ constexpr uint64_t  IS_SMF_ADDR_BIT =             0x0008000000000000;
  *         topology ID.
  */
 inline uint64_t computeMemoryMapOffset( const uint64_t i_baseAddr,
-                                        const topoMode_t i_topologyMode,
-                                        const topoId_t i_topologyId)
+                                        const uint8_t i_topologyMode,
+                                        const uint8_t i_topologyId)
 {
     // The 5-bit topology index value must be used to calculate the
     // address.  The index value is derived from the topology ID as
@@ -146,7 +140,7 @@ inline uint64_t computeMemoryMapOffset( const uint64_t i_baseAddr,
     topologyIndexBits_t l_indexBits;
     l_indexBits.topoIndex = 0;
 
-    if(i_topologyMode == TARGETING::PROC_FABRIC_TOPOLOGY_MODE_MODE0)
+    if(i_topologyMode == 0)
     {
         l_indexBits.mode0.group = l_idBits.mode0.group;
         l_indexBits.mode0.chip = l_idBits.mode0.chip;
@@ -188,15 +182,15 @@ inline uint64_t computeMemoryMapOffset( const uint64_t i_baseAddr,
  *
  * @return The topology ID for the group and chip number
  */
-inline topoId_t makeTopoId(const topoMode_t i_topologyMode,
-                           const groupId_t i_group,
-                           const chipId_t i_chip)
+inline uint8_t makeTopoId(const uint8_t i_topologyMode,
+                          const uint8_t i_group,
+                          const uint8_t i_chip)
 {
     // NOTE: mode 0 -> GGGC
     //       mode 1 -> GGCC
     topologyIdBits_t l_idBits;
     l_idBits.topoId = 0;
-    if (i_topologyMode == TARGETING::PROC_FABRIC_TOPOLOGY_MODE_MODE0)
+    if (i_topologyMode == 0)
     {
         l_idBits.mode0.group = i_group;
         l_idBits.mode0.chip = i_chip;
@@ -234,6 +228,10 @@ constexpr uint64_t  MMIO_GROUP0_CHIP0_XIVE_CONTROLLER_BASE_ADDR =
                                                              0x0006030200000000;
 constexpr uint64_t  MMIO_GROUP0_CHIP0_INT_CQ_TM_BASE_ADDR =  0x0006030203180000;
 constexpr uint64_t  MMIO_GROUP0_CHIP0_PSI_HB_ESB_BASE_ADDR = 0x0006030202000000;
+
+// 64 TB offset for each node, maximum of nodes possible
+constexpr uint64_t  NODE_OFFSET =                            0x0000400000000000;
+constexpr uint64_t  NODE_OFFSET_MASK =                       0x0000F00000000000;
 
 } //end namespace
 

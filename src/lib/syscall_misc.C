@@ -24,6 +24,7 @@
 /* IBM_PROLOG_END_TAG                                                     */
 #define __HIDDEN_SYSCALL_SHUTDOWN
 
+#include <arch/memorymap.H>
 #include <sys/misc.h>
 #include <sys/syscall.h>
 #include <sys/task.h>
@@ -90,7 +91,7 @@ uint64_t cpu_spr_value(CpuSprNames spr)
 
 uint64_t cpu_hrmor_nodal_base()
 {
-    return (cpu_spr_value(CPU_SPR_HRMOR) - VMM_HRMOR_OFFSET);
+    return (cpu_spr_value(CPU_SPR_HRMOR) & MEMMAP::NODE_OFFSET_MASK);
 }
 
 uint64_t cpu_spr_set(CpuSprNames spr, uint64_t newValue)

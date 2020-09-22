@@ -695,7 +695,7 @@ void check_scratch_regs_vs_attrs( IStepError & io_StepError )
 
     // Compare 0:31 to ATTR_CHIP_CONTAINED_ACTIVE_CORES_VEC
     // only if in chip-contained mode (ipl phase = 0b10)
-    if (l_ipl_phase == MboxScratch5_t::CHIP_CONTAINED)
+    if (l_ipl_phase == INITSERVICE::SPLESS::MboxScratch5_t::CHIP_CONTAINED)
     {
         l_scratch = l_scratch7.activeCores.activeCoresMask;
         const auto l_attr_chip_contained_cores =
@@ -805,7 +805,7 @@ void check_scratch_regs_vs_attrs( IStepError & io_StepError )
 
     // Compare 0:31 to ATTR_CHIP_CONTAINED_BACKING_CACHES_VEC
     // only if in chip-contained mode (ipl phase = 0b10)
-    if (l_ipl_phase == MboxScratch5_t::CHIP_CONTAINED)
+    if (l_ipl_phase == INITSERVICE::SPLESS::MboxScratch5_t::CHIP_CONTAINED)
     {
         l_scratch = l_scratch10.chipCaches.backingCachesMask;
         const auto l_attr_chip_contained_caches =

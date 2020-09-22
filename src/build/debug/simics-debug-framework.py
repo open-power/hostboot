@@ -626,7 +626,8 @@ def magic_instruction_callback(user_arg, cpu, arg):
             return
 
         hb_hrmor = cpu.hrmor
-        per_node = 0x200000000000   #32TB
+        # see NODE_OFFSET in memorymap.H
+        per_node = 0x400000000000   #64TB
         per_chip = 0x40000000000    #4TB
         node_num = hb_hrmor//per_node
         # TODO RTC:200729 right now for 3 node systems the chip is getting calculated wrong
@@ -695,7 +696,8 @@ def magic_instruction_callback(user_arg, cpu, arg):
         hb_tracBinaryBuffer = cpu.r4
         hb_tracBinaryBufferSz = cpu.r5
         hb_tracBinaryMaxOffset = hb_tracBinaryBuffer + hb_tracBinaryBufferSz
-        per_node = 0x200000000000   #32TB
+        # see NODE_OFFSET in memorymap.H
+        per_node = 0x400000000000   #64TB
         per_chip = 0x40000000000    #4TB
         hb_hrmor = cpu.hrmor
         node_num = hb_hrmor//per_node

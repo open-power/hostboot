@@ -35,6 +35,7 @@ use Hostboot::_DebugFramework;
 
 # HRMOR value: 4 GB - 512 MB = 3584 MB
 use constant DEFAULT_HRMOR => 3584*1024*1024;
+# see NODE_OFFSET in memorymap.H
 use constant PER_NODE_OFFSET => 64*1024*1024*1024*1024; # 64 TB.
 use constant UNSET_HRMOR => 0xFFFFFFFFFFFFFFFF;
 

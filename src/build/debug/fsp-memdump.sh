@@ -124,8 +124,9 @@ fi
 
 # HB HRMOR offset is at: 4 GB - 256 MB = 3840 MB
 HB_OFFSET=`expr 3840 \* 1024 \* 1024`
-#(32TB - 0x200000000000 OR 35184372088832)
-HB_BASE_HRMOR=`expr 32 \* 1024 \* 1024 \* 1024 \* 1024`
+# (64TB - 0x400000000000 OR 35184372088832)
+# see NODE_OFFSET in memorymap.H
+HB_BASE_HRMOR=`expr 64 \* 1024 \* 1024 \* 1024 \* 1024`
 
 # Calculate HRMOR (in decimal).
 HRMOR=`expr ${HB_BASE_HRMOR} \* ${NODE} + ${HB_OFFSET}`
