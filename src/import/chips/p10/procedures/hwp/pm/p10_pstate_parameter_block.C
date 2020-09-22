@@ -1057,7 +1057,7 @@ fapi2::ReturnCode PlatPmPPB::gppb_init(
         //Set PGPE Flags
         io_globalppb->pgpe_flags[PGPE_FLAG_RESCLK_ENABLE] = iv_resclk_enabled;
         io_globalppb->pgpe_flags[PGPE_FLAG_CURRENT_READ_DISABLE] = iv_attrs.attr_system_current_read_disable;
-        io_globalppb->pgpe_flags[PGPE_FLAG_OCS_DISABLE] = !iv_ocs_enabled;
+        io_globalppb->pgpe_flags[PGPE_FLAG_OCS_DISABLE] = !is_ocs_enabled();
         io_globalppb->pgpe_flags[PGPE_FLAG_WOF_ENABLE] = iv_wof_enabled;
         io_globalppb->pgpe_flags[PGPE_FLAG_WOV_UNDERVOLT_ENABLE] = iv_wov_underv_enabled;
         io_globalppb->pgpe_flags[PGPE_FLAG_WOV_OVERVOLT_ENABLE] = iv_wov_overv_enabled;
@@ -1744,8 +1744,9 @@ FAPI_INF("%-60s[3] = 0x%08x %d", #attr_name, iv_attrs.attr_assign[3], iv_attrs.a
     iv_pstates_enabled = true;
     iv_resclk_enabled  = true;
     iv_dds_enabled     = true;
-    iv_rvrm_enabled     = true;
+    iv_rvrm_enabled    = true;
     iv_wof_enabled     = true;
+    iv_ocs_enabled     = true;
     //iv_wov_underv_enabled = true;
     //iv_wov_overv_enabled = true;
 

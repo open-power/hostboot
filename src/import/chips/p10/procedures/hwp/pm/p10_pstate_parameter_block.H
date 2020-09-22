@@ -206,7 +206,8 @@ class PlatPmPPB
             iv_dds_enabled(0), iv_rvrm_enabled(0), iv_wof_enabled(0), iv_safe_voltage (0),
             iv_safe_frequency(0), iv_reference_frequency_mhz(0), iv_reference_frequency_khz(0),
             iv_frequency_step_khz(0), iv_proc_dpll_divider(0), iv_occ_freq_mhz(0),
-            iv_wov_underv_enabled(0), iv_wov_overv_enabled(0), iv_poundV_fmax_enable(true)
+            iv_wov_underv_enabled(0), iv_wov_overv_enabled(0), iv_ocs_enabled(0),
+            iv_poundV_fmax_enable(true)
 
         {
             attr_init();
@@ -271,11 +272,10 @@ class PlatPmPPB
 //        fapi2::ReturnCode lppb_init(LocalPstateParmBlock* i_localppb);
 
         /// -----------------------------------------------------------------------
-        /// @brief This will set the pstate feature attrbutes(VDM,RESCLK,VRM,WOF)
+        /// @brief This will set the pstate feature attrbutes(DDS,RESCLK,VRM,WOF)
         /// @return fapi2::ReturnCode: FAPI2_RC_SUCCESS if success, else error code.
         /// -----------------------------------------------------------------------
         fapi2::ReturnCode set_global_feature_attributes();
-
 
         /// -----------------------------------------------------------------------
         /// @brief Initialize occ pstate parameter block
@@ -304,6 +304,7 @@ class PlatPmPPB
         /// -----------------------------------------------------------------------
         fapi2::ReturnCode pm_set_frequency();
         /// -----------------------------------------------------------------------
+
         /// @brief Read #V data from module vpd
         /// @return fapi::ReturnCode: FAPI2_RC_SUCCESS if success, else error code.
         /// -----------------------------------------------------------------------
@@ -314,7 +315,6 @@ class PlatPmPPB
         /// @return fapi::ReturnCode: FAPI2_RC_SUCCESS if success, else error code.
         /// -----------------------------------------------------------------------
         fapi2::ReturnCode get_mvpd_poundAW();
-
 
         /// -----------------------------------------------------------------------
         /// @brief Read #W data from module vpd
@@ -335,7 +335,6 @@ class PlatPmPPB
         /// @return none
         /// -----------------------------------------------------------------------
         void update_vpd_pts_value();
-
 
         /// -----------------------------------------------------------------------
         /// @brief Compute safe mode values
