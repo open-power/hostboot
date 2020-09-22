@@ -476,7 +476,7 @@ void IpcSp::msgHandler()
 
                 if (err) break;
 
-/* FIXME RTC: 257487 don't need istep21 stuff yet
+/* FIXME RTC: 257487 don't need core checkstop stuff yet
                 err = ISTEP_21::enableCoreCheckstops();
 
                 if (err)
@@ -484,11 +484,12 @@ void IpcSp::msgHandler()
                     // Commit the error but continue to shutdown
                     errlCommit(err, IPC_COMP_ID);
                 }
-
+**/
                 //  Function will not return unless error
+
+#ifndef CONFIG_VPO_COMPILE
                 err = ISTEP_21::callShutdown(msg->data[0],false,
                                              msg->data[1]);
-*/
 
                 if(err)
                 {
@@ -496,7 +497,7 @@ void IpcSp::msgHandler()
                     errlCommit(err, IPC_COMP_ID);
                     INITSERVICE::doShutdown(l_errEid, true);
                 }
-
+#endif
                 for (auto cnt = 0; cnt < NUM_MOD; ++cnt)
                 {
                     if ( loaded_mods[cnt] )
