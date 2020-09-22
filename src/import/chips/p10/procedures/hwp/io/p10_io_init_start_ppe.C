@@ -229,6 +229,11 @@ fapi2::ReturnCode p10_io_init::img_regs(const fapi2::Target<fapi2::TARGET_TYPE_P
         FAPI_TRY(p10_io_ppe_img_regs.flush());
         FAPI_TRY(flush_fw_regs());
 
+        // Enable SRAM Scrubbing
+        FAPI_TRY(GET_PHY_PPE_WRAP_ARB_CSCR_RW(l_pauc_target, l_data));
+        SET_PHY_PPE_WRAP_ARB_CSCR_SRAM_SCRUB_ENABLE(1, l_data);
+        FAPI_TRY(PUT_PHY_PPE_WRAP_ARB_CSCR_RW(l_pauc_target, l_data));
+
         // Start the ppe's
         FAPI_TRY(PREP_PHY_PPE_WRAP_XIXCR(l_pauc_target));
         SET_PHY_PPE_WRAP_XIXCR_PPE_XIXCR_XCR(6, l_data); //Hard reset
