@@ -310,15 +310,17 @@ int32_t PllDomain::Analyze(STEP_CODE_DATA_STRUCT& io_sc,
     // treat PLL unlock attentions and RCS unlock detect attentions as
     // individual events to simplify PRD analysis.
 
-    // Slow frequency drifts or jitter from the clocks will be reported as PLL
-    // unlock attentions. In addition, PLL unlock attentions may indicate there
-    // is a problem within the processor that reported the error. Therefore,
-    // PRD must call out both the primary clock and the processor. If more than
-    // one processor in the clock domain is reporting PLL unlock attentions,
-    // then the primary clock is more likely at fault than the processors.
-    // Similarly, if all PLL unlock attentions are scoped to a single processor
-    // in the clock domain, then the processor is more likely at fault than the
-    // primary clock.
+    // Slow frequency drifts will not be detected by the RCS checkers. However,
+    // they can cause cause PLL unlock attentions if the frequency deviates
+    // beyond the specified PLL frequency band. Jitter can cause PLL unlock
+    // attentions, but will most likely be caught by the RCS checkers. In
+    // addition, PLL unlock attentions may indicate there is a problem within
+    // the processor that reported the error.  Therefore, PRD must call out
+    // both the primary clock and the processor. If more than one processor in
+    // the clock domain is reporting PLL unlock attentions, then the primary
+    // clock is more likely at fault than the processors. Similarly, if all PLL
+    // unlock attentions are scoped to a single processor in the clock domain,
+    // then the processor is more likely at fault than the primary clock.
 
     if (errTypesSummary.query(PllErrTypes::RCS_OSC_ERROR_0) ||
         errTypesSummary.query(PllErrTypes::RCS_OSC_ERROR_1))

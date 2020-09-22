@@ -479,7 +479,9 @@ sub filetype
     {
         return "xsl"
     }
-    if ( $filename =~ m/\.txt$/i )
+    if ( ($filename =~ m/\.txt$/i) ||
+         ($filename =~ m/\.md$/i) ||
+         ($filename =~ m/\.markdown$/i) )
     {
         return "txt"
     }
@@ -1219,3 +1221,4 @@ sub getFileContributors
     }
     return %fileContributors;
 }
+
