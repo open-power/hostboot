@@ -1059,6 +1059,34 @@ void*    call_mss_attr_update( void *io_pArgs )
                 errlCommit( l_err, HWPF_COMP_ID );
             }
         }
+
+
+        // Set PLL BUCKET attributes, might be needed for SBE update check
+        //  or scratch reg compare later on
+        const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>
+        l_fapi2_proc_target (l_mProc);
+
+        TRACFCOMP(g_trac_isteps_trace,
+                  "Running p10_sbe_scratch_regs_set_pll_buckets HWP on processor target %.8X",
+                  get_huid(l_mProc));
+
+        FAPI_INVOKE_HWP(l_err,
+                        p10_sbe_scratch_regs_set_pll_buckets,
+                        l_fapi2_proc_target);
+        if(l_err)
+        {
+            TRACFCOMP(g_trac_isteps_trace,
+                "ERROR in p10_sbe_scratch_regs_set_pll_buckets HWP "
+                "for HUID %.8x. "
+                TRACE_ERR_FMT,
+                get_huid(l_mProc),
+                TRACE_ERR_ARGS(l_err));
+            l_StepError.addErrorDetails(l_err);
+            errlCommit( l_err, HWPF_COMP_ID );
+        }
+
+
+        // Check for any previous reason to force a SBE update
         ATTR_FORCE_SBE_UPDATE_type l_sbe_update =
             l_sys->getAttr<ATTR_FORCE_SBE_UPDATE>();
         TRACFCOMP(g_trac_isteps_trace, "Checking FORCE_SBE_UPDATE=0x%X",
@@ -1153,6 +1181,7 @@ void*    call_mss_attr_update( void *io_pArgs )
                                          HWAS::GARD_NULL);
                     l_err->collectTrace(TARG_COMP_NAME);
                     l_err->collectTrace(SBE_COMP_NAME);
+                    l_err->collectTrace(ISTEP_COMP_NAME);
                     captureError(l_err, l_StepError, HWPF_COMP_ID);
                 }
             }
@@ -1163,29 +1192,6 @@ void*    call_mss_attr_update( void *io_pArgs )
                       "ATTR_FORCE_SBE_UPDATE -NOT- "
                       "set to call updateProcessorSbeSeeproms,"
                       " skipped calling updateProcessSbeSeeproms");
-        }
-
-        // Set PLL BUCKET attributes
-        const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>
-        l_fapi2_proc_target (l_mProc);
-
-        TRACFCOMP(g_trac_isteps_trace,
-                  "Running p10_sbe_scratch_regs_set_pll_buckets HWP on processor target %.8X",
-                  get_huid(l_mProc));
-
-        FAPI_INVOKE_HWP(l_err,
-                        p10_sbe_scratch_regs_set_pll_buckets,
-                        l_fapi2_proc_target);
-        if(l_err)
-        {
-            TRACFCOMP(g_trac_isteps_trace,
-                "ERROR in p10_sbe_scratch_regs_set_pll_buckets HWP "
-                "for HUID %.8x. "
-                TRACE_ERR_FMT,
-                get_huid(l_mProc),
-                TRACE_ERR_ARGS(l_err));
-            l_StepError.addErrorDetails(l_err);
-            errlCommit( l_err, HWPF_COMP_ID );
         }
 
         // Compare the SBE scratch regs to attributes

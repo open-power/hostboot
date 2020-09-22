@@ -115,8 +115,6 @@ void*    call_mss_freq( void *io_pArgs )
             break;
         }
 
-        Target * l_sys = UTIL::assertGetToplevelTarget();
-
         // Save off current settings for OMI frequency
         ATTR_FREQ_OMI_MHZ_type l_originalOmiFreq = 0;
         l_err = fapi2::platAttrSvc::getOmiFreq(l_originalOmiFreq);
@@ -190,10 +188,6 @@ void*    call_mss_freq( void *io_pArgs )
 
         // Check if desired OMI frequency setting changed
         ATTR_FREQ_OMI_MHZ_type l_newOmiFreq = 0;
-        ATTR_FORCE_SBE_UPDATE_type l_sbe_update =
-            l_sys->getAttr<TARGETING::ATTR_FORCE_SBE_UPDATE>();
-        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-            "call_mss_freq: FORCE_SBE_UPDATE l_sbe_update=0x%X", l_sbe_update);
         l_err = fapi2::platAttrSvc::getOmiFreq(l_newOmiFreq);
         if(l_err)
         {
@@ -207,21 +201,6 @@ void*    call_mss_freq( void *io_pArgs )
             break;
         }
 
-        //@FIXME-RTC:258326-Remove once we have newer SPD in Simics
-        // Force the OMI frequency to match what we booted with until we get SPD
-        //  and MRW in-sync
-        if( l_newOmiFreq  != l_originalOmiFreq )
-        {
-            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                      "Forcing computed OMI Frequency (%d) to match our expected value (%d)",
-                      l_newOmiFreq, l_originalOmiFreq);
-            l_newOmiFreq = l_originalOmiFreq;
-            for (const auto & l_proc_target : l_procTargetList)
-            {
-                l_proc_target->setAttr<TARGETING::ATTR_FREQ_OMI_MHZ>(l_originalOmiFreq);
-            }
-        }
-
         // FW examines the master SBE boot scratch registers versus
         // system MRW ATTR and will customize the master SBE
         // Set ATTR_FORCE_SBE_UPDATE to trigger SBE update in later IPL flow
@@ -230,13 +209,9 @@ void*    call_mss_freq( void *io_pArgs )
         {
             TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
                 "call_mss_freq: OMI frequency changed!"
-                " Original Omi : %d New Omi : %d "
-                " set ATTR_FORCE_SBE_UPDATE for deferred action",
+                " Original Omi : %d New Omi : %d ",
                 l_originalOmiFreq, l_newOmiFreq);
-            l_sys->setAttr<TARGETING::ATTR_FORCE_SBE_UPDATE>
-              (l_sbe_update | TARGETING::SBE_UPDATE_TYPE_MSS_FREQ_CHANGE);
         }
-
     } while(0);
 
     TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, "call_mss_freq exit");
