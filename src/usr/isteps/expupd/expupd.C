@@ -197,7 +197,8 @@ void OcmbWorkItem::operator()()
     // reset watchdog for each Ocmb as this function can be very slow
     INITSERVICE::sendProgressCode();
 
-    fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP> l_fapi2Target(const_cast<TARGETING::TargetHandle_t>(iv_ocmb));
+    fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>
+      l_fapi2Target(const_cast<TARGETING::TargetHandle_t>(iv_ocmb));
 
     // Invoke procedure
     FAPI_INVOKE_HWP(l_err, exp_fw_update, l_fapi2Target,
@@ -209,6 +210,13 @@ void OcmbWorkItem::operator()()
                   TARGETING::get_huid(iv_ocmb));
 
         l_err->collectTrace(EXPUPD_COMP_NAME);
+
+        // explicitly deconfigure this part since we don't want to run on
+        //  down-level code
+        l_err->addHwCallout( iv_ocmb,
+                             HWAS::SRCI_PRIORITY_MED,
+                             HWAS::DELAYED_DECONFIG,
+                             HWAS::GARD_NULL );
 
         // addErrorDetails may not be thread-safe.  Protect with mutex.
         mutex_lock(&g_stepErrorMutex);
@@ -443,6 +451,9 @@ void updateAll(IStepError& o_stepError)
             break;
         }
 
+        // Always reboot if we make an attempt
+        l_rebootRequired = true;
+
         //Don't create more threads than we have targets
         size_t l_numTargets = l_flashUpdateList.size();
         uint32_t l_numThreads = std::min(MAX_OCMB_THREADS, l_numTargets);
@@ -503,7 +514,7 @@ void updateAll(IStepError& o_stepError)
 #endif //CONFIG_SECUREBOOT
     }
 
-    // force reboot if any updates were successful
+    // force reboot if any updates were attempted
     if(l_rebootRequired)
     {
         TRACFCOMP(g_trac_expupd,
@@ -515,7 +526,7 @@ void updateAll(IStepError& o_stepError)
     }
     else
     {
-        TRACFCOMP(g_trac_expupd, "updateAll: No OCMB chips were updated");
+        TRACFCOMP(g_trac_expupd, "updateAll: No updates were attempted");
     }
 
 
