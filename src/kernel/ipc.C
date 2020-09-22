@@ -38,12 +38,11 @@ using namespace KernelIpc;
 // values, this is 2 (reserved) * 32 (cores) * 4 (threads)
 //
 // To get the rest of the divisor we consider the mode.
-// Mode 0 = GGGC, also known as chip=node mode
-// Since C is the node number and it's not used (always zero) simply divide the PIR by a value larger than it
-// to always get 0 for the node number.
+// Mode 0 = GGGC, C is the node number and it's not used (always zero) simply divide the PIR by a value larger
+// than it to always get 0 for the node number.
 #define TOPOLOGY_MODE_0_NODE_DIVISOR (16 * 2 * 32 * 4)
-// Mode 1 = GGCC, also known as chip=group mode
-// GG are the bits the represent the node number so divide by the value that leaves only GG as the remainder.
+// Mode 1 = GGCC, GG are the bits the represent the node number so divide by the value that leaves only GG as the
+// remainder.
 #define TOPOLOGY_MODE_1_NODE_DIVISOR (4 * 2 * 32 * 4)
 
 TARGETING::topoMode_t g_topology_mode = TARGETING::PROC_FABRIC_TOPOLOGY_MODE_INVALID;
