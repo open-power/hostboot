@@ -111,6 +111,7 @@ ErrlEntry::ErrlEntry(const errlSeverity_t i_sev,
     iv_Src( SRC_ERR_INFO, i_modId, i_reasonCode, i_user1, i_user2 ),
     iv_termState(TERM_STATE_UNKNOWN),
     iv_sevFinal(false),
+    iv_skipProcessingLog(true),
     iv_skipShowingLog(true),
     iv_eselCallhomeInfoEvent(false),
     iv_doHbDump(i_hbDump)
@@ -800,58 +801,61 @@ void ErrlEntry::addVersionInfo()
 }
 
 enum {
-    SKIP_INFO_RECOVERABLE_LOGS =
-        TARGETING::HIDDEN_ERRLOGS_ENABLE_NO_HIDDEN_LOGS,
+    SKIP_INFO_RECOVERABLE_LOGS = 0,
     ENABLE_INFORMATIONAL_LOGS =
         TARGETING::HIDDEN_ERRLOGS_ENABLE_ALLOW_INFORMATIONAL,
     ENABLE_RECOVERABLE_LOGS =
         TARGETING::HIDDEN_ERRLOGS_ENABLE_ALLOW_RECOVERED,
-    ENABLE_ALL_LOGS =
-        TARGETING::HIDDEN_ERRLOGS_ENABLE_ALLOW_ALL_LOGS
+    ENABLE_ALL_LOGS = ENABLE_INFORMATIONAL_LOGS | ENABLE_RECOVERABLE_LOGS,
+    DISPLAY_INFORMATIONAL_LOGS =
+        TARGETING::HIDDEN_ERRLOGS_ENABLE_DISPLAY_INFORMATIONAL,
+    DISPLAY_RECOVERABLE_LOGS =
+        TARGETING::HIDDEN_ERRLOGS_ENABLE_DISPLAY_RECOVERED,
+    DISPLAY_ALL_LOGS = DISPLAY_INFORMATIONAL_LOGS | DISPLAY_RECOVERABLE_LOGS
 };
 
 void ErrlEntry::checkHiddenLogsEnable( )
 {
+    // Note: iv_skipShowingLog and iv_skipProcessingLog are set to true by
+    //     default
+    // See HIDDEN_ERRLOGS_ENABLE targeting enumeration for possible bitmask
+    // values.
 
-    // Note: iv_skipShowingLog is set to True by default
-    //0 = Prevent INFORMATIONAL/RECOVERED error logs from being processed.
-    //1 = Send only INFORMATIONAL error logs.
-    //2 = Send only RECOVERED error logs.
-    //3 = Allow all hidden error logs to be processed.
+    const auto hiddenLogFlags = getHiddenLogsEnable();
 
-    uint8_t l_enableLogs = getHiddenLogsEnable();
-
-    // enable all logs to be displayed
-    if( l_enableLogs == ENABLE_ALL_LOGS )
+    switch(sev())
     {
-        iv_skipShowingLog = false;
-    }
-    else
-    {
-        // need to check based on severity
-        switch( sev() )
-        {
-            case ERRL_SEV_INFORMATIONAL:
+        case ERRL_SEV_INFORMATIONAL:
 
-                if(l_enableLogs & ENABLE_INFORMATIONAL_LOGS )
-                {
-                    iv_skipShowingLog = false;
-                }
-                break;
-
-            case ERRL_SEV_RECOVERED:
-
-                if(l_enableLogs & ENABLE_RECOVERABLE_LOGS )
-                {
-                    iv_skipShowingLog = false;
-                }
-                break;
-
-            default:
-                // For any error log that is not INFORMATIONAL
-                // or RECOVERED, we want to show the log
+            if(hiddenLogFlags & ENABLE_INFORMATIONAL_LOGS)
+            {
+                iv_skipProcessingLog = false;
+            }
+            if(hiddenLogFlags & DISPLAY_INFORMATIONAL_LOGS)
+            {
                 iv_skipShowingLog = false;
-        }
+            }
+            break;
+
+        case ERRL_SEV_RECOVERED:
+
+            if(hiddenLogFlags & ENABLE_RECOVERABLE_LOGS)
+            {
+                iv_skipProcessingLog = false;
+            }
+            if(hiddenLogFlags & DISPLAY_RECOVERABLE_LOGS)
+            {
+                iv_skipShowingLog = false;
+            }
+            break;
+
+        default:
+
+            // For any error log that is not INFORMATIONAL
+            // or RECOVERED, we want to process and display the log
+            iv_skipProcessingLog = false;
+            iv_skipShowingLog = false;
+            break;
     }
 }
 
@@ -1100,7 +1104,7 @@ void ErrlEntry::commit( compId_t  i_committerComponent )
     // Add the Hostboot Build ID to the error log
     addHbBuildId();
 
-    // check to see if we should skip info and recoverable errors?
+    // Check to see if we should skip processing info and recoverable errors
     checkHiddenLogsEnable();
 
     // Check to make sure targeting is initialized. If so, collect part and

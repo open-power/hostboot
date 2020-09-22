@@ -507,41 +507,60 @@
   <attribute>
     <id>HIDDEN_ERRLOGS_ENABLE</id>
     <description>
-        Used to decide whether or not to prevent INFORMATIONAL/RECOVERED error
-        logs from being sent to the BMC via SEL/eSEL, saved to the PNOR, and
-        displayed to the console.
-        0 = Prevent INFORMATIONAL/RECOVERED error logs from being processed.
-        1 = Send only INFORMATIONAL error logs.
-        2 = Send only RECOVERED error logs.
-        3 = Allow all hidden error logs to be processed.
+        Bitmask used to decide whether or not to process INFORMATIONAL/RECOVERED
+        error logs (i.e. send them to the BMC and save them to PNOR) and/or to
+        display them on the console.  The bitmask values are defined
+        by the HIDDEN_ERRLOGS_ENABLE_FLAGS enumeration.
+
+        0x00 = Prevent INFORMATIONAL/RECOVERED error logs from being processed
+               or displayed (absense of any bits set)
+
+        Otherwise, any combination of the following bits, when allowed:
+
+        0x01 = Process INFORMATIONAL error logs.
+        0x02 = Process RECOVERED error logs.
+        0x04 = Display INFORMATIONAL error logs
+        0x08 = Display RECOVERED error logs
     </description>
     <simpleType>
       <uint8_t>
-        <default>0</default>
+        <default>0x03</default>
       </uint8_t>
     </simpleType>
     <persistency>volatile</persistency>
     <readable/>
+    <no_export/>
   </attribute>
 
   <enumerationType>
     <id>HIDDEN_ERRLOGS_ENABLE</id>
-    <description>Enumeration of HIDDEN_ERRLOGS_ENABLE</description>
-    <enumerator>
-      <name>NO_HIDDEN_LOGS</name>
-      <value>0</value>
-    </enumerator>
+    <description>Enumeration describing valid bitmask values used by the
+        HIDDEN_ERRLOGS_ENABLEBLE attribute.  ALLOW_ALL_LOGS and
+        DISPLAY_ALL_LOGS are conveneience aggregations of multiple
+        bits</description>
     <enumerator>
       <name>ALLOW_INFORMATIONAL</name>
-      <value>1</value>
+      <value>0x01</value>
     </enumerator>
     <enumerator>
       <name>ALLOW_RECOVERED</name>
-      <value>2</value>
+      <value>0x02</value>
     </enumerator>
     <enumerator>
       <name>ALLOW_ALL_LOGS</name>
-      <value>3</value>
+      <value>0x03</value>
+    </enumerator>
+    <enumerator>
+      <name>DISPLAY_INFORMATIONAL</name>
+      <value>0x04</value>
+    </enumerator>
+    <enumerator>
+      <name>DISPLAY_RECOVERED</name>
+      <value>0x08</value>
+    </enumerator>
+    <enumerator>
+      <name>DISPLAY_ALL_LOGS</name>
+      <value>0x0C</value>
     </enumerator>
   </enumerationType>
 

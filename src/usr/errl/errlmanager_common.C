@@ -202,9 +202,10 @@ void ErrlManager::setupPnorInfo()
                     }
                     else
                     {
-                        // Decide if we need to skip the error log
+                        // Decide if we need to skip processing / displaying the
+                        // error log
                         setErrlSkipFlag(err);
-                        if(err->getSkipShowingLog())
+                        if(err->getSkipProcessingLog())
                         {
                             // skip it, go to the next one
                             continue;
@@ -323,7 +324,7 @@ bool ErrlManager::saveErrLogToPnor( errlHndl_t& io_err)
     {
         // Decide whether or not to skip error log
         // if so, we'll just 'say' that we saved it and go on.
-        if( io_err->getSkipShowingLog() )
+        if( io_err->getSkipProcessingLog() )
         {
             TRACFCOMP( g_trac_errl, INFO_MRK"saveErrLogToPnor: INFORMATIONAL/RECOVERED log, skipping");
             rc = true;
@@ -625,7 +626,7 @@ void ErrlManager::sendErrLogToBmc(errlHndl_t &io_err, bool i_sendSels)
         SensorModifier l_modifier;
 
         // Decide whether we want to skip the error log
-        if( io_err->getSkipShowingLog() && !l_callhome_type )
+        if( io_err->getSkipProcessingLog() && !l_callhome_type )
         {
             TRACFCOMP( g_trac_errl, INFO_MRK
                 "sendErrLogToBmc: %.8X is INFORMATIONAL/RECOVERED; skipping",
@@ -1043,24 +1044,24 @@ void getSensorOffsetBasedOnSeverity(errlHndl_t & io_err,
 
 void ErrlManager::setErrlSkipFlag(errlHndl_t io_err)
 {
-    // Note: iv_skipShowingLog is set to True by default
-    //0 = Prevent INFORMATIONAL/RECOVERED error logs from being processed.
-    //1 = Send only INFORMATIONAL error logs.
-    //2 = Send only RECOVERED error logs.
-    //3 = Allow all hidden error logs to be processed.
+    // Note: iv_skipShowingLog and iv_skipProcessingLog are set to true by
+    //     default
+    // See HIDDEN_ERRLOGS_ENABLE targeting enumeration for possible bitmask
+    // values.
 
-    //Check severity
+    // Check severity
     switch (io_err->sev())
     {
         case ERRORLOG::ERRL_SEV_INFORMATIONAL:
 
-            // check if we are allowing info logs through.
-            if((iv_hiddenErrLogsEnable ==
-                TARGETING::
-                    HIDDEN_ERRLOGS_ENABLE_ALLOW_INFORMATIONAL)||
-               (iv_hiddenErrLogsEnable ==
-                TARGETING::
-                    HIDDEN_ERRLOGS_ENABLE_ALLOW_ALL_LOGS))
+            // Check if we are allowing info logs through.
+            if(  iv_hiddenErrLogsEnable
+               & TARGETING::HIDDEN_ERRLOGS_ENABLE_ALLOW_INFORMATIONAL)
+            {
+                io_err->setSkipProcessingLog(false);
+            }
+            if(  iv_hiddenErrLogsEnable
+               & TARGETING::HIDDEN_ERRLOGS_ENABLE_DISPLAY_INFORMATIONAL)
             {
                 io_err->setSkipShowingLog(false);
             }
@@ -1068,17 +1069,21 @@ void ErrlManager::setErrlSkipFlag(errlHndl_t io_err)
 
         case ERRORLOG::ERRL_SEV_RECOVERED:
 
-            // check if we are allowing recovered logs through.
-            if(((iv_hiddenErrLogsEnable ==
-               TARGETING::
-                    HIDDEN_ERRLOGS_ENABLE_ALLOW_RECOVERED) ||
-               (iv_hiddenErrLogsEnable ==
-                TARGETING::
-                    HIDDEN_ERRLOGS_ENABLE_ALLOW_ALL_LOGS)))
+            // Check if we are allowing recovered logs through.
+            if(  iv_hiddenErrLogsEnable
+               & TARGETING::HIDDEN_ERRLOGS_ENABLE_ALLOW_RECOVERED)
             {
-                //Recovered error logs that are encountered
-                //before targeting and initservice are loaded,
-                //will still be queued for sending to PNOR/IPMI
+                // Recovered error logs that are encountered
+                // before targeting and initservice are loaded
+                // will still be queued for sending to PNOR/BMC
+                io_err->setSkipProcessingLog(false);
+            }
+            if(  iv_hiddenErrLogsEnable
+               & TARGETING::HIDDEN_ERRLOGS_ENABLE_DISPLAY_RECOVERED)
+            {
+                // Recovered error logs that are encountered
+                // before targeting and initservice are loaded
+                // will still be queued for display
                 io_err->setSkipShowingLog(false);
             }
             break;
@@ -1086,7 +1091,8 @@ void ErrlManager::setErrlSkipFlag(errlHndl_t io_err)
         default:
 
             // For any error log that is not INFORMATIONAL
-            // or RECOVERED, we want to show the log
+            // or RECOVERED, we want to process and display the log
+            io_err->setSkipProcessingLog(false);
             io_err->setSkipShowingLog(false);
     }
 } // setErrlSkipFlag

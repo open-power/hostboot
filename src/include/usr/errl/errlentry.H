@@ -901,19 +901,41 @@ private:
 #endif
 
     /**
-     * @brief set iv_skipShowingLogs
+     *  @brief Sets flag controlling whether or not to display a given
+     *      error log to the console.  It is only possible to display an
+     *      error log whose processing has not been skipped.
      *
-     * @return nothing
+     *  @param[in] i_skipShowingLog Whether to skip displaying the log (true)
+     *      or not (false)
      */
-    void setSkipShowingLog(bool i_showLog);
+    void setSkipShowingLog(bool i_skipShowingLog);
 
     /**
-     * @brief get iv_skipShowingLogs
+     *  @brief Reads the flag controlling whether or not to display a given
+     *      error log to the console.  It's only possible to display an error
+     *      log whose processing has not been skipped.
      *
-     * @return true if the log should be skipped, false otherwise
+     *  @return true if the log should be skipped, false otherwise
      */
-    bool getSkipShowingLog();
+    bool getSkipShowingLog() const;
 
+    /**
+     *  @brief Sets flag controlling whether or not to process a given
+     *      error log (send to BMC and record it in the PNOR).  A log that is
+     *      not processed will never be displayed.
+     *
+     *  @param[in] i_skipProcessingLog Whether to skip processing or not
+     */
+    void setSkipProcessingLog(bool i_skipProcessingLog);
+
+    /**
+     *  @brief Reads flag controlling whether or not to process a given error log
+     *      (send to BMC and record it in the PNOR).  A log that is not
+     *      processed will never be displayed.
+     *
+     *  @return bool Whether to skip processing the log (true), or not (false).
+     */
+    bool getSkipProcessingLog() const;
 
     /**
      * @brief Sets internal flag to indicate if this log should be
@@ -963,8 +985,11 @@ private:
     // when true, the severity has been set "final" and can not be changed.
     bool iv_sevFinal;
 
-    //when true, the current error log will not be saved to PNOR, sent to the
-    //BMC, or displayed in the console
+    // When true, the current error log will neither be saved to PNOR nor
+    // sent to the BMC.
+    bool iv_skipProcessingLog;
+
+    // When true, the current error log will not be displayed on the console.
     bool iv_skipShowingLog;
 
     // when true, send this special type of eSEL to the BMC
@@ -1113,17 +1138,32 @@ inline void ErrlEntry::setSrcType(const srcType_t i_srcType)
 
 ////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////
-inline void ErrlEntry::setSkipShowingLog(bool i_showLog)
+inline void ErrlEntry::setSkipShowingLog(const bool i_skipShowingLog)
 {
-    iv_skipShowingLog = i_showLog;
+    iv_skipShowingLog = i_skipShowingLog;
     return;
 }
 
 ////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////
-inline bool ErrlEntry::getSkipShowingLog()
+inline bool ErrlEntry::getSkipShowingLog() const
 {
     return iv_skipShowingLog;
+}
+
+////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////
+inline void ErrlEntry::setSkipProcessingLog(const bool i_skipProcessingLog)
+{
+    iv_skipProcessingLog = i_skipProcessingLog;
+    return;
+}
+
+////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////
+inline bool ErrlEntry::getSkipProcessingLog() const
+{
+    return iv_skipProcessingLog;
 }
 
 ////////////////////////////////////////////////////////////////////////////

@@ -664,7 +664,7 @@ void ErrLogDisplay::msgDisplay (const errlHndl_t &i_err,
 
     do
     {
-        // Decide whether or not to skip the error log
+        // Decide whether or not to skip displaying the error log to the console
         if( i_err->getSkipShowingLog() )
         {
             TRACDCOMP( g_trac_errldisp, INFO_MRK"msgDisplay: %.8X is INFORMATIONAL/RECOVERED; skipping...", i_err->eid());
