@@ -39,7 +39,7 @@
 #include <prdfGlobal_common.H>
 #include <UtilHash.H>
 #include <prdfFsiCapUtil.H>
-#include <prdfP10Pll.H>
+#include <prdfPllDomain.H>
 
 using namespace TARGETING;
 
@@ -47,7 +47,6 @@ namespace PRDF
 {
 
 using namespace PlatServices;
-using namespace PLL;
 
 namespace p10_proc
 {
@@ -343,18 +342,18 @@ bool CheckChipletPll(ExtensibleChip * i_chip, TARGETING::TYPE i_chpltType)
 /**
  * @brief  Queries for all PLL error types that occurred on this chip.
  * @param  i_chip    A PROC chip.
- * @param  o_errType The types of errors found. See enum PllErrorType.
+ * @param  o_errType The types of errors found.
  * @return Non-SUCCESS on failure. SUCCESS, otherwise.
  */
-int32_t CheckErrorType(ExtensibleChip * i_chip, uint32_t & o_errType)
+int32_t CheckErrorType(ExtensibleChip * i_chip, PllErrTypes& o_errType)
 {
     #define PRDF_FUNC "[p10_proc::CheckErrorType] "
     int32_t rc = SUCCESS;
 
-    // TODO: Currently disabling PLL error analysis until we are able to update
-    //       it for P10.
-    return SUCCESS;
+    o_errType.clear();
 
+/* TODO: Currently disabling PLL error analysis until we are able to update
+ *       it for P10.
     SCAN_COMM_REGISTER_CLASS * TP_LFIR =
                 i_chip->getRegister("TP_LFIR");
     SCAN_COMM_REGISTER_CLASS * TP_LFIRmask =
@@ -397,6 +396,7 @@ int32_t CheckErrorType(ExtensibleChip * i_chip, uint32_t & o_errType)
             }
         }
     } while (0);
+*/
 
     return rc;
 
@@ -439,28 +439,15 @@ PRDF_PLUGIN_DEFINE(p10_proc, clearParityError);
  */
 int32_t QueryPll(ExtensibleChip * i_chip, bool & o_result)
 {
-    #define PRDF_FUNC "[p10_proc::QueryPll] "
-
-    int32_t rc = SUCCESS;
     o_result = false;
 
-    uint32_t errType = 0;
-
-    rc = CheckErrorType(i_chip, errType);
-
-    if (rc == SUCCESS)
+    PllErrTypes errType;
+    if (SUCCESS == CheckErrorType(i_chip, errType))
     {
-        o_result = (errType != 0);
-    }
-    else
-    {
-        PRDF_ERR(PRDF_FUNC "failed for proc: 0x%.8X",
-                 i_chip->getHuid());
+        o_result = errType.any();
     }
 
     return SUCCESS;
-
-    #undef PRDF_FUNC
 }
 PRDF_PLUGIN_DEFINE(p10_proc, QueryPll);
 
@@ -509,12 +496,14 @@ PRDF_PLUGIN_DEFINE(p10_proc, ClearPll);
  * @brief  Masks PLL errors on this chip.
  * @param  i_chip    A PROC chip.
  * @param  io_sc     The step code data struct.
- * @param  i_errType The types of errors to mask. See enum PllErrorType.
+ * @param  i_errType The types of errors to mask.
  * @return Non-SUCCESS on failure. SUCCESS, otherwise.
  */
 int32_t MaskPll(ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc,
-                uint32_t i_errType)
+                const PllErrTypes& i_errType)
 {
+/* TODO: Currently disabling PLL error analysis until we are able to update
+ *       it for P10.
     int32_t rc = SUCCESS;
 
     if (SYS_PLL_UNLOCK & i_errType)
@@ -538,6 +527,7 @@ int32_t MaskPll(ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc,
                      "for chip: 0x%08x", i_chip->getHuid());
         }
     }
+*/
 
     return SUCCESS;
 }

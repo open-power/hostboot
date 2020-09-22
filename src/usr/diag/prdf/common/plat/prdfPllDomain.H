@@ -37,6 +37,64 @@ namespace PRDF
 
 //------------------------------------------------------------------------------
 
+class PllErrTypes
+{
+  public: // Consts, enums, etc.
+
+    // Each value in this enum represents a bit in iv_flags.
+    enum Types
+    {
+        PLL_UNLOCK = 0x01,
+    };
+
+  public: // Constructors, destructor, assignment, etc.
+
+    /** @brief Default constructor. */
+    PllErrTypes() = default;
+
+    /** @brief Destructor. */
+    ~PllErrTypes() = default;
+
+    /** @brief Copy constructor. */
+    PllErrTypes(const PllErrTypes&) = default;
+
+    /** @brief Assignment operator. */
+    PllErrTypes& operator=(const PllErrTypes&) = default;
+
+  private: // Instance variables
+
+    /** A bitwise mask for all error types that are currently reporting
+     *  attentions. See enum Types for the list of supported error types. */
+    unsigned int iv_types = 0;
+
+  public: // Member functions
+
+    /** @return True, if the given type is currently set in iv_types. */
+    bool query( Types i_types ) const { return ( 0 != (iv_types & i_types) ); }
+
+    /** @return True, if any type is currently set in iv_types. */
+    bool any() const { return ( 0 != iv_types ); }
+
+    /** @brief Sets the given type in iv_types. */
+    void set( Types i_types ) { iv_types |= i_types; }
+
+    /** @brief Clears the given type in iv_types. */
+    void clear( Types i_types ) { iv_types &= ~i_types; }
+
+    /** @brief Clears all types in iv_types. */
+    void clear() { iv_types = 0; }
+
+    /** @brief Bitwise OR operator. */
+    PllErrTypes operator|(const PllErrTypes& i_types) const
+    {
+        PllErrTypes o_types;
+        o_types.iv_types = this->iv_types | i_types.iv_types;
+        return o_types;
+    }
+};
+
+//------------------------------------------------------------------------------
+
 class PllDomain : public RuleChipDomain, public ExtensibleDomain
 {
   public:
@@ -100,7 +158,7 @@ class PllDomain : public RuleChipDomain, public ExtensibleDomain
      */
     static int32_t MaskPll( ExtensibleDomain * i_domain,
                             STEP_CODE_DATA_STRUCT & i_sc,
-                            uint32_t i_errType );
+                            const PllErrTypes& i_errType );
 
 protected:
 
