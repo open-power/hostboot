@@ -29,6 +29,9 @@
 #include <errno.h>
 #include <sys/misc.h>
 
+// @TODO RTC 260148: Remove when hardware can load and star the PM complex
+#include <util/misc.H>
+
 #include <trace/interface.H>
 #include <util/utillidmgr.H>
 
@@ -536,55 +539,67 @@ namespace RTPM
         TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
                   ENTER_MRK"load_and_start_pm_complex");
 #ifdef CONFIG_AUTO_START_PM_COMPLEX_FOR_PHYP
-        int l_rc = 0;
-        errlHndl_t l_errl = nullptr;
-        Target* l_failedProc = nullptr;
 
-        do {
-
-        // No-op on non-PHYP systems
-        if(!is_phyp_load())
+        // @TODO RTC 260148: Remove simulation check when hardware is capable of
+        // autostarting the PM complex
+        if(Util::isSimicsRunning())
         {
-            break;
-        }
+            int l_rc = 0;
+            errlHndl_t l_errl = nullptr;
+            Target* l_failedProc = nullptr;
 
-        l_errl = HBPM::loadAndStartPMAll(HBPM::PM_LOAD,
-                                         l_failedProc);
-        if(l_errl)
-        {
-            pm_complex_error(l_errl, l_rc);
-            break;
-        }
+            do {
 
-        if(l_failedProc)
-        {
-            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                      ERR_MRK"load_and_start_pm_complex: could not load/start PM Complex on proc HUID 0x%08x",
-                      get_huid(l_failedProc));
-            break;
-        }
+            // No-op on non-PHYP systems
+            if(!is_phyp_load())
+            {
+                break;
+            }
+
+            l_errl = HBPM::loadAndStartPMAll(HBPM::PM_LOAD,
+                                             l_failedProc);
+            if(l_errl)
+            {
+                pm_complex_error(l_errl, l_rc);
+                break;
+            }
+
+            if(l_failedProc)
+            {
+                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                          ERR_MRK"load_and_start_pm_complex: could not load/start PM Complex on proc HUID 0x%08x",
+                          get_huid(l_failedProc));
+                break;
+            }
 
 #ifdef CONFIG_HTMGT
-        HTMGT::processOccStartStatus(true, //i_startCompleted
-                              l_failedProc); //this is nullptr at this point
+            HTMGT::processOccStartStatus(true, //i_startCompleted
+                                  l_failedProc); //this is nullptr at this point
 #else
-        l_errl = HBPM::verifyOccChkptAll();
-        if(l_errl)
-        {
-            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                      ERR_MRK"load_and_start_pm_complex: verifyOccChkptAll failed!");
-            pm_complex_error(l_errl, l_rc);
-            break;
-        }
+            l_errl = HBPM::verifyOccChkptAll();
+            if(l_errl)
+            {
+                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                          ERR_MRK"load_and_start_pm_complex: verifyOccChkptAll failed!");
+                pm_complex_error(l_errl, l_rc);
+                break;
+            }
 #endif
-        }while(0);
+            }while(0);
 
-        if(l_rc)
+            if(l_rc)
+            {
+                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                          ERR_MRK"load_and_start_pm_complex: error occurred; rc: %d", l_rc);
+            }
+
+        }
+        else
         {
             TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                      ERR_MRK"load_and_start_pm_complex: error occurred; rc: %d", l_rc);
+                      INFO_MRK "Workaround: Not auto-starting the PM complex "
+                      "on hardware.");
         }
-
 #endif
         TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
                   EXIT_MRK"load_and_start_pm_complex");
