@@ -699,8 +699,8 @@ void HdatIplParms::hdatGetSystemParamters()
     }
     HDAT_DBG("after HYP_DISPATCH_WHEEL");
 
-    TARGETING::ATTR_FREQ_PB_MHZ_type l_nestClockFreq;
-    if(l_pSysTarget->tryGetAttr<TARGETING::ATTR_FREQ_PB_MHZ>
+    TARGETING::ATTR_FREQ_PAU_MHZ_type l_nestClockFreq;
+    if(l_pSysTarget->tryGetAttr<TARGETING::ATTR_FREQ_PAU_MHZ>
                                                          (l_nestClockFreq))
     {
         this->iv_hdatIPLParams->iv_sysParms.hdatNestFreq =
@@ -708,9 +708,9 @@ void HdatIplParms::hdatGetSystemParamters()
     }
     else
     {
-        HDAT_ERR("Error in getting FREQ_PB_MHZ");
+        HDAT_ERR("Error in getting FREQ_PAU_MHZ");
     }
-    HDAT_DBG("after FREQ_PB_MHZ");
+    HDAT_DBG("after FREQ_PAU_MHZ");
 
     this->iv_hdatIPLParams->iv_sysParms.hdatSplitCoreMode = 1;
 
