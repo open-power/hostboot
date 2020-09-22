@@ -66,17 +66,23 @@ fapi2::ReturnCode is_ccs_2666_write_needed(const fapi2::Target<fapi2::TARGET_TYP
     constexpr bool NO_RCD = false;
 
     uint64_t l_freq = 0;
+    uint8_t l_height = 0;
     bool l_has_rcd = false;
     o_is_needed = false;
+    const auto l_ocmb = mss::find_target<fapi2::TARGET_TYPE_OCMB_CHIP>(i_target);
 
     FAPI_TRY(mss::attr::get_freq(i_target, l_freq));
     FAPI_TRY(mss::dimm::has_rcd<mss::mc_type::EXPLORER>(i_target, l_has_rcd));
+    FAPI_TRY(mss::attr::get_dram_module_height(l_ocmb, l_height));
 
-    // The workaround is needed if we're at 2666 and do not have an RCD
-    o_is_needed = (l_freq == FREQ_NEEDS_WORKAROUND) &&
-                  (l_has_rcd == NO_RCD);
-    FAPI_DBG("%s freq:%lu, RCD:%s, workaround %s needed",
-             mss::c_str(i_target), l_freq, l_has_rcd ? "yes" : "no", o_is_needed ? "is" : "not");
+    // The workaround is needed if we're at 2666 and do not have an RCD parity delay
+    // 4U DDIMM's do not run in RCD parity mode but have an RCD so we do not have a delay from parity
+    {
+        const bool l_no_rcd_delay = (l_has_rcd == NO_RCD) || (l_height == fapi2::ENUM_ATTR_MEM_EFF_DRAM_MODULE_HEIGHT_4U);
+        o_is_needed = (l_freq == FREQ_NEEDS_WORKAROUND) && (l_no_rcd_delay);
+        FAPI_DBG("%s freq:%lu, RCD:%s, workaround %s needed",
+                 mss::c_str(i_target), l_freq, l_no_rcd_delay ? "yes" : "no", o_is_needed ? "is" : "not");
+    }
 
 fapi_try_exit:
     return fapi2::current_err;
