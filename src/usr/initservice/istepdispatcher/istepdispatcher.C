@@ -730,6 +730,7 @@ errlHndl_t IStepDispatcher::executeAllISteps()
                             #endif // CONFIG_BMC_IPMI
                             #ifdef CONFIG_PLDM
                             TRACFCOMP(g_trac_initsvc, INFO_MRK"executeAllISteps: sending PLDM reboot request");
+                            INITSERVICE::stopIpl();
                             err = PLDM::sendGracefulRebootRequest();
                             if(err)
                             {

@@ -5926,6 +5926,7 @@ errlHndl_t sbeDoReboot( void )
         else
         {
             TRACFCOMP(g_trac_sbe, "sbeDoReboot: requesting PLDM reboot");
+            INITSERVICE::stopIpl();
             err = PLDM::sendGracefulRebootRequest();
             if(err)
             {

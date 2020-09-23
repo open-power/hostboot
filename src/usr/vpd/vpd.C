@@ -504,6 +504,7 @@ errlHndl_t updateSerialNumberFromBMC( TARGETING::Target * i_nodetarget )
                     CONSOLE::displayf(nullptr, "Need a reboot.");
                     CONSOLE::flush();
 #ifdef CONFIG_PLDM
+                    INITSERVICE::stopIpl();
                     l_errl = PLDM::sendGracefulRebootRequest();
                     if(l_errl)
                     {

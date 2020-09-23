@@ -227,6 +227,7 @@ errlHndl_t rediscoverI2CTargets(void)
 #ifdef CONFIG_PLDM
             TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, INFO_MRK
                       "rediscoverI2CTargets: requesting PLDM reboot");
+            INITSERVICE::stopIpl();
             err = PLDM::sendGracefulRebootRequest();
             if(err)
             {
