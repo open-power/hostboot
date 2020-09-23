@@ -1365,4 +1365,31 @@
       <mssAccessorName>exp_resp_vref_dq_train_enable</mssAccessorName>
     </attribute>
 
+    <attribute>
+      <id>ATTR_MSS_EXP_CDR_BW_OVERRIDE_ENABLE</id>
+      <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+      <description>
+          This enables the override to the Explroer CDR bandwidth, to
+          the value specified by ATTR_MSS_EXP_CDR_BW_OVERRIDE_VALUE.
+      </description>
+      <initToZero></initToZero>
+      <valueType>uint8</valueType>
+      <enum>DISABLE = 0, ENABLE = 1</enum>
+      <writeable/>
+      <mssAccessorName>exp_cdr_bw_override_enable</mssAccessorName>
+    </attribute>
+
+    <attribute>
+      <id>ATTR_MSS_EXP_CDR_BW_OVERRIDE_VALUE</id>
+      <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+      <description>
+          Value for the Explorer CDR Bandwidth when override is enabled via
+          ATTR_MSS_EXP_CDR_BW_OVERRIDE_ENABLE
+      </description>
+      <valueType>uint8</valueType>
+      <default>47</default>
+      <writeable/>
+      <mssAccessorName>exp_cdr_bw_override_value</mssAccessorName>
+    </attribute>
+
 </attributes>

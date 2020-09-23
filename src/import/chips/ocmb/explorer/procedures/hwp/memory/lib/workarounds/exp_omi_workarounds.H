@@ -101,9 +101,11 @@ fapi2::ReturnCode pre_training_prbs(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_
 ///
 /// @brief Workaround for exp_omi-setup to set explorer cdr bw value
 /// @param[in] i_target OCMB chip
+/// @param[in] i_omi_freq OMI operating frequency
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success
 ///
-fapi2::ReturnCode cdr_bw_override(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target);
+fapi2::ReturnCode cdr_bw_override(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+                                  uint32_t i_omi_freq);
 
 
 } // omi

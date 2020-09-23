@@ -64,10 +64,13 @@ extern "C"
         fapi2::ReturnCode l_rc(fapi2::FAPI2_RC_SUCCESS);
         uint8_t l_gem_menterp_workaround = 0;
         uint8_t l_enable_ffe_settings = 0;
+        uint32_t l_omi_freq = 0;
 
         // Declares variables
         std::vector<uint8_t> l_boot_config_data;
         std::vector<uint8_t> l_ffe_setup_data;
+
+        const auto& l_proc = mss::find_target<fapi2::TARGET_TYPE_PROC_CHIP>(i_target);
 
         // BOOT CONFIG 0
         uint8_t l_dl_layer_boot_mode = fapi2::ENUM_ATTR_MSS_OCMB_EXP_BOOT_CONFIG_DL_LAYER_BOOT_MODE_NON_DL_TRAINING;
@@ -166,7 +169,8 @@ extern "C"
         }
 
         // Update explorer CDR BW value to 0x2F based on Chris Steffen's testing
-        FAPI_TRY(mss::exp::workarounds::omi::cdr_bw_override(i_target));
+        FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_FREQ_OMI_MHZ, l_proc, l_omi_freq) );
+        FAPI_TRY(mss::exp::workarounds::omi::cdr_bw_override(i_target, l_omi_freq));
 
         // Perform p10 workaround
         // Train mode 6 (state 3)
