@@ -749,6 +749,7 @@
     <attribute>
         <id>ATTR_PROC_FABRIC_PRESENT_GROUPS</id>
         <writeable/>
+        <persistency>non-volatile</persistency><!-- needs to be nonvolatile as FSP is setting it -->
     </attribute>
 
     <!-- Delete the redundant values from SW2 -->
@@ -836,7 +837,7 @@
     </attribute>
     <attribute>
         <id>ATTR_PROC_FABRIC_TOPOLOGY_ID_TABLE</id>
-        <persistency>volatile</persistency><!-- needs non-zero default -->
+        <persistency>non-volatile</persistency><!-- needs to be nonvolatile as FSP is setting it -->
     </attribute>
     <attribute>
         <id>ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE</id>
