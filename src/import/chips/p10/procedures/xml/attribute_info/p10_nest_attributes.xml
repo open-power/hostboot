@@ -53,6 +53,8 @@
     INVALID,INVALID,INVALID,INVALID,INVALID,INVALID,INVALID,INVALID
   </default>
   <writeable/>
+  <platInit/>
+  <mrwHide/>
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
