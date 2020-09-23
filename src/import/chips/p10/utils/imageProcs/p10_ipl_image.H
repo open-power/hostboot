@@ -1936,7 +1936,9 @@ typedef enum
     P9_XIP_SECTION_SBE_HDCT            = P9_XIP_SECTIONS_PLUS(13),
     P9_XIP_SECTION_SBE_SBH_FIRMWARE    = P9_XIP_SECTIONS_PLUS(14),
     P9_XIP_SECTION_SBE_SBH_HBBL        = P9_XIP_SECTIONS_PLUS(15),
-    P9_XIP_SECTIONS_SBE                = P9_XIP_SECTIONS_PLUS(16) // # sections
+    P9_XIP_SECTION_SBE_SB_SETTINGS     = P9_XIP_SECTIONS_PLUS(16),
+    P9_XIP_SECTION_SBE_SB_VERIFICATION = P9_XIP_SECTIONS_PLUS(17),
+    P9_XIP_SECTIONS_SBE                = P9_XIP_SECTIONS_PLUS(18) // # sections
 } p9_xip_section_sbe_t;
 
 #define P9_XIP_SECTION_NAMES_SBE(var)     \
@@ -1956,7 +1958,9 @@ typedef enum
                          ".ringidfeatlist",\
                          ".hdct",\
                          ".sbh_firmware",\
-                         ".sbh_hbbl")
+                         ".sbh_hbbl",\
+                         ".sb_settings",\
+                         ".sb_verification")
 
 /**************************************************************************/
 /* QME Image                                                             */
