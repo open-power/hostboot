@@ -429,7 +429,8 @@ void* call_host_runtime_setup (void *io_pArgs)
         // Default captured data to 0s -- MPIPL if check fills in if
         // valid
         uint32_t threadRegSize = sizeof(DUMP::hostArchRegDataHdr)+
-                                (95 * sizeof(DUMP::hostArchRegDataEntry));
+                                (DEF_ARCH_REG_COUNT_PER_THREAD *
+                                 sizeof(DUMP::hostArchRegDataEntry));
         uint8_t threadRegFormat = REG_DUMP_SBE_HB_STRUCT_VER;
         uint64_t capThreadArrayAddr = 0;
         uint64_t capThreadArraySize = 0;

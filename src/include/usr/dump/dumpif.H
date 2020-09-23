@@ -157,6 +157,11 @@ namespace DUMP
     #define DUMP_ARCH_REG_TYPE_GPR 0x01
     #define DUMP_ARCH_REG_TYPE_SPR 0x02
     #define DUMP_ARCH_REG_TYPE_TIMA 0x03
+    //Below count is used by hostboot in the forward path
+    //as part of call_host_runtime_setup to update default values
+    //into the HDAT. Actual values will be later updated into the
+    //HDAT in the MPIPL path
+    #define DEF_ARCH_REG_COUNT_PER_THREAD 182
 
     // Architected register data content entries
     union reg_t
