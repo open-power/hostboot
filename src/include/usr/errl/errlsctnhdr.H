@@ -32,7 +32,7 @@
  *  an error log section.  Every section in PEL binary data starts with
  *  eight bytes of data. This class manages those 8 bytes for all manner
  *  of PEL sections, including PH (private header), UH (user header),
- *  UD (user defined), etc.
+ *  UD (user defined data), ED (extended user defined data) etc.
  *
  */
 
@@ -68,6 +68,7 @@ class ErrlSctnHdr
     friend class ErrlUH;
     friend class ErrlUD;
     friend class ErrlEH;
+    friend class ErrlED;
     friend class ErrlSrc;
     friend class ErrlEntry;
     friend class ErrlManager;

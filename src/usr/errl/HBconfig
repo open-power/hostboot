@@ -7,4 +7,4 @@ config ERRL_ENTRY_TRACE
 config BUILD_FULL_PEL
     default y
     help
-        When enabled, include EH sections in PELs.
+        When enabled, include EH and ED sections in PELs.

@@ -142,6 +142,7 @@ enum errlActions_t
 enum errlCreator_t
 {
     ERRL_CID_HOSTBOOT                       = 'B',
+    ERRL_CID_EBMC                           = 'O',
 };
 
 
@@ -159,7 +160,8 @@ enum errlSectionId_t
     ERRL_SID_USER_HEADER                    = 0x5548, // UH user header
     ERRL_SID_EXTENDED_HEADER                = 0x4548, // EH user header
     ERRL_SID_PRIMARY_SRC                    = 0x5053, // PS
-    ERRL_SID_USER_DEFINED                   = 0x5544  // UD user defined
+    ERRL_SID_USER_DEFINED                   = 0x5544, // UD user defined
+    ERRL_SID_EXTENDED_USER_DEFINED          = 0x4544  // ED user defined
 };
 
 
@@ -414,7 +416,7 @@ typedef struct marker
  *
  * This structure represents the first 8 bytes of any PEL section.
  * Populated by the flatten code of class ErrlSctnHdr for any PEL
- * section.  Classes ErrlUH, ErrlPrvt, and ErrlSctn each have a
+ * section.  Classes ErrlUH, ErrlED, ErrlPrvt, and ErrlSctn each have a
  * ErrlSctnHdr.  User-defined sections derive from ErrlSctn, so
  * their section header works though ErrlSctn parent class.
  *
@@ -467,7 +469,32 @@ typedef struct pelprivateheadersection
   uint32_t   eid;
 } __attribute__((packed)) pelPrivateHeaderSection_t;
 
-
+/**
+ * @brief pelEDHeaderSection_t
+ *
+ * A PEL structure used to flatten error logs to PEL format.
+ *
+ * This structure represents an entire Extended User
+ * Defined Data (ED) PEL section. This section is a fixed overall
+ * total length of 212 bytes including the PEL section header.
+ * Populated by the flatten code of class ErrlED.
+ *
+ * The creator named is EBMC.
+ *
+ * See eBMC API makeSysInfoUserDataSection
+ * https://github.com/openbmc/phosphor-logging/blob/master/extensions/openpower-pels/pel.cpp
+ *
+ * eBMC will populate the ED section when the log is sent down to the eBMC.
+ * The pel.cpp is the authoritative source, examples are process name, fw version and states.
+ */
+typedef struct pelEDheadersection
+{
+  pelSectionHeader_t  sectionheader = { };
+  uint8_t    creatorId = ERRL_CID_EBMC; // 'O' for EBMC
+  char reserved1[3] = { };
+  char ed_data[200] = { };
+  // length 212 total
+} __attribute__((packed)) pelEDHeaderSection_t;
 
 /**
  * @brief pelUserHeaderSection_t

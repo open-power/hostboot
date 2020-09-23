@@ -111,6 +111,7 @@ ErrlEntry::ErrlEntry(const errlSeverity_t i_sev,
     // The SRC_ERR_INFO becomes part of the SRC; example, B1 in SRC B180xxxx
     // iv_Src assigns the epubSubSystem_t; example, 80 in SRC B180xxxx
     iv_Src( SRC_ERR_INFO, i_modId, i_reasonCode, i_user1, i_user2 ),
+    iv_ED( ),
     iv_termState(TERM_STATE_UNKNOWN),
     iv_sevFinal(false),
     iv_skipProcessingLog(true),
@@ -1083,7 +1084,6 @@ void ErrlEntry::addSensorDataToErrLog(TARGETING::Target * i_target,
 void ErrlEntry::commit( compId_t  i_committerComponent )
 {
     using namespace TARGETING;
-
     // TODO RTC 35258 need a better timepiece, or else apply a transform onto
     // timebase for an approximation of real time.
     iv_Private.iv_committed = getTB();
@@ -1091,6 +1091,7 @@ void ErrlEntry::commit( compId_t  i_committerComponent )
     // User/Extended headers contain the component ID of the committer.
     iv_User.setComponentId( i_committerComponent );
     iv_Extended.setComponentId(i_committerComponent);
+    iv_ED.setComponentId( i_committerComponent );
 
     // Avoid adding a callout to informational callhome "error"
     if (!getEselCallhomeInfoEvent())
@@ -1771,7 +1772,8 @@ uint64_t ErrlEntry::flattenedSize()
     uint64_t l_bytecount = iv_Private.flatSize() +
                            iv_User.flatSize() +
                            iv_Src.flatSize() +
-                           fullPelOnly(iv_Extended.flatSize());
+                           fullPelOnly(iv_Extended.flatSize()) +
+                           fullPelOnly(iv_ED.flatSize());
 
     // plus the sizes of the other optional sections
 
@@ -1820,9 +1822,9 @@ uint64_t ErrlEntry::flatten( void * o_pBuffer,
 
 
         // Inform the private header how many sections there are,
-        // counting the PH, UH, PS, EH, and the optionals.
+        // counting the PH, UH, PS, EH, ED, and the optionals.
         const auto startingSectionCount = iv_SectionVector.size();
-        iv_Private.iv_sctns = 3 + fullPelOnly(1) + startingSectionCount;
+        iv_Private.iv_sctns = 3 + fullPelOnly(2) + startingSectionCount;
 
         char * pBuffer = static_cast<char *>(o_pBuffer);
 
@@ -1859,6 +1861,12 @@ uint64_t ErrlEntry::flatten( void * o_pBuffer,
         if (fullPelOnly(true))
         {
             if (!flattener(iv_Extended, "eh")) break;
+        }
+        // flatten the ED extended user data section for OpenPOWER systems (the FSP
+        // adds this section for us otherwise)
+        if (fullPelOnly(true))
+        {
+            if (!flattener(iv_ED, "ed")) break;
         }
 
         // flatten the optional user-defined sections
@@ -1987,8 +1995,8 @@ uint64_t ErrlEntry::flatten( void * o_pBuffer,
         {
             // some section was too big and didn't get flatten - update the
             // section count in the PH section and re-flatten it.
-            // count is the PH, UH, PS, and the optionals.
-            iv_Private.iv_sctns = 3 + fullPelOnly(1) + flattenedSections;
+            // count is the PH, UH, PS, EH, ED and the optionals.
+            iv_Private.iv_sctns = 3 + fullPelOnly(2) + flattenedSections;
             // use ph size, since this is overwriting flattened data
             l_cb = iv_Private.flatten( pPHBuffer, iv_Private.flatSize() );
             if( 0 == l_cb )
@@ -2038,13 +2046,21 @@ uint64_t ErrlEntry::unflatten( const void * i_buffer,  uint64_t i_len )
         l_buf       += bytes_used;
     }
 
+    if (fullPelOnly(true))
+    {
+        TRACDCOMP(g_trac_errl, INFO_MRK"Unflatten ED section...");
+        bytes_used = iv_ED.unflatten(l_buf);
+        consumed    += bytes_used;
+        l_buf       += bytes_used;
+    }
+
     iv_SectionVector.clear();
     iv_btAddrs.clear();
     removeBackTrace();
 
     // loop thru the User Data sections (after already doing 3: Private, User
     // Header, SRC sections) while there's still data to process
-    for (int32_t l_sc = 3 + fullPelOnly(1);
+    for (int32_t l_sc = 3 + fullPelOnly(2);
             (l_sc < iv_Private.iv_sctns) && (consumed < i_len);
             l_sc++)
     {
@@ -2073,7 +2089,7 @@ uint64_t ErrlEntry::unflatten( const void * i_buffer,  uint64_t i_len )
 
     // if we didn't get as many User Detail sections as the Private header says
     // we should have, then we have an error
-    if ((iv_SectionVector.size() + 3) != iv_Private.iv_sctns)
+    if ((iv_SectionVector.size() + 3 + fullPelOnly(2)) != iv_Private.iv_sctns)
     {
         rc = -1;
     }

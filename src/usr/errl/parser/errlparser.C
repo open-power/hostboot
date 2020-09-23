@@ -513,6 +513,7 @@ bool ParseForPEL( char * i_pchNativePEL,
             }
             break;
         case ERRL_SID_USER_DEFINED:
+        case ERRL_SID_EXTENDED_USER_DEFINED:
             {
                 pvoid = malloc(sectionHeader.len);
                 pelSectionHeader_t * p;

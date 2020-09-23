@@ -58,6 +58,7 @@
 #include <errl/errleh.H>
 #include <errl/errlsrc.H>
 #include <errl/errlud.H>
+#include <errl/errled.H>
 #include <hbotcompid.H>
 #include <targeting/common/target.H>
 #include <attributeenums.H>
@@ -976,6 +977,7 @@ private:
     ErrlUH          iv_User;       // user header object
     ErrlSrc         iv_Src;        // primary SRC section
     ErrlEH          iv_Extended;   // extended user header object
+    ErrlED          iv_ED;         // ED section
     std::vector<ErrlUD*> iv_SectionVector;  // list of user defined sections
     std::vector<uint64_t> iv_btAddrs;    // list of addresses for the backtrace
     ErrlUserDetailsBackTrace * iv_pBackTrace; // Pointer to back trace
