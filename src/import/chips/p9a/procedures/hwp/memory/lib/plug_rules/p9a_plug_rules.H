@@ -37,13 +37,57 @@
 #define _P9A_PLUG_RULES_H_
 
 #include <fapi2.H>
-#include <generic/memory/lib/utils/pos.H>
 
 namespace mss
 {
 
 namespace plug_rule
 {
+
+///
+/// @class SPD lookup key class
+/// @note allows us to lookup the min supported and latest SPD
+///
+struct spd_lookup_key
+{
+    uint16_t iv_module_mfg_id;
+    uint8_t iv_dimm_height;
+    uint32_t iv_dimm_size;
+
+    ///
+    /// @brief Target based constructor
+    /// @param[in] i_target the DIMM target on which to operate
+    /// @param[out] o_rc SUCCESS if the function passes
+    /// @note Reads in the attributes
+    ///
+    spd_lookup_key(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target, fapi2::ReturnCode& o_rc);
+
+    ///
+    /// @brief Target based constructor
+    /// @param[in] i_module_mfg_id the module manufacturing ID
+    /// @param[in] i_dimm_height the DIMM height (1U, 2U, 4U)
+    /// @param[in] i_dimm_size the DIMM size in question (16GB, 32GB, etc)
+    /// @note Used to create the lookup table
+    ///
+    spd_lookup_key(const uint16_t i_module_mfg_id = 0,
+                   const uint8_t i_dimm_height = 0,
+                   const uint32_t i_dimm_size = 0);
+
+    ///
+    /// @brief Less than comparison operator
+    /// @param[in] i_rhs the value to compare against
+    /// @return true if this spd_lookup_key is less than i_rhs
+    ///
+    bool operator<(const spd_lookup_key& i_rhs) const;
+
+    ///
+    /// @brief Not equal to comparison operator
+    /// @param[in] i_rhs the value to compare against
+    /// @return true if this spd_lookup_key is not equal to i_rhs
+    ///
+    bool operator!=(const spd_lookup_key& i_rhs) const;
+};
+
 /// @note This is the oldest functional DDIMM SPD revision
 ///       any DIMMs with older SPD will be called out
 static const uint8_t MIN_FUNCTIONAL_SPD_REV = 0x03;

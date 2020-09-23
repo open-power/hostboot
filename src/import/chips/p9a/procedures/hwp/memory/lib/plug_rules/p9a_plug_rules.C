@@ -37,6 +37,7 @@
 #include <lib/shared/axone_consts.H>
 #include <algorithm>
 
+#include <generic/memory/lib/utils/pos.H>
 #include <generic/memory/lib/mss_generic_attribute_getters.H>
 #include <generic/memory/lib/utils/assert_noexit.H>
 #include <generic/memory/lib/utils/find.H>
@@ -45,12 +46,78 @@
 #include <generic/memory/lib/utils/num.H>
 
 #include <lib/plug_rules/p9a_plug_rules.H>
+#include <lib/plug_rules/exp_spd_keys_supported_map.H>
 
 namespace mss
 {
 
 namespace plug_rule
 {
+
+///
+/// @brief Target based constructor
+/// @param[in] i_target the DIMM target on which to operate
+/// @param[out] o_rc SUCCESS if the function passes
+/// @note Reads in the attributes
+///
+spd_lookup_key::spd_lookup_key(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target, fapi2::ReturnCode& o_rc)
+{
+    const auto& l_ocmb = mss::find_target<fapi2::TARGET_TYPE_OCMB_CHIP>(i_target);
+    FAPI_TRY( mss::attr::get_module_mfg_id(i_target, iv_module_mfg_id) );
+    FAPI_TRY( mss::attr::get_dram_module_height(l_ocmb, iv_dimm_height) );
+    FAPI_TRY( mss::attr::get_dimm_size(i_target, iv_dimm_size) );
+
+fapi_try_exit:
+    o_rc = fapi2::current_err;
+}
+
+///
+/// @brief Target based constructor
+/// @param[in] i_module_mfg_id the module manufacturing ID
+/// @param[in] i_dimm_height the DIMM height (1U, 2U, 4U)
+/// @param[in] i_dimm_size the DIMM size in question (16GB, 32GB, etc)
+/// @note Used to create the lookup table
+///
+spd_lookup_key::spd_lookup_key(const uint16_t i_module_mfg_id,
+                               const uint8_t i_dimm_height,
+                               const uint32_t i_dimm_size) :
+    iv_module_mfg_id(i_module_mfg_id),
+    iv_dimm_height(i_dimm_height),
+    iv_dimm_size(i_dimm_size)
+{}
+
+///
+/// @brief Less than comparison operator
+/// @param[in] i_rhs the value to compare against
+/// @return true if this spd_lookup_key is less than i_rhs
+///
+bool spd_lookup_key::operator<(const spd_lookup_key& i_rhs) const
+{
+    if(iv_module_mfg_id != i_rhs.iv_module_mfg_id)
+    {
+        return iv_module_mfg_id < i_rhs.iv_module_mfg_id;
+    }
+
+    if(iv_dimm_height != i_rhs.iv_dimm_height)
+    {
+        return iv_dimm_height < i_rhs.iv_dimm_height;
+    }
+
+    return iv_dimm_size < i_rhs.iv_dimm_size;
+}
+
+///
+/// @brief Not equal to comparison operator
+/// @param[in] i_rhs the value to compare against
+/// @return true if this spd_lookup_key is not equal to i_rhs
+///
+bool spd_lookup_key::operator!=(const spd_lookup_key& i_rhs) const
+{
+    return iv_module_mfg_id != i_rhs.iv_module_mfg_id ||
+           iv_dimm_height != i_rhs.iv_dimm_height ||
+           iv_dimm_size != i_rhs.iv_dimm_size;
+}
+
 ///
 /// @brief Helper function for channel_a_before_channel_b unit testing
 /// @param[in] i_target ocmb chip target
