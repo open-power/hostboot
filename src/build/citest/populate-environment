@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2014,2019
+# Contributors Listed Below - COPYRIGHT 2014,2020
 # [+] International Business Machines Corp.
 #
 #
@@ -47,3 +47,19 @@ if [ -z "$SKIP_CXX_TESTS" ]; then
 else
     hbDistribute --hb-standalone -j32 || exit -1
 fi
+
+# Create simics.tar
+# "hbDistribute --hb-standalone" has been run, which means that simics_setup()
+# in ${PROJECT_ROOT}/src/build/tools/standaloneHelper also ran.
+# simics_setup() populates ${PROJECT_ROOT}/standalone/simics/hbfw/ with useful debugging artifacts
+# which will now be placed in ${PROJECT_ROOT}/standalone/simics/simics.tar for CI to pull out:
+CURRENT_DIR=$PWD
+cd ${PROJECT_ROOT}/standalone/simics/
+
+echo "simics.tar " \
+"Debug tar file created from content of ${PROJECT_ROOT}/standalone/simics/hbfw/" \
+> hbfw/README.md
+
+tar -zcvf simics.tar hbfw
+
+cd $CURRENT_DIR
