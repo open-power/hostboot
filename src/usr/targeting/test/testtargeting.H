@@ -571,26 +571,6 @@ class TargetingTestSuite : public CxxTest::TestSuite
      */
     void testStdArray()
     {
-
-        // Testing 1D array
-
-        TS_INFO(ENTER_MRK "testStdArray: Testing 1D array");
-
-        constexpr auto TA = TARGETING::ATTR_IPC_NODE_BUFFER_GLOBAL_ADDRESS;
-            // TA: targeting attribute
-        typedef TARGETING::ATTR_IPC_NODE_BUFFER_GLOBAL_ADDRESS_typeStdArr
-            TA_typeStdArr;
-        typedef TARGETING::ATTR_IPC_NODE_BUFFER_GLOBAL_ADDRESS_type TA_type;
-
-        TARGETING::Target* l_pTarget = nullptr;
-        TARGETING::targetService().getTopLevelTarget(l_pTarget);
-        assert(l_pTarget != nullptr, "testStdArray, unable to establish top"
-            " level target service");
-
-        TA_typeStdArr l_setVal = {9, 6, 3, 1, 5, 1, 7, 3};
-
-        testStdArrayND<TA, TA_typeStdArr, TA_type>(l_pTarget, l_setVal);
-
         // Testing 2D array
         TS_INFO(ENTER_MRK "testStdArray: Testing 2D array");
 
