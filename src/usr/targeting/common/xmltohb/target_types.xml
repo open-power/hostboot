@@ -173,12 +173,28 @@
     <parent>chip-tpm-cectpm</parent>
   </targetType>
 
+  <!-- This special GPIO_EXPANDER target adapts the MRW to Hostboot's specific
+       GENERIC_I2C_DEVICE target.  All attributes should be declared
+       against the parent target. -->
+  <targetType>
+    <id>chip-PCA9554</id>
+    <parent>generic_i2c_device</parent>
+  </targetType>
+
   <!-- This special UCD target adapts the MRW to Hostboot's specific UCD
       target.  All attributes should be declared against the parent
       target. -->
   <targetType>
     <id>chip-UCD9090</id>
     <parent>ucd9090</parent>
+  </targetType>
+
+  <!-- This special ADC target adapts the MRW to Hostboot's specific
+       GENERIC_I2C_DEVICE target.  All attributes should be declared
+       against the parent target. -->
+  <targetType>
+    <id>chip-adc</id>
+    <parent>generic_i2c_device</parent>
   </targetType>
 
   <targetType>
