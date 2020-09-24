@@ -694,13 +694,13 @@ fapi2::ReturnCode set_fwms( const fapi2::Target<T>& i_target,
                             const mss::mcbist::address& i_address )
 {
     fapi2::buffer<uint64_t> l_buffer;
-    uint8_t l_symbol = 0;
+    uint64_t l_symbol = 0;
 
     // galois value of 0 means to clear the mark so only fill in fields if non-zero
     if (i_galois != 0)
     {
         // check for valid Galois code
-        FAPI_TRY( mss::ecc::galois_to_symbol<MC>(static_cast<uint8_t>(i_galois), l_symbol) );
+        FAPI_TRY( mss::ecc::galois_to_symbol<MC>(i_galois, l_symbol) );
 
         mss::ecc::fwms::set_mark<MC>(l_buffer, i_galois);
         mss::ecc::fwms::set_type<MC>(l_buffer, i_type);

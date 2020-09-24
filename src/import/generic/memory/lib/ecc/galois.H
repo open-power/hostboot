@@ -56,7 +56,7 @@ namespace ecc
 /// @return FAPI2_RC_SUCCESS iff all is ok
 ///
 template< mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T = DEFAULT_MEM_PORT_TARGET, typename TT = eccTraits<MC, T> >
-fapi2::ReturnCode galois_to_symbol( const uint8_t i_galois, uint8_t& o_symbol )
+fapi2::ReturnCode galois_to_symbol( const uint64_t i_galois, uint64_t& o_symbol )
 {
     const auto& l_p = std::find(TT::symbol2galois, (TT::symbol2galois + TT::ECC_MAX_SYMBOLS), i_galois);
 
@@ -83,7 +83,7 @@ fapi_try_exit:
 /// @return FAPI2_RC_SUCCESS iff all is ok
 ///
 template< mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T = DEFAULT_MEM_PORT_TARGET, typename TT = eccTraits<MC, T> >
-fapi2::ReturnCode symbol_to_galois( const uint8_t i_symbol, uint8_t& o_galois )
+fapi2::ReturnCode symbol_to_galois( const uint64_t i_symbol, uint64_t& o_galois )
 {
     FAPI_ASSERT( i_symbol < TT::ECC_MAX_SYMBOLS,
                  fapi2::MSS_INVALID_SYMBOL_FOR_GALOIS()
@@ -108,7 +108,7 @@ fapi_try_exit:
 /// @return FAPI2_RC_SUCCESS iff all is ok
 ///
 template< mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T = DEFAULT_MEM_PORT_TARGET, typename TT = eccTraits<MC, T> >
-fapi2::ReturnCode dq_to_symbol( const uint8_t i_dq, uint8_t& o_symbol )
+fapi2::ReturnCode dq_to_symbol( const uint64_t i_dq, uint64_t& o_symbol )
 {
     const auto& l_p = std::find(TT::symbol2dq, (TT::symbol2dq + TT::ECC_MAX_SYMBOLS), i_dq);
 
@@ -135,7 +135,7 @@ fapi_try_exit:
 /// @return FAPI2_RC_SUCCESS iff all is ok
 ///
 template< mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T = DEFAULT_MEM_PORT_TARGET, typename TT = eccTraits<MC, T> >
-fapi2::ReturnCode symbol_to_dq( const uint8_t i_symbol, uint8_t& o_dq )
+fapi2::ReturnCode symbol_to_dq( const uint64_t i_symbol, uint64_t& o_dq )
 {
     FAPI_ASSERT( i_symbol < TT::ECC_MAX_SYMBOLS,
                  fapi2::MSS_INVALID_SYMBOL_TO_DQ()
@@ -160,9 +160,9 @@ fapi_try_exit:
 /// @return FAPI2_RC_SUCCESS iff all is ok
 ///
 template< mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T = DEFAULT_MEM_PORT_TARGET, typename TT = eccTraits<MC, T> >
-fapi2::ReturnCode galois_to_dq( const uint8_t i_galois, uint8_t& o_dq  )
+fapi2::ReturnCode galois_to_dq( const uint64_t i_galois, uint64_t& o_dq  )
 {
-    uint8_t l_symbol = 0;
+    uint64_t l_symbol = 0;
 
     FAPI_TRY( galois_to_symbol(i_galois, l_symbol), "Failed galois_to_symbol");
     FAPI_TRY( symbol_to_dq(l_symbol, o_dq), "Failed symbol_to_dq" );
@@ -181,9 +181,9 @@ fapi_try_exit:
 /// @return FAPI2_RC_SUCCESS iff all is ok
 ///
 template< mss::mc_type MC = DEFAULT_MC_TYPE, fapi2::TargetType T = DEFAULT_MEM_PORT_TARGET, typename TT = eccTraits<MC, T> >
-fapi2::ReturnCode dq_to_galois( const uint8_t i_dq, uint8_t& o_galois )
+fapi2::ReturnCode dq_to_galois( const uint64_t i_dq, uint64_t& o_galois )
 {
-    uint8_t l_symbol = 0;
+    uint64_t l_symbol = 0;
 
     FAPI_TRY( dq_to_symbol(i_dq, l_symbol), "Failed dq_to_symbol");
     FAPI_TRY( symbol_to_galois(l_symbol, o_galois) , "Failed symbol_to_galois" );

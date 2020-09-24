@@ -66,12 +66,12 @@ fapi2::ReturnCode place_chip_mark(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& 
 {
     const auto& l_port = mss::find_target<TT::PORT_TYPE>(i_target);
 
-    uint8_t l_galois = 0;
-    uint8_t l_symbol = 0;
+    uint64_t l_galois = 0;
+    uint64_t l_symbol = 0;
 
     // For chip marks, we set the appropriate Hardware Mark Store reg, with the Galois code
     // of the first (smallest) symbol in the bad nibble, and both confirmed and exit1 bits set
-    FAPI_TRY( mss::ecc::dq_to_symbol<MC>(static_cast<uint8_t>(i_dq), l_symbol) );
+    FAPI_TRY( mss::ecc::dq_to_symbol<MC>(i_dq, l_symbol) );
 
     // Round down to the nearest "nibble" to get the correct symbol, then get the Galois code for it
     l_symbol = (l_symbol / BITS_PER_NIBBLE) * BITS_PER_NIBBLE;
@@ -102,13 +102,13 @@ fapi2::ReturnCode place_symbol_mark(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>
     const auto l_dimm_idx = mss::index(i_target);
     const auto l_rank_idx = mss::index(i_rank);
 
-    uint8_t l_galois = 0;
+    uint64_t l_galois = 0;
     mss::mcbist::address l_addr;
 
     // For symbol marks, we set the appropriate Firmware Mark Store reg, with the symbol's
     // Galois code, mark_type=SYMBOL, mark_region=MRANK, and the address of the DIMM+MRANK
     // TODO RTC:165133 Remove static_cast once Galois API is updated to accept uint64_t input
-    FAPI_TRY( mss::ecc::dq_to_galois<MC>(static_cast<uint8_t>(i_dq), l_galois) );
+    FAPI_TRY( mss::ecc::dq_to_galois<MC>(i_dq, l_galois) );
 
     l_addr.set_dimm(l_dimm_idx).set_master_rank(l_rank_idx);
 

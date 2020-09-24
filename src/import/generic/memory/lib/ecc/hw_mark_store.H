@@ -566,13 +566,13 @@ fapi2::ReturnCode set_hwms( const fapi2::Target<T>& i_target,
                             const uint64_t i_galois )
 {
     fapi2::buffer<uint64_t> l_buffer;
-    uint8_t l_symbol = 0;
+    uint64_t l_symbol = 0;
 
     // galois value of 0 means to clear the mark so only fill in fields if non-zero
     if (i_galois != 0)
     {
         // check for valid Galois code
-        FAPI_TRY( mss::ecc::galois_to_symbol<MC>( (uint8_t)i_galois, l_symbol) );
+        FAPI_TRY( mss::ecc::galois_to_symbol<MC>(i_galois, l_symbol) );
 
         mss::ecc::hwms::set_chipmark<MC>(l_buffer, i_galois);
         mss::ecc::hwms::set_confirmed<MC>(l_buffer, mss::YES);
