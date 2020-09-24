@@ -1745,6 +1745,11 @@
       <name>MISSING</name>
       <value>0x2</value>
     </enumerator>
+    <enumerator>
+      <!-- Part cannot be crosschecked -->
+      <name>SKIP</name>
+      <value>0x3</value>
+    </enumerator>
     <id>FOUND_PRESENT_BY_SP</id>
   </enumerationType>
 

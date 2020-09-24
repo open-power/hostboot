@@ -456,7 +456,8 @@ void crosscheck_sp_presence( ISTEP_ERROR::IStepError& i_istepErr )
         bool hb_presence = target->getAttr<TARGETING::ATTR_HWAS_STATE>().present;
 
         // SP did not attempt presence-detection, nothing to cross-check
-        if( TARGETING::FOUND_PRESENT_BY_SP_NO_ATTEMPT == sp_presence )
+        if( (TARGETING::FOUND_PRESENT_BY_SP_NO_ATTEMPT == sp_presence)
+            || (TARGETING::FOUND_PRESENT_BY_SP_SKIP == sp_presence) )
         {
             // nothing to do here
             continue;

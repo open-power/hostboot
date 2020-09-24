@@ -1560,6 +1560,10 @@
     <id>chip-tpm-cectpm</id>
     <parent>chip</parent>
     <attribute>
+      <id>FOUND_PRESENT_BY_SP</id>
+      <default>SKIP</default><!-- TODO:SW508198 : Remove once FSP supports it -->
+    </attribute>
+    <attribute>
       <default>CECTPM</default>
       <id>MODEL</id>
     </attribute>
