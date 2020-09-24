@@ -102,7 +102,6 @@ void* call_mss_draminit (void *io_pArgs)
                       TRACE_ERR_ARGS(l_err));
             // capture error and commit it
             captureError(l_err, l_stepError, HWPF_COMP_ID, l_ocmb);
-            break;
         }
         else
         {
