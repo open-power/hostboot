@@ -69,6 +69,15 @@ bool expAddLog( const exp_log_type i_type,
                 TARGETING::Target * i_ocmb,
                 uint32_t i_max_log_size,
                 errlHndl_t & io_errl );
+
+/**
+ * @brief Create informational error logs for Explorer saved logs
+ * @param[in] i_ocmbTargetList - OCMB targets
+ * @param[in] i_earlyLogs - true if grabbing early in IPL, false otherwise
+ */
+void createExplorerLogs(const TARGETING::TargetHandleList i_ocmbTargetList,
+                        const bool i_earlyLogs);
+
 }
 
 #endif

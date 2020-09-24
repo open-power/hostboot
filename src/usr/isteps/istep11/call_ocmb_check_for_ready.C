@@ -58,6 +58,9 @@
 //  HWP call support
 #include <exp_check_for_ready.H>
 
+// Explorer error logs
+#include <expscom/expscom_errlog.H>
+
 using namespace ISTEPS_TRACE;
 using namespace ISTEP_ERROR;
 using namespace ERRORLOG;
@@ -221,6 +224,9 @@ void* call_ocmb_check_for_ready (void *io_pArgs)
                 }
             }
         }
+
+        // Grab informational Explorer logs (early IPL = true)
+        EXPSCOM::createExplorerLogs(l_functionalOcmbChipList, true);
     }
 
     // Loop thru the list of processors and send the OCMB config info to SBE

@@ -56,6 +56,8 @@
 #include    <p10_omi_init.H>
 #include    <p10_disable_ocmb_i2c.H>
 
+// Explorer error logs
+#include    <expscom/expscom_errlog.H>
 
 using   namespace   ISTEP;
 using   namespace   ISTEP_ERROR;
@@ -72,12 +74,11 @@ void* call_host_omi_init (void *io_pArgs)
     IStepError l_StepError;
     errlHndl_t l_err = nullptr;
     TRACFCOMP( g_trac_isteps_trace, "call_host_omi_init entry" );
-
+    TargetHandleList l_ocmbTargetList;
     do
     {
         // 12.11.a exp_omi_init.C
         //        - Initialize config space on the Explorers
-        TargetHandleList l_ocmbTargetList;
         getAllChips(l_ocmbTargetList, TYPE_OCMB_CHIP);
         TRACFCOMP(g_trac_isteps_trace,
             "call_host_omi_init: %d ocmb chips found",
@@ -225,12 +226,16 @@ void* call_host_omi_init (void *io_pArgs)
         } // proc loop
     } while(0);
 
+    // Grab informational Explorer logs (early IPL = false)
+    EXPSCOM::createExplorerLogs(l_ocmbTargetList, false);
+
     TRACFCOMP( g_trac_isteps_trace, "call_host_omi_init exit" );
 
     // end task, returning any errorlogs to IStepDisp
     return l_StepError.getErrorHandle();
 
 }
+
 
 /**
  * @brief Enable Inband Scom for the OCMB targets

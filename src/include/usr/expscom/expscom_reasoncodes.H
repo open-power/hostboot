@@ -31,8 +31,9 @@ namespace EXPSCOM
 {
     enum EXPSCOMModuleId
     {
-        MOD_OCMBSCOM_INVALID    = 0x00, // Zero is an invalid module id
-        MOD_OCMB_UTILS          = 0x01, // expscom_utils.C
+        MOD_OCMBSCOM_INVALID     = 0x00, // Zero is an invalid module id
+        MOD_OCMB_UTILS           = 0x01, // expscom_utils.C
+        MOD_CREATE_EXPLORER_LOGS = 0x02,
     };
 
     enum EXPSCOMReasonCode
@@ -42,6 +43,9 @@ namespace EXPSCOM
         RC_INVALID_MODEL_TYPE        = EXPSCOM_COMP_ID | 0x02,
         RC_INVALID_OPTYPE            = EXPSCOM_COMP_ID | 0x03,
         RC_INVALID_ADDRESS           = EXPSCOM_COMP_ID | 0x04,
+        RC_EXPLORER_SAVED_A          = EXPSCOM_COMP_ID | 0x05,
+        RC_EXPLORER_SAVED_B          = EXPSCOM_COMP_ID | 0x06,
+        RC_EXPLORER_ACTIVE           = EXPSCOM_COMP_ID | 0x07,
     };
 
     enum UserDetailsTypes

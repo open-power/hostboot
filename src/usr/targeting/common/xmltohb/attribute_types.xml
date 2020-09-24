@@ -719,6 +719,96 @@
   </attribute>
 
   <attribute>
+    <complexType>
+      <description>Structure which defines what Explorer logs to grab
+        Prefixes:
+        early = early in the IPL
+        late  = later in the IPL
+      </description>
+      <field>
+        <bits>1</bits>
+        <default>0</default>
+        <description>Grab Saved Log from Image A side (SPI flash data)
+          0b0: Do not collect log
+          0b1: Collect the log
+        </description>
+        <name>earlySavedLogA</name>
+        <type>uint8_t</type>
+      </field>
+      <field>
+        <bits>1</bits>
+        <default>0</default>
+        <description>Grab Saved Log from Image B side (SPI flash data)
+          0b0: Do not collect log
+          0b1: Collect the log
+        </description>
+        <name>earlySavedLogB</name>
+        <type>uint8_t</type>
+      </field>
+      <field>
+        <bits>1</bits>
+        <default>0</default>
+        <description>Grab Active log (RAM data)
+          0b0: Do not collect log
+          0b1: Collect the log
+        </description>
+        <name>earlyActiveLog</name>
+        <type>uint8_t</type>
+      </field>
+      <field>
+        <bits>1</bits>
+        <default>0</default>
+        <description>Reserved for future expansion</description>
+        <name>earlyReserved</name>
+        <type>uint8_t</type>
+      </field>
+      <field>
+        <bits>1</bits>
+        <default>0</default>
+        <description>Grab Saved Log from Image A side (SPI flash data)
+          0b0: Do not collect log
+          0b1: Collect the log
+        </description>
+        <name>lateSavedLogA</name>
+        <type>uint8_t</type>
+      </field>
+      <field>
+        <bits>1</bits>
+        <default>0</default>
+        <description>Grab Saved Log from Image B side (SPI flash data)
+          0b0: Do not collect log
+          0b1: Collect the log
+        </description>
+        <name>lateSavedLogB</name>
+        <type>uint8_t</type>
+      </field>
+      <field>
+        <bits>1</bits>
+        <default>0</default>
+        <description>Grab Active log (RAM data)
+          0b0: Do not collect log
+          0b1: Collect the log
+        </description>
+        <name>lateActiveLog</name>
+        <type>uint8_t</type>
+      </field>
+      <field>
+        <bits>1</bits>
+        <default>0</default>
+        <description>Reserved for future expansion</description>
+        <name>lateReserved</name>
+        <type>uint8_t</type>
+      </field>
+    </complexType>
+    <description>Explorer logs to grab and report in the IPL</description>
+    <id>DEBUG_OCMB_LOGS</id>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <no_export/>
+  </attribute>
+
+  <attribute>
     <description>If the Target is directly deconfigurable and GARDable; target
     may still be deconfigured in 'by association' processing.</description>
     <id>DECONFIG_GARDABLE</id>

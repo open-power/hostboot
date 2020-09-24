@@ -647,6 +647,122 @@ bool EXPSCOM::expAddLog( const exp_log_type i_log_type,
     return l_logsAdded;
 }
 
+// See expscom_errlog.H for header definition
+void EXPSCOM::createExplorerLogs(const TARGETING::TargetHandleList i_ocmbTargetList,
+                                 const bool i_earlyLogs)
+{
+    errlHndl_t l_err = nullptr;
+
+    for (const auto & l_ocmb : i_ocmbTargetList)
+    {
+        TARGETING::DebugOcmbLogs expLogAttr =
+            l_ocmb->getAttr<TARGETING::ATTR_DEBUG_OCMB_LOGS>();
+
+        bool savedLogA = i_earlyLogs?expLogAttr.earlySavedLogA:expLogAttr.lateSavedLogA;
+        bool savedLogB = i_earlyLogs?expLogAttr.earlySavedLogB:expLogAttr.lateSavedLogB;
+        bool activeLog = i_earlyLogs?expLogAttr.earlyActiveLog:expLogAttr.lateActiveLog;
+
+        if (savedLogA)
+        {
+            /*@
+             * @errortype
+             * @moduleid     EXPSCOM::MOD_CREATE_EXPLORER_LOGS
+             * @reasoncode   EXPSCOM::RC_EXPLORER_SAVED_A
+             * @userdata1    OCMB target
+             * @devdesc      Debug saved explorer log for image A
+             * @custdesc     Debug log for possible earlier failure
+             */
+            l_err = new ERRORLOG::ErrlEntry(
+                                      ERRORLOG::ERRL_SEV_INFORMATIONAL,
+                                      EXPSCOM::MOD_CREATE_EXPLORER_LOGS,
+                                      EXPSCOM::RC_EXPLORER_SAVED_A,
+                                      get_huid(l_ocmb),
+                                      0,
+                                      ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+            // Add explorer error logs to this and commit
+            bool logAdded = EXPSCOM::expAddLog(EXPSCOM::SAVED_LOG_A, l_ocmb, EXPSCOM::FULL_SAVED_EXPLOG, l_err);
+            if (!logAdded)
+            {
+                TRACFCOMP(g_trac_expscom,"createExplorerLogs: "
+                    "No SAVED image A explorer logs for 0x%.8X OCMB added to 0x%04X",
+                    get_huid(l_ocmb), l_err->plid());
+                delete l_err;
+                l_err = nullptr;
+            }
+            else
+            {
+                errlCommit(l_err, EXPSCOM_COMP_ID);
+            }
+        }
+
+        if (savedLogB)
+        {
+            /*@
+             * @errortype
+             * @moduleid     EXPSCOM::MOD_CREATE_EXPLORER_LOGS
+             * @reasoncode   EXPSCOM::RC_EXPLORER_SAVED_B
+             * @userdata1    OCMB target
+             * @devdesc      Debug saved explorer log for image B
+             * @custdesc     Debug log for possible earlier failure
+             */
+            l_err = new ERRORLOG::ErrlEntry(
+                                      ERRORLOG::ERRL_SEV_INFORMATIONAL,
+                                      EXPSCOM::MOD_CREATE_EXPLORER_LOGS,
+                                      EXPSCOM::RC_EXPLORER_SAVED_B,
+                                      get_huid(l_ocmb),
+                                      0,
+                                      ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+            // Add explorer error logs to this and commit
+            bool logAdded = EXPSCOM::expAddLog(EXPSCOM::SAVED_LOG_B, l_ocmb, EXPSCOM::FULL_SAVED_EXPLOG, l_err);
+            if (!logAdded)
+            {
+                TRACFCOMP(g_trac_expscom,"createExplorerLogs: "
+                    "No SAVED image B explorer logs for 0x%.8X OCMB added to 0x%04X",
+                    get_huid(l_ocmb), l_err->plid());
+                delete l_err;
+                l_err = nullptr;
+            }
+            else
+            {
+                errlCommit(l_err, EXPSCOM_COMP_ID);
+            }
+        }
+
+        if (activeLog)
+        {
+            /*@
+             * @errortype
+             * @moduleid     EXPSCOM::MOD_CREATE_EXPLORER_LOGS
+             * @reasoncode   EXPSCOM::RC_EXPLORER_ACTIVE
+             * @userdata1    OCMB target
+             * @devdesc      Debug active log
+             * @custdesc     Debug log for possible earlier failure
+             */
+            l_err = new ERRORLOG::ErrlEntry(
+                                      ERRORLOG::ERRL_SEV_INFORMATIONAL,
+                                      EXPSCOM::MOD_CREATE_EXPLORER_LOGS,
+                                      EXPSCOM::RC_EXPLORER_ACTIVE,
+                                      get_huid(l_ocmb),
+                                      0,
+                                      ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+            // Add explorer error logs to this and commit
+            bool logAdded = EXPSCOM::expAddLog(EXPSCOM::ACTIVE_LOG, l_ocmb, EXPSCOM::FULL_ACTIVE_EXPLOG, l_err);
+            if (!logAdded)
+            {
+                TRACFCOMP(g_trac_expscom,"createExplorerLogs: "
+                    "No ACTIVE explorer logs for 0x%.8X OCMB added to 0x%04X",
+                    get_huid(l_ocmb), l_err->plid());
+                delete l_err;
+                l_err = nullptr;
+            }
+            else
+            {
+                errlCommit(l_err, EXPSCOM_COMP_ID);
+            }
+        }
+    }
+}
+
 //------------------------------------------------------------------------------
 //  Expscom Active Log User Details
 //------------------------------------------------------------------------------

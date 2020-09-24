@@ -478,6 +478,9 @@
       <id>CDM_DOMAIN</id>
     </attribute>
     <attribute>
+      <id>DEBUG_OCMB_LOGS</id>
+    </attribute>
+    <attribute>
       <default>1</default>
       <id>DECONFIG_GARDABLE</id>
     </attribute>
