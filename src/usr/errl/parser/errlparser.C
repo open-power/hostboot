@@ -269,6 +269,17 @@ pelSRCSection_t * ConvertSRC( pelSRCSection_t * p )
 }
 
 
+//-------------------------------------------------------------
+// endian stuff, convert in place.  The EH (Extended User Header) section
+// in PEL is the 4th section.
+pelExtendedUserHeaderSection_t * ConvertExtendedUserHeader( pelExtendedUserHeaderSection_t * p )
+{
+    ConvertPELSectionHeader( &p->sectionheader );
+    p->reserved  = ntohl( p->reserved );
+    p->timestamp = ntohll( p->timestamp );
+    return p;
+}
+
 
 
 //-----------------------------------------------------------------------
@@ -459,7 +470,6 @@ bool ParseForPEL( char * i_pchNativePEL,
         memcpy( &sectionHeader, pch, sizeof( pelSectionHeader_t ));
         ConvertPELSectionHeader( &sectionHeader );
 
-
         // For each section, allocate space for it, endian convert the
         // section, then insert into output vector.
         switch( sectionHeader.sid ) {
@@ -493,6 +503,15 @@ bool ParseForPEL( char * i_pchNativePEL,
                 o_vector.push_back( reinterpret_cast<pelSectionHeader_t*>(p) );
             }
             break;
+        case ERRL_SID_EXTENDED_HEADER:
+            {
+                pvoid = malloc(sectionHeader.len);
+                pelExtendedUserHeaderSection_t * p = static_cast<pelExtendedUserHeaderSection_t*>(pvoid);
+                memcpy( p, pch, sectionHeader.len );
+                ConvertExtendedUserHeader( p );
+                o_vector.push_back( &p->sectionheader );
+            }
+            break;
         case ERRL_SID_USER_DEFINED:
             {
                 pvoid = malloc(sectionHeader.len);
@@ -506,7 +525,7 @@ bool ParseForPEL( char * i_pchNativePEL,
             }
             break;
         default:
-	    assert( 0 );
+            assert( 0 );
             break;
         }
 
@@ -1026,4 +1045,3 @@ int main( int argc,  char *argv[] )
     }
     return exitcode;
 }
-

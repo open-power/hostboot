@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2020                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -67,6 +67,7 @@ class ErrlSctnHdr
     friend class ErrlPrvt;
     friend class ErrlUH;
     friend class ErrlUD;
+    friend class ErrlEH;
     friend class ErrlSrc;
     friend class ErrlEntry;
     friend class ErrlManager;
@@ -140,7 +141,7 @@ private:
     uint64_t flatten( void * o_pbuffer, const uint64_t i_cbBuffer );
 
     /**
-     * @brief Import flattened data 
+     * @brief Import flattened data
      * @param[in] i_buf, pointer to flattened data
      * @return number of bytes consumed in the flattened data
      */
@@ -175,4 +176,3 @@ inline uint64_t ErrlSctnHdr::flatSize() const
 } // End namespace
 
 #endif //ERRLSCTNHDR_H
-

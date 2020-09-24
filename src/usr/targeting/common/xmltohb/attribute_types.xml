@@ -6952,7 +6952,7 @@
        Raw value of system MTM
     </description>
     <id>RAW_MTM</id>
-    <persistency>volatile-zeroed</persistency>
+    <persistency>non-volatile</persistency>
     <readable/>
     <simpleType>
       <string>
@@ -6960,6 +6960,7 @@
       </string>
     </simpleType>
     <writeable/>
+    <no_export/>
   </attribute>
 
   <enumerationType>

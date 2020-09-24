@@ -71,9 +71,79 @@ const std::map<uint32_t, std::vector<uint16_t> > record_keyword_field_map {
  *                                  Fru Records related to an Entity's Record
  *                                  Set ID
  * @param[in] i_record_count        Number of records in the fru record table
+ * @param[in] i_key                 FRU record ID key to search for
+ * @param[in] o_value               Null-terminated string containing the
+ *                                  value associated with this record
+ *
+ * @return bool                     True if the record was found, false otherwise
+ */
+bool getRecordSetRecordValue(const uint8_t* const i_pldm_fru_table_buf,
+                             const uint16_t i_record_count,
+                             const uint8_t i_key,
+                             std::vector<uint8_t>& o_value)
+{
+    assert( i_pldm_fru_table_buf != nullptr,
+            "getRecordSetRecordValue: i_pldm_fru_table_buf is a nullptr!");
+
+    // copy the pointer provided by the caller into
+    // a local variable so we can do some ptr arithmetic
+    // on it without messing up the caller
+    const uint8_t* in_table_cur_ptr = i_pldm_fru_table_buf;
+
+    o_value.clear();
+
+    for(uint16_t i = 0; i < i_record_count; i++)
+    {
+        const pldm_fru_record_data_format *record_data =
+            reinterpret_cast<const pldm_fru_record_data_format *>(in_table_cur_ptr);
+
+        size_t offset_of_cur_pldm_record_entry = offsetof(pldm_fru_record_data_format, tlvs);
+
+        for(uint8_t j = 0; j < record_data->num_fru_fields; j++)
+        {
+            const pldm_fru_record_tlv *fru_tlv =
+                reinterpret_cast<const pldm_fru_record_tlv *>(in_table_cur_ptr +
+                                                              offset_of_cur_pldm_record_entry);
+
+            if(fru_tlv->type == i_key)
+            {
+                o_value.insert(o_value.begin(),
+                               fru_tlv->value,
+                               fru_tlv->value + fru_tlv->length);
+
+                // PLDM FRU Record Fields of type string are not null terminated
+                // (see DSP0257 1.0.0 section 7.4)
+                o_value.push_back('\0');
+
+                // if we found the key we can break out
+                break;
+            }
+
+            offset_of_cur_pldm_record_entry  += (offsetof(pldm_fru_record_tlv, value) +
+                                                 fru_tlv->length);
+        }
+
+        // if we found the key we can break out
+        if(o_value.size()) { break; }
+
+        // otherwise move to the next record in hopes of finding the key
+        in_table_cur_ptr += offset_of_cur_pldm_record_entry;
+    }
+
+    return !o_value.empty();
+}
+
+/**
+ *  @brief Given a complete fru record table's set of records, find the location
+ *         code record.
+ *
+ * @param[in] i_pldm_fru_table_buf  Pointer to a buffer which contains all of
+ *                                  Fru Records related to an Entity's Record
+ *                                  Set ID
+ * @param[in] i_record_count        Number of records in the fru record table
  * @param[in] o_location_code       Null-terminated string containing the
  *                                  location code associated with this
- *                                  Record Set ID
+ *                                  record
  *
  * @return returns error log if error occurs, otherwise returns nullptr
  */
@@ -81,90 +151,49 @@ errlHndl_t getRecordSetLocationCode(const uint8_t* const i_pldm_fru_table_buf,
                                     const uint16_t i_record_count,
                                     std::vector<uint8_t>& o_location_code)
 {
-    assert( i_pldm_fru_table_buf != nullptr,
-            "printFruRecordTable: i_pldm_fru_table_buf is a nullptr!");
-    // copy the pointer provided by the caller into
-    // a local variable so we can do some ptr arithmetic
-    // on it without messing up the caller
-  errlHndl_t errl = nullptr;
-  const uint8_t * in_table_cur_ptr =
-        const_cast<const uint8_t*>(i_pldm_fru_table_buf);
+    // Location code is a record with a single TLV that has the location code
+    // associated with the record set id
+    constexpr uint8_t LOCATION_CODE_FIELD_ID = 254;
 
-  o_location_code.clear();
+    errlHndl_t errl = nullptr;
 
-  for(uint16_t i = 0; i < i_record_count; i++)
-  {
-      const pldm_fru_record_data_format *record_data =
-          reinterpret_cast<const pldm_fru_record_data_format *>(in_table_cur_ptr);
+    if(!getRecordSetRecordValue(i_pldm_fru_table_buf,
+                                i_record_count,
+                                LOCATION_CODE_FIELD_ID,
+                                o_location_code))
+    {
+        const auto record_data =
+            reinterpret_cast<const pldm_fru_record_data_format *>(i_pldm_fru_table_buf);
 
-      size_t offset_of_cur_pldm_record_entry = offsetof(pldm_fru_record_data_format, tlvs);
+        const uint64_t record_set_id = (i_record_count > 0
+                                        ? record_data->record_set_id
+                                        : 0xFFFFFFFFu);
 
-      for(uint8_t j = 0; j < record_data->num_fru_fields; j++)
-      {
-          const pldm_fru_record_tlv *fru_tlv =
-              reinterpret_cast<const pldm_fru_record_tlv *>(in_table_cur_ptr +
-                                                            offset_of_cur_pldm_record_entry);
-          // Location code is a record with a single TLV that has the location code
-          // associated with the record set id
-          constexpr uint8_t LOCATION_CODE_FIELD_ID = 254;
+        PLDM_ERR("getRecordSetLocationCode: failed to find location code in "
+                 "records associated with RSI 0x%04x",
+                 record_set_id);
 
-          if(fru_tlv->type == LOCATION_CODE_FIELD_ID)
-          {
-              const uint8_t * location_val_ptr = in_table_cur_ptr +
-                                                 offset_of_cur_pldm_record_entry +
-                                                 offsetof(pldm_fru_record_tlv, value);
+        /*
+         * @errortype  ERRL_SEV_UNRECOVERABLE
+         * @moduleid   MOD_GET_LOCATION_CODE
+         * @reasoncode RC_INVALID_LENGTH
+         * @userdata1  record set id of record set passed by caller
+         *             (or 0xFFFFFFFF if the record set is empty)
+         * @userdata2  unused
+         * @devdesc    Unable to find the location code in the record
+         *             set provided by caller
+         * @custdesc   A software error occurred during system boot
+         */
+        errl = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
+                             MOD_GET_LOCATION_CODE,
+                             RC_INVALID_LENGTH,
+                             record_set_id,
+                             0,
+                             ERRORLOG::ErrlEntry::NO_SW_CALLOUT);
+        addBmcErrorCallouts(errl);
+    }
 
-              o_location_code.insert(o_location_code.begin(),
-                                     location_val_ptr,
-                                     location_val_ptr + fru_tlv->length);
-
-              // PLDM FRU Record Fields of type string are not null terminated
-              // (see DSP0257 1.0.0 section 7.4)
-              o_location_code.push_back('\0');
-
-              // if we found the location code we can break out
-              break;
-          }
-
-          offset_of_cur_pldm_record_entry  += (offsetof(pldm_fru_record_tlv, value) +
-                                              fru_tlv->length);
-      }
-
-      // if we found the location code we can break out
-      if(o_location_code.size()) { break; }
-
-      // otherwise move to the next record in hopes of finding the location code
-      in_table_cur_ptr += offset_of_cur_pldm_record_entry;
-  }
-
-  if(o_location_code.empty())
-  {
-      const pldm_fru_record_data_format *record_data =
-          reinterpret_cast<const pldm_fru_record_data_format *>(in_table_cur_ptr);
-      PLDM_ERR("getRecordSetLocationCode: failed to find location code in"
-               "records associated with RSI 0x%04x",
-               record_data->record_set_id);
-
-      /*
-      * @errortype  ERRL_SEV_UNRECOVERABLE
-      * @moduleid   MOD_GET_LOCATION_CODE
-      * @reasoncode RC_INVALID_LENGTH
-      * @userdata1  record set id of record set passed by called
-      * @userdata2  unused
-      * @devdesc    Unable to find the location code in the record
-      *             set provided by caller
-      * @custdesc   A software error occurred during system boot
-      */
-      errl = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
-                              MOD_GET_LOCATION_CODE,
-                              RC_INVALID_LENGTH,
-                              record_data->record_set_id,
-                              0,
-                              ERRORLOG::ErrlEntry::NO_SW_CALLOUT);
-      addBmcErrorCallouts(errl);
-  }
-
-  return errl;
+    return errl;
 }
 
 /**
@@ -494,7 +523,7 @@ errlHndl_t generate_vtoc_record(std::vector<uint8_t>& o_vtoc_buf,
                         KEYWORD_SIZE_BYTE_SIZE + // 2 bytes (variable);
                         i_pad_bytes;
 
-    // subtract off the parts of the struct that are not included  in the 
+    // subtract off the parts of the struct that are not included  in the
     // vtoc record length field
     vtoc_len = vtoc_len -
              sizeof(((vtoc_first_part *)0)->vtoc_rec_start) - // large resource
@@ -990,8 +1019,15 @@ errlHndl_t cacheRemoteFruVpd()
                              table_ptr.get() );
     if(errl) { break; }
 
-    const bool CACHE_VPD = true;
-    const bool NO_CACHE_VPD = false;
+    static const bool CACHE_VPD = true;
+    static const bool NO_CACHE_VPD = false;
+
+    enum extra_fru_data_t
+    {
+        NO_EXTRA_FRU_INFO = 0,
+        HAS_FW_VERSION_INFO = 1 << 0,
+        HAS_SERIAL_NUMBER = 1 << 1
+    };
 
     struct pldm_entity_to_targeting_mapping
     {
@@ -999,6 +1035,7 @@ errlHndl_t cacheRemoteFruVpd()
         TARGETING::TYPE targeting_type;
         EEPROM::EEPROM_ROLE device_role;
         size_t max_expected_records;
+        extra_fru_data_t extra_fru_info = NO_EXTRA_FRU_INFO;
         bool cache_vpd = CACHE_VPD;
         location_code_setter_t location_code_setter = nullptr;
     };
@@ -1007,17 +1044,20 @@ errlHndl_t cacheRemoteFruVpd()
         { ENTITY_TYPE_BACKPLANE,
           TYPE_NODE,
           EEPROM::VPD_PRIMARY,
-          1},
+          1,
+          HAS_SERIAL_NUMBER },
         { ENTITY_TYPE_CHASSIS,
           TYPE_SYS,
           EEPROM::VPD_PRIMARY,
           1,
+          NO_EXTRA_FRU_INFO,
           NO_CACHE_VPD,
           setAttribute<ATTR_CHASSIS_LOCATION_CODE> },
         { ENTITY_TYPE_LOGICAL_SYSTEM,
           TYPE_SYS,
           EEPROM::VPD_PRIMARY,
           1,
+          HAS_FW_VERSION_INFO,
           NO_CACHE_VPD,
           setAttribute<ATTR_SYS_LOCATION_CODE> }
     };
@@ -1168,6 +1208,58 @@ errlHndl_t cacheRemoteFruVpd()
                     PLDM_ERR("cacheRemoteFruVpd: An error occurred during EEPROM::cacheEepromBuffer");
                     break;
                 }
+            }
+
+            /* Read and store firmware version info if necessary */
+
+            const auto getrecord = [&](const uint8_t record_key, void* const buffer, const size_t bufsize,
+                                       const char* const field_name)
+            {
+                std::vector<uint8_t> record_data;
+                if (getRecordSetRecordValue(device_fru_records.data(),
+                                            records_in_set,
+                                            record_key,
+                                            record_data))
+                {
+                    memcpy(buffer,
+                           record_data.data(),
+                           std::min(bufsize, record_data.size()) - 1); // subtract 1 for terminator
+                }
+                else
+                {
+                    PLDM_INF("cacheRemoteFruVpd: Can't find %s in FRU data for HUID 0x%08x",
+                             field_name,
+                             get_huid(entity_target));
+                }
+            };
+
+            // @TODO RTC 260604: Update the PLDM_FRU_FIELD* constants below to the correct values
+
+            if (map_entry.extra_fru_info & HAS_FW_VERSION_INFO)
+            {
+                ATTR_FW_RELEASE_VERSION_type fw_release_string = { };
+                ATTR_FW_SUBSYS_VERSION_type subsys_version_string = { };
+
+                getrecord(PLDM_FRU_FIELD_TYPE_VERSION,
+                          subsys_version_string, sizeof(subsys_version_string),
+                          "subsystem version");
+                getrecord(PLDM_FRU_FIELD_TYPE_OTHER,
+                          fw_release_string, sizeof(fw_release_string),
+                          "firmware release version");
+
+                entity_target->setAttr<ATTR_FW_RELEASE_VERSION>(fw_release_string);
+                entity_target->setAttr<ATTR_FW_SUBSYS_VERSION>(subsys_version_string);
+            }
+
+            if (map_entry.extra_fru_info & HAS_SERIAL_NUMBER)
+            {
+                ATTR_SERIAL_NUMBER_type serial_number = { };
+
+                getrecord(PLDM_FRU_FIELD_TYPE_SN, // TODO: Verify this key value
+                          serial_number, sizeof(serial_number),
+                          "serial number");
+
+                entity_target->setAttr<ATTR_SERIAL_NUMBER>(serial_number);
             }
         }
 

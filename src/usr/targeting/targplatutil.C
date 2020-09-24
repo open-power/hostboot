@@ -213,7 +213,9 @@ Target* getCurrentNodeTarget(void)
     TargetHandleList l_nodelist;
     getEncResources(l_nodelist, TARGETING::TYPE_NODE,
                     TARGETING::UTIL_FILTER_FUNCTIONAL);
-    assert(l_nodelist.size() == 1, "ERROR, only expect one node.");
+    assert(l_nodelist.size() == 1,
+           "ERROR, only expect one node, got %llu.",
+           l_nodelist.size());
 
     Target* pTgt =  l_nodelist[0];
     assert(pTgt != nullptr, "getCurrentNodeTarget found nullptr");

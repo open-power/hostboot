@@ -56,9 +56,11 @@
 #include <arch/ppc.H>
 #include <hwas/common/hwasCallout.H>
 #include <hwas/common/deconfigGard.H>
+#include <targeting/targplatutil.H>
 #include <targeting/common/targetservice.H>
 #include <targeting/common/utilFilter.H>
 #include <targeting/common/commontargeting.H>
+#include <targeting/common/targetservice.H>
 #include <initservice/initserviceif.H>
 #include <attributeenums.H>
 #include "errlentry_consts.H"
@@ -1080,12 +1082,15 @@ void ErrlEntry::addSensorDataToErrLog(TARGETING::Target * i_target,
 // for use by ErrlManager
 void ErrlEntry::commit( compId_t  i_committerComponent )
 {
+    using namespace TARGETING;
+
     // TODO RTC 35258 need a better timepiece, or else apply a transform onto
     // timebase for an approximation of real time.
     iv_Private.iv_committed = getTB();
 
-    // User header contains the component ID of the committer.
+    // User/Extended headers contain the component ID of the committer.
     iv_User.setComponentId( i_committerComponent );
+    iv_Extended.setComponentId(i_committerComponent);
 
     // Avoid adding a callout to informational callhome "error"
     if (!getEselCallhomeInfoEvent())
@@ -1107,10 +1112,38 @@ void ErrlEntry::commit( compId_t  i_committerComponent )
     // Check to see if we should skip processing info and recoverable errors
     checkHiddenLogsEnable();
 
+    // These will go into the EH section. The real information will be gathered
+    // from attributes on called-out targets, if targeting is loaded.
+    ATTR_SERIAL_NUMBER_type serial_number = { }; // first 4 bytes used as serial
+    ATTR_RAW_MTM_type mtm = "UNKNOWN";
+    ATTR_FW_RELEASE_VERSION_type release_version = "UNKNOWN";
+    ATTR_FW_SUBSYS_VERSION_type subsys_version = "UNKNOWN";
+
     // Check to make sure targeting is initialized. If so, collect part and
     // serial numbers
-    if(Util::isTargetingLoaded() && TARGETING::targetService().isInitialized())
+    if(Util::isTargetingLoaded() && targetService().isInitialized())
     {
+        Target* sys = nullptr;
+        targetService().getTopLevelTarget(sys);
+
+        Target* node = nullptr;
+        UTIL::getMasterNodeTarget(node);
+
+        // Set the starting values for these attributes based on the toplevel
+        // and master node targets. They will be overriden by PEL target
+        // callouts if there are any.
+        if (sys)
+        {
+            UTIL::tryGetAttributeInHierarchy<ATTR_RAW_MTM>(sys, mtm);
+            UTIL::tryGetAttributeInHierarchy<ATTR_FW_RELEASE_VERSION>(sys, release_version);
+            UTIL::tryGetAttributeInHierarchy<ATTR_FW_SUBSYS_VERSION>(sys, subsys_version);
+        }
+
+        if (node)
+        {
+            UTIL::tryGetAttributeInHierarchy<ATTR_SERIAL_NUMBER>(node, serial_number);
+        }
+
         // Add the version info to the error log for OpenPOWER systems
         addVersionInfo();
 
@@ -1130,7 +1163,7 @@ void ErrlEntry::commit( compId_t  i_committerComponent )
                    (HWAS::HW_CALLOUT == l_ud->type))
                 {
                     uint8_t * l_uData = (uint8_t *)(l_ud + 1);
-                    TARGETING::Target * l_target = NULL;
+                    Target * l_target = NULL;
 
                     bool l_err = HWAS::retrieveTarget(l_uData,
                                                       l_target,
@@ -1147,6 +1180,12 @@ void ErrlEntry::commit( compId_t  i_committerComponent )
 #endif
 
 #endif
+
+                        // Let the called-out targets override these values
+                        UTIL::tryGetAttributeInHierarchy<ATTR_SERIAL_NUMBER>(l_target, serial_number);
+                        UTIL::tryGetAttributeInHierarchy<ATTR_RAW_MTM>(l_target, mtm);
+                        UTIL::tryGetAttributeInHierarchy<ATTR_FW_RELEASE_VERSION>(l_target, release_version);
+                        UTIL::tryGetAttributeInHierarchy<ATTR_FW_SUBSYS_VERSION>(l_target, subsys_version);
                     }
                     else
                     {
@@ -1161,6 +1200,29 @@ void ErrlEntry::commit( compId_t  i_committerComponent )
         TRACFCOMP(g_trac_errl,
                 "TARGETING has not been initialized yet! Skipping serial/part "
                 "number collection!");
+    }
+
+    { /* Set Extended Header info */
+        char serial_string[sizeof(mtms_t::serial)] = { };
+
+        snprintf(serial_string, sizeof(serial_string),
+                 "%.8X", *reinterpret_cast<const uint32_t*>(serial_number));
+
+        iv_Extended.setSerial(serial_string);
+        iv_Extended.setMTM(mtm);
+        iv_Extended.setFirmwareVersion(release_version);
+        iv_Extended.setSubsystemVersion(subsys_version);
+
+        // Flatten the SRC section (and discard the result afterwards) so that
+        // we can get the SRC words for the EH section's symptom ID
+        std::vector<uint8_t> flatsrc(iv_Src.flatSize());
+
+        iv_Src.flatten(flatsrc.data(), flatsrc.size());
+
+        // Skip SRC words 0 and 1 to start at SRC word 2 for the symptom ID
+        // (wordcount does not include the zeroth SRC word)
+        const auto pelsrchdr = reinterpret_cast<const pelSRCSection_t*>(flatsrc.data());
+        iv_Extended.setSymptomId(pelsrchdr->srcString, &pelsrchdr->word2, pelsrchdr->wordcount - 1);
     }
 }
 
@@ -1685,6 +1747,22 @@ void ErrlEntry::deferredDeconfigure()
     TRACDCOMP(g_trac_errl, INFO_MRK"errlEntry::deferredDeconfigure returning");
 }
 
+/* @brief Convenience function to select a value for systems that need Hostboot
+ *        to build a full PEL (including the EH section) or 0 for those that don't.
+ * @param[in] i_number Number to return
+ * @return    size_t   The given value if this is a system that needs a full PEL,
+ *                     or 0 otherwise.
+ */
+
+static size_t fullPelOnly(const size_t i_number)
+{
+#ifdef CONFIG_BUILD_FULL_PEL
+    return i_number;
+#else
+    return 0;
+#endif
+}
+
 //////////////////////////////////////////////////////////////////////////////
 // for use by ErrlManager
 
@@ -1692,7 +1770,8 @@ uint64_t ErrlEntry::flattenedSize()
 {
     uint64_t l_bytecount = iv_Private.flatSize() +
                            iv_User.flatSize() +
-                           iv_Src.flatSize();
+                           iv_Src.flatSize() +
+                           fullPelOnly(iv_Extended.flatSize());
 
     // plus the sizes of the other optional sections
 
@@ -1741,52 +1820,46 @@ uint64_t ErrlEntry::flatten( void * o_pBuffer,
 
 
         // Inform the private header how many sections there are,
-        // counting the PH, UH, PS, and the optionals.
+        // counting the PH, UH, PS, EH, and the optionals.
         const auto startingSectionCount = iv_SectionVector.size();
-        iv_Private.iv_sctns = 3 + startingSectionCount;
+        iv_Private.iv_sctns = 3 + fullPelOnly(1) + startingSectionCount;
 
-        // Flatten the PH private header section
         char * pBuffer = static_cast<char *>(o_pBuffer);
-        l_cb = iv_Private.flatten( pBuffer, l_sizeRemaining );
-        if( 0 == l_cb )
-        {
-            TRACFCOMP( g_trac_errl, ERR_MRK"ph.flatten error");
-            l_flatSize = 0;
-            // don't check i_truncate - this section MUST fit.
-            break;
-        }
 
         // save this location - if the number of sections that we flatten is
         // reduced, we need to update this PH section.
         char *pPHBuffer = pBuffer;
 
-        pBuffer += l_cb;
-        l_sizeRemaining -= l_cb;
+        auto flattener = [&](auto& section, const char* const section_name)
+        {
+            l_cb = section.flatten( pBuffer, l_sizeRemaining );
+            if( 0 == l_cb )
+            {
+                TRACFCOMP( g_trac_errl, ERR_MRK"%s.flatten error", section_name);
+                l_flatSize = 0;
+                // don't check i_truncate - this section MUST fit.
+                return false;
+            }
+            pBuffer += l_cb;
+            l_sizeRemaining -= l_cb;
+            return true;
+        };
+
+        // flatten the PH private header section
+        if (!flattener(iv_Private, "ph")) break;
 
         // flatten the UH user header section
-        l_cb = iv_User.flatten( pBuffer,  l_sizeRemaining );
-        if( 0 == l_cb )
-        {
-            TRACFCOMP( g_trac_errl, ERR_MRK"uh.flatten error");
-            l_flatSize = 0;
-            // don't check i_truncate - this section MUST fit.
-            break;
-        }
-        pBuffer += l_cb;
-        l_sizeRemaining -= l_cb;
+        if (!flattener(iv_User, "uh")) break;
 
         // flatten the PS primary SRC section
-        l_cb = iv_Src.flatten( pBuffer, l_sizeRemaining );
-        if( 0 == l_cb )
-        {
-            TRACFCOMP( g_trac_errl, ERR_MRK"ps.flatten error");
-            l_flatSize = 0;
-            // don't check i_truncate - this section MUST fit.
-            break;
-        }
-        pBuffer += l_cb;
-        l_sizeRemaining -= l_cb;
+        if (!flattener(iv_Src, "ps")) break;
 
+        // flatten the EH extended header section for OpenPOWER systems (the FSP
+        // adds this section for us otherwise)
+        if (fullPelOnly(true))
+        {
+            if (!flattener(iv_Extended, "eh")) break;
+        }
 
         // flatten the optional user-defined sections
         // Flattens in the following order: 1. Hardware Callouts
@@ -1915,7 +1988,7 @@ uint64_t ErrlEntry::flatten( void * o_pBuffer,
             // some section was too big and didn't get flatten - update the
             // section count in the PH section and re-flatten it.
             // count is the PH, UH, PS, and the optionals.
-            iv_Private.iv_sctns = 3 + flattenedSections;
+            iv_Private.iv_sctns = 3 + fullPelOnly(1) + flattenedSections;
             // use ph size, since this is overwriting flattened data
             l_cb = iv_Private.flatten( pPHBuffer, iv_Private.flatSize() );
             if( 0 == l_cb )
@@ -1957,13 +2030,21 @@ uint64_t ErrlEntry::unflatten( const void * i_buffer,  uint64_t i_len )
     consumed    += bytes_used;
     l_buf       += bytes_used;
 
+    if (fullPelOnly(true))
+    {
+        TRACDCOMP(g_trac_errl, INFO_MRK"Unflatten Extended User Header section...");
+        bytes_used = iv_Extended.unflatten(l_buf);
+        consumed    += bytes_used;
+        l_buf       += bytes_used;
+    }
+
     iv_SectionVector.clear();
     iv_btAddrs.clear();
     removeBackTrace();
 
     // loop thru the User Data sections (after already doing 3: Private, User
     // Header, SRC sections) while there's still data to process
-    for (int32_t l_sc = 3;
+    for (int32_t l_sc = 3 + fullPelOnly(1);
             (l_sc < iv_Private.iv_sctns) && (consumed < i_len);
             l_sc++)
     {
@@ -2392,4 +2473,3 @@ void ErrlEntry::addI2cDeviceCallout(const TARGETING::Target *i_i2cMaster,
 
 
 } // End namespace
-

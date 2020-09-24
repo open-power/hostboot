@@ -48,6 +48,7 @@
 #include <targeting/common/trace.H>
 #include <targeting/common/target.H>
 #include <targeting/common/targetservice.H>
+#include <targeting/common/utilFilter.H>
 
 namespace TARGETING
 {
@@ -140,6 +141,27 @@ struct tryGetAttributes<>
         // This is the base case of the recursion, no more attributes to read.
     }
 };
+
+/* @brief Recursively search a target and its parents for the first occurrence
+ *        of an attribute and retrieve its value.
+ *
+ * @param[in] i_target Target to search
+ * @param[in] o_value  Location to store the attribute value.
+ * @return    bool     True if the attribute was found, false otherwise.
+ * @note o_value is not modified if the attribute is not found.
+ */
+template<ATTRIBUTE_ID Attr>
+bool tryGetAttributeInHierarchy(Target* const i_target,
+                                typename AttributeTraits<Attr>::Type& o_value)
+{
+    if (!i_target)
+    {
+        return false;
+    }
+
+    return i_target->tryGetAttr<Attr>(o_value)
+        || tryGetAttributeInHierarchy<Attr>(getImmediateParentByAffinity(i_target), o_value);
+}
 
 /**
  *  @brief Creates a standard error log of tracing type

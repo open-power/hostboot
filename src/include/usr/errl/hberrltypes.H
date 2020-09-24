@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -157,6 +157,7 @@ enum errlSectionId_t
 {
     ERRL_SID_PRIVATE_HEADER                 = 0x5048, // PH private header
     ERRL_SID_USER_HEADER                    = 0x5548, // UH user header
+    ERRL_SID_EXTENDED_HEADER                = 0x4548, // EH user header
     ERRL_SID_PRIMARY_SRC                    = 0x5053, // PS
     ERRL_SID_USER_DEFINED                   = 0x5544  // UD user defined
 };
@@ -445,7 +446,7 @@ typedef struct pelsectionheader
  * This structure represents an entire Private Header (PH)
  * PEL section. This section is a fixed overall
  * length of 48 bytes including the PEL section header.
- * This the first section found in a flat PEL dataset.
+ * This is the first section found in a flat PEL dataset.
  * Populated by the flatten code of class ErrlPrvt.
  *
  * The component named in the section header is the
@@ -476,7 +477,7 @@ typedef struct pelprivateheadersection
  * This structure represents an entire User Header (UH)
  * PEL section. This section is a fixed overall
  * length of 0x18 bytes including the PEL section header.
- * This the second section found in a flat PEL dataset.
+ * This is the second section found in a flat PEL dataset.
  * Populated by the flatten code of class ErrlUH.
  *
  * The component named in the section header is the
@@ -507,7 +508,7 @@ typedef struct peluserheadersection
  * This structure represents an entire Primary SRC (PS)
  * PEL section. This section is a fixed overall
  * length of 80 bytes including the PEL section header.
- * This the usually the third section found in a flat PEL dataset.
+ * This is the usually the third section found in a flat PEL dataset.
  * Populated by the flatten code of class ErrlSRC.
  *
  * Hostboot generates a minimal SRC as described under
@@ -544,9 +545,45 @@ typedef struct pelsrcsection
 } __attribute__((packed)) pelSRCSection_t;
 
 
+/**
+ * @brief Structure to represent machine type/model and serial number, as used
+ * in the EH section below
+ */
+typedef struct mtms_t
+{
+    char mtm[8] = { }; // Machine type/model string
+    char serial[12] = { };
+} __attribute__((packed)) mtms_t;
 
-
-
+/**
+ * @brief pelExtendedUserHeaderSection_t
+ *
+ * A PEL structure used to flatten error logs to PEL format.
+ *
+ * This structure represents an entire Extended User Header (EH) PEL
+ * section. This section is a variable overall length.  This is the fourth section
+ * found in a flat PEL dataset.  Populated by the flatten code of class ErrlEH.
+ *
+ * Note that while the symptom_id may be a maximum of 80 characters, it may be
+ * less in practice, and the array should not be addressed beyond the number of
+ * characters indicated by symptom_id_length (this includes by indirect copying
+ * such as assigning the structure, passing it as an argument by value, etc).
+ *
+ * The component named in the section header is the committing component of the
+ * error log.
+ */
+typedef struct pelextendeduserheadersection
+{
+    pelSectionHeader_t sectionheader = { };
+    mtms_t mtms = { };
+    char firmware[16] = { }; // server firmware released version
+    char subsystem[16] = { }; // firmware subsystem driver version
+    uint32_t reserved = 0;
+    uint64_t timestamp = 0;
+    char reserved2[3] = { };
+    uint8_t symptom_id_length = 0;
+    char symptom_id[80] = { };
+} __attribute__((packed)) pelExtendedUserHeaderSection_t;
 
 
 } // End namespace

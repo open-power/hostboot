@@ -237,6 +237,16 @@
   </targetTypeExtension>
 
   <targetTypeExtension>
+    <id>sys</id>
+    <attribute>
+      <id>FW_RELEASE_VERSION</id>
+    </attribute>
+    <attribute>
+      <id>FW_SUBSYS_VERSION</id>
+    </attribute>
+  </targetTypeExtension>
+
+  <targetTypeExtension>
     <id>sys-sys-power10</id>
     <attribute>
       <id>ALLOW_ATTR_OVERRIDES_IN_SECURE_MODE</id>
