@@ -29,12 +29,13 @@ SUBDIRS += test.d
 SUBDIRS += runtime.d
 
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/common/include/
-
+EXTRAINCDIR += ${ROOTPATH}/src/include/util/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/ffdc/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/
 EXTRAINCDIR += ${ROOTPATH}/src/import/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/imageProcs/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/ocmb/explorer/common/include/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/ocmb/explorer/procedures/hwp/memory/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/ocmb/explorer/procedures/hwp/memory/lib/inband/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/scomt/
 

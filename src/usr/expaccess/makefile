@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2011,2019
+# Contributors Listed Below - COPYRIGHT 2011,2020
 # [+] International Business Machines Corp.
 #
 #
@@ -30,6 +30,9 @@ SUBDIRS += test.d
 SUBDIRS += runtime.d
 
 include expaccess.mk
+
+EXTRAINCDIR += ${ROOTPATH}/obj/genfiles/generic/memory/lib/
+EXTRAINCDIR += ${ROOTPATH}/obj/genfiles/chips/ocmb/explorer/procedures/hwp/memory/lib/
 
 include ${ROOTPATH}/config.mk
 

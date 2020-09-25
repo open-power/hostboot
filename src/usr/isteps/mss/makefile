@@ -37,6 +37,7 @@ EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/utils/imageProcs/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/imageProcs/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/common/include/
 EXTRAINCDIR += ${IMPORT_PATH}/chips/ocmb/explorer/common/include/
+EXTRAINCDIR += ${EXPLORER_PROCEDURES_PATH}
 EXTRAINCDIR += ${ROOTPATH}/obj/genfiles/chips/ocmb/explorer/procedures/hwp/memory/lib/
 EXTRAINCDIR += ${ROOTPATH}/obj/genfiles/generic/memory/lib/
 EXTRAINCDIR += ${ROOTPATH}/obj/genfiles/

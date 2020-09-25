@@ -31,7 +31,10 @@ SUBDIRS += test.d
 
 include ../expaccess.mk
 
-EXTRAINCDIR += ../
+EXTRAINCDIR += ..
+EXTRAINCDIR += ${ROOTPATH}/obj/genfiles/generic/memory/
+EXTRAINCDIR += ${ROOTPATH}/obj/genfiles/generic/memory/lib/
+EXTRAINCDIR += ${ROOTPATH}/obj/genfiles/chips/ocmb/explorer/procedures/hwp/memory/lib/
 
 VPATH += ${ROOTPATH}/src/import/chips/ocmb/explorer/procedures/hwp/memory/
 VPATH += ${ROOTPATH}/src/usr/expaccess/
