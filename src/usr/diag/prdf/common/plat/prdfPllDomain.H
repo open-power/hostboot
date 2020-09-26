@@ -32,10 +32,6 @@
 #include <prdfRuleChipDomain.H>
 #include <prdfThresholdResolutions.H>
 
-#ifndef __HOSTBOOT_MODULE
-  #include <hdctContent.H> // for hwTableContent
-#endif
-
 namespace PRDF
 {
 
@@ -45,8 +41,6 @@ class PllDomain : public RuleChipDomain, public ExtensibleDomain
 {
   public:
 
-#ifdef __HOSTBOOT_MODULE
-
     /**
      * @brief Constructor
      * @param DOMAIN_ID  the domain ID
@@ -66,34 +60,6 @@ class PllDomain : public RuleChipDomain, public ExtensibleDomain
     PllDomain( DOMAIN_ID domain_id, Resolution & secondClockSource,
                Resolution & clockSource,
                const ThresholdResolution::ThresholdPolicy & i_mfgThresh );
-
-#else // not __HOSTBOOT_MODULE
-
-    /**
-     * @brief Constructor
-     * @param DOMAIN_ID  the domain ID
-     * @param Resolution to callout the correct clock source
-     * @param Dump content
-     * @param ThresholdResolution::ThresholdPolicy
-     */
-    PllDomain( DOMAIN_ID domain_id, Resolution & clockSource,
-               hwTableContent i_hwdc,
-               const ThresholdResolution::ThresholdPolicy & i_mfgThresh );
-
-    /**
-     * @brief Constructor
-     * @param DOMAIN_ID  the domain ID
-     * @param Resolution to callout the correct second clock source
-     * @param Resolution to callout the correct clock source
-     * @param Dump content
-     * @param ThresholdResolution::ThresholdPolicy
-     */
-    PllDomain( DOMAIN_ID domain_id, Resolution & secondClockSource,
-               Resolution & clockSource,
-               hwTableContent i_hwdc,
-               const ThresholdResolution::ThresholdPolicy & i_mfgThresh );
-
-#endif // not __HOSTBOOT_MODULE
 
   /**
    *  @brief Perform any initialization required by the hardware
@@ -144,18 +110,6 @@ class PllDomain : public RuleChipDomain, public ExtensibleDomain
                             STEP_CODE_DATA_STRUCT & i_sc,
                             uint32_t i_errType );
 
-    /**
-     * @brief  Domain level plugin function used to mask PLL attentions in a
-     *         domain and its subdomains.
-     * @param  i_domain The target PLL domain.
-     * @param  i_sc The step code data struct.
-     * @param  i_oscPos osc position (only used by IO pcie domain)
-     * @return SUCCESS
-     */
-    static int32_t MaskPllIo( ExtensibleDomain * i_domain,
-                            STEP_CODE_DATA_STRUCT & i_sc,
-                            uint32_t i_oscPos );
-
 protected:
 
   /**
@@ -174,17 +128,10 @@ private:  // Data
   Resolution & farClockSource;
 
   Resolution & iv_threshold;
-
-#ifndef __HOSTBOOT_MODULE
-    hwTableContent iv_dumpContent;
-#endif
-
 };
 
 //------------------------------------------------------------------------------
 
-#ifdef __HOSTBOOT_MODULE
-
 inline
 PllDomain::PllDomain( DOMAIN_ID domain_id, Resolution & clockSource,
                       const ThresholdResolution::ThresholdPolicy& i_mfgThresh) :
@@ -211,41 +158,6 @@ PllDomain::PllDomain( DOMAIN_ID domain_id, Resolution & secondClockSource,
                                 i_mfgThresh ) )
 {
 }
-
-#else // not __HOSTBOOT_MODULE
-
-inline
-PllDomain::PllDomain( DOMAIN_ID domain_id, Resolution & clockSource,
-                      hwTableContent i_hwdc,
-                      const ThresholdResolution::ThresholdPolicy& i_mfgThresh) :
-    RuleChipDomain( domain_id, PllDomain::CONTAINER_SIZE ),
-    ExtensibleDomain("PllDomain"),
-    closeClockSource(clockSource),
-    farClockSource(clockSource),
-    iv_threshold( ResolutionFactory::Access().GetThresholdResolution( 1,
-                                ThresholdResolution::cv_pllDefault,
-                                i_mfgThresh ) ),
-    iv_dumpContent(i_hwdc)
-{
-}
-
-inline
-PllDomain::PllDomain( DOMAIN_ID domain_id, Resolution & secondClockSource,
-                      Resolution & clockSource,
-                      hwTableContent i_hwdc,
-                      const ThresholdResolution::ThresholdPolicy& i_mfgThresh) :
-    RuleChipDomain( domain_id, PllDomain::CONTAINER_SIZE ),
-    ExtensibleDomain("PllDomain"),
-    closeClockSource(secondClockSource),
-    farClockSource(clockSource),
-    iv_threshold( ResolutionFactory::Access().GetThresholdResolution( 1,
-                                ThresholdResolution::cv_pllDefault,
-                                i_mfgThresh ) ),
-    iv_dumpContent(i_hwdc)
-{
-}
-
-#endif // not __HOSTBOOT_MODULE
 
 //------------------------------------------------------------------------------
 

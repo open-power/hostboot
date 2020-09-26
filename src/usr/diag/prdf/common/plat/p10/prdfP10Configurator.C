@@ -298,13 +298,8 @@ void PlatConfigurator::addChipToPllDomain( DOMAIN_ID i_domainId,
     {
         Resolution & clock = i_resFac.GetClockResolution( i_trgt, i_type );
 
-        #ifdef __HOSTBOOT_MODULE
         io_pllDmnMap[pos] = new PllDomain( i_domainId, clock,
                                      ThresholdResolution::cv_mnfgDefault );
-        #else
-        io_pllDmnMap[pos] = new PllDomain( i_domainId, clock, CONTENT_HW,
-                                     ThresholdResolution::cv_mnfgDefault );
-        #endif
     }
 
     io_pllDmnMap[pos]->AddChip( i_chip );
