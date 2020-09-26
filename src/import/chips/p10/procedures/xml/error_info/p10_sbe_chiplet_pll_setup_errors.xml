@@ -71,6 +71,21 @@
    <!-- ******************************************************************** -->
    <hwpError>
       <sbeError/>
+      <rc>RC_P10_HW540133_FLB_WA_ERR</rc>
+      <description>
+        Error applying first_locking_bandsel workaround -- bad return code in
+        scan/scom sequence application or failure to observe subseqent PLL lock
+      </description>
+      <ffdc>TARGET</ffdc>
+      <ffdc>LOCK_ERR</ffdc>
+      <ffdc>FIRST_ATTEMPT</ffdc>
+      <ffdc>INTERMEDIATE_STEP</ffdc>
+      <ffdc>LAST_ATTEMPT</ffdc>
+      <ffdc>WA_TYPE</ffdc>
+   </hwpError>
+   <!-- ******************************************************************** -->
+   <hwpError>
+      <sbeError/>
       <rc>RC_P10_HW540133_WORKAROUND_ERR</rc>
       <description>
         Unsupported workaround selection
