@@ -205,7 +205,7 @@ int32_t PllDomain::Analyze(STEP_CODE_DATA_STRUCT& io_sc,
     if (pllUnlockList.size() > 0)
     {
         // Test for threshold
-        iv_threshold.Resolve(io_sc);
+        iv_thPllUnlock.Resolve(io_sc);
         if(io_sc.service_data->IsAtThreshold())
         {
             mskErrType |= SYS_PLL_UNLOCK;

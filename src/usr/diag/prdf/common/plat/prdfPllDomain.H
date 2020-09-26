@@ -43,11 +43,15 @@ class PllDomain : public RuleChipDomain, public ExtensibleDomain
 
     /**
      * @brief Constructor
-     * @param DOMAIN_ID  the domain ID
-     * @param ThresholdResolution::ThresholdPolicy
+     * @param i_domainId The domain ID.
      */
-    PllDomain( DOMAIN_ID domain_id,
-               const ThresholdResolution::ThresholdPolicy & i_mfgThresh );
+    explicit PllDomain(DOMAIN_ID i_domainId) :
+        RuleChipDomain(i_domainId, PllDomain::CONTAINER_SIZE),
+        ExtensibleDomain("PllDomain"),
+        iv_thPllUnlock(ResolutionFactory::Access().GetThresholdResolution(1,
+                            ThresholdResolution::cv_pllDefault,
+                            ThresholdResolution::cv_mnfgDefault))
+    {}
 
   /**
    *  @brief Perform any initialization required by the hardware
@@ -112,21 +116,9 @@ private:  // Data
 
   enum { CONTAINER_SIZE = 8 };
 
-  Resolution & iv_threshold;
+    /** Threshold resolution for a PLL unlock error. */
+    Resolution & iv_thPllUnlock;
 };
-
-//------------------------------------------------------------------------------
-
-inline
-PllDomain::PllDomain( DOMAIN_ID domain_id,
-                      const ThresholdResolution::ThresholdPolicy& i_mfgThresh) :
-    RuleChipDomain( domain_id, PllDomain::CONTAINER_SIZE ),
-    ExtensibleDomain("PllDomain"),
-    iv_threshold( ResolutionFactory::Access().GetThresholdResolution( 1,
-                                ThresholdResolution::cv_pllDefault,
-                                i_mfgThresh ) )
-{
-}
 
 //------------------------------------------------------------------------------
 

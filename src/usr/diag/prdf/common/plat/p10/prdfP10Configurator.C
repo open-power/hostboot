@@ -296,8 +296,7 @@ void PlatConfigurator::addChipToPllDomain( DOMAIN_ID i_domainId,
 
     if ( io_pllDmnMap.end() == io_pllDmnMap.find(pos) )
     {
-        io_pllDmnMap[pos] = new PllDomain( i_domainId,
-                                     ThresholdResolution::cv_mnfgDefault );
+        io_pllDmnMap[pos] = new PllDomain(i_domainId);
     }
 
     io_pllDmnMap[pos]->AddChip( i_chip );
