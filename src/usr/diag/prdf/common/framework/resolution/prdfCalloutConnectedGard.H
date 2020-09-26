@@ -67,7 +67,6 @@ class CalloutConnectedGard : public Resolution
      * @param   i_peerConnType    type of unit that is peer connected to
      *                            i_targetType
      * @param   i_trgtGardState   gard policy associated with target callout
-     * @note    Don't use this class to callout clocks - use ClockResolution
      */
     CalloutConnectedGard( TARGETING::TYPE i_targetType   = TARGETING::TYPE_NA,
                           uint32_t i_idx                 = INVALID_INDEX,

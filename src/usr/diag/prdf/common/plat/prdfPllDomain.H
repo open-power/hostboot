@@ -44,21 +44,9 @@ class PllDomain : public RuleChipDomain, public ExtensibleDomain
     /**
      * @brief Constructor
      * @param DOMAIN_ID  the domain ID
-     * @param Resolution to callout the correct clock source
      * @param ThresholdResolution::ThresholdPolicy
      */
-    PllDomain( DOMAIN_ID domain_id, Resolution & clockSource,
-               const ThresholdResolution::ThresholdPolicy & i_mfgThresh );
-
-    /**
-     * @brief Constructor
-     * @param DOMAIN_ID  the domain ID
-     * @param Resolution to callout the correct second clock source
-     * @param Resolution to callout the correct clock source
-     * @param ThresholdResolution::ThresholdPolicy
-     */
-    PllDomain( DOMAIN_ID domain_id, Resolution & secondClockSource,
-               Resolution & clockSource,
+    PllDomain( DOMAIN_ID domain_id,
                const ThresholdResolution::ThresholdPolicy & i_mfgThresh );
 
   /**
@@ -124,35 +112,16 @@ private:  // Data
 
   enum { CONTAINER_SIZE = 8 };
 
-  Resolution & closeClockSource;
-  Resolution & farClockSource;
-
   Resolution & iv_threshold;
 };
 
 //------------------------------------------------------------------------------
 
 inline
-PllDomain::PllDomain( DOMAIN_ID domain_id, Resolution & clockSource,
+PllDomain::PllDomain( DOMAIN_ID domain_id,
                       const ThresholdResolution::ThresholdPolicy& i_mfgThresh) :
     RuleChipDomain( domain_id, PllDomain::CONTAINER_SIZE ),
     ExtensibleDomain("PllDomain"),
-    closeClockSource(clockSource),
-    farClockSource(clockSource),
-    iv_threshold( ResolutionFactory::Access().GetThresholdResolution( 1,
-                                ThresholdResolution::cv_pllDefault,
-                                i_mfgThresh ) )
-{
-}
-
-inline
-PllDomain::PllDomain( DOMAIN_ID domain_id, Resolution & secondClockSource,
-                      Resolution & clockSource,
-                      const ThresholdResolution::ThresholdPolicy& i_mfgThresh) :
-    RuleChipDomain( domain_id, PllDomain::CONTAINER_SIZE ),
-    ExtensibleDomain("PllDomain"),
-    closeClockSource(secondClockSource),
-    farClockSource(clockSource),
     iv_threshold( ResolutionFactory::Access().GetThresholdResolution( 1,
                                 ThresholdResolution::cv_pllDefault,
                                 i_mfgThresh ) )

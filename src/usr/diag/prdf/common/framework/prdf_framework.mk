@@ -68,7 +68,6 @@ prd_obj += prdfScomRegister.o
 prd_obj += iipResolution.o
 prd_obj += iipResolutionFactory.o
 prd_obj += prdfCaptureResolution.o
-prd_obj += prdfClockResolution.o
 prd_obj += prdfResolutionMap.o
 prd_obj += prdfThresholdResolutions.o
 prd_obj += xspprdFlagResolution.o

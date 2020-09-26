@@ -200,11 +200,7 @@ int32_t PllDomain::Analyze(STEP_CODE_DATA_STRUCT& io_sc,
         io_sc.service_data->SetUERE();
     }
 
-    closeClockSource.Resolve(io_sc);
-    if(&closeClockSource != &farClockSource)
-    {
-        farClockSource.Resolve(io_sc);
-    }
+    // TODO: Make callouts based on error types.
 
     if (pllUnlockList.size() > 0)
     {

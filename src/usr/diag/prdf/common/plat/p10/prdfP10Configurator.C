@@ -296,9 +296,7 @@ void PlatConfigurator::addChipToPllDomain( DOMAIN_ID i_domainId,
 
     if ( io_pllDmnMap.end() == io_pllDmnMap.find(pos) )
     {
-        Resolution & clock = i_resFac.GetClockResolution( i_trgt, i_type );
-
-        io_pllDmnMap[pos] = new PllDomain( i_domainId, clock,
+        io_pllDmnMap[pos] = new PllDomain( i_domainId,
                                      ThresholdResolution::cv_mnfgDefault );
     }
 

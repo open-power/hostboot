@@ -258,14 +258,6 @@ Resolution & ResolutionFactory::GetCaptureResolution( int32_t i_group )
     return iv_captureResolutionFW.get( CaptureResolution( i_group ) );
 }
 
-Resolution & ResolutionFactory::GetClockResolution(
-                                    TARGETING::TargetHandle_t i_pClockHandle,
-                                    TARGETING::TYPE i_targetType )
-{
-    return iv_clockResolutionFW.get( ClockResolution( i_pClockHandle,
-                                                      i_targetType ) );
-}
-
 void ResolutionFactory::Reset()
 {
   PRDF_INF( "ResolutionFactory.Reset()" );
@@ -278,10 +270,6 @@ void ResolutionFactory::Reset()
   iv_eregResolutionFW.clear();
   iv_tryResolutionFW.clear();
   iv_captureResolutionFW.clear();
-  /*Clear because the "alt resolution" could have be a link or other cleared
-  resolution.*/
-  iv_clockResolutionFW.clear();
-
 }
 
 #ifdef FLYWEIGHT_PROFILING
@@ -310,8 +298,6 @@ void ResolutionFactory::printStats()
     iv_dumpResolutionFW.printStats( );
     PRDF_TRAC("captureResolution");
     iv_captureResolutionFW.printStats( );
-    PRDF_TRAC("clockResolution");
-    iv_clockResolutionFW.printStats( );
     PRDF_TRAC("CalloutGardResolFW");
     iv_calloutGardFW.printStats( );
     PRDF_TRAC("CalloutConnectedGardResolFW");

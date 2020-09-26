@@ -63,7 +63,6 @@
 #include <xspprdFlagResolution.h>
 #include <prdDumpResolution.H>
 #include <prdfCaptureResolution.H>
-#include <prdfClockResolution.H>
 #include <prdfCalloutGard.H>
 #include <prdfCalloutConnectedGard.H>
 
@@ -149,9 +148,7 @@ public:
    * @param     i_gardState     gard policy associated with callout target
    * @return    reference to a resolution
    * @note      This resolution callouts a connected target. There is an option
-   *            to specify the gard policy for the callout target. Don't use
-   *            this to callout clocks - use prdfClockResolution
-
+   *            to specify the gard policy for the callout target.
    */
   Resolution & getConnCalloutGardResol(
                                     TARGETING::TYPE i_targetType,
@@ -241,16 +238,6 @@ public:
    */
   Resolution & GetCaptureResolution( int32_t i_group );
 
-    /**
-   * @brief     Get a ClockResolution
-   * @param[in] i_pClockHandle Target pointer pertaining to clock
-   * @param[in] i_targetType   desired Targets type connected to clock
-   * @return    reference to a resolution
-   * @post      only one instance of this obect with these paramaters will exist
-   */
-  Resolution & GetClockResolution(
-                    TARGETING::TargetHandle_t i_pClockHandle = nullptr ,
-                    TARGETING::TYPE i_targetType = TARGETING::TYPE_PROC );
 /**
    Link resolutions to form a single resolution performing the actions of them all
    <ul>
@@ -379,7 +366,6 @@ private:  // Data
   typedef FlyWeight< FlagResolution, 5 > FlagResolutionFW;           // dg06a
   typedef FlyWeight< DumpResolution, 5 > DumpResolutionFW;           // dg06a
   typedef FlyWeight< CaptureResolution, 5> CaptureResolutionFW;  // pw01
-  typedef FlyWeight< ClockResolution, 8 > ClockResolutionFW;         // jl01a
   typedef FlyWeight< CalloutGardResolution, 50 > CalloutGardResolFW;
   typedef FlyWeight< CalloutConnectedGard, 25> CalloutConnectedGardResolFW;
 
@@ -396,7 +382,6 @@ private:  // Data
   FlagResolutionFW iv_flagResolutionFW;        // dg06a
   DumpResolutionFW iv_dumpResolutionFW;        // dg06a
   CaptureResolutionFW iv_captureResolutionFW;  // pw01
-  ClockResolutionFW iv_clockResolutionFW;      // jl01a
   CalloutGardResolFW iv_calloutGardFW; ///<  stores CalloutGardResolution
   CalloutConnectedGardResolFW iv_connCalloutGardFW; ///< CalloutConnectedGard
 
