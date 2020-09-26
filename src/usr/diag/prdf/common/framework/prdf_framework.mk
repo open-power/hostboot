@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2016
+# Contributors Listed Below - COPYRIGHT 2016,2020
 # [+] International Business Machines Corp.
 #
 #
@@ -50,7 +50,6 @@ prd_obj += iipDomain.o
 prd_obj += iipDomainContainer.o
 prd_obj += iipSystem.o
 prd_obj += prdfExtensibleDomain.o
-prd_obj += prdfParentDomain.o
 prd_obj += prdfRuleChipDomain.o
 
 # common/framework/register/

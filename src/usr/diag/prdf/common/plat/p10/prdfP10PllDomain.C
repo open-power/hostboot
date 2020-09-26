@@ -316,18 +316,6 @@ int32_t PllDomain::ClearPll( ExtensibleDomain * i_domain,
                     PluginDef::bindParm<STEP_CODE_DATA_STRUCT&>(i_sc) );
     }
 
-    // Clear children domains.
-    // This looks like a recursive call.  It calls other domains of Clear.
-    ParentDomain<ExtensibleDomain>::iterator i;
-    for (i = l_domain->getBeginIterator(); i != l_domain->getEndIterator(); i++)
-    {
-        // Clear PLLs from this domain.
-        ExtensibleDomainFunction * l_clear =
-                                (i->second)->getExtensibleFunction("ClearPll");
-        (*l_clear)( i->second,
-                    PluginDef::bindParm<STEP_CODE_DATA_STRUCT&>(i_sc) );
-    }
-
     return SUCCESS;
 }
 PRDF_PLUGIN_DEFINE( PllDomain, ClearPll );
@@ -347,18 +335,6 @@ int32_t PllDomain::MaskPll( ExtensibleDomain * i_domain,
         ExtensibleChipFunction * l_mask =
                             l_chip->getExtensibleFunction("MaskPll");
         (*l_mask)( l_chip,
-            PluginDef::bindParm<STEP_CODE_DATA_STRUCT&, uint32_t>
-                (i_sc, i_errType) );
-    }
-
-    // Mask children domains.
-    // This looks like a recursive call.  It calls other domains of Mask.
-    ParentDomain<ExtensibleDomain>::iterator i;
-    for (i = l_domain->getBeginIterator(); i != l_domain->getEndIterator(); i++)
-    {
-        ExtensibleDomainFunction * l_mask =
-                                (i->second)->getExtensibleFunction("MaskPll");
-        (*l_mask)( i->second,
             PluginDef::bindParm<STEP_CODE_DATA_STRUCT&, uint32_t>
                 (i_sc, i_errType) );
     }

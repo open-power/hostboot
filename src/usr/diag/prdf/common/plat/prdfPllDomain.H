@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -29,7 +29,6 @@
 #include <iipDomain.h>
 #include <iipResolutionFactory.h>
 #include <prdfExtensibleDomain.H>
-#include <prdfParentDomain.H>
 #include <prdfRuleChipDomain.H>
 #include <prdfThresholdResolutions.H>
 
@@ -42,8 +41,7 @@ namespace PRDF
 
 //------------------------------------------------------------------------------
 
-class PllDomain : public RuleChipDomain, public ExtensibleDomain,
-                  public ParentDomain<ExtensibleDomain>
+class PllDomain : public RuleChipDomain, public ExtensibleDomain
 {
   public:
 
