@@ -73,9 +73,9 @@ using namespace pm_pstate_parameter_block;
                  iv_attr_mvpd_data[i].ics_tdp_dc_10ma == 0 || \
                  iv_attr_mvpd_data[i].ics_rdp_ac_10ma == 0 || \
                  iv_attr_mvpd_data[i].ics_rdp_dc_10ma == 0 || \
-                 iv_attr_mvpd_data[i].irt_rdp_ac_10ma == 0 || \
-                 iv_attr_mvpd_data[i].irt_rdp_dc_10ma == 0 || \
                  iv_attr_mvpd_data[i].vdd_vmin == 0)
+        //         iv_attr_mvpd_data[i].irt_rdp_ac_10ma == 0 || 
+          //       iv_attr_mvpd_data[i].irt_rdp_dc_10ma == 0 || 
 
 #define POUNDV_POINTS_PRINT(i,suffix)   \
                   .set_FREQUENCY_##suffix(iv_attr_mvpd_data[i].frequency_mhz)  \
