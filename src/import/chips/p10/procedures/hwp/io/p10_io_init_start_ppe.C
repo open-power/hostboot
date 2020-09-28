@@ -379,6 +379,9 @@ fapi2::ReturnCode p10_io_init::init_regs(const fapi2::Target<fapi2::TARGET_TYPE_
                     l_ppe_channel_loss = 2;
                 }
 
+                // Peaking
+                FAPI_TRY(p10_io_ppe_ppe_ctle_peak1_disable[l_thread].putData(l_pauc_target, 0x1));
+
                 // RX A CTLE_PEAK1
                 FAPI_TRY(p10_io_omi_put_pl_regs(l_omi_target,
                                                 RXPACKS_0_DEFAULT_RD_RX_DAC_REGS_CNTL6_PL,
@@ -386,15 +389,6 @@ fapi2::ReturnCode p10_io_init::init_regs(const fapi2::Target<fapi2::TARGET_TYPE_
                                                 RXPACKS_0_DEFAULT_RD_RX_DAC_REGS_CNTL6_PL_PEAK1_LEN,
                                                 l_num_lanes,
                                                 4));
-
-                // RX A CTLE_PEAK2
-                FAPI_TRY(p10_io_omi_put_pl_regs(l_omi_target,
-                                                RXPACKS_0_DEFAULT_RD_RX_DAC_REGS_CNTL6_PL,
-                                                RXPACKS_0_DEFAULT_RD_RX_DAC_REGS_CNTL6_PL_PEAK2,
-                                                RXPACKS_0_DEFAULT_RD_RX_DAC_REGS_CNTL6_PL_PEAK2_LEN,
-                                                l_num_lanes,
-                                                4));
-
                 // RX B CTLE_PEAK1
                 FAPI_TRY(p10_io_omi_put_pl_regs(l_omi_target,
                                                 RXPACKS_0_DEFAULT_RD_RX_DAC_REGS_CNTL13_PL,
@@ -403,16 +397,6 @@ fapi2::ReturnCode p10_io_init::init_regs(const fapi2::Target<fapi2::TARGET_TYPE_
                                                 l_num_lanes,
                                                 4));
 
-                // RX B CTLE_PEAK2
-                FAPI_TRY(p10_io_omi_put_pl_regs(l_omi_target,
-                                                RXPACKS_0_DEFAULT_RD_RX_DAC_REGS_CNTL13_PL,
-                                                RXPACKS_0_DEFAULT_RD_RX_DAC_REGS_CNTL13_PL_PEAK2,
-                                                RXPACKS_0_DEFAULT_RD_RX_DAC_REGS_CNTL13_PL_PEAK2_LEN,
-                                                l_num_lanes,
-                                                4));
-
-                //FAPI_TRY(p10_io_ppe_rx_disable_bank_pdwn[l_thread].putData(l_pauc_target, 0x01));
-
 
                 FAPI_TRY(p10_io_ppe_tx_ffe_pre1_coef[l_thread].putData(l_pauc_target, l_pre1));
                 FAPI_TRY(p10_io_ppe_tx_ffe_pre2_coef[l_thread].putData(l_pauc_target, l_pre2));
@@ -420,11 +404,10 @@ fapi2::ReturnCode p10_io_init::init_regs(const fapi2::Target<fapi2::TARGET_TYPE_
                 FAPI_TRY(p10_io_ppe_ppe_data_rate[l_thread].putData(l_pauc_target, l_omi_data_rate));
                 FAPI_TRY(p10_io_ppe_ppe_channel_loss[l_thread].putData(l_pauc_target, l_ppe_channel_loss));
 
+                // Eye Opt / Recal Steps
                 //FAPI_TRY(p10_io_ppe_tx_dc_enable_dcc[l_thread].putData(l_pauc_target, 0x0));
                 FAPI_TRY(p10_io_ppe_rx_eo_enable_edge_offset_cal[l_thread].putData(l_pauc_target, 0x0));
                 FAPI_TRY(p10_io_ppe_rx_eo_enable_dfe_full_cal [l_thread].putData(l_pauc_target, 0x0));
-                FAPI_TRY(p10_io_ppe_rx_eo_enable_ctle_peak_cal[l_thread].putData(l_pauc_target, 0x0));
-                FAPI_TRY(p10_io_ppe_rx_rc_enable_ctle_peak_cal[l_thread].putData(l_pauc_target, 0x0));
                 FAPI_TRY(p10_io_ppe_rx_rc_enable_edge_offset_cal[l_thread].putData(l_pauc_target, 0x0));
 
             }
