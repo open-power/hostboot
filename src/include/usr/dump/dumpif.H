@@ -134,7 +134,8 @@ namespace DUMP
     {
         uint32_t threadRegSize;        // Architected reg data size per thread
         uint8_t  threadRegVersion;     // Data format version
-        uint8_t  reserved1[10];        // Reserved
+        uint8_t  reserved1[9];         // Reserved
+        uint8_t  HypInitSuccess;       // Hypervisor Initialization Successful indicator
         uint8_t  sprIdType;            // Hypervisor passed (SPR Name/SPR Number) indentification type
         uint64_t dstArrayAddr;         // Hypervisor passed destination addresss
         uint8_t  reserved2[4];         // Reserved

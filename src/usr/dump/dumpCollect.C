@@ -501,10 +501,10 @@ errlHndl_t copyArchitectedRegs(void)
 
 
             bool collectMinimumDataMode = false;
-            //Validate the memory size allocated by the Hypervisor
+            //Check if PHYP initialization was successfull.
             //In case of Hypervisor pre-init failure, Hypervisor allocates memory to save off
             //first fused core data
-            if(procTableEntry->dstArraySize ==  HYP_REQUIRED_MIN_REG_SIZE)
+            if(!procTableEntry->HypInitSuccess)
             {
                 //HYP Pre-Init Failure cause.
                 collectMinimumDataMode = true;
@@ -591,13 +591,6 @@ errlHndl_t copyArchitectedRegs(void)
                     hostRegData->reg.type = sbeRegData->regType;
                     hostRegData->reg.num  = sbeRegData->regNum;
                     hostRegData->regVal  = sbeRegData->regVal;
-
-                    //If SPR needs to be identified by Name, then replace the
-                    //number with the names.
-                    if (procTableEntry->sprIdType == SPR_ID_TYPE_NAME)
-                    {
-                        replaceRegNumWithName(hostRegData);
-                    }
 
                     dstTempAddr = reinterpret_cast<uint64_t>(dstTempAddr +
                                                   sizeof(hostArchRegDataEntry));
