@@ -33,7 +33,7 @@
 static const uint64_t DYN_MAGIC_FEATURE = 0x44594e4645415453; //'DYNFEATS'
 static const uint64_t DYN_MAGIC_SERVICE = 0x44594e5345525653; //'DYNSERVS'
 
-#define MAX_DYN_FEATURES   31
+#define MAX_DYN_FEATURES   32
 #define NUM_OF_64_BITS_SET 1
 
 typedef struct
@@ -169,6 +169,7 @@ enum DYN_FEATURES
     CONTAINED_CLKOFFS             = 28,
     CORE_RECOVERY                 = 29,
     REVERT_HW542915               = 30,
+    REVERT_HW541421               = 31,
 };
 
 enum DYN_SERVICES
