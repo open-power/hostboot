@@ -53,6 +53,14 @@ SRCPATH = ${DEFAULT_PATH:M*src*}
     GEN_DEFAULT_IMAGES_DEPS = cp_hbfiles dump-secureboot-config
 .endif
 
+OBJECTS=hcode_lid
+# Be sure to first get the hcode_lid copied at appropriate time
+.if (${MAKEFILE_PASS} == "OBJECTS")
+build_all: $(OBJECTS)
+.else
+build_all: $(BUILD_ALL_DEPS)
+.endif
+
 build_all: $(BUILD_ALL_DEPS)
 install_all: gen_system_specific_images build_sbe_partitions build_pnor_images
 
