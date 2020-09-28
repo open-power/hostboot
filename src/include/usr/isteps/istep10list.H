@@ -163,7 +163,7 @@ const   TaskInfo    g_istep10[]  =   {
         {
                 ISTEPNAME(10,01,"proc_build_smp"),
                 ISTEP_10::call_proc_build_smp,
-                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
+                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, false } //TODO RTC:260484 set back to true
         },
         {
                 ISTEPNAME(10,02,"host_sbe_update"),
