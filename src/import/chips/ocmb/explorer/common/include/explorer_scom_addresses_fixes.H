@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -3261,7 +3261,7 @@ static const uint64_t EXP_DDR4_PHY_DBYTE7_DXLCDLSTATUS = 0x405C390ull;
 static const uint64_t EXP_DDR4_PHY_DBYTE8_DXLCDLSTATUS = 0x4060390ull;
 static const uint64_t EXP_DDR4_PHY_DBYTE9_DXLCDLSTATUS = 0x4064390ull;
 static const uint64_t EXP_DDR4_PHY_MASTER0_LCDLDBGCNTL = 0x408038Cull;
-
+static const uint64_t EXP_DDR4_PHY_MASTER0_MEMALERTCONTROL = 0x408016Cull;
 
 
 static const uint32_t EXPLR_EFUSE_IMAGE_OUT_0                                   = 0x20B080ull;
