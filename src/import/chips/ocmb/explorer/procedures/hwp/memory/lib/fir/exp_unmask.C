@@ -453,8 +453,24 @@ fapi2::ReturnCode after_memdiags<mss::mc_type::EXPLORER>( const fapi2::Target<fa
     fapi2::ReturnCode l_rc1 = fapi2::FAPI2_RC_SUCCESS;
     fapi2::ReturnCode l_rc2 = fapi2::FAPI2_RC_SUCCESS;
     fapi2::buffer<uint64_t> l_reg_data;
-    uint32_t l_mfg_flags[4] = {};
     bool l_has_rcd = false;
+
+    // Calculate the number of bits in the cells/fields of the manufacturing flags
+    const uint32_t l_bits_in_cell = sizeof(uint32_t) * 8;
+
+    // Calculate the cell/field the THRESHOLDS flag is in
+    const uint32_t l_thresholds_cell_index =
+        fapi2::ENUM_ATTR_MFG_FLAGS_MNFG_THRESHOLDS / l_bits_in_cell;
+
+    // Calculate the THRESHOLDS bit position within the cell/field
+    const uint32_t l_thresholds_bit_position =
+        fapi2::ENUM_ATTR_MFG_FLAGS_MNFG_THRESHOLDS % l_bits_in_cell;
+
+    // Variable to hold the cell/field data where the THRESHOLDS flag resides in
+    fapi2::buffer<uint32_t> l_mfg_flag_cell;
+
+    // Variable to hold all the manufacturing flags
+    fapi2::ATTR_MFG_FLAGS_Type l_mfg_flags;
 
     mss::fir::reg<EXPLR_RDF_FIR> l_exp_rdf_fir_reg(i_target, l_rc1);
     mss::fir::reg<EXPLR_SRQ_SRQFIRQ> l_exp_srq_srqfirq_reg(i_target, l_rc2);
@@ -462,7 +478,12 @@ fapi2::ReturnCode after_memdiags<mss::mc_type::EXPLORER>( const fapi2::Target<fa
     FAPI_TRY(l_rc1, "unable to create fir::reg for EXPLR_RDF_FIR 0x%08X", EXPLR_RDF_FIR);
     FAPI_TRY(l_rc2, "unable to create fir::reg for EXPLR_SRQ_SRQFIRQ 0x%08X", EXPLR_SRQ_SRQFIRQ);
 
+    // Retrieve all the manufacturing flags that are set in the system,
+    // which are split among 4 cells/fields.
     FAPI_TRY(mss::attr::get_mfg_flags(l_mfg_flags), "unable to get MFG Flags");
+
+    // Copy the cell/field for easy inspection
+    l_mfg_flag_cell = l_mfg_flags[l_thresholds_cell_index];
 
     // Determine if dimm is a DIMM with RCD
     // If so set RCD fir to recoverable
@@ -474,11 +495,10 @@ fapi2::ReturnCode after_memdiags<mss::mc_type::EXPLORER>( const fapi2::Target<fa
         l_exp_rdf_fir_reg.recoverable_error<EXPLR_RDF_FIR_MAINLINE_RCD>();
     }
 
-    // Check MFG Thresholds Policy flag
-    // Unmask FIR_MAINTENANCE_IUE to recoverable if not set
-    // MNFG_TRHESHOLDS = 29, so will be in first entry in uint32_t array
-    if( !(l_mfg_flags[0] & fapi2::ENUM_ATTR_MFG_FLAGS_MNFG_THRESHOLDS) )
+    // Check MNFG THRESHOLDS Policy flag
+    if( !(l_mfg_flag_cell.getBit<l_thresholds_bit_position> ()) )
     {
+        // Unmask FIR_MAINTENANCE_IUE to recoverable if Threshold not set
         l_exp_rdf_fir_reg.recoverable_error<EXPLR_RDF_FIR_MAINTENANCE_IUE>();
     }
 

@@ -130,13 +130,33 @@ fapi2::ReturnCode p10_smp_wrap_mfg_mode(
 {
     FAPI_DBG("Start");
 
+    // Calculate the number of bits in the cells/fields of the manufacturing flags
+    const uint32_t l_bits_in_cell = sizeof(uint32_t) * 8;
+
+    // Calculate the cell/field the SMP WRAP flag is in
+    const uint32_t l_smp_wrap_cell_index =
+        fapi2::ENUM_ATTR_MFG_FLAGS_MNFG_SMP_WRAP_CONFIG / l_bits_in_cell;
+
+    // Calculate the SMP WRAP bit position within the cell/field
+    const uint32_t l_smp_wrap_bit_position =
+        fapi2::ENUM_ATTR_MFG_FLAGS_MNFG_SMP_WRAP_CONFIG % l_bits_in_cell;
+
+    // Variable to hold the cell/field data where the SMP WRAP flag resides in
+    fapi2::buffer<uint32_t> l_mfg_flag_cell;
+
     fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
 
+    // Retrieve all the manufacturing flags that are set in the system,
+    // which are split among 4 cells/fields.
     fapi2::ATTR_MFG_FLAGS_Type l_mfg_flags;
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MFG_FLAGS, FAPI_SYSTEM, l_mfg_flags),
              "Error from FAPI_ATTR_GET (ATTR_MFG_FLAGS)");
 
-    o_is_smp_wrap_mode = (l_mfg_flags[MFG_FLAGS_SMP_WRAP_CELL] == fapi2::ENUM_ATTR_MFG_FLAGS_MNFG_SMP_WRAP_CONFIG) ?
+    // Copy the cell/field for easy inspection
+    l_mfg_flag_cell = l_mfg_flags[l_smp_wrap_cell_index];
+
+    // Determine if SMP WRAP flag is set
+    o_is_smp_wrap_mode = ( l_mfg_flag_cell.getBit<l_smp_wrap_bit_position> () ) ?
                          (true) : (false);
 
 fapi_try_exit:
