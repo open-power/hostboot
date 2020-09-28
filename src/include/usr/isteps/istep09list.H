@@ -207,7 +207,6 @@ namespace   INITSERVICE
 
 const DepModInfo  g_istep09Dependancies = {
     {
-        DEP_LIB(libistep07.so),
         DEP_LIB(libistep09.so),
         DEP_LIB(libpm.so),
         DEP_LIB(libnestmemutils.so),

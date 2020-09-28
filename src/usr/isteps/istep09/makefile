@@ -59,5 +59,6 @@ OBJS += p10_fabric_link_layer.o
 OBJS += p10_fabric_dl_post_trainadv.o
 OBJS += p10_fabric_iovalid.o
 OBJS += p10_fbc_eff_config_aggregate.o
+OBJS += p10_fbc_utils.o
 
 include ${ROOTPATH}/config.mk
