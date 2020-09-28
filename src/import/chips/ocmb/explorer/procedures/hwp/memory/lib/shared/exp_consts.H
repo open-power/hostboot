@@ -505,6 +505,12 @@ enum response_arg
 } // namespace omi
 #endif
 
+enum fw_version
+{
+    FW_VER_OLD = 397559,
+    FW_VER_BOOTLEG = 99999,
+};
+
 } // namespace exp
 } // namespace mss
 
