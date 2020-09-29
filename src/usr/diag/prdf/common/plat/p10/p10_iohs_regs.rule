@@ -32,6 +32,7 @@
         name        "P10 chip IOHS_DLP_FIR atomic AND register";
         scomaddr    0x18011001;
         capture     group never;
+        access      write_only;
     };
 
     register IOHS_DLP_PHY_CONFIG
