@@ -1234,9 +1234,8 @@ sub processDdimmAndChildren
     } # end if ($conn ne "")
 
     # The DIMM position is not based on the DIMM's parent but on the OMI that it is associated with
-    my $dimmPosPerNode = $omiId +
-                        ( (getMaxInstPerProc("DIMM") / $targetObj->{NUMBER_PROCS_PER_SOCKET})
-                          * $procPosRelativeToNode );
+    my $dimmPosPerNode =   $omiId
+                         + (getMaxInstPerProc("DIMM") * $procPosRelativeToNode);
 
     # Get some useful info from the DDIMM parent's SYS and NODE and targets
     my $sysParent = $targetObj->findParentByType($target, "SYS");
