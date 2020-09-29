@@ -179,7 +179,7 @@ sub getHRMOR
     else
     {
         # read Core Scratch 1 (multicast to all good cores)
-        my $scratch1 = readScom( 0x4702F487, 8 );
+        my $scratch1 = readScom( 0x4602F487, 8 );
         # Bits 4:51 are the current HRMOR in Bytes (see memstate.H)
         my $hrmor = ($scratch1 & 0x0FFFFFFFFFFFF000)>>12;
         if( $hrmor == 0 )
