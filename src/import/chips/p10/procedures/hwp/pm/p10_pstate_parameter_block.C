@@ -5351,7 +5351,8 @@ fapi2::ReturnCode PlatPmPPB::wof_init(
 fapi_try_exit:
     if (l_wof_table_data)
     {
-        delete l_wof_table_data;
+        delete[] l_wof_table_data;
+        l_wof_table_data = nullptr;
     }
 
     FAPI_DBG("<< WOF initialization");

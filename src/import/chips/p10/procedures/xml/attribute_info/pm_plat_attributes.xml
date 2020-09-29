@@ -853,7 +853,7 @@
     <description>
     Selects the WOF table from a set of WOF tables
 
-    Valid values:  0, 1, 2, 3
+    Valid values:  0, 1, 2
 
     Consumers: Hostboot firmware
     </description>
