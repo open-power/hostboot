@@ -91,8 +91,8 @@ const char * const TARGET_POS_ALL_STR = "all";
 struct TargStrToType
 {
     const char * iv_pString;
-    uint32_t iv_fapiType;
-    uint32_t iv_targType;
+    uint64_t iv_fapiType;
+    uint64_t iv_targType;
 };
 
 
@@ -134,6 +134,7 @@ TargStrToType CHIP_UNIT_TYPE_TARG_STR_TO_TYPE [] =
     {"omic"     , fapi2::TARGET_TYPE_OMIC       , TARGETING::TYPE_OMIC},
     {"mcc"      , fapi2::TARGET_TYPE_MCC        , TARGETING::TYPE_MCC},
     {"mp"       , fapi2::TARGET_TYPE_MEM_PORT   , TARGETING::TYPE_MEM_PORT},
+    {"iohs"     , fapi2::TARGET_TYPE_IOHS       , TARGETING::TYPE_IOHS},
     {"LAST"     , 0                             , 0}
 };
 
