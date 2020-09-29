@@ -418,31 +418,6 @@ fapiToTargeting::ID, sizeof(VAL), &(VAL))
 platAttrSvc::setTargetingAttr(PTARGET, (const TARGETING::ATTRIBUTE_ID)\
 fapiToTargeting::ID, sizeof(VAL), &(VAL))
 
-/* @TODO RTC 245730: Support getPllBucket for IOHS
-//------------------------------------------------------------------------------
-// MACRO to route ATTR_OB[0..3]_PLL_BUCKET access to the correct HB function
-//------------------------------------------------------------------------------
-#define ATTR_OB0_PLL_BUCKET_GETMACRO(ID,PTARGET,VAL) \
-    AttrOverrideSync::getAttrOverrideFunc(ID, PTARGET, &VAL)\
-    ? fapi2::ReturnCode() : \
-    fapi2::platAttrSvc::getPllBucket(PTARGET, VAL, 0)
-
-#define ATTR_OB1_PLL_BUCKET_GETMACRO(ID,PTARGET,VAL) \
-    AttrOverrideSync::getAttrOverrideFunc(ID, PTARGET, &VAL)\
-    ? fapi2::ReturnCode() : \
-    fapi2::platAttrSvc::getPllBucket(PTARGET, VAL, 1)
-
-#define ATTR_OB2_PLL_BUCKET_GETMACRO(ID,PTARGET,VAL) \
-    AttrOverrideSync::getAttrOverrideFunc(ID, PTARGET, &VAL)\
-    ? fapi2::ReturnCode() : \
-    fapi2::platAttrSvc::getPllBucket(PTARGET, VAL, 2)
-
-#define ATTR_OB3_PLL_BUCKET_GETMACRO(ID,PTARGET,VAL) \
-    AttrOverrideSync::getAttrOverrideFunc(ID, PTARGET, &VAL)\
-    ? fapi2::ReturnCode() : \
-    fapi2::platAttrSvc::getPllBucket(PTARGET, VAL, 3)
-*/
-
 //------------------------------------------------------------------------------
 // MACRO to route ATTR_NAME access to the correct Hostboot function
 //------------------------------------------------------------------------------

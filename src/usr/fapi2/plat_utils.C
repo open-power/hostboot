@@ -48,6 +48,8 @@
 #include <scom/wakeup.H>
 #include <util/misc.H>
 
+#include <fapi2.H>
+
 //******************************************************************************
 // Trace descriptors
 //******************************************************************************
@@ -544,25 +546,23 @@ void processEIBusCallouts(const ErrorInfo & i_errInfo,
         TARGETING::TYPE l_type1 = l_pTarget1->getAttr<TARGETING::ATTR_TYPE>();
         TARGETING::TYPE l_type2 = l_pTarget2->getAttr<TARGETING::ATTR_TYPE>();
 
-        /* @TODO RTC 245730: Implement for P10 and IOHS
-        if ((l_type1 == TARGETING::TYPE_ABUS) &&
-            (l_type2 == TARGETING::TYPE_ABUS))
+        if ( (l_type1 == TARGETING::TYPE_IOHS) && (l_type2 == TARGETING::TYPE_IOHS) )
         {
-            l_busType = HWAS::A_BUS_TYPE;
+            const auto l_configMode_pTarget1 = l_pTarget1->getAttr<TARGETING::ATTR_IOHS_CONFIG_MODE>();
+            const auto l_configMode_pTarget2 = l_pTarget2->getAttr<TARGETING::ATTR_IOHS_CONFIG_MODE>();
+            if ((l_configMode_pTarget1 == fapi2::ENUM_ATTR_IOHS_CONFIG_MODE_SMPX) &&
+                (l_configMode_pTarget2 == fapi2::ENUM_ATTR_IOHS_CONFIG_MODE_SMPX))
+            {
+                l_busType = HWAS::X_BUS_TYPE;
+            }
+            else if ((l_configMode_pTarget1 == fapi2::ENUM_ATTR_IOHS_CONFIG_MODE_SMPA) &&
+                     (l_configMode_pTarget2 == fapi2::ENUM_ATTR_IOHS_CONFIG_MODE_SMPA))
+            {
+                l_busType = HWAS::A_BUS_TYPE;
+            }
+
         }
-        else if ((l_type1 == TARGETING::TYPE_XBUS) &&
-                 (l_type2 == TARGETING::TYPE_XBUS))
-        {
-            l_busType = HWAS::X_BUS_TYPE;
-        }
-        else if ((l_type1 == TARGETING::TYPE_OBUS) &&
-                 (l_type2 == TARGETING::TYPE_OBUS))
-        {
-            l_busType = HWAS::O_BUS_TYPE;
-        }
-        else
-        */
-        if ( ((l_type1 == TARGETING::TYPE_OMI) &&
+        else if ( ((l_type1 == TARGETING::TYPE_OMI) &&
                    (l_type2 == TARGETING::TYPE_OCMB_CHIP)) ||
                   ((l_type1 == TARGETING::TYPE_OCMB_CHIP) &&
                    (l_type2 == TARGETING::TYPE_OMI)) )
@@ -578,7 +578,7 @@ void processEIBusCallouts(const ErrorInfo & i_errInfo,
 
         if (l_busTypeValid)
         {
-            FAPI_DBG("processEIBusCallouts: Adding bus-callout"
+            FAPI_INF("processEIBusCallouts: Adding bus-callout"
                      " (bus:%d, pri:%d)",
                      l_busType, l_priority);
             io_pError->addBusCallout(l_pTarget1, l_pTarget2, l_busType,

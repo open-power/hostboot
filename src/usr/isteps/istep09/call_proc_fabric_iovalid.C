@@ -125,7 +125,7 @@ void calloutBUS(const TargetHandle_t i_proc,
             l_trainValBefore = l_itr->second;
         }
 
-        TRACDCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
                   "calloutBUS: HUID=0x%x BeforeTrainVal=0x%x CurrTrainVal=0x%x",
                   get_huid(l_bus),
                   l_trainValBefore,
@@ -142,19 +142,18 @@ void calloutBUS(const TargetHandle_t i_proc,
         const auto l_peerPath = l_bus->getAttr<ATTR_PEER_PATH>();
 
         // Set the bus type
-        // @todo RTC:245730 Support A/X/O/N bus callout equivalent of P9 using IOHS targets
         const auto l_configMode = l_bus->getAttr<ATTR_IOHS_CONFIG_MODE>();
         HWAS::busTypeEnum l_busType = HWAS::FSI_BUS_TYPE;
         if (l_configMode == fapi2::ENUM_ATTR_IOHS_CONFIG_MODE_SMPX)
         {
             l_busType = X_BUS_TYPE;
-            TRACDCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
                       "calloutBUS: bustype=%d",l_busType);
         }
         else if (l_configMode == fapi2::ENUM_ATTR_IOHS_CONFIG_MODE_SMPA)
         {
             l_busType = A_BUS_TYPE;
-            TRACDCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
                       "calloutBUS: bustype=%d",l_busType);
         }
         else
