@@ -35,7 +35,7 @@
 
 SETUP_SUBDIRS    += fsp simics
 EXPINC_SUBDIRS   += fsp
-OBJECTS_SUBDIRS  +=
+OBJECTS_SUBDIRS  += img
 EXPLIB_SUBDIRS   += fsp
 EXPSHLIB_SUBDIRS += fsp
 STANDARD_SUBDIRS += fsp img simics
