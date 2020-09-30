@@ -52,6 +52,8 @@
 #include <p10_qme_customize.H>
 #include <p10_qme_meta_data.H>
 #include <p10_qme_build_attributes.H>
+#include <p10_scan_compression.H>
+
 
 extern "C"
 {
@@ -69,6 +71,8 @@ enum
     ENABLE_ALL_CORE     =   0xFFFFFFFF,
     BCE_RD_BLOCK_SIZE   =   0x20,
     SHIFT_RD_BLOCK_SIZE =   5,
+    INST_RING_OFFSET    =   2,
+    OVRD_RING_OFFSET    =   0x44,
 };
 
 /**
@@ -141,6 +145,23 @@ struct RingBufData
     { }
 };
 
+//-------------------------------------------------------------------------
+/**
+ * @brief captures stat pertaining to RS4 container.
+ */
+struct Rs4Stat
+{
+    uint16_t iv_cmnRingMaxSize;
+    uint16_t iv_cmnRingAvgSize;
+    RingId_t iv_maxSizeCmnRing;
+    uint16_t iv_instRingMaxSize;
+    uint16_t iv_instRingAvgSize;
+    RingId_t iv_maxSizeInstRing;
+    uint16_t iv_ovrdRingMaxSize;
+    uint16_t iv_ovrdRingAvgSize;
+    RingId_t iv_maxSizeOvrdRing;
+    uint8_t  iv_reserve[2];
+};
 //-------------------------------------------------------------------------
 
 class ImageBuildRecord
@@ -2258,6 +2279,273 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
+//-------------------------------------------------------------------------------------------------------
+
+fapi2::ReturnCode traceCommonRingRs4Size( Homerlayout_t* i_pChipHomer, Rs4Stat & i_rs4Stat )
+{
+    CpmrHeader_t* pCpmrHdr      =
+        (CpmrHeader_t*) & ( i_pChipHomer->iv_cpmrRegion.iv_selfRestoreRegion.iv_CPMR_SR.elements.iv_CPMRHeader);
+    std::map < RingId_t , uint32_t> l_ringSizeMap;
+    uint32_t l_cmnRingOffset    =   htobe32( pCpmrHdr->iv_commonRingOffset );
+    uint8_t  * l_pRingSectn     =   (uint8_t *) i_pChipHomer + CPMR_HOMER_OFFSET + l_cmnRingOffset;
+    uint16_t  * l_pSectnTor     =   (uint16_t *)( l_pRingSectn + sizeof( TorHeader_t ) );
+    uint16_t * l_pRingTor       =   (uint16_t *)( l_pRingSectn + htobe16( *l_pSectnTor ) );
+    uint8_t  * l_pRing          =   NULL;
+
+    FAPI_DBG( "CPMR Ring Offset 0x%08x", (uint8_t *) l_pRingTor - (uint8_t *) i_pChipHomer );
+
+    for( uint8_t ring = 0; ring < 25/*EQ::g_chipletData.numCommonRings */; ring++ , l_pRingTor++ )
+    {
+        if( !*l_pRingTor )
+        {
+            FAPI_DBG( "Ring TOR Slot is Zero. Skipping" );
+
+            continue;
+        }
+
+        FAPI_DBG( "Cmn Ring Found!. TOR Offset 0x%08x", htobe16( *l_pRingTor ) );
+
+        l_pRing = l_pRingSectn + htobe16( *l_pRingTor );
+        CompressedScanData * l_pHdr = ( CompressedScanData * ) l_pRing;
+
+        if( htobe16( l_pHdr->iv_magic ) == 0x5253 )
+        {
+            l_ringSizeMap[ htobe16(l_pHdr->iv_ringId) ]    =   htobe16( l_pHdr->iv_size );
+        }
+    }
+
+    uint32_t l_avgSize  = 0;
+    uint32_t l_maxSize  = 0;
+    uint16_t l_maxSizeRingId = 0;
+
+    for( auto ring_size = l_ringSizeMap.begin(); ring_size != l_ringSizeMap.end();
+         ring_size++ )
+    {
+        l_avgSize += ring_size->second;
+
+        if( l_maxSize < ring_size->second )
+        {
+            l_maxSize = ring_size->second;
+            l_maxSizeRingId = ring_size->first;
+        }
+
+    }
+
+    i_rs4Stat.iv_cmnRingMaxSize  = l_maxSize;
+
+    if( l_ringSizeMap.size() > 0 )
+    {
+        i_rs4Stat.iv_cmnRingAvgSize = l_avgSize / l_ringSizeMap.size();
+    }
+
+    i_rs4Stat.iv_maxSizeCmnRing = l_maxSizeRingId;
+
+    return fapi2::FAPI2_RC_SUCCESS;
+}
+
+//-------------------------------------------------------------------------------------------------------
+
+fapi2::ReturnCode traceRs4InstRingSize( Homerlayout_t * i_pChipHomer, Rs4Stat & i_rs4Stat )
+{
+    FAPI_INF( ">> traceRs4InstRingSize" );
+    CpmrHeader_t* pCpmrHdr      =
+    (CpmrHeader_t*) & ( i_pChipHomer->iv_cpmrRegion.iv_selfRestoreRegion.iv_CPMR_SR.elements.iv_CPMRHeader);
+    std::map < RingId_t , uint32_t> l_ringSizeMap;
+    uint32_t l_instRingOffset   =   htobe32( pCpmrHdr->iv_specRingOffset );
+    uint8_t  * l_pRingInst0     =   (uint8_t *) i_pChipHomer + CPMR_HOMER_OFFSET + l_instRingOffset;
+    uint16_t * l_pSectnTor      =   NULL;
+    uint16_t * l_pRingTor       =   NULL;
+    uint8_t  * l_pRing          =   NULL;
+    uint32_t l_avgSize    =   0;
+    uint32_t l_maxSize    =   0;
+    uint16_t l_maxSizeRingId   =   0;
+    uint16_t l_numInstRing      =   0;
+
+    for( uint8_t l_eq = 0; l_eq < MAX_QUADS_PER_CHIP; l_eq++ )
+    {
+        l_ringSizeMap.empty();
+        uint8_t  * l_pRingSectn = l_pRingInst0 + ( htobe32( pCpmrHdr->iv_specRingLength ) * l_eq );
+        TorHeader_t * l_pTorHdr = ( TorHeader_t * )l_pRingSectn;
+
+        if( l_pTorHdr->magic != htobe32( TOR_MAGIC_QME ) )
+        {
+            continue;
+        }
+
+        l_pSectnTor = (uint16_t *)( l_pRingSectn + sizeof( TorHeader_t ) + INST_RING_OFFSET );
+        l_pRingTor  = (uint16_t *)( l_pRingSectn + htobe16( *l_pSectnTor ) );
+
+        FAPI_DBG( "CPMR Ring Offset 0x%08x",
+                    (uint8_t *) l_pRingTor - (uint8_t *) i_pChipHomer );
+
+        for( uint8_t ring = 0; ring < 8; ring++ , l_pRingTor++ )
+        {
+            if( !*l_pRingTor )
+            {
+              FAPI_DBG( "TOR Index is Zero. Skipping" );
+
+              continue;
+            }
+
+            FAPI_DBG( "Instance Ring Found!. TOR Offset 0x%08x", htobe16( *l_pRingTor ) );
+
+            l_pRing = l_pRingSectn + htobe16( *l_pRingTor );
+            CompressedScanData * l_pHdr = ( CompressedScanData * ) l_pRing;
+
+            if( htobe16( l_pHdr->iv_magic ) == 0x5253 )
+            {
+                l_ringSizeMap[ htobe16( l_pHdr->iv_ringId ) ] = htobe16( l_pHdr->iv_size );
+            }
+        }
+
+        for( auto ring_size = l_ringSizeMap.begin(); ring_size != l_ringSizeMap.end();
+             ring_size++ )
+        {
+            l_avgSize += ring_size->second;
+
+            if( l_maxSize < ring_size->second )
+            {
+                l_maxSize = ring_size->second;
+                l_maxSizeRingId = ring_size->first;
+            }
+        }
+
+        l_numInstRing += l_ringSizeMap.size();
+    }
+
+    i_rs4Stat.iv_instRingMaxSize = l_maxSize;
+
+    if( l_numInstRing > 0 )
+    {
+        i_rs4Stat.iv_instRingAvgSize = l_avgSize / l_numInstRing;
+    }
+
+    i_rs4Stat.iv_maxSizeInstRing = l_maxSizeRingId;
+
+    FAPI_INF( "<< traceRs4InstRingSize" );
+    return fapi2::FAPI2_RC_SUCCESS;
+}
+
+//-------------------------------------------------------------------------------------------------------
+
+fapi2::ReturnCode traceRs4OverrideSize( Homerlayout_t * i_pChipHomer, Rs4Stat & i_rs4Stat )
+{
+    FAPI_INF( ">> traceRs4OverrideSize" );
+    QmeHeader_t* pImgHdr        =
+            (QmeHeader_t*) & i_pChipHomer->iv_cpmrRegion.iv_qmeSramRegion[QME_INT_VECTOR_SIZE];
+    std::map < RingId_t , uint32_t> l_ringSizeMap;
+    uint32_t l_ovrdOffset    =   htobe32( pImgHdr->g_qme_cmn_ring_ovrd_offset );
+    uint8_t  * l_pRingSectn  =   (uint8_t *) i_pChipHomer + CPMR_HOMER_OFFSET + QME_IMAGE_CPMR_OFFSET + l_ovrdOffset;
+    uint16_t * l_pRingTor    =   (uint16_t *)( l_pRingSectn + sizeof( TorHeader_t ) + OVRD_RING_OFFSET  );
+    uint8_t  * l_pRing       =   NULL;
+    uint32_t l_avgSize       =   0;
+    uint32_t l_maxSize       =   0;
+    uint16_t l_maxSizeRingId =   0;
+
+    if( !l_ovrdOffset )
+    {
+        goto fapi_try_exit;
+    }
+
+    l_pRingTor  = (uint16_t *) ( l_pRingSectn + htobe16( *l_pRingTor ) );
+
+    FAPI_DBG( "CPMR Ring Offset 0x%08x", (uint8_t *) l_pRingTor - (uint8_t *) i_pChipHomer );
+
+    for( uint8_t ring = 0; ring < 25/*EQ::g_chipletData.numCommonRings */; ring++ , l_pRingTor++ )
+    {
+        if( !*l_pRingTor )
+        {
+            FAPI_DBG( "TOR Index is Zero. Skipping" );
+
+            continue;
+        }
+
+        FAPI_DBG( "Ovrd Ring Found!. TOR Offset 0x%08x", htobe16( *l_pRingTor ) );
+
+        l_pRing = l_pRingSectn + htobe16( *l_pRingTor );
+        CompressedScanData * l_pHdr = ( CompressedScanData * ) l_pRing;
+
+        if( htobe16( l_pHdr->iv_magic ) == 0x5253 )
+        {
+            FAPI_INF( "Ovrd Magic Word" );
+            l_ringSizeMap[ htobe16( l_pHdr->iv_ringId ) ]    =   htobe16( l_pHdr->iv_size );
+        }
+    }
+
+    for( auto ring_size = l_ringSizeMap.begin(); ring_size != l_ringSizeMap.end();
+         ring_size++ )
+    {
+        l_avgSize += ring_size->second;
+
+        if( l_maxSize < ring_size->second )
+        {
+            l_maxSize = ring_size->second;
+            l_maxSizeRingId = ring_size->first;
+        }
+    }
+
+    i_rs4Stat.iv_ovrdRingMaxSize  =  l_maxSize;
+
+    if( l_ringSizeMap.size() > 0 )
+    {
+        i_rs4Stat.iv_ovrdRingAvgSize  =  l_avgSize / l_ringSizeMap.size();
+    }
+
+    i_rs4Stat.iv_maxSizeOvrdRing  =  l_maxSizeRingId;
+
+fapi_try_exit:
+    FAPI_INF( "<< traceRs4OverrideSize" );
+
+    return fapi2::FAPI2_RC_SUCCESS;
+}
+
+//-------------------------------------------------------------------------------------------------------
+
+fapi2::ReturnCode traceRs4ContainerSize(  void* const i_pHomerImage )
+{
+    FAPI_INF( ">> traceRs4ContainerSize" );
+
+#ifdef P10_RS4_CONTANER_SIZE_TRACING
+
+    Rs4Stat l_rs4Stat;
+    memset( &l_rs4Stat, 0x00, sizeof( Rs4Stat ));
+    Homerlayout_t* pChipHomer = ( Homerlayout_t*) i_pHomerImage;
+
+    //Analyzing the common ring sizes
+    FAPI_TRY( traceCommonRingRs4Size( pChipHomer, l_rs4Stat ) );
+
+    //Analyzing the instance specific ring sizes
+    FAPI_TRY( traceRs4InstRingSize( pChipHomer, l_rs4Stat ) );
+
+    //Analyzing the Override ring sizes
+    FAPI_TRY( traceRs4OverrideSize( pChipHomer, l_rs4Stat ) );
+
+    FAPI_INF( "+++++++++++++++++++++++++ Scan Ring Stat +++++++++++++++++++++++++ " );
+    FAPI_INF( "Common Ring Rs4 Max Size 0x%08x ( %08d )     Rind Id     0x%04x",
+                l_rs4Stat.iv_cmnRingMaxSize, l_rs4Stat.iv_cmnRingMaxSize,
+                l_rs4Stat.iv_maxSizeCmnRing );
+    FAPI_INF( "Inst Ring Rs4 Max Size   0x%08x ( %08d )     Ring Id     0x%04x",
+                l_rs4Stat.iv_instRingMaxSize, l_rs4Stat.iv_instRingMaxSize,
+                l_rs4Stat.iv_maxSizeInstRing );
+    FAPI_INF( "Ovrd Ring Rs4 Max Size   0x%08x ( %08d )     Ring Id     0x%04x",
+                l_rs4Stat.iv_ovrdRingMaxSize, l_rs4Stat.iv_ovrdRingMaxSize,
+                l_rs4Stat.iv_maxSizeOvrdRing );
+    FAPI_INF( "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ " );
+    FAPI_INF( "Common Ring Rs4 Avg Size 0x%08x ( %08d )",
+                l_rs4Stat.iv_cmnRingAvgSize, l_rs4Stat.iv_cmnRingAvgSize );
+    FAPI_INF( "Inst Ring Rs4 Avg Size   0x%08x ( %08d )",
+               l_rs4Stat.iv_instRingAvgSize, l_rs4Stat.iv_instRingAvgSize );
+    FAPI_INF( "Ovrd Ring Rs4 Avg Size   0x%08x ( %08d )",
+               l_rs4Stat.iv_ovrdRingAvgSize, l_rs4Stat.iv_ovrdRingAvgSize );
+
+    FAPI_INF( "+++++++++++++++++++++++++ Scan Ring Stat Ends ++++++++++++++++++++ " );
+
+fapi_try_exit:
+#endif
+
+    FAPI_INF( "<< traceRs4ContainerSize" );
+     return fapi2::current_err;
+}
 
 //-------------------------------------------------------------------------------------------------------
 
@@ -2275,8 +2563,6 @@ fapi2::ReturnCode p10_hcode_image_build(    CONST_FAPI2_PROC& i_procTgt,
                                             const uint32_t  i_sizeBuf3,
                                             void* const     i_pBuf4,
                                             const uint32_t  i_sizeBuf4 )
-
-
 {
     FAPI_IMP(">> p10_hcode_image_build ");
     P10FuncModel l_chipFuncModel( i_procTgt );
@@ -2340,6 +2626,8 @@ fapi2::ReturnCode p10_hcode_image_build(    CONST_FAPI2_PROC& i_procTgt,
 
     FAPI_TRY( verifySramImageSize( pChipHomer, l_chipFuncModel ) ,
               "Image Size Check Failed " );
+    FAPI_TRY( traceRs4ContainerSize( pChipHomer ),
+        "Failed To Trace RS4 Size" );
 
 fapi_try_exit:
     FAPI_IMP("<< p10_hcode_image_build" );
