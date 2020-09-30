@@ -2996,25 +2996,15 @@ sub postProcessApss {
     {
         if ($targetObj->getMrwType($child) eq "APSS_SENSOR")
         {
-             #TODO add PLDM specific processing here
-             my $entity_id = 0;
-             my $sensor_id = 0;
-             my $sensor_type=0;
-             my $sensor_evt=0;
-
-            #@fixme-RTC:175309-Remove deprecated support
-            my $name;
-            my $channel;
-            my $channel_id;
-            my $channel_gain;
-            my $channel_offset;
-            my $channel_ground;
+            my $channel = "";
+            my $channel_id = "";
+            my $channel_gain = "";
+            my $channel_offset = "";
+            my $channel_ground = "";
 
             if ($targetObj->getTargetType($child) eq "apss.unit-adc-generic")
             {
                 #Using correct/new names for the APSS entries
-                $name = $targetObj->
-                  getAttribute($child,"FUNCTION_NAME");
                 $channel = $targetObj->
                   getAttribute($child,"CHANNEL");
                 $channel_id = $targetObj->
@@ -3022,7 +3012,7 @@ sub postProcessApss {
                 $channel_gain = $targetObj->
                   getAttribute($child,"GAIN");
 
-                #Channel Gain is reprsented in decimal format in the MRW
+                #Channel Gain is represented in decimal format in the MRW
                 # multiply by 1000 so it is a valid attribute value
                 $channel_gain = $channel_gain * 1000;
 
@@ -3033,47 +3023,16 @@ sub postProcessApss {
                 # multiply by 1000 so it is a valid attribute value
                 $channel_offset = $channel_offset * 1000;
 
-                #Temporarily leave use of ADC_CHANNEL_GROUND as a backup
-                #to transition from old to new MRW
-                if ($targetObj->doesAttributeExistForTarget($child,"GND"))
-                {
-                    $channel_ground = $targetObj->
-                      getAttribute($child,"GND");
-                }
-                else
-                {
-                    #Temporarily use old attribute to help with MRW transition
-                    $channel_ground = $targetObj->
-                      getAttribute($child,"ADC_CHANNEL_GROUND");
-                }
-            }
-
-            $name=~s/\n//g;
-            $name=~s/\s+//g;
-            $name=~s/\t+//g;
-
-            my $sensor_id_str = "";
-            if ($sensor_id ne "")
-            {
-                $sensor_id_str = sprintf("0x%02X",oct($sensor_id));
+                $channel_ground = $targetObj->getAttribute($child,"GND");
             }
 
             if ($channel ne "")
             {
-                $sensors[$channel] = $sensor_id_str;
                 $channel_ids[$channel] = $channel_id;
                 $channel_grounds[$channel] = $channel_ground;
                 $channel_offsets[$channel] = $channel_offset;
                 $channel_gains[$channel] = $channel_gain;
             }
-            my $str=sprintf(
-                    " %30s | %10s |  0x%02X  | 0x%02X |    0x%02x   |" .
-                    " %4s | %4d | %4d | %10s | %s\n",
-                    $name,"",oct($entity_id),oct($sensor_type),
-                    oct($sensor_evt),$sensor_id_str,$channel,"","",
-                    $systemTarget);
-
-            $targetObj->writeReport($str);
         } # end if ($targetObj->getMrwType($child) eq "APSS_SENSOR")
         elsif ($targetObj->getMrwType($child) eq "APSS_GPIO")
         {
@@ -3091,10 +3050,10 @@ sub postProcessApss {
 
     for (my $i=0;$i<16;$i++)
     {
-        if ($sensors[$i] eq "")
-        {
-            $sensors[$i]="0x00";
-        }
+        # sensor ID for the BMC to use in order to report the channel power
+        # if that's not going to be supported they can just be 0's
+        $sensors[$i]="0x00";
+
         if ($channel_ids[$i] eq "")
         {
             $channel_ids[$i]="0";
