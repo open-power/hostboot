@@ -88,6 +88,16 @@ enum  SPI_CLOCK_CONTROL_REG_INFO : size_t
     SPI_CLOCK_RECEIVE_DELAY_LEN_BITS = 8,
 };
 
+// Information om part that each SPI engine drives
+enum  SPI_ENGINE_PART : size_t
+{
+    SPI_ENGINE_PRIMARY_BOOT_SEEPROM = 0,
+    SPI_ENGINE_BACKUP_BOOT_SEEPROM  = 1,
+    SPI_ENGINE_PRIMARY_MVPD_SEEPROM = 2,
+    SPI_ENGINE_BACKUP_MVPD_SEEPROM  = 3,
+    SPI_ENGINE_TPM                  = 4,
+};
+
 /**
  *  @brief Calculates SPI receive delay value, given an input number of delay
  *      cycles, to program into the SPI clock control register.  A value of
