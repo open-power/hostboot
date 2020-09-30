@@ -115,36 +115,6 @@ void*    call_mss_freq( void *io_pArgs )
             break;
         }
 
-        // Save off current settings for OMI frequency
-        ATTR_FREQ_OMI_MHZ_type l_originalOmiFreq = 0;
-        l_err = fapi2::platAttrSvc::getOmiFreq(l_originalOmiFreq);
-        if(l_err)
-        {
-            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                     "call_mss_freq: 1st call to getOmiFreq failed. "
-                     TRACE_ERR_FMT,
-                     TRACE_ERR_ARGS(l_err));
-            l_StepError.addErrorDetails( l_err );
-            l_err->collectTrace("ISTEPS_TRACE");
-            errlCommit( l_err, ISTEP_COMP_ID );
-            break;
-        }
-
-        Target * l_masterProc = nullptr;
-
-        l_err = targetService().queryMasterProcChipTargetHandle(l_masterProc);
-        if(l_err)
-        {
-            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                     "call_mss_freq: call to queryMasterProcChipTargetHandle failed. "
-                     TRACE_ERR_FMT,
-                     TRACE_ERR_ARGS(l_err));
-            l_StepError.addErrorDetails( l_err );
-            l_err->collectTrace("ISTEPS_TRACE");
-            errlCommit( l_err, ISTEP_COMP_ID );
-            break;
-        }
-
         for (const auto & l_proc_target : l_procTargetList)
         {
             //  call the HWP on each processor
@@ -186,32 +156,6 @@ void*    call_mss_freq( void *io_pArgs )
             break;
         }
 
-        // Check if desired OMI frequency setting changed
-        ATTR_FREQ_OMI_MHZ_type l_newOmiFreq = 0;
-        l_err = fapi2::platAttrSvc::getOmiFreq(l_newOmiFreq);
-        if(l_err)
-        {
-            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                     "call_mss_freq: 2nd call to getOmiFreq failed. "
-                     TRACE_ERR_FMT,
-                     TRACE_ERR_ARGS(l_err));
-            l_StepError.addErrorDetails( l_err );
-            l_err->collectTrace("ISTEPS_TRACE");
-            errlCommit( l_err, ISTEP_COMP_ID );
-            break;
-        }
-
-        // FW examines the master SBE boot scratch registers versus
-        // system MRW ATTR and will customize the master SBE
-        // Set ATTR_FORCE_SBE_UPDATE to trigger SBE update in later IPL flow
-        // (slaves will get data via mbox scratch registers)
-        if (l_newOmiFreq  != l_originalOmiFreq)
-        {
-            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                "call_mss_freq: OMI frequency changed!"
-                " Original Omi : %d New Omi : %d ",
-                l_originalOmiFreq, l_newOmiFreq);
-        }
     } while(0);
 
     TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, "call_mss_freq exit");
