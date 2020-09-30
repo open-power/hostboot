@@ -51,11 +51,14 @@ using namespace PlatServices;
 namespace p10_proc
 {
 
-// PLL detect bits in TPLFIR
+// Target bits in the TP_LOCAL_FIR
 enum
 {
-    PLL_UNLOCK = 21,
-    OSC_SW_SYS_REF = 36,
+    PCB_SLAVE   = 28,
+    OSC_ERR_0   = 42,
+    OSC_ERR_1   = 43,
+    UNLOCKDET_0 = 44,
+    UNLOCKDET_1 = 45,
 };
 
 //------------------------------------------------------------------------------
@@ -339,70 +342,113 @@ bool CheckChipletPll(ExtensibleChip * i_chip, TARGETING::TYPE i_chpltType)
     #undef PRDF_FUNC
 }
 
+//------------------------------------------------------------------------------
+
+bool __queryPllUnlock(ExtensibleChip* i_chip)
+{
+    // Use the broadcast OR register to get a summary of the xx_PCBSLV_ERROR
+    // register on each chiplet.
+
+    SCAN_COMM_REGISTER_CLASS* err = i_chip->getRegister("BC_OR_PCBSLV_ERROR");
+
+    if (SUCCESS != err->Read())
+    {
+        // If BC_OR_PCBSLV_ERROR[24:31] has a non-zero value, there is at least
+        // one PLL unlock error on this chip.
+        if (0 != err->GetBitFieldJustified(24, 8))
+        {
+            // PLL unlock error found.
+            return true;
+        }
+    }
+
+    return false; // no PLL unlock found.
+}
+
 /**
  * @brief  Queries for all PLL error types that occurred on this chip.
- * @param  i_chip    A PROC chip.
- * @param  o_errType The types of errors found.
+ * @param  i_chip     A PROC chip.
+ * @param  o_errTypes The types of errors found.
  * @return Non-SUCCESS on failure. SUCCESS, otherwise.
  */
-int32_t CheckErrorType(ExtensibleChip * i_chip, PllErrTypes& o_errType)
+int32_t queryPllErrTypes(ExtensibleChip* i_chip, PllErrTypes& o_errTypes)
 {
-    #define PRDF_FUNC "[p10_proc::CheckErrorType] "
+    // RCS OSC errors have the potential of generating PLL unlock errors, but it
+    // is also possible the PLL unlock errors could have asserted on their own.
+    // Regardless, the callouts should be the same for the two error types. So
+    // to avoid complicated analysis code with many potential race conditions,
+    // the decision is to handle each error type individually.
+
+    // Similarly, certain PLL unlock errors have the potential of causing RCS
+    // unlock detect errors, but again it is also possible the two errors could
+    // have asserted on their own. So the decision is to once again treat each
+    // error type individually.
+
+    // RCS unlock detect errors only have meaning if found on the non-primary
+    // clock. It is possible that by the time PRD has been able to analyze an
+    // RCS unlock detect attention, a clock could have failed over one or more
+    // times. This could make PRD analysis complicated and, again, may have many
+    // potential race conditions.  Therefore, the decision is that RCS unlock
+    // detect errors will only be handled when there are no active RCS OSC
+    // errors on either side.
+
     int32_t rc = SUCCESS;
 
-    o_errType.clear();
+    o_errTypes.clear();
 
-/* TODO: Currently disabling PLL error analysis until we are able to update
- *       it for P10.
-    SCAN_COMM_REGISTER_CLASS * TP_LFIR =
-                i_chip->getRegister("TP_LFIR");
-    SCAN_COMM_REGISTER_CLASS * TP_LFIRmask =
-                i_chip->getRegister("TP_LFIR_MASK");
+    SCAN_COMM_REGISTER_CLASS* fir = i_chip->getRegister("TP_LOCAL_FIR");
+    SCAN_COMM_REGISTER_CLASS* msk = i_chip->getRegister("TP_LOCAL_FIR_MASK");
 
     do
     {
-        rc = TP_LFIR->Read();
-        if (rc != SUCCESS)
+        rc = fir->Read();
+        if (SUCCESS != rc) break;
+
+        rc = msk->Read();
+        if (SUCCESS != rc) break;
+
+        // PLL unlock errors are reported via the "PCB slave error" bit.
+        if (fir->IsBitSet(PCB_SLAVE) && !msk->IsBitSet(PCB_SLAVE) &&
+            __queryPllUnlock(i_chip))
         {
-            PRDF_ERR(PRDF_FUNC "TP_LFIR read failed"
-                     "for 0x%08x", i_chip->getHuid());
-            break;
+            o_errTypes.set(PllErrTypes::PLL_UNLOCK);
         }
 
-        rc = TP_LFIRmask->Read();
-        if (rc != SUCCESS)
+        // RCS OSC error on clock 0.
+        if (fir->IsBitSet(OSC_ERR_0) && !msk->IsBitSet(OSC_ERR_0))
         {
-            PRDF_ERR(PRDF_FUNC "TP_LFIR_MASK read failed"
-                     "for 0x%08x", i_chip->getHuid());
-            break;
+            o_errTypes.set(PllErrTypes::RCS_OSC_ERROR_0);
         }
 
-        if ((! TP_LFIRmask->IsBitSet(OSC_SW_SYS_REF)) &&
-             TP_LFIR->IsBitSet(OSC_SW_SYS_REF))
+        // RCS OSC error on clock 1.
+        if (fir->IsBitSet(OSC_ERR_1) && !msk->IsBitSet(OSC_ERR_1))
         {
-            o_errType |= SYS_OSC_FAILOVER;
+            o_errTypes.set(PllErrTypes::RCS_OSC_ERROR_1);
         }
 
-        if ((! TP_LFIRmask->IsBitSet(PLL_UNLOCK)) &&
-             TP_LFIR->IsBitSet(PLL_UNLOCK))
+        // RCS unlock detect errors are only valid if there are no RCS OSC
+        // errors.
+        if (!o_errTypes.query(PllErrTypes::RCS_OSC_ERROR_0) &&
+            !o_errTypes.query(PllErrTypes::RCS_OSC_ERROR_1))
         {
-            // Check TP, XBUS, OBUS and MC Chiplets for sys ref unlock
-            if (CheckChipletPll(i_chip, TYPE_PROC) ||
-                CheckChipletPll(i_chip, TYPE_XBUS) ||
-                CheckChipletPll(i_chip, TYPE_OBUS) ||
-                CheckChipletPll(i_chip, TYPE_MC))
+            // RCS unlock detect on clock 0.
+            if (fir->IsBitSet(UNLOCKDET_0) && !msk->IsBitSet(UNLOCKDET_0))
             {
-                o_errType |= SYS_PLL_UNLOCK;
+                o_errTypes.set(PllErrTypes::RCS_UNLOCKDET_0);
+            }
+
+            // RCS unlock detect on clock 1.
+            if (fir->IsBitSet(UNLOCKDET_1) && !msk->IsBitSet(UNLOCKDET_1))
+            {
+                o_errTypes.set(PllErrTypes::RCS_UNLOCKDET_1);
             }
         }
+
     } while (0);
-*/
 
     return rc;
-
-    #undef PRDF_FUNC
 }
-PRDF_PLUGIN_DEFINE(p10_proc, CheckErrorType);
+PRDF_PLUGIN_DEFINE(p10_proc, queryPllErrTypes);
 
 /**
  * @brief  Clears PCB slave parity errors on this chip.
@@ -441,10 +487,10 @@ int32_t QueryPll(ExtensibleChip * i_chip, bool & o_result)
 {
     o_result = false;
 
-    PllErrTypes errType;
-    if (SUCCESS == CheckErrorType(i_chip, errType))
+    PllErrTypes errTypes;
+    if (SUCCESS == queryPllErrTypes(i_chip, errTypes))
     {
-        o_result = errType.any();
+        o_result = errTypes.any();
     }
 
     return SUCCESS;
@@ -461,6 +507,8 @@ int32_t ClearPll(ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc)
 {
     #define PRDF_FUNC "[p10_proc::ClearPll] "
 
+/* TODO: Currently disabling PLL error analysis until we are able to update
+ *       it for P10.
     int32_t rc = SUCCESS;
 
     if (CHECK_STOP != io_sc.service_data->getPrimaryAttnType())
@@ -485,6 +533,7 @@ int32_t ClearPll(ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc)
                      "for chip: 0x%08x", i_chip->getHuid());
         }
     }
+*/
 
     return SUCCESS;
 

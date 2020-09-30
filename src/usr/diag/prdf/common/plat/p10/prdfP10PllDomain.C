@@ -61,56 +61,57 @@ int32_t PllDomain::Initialize(void)
 
 //------------------------------------------------------------------------------
 
-bool PllDomain::Query(ATTENTION_TYPE attentionType)
+bool PllDomain::Query(ATTENTION_TYPE i_attnType)
 {
     bool atAttn = false;
 
-    int32_t rc = SUCCESS;
-
-    ExtensibleChipFunction* func = nullptr;
-
     // System always checks for RE's first, even if there is an XSTOP
     // So we only need to check for PLL errors on RECOVERABLE type
-    if(attentionType == RECOVERABLE)
+    if (RECOVERABLE == i_attnType)
     {
-        // check sysdbug for attention first
+        int32_t rc = SUCCESS;
+        ExtensibleChipFunction* func = nullptr;
         SYSTEM_DEBUG_CLASS sysdbug;
-        for(unsigned int index = 0; (index < GetSize()) && (atAttn == false);
-            ++index)
+
+        for (unsigned int index = 0; index < GetSize(); ++index)
         {
-            ExtensibleChip * chip = LookUp( index );
-            TARGETING::TargetHandle_t l_chipTgt = chip->getTrgt();
-            bool l_analysisPending =
-                  sysdbug.isActiveAttentionPending( l_chipTgt, RECOVERABLE );
+            ExtensibleChip* chip = LookUp(index);
 
-            if( l_analysisPending )
+            // Only query if there is an active pending recoverable attention on
+            // this chip.
+            if (!sysdbug.isActiveAttentionPending(chip->getTrgt(), RECOVERABLE))
+                continue;
+
+            // Query for any clock errors.
+            PllErrTypes errTypes;
+            func = chip->getExtensibleFunction("queryPllErrTypes");
+            rc = (*func)(chip, PluginDef::bindParm<PllErrTypes&>(errTypes));
+
+            if (PRD_POWER_FAULT == rc)
             {
-                // Check if any clock errors are present
-                PllErrTypes errType;
-                func = chip->getExtensibleFunction("CheckErrorType");
-                rc = (*func)(chip, PluginDef::bindParm<PllErrTypes&>(errType));
+                PRDF_ERR("[PllDomain::Query] Power Fault detected: "
+                         "chip=0x%08x", chip->getHuid());
+                break; // No need to continue.
+            }
+            else if (SUCCESS != rc)
+            {
+                PRDF_ERR("[PllDomain::Query] SCOM failed: rc=%x "
+                         "chip=0x%08x", rc, chip->getHuid());
+                continue; // Try the next chip.
+            }
 
-                if ( errType.any() )
-                    atAttn = true;
-
-                // if rc then scom read failed
-                // Error log has already been generated
-                if (PRD_POWER_FAULT == rc)
-                {
-                    PRDF_ERR("prdfPllDomain::Query() Power Fault detected: "
-                             "chip=0x%08x", chip->getHuid() );
-                    break;
-                }
-                else if (SUCCESS != rc)
-                {
-                    PRDF_ERR("prdfPllDomain::Query() SCOM failed: rc=%x "
-                             "chip=0x%08x", rc, chip->getHuid() );
-                }
+            // If there are any clock errors, we are done.
+            if ( errTypes.any() )
+            {
+/* TODO: Currently disabling analysis until remaining code is complete.
+                atAttn = true;
+*/
+                break;
             }
         }
     }
 
-    return(atAttn);
+    return atAttn;
 }
 
 //------------------------------------------------------------------------------
@@ -122,7 +123,7 @@ int32_t PllDomain::Analyze(STEP_CODE_DATA_STRUCT& io_sc,
     std::vector<ExtensibleChip *> pllUnlockList;
     std::vector<ExtensibleChip *> failoverList;
     int32_t rc = SUCCESS;
-    PllErrTypes mskErrType;
+    PllErrTypes errTypesSummary;
 
     ExtensibleChipFunction * func = nullptr;
 
@@ -134,7 +135,7 @@ int32_t PllDomain::Analyze(STEP_CODE_DATA_STRUCT& io_sc,
     // Examine each chip in domain
     for(unsigned int index = 0; index < GetSize(); ++index)
     {
-        PllErrTypes errType;
+        PllErrTypes errTypes;
 
         ExtensibleChip * l_chip = LookUp(index);
 
@@ -146,15 +147,17 @@ int32_t PllDomain::Analyze(STEP_CODE_DATA_STRUCT& io_sc,
         }
 
         // Check if this chip has a clock error
-        func = l_chip->getExtensibleFunction("CheckErrorType");
-        rc |= (*func)(l_chip, PluginDef::bindParm<PllErrTypes&>(errType));
+        func = l_chip->getExtensibleFunction("queryPllErrTypes");
+        rc |= (*func)(l_chip, PluginDef::bindParm<PllErrTypes&>(errTypes));
+        if (SUCCESS != rc)
+            continue; // Try the next chip.
 
         // Continue if no clock errors reported on this chip
-        if ( !errType.any() )
+        if ( !errTypes.any() )
             continue;
 
         // Keep a cumulative list of error types to mask if needed.
-        mskErrType = mskErrType | errType;
+        errTypesSummary = errTypesSummary | errTypes;
 
         // Capture any registers needed for PLL analysis, which would be
         // captured by default during normal analysis.
@@ -165,7 +168,7 @@ int32_t PllDomain::Analyze(STEP_CODE_DATA_STRUCT& io_sc,
         func = l_chip->getExtensibleFunction("capturePllFfdc");
         (*func)(l_chip, PluginDef::bindParm<STEP_CODE_DATA_STRUCT &>(io_sc));
 
-        if (errType.query(PllErrTypes::PLL_UNLOCK))
+        if (errTypes.query(PllErrTypes::PLL_UNLOCK))
         {
             pllUnlockList.push_back(l_chip);
 
@@ -259,7 +262,7 @@ int32_t PllDomain::Analyze(STEP_CODE_DATA_STRUCT& io_sc,
         ExtensibleDomainFunction * mask = getExtensibleFunction("MaskPll");
         (*mask)(this,
                 PluginDef::bindParm<STEP_CODE_DATA_STRUCT&, const PllErrTypes&>
-                          (io_sc, mskErrType));
+                          (io_sc, errTypesSummary));
     }
 
     // Clear PLLs from this domain.
