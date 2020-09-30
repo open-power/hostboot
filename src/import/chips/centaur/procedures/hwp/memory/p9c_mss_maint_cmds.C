@@ -2287,6 +2287,12 @@ fapi2::ReturnCode mss_MaintCmd::loadSpeed(const TimeBaseSpeed i_speed)
             }
         }
 
+        // Adds in the row for 16Gb. Yes, it's located in a different location
+        if(l_end_address.getBit<CEN_MBA_MBMEAQ_CMD_ROW17>())
+        {
+            l_num_address_bits++;
+        }
+
         // NOTE: Assumption is max 32 address bits, which can be done
         // in 12h (+/- 2h). More than 32 address bits would
         // double scrub time for every extra address bit.
