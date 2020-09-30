@@ -30,12 +30,15 @@
     # This register helps us determine where in the IPL the attention occurred.
     # Possible values for this register (in ASCII): hostboot, bootload, shutdown
 
-    register CORE_SCRATCH_REG_3
-    {
-        name        "Core scratch register 3";
-        scomaddr    0x4602F489;
-        capture     group default;
-    };
+# TODO: This address is currently experiencing SCOM errors. The Hostboot team is
+#       investigating the reason and will get back to us when the issue is
+#       resolved.
+#    register CORE_SCRATCH_REG_3
+#    {
+#        name        "Core scratch register 3";
+#        scomaddr    0x4602F489;
+#        capture     group default;
+#    };
 
     ############################################################################
     # HCA_FIR FFDC Regs
