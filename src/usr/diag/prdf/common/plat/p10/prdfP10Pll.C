@@ -782,6 +782,91 @@ PRDF_PLUGIN_DEFINE(p10_proc, clearPllErrTypes);
 
 //------------------------------------------------------------------------------
 
+void __maskPllUnlock(ExtensibleChip* i_chip)
+{
+    // Mask PLL unlock attentions by setting xx_PCBSLV_CONFIG[12:19] to all
+    // 1's using a read-modify-write.
+
+    FOR_EACH_REG_PAIR(i_chip)
+
+        SCAN_COMM_REGISTER_CLASS* cfg = chip->getRegister(pair.first);
+
+        if (SUCCESS != cfg->Read()) continue;
+
+        cfg->SetBitFieldJustified(12, 8, 0xFF);
+
+        cfg->Write();
+
+    END_FOR_EACH_REG_PAIR
+}
+
+//------------------------------------------------------------------------------
+
+/**
+ * @brief  Masks attentions for the given error types.
+ * @param  i_chip     A PROC chip.
+ * @param  io_sc      The step code data struct.
+ * @param  i_errTypes The types of errors to mask.
+ * @return Non-SUCCESS on failure. SUCCESS, otherwise.
+ */
+int32_t maskPllErrTypes(ExtensibleChip* i_chip, const PllErrTypes& i_errTypes)
+{
+    SCAN_COMM_REGISTER_CLASS* msk = i_chip->getRegister("TP_LOCAL_FIR_MASK_OR");
+    msk->clearAllBits();
+
+    if (i_errTypes.query(PllErrTypes::PLL_UNLOCK))
+    {
+        // Mask all of the underlying PLL errors in each chiplet.
+        __maskPllUnlock(i_chip);
+
+        // Do NOT mask the PCB slave error bit in the TP_LOCAL_FIR because that
+        // bit also reports parity errors. Masking the underlying bits should
+        // be enough.
+    }
+
+    // When we mask an RCS OSC error on EITHER side, it will also mask RCS
+    // unlock detect attentions on BOTH sides. See notes in queryPllErrTypes()
+    // regarding the reason why.
+
+    if (i_errTypes.query(PllErrTypes::RCS_OSC_ERROR_0))
+    {
+        // Mask this RCS OSC error bit and both RCS unlock detect bits in the
+        // TP_LOCAL_FIR.
+        msk->SetBit(OSC_ERR_0);
+        msk->SetBit(UNLOCKDET_0);
+        msk->SetBit(UNLOCKDET_1);
+    }
+
+    if (i_errTypes.query(PllErrTypes::RCS_OSC_ERROR_1))
+    {
+        // Mask this RCS OSC error bit and both RCS unlock detect bits in the
+        // TP_LOCAL_FIR.
+        msk->SetBit(OSC_ERR_1);
+        msk->SetBit(UNLOCKDET_0);
+        msk->SetBit(UNLOCKDET_1);
+    }
+
+    if (i_errTypes.query(PllErrTypes::RCS_UNLOCKDET_0))
+    {
+        // Mask this RCS unlock detect bit in the TP_LOCAL_FIR.
+        msk->SetBit(UNLOCKDET_0);
+    }
+
+    if (i_errTypes.query(PllErrTypes::RCS_UNLOCKDET_1))
+    {
+        // Mask this RCS unlock detect bit in the TP_LOCAL_FIR.
+        msk->SetBit(UNLOCKDET_1);
+    }
+
+    // Mask the target TP_LOCAL_FIR bits.
+    msk->Write();
+
+    return SUCCESS;
+}
+PRDF_PLUGIN_DEFINE(p10_proc, maskPllErrTypes);
+
+//------------------------------------------------------------------------------
+
 #endif // __HOSTBOOT_MODULE
 
 //------------------------------------------------------------------------------
