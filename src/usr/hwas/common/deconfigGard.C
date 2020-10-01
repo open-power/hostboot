@@ -679,7 +679,42 @@ void DeconfigGard::_deconfigParentAssoc(TARGETING::Target & i_target,
                 {
                     _deconfigureTarget(*iohs, i_errlEid, nullptr, i_deconfigRule);
                 }
+                break;
             } // TYPE_PAU
+
+            case TYPE_NMMU:
+            {
+                const ATTR_CHIP_UNIT_type NEST0_CHIP_UNIT = 2;
+
+                // If this is NMMU0 then we must knock out the parent
+                // processor chip, otherwise we do the standard
+                // _deconfigAffinityParent call and break.
+                if(i_target.getAttr<ATTR_CHIP_UNIT>() != NEST0_CHIP_UNIT)
+                {
+                    _deconfigAffinityParent(i_target, i_errlEid, i_deconfigRule);
+                    break;
+                }
+
+                // Otherwise if we are deconfiguring NMMU0 we must also deconfig
+                // it's parent processor chip so fall through to the next case
+            } // TYPE_NMMU
+
+            case TYPE_PAUC:
+            case TYPE_EQ:
+            {
+                // If any PAUC or EQ is deconfigured than deconfigure its
+                // parent processor chip
+                Target* const l_chip = const_cast<Target*>(getParentChip(&i_target));
+
+                HWAS_ASSERT(l_chip != nullptr,
+                            "Unable to find parent chip for target 0x%08x",
+                            get_huid(&i_target));
+
+                _deconfigureTarget(*l_chip, i_errlEid, nullptr, i_deconfigRule);
+                _deconfigureByAssoc(*l_chip, i_errlEid, i_deconfigRule);
+
+                break;
+            } // TYPE_PAUC or TYPE_EQ
 
             default:
             {
