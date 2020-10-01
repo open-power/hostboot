@@ -46,7 +46,7 @@
      Number of dynamic init features.
     </description>
     <valueType>uint64</valueType>
-    <default>32</default>
+    <default>33</default>
     <writeable/>
     <persistRuntime/>
   </attribute>
