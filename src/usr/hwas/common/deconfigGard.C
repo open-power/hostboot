@@ -2808,7 +2808,7 @@ errlHndl_t DeconfigGard::processFieldCoreOverride()
             HWAS_INF("FCO: calling restrictECunits with %d entries",
                     l_procRestrictList.size());
             l_pErr = restrictECunits(l_procRestrictList,
-                        true, DECONFIGURED_BY_FIELD_CORE_OVERRIDE);
+                                     DECONFIGURED_BY_FIELD_CORE_OVERRIDE);
             if (l_pErr)
             {
                 break;

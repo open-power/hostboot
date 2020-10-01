@@ -1048,7 +1048,7 @@ errlHndl_t HWASDiscovery::discoverTargets()
             }
         }
 
-        //Check all of the slave processor's EC levels to ensure they match master
+        //Check all of the secondary processor's EC levels to ensure they match master
         //processor's EC level.
         //function will return error log pointing to all error logs created
         //by this function as this function could detect multiple procs w/
@@ -1062,11 +1062,11 @@ errlHndl_t HWASDiscovery::discoverTargets()
         }
 
         // Potentially reduce the number of ec/core units that are present
-        //  based on fused mode
-        //  marking bad units as present=false;
-        //  deconfigReason = 0 because present is false so this is not a
-        //   deconfigured event.
-        errl = restrictECunits(l_procRestrictList, false, 0);
+        // based on fused mode
+        // deconfigReason = 0 because this is not a deconfigured event.
+        // Units that get knocked out will be marked present=false
+        // function = false.
+        errl = restrictECunits(l_procRestrictList, 0);
         if (errl)
         {
             HWAS_ERR("discoverTargets: restrictECunits failed");
@@ -1648,22 +1648,21 @@ void forceEcFcDeconfig(const TARGETING::TargetHandle_t i_core,
 
 errlHndl_t restrictECunits(
     std::vector <procRestrict_t> &i_procList,
-    const bool i_present,
     const uint32_t i_deconfigReason)
 {
     HWAS_INF("restrictECunits entry, %d elements", i_procList.size());
     errlHndl_t errl = nullptr;
-    TargetHandle_t l_masterProcTarget = nullptr;
+    TargetHandle_t l_primaryProcTarget = nullptr;
 
     do {
 
-    errl = targetService().queryMasterProcChipTargetHandle(l_masterProcTarget);
+    errl = targetService().queryMasterProcChipTargetHandle(l_primaryProcTarget);
     if(errl)
     {
-        HWAS_ERR( "restrictECunits:: Unable to find master proc");
+        HWAS_ERR( "restrictECunits:: Unable to find primary proc");
         break;
     }
-    HWAS_DBG("master proc huid: 0x%X", TARGETING::get_huid(l_masterProcTarget));
+    HWAS_DBG("primary proc huid: 0x%X", TARGETING::get_huid(l_primaryProcTarget));
 
     // sort by group so PROC# are in the right groupings.
     std::sort(i_procList.begin(), i_procList.end(),
@@ -1679,7 +1678,7 @@ errlHndl_t restrictECunits(
     {
         // determine the number of procs we should enable
         uint8_t procs = i_procList[procIdx].procs;
-        int l_masterProc = -1;
+        int l_primaryProc = -1;
         uint32_t maxECs = i_procList[procIdx].maxECs;
 
         // this procs number, used to determine groupings
@@ -1717,10 +1716,10 @@ errlHndl_t restrictECunits(
                 break;
             }
 
-            // is this proc the master for this node?
-            if (pProc == l_masterProcTarget)
+            // is this proc the primary for this node?
+            if (pProc == l_primaryProcTarget)
             {
-                l_masterProc = i;
+                l_primaryProc = i;
             }
 
             // get this proc's (CHILD) FC units
@@ -1803,7 +1802,7 @@ errlHndl_t restrictECunits(
             continue;
         }
 
-        HWAS_INF("master proc idx: %d", l_masterProc);
+        HWAS_INF("primary proc idx: %d", l_primaryProc);
 
         HWAS_DBG("currentECs 0x%X > maxECs 0x%X -- restricting!",
                 (currentPairedECs + currentSingleECs), maxECs);
@@ -1824,9 +1823,9 @@ errlHndl_t restrictECunits(
         uint32_t goodECs = 0;
         HWAS_DBG("procs 0x%X maxECs 0x%X", procs, maxECs);
 
-        // Keep track of when we allocate at least one core to the master chip
-        // in order to avoid the situation of master not having any cores.
-        bool l_allocatedToMaster = false;
+        // Keep track of when we allocate at least one core to the primary chip
+        // in order to avoid the situation of primary not having any cores.
+        bool l_allocatedToPrimary = false;
 
         // Each pECList has ECs for a given FC and proc.  Check each EC list to
         //  determine if it has an EC pair or a single EC and if the remaining
@@ -1889,9 +1888,15 @@ errlHndl_t restrictECunits(
                     // Check if EC pair for this FC
                     if ((pECList[l_proc][l_FC].size() == 2) &&
                         (pairedECs_remaining != 0)  &&
-                         (l_proc==l_masterProc || // is master or
-                          l_allocatedToMaster || // was allocated to master
-                          pairedECs_remaining > 2)) // save 2 cores for master
+                        // if we are doing field core override
+                        // restriction we must ensure we are leaving
+                        // enough allowed cores to give the primary processor
+                        // at least 1 fused core
+                        (i_deconfigReason != HWAS::DeconfigGard::DECONFIGURED_BY_FIELD_CORE_OVERRIDE ||
+                         l_proc==l_primaryProc || // is primary or
+                         l_allocatedToPrimary || // was allocated to primary
+                         pairedECs_remaining > 2) // save 2 cores for primary
+                       )
                     {
                         // got a functional EC that is part of a pair
                         goodECs++;
@@ -1899,18 +1904,23 @@ errlHndl_t restrictECunits(
                         HWAS_DBG("pEC   0x%.8X - is good %d! (paired) pi:%d FCi:%d pairedECs_remaining %d",
                                  (*(pEC_it[l_proc][l_FC]))->getAttr<ATTR_HUID>(),
                                  goodECs, l_proc, l_FC, pairedECs_remaining);
-                        if (l_proc == l_masterProc)
+                        if (l_proc == l_primaryProc)
                         {
-                            HWAS_DBG("Allocated to master");
-                            l_allocatedToMaster = true;
+                            HWAS_DBG("Allocated to primary");
+                            l_allocatedToPrimary = true;
                         }
                     }
                     // Check if single EC for this FC
                     else if ((pECList[l_proc][l_FC].size() == 1) &&
                              (singleECs_remaining != 0) &&
-                              (l_proc==l_masterProc || // is master or
-                               l_allocatedToMaster || // was allocated to master
-                               singleECs_remaining > 1)) // save core for master
+                              // if we are doing field core override
+                              // restriction we must ensure we are leaving
+                              // enough allowed cores to give the primary processor
+                              // at least 1 fused core
+                              (i_deconfigReason != HWAS::DeconfigGard::DECONFIGURED_BY_FIELD_CORE_OVERRIDE ||
+                              l_proc==l_primaryProc || // is primary or
+                               l_allocatedToPrimary || // was allocated to primary
+                               singleECs_remaining > 1)) // save core for primary
 
                     {
                         // got a functional EC without a pair
@@ -1919,10 +1929,10 @@ errlHndl_t restrictECunits(
                         HWAS_DBG("pEC   0x%.8X - is good %d! (single) pi:%d FCi:%d singleECs_remaining %d",
                                  (*(pEC_it[l_proc][l_FC]))->getAttr<ATTR_HUID>(),
                                  goodECs, l_proc, l_FC, singleECs_remaining);
-                        if (l_proc == l_masterProc)
+                        if (l_proc == l_primaryProc)
                         {
-                            HWAS_DBG("Allocated to master");
-                            l_allocatedToMaster = true;
+                            HWAS_DBG("Allocated to primary");
+                            l_allocatedToPrimary = true;
                         }
                     }
                     // Otherwise paired or single EC, but not needed for maxECs
@@ -1930,7 +1940,9 @@ errlHndl_t restrictECunits(
                     {
                         // got an EC to be restricted and marked not functional
                         TargetHandle_t l_pEC = *(pEC_it[l_proc][l_FC]);
-                        forceEcFcDeconfig(l_pEC, i_present, i_deconfigReason);
+                        bool l_markPresent =
+                          (i_deconfigReason == HWAS::DeconfigGard::DECONFIGURED_BY_FIELD_CORE_OVERRIDE) ? true : false;
+                        forceEcFcDeconfig(l_pEC, l_markPresent, i_deconfigReason);
                         HWAS_DBG("pEC   0x%.8X - deconfigured! (%s) pi:%d FCi:%d",
                             (*(pEC_it[l_proc][l_FC]))->getAttr<ATTR_HUID>(),
                             (pECList[l_proc][l_FC].size() == 1)? "single": "paired",
