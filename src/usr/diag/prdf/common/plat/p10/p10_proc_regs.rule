@@ -359,6 +359,22 @@
     # PLL FFDC Regs
     ############################################################################
 
+    register TP_LOCAL_FIR_AND
+    {
+        name        "P10 chip TP_LOCAL_FIR atomic AND";
+        scomaddr    0x01040101;
+        capture     group never;
+        access      write_only;
+    };
+
+    register TP_LOCAL_FIR_MASK_OR
+    {
+        name        "P10 chip TP_LOCAL_FIR MASK atomic OR";
+        scomaddr    0x01040105;
+        capture     group never;
+        access      write_only;
+    };
+
     register CFAM_FSI_STATUS
     {
         name        "TP.TPVSB.FSI.W.FSI2PIB.STATUS";
@@ -378,11 +394,19 @@
         capture     group pll_ffdc;
     };
 
+    register ROOT_CTRL5
+    {
+        name        "TP Chiplet ROOT CONTROL 5 register";
+        scomaddr    0x00050015;
+        capture     group pll_ffdc;
+    };
+
     register RCS_SENSE_1
     {
         name        "RCS Sense 1 register";
         scomaddr    0x0005001D;
         capture     group pll_ffdc;
+        access      read_only;
     };
 
     register TP_PCBSLV_CONFIG

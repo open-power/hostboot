@@ -40,6 +40,7 @@
 #include <UtilHash.H>
 #include <prdfFsiCapUtil.H>
 #include <prdfPllDomain.H>
+#include <prdfRegisterCache.H>
 
 using namespace TARGETING;
 
@@ -611,6 +612,179 @@ int32_t capturePllFfdc(ExtensibleChip * i_chip,
     return SUCCESS;
 }
 PRDF_PLUGIN_DEFINE(p10_proc, capturePllFfdc);
+
+//##############################################################################
+//## All of the following functions are Hosbtoot only since we are not allowed
+//## to modify hardware from the FSP.
+//##############################################################################
+
+#ifdef __HOSTBOOT_MODULE
+
+//------------------------------------------------------------------------------
+
+void __clearPllUnlock(ExtensibleChip* i_chip)
+{
+    // Use the broadcast OR register to write the same value to the
+    // xx_PCBSLV_ERROR register on each chiplet. These registers are
+    // "write-to-clear". So setting a bit to 1 will tell hardware to clear
+    // the bit.
+
+    SCAN_COMM_REGISTER_CLASS* err = i_chip->getRegister("BC_OR_PCBSLV_ERROR");
+
+    // Clear only the PLL unlock errors.
+    err->clearAllBits();
+    err->SetBitFieldJustified(24, 8, 0xFF);
+
+    err->Write();
+
+    // Since hardware will change the value of the xx_PCBSLV_ERROR registers,
+    // clear them out of the cache so that subsequent reads will refresh the
+    // cache.
+
+    RegDataCache& cache = RegDataCache::getCachedRegisters();
+    cache.flush(i_chip, err);
+
+    FOR_EACH_REG_PAIR(i_chip)
+        cache.flush(chip, chip->getRegister(pair.second));
+    END_FOR_EACH_REG_PAIR
+}
+
+//------------------------------------------------------------------------------
+
+void __clearRcsAttns(ExtensibleChip* i_chip, bool i_clearOsc0, bool i_clearOsc1)
+{
+    do
+    {
+        if (!i_clearOsc0 && !i_clearOsc1) break; // nothing to do
+
+        // Since hardware will change the value of OSC_SENSE_1, clear it out of
+        // the cache so that subsequent reads will refresh the cache.
+        RegDataCache& cache = RegDataCache::getCachedRegisters();
+        cache.flush(i_chip, i_chip->getRegister("OSC_SENSE_1"));
+
+        // We must toggle (set high, then low) ROOT_CTRL5[6:7] to clear the RCS
+        // attentions because the OSC_SENSE_1 register is read-only.
+
+        SCAN_COMM_REGISTER_CLASS* ctrl = i_chip->getRegister("ROOT_CTRL5");
+        if (SUCCESS != ctrl->Read()) break;
+
+        // Set the target bits high.
+        if (i_clearOsc0) ctrl->SetBit(6);
+        if (i_clearOsc1) ctrl->SetBit(7);
+
+        if (SUCCESS != ctrl->Write()) break;
+
+        // Set the target bits low.
+        if (i_clearOsc0) ctrl->ClearBit(6);
+        if (i_clearOsc1) ctrl->ClearBit(7);
+
+        if (SUCCESS != ctrl->Write()) break;
+
+    } while (0);
+}
+
+//------------------------------------------------------------------------------
+
+/**
+ * @brief  Clears attentions for the given error types.
+ * @param  i_chip     A PROC chip.
+ * @param  io_sc      The step code data struct.
+ * @param  i_errTypes The types of errors to clear.
+ * @return Non-SUCCESS on failure. SUCCESS, otherwise.
+ */
+int32_t clearPllErrTypes(ExtensibleChip* i_chip, const PllErrTypes& i_errTypes)
+{
+    SCAN_COMM_REGISTER_CLASS* fir = i_chip->getRegister("TP_LOCAL_FIR_AND");
+    fir->setAllBits();
+
+    if (i_errTypes.query(PllErrTypes::PLL_UNLOCK))
+    {
+        // Clear all of the underlying PLL errors in each chiplet.
+        __clearPllUnlock(i_chip);
+
+        // Clear the PCB slave error bit in the TP_LOCAL_FIR.
+        fir->ClearBit(PCB_SLAVE);
+    }
+
+    // When we clear an RCS OSC error on EITHER side, we will also clear RCS
+    // unlock detect attentions on BOTH sides to ensure a clean slate for the
+    // next attention. See notes in queryPllErrTypes() regarding the reason why.
+
+    // When clearing the underlying bits in the OSC_SENSE_1 register for a
+    // specific clock, hardware will clear both the RCS OSC error and the RCS
+    // unlock detect for that clock. There is no way to separate this.
+    // Therefore, it is possible we may clear the underlying bits for a FIR
+    // attention we have not handled yet. For example, say there is an RCS OSC
+    // error on clock 0. Then during analysis of that error, but before clearing
+    // the error, there is an RCS OSC error on clock 1. When clearing the RCS
+    // unlock detect on clock 1 for the first attention, it will also clear the
+    // underlying bit for the RCS OSC error on clock 1. This should be fine for
+    // analysis of the second attention because we will still have the FIR bit.
+    // It just may look weird not seeing the underlying bit in the FFDC (if
+    // anyone is paying attention to that).
+
+    bool clearOsc0 = false;
+    bool clearOsc1 = false;
+
+    if (i_errTypes.query(PllErrTypes::RCS_OSC_ERROR_0))
+    {
+        // Clear the underlying bits in the OSC_SENSE_1 register.
+        clearOsc0 = true;
+        clearOsc1 = true; // to clear unlock detect on clock 1
+
+        // Clear this RCS OSC error bit and both RCS unlock detect bits in the
+        // TP_LOCAL_FIR.
+        fir->ClearBit(OSC_ERR_0);
+        fir->ClearBit(UNLOCKDET_0);
+        fir->ClearBit(UNLOCKDET_1);
+    }
+
+    if (i_errTypes.query(PllErrTypes::RCS_OSC_ERROR_1))
+    {
+        // Clear the underlying bits in the OSC_SENSE_1 register.
+        clearOsc0 = true; // to clear unlock detect on clock 1
+        clearOsc1 = true;
+
+        // Clear this RCS OSC error bit and both RCS unlock detect bits in the
+        // TP_LOCAL_FIR.
+        fir->ClearBit(OSC_ERR_1);
+        fir->ClearBit(UNLOCKDET_0);
+        fir->ClearBit(UNLOCKDET_1);
+    }
+
+    if (i_errTypes.query(PllErrTypes::RCS_UNLOCKDET_0))
+    {
+        // Clear the underlying bits in the OSC_SENSE_1 register.
+        clearOsc0 = true;
+
+        // Clear this RCS unlock detect bit in the TP_LOCAL_FIR.
+        fir->ClearBit(UNLOCKDET_0);
+    }
+
+    if (i_errTypes.query(PllErrTypes::RCS_UNLOCKDET_1))
+    {
+        // Clear the underlying bits in the OSC_SENSE_1 register.
+        clearOsc1 = true;
+
+        // Clear this RCS unlock detect bit in the TP_LOCAL_FIR.
+        fir->ClearBit(UNLOCKDET_1);
+    }
+
+    // Clear the underlying RCS attentions, if needed.
+    __clearRcsAttns(i_chip, clearOsc0, clearOsc1);
+
+    // Clear the target TP_LOCAL_FIR bits.
+    fir->Write();
+
+    return SUCCESS;
+}
+PRDF_PLUGIN_DEFINE(p10_proc, clearPllErrTypes);
+
+//------------------------------------------------------------------------------
+
+#endif // __HOSTBOOT_MODULE
+
+//------------------------------------------------------------------------------
 
 } // end namespace p10_proc
 
