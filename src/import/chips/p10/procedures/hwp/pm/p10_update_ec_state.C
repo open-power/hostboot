@@ -215,9 +215,6 @@ static fapi2::ReturnCode update_ec_config(
                 //setting Region Partial Good bits
                 FAPI_TRY(fapi2::putScom(l_eq, CPLT_CTRL2_WO_OR, l_pg_config));
 
-                // Set PSCOM enable
-                FAPI_TRY(fapi2::putScom(l_eq, CPLT_CTRL3_WO_OR, l_pg_config));
-
                 // Clear Power Gate/DFT fence
                 FAPI_TRY(fapi2::putScom(l_eq, CPLT_CTRL5_WO_CLEAR, l_pg_config));
 
