@@ -128,27 +128,27 @@ int32_t PllDomain::Analyze(STEP_CODE_DATA_STRUCT& io_sc,
     ExtensibleChipFunction * func = nullptr;
 
     // Due to clock issues some chips may be moved to non-functional during
-    // analysis. In this case, these chips will need to be removed from their
+    // analysis. In this case, these chips will need to be removed from the
     // domains.
     std::vector<ExtensibleChip *>  nfchips;
 
-    // Examine each chip in domain
-    for(unsigned int index = 0; index < GetSize(); ++index)
+    // Examine each chip in the domain.
+    for (unsigned int index = 0; index < GetSize(); ++index)
     {
-        PllErrTypes errTypes;
+        ExtensibleChip* chip = LookUp(index);
 
-        ExtensibleChip * l_chip = LookUp(index);
-
-        if ( !PlatServices::isFunctional(l_chip->getTrgt()) )
+        // Continue only if this chip is functional.
+        if (!PlatServices::isFunctional(chip->getTrgt()))
         {
             // The chip is now non-functional.
-            nfchips.push_back( l_chip );
+            nfchips.push_back(chip);
             continue;
         }
 
         // Check if this chip has a clock error
-        func = l_chip->getExtensibleFunction("queryPllErrTypes");
-        rc |= (*func)(l_chip, PluginDef::bindParm<PllErrTypes&>(errTypes));
+        PllErrTypes errTypes;
+        func = chip->getExtensibleFunction("queryPllErrTypes");
+        rc = (*func)(chip, PluginDef::bindParm<PllErrTypes&>(errTypes));
         if (SUCCESS != rc)
             continue; // Try the next chip.
 
@@ -161,29 +161,29 @@ int32_t PllDomain::Analyze(STEP_CODE_DATA_STRUCT& io_sc,
 
         // Capture any registers needed for PLL analysis, which would be
         // captured by default during normal analysis.
-        l_chip->CaptureErrorData(io_sc.service_data->GetCaptureData(),
-                                 Util::hashString("default_pll_ffdc"));
+        chip->CaptureErrorData(io_sc.service_data->GetCaptureData(),
+                               Util::hashString("default_pll_ffdc"));
 
         // Capture the rest of this chip's PLL FFDC.
-        func = l_chip->getExtensibleFunction("capturePllFfdc");
-        (*func)(l_chip, PluginDef::bindParm<STEP_CODE_DATA_STRUCT &>(io_sc));
+        func = chip->getExtensibleFunction("capturePllFfdc");
+        (*func)(chip, PluginDef::bindParm<STEP_CODE_DATA_STRUCT &>(io_sc));
 
         if (errTypes.query(PllErrTypes::PLL_UNLOCK))
         {
-            pllUnlockList.push_back(l_chip);
+            pllUnlockList.push_back(chip);
 
             // In the case of a PLL_UNLOCK error, we want to do additional
             // isolation in case of a HWP failure.
-            PlatServices::hwpErrorIsolation( l_chip, io_sc );
+            PlatServices::hwpErrorIsolation( chip, io_sc );
         }
     }
 
     // Remove all non-functional chips.
-    if ( CHECK_STOP != io_sc.service_data->getPrimaryAttnType() )
+    if (CHECK_STOP != io_sc.service_data->getPrimaryAttnType())
     {
-        for (  auto i : nfchips )
+        for (const auto& i : nfchips)
         {
-            systemPtr->RemoveStoppedChips( i->getTrgt() );
+            systemPtr->RemoveStoppedChips(i->getTrgt());
         }
     }
 
@@ -268,21 +268,6 @@ int32_t PllDomain::Analyze(STEP_CODE_DATA_STRUCT& io_sc,
     // Clear PLLs from this domain.
     ExtensibleDomainFunction * clear = getExtensibleFunction("ClearPll");
     (*clear)(this, PluginDef::bindParm<STEP_CODE_DATA_STRUCT&>(io_sc));
-
-    // Run PLL Post Analysis on any analyzed chips in this domain.
-    for(auto l_chip : pllUnlockList)
-    {
-        // Send any special messages indicating there was a PLL error.
-        func = l_chip->getExtensibleFunction("PllPostAnalysis", true);
-        (*func)(l_chip, PluginDef::bindParm<STEP_CODE_DATA_STRUCT&>(io_sc));
-    }
-
-    for(auto l_chip : failoverList)
-    {
-        // Send any special messages indicating there was a PLL error.
-        func = l_chip->getExtensibleFunction("PllPostAnalysis", true);
-        (*func)(l_chip, PluginDef::bindParm<STEP_CODE_DATA_STRUCT&>(io_sc));
-    }
 
     return SUCCESS;
 
