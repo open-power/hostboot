@@ -126,7 +126,8 @@ enum PGPE_FLAGS_IDX
     PGPE_FLAG_DDS_ENABLE                    = 14,
     PGPE_FLAG_TRIP_MODE                     = 15,
     PGPE_FLAG_TRIP_INTERPOLATION_CONTROL    = 16,
-    PGPE_FLAG_MAX_DEFINED                   = 17
+    PGPE_FLAG_STATIC_VOLTAGE_ENABLE         = 17,
+    PGPE_FLAG_MAX_DEFINED                   = 18
 };
 
 /// Control Attributes

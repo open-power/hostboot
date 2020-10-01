@@ -143,6 +143,7 @@ typedef struct
     uint8_t attr_dds_trip_interpolation_control;
     uint8_t attr_dds_bias_enable;
     uint8_t attr_fmax_enable;
+    uint8_t attr_war_mode;
 
     uint8_t attr_dd_wof_not_supported;
     uint8_t attr_dd_dds_not_supported;
@@ -345,11 +346,9 @@ class PlatPmPPB
 
         /// -----------------------------------------------------------------------
         /// @brief Compute safe mode values
-        /// @param[in]     i_pstate  pstate value
         /// @return fapi::ReturnCode: FAPI2_RC_SUCCESS if success, else error code.
         /// -----------------------------------------------------------------------
-        fapi2::ReturnCode safe_mode_computation(
-            const Pstate i_ps_pstate);
+        fapi2::ReturnCode safe_mode_computation();
 
         /// -----------------------------------------------------------------------
         /// @brief Compute the retention VID value

@@ -74,8 +74,8 @@ using namespace pm_pstate_parameter_block;
                  iv_attr_mvpd_data[i].ics_rdp_ac_10ma == 0 || \
                  iv_attr_mvpd_data[i].ics_rdp_dc_10ma == 0 || \
                  iv_attr_mvpd_data[i].vdd_vmin == 0)
-        //         iv_attr_mvpd_data[i].irt_rdp_ac_10ma == 0 || 
-          //       iv_attr_mvpd_data[i].irt_rdp_dc_10ma == 0 || 
+        //         iv_attr_mvpd_data[i].irt_rdp_ac_10ma == 0 ||
+          //       iv_attr_mvpd_data[i].irt_rdp_dc_10ma == 0 ||
 
 #define POUNDV_POINTS_PRINT(i,suffix)   \
                   .set_FREQUENCY_##suffix(iv_attr_mvpd_data[i].frequency_mhz)  \
@@ -91,7 +91,7 @@ using namespace pm_pstate_parameter_block;
                  .set_ICS_RDP_DC_##suffix(iv_attr_mvpd_data[i].ics_rdp_dc_10ma) \
                  .set_ICS_RDP_AC_##suffix(iv_attr_mvpd_data[i].irt_rdp_ac_10ma) \
                  .set_ICS_RDP_DC_##suffix(iv_attr_mvpd_data[i].irt_rdp_dc_10ma) \
-                 .set_VDD_VMIN_##suffix(iv_attr_mvpd_data[i].vdd_vmin) 
+                 .set_VDD_VMIN_##suffix(iv_attr_mvpd_data[i].vdd_vmin)
 
 //w => N_L (w > 7 is invalid)
 //x => N_S (x > N_L is invalid)
@@ -1079,6 +1079,11 @@ fapi2::ReturnCode PlatPmPPB::gppb_init(
         io_globalppb->pgpe_flags[PGPE_FLAG_DDS_ENABLE] = iv_dds_enabled;
         io_globalppb->pgpe_flags[PGPE_FLAG_TRIP_MODE] = iv_attrs.attr_dds_trip_mode;
         io_globalppb->pgpe_flags[PGPE_FLAG_TRIP_INTERPOLATION_CONTROL] = iv_attrs.attr_dds_trip_interpolation_control;
+
+        // turn off voltage movement when the WAR MODE defect exists.
+        io_globalppb->pgpe_flags[PGPE_FLAG_STATIC_VOLTAGE_ENABLE] =
+                            iv_attrs.attr_war_mode == fapi2::ENUM_ATTR_HW543384_WAR_MODE_TIE_NEST_TO_PAU ? 1 : 0;
+
         if (iv_attrs.attr_pgpe_hcode_function_enable == 0) {
             io_globalppb->pgpe_flags[PGPE_FLAG_OCC_IPC_IMMEDIATE_MODE] = 1;
             io_globalppb->pgpe_flags[PGPE_FLAG_WOF_IPC_IMMEDIATE_MODE] = 1;
@@ -1542,6 +1547,7 @@ FAPI_INF("%-60s[3] = 0x%08x %d", #attr_name, iv_attrs.attr_assign[3], iv_attrs.a
     DATABLOCK_GET_ATTR(ATTR_FREQ_CORE_CEILING_MHZ,  iv_procChip, attr_freq_core_ceiling_mhz);
     DATABLOCK_GET_ATTR(ATTR_FREQ_CORE_FLOOR_MHZ,    iv_procChip, attr_freq_core_floor_mhz);
     DATABLOCK_GET_ATTR(ATTR_SYSTEM_FMAX_ENABLE,     FAPI_SYSTEM, attr_fmax_enable);
+    DATABLOCK_GET_ATTR(ATTR_HW543384_WAR_MODE,      FAPI_SYSTEM, attr_war_mode);
 
     // Loadline, Distribution loss and Distribution offset attributes
 
@@ -3810,7 +3816,7 @@ fapi2::ReturnCode PlatPmPPB::create_stretched_pts()
 {
     FAPI_INF(">>>>>>>>>> create_stretched_points");
 
-    // COpy the raw data from the vpd 
+    // COpy the raw data from the vpd
     memcpy (iv_attr_mvpd_poundV_raw_orig,
             iv_attr_mvpd_poundV_raw,
             sizeof(iv_attr_mvpd_poundV_raw));
@@ -4064,30 +4070,16 @@ void PlatPmPPB::compute_vpd_pts()
 fapi2::ReturnCode PlatPmPPB::safe_mode_init( void )
 {
     FAPI_INF(">>>>>>>>>> safe_mode_init");
-    uint8_t l_ps_pstate = 0;
-    uint32_t l_ps_freq_khz =
-    iv_operating_points[VPD_PT_SET_BIASED][VPD_PV_CF0].frequency_mhz * 1000;
 
-    do
+    if (!iv_attrs.attr_pm_safe_voltage_mv[VDD] ||
+            !iv_attrs.attr_pm_safe_voltage_mv[VCS] ||
+            !iv_attrs.attr_pm_safe_frequency_mhz)
     {
-        if (!iv_attrs.attr_pm_safe_voltage_mv[VDD] &&
-             !iv_attrs.attr_pm_safe_voltage_mv[VCS] &&
-                !iv_attrs.attr_pm_safe_frequency_mhz)
-        {
-            freq2pState( l_ps_freq_khz, &l_ps_pstate);
-
-            //Compute safe mode values
-            FAPI_TRY(safe_mode_computation (
-                        l_ps_pstate),
-                    "Error from safe_mode_computation function");
-
-            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SAFE_MODE_FREQUENCY_MHZ,
-                        iv_procChip,iv_attrs.attr_pm_safe_frequency_mhz ));
-            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SAFE_MODE_VOLTAGE_MV,
-                        iv_procChip, iv_attrs.attr_pm_safe_voltage_mv));
-
-        }
-    }while(0);
+        //Compute safe mode values
+        FAPI_TRY(safe_mode_computation (
+                    ),
+                "Error from safe_mode_computation function");
+    }
 
 fapi_try_exit:
     FAPI_INF("<<<<<<<<<< safe_mode_init");
@@ -4097,8 +4089,7 @@ fapi_try_exit:
 ///////////////////////////////////////////////////////////
 ////////   safe_mode_computation
 ///////////////////////////////////////////////////////////
-fapi2::ReturnCode PlatPmPPB::safe_mode_computation(
-                                const Pstate i_ps_pstate)
+fapi2::ReturnCode PlatPmPPB::safe_mode_computation()
 {
     const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
     fapi2::ATTR_SAFE_MODE_FREQUENCY_MHZ_Type l_safe_mode_freq_mhz;
@@ -4110,7 +4101,6 @@ fapi2::ReturnCode PlatPmPPB::safe_mode_computation(
     uint32_t                                 l_core_floor_mhz;
     uint32_t                                 l_op_pt;
     Pstate                                   l_safe_mode_ps;
-
 
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_FREQ_CORE_FLOOR_MHZ,
                            iv_procChip,
@@ -4141,9 +4131,14 @@ fapi2::ReturnCode PlatPmPPB::safe_mode_computation(
     FAPI_INF ("step_frequency 0%08x (%d)",
                 iv_frequency_step_khz, iv_frequency_step_khz);
 
-    //#V PS frequency
-    // RTC: 259853
-    l_op_pt = iv_vddPsavFreq;
+    if ( iv_attrs.attr_pm_safe_frequency_mhz)
+    {
+        l_op_pt = iv_attrs.attr_pm_safe_frequency_mhz;
+    }
+    else
+    {
+        l_op_pt = iv_vddPsavFreq;
+    }
 
     // Safe operational frequency is the MAX(core floor, VPD Powersave).
     // PowerSave is the lowest operational frequency that the part was tested at
@@ -4206,7 +4201,14 @@ fapi2::ReturnCode PlatPmPPB::safe_mode_computation(
               l_safe_mode_freq_mhz,
               l_safe_mode_freq_mhz, iv_reference_frequency_khz);
 
-    FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_SAFE_MODE_FREQUENCY_MHZ, iv_procChip, l_safe_mode_freq_mhz));
+    FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_SAFE_MODE_FREQUENCY_MHZ,
+                            iv_procChip,
+                            l_safe_mode_freq_mhz));
+
+    // Read back to get any overrides
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SAFE_MODE_FREQUENCY_MHZ,
+                            iv_procChip,
+                            l_safe_mode_freq_mhz));
 
     FAPI_INF ("l_safe_mode_freq_mhz 0x%0x (%d)",
                 l_safe_mode_freq_mhz,
@@ -4263,20 +4265,27 @@ fapi2::ReturnCode PlatPmPPB::safe_mode_computation(
                 iv_attrs.attr_save_mode_nodds_uplift_mv[VCS]);
     }
 
-
     FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_SAFE_MODE_VOLTAGE_MV,
                                iv_procChip,
                                l_safe_mode_mv));
 
+    // Read back to get any overrides
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SAFE_MODE_VOLTAGE_MV,
+                                iv_procChip,
+                                iv_attrs.attr_pm_safe_voltage_mv));
 
-    // Calculate boot mode voltage
-    iv_attrs.attr_boot_voltage_mv[VDD] = bias_adjust_mv(iv_attr_mvpd_poundV_biased[VPD_PV_CF0].vdd_mv,
-                                                     iv_attrs.attr_boot_voltage_biase_0p5pct);
+    // Calculate boot mode voltages
+    if (!iv_attrs.attr_boot_voltage_mv[VDD])
+    {
+        iv_attrs.attr_boot_voltage_mv[VDD] =
+                bias_adjust_mv(iv_attrs.attr_pm_safe_voltage_mv[VDD], iv_attrs.attr_boot_voltage_biase_0p5pct);
+    }
 
-
-    iv_attrs.attr_boot_voltage_mv[VCS] = bias_adjust_mv(iv_attr_mvpd_poundV_biased[VPD_PV_CF0].vcs_mv,
-                                              iv_attrs.attr_boot_voltage_biase_0p5pct);
-
+    if (!iv_attrs.attr_boot_voltage_mv[VCS])
+    {
+        iv_attrs.attr_boot_voltage_mv[VCS] =
+                bias_adjust_mv(iv_attrs.attr_pm_safe_voltage_mv[VCS], iv_attrs.attr_boot_voltage_biase_0p5pct);
+    }
 
     FAPI_INF("VDD boot_mode_mv 0x%x (%d)",
         iv_attrs.attr_boot_voltage_mv[VDD],
@@ -5520,12 +5529,12 @@ fapi2::ReturnCode PlatPmPPB::pm_set_frequency()
             //FLOOR frequency are set from the MRW to 2000MHZ, But for now we
             //should force the ceil freq to 2400MHZ to make OCC happy
             // Will comeback to this once we sort out, why and how MRW are
-            // gettting the ceil and floor values 
+            // gettting the ceil and floor values
 #if 0
             if (l_limited_freq_mhz)
             {
-                if ((l_sys_freq_core_ceil_mhz) && 
-                        (l_sys_freq_core_ceil_mhz > l_forced_ceil_freq_mhz))
+                if ((l_sys_freq_core_ceil_mhz) &&
+                    (l_sys_freq_core_ceil_mhz > l_forced_ceil_freq_mhz))
                 {
                     l_sys_freq_core_ceil_mhz = l_forced_ceil_freq_mhz;
                 }
