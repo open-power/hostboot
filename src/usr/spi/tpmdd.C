@@ -51,6 +51,7 @@
 #include <secureboot/service.H>
 #include <secureboot/trustedbootif.H>
 #include "tpmdd.H"
+#include <spi/spi.H> // spiInitEngine
 
 
 // ----------------------------------------------
@@ -383,6 +384,25 @@ bool tpmPresence (TARGETING::Target* i_pTpm)
 
         // Set the offset for the vendor reg
         tpmInfo.offset = tpmInfo.vendorIdOffset;
+
+        // Set up CLOCK_CONFIG register for SPI engine 4 being used to communicate with TPM
+        pError = SPI::spiInitEngine(tpmInfo.spiTarget, tpmInfo.spiEngine);
+
+        if (pError)
+        {
+            if(verbose)
+            {
+                TRACFCOMP(g_trac_tpmdd,ERR_MRK
+                    "tpmPresence: SPI::spiInitEngine(...) Failed to configure SPIM4 CLOCK_CONFIG "
+                    "register. TPM HUID=0x%08X, SPI HUID=0x%08X, Engine=%d"
+                    TRACE_ERR_FMT,
+                    TARGETING::get_huid(i_pTpm),
+                    TARGETING::get_huid(tpmInfo.spiTarget),
+                    tpmInfo.spiEngine,
+                    TRACE_ERR_ARGS(pError));
+            }
+            break;
+        }
 
         pError = tpmRead(&vendorId,
                          vendorIdSize,
