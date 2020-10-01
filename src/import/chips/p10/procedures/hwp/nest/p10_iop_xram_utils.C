@@ -286,9 +286,8 @@ fapi2::ReturnCode autoIncrementControl(
     fapi2::buffer<uint64_t> l_xramArrayMode_reg(0);
     uint64_t l_xramBaseReg = getXramBaseReg(i_top);
 
-    FAPI_DBG("enableAutoIncrement: i_top %d, Action %s, Oper %s", i_top,
-             i_enable ? "Enable" : "Disable",
-             i_write_op ? "Write" : "Read");
+    FAPI_DBG("enableAutoIncrement: i_top %d, Action - Enable[1]/Disable[0] - %d,"
+             " Oper - Write[1]/Read[0] - %d", i_top, i_enable, i_write_op);
 
     // Need to do RMW on individual PEC
     for (auto l_pec : i_target.getChildren<fapi2::TARGET_TYPE_PEC>())

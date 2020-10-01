@@ -58,8 +58,10 @@ fapi2::ReturnCode p10_putsram(const fapi2::Target <fapi2::TARGET_TYPE_PROC_CHIP>
                               uint8_t* i_data)
 {
     FAPI_DBG("Start");
-    FAPI_DBG("p10_putsram: PervChipletId 0x%.8X, Multicast %d, i_mode 0x%.2X, i_offset %p, i_bytes %u.",
-             i_pervChipletId, i_multicast, i_mode, i_offset, i_bytes);
+    FAPI_DBG("p10_putsram: PervChipletId 0x%.8X, Multicast %d, i_mode 0x%.2X",
+             i_pervChipletId, i_multicast, i_mode);
+    FAPI_DBG("p10_putsram: i_offset [0x%.8X%.8X], i_bytes %u.",
+             ((i_offset >> 32) & 0xFFFFFFFF), (i_offset & 0xFFFFFFFF), i_bytes);
 
     if ( (i_pervChipletId >= PAU0_PERV_CHIPLET_ID) && (i_pervChipletId <= PAU3_PERV_CHIPLET_ID) )
     {
