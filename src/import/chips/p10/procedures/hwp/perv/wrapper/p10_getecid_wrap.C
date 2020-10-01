@@ -83,7 +83,7 @@ p10_ecid_decodeEcidFuseString( ecmdDataBuffer fuseString, char* ecidString, char
     uint8_t        Yloc;
     uint8_t        majorEC;
     uint8_t        minorEC;
-    ecmdDataBuffer subMinorEC(4);
+    ecmdDataBuffer subMinorEC(3);
     char           waferIdText[11];
 
 
@@ -138,11 +138,11 @@ p10_ecid_decodeEcidFuseString( ecmdDataBuffer fuseString, char* ecidString, char
     // if the sub-minor encoding is zero, no chip specific lookup is needed
     // just report the DD level as DD<major>.<minor>0
     DD = std::to_string(majorEC) + "." + std::to_string(minorEC);
-    fuseString.extract( subMinorEC, 173, 4 );
+    fuseString.extract( subMinorEC, 173, 3 );
 
     printf("sub minor EC: %02X \n", subMinorEC.getByte(0));
 
-    if ( subMinorEC.isBitClear(0, 4) )
+    if ( subMinorEC.isBitClear(0, 3) )
     {
         DD += "0";
     }
@@ -157,14 +157,14 @@ p10_ecid_decodeEcidFuseString( ecmdDataBuffer fuseString, char* ecidString, char
         }
 
         if (lookup == NULL ||
-            (*lookup)[subMinorEC.genBinStr( 0, 4 ).c_str()] == "")
+            (*lookup)[subMinorEC.genBinStr( 0, 3 ).c_str()] == "")
         {
             printf( "Getecid not supported for this chip ID = %#x, update needed\n", l_cfamid.getWord(0) );
             DD += "?";
         }
         else
         {
-            DD += (*lookup)[subMinorEC.genBinStr( 0, 4 )].c_str();
+            DD += (*lookup)[subMinorEC.genBinStr( 0, 3 )].c_str();
         }
     }
 
@@ -225,10 +225,10 @@ ecid_initDecodeTable()
 void
 DD10level_decodetable()
 {
-    DD10LEVEL.insert( std::pair<std::string, std::string> ( "1000" , "1 (Joachim approved)" ) );
-    DD10LEVEL.insert( std::pair<std::string, std::string> ( "1100" , "2 (Unused)" ) );
-    DD10LEVEL.insert( std::pair<std::string, std::string> ( "1110" , "3 (Unused)" ) );
-    DD10LEVEL.insert( std::pair<std::string, std::string> ( "1111" , "4 (Unused)" ) );
+    DD10LEVEL.insert( std::pair<std::string, std::string> ( "100" , "1 (G1 fix, Joachim approved)" ) );
+    DD10LEVEL.insert( std::pair<std::string, std::string> ( "010" , "2 (V1 fix, decap short" ) );
+    DD10LEVEL.insert( std::pair<std::string, std::string> ( "110" , "3 (Unused)" ) );
+    DD10LEVEL.insert( std::pair<std::string, std::string> ( "001" , "4 (Unused)" ) );
 }
 
 
