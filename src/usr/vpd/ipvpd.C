@@ -1300,17 +1300,53 @@ errlHndl_t IpVpdFacade::findRecordOffsetPnor ( const char * i_record,
 // IpVpdFacade::findRecordOffsetSeeprom
 // ------------------------------------------------------------------
 errlHndl_t IpVpdFacade::findRecordOffsetSeeprom ( const char * i_record,
-                                                  uint16_t & o_offset,
-                                                  uint16_t & o_length,
+                                                  uint16_t & o_recordOffset,
+                                                  uint16_t & o_recordlength,
                                                   TARGETING::Target * i_target,
                                                   input_args_t i_args )
+{
+    TRACSSCOMP( g_trac_vpd, ENTER_MRK"IpVpdFacade::findRecordOffsetSeeprom()" );
+
+    errlHndl_t l_err(nullptr);
+
+    // Create these "dummy" variables.  Don't need but necessary for API
+    uint16_t l_eccOffset(0), l_eccLength(0);
+
+    // Get the record meta data, which has the record offset/length caller
+    // is interested in.
+    l_err = findRecordMetaDataSeeprom( i_record, o_recordOffset, o_recordlength,
+                                       l_eccOffset, l_eccLength,
+                                       i_target, i_args);
+
+    // The caller is only interested in the data past the 'Large Resource' byte,
+    // therefore, move the offset 1 byte over.
+    o_recordOffset += 1;
+
+    TRACSSCOMP( g_trac_vpd,
+                EXIT_MRK"IpVpdFacade::findRecordOffsetSeeprom(): returning %s errors",
+                (l_err ? "with" : "with no") );
+
+    return l_err;
+} // findRecordOffsetSeeprom
+
+
+// ------------------------------------------------------------------
+// IpVpdFacade::findRecordMetaDataSeeprom
+// ------------------------------------------------------------------
+errlHndl_t IpVpdFacade::findRecordMetaDataSeeprom ( const char * i_record,
+                                                    uint16_t & o_recordOffset,
+                                                    uint16_t & o_recordLength,
+                                                    uint16_t & o_eccOffset,
+                                                    uint16_t & o_eccLength,
+                                                    TARGETING::Target * i_target,
+                                                    const input_args_t &i_args )
 {
     errlHndl_t err = nullptr;
     char l_buffer[256] = { 0 };
     uint16_t offset = 0x0;
 
     TRACSSCOMP( g_trac_vpd,
-                ENTER_MRK"IpVpdFacade::findRecordOffsetSeeprom()" );
+                ENTER_MRK"IpVpdFacade::findRecordMetaDataSeeprom()" );
 
     // Skip the ECC data + large resource ID in the VHDR
     offset = VHDR_ECC_DATA_SIZE + RESOURCE_ID_SIZE;
@@ -1328,7 +1364,7 @@ errlHndl_t IpVpdFacade::findRecordOffsetSeeprom ( const char * i_record,
         (memcmp(toc_rec->record_name, "VTOC",
                 sizeof(toc_rec->record_name)) != 0))
     {
-        TRACFCOMP( g_trac_vpd, ERR_MRK"IpVpdFacade::findRecordOffsetSeeprom: "
+        TRACFCOMP( g_trac_vpd, ERR_MRK"IpVpdFacade::findRecordMetaDataSeeprom: "
                    "VHDR is invalid!");
 
         /*@
@@ -1393,9 +1429,10 @@ errlHndl_t IpVpdFacade::findRecordOffsetSeeprom ( const char * i_record,
             if (memcmp(toc_rec->record_name, i_record,
                        sizeof(toc_rec->record_name)) == 0)
             {
-                // Byte swap field on output, skip 'large resource' byte
-                o_offset = le16toh( toc_rec->record_offset ) + 1;
-                o_length = le16toh( toc_rec->record_length );
+                o_recordOffset = le16toh( toc_rec->record_offset );
+                o_recordLength = le16toh( toc_rec->record_length );
+                o_eccOffset = le16toh( toc_rec->ecc_offset );
+                o_eccLength = le16toh( toc_rec->ecc_length );
                 found = true;
                 break;
             }
@@ -1404,7 +1441,7 @@ errlHndl_t IpVpdFacade::findRecordOffsetSeeprom ( const char * i_record,
 
     if ( !found && err == nullptr ) {
         TRACFCOMP( g_trac_vpd,
-                   ERR_MRK"IpVpdFacade::findRecordOffsetSeeprom: "
+                   ERR_MRK"IpVpdFacade::findRecordMetaDataSeeprom: "
                    "No matching Record (%s) found in VTOC!", i_record );
 
         /*@
@@ -1440,10 +1477,11 @@ errlHndl_t IpVpdFacade::findRecordOffsetSeeprom ( const char * i_record,
     }
 
     TRACSSCOMP( g_trac_vpd,
-                EXIT_MRK"IpVpdFacade::findRecordOffsetSeeprom()" );
+                EXIT_MRK"IpVpdFacade::findRecordMetaDataSeeprom(): returning %s errors",
+                (l_err ? "with" : "with no") );
 
     return err;
-}
+} // findRecordMetaDataSeeprom
 
 
 // ------------------------------------------------------------------

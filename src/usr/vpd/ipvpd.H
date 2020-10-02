@@ -466,6 +466,40 @@ class IpVpdFacade
                                          input_args_t i_args );
 
     /**
+     * @brief Get a record's meta data - record offset, record length, ECC offset
+     *        and ECC length.
+     *
+     * @details A record is book ended by starting byte 0x84 and ending byte 0x78.
+     *          In the document 'Common VPD Architecture' these bytes are referred
+     *          to as 'Large Resource' for byte 0x84 and 'Small Resource' for
+     *          byte 0x78.
+     *          The record offset, that is returned, points to the 'Large Resource'
+     *          byte 0x84, and the record length consists of the two book end bytes
+     *          plus the size of the data between these two bytes.
+     *
+     * @param[in] i_record        - The record to find
+     * @param[out] o_recordOffset - The offset of the record within the VPD.
+     *                              The offset points to the 'Large Resource' byte 0x84.
+     * @param[out] o_recordLength - The length of the record within the VPD.
+     *                              This length consists of the two book end bytes
+     *                              plus the size of the data between these two bytes.
+     * @param[out] o_eccOffset    - The offset of the ECC within the VPD
+     * @param[out] o_eccLength    - The length of the ECC within the VPD
+     * @param[in] i_target        - Target pointer
+     * @param[in] i_args          - The input arguments, key, record, location and
+     *                              the EEPROM source.
+     * @return errlHndl_t - NULL if successful, otherwise a pointer to the
+     *                      error log.
+     */
+    errlHndl_t findRecordMetaDataSeeprom ( const char * i_record,
+                                           uint16_t & o_recordOffset,
+                                           uint16_t & o_recordLength,
+                                           uint16_t & o_eccOffset,
+                                           uint16_t & o_eccLength,
+                                           TARGETING::Target * i_target,
+                                           const input_args_t &i_args );
+
+    /**
      * @brief This function will scan the SEEPROM and return a list of VPD
      *      records for this target.
      *
