@@ -1519,6 +1519,13 @@ sub processGenericI2cDevice
         $instancePos = 3;
         $i2cDevType = "PCA9554A_GPIO_EXPANDER";
     }
+    else
+    {
+        select()->flush(); # flush buffer before spewing out error message
+        die "\nprocessGenericI2cDevice: ERROR: The GENERIC_I2C_DEVICE's instance name " .
+            "($instanceName) is not supported. Error";
+    }
+
     $targetObj->setAttribute($target, "I2C_DEV_TYPE", $i2cDevType);
 
     # Cache the device's maximum instance per parent (DDIMM) for quick reference
@@ -1529,7 +1536,7 @@ sub processGenericI2cDevice
     if ($instancePos >= $maxDevicePerDdimm )
     {
         select()->flush(); # flush buffer before spewing out error message
-        die "\nprocessPmic: ERROR: The GENERIC_I2C_DEVICE's instance position " .
+        die "\nprocessGenericI2cDevice: ERROR: The GENERIC_I2C_DEVICE's instance position " .
             "($instancePos), extracted from instance name " .
             "\"$instanceName\", exceeds or is equal to the maximum GENERIC_I2C_DEVICE " .
             "per DIMM (" . $maxDevicePerDdimm . "). Error" ;
@@ -1580,6 +1587,8 @@ sub processGenericI2cDevice
     $targetObj->setAttribute($target, "REL_POS",       $instancePos);
     $targetObj->setAttribute($target, "AFFINITY_PATH", $deviceAffinity);
     $targetObj->setAttribute($target, "PHYS_PATH",     $devicePhysical);
+    # Until CLASS is removed from MRW, rewrite it here
+    $targetObj->setAttribute($target, "CLASS",     "ASIC");
 
     # Set the FAPI_I2C_CONTROL_INFO attribute
     setFapi2AttributeForDimmI2cDevices($targetObj, $target, "GENERIC_I2C_DEVICE");

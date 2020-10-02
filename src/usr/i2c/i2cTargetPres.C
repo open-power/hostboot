@@ -35,6 +35,7 @@
 #include <vpd/spdenums.H>
 #include <fapiwrap/fapiWrapif.H>
 #include "../eeprom/eepromCache.H"
+#include <attributeenums.H>
 
 extern trace_desc_t* g_trac_i2c;
 
@@ -202,13 +203,62 @@ errlHndl_t genericI2CTargetPresenceDetect(TARGETING::Target* i_target,
                    TARGETING::get_huid(i_target),  TARGETING::get_huid(l_i2cMasterTarget),
                    l_i2cInfo.engine, l_i2cInfo.port, l_i2cInfo.devAddr);
 
-        //Check for the target at the I2C level
-        l_target_present = I2C::i2cPresence(l_i2cMasterTarget,
+        // The GPIO devices require an I2C read of 1 byte for their prsesence detection
+        TARGETING::ATTR_I2C_DEV_TYPE_type l_i2c_dev_type = TARGETING::I2C_DEV_TYPE_INVALID;
+        if ((i_target->tryGetAttr<TARGETING::ATTR_I2C_DEV_TYPE>(l_i2c_dev_type)) &&
+            (l_i2c_dev_type == TARGETING::I2C_DEV_TYPE_PCA9554A_GPIO_EXPANDER))
+        {
+            uint8_t l_data;
+            size_t  l_size=sizeof(l_data);
+            uint8_t l_offset=0;
+            size_t  l_offset_length=sizeof(l_offset);
+
+            TRACSSCOMP(g_trac_i2c, "I2C::genericI2CTargetPresenceDetect> trying 1-byte I2C read "
+                       "for HUID 0x%.08X i2cm=0x%.08X, e%d/p%d/devAddr=0x%X, offset=%d, "
+                       "offset_length=%d",
+                       get_huid(i_target), get_huid(l_i2cMasterTarget), l_i2cInfo.engine,
+                       l_i2cInfo.port, l_i2cInfo.devAddr, l_offset, l_offset_length);
+
+            l_errl = deviceOp( DeviceFW::READ,
+                              l_i2cMasterTarget,
+                              &l_data,
+                              l_size,
+                              DEVICE_I2C_ADDRESS_OFFSET(
                                             l_i2cInfo.port,
                                             l_i2cInfo.engine,
                                             l_i2cInfo.devAddr,
+                                            l_offset_length,
+                                            &l_offset,
                                             l_i2cInfo.i2cMuxBusSelector,
-                                            l_i2cInfo.i2cMuxPath );
+                                            &(l_i2cInfo.i2cMuxPath) ) );
+
+            if( l_errl )
+            {
+                TRACSSCOMP(g_trac_i2c,ERR_MRK"I2C::genericI2CTargetPresenceDetect> Failed for HUID 0x%.08X "
+                          "- Deleting error: "
+                          TRACE_ERR_FMT,
+                          get_huid(i_target),
+                          TRACE_ERR_ARGS(l_errl));
+                          delete l_errl;
+                          l_errl = nullptr;
+            }
+            else
+            {
+                TRACSSCOMP(g_trac_i2c,INFO_MRK"I2C::genericI2CTargetPresenceDetect> Success for HUID 0x%.08X", get_huid(i_target));
+                l_target_present = true;
+            }
+        }
+
+        // The PMICs and ADCs can use the i2cPresence() function
+        else
+        {
+            l_target_present = I2C::i2cPresence(l_i2cMasterTarget,
+                                                l_i2cInfo.port,
+                                                l_i2cInfo.engine,
+                                                l_i2cInfo.devAddr,
+                                                l_i2cInfo.i2cMuxBusSelector,
+                                                l_i2cInfo.i2cMuxPath );
+        }
     }while(0);
 
     o_present = l_target_present;

@@ -756,11 +756,6 @@ errlHndl_t HWASDiscovery::discoverTargets()
         PredicateCTM predChip(CLASS_CHIP);
         PredicateCTM predDimm(CLASS_LOGICAL_CARD, TYPE_DIMM);
 
-        // We can ignore PMIC and GENERIC_I2C_DEVICE at first as
-        // they will be handled with separate sections below since they
-        // have dynamic I2C device addresses
-        PredicateCTM predPmic(CLASS_ASIC, TYPE_PMIC);
-        PredicateCTM predGi2c(CLASS_ASIC, TYPE_GENERIC_I2C_DEVICE);
         // We can ignore chips of TYPE_I2C_MUX because they
         // were already detected above in discoverMuxTargetsAndEnable
         // Also we can ignore chips of type PMIC because they will be processed
@@ -768,9 +763,7 @@ errlHndl_t HWASDiscovery::discoverTargets()
         PredicateCTM predMux(CLASS_CHIP, TYPE_I2C_MUX);
         PredicatePostfixExpr checkExpr;
         checkExpr.push(&predChip).push(&predDimm).Or().push(&predEnc).Or().
-                  push(&predMux).Not().And().
-                  push(&predPmic).Not().And().
-                  push(&predGi2c).Not().And();
+                  push(&predMux).Not().And();
 
         TargetHandleList pCheckPres;
         targetService().getAssociated( pCheckPres, pSys,
