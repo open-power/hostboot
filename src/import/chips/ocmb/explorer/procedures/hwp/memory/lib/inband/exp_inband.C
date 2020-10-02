@@ -107,11 +107,10 @@ fapi2::ReturnCode putScom(
     return putMMIO64(i_target, l_scomAddr, i_data);
 }
 
-/// @brief Writes user_input_msdg_t to the data buffer
+/// @brief Writes user_input_msdg to the data buffer
 ///
-/// @tparam T user_input_msdg_t type
 /// @param[in] i_target     The Explorer chip to issue the command to
-/// @param[in] i_data       The user_input_msdg_t data to write
+/// @param[in] i_data       The user_input_msdg data to write
 /// @param[out] o_crc       The calculated crc of the data.
 ///
 /// @return fapi2::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
@@ -905,14 +904,14 @@ fapi_try_exit:
 }
 
 ///
-/// @brief Converts user_input_msdg_t to little endian and calculates the crc
-/// @param[in] i_input user_input_msdg_t structure to convert
+/// @brief Converts user_input_msdg to little endian and calculates the crc
+/// @param[in] i_input user_input_msdg structure to convert
 /// @param[in] i_is_new_fw_version denotes if newer than FW ver397559
 /// @param[out] o_data vector of bytes for mmio
 /// @param[out] o_crc the calculated crc of the data
 /// @return fapi2::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
 ///
-fapi2::ReturnCode user_input_msdg_to_little_endian(const user_input_msdg_t& i_input,
+fapi2::ReturnCode user_input_msdg_to_little_endian(const user_input_msdg& i_input,
         const bool i_is_new_fw_version,
         std::vector<uint8_t>& o_data,
         uint32_t& o_crc)

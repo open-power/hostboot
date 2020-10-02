@@ -138,8 +138,8 @@ static const uint64_t EXPLR_IB_SENSOR_CACHE_ADDR = EXPLR_IB_MMIO_OFFSET | 0x4008
 //--------------------------------------------------------------------------------
 
 ///
-/// @brief Converts new_user_input_msdg to little endian and calculates the crc
-/// @param[in] i_input new_user_input_msdg structure to convert
+/// @brief Converts user_input_msdg to little endian and calculates the crc
+/// @param[in] i_input user_input_msdg structure to convert
 /// @param[in] i_is_new_fw_version denotes if newer than FW ver397559
 /// @param[out] o_data vector of bytes for mmio
 /// @param[out] o_crc the calculated crc of the data
@@ -264,7 +264,6 @@ fapi2::ReturnCode putOCCfg(
 
 /// @brief Writes user_input_msdg to the data buffer
 ///
-/// @tparam T user_input_msdg type
 /// @param[in] i_target     The Explorer chip to issue the command to
 /// @param[in] i_data       The user_input_msdg data to write
 /// @param[out] o_crc       The calculated crc of the data.
