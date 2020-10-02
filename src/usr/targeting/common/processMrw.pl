@@ -2895,8 +2895,9 @@ sub postProcessOmi
     ## The offset for each MC is 8GB
 
     ## Define some useful constants
+    my $OMI_PER_PROC = getMaxInstPerProc("OMI");
     # The number of OMI targets to an MC target
-    my $OMI_PER_MC = (getMaxInstPerProc("OMI") / getMaxInstPerProc("MC"));
+    my $OMI_PER_MC = ($OMI_PER_PROC / getMaxInstPerProc("MC"));
     # The number of OMI targets to it's parent
     my $OMI_PER_PARENT = getMaxInstPerParent("OMI");
     # The size of a gigabyte in hex form
@@ -2910,14 +2911,14 @@ sub postProcessOmi
     use constant OMI_BASE_BAR_ADDRESS_OFFSET => 0x30400000000;
 
     # Get the OMI position using the value found in attribute FAPI_POS
-    my $omiFapiPos = $targetObj->getAttribute($target,"FAPI_POS");
+    my $omiProcRelativePos = $targetObj->getAttribute($target,"FAPI_POS") % $OMI_PER_PROC;
 
     # This formula is a verbatim copy of the same formula as found in
     # hostboot/src/usr/mmio/mmio.C::mmioSetup(), except without the magic numbers
     use integer;
     my $value = Math::BigInt->new(
-                (($omiFapiPos / $OMI_PER_PARENT) * GB_PER_MMC * GB_SIZE) +
-                (($omiFapiPos % $OMI_PER_PARENT) * GB_PER_OMI * GB_SIZE) );
+                (($omiProcRelativePos / $OMI_PER_PARENT) * GB_PER_MMC * GB_SIZE) +
+                (($omiProcRelativePos % $OMI_PER_PARENT) * GB_PER_OMI * GB_SIZE) );
     $value = OMI_BASE_BAR_ADDRESS_OFFSET + $value;
 
     # Put the value in hex form before setting the OMI attribute
@@ -2926,7 +2927,7 @@ sub postProcessOmi
     $targetObj->setAttribute($target, "OMI_INBAND_BAR_BASE_ADDR_OFFSET", $value);
 
     # Set the parent MC BAR value to the value of first OMI within the OMI group per MC
-    if (($omiFapiPos % $OMI_PER_MC) eq 0)
+    if (($omiProcRelativePos % $OMI_PER_MC) eq 0)
     {
         my $parentMC = $targetObj->findParentByType($target, "MC");
         $targetObj->setAttribute($parentMC, "OMI_INBAND_BAR_BASE_ADDR_OFFSET", $value);
