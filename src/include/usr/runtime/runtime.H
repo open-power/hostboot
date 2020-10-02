@@ -34,6 +34,7 @@
 #include "../../../src/usr/runtime/hdatstructs.H"
 #include <vmmconst.h>
 #include <sys/misc.h>
+#include <arch/memorymap.H>
 #include <kernel/vmmmgr.H>
 
 
@@ -399,18 +400,39 @@ errlHndl_t getRsvdMemTraceBuf(uint64_t& o_RsvdMemAddress, uint64_t& o_size);
  */
 errlHndl_t getPayloadAttnAreaAddr(uint64_t& o_payloadTiAddr);
 
+
+/**
+ *  @brief Returns the HB base address relative to the current node.
+ *         The address returned takes memory mirroring mode into
+ *         account.
+ *  @return Base address of this instance of hostboot relative to
+ *          the current node.
+ */
 inline uint64_t getHbBaseAddr()
 {
     const auto sys = TARGETING::UTIL::assertGetToplevelTarget();
     const auto mirror_base = sys->getAttr<TARGETING::ATTR_PAYLOAD_IN_MIRROR_MEM>() ?
                               sys->getAttr<TARGETING::ATTR_MIRROR_BASE_ADDRESS>() : 0;
-    const auto hrmor = cpu_spr_value(CPU_SPR_HRMOR);
+    // ignore the node offset
+    const auto hrmor_offset = cpu_spr_value(CPU_SPR_HRMOR) & ~MEMMAP::NODE_OFFSET_MASK;
 
     // If a non-zero mirror_base found then we need to return a
     // mirrored address. To calculate hostboot's mirrored base
     // address you take the hrmor divided in half and offset
     // by the mirrored base.
-    return mirror_base ? (hrmor / 2) + mirror_base : hrmor;
+    return mirror_base ? (hrmor_offset / 2) + mirror_base : hrmor_offset;
+}
+
+/**
+ *  @brief Returns the HB base address relative to the entire system.
+ *         The returned address will include the node offset.
+ *         The address returned takes memory mirroring mode into
+ *         account.
+ *  @return Base address of this instance of hostboot relative to the system.
+ */
+inline uint64_t getHbBaseAddrWithNodeOffset()
+{
+      return getHbBaseAddr() | cpu_hrmor_nodal_base();
 }
 
 /**
@@ -422,7 +444,7 @@ inline uint64_t getHbBaseAddr()
  */
 inline uint64_t calcSpAttnAreaStart()
 {
-    return  (getHbBaseAddr() + PHYP_ATTN_AREA_OFFSET) | VmmManager::FORCE_PHYS_ADDR;
+    return  (getHbBaseAddrWithNodeOffset() + PHYP_ATTN_AREA_OFFSET) | VmmManager::FORCE_PHYS_ADDR;
 }
 
 /*

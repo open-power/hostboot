@@ -138,7 +138,7 @@ errlHndl_t utilSetupPayloadTces(void)
     TRACFCOMP(g_trac_tce,ENTER_MRK"utilSetupPayloadTces(): nodeId=0x%X", nodeId);
     // Get the hostboot base address adjusted for mirrored
     // memory if neccessary
-    const uint64_t hostboot_base_address = RUNTIME::getHbBaseAddr();
+    const uint64_t hostboot_base_address = RUNTIME::getHbBaseAddrWithNodeOffset();
 
     // Allocate TCEs for PAYLOAD to Temporary Space
     addr = hostboot_base_address + MCL_TMP_ADDR;
@@ -234,7 +234,7 @@ errlHndl_t utilClosePayloadTces(void)
 
     // Get the hostboot base address adjusted for mirrored
     // memory if neccessary
-    const uint64_t hostboot_base_address = RUNTIME::getHbBaseAddr();
+    const uint64_t hostboot_base_address = RUNTIME::getHbBaseAddrWithNodeOffset();
     // Close the Unsecure Memory Region that was opened for the FSP to run
     // PSI Diagnostics Test using the PAYLOAD section
     // -- addr is a constant for PAYLOAD
@@ -285,7 +285,7 @@ UtilTceMgr::UtilTceMgr(const uint64_t i_tableAddr, const size_t i_tableSize)
 {
     // Get the hostboot base address adjusted for mirrored
     // memory if neccessary
-    const uint64_t hostboot_base_address = RUNTIME::getHbBaseAddr();
+    const uint64_t hostboot_base_address = RUNTIME::getHbBaseAddrWithNodeOffset();
 
     iv_tceTablePhysAddr = hostboot_base_address + TCE_TABLE_ADDR;
 

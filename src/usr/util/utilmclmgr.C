@@ -107,7 +107,7 @@ MasterContainerLidMgr::MasterContainerLidMgr(const bool i_loadOnly)
   iv_compInfoCache{}, iv_hasHeader(true), iv_loadOnly(i_loadOnly)
 {
     // Need to make Memory spaces HRMOR-relative
-    const uint64_t hostboot_base_address = RUNTIME::getHbBaseAddr();
+    const uint64_t hostboot_base_address = RUNTIME::getHbBaseAddrWithNodeOffset();
 
     iv_tmpAddr = hostboot_base_address + MCL_TMP_ADDR;
     iv_mclAddr = hostboot_base_address + MCL_ADDR;
@@ -122,7 +122,7 @@ MasterContainerLidMgr::MasterContainerLidMgr(const void* i_pMcl,
   iv_compInfoCache{}, iv_hasHeader(false)
 {
     // Need to make Memory spaces HRMOR-relative
-    const uint64_t hostboot_base_address = RUNTIME::getHbBaseAddr();
+    const uint64_t hostboot_base_address = RUNTIME::getHbBaseAddrWithNodeOffset();
 
     iv_mclAddr = hostboot_base_address + MCL_ADDR;
     iv_tmpAddr = hostboot_base_address + MCL_TMP_ADDR;

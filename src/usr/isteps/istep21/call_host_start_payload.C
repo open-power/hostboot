@@ -363,7 +363,8 @@ void* call_host_start_payload (void *io_pArgs)
         }
 
         // calculate the memory location to be used as COMM base
-        uint64_t l_commBase = RUNTIME::getHbBaseAddr() + PHYP_ATTN_AREA_OFFSET;
+        uint64_t l_commBase = RUNTIME::getHbBaseAddrWithNodeOffset() +
+                              PHYP_ATTN_AREA_OFFSET;
 
         //  - Call shutdown using payload base, and payload entry.
         //      - base/entry will be from system attributes

@@ -341,15 +341,15 @@ errlHndl_t checkHbResMemLimit(const uint64_t i_addr, const uint64_t i_size)
 
     // Find the start of HB addr space , which will be
     // the node base + the hostboot base addr
-    uint64_t l_node_base = cpu_hrmor_nodal_base();
-    uint64_t l_hostboot_base_addr = RUNTIME::getHbBaseAddr();
+    uint64_t l_hostboot_base_addr = RUNTIME::getHbBaseAddrWithNodeOffset();
 
     // Address limits
-    uint64_t l_lowerLimit = l_hostboot_base_addr + l_node_base + RESERVED_MEM_START_OFFSET;
-    uint64_t l_upperLimit = l_hostboot_base_addr + l_node_base + RESERVED_MEM_END_OFFSET;
+    uint64_t l_lowerLimit = l_hostboot_base_addr + RESERVED_MEM_START_OFFSET;
+    uint64_t l_upperLimit = l_hostboot_base_addr + RESERVED_MEM_END_OFFSET;
 
-    TRACDCOMP(g_trac_runtime, "l_node_base 0x%.16llX, i_addr 0x%.16llX, l_lowerLimit 0x%.16llX",
-              l_node_base, i_addr, l_lowerLimit);
+    TRACDCOMP(g_trac_runtime,
+              "l_hostboot_base_addr 0x%.16llX, i_addr 0x%.16llX, l_lowerLimit 0x%.16llX",
+              l_hostboot_base_addr, i_addr, l_lowerLimit);
     TRACDCOMP(g_trac_runtime, "i_size = 0x%.16llX, l_upperLimit = 0x%.16llX",
               i_size, l_upperLimit);
 
@@ -1063,7 +1063,7 @@ errlHndl_t populate_HbRsvMem(uint64_t i_nodeId, bool i_master_node)
         // Setting r to 26 sets the offset granularity to 64MB.
         // 64MB * 60 = 3840MB, which is equal to 4GB-256MB.
         ////////////////////////////////////////////////////////////////////
-        uint64_t l_hbAddr = RUNTIME::getHbBaseAddr();
+        uint64_t l_hbAddr = RUNTIME::getHbBaseAddrWithNodeOffset();
 
         /* The primary reserved section should encompass the entirety of the
          * Hostboot local memory space.  This data will be preserved across
@@ -1177,7 +1177,8 @@ errlHndl_t populate_HbRsvMem(uint64_t i_nodeId, bool i_master_node)
         uint64_t l_archAddr = 0;
         if(TARGETING::is_phyp_load())
         {
-            l_archAddr = RUNTIME::getHbBaseAddr() + VMM_ARCH_REG_DATA_START_OFFSET;
+            l_archAddr = RUNTIME::getHbBaseAddrWithNodeOffset() +
+                         VMM_ARCH_REG_DATA_START_OFFSET;
         }
         else if(TARGETING::is_sapphire_load())
         {
@@ -1242,7 +1243,8 @@ errlHndl_t populate_HbRsvMem(uint64_t i_nodeId, bool i_master_node)
 
         if(TARGETING::is_phyp_load())
         {
-            l_startAddr = RUNTIME::getHbBaseAddr() + VMM_HB_DATA_TOC_START_OFFSET;
+            l_startAddr = RUNTIME::getHbBaseAddrWithNodeOffset() +
+                          VMM_HB_DATA_TOC_START_OFFSET;
         }
         else if(TARGETING::is_sapphire_load())
         {
@@ -4129,7 +4131,7 @@ errlHndl_t verifyAndMovePayload(void)
 
     // Get Temporary Virtual Address To Payload
     // - Need to make Memory spaces HRMOR-relative
-    uint64_t hostboot_base_addr = RUNTIME::getHbBaseAddr();
+    uint64_t hostboot_base_addr = RUNTIME::getHbBaseAddrWithNodeOffset();
     uint64_t payload_tmp_phys_addr = hostboot_base_addr + MCL_TMP_ADDR;
     uint64_t payload_size          = MCL_TMP_SIZE;
 
