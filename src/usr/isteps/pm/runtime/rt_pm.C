@@ -29,11 +29,6 @@
 #include <errno.h>
 #include <sys/misc.h>
 
-// @TODO RTC 260148: Remove following two includes when hardware can load and
-// start the PM complex
-#include <util/misc.H>
-#include <../../usr/htmgt/htmgt_utility.H>
-
 #include <trace/interface.H>
 #include <util/utillidmgr.H>
 
@@ -542,16 +537,11 @@ namespace RTPM
                   ENTER_MRK"load_and_start_pm_complex");
 #ifdef CONFIG_AUTO_START_PM_COMPLEX_FOR_PHYP
 
-        // @TODO RTC 260148: Remove simulation check (and false case handler)
-        // when hardware is capable of autostarting the PM complex, which
-        // requires valid #V and error paths that don't blow the stack
-        if(Util::isSimicsRunning())
-        {
-            int l_rc = 0;
-            errlHndl_t l_errl = nullptr;
-            Target* l_failedProc = nullptr;
+        int l_rc = 0;
+        errlHndl_t l_errl = nullptr;
+        Target* l_failedProc = nullptr;
 
-            do {
+        do {
 
             // No-op on non-PHYP systems
             if(!is_phyp_load())
@@ -577,7 +567,7 @@ namespace RTPM
 
 #ifdef CONFIG_HTMGT
             HTMGT::processOccStartStatus(true, //i_startCompleted
-                                  l_failedProc); //this is nullptr at this point
+                                         l_failedProc); //this is nullptr at this point
 #else
             l_errl = HBPM::verifyOccChkptAll();
             if(l_errl)
@@ -588,35 +578,14 @@ namespace RTPM
                 break;
             }
 #endif
-            }while(0);
+        }while(0);
 
-            if(l_rc)
-            {
-                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                          ERR_MRK"load_and_start_pm_complex: error occurred; rc: %d", l_rc);
-            }
-
-        }
-        else
+        if(l_rc)
         {
             TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                      INFO_MRK "Workaround: Not auto-starting the PM complex "
-                      "on hardware.");
-
-            #ifdef CONFIG_HTMGT
-
-            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                      INFO_MRK "Workaround: Disabling OCC reset and holding "
-                      "OCCs in reset on hardware.");
-
-            // As part of the HW workaround, if HTMGT is compiled in,
-            // disable OCC reset and hold the OCCs in reset.
-            auto flags = HTMGT::get_int_flags();
-            flags |= (  HTMGT::FLAG_EXT_RESET_DISABLED
-                      | HTMGT::FLAG_HOLD_OCCS_IN_RESET);
-            HTMGT::set_int_flags(flags);
-            #endif
+                      ERR_MRK"load_and_start_pm_complex: error occurred; rc: %d", l_rc);
         }
+
 #endif
         TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
                   EXIT_MRK"load_and_start_pm_complex");

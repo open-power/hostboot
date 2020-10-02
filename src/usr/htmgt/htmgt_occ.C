@@ -30,6 +30,7 @@
 #include "htmgt_cfgdata.H"
 #include "htmgt_occ.H"
 #include "htmgt_poll.H"
+#include <stdio.h>
 
 #include <targeting/common/commontargeting.H>
 #include <targeting/common/utilFilter.H>
@@ -281,7 +282,6 @@ namespace HTMGT
             l_scom_data.addData(DEVICE_SCOM_ADDRESS(0x6C213));//OCB_OCI_OCBSHBR1
             l_scom_data.addData(DEVICE_SCOM_ADDRESS(0x6C214));//OCB_OCI_OCBSHCS1
             l_scom_data.addData(DEVICE_SCOM_ADDRESS(0x6C216));//OCB_OCI_OCBSES1
-            l_scom_data.addData(DEVICE_SCOM_ADDRESS(0x6C217));//OCB_OCI_OCBICR1
             l_scom_data.addData(DEVICE_SCOM_ADDRESS(0x6C218));//OCB_OCI_OCBLWCR1
             l_scom_data.addData(DEVICE_SCOM_ADDRESS(0x6C21A));//OCB_OCI_OCBLWSR1
             l_scom_data.addData(DEVICE_SCOM_ADDRESS(0x6C21C));//*_OCI_OCBLWSBR1
