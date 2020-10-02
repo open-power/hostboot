@@ -216,14 +216,14 @@ bool fw_status_loop_done(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_ta
 
     if (i_busy)
     {
-        FAPI_DBG( "%s reutrned FW_BUSY status. Retrying...", mss::c_str(i_target) );
+        FAPI_DBG( TARGTIDFORMAT " reutrned FW_BUSY status. Retrying...", MSSTARGID );
         return false;
     }
 
     if (i_boot_stage != EXPECTED_BOOT_STAGE)
     {
-        FAPI_DBG( "%s reutrned non-RUNTIME boot stage (0x%02x). Retrying...",
-                  mss::c_str(i_target), i_boot_stage );
+        FAPI_DBG( TARGTIDFORMAT " reutrned non-RUNTIME boot stage (0x%02x). Retrying...",
+                  MSSTARGID, i_boot_stage );
         return false;
     }
 
