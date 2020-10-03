@@ -879,6 +879,23 @@
   </attribute>
   <!-- ******************************************************************** -->
   <attribute>
+   <id>ATTR_CHIP_EC_FEATURE_HW534853</id>
+   <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+   <description>
+     MCD configuration register parity error FIR is unreliable for DD1
+   </description>
+   <chipEcFeature>
+     <chip>
+       <name>ENUM_ATTR_NAME_P10</name>
+       <ec>
+         <value>0x10</value>
+         <test>EQUAL</test>
+       </ec>
+     </chip>
+   </chipEcFeature>
+  </attribute>
+  <!-- ******************************************************************** -->
+  <attribute>
    <id>ATTR_CHIP_EC_FEATURE_HW543384</id>
    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
    <description>
