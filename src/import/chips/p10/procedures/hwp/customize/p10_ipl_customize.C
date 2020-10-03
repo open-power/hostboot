@@ -169,7 +169,7 @@ fapi2::ReturnCode writeMboxRegs (
     MBOX_ATTR_WRITE(ATTR_IO_TANK_PLL_BYPASS,                    i_procTarget, i_image);
     MBOX_ATTR_WRITE(ATTR_SKEWADJ_BYPASS,                        i_procTarget, i_image);
     MBOX_ATTR_WRITE(ATTR_DCADJ_BYPASS,                          i_procTarget, i_image);
-    MBOX_ATTR_CLEAR(ATTR_PROC_FABRIC_EFF_TOPOLOGY_ID,           i_procTarget, i_image);
+    MBOX_ATTR_WRITE(ATTR_PROC_FABRIC_EFF_TOPOLOGY_ID,           i_procTarget, i_image);
     MBOX_ATTR_WRITE(ATTR_PROC_FABRIC_TOPOLOGY_MODE,             FAPI_SYSTEM,  i_image);
     MBOX_ATTR_WRITE(ATTR_PROC_FABRIC_BROADCAST_MODE,            FAPI_SYSTEM,  i_image);
     MBOX_ATTR_SET(ATTR_PROC_SBE_MASTER_CHIP,                    i_procTarget, i_image);
