@@ -291,4 +291,15 @@
   <default>NONE</default>
 </attribute>
 <!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_DISABLE_TOD_SYNC_SPREAD</id>
+  <targetType>TARGET_TYPE_SYSTEM</targetType>
+  <description>
+    Disable spread synchronization via system TOD
+  </description>
+  <valueType>uint8</valueType>
+  <initToZero/>
+  <overrideOnly/>
+</attribute>
+<!-- ********************************************************************** -->
 </attributes>
