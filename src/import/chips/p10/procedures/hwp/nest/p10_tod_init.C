@@ -330,7 +330,7 @@ fapi2::ReturnCode sync_spread(
 
     // in TOD counts of 32Mhz clock; needs to account for SCOM latency
     // and number of chips to be started in sync
-    const uint64_t P10_TOD_SSCG_START_DELAY = ((i_is_simulation) ? (0x100) : (0x100000));
+    const uint64_t P10_TOD_SSCG_START_DELAY = ((i_is_simulation) ? (0x100) : (0x1000000));
 
     std::vector<fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>> l_targets;
     get_targets(i_tod_node, 0, l_targets);
