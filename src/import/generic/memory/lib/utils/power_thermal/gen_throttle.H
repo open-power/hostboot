@@ -151,13 +151,13 @@ fapi2::ReturnCode calc_util_from_throttles(const uint16_t i_n_throttles,
     // Check for the minimum
     if(o_calc_util < TT::MIN_UTIL)
     {
-        FAPI_INF("Calculated utilization (%f) is less than the minimum utilization: %lu. Setting to minimum value",
-                 o_calc_util, TT::MIN_UTIL);
+        FAPI_INF("Calculated utilization (%lu) is less than the minimum utilization: %lu. Setting to minimum value",
+                 static_cast<uint64_t>(o_calc_util), TT::MIN_UTIL);
         o_calc_util = TT::MIN_UTIL;
     }
 
-    FAPI_INF("In calc_util_from_throttles, calculated %f for output utilization from throttles:%d, dram_clocks %d",
-             o_calc_util, i_n_throttles, i_num_dram_clocks);
+    FAPI_INF("In calc_util_from_throttles, calculated %lu for output utilization from throttles:%d, dram_clocks %d",
+             static_cast<uint64_t>(o_calc_util), i_n_throttles, i_num_dram_clocks);
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -605,17 +605,18 @@ fapi2::ReturnCode throttle<MC, TT>::power_regulator_throttles ()
               "Failed to calculate the max and idle power for port %s",
               mss::c_str(iv_target));
 
-    FAPI_INF("POWER throttles: %s max port power is %f", mss::c_str(iv_target), l_port_power_calc_max);
+    FAPI_INF("POWER throttles: %s max port power is %lu", mss::c_str(iv_target),
+             static_cast<uint64_t>(l_port_power_calc_max));
 
     //Calculate the power curve slope and intercept using the port's min and max power values
     FAPI_TRY(calc_power_curve(l_port_power_calc_idle,
                               l_port_power_calc_max,
                               l_port_power_slope,
                               l_port_power_int),
-             "Failed to calculate the power curve for port %s, calculated port power max is %f, idle is %f",
+             "Failed to calculate the power curve for port %s, calculated port power max is %lu, idle is %lu",
              mss::c_str(iv_target),
-             l_port_power_calc_max,
-             l_port_power_calc_idle);
+             static_cast<uint64_t>(l_port_power_calc_max),
+             static_cast<uint64_t>(l_port_power_calc_idle));
 
     FAPI_INF("%s POWER Port power limit is %d", mss::c_str(iv_target), iv_port_power_limit);
     //Calculate the port's utilization to get under watt target using the port's calculated slopes
@@ -624,13 +625,13 @@ fapi2::ReturnCode throttle<MC, TT>::power_regulator_throttles ()
                     iv_port_power_limit,
                     l_calc_util_port);
 
-    FAPI_INF("%s POWER calc util port is %f",  mss::c_str(iv_target), l_calc_util_port);
+    FAPI_INF("%s POWER calc util port is %lu",  mss::c_str(iv_target), static_cast<uint64_t>(l_calc_util_port));
 
     //Calculate the new slot values and the max power value for the port
     FAPI_TRY( calc_slots_and_power( l_calc_util_port),
-              "%s Error calculating the final throttles and power values for target with passed in port utilization %f",
+              "%s Error calculating the final throttles and power values for target with passed in port utilization %lu",
               mss::c_str(iv_target),
-              l_calc_util_port);
+              static_cast<uint64_t>(l_calc_util_port));
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -707,7 +708,8 @@ fapi2::ReturnCode throttle<MC, TT>::thermal_throttles ()
                         iv_dimm_thermal_limit[l_pos],
                         l_calc_util[l_pos]);
 
-        FAPI_INF("THERMAL throttles: %s dram databus utilization is %f", mss::c_str(l_dimm), l_calc_util[l_pos]);
+        FAPI_INF("THERMAL throttles: %s dram databus utilization is %lu", mss::c_str(l_dimm),
+                 static_cast<uint64_t>(l_calc_util[l_pos]));
 
         l_temp_n_slot = power_thermal::throttled_cmds (l_calc_util[l_pos], iv_m_clocks);
 
@@ -773,11 +775,11 @@ fapi2::ReturnCode throttle<MC, TT>::calc_port_power(const double i_idle_util [TT
     {
         const auto l_pos = mss::index(l_dimm);
         //Printing as decimals because HB messes up floats
-        FAPI_INF("%s max dram databus for DIMM in pos %d is %d, databus for idle is %d",
+        FAPI_INF("%s max dram databus for DIMM in pos %d is %lu, databus for idle is %lu",
                  mss::c_str(iv_target),
                  l_pos,
-                 static_cast<uint64_t>( i_max_util[l_pos]),
-                 static_cast<uint64_t>( i_idle_util[l_pos]) );
+                 static_cast<uint64_t>(i_max_util[l_pos]),
+                 static_cast<uint64_t>(i_idle_util[l_pos]) );
         //Sum up the dimm's power to calculate the port power curve
         o_port_power_idle += calc_power(i_idle_util[l_pos], l_pos, l_rc);
         FAPI_TRY(l_rc, "calc_power failed");
@@ -835,9 +837,9 @@ fapi2::ReturnCode throttle<MC, TT>::calc_dimm_power(const double i_databus_idle,
         calc_power_uplift(iv_power_uplift_idle, o_dimm_power_idle[l_pos]);
         calc_power_uplift(iv_power_uplift, o_dimm_power_max[l_pos]);
 
-        FAPI_INF("Calc_dimm_power: dimm (%d) power max is %f, dimm slope %d, intercept %d for %s",
+        FAPI_INF("Calc_dimm_power: dimm (%d) power max is %lu, dimm slope %d, intercept %d for %s",
                  l_pos,
-                 o_dimm_power_max[l_pos],
+                 static_cast<uint64_t>(o_dimm_power_max[l_pos]),
                  iv_pwr_slope[l_pos],
                  iv_pwr_int[l_pos],
                  mss::c_str(l_dimm));
@@ -876,11 +878,20 @@ fapi2::ReturnCode throttle<MC, TT>::calc_power_curve(const double i_power_idle,
                  "Calculated zero for the divisor in calc_power_curve on target %s",
                  mss::c_str(iv_target) );
 
+    FAPI_ASSERT (((i_power_max - i_power_idle) > 0),
+                 fapi2::MSS_CALC_POWER_CURVE_NEGATIVE_OR_ZERO_SLOPE()
+                 .set_PORT_TARGET(iv_target)
+                 .set_PORT_IDLE_POWER(i_power_idle)
+                 .set_PORT_MAX_UTIL_POWER(i_power_max)
+                 .set_RESULT(i_power_max - i_power_idle),
+                 "Calculated zero or negative value for the slope in calc_power_curve (%lu - %lu) on target %s",
+                 static_cast<uint64_t>(i_power_max), static_cast<uint64_t>(i_power_idle), mss::c_str(iv_target) );
+
     o_slope = (i_power_max - i_power_idle) / l_divisor;
     o_int = i_power_idle - (o_slope * TT::IDLE_UTIL);
-    FAPI_INF("Calc_power_curve: power idle is %f, max is %f, slope is %d, int is %d for %s",
-             i_power_idle,
-             i_power_max,
+    FAPI_INF("Calc_power_curve: power idle is %lu, max is %lu, slope is %d, int is %d for %s",
+             static_cast<uint64_t>(i_power_idle),
+             static_cast<uint64_t>(i_power_max),
              o_slope,
              o_int,
              mss::c_str(iv_target));
@@ -916,8 +927,8 @@ void throttle<MC, TT>::calc_util_usage(const uint32_t i_slope,
     // Check for the minimum threshnold and update if need be
     if(o_util < TT::MIN_UTIL)
     {
-        FAPI_INF("Calculated utilization (%f) is less than the minimum utilization: %lu. Setting to minimum value for %s",
-                 o_util,
+        FAPI_INF("Calculated utilization (%lu) is less than the minimum utilization: %lu. Setting to minimum value for %s",
+                 static_cast<uint64_t>(o_util),
                  TT::MIN_UTIL, mss::c_str(iv_target));
         o_util = TT::MIN_UTIL;
     }
@@ -955,10 +966,10 @@ fapi2::ReturnCode throttle<MC, TT>::calc_power_from_n (const uint16_t i_n_slot,
 
     //Determine the utilization for each DIMM that will maximize the port power
     FAPI_TRY( calc_split_util(l_calc_util_slot, l_calc_util_port, l_calc_databus_port_max),
-              "Error splitting the utilization for target %s with slot utilizatio %f and port util %f",
+              "Error splitting the utilization for target %s with slot utilization %lu and port util %lu",
               mss::c_str(iv_target),
-              l_calc_util_slot,
-              l_calc_util_port);
+              static_cast<uint64_t>(l_calc_util_slot),
+              static_cast<uint64_t>(l_calc_util_port));
 
     FAPI_TRY( calc_port_power(l_calc_databus_port_idle,
                               l_calc_databus_port_max,
@@ -1051,9 +1062,9 @@ fapi2::ReturnCode throttle<MC, TT>::calc_split_util(
                  fapi2::MSS_SLOT_UTIL_EXCEEDS_PORT()
                  .set_SLOT_UTIL(i_util_slot)
                  .set_PORT_UTIL(i_util_port),
-                 "The slot utilization (%f) exceeds the port's utilization (%f) for %s",
-                 i_util_slot,
-                 i_util_port,
+                 "The slot utilization (%lu) exceeds the port's utilization (%lu) for %s",
+                 static_cast<uint64_t>(i_util_slot),
+                 static_cast<uint64_t>(i_util_port),
                  mss::c_str(iv_target));
 
     if (l_count_dimms == 0)
@@ -1070,9 +1081,9 @@ fapi2::ReturnCode throttle<MC, TT>::calc_split_util(
     //assumptions slot <= port, l_count_dimms <=2
     if (i_util_slot * l_count_dimms > i_util_port)
     {
-        FAPI_INF("i_util_slot is %f, i_util_port is %f, l_count_dimms is %d for %s",
-                 i_util_slot,
-                 i_util_port,
+        FAPI_INF("i_util_slot is %lu, i_util_port is %lu, l_count_dimms is %d for %s",
+                 static_cast<uint64_t>(i_util_slot),
+                 static_cast<uint64_t>(i_util_port),
                  l_count_dimms,
                  mss::c_str(iv_target));
         const uint8_t l_high_pos = (iv_pwr_slope[0] >= iv_pwr_slope[1]) ? 0 : 1;
@@ -1087,12 +1098,12 @@ fapi2::ReturnCode throttle<MC, TT>::calc_split_util(
                                           0
                                          );
 
-        FAPI_INF("Split utilization for target %s, DIMM in %d gets %f, DIMM in %d gets %f",
+        FAPI_INF("Split utilization for target %s, DIMM in %d gets %lu, DIMM in %d gets %lu",
                  mss::c_str(iv_target),
                  l_high_pos,
-                 o_util_dimm_max[l_high_pos],
+                 static_cast<uint64_t>(o_util_dimm_max[l_high_pos]),
                  !l_high_pos,
-                 o_util_dimm_max[!l_high_pos]);
+                 static_cast<uint64_t>(o_util_dimm_max[!l_high_pos]));
     }
     else
     {

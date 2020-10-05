@@ -953,6 +953,21 @@
     </callout>
   </hwpError>
 
+  <hwpError>
+    <rc>RC_MSS_CALC_POWER_CURVE_NEGATIVE_OR_ZERO_SLOPE</rc>
+    <description>
+      Power curve slope equals 0 or is negative
+    </description>
+    <ffdc>PORT_TARGET</ffdc>
+    <ffdc>PORT_IDLE_POWER</ffdc>
+    <ffdc>PORT_MAX_UTIL_POWER</ffdc>
+    <ffdc>RESULT</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
  <hwpError>
     <rc>RC_MSS_NO_PORT_POWER_LIMIT</rc>
     <description>
