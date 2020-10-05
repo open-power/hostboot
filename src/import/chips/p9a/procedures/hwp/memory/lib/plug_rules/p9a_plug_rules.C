@@ -384,6 +384,11 @@ fapi2::ReturnCode spd_latest_combined_revision(const fapi2::Target<fapi2::TARGET
                      mss::c_str(i_target), i_spd_combined_rev, i_latest_combined_rev );
 #endif
     }
+    else
+    {
+        FAPI_DBG("%s DDIMM has current SPD combined revision (0x%04X >= 0x%04X)",
+                 mss::c_str(i_target), i_spd_combined_rev, i_latest_combined_rev );
+    }
 
     return fapi2::FAPI2_RC_SUCCESS;
 
