@@ -762,6 +762,11 @@
     </attribute>
 
     <attribute>
+        <id>ATTR_PBAX_CHIPID</id>
+        <global/>
+    </attribute>
+
+    <attribute>
         <id>ATTR_CEN_MSS_CACHE_ENABLE</id>
         <no_export/>
         <default>0x1</default>

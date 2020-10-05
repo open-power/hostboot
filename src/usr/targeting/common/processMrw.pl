@@ -2852,8 +2852,10 @@ sub postProcessProcessor
     my $staticAbsLocationCode = getStaticAbsLocationCode($targetObj,$target);
     $targetObj->setAttribute($target, "STATIC_ABS_LOCATION_CODE",$staticAbsLocationCode);
 
+    my $systemName = $targetObj->getSystemName();
+
     ## Copy PCIE attributes from socket
-    ## Copy PBAX attributes from socket
+    ## Copy PBAX attributes from socket for Denali only
     foreach my $attr (sort (keys
            %{ $targetObj->getTarget($socket_target)->{TARGET}->{attribute} }))
     {
@@ -2861,25 +2863,27 @@ sub postProcessProcessor
         {
             $targetObj->copyAttribute($socket_target,$target,$attr);
         }
-        elsif ($attr =~/PBAX_BRDCST_ID_VECTOR/)
-        {
-            $targetObj->copyAttribute($socket_target,$target,$attr);
-        }
-        elsif ($attr =~/PBAX_CHIPID/)
-        {
-            $targetObj->copyAttribute($socket_target,$target,$attr);
-        }
-        elsif ($attr =~/PBAX_GROUPID/)
-        {
-            $targetObj->copyAttribute($socket_target,$target,$attr);
-        }
-        elsif ($attr =~/PM_PBAX_NODEID/)
-        {
-            $targetObj->copyAttribute($socket_target,$target,$attr);
-        }
         elsif ($attr =~/NO_APSS_PROC_POWER_VCS_VIO_WATTS/)
         {
             $targetObj->copyAttribute($socket_target,$target,$attr);
+        }
+        # TODO RTC 260629: Remove this leg of logic when all MRWs
+        # have switched to entirely consume these attributes from processor
+        # globals or instances, and update the PBAX comment above.
+        elsif ($systemName =~ m/DENALI/)
+        {
+            if ($attr =~/PBAX_BRDCST_ID_VECTOR/)
+            {
+                $targetObj->copyAttribute($socket_target,$target,$attr);
+            }
+            elsif ($attr =~/PBAX_CHIPID/)
+            {
+                $targetObj->copyAttribute($socket_target,$target,$attr);
+            }
+            elsif ($attr =~/PBAX_GROUPID/)
+            {
+                $targetObj->copyAttribute($socket_target,$target,$attr);
+            }
         }
     }
 
