@@ -790,7 +790,8 @@ p10_exit_cache_contained_run_mcc_initfile_xscom(
 
     l_scom_data |= (uint64_t)  0x1 << (64 - (62 + 1));
     //mask
-    l_scom_mask |= (uint64_t)  0x3 << (64 - (21 + 1));
+    l_scom_mask |= (uint64_t)  0x3 << (64 - (21 + 2));
+    l_scom_mask |= (uint64_t)  0xF << (64 - (40 + 4));
     l_scom_mask |= (uint64_t)  0x1 << (64 - (62 + 1));
 
     FAPI_TRY(p10_gen_xscom_init(
