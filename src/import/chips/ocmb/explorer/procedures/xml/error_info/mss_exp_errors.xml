@@ -556,7 +556,8 @@
       a FAILURE for enabling sensor cache
     </description>
     <ffdc>RSP_ID</ffdc>
-    <ffdc>ERROR_CODE</ffdc>
+    <ffdc>ERROR_CODE_1</ffdc>
+    <ffdc>ERROR_CODE_2</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>MEDIUM</priority>
