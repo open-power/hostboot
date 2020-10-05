@@ -49,7 +49,6 @@ namespace mss
 namespace pmic
 {
 
-
 ///
 /// @brief Determine if PMIC is disabled based on ATTR_MEM_PMIC_FORCE_N_MODE attribute setting
 ///
@@ -407,7 +406,7 @@ namespace status
 ///
 fapi2::ReturnCode check_for_vr_enable(
     const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_ocmb_target,
-    const fapi2::Target<fapi2::TargetType::TARGET_TYPE_PMIC>& i_pmic_target)
+    const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& i_pmic_target)
 {
     fapi2::buffer<uint8_t> l_vr_enable_buffer;
 
@@ -431,61 +430,88 @@ fapi_try_exit:
 }
 
 ///
+/// @brief Helper function for check_all_pmics, returns one RC
+///
+/// @param[in] i_ocmb_target OCMB targer
+/// @param[in] i_pmic_target PMIC target
+/// @return fapi2::ReturnCode Returns the first bad RC found, otherwise, success
+///
+fapi2::ReturnCode check_all_pmics_helper(
+    const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_ocmb_target,
+    const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& i_pmic_target)
+{
+    // Grab the OCMB c_str now in case needed in the assert,
+    // since we can only use one call to c_str per trace.
+    const char* l_ocmb_c_str = mss::c_str(i_ocmb_target);
+
+    bool l_pmic_error = false;
+    FAPI_TRY(check_for_vr_enable(i_ocmb_target, i_pmic_target),
+             "PMIC %s did not return enabled status", mss::c_str(i_pmic_target));
+
+    // Now check if we had any bad status bits
+    FAPI_TRY(mss::pmic::status::check_pmic(i_pmic_target, l_pmic_error));
+
+    FAPI_ASSERT(!l_pmic_error,
+                fapi2::PMIC_STATUS_ERRORS()
+                .set_OCMB_TARGET(i_ocmb_target)
+                .set_PMIC_TARGET(i_pmic_target),
+                "PMIC on OCMB %s had one or more status bits set after running pmic_enable(). "
+                "One of possibly several bad PMICs: %s",
+                l_ocmb_c_str, mss::c_str(i_pmic_target));
+
+    return fapi2::FAPI2_RC_SUCCESS;
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+///
 /// @brief Check the statuses of all PMICs present on the given OCMB chip
 ///
 /// @param[in] i_ocmb_target OCMB target
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if success, else error code
-/// @note the returned target is only valid if o_errors returns as true. Else, the target is an uninitialized blank target!
+/// @note To be used with 1U/2U Enable sequence
 ///
 fapi2::ReturnCode check_all_pmics(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_ocmb_target)
 {
-    const char* l_ocmb_c_str = mss::c_str(i_ocmb_target);
-
-    // Initialize returnable PMIC with a blank target. This blank target won't be used if there's no error.
-    // If there is an error, this will be overwritten with a valid erroneous PMIC
-    bool l_pmic_error = false;
-
-    fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
-
     // Start success so we can't log and return the same error in loop logic
-    fapi2::ReturnCode l_rc = fapi2::FAPI2_RC_SUCCESS;
+    // We will hold onto the first fail seen to return, and log any others
+    fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+    fapi2::ReturnCode l_rc_return = fapi2::FAPI2_RC_SUCCESS;
 
     // Check that the PMICs are enabled and without errors
     for (const auto& l_pmic : mss::find_targets<fapi2::TARGET_TYPE_PMIC>(i_ocmb_target))
     {
-        // Don't run if our N Mode configuration has been overridden to skip this pmic
-        // (in which case it was never enabled)
-        FAPI_TRY(run_if_not_disabled(l_pmic, [&i_ocmb_target, &l_pmic, &l_pmic_error]()
+        // Redundant set of current_err as this is set automatically by the
+        // return of the function in a case where there was a failure
+        fapi2::current_err = check_all_pmics_helper(i_ocmb_target, l_pmic);
+
+        // RC processing
+        if (fapi2::current_err != fapi2::FAPI2_RC_SUCCESS)
         {
-            FAPI_TRY_LAMBDA(check_for_vr_enable(i_ocmb_target, l_pmic));
-            FAPI_TRY_LAMBDA(mss::pmic::status::check_pmic(l_pmic, l_pmic_error));
-
-        fapi_try_exit_lambda:
-            return fapi2::current_err;
-        }));
-
-
-        FAPI_ASSERT_NOEXIT(!l_pmic_error,
-                           fapi2::PMIC_STATUS_ERRORS()
-                           .set_OCMB_TARGET(i_ocmb_target)
-                           .set_PMIC_TARGET(l_pmic),
-                           "PMIC on OCMB %s had one or more status bits set after running pmic_enable(). "
-                           "One of possibly several bad PMICs: %s",
-                           l_ocmb_c_str, mss::c_str(l_pmic));
-
-        if (l_rc != fapi2::FAPI2_RC_SUCCESS)
-        {
-            fapi2::logError(fapi2::current_err, fapi2::FAPI2_ERRL_SEV_UNRECOVERABLE);
+            // Is this the first error?
+            if (l_rc_return == fapi2::FAPI2_RC_SUCCESS)
+            {
+                // We will return this error
+                l_rc_return = fapi2::current_err;
+            }
+            else
+            {
+                // We already have an error to return, log this one.
+                fapi2::logError(fapi2::current_err, fapi2::FAPI2_ERRL_SEV_UNRECOVERABLE);
+            }
         }
 
         // Reset for next loop
-        l_rc = fapi2::current_err;
-        l_pmic_error = false;
         fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
     }
 
     // Else, exit on whatever RC we had
-    FAPI_TRY(l_rc);
+    FAPI_TRY(l_rc_return);
+
+    // If we get here, statuses are good
+    FAPI_INF("All post-enable statuses reported good for %s", mss::c_str(i_ocmb_target));
+
+    return fapi2::FAPI2_RC_SUCCESS;
 
 fapi_try_exit:
     return fapi2::current_err;

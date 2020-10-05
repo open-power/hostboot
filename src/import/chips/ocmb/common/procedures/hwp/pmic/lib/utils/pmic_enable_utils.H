@@ -56,11 +56,13 @@ namespace gpio
 /// @brief Poll for the GPIO input port ready on the bit corresponding to the PMIC pair
 ///
 /// @param[in] i_gpio_target GPIO target
-/// @param[in] i_pmic_pair_bit the PMIC pair bit
+/// @param[in] i_pmic_target PMIC target that the input line is connecting to
+/// @param[in] i_pmic_pair_bit the PMIC pair bit INPUT_PORT_REG_PMIC_PAIR0/1
 /// @return fapi2::ReturnCode
 ///
 fapi2::ReturnCode poll_input_port_ready(
     const fapi2::Target<fapi2::TARGET_TYPE_GENERICI2CSLAVE>& i_gpio_target,
+    const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& i_pmic_target,
     const mss::gpio::fields i_pmic_pair_bit);
 
 } // ns gpio
@@ -70,6 +72,7 @@ namespace pmic
 
 using ADC_REGS = mss::adc::regs;
 using ADC_FIELDS = mss::adc::fields;
+using CONSTS = mss::pmic::consts<mss::pmic::product::JEDEC_COMPLIANT>;
 
 // The sequences below and accompanying comments are
 // defined in section 6.1.1 of the Redundant Power on DIMM –
@@ -270,10 +273,7 @@ static const std::vector<std::pair<uint8_t, uint8_t>> ADC2_CH_INIT =
 ///
 struct target_info_redundancy
 {
-    fapi2::Target<fapi2::TARGET_TYPE_PMIC> iv_pmic0;
-    fapi2::Target<fapi2::TARGET_TYPE_PMIC> iv_pmic1;
-    fapi2::Target<fapi2::TARGET_TYPE_PMIC> iv_pmic2;
-    fapi2::Target<fapi2::TARGET_TYPE_PMIC> iv_pmic3;
+    std::map<size_t, fapi2::Target<fapi2::TARGET_TYPE_PMIC>> iv_pmic_map;
 
     fapi2::Target<fapi2::TARGET_TYPE_GENERICI2CSLAVE> iv_adc1;
     fapi2::Target<fapi2::TARGET_TYPE_GENERICI2CSLAVE> iv_adc2;
@@ -282,34 +282,59 @@ struct target_info_redundancy
 
     fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP> iv_ocmb;
 
+    target_info_redundancy() = delete;
+
     ///
     /// @brief Construct a new target_info_redundancy object
     ///
     /// @param[in] i_ocmb OCMB target
+    /// @param[out] o_rc ReturnCode in case of construction error
     /// @note pmic_enable.C plug rules ensures that a valid number of I2C and PMIC children targets exist
     ///
-    target_info_redundancy(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_ocmb)
+    target_info_redundancy(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_ocmb, fapi2::ReturnCode& o_rc)
     {
+        o_rc = fapi2::FAPI2_RC_SUCCESS;
+
         const auto I2C_DEVICES =
             mss::find_targets_sorted_by_index<fapi2::TARGET_TYPE_GENERICI2CSLAVE>(i_ocmb);
 
-        const auto PMICS =
-            mss::find_targets_sorted_by_index<fapi2::TARGET_TYPE_PMIC>(i_ocmb);
+        // The ATTR_REL_POS (mss::index) numbering is how PMIC HWP's have numbered the PMICs and how platform
+        // provides them. This varies from the "Redundant Power on DIMM – Functional Specification" numbering
+        for (const auto& l_pmic : mss::find_targets<fapi2::TARGET_TYPE_PMIC>(i_ocmb))
+        {
+            // mss::index grabs ATTR_REL_POS, returning 0-3 for these PMIC targets
+            iv_pmic_map.insert(std::make_pair(mss::index(l_pmic), l_pmic));
+        }
 
-        // This numbering is how PMIC HWP's have numbered the PMICs and how platform provides them.
-        // This varies from the "Redundant Power on DIMM – Functional Specification" numbering
-        iv_pmic0 = PMICS[mss::pmic::id::PMIC0];
-        iv_pmic1 = PMICS[mss::pmic::id::PMIC1];
-        iv_pmic2 = PMICS[mss::pmic::id::PMIC2]; // Redundant PMIC0
-        iv_pmic3 = PMICS[mss::pmic::id::PMIC3]; // Redundant PMIC1
+        const uint8_t NUM_PMICS = iv_pmic_map.size();
+        const uint8_t NUM_GENERICI2CSLAVE = I2C_DEVICES.size();
 
+        // If we are given a guaranteed failing list of targets (< 2 PMICs or < 4 GI2CS), exit now
+        FAPI_ASSERT((NUM_PMICS >= CONSTS::NUM_PRIMARY_PMICS) &&
+                    (NUM_GENERICI2CSLAVE == mss::generic_i2c_slave::NUM_TOTAL_DEVICES),
+                    fapi2::INVALID_NUMBER_OF_TARGETS()
+                    .set_OCMB_TARGET(i_ocmb)
+                    .set_NUM_PMIC(NUM_PMICS)
+                    .set_NUM_GENERICI2CSLAVE(NUM_GENERICI2CSLAVE),
+                    "%s pmic_enable requires 4 GENERICI2CSLAVE targets and at least 2 PMICs. "
+                    "Given %u PMICs, %u GENERIC2CSLAVE",
+                    mss::c_str(i_ocmb), NUM_PMICS, NUM_GENERICI2CSLAVE);
+
+        // Since we have all 4 and they are sorted, we already know what is where
         iv_adc1 = I2C_DEVICES[mss::generic_i2c_slave::ADC1];
         iv_adc2 = I2C_DEVICES[mss::generic_i2c_slave::ADC2];
         iv_gpio1 = I2C_DEVICES[mss::generic_i2c_slave::GPIO1];
         iv_gpio2 = I2C_DEVICES[mss::generic_i2c_slave::GPIO2];
 
         iv_ocmb = i_ocmb;
+
+        return;
+
+    fapi_try_exit:
+        o_rc = fapi2::current_err;
     }
+
+
 };
 
 ///
@@ -317,10 +342,15 @@ struct target_info_redundancy
 ///
 struct enable_fields_4u
 {
-    fapi2::Target<fapi2::TARGET_TYPE_PMIC> iv_pmic;
+    uint8_t iv_pmic_id;
     fapi2::Target<fapi2::TARGET_TYPE_GENERICI2CSLAVE> iv_gpio;
     uint8_t iv_input_port_bit;
 };
+
+///
+/// @brief Fields to loop over when VR-enabling redundant PMICs
+///
+using enable_loop_fields_t = std::array<mss::pmic::enable_fields_4u, CONSTS::NUM_PMICS_4U>;
 
 //-----------------------------------
 // SPD Biasing functions
@@ -712,10 +742,18 @@ fapi2::ReturnCode setup_adc1(const fapi2::Target<fapi2::TARGET_TYPE_GENERICI2CSL
 fapi2::ReturnCode setup_adc2(const fapi2::Target<fapi2::TARGET_TYPE_GENERICI2CSLAVE>& i_adc);
 
 ///
+/// @brief Set the up PMIC ADC to read VIN_BULK
+///
+/// @param[in] i_pmic_target PMIC target
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else unrecoverable error
+///
+fapi2::ReturnCode setup_adc_vin_bulk_read(const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& i_pmic_target);
+
+///
 /// @brief Validate that the efuse appears off by measuring VIN of the given PMIC
 ///
 /// @param[in] i_pmic_target PMIC target
-/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else unrecoverable error
 ///
 fapi2::ReturnCode validate_efuse_off(const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& i_pmic_target);
 
@@ -723,7 +761,7 @@ fapi2::ReturnCode validate_efuse_off(const fapi2::Target<fapi2::TARGET_TYPE_PMIC
 /// @brief Validate that the efuse appears on by measuring VIN of the given PMIC
 ///
 /// @param[in] i_pmic_target PMIC target
-/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else unrecoverable error
 ///
 fapi2::ReturnCode validate_efuse_on(const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& i_pmic_target);
 
@@ -739,16 +777,48 @@ fapi2::ReturnCode enable_efuse(const fapi2::Target<fapi2::TARGET_TYPE_GENERICI2C
 ///
 /// @brief Set the up PMIC pair and matching GPIO expander prior to PMIC enable
 ///
-/// @param[in] i_pmic0 PMIC target connected to GPIO expander
-/// @param[in] i_pmic1 PMIC target connected to GPIO expander
-/// @param[in] i_gpio GPIO expander
+/// @param[in] i_pmic_map PMIC position to target map
+/// @param[in] i_pmic_id_0 ID for "pmic0" (0/2) connected to i_gpio
+/// @param[in] i_pmic_id_1 ID for "pmic1" (1/3) connected to i_gpio
+/// @param[in] i_gpio GPIO target
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
 /// @note the PMIC pair is NOT a redundant pair, this is the independent pair connected to one GPIO
 ///
 fapi2::ReturnCode setup_pmic_pair_and_gpio(
-    const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& i_pmic0,
-    const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& i_pmic1,
+    const std::map<size_t, fapi2::Target<fapi2::TARGET_TYPE_PMIC>>& i_pmic_map,
+    const uint8_t i_pmic_id_0,
+    const uint8_t i_pmic_id_1,
     const fapi2::Target<fapi2::TARGET_TYPE_GENERICI2CSLAVE>& i_gpio);
+
+///
+/// @brief Step 1 of enable_with_redundancy: set up the GPIO EFUSE's
+///
+/// @param[in] i_target_info target info struct
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else unrecoverable error
+///
+fapi2::ReturnCode redundancy_gpio_efuse_setup(const target_info_redundancy& i_target_info);
+
+///
+/// @brief Kick off VR_ENABLE's for a redundancy PMIC config in the provided mode
+///
+/// @param[in] i_target_info target info struct
+/// @param[in] i_enable_loop_fields Parameters/fields to iterate over
+/// @param[in] i_mode enable-mode MANUAL/SPD
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else unrecoverable error
+///
+fapi2::ReturnCode redundancy_vr_enable_kickoff(
+    const target_info_redundancy& i_target_info,
+    const mss::pmic::enable_loop_fields_t& i_enable_loop_fields,
+    const mss::pmic::enable_mode i_mode);
+
+///
+/// @brief Check the statuses of all PMICs present on the given OCMB chip
+///
+/// @param[in] i_ocmb_target OCMB target
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if success, else error code
+/// @note To be used with 4U/Redundant Enable sequence
+///
+fapi2::ReturnCode redundancy_check_all_pmics(const target_info_redundancy& i_target_info);
 
 ///
 /// @brief Set the up GPIOs, ADCs, PMICs for a redundancy configuration / 4U
@@ -761,8 +831,64 @@ fapi2::ReturnCode enable_with_redundancy(
     const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_ocmb_target,
     const mss::pmic::enable_mode i_mode);
 
+///
+/// @brief Log recoverable errors for each PMIC that declared N-mode
+///
+/// @param[in] i_target_info Target info struct
+/// @param[in] i_n_mode_pmic n-mode states for each PMIC, present or not
+///
+void log_n_modes_as_recoverable_errors(
+    const target_info_redundancy& i_target_info,
+    const std::array<mss::pmic::n_mode, CONSTS::NUM_PMICS_4U>& i_n_mode_pmic);
+
+///
+/// @brief Assert the resulting n-mode states with the proper error FFDC
+///
+/// @param[in] i_target_info target info struct
+/// @param[in] i_n_mode_pmic n-mode states for each PMIC, present or not
+/// @param[in] i_mnfg_thresholds thresholds policy setting
+/// @return fapi2::ReturnCode iff no n-modes, else, relevant error FFDC
+///
+fapi2::ReturnCode assert_n_mode_states(
+    const target_info_redundancy& i_target_info,
+    const std::array<mss::pmic::n_mode, CONSTS::NUM_PMICS_4U>& i_n_mode_pmic,
+    const bool i_mnfg_thresholds);
+
+///
+/// @brief Get the mnfg thresholds policy setting
+///
+/// @param[out] o_thresholds thresholds policy setting
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
+///
+fapi2::ReturnCode get_mnfg_thresholds(bool& o_thresholds);
+
+///
+/// @brief Process the results of the N-Mode declarations (if any)
+///
+/// @param[in] i_target_info OCMB, PMIC and I2C target struct
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, or error code based on the
+///                           n mode results + policy settings
+///
+fapi2::ReturnCode process_n_mode_results(const target_info_redundancy& i_target_info);
+
 namespace check
 {
+
+///
+/// @brief Check for a bad pair given the n-mode states of the 4 4U pmics
+///
+/// @param[in] i_n_mode_pmic n-mode states of the 4 PMICs
+/// @return true/false pair bad
+///
+bool bad_pair(const std::array<mss::pmic::n_mode, CONSTS::NUM_PMICS_4U>& i_n_mode_pmic);
+
+///
+/// @brief Check if at least one PMIC has declared N mode
+///
+/// @param[in] i_n_mode_pmic n-mode states of the 4 PMICs
+/// @return true/false at least one pmic is bad
+///
+bool bad_any(const std::array<mss::pmic::n_mode, CONSTS::NUM_PMICS_4U>& i_n_mode_pmic);
 
 ///
 /// @brief Reset N Mode attributes
@@ -793,31 +919,6 @@ inline bool gpios_already_enabled_helper(const uint8_t i_config)
 {
     return (i_config == mss::gpio::fields::CONFIGURATION_IO_MAP);
 }
-
-///
-/// @brief Check for the given 4 PMICs that their n-mode declarations are safe to continue the procedure
-///
-/// @param[in] i_target_info OCMB, PMIC and I2C target struct
-/// @return fapi2::ReturnCode RC_PMIC_REDUNDANT_PAIR_DOWN if pair declares n-mode, else SUCCESS if no issue
-///
-fapi2::ReturnCode valid_n_mode(const target_info_redundancy& i_target_info);
-
-///
-/// @brief Check for valid N-mode given the status of all 4 PMICs, assert out otherwise
-///
-/// @param[in] i_ocmb_target OCMB target (for FFDC)
-/// @param[in] i_n_mode_pmic0 N-mode state for pmic
-/// @param[in] i_n_mode_pmic1 N-mode state for pmic
-/// @param[in] i_n_mode_pmic2 N-mode state for pmic
-/// @param[in] i_n_mode_pmic3 N-mode state for pmic
-/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else RC_PMIC_REDUNDANT_PAIR_DOWN
-///
-fapi2::ReturnCode valid_n_mode_helper(
-    const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_ocmb_target,
-    const uint8_t i_n_mode_pmic0,
-    const uint8_t i_n_mode_pmic1,
-    const uint8_t i_n_mode_pmic2,
-    const uint8_t i_n_mode_pmic3);
 
 ///
 /// @brief Check that the vendor ID register and attribute match

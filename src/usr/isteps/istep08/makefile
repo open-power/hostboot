@@ -77,6 +77,7 @@ VPATH += ${PROCEDURES_PATH}/hwp/lib
 VPATH += ${COMMON_PATH_OCMB}/pmic/
 VPATH += ${COMMON_PATH_OCMB}/procedures/hwp/pmic/
 VPATH += ${COMMON_PATH_OCMB}/procedures/hwp/pmic/lib/utils/
+VPATH += ${COMMON_PATH_OCMB}/procedures/hwp/pmic/lib/
 VPATH += ${COMMON_PATH_OCMB}/include/
 
 include ${ROOTPATH}/procedure.rules.mk
@@ -131,5 +132,6 @@ include $(PROCEDURES_PATH)/hwp/pm/p9_pm_utils.mk
 OBJS += $(if $(CONFIG_AXONE),pmic_common_utils.o,)
 OBJS += $(if $(CONFIG_AXONE),pmic_enable_utils.o,)
 OBJS += $(if $(CONFIG_AXONE),pmic_enable.o,)
+OBJS += $(if $(CONFIG_AXONE),mss_pmic_attribute_accessors_manual.o,)
 
 include ${ROOTPATH}/config.mk
