@@ -281,13 +281,14 @@
   </hwpError>
 
   <hwpError>
-    <rc>RC_INVALID_NUMBER_OF_I2C_DEVICES</rc>
+    <rc>RC_INVALID_NUMBER_OF_TARGETS</rc>
     <description>
-       Expected 4 GENERICI2CSLAVE targets: 2 GPIO expanders and 2 ADCs.
-       Platform did not provide 4 devices.
+       Expected 4 GENERICI2CSLAVE targets and at least 2 PMICs, otherwise,
+       we can not properly enable the PMICs on the 4U DIMM.
     </description>
     <ffdc>OCMB_TARGET</ffdc>
-    <ffdc>NUM_I2C_DEVICES</ffdc>
+    <ffdc>NUM_GENERICI2CSLAVE</ffdc>
+    <ffdc>NUM_PMIC</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>MEDIUM</priority>
@@ -296,6 +297,9 @@
       <target>OCMB_TARGET</target>
       <priority>HIGH</priority>
     </callout>
+    <deconfigure>
+      <target>OCMB_TARGET</target>
+    </deconfigure>
   </hwpError>
 
   <hwpError>
@@ -318,7 +322,7 @@
   </hwpError>
 
   <hwpError>
-    <rc>RC_PMIC_REDUNDANT_PAIR_DOWN</rc>
+    <rc>RC_PMIC_REDUNDANCY_FAIL</rc>
     <description>
        Both PMICs in a redundant pair had errors which caused each to drop into N-Mode.
        Neither PMIC will be able to be VR_ENABLE'd
@@ -342,6 +346,46 @@
     <gard>
       <target>OCMB_TARGET</target>
     </gard>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_PMIC_DROPPED_INTO_N_MODE</rc>
+    <description>
+       The provided PMIC_ID on OCMB_TARGET had errors which has caused a drop into N-Mode.
+       Should be logged as recoverable, only a bad status resulting from multiple
+       PMICs would cause a procedure failure via a different error.
+    </description>
+    <ffdc>OCMB_TARGET</ffdc>
+    <ffdc>PMIC_ID</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>MEDIUM</priority>
+    </callout>
+    <callout>
+      <target>OCMB_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_DIMM_RUNNING_IN_N_MODE</rc>
+    <description>
+       One of the 4 PMICs had errors which caused the DIMM to drop into N-Mode.
+       Should be logged as recoverable unless the thresholds policy setting overrides this.
+    </description>
+    <ffdc>OCMB_TARGET</ffdc>
+    <ffdc>N_MODE_PMIC0</ffdc>
+    <ffdc>N_MODE_PMIC1</ffdc>
+    <ffdc>N_MODE_PMIC2</ffdc>
+    <ffdc>N_MODE_PMIC3</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>MEDIUM</priority>
+    </callout>
+    <callout>
+      <target>OCMB_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
 
   <hwpError>

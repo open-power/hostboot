@@ -144,25 +144,41 @@ inline std::vector<fapi2::Target<fapi2::TARGET_TYPE_PMIC>> get_valid_pmics_for_i
 fapi2::ReturnCode disabled(const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& i_pmic_target, bool& o_disabled);
 
 ///
-/// @brief Run the provided function
+/// @brief Run the provided function if the PMIC is present and not overridden to N-Mode
 ///
 /// @tparam F function type (expected to be lambda)
-/// @param[in] i_pmic_target PMIC target
+/// @param[in] i_pmic_map Map of pmic ID to pmic target
+/// @param[in] i_pmic_id desired pmic ID to key on
 /// @param[in] i_func lambda function to run if given PMIC is not disabled
-/// @return fapi2::ReturnCode
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
 ///
 template<typename F>
-fapi2::ReturnCode run_if_not_disabled(
-    const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& i_pmic_target,
-    const F&& i_func)
+fapi2::ReturnCode run_if_present(
+    const std::map<size_t, fapi2::Target<fapi2::TARGET_TYPE_PMIC>>& i_pmic_map,
+    const uint8_t i_pmic_id,
+    const F i_func)
 {
+    // No const here due to the HB implementation of map/iterator: Does not allow for
+    // const iterators to perform the -> operator (has trouble de-const'ing)
+    auto l_pmic_it = i_pmic_map.find(i_pmic_id);
     bool l_disabled = false;
-    FAPI_TRY(mss::pmic::disabled(i_pmic_target, l_disabled));
 
-    // Called with arguments pre-provided via capture
+    // If we don't have the PMIC in the map, then platform never provided it as present,
+    // so we should just exit, do not run i_func()
+    if ( l_pmic_it == i_pmic_map.end() )
+    {
+        return fapi2::FAPI2_RC_SUCCESS;
+    }
+
+    const auto& l_pmic = l_pmic_it->second;
+
+    // PMIC does exist, now see if it was overridden to disabled via ATTR_PMIC_FORCE_N_MODE
+    FAPI_TRY(mss::pmic::disabled(l_pmic, l_disabled));
+
+    // PMIC target provided here. Other arguments to be provided via capture list
     if (!l_disabled)
     {
-        FAPI_TRY(i_func());
+        FAPI_TRY(i_func(l_pmic));
     }
 
 fapi_try_exit:
@@ -395,14 +411,25 @@ static const std::vector<std::pair<uint8_t, std::vector<status_field>>> STATUS_F
 ///
 fapi2::ReturnCode check_for_vr_enable(
     const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_ocmb_target,
-    const fapi2::Target<fapi2::TargetType::TARGET_TYPE_PMIC>& i_pmic_target);
+    const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& i_pmic_target);
+
+///
+/// @brief Helper function for check_all_pmics, returns one RC
+///
+/// @param[in] i_ocmb_target OCMB targer
+/// @param[in] i_pmic_target PMIC target
+/// @return fapi2::ReturnCode Returns the first bad RC found, otherwise, success
+///
+fapi2::ReturnCode check_all_pmics_helper(
+    const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_ocmb_target,
+    const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& i_pmic_target);
 
 ///
 /// @brief Check the statuses of all PMICs present on the given OCMB chip
 ///
 /// @param[in] i_ocmb_target OCMB target
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if success, else error code
-/// @note the returned target is only valid if o_errors returns as true. Else, the target is an uninitialized blank target!
+/// @note To be used with 1U/2U Enable sequence
 ///
 fapi2::ReturnCode check_all_pmics(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_ocmb_target);
 

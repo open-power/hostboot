@@ -30,7 +30,7 @@
 // *HWP HWP Owner: Mark Pizzutillo <mark.pizzutillo@ibm.com>
 // *HWP HWP Backup: Louis Stermole <stermole@us.ibm.com>
 // *HWP Team: Memory
-// *HWP Level: 1
+// *HWP Level: 3
 // *HWP Consumed by: FSP:HB
 
 #ifndef _MSS_PMIC_ATTR_ACCESSORS_MANUAL_H_
@@ -39,6 +39,7 @@
 #include <fapi2.H>
 #include <mss_pmic_attribute_getters.H>
 #include <mss_pmic_attribute_setters.H>
+#include <lib/utils/pmic_consts.H>
 
 namespace mss
 {
@@ -309,6 +310,33 @@ static constexpr pmic_attr_ptr get_phase_comb[] =
     mss::attr::get_pmic0_phase_comb,
     mss::attr::get_pmic1_phase_comb
 };
+
+///
+/// @brief Get pmic n mode state for the given PMIC ID
+///
+/// @param[in] i_ocmb OCMB target
+/// @param[in] i_pmic_id PMIC ID [0-3]
+/// @param[out] o_n_mode N-Mode state
+/// @return fapi2::ReturnCode
+///
+fapi2::ReturnCode get_n_mode_helper(
+    const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_ocmb,
+    const uint8_t i_pmic_id,
+    mss::pmic::n_mode& o_n_mode);
+
+///
+/// @brief Set pmic n mode state for the given PMIC ID
+///
+/// @param[in] i_ocmb OCMB target
+/// @param[in] i_pmic_id PMIC ID [0-3]
+/// @param[in] i_n_mode N-Mode state
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
+///
+fapi2::ReturnCode set_n_mode_helper(
+    const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_ocmb,
+    const uint8_t i_pmic_id,
+    const mss::pmic::n_mode i_n_mode);
+
 } // nss attr
 } // ns mss
 

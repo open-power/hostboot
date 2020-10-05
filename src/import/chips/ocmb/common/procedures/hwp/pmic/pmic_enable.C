@@ -41,6 +41,7 @@
 #include <lib/utils/pmic_consts.H>
 #include <generic/memory/lib/utils/shared/mss_generic_consts.H>
 #include <generic/memory/lib/utils/c_str.H>
+#include <mss_generic_attribute_getters.H>
 
 extern "C"
 {
@@ -53,6 +54,7 @@ extern "C"
     fapi2::ReturnCode pmic_enable(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_ocmb_target,
                                   const mss::pmic::enable_mode i_mode)
     {
+        uint8_t l_module_height = 0;
         auto l_pmics = mss::find_targets_sorted_by_index<fapi2::TARGET_TYPE_PMIC>(i_ocmb_target);
 
         // Check that we have PMICs (we wouldn't on gemini, for example)
@@ -65,28 +67,20 @@ extern "C"
         // Disable PMICs and clear status bits so we are starting at a known off state
         FAPI_TRY(mss::pmic::disable_and_reset_pmics(i_ocmb_target));
 
-        //
-        // TK - plug rules here in next commit for 4U attribute/target validation
-        //
+        // Grab the module-height attribute to determine 1U/2U vs 4U
+        FAPI_TRY(mss::attr::get_dram_module_height(i_ocmb_target, l_module_height));
 
-        if (mss::find_targets<fapi2::TARGET_TYPE_GENERICI2CSLAVE>(i_ocmb_target).size() > 0)
+        // Kick off the matching enable procedure
+        if (l_module_height == fapi2::ENUM_ATTR_MEM_EFF_DRAM_MODULE_HEIGHT_4U)
         {
-            // We have I2C slave devices, so we will do the "4U" redundancy enable process
+            FAPI_INF("Enabling PMICs on %s with Redundancy/4U Mode", mss::c_str(i_ocmb_target));
             FAPI_TRY(mss::pmic::enable_with_redundancy(i_ocmb_target, i_mode));
         }
         else
         {
+            FAPI_INF("Enabling PMICs on %s with 1U/2U Mode", mss::c_str(i_ocmb_target));
             FAPI_TRY(mss::pmic::enable_1u_2u(i_ocmb_target, i_mode));
         }
-
-        // If we're enabling via internal settings, we can just run VR ENABLE down the line
-
-        // Check that all the PMIC statuses are good post-enable
-        FAPI_TRY(mss::pmic::status::check_all_pmics(i_ocmb_target),
-                 "Bad statuses returned, or error checking statuses of PMICs on %s", mss::c_str(i_ocmb_target));
-
-        // If we get here, statuses are good
-        FAPI_INF("All status codes were OK for PMICs on %s", mss::c_str(i_ocmb_target));
 
         return fapi2::FAPI2_RC_SUCCESS;
 

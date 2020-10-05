@@ -44,6 +44,15 @@ namespace pmic
 {
 
 ///
+/// @brief N-mode states
+///
+enum n_mode : bool
+{
+    N_MODE          = true,
+    N_PLUS_1_MODE   = false,
+};
+
+///
 /// @brief Different enable operations
 ///
 enum enable_mode
@@ -64,9 +73,9 @@ enum module_height
 };
 
 ///
-/// @brief IDs for PMIC0 or PMIC1
+/// @brief IDs for PMIC0-3
 ///
-enum id
+enum id : uint8_t
 {
     PMIC0 = 0,
     PMIC1 = 1,

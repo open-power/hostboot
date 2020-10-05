@@ -45,6 +45,7 @@
 #include <generic/memory/lib/utils/find.H>
 #include <mss_generic_attribute_getters.H>
 #include <mss_pmic_attribute_accessors_manual.H>
+#include <mss_generic_system_attribute_getters.H>
 #include <generic/memory/lib/utils/poll.H>
 
 namespace mss
@@ -56,19 +57,23 @@ namespace gpio
 /// @brief Poll for the GPIO input port ready on the bit corresponding to the PMIC pair
 ///
 /// @param[in] i_gpio_target GPIO target
+/// @param[in] i_pmic_target PMIC target that the input line is connecting to
 /// @param[in] i_pmic_pair_bit the PMIC pair bit INPUT_PORT_REG_PMIC_PAIR0/1
 /// @return fapi2::ReturnCode
 ///
 fapi2::ReturnCode poll_input_port_ready(
     const fapi2::Target<fapi2::TARGET_TYPE_GENERICI2CSLAVE>& i_gpio_target,
+    const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& i_pmic_target,
     const uint8_t i_pmic_pair_bit)
 {
+    const char* l_gpio_string = mss::c_str(i_gpio_target);
+
     // We want a 50ms timeout, so let's poll 10 times at 5ms a piece
     mss::poll_parameters l_poll_params;
     l_poll_params.iv_delay = 5 * mss::common_timings::DELAY_1MS;
     l_poll_params.iv_poll_count = 10;
 
-    FAPI_ASSERT( mss::poll(i_gpio_target, l_poll_params, [&i_gpio_target, i_pmic_pair_bit]()->bool
+    const bool l_success = mss::poll(i_gpio_target, l_poll_params, [&i_gpio_target, i_pmic_pair_bit, l_gpio_string]()->bool
     {
         fapi2::buffer<uint8_t> l_reg_contents;
 
@@ -84,18 +89,32 @@ fapi2::ReturnCode poll_input_port_ready(
         return l_reg_contents.getBit(i_pmic_pair_bit);
 
     fapi_try_exit:
-        // No ack, return false and continue polling
+        // Getting here implies we've nacked, which should not occur unless the GPIO has suddenly
+        // died in the last few milliseconds. We'll throw a FAPI_ERR in for debug purposes
+        // (as now we're guaranteed to not get past this istep), but this should never occur.
+        FAPI_ERR("%s did not ACK, will cause PMICs to drop into N-Mode", l_gpio_string);
         return false;
-    }),
-    fapi2::MSS_PMIC_I2C_POLLING_TIMEOUT()
-    .set_TARGET(i_gpio_target)
-    .set_FUNCTION(mss::POLL_INPUT_PORT_READY),
-    "I2C read from %s either did not ACK or did not respond with good status",
-    mss::c_str(i_gpio_target) );
+    });
 
+    if (!l_success)
+    {
+        fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+
+        FAPI_DBG("%s Did not report input bit %u ready, %s does not have 12V, declaring N-Mode",
+                 l_gpio_string, i_pmic_pair_bit, mss::c_str(i_pmic_target));
+
+        // As the trace implies, now we will declare N-mode
+        FAPI_TRY(mss::attr::set_n_mode_helper(
+                     mss::find_target<fapi2::TARGET_TYPE_OCMB_CHIP>(i_pmic_target),
+                     mss::index(i_pmic_target),
+                     mss::pmic::n_mode::N_MODE));
+    }
+
+    // If we get here, we are good
     return fapi2::FAPI2_RC_SUCCESS;
 
 fapi_try_exit:
+    // This should only be reached in the case of an attribute set error
     return fapi2::current_err;
 }
 
@@ -548,42 +567,6 @@ fapi_try_exit:
 }
 
 ///
-/// @brief Enable pmics using manual mode (direct VR enable, no SPD fields)
-/// @param[in] i_pmics vector of PMICs to enable
-/// @return FAPI2_RC_SUCCESS iff success, else error
-///
-fapi2::ReturnCode enable_manual(const std::vector<fapi2::Target<fapi2::TARGET_TYPE_PMIC>>& i_pmics)
-{
-    using CONSTS = mss::pmic::consts<mss::pmic::product::JEDEC_COMPLIANT>;
-    using REGS = pmicRegs<mss::pmic::product::JEDEC_COMPLIANT>;
-    using FIELDS = pmicFields<mss::pmic::product::JEDEC_COMPLIANT>;
-
-    for (const auto& l_pmic : i_pmics)
-    {
-        fapi2::buffer<uint8_t> l_programmable_mode;
-        l_programmable_mode.writeBit<FIELDS::R2F_SECURE_MODE>(CONSTS::PROGRAMMABLE_MODE);
-
-        FAPI_INF("Enabling PMIC %s with default settings", mss::c_str(l_pmic));
-
-        // Check to make sure VIN_BULK measures above minimum voltage tolerance, ensuring the PMIC
-        // will function as expected
-        FAPI_TRY(mss::pmic::check_vin_bulk_good(l_pmic),
-                 "%s pmic_enable: check for VIN_BULK good either failed, or was below minimum voltage tolerance",
-                 mss::c_str(l_pmic));
-
-        // Enable programmable mode
-        FAPI_TRY(mss::pmic::i2c::reg_write_reverse_buffer(l_pmic, REGS::R2F, l_programmable_mode));
-
-        // Start VR Enable
-        FAPI_TRY(mss::pmic::start_vr_enable(l_pmic),
-                 "Error starting VR_ENABLE on PMIC %s", mss::c_str(l_pmic));
-    }
-
-fapi_try_exit:
-    return fapi2::current_err;
-}
-
-///
 /// @brief Function to enable PMIC using SPD settings
 ///
 /// @param[in] i_pmic_target - the pmic target
@@ -746,6 +729,10 @@ fapi2::ReturnCode enable_1u_2u(
         }
     }
 
+    // Check that all the PMIC statuses are good post-enable
+    FAPI_TRY(mss::pmic::status::check_all_pmics(i_ocmb_target),
+             "Bad statuses returned, or error checking statuses of PMICs on %s", mss::c_str(i_ocmb_target));
+
     return fapi2::FAPI2_RC_SUCCESS;
 
 fapi_try_exit:
@@ -789,15 +776,65 @@ fapi_try_exit:
 }
 
 ///
+/// @brief Set the up PMIC ADC to read VIN_BULK
+///
+/// @param[in] i_pmic_target PMIC target
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else unrecoverable error
+/// @note Will set N-Mode attribute on i_pmic_target in case of recoverable error.
+///       N-mode states will be handled in process_n_mode_results() later
+///
+fapi2::ReturnCode setup_adc_vin_bulk_read(const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& i_pmic_target)
+{
+    using CONSTS = mss::pmic::consts<mss::pmic::product::JEDEC_COMPLIANT>;
+    using REGS = pmicRegs<mss::pmic::product::JEDEC_COMPLIANT>;
+
+    // Set up PMIC to sample VIN_BULK
+    fapi2::buffer<uint8_t> l_reg_contents(CONSTS::R30_SAMPLE_VIN_BULK_ENABLE_ADC);
+    FAPI_TRY(mss::pmic::i2c::reg_write(i_pmic_target, REGS::R30, l_reg_contents));
+
+    return fapi2::FAPI2_RC_SUCCESS;
+
+fapi_try_exit:
+
+    // Log as recoverable, but set N mode attribute. We will handle these later
+    // when we know exactly which pmics have failed
+    fapi2::logError(fapi2::current_err, fapi2::FAPI2_ERRL_SEV_RECOVERED);
+    fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+
+    return mss::attr::set_n_mode_helper(
+               mss::find_target<fapi2::TARGET_TYPE_OCMB_CHIP>(i_pmic_target),
+               mss::index(i_pmic_target),
+               mss::pmic::n_mode::N_MODE);
+}
+
+///
 /// @brief Validate that the efuse appears off by measuring VIN of the given PMIC
 ///
 /// @param[in] i_pmic_target PMIC target
-/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else unrecoverable error
+/// @note Will set N-Mode attribute on i_pmic_target in case of recoverable error.
+///       N-mode states will be handled in process_n_mode_results() later
 ///
 fapi2::ReturnCode validate_efuse_off(const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& i_pmic_target)
 {
     fapi2::buffer<uint8_t> l_reg_contents;
-    FAPI_TRY(mss::pmic::i2c::reg_read(i_pmic_target, REGS::R31, l_reg_contents));
+    fapi2::ReturnCode l_rc = mss::pmic::i2c::reg_read(i_pmic_target, REGS::R31, l_reg_contents);
+
+    // Check the error on the reg_read
+    if (l_rc != fapi2::FAPI2_RC_SUCCESS)
+    {
+        // Reset current_err
+        fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+
+        // Log as recovered, but set N mode attribute. We will handle these later
+        // when we know exactly which pmics have failed
+        fapi2::logError(l_rc, fapi2::FAPI2_ERRL_SEV_RECOVERED);
+
+        return mss::attr::set_n_mode_helper(
+                   mss::find_target<fapi2::TARGET_TYPE_OCMB_CHIP>(i_pmic_target),
+                   mss::index(i_pmic_target),
+                   mss::pmic::n_mode::N_MODE);
+    }
 
     FAPI_DBG("R31 VIN_BULK Reading: 0x%02X", l_reg_contents);
 
@@ -807,24 +844,44 @@ fapi2::ReturnCode validate_efuse_off(const fapi2::Target<fapi2::TARGET_TYPE_PMIC
     if (l_reg_contents > CONSTS::R31_VIN_BULK_EFUSE_OFF_HIGH)
     {
         // FAPI INF as we will have a fail-in-place model. Don't alert the user with an ERR
-        FAPI_MFG("EFUSE for %s appears blown, declaring N-Mode", mss::c_str(i_pmic_target));
-        FAPI_TRY(mss::attr::set_pmic_n_mode(i_pmic_target, fapi2::ENUM_ATTR_MEM_PMIC_4U_N_MODE_N_MODE));
+        FAPI_DBG("EFUSE for %s appears blown, declaring N-Mode", mss::c_str(i_pmic_target));
+        return mss::attr::set_n_mode_helper(
+                   mss::find_target<fapi2::TARGET_TYPE_OCMB_CHIP>(i_pmic_target),
+                   mss::index(i_pmic_target),
+                   mss::pmic::n_mode::N_MODE);
     }
 
-fapi_try_exit:
-    return fapi2::current_err;
+    return fapi2::FAPI2_RC_SUCCESS;
 };
 
 ///
 /// @brief Validate that the efuse appears on by measuring VIN of the given PMIC
 ///
 /// @param[in] i_pmic_target PMIC target
-/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else unrecoverable error
+/// @note Will set N-Mode attribute on i_pmic_target in case of recoverable error.
+///       N-mode states will be handled in process_n_mode_results() later
 ///
 fapi2::ReturnCode validate_efuse_on(const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& i_pmic_target)
 {
     fapi2::buffer<uint8_t> l_reg_contents;
-    FAPI_TRY(mss::pmic::i2c::reg_read(i_pmic_target, REGS::R31, l_reg_contents));
+    fapi2::ReturnCode l_rc = mss::pmic::i2c::reg_read(i_pmic_target, REGS::R31, l_reg_contents);
+
+    // Check the error on the reg_read
+    if (l_rc != fapi2::FAPI2_RC_SUCCESS)
+    {
+        // Reset current_err
+        fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+
+        // Log as recovered, but set N mode attribute. We will handle these later
+        // when we know exactly which pmics have failed
+        fapi2::logError(l_rc, fapi2::FAPI2_ERRL_SEV_RECOVERED);
+
+        return mss::attr::set_n_mode_helper(
+                   mss::find_target<fapi2::TARGET_TYPE_OCMB_CHIP>(i_pmic_target),
+                   mss::index(i_pmic_target),
+                   mss::pmic::n_mode::N_MODE);
+    }
 
     FAPI_DBG("R31 VIN_BULK Reading: 0x%02X", l_reg_contents);
 
@@ -834,12 +891,15 @@ fapi2::ReturnCode validate_efuse_on(const fapi2::Target<fapi2::TARGET_TYPE_PMIC>
     if ((l_reg_contents < CONSTS::R31_VIN_BULK_EFUSE_ON_LOW) ||
         (l_reg_contents > CONSTS::R31_VIN_BULK_EFUSE_ON_HIGH))
     {
-        FAPI_MFG("EFUSE for %s did not appear on, declaring N-Mode", mss::c_str(i_pmic_target));
-        FAPI_TRY(mss::attr::set_pmic_n_mode(i_pmic_target, fapi2::ENUM_ATTR_MEM_PMIC_4U_N_MODE_N_MODE));
+        FAPI_DBG("EFUSE for %s did not appear on, declaring N-Mode", mss::c_str(i_pmic_target));
+
+        return mss::attr::set_n_mode_helper(
+                   mss::find_target<fapi2::TARGET_TYPE_OCMB_CHIP>(i_pmic_target),
+                   mss::index(i_pmic_target),
+                   mss::pmic::n_mode::N_MODE);
     }
 
-fapi_try_exit:
-    return fapi2::current_err;
+    return fapi2::FAPI2_RC_SUCCESS;
 }
 
 ///
@@ -874,34 +934,35 @@ fapi_try_exit:
 ///
 /// @brief Set the up PMIC pair and matching GPIO expander prior to PMIC enable
 ///
-/// @param[in] i_pmic0 PMIC target connected to GPIO expander
-/// @param[in] i_pmic1 PMIC target connected to GPIO expander
-/// @param[in] i_gpio GPIO expander
+/// @param[in] i_pmic_map PMIC position to target map
+/// @param[in] i_pmic_id_0 ID for "pmic0" (0/2) connected to i_gpio
+/// @param[in] i_pmic_id_1 ID for "pmic1" (1/3) connected to i_gpio
+/// @param[in] i_gpio GPIO target
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
 /// @note the PMIC pair is NOT a redundant pair, this is the independent pair connected to one GPIO
 ///
 fapi2::ReturnCode setup_pmic_pair_and_gpio(
-    const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& i_pmic0,
-    const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& i_pmic1,
+    const std::map<size_t, fapi2::Target<fapi2::TARGET_TYPE_PMIC>>& i_pmic_map,
+    const uint8_t i_pmic_id_0,
+    const uint8_t i_pmic_id_1,
     const fapi2::Target<fapi2::TARGET_TYPE_GENERICI2CSLAVE>& i_gpio)
 {
-    using CONSTS = mss::pmic::consts<mss::pmic::product::JEDEC_COMPLIANT>;
-    using REGS = pmicRegs<mss::pmic::product::JEDEC_COMPLIANT>;
-
     // The sequence below is defined in section 6.1.1 of the
     // Redundant Power on DIMM – Functional Specification document
 
-    // Set up PMIC0 & PMIC1 to sample VIN_BULK
-    fapi2::buffer<uint8_t> l_reg_contents(CONSTS::R30_SAMPLE_VIN_BULK_ENABLE_ADC);
-
-    FAPI_TRY(run_if_not_disabled(i_pmic0, [&i_pmic0, &l_reg_contents]()
+    // First set up the ADCs on the PMICs to measure VIN_BULK
+    FAPI_TRY(run_if_present(i_pmic_map, i_pmic_id_0, [&i_pmic_map, i_pmic_id_0]
+                            (const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& i_pmic)
     {
-        return mss::pmic::i2c::reg_write(i_pmic0, REGS::R30, l_reg_contents);
+        // PMIC0/2
+        return mss::pmic::setup_adc_vin_bulk_read(i_pmic);
     }));
 
-    FAPI_TRY(run_if_not_disabled(i_pmic1, [&i_pmic1, &l_reg_contents]()
+    FAPI_TRY(run_if_present(i_pmic_map, i_pmic_id_1, [&i_pmic_map, i_pmic_id_1]
+                            (const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& i_pmic)
     {
-        return mss::pmic::i2c::reg_write(i_pmic1, REGS::R30, l_reg_contents);
+        // PMIC1/3
+        return mss::pmic::setup_adc_vin_bulk_read(i_pmic);
     }));
 
     // Delay 25ms
@@ -910,17 +971,22 @@ fapi2::ReturnCode setup_pmic_pair_and_gpio(
     // Now, sampling VIN_BULK, which is protected by a fuse, we check that VIN_BULK does not read
     // more than 0.28V. If it does, then the fuse must be bad/blown, and we will declare N-mode.
 
-    FAPI_TRY(run_if_not_disabled(i_pmic0, [&i_pmic0]()
+    // Now, validate the EFUSE readings for both PMICs
+    FAPI_TRY(run_if_present(i_pmic_map, i_pmic_id_0, [&i_pmic_map, i_pmic_id_0]
+                            (const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& i_pmic)
     {
-        return mss::pmic::validate_efuse_off(i_pmic0);
+        // PMIC0/2
+        return mss::pmic::validate_efuse_off(i_pmic);
     }));
 
-    FAPI_TRY(run_if_not_disabled(i_pmic1, [&i_pmic1]()
+    FAPI_TRY(run_if_present(i_pmic_map, i_pmic_id_1, [&i_pmic_map, i_pmic_id_1]
+                            (const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& i_pmic)
     {
-        return mss::pmic::validate_efuse_off(i_pmic1);
+        // PMIC1/3
+        return mss::pmic::validate_efuse_off(i_pmic);
     }));
 
-    // Enable E-Fuse
+    // Enable E-Fuse via GPIO
     FAPI_TRY(enable_efuse(i_gpio));
 
     // Delay 30ms looked consistantly good in testing
@@ -928,22 +994,264 @@ fapi2::ReturnCode setup_pmic_pair_and_gpio(
 
     // E-Fuse turned on, so now we should expect to see VIN_BULK within the valid on-range,
     // else, outside limit we will declare N-mode
-    FAPI_TRY(run_if_not_disabled(i_pmic0, [&i_pmic0]()
+    FAPI_TRY(run_if_present(i_pmic_map, i_pmic_id_0, [&i_pmic_map, i_pmic_id_0]
+                            (const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& i_pmic)
     {
-        return mss::pmic::validate_efuse_on(i_pmic0);
+        // PMIC0/2
+        return mss::pmic::validate_efuse_on(i_pmic);
     }));
 
-    FAPI_TRY(run_if_not_disabled(i_pmic1, [&i_pmic1]()
+    FAPI_TRY(run_if_present(i_pmic_map, i_pmic_id_1, [&i_pmic_map, i_pmic_id_1]
+                            (const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& i_pmic)
     {
-        return mss::pmic::validate_efuse_on(i_pmic1);
+        // PMIC1/3
+        return mss::pmic::validate_efuse_on(i_pmic);
     }));
 
 fapi_try_exit:
     return fapi2::current_err;
 }
 
+///
+/// @brief Log recoverable errors for each PMIC that declared N-mode
+///
+/// @param[in] i_target_info Target info struct
+/// @param[in] i_n_mode_pmic n-mode states for each PMIC, present or not
+///
+void log_n_modes_as_recoverable_errors(
+    const target_info_redundancy& i_target_info,
+    const std::array<mss::pmic::n_mode, CONSTS::NUM_PMICS_4U>& i_n_mode_pmic)
+{
+    for (uint8_t l_idx = PMIC0; l_idx < CONSTS::NUM_PMICS_4U; ++l_idx)
+    {
+        FAPI_ASSERT_NOEXIT((i_n_mode_pmic[l_idx] == mss::pmic::n_mode::N_PLUS_1_MODE),
+                           fapi2::PMIC_DROPPED_INTO_N_MODE()
+                           .set_OCMB_TARGET(i_target_info.iv_ocmb)
+                           .set_PMIC_ID(l_idx),
+                           "%s PMIC%u had errors which caused a drop into N-Mode",
+                           mss::c_str(i_target_info.iv_ocmb), l_idx);
+
+        // Log that error, set back to success
+        if (fapi2::current_err != fapi2::FAPI2_RC_SUCCESS)
+        {
+            fapi2::logError(fapi2::current_err, fapi2::FAPI2_ERRL_SEV_RECOVERED);
+            fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+        }
+    }
+}
+
+///
+/// @brief Assert the resulting n-mode states with the proper error FFDC
+///
+/// @param[in] i_target_info target info struct
+/// @param[in] i_n_mode_pmic n-mode states for each PMIC, present or not
+/// @param[in] i_mnfg_thresholds thresholds policy setting
+/// @return fapi2::ReturnCode iff no n-modes, else, relevant error FFDC
+///
+fapi2::ReturnCode assert_n_mode_states(
+    const target_info_redundancy& i_target_info,
+    const std::array<mss::pmic::n_mode, CONSTS::NUM_PMICS_4U>& i_n_mode_pmic,
+    const bool i_mnfg_thresholds)
+{
+
+    // Check if we have lost a redundant pair :(
+    FAPI_ASSERT(!(mss::pmic::check::bad_pair(i_n_mode_pmic)),
+                fapi2::PMIC_REDUNDANCY_FAIL()
+                .set_OCMB_TARGET(i_target_info.iv_ocmb)
+                .set_N_MODE_PMIC0(i_n_mode_pmic[PMIC0])
+                .set_N_MODE_PMIC1(i_n_mode_pmic[PMIC1])
+                .set_N_MODE_PMIC2(i_n_mode_pmic[PMIC2])
+                .set_N_MODE_PMIC3(i_n_mode_pmic[PMIC3]),
+                "A pair of redundant PMICs have both declared N-Mode. Procedure will not be able "
+                "to turn either on and provide power to the OCMB %s "
+                "N_MODE_PMIC0: %u N_MODE_PMIC1: %u N_MODE_PMIC2: %u N_MODE_PMIC3: %u",
+                mss::c_str(i_target_info.iv_ocmb),
+                i_n_mode_pmic[PMIC0], i_n_mode_pmic[PMIC1], i_n_mode_pmic[PMIC2], i_n_mode_pmic[PMIC3]);
+
+    // Now in the other case, if at least one is down, assert this error. However, depending on the
+    // thresholds policy setting, in most cases this error will be logged as recoverable in the
+    // fapi_try_exit of process_n_mode_results(...)
+    FAPI_ASSERT(!(mss::pmic::check::bad_any(i_n_mode_pmic)),
+                fapi2::DIMM_RUNNING_IN_N_MODE()
+                .set_OCMB_TARGET(i_target_info.iv_ocmb)
+                .set_N_MODE_PMIC0(i_n_mode_pmic[PMIC0])
+                .set_N_MODE_PMIC1(i_n_mode_pmic[PMIC1])
+                .set_N_MODE_PMIC2(i_n_mode_pmic[PMIC2])
+                .set_N_MODE_PMIC3(i_n_mode_pmic[PMIC3]),
+                "%s At least one of the 4 PMICs had errors which caused a drop into N-Mode. "
+                "MNFG_THRESHOLDS has asserted that we %s. "
+                "N_MODE_PMIC0: %u N_MODE_PMIC1: %u N_MODE_PMIC2: %u N_MODE_PMIC3: %u",
+                mss::c_str(i_target_info.iv_ocmb),
+                (i_mnfg_thresholds) ? "EXIT." : "DO NOT EXIT.",
+                i_n_mode_pmic[PMIC0], i_n_mode_pmic[PMIC1], i_n_mode_pmic[PMIC2], i_n_mode_pmic[PMIC3]);
+
+    return fapi2::FAPI2_RC_SUCCESS;
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Get the mnfg thresholds policy setting
+///
+/// @param[out] o_thresholds thresholds policy setting
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
+///
+fapi2::ReturnCode get_mnfg_thresholds(bool& o_thresholds)
+{
+    o_thresholds = false;
+
+    // Consts and vars
+    fapi2::ATTR_MFG_FLAGS_Type l_mfg_array = {0};
+    fapi2::buffer<uint32_t> l_mfg_flags;
+    static constexpr uint32_t MNFG_THRESHOLDS_ARR_IDX = 0;
+    static constexpr uint32_t MNFG_THRESHOLDS_BIT = fapi2::ENUM_ATTR_MFG_FLAGS_MNFG_THRESHOLDS;
+
+    // Grab THRESHOLDS setting
+    FAPI_TRY(mss::attr::get_mfg_flags(l_mfg_array));
+    l_mfg_flags = l_mfg_array[MNFG_THRESHOLDS_ARR_IDX];
+    o_thresholds = l_mfg_flags.getBit<MNFG_THRESHOLDS_BIT>();
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Process the results of the N-Mode declarations (if any)
+///
+/// @param[in] i_target_info OCMB, PMIC and I2C target struct
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, or error code based on the
+///                           n mode results + policy settings
+/// @note Logs a recoverable error per bad PMIC to aid FW, but will return good/bad code
+///       whether we are able to continue or not given those states
+///
+fapi2::ReturnCode process_n_mode_results(const target_info_redundancy& i_target_info)
+{
+    using CONSTS = mss::pmic::consts<mss::pmic::product::JEDEC_COMPLIANT>;
+    using mss::pmic::id;
+
+    // Hold N-Mode states
+    std::array<mss::pmic::n_mode, CONSTS::NUM_PMICS_4U> l_n_mode_pmic =
+    {
+        mss::pmic::n_mode::N_PLUS_1_MODE,
+        mss::pmic::n_mode::N_PLUS_1_MODE,
+        mss::pmic::n_mode::N_PLUS_1_MODE,
+        mss::pmic::n_mode::N_PLUS_1_MODE
+    };
+
+    // Force an n-mode configuration via lab override
+    uint8_t l_force_n_mode = 0;
+    fapi2::buffer<uint8_t> l_force_n_mode_buffer;
+
+    // MFG flags vars/consts
+    bool l_mnfg_thresholds = false;
+
+    // Grab N mode attributes
+    FAPI_TRY(mss::attr::get_n_mode_helper(i_target_info.iv_ocmb, PMIC0, l_n_mode_pmic[PMIC0]));
+    FAPI_TRY(mss::attr::get_n_mode_helper(i_target_info.iv_ocmb, PMIC1, l_n_mode_pmic[PMIC1]));
+    FAPI_TRY(mss::attr::get_n_mode_helper(i_target_info.iv_ocmb, PMIC2, l_n_mode_pmic[PMIC2]));
+    FAPI_TRY(mss::attr::get_n_mode_helper(i_target_info.iv_ocmb, PMIC3, l_n_mode_pmic[PMIC3]));
+
+    // Overridden to an N mode configuration
+    FAPI_TRY(mss::attr::get_pmic_force_n_mode(i_target_info.iv_ocmb, l_force_n_mode));
+    l_force_n_mode_buffer = l_force_n_mode;
+
+    // Check map entries, missing ones will be declared N-Mode
+    // If we don't have the PMIC in the map, then platform never provided it as present,
+    // so we should just exit, do not run i_func()
+
+    // Check N-mode override attribute states
+    for (uint8_t l_idx = PMIC0; l_idx < CONSTS::NUM_PMICS_4U; ++l_idx)
+    {
+        // l_force_n_mode_buffer is expected to have an "n-mode configuration" as high bits.
+        // in other words, a setting such as 0b11000000 would say to use the n-mode configuration of
+        // PMIC0 and PMIC1. Therefore, if bits are not set, we are considering those overridden
+        // to be disabled. (Default value is 0xF0). (This logic is not the same as the live n-mode states)
+        if (!l_force_n_mode_buffer.getBit(l_idx) ||
+            (i_target_info.iv_pmic_map.find(l_idx) == i_target_info.iv_pmic_map.end()))
+        {
+            // Hardcode it to N-Mode, since this pmic is disabled or not-present.
+            // This allows valid_n_mode_helper to operate normally, with the
+            // assumption that two PMICs are "dead"
+            l_n_mode_pmic[l_idx] = mss::pmic::n_mode::N_MODE;
+        }
+    }
+
+    // First, we want to log a recoverable error for each PMIC that is in an N-mode state.
+    // This helps FW identify which parts are bad if we do have a full redundancy fail which
+    // causes a procedure exit. No RC from this function.
+    log_n_modes_as_recoverable_errors(i_target_info, l_n_mode_pmic);
+
+    // Easy case first, return success if they're all N_PLUS1_MODE (not N-mode)
+    if (!l_n_mode_pmic[PMIC0] &&
+        !l_n_mode_pmic[PMIC1] &&
+        !l_n_mode_pmic[PMIC2] &&
+        !l_n_mode_pmic[PMIC3])
+    {
+        return fapi2::FAPI2_RC_SUCCESS;
+    }
+
+    // Get mnfg thresholds policy setting
+    FAPI_TRY(mss::pmic::get_mnfg_thresholds(l_mnfg_thresholds));
+
+    // If we have any n-modes, we will jump to fapi_try_exit, where either
+    // 1. We have lost a redundant pair, so we must exit
+    // 2. We have not lost a pair, but the MNFG_THRESHOLDS setting asserts we exit anyway
+    FAPI_TRY(assert_n_mode_states(i_target_info, l_n_mode_pmic, l_mnfg_thresholds));
+
+    return fapi2::FAPI2_RC_SUCCESS;
+
+fapi_try_exit:
+
+    // If we are allowing redundancy, log the N_MODE error as recovered
+    if (fapi2::current_err == static_cast<uint32_t>(fapi2::RC_DIMM_RUNNING_IN_N_MODE)
+        && !l_mnfg_thresholds)
+    {
+        fapi2::logError(fapi2::current_err, fapi2::FAPI2_ERRL_SEV_RECOVERED);
+        fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+    }
+
+    return fapi2::current_err;
+}
+
 namespace check
 {
+
+///
+/// @brief Check for a bad pair given the n-mode states of the 4 4U pmics
+///
+/// @param[in] i_n_mode_pmic n-mode states of the 4 PMICs
+/// @return true/false pair bad
+///
+bool bad_pair(const std::array<mss::pmic::n_mode, CONSTS::NUM_PMICS_4U>& i_n_mode_pmic)
+{
+    // For readability
+    static constexpr mss::pmic::n_mode N_MODE = mss::pmic::n_mode::N_MODE;
+
+    // Return false if both in a pair are bad, in which case we will
+    // be unable to continue booting
+    return ((i_n_mode_pmic[0] == N_MODE && i_n_mode_pmic[2] == N_MODE) ||
+            (i_n_mode_pmic[1] == N_MODE && i_n_mode_pmic[3] == N_MODE));
+}
+
+///
+/// @brief Check if at least one PMIC has declared N mode
+///
+/// @param[in] i_n_mode_pmic n-mode states of the 4 PMICs
+/// @return true/false at least one pmic is bad
+///
+bool bad_any(const std::array<mss::pmic::n_mode, CONSTS::NUM_PMICS_4U>& i_n_mode_pmic)
+{
+    // For readability
+    static constexpr mss::pmic::n_mode N_MODE = mss::pmic::n_mode::N_MODE;
+
+    // True if any are N_MODE
+    return i_n_mode_pmic[0] == N_MODE ||
+           i_n_mode_pmic[1] == N_MODE ||
+           i_n_mode_pmic[2] == N_MODE ||
+           i_n_mode_pmic[3] == N_MODE;
+}
+
 
 ///
 /// @brief Reset N Mode attributes
@@ -954,12 +1262,8 @@ namespace check
 ///
 fapi2::ReturnCode reset_n_mode_attrs(const target_info_redundancy& i_target_info)
 {
-    uint8_t l_n_mode = fapi2::ENUM_ATTR_MEM_PMIC_4U_N_MODE_N_PLUS_1_MODE;
-
-    FAPI_TRY(mss::attr::set_pmic_n_mode(i_target_info.iv_pmic0, l_n_mode));
-    FAPI_TRY(mss::attr::set_pmic_n_mode(i_target_info.iv_pmic1, l_n_mode));
-    FAPI_TRY(mss::attr::set_pmic_n_mode(i_target_info.iv_pmic2, l_n_mode));
-    FAPI_TRY(mss::attr::set_pmic_n_mode(i_target_info.iv_pmic3, l_n_mode));
+    uint8_t l_n_mode = 0x00;
+    FAPI_TRY(mss::attr::set_pmic_n_mode(i_target_info.iv_ocmb, l_n_mode));
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -982,99 +1286,6 @@ fapi2::ReturnCode gpios_already_enabled(const target_info_redundancy& i_target_i
     FAPI_TRY(mss::pmic::i2c::reg_read(i_target_info.iv_gpio2, mss::gpio::regs::CONFIGURATION, l_reg_contents));
 
     o_already_enabled = gpios_already_enabled_helper(l_reg_contents);
-
-fapi_try_exit:
-    return fapi2::current_err;
-}
-
-///
-/// @brief Check for the given 4 PMICs that their n-mode declarations are safe to continue the procedure
-///
-/// @param[in] i_target_info OCMB, PMIC and I2C target struct
-/// @return fapi2::ReturnCode RC_PMIC_REDUNDANT_PAIR_DOWN if pair declares n-mode, else SUCCESS if no issue
-///
-fapi2::ReturnCode valid_n_mode(const target_info_redundancy& i_target_info)
-{
-    // If both PMICs in a pair have declared N-mode, enables will not be successful.
-    // Deconfig and gard the OCMB
-    constexpr auto NUM_PMICS_4U = mss::pmic::consts<mss::pmic::product::JEDEC_COMPLIANT>::NUM_PMICS_4U;
-
-    uint8_t l_n_mode_pmic[NUM_PMICS_4U] = {0};
-    uint8_t l_force_n_mode = 0;
-    fapi2::buffer<uint8_t> l_force_n_mode_buffer;
-
-    FAPI_TRY(mss::attr::get_pmic_n_mode(i_target_info.iv_pmic0, l_n_mode_pmic[0]));
-    FAPI_TRY(mss::attr::get_pmic_n_mode(i_target_info.iv_pmic1, l_n_mode_pmic[1]));
-    FAPI_TRY(mss::attr::get_pmic_n_mode(i_target_info.iv_pmic2, l_n_mode_pmic[2]));
-    FAPI_TRY(mss::attr::get_pmic_n_mode(i_target_info.iv_pmic3, l_n_mode_pmic[3]));
-
-    FAPI_TRY(mss::attr::get_pmic_force_n_mode(i_target_info.iv_ocmb, l_force_n_mode));
-    l_force_n_mode_buffer = l_force_n_mode;
-
-    for (uint8_t l_pmic_idx = 0; l_pmic_idx < NUM_PMICS_4U; ++l_pmic_idx)
-    {
-        if (!l_force_n_mode_buffer.getBit(l_pmic_idx))
-        {
-            // Hardcode it to N-Mode, since this pmic is disabled.
-            // This allows valid_n_mode_helper to operate normally, with the
-            // assumption that two PMICs are "dead"
-            l_n_mode_pmic[l_pmic_idx] = fapi2::ENUM_ATTR_MEM_PMIC_4U_N_MODE_N_MODE;
-        }
-    }
-
-    FAPI_TRY(valid_n_mode_helper(
-                 i_target_info.iv_ocmb,
-                 l_n_mode_pmic[0],
-                 l_n_mode_pmic[1],
-                 l_n_mode_pmic[2],
-                 l_n_mode_pmic[3]));
-
-    return fapi2::FAPI2_RC_SUCCESS;
-
-fapi_try_exit:
-    return fapi2::current_err;
-}
-
-///
-/// @brief Check for valid N-mode given the status of all 4 PMICs, assert out otherwise
-///
-/// @param[in] i_ocmb_target OCMB target (for FFDC)
-/// @param[in] i_n_mode_pmic0 N-mode state for pmic
-/// @param[in] i_n_mode_pmic1 N-mode state for pmic
-/// @param[in] i_n_mode_pmic2 N-mode state for pmic
-/// @param[in] i_n_mode_pmic3 N-mode state for pmic
-/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else RC_PMIC_REDUNDANT_PAIR_DOWN
-///
-fapi2::ReturnCode valid_n_mode_helper(
-    const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_ocmb_target,
-    const uint8_t i_n_mode_pmic0,
-    const uint8_t i_n_mode_pmic1,
-    const uint8_t i_n_mode_pmic2,
-    const uint8_t i_n_mode_pmic3)
-{
-    // If both PMICs declare n-mode, the pair is not ok and enable will not proceed
-    const bool l_pair0_ok =
-        !((i_n_mode_pmic0 == fapi2::ENUM_ATTR_MEM_PMIC_4U_N_MODE_N_MODE) &&
-          (i_n_mode_pmic2 == fapi2::ENUM_ATTR_MEM_PMIC_4U_N_MODE_N_MODE));
-
-    const bool l_pair1_ok =
-        !((i_n_mode_pmic1 == fapi2::ENUM_ATTR_MEM_PMIC_4U_N_MODE_N_MODE) &&
-          (i_n_mode_pmic3 == fapi2::ENUM_ATTR_MEM_PMIC_4U_N_MODE_N_MODE));
-
-    FAPI_ASSERT(l_pair0_ok && l_pair1_ok,
-                fapi2::PMIC_REDUNDANT_PAIR_DOWN()
-                .set_OCMB_TARGET(i_ocmb_target)
-                .set_N_MODE_PMIC0(i_n_mode_pmic0)
-                .set_N_MODE_PMIC1(i_n_mode_pmic1)
-                .set_N_MODE_PMIC2(i_n_mode_pmic2)
-                .set_N_MODE_PMIC3(i_n_mode_pmic3),
-                "A pair of redundant PMICs have both declared N-Mode. Procedure will not be able "
-                "to turn either on and provide power to the OCMB %s "
-                "N_MODE_PMIC0: %u N_MODE_PMIC1: %u N_MODE_PMIC2: %u N_MODE_PMIC3: %u",
-                mss::c_str(i_ocmb_target),
-                i_n_mode_pmic0, i_n_mode_pmic1, i_n_mode_pmic2, i_n_mode_pmic3);
-
-    return fapi2::FAPI2_RC_SUCCESS;
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -1225,6 +1436,185 @@ fapi_try_exit:
 } // ns check
 
 ///
+/// @brief Step 1 of enable_with_redundancy: set up the GPIO EFUSE's
+///
+/// @param[in] i_target_info target info struct
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else unrecoverable error
+///
+fapi2::ReturnCode redundancy_gpio_efuse_setup(const target_info_redundancy& i_target_info)
+{
+    bool l_already_enabled = false;
+
+    // Reset N Mode attributes
+    FAPI_TRY(check::reset_n_mode_attrs(i_target_info));
+
+    // First set up independent PMIC pairs with their GPIO expander
+    FAPI_TRY(check::gpios_already_enabled(i_target_info, l_already_enabled));
+
+    // If we are already enabled (12V on), skip all the GPIO initialization,
+    // 12V being on will cause the efuse N-mode checks to fail, anyway
+    if (!l_already_enabled)
+    {
+        // Set up both trios of devices
+        FAPI_TRY(setup_pmic_pair_and_gpio(
+                     i_target_info.iv_pmic_map,
+                     mss::pmic::id::PMIC0,
+                     mss::pmic::id::PMIC1,
+                     i_target_info.iv_gpio1));
+
+        FAPI_TRY(setup_pmic_pair_and_gpio(
+                     i_target_info.iv_pmic_map,
+                     mss::pmic::id::PMIC2,
+                     mss::pmic::id::PMIC3,
+                     i_target_info.iv_gpio2));
+    }
+    else
+    {
+        // Make sure that we do report 12V on each PMIC, since the GPIOs claim that the
+        // efuses are on. Otherwise, we will declare N-mode
+        for (uint8_t l_pmic_id = mss::pmic::id::PMIC0; l_pmic_id < CONSTS::NUM_PMICS_4U; ++l_pmic_id)
+        {
+            FAPI_TRY(run_if_present(i_target_info.iv_pmic_map, l_pmic_id, [&i_target_info, l_pmic_id]
+                                    (const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& i_pmic)
+            {
+                FAPI_TRY_LAMBDA(mss::pmic::setup_adc_vin_bulk_read(i_pmic));
+                FAPI_TRY_LAMBDA(mss::pmic::validate_efuse_on(i_pmic));
+
+            fapi_try_exit_lambda:
+                // Both those functions in their fapi_try_exit will set n-mode accordingly,
+                // so we don't have to do anything other than return current_err
+                return fapi2::current_err;
+            }));
+        }
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Kick off VR_ENABLE's for a redundancy PMIC config in the provided mode
+///
+/// @param[in] i_target_info target info struct
+/// @param[in] i_enable_loop_fields Parameters/fields to iterate over
+/// @param[in] i_mode enable-mode MANUAL/SPD
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else unrecoverable error
+///
+fapi2::ReturnCode redundancy_vr_enable_kickoff(
+    const target_info_redundancy& i_target_info,
+    const mss::pmic::enable_loop_fields_t& i_enable_loop_fields,
+    const mss::pmic::enable_mode i_mode)
+{
+    static constexpr uint16_t l_vendor_id = static_cast<uint16_t>(mss::pmic::vendor::TI);
+
+    for (const auto& l_enable_fields : i_enable_loop_fields)
+    {
+        // No trace for these so HB does not try to shove the entirety of the lambda into an error trace.
+        // The internal function calls have descriptive error ouptuts that should be sufficient in the
+        // case of an error
+        FAPI_TRY_NO_TRACE(run_if_present(i_target_info.iv_pmic_map, l_enable_fields.iv_pmic_id,
+                                         [&i_target_info, &l_enable_fields, i_mode]
+                                         (const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& i_pmic) -> fapi2::ReturnCode
+        {
+            // Set soft-start time to maximum to avoid ramp-down time voltage spike
+            FAPI_TRY_LAMBDA(mss::pmic::set_soft_stop_time(i_pmic));
+
+            // Check if we are manual or SPD, and perform the matching enable
+            if (i_mode == mss::pmic::enable_mode::MANUAL)
+            {
+                FAPI_TRY_LAMBDA(mss::pmic::start_vr_enable(i_pmic));
+            }
+            else
+            {
+                FAPI_TRY_LAMBDA(mss::pmic::enable_spd(i_pmic, i_target_info.iv_ocmb, l_vendor_id));
+            }
+
+            // Poll for the GPIO bit corresponding to the provided PMIC target, ensure polls good
+            FAPI_TRY_LAMBDA(mss::gpio::poll_input_port_ready(
+                l_enable_fields.iv_gpio,
+                i_pmic,
+                l_enable_fields.iv_input_port_bit));
+
+            return fapi2::FAPI2_RC_SUCCESS;
+
+        fapi_try_exit_lambda:
+            // Log as recoverable, set N mode attribute, all will be checked later
+            fapi2::logError(fapi2::current_err, fapi2::FAPI2_ERRL_SEV_RECOVERED);
+            fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+
+            return mss::attr::set_n_mode_helper(
+                i_target_info.iv_ocmb,
+                l_enable_fields.iv_pmic_id,
+                mss::pmic::n_mode::N_MODE);
+        }));
+    }
+
+    return fapi2::FAPI2_RC_SUCCESS;
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Check the statuses of all PMICs present on the given OCMB chip
+///
+/// @param[in] i_ocmb_target OCMB target
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if success, else error code
+/// @note To be used with 4U/Redundant Enable sequence
+///
+fapi2::ReturnCode redundancy_check_all_pmics(const target_info_redundancy& i_target_info)
+{
+    // Start success so we can't log and return the same error in loop logic
+    fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+
+    // For each PMIC ID
+    for (uint8_t l_idx = mss::pmic::id::PMIC0; l_idx < CONSTS::NUM_PMICS_4U; ++l_idx)
+    {
+        // If the pmic is not overridden to disabled, run the status checking
+        FAPI_TRY_NO_TRACE(run_if_present(i_target_info.iv_pmic_map, l_idx, [&i_target_info, l_idx]
+                                         (const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& i_pmic) -> fapi2::ReturnCode
+        {
+            mss::pmic::n_mode l_n_mode_pmic = mss::pmic::n_mode::N_PLUS_1_MODE;
+            FAPI_TRY_LAMBDA(mss::attr::get_n_mode_helper(i_target_info.iv_ocmb, mss::index(i_pmic), l_n_mode_pmic));
+
+            // Only check the vr enable status if the PMIC didn't declare N-mode, otherwise, don't bother
+            // as it's unlikely it succeeded anyway, and setting n-mode twice is a no-op
+            if (!(l_n_mode_pmic == mss::pmic::n_mode::N_MODE))
+            {
+                // Redundant setting of current_err, just so it's clear what we're trying to do
+                fapi2::current_err = mss::pmic::status::check_for_vr_enable(i_target_info.iv_ocmb, i_pmic);
+
+                // TK ZEN659 add in status bit checking when we achieve stability on powerup
+            }
+
+            // If we aren't success, then either VR-Enable did not occur or the register read failed.
+            // In either case, declare N-Mode, and continue
+            if (fapi2::current_err != fapi2::FAPI2_RC_SUCCESS)
+            {
+                // Log as recoverable, set N mode attribute, all will be checked later
+                fapi2::logError(fapi2::current_err, fapi2::FAPI2_ERRL_SEV_RECOVERED);
+                fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+
+                FAPI_TRY_LAMBDA(mss::attr::set_n_mode_helper(
+                    i_target_info.iv_ocmb,
+                    mss::index(i_pmic),
+                    mss::pmic::n_mode::N_MODE));
+            }
+
+            return fapi2::FAPI2_RC_SUCCESS;
+
+        fapi_try_exit_lambda:
+            return fapi2::current_err;
+        }));
+    }
+
+    return fapi2::FAPI2_RC_SUCCESS;
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
 /// @brief Set the up GPIOs, ADCs, PMICs for a redundancy configuration / 4U
 ///
 /// @param[in] i_ocmb_target OCMB target
@@ -1235,93 +1625,58 @@ fapi2::ReturnCode enable_with_redundancy(
     const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_ocmb_target,
     const mss::pmic::enable_mode i_mode)
 {
-    bool l_already_enabled = false;
+    FAPI_INF("Enabling PMICs on %s with 4U/redundancy mode", mss::c_str(i_ocmb_target));
+
     fapi2::buffer<uint8_t> l_reg_contents;
+    fapi2::ReturnCode l_rc = fapi2::FAPI2_RC_SUCCESS;
 
-    // Grab the targets as a struct if they exist
-    // Platform is required to provide 2 GPIOs and 2 ADCs
-    target_info_redundancy l_target_info(i_ocmb_target);
+    // Grab the targets as a struct, if they exist
+    target_info_redundancy l_target_info(i_ocmb_target, l_rc);
 
-    // We can loop on these to pick out the PMIC, connected GPIO, and input port bit to use later
-    // when we VR_ENABLE (via manual or SPD), and then check the GPIO input port reg
-    const std::vector<mss::pmic::enable_fields_4u> l_enable_loop_fields =
+    // If platform did not provide a usable set of targets (4 GENERICI2CSLAVE, at least 2 PMICs),
+    // Then we can't properly enable
+    FAPI_TRY(l_rc, "Unusable PMIC/GENERICI2CSLAVE child target configuration found from %s",
+             mss::c_str(i_ocmb_target));
+
     {
-        {l_target_info.iv_pmic0, l_target_info.iv_gpio1, mss::gpio::fields::INPUT_PORT_REG_PMIC_PAIR0},
-        {l_target_info.iv_pmic2, l_target_info.iv_gpio2, mss::gpio::fields::INPUT_PORT_REG_PMIC_PAIR0},
-        {l_target_info.iv_pmic1, l_target_info.iv_gpio1, mss::gpio::fields::INPUT_PORT_REG_PMIC_PAIR1},
-        {l_target_info.iv_pmic3, l_target_info.iv_gpio2, mss::gpio::fields::INPUT_PORT_REG_PMIC_PAIR1},
-    };
-
-    // First set up independent PMIC pairs with their GPIO expander
-    FAPI_TRY(check::gpios_already_enabled(l_target_info, l_already_enabled));
-
-    // If we are already enabled (12V on), skip all the GPIO initialization,
-    // 12V being on will cause the efuse N-mode checks to fail, anyway
-    if (!l_already_enabled)
-    {
-        // Reset N Mode attributes
-        FAPI_TRY(check::reset_n_mode_attrs(l_target_info));
-
-        FAPI_TRY(setup_pmic_pair_and_gpio(l_target_info.iv_pmic0, l_target_info.iv_pmic1, l_target_info.iv_gpio1));
-        FAPI_TRY(setup_pmic_pair_and_gpio(l_target_info.iv_pmic2, l_target_info.iv_pmic3, l_target_info.iv_gpio2));
-
-        // Now make sure the resulting n-mode states are valid before continuing
-        FAPI_TRY(check::valid_n_mode(l_target_info));
-    }
-
-    // Now we're ready to kick off the regular PMIC enable. This process already includes setting
-    // R2F bit 1 to set the PMIC into programmable/diagnostic mode
-
-    // If we're enabling via internal settings (manual), we can just run VR ENABLE down the line
-    if (i_mode == mss::pmic::enable_mode::MANUAL)
-    {
-        for (const auto l_enable_fields : l_enable_loop_fields)
+        // We can loop on these to pick out the PMIC, connected GPIO, and input port bit to use later
+        // when we VR_ENABLE (via manual or SPD), and then check the GPIO input port reg
+        const enable_loop_fields_t l_enable_loop_fields =
         {
-            FAPI_TRY(run_if_not_disabled(l_enable_fields.iv_pmic, [&l_target_info, &l_enable_fields]()
             {
-                FAPI_TRY_LAMBDA(mss::pmic::set_soft_stop_time(l_enable_fields.iv_pmic));
-                FAPI_TRY_LAMBDA(mss::pmic::start_vr_enable(l_enable_fields.iv_pmic));
-                FAPI_TRY_LAMBDA(mss::gpio::poll_input_port_ready(l_enable_fields.iv_gpio, l_enable_fields.iv_input_port_bit));
+                {mss::pmic::id::PMIC0, l_target_info.iv_gpio1, mss::gpio::fields::INPUT_PORT_REG_PMIC_PAIR0},
+                {mss::pmic::id::PMIC2, l_target_info.iv_gpio2, mss::gpio::fields::INPUT_PORT_REG_PMIC_PAIR0},
+                {mss::pmic::id::PMIC1, l_target_info.iv_gpio1, mss::gpio::fields::INPUT_PORT_REG_PMIC_PAIR1},
+                {mss::pmic::id::PMIC3, l_target_info.iv_gpio2, mss::gpio::fields::INPUT_PORT_REG_PMIC_PAIR1}
+            }
+        };
 
-            fapi_try_exit_lambda:
-                return fapi2::current_err;
-            }));
-        }
-    }
-    else // SPD enable process
-    {
-        // 4U will only be using TI PMICs, until we know of otherwise
-        uint16_t l_vendor_id = static_cast<uint16_t>(mss::pmic::vendor::TI);
+        // Set up GPIO expanders: Turn on the EFUSEs to supply 12V to the pmics. Declares N-Mode
+        // for any failed 12V checks.
+        FAPI_TRY(mss::pmic::redundancy_gpio_efuse_setup(l_target_info));
 
-        // Enable SPD and then check input port ready for each not-disabled pmic
-        for (const auto l_enable_fields : l_enable_loop_fields)
-        {
-            FAPI_TRY(run_if_not_disabled(l_enable_fields.iv_pmic, [&l_target_info, &l_enable_fields, l_vendor_id]()
-            {
-                FAPI_TRY_LAMBDA(mss::pmic::set_soft_stop_time(l_enable_fields.iv_pmic));
-                FAPI_TRY_LAMBDA(mss::pmic::enable_spd(l_enable_fields.iv_pmic, l_target_info.iv_ocmb, l_vendor_id));
-                FAPI_TRY_LAMBDA(mss::gpio::poll_input_port_ready(l_enable_fields.iv_gpio, l_enable_fields.iv_input_port_bit));
+        // Now, perform any needed workarounds, kick off VR_ENABLEs, and check GPIO input port bits,
+        // declaring N-Mode wherever necessary.
+        FAPI_TRY(mss::pmic::redundancy_vr_enable_kickoff(l_target_info, l_enable_loop_fields, i_mode));
 
-            fapi_try_exit_lambda:
-                return fapi2::current_err;
-            }));
-        }
+        // Now, check that the PMICs were enabled properly. If any don't report on that are expected
+        // to be on, declare N-mode there too.
+        FAPI_TRY(mss::pmic::redundancy_check_all_pmics(l_target_info));
 
-        // TK / TODO: #476 PMIC 4U Enable Error/RC Processing
-        // Add error / RC processing here when we/HB/RAS agree on how asserts should be handled
-    }
-
-    // Finally, set up the ADCs post-enable
-    {
+        // Next, set up the ADC devices post-enable
         FAPI_TRY(setup_adc1(l_target_info.iv_adc1));
         FAPI_TRY(setup_adc2(l_target_info.iv_adc2));
+
+        // Finally, pocess the N-Mode results
+        FAPI_TRY(mss::pmic::process_n_mode_results(l_target_info));
     }
+
+    FAPI_INF("Successfully enabled PMICs on %s with 4U/redundancy mode", mss::c_str(i_ocmb_target));
 
     return fapi2::FAPI2_RC_SUCCESS;
 
 fapi_try_exit:
     return fapi2::current_err;
-
 }
 
 } // pmic

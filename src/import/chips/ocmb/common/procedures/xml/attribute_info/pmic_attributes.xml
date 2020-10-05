@@ -25,15 +25,16 @@
 <attributes>
     <attribute>
         <id>ATTR_MEM_PMIC_4U_N_MODE</id>
-        <targetType>TARGET_TYPE_PMIC</targetType>
+        <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
         <description>
-            PMIC pair running in N-Mode (no redundancy) instead of N+1 mode.
-            This attribute applies to 4U only, would be set if GPIO or PMIC
-            setup reported a failure. Attribute should be compared with the
-            value of its redundant pmic's attribute. If both have declared
-            N-Mode, then both in the redundant pair will not be enabled.
+            States of N-Mode declaration for the PMICs on a 4U DIMM.
+            The bit would be set high if GPIO or PMIC setup reported a
+            failure relating to that part. If two PMICs in a redundant pair have declared
+            N-Mode, then the DIMM can not be enabled.
+
+            The bits are as follows: [PMIC0, PMIC1, PMIC2, PMIC3, 0, 0, 0, 0]
+            Bit high = N-Mode declared, or PMIC was not identified as PRESENT
         </description>
-        <enum>N_PLUS_1_MODE = 0, N_MODE = 1</enum>
         <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>

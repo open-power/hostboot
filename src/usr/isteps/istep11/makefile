@@ -65,10 +65,12 @@ OBJS += exp_check_for_ready.o
 OBJS += pmic_enable.o
 OBJS += pmic_enable_utils.o
 OBJS += pmic_common_utils.o
+OBJS += mss_pmic_attribute_accessors_manual.o
 
 VPATH += ${PROCEDURES_PATH}/hwp/perv/
 VPATH += ${EXPLORER_PATH_OCMB}/procedures/hwp/memory/
 VPATH += ${COMMON_PATH_OCMB}/procedures/hwp/pmic/
 VPATH += ${COMMON_PATH_OCMB}/procedures/hwp/pmic/lib/utils/
+VPATH += ${COMMON_PATH_OCMB}/procedures/hwp/pmic/lib/
 
 include ${ROOTPATH}/config.mk
