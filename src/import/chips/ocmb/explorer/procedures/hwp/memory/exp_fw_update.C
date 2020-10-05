@@ -63,37 +63,36 @@ fapi2::ReturnCode check_response(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHI
                                  const host_fw_response_struct& i_rsp,
                                  const host_fw_command_struct& i_cmd)
 {
-    std::vector<uint8_t> resp_arg;
-    uint8_t  success_flag = 0;
-    uint16_t err_code = 0;
-    uint32_t index = 0;
-
-    //copy response_argument field into a vector that can be used by
-    //readCrctEndian()
-    resp_arg.assign(i_rsp.response_argument,
-                    i_rsp.response_argument + ARGUMENT_SIZE);
-
-    //convert fields to native endianness
-    FAPI_TRY(mss::exp::ib::readCrctEndian(resp_arg, index, success_flag));
-    FAPI_TRY(mss::exp::ib::readCrctEndian(resp_arg, index, err_code));
+    // The byte indices of i_rsp.response_argument which contain the MCHP
+    // error codes. Useful for debug purposes.
+    static constexpr uint8_t MCHP_ERROR_CODE_1 = 1;
+    static constexpr uint8_t MCHP_ERROR_CODE_2 = 2;
+    static constexpr uint8_t MCHP_ERROR_CODE_3 = 3;
 
     // Check if cmd was successful
-    FAPI_ASSERT(success_flag == omi::response_arg::SUCCESS &&
+    // The CMD_WRITE subcommand provides 3 bytes of MCHP error
+    // information in response_argument[1] to [3]
+    FAPI_ASSERT(i_rsp.response_argument[0] == omi::response_arg::SUCCESS &&
                 i_rsp.request_identifier == i_cmd.request_identifier,
                 fapi2::EXP_UPDATE_CMD_FAILED().
                 set_TARGET(i_target).
                 set_RSP_ID(i_rsp.response_id).
                 set_REQ_ID(i_rsp.request_identifier).
-                set_ERROR_CODE(err_code).
-                set_RSP_DATA(i_rsp),
-                "Recieved failure response for firmware update command on %s",
-                mss::c_str(i_target));
+                set_MCHP_ERROR_CODE_1(i_rsp.response_argument[MCHP_ERROR_CODE_1]).
+                set_MCHP_ERROR_CODE_2(i_rsp.response_argument[MCHP_ERROR_CODE_2]).
+                set_MCHP_ERROR_CODE_3(i_rsp.response_argument[MCHP_ERROR_CODE_3]),
+                "Recieved failure response for firmware update command on %s . MCHP Error codes: "
+                "response_argument[1] = 0x%02X, [2] = 0x%02X, [3] = 0x%02X",
+                mss::c_str(i_target),
+                i_rsp.response_argument[MCHP_ERROR_CODE_1],
+                i_rsp.response_argument[MCHP_ERROR_CODE_2],
+                i_rsp.response_argument[MCHP_ERROR_CODE_3]);
 
 fapi_try_exit:
     return fapi2::current_err;
 }
 
-}//bupg
+}// ns bupg
 
 ///
 /// @brief host_fw_command_struct structure setup for flash_write
