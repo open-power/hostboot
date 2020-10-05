@@ -250,7 +250,7 @@ errlHndl_t writePNOR ( uint64_t i_byteAddr,
                             VPD_REMOVE_PAGES_FAIL,
                             addr,
                             TO_UINT64(rc),
-                            true /*Add HB Software Callout*/ );
+                            ERRORLOG::ErrlEntry::ADD_SW_CALLOUT );
         }
     } while( 0 );
 
@@ -330,7 +330,6 @@ errlHndl_t sendMboxWriteMsg ( size_t i_numBytes,
 
             // just commit the log and move on, nothing else to do
             errlCommit( l_err, VPD_COMP_ID );
-            l_err = nullptr;
 
             free( msg->extra_data );
             msg->extra_data = nullptr;
@@ -351,7 +350,11 @@ errlHndl_t sendMboxWriteMsg ( size_t i_numBytes,
 void setPartAndSerialNumberAttributes( TARGETING::Target * i_target )
 {
     errlHndl_t l_err = nullptr;
-    vpdKeyword l_serialNumberKeyword = 0;
+    vpdRecord l_recordPNSN = 0;
+    vpdRecord l_recordCC = 0;
+    vpdKeyword l_keywordPN = 0;
+    vpdKeyword l_keywordSN = 0;
+    vpdKeyword l_keywordCC = 0;
     size_t l_dataSize = 0;
 
     TARGETING::TYPE l_type = i_target->getAttr<TARGETING::ATTR_TYPE>();
@@ -359,122 +362,209 @@ void setPartAndSerialNumberAttributes( TARGETING::Target * i_target )
     TRACSSCOMP(g_trac_vpd, ENTER_MRK"vpd.C::setPartAndSerialNumberAttributes");
     do
     {
-            IpVpdFacade * l_ipvpd = &(Singleton<MvpdFacade>::instance());
-            if(l_type == TARGETING::TYPE_NODE)
-            {
-                l_ipvpd = &(Singleton<PvpdFacade>::instance());
-            }
+        IpVpdFacade * l_ipvpd = &(Singleton<MvpdFacade>::instance());
+        if(l_type == TARGETING::TYPE_NODE)
+        {
+            l_ipvpd = &(Singleton<PvpdFacade>::instance());
+        }
 
-            IpVpdFacade::input_args_t l_args;
+        // Get the pn/sn record/keyword based on the type
+        l_err = getPnAndSnRecordAndKeywords( i_target,
+                                             l_type,
+                                             l_recordPNSN,
+                                             l_keywordPN,
+                                             l_keywordSN );
+        if( l_err )
+        {
+            TRACFCOMP(g_trac_vpd,
+                      "Error getting record/keywords for PN/SN");
+            errlCommit(l_err, VPD_COMP_ID);
+            break;
+        }
 
-            l_err = getPnAndSnRecordAndKeywords( i_target,
-                                                 l_type,
-                                                 l_args.record,
-                                                 l_args.keyword,
-                                                 l_serialNumberKeyword );
+        // Get the cc record/keyword based on the type
+        l_err = getCcinRecordAndKeywords( i_target,
+                                          l_type,
+                                          l_recordCC,
+                                          l_keywordCC );
+        if( l_err )
+        {
+            TRACFCOMP(g_trac_vpd,
+                      "Error getting record/keywords for CC");
+            errlCommit(l_err, VPD_COMP_ID);
+            break;
+        }
 
-            if( l_err )
-            {
-                TRACFCOMP(g_trac_vpd, "setPartAndSerialNumberAttributes::Error getting record/keywords for PN/SN");
-                errlCommit(l_err, VPD_COMP_ID);
-                l_err = nullptr;
-                break;
-            }
+        //------------------
+        // ATTR_PART_NUMBER
+        //------------------
 
-            // Get the size of the part number
+        // Get the part number size
+        IpVpdFacade::input_args_t l_args;
+        l_args.record = l_recordPNSN;
+        l_args.keyword = l_keywordPN;
+        l_err = l_ipvpd->read( i_target,
+                               nullptr,
+                               l_dataSize,
+                               l_args );
+        if( l_err )
+        {
+            TRACFCOMP(g_trac_vpd, "Error reading VPD part number size");
+            errlCommit(l_err, VPD_COMP_ID);
+            // Don't break, continue to serial number
+        }
+        else
+        {
+            // Get the part number data
+            uint8_t l_partNumberData[l_dataSize] = {};
             l_err = l_ipvpd->read( i_target,
-                                   nullptr,
-                                   l_dataSize,
-                                   l_args );
-
+                                l_partNumberData,
+                                l_dataSize,
+                                l_args );
             if( l_err )
             {
-                TRACFCOMP(g_trac_vpd, " vpd.C::setPartAndSerialNumbers::read part number size");
+                TRACFCOMP(g_trac_vpd, "Error reading VPD part number");
                 errlCommit(l_err, VPD_COMP_ID);
-                l_err = nullptr;
-                break;
-            }
-
-            //get the actual part number data
-            uint8_t l_partNumberData[l_dataSize];
-            l_err = l_ipvpd->read( i_target,
-                                   l_partNumberData,
-                                   l_dataSize,
-                                   l_args );
-            if( l_err )
-            {
-                TRACFCOMP(g_trac_vpd, "vpd.C::setPartAndSerialNumbers::read part number");
-                errlCommit(l_err, VPD_COMP_ID);
-                l_err = nullptr;
-                break;
-            }
-
-            // Set the part number attribute
-            TARGETING::ATTR_PART_NUMBER_type l_partNumber = {0};
-            size_t expectedPNSize = sizeof(l_partNumber);
-            if(expectedPNSize < l_dataSize)
-            {
-                TRACFCOMP(g_trac_vpd, "Part number data to large for attribute. Expected: %d Actual: %d",
-                        expectedPNSize, l_dataSize);
+                // Don't break, continue to serial number
             }
             else
             {
-                memcpy( l_partNumber, l_partNumberData, l_dataSize );
-                i_target->trySetAttr<TARGETING::ATTR_PART_NUMBER>(l_partNumber);
+                // Set the part number attribute
+                TARGETING::ATTR_PART_NUMBER_type l_partNumber = {0};
+                size_t l_attrPNSize = sizeof(l_partNumber);
+                if(l_attrPNSize < l_dataSize)
+                {
+                    TRACFCOMP(g_trac_vpd,
+                            "Part number data too large for attribute."
+                            " ATTR size: %d VPD size: %d",
+                            l_attrPNSize,
+                            l_dataSize);
+                }
+                else
+                {
+                    memcpy( l_partNumber, l_partNumberData, l_dataSize );
+                    i_target->trySetAttr
+                                <TARGETING::ATTR_PART_NUMBER>(l_partNumber);
+                }
             }
-            // Get the serial number attribute data
-            l_args.keyword = l_serialNumberKeyword;
-            l_dataSize = 0;
-            l_err = l_ipvpd->read( i_target,
-                          nullptr,
-                          l_dataSize,
-                          l_args );
+        }
 
+        //--------------------
+        // ATTR_SERIAL_NUMBER
+        //--------------------
+
+        // Get the serial number size
+        l_args.record = l_recordPNSN;
+        l_args.keyword = l_keywordSN;
+        l_dataSize = 0;
+        l_err = l_ipvpd->read( i_target,
+                               nullptr,
+                               l_dataSize,
+                               l_args );
+        if( l_err )
+        {
+            TRACFCOMP(g_trac_vpd, "Error reading VPD serial number size");
+            errlCommit( l_err, VPD_COMP_ID );
+            // Don't break, continue to CCIN
+        }
+        else
+        {
+            // Get the serial number data
+            uint8_t l_serialNumberData[l_dataSize] = {};
+            l_err = l_ipvpd->read( i_target,
+                                l_serialNumberData,
+                                l_dataSize,
+                                l_args );
             if( l_err )
             {
-                TRACFCOMP(g_trac_vpd, "vpd.C::setPartAndSerialNumbers::read serial number size");
+                TRACFCOMP(g_trac_vpd, "Error reading VPD serial number");
                 errlCommit( l_err, VPD_COMP_ID );
-                l_err = nullptr;
-                break;
-            }
-
-            // Get the actual serial number data
-            uint8_t l_serialNumberData[l_dataSize];
-            l_err = l_ipvpd->read( i_target,
-                                   l_serialNumberData,
-                                   l_dataSize,
-                                   l_args );
-
-            if( l_err )
-            {
-                TRACFCOMP(g_trac_vpd, "vpd.C::setPartAndSerialNumbers::serial number");
-                errlCommit( l_err, VPD_COMP_ID );
-                l_err = nullptr;
-                break;
-            }
-
-            // set the serial number attribute
-            TARGETING::ATTR_SERIAL_NUMBER_type l_serialNumber = {0};
-            size_t expectedSNSize = sizeof(l_serialNumber);
-            if(expectedSNSize < l_dataSize)
-            {
-                TRACFCOMP(g_trac_vpd, "Serial number data to large for attribute. Expected: %d Actual: %d",
-                        expectedSNSize, l_dataSize);
+                // Don't break, continue to CCIN
             }
             else
             {
-                memcpy( l_serialNumber, l_serialNumberData, l_dataSize );
-                i_target->trySetAttr
-                            <TARGETING::ATTR_SERIAL_NUMBER>(l_serialNumber);
+                // Set the serial number attribute
+                TARGETING::ATTR_SERIAL_NUMBER_type l_serialNumber = {0};
+                size_t l_attrSNSize = sizeof(l_serialNumber);
+                if(l_attrSNSize < l_dataSize)
+                {
+                    TRACFCOMP(g_trac_vpd,
+                            "Serial number data too large for attribute."
+                            " ATTR size: %d VPD size: %d",
+                            l_attrSNSize,
+                            l_dataSize);
+                }
+                else
+                {
+                    memcpy( l_serialNumber, l_serialNumberData, l_dataSize );
+                    i_target->trySetAttr
+                                <TARGETING::ATTR_SERIAL_NUMBER>(l_serialNumber);
+                }
             }
+        }
 
+        //---------------
+        // ATTR_FRU_CCIN
+        //---------------
+
+        // If no CCIN keyword just exit
+        if (l_keywordCC == 0)
+        {
+            break;
+        }
+
+        // Get the ccin size
+        l_args.record = l_recordCC;
+        l_args.keyword = l_keywordCC;
+        l_dataSize = 0;
+        l_err = l_ipvpd->read( i_target,
+                               nullptr,
+                               l_dataSize,
+                               l_args );
+        if( l_err )
+        {
+            TRACFCOMP(g_trac_vpd, "Error reading VPD ccin size");
+            errlCommit( l_err, VPD_COMP_ID );
+            break;
+        }
+
+        // Get the ccin data
+        uint8_t l_ccinData[l_dataSize] = {};
+        l_err = l_ipvpd->read( i_target,
+                               l_ccinData,
+                               l_dataSize,
+                               l_args );
+        if( l_err )
+        {
+            TRACFCOMP(g_trac_vpd, "Error reading VPD ccin");
+            errlCommit( l_err, VPD_COMP_ID );
+            break;
+        }
+
+        // Set the ccin attribute
+        TARGETING::ATTR_FRU_CCIN_type l_fruCcin = 0;
+        size_t l_attrCcinSize = sizeof(l_fruCcin);
+        if(l_attrCcinSize < l_dataSize)
+        {
+            TRACFCOMP(g_trac_vpd,
+                      "Ccin data too large for attribute."
+                      " ATTR size: %d VPD size: %d",
+                      l_attrCcinSize,
+                      l_dataSize);
+        }
+        else
+        {
+            memcpy( &l_fruCcin, l_ccinData, l_dataSize );
+            i_target->trySetAttr
+                        <TARGETING::ATTR_FRU_CCIN>(l_fruCcin);
+        }
 
     }while( 0 );
 
 }
 
 // ------------------------------------------------------------------
-// setPartAndSerialNumberAttributes
+// updateSerialNumberFromBMC
 // ------------------------------------------------------------------
 errlHndl_t updateSerialNumberFromBMC( TARGETING::Target * i_nodetarget )
 {
@@ -531,10 +621,10 @@ errlHndl_t updateSerialNumberFromBMC( TARGETING::Target * i_nodetarget )
 // getPnAndSnRecordAndKeywords
 // ------------------------------------------------------------------
 errlHndl_t getPnAndSnRecordAndKeywords( TARGETING::Target * i_target,
-                                  TARGETING::TYPE i_type,
-                                  vpdRecord & io_record,
-                                  vpdKeyword & io_keywordPN,
-                                  vpdKeyword & io_keywordSN )
+                                        TARGETING::TYPE i_type,
+                                        vpdRecord & io_record,
+                                        vpdKeyword & io_keywordPN,
+                                        vpdKeyword & io_keywordSN )
 {
     TRACFCOMP(g_trac_vpd, ENTER_MRK"getPnAndSnRecordAndKeywords()");
     errlHndl_t l_err = nullptr;
@@ -570,7 +660,9 @@ errlHndl_t getPnAndSnRecordAndKeywords( TARGETING::Target * i_target,
         }
         else
         {
-            TRACFCOMP(g_trac_vpd,ERR_MRK"VPD::getPnAndSnRecordAndKeywords() Unexpected target type, huid=0x%X",TARGETING::get_huid(i_target));
+            TRACFCOMP(g_trac_vpd,ERR_MRK
+                      "VPD::getPnAndSnRecordAndKeywords() Unexpected target type, huid=0x%X",
+                      TARGETING::get_huid(i_target));
             /*@
              * @errortype
              * @moduleid     VPD_GET_PN_AND_SN
@@ -585,11 +677,74 @@ errlHndl_t getPnAndSnRecordAndKeywords( TARGETING::Target * i_target,
                                     VPD_UNEXPECTED_TARGET_TYPE,
                                     TO_UINT64(TARGETING::get_huid(i_target)),
                                     0x0,
-                                    true /*Add HB Software Callout*/ );
+                                    ERRORLOG::ErrlEntry::ADD_SW_CALLOUT );
 
         }
     }while( 0 );
     TRACSSCOMP(g_trac_vpd, EXIT_MRK"getPnAndSnRecordAndKeywords()");
+    return l_err;
+}
+
+// ------------------------------------------------------------------
+// getCcinRecordAndKeywords
+// ------------------------------------------------------------------
+errlHndl_t getCcinRecordAndKeywords( TARGETING::Target * i_target,
+                                     TARGETING::TYPE i_type,
+                                     vpdRecord & io_record,
+                                     vpdKeyword & io_keywordCC )
+{
+    TRACFCOMP(g_trac_vpd, ENTER_MRK"getCcinRecordAndKeywords()");
+    errlHndl_t l_err = nullptr;
+    do{
+
+        if( i_type == TARGETING::TYPE_PROC )
+        {
+            io_record    = MVPD::VINI;
+            io_keywordCC = MVPD::CC;
+        }
+        else if((  i_type == TARGETING::TYPE_DIMM )
+               || (i_type == TARGETING::TYPE_OCMB_CHIP))
+        {
+            // SPD does not have singleton instance
+            // SPD does not use record
+            if(TARGETING::UTIL::assertGetToplevelTarget()->getAttr<TARGETING::ATTR_USE_11S_SPD>())
+            {
+                io_keywordCC = SPD::IBM_11S_CC;
+            }
+            else
+            {
+                 // No CC, only in 11S
+            }
+        }
+        else if( i_type == TARGETING::TYPE_NODE )
+        {
+            io_record    = PVPD::VINI;
+            io_keywordCC = PVPD::CC;
+        }
+        else
+        {
+            TRACFCOMP(g_trac_vpd,ERR_MRK
+                      "VPD::getCcinRecordAndKeywords() Unexpected target type, huid=0x%X",
+                      TARGETING::get_huid(i_target));
+            /*@
+             * @errortype
+             * @moduleid     VPD_GET_CCIN
+             * @reasoncode   VPD_UNEXPECTED_TARGET_TYPE
+             * @userdata1    Target HUID
+             * @userdata2    <UNUSED>
+             * @devdesc      Unexpected target type for CCIN Record/Keyword
+             */
+            l_err = new ERRORLOG::ErrlEntry(
+                                    ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                    VPD_GET_CCIN,
+                                    VPD_UNEXPECTED_TARGET_TYPE,
+                                    TO_UINT64(TARGETING::get_huid(i_target)),
+                                    0x0,
+                                    ERRORLOG::ErrlEntry::ADD_SW_CALLOUT );
+
+        }
+    }while( 0 );
+    TRACSSCOMP(g_trac_vpd, EXIT_MRK"getCcinRecordAndKeywords()");
     return l_err;
 }
 
@@ -679,7 +834,7 @@ errlHndl_t ensureEepromCacheIsInSync(TARGETING::Target           * i_target,
                                                 getAttr<TARGETING::ATTR_TYPE>(),
                                             l_record,
                                             l_keywordPN,
-                                            l_keywordSN);
+                                            l_keywordSN );
         if( l_err )
         {
             TRACFCOMP(g_trac_vpd,

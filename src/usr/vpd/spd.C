@@ -2189,17 +2189,19 @@ void setPartAndSerialNumberAttributes( TARGETING::Target * i_target )
     //Default to standard VPD Location for DDIMM SPD SN/PN
     VPD::vpdKeyword l_partKeyword = SPD::MODULE_PART_NUMBER;
     VPD::vpdKeyword l_serialKeyword = SPD::MODULE_SERIAL_NUMBER;
+    VPD::vpdKeyword l_ccinKeyword = 0;
 
     if(TARGETING::UTIL::assertGetToplevelTarget()->getAttr<TARGETING::ATTR_USE_11S_SPD>())
     {
-        //Use IBM 11S Location for DDIMM SN/PN
+        //Use IBM 11S Location for DDIMM SN/PN/CCIN
         l_partKeyword = SPD::IBM_11S_PN;
         l_serialKeyword = SPD::IBM_11S_SN;
+        l_ccinKeyword = SPD::IBM_11S_CC;
     }
 
     do
     {
-         // Read the Basic Memory Type
+        // Read the Basic Memory Type
         uint8_t l_memType(MEM_TYPE_INVALID);
         l_err = getMemType( l_memType,
                             i_target,
@@ -2240,18 +2242,34 @@ void setPartAndSerialNumberAttributes( TARGETING::Target * i_target )
             break;
         }
         size_t l_serialDataSize = entry->length;
-        TRACDCOMP(g_trac_spd,"l_partDataSize=%d,l_serialDataSize=%d\n",
-                l_partDataSize,l_serialDataSize);
+
+        size_t l_ccinDataSize = 0;
+        if (l_ccinKeyword != 0)
+        {
+            entry = NULL;
+            l_err = getKeywordEntry( l_ccinKeyword,
+                                     l_memType,
+                                     i_target,
+                                     entry );
+            if( l_err )
+            {
+                break;
+            }
+            l_ccinDataSize = entry->length;
+        }
+
+        TRACDCOMP(g_trac_spd,
+                  "l_partDataSize=%d,l_serialDataSize=%d\n",
+                  l_partDataSize,l_serialDataSize);
 
         //read the keywords from SEEPROM since PNOR may not be loaded yet
-        uint8_t l_partNumberData[l_partDataSize];
+        uint8_t l_partNumberData[l_partDataSize] = {};
         l_err = spdGetValue( l_partKeyword,
                              l_partNumberData,
                              l_partDataSize,
                              i_target,
                              l_memType,
                              VPD::AUTOSELECT );
-
         if( l_err )
         {
             TRACDCOMP(g_trac_spd, ERR_MRK"spd.C::setPartAndSerialNumberAttributes(): Error after spdGetValue-> PART_NUMBER");
@@ -2260,14 +2278,13 @@ void setPartAndSerialNumberAttributes( TARGETING::Target * i_target )
             break;
         }
 
-        uint8_t l_serialNumberData[l_serialDataSize];
+        uint8_t l_serialNumberData[l_serialDataSize] = {};
         l_err = spdGetValue( l_serialKeyword,
                              l_serialNumberData,
                              l_serialDataSize,
                              i_target,
                              l_memType,
                              VPD::AUTOSELECT );
-
         if( l_err )
         {
             TRACFCOMP(g_trac_spd, ERR_MRK"spd.C::setPartAndSerialNumberAttributes(): Error after spdGetValue-> SERIAL_NUMBER");
@@ -2275,11 +2292,28 @@ void setPartAndSerialNumberAttributes( TARGETING::Target * i_target )
             l_err = NULL;
             break;
         }
+
+        uint8_t l_ccinData[l_ccinDataSize] = {};
+        if (l_ccinKeyword != 0)
+        {
+            l_err = spdGetValue( l_ccinKeyword,
+                                 l_ccinData,
+                                 l_ccinDataSize,
+                                 i_target,
+                                 l_memType,
+                                 VPD::AUTOSELECT );
+            if( l_err )
+            {
+                TRACFCOMP(g_trac_spd, ERR_MRK"spd.C::setPartAndSerialNumberAttributes(): Error after spdGetValue-> CCIN");
+                errlCommit(l_err, VPD_COMP_ID);
+                l_err = NULL;
+                break;
+            }
+        }
+
         // Set the attributes
         TARGETING::ATTR_PART_NUMBER_type l_PN = {0};
-        TARGETING::ATTR_SERIAL_NUMBER_type l_SN = {0};
         size_t expectedPNSize = sizeof(l_PN);
-        size_t expectedSNSize = sizeof(l_SN);
         if(expectedPNSize < l_partDataSize)
         {
             TRACFCOMP(g_trac_spd, "Part data size too large for attribute. Expected: %d Actual: %d"
@@ -2291,6 +2325,9 @@ void setPartAndSerialNumberAttributes( TARGETING::Target * i_target )
             memcpy(l_PN, l_partNumberData, l_partDataSize);
             i_target->trySetAttr<TARGETING::ATTR_PART_NUMBER>(l_PN);
         }
+
+        TARGETING::ATTR_SERIAL_NUMBER_type l_SN = {0};
+        size_t expectedSNSize = sizeof(l_SN);
         if(expectedSNSize < l_serialDataSize)
         {
             TRACFCOMP(g_trac_spd, "Serial data size too large for attribute. Expected: %d Actual: %d",
@@ -2301,6 +2338,24 @@ void setPartAndSerialNumberAttributes( TARGETING::Target * i_target )
             memcpy(l_SN, l_serialNumberData, l_serialDataSize);
             i_target->trySetAttr<TARGETING::ATTR_SERIAL_NUMBER>(l_SN);
         }
+
+        if (l_ccinKeyword != 0)
+        {
+            TARGETING::ATTR_FRU_CCIN_type l_CC = 0;
+            size_t expectedCCSize = sizeof(l_CC);
+            if(expectedCCSize < l_ccinDataSize)
+            {
+                TRACFCOMP(g_trac_spd,
+                          "CCIN data size too large for attribute. Expected: %d Actual: %d",
+                          expectedCCSize, l_ccinDataSize);
+            }
+            else
+            {
+                memcpy(&l_CC, l_ccinData, l_ccinDataSize);
+                i_target->trySetAttr<TARGETING::ATTR_FRU_CCIN>(l_CC);
+            }
+        }
+
     }while( 0 );
 
     TRACSSCOMP(g_trac_spd, EXIT_MRK"spd.C::setPartAndSerialNumberAttributes()");

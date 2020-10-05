@@ -289,18 +289,35 @@ bool resolveVpdSource( TARGETING::Target * i_target,
  * @brief This function sets the correct record/keyword combinations
  *        for the part and serial numbers.
  * @param[in] i_target - target to get the data for
+ * @param[in] i_type - type of target (PROC/DIMM/NODE/etc)
  * @param[in/out] io_record - record for target
- * @param[in/out] io_partKeyword - the part number keyword
- * @param[in/out] io_serialKeyword - the serial number keyword
+ * @param[in/out] io_keywordPN - the part number keyword
+ * @param[in/out] io_keywordSN - the serial number keyword
  *
  * @return errlHndl_t - nullptr if successful, otherwise a pointer to the
  *                error log.
  */
 errlHndl_t getPnAndSnRecordAndKeywords( TARGETING::Target * i_target,
-                                                 TARGETING::TYPE i_type,
-                                                 vpdRecord & io_record,
-                                                 vpdKeyword & io_partKeyword,
-                                                 vpdKeyword & io_serialKeyword);
+                                        TARGETING::TYPE i_type,
+                                        vpdRecord & io_record,
+                                        vpdKeyword & io_keywordPN,
+                                        vpdKeyword & io_keywordSN );
+
+/**
+ * @brief This function sets the correct record/keyword combinations
+ *        for the ccin.
+ * @param[in] i_target - target to get the data for
+ * @param[in] i_type - type of target (PROC/DIMM/NODE/etc)
+ * @param[in/out] io_record - record for target
+ * @param[in/out] io_keywordCC - the CCIN keyword
+ *
+ * @return errlHndl_t - nullptr if successful, otherwise a pointer to the
+ *                error log.
+ */
+errlHndl_t getCcinRecordAndKeywords( TARGETING::Target * i_target,
+                                     TARGETING::TYPE i_type,
+                                     vpdRecord & io_record,
+                                     vpdKeyword & io_keywordCC );
 
 /**
  * @brief Read data from the BMC to update the system serial number

@@ -129,8 +129,11 @@ const KeywordData ddr4DDIMMData[] =
     { TRRDS_FINE_OFFSET,                0x77,   0x01,   0x00,   0x00, false, false, ALL },
     { TCKMAX_FINE_OFFSET,               0x7c,   0x01,   0x00,   0x00, false, false, ALL },
     { BASE_CONFIG_CRC,                  0x7f,   0x02,   0x00,   0x00, true,  false, ALL },
+    // 11S starts at byte 416 (0x1A0,) 22 bytes plus 4 for the CCIN
+    // "11Spppppppsssssssssssscccc"
     { IBM_11S_PN,                       0x1a3,  0x07,   0x00,   0x00, false, false, ALL },
     { IBM_11S_SN,                       0x1aa,  0x0c,   0x00,   0x00, false, false, ALL },
+    { IBM_11S_CC,                       0x1b6,  0x04,   0x00,   0x00, false, false, ALL },
     { EXPLORER_FW_VERSION,              0x3c0,  0x40,   0x00,   0x00, false, true,  ALL },
     // Module Specific fields supported on DDR4 only
     { ENTIRE_SPD_WITHOUT_EFD,           0x00,   0x280,  0x00,   0x00, false, false, ALL },

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -36,6 +36,8 @@
 
 #include <errl/errlsctn.H>
 #include <errl/errlsctnhdr.H>
+
+#include <vector>
 
 
 namespace ERRORLOG
@@ -142,7 +144,6 @@ private:
      */
     void setSubSys( epubSubSystem_t i_ssid ){ iv_ssid = i_ssid; };
 
-
     /**
      * Convert ascii hex digit to binary
      * @param[in] c, the ascii hex digit
@@ -151,6 +152,60 @@ private:
      * '0'-'9', 'A'-'F', 'a'='f'
      */
     uint64_t aschex2bin(char c) const;
+
+
+#ifdef CONFIG_BUILD_FULL_PEL
+
+    /**
+     *  @brief Added to the flatSize(), this is the
+     *  amount of flat storage (in bytes) required to
+     *  store the FRU callouts.
+     *
+     *  @return  Size in bytes.
+     *
+     */
+    uint64_t fruCalloutFlatSize() const;
+
+    /**
+     *  @brief Check if new FRU callout matches an existing
+     *         callout in the vector.  Keep the callout with
+     *         the highest priority.  MRU entries may be added
+     *         to the callout if it is a duplicate FRU.
+     *
+     *  @param[in]  io_co The new callout.
+     *
+     *  @return True if the callout should be added to the vector.
+     *
+     */
+    bool checkForDuplicateCallout(fruCallOutEntry_t& io_co);
+
+    /**
+     *  @brief Add the new FRU callout to the callout vector.
+     *         Entry may be modified if it is a duplicate FRU,
+     *         MRU entries may be added
+     *
+     *  @param[in]  io_co The new callout.
+     *
+     */
+    void addFruCallout(fruCallOutEntry_t& io_co);
+
+    /**
+     *  @brief Translate the HWAS priority to a FRU priority.
+     *
+     *  @param[in]  i_hwasPri The HWAS priority.
+     *
+     */
+    char hwasPriToFruPri( uint32_t i_hwasPri );
+
+    /**
+     *  @brief Flatten the FRU callouts into PEL.
+     *
+     *  @param[in]  i_psrc Pointer to the flattened src.
+     *
+     */
+    void flattenFruCallouts(pelSRCSection_t* i_psrc);
+
+#endif
 
     // Instance data
     srcType_t       iv_srcType : 8; // SRC type, the ?? in SRC ??xxxxxx
@@ -161,7 +216,34 @@ private:
     uint64_t        iv_user2;       // user data 2
     bool            iv_deconfig;    // true if there is a deconfigure callout
     bool            iv_gard;        // true if there is a gard callout
+
+#ifdef CONFIG_BUILD_FULL_PEL
+    std::vector<fruCallOutEntry_t> iv_coVec; // vector of FRU callouts
+#endif
 };
+
+
+#ifdef CONFIG_BUILD_FULL_PEL
+inline uint64_t ErrlSrc::fruCalloutFlatSize() const
+{
+    uint64_t l_size = 0;
+
+    l_size += sizeof(pelSubSectionHeader_t);
+
+    // Loop through all entries in the callout vector
+    for (const auto& entry : iv_coVec)
+    {
+        l_size += sizeof(pelFRUCalloutHeader_t);
+        l_size += entry.locCodeLen;
+        l_size += sizeof(pelFRUIDSubstruct_t);
+        l_size += sizeof(pelMRUIDSubstruct_t);
+        l_size += sizeof(mruidfield) * entry.mruIdVec.size();
+    }
+
+    return l_size;
+
+}
+#endif
 
 
 //**************************************************************************
@@ -171,9 +253,17 @@ inline uint64_t ErrlSrc::flatSize() const
 {
     // 72 bytes in SRC structure + 8 byte section header.
     CPPASSERT( 80 == sizeof( pelSRCSection_t ));
-    return sizeof( pelSRCSection_t );
-}
+    uint64_t l_size = sizeof( pelSRCSection_t );
 
+#ifdef CONFIG_BUILD_FULL_PEL
+    if (!iv_coVec.empty())
+    {
+        l_size += fruCalloutFlatSize();
+    }
+#endif
+
+    return l_size;
+}
 
 
 } // namespace

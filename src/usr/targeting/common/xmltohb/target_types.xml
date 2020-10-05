@@ -559,6 +559,9 @@
       <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
     </attribute>
     <attribute>
+      <id>LOCATION_CODE</id>
+    </attribute>
+    <attribute>
       <default>0</default>
       <id>MMIO_PHYS_ADDR</id>
     </attribute>

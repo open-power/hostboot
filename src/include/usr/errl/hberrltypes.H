@@ -38,6 +38,8 @@
  */
 #include <hbotcompid.H>             // compId_t
 #include <stdint.h>
+#include <string.h>                 // strlen
+#include <vector>
 
 /**
  * @brief Pointer to an ErrlEntry object
@@ -533,6 +535,181 @@ typedef struct peluserheadersection
 
 
 
+/**
+ * @brief Structure to represent machine type/model and serial number, as used
+ * in the EH section below
+ */
+typedef struct mtms_t
+{
+    char mtm[8] = { }; // Machine type/model string
+    char serial[12] = { };
+} __attribute__((packed)) mtms_t;
+
+
+
+/** @brief Function to set the value of errl string variables.
+ *  @param[out] o_array Array to set
+ *  @param[in] i_value  Value to assign to array
+ *  @param[in] i_nullTerm Add null terminator to end of string
+ *
+ *  This function will zero out the given array and set its contents to the
+ *  given value, without writing beyond the bounds of the array. If the given
+ *  value is too long, it will be truncated. The string in the output array
+ *  will be zero-terminated if nullTerm is true.
+ */
+template<uint64_t Size>
+uint64_t set_errl_string(char(&o_array)[Size],
+                         const char* const i_value,
+                         bool i_nullTerm = true)
+{
+    uint64_t value_len = 0;
+    if (i_nullTerm)
+    {
+        value_len = std::min(strlen(i_value), Size - 1);
+    }
+    else
+    {
+        value_len = std::min(strlen(i_value), Size);
+    }
+    memset(o_array, 0, Size);
+    memcpy(o_array, i_value, value_len);
+    return value_len;
+}
+
+
+
+#ifdef CONFIG_BUILD_FULL_PEL
+
+// These are the max string sizes defined in the PEL spec. They may not match
+// the attribute sizes they are copied from so are truncated if necessary by
+// the set_errl_string function.
+// PEL spec 4.2.2.2
+constexpr size_t PEL_LOC_CODE_SIZE = 80;
+// PEL spec 4.2.2.2.3
+constexpr size_t PEL_PART_NUM_SIZE = 8;
+constexpr size_t PEL_CCIN_SIZE = 4;
+constexpr size_t PEL_SERIAL_NUM_SIZE = 12;
+
+/**
+ * @brief PEL SRC subsection header
+ *        PEL spec 4.2.2
+ */
+typedef struct pelsrcsubsectionheader
+{
+  uint8_t    ssid;    // subsection identifier
+  uint8_t    ssflags; // subsection flags
+  uint16_t   sslen;   // overall length of this subsection
+} __attribute__((packed))  pelSubSectionHeader_t;  // 4 bytes
+
+
+/**
+ * @brief SRC FRU callout header
+ *        PEL spec 4.2.2.2
+ */
+typedef struct pelfrucalloutheader
+{
+  uint8_t    fclen;    // fru callout length
+  uint8_t    fcflags;  // fru callout type and flags
+  uint8_t    fcpri;    // fru callout priority
+  uint8_t    fclclen;  // fru callout location code length
+} __attribute__((packed))  pelFRUCalloutHeader_t;  // 4 bytes
+
+
+/**
+ * @brief SRC FRU substruct header
+ *        PEL spec 4.2.2.2.2
+ */
+typedef struct pelfrusubstructheader
+{
+  uint16_t   fsstype;
+  uint8_t    fsslen;
+  uint8_t    fssflags;
+} __attribute__((packed))  pelFRUSubstructHeader_t;  // 4 bytes
+
+
+/**
+ * @brief SRC FRU ID substruct
+ *        PEL spec 4.2.2.2.3
+ */
+typedef struct pelfruidsubstruct
+{
+  pelFRUSubstructHeader_t frusshead; // 4 bytes
+  char      fruidpnString[PEL_PART_NUM_SIZE]; // present if flags[4] or flags[6]
+  char      fruidccinString[PEL_CCIN_SIZE];   // present if flags[5]
+  char      fruidsnString[PEL_SERIAL_NUM_SIZE];  // present if flags[7]
+} __attribute__((packed))  pelFRUIDSubstruct_t; // 28 bytes
+
+
+/**
+ * @brief SRC PCE ID substruct
+ *        PEL spec 4.2.2.2.4
+ * Placeholder, not currently used
+ */
+//typedef struct pelpceidsubstruct
+//{
+//  pelFRUSubstructHeader_t frusshead;
+//  mtms_t     pceidmtms;    // string 20
+//  //char       pceidnameString[32];  // variable up to 32
+//} __attribute__((packed))  pelPCEIDSubstruct_t;
+
+
+/**
+ * @brief SRC MRU field entry
+ *        PEL spec 4.2.2.2.6
+ */
+typedef struct mruidfield
+{
+  uint32_t       mrufieldreserved:24;
+  char           mrureppri;
+  uint32_t       mruid;
+} __attribute__((packed))  pelMRUIDField_t; // 8 bytes
+
+
+/**
+ * @brief SRC MRU ID substruct
+ *        PEL spec 4.2.2.2.5
+ */
+typedef struct pelmruidsubstruct
+{
+  pelFRUSubstructHeader_t frusshead; // 4 bytes
+  uint32_t   mrussreserved;
+} __attribute__((packed))  pelMRUIDSubstruct_t; // 8 bytes
+
+
+/**
+ * @brief PEL SRC subsection
+ *        PEL spec 4.2.2.1 and 4.2.2.2
+ *        Listed here for reference only
+ */
+  // pelSubSectionHeader_t ssheader;    // only 1 subsection header
+  //   pelFRUCalloutHeader_t frucoheader;    // 1 to 10 FRU callouts
+  //   char                  locationcode[]; // variable up to 80
+  //   pelFRUIDSubstruct_t   fruss;          // variable up to 28
+  //   pelPCEIDSubstruct_t   pcess;          // variable up to 56
+  //   pelMRUSubstruct_t     mruss;          // variable up to 128
+
+/**
+ * @brief Entry struct for the SRC FRU callout vector
+ *        Internal-only structure that contains FRU data saved during commit().
+ *        Added to error log in flatten() using PEL spec structures above.
+ */
+typedef struct frucoentry
+{
+    uint32_t        priority;
+    size_t          locCodeLen;
+    char            locationCode[PEL_LOC_CODE_SIZE];
+    uint8_t         fruCompType;
+    char            partNumber[PEL_PART_NUM_SIZE];
+    char            ccin[PEL_CCIN_SIZE];
+    char            serialNumber[PEL_SERIAL_NUM_SIZE];
+    std::vector<uint32_t> mruPriVec;
+    std::vector<uint32_t> mruIdVec;
+} fruCallOutEntry_t;
+
+
+#endif
+
+constexpr size_t SRC_STRING_SIZE = 32;
 
 /**
  * @brief pelSRCSection_t
@@ -575,19 +752,9 @@ typedef struct pelsrcsection
   uint64_t   word6;
   // "Hex word 8-9" optional, iv_user2
   uint64_t   word8;
-  char       srcString[32];
+  char       srcString[SRC_STRING_SIZE];
 } __attribute__((packed)) pelSRCSection_t;
 
-
-/**
- * @brief Structure to represent machine type/model and serial number, as used
- * in the EH section below
- */
-typedef struct mtms_t
-{
-    char mtm[8] = { }; // Machine type/model string
-    char serial[12] = { };
-} __attribute__((packed)) mtms_t;
 
 /**
  * @brief pelExtendedUserHeaderSection_t

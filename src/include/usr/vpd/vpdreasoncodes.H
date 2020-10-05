@@ -50,6 +50,7 @@ enum vpdModuleId
     VPD_ENSURE_CACHE_IS_IN_SYNC             = 0x11,
     VPD_GET_PN_AND_SN                       = 0x12,
     VPD_GET_VPD_LOCATION                    = 0x13,
+    VPD_GET_CCIN                            = 0x14,
 
     // IPVPD
     VPD_IPVPD_TRANSLATE_RECORD              = 0x20,

@@ -356,8 +356,9 @@ enum
     LRMM_CRC                         = SPD_FIRST_MOD_SPEC | 0xb4,
     IBM_11S_PN                       = SPD_FIRST_MOD_SPEC | 0xb5,
     IBM_11S_SN                       = SPD_FIRST_MOD_SPEC | 0xb6,
-    EXPLORER_FW_VERSION              = SPD_FIRST_MOD_SPEC | 0xb7,
-    SPD_LAST_MOD_SPEC                = SPD_FIRST_MOD_SPEC | 0xb8,
+    IBM_11S_CC                       = SPD_FIRST_MOD_SPEC | 0xb7,
+    EXPLORER_FW_VERSION              = SPD_FIRST_MOD_SPEC | 0xb8,
+    SPD_LAST_MOD_SPEC                = SPD_FIRST_MOD_SPEC | 0xb9,
 
     // Latest DDR SPD specifications have standard SPD
     // in the front followed by extendable function

@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2012,2020                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2012,2021                        -->
 <!-- [+] Google Inc.                                                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
@@ -217,6 +217,18 @@
       <uint16_t>
         <default>0x0</default>
       </uint16_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hbOnly/>
+  </attribute>
+
+  <attribute>
+    <id>FRU_CCIN</id>
+    <description>The ccin number for a particular FRU target</description>
+    <simpleType>
+      <uint32_t/>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
     <readable/>
@@ -1489,10 +1501,11 @@
       <uint8_t/>
       <array>18</array>
     </simpleType>
-    <persistency>non-volatile</persistency>
+    <persistency>volatile-zeroed</persistency>
     <readable/>
     <writeable/>
     <no_export/>
+    <hbOnly/>
     <hwpfToHbAttrMap>
       <id>ATTR_SERIAL_NUMBER</id>
       <macro>DIRECT</macro>

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -161,7 +161,7 @@ public:
      */
     void setMTM(const char* const i_mtm)
     {
-        set_string(iv.mtms.mtm, i_mtm);
+        set_errl_string(iv.mtms.mtm, i_mtm);
     }
 
     /* @brief Set the Serial Number string in the EH section
@@ -169,7 +169,7 @@ public:
      */
     void setSerial(const char* const i_serial)
     {
-        set_string(iv.mtms.serial, i_serial);
+        set_errl_string(iv.mtms.serial, i_serial);
     }
 
     /* @brief Set the Firmware Version string in the EH section
@@ -177,7 +177,7 @@ public:
      */
     void setFirmwareVersion(const char* const i_firmware)
     {
-        set_string(iv.firmware, i_firmware);
+        set_errl_string(iv.firmware, i_firmware);
     }
 
     /* @brief Set the Subsystem Version string in the EH section
@@ -185,28 +185,10 @@ public:
      */
     void setSubsystemVersion(const char* const i_subsystem)
     {
-        set_string(iv.subsystem, i_subsystem);
+        set_errl_string(iv.subsystem, i_subsystem);
     }
 
 private:
-    /* @brief Helper function to set the value of member string variables.
-     * @param[out] o_array Array to set
-     * @param[in] i_value  Value to assign to array
-     *
-     * This function will zero out the given array and set its contents to the
-     * given value, without writing beyond the bounds of the array. If the given
-     * value is too long, it will be truncated. The string in the output array
-     * will always be zero-terminated.
-     */
-    template<uint64_t Size>
-    uint64_t set_string(char(&o_array)[Size], const char* const i_value)
-    {
-        const uint64_t value_len = std::min(strlen(i_value), Size - 1);
-        memset(o_array, 0, Size);
-        memcpy(o_array, i_value, value_len);
-        return value_len;
-    }
-
      // size does not include that of the section header
     static const int VER = 1; // section version
     static const int SST = 0; // section subtype

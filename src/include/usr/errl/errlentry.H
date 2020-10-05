@@ -927,6 +927,19 @@ private:
                                HWAS::callOutPriority i_priority );
 #endif
 
+#ifdef CONFIG_BUILD_FULL_PEL
+    /**
+     * @brief Save FRU callout data to vector
+     *
+     * @param[in]   i_target    The target of the callout
+     * @param[in]   i_priority  The priority of the callout
+     * @param[in]   i_compType  The component type of the callout
+     */
+    void addFruCalloutDataToSrc(TARGETING::Target* i_target,
+                                HWAS::callOutPriority i_priority,
+                                uint8_t i_compType );
+#endif
+
     /**
      *  @brief Sets flag controlling whether or not to display a given
      *      error log to the console.  It is only possible to display an

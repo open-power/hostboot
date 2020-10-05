@@ -416,6 +416,10 @@
         <id>PBAX_GROUPID</id>
         <default>0x0</default>
     </attribute>
+    <attribute>
+        <id>LOCATION_CODE</id>
+        <default>S0_N0_PROC0</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -524,6 +528,10 @@
     <attribute>
         <id>PBAX_GROUPID</id>
         <default>0x0</default>
+    </attribute>
+    <attribute>
+        <id>LOCATION_CODE</id>
+        <default>S0_N0_PROC1</default>
     </attribute>
 </targetInstance>
 
@@ -12380,6 +12388,10 @@
             <field><id>writePageSize</id><value>0x20</value></field>
         </default>
     </attribute>
+    <attribute>
+        <id>LOCATION_CODE</id>
+        <default>S0_N0_OCMB0</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -12438,6 +12450,10 @@
             <field><id>writePageSize</id><value>0x20</value></field>
         </default>
     </attribute>
+    <attribute>
+        <id>LOCATION_CODE</id>
+        <default>S0_N0_OCMB1</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -12493,6 +12509,10 @@
             <field><id>writeCycleTime</id><value>05</value></field>
             <field><id>writePageSize</id><value>0x20</value></field>
         </default>
+    </attribute>
+    <attribute>
+        <id>LOCATION_CODE</id>
+        <default>S0_N0_OCMB2</default>
     </attribute>
 </targetInstance>
 
@@ -12550,6 +12570,10 @@
             <field><id>writePageSize</id><value>0x20</value></field>
         </default>
     </attribute>
+    <attribute>
+        <id>LOCATION_CODE</id>
+        <default>S0_N0_OCMB3</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -12605,6 +12629,10 @@
             <field><id>writeCycleTime</id><value>05</value></field>
             <field><id>writePageSize</id><value>0x20</value></field>
         </default>
+    </attribute>
+    <attribute>
+        <id>LOCATION_CODE</id>
+        <default>S0_N0_OCMB4</default>
     </attribute>
 </targetInstance>
 
@@ -12662,6 +12690,10 @@
             <field><id>writePageSize</id><value>0x20</value></field>
         </default>
     </attribute>
+    <attribute>
+        <id>LOCATION_CODE</id>
+        <default>S0_N0_OCMB5</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -12718,6 +12750,10 @@
             <field><id>writePageSize</id><value>0x20</value></field>
         </default>
     </attribute>
+    <attribute>
+        <id>LOCATION_CODE</id>
+        <default>S0_N0_OCMB6</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -12773,6 +12809,10 @@
             <field><id>writeCycleTime</id><value>05</value></field>
             <field><id>writePageSize</id><value>0x20</value></field>
         </default>
+    </attribute>
+    <attribute>
+        <id>LOCATION_CODE</id>
+        <default>S0_N0_OCMB7</default>
     </attribute>
 </targetInstance>
 
@@ -12834,6 +12874,10 @@
             <field><id>writePageSize</id><value>32</value></field>
         </default>
     </attribute>
+    <attribute>
+        <id>LOCATION_CODE</id>
+        <default>S0_N0_OCMB8</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -12889,6 +12933,10 @@
             <field><id>writeCycleTime</id><value>20</value></field>
             <field><id>writePageSize</id><value>32</value></field>
         </default>
+    </attribute>
+    <attribute>
+        <id>LOCATION_CODE</id>
+        <default>S0_N0_OCMB9</default>
     </attribute>
 </targetInstance>
 
@@ -12946,6 +12994,10 @@
             <field><id>writePageSize</id><value>32</value></field>
         </default>
     </attribute>
+    <attribute>
+        <id>LOCATION_CODE</id>
+        <default>S0_N0_OCMB10</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -13001,6 +13053,10 @@
             <field><id>writeCycleTime</id><value>20</value></field>
             <field><id>writePageSize</id><value>32</value></field>
         </default>
+    </attribute>
+    <attribute>
+        <id>LOCATION_CODE</id>
+        <default>S0_N0_OCMB11</default>
     </attribute>
 </targetInstance>
 
@@ -13058,6 +13114,10 @@
             <field><id>writePageSize</id><value>32</value></field>
         </default>
     </attribute>
+    <attribute>
+        <id>LOCATION_CODE</id>
+        <default>S0_N0_OCMB12</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -13113,6 +13173,10 @@
             <field><id>writeCycleTime</id><value>20</value></field>
             <field><id>writePageSize</id><value>32</value></field>
         </default>
+    </attribute>
+    <attribute>
+        <id>LOCATION_CODE</id>
+        <default>S0_N0_OCMB13</default>
     </attribute>
 </targetInstance>
 
@@ -13170,6 +13234,10 @@
             <field><id>writePageSize</id><value>32</value></field>
         </default>
     </attribute>
+    <attribute>
+        <id>LOCATION_CODE</id>
+        <default>S0_N0_OCMB14</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -13225,6 +13293,10 @@
             <field><id>writeCycleTime</id><value>20</value></field>
             <field><id>writePageSize</id><value>32</value></field>
         </default>
+    </attribute>
+    <attribute>
+        <id>LOCATION_CODE</id>
+        <default>S0_N0_OCMB15</default>
     </attribute>
 </targetInstance>
 
@@ -26523,6 +26595,10 @@
             <field><id>writeCycleTime</id><value>05</value></field>
             <field><id>writePageSize</id><value>0x20</value></field>
         </default>
+    </attribute>
+    <attribute>
+        <id>LOCATION_CODE</id>
+        <default>S0_N0_DIMM31</default>
     </attribute>
 </targetInstance>
 <!-- ==== DDIMMs off second processor ==================================== -->

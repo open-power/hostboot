@@ -1085,6 +1085,7 @@ void ErrlEntry::addSensorDataToErrLog(TARGETING::Target * i_target,
 void ErrlEntry::commit( compId_t  i_committerComponent )
 {
     using namespace TARGETING;
+
     // TODO RTC 35258 need a better timepiece, or else apply a transform onto
     // timebase for an approximation of real time.
     iv_Private.iv_committed = getTB();
@@ -1166,7 +1167,6 @@ void ErrlEntry::commit( compId_t  i_committerComponent )
                 {
                     uint8_t * l_uData = (uint8_t *)(l_ud + 1);
                     Target * l_target = NULL;
-
                     bool l_err = HWAS::retrieveTarget(l_uData,
                                                       l_target,
                                                       this);
@@ -1188,6 +1188,14 @@ void ErrlEntry::commit( compId_t  i_committerComponent )
                         UTIL::tryGetAttributeInHierarchy<ATTR_RAW_MTM>(l_target, mtm);
                         UTIL::tryGetAttributeInHierarchy<ATTR_FW_RELEASE_VERSION>(l_target, release_version);
                         UTIL::tryGetAttributeInHierarchy<ATTR_FW_SUBSYS_VERSION>(l_target, subsys_version);
+
+#ifdef CONFIG_BUILD_FULL_PEL
+                        // Add a FRU callout for this target to the Primary SRC
+                        const uint8_t FRU_COMPONENT_TYPE_NORMAL_HW = 0x01;
+                        addFruCalloutDataToSrc(l_target,
+                                               l_ud->priority,
+                                               FRU_COMPONENT_TYPE_NORMAL_HW);
+#endif
                     }
                     else
                     {
@@ -2557,5 +2565,59 @@ void ErrlEntry::addUDSection( ErrlUD* i_section)
 {
     iv_SectionVector.push_back(i_section);
 }
+
+#ifdef CONFIG_BUILD_FULL_PEL
+void ErrlEntry::addFruCalloutDataToSrc(TARGETING::Target* i_target,
+                                       callOutPriority i_priority,
+                                       uint8_t i_compType)
+{
+    using namespace TARGETING;
+
+    // FRU callout
+    fruCallOutEntry_t l_fruco;
+
+    // Priority
+    l_fruco.priority = i_priority;
+
+    // Location Code
+    ATTR_LOCATION_CODE_type l_locationcode;
+    UTIL::tryGetAttributeInHierarchy<ATTR_LOCATION_CODE>(i_target, l_locationcode);
+    set_errl_string(l_fruco.locationCode, l_locationcode);
+    // Spec requires this size to be a multiple of 4 (padded with zeroes).
+    l_fruco.locCodeLen = ALIGN_4(strlen(l_locationcode));
+
+    // Type
+    l_fruco.fruCompType = i_compType;
+
+    // Part Number
+    ATTR_PART_NUMBER_type l_partnum;
+    UTIL::tryGetAttributeInHierarchy<ATTR_PART_NUMBER>(i_target, l_partnum);
+    set_errl_string(l_fruco.partNumber,
+                    reinterpret_cast<const char*>(l_partnum));
+
+    // CCIN
+    ATTR_PCIE_NVME_CCIN_type l_ccin;
+    UTIL::tryGetAttributeInHierarchy<ATTR_PCIE_NVME_CCIN>(i_target, l_ccin);
+    set_errl_string(l_fruco.ccin,
+                    reinterpret_cast<const char*>(&l_ccin),
+                    false);
+
+    // Serial Number
+    ATTR_SERIAL_NUMBER_type l_serialnumber;
+    UTIL::tryGetAttributeInHierarchy<ATTR_SERIAL_NUMBER>(i_target, l_serialnumber);
+    set_errl_string(l_fruco.serialNumber,
+                    reinterpret_cast<const char*>(l_serialnumber),
+                    false);
+
+    // MRU ID
+    ATTR_MRU_ID_type l_mruid;
+    UTIL::tryGetAttributeInHierarchy<ATTR_MRU_ID>(i_target, l_mruid);
+    l_fruco.mruPriVec.push_back(i_priority); // MRU gets same priority as callout
+    l_fruco.mruIdVec.push_back(l_mruid);
+
+    // Add fruco to the src vector
+    iv_Src.addFruCallout(l_fruco);
+}
+#endif
 
 } // End namespace
