@@ -29,7 +29,9 @@ prd_cd_exp_trgts += chip_data_explorer_10.cdb
 # Chip Data Binary targets for the P10 Chip
 prd_cd_p10_trgts += chip_data_p10_10.cdb
 
+prd_cd_combined += chip_data_combined.cdb
+
 # All Chip Data Binary targets
 prd_chip_data_targets += ${prd_cd_exp_trgts}
 prd_chip_data_targets += ${prd_cd_p10_trgts}
-
+prd_chip_data_targets += ${prd_cd_combined}

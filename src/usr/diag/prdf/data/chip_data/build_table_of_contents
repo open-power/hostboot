@@ -1,0 +1,221 @@
+#!/usr/bin/perl
+# IBM_PROLOG_BEGIN_TAG
+# This is an automatically generated prolog.
+#
+# $Source: src/usr/diag/prdf/data/chip_data/build_table_of_contents $
+#
+# OpenPOWER HostBoot Project
+#
+# Contributors Listed Below - COPYRIGHT 2020
+# [+] International Business Machines Corp.
+#
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+# implied. See the License for the specific language governing
+# permissions and limitations under the License.
+#
+# IBM_PROLOG_END_TAG
+
+use warnings;
+use strict;
+
+use Getopt::Long qw(:config no_ignore_case);
+use File::Path qw(make_path);
+use FindBin qw($RealScript);
+
+#-------------------------------------------------------------------------------
+# Help function
+#-------------------------------------------------------------------------------
+
+sub help()
+{
+    print <<EOF;
+Usage: $RealScript -h
+       $RealScript -i <input_dir> -o <output_dir>
+
+Builds a combined Chip Data Binary file with a Table of Contents from the
+Chip Data Binary files located in the input directory.
+
+The format of the Table of Contents for the chip data binaries (cdb) created by
+this script is as follows:
+| Bytes | Desc                      | Value/Example              |
+|:-----:|:-------------------------:|:--------------------------:|
+|     3 | table of contents keyword | 0x544F43 (ascii for "TOC") |
+|     1 | # of cdb files            |                            |
+
+For each cdb file defined:
+| Bytes | Desc              | Value/Example                  |
+|:-----:|:-----------------:|:------------------------------:|
+|     4 | chip model/level  | Unique ID pulled from cdb file |
+|     4 | offset to the cdb | Offset in bytes                |
+
+Followed by the cdb files.
+
+Options:
+ -h, --help     Prints this menu.
+ -i, --input    Directory containing the Chip Data Binary files.
+ -o, --output   Directory that will contain the combined Chip Data Binary file.
+EOF
+
+    exit;
+}
+
+#-------------------------------------------------------------------------------
+# Input
+#-------------------------------------------------------------------------------
+
+help() unless @ARGV; # print help if no arguments
+
+# Get options
+my ( $help, $src_dir, $dest_dir );
+help() unless GetOptions( 'h|help'     => \$help,
+                          'i|input=s'  => \$src_dir,
+                          'o|output=s' => \$dest_dir );
+
+help() if @ARGV; # print usage if there are extra arguments
+
+# -h,--help
+help() if ( $help );
+
+# -i,--input
+die "ERROR> Option -i required." unless ( defined $src_dir );
+die "ERROR> '$src_dir' is not a directory" unless ( -d $src_dir );
+
+# -o,--output
+die "ERROR> Option -o required." unless ( defined $dest_dir );
+make_path( $dest_dir, {error => \my $err} );
+if ( @{$err} )
+{
+    my ( $file, $message ) = %{shift @{$err}};
+    die "ERROR> $message: $file\n";
+}
+
+#-------------------------------------------------------------------------------
+# Output functions
+#-------------------------------------------------------------------------------
+
+# The $num passed into this function can be a numeric or string. All values are
+# converted to a hex string and then into the binary format. This helps avoid
+# portability issues with endianess. Requirements:
+#  - Hex strings must start with '0x'.
+#  - For portability, 64-bit numbers must be passed as a hex string.
+sub __bin($$$)
+{
+    my ( $fh, $bytes, $num ) = @_;
+
+    # $bytes must be a positive integer.
+    die "Invalid bytes: $bytes" unless ( 0 < $bytes );
+
+    my $str = ''; # Default invalid string
+
+    my $char = $bytes * 2; # Number of characters in the string.
+
+    # Check if $num is a hex string.
+    if ( $num =~ /^0[x|X](.*)/ )
+    {
+        $str = $1; # strip the '0x'
+    }
+    # Check if $num is string or numeric decimal integer (32-bit max).
+    elsif ( $num =~ /^[0-9]+$/ and $bytes <= 4 )
+    {
+        $str = sprintf("%0${char}x", $num); # Convert to hex string
+    }
+
+    # Check for a hex number with the valid size.
+    unless ( $str =~ /^[0-9a-fA-F]{$char}$/ )
+    {
+        die "Invalid number: $num (size: $bytes)";
+    }
+
+    # Print the binary string.
+    print $fh pack( "H$char", $str );
+}
+
+#-------------------------------------------------------------------------------
+# Main
+#-------------------------------------------------------------------------------
+
+# The format of the Table of Contents for the chip data binaries (cdb) created
+# by this script is as follows:
+# | Bytes | Desc                      | Value/Example              |
+# |:-----:|:-------------------------:|:--------------------------:|
+# |     3 | table of contents keyword | 0x544F43 (ascii for "TOC") |
+# |     1 | # of cdb files            |                            |
+#
+# For each cdb file defined:
+# | Bytes | Desc              | Value/Example                  |
+# |:-----:|:-----------------:|:------------------------------:|
+# |     4 | chip model/level  | Unique ID pulled from cdb file |
+# |     4 | offset to the cdb | Offset in bytes                |
+#
+# Followed by the cdb files.
+
+# Get the chip data binaries in the source directory.
+opendir DIR, $src_dir or die "Couldn't open dir '$src_dir': $!";
+my @chip_data_binaries = grep {/^(?!chip_data_combined).+\.cdb$/} readdir DIR;
+closedir DIR;
+
+my $outfile = "$dest_dir/chip_data_combined.cdb";
+open my $out_fh, '>', $outfile or die "Cannot open $outfile: $!";
+binmode $out_fh;
+
+# Add the header metadata "TOC" to specify the table of contents. 3 Bytes
+__bin($out_fh, 1, $_) for ( unpack("C*", "TOC") );
+
+# Add the number of chip data binaries. 1 Byte
+my $numOfCDB = @chip_data_binaries;
+__bin($out_fh, 1, $numOfCDB);
+
+# We'll want to keep track of the size (in bytes) of the header as well as the
+# combined sizes of the included chip data binaries to calculate offset for the
+# table of contents as well as ensure we don't have a combined binary that will
+# be too large to store in PNOR.
+my $header_size = 4 + (8 * $numOfCDB);
+my $cdb_total_size = 0;
+
+# Loop through the chip data binaries to add their data to the table of contents
+for my $cdb ( @chip_data_binaries )
+{
+    # Get the chip model and EC level from the chip data binary file.
+    # This can be found in bytes 8:11 in the chip data binary file.
+    open my $cdb_fh, '<', "$src_dir/$cdb" or die "Cannot open $cdb: $!";
+    binmode $cdb_fh;
+    seek $cdb_fh, 8, 0 or die "Could not seek: $!";
+    my $num_bytes_read = read $cdb_fh, my $model_ec, 4;
+    close $cdb_fh;
+
+    # Add the chip model and EC level. 4 Bytes
+    print $out_fh $model_ec;
+
+    # Add the offset (in bytes) to this chip data binary. 4 Bytes
+    my $offset = $header_size + $cdb_total_size;
+    __bin($out_fh, 4, $offset);
+
+    # Increment our total size by the size of this chip data binary.
+    $cdb_total_size += -s "$src_dir/$cdb";
+}
+
+# Check whether the total size of the binaries is larger than the space we have
+# available in the CHIPDATA section of PNOR.
+my $pnor_section_size = 0x40000;
+if ( ($cdb_total_size + $header_size) > $pnor_section_size )
+{
+    die "ERROR: Chip data binaries size of $cdb_total_size is too large to
+         store in CHIPDATA PNOR section of size $pnor_section_size";
+}
+
+# Loop through the chip data binaries and concatenate them to the combined bin.
+for my $cdb ( @chip_data_binaries )
+{
+    system "cat $src_dir/$cdb >> $outfile"
+}
+
+close $out_fh

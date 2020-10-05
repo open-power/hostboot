@@ -6,6 +6,7 @@
 # OpenPOWER HostBoot Project
 #
 # Contributors Listed Below - COPYRIGHT 2020
+# [+] International Business Machines Corp.
 #
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -55,10 +56,16 @@ $(2): $(wildcard $(1)/*.xml) | $${OBJ_DIR}
 	$(C1)./build_chip_data_binary -i $(1) -o $$|
 endef
 
+CDB_EXP = $(addprefix ${OBJ_DIR}/, ${prd_cd_exp_trgts})
+CDB_P10 = $(addprefix ${OBJ_DIR}/, ${prd_cd_p10_trgts})
+
 # Add a line here for each directory containing chip data XML. Make sure to add
 # the targets to prdf_chip_data.mk.
-$(eval $(call DIR_RULE,explorer,$(addprefix ${OBJ_DIR}/, ${prd_cd_exp_trgts})))
-$(eval $(call DIR_RULE,p10,     $(addprefix ${OBJ_DIR}/, ${prd_cd_p10_trgts})))
+$(eval $(call DIR_RULE,explorer,${CDB_EXP}))
+$(eval $(call DIR_RULE,p10,     ${CDB_P10}))
+
+$(addprefix ${OBJ_DIR}/, ${prd_cd_combined}): ${CDB_EXP} ${CDB_P10}
+	$(C1)./build_table_of_contents -i ${OBJ_DIR} -o ${OBJ_DIR}
 
 # Copy all of the built chip data binaries to the image directory.
 ${PRD_IMG_PATHS}: ${IMGDIR}/% : ${OBJ_DIR}/%
