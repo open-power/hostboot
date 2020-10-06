@@ -341,8 +341,8 @@ fapi2::ReturnCode pm_occ_fir_init(
              FIR_REC_ATTN_ERROR);
     FAPI_TRY(l_occFir.mask(SPARE_ERR_38),
              FIR_MASK_ERROR);
-    FAPI_TRY(l_occFir.setRecvAttn(C405_ECC_UE),
-             FIR_REC_ATTN_ERROR);
+    FAPI_TRY(l_occFir.setRecvIntr(C405_ECC_UE),
+             FIR_REC_INTR_ERROR);
     FAPI_TRY(l_occFir.setRecvAttn(C405_ECC_CE),
              FIR_REC_ATTN_ERROR);
     FAPI_TRY(l_occFir.setRecvAttn(C405_OCI_MC_CHK),
