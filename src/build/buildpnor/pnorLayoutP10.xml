@@ -132,7 +132,6 @@ Layout Description
         <physicalRegionSize>0x1400000</physicalRegionSize>
         <sha512Version/>
         <side>sideless</side>
-        <ecc/>
     </section>
     <section>
         <description>SBE-IPL (Staging Area) (752K)</description>
@@ -157,7 +156,6 @@ Layout Description
         <physicalRegionSize>0x800000</physicalRegionSize>
         <sha512Version/>
         <side>sideless</side>
-        <ecc/>
     </section>
     <section>
         <description>Payload (10.875MB)</description>
