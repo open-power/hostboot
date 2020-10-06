@@ -470,7 +470,7 @@ fapi2::ReturnCode after_memdiags<mss::mc_type::EXPLORER>( const fapi2::Target<fa
     fapi2::buffer<uint32_t> l_mfg_flag_cell;
 
     // Variable to hold all the manufacturing flags
-    fapi2::ATTR_MFG_FLAGS_Type l_mfg_flags;
+    fapi2::ATTR_MFG_FLAGS_Type l_mfg_flags = {0};
 
     mss::fir::reg<EXPLR_RDF_FIR> l_exp_rdf_fir_reg(i_target, l_rc1);
     mss::fir::reg<EXPLR_SRQ_SRQFIRQ> l_exp_srq_srqfirq_reg(i_target, l_rc2);
