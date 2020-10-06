@@ -103,9 +103,7 @@ bool PllDomain::Query(ATTENTION_TYPE i_attnType)
             // If there are any clock errors, we are done.
             if ( errTypes.any() )
             {
-/* TODO: Currently disabling analysis until remaining code is complete.
                 atAttn = true;
-*/
                 break;
             }
         }
@@ -229,14 +227,36 @@ int32_t PllDomain::Analyze(STEP_CODE_DATA_STRUCT& io_sc,
 
         #undef TMP_FUNC
 
-        // If any RCS OSC errors or PLL unlocks on this chip, link this log to
-        // any possible recent HWP failures.
+        // Special cases for types that could have downstream effects.
         if (errTypes.query(PllErrTypes::PLL_UNLOCK_0   ) ||
             errTypes.query(PllErrTypes::PLL_UNLOCK_1   ) ||
             errTypes.query(PllErrTypes::RCS_OSC_ERROR_0) ||
             errTypes.query(PllErrTypes::RCS_OSC_ERROR_1))
         {
+            // If any RCS OSC errors or PLL unlocks on this chip, link this log
+            // to any possible recent HWP failures.
             PlatServices::hwpErrorIsolation(chip, io_sc);
+
+            // TODO: RTC 184513 - It is possible to have a PLL unlock, a UE RE,
+            // and an SUE CS. Isolation should be to the PLL error and then the
+            // additional FFDC should show there was an SUE CS were the root is
+            // the UE RE. However, PRD does not know how to handle three
+            // attentions at the same time. For now this will remain a
+            // limitation due to time contraits, but there is a proposal in RTC
+            // 184513 that will be solved later. In the meantime, there is a
+            // hole in our analysis that needs to be fixed. If the is a SUE CS
+            // and no UE RE, PRD assumes the UE RE was already predictively
+            // called out in a previous error log. Therefore, nothing will be
+            // garded in this error log. In the example stated above, the
+            // current PRD code will not see the UE RE because of the higher
+            // priority PLL unlock. So even though there is a UE RE present,
+            // nothing gets garded. To circumvent this, we will set the UERE
+            // flag here even though the PLL error is not the true SUE
+            // source.
+            if (CHECK_STOP == io_sc.service_data->getPrimaryAttnType())
+            {
+                io_sc.service_data->SetUERE();
+            }
         }
     }
 
@@ -267,26 +287,6 @@ int32_t PllDomain::Analyze(STEP_CODE_DATA_STRUCT& io_sc,
     TMP_FUNC(RCS_OSC_ERROR_1)
 
     #undef TMP_FUNC
-
-    // TODO: RTC 184513 - It is possible to have a PLL unlock, a UE RE, and an
-    //       SUE CS. Isolation should be to the PLL error and then the
-    //       additional FFDC should show there was an SUE CS were the root is
-    //       the UE RE. However, PRD does not know how to handle three
-    //       attentions at the same time. For now this will remain a limitation
-    //       due to time contraits, but there is a proposal in RTC 184513 that
-    //       will be solved later. In the meantime, there is a hole in our
-    //       analysis that needs to be fixed. If the is a SUE CS and no UE RE,
-    //       PRD assumes the UE RE was already predictively called out in a
-    //       previous error log. Therefore, nothing will be garded in this error
-    //       log. In the example stated above, the current PRD code will not see
-    //       the UE RE because of the higher priority PLL unlock. So even though
-    //       there is a UE RE present, nothing gets garded. To circumvent this,
-    //       we will set the UERE flag here even though the PLL error is not the
-    //       true SUE source.
-    if ( CHECK_STOP == io_sc.service_data->getPrimaryAttnType() )
-    {
-        io_sc.service_data->SetUERE();
-    }
 
     // RCS OSC error attentions have the potential of generating PLL unlock
     // attentions, but it is also possible the PLL unlock attentions could have
