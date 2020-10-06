@@ -277,8 +277,6 @@ fapi_try_exit:
 /// @brief Push bit vector state into platform attribute storage
 ///
 /// @param[in]  i_target     System scope target for attribute query
-/// @param[in]  i_type       Type of bit vector to create.  Used to query
-///                          appropriate platform attributes
 /// @param[in]  i_bvec       Bit vector filled to platform state/capabilities
 ///
 /// @returns fapi2::ReturnCode FAPI2_RC_SUCCESS if successful, else error
