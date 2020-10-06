@@ -231,6 +231,14 @@ actionclass threshold_and_mask_mem_port
     threshold_and_mask;
 };
 
+/** Mask on 1st occurrence and do not predictively callout */
+actionclass mask_self_th1
+{
+    calloutSelfMed;
+    threshold1;
+    funccall("ClearServiceCallFlag");
+};
+
 ################################################################################
 #                           Callouts with flags                                #
 ################################################################################

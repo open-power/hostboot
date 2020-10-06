@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -208,11 +208,20 @@ uint32_t analyzeFetchRcePue( ExtensibleChip * i_chip,
 
 /**
  * @brief  Will trigger a port fail.
- * @param  i_chip MCA/OCMB chip
+ * @param  i_chip MCA chip
  * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise
  */
 template<TARGETING::TYPE T>
 uint32_t triggerPortFail( ExtensibleChip * i_chip );
+
+/**
+ * @brief  Will trigger a channel fail.
+ * @param  i_chip OCMB chip
+ * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise
+ */
+template<TARGETING::TYPE T>
+uint32_t triggerChnlFail( ExtensibleChip * i_chip );
+
 
 #endif // __HOSTBOOT_RUNTIME
 

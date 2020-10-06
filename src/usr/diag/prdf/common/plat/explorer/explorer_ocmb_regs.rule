@@ -197,6 +197,34 @@
     };
 
     ###########################################################################
+    # P9 OCMB target SRQFIR
+    ###########################################################################
+
+    register SRQFIR_OR
+    {
+        name        "Explorer OCMB Chip SRQFIR OR";
+        scomaddr    0x08011402;
+        capture     group never;
+        access      write_only;
+    };
+
+    register SRQFIR_MASK_AND
+    {
+        name        "Explorer OCMB Chip SRQFIR Mask AND";
+        scomaddr    0x08011404;
+        capture     group never;
+        access      write_only;
+    };
+
+    register SRQFIR_MASK_OR
+    {
+        name        "Explorer OCMB Chip SRQFIR Mask OR";
+        scomaddr    0x08011405;
+        capture     group never;
+        access      write_only;
+    };
+
+    ###########################################################################
     # P9 OCMB target MCBISTFIR
     ###########################################################################
 

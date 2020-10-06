@@ -404,13 +404,65 @@ uint32_t maskMemPort<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip )
         SCAN_COMM_REGISTER_CLASS * chipletSpaMask =
             i_chip->getRegister("OCMB_CHIPLET_SPA_FIR_MASK");
 
+        // We need to leave bits unmasked so we can still analyze to
+        // SRQFIR[25] (to trigger a firmware initiated channel fail) and
+        // the IUE bits, RDFFIR[17,37] if one of the IUE bits is set.
+
         chipletMask->setAllBits();
         chipletSpaMask->setAllBits();
+
+        // Clear bits 7 and 9 so we can still analyze to the SRQFIR and RDFFIR
+        chipletMask->ClearBit(7);
+        chipletMask->ClearBit(9);
 
         o_rc = chipletMask->Write() | chipletSpaMask->Write();
         if ( SUCCESS != o_rc )
         {
-            PRDF_ERR( PRDF_FUNC "Write() failed on 0x%08x", i_chip->getHuid() );
+            PRDF_ERR(PRDF_FUNC "Write() failed for OCMB_CHIPLET_FIR_MASK or "
+                     "OCMB_CHIPLET_SPA_FIR_MASK on 0x%08x", i_chip->getHuid());
+            break;
+        }
+
+        // Mask off all bits in the SRQFIR except bit 25
+        SCAN_COMM_REGISTER_CLASS * srqfir_mask_or =
+            i_chip->getRegister("SRQFIR_MASK_OR");
+        srqfir_mask_or->setAllBits();
+        srqfir_mask_or->ClearBit(25);
+
+        o_rc = srqfir_mask_or->Write();
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "Write() failed for SRQFIR_MASK_OR on 0x%08x",
+                      i_chip->getHuid() );
+            break;
+        }
+
+        // Mask off all bits in the RDFFIR except bits 17,37 (if they are set)
+        SCAN_COMM_REGISTER_CLASS * rdffir_mask_or =
+            i_chip->getRegister("RDFFIR_MASK_OR");
+        rdffir_mask_or->setAllBits();
+
+        // We don't want to mask the IUE bits in the RDFFIR if they are on
+        // so if we trigger a channel fail that causes a checkstop we have
+        // something to blame it on.
+        SCAN_COMM_REGISTER_CLASS * rdffir = i_chip->getRegister("RDFFIR");
+
+        o_rc = rdffir->Read();
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "Read() failed for RDFFIR on 0x%08x",
+                      i_chip->getHuid() );
+            break;
+        }
+
+        if ( rdffir->IsBitSet(17) ) rdffir_mask_or->ClearBit(17);
+        if ( rdffir->IsBitSet(37) ) rdffir_mask_or->ClearBit(37);
+
+        o_rc = rdffir_mask_or->Write();
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "Write() failed for RDFFIR_MASK_OR on 0x%08x",
+                      i_chip->getHuid() );
             break;
         }
 
@@ -494,52 +546,108 @@ uint32_t triggerPortFail<TYPE_MCA>( ExtensibleChip * i_chip )
     #undef PRDF_FUNC
 }
 
+//------------------------------------------------------------------------------
+
 template<>
-uint32_t triggerPortFail<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip )
+uint32_t triggerChnlFail<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip )
 {
-    #define PRDF_FUNC "[MemEcc::triggerPortFail<TYPE_OCMB_CHIP>] "
+    #define PRDF_FUNC "[MemEcc::triggerChnlFail<TYPE_OCMB_CHIP>] "
 
     PRDF_ASSERT( nullptr != i_chip );
     PRDF_ASSERT( TYPE_OCMB_CHIP == i_chip->getType() );
 
     uint32_t o_rc = SUCCESS;
 
-    OcmbDataBundle * db = getOcmbDataBundle( i_chip );
-
     do
     {
-        // trigger a port fail
-        // set FARB0[59] - MBA_FARB0Q_CFG_INJECT_PARITY_ERR_CONSTANT and
-        //     FARB0[40] - MBA_FARB0Q_CFG_INJECT_PARITY_ERR_ADDR5
-        SCAN_COMM_REGISTER_CLASS * farb0 = i_chip->getRegister("FARB0");
+        // Trigger a channel fail by unmasking and setting SRQFIR[25]
 
-        o_rc = farb0->Read();
+        // Set the SRQFIR[25] action registers to 0,0 for UNIT_CS
+        // ACT0
+        SCAN_COMM_REGISTER_CLASS * act0 = i_chip->getRegister( "SRQFIR_ACT0" );
+
+        o_rc = act0->Read();
         if ( SUCCESS != o_rc )
         {
-            PRDF_ERR( PRDF_FUNC "Read() FARB0 failed: i_chip=0x%08x",
+            PRDF_ERR( PRDF_FUNC "Read failed on SRQFIR_ACT0: i_chip=0x%08x",
                       i_chip->getHuid() );
             break;
         }
 
-        farb0->SetBit(59);
-        farb0->SetBit(40);
+        // If bit 25 is set, clear it.
+        if ( act0->IsBitSet(25) )
+        {
+            act0->ClearBit(25);
+            o_rc = act0->Write();
+            if ( SUCCESS != o_rc )
+            {
+                PRDF_ERR( PRDF_FUNC "Write failed on SRQFIR_ACT0: "
+                          "i_chip=0x%08x", i_chip->getHuid() );
+                break;
+            }
+        }
 
-        o_rc = farb0->Write();
+        // ACT1
+        SCAN_COMM_REGISTER_CLASS * act1 = i_chip->getRegister( "SRQFIR_ACT1" );
+
+        o_rc = act1->Read();
         if ( SUCCESS != o_rc )
         {
-            PRDF_ERR( PRDF_FUNC "Write() FARB0 failed: i_chip=0x%08x",
+            PRDF_ERR( PRDF_FUNC "Read failed on SRQFIR_ACT1: i_chip=0x%08x",
                       i_chip->getHuid() );
             break;
         }
 
-        // reset thresholds to prevent issuing multiple port failures on
-        // the same port
+        // If bit 25 is set, clear it.
+        if ( act1->IsBitSet(25) )
+        {
+            act1->ClearBit(25);
+            o_rc = act1->Write();
+            if ( SUCCESS != o_rc )
+            {
+                PRDF_ERR( PRDF_FUNC "Write failed on SRQFIR_ACT1: "
+                          "i_chip=0x%08x", i_chip->getHuid() );
+                break;
+            }
+        }
+
+        // Set SRQFIR[25]
+        SCAN_COMM_REGISTER_CLASS * srqfir_or = i_chip->getRegister("SRQFIR_OR");
+
+        srqfir_or->clearAllBits();
+        srqfir_or->SetBit(25);
+
+        o_rc = srqfir_or->Write();
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "Write failed on SRQFIR_OR: i_chip=0x%08x",
+                      i_chip->getHuid() );
+            break;
+        }
+
+        // Unmask SRQFIR[25]
+        SCAN_COMM_REGISTER_CLASS * mask_and =
+            i_chip->getRegister( "SRQFIR_MASK_AND" );
+
+        mask_and->setAllBits();
+        mask_and->ClearBit(25);
+        o_rc = mask_and->Write();
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "Write failed on SRQFIR_MASK_AND: "
+                      "i_chip=0x%08x", i_chip->getHuid() );
+            break;
+        }
+
+        // Reset thresholds to prevent issuing multiple channel failures on
+        // the same port.
+        OcmbDataBundle * db = getOcmbDataBundle( i_chip );
         for ( auto & resetTh : db->iv_iueTh )
         {
             resetTh.second.reset();
         }
 
-        db->iv_iuePortFail = true;
+        db->iv_iueChnlFail = true;
 
         break;
     }while(0);
@@ -1180,8 +1288,8 @@ uint32_t handleMemIue<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
         // Get the data bundle from chip.
         OcmbDataBundle * db = getOcmbDataBundle( i_chip );
 
-        // If we have already caused a port fail, mask the IUE bits.
-        if ( true == db->iv_iuePortFail )
+        // If we have already caused a channel fail, mask the IUE bits.
+        if ( true == db->iv_iueChnlFail )
         {
             SCAN_COMM_REGISTER_CLASS * mask_or =
                 i_chip->getRegister("RDFFIR_MASK_OR");
