@@ -44,11 +44,12 @@ class PllErrTypes
     // Each value in this enum represents a bit in iv_flags.
     enum Types
     {
-        PLL_UNLOCK      = 0x01,
-        RCS_OSC_ERROR_0 = 0x02,
-        RCS_OSC_ERROR_1 = 0x04,
-        RCS_UNLOCKDET_0 = 0x08,
-        RCS_UNLOCKDET_1 = 0x10,
+        PLL_UNLOCK_0    = 0x01,
+        PLL_UNLOCK_1    = 0x02,
+        RCS_OSC_ERROR_0 = 0x04,
+        RCS_OSC_ERROR_1 = 0x08,
+        RCS_UNLOCKDET_0 = 0x10,
+        RCS_UNLOCKDET_1 = 0x20,
     };
 
   public: // Constructors, destructor, assignment, etc.

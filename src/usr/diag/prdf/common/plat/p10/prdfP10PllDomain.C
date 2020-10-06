@@ -167,7 +167,8 @@ int32_t PllDomain::Analyze(STEP_CODE_DATA_STRUCT& io_sc,
         func = chip->getExtensibleFunction("capturePllFfdc");
         (*func)(chip, PluginDef::bindParm<STEP_CODE_DATA_STRUCT &>(io_sc));
 
-        if (errTypes.query(PllErrTypes::PLL_UNLOCK))
+        if (errTypes.query(PllErrTypes::PLL_UNLOCK_0) ||
+            errTypes.query(PllErrTypes::PLL_UNLOCK_1))
         {
             pllUnlockList.push_back(chip);
 

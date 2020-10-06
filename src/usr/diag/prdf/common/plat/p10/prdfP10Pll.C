@@ -366,6 +366,28 @@ bool __queryPllUnlock(ExtensibleChip* i_chip)
     return false; // no PLL unlock found.
 }
 
+void __queryPrimaryClock(ExtensibleChip* i_chip, PllErrTypes& io_errTypes)
+{
+    // In RCS_SENSE_1[12:13]:
+    //  - b10 indicates clock 0 is the primary
+    //  - b01 indicates clock 1 is the primary
+
+    SCAN_COMM_REGISTER_CLASS* reg = i_chip->getRegister("RCS_SENSE_1");
+
+    if (SUCCESS == reg->Read())
+    {
+        uint32_t field = reg->GetBitFieldJustified(12, 2);
+        switch (field)
+        {
+            case 0x2: io_errTypes.set(PllErrTypes::PLL_UNLOCK_0); break;
+            case 0x1: io_errTypes.set(PllErrTypes::PLL_UNLOCK_1); break;
+            default:
+                PRDF_ERR("[__queryPrimaryClock] invalid hardware state: "
+                         "RCS_SENSE_1[12:13] = 0x%x", field);
+        }
+    }
+}
+
 /**
  * @brief  Queries for all PLL error types that occurred on this chip.
  * @param  i_chip     A PROC chip.
@@ -412,7 +434,7 @@ int32_t queryPllErrTypes(ExtensibleChip* i_chip, PllErrTypes& o_errTypes)
         if (fir->IsBitSet(PCB_SLAVE) && !msk->IsBitSet(PCB_SLAVE) &&
             __queryPllUnlock(i_chip))
         {
-            o_errTypes.set(PllErrTypes::PLL_UNLOCK);
+            __queryPrimaryClock(i_chip, o_errTypes);
         }
 
         // RCS OSC error on clock 0.
@@ -670,7 +692,8 @@ int32_t clearPllErrTypes(ExtensibleChip* i_chip, const PllErrTypes& i_errTypes)
     SCAN_COMM_REGISTER_CLASS* fir = i_chip->getRegister("TP_LOCAL_FIR_AND");
     fir->setAllBits();
 
-    if (i_errTypes.query(PllErrTypes::PLL_UNLOCK))
+    if (i_errTypes.query(PllErrTypes::PLL_UNLOCK_0) ||
+        i_errTypes.query(PllErrTypes::PLL_UNLOCK_1))
     {
         // Clear all of the underlying PLL errors in each chiplet.
         __clearPllUnlock(i_chip);
@@ -787,7 +810,8 @@ int32_t maskPllErrTypes(ExtensibleChip* i_chip, const PllErrTypes& i_errTypes)
     SCAN_COMM_REGISTER_CLASS* msk = i_chip->getRegister("TP_LOCAL_FIR_MASK_OR");
     msk->clearAllBits();
 
-    if (i_errTypes.query(PllErrTypes::PLL_UNLOCK))
+    if (i_errTypes.query(PllErrTypes::PLL_UNLOCK_0) ||
+        i_errTypes.query(PllErrTypes::PLL_UNLOCK_1))
     {
         // Mask all of the underlying PLL errors in each chiplet.
         __maskPllUnlock(i_chip);
