@@ -62,8 +62,9 @@ extern "C"
             return fapi2::FAPI2_RC_SUCCESS;
         }
 
-        bool l_is_master_mi_set = false;
+        bool l_primary_mi = true;
 
+        // Loop through and configure all MI and associated OCMB appropriately
         for (const auto& mi : l_mi_list)
         {
             if (mss::count_dimm(mi) == 0)
@@ -72,10 +73,24 @@ extern "C"
                 continue;
             }
 
-            // Enable sync operations for all MIs and then trigger it on a master MI
-            FAPI_TRY(mss::enable_sync_operations(mi));
+            // Enable sync operations for all MIs
+            FAPI_TRY(mss::setup_sync(mi, l_primary_mi),
+                     "setup_sync failed on %s", mss::c_str(mi));
+
+            // Enable the OCMB's to be in sync mode
+            FAPI_TRY(mss::configure_ocmb_sync_operations(mi, mss::states::ON),
+                     "configure_ocmb_sync_operations failed on %s", mss::c_str(mi));
+
+            if(l_primary_mi)
+            {
+                FAPI_DBG("Setup MI %s as primary MI target", mss::c_str(mi));
+            }
+
+            // Mark the first seen
+            l_primary_mi = false;
         }
 
+        // Now, issue the sync command from the primary MI
         for (const auto& mi : l_mi_list)
         {
             if (mss::count_dimm(mi) == 0)
@@ -84,20 +99,23 @@ extern "C"
                 continue;
             }
 
-            // If an MI has already been marked as master, skip this setup
-            if(l_is_master_mi_set)
+            FAPI_TRY(mss::issue_sync(mi), "issue_sync failed on %s", mss::c_str(mi));
+
+            // Only issue the sync command on the primary MI
+            break;
+        }// MIs
+
+        // Finally loop through and disable the OCMB's sync operations
+        for (const auto& mi : l_mi_list)
+        {
+            if (mss::count_dimm(mi) == 0)
             {
-                FAPI_DBG("Master MI already set, skipping master setup for %s", mss::c_str(mi));
+                FAPI_INF("No DIMMs on %s -- skipping", mss::c_str(mi));
                 continue;
             }
 
-            // If there's no master MI setup, mark this MI as master
-            FAPI_DBG("Setup MI %s as master", mss::c_str(mi));
-
-            l_is_master_mi_set = true;
-
-            FAPI_TRY(mss::setup_master(mi), "setup_master() failed on %s",
-                     mss::c_str(mi));
+            FAPI_TRY(mss::configure_ocmb_sync_operations(mi, mss::states::OFF),
+                     "configure_ocmb_sync_operations failed on %s", mss::c_str(mi));
         }// MIs
 
     fapi_try_exit:

@@ -36,24 +36,45 @@
 #define _P10_MSS_THROTTLE_SYNC_UTILS_H_
 
 #include <fapi2.H>
+#include <generic/memory/lib/utils/shared/mss_generic_consts.H>
 
 namespace mss
 {
 
 ///
-/// @brief Enable sync operations
+/// @brief Configure sync operations on the ocmb's for a given MI
 /// @param[in] i_target the target to be programmed
+/// @param[in] i_enable ON if enabled, OFF to disable
 /// @return FAPI2_RC_SUCCESS iff okay
 ///
-fapi2::ReturnCode enable_sync_operations(const fapi2::Target<fapi2::TARGET_TYPE_MI>& i_target);
+fapi2::ReturnCode configure_ocmb_sync_operations(const fapi2::Target<fapi2::TARGET_TYPE_MI>& i_target,
+        const mss::states i_enable);
 
 ///
-/// @brief Programming master MI
-/// @param[in] i_target the target to be programmed as master.
+/// @brief Configure sync operations on the MI
+/// @param[in] i_target the target to be programmed
+/// @param[in] i_enable ON if enabled, OFF to disable
 /// @return FAPI2_RC_SUCCESS iff okay
-/// @note Writes SCOMFIR_MCSYNC reg to set the input MI as the master.
 ///
-fapi2::ReturnCode setup_master(const fapi2::Target<fapi2::TARGET_TYPE_MI>& i_target);
+fapi2::ReturnCode configure_sync_operations(const fapi2::Target<fapi2::TARGET_TYPE_MI>& i_target,
+        const mss::states i_enable);
+
+///
+/// @brief Setting up sync mode in the MI
+/// @param[in] i_target the target to be programmed
+/// @param[in] i_primary true if this is the primary MI to program, otherwise false
+/// @return FAPI2_RC_SUCCESS iff okay
+/// @note Writes SCOMFIR_MCSYNC reg to set the input MI with configuration for primary vs secondary MI
+///
+fapi2::ReturnCode setup_sync(const fapi2::Target<fapi2::TARGET_TYPE_MI>& i_target, const bool i_primary);
+
+///
+/// @brief Programming the MI to issue the sync
+/// @param[in] i_target the target to be programmed - the primary MI
+/// @return FAPI2_RC_SUCCESS iff okay
+/// @note Writes SCOMFIR_MCSYNC reg to issue the sync commands
+///
+fapi2::ReturnCode issue_sync(const fapi2::Target<fapi2::TARGET_TYPE_MI>& i_target);
 
 }// mss
 
