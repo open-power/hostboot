@@ -119,7 +119,6 @@ bool PllDomain::Query(ATTENTION_TYPE i_attnType)
 int32_t PllDomain::Analyze(STEP_CODE_DATA_STRUCT& io_sc,
                            ATTENTION_TYPE attentionType)
 {
-    #define PRDF_FUNC "[PllDomain::Analyze] "
     std::vector<ExtensibleChip *> pllUnlockList;
     std::vector<ExtensibleChip *> failoverList;
     int32_t rc = SUCCESS;
@@ -156,7 +155,7 @@ int32_t PllDomain::Analyze(STEP_CODE_DATA_STRUCT& io_sc,
         if ( !errTypes.any() )
             continue;
 
-        // Keep a cumulative list of error types to mask if needed.
+        // Keep a cumulative list of the error types.
         errTypesSummary = errTypesSummary | errTypes;
 
         // Capture any registers needed for PLL analysis, which would be
@@ -211,9 +210,6 @@ int32_t PllDomain::Analyze(STEP_CODE_DATA_STRUCT& io_sc,
 
     if (pllUnlockList.size() > 0)
     {
-        // Test for threshold
-        iv_thPllUnlock.Resolve(io_sc);
-
         // Set Signature
         io_sc.service_data->GetErrorSignature()->
             setChipId(pllUnlockList[0]->getHuid());
@@ -256,22 +252,32 @@ int32_t PllDomain::Analyze(STEP_CODE_DATA_STRUCT& io_sc,
         io_sc.service_data->SetThresholdMaskId(0);
     }
 
-    if (io_sc.service_data->IsAtThreshold())
+    // TODO: Currently unsure what the threshold should be for each error type.
+    //       Waiting for a response from the RAS team. Will use the default PLL
+    //       error threshold for now.
+    iv_thPllUnlock.Resolve(io_sc);
+
+    #ifdef __HOSTBOOT_MODULE // only allowed to modify hardware from the host
+
+    // Mask/clear attentions on all chips in the domain.
+    for (unsigned int index = 0; index < GetSize(); ++index)
     {
-        // Mask appropriate errors on all chips in domain
-        ExtensibleDomainFunction * mask = getExtensibleFunction("MaskPll");
-        (*mask)(this,
-                PluginDef::bindParm<STEP_CODE_DATA_STRUCT&, const PllErrTypes&>
-                          (io_sc, errTypesSummary));
+        ExtensibleChip*         c = LookUp(index);
+        ExtensibleChipFunction* f = nullptr;
+
+        if (io_sc.service_data->IsAtThreshold())
+        {
+            f = c->getExtensibleFunction("maskPllErrTypes");
+            (*f)(c, PluginDef::bindParm<const PllErrTypes&>(errTypesSummary));
+        }
+
+        f = c->getExtensibleFunction("clearPllErrTypes");
+        (*f)(c, PluginDef::bindParm<const PllErrTypes&>(errTypesSummary));
     }
 
-    // Clear PLLs from this domain.
-    ExtensibleDomainFunction * clear = getExtensibleFunction("ClearPll");
-    (*clear)(this, PluginDef::bindParm<STEP_CODE_DATA_STRUCT&>(io_sc));
+    #endif // __HOSTBOOT_MODULE
 
     return SUCCESS;
-
-    #undef PRDF_FUNC
 }
 
 //------------------------------------------------------------------------------
@@ -280,50 +286,6 @@ void PllDomain::Order(ATTENTION_TYPE attentionType)
 {
     // Order is not important for PLL errors
 }
-
-//------------------------------------------------------------------------------
-
-int32_t PllDomain::ClearPll( ExtensibleDomain * i_domain,
-                             STEP_CODE_DATA_STRUCT & i_sc )
-{
-    PllDomain * l_domain = (PllDomain *) i_domain;
-
-    // Clear children chips.
-    for ( uint32_t i = 0; i < l_domain->GetSize(); i++ )
-    {
-        ExtensibleChip * l_chip = l_domain->LookUp(i);
-        ExtensibleChipFunction * l_clear =
-                        l_chip->getExtensibleFunction("ClearPll");
-        (*l_clear)( l_chip,
-                    PluginDef::bindParm<STEP_CODE_DATA_STRUCT&>(i_sc) );
-    }
-
-    return SUCCESS;
-}
-PRDF_PLUGIN_DEFINE( PllDomain, ClearPll );
-
-//------------------------------------------------------------------------------
-
-int32_t PllDomain::MaskPll( ExtensibleDomain * i_domain,
-                            STEP_CODE_DATA_STRUCT & i_sc,
-                            const PllErrTypes& i_errType )
-{
-    PllDomain * l_domain = (PllDomain *) i_domain;
-
-    // Mask children chips.
-    for ( uint32_t i = 0; i < l_domain->GetSize(); i++ )
-    {
-        ExtensibleChip * l_chip = l_domain->LookUp(i);
-        ExtensibleChipFunction * l_mask =
-                            l_chip->getExtensibleFunction("MaskPll");
-        (*l_mask)( l_chip,
-            PluginDef::bindParm<STEP_CODE_DATA_STRUCT&, const PllErrTypes&>
-                (i_sc, i_errType) );
-    }
-
-    return SUCCESS;
-}
-PRDF_PLUGIN_DEFINE( PllDomain, MaskPll );
 
 //------------------------------------------------------------------------------
 

@@ -142,28 +142,6 @@ class PllDomain : public RuleChipDomain, public ExtensibleDomain
   virtual int32_t Analyze( STEP_CODE_DATA_STRUCT & serviceData,
                            ATTENTION_TYPE attentionType );
 
-    /**
-     * @brief  Domain level plugin function used to clear PLL attentions in a
-     *         domain and its subdomains.
-     * @param  i_domain The target PLL domain.
-     * @param  i_sc The step code data struct.
-     * @return SUCCESS
-     */
-    static int32_t ClearPll( ExtensibleDomain * i_domain,
-                             STEP_CODE_DATA_STRUCT & i_sc );
-
-    /**
-     * @brief  Domain level plugin function used to mask PLL attentions in a
-     *         domain and its subdomains.
-     * @param  i_domain The target PLL domain.
-     * @param  i_sc The step code data struct.
-     * @param  i_errType type of PLL error needing masking
-     * @return SUCCESS
-     */
-    static int32_t MaskPll( ExtensibleDomain * i_domain,
-                            STEP_CODE_DATA_STRUCT & i_sc,
-                            const PllErrTypes& i_errType );
-
 protected:
 
   /**
