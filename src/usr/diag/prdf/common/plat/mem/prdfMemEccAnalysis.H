@@ -191,12 +191,13 @@ uint32_t analyzeImpe( ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc );
 #ifdef __HOSTBOOT_RUNTIME
 
 /**
- * @brief  Will trigger a port fail.
+ * @brief  Will trigger a channel fail.
  * @param  i_chip OCMB chip
  * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise
  */
 template<TARGETING::TYPE T>
-uint32_t triggerPortFail( ExtensibleChip * i_chip );
+uint32_t triggerChnlFail( ExtensibleChip * i_chip );
+
 
 #endif // __HOSTBOOT_RUNTIME
 

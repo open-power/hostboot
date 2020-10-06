@@ -239,6 +239,14 @@ actionclass temporaryBringUpHammer
     funccall("ClearServiceCallFlag_mnfgInfo");
 };
 
+/** Mask on 1st occurrence and do not predictively callout */
+actionclass mask_self_th1
+{
+    calloutSelfMed;
+    threshold1;
+    funccall("ClearServiceCallFlag");
+};
+
 ################################################################################
 #                           Callouts with flags                                #
 ################################################################################

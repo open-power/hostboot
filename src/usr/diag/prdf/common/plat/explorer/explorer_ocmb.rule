@@ -840,9 +840,9 @@ group gSRQFIR
     (rSRQFIR, bit(24)) ? mem_port_th_1;
 
     /** SRQFIR[25]
-     *  TBD
+     *  Firmware initiated channel fail
      */
-    (rSRQFIR, bit(25)) ? defaultMaskedError;
+    (rSRQFIR, bit(25)) ? mask_self_th1;
 
     /** SRQFIR[26]
      *  NCF logic error
