@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -37,6 +37,7 @@
 #include <targeting/runtime/rt_targeting.H>
 #include <runtime/interface.h>
 #include <initservice/initserviceif.H>
+#include <i2c/i2cif.H>
 
 #include "vpd.H"
 #include "mvpd.H"
@@ -415,6 +416,7 @@ errlHndl_t writePNOR ( uint64_t i_byteAddr,
     return err;
 }
 
+
 // ------------------------------------------------------------------
 // sendMboxWriteMsg
 // ------------------------------------------------------------------
@@ -430,6 +432,9 @@ errlHndl_t sendMboxWriteMsg ( size_t i_numBytes,
     // so it is easier to free later
     hostInterfaces::hbrt_fw_msg *l_req_fw_msg = nullptr;
     hostInterfaces::hbrt_fw_msg *l_resp_fw_msg = nullptr;
+
+    // Note if we disabled the centaur i2c sensor cache
+    bool l_i2cDisabled = false;
 
     TRACFCOMP( g_trac_vpd, INFO_MRK
                "sendMboxWriteMsg: Send msg to FSP to write VPD type %.8X, "
@@ -582,6 +587,25 @@ errlHndl_t sendMboxWriteMsg ( size_t i_numBytes,
                    (hostInterfaces::hbrt_fw_msg *)malloc(l_resp_fw_msg_size);
         memset(l_resp_fw_msg, 0, l_resp_fw_msg_size);
 
+        // We need to temporarily disable the Centaur i2c sensor cache
+        //  function to avoid some potential collisions while the SPD
+        //  is getting written.        
+        if( i_target->getAttr<TARGETING::ATTR_TYPE>() ==
+            TARGETING::TYPE_MEMBUF )
+        {
+            l_err = I2C::i2cDisableSensorCache(i_target,l_i2cDisabled);
+            if ( l_err )
+            {
+                TRACFCOMP(g_trac_vpd,
+                          ERR_MRK" Disable Sensor Cache failed for HUID=0x%.8X",
+                          TARGETING::get_huid(i_target));
+                // commit this log and keep going, we still want to attempt the
+                //  vpd write since this is only protecting against a window
+                //  condition
+                errlCommit( l_err, VPD_COMP_ID );
+            }
+        }
+
         // Trace out the request structure
         TRACFBIN( g_trac_vpd, INFO_MRK"Sending firmware_request",
                   l_req_fw_msg,
@@ -598,6 +622,26 @@ errlHndl_t sendMboxWriteMsg ( size_t i_numBytes,
             break;
         }
     } while (0);
+
+    // Re-enable the Centaur sensor cache even if we hit another error
+    if( l_i2cDisabled )
+    {
+        errlHndl_t tmp_err = nullptr;
+
+        tmp_err = I2C::i2cEnableSensorCache(i_target);
+
+        if( l_err && tmp_err)
+        {
+            delete tmp_err;
+            TRACFCOMP(g_trac_vpd,
+                      ERR_MRK" Enable Sensor Cache failed for HUID=0x%.8X",
+                      TARGETING::get_huid(i_target));
+        }
+        else if(tmp_err)
+        {
+            l_err = tmp_err;
+        }
+    }
 
     // release the memory created
     if( l_req_fw_msg ) { free(l_req_fw_msg); }
