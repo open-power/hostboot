@@ -691,7 +691,9 @@ void EXPSCOM::createExplorerLogs(const TARGETING::TargetHandleList i_ocmbTargetL
             }
             else
             {
-                errlCommit(l_err, EXPSCOM_COMP_ID);
+                // Allow multiple logs for this saved log
+                // Also do not worry about keeping trace data
+                errlCommitAllowExtraLogs(l_err, EXPSCOM_COMP_ID, false);
             }
         }
 
@@ -724,7 +726,9 @@ void EXPSCOM::createExplorerLogs(const TARGETING::TargetHandleList i_ocmbTargetL
             }
             else
             {
-                errlCommit(l_err, EXPSCOM_COMP_ID);
+                // Allow multiple logs for this saved log
+                // Also do not worry about keeping trace data
+                errlCommitAllowExtraLogs(l_err, EXPSCOM_COMP_ID, false);
             }
         }
 
@@ -757,7 +761,9 @@ void EXPSCOM::createExplorerLogs(const TARGETING::TargetHandleList i_ocmbTargetL
             }
             else
             {
-                errlCommit(l_err, EXPSCOM_COMP_ID);
+                // Allow multiple logs for this active log
+                // Also do not worry about keeping trace data
+                errlCommitAllowExtraLogs(l_err, EXPSCOM_COMP_ID, false);
             }
         }
     }
