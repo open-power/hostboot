@@ -41,6 +41,7 @@
 #include <mss_explorer_attribute_getters.H>
 #include <exp_data_structs.H>
 #include <mss_generic_system_attribute_getters.H>
+#include <lib/shared/exp_consts.H>
 
 namespace mss
 {
@@ -62,6 +63,22 @@ fapi2::ReturnCode sensor_interval_read(const fapi2::Target<fapi2::TARGET_TYPE_OC
 fapi2::ReturnCode setup_sensor_interval_read_cmd_params(
     const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_port,
     host_fw_command_struct& o_cmd);
+
+///
+/// @brief Helper to check supported FW version
+/// @param[in] i_fw_version FW version
+/// @param[in] i_usage DTM usage
+///
+inline bool is_dtm_supported(const uint32_t i_fw_version,
+                             const uint8_t i_usage)
+{
+    if (i_usage != fapi2::ENUM_ATTR_MEM_EFF_THERM_SENSOR_DIFF_USAGE_MB_INT_DTM)
+    {
+        return true;
+    }
+
+    return ( (i_fw_version >= fw_version::FW_DTM_SUPPORTED) || (i_fw_version == fw_version::FW_VER_BOOTLEG) );
+}
 
 namespace thermal
 {

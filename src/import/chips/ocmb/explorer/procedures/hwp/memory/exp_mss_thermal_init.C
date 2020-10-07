@@ -51,25 +51,27 @@ extern "C"
     {
         FAPI_INF("%s Start thermal_init", mss::c_str(i_target));
 
+        uint8_t l_sim = 0;
         uint8_t l_interval_read_dis = 0;
-        FAPI_TRY(mss::attr::get_disable_therm_init_read(i_target, l_interval_read_dis));
 
-#ifndef __HOSTBOOT_MODULE
+        FAPI_TRY(mss::attr::get_is_simulation(l_sim));
+        FAPI_TRY(mss::attr::get_disable_therm_init_read(i_target, l_interval_read_dis));
 
         // Logic needs to be implemented in simics rainer - AAM
         // Attribute is 0 == enabled, 1 == disabled (enabled by default (0), make sure the disable is not set)
-        if (l_interval_read_dis == fapi2::ENUM_ATTR_MSS_OCMB_DISABLE_THERM_INIT_READ_ENABLED)
+        if ((l_interval_read_dis == fapi2::ENUM_ATTR_MSS_OCMB_DISABLE_THERM_INIT_READ_ENABLED) &&
+            (!l_sim))
         {
             FAPI_TRY(mss::exp::sensor_interval_read(i_target),
                      "Error performing EXP_FW_TEMP_SENSOR_CONFIG_INTERVAL_READ operation on %s", mss::c_str(i_target));
         }
 
-#endif
-
-#ifdef __HOSTBOOT_MODULE
+#if 0
         // Prior to starting OCC, we go into "safemode" throttling
         // After OCC is started, they can change throttles however they want
         // We don't want to do this in Cronus mode
+        // TK ZEN #676 Enable safemode throttles once OCC supports it
+        // but still only in Hostboot
         FAPI_TRY (mss::exp::mc::setup_emergency_throttles(i_target));
 #endif
         // Clear the emergency mode throttle bit

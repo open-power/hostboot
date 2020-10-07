@@ -508,6 +508,7 @@ enum response_arg
 enum fw_version
 {
     FW_VER_OLD = 397559,
+    FW_DTM_SUPPORTED = 402648,
     FW_VER_BOOTLEG = 99999,
 };
 

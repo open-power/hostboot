@@ -730,6 +730,19 @@
   </attribute>
 
   <attribute>
+    <id>ATTR_MSS_MRW_THERMAL_SENSOR_POLLING_PERIOD</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+        Machine Readable Workbook value for polling period of DIMM
+        thermal sensors.
+    </description>
+    <valueType>uint16</valueType>
+    <default>1000</default>
+    <platInit/>
+    <mssAccessorName>mrw_thermal_sensor_polling_period</mssAccessorName>
+  </attribute>
+
+  <attribute>
     <id>ATTR_MEM_PORT_POS_OF_FAIL_THROTTLE</id>
     <targetType>TARGET_TYPE_SYSTEM</targetType>
     <description>
