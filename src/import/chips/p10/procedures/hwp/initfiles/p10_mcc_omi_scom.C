@@ -43,11 +43,11 @@ constexpr uint64_t literal_0xFF = 0xFF;
 constexpr uint64_t literal_0b0000100011 = 0b0000100011;
 constexpr uint64_t literal_0b0000110011 = 0b0000110011;
 constexpr uint64_t literal_0b0001000000 = 0b0001000000;
+constexpr uint64_t literal_1 = 1;
 constexpr uint64_t literal_7 = 7;
 constexpr uint64_t literal_0b0001 = 0b0001;
 constexpr uint64_t literal_0b0010 = 0b0010;
 constexpr uint64_t literal_0b1000 = 0b1000;
-constexpr uint64_t literal_1 = 1;
 constexpr uint64_t literal_0b01 = 0b01;
 constexpr uint64_t literal_0b0000 = 0b0000;
 constexpr uint64_t literal_0b1 = 0b1;
@@ -71,6 +71,8 @@ fapi2::ReturnCode p10_mcc_omi_scom(const fapi2::Target<fapi2::TARGET_TYPE_MCC>& 
         fapi2::ATTR_PROC_EPS_READ_CYCLES_T2_Type l_TGT1_ATTR_PROC_EPS_READ_CYCLES_T2;
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_EPS_READ_CYCLES_T2, TGT1, l_TGT1_ATTR_PROC_EPS_READ_CYCLES_T2));
         uint64_t l_def_MC_EPSILON_CFG_T2 = ((l_TGT1_ATTR_PROC_EPS_READ_CYCLES_T2 + literal_6) / literal_4);
+        fapi2::ATTR_CHIP_EC_FEATURE_HW548941_Type l_TGT2_ATTR_CHIP_EC_FEATURE_HW548941;
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_HW548941, TGT2, l_TGT2_ATTR_CHIP_EC_FEATURE_HW548941));
         fapi2::ATTR_SYS_DISABLE_MCU_TIMEOUTS_Type l_TGT1_ATTR_SYS_DISABLE_MCU_TIMEOUTS;
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SYS_DISABLE_MCU_TIMEOUTS, TGT1, l_TGT1_ATTR_SYS_DISABLE_MCU_TIMEOUTS));
         fapi2::ATTR_SYS_ENABLE_MC_HW520600_X4CTR_Type l_TGT1_ATTR_SYS_ENABLE_MC_HW520600_X4CTR;
@@ -173,6 +175,13 @@ fapi2::ReturnCode p10_mcc_omi_scom(const fapi2::Target<fapi2::TARGET_TYPE_MCC>& 
 
             constexpr auto l_MCP_CHAN0_ATCL_CL_CLSCOM_MCPERF3_128B_CI_PR_W_ON = 0x1;
             l_scom_buffer.insert<45, 1, 63, uint64_t>(l_MCP_CHAN0_ATCL_CL_CLSCOM_MCPERF3_128B_CI_PR_W_ON );
+
+            if ((l_TGT2_ATTR_CHIP_EC_FEATURE_HW548941 == literal_1))
+            {
+                constexpr auto l_MCP_CHAN0_ATCL_CL_CLSCOM_MCPERF3_EN_MDI_UPDATE_MIRROR_ON = 0x1;
+                l_scom_buffer.insert<33, 1, 63, uint64_t>(l_MCP_CHAN0_ATCL_CL_CLSCOM_MCPERF3_EN_MDI_UPDATE_MIRROR_ON );
+            }
+
             FAPI_TRY(fapi2::putScom(TGT0, 0xc010c2bull, l_scom_buffer));
         }
         {
