@@ -376,44 +376,61 @@ update_VDD_VCS_voltage(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_targ
 {
     enum P10_SETUP_EVID_CONSTANTS l_evid_value;
 
-    if (i_present_boot_voltage[VDD] < i_voltage_mv[VDD] &&
-        i_present_boot_voltage[VCS] < i_voltage_mv[VCS])
+    do
     {
-        for (uint8_t i = VDD; i <= VCS;  ++i)
-        {
-            l_evid_value = (i == VDD) ? VDD_SETUP : VCS_SETUP;
 
-            FAPI_TRY(p10_setup_evid_voltageWrite(i_target,
-                                                 i_bus_num[i],
-                                                 i_rail_select[i],
-                                                 i_voltage_mv[i],
-                                                 i_ext_vrm_step_size_mv[i],
-                                                 i_present_boot_voltage[i],
-                                                 l_evid_value),
-                     "Error from p10_setup_evid_voltageWrite setup function");
+        if (i_present_boot_voltage[VDD] == i_voltage_mv[VDD] &&
+            i_present_boot_voltage[VCS] == i_voltage_mv[VCS])
+        {
+            FAPI_INF("SKIP:Both VDD and VCS of present and computed voltage are same");
+            break;
+        }
+
+        // Here if boot voltage is less than computed voltage, then we are
+        // moving the voltage upwards, in this case we should first update VCS
+        // and then VDD
+        if (i_present_boot_voltage[VDD] < i_voltage_mv[VDD] &&
+            i_present_boot_voltage[VCS] <= i_voltage_mv[VCS])
+        {
+            for (int8_t i = VCS; i >= VDD;  --i)
+            {
+                l_evid_value = (i == VDD) ? VDD_SETUP : VCS_SETUP;
+
+                FAPI_TRY(p10_setup_evid_voltageWrite(i_target,
+                                                     i_bus_num[i],
+                                                     i_rail_select[i],
+                                                     i_voltage_mv[i],
+                                                     i_ext_vrm_step_size_mv[i],
+                                                     i_present_boot_voltage[i],
+                                                     l_evid_value),
+                         "Error from p10_setup_evid_voltageWrite setup function");
+            }
+        }
+
+
+        //if boot voltage is greater than computed voltage, then we are
+        //moving downwards,in this case VDD first and VCS should be updated
+        if ((i_present_boot_voltage[VDD] > i_voltage_mv[VDD] &&
+             i_present_boot_voltage[VCS] >= i_voltage_mv[VCS]) ||
+            (i_present_boot_voltage[VDD] > i_voltage_mv[VDD] &&
+             i_present_boot_voltage[VCS] <= i_voltage_mv[VCS]))
+        {
+            for (int8_t i = VDD; i <= VCS;  ++i)
+            {
+                l_evid_value = (i == VDD) ? VDD_SETUP : VCS_SETUP;
+
+                FAPI_TRY(p10_setup_evid_voltageWrite(i_target,
+                                                     i_bus_num[i],
+                                                     i_rail_select[i],
+                                                     i_voltage_mv[i],
+                                                     i_ext_vrm_step_size_mv[i],
+                                                     i_present_boot_voltage[i],
+                                                     l_evid_value),
+                         "Error from p10_setup_evid_voltageWrite setup function");
+            }
         }
     }
-
-
-    if ((i_present_boot_voltage[VDD] > i_voltage_mv[VDD] &&
-         i_present_boot_voltage[VCS] > i_voltage_mv[VCS]) ||
-        (i_present_boot_voltage[VDD] > i_voltage_mv[VDD] &&
-         i_present_boot_voltage[VCS] < i_voltage_mv[VCS]))
-    {
-        for (uint8_t i = VCS; i <= VDD;  --i)
-        {
-            l_evid_value = (i == VDD) ? VDD_SETUP : VCS_SETUP;
-
-            FAPI_TRY(p10_setup_evid_voltageWrite(i_target,
-                                                 i_bus_num[i],
-                                                 i_rail_select[i],
-                                                 i_voltage_mv[i],
-                                                 i_ext_vrm_step_size_mv[i],
-                                                 i_present_boot_voltage[i],
-                                                 l_evid_value),
-                     "Error from p10_setup_evid_voltageWrite setup function");
-        }
-    }
+    while (0);
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -623,7 +640,7 @@ p10_read_dpll_value (const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target
         FAPI_INF("NEST DPLL fmult 0x%08X safe_mode_dpll_value 0x%08X (%d) safe_mode_dpll_fmin 0x%08X (%d)",
                  o_fmult_data, o_safe_mode_dpll_value, o_safe_mode_dpll_value, o_safe_mode_dpll_fmin_value);
 
-        if (o_fmult_data >= o_safe_mode_dpll_value)
+        if (o_fmult_data >= l_attr_safe_mode_freq)
         {
             o_dpll_lesser_value = false;
             FAPI_INF("DPLL setting: Lowering the dpll frequency");
