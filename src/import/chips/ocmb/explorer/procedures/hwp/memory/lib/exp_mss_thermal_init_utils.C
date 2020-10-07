@@ -43,6 +43,7 @@
 #include <exp_data_structs.H>
 #include <mss_explorer_attribute_getters.H>
 #include <generic/memory/lib/utils/find.H>
+#include <lib/exp_attribute_accessors_manual.H>
 
 namespace mss
 {
@@ -160,6 +161,7 @@ fapi2::ReturnCode setup_cmd_flags(
     o_cmd_flags = 0;
 
     fapi2::buffer<uint8_t> l_cmd_flags;
+    uint32_t l_fw_version = 0;
 
     // This is how we are defining the spd/attributes
     // therm_sensor_0_avail --> dimm0
@@ -173,6 +175,8 @@ fapi2::ReturnCode setup_cmd_flags(
     uint8_t l_sensor_0_usage = 0;
     uint8_t l_sensor_1_usage = 0;
     uint8_t l_diff_sensor_usage = 0;
+
+    FAPI_TRY(mss::get_booted_fw_version(mss::find_target<fapi2::TARGET_TYPE_OCMB_CHIP>(i_port), l_fw_version));
 
     FAPI_TRY(mss::attr::get_therm_sensor_0_availability(i_port, l_sensor_0_avail));
     FAPI_TRY(mss::attr::get_therm_sensor_1_availability(i_port, l_sensor_1_avail));
@@ -191,8 +195,10 @@ fapi2::ReturnCode setup_cmd_flags(
         ((l_sensor_1_avail == fapi2::ENUM_ATTR_MEM_EFF_THERM_SENSOR_1_AVAIL_AVAILABLE) &&
          (l_sensor_1_usage != fapi2::ENUM_ATTR_MEM_EFF_THERM_SENSOR_1_USAGE_DISABLED)));
 
+    // Also, do not enable on-chip, non-remote sensor if FW doesn't support it
     l_cmd_flags.writeBit<ONCHIP_SENSOR_PRESENT_BIT>(
-        ((l_diff_sensor_avail == fapi2::ENUM_ATTR_MEM_EFF_THERM_SENSOR_DIFF_AVAIL_AVAILABLE) &&
+        (is_dtm_supported(l_fw_version, l_diff_sensor_usage) &&
+         (l_diff_sensor_avail == fapi2::ENUM_ATTR_MEM_EFF_THERM_SENSOR_DIFF_AVAIL_AVAILABLE) &&
          (l_diff_sensor_usage != fapi2::ENUM_ATTR_MEM_EFF_THERM_SENSOR_DIFF_USAGE_DISABLED)));
 
     o_cmd_flags = l_cmd_flags;
@@ -219,10 +225,12 @@ fapi2::ReturnCode setup_cmd_args(
     uint8_t l_sensor_0_type = 0;
     uint8_t l_sensor_1_type = 0;
     uint8_t l_differential_sensor_type = 0;
+    uint32_t l_fw_version = 0;
 
     FAPI_TRY(mss::attr::get_therm_sensor_0_type(i_port, l_sensor_0_type));
     FAPI_TRY(mss::attr::get_therm_sensor_1_type(i_port, l_sensor_1_type));
     FAPI_TRY(mss::attr::get_therm_sensor_differential_type(i_port, l_differential_sensor_type));
+    FAPI_TRY(mss::get_booted_fw_version(mss::find_target<fapi2::TARGET_TYPE_OCMB_CHIP>(i_port), l_fw_version));
 
     // Sensor 0 / DIMM 0
     {
@@ -295,47 +303,49 @@ fapi2::ReturnCode setup_cmd_args(
         uint8_t l_differential_usage = 0;
         FAPI_TRY(mss::attr::get_therm_sensor_differential_usage(i_port, l_differential_usage));
 
-        // Insert at bits 3-4 (right aligned)
-        l_arg_6.insertFromRight<ONCHIP_REG_READ_LENGTH_START, ONCHIP_REG_READ_LENGTH_LEN>(l_settings.iv_num_bytes_rw);
+        // Skip on-chip sensor arguments if Explorer FW doesn't support sensor type
+        if (is_dtm_supported(l_fw_version, l_differential_usage))
+        {
+            // Insert at bits 3-4 (right aligned)
+            l_arg_6.insertFromRight<ONCHIP_REG_READ_LENGTH_START, ONCHIP_REG_READ_LENGTH_LEN>(l_settings.iv_num_bytes_rw);
 
-        // Insert at bit 2 (right aligned)
-        l_arg_6.writeBit<ONCHIP_REG_OFFSET_SETTING>(l_settings.iv_onchip_reg_offset_setting);
+            // Insert at bit 2 (right aligned)
+            l_arg_6.writeBit<ONCHIP_REG_OFFSET_SETTING>(l_settings.iv_onchip_reg_offset_setting);
 
-        // Insert at bit 1 (right aligned)
-        l_arg_6.writeBit<NUM_REG_READ_OPS>(l_settings.iv_onchip_onchip_register_read_ops);
+            // Insert at bit 1 (right aligned)
+            l_arg_6.writeBit<NUM_REG_READ_OPS>(l_settings.iv_onchip_onchip_register_read_ops);
 
-        // Insert at bit 0 (right aligned)
+            // Insert at bit 0 (right aligned)
 
-        // INTERNAL_DTM implies bit 0 high (FW managed on-chip sensor)
-        // INTERNAL_DTM_REM implies bit 0 low (I2C on-chip sensor)
-        l_arg_6.writeBit<FW_MANAGED_ONCHIP_SENSOR>(
-            l_differential_usage == fapi2::ENUM_ATTR_MEM_EFF_THERM_SENSOR_DIFF_USAGE_MB_INT_DTM);
+            // INTERNAL_DTM implies bit 0 high (FW managed on-chip sensor)
+            // INTERNAL_DTM_REM implies bit 0 low (I2C on-chip sensor)
+            l_arg_6.writeBit<FW_MANAGED_ONCHIP_SENSOR>(
+                l_differential_usage == fapi2::ENUM_ATTR_MEM_EFF_THERM_SENSOR_DIFF_USAGE_MB_INT_DTM);
 
-        o_cmd.command_argument[6] = l_arg_6;
+            o_cmd.command_argument[6] = l_arg_6;
 
-        // Direct mapping
-        FAPI_TRY(mss::attr::get_therm_sensor_differential_i2c_addr(i_port, o_cmd.command_argument[7]));
+            // Direct mapping
+            FAPI_TRY(mss::attr::get_therm_sensor_differential_i2c_addr(i_port, o_cmd.command_argument[7]));
 
-        // cmd_argument[8-9 & 10-11]: register offset
-        o_cmd.command_argument[8] = l_settings.iv_cmd_arg_8_onchip_reg_offset_0;
-        o_cmd.command_argument[9] = l_settings.iv_cmd_arg_9_onchip_reg_offset_0;
-        o_cmd.command_argument[10] = l_settings.iv_cmd_arg_10_onchip_reg_offset_1;
-        o_cmd.command_argument[11] = l_settings.iv_cmd_arg_11_onchip_reg_offset_1;
+            // cmd_argument[8-9 & 10-11]: register offset
+            o_cmd.command_argument[8] = l_settings.iv_cmd_arg_8_onchip_reg_offset_0;
+            o_cmd.command_argument[9] = l_settings.iv_cmd_arg_9_onchip_reg_offset_0;
+            o_cmd.command_argument[10] = l_settings.iv_cmd_arg_10_onchip_reg_offset_1;
+            o_cmd.command_argument[11] = l_settings.iv_cmd_arg_11_onchip_reg_offset_1;
+        }
     }
 
-    // Other
+    // Polling period
     {
-        ///
-        /// @brief Read interval timing
-        ///
-        enum read_interval_fld
-        {
-            MS_1000_LOWER = 0xE8,
-            MS_1000_UPPER = 0x03,
-        };
+        uint16_t l_polling_period = 0;
 
-        o_cmd.command_argument[12] = MS_1000_LOWER;
-        o_cmd.command_argument[13] = MS_1000_UPPER;
+        FAPI_TRY(mss::attr::get_mrw_thermal_sensor_polling_period(l_polling_period));
+
+        // command_argument[12] is the lower byte
+        o_cmd.command_argument[12] = l_polling_period & 0xFF;
+
+        // command_argument[13] is the upper byte
+        o_cmd.command_argument[13] = (l_polling_period >> BITS_PER_BYTE) & 0xFF;
     }
 
 fapi_try_exit:
