@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -53,6 +53,8 @@ using namespace eq;
 #define FIR_REC_ATTN_ERROR  "ERROR: Failed to set recoverable attn action"
 #define FIR_REC_INTR_ERROR  "ERROR: Failed to set recoverable interrupt action"
 #define FIR_MALF_ALRT_ERROR "ERROR: Failed to set malfunction alert action"
+#define FIR_QME_INTR_ERROR  "ERROR: Failed to set QME interrupt action"
+#define FIR_PIG_ALRT_ERROR  "ERROR: Failed to set PIG action"
 namespace pmFIR
 {
 
@@ -157,6 +159,10 @@ class PMFir
         fapi2::ReturnCode setRecvIntr(const uint32_t i_bit);
 
         fapi2::ReturnCode setMalfAlert(const uint32_t i_bit);
+
+        fapi2::ReturnCode setQMEIntr(const uint32_t i_bit);
+
+        fapi2::ReturnCode setPIG(const uint32_t i_bit);
 
         fapi2::ReturnCode mask(const uint32_t i_bit);
 
@@ -468,6 +474,50 @@ fapi2::ReturnCode PMFir<Ftype, K>::setMalfAlert(const uint32_t i_bit)
 fapi_try_exit:
     return fapi2::current_err;
 }
+
+
+/// @brief Set FIR bit action to QME interrupt (10)
+//   Action0    Action1    Mask
+///    1          0         0
+/// @param [in] i_bit       FIR bit to act upon
+///
+/// @return FAPI2_RC_SUCCESS if success, else error code
+///
+template <FIRType Ftype, fapi2::TargetType K>
+fapi2::ReturnCode PMFir<Ftype, K>::setQMEIntr(const uint32_t i_bit)
+{
+    FAPI_TRY(iv_action0.setBit(i_bit));
+    FAPI_TRY(iv_action1.clearBit(i_bit));
+    FAPI_TRY(iv_mask.clearBit(i_bit));
+    iv_action0_write = true;
+    iv_action1_write = true;
+    iv_mask_write = true;
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+/// @brief Set FIR bit action to PIG (11)
+//   Action0    Action1    Mask
+///    1          1         0
+/// @param [in] i_bit       FIR bit to act upon
+///
+/// @return FAPI2_RC_SUCCESS if success, else error code
+///
+template <FIRType Ftype, fapi2::TargetType K>
+fapi2::ReturnCode PMFir<Ftype, K>::setPIG(const uint32_t i_bit)
+{
+    FAPI_TRY(iv_action0.setBit(i_bit));
+    FAPI_TRY(iv_action1.setBit(i_bit));
+    FAPI_TRY(iv_mask.clearBit(i_bit));
+    iv_action0_write = true;
+    iv_action1_write = true;
+    iv_mask_write = true;
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
 
 /// @brief Mask a given bit
 ///

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -93,9 +93,11 @@ enum QME_FIRS
     PB_INVALID_TOPOTABLE_ENTRY = 28,
     PB_TAG_PERR = 29,
     PIG_PROTOCOL_ERR = 30,
-    SPARE1 = 31,
-    SPARE2 = 32,
-    SPARE3 = 33,
+    LOCAL_ACCESS_ERR = 31,
+    PB_SSA_CE = 32,
+    PB_SSA_UE = 33,
+    RESCLK_CCFG_PAR_ERR = 34,
+    STOP11_SPWKUP_IN_XSTOP = 35,
 };
 
 // ----------------------------------------------------------------------
@@ -173,43 +175,43 @@ fapi2::ReturnCode pm_qme_fir_init(
         FAPI_TRY(l_qmeFir.clearAllRegBits(pmFIR::REG_ACTION1),
                  "ERROR: Failed to clear QME action 1");
 
-
-        FAPI_TRY(l_qmeFir.mask(PPE_HALT_ERROR), FIR_MASK_ERROR);
-        FAPI_TRY(l_qmeFir.mask(DEBUG_TRIGGER), FIR_MASK_ERROR);
-        FAPI_TRY(l_qmeFir.mask(SPARE_TRIGGER), FIR_MASK_ERROR);
-        FAPI_TRY(l_qmeFir.mask(PPE_WATCHDOG), FIR_MASK_ERROR);
-        FAPI_TRY(l_qmeFir.mask(LOCAL_PCB_TIMEOUT), FIR_MASK_ERROR);
-        FAPI_TRY(l_qmeFir.mask(FABRIC_ERROR), FIR_MASK_ERROR);
-        FAPI_TRY(l_qmeFir.mask(SRAM_UE), FIR_MASK_ERROR);
-        FAPI_TRY(l_qmeFir.mask(SRAM_CE), FIR_MASK_ERROR);
-        FAPI_TRY(l_qmeFir.mask(RESCLK_ARRAY_PARITY_ERR), FIR_MASK_ERROR);
-        FAPI_TRY(l_qmeFir.mask(PCB_INTERRUPT_PROTOCOL_ERR), FIR_MASK_ERROR);
-        FAPI_TRY(l_qmeFir.mask(SRAM_SCRUB_ERR), FIR_MASK_ERROR);
-        FAPI_TRY(l_qmeFir.mask(CTFS_ERR), FIR_MASK_ERROR);
-        FAPI_TRY(l_qmeFir.mask(CPMS_ERR), FIR_MASK_ERROR);
-        FAPI_TRY(l_qmeFir.mask(PGPE_HEARTBEAT_LOST), FIR_MASK_ERROR);
-        FAPI_TRY(l_qmeFir.mask(BCE_TIMEOUT), FIR_MASK_ERROR);
-        FAPI_TRY(l_qmeFir.mask(RESCLK_PROTOCOL_ERR), FIR_MASK_ERROR);
-        FAPI_TRY(l_qmeFir.mask(PCB_RESET_WHEN_ACTIVE), FIR_MASK_ERROR);
-        FAPI_TRY(l_qmeFir.mask(SPECIAL_WKUP_PROTOCOL_ERR), FIR_MASK_ERROR);
-        FAPI_TRY(l_qmeFir.mask(SPECIAL_WKUP_DONE_WINDOW), FIR_MASK_ERROR);
-        FAPI_TRY(l_qmeFir.mask(DISABLED_INTR), FIR_MASK_ERROR);
-        FAPI_TRY(l_qmeFir.mask(DECONFIGURED_INTR), FIR_MASK_ERROR);
-        FAPI_TRY(l_qmeFir.mask(RS4_TIMEOUT), FIR_MASK_ERROR);
-        FAPI_TRY(l_qmeFir.mask(PB_DATA_HANG), FIR_MASK_ERROR);
-        FAPI_TRY(l_qmeFir.mask(WRITE_PROTECT_FAIL), FIR_MASK_ERROR);
-        FAPI_TRY(l_qmeFir.mask(DTC_ERROR), FIR_MASK_ERROR);
-        FAPI_TRY(l_qmeFir.mask(PB_CE), FIR_MASK_ERROR);
-        FAPI_TRY(l_qmeFir.mask(PB_UE), FIR_MASK_ERROR);
-        FAPI_TRY(l_qmeFir.mask(PB_SUE), FIR_MASK_ERROR);
-        FAPI_TRY(l_qmeFir.mask(PB_INVALID_TOPOTABLE_ENTRY), FIR_MASK_ERROR);
-        FAPI_TRY(l_qmeFir.mask(PB_TAG_PERR), FIR_MASK_ERROR);
-        FAPI_TRY(l_qmeFir.mask(PIG_PROTOCOL_ERR), FIR_MASK_ERROR);
-        FAPI_TRY(l_qmeFir.mask(SPARE1), FIR_MASK_ERROR);
-        FAPI_TRY(l_qmeFir.mask(SPARE2), FIR_MASK_ERROR);
-        FAPI_TRY(l_qmeFir.mask(SPARE3), FIR_MASK_ERROR);
-        FAPI_TRY(l_qmeFir.restoreSavedMask(),
-                 "ERROR: Failed to restore the mask saved");
+        // RTC: 261297
+        FAPI_TRY(l_qmeFir.setPIG(PPE_HALT_ERROR),                   FIR_PIG_ALRT_ERROR);   // 0
+        FAPI_TRY(l_qmeFir.mask(DEBUG_TRIGGER),                      FIR_MASK_ERROR);        // 1
+        FAPI_TRY(l_qmeFir.mask(SPARE_TRIGGER),                      FIR_MASK_ERROR);        // 2
+        FAPI_TRY(l_qmeFir.mask(PPE_WATCHDOG),                       FIR_MASK_ERROR);        // 3
+        FAPI_TRY(l_qmeFir.mask(LOCAL_PCB_TIMEOUT),                  FIR_MASK_ERROR);        // 4  Logged by QME
+        FAPI_TRY(l_qmeFir.mask(FABRIC_ERROR),                       FIR_MASK_ERROR);        // 5  Logged by QME
+        FAPI_TRY(l_qmeFir.mask(SRAM_UE),                            FIR_MASK_ERROR);        // 6  Logged by QME
+        FAPI_TRY(l_qmeFir.setRecvAttn(SRAM_CE),                     FIR_REC_ATTN_ERROR);    // 7
+        FAPI_TRY(l_qmeFir.setQMEIntr(RESCLK_ARRAY_PARITY_ERR),      FIR_QME_INTR_ERROR);    // 8
+        FAPI_TRY(l_qmeFir.setQMEIntr(PCB_INTERRUPT_PROTOCOL_ERR),   FIR_QME_INTR_ERROR);    // 9
+        FAPI_TRY(l_qmeFir.setQMEIntr(SRAM_SCRUB_ERR),               FIR_QME_INTR_ERROR);    // 10
+        FAPI_TRY(l_qmeFir.setQMEIntr(CTFS_ERR),                     FIR_QME_INTR_ERROR);    // 11
+        FAPI_TRY(l_qmeFir.setQMEIntr(CPMS_ERR),                     FIR_QME_INTR_ERROR);    // 12
+        FAPI_TRY(l_qmeFir.setQMEIntr(PGPE_HEARTBEAT_LOST),          FIR_QME_INTR_ERROR);    // 13
+        FAPI_TRY(l_qmeFir.setQMEIntr(BCE_TIMEOUT),                  FIR_QME_INTR_ERROR);    // 14
+        FAPI_TRY(l_qmeFir.setRecvAttn(RESCLK_PROTOCOL_ERR),         FIR_REC_ATTN_ERROR);    // 15
+        FAPI_TRY(l_qmeFir.setQMEIntr(PCB_RESET_WHEN_ACTIVE),        FIR_QME_INTR_ERROR);    // 16
+        FAPI_TRY(l_qmeFir.setQMEIntr(SPECIAL_WKUP_PROTOCOL_ERR),    FIR_QME_INTR_ERROR);    // 17
+        FAPI_TRY(l_qmeFir.setQMEIntr(SPECIAL_WKUP_DONE_WINDOW),     FIR_QME_INTR_ERROR);    // 18
+        FAPI_TRY(l_qmeFir.setQMEIntr(DISABLED_INTR),                FIR_QME_INTR_ERROR);    // 19
+        FAPI_TRY(l_qmeFir.setQMEIntr(DECONFIGURED_INTR),            FIR_QME_INTR_ERROR);    // 20
+        FAPI_TRY(l_qmeFir.mask(RS4_TIMEOUT),                        FIR_MASK_ERROR);        // 21 Not supported
+        FAPI_TRY(l_qmeFir.setQMEIntr(PB_DATA_HANG),                 FIR_QME_INTR_ERROR);    // 22
+        FAPI_TRY(l_qmeFir.setQMEIntr(WRITE_PROTECT_FAIL),           FIR_QME_INTR_ERROR);    // 23
+        FAPI_TRY(l_qmeFir.setQMEIntr(DTC_ERROR),                    FIR_QME_INTR_ERROR);    // 24
+        FAPI_TRY(l_qmeFir.setRecvAttn(PB_CE),                       FIR_REC_ATTN_ERROR);    // 25
+        FAPI_TRY(l_qmeFir.setQMEIntr(PB_UE),                        FIR_QME_INTR_ERROR);    // 26
+        FAPI_TRY(l_qmeFir.setQMEIntr(PB_SUE),                       FIR_QME_INTR_ERROR);    // 27
+        FAPI_TRY(l_qmeFir.setQMEIntr(PB_INVALID_TOPOTABLE_ENTRY),   FIR_QME_INTR_ERROR);    // 28
+        FAPI_TRY(l_qmeFir.setCheckStop(PB_TAG_PERR),                FIR_CHECKSTOP_ERROR);   // 29
+        FAPI_TRY(l_qmeFir.setQMEIntr(PIG_PROTOCOL_ERR),             FIR_QME_INTR_ERROR);    // 30
+        FAPI_TRY(l_qmeFir.setQMEIntr(LOCAL_ACCESS_ERR),             FIR_QME_INTR_ERROR);    // 31
+        FAPI_TRY(l_qmeFir.setRecvAttn(PB_SSA_CE),                   FIR_REC_ATTN_ERROR);    // 32
+        FAPI_TRY(l_qmeFir.setCheckStop(PB_SSA_UE),                  FIR_CHECKSTOP_ERROR);   // 33
+        FAPI_TRY(l_qmeFir.setQMEIntr(RESCLK_CCFG_PAR_ERR),          FIR_QME_INTR_ERROR);    // 34
+        FAPI_TRY(l_qmeFir.mask(STOP11_SPWKUP_IN_XSTOP),             FIR_MASK_ERROR);        // 35
 
         FAPI_TRY(l_qmeFir.put(),
                  "ERROR: Failed to write the QME FIR values");
@@ -233,7 +235,7 @@ fapi2::ReturnCode pm_qme_fir_reset(
               fapi2::TARGET_TYPE_EQ> l_qmeFir(l_eq_chplt);
 
         FAPI_TRY(l_qmeFir.get(pmFIR::REG_FIRMASK),
-                 "ERROR: Failed to get the QME FIR MASK value");
+                 "ERROR: Failed to get the QME FIR QME_INTR value");
 
         /* Fetch the QME FIR MASK; Save it to HWP attribute; clear it */
         FAPI_TRY(l_qmeFir.saveMask(),
