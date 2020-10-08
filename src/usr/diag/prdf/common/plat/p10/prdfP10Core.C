@@ -40,44 +40,62 @@ namespace PRDF
 
 using namespace PlatServices;
 
-namespace Ec
+namespace p10_core
 {
 #ifdef __HOSTBOOT_RUNTIME
 void maskIfCoreCs( ExtensibleChip * i_chip )
 {
     int32_t l_rc = SUCCESS;
 
-    // Get core global mask register.
-    SCAN_COMM_REGISTER_CLASS * coreFirMask =
-        i_chip->getRegister("EC_CHIPLET_FIR_MASK");
+    ExtensibleChip * eq = getConnectedParent( i_chip, TYPE_EQ );
 
-    SCAN_COMM_REGISTER_CLASS * coreUcsMask =
-        i_chip->getRegister("EC_CHIPLET_UCS_FIR_MASK");
-
-    // Read values.
-    l_rc  = coreFirMask->Read();
-    l_rc |= coreUcsMask->Read();
-
-    if (SUCCESS == l_rc)
+    do
     {
-        // Mask bit 4 for recoverable and checkstop
-        coreFirMask->SetBit(4);
-        // Mask bit 0 for local checkstop summary
-        coreFirMask->SetBit(0);
-        // Mask bit 26 (mask for debug trigger)
-        coreFirMask->SetBit(26);
+        // Get the EQ chiplet level mask registers.
+        SCAN_COMM_REGISTER_CLASS * eq_chiplet_cs_fir_mask =
+            eq->getRegister("EQ_CHIPLET_CS_FIR_MASK");
 
-        // Mask bit 1 for Unit checkstop
-        coreUcsMask->SetBit(0); // setting bit 0 masks the FIR bit 1.
+        SCAN_COMM_REGISTER_CLASS * eq_chiplet_re_fir_mask =
+            eq->getRegister("EQ_CHIPLET_RE_FIR_MASK");
 
-        coreFirMask->Write();
-        coreUcsMask->Write();
-    }
+        SCAN_COMM_REGISTER_CLASS * eq_chiplet_ucs_fir_mask =
+            eq->getRegister("EQ_CHIPLET_UCS_FIR_MASK");
+
+        // Read values.
+        l_rc  = eq_chiplet_cs_fir_mask->Read();
+        l_rc |= eq_chiplet_re_fir_mask->Read();
+        l_rc |= eq_chiplet_ucs_fir_mask->Read();
+
+        if ( SUCCESS != l_rc ) break;
+
+        uint8_t corePos = i_chip->getPos() % MAX_EC_PER_EQ; // 0-3
+
+        // Mask analysis to the EQ_CORE_FIR depending on the core position
+        eq_chiplet_cs_fir_mask->SetBit(5+corePos);
+        eq_chiplet_re_fir_mask->SetBit(5+corePos);
+        eq_chiplet_ucs_fir_mask->SetBit(5+corePos);
+
+        eq_chiplet_cs_fir_mask->Write();
+        eq_chiplet_re_fir_mask->Write();
+        eq_chiplet_ucs_fir_mask->Write();
+
+        // Clear the local checkstop summary bit on bit 2 of the RE chiplet FIR
+        SCAN_COMM_REGISTER_CLASS * eq_chiplet_re_fir =
+            eq->getRegister("EQ_CHIPLET_RE_FIR");
+        l_rc = eq_chiplet_re_fir->ForceRead();
+
+        if ( SUCCESS != l_rc ) break;
+
+        if ( eq_chiplet_re_fir->IsBitSet(2) )
+        {
+            eq_chiplet_re_fir->ClearBit(2);
+            eq_chiplet_re_fir->Write();
+        }
+    }while(0);
 }
 
 void rtDcnfgCore( ExtensibleChip * i_chip )
 {
-    /* TODO RTC 256733
     TargetHandle_t coreTgt = i_chip->getTrgt();
 
     // Get the Global Errorlog
@@ -95,7 +113,6 @@ void rtDcnfgCore( ExtensibleChip * i_chip )
                   getHuid(coreTgt));
         PRDF_COMMIT_ERRL( errl, ERRL_ACTION_REPORT );
     }
-    */
 }
 #endif
 
@@ -111,8 +128,7 @@ void rtDcnfgCore( ExtensibleChip * i_chip )
 int32_t PostAnalysis( ExtensibleChip * i_chip,
                       STEP_CODE_DATA_STRUCT & io_sc )
 {
-#ifdef __HOSTBOOT_RUNTIME
-    /* TODO RTC 256733
+    #ifdef __HOSTBOOT_RUNTIME
     if ( io_sc.service_data->isProcCoreCS() )
     {
         ExtensibleChip * n_chip = getNeighborCore(i_chip);
@@ -133,11 +149,10 @@ int32_t PostAnalysis( ExtensibleChip * i_chip,
         }
 
     }
-    */
-#endif
+    #endif
     return SUCCESS;
 }
-PRDF_PLUGIN_DEFINE_NS( axone_ec,   Ec, PostAnalysis );
+PRDF_PLUGIN_DEFINE( p10_core, PostAnalysis );
 
 /**
  * @brief Checks if this core has checkstopped as a side effect of its
@@ -154,10 +169,10 @@ bool neighborHasRealCoreCS( ExtensibleChip * i_chip )
 
     // Check if this core is reporting a neighbor Core Checkstop with no
     // other core checkstop bits of its own
-    SCAN_COMM_REGISTER_CLASS *fir  = i_chip->getRegister("COREFIR");
-    SCAN_COMM_REGISTER_CLASS *msk  = i_chip->getRegister("COREFIR_MASK");
-    SCAN_COMM_REGISTER_CLASS *act0 = i_chip->getRegister("COREFIR_ACT0");
-    SCAN_COMM_REGISTER_CLASS *act1 = i_chip->getRegister("COREFIR_ACT1");
+    SCAN_COMM_REGISTER_CLASS *fir  = i_chip->getRegister("EQ_CORE_FIR");
+    SCAN_COMM_REGISTER_CLASS *msk  = i_chip->getRegister("EQ_CORE_FIR_MASK");
+    SCAN_COMM_REGISTER_CLASS *act0 = i_chip->getRegister("EQ_CORE_FIR_ACT0");
+    SCAN_COMM_REGISTER_CLASS *act1 = i_chip->getRegister("EQ_CORE_FIR_ACT1");
 
     l_rc |=  fir->Read();
     l_rc |=  msk->Read();
@@ -190,10 +205,10 @@ bool neighborHasRealCoreCS( ExtensibleChip * i_chip )
         SCAN_COMM_REGISTER_CLASS * wof;
         uint64_t wofBits;
 
-        fir  = n_chip->getRegister("COREFIR");
-        wof  = n_chip->getRegister("COREFIR_WOF");
-        msk  = n_chip->getRegister("COREFIR_MASK");
-        act1 = n_chip->getRegister("COREFIR_ACT1");
+        fir  = n_chip->getRegister("EQ_CORE_FIR");
+        wof  = n_chip->getRegister("EQ_CORE_FIR_WOF");
+        msk  = n_chip->getRegister("EQ_CORE_FIR_MASK");
+        act1 = n_chip->getRegister("EQ_CORE_FIR_ACT1");
 
         l_rc |=  fir->Read();
         l_rc |=  wof->Read();
@@ -253,20 +268,20 @@ int32_t PreAnalysis( ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc,
 
     return SUCCESS;
 }
-PRDF_PLUGIN_DEFINE_NS( axone_ec,   Ec, PreAnalysis );
+PRDF_PLUGIN_DEFINE( p10_core, PreAnalysis );
 
 void checkCoreRePresent( ExtensibleChip * i_chip,
                          STEP_CODE_DATA_STRUCT & io_sc )
 {
     int32_t l_rc = SUCCESS;
     SCAN_COMM_REGISTER_CLASS *coreWOF =
-             i_chip->getRegister("COREFIR_WOF");
+             i_chip->getRegister("EQ_CORE_FIR_WOF");
     SCAN_COMM_REGISTER_CLASS * coreMask =
-             i_chip->getRegister("COREFIR_MASK");
+             i_chip->getRegister("EQ_CORE_FIR_MASK");
     SCAN_COMM_REGISTER_CLASS * coreAct0 =
-             i_chip->getRegister("COREFIR_ACT0");
+             i_chip->getRegister("EQ_CORE_FIR_ACT0");
     SCAN_COMM_REGISTER_CLASS * coreAct1 =
-             i_chip->getRegister("COREFIR_ACT1");
+             i_chip->getRegister("EQ_CORE_FIR_ACT1");
 
     l_rc  = coreWOF->Read();
     l_rc |= coreMask->Read();
@@ -301,7 +316,7 @@ void checkCoreRePresent( ExtensibleChip * i_chip,
  * 2) Wait for PHYP to evacuate core.
  * 3) Terminate if PHYP doesn't evacuate.
  * 4) If we have UCS without RE, switch attn type to analyze UCS
- * @param i_chip Ex chip.
+ * @param i_chip Core chip.
  * @param io_sc Step Code data struct
  * @return PRD return code
  */
@@ -315,19 +330,26 @@ int32_t CheckCoreCheckstop( ExtensibleChip * i_chip,
     do
     {
         // Skip if we're already at core checkstop in SDC.
-        if (io_sc.service_data->isProcCoreCS())
-            break;
+        if (io_sc.service_data->isProcCoreCS()) break;
 
         // Read core checkstop bit in chiplet RER.
-        SCAN_COMM_REGISTER_CLASS * coreRER
-                                = i_chip->getRegister("EC_CHIPLET_RE_FIR");
-        l_rc = coreRER->ForceRead();
-        if (SUCCESS != l_rc)
-            break;
+        // Check EQ_CHIPLET_UCS_FIR to see if we have a Core UNIT_CS
+        ExtensibleChip * eq = getConnectedParent( i_chip, TYPE_EQ );
 
-        // Check core checkstop bit.
-        if (!coreRER->IsBitSet(0))
-            break;
+        SCAN_COMM_REGISTER_CLASS * fir = eq->getRegister("EQ_CHIPLET_UCS_FIR");
+        l_rc = fir->ForceRead();
+        if ( SUCCESS != l_rc ) break;
+
+        SCAN_COMM_REGISTER_CLASS * mask =
+            eq->getRegister( "EQ_CHIPLET_UCS_FIR_MASK" );
+        l_rc = mask->Read();
+        if ( SUCCESS != l_rc ) break;
+
+        // Just check the bit for the core we are on.
+        uint8_t corePos = i_chip->getPos() % MAX_EC_PER_EQ; // 0-3
+
+        // Break if the bit isn't set in the FIR or if it's masked.
+        if ( !fir->IsBitSet(5+corePos) || mask->IsBitSet(5+corePos) ) break;
 
         // We must be at core checkstop.
         io_sc.service_data->setProcCoreCS();
@@ -342,15 +364,13 @@ int32_t CheckCoreCheckstop( ExtensibleChip * i_chip,
             // respond to the core evacuation hand-shaking. Don't wait for them
             // and don't collect SH dump. This specifically targets a case
             //  where COREFIR bit 54 and 55 assert together.
-
             break;
         }
 
         SCAN_COMM_REGISTER_CLASS *coreHMEER
             = i_chip->getRegister("HOMER_ENABLE");
         l_rc = coreHMEER->Read();
-        if (SUCCESS != l_rc)
-            break;
+        if (SUCCESS != l_rc) break;
 
         // Check if PHYP has enabled core checkstop (HMEER[0]).
         if (!coreHMEER->IsBitSet(0))
@@ -384,7 +404,7 @@ int32_t CheckCoreCheckstop( ExtensibleChip * i_chip,
             {
                 if (!coreSPAttn->IsBitSet(2))
                 {
-                    spAttnCleared = 1;
+                    spAttnCleared = true;
                 }
             }
         } while ((secondsToSleep != 0) && (!spAttnCleared));
@@ -401,7 +421,7 @@ int32_t CheckCoreCheckstop( ExtensibleChip * i_chip,
     return SUCCESS;
     #undef PRDF_FUNC
 }
-PRDF_PLUGIN_DEFINE_NS( axone_ec,   Ec, CheckCoreCheckstop );
+PRDF_PLUGIN_DEFINE( p10_core, CheckCoreCheckstop );
 
-} // end namespace Ec
+} // end namespace p10_core
 } // end namespace PRDF

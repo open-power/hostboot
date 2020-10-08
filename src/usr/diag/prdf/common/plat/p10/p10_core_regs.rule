@@ -260,3 +260,32 @@
         capture     group eq_l3_fir_ffdc;
     };
 
+    ############################################################################
+    # HOMER Enable Register
+    ############################################################################
+
+    register HOMER_ENABLE
+    {
+        name        "Core target HOMER ENABLE";
+        capture     group default;
+        scomaddr    0x20028496;
+    };
+
+    ############################################################################
+    # Core target Special Attn Reason
+    ############################################################################
+
+    register SPEC_ATTN_REASON
+    {
+        name        "Core target SPEC ATTN REASON";
+        scomaddr    0x20028499;
+        capture     group default;
+    };
+
+    register SPEC_ATTN_REASON_MASK
+    {
+        name        "Core target SPEC ATTN REASON MASK";
+        scomaddr    0x2002849A;
+        capture     group default;
+    };
+

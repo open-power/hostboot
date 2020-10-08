@@ -149,18 +149,17 @@ uint32_t ScomAccessor::Access(TargetHandle_t i_target,
                 #ifdef __HOSTBOOT_RUNTIME
                 using namespace stopImageSection;
 
-                // Update CORE/EQ/EX Fir masks in HCODE image
+                // Update CORE/EQ Fir masks in HCODE image
                 TARGETING::TYPE type = PlatServices::getTargetType(i_target);
-                if( TYPE_EX == type || TYPE_EQ == type || TYPE_CORE == type )
+                if( TYPE_EQ == type || TYPE_CORE == type )
                 {
                     uint32_t l_MaskReg[7] = {
-                                        0x2004000f,   // EC_LFIR_MASK_OR
-                                        0x20010a45,   // EC_COREFIR_MASK_OR
-                                        0x1004000f,   // EQ_LOCAL_FIR_MASK_OR
-                                        0x10010805,   // EX_L2FIR_MASK_OR
-                                        0x10011005,   // EX_NCUFIR_MASK_OR
-                                        0x10011805,   // EX_L3FIR_MASK_OR
-                                        0x10012005 }; // EX_CMEFIR_MASK_OR
+                                        0x20018605,   // EQ_L3_FIR_MASK_OR
+                                        0x20018645,   // EQ_NCU_FIR_MASK_OR
+                                        0x20028005,   // EQ_L2_FIR_MASK_OR
+                                        0x20028445,   // EQ_CORE_FIR_MASK_OR
+                                        0x20040105,   // EQ_LOCAL_FIR_MASK_OR
+                                        0x200E0006 }; // EQ_QME_FIR_MASK_OR
 
                     for(uint32_t l_count = 0; l_count < 7; l_count++)
                     {

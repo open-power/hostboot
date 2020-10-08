@@ -75,6 +75,7 @@ prd_incpath += ${ROOTPATH}/src/import/generic/memory/
 prd_incpath += ${ROOTPATH}/src/import/chips/p10/utils/imageProcs/
 prd_incpath += ${ROOTPATH}/src/import/chips/common/utils/
 prd_incpath += ${ROOTPATH}/src/import/chips/common/utils/imageProcs/
+prd_incpath += ${ROOTPATH}/src/import/chips/common/utils/scomt/
 prd_incpath += ${ROOTPATH}/src/import/hwpf/fapi2/include
 prd_incpath += ${ROOTPATH}/src/import/
 prd_incpath += ${ROOTPATH}/src/import/generic/memory/lib/utils/mcbist/
@@ -177,9 +178,9 @@ CLEAN_TARGETS += ${MFG_THRES_PATH}
 
 #prd_vpath += ${ROOTPATH}/src/import/chips/centaur/procedures/hwp/io/
 #
-#prd_vpath += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/perv/
-#prd_obj_no_sim += p9_proc_gettracearray.o
-#prd_obj_no_sim += p9_sbe_tracearray.o
+prd_vpath += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/perv/
+prd_obj_no_sim += p10_proc_gettracearray.o
+prd_obj_no_sim += p10_sbe_tracearray.o
 #prd_obj_no_sim += p9_io_xbus_clear_firs.o
 #prd_obj_no_sim += p9_io_xbus_pdwn_lanes.o
 
@@ -219,16 +220,13 @@ ifeq (${HOSTBOOT_RUNTIME},1)
 #TODO RTC 256733
 #prd_vpath += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/cache/
 #prd_vpath += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/nest/
-#prd_vpath += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/pm/
-## This is really the only file we need, but all of the other files below are
-## required because of dependencies.
-#prd_obj_no_sim += memdiags.o
+prd_vpath += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/pm/
 #prd_obj_no_sim += p9_l2err_linedelete.o
 #prd_obj_no_sim += p9_l2err_extract.o
 #prd_obj_no_sim += p9_l3err_linedelete.o
 #prd_obj_no_sim += p9_l3err_extract.o
 #prd_obj_no_sim += p9_l2_flush.o
-#prd_obj_no_sim += p9_pm_callout.o
+#prd_obj_no_sim += p10_pm_callout.o
 #
 #prd_vpath += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/memory/lib/dimm/
 #prd_vpath += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/memory/lib/eff_config/

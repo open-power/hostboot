@@ -53,8 +53,7 @@
 #include <prdfHomRegisterAccess.H>
 #include <ibscomreasoncodes.H>
 #include <scom/scomreasoncodes.H>
-// TODO RTC 256733 - need P10 version
-//#include <p9_proc_gettracearray.H>
+#include <p10_proc_gettracearray.H>
 #include <fapi2_spd_access.H>
 #include <prdfParserUtils.H>
 #include <fapi2_hwp_executor.H>
@@ -835,7 +834,7 @@ int32_t restartTraceArray(TargetHandle_t i_tgt)
 
     fapi2::Target<PROC_GETTRACEARRAY_TARGET_TYPES> fapiTrgt (l_tgt);
     FAPI_INVOKE_HWP( err,
-                     p9_proc_gettracearray,
+                     p10_proc_gettracearray,
                      fapiTrgt,
                      taArgs,
                      taData);
