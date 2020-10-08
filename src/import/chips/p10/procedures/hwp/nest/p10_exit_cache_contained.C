@@ -757,7 +757,13 @@ p10_exit_cache_contained_run_mcc_initfile_xscom(
     //DSTL_DSTLCFG
     l_scom_data = 0;
     l_scom_mask = 0;
+
     //data
+    if (l_TGT2_ATTR_CHIP_EC_FEATURE_HW548941)
+    {
+        l_scom_data |= (uint64_t)  0x1 << (64 - (7 + 1)); //ATTR_CHIP_EC_FEATURE_HW548941
+    }
+
     l_scom_data |= (uint64_t)  0x1 << (64 - (16 + 4));
     l_scom_data |= (uint64_t)  0x2 << (64 - (24 + 4));
     l_scom_data |= (uint64_t)  0x8 << (64 - (45 + 4));
@@ -768,6 +774,7 @@ p10_exit_cache_contained_run_mcc_initfile_xscom(
     }
 
     //mask
+    l_scom_mask |= (uint64_t)  0x1 << (64 - ( 7 + 1));
     l_scom_mask |= (uint64_t)  0xF << (64 - (16 + 4));
     l_scom_mask |= (uint64_t)  0xF << (64 - (24 + 4));
     l_scom_mask |= (uint64_t)  0xF << (64 - (45 + 4));

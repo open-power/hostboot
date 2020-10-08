@@ -197,6 +197,13 @@ fapi2::ReturnCode p10_mcc_omi_scom(const fapi2::Target<fapi2::TARGET_TYPE_MCC>& 
             l_scom_buffer.insert<16, 4, 60, uint64_t>(literal_0b0001 );
             l_scom_buffer.insert<24, 4, 60, uint64_t>(literal_0b0010 );
             l_scom_buffer.insert<45, 4, 60, uint64_t>(literal_0b1000 );
+
+            if ((l_TGT2_ATTR_CHIP_EC_FEATURE_HW548941 == literal_1))
+            {
+                constexpr auto l_MCP_CHAN0_DSTL_DSTLCFG_SET_MDI_ON_2ND_DIS_ON = 0x1;
+                l_scom_buffer.insert<7, 1, 63, uint64_t>(l_MCP_CHAN0_DSTL_DSTLCFG_SET_MDI_ON_2ND_DIS_ON );
+            }
+
             FAPI_TRY(fapi2::putScom(TGT0, 0xc010d0bull, l_scom_buffer));
         }
         {
