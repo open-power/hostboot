@@ -386,6 +386,15 @@ errlHndl_t eepromReadAttributes ( TARGETING::Target * i_target,
                 }
                 break;
 
+            case WOF_DATA:
+                if (i_target->tryGetAttr<TARGETING::ATTR_SPI_WOF_DATA_INFO>
+                   (reinterpret_cast<TARGETING::ATTR_SPI_WOF_DATA_INFO_type&>
+                   (spiEepromData)))
+                {
+                    found_spi_eep = true;
+                }
+                break;
+
             case SPARE_TEST:
                 if (
                   i_target->tryGetAttr<TARGETING::ATTR_SPI_EEPROM_SPARE_INFO>
@@ -857,6 +866,15 @@ void add_to_list( std::list<EepromInfo_t>& io_list,
                 }
                 break;
 
+            case WOF_DATA:
+                if (i_targ->tryGetAttr<TARGETING::ATTR_SPI_WOF_DATA_INFO>
+                   (reinterpret_cast<TARGETING::ATTR_SPI_WOF_DATA_INFO_type&>
+                   (spiEepromData)))
+                {
+                    found_spi_eep = true;
+                }
+                break;
+
             case SPARE_TEST:
                 if (
                   i_targ->tryGetAttr<TARGETING::ATTR_SPI_EEPROM_SPARE_INFO>
@@ -1104,10 +1122,6 @@ errlHndl_t cacheEepromBuffer(TARGETING::Target * const i_target,
                           DEVICE_CACHE_EEPROM_ADDRESS(i_present,
                                                       EEPROM::VPD_PRIMARY));
     }
-
-    // Also try backup VPD
-    // TODO RTC: 206301 - backup VPD contains
-    // (might need a param to specify what the buffer is for)?
 
     return errl;
 }

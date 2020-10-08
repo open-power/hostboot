@@ -154,8 +154,8 @@ def hb_eecache_setup(file_name, version, verbose):
             # version, written in 1 byte. Supports version 2, i.e. I2C and SPI entries
             f.write(struct.pack('>B', 2));
             # end of cache, written in 4 bytes
-            # it's offset (0x1270D bytes) + size (160 KB) of the last entry
-            f.write(struct.pack('>i', 0x3A70D));
+            # it's offset (0x1270D bytes) + size (180 KB) of the last entry
+            f.write(struct.pack('>i', 0x3F70D));
             # eepromRecordHeader for MVPD
             # valid arg.: 0xC0 means valid and master record
             ### @TODO RTC 258425: Reroute SPI MVPD accesses back through engine 2
@@ -167,7 +167,7 @@ def hb_eecache_setup(file_name, version, verbose):
             write_i2c_eecache_record(f, 0x50000, 1, 3, 0xA0, 0xFF, 4, 0x1170D, 0xC0);
             # for WOF
             # valid arg.: 0x80 means is valid but not master record
-            write_spi_eecache_record(f, 0x50000, 0x03, 0x0100, 160, 0x1270D, 0x80);
+            write_spi_eecache_record(f, 0x50000, 0x03, 0x0100, 180, 0x1270D, 0x80);
 
             # Note: The max eeprom count comes from src/include/usr/eeprom/eeprom_const.H
             # For version 2, it is currently a max count of 100
@@ -233,8 +233,8 @@ def hb_eecache_setup(file_name, version, verbose):
     ret = cli.run_command("get-seeprom 0 0 3") # get ref to seeprom that has WOF for proc 0
     if ret != None:
         image = simics.SIM_get_object(ret)
-        # WOF data is at offset 0x40000 bytes in SEEPROM, and has a size of 0x28000 bytes
-        read_buf = image.iface.image.get(0x40000, 0x28000)
+        # WOF+ECC data is at offset 0x40000 bytes in SEEPROM, and has a size of 0x2D000 bytes
+        read_buf = image.iface.image.get(0x40000, 0x2D000)
         with open(file_name, 'ab') as f:
             f.write(read_buf)
     else:

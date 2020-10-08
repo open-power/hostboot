@@ -5333,25 +5333,11 @@ void getDeviceInfo( TARGETING::Target* i_i2cMaster,
                 l_currentDI.deviceType =
                     TARGETING::HDAT_I2C_DEVICE_TYPE_SEEPROM;
 
-                switch(l_eep->deviceRole)
-                {
-                    case EEPROM::VPD_PRIMARY:
-                    case EEPROM::VPD_BACKUP:
-                        // See i2c.C removeI2cDeviceDuplicates(...) If a
-                        // duplicate of this i2c device is found, the duplicate
-                        // without the "?" in the device label will be
-                        // kept in o_deviceInfo.
-                        strcpy(l_currentDI.deviceLabel, "?");
-                        break;
-                    case EEPROM::SBE_PRIMARY:
-                    case EEPROM::SBE_BACKUP:
-                        strcpy(l_currentDI.deviceLabel, "?");
-                        break;
-                    case EEPROM::LAST_CHIP_TYPE:
-                    case EEPROM::SPARE_TEST:
-                        strcpy(l_currentDI.deviceLabel, "?");
-                        break;
-                }
+                // See i2c.C removeI2cDeviceDuplicates(...) If a
+                // duplicate of this i2c device is found, the duplicate
+                // without the "?" in the device label will be
+                // kept in o_deviceInfo.
+                strcpy(l_currentDI.deviceLabel, "?");
 
                 TRACUCOMP(g_trac_i2c,"Adding addr=0x%X", l_eep->eepromAccess.i2cInfo.devAddr);
                 o_deviceInfo.push_back(l_currentDI);

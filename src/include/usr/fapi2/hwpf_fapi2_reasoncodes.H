@@ -75,6 +75,8 @@ namespace fapi2
         MOD_GET_OMI_FREQ                            = 0x21,
         MOD_FAPI2_EXPLR_IB_I2C_READ                 = 0x22,
         MOD_FAPI2_EXPLR_IB_I2C_WRITE                = 0x23,
+        MOD_FAPI2_GET_DEFAULT_WOF_TABLE             = 0x24,
+        MOD_GET_SEEPROM_ECC_LESS_WOF_DATA           = 0x25,
     };
 
     /**
@@ -133,6 +135,9 @@ namespace fapi2
         RC_ATTR_OVERRIDE_DISALLOWED    = FAPI2_COMP_ID | 0x41,
         RC_UNKNOWN_OCMB_CHIP_TYPE      = FAPI2_COMP_ID | 0x42,
         RC_INVALID_BUFFER_SIZE         = FAPI2_COMP_ID | 0x43,
+        RC_WOF_MRW_IDX_NOT_INCLUDED    = FAPI2_COMP_ID | 0x44,
+        RC_WOF_HEADER_ENTRY_BEYOND_IMG = FAPI2_COMP_ID | 0x45,
+        RC_WOF_READ_UNCORRECTABLE_ECC  = FAPI2_COMP_ID | 0x46,
 
         RC_UNSUPPORTED_OPERATION       = FAPI2_COMP_ID | 0xF0,
 

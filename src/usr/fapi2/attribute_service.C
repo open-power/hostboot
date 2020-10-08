@@ -596,9 +596,7 @@ ReturnCode platGetPoundWBucketData(const Target<TARGET_TYPE_ALL>& i_fapiTarget,
     return rc;
 }
 
-// FIXME RTC: 210975 platParseWOFTables relies on the WOF table structure that
-// is defined in a P9 HWP
-//ReturnCode platParseWOFTables(uint8_t* o_wofData);
+ReturnCode platParseWOFTables(uint8_t* o_wofData);
 
 //******************************************************************************
 // fapi2::platAttrSvc::platGetWOFTableData function
@@ -606,14 +604,9 @@ ReturnCode platGetPoundWBucketData(const Target<TARGET_TYPE_ALL>& i_fapiTarget,
 ReturnCode platGetWOFTableData(const Target<TARGET_TYPE_ALL>& i_fapiTarget,
                                uint8_t * o_wofTableData)
 {
-    fapi2::ReturnCode rc;
-/* FIXME RTC: 210975 see above
-
-    // Parse the tables and return a single wof table
-    rc = platParseWOFTables(o_wofTableData);
-*/
-
-    return rc;
+    // Based on the system's criteria, look for WOF Table Header in PNOR's WOF data.
+    // If not found there, get default table from SEEPROM
+    return platParseWOFTables(o_wofTableData);
 }
 
 //******************************************************************************

@@ -54,19 +54,20 @@ constexpr uint8_t  MAX_EEPROMS_LATEST = MAX_EEPROMS_VERSION_2;
 */
 enum EEPROM_ROLE
 {
-  VPD_PRIMARY   = 0,
-  VPD_BACKUP    = 1,
-  SBE_PRIMARY   = 2,
-  SBE_BACKUP    = 3,
-  LAST_CHIP_TYPE,
+    VPD_PRIMARY   = 0,  // MVPD from Primary SEEPROM
+    VPD_BACKUP    = 1,  // MVPD from Backup SEEPROM
+    SBE_PRIMARY   = 2,
+    SBE_BACKUP    = 3,
+    WOF_DATA      = 4,  // WOF data from Backup SEEPROM
+    LAST_CHIP_TYPE,
 
-  // Test-only eeprom_role
-  // Keep after LAST_CHIP_TYPE so these are not cached/used in production code
-  SPARE_TEST    = 10,
+    // Test-only eeprom_role
+    // Keep after LAST_CHIP_TYPE so these are not cached/used in production code
+    SPARE_TEST    = 10,
 
-  // Useful Enums
-  INVALID_CHIP_TYPE = LAST_CHIP_TYPE,
-  FIRST_CHIP_TYPE = VPD_PRIMARY
+    // Useful Enums
+    INVALID_CHIP_TYPE = LAST_CHIP_TYPE,
+    FIRST_CHIP_TYPE = VPD_PRIMARY
 };
 
 /**

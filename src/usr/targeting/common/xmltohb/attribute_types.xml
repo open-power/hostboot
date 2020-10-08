@@ -7524,7 +7524,7 @@
         <type>uint8_t</type>
       </field>
     </complexType>
-    <description>Information needed to address the BACKUP MVPD/MASUREMENT/KEYSTORE EEPROM via SPI</description>
+    <description>Information needed to address the BACKUP MEASUREMENT/MVPD/WOF/SPARSE EEPROM via SPI</description>
     <id>SPI_EEPROM_VPD_BACKUP_INFO</id>
     <persistency>non-volatile</persistency>
     <readable/>
@@ -7568,7 +7568,7 @@
         <type>uint8_t</type>
       </field>
     </complexType>
-    <description>Information needed to address the PRIMARY MVPD/MEASUREMENT/WOF EEPROM via SPI</description>
+    <description>Information needed to address the PRIMARY MEASUREMENT/MVPD/KEYSTORE EEPROM via SPI</description>
     <id>SPI_EEPROM_VPD_PRIMARY_INFO</id>
     <persistency>non-volatile</persistency>
     <readable/>
@@ -8145,7 +8145,7 @@
       </field>
       <field>
         <default>0xFFFF</default>
-        <description>The number of kilobytes of WOF data in EEPROM</description>
+        <description>The number of kilobytes of WOF data + ECC in EEPROM</description>
         <name>dataSizeKB</name>
         <type>uint16_t</type>
       </field>

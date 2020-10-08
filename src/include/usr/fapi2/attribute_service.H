@@ -255,7 +255,7 @@ ReturnCode platGetPoundWBucketData(const Target<TARGET_TYPE_ALL>& i_fapiTarget,
 ///
 ///
 /// @param[in]  i_fapiTarget     FAPI2 Target reference
-///                                Currently system target and unused,
+///                                Currently system target is unused.
 ///                                Could change to proc target later.
 ///                                Don't need to check the type here, get macro
 ///                                does it for us, thus use the all type to

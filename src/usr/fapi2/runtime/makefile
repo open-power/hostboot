@@ -39,4 +39,8 @@ SUBDIRS += test.d
 
 VPATH += ..
 
+# Pull in ecc.o module needed to remove ECC
+VPATH += ${ROOTPATH}/src/usr/pnor/
+OBJS += ecc.o
+
 include ${ROOTPATH}/config.mk

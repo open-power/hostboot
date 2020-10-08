@@ -966,11 +966,11 @@
       <default>
         <field>
           <id>dataOffsetKB</id>
-          <value>416</value>
+          <value>436</value>
         </field>
         <field>
           <id>dataSizeKB</id>
-          <value>96</value>
+          <value>76</value>
         </field>
         <field>
           <!-- Corresponds to the RAW value of the EEPROM_CONTENT_TYPE enumeration -->
@@ -1335,7 +1335,8 @@
         </field>
         <field>
           <id>dataSizeKB</id>
-          <value>160</value>
+          <!-- WOF data + ECC -->
+          <value>180</value>
         </field>
         <!-- Corresponds to the WOF_DATA value of the EEPROM_CONTENT_TYPE enumeration -->
         <field>
@@ -1561,7 +1562,7 @@
     <parent>chip</parent>
     <attribute>
       <id>FOUND_PRESENT_BY_SP</id>
-      <default>SKIP</default><!-- TODO:SW508198 : Remove once FSP supports it -->
+      <default>SKIP</default>
     </attribute>
     <attribute>
       <default>CECTPM</default>

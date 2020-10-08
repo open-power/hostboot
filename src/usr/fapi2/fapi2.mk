@@ -56,6 +56,9 @@ EXTRAINCDIR += ${ROOTPATH}/src/import/generic/memory/
 EXTRAINCDIR += ${HWP_PATH_1}/hwp/accessors/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/common/include/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/ocmb/explorer/procedures/hwp/memory/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/lib/
+EXTRAINCDIR += ${ROOTPATH}/src/include/usr/eeprom/
+EXTRAINCDIR += ${ROOTPATH}/src/include/usr/pnor/
 
 include ${ROOTPATH}/src/build/mkrules/verbose.rules.mk
 define __CLEAN_TARGET
@@ -73,7 +76,7 @@ OBJS += plat_hw_access.o
 OBJS += plat_spd_access.o
 OBJS += plat_mvpd_access.o
 OBJS += plat_vpd_access.o
-#OBJS += plat_wof_access.o
+OBJS += plat_wof_access.o
 OBJS += dimmBadDqBitmapFuncs.o
 OBJS += rowRepairsFuncs.o
 OBJS += plat_i2c_access.o
