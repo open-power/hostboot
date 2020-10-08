@@ -180,6 +180,11 @@ bool isSMPWrapConfig()
     return isMfgFlagSet(TARGETING::MFG_FLAGS_MNFG_SMP_WRAP_CONFIG);
 };
 
+bool isNoGardSet()
+{
+    return isMfgFlagSet(TARGETING::MFG_FLAGS_MNFG_NO_GARD);
+};
+
 // Canned responses with bit-field of all the manufacturing flags as a parameter
 bool isMfgSpareDramDeploy(ATTR_MFG_FLAGS_typeStdArr &i_mfgFlags)
 {
@@ -277,6 +282,12 @@ bool isSMPWrapConfig(ATTR_MFG_FLAGS_typeStdArr &i_mfgFlags)
     return isMfgFlagSet(TARGETING::MFG_FLAGS_MNFG_SMP_WRAP_CONFIG,
                         i_mfgFlags);
 };
+
+bool isNoGardSet(ATTR_MFG_FLAGS_typeStdArr &i_mfgFlags)
+{
+    return isMfgFlagSet(TARGETING::MFG_FLAGS_MNFG_NO_GARD,
+                        i_mfgFlags);
+}
 
 //##############################################################################
 //##                 Manufacturing (MFG) Flag full API

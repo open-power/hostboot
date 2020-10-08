@@ -159,7 +159,7 @@ bool isExhaustivePatternTestEnabled();
 bool isUpdateBothSidesOfSbe();
 bool isUpdateSbeImage();
 bool isSMPWrapConfig();
-
+bool isNoGardSet();
 
 /**
  * @brief Check if a particular manufacturing flag is set
@@ -199,6 +199,7 @@ bool isExhaustivePatternTestEnabled(ATTR_MFG_FLAGS_typeStdArr &i_mfgFlags);
 bool isUpdateBothSidesOfSbe(ATTR_MFG_FLAGS_typeStdArr &i_mfgFlags);
 bool isUpdateSbeImage(ATTR_MFG_FLAGS_typeStdArr &i_mfgFlags);
 bool isSMPWrapConfig(ATTR_MFG_FLAGS_typeStdArr &i_mfgFlags);
+bool isNoGardSet(ATTR_MFG_FLAGS_typeStdArr &i_mfgFlags);
 
 
 //##############################################################################
