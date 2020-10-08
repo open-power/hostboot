@@ -80,6 +80,9 @@
 #include <arch/memorymap.H>
 #include <util/misc.H> // Util::isSimicsRunning
 
+//#define TRACUCOMP(args...) TRACFCOMP(args)
+#define TRACUCOMP(args...)
+
 namespace   ISTEP_07
 {
 
@@ -165,7 +168,7 @@ errlHndl_t check_proc0_memory_config(IStepError & io_istepErr)
             l_proc0 = i;
         }
 
-        TRACDCOMP(g_trac_isteps_trace,
+        TRACUCOMP(g_trac_isteps_trace,
                   "check_proc0_memory_config: Initial settings for "
                   "Proc %.8X: topoIdDflt = %d, topoIdEff = %d, topoId = %d\n",
                   get_huid(l_procIds[i].proc),
@@ -221,7 +224,7 @@ errlHndl_t check_proc0_memory_config(IStepError & io_istepErr)
             // If proc does not have memory, then continue
             if(l_dimms.empty())
             {
-                TRACDCOMP(g_trac_isteps_trace,
+                TRACUCOMP(g_trac_isteps_trace,
                           "check_proc0_memory_config: Proc %.8X has no  "
                           "functional dimms behind it",
                           get_huid(l_procIds[i].proc) );
@@ -257,7 +260,7 @@ errlHndl_t check_proc0_memory_config(IStepError & io_istepErr)
     // Loop through all procs detecting that IDs are set correctly
     for (i = 0; i < l_procsList.size(); i++)
     {
-        TRACDCOMP(g_trac_isteps_trace,
+        TRACUCOMP(g_trac_isteps_trace,
               "check_proc0_memory_config: Compare settings for "
               "Proc %.8X: topoIdEff = %d, topoId = %d",
               get_huid(l_procIds[i].proc),
@@ -282,7 +285,7 @@ errlHndl_t check_proc0_memory_config(IStepError & io_istepErr)
               (l_sbe_update | SBE_UPDATE_TYPE_TOPOLOGY_CHECKS);
         }
 
-        TRACDCOMP(g_trac_isteps_trace,
+        TRACUCOMP(g_trac_isteps_trace,
               "check_proc0_memory_config: Current attribute "
               "settings for Proc %.8X\n"
               "  ATTR_PROC_FABRIC_EFF_TOPOLOGY_ID = %d\n"
@@ -295,71 +298,6 @@ errlHndl_t check_proc0_memory_config(IStepError & io_istepErr)
 
     return l_err;
 } // end check_proc0_memory_config()
-
-void check_hrmor_within_range (ATTR_PROC_MEM_TO_USE_type i_proc_mem_to_use,
-                               IStepError & io_StepError)
-{
-    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-              "check_hrmor_within_range: PROC_MEM_TO_USE=0x%02X",
-              i_proc_mem_to_use);
-
-    // Find a proc that matches current proc_mem_to_use's topology ID
-    TargetHandleList l_procs;
-    getAllChips(l_procs, TYPE_PROC);
-
-    TargetHandle_t l_procTgtMemUsed {nullptr};
-    for (auto & l_proc : l_procs)
-    {
-        const auto procTopoId = l_proc->getAttr<ATTR_PROC_FABRIC_TOPOLOGY_ID>();
-        if (procTopoId == i_proc_mem_to_use)
-        {
-            l_procTgtMemUsed = l_proc;
-            break;
-        }
-    }
-
-    //if we find it, then we check that the hrmor is within
-    //range of configured mem.
-    //
-    //Otherwise, we want to go down the sbe update and TI path
-    bool l_sbeUpdateTIRequired = true;
-    if (l_procTgtMemUsed)
-    {
-        auto l_lowest_mem_addr  = get_bottom_mem_addr(l_procTgtMemUsed);
-        auto l_highest_mem_addr = get_top_mem_addr(l_procTgtMemUsed);
-        auto l_hrmor = cpu_spr_value(CPU_SPR_HRMOR);
-
-        TRACFCOMP(g_trac_isteps_trace,
-            "check_hrmor_within_range: proc picked: 0x%x, lowest addr=0x%x, "
-            "highest addr=0x%x HRMOR=0x%x", get_huid(l_procTgtMemUsed),
-            l_lowest_mem_addr, l_highest_mem_addr, l_hrmor);
-
-        if ((l_lowest_mem_addr <= l_hrmor) && (l_hrmor < l_highest_mem_addr))
-        {
-            //we are good -- no need for TI
-            l_sbeUpdateTIRequired = false;
-        }
-    }
-
-    if (l_sbeUpdateTIRequired)
-    {
-        Target* l_sys = UTIL::assertGetToplevelTarget();
-        ATTR_FORCE_SBE_UPDATE_type l_sbe_update =
-            l_sys->getAttr<ATTR_FORCE_SBE_UPDATE>();
-        TRACFCOMP(g_trac_isteps_trace,
-            "updateProcessorSbeSeeproms needed check_hrmor_within_range, "
-            "will set ATTR_FORCE_SBE_UPDATE l_sbe_update=0x%X",
-            l_sbe_update);
-        l_sys->setAttr<ATTR_FORCE_SBE_UPDATE>
-          (l_sbe_update | SBE_UPDATE_TYPE_HRMOR_OUTSIDE_CONFIGURED_MEM);
-    }
-    else
-    {
-        TRACFCOMP(g_trac_isteps_trace,
-            "check_hrmor_within_range: SBE update is NOT required");
-    }
-}
-
 
 /**
  * @brief Check mbox scratch regs versus MRW/Calculated via ATTR
@@ -912,7 +850,7 @@ void check_scratch_regs_vs_attrs( IStepError & io_StepError )
 //
 //  Wrapper function to call mss_attr_update
 //
-void*    call_mss_attr_update( void *io_pArgs )
+void* call_mss_attr_update( void *io_pArgs )
 {
     IStepError l_StepError;
 
@@ -921,9 +859,6 @@ void*    call_mss_attr_update( void *io_pArgs )
 
     do
     {
-        bool l_isPhyp = is_phyp_load();
-        bool l_spEnabled = INITSERVICE::spBaseServicesEnabled();
-
         Target* l_sys = UTIL::assertGetToplevelTarget();
 
         //Get the master proc
@@ -938,99 +873,25 @@ void*    call_mss_attr_update( void *io_pArgs )
             break;
         }
 
-        // Check the memory on master proc chip
-        // Use this mechanism for:
-        // non-phyp case or
-        // PHYP on OpenPower machine
-        if (!l_isPhyp || (l_isPhyp && !l_spEnabled))
+        // Check the memory on the boot proc. If no memory, then a series of Topology Id checks will find memory for the
+        // boot proc to use.
+        l_err = check_proc0_memory_config(l_StepError);
+
+        if (l_err)
         {
-            l_err = check_proc0_memory_config(l_StepError);
+            TRACFCOMP( g_trac_isteps_trace,
+                       "ERROR in check_proc0_memory_config. "
+                       TRACE_ERR_FMT,
+                       TRACE_ERR_ARGS(l_err));
 
-            if (l_err)
-            {
-                TRACFCOMP( g_trac_isteps_trace,
-                           "ERROR in check_proc0_memory_config. "
-                           TRACE_ERR_FMT,
-                           TRACE_ERR_ARGS(l_err));
-
-                l_StepError.addErrorDetails(l_err);
-                errlCommit( l_err, HWPF_COMP_ID );
-                break;
-            }
-            else
-            {
-                TRACFCOMP( g_trac_isteps_trace,
-                           "SUCCESS:  check_proc0_memory_config");
-            }
+            l_StepError.addErrorDetails(l_err);
+            errlCommit( l_err, HWPF_COMP_ID );
+            break;
         }
-        // For phyp based systems on FSP, HWSV will call
-        // HWAS::update_proc_mem_to_use function to determine the new
-        // proc to use for memory and update SBE scratch registers as
-        // necessary. HB just needs to tell HWSV to do that. There are
-        // only two cases where HB will want HWSV to attempt the above
-        // logic.
-        // 1) HRMOR that we booted doesn't match the current value
-        //    of PROC_MEM_TO_USE attribute. This can only happen if the
-        //    SBE is really old. So, force an sbe update and TI.
-        // 2) HB deconfigured a bunch of dimms in istep7. In this case,
-        //    HB computes new value of PROC_MEM_TO_USE and checks it
-        //    against current value of PROC_MEM_TO_USE. If they don't
-        //    match, HB will force a reconfig loop TI
         else
         {
-
-            //////////////////////////////////////////////////////////////////
-            //Case1 from above, where HRMOR doesn't fall in configured mem range
-            //of proc pointed by ATTR_PROC_MEM_TO_USE
-            //////////////////////////////////////////////////////////////////
-
-            // NOTE: ATTR_PROC_MEM_TO_USE contains a topology id.
-            const auto l_proc_mem_to_use = l_mProc->getAttr<ATTR_PROC_MEM_TO_USE>();
-            check_hrmor_within_range(l_proc_mem_to_use, l_StepError);
-
-            //////////////////////////////////////////////////////////////////
-            //Case2 from above, where HB deconfigured dimms, so, we need to
-            //recompute PROC_MEM_TO_USE and if it is not the same TI
-            //////////////////////////////////////////////////////////////////
-            bool l_valid {true};
-            l_err=HWAS::check_current_proc_mem_to_use_is_still_valid (l_valid);
-            if (l_err || !l_valid)
-            {
-                TRACFCOMP(g_trac_isteps_trace,
-                        "ERROR: check_current_proc_mem_to_use_is_still_valid"
-                        " going down for a reconfig loop");
-                //We deconfigured a bunch of dimms and the answer
-                //changed for which proc's memory to use. Trigger
-                //reconfig loop TI
-                INITSERVICE::doShutdown(INITSERVICE::SHUTDOWN_DO_RECONFIG_LOOP);
-
-            }
-
-            // Need to handle some code upgrade scenarios where the
-            // swap values aren't getting updated on the SP.
-            // We will force the EFF attributes to match.
-            TargetHandleList l_procTargetList;
-            getAllChips(l_procTargetList, TYPE_PROC);
-            for (const auto & l_proc: l_procTargetList)
-            {
-                auto l_topoId =
-                  l_proc->getAttr<ATTR_PROC_FABRIC_TOPOLOGY_ID>();
-                auto l_effTopoId =
-                  l_proc->getAttr<ATTR_PROC_FABRIC_EFF_TOPOLOGY_ID>();
-                if( l_topoId != l_effTopoId )
-                {
-                    ATTR_FORCE_SBE_UPDATE_type l_sbe_update =
-                        l_sys->getAttr<ATTR_FORCE_SBE_UPDATE>();
-                    TRACFCOMP(g_trac_isteps_trace,
-                        "Mismatch on proc %.8X : topoId=%.8X, effTopoId=%.8X "
-                        "will set ATTR_FORCE_SBE_UPDATE l_sbe_update=0x%X",
-                              get_huid(l_proc), l_topoId, l_effTopoId, l_sbe_update);
-                    l_sys->setAttr<ATTR_FORCE_SBE_UPDATE>
-                      (l_sbe_update | SBE_UPDATE_TYPE_FABRIC_EFF_TOPOLOGY);
-                    l_proc->setAttr<ATTR_PROC_FABRIC_EFF_TOPOLOGY_ID>
-                      (l_topoId);
-                }
-            }
+            TRACUCOMP( g_trac_isteps_trace,
+                       "SUCCESS:  check_proc0_memory_config");
         }
 
         // Get all functional MI chiplets and call p10_mss_attr_update
