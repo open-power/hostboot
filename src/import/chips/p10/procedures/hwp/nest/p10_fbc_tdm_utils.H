@@ -43,35 +43,6 @@
 // Constant definitions
 //------------------------------------------------------------------------------
 
-// DL Control state machine command encodings:
-const uint8_t DL_CONTROL_COMMAND_ENTER_TDM = 0xA;
-const uint8_t DL_CONTROL_COMMAND_EXIT_TDM = 0xB;
-const uint8_t DL_CONTROL_COMMAND_PARTIAL_RESET = 0xE;
-
-// PHY lane/group constants
-const uint8_t  PHY_IOO_EVEN_START_LANE  = 0;
-const uint8_t  PHY_IOO_EVEN_END_LANE    = 12;
-const uint32_t PHY_IOO_EVEN_LANE_VECTOR = 0x00000FFF;
-
-const uint8_t  PHY_IOO_ODD_START_LANE   = 12;
-const uint8_t  PHY_IOO_ODD_END_LANE     = 24;
-const uint32_t PHY_IOO_ODD_LANE_VECTOR  = 0x00FFF000;
-
-const uint8_t  PHY_IOO_GROUP_NUMBER     = 0;
-
-// PPE External Control Register Commands
-enum p10_fbc_tdm_utils_ppe_cmd_t
-{
-    CLEAR      = 0,
-    HALT       = 1,
-    RESUME     = 2,
-    STEP       = 3,
-    TOGGLE     = 4,
-    SOFT_RESET = 5,
-    HARD_RESET = 6,
-    FORCE_HALT = 7
-};
-
 // DL Control State Machine Commands
 enum p10_fbc_tdm_utils_dl_cmd_t
 {
@@ -99,6 +70,20 @@ enum p10_fbc_tdm_utils_dl_cmd_t
 
 extern "C"
 {
+
+///
+/// @brief Return IOLINK child associated with IOHS even/odd half
+///
+/// @param[in] i_iohs_target    Reference to IOHS endpoint target
+/// @param[in] i_even_not_odd   Identify half-link to target (true=even,false=odd)
+/// @param[in] o_iolink_target  Associated IOLINK target
+///
+/// @return fapi::ReturnCode    FAPI2_RC_SUCCESS if success, else error code.
+///
+    fapi2::ReturnCode p10_fbc_tdm_utils_get_iolink(
+        const fapi2::Target<fapi2::TARGET_TYPE_IOHS>& i_iohs_target,
+        const bool i_even_not_odd,
+        fapi2::Target<fapi2::TARGET_TYPE_IOLINK>& o_iolink_target);
 
 ///
 /// @brief Mask PHY/DL/TL FIR bits associated with selected half-link
@@ -192,28 +177,50 @@ extern "C"
         const p10_fbc_tdm_utils_dl_cmd_t i_command);
 
 ///
-/// @brief Stop IO PPE to permit link re-retraining
+/// @brief Stop recalibration
 ///
 /// @param[in] i_target         Reference to IOHS endpoint target
 /// @param[in] i_even_not_odd   Identify half-link to target (true=even,false=odd)
 ///
 /// @return fapi::ReturnCode    FAPI2_RC_SUCCESS if success, else error code.
 ///
-    fapi2::ReturnCode p10_fbc_tdm_utils_ppe_halt(
+    fapi2::ReturnCode p10_fbc_tdm_utils_recal_stop(
         const fapi2::Target<fapi2::TARGET_TYPE_IOHS>& i_target,
         const bool i_even_not_odd);
 
 ///
-/// @brief Restart IO PPE to permit future recovery actions
+/// @brief Confirm that recalibration is stopped
 ///
 /// @param[in] i_target         Reference to IOHS endpoint target
 /// @param[in] i_even_not_odd   Identify half-link to target (true=even,false=odd)
 ///
 /// @return fapi::ReturnCode    FAPI2_RC_SUCCESS if success, else error code.
 ///
-    fapi2::ReturnCode p10_fbc_tdm_utils_ppe_restart(
+    fapi2::ReturnCode p10_fbc_tdm_utils_confirm_recal_stop(
         const fapi2::Target<fapi2::TARGET_TYPE_IOHS>& i_target,
         const bool i_even_not_odd);
+
+///
+/// @brief Restart calibration
+///
+/// @param[in] i_target         Reference to IOHS endpoint target
+/// @param[in] i_even_not_odd   Identify half-link to target (true=even,false=odd)
+///
+/// @return fapi::ReturnCode    FAPI2_RC_SUCCESS if success, else error code.
+///
+    fapi2::ReturnCode p10_fbc_tdm_utils_recal_restart(
+        const fapi2::Target<fapi2::TARGET_TYPE_IOHS>& i_target,
+        const bool i_even_not_odd);
+
+///
+/// @brief Utility function to log DL registers
+///
+/// @param[in] i_target         Reference to IOHS endpoint target
+///
+/// @return fapi::ReturnCode    FAPI2_RC_SUCCESS if success, else error code.
+///
+    fapi2::ReturnCode p10_fbc_tdm_utils_log_regs(
+        const fapi2::Target<fapi2::TARGET_TYPE_IOHS>& i_target);
 
 } // extern "C"
 

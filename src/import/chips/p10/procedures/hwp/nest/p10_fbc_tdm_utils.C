@@ -35,19 +35,57 @@
 //------------------------------------------------------------------------------
 #include <p10_fbc_tdm_utils.H>
 #include <p10_smp_link_firs.H>
-//#include <p10_io_scom.H>
-//#include <p10_io_regs.H>
-//#include <p10_io_common.H>
-//#include <p10_obus_fir_utils.H>
-#include <p10_scom_iohs_c.H>
-#include <p10_scom_iohs_d.H>
-#include <p10_scom_iohs_e.H>
-#include <p10_scom_pauc_2.H>
-#include <p10_scom_pauc_9.H>
+#include <p10_io_iohs_poll_recal.H>
+#include <p10_scom_iohs.H>
+#include <p10_scom_pauc.H>
 
 //------------------------------------------------------------------------------
 // Function definitions
 //------------------------------------------------------------------------------
+
+
+/////////////////////////////////////////////////////////
+// p10_fbc_tdm_utils_get_iolink
+/////////////////////////////////////////////////////////
+fapi2::ReturnCode p10_fbc_tdm_utils_get_iolink(
+    const fapi2::Target<fapi2::TARGET_TYPE_IOHS>& i_iohs_target,
+    const bool i_even_not_odd,
+    fapi2::Target<fapi2::TARGET_TYPE_IOLINK>& o_iolink_target)
+{
+    FAPI_DBG("Start");
+
+    bool l_found = false;
+
+    for (auto l_iolink : i_iohs_target.getChildren<fapi2::TARGET_TYPE_IOLINK>())
+    {
+        fapi2::ATTR_CHIP_UNIT_POS_Type l_unit_pos;
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, l_iolink, l_unit_pos));
+
+        if (i_even_not_odd && ((l_unit_pos % 2) == 0))
+        {
+            l_found = true;
+            o_iolink_target = l_iolink;
+            break;
+        }
+        else if (!i_even_not_odd && ((l_unit_pos % 2) == 1))
+        {
+            l_found = true;
+            o_iolink_target = l_iolink;
+            break;
+        }
+    }
+
+    FAPI_ASSERT(l_found,
+                fapi2::P10_FBC_TDM_UTILS_IOLINK_SEARCH_ERR()
+                .set_IOHS_TARGET(i_iohs_target)
+                .set_EVEN_NOT_ODD(i_even_not_odd),
+                "No IOLINK target found to match requested link half!");
+
+fapi_try_exit:
+    FAPI_DBG("End");
+    return fapi2::current_err;
+}
+
 
 ////////////////////////////////////////////////////////
 // p10_fbc_tdm_utils_fir_mask
@@ -319,22 +357,39 @@ fapi_try_exit:
 }
 
 ////////////////////////////////////////////////////////
-// p10_fbc_tdm_utils_ppe_halt
+// p10_fbc_tdm_utils_recal_stop
 ////////////////////////////////////////////////////////
-fapi2::ReturnCode p10_fbc_tdm_utils_ppe_halt(
+fapi2::ReturnCode p10_fbc_tdm_utils_recal_stop(
     const fapi2::Target<fapi2::TARGET_TYPE_IOHS>& i_target,
     const bool i_even_not_odd)
 {
-    using namespace scomt::pauc;
+    using namespace scomt::iohs;
 
     FAPI_DBG("Start");
 
-    auto l_pauc_target = i_target.getParent<fapi2::TARGET_TYPE_PAUC>();
-    fapi2::buffer<uint64_t> l_ppe_xixcr(0x0);
+    fapi2::buffer<uint64_t> l_dl_config_data;
 
-    FAPI_TRY(PREP_DL_PPE_WRAP_XIXCR(l_pauc_target));
-    SET_DL_PPE_WRAP_XIXCR_PPE_XIXCR_XCR(p10_fbc_tdm_utils_ppe_cmd_t::HALT, l_ppe_xixcr);
-    FAPI_TRY(PUT_DL_PPE_WRAP_XIXCR(l_pauc_target, l_ppe_xixcr));
+    // update DL config register
+    FAPI_TRY(GET_DLP_CONFIG(i_target, l_dl_config_data),
+             "Error from getScom (DLP_CONFIG)");
+    SET_DLP_CONFIG_DISABLE_RECAL_START(l_dl_config_data);
+    FAPI_TRY(PUT_DLP_CONFIG(i_target, l_dl_config_data),
+             "Error from puScom (DLP_CONFIG)");
+
+    // send command via DL state machine
+    FAPI_TRY(p10_fbc_tdm_utils_dl_send_command(
+                 i_target,
+                 i_even_not_odd,
+                 p10_fbc_tdm_utils_dl_cmd_t::RESET_RECAL),
+             "Error from p10_fbc_tdm_utils_dl_send_command (%s)",
+             (i_even_not_odd) ? ("even") : ("odd"));
+
+    FAPI_TRY(p10_fbc_tdm_utils_dl_send_command(
+                 i_target,
+                 !i_even_not_odd,
+                 p10_fbc_tdm_utils_dl_cmd_t::RESET_RECAL),
+             "Error from p10_fbc_tdm_utils_dl_send_command (%s)",
+             (!i_even_not_odd) ? ("odd") : ("even"));
 
 fapi_try_exit:
     FAPI_DBG("End");
@@ -342,26 +397,123 @@ fapi_try_exit:
 }
 
 ////////////////////////////////////////////////////////
-// p10_fbc_tdm_utils_ppe_restart
+// p10_fbc_tdm_utils_confirm_recal_stop
 ////////////////////////////////////////////////////////
-fapi2::ReturnCode p10_fbc_tdm_utils_ppe_restart(
+fapi2::ReturnCode p10_fbc_tdm_utils_confirm_recal_stop(
     const fapi2::Target<fapi2::TARGET_TYPE_IOHS>& i_target,
     const bool i_even_not_odd)
 {
-    using namespace scomt::pauc;
+    FAPI_DBG("Start");
+
+    FAPI_TRY(p10_io_iohs_poll_recal(i_target),
+             "Error from p10_io_iohs_poll_recal");
+
+fapi_try_exit:
+    FAPI_DBG("End");
+    return fapi2::current_err;
+}
+
+////////////////////////////////////////////////////////
+// p10_fbc_tdm_utils_recal_restart
+////////////////////////////////////////////////////////
+fapi2::ReturnCode p10_fbc_tdm_utils_recal_restart(
+    const fapi2::Target<fapi2::TARGET_TYPE_IOHS>& i_target,
+    const bool i_even_not_odd)
+{
+    FAPI_DBG("Start");
+
+    // send command via DL state machine
+    FAPI_TRY(p10_fbc_tdm_utils_dl_send_command(
+                 i_target,
+                 i_even_not_odd,
+                 p10_fbc_tdm_utils_dl_cmd_t::START_RECAL),
+             "Error from p10_fbc_tdm_utils_dl_send_command (%s)",
+             (i_even_not_odd) ? ("even") : ("odd"));
+
+    FAPI_TRY(p10_fbc_tdm_utils_dl_send_command(
+                 i_target,
+                 !i_even_not_odd,
+                 p10_fbc_tdm_utils_dl_cmd_t::START_RECAL),
+             "Error from p10_fbc_tdm_utils_dl_send_command (%s)",
+             (!i_even_not_odd) ? ("odd") : ("even"));
+
+fapi_try_exit:
+    FAPI_DBG("End");
+    return fapi2::current_err;
+}
+
+////////////////////////////////////////////////////////
+// p10_fbc_tdm_utils_log_regs
+////////////////////////////////////////////////////////
+fapi2::ReturnCode p10_fbc_tdm_utils_log_regs(
+    const fapi2::Target<fapi2::TARGET_TYPE_IOHS>& i_target)
+{
+    using namespace scomt::iohs;
 
     FAPI_DBG("Start");
 
-    auto l_pauc_target = i_target.getParent<fapi2::TARGET_TYPE_PAUC>();
-    fapi2::buffer<uint64_t> l_ppe_xixcr(0x0);
+    uint64_t l_scom_addr;
+    fapi2::buffer<uint64_t> l_scom_data;
 
-    FAPI_TRY(PREP_DL_PPE_WRAP_XIXCR(l_pauc_target));
+    l_scom_addr = DLP_FIR_REG_RW;
+    FAPI_TRY(fapi2::getScom(i_target, l_scom_addr, l_scom_data));
+    FAPI_DBG("DLP_FIR_REG_RW: %016lX", l_scom_data);
 
-    SET_DL_PPE_WRAP_XIXCR_PPE_XIXCR_XCR(p10_fbc_tdm_utils_ppe_cmd_t::HARD_RESET, l_ppe_xixcr);
-    FAPI_TRY(PUT_DL_PPE_WRAP_XIXCR(l_pauc_target, l_ppe_xixcr));
+    l_scom_addr = DLP_CONFIG;
+    FAPI_TRY(fapi2::getScom(i_target, l_scom_addr, l_scom_data));
+    FAPI_DBG("DLP_CONFIG: %016lX", l_scom_data);
 
-    SET_DL_PPE_WRAP_XIXCR_PPE_XIXCR_XCR(p10_fbc_tdm_utils_ppe_cmd_t::RESUME, l_ppe_xixcr);
-    FAPI_TRY(PUT_DL_PPE_WRAP_XIXCR(l_pauc_target, l_ppe_xixcr));
+    l_scom_addr = DLP_CONTROL;
+    FAPI_TRY(fapi2::getScom(i_target, l_scom_addr, l_scom_data));
+    FAPI_DBG("DLP_CONTROL: %016lX", l_scom_data);
+
+    l_scom_addr = DLP_PHY_CONFIG;
+    FAPI_TRY(fapi2::getScom(i_target, l_scom_addr, l_scom_data));
+    FAPI_DBG("DLP_PHY_CONFIG: %016lX", l_scom_data);
+
+    l_scom_addr = DLP_SEC_CONFIG;
+    FAPI_TRY(fapi2::getScom(i_target, l_scom_addr, l_scom_data));
+    FAPI_DBG("DLP_SEC_CONFIG: %016lX", l_scom_data);
+
+    l_scom_addr = DLP_LAT_MEASURE;
+    FAPI_TRY(fapi2::getScom(i_target, l_scom_addr, l_scom_data));
+    FAPI_DBG("DLP_LAT_MEASURE: %016lX", l_scom_data);
+
+    l_scom_addr = DLP_OPTICAL_CONFIG;
+    FAPI_TRY(fapi2::getScom(i_target, l_scom_addr, l_scom_data));
+    FAPI_DBG("DLP_OPTICAL_CONFIG: %016lX", l_scom_data);
+
+    l_scom_addr = DLP_LINK0_TX_LANE_CONTROL;
+    FAPI_TRY(fapi2::getScom(i_target, l_scom_addr, l_scom_data));
+    FAPI_DBG("DLP_LINK0_TX_LANE_CONTROL: %016lX", l_scom_data);
+
+    l_scom_addr = DLP_LINK1_TX_LANE_CONTROL;
+    FAPI_TRY(fapi2::getScom(i_target, l_scom_addr, l_scom_data));
+    FAPI_DBG("DLP_LINK1_TX_LANE_CONTROL: %016lX", l_scom_data);
+
+    l_scom_addr = DLP_LINK0_RX_LANE_CONTROL;
+    FAPI_TRY(fapi2::getScom(i_target, l_scom_addr, l_scom_data));
+    FAPI_DBG("DLP_LINK0_RX_LANE_CONTROL: %016lX", l_scom_data);
+
+    l_scom_addr = DLP_LINK1_RX_LANE_CONTROL;
+    FAPI_TRY(fapi2::getScom(i_target, l_scom_addr, l_scom_data));
+    FAPI_DBG("DLP_LINK1_RX_LANE_CONTROL: %016lX", l_scom_data);
+
+    l_scom_addr = DLP_LINK0_ERROR_STATUS;
+    FAPI_TRY(fapi2::getScom(i_target, l_scom_addr, l_scom_data));
+    FAPI_DBG("DLP_LINK0_ERROR_STATUS: %016lX", l_scom_data);
+
+    l_scom_addr = DLP_LINK1_ERROR_STATUS;
+    FAPI_TRY(fapi2::getScom(i_target, l_scom_addr, l_scom_data));
+    FAPI_DBG("DLP_LINK1_ERROR_STATUS: %016lX", l_scom_data);
+
+    l_scom_addr = DLP_DLL_STATUS;
+    FAPI_TRY(fapi2::getScom(i_target, l_scom_addr, l_scom_data));
+    FAPI_DBG("DLP_DLL_STATUS: %016lX", l_scom_data);
+
+    l_scom_addr = DLP_MISC_ERROR_STATUS;
+    FAPI_TRY(fapi2::getScom(i_target, l_scom_addr, l_scom_data));
+    FAPI_DBG("DLP_MISC_ERROR_STATUS: %016lX", l_scom_data);
 
 fapi_try_exit:
     FAPI_DBG("End");

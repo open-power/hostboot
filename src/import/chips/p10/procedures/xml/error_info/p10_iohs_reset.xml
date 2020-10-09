@@ -36,5 +36,18 @@
     </callout>
   </hwpError>
   <!-- ******************************************************************** -->
-
+  <hwpError>
+    <sbeError/>
+    <rc>RC_P10_IOHS_RESET_IOLINK_SEARCH_ERR</rc>
+    <description>
+      No IOLINK target found to match requested link half
+    </description>
+    <ffdc>IOHS_TARGET</ffdc>
+    <ffdc>HALF</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- ******************************************************************** -->>
 </hwpErrors>

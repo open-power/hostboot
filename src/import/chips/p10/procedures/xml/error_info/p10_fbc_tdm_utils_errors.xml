@@ -105,4 +105,17 @@
   </callout>
 </hwpError>
 <!-- ******************************************************************** -->
+<hwpError>
+  <rc>RC_P10_FBC_TDM_UTILS_IOLINK_SEARCH_ERR</rc>
+  <description>
+    No IOLINK target found to match requested operation
+  </description>
+  <ffdc>IOHS_TARGET</ffdc>
+  <ffdc>EVEN_NOT_ODD</ffdc>
+  <callout>
+    <procedure>CODE</procedure>
+    <priority>HIGH</priority>
+  </callout>
+</hwpError>
+<!-- ******************************************************************** -->
 </hwpErrors>

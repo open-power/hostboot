@@ -149,18 +149,45 @@ fapi2::ReturnCode p10_iohs_reset_cls::p10_iohs_reset_ext_req_lanes(const fapi2::
 
     std::vector<int> l_lanes;
     int l_thread = 0;
-    fapi2::ATTR_IOHS_LINK_TRAIN_Type l_link_train_restore;
-    fapi2::ATTR_IOHS_LINK_TRAIN_Type l_link_train_reset = i_half;
-
 
     FAPI_TRY(p10_io_get_iohs_thread(i_target, l_thread));
 
-    // get current value of IOHS train attribute, to restore after this operation
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IOHS_LINK_TRAIN, i_target, l_link_train_restore));
-    // adjust for current operation
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IOHS_LINK_TRAIN, i_target, l_link_train_reset));
+    if (i_half == fapi2::ENUM_ATTR_IOHS_LINK_TRAIN_BOTH)
+    {
+        FAPI_TRY(p10_io_get_iohs_lanes(i_target, l_lanes));
+    }
+    else
+    {
+        fapi2::Target<fapi2::TARGET_TYPE_IOLINK> l_iolink_target;
+        bool l_found = false;
 
-    FAPI_TRY(p10_io_get_iohs_lanes(i_target, l_lanes));
+        for (auto l_iolink : i_target.getChildren<fapi2::TARGET_TYPE_IOLINK>())
+        {
+            fapi2::ATTR_CHIP_UNIT_POS_Type l_unit_pos;
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, l_iolink, l_unit_pos));
+
+            if ((i_half == fapi2::ENUM_ATTR_IOHS_LINK_TRAIN_EVEN_ONLY) && ((l_unit_pos % 2) == 0))
+            {
+                l_found = true;
+                l_iolink_target = l_iolink;
+                break;
+            }
+            else if ((i_half == fapi2::ENUM_ATTR_IOHS_LINK_TRAIN_ODD_ONLY) && ((l_unit_pos % 2) == 1))
+            {
+                l_found = true;
+                l_iolink_target = l_iolink;
+                break;
+            }
+        }
+
+        FAPI_ASSERT(l_found,
+                    fapi2::P10_IOHS_RESET_IOLINK_SEARCH_ERR()
+                    .set_IOHS_TARGET(i_target)
+                    .set_HALF(i_half),
+                    "No IOLINK target found to match requested link half!");
+
+        FAPI_TRY(p10_io_get_iolink_lanes(l_iolink_target, l_lanes));
+    }
 
     FAPI_TRY(p10_iohs_reset_ext_req_set_lane_bits(l_pauc_target, l_lanes, l_thread));
 
@@ -168,8 +195,6 @@ fapi2::ReturnCode p10_iohs_reset_cls::p10_iohs_reset_ext_req_lanes(const fapi2::
     FAPI_TRY(p10_iohs_reset_flush_fw_regs());
 
 fapi_try_exit:
-    // restore prior value of link train attribute
-    (void) FAPI_ATTR_SET(fapi2::ATTR_IOHS_LINK_TRAIN, i_target, l_link_train_restore);
     FAPI_DBG("End");
     return fapi2::current_err;
 }
@@ -300,11 +325,13 @@ fapi_try_exit:
 fapi2::ReturnCode p10_iohs_reset(
     const fapi2::Target<fapi2::TARGET_TYPE_IOHS>& i_target, const uint8_t i_half)
 {
+    FAPI_DBG("Start");
+
     bool l_done = false;
     const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> l_sys;
     auto l_pauc_target = i_target.getParent<fapi2::TARGET_TYPE_PAUC>();
     //Poll for done
-    const int POLLING_LOOPS = 1000;
+    const int POLLING_LOOPS = 6000; // wait 60s, manual servo op can take up to 50s to finish
     int l_try = 0;
     p10_iohs_reset_cls l_p;
 
@@ -316,7 +343,6 @@ fapi2::ReturnCode p10_iohs_reset(
     {
         l_done = true;
 
-        std::vector<int> l_lanes;
         int l_thread = 0;
         fapi2::ATTR_CHIP_UNIT_POS_Type l_iohs_num;
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, i_target, l_iohs_num),
@@ -326,7 +352,7 @@ fapi2::ReturnCode p10_iohs_reset(
 
         FAPI_TRY(l_p.p10_iohs_reset_check_thread_done(l_pauc_target, l_thread, l_done));
 
-        fapi2::delay(1000000, 10000000);
+        fapi2::delay(10000000, 10000000);
     }
 
     FAPI_ASSERT(l_done,
@@ -334,5 +360,6 @@ fapi2::ReturnCode p10_iohs_reset(
                 "Timeout waiting on omi_reset to complete");
 
 fapi_try_exit:
+    FAPI_DBG("End");
     return fapi2::current_err;
 }

@@ -36,7 +36,7 @@
 //------------------------------------------------------------------------------
 #include <p10_fbc_tdm_inject.H>
 #include <p10_fbc_tdm_utils.H>
-//#include <p10_io_obus_pdwn_lanes.H>
+#include <p10_io_power.H>
 
 //------------------------------------------------------------------------------
 // Constant definitions
@@ -45,7 +45,10 @@
 // tdm transition delay/polling constants
 const uint32_t P10_FBC_TDM_INJECT_TDM_TRANSITION_HW_NS_DELAY     = 10000000;
 const uint32_t P10_FBC_TDM_INJECT_TDM_TRANSITION_SIM_CYCLE_DELAY = 10000000;
-const uint32_t P10_FBC_TDM_INJECT_TDM_TRANSITION_MAX_WAIT_POLLS  = 10;
+const uint32_t P10_FBC_TDM_INJECT_TDM_TRANSITION_MAX_WAIT_POLLS  = 100;
+
+// recal stop polling constants
+const uint32_t P10_FBC_TDM_INJECT_RECAL_STOP_MAX_ATTEMPTS = 10;
 
 // typedef for function pointers
 typedef fapi2::ReturnCode (*p10_fbc_tdm_inject_func_t)(
@@ -69,14 +72,35 @@ fapi2::ReturnCode p10_fbc_tdm_enter(
 {
     FAPI_DBG("Start");
 
-    // input parameter specifies link half we want to become
-    // non-functional; command is sent to partner link which we
-    // want to remain functional
-    FAPI_TRY(p10_fbc_tdm_utils_dl_send_command(
-                 i_target,
-                 !i_even_not_odd,
-                 p10_fbc_tdm_utils_dl_cmd_t::ENTER_TDM),
-             "Error from p10_fbc_tdm_utils_dl_send_command");
+    fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP> l_proc_target;
+    fapi2::ATTR_CHIP_EC_FEATURE_HW532820_Type l_hw532820;
+    l_proc_target = i_target.getParent<fapi2::TARGET_TYPE_PROC_CHIP>();
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_HW532820, l_proc_target, l_hw532820));
+
+    // Note that RESET is either a soft reset (when link is up)
+    // or hard reset (when link is down) and would also deassert
+    // link_up, whereas ENTER_TDM would leave link_up asserted.
+    // RESET would be the ideal command here, except HW532820
+    // prevents us from using it.
+    if (l_hw532820)
+    {
+        // input parameter specifies link half we want to become
+        // non-functional; command is sent to partner link which we
+        // want to remain functional in this case
+        FAPI_TRY(p10_fbc_tdm_utils_dl_send_command(
+                     i_target,
+                     !i_even_not_odd,
+                     p10_fbc_tdm_utils_dl_cmd_t::ENTER_TDM),
+                 "Error from p10_fbc_tdm_utils_dl_send_command (ENTER_TDM)");
+    }
+    else
+    {
+        FAPI_TRY(p10_fbc_tdm_utils_dl_send_command(
+                     i_target,
+                     i_even_not_odd,
+                     p10_fbc_tdm_utils_dl_cmd_t::RESET),
+                 "Error from p10_fbc_tdm_utils_dl_send_command (RESET)");
+    }
 
 fapi_try_exit:
     FAPI_DBG("End");
@@ -145,7 +169,7 @@ fapi2::ReturnCode p10_fbc_tdm_confirm_half(
 
     bool l_link_down = false;
 
-    for(uint32_t i = 0; i < P10_FBC_TDM_INJECT_TDM_TRANSITION_MAX_WAIT_POLLS; i++)
+    for (uint32_t i = 0; i < P10_FBC_TDM_INJECT_TDM_TRANSITION_MAX_WAIT_POLLS; i++)
     {
         FAPI_DBG("Polling link state..");
         FAPI_TRY(p10_fbc_tdm_utils_tdm_query(
@@ -154,7 +178,7 @@ fapi2::ReturnCode p10_fbc_tdm_confirm_half(
                      l_link_down),
                  "Error from p10_fbc_tdm_utils_tdm_query");
 
-        if(l_link_down)
+        if (l_link_down)
         {
             FAPI_DBG("Success! DL indicates it is in half-width mode");
             break;
@@ -170,6 +194,101 @@ fapi2::ReturnCode p10_fbc_tdm_confirm_half(
                 .set_PAUC_TARGET(i_target.getParent<fapi2::TARGET_TYPE_PAUC>())
                 .set_EVEN_NOT_ODD(i_even_not_odd),
                 "Link is not running in half-width mode!");
+
+fapi_try_exit:
+    FAPI_DBG("End");
+    return fapi2::current_err;
+}
+
+///
+/// @brief Trigger recal stop on both sublinks
+///
+/// @param[in] i_target         Reference to IOHS endpoint target
+/// @param[in] i_even_not_odd   Identify half-link to reset (true=even,false=odd)
+///
+/// @return fapi::ReturnCode    FAPI2_RC_SUCCESS if success, else error code.
+///
+fapi2::ReturnCode p10_fbc_tdm_recal_stop(
+    const fapi2::Target<fapi2::TARGET_TYPE_IOHS>& i_target,
+    const bool i_even_not_odd)
+{
+    FAPI_DBG("Start");
+    fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP> l_proc_target;
+    fapi2::ATTR_CHIP_EC_FEATURE_HW532820_Type l_hw532820;
+    l_proc_target = i_target.getParent<fapi2::TARGET_TYPE_PROC_CHIP>();
+
+    FAPI_TRY(p10_fbc_tdm_utils_recal_stop(i_target, i_even_not_odd));
+
+    // call twice to avoid window condition on DD1
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_HW532820, l_proc_target, l_hw532820));
+
+    if (l_hw532820)
+    {
+        FAPI_TRY(p10_fbc_tdm_utils_recal_stop(i_target, i_even_not_odd));
+    }
+
+fapi_try_exit:
+    FAPI_DBG("End");
+    return fapi2::current_err;
+}
+
+///
+/// @brief Confirm recal has stopped on both sublinks
+///
+/// @param[in] i_target         Reference to IOHS endpoint target
+/// @param[in] i_even_not_odd   Identify half-link to reset (true=even,false=odd)
+///
+/// @return fapi::ReturnCode    FAPI2_RC_SUCCESS if success, else error code.
+///
+fapi2::ReturnCode p10_fbc_tdm_confirm_recal_stop(
+    const fapi2::Target<fapi2::TARGET_TYPE_IOHS>& i_target,
+    const bool i_even_not_odd)
+{
+    FAPI_DBG("Start");
+    fapi2::ReturnCode l_rc;
+    fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP> l_proc_target;
+    fapi2::ATTR_CHIP_EC_FEATURE_HW532820_Type l_hw532820;
+    l_proc_target = i_target.getParent<fapi2::TARGET_TYPE_PROC_CHIP>();
+
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_HW532820, l_proc_target, l_hw532820));
+
+    l_rc = p10_fbc_tdm_utils_confirm_recal_stop(i_target, i_even_not_odd);
+
+    if (!l_hw532820)
+    {
+        FAPI_TRY(l_rc,
+                 "Error from p10_fbc_tdm_utils_confirm_recal_stop");
+    }
+    else
+    {
+        // if recal is not stopped, then we haven't successfully avoided the window condition where
+        // recal can restart if both endpoints do not stop recal within 20ms.
+        // Attempt to stop recal again for n iterations until we are either
+        // successful or ultimately give up.
+        if (l_rc != fapi2::FAPI2_RC_SUCCESS)
+        {
+            for (uint8_t l_count = 1; l_count <= P10_FBC_TDM_INJECT_RECAL_STOP_MAX_ATTEMPTS; l_count++)
+            {
+                FAPI_DBG("Recal did not stop, trying again (attempt %d/%d)",
+                         l_count, P10_FBC_TDM_INJECT_RECAL_STOP_MAX_ATTEMPTS);
+
+                FAPI_TRY(p10_fbc_tdm_recal_stop(i_target, i_even_not_odd));
+                l_rc = p10_fbc_tdm_utils_confirm_recal_stop(i_target, i_even_not_odd);
+
+                if (l_rc == fapi2::FAPI2_RC_SUCCESS)
+                {
+                    FAPI_DBG("Recal successfully stopped!");
+                    break;
+                }
+                else if (l_count == P10_FBC_TDM_INJECT_RECAL_STOP_MAX_ATTEMPTS)
+                {
+                    FAPI_TRY(l_rc,
+                             "Recal failed to stop after %d attempts!",
+                             P10_FBC_TDM_INJECT_RECAL_STOP_MAX_ATTEMPTS);
+                }
+            }
+        }
+    }
 
 fapi_try_exit:
     FAPI_DBG("End");
@@ -215,26 +334,17 @@ fapi2::ReturnCode p10_fbc_tdm_phy_powerdown(
 {
     FAPI_DBG("Start");
 
-    //const uint32_t l_lane_vector =
-    //    (i_even_not_odd) ?
-    //    (PHY_IOO_EVEN_LANE_VECTOR) :
-    //    (PHY_IOO_ODD_LANE_VECTOR);
+    fapi2::Target<fapi2::TARGET_TYPE_IOLINK> l_iolink_pdwn;
 
-    fapi2::ReturnCode l_rc;
+    FAPI_TRY(p10_fbc_tdm_utils_get_iolink(i_target, i_even_not_odd, l_iolink_pdwn),
+             "Error from p10_fbc_tdm_utils_get_iolink");
 
-    // @TODO: Enable iohs lane power down when available from Chris Steffan
-    //FAPI_EXEC_HWP(l_rc,
-    //              p10_io_obus_pdwn_lanes,
-    //              i_target,
-    //              l_lane_vector);
+    FAPI_TRY(p10_io_iolink_power(l_iolink_pdwn, false),
+             "Error from p10_io_iohs_power");
 
-    //if (l_rc)
-    //{
-    //    FAPI_ERR("Error from p10_io_obus_pdwn_lanes");
-    //}
-
+fapi_try_exit:
     FAPI_DBG("End");
-    return l_rc;
+    return fapi2::current_err;
 }
 
 /// See doxygen comments in header file
@@ -243,6 +353,7 @@ fapi2::ReturnCode p10_fbc_tdm_inject(
     const bool i_even_not_odd,
     const p10_fbc_tdm_inject_opt_t& i_opts)
 {
+    fapi2::ReturnCode l_rc;
     char l_target_str[fapi2::MAX_ECMD_STRING_LEN];
     std::vector<fapi2::Target<fapi2::TARGET_TYPE_IOHS>> l_targets;
 
@@ -258,10 +369,11 @@ fapi2::ReturnCode p10_fbc_tdm_inject(
     p10_fbc_tdm_inject_func_t l_funcs[] =
     {
         p10_fbc_tdm_confirm_partner,
-        p10_fbc_tdm_utils_ppe_halt,
         p10_fbc_tdm_utils_fir_mask,
         p10_fbc_tdm_enter,
         p10_fbc_tdm_confirm_half,
+        p10_fbc_tdm_recal_stop,
+        p10_fbc_tdm_confirm_recal_stop,
         p10_fbc_tdm_partial_reset,
         p10_fbc_tdm_phy_powerdown
     };
