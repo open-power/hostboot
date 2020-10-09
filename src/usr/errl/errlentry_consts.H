@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2017,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -139,6 +139,8 @@ const epubClockTypeToSub_t CLOCK_TO_SUBSYS_TABLE[] =
     { HWAS::TODCLK_TYPE                , EPUB_CEC_HDW_TOD_HDW },
     { HWAS::MEMCLK_TYPE                , EPUB_CEC_HDW_CLK_CTL },
     { HWAS::OSCREFCLK_TYPE             , EPUB_CEC_HDW_CLK_CTL },
+    { HWAS::OSCREFCLK0_TYPE            , EPUB_CEC_HDW_CLK_CTL },
+    { HWAS::OSCREFCLK1_TYPE            , EPUB_CEC_HDW_CLK_CTL },
     { HWAS::OSCPCICLK_TYPE             , EPUB_CEC_HDW_CLK_CTL },
     { HWAS::OSCPCICLK0_TYPE            , EPUB_CEC_HDW_CLK_CTL },
     { HWAS::OSCPCICLK1_TYPE            , EPUB_CEC_HDW_CLK_CTL },

@@ -204,6 +204,8 @@ enum clockTypeEnum
 
     // Specify a specific clock source for the case where the code can determine
     //  which of the redundant sources is actually at fault
+    OSCREFCLK0_TYPE =  8, //Specifically clock 0
+    OSCREFCLK1_TYPE =  9, //Specifically clock 1
     OSCPCICLK0_TYPE = 10, //Specifically clock 0
     OSCPCICLK1_TYPE = 11, //Specifically clock 1
 };
