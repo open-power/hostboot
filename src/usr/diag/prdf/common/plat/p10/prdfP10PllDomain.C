@@ -119,8 +119,6 @@ bool PllDomain::Query(ATTENTION_TYPE i_attnType)
 int32_t PllDomain::Analyze(STEP_CODE_DATA_STRUCT& io_sc,
                            ATTENTION_TYPE attentionType)
 {
-    std::vector<ExtensibleChip *> pllUnlockList;
-    std::vector<ExtensibleChip *> failoverList;
     int32_t rc = SUCCESS;
     PllErrTypes errTypesSummary;
 
@@ -130,6 +128,10 @@ int32_t PllDomain::Analyze(STEP_CODE_DATA_STRUCT& io_sc,
     // analysis. In this case, these chips will need to be removed from the
     // domains.
     std::vector<ExtensibleChip *>  nfchips;
+
+    // Keep track of all chips with with PLL unlock attentions. They will be
+    // used for callouts later.
+    std::vector<ExtensibleChip*> pllUnlockList;
 
     // Examine each chip in the domain.
     for (unsigned int index = 0; index < GetSize(); ++index)
@@ -207,50 +209,55 @@ int32_t PllDomain::Analyze(STEP_CODE_DATA_STRUCT& io_sc,
         io_sc.service_data->SetUERE();
     }
 
-    // TODO: Make callouts based on error types.
+    // RCS OSC error attentions have the potential of generating PLL unlock
+    // attentions, but it is also possible the PLL unlock attentions could have
+    // asserted on their own. Unfortunately, there may have been one or more
+    // clock failovers due to the RCS OSC error attentions. Therefore, it would
+    // be impossible to tell which clock may have generated the PLL unlock
+    // attentions. So, if any RCS OSC error attentions are present, PRD must
+    // ignore all PLL unlock attentions
 
-    if (pllUnlockList.size() > 0)
+    // Similarly, RCS unlock detect attentions only have meaning if found on
+    // the non-primary clock. Again, due to potential clock failovers, it would
+    // be impossible to tell which clock may have been the primary at the time
+    // of the RCS unlock attention. Therefore, PRD must also ignore all RCS
+    // unlock detect attentions if there are any RCS OSC error attentions
+    // present.
+
+    // Certain PLL unlock attentions have the potential of causing RCS unlock
+    // detect attentions, but it is also possible the two error types could
+    // have asserted on their own. Regardless, the callouts will be accurate,
+    // assuming there are no RCS OSC error attentions. So, the decision is to
+    // treat PLL unlock attentions and RCS unlock detect attentions as
+    // individual events to simplify PRD analysis.
+
+    // Slow frequency drifts or jitter from the clocks will be reported as PLL
+    // unlock attentions. In addition, PLL unlock attentions may indicate there
+    // is a problem within the processor that reported the error. Therefore,
+    // PRD must call out both the primary clock and the processor. If more than
+    // one processor in the clock domain is reporting PLL unlock attentions,
+    // then the primary clock is more likely at fault than the processors.
+    // Similarly, if all PLL unlock attentions are scoped to a single processor
+    // in the clock domain, then the processor is more likely at fault than the
+    // primary clock.
+
+    if (errTypesSummary.query(PllErrTypes::RCS_OSC_ERROR_0) ||
+        errTypesSummary.query(PllErrTypes::RCS_OSC_ERROR_1))
     {
-        // Set Signature
-        io_sc.service_data->GetErrorSignature()->
-            setChipId(pllUnlockList[0]->getHuid());
-        io_sc.service_data->SetErrorSig( PRDFSIG_PLL_ERROR );
+        // TODO: Make callouts based on error types.
 
-        // If only one detected sys ref error, add it to the callout list.
-        if (pllUnlockList.size() == 1)
-        {
-            const uint32_t tmpCount =
-                io_sc.service_data->getMruListSize();
-
-            // Call this chip's CalloutPll plugin if it exists.
-            func = pllUnlockList[0]->getExtensibleFunction("CalloutPll", true);
-            if ( nullptr != func )
-            {
-                (*func)(pllUnlockList[0],
-                        PluginDef::bindParm<STEP_CODE_DATA_STRUCT &>(io_sc));
-            }
-
-            // If CalloutPll plugin does not add anything new to the callout
-            // list, callout this chip
-            if ( tmpCount == io_sc.service_data->getMruListSize() )
-            {
-                // No additional callouts were made so add this chip to the list
-                io_sc.service_data->SetCallout(
-                    pllUnlockList[0]->getTrgt());
-            }
-        }
+        // Ensure any PLL unlock or RCS unlock detect errors on either side are
+        // ignored. Generally, this means the attentions should be cleared, but
+        // we will have to mask these attentions as well if either RCS OSC error
+        // attention is masked.
+        errTypesSummary.set(PllErrTypes::PLL_UNLOCK_0   );
+        errTypesSummary.set(PllErrTypes::PLL_UNLOCK_1   );
+        errTypesSummary.set(PllErrTypes::RCS_UNLOCKDET_0);
+        errTypesSummary.set(PllErrTypes::RCS_UNLOCKDET_1);
     }
-
-    if (failoverList.size() > 0)
+    else
     {
-        io_sc.service_data->GetErrorSignature()->
-            setChipId(failoverList[0]->getHuid());
-
-        // Set signature
-        io_sc.service_data->SetErrorSig( PRDFSIG_SYS_REF_FAILOVER );
-
-        // Make the error log predictive on first occurrence.
-        io_sc.service_data->SetThresholdMaskId(0);
+        // TODO: Make callouts based on error types.
     }
 
     // TODO: Currently unsure what the threshold should be for each error type.

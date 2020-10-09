@@ -352,7 +352,7 @@ bool __queryPllUnlock(ExtensibleChip* i_chip)
 
     SCAN_COMM_REGISTER_CLASS* err = i_chip->getRegister("BC_OR_PCBSLV_ERROR");
 
-    if (SUCCESS != err->Read())
+    if (SUCCESS == err->Read())
     {
         // If BC_OR_PCBSLV_ERROR[24:31] has a non-zero value, there is at least
         // one PLL unlock error on this chip.
@@ -396,25 +396,6 @@ void __queryPrimaryClock(ExtensibleChip* i_chip, PllErrTypes& io_errTypes)
  */
 int32_t queryPllErrTypes(ExtensibleChip* i_chip, PllErrTypes& o_errTypes)
 {
-    // RCS OSC errors have the potential of generating PLL unlock errors, but it
-    // is also possible the PLL unlock errors could have asserted on their own.
-    // Regardless, the callouts should be the same for the two error types. So
-    // to avoid complicated analysis code with many potential race conditions,
-    // the decision is to handle each error type individually.
-
-    // Similarly, certain PLL unlock errors have the potential of causing RCS
-    // unlock detect errors, but again it is also possible the two errors could
-    // have asserted on their own. So the decision is to once again treat each
-    // error type individually.
-
-    // RCS unlock detect errors only have meaning if found on the non-primary
-    // clock. It is possible that by the time PRD has been able to analyze an
-    // RCS unlock detect attention, a clock could have failed over one or more
-    // times. This could make PRD analysis complicated and, again, may have many
-    // potential race conditions.  Therefore, the decision is that RCS unlock
-    // detect errors will only be handled when there are no active RCS OSC
-    // errors on either side.
-
     int32_t rc = SUCCESS;
 
     o_errTypes.clear();
@@ -430,13 +411,6 @@ int32_t queryPllErrTypes(ExtensibleChip* i_chip, PllErrTypes& o_errTypes)
         rc = msk->Read();
         if (SUCCESS != rc) break;
 
-        // PLL unlock errors are reported via the "PCB slave error" bit.
-        if (fir->IsBitSet(PCB_SLAVE) && !msk->IsBitSet(PCB_SLAVE) &&
-            __queryPllUnlock(i_chip))
-        {
-            __queryPrimaryClock(i_chip, o_errTypes);
-        }
-
         // RCS OSC error on clock 0.
         if (fir->IsBitSet(OSC_ERR_0) && !msk->IsBitSet(OSC_ERR_0))
         {
@@ -449,22 +423,34 @@ int32_t queryPllErrTypes(ExtensibleChip* i_chip, PllErrTypes& o_errTypes)
             o_errTypes.set(PllErrTypes::RCS_OSC_ERROR_1);
         }
 
-        // RCS unlock detect errors are only valid if there are no RCS OSC
-        // errors.
-        if (!o_errTypes.query(PllErrTypes::RCS_OSC_ERROR_0) &&
-            !o_errTypes.query(PllErrTypes::RCS_OSC_ERROR_1))
+        // If there are any RCS OSC error attentions present, there is a high
+        // probability that the primary clock has failed over to the secondary
+        // clock at least once. Therefore, it would be impossible to determine
+        // which clock was the primary at the time a PLL unlock or RCS unlock
+        // detect attention occurred. So those attention types will be ignored.
+        if (o_errTypes.query(PllErrTypes::RCS_OSC_ERROR_0) ||
+            o_errTypes.query(PllErrTypes::RCS_OSC_ERROR_1))
         {
-            // RCS unlock detect on clock 0.
-            if (fir->IsBitSet(UNLOCKDET_0) && !msk->IsBitSet(UNLOCKDET_0))
-            {
-                o_errTypes.set(PllErrTypes::RCS_UNLOCKDET_0);
-            }
+            break;
+        }
 
-            // RCS unlock detect on clock 1.
-            if (fir->IsBitSet(UNLOCKDET_1) && !msk->IsBitSet(UNLOCKDET_1))
-            {
-                o_errTypes.set(PllErrTypes::RCS_UNLOCKDET_1);
-            }
+        // PLL unlock errors are reported via the "PCB slave error" bit.
+        if (fir->IsBitSet(PCB_SLAVE) && !msk->IsBitSet(PCB_SLAVE) &&
+            __queryPllUnlock(i_chip))
+        {
+            __queryPrimaryClock(i_chip, o_errTypes);
+        }
+
+        // RCS unlock detect on clock 0.
+        if (fir->IsBitSet(UNLOCKDET_0) && !msk->IsBitSet(UNLOCKDET_0))
+        {
+            o_errTypes.set(PllErrTypes::RCS_UNLOCKDET_0);
+        }
+
+        // RCS unlock detect on clock 1.
+        if (fir->IsBitSet(UNLOCKDET_1) && !msk->IsBitSet(UNLOCKDET_1))
+        {
+            o_errTypes.set(PllErrTypes::RCS_UNLOCKDET_1);
         }
 
     } while (0);
@@ -652,13 +638,13 @@ void __clearRcsAttns(ExtensibleChip* i_chip, bool i_clearOsc0, bool i_clearOsc1)
     {
         if (!i_clearOsc0 && !i_clearOsc1) break; // nothing to do
 
-        // Since hardware will change the value of OSC_SENSE_1, clear it out of
+        // Since hardware will change the value of RCS_SENSE_1, clear it out of
         // the cache so that subsequent reads will refresh the cache.
         RegDataCache& cache = RegDataCache::getCachedRegisters();
-        cache.flush(i_chip, i_chip->getRegister("OSC_SENSE_1"));
+        cache.flush(i_chip, i_chip->getRegister("RCS_SENSE_1"));
 
         // We must toggle (set high, then low) ROOT_CTRL5[6:7] to clear the RCS
-        // attentions because the OSC_SENSE_1 register is read-only.
+        // attentions because the RCS_SENSE_1 register is read-only.
 
         SCAN_COMM_REGISTER_CLASS* ctrl = i_chip->getRegister("ROOT_CTRL5");
         if (SUCCESS != ctrl->Read()) break;
@@ -692,7 +678,44 @@ int32_t clearPllErrTypes(ExtensibleChip* i_chip, const PllErrTypes& i_errTypes)
     SCAN_COMM_REGISTER_CLASS* fir = i_chip->getRegister("TP_LOCAL_FIR_AND");
     fir->setAllBits();
 
-    if (i_errTypes.query(PllErrTypes::PLL_UNLOCK_0) ||
+    // When we clear an RCS OSC error attention on EITHER clock, we will also
+    // clear PLL unlock attentions and RCS unlock detect attentions on BOTH
+    // sides to ensure a clean slate for the next attention.
+
+    bool rcsOscErrPresent = false;
+
+    // When clearing the underlying bits in the RCS_SENSE_1 register for a
+    // specific clock, hardware will clear both the RCS OSC error and the RCS
+    // unlock detect for that clock. There is no way to separate this.
+    // Therefore, it is possible we may clear the underlying bits for a FIR
+    // attention we have not handled yet. For example, say there is an RCS OSC
+    // error on clock 0 and RCS unlock detect on clock 1. Then during analysis,
+    // but before clearing the errors, there is an RCS OSC error on clock 1.
+    // When clearing the RCS unlock detect on clock 1 for the first attention,
+    // it will also clear the underlying bit for the RCS OSC error on clock 1.
+    // This should be fine for analysis of the second attention because we will
+    // still have the FIR bit. It just may look weird not seeing the underlying
+    // bit in the FFDC (if anyone is paying attention to that).
+
+    bool clearOsc0 = false;
+    bool clearOsc1 = false;
+
+    if (i_errTypes.query(PllErrTypes::RCS_OSC_ERROR_0))
+    {
+        rcsOscErrPresent = true;
+        clearOsc0 = true;
+        fir->ClearBit(OSC_ERR_0);
+    }
+
+    if (i_errTypes.query(PllErrTypes::RCS_OSC_ERROR_1))
+    {
+        rcsOscErrPresent = true;
+        clearOsc1 = true;
+        fir->ClearBit(OSC_ERR_1);
+    }
+
+    if (rcsOscErrPresent ||
+        i_errTypes.query(PllErrTypes::PLL_UNLOCK_0) ||
         i_errTypes.query(PllErrTypes::PLL_UNLOCK_1))
     {
         // Clear all of the underlying PLL errors in each chiplet.
@@ -702,67 +725,17 @@ int32_t clearPllErrTypes(ExtensibleChip* i_chip, const PllErrTypes& i_errTypes)
         fir->ClearBit(PCB_SLAVE);
     }
 
-    // When we clear an RCS OSC error on EITHER side, we will also clear RCS
-    // unlock detect attentions on BOTH sides to ensure a clean slate for the
-    // next attention. See notes in queryPllErrTypes() regarding the reason why.
-
-    // When clearing the underlying bits in the OSC_SENSE_1 register for a
-    // specific clock, hardware will clear both the RCS OSC error and the RCS
-    // unlock detect for that clock. There is no way to separate this.
-    // Therefore, it is possible we may clear the underlying bits for a FIR
-    // attention we have not handled yet. For example, say there is an RCS OSC
-    // error on clock 0. Then during analysis of that error, but before clearing
-    // the error, there is an RCS OSC error on clock 1. When clearing the RCS
-    // unlock detect on clock 1 for the first attention, it will also clear the
-    // underlying bit for the RCS OSC error on clock 1. This should be fine for
-    // analysis of the second attention because we will still have the FIR bit.
-    // It just may look weird not seeing the underlying bit in the FFDC (if
-    // anyone is paying attention to that).
-
-    bool clearOsc0 = false;
-    bool clearOsc1 = false;
-
-    if (i_errTypes.query(PllErrTypes::RCS_OSC_ERROR_0))
+    if (rcsOscErrPresent ||
+        i_errTypes.query(PllErrTypes::RCS_UNLOCKDET_0))
     {
-        // Clear the underlying bits in the OSC_SENSE_1 register.
         clearOsc0 = true;
-        clearOsc1 = true; // to clear unlock detect on clock 1
-
-        // Clear this RCS OSC error bit and both RCS unlock detect bits in the
-        // TP_LOCAL_FIR.
-        fir->ClearBit(OSC_ERR_0);
         fir->ClearBit(UNLOCKDET_0);
-        fir->ClearBit(UNLOCKDET_1);
     }
 
-    if (i_errTypes.query(PllErrTypes::RCS_OSC_ERROR_1))
+    if (rcsOscErrPresent ||
+        i_errTypes.query(PllErrTypes::RCS_UNLOCKDET_1))
     {
-        // Clear the underlying bits in the OSC_SENSE_1 register.
-        clearOsc0 = true; // to clear unlock detect on clock 1
         clearOsc1 = true;
-
-        // Clear this RCS OSC error bit and both RCS unlock detect bits in the
-        // TP_LOCAL_FIR.
-        fir->ClearBit(OSC_ERR_1);
-        fir->ClearBit(UNLOCKDET_0);
-        fir->ClearBit(UNLOCKDET_1);
-    }
-
-    if (i_errTypes.query(PllErrTypes::RCS_UNLOCKDET_0))
-    {
-        // Clear the underlying bits in the OSC_SENSE_1 register.
-        clearOsc0 = true;
-
-        // Clear this RCS unlock detect bit in the TP_LOCAL_FIR.
-        fir->ClearBit(UNLOCKDET_0);
-    }
-
-    if (i_errTypes.query(PllErrTypes::RCS_UNLOCKDET_1))
-    {
-        // Clear the underlying bits in the OSC_SENSE_1 register.
-        clearOsc1 = true;
-
-        // Clear this RCS unlock detect bit in the TP_LOCAL_FIR.
         fir->ClearBit(UNLOCKDET_1);
     }
 
@@ -810,7 +783,26 @@ int32_t maskPllErrTypes(ExtensibleChip* i_chip, const PllErrTypes& i_errTypes)
     SCAN_COMM_REGISTER_CLASS* msk = i_chip->getRegister("TP_LOCAL_FIR_MASK_OR");
     msk->clearAllBits();
 
-    if (i_errTypes.query(PllErrTypes::PLL_UNLOCK_0) ||
+    // When we mask an RCS OSC error attention on EITHER clock, we will also
+    // mask PLL unlock attentions and RCS unlock detect attentions on BOTH
+    // sides to ensure we don't handle side-effect attentions.
+
+    bool rcsOscErrPresent = false;
+
+    if (i_errTypes.query(PllErrTypes::RCS_OSC_ERROR_0))
+    {
+        rcsOscErrPresent = true;
+        msk->SetBit(OSC_ERR_0);
+    }
+
+    if (i_errTypes.query(PllErrTypes::RCS_OSC_ERROR_1))
+    {
+        rcsOscErrPresent = true;
+        msk->SetBit(OSC_ERR_1);
+    }
+
+    if (rcsOscErrPresent ||
+        i_errTypes.query(PllErrTypes::PLL_UNLOCK_0) ||
         i_errTypes.query(PllErrTypes::PLL_UNLOCK_1))
     {
         // Mask all of the underlying PLL errors in each chiplet.
@@ -821,37 +813,15 @@ int32_t maskPllErrTypes(ExtensibleChip* i_chip, const PllErrTypes& i_errTypes)
         // be enough.
     }
 
-    // When we mask an RCS OSC error on EITHER side, it will also mask RCS
-    // unlock detect attentions on BOTH sides. See notes in queryPllErrTypes()
-    // regarding the reason why.
-
-    if (i_errTypes.query(PllErrTypes::RCS_OSC_ERROR_0))
+    if (rcsOscErrPresent ||
+        i_errTypes.query(PllErrTypes::RCS_UNLOCKDET_0))
     {
-        // Mask this RCS OSC error bit and both RCS unlock detect bits in the
-        // TP_LOCAL_FIR.
-        msk->SetBit(OSC_ERR_0);
-        msk->SetBit(UNLOCKDET_0);
-        msk->SetBit(UNLOCKDET_1);
-    }
-
-    if (i_errTypes.query(PllErrTypes::RCS_OSC_ERROR_1))
-    {
-        // Mask this RCS OSC error bit and both RCS unlock detect bits in the
-        // TP_LOCAL_FIR.
-        msk->SetBit(OSC_ERR_1);
-        msk->SetBit(UNLOCKDET_0);
-        msk->SetBit(UNLOCKDET_1);
-    }
-
-    if (i_errTypes.query(PllErrTypes::RCS_UNLOCKDET_0))
-    {
-        // Mask this RCS unlock detect bit in the TP_LOCAL_FIR.
         msk->SetBit(UNLOCKDET_0);
     }
 
-    if (i_errTypes.query(PllErrTypes::RCS_UNLOCKDET_1))
+    if (rcsOscErrPresent ||
+        i_errTypes.query(PllErrTypes::RCS_UNLOCKDET_1))
     {
-        // Mask this RCS unlock detect bit in the TP_LOCAL_FIR.
         msk->SetBit(UNLOCKDET_1);
     }
 
