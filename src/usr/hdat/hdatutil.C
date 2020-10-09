@@ -711,9 +711,15 @@ errlHndl_t hdatGetAsciiKwdForPvpd(TARGETING::Target * i_target,
                            (sizeof(uint16_t)*numRecords) *  //size val of all recs
                            i_num *2 +//total kwd name size
                            i_num * sizeof(uint8_t); //separator between kwds
+        HDAT_DBG("actual totSize=%d",totSize);                   
+        ////////
+        size_t remSize = totSize % 4  + 32;
+        totSize += remSize; //Phyp needs a stanza of 0s at the end
+        HDAT_DBG("after adding an extra stanza totSize=%d",totSize);
+        ////////                   
         o_kwdSize = totSize;
 
-        o_kwd = new char[totSize]; 
+        o_kwd = new char[totSize](); 
         HDAT_DBG("vini kwd Size=0x%x, numViniKwds=0x%x",viniSize,numViniKwds);
         uint16_t tmpVINISize = viniSize + numViniKwds * 1 + numViniKwds * 2;
         HDAT_DBG("VINI SIZE=0x%x",tmpVINISize);
@@ -837,6 +843,7 @@ errlHndl_t hdatGetPvpdFullRecord(TARGETING::Target * i_target,
     errlHndl_t l_err = NULL;
     uint64_t fails = 0x0;
     VPD::vpdRecord theRecord = 0x0;
+    size_t totSize{};
 
 
     o_kwd = NULL;
@@ -895,7 +902,11 @@ errlHndl_t hdatGetPvpdFullRecord(TARGETING::Target * i_target,
         uint8_t l_endTag = HDAT_VPD_RECORD_END_TAG ;
         uint32_t l_RecTagSize = 2 * sizeof(uint8_t);  // Size of Tags for each record
         uint32_t l_wholeTagSize = l_RecTagSize * numRecs;  // Size of tags for all records
-        o_kwd = new char[o_kwdSize + l_wholeTagSize ];
+        //o_kwd = new char[o_kwdSize + l_wholeTagSize ];
+        size_t remSize = (o_kwdSize + l_wholeTagSize) % 4 + 32;
+        totSize = o_kwdSize + l_wholeTagSize + remSize;
+        o_kwd = new char[totSize]();
+        ////
 
         uint32_t loc = 0;
         for( uint32_t curRec = 0; curRec < numRecs; curRec++ )
@@ -968,6 +979,7 @@ errlHndl_t hdatGetPvpdFullRecord(TARGETING::Target * i_target,
         }
     }while(0);
 
+    o_kwdSize = totSize;
     HDAT_DBG("hdatGetPvpdFullRecord: returning keyword size %d and data %s",
               o_kwdSize,o_kwd);
     HDAT_EXIT();
