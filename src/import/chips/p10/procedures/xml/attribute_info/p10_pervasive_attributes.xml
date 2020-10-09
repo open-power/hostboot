@@ -403,4 +403,12 @@
   <writeable/>
 </attribute>
 <!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_SECUREBOOT_PROTECT_DECONFIGURED_TPM</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>To deconfigure a TPM in a secure system - 01 to set TDP bit</description>
+  <valueType>uint8</valueType>
+  <platInit/>
+</attribute>
+<!-- ********************************************************************** -->
 </attributes>
