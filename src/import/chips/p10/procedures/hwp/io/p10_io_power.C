@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020                             */
+/* Contributors Listed Below - COPYRIGHT 2020,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -135,6 +135,43 @@ fapi2::ReturnCode p10_io_power::flush_fw_regs()
     {
         FAPI_TRY(p10_io_ppe_fw_regs[i].flush());
     }
+
+fapi_try_exit:
+    FAPI_DBG("End");
+    return fapi2::current_err;
+}
+
+///
+/// @brief Set the lane bits for each target and write them to the chip
+///
+/// @param[in] i_iohs_target Iohs target to work with
+///
+/// @return fapi2::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
+fapi2::ReturnCode p10_io_iolink_power(const fapi2::Target<fapi2::TARGET_TYPE_IOLINK>& i_iolink_target, const bool& i_on)
+{
+    std::vector<int> l_lanes;
+    int l_thread = 0;
+    p10_io_power l_proc;
+
+    auto l_iohs_target = i_iolink_target.getParent<fapi2::TARGET_TYPE_IOHS>();
+    auto l_pauc_target = l_iohs_target.getParent<fapi2::TARGET_TYPE_PAUC>();
+
+    FAPI_TRY(p10_io_get_iohs_thread(l_iohs_target, l_thread));
+    FAPI_DBG("Starting Power On/Off for IOHS thread %d", l_thread);
+
+    FAPI_TRY(l_proc.ext_req_clear(l_pauc_target, l_thread));
+
+    FAPI_TRY(p10_io_get_iolink_lanes(i_iolink_target, l_lanes));
+
+    FAPI_TRY(l_proc.ext_req_set_lane_bits(l_pauc_target, l_lanes, l_thread));
+
+    FAPI_TRY(l_proc.p10_io_power_start(l_pauc_target, l_thread, i_on));
+
+    //Write cached values to the chip
+    FAPI_TRY(l_proc.flush_fw_regs());
+
+    FAPI_TRY(l_proc.p10_io_power_poll(l_pauc_target, l_thread, i_on));
+
 
 fapi_try_exit:
     FAPI_DBG("End");
@@ -322,7 +359,7 @@ fapi2::ReturnCode p10_io_power::p10_io_power_poll(
     bool l_done = false;
 
     //Poll for done
-    const int POLLING_LOOPS = 200;
+    const int POLLING_LOOPS = 1000;
 
     for (int l_try = 0; l_try < POLLING_LOOPS && !l_done; l_try++)
     {
@@ -335,7 +372,7 @@ fapi2::ReturnCode p10_io_power::p10_io_power_poll(
 
         FAPI_TRY(p10_io_power_check_thread_done(i_pauc_target, i_thread, i_on, l_done ));
 
-        fapi2::delay(100, 10000000);
+        fapi2::delay(10000000, 10000000);
     }
 
     FAPI_ASSERT(l_done,

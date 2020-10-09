@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -80,6 +80,14 @@ fapi2::ReturnCode p10_io_get_iohs_thread(
 fapi2::ReturnCode p10_io_get_omic_thread(
     const fapi2::Target<fapi2::TARGET_TYPE_OMIC>& i_omic_target,
     int& o_thread);
+
+/// @brief Determines which lanes are enabled for an IOHS target
+/// @param[in] i_iolink_target  IOLINK target to get lanes for
+/// @param[out] o_lanes         The configured lanes
+/// @return FAPI_RC_SUCCESS if arguments are valid
+fapi2::ReturnCode p10_io_get_iolink_lanes(
+    const fapi2::Target<fapi2::TARGET_TYPE_IOLINK>& i_iolink_target,
+    std::vector<int>& o_lanes);
 
 /// @brief Determines which lanes are enabled for an IOHS target
 /// @param[in] i_iohs_target    IOHS target to get lanes for

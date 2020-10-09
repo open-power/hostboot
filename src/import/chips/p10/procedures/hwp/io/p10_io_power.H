@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020                             */
+/* Contributors Listed Below - COPYRIGHT 2020,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -46,6 +46,16 @@
 
 extern "C"
 {
+///
+/// @brief Set power on/off for targeted lanes.
+///
+/// @param[in] i_iolink_target Iolink target to work with
+///
+/// @return fapi2::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
+    fapi2::ReturnCode p10_io_iolink_power(
+        const fapi2::Target<fapi2::TARGET_TYPE_IOLINK>& i_iolink_target,
+        const bool& i_on);
+
 ///
 /// @brief Set power on/off for targeted lanes.
 ///

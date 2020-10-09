@@ -350,6 +350,8 @@ fapi2::ReturnCode p10_smp_link_firs_clear(
 
     SET_DLP_FIR_REG_0_TRAINED(l_clear_mask);
     SET_DLP_FIR_REG_1_TRAINED(l_clear_mask);
+    SET_DLP_FIR_REG_0_SPARE_DONE(l_clear_mask);
+    SET_DLP_FIR_REG_1_SPARE_DONE(l_clear_mask);
 
     FAPI_TRY(PUT_DLP_FIR_REG_WO_AND(i_iohs_target, i_clear_all ? l_clear : l_clear_mask),
              "Error from putScom (DLP_FIR_REG_WO_AND)");

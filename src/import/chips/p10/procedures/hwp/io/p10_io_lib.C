@@ -99,6 +99,40 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
+/// @brief Determines which lanes are enabled for an IOLINK target
+/// @param[in] i_iolink_target  IOLINK target to get lanes for
+/// @param[out] o_lanes         The configured lanes
+/// @return FAPI_RC_SUCCESS if arguments are valid
+fapi2::ReturnCode p10_io_get_iolink_lanes(
+    const fapi2::Target<fapi2::TARGET_TYPE_IOLINK>& i_iolink_target,
+    std::vector<int>& o_lanes)
+{
+    int l_start_bit = 0;
+    int l_end_bit = 0;
+
+    fapi2::ATTR_CHIP_UNIT_POS_Type l_iolink_pos;
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, i_iolink_target, l_iolink_pos),
+             "Error from FAPI_ATTR_GET (ATTR_CHIP_UNIT_POS)");
+
+    if (l_iolink_pos % 2)
+    {
+        l_start_bit = P10_IO_LIB_NUMBER_OF_IOHS_LANES / 2;
+        l_end_bit = P10_IO_LIB_NUMBER_OF_IOHS_LANES;
+    }
+    else
+    {
+        l_end_bit = P10_IO_LIB_NUMBER_OF_IOHS_LANES / 2;
+    }
+
+    for (int l_lane = l_start_bit; l_lane < l_end_bit; l_lane++)
+    {
+        o_lanes.push_back(l_lane);
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
 /// @brief Determines which lanes are enabled for an IOHS target
 /// @param[in] i_iohs_target    IOHS target to get lanes for
 /// @param[out] o_lanes         The configured lanes
@@ -107,10 +141,7 @@ fapi2::ReturnCode p10_io_get_iohs_lanes(
     const fapi2::Target<fapi2::TARGET_TYPE_IOHS>& i_iohs_target,
     std::vector<int>& o_lanes)
 {
-    int l_start_bit = 0;
-    int l_end_bit = 0;
     auto l_iolink_targets = i_iohs_target.getChildren<fapi2::TARGET_TYPE_IOLINK>();
-    uint8_t l_iolink_num_targets;
 
     // handle Cronus platform implementation of IOLINK targets -- both
     // children are always returned as functional, even if no valid remote endpoint
@@ -134,35 +165,16 @@ fapi2::ReturnCode p10_io_get_iohs_lanes(
         l_iolink_targets = l_iolink_targets_filtered;
     }
 
-    l_iolink_num_targets = l_iolink_targets.size();
-
-    if (l_iolink_num_targets == 2)
+    for (const auto l_iolink_target : l_iolink_targets)
     {
-        l_end_bit = P10_IO_LIB_NUMBER_OF_IOHS_LANES;
-    }
+        std::vector<int> l_iolink_lanes;
+        FAPI_TRY(p10_io_get_iolink_lanes(l_iolink_target,
+                                         l_iolink_lanes));
 
-    if (l_iolink_num_targets == 1)
-    {
-        auto l_iolink_target = l_iolink_targets.front();
-
-        fapi2::ATTR_CHIP_UNIT_POS_Type l_iolink_pos;
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, l_iolink_target, l_iolink_pos),
-                 "Error from FAPI_ATTR_GET (ATTR_CHIP_UNIT_POS)");
-
-        if (l_iolink_pos % 2)
+        for (auto l_lane : l_iolink_lanes)
         {
-            l_start_bit = P10_IO_LIB_NUMBER_OF_IOHS_LANES / 2;
-            l_end_bit = P10_IO_LIB_NUMBER_OF_IOHS_LANES;
+            o_lanes.push_back(l_lane);
         }
-        else
-        {
-            l_end_bit = P10_IO_LIB_NUMBER_OF_IOHS_LANES / 2;
-        }
-    }
-
-    for (int l_lane = l_start_bit; l_lane < l_end_bit; l_lane++)
-    {
-        o_lanes.push_back(l_lane);
     }
 
 fapi_try_exit:
