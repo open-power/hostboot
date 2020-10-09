@@ -366,28 +366,6 @@ bool __queryPllUnlock(ExtensibleChip* i_chip)
     return false; // no PLL unlock found.
 }
 
-void __queryPrimaryClock(ExtensibleChip* i_chip, PllErrTypes& io_errTypes)
-{
-    // In RCS_SENSE_1[12:13]:
-    //  - b10 indicates clock 0 is the primary
-    //  - b01 indicates clock 1 is the primary
-
-    SCAN_COMM_REGISTER_CLASS* reg = i_chip->getRegister("RCS_SENSE_1");
-
-    if (SUCCESS == reg->Read())
-    {
-        uint32_t field = reg->GetBitFieldJustified(12, 2);
-        switch (field)
-        {
-            case 0x2: io_errTypes.set(PllErrTypes::PLL_UNLOCK_0); break;
-            case 0x1: io_errTypes.set(PllErrTypes::PLL_UNLOCK_1); break;
-            default:
-                PRDF_ERR("[__queryPrimaryClock] invalid hardware state: "
-                         "RCS_SENSE_1[12:13] = 0x%x", field);
-        }
-    }
-}
-
 /**
  * @brief  Queries for all PLL error types that occurred on this chip.
  * @param  i_chip     A PROC chip.
@@ -434,21 +412,34 @@ int32_t queryPllErrTypes(ExtensibleChip* i_chip, PllErrTypes& o_errTypes)
             break;
         }
 
+        // The current primary clock can be found in RCS_SENSE_1, where:
+        //  - If RCS_SENSE_1[12] is set => clock 0 is the primary
+        //  - If RCS_SENSE_1[13] is set => clock 1 is the primary
+
+        SCAN_COMM_REGISTER_CLASS* sense = i_chip->getRegister("RCS_SENSE_1");
+        rc = sense->Read();
+        if (SUCCESS != rc) break;
+
         // PLL unlock errors are reported via the "PCB slave error" bit.
         if (fir->IsBitSet(PCB_SLAVE) && !msk->IsBitSet(PCB_SLAVE) &&
             __queryPllUnlock(i_chip))
         {
-            __queryPrimaryClock(i_chip, o_errTypes);
+            if (sense->IsBitSet(12)) o_errTypes.set(PllErrTypes::PLL_UNLOCK_0);
+            if (sense->IsBitSet(13)) o_errTypes.set(PllErrTypes::PLL_UNLOCK_1);
         }
 
-        // RCS unlock detect on clock 0.
-        if (fir->IsBitSet(UNLOCKDET_0) && !msk->IsBitSet(UNLOCKDET_0))
+        // An RCS unlock detect on clock 0 is only valid if on the non-primary
+        // clock. Therefore, clock 1 must be primary (RCS_SENSE_1[13]).
+        if (fir->IsBitSet(UNLOCKDET_0) && !msk->IsBitSet(UNLOCKDET_0) &&
+            sense->IsBitSet(13))
         {
             o_errTypes.set(PllErrTypes::RCS_UNLOCKDET_0);
         }
 
-        // RCS unlock detect on clock 1.
-        if (fir->IsBitSet(UNLOCKDET_1) && !msk->IsBitSet(UNLOCKDET_1))
+        // An RCS unlock detect on clock 1 is only valid if on the non-primary
+        // clock. Therefore, clock 0 must be primary (RCS_SENSE_1[12]).
+        if (fir->IsBitSet(UNLOCKDET_1) && !msk->IsBitSet(UNLOCKDET_1) &&
+            sense->IsBitSet(12))
         {
             o_errTypes.set(PllErrTypes::RCS_UNLOCKDET_1);
         }
