@@ -1272,7 +1272,7 @@ namespace HBPM
         do {
             io_overrideImg = nullptr;
 
-#if 0 //@TODO-RTC:249470-Reenable once we have PLDM in place
+#ifndef __HOSTBOOT_RUNTIME
             // Block any use of overrides if we're secure
             if( PNOR::isInhibitedSection(PNOR::RINGOVD) )
             {

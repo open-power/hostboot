@@ -83,6 +83,9 @@ OBJS+=p10_smp_wrap.o
 OBJS+=p10_sbe_lpc_init.o
 OBJS+=p10_lpc_utils.o
 
+# Istep 10.3 -- host_secureboot_lockdown
+OBJS+=p10_update_security_ctrl.o
+
 #Istep 10.4 -- proc_chiplet_scominit
 #              proc_psi_scominit
 OBJS+=p10_chiplet_scominit.o

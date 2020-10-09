@@ -48,7 +48,12 @@
 
 
 // For Secureboot, Trustedboot support
+#include <secureboot/service.H>
 #include <secureboot/phys_presence_if.H>
+
+// Secureboot lockdown HWP
+#include <plat_hwp_invoker.H>
+#include <p10_update_security_ctrl.H>
 
 namespace ISTEP_10
 {
@@ -59,12 +64,49 @@ void* call_host_secureboot_lockdown (void *io_pArgs)
                 ENTER_MRK"call_host_secureboot_lockdown");
 
     ISTEP_ERROR::IStepError l_istepError;
+#ifndef CONFIG_VPO_COMPILE
+    errlHndl_t l_err = nullptr;
+#endif
+
+    do {
+#ifdef CONFIG_SECUREBOOT
+    if(SECUREBOOT::enabled())
+    {
+        TARGETING::TargetHandleList l_procList;
+        getAllChips(l_procList,TARGETING::TYPE_PROC);
+
+        for(const auto& l_proc : l_procList)
+        {
+            const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>l_fapiProc(l_proc);
+            const bool DO_NOT_FORCE_SECURITY = false; // No need to force security
+            const bool DO_NOT_LOCK_ABUS_MAILBOXES = false; // Do not lock abus mailboxes
+            FAPI_INVOKE_HWP(l_err,
+                            p10_update_security_ctrl,
+                            l_fapiProc,
+                            DO_NOT_FORCE_SECURITY,
+                            DO_NOT_LOCK_ABUS_MAILBOXES);
+            if(l_err)
+            {
+                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                          "call_host_secureboot_lockdown: p10_update_security_ctrl failed for Proc HUID 0x%08x "
+                          TRACE_ERR_FMT, TARGETING::get_huid(l_proc),
+                          TRACE_ERR_ARGS(l_err));
+                l_istepError.addErrorDetails(l_err);
+                ERRORLOG::errlCommit(l_err, ISTEP_COMP_ID);
+                // Try to run the HWP on all procs regardless of error.
+            }
+        }
+    }
+    if(l_istepError.getErrorHandle())
+    {
+        break;
+    }
+#endif
 
 #ifdef CONFIG_PHYS_PRES_PWR_BUTTON
     // Check to see if a Physical Presence Window should be opened,
     // and if so, open it.  This could result in the system being shutdown
     // to allow the system administrator to assert physical presence
-    errlHndl_t l_err = nullptr;
     l_err = SECUREBOOT::handlePhysPresenceWindow();
     if (l_err)
     {
@@ -74,8 +116,11 @@ void* call_host_secureboot_lockdown (void *io_pArgs)
                    TRACE_ERR_FMT,
                    TRACE_ERR_ARGS(l_err));
         l_istepError.addErrorDetails(l_err);
+        ERRORLOG::errlCommit(l_err, ISTEP_COMP_ID);
+        break;
     }
 #endif
+    }while(0);
 
     TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
                 EXIT_MRK"call_host_secureboot_lockdown");

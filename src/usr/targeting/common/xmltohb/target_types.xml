@@ -962,6 +962,9 @@
       <id>SBE_IS_STARTED</id>
     </attribute>
     <attribute>
+      <id>SECUREBOOT_PROTECT_DECONFIGURED_TPM</id>
+    </attribute>
+    <attribute>
       <id>SPI_EEPROM_SPARE_INFO</id>
       <default>
         <field>
