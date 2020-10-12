@@ -743,6 +743,23 @@
   </attribute>
 
   <attribute>
+    <id>ATTR_MSS_MRW_DIMM_SLOT_AIRFLOW</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+        Machine Readable Workbook value to describe the airflow past DIMM slots.
+        Facing the front of the DIMM, the airflow is described as either
+        RIGHT_TO_LEFT or LEFT_TO_RIGHT using the attribute enums.
+        Note that the enum values here map to the left/right sensor
+        locations in the DDIMM SPD.
+    </description>
+    <valueType>uint8</valueType>
+    <enum>RIGHT_TO_LEFT = 0x00, LEFT_TO_RIGHT = 0x01</enum>
+    <default>RIGHT_TO_LEFT</default>
+    <platInit/>
+    <mssAccessorName>mrw_dimm_slot_airflow</mssAccessorName>
+  </attribute>
+
+  <attribute>
     <id>ATTR_MEM_PORT_POS_OF_FAIL_THROTTLE</id>
     <targetType>TARGET_TYPE_SYSTEM</targetType>
     <description>
