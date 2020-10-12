@@ -401,8 +401,201 @@ Target * getTargetFromIPMISensor( uint32_t i_sensorNumber )
     return l_target;
 }
 
-
 #endif
+
+typedef struct procIds
+{
+    Target* proc;                                    // Proc
+    ATTR_PROC_FABRIC_TOPOLOGY_ID_type topoIdDflt;    // Default Topo ID
+    ATTR_PROC_FABRIC_EFF_TOPOLOGY_ID_type topoIdEff; // Effective Topo ID
+    ATTR_PROC_FABRIC_TOPOLOGY_ID_type topoId;        // Desired Topo ID
+} procIds_t;
+
+const uint8_t INVALID_PROC = 0xFF;
+
+errlHndl_t check_proc0_memory_config()
+{
+    errlHndl_t l_err = nullptr;
+
+    TRACFCOMP(g_trac_targeting,
+            "check_proc0_memory_config entry");
+
+    // Get all procs
+    TargetHandleList l_procsList;
+    getAllChips(l_procsList, TYPE_PROC);
+
+    // sort based on topology ID in order to deterministically
+    // pick the processor with memory. This will also help guarantee
+    // that we will attempt to use primary (or secondary) proc's memory
+    // first before using another proc's memory.
+    std::sort(l_procsList.begin(), l_procsList.end(),
+            [] (TargetHandle_t a, TargetHandle_t b)
+            {
+                return a->getAttr<ATTR_PROC_FABRIC_TOPOLOGY_ID>() < b->getAttr<ATTR_PROC_FABRIC_TOPOLOGY_ID>();
+            });
+
+    // Loop through all procs getting IDs
+    procIds_t l_procIds[l_procsList.size()];
+    uint8_t i = 0;
+    uint8_t l_proc0 = INVALID_PROC;
+    uint8_t l_victim = INVALID_PROC;
+
+    Target* l_sys = UTIL::assertGetToplevelTarget();
+
+    for (const auto & l_procChip : l_procsList)
+    {
+        l_procIds[i].proc = l_procChip;
+
+        // Get Topology IDs
+        l_procIds[i].topoIdDflt =
+            l_procChip->getAttr<ATTR_PROC_FABRIC_TOPOLOGY_ID>();
+        l_procIds[i].topoIdEff =
+            l_procChip->getAttr<ATTR_PROC_FABRIC_EFF_TOPOLOGY_ID>();
+        l_procIds[i].topoId = l_procIds[i].topoIdDflt;
+
+        // Check if this proc should be tracked as proc0
+        if(l_proc0 == INVALID_PROC)
+        {
+            // No proc0, make initial assignment
+            l_proc0 = i;
+        }
+        else if(l_procIds[i].topoId < l_procIds[l_proc0].topoId)
+        {
+            // Smaller topo ID, replace assignment
+            l_proc0 = i;
+        }
+
+        TRACDCOMP(g_trac_targeting,
+                "check_proc0_memory_config: Initial settings for "
+                "Proc %.8X: topoIdDflt = %d, topoIdEff = %d, topoId = %d\n",
+                get_huid(l_procIds[i].proc),
+                l_procIds[i].topoIdDflt,
+                l_procIds[i].topoIdEff,
+                l_procIds[i].topoId);
+
+        // Increment index
+        i++;
+    }
+
+    // Get the functional DIMMs for proc0
+    PredicateHwas l_functional;
+    l_functional.functional(true);
+    TargetHandleList l_dimms;
+    PredicateCTM l_dimm(CLASS_LOGICAL_CARD, TYPE_DIMM);
+    PredicatePostfixExpr l_checkExprFunctional;
+    l_checkExprFunctional.push(&l_dimm).push(&l_functional).And();
+    targetService().getAssociated(l_dimms,
+            l_procIds[l_proc0].proc,
+            TargetService::CHILD_BY_AFFINITY,
+            TargetService::ALL,
+            &l_checkExprFunctional);
+
+    TRACFCOMP(g_trac_targeting,
+            "check_proc0_memory_config: %d functional dimms behind proc0 "
+            "%.8X",
+            l_dimms.size(), get_huid(l_procIds[l_proc0].proc) );
+
+    if(l_dimms.empty())
+    {
+        TRACFCOMP(g_trac_targeting,
+                "check_proc0_memory_config: proc0 %.8X has no functional "
+                "dimms behind it",
+                get_huid(l_procIds[l_proc0].proc) );
+
+        // Loop through all procs to find ones for memory remap
+        for (i = 0; i < l_procsList.size(); i++)
+        {
+            // If proc0, then continue
+            if(i == l_proc0)
+            {
+                continue;
+            }
+
+            // Get the functional DIMMs for the proc
+            targetService().getAssociated(l_dimms,
+                    l_procIds[i].proc,
+                    TargetService::CHILD_BY_AFFINITY,
+                    TargetService::ALL,
+                    &l_checkExprFunctional);
+
+            // If proc does not have memory, then continue
+            if(l_dimms.empty())
+            {
+                TRACDCOMP(g_trac_targeting,
+                        "check_proc0_memory_config: Proc %.8X has no  "
+                        "functional dimms behind it",
+                        get_huid(l_procIds[i].proc) );
+
+                continue;
+            }
+
+            // Use this proc for swapping memory with proc0
+            l_victim = i;
+
+            // Set the desired proc0 IDs from swapped proc's default IDs
+            l_procIds[l_proc0].topoId = l_procIds[l_victim].topoIdDflt;
+            TRACFCOMP(g_trac_targeting,
+                    "check_proc0_memory_config: proc0 %.8X is set to use "
+                    "topoId %d",
+                    get_huid(l_procIds[l_proc0].proc),
+                    l_procIds[l_proc0].topoId);
+
+            // Set the desired IDs for the swapped proc from proc0 defaults
+            l_procIds[l_victim].topoId = l_procIds[l_proc0].topoIdDflt;
+            TRACFCOMP(g_trac_targeting,
+                    "check_proc0_memory_config: Proc %.8X is set to use "
+                    "topoId %d",
+                    get_huid(l_procIds[l_victim].proc),
+                    l_procIds[l_victim].topoId);
+
+            // Leave loop after swapping memory
+            break;
+        }
+
+    }
+
+    // Loop through all procs detecting that IDs are set correctly
+    for (i = 0; i < l_procsList.size(); i++)
+    {
+        TRACDCOMP(g_trac_targeting,
+                "check_proc0_memory_config: Compare settings for "
+                "Proc %.8X: topoIdEff = %d, topoId = %d",
+                get_huid(l_procIds[i].proc),
+                l_procIds[i].topoIdEff,
+                l_procIds[i].topoId);
+
+        if(l_procIds[i].topoId != l_procIds[i].topoIdEff)
+        {
+            // Update attributes
+            (l_procIds[i].proc)->
+                setAttr<ATTR_PROC_FABRIC_EFF_TOPOLOGY_ID>(l_procIds[i].topoId);
+            ATTR_FORCE_SBE_UPDATE_type l_sbe_update =
+                l_sys->getAttr<ATTR_FORCE_SBE_UPDATE>();
+            TRACFCOMP(g_trac_targeting,
+                    "updateProcessorSbeSeeproms needed due to "
+                    "topology checks, will set ATTR_FORCE_SBE_UPDATE "
+                    "Proc %.8X: topoIdEff = %d, topoId = %d l_sbe_update=0x%X",
+                    get_huid(l_procIds[i].proc),
+                    l_procIds[i].topoIdEff,
+                    l_procIds[i].topoId, l_sbe_update);
+            l_sys->setAttr<ATTR_FORCE_SBE_UPDATE>
+                (l_sbe_update | SBE_UPDATE_TYPE_TOPOLOGY_CHECKS);
+        }
+
+        TRACDCOMP(g_trac_targeting,
+                "check_proc0_memory_config: Current attribute "
+                "settings for Proc %.8X\n"
+                "  ATTR_PROC_FABRIC_EFF_TOPOLOGY_ID = %d\n"
+                "  ATTR_PROC_FABRIC_TOPOLOGY_ID = %d\n",
+                get_huid(l_procIds[i].proc),
+                (l_procIds[i].proc)->
+                getAttr<ATTR_PROC_FABRIC_EFF_TOPOLOGY_ID>(),
+                (l_procIds[i].proc)->getAttr<ATTR_PROC_FABRIC_TOPOLOGY_ID>());
+    }
+
+    return l_err;
+} // end check_proc0_memory_config()
+
 
 #undef TARG_NAMESPACE
 #undef TARG_CLASS

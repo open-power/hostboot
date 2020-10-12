@@ -173,18 +173,6 @@
 </attribute>
 
 <attribute>
-  <id>ATTR_PROC_MEM_TO_USE</id>
-  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
-  <description>This attribute denotes where our boot proc's memory is
-    located. In the case that the boot proc does not have usable memory,
-    we are going to use another proc's memory to boot. The attribute will be
-    set to the topology ID of the proc we want to use.</description>
-  <valueType>uint8</valueType>
-  <platInit/>
-  <mrwHide/>
-</attribute>
-
-<attribute>
   <id>ATTR_OPTICS_CONFIG_MODE</id>
   <targetType>TARGET_TYPE_OBUS</targetType>
   <description>

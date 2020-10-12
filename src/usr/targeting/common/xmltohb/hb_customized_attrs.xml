@@ -812,10 +812,6 @@
         <writeable/>
     </attribute>
     <attribute>
-        <id>ATTR_PROC_MEM_TO_USE</id>
-        <writeable/>
-    </attribute>
-    <attribute>
         <id>ATTR_REL_POS</id>
         <no_export/>
     </attribute>

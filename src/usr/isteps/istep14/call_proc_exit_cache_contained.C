@@ -36,6 +36,7 @@
 #include <targeting/common/mfgFlagAccessors.H>
 #include <targeting/common/utilFilter.H>
 #include <fapi2/target.H>
+#include <targeting/targplatutil.H>
 
 //HWP Invoker
 #include    <fapi2/plat_hwp_invoker.H>
@@ -117,12 +118,15 @@ void* call_proc_exit_cache_contained (void *io_pArgs)
     }
 
 
-    bool l_valid {true};
-    l_errl = HWAS::check_current_proc_mem_to_use_is_still_valid (l_valid);
-    if (l_errl || !l_valid)
+    // Verify the memory config didn't change so much that EFF Topology Id for the boot proc changed.
+    // NOTE: Despite the name of the function, this will verify the alt boot proc's EFF Topology Id because
+    // by using the alt boot proc EFF Topo Id 0 was already set to a proc with memory that isn't proc0 and if that
+    // answer changes here it's still a problem.
+    l_errl = UTIL::check_proc0_memory_config();
+    if (l_errl || (l_sys->getAttr<ATTR_FORCE_SBE_UPDATE>() & SBE_UPDATE_TYPE_TOPOLOGY_CHECKS))
     {
-        //We deconfigured a bunch of dimms and the answer
-        //changed for which proc's memory to use. Give up TI
+        // We deconfigured a bunch of dimms and the answer
+        // changed for which proc's memory to use. Give up TI
         TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
                 "ERROR check_current_proc_mem_to_use_is_still_valid::"
                 " going to TI");

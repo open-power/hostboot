@@ -444,6 +444,28 @@ TARGETING::Target * getSensorTarget( uint32_t i_sensorNumber );
 Target * getTargetFromIPMISensor( uint32_t i_sensorNumber );
 #endif
 
+/**
+ * @brief   check_proc0_memory_config   Check memory config for proc0
+ *
+ *  Loops through all processors gathering topology ID information for
+ *  each one and determining which is proc0 based on having the smallest
+ *  topology ID.
+ *
+ *  Checks that proc0 has associated functional dimms.  If it does not have any
+ *  functional dimms behind it, look for a proc that does have functional dimms
+ *  and swap IDs for these processors.
+ *
+ *  Loops through all processors again making sure that the effective topology
+ *  IDs are the desired IDs.  If the IDs are not as desired, update the
+ *  effective ID attributes and flag that an SBE Update is needed.
+ *
+ *  If SBE Update is needed, sync all attributes to the FSP and perform update.
+ *
+ * @return errlHndl_t       valid errlHndl_t handle if there was an error
+ *                          nullptr if no errors;
+ */
+errlHndl_t check_proc0_memory_config();
+
 } // End namespace TARGETING::UTIL
 
 } // End namespace TARGETING

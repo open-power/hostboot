@@ -1016,10 +1016,6 @@ sub processNode
 
 } # end sub processNode
 
-
-# Hash which maps a node's ordinal ID to the smallest topology ID in that node
-my %minTopoIdForNode;
-
 #--------------------------------------------------
 # @brief Process targets of type PROC and all it's children
 #
@@ -1110,15 +1106,6 @@ sub processProcessorAndChildren
     # Save this target for retrieval later when printing the xml (sub printXML)
     $targetObj->{targeting}{SYS}[$sysParentPos]{NODES}[$nodeParentPos]
                 {PROCS}[$procPosPerNode]{KEY} = $target;
-
-    # Save the minimum topology ID in this node for calculating
-    # PROC_MEM_TO_USE later
-    my $topoId = getTopologyId($targetObj,$target);
-    if (   (!defined $minTopoIdForNode{$nodeParentPos})
-        || ($topoId < $minTopoIdForNode{$nodeParentPos}) )
-    {
-        $minTopoIdForNode{$nodeParentPos}=$topoId;
-    }
 
     # Set the PROC's master status
     setProcMasterStatus($targetObj, $target);
@@ -3056,8 +3043,6 @@ sub postProcessProcessor
     # dynamically during system operation.
     my $nodeParent = $targetObj->findParentByType($target, "NODE");
     my $nodeParentPos = $targetObj->getAttribute($nodeParent, "ORDINAL_ID");
-    $targetObj->setAttribute($target,
-                             "PROC_MEM_TO_USE",$minTopoIdForNode{$nodeParentPos});
 
     processPowerRails ($targetObj, $target);
 
