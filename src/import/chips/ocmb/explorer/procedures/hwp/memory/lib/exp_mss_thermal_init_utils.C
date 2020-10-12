@@ -41,6 +41,7 @@
 #include <explorer_scom_addresses.H>
 #include <explorer_scom_addresses_fld.H>
 #include <exp_data_structs.H>
+#include <lib/exp_attribute_accessors_manual.H>
 #include <mss_explorer_attribute_getters.H>
 #include <generic/memory/lib/utils/find.H>
 #include <lib/exp_attribute_accessors_manual.H>
@@ -226,15 +227,38 @@ fapi2::ReturnCode setup_cmd_args(
     uint8_t l_sensor_1_type = 0;
     uint8_t l_differential_sensor_type = 0;
     uint32_t l_fw_version = 0;
+    uint8_t l_airflow_direction = 0;
 
     FAPI_TRY(mss::attr::get_therm_sensor_0_type(i_port, l_sensor_0_type));
     FAPI_TRY(mss::attr::get_therm_sensor_1_type(i_port, l_sensor_1_type));
     FAPI_TRY(mss::attr::get_therm_sensor_differential_type(i_port, l_differential_sensor_type));
     FAPI_TRY(mss::get_booted_fw_version(mss::find_target<fapi2::TARGET_TYPE_OCMB_CHIP>(i_port), l_fw_version));
+    FAPI_TRY(mss::attr::get_mrw_dimm_slot_airflow(l_airflow_direction));
 
     // Sensor 0 / DIMM 0
     {
+        uint8_t l_secondary_sensor_avail = 0;
+        uint8_t l_primary_sensor_location = 0;
+        uint8_t l_secondary_sensor_location = 0;
+        uint8_t l_primary_sensor_i2c_addr = 0;
+        uint8_t l_secondary_sensor_i2c_addr = 0;
+        uint8_t l_selected_i2c_addr = 0;
         thermal::thermal_sensor_settings l_settings;
+
+        FAPI_TRY(mss::attr::get_therm_sensor_0_secondary_availability(i_port, l_secondary_sensor_avail));
+        FAPI_TRY(mss::attr::get_therm_sensor_0_location(i_port, l_primary_sensor_location));
+        FAPI_TRY(mss::attr::get_therm_sensor_0_secondary_location(i_port, l_secondary_sensor_location));
+        FAPI_TRY(mss::attr::get_therm_sensor_0_i2c_addr(i_port, l_primary_sensor_i2c_addr));
+        FAPI_TRY(mss::attr::get_therm_sensor_0_secondary_i2c_addr(i_port, l_secondary_sensor_i2c_addr));
+
+        // Select primary or secondary sensor and get i2c address
+        l_selected_i2c_addr = select_ext_sensor(i_port,
+                                                l_secondary_sensor_avail,
+                                                l_primary_sensor_location,
+                                                l_secondary_sensor_location,
+                                                l_primary_sensor_i2c_addr,
+                                                l_secondary_sensor_i2c_addr,
+                                                l_airflow_direction);
 
         // Construct settings object
         FAPI_TRY(thermal::thermal_sensor_settings::get_settings(
@@ -244,7 +268,7 @@ fapi2::ReturnCode setup_cmd_args(
                  "Unknown thermal sensor type %u for %s", l_sensor_0_type, mss::c_str(i_port));
 
         // Insert i2c address
-        FAPI_TRY(mss::attr::get_therm_sensor_0_i2c_addr(i_port, o_cmd.command_argument[0]));
+        o_cmd.command_argument[0] = l_selected_i2c_addr;
 
         // Insert reg offset and r/w length
         o_cmd.command_argument[1] = l_settings.iv_reg_offset;
@@ -253,7 +277,28 @@ fapi2::ReturnCode setup_cmd_args(
 
     // Sensor 1 / DIMM 1
     {
+        uint8_t l_secondary_sensor_avail = 0;
+        uint8_t l_primary_sensor_location = 0;
+        uint8_t l_secondary_sensor_location = 0;
+        uint8_t l_primary_sensor_i2c_addr = 0;
+        uint8_t l_secondary_sensor_i2c_addr = 0;
+        uint8_t l_selected_i2c_addr = 0;
         thermal::thermal_sensor_settings l_settings;
+
+        FAPI_TRY(mss::attr::get_therm_sensor_1_secondary_availability(i_port, l_secondary_sensor_avail));
+        FAPI_TRY(mss::attr::get_therm_sensor_1_location(i_port, l_primary_sensor_location));
+        FAPI_TRY(mss::attr::get_therm_sensor_1_secondary_location(i_port, l_secondary_sensor_location));
+        FAPI_TRY(mss::attr::get_therm_sensor_1_i2c_addr(i_port, l_primary_sensor_i2c_addr));
+        FAPI_TRY(mss::attr::get_therm_sensor_1_secondary_i2c_addr(i_port, l_secondary_sensor_i2c_addr));
+
+        // Select primary or secondary sensor and get i2c address
+        l_selected_i2c_addr = select_ext_sensor(i_port,
+                                                l_secondary_sensor_avail,
+                                                l_primary_sensor_location,
+                                                l_secondary_sensor_location,
+                                                l_primary_sensor_i2c_addr,
+                                                l_secondary_sensor_i2c_addr,
+                                                l_airflow_direction);
 
         // Construct settings object
         FAPI_TRY(thermal::thermal_sensor_settings::get_settings(
@@ -263,7 +308,7 @@ fapi2::ReturnCode setup_cmd_args(
                  "Unknown thermal sensor type %u for %s", l_sensor_1_type, mss::c_str(i_port));
 
         // Insert i2c address
-        FAPI_TRY(mss::attr::get_therm_sensor_1_i2c_addr(i_port, o_cmd.command_argument[3]));
+        o_cmd.command_argument[3] = l_selected_i2c_addr;
 
         // Insert reg offset and r/w length
         o_cmd.command_argument[4] = l_settings.iv_reg_offset;
@@ -350,6 +395,53 @@ fapi2::ReturnCode setup_cmd_args(
 
 fapi_try_exit:
     return fapi2::current_err;
+}
+
+///
+/// @brief Select external sensor and return its I2C address
+/// @param[in] i_target MEM_PORT target
+/// @param[in] i_secondary_sensor_avail value of ATTR_MEM_EFF_THERM_SENSOR_X_SECOND_AVAIL
+/// @param[in] i_primary_sensor_location value of ATTR_MEM_EFF_THERM_SENSOR_X_LOCATION
+/// @param[in] i_secondary_sensor_location value of ATTR_MEM_EFF_THERM_SENSOR_X_SECOND_LOCATION
+/// @param[in] i_primary_sensor_i2c_addr value of ATTR_MEM_EFF_THERM_SENSOR_X_I2C_ADDR
+/// @param[in] i_secondary_sensor_i2c_addr value of ATTR_MEM_EFF_THERM_SENSOR_X_SECOND_I2C_ADDR
+/// @param[in] i_airflow_direction value of ATTR_MSS_MRW_DIMM_SLOT_AIRFLOW
+/// @return I2C address of selected sensor
+///
+uint8_t select_ext_sensor(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
+                          const uint8_t i_secondary_sensor_avail,
+                          const uint8_t i_primary_sensor_location,
+                          const uint8_t i_secondary_sensor_location,
+                          const uint8_t i_primary_sensor_i2c_addr,
+                          const uint8_t i_secondary_sensor_i2c_addr,
+                          const uint8_t i_airflow_direction)
+{
+    if (i_secondary_sensor_avail == fapi2::ENUM_ATTR_MEM_EFF_THERM_SENSOR_0_SECOND_AVAIL_NOT_AVAILABLE)
+    {
+        FAPI_DBG("%s Selecting primary sensor at address 0x%02X since no secondary sensor available",
+                 mss::c_str(i_target), i_primary_sensor_i2c_addr);
+        return i_primary_sensor_i2c_addr;
+    }
+
+    // Note: Sensor location enums are encoded as follows so the math works out:
+    // ATTR_MSS_MRW_DIMM_SLOT_AIRFLOW: RIGHT_TO_LEFT = 0x00, LEFT_TO_RIGHT = 0x01
+    // ATTR_MEM_EFF_THERM_SENSOR_X_LOCATION: LOWER_LEFT = 0, UPPER_LEFT = 1, LOWER_RIGHT = 2, UPPER_RIGHT = 3
+    if (i_primary_sensor_location / 2 == i_airflow_direction)
+    {
+        FAPI_DBG("%s Selecting primary sensor at address 0x%02X since it's downstream",
+                 mss::c_str(i_target), i_primary_sensor_i2c_addr);
+        return i_primary_sensor_i2c_addr;
+    }
+    else if (i_secondary_sensor_location / 2 == i_airflow_direction)
+    {
+        FAPI_DBG("%s Selecting secondary sensor at address 0x%02X since it's downstream",
+                 mss::c_str(i_target), i_secondary_sensor_i2c_addr);
+        return i_secondary_sensor_i2c_addr;
+    }
+
+    FAPI_DBG("%s Selecting primary sensor at address 0x%02X since neither is downstream",
+             mss::c_str(i_target), i_primary_sensor_i2c_addr);
+    return i_primary_sensor_i2c_addr;
 }
 
 } // ns thermal

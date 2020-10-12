@@ -265,6 +265,25 @@ fapi2::ReturnCode setup_cmd_args(
     const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT> i_port,
     host_fw_command_struct& o_cmd);
 
+///
+/// @brief Select external sensor and return its I2C address
+/// @param[in] i_target MEM_PORT target
+/// @param[in] i_secondary_sensor_avail value of ATTR_MEM_EFF_THERM_SENSOR_X_SECOND_AVAIL
+/// @param[in] i_primary_sensor_location value of ATTR_MEM_EFF_THERM_SENSOR_X_LOCATION
+/// @param[in] i_secondary_sensor_location value of ATTR_MEM_EFF_THERM_SENSOR_X_SECOND_LOCATION
+/// @param[in] i_primary_sensor_i2c_addr value of ATTR_MEM_EFF_THERM_SENSOR_X_I2C_ADDR
+/// @param[in] i_secondary_sensor_i2c_addr value of ATTR_MEM_EFF_THERM_SENSOR_X_SECOND_I2C_ADDR
+/// @param[in] i_airflow_direction value of ATTR_MSS_MRW_DIMM_SLOT_AIRFLOW
+/// @return I2C address of selected sensor
+///
+uint8_t select_ext_sensor(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
+                          const uint8_t i_secondary_sensor_avail,
+                          const uint8_t i_primary_sensor_location,
+                          const uint8_t i_secondary_sensor_location,
+                          const uint8_t i_primary_sensor_i2c_addr,
+                          const uint8_t i_secondary_sensor_i2c_addr,
+                          const uint8_t i_airflow_direction);
+
 } // ns thermal
 
 namespace mc
