@@ -51,7 +51,8 @@ enum MruType
     TYPE_TARGET,
     TYPE_MEMMRU,
     TYPE_SYMFRU,
-    TYPE_PROCCLK,
+    TYPE_PROCCLK0,
+    TYPE_PROCCLK1,
     TYPE_TODCLK,
 };
 

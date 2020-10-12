@@ -708,8 +708,14 @@ bool parsePfaData( void * i_buffer, uint32_t i_buflen,
                         i_parser.PrintString( header, data );
                         break;
 
-                    case PRDcalloutData::TYPE_PROCCLK:
-                        strcat( data, "(PROCCLK) " );
+                    case PRDcalloutData::TYPE_PROCCLK0:
+                        strcat( data, "(PROCCLK0) " );
+                        strcat( data, tmpStr );
+                        i_parser.PrintString( header, data );
+                        break;
+
+                    case PRDcalloutData::TYPE_PROCCLK1:
+                        strcat( data, "(PROCCLK1) " );
                         strcat( data, tmpStr );
                         i_parser.PrintString( header, data );
                         break;

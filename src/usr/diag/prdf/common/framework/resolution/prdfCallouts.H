@@ -86,7 +86,8 @@ class PRDcallout
         switch ( iv_type )
         {
             case PRDcalloutData::TYPE_TARGET:
-            case PRDcalloutData::TYPE_PROCCLK:
+            case PRDcalloutData::TYPE_PROCCLK0:
+            case PRDcalloutData::TYPE_PROCCLK1:
                 iv_meldValue.target = PlatServices::getTarget(i_val); break;
             case PRDcalloutData::TYPE_MEMMRU:
             case PRDcalloutData::TYPE_SYMFRU:
@@ -166,7 +167,8 @@ class PRDcallout
         switch ( iv_type )
         {
             case PRDcalloutData::TYPE_TARGET:
-            case PRDcalloutData::TYPE_PROCCLK:
+            case PRDcalloutData::TYPE_PROCCLK0:
+            case PRDcalloutData::TYPE_PROCCLK1:
                 return PlatServices::getHuid(iv_meldValue.target); break;
             case PRDcalloutData::TYPE_MEMMRU:
             case PRDcalloutData::TYPE_SYMFRU:

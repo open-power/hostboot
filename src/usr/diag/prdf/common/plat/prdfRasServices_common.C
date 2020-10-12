@@ -475,14 +475,23 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
                                 errlSev,
                                 l_diagUpdate);
         }
-        else if(PRDcalloutData::TYPE_PROCCLK == thiscallout.getType())
+        else if (PRDcalloutData::TYPE_PROCCLK0 == thiscallout.getType())
         {
-            PRDF_ADD_CLOCK_CALLOUT(iv_errl,
-                                   thiscallout.getTarget(),
-                                   HWAS::OSCREFCLK_TYPE,
-                                   thispriority,
-                                   thisDeconfig,
-                                   thisGard);
+            /* TODO: uncomment once HWAS::OSCREFCLK0_TYPE is supported in both
+             *       Hostboot and HWSV.
+            PRDF_ADD_CLOCK_CALLOUT(iv_errl, thiscallout.getTarget(),
+                                   HWAS::OSCREFCLK0_TYPE, thispriority,
+                                   thisDeconfig, thisGard);
+            */
+        }
+        else if (PRDcalloutData::TYPE_PROCCLK1 == thiscallout.getType())
+        {
+            /* TODO: uncomment once HWAS::OSCREFCLK1_TYPE is supported in both
+             *       Hostboot and HWSV.
+            PRDF_ADD_CLOCK_CALLOUT(iv_errl, thiscallout.getTarget(),
+                                   HWAS::OSCREFCLK1_TYPE, thispriority,
+                                   thisDeconfig, thisGard);
+            */
         }
         else if(PRDcalloutData::TYPE_TODCLK == thiscallout.getType())
         {
