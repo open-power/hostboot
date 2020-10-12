@@ -940,7 +940,16 @@ struct attrEngineTraits<P, exp::attr_eff_engine_fields, exp::attr_eff_engine_fie
     static fapi2::ReturnCode get_value_to_set(const spd::facade& i_spd_data,
             attr_integral_type& o_setting)
     {
-        return i_spd_data.therm_sensor_0_usage(o_setting);
+        constexpr attr_integral_type THERM_SENSOR_0_USAGE_DRAM_AND_PMIC = 0x03;
+
+        const auto l_rc = i_spd_data.therm_sensor_0_usage(o_setting);
+
+        // Note DRAM_AND_PMIC usage is not supported in OCC, so treat that setting as PMIC only
+        o_setting = (o_setting == THERM_SENSOR_0_USAGE_DRAM_AND_PMIC ) ?
+                    fapi2::ENUM_ATTR_MEM_EFF_THERM_SENSOR_0_USAGE_PMIC :
+                    o_setting;
+
+        return l_rc;
     }
 };
 
@@ -1201,7 +1210,16 @@ struct attrEngineTraits<P, exp::attr_eff_engine_fields, exp::attr_eff_engine_fie
     static fapi2::ReturnCode get_value_to_set(const spd::facade& i_spd_data,
             attr_integral_type& o_setting)
     {
-        return i_spd_data.therm_sensor_1_usage(o_setting);
+        constexpr attr_integral_type THERM_SENSOR_1_USAGE_DRAM_AND_PMIC = 0x03;
+
+        const auto l_rc = i_spd_data.therm_sensor_1_usage(o_setting);
+
+        // Note DRAM_AND_PMIC usage is not supported in OCC, so treat that setting as PMIC only
+        o_setting = (o_setting == THERM_SENSOR_1_USAGE_DRAM_AND_PMIC ) ?
+                    fapi2::ENUM_ATTR_MEM_EFF_THERM_SENSOR_1_USAGE_PMIC :
+                    o_setting;
+
+        return l_rc;
     }
 };
 
