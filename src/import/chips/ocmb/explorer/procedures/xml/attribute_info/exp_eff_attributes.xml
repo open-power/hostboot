@@ -208,7 +208,9 @@
         <id>ATTR_MEM_EFF_THERM_SENSOR_0_USAGE</id>
         <targetType>TARGET_TYPE_MEM_PORT</targetType>
         <description>
-          The chosen usage monitor of thermal sensor 0
+          The chosen usage monitor of thermal sensor 0.
+          Note that the SPD encoding of DRAM_AND_PMIC usage (0x03) is not supported
+          and will be changed to PMIC in this attribute.
         </description>
         <valueType>uint8</valueType>
         <initToZero/>
@@ -216,7 +218,6 @@
           DISABLED = 0,
           DRAM = 1,
           PMIC = 2,
-          DRAM_AND_PMIC = 3,
           MEM_BUF_EXT = 4,
           DRAM_AND_MEM_BUF_EXT = 5
         </enum>
@@ -291,7 +292,9 @@
         <id>ATTR_MEM_EFF_THERM_SENSOR_1_USAGE</id>
         <targetType>TARGET_TYPE_MEM_PORT</targetType>
         <description>
-          The chosen usage monitor of thermal sensor 1
+          The chosen usage monitor of thermal sensor 1.
+          Note that the SPD encoding of DRAM_AND_PMIC usage (0x03) is not supported
+          and will be changed to PMIC in this attribute.
         </description>
         <valueType>uint8</valueType>
         <initToZero/>
@@ -299,7 +302,6 @@
           DISABLED = 0,
           DRAM = 1,
           PMIC = 2,
-          DRAM_AND_PMIC = 3,
           MEM_BUF_EXT = 4,
           DRAM_AND_MEM_BUF_EXT = 5
         </enum>
