@@ -357,13 +357,30 @@ using enable_loop_fields_t = std::array<mss::pmic::enable_fields_4u, CONSTS::NUM
 //-----------------------------------
 
 ///
-/// @breif set VR enable bit for system startup via R32 (not broadcast)
+/// @brief set VR enable bit for system startup via R32 (not broadcast)
 ///
 /// @param[in] i_pmic_target PMIC target
 /// @return fapi2::FAPI2_RC_SUCCESS iff success
 ///
 fapi2::ReturnCode start_vr_enable(
     const fapi2::Target<fapi2::TargetType::TARGET_TYPE_PMIC>& i_pmic_target);
+
+///
+/// @brief Set the up VIN latch bit for TPS pmics
+///
+/// @param[in] i_pmic_target PMIC target
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
+///
+fapi2::ReturnCode setup_tps_vin_latch(const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& i_pmic_target);
+
+///
+/// @brief Set the SWD soft start time to 4ms for the provided PMIC if it is providing VPP
+///
+/// @param[in] i_pmic_target PMIC target
+/// @return fapi2::FAPI2_RC_SUCCESS iff success
+/// @note This is used for 4U in order to avoid the issue of too-high current sink during a VR_DISABLE
+///
+fapi2::ReturnCode set_soft_start_time(const fapi2::Target<fapi2::TargetType::TARGET_TYPE_PMIC>& i_pmic_target);
 
 ///
 /// @brief Set the soft start time to maximum for the provided PMIC
@@ -373,6 +390,14 @@ fapi2::ReturnCode start_vr_enable(
 /// @note This is used for 4U in order to avoid the issue of too-high current sink during a VR_DISABLE
 ///
 fapi2::ReturnCode set_soft_stop_time(const fapi2::Target<fapi2::TargetType::TARGET_TYPE_PMIC>& i_pmic_target);
+
+///
+/// @brief Perform pre-enable steps, workarounds, etc.
+///
+/// @param[in] i_pmic_target PMIC target
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
+///
+fapi2::ReturnCode pre_enable_steps(const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& i_pmic_target);
 
 ///
 /// @brief bias PMIC with spd settings for phase combination (SWA, SWB or SWA+SWB)

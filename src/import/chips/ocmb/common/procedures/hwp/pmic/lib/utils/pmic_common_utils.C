@@ -608,19 +608,25 @@ fapi2::ReturnCode check_fields(
 
         for (const auto& l_status : l_reg_bit_pair.second)
         {
-            if (l_reg_contents.getBit(l_status.l_reg_field))
+            if (l_reg_contents.getBit(l_status.iv_reg_field))
             {
                 // Print it out
                 FAPI_ERR("%s %s :: REG 0x%02x bit %u was set on %s",
-                         l_status.l_error_description,
+                         l_status.iv_error_description,
                          i_error_type,
                          l_reg_bit_pair.first,
-                         l_status.l_reg_field,
+                         l_status.iv_reg_field,
                          mss::c_str(i_pmic_target));
-                // We don't want to exit out here, errors can be independent of each other and we should check them all.
-                // Since there's no easy way to FFDC each individual error, we will report them here and then worry about
-                // return codes in the caller of this function
-                o_error = true;
+
+                // We don't want to exit out in this exact spot: Errors can be independent of
+                // each other and we should check them all. Since there's no easy way to FFDC each
+                // individual error, we will FAPI_ERR them here and then worry about return codes in
+                // the caller of this function.
+                if (l_status.iv_assert_out)
+                {
+                    // Only assert out if the error is deemed fatal
+                    o_error = true;
+                }
             }
         }
 
