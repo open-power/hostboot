@@ -26565,6 +26565,10 @@
       <id>TPM_MODEL</id>
       <default>2</default>
     </attribute>
+    <attribute>
+      <id>TPM_ENABLED</id>
+      <default>1</default>
+    </attribute>
 </targetInstance>
 
 </attributes>

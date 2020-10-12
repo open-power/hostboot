@@ -1167,13 +1167,6 @@ errlHndl_t tpmReadAttributes ( TARGETING::Target * i_target,
             break;
         }
 
-        // TODO: RTC:246066 - remove when default is enabled (1)
-        // Always enable in simics, so can be defaulted off for HW bringup
-        if (Util::isSimicsRunning())
-        {
-            io_tpmInfo.tpmEnabled = 1;
-        }
-
         if( !( i_target->
                tryGetAttr<TARGETING::ATTR_TPM_MODEL>
                ( tpmModel ) ) )
