@@ -647,15 +647,15 @@ class SbeFifo
          */
         enum fifoRegisterAddress
         {
-            SBE_FIFO_UPFIFO_DATA_IN    = 0x00002400,
-            SBE_FIFO_UPFIFO_STATUS     = 0x00002404,
-            SBE_FIFO_UPFIFO_SIG_EOT    = 0x00002408,
-            SBE_FIFO_UPFIFO_REQ_RESET  = 0x0000240C,
-            SBE_FIFO_DNFIFO_DATA_OUT   = 0x00002440,
-            SBE_FIFO_DNFIFO_STATUS     = 0x00002444,
-            SBE_FIFO_DNFIFO_RESET      = 0x00002450,
-            SBE_FIFO_DNFIFO_ACK_EOT    = 0x00002454,
-            SBE_FIFO_DNFIFO_MAX_TSFR   = 0x00002458,
+            SBE_FIFO_UPFIFO_DATA_IN    = 0x00002480,
+            SBE_FIFO_UPFIFO_STATUS     = 0x00002484,
+            SBE_FIFO_UPFIFO_SIG_EOT    = 0x00002488,
+            SBE_FIFO_UPFIFO_REQ_RESET  = 0x0000248C,
+            SBE_FIFO_DNFIFO_DATA_OUT   = 0x000024C0,
+            SBE_FIFO_DNFIFO_STATUS     = 0x000024C4,
+            SBE_FIFO_DNFIFO_RESET      = 0x000024D0,
+            SBE_FIFO_DNFIFO_ACK_EOT    = 0x000024D4,
+            SBE_FIFO_DNFIFO_MAX_TSFR   = 0x000024D8,
         };
 
         enum sbeFifoUpstreamStatus
