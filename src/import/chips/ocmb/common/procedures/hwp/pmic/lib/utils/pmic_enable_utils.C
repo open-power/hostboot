@@ -90,9 +90,9 @@ fapi2::ReturnCode poll_input_port_ready(
 
     fapi_try_exit:
         // Getting here implies we've nacked, which should not occur unless the GPIO has suddenly
-        // died in the last few milliseconds. We'll throw a FAPI_ERR in for debug purposes
+        // died in the last few milliseconds. We'll throw a FAPI_DBG in for debug purposes
         // (as now we're guaranteed to not get past this istep), but this should never occur.
-        FAPI_ERR("%s did not ACK, will cause PMICs to drop into N-Mode", l_gpio_string);
+        FAPI_DBG("%s did not ACK, will cause PMICs to drop into N-Mode", l_gpio_string);
         return false;
     });
 
@@ -123,7 +123,7 @@ namespace pmic
 {
 
 ///
-/// @breif set VR enable bit for system startup via R32 (not broadcast)
+/// @brief set VR enable bit for system startup via R32 (not broadcast)
 ///
 /// @param[in] i_pmic_target PMIC target
 /// @return fapi2::FAPI2_RC_SUCCESS iff success
@@ -139,11 +139,12 @@ fapi2::ReturnCode start_vr_enable(
     fapi2::buffer<uint8_t> l_programmable_mode_buffer;
     fapi2::buffer<uint8_t> l_vr_enable_buffer;
 
+    // Perform last-minute pre-enable steps, workarounds, etc. common to 1U/2U/4U PMICs
+    FAPI_TRY(mss::pmic::pre_enable_steps(i_pmic_target));
+
     // Enable programmable mode
     FAPI_TRY(mss::pmic::i2c::reg_read_reverse_buffer(i_pmic_target, REGS::R2F, l_programmable_mode_buffer));
-
     l_programmable_mode_buffer.writeBit<FIELDS::R2F_SECURE_MODE>(CONSTS::PROGRAMMABLE_MODE);
-
     FAPI_TRY(mss::pmic::i2c::reg_write_reverse_buffer(i_pmic_target, REGS::R2F, l_programmable_mode_buffer));
 
     // Next, start VR_ENABLE
@@ -163,6 +164,63 @@ fapi_try_exit:
 }
 
 ///
+/// @brief Set the up VIN latch bit for TPS pmics
+///
+/// @param[in] i_pmic_target PMIC target
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
+///
+fapi2::ReturnCode setup_tps_vin_latch(const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& i_pmic_target)
+{
+    using TPS_REGS = pmicRegs<mss::pmic::product::TPS5383X>;
+    using TPS_FIELDS = pmicFields<mss::pmic::product::TPS5383X>;
+    bool l_pmic_is_ti = false;
+
+    FAPI_TRY(mss::pmic::pmic_is_ti(i_pmic_target, l_pmic_is_ti));
+
+    // If we're TI, set the TPS-specific R9C_EN_VINUV_FLT_LATCH bit, which we should use from
+    // initial poweron, onwards. This handles a FW corner case where loss of 12V prior to enable,
+    // and then a poweron, the TPS parts get stuck in a lockout state requiring a VR_Enable toggle.
+    // This in conjunction with a EEPROM update should prevent such an issue
+    if (l_pmic_is_ti)
+    {
+        fapi2::buffer<uint8_t> l_reg_contents;
+        FAPI_TRY(mss::pmic::i2c::reg_read_reverse_buffer(
+                     i_pmic_target, TPS_REGS::R9C_ON_OFF_CONFIG_GLOBAL, l_reg_contents));
+
+        // Update the bit
+        l_reg_contents.setBit<TPS_FIELDS::R9C_EN_VINUV_FLT_LATCH>();
+
+        FAPI_TRY(mss::pmic::i2c::reg_write_reverse_buffer(
+                     i_pmic_target, TPS_REGS::R9C_ON_OFF_CONFIG_GLOBAL, l_reg_contents));
+    }
+
+    return fapi2::FAPI2_RC_SUCCESS;
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+
+///
+/// @brief Set the soft start times to 4ms for the provided PMIC
+///
+/// @param[in] i_pmic_target PMIC target
+/// @return fapi2::FAPI2_RC_SUCCESS iff success
+/// @note This is used for 4U in order to avoid the issue of too-high current sink during a VR_DISABLE
+///
+fapi2::ReturnCode set_soft_start_time(const fapi2::Target<fapi2::TargetType::TARGET_TYPE_PMIC>& i_pmic_target)
+{
+    using REGS = pmicRegs<mss::pmic::product::JEDEC_COMPLIANT>;
+
+    // Just a direct write
+    fapi2::buffer<uint8_t> l_reg_contents(CONSTS::R2C_R2D_4MS_ALL);
+    FAPI_TRY(mss::pmic::i2c::reg_write(i_pmic_target, REGS::R2C, l_reg_contents));
+    FAPI_TRY(mss::pmic::i2c::reg_write(i_pmic_target, REGS::R2D, l_reg_contents));
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
 /// @brief Set the soft stop time to maximum for the provided PMIC
 ///
 /// @param[in] i_pmic_target PMIC target
@@ -172,7 +230,9 @@ fapi_try_exit:
 fapi2::ReturnCode set_soft_stop_time(const fapi2::Target<fapi2::TargetType::TARGET_TYPE_PMIC>& i_pmic_target)
 {
     using REGS = pmicRegs<mss::pmic::product::JEDEC_COMPLIANT>;
+    using TPS_REGS = pmicRegs<mss::pmic::product::TPS5383X>;
     using FIELDS = pmicFields<mss::pmic::product::JEDEC_COMPLIANT>;
+    using TPS_CONSTS = mss::pmic::consts<mss::pmic::product::TPS5383X>;
 
     static constexpr uint8_t NUM_REGS = 4;
 
@@ -180,6 +240,16 @@ fapi2::ReturnCode set_soft_stop_time(const fapi2::Target<fapi2::TargetType::TARG
     static constexpr std::array<uint8_t, NUM_REGS> SOFT_STOP_TIME_REGS =
     {REGS::R22, REGS::R24, REGS::R26, REGS::R28};
 
+    static constexpr std::array<uint8_t, NUM_REGS> TPS_SOFT_STOP_CFG_REGS =
+    {
+        TPS_REGS::R94_SOFT_START_CFG_SWA,
+        TPS_REGS::R95_SOFT_START_CFG_SWB,
+        TPS_REGS::R96_SOFT_START_CFG_SWC,
+        TPS_REGS::R97_SOFT_START_CFG_SWD
+    };
+
+    // First we will set the host region registers. This will be a fallback in case
+    // for some reason the fixed slew settings don't take effect
     for (const uint8_t l_reg : SOFT_STOP_TIME_REGS)
     {
         fapi2::buffer<uint8_t> l_reg_contents;
@@ -190,6 +260,31 @@ fapi2::ReturnCode set_soft_stop_time(const fapi2::Target<fapi2::TargetType::TARG
 
         FAPI_TRY(mss::pmic::i2c::reg_write_reverse_buffer(i_pmic_target, l_reg, l_reg_contents));
     }
+
+    // Next, perform the TPS-specific fixed-slew rate workaround. When these registers are set,
+    // the SOFT_STOP_TIME_REGS settings are ignored, so these are most important.
+    for (const auto l_reg : TPS_SOFT_STOP_CFG_REGS)
+    {
+        fapi2::buffer<uint8_t> l_reg_contents(TPS_CONSTS::MAX_SOFT_STOP_CFG);
+        FAPI_TRY(mss::pmic::i2c::reg_write_reverse_buffer(i_pmic_target, l_reg, l_reg_contents));
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Perform pre-enable steps, workarounds, etc.
+///
+/// @param[in] i_pmic_target PMIC target
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
+///
+fapi2::ReturnCode pre_enable_steps(const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& i_pmic_target)
+{
+    // TPS VIN Latch workaround
+    FAPI_TRY(setup_tps_vin_latch(i_pmic_target));
+
+    return fapi2::FAPI2_RC_SUCCESS;
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -1063,8 +1158,8 @@ fapi2::ReturnCode assert_n_mode_states(
                 .set_N_MODE_PMIC2(i_n_mode_pmic[PMIC2])
                 .set_N_MODE_PMIC3(i_n_mode_pmic[PMIC3]),
                 "A pair of redundant PMICs have both declared N-Mode. Procedure will not be able "
-                "to turn either on and provide power to the OCMB %s "
-                "N_MODE_PMIC0: %u N_MODE_PMIC1: %u N_MODE_PMIC2: %u N_MODE_PMIC3: %u",
+                "to turn either on and provide power to the OCMB %s N-Mode States:"
+                "PMIC0: %u PMIC1: %u PMIC2: %u PMIC3: %u",
                 mss::c_str(i_target_info.iv_ocmb),
                 i_n_mode_pmic[PMIC0], i_n_mode_pmic[PMIC1], i_n_mode_pmic[PMIC2], i_n_mode_pmic[PMIC3]);
 
@@ -1078,11 +1173,11 @@ fapi2::ReturnCode assert_n_mode_states(
                 .set_N_MODE_PMIC1(i_n_mode_pmic[PMIC1])
                 .set_N_MODE_PMIC2(i_n_mode_pmic[PMIC2])
                 .set_N_MODE_PMIC3(i_n_mode_pmic[PMIC3]),
-                "%s At least one of the 4 PMICs had errors which caused a drop into N-Mode. "
-                "MNFG_THRESHOLDS has asserted that we %s. "
-                "N_MODE_PMIC0: %u N_MODE_PMIC1: %u N_MODE_PMIC2: %u N_MODE_PMIC3: %u",
+                "%s Warning: At least one of the 4 PMICs had errors which caused a drop into N-Mode. "
+                "MNFG_THRESHOLDS has asserted that we %s. N-Mode States:"
+                "PMIC0: %u PMIC1: %u PMIC2: %u PMIC3: %u",
                 mss::c_str(i_target_info.iv_ocmb),
-                (i_mnfg_thresholds) ? "EXIT." : "DO NOT EXIT.",
+                (i_mnfg_thresholds) ? "EXIT." : "DO NOT EXIT. Continuing boot normally with redundant parts.",
                 i_n_mode_pmic[PMIC0], i_n_mode_pmic[PMIC1], i_n_mode_pmic[PMIC2], i_n_mode_pmic[PMIC3]);
 
     return fapi2::FAPI2_RC_SUCCESS;
@@ -1515,6 +1610,9 @@ fapi2::ReturnCode redundancy_vr_enable_kickoff(
                                          [&i_target_info, &l_enable_fields, i_mode]
                                          (const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& i_pmic) -> fapi2::ReturnCode
         {
+            // Set SWD soft-start time to 4ms for VPP pmics
+            FAPI_TRY_LAMBDA(mss::pmic::set_soft_start_time(i_pmic));
+
             // Set soft-start time to maximum to avoid ramp-down time voltage spike
             FAPI_TRY_LAMBDA(mss::pmic::set_soft_stop_time(i_pmic));
 

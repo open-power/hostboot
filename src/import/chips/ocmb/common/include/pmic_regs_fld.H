@@ -47,6 +47,15 @@ template<mss::pmic::product P>
 struct pmicFields;
 
 ///
+/// @brief Fields for TPS5383X PMICs
+///
+template<>
+struct pmicFields<mss::pmic::product::TPS5383X>
+{
+    static constexpr uint8_t R9C_EN_VINUV_FLT_LATCH = 7;
+};
+
+///
 /// @brief Fields for JEDEC_COMPLIANT PMICs
 ///
 template<>

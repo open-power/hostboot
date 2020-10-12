@@ -89,7 +89,8 @@ enum id : uint8_t
 ///
 enum product
 {
-    JEDEC_COMPLIANT, // Only JEDEC exists
+    JEDEC_COMPLIANT,    // Common to all devices
+    TPS5383X,           // TPS custom part
 };
 
 ///
@@ -269,6 +270,16 @@ template<mss::pmic::product P>
 struct consts;
 
 ///
+/// @brief Constants for TPS5383X PMICs
+///
+template<>
+struct consts<mss::pmic::product::TPS5383X>
+{
+    // R94 -> R97
+    static constexpr uint8_t MAX_SOFT_STOP_CFG = 0xBF;
+};
+
+///
 /// @brief constants for JEDEC_COMPLIANT PMICS
 ///
 template<>
@@ -335,7 +346,8 @@ struct consts<mss::pmic::product::JEDEC_COMPLIANT>
 
     static constexpr uint32_t VOLT_STEP                    = 5;
 
-    // 4U Consts
+    // R2C/R2D
+    static constexpr uint8_t R2C_R2D_4MS_ALL = 0x44;
 
     // R30
 
