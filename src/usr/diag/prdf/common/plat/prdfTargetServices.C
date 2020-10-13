@@ -665,11 +665,11 @@ ExtensibleChip * getNeighborCore( ExtensibleChip * i_core )
     PRDF_ASSERT( nullptr != i_core );
 
     TargetHandle_t thisCore = i_core->getTrgt();
-    TargetHandle_t parentEx = getConnectedParent( thisCore, TYPE_EX );
+    TargetHandle_t parentFc = getConnectedParent( thisCore, TYPE_FC );
 
     ExtensibleChip * neighborCore = nullptr;
 
-    TargetHandleList coreList = getConnectedChildren( parentEx, TYPE_CORE );
+    TargetHandleList coreList = getConnectedChildren( parentFc, TYPE_CORE );
 
     for ( auto & trgt : coreList )
     {
