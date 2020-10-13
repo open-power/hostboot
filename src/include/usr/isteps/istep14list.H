@@ -190,6 +190,18 @@ namespace   INITSERVICE
                 ISTEP_14::call_host_mpipl_service,
                 { START_FN, EXT_IMAGE, MPIPL_OP, true }
         },
+        { // @TODO RTC 261059: This istep will be relocated when after other
+          // components support the new istep count
+                ISTEPNAME(14,09,"host_secure_rng_placeholder"),
+                [](void*) -> void* { return nullptr; },
+                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
+        },
+        { // @TODO RTC 261059: This istep will be relocated when after other
+          // components support the new istep count
+                ISTEPNAME(14,10,"host_enable_memory_encryption_placeholder"),
+                [](void*) -> void* { return nullptr; },
+                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
+        },
     };
 
 const DepModInfo g_istep14Dependancies = {
