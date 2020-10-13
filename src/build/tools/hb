@@ -557,8 +557,8 @@ hb_startsimics()
         STARTSIMCMD+=(bmc_files=/host/genEecache:/usr/local/share/pnor/EECACHE)
         STARTSIMCMD+=(eecacheEcc=1)
 
-        # TODO RTC 214692 - Uncomment the following line to switch from 2U to 4U DDIMMs
-        #STARTSIMCMD+=(dimm_type=\"4U\")
+        # Comment out the following line to switch from 4U to 2U DDIMMs
+        STARTSIMCMD+=(dimm_type=\"4U\")
 
         # We don't want to run SBE in VPO mode; pass the SBE image to
         # simics in non-VPO mode

@@ -2287,7 +2287,7 @@ void deconfigPresentByAssoc(TargetInfo i_targInfo)
     {
         TargetHandle_t l_childTarget = *pChild_it;
         enableHwasState(l_childTarget, true, false, i_targInfo.reason);
-        HWAS_INF("deconfigPresentByAssoc: Parent Target: %.8X: Child Target %.8X"
+        HWAS_INF("deconfigPresentByAssoc: Parent Target %.8X: Child Target %.8X"
                  " marked present, not functional: reason %.x",
                  get_huid(i_targInfo.pThisTarget),
                  get_huid(l_childTarget), i_targInfo.reason);
@@ -2539,9 +2539,26 @@ void presentByAssoc(TargetHandleList& i_targets)
           DeconfigGard::DECONFIGURED_BY_NO_CHILD_MEM_PORT,
           DeconfigGard::DECONFIGURED_BY_NO_PARENT_OCMB_CHIP },
 
-        // Asymmetrical rule; every PMIC has to have an OCMB_CHIP parent, but
-        // not every OCMB_CHIP has a PMIC child
+        // TODO RTC 261354: remove compile flag and use the symetric rule for PMICs once
+        // HWSV implements the logic to set PMICs as present
+#ifdef __HOSTBOOT_MODULE
         { TYPE_OCMB_CHIP, TYPE_PMIC,
+          DeconfigGard::DECONFIGURED_BY_NO_CHILD_PMIC,
+          DeconfigGard::DECONFIGURED_BY_NO_PARENT_OCMB_CHIP },
+#else
+        // Asymmetrical rule; every PMIC has to have an OCMB_CHIP parent,
+        // but not every OCMB_CHIP has a PMIC child
+        { TYPE_OCMB_CHIP, TYPE_PMIC,
+          DeconfigGard::INVALID_DECONFIGURED_BY_REASON, // Asymmetrical rules can't
+                                                        // deconfigure the parent
+          DeconfigGard::DECONFIGURED_BY_NO_PARENT_OCMB_CHIP,
+          NO_CHECK_PARENT }, // asymmetrical
+#endif
+
+
+        // Asymmetrical rule; every GENERIC_I2C_DEVICE has to have an OCMB_CHIP parent,
+        // but not every OCMB_CHIP has a GENERIC_I2C_DEVICE child, ie on 2U DDIMMs
+        { TYPE_OCMB_CHIP, TYPE_GENERIC_I2C_DEVICE,
           DeconfigGard::INVALID_DECONFIGURED_BY_REASON, // Asymmetrical rules can't
                                                         // deconfigure the parent
           DeconfigGard::DECONFIGURED_BY_NO_PARENT_OCMB_CHIP,
