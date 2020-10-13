@@ -437,7 +437,7 @@ fapi2::ReturnCode sensor_response(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CH
     // Check if cmd was successful.
     // EXP_FW_TEMP_SENSOR_CONFIG_INTERVAL_READ has 2 error bytes
     // in response_argument[1] and [2], record and print both.
-    FAPI_ASSERT(i_rsp.response_argument[0] == mss::exp::omi::response_arg::SUCCESS,
+    FAPI_ASSERT(i_rsp.response_argument[0] == mss::exp::omi::response_arg::RESPONSE_SUCCESS,
                 fapi2::MSS_EXP_SENSOR_CACHE_ENABLE_FAILED().
                 set_TARGET(i_target).
                 set_RSP_ID(i_rsp.response_id).

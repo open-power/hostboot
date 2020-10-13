@@ -137,14 +137,14 @@ fapi2::ReturnCode status_code( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>
     FAPI_TRY(capture_status(i_target, i_data, l_fw_status_data));
     // Technically many cmds have their own status code decoding..but SUCCESS is always 0.
     // If it's anything else we can just look up the status code
-    FAPI_ASSERT( (l_status == status_codes::SUCCESS) || (i_assert == NO_ASSERT_IF_BAD_FW_STATUS),
+    FAPI_ASSERT( (l_status == status_codes::I2C_SUCCESS) || (i_assert == NO_ASSERT_IF_BAD_FW_STATUS),
                  fapi2::MSS_EXP_I2C_FW_STATUS_CODE_FAILED().
                  set_TARGET(i_target).
                  set_STATUS_CODE(l_status).
                  set_CMD_ID(i_cmd_id).
                  set_STATUS_DATA(l_fw_status_data),
                  "Status code did not return SUCCESS (%d), received (%d) for " TARGTIDFORMAT ,
-                 status_codes::SUCCESS, l_status, MSSTARGID );
+                 status_codes::I2C_SUCCESS, l_status, MSSTARGID );
 
     return fapi2::FAPI2_RC_SUCCESS;
 

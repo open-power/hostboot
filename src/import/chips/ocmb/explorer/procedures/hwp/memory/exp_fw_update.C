@@ -72,7 +72,7 @@ fapi2::ReturnCode check_response(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHI
     // Check if cmd was successful
     // The CMD_WRITE subcommand provides 3 bytes of MCHP error
     // information in response_argument[1] to [3]
-    FAPI_ASSERT(i_rsp.response_argument[0] == omi::response_arg::SUCCESS &&
+    FAPI_ASSERT(i_rsp.response_argument[0] == omi::response_arg::RESPONSE_SUCCESS &&
                 i_rsp.request_identifier == i_cmd.request_identifier,
                 fapi2::EXP_UPDATE_CMD_FAILED().
                 set_TARGET(i_target).

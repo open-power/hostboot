@@ -1035,7 +1035,7 @@ fapi2::ReturnCode response(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_
     insertFromRight<3 * BITS_PER_BYTE, BITS_PER_BYTE>(i_rsp.response_argument[1]);
 
     // Check if cmd was successful
-    FAPI_ASSERT(i_rsp.response_argument[0] == omi::response_arg::SUCCESS &&
+    FAPI_ASSERT(i_rsp.response_argument[0] == omi::response_arg::RESPONSE_SUCCESS &&
                 i_rsp.request_identifier == i_cmd.request_identifier &&
                 i_rsp.response_id == i_cmd.cmd_id,
                 fapi2::MSS_EXP_RSP_ARG_FAILED().

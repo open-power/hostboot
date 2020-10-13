@@ -365,7 +365,7 @@ enum sizes
 ///
 enum status_codes
 {
-    SUCCESS              = 0x00,
+    I2C_SUCCESS          = 0x00,
     ADDRESS_OUT_OF_RANGE = 0x01,
     ADDRESS_PROHIBITED   = 0x02,
     FW_BUSY              = 0xFE,
@@ -377,7 +377,7 @@ enum status_codes
 ///
 enum fw_boot_cfg_status
 {
-    FW_BOOT_CFG_SUCCESS                 = status_codes::SUCCESS,
+    FW_BOOT_CFG_SUCCESS                 = status_codes::I2C_SUCCESS,
 
     // Loopback fail
     FW_BOOT_CFG_LB_FAIL                 = 0x01,
@@ -498,7 +498,7 @@ enum cmd_flags
 ///
 enum response_arg
 {
-    SUCCESS = 0,
+    RESPONSE_SUCCESS = 0,
     ERROR_CODE = 1,
 };
 
