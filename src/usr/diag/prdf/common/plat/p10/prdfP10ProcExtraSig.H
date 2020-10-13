@@ -28,8 +28,12 @@
 
 #include <prdrSignatures.H>
 
-/* PLL Extra signatures */
-PRDR_ERROR_SIGNATURE( PLL_ERROR, 0x00ed0000, "","PLL error" );
-PRDR_ERROR_SIGNATURE( SYS_REF_FAILOVER, 0x00ed0002, "",
-                      "Sys Ref Clk failover" );
+/* PLL extra signatures */
+PRDR_ERROR_SIGNATURE(PLL_UNLOCK_0,    0x00ed0001, "", "PLL unlock on clk0");
+PRDR_ERROR_SIGNATURE(PLL_UNLOCK_1,    0x00ed0002, "", "PLL unlock on clk1");
+PRDR_ERROR_SIGNATURE(RCS_OSC_ERROR_0, 0x00ed0003, "", "RCS OSC error on clk0");
+PRDR_ERROR_SIGNATURE(RCS_OSC_ERROR_1, 0x00ed0004, "", "RCS OSC error on clk1");
+PRDR_ERROR_SIGNATURE(RCS_UNLOCKDET_0, 0x00ed0005, "", "RCS unlock det on clk0");
+PRDR_ERROR_SIGNATURE(RCS_UNLOCKDET_1, 0x00ed0006, "", "RCS unlock det on clk1");
+
 #endif // __prdfP10ProcExtraSig_H

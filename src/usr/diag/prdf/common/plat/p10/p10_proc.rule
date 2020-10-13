@@ -31,6 +31,9 @@ chip p10_proc
     dump        DUMP_CONTENT_HW;
     scomlen     64;
 
+# Import signatures
+.include "prdfP10ProcExtraSig.H";
+
  #############################################################################
  #                                                                           #
  #  ######                                                                   #

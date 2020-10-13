@@ -119,15 +119,17 @@ bool PllDomain::Query(ATTENTION_TYPE i_attnType)
 int32_t PllDomain::Analyze(STEP_CODE_DATA_STRUCT& io_sc,
                            ATTENTION_TYPE attentionType)
 {
-    int32_t rc = SUCCESS;
-    PllErrTypes errTypesSummary;
-
-    ExtensibleChipFunction * func = nullptr;
-
     // Due to clock issues some chips may be moved to non-functional during
     // analysis. In this case, these chips will need to be removed from the
     // domains.
-    std::vector<ExtensibleChip *>  nfchips;
+    std::vector<ExtensibleChip*> nfchips;
+
+    // A summary of all error types found.
+    PllErrTypes errTypesSummary;
+
+    // Keep track of all chips with attentions. They will be used for the
+    // primary signature and callouts later.
+    std::map<PllErrTypes::Types, std::vector<ExtensibleChip*>> chipList;
 
     // Keep track of all chips with with PLL unlock attentions. They will be
     // used for callouts later.
@@ -136,26 +138,31 @@ int32_t PllDomain::Analyze(STEP_CODE_DATA_STRUCT& io_sc,
     // Examine each chip in the domain.
     for (unsigned int index = 0; index < GetSize(); ++index)
     {
-        ExtensibleChip* chip = LookUp(index);
+        ExtensibleChip*         chip = LookUp(index);
+        ExtensibleChipFunction* func = nullptr;
+        TargetHandle_t          trgt = chip->getTrgt();
 
-        // Continue only if this chip is functional.
-        if (!PlatServices::isFunctional(chip->getTrgt()))
+        // Skip this chip if it is non-functional.
+        if (!PlatServices::isFunctional(trgt))
         {
-            // The chip is now non-functional.
             nfchips.push_back(chip);
             continue;
         }
 
-        // Check if this chip has a clock error
+        // Check if this chip has a clock error.
         PllErrTypes errTypes;
         func = chip->getExtensibleFunction("queryPllErrTypes");
-        rc = (*func)(chip, PluginDef::bindParm<PllErrTypes&>(errTypes));
+        int32_t rc = (*func)(chip, PluginDef::bindParm<PllErrTypes&>(errTypes));
         if (SUCCESS != rc)
+        {
             continue; // Try the next chip.
+        }
 
-        // Continue if no clock errors reported on this chip
-        if ( !errTypes.any() )
+        // Skip this chip if it does not have any clock errors.
+        if (!errTypes.any())
+        {
             continue;
+        }
 
         // Keep a cumulative list of the error types.
         errTypesSummary = errTypesSummary | errTypes;
@@ -169,6 +176,25 @@ int32_t PllDomain::Analyze(STEP_CODE_DATA_STRUCT& io_sc,
         func = chip->getExtensibleFunction("capturePllFfdc");
         (*func)(chip, PluginDef::bindParm<STEP_CODE_DATA_STRUCT &>(io_sc));
 
+        // Add each error type to the multi-signature list and keep track of
+        // each chip which will be used later.
+        #define TMP_FUNC(TYPE) \
+        if (errTypes.query(PllErrTypes::TYPE)) \
+        {\
+            io_sc.service_data->AddSignatureList(trgt, PRDFSIG_##TYPE); \
+            chipList[PllErrTypes::TYPE].push_back(chip); \
+        }
+
+        TMP_FUNC(PLL_UNLOCK_0   )
+        TMP_FUNC(PLL_UNLOCK_1   )
+        TMP_FUNC(RCS_OSC_ERROR_0)
+        TMP_FUNC(RCS_OSC_ERROR_1)
+        TMP_FUNC(RCS_UNLOCKDET_0)
+        TMP_FUNC(RCS_UNLOCKDET_1)
+
+        #undef TMP_FUNC
+
+        // Keep track of all chips with PLL attentions.
         if (errTypes.query(PllErrTypes::PLL_UNLOCK_0) ||
             errTypes.query(PllErrTypes::PLL_UNLOCK_1))
         {
@@ -188,6 +214,25 @@ int32_t PllDomain::Analyze(STEP_CODE_DATA_STRUCT& io_sc,
             systemPtr->RemoveStoppedChips(i->getTrgt());
         }
     }
+
+    // Set the primary signature to the highest priority attention type.
+    #define TMP_FUNC(TYPE) \
+    if (!chipList[PllErrTypes::TYPE].empty()) \
+    {\
+        HUID huid = chipList[PllErrTypes::TYPE].front()->getHuid(); \
+        io_sc.service_data->setSignature(huid, PRDFSIG_##TYPE); \
+    }
+
+    // This list needs to be from lowest to highest priority so that the last
+    // signature set is the highest priority.
+    TMP_FUNC(RCS_UNLOCKDET_0)
+    TMP_FUNC(RCS_UNLOCKDET_1)
+    TMP_FUNC(PLL_UNLOCK_0   )
+    TMP_FUNC(PLL_UNLOCK_1   )
+    TMP_FUNC(RCS_OSC_ERROR_0)
+    TMP_FUNC(RCS_OSC_ERROR_1)
+
+    #undef TMP_FUNC
 
     // TODO: RTC 184513 - It is possible to have a PLL unlock, a UE RE, and an
     //       SUE CS. Isolation should be to the PLL error and then the
