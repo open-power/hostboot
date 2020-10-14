@@ -92,7 +92,7 @@ static const std::vector<std::pair<uint64_t, uint64_t>> EXPLORER_CCS_FIR_REGS =
 static const std::vector<std::pair<uint64_t, uint64_t>> MC_OMI_INIT_FIR_REGS =
 {
     // P10 MC_OMI_FIR_REG
-    {scomt::omic::MC_OMI_FIR_MASK_REG_RW, scomt::omic::MC_OMI_FIR_MASK_REG_RW},
+    {scomt::omic::MC_OMI_FIR_REG_RW, scomt::omic::MC_OMI_FIR_MASK_REG_RW},
 };
 
 static const std::vector<std::pair<uint64_t, uint64_t>> MCC_OMI_INIT_FIR_REGS =
