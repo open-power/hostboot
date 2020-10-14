@@ -221,7 +221,7 @@ inline TARGETING::TYPE convertFapi2TypeToTargeting(const fapi2::TargetType i_T)
         }
         else
         {
-            FAPI_ERR("convertFapi2TypeToTargeting:: Chiplet type not supported 0x%.8X!",
+            FAPI_ERR("convertFapi2TypeToTargeting:: Chiplet type not supported 0x%.16llX!",
                      i_T);
             assert(false);
         }
@@ -636,7 +636,6 @@ inline std::vector<Target<T, M, V> >
         const TARGETING::Target * l_platTarget =
                          static_cast<const TARGETING::Target*>(childIter->get());
         uint8_t  l_chiplet_num = 0;
-        uint32_t l_fapi2_type = childIter->getType();
         uint64_t l_bitMask = 0x0;
 
         // ATTR_CHIP_UNIT represents the Pervasive Chiplet numbering and is
@@ -655,7 +654,7 @@ inline std::vector<Target<T, M, V> >
         if (i_filter & l_bitMask) // keep child
         {
           FAPI_DBG("getChildrenFilter: keep child=0x%.8X, type=0x%.8X, l_bitMask=0x%.16X, num=0x%.2X",
-                   TARGETING::get_huid(l_platTarget), l_fapi2_type, l_bitMask, l_chiplet_num );
+                   TARGETING::get_huid(l_platTarget), childIter->getType(), l_bitMask, l_chiplet_num );
 
           ++childIter;
         }
@@ -664,7 +663,7 @@ inline std::vector<Target<T, M, V> >
           childIter = l_children.erase(childIter); // this increments childIter
 
           FAPI_DBG("getChildrenFilter: removed child=0x%.8X, type=0x%.8X, l_bitMask=0x%.16X, num=0x%.2X",
-                   TARGETING::get_huid(l_platTarget), l_fapi2_type, l_bitMask, l_chiplet_num );
+                   TARGETING::get_huid(l_platTarget), childIter->getType(), l_bitMask, l_chiplet_num );
         }
     }
 
