@@ -80,6 +80,7 @@ const std::vector<uint8_t> DYN_FEATURES_COMPAT_XLATE_MAP =
     23,             // 25       RUNN_USE_QME_TB_SRC
     26,             // 26       RUNN_CONTAINED_DUMP
     27,             // 27       UV_INITS
+    28,             // 28       CONVERT_DCBZ_TO_RWITM
 };
 #endif
 
@@ -659,6 +660,7 @@ add_plat_features_rt(
     fapi2::ATTR_SMF_CONFIG_Type l_attr_smf_config;
     fapi2::ATTR_SYSTEM_MMA_POWERON_DISABLE_Type l_attr_system_mma_poweron_disable;
     fapi2::ATTR_MRW_L2_INCREASE_JITTER_Type l_attr_mrw_l2_increase_jitter;
+    fapi2::ATTR_MRW_CONVERT_DCBZ_TO_RWITM_Type l_attr_mrw_convert_dcbz_to_rwitm;
 
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SMF_CONFIG,
                            i_target_sys,
@@ -671,6 +673,10 @@ add_plat_features_rt(
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MRW_L2_INCREASE_JITTER,
                            i_target_sys,
                            l_attr_mrw_l2_increase_jitter));
+
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MRW_CONVERT_DCBZ_TO_RWITM,
+                           i_target_sys,
+                           l_attr_mrw_convert_dcbz_to_rwitm));
 
 
     if (l_attr_smf_config == fapi2::ENUM_ATTR_SMF_CONFIG_ENABLED)
@@ -686,6 +692,11 @@ add_plat_features_rt(
     if (l_attr_mrw_l2_increase_jitter == fapi2::ENUM_ATTR_MRW_L2_INCREASE_JITTER_TRUE)
     {
         FAPI_TRY(set_bit(i_bvec, L2RC_HIGH_JITTER, "L2RC_HIGH_JITTER"));
+    }
+
+    if (l_attr_mrw_convert_dcbz_to_rwitm == fapi2::ENUM_ATTR_MRW_CONVERT_DCBZ_TO_RWITM_TRUE)
+    {
+        FAPI_TRY(set_bit(i_bvec, CONVERT_DCBZ_TO_RWITM, "CONVERT_DCBZ_TO_RWITM"));
     }
 
     // ensure unwanted features are cleared (necessary based on

@@ -731,6 +731,21 @@
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
+  <id>ATTR_MRW_CONVERT_DCBZ_TO_RWITM</id>
+  <targetType>TARGET_TYPE_SYSTEM</targetType>
+  <description>
+    Convert dcbz operations into read within to modify transactions in L2
+  </description>
+  <valueType>uint8</valueType>
+  <enum>
+    FALSE = 0,
+    TRUE = 1
+  </enum>
+  <platInit/>
+  <initToZero/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
   <id>ATTR_PROC_LCO_TARGETS_COUNT</id>
   <targetType>TARGET_TYPE_PROC_CHIP</targetType>
   <description>
