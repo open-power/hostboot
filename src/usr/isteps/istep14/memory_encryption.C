@@ -37,6 +37,7 @@
 // Misc
 #include <devicefw/userif.H>
 #include <initservice/isteps_trace.H>
+#include <secureboot/service.H>
 
 using namespace TARGETING;
 using namespace ERRORLOG;
@@ -55,14 +56,64 @@ static errlHndl_t hardware_random64(uint64_t& o_random)
 
 /* @brief Determine whether memory encryption should be enabled.
  *
- * @param[in] i_proc  Processor target to consider
- * @return bool       True if memory encryption should be enabled on
- *                    the given processor, false otherwise.
+ * @param[in] i_procs    Processor targets to consider
+ * @param[out] o_enable  True if memory encryption should be enabled on
+ *                       all given processors, false otherwise.
+ * @return errlHndl_t    Error if any, otherwise nullptr.
  */
-static bool should_enable_memory_encryption(Target* const i_proc)
+static errlHndl_t should_enable_memory_encryption(TargetHandleList const i_procs,
+                                                  bool& o_enable)
 {
-    // @TODO RTC 208820: Actually check whether we should enable memory encryption
-    return true;
+    errlHndl_t errl = nullptr;
+
+    o_enable = true;
+
+    // If any processor disables encryption, then we won't enable it on any
+    // processor.
+    for (const auto proc : i_procs)
+    {
+        bool encryption_export_controlled = false;
+
+        // Check for export controls on memory encryption
+        {
+            // Read the Export Control Status register to check whether we're
+            // allowed to use cryptography.
+            const uint64_t EXPORT_REGL_STATUS_SCOM_REG = 0x10009;
+            uint64_t export_ctl = 0;
+            size_t export_ctl_size = sizeof(export_ctl);
+            errl = deviceRead(proc,
+                              &export_ctl,
+                              export_ctl_size,
+                              DEVICE_SCOM_ADDRESS(EXPORT_REGL_STATUS_SCOM_REG));
+
+            if (errl)
+            {
+                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                          "Memory encryption: Failed to read export status SCOM register");
+                break;
+            }
+
+            const uint64_t EXPORT_STATUS_TP_MC_ALLOW_CRYPTO_DC = 1ull << (63 - 11);
+
+            encryption_export_controlled = (export_ctl & EXPORT_STATUS_TP_MC_ALLOW_CRYPTO_DC) == 0;
+        }
+
+        if (encryption_export_controlled)
+        {
+            // Do not enable encryption if export controls are in place on any
+            // processor.
+            o_enable = false;
+        }
+        else
+        {
+            // If no export controls are in place, then check whether this
+            // processor's attribute disables encryption.
+            o_enable = o_enable && (proc->getAttr<ATTR_PROC_MEMORY_ENCRYPTION_ENABLED>()
+                                    != PROC_MEMORY_ENCRYPTION_ENABLED_DISABLED);
+        }
+    }
+
+    return errl;
 }
 
 errlHndl_t lock_memory_crypto_settings()
@@ -93,8 +144,13 @@ errlHndl_t setup_memory_crypto_keys()
     // same value.
     struct crypto_scom_pair_t
     {
-        uint64_t encrypt_key_reg = 0, decrypt_key_reg = 0;
+        uint64_t encrypt_key_reg = 0,
+                 decrypt_key_reg = 0,
+                 mask = 0xFFFFFFFFFFFFFFFFull;
     };
+
+    // Nonce register B is only 24 bits.
+    static const uint64_t NONCE_B_MASK = 0xFFFFFF0000000000ull;
 
     // AES-XTS requires both keys, whereas CTR mode only requires one, but we
     // set up both in either case to support both.
@@ -105,7 +161,7 @@ errlHndl_t setup_memory_crypto_keys()
         { MCP_CHANX_CRYPTO_ENCRYPT_CRYPTOKEY2A, MCP_CHANX_CRYPTO_DECRYPT_CRYPTOKEY2A },
         { MCP_CHANX_CRYPTO_ENCRYPT_CRYPTOKEY2B, MCP_CHANX_CRYPTO_DECRYPT_CRYPTOKEY2B },
         { MCP_CHANX_CRYPTO_ENCRYPT_CRYPTONONCEA, MCP_CHANX_CRYPTO_DECRYPT_CRYPTONONCEA },
-        { MCP_CHANX_CRYPTO_ENCRYPT_CRYPTONONCEB, MCP_CHANX_CRYPTO_DECRYPT_CRYPTONONCEB }
+        { MCP_CHANX_CRYPTO_ENCRYPT_CRYPTONONCEB, MCP_CHANX_CRYPTO_DECRYPT_CRYPTONONCEB, NONCE_B_MASK }
     };
 
     errlHndl_t errl = nullptr;
@@ -116,40 +172,55 @@ errlHndl_t setup_memory_crypto_keys()
     {
 
     Target* const node = UTIL::getCurrentNodeTarget();
-
-    TargetHandleList procs;
-    getChildAffinityTargetsByState(procs,
-                                   node,
-                                   CLASS_NA,
-                                   TYPE_PROC,
-                                   UTIL_FILTER_FUNCTIONAL);
-
-    // Collect a list of MCCs from each PROC on this node that wants encryption.
-
     TargetHandleList encrypt_mccs;
 
-    for (const auto proc : procs)
     {
-        if (should_enable_memory_encryption(proc))
+        TargetHandleList procs;
+        getChildAffinityTargetsByState(procs,
+                                       node,
+                                       CLASS_NA,
+                                       TYPE_PROC,
+                                       UTIL_FILTER_FUNCTIONAL);
+
+        // Collect a list of MCCs from each PROC on this node that wants encryption.
+
+        bool enable_encryption { };
+        errl = should_enable_memory_encryption(procs, enable_encryption);
+
+        if (errl)
         {
-            TargetHandleList mccs;
-            getChildAffinityTargetsByState(mccs,
-                                           proc,
+            break;
+        }
+
+        if (enable_encryption)
+        {
+            getChildAffinityTargetsByState(encrypt_mccs,
+                                           node,
                                            CLASS_NA,
                                            TYPE_MCC,
                                            UTIL_FILTER_FUNCTIONAL);
-            encrypt_mccs.insert(encrypt_mccs.end(), mccs.begin(), mccs.end());
         }
     }
 
     // Iterate each MCC in this node and generate a random key for each key SCOM
     // register.
 
-    for (const auto mcc : encrypt_mccs)
+    if (encrypt_mccs.empty())
     {
         TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                  "Enabling encryption for MCC 0x%08x", get_huid(mcc));
+                  "Memory encryption: Encryption disabled on node 0x%08x, not initializing keys",
+                  get_huid(node));
+    }
+    else
+    {
+        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                  "Memory encryption: Initializing keys for a total of %lu MCCs on node 0x%08x",
+                  encrypt_mccs.size(),
+                  get_huid(node));
+    }
 
+    for (const auto mcc : encrypt_mccs)
+    {
         for (const auto scom_pair : key_scoms)
         {
             uint64_t key = 0;
@@ -160,7 +231,8 @@ errlHndl_t setup_memory_crypto_keys()
                 break;
             }
 
-            // Write key to encryption and decryption key registers
+            // Mask key and write to encryption and decryption registers
+            key &= scom_pair.mask;
 
             uint64_t buffer = key;
             uint64_t buffersize = sizeof(buffer);

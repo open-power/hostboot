@@ -56,6 +56,13 @@
      Start of customizations
      ================================================================= -->
      <attribute>
+          <id>ATTR_PROC_MEMORY_ENCRYPTION_ENABLED</id>
+          <!-- Value of "CTR" taken from p10_nest_attributes.xml -->
+          <default>2</default>
+          <no_export/>
+     </attribute>
+
+     <attribute>
           <id>ATTR_SPI_BUS_DIV_REF</id>
           <!-- Value taken from p10_sbe_attributes.xml -->
           <default>0x41</default>
