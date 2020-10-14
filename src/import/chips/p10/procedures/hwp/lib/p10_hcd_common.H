@@ -40,6 +40,8 @@
 
 #ifndef __PPE_QME
 
+    #define CPMS_MMAR_WO_OR              CPMS_MMAR_SCOM2
+
     #define CPMS_FDCR_WO_CLEAR           CPMS_FDCR_SCOM1
     #define CPMS_FDCR_WO_OR              CPMS_FDCR_SCOM2
 
@@ -53,6 +55,8 @@
 
 #else
     #ifndef QME_IMAGE_SOURCE
+
+        #define CPMS_MMAR_WO_OR              CPMS_MMAR_PPE2
 
         #define CPMS_FDCR_WO_CLEAR           CPMS_FDCR_PPE1
         #define CPMS_FDCR_WO_OR              CPMS_FDCR_PPE2

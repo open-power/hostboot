@@ -80,8 +80,12 @@ p10_hcd_mma_stopclocks(
         i_target.getParent < fapi2::TARGET_TYPE_EQ | fapi2::TARGET_TYPE_MULTICAST > ();
     uint32_t                l_regions  = i_target.getCoreSelect() << SHIFT32(18);
     fapi2::buffer<uint64_t> l_scomData = 0;
+    fapi2::buffer<buffer_t> l_mmioData = 0;
 
     FAPI_INF(">>p10_hcd_mma_stopclocks");
+
+    FAPI_DBG("Drop MMA_AVAILABLE via CPMS_MMAR[0]");
+    FAPI_TRY( HCD_PUTMMIO_C( i_target, CPMS_MMAR_WO_CLEAR, MMIO_1BIT(0) ) );
 
     FAPI_DBG("Disable MMA Regional PSCOMs via CPLT_CTRL3[5-8:MMA_REGIONS]");
     FAPI_TRY( HCD_PUTSCOM_Q( eq_target, CPLT_CTRL3_WO_CLEAR, SCOM_LOAD32H(l_regions) ) );
