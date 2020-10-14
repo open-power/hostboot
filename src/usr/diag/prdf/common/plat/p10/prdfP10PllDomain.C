@@ -116,6 +116,45 @@ bool PllDomain::Query(ATTENTION_TYPE i_attnType)
 
 //------------------------------------------------------------------------------
 
+void __callout(STEP_CODE_DATA_STRUCT& io_sc,
+                   std::map<PllErrTypes::Types,
+                            std::vector<ExtensibleChip*>>& i_errList,
+                   PllErrTypes::Types i_errType,
+                   PRDpriority i_clockPri = MRU_HIGH,
+                   PRDpriority i_procPri  = MRU_LOW)
+{
+    // Get the clock callout type.
+    PRDcalloutData::MruType clockType = PRDcalloutData::TYPE_NONE;
+    switch (i_errType)
+    {
+        case PllErrTypes::PLL_UNLOCK_0:
+        case PllErrTypes::RCS_OSC_ERROR_0:
+        case PllErrTypes::RCS_UNLOCKDET_0:
+            clockType = PRDcalloutData::TYPE_PROCCLK0;
+            break;
+
+        case PllErrTypes::PLL_UNLOCK_1:
+        case PllErrTypes::RCS_OSC_ERROR_1:
+        case PllErrTypes::RCS_UNLOCKDET_1:
+            clockType = PRDcalloutData::TYPE_PROCCLK1;
+            break;
+
+        default:
+            PRDF_ASSERT(0);
+    }
+
+    // Add callouts for each chip in the list, if needed.
+    for (const auto& chip : i_errList[i_errType])
+    {
+        // Callout the clock.
+        PRDcallout clockCallout { chip->getTrgt(), clockType };
+        io_sc.service_data->SetCallout(clockCallout, i_clockPri);
+
+        // Callout the processor.
+        io_sc.service_data->SetCallout(chip->getTrgt(), i_procPri);
+    }
+}
+
 int32_t PllDomain::Analyze(STEP_CODE_DATA_STRUCT& io_sc,
                            ATTENTION_TYPE attentionType)
 {
@@ -129,11 +168,7 @@ int32_t PllDomain::Analyze(STEP_CODE_DATA_STRUCT& io_sc,
 
     // Keep track of all chips with attentions. They will be used for the
     // primary signature and callouts later.
-    std::map<PllErrTypes::Types, std::vector<ExtensibleChip*>> chipList;
-
-    // Keep track of all chips with with PLL unlock attentions. They will be
-    // used for callouts later.
-    std::vector<ExtensibleChip*> pllUnlockList;
+    std::map<PllErrTypes::Types, std::vector<ExtensibleChip*>> errList;
 
     // Examine each chip in the domain.
     for (unsigned int index = 0; index < GetSize(); ++index)
@@ -182,7 +217,7 @@ int32_t PllDomain::Analyze(STEP_CODE_DATA_STRUCT& io_sc,
         if (errTypes.query(PllErrTypes::TYPE)) \
         {\
             io_sc.service_data->AddSignatureList(trgt, PRDFSIG_##TYPE); \
-            chipList[PllErrTypes::TYPE].push_back(chip); \
+            errList[PllErrTypes::TYPE].push_back(chip); \
         }
 
         TMP_FUNC(PLL_UNLOCK_0   )
@@ -194,15 +229,14 @@ int32_t PllDomain::Analyze(STEP_CODE_DATA_STRUCT& io_sc,
 
         #undef TMP_FUNC
 
-        // Keep track of all chips with PLL attentions.
-        if (errTypes.query(PllErrTypes::PLL_UNLOCK_0) ||
-            errTypes.query(PllErrTypes::PLL_UNLOCK_1))
+        // If any RCS OSC errors or PLL unlocks on this chip, link this log to
+        // any possible recent HWP failures.
+        if (errTypes.query(PllErrTypes::PLL_UNLOCK_0   ) ||
+            errTypes.query(PllErrTypes::PLL_UNLOCK_1   ) ||
+            errTypes.query(PllErrTypes::RCS_OSC_ERROR_0) ||
+            errTypes.query(PllErrTypes::RCS_OSC_ERROR_1))
         {
-            pllUnlockList.push_back(chip);
-
-            // In the case of a PLL_UNLOCK error, we want to do additional
-            // isolation in case of a HWP failure.
-            PlatServices::hwpErrorIsolation( chip, io_sc );
+            PlatServices::hwpErrorIsolation(chip, io_sc);
         }
     }
 
@@ -217,9 +251,9 @@ int32_t PllDomain::Analyze(STEP_CODE_DATA_STRUCT& io_sc,
 
     // Set the primary signature to the highest priority attention type.
     #define TMP_FUNC(TYPE) \
-    if (!chipList[PllErrTypes::TYPE].empty()) \
+    if (!errList[PllErrTypes::TYPE].empty()) \
     {\
-        HUID huid = chipList[PllErrTypes::TYPE].front()->getHuid(); \
+        HUID huid = errList[PllErrTypes::TYPE].front()->getHuid(); \
         io_sc.service_data->setSignature(huid, PRDFSIG_##TYPE); \
     }
 
@@ -289,7 +323,9 @@ int32_t PllDomain::Analyze(STEP_CODE_DATA_STRUCT& io_sc,
     if (errTypesSummary.query(PllErrTypes::RCS_OSC_ERROR_0) ||
         errTypesSummary.query(PllErrTypes::RCS_OSC_ERROR_1))
     {
-        // TODO: Make callouts based on error types.
+        // Callout associated clocks/procs, if needed.
+        __callout(io_sc, errList, PllErrTypes::RCS_OSC_ERROR_0);
+        __callout(io_sc, errList, PllErrTypes::RCS_OSC_ERROR_1);
 
         // Ensure any PLL unlock or RCS unlock detect errors on either side are
         // ignored. Generally, this means the attentions should be cleared, but
@@ -302,7 +338,29 @@ int32_t PllDomain::Analyze(STEP_CODE_DATA_STRUCT& io_sc,
     }
     else
     {
-        // TODO: Make callouts based on error types.
+        // Callout associated clocks/procs, if needed.
+        __callout(io_sc, errList, PllErrTypes::RCS_UNLOCKDET_0);
+        __callout(io_sc, errList, PllErrTypes::RCS_UNLOCKDET_1);
+
+        // Get the total number of chips that reported PLL errors. Note that it
+        // should not be possible for a chip to report PLL errors from both
+        // clocks because they should only come from the primary clock.
+        unsigned int pllChips = errList[PllErrTypes::PLL_UNLOCK_0].size() +
+                                errList[PllErrTypes::PLL_UNLOCK_1].size();
+        if (0 < pllChips)
+        {
+            // If PLL unlock errors are present on more than one chip, the clock
+            // is more likely to be the problem. If PLL unlock errors are scoped
+            // to a single chip, the chip is more likely to be the problem.
+            PRDpriority clockPri = (1 == pllChips) ? MRU_MED  : MRU_HIGH;
+            PRDpriority procPri  = (1 == pllChips) ? MRU_HIGH : MRU_MED;
+
+            // Callout associated clocks, if needed.
+            __callout(io_sc, errList, PllErrTypes::PLL_UNLOCK_0,
+                      clockPri, procPri);
+            __callout(io_sc, errList, PllErrTypes::PLL_UNLOCK_1,
+                      clockPri, procPri);
+        }
     }
 
     // TODO: Currently unsure what the threshold should be for each error type.
