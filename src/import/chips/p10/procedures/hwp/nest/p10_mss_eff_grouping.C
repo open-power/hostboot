@@ -3320,9 +3320,15 @@ fapi2::ReturnCode grouping_calcRegions(
             if (io_groupData.iv_data[pos][ALT_VALID(ii)])
             {
                 io_groupData.iv_data[pos][ALT_BASE_ADDR(ii)] =
-                    io_groupData.iv_data[pos][BASE_ADDR] +
-                    io_groupData.iv_data[pos][GROUP_SIZE] -
-                    io_groupData.iv_data[pos][ALT_SIZE(ii)];
+                    (
+                        io_groupData.iv_data[pos][BASE_ADDR] +
+                        io_groupData.iv_data[pos][GROUP_SIZE] -
+                        io_groupData.iv_data[pos][ALT_SIZE(ii)]
+                    )
+                    >> 2; //BAR must be adjusted for register alignment
+                FAPI_DBG("Base: %lX Size: %lX Alt Size: %lX Calc: %lx", io_groupData.iv_data[pos][BASE_ADDR],
+                         io_groupData.iv_data[pos][GROUP_SIZE], io_groupData.iv_data[pos][ALT_SIZE(ii)],
+                         io_groupData.iv_data[pos][ALT_BASE_ADDR(ii)]);
 
                 if (l_map_mirror)
                 {
@@ -3339,9 +3345,12 @@ fapi2::ReturnCode grouping_calcRegions(
                              io_groupData.iv_data[pos + MIRR_OFFSET][ALT_SIZE(ii)],
                              io_groupData.iv_data[pos + MIRR_OFFSET][ALT_SIZE(ii)]);
                     io_groupData.iv_data[pos + MIRR_OFFSET][ALT_BASE_ADDR(ii)] =
-                        io_groupData.iv_data[pos + MIRR_OFFSET][BASE_ADDR] +
-                        io_groupData.iv_data[pos + MIRR_OFFSET][GROUP_SIZE] -
-                        io_groupData.iv_data[pos + MIRR_OFFSET][ALT_SIZE(ii)];
+                        (
+                            io_groupData.iv_data[pos + MIRR_OFFSET][BASE_ADDR] +
+                            io_groupData.iv_data[pos + MIRR_OFFSET][GROUP_SIZE] -
+                            io_groupData.iv_data[pos + MIRR_OFFSET][ALT_SIZE(ii)]
+                        )
+                        >> 2;
                     io_groupData.iv_data[pos + MIRR_OFFSET][ALT_VALID(ii)] = 1;
                 }
             }
