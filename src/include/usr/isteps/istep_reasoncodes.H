@@ -169,6 +169,8 @@ namespace ISTEP
         RC_PRESENCE_MISMATCH_HB                  = ISTEP_COMP_ID | 0x5B,
         RC_PRESENCE_MISMATCH_SP                  = ISTEP_COMP_ID | 0x5C,
         RC_MASTER_PROC_SECURE_VERSION_MISMATCH   = ISTEP_COMP_ID | 0x5D,
+        RC_MEMCRYPT_KEY_SETUP_FAILED             = ISTEP_COMP_ID | 0x5E,
+        RC_MEMCRYPT_LOCK_FAILED                  = ISTEP_COMP_ID | 0x5F,
     };
 
 };

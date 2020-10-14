@@ -64,6 +64,7 @@ OBJS += call_proc_setup_mmio_bars.o
 OBJS += call_proc_exit_cache_contained.o
 OBJS += call_proc_htm_setup.o
 OBJS += call_host_mpipl_service.o
+OBJS += memory_encryption.o
 
 # Include the makefiles to compile the HWPs needed by the sub steps
 include ${ROOTPATH}/procedure.rules.mk
