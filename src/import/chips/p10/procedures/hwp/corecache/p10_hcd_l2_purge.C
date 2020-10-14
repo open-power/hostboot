@@ -65,7 +65,7 @@
 
 enum P10_HCD_L2_PURGE_CONSTANTS
 {
-    HCD_L2_PURGE_DONE_POLL_TIMEOUT_HW_NS          = 100000, // 10^5ns = 100us timeout
+    HCD_L2_PURGE_DONE_POLL_TIMEOUT_HW_NS          = 100000000, // 10^5ns = 100us timeout
     HCD_L2_PURGE_DONE_POLL_DELAY_HW_NS            = 1000,   // 1us poll loop delay
     HCD_L2_PURGE_DONE_POLL_DELAY_SIM_CYCLE        = 32000,  // 32k sim cycle delay
     HCD_PMSR_SHIFT_INACTIVE_POLL_TIMEOUT_HW_NS    = 100000, // 10^5ns = 100us timeout
@@ -136,6 +136,26 @@ p10_hcd_l2_purge(
     }
     while( (--l_timeout) != 0 );
 
+    /*debug only
+    #ifdef __PPE_QME
+        if( l_timeout == 0)
+        {
+            uint32_t temp[4] = {0,0,0,0};
+            fapi2::Target < fapi2::TARGET_TYPE_CORE | fapi2::TARGET_TYPE_MULTICAST, fapi2::MULTICAST_AND > tar  = i_target;
+            fapi2::Target< fapi2::TARGET_TYPE_PROC_CHIP > l_chip =
+                i_target.getParent< fapi2::TARGET_TYPE_PROC_CHIP >();
+
+            for( int i=0; i<4; i++ )
+            {
+                tar = l_chip.getMulticast<fapi2::MULTICAST_AND>(fapi2::MCGROUP_GOOD_EQ,
+                       static_cast<fapi2::MulticastCoreSelect>(i));
+                FAPI_TRY( HCD_GETMMIO_C( tar, MMIO_LOWADDR(QME_SCSR), l_mmioData ) );
+                temp[i] = l_mmioData;
+            }
+            FAPI_IMP("L2 Purge Done Timeout %x %x %x %x", temp[0], temp[1], temp[2], temp[3]);
+        }
+    #endif
+    */
     FAPI_ASSERT((l_timeout != 0),
                 fapi2::L2_PURGE_DONE_TIMEOUT()
                 .set_L2_PURGE_DONE_POLL_TIMEOUT_HW_NS(HCD_L2_PURGE_DONE_POLL_TIMEOUT_HW_NS)
