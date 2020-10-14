@@ -4236,9 +4236,12 @@ errlHndl_t verifyAndMovePayload(void)
                                 PAGESIZE);
     payload_size -= PAGESIZE;
 
+    const uint64_t mapSize = std::max(getLMBSizeInMB() * MEGABYTE,
+                                      payload_size);
+
     payloadBase_virt_addr = mm_block_map(
                                reinterpret_cast<void*>(payloadBase),
-                               payload_size);
+                               mapSize);
 
     // Check for nullptr being returned
     if (payloadBase_virt_addr == nullptr)
@@ -4261,6 +4264,21 @@ errlHndl_t verifyAndMovePayload(void)
     memcpy (payloadBase_virt_addr,
             payload_tmp_virt_addr,
             payload_size);
+
+    if (mapSize > payload_size)
+    {
+        const auto payloadBase_virt_addr_ptr = static_cast<uint8_t*>(payloadBase_virt_addr);
+
+        TRACFCOMP(g_trac_runtime,
+                  "verifyAndMovePayload(): Zeroing rest of first LMB of PAYLOAD from 0x%.16llX (va="
+                  "0x%llX) to 0x%.16llX (va=0x%llX)",
+                  payloadBase + payload_size, payloadBase_virt_addr_ptr + payload_size,
+                  payloadBase + mapSize, payloadBase_virt_addr_ptr + mapSize);
+
+        memset(payloadBase_virt_addr_ptr + payload_size,
+               0,
+               mapSize - payload_size);
+    }
 
     // No need to move HDAT on eBMC, since at the time of the execution of this
     // function, it would not have been built yet.

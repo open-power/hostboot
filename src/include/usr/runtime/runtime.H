@@ -454,7 +454,19 @@ inline uint64_t calcSpAttnAreaStart()
  */
 errlHndl_t verifyAndMovePayload(void);
 
+/**
+ * @brief Get the Logical Memory Block (LMB) size in megabytes.
+ *
+ * @return uint64_t Currently configured LMB size, in megabytes
+ */
+inline uint64_t getLMBSizeInMB()
+{
+    //@TODO: RTC 142465 missing attribute ATTR_LMB_SIZE
+    //@TODO RTC 245661 to get from pldm bios
+    // We hardcode this to 256 right now (see hdatGetIplParmsData)
+    return 256;
+}
+
 } // namespace RUNTIME
 
 #endif
-

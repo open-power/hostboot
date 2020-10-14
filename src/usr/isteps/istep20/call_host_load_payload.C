@@ -58,12 +58,14 @@ namespace ISTEP_20
  *
  * @param[in] i_section  - Which section are we loading
  * @param[in] i_physAddr - The physical address of the section
+ * @param[in] i_zeroLmb  - Whether to zero the LMB into which the PNOR section is loaded
  *
  * @return errlHndl_t - NULL if successful, otherwise a pointer
  *                      to the error log.
  */
 static errlHndl_t load_pnor_section(PNOR::SectionId i_section,
-                                    uint64_t i_physAddr);
+                                    uint64_t i_physAddr,
+                                    bool i_zeroLmb);
 
 void* call_host_load_payload (void *io_pArgs)
 {
@@ -95,7 +97,7 @@ void* call_host_load_payload (void *io_pArgs)
         {
             PNOR::SectionId l_secID = PNOR::PAYLOAD;
 
-            l_err = load_pnor_section( l_secID, payloadBase );
+            l_err = load_pnor_section( l_secID, payloadBase, false );
             if ( l_err )
             {
                 TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
@@ -107,7 +109,7 @@ void* call_host_load_payload (void *io_pArgs)
         {
 #ifdef CONFIG_LOAD_PHYP_FROM_BOOTKERNEL
             PNOR::SectionId l_secID = PNOR::BOOTKERNEL;
-            l_err = load_pnor_section(l_secID, payloadBase);
+            l_err = load_pnor_section(l_secID, payloadBase, true);
             if (l_err)
             {
                 TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
@@ -149,7 +151,8 @@ void* call_host_load_payload (void *io_pArgs)
 }
 
 static errlHndl_t load_pnor_section(PNOR::SectionId i_section,
-        uint64_t i_physAddr)
+                                    uint64_t i_physAddr,
+                                    const bool i_zeroLmb)
 {
     TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,ENTER_MRK"load_pnor_section()");
     errlHndl_t err = nullptr;
@@ -205,12 +208,29 @@ static errlHndl_t load_pnor_section(PNOR::SectionId i_section,
             originalPayloadSize,
             i_physAddr );
 
+    const uint32_t lmbSize = (i_zeroLmb
+                              ? RUNTIME::getLMBSizeInMB() * MEGABYTE
+                              : 0);
+
+    const uint32_t mapSize = std::max(uncompressedPayloadSize, lmbSize);
+
     void * loadAddr = NULL;
     // Map in the physical memory we are loading into.
     // If we are not xz compressed, the uncompressedSize
     // is equal to the original size.
     loadAddr = mm_block_map( reinterpret_cast<void*>( i_physAddr ),
-                             uncompressedPayloadSize );
+                             mapSize );
+
+    if (i_zeroLmb)
+    {
+        const auto loadAddr_ptr = static_cast<uint8_t*>(loadAddr);
+        printk("Zeroing first LMB for PHYP (v:%p to v:%p)\n",
+               loadAddr_ptr + uncompressedPayloadSize,
+               loadAddr_ptr + mapSize);
+        memset(loadAddr_ptr + uncompressedPayloadSize,
+               0,
+               mapSize - uncompressedPayloadSize);
+    }
 
     // Print out inital progress bar.
 #ifdef CONFIG_CONSOLE
