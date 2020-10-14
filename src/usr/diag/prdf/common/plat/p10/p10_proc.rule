@@ -2738,24 +2738,24 @@ group gTP_LOCAL_FIR
     (rTP_LOCAL_FIR, bit(41)) ? self_th_32perDay;
 
     /** TP_LOCAL_FIR[42]
-     *  RCS - OSC0 Error
+     *  RCS OSC error on clk0
      */
-    (rTP_LOCAL_FIR, bit(42)) ? self_th_32perDay;
+    (rTP_LOCAL_FIR, bit(42)) ? level2_th_1;
 
     /** TP_LOCAL_FIR[43]
-     *  RCS - OSC1 Error
+     *  RCS OSC error on clk1
      */
-    (rTP_LOCAL_FIR, bit(43)) ? self_th_32perDay;
+    (rTP_LOCAL_FIR, bit(43)) ? level2_th_1;
 
     /** TP_LOCAL_FIR[44]
-     *  RCS - Delay line 0 unlock
+     *  RCS unlock detect on clk0
      */
-    (rTP_LOCAL_FIR, bit(44)) ? self_th_32perDay;
+    (rTP_LOCAL_FIR, bit(44)) ? level2_th_1;
 
     /** TP_LOCAL_FIR[45]
-     *  RCS - Delay line 1 unlock
+     *  RCS unlock detect on clk1
      */
-    (rTP_LOCAL_FIR, bit(45)) ? self_th_32perDay;
+    (rTP_LOCAL_FIR, bit(45)) ? level2_th_1;
 
     /** TP_LOCAL_FIR[46]
      *  PIBMEM

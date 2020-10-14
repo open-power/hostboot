@@ -516,8 +516,8 @@ PRDF_PLUGIN_DEFINE(p10_proc, maskPllErrTypes);
 #endif // __HOSTBOOT_MODULE
 
 //##############################################################################
-//## This plugin is required for both FSP and Hostboot because there is no
-//## mechanism to declare an optional function call from the rule code.
+//## These plugins is required for both FSP and Hostboot because there is no
+//## mechanism to declare optional function calls from the rule code.
 //##############################################################################
 
 /**
@@ -560,6 +560,57 @@ int32_t clearPcbSlaveParityError(ExtensibleChip * i_chip,
     return SUCCESS;
 }
 PRDF_PLUGIN_DEFINE(p10_proc, clearPcbSlaveParityError);
+
+//------------------------------------------------------------------------------
+
+/**
+ * @brief  Masks PCB slave parity errors on this chip, if at threshold.
+ * @param  i_chip A PROC chip.
+ * @param  io_sc  The step code data struct.
+ * @return PRD_NO_CLEAR_FIR_BITS if at threshold and the PCB slave parity errors
+ *         have been masked in the xx_PCBSLV_CONFIG registers. SUCCESS,
+ *         otherwise.
+ */
+int32_t maskPcbSlaveParityError(ExtensibleChip * i_chip,
+                                STEP_CODE_DATA_STRUCT & io_sc)
+{
+    #ifdef __HOSTBOOT_MODULE // only allowed to modify hardware from the host
+
+    // Mask only at threshold.
+    if (io_sc.service_data->IsAtThreshold())
+    {
+        // Mask the parity errors by setting xx_PCBSLV_CONFIG[8:11] to all 1's
+        // using a read-modify-write.
+
+        FOR_EACH_REG_PAIR(i_chip)
+
+            SCAN_COMM_REGISTER_CLASS* cfg = chip->getRegister(pair.first);
+
+            if (SUCCESS != cfg->Read()) continue;
+
+            cfg->SetBitFieldJustified(8, 4, 0xF);
+
+            cfg->Write();
+
+        END_FOR_EACH_REG_PAIR
+
+        // Returning PRD_NO_CLEAR_FIR_BITS below will tell the rule code to not
+        // clear the FIR bit. So we will have to do that manually.
+        SCAN_COMM_REGISTER_CLASS* fir = i_chip->getRegister("TP_LOCAL_FIR_AND");
+        fir->setAllBits();
+        fir->ClearBit(PCB_SLAVE);
+        fir->Write();
+
+        // Returning this will ensure TP_LOCAL_FIR[28] is not masked. This
+        // will allow hardware to continue reporting PLL unlock attentions.
+        return PRD_NO_CLEAR_FIR_BITS;
+    }
+
+    #endif // __HOSTBOOT_MODULE
+
+    return SUCCESS;
+}
+PRDF_PLUGIN_DEFINE(p10_proc, maskPcbSlaveParityError);
 
 //------------------------------------------------------------------------------
 

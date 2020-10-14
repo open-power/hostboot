@@ -61,6 +61,7 @@ actionclass pcb_slave_internal_parity
     thresholdPll;
     funccall("capturePllFfdc");
     funccall("clearPcbSlaveParityError");
+    funccall("maskPcbSlaveParityError"); # must be called last for return code
 };
 
 ###############################################################################
