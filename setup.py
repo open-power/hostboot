@@ -32,7 +32,7 @@ from setuptools import setup
 
 
 """
- New modules should be added to this dictionary.
+ New parsing modules should be added to this dictionary.
  Changes to a C++ UD Parser should also be made to the corresponding Python Parser.
  Helper files for the modules should be added to the directory corresponding to
  "helpers" in dirmap.
@@ -50,17 +50,21 @@ dirmap = {
     "b3600": "src/usr/expaccess/plugins/ebmc",
     "b4500": "src/usr/spi/plugins/ebmc",
     "be500": "src/usr/diag/prdf/plugins/ebmc",
-    "helpers": "src/build/tools/ebmc"
+    "helpers": "src/build/tools/ebmc",
+    "bsrc": "src/usr/errl/parser/ebmc"
 }
 
 """Returns the package name for a parser module
 
 @param[in] dirmap_key: a key from the dirmap dictionary
-@returns: a string of the package name, "udparsers.dirmap_key"
+@returns: a string of the package name for the given key
 
 """
 def get_package_name(dirmap_key):
-    return "udparsers.{}".format(dirmap_key)
+    if (dirmap_key == "bsrc"):
+        return "srcparsers.{}".format(dirmap_key)
+    else:
+        return "udparsers.{}".format(dirmap_key)
 
 """Takes an item from dirmap and gets the package name and directory for the module
 

@@ -456,6 +456,7 @@ my %compValueToParseHash;
 my %rcModValuesUsed;
 my %srcList;
 my %displayDataEntries;
+my %PYdisplayDataEntries;
 
 foreach my $file (@filesToParse)
 {
@@ -768,6 +769,14 @@ foreach my $file (@filesToParse)
                               . "     \"$userDataTextOnly[1]\"\n"
                               . "    },\n\n";
 
+            # Create the Python version of the data entry code for this error
+            my $pythonDataEntryCode = "            0x$rcValue$modIdValue: {    \"devdesc\": \"$desc\",\n"
+                                    . "                          \"moduleid\": \"$modId\",\n"
+                                    . "                        \"reasoncode\": \"$rc\",\n"
+                                    . "                         \"userdata1\": \"$userDataTextOnly[0]\",\n"
+                                    . "                         \"userdata2\": \"$userDataTextOnly[1]\",\n"
+                                    . "                      },\n";
+
             # The component value is the first two characters of the 4 character rc
             my $compValue = $rcValue;
             $compValue =~ s/..$//;
@@ -777,6 +786,8 @@ foreach my $file (@filesToParse)
 
             # Add the data entry code to displayDataEntries
             $displayDataEntries{$modIdValue}{$rcValue} = $dataEntryCode;
+            # Add the data entry code to PYdisplayDataEntries
+            $PYdisplayDataEntries{$modIdValue}{$rcValue} = $pythonDataEntryCode;
         }
     }
 
@@ -1330,6 +1341,28 @@ foreach my $modID (sort hexToDecCmp keys(%displayDataEntries))
         print OFILE $displayDataEntries{$modID}{$rc};
     }
 }
+
+#------------------------------------------------------------------------------
+# Generate the srcdisplaydata.py file that contains the dictionaries of Hostboot
+# component IDs and detailed error data for the use of the python SRC parser.
+#------------------------------------------------------------------------------
+
+my $PYoutputFileName = $outputDir . "/srcdisplaydata.py";
+open(PYFILE, ">", $PYoutputFileName) or die("Cannot open: $PYoutputFileName: $!");
+print PYFILE "\"\"\" Automatically genterated by Hostboot's $0\n\n";
+print PYFILE "The following dictionary is used by bsrc.py to parse SRC data.\n\n";
+print PYFILE "\"\"\"\n\n";
+print PYFILE "srcInfo = {\n";
+foreach my $modID (sort hexToDecCmp keys(%PYdisplayDataEntries))
+{
+    foreach my $rc (sort hexToDecCmp keys(%{$PYdisplayDataEntries{$modID}}))
+    {
+        print PYFILE $PYdisplayDataEntries{$modID}{$rc};
+    }
+}
+print PYFILE "          }\n";
+
+close(PYFILE);
 
 #------------------------------------------------------------------------------
 # Helper function for sort method, sorts by ascending values
