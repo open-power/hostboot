@@ -3472,26 +3472,11 @@ sub postProcessIohs
     my $targetType = targetTypeSanityCheck($targetObj, $target, "IOHS");
     validateTargetHasBeenPreProcessed($targetObj, $target);
 
-    my $iohsConfigMode = $targetObj->getAttribute($target, "IOHS_CONFIG_MODE");
-    if ($iohsConfigMode eq "SMPA")
+    # If in SMP WRAP mode, then ignore the IOHS_CONFIG_MODE attribute of the IOHS
+    # target and process *all* bus connections of type SMPA and SMPX .
+    if ($targetObj->{system_config} eq "w")
     {
         # Iterate over the children looking for ABUS
-        foreach my $child (@{ $targetObj->getTargetChildren($target) })
-        {
-            my $childType = $targetObj->getType($child);
-            if ($childType eq "ABUS")
-            {
-                # The bus connection are one more level deep in the GroupA/GroupB target
-                foreach my $group (@{ $targetObj->getTargetChildren($child) })
-                {
-                    processSmpA($targetObj, $group, $target);
-                }
-            }
-        } # foreach my $child (@{ $targetObj->getTargetChildren($target) })
-    }
-    elsif ($iohsConfigMode eq "SMPX")
-    {
-        # Iterate over the children looking for XBUS
         foreach my $child (@{ $targetObj->getTargetChildren($target) })
         {
             my $childType = $targetObj->getType($child);
@@ -3499,8 +3484,49 @@ sub postProcessIohs
             {
                 processSmpX($targetObj, $child, $target);
             }
-        } # foreach my $child (@{ $targetObj->getTargetChildren($target) })
-    } # end if ($iohsConfigMode eq "SMPA") ... elseif ...
+            elsif ($childType eq "ABUS")
+            {
+                # The bus connection are one more level deep in the GroupA/GroupB target
+                foreach my $group (@{ $targetObj->getTargetChildren($child) })
+                {
+                    processSmpA($targetObj, $group, $target);
+                }
+            }
+        }
+    }
+    # Not in SMP WRAP mode, process the IOHS targets according to the attribute IOHS_CONFIG_MODE
+    else
+    {
+        my $iohsConfigMode = $targetObj->getAttribute($target, "IOHS_CONFIG_MODE");
+        if ($iohsConfigMode eq "SMPA")
+        {
+            # Iterate over the children looking for ABUS
+            foreach my $child (@{ $targetObj->getTargetChildren($target) })
+            {
+                my $childType = $targetObj->getType($child);
+                if ($childType eq "ABUS")
+                {
+                    # The bus connection are one more level deep in the GroupA/GroupB target
+                    foreach my $group (@{ $targetObj->getTargetChildren($child) })
+                    {
+                        processSmpA($targetObj, $group, $target);
+                    }
+                }
+            } # foreach my $child (@{ $targetObj->getTargetChildren($target) })
+        }
+        elsif ($iohsConfigMode eq "SMPX")
+        {
+            # Iterate over the children looking for XBUS
+            foreach my $child (@{ $targetObj->getTargetChildren($target) })
+            {
+                my $childType = $targetObj->getType($child);
+                if ($childType eq "XBUS")
+                {
+                    processSmpX($targetObj, $child, $target);
+                }
+            } # foreach my $child (@{ $targetObj->getTargetChildren($target) })
+        } # end if ($iohsConfigMode eq "SMPA") ... elseif ...
+    } # if ($targetObj->{system_config} eq "w") ... else ...
 
 } # end sub postProcessIohs
 
