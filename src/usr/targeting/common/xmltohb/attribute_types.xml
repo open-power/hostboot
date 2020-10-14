@@ -2520,7 +2520,10 @@
 
   <attribute>
     <complexType>
-      <description>struct - 4 booleans and a PLID</description>
+      <description>
+        Structure consisting of an EID (or reason), 5 booleans, and 3 reserved
+        bits
+      </description>
       <field>
         <default>0</default>
         <description>if this target was deconfigured,
@@ -2581,9 +2584,21 @@
         <name>specdeconfig</name>
         <type>uint8_t</type>
       </field>
+      <field>
+        <bits>3</bits>
+        <default>0</default>
+        <description>Reserved for future use</description>
+        <name>reserved</name>
+        <type>uint8_t</type>
+      </field>
     </complexType>
-    <description>HardWare Availability Service State Attribute.
-        Keeps track of Target values poweredOn, present, functional</description>
+    <description>
+      HardWare Availability Service state attribute which keeps track of whether
+      a given target is powered on (or not), present (or not), functional (or
+      not), functional in terms of dump (or not), speculatively deconfigured (or
+      not), and if deconfigured, the reason or EID associated with the
+      deconfiguration.
+    </description>
     <id>HWAS_STATE</id>
     <persistency>volatile</persistency>
     <readable/>
