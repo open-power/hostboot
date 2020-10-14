@@ -737,16 +737,17 @@ errlHndl_t doForm1IndirectScom(DeviceFW::OperationType i_opType,
  * @param[in] i_chipTarg the target on which the multicast scom operation was
  *            executed
  * @param[out] o_scom_data the captured FFDC for the specified target
+ * @param[out] o_badChiplet chiplet id of the first failing chiplet
  * @return PIB_NO_ERROR on success; error code on failure (see piberror.H)
  */
 PIB::PibError addMulticastFFDC(TARGETING::Target* i_chipTarg,
-                             ERRORLOG::ErrlUserDetailsLogRegister& o_scom_data)
+                             ERRORLOG::ErrlUserDetailsLogRegister& o_scom_data,
+                             uint8_t& o_badChiplet )
 {
     PIB::PibError l_rc = PIB::PIB_NO_ERROR;
     constexpr uint32_t FRONT_NIBBLE = 0x70;
     constexpr uint32_t BACK_NIBBLE = 0x07;
 
-    uint32_t l_badChiplet = 0;
     uint64_t ffdc_regs1[] =
     {
         0x000F001E, // PCBMS.FIRST_ERR_REG
@@ -813,39 +814,43 @@ PIB::PibError addMulticastFFDC(TARGETING::Target* i_chipTarg,
         l_respPtr += l_scomsize; // move to the next chunk
     }
 
-    // find the bad chiplet
+    // find the (first) chiplet that failed the multicast operation
+    o_badChiplet = 0xFF;
     //   4-bits per chiplet : 1-bit response, 3-bit error code
     for(size_t x = 0; x < sizeof(l_responses); ++x)
     {
+        uint8_t l_badChiplet = 0xFF;
         // look for the first non-zero pib error code
         if(l_responses[x] & FRONT_NIBBLE)
         {
             l_badChiplet = x*2;
-            break;
+            o_badChiplet = (o_badChiplet==0xFF) ? l_badChiplet : o_badChiplet;
         }
         else if(l_responses[x] & BACK_NIBBLE)
         {
             l_badChiplet = x*2 + 1;
-            break;
+            o_badChiplet = (o_badChiplet==0xFF) ? l_badChiplet : o_badChiplet;
+        }
+
+        if( l_badChiplet != 0xFF )
+        {
+            uint64_t ffdc_regs3[] =
+            {
+                0x0F0001, // multicast group1
+                0x0F0002, // multicast group2
+                0x0F0003, // multicast group3
+                0x0F0004, // multicast group4
+            };
+            for(size_t x = 0;
+                x < (sizeof(ffdc_regs3)/sizeof(ffdc_regs3[0]));
+                ++x)
+            {
+                p10_scom_addr l_scom(ffdc_regs3[x]);
+                l_scom.setChipletId(l_badChiplet);
+                o_scom_data.addData(DEVICE_SCOM_ADDRESS(l_scom.getAddr()));
+            }
         }
     }
-
-    uint64_t ffdc_regs3[] =
-    {
-        0x0F0001, // multicast group1
-        0x0F0002, // multicast group2
-        0x0F0003, // multicast group3
-        0x0F0004, // multicast group4
-    };
-    for(size_t x = 0;
-        x < (sizeof(ffdc_regs3)/sizeof(ffdc_regs3[0]));
-        ++x)
-    {
-        p10_scom_addr l_scom(ffdc_regs3[x]);
-        l_scom.setChipletId(l_badChiplet);
-        o_scom_data.addData(DEVICE_SCOM_ADDRESS(l_scom.getAddr()));
-    }
-
 
     return l_rc;
 }
@@ -911,7 +916,8 @@ void processMulticastErrl(TARGETING::Target* i_target,
                     PIB::PibError l_pibRc = PIB::PIB_NO_ERROR;
                     ERRORLOG::ErrlUserDetailsLogRegister l_scom_data(
                        i_target);
-                    l_pibRc = addMulticastFFDC(i_target, l_scom_data);
+                    uint8_t l_ignored = 0;
+                    l_pibRc = addMulticastFFDC(i_target, l_scom_data, l_ignored);
                     if(l_pibRc != PIB::PIB_CLOCK_ERROR)
                     {
                         // This is a miscompare
@@ -1100,7 +1106,6 @@ void addScomFailFFDC( errlHndl_t i_err,
     ERRORLOG::ErrlUserDetailsLogRegister l_scom_data(i_chipTarg);
     bool addit = false;
     TARGETING::TYPE l_type = TARGETING::TYPE_NA;
-    uint32_t l_badChiplet = 0x00;
 
     // TODO RTC 214958: Investigate the thread safety of this construct
     static bool l_insideFFDC = false;
@@ -1121,11 +1126,12 @@ void addScomFailFFDC( errlHndl_t i_err,
     }
 
     //Multicast scoms on the processor
+    uint8_t l_badChiplet = 0xFF;
     if( p10_scom_addr(i_addr).isMulticast()
         && (TARGETING::TYPE_PROC == l_type) )
     {
         addit = true;
-        (void)addMulticastFFDC(i_chipTarg, l_scom_data);
+        (void)addMulticastFFDC(i_chipTarg, l_scom_data, l_badChiplet);
     }
 
     //Any non-PCB Slave and non TP reg on the processor
@@ -1134,28 +1140,33 @@ void addScomFailFFDC( errlHndl_t i_err,
         && (TARGETING::TYPE_PROC == l_type) )
     {
         addit = true;
-        if( l_badChiplet == 0x00 )
+
+        // grab some chiplet-specific data
+        if( (l_badChiplet == 0xFF)
+            && !p10_scom_addr(i_addr).isMulticast() )
         {
             l_badChiplet = p10_scom_addr(i_addr).getChipletId();
         }
-        //grab some data related to the PCB slave state
-        uint64_t ffdc_regs[] = {
-            0x0F001F, // PCBSL<cplt>.ERROR_REG
-            0x03000F, // CC.<chiplet>.ERROR_STATUS
-            // FIXME RTC: 213303 find the P10 equivalents
-            //0x010001, // <chiplet>.PSC.PSCOM_STATUS_ERROR_REG
-            //0x010002, // <chiplet>.PSC.PSCOM_ERROR_MASK
-        };
-        for( size_t x = 0; x < (sizeof(ffdc_regs)/sizeof(ffdc_regs[0])); x++ )
+        if( l_badChiplet != 0xFF )
         {
-            p10_scom_addr l_scom(ffdc_regs[x]);
-            l_scom.setChipletId(l_badChiplet);
-            l_scom_data.addData(DEVICE_SCOM_ADDRESS(l_scom.getAddr()));
+            //grab some data related to the PCB slave state
+            uint64_t ffdc_regs[] = {
+                0x0F001F, // PCBSL<cplt>.ERROR_REG
+                0x03000F, // CC.<chiplet>.ERROR_STATUS
+                0x010001, // <chiplet>.PSC.PSCOM_STATUS_ERROR_REG
+                0x010002, // <chiplet>.PSC.PSCOM_ERROR_MASK
+            };
+            for( size_t x = 0; x < (sizeof(ffdc_regs)/sizeof(ffdc_regs[0])); x++ )
+            {
+                p10_scom_addr l_scom(ffdc_regs[x]);
+                l_scom.setChipletId(l_badChiplet);
+                l_scom_data.addData(DEVICE_SCOM_ADDRESS(l_scom.getAddr()));
+            }
         }
 
-        //Osc Switch Sense 1 register
+        //RCS Sense 1 register
         l_scom_data.addData(DEVICE_SCOM_ADDRESS(0x0005001D));
-        //Osc Switch Sense 2 register
+        //RCS Sense 2 register
         l_scom_data.addData(DEVICE_SCOM_ADDRESS(0x0005001E));
 
         //grab the clock regs via FSI too, just in case
@@ -1179,14 +1190,9 @@ void addScomFailFFDC( errlHndl_t i_err,
         //look for hung operations on the PBA
         uint64_t ffdc_regs[] = {
             //grab the PBA buffers in case something is hung
-            0x03021C90, //PBARBUFVAL0
-            0x03021C91, //PBARBUFVAL1
-            0x03021C92, //PBARBUFVAL2
-            0x03021C93, //PBARBUFVAL3
-            0x03021C94, //PBARBUFVAL4
-            0x03021C95, //PBARBUFVAL5
-            0x03021C98, //PBAWBUFVAL0
-            0x03021C99, //PBAWBUFVAL1
+            0x03011DCC, //PBAERRRPT0
+            0x03011DCD, //PBAERRRPT1
+            0x03011DCE, //PBAERRRPT2
         };
         for( size_t x = 0; x < (sizeof(ffdc_regs)/sizeof(ffdc_regs[0])); x++ )
         {
@@ -1199,20 +1205,26 @@ void addScomFailFFDC( errlHndl_t i_err,
              && TARGETING::TYPE_PROC == l_type )
     {
         addit = true;
-        uint8_t l_badChiplet = p10_scom_addr(i_addr).getChipletId();
+        uint8_t l_chiplet = p10_scom_addr(i_addr).getChipletId();
+        uint8_t l_region = p10_scom_addr(i_addr).getRegionSelect();
+
         //grab some data related to the PCB slave state
         uint64_t ffdc_regs[] = {
-            // TODO RTC 214959: Update FFDC SCOM registers for P10
-            0x0F010A, //Special Wakeup Other
-            0x0F010B, //Special Wakeup FSP
-            0x0F010C, //Special Wakeup OCC
-            0x0F010D, //Special Wakeup HYP
-            0x0F0111, //PM State History FSP
+            0x0E8830, //QME Special Wakeup Other
+            0x0E8834, //QME Special Wakeup FSP
+            0x0E8838, //QME Special Wakeup OCC
+            0x0E883C, //QME Special Wakeup HYP
+
+            0x0E8820, //QME Stop State History Other Register
+            0x0E8824, //QME Stop State History FSP Register
+            0x0E8828, //QME Stop State History OCC Register
+            0x0E882C, //QME Stop State History HYP Register
         };
         for( size_t x = 0; x < (sizeof(ffdc_regs)/sizeof(ffdc_regs[0])); x++ )
         {
             p10_scom_addr l_scom(ffdc_regs[x]);
-            l_scom.setChipletId(l_badChiplet);
+            l_scom.setChipletId(l_chiplet);
+            l_scom.setRegionSelect(l_region);
             l_scom_data.addData(DEVICE_SCOM_ADDRESS(l_scom.getAddr()));
         }
     }
