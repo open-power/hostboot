@@ -549,7 +549,6 @@ p10_exit_cache_contained_run_mcc_initfile_xscom(
     fapi2::ATTR_SYS_ENABLE_MC_HW520600_X4CTR_Type l_TGT1_ATTR_SYS_ENABLE_MC_HW520600_X4CTR;
     fapi2::ATTR_SYS_DISABLE_HWFM_Type l_TGT1_ATTR_SYS_DISABLE_HWFM;
     fapi2::ATTR_CHIP_EC_FEATURE_HW548941_Type l_TGT2_ATTR_CHIP_EC_FEATURE_HW548941;
-    fapi2::ATTR_PROC_MEMORY_ENCRYPTION_ENABLED_Type l_TGT2_ATTR_PROC_MEMORY_ENCRYPTION_ENABLED;
     uint64_t l_def_MC_EPSILON_CFG_T0;
     uint64_t l_def_MC_EPSILON_CFG_T1;
     uint64_t l_def_MC_EPSILON_CFG_T2;
@@ -566,8 +565,6 @@ p10_exit_cache_contained_run_mcc_initfile_xscom(
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, i_mcc_target, l_unit_num),
              "Error from FAPI_ATTR_GET (ATTR_CHIP_UNIT_POS)");
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_HW548941, i_target, l_TGT2_ATTR_CHIP_EC_FEATURE_HW548941));
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_MEMORY_ENCRYPTION_ENABLED, i_target,
-                           l_TGT2_ATTR_PROC_MEMORY_ENCRYPTION_ENABLED));
 
     l_def_MC_EPSILON_CFG_T0 = ((l_TGT1_ATTR_PROC_EPS_READ_CYCLES_T0 + 0x6) / 0x4);
     l_def_MC_EPSILON_CFG_T1 = ((l_TGT1_ATTR_PROC_EPS_READ_CYCLES_T1 + 0x6) / 0x4);
@@ -874,62 +871,6 @@ p10_exit_cache_contained_run_mcc_initfile_xscom(
                  o_xscom_inits),
              "Error from p10_gen_xscom_init");
 
-    //CRYPTO_DECRYPT_CRYPTOCFG
-    l_scom_data = 0;
-    l_scom_mask = 0;
-
-    //data
-    if (l_TGT2_ATTR_PROC_MEMORY_ENCRYPTION_ENABLED != fapi2::ENUM_ATTR_PROC_MEMORY_ENCRYPTION_ENABLED_DISABLED)
-    {
-        l_scom_data |= (uint64_t)  0x1 << (64 - (4 + 1));
-    }
-
-    if (l_TGT2_ATTR_PROC_MEMORY_ENCRYPTION_ENABLED == fapi2::ENUM_ATTR_PROC_MEMORY_ENCRYPTION_ENABLED_CTR)
-    {
-        l_scom_data |= (uint64_t)  0x1 << (64 - (5 + 1));
-    }
-
-    //mask
-    l_scom_mask |= (uint64_t)  0x1 << (64 - (4 + 1));
-    l_scom_mask |= (uint64_t)  0x1 << (64 - (5 + 1));
-
-    FAPI_TRY(p10_gen_xscom_init(
-                 i_target,
-                 p10_chipUnitPairing_t(PU_MCC_CHIPUNIT, l_unit_num),
-                 scomt::mcc::CRYPTO_DECRYPT_CRYPTOCFG,
-                 l_scom_data,
-                 l_scom_mask,
-                 o_xscom_inits),
-             "Error from p10_gen_xscom_init");
-
-    //CRYPTO_ENCRYPT_CRYPTOCFG
-    l_scom_data = 0;
-    l_scom_mask = 0;
-
-    //data
-    if (l_TGT2_ATTR_PROC_MEMORY_ENCRYPTION_ENABLED != fapi2::ENUM_ATTR_PROC_MEMORY_ENCRYPTION_ENABLED_DISABLED)
-    {
-        l_scom_data |= (uint64_t)  0x1 << (64 - (4 + 1));
-    }
-
-    if (l_TGT2_ATTR_PROC_MEMORY_ENCRYPTION_ENABLED == fapi2::ENUM_ATTR_PROC_MEMORY_ENCRYPTION_ENABLED_CTR)
-    {
-        l_scom_data |= (uint64_t)  0x1 << (64 - (5 + 1));
-    }
-
-    //mask
-    l_scom_mask |= (uint64_t)  0x1 << (64 - (4 + 1));
-    l_scom_mask |= (uint64_t)  0x1 << (64 - (5 + 1));
-
-    FAPI_TRY(p10_gen_xscom_init(
-                 i_target,
-                 p10_chipUnitPairing_t(PU_MCC_CHIPUNIT, l_unit_num),
-                 scomt::mcc::CRYPTO_ENCRYPT_CRYPTOCFG,
-                 l_scom_data,
-                 l_scom_mask,
-                 o_xscom_inits),
-             "Error from p10_gen_xscom_init");
-
 fapi_try_exit:
     FAPI_DBG("End");
     return fapi2::current_err;
@@ -953,7 +894,6 @@ p10_exit_cache_contained_run_mi_initfile_xscom(
     fapi2::ATTR_SYS_DISABLE_MCU_TIMEOUTS_Type l_TGT1_ATTR_SYS_DISABLE_MCU_TIMEOUTS;
     fapi2::ATTR_CHIP_UNIT_POS_Type l_unit_num;
     fapi2::ATTR_MSS_INTERLEAVE_GRANULARITY_Type l_interleave_granule_size;
-    fapi2::ATTR_PROC_MEMORY_ENCRYPTION_ENABLED_Type l_TGT2_ATTR_PROC_MEMORY_ENCRYPTION_ENABLED;
 
     uint64_t l_scom_data = 0;
     uint64_t l_scom_mask = 0;
@@ -964,9 +904,6 @@ p10_exit_cache_contained_run_mi_initfile_xscom(
              "Error from FAPI_ATTR_GET (ATTR_CHIP_UNIT_POS)");
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_INTERLEAVE_GRANULARITY, FAPI_SYSTEM, l_interleave_granule_size),
              "Error from FAPI_ATTR_GET (ATTR_MSS_INTERLEAVE_GRANULARITY)");
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_MEMORY_ENCRYPTION_ENABLED, i_target,
-                           l_TGT2_ATTR_PROC_MEMORY_ENCRYPTION_ENABLED));
-
 
     //MCPERF1
     l_scom_data = 0;
@@ -1124,60 +1061,6 @@ p10_exit_cache_contained_run_mi_initfile_xscom(
                  l_scom_mask,
                  o_xscom_inits),
              "Error from p10_gen_xscom_init");
-
-    //SCOMFIR_MCFGP0E
-    l_scom_data = 0;
-    l_scom_mask = 0;
-
-    //data
-    if ((l_TGT2_ATTR_PROC_MEMORY_ENCRYPTION_ENABLED != fapi2::ENUM_ATTR_PROC_MEMORY_ENCRYPTION_ENABLED_DISABLED))
-    {
-        l_scom_data |= (uint64_t) 0x1     << (64 - ( 0 +  1)); //MCFGP0E_ENC_VALID
-        l_scom_data |= (uint64_t) 0x1     << (64 - ( 1 +  1)); //MCFGP0E_ENC_EXTEND_TO_END_OF_RANGE
-        l_scom_data |= (uint64_t) 0x7FFFF << (64 - (21 + 19)); //MCFGP0E_ENC_UPPER_ADDRESS
-    }
-
-    //mask
-    l_scom_mask |= (uint64_t) 0x1     << (64 - ( 0 +  1)); //MCFGP0E_ENC_VALID
-    l_scom_mask |= (uint64_t) 0x1     << (64 - ( 1 +  1)); //MCFGP0E_ENC_EXTEND_TO_END_OF_RANGE
-    l_scom_mask |= (uint64_t) 0x7FFFF << (64 - ( 2 + 19)); //MCFGP0E_ENC_LOWER_ADDRESS
-    l_scom_mask |= (uint64_t) 0x7FFFF << (64 - (21 + 19)); //MCFGP0E_ENC_UPPER_ADDRESS
-
-    FAPI_TRY(p10_gen_xscom_init(
-                 i_target,
-                 p10_chipUnitPairing_t(PU_MI_CHIPUNIT, l_unit_num),
-                 scomt::mc::SCOMFIR_MCFGP0E,
-                 l_scom_data,
-                 l_scom_mask,
-                 o_xscom_inits),
-             "Error from p10_gen_xscom_init");
-
-    //SCOMFIR_MCFGP1E
-    l_scom_data = 0;
-    l_scom_mask = 0;
-
-    //data
-    if ((l_TGT2_ATTR_PROC_MEMORY_ENCRYPTION_ENABLED != fapi2::ENUM_ATTR_PROC_MEMORY_ENCRYPTION_ENABLED_DISABLED))
-    {
-        l_scom_data |= (uint64_t) 0x1     << (64 - ( 0 +  1)); //MCFGP1E_ENC_VALID
-        l_scom_data |= (uint64_t) 0x1     << (64 - ( 1 +  1)); //MCFGP1E_ENC_EXTEND_TO_END_OF_RANGE
-        l_scom_data |= (uint64_t) 0x7FFFF << (64 - (21 + 19)); //MCFGP1E_ENC_UPPER_ADDRESS
-    }
-
-    //mask
-    l_scom_mask |= (uint64_t) 0x1     << (64 - ( 0 +  1)); //MCFGP1E_ENC_VALID
-    l_scom_mask |= (uint64_t) 0x1     << (64 - ( 1 +  1)); //MCFGP1E_ENC_EXTEND_TO_END_OF_RANGE
-    l_scom_mask |= (uint64_t) 0x7FFFF << (64 - ( 2 + 19)); //MCFGP1E_ENC_LOWER_ADDRESS
-    l_scom_mask |= (uint64_t) 0x7FFFF << (64 - (21 + 19)); //MCFGP1E_ENC_UPPER_ADDRESS
-
-    FAPI_TRY(p10_gen_xscom_init(
-                 i_target,
-                 p10_chipUnitPairing_t(PU_MI_CHIPUNIT, l_unit_num),
-                 scomt::mc::SCOMFIR_MCFGP1E,
-                 l_scom_data,
-                 l_scom_mask,
-                 o_xscom_inits),
-             "Error from p10_gen_xscom_init ");
 
 fapi_try_exit:
     FAPI_DBG("End");

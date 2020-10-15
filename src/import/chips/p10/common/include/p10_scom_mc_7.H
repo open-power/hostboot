@@ -180,6 +180,18 @@ static const uint32_t SYNC_CONFIG_PHASE_COUNTER_ON_CLKCHANGE_LEN = 8;
 //<< [SYNC_CONFIG]
 // mc/reg00007.H
 
+//>> [SCOMFIR_MCFGPM1E]
+static const uint64_t SCOMFIR_MCFGPM1E = 0x0c010c1dull;
+
+static const uint32_t SCOMFIR_MCFGPM1E_VALID = 0;
+static const uint32_t SCOMFIR_MCFGPM1E_EXTEND_TO_END_OF_RANGE = 1;
+static const uint32_t SCOMFIR_MCFGPM1E_LOWER_ADDRESS = 2;
+static const uint32_t SCOMFIR_MCFGPM1E_LOWER_ADDRESS_LEN = 19;
+static const uint32_t SCOMFIR_MCFGPM1E_UPPER_ADDRESS = 21;
+static const uint32_t SCOMFIR_MCFGPM1E_UPPER_ADDRESS_LEN = 19;
+//<< [SCOMFIR_MCFGPM1E]
+// mc/reg00007.H
+
 //>>THE END<<
 
 #ifndef __PPE_HCODE__
