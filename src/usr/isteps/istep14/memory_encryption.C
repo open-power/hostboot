@@ -118,8 +118,29 @@ static errlHndl_t should_enable_memory_encryption(TargetHandleList const i_procs
 
 errlHndl_t lock_memory_crypto_settings()
 {
-    // @TODO RTC 208820: Actually lock the crypto settings
-    return nullptr;
+    errlHndl_t errl = nullptr;
+
+    TargetHandleList procs;
+    getAllChips(procs, TYPE_PROC);
+    for (const auto proc : procs)
+    {
+        errl = SECUREBOOT::setSecuritySwitchBits({ SECUREBOOT::ProcSecurity::MELBit,
+                                                   SECUREBOOT::ProcSecurity::SKLBitW,
+                                                   SECUREBOOT::ProcSecurity::SKLBitR },
+                                                 proc);
+
+        if (errl)
+        {
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                      ERR_MRK"lock_memory_crypto_settings: "
+                      "Cannot set security switch bits on PROC 0x%08x",
+                      get_huid(proc));
+
+            break;
+        }
+    }
+
+    return errl;
 }
 
 errlHndl_t setup_memory_crypto_keys()

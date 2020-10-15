@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -59,6 +59,9 @@ namespace SECUREBOOT
         // Spare = 0x0004000000000000ull,
         // Spare = 0x0002000000000000ull,
         // Spare = 0x0001000000000000ull,
+        SKLBitW  = 0x0000008000000000ull, // Keystore SEEPROM write lock (Hostboot section)
+        SKLBitR  = 0x0000004000000000ull, // Keystore SEEPROM read lock (Hostboot section)
+        MELBit   = 0x0000000800000000ull, // Memory encryption lock
 
         SwitchRegister = 0x00010005ull,
         SwitchRegisterClear = 0x00010006ull,
