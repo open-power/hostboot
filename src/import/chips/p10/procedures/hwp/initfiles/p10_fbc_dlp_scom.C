@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -37,6 +37,7 @@ constexpr uint64_t literal_0x001A = 0x001A;
 constexpr uint64_t literal_0x5 = 0x5;
 constexpr uint64_t literal_0b0001111 = 0b0001111;
 constexpr uint64_t literal_0b1111111 = 0b1111111;
+constexpr uint64_t literal_0b0111111 = 0b0111111;
 constexpr uint64_t literal_0b111 = 0b111;
 constexpr uint64_t literal_0x6 = 0x6;
 constexpr uint64_t literal_0x7 = 0x7;
@@ -64,6 +65,8 @@ fapi2::ReturnCode p10_fbc_dlp_scom(const fapi2::Target<fapi2::TARGET_TYPE_IOHS>&
         fapi2::ATTR_IS_SIMULATION_Type l_TGT2_ATTR_IS_SIMULATION;
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IS_SIMULATION, TGT2, l_TGT2_ATTR_IS_SIMULATION));
         uint64_t l_def_IS_SIM = (l_TGT2_ATTR_IS_SIMULATION == literal_1);
+        fapi2::ATTR_CHIP_EC_FEATURE_HW547888_Type l_TGT1_ATTR_CHIP_EC_FEATURE_HW547888;
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_HW547888, TGT1, l_TGT1_ATTR_CHIP_EC_FEATURE_HW547888));
         fapi2::buffer<uint64_t> l_scom_buffer;
         {
             FAPI_TRY(fapi2::getScom( TGT0, 0x1801100aull, l_scom_buffer ));
@@ -128,7 +131,16 @@ fapi2::ReturnCode p10_fbc_dlp_scom(const fapi2::Target<fapi2::TARGET_TYPE_IOHS>&
             constexpr auto l_DLP0_DLP_CONFIG_LINK_FAIL_CRC_ERROR_ON = 0x1;
             l_scom_buffer.insert<3, 1, 63, uint64_t>(l_DLP0_DLP_CONFIG_LINK_FAIL_CRC_ERROR_ON );
             l_scom_buffer.insert<20, 4, 60, uint64_t>(literal_0x5 );
-            l_scom_buffer.insert<25, 7, 57, uint64_t>(literal_0b1111111 );
+
+            if ((l_TGT1_ATTR_CHIP_EC_FEATURE_HW547888 == literal_1))
+            {
+                l_scom_buffer.insert<25, 7, 57, uint64_t>(literal_0b1111111 );
+            }
+            else if (literal_1)
+            {
+                l_scom_buffer.insert<25, 7, 57, uint64_t>(literal_0b0111111 );
+            }
+
             constexpr auto l_DLP0_DLP_CONFIG_LINK_FAIL_NO_SPARE_ON = 0x1;
             l_scom_buffer.insert<2, 1, 63, uint64_t>(l_DLP0_DLP_CONFIG_LINK_FAIL_NO_SPARE_ON );
             constexpr auto l_DLP0_DLP_FULL_18_TX_LANE_SWAP_OFF = 0x0;
