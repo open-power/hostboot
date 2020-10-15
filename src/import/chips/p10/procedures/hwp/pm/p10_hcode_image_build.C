@@ -2106,6 +2106,7 @@ fapi2::ReturnCode buildCpmrImage( CONST_FAPI2_PROC& i_procTgt,
 {
     const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
     uint8_t  l_fuseModeState    =   0;
+    uint8_t  l_containedMode    =   0;
     ImageBuildRecord    l_qmeBuildRecord( (uint8_t *)(&i_pChipHomer->iv_occHostRegion), "QME" );
 
     // copy sections pertaining to self restore
@@ -2137,8 +2138,16 @@ fapi2::ReturnCode buildCpmrImage( CONST_FAPI2_PROC& i_procTgt,
     FAPI_TRY( buildQmeHeader( i_procTgt, i_pChipHomer, l_qmeBuildRecord ),
               "Failed To Build QME Image Header" );
 
-    FAPI_TRY( buildQmeAttributes( i_pImageIn, i_procTgt, i_pChipHomer, l_qmeBuildRecord, i_chipFuncModel ),
-              "Failed To Initialize QME Attributes In HOMER QME Hcode Image" );
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CONTAINED_IPL_TYPE,
+                           FAPI_SYSTEM,
+                           l_containedMode),
+             "Error From FAPI_ATTR_GET For Attribute ATTR_CONTAINED_IPL_TYPE");
+
+    if( !l_containedMode )
+    {
+        FAPI_TRY( buildQmeAttributes( i_pImageIn, i_procTgt, i_pChipHomer, l_qmeBuildRecord, i_chipFuncModel ),
+                  "Failed To Initialize QME Attributes In HOMER QME Hcode Image" );
+    }
 
     FAPI_TRY( buildCpmrHeader( i_procTgt, i_pChipHomer, l_fuseModeState, l_qmeBuildRecord ),
               "Failed To Build CPMR Header" );
