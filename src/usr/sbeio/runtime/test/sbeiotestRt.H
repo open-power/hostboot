@@ -46,20 +46,6 @@
 //trace
 extern trace_desc_t* g_trac_sbeio;
 
-//#define cmpSbeHdr and cmpCmdHdr
-#define cmpSbeHdr(actMsg, expMsg) \
-    (((actMsg).sbeHdr.version != (expMsg).sbeHdr.version) || \
-     ((actMsg).sbeHdr.msgSize != (expMsg).sbeHdr.msgSize) || \
-     ((actMsg).sbeHdr.seqId != (expMsg).sbeHdr.seqId))
-
-#define cmpCmdHdr(actMsg, expMsg) \
-    (((actMsg).cmdHdr.version != (expMsg).cmdHdr.version) || \
-     ((actMsg).cmdHdr.command != (expMsg).cmdHdr.command) || \
-     ((actMsg).cmdHdr.dataOffset != (expMsg).cmdHdr.dataOffset) || \
-     ((actMsg).cmdHdr.dataSize != (expMsg).cmdHdr.dataSize) || \
-     ((actMsg).cmdHdr.status != (expMsg).cmdHdr.status))
-
-
 using namespace TARGETING;
 using namespace SBE_MSG;
 using namespace CxxTest;
@@ -73,6 +59,9 @@ class SbeMessagePassingRtTest : public CxxTest::TestSuite
 {
     public:
         uint32_t iv_seqId = 0;
+
+
+/* Helper Functions */
 
         /**
          * @brief initSbeMessagePassing.
@@ -141,7 +130,7 @@ class SbeMessagePassingRtTest : public CxxTest::TestSuite
                 TargetHandle_t proc = procList[0];
 
                 // Get the chip ID for the proc
-                TARGETING::rtChipId_t o_chipId = 0;
+                o_chipId = 0;
                 errlHndl_t err = TARGETING::getRtTarget(proc, o_chipId);
                 if(nullptr != err)
                 {
@@ -392,6 +381,64 @@ class SbeMessagePassingRtTest : public CxxTest::TestSuite
 
             return rc;
         }
+
+        /**
+         * @brief sbeOrCmdHeaderDiffer
+         * Check if the SBE-header or Command-header of two SBE Messages differ.
+         *
+         * @param[in]  msg_1   SBE Message 1
+         * @param[in]  msg_2   SBE Message 2
+         *
+         * @return bool    True if difference is found, False otherwise
+         */
+        inline bool sbeOrCmdHeaderDiffer(const sbeMessage_t* msg_1, const sbeMessage_t* msg_2)
+        {
+            return msg_1->sbeHdr.version    != msg_2->sbeHdr.version    || // SBE header check
+                   msg_1->sbeHdr.msgSize    != msg_2->sbeHdr.msgSize    ||
+                   msg_1->sbeHdr.seqId      != msg_2->sbeHdr.seqId      ||
+                   msg_1->cmdHdr.version    != msg_2->cmdHdr.version    || // Command header check
+                   msg_1->cmdHdr.command    != msg_2->cmdHdr.command    ||
+                   msg_1->cmdHdr.dataOffset != msg_2->cmdHdr.dataOffset ||
+                   msg_1->cmdHdr.dataSize   != msg_2->cmdHdr.dataSize   ||
+                   msg_1->cmdHdr.status     != msg_2->cmdHdr.status;
+        }
+
+        /**
+         * @brief defaultMsgPath_SbeOrCmdHeaderDiffer
+         * Check if the SBE-header or Command-header of two SBE Messages differ.
+         *
+         * This function should only be used in test cases that do no overwrite the SBE command
+         * function to use, i.e they use the default message path (e.g. testSbeMessagePassingDefaultPath
+         * test case) and the SBE message request is to get the OCC Status (as set in initSbeMessagePassing)
+         *
+         * Note: dataSize is use to set msgSize (see rt_sbeio.C process_sbe_msg_cmd_processor(...))
+         * and dataSize is set dynamically (see htmgt_occmanager.C OccManager::_getHtmgtData(...)).
+         * Because of this, msgSize and dataSize will not stay equal to the expMsg's values that are
+         * hard-coded for the tests. However, given the current data structures use to fill in the
+         * SBE Message, msgSize and dataSize must be divisible by 16 (bytes).
+         *
+         * @param[in]  actMsg   Actual SBE Message from default message path
+         * @param[in]  expMsg   Expected SBE Message
+         *
+         * @return bool    True if difference is found, False otherwise
+         */
+        inline bool defaultMsgPath_SbeOrCmdHeaderDiffer(const sbeMessage_t* actMsg,
+                                                        const sbeMessage_t* expMsg)
+        {
+            return actMsg->sbeHdr.version       != expMsg->sbeHdr.version    || // SBE header check
+                   actMsg->sbeHdr.msgSize % 16  !=  0                        ||
+                   actMsg->sbeHdr.seqId         != expMsg->sbeHdr.seqId      ||
+                   actMsg->cmdHdr.version       != expMsg->cmdHdr.version    || // Command header check
+                   actMsg->cmdHdr.command       != expMsg->cmdHdr.command    ||
+                   actMsg->cmdHdr.dataOffset    != expMsg->cmdHdr.dataOffset ||
+                   actMsg->cmdHdr.dataSize % 16 != 0                         ||
+                   actMsg->cmdHdr.status        != expMsg->cmdHdr.status;
+        }
+
+/* End of Helper Functions */
+
+
+/* Test Functions */
 
         /**
          * @brief testSbeMessagePassing Unit test for the
@@ -736,14 +783,10 @@ class SbeMessagePassingRtTest : public CxxTest::TestSuite
          */
         void testSbeMessagePassingDefaultPath(void)
         {
-// @TODO RTC 244854 Re-enable the '#ifdef CONFIG_HTMGT', when runtime HTMGT is enabled
-//      Test fails with message from line 801:
-//      Unexpected response from RT SBE message passing. Testing default path for chipID: 0x00000000
-//#ifdef CONFIG_HTMGT
-#if 0
             // Test entry
             TRACFCOMP(g_trac_sbeio, ENTER_MRK "SbeMessagePassingRtTest::"
                                     "testSbeMessagePassingDefaultPath");
+#ifdef CONFIG_HTMGT
 
             sbeMessage_t l_request;
             sbeMessage_t l_expected_response;
@@ -786,8 +829,7 @@ class SbeMessagePassingRtTest : public CxxTest::TestSuite
                 }
 
                 // Compare test response from SBE Communication area
-                if(cmpSbeHdr(*l_sbeCommAddr_rsp, l_expected_response) ||
-                   cmpCmdHdr(*l_sbeCommAddr_rsp, l_expected_response))
+                if(defaultMsgPath_SbeOrCmdHeaderDiffer(l_sbeCommAddr_rsp, &l_expected_response))
                 {
                     TRACFBIN( g_trac_sbeio,
                               "testSbeMessagePassingDefaultPath: expected rsp",
@@ -803,9 +845,9 @@ class SbeMessagePassingRtTest : public CxxTest::TestSuite
                     break;
                 }
 
-                // Check setting of bits in CFAM register
-                rc = checkResetSbeMessagePassingCFAM(chipId,
-                                                     SBE_MSG_IN_PROGRESS);
+                // Check setting of bits in CFAM register, SBE message passing should be marked
+                // completed as default path finished with no errors
+                rc = checkResetSbeMessagePassingCFAM(chipId, SBE_MSG_COMPLETE);
                 if(0 != rc)
                 {
                     TS_FAIL("Unexpected error during RT SBE message passing. "
@@ -819,11 +861,11 @@ class SbeMessagePassingRtTest : public CxxTest::TestSuite
             // Test exit
             TRACFCOMP(g_trac_sbeio, EXIT_MRK "SbeMessagePassingRtTest::"
                                     "testSbeMessagePassingDefaultPath");
-#else  // #if 0
+#else  // #if CONFIG_HTMGT
             TRACFCOMP(g_trac_sbeio, "SbeMessagePassingRtTest::"
                                     "testSbeMessagePassingDefaultPath skipped "
                                     "because HTMGT is not supported");
-#endif // #else ... #if 0
+#endif // #else ... #if CONFIG_HTMGT
         }
 
         /**
@@ -1038,8 +1080,7 @@ class SbeMessagePassingRtTest : public CxxTest::TestSuite
                 }
 
                 // Compare test response from SBE Communication area
-                if(cmpSbeHdr(*l_sbeCommAddr_rsp, l_expected_response) ||
-                   cmpCmdHdr(*l_sbeCommAddr_rsp, l_expected_response))
+                if(sbeOrCmdHeaderDiffer(l_sbeCommAddr_rsp, &l_expected_response))
                 {
                     TRACFBIN( g_trac_sbeio,
                               "testSbeMessagePassingGoodPath: expected rsp",
@@ -1099,8 +1140,7 @@ class SbeMessagePassingRtTest : public CxxTest::TestSuite
                 }
 
                 // Compare test response from SBE Communication area
-                if(cmpSbeHdr(*l_sbeCommAddr_rsp, l_expected_response) ||
-                   cmpCmdHdr(*l_sbeCommAddr_rsp, l_expected_response))
+                if(sbeOrCmdHeaderDiffer(l_sbeCommAddr_rsp, &l_expected_response))
                 {
                     TRACFBIN( g_trac_sbeio,
                               "testSbeMessagePassingGoodPath: expected rsp",
@@ -1203,8 +1243,7 @@ class SbeMessagePassingRtTest : public CxxTest::TestSuite
                 }
 
                 // Compare test response from SBE Communication area
-                if(cmpSbeHdr(*l_sbeCommAddr_rsp, l_expected_response) ||
-                   cmpCmdHdr(*l_sbeCommAddr_rsp, l_expected_response))
+                if(sbeOrCmdHeaderDiffer(l_sbeCommAddr_rsp, &l_expected_response))
                 {
                     TRACFBIN( g_trac_sbeio,
                               "testSbeMessagePassingErrorPaths: expected rsp",
@@ -1295,8 +1334,7 @@ class SbeMessagePassingRtTest : public CxxTest::TestSuite
                 }
 
                 // Compare test response from SBE Communication area
-                if(cmpSbeHdr(*l_sbeCommAddr_rsp, l_expected_response) ||
-                   cmpCmdHdr(*l_sbeCommAddr_rsp, l_expected_response))
+                if(sbeOrCmdHeaderDiffer(l_sbeCommAddr_rsp, &l_expected_response))
                 {
                     TRACFBIN( g_trac_sbeio,
                               "testSbeMessagePassingErrorPaths: expected rsp",
@@ -1471,6 +1509,8 @@ class SbeMessagePassingRtTest : public CxxTest::TestSuite
             TRACFCOMP(g_trac_sbeio, EXIT_MRK "SbeMessagePassingRtTest::"
                                     "testSbeMessagePassingErrorPaths");
         }
+
+/* End of Test Functions */
 
 }; // class SbeMessagePassingRtTest
 #endif
