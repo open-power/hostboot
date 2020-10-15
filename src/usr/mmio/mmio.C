@@ -66,20 +66,16 @@ namespace MMIO
 
 // Helper function declarations (definitions at the bottom of this file)
 static
-TargetHandle_t getParentProc(TargetHandle_t i_ocmbTarget);
+TargetHandle_t getParentMcc(TargetHandle_t i_ocmbTarget);
 static
-errlHndl_t getProcScom(TargetHandle_t i_ocmbTarget,
-                       uint64_t i_scomAddr,
-                       uint64_t &o_scomData);
+errlHndl_t getMccScom(TargetHandle_t i_ocmbTarget,
+                      uint64_t i_scomAddr,
+                      uint64_t &o_scomData);
 
-// NOTE: removed static qualifier to prevent compiler from complaining about
-//       the function not being used.
-errlHndl_t setProcScom(TargetHandle_t i_ocmbTarget,
-                       uint64_t i_scomAddr,
-                       uint64_t i_scomData);
 static
 void *mmio_memcpy(void *vdest, const void *vsrc, size_t len);
 
+void addChannelFailureRegisterData(Target * i_ocmb, errlHndl_t & io_errl);
 
 /*******************************************************************************
  *
@@ -514,9 +510,9 @@ errlHndl_t checkChannelCheckstop(const TargetHandle_t i_ocmbTarget,
     uint64_t   l_scom_data = 0;
     uint64_t   l_scom_mask = 0;
 
-    auto l_err = getProcScom(i_ocmbTarget,
-                             DSTL_DSTLFIR_RW, // 0x0C010D00
-                             l_scom_data);
+    auto l_err = getMccScom(i_ocmbTarget,
+                            DSTL_DSTLFIR_RW, // 0x0C010D00
+                            l_scom_data);
     if (l_err)
     {
         TRACFCOMP(g_trac_mmio, ERR_MRK
@@ -529,8 +525,8 @@ errlHndl_t checkChannelCheckstop(const TargetHandle_t i_ocmbTarget,
         // bit 20: subchannel A has entered the fail state
         // bit 21: subchannel B has entered the fail state
         l_scom_mask = (isSubChannelA(i_ocmbTarget))?
-             (1ull << DSTL_DSTLFIR_SUBCHANNEL_A_FAIL_ACTION):
-             (1ull << DSTL_DSTLFIR_SUBCHANNEL_B_FAIL_ACTION);
+             (0x8000000000000000 >> DSTL_DSTLFIR_SUBCHANNEL_A_FAIL_ACTION):
+             (0x8000000000000000 >> DSTL_DSTLFIR_SUBCHANNEL_B_FAIL_ACTION);
         if (l_scom_data & l_scom_mask)
         {
             // A channel checkstop has occurred. (our bus is down)
@@ -539,7 +535,6 @@ errlHndl_t checkChannelCheckstop(const TargetHandle_t i_ocmbTarget,
                  " OCMB[0x%08x], DSTL_DSTLFIR_RW=0x%llX",
                  get_huid(i_ocmbTarget), l_scom_data);
             l_checkstopExists = true;
-
         }
     }
     o_checkstopExists = l_checkstopExists;
@@ -1012,8 +1007,8 @@ errlHndl_t ocmbMmioPerformOp(DeviceFW::OperationType i_opType,
                     // OCMB.
                     disableInbandScomsOcmb(i_ocmbTarget);
 
-                    // TODO RTC 201778 - Channel fail handling for Explorer
-                    // dump some registers to the error log here?
+                    // Dump some debug registers to the error log
+                    addChannelFailureRegisterData(i_ocmbTarget, l_err);
 
                     // Look for a better PRD error
                     //
@@ -1270,16 +1265,15 @@ errlHndl_t ocmbMmioPerformOp(DeviceFW::OperationType i_opType,
 
 /*******************************************************************************
  *
- * @brief Finds the processor connected to the target OCMB chip.
+ * @brief Finds the MCC connected to the target OCMB chip.
  *
  */
 static
-TargetHandle_t getParentProc(
-                                    const TargetHandle_t i_ocmbTarget)
+TargetHandle_t getParentMcc( const TargetHandle_t i_ocmbTarget )
 {
-    TargetHandle_t   proc = nullptr;
+    TargetHandle_t   mcc = nullptr;
     TargetHandleList list;
-    PredicateCTM     pred(CLASS_CHIP, TYPE_PROC);
+    PredicateCTM     pred(CLASS_UNIT, TYPE_MCC);
 
     targetService().getAssociated( list,
                                    i_ocmbTarget,
@@ -1289,45 +1283,44 @@ TargetHandle_t getParentProc(
 
     if (list.size() == 1)
     {
-        proc = list[0];
+        mcc = list[0];
     }
 
-    return proc;
+    return mcc;
 }
 
 /*******************************************************************************
  *
- * @brief Reads a scom register on the processor connected to the target OCMB
+ * @brief Reads a scom register on the mcc connected to the target OCMB
  *        chip.
  *
  */
-static
-errlHndl_t getProcScom(const TargetHandle_t i_ocmbTarget,
-                       uint64_t i_scomAddr,
-                       uint64_t &o_scomData)
+static errlHndl_t getMccScom(const TargetHandle_t i_ocmbTarget,
+                             uint64_t i_scomAddr,
+                             uint64_t &o_scomData)
 {
     errlHndl_t l_err = nullptr;
-    auto proc = getParentProc(i_ocmbTarget);
+    auto mcc = getParentMcc(i_ocmbTarget);
 
-    if (proc == nullptr)
+    if (mcc == nullptr)
     {
         TRACFCOMP(g_trac_mmio, ERR_MRK
-                "getProcScom: Unable to find parent processor for target(0x%X)",
+                "getMccScom: Unable to find parent MCC for ocmb target(0x%X)",
                 get_huid(i_ocmbTarget));
 
         /*@
          * @errortype
-         * @moduleid    MMIO::MOD_MMIO_GET_PROC_SCOM
-         * @reasoncode  MMIO::RC_PROC_NOT_FOUND
+         * @moduleid    MMIO::MOD_MMIO_GET_MCC_SCOM
+         * @reasoncode  MMIO::RC_MCC_NOT_FOUND
          * @userdata1   Target huid
          * @userdata2   SCOM address
-         * @devdesc     Unable to find parent processor for target.
+         * @devdesc     Unable to find parent mcc for target.
          * @custdesc    Unexpected memory subsystem firmware error.
          */
         l_err = new ERRORLOG::ErrlEntry(
                                 ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                MMIO::MOD_MMIO_GET_PROC_SCOM,
-                                MMIO::RC_PROC_NOT_FOUND,
+                                MMIO::MOD_MMIO_GET_MCC_SCOM,
+                                MMIO::RC_MCC_NOT_FOUND,
                                 get_huid(i_ocmbTarget),
                                 i_scomAddr,
                                 ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
@@ -1336,7 +1329,7 @@ errlHndl_t getProcScom(const TargetHandle_t i_ocmbTarget,
     {
         auto reqSize = sizeof(o_scomData);
 
-        l_err = DeviceFW::deviceRead(proc,
+        l_err = DeviceFW::deviceRead(mcc,
                                      &o_scomData,
                                      reqSize,
                                      DEVICE_SCOM_ADDRESS(i_scomAddr));
@@ -1345,56 +1338,6 @@ errlHndl_t getProcScom(const TargetHandle_t i_ocmbTarget,
     return l_err;
 }
 
-/*******************************************************************************
- *
- * @brief Writes a scom register on the processor connected to the target OCMB
- *        chip.
- *
- */
-// NOTE: removed static qualifier to prevent compiler from complaining about
-//       the function not being used.
-errlHndl_t setProcScom(const TargetHandle_t i_ocmbTarget,
-                       uint64_t i_scomAddr,
-                       uint64_t i_scomData)
-{
-    errlHndl_t l_err = nullptr;
-    auto proc = getParentProc(i_ocmbTarget);
-
-    if (proc == nullptr)
-    {
-        TRACFCOMP(g_trac_mmio, ERR_MRK
-                "setProcScom: Unable to find parent processor for target(0x%X)",
-                get_huid(i_ocmbTarget));
-
-        /*@
-         * @errortype
-         * @moduleid    MMIO::MOD_MMIO_SET_PROC_SCOM
-         * @reasoncode  MMIO::RC_PROC_NOT_FOUND
-         * @userdata1   Target huid
-         * @userdata2   SCOM address
-         * @devdesc     Unable to find parent processor for target.
-         * @custdesc    Unexpected memory subsystem firmware error.
-         */
-        l_err = new ERRORLOG::ErrlEntry(
-                                ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                MMIO::MOD_MMIO_SET_PROC_SCOM,
-                                MMIO::RC_PROC_NOT_FOUND,
-                                get_huid(i_ocmbTarget),
-                                i_scomAddr,
-                                ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
-    }
-    else
-    {
-        auto reqSize = sizeof(i_scomData);
-
-        l_err = DeviceFW::deviceWrite(proc,
-                                      &i_scomData,
-                                      reqSize,
-                                      DEVICE_SCOM_ADDRESS(i_scomAddr));
-    }
-
-    return l_err;
-}
 
 
 /*******************************************************************************
@@ -1431,6 +1374,235 @@ void *mmio_memcpy(void *vdest, const void *vsrc, size_t len)
     }
 
     return vdest;
+}
+
+/*******************************************************************************
+ *
+ * @brief Grabs a list of targets associated with OCMB for MMIO failure
+ * @param[in] - i_ocmb - OCMB target
+ * @return List of targets assocated with OCMB for register data
+ */
+TargetHandleList grabMmioFailureRegisterTargets(Target * i_ocmb)
+{
+    TargetHandleList o_list;
+
+    // Add the ocmb as the first target
+    o_list.push_back( i_ocmb );
+
+    do {
+        // Find associated OMI
+        TargetHandleList omiList;
+        getParentAffinityTargets( omiList, i_ocmb, CLASS_UNIT, TYPE_OMI );
+        if ( omiList.size() != 1 )
+        {
+            TRACFCOMP(g_trac_mmio, "Could not find parent OMI." );
+            break;
+        }
+
+        // add associated OMIC
+        TargetHandleList omicList;
+        getParentOmicTargetsByState( omicList, omiList[0], CLASS_NA,
+                                     TYPE_OMIC, UTIL_FILTER_FUNCTIONAL );
+        if ( omicList.size() == 1 )
+        {
+            o_list.push_back( omicList[0] );
+        }
+        else
+        {
+            TRACFCOMP(g_trac_mmio, "Could not find parent OMIC." );
+            break;
+        }
+
+        // add associated PAUC
+        TargetHandleList paucList;
+        getParentPaucTargetsByState( paucList, omicList[0], CLASS_NA,
+                TYPE_PAUC, UTIL_FILTER_FUNCTIONAL );
+        if ( paucList.size() == 1 )
+        {
+            o_list.push_back( paucList[0] );
+        }
+        else
+        {
+            TRACFCOMP(g_trac_mmio, "Could not find parent PAUC." );
+            // don't terminate here since paucList isn't used to find other targets
+        }
+
+        // add associated MCC
+        TargetHandleList mccList;
+        getParentAffinityTargets( mccList, omiList[0], CLASS_UNIT, TYPE_MCC );
+        if ( mccList.size() == 1 )
+        {
+            o_list.push_back( mccList[0] );
+        }
+        else
+        {
+            TRACFCOMP(g_trac_mmio, "Could not find parent MCC." );
+            break;
+        }
+
+        // add associated MI
+        TargetHandleList miList;
+        getParentAffinityTargets( miList, mccList[0], CLASS_UNIT, TYPE_MI );
+        if ( miList.size() == 1 )
+        {
+            o_list.push_back( miList[0] );
+        }
+        else
+        {
+            TRACFCOMP(g_trac_mmio, "Could not find parent MI." );
+            break;
+        }
+
+        // add associated MC
+        TargetHandleList mcList;
+        getParentAffinityTargets( mcList, miList[0], CLASS_UNIT, TYPE_MC );
+        if ( mcList.size() == 1 )
+        {
+            o_list.push_back( mcList[0] );
+        }
+        else
+        {
+            TRACFCOMP(g_trac_mmio, "Could not find parent MC." );
+            break;
+        }
+
+        // add associated Proc
+        TargetHandleList procList;
+        getParentAffinityTargets( procList, mcList[0], CLASS_CHIP, TYPE_PROC );
+        if ( procList.size() == 1 )
+        {
+            o_list.push_back( procList[0] );
+        }
+        else
+        {
+            TRACFCOMP(g_trac_mmio, "Could not find parent Proc." );
+            break;
+        }
+    } while (0);
+
+    return o_list;
+}
+
+/*******************************************************************************
+ *
+ * @brief Add channel failure registers debug section to error log
+ * @param[in] - i_ocmb - OCMB target
+ * @param[in/out] io_errl - error log to add registers section
+ */
+void addChannelFailureRegisterData(Target * i_ocmb, errlHndl_t & io_errl)
+{
+    TargetHandleList l_target_list = grabMmioFailureRegisterTargets(i_ocmb);
+
+    // Explorer Scoms
+    const uint32_t ocmb_registerList[] = {
+                                      0x08012800,   // OMI_FIR REG
+                                      0x08010870,   // MMIOFIR
+                                      0x08011800,   // MCBISTFIR
+                                      0x08011c00,   // RDFFIR
+                                      0x08011400,   // SRQFIR
+                                      0x08012400,   // TLXFIR
+                                      0x0804000A,   // OCMB_LFIR
+                                      0x08040000,   // XFIR
+                                      0x08040001,   // RFIR
+                                      0x08040004,   // Special Attention
+                                      0x08040018 }; // Local Checkstop FIR
+
+    // P10 Scoms
+    const uint32_t omic_registerList[] = {
+                                      0x0C011400 }; // DLME.REG0.MC_OMI_FIR_REG
+
+    const uint32_t pauc_registerList[] = {
+                                      0x10012C00 }; // IOO0_OMI01.PHY_SCOM_MAC.FIR_REG
+
+    const uint32_t mcc_registerList[] = {
+                                      0x0C010D00,   // DSTLFIR
+                                      0x0C010E00 }; // USTLFIR
+
+    const uint32_t mi_registerList[] = {
+                                      0x0C010C00 }; // MCFIR
+
+    const uint32_t mc_registerList[] = {
+                                      0x0C040000,   // XFIR
+                                      0x0C040001,   // RFIR
+                                      0x0C040002,   // Special Attention
+                                      0x0C040003,   // Local Checkstop FIR
+                                      0x0C040004,   // Host Attention
+                                      0x0C010F00,   // MISCFIRQ
+                                      0x0C040100 }; // TPMCP.LOCAL_FIR
+    // Global Regs (processor)
+    const uint32_t proc_registerList[] = {
+                                      0x570f001c,   // Global checkstop
+                                      0x500f001c,   // Global checkstop
+                                      0x570f001b,   // Global recoverable Reg
+                                      0x500f001b,   // Global recoverable Reg
+                                      0x570f001a,   // Global special attention
+                                      0x500f001a,   // Global special attention
+                                      0x570f002a,   // Global Unit Checkstop
+                                      0x500f002a,   // Global Unit Checkstop
+                                      0x570f002b,   // Global Host Attention
+                                      0x500f002b }; // Global Host Attention
+
+    const uint32_t * registerList;
+    uint8_t listSize = 0;
+    for (auto tgt : l_target_list )
+    {
+        TYPE l_targetType = tgt->getAttr<ATTR_TYPE>();
+
+        switch (l_targetType)
+        {
+            case TYPE_OCMB_CHIP:
+              TRACFCOMP(g_trac_mmio, "add_channel_failure_register_data: OCMB 0x%.8X", get_huid(tgt));
+              listSize = sizeof(ocmb_registerList)/sizeof(ocmb_registerList[0]);
+              registerList = ocmb_registerList;
+              break;
+            case TYPE_OMIC:
+              TRACFCOMP(g_trac_mmio, "add_channel_failure_register_data: OMIC 0x%.8X", get_huid(tgt));
+              listSize = sizeof(omic_registerList)/sizeof(omic_registerList[0]);
+              registerList = omic_registerList;
+              break;
+            case TYPE_PAUC:
+              TRACFCOMP(g_trac_mmio, "add_channel_failure_register_data: PAUC 0x%.8X", get_huid(tgt));
+              listSize = sizeof(pauc_registerList)/sizeof(pauc_registerList[0]);
+              registerList = pauc_registerList;
+              break;
+            case TYPE_MCC:
+              TRACFCOMP(g_trac_mmio, "add_channel_failure_register_data: MCC 0x%.8X", get_huid(tgt));
+              listSize = sizeof(mcc_registerList)/sizeof(mcc_registerList[0]);
+              registerList = mcc_registerList;
+              break;
+            case TYPE_MI:
+              TRACFCOMP(g_trac_mmio, "add_channel_failure_register_data: MI 0x%.8X", get_huid(tgt));
+              listSize = sizeof(mi_registerList)/sizeof(mi_registerList[0]);
+              registerList = mi_registerList;
+              break;
+            case TYPE_MC:
+              TRACFCOMP(g_trac_mmio, "add_channel_failure_register_data: MC 0x%.8X", get_huid(tgt));
+              listSize = sizeof(mc_registerList)/sizeof(mc_registerList[0]);
+              registerList = mc_registerList;
+              break;
+            case TYPE_PROC:
+              TRACFCOMP(g_trac_mmio, "add_channel_failure_register_data: PROC 0x%.8X", get_huid(tgt));
+              listSize = sizeof(proc_registerList)/sizeof(proc_registerList[0]);
+              registerList = proc_registerList;
+              break;
+            default:
+              TRACFCOMP(g_trac_mmio, "add_channel_failure_register_data: Unknown type: 0x%.8X, target 0x%.8X",
+                  l_targetType, get_huid(tgt));
+              listSize = 0;
+              break;
+        }
+
+        // Add registers associated with the target
+        if ( listSize > 0 )
+        {
+            ERRORLOG::ErrlUserDetailsLogRegister registerUDSection(tgt);
+            for (uint8_t i = 0; i < listSize; i++)
+            {
+                registerUDSection.addData(DEVICE_SCOM_ADDRESS(registerList[i]));
+            }
+            registerUDSection.addToLog(io_errl);
+        }
+    }
 }
 
 }; // end namespace MMIO
