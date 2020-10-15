@@ -32,20 +32,16 @@
 
 #include "../common/securetrace.H"
 
-/* FIXME RTC:257489
 #include <fapi2.H>
 #include <fapi2/plat_hwp_invoker.H>
 
-#include <p9_update_security_ctrl.H>
-*/
+#include <p10_update_security_ctrl.H>
 
 namespace SECUREBOOT
 {
 
 void lockAbusSecMailboxes()
 {
-// FIXME RTC:257489
-#if 0
 #ifdef CONFIG_TPMDD
     errlHndl_t l_errl = nullptr;
     TARGETING::TargetHandleList l_procs;
@@ -56,14 +52,14 @@ void lockAbusSecMailboxes()
     {
         const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>l_fapiProc(*l_pProc);
         FAPI_INVOKE_HWP(l_errl,
-                        p9_update_security_ctrl,
+                        p10_update_security_ctrl,
                         l_fapiProc,
                         false, // do not force security
                         true); // lock down Abus mailboxes
 
         if(l_errl)
         {
-            SB_ERR("lockAbusSecMailboxes: p9_update_security_ctrl failed for"
+            SB_ERR("lockAbusSecMailboxes: p10_update_security_ctrl failed for"
                    " proc 0x%X!. Deconfiguring the proc.",
                    TARGETING::get_huid(*l_pProc));
 
@@ -102,7 +98,6 @@ void lockAbusSecMailboxes()
         ++l_pProc;
 
     } // while
-#endif
 #endif
 }
 

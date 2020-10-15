@@ -71,8 +71,6 @@ const TaskInfo g_exttaskinfolist[]   =   {
 #endif
 
 #ifdef CONFIG_SECUREBOOT
-// FIXME RTC:257489 secureboot_ext isn't compiled yet
-#if 0
         /**
          *  @brief Secureboot extended
          */
@@ -84,7 +82,6 @@ const TaskInfo g_exttaskinfolist[]   =   {
                 EXT_IMAGE,                         // Extended Module
             }
         },
-#endif
 #endif
 #if defined(CONFIG_PLDM) || defined(CONFIG_PLDM_TESTCASES)
         /**

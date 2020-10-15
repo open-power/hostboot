@@ -25,15 +25,18 @@
 ROOTPATH = ../../../..
 MODULE = secureboot_trusted
 
-# FIXME RTC:257489
-#PERV_HWP_PATH += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/perv
+PERV_HWP_PATH += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/perv
 
 #Hardware procedure includes
-#EXTRAINCDIR += ${PERV_HWP_PATH}
+EXTRAINCDIR += ${PERV_HWP_PATH}
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/fapi2/
 EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/fapi2/include/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/utils/imageProcs/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/imageProcs/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/common/include/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/ffdc/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/perv/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/scomt/
 
 #Trustedboot compilation units
 OBJS += $(if $(CONFIG_TPMDD),trustedboot.o,)
@@ -41,16 +44,13 @@ OBJS += $(if $(CONFIG_TPMDD),trustedbootCmds.o,)
 OBJS += $(if $(CONFIG_TPMDD),trustedTypes.o,)
 OBJS += $(if $(CONFIG_TPMDD),tpmLogMgr.o,)
 OBJS += $(if $(CONFIG_TPMDD),trustedbootUtils.o,)
+OBJS += $(if $(CONFIG_TPMDD),p10_update_security_ctrl.o)
 
 #Handle the hardware procedure link dependency
-#VPATH += ${PERV_HWP_PATH}
+VPATH += ${PERV_HWP_PATH}
 
 #SUBDIRS += $(if $(CONFIG_TPMDD),test.d,)
 
 CFLAGS += -iquote ../
-
-#Include HWP procedure makefiles
-#include ${ROOTPATH}/procedure.rules.mk
-#include ${PERV_HWP_PATH}/p9_update_security_ctrl.mk
 
 include ${ROOTPATH}/config.mk

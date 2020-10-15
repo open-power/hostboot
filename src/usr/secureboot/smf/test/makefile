@@ -26,10 +26,9 @@ ROOTPATH = ../../../../..
 
 MODULE = testsmf
 
-# FIXME RTC:257489
-#TESTS = testsmfutils.H
-#TESTS += testmemutils.H
-#TESTS += testsmf.H
+TESTS = testsmfutils.H
+TESTS += testmemutils.H
+TESTS += testsmf.H
 
 include ${ROOTPATH}/config.mk
 

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -347,14 +347,9 @@ public:
             break;
         }
 
-        // Memory is distributed across processors so need to divide the
-        //  expected results by the number of processors
-        TARGETING::TargetHandleList l_procList;
-        TARGETING::getAllChips(l_procList, TARGETING::TYPE_PROC, true);
-
-        if(l_smfBarSize != (DISTRIBUTE_EXACT_SMF_AMT/l_procList.size()))
+        if(l_smfBarSize != (DISTRIBUTE_EXACT_SMF_AMT))
         {
-            TS_FAIL("testDistributeExactAmt: Unexpected amount of memory allocated. Expected: 0x%x, actual 0x%x", (DISTRIBUTE_EXACT_SMF_AMT/l_procList.size()), l_smfBarSize);
+            TS_FAIL("testDistributeExactAmt: Unexpected amount of memory allocated. Expected: 0x%x, actual 0x%x", DISTRIBUTE_EXACT_SMF_AMT, l_smfBarSize);
         }
         } while(0);
 
@@ -406,14 +401,9 @@ public:
             break;
         }
 
-        // Memory is distributed across processors so need to divide the
-        //  expected results by the number of processors
-        TARGETING::TargetHandleList l_procList;
-        TARGETING::getAllChips(l_procList, TARGETING::TYPE_PROC, true);
-
-        if(l_smfBarSize != (DISTRIBUTE_EXACT_SMF_AMT/l_procList.size()))
+        if(l_smfBarSize != (DISTRIBUTE_EXACT_SMF_AMT))
         {
-            TS_FAIL("testDistributeNotExactAmt: Unexpected amount of memory allocated. Expected: 0x%x, actual 0x%x", (DISTRIBUTE_EXACT_SMF_AMT/l_procList.size()), l_smfBarSize);
+            TS_FAIL("testDistributeNotExactAmt: Unexpected amount of memory allocated. Expected: 0x%x, actual 0x%x", DISTRIBUTE_EXACT_SMF_AMT, l_smfBarSize);
         }
         } while(0);
 

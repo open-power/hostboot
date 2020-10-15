@@ -86,9 +86,6 @@ struct SecureRegisterValues
  * ATTR_SECURITY_MODE and customized into the SBE image.  If 0b0, SBE
  * will disable proc security (via SAB bit) if mailbox scratch register 3
  * bit 6 is set.  Otherwise, if 0b1, SBE will not override proc security.
- * TODO RTC 170650: When SBE image is signed in all environments, set
- *     default to 0b1 and rely on SBE signing header to configure the final
- *     value.
  */
 uint8_t g_sbeSecurityMode = 1;
 

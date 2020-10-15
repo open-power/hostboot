@@ -26,25 +26,25 @@ ROOTPATH = ../../../..
 MODULE = secureboot_ext
 SUBDIRS +=
 
-# FIXME RTC:257489
-#PERV_HWP_PATH = $(ROOTPATH)/src/import/chips/p9/procedures/hwp/perv
+PERV_HWP_PATH = $(ROOTPATH)/src/import/chips/p10/procedures/hwp/perv/
 
-#OBJS += $(if $(CONFIG_SECUREBOOT), service_ext.o)
+OBJS += $(if $(CONFIG_SECUREBOOT), service_ext.o)
 OBJS += $(if $(CONFIG_PHYS_PRES_PWR_BUTTON), phys_presence.o)
 OBJS += $(if $(CONFIG_KEY_CLEAR), key_clear.o)
+OBJS += $(if $(CONFIG_SECUREBOOT), p10_update_security_ctrl.o)
 
-#VPATH += $(PERV_HWP_PATH)
+VPATH += $(PERV_HWP_PATH)
 
-EXTRAINCDIR += $(ROOTPATH)/src/include/usr
-#EXTRAINCDIR += $(ROOTPATH)/src/include/usr/fapi2/
-#EXTRAINCDIR += $(ROOTPATH)/src/import/hwpf/fapi2/include
-#EXTRAINCDIR += $(ROOTPATH)/src/import/chips/common/utils/imageProcs
-#EXTRAINCDIR += $(ROOTPATH)/src/import/chips/p9/procedures/hwp/ffdc
-#EXTRAINCDIR += $(PERV_HWP_PATH)
+EXTRAINCDIR += $(ROOTPATH)/src/include/usr/
+EXTRAINCDIR += $(ROOTPATH)/src/include/usr/fapi2/
+EXTRAINCDIR += $(ROOTPATH)/src/import/chips/p10/procedures/hwp/ffdc/
+EXTRAINCDIR += $(ROOTPATH)/src/import/chips/p10/procedures/hwp/perv/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/scomt/
+EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/fapi2/include/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/common/include/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/imageProcs/
 
-#Include HWP procedure makefiles
-#include $(ROOTPATH)/procedure.rules.mk
-#include $(PERV_HWP_PATH)/p9_update_security_ctrl.mk
+EXTRAINCDIR += $(PERV_HWP_PATH)
 
 CFLAGS += -iquote ../
 include ${ROOTPATH}/config.mk

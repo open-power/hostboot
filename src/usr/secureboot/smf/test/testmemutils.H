@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018                             */
+/* Contributors Listed Below - COPYRIGHT 2018,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -280,7 +280,7 @@ public:
         l_masterProc->
                   setAttr<TARGETING::ATTR_PROC_SMF_BAR_SIZE>(TEST_SMF_BAR_SIZE);
 
-        l_sys->setAttr<TARGETING::ATTR_SMF_ENABLED>(false);
+        l_sys->setAttr<TARGETING::ATTR_SMF_CONFIG>(false);
 
         uint64_t l_topHomerAddr = ISTEP::get_top_homer_mem_addr();
         if(l_topHomerAddr == TEST_SMF_BAR_SIZE)
@@ -289,7 +289,7 @@ public:
             TS_FAIL("testGetTopHomerMemAddr: unexpected address returned from get_top_homer_mem_addr while SMF is DISABLED. Returned address: 0x%x", l_topHomerAddr);
         }
 
-        l_sys->setAttr<TARGETING::ATTR_SMF_ENABLED>(true);
+        l_sys->setAttr<TARGETING::ATTR_SMF_CONFIG>(true);
         l_topHomerAddr = ISTEP::get_top_homer_mem_addr();
         if(l_topHomerAddr != TEST_SMF_BAR_SIZE)
         {
@@ -301,7 +301,7 @@ public:
                setAttr<TARGETING::ATTR_PROC_SMF_BAR_BASE_ADDR>(l_origSmfMemBar);
         l_masterProc->
                    setAttr<TARGETING::ATTR_PROC_SMF_BAR_SIZE>(l_origSmfMemSize);
-        l_sys->setAttr<TARGETING::ATTR_SMF_ENABLED>(false);
+        l_sys->setAttr<TARGETING::ATTR_SMF_CONFIG>(false);
         } while(0);
 
         TS_INFO(EXIT_MRK"testGetTopHomerMemAddr");
