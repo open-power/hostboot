@@ -52,6 +52,23 @@ using namespace PlatServices;
 
 //------------------------------------------------------------------------------
 
+PllDomain::PllDomain(DOMAIN_ID i_domainId) :
+    RuleChipDomain(i_domainId, PllDomain::CONTAINER_SIZE),
+    ExtensibleDomain("PllDomain"),
+    iv_thRcsClk0(  ThresholdResolution::cv_pllDefault),
+    iv_thRcsClk1(  ThresholdResolution::cv_pllDefault),
+    iv_thPllUnlock(ThresholdResolution::cv_pllDefault)
+{
+    if (mfgMode())
+    {
+        iv_thRcsClk0  = TimeBasedThreshold(ThresholdResolution::cv_mnfgDefault);
+        iv_thRcsClk1  = TimeBasedThreshold(ThresholdResolution::cv_mnfgDefault);
+        iv_thPllUnlock= TimeBasedThreshold(ThresholdResolution::cv_mnfgDefault);
+    }
+}
+
+//------------------------------------------------------------------------------
+
 int32_t PllDomain::Initialize(void)
 {
 
@@ -114,12 +131,12 @@ bool PllDomain::Query(ATTENTION_TYPE i_attnType)
 
 //------------------------------------------------------------------------------
 
-void __callout(STEP_CODE_DATA_STRUCT& io_sc,
-                   std::map<PllErrTypes::Types,
-                            std::vector<ExtensibleChip*>>& i_errList,
-                   PllErrTypes::Types i_errType,
-                   PRDpriority i_clockPri = MRU_HIGH,
-                   PRDpriority i_procPri  = MRU_LOW)
+void PllDomain::addCallout(STEP_CODE_DATA_STRUCT& io_sc,
+                           std::map<PllErrTypes::Types,
+                                    std::vector<ExtensibleChip*>>& i_errList,
+                           PllErrTypes::Types i_errType,
+                           PllErrTypes& io_maskErrTypes,
+                           PRDpriority i_clockPri, PRDpriority i_procPri)
 {
     // Get the clock callout type.
     PRDcalloutData::MruType clockType = PRDcalloutData::TYPE_NONE;
@@ -151,6 +168,46 @@ void __callout(STEP_CODE_DATA_STRUCT& io_sc,
         // Callout the processor.
         io_sc.service_data->SetCallout(chip->getTrgt(), i_procPri);
     }
+
+    // Increment the threshold counter, if needed.
+    if (!i_errList[i_errType].empty())
+    {
+        switch (i_errType)
+        {
+            case PllErrTypes::RCS_OSC_ERROR_0:
+            case PllErrTypes::RCS_UNLOCKDET_0:
+                if (iv_thRcsClk0.inc(io_sc))
+                {
+                    io_maskErrTypes.set(PllErrTypes::RCS_OSC_ERROR_0);
+                    io_maskErrTypes.set(PllErrTypes::RCS_UNLOCKDET_0);
+                    io_sc.service_data->setPredictive();
+                }
+                break;
+
+            case PllErrTypes::RCS_OSC_ERROR_1:
+            case PllErrTypes::RCS_UNLOCKDET_1:
+                if (iv_thRcsClk1.inc(io_sc))
+                {
+                    io_maskErrTypes.set(PllErrTypes::RCS_OSC_ERROR_1);
+                    io_maskErrTypes.set(PllErrTypes::RCS_UNLOCKDET_1);
+                    io_sc.service_data->setPredictive();
+                }
+                break;
+
+            case PllErrTypes::PLL_UNLOCK_0:
+            case PllErrTypes::PLL_UNLOCK_1:
+                if (iv_thPllUnlock.inc(io_sc))
+                {
+                    io_maskErrTypes.set(PllErrTypes::PLL_UNLOCK_0);
+                    io_maskErrTypes.set(PllErrTypes::PLL_UNLOCK_1);
+                    io_sc.service_data->setPredictive();
+                }
+                break;
+
+            default:
+                PRDF_ASSERT(0);
+        }
+    }
 }
 
 int32_t PllDomain::Analyze(STEP_CODE_DATA_STRUCT& io_sc,
@@ -161,8 +218,11 @@ int32_t PllDomain::Analyze(STEP_CODE_DATA_STRUCT& io_sc,
     // domains.
     std::vector<ExtensibleChip*> nfchips;
 
-    // A summary of all error types found.
-    PllErrTypes errTypesSummary;
+    // A summary of all error types that need to be masked and/or cleared. These
+    // are two separate variables because we only want to mask attentions when
+    // they have hit their respective thresholds.
+    PllErrTypes maskErrTypes;
+    PllErrTypes clearErrTypes;
 
     // Keep track of all chips with attentions. They will be used for the
     // primary signature and callouts later.
@@ -197,8 +257,8 @@ int32_t PllDomain::Analyze(STEP_CODE_DATA_STRUCT& io_sc,
             continue;
         }
 
-        // Keep a cumulative list of the error types.
-        errTypesSummary = errTypesSummary | errTypes;
+        // Keep a cumulative list of the error types that need to be cleared.
+        clearErrTypes = clearErrTypes | errTypes;
 
         // Capture any registers needed for PLL analysis, which would be
         // captured by default during normal analysis.
@@ -322,27 +382,18 @@ int32_t PllDomain::Analyze(STEP_CODE_DATA_STRUCT& io_sc,
     // unlock attentions are scoped to a single processor in the clock domain,
     // then the processor is more likely at fault than the primary clock.
 
-    if (errTypesSummary.query(PllErrTypes::RCS_OSC_ERROR_0) ||
-        errTypesSummary.query(PllErrTypes::RCS_OSC_ERROR_1))
+    if (!errList[PllErrTypes::RCS_OSC_ERROR_0].empty() ||
+        !errList[PllErrTypes::RCS_OSC_ERROR_1].empty())
     {
-        // Callout associated clocks/procs, if needed.
-        __callout(io_sc, errList, PllErrTypes::RCS_OSC_ERROR_0);
-        __callout(io_sc, errList, PllErrTypes::RCS_OSC_ERROR_1);
-
-        // Ensure any PLL unlock or RCS unlock detect errors on either side are
-        // ignored. Generally, this means the attentions should be cleared, but
-        // we will have to mask these attentions as well if either RCS OSC error
-        // attention is masked.
-        errTypesSummary.set(PllErrTypes::PLL_UNLOCK_0   );
-        errTypesSummary.set(PllErrTypes::PLL_UNLOCK_1   );
-        errTypesSummary.set(PllErrTypes::RCS_UNLOCKDET_0);
-        errTypesSummary.set(PllErrTypes::RCS_UNLOCKDET_1);
+        // Callout associated clocks/procs and threshold, if needed.
+        addCallout(io_sc, errList, PllErrTypes::RCS_OSC_ERROR_0, maskErrTypes);
+        addCallout(io_sc, errList, PllErrTypes::RCS_OSC_ERROR_1, maskErrTypes);
     }
     else
     {
-        // Callout associated clocks/procs, if needed.
-        __callout(io_sc, errList, PllErrTypes::RCS_UNLOCKDET_0);
-        __callout(io_sc, errList, PllErrTypes::RCS_UNLOCKDET_1);
+        // Callout associated clocks/procs and threshold, if needed.
+        addCallout(io_sc, errList, PllErrTypes::RCS_UNLOCKDET_0, maskErrTypes);
+        addCallout(io_sc, errList, PllErrTypes::RCS_UNLOCKDET_1, maskErrTypes);
 
         // Get the total number of chips that reported PLL errors. Note that it
         // should not be possible for a chip to report PLL errors from both
@@ -357,18 +408,13 @@ int32_t PllDomain::Analyze(STEP_CODE_DATA_STRUCT& io_sc,
             PRDpriority clockPri = (1 == pllChips) ? MRU_MED  : MRU_HIGH;
             PRDpriority procPri  = (1 == pllChips) ? MRU_HIGH : MRU_MED;
 
-            // Callout associated clocks, if needed.
-            __callout(io_sc, errList, PllErrTypes::PLL_UNLOCK_0,
-                      clockPri, procPri);
-            __callout(io_sc, errList, PllErrTypes::PLL_UNLOCK_1,
-                      clockPri, procPri);
+            // Callout associated clocks/procs and threshold, if needed.
+            addCallout(io_sc, errList, PllErrTypes::PLL_UNLOCK_0, maskErrTypes,
+                       clockPri, procPri);
+            addCallout(io_sc, errList, PllErrTypes::PLL_UNLOCK_1, maskErrTypes,
+                       clockPri, procPri);
         }
     }
-
-    // TODO: Currently unsure what the threshold should be for each error type.
-    //       Waiting for a response from the RAS team. Will use the default PLL
-    //       error threshold for now.
-    iv_thPllUnlock.Resolve(io_sc);
 
     #ifdef __HOSTBOOT_MODULE // only allowed to modify hardware from the host
 
@@ -378,14 +424,11 @@ int32_t PllDomain::Analyze(STEP_CODE_DATA_STRUCT& io_sc,
         ExtensibleChip*         c = LookUp(index);
         ExtensibleChipFunction* f = nullptr;
 
-        if (io_sc.service_data->IsAtThreshold())
-        {
-            f = c->getExtensibleFunction("maskPllErrTypes");
-            (*f)(c, PluginDef::bindParm<const PllErrTypes&>(errTypesSummary));
-        }
+        f = c->getExtensibleFunction("maskPllErrTypes");
+        (*f)(c, PluginDef::bindParm<const PllErrTypes&>(maskErrTypes));
 
         f = c->getExtensibleFunction("clearPllErrTypes");
-        (*f)(c, PluginDef::bindParm<const PllErrTypes&>(errTypesSummary));
+        (*f)(c, PluginDef::bindParm<const PllErrTypes&>(clearErrTypes));
     }
 
     #endif // __HOSTBOOT_MODULE

@@ -30,7 +30,7 @@
 #include <iipResolutionFactory.h>
 #include <prdfExtensibleDomain.H>
 #include <prdfRuleChipDomain.H>
-#include <prdfThresholdResolutions.H>
+#include <prdfThresholdUtils.H>
 
 namespace PRDF
 {
@@ -108,13 +108,7 @@ class PllDomain : public RuleChipDomain, public ExtensibleDomain
      * @brief Constructor
      * @param i_domainId The domain ID.
      */
-    explicit PllDomain(DOMAIN_ID i_domainId) :
-        RuleChipDomain(i_domainId, PllDomain::CONTAINER_SIZE),
-        ExtensibleDomain("PllDomain"),
-        iv_thPllUnlock(ResolutionFactory::Access().GetThresholdResolution(1,
-                            ThresholdResolution::cv_pllDefault,
-                            ThresholdResolution::cv_mnfgDefault))
-    {}
+    explicit PllDomain(DOMAIN_ID i_domainId);
 
   /**
    *  @brief Perform any initialization required by the hardware
@@ -153,12 +147,37 @@ protected:
    */
   virtual void Order(ATTENTION_TYPE attentionType);
 
+  private: // functions
+
+    /**
+     * @brief Adds clock and processor callouts to the service data collector
+     *        based on the given chip list and error type. Will also increment
+     *        the appropriate threshold counter for the given type. On
+     *        threshold, will set the appropriate service data collector flags
+     *        and update the given mask error types for masking the errors at
+     *        the end of analysis.
+     * @param io_sc           The service data collector.
+     * @param i_errList       A list of chips at attention for all error types.
+     * @param i_errType       The target error type.
+     * @param io_maskErrTypes A summary of all attentions types that need to be
+     *                        masked.
+     * @param i_clockPri      The callout priority for clock callouts.
+     * @param i_procPri       The callout priority for processor callouts.
+     */
+    void addCallout(STEP_CODE_DATA_STRUCT& io_sc,
+                    std::map<PllErrTypes::Types,
+                             std::vector<ExtensibleChip*>>& i_errList,
+                    PllErrTypes::Types i_errType, PllErrTypes& io_maskErrTypes,
+                    PRDpriority i_clockPri = MRU_HIGH,
+                    PRDpriority i_procPri = MRU_LOW);
+
 private:  // Data
 
   enum { CONTAINER_SIZE = 8 };
 
-    /** Threshold resolution for a PLL unlock error. */
-    Resolution & iv_thPllUnlock;
+    TimeBasedThreshold iv_thRcsClk0;   ///< RCS OSC error/unlock det on clock 0
+    TimeBasedThreshold iv_thRcsClk1;   ///< RCS OSC error/unlock det on clock 1
+    TimeBasedThreshold iv_thPllUnlock; ///< PLL unlock on either clock
 };
 
 //------------------------------------------------------------------------------
