@@ -54,6 +54,7 @@
 #include <intr/interrupt.H>
 #include <isteps/mem_utils.H>
 #include <arch/magic.H>
+#include <runtime/runtime.H>
 
 #include "memory_encryption.H"
 
@@ -65,6 +66,33 @@ using   namespace   TARGETING;
 
 //Simics only register to trigger exit of cache containment
 #define EXIT_CACHE_CONTAINED_SCOM_ADDR 0x0000000005000003
+
+/* @brief Zero the entire Hostboot Reserved Memory section. Called after exiting
+ * cache-contained mode.
+ */
+static void zero_hb_reserved_memory()
+{
+    // Map in the entire physical range for the reserved memory region
+    const uint64_t hb_base_pa = RUNTIME::getHbBaseAddrWithNodeOffset();
+    const uint64_t hb_rsv_mem_pa = hb_base_pa + VMM_MEMORY_SIZE;
+    const size_t rsv_mem_size = VMM_HB_RSV_MEM_SIZE - VMM_MEMORY_SIZE;
+
+    void* const rsv_mem = mm_block_map(reinterpret_cast<void*>(hb_rsv_mem_pa),
+                                       rsv_mem_size);
+
+    assert(rsv_mem, "mm_block_map failed to map HB reserved memory region");
+
+    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+              "Zeroing HB Reserved Memory from p:0x%lx to p:0x%lx",
+              hb_rsv_mem_pa,
+              hb_rsv_mem_pa + rsv_mem_size);
+
+    // Zero it out and unmap
+    memset(rsv_mem, 0, rsv_mem_size);
+
+    assert(mm_block_unmap(rsv_mem) == 0,
+           "mm_block_unmap failed to unmap hb reserved memory region");
+}
 
 namespace ISTEP_14
 {
@@ -527,6 +555,8 @@ void* call_proc_exit_cache_contained (void *io_pArgs)
                   "SUCCESS call_proc_exit_cache_contained::"
                   " - extendVMM passed");
     }
+
+    zero_hb_reserved_memory();
 
     }while(0);
 
