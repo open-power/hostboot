@@ -91,7 +91,7 @@ static const hang_pulse_t SETUP_HANG_COUNTERS_PAU[] =
 static const hang_pulse_t SETUP_HANG_COUNTERS_EQ[] =
 {
     {0, 16, 0},
-    {1, 21, 1},
+    {1, 23, 1},
     {5, 6, 0},
     {6, 7, 0, 1}
 };
