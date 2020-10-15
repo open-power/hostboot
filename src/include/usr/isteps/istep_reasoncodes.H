@@ -171,6 +171,7 @@ namespace ISTEP
         RC_MASTER_PROC_SECURE_VERSION_MISMATCH   = ISTEP_COMP_ID | 0x5D,
         RC_MEMCRYPT_KEY_SETUP_FAILED             = ISTEP_COMP_ID | 0x5E,
         RC_MEMCRYPT_LOCK_FAILED                  = ISTEP_COMP_ID | 0x5F,
+        RC_RNG_FAILED                            = ISTEP_COMP_ID | 0x60,
     };
 
 };

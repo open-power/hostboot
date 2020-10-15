@@ -36,22 +36,85 @@
 
 // Misc
 #include <devicefw/userif.H>
+#include <isteps/istep_reasoncodes.H>
 #include <initservice/isteps_trace.H>
 #include <secureboot/service.H>
 
 using namespace TARGETING;
 using namespace ERRORLOG;
 
-/** @brief Generate a 64-bit random number.
+/** @brief Generate a 64-bit random number with the DARN instruction.
+ *
+ * See the Power ISA v3.0b page 78 for documentation on the DARN ("Deliver A
+ * Random Number") instruction.
  *
  * @param[out] o_random  A 64-bit random number.
- * @return errlHndl_t    Error on failure, nullptr otherwise
+ * @return errlHndl_t    Error if any, nullptr otherwise.
  */
+
 static errlHndl_t hardware_random64(uint64_t& o_random)
 {
-    // @TODO RTC 208820: Actually generate a random number
+    // The DARN instruction produces this value upon failure (even in 32-bit
+    // mode).
+    static const uint64_t DARN_FAILURE = 0xFFFFFFFFFFFFFFFFull;
+
+    // The spec says that we should retry several times when DARN fails. This
+    // number defines how many times we loop before failing. 10 is the spec's
+    // suggested value.
+    static const int NUM_RETRIES = 10;
+
     o_random = 0;
-    return nullptr;
+
+    int fails = 0;
+
+    while (fails < NUM_RETRIES)
+    {
+        uint64_t random_number = DARN_FAILURE;
+
+        // Use the DARN instruction to generate a 64-bit random number. The
+        // value 1 as the second operand requests a 64-bit "conditioned" random
+        // number (other values are 0 for 32-bit conditioned number, and 2 for
+        // 64-bit unconditioned number). The "volatile" qualifier is imperative
+        // on this asm block, as without it GCC will assume that DARN produces
+        // the same output on repeated executions and possibly optimize it
+        // incorrectly.
+
+        // @TODO RTC 208820: Use the DARN instruction when HWP support is enabled
+        //asm volatile ("darn %0, 1" : "=r" (random_number));
+        random_number = 0;
+
+        if (random_number == DARN_FAILURE)
+        {
+            ++fails;
+        }
+        else
+        {
+            o_random = random_number;
+            break;
+        }
+    }
+
+    errlHndl_t errl = nullptr;
+
+    // Fail if we broke out of the above loop after failing too many times
+    if (fails >= NUM_RETRIES)
+    {
+        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                  ERR_MRK"hardware_random64: DARN failed too many times");
+
+        /* @errortype        ERRL_SEV_UNRECOVERABLE
+         * @moduleid         ISTEP::MOD_PROC_EXIT_CACHE_CONTAINED
+         * @reasoncode       ISTEP::RC_RNG_FAILED
+         * @devdesc          RNG for memory encryption keygen failed
+         * @custdesc         Hardware failure prevents memory encryption
+         */
+        errl = new ERRORLOG::ErrlEntry(
+            ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+            ISTEP::MOD_PROC_EXIT_CACHE_CONTAINED,
+            ISTEP::RC_RNG_FAILED);
+    }
+
+    return errl;
 }
 
 /* @brief Determine whether memory encryption should be enabled.
