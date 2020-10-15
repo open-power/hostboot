@@ -35,6 +35,7 @@ constexpr uint64_t literal_1 = 1;
 constexpr uint64_t literal_0xFC = 0xFC;
 constexpr uint64_t literal_4 = 4;
 constexpr uint64_t literal_8 = 8;
+constexpr uint64_t literal_0 = 0;
 constexpr uint64_t literal_2 = 2;
 
 fapi2::ReturnCode p10_nx_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& TGT0,
@@ -49,6 +50,8 @@ fapi2::ReturnCode p10_nx_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_BROADCAST_MODE, TGT1, l_TGT1_ATTR_PROC_FABRIC_BROADCAST_MODE));
         fapi2::ATTR_SMF_CONFIG_Type l_TGT1_ATTR_SMF_CONFIG;
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SMF_CONFIG, TGT1, l_TGT1_ATTR_SMF_CONFIG));
+        fapi2::ATTR_CHIP_EC_FEATURE_HW544290_Type l_TGT0_ATTR_CHIP_EC_FEATURE_HW544290;
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_HW544290, TGT0, l_TGT0_ATTR_CHIP_EC_FEATURE_HW544290));
         fapi2::buffer<uint64_t> l_scom_buffer;
         {
             FAPI_TRY(fapi2::getScom( TGT0, 0x2011041ull, l_scom_buffer ));
@@ -186,7 +189,15 @@ fapi2::ReturnCode p10_nx_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&
         {
             FAPI_TRY(fapi2::getScom( TGT0, 0x20110d6ull, l_scom_buffer ));
 
-            l_scom_buffer.insert<9, 3, 61, uint64_t>(literal_2 );
+            if ((l_TGT0_ATTR_CHIP_EC_FEATURE_HW544290 == literal_1))
+            {
+                l_scom_buffer.insert<9, 3, 61, uint64_t>(literal_0 );
+            }
+            else if (literal_1)
+            {
+                l_scom_buffer.insert<9, 3, 61, uint64_t>(literal_2 );
+            }
+
             constexpr auto l_NX_PBI_DISABLE_PROMOTE_ON = 0x1;
             l_scom_buffer.insert<6, 1, 63, uint64_t>(l_NX_PBI_DISABLE_PROMOTE_ON );
             FAPI_TRY(fapi2::putScom(TGT0, 0x20110d6ull, l_scom_buffer));
