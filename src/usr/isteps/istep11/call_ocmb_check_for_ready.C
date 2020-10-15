@@ -51,6 +51,7 @@
 //  Targeting support
 #include <attributeenums.H>                     // TYPE_PROC
 #include <targeting/common/utilFilter.H>        // getAllChips
+#include <sbeio/sbeioif.H>
 #include <util/misc.H>
 #include <sys/time.h>
 
@@ -221,6 +222,32 @@ void* call_ocmb_check_for_ready (void *io_pArgs)
             }
         }
     }
+
+    // Loop thru the list of processors and send the OCMB config info to SBE
+    for (auto &l_procTarget: functionalProcChipList)
+    {
+        l_errl = SBEIO::psuSendSbeOcmbConfig(l_procTarget);
+
+        if (l_errl)
+        {
+            TRACFCOMP(g_trac_isteps_trace,
+                      ERR_MRK"ERROR : call_proc_ocmb_enable HWP(): "
+                      "psuSendSbeOcmbConfig failed for target 0x%.08X."
+                      TRACE_ERR_FMT,
+                      get_huid(l_procTarget),
+                      TRACE_ERR_ARGS(l_errl));
+
+            // Commit the error and not fail this istep due to this failure
+            errlCommit( l_errl, HWPF_COMP_ID );
+        }
+        else
+        {
+            TRACFCOMP(g_trac_isteps_trace,
+                      INFO_MRK"SUCCESS : call_proc_ocmb_enable HWP(): "
+                      "psuSendSbeOcmbConfig completed ok for target 0x%.08X.",
+                      get_huid(l_procTarget));
+        }
+    } // for (auto &l_procTarget: functionalProcChipList)
 
     TRACFCOMP(g_trac_isteps_trace, EXIT_MRK"call_ocmb_check_for_ready");
     return l_StepError.getErrorHandle();
