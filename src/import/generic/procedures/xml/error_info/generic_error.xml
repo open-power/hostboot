@@ -1531,4 +1531,23 @@
     </callout>
   </hwpError>
 
+  <hwpError>
+    <rc>RC_MSS_DDIMM_RESET_N_DEAD_LOAD</rc>
+    <description>
+        A DDIMM shares a reset_n signal with a deconfigured DDIMM.
+    </description>
+    <ffdc>OCMB_RESET_GROUP</ffdc>
+    <callout>
+      <procedure>MEMORY_PLUGGING_ERROR</procedure>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <target>OCMB_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>OCMB_TARGET</target>
+    </deconfigure>
+  </hwpError>
+
 </hwpErrors>

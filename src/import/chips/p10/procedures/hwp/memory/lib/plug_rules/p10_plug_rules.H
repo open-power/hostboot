@@ -89,6 +89,13 @@ struct spd_lookup_key
 };
 
 ///
+/// @brief Enforce the plug-rules we can do before mss_freq
+/// @param[in] i_target FAPI2 target (proc chip)
+/// @return fapi2::FAPI2_RC_SUCCESS if okay, otherwise a MSS_PLUG_RULE error code
+///
+fapi2::ReturnCode enforce_pre_freq(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target);
+
+///
 /// @brief Enforce the plug-rules we can do after eff_config
 /// @param[in] i_target FAPI2 target (proc chip)
 /// @return fapi2::FAPI2_RC_SUCCESS if okay, otherwise a MSS_PLUG_RULE error code
@@ -148,6 +155,26 @@ fapi2::ReturnCode spd_minimum_combined_revision(const fapi2::Target<fapi2::TARGE
         const uint16_t i_min_combined_rev);
 
 } // namespace check
+
+///
+/// @brief Helper function for reset_n_dead_load unit testing
+/// @param[in] i_reset_group non-functional ocmb reset group
+/// @param[in] i_functional_dimms vector of all functional configured DIMMs under proc chip
+/// @param[in,out] io_verified_reset_groups list of reset groups we've already verified
+/// @param[out] o_callout_ocmbs vector of configured OCMB_CHIPs that need to be called out
+/// @return fapi2::FAPI2_RC_SUCCESS if okay
+///
+fapi2::ReturnCode reset_n_dead_load_helper(const uint64_t i_reset_group,
+        const std::vector<fapi2::Target<fapi2::TARGET_TYPE_DIMM>>& i_functional_dimms,
+        std::vector<uint8_t>& io_verified_reset_groups,
+        std::vector<fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>>& o_callout_ocmbs);
+
+///
+/// @brief Enforce shared reset_n dependency
+/// @param[in] i_target proc chip target
+/// @return fapi2::FAPI2_RC_SUCCESS if okay
+///
+fapi2::ReturnCode reset_n_dead_load(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target);
 
 ///
 /// @brief Enforce minimum functional DDIMM SPD revision

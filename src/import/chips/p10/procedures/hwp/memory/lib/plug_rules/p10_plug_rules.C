@@ -41,6 +41,7 @@
 #include <generic/memory/lib/utils/count_dimm.H>
 #include <generic/memory/lib/utils/num.H>
 #include <mss_generic_attribute_getters.H>
+#include <mss_generic_system_attribute_getters.H>
 
 #include <fapi2.H>
 #include <lib/plug_rules/p10_plug_rules.H>
@@ -114,6 +115,38 @@ bool spd_lookup_key::operator!=(const spd_lookup_key& i_rhs) const
     return iv_module_mfg_id != i_rhs.iv_module_mfg_id ||
            iv_dimm_height != i_rhs.iv_dimm_height ||
            iv_dimm_size != i_rhs.iv_dimm_size;
+}
+
+///
+/// @brief Enforce the plug-rules we can do before mss_freq
+/// @param[in] i_target FAPI2 target (proc chip)
+/// @return fapi2::FAPI2_RC_SUCCESS if okay, otherwise a MSS_PLUG_RULE error code
+///
+fapi2::ReturnCode enforce_pre_freq(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
+{
+    uint8_t l_ignore_plug_rules = 0;
+
+    // If there are no DIMM, we can just get out.
+    if (mss::count_dimm(mss::find_targets<fapi2::TARGET_TYPE_MEM_PORT>(i_target)) == 0)
+    {
+        FAPI_INF("Skipping plug rule check on %s because it has no DIMM configured", mss::c_str(i_target));
+        return fapi2::FAPI2_RC_SUCCESS;
+    }
+
+    FAPI_TRY( mss::attr::get_ignore_mem_plug_rules(l_ignore_plug_rules) );
+
+    // Skip plug rule checks if set to ignore (e.g. on Apollo)
+    if (l_ignore_plug_rules == fapi2::ENUM_ATTR_MEM_IGNORE_PLUG_RULES_YES)
+    {
+        FAPI_INF("Attribute set to ignore plug rule checking");
+        return fapi2::FAPI2_RC_SUCCESS;
+    }
+
+    // Check shared reset signal plugging dependencies
+    FAPI_TRY( reset_n_dead_load(i_target) );
+
+fapi_try_exit:
+    return fapi2::current_err;
 }
 
 ///
@@ -273,6 +306,120 @@ fapi_try_exit:
 }
 
 } // namespace check
+
+///
+/// @brief Helper function for reset_n_dead_load unit testing
+/// @param[in] i_reset_group non-functional ocmb reset group
+/// @param[in] i_functional_dimms vector of all functional configured DIMMs under proc chip
+/// @param[in,out] io_verified_reset_groups list of reset groups we've already verified
+/// @param[out] o_callout_ocmbs vector of configured OCMB_CHIPs that need to be called out
+/// @return fapi2::FAPI2_RC_SUCCESS if okay
+///
+fapi2::ReturnCode reset_n_dead_load_helper(const uint64_t i_reset_group,
+        const std::vector<fapi2::Target<fapi2::TARGET_TYPE_DIMM>>& i_functional_dimms,
+        std::vector<uint8_t>& io_verified_reset_groups,
+        std::vector<fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>>& o_callout_ocmbs)
+{
+    o_callout_ocmbs.clear();
+
+    // Check if we've already covered this reset group so we don't do any double callouts
+    const auto l_it = std::find(io_verified_reset_groups.begin(), io_verified_reset_groups.end(), i_reset_group);
+
+    if (l_it != io_verified_reset_groups.end())
+    {
+        return fapi2::FAPI2_RC_SUCCESS;
+    }
+
+    for (const auto& l_dimm : i_functional_dimms)
+    {
+        uint8_t l_reset_group = 0;
+        const auto& l_ocmb = mss::find_target<fapi2::TARGET_TYPE_OCMB_CHIP>(l_dimm);
+        FAPI_TRY(mss::attr::get_mrw_ocmb_reset_group(l_ocmb, l_reset_group));
+
+        if (l_reset_group == i_reset_group)
+        {
+            o_callout_ocmbs.push_back(l_ocmb);
+        }
+    }
+
+    io_verified_reset_groups.push_back(i_reset_group);
+
+    return fapi2::FAPI2_RC_SUCCESS;
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Enforce shared reset_n dependency
+/// @param[in] i_target proc chip target
+/// @return fapi2::FAPI2_RC_SUCCESS if okay
+///
+fapi2::ReturnCode reset_n_dead_load(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
+{
+    // On P10 systems, groups of four DDIMM slots share a reset_n signal. Current DIMMs have open drain
+    // receivers for this, which creates a problem in that a dead load (present and not configured DIMM)
+    // will draw the reset signal and cause the configured DIMMs to not operate correctly. Newer DDIMMs
+    // will be fixed to avoid this problem, but this will remain a problem with many DDIMMs in
+    // circulation (both B.0 and A.1)
+    fapi2::ReturnCode l_rc = fapi2::FAPI2_RC_SUCCESS;
+
+    // Note that we have to start from the DIMM targets because hostboot always returns
+    // the architectural limit rather than what is actually installed for every target type
+    // except DIMM targets. Plus we have to go through the MEM_PORT targets because we can't go directly
+    // from PROC_CHIP to DIMM. Thus, our traversal goes PROC_CHIP->MEM_PORT->DIMM->OCMB_CHIP.
+    std::vector<fapi2::Target<fapi2::TARGET_TYPE_DIMM>> l_functional_dimms;
+    const auto& l_ports = mss::find_targets<fapi2::TARGET_TYPE_MEM_PORT>(i_target);
+
+    std::vector<uint8_t> l_verified_reset_groups;
+
+    for(const auto& l_port : l_ports)
+    {
+        for(const auto& l_dimm : mss::find_targets<fapi2::TARGET_TYPE_DIMM>(l_port, fapi2::TARGET_STATE_FUNCTIONAL))
+        {
+            l_functional_dimms.push_back(l_dimm);
+        }
+    }
+
+    for(const auto& l_port : l_ports)
+    {
+        for(const auto& l_dimm : mss::find_targets<fapi2::TARGET_TYPE_DIMM>(l_port, fapi2::TARGET_STATE_PRESENT))
+        {
+            std::vector<fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>> l_callout_ocmbs;
+            const auto& l_ocmb = mss::find_target<fapi2::TARGET_TYPE_OCMB_CHIP>(l_dimm);
+            uint8_t l_reset_group = 0;
+
+            // We're only interested in non-functional targets here
+            if (l_ocmb.isFunctional())
+            {
+                continue;
+            }
+
+            FAPI_TRY(mss::attr::get_mrw_ocmb_reset_group(l_ocmb, l_reset_group));
+
+            FAPI_TRY(reset_n_dead_load_helper(l_reset_group, l_functional_dimms, l_verified_reset_groups, l_callout_ocmbs));
+
+            // Call out any OCMBs that share a reset_n signal with the deconfigured OCMB
+            for (const auto& l_callout_ocmb : l_callout_ocmbs)
+            {
+                FAPI_ASSERT_NOEXIT( false,
+                                    fapi2::MSS_DDIMM_RESET_N_DEAD_LOAD()
+                                    .set_OCMB_RESET_GROUP(l_reset_group)
+                                    .set_OCMB_TARGET(l_callout_ocmb),
+                                    "%s shares a reset_n signal with a deconfigured DDIMM in group %d",
+                                    mss::c_str(l_callout_ocmb), l_reset_group );
+
+                // Save any bad error code so it doesn't get overwritten in the loop
+                l_rc = fapi2::current_err;
+            }
+        }
+    }
+
+    return l_rc;
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
 
 ///
 /// @brief Enforce minimum functional DDIMM SPD revision

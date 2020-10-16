@@ -95,6 +95,10 @@ fapi2::ReturnCode p10_mss_freq( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP
 
     }
 
+    // Check plug rules.
+    FAPI_TRY( mss::plug_rule::enforce_pre_freq(i_target),
+              "Failed enforce_plug_rules for %s", mss::c_str(i_target) );
+
     // Set frequency attributes
     FAPI_TRY(mss::generate_freq<mss::proc_type::PROC_P10>(i_target));
 
