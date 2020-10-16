@@ -93,7 +93,9 @@ fapi2::ReturnCode exp_omi_train_check(const fapi2::Target<fapi2::TARGET_TYPE_OCM
         // There is a window during OMI training where Explorer FW will not respond to anything
         // except FW_STATUS and TWI_POLL_ABORT commands (which precludes i2c scom reads)
         // note the assert param is to suppress assert/callout if polling ends with BUSY state
-        FAPI_TRY( mss::exp::i2c::fw_status(i_target, mss::common_timings::DELAY_1MS, 100,
+        // note the polling count was updated from 100 to 10,000 to give time for training to
+        // complete. This value may need to be optimized once the training procedure is finalized
+        FAPI_TRY( mss::exp::i2c::fw_status(i_target, mss::common_timings::DELAY_1MS, 10000,
                                            mss::exp::i2c::NO_ASSERT_IF_BUSY_FW_STATUS) );
 
         FAPI_TRY( mss::exp::i2c::get_fw_status(i_target, l_fw_status_data) );
