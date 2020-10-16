@@ -221,13 +221,15 @@ errlHndl_t checkWofTableHeaderForCorrectness(TARGETING::Target* i_procTarg,
  *  there, then the table data is picked up directly from the Backup EEPROM
  *  using the getDefaultWofTable(...) function.
  *
+ *  @param[in]  i_procTarget    Get WOF data hanging off of this processor
+ *
  *  @param[out]  o_wofData      Pointer to WOF Table data, which includes
  *                              corresponding WOF Table Header and VRT data
  *
  *  @return fapi2::ReturnCode - fapi2::FAPI2_RC_SUCCESS if no errors encountered
  *                            - else ReturnCode will contain error info
  */
-fapi2::ReturnCode platParseWOFTables(uint8_t* o_wofData)
+fapi2::ReturnCode platParseWOFTables(TARGETING::Target* i_procTarg, uint8_t* o_wofData)
 {
     FAPI_DBG("Entering platParseWOFTables ....");
 
@@ -239,14 +241,12 @@ fapi2::ReturnCode platParseWOFTables(uint8_t* o_wofData)
     */
 
     TARGETING::Target * l_sys = UTIL::assertGetToplevelTarget();
-    TARGETING::Target * l_mProc = nullptr;
     TARGETING::targetService().getTopLevelTarget(l_sys);
-    TARGETING::targetService().masterProcChipTargetHandle(l_mProc);
 
     // Get the number of present cores
     TARGETING::TargetHandleList l_coreTargetList;
     TARGETING::getChildAffinityTargetsByState( l_coreTargetList,
-                                               l_mProc,
+                                               i_procTarg,
                                                TARGETING::CLASS_UNIT,
                                                TARGETING::TYPE_CORE,
                                                TARGETING::UTIL_FILTER_PRESENT);
@@ -571,7 +571,7 @@ fapi2::ReturnCode platParseWOFTables(uint8_t* o_wofData)
 */
         FAPI_INF("Get WOF table from Backup SEEPROM");
 
-        l_errl = getDefaultWofTable(l_mProc, o_wofData);
+        l_errl = getDefaultWofTable(i_procTarg, o_wofData);
 
         if (l_errl)
         {

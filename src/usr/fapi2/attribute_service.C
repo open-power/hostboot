@@ -596,17 +596,33 @@ ReturnCode platGetPoundWBucketData(const Target<TARGET_TYPE_ALL>& i_fapiTarget,
     return rc;
 }
 
-ReturnCode platParseWOFTables(uint8_t* o_wofData);
+ReturnCode platParseWOFTables(TARGETING::Target* i_procTarg, uint8_t* o_wofData);
 
 //******************************************************************************
 // fapi2::platAttrSvc::platGetWOFTableData function
 //******************************************************************************
-ReturnCode platGetWOFTableData(const Target<TARGET_TYPE_ALL>& i_fapiTarget,
-                               uint8_t * o_wofTableData)
+ReturnCode platGetWOFTableData(const Target<TARGET_TYPE_ALL>& i_fapiProcTarg, uint8_t * o_wofData)
 {
-    // Based on the system's criteria, look for WOF Table Header in PNOR's WOF data.
-    // If not found there, get default table from SEEPROM
-    return platParseWOFTables(o_wofTableData);
+    fapi2::ReturnCode l_rc;
+    TARGETING::Target* l_procTarg = nullptr;
+    do
+    {
+        errlHndl_t l_errl = getTargetingTarget(i_fapiProcTarg, l_procTarg);
+        if (l_errl)
+        {
+            FAPI_ERR("platGetWOFTableData failed when calling getTargetingTarget");
+            l_errl->collectTrace(FAPI_TRACE_NAME, 256);
+            addErrlPtrToReturnCode(l_rc, l_errl);
+            break;
+        }
+
+        // Based on the system's criteria, look for WOF Table Header in PNOR's WOF data.
+        // If not found there, get default table from SEEPROM
+        l_rc = platParseWOFTables(l_procTarg, o_wofData);
+
+    } while (0);
+
+    return l_rc;
 }
 
 //******************************************************************************

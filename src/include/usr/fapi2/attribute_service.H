@@ -253,19 +253,14 @@ ReturnCode platGetPoundWBucketData(const Target<TARGET_TYPE_ALL>& i_fapiTarget,
 /// @brief This function is called by the FAPI_ATTR_GET macro when getting
 /// ATTR_WOF_TABLE_DATA. It should not be called directly
 ///
-///
-/// @param[in]  i_fapiTarget     FAPI2 Target reference
-///                                Currently system target is unused.
-///                                Could change to proc target later.
+/// @param[in]  i_fapiProcTarg   FAPI2 Proc Target reference
 ///                                Don't need to check the type here, get macro
 ///                                does it for us, thus use the all type to
 ///                                allow streamlined dump of ATTR
 /// @param[out] o_pos            Output WOF table data
-/// @return ReturnCode           Always FAPI2_RC_SUCCESS, this cannot fail
-///                              if a toplevel target cannot be found then
-///                              an assert triggers in the platform call
+/// @return ReturnCode           Zero on success, else platform specified error
 ///
-ReturnCode platGetWOFTableData(const Target<TARGET_TYPE_ALL>& i_fapiTarget,
+ReturnCode platGetWOFTableData(const Target<TARGET_TYPE_ALL>& i_fapiProcTarg,
                                uint8_t * o_wofTableData);
 
 ///
