@@ -365,7 +365,7 @@ errlHndl_t IntrRp::_init()
     TARGETING::Target * sys = NULL;
     TARGETING::targetService().getTopLevelTarget( sys );
     assert(sys != NULL);
-    uint64_t hrmor_base = cpu_hrmor_nodal_base();
+    uint64_t hrmor_base = cpu_spr_value(CPU_SPR_HRMOR);
 
     KernelIpc::ipc_data_area.pir = iv_masterCpu.word;
     KernelIpc::ipc_data_area.hrmor_base = hrmor_base;
@@ -2551,7 +2551,7 @@ errlHndl_t IntrRp::syncNodes(intr_mpipl_sync_t i_sync_type)
         // Map the internode data areas to a virtual address
         internode_info_t * vaddr[MAX_NODES_PER_SYS];
 
-        for(uint64_t node = 0; node < MAX_NODES_PER_SYS; ++node)
+        for(uint32_t node = 0; node < MAX_NODES_PER_SYS; ++node)
         {
             if (node == PIR_t::nodeOrdinalFromPir(iv_masterCpu.word))
             {
@@ -2572,13 +2572,58 @@ errlHndl_t IntrRp::syncNodes(intr_mpipl_sync_t i_sync_type)
                         reinterpret_cast<uint64_t>(l_pageAlignedPtr) +
                         (l_remote_ipc_addr % PAGE_SIZE) );
 
-                hrmorBase = l_node_ipc_data_area->hrmor_base;
+                uint16_t sleep_time_cur = 0;
+                const uint16_t SLEEP_TIME_WAIT_SEC = 5; // sleep for 5 seconds
+                const uint16_t SLEEP_TIME_MAX = 300; // 300 second (5 minutes)
 
-                mm_block_unmap(reinterpret_cast<void *>(ALIGN_PAGE_DOWN(l_remote_ipc_addr)));
+                while(l_node_ipc_data_area->hrmor_base == 0 && sleep_time_cur < SLEEP_TIME_MAX)
+                {
+                      TRACDCOMP(g_trac_intr, INFO_MRK
+                                "0 hrmor found for node %d. Sleeping for %d sec and trying again",
+                                node,
+                                SLEEP_TIME_WAIT_SEC);
+                      nanosleep(SLEEP_TIME_WAIT_SEC,0);
+                      sleep_time_cur += SLEEP_TIME_WAIT_SEC;
+                }
+
+                if(sleep_time_cur >= SLEEP_TIME_MAX)
+                {
+                    TRACFCOMP(g_trac_intr, ERR_MRK
+                                "Waited for %d seconds and 0 hrmor was found for node"
+                                " %d so we are giving up",
+                                sleep_time_cur,
+                                node);
+                    /*@
+                    * @errortype    ERRL_SEV_UNRECOVERABLE
+                    * @moduleid     INTR::MOD_INTR_SYNC_NODES
+                    * @reasoncode   INTR::RC_NODE_SYNC_TIMEOUT
+                    * @userdata1[0:31] This Node
+                    * @userdata1[0:31] Remote Node we canot get HRMOR from
+                    * @userdata2    Remote IPC Address
+                    * @devdesc      Remote node is failing to fill out
+                    *               its IPC section or this node is failing
+                    *               to read it.
+                    * @custdesc     Firmware error occured during system reboot
+                    */
+                    err = new ERRORLOG::ErrlEntry(
+                            ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                            INTR::MOD_INTR_SYNC_NODES,
+                            INTR::RC_NODE_SYNC_TIMEOUT,
+                            TWO_UINT32_TO_UINT64(
+                              PIR_t::nodeOrdinalFromPir(iv_masterCpu.word),
+                              node),
+                            l_remote_ipc_addr,
+                            true /*Add HB Software Callout*/);
+                    break;
+                }
 
                 node_info_ptr =
                     reinterpret_cast<void *>
-                     ((hrmorBase)+VMM_INTERNODE_PRESERVED_MEMORY_ADDR);
+                     ((l_node_ipc_data_area->hrmor_base)+VMM_INTERNODE_PRESERVED_MEMORY_ADDR);
+
+                mm_block_unmap(reinterpret_cast<void *>(ALIGN_PAGE_DOWN(l_remote_ipc_addr)));
+
+
 
                 internode_info_t * node_info =
                     reinterpret_cast<internode_info_t *>
@@ -2610,7 +2655,7 @@ errlHndl_t IntrRp::syncNodes(intr_mpipl_sync_t i_sync_type)
         {
             synched = true;
 
-            for(uint64_t node = 0; node < MAX_NODES_PER_SYS; ++node)
+            for(uint32_t node = 0; node < MAX_NODES_PER_SYS; ++node)
             {
                 if(this_node_info->exist[node])
                 {
@@ -2635,7 +2680,7 @@ errlHndl_t IntrRp::syncNodes(intr_mpipl_sync_t i_sync_type)
         }
         isync();
 
-        for(uint64_t node = 0; node < MAX_NODES_PER_SYS; ++node)
+        for(uint32_t node = 0; node < MAX_NODES_PER_SYS; ++node)
         {
             if(this_node_info->exist[node])
             {

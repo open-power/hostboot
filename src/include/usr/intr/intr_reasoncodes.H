@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -74,6 +74,7 @@ namespace INTR
         RC_MESSAGE_SEND_ERROR         = INTR_COMP_ID | 0x0C,
         RC_IPC_DATA_INVALID           = INTR_COMP_ID | 0x0D,
         RC_SOURCE_NOT_REGISTERED      = INTR_COMP_ID | 0x0E,
+        RC_NODE_SYNC_TIMEOUT          = INTR_COMP_ID | 0x0F,
     };
 };
 
