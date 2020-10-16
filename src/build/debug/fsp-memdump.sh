@@ -68,7 +68,7 @@ discover()
     descriptor_h=`printf "%08x" ${descriptor_addr}`
 
     # Extract descriptor base address.
-    state_base_h=`cipgetmempba ${descriptor_h} 8 -ox -quiet | tail -n1`
+    state_base_h=`cipgetmempba ${descriptor_h} 8 -ox -quiet -n$NODE | tail -n1`
     state_base=`printf "%d" ${state_base_h}`
 
     # Calculate offset for the state variable within the descriptor.
@@ -77,7 +77,7 @@ discover()
     state_addr_h=`printf "%08x" ${state_addr}`
 
     # Read state.
-    STATE=`cipgetmempba ${state_addr_h} 1 -ox -quiet | tail -n1 | sed "s/0x//"`
+    STATE=`cipgetmempba ${state_addr_h} 1 -ox -quiet -n$NODE | tail -n1 | sed "s/0x//"`
 }
 
 # @fn limit_memory
@@ -91,19 +91,6 @@ limit_memory()
         *)
             ;;
     esac
-}
-
-# @fn find_hrmor
-# Discover the stashed away HRMOR.
-find_hrmor()
-{
-    # HRMOR is stored in bits 4:51 of core scratch 1
-    # See memstate.H for details.
-    # Multicast to all good cores.
-    fullreg=`getscom pu 4702F487 4 48`
-    #multiply result by 1024 since it is in MB
-    #take NODE into account
-    #fixme
 }
 
 # Read filename and state.
@@ -122,14 +109,28 @@ if [[ -z ${NODE} ]]; then
     NODE=0
 fi
 
-# HB HRMOR offset is at: 4 GB - 256 MB = 3840 MB
-HB_OFFSET=`expr 3840 \* 1024 \* 1024`
-# (64TB - 0x400000000000 OR 35184372088832)
-# see NODE_OFFSET in memorymap.H
-HB_BASE_HRMOR=`expr 64 \* 1024 \* 1024 \* 1024 \* 1024`
+# HRMOR is stored in bits 4:51 of core scratch 1
+# See memstate.H for details.
+# Multicast to all good cores.
+HRMOR=`getscom pu 4602F487 4 48 -p0 -n$NODE | grep 0x | sed 's/.*0x/0x/'`
 
-# Calculate HRMOR (in decimal).
-HRMOR=`expr ${HB_BASE_HRMOR} \* ${NODE} + ${HB_OFFSET}`
+# if there was an error reading the hrmor it will
+# have mutli line output, set it to a default
+if [[ "$HRMOR" =~ \ |\' ]]; then
+  echo "Attempt to read HRMOR from scom failed, falling back to default 4 GB - 512 MB error found :"
+  echo "$HRMOR"
+  # HB HRMOR offset is at: 4 GB - 512 MB = 3584 MB
+  HB_OFFSET=`expr 3584 \* 1024 \* 1024`
+  # (64TB - 0x400000000000 OR 35184372088832)
+  # see NODE_OFFSET in memorymap.H
+  HB_BASE_HRMOR=`expr 64 \* 1024 \* 1024 \* 1024 \* 1024`
+  # Calculate HRMOR (in decimal).
+  HRMOR=`expr ${HB_BASE_HRMOR} \* ${NODE} + ${HB_OFFSET}`
+else
+  #convert string to a int
+  HRMOR=$(( HRMOR ))
+fi
+
 echo "NODE: ${NODE} - HRMOR is: ${HRMOR}"
 
 # Using initial STATE, iterate through all the included states dumping each
