@@ -3241,9 +3241,10 @@ errlHndl_t sendSBESystemConfig( void )
 {
     errlHndl_t  l_elog = nullptr;
     uint64_t l_systemFabricConfigurationMap = 0x0;
+    const uint64_t l_u64_1  = 0x0000000000000001;
+    const uint64_t l_u64_63 = 0x000000000000003F;
 
     do {
-
 
         TARGETING::Target * sys = nullptr;
         TARGETING::targetService().getTopLevelTarget( sys );
@@ -3270,7 +3271,13 @@ errlHndl_t sendSBESystemConfig( void )
             // Take topology ID X and set the Xth bit in a 16 bit integer
             // and shift it over by 48 bits to fit 64 bits
             // Math turns out to be shifting left by 63 - topology id
-            l_systemFabricConfigurationMap |= (1 << (63 - l_fabricTopoId));
+            uint64_t tmp = l_fabricTopoId;
+
+            l_systemFabricConfigurationMap |= (l_u64_1 << (l_u64_63 - tmp));
+
+            TRACDCOMP( g_trac_runtime,"sendSBESystemConfig: proc 0x%.08X: "
+                       "l_fabricTopoId=0x%.02X, l_systemFabricConfigurationMap=0x%.16llX",
+                       TARGETING::get_huid(l_proc), l_fabricTopoId, l_systemFabricConfigurationMap);
         }
 
         // ATTR_HB_EXISTING_IMAGE only gets set on a multi-drawer system.
@@ -3280,8 +3287,10 @@ errlHndl_t sendSBESystemConfig( void )
         TARGETING::ATTR_HB_EXISTING_IMAGE_type hb_images =
           sys->getAttr<TARGETING::ATTR_HB_EXISTING_IMAGE>();
         TRACFCOMP( g_trac_runtime, "hb_images = 0x%x, nodeid = 0x%x", hb_images, nodeid);
+
         if (0 != hb_images)  //Multi-node
         {
+
             // multi-node system
             // This msgQ catches the node responses from the commands
             msg_q_t msgQ = msg_q_create();
@@ -3389,8 +3398,9 @@ errlHndl_t sendSBESystemConfig( void )
             for(auto l_proc : l_procChips)
             {
                 TRACDCOMP( g_trac_runtime,
-                           "calling sendSystemConfig on proc 0x%x",
-                           TARGETING::get_huid(l_proc));
+                           "calling sendSystemConfig on proc 0x%.08X: "
+                           "l_systemFabricConfigurationMap=0x%.16llX",
+                           TARGETING::get_huid(l_proc), l_systemFabricConfigurationMap);
                 l_elog = SBEIO::sendSystemConfig(l_systemFabricConfigurationMap,
                                                 l_proc);
                 if ( l_elog )
