@@ -127,13 +127,16 @@ void* call_proc_check_secondary_sbe_seeprom_complete( void *io_pArgs )
             // Set attribute indicating that SBE is started
             l_cpu_target->setAttr<ATTR_SBE_IS_STARTED>(1);
 
-            // Make the FIFO call to get and apply the SBE Capabilities
-            l_errl = getFifoSbeCapabilities(l_cpu_target);
+            // @TODO RTC 261217: Until the labs are saturated with machines with
+            // SBE levels that support getting FIFO capabilities over the 2nd
+            // SBE FIFO, disable this call so that the machines can still IPL.
+            //// Make the FIFO call to get and apply the SBE Capabilities
+            //l_errl = getFifoSbeCapabilities(l_cpu_target);
 
-            if (l_errl)
-            {
-                captureError(l_errl, l_stepError, HWPF_COMP_ID, l_cpu_target);
-            }
+            //if (l_errl)
+            //{
+            //    captureError(l_errl, l_stepError, HWPF_COMP_ID, l_cpu_target);
+            //}
 
             // Switch to using SBE SCOM
             ScomSwitches l_switches =
