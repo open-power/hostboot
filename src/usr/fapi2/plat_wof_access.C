@@ -168,7 +168,7 @@ errlHndl_t getSeepromEccLessWofData(TARGETING::Target* i_procTarg,
 
 /**
  *  @brief Checks that in the WOF image header, the magic number equals
- *  WOF_IMAGE_MAGIC_VALUE and that version number equals WOF_IMAGE_VERSION.
+ *  WOF_IMAGE_MAGIC_VALUE and that version number is a supported level.
  *
  *  @param[in] i_procTarg            Master proc chip target handle pointer
  *  @param[in] i_magicNum            Magic number in WOF image header
@@ -188,7 +188,7 @@ errlHndl_t checkWofImgHeaderForCorrectness(TARGETING::Target* i_procTarg,
 
 /**
  *  @brief Checks that for a certain WOF table header entry the magic number
- *  equals WOF_TABLES_MAGIC_VALUE and that version number equals WOF_TABLE_VERSION.
+ *  equals WOF_TABLES_MAGIC_VALUE and that version number is a supported level.
  *
  *  @param[in] i_procTarg           Master proc chip target handle pointer
  *  @param[in] i_magicVal           Magic value of the WOF table header
@@ -746,7 +746,7 @@ errlHndl_t getDefaultWofTable(TARGETING::Target* i_target, uint8_t* o_wofData)
             * @userdata1   MRW WOF selection index
             * @userdata2   Entry count in SEEPROM WOF image
             * @devdesc     MRW WOF selection index value not included in SEEPROM WOF image entries
-            * @custdesc    Hardware Error, ATTR_WOF_INDEX_SELECT entry not found in SEEPROM's WOF data
+            * @custdesc    Unsupported processor module
             */
             l_errl = new ERRORLOG::ErrlEntry(
                             ERRORLOG::ERRL_SEV_INFORMATIONAL,
@@ -754,7 +754,7 @@ errlHndl_t getDefaultWofTable(TARGETING::Target* i_target, uint8_t* o_wofData)
                             fapi2::RC_WOF_MRW_IDX_NOT_INCLUDED,
                             l_idxSelect,
                             l_imgHeader.entryCount);
-            l_errl->addHwCallout(i_target, HWAS::SRCI_PRIORITY_LOW, HWAS::NO_DECONFIG, HWAS::GARD_NULL);
+            l_errl->addHwCallout(i_target, HWAS::SRCI_PRIORITY_HIGH, HWAS::DELAYED_DECONFIG, HWAS::GARD_NULL);
             break;
         }
 
@@ -796,7 +796,7 @@ errlHndl_t getDefaultWofTable(TARGETING::Target* i_target, uint8_t* o_wofData)
             * @userdata2[00:31]  Selection index ATTR_WOF_INDEX_SELECT
             * @userdata2[32:63]  Size of WOF image
             * @devdesc           WOF table header entry to be fetched goes beyond WOF image in SEEPROM
-            * @custdesc          Hardware Error, selected WOF table header is out of bounds
+            * @custdesc          Unsupported processor module
             */
             l_errl = new ERRORLOG::ErrlEntry(
                             ERRORLOG::ERRL_SEV_INFORMATIONAL,
@@ -804,7 +804,7 @@ errlHndl_t getDefaultWofTable(TARGETING::Target* i_target, uint8_t* o_wofData)
                             fapi2::RC_WOF_HEADER_ENTRY_BEYOND_IMG,
                             TWO_UINT32_TO_UINT64(l_tableEntry.offset, l_tableEntry.size),
                             TWO_UINT32_TO_UINT64(l_idxSelect, l_wofImgSize));
-            l_errl->addHwCallout(i_target, HWAS::SRCI_PRIORITY_LOW, HWAS::NO_DECONFIG, HWAS::GARD_NULL);
+            l_errl->addHwCallout(i_target, HWAS::SRCI_PRIORITY_HIGH, HWAS::DELAYED_DECONFIG, HWAS::GARD_NULL);
             break;
         }
 
@@ -961,8 +961,8 @@ errlHndl_t getSeepromEccLessWofData(TARGETING::Target* i_procTarg, size_t i_bufl
             * @reasoncode        fapi2::RC_WOF_READ_UNCORRECTABLE_ECC
             * @userdata1         Offset used to read WOF+ECC data from SEEPROM
             * @userdata2         Buffer length used to read WOF+ECC data from SEEPROM
-            * @devdesc           WOF data has uncorrecatable ECC
-            * @custdesc          Hardware Error with WOF data in SEEPROM
+            * @devdesc           WOF data has uncorrectable ECC
+            * @custdesc          Hardware error inside processor module
             */
             l_errl = new ERRORLOG::ErrlEntry(
                             ERRORLOG::ERRL_SEV_INFORMATIONAL,
@@ -970,7 +970,7 @@ errlHndl_t getSeepromEccLessWofData(TARGETING::Target* i_procTarg, size_t i_bufl
                             fapi2::RC_WOF_READ_UNCORRECTABLE_ECC,
                             l_eccOffset,
                             l_eccBuflen);
-            l_errl->addHwCallout(i_procTarg, HWAS::SRCI_PRIORITY_LOW, HWAS::NO_DECONFIG, HWAS::GARD_NULL);
+            l_errl->addHwCallout(i_procTarg, HWAS::SRCI_PRIORITY_HIGH, HWAS::DELAYED_DECONFIG, HWAS::GARD_NULL);
             // If this error is seen, then with the l_eccOffset and l_eccBuflen you can find the
             // area of the WOF image that was read
             break;
@@ -1051,7 +1051,7 @@ errlHndl_t checkWofImgHeaderForCorrectness(TARGETING::Target* i_procTarg,
             * @userdata2[32:63]  The LID ID if WOF img was retrieved from PNOR.
             *                    0 if WOF img was retrieved from EEPROM.
             * @devdesc           WOF image header magic value mismatch
-            * @custdesc          Hardware Error
+            * @custdesc          Unsupported processor module
             */
             l_errl = new ERRORLOG::ErrlEntry(
                             ERRORLOG::ERRL_SEV_INFORMATIONAL,
@@ -1059,7 +1059,7 @@ errlHndl_t checkWofImgHeaderForCorrectness(TARGETING::Target* i_procTarg,
                             fapi2::RC_WOF_IMAGE_MAGIC_MISMATCH,
                             l_userData1,
                             l_userData2);
-            l_errl->addHwCallout(i_procTarg, HWAS::SRCI_PRIORITY_LOW, HWAS::NO_DECONFIG, HWAS::GARD_NULL);
+            l_errl->addHwCallout(i_procTarg, HWAS::SRCI_PRIORITY_HIGH, HWAS::DELAYED_DECONFIG, HWAS::GARD_NULL);
             break;
         }
 
@@ -1093,15 +1093,16 @@ errlHndl_t checkWofImgHeaderForCorrectness(TARGETING::Target* i_procTarg,
             * @userdata2         The LID ID if WOF img was retrieved from PNOR.
             *                    0 if WOF img was retrieved from EEPROM.
             * @devdesc           Image header version not supported
-            * @custdesc          Hardware Error
+            * @custdesc          Unsupported processor module for current firmware version
             */
             l_errl = new ERRORLOG::ErrlEntry(
                              ERRORLOG::ERRL_SEV_INFORMATIONAL,
                              fapi2::MOD_FAPI2_PLAT_PARSE_WOF_TABLES,
                              fapi2::RC_WOF_IMAGE_VERSION_MISMATCH,
                              l_userData1,
-                             l_userData2);
-            l_errl->addHwCallout(i_procTarg, HWAS::SRCI_PRIORITY_LOW, HWAS::NO_DECONFIG, HWAS::GARD_NULL);
+                             l_userData2,
+                             ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+            l_errl->addHwCallout(i_procTarg, HWAS::SRCI_PRIORITY_LOW, HWAS::DELAYED_DECONFIG, HWAS::GARD_NULL);
 
             break;
         }
@@ -1156,7 +1157,7 @@ errlHndl_t checkWofTableHeaderForCorrectness(TARGETING::Target* i_procTarg,
             *                    from PNOR.
             *                    0 if WOF img was retrieved from EEPROM.
             * @devdesc           WOF tables header magic value mismatch
-            * @custdesc          Hardware Error
+            * @custdesc          Unsupported processor module
             */
             l_errl = new ERRORLOG::ErrlEntry(
                             ERRORLOG::ERRL_SEV_INFORMATIONAL,
@@ -1164,7 +1165,7 @@ errlHndl_t checkWofTableHeaderForCorrectness(TARGETING::Target* i_procTarg,
                             fapi2::RC_WOF_TABLES_MAGIC_MISMATCH,
                             l_userData1,
                             l_userData2);
-            l_errl->addHwCallout(i_procTarg, HWAS::SRCI_PRIORITY_LOW, HWAS::NO_DECONFIG, HWAS::GARD_NULL);
+            l_errl->addHwCallout(i_procTarg, HWAS::SRCI_PRIORITY_HIGH, HWAS::DELAYED_DECONFIG, HWAS::GARD_NULL);
             break;
         }
 
@@ -1199,15 +1200,16 @@ errlHndl_t checkWofTableHeaderForCorrectness(TARGETING::Target* i_procTarg,
             *                    from PNOR.
             *                    0 if WOF img was retrieved from EEPROM.
             * @devdesc           WOF tables header version not supported
-            * @custdesc          Hardware Error
+            * @custdesc          Unsupported processor module for current firmware level
             */
             l_errl = new ERRORLOG::ErrlEntry(
                             ERRORLOG::ERRL_SEV_INFORMATIONAL,
                             fapi2::MOD_FAPI2_PLAT_PARSE_WOF_TABLES,
                             fapi2::RC_WOF_TABLES_VERSION_MISMATCH,
                             l_userData1,
-                            l_userData2);
-            l_errl->addHwCallout(i_procTarg, HWAS::SRCI_PRIORITY_LOW, HWAS::NO_DECONFIG, HWAS::GARD_NULL);
+                            l_userData2,
+                            ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+            l_errl->addHwCallout(i_procTarg, HWAS::SRCI_PRIORITY_LOW, HWAS::DELAYED_DECONFIG, HWAS::GARD_NULL);
 
             break;
         }
