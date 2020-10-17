@@ -393,6 +393,38 @@ fapi_try_exit:
 }
 
 
+/// @brief Clear the previous fabric DL inits of a TOD node
+/// @param[in] i_tod_node Reference to TOD topology (including FAPI targets)
+/// @return FAPI2_RC_SUCCESS if fabric DL inits are successfully cleared, else error
+fapi2::ReturnCode fbc_dl_tod_node_config_clear(const tod_topology_node* i_tod_node)
+{
+    fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP> l_target = *(i_tod_node->i_target);
+
+    FAPI_DBG("Start");
+
+    // Clear DLP link layer inits
+    FAPI_INF("Clearing Fabric DL TOD inits");
+
+    for(auto l_iohs_target : l_target.getChildren<fapi2::TARGET_TYPE_IOHS>())
+    {
+        FAPI_TRY(fbc_dl_tod_config_clear(l_iohs_target),
+                 "Error from fbc_dl_tod_config_clear");
+    }
+
+    for(auto l_child = (i_tod_node->i_children).begin();
+        l_child != (i_tod_node->i_children).end();
+        ++l_child)
+    {
+        FAPI_TRY(fbc_dl_tod_node_config_clear(*l_child),
+                 "Failure clearing downstream fabric DL TOD inits!");
+    }
+
+fapi_try_exit:
+    FAPI_DBG("End");
+    return fapi2::current_err;
+}
+
+
 /// @brief MPIPL specific steps to clear the previous topology, this should be
 //  called only during MPIPL
 /// @param[in] i_tod_node Reference to TOD topology (including FAPI targets)
@@ -421,6 +453,28 @@ fapi2::ReturnCode mpipl_clear_tod_node(
     FAPI_TRY(PREP_TOD_PSS_MSS_CTRL_REG(l_target));
     FAPI_TRY(PUT_TOD_PSS_MSS_CTRL_REG(l_target, 0x0ULL),
              "Error from PUT_TOD_PSS_MSS_CTRL_REG");
+
+    // If necessary, clear IS_SPECIAL error status bit
+    FAPI_TRY(GET_TOD_PSS_MSS_STATUS_REG(l_target, l_data),
+             "Error from TOD_PSS_MSS_STATUS_REG");
+
+    if (GET_TOD_PSS_MSS_STATUS_REG_IS_SPECIAL_STATUS(l_data))
+    {
+        FAPI_INF("MPIPL: clear IS_SPECIAL error status bit");
+
+        // Need to clear TOD errors first before clearing special status.
+        l_data.flush<1>();
+        FAPI_TRY(PREP_TOD_ERROR_REG(l_target));
+        FAPI_TRY(PUT_TOD_ERROR_REG(l_target, l_data),
+                 "Error from PUT_TOD_ERROR_REG");
+
+        // This clears the IS_SPECIAL error status bit
+        FAPI_TRY(PREP_TOD_LOAD_MOD_REG(l_target));
+        l_data.flush<0>();
+        SET_TOD_LOAD_MOD_REG_TRIGGER(l_data);
+        FAPI_TRY(PUT_TOD_LOAD_MOD_REG(l_target, l_data),
+                 "Master: Error from PUT_TOD_LOAD_MOD_REG");
+    }
 
     FAPI_INF("MPIPL: switch TOD to 'Not Set' state");
     // Generate TType#5 (formats defined in section "TType Fabric Interface"
@@ -462,18 +516,6 @@ fapi2::ReturnCode mpipl_clear_tod_node(
     FAPI_INF("MPIPL: Clearing TOD_S_PATH_CTRL_REG");
     FAPI_TRY(PUT_TOD_S_PATH_CTRL_REG(l_target, l_s_path_ctrl_reg),
              "Error in clearing TOD_S_PATH_CTRL_REG");
-
-    if (i_tod_sel == TOD_PRIMARY)
-    {
-        // Clear DLP link layer inits
-        FAPI_INF("MPIPL: Clearing Fabric DL TOD inits");
-
-        for(auto l_iohs_target : l_target.getChildren<fapi2::TARGET_TYPE_IOHS>())
-        {
-            FAPI_TRY(fbc_dl_tod_config_clear(l_iohs_target),
-                     "Error from fbc_dl_tod_config_clear");
-        }
-    }
 
     for(auto l_child = (i_tod_node->i_children).begin();
         l_child != (i_tod_node->i_children).end();
@@ -547,18 +589,6 @@ fapi2::ReturnCode clear_tod_node(
         SET_TOD_S_PATH_CTRL_REG_S_PATH_REMOTE_SYNC_CHECK_CPS_DEVIATION(STEP_CHECK_CPS_DEVIATION_93_75_PCENT, l_s_path_ctrl_reg);
         FAPI_TRY(PUT_TOD_S_PATH_CTRL_REG(l_target, l_s_path_ctrl_reg),
                  "Error in PUT_TOD_S_PATH_CTRL_REG");
-    }
-
-    if (i_tod_sel == TOD_PRIMARY)
-    {
-        // Clear DLP link layer inits
-        FAPI_DBG("Fabric DL TOD inits will be cleared.");
-
-        for(auto l_iohs_target : l_target.getChildren<fapi2::TARGET_TYPE_IOHS>())
-        {
-            FAPI_TRY(fbc_dl_tod_config_clear(l_iohs_target),
-                     "Error from fbc_dl_tod_config_clear");
-        }
     }
 
     // TOD is cleared for this node; if it has children, start clearing their registers
@@ -1919,6 +1949,7 @@ fapi2::ReturnCode p10_tod_setup(
         // the configuration.
         FAPI_TRY(mpipl_clear_tod_node(i_tod_node, i_tod_sel),
                  "Error from mpipl_clear_tod_node!");
+
     }
 
     // Start configuring each node
@@ -1931,6 +1962,14 @@ fapi2::ReturnCode p10_tod_setup(
     // If there is a previous topology, it needs to be cleared
     FAPI_TRY(clear_tod_node(i_tod_node, i_tod_sel),
              "Error from clear_tod_node!");
+
+    if ( i_tod_sel == TOD_PRIMARY )
+    {
+        // Clear the previous Fabric DL inits once to prevent clearing
+        // the configuration during the Secondary topology setup.
+        FAPI_TRY(fbc_dl_tod_node_config_clear(i_tod_node),
+                 "Error from fbc_dl_tod_node_config_clear!");
+    }
 
     // Start configuring each node
     // configure_tod_node will recurse on each child
