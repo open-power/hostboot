@@ -1964,18 +1964,12 @@
   <attribute>
     <description>Base Address of FSP IO Region</description>
     <id>FSP_BASE_ADDR</id>
-    <persistency>non-volatile</persistency>
+    <persistency>volatile-zeroed</persistency>
     <readable/>
+    <writeable/>
     <simpleType>
-      <uint64_t>
-        <default>0x0003FFE000000000</default>
-      </uint64_t>
+      <uint64_t/>
     </simpleType>
-    <no_export/>
-    <hwpfToHbAttrMap>
-      <id>ATTR_PROC_FSP_BAR_BASE_ADDR</id>
-      <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
   </attribute>
 
   <enumerationType>
@@ -6821,14 +6815,8 @@
     <readable/>
     <writeable/>
     <simpleType>
-      <uint64_t>
-        <default>0xFFFFFFFFFFFFFFFF</default>
-      </uint64_t>
+      <uint64_t/>
     </simpleType>
-    <hwpfToHbAttrMap>
-      <id>ATTR_PROC_PSI_BRIDGE_BAR_BASE_ADDR</id>
-      <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
   </attribute>
 
   <attribute>

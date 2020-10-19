@@ -865,6 +865,16 @@ static void adjustMemoryMap( TargetService& i_targetService )
             l_swapAttrs[ATTR_PSI_HB_ESB_ADDR] = l_psiHbEsbBAR;
         }
 
+        ATTR_FSP_BASE_ADDR_type l_fspBAR =
+            computeMemoryMapOffset(MMIO_GROUP0_CHIP0_FSP_BASE_ADDR,
+                                   l_topologyMode, l_topologyId);
+        TARG_INF( " FSP_BAR =%.16llX", l_fspBAR );
+        l_procChip->setAttr<ATTR_FSP_BASE_ADDR>(l_fspBAR);
+        if( l_swapVictim == l_procChip)
+        {
+            l_swapAttrs[ATTR_FSP_BASE_ADDR] = l_fspBAR;
+        }
+
         //finished setting up interrupt bars
 
         // Set the rest of the BARs...

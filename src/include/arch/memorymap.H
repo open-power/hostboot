@@ -221,13 +221,15 @@ inline uint8_t getTopoIndexFromAddr( const uint64_t i_addr )
  *          by low-level code
  */
 constexpr uint64_t  MMIO_BASE =                              0x0006000000000000;
-constexpr uint64_t  MMIO_GROUP0_CHIP0_XSCOM_BASE_ADDR =      0x000E03FC00000000;
 constexpr uint64_t  MMIO_GROUP0_CHIP0_LPC_BASE_ADDR   =      0x0006030000000000;
-constexpr uint64_t  MMIO_GROUP0_CHIP0_PSI_BRIDGE_BASE_ADDR = 0x0006030203000000;
+constexpr uint64_t  MMIO_GROUP0_CHIP0_FSP_BASE_ADDR =        0x0006030100000000;
 constexpr uint64_t  MMIO_GROUP0_CHIP0_XIVE_CONTROLLER_BASE_ADDR =
                                                              0x0006030200000000;
-constexpr uint64_t  MMIO_GROUP0_CHIP0_INT_CQ_TM_BASE_ADDR =  0x0006030203180000;
 constexpr uint64_t  MMIO_GROUP0_CHIP0_PSI_HB_ESB_BASE_ADDR = 0x0006030202000000;
+constexpr uint64_t  MMIO_GROUP0_CHIP0_PSI_BRIDGE_BASE_ADDR = 0x0006030203000000;
+constexpr uint64_t  MMIO_GROUP0_CHIP0_INT_CQ_TM_BASE_ADDR =  0x0006030203180000;
+// Note : SMF bit is set on XSCOM BAR
+constexpr uint64_t  MMIO_GROUP0_CHIP0_XSCOM_BASE_ADDR =      0x000E03FC00000000;
 
 // 64 TB offset for each node, maximum of nodes possible
 constexpr uint64_t  NODE_OFFSET =                            0x0000400000000000;

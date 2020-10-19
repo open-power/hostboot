@@ -3036,8 +3036,6 @@ sub postProcessProcessor
                              $targetObj->getAttribute($target,
                                                       "PROC_FABRIC_TOPOLOGY_ID"));
 
-    setupMemoryMaps($targetObj,$target);
-
     # Every processor in the same node gets the smallest topology ID present
     # in the node, indicating which proc's memory to use.  This can change
     # dynamically during system operation.
@@ -4001,7 +3999,7 @@ sub processFsi
             if ($proc_type eq "ACTING_MASTER" || $proc_type eq "MASTER_CANDIDATE" )
             {
                 my $topoId = getTopologyId($targetObj, $parentTarget);
-                if (getTopologyIdChipBits($topoId, TOPOLOGY_MODE1) == 1)
+                if (getTopologyIdChip($topoId, TOPOLOGY_MODE1) == 1)
                 {
                   $altfsiswitch = 1;
                 }
@@ -4015,7 +4013,7 @@ sub processFsi
             if ($proc_type eq "ACTING_MASTER" || $proc_type eq "MASTER_CANDIDATE" )
             {
                 my $topoId = getTopologyId($targetObj, $fsi_child_target);
-                if (getTopologyIdChipBits($topoId, TOPOLOGY_MODE1) == 1)
+                if (getTopologyIdChip($topoId, TOPOLOGY_MODE1) == 1)
                 {
                   $flip_port = 1;
                 }
@@ -4841,55 +4839,6 @@ sub processPowerRails
 ################################################################################
 # Subroutines that support the post processing subroutines
 ################################################################################
-#--------------------------------------------------
-# @brief Set up memory maps for certain attributes of the PROCS
-#--------------------------------------------------
-sub setupMemoryMaps
-{
-    my $targetObj = shift;
-    my $target = shift;
-
-    # Keep track of which topology IDs have been used
-    my $topoId = getTopologyId($targetObj, $target);
-    $targetObj->{TOPOLOGY}->{$topoId}++;
-
-    # Get the topology index
-    my $topologyIndex = getTopologyIndex($targetObj, $target);
-
-    # P10 has a defined memory map for all configurations,
-    # these are the base addresses for topology ID 0 (group0-chip0).
-    my %bars=(  "FSP_BASE_ADDR"             => 0x0006030100000000,
-                "PSI_BRIDGE_BASE_ADDR"      => 0x0006030203000000);
-
-    #Note - Not including XSCOM_BASE_ADDRESS and LPC_BUS_ADDR in here
-    # because Hostboot code itself writes those on every boot
-    if (!$targetObj->isBadAttribute($target,"XSCOM_BASE_ADDRESS") )
-    {
-        $targetObj->deleteAttribute($target,"XSCOM_BASE_ADDRESS");
-    }
-    if (!$targetObj->isBadAttribute($target,"LPC_BUS_ADDR") )
-    {
-        $targetObj->deleteAttribute($target,"LPC_BUS_ADDR");
-    }
-
-    # The topology index resides in bits 15:19 of the P10 memory map.
-    # This offset, when multiplied to the index, will put the index in the
-    # correct bits of the memory map.
-    my $topologyIndexOffset = 0x0000100000000000;
-
-    # Add the topology index to the bar base memory
-    foreach my $bar (keys %bars)
-    {
-        my $base = Math::BigInt->new($bars{$bar});
-
-        # Add the topology index (multiplied out to the correct position)
-        # to the base.
-        my $value=sprintf("0x%016s",substr(($base +
-                          ($topologyIndexOffset*$topologyIndex))->as_hex(),2));
-        # Set the bar of the target to calculated value
-        $targetObj->setAttribute($target,$bar,$value);
-    }
-} # end setupMemoryMaps
 
 #--------------------------------------------------
 # @brief Retrieve the fabric topology mode
@@ -4926,7 +4875,7 @@ sub getTopologyMode
 
 
 #--------------------------------------------------
-# @brief Extracts the Group bits from topology ID.
+# @brief Extracts the Group bits from topology ID (right-justified as number).
 #
 # @details  The topology ID is a 4 bit value that depends on the topology mode.
 #                Mode      ID
@@ -4937,7 +4886,7 @@ sub getTopologyMode
 # @param[in] $topologyMode - The topology mode that determines the bit arrangement. Needs to be a base 10 numeral value.
 #
 # @return The value of the group bits.
-sub getTopologyIdGroupBits
+sub getTopologyIdGroup
 {
     my $topologyId = shift;
     my $topologyMode = shift;
@@ -4945,19 +4894,21 @@ sub getTopologyIdGroupBits
     use constant TOPOLOGY_MODE_1 => 1;
 
     # Assume topology mode 0 (GGGC)
-    my $groupMask = 0xE; # Use 0xE, 1110b, to extract 'GGG' from 'GGGC'
+    # Use 0xE, 1110b, to extract 'GGG' from 'GGGC'
+    my $groupId = ($topologyId & 0xE) >> 1;
 
     # If topology mode 1 (GGCC)
     if (TOPOLOGY_MODE_1 == $topologyMode)
     {
-        $groupMask = 0xC; # Use 0xC, 1100b, to extract 'GG' from 'GGCC'
+        # Use 0xC, 1100b, to extract 'GG' from 'GGCC'
+        $groupId = ($topologyId & 0xC) >> 2;
     }
 
-    return ($topologyId & $groupMask);
+    return ($groupId);
 }
 
 #--------------------------------------------------
-# @brief Extracts the Chip bits from topology ID.
+# @brief Extracts the Chip bits from topology ID (right-justified as number).
 #
 # @details  The topology ID is a 4 bit value that depends on the topology mode.
 #                Mode      ID
@@ -4968,7 +4919,7 @@ sub getTopologyIdGroupBits
 # @param[in] $topologyMode - The topology mode that determines the bit arrangement. Needs to be a base 10 numeral value.
 #
 # @return The value of the chip bits.
-sub getTopologyIdChipBits
+sub getTopologyIdChip
 {
     my $topologyId = shift;
     my $topologyMode = shift;
@@ -5014,17 +4965,10 @@ sub convertTopologyIdToIndex
 
     ## Turn the 4 bit topology ID into a 5 bit index
     ## convert GGGC to GGG0C
-    ##      OR GGCC to GG0CC
-    # If group mask equal to 0xE (mode 0) then extract 'GGG' from 'GGGC':
-    #  1) GGGC & 0xE (1110b) returns GGG0 then shift left (<< 1) to get GGG00
-    #  2) extract C from GGGC: GGGC & 0x1 (0001b) returns C
-    # If group mask equal to 0xC (mode 1) then extract 'GG' from 'GGCC':
-    #  1) GGCC & 0xC (1100b) returns GG00 then shift left (<< 1) to get GG000
-    #  2) extract CC from GGCC: GGCC & 0x3 (0011b) returns CC
-    # Bitwise 'OR' 1 and 2 together to produce a 5 bit index value: GGG0C OR GG0CC
-    #    Index     =                  1                  'OR'               2
-    $topologyIndex = (getTopologyIdGroupBits($topologyId, $topologyMode) << 1)
-                   | (getTopologyIdChipBits($topologyId, $topologyMode));
+    ##      OR GGCC to 0GGCC
+    my $group = getTopologyIdGroup($topologyId, $topologyMode);
+    my $chip = getTopologyIdChip($topologyId, $topologyMode);
+    $topologyIndex = ($group << 2) | ($chip);
 
     return ($topologyIndex);
 }
@@ -6134,7 +6078,7 @@ sub testTopologyIdToTopologyIndex
 
     # The different values expected when mode is 0 or 1
     use constant TOPOLOGY_MODE_0_ARRAY => qw/ 0 1 4 5 8 9 12 13 16 17 20 21 24 25 28 29 /;
-    use constant TOPOLOGY_MODE_1_ARRAY => qw/ 0 1 2 3 8 9 10 11 16 17 18 19 24 25 26 27 /;
+    use constant TOPOLOGY_MODE_1_ARRAY => qw/ 0 1 2 4 5 6  7  8  9 10 11 12 13 14 15 16 /;
 
     # The different topology modes
     use constant TOPOLOGY_MODES => qw/ MODE0 MODE1 /;
