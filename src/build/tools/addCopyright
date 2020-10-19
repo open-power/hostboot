@@ -252,11 +252,11 @@ foreach ( @Files )
         next;
     }
 
-    if  ( m/\/subtree\// )
+    if  ( m/\/openbmc\// )
     {
         print STDOUT    "---------------------------------------------------------\n";
         print STDOUT    "Skipping special case file: $_\n";
-        print STDOUT    "         Files pulled in via subtree do not have prologs.\n";
+        print STDOUT    "         Files pulled in from the openBmc project do not have prologs.\n";
         print STDOUT    "---------------------------------------------------------\n";
         next;
     }
