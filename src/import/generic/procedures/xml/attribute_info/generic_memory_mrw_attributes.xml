@@ -772,4 +772,17 @@
     <writeable/>
   </attribute>
 
+  <attribute>
+    <id>ATTR_MSS_MRW_OCMB_RESET_GROUP</id>
+    <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+    <description>
+      System specific definition of which RESET_N signal is connected
+      to the OCMB's DIMM slot. RESET_N signals are ordered from 0-N
+    </description>
+    <valueType>uint8</valueType>
+    <initToZero></initToZero>
+    <platInit/>
+    <mssAccessorName>mrw_ocmb_reset_group</mssAccessorName>
+  </attribute>
+
 </attributes>
