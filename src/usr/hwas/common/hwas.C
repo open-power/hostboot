@@ -1253,6 +1253,13 @@ errlHndl_t checkPartialGoodForDescendants(
             {
                 parentState = true;
             }
+
+            // Special case: don't mark PAUCs bad for lack of functional
+            // children.
+            if(parent->getAttr<ATTR_TYPE>() == TYPE_PAUC)
+            {
+                parentState = true;
+            }
         }
     }
 
