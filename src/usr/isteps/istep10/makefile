@@ -36,6 +36,7 @@ EXTRAINCDIR += ${HWP_ACC_PATH}
 EXTRAINCDIR += ${XIP_CUSTOMIZE_PATH}
 EXTRAINCDIR += ${ROOTPATH}/src/usr/isteps/
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/fapi2/
+EXTRAINCDIR += ${ROOTPATH}/src/import/
 EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/fapi2/include/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/utils/imageProcs/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/imageProcs/
@@ -47,7 +48,6 @@ EXTRAINCDIR += ${INITFILES_HWP_PATH}
 EXTRAINCDIR += ${PERV_HWP_PATH}
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/memory/
 EXTRAINCDIR += ${ROOTPATH}/src/import/
-EXTRAINCDIR += ${ROOTPATH}/src/usr/pldm/extern
 
 OBJS += call_proc_build_smp.o
 OBJS += call_host_sbe_update.o

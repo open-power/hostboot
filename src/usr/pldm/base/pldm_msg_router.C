@@ -41,7 +41,7 @@
 #include <pldm/pldm_errl.H>
 #include <mctp/mctp_message_types.H>
 // From src/usr/pldm/extern/
-#include "../extern/base.h"
+#include <base.h>
 // From src/usr/pldm/common/
 #include "../common/pldmtrace.H"
 

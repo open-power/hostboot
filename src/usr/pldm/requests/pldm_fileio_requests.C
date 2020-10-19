@@ -32,8 +32,8 @@
 #include <sys/msg.h>
 
 #include <pldm/requests/pldm_fileio_requests.H>
-#include "../extern/file_io.h"
-#include "../extern/base.h"
+#include <openbmc/pldm/oem/ibm/libpldm/file_io.h>
+#include <openbmc/pldm/libpldm/base.h>
 #include <pldm/pldm_request.H>
 #include "../common/pldmtrace.H"
 #include <pldm/pldmif.H>
@@ -108,8 +108,8 @@ errlHndl_t getFileTable(std::vector<uint8_t>& o_table)
                                       &l_fileTableResp.completion_code,
                                       &l_fileTableResp.next_transfer_handle,
                                       &l_fileTableResp.transfer_flag,
-                                      &l_fileTableSize,
-                                      l_outputBuffer);
+                                      l_outputBuffer,
+                                      &l_fileTableSize);
         if(l_errl)
         {
             PLDM_ERR("getFileTable: Could not decode PLDM response (pass %d)",

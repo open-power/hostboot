@@ -41,8 +41,8 @@
 #include <pldm/pldm_reasoncodes.H>
 #include <pldm/pldm_errl.H>
 
-// libpldm
-#include "../extern/pdr.h"
+// libpldm header from pldm subtree
+#include <openbmc/pldm/libpldm/pdr.h>
 
 using namespace ERRORLOG;
 

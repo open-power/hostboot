@@ -40,7 +40,7 @@
 #include <pldm/pldm_errl.H>
 #include <pldm/pldmif.H>
 #include "../../../src/usr/pldm/common/pldmtrace.H"
-#include "../../../src/usr/pldm/extern/base.h"
+#include <base.h>
 
 // IPC
 #include <sys/msg.h>

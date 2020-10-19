@@ -24,8 +24,10 @@
 # IBM_PROLOG_END_TAG
 
 EXTRAINCDIR += ${ROOTPATH}/src/usr/mctp
+EXTRAINCDIR += ${ROOTPATH}/src/import
 EXTRAINCDIR += ${ROOTPATH}/src/usr/mctp/extern
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/mctp
+
 
 OBJS += core.o
 OBJS += alloc.o

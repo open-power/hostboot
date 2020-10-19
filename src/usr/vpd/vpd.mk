@@ -25,7 +25,7 @@
 
 # Needed for chipids.H
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/
-EXTRAINCDIR += ${ROOTPATH}/src/usr/pldm/extern
+EXTRAINCDIR += ${ROOTPATH}/src/import
 
 # common objects with runtime
 OBJS += vpd_common.o

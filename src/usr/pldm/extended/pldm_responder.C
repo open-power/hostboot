@@ -55,9 +55,9 @@
 #include "pldm_responder.H"
 
 // libpldm
-#include "../extern/base.h"
-#include "../extern/platform.h"
-#include "../extern/fru.h"
+#include <base.h>
+#include <platform.h>
+#include <fru.h>
 
 // Message handler headers
 #include <pldm/responses/pldm_monitor_control_responders.H>

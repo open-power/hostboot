@@ -36,8 +36,8 @@
 
 #include <util/singleton.H>
 
-#include "../extern/pdr.h"
-#include "../extern/platform.h"
+#include <pdr.h>
+#include <platform.h>
 
 #include <sys/msg.h>
 

@@ -26,7 +26,7 @@ ROOTPATH = ../../../..
 MODULE = istepdisp
 
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/ecmddatabuffer
-
+EXTRAINCDIR += ${ROOTPATH}/src/import/
 EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/fapi2/include/
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/fapi2/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/utils/imageProcs/
@@ -35,7 +35,6 @@ EXTRAINCDIR += ${ROOTPATH}/src/usr/isteps
 EXTRAINCDIR += ${ROOTPATH}/src/usr/mbox/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/common/include/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/ffdc
-EXTRAINCDIR += ${ROOTPATH}/src/usr/pldm/extern
 
 VPATH = ${ROOTPATH}/src/usr/initservice/bootconfig/
 

@@ -46,8 +46,10 @@
 #include <mctp/mctp_message_types.H>
 
 // libpldm
-#include "../../../usr/pldm/extern/base.h"
-#include "../../../usr/pldm/extern/platform.h"
+#include <base.h>
+#include <platform.h>
+
+// PLDM module
 #include <pldm/pldmif.H>
 #include <pldm/pldm_const.H>
 #include <pldm/pldm_errl.H>

@@ -30,17 +30,23 @@
 
 COMMON_ROOTPATH = ../../../..
 
-EXTRAINCDIR += ${ROOTPATH}/src/usr/pldm/extern/
+#external pldm libs
+EXTERN_PLDM_PATH = ${COMMON_ROOTPATH}/src/subtree/openbmc/pldm/libpldm
+EXTERN_PLDM_OEM_PATH = ${COMMON_ROOTPATH}/src/subtree/openbmc/pldm/oem/ibm/libpldm
+
+EXTRAINCDIR += ${EXTERN_PLDM_PATH}
+EXTRAINCDIR += ${EXTERN_PLDM_OEM_PATH}
+EXTRAINCDIR += ${COMMON_IMPORT_PATH}
 
 PLDM_BASE_COMMON_OBJS += pldmtrace.o
 PLDM_BASE_COMMON_OBJS += pldm_utils.o
 # From ../extern/
 PLDM_BASE_COMMON_OBJS += base.o
 PLDM_BASE_COMMON_OBJS += utils.o
+PLDM_BASE_COMMON_OBJS += bios.o
+PLDM_BASE_COMMON_OBJS += bios_table.o
 
 # From ../extern/
-PLDM_EXTENDED_COMMON_OBJS += bios.o
-PLDM_EXTENDED_COMMON_OBJS += bios_table.o
 PLDM_EXTENDED_COMMON_OBJS += fru.o
 PLDM_EXTENDED_COMMON_OBJS += platform.o
 PLDM_EXTENDED_COMMON_OBJS += file_io.o
@@ -61,8 +67,9 @@ PLDM_EXTENDED_COMMON_OBJS += pldm_fru_data_responders.o
 
 # add these paths to VPATH so compiler knows
 # where to find the .C/.c files we need
-VPATH += ${ROOTPATH}/src/usr/pldm/extern
-VPATH += ${ROOTPATH}/src/usr/pldm/common
-VPATH += ${ROOTPATH}/src/usr/pldm/requests
-VPATH += ${ROOTPATH}/src/usr/pldm/responses
-VPATH += ${ROOTPATH}/src/usr/pldm/extended
+VPATH += ${EXTERN_PLDM_PATH}
+VPATH += ${EXTERN_PLDM_OEM_PATH}
+VPATH += ${COMMON_ROOTPATH}/src/usr/pldm/common
+VPATH += ${COMMON_ROOTPATH}/src/usr/pldm/requests
+VPATH += ${COMMON_ROOTPATH}/src/usr/pldm/responses
+VPATH += ${COMMON_ROOTPATH}/src/usr/pldm/extended

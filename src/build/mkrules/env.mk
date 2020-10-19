@@ -5,7 +5,9 @@
 #
 # OpenPOWER HostBoot Project
 #
-# COPYRIGHT International Business Machines Corp. 2013,2014
+# Contributors Listed Below - COPYRIGHT 2013,2020
+# [+] International Business Machines Corp.
+#
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -43,6 +45,7 @@ IMGDIR = $(ROOTPATH)/img
 endif
 
 INCDIR += $(ROOTPATH)/src/include/
+INCDIR += $(ROOTPATH)/src/subtree/
 INCDIR += $(GENDIR)
 INCDIR += $(EXTRAINCDIR)
 

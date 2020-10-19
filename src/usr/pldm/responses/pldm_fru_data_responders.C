@@ -39,10 +39,10 @@
 #include <pldm/responses/pldm_fru_data_responders.H>
 #include "../common/pldmtrace.H"
 
-// libpldm
-#include "../extern/platform.h"
-#include "../extern/base.h"
-#include "../extern/fru.h"
+// libpldm headers from pldm subtree
+#include <openbmc/pldm/libpldm/platform.h>
+#include <openbmc/pldm/libpldm/base.h>
+#include <openbmc/pldm/libpldm/fru.h>
 
 // Targeting
 #include <targeting/common/utilFilter.H>

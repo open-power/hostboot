@@ -41,7 +41,7 @@
 #include <pldm/requests/pldm_fru_requests.H>
 
 // libpldm
-#include "../../../../usr/pldm/extern/pdr.h"
+#include <openbmc/pldm/libpldm/pdr.h>
 
 // Misc
 #include <sys/sync.h>

@@ -51,9 +51,9 @@ VPATH += ${LIB_HWP_PATH}
 #VPATH += ${CACHE_HWP_PATH}
 
 #Add all the extra include paths
+EXTRAINCDIR += ${ROOTPATH}/src/import/
 EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/fapi2/include/plat
 EXTRAINCDIR += ${ROOTPATH}/src/usr/sbe
-EXTRAINCDIR += ${ROOTPATH}/src/usr/pldm/extern/
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/fapi2
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/secureboot
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/common/include

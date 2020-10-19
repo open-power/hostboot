@@ -33,7 +33,7 @@
  */
 
 #include <cstddef>
-#include "../../../src/usr/pldm/extern/base.h"
+#include <openbmc/pldm/libpldm/base.h>
 #include <errl/errlentry.H>
 #include <pldm/pldm_const.H>
 

@@ -29,24 +29,32 @@
  *         fru record table info
  */
 
-#include <util/align.H>
+// System Headers
 #include <cstdlib>
 #include <map>
 #include <memory>
 #include <string.h>
+
+#include "pldm_fru_to_ipz_mapping.H"
+// non-pldm userspace headers
+#include <eeprom/eepromif.H>
+#include <eeprom/eeprom_const.H>
+#include <targeting/common/target.H>
+#include <util/align.H>
+#include <vpd/ipz_vpd_consts.H>
+
+// pldm userspace /src/ headers
 #include <pldm/extended/hb_fru.H>
 #include "../common/pldmtrace.H"
-#include "../extern/fru.h"
-#include "pldm_fru_to_ipz_mapping.H"
-// From pldm include dir
+
+// pldm userspace /include/ headers
 #include <pldm/pldm_errl.H>
 #include <pldm/pldm_reasoncodes.H>
 #include <pldm/extended/pdr_manager.H>
 #include <pldm/requests/pldm_fru_requests.H>
-#include <vpd/ipz_vpd_consts.H>
-#include <eeprom/eepromif.H>
-#include <eeprom/eeprom_const.H>
-#include <targeting/common/target.H>
+
+// libpldm header from pldm subtree
+#include <openbmc/pldm/libpldm/fru.h>
 
 using namespace ERRORLOG;
 

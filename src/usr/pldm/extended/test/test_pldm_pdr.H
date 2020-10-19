@@ -30,12 +30,15 @@
 
 #include <cxxtest/TestSuite.H>
 
+// libpldm
+#include <openbmc/pldm/libpldm/pdr.h>
+#include <openbmc/pldm/libpldm/platform.h>
+
+// hostboot pldm
 #include <pldm/extended/hb_pdrs.H>
 #include <pldm/extended/pdr_manager.H>
 
-#include "../../extern/pdr.h"
-#include "../../extern/platform.h"
-
+// targeting
 #include <targeting/common/target.H>
 #include <targeting/common/predicates/predicatehwas.H>
 #include <targeting/common/predicates/predicatectm.H>

@@ -28,8 +28,6 @@ MODULE = htmgt
 # objects common to hostboot and hbrt
 include htmgt_common.mk
 
-EXTRAINCDIR += ${ROOTPATH}/src/import
-
 # RTC: 247144 - Add Mem Config Support
 #EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/memory
 #EXTRAINCDIR += $(PROCEDURES_PATH)/hwp/memory

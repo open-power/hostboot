@@ -44,9 +44,11 @@
 #include <pldm/requests/pldm_fru_requests.H>
 #include <pldm/pldm_request.H>
 #include <pldm/extended/pldm_fru.H>
+// Common PLDM
 #include "../common/pldmtrace.H"
 // libpldm
-#include "../extern/fru.h"
+#include <fru.h>
+
 // Other userspace module includes
 #include <mctp/mctp_message_types.H>
 
@@ -232,6 +234,7 @@ errlHndl_t getFruRecordTable(const size_t i_table_buffer_len,
 
     pldm_get_fru_record_table_resp response = { };
     size_t table_data_len = 0;
+
 
     errl =
         decode_pldm_response(decode_get_fru_record_table_resp,

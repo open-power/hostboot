@@ -37,10 +37,13 @@
 #include <pldm/extended/hb_pdrs.H>
 #include <pldm/extended/pldm_fru.H>
 #include <pldm/extended/pdr_manager.H>
-#include "../extern/pdr.h"
-#include "../extern/platform.h"
 #include "../common/pldmtrace.H"
 #include <pldm/pldm_reasoncodes.H>
+
+// libpldm headers from pldm subtree
+#include <openbmc/pldm/libpldm/pdr.h>
+#include <openbmc/pldm/libpldm/platform.h>
+#include <openbmc/pldm/libpldm/state_set.h>
 
 // Targeting
 #include <targeting/common/targetservice.H>
@@ -164,12 +167,12 @@ errlHndl_t addOccStateSensorPdrs(pldm_pdr* const io_repo,
 
     const state_sensor_possible_states states =
     {
-        .state_set_id = pldm_state_set_operational_running_status,
+        .state_set_id = PLDM_STATE_SET_OPERATIONAL_RUNNING_STATUS,
         .possible_states_size = 1, // size of possible_states
         .states =
         {
-            enum_bit(pldm_state_set_operational_running_status_stopped)
-            | enum_bit(pldm_state_set_operational_running_status_in_service)
+            enum_bit(PLDM_STATE_SET_OPERATIONAL_RUNNING_STATUS_STOPPED)
+            | enum_bit(PLDM_STATE_SET_OPERATIONAL_RUNNING_STATUS_IN_SERVICE)
         }
     };
 
@@ -200,18 +203,18 @@ errlHndl_t addOccStateSensorPdrs(pldm_pdr* const io_repo,
         .entity_instance = i_entity->entity_instance_num,
         .container_id = i_entity->entity_container_id,
 
-        .sensor_init = state_sensor_noInit,
+        .sensor_init = PLDM_NO_INIT,
         .sensor_auxiliary_names_pdr = false,
         .composite_sensor_count = 1
     };
 
     size_t actual_pdr_size = 0;
 
-    const int rc = encode_pldm_state_sensor_pdr(pdr,
-                                                encoded_pdr.size(),
-                                                &states,
-                                                sizeof(states),
-                                                &actual_pdr_size);
+    const int rc = encode_state_sensor_pdr(pdr,
+                                           encoded_pdr.size(),
+                                           &states,
+                                           sizeof(states),
+                                           &actual_pdr_size);
 
     assert(rc == PLDM_SUCCESS,
            "Failed to encoded OCC state sensor PDR");
@@ -241,12 +244,12 @@ errlHndl_t addOccStateEffecterPdrs(pldm_pdr* const io_repo,
 
     const state_effecter_possible_states states =
     {
-        .state_set_id = pldm_state_set_boot_restart_cause,
+        .state_set_id = PLDM_STATE_SET_BOOT_RESTART_CAUSE,
         .possible_states_size = 1, // size of possible_states
         .states =
         {
-            enum_bit(pldm_state_set_boot_restart_cause_warm_reset)
-            | enum_bit(pldm_state_set_boot_restart_cause_hard_reset)
+            enum_bit(PLDM_STATE_SET_BOOT_RESTART_CAUSE_WARM_RESET)
+            | enum_bit(PLDM_STATE_SET_BOOT_RESTART_CAUSE_HARD_RESET)
         }
     };
 
@@ -278,18 +281,18 @@ errlHndl_t addOccStateEffecterPdrs(pldm_pdr* const io_repo,
         .container_id = i_entity->entity_container_id,
 
         .effecter_semantic_id = 0, // PLDM defines no semantic IDs yet
-        .effecter_init = state_effecter_noInit,
+        .effecter_init = PLDM_NO_INIT,
         .has_description_pdr = false,
         .composite_effecter_count = 1
     };
 
     size_t actual_pdr_size = 0;
 
-    const int rc = encode_pldm_state_effecter_pdr(pdr,
-                                                  encoded_pdr.size(),
-                                                  &states,
-                                                  sizeof(states),
-                                                  &actual_pdr_size);
+    const int rc = encode_state_effecter_pdr(pdr,
+                                             encoded_pdr.size(),
+                                             &states,
+                                             sizeof(states),
+                                             &actual_pdr_size);
 
     assert(rc == PLDM_SUCCESS,
            "Failed to encoded OCC state effecter PDR");

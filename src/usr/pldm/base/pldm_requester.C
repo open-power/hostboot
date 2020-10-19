@@ -32,8 +32,8 @@
  */
 
 // Headers from local directory
-#include "../extern/utils.h"
-#include "../extern/base.h"
+#include <utils.h>
+#include <base.h>
 #include "../common/pldmtrace.H"
 #include "pldm_requester.H"
 

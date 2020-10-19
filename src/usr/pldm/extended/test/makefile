@@ -29,6 +29,9 @@ include ../../common/common.mk
 
 MODULE = testpldm_extended
 
+EXTRAINCDIR += ${ROOTPATH}/src/import/
+EXTRAINCDIR += ${ROOTPATH}/src/import/openbmc/pldm/libpldm
+
 TESTS = *.H
 
 include ${ROOTPATH}/config.mk

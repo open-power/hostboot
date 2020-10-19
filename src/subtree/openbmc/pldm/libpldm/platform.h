@@ -18,6 +18,7 @@ extern "C" {
 #define PLDM_GET_SENSOR_READING_REQ_BYTES 4
 /* Response lengths are inclusive of completion code */
 #define PLDM_SET_STATE_EFFECTER_STATES_RESP_BYTES 1
+#define PLDM_GET_STATE_SENSOR_READINGS_RESP_BYTES 34
 
 #define PLDM_SET_NUMERIC_EFFECTER_VALUE_RESP_BYTES 1
 #define PLDM_SET_NUMERIC_EFFECTER_VALUE_MIN_REQ_BYTES 4
@@ -713,6 +714,12 @@ struct pldm_get_sensor_reading_resp {
 	uint8_t present_reading[1];
 } __attribute__((packed));
 
+/** @brief PLDM set effecter state msg fields
+ */
+enum pldm_effecter_state_fields{
+    PLDM_GRACEFUL_REBOOT = 0x6,
+};
+
 /* Responder */
 
 /* SetNumericEffecterValue */
@@ -1039,6 +1046,7 @@ int decode_get_pdr_resp(const struct pldm_msg *msg, size_t payload_length,
  *         field parameter as sizeof(set_effecter_state_field) *
  *         comp_effecter_count
  *  @param[out] msg - Message will be written to this
+ *  @param[in] payload_length - Length of request message pa
  *  @return pldm_completion_codes
  *  @note  Caller is responsible for memory alloc and dealloc of param
  *         'msg.payload'
@@ -1048,7 +1056,8 @@ int encode_set_state_effecter_states_req(uint8_t instance_id,
 					 uint16_t effecter_id,
 					 uint8_t comp_effecter_count,
 					 set_effecter_state_field *field,
-					 struct pldm_msg *msg);
+					 struct pldm_msg *msg,
+                                         size_t payload_length);
 
 /** @brief Decode SetStateEffecterStates response data
  *

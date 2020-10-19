@@ -226,11 +226,12 @@ int encode_get_file_table_resp(uint8_t instance_id, uint8_t completion_code,
  * @param[in] transfer_opflag - Transfer operation flag
  * @param[in] table_type - the type of file table
  * @param[out] msg - Message will be written to this
+ * @param[in] payload_length - The length of the request
  * @return pldm_completion_codes
  */
 int encode_get_file_table_req(uint8_t instance_id, uint32_t transfer_handle,
 			      uint8_t transfer_opflag, uint8_t table_type,
-			      struct pldm_msg *msg);
+			      struct pldm_msg *msg, size_t payload_length);
 
 /** @brief Decode GetFileTable command response data
  * @param[in] msg - Response message
@@ -583,6 +584,7 @@ struct pldm_read_write_file_by_type_req {
 struct pldm_read_write_file_by_type_resp {
 	uint8_t completion_code; //!< Completion code
 	uint32_t length;	 //!< Number of bytes read
+         uint8_t  file_data[1];
 } __attribute__((packed));
 
 /** @brief Decode ReadFileByType and WriteFileByType
@@ -628,13 +630,14 @@ int encode_rw_file_by_type_resp(uint8_t instance_id, uint8_t command,
  *  @param[in] offset -  Offset to the file at which the read should begin
  *  @param[in] length -  Number of bytes to be read/written
  *  @param[out] msg - Message will be written to this
+ *  @param[in] payload_length - The length of the request in bytes
  *  @return pldm_completion_codes
  *  @note File content has to be read directly by the caller.
  */
 int encode_rw_file_by_type_req(uint8_t instance_id, uint8_t command,
 			       uint16_t file_type, uint32_t file_handle,
 			       uint32_t offset, uint32_t length,
-			       struct pldm_msg *msg);
+			       struct pldm_msg *msg, size_t payload_length);
 
 /** @brief Decode ReadFileByType and WriteFileByType
  *         commands response data
@@ -643,11 +646,14 @@ int encode_rw_file_by_type_req(uint8_t instance_id, uint8_t command,
  *  @param[in] payload_length - Length of response payload
  *  @param[out] completion_code - PLDM completion code
  *  @param[out] length - Number of bytes to be read/written
+ *  @param[out] file_data - The binary contents of the requested file. If
+ *              file_data is NULL, length will still be set, but no data
+ *              will be written to file_data.
  *  @return pldm_completion_codes
  */
 int decode_rw_file_by_type_resp(const struct pldm_msg *msg,
 				size_t payload_length, uint8_t *completion_code,
-				uint32_t *length);
+				uint32_t *length, uint8_t *file_dat);
 
 /** @struct pldm_file_ack_req
  *

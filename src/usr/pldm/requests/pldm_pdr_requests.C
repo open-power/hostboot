@@ -39,9 +39,10 @@
 // IPC
 #include <sys/msg.h>
 
-// libpldm
-#include "../extern/platform.h"
-#include "../extern/pdr.h"
+// libpldm headers from pldm subtree
+#include <openbmc/pldm/libpldm/platform.h>
+#include <openbmc/pldm/libpldm/pdr.h>
+#include <openbmc/pldm/libpldm/state_set.h>
 
 // Hostboot PLDM/MCTP
 #include <mctp/mctp_message_types.H>
@@ -472,7 +473,7 @@ errlHndl_t sendSensorStateChangedEvent(const sensor_id_t i_sensor_id,
         for (int i = 0; i < 2; ++i)
         {
             const int rc
-                = encode_pldm_sensor_event_data(event_data,
+                = encode_sensor_event_data(event_data,
                                                 event_data_bytes.size(),
                                                 i_sensor_id,
                                                 PLDM_STATE_SENSOR_STATE,
@@ -482,7 +483,7 @@ errlHndl_t sendSensorStateChangedEvent(const sensor_id_t i_sensor_id,
                                                 &actual_event_data_size);
 
             assert(rc == PLDM_SUCCESS,
-                   "encode_pldm_sensor_event_data failed in "
+                   "encode_sensor_event_data failed in "
                    " sendSensorStateChangedEvent, rc is %d",
                    rc);
 
@@ -586,10 +587,10 @@ errlHndl_t sendOccStateChangedEvent(const TARGETING::Target* const i_proc_target
     switch (i_new_state)
     {
     case occ_state_stopped:
-        new_occ_state = pldm_state_set_operational_running_status_stopped;
+        new_occ_state = PLDM_STATE_SET_OPERATIONAL_RUNNING_STATUS_STOPPED;
         break;
     case occ_state_in_service:
-        new_occ_state = pldm_state_set_operational_running_status_in_service;
+        new_occ_state = PLDM_STATE_SET_OPERATIONAL_RUNNING_STATUS_IN_SERVICE;
         break;
     default:
         assert(false, "Invalid state %d given to sendOccStateChangedEvent",

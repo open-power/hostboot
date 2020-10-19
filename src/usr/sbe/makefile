@@ -35,7 +35,7 @@ EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/utils/imageProcs/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/common/include/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/scomt/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/customize/
-EXTRAINCDIR += ${ROOTPATH}/src/usr/pldm/extern/
+EXTRAINCDIR += ${ROOTPATH}/src/import/
 
 OBJS += sbe_update.o
 
