@@ -153,7 +153,7 @@
     <description>max size of error log that can be sent to BMC</description>
     <simpleType>
       <uint32_t>
-        <default>2048</default>
+        <default>16384</default>
       </uint32_t>
     </simpleType>
     <persistency>non-volatile</persistency>
