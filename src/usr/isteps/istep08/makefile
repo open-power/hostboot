@@ -131,6 +131,8 @@ OBJS += p10_qme_sram_access.o
 OBJS += p10_io_init_start_ppe.o
 OBJS += p10_io_ppe_lib.o
 OBJS += p10_io_ppe_regs.o
+OBJS += p10_io_power.o
+OBJS += p10_io_lib.o
 
 # proc_iohs_enable_ridi : Apply RI/DI for IOHS
 OBJS += p10_iohs_enable_ridi.o

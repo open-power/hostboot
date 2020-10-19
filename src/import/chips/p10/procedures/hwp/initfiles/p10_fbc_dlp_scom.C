@@ -61,9 +61,6 @@ fapi2::ReturnCode p10_fbc_dlp_scom(const fapi2::Target<fapi2::TARGET_TYPE_IOHS>&
         uint64_t l_def_FBC_EVN_ENABLED = (l_def_FBC_ENABLED
                                           && ((l_TGT0_ATTR_IOHS_LINK_TRAIN == fapi2::ENUM_ATTR_IOHS_LINK_TRAIN_BOTH)
                                               || (l_TGT0_ATTR_IOHS_LINK_TRAIN == fapi2::ENUM_ATTR_IOHS_LINK_TRAIN_EVEN_ONLY)));
-        fapi2::ATTR_LINK_SPEED_Type l_TGT0_ATTR_LINK_SPEED;
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_LINK_SPEED, TGT0, l_TGT0_ATTR_LINK_SPEED));
-        uint64_t l_def_50G_MODE = (l_TGT0_ATTR_LINK_SPEED == fapi2::ENUM_ATTR_LINK_SPEED_50G);
         fapi2::ATTR_IS_SIMULATION_Type l_TGT2_ATTR_IS_SIMULATION;
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IS_SIMULATION, TGT2, l_TGT2_ATTR_IS_SIMULATION));
         uint64_t l_def_IS_SIM = (l_TGT2_ATTR_IS_SIMULATION == literal_1);
@@ -90,17 +87,6 @@ fapi2::ReturnCode p10_fbc_dlp_scom(const fapi2::Target<fapi2::TARGET_TYPE_IOHS>&
         }
         {
             FAPI_TRY(fapi2::getScom( TGT0, 0x1801100cull, l_scom_buffer ));
-
-            if (l_def_50G_MODE)
-            {
-                constexpr auto l_DLP0_DLP_CONFIG_50G_MODE_ON = 0x1;
-                l_scom_buffer.insert<61, 1, 63, uint64_t>(l_DLP0_DLP_CONFIG_50G_MODE_ON );
-            }
-            else if (literal_1)
-            {
-                constexpr auto l_DLP0_DLP_CONFIG_50G_MODE_OFF = 0x0;
-                l_scom_buffer.insert<61, 1, 63, uint64_t>(l_DLP0_DLP_CONFIG_50G_MODE_OFF );
-            }
 
             if (l_def_FBC_ENABLED)
             {

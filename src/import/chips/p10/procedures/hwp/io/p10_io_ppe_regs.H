@@ -313,6 +313,7 @@ class p10_io_ppe_cache_proc
         p10_io_ppe_sram_reg p10_io_ppe_rx_min_recal_cnt[5];
         p10_io_ppe_sram_reg p10_io_ppe_rx_min_recal_cnt_reached[5];
         p10_io_ppe_sram_reg p10_io_ppe_rx_qpa_cdrlock_ignore[5];
+        p10_io_ppe_sram_reg p10_io_ppe_rx_qpa_hysteresis[5];
         p10_io_ppe_sram_reg p10_io_ppe_rx_qpa_hysteresis_enable[5];
         p10_io_ppe_sram_reg p10_io_ppe_rx_qpa_pattern[5];
         p10_io_ppe_sram_reg p10_io_ppe_rx_qpa_pattern_enable[5];

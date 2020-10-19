@@ -38,6 +38,7 @@
 #include <lib/omi/p10_omi_utils.H>
 #include <generic/memory/lib/utils/find.H>
 #include <generic/memory/mss_git_data_helper.H>
+#include <p10_io_lib.H>
 
 ///
 /// @brief Start DL link training on the selected OMIC
@@ -62,6 +63,8 @@ fapi2::ReturnCode p10_omi_train(const fapi2::Target<fapi2::TARGET_TYPE_OMIC>& i_
     // Two OMIs per OMIC
     for (const auto& l_omi : mss::find_targets<fapi2::TARGET_TYPE_OMI>(i_target))
     {
+        FAPI_TRY(p10_io_omi_poll_init_done(l_omi));
+
         // One OCMB per OMI
         // We only need to set up host side registers if there is an OCMB on the other side,
         // otherwise, there's no need to train the link. So with no OCMB, we just skip

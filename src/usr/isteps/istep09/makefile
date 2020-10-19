@@ -60,5 +60,7 @@ OBJS += p10_fabric_dl_post_trainadv.o
 OBJS += p10_fabric_iovalid.o
 OBJS += p10_fbc_eff_config_aggregate.o
 OBJS += p10_fbc_utils.o
+OBJS += p10_io_lib.o
+OBJS += p10_io_power.o
 
 include ${ROOTPATH}/config.mk

@@ -34,20 +34,24 @@
 #include <p10_io_init_done.H>
 #include <p10_io_ppe_lib.H>
 #include <p10_io_ppe_regs.H>
-#include <p10_scom_pauc_0.H>
+#include <p10_scom_pauc.H>
 #include <p10_io_init_start_ppe.H>
 #include <p10_io_lib.H>
 
 class p10_io_done : public p10_io_ppe_cache_proc
 {
     public:
-        fapi2::ReturnCode p10_io_init_done_check_thread_done(
+        fapi2::ReturnCode p10_io_init_done_pon_check_thread_done(
+            const fapi2::Target<fapi2::TARGET_TYPE_PAUC>& i_pauc_target,
+            const int& i_thread,
+            bool& o_done);
+
+        fapi2::ReturnCode p10_io_init_done_poff_check_thread_done(
             const fapi2::Target<fapi2::TARGET_TYPE_PAUC>& i_pauc_target,
             const int& i_thread,
             bool& o_done);
 
 };
-
 ///
 /// @brief Check done status for reg_init, dccal, lane power on, and fifo init for a thread
 ///
@@ -56,7 +60,7 @@ class p10_io_done : public p10_io_ppe_cache_proc
 /// @param[out] o_done Set to false if something isn't done
 ///
 /// @return fapi2::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
-fapi2::ReturnCode p10_io_done::p10_io_init_done_check_thread_done(
+fapi2::ReturnCode p10_io_done::p10_io_init_done_pon_check_thread_done(
     const fapi2::Target<fapi2::TARGET_TYPE_PAUC>& i_pauc_target,
     const int& i_thread,
     bool& o_done)
@@ -108,9 +112,64 @@ fapi2::ReturnCode p10_io_done::p10_io_init_done_check_thread_done(
         o_done = false;
     }
 
-    FAPI_TRY(p10_io_ppe_ext_cmd_done_tx_fifo_init_pl[i_thread].getData(i_pauc_target, l_data, true));
+fapi_try_exit:
+    return fapi2::current_err;
+}
 
-    FAPI_DBG("Thread: %d, ext_cmd_done_tx_fifo_init_pl: 0x%llx", i_thread, l_data);
+///
+/// @brief Check done status for reg_init, dccal, lane power on, and fifo init for a thread
+///
+/// @param[in] i_pauc_target The PAUC target to read from
+/// @param[in] i_thread The thread to read
+/// @param[out] o_done Set to false if something isn't done
+///
+/// @return fapi2::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
+fapi2::ReturnCode p10_io_done::p10_io_init_done_poff_check_thread_done(
+    const fapi2::Target<fapi2::TARGET_TYPE_PAUC>& i_pauc_target,
+    const int& i_thread,
+    bool& o_done)
+{
+    fapi2::buffer<uint64_t> l_data = 0;
+
+    FAPI_TRY(p10_io_ppe_ext_cmd_done_hw_reg_init_pg[i_thread].getData(i_pauc_target, l_data, true));
+
+    FAPI_DBG("Thread: %d, ext_cmd_done_hw_reg_init: 0x%llx", i_thread, l_data);
+
+    if (l_data == 0)
+    {
+        o_done = false;
+    }
+
+    FAPI_TRY(p10_io_ppe_ext_cmd_done_dccal_pl[i_thread].getData(i_pauc_target, l_data, true));
+
+    FAPI_DBG("Thread: %d, ext_cmd_done_dccal: 0x%llx", i_thread, l_data);
+
+    if (l_data == 0)
+    {
+        o_done = false;
+    }
+
+    FAPI_TRY(p10_io_ppe_ext_cmd_done_tx_zcal_pl[i_thread].getData(i_pauc_target, l_data, true));
+
+    FAPI_DBG("Thread: %d, ext_cmd_done_tx_zcal_pl: 0x%llx", i_thread, l_data);
+
+    if (l_data == 0)
+    {
+        o_done = false;
+    }
+
+    FAPI_TRY(p10_io_ppe_ext_cmd_done_tx_ffe_pl[i_thread].getData(i_pauc_target, l_data, true));
+
+    FAPI_DBG("Thread: %d, ext_cmd_done_tx_ffe_pl: 0x%llx", i_thread, l_data);
+
+    if (l_data == 0)
+    {
+        o_done = false;
+    }
+
+    FAPI_TRY(p10_io_ppe_ext_cmd_done_power_off_pl[i_thread].getData(i_pauc_target, l_data, true));
+
+    FAPI_DBG("Thread: %d, ext_cmd_done_power_off_pl: 0x%llx", i_thread, l_data);
 
     if (l_data == 0)
     {
@@ -134,7 +193,18 @@ fapi2::ReturnCode p10_io_init_done(const fapi2::Target<fapi2::TARGET_TYPE_PROC_C
     auto l_pauc_targets = i_target.getChildren<fapi2::TARGET_TYPE_PAUC>();
 
     //Poll for done
-    const int POLLING_LOOPS = 200;
+    int POLLING_LOOPS = 200;
+
+    fapi2::ATTR_IS_SIMICS_Type l_simics;
+    const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IS_SIMICS, FAPI_SYSTEM, l_simics),
+             "Error from FAPI_ATTR_GET (ATTR_IS_SIMICS)");
+
+    // In simics we don't want to wait a long time since it will either be done or not instantly
+    if( l_simics == fapi2::ENUM_ATTR_IS_SIMICS_SIMICS )
+    {
+        POLLING_LOOPS = 2; // using 2 so that we can still get maximum code coverage in the loop
+    }
 
     for (int l_try = 0; l_try < POLLING_LOOPS && !l_done; l_try++)
     {
@@ -160,7 +230,7 @@ fapi2::ReturnCode p10_io_init_done(const fapi2::Target<fapi2::TARGET_TYPE_PROC_C
 
                 FAPI_TRY(p10_io_get_iohs_thread(l_iohs_target, l_thread));
 
-                FAPI_TRY(l_proc.p10_io_init_done_check_thread_done(l_pauc_target, l_thread, l_done ));
+                FAPI_TRY(l_proc.p10_io_init_done_poff_check_thread_done(l_pauc_target, l_thread, l_done ));
 
             }
 
@@ -174,11 +244,18 @@ fapi2::ReturnCode p10_io_init_done(const fapi2::Target<fapi2::TARGET_TYPE_PROC_C
 
                 FAPI_TRY(p10_io_get_omic_thread(l_omic_target, l_thread));
 
-                FAPI_TRY(l_proc.p10_io_init_done_check_thread_done(l_pauc_target, l_thread, l_done));
+                FAPI_TRY(l_proc.p10_io_init_done_pon_check_thread_done(l_pauc_target, l_thread, l_done));
             }
         }
 
         fapi2::delay(100, 10000000);
+    }
+
+    // Avoid failing in Simics until the models get updated
+    if( !l_done && (l_simics == fapi2::ENUM_ATTR_IS_SIMICS_SIMICS) )
+    {
+        FAPI_INF("p10_io_init_done> Skipping timeout in Simics");
+        l_done = true;
     }
 
     FAPI_ASSERT(l_done,

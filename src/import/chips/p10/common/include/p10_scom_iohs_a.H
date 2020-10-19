@@ -65,6 +65,16 @@ static const uint32_t DLP_LINK0_TX_LANE_CONTROL_FAILED_LEN = 9;
 //<< [DLP_LINK0_TX_LANE_CONTROL]
 // iohs/reg00044.H
 
+//>> [IOO_RX0_0_RD_RX_DAC_REGS_CNTL4_PL]
+static const uint64_t IOO_RX0_0_RD_RX_DAC_REGS_CNTL4_PL = 0x8000200010012c3full;
+
+static const uint32_t IOO_RX0_0_RD_RX_DAC_REGS_CNTL4_PL_GAIN = 48;
+static const uint32_t IOO_RX0_0_RD_RX_DAC_REGS_CNTL4_PL_GAIN_LEN = 3;
+static const uint32_t IOO_RX0_0_RD_RX_DAC_REGS_CNTL4_PL_ZERO = 51;
+static const uint32_t IOO_RX0_0_RD_RX_DAC_REGS_CNTL4_PL_ZERO_LEN = 3;
+//<< [IOO_RX0_0_RD_RX_DAC_REGS_CNTL4_PL]
+// iohs/reg00044.H
+
 //>>THE END<<
 
 #ifndef __PPE_HCODE__

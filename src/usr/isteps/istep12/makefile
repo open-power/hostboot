@@ -95,6 +95,10 @@ OBJS += p10_disable_ocmb_i2c.o
 OBJS += exp_getecid.o
 OBJS += p10_io_omi_pre_trainadv.o
 OBJS += p10_io_omi_post_trainadv.o
+OBJS += p10_io_lib.o
+OBJS += p10_io_power.o
+OBJS += p10_io_ppe_lib.o
+OBJS += p10_io_ppe_regs.o
 OBJS += p10_init_mem_encryption.o
 
 include ${ROOTPATH}/config.mk

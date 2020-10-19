@@ -38,7 +38,8 @@
 #include <p10_scom_iohs.H>
 #include <p10_scom_omi.H>
 #include <p10_io_lib.H>
-#include <p10_scom_omi_a.H>
+//#include <p10_scom_iohs_0_unused.H>
+//#include <p10_scom_iohs_1_unused.H>
 
 class p10_io_init : public p10_io_ppe_cache_proc
 {
@@ -172,7 +173,6 @@ fapi2::ReturnCode p10_io_init::img_regs(const fapi2::Target<fapi2::TARGET_TYPE_P
         for (auto l_iohs_target : l_iohs_targets)
         {
             fapi2::ATTR_IOHS_LINK_TRAIN_Type l_link_train;
-            fapi2::ATTR_LINK_SPEED_Type l_link_speed;
             int l_num_lanes = P10_IO_LIB_NUMBER_OF_IOHS_LANES;
             int l_thread = 0;
 
@@ -181,13 +181,6 @@ fapi2::ReturnCode p10_io_init::img_regs(const fapi2::Target<fapi2::TARGET_TYPE_P
 
             FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IOHS_LINK_TRAIN, l_iohs_target, l_link_train),
                      "Error from FAPI_ATTR_GET (ATTR_IOHS_LINK_TRAIN)");
-            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_LINK_SPEED, l_iohs_target, l_link_speed),
-                     "Error from FAPI_ATTR_GET (ATTR_LINK_SPEED)");
-
-            //if (l_link_speed == fapi2::ENUM_ATTR_LINK_SPEED_50G || l_link_train != fapi2::ENUM_ATTR_IOHS_LINK_TRAIN_BOTH)
-            //{
-            //    l_num_lanes /= 2;
-            //}
 
             //Enable spread spectrum
             FAPI_TRY(p10_io_ppe_fw_spread_en[l_thread].putData(l_pauc_target, l_iohs_ss));
@@ -274,7 +267,7 @@ fapi2::ReturnCode p10_io_init::init_regs(const fapi2::Target<fapi2::TARGET_TYPE_
     auto l_pauc_targets = i_target.getChildren<fapi2::TARGET_TYPE_PAUC>();
 
     fapi2::ATTR_FREQ_OMI_MHZ_Type l_omi_freq;
-    fapi2::ATTR_LINK_SPEED_Type l_iohs_speed;
+    fapi2::ATTR_FREQ_IOHS_LINK_MHZ_Type l_iohs_freq;
 
 
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_FREQ_OMI_MHZ, i_target, l_omi_freq),
@@ -289,6 +282,7 @@ fapi2::ReturnCode p10_io_init::init_regs(const fapi2::Target<fapi2::TARGET_TYPE_
 
         for (auto l_iohs_target : l_iohs_targets)
         {
+            int l_num_lanes = P10_IO_LIB_NUMBER_OF_IOHS_LANES;
             int l_thread = 0;
             fapi2::ATTR_IO_IOHS_CHANNEL_LOSS_Type l_loss;
             fapi2::ATTR_IO_IOHS_PRE1_Type l_pre1;
@@ -303,8 +297,8 @@ fapi2::ReturnCode p10_io_init::init_regs(const fapi2::Target<fapi2::TARGET_TYPE_
             FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IO_IOHS_CHANNEL_LOSS, l_iohs_target, l_loss),
                      "Error from FAPI_ATTR_GET (ATTR_IO_IOHS_CHANNEL_LOSS)");
 
-            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_LINK_SPEED, l_iohs_target, l_iohs_speed),
-                     "Error from FAPI_ATTR_GET (ATTR_LINK_SPEED)");
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_FREQ_IOHS_LINK_MHZ, l_iohs_target, l_iohs_freq),
+                     "Error from FAPI_ATTR_GET (ATTR_FREQ_IOHS_LINK_MHZ)");
 
 
             FAPI_TRY(p10_io_get_iohs_thread(l_iohs_target, l_thread));
@@ -323,10 +317,58 @@ fapi2::ReturnCode p10_io_init::init_regs(const fapi2::Target<fapi2::TARGET_TYPE_
 
             uint32_t l_ppe_data_rate = 0;
 
-            if (l_iohs_speed >= fapi2::ENUM_ATTR_LINK_SPEED_25G)
+            if (l_iohs_freq == fapi2::ENUM_ATTR_FREQ_IOHS_LINK_MHZ_25781)
             {
                 l_ppe_data_rate = 1;
             }
+            else if (l_iohs_freq >= fapi2::ENUM_ATTR_FREQ_IOHS_LINK_MHZ_31875)
+            {
+                l_ppe_data_rate = 2;
+            }
+
+            FAPI_DBG("Setting IOHS data rate variable(%d) based on freq(%d)", l_ppe_data_rate, l_iohs_freq);
+
+
+            if (l_ppe_data_rate <= 1)
+            {
+                // Peaking
+                FAPI_TRY(p10_io_ppe_ppe_ctle_peak1_disable[l_thread].putData(l_pauc_target, 0x1));
+
+                // RX A CTLE_PEAK1
+                FAPI_TRY(p10_io_iohs_put_pl_regs(l_iohs_target,
+                                                 IOO_RX0_0_RD_RX_DAC_REGS_CNTL6_PL,
+                                                 IOO_RX0_0_RD_RX_DAC_REGS_CNTL6_PL_PEAK1,
+                                                 IOO_RX0_0_RD_RX_DAC_REGS_CNTL6_PL_PEAK1_LEN,
+                                                 l_num_lanes,
+                                                 4));
+
+                // RX B CTLE_PEAK1
+                FAPI_TRY(p10_io_iohs_put_pl_regs(l_iohs_target,
+                                                 IOO_RX0_0_RD_RX_DAC_REGS_CNTL13_PL,
+                                                 IOO_RX0_0_RD_RX_DAC_REGS_CNTL13_PL_PEAK1,
+                                                 IOO_RX0_0_RD_RX_DAC_REGS_CNTL13_PL_PEAK1_LEN,
+                                                 l_num_lanes,
+                                                 4));
+            }
+
+            // LTE Zero
+            FAPI_TRY(p10_io_ppe_ppe_lte_zero_disable[l_thread].putData(l_pauc_target, 0x1));
+
+            // RX A LTE_ZERO
+            FAPI_TRY(p10_io_iohs_put_pl_regs(l_iohs_target,
+                                             IOO_RX0_0_RD_RX_DAC_REGS_CNTL3_PL,
+                                             IOO_RX0_0_RD_RX_DAC_REGS_CNTL3_PL_ZERO,
+                                             IOO_RX0_0_RD_RX_DAC_REGS_CNTL3_PL_ZERO_LEN,
+                                             l_num_lanes,
+                                             0));
+
+            // RX B LTE_ZERO
+            FAPI_TRY(p10_io_iohs_put_pl_regs(l_iohs_target,
+                                             IOO_RX0_0_RD_RX_DAC_REGS_CNTL4_PL,
+                                             IOO_RX0_0_RD_RX_DAC_REGS_CNTL4_PL_ZERO,
+                                             IOO_RX0_0_RD_RX_DAC_REGS_CNTL4_PL_ZERO_LEN,
+                                             l_num_lanes,
+                                             0));
 
             FAPI_TRY(p10_io_ppe_tx_ffe_pre1_coef[l_thread].putData(l_pauc_target, l_pre1));
             FAPI_TRY(p10_io_ppe_tx_ffe_pre2_coef[l_thread].putData(l_pauc_target, l_pre2));
@@ -344,10 +386,10 @@ fapi2::ReturnCode p10_io_init::init_regs(const fapi2::Target<fapi2::TARGET_TYPE_
 
             uint32_t l_omi_data_rate = 0;
 
-            //if (l_omi_freq >= fapi2::ENUM_ATTR_FREQ_OMI_MHZ_25600)
-            //{
-            //    l_omi_data_rate = 1;
-            //}
+            if (l_omi_freq == fapi2::ENUM_ATTR_FREQ_OMI_MHZ_25600)
+            {
+                l_omi_data_rate = 1;
+            }
 
             int l_num_lanes = P10_IO_LIB_NUMBER_OF_OMI_LANES;
             FAPI_TRY(p10_io_get_omic_thread(l_omic_target, l_thread));
@@ -397,6 +439,25 @@ fapi2::ReturnCode p10_io_init::init_regs(const fapi2::Target<fapi2::TARGET_TYPE_
                                                 l_num_lanes,
                                                 4));
 
+                // LTE Zero
+                FAPI_TRY(p10_io_ppe_ppe_lte_zero_disable[l_thread].putData(l_pauc_target, 0x1));
+
+                // RX A LTE_ZERO
+                FAPI_TRY(p10_io_omi_put_pl_regs(l_omi_target,
+                                                RXPACKS_0_DEFAULT_RD_RX_DAC_REGS_CNTL3_PL,
+                                                RXPACKS_0_DEFAULT_RD_RX_DAC_REGS_CNTL3_PL_ZERO,
+                                                RXPACKS_0_DEFAULT_RD_RX_DAC_REGS_CNTL3_PL_ZERO_LEN,
+                                                l_num_lanes,
+                                                0));
+
+                // RX B LTE_ZERO
+                FAPI_TRY(p10_io_omi_put_pl_regs(l_omi_target,
+                                                RXPACKS_0_DEFAULT_RD_RX_DAC_REGS_CNTL4_PL,
+                                                RXPACKS_0_DEFAULT_RD_RX_DAC_REGS_CNTL4_PL_ZERO,
+                                                RXPACKS_0_DEFAULT_RD_RX_DAC_REGS_CNTL4_PL_ZERO_LEN,
+                                                l_num_lanes,
+                                                0));
+
 
                 FAPI_TRY(p10_io_ppe_tx_ffe_pre1_coef[l_thread].putData(l_pauc_target, l_pre1));
                 FAPI_TRY(p10_io_ppe_tx_ffe_pre2_coef[l_thread].putData(l_pauc_target, l_pre2));
@@ -432,10 +493,95 @@ fapi_try_exit:
 fapi2::ReturnCode p10_io_init::sim_speedup(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
 {
     FAPI_DBG("Begin");
+    using namespace scomt::iohs;
+    using namespace scomt::omi;
+
     auto l_pauc_targets = i_target.getChildren<fapi2::TARGET_TYPE_PAUC>();
 
     for (auto l_pauc_target : l_pauc_targets)
     {
+        auto l_omic_targets = l_pauc_target.getChildren<fapi2::TARGET_TYPE_OMIC>();
+
+        for (auto l_omic_target : l_omic_targets)
+        {
+            auto l_omi_targets = l_omic_target.getChildren<fapi2::TARGET_TYPE_OMI>();
+
+            for (auto l_omi_target : l_omi_targets)
+            {
+                int l_num_lanes = P10_IO_LIB_NUMBER_OF_OMI_LANES;
+                // RX A CTLE_PEAK1
+                FAPI_TRY(p10_io_omi_put_pl_regs(l_omi_target,
+                                                RXPACKS_0_DEFAULT_RD_RX_DAC_REGS_CNTL6_PL,
+                                                RXPACKS_0_DEFAULT_RD_RX_DAC_REGS_CNTL6_PL_PEAK1,
+                                                RXPACKS_0_DEFAULT_RD_RX_DAC_REGS_CNTL6_PL_PEAK1_LEN,
+                                                l_num_lanes,
+                                                10));
+
+                // RX A CTLE_PEAK2
+                FAPI_TRY(p10_io_omi_put_pl_regs(l_omi_target,
+                                                RXPACKS_0_DEFAULT_RD_RX_DAC_REGS_CNTL6_PL,
+                                                RXPACKS_0_DEFAULT_RD_RX_DAC_REGS_CNTL6_PL_PEAK2,
+                                                RXPACKS_0_DEFAULT_RD_RX_DAC_REGS_CNTL6_PL_PEAK2_LEN,
+                                                l_num_lanes,
+                                                0));
+
+                // RX B CTLE_PEAK1
+                FAPI_TRY(p10_io_omi_put_pl_regs(l_omi_target,
+                                                RXPACKS_0_DEFAULT_RD_RX_DAC_REGS_CNTL13_PL,
+                                                RXPACKS_0_DEFAULT_RD_RX_DAC_REGS_CNTL13_PL_PEAK1,
+                                                RXPACKS_0_DEFAULT_RD_RX_DAC_REGS_CNTL13_PL_PEAK1_LEN,
+                                                l_num_lanes,
+                                                10));
+
+                // RX B CTLE_PEAK2
+                FAPI_TRY(p10_io_omi_put_pl_regs(l_omi_target,
+                                                RXPACKS_0_DEFAULT_RD_RX_DAC_REGS_CNTL13_PL,
+                                                RXPACKS_0_DEFAULT_RD_RX_DAC_REGS_CNTL13_PL_PEAK2,
+                                                RXPACKS_0_DEFAULT_RD_RX_DAC_REGS_CNTL13_PL_PEAK2_LEN,
+                                                l_num_lanes,
+                                                0));
+            }
+
+        }
+
+        auto l_iohs_targets = l_pauc_target.getChildren<fapi2::TARGET_TYPE_IOHS>();
+
+        for (auto l_iohs_target : l_iohs_targets)
+        {
+            int l_num_lanes = P10_IO_LIB_NUMBER_OF_IOHS_LANES;
+            // RX A CTLE_PEAK1
+            FAPI_TRY(p10_io_iohs_put_pl_regs(l_iohs_target,
+                                             IOO_RX0_0_RD_RX_DAC_REGS_CNTL6_PL,
+                                             IOO_RX0_0_RD_RX_DAC_REGS_CNTL6_PL_PEAK1,
+                                             IOO_RX0_0_RD_RX_DAC_REGS_CNTL6_PL_PEAK1_LEN,
+                                             l_num_lanes,
+                                             10));
+
+            // RX A CTLE_PEAK2
+            FAPI_TRY(p10_io_iohs_put_pl_regs(l_iohs_target,
+                                             IOO_RX0_0_RD_RX_DAC_REGS_CNTL6_PL,
+                                             IOO_RX0_0_RD_RX_DAC_REGS_CNTL6_PL_PEAK2,
+                                             IOO_RX0_0_RD_RX_DAC_REGS_CNTL6_PL_PEAK2_LEN,
+                                             l_num_lanes,
+                                             0));
+
+            // RX B CTLE_PEAK1
+            FAPI_TRY(p10_io_iohs_put_pl_regs(l_iohs_target,
+                                             IOO_RX0_0_RD_RX_DAC_REGS_CNTL13_PL,
+                                             IOO_RX0_0_RD_RX_DAC_REGS_CNTL13_PL_PEAK1,
+                                             IOO_RX0_0_RD_RX_DAC_REGS_CNTL13_PL_PEAK1_LEN,
+                                             l_num_lanes,
+                                             10));
+
+            // RX B CTLE_PEAK2
+            FAPI_TRY(p10_io_iohs_put_pl_regs(l_iohs_target,
+                                             IOO_RX0_0_RD_RX_DAC_REGS_CNTL13_PL,
+                                             IOO_RX0_0_RD_RX_DAC_REGS_CNTL13_PL_PEAK2,
+                                             IOO_RX0_0_RD_RX_DAC_REGS_CNTL13_PL_PEAK2_LEN,
+                                             l_num_lanes,
+                                             0));
+        }
+
         //Set the reg_init bit
         for (auto i = 0; i < P10_IO_LIB_NUMBER_OF_THREADS; i++)
         {
@@ -506,15 +652,32 @@ fapi2::ReturnCode p10_io_init::ext_req_all(const fapi2::Target<fapi2::TARGET_TYP
 
     for (auto l_pauc_target : l_pauc_targets)
     {
-        //Set the reg_init bit
-        for (auto i = 0; i < P10_IO_LIB_NUMBER_OF_THREADS; i++)
+        auto l_iohs_targets = l_pauc_target.getChildren<fapi2::TARGET_TYPE_IOHS>();
+        auto l_omic_targets = l_pauc_target.getChildren<fapi2::TARGET_TYPE_OMIC>();
+
+        for (auto l_iohs_target : l_iohs_targets)
         {
-            FAPI_TRY(p10_io_ppe_ext_cmd_req_hw_reg_init_pg[i].putData(l_pauc_target, 1));
-            FAPI_TRY(p10_io_ppe_ext_cmd_req_dccal_pl[i].putData(l_pauc_target, 1));
-            FAPI_TRY(p10_io_ppe_ext_cmd_req_tx_zcal_pl[i].putData(l_pauc_target, 1));
-            FAPI_TRY(p10_io_ppe_ext_cmd_req_tx_ffe_pl[i].putData(l_pauc_target, 1));
-            FAPI_TRY(p10_io_ppe_ext_cmd_req_power_on_pl[i].putData(l_pauc_target, 1));    //TODO: Not as documented
-            FAPI_TRY(p10_io_ppe_ext_cmd_req_tx_fifo_init_pl[i].putData(l_pauc_target, 1));//TODO: Not as documented
+            int l_thread = 0;
+            FAPI_TRY(p10_io_get_iohs_thread(l_iohs_target, l_thread));
+
+            FAPI_TRY(p10_io_ppe_ext_cmd_req_hw_reg_init_pg[l_thread].putData(l_pauc_target, 1));
+            FAPI_TRY(p10_io_ppe_ext_cmd_req_dccal_pl[l_thread].putData(l_pauc_target, 1));
+            FAPI_TRY(p10_io_ppe_ext_cmd_req_tx_zcal_pl[l_thread].putData(l_pauc_target, 1));
+            FAPI_TRY(p10_io_ppe_ext_cmd_req_tx_ffe_pl[l_thread].putData(l_pauc_target, 1));
+            FAPI_TRY(p10_io_ppe_ext_cmd_req_power_off_pl[l_thread].putData(l_pauc_target, 1));
+
+        }
+
+        for (auto l_omic_target : l_omic_targets)
+        {
+            int l_thread = 0;
+            FAPI_TRY(p10_io_get_omic_thread(l_omic_target, l_thread));
+
+            FAPI_TRY(p10_io_ppe_ext_cmd_req_hw_reg_init_pg[l_thread].putData(l_pauc_target, 1));
+            FAPI_TRY(p10_io_ppe_ext_cmd_req_dccal_pl[l_thread].putData(l_pauc_target, 1));
+            FAPI_TRY(p10_io_ppe_ext_cmd_req_tx_zcal_pl[l_thread].putData(l_pauc_target, 1));
+            FAPI_TRY(p10_io_ppe_ext_cmd_req_tx_ffe_pl[l_thread].putData(l_pauc_target, 1));
+            FAPI_TRY(p10_io_ppe_ext_cmd_req_power_on_pl[l_thread].putData(l_pauc_target, 1));
         }
     }
 

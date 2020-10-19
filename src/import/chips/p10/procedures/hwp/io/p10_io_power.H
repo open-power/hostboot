@@ -22,6 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+// EKB-Mirror-To: hostboot
 ///
 /// @file p10_io_power.H
 /// @brief Common IO functions and constants
@@ -31,7 +32,38 @@
 /// *HW Consumed by  : HB
 ///-----------------------------------------------------------------------------
 
+#include <fapi2.H>
+
 #ifndef _P10_IO_POWER__
 #define _P10_IO_POWER__
 
+//------------------------------------------------------------------------------
+// Consts
+//------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+// Functions
+//------------------------------------------------------------------------------
+
+extern "C"
+{
+///
+/// @brief Set power on/off for targeted lanes.
+///
+/// @param[in] i_iohs_target Iohs target to work with
+///
+/// @return fapi2::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
+    fapi2::ReturnCode p10_io_iohs_power(
+        const fapi2::Target<fapi2::TARGET_TYPE_IOHS>& i_iohs_target,
+        const bool& i_on);
+
+///
+/// @brief Set power on/off for targeted lanes.
+///
+/// @param[in] i_omic_target Omic target to work with
+///
+/// @return fapi2::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
+    fapi2::ReturnCode p10_io_omic_power(
+        const fapi2::Target<fapi2::TARGET_TYPE_OMIC>& i_omic_target,
+        const bool& i_on);
+} // extern "C"
 #endif

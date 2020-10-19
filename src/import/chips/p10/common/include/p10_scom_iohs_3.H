@@ -120,6 +120,16 @@ static const uint32_t PLL_LOCK_REG_LOCK_LEN = 8;
 //<< [PLL_LOCK_REG]
 // iohs/reg00015.H
 
+//>> [IOO_RX0_0_RD_RX_DAC_REGS_CNTL3_PL]
+static const uint64_t IOO_RX0_0_RD_RX_DAC_REGS_CNTL3_PL = 0x8000180010012c3full;
+
+static const uint32_t IOO_RX0_0_RD_RX_DAC_REGS_CNTL3_PL_GAIN = 48;
+static const uint32_t IOO_RX0_0_RD_RX_DAC_REGS_CNTL3_PL_GAIN_LEN = 3;
+static const uint32_t IOO_RX0_0_RD_RX_DAC_REGS_CNTL3_PL_ZERO = 51;
+static const uint32_t IOO_RX0_0_RD_RX_DAC_REGS_CNTL3_PL_ZERO_LEN = 3;
+//<< [IOO_RX0_0_RD_RX_DAC_REGS_CNTL3_PL]
+// iohs/reg00012.H
+
 //>>THE END<<
 
 #ifndef __PPE_HCODE__
