@@ -24,7 +24,7 @@
 /* IBM_PROLOG_END_TAG                                                     */
 
 ///
-/// @file control_word_ddr4.C
+/// @file control_word_ddr4.H
 /// @brief Run and manage the DDR4 control words for the RCD and data buffers
 ///
 // *HWP HWP Owner: Andre Marin <aamarin@us.ibm.com>
@@ -594,6 +594,117 @@ inline void set_address_inversion(cw_data& io_rc00, const mss::states i_inversio
 
     // Values should be OFF_N or ON_N
     io_rc00.iv_data.template writeBit<INVERSION_BIT>(i_inversion_enable);
+}
+
+///
+/// @brief Decode the provided CW_INFO object and run control_word_engine
+///
+/// @param[in] i_target DIMM target
+/// @param[in] i_sim Simulation true/false
+/// @param[in] i_cw_info control word data
+/// @param[in,out] io_inst a vector of CCS instructions we should add to
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
+///
+inline fapi2::ReturnCode decode_rcw_and_run_engine(
+    const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+    const bool i_sim,
+    const cw_info& i_cw_info,
+    std::vector< ccs::instruction_t >& io_inst)
+{
+    fapi2::buffer<uint8_t> l_f0rc2x_data;
+    fapi2::buffer<uint8_t> l_f0rc4x_data;
+
+    std::vector<cw_info> l_info_list;
+
+    static constexpr bool TURN_ON_CKE = true;
+
+    // F0RC2X constants
+    static constexpr uint8_t F0RC2X_F0RC4X_CW_SOURCE_BIT = 2;
+
+    // F0RC4X constants
+    static constexpr uint8_t F0RC4X_FUNC_SPACE_START = 0;
+    static constexpr uint8_t F0RC4X_FUNC_SPACE_LEN = 3;
+    static constexpr uint8_t F0RC4X_A12_BIT = 3;
+    static constexpr uint8_t F0RC4X_NUMBER_START = 4;
+    static constexpr uint8_t F0RC4X_NUMBER_LEN = 4;
+
+    // F0RC06 constants
+    static constexpr uint8_t F0RC06_CMD_WRITE = 0x05;
+
+    // F0RC6X constants
+    static constexpr uint8_t F0RC6X_A7A4_START = 0;
+    static constexpr uint8_t F0RC6X_A7A4_LEN = 4;
+
+    // Misc constants
+    static constexpr uint8_t FUNCTION_SPACE_0 = 0;
+    static constexpr uint8_t FUNCTION_SPACE_8 = 8;
+    static constexpr uint8_t CW_2 = 2;
+    static constexpr uint8_t CW_4 = 4;
+    static constexpr uint8_t CW_6 = 6;
+    static constexpr uint8_t DATA_LEN_4 = 4;
+    static constexpr uint8_t DATA_LEN_8 = 8;
+
+    // F0RC2X:
+    // We don't have any attribute for this, so we aren't starting with any non-zero default
+    l_f0rc2x_data.writeBit<F0RC2X_F0RC4X_CW_SOURCE_BIT>(
+        i_cw_info.iv_cw_data.iv_func_space >= FUNCTION_SPACE_8);
+
+    // Construct F0RC2X
+    l_info_list.push_back(cw_info(FUNCTION_SPACE_0,
+                                  CW_2,
+                                  l_f0rc2x_data,
+                                  i_cw_info.iv_cw_data.iv_delay,
+                                  CW8_DATA_LEN,
+                                  false));
+
+    // F0RC4X:
+    // [7:5] Func Space
+    l_f0rc4x_data.insertFromRight<F0RC4X_FUNC_SPACE_START, F0RC4X_FUNC_SPACE_LEN>
+    (i_cw_info.iv_cw_data.iv_func_space % FUNCTION_SPACE_8);
+
+    // [4] A12
+    l_f0rc4x_data.writeBit<F0RC4X_A12_BIT>(i_cw_info.iv_is_bcw);
+
+    // [3:0] iv_number
+    l_f0rc4x_data.insertFromRight<F0RC4X_NUMBER_START, F0RC4X_NUMBER_LEN>
+    ((i_cw_info.iv_data_len == DATA_LEN_8) ? i_cw_info.iv_cw_data.iv_number : fapi2::buffer<uint8_t>(0));
+
+    // Construct F0RC4X
+    l_info_list.push_back(cw_info(FUNCTION_SPACE_0,
+                                  CW_4,
+                                  l_f0rc4x_data,
+                                  i_cw_info.iv_cw_data.iv_delay,
+                                  CW8_DATA_LEN,
+                                  false));
+
+    // F0RC6X:
+    // Set up using RCW's data
+    fapi2::buffer<uint8_t> l_f0rc6x_data(i_cw_info.iv_cw_data.iv_data);
+
+    // Overwrite A7-A4 with iv_number for DATA_LEN_4 CWs
+    if (i_cw_info.iv_data_len == DATA_LEN_4)
+    {
+        l_f0rc6x_data.insert<F0RC6X_A7A4_START, F0RC6X_A7A4_LEN>(i_cw_info.iv_cw_data.iv_number);
+    }
+
+    l_info_list.push_back(cw_info(FUNCTION_SPACE_0,
+                                  CW_6,
+                                  l_f0rc6x_data,
+                                  i_cw_info.iv_cw_data.iv_delay,
+                                  CW8_DATA_LEN,
+                                  false));
+
+    // F0RC06 - RCD_WRITE:
+    fapi2::buffer<uint8_t> l_f0rc06_data(F0RC06_CMD_WRITE);
+    l_info_list.push_back(cw_info(FUNCTION_SPACE_0,
+                                  CW_6,
+                                  l_f0rc06_data,
+                                  i_cw_info.iv_cw_data.iv_delay,
+                                  CW4_DATA_LEN,
+                                  false));
+
+    // Issue command
+    return control_word_engine(i_target, l_info_list, i_sim, io_inst, TURN_ON_CKE);
 }
 
 }// mss
