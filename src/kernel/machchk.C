@@ -40,6 +40,24 @@ static uint64_t* g_xstopRegPtr = nullptr;
 //Keep track of the data to write into the xstop reg
 static uint64_t g_xstopRegValue = 0;
 
+/** Constants used to describe upper physical address range for MMIO
+ *  Upper address range is inclusively between
+ *  0x0006000000000000 and 0x0007F00000000000
+ */
+static const uint64_t MMIO_UPPER_RANGE_NIBBLE_MASK = 0xFFFF000000000000;
+static const uint64_t MMIO_UPPER_RANGE_NIBBLE_MIN  = 0x0006000000000000;
+static const uint64_t MMIO_UPPER_RANGE_NIBBLE_MAX  = 0x0007000000000000;
+
+
+/** Constants used to define OCMB MMIO physical address ranges
+ * Per chip offset and range:
+ *  - OCMB physical memory starts at 3TB + 16GB
+ *  - size per chip: 16 OCMBs/chip * (2GB CONFIG + 2GB MMIO) per OCMB = 64GB
+*/
+static const uint64_t MMIO_OCMB_RANGE_MASK  = 0x00000FFFFFFFFFFF;
+static const uint64_t MMIO_OCMB_BASE_START  = 0x0000030400000000; // 3TB + 16GB
+static const uint64_t MMIO_OCMB_BASE_END    = 0x0000031FFFFFFFFF; // Base + 64GB
+
 
 bool handleLoadUE(task_t* t)
 {
@@ -93,34 +111,32 @@ bool handleLoadUE(task_t* t)
 
             uint64_t phys = VmmManager::findPhysicalAddress(vaddr);
 
-            // Check if address is in IBSCOM MMIO Range.
-            //   Base mask bits are always set for ibscom.
-            //   Combined mask bits could be set for ibscom.
-            //   ~Combined mask bits can not be set for ibscom.
-            uint64_t combMask = MMIO_IBSCOM_BASE_MASK  |
-                                MMIO_IBSCOM_DMI_MASK   |
-                                MMIO_IBSCOM_CHIP_MASK  |
-                                MMIO_IBSCOM_GROUP_MASK;
-
-            // Check if address is in OCMB MMIO Range.
-            //   Base mask bits are always set for OCMB.
-            //   ~Combined mask bits can not be set for OCMB.
-            uint64_t combOcmbMask = MMIO_OCMB_BASE_MASK |
-                                    MMIO_OCMB_BASE_RANGE;
-
-            if(((phys & MMIO_IBSCOM_BASE_MASK) == MMIO_IBSCOM_BASE_MASK) &&
-               ((phys & ~combMask) == 0))
+            // Make sure address within MMIO range
+            if ( ((phys & MMIO_UPPER_RANGE_NIBBLE_MASK) == MMIO_UPPER_RANGE_NIBBLE_MIN) ||
+                 ((phys & MMIO_UPPER_RANGE_NIBBLE_MASK) == MMIO_UPPER_RANGE_NIBBLE_MAX) )
             {
-                ueMagicValue = MMIO_IBSCOM_UE_DETECTED;
-            }
-            else if(((phys & MMIO_OCMB_BASE_MASK) == MMIO_OCMB_BASE_MASK) &&
-                    ((phys & ~combOcmbMask) == 0))
-            {
-                ueMagicValue = MMIO_OCMB_UE_DETECTED;
+                // Within MMIO address range, so now remove unique chip address part
+                // Mask the physical address per chip MMIO range
+                uint64_t physPerChipRange = phys & MMIO_OCMB_RANGE_MASK;
+
+                // Check if phys memory is in the OCMB MMIO range
+                if ( (physPerChipRange >= MMIO_OCMB_BASE_START) &&
+                     (physPerChipRange <= MMIO_OCMB_BASE_END) )
+                {
+                    printk("MachineCheck::handleLoadUE: MMIO_OCMB_UE_DETECTED for %lx\n",
+                        phys);
+                    ueMagicValue = MMIO_OCMB_UE_DETECTED;
+                }
+                else
+                {
+                    printk("MachineCheck::handleLoadUE: Unrecognized address outside MMIO_OCMB range %lx\n",
+                           phys);
+                    break;
+                }
             }
             else
             {
-                printk("MachineCheck::handleUE: Unrecognized address %lx\n",
+                printk("MachineCheck::handleLoadUE: Unrecognized address %lx\n",
                        phys);
                 break;
             }

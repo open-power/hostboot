@@ -144,18 +144,6 @@ void mmio_scratch_write(uint64_t which, uint64_t value);
  */
 mutex_t * mmio_xscom_mutex();
 
-/** Constant used by kernel to signal to IBSCOM device driver
- *  that a UE was triggered during the IBSCOM Read operation
- *  Value is "SCOMFAIL" in ASCII.
- */
-static const uint64_t MMIO_IBSCOM_UE_DETECTED = 0x53434F4D4641494C;
-
-/** Constants used to define IBSCOM MMIO address ranges
-*/
-static const uint64_t MMIO_IBSCOM_BASE_MASK  = 0x0006030220000000;
-static const uint64_t MMIO_IBSCOM_DMI_MASK   = 0x000000001FFFFFFF;
-static const uint64_t MMIO_IBSCOM_CHIP_MASK  = 0x00001C0000000000;
-static const uint64_t MMIO_IBSCOM_GROUP_MASK = 0x0001700000000000;
 
 /** Constant used by kernel to signal to OCMB MMIO device driver
  *  that a UE was triggered during the OCMB MMIO Read operation
@@ -163,12 +151,6 @@ static const uint64_t MMIO_IBSCOM_GROUP_MASK = 0x0001700000000000;
  */
 static const uint64_t MMIO_OCMB_UE_DETECTED = 0x4F434D424641494C;
 
-/** Constants used to define OCMB MMIO address ranges
- * OCMB physical memory starts at 3TB + 16GB
- * 64 OCMBs * 4GB per OCMB = 256GB
-*/
-static const uint64_t MMIO_OCMB_BASE_MASK  = 0x0006030400000000; // 3TB + 16GB
-static const uint64_t MMIO_OCMB_BASE_RANGE = 0x00000070FFFFFFFF; // 256GB
 
 #ifdef __cplusplus
 }
