@@ -1478,7 +1478,7 @@ errlHndl_t tpmReadSTSRegValid ( tpm_info_t i_tpmInfo,
             break;
         }
 
-        if (polls > TPMDD::MAX_STSVALID_POLLS)
+        if (polls > TPMDD::MAX_STSVALID_POLLS && !(o_stsReg.stsValid))
         {
             TRACFCOMP( g_trac_tpmdd,
                 ERR_MRK"tpmReadSTSRegValid(): Timeout! "
@@ -1672,6 +1672,13 @@ errlHndl_t tpmPollForDataAvail( const tpm_info_t & i_tpmInfo)
     {
         err = tpmReadSTSRegValid(i_tpmInfo,
                                  stsReg);
+        if ((err != nullptr) && err->reasonCode() == TPM_TIMEOUT)
+        {
+            // Polling loop within tpmReadSTSRegValid timed out, delete error and try again.
+            delete err;
+            err = nullptr;
+        }
+
         if ((nullptr == err && stsReg.dataAvail) ||
             (nullptr != err))
         {
