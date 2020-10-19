@@ -232,9 +232,10 @@
 
 typedef struct
 {
-    uint32_t scomEntryAddress;
+    uint16_t scomEntryTag;
+    uint16_t scomEntryAddress;
     uint64_t scomEntryData;
-} __attribute__((packed)) ScomEntry_t;
+} ScomEntry_t;
 
 //-------------------------
 // Constants
