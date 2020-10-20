@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018                             */
+/* Contributors Listed Below - COPYRIGHT 2018,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -140,7 +140,7 @@ class readerTraits< init_fields::HYBRID_MEDIA, R >
 {
     public:
 
-        static constexpr size_t COMPARISON_VAL = 1;
+        static constexpr size_t COMPARISON_VAL = 3;
         static constexpr const char* FIELD_STR = "Hybrid Media";
 
         template <typename T>

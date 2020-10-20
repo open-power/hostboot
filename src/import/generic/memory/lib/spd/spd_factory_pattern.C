@@ -347,6 +347,13 @@ fapi2::ReturnCode factories::base_cfg_select_param(module_params& o_param) const
         o_param = NVDIMM_MODULE;
         return fapi2::FAPI2_RC_SUCCESS;
     }
+    else if(iv_hybrid == HYBRID && iv_hybrid_media == MDS_HYBRID)
+    {
+        // The MDS hybrid type is only supported by the DDIMM modules
+        // TODO Zenhub:#689 Might need to be changed if SPD changes are significant
+        o_param = DDIMM_MODULE;
+        return fapi2::FAPI2_RC_SUCCESS;
+    }
 
     // If we are here let's make sure we are not hybrid, sanity
     // check to assure we don't have invalid hybrid combination

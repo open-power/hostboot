@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -58,6 +58,8 @@ const std::vector< std::pair<uint8_t , uint8_t> > throttle_traits<mss::mc_type::
     {fapi2::ENUM_ATTR_MEM_EFF_DIMM_TYPE_UDIMM, 0b01},
     {fapi2::ENUM_ATTR_MEM_EFF_DIMM_TYPE_LRDIMM, 0b10},
     {fapi2::ENUM_ATTR_MEM_EFF_DIMM_TYPE_DDIMM, 0b11},
+    // TODO Zenhub:#689 Modify this workaround once real MDS values implemented
+    {fapi2::ENUM_ATTR_MEM_EFF_DIMM_TYPE_MDS, 0b11},
     {ANY_TYPE, 0b111}
 };
 

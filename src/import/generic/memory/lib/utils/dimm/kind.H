@@ -181,6 +181,7 @@ class kind
             FAPI_TRY( mss::attr::get_rcd_mfg_id(i_target, iv_rcd_mfgid) );
             FAPI_TRY( mss::attr::get_dram_module_height(mss::find_target<fapi2::TARGET_TYPE_OCMB_CHIP>(i_target),
                       iv_module_height) );
+
             return;
 
         fapi_try_exit:
@@ -255,6 +256,7 @@ class kind
                          iv_total_ranks);
                 fapi2::Assert(false);
             }
+
         }
 
         fapi2::Target<fapi2::TARGET_TYPE_DIMM> iv_target;
@@ -303,6 +305,18 @@ class kind
 template< mss::mc_type MC, fapi2::TargetType T >
 fapi2::ReturnCode has_rcd( const fapi2::Target<T>& i_target,
                            bool& o_has_rcd );
+
+///
+/// @brief Check if the dimm is hybrid media type MDS
+/// @tparam MC the memory controller type
+/// @tparam T the fapi2::TargetType (derived)
+/// @param[in] i_target - the fapi2::Target we are starting from
+/// @param[out] o_is_mds - true iff any dimm is MDS
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff ok
+///
+template< mss::mc_type MC, fapi2::TargetType T >
+fapi2::ReturnCode is_mds( const fapi2::Target<T>& i_target,
+                          bool& o_is_mds );
 
 
 } // end dimm ns

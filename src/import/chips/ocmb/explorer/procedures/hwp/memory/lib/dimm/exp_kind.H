@@ -78,6 +78,35 @@ template<>
 fapi2::ReturnCode has_rcd<mss::mc_type::EXPLORER>( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
         bool& o_has_rcd );
 
+///
+/// @brief Check if the dimm is hybrid media type MDS - explorer/OCMB specialization
+/// @param[in] i_target - the fapi2::Target we are starting from
+/// @param[out] o_is_mds - true iff any dimm is MDS
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff ok
+///
+template<>
+fapi2::ReturnCode is_mds<mss::mc_type::EXPLORER>( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+        bool& o_is_mds );
+
+///
+/// @brief Check if the dimm is hybrid media type MDS - explorer/OCMB specialization
+/// @param[in] i_target - the fapi2::Target we are starting from
+/// @param[out] o_is_mds - true iff any dimm is MDS
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff ok
+///
+template<>
+fapi2::ReturnCode is_mds<mss::mc_type::EXPLORER>( const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
+        bool& o_is_mds );
+
+///
+/// @brief Check if the dimm is hybrid media type MDS - explorer/OCMB specialization
+/// @param[in] i_target - the fapi2::Target we are starting from
+/// @param[out] o_is_mds - true iff any dimm is MDS
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff ok
+///
+template<>
+fapi2::ReturnCode is_mds<mss::mc_type::EXPLORER>( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+        bool& o_is_mds );
 
 } // end dimm ns
 } // end mss ns

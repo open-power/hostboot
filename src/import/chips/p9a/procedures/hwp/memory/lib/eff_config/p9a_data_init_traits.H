@@ -400,6 +400,7 @@ struct attrEngineTraits<proc_type::AXONE, pre_data_init_fields, pre_data_init_fi
             //{key byte, dimm type}
             {0, fapi2::ENUM_ATTR_MEM_EFF_HYBRID_MEMORY_TYPE_NONE},
             {1, fapi2::ENUM_ATTR_MEM_EFF_HYBRID_MEMORY_TYPE_NVDIMM},
+            {3, fapi2::ENUM_ATTR_MEM_EFF_HYBRID_MEMORY_TYPE_MDS},
             // All others reserved or not supported
         };
         const auto l_dimm = i_spd_data.get_target();
