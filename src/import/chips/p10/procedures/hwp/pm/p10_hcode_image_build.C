@@ -686,13 +686,13 @@ fapi2::ReturnCode buildXgpeHeader( CONST_FAPI2_PROC& i_procTgt,
                 i_procTgt,
                 attrVal),
             "Error from FAPI_ATTR_GET for ATTR_CORE_THROTTLE_ASSERT_COUNT");
-    pXgpeHeader->g_xgpe_coreThrottleAssertCnt =     attrVal;
+    pXgpeHeader->g_xgpe_coreThrottleAssertCnt =   htobe32(attrVal);
 
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CORE_THROTTLE_DEASSERT_COUNT,
                 i_procTgt,
                 attrVal),
             "Error from FAPI_ATTR_GET for ATTR_CORE_THROTTLE_DEASSERT_COUNT");
-    pXgpeHeader->g_xgpe_coreThrottleDeAssertCnt =     attrVal;
+    pXgpeHeader->g_xgpe_coreThrottleDeAssertCnt =     htobe32(attrVal);
 
     pXgpeHeader->g_xgpe_hcodeLength         =   l_sectn.iv_sectnLength;
     pXgpeHeader->g_xgpe_sysResetAddress     =   XGPE_SRAM_BASE_ADDR + PPE_RESET_VECTOR;
@@ -707,7 +707,8 @@ fapi2::ReturnCode buildXgpeHeader( CONST_FAPI2_PROC& i_procTgt,
     FAPI_INF( "XGPE Hcode Length        0x%08x", htobe32( pXgpeHeader->g_xgpe_hcodeLength ) );
     FAPI_INF( "XGPE Sys Reset Address   0x%08x", htobe32( pXgpeHeader->g_xgpe_sysResetAddress ) );
     FAPI_INF( "XGPE IVPR Address        0x%08x", htobe32( pXgpeHeader->g_xgpe_ivprAddress ) );
-
+    FAPI_INF( "XGPE Thr Assert Cnt      0x%08x", htobe32( pXgpeHeader->g_xgpe_coreThrottleAssertCnt ) );
+    FAPI_INF( "XGPE Thr DeAssert Cnt    0x%08x", htobe32( pXgpeHeader->g_xgpe_coreThrottleAssertCnt ) );
     FAPI_DBG( "==========================================================" );
 #endif
 
