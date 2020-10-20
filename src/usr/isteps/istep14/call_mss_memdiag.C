@@ -55,7 +55,8 @@
 #include <fapi2/plat_hwp_invoker.H>      // FAPI_INVOKE_HWP
 
 // HWP
-#include <lib/shared/exp_defaults.H>     // mss::DEFAULT_MC_TYPE, needed by gen_mss_unmask.H
+#include <lib/shared/exp_defaults.H>      // mss::DEFAULT_MC_TYPE, needed by gen_mss_unmask.H
+#include <lib/mc/exp_port.H>              // needed by gen_mss_port.H
 // Using a long path to ensure that the correct file for P10 is used
 #include <generic/memory/lib/utils/fir/gen_mss_unmask.H> // mss::unmask::after_memdiags
 #include <generic/memory/lib/utils/mc/gen_mss_port.H>    // mss::reset_reorder_queue_settings
@@ -248,15 +249,10 @@ void* call_mss_memdiag (void*)
                        "on OCMB target HUID 0x%.8X.",
                        TARGETING::get_huid(l_ocmbTarget) );
 
-#if 0
-// TODO: RTC:208831 - Method mss::reset_reorder_queue_settings is not fully
-// baked yet. Uncomment and call 'FAPI_INVOKE_HWP' when method is ready.
             // Turn off FIFO mode to improve performance.
             FAPI_INVOKE_HWP( l_err,
                              mss::reset_reorder_queue_settings,
                              l_fapiOcmbTarget );
-#endif
-
             if ( l_err )
             {
                 TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, ERR_MRK
