@@ -81,6 +81,7 @@
      <attribute>
           <id>ATTR_PG_MVPD</id>
           <default>0xFFFFFFFF</default>
+          <no_export/>
           <writeable/>
      </attribute>
 
