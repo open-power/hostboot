@@ -75,6 +75,7 @@ namespace INTR
         RC_IPC_DATA_INVALID           = INTR_COMP_ID | 0x0D,
         RC_SOURCE_NOT_REGISTERED      = INTR_COMP_ID | 0x0E,
         RC_NODE_SYNC_TIMEOUT          = INTR_COMP_ID | 0x0F,
+        RC_PROC_IS_NULLPTR            = INTR_COMP_ID | 0x10,
     };
 };
 

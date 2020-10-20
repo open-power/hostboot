@@ -62,7 +62,7 @@ using namespace INTR;
 using namespace TARGETING;
 
 
-trace_desc_t * g_trac_intr = NULL;
+trace_desc_t * g_trac_intr = nullptr;
 TRAC_INIT(&g_trac_intr, INTR_TRACE_NAME, 16*KILOBYTE, TRACE::BUFFER_SLOW);
 
 /**
@@ -87,7 +87,7 @@ errlHndl_t IntrRp::resetIntpForMpipl()
     do{
         TARGETING::TargetHandleList l_funcProcs;
 
-        TARGETING::Target* masterProc = NULL;
+        TARGETING::Target* masterProc = nullptr;
         TARGETING::targetService().masterProcChipTargetHandle( masterProc );
 
         getAllChips(l_funcProcs, TYPE_PROC);
@@ -117,9 +117,9 @@ errlHndl_t IntrRp::resetIntpForMpipl()
             break;
         }
 
-        TARGETING::Target * sys = NULL;
+        TARGETING::Target * sys = nullptr;
         TARGETING::targetService().getTopLevelTarget( sys );
-        assert(sys != NULL);
+        assert(sys != nullptr);
         TARGETING::ATTR_HB_EXISTING_IMAGE_type hb_existing_image = 0;
         hb_existing_image = sys->getAttr<TARGETING::ATTR_HB_EXISTING_IMAGE>();
 
@@ -354,7 +354,7 @@ errlHndl_t IntrRp::_init()
 
     // Do the initialization steps on the master proc chip
     // The other proc chips will be setup at a later point
-    TARGETING::Target* procTarget = NULL;
+    TARGETING::Target* procTarget = nullptr;
     TARGETING::targetService().masterProcChipTargetHandle( procTarget );
 
     intr_hdlr_t* l_procIntrHdlr = new intr_hdlr_t(procTarget);
@@ -362,9 +362,9 @@ errlHndl_t IntrRp::_init()
     iv_chipList.push_back(l_procIntrHdlr);
 
     // Set up the IPC message Data area
-    TARGETING::Target * sys = NULL;
+    TARGETING::Target * sys = nullptr;
     TARGETING::targetService().getTopLevelTarget( sys );
-    assert(sys != NULL);
+    assert(sys != nullptr);
     uint64_t hrmor_base = cpu_spr_value(CPU_SPR_HRMOR);
 
     KernelIpc::ipc_data_area.pir = iv_masterCpu.word;
@@ -717,13 +717,13 @@ errlHndl_t IntrRp::resetIntUnit(intr_hdlr_t* i_proc)
                 // @devdesc         Timeout waiting for Powerbus to Quiesce
                 //
                 l_err = new ERRORLOG::ErrlEntry
-                        (
-                         ERRORLOG::ERRL_SEV_UNRECOVERABLE,    // severity
-                         INTR::MOD_INTRRP_RESETINTUNIT,       // moduleid
-                         INTR::RC_XIVE_PBUS_QUIESCE_TIMEOUT,  // reason code
-                         l_addr,
-                         reg
-                        );
+                      (
+                       ERRORLOG::ERRL_SEV_UNRECOVERABLE,    // severity
+                       INTR::MOD_INTRRP_RESETINTUNIT,       // moduleid
+                       INTR::RC_XIVE_PBUS_QUIESCE_TIMEOUT,  // reason code
+                       l_addr,
+                       reg
+                      );
 
                 break;
             }
@@ -1258,13 +1258,14 @@ void IntrRp::msgHandler()
                             * @custdesc        Error hanlding processor interupts
                             */
                             err = new ERRORLOG::ErrlEntry
-                                    (
-                                    ERRORLOG::ERRL_SEV_INFORMATIONAL,        // severity
-                                    INTR::MOD_INTRRP_UNREGISTERINTERRUPT, // moduleid
-                                    INTR::RC_SOURCE_NOT_REGISTERED,       // reason code
-                                    l_intr_type,
-                                    iv_unregisterdLsiSources.size(),
-                                    true); // sw callout
+                                (
+                                 ERRORLOG::ERRL_SEV_INFORMATIONAL,        // severity
+                                 INTR::MOD_INTRRP_UNREGISTERINTERRUPT, // moduleid
+                                 INTR::RC_SOURCE_NOT_REGISTERED,       // reason code
+                                 l_intr_type,
+                                 iv_unregisterdLsiSources.size(),
+                                 ERRORLOG::ErrlEntry::ADD_SW_CALLOUT
+                                );
                             errlCommit(err,INTR_COMP_ID);
                         }
 
@@ -1480,13 +1481,13 @@ errlHndl_t IntrRp::sendPsiHbEOI(intr_hdlr_t* i_proc, uint64_t& i_intSource)
          * @devdesc         Unexpected RC from issuing PSIHB EOI store
          */
         l_err = new ERRORLOG::ErrlEntry
-          (
-           ERRORLOG::ERRL_SEV_UNRECOVERABLE,    // severity
-           INTR::MOD_INTRRP_SENDEOI,            // moduleid
-           INTR::RC_PSIHB_ESB_EOI_FAIL,         // reason code
-           eoiRead,                             // read value
-           i_intSource                          // interrupt source number
-           );
+              (
+               ERRORLOG::ERRL_SEV_UNRECOVERABLE,    // severity
+               INTR::MOD_INTRRP_SENDEOI,            // moduleid
+               INTR::RC_PSIHB_ESB_EOI_FAIL,         // reason code
+               eoiRead,                             // read value
+               i_intSource                          // interrupt source number
+              );
     }
 
     TRACDCOMP(g_trac_intr, "IntrRp::sendPsiHbEOI read response: %lx", eoiRead);
@@ -1523,7 +1524,8 @@ errlHndl_t IntrRp::sendXiveEOI(uint64_t& i_intSource, PIR_t& i_pir)
             //First acknowledge the interrupt so it won't be re-presented
             acknowledgeInterrupt();
 
-            uint64_t l_data0 = LSI_INTERRUPT << 32;
+            uint64_t l_data0 = LSI_INTERRUPT;
+            l_data0 <<= 32;
             if (iv_msgQ)
             {
                 msg_t * int_msg = msg_allocate();
@@ -1543,13 +1545,13 @@ errlHndl_t IntrRp::sendXiveEOI(uint64_t& i_intSource, PIR_t& i_pir)
                      *                  message to INTRP
                      */
                     l_err = new ERRORLOG::ErrlEntry
-                        (
-                         ERRORLOG::ERRL_SEV_UNRECOVERABLE,  // severity
-                         INTR::MOD_INTRRP_XIVE_SENDEOI,     // moduleid
-                         INTR::RC_MESSAGE_SEND_ERROR,       // reason code
-                         send_rc,
-                         0
-                        );
+                          (
+                           ERRORLOG::ERRL_SEV_UNRECOVERABLE,  // severity
+                           INTR::MOD_INTRRP_XIVE_SENDEOI,     // moduleid
+                           INTR::RC_MESSAGE_SEND_ERROR,       // reason code
+                           send_rc,
+                           0
+                          );
                     break;
                 }
             }
@@ -1561,7 +1563,7 @@ errlHndl_t IntrRp::sendXiveEOI(uint64_t& i_intSource, PIR_t& i_pir)
 
 errlHndl_t IntrRp::sendEOI(uint64_t& i_intSource, PIR_t& i_pir)
 {
-    intr_hdlr_t* l_proc = NULL;
+    intr_hdlr_t* l_proc = nullptr;
     errlHndl_t l_err = NULL;
 
     //Find target handle for Proc to send EOI to
@@ -1582,6 +1584,31 @@ errlHndl_t IntrRp::sendEOI(uint64_t& i_intSource, PIR_t& i_pir)
     }
 
     do {
+
+        if (l_proc == nullptr)
+        {
+
+            /*@ errorlog tag
+            * @errortype       ERRL_SEV_UNRECOVERABLE
+            * @moduleid        INTR::MOD_INTRRP_SENDEOI
+            * @reasoncode      INTR::RC_PROC_IS_NULLPTR
+            * @userdata1       Input Source
+            * @userdata2       Input PIR
+            * @devdesc         Error encountered searching for a
+            *                  proc to send EOI to
+            */
+            l_err = new ERRORLOG::ErrlEntry
+                  (
+                   ERRORLOG::ERRL_SEV_UNRECOVERABLE,  // severity
+                   INTR::MOD_INTRRP_SENDEOI,          // moduleid
+                   INTR::RC_PROC_IS_NULLPTR,          // reason code
+                   i_intSource,
+                   i_pir.word,
+                   ERRORLOG::ErrlEntry::ADD_SW_CALLOUT
+                 );
+            break;
+        }
+
         l_err = sendPsiHbEOI(l_proc, i_intSource);
         if (l_err)
         { break ;}
@@ -1699,7 +1726,17 @@ void IntrRp::handleExternalInterrupt()
 
                     //Send EOI so other interrupt sources other than the one
                     // masked previously can be presented
-                    sendXiveEOI(intSource, l_pir);
+
+                    errlHndl_t l_err = sendXiveEOI(intSource, l_pir);
+
+                    if (l_err)
+                    {
+                        TRACFCOMP(g_trac_intr, "IntrRp::msgHandler() External "
+                            "Interrupt sendXiveEOI returned error for intSource: "
+                            "%lx, and pir: 0x%lx", intSource, l_pir);
+                        errlCommit(l_err, INTR_COMP_ID);
+
+                    }
 
                     //Call function to route the interrupt
                     //to the appropriate handler
@@ -1764,7 +1801,7 @@ errlHndl_t IntrRp::maskInterruptSource(uint8_t i_intr_source,
                INTR::RC_XIVE_ESB_WRONG_STATE,     // reason code
                i_intr_source,
                l_maskRead
-               );
+              );
 
     }
 
@@ -1850,15 +1887,15 @@ errlHndl_t IntrRp::unmaskInterruptSource(uint8_t l_intr_source,
                 * @devdesc         Error unmasking interrupt source
                 */
             l_err = new ERRORLOG::ErrlEntry
-            (
-                ERRORLOG::ERRL_SEV_INFORMATIONAL,  // severity
-                INTR::MOD_INTRRP_UNMASKINTERRUPT,  // moduleid
-                INTR::RC_XIVE_ESB_WRONG_STATE,     // reason code
-                TWO_UINT32_TO_UINT64(
-                    TO_UINT32( TARGETING::get_huid( i_proc->proc )),
-                    TO_UINT32( l_intr_source )),
-                l_esbRead
-            );
+                  (
+                   ERRORLOG::ERRL_SEV_INFORMATIONAL,  // severity
+                   INTR::MOD_INTRRP_UNMASKINTERRUPT,  // moduleid
+                   INTR::RC_XIVE_ESB_WRONG_STATE,     // reason code
+                   TWO_UINT32_TO_UINT64(
+                       TO_UINT32( TARGETING::get_huid( i_proc->proc )),
+                       TO_UINT32( l_intr_source )),
+                   l_esbRead
+                  );
         }
     }
     else
@@ -1931,7 +1968,7 @@ errlHndl_t IntrRp::setCommonInterruptBARs(intr_hdlr_t * i_proc,
 void IntrRp::completeInterruptProcessing(uint64_t& i_intSource, PIR_t& i_pir)
 
 {
-    intr_hdlr_t* l_proc = NULL;
+    intr_hdlr_t* l_proc = nullptr;
     errlHndl_t l_err = NULL;
 
     //Find target handle for Proc to remove pending interrupt for
@@ -2105,7 +2142,7 @@ errlHndl_t IntrRp::registerInterruptXISR(msg_q_t i_msgQ,
                INTR::RC_ALREADY_REGISTERED,         // reason code
                i_xisr,
                0
-               );
+              );
         }
     }
     return err;
@@ -2283,11 +2320,11 @@ errlHndl_t IntrRp::findProcs_Cores(TARGETING::TargetHandleList & o_procs,
                                           TARGETING::TYPE_PROC );
 
         TARGETING::TargetService& tS = TARGETING::targetService();
-        TARGETING::Target * sysTarget = NULL;
+        TARGETING::Target * sysTarget = nullptr;
         tS.getTopLevelTarget( sysTarget );
-        assert( sysTarget != NULL );
+        assert( sysTarget != nullptr );
 
-        TARGETING::Target* masterProcTarget = NULL;
+        TARGETING::Target* masterProcTarget = nullptr;
         TARGETING::targetService().masterProcChipTargetHandle(
                                                         masterProcTarget );
 
@@ -2512,7 +2549,8 @@ errlHndl_t syncNodesError(void * i_p, uint64_t i_len)
          INTR::RC_CANNOT_MAP_MEMORY,
          reinterpret_cast<uint64_t>(i_p),
          i_len,
-         true /*Add HB Software Callout*/);
+         ERRORLOG::ErrlEntry::ADD_SW_CALLOUT
+        );
 }
 
 errlHndl_t IntrRp::syncNodes(intr_mpipl_sync_t i_sync_type)
@@ -2605,15 +2643,17 @@ errlHndl_t IntrRp::syncNodes(intr_mpipl_sync_t i_sync_type)
                     *               to read it.
                     * @custdesc     Firmware error occured during system reboot
                     */
-                    err = new ERRORLOG::ErrlEntry(
-                            ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                            INTR::MOD_INTR_SYNC_NODES,
-                            INTR::RC_NODE_SYNC_TIMEOUT,
-                            TWO_UINT32_TO_UINT64(
-                              PIR_t::nodeOrdinalFromPir(iv_masterCpu.word),
-                              node),
-                            l_remote_ipc_addr,
-                            true /*Add HB Software Callout*/);
+                    err = new ERRORLOG::ErrlEntry
+                        (
+                         ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                         INTR::MOD_INTR_SYNC_NODES,
+                         INTR::RC_NODE_SYNC_TIMEOUT,
+                         TWO_UINT32_TO_UINT64(
+                           PIR_t::nodeOrdinalFromPir(iv_masterCpu.word),
+                           node),
+                         l_remote_ipc_addr,
+                         ERRORLOG::ErrlEntry::ADD_SW_CALLOUT
+                        );
                     break;
                 }
 
@@ -2748,13 +2788,15 @@ errlHndl_t  IntrRp::initializeMpiplSyncArea()
          * @userdata2    Size
          * @devdesc      Error mapping in memory
          */
-        err = new ERRORLOG::ErrlEntry(
-                                      ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                      INTR::MOD_INTR_INIT_MPIPLAREA,
-                                      INTR::RC_CANNOT_MAP_MEMORY,
-                                      reinterpret_cast<uint64_t>(node_info_ptr),
-                                      INTERNODE_INFO_SIZE,
-                                      true /*Add HB Software Callout*/);
+        err = new ERRORLOG::ErrlEntry
+            (
+             ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+             INTR::MOD_INTR_INIT_MPIPLAREA,
+             INTR::RC_CANNOT_MAP_MEMORY,
+             reinterpret_cast<uint64_t>(node_info_ptr),
+             INTERNODE_INFO_SIZE,
+             ERRORLOG::ErrlEntry::ADD_SW_CALLOUT
+            );
 
     }
     return err;
@@ -2797,13 +2839,15 @@ errlHndl_t  IntrRp::addHbNodeToMpiplSyncArea(uint64_t i_hbNode)
          * @userdata2    Size
          * @devdesc      Error mapping in memory
          */
-        err = new ERRORLOG::ErrlEntry(
-                                      ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                      INTR::MOD_INTR_SYNC_ADDNODE,
-                                      INTR::RC_CANNOT_MAP_MEMORY,
-                                      reinterpret_cast<uint64_t>(node_info_ptr),
-                                      INTERNODE_INFO_SIZE,
-                                      true /*Add HB Software Callout*/);
+        err = new ERRORLOG::ErrlEntry
+            (
+             ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+             INTR::MOD_INTR_SYNC_ADDNODE,
+             INTR::RC_CANNOT_MAP_MEMORY,
+             reinterpret_cast<uint64_t>(node_info_ptr),
+             INTERNODE_INFO_SIZE,
+             ERRORLOG::ErrlEntry::ADD_SW_CALLOUT
+            );
 
     }
     return err;
@@ -3333,9 +3377,9 @@ uint64_t INTR::get_enabled_threads( void )
 {
     using namespace INITSERVICE::SPLESS;
 
-    TARGETING::Target* sys = NULL;
+    TARGETING::Target* sys = nullptr;
     TARGETING::targetService().getTopLevelTarget(sys);
-    assert( sys != NULL );
+    assert( sys != nullptr );
     uint64_t en_threads = sys->getAttr<TARGETING::ATTR_ENABLED_THREADS>();
 
     if( en_threads == 0 )
@@ -3494,13 +3538,13 @@ errlHndl_t INTR::printInterruptInfo()
             * @custdesc        Error encountered gathering diagnostic info
             */
             err = new ERRORLOG::ErrlEntry
-            (
-             ERRORLOG::ERRL_SEV_UNRECOVERABLE,  // severity
-             INTR::MOD_INTR_DUMP,               // moduleid
-             INTR::RC_MESSAGE_SEND_ERROR,       // reason code
-             send_rc,
-             0
-             );
+                (
+                 ERRORLOG::ERRL_SEV_UNRECOVERABLE,  // severity
+                 INTR::MOD_INTR_DUMP,               // moduleid
+                 INTR::RC_MESSAGE_SEND_ERROR,       // reason code
+                 send_rc,
+                 0
+                );
         }
     }
     else
@@ -3515,13 +3559,13 @@ errlHndl_t INTR::printInterruptInfo()
         * @custdesc        Error encountered gathering diagnostic info
         */
         err = new ERRORLOG::ErrlEntry
-        (
-         ERRORLOG::ERRL_SEV_INFORMATIONAL,     // severity
-         INTR::MOD_INTR_DUMP,                  // moduleid
-         INTR::RC_RP_NOT_INITIALIZED,          // reason code
-         static_cast<uint64_t>(MSG_INTR_DUMP),
-         0
-         );
+            (
+             ERRORLOG::ERRL_SEV_INFORMATIONAL,     // severity
+             INTR::MOD_INTR_DUMP,                  // moduleid
+             INTR::RC_RP_NOT_INITIALIZED,          // reason code
+             static_cast<uint64_t>(MSG_INTR_DUMP),
+             0
+            );
     }
     return err;
 }
