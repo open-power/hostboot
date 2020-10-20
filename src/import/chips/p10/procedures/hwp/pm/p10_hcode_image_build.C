@@ -73,6 +73,7 @@ enum
     SHIFT_RD_BLOCK_SIZE =   5,
     INST_RING_OFFSET    =   2,
     OVRD_RING_OFFSET    =   0x44,
+    EXT_MEM_ADDR        =   0x80000000,
 };
 
 /**
@@ -184,6 +185,7 @@ class ImageBuildRecord
         iv_maxSizeList["XGPE Boot Copier"]  =   XGPE_BOOT_COPIER_SIZE;
         iv_maxSizeList["XGPE Boot Loader"]  =   XGPE_BOOT_LOADER_LENGTH;
         iv_maxSizeList["XGPE Hcode"]        =   XGPE_HCODE_SIZE;
+        iv_maxSizeList["XGPE Op Trace"]     =   XGPE_OPTRACE_LENGTH;
         iv_maxSizeList["QME Hcode"]         =   QME_HCODE_SIZE;
         iv_maxSizeList["QME Common Ring"]   =   QME_COMMON_RING_SIZE;
         iv_maxSizeList["QME Override Ring"] =   QME_OVERRIDE_RING_SIZE;
@@ -201,6 +203,7 @@ class ImageBuildRecord
         iv_maxSizeList["OPSPB"]             =   OCC_PSTATE_PARAM_BLOCK_REGION_SIZE;
         iv_maxSizeList["PState Table"]      =   PGPE_PSTATE_OUTPUT_TABLES_REGION_SIZE;
         iv_maxSizeList["WOF Tables"]        =   OCC_WOF_TABLES_SIZE;
+        iv_maxSizeList["PGPE Op Trace"]     =   PGPE_OPTRACE_LENGTH;
     }
 
     /**
@@ -674,7 +677,7 @@ fapi2::ReturnCode buildXpmrHeader( Homerlayout_t* i_pChipHomer, ImageBuildRecord
  * @return      fapi2 return code.
  */
 fapi2::ReturnCode buildXgpeHeader( CONST_FAPI2_PROC& i_procTgt,
-                                   Homerlayout_t* i_pChipHomer, 
+                                   Homerlayout_t* i_pChipHomer,
                                    ImageBuildRecord & i_xpmrBuildRecord )
 {
     ImgSectnSumm   l_sectn;
@@ -694,21 +697,33 @@ fapi2::ReturnCode buildXgpeHeader( CONST_FAPI2_PROC& i_procTgt,
             "Error from FAPI_ATTR_GET for ATTR_CORE_THROTTLE_DEASSERT_COUNT");
     pXgpeHeader->g_xgpe_coreThrottleDeAssertCnt =     htobe32(attrVal);
 
-    pXgpeHeader->g_xgpe_hcodeLength         =   l_sectn.iv_sectnLength;
-    pXgpeHeader->g_xgpe_sysResetAddress     =   XGPE_SRAM_BASE_ADDR + PPE_RESET_VECTOR;
-    pXgpeHeader->g_xgpe_ivprAddress         =   XGPE_SRAM_BASE_ADDR;
+    pXgpeHeader->g_xgpe_hcodeLength           =   l_sectn.iv_sectnLength;
+    pXgpeHeader->g_xgpe_sysResetAddress       =   XGPE_SRAM_BASE_ADDR + PPE_RESET_VECTOR;
+    pXgpeHeader->g_xgpe_ivprAddress           =   XGPE_SRAM_BASE_ADDR;
+    pXgpeHeader->g_xgpe_gpspbLength           =   sizeof(GlobalPstateParmBlock_t);
+
+    i_xpmrBuildRecord.getSection( "XGPE Op Trace", l_sectn );
+    pXgpeHeader->g_xgpe_xgpeDeepOpTraceMemAddr   =
+        ( EXT_MEM_ADDR | ( HOMER_XPMR_REGION_NUM * ONE_MB ) |  l_sectn.iv_sectnOffset );
+    pXgpeHeader->g_xgpe_xgpeDeepOpTraceLength    =   l_sectn.iv_sectnLength;
 
 #ifndef __HOSTBOOT_MODULE
-    pXgpeHeader->g_xgpe_hcodeLength         =   htobe32( pXgpeHeader->g_xgpe_hcodeLength );
-    pXgpeHeader->g_xgpe_sysResetAddress     =   htobe32( pXgpeHeader->g_xgpe_sysResetAddress );
-    pXgpeHeader->g_xgpe_ivprAddress         =   htobe32( pXgpeHeader->g_xgpe_ivprAddress );
+    pXgpeHeader->g_xgpe_hcodeLength         =    htobe32( pXgpeHeader->g_xgpe_hcodeLength );
+    pXgpeHeader->g_xgpe_sysResetAddress     =    htobe32( pXgpeHeader->g_xgpe_sysResetAddress );
+    pXgpeHeader->g_xgpe_ivprAddress         =    htobe32( pXgpeHeader->g_xgpe_ivprAddress );
+    pXgpeHeader->g_xgpe_gpspbLength         =    htobe32( pXgpeHeader->g_xgpe_gpspbLength );
+    pXgpeHeader->g_xgpe_xgpeDeepOpTraceMemAddr = htobe32( pXgpeHeader->g_xgpe_xgpeDeepOpTraceMemAddr );
+    pXgpeHeader->g_xgpe_xgpeDeepOpTraceLength  = htobe32( pXgpeHeader->g_xgpe_xgpeDeepOpTraceLength );
 
     FAPI_DBG( "====================== XGPE Header =======================" );
-    FAPI_INF( "XGPE Hcode Length        0x%08x", htobe32( pXgpeHeader->g_xgpe_hcodeLength ) );
-    FAPI_INF( "XGPE Sys Reset Address   0x%08x", htobe32( pXgpeHeader->g_xgpe_sysResetAddress ) );
-    FAPI_INF( "XGPE IVPR Address        0x%08x", htobe32( pXgpeHeader->g_xgpe_ivprAddress ) );
-    FAPI_INF( "XGPE Thr Assert Cnt      0x%08x", htobe32( pXgpeHeader->g_xgpe_coreThrottleAssertCnt ) );
-    FAPI_INF( "XGPE Thr DeAssert Cnt    0x%08x", htobe32( pXgpeHeader->g_xgpe_coreThrottleAssertCnt ) );
+    FAPI_INF( "XGPE Hcode Length            0x%08x", htobe32( pXgpeHeader->g_xgpe_hcodeLength ) );
+    FAPI_INF( "XGPE Sys Reset Address       0x%08x", htobe32( pXgpeHeader->g_xgpe_sysResetAddress ) );
+    FAPI_INF( "XGPE IVPR Address            0x%08x", htobe32( pXgpeHeader->g_xgpe_ivprAddress ) );
+    FAPI_INF( "XGPE GPSPB Length            0x%08x", htobe32( pXgpeHeader->g_xgpe_gpspbLength ) );
+    FAPI_INF( "XGPE Thr Assert Cnt          0x%08x", htobe32( pXgpeHeader->g_xgpe_coreThrottleAssertCnt ) );
+    FAPI_INF( "XGPE Thr DeAssert Cnt        0x%08x", htobe32( pXgpeHeader->g_xgpe_coreThrottleDeAssertCnt ) );
+    FAPI_INF( "XGPE Deep OpTrace Mem Addr   0x%08x", htobe32( pXgpeHeader->g_xgpe_xgpeDeepOpTraceMemAddr ));
+    FAPI_INF( "XGPE Deep OpTrace Length     0x%08x", htobe32( pXgpeHeader->g_xgpe_xgpeDeepOpTraceLength ) );
     FAPI_DBG( "==========================================================" );
 #endif
 
@@ -827,6 +842,7 @@ fapi2::ReturnCode buildXpmrImage( CONST_FAPI2_PROC& i_procTgt,
         FAPI_DBG( "XGPE Hcode       0x%08x",    ppeSection.iv_size );
 
         l_xgpeBuildRecord.setSection( "XGPE SRAM Size", XGPE_IMAGE_XPMR_OFFSET, ppeSection.iv_size );
+        l_xgpeBuildRecord.setSection( "XGPE Op Trace", XGPE_OPTRACE_XPMR_OFFSET, XGPE_OPTRACE_LENGTH );
 
         FAPI_TRY( buildXpmrHeader( i_pChipHomer, l_xgpeBuildRecord ),
                   "Failed To Build XPMR Header" );
@@ -1954,23 +1970,31 @@ fapi2::ReturnCode buildPpmrHeader( Homerlayout_t* i_pChipHomer, ImageBuildRecord
     i_ppmrBuildRecord.getSection( "WOF Tables", l_sectn );
     l_pPpmrHdr->iv_wofTableOffset   =   l_sectn.iv_sectnOffset;
     l_pPpmrHdr->iv_wofTableLength   =   l_sectn.iv_sectnLength;
+
+    //PGPE Op Trace
+    i_ppmrBuildRecord.getSection( "PGPE Op Trace", l_sectn );
+    l_pPpmrHdr->iv_deepOptraceOffset =  l_sectn.iv_sectnOffset;
+    l_pPpmrHdr->iv_deepOptraceLength =  l_sectn.iv_sectnLength;
+
     i_ppmrBuildRecord.dumpBuildRecord();
 
 #ifndef __HOSTBOOT_MODULE
-    l_pPpmrHdr->iv_bootCopierOffset =   htobe32(l_pPpmrHdr->iv_bootCopierOffset);
-    l_pPpmrHdr->iv_bootLoaderOffset =   htobe32(l_pPpmrHdr->iv_bootLoaderOffset);
-    l_pPpmrHdr->iv_bootLoaderLength =   htobe32(l_pPpmrHdr->iv_bootLoaderLength);
-    l_pPpmrHdr->iv_hcodeOffset      =   htobe32(l_pPpmrHdr->iv_hcodeOffset);
-    l_pPpmrHdr->iv_hcodeLength      =   htobe32(l_pPpmrHdr->iv_hcodeLength);
-    l_pPpmrHdr->iv_sramSize         =   htobe32(l_pPpmrHdr->iv_sramSize);
-    l_pPpmrHdr->iv_gpspbOffset      =   htobe32(l_pPpmrHdr->iv_gpspbOffset);
-    l_pPpmrHdr->iv_gpspbLength      =   htobe32(l_pPpmrHdr->iv_gpspbLength);
-    l_pPpmrHdr->iv_opspbOffset      =   htobe32(l_pPpmrHdr->iv_opspbOffset);
-    l_pPpmrHdr->iv_opspbLength      =   htobe32(l_pPpmrHdr->iv_opspbLength);
-    l_pPpmrHdr->iv_pstateOffset     =   htobe32(l_pPpmrHdr->iv_pstateOffset);
-    l_pPpmrHdr->iv_pstateLength     =   htobe32(l_pPpmrHdr->iv_pstateLength);
-    l_pPpmrHdr->iv_wofTableOffset   =   htobe32(l_pPpmrHdr->iv_wofTableOffset);
-    l_pPpmrHdr->iv_wofTableLength   =   htobe32(l_pPpmrHdr->iv_wofTableLength);
+    l_pPpmrHdr->iv_bootCopierOffset     =   htobe32(l_pPpmrHdr->iv_bootCopierOffset);
+    l_pPpmrHdr->iv_bootLoaderOffset     =   htobe32(l_pPpmrHdr->iv_bootLoaderOffset);
+    l_pPpmrHdr->iv_bootLoaderLength     =   htobe32(l_pPpmrHdr->iv_bootLoaderLength);
+    l_pPpmrHdr->iv_hcodeOffset          =   htobe32(l_pPpmrHdr->iv_hcodeOffset);
+    l_pPpmrHdr->iv_hcodeLength          =   htobe32(l_pPpmrHdr->iv_hcodeLength);
+    l_pPpmrHdr->iv_sramSize             =   htobe32(l_pPpmrHdr->iv_sramSize);
+    l_pPpmrHdr->iv_gpspbOffset          =   htobe32(l_pPpmrHdr->iv_gpspbOffset);
+    l_pPpmrHdr->iv_gpspbLength          =   htobe32(l_pPpmrHdr->iv_gpspbLength);
+    l_pPpmrHdr->iv_opspbOffset          =   htobe32(l_pPpmrHdr->iv_opspbOffset);
+    l_pPpmrHdr->iv_opspbLength          =   htobe32(l_pPpmrHdr->iv_opspbLength);
+    l_pPpmrHdr->iv_pstateOffset         =   htobe32(l_pPpmrHdr->iv_pstateOffset);
+    l_pPpmrHdr->iv_pstateLength         =   htobe32(l_pPpmrHdr->iv_pstateLength);
+    l_pPpmrHdr->iv_wofTableOffset       =   htobe32(l_pPpmrHdr->iv_wofTableOffset);
+    l_pPpmrHdr->iv_wofTableLength       =   htobe32(l_pPpmrHdr->iv_wofTableLength);
+    l_pPpmrHdr->iv_deepOptraceOffset    =   htobe32(l_pPpmrHdr->iv_deepOptraceOffset);
+    l_pPpmrHdr->iv_deepOptraceLength    =   htobe32(l_pPpmrHdr->iv_deepOptraceLength);
 
     FAPI_DBG( "====================== PPMR Header =======================" );
     FAPI_DBG( "PPMR BC Offset             0x%08x", htobe32(l_pPpmrHdr->iv_bootCopierOffset));
@@ -1987,6 +2011,8 @@ fapi2::ReturnCode buildPpmrHeader( Homerlayout_t* i_pChipHomer, ImageBuildRecord
     FAPI_DBG( "PGPE SRAM Image Length     0x%08x", htobe32(l_pPpmrHdr->iv_sramSize));
     FAPI_DBG( "WOF Table Offset           0x%08x", htobe32(l_pPpmrHdr->iv_wofTableOffset));
     FAPI_DBG( "WOF Table Length           0x%08x", htobe32(l_pPpmrHdr->iv_wofTableLength));
+    FAPI_DBG( "Deep Op Trace Offset       0x%08x", htobe32(l_pPpmrHdr->iv_deepOptraceOffset));
+    FAPI_DBG( "Deep Op Trace Length       0x%08x", htobe32(l_pPpmrHdr->iv_deepOptraceLength));
 
     FAPI_DBG( "==========================================================" );
 #endif
@@ -2022,6 +2048,10 @@ fapi2::ReturnCode buildPgpeHeader( Homerlayout_t* i_pChipHomer, ImageBuildRecord
     i_ppmrBuildRecord.getSection( "WOF Tables", l_sectn );
     pPgpeHeader->g_pgpe_wofTableAddress     =   l_sectn.iv_sectnOffset + PPMR_MEM_MASK;
     pPgpeHeader->g_pgpe_wofTableLength      =   l_sectn.iv_sectnLength;
+    i_ppmrBuildRecord.getSection( "PGPE Op Trace", l_sectn );
+    pPgpeHeader->g_pgpe_deepOpTraceMemAddress =
+            ( EXT_MEM_ADDR | ( HOMER_PPMR_REGION_NUM * ONE_MB ) | l_sectn.iv_sectnOffset );
+    pPgpeHeader->g_pgpe_deepOpTraceLength   =  l_sectn.iv_sectnLength;
 
 #ifndef __HOSTBOOT_MODULE
     pPgpeHeader->g_pgpe_hcodeLength         =   htobe32( pPgpeHeader->g_pgpe_hcodeLength );
@@ -2034,6 +2064,9 @@ fapi2::ReturnCode buildPgpeHeader( Homerlayout_t* i_pChipHomer, ImageBuildRecord
     pPgpeHeader->g_pgpe_genPsTableMemLength =   htobe32( pPgpeHeader->g_pgpe_genPsTableMemLength );
     pPgpeHeader->g_pgpe_wofTableAddress     =   htobe32( pPgpeHeader->g_pgpe_wofTableAddress );
     pPgpeHeader->g_pgpe_wofTableLength      =   htobe32( pPgpeHeader->g_pgpe_wofTableLength );
+    pPgpeHeader->g_pgpe_deepOpTraceMemAddress = htobe32( pPgpeHeader->g_pgpe_deepOpTraceMemAddress );
+    pPgpeHeader->g_pgpe_deepOpTraceLength   =   htobe32( pPgpeHeader->g_pgpe_deepOpTraceLength );
+
 
     FAPI_DBG( "====================== PGPE Header =======================" );
     FAPI_INF( "PGPE Hcode Length        0x%08x", htobe32( pPgpeHeader->g_pgpe_hcodeLength ) );
@@ -2046,6 +2079,8 @@ fapi2::ReturnCode buildPgpeHeader( Homerlayout_t* i_pChipHomer, ImageBuildRecord
     FAPI_INF( "Gen GPSPB Length         0x%08x", htobe32( pPgpeHeader->g_pgpe_genPsTableMemLength ));
     FAPI_INF( "WOF Table Mem Offset     0x%08x", htobe32( pPgpeHeader->g_pgpe_wofTableAddress ));
     FAPI_INF( "WOF Table Mem Length     0x%08x", htobe32( pPgpeHeader->g_pgpe_wofTableLength ));
+    FAPI_INF( "PGPE Deep Optrace Offset 0x%08x", htobe32( pPgpeHeader->g_pgpe_deepOpTraceMemAddress ));
+    FAPI_INF( "PGPE Deep Optrace Length 0x%08x", htobe32( pPgpeHeader->g_pgpe_deepOpTraceLength ));
 
     FAPI_DBG( "==========================================================" );
 #endif
@@ -2165,6 +2200,8 @@ fapi2::ReturnCode buildPpmrImage( CONST_FAPI2_PROC& i_procTgt,
 
         FAPI_TRY( buildParameterBlock( i_procTgt, i_pChipHomer, l_pgpeBuildRecord ),
                   "Failed To Build P-State Parameter Block" );
+
+        l_pgpeBuildRecord.setSection( "PGPE Op Trace", PGPE_OP_TRACE_PPMR_OFFSET, PGPE_OPTRACE_LENGTH );
 
         FAPI_TRY( buildPpmrHeader( i_pChipHomer, l_pgpeBuildRecord ),
                   "Failed To Build PPMR Header" );
@@ -2452,7 +2489,7 @@ fapi2::ReturnCode traceRs4OverrideSize( Homerlayout_t * i_pChipHomer, Rs4Stat & 
 
     FAPI_DBG( "CPMR Ring Offset 0x%08x", (uint8_t *) l_pRingTor - (uint8_t *) i_pChipHomer );
 
-    for( uint8_t ring = 0; ring < 25/*EQ::g_chipletData.numCommonRings */; ring++ , l_pRingTor++ )
+    for( uint8_t ring = 0; ring < 25; ring++ , l_pRingTor++ )
     {
         if( !*l_pRingTor )
         {

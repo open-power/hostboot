@@ -297,7 +297,7 @@ HCD_HDR_UINT32( g_xgpe_coreThrottleDeAssertCnt,  0 );
 HCD_HDR_UINT32( g_xgpe_charactControls,          0 );
 HCD_HDR_UINT32( g_xgpe_xgpeOpTracePointer,       0 );
 HCD_HDR_UINT32( g_xgpe_xgpeDeepOpTraceMemAddr,   0 );
-HCD_HDR_UINT32( g_xgpe_xgpeDeepOpTraceLength, 0 );
+HCD_HDR_UINT32( g_xgpe_xgpeDeepOpTraceLength,    0 );
 HCD_HDR_PAD(IMG_HDR_ALIGN_SIZE);
 #ifdef __ASSEMBLER__
 .endm
