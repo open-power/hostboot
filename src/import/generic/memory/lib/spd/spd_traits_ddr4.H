@@ -207,7 +207,7 @@ class readerTraits< fields<DDR4, BASE_CNFG>::HYBRID_MEDIA, rev::V1_0 >
 {
     public:
 
-        static constexpr size_t COMPARISON_VAL = 0;
+        static constexpr size_t COMPARISON_VAL = 0x0;
         static constexpr const char* FIELD_STR = "Hybrid Media";
 
         template <typename T>
@@ -225,7 +225,7 @@ class readerTraits< fields<DDR4, BASE_CNFG>::HYBRID_MEDIA, R >
 {
     public:
 
-        static constexpr size_t COMPARISON_VAL = 0x1;
+        static constexpr size_t COMPARISON_VAL = 0x3;
         static constexpr const char* FIELD_STR = "Hybrid Media";
 
         template <typename T>

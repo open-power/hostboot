@@ -39,6 +39,7 @@
 #include <mss_generic_attribute_getters.H>
 #include <mss_generic_system_attribute_getters.H>
 #include <mss_explorer_attribute_getters.H>
+#include <lib/shared/exp_consts.H>
 #include <lib/dimm/exp_kind.H>
 
 namespace mss
@@ -124,6 +125,103 @@ fapi2::ReturnCode has_rcd<mss::mc_type::EXPLORER>( const fapi2::Target<fapi2::TA
         bool l_current_port_rcd = false;
         FAPI_TRY(has_rcd<mss::mc_type::EXPLORER>(l_port, l_current_port_rcd));
         o_has_rcd |= l_current_port_rcd;
+    }
+
+    return fapi2::FAPI2_RC_SUCCESS;
+
+fapi_try_exit:
+
+    return fapi2::current_err;
+}
+
+///
+/// @brief Check if any dimm is hybrid type MDS - explorer/DIMM specialization
+/// @param[in] i_target - the fapi2::Target we are starting from
+/// @param[out] o_is_mds - true iff any DIMM is hybrid type MDS
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff ok
+///
+template<>
+fapi2::ReturnCode is_mds<mss::mc_type::EXPLORER>( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+        bool& o_is_mds )
+{
+    // Assume its not MDS to start
+    o_is_mds = false;
+
+    uint8_t l_hybrid = 0;
+    uint8_t l_hybrid_media_type = 0;
+
+    FAPI_TRY(mss::attr::get_hybrid(i_target, l_hybrid));
+    FAPI_TRY(mss::attr::get_hybrid_memory_type(i_target, l_hybrid_media_type));
+
+    o_is_mds = (l_hybrid_media_type == fapi2::ENUM_ATTR_MEM_EFF_HYBRID_MEMORY_TYPE_MDS &&
+                l_hybrid == fapi2::ENUM_ATTR_MEM_EFF_HYBRID_IS_HYBRID);
+
+fapi_try_exit:
+
+    return fapi2::current_err;
+}
+
+///
+/// @brief Check if any dimm is hybrid type MDS - explorer/DIMM specialization
+/// @param[in] i_target - the fapi2::Target we are starting from
+/// @param[out] o_is_mds - true iff any DIMM is hybrid type MDS
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff ok
+///
+template<>
+fapi2::ReturnCode is_mds<mss::mc_type::EXPLORER>( const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
+        bool& o_is_mds )
+{
+    // Assume its not MDS to start
+    o_is_mds = false;
+
+    uint8_t l_hybrid[mss::exp::MAX_DIMM_PER_PORT] = {};
+    uint8_t l_hybrid_dimm = 0;
+    uint8_t l_hybrid_media_type[mss::exp::MAX_DIMM_PER_PORT] = {};
+    uint8_t l_hybrid_media_type_dimm = 0;
+
+    FAPI_TRY(mss::attr::get_hybrid(i_target, l_hybrid));
+    FAPI_TRY(mss::attr::get_hybrid_memory_type(i_target, l_hybrid_media_type));
+
+    // Loop over all DIMM's and determine if we have any MDS type DIMMs
+    for(const auto& l_dimm : mss::find_targets<fapi2::TARGET_TYPE_DIMM>(i_target))
+    {
+        bool l_current_dimm_mds = false;
+
+        l_hybrid_dimm = l_hybrid[mss::index(l_dimm)];
+        l_hybrid_media_type_dimm = l_hybrid_media_type[mss::index(l_dimm)];
+
+        l_current_dimm_mds = ((l_hybrid_media_type_dimm == fapi2::ENUM_ATTR_MEM_EFF_HYBRID_MEMORY_TYPE_MDS) &&
+                              (l_hybrid_dimm == fapi2::ENUM_ATTR_MEM_EFF_HYBRID_IS_HYBRID));
+
+        o_is_mds |= l_current_dimm_mds;
+    }
+
+    return fapi2::FAPI2_RC_SUCCESS;
+
+fapi_try_exit:
+
+    return fapi2::current_err;
+}
+
+///
+/// @brief Check if any dimm is hybrid type MDS - explorer/DIMM specialization
+/// @param[in] i_target - the fapi2::Target we are starting from
+/// @param[out] o_is_mds - true iff any DIMM is hybrid type MDS
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff ok
+///
+template<>
+fapi2::ReturnCode is_mds<mss::mc_type::EXPLORER>( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+        bool& o_is_mds )
+{
+    // Assume its not MDS to start
+    o_is_mds = false;
+
+    // Loop over all PORT's and determine if we have any MDS type DIMMs
+    for(const auto& l_port : mss::find_targets<fapi2::TARGET_TYPE_MEM_PORT>(i_target))
+    {
+        bool l_current_port_mds = false;
+        FAPI_TRY(is_mds<mss::mc_type::EXPLORER>(l_port, l_current_port_mds));
+        o_is_mds |= l_current_port_mds;
     }
 
     return fapi2::FAPI2_RC_SUCCESS;

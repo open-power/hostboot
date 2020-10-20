@@ -80,7 +80,7 @@
     </description>
     <initToZero></initToZero>
     <valueType>uint8</valueType>
-    <enum> NONE = 0, NVDIMM = 1</enum>
+    <enum> NONE = 0, NVDIMM = 1, MDS = 3</enum>
     <writeable/>
     <array>2</array>
     <mssAccessorName>hybrid_memory_type</mssAccessorName>

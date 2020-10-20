@@ -81,7 +81,8 @@ enum module_type
 {
     NOT_HYBRID = 0,
     HYBRID = 1,
-    NVDIMM_HYBRID = 1
+    NVDIMM_HYBRID = 1,
+    MDS_HYBRID = 3
 };
 
 ///

@@ -1012,6 +1012,7 @@ enum module_params
     LRDIMM_MODULE,
     NVDIMM_MODULE,
     DDIMM_MODULE,
+    MDS_MODULE,
 };
 
 ///
