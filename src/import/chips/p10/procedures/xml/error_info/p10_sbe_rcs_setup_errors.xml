@@ -50,4 +50,11 @@
       <ffdc>RCS_CLOCK_TEST_IN</ffdc>
    </hwpError>
  <!-- ******************************************************************** -->
+   <hwpError>
+      <rc>RC_RCS_FPLL_DESKEW_ERR</rc>
+      <description> Error in caliberating the deskew for RCS FPLL </description>
+      <ffdc>READ_SNS1LTH</ffdc>
+      <ffdc>SHIFTED_ERR_VAL</ffdc>
+   </hwpError>
+  <!-- ******************************************************************** -->
 </hwpErrors>
