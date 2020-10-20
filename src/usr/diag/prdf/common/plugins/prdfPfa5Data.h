@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -65,9 +65,7 @@ enum ErrlVersion
 enum ErrlSubsect
 {
     ErrlSectPFA5_1   = 51,
-    ErrlSectPFA5_2   = 52,
     ErrlCapData_1    = 1,
-    ErrlCapData_2    = 2,
     ErrlMruData      = 62, // For the 80 byte centaur DQ pin map
     ErrlString       = 10,
     ErrlPmFfdcData   = 20,

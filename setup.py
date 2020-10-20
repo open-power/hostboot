@@ -49,6 +49,7 @@ dirmap = {
     "b1e00": "src/usr/secureboot/common/plugins/ebmc",
     "b3600": "src/usr/expaccess/plugins/ebmc",
     "b4500": "src/usr/spi/plugins/ebmc",
+    "be500": "src/usr/diag/prdf/plugins/ebmc",
     "helpers": "src/build/tools/ebmc"
 }
 
