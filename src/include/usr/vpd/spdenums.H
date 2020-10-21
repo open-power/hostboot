@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -354,7 +354,9 @@ enum
     LRMM_ODT_RTT_PARK_2400_3200      = SPD_FIRST_MOD_SPEC | 0xb2,
     RMM_CRC                          = SPD_FIRST_MOD_SPEC | 0xb3,
     LRMM_CRC                         = SPD_FIRST_MOD_SPEC | 0xb4,
-    SPD_LAST_MOD_SPEC                = SPD_FIRST_MOD_SPEC | 0xb5,
+    IBM_11S_PN                       = SPD_FIRST_MOD_SPEC | 0xb5,
+    IBM_11S_SN                       = SPD_FIRST_MOD_SPEC | 0xb6,
+    SPD_LAST_MOD_SPEC                = SPD_FIRST_MOD_SPEC | 0xb7,
 
     // Latest DDR SPD specifcations have standard SPD
     // in the front followed by extendable function

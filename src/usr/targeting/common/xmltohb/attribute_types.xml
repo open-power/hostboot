@@ -9090,6 +9090,22 @@
   </attribute>
 
   <attribute>
+    <description>
+        Indicator to Host Firmware to use the 11S SPD data
+        for Part Number and Serial Number in DDIMM SPD instead
+        of the standard location.
+    </description>
+    <id>USE_11S_SPD</id>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <simpleType>
+      <uint8_t>
+        <default>1</default>
+      </uint8_t>
+    </simpleType>
+  </attribute>
+
+  <attribute>
     <id>USE_TCES_FOR_DMAS</id>
     <description>
       Specifies whether or not the FSP is ready for Hostboot to enable TCEs

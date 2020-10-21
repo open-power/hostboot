@@ -54,6 +54,7 @@
 #include "spdDDR4_DDIMM.H"
 #include "errlud_vpd.H"
 #include "ocmb_spd.H"
+#include <targeting/targplatutil.H>     // assertGetToplevelTarget
 
 // ----------------------------------------------
 // Trace definitions
@@ -2189,8 +2190,17 @@ errlHndl_t getKeywordEntry ( VPD::vpdKeyword i_keyword,
 void setPartAndSerialNumberAttributes( TARGETING::Target * i_target )
 {
     errlHndl_t l_err = NULL;
+
+    //Default to standard VPD Location for DDIMM SPD SN/PN
     VPD::vpdKeyword l_partKeyword = SPD::MODULE_PART_NUMBER;
     VPD::vpdKeyword l_serialKeyword = SPD::MODULE_SERIAL_NUMBER;
+
+    if(TARGETING::UTIL::assertGetToplevelTarget()->getAttr<TARGETING::ATTR_USE_11S_SPD>())
+    {
+        //Use IBM 11S Location for DDIMM SN/PN
+        l_partKeyword = SPD::IBM_11S_PN;
+        l_serialKeyword = SPD::IBM_11S_SN;
+    }
 
     do
     {

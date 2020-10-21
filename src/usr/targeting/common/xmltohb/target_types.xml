@@ -2793,6 +2793,9 @@
       <id>ULTRA_TURBO_FREQ_MHZ</id>
     </attribute>
     <attribute>
+      <id>USE_11S_SPD</id>
+    </attribute>
+    <attribute>
       <id>USE_TCES_FOR_DMAS</id>
     </attribute>
     <attribute>

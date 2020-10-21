@@ -42,7 +42,7 @@
 #include <initservice/istepdispatcherif.H>
 #include <ipmi/ipmifruinv.H>
 #include <pldm/requests/pldm_pdr_requests.H>
-
+#include <targeting/targplatutil.H>     // assertGetToplevelTarget
 
 // ----------------------------------------------
 // Trace - defined in vpd_common
@@ -551,8 +551,16 @@ errlHndl_t getPnAndSnRecordAndKeywords( TARGETING::Target * i_target,
         {
             // SPD does not have singleton instance
             // SPD does not use record
-            io_keywordPN = SPD::MODULE_PART_NUMBER;
-            io_keywordSN = SPD::MODULE_SERIAL_NUMBER;
+            if(TARGETING::UTIL::assertGetToplevelTarget()->getAttr<TARGETING::ATTR_USE_11S_SPD>())
+            {
+                io_keywordPN = SPD::IBM_11S_PN;
+                io_keywordSN = SPD::IBM_11S_SN;
+            }
+            else
+            {
+                io_keywordPN = SPD::MODULE_PART_NUMBER;
+                io_keywordSN = SPD::MODULE_SERIAL_NUMBER;
+            }
         }
         else if( i_type == TARGETING::TYPE_NODE )
         {

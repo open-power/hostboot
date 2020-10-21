@@ -587,7 +587,14 @@ errlHndl_t DeconfigGard::platCreateGardRecord(
 
             if (!INITSERVICE::spBaseServicesEnabled())
             {
-                switch (l_fru_target->getAttr<TARGETING::ATTR_TYPE>())
+                TARGETING::TYPE l_type = l_fru_target->getAttr<TARGETING::ATTR_TYPE>();
+                if (TARGETING::UTIL::assertGetToplevelTarget()->getAttr<TARGETING::ATTR_USE_11S_SPD>())
+                {
+                    //Use Default Type for 11S VPD
+                    l_type = TYPE_NA;
+                }
+
+                switch (l_type)
                 {
                     // RTC 254396 - Support pluggable ISDIMMs
                     case TARGETING::TYPE_DIMM:
