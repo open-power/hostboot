@@ -35,11 +35,26 @@
 #include "../eepromCache.H"
 #include <errl/errlmanager.H>
 #include <errl/errlentry.H>
+#include <conversions.H>
 
 extern trace_desc_t* g_trac_eeprom;
 
 using namespace TARGETING;
 using namespace EEPROM;
+
+// Bring in updateEecacheContents(...) and updateEecacheHeader(...) to be used in tests without
+// making the API available through a header file
+namespace EEPROM
+{
+    errlHndl_t updateEecacheContents(TARGETING::Target*            i_target,
+                                       EEPROM::EEPROM_ROLE const   i_eepromType,
+                                       void        const * const   i_eepromBuffer,
+                                       size_t              const   i_eepromBuflen,
+                                       eepromRecordHeader  const & i_recordHeader);
+
+    errlHndl_t updateEecacheHeader(eepromRecordHeader   const & i_completeRecordHeader,
+                                   eepromRecordHeader * const & io_pnorRecordToUpdate);
+}
 
 class EECACHETest: public CxxTest::TestSuite
 {
@@ -144,57 +159,128 @@ class EECACHETest: public CxxTest::TestSuite
       }
 
       /**
-       * @brief Test clear eecache with ancillary roles
+       * @brief Test clear eecache with cached data from SEEPROM 3
+       *
+       * This test uses the clearEecache() function to delete the cached data from SEEPROM 3.
+       * At the end of the test, these items are manually placed back into the EECACHE.
        */
       void test_clearEecache()
       {
           TRACFCOMP( g_trac_eeprom, ENTER_MRK"test_clearEecache" );
           errlHndl_t l_errl = nullptr;
-          eepromRecordHeader * l_backupVpdRecordHeader_realPnor = nullptr;
+
+          // Will be used as pointers to the actual headers in PNOR EECACHE section
+          eepromRecordHeader * l_mvpdRecordHeader_realPnor      = nullptr;
           eepromRecordHeader * l_spareTestRecordHeader_realPnor = nullptr;
+          eepromRecordHeader * l_wofRecordHeader_realPnor       = nullptr;
+
+          // eepromRecordHeader copies that will be used to restore the header entries in the EECACHE
+          eepromRecordHeader l_mvpdRecordHeader_copy;
+          eepromRecordHeader l_spareRecordHeader_copy;
+          eepromRecordHeader l_wofRecordHeader_copy;
+
+          // Will be used to store data currently in the EECACHE and restore it after tests are done
+          uint8_t * l_mvpdData  = nullptr;
+          uint8_t * l_spareData = nullptr;
+          uint8_t * l_wofData  = nullptr;
+
+          // Flag to mark if data was stored successfully
+          bool l_didStoreMvpd = false;
+          bool l_didStoreSpare = false;
+          bool l_didStoreWof = false;
 
           uint8_t l_numTests = 0;
           uint8_t l_numFails = 0;
 
-          do{
-              // Get a processor Target
-              TARGETING::TargetService& tS = TARGETING::targetService();
-              TARGETING::Target* testTarget = NULL;
-              tS.masterProcChipTargetHandle( testTarget );
-              assert(testTarget != NULL);
+          // Get a processor Target
+          TARGETING::TargetService& tS = TARGETING::targetService();
+          TARGETING::Target* testTarget = NULL;
+          tS.masterProcChipTargetHandle( testTarget );
+          assert(testTarget != NULL);
 
-              // populate backup vpd and spare test
-              size_t presentSize;
-              bool present = true;
-              TRACFCOMP(g_trac_eeprom,"Reading EEPROMs for target 0x%.8X, eeprom cache = %d VPD_BACKUP , target present = %d , eeprom type = %d",
-                        TARGETING::get_huid(testTarget), DEVICE_CACHE_EEPROM_ADDRESS(present, EEPROM::VPD_BACKUP));
-              presentSize = sizeof(present);
-              l_errl = deviceRead(testTarget, &present, presentSize,
-                              DEVICE_CACHE_EEPROM_ADDRESS(present, EEPROM::VPD_BACKUP));
+          do{
+              /* Store MVPD, WOF, and Spare data from EECACHE */
+
+              const size_t l_offset = 0; // Read each VPD from its 0-offset
+
+              // Store MVPD
+              SpiMvpdBackupInfo l_mvpdInfo = testTarget->getAttr<ATTR_SPI_MVPD_BACKUP_INFO>();
+              size_t l_mvpdSize = l_mvpdInfo.dataSizeKB * CONVERSIONS::BYTES_PER_KB;
+              l_mvpdData = new uint8_t[l_mvpdSize]();
+              TRACFCOMP(g_trac_eeprom,"Reading cached VPD_BACKUP from SEEPROM of target 0x%.8X, "
+                        "record size = %d bytes", TARGETING::get_huid(testTarget), l_mvpdSize);
+              l_errl = deviceRead(testTarget, l_mvpdData, l_mvpdSize,
+                                DEVICE_EEPROM_ADDRESS(EEPROM::VPD_BACKUP, l_offset, EEPROM::CACHE));
               if (l_errl != nullptr)
               {
-                  TRACFCOMP(g_trac_eeprom, "pTarget %.8X - failed reading backup VPD eeprom",
-                      TARGETING::get_huid(testTarget));
+                  TS_FAIL("pTarget %.8X - failed reading backup VPD eeprom", TARGETING::get_huid(testTarget));
+                  break;
+              }
+              else
+              {
+                  l_didStoreMvpd = true;
+              }
+
+              // Store Spare
+              // Spare was not cached previously, so must be cached here for the first time, then
+              // data is read out
+
+              // Cache Spare
+              bool present = true;
+              size_t presentSize = sizeof(present);
+              l_errl = deviceRead(testTarget, &present, presentSize,
+                                  DEVICE_CACHE_EEPROM_ADDRESS(present, EEPROM::SPARE_TEST));
+              if (l_errl != nullptr)
+              {
+                  TS_FAIL("pTarget %.8X - failed caching SPARE_TEST", TARGETING::get_huid(testTarget));
                   break;
               }
 
-              TRACFCOMP(g_trac_eeprom,"Reading EEPROMs for target 0x%.8X, eeprom cache = %d SPARE_TEST , target present = %d , eeprom type = %d",
-                        TARGETING::get_huid(testTarget), DEVICE_CACHE_EEPROM_ADDRESS(present, EEPROM::SPARE_TEST));
-              l_errl = deviceRead(testTarget, &present, presentSize,
-                              DEVICE_CACHE_EEPROM_ADDRESS(present, EEPROM::SPARE_TEST));
+              // Store Spare
+              SpiEepromSpareInfo l_spareInfo = testTarget->getAttr<ATTR_SPI_EEPROM_SPARE_INFO>();
+              size_t l_spareSize = l_spareInfo.dataSizeKB * CONVERSIONS::BYTES_PER_KB;
+              l_spareData = new uint8_t[l_spareSize]();
+              TRACFCOMP(g_trac_eeprom,"Reading cached SPARE_TEST from SEEPROM of target 0x%.8X, "
+                        "record size = %d bytes", TARGETING::get_huid(testTarget), l_spareSize);
+              l_errl = deviceRead(testTarget, l_spareData, l_spareSize,
+                                DEVICE_EEPROM_ADDRESS(EEPROM::SPARE_TEST, l_offset, EEPROM::CACHE));
               if (l_errl != nullptr)
               {
-                  TRACFCOMP(g_trac_eeprom, "pTarget %.8X - failed reading SPARE_TEST vpd",
-                      TARGETING::get_huid(testTarget));
+                  TS_FAIL("pTarget %.8X - failed reading SPARE_TEST", TARGETING::get_huid(testTarget));
                   break;
+              }
+              else
+              {
+                  l_didStoreSpare = true;
+              }
+
+              // Store WOF
+              SpiWofDataInfo l_wofInfo = testTarget->getAttr<ATTR_SPI_WOF_DATA_INFO>();
+              size_t l_wofSize = l_wofInfo.dataSizeKB * CONVERSIONS::BYTES_PER_KB;
+              l_wofData = new uint8_t[l_wofSize]();
+              TRACFCOMP(g_trac_eeprom,"Reading cached WOF_DATA from SEEPROM of target 0x%.8X, "
+                        "record size = %d bytes", TARGETING::get_huid(testTarget), l_wofSize);
+              l_errl = deviceRead(testTarget, l_wofData, l_wofSize,
+                                  DEVICE_EEPROM_ADDRESS(EEPROM::WOF_DATA, l_offset, EEPROM::CACHE));
+              if (l_errl != nullptr)
+              {
+                  TS_FAIL("pTarget %.8X - failed reading WOF_DATA", TARGETING::get_huid(testTarget));
+                  break;
+              }
+              else
+              {
+                  l_didStoreWof = true;
               }
 
               // Uncomment to verify manually
               //printTableOfContentsFromPnor(false);
 
+
+              /* Test getting (and storing) valid eepromRecordHeaders for MVPD, WOF, and Spare */
+
               uint64_t l_addr = 0;
 
-              // Grab the SPARE_TEST eeprom record header first
+              // Grab the SPARE_TEST eeprom record header
               l_numTests++;
               l_errl = getEecacheHeaderFromPnor(testTarget, EEPROM::SPARE_TEST, l_addr);
               if (l_errl || l_addr == 0)
@@ -205,6 +291,8 @@ class EECACHETest: public CxxTest::TestSuite
                   break;
               }
               l_spareTestRecordHeader_realPnor = reinterpret_cast<eepromRecordHeader *>(l_addr);
+              // Save off header
+              l_spareRecordHeader_copy = *l_spareTestRecordHeader_realPnor;
 
               l_numTests++;
               if(l_spareTestRecordHeader_realPnor->completeRecord.cached_copy_valid != 1)
@@ -214,7 +302,7 @@ class EECACHETest: public CxxTest::TestSuite
                   break;
               }
 
-              // Grab the BACKUP_VPD eeprom record header
+              // Grab the MVPD eeprom record header
               l_numTests++;
               l_addr = 0;
               l_errl = getEecacheHeaderFromPnor(testTarget, EEPROM::VPD_BACKUP, l_addr);
@@ -225,15 +313,43 @@ class EECACHETest: public CxxTest::TestSuite
                       TARGETING::get_huid(testTarget), EEPROM::VPD_BACKUP);
                   break;
               }
-              l_backupVpdRecordHeader_realPnor = reinterpret_cast<eepromRecordHeader *>(l_addr);
+              l_mvpdRecordHeader_realPnor = reinterpret_cast<eepromRecordHeader *>(l_addr);
+              // Save off header
+              l_mvpdRecordHeader_copy = *l_mvpdRecordHeader_realPnor;
 
               l_numTests++;
-              if(l_backupVpdRecordHeader_realPnor->completeRecord.cached_copy_valid != 1)
+              if(l_mvpdRecordHeader_realPnor->completeRecord.cached_copy_valid != 1)
               {
                   TS_FAIL("test_clearEecache(): Master Proc VPD_BACKUP EECACHE is expected to be valid at start of test!");
                   l_numFails++;
                   break;
               }
+
+              // Grab the WOF eeprom record header
+              l_numTests++;
+              l_addr = 0;
+              l_errl = getEecacheHeaderFromPnor(testTarget, EEPROM::WOF_DATA, l_addr);
+              if (l_errl || l_addr == 0)
+              {
+                  l_numFails++;
+                  TS_FAIL("test_clearEecache(): Unable to find eecache header for %.8X with eeprom_role %d - WOF_DATA",
+                      TARGETING::get_huid(testTarget), EEPROM::WOF_DATA);
+                  break;
+              }
+              l_wofRecordHeader_realPnor = reinterpret_cast<eepromRecordHeader *>(l_addr);
+              // Save off header
+              l_wofRecordHeader_copy = *l_wofRecordHeader_realPnor;
+
+              l_numTests++;
+              if(l_wofRecordHeader_realPnor->completeRecord.cached_copy_valid != 1)
+              {
+                  TS_FAIL("test_clearEecache(): Master Proc WOF_DATA EECACHE is expected to be valid at start of test!");
+                  l_numFails++;
+                  break;
+              }
+
+
+              /* Delete content and verify it was cleared */
 
               // Grab the pointer to the EECACHE
               PNOR::SectionInfo_t l_sectionInfo;
@@ -246,7 +362,7 @@ class EECACHETest: public CxxTest::TestSuite
               }
               eecacheSectionHeader * l_eecacheSectionHeaderPtr = reinterpret_cast<eecacheSectionHeader*>(l_sectionInfo.vaddr);
 
-              // now clear out the eecache with backupVpd and spareTest
+              // now clear out the eecache of MVPD, Spare, and WOF from SEEPROM 3
               l_numTests++;
               l_errl = clearEecache(l_eecacheSectionHeaderPtr, *l_spareTestRecordHeader_realPnor);
               if(l_errl)
@@ -259,7 +375,7 @@ class EECACHETest: public CxxTest::TestSuite
 
               // Now verify the clear worked
               l_numTests++;
-              if(l_backupVpdRecordHeader_realPnor->completeRecord.cached_copy_valid != 0)
+              if(l_mvpdRecordHeader_realPnor->completeRecord.cached_copy_valid != 0)
               {
                   TS_FAIL("test_clearEecache() Master Proc BACKUP VPD EECACHE is expected to be invalid after clearEecache is called!");
                   l_numFails++;
@@ -270,6 +386,14 @@ class EECACHETest: public CxxTest::TestSuite
               if(l_spareTestRecordHeader_realPnor->completeRecord.cached_copy_valid != 0)
               {
                   TS_FAIL("test_clearEecache() Master Proc SPARE_TEST EECACHE is expected to be invalid after clearEecache is called!");
+                  l_numFails++;
+                  break;
+              }
+
+              l_numTests++;
+              if(l_wofRecordHeader_realPnor->completeRecord.cached_copy_valid != 0)
+              {
+                  TS_FAIL("test_clearEecache() Master Proc WOF_DATA EECACHE is expected to be invalid after clearEecache is called!");
                   l_numFails++;
                   break;
               }
@@ -287,7 +411,7 @@ class EECACHETest: public CxxTest::TestSuite
                   l_numFails++;
               }
 
-              addr = lookupEepromCacheAddr(*l_backupVpdRecordHeader_realPnor);
+              addr = lookupEepromCacheAddr(*l_mvpdRecordHeader_realPnor);
               l_numTests++;
               if (addr != 0)
               {
@@ -295,11 +419,20 @@ class EECACHETest: public CxxTest::TestSuite
                   l_numFails++;
               }
 
+              addr = lookupEepromCacheAddr(*l_wofRecordHeader_realPnor);
+              l_numTests++;
+              if (addr != 0)
+              {
+                  TS_FAIL("test_clearEecache() - found eeprom cache address for wof at 0x%.8X", addr);
+                  l_numFails++;
+              }
+
               // Re-validate the cache entry
               setIsValidCacheEntry(testTarget, EEPROM::VPD_BACKUP, true);
               setIsValidCacheEntry(testTarget, EEPROM::SPARE_TEST, true);
+              setIsValidCacheEntry(testTarget, EEPROM::WOF_DATA, true);
 
-              TRACFCOMP(g_trac_eeprom,"Verify PNOR updated for VPD_BACKUP and SPARE_TEST");
+              TRACFCOMP(g_trac_eeprom,"Verify PNOR updated for VPD_BACKUP, SPARE_TEST and WOF_DATA");
               printTableOfContentsFromPnor(false);
 
           }while(0);
@@ -308,6 +441,81 @@ class EECACHETest: public CxxTest::TestSuite
           {
               ERRORLOG::errlCommit(l_errl, CXXTEST_COMP_ID);
           }
+
+          // Place back EECACHE data that was saved off:
+          // This is done in a second while-loop as it may fail in many places, and it cannot be
+          // done at the end of the above while-loop as that is not guaranteed to end successfully.
+          l_errl = nullptr;
+          do{
+              if (l_didStoreMvpd)
+              {
+                  l_errl = updateEecacheHeader(l_mvpdRecordHeader_copy, l_mvpdRecordHeader_realPnor);
+                  if (l_errl != nullptr)
+                  {
+                      TS_FAIL("test_clearEecache() - Failed to update header for EEPROM::VPD_BACKUP");
+                      break;
+                  }
+
+                  // l_mvpdRecordHeader_copy.completeRecord.cache_copy_size is used instead of
+                  // l_mvpdSize because l_mvpdSize size may be larger. cache_copy_size is the actual
+                  // data size that was being held in cache.
+                  l_errl = updateEecacheContents(testTarget, EEPROM::VPD_BACKUP, l_mvpdData,
+                            l_mvpdRecordHeader_copy.completeRecord.cache_copy_size * CONVERSIONS::BYTES_PER_KB,
+                            l_mvpdRecordHeader_copy);
+                  if (l_errl != nullptr)
+                  {
+                      TS_FAIL("test_clearEecache() - Failed to place back cached data for EEPROM::VPD_BACKUP");
+                      break;
+                  }
+              }
+              if (l_didStoreSpare)
+              {
+                  l_errl = updateEecacheHeader(l_spareRecordHeader_copy, l_spareTestRecordHeader_realPnor);
+                  if (l_errl != nullptr)
+                  {
+                      TS_FAIL("test_clearEecache() - Failed to update header for EEPROM::SPARE_TEST");
+                      break;
+                  }
+
+                  l_errl = updateEecacheContents(testTarget, EEPROM::SPARE_TEST, l_spareData,
+                            l_spareRecordHeader_copy.completeRecord.cache_copy_size * CONVERSIONS::BYTES_PER_KB,
+                            l_spareRecordHeader_copy);
+                  if (l_errl != nullptr)
+                  {
+                      TS_FAIL("test_clearEecache() - Failed to place back cached data for EEPROM::SPARE_TEST");
+                      break;
+                  }
+              }
+              if (l_didStoreWof)
+              {
+                  l_errl = updateEecacheHeader(l_wofRecordHeader_copy, l_wofRecordHeader_realPnor);
+                  if (l_errl != nullptr)
+                  {
+                      TS_FAIL("test_clearEecache() - Failed to update header for EEPROM::WOF_DATA");
+                      break;
+                  }
+
+                  l_errl = updateEecacheContents(testTarget, EEPROM::WOF_DATA, l_wofData,
+                            l_wofRecordHeader_copy.completeRecord.cache_copy_size * CONVERSIONS::BYTES_PER_KB,
+                            l_wofRecordHeader_copy);
+                  if (l_errl != nullptr)
+                  {
+                      TS_FAIL("test_clearEecache() - Failed to place back cached data for EEPROM::WOF_DATA");
+                      break;
+                  }
+              }
+          } while (0);
+
+          if (l_errl)
+          {
+              ERRORLOG::errlCommit(l_errl, CXXTEST_COMP_ID);
+          }
+
+          // Release non-empty blocks of memory
+          if (l_mvpdData ) { delete[] l_mvpdData;  }
+          if (l_spareData) { delete[] l_spareData; }
+          if (l_wofData  ) { delete[] l_wofData;   }
+
           TRACFCOMP( g_trac_eeprom, EXIT_MRK"test_clearEecache()  numTests = %d  / num fails = %d", l_numTests, l_numFails );
       }
 
