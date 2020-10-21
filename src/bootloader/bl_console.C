@@ -74,8 +74,11 @@ void computeLpchcErrSev(LpchcErrReg_t i_lpchcErrData,
     o_resetLevel = RESET_CLEAR;
 
     // First check the soft errors
-    // All of these errors are set from bad LPC end points. Setting all to soft
-    if (i_lpchcErrData.lreset || i_lpchcErrData.syncab ||
+    // All of these errors are set from bad LPC end points. Setting all to soft.
+    // On Rainier HW, lreset bit pops up when we get to HBBL, but the console
+    // works OK despite that bit. The check for that bit was removed from HBBL
+    // for now until we check with HW people and figure out why the bit is set.
+    if (i_lpchcErrData.syncab ||
         i_lpchcErrData.syncnr || i_lpchcErrData.syncne ||
         i_lpchcErrData.syncto || i_lpchcErrData.tctar || i_lpchcErrData.mctar)
     {
@@ -165,8 +168,6 @@ static uint64_t convertSecToTicks(const uint64_t i_sec, const uint64_t i_nsec)
     return result;
 }
 
-// @TODO: RTC: 243863
-// Evaluate timing on real hardware and tweak constants as needed
 static void simpleDelay(const uint64_t i_sec, const uint64_t i_nsec)
 {
     uint64_t delay = convertSecToTicks(i_sec, i_nsec);
