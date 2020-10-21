@@ -4241,8 +4241,8 @@ fapi2::ReturnCode PlatPmPPB::safe_mode_computation()
     {
         if (iv_attrs.attr_war_mode == fapi2::ENUM_ATTR_HW543384_WAR_MODE_TIE_NEST_TO_PAU)
         {
-            l_safe_mode_mv[VDD] = iv_operating_points[VPD_PT_SET_BIASED_SYSP][VPD_PV_CF0].vdd_mv;
-            l_safe_mode_mv[VCS] = iv_operating_points[VPD_PT_SET_BIASED_SYSP][VPD_PV_CF0].vcs_mv;
+            l_safe_mode_mv[VDD] = iv_operating_points[VPD_PT_SET_RAW][VPD_PV_CF0].vdd_mv;
+            l_safe_mode_mv[VCS] = iv_operating_points[VPD_PT_SET_RAW][VPD_PV_CF0].vcs_mv;
         }
         else
         {
@@ -4260,8 +4260,8 @@ fapi2::ReturnCode PlatPmPPB::safe_mode_computation()
     {
         if (iv_attrs.attr_war_mode == fapi2::ENUM_ATTR_HW543384_WAR_MODE_TIE_NEST_TO_PAU)
         {
-            l_safe_mode_mv[VDD] = iv_operating_points[VPD_PT_SET_BIASED_SYSP][VPD_PV_CF0].vdd_mv;
-            l_safe_mode_mv[VCS] = iv_operating_points[VPD_PT_SET_BIASED_SYSP][VPD_PV_CF0].vcs_mv;
+            l_safe_mode_mv[VDD] = iv_operating_points[VPD_PT_SET_RAW][VPD_PV_CF0].vdd_mv;
+            l_safe_mode_mv[VCS] = iv_operating_points[VPD_PT_SET_RAW][VPD_PV_CF0].vcs_mv;
         }
         else
         {
