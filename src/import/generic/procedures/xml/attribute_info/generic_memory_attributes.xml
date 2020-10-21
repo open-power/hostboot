@@ -472,4 +472,18 @@
     <mssAccessorName>enable_fir_unmasking</mssAccessorName>
   </attribute>
 
+  <attribute>
+    <id>ATTR_MSS_IS_APOLLO</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+      Indicates if the target system is an Apollo system.
+      Will be set automatically in Cronus based on SYSTEM_TYPE
+    </description>
+    <valueType>uint8</valueType>
+    <initToZero></initToZero>
+    <platInit/>
+    <mrwHide/>
+    <mssAccessorName>is_apollo</mssAccessorName>
+  </attribute>
+
 </attributes>
