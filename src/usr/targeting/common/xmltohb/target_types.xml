@@ -3330,7 +3330,7 @@
     <id>unit-iohs-power10</id>
     <parent>unit</parent>
     <attribute>
-      <default>IO</default>
+      <default>FABRIC</default>
       <id>CDM_DOMAIN</id>
     </attribute>
     <attribute>
