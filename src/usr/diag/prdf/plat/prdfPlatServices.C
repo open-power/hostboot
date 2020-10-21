@@ -791,30 +791,33 @@ uint32_t startTdScrub<TYPE_OCMB_CHIP>(ExtensibleChip * i_chip,
 int32_t restartTraceArray(TargetHandle_t i_tgt)
 {
     int32_t o_rc = SUCCESS;
-    /* TODO RTC 256733 - need P10 version
     errlHndl_t err = nullptr;
     TYPE tgtType = getTargetType(i_tgt);
     proc_gettracearray_args taArgs;
     TargetHandle_t l_tgt = nullptr;
 
+    // We can use the PROC_TB_L20 trace array bus ID passed into the
+    // p10_proc_gettracearray procedure to restart the core trace arrays on
+    // all four cores of the EQ. The procedure will take in a core target.
+    // Which core you pass in shouldn't matter as it will still restart all
+    // the core traces within the EQ.
+    taArgs.trace_bus = PROC_TB_L20;
+
     if (TYPE_CORE == tgtType)
     {
-        taArgs.trace_bus = PROC_TB_CORE0;
         l_tgt = i_tgt;
     }
     else if (TYPE_EQ == tgtType)
     {
-        taArgs.trace_bus = PROC_TB_L20;
-        // HWP requires an EX tgt here, all the traces within EQ/EX start/stop
-        // so it doesn't matter which one, just use the first
-        TargetHandleList lst = getConnectedChildren(i_tgt, TYPE_EX);
+        // It doesn't matter which core we pass in, so just get the first.
+        TargetHandleList lst = getConnectedChildren( i_tgt, TYPE_CORE );
         if (lst.size() > 0)
         {
             l_tgt = lst[0];
         }
         else
         {
-            PRDF_ERR( "restartTraceArray: no functional EX for EQ 0x%08x",
+            PRDF_ERR( "restartTraceArray: no functional CORE for EQ 0x%08x",
                       getHuid(i_tgt) );
             return FAIL;
         }
@@ -846,7 +849,7 @@ int32_t restartTraceArray(TargetHandle_t i_tgt)
         PRDF_COMMIT_ERRL( err, ERRL_ACTION_REPORT );
         o_rc = FAIL;
     }
-    */
+
     return o_rc;
 }
 
