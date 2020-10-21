@@ -31,7 +31,8 @@
 #include <util/misc.H>
 #include <diag/prdf/prdfMain.H>
 #include <plat_hwp_invoker.H>     // for FAPI_INVOKE_HWP
-//#include <lib/fir/memdiags_fir.H> // for mss::unmask::after_background_scrub
+#include <lib/shared/exp_defaults.H> // needed by gen_mss_unmask.H
+#include <generic/memory/lib/utils/fir/gen_mss_unmask.H> // mss::unmask::after_background_scrub
 
 using namespace ERRORLOG;
 using namespace TARGETING;
@@ -118,9 +119,7 @@ void* call_mss_scrub(void* const io_pArgs)
             }
 
             // Start the command on this target.
-            /* @TODO RTC 243962: Implement startScrub for P10
             errl = PRDF::startScrub(maintTrgt);
-            */
 
             if (nullptr != errl)
             {
@@ -130,14 +129,9 @@ void* call_mss_scrub(void* const io_pArgs)
                 break;
             }
 
-            /* @TODO RTC 243962: after_background_scrub isn't defined for p10 in ekb
-
-            // Nimbus chips require us to unmask some additional FIR bits. Note
-            // that this is not needed on Cumulus based systems because this is
-            // already contained within the other Centaur HWPs.
-            if (TYPE_MCBIST == maintTrgtType)
+            if (TYPE_OCMB_CHIP == maintTrgtType)
             {
-                fapi2::Target<fapi2::TARGET_TYPE_MCBIST> ft (maintTrgt);
+                fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP> ft (maintTrgt);
 
                 FAPI_INVOKE_HWP(errl, mss::unmask::after_background_scrub, ft);
 
@@ -151,7 +145,6 @@ void* call_mss_scrub(void* const io_pArgs)
                     break;
                 }
             }
-            */
         }
         if (nullptr != errl)
         {

@@ -33,7 +33,7 @@ EXTRAINCDIR += ${PROCEDURES_PATH}/hwp/nest/
 EXTRAINCDIR += ${PROCEDURES_PATH}/hwp/lib/
 #EXTRAINCDIR += ${PROCEDURES_PATH}/hwp/memory
 #EXTRAINCDIR += ${PROCEDURES_PATH}/hwp/io/
-#EXTRAINCDIR += ${ROOTPATH}/src/import
+EXTRAINCDIR += ${ROOTPATH}/src/import/
 EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/fapi2/include/
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/fapi2/
 #EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/common/include/
@@ -45,6 +45,7 @@ EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/imageProcs/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/ffdc/
 #EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/xip/
 #EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/common/pmlib/include/registers/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/ocmb/explorer/procedures/hwp/memory/
 EXTRAINCDIR += ${ROOTPATH}/src/usr/isteps/
 
 OBJS += call_host_activate_boot_core.o
