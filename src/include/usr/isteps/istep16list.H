@@ -68,16 +68,6 @@ void* call_host_activate_boot_core(void *io_pArgs);
 void* call_host_activate_secondary_cores(void *io_pArgs);
 
 /**
- *  @brief   host_secure_rng
- *
- *  param[in,out]   -   pointer to any arguments, usually NULL
- *
- *  return  any errlogs to istep
- *
- */
-void* call_host_secure_rng(void *io_pArgs);
-
-/**
  *  @brief   mss_scrub
  *
  *  param[in,out]   -   pointer to any arguments, usually NULL
@@ -130,7 +120,8 @@ namespace INITSERVICE
         },
         {
             ISTEPNAME(16,03,"host_secure_rng"),
-            ISTEP_16::call_host_secure_rng,
+            // @TODO RTC 261059: Make this a proper no-op istep
+            [](void*) -> void* { return nullptr; },// ISTEP_16::call_host_secure_rng,
             { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
         },
         {

@@ -97,8 +97,22 @@ static void zero_hb_reserved_memory()
 namespace ISTEP_14
 {
 
+void* call_host_secure_rng(void*);
+
 void* call_proc_exit_cache_contained (void *io_pArgs)
 {
+    // @TODO RTC 261059: Move this to the appropriate new substep in istep 14
+    {
+        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                  "Calling host_secure_rng in istep 14");
+
+        void* const ret = call_host_secure_rng(nullptr);
+
+        if (ret)
+        {
+            return ret;
+        }
+    }
 
     IStepError  l_stepError;
 

@@ -64,6 +64,7 @@ OBJS += call_proc_setup_mmio_bars.o
 OBJS += call_proc_exit_cache_contained.o
 OBJS += call_proc_htm_setup.o
 OBJS += call_host_mpipl_service.o
+OBJS += call_host_secure_rng.o
 OBJS += memory_encryption.o
 
 # Include the makefiles to compile the HWPs needed by the sub steps
@@ -98,6 +99,7 @@ OBJS += p10_l3_flush.o
 OBJS += p10_l2_flush.o
 OBJS += p10_sbe_stop_hb.o
 OBJS += p10_pcie_scom.o
+OBJS += p10_rng_init_phase2.o # @TODO RTC 261059: Remove this when new istep in 14 is created
 
 #TODO-RTC:257623--Consolidate this into 3rd-party module to avoid duplication with istep10
 # needed by p10_exit_cache_contained

@@ -139,6 +139,17 @@ void*    call_proc_exit_cache_contained( void    *io_pArgs );
  *
  */
 void*    call_host_mpipl_service( void    *io_pArgs );
+
+/**
+ *  @brief   host_secure_rng
+ *
+ *  param[in,out]   -   pointer to any arguments, usually NULL
+ *
+ *  return  any errlogs to istep
+ *
+ */
+void* call_host_secure_rng(void *io_pArgs);
+
 };
 
 

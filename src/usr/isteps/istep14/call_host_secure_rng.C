@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/isteps/istep16/call_host_secure_rng.C $               */
+/* $Source: src/usr/isteps/istep14/call_host_secure_rng.C $               */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -66,7 +66,7 @@ using namespace ISTEP_ERROR;
 using namespace ERRORLOG;
 using namespace TARGETING;
 
-namespace ISTEP_16
+namespace ISTEP_14
 {
 
 //******************************************************************************
@@ -95,7 +95,7 @@ void* call_host_secure_rng(void* const io_pArgs)
         // Check for functional NX
         TARGETING::TargetHandleList l_nxTargetList;
         getChildChiplets(l_nxTargetList, l_cpu_target, TYPE_NX, true);
-        
+
         if (l_nxTargetList.empty())
         {
             TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
@@ -106,7 +106,7 @@ void* call_host_secure_rng(void* const io_pArgs)
         }
 
         FAPI_INVOKE_HWP(l_err, p10_rng_init_phase2, l_fapi2_proc_target);
-        
+
         if (l_err)
         {
             TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
@@ -143,4 +143,4 @@ void* call_host_secure_rng(void* const io_pArgs)
     return l_StepError.getErrorHandle();
 } // end call_host_secure_rng
 
-} // end namespace ISTEP_16
+} // end namespace ISTEP_14
