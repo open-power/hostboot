@@ -894,6 +894,8 @@ p10_exit_cache_contained_run_mi_initfile_xscom(
     fapi2::ATTR_SYS_DISABLE_MCU_TIMEOUTS_Type l_TGT1_ATTR_SYS_DISABLE_MCU_TIMEOUTS;
     fapi2::ATTR_CHIP_UNIT_POS_Type l_unit_num;
     fapi2::ATTR_MSS_INTERLEAVE_GRANULARITY_Type l_interleave_granule_size;
+    fapi2::ATTR_CHIP_EC_FEATURE_HW550549_Type l_hw550549;
+
 
     uint64_t l_scom_data = 0;
     uint64_t l_scom_mask = 0;
@@ -904,6 +906,9 @@ p10_exit_cache_contained_run_mi_initfile_xscom(
              "Error from FAPI_ATTR_GET (ATTR_CHIP_UNIT_POS)");
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_INTERLEAVE_GRANULARITY, FAPI_SYSTEM, l_interleave_granule_size),
              "Error from FAPI_ATTR_GET (ATTR_MSS_INTERLEAVE_GRANULARITY)");
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_HW550549, i_target, l_hw550549),
+             "Error from FAPI_ATTR_GET (ATTR_CHIP_EC_FEATURE_HW550549)");
+
 
     //MCPERF1
     l_scom_data = 0;
@@ -1024,7 +1029,11 @@ p10_exit_cache_contained_run_mi_initfile_xscom(
     l_scom_mask |= (uint64_t) 0x1 << (64 - (15 + 1)); //MCFIR_POP_RCMD_NOHIT
     l_scom_mask |= (uint64_t) 0x1 << (64 - (16 + 1)); //MCFIR_POP_RCMD_BADHIT
     l_scom_mask |= (uint64_t) 0x1 << (64 - (20 + 1)); //MCFIR_MULTIPLE_TID_ERROR
-    l_scom_mask |= (uint64_t) 0x1 << (64 - (23 + 1)); //MCFIR_SYNC_ERROR
+
+    if(!l_hw550549) //Unmask only if not affected by HW550549
+    {
+        l_scom_mask |= (uint64_t) 0x1 << (64 - (23 + 1)); //MCFIR_SYNC_ERROR
+    }
 
     FAPI_TRY(p10_gen_xscom_init(
                  i_target,
@@ -1044,14 +1053,23 @@ p10_exit_cache_contained_run_mi_initfile_xscom(
     l_scom_data |= (uint64_t) 0x1 << (64 - ( 8 + 1)); //MCFIR_COMMAND_LIST_TIMEOUT
     l_scom_data |= (uint64_t) 0x1 << (64 - (15 + 1)); //MCFIR_POP_RCMD_NOHIT
     l_scom_data |= (uint64_t) 0x1 << (64 - (16 + 1)); //MCFIR_POP_RCMD_BADHIT
-    l_scom_data |= (uint64_t) 0x1 << (64 - (23 + 1)); //MCFIR_SYNC_ERROR
+
+    if(!l_hw550549) //Set only if not affected by HW550549
+    {
+        l_scom_data |= (uint64_t) 0x1 << (64 - (23 + 1)); //MCFIR_SYNC_ERROR
+    }
+
     //mask
     l_scom_mask |= (uint64_t) 0x1 << (64 - ( 0 + 1)); //MCFIR_MC_INTERNAL_RECOVERABLE_ERROR
     l_scom_mask |= (uint64_t) 0x1 << (64 - ( 3 + 1)); //MCFIR_INBAND_BAR_HIT_WITH_INCORRECT_TTYPE
     l_scom_mask |= (uint64_t) 0x1 << (64 - ( 8 + 1)); //MCFIR_COMMAND_LIST_TIMEOUT
     l_scom_mask |= (uint64_t) 0x1 << (64 - (15 + 1)); //MCFIR_POP_RCMD_NOHIT
     l_scom_mask |= (uint64_t) 0x1 << (64 - (16 + 1)); //MCFIR_POP_RCMD_BADHIT
-    l_scom_mask |= (uint64_t) 0x1 << (64 - (23 + 1)); //MCFIR_SYNC_ERROR
+
+    if(!l_hw550549) //Set only if not affected by HW550549
+    {
+        l_scom_mask |= (uint64_t) 0x1 << (64 - (23 + 1)); //MCFIR_SYNC_ERROR
+    }
 
     FAPI_TRY(p10_gen_xscom_init(
                  i_target,

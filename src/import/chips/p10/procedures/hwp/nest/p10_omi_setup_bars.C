@@ -62,6 +62,12 @@ fapi2::ReturnCode p10_omi_setup_bars(
     fapi2::buffer<uint64_t> l_cfg_bar;
     uint64_t l_base_addr_mmio;
     uint8_t l_mcc_pos;
+    fapi2::ATTR_CHIP_EC_FEATURE_HW550549_Type l_hw550549;
+
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_HW550549,
+                           i_target,
+                           l_hw550549),
+             "Error from FAPI_ATTR_GET (ATTR_CHIP_EC_FEATURE_HW550549)");
 
     // determine base address of chip MMIO range
     FAPI_TRY(p10_fbc_utils_get_chip_base_address(i_target,
@@ -238,7 +244,11 @@ fapi2::ReturnCode p10_omi_setup_bars(
         l_mcfiraction.setBit<SCOMFIR_MCFIR_COMMAND_LIST_TIMEOUT>();
         l_mcfiraction.setBit<SCOMFIR_MCFIR_POP_RCMD_NOHIT>();
         l_mcfiraction.setBit<SCOMFIR_MCFIR_POP_RCMD_BADHIT>();
-        l_mcfiraction.setBit<SCOMFIR_MCFIR_SYNC_ERROR>();
+
+        if(!l_hw550549) //Unmask only if not affected by HW550549
+        {
+            l_mcfiraction.setBit<SCOMFIR_MCFIR_SYNC_ERROR>();
+        }
 
         // Setup FIR bits in MC Fault Isolation Mask Register buffer
         l_mcfirmask_and.flush<1>();
@@ -251,7 +261,11 @@ fapi2::ReturnCode p10_omi_setup_bars(
         l_mcfirmask_and.clearBit<SCOMFIR_MCFIR_POP_RCMD_NOHIT>();
         l_mcfirmask_and.clearBit<SCOMFIR_MCFIR_POP_RCMD_BADHIT>();
         l_mcfirmask_and.clearBit<SCOMFIR_MCFIR_MULTIPLE_TID_ERROR>();
-        l_mcfirmask_and.clearBit<SCOMFIR_MCFIR_SYNC_ERROR>();
+
+        if(!l_hw550549) //Set only if not affected by HW550549
+        {
+            l_mcfirmask_and.clearBit<SCOMFIR_MCFIR_SYNC_ERROR>();
+        }
 
         char l_targetStr[fapi2::MAX_ECMD_STRING_LEN];
         fapi2::toString(l_mi, l_targetStr, sizeof(l_targetStr));
