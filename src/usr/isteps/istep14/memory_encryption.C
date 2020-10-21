@@ -44,6 +44,7 @@
 
 // HWP
 #include <p10_ncu_enable_darn.H>
+#include <p10_init_mem_encryption.H>
 #include <fapi2/plat_hwp_invoker.H>
 
 using namespace TARGETING;
@@ -283,13 +284,15 @@ errlHndl_t setup_memory_crypto_keys()
     bool task_pinned = false;
     errlHndl_t errl = nullptr;
 
-    /// Set up the encryption and decryption keys on every MCC target.
+    /// Enable encryption and set up the encryption and decryption keys on every
+    /// eligible MCC target.
 
     do
     {
 
     Target* const node = UTIL::getCurrentNodeTarget();
     TargetHandleList encrypt_mccs;
+    bool enable_encryption { };
 
     {
         TargetHandleList procs;
@@ -299,9 +302,6 @@ errlHndl_t setup_memory_crypto_keys()
                                        TYPE_PROC,
                                        UTIL_FILTER_FUNCTIONAL);
 
-        // Collect a list of MCCs from each PROC on this node that wants encryption.
-
-        bool enable_encryption { };
         errl = should_enable_memory_encryption(procs, enable_encryption);
 
         if (errl)
@@ -311,6 +311,20 @@ errlHndl_t setup_memory_crypto_keys()
 
         if (enable_encryption)
         {
+            // Set up the encryption SCOMs
+            Target* failproc = nullptr;
+            errl = hwp_for_each(p10_init_mem_encryption, procs, &failproc);
+
+            if (errl)
+            {
+                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                          "Memory encryption: p10_init_mem_encryption failed on processor 0x%08x",
+                          get_huid(failproc));
+                break;
+            }
+
+            // Collect a list of MCCs from each PROC on this node if encryption
+            // is enabled.
             getChildAffinityTargetsByState(encrypt_mccs,
                                            node,
                                            CLASS_NA,
@@ -319,11 +333,12 @@ errlHndl_t setup_memory_crypto_keys()
         }
     }
 
-    if (encrypt_mccs.empty())
+    if (!enable_encryption)
     {
         TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
                   "Memory encryption: Encryption disabled on node 0x%08x, not initializing keys",
                   get_huid(node));
+        break;
     }
     else
     {

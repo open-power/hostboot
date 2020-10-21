@@ -102,6 +102,7 @@ OBJS += p10_sbe_stop_hb.o
 OBJS += p10_pcie_scom.o
 OBJS += p10_rng_init_phase2.o # @TODO RTC 261059: Remove this when new istep in 14 is created
 OBJS += p10_ncu_enable_darn.o
+OBJS += p10_init_mem_encryption.o
 
 #TODO-RTC:257623--Consolidate this into 3rd-party module to avoid duplication with istep10
 # needed by p10_exit_cache_contained

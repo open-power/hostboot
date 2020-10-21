@@ -136,5 +136,37 @@ void hwpResetGlobals(void);
         fapi2::hwpResetGlobals(); \
    }
 
+/* @brief Invoke a hardware procedure on each element of a container. If the
+ *        hardware procedure fails, stop iterating and return the error.
+ *
+ * @param[in] i_hwp        Hardware procedure to invoke (can be a lambda)
+ * @param[in] i_container  Container of elements
+ * @param[out] o_fail_elem Optional pointer to element of the same type as
+ *                         the container's elements. If the HWP fails and
+ *                         o_fail_elem is not nullptr, the element that the
+ *                         HWP failed on is assigned to it.
+ */
+template<typename F, typename Container, typename Element>
+errlHndl_t hwp_for_each(F&& i_hwp, const Container& i_container, Element* o_fail_elem)
+{
+    errlHndl_t errl = nullptr;
+
+    for (const auto& value : i_container)
+    {
+        FAPI_INVOKE_HWP(errl, i_hwp, { value });
+
+        if (errl)
+        {
+            if (o_fail_elem)
+            {
+                *o_fail_elem = value;
+            }
+
+            break;
+        }
+    }
+
+    return errl;
+}
 
 #endif // PLATHWPINVOKER_H_
