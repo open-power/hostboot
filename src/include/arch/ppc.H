@@ -416,4 +416,28 @@ inline void writeScratchReg(uint64_t _scratch_addr, uint64_t _data)
 
 }
 
+// The DARN instruction produces this value upon failure (even in 32-bit
+// mode).
+static const uint64_t DARN_FAILURE = 0xFFFFFFFFFFFFFFFFull;
+
+/* @note The NCU for the core that executes this instruction must be set up
+ *       beforehand with p10_ncu_enable_darn, otherwise the core will checkstop.
+ */
+ALWAYS_INLINE
+inline uint64_t darn()
+{
+    uint64_t value = 0;
+
+    // Use the DARN instruction to generate a 64-bit random number. The
+    // value 1 as the second operand requests a 64-bit "conditioned" random
+    // number (other values are 0 for 32-bit conditioned number, and 2 for
+    // 64-bit unconditioned number). The "volatile" qualifier is imperative
+    // on this asm block, as without it GCC will assume that DARN produces
+    // the same output on repeated executions and possibly optimize it
+    // incorrectly.
+    asm volatile ("darn %0, 1" : "=r" (value));
+
+    return value;
+}
+
 #endif

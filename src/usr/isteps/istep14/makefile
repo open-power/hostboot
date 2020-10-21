@@ -48,6 +48,7 @@ EXTRAINCDIR += ${P10_PROCEDURE_PATH}/memory/
 EXTRAINCDIR += ${P10_PROCEDURE_PATH}/nest
 EXTRAINCDIR += ${P10_PROCEDURE_PATH}/pm/
 EXTRAINCDIR += ${P10_PROCEDURE_PATH}/core/
+EXTRAINCDIR += ${P10_PROCEDURE_PATH}/corecache/
 EXTRAINCDIR += ${EXPLORER_HWP_PATH}/
 EXTRAINCDIR += ${EXPLORER_HWP_PATH}/lib/
 EXTRAINCDIR += ${EXPLORER_HWP_PATH}/lib/inband/
@@ -100,6 +101,7 @@ OBJS += p10_l2_flush.o
 OBJS += p10_sbe_stop_hb.o
 OBJS += p10_pcie_scom.o
 OBJS += p10_rng_init_phase2.o # @TODO RTC 261059: Remove this when new istep in 14 is created
+OBJS += p10_ncu_enable_darn.o
 
 #TODO-RTC:257623--Consolidate this into 3rd-party module to avoid duplication with istep10
 # needed by p10_exit_cache_contained
@@ -113,6 +115,7 @@ VPATH += ${P10_PROCEDURE_PATH}/memory/
 VPATH += ${P10_PROCEDURE_PATH}/nest/
 VPATH += ${P10_PROCEDURE_PATH}/pm/
 VPATH += ${P10_PROCEDURE_PATH}/core/
+VPATH += ${P10_PROCEDURE_PATH}/corecache/
 VPATH += ${EXPLORER_HWP_PATH}/
 VPATH += ${P10_PROCEDURE_PATH}/initfiles/
 

@@ -33,12 +33,18 @@
 #include <targeting/common/mfgFlagAccessors.H>
 #include <targeting/common/utilFilter.H>
 #include <targeting/targplatutil.H>
+#include <targeting/namedtarget.H>
 
 // Misc
 #include <devicefw/userif.H>
 #include <isteps/istep_reasoncodes.H>
 #include <initservice/isteps_trace.H>
 #include <secureboot/service.H>
+#include <arch/ppc.H>
+
+// HWP
+#include <p10_ncu_enable_darn.H>
+#include <fapi2/plat_hwp_invoker.H>
 
 using namespace TARGETING;
 using namespace ERRORLOG;
@@ -54,42 +60,23 @@ using namespace ERRORLOG;
 
 static errlHndl_t hardware_random64(uint64_t& o_random)
 {
-    // The DARN instruction produces this value upon failure (even in 32-bit
-    // mode).
-    static const uint64_t DARN_FAILURE = 0xFFFFFFFFFFFFFFFFull;
-
     // The spec says that we should retry several times when DARN fails. This
     // number defines how many times we loop before failing. 10 is the spec's
     // suggested value.
     static const int NUM_RETRIES = 10;
 
-    o_random = 0;
-
     int fails = 0;
 
     while (fails < NUM_RETRIES)
     {
-        uint64_t random_number = DARN_FAILURE;
+        o_random = darn();
 
-        // Use the DARN instruction to generate a 64-bit random number. The
-        // value 1 as the second operand requests a 64-bit "conditioned" random
-        // number (other values are 0 for 32-bit conditioned number, and 2 for
-        // 64-bit unconditioned number). The "volatile" qualifier is imperative
-        // on this asm block, as without it GCC will assume that DARN produces
-        // the same output on repeated executions and possibly optimize it
-        // incorrectly.
-
-        // @TODO RTC 208820: Use the DARN instruction when HWP support is enabled
-        //asm volatile ("darn %0, 1" : "=r" (random_number));
-        random_number = 0;
-
-        if (random_number == DARN_FAILURE)
+        if (o_random == DARN_FAILURE)
         {
             ++fails;
         }
         else
         {
-            o_random = random_number;
             break;
         }
     }
@@ -206,6 +193,51 @@ errlHndl_t lock_memory_crypto_settings()
     return errl;
 }
 
+/* @brief Initialize the NCU on the master core so that the DARN instruction is
+ *        usable from that core.
+ *
+ * @param[in] i_node  The current node
+ * @return errlHndl_t Error if any, otherwise nullptr
+ */
+static errlHndl_t initialize_master_core_ncu(Target* const i_node)
+{
+    errlHndl_t errl = nullptr;
+
+    const Target* const mastercore = getMasterCore();
+    assert(mastercore, "Cannot get master core");
+    const Target* nx_proc = getParentChip(mastercore);
+    assert(nx_proc, "Cannot get parent chip of master core");
+
+    TargetHandleList nxs;
+    getChildChiplets(nxs, nx_proc, TYPE_NX, true);
+
+    // We prefer to use the NX from the same processor as the master core, but
+    // if that NX is not functional, then we just grab any functional NX and get
+    // its parent processor.
+    // The minimum hardware check in host_gard will ensure that we have at least
+    // one functional NX.
+    if (nxs.empty())
+    {
+        getChildChiplets(nxs, i_node, TYPE_NX, true);
+        assert(!nxs.empty(), "Cannot find any functional NX chiplets");
+        nx_proc = getParentChip(nxs[0]);
+        assert(nx_proc, "NX has no parent chip");
+    }
+
+    FAPI_INVOKE_HWP(errl, p10_ncu_enable_darn, { mastercore }, { nx_proc });
+
+    if (errl)
+    {
+        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                  ERR_MRK"Memory encryption: initialize_master_core_ncu failed "
+                  "for core 0x%08x and processor 0x%08x",
+                  get_huid(mastercore),
+                  get_huid(nx_proc));
+    }
+
+    return errl;
+}
+
 errlHndl_t setup_memory_crypto_keys()
 {
     /// Key setup SCOM addresses
@@ -248,6 +280,7 @@ errlHndl_t setup_memory_crypto_keys()
         { MCP_CHANX_CRYPTO_ENCRYPT_CRYPTONONCEB, MCP_CHANX_CRYPTO_DECRYPT_CRYPTONONCEB, NONCE_B_MASK }
     };
 
+    bool task_pinned = false;
     errlHndl_t errl = nullptr;
 
     /// Set up the encryption and decryption keys on every MCC target.
@@ -286,9 +319,6 @@ errlHndl_t setup_memory_crypto_keys()
         }
     }
 
-    // Iterate each MCC in this node and generate a random key for each key SCOM
-    // register.
-
     if (encrypt_mccs.empty())
     {
         TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
@@ -302,6 +332,22 @@ errlHndl_t setup_memory_crypto_keys()
                   encrypt_mccs.size(),
                   get_huid(node));
     }
+
+    // Set up the master core for DARN and migrate this task there so that the
+    // hardware_random64 calls below work.
+    errl = initialize_master_core_ncu(node);
+
+    if (errl)
+    {
+        break;
+    }
+
+    task_pinned = true;
+    task_affinity_pin();
+    task_affinity_migrate_to_master();
+
+    // Iterate each MCC in this node and generate a random key for each key SCOM
+    // register.
 
     for (const auto mcc : encrypt_mccs)
     {
@@ -344,6 +390,15 @@ errlHndl_t setup_memory_crypto_keys()
     }
 
     } while (false);
+
+    if (task_pinned)
+    { // Affinity pinning and unpinning have to be balanced.
+        task_affinity_unpin();
+    }
+
+    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+              "Memory encryption: setup_memory_crypto_keys %s",
+              errl ? "failed" : "succeeded");
 
     return errl;
 }
