@@ -284,6 +284,9 @@ fapi2::ReturnCode pre_enable_steps(const fapi2::Target<fapi2::TARGET_TYPE_PMIC>&
     // TPS VIN Latch workaround
     FAPI_TRY(setup_tps_vin_latch(i_pmic_target));
 
+    // Increase soft start times to 4ms to avoid overcurrent warnings
+    FAPI_TRY(mss::pmic::set_soft_start_time(i_pmic_target));
+
     return fapi2::FAPI2_RC_SUCCESS;
 
 fapi_try_exit:
@@ -1610,9 +1613,6 @@ fapi2::ReturnCode redundancy_vr_enable_kickoff(
                                          [&i_target_info, &l_enable_fields, i_mode]
                                          (const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& i_pmic) -> fapi2::ReturnCode
         {
-            // Set SWD soft-start time to 4ms for VPP pmics
-            FAPI_TRY_LAMBDA(mss::pmic::set_soft_start_time(i_pmic));
-
             // Set soft-start time to maximum to avoid ramp-down time voltage spike
             FAPI_TRY_LAMBDA(mss::pmic::set_soft_stop_time(i_pmic));
 
