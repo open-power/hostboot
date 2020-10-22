@@ -2945,6 +2945,11 @@
   </targetType>
 
   <targetType>
+    <id>unit-abus-power10</id>
+    <parent>unit-obus-smpgroup</parent>
+  </targetType>
+
+  <targetType>
     <id>unit-capp-axone</id>
     <parent>unit-capp-power9</parent>
     <attribute>

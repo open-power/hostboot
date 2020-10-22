@@ -56,6 +56,7 @@
      * Each P10 has 2 NMMU logic blocks
      * Each P10 has 4 PAUC chiplets
      *     Each PAUC has 2 IOHS units (a total of 8 per chip)
+     *         Each IOHS has 2 SMPGROUPs (groupA and groupB)
      *     PAUC 0 and 1 have 1 child PAU unit each; PAUC 2 and 3 have 2 each (a total of 6 per chip)
      *     Each PAUC has a logical relationship with 2 OMIC units (a total of 8 per chip)
      * Each chiplet existing in an P10 has 1 equivalent PERV unit

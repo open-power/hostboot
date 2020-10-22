@@ -110,6 +110,8 @@ my %MAX_INST_PER_PARENT =
 
     PAUC      => 4, # Number of PAUCs per PROC
     IOHS      => 2, # Number of IOHSs per PAUC
+    ABUS      => 1, # Not an actual target, but needed for SMPGROUP
+    SMPGROUP  => 2, # Number of SMPGROUPs per applicable IOHS
     PAU       => 2, # Number of PAUs per PAUC
 
     NMMU      => 2, # Number of NMMUs per PROC
@@ -170,6 +172,10 @@ my %MAX_INST_PER_PROC =
 
     PAUC       => getMaxInstPerParent("PAUC"),
     IOHS       => getMaxInstPerParent("PAUC") * getMaxInstPerParent("IOHS"),
+    ABUS       => getMaxInstPerParent("PAUC") * getMaxInstPerParent("IOHS") *
+                  getMaxInstPerParent("ABUS"),
+    SMPGROUP   => getMaxInstPerParent("PAUC") * getMaxInstPerParent("IOHS") *
+                  getMaxInstPerParent("ABUS") * getMaxInstPerParent("SMPGROUP"),
     PAU        => getMaxInstPerParent("PAUC") * getMaxInstPerParent("PAU"),
                   # For PAU, only 6 used, PAU1 and PAU2 not used
 
@@ -189,7 +195,6 @@ my %MAX_INST_PER_PROC =
     PPE        => 51, # Only 21, but they are sparsely populated
     SBE        => 1,
     TPM        => 1,
-    SMPGROUP   => 8,
     PCICLKENDPT => getMaxInstPerParent("PCICLKENDPT"),
     LPCREFCLKENDPT => getMaxInstPerParent("LPCREFCLKENDPT"),
     OMIC_CLK => getMaxInstPerParent("OMIC_CLK"),
@@ -521,8 +526,8 @@ sub processTargets
             elsif ($type eq "PROC")
             {
                 # The P10 children that get processed are:
-                #     CORE, EQ, FC, IOHS, MC, MCC, MI, NMMU, NX, OCC, OMI,
-                #     OMIC, OSCREFCLK, PAU, PAUC, PEC, PERV, SEEPROM
+                #     CORE, EQ, FC, IOHS, ABUS, MC, MCC, MI, NMMU, NX, OCC,
+                #     OMI, OMIC, OSCREFCLK, PAU, PAUC, PEC, PERV, SEEPROM
                 processProcessorAndChildren($targetObj, $target);
             }
             elsif ( ($type eq "DIMM")   &&
@@ -1115,8 +1120,8 @@ sub processProcessorAndChildren
 
     # Iterate over the children of the PROC and set some attributes for them
     # NOTE: Must send in the target PROC itself, not it's children.
-    # Rainier children: CORE, EQ, FC, IOHS, MC, MCC, MI, NMMU, NX, OCC,
-    #         OMI, OMIC, OSCREFCLK, PAU, PAUC, PEC, PERV, SEEPROM
+    # Rainier children: CORE, EQ, FC, IOHS, ABUS, MC, MCC, MI, NMMU, NX,
+    #         OCC, OMI, OMIC, OSCREFCLK, PAU, PAUC, PEC, PERV, SEEPROM
     # Children may differ for different systems.
     iterateOverChiplets($targetObj, $target, $sysParentPos,
                         $nodeParentPos, $procPosPerNode);
@@ -2019,14 +2024,13 @@ sub iterateOverChiplets
 
                 # System XML has some sensor target as hidden children
                 # of targets. We don't care for sensors in this function nor
-                # for the XBUS and ABUS.
+                # for the XBUS.
                 # These can be avoided with this conditional.
                 if ($unit_type ne "PCI" && $unit_type ne "NA" &&
                     $unit_type ne "FSI" && $unit_type ne "PSI" &&
                     $unit_type ne "SYSREFCLKENDPT" &&
                     $unit_type ne "PCICLKENDPT"    &&
                     $unit_type ne "LPCREFCLKENDPT" &&
-                    $unit_type ne "ABUS"           &&
                     $unit_type ne "XBUS" )
                 {
                     #set common attrs for child
@@ -2082,7 +2086,16 @@ sub setCommonAttrForChiplet
     my $nodePos   = shift;
     my $procPos   = shift;
 
+    my $instanceName = $targetObj->getInstanceName($target);
     my $targetType  = $targetObj->getType($target);
+    # Change SMPGROUP type from ABUS to SMPGROUP
+    # Need this for naming purposes
+    # If instance name is groupA or groupB
+    if (index($instanceName, "group") != -1)
+    {
+        $targetType = "SMPGROUP";
+        $targetObj->setAttribute($target, "TYPE", $targetType);
+    }
 
     # Make sure the target's parent has been processed.
     if ($targetType eq "PHB")
@@ -2097,7 +2110,21 @@ sub setCommonAttrForChiplet
 
     # Targets have the CHIP_UNIT (target position) attribute set, for the first
     # PROC, which allows for some of the other numerical data to calculated.
+    # TODO RTC: 245730 get MRW changed for SMPGROUP CHIP_UNIT (currently it's just 0)
     my $targetPos = $targetObj->getAttribute($target, "CHIP_UNIT");
+    if ($targetType eq "SMPGROUP")
+    {
+        # Get CHIP_UNIT of IOHS parent
+        my $iohsParent = $targetObj->findParentByType($target, "IOHS");
+        my $iohsChipUnit = $targetObj->getAttribute($iohsParent, "CHIP_UNIT");
+        my $smpUnit = 1;
+        if (index($instanceName, "groupA") != -1)
+        {
+            $smpUnit = 0; # found groupA in instanceName
+        }
+        $targetPos = 2 * $iohsChipUnit + $smpUnit;
+        $targetObj->setAttribute($target, "CHIP_UNIT", $targetPos);
+    }
 
     # Calculate a per parent numerical value.  The per parent numerical value
     # is used to populate the AFFINITY_PATH, PHYS_PATH and REL_PATH.
@@ -2142,6 +2169,12 @@ sub setCommonAttrForChiplet
     $targetObj->setAttribute($target, "FAPI_POS",      $ordinalId);
     $targetObj->setAttribute($target, "FAPI_NAME",     $fapiName);
     $targetObj->setAttribute($target, "REL_POS",       $perParentNumValue);
+    # Remove abus from smpgroup affinity and physical path
+    if ($targetType eq "SMPGROUP")
+    {
+        $targetPhysical =~ s/abus-\d+\///;
+        $targetAffinity =~ s/abus-\d+\///;
+    }
     $targetObj->setAttribute($target, "AFFINITY_PATH", $targetAffinity);
     $targetObj->setAttribute($target, "PHYS_PATH",     $targetPhysical);
 
@@ -2172,9 +2205,13 @@ sub setCommonAttrForChiplet
     }
 
     # Save this target for retrieval later when printing the xml (sub printXML)
-    push(@{$targetObj->{targeting}
+    # TODO RTC: 245730 Remove this check when MRW fixes typing of SMPGROUP
+    if ($targetType ne "ABUS")
+    {
+        push(@{$targetObj->{targeting}
             ->{SYS}[$sysPos]{NODES}[$nodePos]{PROCS}[$procPos]{$targetType}},
             { 'KEY' => $target });
+    }
 
     # Mark this target as processed
     markTargetAsProcessed($targetObj, $target);
