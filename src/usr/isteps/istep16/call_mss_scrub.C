@@ -49,12 +49,6 @@ void* call_mss_scrub(void* const io_pArgs)
 
     IStepError l_stepError;
 
-    /* @TODO RTC 245529: Implement IStep 16.4 */
-    {
-        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, ISTEP_FUNC "skipping");
-        return l_stepError.getErrorHandle();
-    }
-
     TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, ISTEP_FUNC "entry");
 
     errlHndl_t errl = nullptr;
