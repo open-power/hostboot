@@ -2045,39 +2045,22 @@ fapi_try_exit:
 fapi2::ReturnCode PlatPmPPB::get_mvpd_poundAW()
 {
     FAPI_INF(">>>>>>>>> get_mvpd_poundAW");
-    uint8_t* l_fullVpdData = NULL;
+    uint8_t* l_fullVpdData = nullptr;
     uint32_t l_vpdSize = 0;
 
     do
     {
-        //First read is to get size of vpd record, note the o_buffer is NULL
+        // First read is to get size of VPD record, note the o_buffer is nullptr
         FAPI_TRY( getMvpdField(fapi2::MVPD_RECORD_CP00,
                     fapi2::MVPD_KEYWORD_AW,
                     iv_procChip,
-                    NULL,
+                    nullptr,
                     l_vpdSize) );
 
-
-        //save off the actual vpd size
-        l_vpdSize = l_vpdSize;
-        //Allocate memory for vpd data
+        // Allocate memory for VPD data
         l_fullVpdData = reinterpret_cast<uint8_t*>(malloc(l_vpdSize));
 
-
-        //Second read is to get data of vpd record
-        FAPI_TRY( getMvpdField(fapi2::MVPD_RECORD_CP00,
-                    fapi2::MVPD_KEYWORD_AW,
-                    iv_procChip,
-                    l_fullVpdData,
-                    l_vpdSize) );
-
-        //save off the actual vpd size
-        l_vpdSize = l_vpdSize;
-        //Allocate memory for vpd data
-        l_fullVpdData = reinterpret_cast<uint8_t*>(malloc(l_vpdSize));
-
-
-        //Second read is to get data of vpd record
+        // Second read is to get data of VPD record
         FAPI_TRY( getMvpdField(fapi2::MVPD_RECORD_CP00,
                     fapi2::MVPD_KEYWORD_AW,
                     iv_procChip,
@@ -2086,12 +2069,15 @@ fapi2::ReturnCode PlatPmPPB::get_mvpd_poundAW()
 
         memcpy(&iv_array_vdn_mv,l_fullVpdData,sizeof(iv_array_vdn_mv));
         memcpy(&iv_array_vdd_mv,(l_fullVpdData + 2),sizeof(iv_array_vdd_mv));
-
     }
     while(0);
 
 
 fapi_try_exit:
+
+    free(l_fullVpdData);
+    l_fullVpdData = nullptr;
+
     FAPI_INF("<<<<<<<<< get_mvpd_poundAW");
 
     return fapi2::current_err;

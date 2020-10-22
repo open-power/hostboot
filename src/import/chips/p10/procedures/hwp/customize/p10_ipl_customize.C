@@ -357,6 +357,7 @@ fapi2::ReturnCode writePG(
     const uint32_t DEFAULT_PG_VAL = 0xffffffff;
     const uint32_t STANDBY_PG_VAL = 0xffe03fff;
     uint8_t l_pg_idx = 0;
+    uint8_t* fullPGData = nullptr;
 
     FAPI_DBG ("writePG Entering...");
 
@@ -408,7 +409,6 @@ fapi2::ReturnCode writePG(
     FAPI_DBG("Updating ATTR_PG_MVPD...")
     {
         uint32_t       sizeMvpdPGField = 0;
-        uint8_t*       fullPGData = nullptr;
         const uint8_t  MVPD_PG_KWD_VER1 = 0x01;
         const uint8_t  MVPD_PG_KWD_VER1_SIZE = 193;
 
@@ -466,6 +466,10 @@ fapi2::ReturnCode writePG(
 
 
 fapi_try_exit:
+
+    delete[] fullPGData;
+    fullPGData = nullptr;
+
     FAPI_DBG ("writePG Exiting...");
     return fapi2::current_err;
 }
@@ -2132,6 +2136,7 @@ ReturnCode p10_ipl_customize (
     uint8_t         chipName = 0;
     uint32_t        sizeMvpdCIField = 0;
     uint8_t*        fullCIData = nullptr;
+    uint8_t*        fullMKData = nullptr;
 
     RingProperties_t* ringProps = nullptr; // Ring properties list
     RingId_t        ringId = UNDEFINED_RING_ID;
@@ -2141,14 +2146,14 @@ ReturnCode p10_ipl_customize (
 #endif
     std::map< Rs4Selector_t,  Rs4Selector_t> idxFeatureMap;
     std::map<RingId_t, uint64_t> ringIdFeatureVecMap;
-    uint8_t*        ringIdFeatList = NULL;
+    uint8_t*        ringIdFeatList = nullptr;
     uint16_t        ringIdFeatListSize = 0;
     uint16_t        listPos = 0;
     Rs4Selector_t   numberOfFeatures = 0;
     void*           baseRingSection = NULL;
     void*           dynamicRingSection = NULL;
     TorHeader_t*    torHeaderBase;
-    uint8_t*        partialKwdData = NULL;
+    uint8_t*        partialKwdData = nullptr;
     uint32_t        sizeofPartialKwdData  = 0;
     uint8_t         mvpdRtvFromCode = 0xff;
     uint8_t         mvpdRtvFromMvpd = 0xff;
@@ -2386,13 +2391,12 @@ ReturnCode p10_ipl_customize (
                 "and MVPD (i.e. fullCIData: 0x%0x)is different",
                 chipName, *fullCIData );
 
-    delete fullDDData;
-    fullDDData = NULL;
-    delete decimalDDData;
-    decimalDDData = NULL;
-    delete fullCIData;
-    fullCIData = NULL;
-
+    delete[] fullDDData;
+    fullDDData = nullptr;
+    delete[] decimalDDData;
+    decimalDDData = nullptr;
+    delete[] fullCIData;
+    fullCIData = nullptr;
 
     ///////////////////////////////////////////////////////////////////////////
     // CUSTOMIZE item:     Write mailbox attributes
@@ -2501,7 +2505,6 @@ ReturnCode p10_ipl_customize (
     {
 
         uint32_t       sizeMvpdMKField = 0;
-        uint8_t*       fullMKData = nullptr;
         const uint8_t  MVPD_MK_KWD_VER1 = 0x01;
 #ifndef WIN32
         fapi2::ATTR_SKEWADJ_CORE_PDLY_OVERRIDE_Type  l_attr_skewadj_core_pdly_override = 0;
@@ -2587,8 +2590,8 @@ ReturnCode p10_ipl_customize (
         MBOX_ATTR_WRITE(ATTR_DCADJ_DCC_OVERRIDE,          l_attr_dcadj_dcc_override,          io_image);
         MBOX_ATTR_WRITE(ATTR_DCADJ_TARGET_OVERRIDE,       l_attr_dcadj_target_override,       io_image);
 #endif
-        delete fullMKData;
-        fullMKData = NULL;
+        delete[] fullMKData;
+        fullMKData = nullptr;
     }
 
 //#endif     comment end Joe #ifndef WIN32
@@ -3356,8 +3359,8 @@ ReturnCode p10_ipl_customize (
                      " for MVPD ringType 0x%0x",
                      mvpdRtvFromMvpd, mvpdRtvFromCode, mvpdKeyword );
 
-        delete partialKwdData;
-        partialKwdData = NULL;
+        delete[] partialKwdData;
+        partialKwdData = nullptr;
     }
 
     //
@@ -3623,7 +3626,7 @@ ReturnCode p10_ipl_customize (
                      ringIdFeatListSize, RINGID_FEAT_LIST_MAX_SIZE );
     }
 
-    ringIdFeatList = new uint8_t[ringIdFeatListSize];
+    ringIdFeatList = new uint8_t[ringIdFeatListSize]();
     listPos = 0;
 
     for( std::map<RingId_t, uint64_t>::iterator it = ringIdFeatureVecMap.begin();
@@ -3670,8 +3673,8 @@ ReturnCode p10_ipl_customize (
                      (uint32_t)l_rc );
     }
 
-    delete ringIdFeatList;
-    ringIdFeatList = NULL;      // added mcsgro 07152020
+    delete[] ringIdFeatList;
+    ringIdFeatList = nullptr;      // added mcsgro 07152020
 
 
 
@@ -3700,6 +3703,22 @@ ReturnCode p10_ipl_customize (
     FAPI_DBG("Final customized .rings section size: %d", io_ringSectionBufSize);
 
 fapi_try_exit:
+
+    // Error paths don't necessarily delete these memory allocations, so make
+    // sure these are always cleaned up
+    delete[] fullCIData;
+    fullCIData = nullptr;
+    delete[] decimalDDData;
+    decimalDDData = nullptr;
+    delete[] fullCIData;
+    fullCIData = nullptr;
+    delete[] ringIdFeatList;
+    ringIdFeatList = nullptr;
+    delete[] partialKwdData;
+    partialKwdData = nullptr;
+    delete[] fullMKData;
+    fullMKData = nullptr;
+
     FAPI_IMP("Exiting p10_ipl_customize w/rc=0x%08x", (uint32_t)fapi2::current_err);
     return fapi2::current_err;
 
