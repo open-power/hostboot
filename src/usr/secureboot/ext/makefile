@@ -35,6 +35,7 @@ OBJS += $(if $(CONFIG_SECUREBOOT), p10_update_security_ctrl.o)
 
 VPATH += $(PERV_HWP_PATH)
 
+EXTRAINCDIR += $(ROOTPATH)/src/usr/
 EXTRAINCDIR += $(ROOTPATH)/src/include/usr/
 EXTRAINCDIR += $(ROOTPATH)/src/include/usr/fapi2/
 EXTRAINCDIR += $(ROOTPATH)/src/import/chips/p10/procedures/hwp/ffdc/
@@ -43,6 +44,7 @@ EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/scomt/
 EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/fapi2/include/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/common/include/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/imageProcs/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/utils/imageProcs/
 
 EXTRAINCDIR += $(PERV_HWP_PATH)
 

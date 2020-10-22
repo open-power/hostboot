@@ -50,6 +50,7 @@
 // For Secureboot, Trustedboot support
 #include <secureboot/service.H>
 #include <secureboot/phys_presence_if.H>
+#include <secureboot/service_ext.H>
 
 // Secureboot lockdown HWP
 #include <plat_hwp_invoker.H>
@@ -70,13 +71,41 @@ void* call_host_secureboot_lockdown (void *io_pArgs)
 
     do {
 #ifdef CONFIG_SECUREBOOT
+
     if(SECUREBOOT::enabled())
     {
         TARGETING::TargetHandleList l_procList;
+        TARGETING::TargetHandleList l_tpmList;
         getAllChips(l_procList,TARGETING::TYPE_PROC);
+        getAllChips(l_tpmList,TARGETING::TYPE_TPM,false);
 
         for(const auto& l_proc : l_procList)
         {
+
+            bool l_notInMrw = true;
+            // check if processor has a TPM according to the mrw
+            // for each TPM in the list compare SPI master path with
+            // the path of the current processor
+            for (auto itpm : l_tpmList)
+            {
+                auto l_physPath = l_proc->getAttr<TARGETING::ATTR_PHYS_PATH>();
+
+                auto l_tpmInfo = itpm->getAttr<TARGETING::ATTR_SPI_TPM_INFO>();
+
+                if (l_tpmInfo.spiMasterPath == l_physPath)
+                {
+                    l_notInMrw = false;
+                    break;
+                }
+            }
+            if (l_notInMrw)
+            {
+                uint8_t l_protectTpm = 1;
+                l_proc->setAttr<
+                    TARGETING::ATTR_SECUREBOOT_PROTECT_DECONFIGURED_TPM
+                                                                    >(l_protectTpm);
+            }
+
             const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>l_fapiProc(l_proc);
             const bool DO_NOT_FORCE_SECURITY = false; // No need to force security
             const bool DO_NOT_LOCK_ABUS_MAILBOXES = false; // Do not lock abus mailboxes
@@ -101,6 +130,9 @@ void* call_host_secureboot_lockdown (void *io_pArgs)
     {
         break;
     }
+
+    SECUREBOOT::validateSecuritySettings();
+
 #endif
 
 #ifdef CONFIG_PHYS_PRES_PWR_BUTTON
