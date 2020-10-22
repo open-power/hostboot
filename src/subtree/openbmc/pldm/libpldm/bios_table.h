@@ -714,6 +714,13 @@ int pldm_bios_table_attr_value_copy_and_update(
     const void *src_table, size_t src_length, void *dest_table,
     size_t *dest_length, const void *entry, size_t entry_length);
 
+/** @brief Verify the crc value of the complete table
+ *  @param[in] table - Pointer to a buffer of a bios table
+ *  @param[in] size - Size of the buffer of a bios table
+ *  @return true: crc value is correct
+ */
+bool pldm_bios_table_checksum(const uint8_t *table, size_t size);
+
 #ifdef __cplusplus
 }
 #endif

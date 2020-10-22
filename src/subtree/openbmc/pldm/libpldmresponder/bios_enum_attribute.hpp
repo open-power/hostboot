@@ -51,6 +51,15 @@ class BIOSEnumAttribute : public BIOSAttribute
     void constructEntry(const BIOSStringTable& stringTable, Table& attrTable,
                         Table& attrValueTable) override;
 
+    /** @brief Generate attribute entry by the spec DSP0247_1.0.0 Table 14
+     *  @param[in] attributevalue - attribute value(Enumeration, String and
+     *             Integer)
+     *  @param[in,out] attrValueEntry - attribute entry
+     */
+    void generateAttributeEntry(
+        const std::variant<int64_t, std::string>& attributevalue,
+        Table& attrValueEntry) override;
+
     int updateAttrVal(Table& newValue, uint16_t attrHdl, uint8_t attrType,
                       const PropertyValue& newPropVal);
 
@@ -89,6 +98,13 @@ class BIOSEnumAttribute : public BIOSAttribute
      *  @return The index of the current value in possible values
      */
     uint8_t getAttrValueIndex();
+
+    /** @brief Get index of the property value in possible values
+     *  @param[in] propValue - property values
+     *
+     *  @return The index of the property value in possible values
+     */
+    uint8_t getAttrValueIndex(const PropertyValue& propValue);
 };
 
 } // namespace bios

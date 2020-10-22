@@ -3,7 +3,7 @@
 #include "libpldm/base.h"
 #include "oem/ibm/libpldm/file_io.h"
 
-#include "utils.hpp"
+#include "common/utils.hpp"
 
 #include <stdint.h>
 

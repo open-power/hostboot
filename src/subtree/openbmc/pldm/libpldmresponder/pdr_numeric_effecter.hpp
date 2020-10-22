@@ -24,8 +24,9 @@ static const Json empty{};
  *  @param[out] repo - pdr::RepoInterface
  *
  */
-template <class Handler>
-void generateNumericEffecterPDR(const Json& json, Handler& handler,
+template <class DBusInterface, class Handler>
+void generateNumericEffecterPDR(const DBusInterface& dBusIntf, const Json& json,
+                                Handler& handler,
                                 pdr_utils::RepoInterface& repo)
 {
     static const std::vector<Json> emptyList{};
@@ -46,9 +47,35 @@ void generateNumericEffecterPDR(const Json& json, Handler& handler,
 
         pdr->terminus_handle = e.value("terminus_handle", 0);
         pdr->effecter_id = handler.getNextEffecterId();
-        pdr->entity_type = e.value("entity_type", 0);
-        pdr->entity_instance = e.value("entity_instance", 0);
-        pdr->container_id = e.value("container_id", 0);
+
+        try
+        {
+            std::string entity_path = e.value("entity_path", "");
+            auto& associatedEntityMap = handler.getAssociateEntityMap();
+            if (entity_path != "" && associatedEntityMap.find(entity_path) !=
+                                         associatedEntityMap.end())
+            {
+                pdr->entity_type =
+                    associatedEntityMap.at(entity_path).entity_type;
+                pdr->entity_instance =
+                    associatedEntityMap.at(entity_path).entity_instance_num;
+                pdr->container_id =
+                    associatedEntityMap.at(entity_path).entity_container_id;
+            }
+            else
+            {
+                pdr->entity_type = e.value("type", 0);
+                pdr->entity_instance = e.value("instance", 0);
+                pdr->container_id = e.value("container", 0);
+            }
+        }
+        catch (const std::exception& ex)
+        {
+            pdr->entity_type = e.value("type", 0);
+            pdr->entity_instance = e.value("instance", 0);
+            pdr->container_id = e.value("container", 0);
+        }
+
         pdr->effecter_semantic_id = e.value("effecter_semantic_id", 0);
         pdr->effecter_init = e.value("effecter_init", PLDM_NO_INIT);
         pdr->effecter_auxiliary_names = e.value("effecter_init", false);
@@ -164,6 +191,17 @@ void generateNumericEffecterPDR(const Json& json, Handler& handler,
         auto interface = dbusEntry.value("interface", "");
         auto propertyName = dbusEntry.value("property_name", "");
         auto propertyType = dbusEntry.value("property_type", "");
+
+        try
+        {
+            auto service =
+                dBusIntf.getService(objectPath.c_str(), interface.c_str());
+        }
+        catch (const std::exception& e)
+        {
+            continue;
+        }
+
         pldm::utils::DBusMapping dbusMapping{objectPath, interface,
                                              propertyName, propertyType};
         DbusMappings dbusMappings{};

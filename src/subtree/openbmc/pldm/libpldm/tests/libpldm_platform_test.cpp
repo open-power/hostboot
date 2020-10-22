@@ -550,7 +550,9 @@ TEST(SetNumericEffecterValue, testBadEncodeResponse)
 
 TEST(GetStateSensorReadings, testGoodEncodeResponse)
 {
-    std::array<uint8_t, hdrSize + PLDM_GET_STATE_SENSOR_READINGS_RESP_BYTES>
+    std::array<uint8_t, hdrSize +
+                            PLDM_GET_STATE_SENSOR_READINGS_MIN_RESP_BYTES +
+                            sizeof(get_sensor_state_field) * 2>
         responseMsg{};
 
     auto response = reinterpret_cast<pldm_msg*>(responseMsg.data());
@@ -558,8 +560,10 @@ TEST(GetStateSensorReadings, testGoodEncodeResponse)
     uint8_t comp_sensorCnt = 0x2;
 
     std::array<get_sensor_state_field, 2> stateField{};
-    stateField[0] = {ENABLED, NORMAL, WARNING, UNKNOWN};
-    stateField[1] = {FAILED, UPPERFATAL, UPPERCRITICAL, FATAL};
+    stateField[0] = {PLDM_SENSOR_ENABLED, PLDM_SENSOR_NORMAL,
+                     PLDM_SENSOR_WARNING, PLDM_SENSOR_UNKNOWN};
+    stateField[1] = {PLDM_SENSOR_FAILED, PLDM_SENSOR_UPPERFATAL,
+                     PLDM_SENSOR_UPPERCRITICAL, PLDM_SENSOR_FATAL};
 
     auto rc = encode_get_state_sensor_readings_resp(
         0, PLDM_SUCCESS, comp_sensorCnt, stateField.data(), response);
@@ -591,15 +595,19 @@ TEST(GetStateSensorReadings, testBadEncodeResponse)
 
 TEST(GetStateSensorReadings, testGoodDecodeResponse)
 {
-    std::array<uint8_t, hdrSize + PLDM_GET_STATE_SENSOR_READINGS_RESP_BYTES>
+    std::array<uint8_t, hdrSize +
+                            PLDM_GET_STATE_SENSOR_READINGS_MIN_RESP_BYTES +
+                            sizeof(get_sensor_state_field) * 2>
         responseMsg{};
 
     uint8_t completionCode = 0;
     uint8_t comp_sensorCnt = 2;
 
     std::array<get_sensor_state_field, 2> stateField{};
-    stateField[0] = {DISABLED, UNKNOWN, UNKNOWN, UNKNOWN};
-    stateField[1] = {ENABLED, LOWERFATAL, LOWERCRITICAL, WARNING};
+    stateField[0] = {PLDM_SENSOR_DISABLED, PLDM_SENSOR_UNKNOWN,
+                     PLDM_SENSOR_UNKNOWN, PLDM_SENSOR_UNKNOWN};
+    stateField[1] = {PLDM_SENSOR_ENABLED, PLDM_SENSOR_LOWERFATAL,
+                     PLDM_SENSOR_LOWERCRITICAL, PLDM_SENSOR_WARNING};
 
     uint8_t retcompletion_code = 0;
     uint8_t retcomp_sensorCnt = 2;
@@ -634,7 +642,9 @@ TEST(GetStateSensorReadings, testGoodDecodeResponse)
 
 TEST(GetStateSensorReadings, testBadDecodeResponse)
 {
-    std::array<uint8_t, hdrSize + PLDM_GET_STATE_SENSOR_READINGS_RESP_BYTES>
+    std::array<uint8_t, hdrSize +
+                            PLDM_GET_STATE_SENSOR_READINGS_MIN_RESP_BYTES +
+                            sizeof(get_sensor_state_field) * 2>
         responseMsg{};
 
     auto response = reinterpret_cast<pldm_msg*>(responseMsg.data());
@@ -648,7 +658,8 @@ TEST(GetStateSensorReadings, testBadDecodeResponse)
     uint8_t comp_sensorCnt = 1;
 
     std::array<get_sensor_state_field, 1> stateField{};
-    stateField[0] = {ENABLED, UPPERFATAL, UPPERCRITICAL, WARNING};
+    stateField[0] = {PLDM_SENSOR_ENABLED, PLDM_SENSOR_UPPERFATAL,
+                     PLDM_SENSOR_UPPERCRITICAL, PLDM_SENSOR_WARNING};
 
     uint8_t retcompletion_code = 0;
     uint8_t retcomp_sensorCnt = 0;
@@ -1686,9 +1697,9 @@ TEST(GetSensorReading, testGoodEncodeResponse)
     uint8_t sensor_dataSize = PLDM_EFFECTER_DATA_SIZE_UINT8;
     uint8_t sensor_operationalState = PLDM_SENSOR_ENABLED;
     uint8_t sensor_event_messageEnable = PLDM_NO_EVENT_GENERATION;
-    uint8_t presentState = NORMAL;
-    uint8_t previousState = WARNING;
-    uint8_t eventState = UPPERWARNING;
+    uint8_t presentState = PLDM_SENSOR_NORMAL;
+    uint8_t previousState = PLDM_SENSOR_WARNING;
+    uint8_t eventState = PLDM_SENSOR_UPPERWARNING;
     uint8_t presentReading = 0x21;
 
     auto rc = encode_get_sensor_reading_resp(
@@ -1751,9 +1762,9 @@ TEST(GetSensorReading, testGoodDecodeResponse)
     uint8_t sensor_dataSize = PLDM_EFFECTER_DATA_SIZE_UINT32;
     uint8_t sensor_operationalState = PLDM_SENSOR_STATUSUNKOWN;
     uint8_t sensor_event_messageEnable = PLDM_EVENTS_ENABLED;
-    uint8_t presentState = CRITICAL;
-    uint8_t previousState = UPPERCRITICAL;
-    uint8_t eventState = WARNING;
+    uint8_t presentState = PLDM_SENSOR_CRITICAL;
+    uint8_t previousState = PLDM_SENSOR_UPPERCRITICAL;
+    uint8_t eventState = PLDM_SENSOR_WARNING;
     uint32_t presentReading = 0xABCDEF11;
 
     uint8_t retcompletionCode;
@@ -1813,11 +1824,11 @@ TEST(GetSensorReading, testBadDecodeResponse)
 
     uint8_t completionCode = 0;
     uint8_t sensor_dataSize = PLDM_EFFECTER_DATA_SIZE_UINT8;
-    uint8_t sensor_operationalState = INTEST;
+    uint8_t sensor_operationalState = PLDM_SENSOR_INTEST;
     uint8_t sensor_event_messageEnable = PLDM_EVENTS_DISABLED;
-    uint8_t presentState = FATAL;
-    uint8_t previousState = UPPERFATAL;
-    uint8_t eventState = WARNING;
+    uint8_t presentState = PLDM_SENSOR_FATAL;
+    uint8_t previousState = PLDM_SENSOR_UPPERFATAL;
+    uint8_t eventState = PLDM_SENSOR_WARNING;
     uint8_t presentReading = 0xA;
 
     uint8_t retcompletionCode;

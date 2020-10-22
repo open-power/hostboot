@@ -6,8 +6,8 @@
 #include "oem/ibm/libpldm/file_io.h"
 #include "oem/ibm/libpldm/host.h"
 
-#include "handler.hpp"
-#include "utils.hpp"
+#include "common/utils.hpp"
+#include "pldmd/handler.hpp"
 
 #include <fcntl.h>
 #include <stdint.h>

@@ -1,6 +1,7 @@
 #include <string.h>
 
 #include <array>
+#include <cstring>
 
 #include "libpldm/base.h"
 #include "libpldm/fru.h"
@@ -513,4 +514,261 @@ TEST(GetFruRecordTable, testBadDecodeResponse)
         &transfer_flag, fru_record_table_data.data(), &fru_record_table_length);
 
     ASSERT_EQ(rc, PLDM_ERROR_INVALID_LENGTH);
+}
+
+TEST(GetFRURecordByOption, testGoodEncodeRequest)
+{
+    uint8_t instanceId = 2;
+    uint32_t dataTransferHandle = 3;
+    uint16_t fruTableHandle = 4;
+    uint16_t recordSetIdentifier = 5;
+    uint8_t recordType = 6;
+    uint8_t fieldType = 7;
+    uint8_t transferOpFlag = 0;
+
+    constexpr auto payLoadLength = sizeof(pldm_get_fru_record_by_option_req);
+
+    std::array<uint8_t, sizeof(pldm_msg_hdr) + payLoadLength> request;
+    auto reqMsg = reinterpret_cast<pldm_msg*>(request.data());
+
+    auto rc = encode_get_fru_record_by_option_req(
+        instanceId, dataTransferHandle, fruTableHandle, recordSetIdentifier,
+        recordType, fieldType, transferOpFlag, reqMsg, payLoadLength);
+
+    EXPECT_EQ(rc, PLDM_SUCCESS);
+    EXPECT_EQ(instanceId, reqMsg->hdr.instance_id);
+
+    auto payLoadMsg =
+        reinterpret_cast<pldm_get_fru_record_by_option_req*>(reqMsg->payload);
+
+    EXPECT_EQ(le32toh(payLoadMsg->data_transfer_handle), dataTransferHandle);
+    EXPECT_EQ(le16toh(payLoadMsg->fru_table_handle), fruTableHandle);
+    EXPECT_EQ(le16toh(payLoadMsg->record_set_identifier), recordSetIdentifier);
+    EXPECT_EQ(payLoadMsg->record_type, recordType);
+    EXPECT_EQ(payLoadMsg->field_type, fieldType);
+    EXPECT_EQ(payLoadMsg->transfer_op_flag, transferOpFlag);
+}
+
+TEST(GetFRURecordByOption, testBadEncodeRequest)
+{
+
+    constexpr auto payLoadLength = sizeof(pldm_get_fru_record_by_option_req);
+
+    auto rc = encode_get_fru_record_by_option_req(1, 2, 3, 4, 5, 6, 0, nullptr,
+                                                  payLoadLength);
+
+    EXPECT_EQ(rc, PLDM_ERROR_INVALID_DATA);
+    std::array<uint8_t, sizeof(pldm_msg_hdr) + payLoadLength> request;
+    auto reqMsg = reinterpret_cast<pldm_msg*>(request.data());
+
+    rc = encode_get_fru_record_by_option_req(1, 2, 3, 4, 5, 6, 0, reqMsg,
+                                             payLoadLength - 1);
+
+    EXPECT_EQ(rc, PLDM_ERROR_INVALID_LENGTH);
+}
+
+TEST(GetFRURecordByOption, testGoodDecodeRequest)
+{
+    uint8_t instanceId = 2;
+    uint32_t dataTransferHandle = 3;
+    uint16_t fruTableHandle = 4;
+    uint16_t recordSetIdentifier = 5;
+    uint8_t recordType = 6;
+    uint8_t fieldType = 7;
+    uint8_t transferOpFlag = 0;
+
+    constexpr auto payLoadLength = sizeof(pldm_get_fru_record_by_option_req);
+
+    std::array<uint8_t, sizeof(pldm_msg_hdr) + payLoadLength> request;
+    auto reqMsg = reinterpret_cast<pldm_msg*>(request.data());
+
+    auto rc = encode_get_fru_record_by_option_req(
+        instanceId, dataTransferHandle, fruTableHandle, recordSetIdentifier,
+        recordType, fieldType, transferOpFlag, reqMsg, payLoadLength);
+
+    EXPECT_EQ(rc, PLDM_SUCCESS);
+
+    uint32_t retDataTransferHandle{};
+    uint16_t retFruTableHandle{};
+    uint16_t retRecordSetIdentifier{};
+    uint8_t retRecordType{};
+    uint8_t retFieldType{};
+    uint8_t retTransferOpFlag{};
+
+    rc = decode_get_fru_record_by_option_req(
+        reqMsg, payLoadLength, &retDataTransferHandle, &retFruTableHandle,
+        &retRecordSetIdentifier, &retRecordType, &retFieldType,
+        &retTransferOpFlag);
+
+    EXPECT_EQ(rc, PLDM_SUCCESS);
+    EXPECT_EQ(retDataTransferHandle, dataTransferHandle);
+    EXPECT_EQ(retFruTableHandle, fruTableHandle);
+    EXPECT_EQ(retRecordSetIdentifier, recordSetIdentifier);
+    EXPECT_EQ(retRecordType, recordType);
+    EXPECT_EQ(retFieldType, fieldType);
+    EXPECT_EQ(retTransferOpFlag, transferOpFlag);
+}
+
+TEST(GetFRURecordByOption, testBadDecodeRequest)
+{
+    constexpr auto payLoadLength = sizeof(pldm_get_fru_record_by_option_req);
+    std::array<uint8_t, sizeof(pldm_msg_hdr) + payLoadLength> request;
+    auto reqMsg = reinterpret_cast<pldm_msg*>(request.data());
+
+    uint32_t retDataTransferHandle{};
+    uint16_t retFruTableHandle{};
+    uint16_t retRecordSetIdentifier{};
+    uint8_t retRecordType{};
+    uint8_t retFieldType{};
+    uint8_t retTransferOpFlag{};
+
+    auto rc = decode_get_fru_record_by_option_req(
+        reqMsg, payLoadLength - 1, &retDataTransferHandle, &retFruTableHandle,
+        &retRecordSetIdentifier, &retRecordType, &retFieldType,
+        &retTransferOpFlag);
+
+    EXPECT_EQ(rc, PLDM_ERROR_INVALID_LENGTH);
+
+    rc = decode_get_fru_record_by_option_req(
+        reqMsg, payLoadLength - 1, nullptr, &retFruTableHandle,
+        &retRecordSetIdentifier, &retRecordType, &retFieldType,
+        &retTransferOpFlag);
+
+    EXPECT_EQ(rc, PLDM_ERROR_INVALID_DATA);
+}
+
+TEST(GetFruRecordByOption, testGoodEncodeResponse)
+{
+    uint8_t completionCode = PLDM_SUCCESS;
+    uint8_t instanceId = 2;
+    uint32_t dataTransferHandle = 3;
+    uint8_t transferFlag = 5;
+
+    std::array<uint8_t, 5> fruData = {1, 2, 3, 4, 5};
+    constexpr auto payLoadLength =
+        sizeof(pldm_get_fru_record_by_option_resp) - 1 + fruData.size();
+
+    std::array<uint8_t, sizeof(pldm_msg_hdr) + payLoadLength> response;
+    auto respMsg = reinterpret_cast<pldm_msg*>(response.data());
+
+    auto rc = encode_get_fru_record_by_option_resp(
+        instanceId, completionCode, dataTransferHandle, transferFlag,
+        fruData.data(), fruData.size(), respMsg, payLoadLength);
+
+    auto payLoadMsg =
+        reinterpret_cast<pldm_get_fru_record_by_option_resp*>(respMsg->payload);
+
+    EXPECT_EQ(rc, PLDM_SUCCESS);
+    EXPECT_EQ(payLoadMsg->completion_code, completionCode);
+    EXPECT_EQ(payLoadMsg->next_data_transfer_handle,
+              htole32(dataTransferHandle));
+    EXPECT_EQ(payLoadMsg->transfer_flag, transferFlag);
+
+    EXPECT_EQ(std::memcmp(payLoadMsg->fru_structure_data, fruData.data(),
+                          fruData.size()),
+              0);
+}
+
+TEST(GetFruRecordByOption, testBadEncodeResponse)
+{
+    uint8_t completionCode = PLDM_SUCCESS;
+    uint8_t instanceId = 2;
+    uint32_t dataTransferHandle = 3;
+    uint8_t transferFlag = 5;
+
+    std::array<uint8_t, 5> fruData = {1, 2, 3, 4, 5};
+    constexpr auto payLoadLength =
+        sizeof(pldm_get_fru_record_by_option_resp) - 1 + fruData.size();
+
+    std::array<uint8_t, sizeof(pldm_msg_hdr) + payLoadLength> response;
+    auto respMsg = reinterpret_cast<pldm_msg*>(response.data());
+
+    auto rc = encode_get_fru_record_by_option_resp(
+        instanceId, completionCode, dataTransferHandle, transferFlag, nullptr,
+        fruData.size(), respMsg, payLoadLength);
+
+    EXPECT_EQ(rc, PLDM_ERROR_INVALID_DATA);
+
+    rc = encode_get_fru_record_by_option_resp(
+        instanceId, completionCode, dataTransferHandle, transferFlag,
+        fruData.data(), fruData.size(), respMsg, payLoadLength - 1);
+
+    EXPECT_EQ(rc, PLDM_ERROR_INVALID_LENGTH);
+}
+
+TEST(GetFruRecordByOption, testGoodDecodeResponse)
+{
+    uint8_t completionCode = PLDM_SUCCESS;
+    uint8_t instanceId = 2;
+    uint32_t dataTransferHandle = 3;
+    uint8_t transferFlag = 5;
+
+    std::array<uint8_t, 5> fruData = {1, 2, 3, 4, 5};
+    constexpr auto payLoadLength =
+        sizeof(pldm_get_fru_record_by_option_resp) - 1 + fruData.size();
+
+    std::array<uint8_t, sizeof(pldm_msg_hdr) + payLoadLength> response;
+    auto respMsg = reinterpret_cast<pldm_msg*>(response.data());
+
+    auto rc = encode_get_fru_record_by_option_resp(
+        instanceId, completionCode, dataTransferHandle, transferFlag,
+        fruData.data(), fruData.size(), respMsg, payLoadLength);
+
+    EXPECT_EQ(rc, PLDM_SUCCESS);
+
+    uint8_t retCompletionCode;
+    uint32_t retDataTransferHandle;
+    uint8_t retTransferFlag;
+    variable_field retFruData;
+
+    rc = decode_get_fru_record_by_option_resp(
+        respMsg, payLoadLength, &retCompletionCode, &retDataTransferHandle,
+        &retTransferFlag, &retFruData);
+
+    EXPECT_EQ(rc, PLDM_SUCCESS);
+    EXPECT_EQ(retCompletionCode, completionCode);
+    EXPECT_EQ(retDataTransferHandle, dataTransferHandle);
+    EXPECT_EQ(retTransferFlag, transferFlag);
+    EXPECT_EQ(retFruData.length, fruData.size());
+    EXPECT_EQ(std::memcmp(fruData.data(), retFruData.ptr, fruData.size()), 0);
+}
+
+TEST(GetFruRecordByOption, testBadDecodeResponse)
+{
+
+    uint8_t completionCode = PLDM_SUCCESS;
+    uint8_t instanceId = 2;
+    uint32_t dataTransferHandle = 3;
+    uint8_t transferFlag = 5;
+
+    std::array<uint8_t, 5> fruData = {1, 2, 3, 4, 5};
+    constexpr auto payLoadLength =
+        sizeof(pldm_get_fru_record_by_option_resp) - 1 + fruData.size();
+
+    std::array<uint8_t, sizeof(pldm_msg_hdr) + payLoadLength> response;
+    auto respMsg = reinterpret_cast<pldm_msg*>(response.data());
+
+    auto rc = encode_get_fru_record_by_option_resp(
+        instanceId, completionCode, dataTransferHandle, transferFlag,
+        fruData.data(), fruData.size(), respMsg, payLoadLength);
+
+    EXPECT_EQ(rc, PLDM_SUCCESS);
+
+    uint8_t retCompletionCode;
+    uint32_t retDataTransferHandle;
+    uint8_t retTransferFlag;
+    variable_field retFruData;
+
+    rc = decode_get_fru_record_by_option_resp(respMsg, payLoadLength, nullptr,
+                                              &retDataTransferHandle,
+                                              &retTransferFlag, &retFruData);
+
+    EXPECT_EQ(rc, PLDM_ERROR_INVALID_DATA);
+
+    rc = decode_get_fru_record_by_option_resp(
+        respMsg, PLDM_GET_FRU_RECORD_BY_OPTION_MIN_RESP_BYTES - 1,
+        &retCompletionCode, &retDataTransferHandle, &retTransferFlag,
+        &retFruData);
+
+    EXPECT_EQ(rc, PLDM_ERROR_INVALID_LENGTH);
 }

@@ -18,7 +18,6 @@ extern "C" {
 #define PLDM_GET_SENSOR_READING_REQ_BYTES 4
 /* Response lengths are inclusive of completion code */
 #define PLDM_SET_STATE_EFFECTER_STATES_RESP_BYTES 1
-#define PLDM_GET_STATE_SENSOR_READINGS_RESP_BYTES 34
 
 #define PLDM_SET_NUMERIC_EFFECTER_VALUE_RESP_BYTES 1
 #define PLDM_SET_NUMERIC_EFFECTER_VALUE_MIN_REQ_BYTES 4
@@ -28,11 +27,13 @@ extern "C" {
 #define PLDM_GET_PDR_MIN_RESP_BYTES 12
 #define PLDM_GET_NUMERIC_EFFECTER_VALUE_MIN_RESP_BYTES 5
 #define PLDM_GET_SENSOR_READING_MIN_RESP_BYTES 8
+#define PLDM_GET_STATE_SENSOR_READINGS_MIN_RESP_BYTES 2
 
 /* Minimum length for PLDM PlatformEventMessage request */
 #define PLDM_PLATFORM_EVENT_MESSAGE_MIN_REQ_BYTES 3
 #define PLDM_PLATFORM_EVENT_MESSAGE_STATE_SENSOR_STATE_REQ_BYTES 6
 #define PLDM_PLATFORM_EVENT_MESSAGE_RESP_BYTES 2
+#define PLDM_PLATFORM_EVENT_MESSAGE_FORMAT_VERSION 1
 
 /* Minumum length of senson event data */
 #define PLDM_SENSOR_EVENT_DATA_MIN_LENGTH 5
@@ -47,6 +48,9 @@ extern "C" {
 /* Minimum length of data for pldmPDRRepositoryChgEvent */
 #define PLDM_PDR_REPOSITORY_CHG_EVENT_MIN_LENGTH 2
 #define PLDM_PDR_REPOSITORY_CHANGE_RECORD_MIN_LENGTH 2
+
+#define PLDM_INVALID_EFFECTER_ID 0xFFFF
+#define PLDM_TID_RESERVED 0xFF
 
 enum pldm_effecter_data_size {
 	PLDM_EFFECTER_DATA_SIZE_UINT8,
@@ -71,29 +75,18 @@ enum set_request { PLDM_NO_CHANGE = 0x00, PLDM_REQUEST_SET = 0x01 };
 
 enum effecter_state { PLDM_INVALID_VALUE = 0xFF };
 
-enum sensor_operational_state {
-	ENABLED = 0x00,
-	DISABLED = 0x01,
-	UNAVAILABLE = 0x02,
-	STATUSUNKNOWN = 0x03,
-	FAILED = 0x04,
-	INITIALIZING = 0x05,
-	SHUTTINGDOWN = 0x06,
-	INTEST = 0x07
-};
-
-enum present_state {
-	UNKNOWN = 0x0,
-	NORMAL = 0x01,
-	WARNING = 0x02,
-	CRITICAL = 0x03,
-	FATAL = 0x04,
-	LOWERWARNING = 0x05,
-	LOWERCRITICAL = 0x06,
-	LOWERFATAL = 0x07,
-	UPPERWARNING = 0x08,
-	UPPERCRITICAL = 0x09,
-	UPPERFATAL = 0x0a
+enum pldm_sensor_present_state {
+	PLDM_SENSOR_UNKNOWN = 0x0,
+	PLDM_SENSOR_NORMAL = 0x01,
+	PLDM_SENSOR_WARNING = 0x02,
+	PLDM_SENSOR_CRITICAL = 0x03,
+	PLDM_SENSOR_FATAL = 0x04,
+	PLDM_SENSOR_LOWERWARNING = 0x05,
+	PLDM_SENSOR_LOWERCRITICAL = 0x06,
+	PLDM_SENSOR_LOWERFATAL = 0x07,
+	PLDM_SENSOR_UPPERWARNING = 0x08,
+	PLDM_SENSOR_UPPERCRITICAL = 0x09,
+	PLDM_SENSOR_UPPERFATAL = 0x0a
 };
 
 enum pldm_sensor_event_message_enable {
@@ -129,11 +122,28 @@ enum pldm_platform_commands {
 /** @brief PLDM PDR types
  */
 enum pldm_pdr_types {
+	PLDM_TERMINUS_LOCATOR_PDR = 1,
+	PLDM_NUMERIC_SENSOR_PDR = 2,
+	PLDM_NUMERIC_SENSOR_INITIALIZATION_PDR = 3,
 	PLDM_STATE_SENSOR_PDR = 4,
+	PLDM_STATE_SENSOR_INITIALIZATION_PDR = 5,
+	PLDM_SENSOR_AUXILIARY_NAMES_PDR = 6,
+	PLDM_OEM_UNIT_PDR = 7,
+	PLDM_OEM_STATE_SET_PDR = 8,
 	PLDM_NUMERIC_EFFECTER_PDR = 9,
+	PLDM_NUMERIC_EFFECTER_INITIALIZATION_PDR = 10,
 	PLDM_STATE_EFFECTER_PDR = 11,
+	PLDM_STATE_EFFECTER_INITIALIZATION_PDR = 12,
+	PLDM_EFFECTER_AUXILIARY_NAMES_PDR = 13,
+	PLDM_EFFECTER_OEM_SEMANTIC_PDR = 14,
 	PLDM_PDR_ENTITY_ASSOCIATION = 15,
+	PLDM_ENTITY_AUXILIARY_NAMES_PDR = 16,
+	PLDM_OEM_ENTITY_ID_PDR = 17,
+	PLDM_INTERRUPT_ASSOCIATION_PDR = 18,
+	PLDM_EVENT_LOG_PDR = 19,
 	PLDM_PDR_FRU_RECORD_SET = 20,
+	PLDM_OEM_DEVICE_PDR = 126,
+	PLDM_OEM_PDR = 127,
 };
 
 /** @brief PLDM effecter initialization schemes
@@ -148,6 +158,9 @@ enum pldm_effecter_init {
 /** @brief PLDM Platform M&C completion codes
  */
 enum pldm_platform_completion_codes {
+	PLDM_PLATFORM_INVALID_SENSOR_ID = 0x80,
+	PLDM_PLATFORM_REARM_UNAVAILABLE_IN_PRESENT_STATE = 0x81,
+
 	PLDM_PLATFORM_INVALID_EFFECTER_ID = 0x80,
 	PLDM_PLATFORM_INVALID_STATE_VALUE = 0x81,
 
@@ -233,6 +246,22 @@ enum pldm_platform_event_status {
 	PLDM_EVENT_LOGGING_REJECTED = 0x05
 };
 
+/** @brief PLDM Terminus Locator PDR validity
+ */
+enum pldm_terminus_locator_pdr_validity {
+	PLDM_TL_PDR_NOT_VALID,
+	PLDM_TL_PDR_VALID
+};
+
+/** @brief PLDM Terminus Locator type
+ */
+enum pldm_terminus_locator_type {
+	PLDM_TERMINUS_LOCATOR_TYPE_UID,
+	PLDM_TERMINUS_LOCATOR_TYPE_MCTP_EID,
+	PLDM_TERMINUS_LOCATOR_TYPE_SMBUS_RELATIVE,
+	PLDM_TERMINUS_LOCATOR_TYPE_SYS_SW
+};
+
 /** @struct pldm_pdr_hdr
  *
  *  Structure representing PLDM common PDR header
@@ -243,6 +272,30 @@ struct pldm_pdr_hdr {
 	uint8_t type;
 	uint16_t record_change_num;
 	uint16_t length;
+} __attribute__((packed));
+
+/** @struct pldm_terminus_locator_pdr
+ *
+ *  Structure representing PLDM terminus locator PDR
+ */
+struct pldm_terminus_locator_pdr {
+	struct pldm_pdr_hdr hdr;
+	uint16_t terminus_handle;
+	uint8_t validity;
+	uint8_t tid;
+	uint16_t container_id;
+	uint8_t terminus_locator_type;
+	uint8_t terminus_locator_value_size;
+	uint8_t terminus_locator_value[1];
+} __attribute__((packed));
+
+/** @struct pldm_terminus_locator_type_mctp_eid
+ *
+ *  Structure representing terminus locator value for
+ *  terminus locator type MCTP_EID
+ */
+struct pldm_terminus_locator_type_mctp_eid {
+	uint8_t eid;
 } __attribute__((packed));
 
 /** @struct pldm_pdr_entity_association
@@ -313,6 +366,29 @@ struct pldm_state_effecter_pdr {
 	uint8_t composite_effecter_count;
 	uint8_t possible_states[1];
 } __attribute__((packed));
+
+/** @brief Encode PLDM state sensor PDR
+ *
+ * @param[in/out] sensor                 Structure to encode. All members of
+ * sensor, except those mentioned in the @note below, should be initialized by
+ * the caller.
+ * @param[in]     allocation_size        Size of sensor allocation in bytes
+ * @param[in]     possible_states        Possible sensor states
+ * @param[in]     possible_states_size   Size of possible sensor states in bytes
+ * @param[out]    actual_size            Size of sensor PDR. Set to 0 on error.
+ * @return int    pldm_completion_codes
+ *                PLDM_SUCCESS/PLDM_ERROR/PLDM_ERROR_INVALID_LENGTH
+ *
+ * @note The sensor parameter will be encoded in place.
+ * @note Caller is responsible for allocation of the sensor parameter. Caller
+ *       must allocate enough space for the base structure and the
+ *       sensor->possible_states array, otherwise the function will fail.
+ * @note sensor->hdr.length, .type, and .version will be set appropriately.
+ */
+int encode_state_sensor_pdr(
+    struct pldm_state_sensor_pdr *sensor, size_t allocation_size,
+    const struct state_sensor_possible_states *possible_states,
+    size_t possible_states_size, size_t *actual_size);
 
 /** @union union_effecter_data_size
  *
@@ -396,6 +472,32 @@ struct state_effecter_possible_states {
 	uint8_t possible_states_size;
 	bitfield8_t states[1];
 } __attribute__((packed));
+
+/** @brief Encode PLDM state effecter PDR
+ *
+ * @param[in/out] effecter               Structure to encode. All members of
+ *                                       effecter, except those mentioned in
+ *                                       the @note below, should be initialized
+ *                                       by the caller.
+ * @param[in]     allocation_size        Size of effecter allocation in bytes
+ * @param[in]     possible_states        Possible effecter states
+ * @param[in]     possible_states_size   Size of possible effecter states in
+ *                                       bytes
+ * @param[out]    actual_size            Size of effecter PDR. Set to 0 on
+ *                                       error.
+ * @return int    pldm_completion_codes
+ *                PLDM_SUCCESS/PLDM_ERROR/PLDM_ERROR_INVALID_LENGTH
+ *
+ * @note The effecter parameter will be encoded in place.
+ * @note Caller is responsible for allocation of the effecter parameter. Caller
+ *       must allocate enough space for the base structure and the
+ *       effecter->possible_states array, otherwise the function will fail.
+ * @note effecter->hdr.length, .type, and .version will be set appropriately.
+ */
+int encode_state_effecter_pdr(
+    struct pldm_state_effecter_pdr *effecter, size_t allocation_size,
+    const struct state_effecter_possible_states *possible_states,
+    size_t possible_states_size, size_t *actual_size);
 
 /** @struct set_effecter_state_field
  *
@@ -1270,6 +1372,29 @@ int encode_pldm_pdr_repository_chg_event_data(
     const uint32_t *const *change_entries,
     struct pldm_pdr_repository_chg_event_data *event_data,
     size_t *actual_change_records_size, size_t max_change_records_size);
+
+/** @brief Encode event data for a PLDM Sensor Event
+ *
+ *  @param[out] event_data              The object to store the encoded event in
+ *  @param[in] event_data_size          Size of the allocation for event_data
+ *  @param[in] sensor_id                Sensor ID
+ *  @param[in] sensor_event_class       Sensor event class
+ *  @param[in] sensor_offset            Offset
+ *  @param[in] event_state              Event state
+ *  @param[in] previous_event_state     Previous event state
+ *  @param[out] actual_event_data_size  The real size in bytes of the event_data
+ *  @return int pldm_completion_codes   PLDM_SUCCESS/PLDM_ERROR_INVALID_LENGTH
+ *  @note If event_data is NULL, then *actual_event_data_size will be set to
+ *        reflect the size of the event data, and PLDM_SUCCESS will be returned.
+ *  @note The caller is responsible for allocating and deallocating the
+ *        event_data
+ */
+int encode_sensor_event_data(struct pldm_sensor_event_data *event_data,
+			     size_t event_data_size, uint16_t sensor_id,
+			     enum sensor_event_class_states sensor_event_class,
+			     uint8_t sensor_offset, uint8_t event_state,
+			     uint8_t previous_event_state,
+			     size_t *actual_event_data_size);
 
 /** @brief Decode PldmPDRRepositoryChangeRecord response data
  *

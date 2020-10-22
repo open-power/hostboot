@@ -1,4 +1,4 @@
-#include "instance_id.hpp"
+#include "pldmd/instance_id.hpp"
 
 #include <stdexcept>
 

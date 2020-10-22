@@ -178,6 +178,16 @@ struct pldm_get_file_table_resp {
 	uint8_t table_data[1];	       //!< Table Data
 } __attribute__((packed));
 
+/** @struct pldm_file_attr_table_entry
+ *
+ * Structure representing File attribute table entry
+ */
+struct pldm_file_attr_table_entry {
+	uint32_t file_handle;		//!< File Handle
+	uint16_t file_name_length;	//!< File name length
+	uint8_t file_attr_table_nst[1]; //!< File name size traits
+} __attribute__((packed));
+
 /** @brief Decode GetFileTable command request data
  *
  *  @param[in] msg - Pointer to PLDM request message
@@ -208,6 +218,38 @@ int encode_get_file_table_resp(uint8_t instance_id, uint8_t completion_code,
 			       uint32_t next_transfer_handle,
 			       uint8_t transfer_flag, const uint8_t *table_data,
 			       size_t table_size, struct pldm_msg *msg);
+
+/** @brief Encode GetFileTable command request data
+ *
+ * @param[in] instance_id - Message's instance id
+ * @param[in] transfer_handle - the handle of data
+ * @param[in] transfer_opflag - Transfer operation flag
+ * @param[in] table_type - the type of file table
+ * @param[out] msg - Message will be written to this
+ * @return pldm_completion_codes
+ */
+int encode_get_file_table_req(uint8_t instance_id, uint32_t transfer_handle,
+			      uint8_t transfer_opflag, uint8_t table_type,
+			      struct pldm_msg *msg);
+
+/** @brief Decode GetFileTable command response data
+ * @param[in] msg - Response message
+ * @param[in] payload_length - length of response message payload
+ * @param[out] completion_code - PLDM completion code
+ * @param[out] next_transfer_handle -  Handle to identify next portion of data
+ * transfer
+ * @param[out] transfer_flag - Represents the part of transfer
+ * @param[out] file_table_data_start_offset - This data is a portion of the
+ * overall File Table
+ * @param[out] file_table_length - Length of the File table data
+ * @return pldm_completion_codes
+ */
+int decode_get_file_table_resp(const struct pldm_msg *msg,
+			       size_t payload_length, uint8_t *completion_code,
+			       uint32_t *next_transfer_handle,
+			       uint8_t *transfer_flag,
+			       uint8_t *file_table_data_start_offset,
+			       size_t *file_table_length);
 
 /** @struct pldm_read_file_req
  *

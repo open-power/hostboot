@@ -1,4 +1,4 @@
-#include "bios_utils.hpp"
+#include "common/bios_utils.hpp"
 #include "libpldmresponder/bios_config.hpp"
 #include "libpldmresponder/bios_string_attribute.hpp"
 #include "mocked_bios.hpp"
@@ -79,7 +79,8 @@ TEST_F(TestBIOSConfig, buildTablesTest)
     ON_CALL(dbusHandler, getDbusPropertyVariant(_, _, _))
         .WillByDefault(Throw(std::exception()));
 
-    BIOSConfig biosConfig("./bios_jsons", tableDir.c_str(), &dbusHandler);
+    BIOSConfig biosConfig("./bios_jsons", tableDir.c_str(), &dbusHandler, 0, 0,
+                          nullptr);
     biosConfig.buildTables();
 
     auto stringTable = biosConfig.getBIOSTable(PLDM_BIOS_STRING_TABLE);
@@ -247,7 +248,8 @@ TEST_F(TestBIOSConfig, setAttrValue)
 {
     MockdBusHandler dbusHandler;
 
-    BIOSConfig biosConfig("./bios_jsons", tableDir.c_str(), &dbusHandler);
+    BIOSConfig biosConfig("./bios_jsons", tableDir.c_str(), &dbusHandler, 0, 0,
+                          nullptr);
     biosConfig.removeTables();
     biosConfig.buildTables();
 

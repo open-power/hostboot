@@ -4,6 +4,7 @@
             "pdrType": 11,
             "entries": [
                 {
+                    "entity_path": "/xyz/openbmc_project/foo",
                     "type": 33,
                     "instance": 0,
                     "container": 0,
@@ -49,6 +50,7 @@
                     ]
                 },
                 {
+                    "entity_path": "/xyz/openbmc_project/foo",
                     "type": 100,
                     "instance": 0,
                     "container": 0,
@@ -83,7 +85,7 @@
                                 ]
                             },
                             "dbus": {
-                                "path": "/foo/bar/baz",
+                                "path": "/foo/bar",
                                 "interface": "xyz.openbmc_project.Foo.Bar.Baz",
                                 "property_name": "propertyName",
                                 "property_type": "string",
@@ -103,6 +105,10 @@
             "pdrType": 9,
             "entries": [
                 {
+                    "entity_path": "/xyz/openbmc_project/foo",
+                    "type": 0,
+                    "instance": 0,
+                    "container": 0,
                     "base_unit": 21,
                     "rate_unit": 3,
                     "effecter_resolution_init": 1,

@@ -1,6 +1,6 @@
 #include "bios_integer_attribute.hpp"
 
-#include "utils.hpp"
+#include "common/utils.hpp"
 
 namespace pldm
 {
@@ -46,7 +46,7 @@ void BIOSIntegerAttribute::setAttrValueOnDbus(
     const pldm_bios_attr_val_table_entry* attrValueEntry,
     const pldm_bios_attr_table_entry*, const BIOSStringTable&)
 {
-    if (readOnly)
+    if (readOnly || !dBusMap.has_value())
     {
         return;
     }
@@ -86,6 +86,11 @@ void BIOSIntegerAttribute::setAttrValueOnDbus(
     {
         return dbusHandler->setDbusProperty(*dBusMap,
                                             static_cast<int64_t>(currentValue));
+    }
+    else if (dBusMap->propertyType == "double")
+    {
+        return dbusHandler->setDbusProperty(*dBusMap,
+                                            static_cast<double>(currentValue));
     }
 
     std::cerr << "Unsupported property type on dbus: " << dBusMap->propertyType
@@ -146,12 +151,16 @@ uint64_t BIOSIntegerAttribute::getAttrValue(const PropertyValue& propertyValue)
     {
         value = std::get<int64_t>(propertyValue);
     }
+    else if (dBusMap->propertyType == "double")
+    {
+        value = std::get<double>(propertyValue);
+    }
     return value;
 }
 
 uint64_t BIOSIntegerAttribute::getAttrValue()
 {
-    if (readOnly)
+    if (readOnly || !dBusMap.has_value())
     {
         return integerInfo.defaultValue;
     }
@@ -180,6 +189,21 @@ int BIOSIntegerAttribute::updateAttrVal(Table& newValue, uint16_t attrHdl,
     table::attribute_value::constructIntegerEntry(newValue, attrHdl, attrType,
                                                   newVal);
     return PLDM_SUCCESS;
+}
+
+void BIOSIntegerAttribute::generateAttributeEntry(
+    const std::variant<int64_t, std::string>& attributevalue,
+    Table& attrValueEntry)
+{
+    attrValueEntry.resize(sizeof(pldm_bios_attr_val_table_entry) +
+                          sizeof(int64_t) - 1);
+
+    auto entry = reinterpret_cast<pldm_bios_attr_val_table_entry*>(
+        attrValueEntry.data());
+
+    int64_t value = std::get<int64_t>(attributevalue);
+    entry->attr_type = 3;
+    memcpy(entry->value, &value, sizeof(int64_t));
 }
 
 } // namespace bios

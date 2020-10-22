@@ -2,7 +2,7 @@
 
 #include "libpldm/utils.h"
 
-#include "utils.hpp"
+#include "common/utils.hpp"
 
 #include <systemd/sd-journal.h>
 
@@ -17,12 +17,13 @@ namespace pldm
 namespace responder
 {
 
-FruImpl::FruImpl(const std::string& configPath, pldm_pdr* pdrRepo,
-                 pldm_entity_association_tree* entityTree) :
-    pdrRepo(pdrRepo),
-    entityTree(entityTree)
+void FruImpl::buildFRUTable()
 {
-    fru_parser::FruParser handle(configPath);
+
+    if (isBuilt)
+    {
+        return;
+    }
 
     fru_parser::DBusLookupInfo dbusInfo;
     // Read the all the inventory D-Bus objects
@@ -31,7 +32,7 @@ FruImpl::FruImpl(const std::string& configPath, pldm_pdr* pdrRepo,
 
     try
     {
-        dbusInfo = handle.inventoryLookup();
+        dbusInfo = parser.inventoryLookup();
         auto method = bus.new_method_call(
             std::get<0>(dbusInfo).c_str(), std::get<1>(dbusInfo).c_str(),
             "org.freedesktop.DBus.ObjectManager", "GetManagedObjects");
@@ -61,7 +62,7 @@ FruImpl::FruImpl(const std::string& configPath, pldm_pdr* pdrRepo,
                 try
                 {
                     pldm_entity entity{};
-                    entity.entity_type = handle.getEntityType(interface.first);
+                    entity.entity_type = parser.getEntityType(interface.first);
                     pldm_entity_node* parent = nullptr;
                     auto parentObj = pldm::utils::findParent(object.first.str);
                     // To add a FRU to the entity association tree, we need to
@@ -90,8 +91,10 @@ FruImpl::FruImpl(const std::string& configPath, pldm_pdr* pdrRepo,
                         PLDM_ENTITY_ASSOCIAION_PHYSICAL);
                     objToEntityNode[object.first.str] = node;
 
-                    auto recordInfos = handle.getRecordInfo(interface.first);
+                    auto recordInfos = parser.getRecordInfo(interface.first);
                     populateRecords(interfaces, recordInfos, entity);
+
+                    associatedEntityMap.emplace(object.first, entity);
                     break;
                 }
                 catch (const std::exception& e)
@@ -115,6 +118,7 @@ FruImpl::FruImpl(const std::string& configPath, pldm_pdr* pdrRepo,
         // Calculate the checksum
         checksum = crc32(table.data(), table.size());
     }
+    isBuilt = true;
 }
 
 void FruImpl::populateRecords(
@@ -202,12 +206,51 @@ void FruImpl::getFRUTable(Response& response)
                 iter);
 }
 
+int FruImpl::getFRURecordByOption(std::vector<uint8_t>& fruData,
+                                  uint16_t /* fruTableHandle */,
+                                  uint16_t recordSetIdentifer,
+                                  uint8_t recordType, uint8_t fieldType)
+{
+    // FRU table is built lazily, build if not done.
+    buildFRUTable();
+
+    /* 7 is sizeof(checksum,4) + padBytesMax(3)
+     * We can not know size of the record table got by options in advance, but
+     * it must be less than the source table. So it's safe to use sizeof the
+     * source table + 7 as the buffer length
+     */
+    size_t recordTableSize = table.size() - padBytes + 7;
+    fruData.resize(recordTableSize, 0);
+
+    get_fru_record_by_option(table.data(), table.size() - padBytes,
+                             fruData.data(), &recordTableSize,
+                             recordSetIdentifer, recordType, fieldType);
+
+    if (recordTableSize == 0)
+    {
+        return PLDM_FRU_DATA_STRUCTURE_TABLE_UNAVAILABLE;
+    }
+
+    auto pads = utils::getNumPadBytes(recordTableSize);
+    auto sum = crc32(fruData.data(), recordTableSize + pads);
+
+    auto iter = fruData.begin() + recordTableSize + pads;
+    std::copy_n(reinterpret_cast<const uint8_t*>(&checksum), sizeof(checksum),
+                iter);
+    fruData.resize(recordTableSize + pads + sizeof(sum));
+
+    return PLDM_SUCCESS;
+}
+
 namespace fru
 {
 
 Response Handler::getFRURecordTableMetadata(const pldm_msg* request,
                                             size_t /*payloadLength*/)
 {
+    // FRU table is built lazily, build if not done.
+    buildFRUTable();
+
     constexpr uint8_t major = 0x01;
     constexpr uint8_t minor = 0x00;
     constexpr uint32_t maxSize = 0xFFFFFFFF;
@@ -232,6 +275,9 @@ Response Handler::getFRURecordTableMetadata(const pldm_msg* request,
 Response Handler::getFRURecordTable(const pldm_msg* request,
                                     size_t payloadLength)
 {
+    // FRU table is built lazily, build if not done.
+    buildFRUTable();
+
     if (payloadLength != PLDM_GET_FRU_RECORD_TABLE_REQ_BYTES)
     {
         return ccOnlyResponse(request, PLDM_ERROR_INVALID_LENGTH);
@@ -250,6 +296,57 @@ Response Handler::getFRURecordTable(const pldm_msg* request,
     }
 
     impl.getFRUTable(response);
+
+    return response;
+}
+
+Response Handler::getFRURecordByOption(const pldm_msg* request,
+                                       size_t payloadLength)
+{
+    if (payloadLength != sizeof(pldm_get_fru_record_by_option_req))
+    {
+        return ccOnlyResponse(request, PLDM_ERROR_INVALID_LENGTH);
+    }
+
+    uint32_t retDataTransferHandle{};
+    uint16_t retFruTableHandle{};
+    uint16_t retRecordSetIdentifier{};
+    uint8_t retRecordType{};
+    uint8_t retFieldType{};
+    uint8_t retTransferOpFlag{};
+
+    auto rc = decode_get_fru_record_by_option_req(
+        request, payloadLength, &retDataTransferHandle, &retFruTableHandle,
+        &retRecordSetIdentifier, &retRecordType, &retFieldType,
+        &retTransferOpFlag);
+
+    if (rc != PLDM_SUCCESS)
+    {
+        return ccOnlyResponse(request, rc);
+    }
+
+    std::vector<uint8_t> fruData;
+    rc = impl.getFRURecordByOption(fruData, retFruTableHandle,
+                                   retRecordSetIdentifier, retRecordType,
+                                   retFieldType);
+    if (rc != PLDM_SUCCESS)
+    {
+        return ccOnlyResponse(request, rc);
+    }
+
+    auto respPayloadLength =
+        PLDM_GET_FRU_RECORD_BY_OPTION_MIN_RESP_BYTES + fruData.size();
+    Response response(sizeof(pldm_msg_hdr) + respPayloadLength, 0);
+    auto responsePtr = reinterpret_cast<pldm_msg*>(response.data());
+
+    rc = encode_get_fru_record_by_option_resp(
+        request->hdr.instance_id, PLDM_SUCCESS, 0, PLDM_START_AND_END,
+        fruData.data(), fruData.size(), responsePtr, respPayloadLength);
+
+    if (rc != PLDM_SUCCESS)
+    {
+        return ccOnlyResponse(request, rc);
+    }
 
     return response;
 }

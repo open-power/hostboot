@@ -1,6 +1,6 @@
 #include "libpldm/base.h"
 
-#include "invoker.hpp"
+#include "pldmd/invoker.hpp"
 
 #include <stdexcept>
 

@@ -4,9 +4,9 @@
 
 #include "libpldm/base.h"
 
+#include "common/utils.hpp"
 #include "file_io_by_type.hpp"
 #include "file_table.hpp"
-#include "utils.hpp"
 #include "xyz/openbmc_project/Common/error.hpp"
 
 #include <fcntl.h>

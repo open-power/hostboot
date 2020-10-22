@@ -2,7 +2,8 @@
 
 #include "libpldm/platform.h"
 
-#include "libpldmresponder/pdr_utils.hpp"
+#include "pdr.hpp"
+#include "pdr_utils.hpp"
 
 namespace pldm
 {
@@ -24,9 +25,9 @@ static const Json empty{};
  *  @param[out] repo - pdr::RepoInterface
  *
  */
-template <class Handler>
-void generateStateEffecterPDR(const Json& json, Handler& handler,
-                              pdr_utils::RepoInterface& repo)
+template <class DBusInterface, class Handler>
+void generateStateEffecterPDR(const DBusInterface& dBusIntf, const Json& json,
+                              Handler& handler, pdr_utils::RepoInterface& repo)
 {
     static const std::vector<Json> emptyList{};
     auto entries = json.value("entries", emptyList);
@@ -62,11 +63,37 @@ void generateStateEffecterPDR(const Json& json, Handler& handler,
         pdr->hdr.record_change_num = 0;
         pdr->hdr.length = pdrSize - sizeof(pldm_pdr_hdr);
 
-        pdr->terminus_handle = 0;
+        pdr->terminus_handle = pdr::BmcPldmTerminusHandle;
         pdr->effecter_id = handler.getNextEffecterId();
-        pdr->entity_type = e.value("type", 0);
-        pdr->entity_instance = e.value("instance", 0);
-        pdr->container_id = e.value("container", 0);
+
+        try
+        {
+            std::string entity_path = e.value("entity_path", "");
+            auto& associatedEntityMap = handler.getAssociateEntityMap();
+            if (entity_path != "" && associatedEntityMap.find(entity_path) !=
+                                         associatedEntityMap.end())
+            {
+                pdr->entity_type =
+                    associatedEntityMap.at(entity_path).entity_type;
+                pdr->entity_instance =
+                    associatedEntityMap.at(entity_path).entity_instance_num;
+                pdr->container_id =
+                    associatedEntityMap.at(entity_path).entity_container_id;
+            }
+            else
+            {
+                pdr->entity_type = e.value("type", 0);
+                pdr->entity_instance = e.value("instance", 0);
+                pdr->container_id = e.value("container", 0);
+            }
+        }
+        catch (const std::exception& ex)
+        {
+            pdr->entity_type = e.value("type", 0);
+            pdr->entity_instance = e.value("instance", 0);
+            pdr->container_id = e.value("container", 0);
+        }
+
         pdr->effecter_semantic_id = 0;
         pdr->effecter_init = PLDM_NO_INIT;
         pdr->has_description_pdr = false;
@@ -95,7 +122,7 @@ void generateStateEffecterPDR(const Json& json, Handler& handler,
                 auto bit = state - (index * 8);
                 bitfield8_t* bf = reinterpret_cast<bitfield8_t*>(start + index);
                 bf->byte |= 1 << bit;
-                stateValues.emplace_back(std::move(state));
+                stateValues.emplace_back(state);
             }
             start += possibleStates->possible_states_size;
 
@@ -104,6 +131,17 @@ void generateStateEffecterPDR(const Json& json, Handler& handler,
             auto interface = dbusEntry.value("interface", "");
             auto propertyName = dbusEntry.value("property_name", "");
             auto propertyType = dbusEntry.value("property_type", "");
+
+            try
+            {
+                auto service =
+                    dBusIntf.getService(objectPath.c_str(), interface.c_str());
+            }
+            catch (const std::exception& e)
+            {
+                continue;
+            }
+
             pldm::utils::DBusMapping dbusMapping{objectPath, interface,
                                                  propertyName, propertyType};
             dbusMappings.emplace_back(std::move(dbusMapping));

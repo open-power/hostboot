@@ -1,6 +1,6 @@
 #include "bios.hpp"
 
-#include "utils.hpp"
+#include "common/utils.hpp"
 
 #include <time.h>
 
@@ -67,7 +67,9 @@ using EpochTimeUS = uint64_t;
 
 DBusHandler dbusHandler;
 
-Handler::Handler() : biosConfig(BIOS_JSONS_DIR, BIOS_TABLES_DIR, &dbusHandler)
+Handler::Handler(int fd, uint8_t eid, dbus_api::Requester* requester) :
+    biosConfig(BIOS_JSONS_DIR, BIOS_TABLES_DIR, &dbusHandler, fd, eid,
+               requester)
 {
     biosConfig.removeTables();
     biosConfig.buildTables();
@@ -83,6 +85,10 @@ Handler::Handler() : biosConfig(BIOS_JSONS_DIR, BIOS_TABLES_DIR, &dbusHandler)
     handlers.emplace(PLDM_GET_BIOS_TABLE,
                      [this](const pldm_msg* request, size_t payloadLength) {
                          return this->getBIOSTable(request, payloadLength);
+                     });
+    handlers.emplace(PLDM_SET_BIOS_TABLE,
+                     [this](const pldm_msg* request, size_t payloadLength) {
+                         return this->setBIOSTable(request, payloadLength);
                      });
     handlers.emplace(PLDM_GET_BIOS_ATTRIBUTE_CURRENT_VALUE_BY_HANDLE,
                      [this](const pldm_msg* request, size_t payloadLength) {
@@ -214,6 +220,40 @@ Response Handler::getBIOSTable(const pldm_msg* request, size_t payloadLength)
     rc = encode_get_bios_table_resp(
         request->hdr.instance_id, PLDM_SUCCESS, 0 /* nxtTransferHandle */,
         PLDM_START_AND_END, table->data(), response.size(), responsePtr);
+    if (rc != PLDM_SUCCESS)
+    {
+        return ccOnlyResponse(request, rc);
+    }
+
+    return response;
+}
+
+Response Handler::setBIOSTable(const pldm_msg* request, size_t payloadLength)
+{
+    uint32_t transferHandle{};
+    uint8_t transferOpFlag{};
+    uint8_t tableType{};
+    struct variable_field field;
+
+    auto rc = decode_set_bios_table_req(request, payloadLength, &transferHandle,
+                                        &transferOpFlag, &tableType, &field);
+    if (rc != PLDM_SUCCESS)
+    {
+        return ccOnlyResponse(request, rc);
+    }
+
+    Table table(field.ptr, field.ptr + field.length);
+    rc = biosConfig.setBIOSTable(tableType, table);
+    if (rc != PLDM_SUCCESS)
+    {
+        return ccOnlyResponse(request, rc);
+    }
+
+    Response response(sizeof(pldm_msg_hdr) + PLDM_SET_BIOS_TABLE_RESP_BYTES);
+    auto responsePtr = reinterpret_cast<pldm_msg*>(response.data());
+
+    rc = encode_set_bios_table_resp(request->hdr.instance_id, PLDM_SUCCESS,
+                                    0 /* nxtTransferHandle */, responsePtr);
     if (rc != PLDM_SUCCESS)
     {
         return ccOnlyResponse(request, rc);

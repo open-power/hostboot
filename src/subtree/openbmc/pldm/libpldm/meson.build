@@ -4,7 +4,9 @@ headers = [
   'platform.h',
   'bios.h',
   'bios_table.h',
+  'entity.h',
   'states.h',
+  'state_set.h',
   'fru.h',
   'utils.h',
   'pdr.h'
@@ -25,11 +27,13 @@ libpldm_headers = ['.', '..']
 if get_option('oem-ibm').enabled()
   headers += [
     '../oem/ibm/libpldm/file_io.h',
-    '../oem/ibm/libpldm/host.h'
+    '../oem/ibm/libpldm/host.h',
+    '../oem/ibm/libpldm/platform_oem_ibm.h'
   ]
   sources += [
     '../oem/ibm/libpldm/file_io.c',
-    '../oem/ibm/libpldm/host.c'
+    '../oem/ibm/libpldm/host.c',
+    '../oem/ibm/libpldm/platform_oem_ibm.c'
   ]
   libpldm_headers += ['../oem/ibm']
 endif

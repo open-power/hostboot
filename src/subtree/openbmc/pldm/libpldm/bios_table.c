@@ -1117,3 +1117,19 @@ out:
 	pldm_bios_table_iter_free(iter);
 	return rc;
 }
+
+bool pldm_bios_table_checksum(const uint8_t *table, size_t size)
+{
+	if (table == NULL)
+		return false;
+
+	// 12: BIOSStringHandle(uint16) + BIOSStringLength(uint16) +
+	//     Variable(4) + checksum(uint32)
+	if (size < 12)
+		return false;
+
+	uint32_t src_crc = le32toh(*(uint32_t *)(table + size - 4));
+	uint32_t dst_crc = crc32(table, size - 4);
+
+	return src_crc == dst_crc;
+}

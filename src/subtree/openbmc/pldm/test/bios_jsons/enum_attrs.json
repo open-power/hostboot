@@ -4,9 +4,10 @@
          "attribute_name" : "HMCManagedState",
          "possible_values" : [ "On", "Off" ],
          "default_values" : [ "On" ],
-         "object_path" : "/xyz/abc/def",
+         "readOnly" : false,
          "dbus":
             {
+               "object_path" : "/xyz/abc/def",
                "interface" : "xyz.openbmc_project.HMCManaged.State",
                "property_name" : "State",
                "property_type" : "string",
@@ -17,6 +18,7 @@
          "attribute_name" : "FWBootSide",
          "possible_values" : [ "Perm", "Temp" ],
          "default_values" : [ "Perm" ],
+         "readOnly" : false,
          "dbus":
             {
                "object_path" : "/xyz/abc/def",
@@ -30,6 +32,7 @@
          "attribute_name" : "InbandCodeUpdate",
          "possible_values" : [ "Allowed", "NotAllowed" ],
          "default_values" : [ "Allowed" ],
+         "readOnly" : false,
          "dbus":
             {
                "object_path" : "/xyz/abc/def",
@@ -42,7 +45,8 @@
       {
          "attribute_name" : "CodeUpdatePolicy",
          "possible_values" : [ "Concurrent", "Disruptive" ],
-         "default_values" : [ "Concurrent" ]
+         "default_values" : [ "Concurrent" ],
+         "readOnly" : true
       }
     ]
 }

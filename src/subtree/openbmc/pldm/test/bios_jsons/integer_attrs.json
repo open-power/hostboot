@@ -6,6 +6,7 @@
          "upper_bound" : 15,
          "scalar_increment" : 1,
          "default_value" : 0,
+         "readOnly" : false,
          "dbus":{
             "object_path" : "/xyz/openbmc_project/avsbus",
             "interface" : "xyz.openbmc.AvsBus.Manager",
@@ -18,14 +19,16 @@
          "lower_bound" : 1,
          "upper_bound" : 15,
          "scalar_increment" : 1,
-         "default_value" : 2
+         "default_value" : 2,
+         "readOnly" : true
       },
       {
          "attribute_name" : "INTEGER_INVALID_CASE",
          "lower_bound" : 1,
          "upper_bound" : 15,
          "scalar_increment" : 2,
-         "default_value" : 4
+         "default_value" : 3,
+         "readOnly" : true
       }
    ]
 }

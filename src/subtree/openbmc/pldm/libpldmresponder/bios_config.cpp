@@ -4,9 +4,16 @@
 #include "bios_integer_attribute.hpp"
 #include "bios_string_attribute.hpp"
 #include "bios_table.hpp"
+#include "common/bios_utils.hpp"
+
+#include <xyz/openbmc_project/BIOSConfig/Manager/server.hpp>
 
 #include <fstream>
 #include <iostream>
+
+#ifdef OEM_IBM
+#include "oem/ibm/libpldmresponder/platform_oem_ibm.hpp"
+#endif
 
 namespace pldm
 {
@@ -16,6 +23,9 @@ namespace bios
 {
 namespace
 {
+
+using BIOSConfigManager =
+    sdbusplus::xyz::openbmc_project::BIOSConfig::server::Manager;
 
 constexpr auto enumJsonFile = "enum_attrs.json";
 constexpr auto stringJsonFile = "string_attrs.json";
@@ -28,12 +38,16 @@ constexpr auto attrValueTableFile = "attributeValueTable";
 } // namespace
 
 BIOSConfig::BIOSConfig(const char* jsonDir, const char* tableDir,
-                       DBusHandler* const dbusHandler) :
+                       DBusHandler* const dbusHandler, int fd, uint8_t eid,
+                       dbus_api::Requester* requester) :
     jsonDir(jsonDir),
-    tableDir(tableDir), dbusHandler(dbusHandler)
+    tableDir(tableDir), dbusHandler(dbusHandler), fd(fd), eid(eid),
+    requester(requester)
+
 {
     fs::create_directories(tableDir);
     constructAttributes();
+    listenPendingAttributes();
 }
 
 void BIOSConfig::buildTables()
@@ -61,6 +75,379 @@ std::optional<Table> BIOSConfig::getBIOSTable(pldm_bios_table_types tableType)
             break;
     }
     return loadTable(tablePath);
+}
+
+int BIOSConfig::setBIOSTable(uint8_t tableType, const Table& table,
+                             bool updateBaseBIOSTable)
+{
+    fs::path stringTablePath(tableDir / stringTableFile);
+    fs::path attrTablePath(tableDir / attrTableFile);
+    fs::path attrValueTablePath(tableDir / attrValueTableFile);
+
+    if (!pldm_bios_table_checksum(table.data(), table.size()))
+    {
+        return PLDM_INVALID_BIOS_TABLE_DATA_INTEGRITY_CHECK;
+    }
+
+    if (tableType == PLDM_BIOS_STRING_TABLE)
+    {
+        storeTable(stringTablePath, table);
+    }
+    else if (tableType == PLDM_BIOS_ATTR_TABLE)
+    {
+        BIOSTable biosStringTable(stringTablePath.c_str());
+        if (biosStringTable.isEmpty())
+        {
+            return PLDM_INVALID_BIOS_TABLE_TYPE;
+        }
+
+        auto rc = checkAttributeTable(table);
+        if (rc != PLDM_SUCCESS)
+        {
+            return rc;
+        }
+
+        storeTable(attrTablePath, table);
+    }
+    else if (tableType == PLDM_BIOS_ATTR_VAL_TABLE)
+    {
+        BIOSTable biosStringTable(stringTablePath.c_str());
+        BIOSTable biosStringValueTable(attrTablePath.c_str());
+        if (biosStringTable.isEmpty() || biosStringValueTable.isEmpty())
+        {
+            return PLDM_INVALID_BIOS_TABLE_TYPE;
+        }
+
+        auto rc = checkAttributeValueTable(table);
+        if (rc != PLDM_SUCCESS)
+        {
+            return rc;
+        }
+
+        storeTable(attrValueTablePath, table);
+    }
+    else
+    {
+        return PLDM_INVALID_BIOS_TABLE_TYPE;
+    }
+
+    if ((tableType == PLDM_BIOS_ATTR_VAL_TABLE) && updateBaseBIOSTable)
+    {
+        std::cout << "setBIOSTable:: updateBaseBIOSTableProperty() "
+                  << "\n";
+        updateBaseBIOSTableProperty();
+    }
+
+    return PLDM_SUCCESS;
+}
+
+int BIOSConfig::checkAttributeTable(const Table& table)
+{
+    using namespace pldm::bios::utils;
+    auto stringTable = getBIOSTable(PLDM_BIOS_STRING_TABLE);
+    for (auto entry :
+         BIOSTableIter<PLDM_BIOS_ATTR_TABLE>(table.data(), table.size()))
+    {
+        auto attrNameHandle =
+            pldm_bios_table_attr_entry_decode_string_handle(entry);
+
+        auto stringEnty = pldm_bios_table_string_find_by_handle(
+            stringTable->data(), stringTable->size(), attrNameHandle);
+        if (stringEnty == nullptr)
+        {
+            return PLDM_INVALID_BIOS_ATTR_HANDLE;
+        }
+
+        auto attrType = static_cast<pldm_bios_attribute_type>(
+            pldm_bios_table_attr_entry_decode_attribute_type(entry));
+
+        switch (attrType)
+        {
+            case PLDM_BIOS_ENUMERATION:
+            case PLDM_BIOS_ENUMERATION_READ_ONLY:
+            {
+                auto pvNum =
+                    pldm_bios_table_attr_entry_enum_decode_pv_num(entry);
+                std::vector<uint16_t> pvHandls(pvNum);
+                pldm_bios_table_attr_entry_enum_decode_pv_hdls(
+                    entry, pvHandls.data(), pvHandls.size());
+                auto defNum =
+                    pldm_bios_table_attr_entry_enum_decode_def_num(entry);
+                std::vector<uint8_t> defIndices(defNum);
+                pldm_bios_table_attr_entry_enum_decode_def_indices(
+                    entry, defIndices.data(), defIndices.size());
+
+                for (size_t i = 0; i < pvHandls.size(); i++)
+                {
+                    auto stringEntry = pldm_bios_table_string_find_by_handle(
+                        stringTable->data(), stringTable->size(), pvHandls[i]);
+                    if (stringEntry == nullptr)
+                    {
+                        return PLDM_INVALID_BIOS_ATTR_HANDLE;
+                    }
+                }
+
+                for (size_t i = 0; i < defIndices.size(); i++)
+                {
+                    auto stringEntry = pldm_bios_table_string_find_by_handle(
+                        stringTable->data(), stringTable->size(),
+                        pvHandls[defIndices[i]]);
+                    if (stringEntry == nullptr)
+                    {
+                        return PLDM_INVALID_BIOS_ATTR_HANDLE;
+                    }
+                }
+                break;
+            }
+            case PLDM_BIOS_INTEGER:
+            case PLDM_BIOS_INTEGER_READ_ONLY:
+            case PLDM_BIOS_STRING:
+            case PLDM_BIOS_STRING_READ_ONLY:
+            case PLDM_BIOS_PASSWORD:
+            case PLDM_BIOS_PASSWORD_READ_ONLY:
+                break;
+            default:
+                return PLDM_INVALID_BIOS_ATTR_HANDLE;
+        }
+    }
+
+    return PLDM_SUCCESS;
+}
+
+int BIOSConfig::checkAttributeValueTable(const Table& table)
+{
+    using namespace pldm::bios::utils;
+    auto stringTable = getBIOSTable(PLDM_BIOS_STRING_TABLE);
+    auto attrTable = getBIOSTable(PLDM_BIOS_ATTR_TABLE);
+
+    baseBIOSTableMaps.clear();
+
+    for (auto tableEntry :
+         BIOSTableIter<PLDM_BIOS_ATTR_VAL_TABLE>(table.data(), table.size()))
+    {
+        AttributeName attributeName{};
+        AttributeType attributeType{};
+        ReadonlyStatus readonlyStatus{};
+        DisplayName displayName{};
+        Description description{};
+        MenuPath menuPath{};
+        CurrentValue currentValue{};
+        DefaultValue defaultValue{};
+        Option options{};
+
+        auto attrValueHandle =
+            pldm_bios_table_attr_value_entry_decode_attribute_handle(
+                tableEntry);
+        auto attrType = static_cast<pldm_bios_attribute_type>(
+            pldm_bios_table_attr_value_entry_decode_attribute_type(tableEntry));
+
+        auto attrEntry = pldm_bios_table_attr_find_by_handle(
+            attrTable->data(), attrTable->size(), attrValueHandle);
+        if (attrEntry == nullptr)
+        {
+            return PLDM_INVALID_BIOS_ATTR_HANDLE;
+        }
+        auto attrHandle =
+            pldm_bios_table_attr_entry_decode_attribute_handle(attrEntry);
+        auto attrNameHandle =
+            pldm_bios_table_attr_entry_decode_string_handle(attrEntry);
+
+        auto stringEntry = pldm_bios_table_string_find_by_handle(
+            stringTable->data(), stringTable->size(), attrNameHandle);
+        if (stringEntry == nullptr)
+        {
+            return PLDM_INVALID_BIOS_ATTR_HANDLE;
+        }
+        auto strLength =
+            pldm_bios_table_string_entry_decode_string_length(stringEntry);
+        std::vector<char> buffer(strLength + 1 /* sizeof '\0' */);
+        pldm_bios_table_string_entry_decode_string(stringEntry, buffer.data(),
+                                                   buffer.size());
+        attributeName = std::string(buffer.data(), buffer.data() + strLength);
+
+        if (!biosAttributes.empty())
+        {
+            readonlyStatus =
+                biosAttributes[attrHandle % biosAttributes.size()]->readOnly;
+        }
+
+        switch (attrType)
+        {
+            case PLDM_BIOS_ENUMERATION:
+            case PLDM_BIOS_ENUMERATION_READ_ONLY:
+            {
+                auto getValue = [](uint16_t handle,
+                                   const Table& table) -> std::string {
+                    auto stringEntry = pldm_bios_table_string_find_by_handle(
+                        table.data(), table.size(), handle);
+
+                    auto strLength =
+                        pldm_bios_table_string_entry_decode_string_length(
+                            stringEntry);
+                    std::vector<char> buffer(strLength + 1 /* sizeof '\0' */);
+                    pldm_bios_table_string_entry_decode_string(
+                        stringEntry, buffer.data(), buffer.size());
+
+                    return std::string(buffer.data(),
+                                       buffer.data() + strLength);
+                };
+
+                attributeType = "xyz.openbmc_project.BIOSConfig.Manager."
+                                "AttributeType.Enumeration";
+
+                auto pvNum =
+                    pldm_bios_table_attr_entry_enum_decode_pv_num(attrEntry);
+                std::vector<uint16_t> pvHandls(pvNum);
+                pldm_bios_table_attr_entry_enum_decode_pv_hdls(
+                    attrEntry, pvHandls.data(), pvHandls.size());
+
+                // get possible_value
+                for (size_t i = 0; i < pvHandls.size(); i++)
+                {
+                    options.push_back(
+                        std::make_tuple("xyz.openbmc_project.BIOSConfig."
+                                        "Manager.BoundType.OneOf",
+                                        getValue(pvHandls[i], *stringTable)));
+                }
+
+                auto count =
+                    pldm_bios_table_attr_value_entry_enum_decode_number(
+                        tableEntry);
+                std::vector<uint8_t> handles(count);
+                pldm_bios_table_attr_value_entry_enum_decode_handles(
+                    tableEntry, handles.data(), handles.size());
+
+                // get current_value
+                for (size_t i = 0; i < handles.size(); i++)
+                {
+                    currentValue = getValue(pvHandls[handles[i]], *stringTable);
+                }
+
+                auto defNum =
+                    pldm_bios_table_attr_entry_enum_decode_def_num(attrEntry);
+                std::vector<uint8_t> defIndices(defNum);
+                pldm_bios_table_attr_entry_enum_decode_def_indices(
+                    attrEntry, defIndices.data(), defIndices.size());
+
+                // get default_value
+                for (size_t i = 0; i < defIndices.size(); i++)
+                {
+                    defaultValue =
+                        getValue(pvHandls[defIndices[i]], *stringTable);
+                }
+
+                break;
+            }
+            case PLDM_BIOS_INTEGER:
+            case PLDM_BIOS_INTEGER_READ_ONLY:
+            {
+                attributeType = "xyz.openbmc_project.BIOSConfig.Manager."
+                                "AttributeType.Integer";
+                currentValue = static_cast<int64_t>(
+                    pldm_bios_table_attr_value_entry_integer_decode_cv(
+                        tableEntry));
+
+                uint64_t lower, upper, def;
+                uint32_t scalar;
+                pldm_bios_table_attr_entry_integer_decode(
+                    attrEntry, &lower, &upper, &scalar, &def);
+                options.push_back(
+                    std::make_tuple("xyz.openbmc_project.BIOSConfig.Manager."
+                                    "BoundType.LowerBound",
+                                    static_cast<int64_t>(lower)));
+                options.push_back(
+                    std::make_tuple("xyz.openbmc_project.BIOSConfig.Manager."
+                                    "BoundType.UpperBound",
+                                    static_cast<int64_t>(upper)));
+                options.push_back(
+                    std::make_tuple("xyz.openbmc_project.BIOSConfig.Manager."
+                                    "BoundType.ScalarIncrement",
+                                    static_cast<int64_t>(scalar)));
+                defaultValue = static_cast<int64_t>(def);
+                break;
+            }
+            case PLDM_BIOS_STRING:
+            case PLDM_BIOS_STRING_READ_ONLY:
+            {
+                attributeType = "xyz.openbmc_project.BIOSConfig.Manager."
+                                "AttributeType.String";
+                variable_field currentString;
+                pldm_bios_table_attr_value_entry_string_decode_string(
+                    tableEntry, &currentString);
+                currentValue = std::string(
+                    reinterpret_cast<const char*>(currentString.ptr),
+                    currentString.length);
+                auto min = pldm_bios_table_attr_entry_string_decode_min_length(
+                    attrEntry);
+                auto max = pldm_bios_table_attr_entry_string_decode_max_length(
+                    attrEntry);
+                auto def =
+                    pldm_bios_table_attr_entry_string_decode_def_string_length(
+                        attrEntry);
+                std::vector<char> defString(def + 1);
+                pldm_bios_table_attr_entry_string_decode_def_string(
+                    attrEntry, defString.data(), defString.size());
+                options.push_back(
+                    std::make_tuple("xyz.openbmc_project.BIOSConfig.Manager."
+                                    "BoundType.MinStringLength",
+                                    static_cast<int64_t>(min)));
+                options.push_back(
+                    std::make_tuple("xyz.openbmc_project.BIOSConfig.Manager."
+                                    "BoundType.MaxStringLength",
+                                    static_cast<int64_t>(max)));
+                defaultValue = defString.data();
+                break;
+            }
+            case PLDM_BIOS_PASSWORD:
+            case PLDM_BIOS_PASSWORD_READ_ONLY:
+            {
+                attributeType = "xyz.openbmc_project.BIOSConfig.Manager."
+                                "AttributeType.Password";
+                break;
+            }
+            default:
+                return PLDM_INVALID_BIOS_ATTR_HANDLE;
+        }
+        baseBIOSTableMaps.emplace(
+            std::move(attributeName),
+            std::make_tuple(attributeType, readonlyStatus, displayName,
+                            description, menuPath, currentValue, defaultValue,
+                            std::move(options)));
+    }
+
+    return PLDM_SUCCESS;
+}
+
+void BIOSConfig::updateBaseBIOSTableProperty()
+{
+    constexpr static auto biosConfigPath =
+        "/xyz/openbmc_project/bios_config/manager";
+    constexpr static auto biosConfigInterface =
+        "xyz.openbmc_project.BIOSConfig.Manager";
+    constexpr static auto biosConfigPropertyName = "BaseBIOSTable";
+    constexpr static auto dbusProperties = "org.freedesktop.DBus.Properties";
+
+    if (baseBIOSTableMaps.empty())
+    {
+        return;
+    }
+
+    try
+    {
+        auto& bus = dbusHandler->getBus();
+        auto service =
+            dbusHandler->getService(biosConfigPath, biosConfigInterface);
+        auto method = bus.new_method_call(service.c_str(), biosConfigPath,
+                                          dbusProperties, "Set");
+        std::variant<BaseBIOSTable> value = baseBIOSTableMaps;
+        method.append(biosConfigInterface, biosConfigPropertyName, value);
+        bus.call_noreply(method);
+    }
+    catch (const std::exception& e)
+    {
+        std::cerr << "failed to update BaseBIOSTable property, ERROR="
+                  << e.what() << "\n";
+    }
 }
 
 void BIOSConfig::constructAttributes()
@@ -102,9 +489,8 @@ void BIOSConfig::buildAndStoreAttrTables(const Table& stringTable)
 
     table::appendPadAndChecksum(attrTable);
     table::appendPadAndChecksum(attrValueTable);
-
-    storeTable(tableDir / attrTableFile, attrTable);
-    storeTable(tableDir / attrValueTableFile, attrValueTable);
+    setBIOSTable(PLDM_BIOS_ATTR_TABLE, attrTable);
+    setBIOSTable(PLDM_BIOS_ATTR_VAL_TABLE, attrValueTable);
 }
 
 std::optional<Table> BIOSConfig::buildAndStoreStringTable()
@@ -137,7 +523,7 @@ std::optional<Table> BIOSConfig::buildAndStoreStringTable()
     }
 
     table::appendPadAndChecksum(table);
-    storeTable(tableDir / stringTableFile, table);
+    setBIOSTable(PLDM_BIOS_STRING_TABLE, table);
     return table;
 }
 
@@ -255,7 +641,8 @@ int BIOSConfig::checkAttrValueToUpdate(
     };
 }
 
-int BIOSConfig::setAttrValue(const void* entry, size_t size)
+int BIOSConfig::setAttrValue(const void* entry, size_t size,
+                             bool updateBaseBIOSTable)
 {
     auto attrValueTable = getBIOSTable(PLDM_BIOS_ATTR_VAL_TABLE);
     auto attrTable = getBIOSTable(PLDM_BIOS_ATTR_TABLE);
@@ -314,8 +701,8 @@ int BIOSConfig::setAttrValue(const void* entry, size_t size)
         return PLDM_ERROR;
     }
 
-    BIOSTable biosAttrValueTable((tableDir / attrValueTableFile).c_str());
-    biosAttrValueTable.store(*destTable);
+    setBIOSTable(PLDM_BIOS_ATTR_VAL_TABLE, *destTable, updateBaseBIOSTable);
+
     return PLDM_SUCCESS;
 }
 
@@ -408,6 +795,124 @@ void BIOSConfig::processBiosAttrChangeNotification(
     {
         storeTable(tableDir / attrValueTableFile, *destTable);
     }
+}
+
+uint16_t BIOSConfig::findAttrHandle(const std::string& attrName)
+{
+    auto stringTable = getBIOSTable(PLDM_BIOS_STRING_TABLE);
+    auto attrTable = getBIOSTable(PLDM_BIOS_ATTR_TABLE);
+
+    BIOSStringTable biosStringTable(*stringTable);
+    pldm::bios::utils::BIOSTableIter<PLDM_BIOS_ATTR_TABLE> attrTableIter(
+        attrTable->data(), attrTable->size());
+    auto stringHandle = biosStringTable.findHandle(attrName);
+
+    for (auto entry : pldm::bios::utils::BIOSTableIter<PLDM_BIOS_ATTR_TABLE>(
+             attrTable->data(), attrTable->size()))
+    {
+        auto header = table::attribute::decodeHeader(entry);
+        if (header.stringHandle == stringHandle)
+        {
+            return header.attrHandle;
+        }
+    }
+
+    throw std::invalid_argument("Unknow attribute Name");
+}
+
+void BIOSConfig::constructPendingAttribute(
+    const PendingAttributes& pendingAttributes)
+{
+    std::vector<uint16_t> listOfHandles{};
+
+    for (auto& attribute : pendingAttributes)
+    {
+        std::string attributeName = attribute.first;
+        auto& [attributeType, attributevalue] = attribute.second;
+
+        auto iter = std::find_if(biosAttributes.begin(), biosAttributes.end(),
+                                 [&attributeName](const auto& attr) {
+                                     return attr->name == attributeName;
+                                 });
+
+        if (iter == biosAttributes.end())
+        {
+            std::cerr << "Wrong attribute name, attributeName = "
+                      << attributeName << std::endl;
+            continue;
+        }
+
+        Table attrValueEntry(sizeof(pldm_bios_attr_val_table_entry), 0);
+        auto entry = reinterpret_cast<pldm_bios_attr_val_table_entry*>(
+            attrValueEntry.data());
+
+        auto handler = findAttrHandle(attributeName);
+        auto type =
+            BIOSConfigManager::convertAttributeTypeFromString(attributeType);
+
+        if (type != BIOSConfigManager::AttributeType::Enumeration &&
+            type != BIOSConfigManager::AttributeType::String &&
+            type != BIOSConfigManager::AttributeType::Integer)
+        {
+            std::cerr << "Attribute type not supported, attributeType = "
+                      << attributeType << std::endl;
+            continue;
+        }
+
+        entry->attr_handle = htole16(handler);
+        listOfHandles.emplace_back(htole16(handler));
+
+        (*iter)->generateAttributeEntry(attributevalue, attrValueEntry);
+
+        setAttrValue(attrValueEntry.data(), attrValueEntry.size(), false);
+    }
+
+    if (listOfHandles.size())
+    {
+#ifdef OEM_IBM
+        auto rc = pldm::responder::platform::sendBiosAttributeUpdateEvent(
+            fd, eid, requester, listOfHandles);
+        if (rc != PLDM_SUCCESS)
+        {
+            return;
+        }
+#endif
+        updateBaseBIOSTableProperty();
+    }
+}
+
+void BIOSConfig::listenPendingAttributes()
+{
+    constexpr auto objPath = "/xyz/openbmc_project/bios_config/manager";
+    constexpr auto objInterface = "xyz.openbmc_project.BIOSConfig.Manager";
+
+    using namespace sdbusplus::bus::match::rules;
+    auto updateBIOSMatch = std::make_unique<sdbusplus::bus::match::match>(
+        pldm::utils::DBusHandler::getBus(),
+        propertiesChanged(objPath, objInterface),
+        [this](sdbusplus::message::message& msg) {
+            constexpr auto propertyName = "PendingAttributes";
+
+            using Value =
+                std::variant<std::string, PendingAttributes, BaseBIOSTable>;
+            using Properties = std::map<DbusProp, Value>;
+
+            Properties props{};
+            std::string intf;
+            msg.read(intf, props);
+
+            auto valPropMap = props.find(propertyName);
+            if (valPropMap == props.end())
+            {
+                return;
+            }
+
+            PendingAttributes pendingAttributes =
+                std::get<PendingAttributes>(valPropMap->second);
+            this->constructPendingAttribute(pendingAttributes);
+        });
+
+    biosAttrMatch.emplace_back(std::move(updateBIOSMatch));
 }
 
 } // namespace bios

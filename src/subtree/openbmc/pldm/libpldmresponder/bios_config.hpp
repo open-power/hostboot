@@ -4,6 +4,7 @@
 
 #include "bios_attribute.hpp"
 #include "bios_table.hpp"
+#include "pldmd/dbus_impl_requester.hpp"
 
 #include <nlohmann/json.hpp>
 
@@ -22,6 +23,35 @@ namespace responder
 namespace bios
 {
 
+enum class BoundType
+{
+    LowerBound,
+    UpperBound,
+    ScalarIncrement,
+    MinStringLength,
+    MaxStringLength,
+    OneOf
+};
+
+using AttributeName = std::string;
+using AttributeType = std::string;
+using ReadonlyStatus = bool;
+using DisplayName = std::string;
+using Description = std::string;
+using MenuPath = std::string;
+using CurrentValue = std::variant<int64_t, std::string>;
+using DefaultValue = std::variant<int64_t, std::string>;
+using OptionString = std::string;
+using OptionValue = std::variant<int64_t, std::string>;
+using Option = std::vector<std::tuple<OptionString, OptionValue>>;
+using BIOSTableObj =
+    std::tuple<AttributeType, ReadonlyStatus, DisplayName, Description,
+               MenuPath, CurrentValue, DefaultValue, Option>;
+using BaseBIOSTable = std::map<AttributeName, BIOSTableObj>;
+
+using PendingObj = std::tuple<AttributeType, CurrentValue>;
+using PendingAttributes = std::map<AttributeName, PendingObj>;
+
 /** @class BIOSConfig
  *  @brief Manager BIOS Attributes
  */
@@ -39,16 +69,23 @@ class BIOSConfig
      *  @param[in] jsonDir - The directory where json file exists
      *  @param[in] tableDir - The directory where the persistent table is placed
      *  @param[in] dbusHandler - Dbus Handler
+     *  @param[in] fd - socket descriptor to communicate to host
+     *  @param[in] eid - MCTP EID of host firmware
+     *  @param[in] requester - pointer to Requester object
      */
     explicit BIOSConfig(const char* jsonDir, const char* tableDir,
-                        DBusHandler* const dbusHandler);
+                        DBusHandler* const dbusHandler, int fd, uint8_t eid,
+                        dbus_api::Requester* requester);
 
     /** @brief Set attribute value on dbus and attribute value table
      *  @param[in] entry - attribute value entry
      *  @param[in] size - size of the attribute value entry
+     *  @param[in] updateBaseBIOSTable - update BaseBIOSTable D-Bus property
+     *                                   if this is set to true
      *  @return pldm_completion_codes
      */
-    int setAttrValue(const void* entry, size_t size);
+    int setAttrValue(const void* entry, size_t size,
+                     bool updateBaseBIOSTable = true);
 
     /** @brief Remove the persistent tables */
     void removeTables();
@@ -62,10 +99,34 @@ class BIOSConfig
      */
     std::optional<Table> getBIOSTable(pldm_bios_table_types tableType);
 
+    /** @brief set BIOS table
+     *  @param[in] tableType - Indicates what table is being transferred
+     *             {BIOSStringTable=0x0, BIOSAttributeTable=0x1,
+     *              BIOSAttributeValueTable=0x2}
+     *  @param[in] table - table data
+     *  @param[in] updateBaseBIOSTable - update BaseBIOSTable D-Bus property
+     *                                   if this is set to true
+     *  @return pldm_completion_codes
+     */
+    int setBIOSTable(uint8_t tableType, const Table& table,
+                     bool updateBaseBIOSTable = true);
+
   private:
     const fs::path jsonDir;
     const fs::path tableDir;
     DBusHandler* const dbusHandler;
+    BaseBIOSTable baseBIOSTableMaps;
+
+    /** @brief socket descriptor to communicate to host */
+    int fd;
+
+    /** @brief MCTP EID of host firmware */
+    uint8_t eid;
+
+    /** @brief pointer to Requester object, primarily used to access API to
+     *  obtain PLDM instance id.
+     */
+    dbus_api::Requester* requester;
 
     // vector persists all attributes
     using BIOSAttributes = std::vector<std::unique_ptr<BIOSAttribute>>;
@@ -167,6 +228,39 @@ class BIOSConfig
     int checkAttrValueToUpdate(
         const pldm_bios_attr_val_table_entry* attrValueEntry,
         const pldm_bios_attr_table_entry* attrEntry, Table& stringTable);
+
+    /** @brief Check the attribute table
+     *  @param[in] table - The table
+     *  @return pldm_completion_codes
+     */
+    int checkAttributeTable(const Table& table);
+
+    /** @brief Check the attribute value table
+     *  @param[in] table - The table
+     *  @return pldm_completion_codes
+     */
+    int checkAttributeValueTable(const Table& table);
+
+    /** @brief Update the BaseBIOSTable property of the D-Bus interface
+     */
+    void updateBaseBIOSTableProperty();
+
+    /** @brief Listen the PendingAttributes property of the D-Bus interface and
+     *         update BaseBIOSTable
+     */
+    void listenPendingAttributes();
+
+    /** @brief Find attribute handle from bios attribute table
+     *  @param[in] attrName - attribute name
+     *  @return attribute handle
+     */
+    uint16_t findAttrHandle(const std::string& attrName);
+
+    /** @brief Listen the PendingAttributes property of the D-Bus interface
+     * and update BaseBIOSTable
+     *  @param[in] msg - Data associated with subscribed signal
+     */
+    void constructPendingAttribute(const PendingAttributes& pendingAttributes);
 };
 
 } // namespace bios

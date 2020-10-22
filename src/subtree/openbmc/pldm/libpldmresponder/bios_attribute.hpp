@@ -3,7 +3,7 @@
 #include "bios_table.h"
 
 #include "bios_table.hpp"
-#include "utils.hpp"
+#include "common/utils.hpp"
 
 #include <nlohmann/json.hpp>
 
@@ -73,6 +73,15 @@ class BIOSAttribute
                               uint8_t attrType,
                               const PropertyValue& newPropVal) = 0;
 
+    /** @brief Generate attribute entry by the spec DSP0247_1.0.0 Table 14
+     *  @param[in] attributevalue - attribute value(Enumeration, String and
+     *             Integer)
+     *  @param[in,out] attrValueEntry - attribute entry
+     */
+    virtual void generateAttributeEntry(
+        const std::variant<int64_t, std::string>& attributevalue,
+        Table& attrValueEntry) = 0;
+
     /** @brief Method to return the D-Bus map */
     std::optional<DBusMapping> getDBusMap();
 
@@ -80,7 +89,7 @@ class BIOSAttribute
     const std::string name;
 
     /** Weather this attribute is read-only */
-    const bool readOnly;
+    bool readOnly;
 
   protected:
     /** @brief dbus backend, nullopt if this attribute is read-only*/

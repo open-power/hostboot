@@ -1120,3 +1120,17 @@ TEST(PadAndChecksum, PadAndChecksum)
                            0x66, 0x00, 0x6d, 0x81, 0x4a, 0xb6};
     EXPECT_EQ(attrValTable, expectedTable);
 }
+
+TEST(BIOSTableChecksum, testBIOSTableChecksum)
+{
+    std::vector<uint8_t> stringTable{
+        1,   0,                  /* string handle*/
+        5,   0,                  /* string length */
+        'T', 'a', 'b', 'l', 'e', /* string */
+    };
+
+    buildTable(stringTable);
+
+    EXPECT_EQ(true,
+              pldm_bios_table_checksum(stringTable.data(), stringTable.size()));
+}

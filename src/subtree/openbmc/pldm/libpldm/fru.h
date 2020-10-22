@@ -10,13 +10,19 @@ extern "C" {
 #include <stdint.h>
 
 #include "base.h"
+#include "utils.h"
 
 #define PLDM_GET_FRU_RECORD_TABLE_METADATA_REQ_BYTES 0
 #define PLDM_GET_FRU_RECORD_TABLE_METADATA_RESP_BYTES 19
 #define PLDM_GET_FRU_RECORD_TABLE_REQ_BYTES 5
 #define PLDM_GET_FRU_RECORD_TABLE_MIN_RESP_BYTES 6
+#define PLDM_GET_FRU_RECORD_BY_OPTION_MIN_RESP_BYTES 6
 
 #define FRU_TABLE_CHECKSUM_SIZE 4
+
+enum pldm_fru_completion_codes {
+	PLDM_FRU_DATA_STRUCTURE_TABLE_UNAVAILABLE = 0x85,
+};
 
 /** @brief PLDM FRU commands
  */
@@ -102,6 +108,22 @@ struct pldm_get_fru_record_table_resp {
 	uint32_t next_data_transfer_handle;
 	uint8_t transfer_flag;
 	uint8_t fru_record_table_data[1];
+} __attribute__((packed));
+
+struct pldm_get_fru_record_by_option_req {
+	uint32_t data_transfer_handle;
+	uint16_t fru_table_handle;
+	uint16_t record_set_identifier;
+	uint8_t record_type;
+	uint8_t field_type;
+	uint8_t transfer_op_flag;
+} __attribute__((packed));
+
+struct pldm_get_fru_record_by_option_resp {
+	uint8_t completion_code;
+	uint32_t next_data_transfer_handle;
+	uint8_t transfer_flag;
+	uint8_t fru_structure_data[1];
 } __attribute__((packed));
 
 /** @struct pldm_fru_record_tlv
@@ -235,6 +257,53 @@ int encode_get_fru_record_table_resp(uint8_t instance_id,
 				     uint32_t next_data_transfer_handle,
 				     uint8_t transfer_flag,
 				     struct pldm_msg *msg);
+
+/* GetFRURecordByOption */
+
+/** @brief Decode GetFRURecordByOption request data
+ *
+ *  @param[in] msg - PLDM request message payload
+ *  @param[in] payload_length - Length of request payload
+ *  @param[out] data_transfer_handle - A handle, used to identify a FRU Record
+ *              Table data transfer
+ *  @param[out] fru_table_handle - A handle, used to identify a FRU DATA
+ *              records
+ *  @param[out] record_set_identifier - FRU record set identifier
+ *  @param[out] record_type - FRU record type
+ *  @param[out] field_type - FRU field type
+ *  @param[out] transfer_op_flag - A flag that indicates whether this is
+ *              the start of the transfer
+ *  @return pldm_completion_codes
+ */
+int decode_get_fru_record_by_option_req(
+    const struct pldm_msg *msg, size_t payload_length,
+    uint32_t *data_transfer_handle, uint16_t *fru_table_handle,
+    uint16_t *record_set_identifier, uint8_t *record_type, uint8_t *field_type,
+    uint8_t *transfer_op_flag);
+
+/** @brief Encode GetFRURecordByOption response data
+ *
+ *  @param[in] instance_id - Message's instance id
+ *  @param[in] completion_code - PLDM completion code
+ *  @param[in] next_data_transfer_handle - A handle that is used to identify the
+ *             next portion of the transfer
+ *  @param[in] transfer_flag - The transfer flag that indicates what part of the
+ *             transfer this response represents
+ *  @param[in] fru_structure_data - FRU Structure Data
+ *  @param[in] data_size - Size of FRU Structrue Data
+ *  @param[in,out] msg - Message will be written to this
+ *  @return pldm_completion_codes
+ *  @note  Caller is responsible for memory alloc and dealloc of param 'msg',
+ *         and for appending the FRU table to the msg.
+ */
+int encode_get_fru_record_by_option_resp(uint8_t instance_id,
+					 uint8_t completion_code,
+					 uint32_t next_data_transfer_handle,
+					 uint8_t transfer_flag,
+					 const void *fru_structure_data,
+					 size_t data_size, struct pldm_msg *msg,
+					 size_t payload_length);
+
 /* Requester */
 
 /* GetFruRecordTable */
@@ -299,6 +368,61 @@ int encode_fru_record(uint8_t *fru_table, size_t total_size, size_t *curr_size,
 		      uint16_t record_set_id, uint8_t record_type,
 		      uint8_t num_frus, uint8_t encoding, uint8_t *tlvs,
 		      size_t tlvs_size);
+
+/* GetFRURecordByOption */
+
+/** @brief Create a PLDM request message for GetFRURecordByOption
+ *
+ *  @param[in] instance_id - Message's instance id
+ *  @param[in] data_transfer_handle - A handle, used to identify a FRU Record
+ *             Table data transfer
+ *  @param[in] fru_table_handle - A handle, used to identify a FRU DATA records
+ *  @param[in] record_set_identifier - FRU record set identifier
+ *  @param[in] record_type - FRU record type
+ *  @param[in] field_type - FRU field type
+ *  @param[in] transfer_op_flag - A flag that indicates whether this is
+ *             the start of the transfer
+ *  @param[in,out] msg - Message will be written to this
+ *  @param[in] payload_length - Length of request message payload
+ *  @return pldm_completion_codes
+ *  @note  Caller is responsible for memory alloc and dealloc of param
+ *         'msg.payload'
+ */
+int encode_get_fru_record_by_option_req(
+    uint8_t instance_id, uint32_t data_transfer_handle,
+    uint16_t fru_table_handle, uint16_t record_set_identifier,
+    uint8_t record_type, uint8_t field_type, uint8_t transfer_op_flag,
+    struct pldm_msg *msg, size_t payload_length);
+
+/** @brief Decode GetFRURecordByOption response data
+ *
+ *  @param[in] msg - Response message
+ *  @param[in] payload_length - Length of response message payload
+ *  @param[out] completion_code - Pointer to response msg's PLDM completion code
+ *  @param[out] next_data_transfer_handle - A handle used to identify the next
+ *              portion of the transfer
+ *  @param[out] transfer_flag - The transfer flag that indicates what part of
+ *              the transfer this response represents
+ *  @param[out] fru_structure_data - FRU Structure Data
+ *  @return pldm_completion_codes
+ */
+int decode_get_fru_record_by_option_resp(
+    const struct pldm_msg *msg, size_t payload_length, uint8_t *completion_code,
+    uint32_t *next_transfer_handle, uint8_t *transfer_flag,
+    struct variable_field *fru_structure_data);
+
+/** @brief Get FRU Record Table By Option
+ *  @param[in] table - The source fru record table
+ *  @param[in] table_size - Size of the source fru record table
+ *  @param[out] record_table - Fru table fetched based on the input option
+ *  @param[in/out] record_size - Size of the table fetched by fru record option
+ *  @param[in] rsi - FRU record set identifier
+ *  @param[in] rt - FRU record type
+ *  @param[in] ft - FRU field type
+ */
+void get_fru_record_by_option(const uint8_t *table, size_t table_size,
+			      uint8_t *record_table, size_t *record_size,
+			      uint16_t rsi, uint8_t rt, uint8_t ft);
 
 #ifdef __cplusplus
 }

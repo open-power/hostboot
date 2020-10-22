@@ -6,7 +6,7 @@
 #include "libpldm/pdr.h"
 
 #include "fru_parser.hpp"
-#include "handler.hpp"
+#include "pldmd/handler.hpp"
 
 #include <sdbusplus/message.hpp>
 
@@ -31,6 +31,7 @@ using PropertyMap = std::map<Property, Value>;
 using InterfaceMap = std::map<Interface, PropertyMap>;
 using ObjectValueTree = std::map<sdbusplus::message::object_path, InterfaceMap>;
 using ObjectPath = std::string;
+using AssociatedEntityMap = std::map<ObjectPath, pldm_entity>;
 
 } // namespace dbus
 
@@ -49,15 +50,19 @@ class FruImpl
         sizeof(struct pldm_fru_record_data_format) -
         sizeof(struct pldm_fru_record_tlv);
 
-    /** @brief The FRU table is populated by processing the D-Bus inventory
-     *         namespace, based on the config files for FRU. The configPath is
-     *         consumed to build the FruParser object.
+    /** @brief Constructor for FruImpl, the configPath is consumed to build the
+     *         FruParser object.
      *
      *  @param[in] configPath - path to the directory containing config files
-     * for PLDM FRU
+     *                          for PLDM FRU
+     *  @param[in] pdrRepo - opaque pointer to PDR repository
+     *  @param[in] entityTree - opaque pointer to the entity association tree
      */
     FruImpl(const std::string& configPath, pldm_pdr* pdrRepo,
-            pldm_entity_association_tree* entityTree);
+            pldm_entity_association_tree* entityTree) :
+        parser(configPath),
+        pdrRepo(pdrRepo), entityTree(entityTree)
+    {}
 
     /** @brief Total length of the FRU table in bytes, this excludes the pad
      *         bytes and the checksum.
@@ -102,6 +107,36 @@ class FruImpl
      */
     void getFRUTable(Response& response);
 
+    /** @brief Get FRU Record Table By Option
+     *  @param[out] response - Populate response with the FRU table got by
+     *                         options
+     *  @param[in] fruTableHandle - The fru table handle
+     *  @param[in] recordSetIdentifer - The record set identifier
+     *  @param[in] recordType - The record type
+     *  @param[in] fieldType - The field type
+     */
+    int getFRURecordByOption(Response& response, uint16_t fruTableHandle,
+                             uint16_t recordSetIdentifer, uint8_t recordType,
+                             uint8_t fieldType);
+
+    /** @brief FRU table is built by processing the D-Bus inventory namespace
+     *         based on the config files for FRU. The table is populated based
+     *         on the isBuilt flag.
+     */
+    void buildFRUTable();
+
+    /** @brief Get std::map associated with the entity
+     *         key: object path
+     *         value: pldm_entity
+     *
+     *  @return std::map<ObjectPath, pldm_entity>
+     */
+    inline const pldm::responder::dbus::AssociatedEntityMap&
+        getAssociateEntityMap() const
+    {
+        return associatedEntityMap;
+    }
+
   private:
     uint16_t nextRSI()
     {
@@ -113,7 +148,9 @@ class FruImpl
     uint8_t padBytes = 0;
     std::vector<uint8_t> table;
     uint32_t checksum = 0;
+    bool isBuilt = false;
 
+    fru_parser::FruParser parser;
     pldm_pdr* pdrRepo;
     pldm_entity_association_tree* entityTree;
 
@@ -127,9 +164,13 @@ class FruImpl
      *  @param[in] recordInfos - FRU record info to build the FRU records
      *  @param[in/out] entity - PLDM entity corresponding to FRU instance
      */
-    void populateRecords(const pldm::responder::dbus::InterfaceMap& interfaces,
+    void populateRecords(const dbus::InterfaceMap& interfaces,
                          const fru_parser::FruRecordInfos& recordInfos,
                          const pldm_entity& entity);
+
+    /** @brief Associate sensor/effecter to FRU entity
+     */
+    dbus::AssociatedEntityMap associatedEntityMap;
 };
 
 namespace fru
@@ -154,6 +195,11 @@ class Handler : public CmdHandler
                              return this->getFRURecordTable(request,
                                                             payloadLength);
                          });
+        handlers.emplace(PLDM_GET_FRU_RECORD_BY_OPTION,
+                         [this](const pldm_msg* request, size_t payloadLength) {
+                             return this->getFRURecordByOption(request,
+                                                               payloadLength);
+                         });
     }
 
     /** @brief Handler for Get FRURecordTableMetadata
@@ -174,6 +220,36 @@ class Handler : public CmdHandler
      *  @return PLDM response message
      */
     Response getFRURecordTable(const pldm_msg* request, size_t payloadLength);
+
+    /** @brief Build FRU table is bnot already built
+     *
+     */
+    void buildFRUTable()
+    {
+        impl.buildFRUTable();
+    }
+
+    /** @brief Get std::map associated with the entity
+     *         key: object path
+     *         value: pldm_entity
+     *
+     *  @return std::map<ObjectPath, pldm_entity>
+     */
+    const pldm::responder::dbus::AssociatedEntityMap&
+        getAssociateEntityMap() const
+    {
+        return impl.getAssociateEntityMap();
+    }
+
+    /** @brief Handler for GetFRURecordByOption
+     *
+     *  @param[in] request - Request message payload
+     *  @param[in] payloadLength - Request payload length
+     *
+     *  @return PLDM response message
+     */
+    Response getFRURecordByOption(const pldm_msg* request,
+                                  size_t payloadLength);
 
   private:
     FruImpl impl;

@@ -16,9 +16,10 @@ gtest = dependency('gtest', main: true, disabler: true, required: true)
 gmock = dependency('gmock', disabler: true, required: true)
 pldmd = declare_dependency(
           sources: [
-            '../instance_id.cpp',
-            '../dbus_impl_requester.cpp',
-            '../host_pdr_handler.cpp'])
+            '../pldmd/instance_id.cpp',
+            '../pldmd/dbus_impl_requester.cpp',
+            '../host-bmc/host_pdr_handler.cpp',
+            '../host-bmc/dbus_to_host_effecters.cpp'])
 
 tests = [
   'libpldmresponder_base_test',
@@ -29,12 +30,14 @@ tests = [
   'libpldmresponder_bios_integer_attribute_test',
   'libpldmresponder_bios_enum_attribute_test',
   'libpldmresponder_pdr_effecter_test',
+  'libpldmresponder_pdr_sensor_test',
   'libpldmresponder_bios_table_test',
   'libpldmresponder_platform_test',
   'pldmd_instanceid_test',
   'pldmd_registration_test',
   'pldm_utils_test',
   'libpldmresponder_fru_test',
+  'libpldmresponder_dbus_to_host_effecter_test',
 ]
 
 if get_option('oem-ibm').enabled()

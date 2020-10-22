@@ -4,13 +4,16 @@
 
 #include "libpldm/platform.h"
 #include "libpldm/states.h"
+#include "pdr.h"
 
+#include "common/utils.hpp"
 #include "event_parser.hpp"
-#include "handler.hpp"
-#include "host_pdr_handler.hpp"
+#include "fru.hpp"
+#include "host-bmc/dbus_to_event_handler.hpp"
+#include "host-bmc/host_pdr_handler.hpp"
 #include "libpldmresponder/pdr.hpp"
 #include "libpldmresponder/pdr_utils.hpp"
-#include "utils.hpp"
+#include "pldmd/handler.hpp"
 
 #include <stdint.h>
 
@@ -25,9 +28,11 @@ namespace platform
 
 using namespace pldm::utils;
 using namespace pldm::responder::pdr_utils;
+using namespace pldm::state_sensor;
 
 using generatePDR =
-    std::function<void(const Json& json, pdr_utils::RepoInterface& repo)>;
+    std::function<void(const pldm::utils::DBusHandler& dBusIntf,
+                       const Json& json, pdr_utils::RepoInterface& repo)>;
 
 using EffecterId = uint16_t;
 using DbusObjMaps =
@@ -41,26 +46,28 @@ using EventHandler = std::function<int(
     uint8_t tid, size_t eventDataOffset)>;
 using EventHandlers = std::vector<EventHandler>;
 using EventMap = std::map<EventType, EventHandlers>;
-
-// EventEntry = <uint8_t> - EventState <uint8_t> - SensorOffset <uint16_t> -
-// SensorID
-using EventEntry = uint32_t;
-struct DBusInfo
-{
-    pldm::utils::DBusMapping dBusValues;
-    pldm::utils::PropertyValue dBusPropertyValue;
-};
+using AssociatedEntityMap = std::map<DbusPath, pldm_entity>;
 
 class Handler : public CmdHandler
 {
   public:
-    Handler(const std::string& pdrJsonsDir, const std::string& eventsJsonsDir,
+    Handler(const pldm::utils::DBusHandler* dBusIntf,
+            const std::string& pdrJsonsDir, const std::string& eventsJsonsDir,
             pldm_pdr* repo, HostPDRHandler* hostPDRHandler,
+            DbusToPLDMEvent* dbusToPLDMEventHandler, fru::Handler* fruHandler,
+            bool buildPDRLazily = false,
             const std::optional<EventMap>& addOnHandlersMap = std::nullopt) :
         pdrRepo(repo),
-        hostPDRHandler(hostPDRHandler), stateSensorHandler(eventsJsonsDir)
+        hostPDRHandler(hostPDRHandler), stateSensorHandler(eventsJsonsDir),
+        dbusToPLDMEventHandler(dbusToPLDMEventHandler), fruHandler(fruHandler),
+        dBusIntf(dBusIntf), pdrJsonsDir(pdrJsonsDir), pdrCreated(false)
     {
-        generate(pdrJsonsDir, pdrRepo);
+        if (!buildPDRLazily)
+        {
+            generateTerminusLocatorPDR(pdrRepo);
+            generate(*dBusIntf, pdrJsonsDir, pdrRepo);
+            pdrCreated = true;
+        }
 
         handlers.emplace(PLDM_GET_PDR,
                          [this](const pldm_msg* request, size_t payloadLength) {
@@ -80,6 +87,11 @@ class Handler : public CmdHandler
                          [this](const pldm_msg* request, size_t payloadLength) {
                              return this->platformEventMessage(request,
                                                                payloadLength);
+                         });
+        handlers.emplace(PLDM_GET_STATE_SENSOR_READINGS,
+                         [this](const pldm_msg* request, size_t payloadLength) {
+                             return this->getStateSensorReadings(request,
+                                                                 payloadLength);
                          });
 
         // Default handler for PLDM Events
@@ -126,39 +138,50 @@ class Handler : public CmdHandler
     }
 
     /** @brief Add D-Bus mapping and value mapping(stateId to D-Bus) for the
-     *         effecterId. If the same id is added, the previous dbusObjs will
+     *         Id. If the same id is added, the previous dbusObjs will
      *         be "over-written".
      *
-     *  @param[in] effecterId - effecter id
+     *  @param[in] Id - effecter/sensor id
      *  @param[in] dbusObj - list of D-Bus object structure and list of D-Bus
      *                       property value to attribute value
+     *  @param[in] typeId - the type id of enum
      */
     void addDbusObjMaps(
-        uint16_t effecterId,
-        std::tuple<pdr_utils::DbusMappings, pdr_utils::DbusValMaps> dbusObj);
+        uint16_t id,
+        std::tuple<pdr_utils::DbusMappings, pdr_utils::DbusValMaps> dbusObj,
+        TypeId typeId = TypeId::PLDM_EFFECTER_ID);
 
-    /** @brief Retrieve an effecter id -> D-Bus objects mapping
+    /** @brief Retrieve an id -> D-Bus objects mapping
      *
-     *  @param[in] effecterId - effecter id
+     *  @param[in] Id - id
+     *  @param[in] typeId - the type id of enum
      *
      *  @return std::tuple<pdr_utils::DbusMappings, pdr_utils::DbusValMaps> -
      *          list of D-Bus object structure and list of D-Bus property value
      *          to attribute value
      */
     const std::tuple<pdr_utils::DbusMappings, pdr_utils::DbusValMaps>&
-        getDbusObjMaps(uint16_t effecterId) const;
+        getDbusObjMaps(uint16_t id,
+                       TypeId typeId = TypeId::PLDM_EFFECTER_ID) const;
 
     uint16_t getNextEffecterId()
     {
         return ++nextEffecterId;
     }
 
+    uint16_t getNextSensorId()
+    {
+        return ++nextSensorId;
+    }
+
     /** @brief Parse PDR JSONs and build PDR repository
      *
+     *  @param[in] dBusIntf - The interface object
      *  @param[in] dir - directory housing platform specific PDR JSON files
      *  @param[in] repo - instance of concrete implementation of Repo
      */
-    void generate(const std::string& dir, Repo& repo);
+    void generate(const pldm::utils::DBusHandler& dBusIntf,
+                  const std::string& dir, Repo& repo);
 
     /** @brief Parse PDR JSONs and build state effecter PDR repository
      *
@@ -188,6 +211,15 @@ class Handler : public CmdHandler
      */
     Response setNumericEffecterValue(const pldm_msg* request,
                                      size_t payloadLength);
+
+    /** @brief Handler for getStateSensorReadings
+     *
+     *  @param[in] request - Request message
+     *  @param[in] payloadLength - Request payload length
+     *  @return Response - PLDM Response message
+     */
+    Response getStateSensorReadings(const pldm_msg* request,
+                                    size_t payloadLength);
 
     /** @brief Handler for setStateEffecterStates
      *
@@ -248,18 +280,6 @@ class Handler : public CmdHandler
                             size_t changeEntryDataSize,
                             size_t numberOfChangeEntries,
                             PDRRecordHandles& pdrRecordHandles);
-
-    /** @brief Handler for setting Sensor event data
-     *
-     *  @param[in] sensorId - sensorID value of the sensor
-     *  @param[in] sensorOffset - Identifies which state sensor within a
-     * composite state sensor the event is being returned for
-     *  @param[in] eventState - The event state value from the state change that
-     * triggered the event message
-     *  @return PLDM completion code
-     */
-    int setSensorEventData(uint16_t sensorId, uint8_t sensorOffset,
-                           uint8_t eventState);
 
     /** @brief Function to set the effecter requested by pldm requester
      *  @param[in] dBusIntf - The interface object
@@ -327,7 +347,7 @@ class Handler : public CmdHandler
         try
         {
             const auto& [dbusMappings, dbusValMaps] =
-                dbusObjMaps.at(effecterId);
+                effecterDbusObjMaps.at(effecterId);
             for (uint8_t currState = 0; currState < compEffecterCnt;
                  ++currState)
             {
@@ -390,12 +410,40 @@ class Handler : public CmdHandler
         return rc;
     }
 
+    /** @brief Build BMC Terminus Locator PDR
+     *
+     *  @param[in] repo - instance of concrete implementation of Repo
+     */
+    void generateTerminusLocatorPDR(Repo& repo);
+
+    /** @brief Get std::map associated with the entity
+     *         key: object path
+     *         value: pldm_entity
+     *
+     *  @return std::map<ObjectPath, pldm_entity>
+     */
+    inline const AssociatedEntityMap& getAssociateEntityMap() const
+    {
+        if (fruHandler == nullptr)
+        {
+            throw InternalFailure();
+        }
+        return fruHandler->getAssociateEntityMap();
+    }
+
   private:
     pdr_utils::Repo pdrRepo;
     uint16_t nextEffecterId{};
-    DbusObjMaps dbusObjMaps{};
+    uint16_t nextSensorId{};
+    DbusObjMaps effecterDbusObjMaps{};
+    DbusObjMaps sensorDbusObjMaps{};
     HostPDRHandler* hostPDRHandler;
     events::StateSensorHandler stateSensorHandler;
+    DbusToPLDMEvent* dbusToPLDMEventHandler;
+    fru::Handler* fruHandler;
+    const pldm::utils::DBusHandler* dBusIntf;
+    std::string pdrJsonsDir;
+    bool pdrCreated;
 };
 
 } // namespace platform

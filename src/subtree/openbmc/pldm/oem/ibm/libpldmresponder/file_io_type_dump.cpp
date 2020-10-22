@@ -3,7 +3,7 @@
 #include "libpldm/base.h"
 #include "oem/ibm/libpldm/file_io.h"
 
-#include "utils.hpp"
+#include "common/utils.hpp"
 #include "xyz/openbmc_project/Common/error.hpp"
 
 #include <stdint.h>
@@ -26,7 +26,7 @@ namespace responder
 
 static constexpr auto nbdInterfaceDefault = "/dev/nbd1";
 static constexpr auto dumpEntry = "xyz.openbmc_project.Dump.Entry";
-static constexpr auto dumpObjPath = "/xyz/openbmc_project/dump";
+static constexpr auto dumpObjPath = "/xyz/openbmc_project/dump/system";
 
 int DumpHandler::fd = -1;
 

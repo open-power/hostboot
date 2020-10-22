@@ -5,11 +5,11 @@
 #include "libpldm/base.h"
 #include "oem/ibm/libpldm/file_io.h"
 
+#include "common/utils.hpp"
 #include "file_io_type_cert.hpp"
 #include "file_io_type_dump.hpp"
 #include "file_io_type_lid.hpp"
 #include "file_io_type_pel.hpp"
-#include "utils.hpp"
 #include "xyz/openbmc_project/Common/error.hpp"
 
 #include <stdint.h>

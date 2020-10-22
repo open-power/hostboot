@@ -18,8 +18,6 @@ const Json emptyJson{};
 const std::vector<Json> emptyJsonList{};
 const std::vector<std::string> emptyStringVec{};
 
-constexpr auto eventStateSensorJson = "event_state_sensor.json";
-
 const std::set<std::string_view> supportedDbusPropertyTypes = {
     "bool",     "uint8_t", "int16_t",  "uint16_t", "int32_t",
     "uint32_t", "int64_t", "uint64_t", "double",   "string"};
@@ -34,74 +32,69 @@ StateSensorHandler::StateSensorHandler(const std::string& dirPath)
         return;
     }
 
-    fs::path filePath = dir / eventStateSensorJson;
-    if (!fs::exists(filePath))
+    for (auto& file : fs::directory_iterator(dirPath))
     {
-        std::cerr << "Event state sensor JSON does not exist, PATH=" << filePath
-                  << "\n";
-        throw InternalFailure();
-    }
+        std::ifstream jsonFile(file.path());
 
-    std::ifstream jsonFile(filePath);
-
-    auto data = Json::parse(jsonFile, nullptr, false);
-    if (data.is_discarded())
-    {
-        std::cerr << "Parsing Event state sensor JSON file failed, FILE="
-                  << filePath;
-        throw InternalFailure();
-    }
-
-    auto entries = data.value("entries", emptyJsonList);
-    for (const auto& entry : entries)
-    {
-        StateSensorEntry stateSensorEntry{};
-        stateSensorEntry.containerId =
-            static_cast<uint16_t>(entry.value("containerID", 0));
-        stateSensorEntry.entityType =
-            static_cast<uint16_t>(entry.value("entityType", 0));
-        stateSensorEntry.entityInstance =
-            static_cast<uint16_t>(entry.value("entityInstance", 0));
-        stateSensorEntry.sensorOffset =
-            static_cast<uint8_t>(entry.value("sensorOffset", 0));
-
-        pldm::utils::DBusMapping dbusInfo{};
-
-        auto dbus = entry.value("dbus", emptyJson);
-        dbusInfo.objectPath = dbus.value("object_path", "");
-        dbusInfo.interface = dbus.value("interface", "");
-        dbusInfo.propertyName = dbus.value("property_name", "");
-        dbusInfo.propertyType = dbus.value("property_type", "");
-        if (dbusInfo.objectPath.empty() || dbusInfo.interface.empty() ||
-            dbusInfo.propertyName.empty() ||
-            (supportedDbusPropertyTypes.find(dbusInfo.propertyType) ==
-             supportedDbusPropertyTypes.end()))
+        auto data = Json::parse(jsonFile, nullptr, false);
+        if (data.is_discarded())
         {
-            std::cerr << "Invalid dbus config,"
-                      << " OBJPATH=" << dbusInfo.objectPath << " INTERFACE="
-                      << dbusInfo.interface << " PROPERTY_NAME="
-                      << dbusInfo.propertyName
-                      << " PROPERTY_TYPE=" << dbusInfo.propertyType << "\n";
+            std::cerr << "Parsing Event state sensor JSON file failed, FILE="
+                      << file.path();
             continue;
         }
 
-        auto eventStates = entry.value("event_states", emptyJsonList);
-        auto propertyValues = dbus.value("property_values", emptyJsonList);
-        if ((eventStates.size() == 0) || (propertyValues.size() == 0) ||
-            (eventStates.size() != propertyValues.size()))
+        auto entries = data.value("entries", emptyJsonList);
+        for (const auto& entry : entries)
         {
-            std::cerr << "Invalid event state JSON config,"
-                      << " EVENT_STATE_SIZE=" << eventStates.size()
-                      << " PROPERTY_VALUE_SIZE=" << propertyValues.size()
-                      << "\n";
-            continue;
-        }
+            StateSensorEntry stateSensorEntry{};
+            stateSensorEntry.containerId =
+                static_cast<uint16_t>(entry.value("containerID", 0));
+            stateSensorEntry.entityType =
+                static_cast<uint16_t>(entry.value("entityType", 0));
+            stateSensorEntry.entityInstance =
+                static_cast<uint16_t>(entry.value("entityInstance", 0));
+            stateSensorEntry.sensorOffset =
+                static_cast<uint8_t>(entry.value("sensorOffset", 0));
 
-        auto eventStateMap = mapStateToDBusVal(eventStates, propertyValues,
-                                               dbusInfo.propertyType);
-        eventMap.emplace(
-            stateSensorEntry,
-            std::make_tuple(std::move(dbusInfo), std::move(eventStateMap)));
+            pldm::utils::DBusMapping dbusInfo{};
+
+            auto dbus = entry.value("dbus", emptyJson);
+            dbusInfo.objectPath = dbus.value("object_path", "");
+            dbusInfo.interface = dbus.value("interface", "");
+            dbusInfo.propertyName = dbus.value("property_name", "");
+            dbusInfo.propertyType = dbus.value("property_type", "");
+            if (dbusInfo.objectPath.empty() || dbusInfo.interface.empty() ||
+                dbusInfo.propertyName.empty() ||
+                (supportedDbusPropertyTypes.find(dbusInfo.propertyType) ==
+                 supportedDbusPropertyTypes.end()))
+            {
+                std::cerr << "Invalid dbus config,"
+                          << " OBJPATH=" << dbusInfo.objectPath << " INTERFACE="
+                          << dbusInfo.interface << " PROPERTY_NAME="
+                          << dbusInfo.propertyName
+                          << " PROPERTY_TYPE=" << dbusInfo.propertyType << "\n";
+                continue;
+            }
+
+            auto eventStates = entry.value("event_states", emptyJsonList);
+            auto propertyValues = dbus.value("property_values", emptyJsonList);
+            if ((eventStates.size() == 0) || (propertyValues.size() == 0) ||
+                (eventStates.size() != propertyValues.size()))
+            {
+                std::cerr << "Invalid event state JSON config,"
+                          << " EVENT_STATE_SIZE=" << eventStates.size()
+                          << " PROPERTY_VALUE_SIZE=" << propertyValues.size()
+                          << "\n";
+                continue;
+            }
+
+            auto eventStateMap = mapStateToDBusVal(eventStates, propertyValues,
+                                                   dbusInfo.propertyType);
+            eventMap.emplace(
+                stateSensorEntry,
+                std::make_tuple(std::move(dbusInfo), std::move(eventStateMap)));
+        }
     }
 }
 

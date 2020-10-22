@@ -4,6 +4,7 @@
 
 #include "file_io_by_type.hpp"
 
+#include <filesystem>
 #include <sstream>
 #include <string>
 
@@ -13,6 +14,7 @@ namespace responder
 {
 
 using namespace pldm::responder::dma;
+namespace fs = std::filesystem;
 
 /** @class LidHandler
  *
@@ -26,10 +28,21 @@ class LidHandler : public FileHandler
      */
     LidHandler(uint32_t fileHandle, bool permSide) : FileHandler(fileHandle)
     {
-        std::string dir = permSide ? LID_PERM_DIR : LID_TEMP_DIR;
+        std::string dir = permSide ? LID_ALTERNATE_DIR : LID_RUNNING_DIR;
         std::stringstream stream;
         stream << std::hex << fileHandle;
-        lidPath = std::move(dir) + '/' + stream.str() + ".lid";
+        auto lidName = stream.str() + ".lid";
+        std::string patchDir =
+            permSide ? LID_ALTERNATE_PATCH_DIR : LID_RUNNING_PATCH_DIR;
+        auto patch = fs::path(patchDir) / lidName;
+        if (fs::is_regular_file(patch))
+        {
+            lidPath = patch;
+        }
+        else
+        {
+            lidPath = std::move(dir) + '/' + lidName;
+        }
     }
 
     virtual int writeFromMemory(uint32_t /*offset*/, uint32_t /*length*/,

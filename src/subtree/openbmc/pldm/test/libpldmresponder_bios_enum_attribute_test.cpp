@@ -34,7 +34,8 @@ TEST_F(TestBIOSEnumAttribute, CtorTest)
     auto jsonEnumReadOnly = R"({
          "attribute_name" : "CodeUpdatePolicy",
          "possible_values" : [ "Concurrent", "Disruptive" ],
-         "default_values" : [ "Concurrent" ]
+         "default_values" : [ "Concurrent" ],
+         "readOnly" : true
       })"_json;
 
     BIOSEnumAttribute enumReadOnly{jsonEnumReadOnly, nullptr};
@@ -47,7 +48,8 @@ TEST_F(TestBIOSEnumAttribute, CtorTest)
     auto jsonEnumReadOnlyError = R"({
          "attribute_name" : "CodeUpdatePolicy",
          "possible_value" : [ "Concurrent", "Disruptive" ],
-         "default_values" : [ "Concurrent" ]
+         "default_values" : [ "Concurrent" ],
+         "readOnly" : true
       })"_json; // possible_value -> possible_values
     EXPECT_THROW((BIOSEnumAttribute{jsonEnumReadOnlyError, nullptr}),
                  Json::exception);
@@ -56,6 +58,7 @@ TEST_F(TestBIOSEnumAttribute, CtorTest)
          "attribute_name" : "FWBootSide",
          "possible_values" : [ "Perm", "Temp" ],
          "default_values" : [ "Perm" ],
+         "readOnly" : false,
          "dbus":
             {
                "object_path" : "/xyz/abc/def",
@@ -79,7 +82,8 @@ TEST_F(TestBIOSEnumAttribute, ConstructEntry)
     auto jsonEnumReadOnly = R"({
          "attribute_name" : "CodeUpdatePolicy",
          "possible_values" : [ "Concurrent", "Disruptive" ],
-         "default_values" : [ "Disruptive" ]
+         "default_values" : [ "Disruptive" ],
+         "readOnly" : true
       })"_json;
 
     std::vector<uint8_t> expectedAttrEntry{
@@ -116,6 +120,7 @@ TEST_F(TestBIOSEnumAttribute, ConstructEntry)
          "attribute_name" : "CodeUpdatePolicy",
          "possible_values" : [ "Concurrent", "Disruptive" ],
          "default_values" : [ "Disruptive" ],
+         "readOnly" : false,
          "dbus":
             {
                "object_path" : "/xyz/abc/def",
@@ -165,6 +170,7 @@ TEST_F(TestBIOSEnumAttribute, setAttrValueOnDbus)
          "attribute_name" : "CodeUpdatePolicy",
          "possible_values" : [ "Concurrent", "Disruptive" ],
          "default_values" : [ "Disruptive" ],
+         "readOnly" : false,
          "dbus":
             {
                "object_path" : "/xyz/abc/def",

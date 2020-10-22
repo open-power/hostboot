@@ -3,7 +3,7 @@
 #include "bios_attribute.hpp"
 
 #include "bios_config.hpp"
-#include "utils.hpp"
+#include "common/utils.hpp"
 
 #include <iostream>
 #include <variant>
@@ -18,16 +18,32 @@ namespace bios
 BIOSAttribute::BIOSAttribute(const Json& entry,
                              DBusHandler* const dbusHandler) :
     name(entry.at("attribute_name")),
-    readOnly(!entry.contains("dbus")), dbusHandler(dbusHandler)
+    readOnly(false), dbusHandler(dbusHandler)
 {
+    try
+    {
+        readOnly = entry.at("readOnly");
+    }
+    catch (const std::exception& e)
+    {
+        // No action required, readOnly is initialised to false
+    }
+
     if (!readOnly)
     {
-        std::string objectPath = entry.at("dbus").at("object_path");
-        std::string interface = entry.at("dbus").at("interface");
-        std::string propertyName = entry.at("dbus").at("property_name");
-        std::string propertyType = entry.at("dbus").at("property_type");
+        try
+        {
+            std::string objectPath = entry.at("dbus").at("object_path");
+            std::string interface = entry.at("dbus").at("interface");
+            std::string propertyName = entry.at("dbus").at("property_name");
+            std::string propertyType = entry.at("dbus").at("property_type");
 
-        dBusMap = {objectPath, interface, propertyName, propertyType};
+            dBusMap = {objectPath, interface, propertyName, propertyType};
+        }
+        catch (const std::exception& e)
+        {
+            // No action required, dBusMap whill have no value
+        }
     }
 }
 
