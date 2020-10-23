@@ -71,6 +71,15 @@ namespace PLDM
 
         // sendSetStateEffecterStatesRequest
         MOD_SEND_SET_STATE_EFFECTER_STATES_REQUEST = 0x19,
+
+        // getBiosAttrFromHandle
+        MOD_GET_BIOS_ATTR_FROM_HANDLE = 0x1A,
+
+        // getBiosTable
+        MOD_GET_BIOS_TABLE = 0x1B,
+
+        // getCurrentAttrValue
+        MOD_GET_CURRENT_VALUE = 0x1C,
     };
 
     enum PLDMReasonCode
@@ -107,6 +116,8 @@ namespace PLDM
         RC_OVERLONG_LOCATION_CODE   = PLDM_COMP_ID | 0x1E,
         RC_RECV_FAIL                = PLDM_COMP_ID | 0x1F,
         RC_MULTIPLE_AWAIT           = PLDM_COMP_ID | 0x20,
+        RC_UNSUPPORTED_ATTRIBUTE    = PLDM_COMP_ID | 0x21,
+        RC_NO_ATTRIBUTE_MATCH       = PLDM_COMP_ID | 0x22,
     };
 }
 #endif

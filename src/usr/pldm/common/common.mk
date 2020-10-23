@@ -31,45 +31,43 @@
 COMMON_ROOTPATH = ../../../..
 
 #external pldm libs
-EXTERN_PLDM_PATH = ${COMMON_ROOTPATH}/src/subtree/openbmc/pldm/libpldm
-EXTERN_PLDM_OEM_PATH = ${COMMON_ROOTPATH}/src/subtree/openbmc/pldm/oem/ibm/libpldm
+EXTERN_PLDM_PATH = ${COMMON_ROOTPATH}/src/subtree/openbmc/pldm
+EXTERN_LIBPLDM_PATH = ${COMMON_ROOTPATH}/src/subtree/openbmc/pldm/libpldm
+EXTERN_LIBPLDM_OEM_PATH = ${COMMON_ROOTPATH}/src/subtree/openbmc/pldm/oem/ibm/libpldm
 
 EXTRAINCDIR += ${EXTERN_PLDM_PATH}
-EXTRAINCDIR += ${EXTERN_PLDM_OEM_PATH}
+EXTRAINCDIR += ${EXTERN_LIBPLDM_PATH}
+EXTRAINCDIR += ${EXTERN_LIBPLDM_OEM_PATH}
 EXTRAINCDIR += ${COMMON_IMPORT_PATH}
 
 PLDM_BASE_COMMON_OBJS += pldmtrace.o
 PLDM_BASE_COMMON_OBJS += pldm_utils.o
-# From ../extern/
 PLDM_BASE_COMMON_OBJS += base.o
 PLDM_BASE_COMMON_OBJS += utils.o
 PLDM_BASE_COMMON_OBJS += bios.o
 PLDM_BASE_COMMON_OBJS += bios_table.o
+PLDM_BASE_COMMON_OBJS += hb_bios_attrs.o
+PLDM_BASE_COMMON_OBJS += pldm_bios_attr_requests.o
 
-# From ../extern/
 PLDM_EXTENDED_COMMON_OBJS += fru.o
 PLDM_EXTENDED_COMMON_OBJS += platform.o
 PLDM_EXTENDED_COMMON_OBJS += file_io.o
 PLDM_EXTENDED_COMMON_OBJS += pdr.o
-# From ../requests/
 PLDM_EXTENDED_COMMON_OBJS += pldm_fru_requests.o
 PLDM_EXTENDED_COMMON_OBJS += pldm_pdr_requests.o
 PLDM_EXTENDED_COMMON_OBJS += pldm_fileio_requests.o
-# From ../extended/
 PLDM_EXTENDED_COMMON_OBJS += hb_fru.o
 PLDM_EXTENDED_COMMON_OBJS += hb_pdrs.o
 PLDM_EXTENDED_COMMON_OBJS += pldm_responder.o
 PLDM_EXTENDED_COMMON_OBJS += pdr_manager.o
 PLDM_EXTENDED_COMMON_OBJS += pldm_fru.o
-# From ../responses/
 PLDM_EXTENDED_COMMON_OBJS += pldm_monitor_control_responders.o
 PLDM_EXTENDED_COMMON_OBJS += pldm_fru_data_responders.o
 
 # add these paths to VPATH so compiler knows
 # where to find the .C/.c files we need
-VPATH += ${EXTERN_PLDM_PATH}
-VPATH += ${EXTERN_PLDM_OEM_PATH}
+VPATH += ${EXTERN_LIBPLDM_PATH}
+VPATH += ${EXTERN_LIBPLDM_OEM_PATH}
 VPATH += ${COMMON_ROOTPATH}/src/usr/pldm/common
 VPATH += ${COMMON_ROOTPATH}/src/usr/pldm/requests
 VPATH += ${COMMON_ROOTPATH}/src/usr/pldm/responses
-VPATH += ${COMMON_ROOTPATH}/src/usr/pldm/extended

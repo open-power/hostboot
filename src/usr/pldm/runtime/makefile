@@ -35,3 +35,6 @@ OBJS += ${PLDM_EXTENDED_COMMON_OBJS}
 OBJS += pldmrp_rt.o
 
 include ${ROOTPATH}/config.mk
+
+VPATH += ${ROOTPATH}/src/usr/pldm/extended
+VPATH += ${ROOTPATH}/src/usr/pldm/base

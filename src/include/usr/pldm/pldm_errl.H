@@ -33,6 +33,8 @@
 
 #include <errl/errlentry.H>
 
+using namespace ERRORLOG;
+
 namespace PLDM
 {
 

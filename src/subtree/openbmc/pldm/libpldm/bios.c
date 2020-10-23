@@ -1,3 +1,26 @@
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/import/openbmc/pldm/libpldm/bios.c $                      */
+/*                                                                        */
+/* OpenPOWER HostBoot Project                                             */
+/*                                                                        */
+/* Contributors Listed Below - COPYRIGHT 2020                             */
+/*                                                                        */
+/*                                                                        */
+/* Licensed under the Apache License, Version 2.0 (the "License");        */
+/* you may not use this file except in compliance with the License.       */
+/* You may obtain a copy of the License at                                */
+/*                                                                        */
+/*     http://www.apache.org/licenses/LICENSE-2.0                         */
+/*                                                                        */
+/* Unless required by applicable law or agreed to in writing, software    */
+/* distributed under the License is distributed on an "AS IS" BASIS,      */
+/* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or        */
+/* implied. See the License for the specific language governing           */
+/* permissions and limitations under the License.                         */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
 #include "bios.h"
 #include "utils.h"
 #include <endian.h>
@@ -242,13 +265,17 @@ int encode_get_bios_table_resp(uint8_t instance_id, uint8_t completion_code,
 
 int encode_get_bios_table_req(uint8_t instance_id, uint32_t transfer_handle,
 			      uint8_t transfer_op_flag, uint8_t table_type,
-			      struct pldm_msg *msg)
+			      struct pldm_msg *msg, size_t payload_length)
 {
 	struct pldm_header_info header = {0};
 
 	if (msg == NULL) {
 		return PLDM_ERROR_INVALID_DATA;
 	}
+
+        if(payload_length != PLDM_GET_BIOS_TABLE_REQ_BYTES) {
+            return PLDM_ERROR_INVALID_LENGTH;
+        }
 
 	header.msg_type = PLDM_REQUEST;
 	header.instance = instance_id;
@@ -323,13 +350,17 @@ int decode_get_bios_table_resp(const struct pldm_msg *msg,
 
 int encode_get_bios_attribute_current_value_by_handle_req(
     uint8_t instance_id, uint32_t transfer_handle, uint8_t transfer_op_flag,
-    uint16_t attribute_handle, struct pldm_msg *msg)
+    uint16_t attribute_handle, struct pldm_msg *msg, size_t payload_length)
 {
 	struct pldm_header_info header = {0};
 
 	if (msg == NULL) {
 		return PLDM_ERROR_INVALID_DATA;
 	}
+
+	if(payload_length != PLDM_GET_BIOS_ATTR_CURR_VAL_BY_HANDLE_REQ_BYTES) {
+            return PLDM_ERROR_INVALID_LENGTH;
+        }
 
 	header.msg_type = PLDM_REQUEST;
 	header.instance = instance_id;
