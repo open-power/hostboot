@@ -126,8 +126,6 @@ class CoreAction
 
 fapi2::ReturnCode CoreAction::clearDeadCorePcbInt( )
 {
-
-fapi_try_exit:
     return fapi2::current_err;
 }
 
