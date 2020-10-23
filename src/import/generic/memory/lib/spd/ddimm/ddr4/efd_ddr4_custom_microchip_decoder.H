@@ -1003,10 +1003,10 @@ class decoder<mss::spd::device_type::DDR4, DDR4_CUSTOM_MICROCHIP, R > : public b
         {
             uint8_t l_byte = 0;
 
-            // In the EFD, byte0 is the MSB and byte1 if the LSB
-            FAPI_TRY(( reader<fields_t::RCD_DIC_0, R>(iv_target, iv_data, l_byte)) );
-            o_output = l_byte << BITS_PER_BYTE;
+            // In the EFD, byte1 is the MSB and byte0 if the LSB
             FAPI_TRY(( reader<fields_t::RCD_DIC_1, R>(iv_target, iv_data, l_byte)) );
+            o_output = l_byte << BITS_PER_BYTE;
+            FAPI_TRY(( reader<fields_t::RCD_DIC_0, R>(iv_target, iv_data, l_byte)) );
             o_output |= l_byte;
             return fapi2::FAPI2_RC_SUCCESS;
 
@@ -1024,11 +1024,12 @@ class decoder<mss::spd::device_type::DDR4, DDR4_CUSTOM_MICROCHIP, R > : public b
         {
             uint8_t l_byte = 0;
 
-            // In the EFD, byte0 is the MSB and byte1 if the LSB
+            // In the EFD, we get bits 3:0 in byte 0 and 11:4 in byte 1
+            // We do a bit of shifting to get this to work out
             FAPI_TRY(( reader<fields_t::RCD_VOLTAGE_CTRL_0, R>(iv_target, iv_data, l_byte)) );
-            o_output = l_byte << BITS_PER_BYTE;
+            o_output = l_byte;
             FAPI_TRY(( reader<fields_t::RCD_VOLTAGE_CTRL_1, R>(iv_target, iv_data, l_byte)) );
-            o_output |= l_byte;
+            o_output |= (l_byte << BITS_PER_NIBBLE);
             return fapi2::FAPI2_RC_SUCCESS;
 
         fapi_try_exit:
@@ -1125,10 +1126,10 @@ class decoder<mss::spd::device_type::DDR4, DDR4_CUSTOM_MICROCHIP, R > : public b
         {
             uint8_t l_byte = 0;
 
-            // In the EFD, byte0 is the MSB and byte1 if the LSB
-            FAPI_TRY(( reader<fields_t::RCD_SLEW_RATE_CTRL_0, R>(iv_target, iv_data, l_byte)) );
-            o_output = l_byte << BITS_PER_BYTE;
+            // In the EFD, byte0 is the LSB and byte1 if the MSB
             FAPI_TRY(( reader<fields_t::RCD_SLEW_RATE_CTRL_1, R>(iv_target, iv_data, l_byte)) );
+            o_output = l_byte << BITS_PER_BYTE;
+            FAPI_TRY(( reader<fields_t::RCD_SLEW_RATE_CTRL_0, R>(iv_target, iv_data, l_byte)) );
             o_output |= l_byte;
             return fapi2::FAPI2_RC_SUCCESS;
 
