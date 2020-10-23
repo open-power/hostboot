@@ -217,17 +217,20 @@ static errlHndl_t load_pnor_section(PNOR::SectionId i_section,
     loadAddr = mm_block_map( reinterpret_cast<void*>( i_physAddr ),
                              mapSize );
 
-    const auto loadAddr_ptr = static_cast<uint8_t*>(loadAddr);
-    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-              "Zeroing first LMB for hypervisor (v:%p/p:%p to v:%p/p:%p)\n",
-              loadAddr_ptr + uncompressedPayloadSize,
-              i_physAddr + uncompressedPayloadSize,
-              loadAddr_ptr + mapSize,
-              i_physAddr + mapSize);
+    if(!UTIL::assertGetToplevelTarget()->getAttr<TARGETING::ATTR_IS_MPIPL_HB>())
+    {
+        const auto loadAddr_ptr = static_cast<uint8_t*>(loadAddr);
+        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                  "Zeroing first LMB for hypervisor (v:%p/p:%p to v:%p/p:%p)\n",
+                  loadAddr_ptr + uncompressedPayloadSize,
+                  i_physAddr + uncompressedPayloadSize,
+                  loadAddr_ptr + mapSize,
+                  i_physAddr + mapSize);
 
-    memset(loadAddr_ptr + uncompressedPayloadSize,
-           0,
-           mapSize - uncompressedPayloadSize);
+        memset(loadAddr_ptr + uncompressedPayloadSize,
+              0,
+              mapSize - uncompressedPayloadSize);
+    }
 
     // Print out inital progress bar.
 #ifdef CONFIG_CONSOLE

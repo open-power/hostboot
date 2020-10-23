@@ -4275,7 +4275,10 @@ errlHndl_t verifyAndMovePayload(void)
             payload_tmp_virt_addr,
             payload_size);
 
-    if (mapSize > payload_size)
+    // Do not zero out first LMB on MPIPL or it will mess up PHYP.
+    // This is generally done to clean up after any memory encryption
+    // enablement which is not done on the MPIPL path
+    if (!sys->getAttr<TARGETING::ATTR_IS_MPIPL_HB>() && mapSize > payload_size)
     {
         const auto payloadBase_virt_addr_ptr = static_cast<uint8_t*>(payloadBase_virt_addr);
 
