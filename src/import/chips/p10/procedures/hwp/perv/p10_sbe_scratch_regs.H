@@ -99,6 +99,8 @@ enum p10_sbe_scratch_regs
     ATTR_SBE_SELECT_EX_POLICY_STARTBIT              = 4,
     ATTR_SBE_SELECT_EX_POLICY_LENGTH                = 3,
 
+    ATTR_CONTAINED_LOAD_PATH_BIT                    = 7,
+
     ATTR_CLOCKSTOP_ON_XSTOP_STARTBIT                = 10,
     ATTR_CLOCKSTOP_ON_XSTOP_LENGTH                  = 2,
     ATTR_CLOCKSTOP_ON_XSTOP_DISABLED                = 0x0,
@@ -111,8 +113,6 @@ enum p10_sbe_scratch_regs
 
     ATTR_CLOCK_MUX_PCI_LCPLL_INPUT_STARTBIT         = 28,
     ATTR_CLOCK_MUX_PCI_LCPLL_INPUT_LENGTH           = 2,
-
-    ATTR_CONTAINED_LOAD_PATH_BIT                    = 30,
 
     // Scratch_reg_6
     SCRATCH6_REG_VALID_BIT                          = 5,
