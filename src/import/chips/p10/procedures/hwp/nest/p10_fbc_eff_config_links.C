@@ -207,9 +207,20 @@ fapi2::ReturnCode p10_fbc_eff_config_links_query_endp(
         }
         else
         {
-            // endpoint target is configured, qualify local link enable with remote endpoint state
-            FAPI_TRY(p10_fbc_eff_config_links_query_link_en(l_rem_target, o_loc_link_en[l_loc_link_id]),
+            // verify that remote link end is also enabled, otherwise assert that
+            // local link is also not enabled. avoid directly qualifying the local link
+            // enable with the remote endpoint state since this can be problematic for
+            // links with lane swap where one link end may have even-only trained, while
+            // the remote end may have odd-only trained
+
+            uint8_t l_rem_link_en = 0;
+            FAPI_TRY(p10_fbc_eff_config_links_query_link_en(l_rem_target, l_rem_link_en),
                      "Error from p10_fbc_eff_config_links_query_link_en (remote)");
+
+            if(l_rem_link_en == fapi2::ENUM_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG_FALSE)
+            {
+                o_loc_link_en[l_loc_link_id] = fapi2::ENUM_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG_FALSE;
+            }
         }
     }
 

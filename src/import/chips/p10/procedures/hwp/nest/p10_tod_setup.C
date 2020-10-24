@@ -843,23 +843,11 @@ fapi2::ReturnCode configure_port_ctrl_regs(
     fapi2::buffer<uint64_t> l_port_ctrl_check_reg = 0;
     uint32_t l_port_ctrl_check_addr = 0;
     uint32_t l_path_sel = 0;
-    fapi2::ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG_Type l_x_attached_chip_cnfg;
-    fapi2::ATTR_PROC_FABRIC_A_ATTACHED_CHIP_CNFG_Type l_a_attached_chip_cnfg;
     fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP> l_target = *(i_tod_node->i_target);
 
     FAPI_DBG("Start");
 
     const bool is_mdmt = (i_tod_node->i_tod_master && i_tod_node->i_drawer_master);
-
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG,
-                           l_target,
-                           l_x_attached_chip_cnfg),
-             "Error from FAPI_ATTR_GET (ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG)!");
-
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_A_ATTACHED_CHIP_CNFG,
-                           l_target,
-                           l_a_attached_chip_cnfg),
-             "Error from FAPI_ATTR_GET (ATTR_PROC_FABRIC_A_ATTACHED_CHIP_CNFG)!");
 
     // TOD_PRI_PORT_0_CTRL_REG is only used for Primary configurations
     // TOD_SEC_PORT_1_CTRL_REG is only used for Secondary configurations
@@ -900,6 +888,7 @@ fapi2::ReturnCode configure_port_ctrl_regs(
     {
         uint8_t l_bus_rx = 0;
         fapi2::Target<fapi2::TARGET_TYPE_IOHS> l_iohs_target;
+        fapi2::ATTR_IOHS_LINK_TRAIN_Type l_link_train;
 
         FAPI_TRY(p10_tod_lookup_iohs_target(
                      l_target,
@@ -908,8 +897,10 @@ fapi2::ReturnCode configure_port_ctrl_regs(
                      l_iohs_target),
                  "Error from p10_tod_lookup_iohs_target");
 
-        FAPI_ASSERT((l_x_attached_chip_cnfg[l_bus_rx] != 0) ||
-                    (l_a_attached_chip_cnfg[l_bus_rx] != 0),
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IOHS_LINK_TRAIN, l_iohs_target, l_link_train),
+                 "Error from FAPI_ATTR_GET (ATTR_IOHS_LINK_TRAIN)");
+
+        FAPI_ASSERT(l_link_train != fapi2::ENUM_ATTR_IOHS_LINK_TRAIN_NONE,
                     fapi2::P10_TOD_SETUP_INVALID_TOPOLOGY_RX()
                     .set_TARGET(l_target)
                     .set_RX(i_tod_node->i_bus_rx),
@@ -988,6 +979,7 @@ fapi2::ReturnCode configure_port_ctrl_regs(
         {
             uint8_t l_bus_tx = 0;
             fapi2::Target<fapi2::TARGET_TYPE_IOHS> l_iohs_target;
+            fapi2::ATTR_IOHS_LINK_TRAIN_Type l_link_train;
 
             FAPI_TRY(p10_tod_lookup_iohs_target(
                          l_target,
@@ -996,8 +988,10 @@ fapi2::ReturnCode configure_port_ctrl_regs(
                          l_iohs_target),
                      "Error from p10_tod_lookup_iohs_target");
 
-            FAPI_ASSERT((l_x_attached_chip_cnfg[l_bus_tx] != 0) ||
-                        (l_a_attached_chip_cnfg[l_bus_tx] != 0),
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IOHS_LINK_TRAIN, l_iohs_target, l_link_train),
+                     "Error from FAPI_ATTR_GET (ATTR_IOHS_LINK_TRAIN)");
+
+            FAPI_ASSERT(l_link_train != fapi2::ENUM_ATTR_IOHS_LINK_TRAIN_NONE,
                         fapi2::P10_TOD_SETUP_INVALID_TOPOLOGY_TX()
                         .set_TARGET(l_target)
                         .set_TX((*l_child)->i_bus_tx),
@@ -1476,12 +1470,17 @@ fapi2::ReturnCode p10_tod_get_iohs_latency_measures(
     iohs_latency_t l_iohs_local_latency_diff = 0 ;
     iohs_latency_t l_iohs_latency_link0 = 0 ;
     iohs_latency_t l_iohs_latency_link1 = 0 ;
+    fapi2::ATTR_IOHS_LINK_TRAIN_Type l_link_train;
 
     FAPI_DBG("Start");
 
     // Initialize
     o_iohs_latency = 0;
     o_iohs_round_trip_clocks = 0;
+
+    // Get attribute that determines whether both link halves are enabled
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IOHS_LINK_TRAIN, i_iohs_target, l_link_train),
+             "Error from FAPI_ATTR_GET (ATTR_IOHS_LINK_TRAIN)");
 
     // Get the latency measure register
     FAPI_TRY(GET_DLP_LAT_MEASURE(i_iohs_target, l_lat_measure_reg),
@@ -1505,24 +1504,70 @@ fapi2::ReturnCode p10_tod_get_iohs_latency_measures(
     // the local latency difference value should be added to the
     // round trip time register value to get the total round trip time."
 
-    // FIXME @RTC 213485  Is there a need to account for a half-link configuration
-    // (e.g. using only one link out of a link pair) when using the TOD latency
-    // measurement register values?
-
     // ------------
     // determine TOD latency value
     // ------------
-    GET_DLP_LAT_MEASURE_LINK0_TOD_LATENCY(l_lat_measure_reg, l_iohs_latency_link0);
-    GET_DLP_LAT_MEASURE_LINK1_TOD_LATENCY(l_lat_measure_reg, l_iohs_latency_link1);
+    switch(l_link_train)
+    {
+        case fapi2::ENUM_ATTR_IOHS_LINK_TRAIN_BOTH:
+            GET_DLP_LAT_MEASURE_LINK0_TOD_LATENCY(l_lat_measure_reg, l_iohs_latency_link0);
+            GET_DLP_LAT_MEASURE_LINK1_TOD_LATENCY(l_lat_measure_reg, l_iohs_latency_link1);
+            o_iohs_latency = (l_iohs_latency_link0 < l_iohs_latency_link1) ? l_iohs_latency_link0 : l_iohs_latency_link1;
+            break;
 
-    // FIXME @RTC 213485 -- Can the TOD latency ever be zero (like an invalid value)
-    // on one of the half-links but not the other?
+        case fapi2::ENUM_ATTR_IOHS_LINK_TRAIN_EVEN_ONLY:
+            GET_DLP_LAT_MEASURE_LINK0_TOD_LATENCY(l_lat_measure_reg, o_iohs_latency);
+            break;
 
-    o_iohs_latency = (l_iohs_latency_link0 < l_iohs_latency_link1) ? l_iohs_latency_link0 : l_iohs_latency_link1 ;
+        case fapi2::ENUM_ATTR_IOHS_LINK_TRAIN_ODD_ONLY:
+            GET_DLP_LAT_MEASURE_LINK1_TOD_LATENCY(l_lat_measure_reg, o_iohs_latency);
+            break;
+
+        default:
+            break;
+    }
 
     // ------------
     // determine round-trip clocks
     // ------------
+    if(l_link_train == fapi2::ENUM_ATTR_IOHS_LINK_TRAIN_EVEN_ONLY)
+    {
+        GET_DLP_LAT_MEASURE_LINK0_ROUND_TRIP(l_lat_measure_reg, o_iohs_round_trip_clocks);
+
+        FAPI_ASSERT(GET_DLP_LAT_MEASURE_LINK0_ROUND_TRIP_VALID(l_lat_measure_reg)
+                    && o_iohs_round_trip_clocks != 0,
+                    fapi2::P10_TOD_SETUP_INVALID_LATENCY()
+                    .set_TARGET(i_iohs_target)
+                    .set_IOHS_LATENCY(o_iohs_latency)
+                    .set_ROUND_TRIP_TIME(o_iohs_round_trip_clocks)
+                    .set_LATENCY_MEASURE(l_lat_measure_reg),
+                    "Invalid latency measure register value");
+
+        FAPI_DBG("Latency measure values : o_iohs_latency = %u o_iohs_round_trip_clocks = %u",
+                 o_iohs_latency, o_iohs_round_trip_clocks);
+
+        goto fapi_try_exit;
+    }
+
+    if(l_link_train == fapi2::ENUM_ATTR_IOHS_LINK_TRAIN_ODD_ONLY)
+    {
+        GET_DLP_LAT_MEASURE_LINK1_ROUND_TRIP(l_lat_measure_reg, o_iohs_round_trip_clocks);
+
+        FAPI_ASSERT(GET_DLP_LAT_MEASURE_LINK1_ROUND_TRIP_VALID(l_lat_measure_reg)
+                    && o_iohs_round_trip_clocks != 0,
+                    fapi2::P10_TOD_SETUP_INVALID_LATENCY()
+                    .set_TARGET(i_iohs_target)
+                    .set_IOHS_LATENCY(o_iohs_latency)
+                    .set_ROUND_TRIP_TIME(o_iohs_round_trip_clocks)
+                    .set_LATENCY_MEASURE(l_lat_measure_reg),
+                    "Invalid latency measure register value");
+
+        FAPI_DBG("Latency measure values : o_iohs_latency = %u o_iohs_round_trip_clocks = %u",
+                 o_iohs_latency, o_iohs_round_trip_clocks);
+
+        goto fapi_try_exit;
+    }
+
     if (GET_DLP_LAT_MEASURE_LINK0_ROUND_TRIP_VALID(l_lat_measure_reg))
     {
         GET_DLP_LAT_MEASURE_LINK0_ROUND_TRIP(l_lat_measure_reg, o_iohs_round_trip_clocks);
