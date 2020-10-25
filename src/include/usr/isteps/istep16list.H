@@ -119,10 +119,9 @@ namespace INITSERVICE
             { START_FN, EXT_IMAGE, NORMAL_IPL_OP | MPIPL_OP, true }
         },
         {
-            ISTEPNAME(16,03,"host_secure_rng"),
-            // @TODO RTC 261059: Make this a proper no-op istep
-            [](void*) -> void* { return nullptr; },// ISTEP_16::call_host_secure_rng,
-            { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
+            ISTEPNAME(16,03,"host_secure_rng_noop"),
+            nullptr,
+            { NONE, EXT_IMAGE, IPL_NOOP, false }
         },
         {
             // Hostboot PRD should no longer be called after this step.

@@ -66,7 +66,7 @@ OBJS += call_proc_exit_cache_contained.o
 OBJS += call_proc_htm_setup.o
 OBJS += call_host_mpipl_service.o
 OBJS += call_host_secure_rng.o
-OBJS += memory_encryption.o
+OBJS += call_host_enable_memory_encryption.o
 
 # Include the makefiles to compile the HWPs needed by the sub steps
 include ${ROOTPATH}/procedure.rules.mk
@@ -100,7 +100,7 @@ OBJS += p10_l3_flush.o
 OBJS += p10_l2_flush.o
 OBJS += p10_sbe_stop_hb.o
 OBJS += p10_pcie_scom.o
-OBJS += p10_rng_init_phase2.o # @TODO RTC 261059: Remove this when new istep in 14 is created
+OBJS += p10_rng_init_phase2.o
 OBJS += p10_ncu_enable_darn.o
 OBJS += p10_init_mem_encryption.o
 

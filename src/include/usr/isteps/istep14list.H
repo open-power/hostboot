@@ -29,24 +29,28 @@
  * @file    istep14list.H
  *
  *  IStep 14    Step 14 DRAM Initialization
- *  IPL FLow Doc        v1.07
+ *  IPL FLow Doc        v0.93
  *
- * 14.1  mss_memdiag
- *       :  Mainstore Pattern Testing
- * 14.2  mss_thermal_init
- *       :  Initialize the thermal sensor
- * 14.3  proc_load_iop_xram
- *       :  Load PCIe IOP XRAM
- * 14.4  proc_pcie_config
- *       :  Configure the PHBs
- * 14.5  proc_setup_mmio_bars
- *       :  Program unit MMIO BARs
- * 14.6  proc_exit_cache_contained
- *       :  Execution from memory
- * 14.7  proc_htm_setup
- *       :  Setup HTM allocations
- * 14.8  host_mpipl_service
- *       :  Perform MPIPL tasks
+ * 14.1   mss_memdiag
+ *        :  Mainstore Pattern Testing
+ * 14.2   mss_thermal_init
+ *        :  Initialize the thermal sensor
+ * 14.3   proc_load_iop_xram
+ *        :  Load PCIe IOP XRAM
+ * 14.4   proc_pcie_config
+ *        :  Configure the PHBs
+ * 14.5   proc_setup_mmio_bars
+ *        :  Program unit MMIO BARs
+ * 14.6   host_secure_rng
+ *        :  Secure the random number generator
+ * 14.7   host_enable_memory_encryption
+ *        :  Enable memory encryption
+ * 14.8   proc_exit_cache_contained
+ *        :  Execution from memory
+ * 14.9   proc_htm_setup
+ *        :  Setup HTM allocations
+ * 14.10  host_mpipl_service
+ *        :  Perform MPIPL tasks
  *
  *  Please see the note in initsvcstructs.H for description of
  *      the ISTEPNAME macro.
@@ -111,6 +115,26 @@ void*   call_proc_load_iop_xram( void   *io_pArgs );
 void*    call_proc_setup_mmio_bars( void    *io_pArgs );
 
 /**
+ *  @brief   host_secure_rng
+ *
+ *  param[in,out]   -   pointer to any arguments, usually NULL
+ *
+ *  return  any errlogs to istep
+ *
+ */
+void* call_host_secure_rng(void *io_pArgs);
+
+/**
+ *  @brief   host_enable_memory_encryption
+ *
+ *  param[in,out]   -   pointer to any arguments, usually NULL
+ *
+ *  return  any errlogs to istep
+ *
+ */
+void* call_host_enable_memory_encryption(void *io_pArgs);
+
+/**
  *  @brief   proc_htm_setup
  *
  *  param[in,out]   -   pointer to any arguments, usually NULL
@@ -139,16 +163,6 @@ void*    call_proc_exit_cache_contained( void    *io_pArgs );
  *
  */
 void*    call_host_mpipl_service( void    *io_pArgs );
-
-/**
- *  @brief   host_secure_rng
- *
- *  param[in,out]   -   pointer to any arguments, usually NULL
- *
- *  return  any errlogs to istep
- *
- */
-void* call_host_secure_rng(void *io_pArgs);
 
 };
 
@@ -187,31 +201,29 @@ namespace   INITSERVICE
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
         },
         {
-                ISTEPNAME(14,06,"proc_exit_cache_contained"),
+                ISTEPNAME(14,06,"host_secure_rng"),
+                ISTEP_14::call_host_secure_rng,
+                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
+        },
+        {
+                ISTEPNAME(14,07,"host_enable_memory_encryption"),
+                ISTEP_14::call_host_enable_memory_encryption,
+                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
+        },
+        {
+                ISTEPNAME(14,08,"proc_exit_cache_contained"),
                 ISTEP_14::call_proc_exit_cache_contained,
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
         },
         {
-                ISTEPNAME(14,07,"proc_htm_setup"),
+                ISTEPNAME(14,09,"proc_htm_setup"),
                 ISTEP_14::call_proc_htm_setup,
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
         },
         {
-                ISTEPNAME(14,08,"host_mpipl_service"),
+                ISTEPNAME(14,10,"host_mpipl_service"),
                 ISTEP_14::call_host_mpipl_service,
                 { START_FN, EXT_IMAGE, MPIPL_OP, true }
-        },
-        { // @TODO RTC 261059: This istep will be relocated when after other
-          // components support the new istep count
-                ISTEPNAME(14,09,"host_secure_rng_placeholder"),
-                [](void*) -> void* { return nullptr; },
-                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
-        },
-        { // @TODO RTC 261059: This istep will be relocated when after other
-          // components support the new istep count
-                ISTEPNAME(14,10,"host_enable_memory_encryption_placeholder"),
-                [](void*) -> void* { return nullptr; },
-                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
         },
     };
 

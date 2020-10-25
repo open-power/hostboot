@@ -82,6 +82,7 @@ namespace ISTEP
         MOD_SCOPED_HOMER_MAPPER_MAP                       = 0x33,
         MOD_SCOPED_HOMER_MAPPER_UNMAP                     = 0x34,
         MOD_GET_RUNTIME_PM_ADDRESSES                      = 0x35,
+        MOD_ENABLE_MEMORY_ENCRYPTION                      = 0x36,
     };
 
     /**

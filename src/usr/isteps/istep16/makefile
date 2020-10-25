@@ -55,7 +55,6 @@ OBJS += call_host_ipl_complete.o
 
 #HWP object file needed to run istep 16
 OBJS += p10_query_core_stop_state.o
-OBJS += p10_rng_init_phase2.o
 OBJS += p10_core_special_wakeup.o
 
 include ${ROOTPATH}/procedure.rules.mk

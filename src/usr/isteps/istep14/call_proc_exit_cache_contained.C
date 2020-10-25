@@ -56,8 +56,6 @@
 #include <arch/magic.H>
 #include <runtime/runtime.H>
 
-#include "memory_encryption.H"
-
 using   namespace   ISTEP;
 using   namespace   ISTEP_ERROR;
 using   namespace   ERRORLOG;
@@ -97,23 +95,8 @@ static void zero_hb_reserved_memory()
 namespace ISTEP_14
 {
 
-void* call_host_secure_rng(void*);
-
 void* call_proc_exit_cache_contained (void *io_pArgs)
 {
-    // @TODO RTC 261059: Move this to the appropriate new substep in istep 14
-    {
-        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                  "Calling host_secure_rng in istep 14");
-
-        void* const ret = call_host_secure_rng(nullptr);
-
-        if (ret)
-        {
-            return ret;
-        }
-    }
-
     IStepError  l_stepError;
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
@@ -411,38 +394,12 @@ void* call_proc_exit_cache_contained (void *io_pArgs)
     else
     {
         do {
-            // 1) Set up keys for memory encryption
-            // 2) Reclaim all DMA buffers from the FSP
-            // 3) Suspend the mailbox with interrupt disable
-            // 4) Ensure that interrupt presenter is drained
-            // 5) call p10_exit_cache_contained which routes
+            // 1) Reclaim all DMA buffers from the FSP
+            // 2) Suspend the mailbox with interrupt disable
+            // 3) Ensure that interrupt presenter is drained
+            // 4) call p10_exit_cache_contained which routes
             //       a chipop to the SBE
-            // 6) Resume the mailbox
-
-            errlHndl_t crypto_error = setup_memory_crypto_keys();
-
-            if (crypto_error)
-            {
-                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                          ERR_MRK"call_proc_exit_cache_contained: "
-                          "setup_memory_crypto_keys failed");
-
-                /* @errortype      ERRL_SEV_UNRECOVERABLE
-                 * @moduleid       ISTEP::MOD_EXIT_CACHE_CONTAINED
-                 * @reasoncode     ISTEP::RC_MEMCRYPT_KEY_SETUP_FAILED
-                 * @devdesc        Memory encryption key setup failed
-                 * @custdesc       Platform security problem detected
-                 */
-                l_errl = new ERRORLOG::ErrlEntry(
-                    ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                    ISTEP::MOD_EXIT_CACHE_CONTAINED,
-                    ISTEP::RC_MEMCRYPT_KEY_SETUP_FAILED);
-
-                l_errl->plid(crypto_error->plid());
-                l_errl->collectTrace(ISTEP_COMP_NAME);
-                errlCommit(crypto_error, HWPF_COMP_ID);
-                break;
-            }
+            // 5) Resume the mailbox
 
             l_errl = MBOX::reclaimDmaBfrsFromFsp();
             if (l_errl)
@@ -573,36 +530,6 @@ void* call_proc_exit_cache_contained (void *io_pArgs)
     zero_hb_reserved_memory();
 
     }while(0);
-
-    // Lock memory crypto settings (even if we didn't enable memory encryption)
-    {
-        errlHndl_t crypto_error = lock_memory_crypto_settings();
-
-        if (crypto_error)
-        {
-            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                      ERR_MRK"call_proc_exit_cache_contained: "
-                      "lock_memory_crypto_settings failed");
-
-            /* @errortype      ERRL_SEV_UNRECOVERABLE
-             * @moduleid       ISTEP::MOD_EXIT_CACHE_CONTAINED
-             * @reasoncode     ISTEP::RC_MEMCRYPT_LOCK_FAILED
-             * @devdesc        Memory encryption lock failed
-             * @custdesc       Platform security problem detected
-             */
-            errlHndl_t setup_fail = new ERRORLOG::ErrlEntry(
-                ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                ISTEP::MOD_EXIT_CACHE_CONTAINED,
-                ISTEP::RC_MEMCRYPT_LOCK_FAILED);
-
-            setup_fail->plid(crypto_error->plid());
-            setup_fail->collectTrace(ISTEP_COMP_NAME);
-            l_stepError.addErrorDetails(setup_fail);
-
-            errlCommit(crypto_error, HWPF_COMP_ID);
-            errlCommit(setup_fail, HWPF_COMP_ID);
-        }
-    }
 
     if ( l_errl )
     {
