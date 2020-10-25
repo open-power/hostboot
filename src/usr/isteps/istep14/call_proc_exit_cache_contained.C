@@ -431,7 +431,7 @@ void* call_proc_exit_cache_contained (void *io_pArgs)
                  * @moduleid       ISTEP::MOD_EXIT_CACHE_CONTAINED
                  * @reasoncode     ISTEP::RC_MEMCRYPT_KEY_SETUP_FAILED
                  * @devdesc        Memory encryption key setup failed
-                 * @custdesc       Firmware encountered an internal error
+                 * @custdesc       Platform security problem detected
                  */
                 l_errl = new ERRORLOG::ErrlEntry(
                     ERRORLOG::ERRL_SEV_UNRECOVERABLE,
@@ -588,7 +588,7 @@ void* call_proc_exit_cache_contained (void *io_pArgs)
              * @moduleid       ISTEP::MOD_EXIT_CACHE_CONTAINED
              * @reasoncode     ISTEP::RC_MEMCRYPT_LOCK_FAILED
              * @devdesc        Memory encryption lock failed
-             * @custdesc       Firmware encountered an internal error
+             * @custdesc       Platform security problem detected
              */
             errlHndl_t setup_fail = new ERRORLOG::ErrlEntry(
                 ERRORLOG::ERRL_SEV_UNRECOVERABLE,

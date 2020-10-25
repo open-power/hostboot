@@ -23,10 +23,19 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
+/* @file memory_encryption.C
+ *
+ * @brief Implements Hostboot support for memory encryption. Support includes
+ * things like cryptographic key generation and installation, encryption
+ * activation, and keystore and SCOM register locking.
+ */
+
 // Error logs
 #include <errl/errlentry.H>
 #include <errl/errlmanager.H>
+#include <errl/errludstring.H>
 #include <errl/errludtarget.H>
+#include <errl/errlreasoncodes.H>
 
 // Targeting support
 #include <targeting/common/commontargeting.H>
@@ -287,12 +296,13 @@ errlHndl_t setup_memory_crypto_keys()
     /// Enable encryption and set up the encryption and decryption keys on every
     /// eligible MCC target.
 
+    TargetHandleList encrypt_mccs;
+    bool enable_encryption { };
+
     do
     {
 
     Target* const node = UTIL::getCurrentNodeTarget();
-    TargetHandleList encrypt_mccs;
-    bool enable_encryption { };
 
     {
         TargetHandleList procs;
@@ -409,6 +419,34 @@ errlHndl_t setup_memory_crypto_keys()
     if (task_pinned)
     { // Affinity pinning and unpinning have to be balanced.
         task_affinity_unpin();
+    }
+
+    { // Create an informational error log to report whether we enabled memory encryption
+        /*@
+         * @errortype         ERRL_SEV_INFORMATIONAL
+         * @moduleid          ISTEP::MOD_PROC_EXIT_CACHE_CONTAINED
+         * @reasoncode        ISTEP::RC_MEMORY_ENCRYPTION_ENABLED
+         * @userdata1         Was memory encryption successfully enabled? (1 = yes, 0 = no)
+         * @devdesc           Memory encryption was enabled for the listed MCCs
+         * @custdesc          Memory encryption information
+         */
+        auto cryptinfo = new ErrlEntry(ERRL_SEV_INFORMATIONAL,
+                                       ISTEP::MOD_PROC_EXIT_CACHE_CONTAINED,
+                                       ISTEP::RC_MEMORY_ENCRYPTION_ENABLED);
+
+        if (enable_encryption && !errl)
+        {
+            cryptinfo->addUserData1(1); // Encryption was successfully enabled
+
+            for (const auto mcc : encrypt_mccs)
+            {
+                char buf[128] = { }; // 128 is just a generous guess for the snprintf below
+                snprintf(buf, sizeof(buf), "Encryption enabled on MCC 0x%08x", get_huid(mcc));
+                ErrlUserDetailsString(buf).addToLog(cryptinfo);
+            }
+        }
+
+        errlCommit(cryptinfo, ISTEP_COMP_ID);
     }
 
     TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,

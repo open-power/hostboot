@@ -59,7 +59,6 @@
           <id>ATTR_PROC_MEMORY_ENCRYPTION_ENABLED</id>
           <!-- Value of "CTR" taken from p10_nest_attributes.xml -->
           <default>2</default>
-          <persistency>volatile</persistency>
           <no_export/>
      </attribute>
 

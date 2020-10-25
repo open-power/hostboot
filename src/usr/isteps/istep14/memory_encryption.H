@@ -23,6 +23,11 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
+/* @file memory_encryption.H
+ *
+ * Interface for Hostboot support for memory encryption.
+ */
+
 #ifndef MEMORY_ENCRYPTION_H
 #define MEMORY_ENCRYPTION_H
 
