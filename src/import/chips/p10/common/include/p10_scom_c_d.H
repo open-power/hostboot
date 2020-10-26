@@ -279,6 +279,11 @@ static const uint32_t EC_PC_FIR_CORE_ACTION1_PC_PHYP_XSTOP_ERROR = 63;
 //<< [EC_PC_FIR_CORE_ACTION1]
 // c/reg00013.H
 
+//>> [EC_PC_SCR1]
+static const uint64_t EC_PC_SCR1 = 0x20020487ull;
+//<< [EC_PC_SCR1]
+// c/reg00013.H
+
 //>>THE END<<
 
 #ifndef __PPE_HCODE__

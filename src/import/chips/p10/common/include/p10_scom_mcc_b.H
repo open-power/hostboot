@@ -81,6 +81,14 @@ static const uint32_t DSTL_DSTLFIR_SPARE38 = 38;
 //<< [DSTL_DSTLFIR]
 // mcc/reg00011.H
 
+//>> [CRYPTO_DECRYPT_CRYPTOKEY1B]
+static const uint64_t CRYPTO_DECRYPT_CRYPTOKEY1B = 0x0c010f5bull;
+
+static const uint32_t CRYPTO_DECRYPT_CRYPTOKEY1B_KEY1B = 0;
+static const uint32_t CRYPTO_DECRYPT_CRYPTOKEY1B_KEY1B_LEN = 64;
+//<< [CRYPTO_DECRYPT_CRYPTOKEY1B]
+// mcc/reg00011.H
+
 //>>THE END<<
 
 #ifndef __PPE_HCODE__

@@ -13240,6 +13240,55 @@ fapi_try_exit:
 }
 //<< GET_[EC_PC_FIR_CORE_ACTION1_PC_PHYP_XSTOP_ERROR]
 
+//>> PREP_[EC_PC_SCR1]
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PREP_EC_PC_SCR1(const fapi2::Target<K, M, V>& i_target)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = EC_PC_SCR1;
+#endif
+    return fapi2::current_err;
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+//<< PREP_[EC_PC_SCR1]
+
+//>> GET_[EC_PC_SCR1]
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode GET_EC_PC_SCR1(const fapi2::Target<K, M, V>& i_target, fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = EC_PC_SCR1;
+#endif
+    return fapi2::getScom(i_target, EC_PC_SCR1, o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+//<< GET_[EC_PC_SCR1]
+
+//>> PUT_[EC_PC_SCR1]
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PUT_EC_PC_SCR1(const fapi2::Target<K, M, V>& i_target, const uint64_t i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    FAPI_TRY(scomt::chkReg(EC_PC_SCR1));
+#endif
+    return fapi2::putScom(i_target, EC_PC_SCR1, i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+//<< PUT_[EC_PC_SCR1]
+
+
 //>>THE END<<
 
 #ifndef __PPE_HCODE__

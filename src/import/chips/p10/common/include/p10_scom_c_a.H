@@ -133,6 +133,35 @@ static const uint32_t EC_PC_FIR_CORE_WOF_PC_PHYP_XSTOP_ERROR = 63;
 //<< [EC_PC_FIR_CORE_WOF]
 // c/reg00010.H
 
+//>> [EC_PC_PMC_UPDATE]
+static const uint64_t EC_PC_PMC_UPDATE = 0x20020414ull;
+
+static const uint32_t EC_PC_PMC_UPDATE_PMC_REG_MSR_S_ON_SRESET = 0;
+static const uint32_t EC_PC_PMC_UPDATE_PMC_REG_DIS_XFER_TFAC = 1;
+static const uint32_t EC_PC_PMC_UPDATE_PMC_REG_XFER_TFAC = 31;
+static const uint32_t EC_PC_PMC_UPDATE_WRITE_VT0_PM_STATE = 32;
+static const uint32_t EC_PC_PMC_UPDATE_PSSCR_VT0_PLS = 33;
+static const uint32_t EC_PC_PMC_UPDATE_PSSCR_VT0_PLS_LEN = 4;
+static const uint32_t EC_PC_PMC_UPDATE_PSSCR_VT0_SRR1 = 37;
+static const uint32_t EC_PC_PMC_UPDATE_PSSCR_VT0_SRR1_LEN = 3;
+static const uint32_t EC_PC_PMC_UPDATE_WRITE_VT1_PM_STATE = 40;
+static const uint32_t EC_PC_PMC_UPDATE_PSSCR_VT1_PLS = 41;
+static const uint32_t EC_PC_PMC_UPDATE_PSSCR_VT1_PLS_LEN = 4;
+static const uint32_t EC_PC_PMC_UPDATE_PSSCR_VT1_SRR1 = 45;
+static const uint32_t EC_PC_PMC_UPDATE_PSSCR_VT1_SRR1_LEN = 3;
+static const uint32_t EC_PC_PMC_UPDATE_WRITE_VT2_PM_STATE = 48;
+static const uint32_t EC_PC_PMC_UPDATE_PSSCR_VT2_PLS = 49;
+static const uint32_t EC_PC_PMC_UPDATE_PSSCR_VT2_PLS_LEN = 4;
+static const uint32_t EC_PC_PMC_UPDATE_PSSCR_VT2_SRR1 = 53;
+static const uint32_t EC_PC_PMC_UPDATE_PSSCR_VT2_SRR1_LEN = 3;
+static const uint32_t EC_PC_PMC_UPDATE_WRITE_VT3_PM_STATE = 56;
+static const uint32_t EC_PC_PMC_UPDATE_PSSCR_VT3_PLS = 57;
+static const uint32_t EC_PC_PMC_UPDATE_PSSCR_VT3_PLS_LEN = 4;
+static const uint32_t EC_PC_PMC_UPDATE_PSSCR_VT3_SRR1 = 61;
+static const uint32_t EC_PC_PMC_UPDATE_PSSCR_VT3_SRR1_LEN = 3;
+//<< [EC_PC_PMC_UPDATE]
+// c/reg00010.H
+
 //>>THE END<<
 
 #ifndef __PPE_HCODE__

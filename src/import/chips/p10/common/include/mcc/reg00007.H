@@ -4935,6 +4935,108 @@ fapi_try_exit:
 }
 //<< GET_[WRITE_READCFG_READCFG_RESERVED_38_39]
 
+//>> PREP_[CRYPTO_ENCRYPT_CRYPTOKEY1A]
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PREP_CRYPTO_ENCRYPT_CRYPTOKEY1A(const fapi2::Target<K, M, V>& i_target)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = CRYPTO_ENCRYPT_CRYPTOKEY1A;
+#endif
+    return fapi2::current_err;
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+//<< PREP_[CRYPTO_ENCRYPT_CRYPTOKEY1A]
+
+//>> GET_[CRYPTO_ENCRYPT_CRYPTOKEY1A]
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode GET_CRYPTO_ENCRYPT_CRYPTOKEY1A(const fapi2::Target<K, M, V>& i_target,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = CRYPTO_ENCRYPT_CRYPTOKEY1A;
+#endif
+    return fapi2::getScom(i_target, CRYPTO_ENCRYPT_CRYPTOKEY1A, o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+//<< GET_[CRYPTO_ENCRYPT_CRYPTOKEY1A]
+
+//>> PUT_[CRYPTO_ENCRYPT_CRYPTOKEY1A]
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PUT_CRYPTO_ENCRYPT_CRYPTOKEY1A(const fapi2::Target<K, M, V>& i_target,
+        const uint64_t i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    FAPI_TRY(scomt::chkReg(CRYPTO_ENCRYPT_CRYPTOKEY1A));
+#endif
+    return fapi2::putScom(i_target, CRYPTO_ENCRYPT_CRYPTOKEY1A, i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+//<< PUT_[CRYPTO_ENCRYPT_CRYPTOKEY1A]
+
+
+//>> SET_[CRYPTO_ENCRYPT_CRYPTOKEY1A_KEY1A]
+static inline fapi2::buffer<uint64_t>& SET_CRYPTO_ENCRYPT_CRYPTOKEY1A_KEY1A(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CRYPTO_ENCRYPT_CRYPTOKEY1A));
+#endif
+    return o_data.insertFromRight<CRYPTO_ENCRYPT_CRYPTOKEY1A_KEY1A,
+           CRYPTO_ENCRYPT_CRYPTOKEY1A_KEY1A_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("0:scom_mcc Invalid dial access CRYPTO_ENCRYPT_CRYPTOKEY1A_KEY1A chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[CRYPTO_ENCRYPT_CRYPTOKEY1A_KEY1A]
+
+//>> SET_[CRYPTO_ENCRYPT_CRYPTOKEY1A_KEY1A]
+static inline fapi2::buffer<uint64_t>& SET_CRYPTO_ENCRYPT_CRYPTOKEY1A_KEY1A(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CRYPTO_ENCRYPT_CRYPTOKEY1A));
+#endif
+    return o_data.insertFromRight<CRYPTO_ENCRYPT_CRYPTOKEY1A_KEY1A,
+           CRYPTO_ENCRYPT_CRYPTOKEY1A_KEY1A_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("1:scom_mcc Invalid dial access CRYPTO_ENCRYPT_CRYPTOKEY1A_KEY1A chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[CRYPTO_ENCRYPT_CRYPTOKEY1A_KEY1A]
+
+//>> GET_[CRYPTO_ENCRYPT_CRYPTOKEY1A_KEY1A]
+static inline fapi2::buffer<uint64_t>& GET_CRYPTO_ENCRYPT_CRYPTOKEY1A_KEY1A(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(CRYPTO_ENCRYPT_CRYPTOKEY1A));
+#endif
+    return i_data.extractToRight<CRYPTO_ENCRYPT_CRYPTOKEY1A_KEY1A,
+           CRYPTO_ENCRYPT_CRYPTOKEY1A_KEY1A_LEN>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("4:scom_mcc Invalid dial access CRYPTO_ENCRYPT_CRYPTOKEY1A_KEY1A chip: %x, ec: %x", scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[CRYPTO_ENCRYPT_CRYPTOKEY1A_KEY1A]
+
 //>>THE END<<
 
 #ifndef __PPE_HCODE__

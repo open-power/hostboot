@@ -109,6 +109,14 @@ static const uint32_t USTL_USTLFIR_SPARE_61 = 61;
 //<< [USTL_USTLFIR]
 // mcc/reg00002.H
 
+//>> [CRYPTO_DECRYPT_CRYPTOKEY2A]
+static const uint64_t CRYPTO_DECRYPT_CRYPTOKEY2A = 0x0c010f5cull;
+
+static const uint32_t CRYPTO_DECRYPT_CRYPTOKEY2A_KEY2A = 0;
+static const uint32_t CRYPTO_DECRYPT_CRYPTOKEY2A_KEY2A_LEN = 64;
+//<< [CRYPTO_DECRYPT_CRYPTOKEY2A]
+// mcc/reg00002.H
+
 //>>THE END<<
 
 #ifndef __PPE_HCODE__
