@@ -58,6 +58,10 @@
 #include <fapi2/plat_hwp_invoker.H>
 #include <isteps/hwpisteperror.H>
 
+// SCOM definitions
+#include <p10_scom_mcc.H>
+#include <p10_scom_proc.H>
+
 using namespace TARGETING;
 using namespace ERRORLOG;
 using namespace ISTEP;
@@ -114,6 +118,9 @@ static void addRngFFDC(const errlHndl_t i_errlog,
 
     ErrlUserDetailsString(msg).addToLog(i_errlog);
 }
+
+using namespace scomt::proc;
+using namespace scomt::mcc;
 
 /** @brief Generate a 64-bit random number with the DARN instruction.
  *
@@ -204,13 +211,12 @@ static errlHndl_t should_enable_memory_encryption(TargetHandleList const i_procs
         {
             // Read the Export Control Status register to check whether we're
             // allowed to use cryptography.
-            const uint64_t EXPORT_REGL_STATUS_SCOM_REG = 0x10009;
             uint64_t export_ctl = 0;
             size_t export_ctl_size = sizeof(export_ctl);
             errl = deviceRead(proc,
                               &export_ctl,
                               export_ctl_size,
-                              DEVICE_SCOM_ADDRESS(EXPORT_REGL_STATUS_SCOM_REG));
+                              DEVICE_SCOM_ADDRESS(TP_TPCHIP_PIB_OTP_OTPC_M_EXPORT_REGL_STATUS));
 
             if (errl)
             {
@@ -219,9 +225,10 @@ static errlHndl_t should_enable_memory_encryption(TargetHandleList const i_procs
                 break;
             }
 
-            const uint64_t EXPORT_STATUS_TP_MC_ALLOW_CRYPTO_DC = 1ull << (63 - 11);
+            const uint64_t EXPORT_STATUS_TP_MC_ALLOW_CRYPTO_DC_MASK
+                = 1ull << (63 - TP_TPCHIP_PIB_OTP_OTPC_M_EXPORT_REGL_STATUS_TP_MC_ALLOW_CRYPTO_DC);
 
-            encryption_export_controlled = (export_ctl & EXPORT_STATUS_TP_MC_ALLOW_CRYPTO_DC) == 0;
+            encryption_export_controlled = (export_ctl & EXPORT_STATUS_TP_MC_ALLOW_CRYPTO_DC_MASK) == 0;
         }
 
         if (encryption_export_controlled)
@@ -335,22 +342,6 @@ static errlHndl_t initialize_master_core_ncu(Target* const i_node,
 
 static errlHndl_t enable_memory_encryption()
 {
-    /// Key setup SCOM addresses
-    // We don't list the CHAN1 and CHAN2 SCOMs separately here because they are
-    // modeled as different targets.
-    static const uint64_t MCP_CHANX_CRYPTO_ENCRYPT_CRYPTOKEY1A = 0x000000000C010F52ull;
-    static const uint64_t MCP_CHANX_CRYPTO_ENCRYPT_CRYPTOKEY1B = 0x000000000C010F53ull;
-    static const uint64_t MCP_CHANX_CRYPTO_ENCRYPT_CRYPTOKEY2A = 0x000000000C010F54ull;
-    static const uint64_t MCP_CHANX_CRYPTO_ENCRYPT_CRYPTOKEY2B = 0x000000000C010F55ull;
-    static const uint64_t MCP_CHANX_CRYPTO_ENCRYPT_CRYPTONONCEA = 0x000000000C010F56ull;
-    static const uint64_t MCP_CHANX_CRYPTO_ENCRYPT_CRYPTONONCEB = 0x000000000C010F57ull;
-    static const uint64_t MCP_CHANX_CRYPTO_DECRYPT_CRYPTOKEY1A = 0x000000000C010F5Aull;
-    static const uint64_t MCP_CHANX_CRYPTO_DECRYPT_CRYPTOKEY1B = 0x000000000C010F5Bull;
-    static const uint64_t MCP_CHANX_CRYPTO_DECRYPT_CRYPTOKEY2A = 0x000000000C010F5Cull;
-    static const uint64_t MCP_CHANX_CRYPTO_DECRYPT_CRYPTOKEY2B = 0x000000000C010F5Dull;
-    static const uint64_t MCP_CHANX_CRYPTO_DECRYPT_CRYPTONONCEA = 0x000000000C010F5Eull;
-    static const uint64_t MCP_CHANX_CRYPTO_DECRYPT_CRYPTONONCEB = 0x000000000C010F5Full;
-
     // List of pairs of encrypt and decrypt registers, which need to contain the
     // same value.
     struct crypto_scom_pair_t
@@ -367,12 +358,12 @@ static errlHndl_t enable_memory_encryption()
     // set up both in either case to support both.
     static const crypto_scom_pair_t key_scoms[] =
     {
-        { MCP_CHANX_CRYPTO_ENCRYPT_CRYPTOKEY1A, MCP_CHANX_CRYPTO_DECRYPT_CRYPTOKEY1A },
-        { MCP_CHANX_CRYPTO_ENCRYPT_CRYPTOKEY1B, MCP_CHANX_CRYPTO_DECRYPT_CRYPTOKEY1B },
-        { MCP_CHANX_CRYPTO_ENCRYPT_CRYPTOKEY2A, MCP_CHANX_CRYPTO_DECRYPT_CRYPTOKEY2A },
-        { MCP_CHANX_CRYPTO_ENCRYPT_CRYPTOKEY2B, MCP_CHANX_CRYPTO_DECRYPT_CRYPTOKEY2B },
-        { MCP_CHANX_CRYPTO_ENCRYPT_CRYPTONONCEA, MCP_CHANX_CRYPTO_DECRYPT_CRYPTONONCEA },
-        { MCP_CHANX_CRYPTO_ENCRYPT_CRYPTONONCEB, MCP_CHANX_CRYPTO_DECRYPT_CRYPTONONCEB, NONCE_B_MASK }
+        { CRYPTO_ENCRYPT_CRYPTOKEY1A, CRYPTO_DECRYPT_CRYPTOKEY1A },
+        { CRYPTO_ENCRYPT_CRYPTOKEY1B, CRYPTO_DECRYPT_CRYPTOKEY1B },
+        { CRYPTO_ENCRYPT_CRYPTOKEY2A, CRYPTO_DECRYPT_CRYPTOKEY2A },
+        { CRYPTO_ENCRYPT_CRYPTOKEY2B, CRYPTO_DECRYPT_CRYPTOKEY2B },
+        { CRYPTO_ENCRYPT_CRYPTONONCEA, CRYPTO_DECRYPT_CRYPTONONCEA },
+        { CRYPTO_ENCRYPT_CRYPTONONCEB, CRYPTO_DECRYPT_CRYPTONONCEB, NONCE_B_MASK }
     };
 
     errlHndl_t errl = nullptr;
@@ -603,4 +594,4 @@ void* call_host_enable_memory_encryption(void*)
     return stepError.getErrorHandle();
 }
 
-} // namespace ISTEP14
+} // namespace ISTEP_14

@@ -39,6 +39,7 @@ EXTRAINCDIR += ${SRC_IMPORT_PATH}/
 EXTRAINCDIR += ${SRC_IMPORT_PATH}/chips/common/utils/
 EXTRAINCDIR += ${SRC_IMPORT_PATH}/chips/common/utils/imageProcs
 EXTRAINCDIR += ${SRC_IMPORT_PATH}/chips/common/utils/scomt/
+EXTRAINCDIR += ${SRC_IMPORT_PATH}/chips/p10/common/include/
 EXTRAINCDIR += ${SRC_IMPORT_PATH}/chips/p10/common/scominfo/
 EXTRAINCDIR += ${SRC_IMPORT_PATH}/chips/p10/utils/imageProcs/
 EXTRAINCDIR += ${SRC_IMPORT_PATH}/generic/memory/lib/
