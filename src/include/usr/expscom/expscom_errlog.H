@@ -49,19 +49,25 @@ enum exp_log_type : uint8_t
     NONCURRENT_SAVED_LOG = 5, // SPI flash error section (non-current image running)
 };
 
+// Values for full explorer log size (i_max_log_size)
+const uint32_t FULL_ACTIVE_EXPLOG = 4 * 1024;      // 4K ACTIVE LOG
+const uint32_t FULL_SAVED_EXPLOG = 64 * 1024 * 4; // 256K SAVED LOG (needs 4 64KB calls)
+
 /**
  * @brief Adds Explorer log data to platform log
  *        Grabs explorer error log based on type and then breaks that data
  *        into smaller user-data sections adding them to the platform log.
  *        Note: First section will be the smallest and contain the most recent
  *        trace data.
- * @param i_type - what kind of explorer error log to add
- * @param i_ocmb - Explorer target
- * @param io_errl - Platform error log to add logs into
+ * @param[in] i_type         - what type of explorer error log to add
+ * @param[in] i_ocmb         - Explorer target
+ * @param[in] i_max_log_size - maximum bytes of log data to add to error log
+ * @param[in/out] io_errl    - Platform error log for added explorer logs
  * @return true if explorer error data added, else false
  */
 bool expAddLog( const exp_log_type i_type,
                 TARGETING::Target * i_ocmb,
+                uint32_t i_max_log_size,
                 errlHndl_t & io_errl );
 }
 

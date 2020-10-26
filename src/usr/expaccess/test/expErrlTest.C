@@ -77,7 +77,7 @@ uint32_t expErrorLogHb()
             // Add explorer error logs to this and commit
             bool logAdded = false;
             numTests++;
-            logAdded = EXPSCOM::expAddLog(EXPSCOM::ACTIVE_LOG, l_ocmb, l_err);
+            logAdded = EXPSCOM::expAddLog(EXPSCOM::ACTIVE_LOG, l_ocmb, EXPSCOM::FULL_ACTIVE_EXPLOG, l_err);
             if (!logAdded)
             {
                 TS_FAIL("expErrorLogHb: No ACTIVE explorer logs added to 0x%04X", l_err->plid());
@@ -85,17 +85,26 @@ uint32_t expErrorLogHb()
             }
 
             numTests++;
-            logAdded = EXPSCOM::expAddLog(EXPSCOM::SAVED_LOG_A, l_ocmb, l_err);
+            logAdded = EXPSCOM::expAddLog(EXPSCOM::SAVED_LOG_A, l_ocmb, EXPSCOM::FULL_SAVED_EXPLOG, l_err);
             if (!logAdded)
             {
                 TS_FAIL("expErrorLogHb: No SAVED image A explorer logs added to 0x%04X", l_err->plid());
                 numFails++;
             }
+
             numTests++;
-            logAdded = EXPSCOM::expAddLog(EXPSCOM::SAVED_LOG_B, l_ocmb, l_err);
+            logAdded = EXPSCOM::expAddLog(EXPSCOM::SAVED_LOG_B, l_ocmb, EXPSCOM::FULL_SAVED_EXPLOG, l_err);
             if (!logAdded)
             {
                 TS_FAIL("expErrorLogHb: No SAVED image B explorer logs added to 0x%04X", l_err->plid());
+                numFails++;
+            }
+
+            numTests++;
+            logAdded = EXPSCOM::expAddLog(EXPSCOM::NONCURRENT_SAVED_LOG, l_ocmb, EXPSCOM::FULL_SAVED_EXPLOG, l_err);
+            if (!logAdded)
+            {
+                TS_FAIL("expErrorLogHb: No SAVED NONCURRENT explorer logs added to 0x%04X", l_err->plid());
                 numFails++;
             }
             errlCommit(l_err, CXXTEST_COMP_ID);
