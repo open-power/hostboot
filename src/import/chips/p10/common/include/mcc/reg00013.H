@@ -8402,6 +8402,165 @@ fapi_try_exit:
 }
 //<< GET_[CRYPTO_ENCRYPT_CRYPTOKEY1B_KEY1B]
 
+//>> PREP_[USTL_USTLLOLMASK]
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PREP_USTL_USTLLOLMASK(const fapi2::Target<K, M, V>& i_target)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = USTL_USTLLOLMASK;
+#endif
+    return fapi2::current_err;
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+//<< PREP_[USTL_USTLLOLMASK]
+
+//>> GET_[USTL_USTLLOLMASK]
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode GET_USTL_USTLLOLMASK(const fapi2::Target<K, M, V>& i_target,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = USTL_USTLLOLMASK;
+#endif
+    return fapi2::getScom(i_target, USTL_USTLLOLMASK, o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+//<< GET_[USTL_USTLLOLMASK]
+
+//>> PUT_[USTL_USTLLOLMASK]
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PUT_USTL_USTLLOLMASK(const fapi2::Target<K, M, V>& i_target, const uint64_t i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    FAPI_TRY(scomt::chkReg(USTL_USTLLOLMASK));
+#endif
+    return fapi2::putScom(i_target, USTL_USTLLOLMASK, i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+//<< PUT_[USTL_USTLLOLMASK]
+
+
+//>> SET_[USTL_USTLLOLMASK_RECOVER_ENABLE_MASK]
+static inline fapi2::buffer<uint64_t>& SET_USTL_USTLLOLMASK_RECOVER_ENABLE_MASK(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(USTL_USTLLOLMASK));
+#endif
+    return o_data.insertFromRight<USTL_USTLLOLMASK_RECOVER_ENABLE_MASK,
+           USTL_USTLLOLMASK_RECOVER_ENABLE_MASK_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("0:scom_mcc Invalid dial access USTL_USTLLOLMASK_RECOVER_ENABLE_MASK chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[USTL_USTLLOLMASK_RECOVER_ENABLE_MASK]
+
+//>> SET_[USTL_USTLLOLMASK_RECOVER_ENABLE_MASK]
+static inline fapi2::buffer<uint64_t>& SET_USTL_USTLLOLMASK_RECOVER_ENABLE_MASK(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(USTL_USTLLOLMASK));
+#endif
+    return o_data.insertFromRight<USTL_USTLLOLMASK_RECOVER_ENABLE_MASK,
+           USTL_USTLLOLMASK_RECOVER_ENABLE_MASK_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("1:scom_mcc Invalid dial access USTL_USTLLOLMASK_RECOVER_ENABLE_MASK chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[USTL_USTLLOLMASK_RECOVER_ENABLE_MASK]
+
+//>> GET_[USTL_USTLLOLMASK_RECOVER_ENABLE_MASK]
+static inline fapi2::buffer<uint64_t>& GET_USTL_USTLLOLMASK_RECOVER_ENABLE_MASK(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(USTL_USTLLOLMASK));
+#endif
+    return i_data.extractToRight<USTL_USTLLOLMASK_RECOVER_ENABLE_MASK,
+           USTL_USTLLOLMASK_RECOVER_ENABLE_MASK_LEN>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("4:scom_mcc Invalid dial access USTL_USTLLOLMASK_RECOVER_ENABLE_MASK chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[USTL_USTLLOLMASK_RECOVER_ENABLE_MASK]
+
+//>> SET_[USTL_USTLLOLMASK_CHECKSTOP_ENABLE_MASK]
+static inline fapi2::buffer<uint64_t>& SET_USTL_USTLLOLMASK_CHECKSTOP_ENABLE_MASK(fapi2::buffer<uint64_t>& i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(USTL_USTLLOLMASK));
+#endif
+    return o_data.insertFromRight<USTL_USTLLOLMASK_CHECKSTOP_ENABLE_MASK,
+           USTL_USTLLOLMASK_CHECKSTOP_ENABLE_MASK_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("0:scom_mcc Invalid dial access USTL_USTLLOLMASK_CHECKSTOP_ENABLE_MASK chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[USTL_USTLLOLMASK_CHECKSTOP_ENABLE_MASK]
+
+//>> SET_[USTL_USTLLOLMASK_CHECKSTOP_ENABLE_MASK]
+static inline fapi2::buffer<uint64_t>& SET_USTL_USTLLOLMASK_CHECKSTOP_ENABLE_MASK(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(USTL_USTLLOLMASK));
+#endif
+    return o_data.insertFromRight<USTL_USTLLOLMASK_CHECKSTOP_ENABLE_MASK,
+           USTL_USTLLOLMASK_CHECKSTOP_ENABLE_MASK_LEN>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("1:scom_mcc Invalid dial access USTL_USTLLOLMASK_CHECKSTOP_ENABLE_MASK chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[USTL_USTLLOLMASK_CHECKSTOP_ENABLE_MASK]
+
+//>> GET_[USTL_USTLLOLMASK_CHECKSTOP_ENABLE_MASK]
+static inline fapi2::buffer<uint64_t>& GET_USTL_USTLLOLMASK_CHECKSTOP_ENABLE_MASK(fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(USTL_USTLLOLMASK));
+#endif
+    return i_data.extractToRight<USTL_USTLLOLMASK_CHECKSTOP_ENABLE_MASK,
+           USTL_USTLLOLMASK_CHECKSTOP_ENABLE_MASK_LEN>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("4:scom_mcc Invalid dial access USTL_USTLLOLMASK_CHECKSTOP_ENABLE_MASK chip: %x, ec: %x", scomt::chip,
+             scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[USTL_USTLLOLMASK_CHECKSTOP_ENABLE_MASK]
+
+
 //>>THE END<<
 
 #ifndef __PPE_HCODE__

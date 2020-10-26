@@ -546,7 +546,6 @@ p10_exit_cache_contained_run_mcc_initfile_xscom(
     fapi2::ATTR_PROC_EPS_READ_CYCLES_T1_Type l_TGT1_ATTR_PROC_EPS_READ_CYCLES_T1;
     fapi2::ATTR_PROC_EPS_READ_CYCLES_T2_Type l_TGT1_ATTR_PROC_EPS_READ_CYCLES_T2;
     fapi2::ATTR_SYS_DISABLE_MCU_TIMEOUTS_Type l_TGT1_ATTR_SYS_DISABLE_MCU_TIMEOUTS;
-    fapi2::ATTR_SYS_ENABLE_MC_HW520600_X4CTR_Type l_TGT1_ATTR_SYS_ENABLE_MC_HW520600_X4CTR;
     fapi2::ATTR_SYS_DISABLE_HWFM_Type l_TGT1_ATTR_SYS_DISABLE_HWFM;
     fapi2::ATTR_CHIP_EC_FEATURE_HW548941_Type l_TGT2_ATTR_CHIP_EC_FEATURE_HW548941;
     uint64_t l_def_MC_EPSILON_CFG_T0;
@@ -559,8 +558,6 @@ p10_exit_cache_contained_run_mcc_initfile_xscom(
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_EPS_READ_CYCLES_T1, FAPI_SYSTEM, l_TGT1_ATTR_PROC_EPS_READ_CYCLES_T1));
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_EPS_READ_CYCLES_T2, FAPI_SYSTEM, l_TGT1_ATTR_PROC_EPS_READ_CYCLES_T2));
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SYS_DISABLE_MCU_TIMEOUTS, FAPI_SYSTEM, l_TGT1_ATTR_SYS_DISABLE_MCU_TIMEOUTS));
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SYS_ENABLE_MC_HW520600_X4CTR, FAPI_SYSTEM,
-                           l_TGT1_ATTR_SYS_ENABLE_MC_HW520600_X4CTR));
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SYS_DISABLE_HWFM, FAPI_SYSTEM, l_TGT1_ATTR_SYS_DISABLE_HWFM));
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, i_mcc_target, l_unit_num),
              "Error from FAPI_ATTR_GET (ATTR_CHIP_UNIT_POS)");
@@ -791,14 +788,8 @@ p10_exit_cache_contained_run_mcc_initfile_xscom(
     l_scom_mask = 0;
 
     //data
-    if (l_TGT1_ATTR_SYS_ENABLE_MC_HW520600_X4CTR)
-    {
-        l_scom_data |= (uint64_t) 0x1 << (64 - (21 + 2));
-    }
-
     l_scom_data |= (uint64_t)  0x1 << (64 - (62 + 1));
     //mask
-    l_scom_mask |= (uint64_t)  0x3 << (64 - (21 + 2));
     l_scom_mask |= (uint64_t)  0xF << (64 - (40 + 4));
     l_scom_mask |= (uint64_t)  0x1 << (64 - (62 + 1));
 

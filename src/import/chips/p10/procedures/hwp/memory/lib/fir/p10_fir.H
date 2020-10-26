@@ -56,6 +56,7 @@ static constexpr uint8_t USTL_USTLFAILMASK_RECOVER_ENABLE_MASK_7             = 7
 static constexpr uint8_t USTL_USTLFAILMASK_RECOVER_ENABLE_MASK_8             = 8;
 static constexpr uint8_t USTL_USTLFAILMASK_RECOVER_ENABLE_MASK_9             = 9;
 static constexpr uint8_t USTL_USTLFAILMASK_RECOVER_ENABLE_MASK_10            = 10;
+static constexpr uint8_t USTL_USTLFAILMASK_RECOVER_ENABLE_MASK_11            = 11;
 
 static constexpr uint8_t USTL_USTLFAILMASK_CHECKSTOP_ENABLE_MASK_16          = 16;
 static constexpr uint8_t USTL_USTLFAILMASK_CHECKSTOP_ENABLE_MASK_17          = 17;
@@ -68,6 +69,7 @@ static constexpr uint8_t USTL_USTLFAILMASK_CHECKSTOP_ENABLE_MASK_23          = 2
 static constexpr uint8_t USTL_USTLFAILMASK_CHECKSTOP_ENABLE_MASK_24          = 24;
 static constexpr uint8_t USTL_USTLFAILMASK_CHECKSTOP_ENABLE_MASK_25          = 25;
 static constexpr uint8_t USTL_USTLFAILMASK_CHECKSTOP_ENABLE_MASK_26          = 26;
+static constexpr uint8_t USTL_USTLFAILMASK_CHECKSTOP_ENABLE_MASK_27          = 27;
 
 static constexpr uint8_t USTL_USTLFAILMASK_CHAN_FAIL_ENABLE_MASK_32          = 32;
 static constexpr uint8_t USTL_USTLFAILMASK_CHAN_FAIL_ENABLE_MASK_33          = 33;
@@ -80,6 +82,7 @@ static constexpr uint8_t USTL_USTLFAILMASK_CHAN_FAIL_ENABLE_MASK_39          = 3
 static constexpr uint8_t USTL_USTLFAILMASK_CHAN_FAIL_ENABLE_MASK_40          = 40;
 static constexpr uint8_t USTL_USTLFAILMASK_CHAN_FAIL_ENABLE_MASK_41          = 41;
 static constexpr uint8_t USTL_USTLFAILMASK_CHAN_FAIL_ENABLE_MASK_42          = 42;
+static constexpr uint8_t USTL_USTLFAILMASK_CHAN_FAIL_ENABLE_MASK_43          = 43;
 
 static constexpr uint8_t USTL_USTLFAILMASK_CHANNEL_FAIL_TYPE_DISABLE_48      = 48;
 static constexpr uint8_t USTL_USTLFAILMASK_CHANNEL_FAIL_TYPE_DISABLE_49      = 49;
@@ -376,6 +379,7 @@ inline fapi2::ReturnCode after_p10_omi_init_ustlfir_helper(const fapi2::Target<f
     .setBit<scomt::mcc::USTL_USTLFAILMASK_RECOVER_ENABLE_MASK_8>()
     .clearBit<scomt::mcc::USTL_USTLFAILMASK_RECOVER_ENABLE_MASK_9>()
     .clearBit<scomt::mcc::USTL_USTLFAILMASK_RECOVER_ENABLE_MASK_10>()
+    .setBit<scomt::mcc::USTL_USTLFAILMASK_RECOVER_ENABLE_MASK_11>()
     .clearBit<scomt::mcc::USTL_USTLFAILMASK_CHECKSTOP_ENABLE_MASK_16>()
     .clearBit<scomt::mcc::USTL_USTLFAILMASK_CHECKSTOP_ENABLE_MASK_17>()
     .clearBit<scomt::mcc::USTL_USTLFAILMASK_CHECKSTOP_ENABLE_MASK_18>()
@@ -387,6 +391,7 @@ inline fapi2::ReturnCode after_p10_omi_init_ustlfir_helper(const fapi2::Target<f
     .clearBit<scomt::mcc::USTL_USTLFAILMASK_CHECKSTOP_ENABLE_MASK_24>()
     .setBit<scomt::mcc::USTL_USTLFAILMASK_CHECKSTOP_ENABLE_MASK_25>()
     .setBit<scomt::mcc::USTL_USTLFAILMASK_CHECKSTOP_ENABLE_MASK_26>()
+    .clearBit<scomt::mcc::USTL_USTLFAILMASK_CHECKSTOP_ENABLE_MASK_27>()
     .clearBit<scomt::mcc::USTL_USTLFAILMASK_CHAN_FAIL_ENABLE_MASK_32>()
     .clearBit<scomt::mcc::USTL_USTLFAILMASK_CHAN_FAIL_ENABLE_MASK_33>()
     .clearBit<scomt::mcc::USTL_USTLFAILMASK_CHAN_FAIL_ENABLE_MASK_34>()
@@ -398,6 +403,7 @@ inline fapi2::ReturnCode after_p10_omi_init_ustlfir_helper(const fapi2::Target<f
     .clearBit<scomt::mcc::USTL_USTLFAILMASK_CHAN_FAIL_ENABLE_MASK_40>()
     .setBit<scomt::mcc::USTL_USTLFAILMASK_CHAN_FAIL_ENABLE_MASK_41>()
     .setBit<scomt::mcc::USTL_USTLFAILMASK_CHAN_FAIL_ENABLE_MASK_42>()
+    .clearBit<scomt::mcc::USTL_USTLFAILMASK_CHAN_FAIL_ENABLE_MASK_43>()
     .clearBit<scomt::mcc::USTL_USTLFAILMASK_CHANNEL_FAIL_TYPE_DISABLE_48>()
     .clearBit<scomt::mcc::USTL_USTLFAILMASK_CHANNEL_FAIL_TYPE_DISABLE_49>()
     .clearBit<scomt::mcc::USTL_USTLFAILMASK_CHANNEL_FAIL_TYPE_DISABLE_50>()
@@ -410,6 +416,39 @@ inline fapi2::ReturnCode after_p10_omi_init_ustlfir_helper(const fapi2::Target<f
     .clearBit<scomt::mcc::USTL_USTLFAILMASK_CHANNEL_FAIL_TYPE_DISABLE_57>();
 
     FAPI_TRY(fapi2::putScom(i_target, MCCT::USTL_FAILMASK, l_reg_data));
+
+    // Configures the USTLCNFG register
+    // NOTE: These are outside of standard FIR procedure and are being configured due to p10 HW bugs
+    FAPI_TRY(fapi2::getScom(i_target, scomt::mcc::USTL_USTLCFG, l_reg_data));
+
+    // TODO:ZEN695 USTL_USTLCFG_LOL_DOUBLEDEAD_SUPPORT_MODE for p10 DD2
+
+    l_reg_data.setBit<scomt::mcc::USTL_USTLCFG_DATE_ERROR_RETRY_ENABLE>()
+    .insertFromRight<scomt::mcc::USTL_USTLCFG_LOL_DOUBLEDEAD_SUPPORT_MODE, scomt::mcc::USTL_USTLCFG_LOL_DOUBLEDEAD_SUPPORT_MODE_LEN>
+    (0b11)
+    .setBit<scomt::mcc::USTL_USTLCFG_DL_WIDTH_X4_LOL_ENABLE>()
+    .setBit<scomt::mcc::USTL_USTLCFG_DL_WIDTH_X2_LOL_ENABLE>()
+    .insertFromRight<scomt::mcc::USTL_USTLCFG_USTLCFG_OPENCAPI_ERROR_LOG_ENABLE, scomt::mcc::USTL_USTLCFG_USTLCFG_OPENCAPI_ERROR_LOG_ENABLE_LEN>
+    (0x7f)
+    .insertFromRight<scomt::mcc::USTL_USTLCFG_LOL_CAPTURE_CONFIG, scomt::mcc::USTL_USTLCFG_LOL_CAPTURE_CONFIG_LEN>(0b11)
+    .setBit<scomt::mcc::USTL_USTLCFG_RETRY_LOL_HOLDOFF_ENABLE>()
+    .setBit<scomt::mcc::USTL_USTLCFG_RETRY_LOL_HOLDOFF_MAX_CMD_COUNT_ENABLE>()
+    .insertFromRight<scomt::mcc::USTL_USTLCFG_RETRY_LOL_HOLDOFF_MAX_CMD_COUNT, scomt::mcc::USTL_USTLCFG_RETRY_LOL_HOLDOFF_MAX_CMD_COUNT_LEN>
+    (0b111);
+
+    // TODO:ZEN690 Update after_p10_omi_init_ustlfir_helper for DD2
+    // Set new DD2 new USTLCFG bit: USTLCFG_wrstuck_mitigation_en_p10d20 -> 1
+
+    FAPI_TRY(fapi2::putScom(i_target, scomt::mcc::USTL_USTLCFG, l_reg_data));
+
+    // Configures the USTLLOLMASK register
+    // NOTE: These are outside of standard FIR procedure and are being configured due to p10 HW bugs
+    FAPI_TRY(fapi2::getScom(i_target, scomt::mcc::USTL_USTLLOLMASK, l_reg_data));
+
+    l_reg_data.insertFromRight<scomt::mcc::USTL_USTLLOLMASK_RECOVER_ENABLE_MASK, scomt::mcc::USTL_USTLLOLMASK_RECOVER_ENABLE_MASK_LEN>
+    (0x27FC60);
+
+    FAPI_TRY(fapi2::putScom(i_target, scomt::mcc::USTL_USTLLOLMASK, l_reg_data));
 
 fapi_try_exit:
 
