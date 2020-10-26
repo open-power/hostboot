@@ -189,7 +189,7 @@ sub log_fprint
     #    print "log_lvl: $log_lvl.\n";
     #    print "g_log_lvl: $g_log_lvl_target.\n";
     # also check if it is required to print.
-    if ( ( $log_lvl < $g_log_lvl_target ) or ( $log_lvl >= $LOG_LVL_5 ) )
+    if ( ( $log_lvl < $g_log_lvl_target ) || ( $log_lvl >= $LOG_LVL_5 ) )
     {
         return;
     }
@@ -367,19 +367,19 @@ use IO::File;
 our $p_log_lvl = $LOG_LVL_0;
 
 # Number of vcs_ceff_index values
-our $CSV_VCS_CEFF_INDEX_COUNT;
+our $csv_vcs_ceff_index_count;
 
 # Number of vdd_ceff_index values
-our $CSV_VDD_CEFF_INDEX_COUNT;
+our $csv_vdd_ceff_index_count;
 
 # Number of amb_cond_index values
-our $CSV_IO_POWER_INDEX_COUNT;
+our $csv_io_power_index_count;
 
 # Number of amb_cond_index values
-our $CSV_AMB_COND_INDEX_COUNT;
+our $csv_amb_cond_index_count;
 
 # Number ofvratio_index values
-our $CSV_VRATIO_INDEX_COUNT = 12;
+our $csv_vratio_index_count = 12;
 
 # Number of columns in the CSV file
 our $CSV_COLUMN_COUNT;
@@ -490,24 +490,24 @@ sub new
     }
 
     # set index counts from global variable read from command options
-    # or from default values.
-    $CSV_VCS_CEFF_INDEX_COUNT = $g_vcs_ceff_size;
-    $CSV_VDD_CEFF_INDEX_COUNT = $g_vdd_ceff_size;
-    $CSV_IO_POWER_INDEX_COUNT = $g_io_power_size;
-    $CSV_AMB_COND_INDEX_COUNT = $g_amb_cond_size;
+    # || from default values.
+    $csv_vcs_ceff_index_count = $g_vcs_ceff_size;
+    $csv_vdd_ceff_index_count = $g_vdd_ceff_size;
+    $csv_io_power_index_count = $g_io_power_size;
+    $csv_amb_cond_index_count = $g_amb_cond_size;
 
     # Build four-dimensional array to hold VRTs. The dimensions include
     # vcs_ceff_index, vdd_ceff_index, io_power_index, and amb_cond_index.
-    for ( my $vcs_idx = 0; $vcs_idx < $CSV_VCS_CEFF_INDEX_COUNT; $vcs_idx++ )
+    for ( my $vcs_idx = 0; $vcs_idx < $csv_vcs_ceff_index_count; $vcs_idx++ )
     {
         $self->{$CSV_ATTR_vrts}[$vcs_idx] = [];
-        for ( my $vdd_idx = 0; $vdd_idx < $CSV_VDD_CEFF_INDEX_COUNT; $vdd_idx++ )
+        for ( my $vdd_idx = 0; $vdd_idx < $csv_vdd_ceff_index_count; $vdd_idx++ )
         {
             $self->{$CSV_ATTR_vrts}[$vcs_idx][$vdd_idx] = [];
-            for ( my $io_power_idx = 0; $io_power_idx < $CSV_IO_POWER_INDEX_COUNT; $io_power_idx++ )
+            for ( my $io_power_idx = 0; $io_power_idx < $csv_io_power_index_count; $io_power_idx++ )
             {
                 $self->{$CSV_ATTR_vrts}[$vcs_idx][$vdd_idx][$io_power_idx] = [];
-                for ( my $amb_cond_idx = 0; $amb_cond_idx < $CSV_AMB_COND_INDEX_COUNT; $amb_cond_idx++ )
+                for ( my $amb_cond_idx = 0; $amb_cond_idx < $csv_amb_cond_index_count; $amb_cond_idx++ )
                 {
                     $self->{$CSV_ATTR_vrts}[$vcs_idx][$vdd_idx][$io_power_idx][$amb_cond_idx] = undef;
                 }
@@ -679,7 +679,8 @@ sub _extract_column_names_indexes
     # populate the CSV_COLUMN_INDEX_TO_NAME hash table with reverse.
     %CSV_COLUMN_INDEX_TO_NAME = reverse %CSV_COLUMN_NAME_TO_INDEX;
     Log::log_print $p_log_lvl, "  CSV_COLUMN_NAME_TO_INDEX:\n";
-    Log::log_print $p_log_lvl, "  key: $_ and value: $CSV_COLUMN_NAME_TO_INDEX{$_}.\n";
+
+    #    Log::log_print $p_log_lvl, "  key: $_ and value: $CSV_COLUMN_NAME_TO_INDEX{$_}.\n";
 
     # make sure @CSV_SCOPE_COLUMN_NAMES is subset of @CSV_COLUMN_NAMES.
     # use a temp hash as storage, and compare two arrays.
@@ -712,13 +713,13 @@ sub _verify_stored_data
     Log::log_print $p_log_lvl, "_verify_stored_data():\n";
 
     # Verify all VRTs were found
-    for ( my $vcs_ceff_index = 0; $vcs_ceff_index < $CSV_VCS_CEFF_INDEX_COUNT; $vcs_ceff_index++ )
+    for ( my $vcs_ceff_index = 0; $vcs_ceff_index < $csv_vcs_ceff_index_count; $vcs_ceff_index++ )
     {
-        for ( my $vdd_ceff_index = 0; $vdd_ceff_index < $CSV_VDD_CEFF_INDEX_COUNT; $vdd_ceff_index++ )
+        for ( my $vdd_ceff_index = 0; $vdd_ceff_index < $csv_vdd_ceff_index_count; $vdd_ceff_index++ )
         {
-            for ( my $io_power_index = 0; $io_power_index < $CSV_IO_POWER_INDEX_COUNT; $io_power_index++ )
+            for ( my $io_power_index = 0; $io_power_index < $csv_io_power_index_count; $io_power_index++ )
             {
-                for ( my $amb_cond_index = 0; $amb_cond_index < $CSV_AMB_COND_INDEX_COUNT; $amb_cond_index++ )
+                for ( my $amb_cond_index = 0; $amb_cond_index < $csv_amb_cond_index_count; $amb_cond_index++ )
                 {
                     my $vrt =
                         $self->{$CSV_ATTR_vrts}[$vcs_ceff_index][$vdd_ceff_index][$io_power_index][$amb_cond_index];
@@ -842,7 +843,7 @@ sub _store_vrt_scope_columns
     # Get vratio_index value and verify it is valid.  This is the VRT column index.
     my $vratio_index = $columns->[ $CSV_COLUMN_NAME_TO_INDEX{$CSV_ATTR_vratio_index} ];
     Log::log_print $p_log_lvl, "  vratio_index: $vratio_index.\n";
-    if ( ( $vratio_index < 0 ) or ( $vratio_index >= $VRT_COLUMN_COUNT ) )
+    if ( ( $vratio_index < 0 ) || ( $vratio_index >= $VRT_COLUMN_COUNT ) )
     {
         die "Error: Invalid vratio_index value $vratio_index in row "
             . "$row_number of file "
@@ -891,7 +892,7 @@ sub _get_vrt
             . $self->access($CSV_ATTR_file_name) . ".\n";
     }
     if (   ( $vcs_ceff_index < 0 )
-        or ( $vcs_ceff_index >= $CSV_VCS_CEFF_INDEX_COUNT ) )
+        || ( $vcs_ceff_index >= $csv_vcs_ceff_index_count ) )
     {
         die "Error: Invalid vcs_ceff_index value $vcs_ceff_index in row "
             . "$row_number of file "
@@ -908,7 +909,7 @@ sub _get_vrt
             . $self->access($CSV_ATTR_file_name) . ".\n";
     }
     if (   ( $vdd_ceff_index < 0 )
-        or ( $vdd_ceff_index >= $CSV_VDD_CEFF_INDEX_COUNT ) )
+        || ( $vdd_ceff_index >= $csv_vdd_ceff_index_count ) )
     {
         die "Error: Invalid vdd_ceff_index value $vdd_ceff_index in row "
             . "$row_number of file "
@@ -925,7 +926,7 @@ sub _get_vrt
             . $self->access($CSV_ATTR_file_name) . ".\n";
     }
     if (   ( $io_power_index < 0 )
-        or ( $io_power_index >= $CSV_IO_POWER_INDEX_COUNT ) )
+        || ( $io_power_index >= $csv_io_power_index_count ) )
     {
         die "Error: Invalid io_power_index value $io_power_index in row "
             . "$row_number of file "
@@ -943,7 +944,7 @@ sub _get_vrt
             . $self->access($CSV_ATTR_file_name) . ".\n";
     }
     if (   ( $amb_cond_index < 0 )
-        or ( $amb_cond_index >= $CSV_AMB_COND_INDEX_COUNT ) )
+        || ( $amb_cond_index >= $csv_amb_cond_index_count ) )
     {
         die "Error: Invalid amb_cond_index value $amb_cond_index in row "
             . "$row_number of file "
@@ -994,6 +995,10 @@ use IO::File;
 use Fcntl qw(SEEK_SET SEEK_CUR);    # Import constants for seek()
 our $p_log_lvl = $LOG_LVL_0;
 
+# Attribute names in this class
+our $BFIO_ATTR_file_name = 'file_name';
+our $BFIO_ATTR_file      = 'file';
+
 sub new
 {
     my ( $class, $file_name ) = @_;
@@ -1001,17 +1006,23 @@ sub new
     # check to use global logging level.
     # $p_log_lvl = $g_log_lvl if ( $g_use_global_log_lvl == 1 );
     my $self = {
-        'file_name' => $file_name,
-        'file'      => IO::File->new(),
+        $BFIO_ATTR_file_name => $file_name,
+        $BFIO_ATTR_file      => IO::File->new(),
     };
     bless($self);
     return $self;
 }
 
+sub access
+{
+    my ( $self, $attr_name ) = @_;
+    return $self->{$attr_name};
+}
+
 sub file_name
 {
     my ($self) = @_;
-    return $self->{'file_name'};
+    return $self->{$BFIO_ATTR_file_name};
 }
 
 sub open
@@ -1021,34 +1032,34 @@ sub open
     Log::log_print $p_log_lvl, "  mode: $mode.\n";
 
     # Open image file
-    if ( !( $self->{'file'}->open( $self->{'file_name'}, $mode ) ) )
+    if ( !( $self->{$BFIO_ATTR_file}->open( $self->{$BFIO_ATTR_file_name}, $mode ) ) )
     {
-        die "Error: Unable to open file " . $self->{'file_name'} . ": $!.\n";
+        die "Error: Unable to open file " . $self->{$BFIO_ATTR_file_name} . ": $!.\n";
     }
 
     # Set file to binary mode
-    if ( !( $self->{'file'}->binmode() ) )
+    if ( !( $self->{$BFIO_ATTR_file}->binmode() ) )
     {
-        die "Error: Unable to open file " . $self->{'file_name'} . " in binary mode: $!.\n";
+        die "Error: Unable to open file " . $self->{$BFIO_ATTR_file_name} . " in binary mode: $!.\n";
     }
 }
 
 sub close
 {
     my ($self) = @_;
-    if ( !( $self->{'file'}->close() ) )
+    if ( !( $self->{$BFIO_ATTR_file}->close() ) )
     {
-        die "Error: Unable to close file " . $self->{'file_name'} . ": $!.\n";
+        die "Error: Unable to close file " . $self->{$BFIO_ATTR_file_name} . ": $!.\n";
     }
 }
 
 sub get_pos
 {
     my ($self) = @_;
-    my $pos = $self->{'file'}->tell();
+    my $pos = $self->{$BFIO_ATTR_file}->tell();
     if ( $pos == -1 )
     {
-        die "Error: Unable to obtain current position in file " . $self->{'file_name'} . ".\n";
+        die "Error: Unable to obtain current position in file " . $self->{$BFIO_ATTR_file_name} . ".\n";
     }
     return $pos;
 }
@@ -1056,9 +1067,9 @@ sub get_pos
 sub set_pos
 {
     my ( $self, $pos ) = @_;
-    if ( !( $self->{'file'}->seek( $pos, SEEK_SET ) ) )
+    if ( !( $self->{$BFIO_ATTR_file}->seek( $pos, SEEK_SET ) ) )
     {
-        die "Error: Unable to move to byte $pos in file " . $self->{'file_name'} . ".\n";
+        die "Error: Unable to move to byte $pos in file " . $self->{$BFIO_ATTR_file_name} . ".\n";
     }
 }
 
@@ -1068,7 +1079,7 @@ sub read
     my $buffer;
     if ( $length > 0 )
     {
-        my $bytes_read = $self->{'file'}->read( $buffer, $length );
+        my $bytes_read = $self->{$BFIO_ATTR_file}->read( $buffer, $length );
         if ( $bytes_read != $length )
         {
             my $error_description;
@@ -1087,18 +1098,42 @@ sub read
 
             #      my $pos =  $self->get_pos();
             #      Log::log_print $LOG_LVL_1, "  pos: $pos.\n";
-            die "Error: Unable to read $length bytes from file " . $self->{'file_name'} . ": $error_description.\n";
+            die "Error: Unable to read $length bytes from file "
+                . $self->{$BFIO_ATTR_file_name}
+                . ": $error_description.\n";
         }
     }
     return $buffer;
 }
 
+sub read_to_buffer
+{
+    my ( $self, $length ) = @_;
+    my $buffer     = undef;
+    my $bytes_read = 0;
+
+    if ( $length <= 0 )
+    {
+        die "Error: Invalid length passed in: $length\n";
+    }
+    $bytes_read = $self->{$BFIO_ATTR_file}->read( $buffer, $length );
+    my $error_description;
+    if ( !defined($bytes_read) )
+    {
+        $error_description = $!;
+        die "Error: Unable to read $length bytes from file "
+            . $self->{$BFIO_ATTR_file_name}
+            . ": $error_description.\n";
+    }
+    return ( $buffer, $bytes_read );
+}
+
 sub write
 {
     my ( $self, $buffer ) = @_;
-    if ( !( $self->{'file'}->print($buffer) ) )
+    if ( !( $self->{$BFIO_ATTR_file}->print($buffer) ) )
     {
-        die "Error: Unable to write to file " . $self->{'file_name'} . ": $!.\n";
+        die "Error: Unable to write to file " . $self->{$BFIO_ATTR_file_name} . ": $!.\n";
     }
 }
 
@@ -1157,9 +1192,9 @@ sub write_ascii_text
 sub skip_bytes
 {
     my ( $self, $byte_count ) = @_;
-    if ( !( $self->{'file'}->seek( $byte_count, SEEK_CUR ) ) )
+    if ( !( $self->{$BFIO_ATTR_file}->seek( $byte_count, SEEK_CUR ) ) )
     {
-        die "Error: Unable to move forward $byte_count bytes in file " . $self->{'file_name'} . ".\n";
+        die "Error: Unable to move forward $byte_count bytes in file " . $self->{$BFIO_ATTR_file_name} . ".\n";
     }
 }
 
@@ -1328,6 +1363,7 @@ sub write
     $file->write_uint32( $self->access($STE_ATTR_section_offset) );
     $file->write_uint32( $self->access($STE_ATTR_section_size) );
 }
+
 ################################################################################
 # SectionTable Class
 #
@@ -1438,10 +1474,6 @@ our $WOF_TABLES_HEADER_VRT_BLOCK_SIZE        = 16;
 our $WOF_TABLES_HEADER_VRT_BLOCK_HEADER_SIZE = 4;
 our $WOF_TABLES_HEADER_VRT_DATA_SIZE         = 1;
 our $WOF_TABLES_HEADER_OCS_MODE              = 1;
-our $WOF_TABLES_HEADER_IO_POWER_SIZE         = $CSV_IO_POWER_INDEX_COUNT;
-our $WOF_TABLES_HEADER_AMB_COND_SIZE         = $CSV_AMB_COND_INDEX_COUNT;
-our $WOF_TABLES_HEADER_VCS_SIZE              = $CSV_VCS_CEFF_INDEX_COUNT;
-our $WOF_TABLES_HEADER_VDD_SIZE              = $CSV_VDD_CEFF_INDEX_COUNT;
 our $WOF_TABLES_HEADER_VRATIO_SIZE           = $VRT_COLUMN_COUNT;
 our $WOF_TABLES_HEADER_SIZE                  = 128;
 our $CSV_WOF_CONV_MULTIPLIER_PERCENT         = 10000;
@@ -1449,6 +1481,8 @@ our $CSV_WOF_CONV_MULTIPLIER_VALUE           = 1;
 
 # Attribute names in this class
 our $WOF_ATTR_magic_value               = 'magic_value';
+our $WOF_ATTR_major_dd_level            = 'major_dd_level';
+our $WOF_ATTR_minor_dd_level            = 'minor_dd_level';
 our $WOF_ATTR_header_version            = 'header_version';
 our $WOF_ATTR_vrt_block_size            = 'vrt_block_size';
 our $WOF_ATTR_vrt_block_header_size     = 'vrt_block_header_size';
@@ -1494,6 +1528,8 @@ sub new
     $p_log_lvl = $g_log_lvl if ( $g_use_global_log_lvl == 1 );
     my $self = {
         $WOF_ATTR_magic_value               => $WOF_TABLES_HEADER_MAGIC_VALUE,
+        $WOF_ATTR_major_dd_level            => undef,
+        $WOF_ATTR_minor_dd_level            => undef,
         $WOF_ATTR_header_version            => $WOF_TABLES_HEADER_HEADER_VERSION,
         $WOF_ATTR_vrt_block_size            => $WOF_TABLES_HEADER_VRT_BLOCK_SIZE,
         $WOF_ATTR_vrt_block_header_size     => $WOF_TABLES_HEADER_VRT_BLOCK_HEADER_SIZE,
@@ -1560,8 +1596,10 @@ sub read
     my $pos = $file->get_pos();
 
     # Read field values from binary file
-    $self->access( $WOF_ATTR_magic_value, $file->read_ascii_text(4) );
-    $file->skip_bytes(3);    # Reserved 3 bytes
+    $self->access( $WOF_ATTR_magic_value,    $file->read_ascii_text(4) );
+    $self->access( $WOF_ATTR_major_dd_level, $file->read_uint8() );
+    $self->access( $WOF_ATTR_minor_dd_level, $file->read_uint8() );
+    $file->skip_bytes(1);    # Reserved 1 bytes
     $self->access( $WOF_ATTR_header_version,            $file->read_uint8() );
     $self->access( $WOF_ATTR_vrt_block_size,            $file->read_uint16() );
     $self->access( $WOF_ATTR_vrt_block_header_size,     $file->read_uint16() );
@@ -1637,7 +1675,9 @@ sub write
 
     # Write field values to binary file
     $file->write_ascii_text( $self->access($WOF_ATTR_magic_value), 4 );
-    $file->fill_bytes( 3, 0x00 );    # Padding 3 bytes
+    $file->write_uint8( $self->access($WOF_ATTR_major_dd_level) );
+    $file->write_uint8( $self->access($WOF_ATTR_minor_dd_level) );
+    $file->fill_bytes( 1, 0x00 );    # Padding 1 bytes
     $file->write_uint8( $self->access($WOF_ATTR_header_version) );
     $file->write_uint16( $self->access($WOF_ATTR_vrt_block_size) );
     $file->write_uint16( $self->access($WOF_ATTR_vrt_block_header_size) );
@@ -1698,6 +1738,8 @@ sub print
     # Print header fields to stdout
     printf("WOF Tables Header:\n");
     printf( "  Magic Value                    : %s\n", $self->access($WOF_ATTR_magic_value) );
+    printf( "  Major DD Level                 : %s\n", $self->access($WOF_ATTR_major_dd_level) );
+    printf( "  Minor DD Level                 : %s\n", $self->access($WOF_ATTR_minor_dd_level) );
     printf( "  Header Version                 : %u\n", $self->access($WOF_ATTR_header_version) );
     printf( "  VRT Block Size                 : %u\n", $self->access($WOF_ATTR_vrt_block_size) );
     printf( "  VRT Block Header Size          : %u\n", $self->access($WOF_ATTR_vrt_block_header_size) );
@@ -2017,7 +2059,7 @@ sub list
     if ( defined($section_number) )
     {
         if (   ( $section_number < 0 )
-            or ( $section_number >= $self->access($IMF_ATTR_section_table)->entry_count() ) )
+            || ( $section_number >= $self->access($IMF_ATTR_section_table)->entry_count() ) )
         {
             die "Error: Option section_number $section_number is invalid.\n";
         }
@@ -2111,7 +2153,7 @@ sub squint
     else
     {
         if (   ( $section_number < 0 )
-            or ( $section_number >= $self->access($IMF_ATTR_section_table)->entry_count() ) )
+            || ( $section_number >= $self->access($IMF_ATTR_section_table)->entry_count() ) )
         {
             die "Error: Option section_number $section_number is invalid.\n";
         }
@@ -2138,7 +2180,7 @@ sub squint
     if ( defined($vrt_index) )
     {
         if (   ( $vrt_index < 0 )
-            or ( $vrt_index > $max_vrt_index ) )
+            || ( $vrt_index > $max_vrt_index ) )
         {
             die "Error: Option vrt_index $vrt_index is invalid.\n";
         }
@@ -2176,6 +2218,63 @@ sub extract
 
     # Close image file
     $self->access($IMF_ATTR_binary_file_io)->close();
+}
+
+sub retrieve_wof_table_header
+{
+    my ( $self, $section_number ) = @_;
+
+    Log::log_print $p_log_lvl, "retrieve_wof_table_header():\n";
+
+    my $entry;
+    my $wof_tables_header;
+
+    # Open image file for reading
+    $self->access($IMF_ATTR_binary_file_io)->open('r');
+
+    # Read image header.
+    # this step is required to populate data to objects in this class.
+    $self->_read_image_header();
+
+    # Read section table Section Table pointed by into Section Table attribute,
+    # and file pointer is set file pointer to the end of Section Table.
+    $self->_read_section_table();
+
+    # validate $section_number
+    if ( !defined($section_number) )
+    {
+        die "Error: Option section_number $section_number is note defined.\n";
+    }
+    else
+    {
+        if (   ( $section_number < 0 )
+            || ( $section_number >= $self->access($IMF_ATTR_section_table)->entry_count() ) )
+        {
+            die "Error: Option section_number $section_number is invalid.\n";
+        }
+    }
+
+    $entry = $self->access($IMF_ATTR_section_table)->get_entry($section_number);
+
+    # Set file offset to the start of the section table.
+    $self->access($IMF_ATTR_binary_file_io)->set_pos( $entry->access($STE_ATTR_section_offset) );
+
+    # Read and print the WOF Tables Header at the start of the section
+    $wof_tables_header = $self->_read_wof_tables_header();
+
+    Log::log_print $p_log_lvl, "Entry Number: $section_number\n";
+
+    my $major_dd_level        = $wof_tables_header->access($WOF_ATTR_major_dd_level);
+    my $minor_dd_level        = $wof_tables_header->access($WOF_ATTR_minor_dd_level);
+    my $core_count            = $wof_tables_header->access($WOF_ATTR_core_count);
+    my $socket_power_w        = $wof_tables_header->access($WOF_ATTR_socket_power_w);
+    my $sort_pwr_tgt_freq_mhz = $wof_tables_header->access($WOF_ATTR_sort_pwr_tgt_freq_mhz);
+    my $package_name          = $wof_tables_header->access($WOF_ATTR_package_name);
+
+    # Close image file
+    $self->access($IMF_ATTR_binary_file_io)->close();
+
+    return ( $major_dd_level, $minor_dd_level, $core_count, $socket_power_w, $sort_pwr_tgt_freq_mhz, $package_name );
 }
 
 #------------------------------------------------------------------------------
@@ -2526,16 +2625,16 @@ sub _write_tables_vrts
     Log::log_print $p_log_lvl, "_write_tables_vrts():\n";
 
     # Iterate over all the valid values for vcs_ceff_index
-    for ( my $vcs_ceff_index = 0; $vcs_ceff_index < $CSV_VCS_CEFF_INDEX_COUNT; $vcs_ceff_index++ )
+    for ( my $vcs_ceff_index = 0; $vcs_ceff_index < $csv_vcs_ceff_index_count; $vcs_ceff_index++ )
     {
         # Iterate over all the valid values for vdd_ceff_index
-        for ( my $vdd_ceff_index = 0; $vdd_ceff_index < $CSV_VDD_CEFF_INDEX_COUNT; $vdd_ceff_index++ )
+        for ( my $vdd_ceff_index = 0; $vdd_ceff_index < $csv_vdd_ceff_index_count; $vdd_ceff_index++ )
         {
             # Iterate over all the valid values for io_power_index
-            for ( my $io_power_index = 0; $io_power_index < $CSV_IO_POWER_INDEX_COUNT; $io_power_index++ )
+            for ( my $io_power_index = 0; $io_power_index < $csv_io_power_index_count; $io_power_index++ )
             {
                 # Iterate over all the valid values for amb_cond_index
-                for ( my $amb_cond_index = 0; $amb_cond_index < $CSV_AMB_COND_INDEX_COUNT; $amb_cond_index++ )
+                for ( my $amb_cond_index = 0; $amb_cond_index < $csv_amb_cond_index_count; $amb_cond_index++ )
                 {
                     # Get VRT for current index values
                     my $vrt = $csv_file->vrt( $vcs_ceff_index, $vdd_ceff_index, $io_power_index, $amb_cond_index );
@@ -2569,7 +2668,7 @@ sub _calc_system_vre
     {
         # Get WOF frequency value in MHz.  Verify it is >= 1000.
         my $wof_freq_mhz = $vrt->wof_freq($column_index);
-        if ( ( $wof_freq_mhz < 1800 ) or ( $wof_freq_mhz > 4250 ) )
+        if ( ( $wof_freq_mhz < 1800 ) || ( $wof_freq_mhz > 4250 ) )
         {
             die "Error: Invalid WOF frequency $wof_freq_mhz in "
                 . $csv_file->file_name()
@@ -2585,7 +2684,7 @@ sub _calc_system_vre
 
         # Make sure converted value fits in the range.
         if (   ( $system_vre_freq_encode < $G_MIN_FREQ_ENCODE )
-            or ( $system_vre_freq_encode > $G_MAX_FREQ_ENCODE ) )
+            || ( $system_vre_freq_encode > $G_MAX_FREQ_ENCODE ) )
         {
             die "Error: Invalid WOF frequency $wof_freq_mhz in "
                 . $csv_file->file_name()
@@ -2607,7 +2706,7 @@ sub _calc_system_vre
 
         # Make sure converted value fits in the range.
         if (   ( $system_vre_overage_encode < $G_MIN_OVRG_ENCODE )
-            or ( $system_vre_overage_encode > $G_MAX_OVRG_ENCODE ) )
+            || ( $system_vre_overage_encode > $G_MAX_OVRG_ENCODE ) )
         {
             die "Error: Invalid VRE Overage Encode "
                 . "  system_vre_overage_encode: "
@@ -2760,18 +2859,18 @@ sub _view_vrt_with_rows_cols
     my $rows_index_order  = $MAX_INDEX_COUNT - 2;
     my $wof_tables_header = $self->_read_wof_tables_header();
 
-    $CSV_IO_POWER_INDEX_COUNT = $wof_tables_header->access($WOF_ATTR_io_power_size);
-    $CSV_VCS_CEFF_INDEX_COUNT = $wof_tables_header->access($WOF_ATTR_vcs_size);
-    $CSV_VDD_CEFF_INDEX_COUNT = $wof_tables_header->access($WOF_ATTR_vdd_size);
-    $CSV_AMB_COND_INDEX_COUNT = $wof_tables_header->access($WOF_ATTR_amb_cond_size);
-    $CSV_VRATIO_INDEX_COUNT   = $wof_tables_header->access($WOF_ATTR_vratio_size);
+    $csv_io_power_index_count = $wof_tables_header->access($WOF_ATTR_io_power_size);
+    $csv_vcs_ceff_index_count = $wof_tables_header->access($WOF_ATTR_vcs_size);
+    $csv_vdd_ceff_index_count = $wof_tables_header->access($WOF_ATTR_vdd_size);
+    $csv_amb_cond_index_count = $wof_tables_header->access($WOF_ATTR_amb_cond_size);
+    $csv_vratio_index_count   = $wof_tables_header->access($WOF_ATTR_vratio_size);
 
     my %DIM_TYPE_COUNT_MAP;
-    $DIM_TYPE_COUNT_MAP{$G_ATTR_vcs_ceff_index} = $CSV_VCS_CEFF_INDEX_COUNT;
-    $DIM_TYPE_COUNT_MAP{$G_ATTR_vdd_ceff_index} = $CSV_VDD_CEFF_INDEX_COUNT;
-    $DIM_TYPE_COUNT_MAP{$G_ATTR_io_power_index} = $CSV_IO_POWER_INDEX_COUNT;
-    $DIM_TYPE_COUNT_MAP{$G_ATTR_amb_cond_index} = $CSV_AMB_COND_INDEX_COUNT;
-    $DIM_TYPE_COUNT_MAP{$G_ATTR_vratio_index}   = $CSV_VRATIO_INDEX_COUNT;
+    $DIM_TYPE_COUNT_MAP{$G_ATTR_vcs_ceff_index} = $csv_vcs_ceff_index_count;
+    $DIM_TYPE_COUNT_MAP{$G_ATTR_vdd_ceff_index} = $csv_vdd_ceff_index_count;
+    $DIM_TYPE_COUNT_MAP{$G_ATTR_io_power_index} = $csv_io_power_index_count;
+    $DIM_TYPE_COUNT_MAP{$G_ATTR_amb_cond_index} = $csv_amb_cond_index_count;
+    $DIM_TYPE_COUNT_MAP{$G_ATTR_vratio_index}   = $csv_vratio_index_count;
 
     my $rows_start =
         $wof_tables_header->access( $DIM_TYPE_WOF_START_MAP{ $DIM_TYPE[$rows_index_order] } ) / 100;
@@ -3064,9 +3163,9 @@ sub _verify_vrt_offset
     my $vrth_vdd_id = $vrt_header->access($VRTH_ATTR_vdd_index);
 
     if (   ( $io_power_index != $vrth_io_id )
-        or ( $amb_cond_index != $vrth_ac_id )
-        or ( $vcs_ceff_index != $vrth_vcs_id )
-        or ( $vdd_ceff_index != $vrth_vdd_id ) )
+        || ( $amb_cond_index != $vrth_ac_id )
+        || ( $vcs_ceff_index != $vrth_vcs_id )
+        || ( $vdd_ceff_index != $vrth_vdd_id ) )
     {
         return 0;
     }
@@ -3221,7 +3320,7 @@ sub _get_vrt_offset_by_index
     else
     {
         if (   ( $section_number < 0 )
-            or ( $section_number >= $self->access($IMF_ATTR_section_table)->entry_count() ) )
+            || ( $section_number >= $self->access($IMF_ATTR_section_table)->entry_count() ) )
         {
             die "Error: Option section_number $section_number is invalid.\n";
         }
@@ -3252,7 +3351,7 @@ sub _get_vrt_offset_by_index
     if ( defined($vrt_index) )
     {
         if (   ( $vrt_index < 0 )
-            or ( $vrt_index > $max_vrt_index ) )
+            || ( $vrt_index > $max_vrt_index ) )
         {
             die "Error: Option vrt_index $vrt_index is invalid.\n";
         }
@@ -3352,6 +3451,859 @@ sub _write_padding
         $self->access($IMF_ATTR_binary_file_io)->fill_bytes( $padding_byte_count, 0x00 );
     }
 }
+
+################################################################################
+# OverrideHeader Class
+#
+# This class represents the Override Header within a WOF Tables Override File.
+################################################################################
+package OverrideHeader;
+our $p_log_lvl = $LOG_LVL_0;
+
+# Constants representing expected field values
+our $OVERRIDE_HEADER_MAGIC_NUMBER = 'WTSO';
+our $OVERRIDE_HEADER_VERSION      = 1;
+
+# Header size in bytes
+our $OVERRIDE_HEADER_SIZE = 32;
+
+# Attribute names in this class
+our $OVRH_ATTR_magic_number              = 'magic_number';
+our $OVRH_ATTR_version                   = 'version';
+our $OVRH_ATTR_section_table_entry_count = 'section_table_entry_count';
+our $OVRH_ATTR_section_table_offset      = 'section_table_offset';
+our $OVRH_ATTR_wof_override_id           = 'wof_override_id';
+
+sub new
+{
+    my ($class) = @_;
+
+    # check to use global logging level.
+    $p_log_lvl = $g_log_lvl if ( $g_use_global_log_lvl == 1 );
+    my $self = {
+        $OVRH_ATTR_magic_number              => $OVERRIDE_HEADER_MAGIC_NUMBER,
+        $OVRH_ATTR_version                   => $OVERRIDE_HEADER_VERSION,
+        $OVRH_ATTR_section_table_entry_count => undef,
+        $OVRH_ATTR_section_table_offset      => undef,
+        $OVRH_ATTR_wof_override_id           => undef,
+    };
+    bless($self);
+    return $self;
+}
+
+sub access
+{
+    my ( $self, $attr_name, $attr_value ) = @_;
+    Log::log_print $LOG_LVL_0, "access():\n";
+    Log::log_print $LOG_LVL_0, "  attr_name: $attr_name.\n";
+    if ( defined($attr_value) )
+    {
+        $self->{$attr_name} = $attr_value;
+        Log::log_print $LOG_LVL_0, "  attr_value: $attr_value.\n";
+    }
+    return $self->{$attr_name};
+}
+
+sub read
+{
+    my ( $self, $file ) = @_;
+
+    # Read field values from binary file
+    $self->access( $OVRH_ATTR_magic_number,              $file->read_ascii_text(4) );
+    $self->access( $OVRH_ATTR_version,                   $file->read_uint8() );
+    $self->access( $OVRH_ATTR_section_table_entry_count, $file->read_uint8() );
+    $file->skip_bytes(2);    # skip padding 2 bytes for reserved.
+    $self->access( $OVRH_ATTR_section_table_offset, $file->read_uint16() );
+    $self->access( $OVRH_ATTR_wof_override_id,      $file->read_ascii_text(16) );
+    $file->skip_bytes(6);    # skip padding 6 bytes for reserved.
+
+    # Verify field values
+    if ( $self->access($OVRH_ATTR_magic_number) ne $OVERRIDE_HEADER_MAGIC_NUMBER )
+    {
+        die "Error: Unexpected value in Magic Number field of Override Header: "
+            . $self->access($OVRH_ATTR_magic_number) . "\n";
+    }
+    if ( $self->access($OVRH_ATTR_version) != $OVERRIDE_HEADER_VERSION )
+    {
+        die "Error: Unexpected value in Version field of Override Header: "
+            . sprintf( "0x%02X", $self->access($OVRH_ATTR_version) ) . "\n";
+    }
+}
+
+sub write
+{
+    my ( $self, $file ) = @_;
+
+    # Write field values to binary file
+    $file->write_ascii_text( $self->access($OVRH_ATTR_magic_number), 4 );
+    $file->write_uint8( $self->access($OVRH_ATTR_version) );
+    $file->write_uint8( $self->access($OVRH_ATTR_section_table_entry_count) );
+    $file->fill_bytes( 2, 0x00 );    # padding 2 bytes for reserved.
+    $file->write_uint16( $self->access($OVRH_ATTR_section_table_offset) );
+    $file->write_ascii_text( $self->access($OVRH_ATTR_wof_override_id), 16 );
+    $file->fill_bytes( 6, 0x00 );    # padding 6 bytes for reserved.
+                                     # align
+}
+
+sub print
+{
+    my ($self) = @_;
+
+    # Print header fields to stdout
+    printf("Override Header:\n");
+    printf( "  Magic Number             : %s\n",     $self->access($OVRH_ATTR_magic_number) );
+    printf( "  Version                  : %u\n",     $self->access($OVRH_ATTR_version) );
+    printf( "  Section Table Entry Count: %u\n",     $self->access($OVRH_ATTR_section_table_entry_count) );
+    printf( "  Section Table Offset     : 0x%08X\n", $self->access($OVRH_ATTR_section_table_offset) );
+    printf( "  Overrid ID               : %s\n",     $self->access($OVRH_ATTR_wof_override_id) );
+    printf("\n");
+}
+
+################################################################################
+# WTSTableEntry Class
+#
+# This class represents a WTS Table Entry within a WOF Tables Image File.
+################################################################################
+package WTSTableEntry;
+
+# Attribute names in this class
+our $WTSTE_ATTR_wfs_offset            = 'wfs_offset';
+our $WTSTE_ATTR_wfs_size              = 'wfs_size';
+our $WTSTE_ATTR_major_dd_level        = 'major_dd_level';
+our $WTSTE_ATTR_minor_dd_level        = 'minor_dd_level';
+our $WTSTE_ATTR_core_count            = 'core_count';
+our $WTSTE_ATTR_socket_power_w        = 'socket_power_w';
+our $WTSTE_ATTR_sort_pwr_tgt_freq_mhz = 'sort_pwr_tgt_freq_mhz';
+our $WTSTE_ATTR_package_name          = 'package_name';
+
+our $WTS_TABLE_ENTRY = 32;
+
+sub new
+{
+    my ($class) = @_;
+    my $self = {
+        $WTSTE_ATTR_wfs_offset            => undef,
+        $WTSTE_ATTR_wfs_size              => undef,
+        $WTSTE_ATTR_major_dd_level        => undef,
+        $WTSTE_ATTR_minor_dd_level        => undef,
+        $WTSTE_ATTR_core_count            => undef,
+        $WTSTE_ATTR_socket_power_w        => undef,
+        $WTSTE_ATTR_sort_pwr_tgt_freq_mhz => undef,
+        $WTSTE_ATTR_package_name          => undef,
+    };
+    bless($self);
+    return $self;
+}
+
+sub access
+{
+    my ( $self, $attr_name, $attr_value ) = @_;
+    Log::log_print $LOG_LVL_0, "access():\n";
+    Log::log_print $LOG_LVL_0, "  attr_name: $attr_name.\n";
+    if ( defined($attr_value) )
+    {
+        $self->{$attr_name} = $attr_value;
+        Log::log_print $LOG_LVL_0, "  attr_value: $attr_value.\n";
+    }
+    return $self->{$attr_name};
+}
+
+sub read
+{
+    my ( $self, $file ) = @_;
+
+    # Read field values from binary file
+    $self->access( $WTSTE_ATTR_wfs_offset,     $file->read_uint32() );
+    $self->access( $WTSTE_ATTR_wfs_size,       $file->read_uint32() );
+    $self->access( $WTSTE_ATTR_major_dd_level, $file->read_uint8() );
+    $self->access( $WTSTE_ATTR_minor_dd_level, $file->read_uint8() );
+    $file->skip_bytes(1);    # skip padding 1 bytes for reserved.
+    $self->access( $WTSTE_ATTR_core_count,            $file->read_uint8() );
+    $self->access( $WTSTE_ATTR_socket_power_w,        $file->read_uint16() );
+    $self->access( $WTSTE_ATTR_sort_pwr_tgt_freq_mhz, $file->read_uint16() );
+    $self->access( $WTSTE_ATTR_package_name,          $file->read_ascii_text(16) );
+}
+
+sub write
+{
+    my ( $self, $file ) = @_;
+
+    # Write field values to binary file
+    $file->write_uint32( $self->access($WTSTE_ATTR_wfs_offset) );
+    $file->write_uint32( $self->access($WTSTE_ATTR_wfs_size) );
+    $file->write_uint8( $self->access($WTSTE_ATTR_major_dd_level) );
+    $file->write_uint8( $self->access($WTSTE_ATTR_minor_dd_level) );
+    $file->fill_bytes( 1, 0x00 );    # padding 1 bytes for reserved.
+    $file->write_uint8( $self->access($WTSTE_ATTR_core_count) );
+    $file->write_uint16( $self->access($WTSTE_ATTR_socket_power_w) );
+    $file->write_uint16( $self->access($WTSTE_ATTR_sort_pwr_tgt_freq_mhz) );
+    $file->write_ascii_text( $self->access($WTSTE_ATTR_package_name), 16 );
+}
+
+sub print
+{
+    my ( $self, $file ) = @_;
+
+    print( "   " . "$WTSTE_ATTR_wfs_offset: " . $self->access($WTSTE_ATTR_wfs_offset) . "\n" );
+    print( "   " . "$WTSTE_ATTR_wfs_size: " . $self->access($WTSTE_ATTR_wfs_size) . "\n" );
+    print( "   " . "$WTSTE_ATTR_major_dd_level: " . $self->access($WTSTE_ATTR_major_dd_level) . "\n" );
+    print( "   " . "$WTSTE_ATTR_minor_dd_level: " . $self->access($WTSTE_ATTR_minor_dd_level) . "\n" );
+    print( "   " . "$WTSTE_ATTR_core_count: " . $self->access($WTSTE_ATTR_core_count) . "\n" );
+    print( "   " . "$WTSTE_ATTR_socket_power_w: " . $self->access($WTSTE_ATTR_socket_power_w) . "\n" );
+    print( "   " . "$WTSTE_ATTR_sort_pwr_tgt_freq_mhz: " . $self->access($WTSTE_ATTR_sort_pwr_tgt_freq_mhz) . "\n" );
+    print( "   " . "$WTSTE_ATTR_package_name: " . $self->access($WTSTE_ATTR_package_name) . "\n" );
+}
+
+################################################################################
+# OverrideSectionTable Class
+#
+# This class represents the Section Table within a WOF Tables Image File.
+################################################################################
+package OverrideSectionTable;
+our $p_log_lvl = $LOG_LVL_0;
+
+sub new
+{
+    my ($class) = @_;
+    my $self = [];    # anonymous array
+    bless($self);
+    return $self;
+}
+
+sub entry_count
+{
+    my ($self) = @_;
+    return scalar(@$self);
+}
+
+sub clear
+{
+    my ($self) = @_;
+    @$self = ();
+}
+
+sub add_entry
+{
+    my ( $self, $entry ) = @_;
+    push( @$self, $entry );
+}
+
+sub get_entry
+{
+    my ( $self, $index ) = @_;
+    return $self->[$index];
+}
+
+sub read
+{
+    my ( $self, $file, $entry_count ) = @_;
+
+    # Clear out any current entries in table
+    $self->clear();
+
+    # Read entries from binary file
+    for ( my $i = 0; $i < $entry_count; $i++ )
+    {
+        my $entry = WTSTableEntry->new();
+
+        # read entry info of Section Table Entry from file.
+        $entry->read($file);
+
+        # and save the entry to array of Section Table
+        $self->add_entry($entry);
+    }
+}
+
+sub write
+{
+    my ( $self, $file ) = @_;
+
+    # Write entries to binary file
+    my $entry_count = $self->entry_count();
+    for ( my $i = 0; $i < $entry_count; $i++ )
+    {
+        my $entry = $self->get_entry($i);
+        $entry->write($file);
+    }
+}
+
+sub write_empty_entries
+{
+    my ( $self, $file ) = @_;
+
+    # Write entries to binary file
+    my $entry_count = $self->entry_count();
+    for ( my $i = 0; $i < $entry_count; $i++ )
+    {
+        my $entry = $self->get_entry($i);
+        $entry->access( $WTSTE_ATTR_wfs_offset,            0xFFFFFFFF );
+        $entry->access( $WTSTE_ATTR_wfs_size,              0xFFFFFFFF );
+        $entry->access( $WTSTE_ATTR_major_dd_level,        0xFF );
+        $entry->access( $WTSTE_ATTR_minor_dd_level,        0xFF );
+        $entry->access( $WTSTE_ATTR_core_count,            0xFF );
+        $entry->access( $WTSTE_ATTR_socket_power_w,        0xFFFF );
+        $entry->access( $WTSTE_ATTR_sort_pwr_tgt_freq_mhz, 0xFFFF );
+        $entry->access( $WTSTE_ATTR_package_name,          "0123456789abcdef" );
+        $entry->write($file);
+    }
+}
+
+sub print
+{
+    my ($self) = @_;
+
+    # Print section table to stdout
+    printf("Section Table\n");
+    my $entry_count = $self->entry_count();
+    for ( my $i = 0; $i < $entry_count; $i++ )
+    {
+        # Print section table entry fields to stdout
+        my $entry = $self->get_entry($i);
+        printf(" Entry #: $i\n");
+        $entry->print();
+    }
+    printf("\n");
+}
+
+################################################################################
+# OverrideFile Class
+#
+# This class represents a WOF Tables Override File.
+#
+# The file format is described in detail by the documents referenced at the
+# beginning of this script.
+#
+# A WOF Tables Override File is a binary file in big-endian format.  Major data
+# structures are aligned on 8 byte boundaries.  The file begins with an Override
+# File Header, followed by a Section Table, followed by one or more sections.
+# Each section contains a WOF Tables Header followed by all of the VRTs for one
+# SPWBF (Socket Power and WOF Base Frequency) combination.
+################################################################################
+package OverrideFile;
+use File::Basename;
+our $p_log_lvl                    = $LOG_LVL_0;
+our $OVERRIDE_FILE_BYTE_ALIGNMENT = 8;
+
+our $FILE_COPY_BUFFER_SIZE = 1024;
+
+# Attribute names in this class
+our $OVRF_ATTR_binary_file_io  = 'file';
+our $OVRF_ATTR_override_header = 'override_header';
+our $OVRF_ATTR_section_table   = 'section_table';
+
+sub new
+{
+    my ( $class, $file_name ) = @_;
+
+    # check to use global logging level.
+    #  $p_log_lvl = $g_log_lvl if ( $g_use_global_log_lvl == 1 );
+    my $self = {
+        $OVRF_ATTR_binary_file_io  => BinaryFileIO->new($file_name),
+        $OVRF_ATTR_override_header => OverrideHeader->new(),
+        $OVRF_ATTR_section_table   => OverrideSectionTable->new(),
+    };
+    bless($self);
+    return $self;
+}
+
+sub access
+{
+    my ( $self, $attr_name, $attr_value ) = @_;
+    Log::log_print $LOG_LVL_0, "access():\n";
+    Log::log_print $LOG_LVL_0, "  attr_name: $attr_name.\n";
+    if ( defined($attr_value) )
+    {
+        $self->{$attr_name} = $attr_value;
+        Log::log_print $LOG_LVL_0, "  attr_value: $attr_value.\n";
+    }
+    return $self->{$attr_name};
+}
+
+sub combine
+{
+    my ( $self, $dd_level, @combine_file_names ) = @_;
+    Log::log_print $p_log_lvl, "combine():\n";
+
+    # Open override file for writing
+    $self->access($OVRF_ATTR_binary_file_io)->open('w');
+
+    # Write override file contents
+    $self->_write_override_file( $dd_level, @combine_file_names );
+
+    # Close override file
+    $self->access($OVRF_ATTR_binary_file_io)->close();
+}
+
+sub list_ovr
+{
+    my ( $self, $section_number ) = @_;
+
+    Log::log_print $p_log_lvl, "list_ovr():\n";
+
+    # Open override file for reading
+    $self->access($OVRF_ATTR_binary_file_io)->open('r');
+
+    # Read and print override header
+    $self->_read_override_header();
+    $self->access($OVRF_ATTR_override_header)->print();
+
+    # Read section table Section Table pointed by into Section Table attribute,
+    # and file pointer is set file pointer to the end of Section Table.
+    $self->_read_override_table();
+
+    # Print section table
+    $self->access($OVRF_ATTR_section_table)->print();
+
+    # Close override file
+    $self->access($OVRF_ATTR_binary_file_io)->close();
+}
+
+sub split_ovr_file
+{
+    my ($self) = @_;
+
+    Log::log_print $p_log_lvl, "split_ovr_file():\n";
+
+    # Open override file for reading
+    $self->access($OVRF_ATTR_binary_file_io)->open('r');
+
+    # Read override header to populate it in object.
+    $self->_read_override_header();
+    my $entry_count = $self->access($OVRF_ATTR_override_header)->access($OVRH_ATTR_section_table_entry_count);
+
+    # Read section table Section Table pointed by into Section Table attribute,
+    # and file pointer is set file pointer to the end of Section Table.
+    $self->_split_override_file($entry_count);
+
+    # Close override file
+    $self->access($OVRF_ATTR_binary_file_io)->close();
+}
+
+#------------------------------------------------------------------------------
+# Private methods
+#------------------------------------------------------------------------------
+sub _write_override_file
+{
+    my ( $self, $dd_level, @combine_file_names ) = @_;
+    Log::log_print $p_log_lvl, "_write_override_file():\n";
+
+    my $image_file;
+    my $wfs_offset;
+    my $wfs_size;
+    my $major_dd_level;
+    my $minor_dd_level;
+    my $core_count;
+    my $socket_power_w;
+    my $sort_pwr_tgt_freq_mhz;
+    my $package_name;
+    my $entry;
+
+    my $major_dd_level_in_option;
+    my $minor_dd_level_in_option;
+    if ( defined($dd_level) )
+    {
+        $major_dd_level_in_option = substr( $dd_level, 0, 1 );
+        $minor_dd_level_in_option = substr( $dd_level, 1, 1 );
+    }
+
+    # Write override header to override file.
+    my $section_count = scalar(@combine_file_names);
+    $self->_write_override_header($section_count);
+
+    my $override_table_pos = $self->access($OVRF_ATTR_binary_file_io)->get_pos();
+
+    # Write section table for all entries to reserve spaces in the table.
+    # It overrides file with default section offsets/sizes.
+    $self->_write_override_table();
+
+    # get beginning address of first WTS Table.
+    my $next_wts_table_set_pos = $self->access($OVRF_ATTR_binary_file_io)->get_pos();
+
+    # file position is WTS_Table. Set it to Override Table.
+    $self->access($OVRF_ATTR_binary_file_io)->set_pos($override_table_pos);
+
+    for ( my $i = 0; $i < $section_count; $i++ )
+    {
+        if ( !-e $combine_file_names[$i] )
+        {
+            die "Error - The file, $combine_file_names[$i], not exists.";
+        }
+
+        # Get current file offset.  This is the offset to the start of the section.
+        $image_file = ImageFile->new( $combine_file_names[$i] );
+
+        # Get WOF table info from the input image file.
+        ( $major_dd_level, $minor_dd_level, $core_count, $socket_power_w, $sort_pwr_tgt_freq_mhz, $package_name ) =
+            $image_file->retrieve_wof_table_header(0);
+
+        my $filesize = -s $combine_file_names[$i];
+        if ( $filesize <= 0 )
+        {
+            die "Error: file size is not positive, size: $filesize\n";
+        }
+
+        # Store section offset and size in section table entry
+        # of output file.
+        $entry = $self->access($OVRF_ATTR_section_table)->get_entry($i);
+        if ( !defined($entry) )
+        {
+            die "Error: No Section Table Entry for section number:  $i.\n";
+        }
+
+        # Update wfs offset and size for current file.
+        $wfs_offset = $next_wts_table_set_pos;
+        $wfs_size   = $filesize;
+
+        # if dd_level is not specified in command option,
+        # the value from input image file will be used.
+        if ( defined($dd_level) )
+        {
+            $major_dd_level = $major_dd_level_in_option;
+            $minor_dd_level = $minor_dd_level_in_option;
+        }
+
+        $entry->access( $WTSTE_ATTR_wfs_offset,            $wfs_offset );
+        $entry->access( $WTSTE_ATTR_wfs_size,              $wfs_size );
+        $entry->access( $WTSTE_ATTR_major_dd_level,        $major_dd_level );
+        $entry->access( $WTSTE_ATTR_minor_dd_level,        $minor_dd_level );
+        $entry->access( $WTSTE_ATTR_core_count,            $core_count );
+        $entry->access( $WTSTE_ATTR_socket_power_w,        $socket_power_w );
+        $entry->access( $WTSTE_ATTR_sort_pwr_tgt_freq_mhz, $sort_pwr_tgt_freq_mhz );
+        $entry->access( $WTSTE_ATTR_package_name,          $package_name );
+
+        # calculate position of next wfs table entry.
+        my $current_wts_table_entry_pos = $override_table_pos + $WTS_TABLE_ENTRY * $i;
+
+        # set position of override file to the beginning of wfs table entry.
+        $self->access($OVRF_ATTR_binary_file_io)->set_pos($current_wts_table_entry_pos);
+        $entry->write( $self->access($OVRF_ATTR_binary_file_io) );
+
+        # set position of override file to next wfs table set.
+        $self->access($OVRF_ATTR_binary_file_io)->set_pos($next_wts_table_set_pos);
+
+        # Write section to override file.
+        $self->_copy_file_to_binary_wts( $combine_file_names[$i] );
+
+        # make sure the position is set to end of the output file.
+        # Then position is the beginning of next write, that is the offset.
+        $wfs_offset = $self->access($OVRF_ATTR_binary_file_io)->get_pos();
+
+        # save wts position for next file.
+        $next_wts_table_set_pos += $filesize;
+
+        if ( $next_wts_table_set_pos != $wfs_offset )
+        {
+            die
+                "two variable should be same, but not. next_wts_table_set_pos: $next_wts_table_set_pos, wfs_offset: $wfs_offset\n";
+        }
+    }
+}
+
+sub _split_override_file
+{
+    my ( $self, $section_count ) = @_;
+    Log::log_print $p_log_lvl, "_write_override_file():\n";
+
+    my $image_file;
+    my $wfs_offset;
+    my $wfs_size;
+    my $entry;
+
+    my $split_tag = "split";
+
+    # set pos to beginning of the file.
+    $self->access($OVRF_ATTR_binary_file_io)->set_pos(0);
+    $self->_read_override_header($section_count);
+
+    # get the pos of override table for later use.
+    my $override_table_pos = $self->access($OVRF_ATTR_binary_file_io)->get_pos();
+
+    # Read override table so that it will populate entry table.
+    $self->_read_override_table();
+
+    my $override_file_name = $self->access($OVRF_ATTR_binary_file_io)->file_name();
+
+    # get file's extension.
+    my ( $file, $dir, $ext ) = fileparse( $override_file_name, qr/\.\D.*/ );
+
+    # remove the extention from the file path.
+    $override_file_name =~ s/$ext$//g;
+
+    for ( my $i = 0; $i < $section_count; $i++ )
+    {
+        # fabricate the new file path.
+        my $split_file_name = $override_file_name . "_" . $split_tag . "_" . $i . $ext;
+
+        # Get current file offset.  This is the offset to the start of the section.
+        $image_file = ImageFile->new($split_file_name);
+
+        # Store section offset and size in section table entry
+        # of output file.
+        $entry = $self->access($OVRF_ATTR_section_table)->get_entry($i);
+        if ( !defined($entry) )
+        {
+            die "Error: No Section Table Entry for section number:  $i.\n";
+        }
+
+        $wfs_offset = $entry->access($WTSTE_ATTR_wfs_offset);
+        $wfs_size   = $entry->access($WTSTE_ATTR_wfs_size);
+
+        # copy from Image File to external file.
+
+        # calculate position of next wfs table entry.
+        my $current_wts_table_entry_pos = $override_table_pos + $WTS_TABLE_ENTRY * $i;
+
+        # set position of override file to next wfs table set.
+        $self->access($OVRF_ATTR_binary_file_io)->set_pos($wfs_offset);
+
+        # Write section to override file.
+        $self->_copy_binary_wts_to_file( $split_file_name, $wfs_size );
+    }
+}
+
+sub _read_override_header
+{
+    my ($self) = @_;
+    Log::log_print $p_log_lvl, "_read_override_header():\n";
+
+    # Read override header from override file
+    $self->access($OVRF_ATTR_override_header)->read( $self->access($OVRF_ATTR_binary_file_io) );
+
+    # Read past any padding
+    # The data structure is defined so that this is not needed. Comment it out.
+    # $self->_read_padding();
+}
+
+sub _write_override_header
+{
+    my ( $self, $section_count ) = @_;
+    Log::log_print $p_log_lvl, "_write_override_header():\n";
+    Log::log_print $p_log_lvl, "  section_count: $section_count.\n";
+
+    # Set the Section Table Entry Count field
+    $self->{$OVRF_ATTR_override_header}->access( $OVRH_ATTR_section_table_entry_count, $section_count );
+
+    my $section_table_offset = $OVERRIDE_HEADER_SIZE;
+    $self->{$OVRF_ATTR_override_header}->access( $OVRH_ATTR_section_table_offset, $section_table_offset );
+
+    # Write override header to override file
+    $self->{$OVRF_ATTR_override_header}->write( $self->access($OVRF_ATTR_binary_file_io) );
+
+    # Write any necessary padding so header ends on proper byte boundary
+    # The data structure is defined so that this is not needed. Comment it out.
+    # $self->_write_padding();
+}
+
+sub _read_override_table
+{
+    my ($self) = @_;
+    Log::log_print $p_log_lvl, "_read_override_table():\n";
+
+    # Get number of section table entries from override header
+    my $entry_count = $self->{$OVRF_ATTR_override_header}->access($OVRH_ATTR_section_table_entry_count);
+
+    # Read section table from override file
+    $self->access($OVRF_ATTR_section_table)->read( $self->access($OVRF_ATTR_binary_file_io), $entry_count );
+
+    # Read past any padding following the section table
+    # The data structure is defined so that this is not needed. Comment it out.
+    # $self->_read_padding();
+}
+
+sub _write_override_table
+{
+    my ($self) = @_;
+    Log::log_print $p_log_lvl, "_write_override_table():\n";
+
+    # Clear current contents of section table
+    $self->access($OVRF_ATTR_section_table)->clear();
+
+    # Get number of section table entries from override header
+    my $entry_count = $self->{$OVRF_ATTR_override_header}->access($OVRH_ATTR_section_table_entry_count);
+
+    # Add section table entries with default section offsets/sizes
+    for ( my $i = 0; $i < $entry_count; $i++ )
+    {
+        my $entry = WTSTableEntry->new();
+        $self->access($OVRF_ATTR_section_table)->add_entry($entry);
+    }
+
+    # Write section table to override file
+    $self->access($OVRF_ATTR_section_table)->write_empty_entries( $self->access($OVRF_ATTR_binary_file_io) );
+
+    # Write any necessary padding so table ends on proper byte boundary
+    # The data structure is defined so that this is not needed. Comment it out.
+    # $self->_write_padding();
+}
+
+sub _update_override_table
+{
+    my ($self) = @_;
+    Log::log_print $p_log_lvl, "_update_override_table():\n";
+
+    # Get offset to the section table from the override header
+    my $section_table_offset = $self->access($OVRF_ATTR_override_header)->access($OVRH_ATTR_section_table_offset);
+
+    # Move to section table offset within override file
+    $self->access($OVRF_ATTR_binary_file_io)->set_pos($section_table_offset);
+
+    # Update section table in override file.  Write actual section offsets/sizes.
+    $self->access($OVRF_ATTR_section_table)->write( $self->access($OVRF_ATTR_binary_file_io) );
+}
+
+#
+# _copy_file_to_binary_wts() subroutine
+# copy binary data from image file to binary wof table section
+# Note: before calling this function, make sure the position of
+# override file set to the expected Binarry WOF Table Section.
+#
+sub _copy_file_to_binary_wts
+{
+    my ( $self, $combine_file_name ) = @_;
+    Log::log_print $p_log_lvl, "_copy_file_to_binary_wts():\n";
+
+    if ( !-e $combine_file_name )
+    {
+        die "Error - The file, $combine_file_name, not exists.";
+    }
+
+    my $filesize = -s $combine_file_name;
+    if ( $filesize <= 0 )
+    {
+        die "Error: file size is not positive, size: $filesize\n";
+    }
+
+    # Create combine file IO object
+    my $combine_file_io = BinaryFileIO->new($combine_file_name);
+    if ( !defined($combine_file_io) )
+    {
+        die "Error: -- cannot create file object for $combine_file_io.\n";
+    }
+
+    # reset file position to the beginning before reading it to copy the image file.
+    $combine_file_io->open('r');
+    $combine_file_io->set_pos(0);
+
+    my $left_to_copy = $filesize;
+    while ( $left_to_copy > 0 )
+    {
+        my $length_to_copy =
+            ( ( $left_to_copy - $FILE_COPY_BUFFER_SIZE ) >= 0 ) ? $FILE_COPY_BUFFER_SIZE : $left_to_copy;
+        ( my $buffer, my $read_size ) = $combine_file_io->read_to_buffer($length_to_copy);
+
+        if ( !defined($buffer) )
+        {
+            last;
+        }
+        if ( $read_size <= 0 )
+        {
+            last;
+        }
+        $left_to_copy -= $length_to_copy;
+        $self->access($OVRF_ATTR_binary_file_io)->write($buffer);
+    }
+
+    $combine_file_io->close();
+
+    # Write any necessary padding so section ends on proper byte boundary
+    # image file is already aligned, so comment this out.
+    # $self->_write_padding();
+}
+
+#
+# _copy_binary_wts_to_file() subroutine
+# copy binary data from binary wof table section to file
+# Note: before calling this function, make sure the position of
+# override file set to the expected Binarry WOF Table Section.
+#
+sub _copy_binary_wts_to_file
+{
+    my ( $self, $image_file_name, $filesize ) = @_;
+    Log::log_print $p_log_lvl, "_copy_binary_wts_to_file():\n";
+    Log::log_print $p_log_lvl, "  filesize: $filesize.\n";
+
+    if ( $filesize <= 0 )
+    {
+        die "Error: file size is not positive, size: $filesize\n";
+    }
+
+    # Create image file IO object
+    my $image_file_io = BinaryFileIO->new($image_file_name);
+    if ( !defined($image_file_io) )
+    {
+        die "Error: -- cannot create file object for $image_file_io.\n";
+    }
+
+    # reset file position to the beginning before reading it to copy the image file.
+    $image_file_io->open('w');
+    $image_file_io->set_pos(0);
+
+    my $left_to_copy = $filesize;
+    while ( $left_to_copy > 0 )
+    {
+        my $length_to_copy =
+            ( ( $left_to_copy - $FILE_COPY_BUFFER_SIZE ) >= 0 ) ? $FILE_COPY_BUFFER_SIZE : $left_to_copy;
+        ( my $buffer, my $read_size ) = $self->access($OVRF_ATTR_binary_file_io)->read_to_buffer($length_to_copy);
+        if ( !defined($buffer) )
+        {
+            last;
+        }
+        if ( $read_size <= 0 )
+        {
+            last;
+        }
+        $left_to_copy -= $length_to_copy;
+        $image_file_io->write($buffer);
+    }
+
+    $image_file_io->close();
+
+    # Write any necessary padding so section ends on proper byte boundary
+    # image file is already aligned, so comment this out.
+    # $self->_write_padding();
+}
+
+sub _get_padding_count
+{
+    my ( $self, $file_offset ) = @_;
+    Log::log_print $p_log_lvl, "_get_padding_count():\n";
+
+    #  Log::log_print $p_log_lvl, "  file_offset: $file_offset.\n";
+    # If a file offset was not specified, get the current file offset
+    if ( !defined($file_offset) )
+    {
+        $file_offset = $self->access($OVRF_ATTR_binary_file_io)->get_pos();
+    }
+
+    # Return the padding needed to reach the correct alignment boundary
+    my $remainder = $file_offset % $OVERRIDE_FILE_BYTE_ALIGNMENT;
+    return ( $remainder == 0 ) ? 0 : ( $OVERRIDE_FILE_BYTE_ALIGNMENT - $remainder );
+}
+
+sub _read_padding
+{
+    my ($self) = @_;
+    Log::log_print $p_log_lvl, "_read_padding():\n";
+    my $padding_byte_count = $self->_get_padding_count();
+    if ( $padding_byte_count > 0 )
+    {
+        # Skip forward past the padding bytes
+        $self->access($OVRF_ATTR_binary_file_io)->skip_bytes($padding_byte_count);
+    }
+}
+
+sub _write_padding
+{
+    my ($self) = @_;
+    Log::log_print $p_log_lvl, "_write_padding():\n";
+    my $padding_byte_count = $self->_get_padding_count();
+    if ( $padding_byte_count > 0 )
+    {
+        # Write 0x00 in the padding bytes
+        $self->access($OVRF_ATTR_binary_file_io)->fill_bytes( $padding_byte_count, 0x00 );
+    }
+}
+
 ################################################################################
 # Options Class
 #
@@ -3367,11 +4319,16 @@ our $OPT_ATTR_list             = 'list';
 our $OPT_ATTR_view             = 'view';
 our $OPT_ATTR_squint           = 'squint';
 our $OPT_ATTR_extract          = 'extract';
+our $OPT_ATTR_combine          = 'combine';
+our $OPT_ATTR_list_ovr         = 'list_ovr';
+our $OPT_ATTR_split_ovr        = 'split_ovr';
 our $OPT_ATTR_help             = 'help';
 our $OPT_ATTR_debug            = 'debug';
 our $OPT_ATTR_table_set_id     = 'tsi';
 our $OPT_ATTR_section_number   = 'section_number';
 our $OPT_ATTR_vrt_index        = 'vrt_index';
+our $OPT_ATTR_wof_override_id  = 'woi';
+our $OPT_ATTR_dd_level         = 'dd';
 our $OPT_ATTR_vcs_ceff_index   = $G_ATTR_vcs_ceff_index;
 our $OPT_ATTR_vdd_ceff_index   = $G_ATTR_vdd_ceff_index;
 our $OPT_ATTR_io_power_index   = $G_ATTR_io_power_index;
@@ -3385,6 +4342,8 @@ our $OPT_ATTR_vdd_ceff_size    = 'vdd_ceff_size';
 our $OPT_ATTR_amb_cond_size    = 'am_cond_size';
 our $OPT_ATTR_freq_format      = 'freq_format';
 our $OPT_ATTR_csv_files        = 'csv_files';
+our $OPT_ATTR_combine_files    = 'combine_files';
+our $OPT_ATTR_input_file       = 'input_file';
 our $OPT_ATTR_output_file      = 'output_file';
 our $OPT_ATTR_disp_axis_vcs    = $G_ATTR_disp_axis_vcs;
 our $OPT_ATTR_disp_axis_vdd    = $G_ATTR_disp_axis_vdd;
@@ -3410,18 +4369,36 @@ our %OPT_DISP_AXIS_TYPE_MAP = (
 );
 
 # Possible return values from the action() method
-our $OPTIONS_ACTION_CREATE  = $OPT_ATTR_create;
-our $OPTIONS_ACTION_LIST    = $OPT_ATTR_list;
-our $OPTIONS_ACTION_VIEW    = $OPT_ATTR_view;
-our $OPTIONS_ACTION_SQUINT  = $OPT_ATTR_squint;
-our $OPTIONS_ACTION_EXTRACT = $OPT_ATTR_extract;
-our $OPTIONS_ACTION_HELP    = $OPT_ATTR_help;
+our $OPTIONS_ACTION_CREATE    = $OPT_ATTR_create;
+our $OPTIONS_ACTION_LIST      = $OPT_ATTR_list;
+our $OPTIONS_ACTION_VIEW      = $OPT_ATTR_view;
+our $OPTIONS_ACTION_SQUINT    = $OPT_ATTR_squint;
+our $OPTIONS_ACTION_EXTRACT   = $OPT_ATTR_extract;
+our $OPTIONS_ACTION_COMBINE   = $OPT_ATTR_combine;
+our $OPTIONS_ACTION_LIST_OVR  = $OPT_ATTR_list_ovr;
+our $OPTIONS_ACTION_SPLIT_OVR = $OPT_ATTR_split_ovr;
+our $OPTIONS_ACTION_HELP      = $OPT_ATTR_help;
 
 # Possible return values from the freq_format() method
 our $OPTIONS_FREQ_FORMAT_MHZ    = 'mhz';
 our $OPTIONS_FREQ_FORMAT_SYSTEM = 'system';
 
 our $OPT_SECTION_NUMB_DEFAULT = 0;
+
+our @all_options = (
+    $OPT_ATTR_create,          $OPT_ATTR_list,           $OPT_ATTR_view,           $OPT_ATTR_squint,
+    $OPT_ATTR_extract,         $OPT_ATTR_combine,        $OPT_ATTR_list_ovr,       $OPT_ATTR_split_ovr,
+    $OPT_ATTR_help,            $OPT_ATTR_vcs_ceff_index, $OPT_ATTR_vdd_ceff_index, $OPT_ATTR_io_power_index,
+    $OPT_ATTR_amb_cond_index,  $OPT_ATTR_vratio_index,   $OPT_ATTR_vrt_index,      $OPT_ATTR_outrows,
+    $OPT_ATTR_outcols,         $OPT_ATTR_freq_format,    $OPT_ATTR_section_number, $OPT_ATTR_table_set_id,
+    $OPT_ATTR_wof_override_id, $OPT_ATTR_dd_level,       $OPT_ATTR_io_power_size,  $OPT_ATTR_vcs_ceff_size,
+    $OPT_ATTR_vdd_ceff_size,   $OPT_ATTR_amb_cond_size,
+);
+
+our @action_options = (
+    $OPT_ATTR_create,  $OPT_ATTR_list,     $OPT_ATTR_view,      $OPT_ATTR_squint, $OPT_ATTR_extract,
+    $OPT_ATTR_combine, $OPT_ATTR_list_ovr, $OPT_ATTR_split_ovr, $OPT_ATTR_help,
+);
 
 sub new
 {
@@ -3430,29 +4407,36 @@ sub new
     # check to use global logging level.
     $p_log_lvl = $g_log_lvl if ( $g_use_global_log_lvl == 1 );
     my $self = {
-        $OPT_ATTR_create         => undef,
-        $OPT_ATTR_list           => undef,
-        $OPT_ATTR_view           => undef,
-        $OPT_ATTR_extract        => undef,
-        $OPT_ATTR_help           => undef,
-        $OPT_ATTR_debug          => undef,
-        $OPT_ATTR_section_number => undef,
-        $OPT_ATTR_vrt_index      => undef,
-        $OPT_ATTR_table_set_id   => undef,
-        $OPT_ATTR_vcs_ceff_index => undef,
-        $OPT_ATTR_vdd_ceff_index => undef,
-        $OPT_ATTR_io_power_index => undef,
-        $OPT_ATTR_amb_cond_index => undef,
-        $OPT_ATTR_freq_format    => undef,
-        $OPT_ATTR_vratio_index   => undef,
-        $OPT_ATTR_outrows        => undef,
-        $OPT_ATTR_outcols        => undef,
-        $OPT_ATTR_io_power_size  => undef,
-        $OPT_ATTR_vcs_ceff_size  => undef,
-        $OPT_ATTR_vdd_ceff_size  => undef,
-        $OPT_ATTR_amb_cond_size  => undef,
-        $OPT_ATTR_csv_files      => [],
-        $OPT_ATTR_output_file    => undef,
+        $OPT_ATTR_create          => undef,
+        $OPT_ATTR_list            => undef,
+        $OPT_ATTR_view            => undef,
+        $OPT_ATTR_extract         => undef,
+        $OPT_ATTR_combine         => undef,
+        $OPT_ATTR_list_ovr        => undef,
+        $OPT_ATTR_split_ovr       => undef,
+        $OPT_ATTR_help            => undef,
+        $OPT_ATTR_debug           => undef,
+        $OPT_ATTR_section_number  => undef,
+        $OPT_ATTR_vrt_index       => undef,
+        $OPT_ATTR_table_set_id    => undef,
+        $OPT_ATTR_wof_override_id => undef,
+        $OPT_ATTR_dd_level        => undef,
+        $OPT_ATTR_vcs_ceff_index  => undef,
+        $OPT_ATTR_vdd_ceff_index  => undef,
+        $OPT_ATTR_io_power_index  => undef,
+        $OPT_ATTR_amb_cond_index  => undef,
+        $OPT_ATTR_freq_format     => undef,
+        $OPT_ATTR_vratio_index    => undef,
+        $OPT_ATTR_outrows         => undef,
+        $OPT_ATTR_outcols         => undef,
+        $OPT_ATTR_io_power_size   => undef,
+        $OPT_ATTR_vcs_ceff_size   => undef,
+        $OPT_ATTR_vdd_ceff_size   => undef,
+        $OPT_ATTR_amb_cond_size   => undef,
+        $OPT_ATTR_csv_files       => [],
+        $OPT_ATTR_combine_files   => [],
+        $OPT_ATTR_input_file      => undef,
+        $OPT_ATTR_output_file     => undef,
     };
     bless($self);
     return $self;
@@ -3478,8 +4462,21 @@ sub action
 
     # Return the action that was specified (if any)
     my $action = undef;
-    foreach my $option ( $OPT_ATTR_create, $OPT_ATTR_list, $OPT_ATTR_view, $OPT_ATTR_squint, $OPT_ATTR_extract,
-        $OPT_ATTR_help )
+
+    if ( defined( $self->access($OPT_ATTR_create) ) )
+    {
+        if ( !defined( $self->access($OPT_ATTR_combine) ) )
+        {
+            $action = $OPT_ATTR_create;
+        }
+        else
+        {
+            $action = $OPT_ATTR_combine;
+        }
+        return $action;
+    }
+
+    foreach my $option (@action_options)
     {
         if ( defined( $self->{$option} ) )
         {
@@ -3498,7 +4495,7 @@ sub image_file
     # Return the image file for the currently specified action (if any)
     my $image_file = undef;
     my $action     = $self->action();
-    if ( defined($action) and ( $action ne $OPT_ATTR_help ) )
+    if ( defined($action) && ( $action ne $OPT_ATTR_help ) )
     {
         $image_file = $self->{$action};
     }
@@ -3510,6 +4507,48 @@ sub csv_files
     my ($self) = @_;
     Log::log_print $p_log_lvl, "csv_files():\n";
     return @{ $self->{$OPT_ATTR_csv_files} };
+}
+
+sub override_file
+{
+    my ($self) = @_;
+    Log::log_print $p_log_lvl, "override_file():\n";
+
+    # Return the override file for the currently specified action (if any)
+    my $override_file = undef;
+    my $action        = $self->action();
+    if ( ( $action eq $OPT_ATTR_create ) || ( $action eq $OPT_ATTR_combine ) )
+    {
+        $override_file = $self->access($OPT_ATTR_create);
+    }
+    else
+    {
+        $override_file = $self->access($action);
+    }
+    return $override_file;
+}
+
+sub combine_files
+{
+    my ($self) = @_;
+    Log::log_print $p_log_lvl, "override_file():\n";
+
+    # Return the override file for the currently specified action (if any)
+    my $combine_file_list = undef;
+    $combine_file_list = $self->access($OPT_ATTR_combine);
+    if ( !-e $combine_file_list )
+    {
+        die "Error - The file, $combine_file_list, not exists.";
+    }
+    open( FH, '<', $combine_file_list ) or die "Cannot open file: $combine_file_list!";
+    while ( my $line = <FH> )
+    {
+        # remove line feed first.
+        $line =~ s/\015?\012?$//;
+        push @{ $self->{$OPT_ATTR_combine_files} }, $line;
+    }
+    close(FH);
+    return @{ $self->{$OPT_ATTR_combine_files} };
 }
 
 sub parse
@@ -3539,18 +4578,23 @@ sub parse
             $OPT_ATTR_view . '=s',
             $OPT_ATTR_squint . '=s',
             $OPT_ATTR_extract . '=s',
+            $OPT_ATTR_combine . '=s',
+            $OPT_ATTR_list_ovr . '=s',
+            $OPT_ATTR_split_ovr . '=s',
             $OPT_ATTR_help,
             $OPT_ATTR_debug,
             $OPT_ATTR_table_set_id . '=s',
+            $OPT_ATTR_wof_override_id . '=s',
+            $OPT_ATTR_dd_level . '=i',
             $OPT_ATTR_section_number . '=i',
             $OPT_ATTR_vrt_index . '=i',
+            $OPT_ATTR_outrows . '=s',
+            $OPT_ATTR_outcols . '=s',
             $OPT_ATTR_vcs_ceff_index . '=i',
             $OPT_ATTR_vdd_ceff_index . '=i',
             $OPT_ATTR_io_power_index . '=i',
             $OPT_ATTR_amb_cond_index . '=i',
             $OPT_ATTR_vratio_index . '=i',
-            $OPT_ATTR_outrows . '=s',
-            $OPT_ATTR_outcols . '=s',
             $OPT_ATTR_io_power_size . '=i',
             $OPT_ATTR_vcs_ceff_size . '=i',
             $OPT_ATTR_vdd_ceff_size . '=i',
@@ -3593,6 +4637,18 @@ sub parse
     {
         $self->_verify_extract_options();
     }
+    elsif ( $action eq $OPT_ATTR_combine )
+    {
+        $self->_verify_combine_options();
+    }
+    elsif ( $action eq $OPT_ATTR_list_ovr )
+    {
+        $self->_verify_list_ovr_options();
+    }
+    elsif ( $action eq $OPT_ATTR_split_ovr )
+    {
+        $self->_verify_split_ovr_options();
+    }
     elsif ( $action eq $OPT_ATTR_help )
     {
         $self->_verify_help_options();
@@ -3609,23 +4665,33 @@ sub print_usage
     Log::log_print $p_log_lvl, "print_usage():\n";
     print STDERR "Usage:\n"
         . "  wof_data_xlator.pl --create <image_file> <csv_file>/<csv_dir> [<csv_file> ...]\n"
+        . "  wof_data_xlator.pl --create <overrid_image_file> --combine <override_list_file>]\n"
         . "  wof_data_xlator.pl --list <image_file>\n"
         . "  wof_data_xlator.pl --view <image_file> --section_number <number>\n"
         . "                   --vcs_ceff_index <number> --vdd_ceff_index <number>\n"
         . "                   --io_power_index <number> --amb_cond_index <number>\n"
         . "                   --vratio_index <number>\n"
         . "                   [--freq_format mhz|system]\n"
+        . "  wof_data_xlator.pl --squint <image_file> --section_number <section_number> --vrt_index <vrt_index>\n"
         . "  wof_data_xlator.pl --extract <image_file> --section_number <number>\n"
         . "  wof_data_xlator.pl --help\n"
         . "Actions:\n"
-        . "  --create   Create a WOF Tables image file based on input CSV files or directory.\n"
-        . "  --list     List the contents of a WOF Tables image file.\n"
-        . "  --view     View one VRT within a WOF Tables image file.\n"
-        . "  --extract  Extract one set of WOF Tables from an image file.\n"
-        . "  --help     Show brief description of command syntax.\n"
+        . "  --create       Create a WOF Tables image file based on input CSV files or directory,\n"
+        . "                 or create a WOF Override image file based on input WOF image files,\n"
+        . "                 depending on --combine option.\n"
+        . "  --list         List the contents of a WOF Tables image file.\n"
+        . "  --view         View one VRT within a WOF Tables image file.\n"
+        . "  --squint       Display VRT headers in WOF Table Session.\n"
+        . "  --extract      Extract one set of WOF Tables from an image file.\n"
+        . "  --combine      Combine files in the list file in this option.\n"
+        . "  --list_ovr     List the contents of a WOF override file.\n"
+        . "  --split_ovr    Split Override file into files for each Binary WTS.\n"
+        . "  --help         Show brief description of command syntax.\n"
         . "Options:\n"
         . "  --tsi                         Image Header Table Set ID (max length: 16).\n"
         . "  --section_number              WOF Tables section_number value.\n"
+        . "  --woi                         WOF Override ID (max length: 16).\n"
+        . "  --dd                          DD Level for override file.\n"
         . "  --vcs_ceff_index              VRT vcs_ceff_index value.\n"
         . "  --vdd_ceff_index              VRT vdd_ceff_index value.\n"
         . "  --io_power_index              VRT io_power_index value.\n"
@@ -3666,15 +4732,16 @@ sub _verify_create_options
     }
     Log::log_print $p_log_lvl, "  ARGV: " . join( ", ", @ARGV ) . ".\n";
 
+    # valid options for combine action.
+    my @valid_options = (
+        $OPT_ATTR_create,        $OPT_ATTR_table_set_id,  $OPT_ATTR_dd_level, $OPT_ATTR_io_power_size,
+        $OPT_ATTR_vcs_ceff_size, $OPT_ATTR_vdd_ceff_size, $OPT_ATTR_amb_cond_size,
+    );
+
     # Verify no invalid options were specified.
-    # Options listed below are invalid for this action.
-    foreach my $option (
-        $OPT_ATTR_list,           $OPT_ATTR_view,           $OPT_ATTR_extract,        $OPT_ATTR_help,
-        $OPT_ATTR_vcs_ceff_index, $OPT_ATTR_vdd_ceff_index, $OPT_ATTR_io_power_index, $OPT_ATTR_amb_cond_index,
-        $OPT_ATTR_freq_format,    $OPT_ATTR_section_number, $OPT_ATTR_squint,         $OPT_ATTR_vrt_index,
-        )
+    foreach my $option (@all_options)
     {
-        if ( defined( $self->{$option} ) )
+        if ( defined( $self->{$option} ) && !grep( /^$option$/, @valid_options ) )
         {
             die "Error: --$option is not valid with --create.\n";
         }
@@ -3686,6 +4753,14 @@ sub _verify_create_options
         if ( !defined( $self->{$option} ) )
         {
             die "Error: --$option is required with --create.\n";
+        }
+    }
+
+    if ( defined( $self->{$OPT_ATTR_dd_level} ) )
+    {
+        if ( !( $self->access($OPT_ATTR_dd_level) =~ /^[0-9][0-9]$/ ) )
+        {
+            die "Error: --dd option is invalid: $self->access($OPT_ATTR_dd_level).\n";
         }
     }
 
@@ -3774,15 +4849,12 @@ sub _verify_list_options
     my ($self) = @_;
     Log::log_print $p_log_lvl, "_verify_list_options():\n";
 
+    my @valid_options = ( $OPT_ATTR_list, $OPT_ATTR_section_number, );
+
     # Verify no invalid options were specified.
-    # Options listed below are invalid for this action.
-    foreach my $option (
-        $OPT_ATTR_create,         $OPT_ATTR_view,           $OPT_ATTR_extract,        $OPT_ATTR_help,
-        $OPT_ATTR_table_set_id,   $OPT_ATTR_vcs_ceff_index, $OPT_ATTR_vdd_ceff_index, $OPT_ATTR_io_power_index,
-        $OPT_ATTR_amb_cond_index, $OPT_ATTR_freq_format,    $OPT_ATTR_squint,         $OPT_ATTR_vrt_index,
-        )
+    foreach my $option (@all_options)
     {
-        if ( defined( $self->{$option} ) )
+        if ( defined( $self->{$option} ) && !grep( /^$option$/, @valid_options ) )
         {
             die "Error: --$option is not valid with --list.\n";
         }
@@ -3800,28 +4872,33 @@ sub _verify_view_options
     my ($self) = @_;
     Log::log_print $p_log_lvl, "_verify_view_options():\n";
 
-    # Options listed below are invalid for this action.
-    # Verify no invalid options were specified
-    foreach my $option ( $OPT_ATTR_create, $OPT_ATTR_list, $OPT_ATTR_extract,
-        $OPT_ATTR_help, $OPT_ATTR_squint, $OPT_ATTR_vrt_index, )
+    # valid options for extract action.
+    my @valid_options = (
+        $OPT_ATTR_view,           $OPT_ATTR_section_number, $OPT_ATTR_outrows,        $OPT_ATTR_outcols,
+        $OPT_ATTR_vcs_ceff_index, $OPT_ATTR_vdd_ceff_index, $OPT_ATTR_io_power_index, $OPT_ATTR_amb_cond_index,
+        $OPT_ATTR_vratio_index,   $OPT_ATTR_freq_format,
+    );
+
+    # Verify no invalid options were specified.
+    foreach my $option (@all_options)
     {
-        if ( defined( $self->{$option} ) )
+        if ( defined( $self->{$option} ) && !grep( /^$option$/, @valid_options ) )
         {
             die "Error: --$option is not valid with --view.\n";
         }
     }
 
     # Verify all required options were specified
-    if (( !defined( $self->{$OPT_ATTR_outrows} ) and defined( $self->{$OPT_ATTR_outcols} ) )
-        or ( defined( $self->{$OPT_ATTR_outrows} )
-            and !defined( $self->{$OPT_ATTR_outcols} ) )
+    if (( !defined( $self->{$OPT_ATTR_outrows} ) && defined( $self->{$OPT_ATTR_outcols} ) )
+        || ( defined( $self->{$OPT_ATTR_outrows} )
+            && !defined( $self->{$OPT_ATTR_outcols} ) )
         )
     {
         die "Error: --outraw or outcol were specified incorrectly." . " Please specify both or ignore both.\n";
     }
 
-    if (    !defined( $self->{$OPT_ATTR_outrows} )
-        and !defined( $self->{$OPT_ATTR_outcols} ) )
+    if (   !defined( $self->{$OPT_ATTR_outrows} )
+        && !defined( $self->{$OPT_ATTR_outcols} ) )
     {
         $self->access( $OPT_ATTR_outrows, $OPT_ATTR_disp_axis_io );
         $self->access( $OPT_ATTR_outcols, $OPT_ATTR_disp_axis_vratio );
@@ -3919,17 +4996,17 @@ sub _verify_view_options
         die "Error: Invalid --outrows and --outcols values cannot be the same.\n";
     }
 
-    if (( !defined( $self->access($OPT_ATTR_outrows) ) and defined( $self->access($OPT_ATTR_outcols) ) )
+    if (( !defined( $self->access($OPT_ATTR_outrows) ) && defined( $self->access($OPT_ATTR_outcols) ) )
         or ( defined( $self->access($OPT_ATTR_outrows) )
-            and !defined( $self->access($OPT_ATTR_outcols) ) )
+            && !defined( $self->access($OPT_ATTR_outcols) ) )
         )
     {
         die "Error: Both --outrows and" . " --outcols options should be defined or not defined.\n";
     }
 
     # Verify --freq_format value is valid
-    if (    ( $self->access($OPT_ATTR_freq_format) ne $OPTIONS_FREQ_FORMAT_MHZ )
-        and ( $self->access($OPT_ATTR_freq_format) ne $OPTIONS_FREQ_FORMAT_SYSTEM ) )
+    if (   ( $self->access($OPT_ATTR_freq_format) ne $OPTIONS_FREQ_FORMAT_MHZ )
+        && ( $self->access($OPT_ATTR_freq_format) ne $OPTIONS_FREQ_FORMAT_SYSTEM ) )
     {
         die "Error: Invalid --freq_format value: Must be one of the following: "
             . "$OPTIONS_FREQ_FORMAT_MHZ $OPTIONS_FREQ_FORMAT_SYSTEM\n";
@@ -3941,17 +5018,15 @@ sub _verify_squint_options
     my ($self) = @_;
     Log::log_print $p_log_lvl, "_verify_list_options():\n";
 
+    # valid options for extract action.
+    my @valid_options = ( $OPT_ATTR_squint, $OPT_ATTR_section_number, $OPT_ATTR_vrt_index, );
+
     # Verify no invalid options were specified.
-    # Options listed below are invalid for this action.
-    foreach my $option (
-        $OPT_ATTR_create,         $OPT_ATTR_view,           $OPT_ATTR_extract,        $OPT_ATTR_help,
-        $OPT_ATTR_table_set_id,   $OPT_ATTR_vcs_ceff_index, $OPT_ATTR_vdd_ceff_index, $OPT_ATTR_io_power_index,
-        $OPT_ATTR_amb_cond_index, $OPT_ATTR_freq_format,    $OPT_ATTR_list,
-        )
+    foreach my $option (@all_options)
     {
-        if ( defined( $self->{$option} ) )
+        if ( defined( $self->{$option} ) && !grep( /^$option$/, @valid_options ) )
         {
-            die "Error: --$option is not valid with --list.\n";
+            die "Error: --$option is not valid with --squint.\n";
         }
     }
 
@@ -3973,15 +5048,13 @@ sub _verify_extract_options
     my ($self) = @_;
     Log::log_print $p_log_lvl, "_verify_extract_options():\n";
 
+    # valid options for extract action.
+    my @valid_options = ( $OPT_ATTR_extract, $OPT_ATTR_section_number, );
+
     # Verify no invalid options were specified.
-    # Options listed below are invalid for this action.
-    foreach my $option (
-        $OPT_ATTR_create,         $OPT_ATTR_list,           $OPT_ATTR_view,           $OPT_ATTR_help,
-        $OPT_ATTR_vcs_ceff_index, $OPT_ATTR_vdd_ceff_index, $OPT_ATTR_io_power_index, $OPT_ATTR_amb_cond_index,
-        $OPT_ATTR_freq_format,    $OPT_ATTR_squint,         $OPT_ATTR_vrt_index,
-        )
+    foreach my $option (@all_options)
     {
-        if ( defined( $self->{$option} ) )
+        if ( defined( $self->{$option} ) && !grep( /^$option$/, @valid_options ) )
         {
             die "Error: --$option is not valid with --extract.\n";
         }
@@ -3990,21 +5063,100 @@ sub _verify_extract_options
     # Verify all required options were specified.
     # currently only check one command option.
     # add to the list if need to check more cmd option.
-    foreach my $option ($OPT_ATTR_section_number)
+    if ( !defined( $self->{$OPT_ATTR_section_number} ) )
     {
-        if ( !defined( $self->{$option} ) )
-        {
-            die "Error: --$option is required with --extract.\n";
-        }
+        die "Error: --section_number option is required but missing.\n";
     }
 
     # Treat any remaining (unparsed) command line arguments as output files.
     # Verify that at exactly one was specified.
     if ( scalar(@ARGV) != 1 )
     {
-        die "Error: --extract requires one output file name.\n";
+        die "Error: unrequired command option is specified - " . $ARGV[0] . "\n";
     }
     $self->access( $OPT_ATTR_output_file, $ARGV[0] );
+}
+
+sub _verify_combine_options
+{
+    my ($self) = @_;
+    Log::log_print $p_log_lvl, "_verify_combine_options():\n";
+
+    # valid options for combine action.
+    my @valid_options = ( $OPT_ATTR_create, $OPT_ATTR_combine, $OPT_ATTR_dd_level, $OPT_ATTR_wof_override_id, );
+
+    # Verify no invalid options were specified.
+    foreach my $option (@all_options)
+    {
+        if ( defined( $self->{$option} ) && !grep( /^$option$/, @valid_options ) )
+        {
+            die "Error: --$option is not valid with --combine.\n";
+        }
+    }
+
+    # Verify all required options were specified.
+    # currently only check one command option.
+    # add to the list if need to check more cmd option.
+    if ( !defined( $self->{$OPT_ATTR_wof_override_id} ) )
+    {
+        $self->access( $OPT_ATTR_wof_override_id, "" );
+    }
+
+    if ( defined( $self->{$OPT_ATTR_dd_level} ) )
+    {
+        if ( !( $self->access($OPT_ATTR_dd_level) =~ /^[0-9][0-9]$/ ) )
+        {
+            die "Error: --dd option is invalid: $self->access($OPT_ATTR_dd_level).\n";
+        }
+    }
+}
+
+sub _verify_list_ovr_options
+{
+    my ($self) = @_;
+    Log::log_print $p_log_lvl, "_verify_list_options():\n";
+
+    # valid options for list_ovr action.
+    my @valid_options = ( $OPT_ATTR_list_ovr, $OPT_ATTR_section_number, );
+
+    # Verify no invalid options were specified.
+    foreach my $option (@all_options)
+    {
+        if ( defined( $self->{$option} ) && !grep( /^$option$/, @valid_options ) )
+        {
+            die "Error: --$option is not valid with --list_ovr.\n";
+        }
+    }
+
+    # Verify there are no remaining (unparsed) command line arguments
+    if ( scalar(@ARGV) > 0 )
+    {
+        die "Error: Unexpected options specified with --list_ovr: @ARGV\n";
+    }
+}
+
+sub _verify_split_ovr_options
+{
+    my ($self) = @_;
+    Log::log_print $p_log_lvl, "_verify_split_ovr_options():\n";
+
+    # valid options for list_ovr action.
+    my @valid_options = ( $OPT_ATTR_split_ovr, );
+
+    # Verify no invalid options were specified.
+    foreach my $option (@all_options)
+    {
+        if ( defined( $self->{$option} ) && !grep( /^$option$/, @valid_options ) )
+        {
+            die "Error: --$option is not valid with --split_ovr.\n";
+        }
+    }
+
+    # Verify there are no remaining (unparsed) command line arguments
+    if ( scalar(@ARGV) > 0 )
+    {
+        die "Error: Unexpected options specified with --list_ovr: @ARGV\n";
+    }
 }
 
 sub _verify_help_options
@@ -4012,17 +5164,12 @@ sub _verify_help_options
     my ($self) = @_;
     Log::log_print $p_log_lvl, "_verify_help_options():\n";
 
+    my @valid_options = ( $OPT_ATTR_help, );
+
     # Verify no invalid options were specified.
-    # Options listed below are invalid for this action.
-    foreach my $option (
-        $OPT_ATTR_create,         $OPT_ATTR_list,           $OPT_ATTR_view,           $OPT_ATTR_extract,
-        $OPT_ATTR_section_number, $OPT_ATTR_table_set_id,   $OPT_ATTR_vcs_ceff_index, $OPT_ATTR_vdd_ceff_index,
-        $OPT_ATTR_io_power_index, $OPT_ATTR_amb_cond_index, $OPT_ATTR_outrows,        $OPT_ATTR_outcols,
-        $OPT_ATTR_freq_format,    $OPT_ATTR_squint,         $OPT_ATTR_vrt_index,      $OPT_ATTR_io_power_size,
-        $OPT_ATTR_vcs_ceff_size,  $OPT_ATTR_vdd_ceff_size,  $OPT_ATTR_amb_cond_size,
-        )
+    foreach my $option (@all_options)
     {
-        if ( defined( $self->{$option} ) )
+        if ( defined( $self->{$option} ) && !grep( /^$option$/, @valid_options ) )
         {
             die "Error: --$option is not valid with --help.\n";
         }
@@ -4034,6 +5181,7 @@ sub _verify_help_options
         die "Error: Unexpected options specified with --help: @ARGV\n";
     }
 }
+
 ################################################################################
 # Main Package
 #
@@ -4136,6 +5284,59 @@ sub extract_from_image_file
     my $image_file = ImageFile->new($image_file_name);
     $image_file->extract( $section_number, $output_file_name );
 }
+
+sub combine_to_override_file
+{
+    my ($options) = @_;
+    Log::log_print $p_log_lvl, "combine_to_override_file():\n";
+
+    # Get relevant command line options
+    my $override_file_name = $options->override_file();
+    my @combine_file_names = $options->combine_files();
+    my $dd_level           = $options->access($OPT_ATTR_dd_level);
+
+    # get --woi command option.
+    my $wof_override_id = $options->access($OPT_ATTR_wof_override_id);
+    Log::log_print $p_log_lvl, "  override_file_name: $override_file_name.\n";
+    Log::log_print $p_log_lvl, "  combine_file_names: " . join( ", ", @combine_file_names ) . ".\n";
+
+    # Create override file
+    my $override_file = OverrideFile->new($override_file_name);
+    if ( !defined($override_file) )
+    {
+        die "Error: -- cannot create override file object for $override_file_name.\n";
+    }
+    $override_file->access($OVRF_ATTR_override_header)->access( $OVRH_ATTR_wof_override_id, $wof_override_id );
+    $override_file->combine( $dd_level, @combine_file_names );
+}
+
+sub list_ovr_file_contents
+{
+    my ($options) = @_;
+
+    # Get relevant command line options
+    my $override_file_name = $options->override_file();
+
+    # List contents of specified override file
+    my $override_file  = OverrideFile->new($override_file_name);
+    my $section_number = $options->access($OPT_ATTR_section_number);
+
+    $override_file->list_ovr($section_number);
+}
+
+sub split_ovr_file
+{
+    my ($options) = @_;
+
+    # Get relevant command line options
+    my $override_file_name = $options->override_file();
+
+    # List contents of specified override file
+    my $override_file = OverrideFile->new($override_file_name);
+
+    $override_file->split_ovr_file();
+}
+
 ################################################################################
 # Main subroutine
 ################################################################################
@@ -4187,6 +5388,21 @@ elsif ( $action eq $OPTIONS_ACTION_EXTRACT )
 {
     Log::log_print $p_log_lvl, "Calling extract_from_image_file().\n";
     extract_from_image_file($options);
+}
+elsif ( $action eq $OPTIONS_ACTION_COMBINE )
+{
+    Log::log_print $p_log_lvl, "Calling combine_to_override_file().\n";
+    combine_to_override_file($options);
+}
+elsif ( $action eq $OPTIONS_ACTION_LIST_OVR )
+{
+    Log::log_print $p_log_lvl, "Calling list_ovr_file_contents().\n";
+    list_ovr_file_contents($options);
+}
+elsif ( $action eq $OPTIONS_ACTION_SPLIT_OVR )
+{
+    Log::log_print $p_log_lvl, "Calling split_ovr_file().\n";
+    split_ovr_file($options);
 }
 elsif ( $action eq $OPTIONS_ACTION_HELP )
 {
