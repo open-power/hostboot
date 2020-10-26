@@ -64,6 +64,34 @@ actionclass pcb_slave_internal_parity
     funccall("maskPcbSlaveParityError"); # must be called last for return code
 };
 
+/**
+ * Threshold 32/day (field) and 1 (mnfg). Do not predictively callout on
+ * threshold, instead just mask.
+ */
+actionclass hang_recovery_gte
+{
+    calloutSelfMed;
+    threshold32pday;
+    funccall("ClearServiceCallFlag_mnfgInfo");
+};
+
+actionclass hang_recovery_gte_0  {capture(PbStationMode0 ); hang_recovery_gte;};
+actionclass hang_recovery_gte_1  {capture(PbStationMode1 ); hang_recovery_gte;};
+actionclass hang_recovery_gte_2  {capture(PbStationMode2 ); hang_recovery_gte;};
+actionclass hang_recovery_gte_3  {capture(PbStationMode3 ); hang_recovery_gte;};
+actionclass hang_recovery_gte_4  {capture(PbStationMode4 ); hang_recovery_gte;};
+actionclass hang_recovery_gte_5  {capture(PbStationMode5 ); hang_recovery_gte;};
+actionclass hang_recovery_gte_6  {capture(PbStationMode6 ); hang_recovery_gte;};
+actionclass hang_recovery_gte_7  {capture(PbStationMode7 ); hang_recovery_gte;};
+actionclass hang_recovery_gte_8  {capture(PbStationMode8 ); hang_recovery_gte;};
+actionclass hang_recovery_gte_9  {capture(PbStationMode9 ); hang_recovery_gte;};
+actionclass hang_recovery_gte_10 {capture(PbStationMode10); hang_recovery_gte;};
+actionclass hang_recovery_gte_11 {capture(PbStationMode11); hang_recovery_gte;};
+actionclass hang_recovery_gte_12 {capture(PbStationMode12); hang_recovery_gte;};
+actionclass hang_recovery_gte_13 {capture(PbStationMode13); hang_recovery_gte;};
+actionclass hang_recovery_gte_14 {capture(PbStationMode14); hang_recovery_gte;};
+actionclass hang_recovery_gte_15 {capture(PbStationMode15); hang_recovery_gte;};
+
 ###############################################################################
 # Analyze connected
 ###############################################################################

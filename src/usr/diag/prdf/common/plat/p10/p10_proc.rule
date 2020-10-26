@@ -5773,7 +5773,7 @@ group gPB_STATION_FIR_4
     /** PB_STATION_FIR_4[9]
      *  hang recovery gte level1
      */
-    (rPB_STATION_FIR_4, bit(9)) ? TBDDefaultCallout;
+    (rPB_STATION_FIR_4, bit(9)) ? hang_recovery_gte_4;
 
     /** PB_STATION_FIR_4[10]
      *  force MP- IPL
@@ -5901,7 +5901,7 @@ group gPB_STATION_FIR_5
     /** PB_STATION_FIR_5[9]
      *  hang recovery gte level1
      */
-    (rPB_STATION_FIR_5, bit(9)) ? TBDDefaultCallout;
+    (rPB_STATION_FIR_5, bit(9)) ? hang_recovery_gte_5;
 
     /** PB_STATION_FIR_5[10]
      *  force MP- IPL
@@ -6029,7 +6029,7 @@ group gPB_STATION_FIR_6
     /** PB_STATION_FIR_6[9]
      *  hang recovery gte level1
      */
-    (rPB_STATION_FIR_6, bit(9)) ? TBDDefaultCallout;
+    (rPB_STATION_FIR_6, bit(9)) ? hang_recovery_gte_6;
 
     /** PB_STATION_FIR_6[10]
      *  force MP- IPL
@@ -6157,7 +6157,7 @@ group gPB_STATION_FIR_7
     /** PB_STATION_FIR_7[9]
      *  hang recovery gte level1
      */
-    (rPB_STATION_FIR_7, bit(9)) ? TBDDefaultCallout;
+    (rPB_STATION_FIR_7, bit(9)) ? hang_recovery_gte_7;
 
     /** PB_STATION_FIR_7[10]
      *  force MP- IPL
@@ -6285,7 +6285,7 @@ group gPB_STATION_FIR_8
     /** PB_STATION_FIR_8[9]
      *  hang recovery gte level1
      */
-    (rPB_STATION_FIR_8, bit(9)) ? TBDDefaultCallout;
+    (rPB_STATION_FIR_8, bit(9)) ? hang_recovery_gte_8;
 
     /** PB_STATION_FIR_8[10]
      *  force MP- IPL
@@ -6413,7 +6413,7 @@ group gPB_STATION_FIR_9
     /** PB_STATION_FIR_9[9]
      *  hang recovery gte level1
      */
-    (rPB_STATION_FIR_9, bit(9)) ? TBDDefaultCallout;
+    (rPB_STATION_FIR_9, bit(9)) ? hang_recovery_gte_9;
 
     /** PB_STATION_FIR_9[10]
      *  force MP- IPL
@@ -6541,7 +6541,7 @@ group gPB_STATION_FIR_10
     /** PB_STATION_FIR_10[9]
      *  hang recovery gte level1
      */
-    (rPB_STATION_FIR_10, bit(9)) ? TBDDefaultCallout;
+    (rPB_STATION_FIR_10, bit(9)) ? hang_recovery_gte_10;
 
     /** PB_STATION_FIR_10[10]
      *  force MP- IPL
@@ -6669,7 +6669,7 @@ group gPB_STATION_FIR_11
     /** PB_STATION_FIR_11[9]
      *  hang recovery gte level1
      */
-    (rPB_STATION_FIR_11, bit(9)) ? TBDDefaultCallout;
+    (rPB_STATION_FIR_11, bit(9)) ? hang_recovery_gte_11;
 
     /** PB_STATION_FIR_11[10]
      *  force MP- IPL
@@ -6797,7 +6797,7 @@ group gPB_STATION_FIR_0
     /** PB_STATION_FIR_0[9]
      *  hang recovery gte level1
      */
-    (rPB_STATION_FIR_0, bit(9)) ? TBDDefaultCallout;
+    (rPB_STATION_FIR_0, bit(9)) ? hang_recovery_gte_0;
 
     /** PB_STATION_FIR_0[10]
      *  force MP- IPL
@@ -6925,7 +6925,7 @@ group gPB_STATION_FIR_1
     /** PB_STATION_FIR_1[9]
      *  hang recovery gte level1
      */
-    (rPB_STATION_FIR_1, bit(9)) ? TBDDefaultCallout;
+    (rPB_STATION_FIR_1, bit(9)) ? hang_recovery_gte_1;
 
     /** PB_STATION_FIR_1[10]
      *  force MP- IPL
@@ -7053,7 +7053,7 @@ group gPB_STATION_FIR_2
     /** PB_STATION_FIR_2[9]
      *  hang recovery gte level1
      */
-    (rPB_STATION_FIR_2, bit(9)) ? TBDDefaultCallout;
+    (rPB_STATION_FIR_2, bit(9)) ? hang_recovery_gte_2;
 
     /** PB_STATION_FIR_2[10]
      *  force MP- IPL
@@ -7181,7 +7181,7 @@ group gPB_STATION_FIR_3
     /** PB_STATION_FIR_3[9]
      *  hang recovery gte level1
      */
-    (rPB_STATION_FIR_3, bit(9)) ? TBDDefaultCallout;
+    (rPB_STATION_FIR_3, bit(9)) ? hang_recovery_gte_3;
 
     /** PB_STATION_FIR_3[10]
      *  force MP- IPL
@@ -7309,7 +7309,7 @@ group gPB_STATION_FIR_12
     /** PB_STATION_FIR_12[9]
      *  hang recovery gte level1
      */
-    (rPB_STATION_FIR_12, bit(9)) ? TBDDefaultCallout;
+    (rPB_STATION_FIR_12, bit(9)) ? hang_recovery_gte_12;
 
     /** PB_STATION_FIR_12[10]
      *  force MP- IPL
@@ -7437,7 +7437,7 @@ group gPB_STATION_FIR_13
     /** PB_STATION_FIR_13[9]
      *  hang recovery gte level1
      */
-    (rPB_STATION_FIR_13, bit(9)) ? TBDDefaultCallout;
+    (rPB_STATION_FIR_13, bit(9)) ? hang_recovery_gte_13;
 
     /** PB_STATION_FIR_13[10]
      *  force MP- IPL
@@ -7565,7 +7565,7 @@ group gPB_STATION_FIR_14
     /** PB_STATION_FIR_14[9]
      *  hang recovery gte level1
      */
-    (rPB_STATION_FIR_14, bit(9)) ? TBDDefaultCallout;
+    (rPB_STATION_FIR_14, bit(9)) ? hang_recovery_gte_14;
 
     /** PB_STATION_FIR_14[10]
      *  force MP- IPL
@@ -7693,7 +7693,7 @@ group gPB_STATION_FIR_15
     /** PB_STATION_FIR_15[9]
      *  hang recovery gte level1
      */
-    (rPB_STATION_FIR_15, bit(9)) ? TBDDefaultCallout;
+    (rPB_STATION_FIR_15, bit(9)) ? hang_recovery_gte_15;
 
     /** PB_STATION_FIR_15[10]
      *  force MP- IPL
