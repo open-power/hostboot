@@ -910,7 +910,10 @@
         <id>ATTR_PROC_PCIE_PHB_ACTIVE</id>
         <writeable/>
     </attribute>
-
+    <attribute>
+        <id>ATTR_MSS_MRW_OCMB_RESET_GROUP</id>
+        <global/>
+    </attribute>
     <attribute>
         <!-- We never want to enable Checkstops for special attentions -->
         <id>ATTR_XSTOP_ON_SPATTN</id>
