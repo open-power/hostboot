@@ -82,6 +82,7 @@ actionclass l2_power_bus_ce
 
 actionclass analyzeEQ_CORE_FIR
 {
+    funccall("CheckCoreCheckstop");
     capture(eq_core_fir_ffdc);
     analyze(gEQ_CORE_FIR);
 };

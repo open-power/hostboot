@@ -26,7 +26,7 @@
 /** EQ_CHIPLET_RE_FIR[2] - Core Unit Checkstop support */
 actionclass coreUnitCheckstop
 {
-    # TBD
+    funccall("coreUcsSummary");
 };
 
 ###############################################################################

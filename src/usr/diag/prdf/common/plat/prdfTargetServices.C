@@ -881,7 +881,7 @@ bool checkLastFuncCore( TARGETING::TargetHandle_t i_trgt )
     // Check for fused-core mode.
     if ( is_fused_mode() )
     {
-        type = TYPE_EX;
+        type = TYPE_FC;
         trgt = getConnectedParent( trgt, type );
     }
 
