@@ -26,7 +26,7 @@
 #define PLDM_BIOS_ATTR_REQUESTS_H
 
 /** @file  pldm_bios_attr_requests.H
- *  @brief This file contains the declaraction(s) of the function(s) that
+ *  @brief This file contains the declaration(s) of the function(s) that
  *         are used to perform PLDM BIOS requests to the BMC
  */
 

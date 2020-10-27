@@ -80,6 +80,9 @@ namespace PLDM
 
         // getCurrentAttrValue
         MOD_GET_CURRENT_VALUE = 0x1C,
+
+        // getHypervisorMode
+        MOD_GET_HYPERVISOR_MODE = 0x1D,
     };
 
     enum PLDMReasonCode

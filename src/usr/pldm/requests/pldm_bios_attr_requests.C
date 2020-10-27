@@ -74,6 +74,9 @@ errlHndl_t getBiosTable(const pldm_bios_table_types i_type,
 
     errlHndl_t errl = nullptr;
 
+    // start with clean output vector
+    o_table.clear();
+
     do
     {
         /* Make the getBiosTable request and get the response message bytes */
@@ -150,7 +153,6 @@ errlHndl_t getBiosTable(const pldm_bios_table_types i_type,
                "Expected PLDM next data transfer handle to be 0, got %d",
                response.next_transfer_handle);
 
-        o_table.clear();
         o_table.insert(o_table.begin(),
                         (response_bytes.data() + sizeof(pldm_msg_hdr) + table_data_offset),
                         response_bytes.end());
@@ -199,6 +201,9 @@ errlHndl_t getBiosAttrFromHandle(const bios_handle_t i_bios_attr_handle,
         .transfer_op_flag = PLDM_GET_FIRSTPART, // transfer op flag
         .attribute_handle= i_bios_attr_handle // attribute handle
     };
+
+    // start with clean output vector
+    o_attrVal.clear();
 
     do
     {
@@ -301,7 +306,6 @@ errlHndl_t getBiosAttrFromHandle(const bios_handle_t i_bios_attr_handle,
                "Expected PLDM next data transfer handle to be 0, got %d",
                response.next_transfer_handle);
 
-        o_attrVal.clear();
         o_attrVal.insert(o_attrVal.begin(),
                          attribute_data.ptr,
                          attribute_data.ptr + attribute_data.length);

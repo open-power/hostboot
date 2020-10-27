@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -28,6 +28,7 @@
 #include <errl/errlentry.H>
 #include <errl/errlmanager.H>
 #include <isteps/hwpisteperror.H>
+#include <isteps/istep_reasoncodes.H>
 #include <initservice/isteps_trace.H>
 #include <util/utilsemipersist.H>
 #include <hwas/common/deconfigGard.H>
@@ -35,18 +36,84 @@
 #include <sys/mmio.h>
 #include <console/consoleif.H>
 #include <initservice/initserviceif.H>
-
+#ifdef CONFIG_PLDM
+#include <pldm/base/hb_bios_attrs.H>
+#include <pldm/pldm_errl.H>
+#endif
 #if (defined(CONFIG_PNORDD_IS_BMCMBOX) || defined(CONFIG_PNORDD_IS_IPMI))
 #include <pnor/pnorif.H>
 #endif
 
+using namespace TARGETING;
+using namespace ISTEP;
+
 namespace ISTEP_06
 {
+#ifdef CONFIG_PLDM
+errlHndl_t getAndSetPLDMBiosAttrs(void)
+{
+      errlHndl_t errl = nullptr;
+      do {
+      std::vector<uint8_t> bios_string_table;
+      std::vector<uint8_t> bios_attr_table;
+      const auto sys = TARGETING::UTIL::assertGetToplevelTarget();
+
+      ATTR_PAYLOAD_KIND_type payload_kind = PAYLOAD_KIND_UNKNOWN;
+
+      errl = PLDM::getHypervisorMode(bios_string_table,
+                                     bios_attr_table,
+                                     payload_kind);
+
+      // If we get an error, or are returned a payload_kind
+      // that is not PHYP or SAPPHIRE then we do not know
+      // what payload to pick. We cannot assume the payload
+      // kind as booting for the incorrect hypervisor could
+      // result in loss of data in NVRAM that was generated
+      // by the hypervisor on previous boots.
+      if(errl)
+      {
+          TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                     "getAndSetPLDMBiosAttrs: An error occurred getting Hypervisor Mode from the BMC" );
+          break;
+      }
+
+      if(payload_kind != PAYLOAD_KIND_PHYP &&
+         payload_kind != PAYLOAD_KIND_SAPPHIRE)
+      {
+         /*
+          * @errortype
+          * @severity   ERRL_SEV_UNRECOVERABLE
+          * @moduleid   MOD_SET_IPL_PARMS
+          * @reasoncode RC_INVALID_PAYLOAD_KIND
+          * @userdata1  Payload Kind that BMC returned
+          * @userdata2  unused
+          * @devdesc    Software problem, bad data from BMC
+          * @custdesc   A software error occurred during system boot
+          */
+          errl = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
+                               MOD_SET_IPL_PARMS,
+                               RC_INVALID_PAYLOAD_KIND,
+                               payload_kind,
+                               0,
+                               ErrlEntry::NO_SW_CALLOUT);
+          PLDM::addBmcErrorCallouts(errl);
+          break;
+      }
+
+      sys->setAttr<ATTR_PAYLOAD_KIND>(payload_kind);
+
+      }while(0);
+
+      return errl;
+}
+#endif
 
 void* host_set_ipl_parms( void *io_pArgs )
 {
     ISTEP_ERROR::IStepError l_stepError;
     errlHndl_t l_err;
+
+    do{
 
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "host_set_ipl_parms entry" );
 
@@ -86,6 +153,27 @@ void* host_set_ipl_parms( void *io_pArgs )
 
         //Write update data back out
         Util::writeSemiPersistData(l_semiData);
+#ifdef CONFIG_PLDM
+        const auto sys = TARGETING::UTIL::assertGetToplevelTarget();
+        if(!sys->getAttr<ATTR_IS_MPIPL_HB>())
+        {
+            l_err = getAndSetPLDMBiosAttrs();
+            if(l_err)
+            {
+                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                          "host_set_ipl_parms: error occurred getting/setting PLDM bios attrs");
+                l_err->collectTrace("ISTEPS_TRACE",256);
+                l_stepError.addErrorDetails( l_err );
+                errlCommit( l_err, ISTEP_COMP_ID );
+                break;
+            }
+        }
+        else
+        {
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                          "host_set_ipl_parms: MPIPL detected, using PLDM bios attrs values from previous boot");
+        }
+#endif
     }
 
     /* @TODO RTC 245390: Update for P10 DD 1.0 */
@@ -188,6 +276,8 @@ void* host_set_ipl_parms( void *io_pArgs )
 #endif
 
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "host_set_ipl_parms exit" );
+
+    }while(0);
 
     return l_stepError.getErrorHandle();
 }

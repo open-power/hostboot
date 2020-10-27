@@ -31,6 +31,8 @@
 #ifndef COMPILETIME_TRACEHASH_H
 #define COMPILETIME_TRACEHASH_H
 
+#include <algorithm>
+
 namespace trace_impl
 {
 
@@ -53,18 +55,6 @@ struct compiletime_string
     char data[sizeof(TRACE::traceParseInfo::string)] = { };
     size_t length = 0;
 };
-
-// @brief Compile-time strlen implementation.
-constexpr inline size_t comptime_strlen(const char* s)
-{
-    size_t length = 0;
-    while (*s)
-    {
-        ++length;
-        ++s;
-    }
-    return length;
-}
 
 /* @brief Copies a format specifier, not including width information or other
  *        modifiers, from one string to another.
@@ -119,7 +109,7 @@ constexpr inline void copy_format_spec(const char* string, compiletime_string& r
  */
 constexpr inline compiletime_string reduce_format_string(const char* string)
 {
-    size_t length = comptime_strlen(string) + 1;
+    size_t length = std::comptime_strlen(string) + 1;
 
     compiletime_string result { };
 
@@ -208,7 +198,7 @@ constexpr string_container<N> initialize_string(const char* c)
  */
 constexpr inline compiletime_string compiletime_basename(const char* c)
 {
-    const char* slash = c + comptime_strlen(c);
+    const char* slash = c + std::comptime_strlen(c);
 
     while (slash != c)
     {

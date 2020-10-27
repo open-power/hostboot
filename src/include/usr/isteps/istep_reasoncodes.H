@@ -174,6 +174,7 @@ namespace ISTEP
         RC_MEMCRYPT_LOCK_FAILED                  = ISTEP_COMP_ID | 0x5F,
         RC_RNG_FAILED                            = ISTEP_COMP_ID | 0x60,
         RC_MEMORY_ENCRYPTION_ENABLED             = ISTEP_COMP_ID | 0x61,
+        RC_INVALID_PAYLOAD_KIND                  = ISTEP_COMP_ID | 0x62,
     };
 
 };

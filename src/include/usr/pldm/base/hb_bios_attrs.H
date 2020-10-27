@@ -32,31 +32,36 @@
  */
 
 #include <openbmc/pldm/libpldm/bios_table.h>
+#include <attributetraits.H>
+#include <attributeenums.H>
 
 namespace PLDM
 {
-    const char PLDM_BIOS_HB_HYP_SWITCH_STRING[] = "hb-hyp-switch";
-
-    /** @brief Given a string describing the name of a PLDM bios attribute
-    *          Hostboot wants to read from the BMC, retrieve the value
-    *          and value type of that attribute
+    /** @brief Retrieve the current value of the hb-hyp-switch
+    *          PLDM bios attribute, convert it to ATTR_PAYLOAD_KIND
+    *          enum, and set ATTR_PAYLOAD_KIND on the system target.
     *
-    * @param[in] i_attr_string
-    *                String representing PLDM Bios attribute we want
-    *                the value of. Consts should be defined in this header.
+    * @param[in,out] io_string_table  A byte vector that if empty will be filled
+    *                                 with the string table via a PLDM Bios Table
+    *                                 request to the BMC. If already has contents
+    *                                 no request will be made and vector will not
+    *                                 be modified.
     *
-    * @param[out] o_attr_type
-    *                Type of PLDM attribute, See bios.h.
-    * @param[out] o_attr_val
-      *              Expected to be empty on input, will be cleared
-    *                during the function. If no error then will
-    *                contain bios attribute value when
-    *                function completes.
+    * @param[in,out] io_attr_table    A byte vector that if empty will be filled
+    *                                 with the attribute table via a PLDM Bios Table
+    *                                 request to the BMC. If already has contents
+    *                                 no request will be made and vector will not
+    *                                 be modified.
+    *
+    * @param[out]    o_payloadType    If no error occurs will contain the value
+    *                                 we found for hb-hyp-switch translated to
+    *                                 terms of ATTR_PAYLOAD_KIND_type.
+    *
     * @return Error if any, otherwise nullptr.
     */
-    errlHndl_t getCurrentAttrValue(const char *i_attr_string,
-                                  pldm_bios_attribute_type& o_attr_type,
-                                  std::vector<uint8_t>& o_attr_val);
+    errlHndl_t getHypervisorMode(std::vector<uint8_t>& io_string_table,
+                                std::vector<uint8_t>& io_attr_table,
+                                TARGETING::ATTR_PAYLOAD_KIND_type &o_payloadType);
 }
 
 #endif
