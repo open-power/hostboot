@@ -524,6 +524,13 @@ fapi2::ReturnCode p10_fabric_iovalid_link_validate(
                          l_dl_fail_evn ? (1) : (0), l_dl_timeout_state_evn,
                          l_dl_fail_odd ? (1) : (0), l_dl_timeout_state_odd);
             }
+            else
+            {
+                // ensure fail indicators are cleared from prior loop, to
+                // guarantee that spare lanes are checked on both even/odd
+                l_dl_fail_evn = false;
+                l_dl_fail_odd = false;
+            }
         }
         else if (l_loc_link_train == fapi2::ENUM_ATTR_IOHS_LINK_TRAIN_EVEN_ONLY)
         {
