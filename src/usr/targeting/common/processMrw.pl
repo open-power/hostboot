@@ -2031,7 +2031,7 @@ sub iterateOverChiplets
                     $unit_type ne "SYSREFCLKENDPT" &&
                     $unit_type ne "PCICLKENDPT"    &&
                     $unit_type ne "LPCREFCLKENDPT" &&
-                    $unit_type ne "XBUS" )
+                    $unit_type ne "XBUS")
                 {
                     #set common attrs for child
                     setCommonAttrForChiplet($targetObj, $child,
@@ -3636,7 +3636,6 @@ sub processSmpA
     my $busConnection = "";
     # Retrieve option '-c' caller supplied
     my $systemConfig = $targetObj->{system_config};
-
     my $numBusConnections = $targetObj->getNumConnections($target);
     # Only proceed if a bus connection exists ...
     if ($numBusConnections != 0)
@@ -3789,6 +3788,29 @@ sub setCommonBusConfigAttributes
     chop($busSrcPath);
     chop($busDestPath);
 
+    # Save off abus level for use later
+    my $busSrcCopy = $busSrcPath;
+    my $busDestCopy = $busDestPath;
+    my $type = $targetObj->getType($target);
+    my $abusSrc = 0;
+    my $abusDest = 0;
+    if ($type eq "SMPGROUP")
+    {
+        if ($busSrcCopy !~ s/(abus.*)//g)
+        {
+            select()->flush(); # flush buffer before spewing out error message
+            die "MRW is not as expected when finding ABUS src: $busSrcPath";
+        }
+        $abusSrc = $1;
+
+        if ($busDestCopy !~ s/(abus.*)//g)
+        {
+            select()->flush(); # flush buffer before spawning out error message
+            die "MRW is not as expected when finding ABUS dest: $busDestPath";
+        }
+        $abusDest = $1;
+    }
+
     # SMPA has one more level of indirection, remove it
     $busSrcPath =~ s/\/abus.*//g;
     $busDestPath =~ s/\/abus.*//g;
@@ -3818,6 +3840,22 @@ sub setCommonBusConfigAttributes
         # destination targets
         my $busType = $busConnection->{bus_type};
 
+        # Set up paths for smpgroup
+        if ($type eq "SMPGROUP")
+        {
+            # Append smpgroup to the bus target by extracting out groupA/groupB
+            my $targetCopy = $target;
+            if ($targetCopy !~ s/(group.*)//g)
+            {
+                select()->flush(); # flush buffer before spewing out error message
+                die "MRW is not as expected when finding ABUS";
+            }
+            my $smpgroup = $1;
+
+            $busSrcTarget .= "/$abusSrc/$smpgroup";
+            $busDestTarget .= "/$abusDest/$smpgroup";;
+        }
+
         my $busSrcHuid = $targetObj->getAttribute($busSrcTarget, "HUID");
         my $busSrcPhysicalPath = $targetObj->getAttribute($busSrcTarget, "PHYS_PATH");
 
@@ -3834,6 +3872,7 @@ sub setCommonBusConfigAttributes
         $targetObj->setAttribute($busDestTarget, "PEER_PATH",   $busSrcPhysicalPath);
         $targetObj->setAttribute($busDestTarget, "PEER_HUID",   $busSrcHuid);
         $targetObj->setAttribute($busDestTarget, "BUS_TYPE",    $busType);
+
     }
     else
     {
