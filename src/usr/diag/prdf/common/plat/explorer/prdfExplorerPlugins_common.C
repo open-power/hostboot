@@ -177,7 +177,7 @@ int32_t CollectOmiFfdc( ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc )
     TargetHandle_t omicTrgt = getConnectedParent( omiTrgt, TYPE_OMIC );
 
     // Get the FFDC for the appropriate DL
-    uint8_t omiPosRelOmic = omiTrgt->getAttr<ATTR_OMI_DL_GROUP_POS>(); // 0:2
+    uint8_t omiPosRelOmic = omiTrgt->getAttr<ATTR_REL_POS>(); // 0:1
     char ffdcName[64];
     sprintf( ffdcName, "dl%x_ffdc", omiPosRelOmic );
 

@@ -383,8 +383,8 @@ bool __queryUcsOmic( ExtensibleChip * i_omic, ExtensibleChip * i_mcc,
                          act0->Read() | act1->Read() ) )
         {
             // Get the position of the inputted OMI relative to the parent
-            // OMIC (0-2). We'll need to use ATTR_OMI_DL_GROUP_POS for this.
-            uint8_t omiPosRelOmic = i_omi->getAttr<ATTR_OMI_DL_GROUP_POS>();
+            // OMIC (0-2). We'll need to use ATTR_REL_POS for this.
+            uint8_t omiPosRelOmic = i_omi->getAttr<ATTR_REL_POS>();
 
             // Get the bit offset for the bit relevant to the inputted OMI.
             // 0 : OMI-DL 0
@@ -738,8 +738,8 @@ void __cleanupChnlFail<TYPE_OMI>( TargetHandle_t i_omi,
         TargetHandle_t mcc  = getConnectedParent( i_omi, TYPE_MCC );
         ExtensibleChip * mccChip = (ExtensibleChip *)systemPtr->GetChip(mcc);
 
-        // Get the OMI position relative to the OMIC (0,1,2) and the MCC (0,1)
-        uint8_t omiPosRelOmic = i_omi->getAttr<ATTR_OMI_DL_GROUP_POS>();
+        // Get the OMI position relative to the OMIC (0,1) and the MCC (0,1)
+        uint8_t omiPosRelOmic = i_omi->getAttr<ATTR_REL_POS>();
         uint8_t omiPosRelMcc = getTargetPosition(i_omi) % MAX_OMI_PER_MCC;
 
         // Note that this is a clean up function. If there are any SCOM errors
