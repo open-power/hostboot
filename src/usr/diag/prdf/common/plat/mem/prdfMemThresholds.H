@@ -56,11 +56,6 @@ void getMnfgMemCeTh( ExtensibleChip * i_chip, const MemRank & i_rank,
 #ifdef __HOSTBOOT_MODULE
 
 /**
- * @brief Returns RCD Parity Error threshold policy.
- */
-ThresholdResolution::ThresholdPolicy getRcdParityTh();
-
-/**
  * @brief Returns IUE threshold policy.
  */
 ThresholdResolution::ThresholdPolicy getIueTh();

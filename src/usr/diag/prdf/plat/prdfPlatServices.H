@@ -106,19 +106,6 @@ uint32_t getScom(TARGETING::TargetHandle_t i_target, BitString& io_bs,
 uint32_t putScom(TARGETING::TargetHandle_t i_target, BitString& io_bs,
                    uint64_t i_address);
 
-/**
- * @brief Grabs the SPD record on DIMM target
- *
- * @param i_target   DIMM target
- * @param o_data     SPD record data (malloc'd memory)
- * @param o_len      length of record
- *
- * @return SUCCESS or FAIL
- */
-uint32_t getSpdData(TARGETING::TargetHandle_t i_target,
-                      uint8_t *& o_data,
-                      size_t & o_len);
-
 //##############################################################################
 //##                        Memory specific functions
 //##############################################################################

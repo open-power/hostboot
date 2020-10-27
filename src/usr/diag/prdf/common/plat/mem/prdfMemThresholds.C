@@ -76,26 +76,6 @@ uint8_t getMnfgCeTh()
 
 #ifdef __HOSTBOOT_MODULE
 
-ThresholdResolution::ThresholdPolicy getRcdParityTh()
-{
-    uint32_t th = RCD_PARITY_NON_MNFG_TH;
-
-    if ( mfgMode() )
-    {
-        th = MfgThresholdMgr::getInstance()->
-                            getThreshold(ATTR_MNFG_TH_MEMORY_RCD_PARITY_ERRORS);
-    }
-
-    return ThresholdResolution::ThresholdPolicy( th,
-                                                 ThresholdResolution::ONE_DAY );
-}
-
-#endif
-
-//------------------------------------------------------------------------------
-
-#ifdef __HOSTBOOT_MODULE
-
 ThresholdResolution::ThresholdPolicy getIueTh()
 {
     uint32_t th = IUE_NON_MNFG_TH;

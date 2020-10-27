@@ -212,61 +212,6 @@ uint32_t putScom(TARGETING::TargetHandle_t i_target, BitString& io_bs,
     return rc;
 }
 
-//------------------------------------------------------------------------------
-uint32_t getSpdData(TARGETING::TargetHandle_t i_target,
-                      uint8_t *& o_data,
-                      size_t & o_len)
-{
-#define PRDF_FUNC "[PlatServices::getSPDdata] "
-    uint32_t o_rc = SUCCESS;
-
-    errlHndl_t l_errl = nullptr;
-
-    o_len = 0;
-
-    const fapi2::Target<fapi2::TARGET_TYPE_DIMM> l_fapi2_dimm(i_target);
-
-    do {
-      // SPD interface call with nullptr blob to get size data
-      FAPI_INVOKE_HWP(l_errl, fapi2::getSPD, l_fapi2_dimm, nullptr, o_len);
-
-      // Check for a valid size returned without an error
-      if(nullptr != l_errl)
-      {
-          PRDF_ERR( PRDF_FUNC "Failed to get SPD size from DIMM with HUID=0x%x",
-                    TARGETING::get_huid(i_target) );
-          PRDF_COMMIT_ERRL( l_errl, ERRL_ACTION_REPORT );
-
-          o_rc = FAIL;
-          break;
-      }
-      else if (o_len == 0)
-      {
-         PRDF_ERR( PRDF_FUNC "SPD size data of DIMM with HUID=0x%x returned 0",
-                    TARGETING::get_huid(i_target) );
-         o_rc = FAIL;
-         break;
-      }
-
-      //  allocate the blob data of mem size length to hold data
-      o_data = reinterpret_cast<uint8_t *>(malloc(o_len));
-      memset(o_data, 0, o_len);
-
-      FAPI_INVOKE_HWP(l_errl, fapi2::getSPD, l_fapi2_dimm, o_data, o_len);
-      if ( nullptr != l_errl )
-      {
-          PRDF_ERR( PRDF_FUNC "Failed to read data from DIMM with HUID= 0x%x",
-                    TARGETING::get_huid(i_target) );
-          PRDF_COMMIT_ERRL( l_errl, ERRL_ACTION_REPORT );
-          o_rc = FAIL;
-          break;
-      }
-    } while (0);
-
-    return o_rc;
-#undef PRDF_FUNC
-}
-
 //##############################################################################
 //##                       Processor specific functions
 //##############################################################################

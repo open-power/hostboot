@@ -75,9 +75,6 @@ bool isHyprConfigOpal();
 /** @return TRUE if the hypervisor is running. FALSE otherwise. */
 bool isHyprRunning();
 
-/** @return TRUE if this system has redundant clocks. FALSE otherwise.*/
-bool hasRedundantClocks();
-
 //##############################################################################
 //##
 //##                 Target Manipulation Utility Functions
@@ -358,15 +355,6 @@ TARGETING::TargetHandle_t getMasterProc();
  *          Can compare against enums in PositionBounds for validity.
  */
 uint32_t getTargetPosition( TARGETING::TargetHandle_t i_target );
-
-/**
- * @brief   Returns Phb Config associated with the Proc target.
- *          Config number indicates about slot bifurcation and
- *          associated PHB with the slot.
- * @param   i_proc Proc target
- * @return  PCI Config info as uin32_t. value expected is from [0-12].
- */
-uint32_t getPhbConfig( TARGETING::TargetHandle_t i_proc );
 
 //##############################################################################
 //##

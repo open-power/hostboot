@@ -185,9 +185,6 @@ class OcmbDataBundle : public DataBundle
 
     #ifdef __HOSTBOOT_MODULE
 
-    /** Threshold table for RCD parity errors. */
-    TimeBasedThreshold iv_rcdParityTh = TimeBasedThreshold( getRcdParityTh() );
-
     /** Threshold table for IUEs. Threshold per DIMM */
     std::map<uint8_t, TimeBasedThreshold> iv_iueTh;
 

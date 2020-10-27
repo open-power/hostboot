@@ -116,11 +116,6 @@ bool isHyprRunning()
     return rc;
 }
 
-bool hasRedundantClocks()
-{
-    return ( 0 != getSystemTarget()->getAttr<ATTR_REDUNDANT_CLOCKS>() );
-}
-
 //##############################################################################
 //##
 //##                         General Utility Functions
@@ -970,28 +965,6 @@ uint32_t getTargetPosition( TargetHandle_t i_trgt )
     }
 
     return o_pos;
-
-    #undef PRDF_FUNC
-}
-
-//------------------------------------------------------------------------------
-
-uint32_t getPhbConfig( TARGETING::TargetHandle_t i_proc )
-{
-    #define PRDF_FUNC "[PlatServices::getPhbConfig] "
-
-    uint32_t l_pciConfig = 0xffffffff;
-
-    if ( TYPE_PROC == getTargetType(i_proc) )
-    {
-        l_pciConfig = i_proc->getAttr<ATTR_PROC_PCIE_IOP_CONFIG>();
-    }
-    else
-    {
-        PRDF_ERR( PRDF_FUNC "Invalid Target Huid = 0x%08x", getHuid(i_proc) );
-    }
-
-    return l_pciConfig;
 
     #undef PRDF_FUNC
 }
