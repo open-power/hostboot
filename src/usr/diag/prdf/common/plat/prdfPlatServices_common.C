@@ -53,6 +53,7 @@
 #include <p9_io_dmi_read_erepair.H>
 #include <p9_io_dmi_clear_firs.H>
 #include <p9_io_dmi_pdwn_lanes.H>
+#include <p9_io_obus_pdwn_lanes.H>
 #endif
 
 using namespace TARGETING;
@@ -367,6 +368,43 @@ int32_t powerDownLanes<TYPE_DMI>(TargetHandle_t i_rxBusTgt,
     }
 
     #endif
+    return o_rc;
+}
+
+int32_t powerDownObusLink(TargetHandle_t i_obusTrgt, unsigned int i_link)
+{
+    int32_t o_rc = SUCCESS;
+
+    #ifdef __HOSTBOOT_MODULE
+
+    PRDF_ASSERT(nullptr != i_obusTrgt);
+    PRDF_ASSERT(TYPE_OBUS == getTargetType(i_obusTrgt));
+    PRDF_ASSERT(i_link < 2);
+
+
+    errlHndl_t errl = nullptr;
+    fapi2::Target<fapi2::TARGET_TYPE_OBUS> fapiTrgt { i_obusTrgt };
+
+    // The lane vector is a 24-bit unsigned integer (right justified). Each bit
+    // represents lanes 23 to 0 (left to right). Each link is defined as such:
+    //   Lanes 23-13 => link 1
+    //   Lanes 12-11 => unused
+    //   Lanes 10-0  => link 0
+    uint32_t laneVector = (0 == i_link) ? 0x0007ff : 0xffe000;
+
+    FAPI_INVOKE_HWP(errl, p9_io_obus_pdwn_lanes, i_obusTrgt, laneVector);
+
+    if (nullptr != errl)
+    {
+        PRDF_ERR("[PlatServices::powerDownObusLink] p9_io_obus_pdwn_lanes "
+                 "failed: i_obusTrgt=0x%08x i_link=%u", getHuid(i_obusTrgt),
+                 i_link );
+        PRDF_COMMIT_ERRL(errl, ERRL_ACTION_REPORT);
+        o_rc = FAIL;
+    }
+
+    #endif
+
     return o_rc;
 }
 

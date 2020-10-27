@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -186,6 +186,15 @@ int32_t setVpdFailedLanes(TARGETING::TargetHandle_t i_rxBusTgt,
  * @return true if SMP mode
  */
 bool obusInSmpMode(TARGETING::TargetHandle_t obusTgt);
+
+/**
+ * @brief   Calls HWP to power down all OBUS (SMP) lanes on a given link.
+ * @param   i_obusTrgt  The OBUS target.
+ * @param   i_link      The OBUS (SMP) link.
+ * @return  Non-SUCCESS if an internal function fails, SUCCESS otherwise.
+ */
+int32_t powerDownObusLink(TARGETING::TargetHandle_t i_obusTrgt,
+                          unsigned int i_link);
 
 //##############################################################################
 //##                        Memory specific functions

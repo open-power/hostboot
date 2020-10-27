@@ -195,6 +195,7 @@ prd_obj_no_sim += p9_io_xbus_read_erepair.o
 prd_obj_no_sim += p9_io_dmi_read_erepair.o
 prd_obj_no_sim += p9_io_dmi_pdwn_lanes.o
 prd_obj_no_sim += p9_io_dmi_clear_firs.o
+prd_obj_no_sim += p9_io_obus_pdwn_lanes.o
 
 prd_vpath += ${ROOTPATH}/src/import/chips/centaur/procedures/hwp/io/
 prd_obj_no_sim += p9_io_cen_read_erepair.o

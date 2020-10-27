@@ -394,6 +394,9 @@ void   obus_smpCallout( TargetHandle_t i_smpTgt, TargetHandle_t i_obusTgt,
 
             // Make the error log predictive and mask.
             i_sc.service_data->SetThresholdMaskId(0);
+
+            // Power down all lanes of the failed link.
+            powerDownObusLink(i_obusTgt, lnk);
         }
 
         l_mainElog->addBusCallout( i_smpTgt, l_smpPeerTgt, HWAS::O_BUS_TYPE,
