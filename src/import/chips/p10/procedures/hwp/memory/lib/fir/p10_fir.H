@@ -446,7 +446,7 @@ inline fapi2::ReturnCode after_p10_omi_init_ustlfir_helper(const fapi2::Target<f
     FAPI_TRY(fapi2::getScom(i_target, scomt::mcc::USTL_USTLLOLMASK, l_reg_data));
 
     l_reg_data.insertFromRight<scomt::mcc::USTL_USTLLOLMASK_RECOVER_ENABLE_MASK, scomt::mcc::USTL_USTLLOLMASK_RECOVER_ENABLE_MASK_LEN>
-    (0x27FC60);
+    (0x22D860);
 
     FAPI_TRY(fapi2::putScom(i_target, scomt::mcc::USTL_USTLLOLMASK, l_reg_data));
 

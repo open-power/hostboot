@@ -51,14 +51,24 @@ namespace omi
 ///
 fapi2::ReturnCode setup_mc_cmn_config(const fapi2::Target<fapi2::TARGET_TYPE_OMIC>& i_target)
 {
-    // Expected resulting register value: 0x000364008874630F
+    // Expected resulting register value: 0x921364008874630F
     fapi2::buffer<uint64_t> l_val;
 
     // Number of cycles in 1us. Number correct for 25.6, but will also be valid for 21.3
+    constexpr uint64_t CFG_CMN_MESO_BUFFER_START_VAL = 1;
+    constexpr uint64_t CFG_CMN_RX_EDGE_MARGIN_VAL = 1;
     constexpr uint64_t CFG_CMN_1US_TMR = 1600;
     constexpr uint8_t CFG_CMN_PORT_SEL = 0;
 
     FAPI_TRY(scomt::omic::PREP_CMN_CONFIG(i_target));
+
+    // MESO_BUFFER
+    scomt::omic::SET_CMN_CONFIG_MESO_BUFFER_ENABLE(mss::states::ON, l_val);
+    scomt::omic::SET_CMN_CONFIG_MESO_BUFFER_START(CFG_CMN_MESO_BUFFER_START_VAL, l_val);
+
+    // CFG_CMN_RX_EDGE
+    scomt::omic::SET_CMN_CONFIG_CFG_CMN_RX_EDGE_ENA(mss::states::ON, l_val);
+    scomt::omic::SET_CMN_CONFIG_CFG_CMN_RX_EDGE_MARGIN(CFG_CMN_RX_EDGE_MARGIN_VAL, l_val);
 
     // CFG_CMN_SPARE: Spare
     scomt::omic::SET_CMN_CONFIG_CFG_CMN_SPARE(mss::states::OFF, l_val);
