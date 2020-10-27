@@ -637,9 +637,13 @@ p9_pm_set_auto_spwkup(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_targe
     FAPI_INF(">> p9_set_auto_spwkup");
 
     fapi2::buffer <uint64_t> l_deadCoreVector;
+    fapi2::buffer <uint64_t> l_ccsrData;
     uint8_t l_malfAlertActive = fapi2::ENUM_ATTR_PM_MALF_CYCLE_INACTIVE;
     FAPI_TRY (FAPI_ATTR_GET (fapi2::ATTR_PM_MALF_CYCLE, i_target,
                              l_malfAlertActive));
+
+    FAPI_TRY( getScom( i_target, P9N2_PU_OCB_OCI_CCSR_SCOM, l_ccsrData ),
+              "Failed To Read CCSR Register" );
 
     if (l_malfAlertActive == fapi2::ENUM_ATTR_PM_MALF_CYCLE_ACTIVE)
     {
@@ -694,6 +698,13 @@ p9_pm_set_auto_spwkup(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_targe
             }
             else
             {
+                if (!(l_ccsrData.getBit(l_core_num)))
+                {
+                    FAPI_INF ("Spl Wkup did not succeed on a core %d deemed \
+                               non functional due to PM mal-function", l_core_num);
+                    continue;
+                }
+
                 if (l_malfAlertActive == fapi2::ENUM_ATTR_PM_MALF_CYCLE_INACTIVE)
                 {
                     FAPI_ASSERT (false,
