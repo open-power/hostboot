@@ -825,10 +825,6 @@
     <writeable/>
     <ignoreEkb/>
     <no_export/>
-    <hwpfToHbAttrMap>
-      <id>ATTR_DUMMY_SCRATCH_PLAT_INIT_UINT8</id>
-      <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
   </attribute>
 
   <attribute>
@@ -7195,6 +7191,114 @@
     <readable/>
     <writeable/>
     <no_export/>
+  </attribute>
+
+  <attribute>
+    <description>
+        Scratch uint32_t attribute.
+        Can be used by HWPs for testing.
+    </description>
+    <id>SCRATCH_UINT32_1</id>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <simpleType>
+      <uint32_t/>
+    </simpleType>
+    <writeable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_SCRATCH_UINT32_1</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+  </attribute>
+
+  <attribute>
+    <description>
+        Scratch uint32_t attribute.
+        Can be used by HWPs for testing.
+    </description>
+    <id>SCRATCH_UINT32_2</id>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <simpleType>
+      <uint32_t/>
+    </simpleType>
+    <writeable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_SCRATCH_UINT32_2</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+  </attribute>
+
+  <attribute>
+    <description>
+        Scratch uint64_t attribute.
+        Can be used by HWPs for testing.
+    </description>
+    <id>SCRATCH_UINT64_1</id>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <simpleType>
+      <uint64_t/>
+    </simpleType>
+    <writeable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_SCRATCH_UINT64_1</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+  </attribute>
+
+  <attribute>
+    <description>
+        Scratch uint64_t attribute
+        Can be used by HWPs for testing.
+    </description>
+    <id>SCRATCH_UINT64_2</id>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <simpleType>
+      <uint64_t/>
+    </simpleType>
+    <writeable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_SCRATCH_UINT64_2</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+  </attribute>
+
+  <attribute>
+    <description>
+        Scratch uint8_t attribute.
+        Can be used by HWPs for testing.
+    </description>
+    <id>SCRATCH_UINT8_1</id>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <simpleType>
+      <uint8_t/>
+    </simpleType>
+    <writeable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_SCRATCH_UINT8_1</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+  </attribute>
+
+  <attribute>
+    <description>
+        Scratch uint8_t attribute.
+        Can be used by HWPs for testing.
+    </description>
+    <id>SCRATCH_UINT8_2</id>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <simpleType>
+      <uint8_t/>
+    </simpleType>
+    <writeable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_SCRATCH_UINT8_2</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
   </attribute>
 
   <attribute>

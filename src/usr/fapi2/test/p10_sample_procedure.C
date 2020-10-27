@@ -25,15 +25,12 @@
 #include <cxxtest/TestSuite.H>
 #include <p10_sample_procedure.H>
 #include <fapi2.H>
-#include <plat_attribute_service.H>
-#include <arch/ppc.H>
 
 //------------------------------------------------------------------------------
 /// @file  p10_sample_procedure.C
 ///
-/// @brief These procedures test FAPI_ATTR_GET, FAPI_ATTR_SET,
-///        and FAPI_TRY and FAPI_ERR. This is primarily here to
-///        to make sure these compile okay.
+/// @brief This procedures tests FAPI_ATTR_GET, FAPI_TRY, and FAPI_ERR.
+///        This is primarily here to make sure these compile okay.
 //------------------------------------------------------------------------------
 
 
@@ -42,20 +39,12 @@
         fapi2::Target<FAPI2_TYPE>& i_target,                        \
         uint8_t expectedValue)                                      \
     {                                                               \
-        uint8_t l_attr_scratch = 0;                                 \
+         fapi2::ATTR_FAPI_POS_Type l_fapi_pos = 0;                             \
         FAPI_ERR("Entering ...");                                   \
-        FAPI_ERR("Set Scratch Attr on PROC Target %p = %d",         \
-                 (TARGETING::Target*)i_target.get(), expectedValue);\
-        FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_SCRATCH_UINT8_1,         \
+        FAPI_ERR("Get ATTR_FAPI_POS on FAPI2_TYPE Target");         \
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_FAPI_POS,                \
                                i_target,                            \
-                               expectedValue));                     \
-        FAPI_ERR("Get Scratch Attr on FAPI2_TYPE Target");          \
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SCRATCH_UINT8_1,         \
-                               i_target,                            \
-                               l_attr_scratch));                    \
-        FAPI_ERR("Read scratch value : %d , expected it to be %d",  \
-                 l_attr_scratch,                                    \
-                 expectedValue);                                    \
+                               l_fapi_pos));                    \
     fapi_try_exit:                                                  \
         FAPI_ERR("Exiting ...");                                    \
         return fapi2::current_err;                                  \

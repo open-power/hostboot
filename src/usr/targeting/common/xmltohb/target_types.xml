@@ -798,6 +798,24 @@
       <id>SCOM_SWITCHES</id>
     </attribute>
     <attribute>
+      <id>SCRATCH_UINT32_1</id>
+    </attribute>
+    <attribute>
+      <id>SCRATCH_UINT32_2</id>
+    </attribute>
+    <attribute>
+      <id>SCRATCH_UINT64_1</id>
+    </attribute>
+    <attribute>
+      <id>SCRATCH_UINT64_2</id>
+    </attribute>
+    <attribute>
+      <id>SCRATCH_UINT8_1</id>
+    </attribute>
+    <attribute>
+      <id>SCRATCH_UINT8_2</id>
+    </attribute>
+    <attribute>
       <default>
         <field>
           <id>reserved</id>
@@ -2729,6 +2747,24 @@
     </attribute>
     <attribute>
       <id>SBE_UPDATE_DISABLE</id>
+    </attribute>
+    <attribute>
+      <id>SCRATCH_UINT32_1</id>
+    </attribute>
+    <attribute>
+      <id>SCRATCH_UINT32_2</id>
+    </attribute>
+    <attribute>
+      <id>SCRATCH_UINT64_1</id>
+    </attribute>
+    <attribute>
+      <id>SCRATCH_UINT64_2</id>
+    </attribute>
+    <attribute>
+      <id>SCRATCH_UINT8_1</id>
+    </attribute>
+    <attribute>
+      <id>SCRATCH_UINT8_2</id>
     </attribute>
     <attribute>
       <id>SECURE_VERSION_LOCKIN_POLICY</id>

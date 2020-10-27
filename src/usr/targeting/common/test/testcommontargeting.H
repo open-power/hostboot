@@ -507,6 +507,7 @@ class CommonTargetingTestSuite: public CxxTest::TestSuite
                     "failed write");
         }
 
+#if 0
         DUMMY_RW_ATTR l_wo;
         memset(l_wo,0x00,sizeof(l_wo));
         l_wo[0][1][2] = 6;
@@ -547,6 +548,7 @@ class CommonTargetingTestSuite: public CxxTest::TestSuite
 
         memset(l_setWo,0x05,sizeof(l_setWo));
         l_pTarget->setAttr<ATTR_DUMMY_RW>(l_setWo);
+#endif
 
         TARG_TS_TRACE(EXIT_MRK "testTargetClass" );
     }
@@ -1139,6 +1141,7 @@ class CommonTargetingTestSuite: public CxxTest::TestSuite
         delete (static_cast<PredicateBase*>(l_pExpr));
 
 #if 0
+        //@TODO RTC:142602
         PredicatePostfixExpr l_lhs;
         PredicatePostfixExpr l_rhs;
 
@@ -1455,6 +1458,8 @@ class CommonTargetingTestSuite: public CxxTest::TestSuite
                     "complete");
         }
 
+#if 0
+        //@TODO RTC:142602
         DUMMY_RW_ATTR l_dummyRw;
         memset(l_dummyRw,0x00,sizeof(l_dummyRw));
         l_pTarget->tryGetAttr<TARGETING::ATTR_DUMMY_RW>(l_dummyRw);
@@ -1463,6 +1468,7 @@ class CommonTargetingTestSuite: public CxxTest::TestSuite
             TARG_TS_FAIL("l_dummyRw value is %d, not 5 as expected in direct "
                     "attribute access",l_dummyRw[0][1][2]);
         }
+#endif
 
         TARGETING::CLASS l_class =
           l_pTarget->getAttr<TARGETING::ATTR_CLASS>();
@@ -1489,9 +1495,9 @@ class CommonTargetingTestSuite: public CxxTest::TestSuite
 
         TARG_TS_TRACE(INFO_MRK "Now using FAPI get macros");
 
+#if 0
         memset(l_dummyRw,0x00,sizeof(l_dummyRw));
 
-#if 0
         //@TODO RTC:142602
         fapi::ReturnCode l_rc = FAPI_ATTR_GET(
                                               ATTR_DUMMY_SCRATCH_PLAT_INIT_UINT8, NULL, l_dummyRw);
