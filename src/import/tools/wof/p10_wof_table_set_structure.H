@@ -55,7 +55,7 @@
 typedef struct __attribute__((__packed__))  wofImageHeader
 {
     // "WTIH", WOF Tables Image Header.
-    char[4]     magicNumber;
+    uint32_t    magicNumber;
     // 0x01, Version of this header.
     uint8_t     version;
     // Varies, Number of entries in the Section Table.
@@ -63,9 +63,9 @@ typedef struct __attribute__((__packed__))  wofImageHeader
     // Varies, Absolute offset to the Section Table.
     uint32_t    offset;
     // Varies, Provided from the –tsi input parameter. Otherwise, all NULLs.
-    char[16]    setId;
+    char        setId[16];
     // 0s, Reserved.
-    char[6]     pad;
+    char        pad[6];
 } wofImageHeader_t;
 
 typedef struct __attribute__((__packed__))  wofSectionTableEntry

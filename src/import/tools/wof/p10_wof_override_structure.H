@@ -29,7 +29,6 @@
         WOF Override Container
     ---------------------------
     |      Override Header    |  Points to Override Table
-    |      Override Header    |  Points to Override Table
     |-------------------------|
     |  WTS Entry 1            |  Override Table
     |  WTS Entry 2            |    Each entry points to
@@ -59,24 +58,25 @@
 typedef struct __attribute__((__packed__))  wofContainerHeader
 {
     // "WTSO", WOF Table Set Override.
-    char[4]     magicNumber;
+    uint32_t    magicNumber;
+
     // 0x01, Version of this header.
-
     uint8_t     version;
+
     // Varies, Number of entries in the Override Table.
-
     uint8_t     entryCount;
-    // 0s, Reserved.
 
-    char[2]     pad1;
+    // 0s, Reserved.
+    char        pad1[2];
+
     // Varies, Absolute offset to the Override Table
     uint16_t    offset;
 
     // 0s, Reserved.
-    char[6]     pad2;
+    char        pad2[6];
 
     // Varies, Provided from the -woi input parameter. Otherwise, all NULLs.
-    char[16]    coverrideId;
+    char       coverrideId[16];
 
 } wofContainerHeader_t;
 
@@ -95,7 +95,7 @@ typedef struct __attribute__((__packed__))  wofOverrideTableEntry
     uint8_t     dd_minor;
 
     // 0s, Reserved.
-    char[1]     pad1;
+    char        pad1[1];
 
     // Core count from the WOF Table Set Header
     uint8_t     core_count;
