@@ -1961,7 +1961,11 @@ void grouping_group6MCCPerGroup(const EffGroupingMemInfo& i_memInfo,
 }
 
 ///
-/// @brief Attempts to group 4 MCC per group
+/// @brief Attempts to group 4 MCCs on different MCs
+///
+/// Rules: 4 MCCs must not be grouped yet
+///        4 MCCs must have the same amound of memory.
+///        4 MCCs must be on different MCs
 ///
 /// If they can be grouped, fills in the following fields in io_groupData:
 ///  - iv_data[<group>][MCC_SIZE]
@@ -1971,44 +1975,54 @@ void grouping_group6MCCPerGroup(const EffGroupingMemInfo& i_memInfo,
 ///  - iv_mccGrouped[<group>]
 ///  - iv_numGroups
 ///
-///  @param[in]  i_memInfo         Reference to EffGroupingMemInfo structure
-///  @param[in]  i_mirrorRequired  Mirroring is required
-///  @param[in/out] io_groupData   Reference to in/out data
+///  @param[in]  i_memInfo        Reference to EffGroupingMemInfo structure
+///  @param[in]  i_mirrorRequired Mirroring is required
+///  @param[in/out] io_groupData  Reference to in/out data
 ///  @param[in/out] io_numMCCsRemained Number of ungrouped MCCs remained
 ///
-void grouping_group4MCCPerGroup(const EffGroupingMemInfo& i_memInfo,
-                                const bool i_mirrorRequired,
-                                EffGroupingData& io_groupData,
-                                uint8_t& io_MCCsRemained)
+void grouping_4MCCs_on_different_MCs(const EffGroupingMemInfo& i_memInfo,
+                                     const bool i_mirrorRequired,
+                                     EffGroupingData& io_groupData,
+                                     uint8_t& io_MCCsRemained)
+
 {
     FAPI_DBG("Entering");
-
-    // The following is all the allowed ways of grouping 4 MCC per group.
-    // Earlier array entries are higher priority.
-    // First try to group 2 sets of 4 (0/1, 2/3 or 4/5)
-    // If no success then try to group 1 set of 4
-    FAPI_INF("grouping_group4MCCPerGroup: Attempting to group 4 MCCs");
+    FAPI_INF("grouping_4MCCs_on_different_MCs: Attempting to group 4 MCCs on different MCs");
     uint8_t& g = io_groupData.iv_numGroups;
-
-    const uint8_t NUM_WAYS_4MCC_PER_GROUP = 6;
     const uint8_t MCC_PER_GROUP = 4;
+    const uint8_t NUM_WAYS_4MCC_PER_GROUP = 16;
+
+    // Combination of 4 MCCs on different MCs
     const uint8_t CFG_4MCC[NUM_WAYS_4MCC_PER_GROUP][MCC_PER_GROUP] =
     {
-        { MCC_ID_0, MCC_ID_1, MCC_ID_4, MCC_ID_5 },
-        { MCC_ID_2, MCC_ID_3, MCC_ID_6, MCC_ID_7 },
-        { MCC_ID_0, MCC_ID_1, MCC_ID_6, MCC_ID_7 },
-        { MCC_ID_2, MCC_ID_3, MCC_ID_4, MCC_ID_5 },
-        { MCC_ID_0, MCC_ID_1, MCC_ID_2, MCC_ID_3 },
-        { MCC_ID_4, MCC_ID_5, MCC_ID_6, MCC_ID_7 }
+        { MCC_ID_0, MCC_ID_2, MCC_ID_4, MCC_ID_6 },
+        { MCC_ID_0, MCC_ID_2, MCC_ID_4, MCC_ID_7 },
+        { MCC_ID_0, MCC_ID_2, MCC_ID_5, MCC_ID_6 },
+        { MCC_ID_0, MCC_ID_2, MCC_ID_5, MCC_ID_7 },
+        { MCC_ID_0, MCC_ID_3, MCC_ID_4, MCC_ID_6 },
+        { MCC_ID_0, MCC_ID_3, MCC_ID_4, MCC_ID_7 },
+        { MCC_ID_0, MCC_ID_3, MCC_ID_5, MCC_ID_6 },
+        { MCC_ID_0, MCC_ID_3, MCC_ID_5, MCC_ID_7 },
+        { MCC_ID_1, MCC_ID_2, MCC_ID_4, MCC_ID_6 },
+        { MCC_ID_1, MCC_ID_2, MCC_ID_4, MCC_ID_7 },
+        { MCC_ID_1, MCC_ID_2, MCC_ID_5, MCC_ID_6 },
+        { MCC_ID_1, MCC_ID_2, MCC_ID_5, MCC_ID_7 },
+        { MCC_ID_1, MCC_ID_3, MCC_ID_4, MCC_ID_6 },
+        { MCC_ID_1, MCC_ID_3, MCC_ID_4, MCC_ID_7 },
+        { MCC_ID_1, MCC_ID_3, MCC_ID_5, MCC_ID_6 },
+        { MCC_ID_1, MCC_ID_3, MCC_ID_5, MCC_ID_7 },
     };
-
-    // Array recording which groups of 4 can potentially be grouped
-    uint8_t config4_gp[NUM_WAYS_4MCC_PER_GROUP];
-    memset(config4_gp, 0, sizeof(config4_gp));
 
     // Figure out which groups of 4 can potentially be grouped
     for (uint8_t ii = 0; ii < NUM_WAYS_4MCC_PER_GROUP; ii++)
     {
+        // Skip if group size would be too large
+        if ( (MCC_PER_GROUP * i_memInfo.iv_mccSize[CFG_4MCC[ii][0]]) > i_memInfo.iv_maxGroupMemSize )
+        {
+            FAPI_DBG("Skip row %u, as group size formed would be too large", ii);
+            continue;
+        }
+
         // Check all MCCs in row against first MCC
         bool potential_group = true;
 
@@ -2030,100 +2044,331 @@ void grouping_group4MCCPerGroup(const EffGroupingMemInfo& i_memInfo,
         }
 
         // Group of 4 is possible
-        if (potential_group &&
-            ((MCC_PER_GROUP * i_memInfo.iv_mccSize[CFG_4MCC[ii][0]]) <= i_memInfo.iv_maxGroupMemSize))
+        if ( potential_group )
         {
-            FAPI_INF("    Potential group MCC: MCC_ID %u, MCC_ID %u, MCC_ID %u, MCC_ID %u",
+            io_groupData.iv_data[g][MCC_SIZE] =
+                i_memInfo.iv_mccSize[CFG_4MCC[ii][0]];
+            io_groupData.iv_data[g][MCC_IN_GROUP] = MCC_PER_GROUP;
+            io_groupData.iv_data[g][GROUP_SIZE] =
+                MCC_PER_GROUP * i_memInfo.iv_mccSize[CFG_4MCC[ii][0]];
+            io_groupData.iv_data[g][MEMBER_IDX(0)] = CFG_4MCC[ii][0];
+            io_groupData.iv_data[g][MEMBER_IDX(1)] = CFG_4MCC[ii][1];
+            io_groupData.iv_data[g][MEMBER_IDX(2)] = CFG_4MCC[ii][2];
+            io_groupData.iv_data[g][MEMBER_IDX(3)] = CFG_4MCC[ii][3];
+
+            // Record which MCC were grouped
+            for (uint8_t jj = 0; jj < MCC_PER_GROUP; jj++)
+            {
+                io_groupData.iv_mccGrouped[CFG_4MCC[ii][jj]] = true;
+            }
+
+            // Group index increment
+            g++;
+            FAPI_INF("grouping_4MCCs_on_different_MCs: Successfully grouped 4 "
+                     "MCCs. CFG_4MCC[%d] %u, %u, %u, %u", ii,
                      CFG_4MCC[ii][0], CFG_4MCC[ii][1],
                      CFG_4MCC[ii][2], CFG_4MCC[ii][3]);
-            config4_gp[ii] = 1;
-        }
-    }
+            io_MCCsRemained -= 4;
 
-    // Figure out which groups of 4 to actually group
-    uint8_t gp1 = 0xff;
-    uint8_t gp2 = 0xff;
-
-    // Check if 2 groups of 4 are possible (0/1, 2/3 or 4/5)
-    for (uint8_t ii = 0; ii < NUM_WAYS_4MCC_PER_GROUP; ii += 2)
-    {
-        if (config4_gp[ii] && config4_gp[ii + 1])
-        {
-            gp1 = ii;
-            gp2 = ii + 1;
-            break;
-        }
-    }
-
-    if (gp1 == 0xff)
-    {
-        // 2 groups of 4 are not possible, look for 1 group of 4
-        for (uint8_t ii = 0; ii < NUM_WAYS_4MCC_PER_GROUP; ii++)
-        {
-            if (config4_gp[ii])
+            // Exit loop if not enough for another group of 4
+            if (io_MCCsRemained < 4)
             {
-                gp1 = ii;
                 break;
             }
         }
     }
 
-    // If gp1/gp2 marked as succesfful, update io_groupData
-    if (gp1 != 0xff)
-    {
-        io_groupData.iv_data[g][MCC_SIZE] =
-            i_memInfo.iv_mccSize[CFG_4MCC[gp1][0]];
-        io_groupData.iv_data[g][MCC_IN_GROUP] = MCC_PER_GROUP;
-        io_groupData.iv_data[g][GROUP_SIZE] =
-            MCC_PER_GROUP * i_memInfo.iv_mccSize[CFG_4MCC[gp1][0]];
-        io_groupData.iv_data[g][MEMBER_IDX(0)] = CFG_4MCC[gp1][0];
-        io_groupData.iv_data[g][MEMBER_IDX(1)] = CFG_4MCC[gp1][2];
-        io_groupData.iv_data[g][MEMBER_IDX(2)] = CFG_4MCC[gp1][1];
-        io_groupData.iv_data[g][MEMBER_IDX(3)] = CFG_4MCC[gp1][3];
+    FAPI_DBG("Exiting");
+    return;
+}
 
-        // Record which MCC were grouped
-        for (uint8_t ii = 0; ii < MCC_PER_GROUP; ii++)
+///
+/// @brief Attempts to group 4 MCCs with 2 channels of opposite corners
+///
+/// Rules: 4 MCCs must not be grouped yet
+///        4 MCCs must have the same amound of memory.
+///        4 MCCs must be at opposite corner MCs
+///
+/// If they can be grouped, fills in the following fields in io_groupData:
+///  - iv_data[<group>][MCC_SIZE]
+///  - iv_data[<group>][MCC_IN_GROUP]
+///  - iv_data[<group>][GROUP_SIZE]
+///  - iv_data[<group>][MEMBER_IDX(<members>)]
+///  - iv_mccGrouped[<group>]
+///  - iv_numGroups
+///
+///  @param[in]  i_memInfo        Reference to EffGroupingMemInfo structure
+///  @param[in]  i_mirrorRequired Mirroring is required
+///  @param[in/out] io_groupData  Reference to in/out data
+///  @param[in/out] io_numMCCsRemained Number of ungrouped MCCs remained
+///
+void grouping_4MCCs_opposite_corners(const EffGroupingMemInfo& i_memInfo,
+                                     const bool i_mirrorRequired,
+                                     EffGroupingData& io_groupData,
+                                     uint8_t& io_MCCsRemained)
+{
+    FAPI_DBG("Entering");
+    FAPI_INF("grouping_4MCCs_opposite_corners: Attempting to group 4 MCCs opposite corners");
+    uint8_t& g = io_groupData.iv_numGroups;
+    const uint8_t MCC_PER_GROUP = 4;
+    const uint8_t NUM_WAYS_4MCC_PER_GROUP = 2;
+
+    //
+    //    MCC6/7       MCC4/5
+    //       MC3 -- MC2
+    //        |      |
+    //       MC1 -- MC0
+    //    MCC2/3       MCC0/1
+    //
+
+    // Combination of 4 MCCs on different MCs
+    const uint8_t CFG_4MCC[NUM_WAYS_4MCC_PER_GROUP][MCC_PER_GROUP] =
+    {
+        { MCC_ID_0, MCC_ID_1, MCC_ID_6, MCC_ID_7 },
+        { MCC_ID_2, MCC_ID_3, MCC_ID_4, MCC_ID_5 },
+    };
+
+    // Figure out which groups of 4 can potentially be grouped
+    for (uint8_t ii = 0; ii < NUM_WAYS_4MCC_PER_GROUP; ii++)
+    {
+        // Skip if group size would be too large
+        if ( (MCC_PER_GROUP * i_memInfo.iv_mccSize[CFG_4MCC[ii][0]]) > i_memInfo.iv_maxGroupMemSize )
         {
-            io_groupData.iv_mccGrouped[CFG_4MCC[gp1][ii]] = true;
+            FAPI_DBG("Skip row %u, as group size formed would be too large", ii);
+            continue;
         }
 
-        // Group index increment
-        g++;
-        FAPI_INF("grouping_group4MCCPerGroup: Successfully grouped 4 "
-                 "MCCs. CFG_4MCC[%d] %u, %u, %u, %u", gp1,
-                 CFG_4MCC[gp1][0], CFG_4MCC[gp1][1],
-                 CFG_4MCC[gp1][2], CFG_4MCC[gp1][3]);
-        io_MCCsRemained -= 4;
-    }
+        // Check all MCCs in row against first MCC
+        bool potential_group = true;
 
-    if (gp2 != 0xff)
-    {
-        io_groupData.iv_data[g][MCC_SIZE] =
-            i_memInfo.iv_mccSize[CFG_4MCC[gp2][0]];
-        io_groupData.iv_data[g][MCC_IN_GROUP] = MCC_PER_GROUP;
-        io_groupData.iv_data[g][GROUP_SIZE] =
-            MCC_PER_GROUP * i_memInfo.iv_mccSize[CFG_4MCC[gp2][0]];
-        io_groupData.iv_data[g][MEMBER_IDX(0)] = CFG_4MCC[gp2][0];
-        io_groupData.iv_data[g][MEMBER_IDX(1)] = CFG_4MCC[gp2][2];
-        io_groupData.iv_data[g][MEMBER_IDX(2)] = CFG_4MCC[gp2][1];
-        io_groupData.iv_data[g][MEMBER_IDX(3)] = CFG_4MCC[gp2][3];
-
-        // Record which MCC were grouped
-        for (uint8_t ii = 0; ii < MCC_PER_GROUP; ii++)
+        for (uint8_t jj = 1; jj < MCC_PER_GROUP; jj++)
         {
-            io_groupData.iv_mccGrouped[CFG_4MCC[gp2][ii]] = true;
+            FAPI_DBG("grouping_4MCCs_opposite_corners - Checking CFG_4MCC[%d][%d]: MCC%d vs MCC%d",
+                     ii, jj, CFG_4MCC[ii][jj], CFG_4MCC[ii][0]);
+
+            if ( !isGroupable(i_memInfo,
+                              io_groupData,
+                              i_mirrorRequired,
+                              CFG_4MCC[ii][0],
+                              CFG_4MCC[ii][jj]) )
+            {
+                FAPI_INF("grouping_4MCCs_opposite_corners - Can not group by 4 for row %d.", ii);
+                potential_group = false;
+                break;
+            }
         }
 
-        // Group index increment
-        g++;
+        // Group of 4 is possible
+        if ( potential_group )
+        {
+            io_groupData.iv_data[g][MCC_SIZE] =
+                i_memInfo.iv_mccSize[CFG_4MCC[ii][0]];
+            io_groupData.iv_data[g][MCC_IN_GROUP] = MCC_PER_GROUP;
+            io_groupData.iv_data[g][GROUP_SIZE] =
+                MCC_PER_GROUP * i_memInfo.iv_mccSize[CFG_4MCC[ii][0]];
+            io_groupData.iv_data[g][MEMBER_IDX(0)] = CFG_4MCC[ii][0];
+            io_groupData.iv_data[g][MEMBER_IDX(1)] = CFG_4MCC[ii][1];
+            io_groupData.iv_data[g][MEMBER_IDX(2)] = CFG_4MCC[ii][2];
+            io_groupData.iv_data[g][MEMBER_IDX(3)] = CFG_4MCC[ii][3];
 
-        FAPI_INF("grouping_group4MCCPerGroup: Successfully grouped 4 "
-                 "MCCs. CFG_4MCC[%d] %u, %u, %u, %u", gp2,
-                 CFG_4MCC[gp2][0], CFG_4MCC[gp2][1],
-                 CFG_4MCC[gp2][2], CFG_4MCC[gp2][3]);
-        io_MCCsRemained -= 4;
+            // Record which MCC were grouped
+            for (uint8_t jj = 0; jj < MCC_PER_GROUP; jj++)
+            {
+                io_groupData.iv_mccGrouped[CFG_4MCC[ii][jj]] = true;
+            }
+
+            // Group index increment
+            g++;
+            FAPI_INF("grouping_4MCCs_opposite_corners: Successfully grouped 4 "
+                     "MCCs. CFG_4MCC[%d] %u, %u, %u, %u", ii,
+                     CFG_4MCC[ii][0], CFG_4MCC[ii][1],
+                     CFG_4MCC[ii][2], CFG_4MCC[ii][3]);
+            io_MCCsRemained -= 4;
+
+            // Exit loop if not enough for another group of 4
+            if (io_MCCsRemained < 4)
+            {
+                break;
+            }
+        }
     }
 
+    FAPI_DBG("Exiting");
+    return;
+}
+
+///
+/// @brief Attempts to group 4 MCC per group
+///
+/// If they can be grouped, fills in the following fields in io_groupData:
+///  - iv_data[<group>][MCC_SIZE]
+///  - iv_data[<group>][MCC_IN_GROUP]
+///  - iv_data[<group>][GROUP_SIZE]
+///  - iv_data[<group>][MEMBER_IDX(<members>)]
+///  - iv_mccGrouped[<group>]
+///  - iv_numGroups
+///
+///  @param[in]  i_memInfo         Reference to EffGroupingMemInfo structure
+///  @param[in]  i_mirrorRequired  Mirroring is required
+///  @param[in/out] io_groupData   Reference to in/out data
+///  @param[in/out] io_numMCCsRemained Number of ungrouped MCCs remained
+///
+void grouping_group4MCCPerGroup(const EffGroupingMemInfo& i_memInfo,
+                                const bool i_mirrorRequired,
+                                EffGroupingData& io_groupData,
+                                uint8_t& io_MCCsRemained)
+{
+    FAPI_DBG("Entering");
+    FAPI_INF("grouping_group4MCCPerGroup: Attempting to group 4 MCCs");
+    const uint8_t MCC_PER_GROUP = 4;
+    uint8_t& g = io_groupData.iv_numGroups;
+
+    //
+    //    MCC6/7       MCC4/5
+    //       MC3 -- MC2
+    //        |      |
+    //       MC1 -- MC0
+    //    MCC2/3       MCC0/1
+    //
+    //   Priorities:
+    //     1. One channel from each MC chiplet
+    //     2. Two channels of opposite corners of the chip
+    //     3. Any remaining possible combination
+    //
+
+    //  Priority 1: Try to group 1 MCC from each MC chiplet first
+    grouping_4MCCs_on_different_MCs(i_memInfo, i_mirrorRequired, io_groupData, io_MCCsRemained);
+
+    // Get out if remained MCCs are not to do group of 4
+    if (io_MCCsRemained < 4)
+    {
+        goto fapi_try_exit;
+    }
+
+    // Priority 2: Try to group 2 MCCs of opposite corners of the proc
+    grouping_4MCCs_opposite_corners(i_memInfo, i_mirrorRequired, io_groupData, io_MCCsRemained);
+
+    // Get out if remained MCCs are not to do group of 4
+    if (io_MCCsRemained < 4)
+    {
+        goto fapi_try_exit;
+    }
+
+    // Priority 3: Attempt group of 4 for the remaining un-grouped MCCs
+    FAPI_INF("grouping_group4MCCPerGroup - Attempting to group remaining MCCs as group of 4");
+
+    for (uint8_t mcc0 = 0; mcc0 < (NUM_MCC_PER_PROC - 3); mcc0++)
+    {
+        FAPI_DBG("mcc0 = MCC%u", mcc0);
+
+        // Skip if MCC is already grouped, has no memory, or group size would
+        // be too large
+        if ( (io_groupData.iv_mccGrouped[mcc0]) ||
+             (i_memInfo.iv_mccSize[mcc0] == 0)  ||
+             ((MCC_PER_GROUP * i_memInfo.iv_mccSize[mcc0]) > i_memInfo.iv_maxGroupMemSize) )
+        {
+            FAPI_DBG("Skip MCC%d because already grouped, no memory, or group size is too large", mcc0);
+            FAPI_DBG(" Grouped %u, MCC memsize %u",
+                     io_groupData.iv_mccGrouped[mcc0],
+                     (i_memInfo.iv_mccSize[mcc0] == 0))
+            continue;
+        }
+
+        for (uint8_t mcc1 = mcc0 + 1; mcc1 < (NUM_MCC_PER_PROC - 2); mcc1++)
+        {
+            FAPI_DBG("mcc1 = MCC%u", mcc1);
+
+            // Skip if MCC is already grouped or has no memory
+            if ( (io_groupData.iv_mccGrouped[mcc1]) ||
+                 (i_memInfo.iv_mccSize[mcc1] == 0) )
+            {
+                FAPI_DBG("Skip MCC%d because already grouped or empty:", mcc1);
+                continue;
+            }
+
+            if ( !isGroupable(i_memInfo,
+                              io_groupData,
+                              i_mirrorRequired,
+                              mcc0,
+                              mcc1) )
+            {
+                FAPI_INF("Can not group MCC%u MCC%u together", mcc0, mcc1);
+                continue;
+            }
+
+            for (uint8_t mcc2 = mcc1 + 1; mcc2 < (NUM_MCC_PER_PROC - 1); mcc2++)
+            {
+                FAPI_DBG("mcc2 = MCC%u", mcc2);
+
+                // Skip if MCC is already grouped or has no memory
+                if ( (io_groupData.iv_mccGrouped[mcc2]) ||
+                     (i_memInfo.iv_mccSize[mcc2] == 0) )
+                {
+                    FAPI_DBG("Skip MCC%d because already grouped or empty:", mcc2);
+                    continue;
+                }
+
+                if ( !isGroupable(i_memInfo,
+                                  io_groupData,
+                                  i_mirrorRequired,
+                                  mcc0,
+                                  mcc2) )
+                {
+                    FAPI_INF("Can not group MCC%u MCC%u together", mcc0, mcc2);
+                    continue;
+                }
+
+                for (uint8_t mcc3 = mcc2 + 1; mcc3 < NUM_MCC_PER_PROC; mcc3++)
+                {
+                    FAPI_DBG("mcc3 = MCC%u", mcc3);
+
+                    // Skip if MCC is already grouped or has no memory
+                    if ( (io_groupData.iv_mccGrouped[mcc3]) ||
+                         (i_memInfo.iv_mccSize[mcc3] == 0) )
+                    {
+                        FAPI_DBG("Skip MCC%d because already grouped or empty:", mcc3);
+                        continue;
+                    }
+
+                    if ( !isGroupable(i_memInfo,
+                                      io_groupData,
+                                      i_mirrorRequired,
+                                      mcc0,
+                                      mcc3) )
+                    {
+                        FAPI_INF("Can not group MCC%u MCC%u together", mcc0, mcc3);
+                        continue;
+                    }
+
+                    // These 4 MCCs can be grouped together
+                    io_groupData.iv_data[g][MCC_SIZE] = i_memInfo.iv_mccSize[mcc0];
+                    io_groupData.iv_data[g][MCC_IN_GROUP] = MCC_PER_GROUP;
+                    io_groupData.iv_data[g][GROUP_SIZE] =
+                        MCC_PER_GROUP * i_memInfo.iv_mccSize[mcc0];
+                    io_groupData.iv_data[g][MEMBER_IDX(0)] = mcc0;
+                    io_groupData.iv_data[g][MEMBER_IDX(1)] = mcc1;
+                    io_groupData.iv_data[g][MEMBER_IDX(2)] = mcc2;
+                    io_groupData.iv_data[g][MEMBER_IDX(3)] = mcc3;
+
+                    // Record which MCCs were grouped
+                    io_groupData.iv_mccGrouped[mcc0] = true;
+                    io_groupData.iv_mccGrouped[mcc1] = true;
+                    io_groupData.iv_mccGrouped[mcc2] = true;
+                    io_groupData.iv_mccGrouped[mcc3] = true;
+
+                    // Group index increment
+                    g++;
+                    FAPI_INF("grouping_group4MCCPerGroup: Successfully grouped 4 "
+                             "MCCs: %u, %u, %u, %u", mcc0, mcc1, mcc2, mcc3);
+
+                    io_MCCsRemained -= 4;
+
+                }
+            }
+        }
+    }
+
+fapi_try_exit:
     FAPI_DBG("Exiting");
     return;
 }
