@@ -38,6 +38,7 @@ void fapi2PlatGetVpdOcmbChipTest::testPlatGetVPD_EFD()
     // Find a valid target of type OCMB_CHIP
     TARGETING::TargetHandleList l_ocmbTargetList;
     TARGETING::getAllChips(l_ocmbTargetList, TARGETING::TYPE_OCMB_CHIP, true);
+    TS_INFO("testPlatGetVPD_EFD: l_ocmbTargetList.size=%d", l_ocmbTargetList.size());
     if (!l_ocmbTargetList.size())
     {
         TS_FAIL("<<testGetVPD_EFD: No valid TYPE_OCMB_CHIP target found. "

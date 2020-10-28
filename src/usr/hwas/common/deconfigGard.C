@@ -476,7 +476,7 @@ void DeconfigGard::_deconfigParentAssoc(TARGETING::Target & i_target,
                                         const uint32_t i_errlEid,
                                         const DeconfigureFlags i_deconfigRule)
 {
-    HWAS_INF("_deconfigParentAssoc for %.8X (i_deconfigRule %d)",
+    HWAS_INF("_deconfigParentAssoc entry for %.8X (i_deconfigRule %d)",
             get_huid(&i_target), i_deconfigRule);
 
     // Retrieve the target type from the given target
@@ -505,6 +505,7 @@ void DeconfigGard::_deconfigParentAssoc(TARGETING::Target & i_target,
         {
             case TYPE_CORE:
             {
+                HWAS_DBG("_deconfigParentAssoc CORE deconfig parent proc");
                 //
                 // In Fused Core Mode, Cores must be de-configureed
                 // in pairs
@@ -527,9 +528,11 @@ void DeconfigGard::_deconfigParentAssoc(TARGETING::Target & i_target,
 
                 if (isFunctional(l_parentFC))
                 {
+                    HWAS_DBG("_deconfigParentAssoc isFunctional");
                     // Fused Core Mode
                     if (is_fused_mode())
                     {
+                        HWAS_DBG("_deconfigParentAssoc is_fused_mode");
                         // If parent is functional, deconfigure it
                         _deconfigureTarget(*l_parentFC,
                            i_errlEid, NULL,i_deconfigRule);
@@ -542,6 +545,7 @@ void DeconfigGard::_deconfigParentAssoc(TARGETING::Target & i_target,
                     // if both cores of FC non-functional, de-config FC
                     else if (!anyChildFunctional(*l_parentFC))
                     {
+                       HWAS_DBG("_deconfigParentAssoc normal core");
                        uint32_t l_errlEidOverride = i_errlEid;
 
 
@@ -549,13 +553,14 @@ void DeconfigGard::_deconfigParentAssoc(TARGETING::Target & i_target,
                        // the deconfig by Eid reason of its parent to FCO
                        if (anyChildFCO(*l_parentFC))
                        {
-                           HWAS_INF("Override FC %.8X deconfigByEid %.8X->FCO",
+                           HWAS_INF("_deconfigParentAssoc Override FC %.8X deconfigByEid %.8X->FCO",
                                     get_huid(l_parentFC), i_errlEid);
                            l_errlEidOverride =
                                     DECONFIGURED_BY_FIELD_CORE_OVERRIDE;
                        }
 
                        // If parent is functional, deconfigure it
+                       HWAS_DBG("_deconfigParentAssoc parent functional deconfigure");
                        _deconfigureTarget(*l_parentFC,
                           l_errlEidOverride, NULL, i_deconfigRule);
                        _deconfigureByAssoc(*l_parentFC,
@@ -567,6 +572,7 @@ void DeconfigGard::_deconfigParentAssoc(TARGETING::Target & i_target,
 
             case TYPE_DIMM:
             {
+                HWAS_DBG("_deconfigParentAssoc DIMM deconfig parent proc");
                 // Whenever a DIMM is deconfigured, we will also deconfigure
                 // the immediate parent target (e.g. MCA, MBA, etc) to ensure
                 // there is not an unbalanced load on the ports.
@@ -605,6 +611,7 @@ void DeconfigGard::_deconfigParentAssoc(TARGETING::Target & i_target,
 
             case TYPE_OMI:
             {
+                HWAS_DBG("_deconfigParentAssoc OMI deconfig parent proc");
                 TargetHandleList pOmicParentList;
                 getParentOmicTargetsByState(pOmicParentList,
                         &i_target, CLASS_NA, TYPE_OMIC,
@@ -629,6 +636,7 @@ void DeconfigGard::_deconfigParentAssoc(TARGETING::Target & i_target,
                 // If PAU 0, 4, and 5 are all deconfigured then nest 1's NMMU is
                 // power-gated and we deconfigure it here.
 
+                HWAS_DBG("_deconfigParentAssoc PAU deconfig parent proc");
                 const Target* const l_chip = getParentChip(&i_target);
 
                 Target* const l_nmmu1 = shouldPowerGateNMMU1(*l_chip);
@@ -686,6 +694,7 @@ void DeconfigGard::_deconfigParentAssoc(TARGETING::Target & i_target,
             {
                 const ATTR_CHIP_UNIT_type NEST0_CHIP_UNIT = 2;
 
+                HWAS_DBG("_deconfigParentAssoc NMMU deconfig parent proc");
                 // If this is NMMU0 then we must knock out the parent
                 // processor chip, otherwise we do the standard
                 // _deconfigAffinityParent call and break.
@@ -704,6 +713,7 @@ void DeconfigGard::_deconfigParentAssoc(TARGETING::Target & i_target,
             {
                 // If any PAUC or EQ is deconfigured than deconfigure its
                 // parent processor chip
+                HWAS_DBG("_deconfigParentAssoc PAUC or EQ deconfig parent proc");
                 Target* const l_chip = const_cast<Target*>(getParentChip(&i_target));
 
                 HWAS_ASSERT(l_chip != nullptr,
@@ -718,6 +728,7 @@ void DeconfigGard::_deconfigParentAssoc(TARGETING::Target & i_target,
 
             default:
             {
+              HWAS_DBG("_deconfigParentAssoc default case _deconfigAffinityParent");
               // TYPE_MEMBUF, TYPE_MCA, TYPE_MCS, TYPE_MC, TYPE_MI, TYPE_DMI,
               // TYPE_MBA, TYPE_PHB, TYPE_OBUS_BRICK, TYPE_EQ
               _deconfigAffinityParent(i_target, i_errlEid, i_deconfigRule);

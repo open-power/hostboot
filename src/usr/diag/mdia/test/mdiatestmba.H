@@ -56,6 +56,7 @@ class MdiaMbaTest : public CxxTest::TestSuite
 
             TargetHandleList list;
             TARGETING::getAllChips( list, TYPE_OCMB_CHIP );
+            TS_INFO("testGetWorkFlow getAllChips list.size()=%d", list.size());
 
             if( !list.empty() )
             {

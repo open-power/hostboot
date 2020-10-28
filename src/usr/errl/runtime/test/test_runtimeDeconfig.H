@@ -228,15 +228,16 @@ class deconfigureTargetAtRuntimeTest : public CxxTest::TestSuite
 
         void testDeconfigAtRuntime()
         {
-            TRACFCOMP(g_trac_runtime, "testDeconfigAtRuntime running");
+            TRACFCOMP(g_trac_runtime, "testDeconfigAtRuntime ENTRY");
 
 #ifndef __ENABLE_DECONFIG_TEST
             //  NOTE:  This test marks targets nonfunctional and then
             //         restore them.  Since all the unit tests run in
             //         parallel, this may cause other tests to fail.
             //         Do not leave this test enabled for normal operations.
-            TS_TRACE(INFO_MRK "SKIPPING: other tests could be affected.");
+            TS_INFO(INFO_MRK "testDeconfigAtRuntime SKIPPING: other tests could be affected.");
 #else
+            TS_INFO(INFO_MRK "testDeconfigAtRuntime: RUNNING other tests could be affected.");
             TARGETING::TargetHandleList l_cores;
             TARGETING::getAllChiplets(l_cores, TARGETING::TYPE_CORE);
 

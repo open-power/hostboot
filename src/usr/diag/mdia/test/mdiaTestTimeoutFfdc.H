@@ -51,7 +51,7 @@ class MdiaTimeoutFfdcTest : public CxxTest::TestSuite
         {
             TargetHandleList tmp;
             TARGETING::getAllChips(tmp, TYPE_OCMB_CHIP);
-
+            TS_INFO("MdiaTimeoutFfdcTest getAllChips tmp.size=%d", tmp.size());
             return tmp[0];
         }
 
@@ -62,7 +62,7 @@ class MdiaTimeoutFfdcTest : public CxxTest::TestSuite
             using namespace MDIA;
             using namespace TARGETING;
 
-            TS_TRACE(ENTER_MRK "testOcmbTimeoutFfdc");
+            TS_INFO(ENTER_MRK "testOcmbTimeoutFfdc");
 
             // Just call addTimeoutFFDC with some appropriate target to ensure
             // it doesn't assert or crash.
@@ -74,7 +74,7 @@ class MdiaTimeoutFfdcTest : public CxxTest::TestSuite
                     get_huid(trgt) );
             addTimeoutFFDC( trgt, err );
 
-            TS_TRACE(EXIT_MRK "testOcmbTimeoutFfdc");
+            TS_INFO(EXIT_MRK "testOcmbTimeoutFfdc");
         }
 
 };

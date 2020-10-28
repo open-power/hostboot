@@ -1127,10 +1127,12 @@ public:
 #else
 
         errlHndl_t l_pErr = nullptr;
+        saveSystemState();
 
         do
         {
-            // find a eq unit that we can play with
+            // find EQ unit that we can play with
+            TS_INFO("testDeConfigEQTarget: is_fused_mode=0x%X", is_fused_mode());
             Target* pSys = UTIL::assertGetToplevelTarget();
 
             PredicateCTM predEq(CLASS_UNIT, TYPE_EQ);
@@ -1148,79 +1150,142 @@ public:
                 TS_FAIL("testDeconfigureEQTarget: SKIPPING empty pEqList CLASS_UNIT, TYPE_EQ");
                 break;
             }
-            TargetHandle_t l_pTargetEQ = *pEqList.begin();
 
-            // Get the original HWAS_STATE of EQ
-
-            HwasState l_state = l_pTargetEQ->getAttr<ATTR_HWAS_STATE>();
-            TS_INFO("testDeconfigureEQTarget: Working with EQ HUID=0x%X state=0x%X present=0x%X",
-                get_huid(l_pTargetEQ), l_state.functional, l_state.present);
-            if (!l_state.functional)
+            // Health Check pre-testing
+            TargetHandle_t l_pTargetEQ1 = *pEqList.begin(); // prime first EQ
+            TargetHandle_t l_pTargetEQ2;
+            HwasState l_state_eq;
+            for (TargetHandleList::iterator pEq_it = pEqList.begin();
+                   (pEq_it != pEqList.end()); ++pEq_it)
             {
-                TS_FAIL("testDeconfigureEQTarget: EQ is non-functional before deconfiguration");
-                break;
+                l_pTargetEQ2 = *pEq_it; // last iteration will save last one of two as the END EQ
+                // Get the original HWAS_STATE of EQ
+                l_state_eq = l_pTargetEQ2->getAttr<ATTR_HWAS_STATE>();
+                //  This information is saved to help validate and cleanup later
+                TS_INFO("testDeconfigureEQTarget: INITIAL STATE EQ HUID=0x%X state=0x%X present=0x%X",
+                    get_huid(l_pTargetEQ2), l_state_eq.functional, l_state_eq.present);
+                if (!l_state_eq.functional)
+                {
+                    TS_FAIL("testDeconfigureEQTarget: EQ is not functional before deconfig EQ HUID=0x%X state=0x%X, unexpected",
+                        get_huid(l_pTargetEQ2), l_state_eq);
+                    break;
+                }
             }
 
-            TargetHandleList pFcList, pCoreList[2];
+            TargetHandleList pFcList1, pCoreList1[2];
+            TargetHandleList pFcList2, pCoreList2[2];
             uint32_t cIndex = 0;
             // get the list of FCs
-            getChildAffinityTargets(pFcList, l_pTargetEQ, CLASS_NA ,TYPE_FC);
+            getChildAffinityTargets(pFcList1, l_pTargetEQ1, CLASS_NA ,TYPE_FC);
+            getChildAffinityTargets(pFcList2, l_pTargetEQ2, CLASS_NA ,TYPE_FC);
 
-            TS_INFO("testDeconfigureEQTarget: getChildAffinityTargets pFcList.size()=%d",
-                pFcList.size());
+            TS_INFO("testDeconfigureEQTarget: getChildAffinityTargets pFcList1.size()=%d",
+                pFcList1.size());
+            TS_INFO("testDeconfigureEQTarget: getChildAffinityTargets pFcList2.size()=%d",
+                pFcList2.size());
 
-            if (pFcList.empty())
+            if (pFcList1.empty())
             {
-                TS_FAIL("testDeconfigureEQTarget: empty pFcList");
+                TS_FAIL("testDeconfigureEQTarget: empty pFcList1");
                 break;
             }
 
             // Pick up FC and cores and save them
 
-            TargetHandle_t pFc, pCore;
+            TargetHandle_t pFc1, pCore1;
+            HwasState l_state;
             bool exitLoop = false;
-            for (TargetHandleList::iterator pFc_it = pFcList.begin();
-                   (pFc_it != pFcList.end()) || exitLoop; ++pFc_it)
+            for (TargetHandleList::iterator pFc_it1 = pFcList1.begin();
+                   (pFc_it1 != pFcList1.end()) && !exitLoop; ++pFc_it1)
             {
-                pFc = *pFc_it;
+                pFc1 = *pFc_it1;
                 // Get the original HWAS_STATE of FC
-                l_state = pFc->getAttr<ATTR_HWAS_STATE>();
-                TS_INFO("testDeconfigureEQTarget: Working with pFc: 0x%.8X state=0x%X",
-                         get_huid(pFc), l_state.functional);
+                l_state = pFc1->getAttr<ATTR_HWAS_STATE>();
+                TS_INFO("testDeconfigureEQTarget: Working with FC before deconfig FC HUID=0x%X state=0x%X",
+                         get_huid(pFc1), l_state.functional);
                 if (!l_state.functional)
                 {
-                    TS_FAIL("testDeconfigureEQTarget: FC is non-functional before deconfiguration");
+                    TS_FAIL("testDeconfigureEQTarget: FC is not functional before deconfig FC HUID=0x%X state=0x%X",
+                        get_huid(pFc1), l_state.functional);
                     break;
                 }
-                getChildAffinityTargets(pCoreList[cIndex],
-                                    pFc, CLASS_NA ,TYPE_NA);
-                TS_INFO("testDeconfigureEQTarget: pCoreList[cIndex] HUID=0x%X pCoreList[cIndex].size()=%d",
-                    get_huid(pFc), pCoreList[cIndex].size());
-                if(pCoreList[cIndex].empty())
+                getChildAffinityTargets(pCoreList1[cIndex],
+                                    pFc1, CLASS_NA ,TYPE_NA);
+                TS_INFO("testDeconfigureEQTarget: pCoreList1[%d] HUID=0x%X pCoreList1[%d].size()=%d",
+                    cIndex, get_huid(pFc1), cIndex, pCoreList1[cIndex].size());
+                if(pCoreList1[cIndex].empty())
                 {
-                    TS_FAIL("testDeconfigureEQTarget: empty pCoreList[%d]", cIndex);
+                    TS_FAIL("testDeconfigureEQTarget: empty pCoreList1[%d]", cIndex);
                     exitLoop = true;
                     break;
                 }
 
-                for (TargetHandleList::iterator pChild_it =
-                       pCoreList[cIndex].begin();
-                       pChild_it != pCoreList[cIndex].end(); ++pChild_it)
+                for (TargetHandleList::iterator pChild_it1 =
+                       pCoreList1[cIndex].begin();
+                       pChild_it1 != pCoreList1[cIndex].end(); ++pChild_it1)
                 {
-                    pCore = *pChild_it;
+                    pCore1 = *pChild_it1;
                     // Get the original HWAS_STATE of the core
-                    l_state = pCore->getAttr<ATTR_HWAS_STATE>();
-                    TS_INFO("testDeconfigureEQTarget: Working with Core: %.8X state=0x%X",
-                         get_huid(pCore), l_state.functional);
+                    l_state = pCore1->getAttr<ATTR_HWAS_STATE>();
+                    TS_INFO("testDeconfigureEQTarget before deconfig: Working with Core HUID=0x%X state=0x%X",
+                         get_huid(pCore1), l_state.functional);
                     if (!l_state.functional)
                     {
-                        TS_FAIL("testDeconfigureEQTarget: Core is non-functional before deconfiguration");
+                        TS_FAIL("testDeconfigureEQTarget: Core is not functional before deconfig Core HUID=0x%X state=0x%X",
+                            get_huid(pCore1), l_state.functional);
                         exitLoop = true;
                         break;
                     }
                 } // for CHILD
                 cIndex++;
-            } // for pFc_it
+            } // for pFc_it1
+
+            // FC2 needed in case debug needed
+            TargetHandle_t pFc2, pCore2;
+            for (TargetHandleList::iterator pFc_it2 = pFcList2.begin();
+                   (pFc_it2 != pFcList2.end()) && !exitLoop; ++pFc_it2)
+            {
+                pFc2 = *pFc_it2;
+                // Get the original HWAS_STATE of FC
+                l_state = pFc2->getAttr<ATTR_HWAS_STATE>();
+                TS_INFO("testDeconfigureEQTarget: Working with FC2 before deconfig FC2 HUID=0x%X  state=0x%X",
+                    get_huid(pFc2), l_state.functional);
+                if (!l_state.functional)
+                {
+                    TS_FAIL("testDeconfigureEQTarget: FC2 is not functional before deconfig FC2 HUID=0x%X state=0x%X",
+                         get_huid(pFc2), l_state.functional);
+                    break;
+                }
+                getChildAffinityTargets(pCoreList2[cIndex],
+                                    pFc2, CLASS_NA ,TYPE_NA);
+                TS_INFO("testDeconfigureEQTarget: pCoreList2[%d] HUID=0x%X pCoreList2[%d].size()=%d",
+                    cIndex, get_huid(pFc2), cIndex, pCoreList2[cIndex].size());
+                if(pCoreList2[cIndex].empty())
+                {
+                    TS_FAIL("testDeconfigureEQTarget: empty pCoreList2[%d]", cIndex);
+                    exitLoop = true;
+                    break;
+                }
+
+                for (TargetHandleList::iterator pChild_it2 =
+                       pCoreList2[cIndex].begin();
+                       pChild_it2 != pCoreList2[cIndex].end(); ++pChild_it2)
+                {
+                    pCore2 = *pChild_it2;
+                    // Get the original HWAS_STATE of the core
+                    l_state = pCore2->getAttr<ATTR_HWAS_STATE>();
+                    TS_INFO("testDeconfigureEQTarget before deconfig: Working with Core HUID=0x%X state=0x%X",
+                         get_huid(pCore2), l_state.functional);
+                    if (!l_state.functional)
+                    {
+                        TS_FAIL("testDeconfigureEQTarget: Core is not functional before deconfig Core HUID=0x%X state=0x%X",
+                            get_huid(pCore2), l_state.functional);
+                        exitLoop = true;
+                        break;
+                    }
+                } // for CHILD
+                cIndex++;
+            } // for pFc_it2
 
             if (exitLoop)
             {
@@ -1229,79 +1294,146 @@ public:
 
             // Deconfigure the target EQ
             TS_INFO("testDeconfigureEQTarget: calling deconfigureTarget EQ HUID=0x%X",
-                get_huid(l_pTargetEQ));
+                get_huid(l_pTargetEQ1));
             l_pErr = theDeconfigGard().
-                    deconfigureTarget(*l_pTargetEQ,
+                    deconfigureTarget(*l_pTargetEQ1,
                         DeconfigGard::DECONFIGURED_BY_EQ_DECONFIG);
-            if (!l_pErr)
+            if (l_pErr)
             {
-                TS_FAIL("testDeconfigureEQTarget: Did not get expected error from deconfigureTarget");
+                TS_FAIL("testDeconfigureEQTarget: We were unable to deconfigureTarget, EQ HUID=0x%X should be gardable",
+                    get_huid(l_pTargetEQ1));
                 break;
             }
             else
             {
-                TS_INFO("testDeconfigureEQTarget: Got expected error from deconfigureTarget");
+                TS_INFO("testDeconfigureEQTarget: We were able to deconfigureTarget, EQ HUID=0x%X is gardable",
+                    get_huid(l_pTargetEQ1));
                 errlCommit(l_pErr,CXXTEST_COMP_ID);
             }
 
 
-            l_state = l_pTargetEQ->getAttr<ATTR_HWAS_STATE>();
-            TS_INFO("testDeconfigureEQTarget: Working with EQ after deconfig attempt HUID=0x%X state=0x%X present=0x%X",
-                get_huid(l_pTargetEQ), l_state.functional, l_state.present);
+            l_state = l_pTargetEQ1->getAttr<ATTR_HWAS_STATE>();
+            TS_INFO("testDeconfigureEQTarget: Working with EQ after deconfig EQ HUID=0x%X state=0x%X present=0x%X",
+                get_huid(l_pTargetEQ1), l_state.functional, l_state.present);
             if (!l_state.functional)
             {
-                TS_FAIL("testDeconfigureEQTarget: RESET EQ is not functional after deconfiguration attempt!");
-                // Reset the HWAS_STATE of EQ
+                // Reset the HWAS_STATE of EQ back to functional
+                TS_INFO("testDeconfigureEQTarget: GOING TO RESET HWAS_STATE for EQ to functional after deconfig EQ HUID=0x%X state=0x%X, expected",
+                    get_huid(l_pTargetEQ1), l_state.functional);
                 l_state.functional = 1;
-                l_pTargetEQ->setAttr<ATTR_HWAS_STATE>(l_state);
-                break;
+                l_pTargetEQ1->setAttr<ATTR_HWAS_STATE>(l_state);
+                l_state = l_pTargetEQ1->getAttr<ATTR_HWAS_STATE>();
+                TS_INFO("testDeconfigureEQTarget: RESET CONFIRMATION HWAS_STATE for EQ to functional after deconfig EQ HUID=0x%X state=0x%X present=0x%X",
+                    get_huid(l_pTargetEQ1), l_state.functional, l_state.present);
             }
             else
             {
-                TS_INFO("testDeconfigureEQTarget: EQ is functional after deconfiguration attempt (as expected).");
+                TS_FAIL("testDeconfigureEQTarget: EQ is functional after deconfig EQ HUID=0x%X state=0x%X, unexpected",
+                    get_huid(l_pTargetEQ1), l_state.functional);
+                break;
             }
 
             cIndex = 0;
-            for (TargetHandleList::iterator pFc_it = pFcList.begin();
-                   (pFc_it != pFcList.end()) || exitLoop; ++pFc_it)
+            bool found_proc_disabled = false; // used to flag that we found the proc disabled at least first time
+            for (TargetHandleList::iterator pFc_it1 = pFcList1.begin();
+                   (pFc_it1 != pFcList1.end()); ++pFc_it1)
             {
-                pFc = *pFc_it;
+                pFc1 = *pFc_it1;
                 // Get the HWAS_STATE of FC
-                l_state = pFc->getAttr<ATTR_HWAS_STATE>();
-                TS_INFO("testDeconfigureEQTarget: Working with pFc: %.8X state=0x%X",
-                         get_huid(pFc), l_state.functional);
+                l_state = pFc1->getAttr<ATTR_HWAS_STATE>();
+                TS_INFO("testDeconfigureEQTarget: Working with FC HUID=0x%X state=0x%X",
+                         get_huid(pFc1), l_state.functional);
                 if (!l_state.functional)
                 {
-                    TS_FAIL("testDeconfigureEQTarget: FC is not functional after EQ deconfiguration");
+                    TS_INFO("testDeconfigureEQTarget: FC is not functional after EQ deconfig FC HUID=0x%X state=0x%X, expected",
+                        get_huid(pFc1), l_state.functional);
+                    l_state.functional = 1;
+                    pFc1->setAttr<ATTR_HWAS_STATE>(l_state);
+                    l_state = pFc1->getAttr<ATTR_HWAS_STATE>();
+                    TS_INFO("testDeconfigureEQTarget: RESET CONFIRMATION HWAS_STATE to functional after deconfig FC HUID=0x%X state=0x%X",
+                        get_huid(pFc1), l_state.functional);
+                }
+                else
+                {
+                    TS_FAIL("testDeconfigureEQTarget: FC is functional after EQ deconfig HUID=0x%X state=0x%X, unexpected",
+                        get_huid(pFc1), l_state.functional);
                     break;
                 }
 
-                for (TargetHandleList::iterator pChild_it =
-                       pCoreList[cIndex].begin();
-                       pChild_it != pCoreList[cIndex].end(); ++pChild_it)
+                // Next block is to restore and confirm all is functional
+
+                for (TargetHandleList::iterator pChild_it1 =
+                       pCoreList1[cIndex].begin();
+                       pChild_it1 != pCoreList1[cIndex].end(); ++pChild_it1)
                 {
-                    pCore = *pChild_it;
+                    pCore1 = *pChild_it1;
                     // Get the HWAS_STATE of the core
-                    l_state = pCore->getAttr<ATTR_HWAS_STATE>();
-                    TS_INFO("testDeconfigureEQTarget: Working with Core: %.8X state=0x%X",
-                         get_huid(pCore), l_state.functional);
+                    l_state = pCore1->getAttr<ATTR_HWAS_STATE>();
+                    TS_INFO("testDeconfigureEQTarget: Working with Core HUID=0x%X state=0x%X",
+                         get_huid(pCore1), l_state.functional);
                     if (!l_state.functional)
                     {
-                        TS_FAIL("testDeconfigureEQTarget: Core is not functional after EQ deconfiguration");
-                        exitLoop = true;
-                        break;
+                        TS_INFO("testDeconfigureEQTarget: Core is not functional after EQ deconfig Core HUID=0x%X state=0x%X, maybe expected",
+                            get_huid(pCore1), l_state.functional);
+                        l_state.functional = 1;
+                        pCore1->setAttr<ATTR_HWAS_STATE>(l_state);
+                        l_state = pCore1->getAttr<ATTR_HWAS_STATE>();
+                        TS_INFO("testDeconfigureEQTarget: RESET CONFIRMATION HWAS_STATE to functional after deconfig Core HUID=0x%X state=0x%X",
+                             get_huid(pCore1), l_state.functional);
                     }
-                    // Reset the HWAS_STATE of the core
-                    l_state.functional = 1;
-                    pCore->setAttr<ATTR_HWAS_STATE>(l_state);
-                    TS_INFO("testDeconfigureEQTarget: RESET to functional Core: %.8X state=0x%X",
-                         get_huid(pCore), l_state.functional);
                 } // for CHILD
-                l_state = pFc->getAttr<ATTR_HWAS_STATE>();
-                TS_INFO("testDeconfigureEQTarget: Working with FC: %.8X state=0x%X",
-                         get_huid(pFc), l_state.functional);
+                l_state = pFc1->getAttr<ATTR_HWAS_STATE>();
+                TS_INFO("testDeconfigureEQTarget: FC SHOULD BE FUNCTIONAL Working with FC HUID=0x%X state=0x%X",
+                    get_huid(pFc1), l_state.functional);
+                if (!l_state.functional)
+                {
+                    TS_FAIL("testDeconfigureEQTarget: NOT FUNCTIONAL Working with FC HUID=0x%X state=0x%X, unexpected",
+                        get_huid(pFc1), l_state.functional);
+                        break;
+                }
+
+                // Check out the PARENT PROC and cleanup
+                Target* const l_proc = const_cast<Target*>(getParentChip(l_pTargetEQ1));
+                HwasState l_proc_state;
+                l_proc_state= l_proc->getAttr<ATTR_HWAS_STATE>();
+                TS_INFO("testDeconfigureEQTarget: Parent PROC SHOULD NOT BE FUNCTIONAL on the first pass Parent PROC HUID=0x%X state=0x%X",
+                         get_huid(l_proc), l_proc_state.functional);
+                if (!l_proc_state.functional)
+                {
+                    found_proc_disabled = true;
+                    l_proc_state.functional = 1;
+                    l_proc->setAttr<ATTR_HWAS_STATE>(l_proc_state);
+                    l_proc_state= l_proc->getAttr<ATTR_HWAS_STATE>();
+                    TS_INFO("testDeconfigureEQTarget: RESET CONFIRMATION HWAS_STATE to functional after deconfig Parent PROC HUID=0x%X state=0x%X",
+                             get_huid(l_proc), l_proc_state.functional);
+                }
+                if (!found_proc_disabled)
+                {
+                    TS_FAIL("testDeconfigureEQTarget: Parent PROC HWAS_STATE found functional after deconfig Parent PROC HUID=0x%X state=0x%X",
+                        get_huid(l_proc), l_proc_state.functional);
+                }
+                else
+                {
+                    TS_INFO("testDeconfigureEQTarget: Parent PROC HWAS_STATE RESET after deconfig Parent PROC HUID=0x%X state=0x%X",
+                        get_huid(l_proc), l_proc_state.functional);
+                }
                 cIndex++;
             }
+
+            // Confirm EQ is functional after cleanup, health check only and logging
+            l_state = l_pTargetEQ1->getAttr<ATTR_HWAS_STATE>();
+            TS_INFO("testDeconfigureEQTarget: PRE CLEANUP Working with EQ after deconfig CLEANUP SHOULD BE FUNCTIONAL HUID=0x%X state=0x%X present=0x%X",
+                get_huid(l_pTargetEQ1), l_state.functional, l_state.present);
+            l_state = l_pTargetEQ2->getAttr<ATTR_HWAS_STATE>();
+            TS_INFO("testDeconfigureEQTarget: PRE CLEANUP Working with EQ after deconfig CLEANUP SHOULD BE FUNCTIONAL HUID=0x%X state=0x%X present=0x%X",
+                get_huid(l_pTargetEQ2), l_state.functional, l_state.present);
+            restoreSystemState();
+            l_state = l_pTargetEQ1->getAttr<ATTR_HWAS_STATE>();
+            TS_INFO("testDeconfigureEQTarget: POST CLEANUP Working with EQ after deconfig CLEANUP SHOULD BE FUNCTIONAL HUID=0x%X state=0x%X present=0x%X",
+                get_huid(l_pTargetEQ1), l_state.functional, l_state.present);
+            l_state = l_pTargetEQ2->getAttr<ATTR_HWAS_STATE>();
+            TS_INFO("testDeconfigureEQTarget: POST CLEANUP Working with EQ after deconfig CLEANUP SHOULD BE FUNCTIONAL HUID=0x%X state=0x%X present=0x%X",
+                get_huid(l_pTargetEQ2), l_state.functional, l_state.present);
 
             TS_INFO("testDeconfigureEQTarget: Success");
         }
@@ -2301,19 +2433,38 @@ public:
 
             l_State.functional  =   0 ;
             pFc->setAttr<TARGETING::ATTR_HWAS_STATE>(l_State);
-            TS_INFO("testDeConfigEQ1BadFC: POST should be non-functional 1st Core %8.X state=0x%X",
-                get_huid(pFc), l_State.functional);
 
-            // Set second core state functional
+            // Confirm that we setAttr properly
+            l_State = pFc->getAttr<ATTR_HWAS_STATE>();
+            TS_INFO("testDeConfigEQ1BadFC: POST CONFIRMATION - SHOULD BE NON-FUNCTIONAL 1st Core %8.X state=0x%X",
+                get_huid(pFc), l_State.functional);
+            if (l_State.functional)
+            {
+                TS_FAIL("testDeConfigEQ1BadFC: FAILED to set 1st Core NON-FUNCTIONAL %8.X state=0x%X",
+                    get_huid(pFc), l_State.functional);
+            }
+
+            // Set second core state functional explicitly for assurance test is properly setup
             ++pChild_it;
             pFc = *pChild_it;
             l_State = pFc->getAttr<ATTR_HWAS_STATE>();
             TS_INFO("testDeConfigEQ1BadFC: PRE should be functional 2nd Core %8.X state=0x%X",
                 get_huid(pFc), l_State.functional);
+            if (!l_State.functional)
+            {
+                TS_WARN("testDeConfigEQ1BadFC: PRE should have been functional 2nd Core %8.X state=0x%X",
+                    get_huid(pFc), l_State.functional);
+            }
             l_State.functional  =   1 ;
             pFc->setAttr<TARGETING::ATTR_HWAS_STATE>(l_State);
+            l_State = pFc->getAttr<ATTR_HWAS_STATE>();
             TS_INFO("testDeConfigEQ1BadFC: POST should be functional 2nd Core %8.X state=0x%X",
                 get_huid(pFc), l_State.functional);
+            if (!l_State.functional)
+            {
+                TS_FAIL("testDeConfigEQ1BadFC: FAILED to set 2nd Core FUNCTIONAL %8.X state=0x%X",
+                    get_huid(pFc), l_State.functional);
+            }
 
             // Get the HWAS_STATE of EQ
             oeq_State = pEq->getAttr<ATTR_HWAS_STATE>();

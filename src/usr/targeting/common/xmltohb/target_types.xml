@@ -3176,6 +3176,14 @@
     <id>unit-eq-power10</id>
     <parent>unit-eq</parent>
     <attribute>
+      <default>CPU</default>
+      <id>CDM_DOMAIN</id>
+    </attribute>
+    <attribute>
+      <default>1</default>
+      <id>DECONFIG_GARDABLE</id>
+    </attribute>
+    <attribute>
       <default>
         <field>
           <id>childRollupAllowed</id>
