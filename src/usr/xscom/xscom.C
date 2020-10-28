@@ -399,13 +399,20 @@ errlHndl_t  xScomDoOp(DeviceFW::OperationType i_opType,
 
     TRACDCOMP(g_trac_xscom, "xscomDoOp: l_offset 0x%.16llX; VirtAddr %p; i_virtAddr+l_offset %p",l_offset,i_virtAddr,i_virtAddr + l_offset);
 
-    if (i_opType == DeviceFW::READ)
+    if (SCOM::shouldBlockScomValueTrace())
     {
-        TRACDCOMP(g_trac_xscom, "xscomDoOp: Read data: %.16llx", l_data);
+        TRACDCOMP(g_trac_xscom, "xscomDoOp: Value trace on 0x%x blocked for security", i_xscomAddr);
     }
     else
     {
-        TRACDCOMP(g_trac_xscom, "xscomDoOp: Write data: %.16llx", l_data);
+        if (i_opType == DeviceFW::READ)
+        {
+            TRACDCOMP(g_trac_xscom, "xscomDoOp: Read data: %.16llx", l_data);
+        }
+        else
+        {
+            TRACDCOMP(g_trac_xscom, "xscomDoOp: Write data: %.16llx", l_data);
+        }
     }
 
     do

@@ -234,21 +234,14 @@ namespace std
              * @brief Constructs a unique_ptr taking ownership of the given
              * resource and the given deleter.
              *
+             * @tparam    D    The specific deleter to use deallocate the
+             *                 object when it goes out of scope
              * @param[in] p    Pointer to own.
              * @param[in] del  Deleter to free the resource.
              */
-            unique_ptr(pointer p, Deleter&& del) :
-                __base { std::forward<Deleter>(del) }, iv_ptr(p) {}
-
-            /*
-             * @brief Constructs a unique_ptr taking ownership of the given
-             * resource and the given deleter.
-             *
-             * @param[in] p    Pointer to own.
-             * @param[in] del  Deleter to free the resource.
-             */
-            unique_ptr(pointer p, const Deleter& del) :
-                __base { std::forward<Deleter>(del) }, iv_ptr(p) {}
+            template<typename D>
+            unique_ptr(pointer p, D&& del) :
+                __base { std::forward<D>(del) }, iv_ptr(p) {}
 
             /*
              * @brief Move-constructor, takes ownership from the given
@@ -455,6 +448,33 @@ namespace std
     void swap(unique_ptr<T, Del>& l, unique_ptr<T, Del>& r) {
         return l.swap(r);
     }
+}
+
+namespace hbstd
+{
+
+/* @brief Create an object that will invoke a function when it gets
+ * destroyed. This can be used to delay function execution until the end of a
+ * lexical scope block.
+ *
+ * @param[in] i_functor  The function to call
+ * @return unique_ptr    An object that will call i_functor when destroyed
+ */
+template<typename F>
+auto scope_exit(F&& i_functor)
+{
+    auto deleter = [functor = std::forward<F>(i_functor)](void*) {
+        functor();
+    };
+
+    return std::unique_ptr<void, decltype(deleter)> {
+        reinterpret_cast<void*>(1), // This never gets used, we just need it to
+                                    // be nonzero so that the unique_ptr
+                                    // destructor will call our deleter
+        std::move(deleter)
+    };
+}
+
 }
 
 #endif

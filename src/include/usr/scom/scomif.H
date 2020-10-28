@@ -73,6 +73,38 @@ errlHndl_t scomOpSanityCheck(const DeviceFW::OperationType i_opType,
 bool scomCheckIfFsiSpiAddress( const TARGETING::Target * i_target,
                                const uint64_t i_scom_address );
 
+/* @brief Check whether SCOM value tracing should be blocked/disabled for the
+ *        current thread.
+ *
+ * @note  For debug purposes, some SCOM handlers print the value read or written
+ *        by a particular SCOM operation. But certain SCOM registers contain
+ *        sensitive information (e.g. cryptographic keys) that should not be
+ *        traced. This interface allows code to temporarily disable SCOM value
+ *        tracing on the current thread to avoid leaking this sensitive data.
+ *
+ * @note  This only applies to XSCOM operations right now but may be supported by
+ *        other SCOM interfaces in the future.
+ *
+ * @return bool  True if SCOM value tracing should be blocked/disabled, false
+ *               if it should be allowed.
+ */
+inline bool shouldBlockScomValueTrace()
+{
+    extern thread_local size_t block_scom_value_trace;
+    return block_scom_value_trace > 0;
+}
+
+/* @brief Enable or disable sensitive SCOM value tracing on the current thread.
+ *
+ * @note  See shouldBlockScomValueTrace for more information.
+ *
+ * @note  Each call to block tracing should be balanced by a call to unblock
+ *        tracing.
+ *
+ * @param[in] i_block  True to block SCOM value tracing, false otherwise.
+ */
+void setBlockScomValueTrace(bool i_block);
+
 #ifndef __HOSTBOOT_RUNTIME
 /**
  * @brief Enable scoms to all cores for multicast workaround

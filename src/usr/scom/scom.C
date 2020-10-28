@@ -85,6 +85,22 @@ void enableMemChipletMulticast( void )
 };
 #endif
 
+thread_local size_t block_scom_value_trace = 0;
+
+void setBlockScomValueTrace(const bool i_block)
+{
+    if (i_block)
+    {
+        ++block_scom_value_trace;
+    }
+    else
+    {
+        assert(block_scom_value_trace > 0,
+               "Underflow in setBlockScomValueTrace");
+        --block_scom_value_trace;
+    }
+}
+
 /**
  * @brief Add any additional FFDC for this specific type of scom
  *

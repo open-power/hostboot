@@ -51,6 +51,7 @@
 #include <secureboot/service.H>
 #include <arch/ppc.H>
 #include <memory>
+#include <scom/scomif.H>
 
 // HWP
 #include <p10_ncu_enable_darn.H>
@@ -166,7 +167,8 @@ static errlHndl_t hardware_random64(const Target* const i_core,
         TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
                   ERR_MRK"hardware_random64: DARN failed too many times");
 
-        /* @errortype        ERRL_SEV_UNRECOVERABLE
+        /* @errortype
+         * @severity         ERRL_SEV_UNRECOVERABLE
          * @moduleid         MOD_ENABLE_MEMORY_ENCRYPTION
          * @reasoncode       RC_RNG_FAILED
          * @devdesc          RNG for memory encryption keygen failed
@@ -447,9 +449,13 @@ static errlHndl_t enable_memory_encryption()
     task_affinity_migrate_to_master();
 
     // Unpin this task's affinity when this scope ends
-    std::unique_ptr<void, void(*)(void*)>
-        unpin_affinity(reinterpret_cast<void*>(1), // just needs to be nonzero
-                       [](void*){ task_affinity_unpin(); });
+    const auto unpin_affinity = hbstd::scope_exit(task_affinity_unpin);
+
+    // Block SCOM value tracing for these sensitive data
+    SCOM::setBlockScomValueTrace(true);
+
+    // Unblock SCOM value tracing when this scope ends
+    const auto unblock_scom_trace = hbstd::scope_exit([] { SCOM::setBlockScomValueTrace(false); });
 
     // Iterate each MCC in this node and generate a random key for each key SCOM
     // register.
@@ -497,8 +503,8 @@ static errlHndl_t enable_memory_encryption()
     } while (false);
 
     { // Create an informational error log to report whether we enabled memory encryption
-        /*@
-         * @errortype         ERRL_SEV_INFORMATIONAL
+        /* @errortype
+         * @severity          ERRL_SEV_INFORMATIONAL
          * @moduleid          MOD_ENABLE_MEMORY_ENCRYPTION
          * @reasoncode        RC_MEMORY_ENCRYPTION_ENABLED
          * @userdata1         Was memory encryption successfully enabled? (1 = yes, 0 = no)
@@ -559,14 +565,16 @@ void* call_host_enable_memory_encryption(void*)
         {
             // These are the errors that the expression below can produce:
 
-            /* @errortype      ERRL_SEV_UNRECOVERABLE
+            /* @errortype
+             * @severity       ERRL_SEV_UNRECOVERABLE
              * @moduleid       MOD_ENABLE_MEMORY_ENCRYPTION
              * @reasoncode     RC_MEMCRYPT_KEY_SETUP_FAILED
              * @devdesc        Memory encryption key setup failed
              * @custdesc       Platform security problem detected
              */
 
-            /* @errortype      ERRL_SEV_UNRECOVERABLE
+            /* @errortype
+             * @severity       ERRL_SEV_UNRECOVERABLE
              * @moduleid       MOD_ENABLE_MEMORY_ENCRYPTION
              * @reasoncode     RC_MEMCRYPT_LOCK_FAILED
              * @devdesc        Memory encryption lock failed
