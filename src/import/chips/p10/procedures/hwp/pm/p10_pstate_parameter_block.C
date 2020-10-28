@@ -47,6 +47,10 @@
 #include <p10_pm_utils.H>
 #include <mvpd_access_defs.H>
 
+#ifdef __HOSTBOOT_MODULE
+    #include <util/misc.H>                   // Util::isSimicsRunning
+#endif
+
 using namespace pm_pstate_parameter_block;
 
 #define IQ_BUFFER_ALLOC            255
@@ -434,11 +438,6 @@ p10_pstate_parameter_block( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i
         l_pmPPB->resclk_init();
 
         // ----------------
-        // Initialize GPPB structure
-        // ----------------
-        FAPI_TRY(l_pmPPB->gppb_init(l_globalppb));
-
-        // ----------------
         // WOF initialization
         // ----------------
         io_size = 0;
@@ -446,6 +445,12 @@ p10_pstate_parameter_block( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i
                  o_buf,
                  io_size),
                  "WOF initialization failure");
+
+        // ----------------
+        // Initialize GPPB structure
+        // ----------------
+        FAPI_TRY(l_pmPPB->gppb_init(l_globalppb));
+
 
         // ----------------
         //Initialize OPPB structure
@@ -635,7 +640,7 @@ void gppb_print(GlobalPstateParmBlock_t* i_gppb)
              revle32(i_gppb->safe_voltage_mv[SAFE_VOLTAGE_VDD]));
     FAPI_INF("%s", l_buffer);
 
-    FAPI_INF("\nExternal VRM Parameters:");
+    FAPI_INF("External VRM Parameters:");
     for (auto i=0; i < RUNTIME_RAILS; ++i)
     {
         strcpy(l_buffer,"");
@@ -1031,6 +1036,13 @@ fapi2::ReturnCode PlatPmPPB::gppb_init(
         io_globalppb->pgpe_flags[PGPE_FLAG_STATIC_VOLTAGE_ENABLE] =
                             iv_attrs.attr_war_mode == fapi2::ENUM_ATTR_HW543384_WAR_MODE_TIE_NEST_TO_PAU ? 1 : 0;
 
+#ifdef __HOSTBOOT_MODULE
+        if (Util::isSimicsRunning())
+        {
+            iv_attrs.attr_pgpe_hcode_function_enable = 0;
+        }
+#endif
+
         if (iv_attrs.attr_pgpe_hcode_function_enable == 0) {
             io_globalppb->pgpe_flags[PGPE_FLAG_OCC_IPC_IMMEDIATE_MODE] = 1;
             io_globalppb->pgpe_flags[PGPE_FLAG_WOF_IPC_IMMEDIATE_MODE] = 1;
@@ -1061,6 +1073,15 @@ fapi2::ReturnCode PlatPmPPB::gppb_init(
             FAPI_INF("WOV_VMIN_MV=%u",revle16(io_globalppb->wov_underv_vmin_mv));
             FAPI_INF("SafeVoltage=%u",revle32(io_globalppb->safe_voltage_mv[SAFE_VOLTAGE_VDD]));
         }
+        io_globalppb->attr.fields.pstates_enabled = iv_pstates_enabled;
+        io_globalppb->attr.fields.resclk_enabled  = iv_resclk_enabled;
+        io_globalppb->attr.fields.wof_enabled     = iv_wof_enabled;
+        io_globalppb->attr.fields.dds_enabled     = iv_dds_enabled;
+        io_globalppb->attr.fields.ocs_enabled     = iv_ocs_enabled;
+        io_globalppb->attr.fields.underv_enabled  = iv_wov_underv_enabled;
+        io_globalppb->attr.fields.overv_enabled   = iv_wov_overv_enabled;
+        io_globalppb->attr.fields.rvrm_enabled    = iv_rvrm_enabled;
+
 
     } while (0);
 
@@ -1093,7 +1114,18 @@ fapi2::ReturnCode PlatPmPPB::oppb_init(
         i_occppb->vcs_sysparm     = iv_vcs_sysparam;
         i_occppb->vdn_sysparm     = iv_vdn_sysparam;
 
-        memcpy(&i_occppb->attr, &iv_attrs, sizeof (Attributes_t));
+        i_occppb->attr.fields.pstates_enabled = iv_pstates_enabled;
+        i_occppb->attr.fields.resclk_enabled  = iv_resclk_enabled;
+        i_occppb->attr.fields.wof_enabled     = iv_wof_enabled;
+        i_occppb->attr.fields.dds_enabled     = iv_dds_enabled;
+        i_occppb->attr.fields.ocs_enabled     = iv_ocs_enabled;
+        i_occppb->attr.fields.underv_enabled  = iv_wov_underv_enabled;
+        i_occppb->attr.fields.overv_enabled   = iv_wov_overv_enabled;
+        i_occppb->attr.fields.rvrm_enabled    = iv_rvrm_enabled;
+
+        FAPI_INF("OPPB i_occppb->attr.fields.pstates_enabled %d, i_occppb->attr.fields.wof_enabled %d %d",
+        i_occppb->attr.fields.pstates_enabled,i_occppb->attr.fields.wof_enabled, iv_wof_enabled);
+
 
         //load vpd operating points
         for (uint32_t i = 0; i < NUM_OP_POINTS; i++)
@@ -1346,35 +1378,82 @@ void oppb_print(OCCPstateParmBlock_t* i_oppb)
     strcat(l_buffer, l_temp_buffer);
     FAPI_INF("%s", l_buffer);
 
-    FAPI_INF("%-28s : 0x%04X (%3d)",
+    FAPI_INF("  %-26s : 0x%04X (%3d)",
              "Frequency Minumum (kHz)",
              revle32(i_oppb->frequency_min_khz),
              revle32(i_oppb->frequency_min_khz));
 
-    FAPI_INF("%-28s : 0x%04X (%3d)",
+    FAPI_INF("  %-26s : 0x%04X (%3d)",
              "Frequency Maximum (kHz)",
              revle32(i_oppb->frequency_max_khz),
              revle32(i_oppb->frequency_max_khz));
 
-    FAPI_INF("%-28s : 0x%04X (%3d)",
+    FAPI_INF("  %-26s : 0x%04X (%3d)",
              "Frequency Ceiling (kHz)",
              revle32(i_oppb->frequency_ceiling_khz),
              revle32(i_oppb->frequency_ceiling_khz));
 
-     FAPI_INF("%-28s : 0x%04X (%3d)",
+     FAPI_INF("  %-26s : 0x%04X (%3d)",
              "Frequency Step (kHz)",
              revle32(i_oppb->frequency_step_khz),
              revle32(i_oppb->frequency_step_khz));
 
-    FAPI_INF("%-28s : 0x%04X (%3d)",
+    FAPI_INF("  %-26s : 0x%04X (%3d)",
              "Frequency Minimum (Pstate)",
              revle32(i_oppb->pstate_min),
              revle32(i_oppb->pstate_min));
 
-    FAPI_INF("%-28s : 0x%04X (%3d)",
+    FAPI_INF("  %-26s : 0x%04X (%3d)",
              "Frequency OCC Complex (MHz)",
              revle32(i_oppb->occ_complex_frequency_mhz),
              revle32(i_oppb->occ_complex_frequency_mhz));
+
+    FAPI_INF("Attributes:");
+
+    FAPI_INF("%-28s : %1d",
+             "pstates_enabled",
+             i_oppb->attr.fields.pstates_enabled,
+             i_oppb->attr.fields.pstates_enabled);
+
+    FAPI_INF("%-28s : %1d",
+             "resclk_enabled",
+             i_oppb->attr.fields.resclk_enabled,
+             i_oppb->attr.fields.resclk_enabled);
+
+    FAPI_INF("%-28s : %1d",
+             "wof_enabled",
+             i_oppb->attr.fields.wof_enabled,
+             i_oppb->attr.fields.wof_enabled);
+
+   FAPI_INF("%-28s : %1d",
+             "dds_enabled",
+             i_oppb->attr.fields.dds_enabled,
+             i_oppb->attr.fields.dds_enabled);
+
+    FAPI_INF("%-28s : %1d",
+             "ocs_enabled",
+             i_oppb->attr.fields.ocs_enabled,
+             i_oppb->attr.fields.ocs_enabled);
+
+    FAPI_INF("%-28s : %1d",
+             "underv_enabled",
+             revle32(i_oppb->attr.fields.underv_enabled),
+             revle32(i_oppb->attr.fields.underv_enabled));
+
+   FAPI_INF("%-28s : %1d",
+             "overv_enabled",
+             revle32(i_oppb->attr.fields.overv_enabled),
+             revle32(i_oppb->attr.fields.overv_enabled));
+
+    FAPI_INF("%-28s : %1d",
+             "throttle_control_enabled",
+             revle32(i_oppb->attr.fields.throttle_control_enabled),
+             revle32(i_oppb->attr.fields.throttle_control_enabled));
+
+    FAPI_INF("%-28s : %1d",
+             "rvrm_enabled",
+             revle32(i_oppb->attr.fields.rvrm_enabled),
+             revle32(i_oppb->attr.fields.rvrm_enabled))
 
     // Put out the structure to the trace
     iddq_print(&(i_oppb->iddq));
@@ -1389,14 +1468,23 @@ void wfth_print(WofTablesHeader_t* i_wfth)
 {
     // Put out the endian-corrected scalars
 
-#define WFTH_PRINT8(_member, _hexwidth, _decwidth) \
-FAPI_INF("%-25s = 0x%0*X (%0*d)", #_member, _hexwidth, i_wfth->_member, _decwidth, i_wfth->_member); \
+#define WFTH_PRINT8_h4_d1(_member) \
+FAPI_INF("%-25s = 0x%04X (%01d)", #_member, i_wfth->_member, i_wfth->_member);
 
-#define WFTH_PRINT16(_member, _hexwidth, _decwidth) \
-FAPI_INF("%-25s = 0x%0*X (%0*d)", #_member, _hexwidth, revle16(i_wfth->_member), _decwidth, revle16(i_wfth->_member)); \
+#define WFTH_PRINT8_h4_d2(_member) \
+FAPI_INF("%-25s = 0x%04X (%02d)", #_member, i_wfth->_member, i_wfth->_member);
 
-#define WFTH_PRINT32(_member, _hexwidth, _decwidth) \
-FAPI_INF("%-25s = 0x%0*X (%0*d)", #_member, _hexwidth, revle32(i_wfth->_member), _decwidth, revle32(i_wfth->_member)); \
+#define WFTH_PRINT8_h4_d5(_member) \
+FAPI_INF("%-25s = 0x%04X (%05d)", #_member, i_wfth->_member, i_wfth->_member);
+
+#define WFTH_PRINT16_h4_d5(_member) \
+FAPI_INF("%-25s = 0x%04X (%05d)", #_member, revle16(i_wfth->_member), revle16(i_wfth->_member));
+
+#define WFTH_PRINT16_h8_d0(_member) \
+FAPI_INF("%-25s = 0x%08X", #_member, revle16(i_wfth->_member), revle16(i_wfth->_member));
+
+#define WFTH_PRINT32(_member) \
+FAPI_INF("%-25s = 0x%0*X (%0*d)", #_member, revle32(i_wfth->_member), revle32(i_wfth->_member));
 
 #define WFTH_PRINTS(_member) \
 FAPI_INF("%-25s = %s", #_member, i_wfth->_member);
@@ -1405,40 +1493,40 @@ FAPI_INF("%-25s = %s", #_member, i_wfth->_member);
     FAPI_INF("WOF Table Header");
     FAPI_INF("---------------------------------------------------------------------------------------");
 
-    WFTH_PRINTS (magic_number.text);
-    WFTH_PRINT8 (header_version,            4, 1);
-    WFTH_PRINT8 (vrt_block_size,            4, 5);
-    WFTH_PRINT8 (ocs_mode,                  4, 1);
-    WFTH_PRINT8 (core_count,                4, 2);
-    WFTH_PRINT16(vcs_start,                 4, 5);
-    WFTH_PRINT16(vcs_step,                  4, 5);
-    WFTH_PRINT16(vcs_size,                  4, 5);
-    WFTH_PRINT16(vdd_start,                 4, 5);
-    WFTH_PRINT16(vdd_step,                  4, 5);
-    WFTH_PRINT16(vdd_size,                  4, 5);
-    WFTH_PRINT16(vratio_start,              4, 5);
-    WFTH_PRINT16(vratio_step,               4, 5);
-    WFTH_PRINT16(vratio_size,               4, 5);
-    WFTH_PRINT16(io_start,                  4, 5);
-    WFTH_PRINT16(io_step,                   4, 5);
-    WFTH_PRINT16(io_size,                   4, 5);
-    WFTH_PRINT16(amb_cond_start,            4, 5);
-    WFTH_PRINT16(amb_cond_step,             4, 5);
-    WFTH_PRINT16(amb_cond_size,             4, 5);
-    WFTH_PRINT16(socket_power_w,            4, 5);
-    WFTH_PRINT16(sort_power_freq_mhz,       4, 5);
-    WFTH_PRINT16(rdp_current_a,             4, 5);
-    WFTH_PRINT16(boost_current_a,           4, 5);
-    WFTH_PRINT8 (vcs_tdp_ceff_indx,         4, 5);
-    WFTH_PRINT8 (vdd_tdp_ceff_indx,         4, 5);
-    WFTH_PRINT8 (io_tdp_pwr_indx,           4, 5);
-    WFTH_PRINT8 (amb_cond_tdp_indx,         4, 5);
-//    WFTH_PRINT8(io_tdp_w,                  4 ,5);
-//    WFTH_PRINT8(io_dis_w,                  4 ,5);
-    WFTH_PRINT16(sort_ultraturbo_freq_mhz,  4, 5);
-    WFTH_PRINT16(table_date_timestamp,     8, 0);
-    WFTH_PRINTS(table_version);
-    WFTH_PRINTS(package_name);
+    WFTH_PRINTS       (magic_number.text  );
+    WFTH_PRINT8_h4_d1 (header_version     );
+    WFTH_PRINT8_h4_d5 (vrt_block_size     );
+    WFTH_PRINT8_h4_d1 (ocs_mode           );
+    WFTH_PRINT8_h4_d2 (core_count         );
+    WFTH_PRINT16_h4_d5(vcs_start          );
+    WFTH_PRINT16_h4_d5(vcs_step           );
+    WFTH_PRINT16_h4_d5(vcs_size           );
+    WFTH_PRINT16_h4_d5(vdd_start          );
+    WFTH_PRINT16_h4_d5(vdd_step           );
+    WFTH_PRINT16_h4_d5(vdd_size           );
+    WFTH_PRINT16_h4_d5(vratio_start       );
+    WFTH_PRINT16_h4_d5(vratio_step        );
+    WFTH_PRINT16_h4_d5(vratio_size        );
+    WFTH_PRINT16_h4_d5(io_start           );
+    WFTH_PRINT16_h4_d5(io_step            );
+    WFTH_PRINT16_h4_d5(io_size            );
+    WFTH_PRINT16_h4_d5(amb_cond_start     );
+    WFTH_PRINT16_h4_d5(amb_cond_step      );
+    WFTH_PRINT16_h4_d5(amb_cond_size      );
+    WFTH_PRINT16_h4_d5(socket_power_w     );
+    WFTH_PRINT16_h4_d5(sort_power_freq_mhz);
+    WFTH_PRINT16_h4_d5(rdp_current_a      );
+    WFTH_PRINT16_h4_d5(boost_current_a    );
+    WFTH_PRINT8_h4_d5 (vcs_tdp_ceff_indx  );
+    WFTH_PRINT8_h4_d5 (vdd_tdp_ceff_indx  );
+    WFTH_PRINT8_h4_d5 (io_tdp_pwr_indx    );
+    WFTH_PRINT8_h4_d5 (amb_cond_tdp_indx  );
+//    WFTH_PRINT8_h4_d5(io_tdp_w);
+//    WFTH_PRINT8_h4_d5(io_dis_w);
+    WFTH_PRINT16_h4_d5(sort_ultraturbo_freq_mhz);
+    WFTH_PRINT16_h8_d0(table_date_timestamp);
+    WFTH_PRINTS       (table_version);
+    WFTH_PRINTS       (package_name);
 }
 
 ///////////////////////////////////////////////////////////
@@ -3494,9 +3582,9 @@ void iddq_print(IddqTable_t* i_iddqt)
     char            l_buffer_str[1024];   // Temporary formatting string buffer
     char            l_line_str[1024];     // Formatted output line string
 
-    static const uint32_t IDDQ_DESC_SIZE = 50;
-    static const uint32_t IDDQ_QUAD_SIZE = IDDQ_DESC_SIZE -
-                                            strlen("Quad X:");
+//    static const uint32_t IDDQ_DESC_SIZE = 50;
+//    static const uint32_t IDDQ_QUAD_SIZE = IDDQ_DESC_SIZE -
+//                                            strlen("Quad X:");
 
     FAPI_INF("IDDQ");
 
@@ -3520,14 +3608,20 @@ void iddq_print(IddqTable_t* i_iddqt)
     static const uint32_t CONST_5MA_1MA = 5;
     FAPI_INF("  IDDQ data is converted 5mA units to 1mA units");
 
-#define IDDQ_TRACE(string, size) \
+#define IDDQ_TRACE(string) \
         strcpy(l_line_str, string); \
-        sprintf(l_buffer_str, "%-*s", size, l_line_str);\
+        sprintf(l_buffer_str, "%-50s", l_line_str);\
         strcpy(l_line_str, l_buffer_str); \
         strcpy(l_buffer_str, "");
 
+#define IDDQ_TRACE_QUAD(string) \
+        strcpy(l_line_str, string); \
+        sprintf(l_buffer_str, "%-43s", l_line_str);\
+        strcpy(l_line_str, l_buffer_str); \
+        strcpy(l_buffer_str, "");        
+
     // Put out the measurement voltages to the trace.
-    IDDQ_TRACE ("  Measurement voltages:", IDDQ_DESC_SIZE);
+    IDDQ_TRACE ("  Measurement voltages:");
 
     for (i = 0; i < IDDQ_MEASUREMENTS; i++)
     {
@@ -3550,7 +3644,7 @@ void iddq_print(IddqTable_t* i_iddqt)
         strcat(l_line_str, l_buffer_str);
 
     // get IVDDQ measurements with all good cores ON
-    IDDQ_TRACE ("  IDDQ all good cores ON:", IDDQ_DESC_SIZE);
+    IDDQ_TRACE ("  IDDQ all good cores ON:");
 
     for (i = 0; i < IDDQ_MEASUREMENTS; i++)
     {
@@ -3560,7 +3654,7 @@ void iddq_print(IddqTable_t* i_iddqt)
     FAPI_INF("%s", l_line_str);
 
     // get IVDDQ measurements with all cores and caches OFF
-    IDDQ_TRACE ("  IVDDQ all cores, caches OFF:", IDDQ_DESC_SIZE);
+    IDDQ_TRACE ("  IVDDQ all cores, caches OFF:");
 
     for (i = 0; i < IDDQ_MEASUREMENTS; i++)
     {
@@ -3570,7 +3664,7 @@ void iddq_print(IddqTable_t* i_iddqt)
     FAPI_INF("%s", l_line_str);;
 
     // get IVDDQ measurements with all good cores OFF and caches ON
-    IDDQ_TRACE ("  IVDDQ all good cores OFF, caches ON:", IDDQ_DESC_SIZE);
+    IDDQ_TRACE ("  IVDDQ all good cores OFF, caches ON:");
 
     for (i = 0; i < IDDQ_MEASUREMENTS; i++)
     {
@@ -3582,7 +3676,7 @@ void iddq_print(IddqTable_t* i_iddqt)
     // get IVDDQ measurements with all good cores in each quad
     for (i = 0; i < MAXIMUM_EQ_SETS; i++)
     {
-        IDDQ_TRACE ("  IVDDQ all good cores ON, caches ON:", IDDQ_QUAD_SIZE);
+        IDDQ_TRACE ("  IVDDQ all good cores ON, caches ON:");
         sprintf(l_buffer_str, "Quad %d:", i);
         strcat(l_line_str, l_buffer_str);
 
@@ -3595,7 +3689,7 @@ void iddq_print(IddqTable_t* i_iddqt)
     }
 
     // get ICSQ measurements with all good cores ON
-    IDDQ_TRACE ("  ICSQ all good cores ON:", IDDQ_DESC_SIZE);
+    IDDQ_TRACE ("  ICSQ all good cores ON:");
 
     for (i = 0; i < IDDQ_MEASUREMENTS; i++)
     {
@@ -3605,7 +3699,7 @@ void iddq_print(IddqTable_t* i_iddqt)
     FAPI_INF("%s", l_line_str);
 
     // get ICSQ measurements with all cores and caches OFF
-    IDDQ_TRACE ("  ICSQ all cores, caches OFF:", IDDQ_DESC_SIZE);
+    IDDQ_TRACE ("  ICSQ all cores, caches OFF:");
 
     for (i = 0; i < IDDQ_MEASUREMENTS; i++)
     {
@@ -3615,7 +3709,7 @@ void iddq_print(IddqTable_t* i_iddqt)
     FAPI_INF("%s", l_line_str);;
 
     // get ICSQ measurements with all good cores OFF and caches ON
-    IDDQ_TRACE ("  ICSQ all good cores OFF, caches ON:", IDDQ_DESC_SIZE);
+    IDDQ_TRACE ("  ICSQ all good cores OFF, caches ON:");
 
     for (i = 0; i < IDDQ_MEASUREMENTS; i++)
     {
@@ -3627,7 +3721,7 @@ void iddq_print(IddqTable_t* i_iddqt)
     // get ICSQ measurements with all good cores in each quad
     for (i = 0; i < MAXIMUM_EQ_SETS; i++)
     {
-        IDDQ_TRACE ("  ICSQ all good cores ON, caches ON", IDDQ_QUAD_SIZE);
+        IDDQ_TRACE ("  ICSQ all good cores ON, caches ON");
         sprintf(l_buffer_str, "Quad %d:", i);
         strcat(l_line_str, l_buffer_str);
 
@@ -3640,7 +3734,7 @@ void iddq_print(IddqTable_t* i_iddqt)
     }
 
     // get average temperature measurements with all good cores ON
-    IDDQ_TRACE ("  Avg temp all good cores ON:",IDDQ_DESC_SIZE);
+    IDDQ_TRACE ("  Avg temp all good cores ON:");
 
     for (i = 0; i < IDDQ_MEASUREMENTS; i++)
     {
@@ -3650,7 +3744,7 @@ void iddq_print(IddqTable_t* i_iddqt)
     FAPI_INF("%s", l_line_str);
 
     // get average temperature measurements with all cores and caches OFF
-    IDDQ_TRACE ("  Avg temp all cores OFF, caches OFF:", IDDQ_DESC_SIZE);
+    IDDQ_TRACE ("  Avg temp all cores OFF, caches OFF:");
 
     for (i = 0; i < IDDQ_MEASUREMENTS; i++)
     {
@@ -3660,7 +3754,7 @@ void iddq_print(IddqTable_t* i_iddqt)
     FAPI_INF("%s", l_line_str);
 
     // get average temperature measurements with all good cores OFF and caches ON
-    IDDQ_TRACE ("  Avg temp all good cores OFF, caches ON:",IDDQ_DESC_SIZE);
+    IDDQ_TRACE ("  Avg temp all good cores OFF, caches ON:");
 
     for (i = 0; i < IDDQ_MEASUREMENTS; i++)
     {

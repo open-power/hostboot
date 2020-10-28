@@ -151,7 +151,7 @@ enum PGPE_FLAGS_IDX
 typedef union
 {
     uint8_t value[128];
-    union
+    struct
     {
         uint8_t pstates_enabled;
         uint8_t resclk_enabled;

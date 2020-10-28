@@ -853,10 +853,6 @@
         <persistency>volatile</persistency><!-- needs non-zero default -->
     </attribute>
     <attribute>
-        <id>ATTR_PGPE_HCODE_FUNCTION_ENABLE</id>
-        <persistency>volatile-zeroed</persistency>
-    </attribute>
-    <attribute>
         <id>ATTR_FREQ_PB_MHZ_POUNDV_FALLBACK</id>
         <persistency>volatile-zeroed</persistency>
     </attribute>
