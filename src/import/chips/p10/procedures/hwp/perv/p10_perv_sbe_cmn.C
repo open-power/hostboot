@@ -86,12 +86,13 @@ enum P10_PERV_SBE_CMN_Private_Constants
 /// @param[in]     i_loop_counter              loop count value to set opcg run-N mode
 /// @param[in]     i_start_abist_match_value   match setup idle count value
 /// @return  FAPI2_RC_SUCCESS if success, else error code.
-fapi2::ReturnCode p10_perv_sbe_cmn_array_init_module(const
-        fapi2::Target < fapi2::TARGET_TYPE_PERV | fapi2::TARGET_TYPE_MULTICAST, fapi2::MULTICAST_AND > & i_mcast_target,
-        const fapi2::buffer<uint16_t> i_regions,
-        const fapi2::buffer<uint64_t> i_loop_counter,
-        const fapi2::buffer<uint64_t> i_start_abist_match_value,
-        bool i_drop_fences)
+fapi2::ReturnCode p10_perv_sbe_cmn_array_init_module(
+    const fapi2::Target < fapi2::TARGET_TYPE_PERV | fapi2::TARGET_TYPE_MULTICAST, fapi2::MULTICAST_AND > & i_mcast_target,
+    const fapi2::buffer<uint16_t> i_regions,
+    const fapi2::buffer<uint64_t> i_loop_counter,
+    const fapi2::buffer<uint64_t> i_start_abist_match_value,
+    bool i_drop_fences,
+    bool i_clear_sram_abist_mode)
 {
 
     using namespace scomt;
@@ -218,7 +219,8 @@ fapi2::ReturnCode p10_perv_sbe_cmn_array_init_module(const
 
     FAPI_DBG("clear BIST REGISTER");
     //Setting BIST register value
-    FAPI_TRY(fapi2::putScom(i_mcast_target, BIST, 0));
+    l_data64.flush<0>().writeBit<BIST_TC_SRAM_ABIST_MODE_DC>(!i_clear_sram_abist_mode);
+    FAPI_TRY(fapi2::putScom(i_mcast_target, BIST, l_data64));
 
     FAPI_INF("p10_perv_sbe_cmn_array_init_module: Exiting ...");
 
