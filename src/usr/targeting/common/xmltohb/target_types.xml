@@ -2776,9 +2776,6 @@
       <id>SMF_MEM_AMT_REQUESTED</id>
     </attribute>
     <attribute>
-      <id>SOCKET_POWER_NOMINAL</id>
-    </attribute>
-    <attribute>
       <id>SOCKET_POWER_TURBO</id>
     </attribute>
     <attribute>

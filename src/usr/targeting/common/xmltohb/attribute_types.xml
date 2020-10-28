@@ -7401,22 +7401,6 @@
   </attribute>
 
   <attribute>
-    <id>SOCKET_POWER_NOMINAL</id>
-    <description>
-      The socket power in nominal mode.
-      Controls how much power can be used.
-      This is the same for all cores in the system.
-      Data is provided by MVPD #V.
-    </description>
-    <simpleType>
-      <uint32_t/>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-  </attribute>
-
-  <attribute>
     <id>SOCKET_POWER_TURBO</id>
     <description>
       The socket power in turbo mode.
