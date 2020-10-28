@@ -38,6 +38,7 @@
 #include <stdarg.h>
 #include <builtins.h>
 #include <targeting/common/targetservice.H>
+#include <devicefw/driverif_common.H>
 
 #endif // not PARSER
 
@@ -69,19 +70,6 @@ namespace DeviceFW
         SPI_EEPROM,
         SPI_TPM,
         LAST_DRIVER_ACCESS_TYPE
-    };
-
-    /** @enum OperationType
-     *  @brief Set of operations which can be registered for.
-     */
-    enum OperationType
-    {
-        READ = 0,
-        WRITE,
-
-        LAST_OP_TYPE,
-        FIRST_OP_TYPE = READ
-
     };
 
     /** @enum DriverSpecial

@@ -34,6 +34,7 @@
 #include <target_types.H>
 
 #include <plat_hw_access.H>
+#include <bl_xscom.H>
 
 namespace fapi2
 {
@@ -59,8 +60,11 @@ ReturnCode platGetScom(const Target<TARGET_TYPE_ALL>& i_target,
                        const uint64_t i_address,
                        buffer<uint64_t>& o_data)
 {
-    // @TODO RTC 244855 XSCOM driver for bootloader
-    ReturnCode l_rc = FAPI2_RC_SUCCESS;
+    size_t l_readSize = sizeof(uint64_t);
+    ReturnCode l_rc = XSCOM::xscomPerformOp(DeviceFW::READ,
+                                            o_data.pointer(),
+                                            l_readSize,
+                                            i_address);
     return l_rc;
 }
 
@@ -69,8 +73,11 @@ ReturnCode platPutScom(const Target<TARGET_TYPE_ALL>& i_target,
                        const uint64_t i_address,
                        const buffer<uint64_t> i_data)
 {
-    // @TODO RTC 244855 XSCOM driver for bootloader
-    ReturnCode l_rc = FAPI2_RC_SUCCESS;
+    size_t l_writeSize = sizeof(uint64_t);
+    ReturnCode l_rc = XSCOM::xscomPerformOp(DeviceFW::WRITE,
+                                            const_cast<uint64_t*>(i_data.pointer()),
+                                            l_writeSize,
+                                            i_address);
     return l_rc;
 }
 

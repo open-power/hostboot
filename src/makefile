@@ -73,6 +73,7 @@ BOOTLDR_OBJECTS += rom_entry.o
 BOOTLDR_OBJECTS += bl_console.o
 BOOTLDR_OBJECTS += plat_hw_access.o
 BOOTLDR_OBJECTS += plat_utils.o
+BOOTLDR_OBJECTS += bl_xscom.o
 
 SECUREROM_OBJECTS += ROM.o
 SECUREROM_OBJECTS += ecverify.o

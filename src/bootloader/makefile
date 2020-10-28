@@ -60,15 +60,14 @@ OBJS += bl_builtins.o
 OBJS += bl_terminate.o
 OBJS += bl_string_utils.o
 OBJS += bl_console.o
+OBJS += bl_xscom.o
+OBJS += p10_sbe_spi_cmd.o
 
 OPT_LEVEL = -Os
 
 VPATH += ${HWP_PATH}/hwp/spi
 
 include ${ROOTPATH}/procedure.rules.mk
-# @TODO RTC 216130 fapi2 HWP makefiles shouldn't be included directly,
-#                  investigate removal based on prior interlock discussion.
-include ${HWP_PATH}/hwp/spi/p10_sbe_spi_cmd.mk
 include ${ROOTPATH}/config.mk
 
 vpath ${ROOTPATH}/src/usr/console/uart.H  ${HWP_PATH}/hwp/spi/p10_sbe_spi_cmd.H

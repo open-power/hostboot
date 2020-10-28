@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -61,6 +61,7 @@ namespace Bootloader
  */
     enum hbblReasonCode
     {
+        RC_NO_ERROR                = 0x0,
         RC_ASSERT                  = HBBL_COMP_ID | 0x01, /**< Assert */
         RC_SHUTDOWN                = HBBL_COMP_ID | 0x02, /**< Shutdown */
         RC_STD_EXCEPTION           = HBBL_COMP_ID | 0x03, /**< Standard Exception */
@@ -86,6 +87,8 @@ namespace Bootloader
         RC_LPC_ERR                 = HBBL_COMP_ID | 0x10, /**< LPC Error */
         //termination_rc
         RC_TOC_NOT_FOUND_ERR       = HBBL_COMP_ID | 0x11, /**< TOC Not Found Error */
+        RC_XSCOM_BAD_PARAM         = HBBL_COMP_ID | 0x12  /**< Bad params passed to XSCOM op */
+
     };
 
 };  // end Bootloader

@@ -633,7 +633,7 @@ namespace Bootloader{
         uint64_t l_srcAddr_base = i_srcAddr | IGNORE_HRMOR_MASK;
         uint64_t l_destAddr_base = i_destAddr | IGNORE_HRMOR_MASK;
 
-        uint32_t l_targetGPR = 0;
+        uint64_t l_targetGPR = 0;
 
         for(uint32_t i = 0;
             i < i_size;
@@ -648,58 +648,78 @@ namespace Bootloader{
                 if (i_mmioOp == READ)
                 {
                     // Cache-inhibited load byte from hypervisor state.
-                    // lbzcix      BOP1,Ref_G0,BOP2
+                    // lbzcix    BOP1,Ref_G0,BOP2
                     asm volatile("lbzcix %0, 0, %1"
                                 : "=r" (l_targetGPR)    // output, %0
                                 : "r" (l_srcAddr)       // input,  %1
                                 : );                    // no impacts
 
-                    // Store byte.
-                    // stbx      BOP1,Ref_G0,BOP2
-                    asm volatile("stbx %0,0,%1"
-                                :: "r" (l_targetGPR) , "r" (l_destAddr));
+                    uint8_t* l_destPtr = reinterpret_cast<uint8_t*>(l_destAddr);
+                    *l_destPtr = l_targetGPR;
                 }
                 else
                 {
-                    // Load byte from src address to GPR
-                    // lbzx     BOP1,Ref_G0,BOP2
-                    asm volatile("lbzx %0, 0, %1"
-                                : "=r" (l_targetGPR)
-                                : "r" (l_srcAddr));
+                    uint8_t l_data = *(reinterpret_cast<uint8_t*>(l_srcAddr));
 
                     // Cache-inhibited store byte from hypervisor state
-                    // stbcix   BOP1,Ref_G0,BOP2
+                    // stbcix    BOP1,Ref_G0,BOP2
                     asm volatile("stbcix %0, 0, %1"
-                                :: "r" (l_targetGPR), "r" (l_destAddr));
+                                :
+                                : "r" (l_data), "r" (l_destAddr)
+                                : "memory"); // indicates mem read/write op
                 }
             }
             else if(i_ld_st_size == WORDSIZE)
             {
-                // Cache-inhibited load word from hypervisor state.
-                // lwzcix      BOP1,Ref_G0,BOP2
-                asm volatile("lwzcix %0, 0, %1"
-                             : "=r" (l_targetGPR)    // output, %0
-                             : "r" (l_srcAddr)       // input,  %1
-                             : );                    // no impacts
+                if(i_mmioOp == READ)
+                {
+                    // Cache-inhibited load word from hypervisor state.
+                    // lwzcix    BOP1,Ref_G0,BOP2
+                    asm volatile("lwzcix %0, 0, %1"
+                                 : "=r" (l_targetGPR)    // output, %0
+                                 : "r" (l_srcAddr)       // input,  %1
+                                 : );                    // no impacts
 
-                // store word.
-                // stwx      BOP1,Ref_G0,BOP2
-                asm volatile("stwx %0,0,%1"
-                             :: "r" (l_targetGPR) , "r" (l_destAddr));
+                    uint32_t* l_destPtr = reinterpret_cast<uint32_t*>(l_destAddr);
+                    *l_destPtr = l_targetGPR;
+                }
+                else
+                {
+                    uint32_t l_data = *(reinterpret_cast<uint32_t*>(l_srcAddr));
+
+                    // Cache-inhibited store word from hypervisor state
+                    // stwcix    BOP1,Ref_G0,BOP2
+                    asm volatile("stwcix %0, 0, %1"
+                                 :
+                                 : "r" (l_data), "r" (l_destAddr)
+                                 : "memory"); // indicates mem read/write op
+                }
             }
             else
             {
-                // Cache-inhibited load double word from hypervisor state.
-                // ldcix       BOP1,Ref_G0,BOP2
-                asm volatile("ldcix %0, 0, %1"
-                             : "=r" (l_targetGPR)    // output, %0
-                             : "r" (l_srcAddr)       // input,  %1
-                             : );                    // no impacts
+                if(i_mmioOp == READ)
+                {
+                    // Cache-inhibited load double word from hypervisor state.
+                    // ldcix       BOP1,Ref_G0,BOP2
+                    asm volatile("ldcix %0, 0, %1"
+                                 : "=r" (l_targetGPR)    // output, %0
+                                 : "r" (l_srcAddr)       // input,  %1
+                                 : );                    // no impacts
 
-                // Store double word.
-                // stdx      BOP1,Ref_G0,BOP2
-                asm volatile("stdx %0,0,%1"
-                             :: "r" (l_targetGPR) , "r" (l_destAddr));
+                    uint64_t* l_destPtr = reinterpret_cast<uint64_t*>(l_destAddr);
+                    *l_destPtr = l_targetGPR;
+                }
+                else
+                {
+                    uint64_t l_data = *(reinterpret_cast<uint64_t*>(l_srcAddr));
+
+                    // Cache-inhibited store double word from hypervisor state
+                    // stdcix    BOP1,Ref_G0,BOP2
+                    asm volatile("stdcix %0, 0, %1"
+                                 :
+                                 : "r" (l_data), "r" (l_destAddr)
+                                 : "memory"); // indicates mem read/write op
+                }
             }
         }
     }
