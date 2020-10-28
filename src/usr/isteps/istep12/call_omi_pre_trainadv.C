@@ -97,20 +97,6 @@ void* call_omi_pre_trainadv (void *io_pArgs)
         }
     }
 
-    // Set ATTR_ATTN_CHK_OCMBS to let ATTN know that we may now get attentions
-    // from the OCMB, but interrupts from the OCMB are not enabled yet.
-
-
-
-    /* @TODO RTC 258544: Re-enable this, it's causing explorers to die right now
-    TargetHandle_t sys = nullptr;
-    targetService().getTopLevelTarget( sys );
-    assert( sys != nullptr );
-    sys->setAttr<ATTR_ATTN_CHK_OCMBS>(1);
-    */
-    TRACFCOMP(g_trac_isteps_trace,
-              "call_omi_pre_trainadv: Skipping setting ATTN_CHK_OCMBS");
-
     TRACFCOMP(g_trac_isteps_trace, EXIT_MRK"call_omi_pre_trainadv ");
 
     // end task, returning any errorlogs to IStepDisp

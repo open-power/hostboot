@@ -284,7 +284,15 @@ void* call_omi_setup (void *io_pArgs)
                 "had failures");
             break;
         }
+
     } while (0);
+
+    // Set ATTR_ATTN_CHK_OCMBS to let ATTN know that we may now get attentions
+    // from the OCMB, but interrupts from the OCMB are not enabled yet.
+    TargetHandle_t sys = nullptr;
+    targetService().getTopLevelTarget( sys );
+    assert( sys != nullptr );
+    sys->setAttr<ATTR_ATTN_CHK_OCMBS>(1);
 
     TRACFCOMP(g_trac_isteps_trace, EXIT_MRK"call_omi_setup ");
 
