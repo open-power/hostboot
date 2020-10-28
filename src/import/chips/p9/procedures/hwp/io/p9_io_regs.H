@@ -714,6 +714,12 @@
 #define OPT_RX_RECAL_ABORT                                 0x800320000000003f, 51,  1 // stop recalibration on given lane
 #define OPT_RX_LANE_DISABLED                               0x800320000000003f, 52,  1 // used to set the given lane to be ignored by training logic.  this does not affect powerdown.
 #define OPT_RX_FORCE_INIT_DONE                             0x800320000000003f, 53,  1 // force init_done output port for this lane to one.
+
+#define OPT_RX_INT_MODE                                    0x8008e8000000003f, 48,  4 // rx interrupt mode setting
+#define OPT_RX_INT_ENABLE_ENC                              0x8008f0000000003f, 48,  4 // rx interrupt encoded enable
+#define OPT_RX_INT_CURRENT_STATE                           0x8008e8000000003f, 52, 12 // rx interrupt current state to stop on
+#define OPT_RX_INT_NEXT_STATE                              0x8008f0000000003f, 52, 12 // rx interrupt next state to stop on
+#define OPT_RX_INT_GOTO_STATE                              0x8008f8000000003f, 52, 12 // rx interrupt state to go to upon interrupt trigger
 /*
 #define OPT_RX_FORCE_RECAL_DONE                            0x800320000000003f, 54,  1 // force recal_done output port for this lane to one.
 #define OPT_RX_GLBSM_PL_CNTL1_O_PL                         0x800320000000003f, 48, 16 // register -- description
@@ -977,6 +983,7 @@
 #define OPT_RX_SPEED_SELECT                                0x800988000000003f, 51,  2 // ioo speed control
 #define OPT_RX_AC_COUPLED                                  0x800988000000003f, 53,  1 // ioo select ac coupled mode in receiver
 #define OPT_RX_CTL_MODE2_O_PG                              0x800988000000003f, 48, 16 // register -- description
+#define OPT_RX_EYE_OPT_STATE                               0x800ab8000000003f, 48, 12 // eye optimizaton state machine current state
 /*
 #define OPT_RX_PG_GLBSM_SPARE_MODE_0                       0x800a80000000003f, 48,  1 // per-group spare mode latch.
 #define OPT_RX_PG_GLBSM_SPARE_MODE_1                       0x800a80000000003f, 49,  1 // per-group spare mode latch.
