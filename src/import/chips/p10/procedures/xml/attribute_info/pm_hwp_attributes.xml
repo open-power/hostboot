@@ -727,5 +727,19 @@
     <initToZero/>
   </attribute>
   <!-- *********************************************************************-->
+  <attribute>
+    <id>ATTR_SOCKET_POWER_NOMINAL</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      The socket power in nominal mode.
+       Controls how much power can be used.
+       Data is provided by MVPD #V.
+    Producer: p10_pstate_parameter_block
+    </description>
+    <valueType>uint16</valueType>
+    <writeable/>
+    <initToZero/>
+  </attribute>
+  <!-- *********************************************************************-->
   
 </attributes>

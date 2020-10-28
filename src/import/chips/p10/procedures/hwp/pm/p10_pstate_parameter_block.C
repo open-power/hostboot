@@ -5507,6 +5507,7 @@ fapi2::ReturnCode PlatPmPPB::pm_set_frequency()
     voltageBucketData_t l_poundV_data;
     uint16_t l_fmax_freq;
     uint16_t l_ut_freq;
+    uint16_t l_powr_watts;
     uint16_t l_psav_freq;
     uint16_t l_wofbase_freq;
     uint8_t l_sys_pdv_mode;
@@ -5516,6 +5517,7 @@ fapi2::ReturnCode PlatPmPPB::pm_set_frequency()
     fapi2::ATTR_FREQ_SYSTEM_CORE_CEILING_MHZ_Type l_sys_freq_core_ceil_mhz;
     fapi2::ATTR_FREQ_CORE_FLOOR_MHZ_Type l_floor_freq_mhz;
     fapi2::ATTR_FREQ_CORE_CEILING_MHZ_Type l_ceil_freq_mhz;
+    fapi2::ATTR_SOCKET_POWER_NOMINAL_Type l_powr_nom;
 
     fapi2::ATTR_CHIP_EC_FEATURE_DD1_LIMITED_FREQUENCY_Type l_limited_freq_mhz;
     const fapi2::ATTR_FREQ_CORE_CEILING_MHZ_Type l_forced_ceil_freq_mhz = 2400;
@@ -5581,6 +5583,8 @@ fapi2::ReturnCode PlatPmPPB::pm_set_frequency()
             }
 
 
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SOCKET_POWER_NOMINAL,
+                        l_proc_target,l_powr_nom));
             FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_FREQ_CORE_FLOOR_MHZ,
                         l_proc_target,l_floor_freq_mhz));
 
@@ -5608,8 +5612,18 @@ fapi2::ReturnCode PlatPmPPB::pm_set_frequency()
             l_ut_freq       = revle16(l_poundV_data.other_info.VddUTCoreFreq);
             l_psav_freq     = revle16(l_poundV_data.other_info.VddPsavCoreFreq);
             l_wofbase_freq  = revle16(l_poundV_data.other_info.VddTdpWofCoreFreq);
-            FAPI_INF("VPD fmax_freq=%04d, ut_freq=%04d  psav_freq=%04d, psav_freq=%04d",
-                    l_fmax_freq, l_ut_freq, l_wofbase_freq, l_psav_freq);
+            l_powr_watts    = revle16(l_poundV_data.other_info.TSrtSocPowTgt);
+            FAPI_INF("VPD fmax_freq=%04d, ut_freq=%04d  psav_freq=%04d, psav_freq=%04d powr = %04d",
+                    l_fmax_freq, l_ut_freq, l_wofbase_freq, l_psav_freq, l_powr_watts);
+
+
+            //Update powr nominal target
+            if (!l_powr_nom)
+            {
+                l_powr_nom = l_powr_watts;
+                FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_SOCKET_POWER_NOMINAL,
+                            l_proc_target,l_powr_nom));
+            }
 
             //Compute floor freq
             if (!l_tmp_psav_freq)
