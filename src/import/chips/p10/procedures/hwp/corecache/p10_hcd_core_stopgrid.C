@@ -50,10 +50,14 @@
 #include "p10_hcd_common.H"
 
 #ifdef __PPE_QME
+    #include "p10_ppe_eq.H"
     #include "p10_ppe_c.H"
+    using namespace scomt::ppe_eq;
     using namespace scomt::ppe_c;
 #else
+    #include "p10_scom_eq.H"
     #include "p10_scom_c.H"
+    using namespace scomt::eq;
     using namespace scomt::c;
 #endif
 
@@ -63,9 +67,12 @@
 
 enum P10_HCD_CORE_STOPGRID_CONSTANTS
 {
-    HCD_ECL2_CLK_SYNC_DROP_POLL_TIMEOUT_HW_NS        = 10000,   // 10^4ns = 10us timeout
-    HCD_ECL2_CLK_SYNC_DROP_POLL_DELAY_HW_NS          = 100,     // 100ns poll loop delay
-    HCD_ECL2_CLK_SYNC_DROP_POLL_DELAY_SIM_CYCLE      = 3200,    // 3.2k sim cycle delay
+    HCD_ECL2_CLK_SYNC_DROP_POLL_TIMEOUT_HW_NS                   = 10000,   // 10^4ns = 10us timeout
+    HCD_ECL2_CLK_SYNC_DROP_POLL_DELAY_HW_NS                     = 100,     // 100ns poll loop delay
+    HCD_ECL2_CLK_SYNC_DROP_POLL_DELAY_SIM_CYCLE                 = 3200,    // 3.2k sim cycle delay
+    HCD_CORE_CHANGE_DONE_RESCLK_ENTRY_POLL_TIMEOUT_HW_NS        = 100000000, // 10^4ns = 10us timeout
+    HCD_CORE_CHANGE_DONE_RESCLK_ENTRY_POLL_DELAY_HW_NS          = 100,     // 100ns poll loop delay
+    HCD_CORE_CHANGE_DONE_RESCLK_ENTRY_POLL_DELAY_SIM_CYCLE      = 3200,    // 3.2k sim cycle delay
 };
 
 //------------------------------------------------------------------------------
@@ -76,13 +83,16 @@ fapi2::ReturnCode
 p10_hcd_core_stopgrid(
     const fapi2::Target < fapi2::TARGET_TYPE_CORE | fapi2::TARGET_TYPE_MULTICAST, fapi2::MULTICAST_AND > & i_target)
 {
+    fapi2::Target < fapi2::TARGET_TYPE_EQ | fapi2::TARGET_TYPE_MULTICAST, fapi2::MULTICAST_AND > eq_target =
+        i_target.getParent < fapi2::TARGET_TYPE_EQ | fapi2::TARGET_TYPE_MULTICAST > ();
     fapi2::buffer<buffer_t> l_mmioData = 0;
-#ifndef EQ_SKEW_ADJUST_DISABLE
+    fapi2::buffer<uint64_t> l_scomData = 0;
     uint32_t                l_timeout  = 0;
+    uint32_t                l_core_change_done = 0;
+    uint32_t                l_regions  = i_target.getCoreSelect();
     fapi2::Target < fapi2::TARGET_TYPE_SYSTEM > l_sys;
     fapi2::ATTR_RUNN_MODE_Type                  l_attr_runn_mode;
     FAPI_TRY( FAPI_ATTR_GET( fapi2::ATTR_RUNN_MODE, l_sys, l_attr_runn_mode ) );
-#endif
 
     FAPI_INF(">>p10_hcd_core_stopgrid");
 
@@ -93,8 +103,6 @@ p10_hcd_core_stopgrid(
 
     FAPI_DBG("Disable ECL2 Skewadjust via CPMS_CGCSR_[1:CL2_CLK_SYNC_ENABLE]");
     FAPI_TRY( HCD_PUTMMIO_C( i_target, CPMS_CGCSR_WO_CLEAR, MMIO_1BIT(1) ) );
-
-#ifndef EQ_SKEW_ADJUST_DISABLE
 
     FAPI_DBG("Check ECL2 Skewadjust Removed via CPMS_CGCSR[33:CL2_CLK_SYNC_DONE]");
     l_timeout = HCD_ECL2_CLK_SYNC_DROP_POLL_TIMEOUT_HW_NS /
@@ -123,7 +131,37 @@ p10_hcd_core_stopgrid(
                  .set_CORE_TARGET(i_target),
                  "ERROR: ECL2 Clock Sync Drop Timeout");
 
-#endif
+    FAPI_DBG("Assert CORE_OFF_REQ[0:3] of Resonent Clocking via RCSCR[0:3]");
+    FAPI_TRY( HCD_PUTMMIO_Q( eq_target, QME_RCSCR_WO_OR, MMIO_LOAD32H( ( l_regions << SHIFT32(3) ) ) ) );
+
+    FAPI_DBG("Poll for CORE_CHANGE_DONE in RCSR[4:7]");
+    l_timeout = HCD_CORE_CHANGE_DONE_RESCLK_ENTRY_POLL_TIMEOUT_HW_NS /
+                HCD_CORE_CHANGE_DONE_RESCLK_ENTRY_POLL_DELAY_HW_NS;
+
+    do
+    {
+        FAPI_TRY( HCD_GETMMIO_Q( eq_target, QME_RCSCR, l_mmioData ) );
+
+        MMIO_EXTRACT(4, 4, l_core_change_done);
+
+        if( ( !l_attr_runn_mode ) &&
+            ( (l_core_change_done & l_regions) == l_regions) )
+        {
+            break;
+        }
+
+        fapi2::delay(HCD_CORE_CHANGE_DONE_RESCLK_ENTRY_POLL_DELAY_HW_NS,
+                     HCD_CORE_CHANGE_DONE_RESCLK_ENTRY_POLL_DELAY_SIM_CYCLE);
+    }
+    while( (--l_timeout) != 0 );
+
+    FAPI_ASSERT( ( l_attr_runn_mode ? ((l_core_change_done & l_regions) == l_regions) : (l_timeout != 0)),
+                 fapi2::CORE_CHANGE_DONE_RESCLK_ENTRY_TIMEOUT()
+                 .set_CORE_CHANGE_DONE_RESCLK_ENTRY_POLL_TIMEOUT_HW_NS(HCD_CORE_CHANGE_DONE_RESCLK_ENTRY_POLL_TIMEOUT_HW_NS)
+                 .set_CORE_CHANGE_DONE(l_core_change_done)
+                 .set_CORE_SELECT(l_regions)
+                 .set_CORE_TARGET(i_target),
+                 "ERROR: Core Resclk Change Done Entry Timeout");
 
     FAPI_DBG("Switch glsmux to refclk to save clock grid power via CPMS_CGCSR[11]");
     FAPI_TRY( HCD_PUTMMIO_C( i_target, CPMS_CGCSR_WO_CLEAR, MMIO_1BIT(11) ) );

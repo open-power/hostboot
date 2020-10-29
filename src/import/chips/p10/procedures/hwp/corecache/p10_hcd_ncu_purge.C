@@ -68,7 +68,7 @@
 
 enum P10_HCD_NCU_PURGE_CONSTANTS
 {
-    HCD_NCU_PURGE_DONE_POLL_TIMEOUT_HW_NS    = 100000, // 10^5ns = 100us timeout
+    HCD_NCU_PURGE_DONE_POLL_TIMEOUT_HW_NS    = 100000000, // 10^5ns = 100us timeout
     HCD_NCU_PURGE_DONE_POLL_DELAY_HW_NS      = 1000,   // 1us poll loop delay
     HCD_NCU_PURGE_DONE_POLL_DELAY_SIM_CYCLE  = 32000,  // 32k sim cycle delay
 };
