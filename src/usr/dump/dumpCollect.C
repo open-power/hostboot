@@ -672,8 +672,15 @@ errlHndl_t copyArchitectedRegs(void)
 
             //Update Processor Specific data TOC contents. 
             procTableEntry->iv_procArcRegDataToc[procNum].dataSize = (procTableEntry->threadRegSize * threadCount);
-            procTableEntry->iv_procArcRegDataToc[procNum].dataOffset = (uint64_t)pDstAddrBase + 
-                                                                       (procNum * procTableEntry->iv_procArcRegDataToc[procNum].dataSize);
+            if(procNum == 0)
+            {
+                procTableEntry->iv_procArcRegDataToc[procNum].dataOffset = (uint64_t)pDstAddrBase;
+            }
+            else
+            {
+                procTableEntry->iv_procArcRegDataToc[procNum].dataOffset = procTableEntry->iv_procArcRegDataToc[procNum-1].dataOffset + 
+                                                                           procTableEntry->iv_procArcRegDataToc[procNum-1].dataSize;
+            }
 
             if(collectMinimumDataMode)
             {
