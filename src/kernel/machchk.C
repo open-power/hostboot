@@ -29,6 +29,8 @@
 #include <arch/ppc.H>
 #include <arch/magic.H>
 
+extern "C" void enable_machine_check();
+
 namespace Kernel
 {
 namespace MachineCheck
@@ -169,7 +171,9 @@ bool handleSLB(task_t* t)
 
 /**
  *  @brief Tells the kernel how to force a checkstop for unrecoverable
- *         machine checks
+ *         machine checks and enables machine check
+ *  @param[in] i_xstopAddr - fir scom address for xstop
+ *  @param[in] i_xstopData - register value for xstop
  */
 void setCheckstopData(uint64_t i_xstopAddr, uint64_t i_xstopData)
 {
@@ -179,11 +183,9 @@ void setCheckstopData(uint64_t i_xstopAddr, uint64_t i_xstopData)
     printk( "Arm MchChk Xstop: %p=%.16lX\n", g_xstopRegPtr, g_xstopRegValue );
 
     // Now that the machine check handler can do the xscom we
-    //  can set MSR[ME]=1 to enable the regular machine check
-    //  handling
-    uint64_t l_msr = getMSR();
-    l_msr |= 0x0000000000001000; //set bit 51
-    setMSR(l_msr);
+    // can set MSR[ME]=1 to enable the regular machine check
+    // handling
+    enable_machine_check();
 }
 
 /**

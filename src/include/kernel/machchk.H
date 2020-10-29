@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -47,13 +47,12 @@ namespace Kernel
         bool handleSLB(task_t* t);
 
         /**
-         * Constants to define the FIR bit to use to force a checkstop
+         *  Constants to define the FIR bit to use to force a checkstop
          *  for an unhandled machine check.
          */
-#ifdef CONFIG_P9_SYSTEM
-        constexpr uint64_t MCHK_XSTOP_FIR_SCOM_ADDR = 0x05012000;
-        constexpr uint64_t MCHK_XSTOP_FIR_VALUE = 0x0000000100000000ull;//31
-#endif
+        constexpr uint64_t MCHK_XSTOP_FIR_SCOM_ADDR = 0x03040100;
+        constexpr uint64_t MCHK_XSTOP_FIR_VALUE = 0x0000000000000008ull;//60
+
 
         /** @fn setCheckstopData
          *  @brief Tells the kernel how to force a checkstop for unrecoverable

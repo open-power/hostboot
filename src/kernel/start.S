@@ -1091,6 +1091,27 @@ kernel_execute_stop:
 1:
     stop
 
+    ;// @fn enable_machine_check
+    ;//
+    ;// Sets MSR[ME]=1 to enable the regular machine check handling
+    ;//
+.global enable_machine_check
+enable_machine_check:
+    mflr  %r0
+    bcl 20,31,$+4
+0:  mflr  %r3
+    addi  %r3,%r3,(1f - 0b)
+    mtspr HSRR0,%r3
+    mfmsr %r3
+
+    ;// Load ME bit 51
+    ori %r3,%r3,0x01000
+    mtspr HSRR1,%r3
+    hrfid
+1:  mtlr  %r0
+    blr
+
+
 .section .data
     .balign 1024
 kernel_stack:

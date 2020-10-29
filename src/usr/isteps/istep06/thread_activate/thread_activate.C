@@ -64,6 +64,8 @@
 #include    <pnor/pnorif.H>
 #include    <vpd/mvpdenums.H>
 #include    <vfs/vfs.H>
+#include    <xscom/xscomif.H>
+#include    <kernel/machchk.H>
 
 namespace   THREAD_ACTIVATE
 {
@@ -157,6 +159,16 @@ void activate_threads( errlHndl_t& io_rtaskRetErrl )
         task_affinity_pin();
         task_affinity_migrate_to_master(); //just in case...
         uint64_t cpuid = task_getcpuid();
+
+        // Now that the checkstop handler is running (or we don't have one),
+        //  setup the machine check code to trigger a checkstop for UE
+        TRACFCOMP( g_fapiImpTd,"Enabling machine check handler to generate checkstops on master thread" );
+
+        uint64_t l_xstopXscom = XSCOM::generate_mmio_addr( l_masterProc,
+                           Kernel::MachineCheck::MCHK_XSTOP_FIR_SCOM_ADDR );
+        set_mchk_data( l_xstopXscom,
+                   Kernel::MachineCheck::MCHK_XSTOP_FIR_VALUE );
+
         task_affinity_unpin();
 
         uint64_t l_masterCoreID = PIR_t::coreFromPir(cpuid);
