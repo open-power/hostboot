@@ -1234,8 +1234,7 @@
         </field>
         <field>
           <id>engine</id>
-          <!-- @TODO RTC 258425: Change this back to 2 when ready -->
-          <value>3</value>
+          <value>2</value>
         </field>
         <field>
           <id>spiMasterPath</id>

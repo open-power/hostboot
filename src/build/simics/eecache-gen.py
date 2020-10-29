@@ -158,9 +158,7 @@ def hb_eecache_setup(file_name, version, verbose):
             f.write(struct.pack('>i', 0x3F70D));
             # eepromRecordHeader for MVPD
             # valid arg.: 0xC0 means valid and master record
-            ### @TODO RTC 258425: Reroute SPI MVPD accesses back through engine 2
-            ### Change 0x03 to 0x02 for first record only:
-            write_spi_eecache_record(f, 0x50000, 0x03, 0x00C0, 64, 0x70D, 0xC0);
+            write_spi_eecache_record(f, 0x50000, 0x02, 0x00C0, 64, 0x70D, 0xC0);
             # for DIMM port 0
             write_i2c_eecache_record(f, 0x50000, 0, 3, 0xA0, 0xFF, 4, 0x1070D, 0xC0);
             # for DIMM port 1

@@ -296,6 +296,17 @@ errlHndl_t updateEecacheContents(TARGETING::Target*          i_target,
     size_t  l_eepromLen = i_recordHeader.completeRecord.cache_copy_size
                         * KILOBYTE;
 
+    // Skip the last 8 bytes of MVPD for Proc targets. MVPD borders Keystore,
+    // and Keystore is read-protected on SPI engine 2. There is a HW bug where
+    // we can't read the last byte leading up to the border of the Keystore
+    // partition, so we need to read less than the full size of MVPD. We're
+    // reading 8 bytes less because SPI reading logic rounds the sizes up to
+    // 8 bytes.
+    if(i_eepromType == EEPROM::VPD_PRIMARY &&
+       i_target->getAttr<TARGETING::ATTR_TYPE>() == TARGETING::TYPE_PROC)
+    {
+        l_eepromLen = l_eepromLen - 8;
+    }
 
     // Where in PNOR to write the eeprom contents.
     void * l_internalSectionAddr =
