@@ -210,13 +210,6 @@ void getKeyClearRequest(bool & o_requestPhysPres,
 
     do
     {
-    // Not supported in simics
-    if (Util::isSimicsRunning())
-    {
-        SB_ERR("getKeyClearRequest: Skipping as not supported in simics");
-
-        break;
-    }
 
     // Get Key Clear Request information
 #ifndef CONFIG_BMC_IPMI
@@ -273,7 +266,6 @@ void getKeyClearRequest(bool & o_requestPhysPres,
                    "presence assertion",
                     KEY_CLEAR_REQUEST_MFG, KEY_CLEAR_REQUEST_MFG_ALL,
                     l_keyClearRequests);
-            o_requestPhysPres = false;
         }
         // Some bit(s) are set and therefore require physical presence assertion
         else

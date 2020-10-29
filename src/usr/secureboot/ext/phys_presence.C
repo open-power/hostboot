@@ -61,16 +61,6 @@ errlHndl_t detectPhysPresence(void)
 
     SB_ENTER("detectPhysPresence");
 
-    // Not supported in simics
-    if (Util::isSimicsRunning())
-    {
-        SB_INF("detectPhysPresence: Skipping as not supported in simics");
-
-        // Normally don't have multiple return statements, but
-        // this solves having 2 do-while loops
-        return err;
-    }
-
     // Declare local variables here as there might be an operation
     // after the do-while() loop
     Target * mproc = nullptr;
@@ -108,9 +98,10 @@ errlHndl_t detectPhysPresence(void)
 #ifdef CONFIG_KEY_CLEAR
     getKeyClearRequest(doesKeyClearRequestPhysPres, keyClearRequests);
     SB_INF("detectPhysPresence: call to getKeyClearRequest "
-           "returned: doesKeyClearRequestPhysPres=%d, "
+           "returned: doesKeyClearRequestPhysPres=%s, "
            "keyClearRequests=0x%.4X",
-           doesKeyClearRequestPhysPres,keyClearRequests);
+           doesKeyClearRequestPhysPres ? "TRUE" : "FALSE",
+           keyClearRequests);
 #endif
 
     // The PCA9551 device that controls the "window open" and
@@ -130,7 +121,7 @@ errlHndl_t detectPhysPresence(void)
     if (mproc->tryGetAttr<ATTR_GPIO_INFO_PHYS_PRES>(gpioInfo))
     {
         SB_INF("detectPhysPresence: gpioInfo: mproc=0x%0.8X "
-               "e%d/p%d/devAddr=0x%X, windowOpenPin=%d, physPresPin=%d",
+               "e%d/p%d/devAddr=0x%X, windowOpenPin=pin #%d, physPresPin=pin #%d",
                get_huid(mproc),
                gpioInfo.engine, gpioInfo.port, gpioInfo.devAddr,
                gpioInfo.windowOpenPin, gpioInfo.physicalPresencePin);
@@ -184,7 +175,6 @@ errlHndl_t detectPhysPresence(void)
     // (technically it's not supposed to be asserted unless the window is open)
     is_phys_pres_asserted = is_window_open &&
                             (! (led_phys_pres_asserted & led_data));
-
 
     // Look for special case to fake assertion
     if ((is_window_open == true ) &&
@@ -256,7 +246,6 @@ errlHndl_t detectPhysPresence(void)
                                         (led_window_open),
                                       PCA9551_OUTPUT_HIGH_IMPEDANCE,
                                       led_data);
-
         if (err_close == nullptr)
         {
             // Verify that window was closed
@@ -398,13 +387,6 @@ errlHndl_t handlePhysPresenceWindow(void)
 
     do
     {
-
-    // Not supported in simics
-    if (Util::isSimicsRunning())
-    {
-        SB_INF("handlePhysPresenceWindow: Skipping as not supported in simics");
-        break;
-    }
 
     // NOTE: Using attributes to request opening the physical presence window
     // and/or fake the assertion of physical presence is only for testing

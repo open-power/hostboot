@@ -3096,6 +3096,28 @@ sub postProcessProcessor
         # Set the target MRU_ID attribute
         $targetObj->setAttribute($target, "MRU_ID", $mruiId);
     }
+
+    # Set GPIO_INFO_PHYS_PRES for each proc to the same default even though
+    # it's only valid on the primary and alt-primary proc.
+    # It will only get called on the active primary processor during the IPL.
+
+    $targetObj->setAttributeField($target,"GPIO_INFO_PHYS_PRES",
+        "i2cMasterPath",$path);
+    $targetObj->setAttributeField($target,"GPIO_INFO_PHYS_PRES",
+        "port","0");
+    $targetObj->setAttributeField($target,"GPIO_INFO_PHYS_PRES",
+        "devAddr","0xC0");
+    $targetObj->setAttributeField($target,"GPIO_INFO_PHYS_PRES",
+        "engine","2");
+    $targetObj->setAttributeField($target,"GPIO_INFO_PHYS_PRES",
+        "windowOpenPin","0");
+    $targetObj->setAttributeField($target,"GPIO_INFO_PHYS_PRES",
+        "physicalPresencePin","1");
+    $targetObj->setAttributeField($target,"GPIO_INFO_PHYS_PRES",
+        "i2cMuxBusSelector","0xFF");
+    $targetObj->setAttributeField($target,"GPIO_INFO_PHYS_PRES",
+        "i2cMuxPath","physical:sys-0");
+
 } # end sub postProcessProcessor
 
 #--------------------------------------------------
