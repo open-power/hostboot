@@ -445,6 +445,12 @@ uint64_t I2C_SET_USER_DATA_1 ( status_reg_t status_reg,
  */
 uint64_t I2C_SET_USER_DATA_2 ( misc_args_t args);
 
+// These defines allow standard logging of engine/port/deviceAddress information in traces
+#define TRACE_I2C_ADDR_FMT " (e%d/p%d/devAddr=0x%X) "
+
+#define TRACE_I2C_ADDR_ARGS(args) \
+    args.engine, args.port, args.devAddr
+
 
 /**
 *

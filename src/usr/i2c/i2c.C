@@ -3190,40 +3190,45 @@ errlHndl_t i2cCheckForErrors ( TARGETING::Target * i_target,
         {
             errorFound = true;
             TRACFCOMP( g_trac_i2c,
-                       ERR_MRK"I2C Invalid Command! - status reg: %016llx",
-                       i_statusVal.value );
+                       ERR_MRK"I2C Invalid Command! - status reg: %016llx"
+                       TRACE_I2C_ADDR_FMT,
+                       i_statusVal.value, TRACE_I2C_ADDR_ARGS(i_args) );
         }
 
         if( 1 == i_statusVal.lbus_parity_error )
         {
             errorFound = true;
             TRACFCOMP( g_trac_i2c,
-                       ERR_MRK"I2C Local Bus Parity Error! - status reg: %016llx",
-                       i_statusVal.value );
+                       ERR_MRK"I2C Local Bus Parity Error! - status reg: %016llx"
+                       TRACE_I2C_ADDR_FMT,
+                       i_statusVal.value, TRACE_I2C_ADDR_ARGS(i_args) );
         }
 
         if( 1 == i_statusVal.backend_overrun_error )
         {
             errorFound = true;
             TRACFCOMP( g_trac_i2c,
-                       ERR_MRK"I2C BackEnd OverRun Error! - status reg: %016llx",
-                       i_statusVal.value );
+                       ERR_MRK"I2C BackEnd OverRun Error! - status reg: %016llx"
+                       TRACE_I2C_ADDR_FMT,
+                       i_statusVal.value, TRACE_I2C_ADDR_ARGS(i_args) );
         }
 
         if( 1 == i_statusVal.backend_access_error )
         {
             errorFound = true;
             TRACFCOMP( g_trac_i2c,
-                       ERR_MRK"I2C BackEnd Access Error! - status reg: %016llx",
-                       i_statusVal.value );
+                       ERR_MRK"I2C BackEnd Access Error! - status reg: %016llx"
+                       TRACE_I2C_ADDR_FMT,
+                       i_statusVal.value, TRACE_I2C_ADDR_ARGS(i_args) );
         }
 
         if( 1 == i_statusVal.arbitration_lost_error )
         {
             busArbiLostFound = true;
             TRACFCOMP( g_trac_i2c,
-                       ERR_MRK"I2C Arbitration Lost! - status reg: %016llx",
-                       i_statusVal.value );
+                       ERR_MRK"I2C Arbitration Lost! - status reg: %016llx"
+                       TRACE_I2C_ADDR_FMT,
+                       i_statusVal.value, TRACE_I2C_ADDR_ARGS(i_args) );
         }
 
         if( 1 == i_statusVal.nack_received )
@@ -3231,8 +3236,9 @@ errlHndl_t i2cCheckForErrors ( TARGETING::Target * i_target,
             // Rather than using 'errorFound', use specific nackFound
             nackFound  = true;
             TRACFCOMP( g_trac_i2c,
-                       ERR_MRK"I2C NACK Received! - status reg: %016llx",
-                       i_statusVal.value );
+                       ERR_MRK"I2C NACK Received! - status reg: %016llx"
+                       TRACE_I2C_ADDR_FMT,
+                       i_statusVal.value, TRACE_I2C_ADDR_ARGS(i_args) );
         }
 
 
@@ -3240,16 +3246,18 @@ errlHndl_t i2cCheckForErrors ( TARGETING::Target * i_target,
         {
             errorFound = true;
             TRACFCOMP( g_trac_i2c,
-                       ERR_MRK"I2C STOP Error! - status reg: %016llx",
-                       i_statusVal.value );
+                       ERR_MRK"I2C STOP Error! - status reg: %016llx"
+                       TRACE_I2C_ADDR_FMT,
+                       i_statusVal.value, TRACE_I2C_ADDR_ARGS(i_args) );
         }
 
         if( 1 == i_statusVal.any_i2c_interrupt )
         {
             errorFound = true;
             TRACFCOMP( g_trac_i2c,
-                       ERR_MRK"I2C Interrupt Detected! - status reg: %016llx",
-                       i_statusVal.value );
+                       ERR_MRK"I2C Interrupt Detected! - status reg: %016llx"
+                       TRACE_I2C_ADDR_FMT,
+                       i_statusVal.value, TRACE_I2C_ADDR_ARGS(i_args) );
 
             // Get the Interrupt Register value to add to the log
             // - i2cGetInterrupts() adds intRegVal to trace, so it ill be added
@@ -3268,7 +3276,9 @@ errlHndl_t i2cCheckForErrors ( TARGETING::Target * i_target,
         if( errorFound )
         {
             TRACFCOMP( g_trac_i2c,
-                       ERR_MRK"i2cCheckForErrors() - Error(s) found" );
+                       ERR_MRK"i2cCheckForErrors() - Error(s) found"
+                       TRACE_I2C_ADDR_FMT,
+                       TRACE_I2C_ADDR_ARGS(i_args) );
 
 
             /*@
@@ -3310,7 +3320,9 @@ errlHndl_t i2cCheckForErrors ( TARGETING::Target * i_target,
         else if ( nackFound )
         {
             TRACFCOMP( g_trac_i2c,
-                       ERR_MRK"i2cCheckForErrors() - NACK found (only error)" );
+                       ERR_MRK"i2cCheckForErrors() - NACK found (only error)"
+                       TRACE_I2C_ADDR_FMT,
+                       TRACE_I2C_ADDR_ARGS(i_args) );
 
             /*@
              * @errortype
@@ -3351,7 +3363,10 @@ errlHndl_t i2cCheckForErrors ( TARGETING::Target * i_target,
         else if( busArbiLostFound )
         {
             TRACFCOMP( g_trac_i2c,
-            ERR_MRK"i2cCheckForErrors() - Bus Arbitration Lost (only error)");
+            ERR_MRK"i2cCheckForErrors() - Bus Arbitration Lost (only error)"
+                    TRACE_I2C_ADDR_FMT,
+                    TRACE_I2C_ADDR_ARGS(i_args) );
+
 
             /*@
              * @errortype
