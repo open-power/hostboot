@@ -57,14 +57,14 @@
 /**
  * @brief   bit position for various chiplets in config vector.
  * PB     = 0x8000000000000000 //Bit-0
- * MC-0   = 0x4000000000000000 //Bit-1
- * MC-1   = 0x2000000000000000 //Bit-2
- * MC-2   = 0x1000000000000000 //Bit-3
- * MC-3   = 0x0800000000000000 //Bit-4
- * MC-4   = 0x0400000000000000 //Bit-5
- * MC-5   = 0x0200000000000000 //Bit-6
- * MC-6   = 0x0100000000000000 //Bit-7
- * MC-7   = 0x0080000000000000 //Bit-8
+ * MC00   = 0x4000000000000000 //Bit-1
+ * MC01   = 0x2000000000000000 //Bit-2
+ * MC10   = 0x1000000000000000 //Bit-3
+ * MC11   = 0x0800000000000000 //Bit-4
+ * MC20   = 0x0400000000000000 //Bit-5
+ * MC21   = 0x0200000000000000 //Bit-6
+ * MC30   = 0x0100000000000000 //Bit-7
+ * MC31   = 0x0080000000000000 //Bit-8
  * PEC-0  = 0x0040000000000000 //Bit-9
  * PEC-1  = 0x0020000000000000 //Bit-10
  * TLPM-0 = 0x001C000000000000 //Bit-11-13
@@ -97,6 +97,7 @@
  * OCMB-13= 0x0000000000000200 //Bit-54
  * OCMB-14= 0x0000000000000100 //Bit-55
  * OCMB-15= 0x0000000000000080 //Bit-56
+ * NX     = 0x0000000000000040 //Bit-57
  *
  * TLPM defined as below:
  * Bit [0]   - Not functional/ 1-Functional
@@ -112,7 +113,7 @@
  */
 enum
 {
-    MC_POS              =   1,
+    MCC_POS             =   1,
     PEC_POS             =   9,
     TLPM_POS            =   11,
     PHB_POS             =   35,
@@ -121,7 +122,7 @@ enum
 
 enum
 {
-    INIT_CONFIG_VALUE        =       0x8000000000000000ull,
+    INIT_CONFIG_VALUE        =       0x8000000000000040ull,
     XPMR_PROC_CONFIG_UAV_POS =       0xBFC18,
     TLPM_BITS_WIDTH          =       3,
     TLPM_CONFIG_POS          =       (TLPM_POS + 1)
@@ -278,14 +279,14 @@ fapi2::ReturnCode p10_check_proc_config ( CONST_FAPI2_PROC& i_procTgt, void* i_p
     pHomer = (uint8_t*)i_pHomerImage + XPMR_HOMER_OFFSET + XPMR_PROC_CONFIG_UAV_POS;
 
 #ifndef __HOSTBOOT_MODULE
-    g_targetTypeMap[fapi2::TARGET_TYPE_MC]          =   "MC";
+    g_targetTypeMap[fapi2::TARGET_TYPE_MCC]         =   "MCC";
     g_targetTypeMap[fapi2::TARGET_TYPE_PEC]         =   "PEC";
     g_targetTypeMap[fapi2::TARGET_TYPE_PHB]         =   "PHB";
 #endif
 
 
-    FAPI_TRY( checkChiplet< fapi2::TARGET_TYPE_MC >
-              ( i_procTgt, fapi2::TARGET_TYPE_MC, l_configVectVal, MC_POS ),
+    FAPI_TRY( checkChiplet< fapi2::TARGET_TYPE_MCC >
+              ( i_procTgt, fapi2::TARGET_TYPE_MCC, l_configVectVal, MCC_POS ),
               "Failed to get MC configuration" );
 
     FAPI_TRY( checkChiplet< fapi2::TARGET_TYPE_PEC >
