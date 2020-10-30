@@ -129,4 +129,86 @@ extern "C"
     fapi_try_exit:
         return fapi2::current_err;
     }
+
+    /// See header
+    fapi2::ReturnCode exp_clear_active_log(
+        const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_ocmbTarget)
+    {
+        host_fw_command_struct l_clear_errl_cmd;
+        host_fw_response_struct l_response;
+        std::vector<uint8_t> l_data;
+
+        // common interface (SUB_CMD_CLEAR_ACTIVE_LOG ignores last 3 parms)
+        mss::exp::ib::exp_fw_log_cmd_parms_struct_t l_cmd_parms =
+        {
+            mss::exp::ib::SUB_CMD_CLEAR_ACTIVE_LOG,
+            mss::exp::ib::EXP_IMAGE_A, 0, 0 // unused parameters
+        };
+
+        // Set up the command packet
+        FAPI_TRY(mss::exp::ib::build_log_cmd(i_ocmbTarget,
+                                             l_cmd_parms,
+                                             l_clear_errl_cmd),
+                 "exp_clear_active_log: Failed build_log_cmd() for %s!",
+                 mss::c_str(i_ocmbTarget));
+
+        // Send the command packet
+        FAPI_TRY(mss::exp::ib::putCMD(i_ocmbTarget, l_clear_errl_cmd),
+                 "exp_clear_active_log: Failed putCMD() for %s!",
+                 mss::c_str(i_ocmbTarget));
+
+        // Get the response
+        FAPI_TRY(mss::exp::ib::getRSP(i_ocmbTarget, l_response, l_data),
+                 "exp_clear_active_log: Failed getRSP() cmd for %s!",
+                 mss::c_str(i_ocmbTarget));
+
+        // Check if cmd was successful
+        FAPI_TRY(mss::exp::ib::check_log_cmd_response(i_ocmbTarget, l_response),
+                 "exp_clear_active_log: Failed check_log_cmd_response() for %s!",
+                 mss::c_str(i_ocmbTarget));
+
+    fapi_try_exit:
+        return fapi2::current_err;
+    }
+
+    /// See header
+    fapi2::ReturnCode exp_clear_saved_log(
+        const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_ocmbTarget)
+    {
+        host_fw_command_struct l_clear_errl_cmd;
+        host_fw_response_struct l_response;
+        std::vector<uint8_t> l_data;
+
+        // common interface (SUB_CMD_READ_ACTIVE_LOG ignores image and offset)
+        mss::exp::ib::exp_fw_log_cmd_parms_struct_t l_cmd_parms =
+        {
+            mss::exp::ib::SUB_CMD_ERASE_SAVED_LOG,
+            mss::exp::ib::EXP_IMAGE_A, 0, 0
+        };
+
+        // Set up the command packet
+        FAPI_TRY(mss::exp::ib::build_log_cmd(i_ocmbTarget,
+                                             l_cmd_parms,
+                                             l_clear_errl_cmd),
+                 "exp_clear_saved_log: Failed build_log_cmd() for %s!",
+                 mss::c_str(i_ocmbTarget));
+
+        // Send the command packet
+        FAPI_TRY(mss::exp::ib::putCMD(i_ocmbTarget, l_clear_errl_cmd),
+                 "exp_clear_saved_log: Failed putCMD() for %s!",
+                 mss::c_str(i_ocmbTarget));
+
+        // Get the response
+        FAPI_TRY(mss::exp::ib::getRSP(i_ocmbTarget, l_response, l_data),
+                 "exp_clear_saved_log: Failed getRSP() cmd for %s!",
+                 mss::c_str(i_ocmbTarget));
+
+        // Check if cmd was successful
+        FAPI_TRY(mss::exp::ib::check_log_cmd_response(i_ocmbTarget, l_response),
+                 "exp_clear_saved_log: Failed check_log_cmd_response() for %s!",
+                 mss::c_str(i_ocmbTarget));
+
+    fapi_try_exit:
+        return fapi2::current_err;
+    }
 }

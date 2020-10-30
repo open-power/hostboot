@@ -51,6 +51,12 @@ typedef fapi2::ReturnCode (*exp_saved_log_FP_t) (
     const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>&,
     std::vector<uint8_t>& );
 
+typedef fapi2::ReturnCode (*exp_clear_active_log_FP_t)(
+    const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& );
+
+typedef fapi2::ReturnCode (*exp_clear_saved_log_FP_t)(
+    const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& );
+
 extern "C"
 {
 
@@ -81,6 +87,24 @@ extern "C"
         const uint32_t i_offset,
         const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_ocmbTarget,
         std::vector<uint8_t>& io_data );
+
+    ///
+    /// @brief Clear active log entries from Explorer RAM
+    /// @param[in] i_target the controller
+    ///
+    /// @return FAPI2_RC_SUCCESS iff ok
+    ///
+    fapi2::ReturnCode exp_clear_active_log(
+        const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_ocmbTarget );
+
+    ///
+    /// @brief Clear saved log entries from Explorer SPI flash
+    /// @param[in] i_target the controller
+    ///
+    /// @return FAPI2_RC_SUCCESS iff ok
+    ///
+    fapi2::ReturnCode exp_clear_saved_log(
+        const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_ocmbTarget );
 
 }// extern C
 #endif
