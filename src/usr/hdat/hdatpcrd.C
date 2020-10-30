@@ -696,7 +696,7 @@ errlHndl_t HdatPcrd::hdatLoadPcrd(uint32_t &o_size, uint32_t &o_count)
             std::vector<hdatSpiDevData_t> l_spiDevEntries;
             std::vector<hdatEepromPartData_t> l_eepromParts;
 
-            hdatGetHostSpiDevInfo(l_spiDevEntries, l_eepromParts);
+            hdatGetHostSpiDevInfo(l_spiDevEntries,l_eepromParts,l_pProcTarget);
 
             const uint32_t l_pcrdSpiDevTotalSize =
                 sizeof(hdatHDIFVersionedDataArray_t) +

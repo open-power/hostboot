@@ -2280,12 +2280,13 @@ void hdatGetMemTargetMmioInfo(TARGETING::Target* i_pTarget,
 // hdatGetHostSpiDevInfo
 /******************************************************************************/
 void hdatGetHostSpiDevInfo(std::vector<hdatSpiDevData_t>&o_spiDevEntries,
-     std::vector<hdatEepromPartData_t>&o_eepromPartEntries)
+     std::vector<hdatEepromPartData_t>&o_eepromPartEntries,
+     TARGETING::Target* i_pProcTarget)
 {
     HDAT_ENTER();
 
     std::vector<spiSlaveDevice> spiInfo;
-    getSpiDeviceInfo(spiInfo);
+    getSpiDeviceInfo(spiInfo, i_pProcTarget);
     char *l_hwSubsystemOrScope = NULL;
 
     if(spiInfo.empty())

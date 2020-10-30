@@ -724,12 +724,15 @@ void hdatGetMemTargetMmioInfo(TARGETING::Target* i_pTarget,
  *       The SPI device entries
  * @param[out] o_eepromPartEntries
  *       The EEPROM partition entries
+ * @param[in]  i_pProcTarget
+ *       The Proc target
  *
  * @return void
  *
 *******************************************************************************/
 void hdatGetHostSpiDevInfo(std::vector<hdatSpiDevData_t>&o_spiDevEntries,
-    std::vector<hdatEepromPartData_t>&o_eepromPartEntries);
+    std::vector<hdatEepromPartData_t>&o_eepromPartEntries,
+    TARGETING::Target* i_pProcTarget);
 
 /*******************************************************************************
  * hdatGetPrimaryTopIdIndex
