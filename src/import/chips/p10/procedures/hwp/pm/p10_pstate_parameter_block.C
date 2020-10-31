@@ -1052,6 +1052,8 @@ fapi2::ReturnCode PlatPmPPB::gppb_init(
         }
         io_globalppb->pgpe_flags[PGPE_FLAG_PHANTOM_HALT_ENABLE] = iv_attrs.attr_phantom_halt_enable;
         io_globalppb->pgpe_flags[PGPE_FLAG_RVRM_ENABLE] = iv_rvrm_enabled;
+        io_globalppb->pgpe_flags[PGPE_FLAG_WOF_THROTTLE_ENABLE] = is_wof_throttle_enabled();
+
         io_globalppb->vcs_vdd_offset_mv= revle16(uint16_t(iv_attrs.attr_vcs_vdd_offset_mv & 0xFF));//Attribute is 1-byte only so truncate it
         io_globalppb->vcs_floor_mv  = revle16(iv_attrs.attr_vcs_floor_mv);
 
@@ -1839,6 +1841,7 @@ FAPI_INF("%-54s[3] = 0x%08x %d", #attr_name, iv_attrs.attr_assign[3], iv_attrs.a
     iv_rvrm_enabled    = true;
     iv_wof_enabled     = true;
     iv_ocs_enabled     = true;
+    iv_wof_throttle_enabled = true;
     //iv_wov_underv_enabled = true;
     //iv_wov_overv_enabled = true;
 
@@ -3197,6 +3200,28 @@ bool PlatPmPPB::is_ocs_enabled()
          iv_ocs_enabled)
         ? true : false;
 } //end of is_ocs_enabled
+
+///////////////////////////////////////////////////////////
+////////  is_wof_throttle_enabled
+///////////////////////////////////////////////////////////
+bool PlatPmPPB::is_wof_throttle_enabled()
+{
+     fapi2::ATTR_WOF_THROTTLE_CONTROL_LOOP_DISABLE_Type attr_system_wof_throttle_disable = false;
+     const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
+     FAPI_ATTR_GET(fapi2::ATTR_WOF_THROTTLE_CONTROL_LOOP_DISABLE, FAPI_SYSTEM, attr_system_wof_throttle_disable);
+
+     fapi2::ATTR_WOF_PITCH_ENABLE_Type attr_system_wof_pitch_enable = false;
+     FAPI_ATTR_GET(fapi2::ATTR_WOF_PITCH_ENABLE, FAPI_SYSTEM, attr_system_wof_pitch_enable);
+
+
+     return
+         (!(attr_system_wof_throttle_disable) &&
+          !(attr_system_wof_pitch_enable) && 
+         iv_wof_throttle_enabled)
+         ? true : false;
+} //end of is_wof_throttle_enabled
+
+
 
 ///////////////////////////////////////////////////////////
 ////////   apply_biased_values
@@ -5523,6 +5548,9 @@ fapi2::ReturnCode PlatPmPPB::set_global_feature_attributes()
     fapi2::ATTR_RVRM_ENABLED_Type l_rvrm_enabled =
         (fapi2::ATTR_RVRM_ENABLED_Type)fapi2::ENUM_ATTR_RVRM_ENABLED_FALSE;
 
+    fapi2::ATTR_WOF_THROTTLE_CONTROL_DISABLED_Type l_wof_throttle_disabled =
+        (fapi2::ATTR_WOF_THROTTLE_CONTROL_DISABLED_Type)fapi2::ENUM_ATTR_WOF_THROTTLE_CONTROL_DISABLED_FALSE;
+
 // RTC 247962:need to revisit
 #if 0
     fapi2::ATTR_WOV_UNDERV_ENABLED_Type l_wov_underv_enabled =
@@ -5576,6 +5604,11 @@ fapi2::ReturnCode PlatPmPPB::set_global_feature_attributes()
         l_wof_enabled = (fapi2::ATTR_WOF_ENABLED_Type)fapi2::ENUM_ATTR_WOF_ENABLED_TRUE;
     }
 
+    if (iv_wof_throttle_enabled)
+    {
+        l_wof_throttle_disabled = (fapi2::ATTR_WOF_THROTTLE_CONTROL_DISABLED_Type)fapi2::ENUM_ATTR_WOF_THROTTLE_CONTROL_DISABLED_FALSE;
+    }
+
 #if 0
     if (iv_wov_underv_enabled)
     {
@@ -5595,6 +5628,7 @@ fapi2::ReturnCode PlatPmPPB::set_global_feature_attributes()
     SET_ATTR(fapi2::ATTR_DDS_ENABLED, iv_procChip, l_dds_enabled);
     SET_ATTR(fapi2::ATTR_RVRM_ENABLED, iv_procChip, l_rvrm_enabled);
     SET_ATTR(fapi2::ATTR_WOF_ENABLED, iv_procChip, l_wof_enabled);
+    SET_ATTR(fapi2::ATTR_WOF_THROTTLE_CONTROL_DISABLED, iv_procChip, l_wof_throttle_disabled);
 //    SET_ATTR(fapi2::ATTR_WOV_UNDERV_ENABLED, iv_procChip, l_wov_underv_enabled);
   //  SET_ATTR(fapi2::ATTR_WOV_OVERV_ENABLED, iv_procChip, l_wov_overv_enabled);
 

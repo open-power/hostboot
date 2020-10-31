@@ -214,6 +214,7 @@ class PlatPmPPB
             iv_safe_frequency(0), iv_reference_frequency_mhz(0), iv_reference_frequency_khz(0),
             iv_frequency_step_khz(0), iv_proc_dpll_divider(0), iv_occ_freq_mhz(0),
             iv_wov_underv_enabled(0), iv_wov_overv_enabled(0), iv_ocs_enabled(0),
+            iv_wof_throttle_enabled(0),
             iv_poundV_fmax_enable(true)
 
         {
@@ -467,6 +468,11 @@ class PlatPmPPB
         /// -----------------------------------------------------------------------
         bool is_wov_overv_enabled();
 
+        /// @brief State of WOF Throttle
+        /// @return enabled(true)/disabled (false)
+        /// -----------------------------------------------------------------------
+        bool is_wof_throttle_enabled();
+
         /// -----------------------------------------------------------------------
         /// @brief Compute and apply biased values
         /// @return fapi::ReturnCode: FAPI2_RC_SUCCESS if success, else error code.
@@ -701,6 +707,7 @@ class PlatPmPPB
         uint8_t                   iv_wov_underv_enabled;
         uint8_t                   iv_wov_overv_enabled;
         uint8_t                   iv_ocs_enabled;
+        uint8_t                   iv_wof_throttle_enabled;
         bool                      iv_optional_pdv_pts_value_zero;
         bool                      iv_poundV_fmax_enable;
         uint16_t                  iv_array_vdn_mv;
