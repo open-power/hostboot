@@ -784,7 +784,6 @@ def magic_instruction_callback(user_arg, cpu, arg):
                     hb_tracBinaryBuffer,\
                     hb_tracBinaryBufferSz)
 
-
         cmd2 = "(shell \"(fsp-trace ./%s -s %s/hbotStringFile | sort -s -k 1,1 >> %s 2>/dev/null) || true\")"\
                 %(tracbin[node_num],\
                 os.environ['HB_TOOLPATH'],\
@@ -798,10 +797,13 @@ def magic_instruction_callback(user_arg, cpu, arg):
             cmd3 = "(get-master-proc %d).proc_fsi2host_mbox->regs[95][1] = 0"%(node_num)
         saveCommand = "%s; %s; %s"%(cmd1,cmd2,cmd3)
 
-        if (simenv.fileSystemOk == 1):
-            SIM_run_alone(run_command, saveCommand )
-        else:
-            print "Unable to write traces. Continuing..."
+        try:
+            if (simenv.fileSystemOk == 1):
+                SIM_run_alone(run_command, saveCommand )
+            else:
+                print "WARNING: Unable to write Hostboot traces, maybe check your credentials, but continuing"
+        except Exception as e:
+            print "WARNING: Problem running saveCommand for Hostboot traces, maybe check your credentials, but continuing... {}".format(e)
 
         #file = open("hb_trace_debug.dat", "a")
         #file.write("%s\n" % (saveCommand))
