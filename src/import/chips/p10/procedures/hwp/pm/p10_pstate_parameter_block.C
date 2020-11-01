@@ -978,9 +978,10 @@ fapi2::ReturnCode PlatPmPPB::gppb_init(
         compute_PStateV_I_slope(io_globalppb);
 
         //Copy over the DDS data
-        memcpy(&io_globalppb->dds, &iv_poundW_data.entry, sizeof(((PoundW_t*)0)->entry));
-        memcpy(&io_globalppb->dds_alt_cal, &iv_poundW_data.entry_alt_cal, sizeof(((PoundW_t*)0)->entry_alt_cal));
-        memcpy(&io_globalppb->dds_tgt_act_bin, &iv_poundW_data.entry_tgt_act_bin, (sizeof(((PoundW_t*)0)->entry_tgt_act_bin)));
+        memcpy(&io_globalppb->dds, &iv_poundW_data.entry, sizeof(PoundWEntry_t)* MAXIMUM_CORES* NUM_PV_POINTS);
+        memcpy(&io_globalppb->dds_alt_cal, &iv_poundW_data.entry[0].entry_alt_cal, sizeof(PoundWEntry_AltCal_t) * MAXIMUM_CORES * NUM_PV_POINTS);
+        memcpy(&io_globalppb->dds_tgt_act_bin, &iv_poundW_data.entry[0].entry_tgt_act_bin, (sizeof(PoundWEntry_TgtActBin_t)* MAXIMUM_CORES * NUM_PV_POINTS));
+        memcpy(&io_globalppb->vdd_cal,  &iv_poundW_data.vdd_cal, (sizeof(((PoundW_t*)0)->vdd_cal)));
         memcpy(&io_globalppb->vdd_cal,  &iv_poundW_data.vdd_cal, (sizeof(((PoundW_t*)0)->vdd_cal)));
         memcpy(&io_globalppb->dds_other, &iv_poundW_data.other, (sizeof(((PoundW_t*)0)->other)));
 
@@ -3260,7 +3261,7 @@ fapi2::ReturnCode PlatPmPPB::get_mvpd_poundW (void)
         FAPI_DBG("get_mvpd_poundW: VDM enable = %d, WOF enable %d",
                 is_dds_enabled(), is_wof_enabled());
 
-        // Exit if both DDS and WOF is disabled
+        // Exit if both VDM and WOF is disabled
         if ((!is_dds_enabled() && !is_wof_enabled()))
         {
             FAPI_INF("   get_mvpd_poundW: BOTH VDM and WOF are disabled.  Skipping remaining checks");
@@ -3304,11 +3305,21 @@ fapi2::ReturnCode PlatPmPPB::get_mvpd_poundW (void)
 
         // validate vid values
         bool l_frequency_value_state = 1;
-        VALIDATE_FREQUENCY_DROP_VALUES(iv_poundW_data.other.dpll_settings.fields.N_S_drop_3p125pct,
-                iv_poundW_data.other.dpll_settings.fields.N_L_drop_3p125pct,
-                iv_poundW_data.other.dpll_settings.fields.L_S_return_3p125pct,
-                iv_poundW_data.other.dpll_settings.fields.S_N_return_3p125pct,
-                l_frequency_value_state);
+        iv_poundW_data.other.dpll_settings.value = revle16(iv_poundW_data.other.dpll_settings.value);
+        FAPI_INF("iv_poundW_data.other.dpll_settings.fields.N_S_drop_3p125pct %x",iv_poundW_data.other.dpll_settings.fields.N_S_drop_3p125pct);
+        FAPI_INF("iv_poundW_data.other.dpll_settings.fields.N_L_drop_3p125pct %x",iv_poundW_data.other.dpll_settings.fields.N_L_drop_3p125pct);
+        FAPI_INF(" iv_poundW_data.other.dpll_settings.fields.L_S_return_3p125pct %x",iv_poundW_data.other.dpll_settings.fields.L_S_return_3p125pct);
+        FAPI_INF("iv_poundW_data.other.dpll_settings.fields.S_N_return_3p125pct %x",iv_poundW_data.other.dpll_settings.fields.S_N_return_3p125pct);
+        if ( iv_poundW_data.other.dds_calibration_version)
+        {
+            iv_poundW_data.other.dpll_settings.value = revle16(iv_poundW_data.other.dpll_settings.value);
+            VALIDATE_FREQUENCY_DROP_VALUES(iv_poundW_data.other.dpll_settings.fields.N_S_drop_3p125pct,
+                    iv_poundW_data.other.dpll_settings.fields.N_L_drop_3p125pct,
+                    iv_poundW_data.other.dpll_settings.fields.L_S_return_3p125pct,
+                    iv_poundW_data.other.dpll_settings.fields.S_N_return_3p125pct,
+                    l_frequency_value_state);
+        }
+
 
 
         if (!l_frequency_value_state)
@@ -4791,8 +4802,8 @@ void PlatPmPPB::compute_dds_slopes(
                 //Insertion delay slopes
                 o_gppb->ps_dds_delay_slopes[pt_set][cores][region] =
                     revle16(
-                            compute_slope_4_12(iv_poundW_data.entry[cores][region+1].ddsc.fields.insrtn_dely,
-                                iv_poundW_data.entry[cores][region].ddsc.fields.insrtn_dely,
+                            compute_slope_4_12(iv_poundW_data.entry[region+1].entry[cores].ddsc.fields.insrtn_dely,
+                                iv_poundW_data.entry[region].entry[cores].ddsc.fields.insrtn_dely,
                                 iv_operating_points[pt_set][region].pstate,
                                 iv_operating_points[pt_set][region + 1].pstate)
                            );
@@ -4810,52 +4821,52 @@ void PlatPmPPB::compute_dds_slopes(
                     switch (dds_cnt)
                     {
                         case TRIP_OFFSET:
-                            l_max = iv_poundW_data.entry[cores][region+1].ddsc.fields.trip_offset;
-                            l_min = iv_poundW_data.entry[cores][region].ddsc.fields.trip_offset;
+                            l_max = iv_poundW_data.entry[region+1].entry[cores].ddsc.fields.trip_offset;
+                            l_min = iv_poundW_data.entry[region].entry[cores].ddsc.fields.trip_offset;
                             break;
                         case DATA0_OFFSET:
-                            l_max = iv_poundW_data.entry[cores][region+1].ddsc.fields.data0_select;
-                            l_min = iv_poundW_data.entry[cores][region].ddsc.fields.data0_select;
+                            l_max = iv_poundW_data.entry[region+1].entry[cores].ddsc.fields.data0_select;
+                            l_min = iv_poundW_data.entry[region].entry[cores].ddsc.fields.data0_select;
                             break;
                         case DATA1_OFFSET:
-                            l_max = iv_poundW_data.entry[cores][region+1].ddsc.fields.data1_select;
-                            l_min = iv_poundW_data.entry[cores][region].ddsc.fields.data1_select;
+                            l_max = iv_poundW_data.entry[region+1].entry[cores].ddsc.fields.data1_select;
+                            l_min = iv_poundW_data.entry[region].entry[cores].ddsc.fields.data1_select;
                             break;
                         case DATA2_OFFSET:
-                            l_max = iv_poundW_data.entry[cores][region+1].ddsc.fields.data2_select;
-                            l_min = iv_poundW_data.entry[cores][region].ddsc.fields.data2_select;
+                            l_max = iv_poundW_data.entry[region+1].entry[cores].ddsc.fields.data2_select;
+                            l_min = iv_poundW_data.entry[region].entry[cores].ddsc.fields.data2_select;
                             break;
                         case LARGE_DROOP_DETECT:
-                            l_max = iv_poundW_data.entry[cores][region+1].ddsc.fields.large_droop;
-                            l_min = iv_poundW_data.entry[cores][region].ddsc.fields.large_droop;
+                            l_max = iv_poundW_data.entry[region+1].entry[cores].ddsc.fields.large_droop;
+                            l_min = iv_poundW_data.entry[region].entry[cores].ddsc.fields.large_droop;
                             break;
                         case SMALL_DROOP_DETECT:
-                            l_max = iv_poundW_data.entry[cores][region+1].ddsc.fields.small_droop;
-                            l_min = iv_poundW_data.entry[cores][region].ddsc.fields.small_droop;
+                            l_max = iv_poundW_data.entry[region+1].entry[cores].ddsc.fields.small_droop;
+                            l_min = iv_poundW_data.entry[region].entry[cores].ddsc.fields.small_droop;
                             break;
                         case SLOPEA_START_DETECT:
-                            l_max = iv_poundW_data.entry[cores][region+1].ddsc.fields.slopeA_start;
-                            l_min = iv_poundW_data.entry[cores][region].ddsc.fields.slopeA_start;
+                            l_max = iv_poundW_data.entry[region+1].entry[cores].ddsc.fields.slopeA_start;
+                            l_min = iv_poundW_data.entry[region].entry[cores].ddsc.fields.slopeA_start;
                             break;
                         case SLOPEA_END_DETECT:
-                            l_max = iv_poundW_data.entry[cores][region+1].ddsc.fields.slopeA_end;
-                            l_min = iv_poundW_data.entry[cores][region].ddsc.fields.slopeA_end;
+                            l_max = iv_poundW_data.entry[region+1].entry[cores].ddsc.fields.slopeA_end;
+                            l_min = iv_poundW_data.entry[region].entry[cores].ddsc.fields.slopeA_end;
                             break;
                         case SLOPEB_START_DETECT:
-                            l_max = iv_poundW_data.entry[cores][region+1].ddsc.fields.slopeB_start;
-                            l_min = iv_poundW_data.entry[cores][region].ddsc.fields.slopeB_start;
+                            l_max = iv_poundW_data.entry[region+1].entry[cores].ddsc.fields.slopeB_start;
+                            l_min = iv_poundW_data.entry[region].entry[cores].ddsc.fields.slopeB_start;
                             break;
                         case SLOPEB_END_DETECT:
-                            l_max = iv_poundW_data.entry[cores][region+1].ddsc.fields.slopeB_end;
-                            l_min = iv_poundW_data.entry[cores][region].ddsc.fields.slopeB_end;
+                            l_max = iv_poundW_data.entry[region+1].entry[cores].ddsc.fields.slopeB_end;
+                            l_min = iv_poundW_data.entry[region].entry[cores].ddsc.fields.slopeB_end;
                             break;
                         case SLOPEA_CYCLES:
-                            l_max = iv_poundW_data.entry[cores][region+1].ddsc.fields.slopeA_cycles;
-                            l_min = iv_poundW_data.entry[cores][region].ddsc.fields.slopeA_cycles;
+                            l_max = iv_poundW_data.entry[region+1].entry[cores].ddsc.fields.slopeA_cycles;
+                            l_min = iv_poundW_data.entry[region].entry[cores].ddsc.fields.slopeA_cycles;
                             break;
                         case SLOPEB_CYCLES:
-                            l_max = iv_poundW_data.entry[cores][region+1].ddsc.fields.slopeB_cycles;
-                            l_min = iv_poundW_data.entry[cores][region].ddsc.fields.slopeB_cycles;
+                            l_max = iv_poundW_data.entry[region+1].entry[cores].ddsc.fields.slopeB_cycles;
+                            l_min = iv_poundW_data.entry[region].entry[cores].ddsc.fields.slopeB_cycles;
                             break;
                     }
 

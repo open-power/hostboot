@@ -329,6 +329,15 @@ typedef struct __attribute__((__packed__))
 }
 PoundWDpllSettings_t;
 
+typedef struct __attribute__((__packed__))
+{
+    PoundWEntry_t           entry[MAXIMUM_CORES];
+    PoundWEntry_TgtActBin_t entry_tgt_act_bin[MAXIMUM_CORES];
+    PoundWEntry_AltCal_t    entry_alt_cal[MAXIMUM_CORES];
+}
+PoundW_curfits;
+
+
 /// #W Other Settings
 typedef struct __attribute__((__packed__))
 {
@@ -348,9 +357,7 @@ PoundWOther_t;
 /// Part specific data to manage the Digital Droop Sensor (DDS)
 typedef struct __attribute__((__packed__))
 {
-    PoundWEntry_t           entry[MAXIMUM_CORES][NUM_PV_POINTS];
-    PoundWEntry_AltCal_t    entry_alt_cal[MAXIMUM_CORES][NUM_PV_POINTS];
-    PoundWEntry_TgtActBin_t entry_tgt_act_bin[MAXIMUM_CORES][NUM_PV_POINTS];
+    PoundW_curfits          entry[NUM_PV_POINTS];
     vdd_calibration         vdd_cal[NUM_PV_POINTS];
     PoundWOther_t           other;
 }
