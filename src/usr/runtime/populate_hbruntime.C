@@ -1927,137 +1927,137 @@ errlHndl_t populate_TpmInfoByNode(const uint64_t i_instance)
     errlHndl_t l_elog = nullptr;
     do {
 
-        uint64_t l_baseAddr = 0;
-        uint64_t l_dataSizeMax = 0;
+    uint64_t l_baseAddr = 0;
+    uint64_t l_dataSizeMax = 0;
 
+    TRACFCOMP( g_trac_runtime, ENTER_MRK "populate_TpmInfoByNode: "
+            "calling get_host_data_section() to populate instance %d",i_instance);
+
+    l_elog = RUNTIME::get_host_data_section(RUNTIME::NODE_TPM_RELATED,
+            i_instance,
+            l_baseAddr,
+            l_dataSizeMax);
+    if(l_elog)
+    {
         TRACFCOMP( g_trac_runtime, ERR_MRK "populate_TpmInfoByNode: "
-                    "calling get_host_data_section() to populate instance %d",i_instance);
+                "get_host_data_section() failed for Node TPM-related Data section");
+        break;
+    }
 
-        l_elog = RUNTIME::get_host_data_section(RUNTIME::NODE_TPM_RELATED,
-                i_instance,
-                l_baseAddr,
-                l_dataSizeMax);
-        if(l_elog)
-        {
-            TRACFCOMP( g_trac_runtime, ERR_MRK "populate_TpmInfoByNode: "
-                    "get_host_data_section() failed for Node TPM-related Data section");
-            break;
-        }
+    // obtain the node target, used later to populate fields
+    TARGETING::Target* mproc = nullptr;
+    l_elog = TARGETING::targetService().queryMasterProcChipTargetHandle(mproc);
+    if(l_elog)
+    {
+        TRACFCOMP( g_trac_runtime, ERR_MRK "populate_TpmInfoByNode: "
+                "could not obtain the master processor from targeting");
+        break;
+    }
+    auto targetType = TARGETING::TYPE_NODE;
+    const TARGETING::Target* l_node = getParent(mproc, targetType);
+    assert(l_node != nullptr, "Bug! getParent on master proc returned null.");
 
-        // obtain the node target, used later to populate fields
-        TARGETING::Target* mproc = nullptr;
-        l_elog = TARGETING::targetService().queryMasterProcChipTargetHandle(mproc);
-        if(l_elog)
-        {
-            TRACFCOMP( g_trac_runtime, ERR_MRK "populate_TpmInfoByNode: "
-                    "could not obtain the master processor from targeting");
-            break;
-        }
-        auto targetType = TARGETING::TYPE_NODE;
-        const TARGETING::Target* l_node = getParent(mproc, targetType);
-        assert(l_node != nullptr, "Bug! getParent on master proc returned null.");
+    // this will additively keep track of the next available offset
+    // as we fill the section
+    uint32_t l_currOffset = 0;
 
-        // this will additively keep track of the next available offset
-        // as we fill the section
-        uint32_t l_currOffset = 0;
+    ////////////////////////////////////////////////////////////////////////
+    // Section Node Secure and Trusted boot Related Data
+    ////////////////////////////////////////////////////////////////////////
 
-        ////////////////////////////////////////////////////////////////////////
-        // Section Node Secure and Trusted boot Related Data
-        ////////////////////////////////////////////////////////////////////////
+    auto const l_hdatTpmData
+        = reinterpret_cast<HDAT::hdatTpmData_t*>(l_baseAddr);
 
-        auto const l_hdatTpmData
-            = reinterpret_cast<HDAT::hdatTpmData_t*>(l_baseAddr);
+    // make sure we have enough room
+    auto const l_tpmDataCalculatedMax = HDAT::hdatTpmDataCalcInstanceSize();
+    if(l_dataSizeMax < l_tpmDataCalculatedMax)
+    {
 
-        // make sure we have enough room
-        auto const l_tpmDataCalculatedMax = HDAT::hdatTpmDataCalcInstanceSize();
-        if(l_dataSizeMax < l_tpmDataCalculatedMax)
-        {
+        TRACFCOMP( g_trac_runtime, ERR_MRK "populate_TpmInfoByNode: The TPM data hdat section doesn't have enough space");
 
-            TRACFCOMP( g_trac_runtime, ERR_MRK "populate_TpmInfoByNode: The TPM data hdat section doesn't have enough space");
+        /*@
+         * @errortype
+         * @severity      ERRL_SEV_UNRECOVERABLE
+         * @moduleid      RUNTIME::MOD_POPULATE_TPMINFOBYNODE
+         * @reasoncode    RUNTIME::RC_TPM_HDAT_OUT_OF_SPACE
+         * @userdata1     Size of hdat data struct
+         * @userdata2     Max size of hdat data struct
+         * @devdesc       The TPM data hdat section doesn't have enough space
+         * @custdesc      Platform security problem detected
+         */
+        l_elog = new ERRORLOG::ErrlEntry(
+                ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                RUNTIME::MOD_POPULATE_TPMINFOBYNODE,
+                RUNTIME::RC_TPM_HDAT_OUT_OF_SPACE,
+                l_dataSizeMax,
+                l_tpmDataCalculatedMax,
+                true);
+        l_elog->collectTrace(RUNTIME_COMP_NAME);
+        break;
+    }
 
-            /*@
-             * @errortype
-             * @severity      ERRL_SEV_UNRECOVERABLE
-             * @moduleid      RUNTIME::MOD_POPULATE_TPMINFOBYNODE
-             * @reasoncode    RUNTIME::RC_TPM_HDAT_OUT_OF_SPACE
-             * @userdata1     Size of hdat data struct
-             * @userdata2     Max size of hdat data struct
-             * @devdesc       The TPM data hdat section doesn't have enough space
-             * @custdesc      Platform security problem detected
-             */
-            l_elog = new ERRORLOG::ErrlEntry(
-                    ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                    RUNTIME::MOD_POPULATE_TPMINFOBYNODE,
-                    RUNTIME::RC_TPM_HDAT_OUT_OF_SPACE,
-                    l_dataSizeMax,
-                    l_tpmDataCalculatedMax,
-                    true);
-            l_elog->collectTrace(RUNTIME_COMP_NAME);
-            break;
-        }
+    // check that hdat structure format and eye catch were filled out
+    if(l_hdatTpmData->hdatHdr.hdatStructId != HDAT::HDAT_HDIF_STRUCT_ID)
+    {
+        TRACFCOMP( g_trac_runtime, ERR_MRK "populate_TpmInfoByNode: The TPM data hdat struct format value doesn't match");
 
-        // check that hdat structure format and eye catch were filled out
-        if(l_hdatTpmData->hdatHdr.hdatStructId != HDAT::HDAT_HDIF_STRUCT_ID)
-        {
-            TRACFCOMP( g_trac_runtime, ERR_MRK "populate_TpmInfoByNode: The TPM data hdat struct format value doesn't match");
+        /*@
+         * @errortype
+         * @severity      ERRL_SEV_UNRECOVERABLE
+         * @moduleid      RUNTIME::MOD_POPULATE_TPMINFOBYNODE
+         * @reasoncode    RUNTIME::RC_TPM_HDAT_ID_MISMATCH
+         * @userdata1     hdat struct format value
+         * @userdata2     Expected hdat struct format value
+         * @devdesc       TPM data hdat struct format value doesn't match
+         * @custdesc      Platform security problem detected
+         */
+        l_elog = new ERRORLOG::ErrlEntry(
+                ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                RUNTIME::MOD_POPULATE_TPMINFOBYNODE,
+                RUNTIME::RC_TPM_HDAT_ID_MISMATCH,
+                l_hdatTpmData->hdatHdr.hdatStructId,
+                HDAT::HDAT_HDIF_STRUCT_ID,
+                true);
+        l_elog->collectTrace(RUNTIME_COMP_NAME);
+        break;
+    }
 
-            /*@
-             * @errortype
-             * @severity      ERRL_SEV_UNRECOVERABLE
-             * @moduleid      RUNTIME::MOD_POPULATE_TPMINFOBYNODE
-             * @reasoncode    RUNTIME::RC_TPM_HDAT_ID_MISMATCH
-             * @userdata1     hdat struct format value
-             * @userdata2     Expected hdat struct format value
-             * @devdesc       TPM data hdat struct format value doesn't match
-             * @custdesc      Platform security problem detected
-             */
-            l_elog = new ERRORLOG::ErrlEntry(
-                    ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                    RUNTIME::MOD_POPULATE_TPMINFOBYNODE,
-                    RUNTIME::RC_TPM_HDAT_ID_MISMATCH,
-                    l_hdatTpmData->hdatHdr.hdatStructId,
-                    HDAT::HDAT_HDIF_STRUCT_ID,
-                    true);
-            l_elog->collectTrace(RUNTIME_COMP_NAME);
-            break;
-        }
+    auto l_eyeCatchLen = strlen(HDAT::g_hdatTpmDataEyeCatch);
+    if(memcmp(l_hdatTpmData->hdatHdr.hdatStructName,
+                HDAT::g_hdatTpmDataEyeCatch,
+                l_eyeCatchLen) != 0)
+    {
 
-        auto l_eyeCatchLen = strlen(HDAT::g_hdatTpmDataEyeCatch);
-        if(memcmp(l_hdatTpmData->hdatHdr.hdatStructName,
-                    HDAT::g_hdatTpmDataEyeCatch,
-                    l_eyeCatchLen) != 0)
-        {
+        // Convert char strings to uin64_t for errorlogs
+        uint64_t l_eyeCatch = 0;
+        memcpy(&l_eyeCatch,
+                l_hdatTpmData->hdatHdr.hdatStructName,
+                strnlen(l_hdatTpmData->hdatHdr.hdatStructName,sizeof(uint64_t)));
+        uint64_t l_expectedEyeCatch = 0;
+        memcpy(&l_expectedEyeCatch,
+                HDAT::g_hdatTpmDataEyeCatch,
+                strnlen(HDAT::g_hdatTpmDataEyeCatch, sizeof(uint64_t)));
 
-            // Convert char strings to uin64_t for errorlogs
-            uint64_t l_eyeCatch = 0;
-            memcpy(&l_eyeCatch,
-                    l_hdatTpmData->hdatHdr.hdatStructName,
-                    strnlen(l_hdatTpmData->hdatHdr.hdatStructName,sizeof(uint64_t)));
-            uint64_t l_expectedEyeCatch = 0;
-            memcpy(&l_expectedEyeCatch,
-                    HDAT::g_hdatTpmDataEyeCatch,
-                    strnlen(HDAT::g_hdatTpmDataEyeCatch, sizeof(uint64_t)));
+        TRACFCOMP( g_trac_runtime, ERR_MRK "populate_TpmInfoByNode: The TPM data hdat struct name eye catcher (0x%X) doesn't match expected value (0x%X",
+                l_eyeCatch, l_expectedEyeCatch);
 
-            TRACFCOMP( g_trac_runtime, ERR_MRK "populate_TpmInfoByNode: The TPM data hdat struct name eye catcher (0x%X) doesn't match expected value (0x%X",
-                    l_eyeCatch, l_expectedEyeCatch);
-
-            /*@
-             * @errortype
-             * @severity      ERRL_SEV_UNRECOVERABLE
-             * @moduleid      RUNTIME::MOD_POPULATE_TPMINFOBYNODE
-             * @reasoncode    RUNTIME::RC_TPM_HDAT_EYE_CATCH_MISMATCH
+        /*@
+         * @errortype
+         * @severity      ERRL_SEV_UNRECOVERABLE
+         * @moduleid      RUNTIME::MOD_POPULATE_TPMINFOBYNODE
+         * @reasoncode    RUNTIME::RC_TPM_HDAT_EYE_CATCH_MISMATCH
          * @userdata1     hdat struct name eye catcher
          * @userdata2     Expected hdat eye catch
          * @devdesc       TPM data hdat struct name eye catcher doesn't match
          * @custdesc      Platform security problem detected
          */
         l_elog = new ERRORLOG::ErrlEntry(
-            ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-            RUNTIME::MOD_POPULATE_TPMINFOBYNODE,
-            RUNTIME::RC_TPM_HDAT_EYE_CATCH_MISMATCH,
-            l_eyeCatch,
-            l_expectedEyeCatch,
-            true);
+                ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                RUNTIME::MOD_POPULATE_TPMINFOBYNODE,
+                RUNTIME::RC_TPM_HDAT_EYE_CATCH_MISMATCH,
+                l_eyeCatch,
+                l_expectedEyeCatch,
+                true);
         l_elog->collectTrace(RUNTIME_COMP_NAME);
         break;
     }
@@ -2071,10 +2071,10 @@ errlHndl_t populate_TpmInfoByNode(const uint64_t i_instance)
     l_hdatTpmData->hdatHdr.hdatChildStrOffset = HDAT::TpmDataChildStrOffset;
 
     TRACFCOMP(g_trac_runtime,"populate_TpmInfoByNode: "
-        "HDAT TPM Data successfully read. Struct Format:0x%X",
-        l_hdatTpmData->hdatHdr.hdatStructId);
+            "HDAT TPM Data successfully read. Struct Format:0x%X",
+            l_hdatTpmData->hdatHdr.hdatStructId);
     TRACFBIN(g_trac_runtime, "populate_TpmINfoByNode - EyeCatch: ",
-         l_hdatTpmData->hdatHdr.hdatStructName, l_eyeCatchLen);
+            l_hdatTpmData->hdatHdr.hdatStructName, l_eyeCatchLen);
 
     // go past the end of the first struct to get to the next one
     l_currOffset += sizeof(*l_hdatTpmData);
