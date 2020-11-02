@@ -412,6 +412,12 @@ TargetHandleList getConnAssoc( TargetHandle_t i_target, TYPE i_connType,
         getParentOmicTargetsByState( o_list, i_target, CLASS_NA, TYPE_OMIC,
                                      UTIL_FILTER_FUNCTIONAL );
     }
+    // OMIC -> PAUC requires special handling.
+    else if ( TYPE_OMIC == trgtType && TYPE_PAUC == i_connType )
+    {
+        getParentPaucTargetsByState( o_list, i_target, CLASS_NA, TYPE_PAUC,
+                                     UTIL_FILTER_FUNCTIONAL );
+    }
     else
     {
         // Match any class, specified type, and functional.

@@ -126,6 +126,7 @@ enum PositionBounds
     MAX_MCC_PER_PROC    = MAX_MCC_PER_MC * MAX_MC_PER_PROC,
 
     MAX_OMIC_PER_MC     = 2,
+    MAX_OMIC_PER_PAUC   = 2,
     MAX_OMIC_PER_PROC   = MAX_OMIC_PER_MC * MAX_MC_PER_PROC,
 
     MAX_OMI_PER_MCC     = 2,

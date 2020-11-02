@@ -159,7 +159,7 @@ group gMC_OMI_DL_FIR
     /** MC_OMI_DL_FIR[5]
      *  OMI-DL0 running in degraded mode
      */
-    (rMC_OMI_DL_FIR, bit(5)) ? dl0_omi_bus_th_1; # TBD for DD2
+    (rMC_OMI_DL_FIR, bit(5)) ? dl0_omi_bus_th_1_CRC; # TBD for DD2
 
     /** MC_OMI_DL_FIR[6]
      *  OMI-DL0 parity error detection on a lane
@@ -169,7 +169,7 @@ group gMC_OMI_DL_FIR
     /** MC_OMI_DL_FIR[7]
      *  OMI-DL0 retrained due to no forward progress
      */
-    (rMC_OMI_DL_FIR, bit(7)) ? dl0_omi_bus_th_32perDay;
+    (rMC_OMI_DL_FIR, bit(7)) ? dl0_omi_bus_th_32perDay_CRC;
 
     /** MC_OMI_DL_FIR[8]
      *  OMI-DL0 remote side initiated a retrain
@@ -184,7 +184,7 @@ group gMC_OMI_DL_FIR
     /** MC_OMI_DL_FIR[10]
      *  OMI-DL0 threshold reached
      */
-    (rMC_OMI_DL_FIR, bit(10)) ? dl0_omi_bus_th_32perDay;
+    (rMC_OMI_DL_FIR, bit(10)) ? dl0_omi_bus_th_32perDay_CRC;
 
     /** MC_OMI_DL_FIR[11]
      *  OMI-DL0 trained
@@ -259,7 +259,7 @@ group gMC_OMI_DL_FIR
     /** MC_OMI_DL_FIR[25]
      *  OMI-DL1 running in degraded mode
      */
-    (rMC_OMI_DL_FIR, bit(25)) ? dl1_omi_bus_th_1; # TBD for DD2
+    (rMC_OMI_DL_FIR, bit(25)) ? dl1_omi_bus_th_1_CRC; # TBD for DD2
 
     /** MC_OMI_DL_FIR[26]
      *  OMI-DL1 parity error detection on a lane
@@ -269,7 +269,7 @@ group gMC_OMI_DL_FIR
     /** MC_OMI_DL_FIR[27]
      *  OMI-DL1 retrained due to no forward progress
      */
-    (rMC_OMI_DL_FIR, bit(27)) ? dl1_omi_bus_th_32perDay;
+    (rMC_OMI_DL_FIR, bit(27)) ? dl1_omi_bus_th_32perDay_CRC;
 
     /** MC_OMI_DL_FIR[28]
      *  OMI-DL1 remote side initiated a retrain
@@ -284,7 +284,7 @@ group gMC_OMI_DL_FIR
     /** MC_OMI_DL_FIR[30]
      *  OMI-DL1 threshold reached
      */
-    (rMC_OMI_DL_FIR, bit(30)) ? dl1_omi_bus_th_32perDay;
+    (rMC_OMI_DL_FIR, bit(30)) ? dl1_omi_bus_th_32perDay_CRC;
 
     /** MC_OMI_DL_FIR[31]
      *  OMI-DL1 trained

@@ -121,3 +121,29 @@ actionclass dl1_omi_bus_th_32perDay
     threshold32pday;
 };
 
+# Bits using these actions are CRC-related errors that are potential
+# side-effects of bits in the PAU_PHY_FIR. There is additional handling
+# to determine the callout if a root cause bit is found on as well.
+actionclass dl0_omi_bus_th_1_CRC
+{
+    try( funccall("CrcSideEffect_0"), dl0_omi_bus );
+    threshold1;
+};
+
+actionclass dl0_omi_bus_th_32perDay_CRC
+{
+    try( funccall("CrcSideEffect_0"), dl0_omi_bus );
+    threshold32pday;
+};
+
+actionclass dl1_omi_bus_th_1_CRC
+{
+    try( funccall("CrcSideEffect_1"), dl1_omi_bus );
+    threshold1;
+};
+
+actionclass dl1_omi_bus_th_32perDay_CRC
+{
+    try( funccall("CrcSideEffect_1"), dl1_omi_bus );
+    threshold32pday;
+};

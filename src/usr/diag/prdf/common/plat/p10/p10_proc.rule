@@ -1937,8 +1937,10 @@ rule rGLOBAL_RE_FIR
     GLOBAL_RE_FIR;
 };
 
+# We need to check the PAU chiplet first because of some bits in the
+# PAU_PHY_FIR that can cause side effects in FIRs in the OMIC, MCC, and OCMB.
 group gGLOBAL_RE_FIR attntype RECOVERABLE
-    filter singlebit
+    filter priority(16,17,18,19)
 {
     /** GLOBAL_RE_FIR[1]
      *  Attention from TP chiplet
@@ -2097,8 +2099,10 @@ rule rGLOBAL_UCS_FIR
     GLOBAL_UCS_FIR;
 };
 
+# We need to check the PAU chiplet first because of some bits in the
+# PAU_PHY_FIR that can cause side effects in FIRs in the OMIC, MCC, and OCMB.
 group gGLOBAL_UCS_FIR attntype UNIT_CS
-    filter singlebit
+    filter priority(16,17,18,19)
 {
     /** GLOBAL_UCS_FIR[1]
      *  Attention from TP chiplet

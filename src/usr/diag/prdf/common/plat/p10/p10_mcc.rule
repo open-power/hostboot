@@ -313,12 +313,12 @@ group gMC_DSTL_FIR
     /** MC_DSTL_FIR[22]
      *  DSTLFIR channel timeout on subch A
      */
-    (rMC_DSTL_FIR, bit(22)) ? chnl0_omi_bus_th_1;
+    (rMC_DSTL_FIR, bit(22)) ? chnl0_omi_bus_th_1_CRC;
 
     /** MC_DSTL_FIR[23]
      *  DSTLFIR channel timeout on subch B
      */
-    (rMC_DSTL_FIR, bit(23)) ? chnl1_omi_bus_th_1;
+    (rMC_DSTL_FIR, bit(23)) ? chnl1_omi_bus_th_1_CRC;
 
     /** MC_DSTL_FIR[24]
      *  Error info from decrypt
