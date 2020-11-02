@@ -1057,7 +1057,7 @@ int encode_set_state_effecter_states_req(uint8_t instance_id,
 					 uint8_t comp_effecter_count,
 					 set_effecter_state_field *field,
 					 struct pldm_msg *msg,
-                                         size_t payload_length);
+					 size_t payload_length);
 
 /** @brief Decode SetStateEffecterStates response data
  *
