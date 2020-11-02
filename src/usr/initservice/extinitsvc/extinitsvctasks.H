@@ -249,19 +249,6 @@ const TaskInfo g_exttaskinfolist[]   =   {
 
 
         /**
-         * @brief   SCAN Device Driver
-         */
-        {
-            "libscan.so" ,                              // taskname
-            NULL,                                       // no pointer to fn
-            {
-                INIT_TASK,                          // task type
-                EXT_IMAGE,                          // Extended Module
-            }
-        },
-
-
-        /**
          * @brief   I2C Device Driver
          */
         {

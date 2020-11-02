@@ -66,7 +66,6 @@ SUBDIRS += runtime.d
 SUBDIRS += spi.d
 SUBDIRS += sbe.d
 SUBDIRS += sbeio.d
-SUBDIRS += scan.d
 SUBDIRS += scom.d
 SUBDIRS += secureboot.d
 SUBDIRS += sio.d
