@@ -4151,22 +4151,6 @@ sub processI2C
             {
                 $type = "0xFF";
             }
-            # FXIME RTC: 212110 Secureboot: P10 - HDAT SPI rework  - HDAT security related code
-            # # TPM types can vary by MODEL number
-            # elsif ($type_str eq "NUVOTON_TPM")
-            # {
-            #     # Model values can be found in tpmddif.H and are kept in
-            #     # sync with TPM_MODEL attribute in attribute_types_hb.xml
-            #     my $tpm_model = $targetObj->getAttribute($i2c->{DEST_PARENT},"TPM_MODEL");
-            #     if ($tpm_model eq 1)
-            #     {
-            #         $type = $targetObj->getEnumValue("HDAT_I2C_DEVICE_TYPE",$type_str);
-            #     }
-            #     if ($tpm_model eq 2)
-            #     {
-            #         $type = $targetObj->getEnumValue("HDAT_I2C_DEVICE_TYPE","TCG_I2C_TPM");
-            #     }
-            # }
             else
             {
                 $type = $targetObj->getEnumValue("HDAT_I2C_DEVICE_TYPE",$type_str);
@@ -4294,24 +4278,6 @@ sub processI2C
                         }
                     }
                 }
-
-                # FXIME RTC: 212110 Secureboot: P10 - HDAT SPI rework  - HDAT security related code
-                # # For TPM:
-                # # <vendor>,<device type>,<purpose>,<scope>
-                # if ($type_str eq "NUVOTON_TPM")
-                # {
-                #     # Model values can be found in tpmddif.H and are kept in
-                #     # sync with TPM_MODEL attribute in attribute_types_hb.xml
-                #     my $tpm_model = $targetObj->getAttribute($i2c->{DEST_PARENT},"TPM_MODEL");
-                #     if ($tpm_model eq 1)
-                #     {
-                #         $label = "nuvoton,npct601,tpm,host";
-                #     }
-                #     if ($tpm_model eq 2)
-                #     {
-                #         $label = "tcg,tpm_i2c_ptp,tpm,host";
-                #     }
-                # }
 
                 if ($label eq "")
                 {

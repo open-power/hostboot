@@ -178,6 +178,18 @@ struct genericSpiInfo
         eepromContentType = i_spiInfo.eepromContentType;
     }
 
+    genericSpiInfo(const SpiTpmInfo& i_spiInfo)
+    {
+        static_assert(sizeof(SpiTpmInfo) == sizeof(spiMasterPath) + sizeof(engine),
+                      "Cannot constuct genericSpiInfo from SpiTpmInfo because structure of latter has changed");
+
+        spiMasterPath = i_spiInfo.spiMasterPath;
+        engine = i_spiInfo.engine;
+        dataOffsetKB = 0xFFFF;
+        dataSizeKB = 0xFFFF;
+        eepromContentType = 0xFF;
+    }
+
     EntityPath spiMasterPath;
     uint8_t engine;
     uint16_t dataOffsetKB;
@@ -368,9 +380,20 @@ void getTargetSpiDeviceInfo(Target* const i_spiTarget,
                             std::vector<spiSlaveDevice>& o_deviceInfo)
 {
     Target* const parentNode = getParent(i_spiTarget, TYPE_NODE);
-    Target* const spiMaster = (i_spiTarget->getAttr<ATTR_TYPE>() == TYPE_PROC
-                               ? i_spiTarget
-                               : getParent(i_spiTarget, TYPE_PROC));
+    Target* spiMaster = nullptr;
+
+    if (i_spiTarget->getAttr<ATTR_TYPE>() == TYPE_PROC)
+    {
+        spiMaster = i_spiTarget;
+    }
+    else
+    {
+        TargetHandleList procParentList;
+        getParentAffinityTargetsByState(procParentList, i_spiTarget, CLASS_NA, TYPE_PROC, UTIL_FILTER_ALL);
+        assert(procParentList.size() != 0, "Couldn't find PROC parent by affinity for i_spiTarget HUID 0x%X",
+               get_huid(i_spiTarget));
+        spiMaster = procParentList[0];
+    }
 
     std::map<uint8_t, spiSlaveDevice> engineToDevice;
 
@@ -380,7 +403,8 @@ void getTargetSpiDeviceInfo(Target* const i_spiTarget,
     tryGetAttributes<ATTR_SPI_EEPROM_VPD_PRIMARY_INFO,
                      ATTR_SPI_EEPROM_VPD_BACKUP_INFO,
                      ATTR_SPI_SBE_BOOT_CODE_PRIMARY_INFO,
-                     ATTR_SPI_SBE_BOOT_CODE_BACKUP_INFO>
+                     ATTR_SPI_SBE_BOOT_CODE_BACKUP_INFO,
+                     ATTR_SPI_TPM_INFO>
         ::get(i_spiTarget,
               [spiMaster, parentNode, &o_deviceInfo, &engineToDevice]
               (ATTRIBUTE_ID, const genericSpiInfo& value) {
@@ -465,6 +489,18 @@ void getSpiDeviceInfo(std::vector<spiSlaveDevice>& o_deviceInfo,
 
     if (i_spiMaster)
     {
+        // If the SPI controller is a proc then also accumulate the TPM SPI info as it is driven by the proc and
+        // callers intuition expects that data along with the proc's SPI Device info.
+        if (i_spiMaster->getAttr<ATTR_TYPE>() == TYPE_PROC)
+        {
+            bool isFunctional = true;
+            getChildAffinityTargets(spimasters,
+                                    i_spiMaster,
+                                    TARGETING::CLASS_CHIP,
+                                    TARGETING::TYPE_TPM,
+                                    !isFunctional);
+        }
+
         spimasters.push_back(i_spiMaster);
     }
     else

@@ -88,7 +88,6 @@ uint32_t hdatTpmDataCalcInstanceSize()
                 TPM_DRTM_EVENT_LOG_MAX)
                 * hdatCalcMaxTpmsPerNode());
 
-    // FXIME RTC: 212110 Secureboot: P10 - HDAT SPI rework  - HDAT security related code
     // account for User physical interaction mechanism info struct
     // and Host I2C device information pointers
     l_size += sizeof(hdatPhysInterMechInfo_t);

@@ -5359,82 +5359,6 @@ void getDeviceInfo( TARGETING::Target* i_i2cMaster,
                 l_eep = l_eepromInfo.erase(l_eep);
             } //end of eeprom iter
 
-    // @TODO RTC 212110: Move this functionality to SPI
-    #if 0 // CONFIG_TPMDD
-
-            TPMDD::tpm_info_t tpmInfo;
-            errlHndl_t l_err = nullptr;
-            TARGETING::TargetHandleList tpmList;
-            TRUSTEDBOOT::getTPMs(tpmList);
-
-            for(auto pTpm : tpmList)
-            {
-                DeviceInfo_t l_currentDI;
-                TPMDD::tpm_locality_t locality = TPMDD::TPM_LOCALITY_0;
-
-                // Lookup i2c info for the TPM
-                l_err = TPMDD::tpmReadAttributes(pTpm,
-                                                 tpmInfo, locality);
-
-                if( nullptr != l_err )
-                {
-                    // Unable to get info, so we skip
-                    delete l_err;
-                    l_err = nullptr;
-                    continue;
-                }
-                // ignore the devices that aren't on the current target
-                if( tpmInfo.i2cTarget != pChipTarget )
-                {
-                    continue;
-                }
-                // skip the devices that are on a different engine
-                else if( tpmInfo.engine != i2cm.engine )
-                {
-                    continue;
-                }
-
-                l_currentDI.assocNode = assocNode;
-                l_currentDI.assocProc = assocProc;
-                l_currentDI.masterChip = tpmInfo.i2cTarget;
-                l_currentDI.engine = tpmInfo.engine;
-                l_currentDI.masterPort = tpmInfo.port;
-                l_currentDI.addr = tpmInfo.devAddr;
-                l_currentDI.slavePort = 0xFF;
-                l_currentDI.busFreqKhz = (tpmInfo.busFreq)
-                    / FREQ_CONVERSION::HZ_PER_KHZ;
-                l_currentDI.devicePurpose =
-                    TARGETING::HDAT_I2C_DEVICE_PURPOSE_TPM;
-
-                // Read TPM Model attribute to determine some values
-                if (tpmInfo.model == TPMDD::TPM_MODEL_65x)
-                {
-                    strcpy(l_currentDI.deviceLabel,"?nuvoton,npct601,tpm,host");
-                    l_currentDI.deviceType =
-                        TARGETING::HDAT_I2C_DEVICE_TYPE_NUVOTON_TPM;
-                }
-                else if (tpmInfo.model == TPMDD::TPM_MODEL_75x)
-                {
-                    strcpy(l_currentDI.deviceLabel,"?tcg,tpm_i2c_ptp,tpm,host");
-                    l_currentDI.deviceType =
-                        TARGETING::HDAT_I2C_DEVICE_TYPE_TCG_I2C_TPM;
-                }
-                else
-                {
-                    // Should never get here as tpmReadAttributes will fail if
-                    // unknown TPM Model, but just in case do this:
-                    strcpy(l_currentDI.deviceLabel,
-                           "?unknwon,unknown,tpm,host");
-                }
-
-                TRACUCOMP(g_trac_i2c,"TPM 0x%X is Model %d using label %s",
-                          TARGETING::get_huid(pTpm),
-                          tpmInfo.model,
-                          l_currentDI.deviceLabel);
-                o_deviceInfo.push_back(l_currentDI);
-
-            } //end of tpm iter
-    #endif // #if 0 (CONFIG_TPMDD)
         } //end of i2cm
 
 #if CONFIG_INCLUDE_XML_OPENPOWER
@@ -5674,49 +5598,6 @@ void addHwCalloutsI2c(errlHndl_t i_err,
                             HWAS::NO_DECONFIG,
                             HWAS::GARD_NULL);
     }
-
-// @TODO RTC 212110: Move this functionality to SPI
-#if 0 // CONFIG_TPMDD
-    // For FSP systems which don't yet have special handling for
-    // i2c device callouts we still need to handle the TPM and UCD
-    // search to avoid regression back to the "non TPM aware" and
-    // "non UCD aware" behavior.
-    {
-        // Loop thru TPMs in the system and match physical path,
-        // engine, and port to the i2c master
-        auto l_devFound = false;
-        const auto l_physPath = i_target->getAttr<
-                                         TARGETING::ATTR_PHYS_PATH>();
-        TARGETING::TargetHandleList allTpms;
-        TARGETING::getAllChips( allTpms, TARGETING::TYPE_TPM, false );
-        for(const auto &tpm: allTpms)
-        {
-            const auto l_tpmInfo = tpm->getAttr<
-                                          TARGETING::ATTR_TPM_INFO>();
-
-            if (l_tpmInfo.i2cMasterPath == l_physPath &&
-                l_tpmInfo.engine == i_args.engine &&
-                l_tpmInfo.port == i_args.port &&
-                l_tpmInfo.devAddrLocality0 == i_args.devAddr)
-            {
-                TRACFCOMP(g_trac_i2c,
-                    "Unresponsive TPM found: "
-                    "Engine=%d, masterPort=%d, address=0x%X "
-                    "huid for its i2c master is 0x%.8X",
-                    l_tpmInfo.engine,
-                    l_tpmInfo.port,
-                    l_tpmInfo.devAddrLocality0,
-                    TARGETING::get_huid(i_target));
-                i_err->addHwCallout(tpm,
-                                  HWAS::SRCI_PRIORITY_HIGH,
-                                  HWAS::NO_DECONFIG,
-                                  HWAS::GARD_NULL);
-                l_devFound = true;
-                break;
-            }
-        }
-    }
-#endif // #if 0 (CONFIG_TPMDD)
 }
 
 } // end namespace I2C
