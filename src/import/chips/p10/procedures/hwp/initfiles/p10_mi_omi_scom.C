@@ -31,6 +31,7 @@ using namespace fapi2;
 
 constexpr uint64_t literal_0b1 = 0b1;
 constexpr uint64_t literal_0b01111 = 0b01111;
+constexpr uint64_t literal_0b0001 = 0b0001;
 constexpr uint64_t literal_0b0000000000000000000 = 0b0000000000000000000;
 constexpr uint64_t literal_0b1111111111111111111 = 0b1111111111111111111;
 constexpr uint64_t literal_0 = 0;
@@ -88,6 +89,12 @@ fapi2::ReturnCode p10_mi_omi_scom(const fapi2::Target<fapi2::TARGET_TYPE_MI>& TG
             constexpr auto l_MCP_PBI01_SCOMFIR_MCMODE1_EN_EPF_CL_LIMIT_ON = 0x1;
             l_scom_buffer.insert<9, 1, 63, uint64_t>(l_MCP_PBI01_SCOMFIR_MCMODE1_EN_EPF_CL_LIMIT_ON );
             FAPI_TRY(fapi2::putScom(TGT0, 0xc010c12ull, l_scom_buffer));
+        }
+        {
+            FAPI_TRY(fapi2::getScom( TGT0, 0xc010c13ull, l_scom_buffer ));
+
+            l_scom_buffer.insert<40, 4, 60, uint64_t>(literal_0b0001 );
+            FAPI_TRY(fapi2::putScom(TGT0, 0xc010c13ull, l_scom_buffer));
         }
         {
             FAPI_TRY(fapi2::getScom( TGT0, 0xc010c16ull, l_scom_buffer ));

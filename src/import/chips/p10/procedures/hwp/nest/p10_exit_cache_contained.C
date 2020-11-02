@@ -734,9 +734,11 @@ p10_exit_cache_contained_run_mcc_initfile_xscom(
         l_scom_data |= (uint64_t)  0x1 << (64 - (33 + 1)); //ATTR_CHIP_EC_FEATURE_HW548941
     }
 
+    l_scom_data |= (uint64_t)  0x1 << (64 - (43 + 1));
     l_scom_data |= (uint64_t)  0x1 << (64 - (45 + 1));
     //mask
     l_scom_mask |= (uint64_t)  0x1 << (64 - (33 + 1));
+    l_scom_mask |= (uint64_t)  0x1 << (64 - (43 + 1));
     l_scom_mask |= (uint64_t)  0x1 << (64 - (45 + 1));
 
     FAPI_TRY(p10_gen_xscom_init(
@@ -964,6 +966,23 @@ p10_exit_cache_contained_run_mi_initfile_xscom(
                  i_target,
                  p10_chipUnitPairing_t(PU_MI_CHIPUNIT, l_unit_num),
                  scomt::mc::SCOMFIR_MCMODE1,
+                 l_scom_data,
+                 l_scom_mask,
+                 o_xscom_inits),
+             "Error from p10_gen_xscom_init");
+
+    //MCMODE2
+    l_scom_data = 0;
+    l_scom_mask = 0;
+    //data
+    l_scom_data |= (uint64_t) 0x1 << (64 - (40 + 4));
+    //mask
+    l_scom_mask |= (uint64_t) 0xF << (64 - (40 + 4));
+
+    FAPI_TRY(p10_gen_xscom_init(
+                 i_target,
+                 p10_chipUnitPairing_t(PU_MI_CHIPUNIT, l_unit_num),
+                 scomt::mc::SCOMFIR_MCMODE2,
                  l_scom_data,
                  l_scom_mask,
                  o_xscom_inits),

@@ -177,6 +177,8 @@ fapi2::ReturnCode p10_mcc_omi_scom(const fapi2::Target<fapi2::TARGET_TYPE_MCC>& 
 
             constexpr auto l_MCP_CHAN0_ATCL_CL_CLSCOM_MCPERF3_128B_CI_PR_W_ON = 0x1;
             l_scom_buffer.insert<45, 1, 63, uint64_t>(l_MCP_CHAN0_ATCL_CL_CLSCOM_MCPERF3_128B_CI_PR_W_ON );
+            constexpr auto l_MCP_CHAN0_ATCL_CL_CLSCOM_MCPERF3_ENABLE_CP_M_MDI0_LOCAL_ONLY_ON = 0x1;
+            l_scom_buffer.insert<43, 1, 63, uint64_t>(l_MCP_CHAN0_ATCL_CL_CLSCOM_MCPERF3_ENABLE_CP_M_MDI0_LOCAL_ONLY_ON );
 
             if ((l_TGT2_ATTR_CHIP_EC_FEATURE_HW548941 == literal_1))
             {
